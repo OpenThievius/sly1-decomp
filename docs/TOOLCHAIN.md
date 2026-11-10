@@ -3573,6 +3573,37 @@ base, and gives both reloads (the hits' other stores unchanged). The sibling fun
 reuses one face pointer for its three loops the same way. Spot it: a frame local reloaded
 after a store through a pointer derived from a parameter, where ours keeps it in a register.
 
+### An inline's pointer parameter and frame stores (func_001A2830)
+
+MoveTumblingEffect matched on 2026-11-10 from 32.7%. Three mechanisms, each read from the
+`.sched` and `.lreg` dumps:
+
+- **find_base_term needs the pointer flag.** For an address `(plus P 16)`, alias.c's
+  find_base_term takes P's base only when P has REGNO_POINTER_FLAG; otherwise it looks up both
+  operands and keeps a base only if it is a symbol or a Pmode ADDRESS (the stack). An argument's
+  base is a VOIDmode ADDRESS, so `(plus P 16)` with P an unflagged copy of `self + 0x50` has no
+  base, base_alias_check answers "may alias", and the load depends on every earlier frame store
+  through a `u128` cast. A declared pointer local (`Vec02* b = self->rot50;`) is flagged
+  (expand_decl), so its loads never wait for the frame; an inline function's pointer or
+  reference parameter is a pseudo of the inline's own without the flag. Retail's rows 1 and 2 of
+  the placement, loaded at `0x10(s0)` and `0x20(s0)` each after the stores of the row before, with
+  s0 set before the call that builds the turn, are a reference parameter of an inline that makes
+  that call (`TurnEffectAboutRow(self, *(Mat02*)self->rot50, &turn, angle)`); row 0's load,
+  `(mem P)`, is folded by CSE to `0x50(s1)` (self, flagged) and so issues early. The rows are
+  stored through the effect (`*(Mat02*)o->rot50 = r`), so the stores use s1 and the turn's rows,
+  loaded once, are not reloaded. Spot it: loads through a register that crosses a call and is
+  never folded into the object's offset, each after the frame stores before it.
+- **An in-place normalisation as an inline over a pointer**, `*v = fallback` in one arm and
+  `Q(*v) = DivX(t, l)` in the other with `t` a `Vu0::Vec` copy of `*v`: retail's
+  `lq v0,48(sp); qmtc2 v0,$vf3` (the copy through a GPR), the fallback's address before the
+  branch and its `lq; sq` in the arm, and a store in each arm, with the length's two conversions
+  (ToFloat for the test, ToFloatMoved for the returned length after the join).
+- **One float scratch for two values** (`t = ToFloat(Dot(..))`, later `t = NormalizeInPlace(..)`):
+  two sets and two deaths, so local-alloc leaves it to global-alloc, which places it above every
+  local of both blocks ($f4 in both, where ours had $f0 and $f3), and a product no longer ties to
+  it (retail's `mul.s $f0,$f4,$f0`). Spot it: the same high FPR for two unrelated values that
+  each live in one block, with the block's other temporaries packed below it.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences
