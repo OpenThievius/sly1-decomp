@@ -10,6 +10,7 @@
 #include "script_value.h"
 #include "script_builtin.h"
 #include "queued_call.h"
+#include "c8b.h"
 #include "vu0.h"
 
 // The script machine's built-in functions (the table D_00259958, which func_00119BB0 calls through,
@@ -2966,8 +2967,6 @@ struct __attribute__((aligned(16))) ScriptSampleRotation {
 };
 
 void* AllocateBackMemory(s32 size);
-void func_0012CD78(void* anim, f32 a, f32 b, void* from, void* to, s32 n, void* positions, void* rotations,
-                   void* q4, void* q8);
 void CopyRotationMatrix(f32* dst, ScriptSampleRotation* src);
 
 ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
@@ -3007,7 +3006,8 @@ ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* arg
     if (mask & 8) {
         q8 = (u8*)AllocateBackMemory(n * sizeof(ScriptSampleQuad));
     }
-    func_0012CD78(anim, a, b, from, to, n, positions, rotations, q4, q8);
+    func_0012CD78((Gr8B*)anim, a, b, (PlacedObject*)from, (PlacedObject*)to, n, (Vec02*)positions, (Mat02*)rotations,
+                  (Vec02*)q4, (Vec02*)q8);
     R11B008Node* head = 0;
     R11B008Node* tail = 0;
     for (s32 bit = 1; bit < 9; bit <<= 1) {
