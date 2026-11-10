@@ -1596,6 +1596,31 @@ StartNextQueueEntry (2026-11-10):
   needs for retail's vector registers. CreateAnimationPlayerWithoutPresetTargets declared void
   (as five other files do) lets local-alloc give the next load v0.
 
+### A constant passed through an inline is no pseudo for cse2 to copy (func_0016BEA0)
+
+Read from calls.c, integrate.c and cse.c with `-dt -dL -dS -dl` dumps (2026-11-10,
+DrawGridSelector, src/main/file_16AA18.cpp):
+
+- **Retail's sign.** `lui/ori/mtc1 $f12` for the push's 1.3 after GetFontById, a second
+  `lui/ori/mtc1 $f27` for the loop's 1.3, and `mov.s $f13,$f12` in the call's delay slot. Ours
+  (`PushFontScale(f, 1.3f, 1.3f)` and `k * 1.3f` in the loop) loaded 1.3 once, before the
+  title's DrawFontString, into a saved register, and copied it for the call and the loop.
+- **Why.** A call's constant argument costs more than 2, so precompute_register_parameters
+  copies it into a pseudo before the hard register (calls.c, preserve_subexpressions_p is
+  always true at -O2). loop.c hoists the loop's 1.3 to the end of the block that holds the
+  push, and cse2 (after loop) finds that pseudo still holding 1.3 there: the hoist becomes a
+  copy of it, the pseudo crosses the calls, and sched1 (a call-crossing pseudo has no anti
+  dependence on the last call) moves its set above DrawFontString. The 0.5 and `&out` copies
+  retail does show (`mov.s $f25,$f20`, `move s8,s0`) are this same mechanism on user variables.
+- **Retail's form: an inline with one scale.** `inline void PushUniformFontScale(Font* f, f32 s)
+  { PushFontScale(f, s, s); }` called with 1.3f: integrate.c substitutes an unmodified
+  parameter's constant into the saved body, whose call already reads a register, so the body
+  sets `$f12` and `$f13` from the constant directly, no pseudo holds it after the call (the call
+  clobbers the hard registers), and the hoisted 1.3 keeps its own load. The `$f12` load stays
+  after GetFontById (a call-used hard register depends on the last call).
+- **Spot it.** Two loads of one float constant in a block, one into an argument register:
+  the argument came through an inline's parameter (or was otherwise never a pseudo).
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
@@ -1965,6 +1990,27 @@ difference is only where r181 is born, and it decides every GPR of the loop (202
   slot before a guarded call) where retail forms it at each call: try the calls through an
   inline function taking the pointer.
 
+### A named frame address is an expression; an argument register's is not (func_0016BEA0)
+
+Read from gcse.c (hash_scan_set) and global.c with `-dG -dl -dg` dumps (2026-11-10,
+DrawGridSelector):
+
+- **Retail's sign.** `addiu a1,sp,48` before `addiu a0,sp,16` for SetTextLayoutColor, and in
+  the loop and the tail `addiu a1,sp,48` / `addiu t2,sp,48` (rematerialized) while `&out`'s
+  loop copy has s8. Ours set a0 first, and PRE's reaching register for `sp+48` (inserted at the
+  end of the block before the loop) took the last saved register from `&out`'s copy.
+- **Why.** gcse records only sets of pseudos. Through the inline methods (`out.Color(&slot.v)`)
+  the frame address is substituted as a constant and set straight into `$a1`: no expression.
+  PRE then inserts its own computation late (lazy code motion), so the reaching register lives
+  from there to the tail: 5 refs over 72 insns beat `&out`'s copy (4 over 236) in
+  global-alloc. Named
+  (`s32* color = &slot.v; out.Color(color);`) the address is a pseudo set in the first block,
+  the loop's and the tail's `sp+48` are redundant with it, the reaching register lives over the
+  whole function and is spilled (its REG_EQUIV address is rematerialized at each use), and the
+  set's extra dependent (PRE's copy) ranks it, and so `$a1`, before `$a0` in sched1.
+- **Spot it.** An argument's frame address set before an earlier argument's, and the same
+  offset rematerialized later in the function: the original named that address.
+
 ## sched1
 
 GCC 2.95's first scheduling pass (haifa-sched.c, run before register allocation) decides
@@ -2016,6 +2062,22 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   instead of `||` gives 10 refs (priority 0.24), and the function matches. global.c's priority is
   `floor_log2(refs) * refs / live_length`, so one ref can reorder two pseudos whose code is
   identical.
+
+### Two loads tied at one priority: name the term retail loads first (func_0016BEA0)
+
+DrawGridSelector's first cell's y (`self->y + fontH * fontSy + gap + cellH * half`) and x:
+retail loads the cell font's height and scale before the title font's and both before
+`self->y` and `self->x`. The title font's loads wait two cycles for `self->font`, and among
+the ready loads of equal priority INSN_LUID decides, so the cell's height named first (`f32
+cellW = f->Width('_'); f32 cellH = (f32)f->height * f->sy;`, then y0, then x0) gives retail's
+order and registers; the step (`dy`) still reads the font again after the second Width call,
+as retail does.
+
+- **PAL's frame (func_0016C4C8).** PAL draws the title through a 0xC0-byte text buffer at 0x40
+  while the colour slot, the cell string and the line's colour share 0x30 and the string's
+  initializer temporary is at 0x100. The colour slot in a block, freed as a 16-byte slot that
+  the buffer does not fit, and the buffer declared at function level after the block give that
+  layout; the buffer in a block of its own is freed and the temporary moves into it.
 
 ### sched2 keeps sched1's dependences (func_001358D0)
 
