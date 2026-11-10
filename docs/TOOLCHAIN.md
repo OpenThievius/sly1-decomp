@@ -5510,6 +5510,44 @@ retail's frame offsets and registers:
   above the MultiplyMatrices line, then `ScaleMatrix(result, ...)`. Placed after the call, the
   same pointer is propagated away (one use) and changes nothing.
 
+### Which induction variable loop.c keeps: combine_givs' totals (func_001575D8)
+
+func_001575D8 adds particles to chunks of six parallel arrays (this frame's position, velocity
+and record, and a copy of each for the frame before). Retail walks the record array in one
+register (`s0`, the positions and velocities at -0x580 and -0x2C0 from it, and `s0` itself is
+FillMemory's argument) and the copy in another (`s2`, from `addiu a2, s1, 0x840` before the
+loop). Ours folded everything into one register based on the positions. The -dL dump's "Sorted
+combine statistics" line says why:
+
+- **combine_givs keeps the giv with the largest total.** Each giv's total is its own benefit
+  (+1 for a zero addend, `no_const_addval`) plus, for every other giv it can absorb, that giv's
+  benefit + 3. A DEST_ADDR giv (a memory reference) can be absorbed by any giv whose difference
+  is a valid address; a DEST_REG giv (a pseudo) only by an identical one. Written as
+  `chunk->pos[k]` everywhere, CSE makes one `k*16 + chunk` pseudo for the top of the body and,
+  after the ifs' join, a second one for the copy; each absorbs the other (identical) and so
+  totals 9 more than the record pointer `rec` (182 against 173): the position register wins and
+  `rec` stays a register of its own (an extra spilled giv, 12 bytes).
+- **One pointer per array.** `Quad16* p = &chunk->cur.pos[k]; Quad16* v = ...; Quad16* rec =
+  ...;` at the top of the body, used for every access including the copy, leaves no CSE pseudo
+  after the join; `rec` (benefit 10 against p's 7+1) then wins and absorbs every memory
+  reference; p and v die.
+- **A copy through a pointer of its own.** `ParticleState* last = &chunk->prev;` before the inner
+  loop makes `last + k*16` a giv whose addend is a register, not `chunk + constant`, so it
+  cannot be combined with the record's: loop.c moves `chunk + 0x840` out and reduces a second
+  register, retail's s2. Written as `chunk->prev.pos[k]`, get_inner_reference folds 0x840 into
+  the constant offset and the copy joins the first register.
+- **`while (a && b)`, not `if (a && b) do { } while (a && b)`.** The `while` is expanded with
+  its test at the top and jump.c copies the whole exit test to the bottom (retail: both tests
+  at the bottom, no jump into the loop); the do-while left a `b` into the second test (4 bytes).
+- **The increments' order is the bivs' order.** `i++; k++;` (the counter of the inputs first)
+  puts i's givs' initialisations first in the preheader, so `i * 16` reuses the `lw v1` of the
+  entry test as retail's does; `k++; i++;` reloads i.
+- **`x & 0xFFFFFFFE` is `lui; ori`.** An unsigned constant above 0x7FFFFFFF is not a SMALL_INT
+  here; `~1` gives `li -2`.
+- **A 32-byte record taken by index.** `ParticleExtra* x = &chunk->extra[k]; x->a = ..; x->b =
+  ..;` gives retail's `addu a0, a0, v0` (base first); `chunk->extra[k].a = ..` repeated costs
+  8 bytes, and the byte-offset form puts the index first.
+
 ## Shapes of large functions
 
 What retail's larger functions showed the night of 2026-11-07 (func_001C61E0,
