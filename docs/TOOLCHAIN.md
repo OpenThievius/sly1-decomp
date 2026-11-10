@@ -1826,6 +1826,48 @@ combine.c (try_combine, find_split_point) and cse.c (make_regs_eqv) with `-dc -d
   dies (MoveAnimationTrackToEnd's `(count - idx) * 0x1C`, EnterTimedGroupState's `* 1000`) copied
   to an argument register: a three-insn combine whose split leaves the bare SET.
 
+### Frame addresses and a constant's copy in the arc's frame (func_001E7C60)
+
+Read from function.c (assign_stack_temp_for_type, combine_temp_slots), integrate.c and cse.c with
+`-dr -dF -dc -dl -dg` dumps (2026-11-10). The near miss was 16 bytes long (s6, s7 and 0x30 more
+frame); four changes matched it:
+
+- **A block local takes its slot where it is declared.** g++ expands a declaration at its
+  statement (expand_decl, `assign_temp (type, 1, 1, 1)`), so `Vec02 pos;` at the top of a case's
+  block holds its 16 bytes before the block's weight temporaries are made, and they go to the
+  next slot (0xD0). Declared just before its assignment, after the weights' statements, pos
+  takes the freed slot the weights used (0xC0), as retail's does; the outline's 0x80-byte request
+  then fits after one slot (0xD0), not two (free BLKmode slots combine only when adjacent, and
+  two 16-byte ones are too small for it). Spot it: retail's frame reuses one offset for weights
+  and a later local.
+- **FromFloats took its slot's address through Q.** As Scalar's did (func_0017BCD0, above),
+  `return Q((s128)r);` left `(set (reg) (plus fp 192))` for CSE, which made that pseudo the
+  canonical register of the frame address; the case blocks' `&pos` and the ticks' request, given
+  the same slot, were read through it, live from the unprojection to the end (s6). FromFloats now
+  ends `return *(u128*)&(s128)r;`; every matched function builds the same (full build MATCH).
+- **An address passed through an inline is no pseudo.** `FillMemory(&request, 0, 0x80);
+  ...; QueueDeferredRequest(&request);` expands each `&request` into a pseudo, and CSE replaces
+  the second with the first, which then lives across FillMemory's call in a saved register (s0).
+  Retail forms `addiu a0,sp,0xD0` at both calls. A small inline that clears the record
+  (`ClearArcQueueRequest(&request)`, as matrix.cpp's ClearMatrix) gives it: integrate.c
+  substitutes the unmodified parameter's frame address as a constant, so the argument is set
+  straight into a0 (`(set (reg a0) (plus fp 208))`), no register holds the address after the
+  call, and the second `&request` stays a one-use pseudo that combine folds into a0. Spot it:
+  `addiu a0,sp,N` both before FillMemory's call and after it; among US's 170 FillMemory calls
+  this shows only at a handful (BuildScaleAboutFrame's ClearMatrix, 0x163218, 0x1CB244, here).
+- **A literal CSE'd into a copy that outlives its source.** Retail's stick arm has
+  `mov.s $f4,$f6` (150 copied from `dist`, still 150) before the height's product. With
+  `dist = |x|*x*150.0f + dist; height = |y|*y*150.0f + height;` the first 150's pseudo becomes a
+  copy of `dist` (the cheaper equal register) whose use CSE replaces with `dist`; the second 150
+  finds that pseudo still holding 150 after `dist` changed, so it is read through it and the copy
+  stays. Written `* dist` in the first line, or height first, there is no copy (the 150s are
+  `dist` itself); the else arm, off CSE's path from the initialisation, loads 150 afresh.
+- Also: the first aim term as `Vu0::Vec::Of(cam->f40).q` puts the load before the height's slot
+  store (an inline call, integrate.c's first pass; above, "A weighted sum's operands in insn
+  order"), so the fA0 load after it anti-depends on the store, the store keeps its place before
+  the vmulx and the weight dies at the vmulx, which takes its register as retail's does
+  (`vmulx vf3, vf1, vf3x`). `place.scaleX = place.scaleY = 1.0f;` stores scaleX first.
+
 ## GCSE
 
 What GCC 2.95's gcse.c does with a load, read from its source and `-dG` dumps (2026-11-08,
