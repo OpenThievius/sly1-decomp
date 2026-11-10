@@ -939,3 +939,41 @@ func_00141D88 and func_00141F48 (the same head: `c = Dot(pa,pa) - r*r`, `hb = Do
   (combine merges the copy, twoB is set once again); an inline root solver taking
   `(roots, a, b, c)` (CSE propagates its parameter copies, and the returned count adds a
   test).
+
+### The side test and the half-width: what retail's order needs of each conversion (func_00142278, unsolved)
+
+Read from haifa-sched.c (priority, insn_cost, rank_for_schedule), the `-dS -dR -dl -dg
+-fsched-verbose-6` dumps and a model of sched2's list scheduler (build/swarm/w15-142278/sim2.py
+in the g10 worktree: hard-register dependences, sched1's stale true links, link cost 1 into an
+asm or for an anti or output dependence, two issues a cycle, one insn per unit; it reproduces the
+near miss's sched2 order of the block exactly) (2026-11-10, w15):
+
+- **The side test's block needs ToFloatViaBits for all three, and the s dot before side's qmfc2
+  in sched1's output.** Retail's order (dot side; both crosses; the zero; dot s; side's qmfc2 and
+  mtc1; dot u; the compare; the qmfc2s of s and u; their mtc1s) comes out of sched2, with retail's
+  registers (side v1, s a0, u v0), only for side ToFloatViaBits (or Moved) and s and u
+  ToFloatViaBits or Moved, and only when the s dot's LUID is below side's qmfc2: they tie at
+  sched2 priority 6 with three dependents each, so the LUID decides. ToFloatNow for side loses
+  the zero's tie on dependents (its asm also writes the FPR the u conversion writes), ToFloat for
+  side adds the compiler mtc1's 2 cycles. Moved for side, its qmfc2 a reload right after the dot,
+  never gives it. u's qmfc2 and mtc1 are split in retail (`qmfc2 v0; mtc1 a0; mtc1 v0`), so u
+  is not ToFloatNow either.
+- **sched1 cannot.** sched1's output is sched2's LUID order. With ToFloatViaBits side's qmfc2 has
+  priority 6 (qmfc2, mtc1, the compare's 3, the branch), the s dot 5 (the division's link to
+  the branch costs 1), and the qmfc2 is ready a cycle before the s dot can be: it always goes
+  first. No conversion of s or u lengthens the s chain (ToFloat, Moved and Now are shorter), and
+  the zero named in an earlier block (update_equiv_regs moves its set after sched1) frees a slot
+  but not the tie. This is the quadratic's head's wall again: a dot's chain one cycle short of
+  a conversion's, with nothing visible in the code to lengthen it.
+- **The half-width's conversion is Moved whose pseudo lives in VU0.** Retail's `qmfc2 a0` (w),
+  `qmfc2 v0` (k), `qmfc2 v1` (kk) are reload's spill registers in turn: ToFloat for w (its "=r"
+  float reloaded through a GPR) gives exactly those, where Moved's TI_REGS pseudo, tied to
+  nothing (cd lives on, m is global), takes $v0 from local-alloc (the GPRs come first in its
+  order, VU0 registers still free). ToFloat also gives retail's dot vf3 and scratch vf4 (a VU0
+  pseudo allocated before the scratch). But its qmfc2 is an asm with no unit, so sched2 issues
+  ab's `lqc2` beside it and the mtc1 a cycle later; retail's order (qmfc2, mtc1, lqc2, div.s) is
+  the compiler's qmfc2, which needs the vu0 unit the lqc2 also takes, as Moved's reload copy
+  does (the near miss has that order). So retail read a VU0-allocated dot result through an
+  "r" operand. Not reached: the Vec forms of the dot (their copies are gone before regclass), the
+  dot named before or after the square root, the division written apart, and all 64 mixes of
+  the four conversions for w, k and kk (Moved for all three stays best, at 8 lines).
