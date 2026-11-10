@@ -2027,7 +2027,7 @@ void AddAgentClipGroup(Agent* self, s32 a, s32 b, s32 c, s32 d) { if ((u32)self-
 void AddTurningColliderProbeContact(Agent* a, Collider* b, s32 c, s32 d);
 s32 IsObjectOfKind(Collider* a, s32 b);
 s32 IsObjectAttached(Collider* a);
-void AddMeshContacts(f32 f, Collider* a, void* b, Collider* c, s32 d, s32 e, s32 g, void* h);
+void AddMeshContacts(Collider* a, f32 f, void* b, Collider* c, s32 d, s32 e, s32 g, void* h);
 void func_00186BA8(Collider* a, Collider* b, s32 c, s32 d, s32 e, void* f);
 
 void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32 a5)
@@ -2047,7 +2047,7 @@ void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32
         Elem08* e = &a0->fA7C[i];
         if (IsObjectAttached((Collider*)e->obj) != 0) {
             if (a1->flags538 & 0x10000000000ULL) {
-                AddMeshContacts(a1->radius3CC, a1, (u8*)a1 + 0x140, (Collider*)e->obj,
+                AddMeshContacts(a1, a1->radius3CC, (u8*)a1 + 0x140, (Collider*)e->obj,
                               ((Collider*)e->obj)->tree.count,
                               (s32)((Collider*)e->obj)->tree.nodes, 0, (u8*)a0 + 0xAAC);
             } else if (a3 != 0) {

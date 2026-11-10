@@ -1439,7 +1439,7 @@ typedef void (*TargetNotifyFn)(Collider* self, TrackerHit* hit);
 s32 CollectMeshHits(f32 radius, Vec02* pos, s32 count, s32 nodes, s32 zero, void* mesh, s32 one, void* out);
 s32 CollectTreeNodeSpans(s32 tree, void* a1, void* a2, s32 a3, s32 a4, void* out);
 void AddSphereSphereContact(Collider* a, Collider* b, s32* out);
-void AddMeshContacts(f32 radius, Collider* a, Vec02* pos, Collider* b, s32 c, s32 d, s32 e, s32* out);
+void AddMeshContacts(Collider* a, f32 radius, Vec02* pos, Collider* b, s32 c, s32 d, s32 e, s32* out);
 void func_00186BA8(Collider* a, Collider* b, s32 c, s32 d, s32 e, void* f);
 void InitOwnerMessage(void* out, s32 kind, void* owner);
 void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out);
@@ -1516,10 +1516,10 @@ void UpdateC37(C37* self)
                 if ((self->flags538 & ((u64)0x8000 << 25)) != 0) {
                     AddSphereSphereContact(target, self, &result);
                 } else {
-                    AddMeshContacts(target->radius3CC, target, pos, self, (s32)self->tree.count2, (s32)self->tree.nodes, 0, &result);
+                    AddMeshContacts(target, target->radius3CC, pos, self, (s32)self->tree.count2, (s32)self->tree.nodes, 0, &result);
                 }
             } else if ((self->flags538 & ((u64)0x8000 << 25)) != 0) {
-                AddMeshContacts(self->radius3CC, self, &self->v140, target, (s32)target->tree.count2, (s32)target->tree.nodes, 0, &result);
+                AddMeshContacts(self, self->radius3CC, &self->v140, target, (s32)target->tree.count2, (s32)target->tree.nodes, 0, &result);
             } else {
                 s32 nodes = (s32)self->tree.nodes;
                 if (nodes != 0) {
