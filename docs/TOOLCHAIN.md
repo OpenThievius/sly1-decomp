@@ -1169,6 +1169,28 @@ local-alloc.c's update_equiv_regs):
   a0. u128 helpers (Q) there make it 218 and 201: the tilt's two move in pass 1, and pass 2 moves
   both unit vectors' `%hi`, spilled and rematerialized (`lui v0`) at each use, as retail's are.
 
+### One address, two adds: which forms CSE merges (func_001C3C98, unsolved)
+
+Observed in the `.rtl`, `.cse` and `.lreg` dumps of func_001C3C98 (three accesses to
+`c->end[end]`: two loads and a store), 2026-11-10:
+
+- **Index first means no pointer local.** An address expanded as an inline's reference argument
+  or inside a memory reference (`Vu0::Q(c->end[end].v10)`, `Vec::Of`, `*(Vu0::Vec*)&...`) is
+  `(plus index c)`, retail's `addu v0, v1, a1`. A reference or pointer local
+  (`ContactEnd03& e = c->end[end]`) folds `&c->end[end]` into pointer arithmetic: `(plus c index)`.
+- **CSE never reuses a user variable's address for a later one.** Q's and Of's reference
+  parameter is a user variable; a later equal sum (a cast's temporary, or another Q) stays an add
+  of its own (three Qs: three adds). reload_cse then turns each later add into `move`, the copy
+  retail shows. The other way round, a temporary's address first and a Q later, CSE replaces the
+  Q's parameter with the temporary and deletes it: one register for everything.
+- **So retail's `addu v0; move v1, v0`, both loads on v0 and the store on v1** is the store's
+  user-variable address expanded first (`Q(...v30) = MulAddX(...)` in one statement, the left
+  side expanded before the arguments) and both loads as temporaries (a cast and `*(Vec*)&`)
+  after it. Spot it: an address copied with `move` right after its add, the copy used only by
+  the store.
+- What was left in func_001C3C98 is local-alloc's ranking (the address, 3 refs over 9 insns,
+  against p->anim, 2 over 4): see the near miss's notes.
+
 ### A reload after an if whose body returns: follow-jumps (func_00183668, unsolved)
 
 `cse_end_of_basic_block` follows a conditional jump (`-fcse-follow-jumps`, on at -O2) when its

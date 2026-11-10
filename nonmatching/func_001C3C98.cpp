@@ -1,36 +1,52 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 136/144, checked 2026-11-07
+// BYTES 114/144 (79.2%), checked 2026-11-10
 #include "common.h"
 #include "switched_collider.h"
+#include "collider.h"
 #include "attachment.h"
 #include "animation.h"
 #include "vu0.h"
-// NEAR (2026-11-07, worker vu0-a): the instructions are retail's but scheduled and allocated
-// differently. Retail divides and moves the scale into the VU (qmtc2 vf4, stored to k) before
-// it loads the entry's position: the velocity and self's position are loaded first (vf3, vf5),
-// so the Dot's scratch is vf6, and self is copied to a3 (the player takes a0). Here sched1 puts
-// the division's mfc1/qmtc2 last, after vmulq, and loads self's position first. The same as
-// func_0018DDD8 and func_001C3EB0: retail moves a float into the VU early, the compiler here
-// late. Tried: the scale kept in a u128, the entry as a pointer or indexed twice, the
-// normalisation as Length and DivX or as Normalize (the same code).
-
-struct ContactEntry40 {
-    u8 pad00[0x10];
-    Vec02 pos;              // 0x10
-    u8 pad20[0x30 - 0x20];
-    Vec02 vel;              // 0x30
-};
+// NEAR (2026-11-10, worker w10-1C3C98): the size is right and 26 of 37 instructions agree; what
+// is left is one local-alloc ranking and the schedule it pulls with it.
+//
+// Found: the method is the class's slot 0x104, called only by func_001860A8 with (part,
+// contact, end) like slot 0x100 (NoteHitCountColliderContact): the second argument is a
+// Contact03 and the entry is c->end[end] (ContactEnd03), not an array of 64-byte records
+// indexed by the caller. Retail's `addu v0, v1(index), a1(c)` is an address expanded inside a
+// reference or memory operand (Q, Vec::Of, *(Vec*)&); a pointer or reference local
+// (`ContactEnd03& e = c->end[end]`) gives `addu c, index` and one register for everything.
+// Retail's extra `move v1, v0` is a second add of the same address that reload_cse turned into a
+// copy: CSE never replaces a later address with an earlier one held in a user variable (an
+// inline's reference parameter, as Q's), but it does replace a user variable's with an earlier
+// temporary's (a plain cast), and then deletes it. The Scalar slot store (Vu0::Scalar, the
+// scale named first) comes before the position's load, which waits for it (no alias flag:
+// Of's or Q's cast), while the velocity's load does not (*(Vec*)&, a mem/s aggregate).
+//
+// Left: retail's local-alloc places the address (v0) before p->anim (a0); ours places p->anim
+// first: priority 0.5 (2 refs over 4 insns) against the address's 0.333 (3 refs over 9 insns,
+// its life to the position's load behind the slot store), so p->anim takes v0, the address a0,
+// self's copy and the reload of the scale's mfc1 follow, and sched2 then puts the velocity load
+// after the division instead of before the length's lwc1. Retail's address needs a fourth
+// reference or a span of at most 5, or p->anim a span of at least 7.
+//
+// Tried (all with the c->end[end] signature, 2026-11-10): every combination of Q, a u128 cast
+// and *(Vec*)& for the position load, the velocity load and the store, with the store in the
+// same statement or after a named value (54 variants); the same with a Normalize helper
+// (DivX(v, Length(v))) in one statement (27): the closest, pos as a cast, vel as *(Vec*)&, store
+// as Q in one statement, gives retail's address structure (both loads on the first add, the
+// store on the copy) but the same ranking; the scale named after the difference or inline in the
+// MulAddX (slot store late: 25 differ); the length read into a local first; the velocity named
+// first. The form below (Vec values, as collider_contact.cpp writes c->end[1].v10) scores the
+// same 11 differing instructions.
 
 extern f32 D_00274A44;
 
-void func_001C3C98(HitCountCollider* self, ContactEntry40* entries, s32 i)
+void func_001C3C98(HitCountCollider* self, Contact03* c, s32 end)
 {
     AnimationPlayer* p = self->f67C;
     if (p != 0) {
-        Vec02 k;
-        Vu0::Q(k) = Vu0::FromFloat((D_00274A44 - self->f68C) / p->anim->length);
-        ContactEntry40* e = &entries[i];
-        u128 d = Vu0::Sub(Vu0::Q(e->pos), Vu0::Q(self->v140));
-        Vu0::Q(e->vel) = Vu0::MulAddX(Vu0::Q(e->vel), Vu0::DivX(d, Vu0::Length(d)), Vu0::Q(k));
+        Vu0::Vec k = Vu0::Vec::Scalar((D_00274A44 - self->f68C) / p->anim->length);
+        Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(c->end[end].v10), Vu0::Vec::Of(self->v140));
+        *(Vu0::Vec*)&c->end[end].v30 = Vu0::MulAddX(*(Vu0::Vec*)&c->end[end].v30, Vu0::DivX(d, Vu0::Length(d)), k);
     }
 }
