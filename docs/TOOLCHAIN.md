@@ -4556,6 +4556,13 @@ of which the first is filled and `StartIopDma(transfers, 1)` sends one, as a sen
 for a record table of fixed capacity would. The failure message is a string literal in both
 places (one .rodata copy, at D_0024F738, where the near miss's named global was).
 
+The maintainer allowed this form (2026-11-09), and its limit matters: AGENTS.md forbids a local
+that exists only to size the frame. A local whose size a retail frame proves is accepted only as
+an array of the real record type, passed through the callee's real interface (a pointer and a
+count), with the other callers' frames showing nothing else is padded. A byte array, a scratch
+array of an unrelated type, an invented wrapper type or an alignment attribute is still not
+allowed.
+
 ### A pointer field's type picks its store's partner (func_002042C8)
 
 Read from haifa-sched.c (priority, rank_for_schedule) and the `-dS -dl -dg -fsched-verbose-6`
