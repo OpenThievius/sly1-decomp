@@ -939,3 +939,42 @@ func_00141D88 and func_00141F48 (the same head: `c = Dot(pa,pa) - r*r`, `hb = Do
   (combine merges the copy, twoB is set once again); an inline root solver taking
   `(roots, a, b, c)` (CSE propagates its parameter copies, and the returned count adds a
   test).
+
+### Spill stores between float constants: counting a preheader's %hi/%lo pairs (func_00134B48, unsolved)
+
+Wave 15 (2026-11-10). The second loop's preheader differs from retail's only in where two
+spill stores fall among four float constants (`sw a1,540(sp)` / `sw a2,544(sp)`, &pos's and
+&screen's frame addresses, loop invariants that PRE put at the loop header and loop.c's first
+pass moved out, spilled because nothing rematerializes `sp+N`). The detail is in
+alias-classes.md ("Confirmed in US func_00134B48"); what this wave added:
+
+- **sched2 only replays sched1's LUIDs here.** In sched2 the constants (`lui at; mtc1`, the
+  memory unit, one per cycle) and the spill stores all have priority 2, class 3 and no
+  dependents, so they issue in LUID order, and a spill store's LUID is its `addiu`'s place in
+  sched1's output. Retail's order needs sched1 to emit `1728.0, &pos, 16.0, x, 0.4545, &screen,
+  1936.0`: &pos picked second in the first constant's cycle.
+- **Exactly two pairs may rank ahead.** At issue rate 2, only a `%hi` with an in-block `%lo`
+  (priority 2, one dependent) and a `%lo` raised by adjust_priority (priority 2) rank before
+  &pos (priority 1, no in-block predecessor). Two pairs fill cycles 1 and 2 and leave the
+  first constant and &pos to cycle 3; a third pair (or one extra priority-2 ALU insn, at
+  any LUID) always puts something between them. A `%lo` that ends its `%hi` (weight 0) beats
+  a constant; one whose `%hi` lives on (weight 1) falls behind it by LUID; a lone `%hi` beats
+  a weight-1 `%lo` on its dependent count.
+- **Where our third pair comes from.** Limit's `this` (REG_EQUAL `&g_unitRange`, a move-insn)
+  is re-emitted by loop.c's second pass with emit_move_insn: a fresh `%hi` (a new pseudo) and
+  the `%lo`, at the end of the preheader. cse2 then replaces the fresh `%hi` with PRE's pseudo
+  for the same `high`, set earlier in the same block by the first pass, and deletes it: the
+  `%lo` now depends on that `%hi`. An experiment reading g_unitRange before the first loop
+  (not a candidate form) kept the pair: PRE then left the body's `%hi` alone and the second
+  pass moved it too, set again in the preheader. So any hoisted `this` brings its pair;
+  retail's body code (`move a3,a2; addiu a3,a3,%lo` for the `+4` read: an unallocated pseudo
+  with a constant equivalence, or an allocated one whose input reload took the output
+  register, reload_cse then copying a2's `%hi`) fits both a hoisted and an in-loop `this`.
+- **Ruled out (w15).** A range pointer declared before the second loop or at the function's
+  top (the `lo` read is no longer folded into `%lo(g_unitRange)`: `lwc1 $f4,0(a2)`, s4/s8
+  swap); the coefficient table addressed from D_00261190 (`&D_00261190[4]`: g++ forms
+  `high(D_00261190+16)`, its own GCSE expression, nothing shared with the first loop);
+  the clamp with early returns reading `hi` after the first test (retail's preheader order,
+  but g_unitRange's `%hi` takes s4, as the else-arm clamp did, and the code grows 4 bytes);
+  two ApproachValueWithRamp calls in an if/else for f58 (not cross-jumped back, 1764-1772
+  bytes).
