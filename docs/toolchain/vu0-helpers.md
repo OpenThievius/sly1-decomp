@@ -436,3 +436,33 @@ func_0013A498 shows the same thing for the loads and stores around its vcallms, 
   `blez`, which combine gives only with no volatile insn between kept's set and the test
   (can_combine_p). Tried with the helpers: kept's `= 0` at the top gives the slt back (392
   bytes, 96 differing lines); `if (count > 0)` around a do-while makes loop.c count up (100).
+
+### New microprogram helpers fail the recurrence rule (2026-11-10, w16)
+
+New VU0 helpers are allowed when they fit AGENTS.md ("Plain C++": one instruction or one short
+sequence the compiler cannot emit, recurring across retail's functions, once in include/vu0.h).
+Neither near miss above can use one:
+
+- **Only two functions in retail touch the microprogram interface.** In asm/us/text.s every
+  `vcallms` and every reference to $vf16..$vf31 is in func_0013A498 (18) or func_00185150 (3);
+  in asm/eu/text.s, in their PAL copies func_0013A798 and func_001857B0. The only writes of
+  $vi3 and $vi4 anywhere are func_00185150's (0x185224, 0x185228; PAL 0x185884, 0x185888), and
+  `vcallms 0x60`, `vcallms 0x168` and `vcallms 0x10` each occur in one function. The other
+  control-register reads in retail are a different sequence: four `vnop` then `cfc2.ni $v0,$vi17`
+  (func_00125C90, func_00126270 twice, func_00134B48, func_001358D0, func_0013AD80,
+  func_00146038, func_0018F9D8, func_0019F620, func_001A0758, func_001A3250, func_001AFBB0,
+  func_001F4AE0), and func_002018E8/func_00201988's $vi28/$vi29 (library). So func_00185150's
+  `ctc2.i $vi3; ctc2.ni $vi4; cfc2.ni $vi2; vnop` block and func_0013A498's `lqc2 $vf24; lqc2
+  $vf23; vcallms 0x10` are each one function's code: a helper for either would reproduce that
+  function, which the rules forbid. func_00185150 keeps its four one-instruction helpers (and
+  the one-asm form was not EXACT either: build/swarm/w11-185150/h4.cpp left a global-alloc tie).
+- **func_0013A498's loads cannot be non-volatile.** Retail's prologue (`qmtc2.ni a1,$vf27` ahead
+  of the saves, the parameter spills after lqc2s) needs its loads into $vf23..$vf31 to be free
+  moves. An asm with no outputs is always volatile (stmt.c), no output constraint reaches
+  $vf16..$vf31 (they are fixed under -mvu0-use-vf0-vf15; "j" allocates $vf1..$vf15), and a GPR
+  or memory output added to a load would be an output written only to steer the compiler. Only
+  the stores have a natural non-volatile form, a memory output (`__asm__("sqc2 $vf%1, %0" :
+  "=m"(*(u128*)p) : "i"(N))`): in scratch (build/swarm/w16-185150/nvstore.cpp) it moves the else
+  arm's address adds and the return's `move` as retail has them, 66 differing lines against 73,
+  but the prologue and the entry test are unchanged, so it is not landed. Retail's form is the
+  compiler's own moves into fixed registers, i.e. register variables, which stay a user decision.
