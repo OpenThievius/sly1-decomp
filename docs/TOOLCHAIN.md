@@ -110,6 +110,135 @@ What else was measured:
 - **The preprocessor** is the toolchain's `cpp.exe`, given the macros the
   compiler driver defines (tools/compile.py).
 
+## Index of the techniques that matched
+
+What matched functions overnight on 2026-11-08/09 (about 80 of them), grouped by the compiler pass each
+technique targets. The rule of the method: find the pass in the dumps and GCC's source first, then write the
+plain C++ that has retail's property. Each entry names a function where it matched and the section that
+explains it; search the section's title or the function. Walls that stay open are listed at the end.
+
+### Signatures and declarations
+- **A missing parameter is the commonest hidden difference.** A parameter passed on to a base method or a
+  virtual slot is one more pseudo before the call; reload deletes its moves, but sched1 and global-alloc count
+  it. Look at the callers' argument registers and the sibling methods' signatures (func_001EBF40 "A Load
+  method's reader", func_00143418 "A time step passed on", func_0018AD88, func_00161B10, func_001719E8).
+- **A prototype's parameter order** sets the order of argument moves, since ints and floats use separate
+  registers; the callee's code cannot show it, the callers do (func_0013A128, func_0012C9E8, func_001E4888,
+  func_00131198).
+- **A callee declared `void` that really sets v0** changes sched2's dependents (func_00131198 "A call's result
+  register ends a use's dependences"). A function returning a value nobody reads can be the original
+  (func_00211618).
+- **A matrix returned by value** is g++'s named return value: each row to a local, then to the result
+  (func_0018A040, func_00188B48, func_001BA5B0, func_001C6028).
+- **The file's real struct and pointer types.** A record's member load has an alias flag a cast array's does not
+  (func_00191C78 "Corner pointers read as a record's members"); Sony's compiler separates stores by type
+  (func_001F7BE8 "A run of stores in two alias classes").
+
+### Alias classes and memory (sched1, sched2)
+- **The weight slot is a cast's copy.** `Vu0::Scalar`, `ScalarAt`, `FromFloats` and `ScalarInGpr` end in
+  `return Q((s128)r)`: g++ 2.95 copies the register into a scalar-flagged temporary that member loads never wait
+  for (func_001D87C8, func_001C75B0, func_0017ABE8, func_001A00A0, func_0015BC78 "The weight slot is a cast's
+  copy"). Where a near miss stores its own `Vec02 k` or `Slot`, pass `Vu0::Scalar(...)` directly.
+- **Call through the descriptor member** (`self->desc02()->m20(...)`), not a cast array of function pointers,
+  so both sides of the alias test carry a flag (func_001EB698). `RotateMembers` and `Vec::ScalarAtValue` read
+  rows and members as members (func_001980B0, func_001C75B0, func_001719E8).
+- **A global read as `D[0]`** is an aggregate's word and waits behind pointer stores (func_001CDB70, PAL
+  func_eu_001AEC90 "A pointer global read as an aggregate's word").
+- **Read a pointer or vector where it is used**, or before the frame stores, so no register holds an address
+  across a test and no store holds the load back (func_00199698, func_001A2D88 "A pointer read before the frame
+  stores").
+- **An extern const float or FLT_MAX is folded into a second .rodata word:** write the literal (func_00186BA8,
+  func_001C57C8, func_0013BF68). check.py misses it; the full build catches it.
+
+### Scheduling order (sched1, sched2)
+- **The birthing rule:** adjust_priority raises a pseudo set once and live at the block's end (func_00179A68).
+  Ties fall to INSN_REG_WEIGHT, then dependents, then INSN_LUID, which is where the insn is expanded.
+- **Operands in insn order:** name each weight beside its vector, or pass the vectors as `Vec::Of`, so loads
+  come before slot stores (func_001A15D8 "Operands in insn order", func_00191570). Name a weight just before its
+  use, not at the top, where retail stores it late (func_001C3EB0, func_0018DDD8, func_0014A8F8).
+- **Weight-first helpers:** a sum helper's parameter order sets when slot stores are emitted (`MulAddX3`,
+  `MulAddX2WeightFirst`; func_001DDE90, func_001218C0).
+- **A store after a call at a block's end** makes the jump every insn's dependent: write it once after the join
+  so the call ends the block (func_0017B8C0). The same shape lets a call end its arm and flow's nop take an
+  issue slot (func_0013BF68 "A call that ends an arm leaves flow's nop").
+- **Conversion helpers** (`ToFloat`, `ToFloatMoved`, `ToFloatViaBits`, `ToFloatNow`) differ in latency, unit
+  and where the GPR comes from; try the other one (func_001D4348, func_00186230, func_00141D88).
+- **Store then scale in place** (`Q(*o) = Sum(..); Q(*o) = MulX(Q(*o), w)`): the dead store lives until flow2
+  and keeps the product out of the sum's register (func_00130540, func_001C6028).
+- **sched1's weight puts a dying value's store first** (Sony's compiler, func_001F8290).
+
+### Register allocation (local-alloc, global-alloc, reload)
+- **Global ranking is log2(refs) x refs / live length.** Split an expression into two statements, or name an
+  intermediate, to change the counts (func_001F7390, func_0012C9E8 "A named operand of `>?`", func_00144BE8).
+- **A variable reused for two values or two loops** joins their conflicts and preferences (func_0016E738,
+  func_00186568, func_001BBC38, func_0018AE38).
+- **A block-local variable that crosses a call** takes s0 first and pushes a long-lived value out of it
+  (func_001C9DE0 "A load hoisted over a conditional move takes a register from it").
+- **A literal initial value, or leading equal constants,** double a life through REG_EQUAL (func_001BB290,
+  func_0017C428 "a switch's default first", PAL func_eu_0015DF58).
+- **A named local versus a literal** moves a life by one insn: a float constant in a named local is a
+  user-variable pseudo scheduled early; write the literal where the matched twin does (PAL func_eu_0015C5C0,
+  func_eu_001AB2B0).
+- **Two variables sharing one register:** read the near key before the call in its arm (func_00185498).
+- **A Vec named from a Vec result** adds a movti copy and a reference (func_0016C528).
+- **Reload's round robin is one step off with no visible extra reload:** the original repeated code that
+  cross-jumping merged after reload; write the repeated tail instead of a fall-through (func_001F2840).
+
+### Loops (loop.c, jump.c)
+- **loop.c moves an invariant when 80 x savings x lifetime >= insns** (the threshold is 79 for a loop with a
+  call and falls by 3 per move). A `const f32&` local at the top of the body, a named constant, or Vec versus
+  u128 operands change what moves and in which pass (func_001CF158, func_001389D0, func_001D8E40).
+- **Pass a weight by value** (`ScalarAtCall`) so loop.c does not hoist its address (func_0017E3C8).
+- **`for (i = n; --i >= 0; )`** keeps PRE off `n - 1` and reloads `n` before each of several loops
+  (func_00186568). `&recs[n++]` versus `q[-1]` reduces differently (func_00148938).
+- **A `continue` leaves a label among the rolled tests** and stops jump.c copying a loop's exit test
+  (func_001388A0).
+- **Vec values in the loop body** keep cse_around_loop from folding the loop bound into a second register
+  (func_001C4D60, func_00191C78).
+- **A loop variable declared before its loop** puts its set in the preheader (func_001E4888).
+
+### CSE, GCSE, jump and reorg
+- **GCSE's table has (n+3)/2|1 buckets** from the insn count; PRE's pseudos follow bucket order, which sets
+  spill slots and callee-saved registers. Read T from the -dG dump's second "hash table (N buckets" line and
+  tune the count with Vec/u128 forms or extra statements (func_001841D0, PAL func_0016AB38, func_00211618).
+- **A store in each arm** avoids a pointer copy and keeps a value read after the join; cross-jumping merges the
+  stores after reload (func_00126CB8, func_001D8E40).
+- **A set written in the target's arm** lets reorg copy it into the delay slot (func_001CD870). jump.c hoists
+  `x = 1` above a test when the else arm's first insn sets x: write the set later (func_001C4D60).
+- **A return in each branch** lets the tails merge before the epilogue (func_0014DA98).
+- **Assignments written once after an if/else** keep PRE from copying them into the arms (func_0013BF68,
+  PAL func_eu_0015DF58).
+
+### Inlining
+- **An inline setter's constants** are substituted per insn, giving retail's mix of frame-relative and
+  register-relative stores (func_001A7800 "A stack record filled by an inline").
+- **An inline layout helper's frame-address parameters** give a fresh `addiu` at each call and the buffer from a
+  spill slot (PAL func_001316E8 "Integration: an inline function's parameters and results"; func_00134B48).
+- **An inline's whole frame** is one BLKmode temporary per call; locals declared in an inner block free their
+  slots at its end (func_00125138, func_001E4888).
+
+### Library code (Sony's 2.9-ee-991111)
+- **Stores of different types do not conflict;** use the file's real pointer types (func_001F7BE8).
+- **The frame is the size of the locals,** so a 256-byte frame means a 256-byte local (func_00203FD0, held back
+  for the maintainer's decision; its section is on branch w9-203FD0).
+- **`volatile` only for words an interrupt or another thread shares,** as retail reloads them (func_00203548).
+- The GCSE bucket order is the same as SN's (func_00211618 "Sony's compiler: the same bucket order").
+
+### Process
+- Find the mechanism first: the pass in the dumps (-dS, -dl, -dg, -dL, -dG, -fsched-verbose-6) and in GCC
+  2.95.3's source, then write variants.
+- Re-score before starting: notes go stale (constants, prototypes, a fix lost in a merge).
+- Predict before compiling: the local-alloc and sched1 emulators and the GCSE table-size formula.
+- Diagnostic probes that print EXACT but are not plain C++ (an empty `asm volatile`, a dead `else`, a volatile
+  slot) prove a mechanism; they are never landed.
+
+### Still open
+func_00186230, func_00186320, func_00130748 and func_001D4348 (a compiler-made `qmfc2` that an asm one does not
+reproduce); the static-record constructor wall (func_0018A510, func_001D61C8, func_001D5FA8, func_001D60B0);
+func_0013BE18 and func_0014F168 (a store in each arm merged only after sched2); func_001F3140, func_0020A190,
+func_00183668 (a pass-ordering effect no plain form gives); func_0014B6A8, func_001DC4D0, func_001DC238 and
+func_0015A198 (an unread small object that only an empty destructor reproduces).
+
 ## The VU0 helpers
 
 include/vu0.h holds the VU0 macro-mode sequences of the game's C (2026-11-07,
@@ -4421,6 +4550,37 @@ The same function's parent pointer: one variable assigned in both arms of the fi
 and in the else arm is one pseudo across all three lives, which global-alloc gives a0 (r206,
 the else arm's row pointer, took v1 in local-alloc first). Retail's v1 in the first arm and
 a0 in the else arm are two variables: the else arm declares its own `parent`.
+
+### A local's size is the frame (func_00203FD0)
+
+Sony's 2.9-ee-991111, like SN's 2.95.3, adds nothing to the locals' area: mips.c's
+compute_frame_size takes get_frame_size(), the sum of the locals' slots, and rounds it to 16.
+The three other callers of StartIopDma have exactly their records' bytes below their saves
+(0x10 for one record in func_0018E7C0 and func_001F9AD8, 0x20 for command_channel's
+`recs[2]`). SendPadDma (src/lib/pad.c) has 0x100, with its one record at 0: its local was
+256 bytes. Ruled out, with dumps of the frame (2026-11-09):
+
+- **A variable's alignment does nothing.** expand_decl allocates a BLKmode local from its
+  size and then resets DECL_ALIGN to BIGGEST_ALIGNMENT, so `PadDmaTransfer t
+  __attribute__((aligned(64)))` keeps a 0x60 frame.
+- **A type's alignment changes its size.** `aligned(64)` on the record's typedef makes it 64
+  bytes (a 0x90 frame); `aligned(256)` gives retail's 0x150 frame and the function matches,
+  but nothing in retail asks for a 256-byte-aligned DMA record (the library's own DMA words
+  and request buffer are 64-aligned in .bss).
+- **No temporary or inline frame.** The function has no struct value, call returning a
+  struct or inline call that could leave a 0xF0-byte temporary.
+
+What matches, and is landed: a table of sixteen records (`PadDmaTransfer transfers[16]`),
+of which the first is filled and `StartIopDma(transfers, 1)` sends one, as a sender written
+for a record table of fixed capacity would. The failure message is a string literal in both
+places (one .rodata copy, at D_0024F738, where the near miss's named global was).
+
+The maintainer allowed this form (2026-11-09), and its limit matters: AGENTS.md forbids a local
+that exists only to size the frame. A local whose size a retail frame proves is accepted only as
+an array of the real record type, passed through the callee's real interface (a pointer and a
+count), with the other callers' frames showing nothing else is padded. A byte array, a scratch
+array of an unrelated type, an invented wrapper type or an alignment attribute is still not
+allowed.
 
 ### A pointer field's type picks its store's partner (func_002042C8)
 

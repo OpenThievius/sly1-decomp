@@ -50,6 +50,14 @@ typedef struct PadFrame {
     u8 pad7D[3];
 } PadFrame;
 
+/* One transfer of the IOP's DMA: the source, the IOP's destination, the size and the mode. */
+typedef struct PadDmaTransfer {
+    u32* src;
+    void* dst;
+    s32 size;
+    s32 attr;
+} PadDmaTransfer;
+
 /* The requests sent to the pad module, each a view of the request buffer. */
 typedef struct PadRequest {
     s32 command;
@@ -108,12 +116,46 @@ s32 func_00204B80(s32 port, s32 slot);
 s32 SendPadMaskRequest(s32 port, s32 slot, s32 data);
 s32 func_00204DB8(void);
 void RefreshPadFrames(void* start, void* end);
+s32 GetIopDmaStatus(s32 id);
+s32 StartIopDma(PadDmaTransfer* transfers, s32 n);
 
-INCLUDE_ASM(func_00203FD0);
+/* Sends a slot's DMA words to the IOP, into the half of its IOP buffer the new count selects.
+ * The record table holds sixteen transfers, of which one is sent: retail's frame has 0x100
+ * bytes of locals with the record at its bottom (docs/TOOLCHAIN.md, "A local's size is the
+ * frame"). The failure message is written twice, as cross-jumping merges the copies after
+ * allocation; written once, CSE carries the busy test's slot offset into the transfer. */
+s32 SendPadDma(s32 port, s32 slot)
+{
+    PadDmaTransfer transfers[16];
+    u32* dma = g_padSlots[port][slot].dma;
+    u8* dst;
+    s32 id;
+    u32 count;
 
-/* The message of func_00203FD0, defined here while it is assembly (after it: an included
- * function leaves the assembler in .text), and one of a function the linker stripped. */
-const char D_0024F738[] = "libpad: sceSifSetDma faild\n";
+    if (g_padSlots[port][slot].f0C != 0 && GetIopDmaStatus(g_padSlots[port][slot].f0C) >= 0) {
+        if (D_0027AE84 != 0)
+            PrintFormatted("libpad: sceSifSetDma faild\n");
+        return 0;
+    }
+    count = dma[0] + 1;
+    dst = (u8*)g_padSlots[port][slot].f08 + ((count & 1) << 5);
+    dma[0] = count;
+    RefreshPadFrames(dma, dma + 8);
+    transfers[0].dst = dst;
+    transfers[0].src = dma;
+    transfers[0].size = 0x20;
+    transfers[0].attr = 0;
+    id = StartIopDma(transfers, 1);
+    if (id == 0) {
+        if (D_0027AE84 != 0)
+            PrintFormatted("libpad: sceSifSetDma faild\n");
+        return 0;
+    }
+    g_padSlots[port][slot].f0C = id;
+    return 1;
+}
+
+/* The message of a function the linker stripped. */
 const char D_0024F758[] = "libpad: tPadDma Structure Invalid\n";
 
 s32 InitPadLibrary(s32 mode)
