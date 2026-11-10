@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 176/184, checked 2026-11-07
-// NEAR: retail loads the solver's count afresh in the loop's body for the row's index (lw v1, 4(s0)) and in the delay slot of a beql on the row's test; here the count of the loop's test stays in v1 and is reused. The store is ToBits's qmfc2 + sw, as retail's. A local index, the row read twice, &items[i]: no change.
+// BYTES 176/184 (95.7%), checked 2026-11-10
+// NEAR: the dot over Vu0::Vec values (Vec::Of for both operands) gives retail's size: with u128 operands cse_around_loop keeps the loop test's count for the row's index, as Vec temporaries in a loop body stop (docs/TOOLCHAIN.md, func_001C4D60); now retail's code but for local-alloc's order in the body: retail places the count chain (lw v1, 4(s0); sll; addu) before the owner pointer (lw a0, 0(t0)), so the owner gets a0 and the count v1; here the owner (r138, shorter) is placed first and takes v1. A named slot, a named axis, the dot inline in the store, a named bits word and the operands swapped: no change or worse.
 #include "common.h"
 #include "gauge_manager.h"
 #include "asm_func.h"
@@ -44,8 +44,8 @@ void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item)
         ActiveSetItem* e = (ActiveSetItem*)(self->items + i * 0x60);
         f32* row = e->row;
         if (row != 0) {
-            u128 d = Vu0::Dot(Vu0::Q(item->axis), Vu0::Q(e->axes[*(s32*)((u8*)item->owner + 0xCC)]));
-            ((u32*)row)[self->count] = Vu0::ToBits(d);
+            Vu0::Vec d = Vu0::Dot(Vu0::Vec::Of(item->axis), Vu0::Vec::Of(e->axes[*(s32*)((u8*)item->owner + 0xCC)]));
+            ((u32*)row)[self->count] = Vu0::ToBits(d.q);
         }
     }
     AppendToList(&self->pending, item);
