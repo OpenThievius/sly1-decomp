@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 576/580, checked 2026-11-08
-// NEAR (2026-11-08, night-sizex1): 580 bytes, retail's size now: the corner index written (i + j + 1) % 4 in the inner loop gives retail's two givs (i + 1 and the modulo's i + 4) and the reversed counter. Still differs (100 lines): the registers, one lower in retail from the start (self t3, corner t2, i t0 reused for i * 4), and the VU0 registers that follow. Earlier: the four corner weights and the blend loops are right but the register allocation and the loop forms differ (the corner index modulo is strength-reduced in retail, the weight array is addressed through two registers).
+// BYTES 567/580 (97.8%), checked 2026-11-10
+// NEAR (2026-11-10, w14-19C9C8): 580 bytes, retail's size, code 99.3% (7 lines). Found: the parameters are typed pointers (C8B*, a cell of four corner indices, Vec02*): an int parameter has no REGNO_POINTER_FLAG, so cell->corner[i] waited behind the side and normal stores and the body's schedule (and every VU0 register) followed; one i for both outer loops (retail's t0 in each, i*4 in i's register) and a k shared by the zero loop and the blend; the corners read as a struct member put the cell base first in its addu. Landing needs file_198980.cpp's declaration and its two callers (TrackAimTargetObject, TrackAimTargetPoint) to pass a Cell8B*. Still differs (7 lines, loop 2 only): retail copies block into a2 at the top of each outer iteration (`move a2,t4`) and starts the inner pointer from that copy (`move v0,a2`); ours starts it from block itself, so the weight base takes a2 (retail a3) and 100 takes a3 (retail t5). A per-iteration `f32* out = block` is removed by GCSE's cprop; `out = (f32*)self->slots` becomes a PRE copy that cprop pass 2 removes, its reaching register inserted in loop 1 and hoisted by loop.c; a biv `out += 8` is the giv itself; an inline helper, `*record++`, and j reused for the inner loops do not give the copy (j gives retail's t5 for 100 but the counter in a3).
 #include "common.h"
 #include "switched_collider.h"
 #include "object_set.h"
@@ -156,7 +156,7 @@ void RemoveFromList(void* table, void* self);
 extern f32 g_gameClock[];
 void func_0019CEC0(void* a, void* b, void* c, f32 d);
 void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
-void func_0019C9C8(void* a, s32 b, void* c);
+
 void UnregisterCollider(Collider* self);
 struct LoadStream;
 s32 ReadBufferedS16(LoadStream* in);
@@ -230,40 +230,47 @@ void func_001399F8(void* a, s32 b, s32 c, void* d);
 // Weights of the four corners of a cell for the point c, from the planes of its faces (the
 // sides' cross products), then blends the corners' 24 floats by those weights into self's
 // block and gives it to the renderer.
-void func_0019C9C8(void* a, s32 b, void* c)
+// A cell of the grid func_0019CF68 finds a point in: the indices of its four corners in the
+// point table at 0xA8 and the record table at 0xC4.
+struct Cell8B { s32 corner[4]; };
+
+// Weights of the four corners of a cell for the point, from the planes of its faces (the sides'
+// cross products), then blends the corners' 24 floats by those weights into self's slots and
+// gives them to the renderer.
+void func_0019C9C8(C8B* self, Cell8B* cell, Vec02* point)
 {
-    u8* self = (u8*)a;
-    s32* corner = (s32*)b;
-    Vec02* point = (Vec02*)c;
     s32 tri[3];
     Vec02 side1;
     Vec02 side2;
     Vec02 normal;
     f32 weight[4];
-    f32* block = (f32*)(self + 0xE4);
-    for (s32 i = 0; i < 4; i++) {
-        for (s32 j = 0; j < 3; j++) {
-            tri[j] = corner[(i + j + 1) % 4];
+    f32* block = (f32*)self->slots;
+    s32 i;
+    s32 j;
+    s32 k;
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            tri[j] = cell->corner[(i + j + 1) % 4];
         }
-        Vec02* points = *(Vec02**)(self + 0xA8);
+        Vec02* points = *(Vec02**)((u8*)self + 0xA8);
         Vu0::Q(side1) = Vu0::Sub(Vu0::Q(points[tri[1]]), Vu0::Q(points[tri[0]]));
         Vu0::Q(side2) = Vu0::Sub(Vu0::Q(points[tri[2]]), Vu0::Q(points[tri[0]]));
         Vu0::Q(normal) = Vu0::Cross(Vu0::Q(side1), Vu0::Q(side2));
         Vu0::Q(normal) = Vu0::DivX(Vu0::Q(normal), Vu0::Length(Vu0::Q(normal)));
         f32 along = Vu0::ToFloat(Vu0::Dot(Vu0::Q(*point), Vu0::Q(normal)));
         f32 corner0 = Vu0::ToFloat(Vu0::Dot(Vu0::Q(points[tri[0]]), Vu0::Q(normal)));
-        f32 cornerI = Vu0::ToFloat(Vu0::Dot(Vu0::Q(points[corner[i]]), Vu0::Q(normal)));
+        f32 cornerI = Vu0::ToFloat(Vu0::Dot(Vu0::Q(points[cell->corner[i]]), Vu0::Q(normal)));
         weight[i] = (along - corner0) / (cornerI - corner0);
     }
-    for (s32 k = 23; k >= 0; k--) {
+    for (k = 23; k >= 0; k--) {
         block[k * 8] = 0.0f;
     }
-    for (s32 i = 0; i < 4; i++) {
+    for (i = 0; i < 4; i++) {
         f32 w = weight[i];
-        f32* record = (f32*)(*(u8**)(self + 0xC4) + corner[i] * 0x64) + 1;
-        for (s32 k = 0; k < 24; k++) {
+        f32* record = (f32*)self->fC4[cell->corner[i]].pos;
+        for (k = 0; k < 24; k++) {
             block[k * 8] += record[k] * w;
         }
     }
-    func_001399F8(*(void**)(self + 0x3E4), 0x20, 0x18, block);
+    func_001399F8(self->f3E4, 0x20, 0x18, block);
 }

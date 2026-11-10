@@ -1163,6 +1163,29 @@ loads and stores, with every other value ranked as at the inner loop's depth, is
 the loop that loop.c did not move out. A `while (1)` with `{ store; break; }` loses it; a
 `do { } while (1)` keeps it.
 
+### An int parameter used as a pointer: no base for the alias test (func_0019C9C8, near miss)
+
+func_0019C9C8 took its cell as `s32 b` (the caller's word from func_0019D0E0) and read
+`((s32*)b)[i]` after storing three Vec02 locals. With an int parameter the cell's address has no
+REGNO_POINTER_FLAG (the rule in "Alias classes": a pointer parameter's base never conflicts with
+frame stores; seen in the output, not traced in alias.c), so the read may alias the frame stores:
+sched1 kept the load after the normal's stores, and the body's order, the VU0 registers
+and global-alloc's ranking (every register one too high from the first insn) followed. Typed as a
+pointer (`Cell8B* cell`), the read has the argument's base, never conflicts with a frame store,
+and the whole first loop matches (100 lines to 7). The tell: a word read through a parameter
+scheduled late behind `sqc2 ...(sp)` stores in ours and early in retail; check the parameter's
+type before anything else. The same function needed one `i` for both outer loops (retail keeps
+`i` in one register in each and reuses it for `i * 4`) and its corner array read as a struct
+member (`cell->corner[k]`, base first in the `addu`, where `corner[k]` through a plain pointer
+puts the index first).
+
+Still open there: retail copies `block` into a fresh register at the top of each iteration of the
+second outer loop and starts the inner loop's reduced pointer from the copy. Ruled out: a
+per-iteration `f32* out = block` (GCSE's cprop propagates the copy into the inner loop and it
+dies); `out = (f32*)self->slots` (PRE turns it into a copy in pass 1, cprop pass 2 propagates it,
+and PRE's reaching register is inserted in loop 1 and hoisted to the top by loop.c); a biv
+`out += 8` (it is the inner pointer itself); the same loop in an inline helper; `*record++`.
+
 ## CSE
 
 ### The same walk twice: Vec values keep the second bound's copy (func_00191C78)
