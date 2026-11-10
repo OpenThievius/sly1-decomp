@@ -1313,4 +1313,6 @@ times, the vertical flag in t9 both times).
   both, assigned again for the second half. A missing reload of a parameter just after its
   spill store points at a birthing raise that should not have happened (a variable set twice).
 - **Still differs** (85.9% "order"): fy is placed 16th and takes s0 (retail t9), which shifts
-  three parameters one saved register; half and the luma part swap t4 and t5.
+  three parameters one saved register; half and the luma part swap t4 and t5. (Resolved
+  through global-alloc's pass 0 the same day: docs/toolchain/long-block-constants.md, "Pass 0
+  takes no new saved register" (func_0020CAF8).)

@@ -92,3 +92,38 @@ Measured 2026-11-10 (w15) from the -dS and -dl dumps, with local-alloc.c and glo
   life (or one fewer before hi) that is gone by the final code. Written `y1` before `y0`,
   sched1 puts y1's subtraction last and local-alloc's registers are retail's but global-alloc's
   are not; the other way round, the reverse.
+
+### Pass 0 takes no new saved register: a variable split off to lower a priority (func_0020CAF8)
+
+Measured 2026-11-10 on the MPEG macroblock prediction (src/lib/mpeg_macroblock.cpp,
+2.9-ee-991111; nonmatching/func_0020CAF8.cpp; an emulation of the pass below on the `.greg` and
+`.lreg` dumps reproduced our allocation exactly). global.c's find_reg tries each
+allocno in two passes. Pass 0 skips every register not yet in `regs_used_so_far` (the
+call-clobbered ones, the ones local-alloc used, and the saved ones some earlier allocno took),
+and every register a lower-priority conflicting allocno prefers (`regs_someone_prefers`). So in
+a function without calls an allocno placed before any saved register is taken lands in the
+first free call-clobbered one, t8 and t9 included, and the saved registers s0, s1, ... go out in
+placement order to the first allocnos that find no call-clobbered register. Retail's t9 for a
+long-lived flag next to s0-s7 holders means it was placed before them all.
+
+- **Lever: one variable for two lives raises its priority; two lower it.** Our chroma part
+  reused `base` (`base += ...;`): 7 references over 112 insns, priority 0.125, placed before
+  the vertical flag (0.108), so it took t9 and the flag took s0, pushing dstY, srcField and dy
+  one saved register up. Retail's base shares s2 with dy, so it came after dstY and srcField
+  (0.096, 0.087). The chroma base as its own variable (`cbase = base + ...;`, local to its block)
+  leaves the luma base 4 references over 92 insns (0.087, just after srcField): the flag then
+  takes t9 in pass 0 and dstY, srcField, base get s0, s1, s2 ("order" 85.9% to 91.3%).
+- **The other way round:** the column flag fx (2 refs over 44, 0.045) took a2 in retail's s3;
+  reusing it for the chroma flag (`fx = cdx & 1;`, four references) moves it ahead of the block
+  indices, so it opens s3 and the chroma halving takes s3 after it (97.3%). With the chroma
+  statements in retail's order (the row index before the column index) and the routine table's
+  store after src1's, every instruction is retail's ("registers" 100%).
+- **Spot it.** Saved registers handed out in an order that is retail's shifted by one: list the
+  allocnos in `.greg`'s order with tools/regalloc.py, find the first that takes a saved
+  register in ours and not in retail, and change its references or life length (a reused or a
+  split variable) until it falls on the right side of its neighbour.
+- **Still differs:** ys and yo take t1 (retail a2): yo dies in `yo << 4`, which local-alloc puts
+  in t1 in both, so set_preference gives yo, and expand_preferences ys, a preference for t1
+  that our global-alloc honours. Retail's a2 needs t1 in their pass-0 exclusion (a
+  lower-priority conflicting allocno preferring t1) or yo alive past the shift; not found.
+
