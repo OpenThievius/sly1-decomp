@@ -1109,6 +1109,31 @@ MoveTumblingEffect matched on 2026-11-10 from 32.7%. Three mechanisms, each read
   blocks), but retail has no insn between the lw of dir and the join's first: its arm emitted
   nothing. A search over the arm's position and contents (3960 compiles) found none closer
   than 14 lines. What survives the early jump passes and emits nothing is still open.
+- Where the dead constant can come from (2026-11-10, w15, read from jump.c, flow.c, reorg.c and
+  reload1.c with `-da` dumps). jump.c's delete_computation returns at once after reload when
+  sched2 runs (`reload_completed && flag_schedule_insns_after_reload`), so any branch that jump2
+  or reorg deletes leaves its compare's `li`. A branch over an arm emptied before flow2 does not:
+  reload_cse deletes a fall-through arm's redundant store (`if (dir != 1) e->fC = dir;`, or the
+  then-arm of an if/else of such stores), flow2 finds the branch to the next block gone with it,
+  and its life analysis deletes the then dead `li`. So retail's arm was still there at flow2 and
+  sched2, and vanished in jump2 or reorg. Only these remove code there: jump2's cross-jumping
+  (keeps one copy, which emits), jump2's delete_noop_moves (a register move find_equiv_reg proves
+  redundant inside its block, made a USE or deleted; flow2 has already removed the plain
+  self-moves, reload_cse those of a fall-through block), and reorg's redundant_insn (an arm insn
+  rtx-equal to one before the branch since the last label: here only `li v0,1`, `lw t0,12(t1)`
+  and the two argument moves). A branch over USEs alone counts as a jump to the next insn after
+  reload (USE and CLOBBER are not active insns).
+- Ruled out (25 compiles): register copies in the arms (`d = dir; o = self;`, `d = 1` against
+  `d = dir`, `s32 d = dir; if (dir == 1) d = 1;`): CSE turns the then-arm copy into the constant
+  and the jump pass after loop makes the if a conditional move (`movz`/`movn` RTL), gone before
+  flow; re-reads `dir = e->fC` in the arms (CSE); stores back `e->fC = dir` (then-arm deleted by
+  reload_cse, the else store left after jump2 inverts the branch: 31 lines); stores to the stack
+  entry in the arms (`entry.dir`, `entry.t = 0`: kept, cross-block stores are never dead); the
+  whole body in both arms with or without the call (CSE folds `fC10[1]`). The one form with
+  retail's B0 and no arm of its own is a third parameter compared with 1 (`if (mode == 1) dir =
+  e->fC; else dir = e->fC;`: the surviving load is retail's `lw t0` and the `li` sits before it,
+  16 lines, the join scheduled differently), but RunTimelineEntry, the only caller, passes two
+  arguments, so that is not the original either.
 
 ### A named float argument lengthens a long life by one insn (func_eu_001AB2B0)
 
