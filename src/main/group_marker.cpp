@@ -314,7 +314,33 @@ void PrepareUnzoomedGroup(void)
     }
 }
 
-INCLUDE_ASM(func_0019DC98);
+void UploadLightVolumes(World* world);
+extern s32 D_00262474;
+
+// The caller passes the camera too, unused here; the world goes on to UploadLightVolumes. The
+// four words at D_00604780 are cleared in address order.
+void SubmitDeferredRequests(World* world, void* camera)
+{
+    DeferredRequest* list[0x412];
+    UploadLightVolumes(world);
+    s32 n = *(DeferredRequest**)g_nextDeferredRequest - g_deferredRequests;
+    D_00604780 = 0;
+    D_00604784 = 0;
+    g_cameraUploadedThisFrame = 0;
+    *(u32*)D_0060478C = 0;
+    D_00262474 = 0x214;
+    s32 count = BucketDeferredRequests(n, g_deferredRequests, (void**)list);
+    g_vifPacketWriter.f20 = 1;
+    CloseDmaTag(&g_vifPacketWriter);
+    for (s32 i = 0; i < count; i++) {
+        ((void (*)(DeferredRequest*))list[i]->callback)(list[i]);
+    }
+    BeginDmaTag(&g_vifPacketWriter);
+    if (count == 0) {
+        WriteVifDirect(&g_vifPacketWriter, 0x2C, D_002BDC20, 0);
+    }
+    *(DeferredRequest**)g_nextDeferredRequest = 0;
+}
 
 void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p)
 {

@@ -2498,6 +2498,7 @@ func_0019DAD8	func_0019E820	match
 func_0019DB20	func_0019E868	match	
 func_0019DB68	func_0019E8B0	match	
 func_0019DBB0	func_0019E8F8	match	version-specific
+func_0019DC98	func_0019E9E0	match	
 func_0019DDA0	func_0019EAE8	match	version-specific
 func_0019DF48	func_0019EC90	match	
 func_0019E040	func_0019ED88	match	
