@@ -1359,6 +1359,22 @@ differed (37.4%).
   (loop.c's reduced giv: `addu s2,v0,s3`, index first) rather than a walking pointer, and
   `radius` declared before `step` (retail loads 1/(2pi) before 2pi).
 
+### A break with a body: the copied exit test enters the loop from outside (PAL func_001366A0, unsolved)
+
+PAL's DrawTextPanel cuts a copied lines record at the line being typed:
+`for (i = 1; i < lines.count; i++) if (at < lines.lines[i].start) { lines.count = i; lines.height
+= i * h; break; }`. stmt.c rolls the `if` with its body into the exit test, jump.c copies the
+test before NOTE_INSN_LOOP_BEG (retail's peeled `i = 1`, its height stored unmultiplied), and the
+copy's path that goes on looping is a conditional jump to the increment's label inside the loop:
+mark_loop_jump (loop.c) invalidates any loop entered by a jump from outside, the .loop dump says
+"ignored due to multiple entry points", and the index stays `sll; addu`. The US twin's search
+(an empty break body) is valid because its copy falls through into the loop. Retail's PAL loop
+is reduced (`addiu a0,s5,24`, `addiu a0,a0,8`) with the count reloaded each pass, so either its
+loop was valid or the walk was written: an explicit pointer (`for (s32* start =
+&lines.lines[1].start; ...; i++, start += 2)`) gives retail's loop insn for insn, but CSE folds
+its base to the frame (`addiu a0,sp,0x538`) where retail keeps the record copy's block-move
+address (`move s5,a2`); `goto` past the loop keeps it valid but hoists the count. Open.
+
 ### A search loop that leaves by `goto`: breaks roll the body into the exit test (func_0015FD78)
 
 expand_end_loop's scan takes the *last* jump to the loop's end label within 30 insns of the first,
