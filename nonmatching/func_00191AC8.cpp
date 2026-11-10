@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 432/428, checked 2026-11-08
-// NEAR (2026-11-08, quadword-float): the float is made once before the loop with Vu0::ScalarInGprReg (mfc1 into a register, no slot, added next to ScalarInGpr) and stored per iteration (Q(k) = w); the mfc1 and the per-use copy and store come out, but the value is not kept in a saved GPR (our s6 holds &rot): the compiler spills it and reads k from memory twice, and hoists &rot and &s into s6/s7 where retail takes sp offsets per use. Moving Q(k) = w before BuildAxisAngleMatrix, or through a Slot, is worse. Still differs: register allocation (w in s6, 10 saved registers in retail), frame 528 vs 512.
+// SIZE 412/428, checked 2026-11-10
+// NEAR (2026-11-10, w13-192DD0): the frame (512) and the saved set now match retail (code 80.4% by regdiff, was 64.5%; four insns short: retail reloads k more often): the copy goes through an inline (CopyMatrix) so integrate.c substitutes &rot and &s as constants straight into a0/a1 (GCSE no longer hoists them into s6/s7; retail rematerialises them as addiu a0,sp,192 at the call), the rows are stored as Vu0::Vec values (a Q(s.r[i]) reference makes &s a pseudo CSE reuses for the argument), and Q(k) = w is stored before BuildAxisAngleMatrix (the call keeps CSE from forwarding w into the products, so they read k at 304 as retail). Saved registers still differ in order (ours &p s6, &span s5, w s4, dir s3, &D[i] s2; retail s5, s4, s6, s2, s3); retail reads k twice for the rows (vf2, then vf4 for rows 1 and 2), copies k2 = k through a GPR from 304, reloads k into vf4 after TestOwnerGraphSpan inside the loop and stores it to 192 (rot's slot, a freed temporary) before the vdiv: k looks like a spilled pseudo whose REG_EQUIV memory is 304, not a memory local. Tried: a Vu0::Vec k = Vec::ScalarInGpr(scale) per iteration (loop.c then moves the copy chain out and k gets a spill slot at 320: frame 528), rot/k2/s declared in the loop body (no change), `rot = s` (move_by_pieces, no memcpy; a Mat3U copy is ldl/sdl pieces), an inline returning Mat02 by value (no memcpy). The pos copy as a Vec value (spilled to 320 across CopyBytes, as retail) and the final DivX on Vec values took it to 94 lines but 77.6%.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -198,6 +198,9 @@ s32 TestOwnerGraphSpan(Obj_191AA8* self, Vec02* pos, Vec02* point, s32 count, Co
 void* CopyBytes(void* dst, void* src, s32 n);
 void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
 
+// A matrix copied whole: the call's arguments are its parameters, substituted as constants.
+static inline void CopyMatrix(Mat02* d, const Mat02* s) { CopyBytes(d, (void*)s, 0x30); }
+
 void func_00191AC8(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)
 {
     Mat02 m;
@@ -210,17 +213,17 @@ void func_00191AC8(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)
     Vec02 k;
     Vec02 pcopy;
     f32 best = -1.0f;
-    s32 i = 0;
+    u32 i = 0;
     u128 w = Vu0::ScalarInGprReg(scale);
     do {
-        BuildAxisAngleMatrix(&g_unitZVector, D_00269B78[i], &m);
         Vu0::Q(k) = w;
-        Vu0::Q(s.r[0]) = Vu0::MulX(Vu0::Q(m.r[0]), Vu0::Q(k));
-        Vu0::Q(s.r[1]) = Vu0::MulX(Vu0::Q(m.r[1]), Vu0::Q(k));
-        Vu0::Q(s.r[2]) = Vu0::MulX(Vu0::Q(m.r[2]), Vu0::Q(k));
+        BuildAxisAngleMatrix(&g_unitZVector, D_00269B78[i], &m);
+        *(Vu0::Vec*)&s.r[0] = Vu0::MulX(Vu0::Vec::Of(m.r[0]), Vu0::Vec::Of(k));
+        *(Vu0::Vec*)&s.r[1] = Vu0::MulX(Vu0::Vec::Of(m.r[1]), Vu0::Vec::Of(k));
+        *(Vu0::Vec*)&s.r[2] = Vu0::MulX(Vu0::Vec::Of(m.r[2]), Vu0::Vec::Of(k));
         Vu0::Q(k2) = Vu0::Q(k);
         pcopy = *pos;
-        CopyBytes(&rot, &s, 0x30);
+        CopyMatrix(&rot, &s);
         Vu0::Q(p) = Vu0::Add(Vu0::Q(pcopy), Vu0::Rotate(rot, Vu0::Q(*dir)));
         if (TestOwnerGraphSpan(self, pos, &p, 1, &span) != 0 && best < span.time[1]) {
             best = span.time[1];

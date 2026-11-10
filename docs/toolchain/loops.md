@@ -120,6 +120,55 @@ The two functions before it in the file (2026-11-10):
   for the row's index, cse_around_loop as in func_001C4D60); only local-alloc's order of the
   owner pointer and the count chain differs (a0/v1 swapped).
 
+### jump.c's copy of a loop test has a life of 2: three constants, two moved (func_00192DD0)
+
+Measured with `-dL` dumps (2026-11-10, the switched collider's segment walk,
+src/main/file_18F988.cpp). Retail's outer loop over the segments holds 1.0 (the walk's guard) and
+0.0001 (the length test) in f24 and f23, in that order in the preheader, and loads 5.0 in the
+else arm before the divide.
+
+- **The order says two passes.** The three constants are in the loop in the order 0.0001, 5.0,
+  1.0, each a one-insn load. With life 1 each, one pass moves them first to last while
+  `80 - 3k >= insns`, so moving 0.0001 and 1.0 but not 5.0 needs 1.0 to have a longer life, and
+  1.0 ahead of 0.0001 in the preheader needs 1.0 moved in pass 1 and 0.0001 in pass 2 (see the
+  next section).
+- **The walk as a `for`.** `for (f32 t = step; t < 1.0f; t += step)` (with `step` set in both
+  arms of the length test) makes jump.c copy the exit test ahead of the loop; the copied 1.0 is a
+  fresh pseudo whose load sits two luids from its compare (life 2), where the near miss's
+  `if (t < 1.0f) do { } while (t < 1.0f);` gives life 1. So it moves at `80 * 2 >= insns`.
+- **The size: 82 in pass 1, 79 in pass 2.** With Length and MulXSum on Vu0::Vec values
+  (Distance, and the interpolated point stored as a Vec) and the endpoint's copy into the message
+  written `*(Vu0::Vec*)&msg.vb = Vu0::Vec::Of(b)`, pass 1 counts 82 insns: 0.0001 (80) and 5.0
+  stay, 1.0 (160) moves; pass 2 counts 79: 0.0001 moves, the threshold falls to 77 and 5.0
+  stays. The same with a plain `msg.vb = b` is 78 and 74 (5.0 moves in pass 2); the final store
+  to the collider also as a Vec makes 86 and 83 (0.0001 never moves).
+- **The prologue's save order** followed from `target = 0` being set before the `if (sink)`:
+  its `move s4,zero` in the first block ties `sq s4` to it in sched2. Declared inside the `if`
+  (reorg still fills the branch's delay slot with it) the saves come in retail's order.
+- **The node scan.** Retail starts its walk pointer at `self + 0x59C` (`addiu s0,s3,1436`); a
+  cast array indexed at each use gives `move s0,s3` and offset 1436 in each load. The giv's add
+  value must be a register: the array named once, `void** nodes = (void**)((u8*)self + 0x59C);`.
+
+### A call's frame-address arguments that GCSE does not hoist (func_00191AC8, unsolved)
+
+Read from the `-dF` dumps (2026-11-10, nonmatching/func_00191AC8.cpp). In a loop, a call's argument
+`&local` is expanded into a pseudo (`(set (reg) (plus sp N))`) that PRE hoists to the function's entry
+like any frame address, and global-alloc then gives it a saved register. Retail's `addiu a0,sp,192`
+and `addiu a1,sp,256` at the CopyBytes call inside the loop (with `&p` and `&span` hoisted into
+s5/s4) mean those two never were pseudos:
+
+- **An inline's address parameters are substituted.** Called through an inline whose parameters are
+  the two pointers, integrate.c substitutes the constant frame addresses into the argument moves
+  themselves (`(set (reg a0) (plus sp 192))`), which PRE does not touch (its destination is a hard
+  register).
+- **But a reference in the same block undoes it.** Rows stored as `Vu0::Q(s.r[i]) = ...` pass s.r[0]
+  to Q by reference, which copies its address into a pseudo; CSE then uses that pseudo for the later
+  `&s` argument, and PRE hoists it. Stored as `*(Vu0::Vec*)&s.r[i] = ...` the address stays a
+  constant in the memory reference.
+- **Not a struct assignment.** `rot = s` of two Mat02 is moved by pieces (lq/sq), of two Mat3U by
+  ldl/sdl pieces, and an inline returning a Mat02 by value copies it by pieces too: none calls
+  CopyBytes (memcpy), so retail's call was written.
+
 ### Which pass moves an invariant: the preheader's order (func_001971B8)
 
 The preheader holds what loop.c put before the loop's start, in the order it put it there, and
