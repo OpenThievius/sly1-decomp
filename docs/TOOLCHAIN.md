@@ -1402,6 +1402,36 @@ Observed in the `.rtl`, `.cse` and `.lreg` dumps of func_001C3C98 (three accesse
 - What was left in func_001C3C98 is local-alloc's ranking (the address, 3 refs over 9 insns,
   against p->anim, 2 over 4): see the near miss's notes.
 
+### A member array searched and moved up: where the constant is added (func_00145088)
+
+Read in expr.c and the `-dG`, `.loop`, `.flow` and `.combine` dumps of func_00145088
+(PushCameraController: a search through `self->stack[i].key`, then MoveMemory of the entries up
+by one), 2026-11-10:
+
+- **`self->stack[i].key` adds the member's offset first.** expand_expr's COMPONENT_REF case (via
+  get_inner_reference) adds the constant to the base before the index whenever the base is a
+  BLKmode object and the reference's alignment equals the field mode's (any `s32` member of a
+  struct array): `t = self + 980; a = t + i*16`. `t` is a loop invariant expression, and PRE
+  inserts it, with the count's load, at the end of the block before the loop, before its
+  branch; the count's pseudo then shares a register with the loop's copy of the count (ours:
+  `lw a0; blez a0` and no `move`).
+- **`(self->stack + i)->key` adds the index first.** The reference is an INDIRECT_REF, whose
+  address is expanded with EXPAND_SUM, which puts the constant outside:
+  `(plus (plus (mult i 16) self) 980)`. Nothing is invariant, loop.c reduces the address to a
+  giv initialised in the preheader after the entry test, and the entry test's count dies in
+  the copy for the loop (`lw v1; blez v1; ... move a0,v1; addiu v1,s1,980`), retail's code.
+  The rotated first test still reads `980(s1)`: CSE folds i = 0.
+- **Two pointers from one base, copied: an inline's parameters.** Retail's `addu a0,s0,s1;
+  move a1,a0; addiu a0,a0,996; addiu a1,a1,980` is two equal sums that CSE kept apart, the
+  second made a `move` by reload_cse, as in RemoveFromSmallList (file_1E88D0.cpp, its
+  MoveItemsDown helper) and the section above: MoveMemory called through a small inline whose
+  parameters are the two entry pointers (`MoveEntriesUp::Of(&self->stack[i + 1],
+  &self->stack[i], n)`). Called directly, CSE shares one `i*16 + self` and combine folds the adds
+  into the argument moves (`addiu a1,a0,980`, one insn short).
+- Spot it: a search loop whose count is loaded into one register and copied to another after
+  the first test, and the loop pointer set after that copy; and a pointer argument made by
+  `move` and then `addiu` of its own register.
+
 ### A reload after an if whose body returns: follow-jumps (func_00183668, unsolved)
 
 `cse_end_of_basic_block` follows a conditional jump (`-fcse-follow-jumps`, on at -O2) when its
