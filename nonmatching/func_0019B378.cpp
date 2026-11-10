@@ -71,7 +71,7 @@ void* GetActiveSwitchedCollider();
 void UpdateCollider(Collider* self, f32 dt);
 void StartSoundEffect(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
 f32 RandomGaussian(f32 a, f32 b, f32 c);
-s32 FindColliderFloorContact(void* self, s32 a, void* out);
+void* FindColliderFloorContact(void* self, s32 key, s32* out);
 s32 TestPointAgainstObjectShape(void* obj, Vec02* p);
 void ClearRootTries(void* self);
 typedef void (*GathererVecFn_19B378)(ObjectGatherer* self, const Vec02* v);
@@ -107,11 +107,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         state = 2;
         g_activeListFrames = frame.prev;
     } else {
-        Vec02 push;
-        Vec02 weight;
-        u8 floor[0x10];
-        f32 speed;
-        f32 lift;
+        s32 side;
         s32 go;
         switch (state) {
         case 0:
@@ -122,12 +118,13 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         case 1: {
             go = 0;
             if (self->ring == 0 && self->f554 + 0.5f < g_gameTime[0] && Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150))) < self->f614 * 0.1f) {
-                go = FindColliderFloorContact(self, 0, floor) != 0;
+                go = FindColliderFloorContact(self, 0, &side) != 0;
             }
             if (go) {
-                speed = self->f614;
-                lift = 0.7f;
-                goto push;
+                Vec02 push;
+                Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(self->m110.r[0]), Vu0::Scalar(self->f614 * 0.7f), Vu0::Q(g_unitZVector), Vu0::ScalarAt(self->f620));
+                self->desc02()->m20(self, &push);
+                break;
             }
             if (self->f558 < g_gameTime[0]) {
                 state = 0;
@@ -141,14 +138,12 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         case 2: {
             go = 0;
             if (self->ring == 0 && self->f554 + 0.7f < g_gameTime[0] && Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v150))) < self->f618 * 0.3f) {
-                go = FindColliderFloorContact(self, 0, floor) != 0;
+                go = FindColliderFloorContact(self, 0, &side) != 0;
             }
             if (go) {
-                speed = self->f618;
-                lift = 0.5f;
-            push:
-                Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(self->m110.r[0]), Vu0::Scalar(speed * lift), Vu0::Q(g_unitZVector), Vu0::ScalarAt(self->f620));
-                ((GathererVecFn_19B378*)self->desc)[36](self, &push);
+                Vec02 push;
+                Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(self->m110.r[0]), Vu0::Scalar(self->f618 * 0.5f), Vu0::Q(g_unitZVector), Vu0::ScalarAt(self->f620));
+                self->desc02()->m20(self, &push);
                 break;
             }
             if (self->f558 < g_gameTime[0]) {
@@ -173,15 +168,15 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
                         break;
                     }
                 }
-                if (any == 0) {
-                    state = 1;
-                } else {
+                if (any != 0) {
                     self->f558 = g_gameClock[1] + RandomFloatInRange(0.2f, 3.0f);
+                } else {
+                    state = 1;
                 }
                 g_activeListFrames = frame.prev;
             } else {
-                ((GathererVecFn_19B378*)self->desc)[36](self, &D_00248D30);
-                ((GathererVecFn_19B378*)self->desc)[37](self, &D_00248D30);
+                self->desc02()->m20(self, (Vec02*)&D_00248D30);
+                self->desc02()->m21(self, (Vec02*)&D_00248D30);
             }
             break;
         }
