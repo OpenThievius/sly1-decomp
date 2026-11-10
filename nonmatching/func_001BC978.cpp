@@ -18,6 +18,12 @@
 // (64 compiles; ToFloat for offsetSq gives v1 but moves its mtc1), every order of the four
 // statements, permute.py --auto, the offset as a Vec local, u128 operands (the loop shrinks
 // and loop.c reduces it), RotateMembers.
+// Why (w15, 2026-11-10; docs/toolchain/reloads-and-stores.md): both dots are TI_REGS pseudos.
+// d's (r368) takes rn's vf1 by local-alloc's suggestion (rn dies in the asm), so its qmfc2 is
+// the mtc1's input reload (v0); offsetSq's (r393) has no suggestion (the offset lives on to
+// ro's Rotate) and takes the first GPR, v0. Retail's v1 fits a second reload in reload's
+// round robin, i.e. offsetSq's dot in a VU0 register. Also not it: o->mass read in the
+// expression, ToFloatViaBits for offsetSq.
 
 struct ImpulseRow {
     Vec02 linear;           // 0x00

@@ -20,6 +20,11 @@
 // (the asm and the first call) with vf6 as its hard register. Not it: d as Vu0::Vec, as a Vec02
 // in memory, through Vu0::Q, an inline helper taking d (u128 or Vec) for PlaneSigns and the
 // first call, a named radius (that moves the cull's registers).
+// Also ruled out (w15, 2026-11-10; docs/toolchain/stack-slots.md): movti's constraints make the
+// GPR-from-memory alternative free, and reload_cse will not swap the lq for vf6 (VU0 to GPR
+// does not cost 2). d forced into the frame lands at 0x1C0 after fade, retail's offsets, but
+// cse2 forwards its store (vsub into vf6, no reload); a Vec02 d is forwarded by cse1; a
+// `const u128&` to d (local, or an inline helper's parameter) is purged back to one pseudo.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
