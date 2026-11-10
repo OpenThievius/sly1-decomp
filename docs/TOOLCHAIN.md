@@ -1432,6 +1432,16 @@ by one), 2026-11-10:
   the first test, and the loop pointer set after that copy; and a pointer argument made by
   `move` and then `addiu` of its own register.
 
+### A vector copied before a call with global float arguments (func_00145718, unsolved)
+
+`self->pos = *a2;` then a call whose float arguments are three `.data` globals: copied as a
+Vec02 assignment the store is MEM_IN_STRUCT_P, the scalar globals' loads pass it
+(fixed_scalar_and_varying_struct_p), and local-alloc gives the copy a2 and a %hi t0 (four bytes
+short: a0 keeps self, no `move a0,s0`). Copied as `Vu0::Q(self->pos) = Vu0::Q(*a2)` the store has
+no class, every float load waits for it, and the registers are retail's (copy in v0, %hi in a0,
+`move a0,s0` in the delay slot), but retail loads `$f13` before the store and ours after it.
+Neither form gives both; a Vec member store (`((Vu0::Vec*)&p)->q`) behaves as the assignment.
+
 ### A reload after an if whose body returns: follow-jumps (func_00183668, unsolved)
 
 `cse_end_of_basic_block` follows a conditional jump (`-fcse-follow-jumps`, on at -O2) when its
