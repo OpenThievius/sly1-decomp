@@ -3712,6 +3712,41 @@ dumps of CallRemoteService with Sony's 2.9-ee-991111 (2026-11-09):
 - **Spot it.** Two stores swapped against retail where the earlier one's value dies in it and the
   later one's lives on: the tie is the weight, and moving statements does not change it.
 
+### Sony's compiler balances a chain of | and + (func_00202140)
+
+Measured with 2.9-ee-991111's `-dr` dumps (2026-11-10), on test functions and on
+sceGsSetDefDispEnv's DISPLAY register (src/lib/graph.c, func_00202140):
+
+- **A left chain is rebuilt as a balanced tree as it is folded.** SN 2.95.3 expands
+  `a | b | c | d` as written; the libraries' compiler re-associates each step (the same for `+`,
+  so it is not fold-const.c's `associate:` of mainline 1999, which only moves constants). For
+  parameters a, b, c, ... the .rtl shows:
+  - 3 terms: `(a|b)|c` (unchanged); 4: `(a|d)|(c|b)`; 5: `((a|e)|(c|b))|d`;
+    6: `((a|f)|(d|c))|(b|e)`; 7: `((a|g)|(b|e))|((d|c)|f)`; 8: `((a|h)|(d|f))|((b|c)|(e|g))`;
+  - `(a|b)|(c|d)` gives `(a|c)|(b|d)`; `a|(b|c)` is unchanged.
+  So the order of the ORs in retail's code (`or rd,rs,rt` keeps the tree's operand order) is a
+  fingerprint of the source's term order, not that order itself: read it back through this table.
+- **With a ternary among the terms, fold distributes the ORs into both arms** (fold's COND_EXPR
+  rule: `X | (c ? a : b)` becomes `c ? X|a : X|b`, X made a SAVE_EXPR evaluated before the test).
+  Every term ORed in after the ternary is saved too, so all terms are computed before the branch
+  and each arm ORs them, in a tree balanced from the arm's own chain; cross-jumping then merges
+  the arms' common tails (here across two video modes as well). The terms before the ternary are
+  one save: ORs before the branch mean the ternary came late in the chain, none (retail here)
+  that it was first or second.
+- **What it gave func_00202140.** Retail ORs `((magh | dw) | (dx | dh)) | dy` in all four
+  display arms with every term computed before the field test; of the 120 orders of the macro's
+  five terms only `magh, dh, dx, dy, dw` gives it (a sweep, scored with check.py), and with it
+  the size and every block but the division's are retail's. A second lever: `magh` declared in
+  each arm, not once for the function; one variable assigned in four arms is a global pseudo,
+  which local-alloc cannot tie the quotient to (`mflo v1; move v0,v1`).
+- **Unsolved: the zero trap's place.** In both interlaced arms retail issues the division's
+  `beqzl/break` before dy's `dsll a3,v1,12`; sched2 gives the shift priority 5 (an anti
+  dependence: the dx term's `daddiu` writes the v1 it reads) and the trap 4 (`1 +` the field
+  load it orders), with retail's own registers, so retail's sched2 had a dependence ours lacks
+  (a sched1 link to the trap, which only memory references after it get, or a field load with a
+  longer chain). The ternary's spellings and a named `magh * w - 1` (which moves the multiplies)
+  do not change it.
+
 ### A result scaled where it is stored: a fourth reference and a fresh register (func_00130540, func_00130748)
 
 - **The form.** Both Hermite steps end in a weighted sum scaled by a parameter (the velocity
