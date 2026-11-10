@@ -2503,6 +2503,46 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   its own; the same construct would likely explain the varying store orders of mul_rotation.h's
   other sites, which are one inline helper in the original.
 
+### A rotation product's row slots are cast copies (func_00172078, near miss)
+
+func_00172078 (two rotation products, `c = rot m`, then `a = c f61C->rot`, `*out = a`) went from
+32 differing lines to 5 on 2026-11-10 (`-dS -dR -fsched-verbose-6` dumps, a local-alloc emulator
+on the `.lreg` dump). Read with alias.c (true_dependence, base_alias_check, find_base_term),
+function.c (assign_stack_temp_for_type, purge_addressof_1), stmt.c (expand_decl), expr.c
+(INDIRECT_REF, ADDR_EXPR) and integrate.c of 2.95.3.
+
+- **The registers are local-alloc's priority, decided by one insn.** The second product's row 0
+  of f61C's matrix and its result are one quantity (6 references); with a life of 20 its
+  priority (1.2) beat the first product's `a0 + z` and `m1 + y` quantities (1.15, 1.09), so it
+  took vf4 and pushed theirs to vf5/vf6 (retail: vf4, vf5, vf6 the other way). Any sched1 order
+  that issues that row load one insn earlier (life 22) gives retail's allocation, by the
+  emulator and by the compiler.
+- **Why the load waited.** It went after every frame store of the first product: its address
+  (`f61C + 0xD0`, a pointer loaded from memory) has no base, so base_alias_check cannot separate
+  it from the stack, and neither MEM carried a flag (`*(u128*)&` stores and loads). Retail's
+  sched2 issues it before the first product's y and z slot stores but after the stores to the
+  matrix local, and loads rows 1 and 2 after the previous row's store to `a` but before its slot
+  store: the slot stores are MEM_SCALAR_P at fixed addresses and the row loads MEM_IN_STRUCT_P
+  (fixed_scalar_and_varying_struct_p), while `a`'s and `c`'s rows (no flag) conflict.
+- **The plain form.** f61C's rows read as Vec members (`((const Vu0::Vec*)&b)[i].q`: `/s`)
+  and each row value stored through a cast's copy (`Vu0::Q((s128)x)`, as Vu0::Scalar). With both,
+  registers, frame and every store but the second product's slots are retail's.
+- **What is left: three slots in per-row statements.** Retail's slots are distinct (0xA0, 0xB0,
+  0xC0 in both products, the inline frame's). Three casts that are arguments of one inline
+  call (`SetRows(out, Q((s128)x), Q((s128)y), Q((s128)z))`) get three: they are expanded in the
+  caller's statement before the call's body. That suits the first product (its loads are frame
+  slots at fixed offsets, which never conflict). The second product needs out's row stored
+  before the next row is loaded (its rows wait for `a`'s stores in retail), so its stores are
+  per row, and a cast's temporary (`assign_temp (type, 1, 1, 1)`, keep 1) is freed when its
+  statement ends: every row's slot is 0xA0. With SetRows there too, the rows load before any
+  store (37 to 42 lines). Ruled out for the second product: per-row stores then one call with the
+  three casts (38: the slot stores move after the last product), the casts bound to references
+  or a pointer (shared slot), a row helper returning `Q((s128)r)` per statement or in one comma
+  expression (an inline's frame block is free again when the call returns: shared), a `const`
+  reference bound to the product's rvalue (a register, no slot), volatile slots (56). What would
+  close it: a plain construct that keeps three 16-byte scalar slots alive across three
+  statements, which none of temporaries, reference bindings and inline frames gives in g++ 2.95.
+
 ### Global allocation's preferences (func_00149760)
 
 - find_reg's first pass skips every register in `regs_someone_prefers`: the full preferences

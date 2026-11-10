@@ -1,6 +1,23 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 240/308 (77.9%), checked 2026-11-08
-// NEAR (2026-11-08, night-sizex1): 308 bytes, retail's size and frame now: the second product reads f61C's rows by index through a pointer (MulRotationIntoIndexed, q[i]), which gives retail's `addiu v1, v0, 208` and 16(v1), 32(v1). Still differs (32 lines): the first product's rows 1 and 2 take vf6/vf5 where retail has vf5/vf6, which the second product's registers follow, and the order of the dead stores of x, y, z against the rows (retail stores the first product's y and z last). Tried the chained stores in the other order, separate statements, *(u128*)& stores, both products indexed (320 bytes).
+// BYTES 301/308 (97.7%), checked 2026-11-10
+// NEAR (2026-11-10, w10-172078): 5 lines, all in the second product's dead stores of its row
+// values: retail stores them to three slots (0xA0, 0xB0, 0xC0, the first product's), ours to one
+// (0xA0) for every row. Registers, frame and every other store are retail's. The mechanism
+// (docs/TOOLCHAIN.md, "A rotation product's row slots are cast copies"): the row values' slots
+// are MEM_SCALAR_P (a cast's copy, as Vu0::Scalar's) and the second product's rows of f61C's
+// matrix are read as Vec members (MEM_IN_STRUCT_P), so the row loads pass the slot stores
+// (fixed_scalar_and_varying_struct_p) but wait for the stores to the matrix local. That moves
+// f61C's row 0 load one insn earlier in sched1, which lowers its quantity's local-alloc priority
+// below the first product's rows (life 22 against 20) and gives retail's vf4/vf5/vf6. Three
+// distinct slots come from three casts that are arguments of one call (SetRows, first product);
+// per-row statements (second product, which needs each out row stored before the next row's
+// load) free the cast's temporary at the statement's end, so the rows share one. Tried for the
+// second product: SetRows (the loads then pass the out stores: 37-42 lines), per-row stores then
+// one call with the three casts (38), the casts bound to references (`const u128& r =
+// Q((s128)x)`, `const s128& r = (s128)x`, a pointer: 5, shared slot), a value-returning row
+// helper ending `return Q((s128)r)` per statement or in one comma expression (20: an inline's
+// frame is freed when it returns), references bound to the product's rvalue (44, no slot),
+// volatile slots (56).
 #include "common.h"
 #include "globals.h"
 #include "switched_collider.h"
@@ -33,36 +50,41 @@
 extern f32 g_frameDt[];
 void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
 
-// The product a b of two rotations into out: b's rows each rotated by a's rows (loaded once
-// as values), each result stored to a vector local and to out's row.
-static inline void MulRotationInto(Mat02* out, const Mat02& a, const Mat02& b)
+// Out's rows from three row values (the casts' copies, bound to the parameters).
+static inline void SetRows(Mat02* out, const u128& x, const u128& y, const u128& z)
 {
-    const u128* p = (const u128*)&a;
-    u128 a0 = p[0];
-    u128 a1 = p[1];
-    u128 a2 = p[2];
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    Vu0::Q(x) = Vu0::Q(out->r[0]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
-    Vu0::Q(y) = Vu0::Q(out->r[1]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
-    Vu0::Q(z) = Vu0::Q(out->r[2]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+    Vu0::Q(out->r[0]) = x;
+    Vu0::Q(out->r[1]) = y;
+    Vu0::Q(out->r[2]) = z;
 }
 
-// The same with b's rows read by index through a pointer to them.
-static inline void MulRotationIntoIndexed(Mat02* out, const Mat02& a, const Mat02& b)
+// The product a b: the three rows computed, then stored through casts (one slot each).
+static inline void MulRotationCast(Mat02* out, const Mat02& a, const Mat02& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
-    const u128* q = (const u128*)&b;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    Vu0::Q(x) = Vu0::Q(out->r[0]) = Vu0::RotateRows(a0, a1, a2, q[0]);
-    Vu0::Q(y) = Vu0::Q(out->r[1]) = Vu0::RotateRows(a0, a1, a2, q[1]);
-    Vu0::Q(z) = Vu0::Q(out->r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]);
+    u128 x = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+    u128 y = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+    u128 z = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+    SetRows(out, Vu0::Q((s128)x), Vu0::Q((s128)y), Vu0::Q((s128)z));
+}
+
+// The same with b's rows read as Vec members and each row stored in its own statement.
+static inline void MulRotationCastRows(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    const Vu0::Vec* q = (const Vu0::Vec*)&b;
+    u128 x = Vu0::RotateRows(a0, a1, a2, q[0].q);
+    Vu0::Q(out->r[0]) = Vu0::Q((s128)x);
+    u128 y = Vu0::RotateRows(a0, a1, a2, q[1].q);
+    Vu0::Q(out->r[1]) = Vu0::Q((s128)y);
+    u128 z = Vu0::RotateRows(a0, a1, a2, q[2].q);
+    Vu0::Q(out->r[2]) = Vu0::Q((s128)z);
 }
 
 void func_00172078(Player* self, Mat02* out, f32 t)
@@ -77,7 +99,7 @@ void func_00172078(Player* self, Mat02* out, f32 t)
     BuildAxisAngleMatrix(&axis, &m, self->f2434 - g_frameDt[0] * self->f2430 * t);
     Mat02 a;
     Mat02 c;
-    MulRotationInto(&c, self->rot, m);
-    MulRotationIntoIndexed(&a, c, ((PlacedObject*)self->f61C)->rot);
+    MulRotationCast(&c, self->rot, m);
+    MulRotationCastRows(&a, c, ((PlacedObject*)self->f61C)->rot);
     *out = a;
 }
