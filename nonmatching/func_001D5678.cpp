@@ -53,7 +53,11 @@
 // `last = n - 1`) gives s3, but its set then has an earlier LUID than the entry test and sched1
 // issues it two slots early; the same variable assigned after the loop is PRE'd into a new
 // temporary whose copy dies (s2 again). `entries + 1`, a `Vec02* row = rows + r` (spill slots
-// move) and a function-scope j (109 lines) were tried.
+// move) and a function-scope j (109 lines) were tried. Also tried (w17, second round): `n--;`
+// before the sort and `n++;` after (8 bytes longer), `RingEntry* first = &entries[1];` passed
+// (no change), `s32 count = n - 1;` before the angles loop (s2, and issued early), and the sorts
+// through an inline `SortEntries(base, count)` (GCSE's table changes size and the four PRE'd
+// addresses take other spill slots: 557 lines).
 // In the context of its file, src/main/player_request.cpp (FLT_MAX is retail's D_0024DC88).
 #include "common.h"
 #include "shapes.h"
