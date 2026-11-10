@@ -169,6 +169,21 @@ s5/s4) mean those two never were pseudos:
   ldl/sdl pieces, and an inline returning a Mat02 by value copies it by pieces too: none calls
   CopyBytes (memcpy), so retail's call was written.
 
+- **The scale as a spilled Vec value (2026-11-10, w16-191AC8).** Held as a `Vu0::Vec` value
+  instead of a Vec02 in memory, the scale has 10 refs and crosses 3 calls: CALLER_SAVE_PROFITABLE
+  (4 * calls < refs) fails, global-alloc leaves it unallocated and reload gives it the spill slot
+  after the locals (304). Every load in the loop then is retail's: row 0's in vf2, rows 1 and 2
+  sharing vf4 (inheritance), and `k2 = k` as a memory-to-memory move through v0
+  (`lq v0,304; sq v0,240`). Two things remain. Retail's set of the scale stays in the loop as a
+  copy of a saved GPR (`mfc1 s6,$f12` before the loop, `move v0,s6; sq v0,304` in it), where
+  loop.c moves ours out: after CSE the asm's output is the variable itself, set once with an
+  invariant source, so it is moved whatever its lifetime; retail's set was not invariant to
+  loop.c (a partial or second set). And retail loads the scale into vf4 right after
+  TestOwnerGraphSpan, before the branch (so not reorg's: vf4 is live into the exit), and after
+  the loop stores vf4 to rot's freed slot and divides by it: a value set in the loop after the
+  last call and live only to the exit. A separate copy written there is moved out with the
+  scale; a union of a float and a u128 stays in memory (swc1, lq), not a register.
+
 ### Which pass moves an invariant: the preheader's order (func_001971B8)
 
 The preheader holds what loop.c put before the loop's start, in the order it put it there, and
