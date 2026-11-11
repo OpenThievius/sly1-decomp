@@ -21,6 +21,14 @@
 //       an addressable scalar's slot comes at purge time, the load is no birthing insn, the
 //       store's weight is at most 0, and self->contacts never conflicts with the frame. acc as
 //       a plain u128, or down as a Vec02, cascade (docs/toolchain/alias-classes.md).
+// w19 (2026-11-10): re-scored, unchanged. tools/sched1.py on block 34 (the call's block): 871
+//       (the copy's store) and 880 (self->contacts) tie at priority 5 at t=4 with one memory
+//       unit; weight -1 vs +1 picks the copy. --prio 880=6 or --prio 871=4 gives 880 875 871
+//       882, the order that leaves r307 in v0 across the copy. No other rank fits: weight can't
+//       (a load is +1, the store at most 0), the birthing raise needs r307 live at the block's
+//       end, and the block's insns are retail's. Reload's round robin is not it: the spill regs
+//       are v0, v1, vf3 and the reload before 871 (down into vf3 in the rhs loop) starts the
+//       rotation at v0 (docs/toolchain/sched1.md, "The copy and the list's load").
 // w11 levers that closed the rest (from 46.1%): one row and one contact variable for every
 //       loop (retail's a2 and a0 in all four: one pseudo each, as camera.cpp's sibling
 //       func_00145B68 reuses i and j); the normals as Vu0::Vec values (the Gram loop's vf4 and
