@@ -86,7 +86,7 @@ D_002484B0	g_movieKeys	16 key records of 32 bytes; FindKeyIndex looks an argumen
 D_002486B0	g_screenElements	array of the 37 screen element objects InstallScreenElements, InitScreenElements and the teardown call slots on in turn
 D_00248748	g_levelEntries	the 33 LevelEntry records func_001DFE80 searches by their first word
 D_00248D00	g_unitXVector	constant quad (1,0,0,0) copied into object axis fields (InitTargetVector and others)
-D_00248D10	g_unitYVector	constant quad (0,1,0,0) copied into object axis fields and listed as an axis in the table in file_1B7968.cpp
+D_00248D10	g_unitYVector	constant quad (0,1,0,0) copied into object axis fields and listed as an axis in the table in collider.cpp
 D_00248D20	g_unitZVector	constant quad (0,0,1,0) used as the rotation axis of the heading matrix (BuildTurningColliderHeadingMatrix) and copied into direction fields
 D_00249428	g_rpcBindErrorFormat	the format string InitIopCommandChannels prints (func_001E1F10) when binding an RPC client fails
 D_00249D80	g_baseReaderMethods	the GCC vtable of the memory reader's base class, its entry 1 being ReadNothing; nothing builds that class, the memory reader's own table is g_memoryReaderMethods
@@ -176,7 +176,7 @@ D_00261F14	g_vif0Channel	handle func_00152810 gets from func_002027A0(0) (DMA ch
 D_00261F18	g_vif1Channel	handle from func_002027A0(1) (DMA channel 1, VIF1): the render thread sends it the buffer of the second packet writer (bufB)
 D_00261F1C	g_gifChannel	handle from func_002027A0(2) (DMA channel 2, GIF): the render thread sends it the buffer of the first packet writer (bufA)
 D_00261F20	g_fromSprChannel	handle from func_002027A0(8) (DMA channel 8, fromSPR), stored once by func_00152810
-D_00261F24	g_toSprChannel	handle from func_002027A0(9) (DMA channel 9, toSPR); file_1B7968.cpp reads it as a channel record
+D_00261F24	g_toSprChannel	handle from func_002027A0(9) (DMA channel 9, toSPR); file_1C1190.cpp reads it as a channel record
 D_002621C8	g_objectCyclerLoadLinks	two-entry link table LoadObjectCycler installs through func_00124DF8
 D_002621E0	g_objectCyclerStartLinks	two-entry link table StartObjectCycler installs through func_00124DF8
 D_00262250	g_fontEscapeKeys	the characters '0','2','1','3','4': func_0015C200 maps a key character to a font slot and screen_element.cpp writes entries 3 and 4 into text escapes

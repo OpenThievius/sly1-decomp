@@ -44,7 +44,7 @@
 #include "object_group.h"
 #include "cursor_animator.h"
 #include "object_cycler.h"
-#include "c60.h"
+#include "scaling_volume.h"
 #include "world.h"
 #include "globals.h"
 #include "deferred_request.h"

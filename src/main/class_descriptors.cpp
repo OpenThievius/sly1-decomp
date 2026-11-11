@@ -346,7 +346,7 @@ void LoadStepSequence();
 void StartStepSequence();
 void UpdateStepSequence();
 void HandleStepSequenceNotification();
-void InitC61Object();
+void InitTextureRenderObject();
 void QueuePlacedObjectDraw();
 void InitEffectSpawner();
 void LoadEffectSpawner();
@@ -374,10 +374,10 @@ void LoadCrossfadeAnimator();
 void BindCrossfadeAnimator();
 void StepCrossfadeAnimator();
 void* FindCrossfadeCursor();
-void InitC60Object();
-void LoadC60Object();
-void UpdateC60Object();
-void DrawC60Object();
+void InitScalingVolume();
+void LoadScalingVolume();
+void UpdateScalingVolume();
+void DrawScalingVolume();
 void InitObjectCycler();
 void LoadObjectCycler();
 void CopyObjectCycler();
@@ -666,10 +666,10 @@ void InitFlaggedObjectSet();
 void CopyFlaggedObjectSet();
 s32 GetFlaggedObjectSetActivationState();
 void CollectFlaggedObjectSet();
-void LoadC5CObject();
-void StartC5CObject();
-void LoadC5DObject();
-void StartC5DObject();
+void LoadStateWalkerObject();
+void StartStateWalkerObject();
+void LoadStateWalkerGroup();
+void StartStateWalkerGroup();
 void InitNumberedItem();
 void LoadNumberedItem();
 void CopyNumberedItem();
@@ -703,9 +703,9 @@ void ApplyObjectGathererLodObject();
 s32 HandleObjectGathererObjectEvent();
 void RegisterC7CObject();
 void UnregisterC7CObject();
-void InitC8BObject();
-void LoadC8BObject();
-void StartC8BObject();
+void InitAimBlendGrid();
+void LoadAimBlendGrid();
+void StartAimBlendGrid();
 void InitEffectOwner();
 void ReleaseEffectOwner();
 void MoveEffectsAndBounds();
@@ -1819,7 +1819,7 @@ extern const ClassDescriptor<72> D_00219AF0 = { &D_00217568, 0x1E, 0x3, 0x570, {
     (Fn_Table)SaveColliderPreviousPosition, (Fn_Table)CaptureColliderPose, (Fn_Table)ApplyColliderAttachedSetContact, (Fn_Table)RequestColliderLaunch,
 } };
 // The effect kinds' tables of functions (func_0019E908 returns one per kind); their functions
-// are in src/main/file_19E040.cpp.
+// are in src/main/effect.cpp.
 extern const Fn_Table g_basicEffectMethods[8] = { (Fn_Table)InitEffect, 0, 0, (Fn_Table)MoveEffect, (Fn_Table)UpdateEffect, (Fn_Table)DrawEffect, (Fn_Table)EndEffect, (Fn_Table)HandleEffectContact };
 extern const Fn_Table g_fallingEffectMethods[8] = { (Fn_Table)InitFallingEffect, 0, 0, (Fn_Table)MoveEffect, (Fn_Table)UpdateEffect, (Fn_Table)DrawEffect, (Fn_Table)EndEffectWithImpact, (Fn_Table)HandleEffectContact };
 extern const Fn_Table g_risingEffectMethods[8] = { (Fn_Table)InitRisingEffect, 0, 0, (Fn_Table)MoveDriftingEffect, (Fn_Table)UpdateEffect, (Fn_Table)DrawEffect, (Fn_Table)EndEffectWithImpactOnExit, (Fn_Table)HandleEffectContact };
@@ -1988,11 +1988,11 @@ extern const T2195_Vt D_0021A790 = {
     (AttachGetIndexed)GetOwnerIndexedValue, 0,
 };
 extern const ClassDescriptor<28> D_0021A7B8 = { &D_00217418, 0x8B, 0x0, 0x3F0, {
-    (Fn_Table)InitC8BObject, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+    (Fn_Table)InitAimBlendGrid, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachObject, (Fn_Table)DetachObject, (Fn_Table)RegisterObject, (Fn_Table)UnregisterObject,
-    (Fn_Table)CloneObject, (Fn_Table)CopyObjectData, (Fn_Table)LoadC8BObject, 0,
+    (Fn_Table)CloneObject, (Fn_Table)CopyObjectData, (Fn_Table)LoadAimBlendGrid, 0,
     0, 0, (Fn_Table)SendObjectNotification, 0,
-    (Fn_Table)StartC8BObject, 0, 0, 0,
+    (Fn_Table)StartAimBlendGrid, 0, 0, 0,
     0, (Fn_Table)ReparentObject, 0, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, 0,
 } };
@@ -2683,9 +2683,9 @@ extern const ClassDescriptor<76> D_0021CEF8 = { &D_0021CC78, 0x2E, 0x3, 0x5C0, {
 extern const ClassDescriptor<48> D_0021D038 = { &D_00217498, 0x5C, 0x1, 0x2E0, {
     (Fn_Table)InitPlacedObject, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterPlacedObject, (Fn_Table)UnregisterPlacedObject,
-    (Fn_Table)ClonePlacedObject, (Fn_Table)CopyPlacedObject, (Fn_Table)LoadC5CObject, 0,
+    (Fn_Table)ClonePlacedObject, (Fn_Table)CopyPlacedObject, (Fn_Table)LoadStateWalkerObject, 0,
     0, (Fn_Table)HandlePlacedObjectNotification, (Fn_Table)SendObjectNotification, (Fn_Table)PostLoadPlacedObject,
-    (Fn_Table)StartC5CObject, (Fn_Table)UpdatePlacedObject, (Fn_Table)RecomputePlacedObjectFrame, (Fn_Table)ComputePlacedObjectWorldFrame,
+    (Fn_Table)StartStateWalkerObject, (Fn_Table)UpdatePlacedObject, (Fn_Table)RecomputePlacedObjectFrame, (Fn_Table)ComputePlacedObjectWorldFrame,
     (Fn_Table)SetPlacedObjectFrozen, (Fn_Table)ReparentPlacedObject, (Fn_Table)ReframePlacedObject, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MovePlacedObject,
     (Fn_Table)BeginPlacedObjectMove, (Fn_Table)SetPlacedObjectPosition, (Fn_Table)SetPlacedObjectRotation, (Fn_Table)CopyPlacedObjectFrame,
@@ -2697,9 +2697,9 @@ extern const ClassDescriptor<48> D_0021D038 = { &D_00217498, 0x5C, 0x1, 0x2E0, {
 extern const ClassDescriptor<48> D_0021D108 = { &D_00217498, 0x5D, 0x1, 0x330, {
     (Fn_Table)InitPlacedObject, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterPlacedObject, (Fn_Table)UnregisterPlacedObject,
-    (Fn_Table)ClonePlacedObject, (Fn_Table)CopyPlacedObject, (Fn_Table)LoadC5DObject, 0,
+    (Fn_Table)ClonePlacedObject, (Fn_Table)CopyPlacedObject, (Fn_Table)LoadStateWalkerGroup, 0,
     0, (Fn_Table)HandlePlacedObjectNotification, (Fn_Table)SendObjectNotification, (Fn_Table)PostLoadPlacedObject,
-    (Fn_Table)StartC5DObject, (Fn_Table)UpdatePlacedObject, (Fn_Table)RecomputePlacedObjectFrame, (Fn_Table)ComputePlacedObjectWorldFrame,
+    (Fn_Table)StartStateWalkerGroup, (Fn_Table)UpdatePlacedObject, (Fn_Table)RecomputePlacedObjectFrame, (Fn_Table)ComputePlacedObjectWorldFrame,
     (Fn_Table)SetPlacedObjectFrozen, (Fn_Table)ReparentPlacedObject, (Fn_Table)ReframePlacedObject, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MovePlacedObject,
     (Fn_Table)BeginPlacedObjectMove, (Fn_Table)SetPlacedObjectPosition, (Fn_Table)SetPlacedObjectRotation, (Fn_Table)CopyPlacedObjectFrame,
@@ -2919,16 +2919,16 @@ extern const ClassDescriptor<74> D_0021DD08 = { &D_00218BD8, 0x23, 0x13, 0x7C0, 
     (Fn_Table)ReleasePooledHolder, 0,
 } };
 extern const ClassDescriptor<48> D_0021DE40 = { &D_00217498, 0x60, 0x1, 0x300, {
-    (Fn_Table)InitC60Object, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+    (Fn_Table)InitScalingVolume, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterPlacedObject, (Fn_Table)UnregisterPlacedObject,
-    (Fn_Table)ClonePlacedObject, (Fn_Table)CopyPlacedObject, (Fn_Table)LoadC60Object, 0,
+    (Fn_Table)ClonePlacedObject, (Fn_Table)CopyPlacedObject, (Fn_Table)LoadScalingVolume, 0,
     0, (Fn_Table)HandlePlacedObjectNotification, (Fn_Table)SendObjectNotification, (Fn_Table)PostLoadPlacedObject,
-    (Fn_Table)StartPlacedObject, (Fn_Table)UpdateC60Object, (Fn_Table)RecomputePlacedObjectFrame, (Fn_Table)ComputePlacedObjectWorldFrame,
+    (Fn_Table)StartPlacedObject, (Fn_Table)UpdateScalingVolume, (Fn_Table)RecomputePlacedObjectFrame, (Fn_Table)ComputePlacedObjectWorldFrame,
     (Fn_Table)SetPlacedObjectFrozen, (Fn_Table)ReparentPlacedObject, (Fn_Table)ReframePlacedObject, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MovePlacedObject,
     (Fn_Table)BeginPlacedObjectMove, (Fn_Table)SetPlacedObjectPosition, (Fn_Table)SetPlacedObjectRotation, (Fn_Table)CopyPlacedObjectFrame,
     (Fn_Table)SetPlacedObjectVelocity, (Fn_Table)SetPlacedObjectSpin, (Fn_Table)GetPlacedObjectPositionAt, (Fn_Table)GetPlacedObjectRotationAt,
-    (Fn_Table)ApplyPlacedObjectTransform, (Fn_Table)DrawC60Object, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
+    (Fn_Table)ApplyPlacedObjectTransform, (Fn_Table)DrawScalingVolume, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
     0, (Fn_Table)ApplyObjectFrameOffsetToPose, (Fn_Table)RemoveObjectFrameOffsetFromPose, (Fn_Table)ChooseActiveAttachments,
     (Fn_Table)UpdateLinkConstraint, (Fn_Table)TestOtherFlagged, 0, 0,
 } };
@@ -3038,7 +3038,7 @@ extern const ClassDescriptor<72> g_scaledOffsetObjectClass = { &D_00217568, 0x39
     (Fn_Table)SaveColliderPreviousPosition, (Fn_Table)CaptureColliderPose, (Fn_Table)ApplyColliderAttachedSetContact, (Fn_Table)RequestColliderLaunch,
 } };
 extern const ClassDescriptor<48> D_0021E588 = { &D_00217498, 0x61, 0x1, 0x2F0, {
-    (Fn_Table)InitC61Object, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+    (Fn_Table)InitTextureRenderObject, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterPlacedObject, (Fn_Table)UnregisterPlacedObject,
     (Fn_Table)ClonePlacedObject, (Fn_Table)CopyPlacedObject, (Fn_Table)LoadPlacedObject, 0,
     0, (Fn_Table)HandlePlacedObjectNotification, (Fn_Table)SendObjectNotification, (Fn_Table)PostLoadPlacedObject,

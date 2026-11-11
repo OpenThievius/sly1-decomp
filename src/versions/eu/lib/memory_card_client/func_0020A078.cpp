@@ -4,15 +4,15 @@ s32 func_eu_001F7738(s8* dst, s8* src, s32 n);
 
 s32 RequestCardSpaceForPath(s32 a0, s32 a1, s8* a2)
 {
-    Reg_0020A078* reg;
-    Buf_0020A078* buf;
-    Buf_0020A078* res;
+    RemoteCallClient* reg;
+    CardPathRequest* buf;
+    CardPathRequest* res;
 
     if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
-    reg = ((Reg_0020A078*)&g_cardClient);
-    if (reg->f24 == 0) {
+    reg = ((RemoteCallClient*)&g_cardClient);
+    if (reg->server == 0) {
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
@@ -20,7 +20,7 @@ s32 RequestCardSpaceForPath(s32 a0, s32 a1, s8* a2)
         PostSemaphore(g_cardSemaphore);
         return -210;
     }
-    buf = ((Buf_0020A078*)&D_0062ADF0);
+    buf = ((CardPathRequest*)&D_0062ADF0);
     buf->f0 = a0;
     buf->f4 = a1;
     func_eu_001F7738(buf->text14, a2, 0x3FF);

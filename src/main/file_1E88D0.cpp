@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The source file from 0x1E88D0 to 0x1F2758, built whole (config/us/files.tsv): it starts where
 // file_1E5378.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
-// list D_0027B130). Its .rodata runs 0x24E600-0x24E840 and its .data 0x275B60-0x276970, which ends
-// with the C library's state record and the pointer to it (D_0027696C). Named after its first address until what it was is known.
+// list D_0027B130). Its .rodata runs 0x24E600-0x24E840 and its .data 0x275B60-0x276680, which ends
+// with a build stamp no code reads; the C library's state record after it is
+// src/lib/library_state.c's (that file says why). Named after its first address until what it was is known.
 #include "common.h"
 #include "switched_collider.h"
 #include "list_iter.h"
@@ -19,7 +20,7 @@
 #include "memory_card.h"
 #include "timeline.h"
 #include "value_list_object.h"
-#include "c62.h"
+#include "state_reset_object.h"
 #include "attached_set.h"
 #include "packet_writer.h"
 #include "screen_fade.h"
@@ -340,7 +341,7 @@ struct StateChangeMsg {
     s32 old;
     s32 cur;
 };
-s32 SetGatheredWalkerTargets(World* mgr, s32 a, void* b, C62* self, s32 c);
+s32 SetGatheredWalkerTargets(World* mgr, s32 a, void* b, StateResetObject* self, s32 c);
 void GetStateWalkerCurrentKey(s32 sub, s32* out);
 void ScheduleTempoAgentBeatPress(TempoAgent* p);
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32* c);
@@ -365,7 +366,7 @@ void* MoveMemory(void* dst, void* src, s32 size);
 // An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
 // Moves n bytes of the item list down over a removed item.
 struct MoveItemsDown {
-    static void Of(C62** dst, C62** src, s32 n)
+    static void Of(StateResetObject** dst, StateResetObject** src, s32 n)
     {
         MoveMemory(dst, src, n);
     }
@@ -520,7 +521,7 @@ void AddTempoAgentEntry(TempoAgent* self, AnimationPlayer* a, s32 b);
 void RestartTimeline(Timeline* self);
 void EndTimeline(Timeline* self);
 void RunTimelineEntries(Timeline* self);
-void SetStateAndNotify(C62* self, s32 state);
+void SetStateAndNotify(StateResetObject* self, s32 state);
 s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, void* param2);
 void SetWarpPageMode(WarpPage* self, u32 next);
 void SetWarpCursor(WarpPage* self, s32 a1, s32 a2);
@@ -535,7 +536,7 @@ ObjectLink D_00275B60[8] = {
 u8 g_elementStack[4] = {0};
 INCLUDE_DATA(D_00275BC4);
 // size: s32 read as one word (file_14EE40.cpp and screen_element.cpp test bit 8)
-// size: s32 compared with 1 in file_149398.cpp and 2 in pause_menu.cpp
+// size: s32 compared with 1 in item_column.cpp and 2 in pause_menu.cpp
 s32 D_00275BEC = 0;
 s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };
 f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
@@ -718,19 +719,10 @@ f32 D_00276648 = 24.0f;
 f32 D_00276650 = D_00276648 * 0.75f;
 #endif
 s32 D_00276654 = 0;
-extern s32 D_00276864, D_002768BC, D_00276914;
 extern f32 D_0027663C[];
 char D_00276658[8] = "jojo";
 char D_00276660[16] = "08/24/02 22:06";
 char D_00276670[12] = "0824.2206";
-// The C library's state record (g_libraryState points to it): the error number, the three records
-// after it, a pointer into .rodata at +0x34 and the random seed at +0x58.
-void* D_00276680[121] = { 0, &D_00276864, &D_002768BC, &D_00276914, 0, 0, 0, 0, 0, 0, 0, 0, 0, (void*)0x0024E980,
-                          0, 0, 0, 0, 0, 0, 0, 0, (void*)1 };
-INCLUDE_DATA(D_00276864);
-INCLUDE_DATA(D_002768BC);
-INCLUDE_DATA(D_00276914);
-void* g_libraryState = D_00276680;
 
 
 void InitKeyedConeAgent(KeyedConeAgent* self)
@@ -3780,14 +3772,14 @@ void ClearAttachedSetTrackedNodes(AttachedSet* o)
     o->trackedNodes.found = 0;
 }
 
-void InitStateResetObject(C62* self)
+void InitStateResetObject(StateResetObject* self)
 {
     InitPlacedObject(self);
     self->id2D0 = -1;
     self->id2E0 = -1;
 }
 
-void StartStateResetObject(C62* self)
+void StartStateResetObject(StateResetObject* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, D_00275E10);
@@ -3802,7 +3794,7 @@ s32 AddStateResetEntry(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a
 
 void UpdateStateResetObject(void) {}
 
-void SetStateAndNotify(C62* self, s32 state)
+void SetStateAndNotify(StateResetObject* self, s32 state)
 {
     if (self->id2D0 != state) {
         if (state != 0) {
@@ -3822,7 +3814,7 @@ void SetStateAndNotify(C62* self, s32 state)
     }
 }
 
-void HandleStateResetNotification(C62* self, s32 kind, Msg62* msg)
+void HandleStateResetNotification(StateResetObject* self, s32 kind, StateResetMsg* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 5) {
@@ -3834,14 +3826,14 @@ void HandleStateResetNotification(C62* self, s32 kind, Msg62* msg)
 
 void* CreateRecord2505C0(void)
 {
-    C62Group* p = (C62Group*)AllocateZeroedFrontMemory(48);
+    StateResetGroup* p = (StateResetGroup*)AllocateZeroedFrontMemory(48);
     p->vtbl = D_002505C0;
     return p;
 }
 
-void AppendToSmallList(C62Group* self, C62* value) { u32 i = self->count; if (i < 8) { self->items[i] = value; self->count = i + 1; } }
+void AppendToSmallList(StateResetGroup* self, StateResetObject* value) { u32 i = self->count; if (i < 8) { self->items[i] = value; self->count = i + 1; } }
 
-void RemoveFromSmallList(C62Group* self, C62* value)
+void RemoveFromSmallList(StateResetGroup* self, StateResetObject* value)
 {
     s32 i;
     for (i = 0; i < self->count; i++) {
@@ -3853,7 +3845,7 @@ void RemoveFromSmallList(C62Group* self, C62* value)
     }
 }
 
-void UpdateItemTimeouts(C62Group* s)
+void UpdateItemTimeouts(StateResetGroup* s)
 {
     s->scheduled = 0;
     if (s->owner != 0 && s->owner->f180 != -1 && s->items[0]->id2E0 == s->owner->f180) {
@@ -3870,7 +3862,7 @@ void UpdateItemTimeouts(C62Group* s)
         return;
     }
     for (s32 i = 0; i < s->count; i++) {
-        C62* it = s->items[i];
+        StateResetObject* it = s->items[i];
         if (it->id2D0 != 2) continue;
         if (it->id2DC != 0) continue;
         f32 d = g_gameClock.time - it->f2D4;
@@ -3880,7 +3872,7 @@ void UpdateItemTimeouts(C62Group* s)
     }
 }
 
-void ScheduleItemTimeouts(C62Group* self)
+void ScheduleItemTimeouts(StateResetGroup* self)
 {
     if (self->scheduled == 0) {
         self->scheduled = 1;

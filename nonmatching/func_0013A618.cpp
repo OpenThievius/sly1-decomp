@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 751/804 (93.4%), checked 2026-11-11
-// NEAR: retail's size (804 bytes), 30 differing lines when built in src/main/file_137290.cpp (and
+// NEAR: retail's size (804 bytes), 30 differing lines when built in src/main/world_listed_object.cpp (and
 //       standalone). New this round:
 //       the bank pointer `p` is one variable reused by the three transfers (C style), so it is a
 //       global pseudo that global-alloc puts in a1 (two of its three copies go to a1), which gives
@@ -16,14 +16,14 @@
 //       of moved invariants that got no register (s0-s8 are all taken). A `void* const& ch =
 //       g_toSprChannel;` at the loop top gives the hoist (life 2), but changes the preheader and
 //       is not plausible code. Lands with: the FLT_MAX bounds as literals, which removes the C
-//       definitions of D_00249D64 and D_00249D68 from src/main/file_137290.cpp (they are this
+//       definitions of D_00249D64 and D_00249D68 from src/main/world_listed_object.cpp (they are this
 //       function's literal pool, the file's .rodata +0 and +4).
 // W23 (2026-11-11): built in its file, tools/sched1.py replays the prologue block as the trace: the
 //       two literal %hi's (insns 16 and 38) both have priority 26 and issue at t = 1; retail's
 //       v0 reuse needs 38 issued no earlier than the first lwc1 (insn 19): priority 24, or 25 and
 //       losing to `move s4,a0` (insn 5). Every form docs/toolchain/sched1.md records was not
 //       re-tried; no new lever found.
-// In the context of its file, src/main/file_137290.cpp.
+// In the context of its file, src/main/world_listed_object.cpp.
 #include "common.h"
 #include "asm_func.h"
 #include "list_iter.h"
@@ -34,7 +34,7 @@
 
 void DetachOwnedRecord(OwnedRecord* o);
 
-// One of the two scratchpad transfer buffers (file_1B7968.cpp): the blocks StartToSprChain sent.
+// One of the two scratchpad transfer buffers (file_1C1190.cpp): the blocks StartToSprChain sent.
 struct SprTransfer {
     void* tags;             // 0x00
     s32 base;               // 0x04

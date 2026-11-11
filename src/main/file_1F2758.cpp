@@ -2,7 +2,10 @@
 // The source file from 0x1F2758 to 0x1F59C4, built whole (config/us/files.tsv): it starts where
 // file_1E88D0.cpp's _GLOBAL_$I$ ends and ends where the libraries begin (config/us/layout.tsv).
 // Its .rodata is the two jump tables of its assembly at 0x24E840 and 0x24E860; it has no .data
-// or .bss. Named after its first address until what it was is known.
+// or .bss. Its .rodata range runs to 0x24E980, where src/lib/library_state.c's begins, and holds
+// after the jump tables the character class table (0x24E878 to 0x24E979, from the disassembly),
+// which could be this file's, library_state.c's or a library file's of its own. Named after its
+// first address until what it was is known.
 #include "transform_object.h"
 #include "warp_page.h"
 #include "oscillator.h"

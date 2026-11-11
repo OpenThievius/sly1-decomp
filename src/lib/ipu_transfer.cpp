@@ -10,6 +10,7 @@
 // by the MPEG library and uses no IPU register, so its own file ends here; the data can't
 // decide. Written for this project from retail's code.
 #include "common.h"
+#include "mpeg_decoder.h"
 
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
@@ -32,24 +33,23 @@ void StartIpuInputTransfer(u32 value)
     EnableInterrupts();
 }
 
-struct Out_002118A0 { u32 w00; u32 w04; u32 w08; u32 w0C; u32 w10; u32 w14; u32 w18; u32 w1C; u32 w20; };
 
-void SaveIpuDmaChannels(Out_002118A0* out)
+void SaveIpuDmaChannels(IpuDmaState* out)
 {
     StartIpuInputTransfer(1);
     volatile u32* a = (volatile u32*)0x1000B410;
-    out->w00 = *a;
-    out->w04 = *(volatile u32*)0x1000B430;
-    out->w08 = *(volatile u32*)0x1000B420;
-    out->w0C = *(volatile u32*)0x1000B400;
+    out->inAddress = *a;
+    out->inTagAddress = *(volatile u32*)0x1000B430;
+    out->inCount = *(volatile u32*)0x1000B420;
+    out->inControl = *(volatile u32*)0x1000B400;
     while ((*(volatile u32*)0x10002010 & 0xF0) != 0) {
     }
     StartIpuOutputTransfer(0);
-    out->w10 = *(volatile u32*)0x1000B010;
-    out->w14 = *(volatile u32*)0x1000B020;
-    out->w18 = *(volatile u32*)0x1000B000;
-    out->w1C = *(volatile u32*)0x10002020;
-    out->w20 = *(volatile u32*)0x10002010;
+    out->outAddress = *(volatile u32*)0x1000B010;
+    out->outCount = *(volatile u32*)0x1000B020;
+    out->outControl = *(volatile u32*)0x1000B000;
+    out->bitPosition = *(volatile u32*)0x10002020;
+    out->control = *(volatile u32*)0x10002010;
 }
 
 struct Ctx_211988 {

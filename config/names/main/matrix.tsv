@@ -4,7 +4,7 @@ func_001884E0	CopyRotationMatrix	copies a matrix's first three rows and resets t
 func_00188520	MultiplyByTransposedMatrix3x3	writes each of the three rows of the second matrix as dot products with the three rows of the first (out = b times a transposed), on VU0; CopyRotationMatrix's neighbour, used by func_00128150 and func_0016C528
 func_001885E0	InitIdentityMatrix	clears 0x40 bytes and sets the four diagonal floats to 1.0
 func_00188628	ScaleMatrix	multiplies all four rows of a matrix by one float into the output
-func_00188668	MultiplyMatrices	original assembly: writes the product of two matrices (DrawC60Object multiplies its transform by its scale with it; TransformMatrixByObject and a dozen others call it)
+func_00188668	MultiplyMatrices	original assembly: writes the product of two matrices (DrawScalingVolume multiplies its transform by its scale with it; TransformMatrixByObject and a dozen others call it)
 func_00188700	TransformByMatrixWithW	x times row 0 plus y times row 1 plus z times row 2 plus the given w times row 3: a point (w 1) or a direction (w 0) through a matrix (TransformPointArray, DrawPathCurveSegment)
 func_00188740	TransformVector4	multiplies a four-component vector by a 4x4 matrix and returns the result in a register (DrawTriangleGroups, DrawColoredTriangles)
 func_00188770	CopyTransposedMatrix	copies four rows, then swaps m[i][j] with m[j][i] for i < j
@@ -32,6 +32,6 @@ func_00189B18	BuildBasisFromXAndYHint	a rotation whose row 0 is the normalised x
 func_00189C28	BuildBasisFromXAndZHint	a rotation whose row 0 is the normalised x direction and row 1 the normalised cross product of the z hint with it (row 2 from func_001ED840 when that is shorter than 1e-4)
 func_00189D38	BuildShortestArcRotation	normalises both vectors (the unit z vector for a short one), takes their cross product as the axis (crossing with the unit x or y vector when they are parallel) and the arc cosine of their dot product as the angle (BuildAxisAngleMatrix)
 func_00189F58	BuildProjectionMatrix	clears 0x40 bytes and fills a, b, c, d, (e+f)/(e-f), e*(1-that) and 1.0 at fixed elements from six floats
-func_0018A008	BuildUniformScaleAboutPoint	BuildScaleAboutFrame about a point with no rotation and the same scale on all three axes (DrawC60Object, DrawTriangleGroups)
+func_0018A008	BuildUniformScaleAboutPoint	BuildScaleAboutFrame about a point with no rotation and the same scale on all three axes (DrawScalingVolume, DrawTriangleGroups)
 func_0018A040	BuildScaleAboutFrame	builds the frame of a translation and a rotation (BuildMatrixFromRotationAndTranslation; the origin and the identity by default), its inverse (InvertRigidTransform) and a diagonal scale, and writes frame times scale times inverse (MultiplyMatrices)
 func_0018A160	BuildRotationBetweenVectors	the rotation that turns the first vector into the second, about their normalised cross product; the identity when either is shorter than 1e-4 (func_0016C528, func_001DDE90)

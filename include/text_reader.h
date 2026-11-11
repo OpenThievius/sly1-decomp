@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The text reader func_0015DB28(reader, text, font) sets up (file_1549C8.cpp): the text, the
+// The text reader func_0015DB28(reader, text, font) sets up (font.cpp): the text, the
 // cursor in it, the current font and the default one, an inline font (Font, font.h) the
 // text's font codes change, and four colours (0xFF808080 at set-up). func_0015DBE0 reads
 // the next character, acting on the codes in the text (~ colour, & font, ^ scale);

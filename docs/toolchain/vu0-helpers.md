@@ -334,7 +334,8 @@ What retail shows, and what the compiler does:
   assigned at the top, the constant is propagated into each use. (6) With func_001BC0E0's C
   (EXACT alone), our assembler padded StartSoundEffect's copy loop with five nops in the whole
   file's build; the cause was its fragment breaks, not the code, and tools/short_loops.py now
-  pads short loops as the original did (see "The assembler matters"): file_1B7968.cpp places.
+  pads short loops as the original did (see "The assembler matters"): file_1B7968.cpp (now collider.cpp
+  and file_1BE1E8.cpp) places.
 
 The sequences still without a helper: a float stored as a quadword (func_00191AC8,
 func_00118CF0: mfc1 once into a saved GPR, then per use a copy (`daddu`) and sq,

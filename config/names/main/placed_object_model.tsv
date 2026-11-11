@@ -1,0 +1,20 @@
+symbol	name	evidence
+func_00162890	ReadPlacedObjectModel	LoadPlacedObject's reader of the object's model from the level stream: counts, matrices, animation records, mesh strips queued for upload (g_meshQueueCount) and their packets (func_00165AE8, func_00165588)
+func_00163938	WriteStripMeshMscal	writes the VIF MSCAL of the strip mesh's microprogram (0x18C0 or 0x18F8 by mode); BuildStripMeshPacket and BuildLitStripMeshPacket call it
+func_00163990	WriteMorphTargetMscal	writes the VIF MSCAL of the morph target's microprogram (0xFA0 or 0xFD8 by mode); BuildMorphTargetPacket calls it
+func_001639E8	BuildMorphTargetPacket	writes positions, optional weights and, for each of the f40 targets, the difference between the target's vertex (through its index list) and the base position
+func_00163ED8	BuildStripMeshPacket	writes positions with the per-record flag, optional texture coordinates, weights, morph differences, tinted colours and queues each strip (func_001694F8)
+func_00164868	BuildLitStripMeshPacket	the strip-mesh builder that also carries per-vertex normals and their morph differences
+func_00165588	BuildPartVifPackets	unless the part or the owner is flagged, writes two VIF packets for the part's range: an unpack with STCYCL 1,4 and MSCAL 0x10, then two unpacks and MSCAL 0xF0, keeping each packet's start and size in the output (ReadPlacedObjectModel and CopyAttachmentPart call it)
+func_00165728	StartAttachments	for each attachment entry runs the object's slot 1 and func_001662A8, then hands every listed node's looked-up object to func_001F2798; PlacedObject's start calls it with the block at +0x22C
+func_00165828	BindAttachmentTargets	looks up the object for each key with func_0015A448 and stores the relative transform between it and the owner (func_00188668) in the element; PostLoadPlacedObject calls it
+func_00165920	CopyAttachmentBlock	copies the 0x58-byte block from the source, reallocates its arrays, re-links the node chain to the new copies and rebuilds the ref list; CopyPlacedObject calls it with both +0x22C blocks
+func_00165AE8	CopyAttachmentPart	copies one 0x70-byte attachment part's arrays into front memory (CopyToFrontMemory), queues its strips and node links (QueueMeshStrip, QueueNodeLink, RemapMeshQueueValues) and builds its packets (BuildPartVifPackets); CopyAttachmentBlock calls it for each part and ReadPlacedObjectModel for each part it reads
+func_00165FE0	UpdateAttachments	calls slot 2 of each attached element that func_001B4B08 accepts with the frame time, then func_001F3408 on each chained node; UpdatePlacedObject calls it first
+func_001660A0	UpdateLinkConstraint	slot 48 of class 0x02: when the record at +0x224 has flag 0x10 at +0xB0 and a partner at +0x64, runs ApplyLinkConstraint on its +0x60
+func_001660E8	UpdateAttachmentFrames	slot 43 of class 0x02: for each attachment record multiplies the owner's (or parent's) frame by the attached object's frame and by the record's local matrix into +0x50
+func_001662A8	BuildAttachmentDmaChain	builds in a temporary packet buffer the DMA chain of call and ref tags for an attachment's parts and keeps a copy of it (DetachPacketBufferCopy); StartAttachments calls it
+func_00166658	FlipVifBaseOffset	sets D_00262474 to 0x23C minus itself and writes it as the VIF base offset of g_vifPacketWriter, toggling between two buffer halves
+func_00166690	DrawModelPart	the part drawer DrawPlacedObjectParts runs for each 0x70-byte part: picks the part's lights (CollectLightsForSphere, rechecked when g_lightingChangeFrame moves), transforms it and writes its VIF packets with g_vifPacketWriter
+func_00167D20	ConstructDefaultRgbaColor	the file's static initialiser (config/us/generated.tsv): on the construction pass (arguments 1 and 0xFFFF) stores 0x80101010 in D_002623E0, the colour the vertex-batch code reads as bytes r, g, b, a
+func_00167D48	ConstructDefaultRgbaColorAtStartup	the file's _GLOBAL_$I$: calls ConstructDefaultRgbaColor with (1, 0xFFFF); an entry of the startup init-list D_0027B130

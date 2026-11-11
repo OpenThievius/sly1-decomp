@@ -29,6 +29,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import version_src  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
@@ -172,9 +173,21 @@ def describe(ours, theirs, pointers):
     return note
 
 
+def build_object(source, obj_path, whole):
+    """Build a source file's object for the check and return its path. A file in which PAL builds
+    anything of its own (src/versions/eu/: its own functions, its own globals, a declaration that
+    reads VERSION_EU) is built as PAL's unit (version_src.unit, with the data the file includes
+    kept), so its sections are what PAL's C makes; any other file as the US build builds it."""
+    import compile as cc
+    if version_src.has_own(source, "eu"):
+        version_src.compile_unit(source, "eu", obj_path, keep_data=True, whole=whole)
+    else:
+        cc.compile_file(source, obj_path, whole=whole)
+    return obj_path
+
+
 def run():
     import check
-    import compile as cc
     import elf
     import tempfile
     import todo
@@ -191,8 +204,7 @@ def run():
         whole = wholes.get(source)
         with tempfile.TemporaryDirectory(prefix="sly1-dc-") as tmp:
             obj_path = Path(tmp) / "unit.o"
-            cc.compile_file(ROOT / source, obj_path, whole=whole is not None)
-            obj = elf.Elf(obj_path.read_bytes())
+            obj = elf.Elf(build_object(ROOT / source, obj_path, whole is not None).read_bytes())
         for row in group:
             eu, status, note = check_global(obj, row, resolver, image, whole)
             rows[row[0]] = ("-" if eu is None else "%08X" % eu, row[2], status, note)
@@ -210,6 +222,30 @@ def write(rows):
     print("wrote %s: %s" % (STATUS.relative_to(ROOT) if ROOT in STATUS.parents else STATUS, ", ".join("%d %s" % (v, k) for k, v in sorted(counts.items()))))
 
 
+def rel(path):
+    return str(path.relative_to(ROOT)) if ROOT in path.parents else str(path)
+
+
+def own_problems():
+    """The files of src/versions/eu/ named for a global (D_XXXXXXXX.cpp) that do not define it, or
+    whose shared file does not (they replace its definition: docs/VERSIONS.md)."""
+    problems = []
+    for name, path in version_src.data_overrides("eu").items():
+        shared = version_src.version_of(path)[1]
+        if not shared.exists():
+            problems.append("%s: its shared file %s does not exist" % (rel(path), rel(shared)))
+            continue
+        try:
+            version_src.data_span(shared.read_text(), name)
+        except version_src.VersionSourceError:
+            problems.append("%s defines %s, which its shared file does not" % (rel(path), name))
+        try:
+            version_src.data_span(path.read_text(), name)
+        except version_src.VersionSourceError:
+            problems.append("%s does not define %s" % (rel(path), name))
+    return problems
+
+
 def check_current():
     listed = {g[0]: g for g in us_globals()}
     rows = read_status()
@@ -219,6 +255,7 @@ def check_current():
                  for n in sorted(set(rows) - set(listed))]
     problems += ["config/eu/c_data_status.tsv gives %s %d bytes, config/us/c_data.tsv %d" % (n, rows[n][1], listed[n][2])
                  for n in sorted(set(rows) & set(listed)) if rows[n][1] != listed[n][2]]
+    problems += own_problems()
     for p in problems:
         print("stale: " + p)
     return 1 if problems else 0

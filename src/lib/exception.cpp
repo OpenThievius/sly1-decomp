@@ -15,11 +15,12 @@
 
 extern void (*D_00278048)();
 u8* GetActiveExceptionSlot(void);
-struct Ctx_001FE978;
-void* GetActiveExceptionSlot(Ctx_001FE978* self);
+// The argument GetActiveExceptionRecord passes through to the slot lookup, which ignores it.
+struct ExceptionLookupArg;
+void* GetActiveExceptionSlot(ExceptionLookupArg* self);
 
-typedef void (*Handler_001FE8F0)(void) __attribute__((noreturn));
-typedef void (*Handler_001FE938)(void) __attribute__((noreturn));
+typedef void (*TerminateHandler)(void) __attribute__((noreturn));
+typedef void (*UnexpectedHandler)(void) __attribute__((noreturn));
 
 // The unexpected handler, at first func_001FE908 (defined below, after its first use).
 extern s32 D_00278640;
@@ -28,7 +29,7 @@ void InvokeTerminateHandler(void) __attribute__((noreturn));
 
 void InvokeTerminateHandler(void)
 {
-	((Handler_001FE8F0)D_00278048)();
+	((TerminateHandler)D_00278048)();
 }
 
 void DefaultUnexpectedHandler(void) __attribute__((noreturn));
@@ -38,9 +39,9 @@ void DefaultUnexpectedHandler(void)
 	InvokeTerminateHandler();
 }
 
-Handler_001FE8F0 ReplaceTerminateHandler(Handler_001FE8F0 handler)
+TerminateHandler ReplaceTerminateHandler(TerminateHandler handler)
 {
-	Handler_001FE8F0 old = (Handler_001FE8F0)D_00278048;
+	TerminateHandler old = (TerminateHandler)D_00278048;
 	D_00278048 = (void (*)())handler;
 	return old;
 }
@@ -56,7 +57,7 @@ void InvokeUnexpectedHandler(void) __attribute__((noreturn));
 
 void InvokeUnexpectedHandler(void)
 {
-	((Handler_001FE938)D_00278640)();
+	((UnexpectedHandler)D_00278640)();
 }
 
 s32 GetThrownObjectAddress(void)
@@ -64,42 +65,9 @@ s32 GetThrownObjectAddress(void)
 	return *(s32*)GetActiveExceptionSlot() + 8;
 }
 
-s32 GetActiveExceptionRecord(Ctx_001FE978* self)
+s32 GetActiveExceptionRecord(ExceptionLookupArg* self)
 {
 	return *(s32*)GetActiveExceptionSlot(self);
-}
-
-struct Obj_001FE998 {
-    u8 pad[0x14];
-    s32 flag;
-    u8 pad2[8];
-    s64 count;
-};
-
-Obj_001FE998* BeginCatchHandler(void)
-{
-    Obj_001FE998* obj = *(Obj_001FE998**)GetActiveExceptionSlot();
-    obj->flag = 1;
-    obj->count++;
-    return obj;
-}
-
-struct Arg_1FE9D0;
-s32 EnterRuntimeLock(Arg_1FE9D0* size);
-
-s32 AllocateRuntimeBlockOrTerminate(Arg_1FE9D0* size)
-{
-    s32 p = EnterRuntimeLock(size);
-    if (p == 0)
-        InvokeTerminateHandler();
-    return p;
-}
-
-s32 LeaveRuntimeLock(void); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
-
-s32 FreeRuntimeBlock(void)
-{
-    return LeaveRuntimeLock();
 }
 
 // The 0x30-byte record of a thrown exception (PushThrownException makes it and puts it on the
@@ -123,18 +91,45 @@ struct ThrownException {
 
 typedef char check_ThrownException[sizeof(ThrownException) == 0x30 ? 1 : -1];
 
-struct Hdr_001FEA18 {
+ThrownException* BeginCatchHandler(void)
+{
+    ThrownException* obj = *(ThrownException**)GetActiveExceptionSlot();
+    obj->f14 = 1;
+    obj->f20++;
+    return obj;
+}
+
+struct Arg_1FE9D0;
+s32 EnterRuntimeLock(Arg_1FE9D0* size);
+
+s32 AllocateRuntimeBlockOrTerminate(Arg_1FE9D0* size)
+{
+    s32 p = EnterRuntimeLock(size);
+    if (p == 0)
+        InvokeTerminateHandler();
+    return p;
+}
+
+s32 LeaveRuntimeLock(void); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
+
+s32 FreeRuntimeBlock(void)
+{
+    return LeaveRuntimeLock();
+}
+
+// What MatchPendingThrowType is handed with the handler: a record whose kind, at 0x04 as in
+// ThrownException's, must be 4.
+struct ThrowMatchHeader {
     u8 pad0[4];
     s16 kind;
 };
 
-struct Res_001FEA18;
+// The function a handler gives, which returns the type it takes.
+typedef s32 (*HandlerTypeFn)();
 
-typedef s32 (*Fn_001FEA18)();
+s32 MatchThrownType(type_info* a, s32 b, s32 c);
 
-s32 MatchThrownType(Res_001FEA18* a, s32 b, s32 c);
-
-s32 MatchPendingThrowType(ThrownException* self, void* fn, Hdr_001FEA18* a2)
+s32 MatchPendingThrowType(ThrownException* self, void* fn, ThrowMatchHeader* a2)
 {
     if (a2 != 0 && a2->kind != 4) {
         return 0;
@@ -142,8 +137,8 @@ s32 MatchPendingThrowType(ThrownException* self, void* fn, Hdr_001FEA18* a2)
     if (fn == (void*)-1) {
         return self->f08;
     }
-    s32 r = ((Fn_001FEA18)fn)();
-    r = MatchThrownType((Res_001FEA18*)r, self->f0C, self->f28);
+    s32 r = ((HandlerTypeFn)fn)();
+    r = MatchThrownType((type_info*)r, self->f0C, self->f28);
     if (r != 0) {
         self->f08 = r;
     }
@@ -220,36 +215,30 @@ void AbandonCatchHandler(void)
     n->flag = 0;
 }
 
-struct Info_001FEC10 {
-    u8 pad[8];
-    void* value;
-    void* type;
-};
-
 void CheckExceptionSpecification(s32 count, void** allowed)
 {
-    Info_001FEC10* info = *(Info_001FEC10**)GetActiveExceptionSlot();
+    ThrownException* info = *(ThrownException**)GetActiveExceptionSlot();
     s32 i;
 
     for (i = 0; i < count; i++) {
-        if (MatchThrownType((Res_001FEA18*)allowed[i], (s32)info->type, (s32)info->value)) {
+        if (MatchThrownType((type_info*)allowed[i], info->f0C, info->f08)) {
             throw;
         }
     }
     try {
         InvokeUnexpectedHandler();
     } catch (...) {
-        if (info != (Info_001FEC10*)__exception_info) {
-            info = (Info_001FEC10*)__exception_info;
+        if (info != (ThrownException*)__exception_info) {
+            info = (ThrownException*)__exception_info;
             for (i = 0; i < count; i++) {
-                if (MatchThrownType((Res_001FEA18*)allowed[i], (s32)info->type, (s32)info->value)) {
+                if (MatchThrownType((type_info*)allowed[i], info->f0C, info->f08)) {
                     throw;
                 }
             }
         }
         const type_info* type = &typeid(bad_exception);
         for (i = 0; i < count; i++) {
-            if (MatchThrownType((Res_001FEA18*)allowed[i], (s32)type, (s32)info->value)) {
+            if (MatchThrownType((type_info*)allowed[i], (s32)type, info->f08)) {
                 throw bad_exception();
             }
         }

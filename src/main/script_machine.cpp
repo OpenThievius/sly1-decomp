@@ -10,7 +10,7 @@
 #include "script_value.h"
 #include "script_builtin.h"
 #include "queued_call.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "vu0.h"
 
 // The script machine's built-in functions (the table D_00259958, which func_00119BB0 calls through,
@@ -3150,7 +3150,7 @@ ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* arg
     if (mask & 8) {
         q8 = (u8*)AllocateBackMemory(n * sizeof(ScriptSampleQuad));
     }
-    SampleAnimationFrameChain((Gr8B*)anim, a, b, (PlacedObject*)from, (PlacedObject*)to, n, (Vec02*)positions, (Mat02*)rotations,
+    SampleAnimationFrameChain((BlendAnimationView*)anim, a, b, (PlacedObject*)from, (PlacedObject*)to, n, (Vec02*)positions, (Mat02*)rotations,
                   (Vec02*)q4, (Vec02*)q8);
     R11B008Node* head = 0;
     R11B008Node* tail = 0;

@@ -27,7 +27,7 @@
 #include "memory_card.h"
 #include "timeline.h"
 #include "value_list_object.h"
-#include "c62.h"
+#include "state_reset_object.h"
 #include "attached_set.h"
 #include "packet_writer.h"
 #include "screen_fade.h"
@@ -347,7 +347,7 @@ struct StateChangeMsg {
     s32 old;
     s32 cur;
 };
-s32 SetGatheredWalkerTargets(World* mgr, s32 a, void* b, C62* self, s32 c);
+s32 SetGatheredWalkerTargets(World* mgr, s32 a, void* b, StateResetObject* self, s32 c);
 void GetStateWalkerCurrentKey(s32 sub, s32* out);
 void ScheduleTempoAgentBeatPress(TempoAgent* p);
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32* c);
@@ -368,7 +368,7 @@ void* MoveMemory(void* dst, void* src, s32 size);
 // An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
 // Moves n bytes of the item list down over a removed item.
 struct MoveItemsDown {
-    static void Of(C62** dst, C62** src, s32 n)
+    static void Of(StateResetObject** dst, StateResetObject** src, s32 n)
     {
         MoveMemory(dst, src, n);
     }
@@ -523,7 +523,7 @@ void AddTempoAgentEntry(TempoAgent* self, AnimationPlayer* a, s32 b);
 void RestartTimeline(Timeline* self);
 void EndTimeline(Timeline* self);
 void RunTimelineEntries(Timeline* self);
-void SetStateAndNotify(C62* self, s32 state);
+void SetStateAndNotify(StateResetObject* self, s32 state);
 s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, void* param2);
 void SetWarpPageMode(WarpPage* self, u32 next);
 void SetWarpCursor(WarpPage* self, s32 a1, s32 a2);
@@ -537,7 +537,7 @@ ObjectLink D_00275B60[8] = {
 // readers pass only its address; byte buffer, size to next label
 u8 g_elementStack[4] = {0};
 // size: s32 read as one word (file_14EE40.cpp and screen_element.cpp test bit 8)
-// size: s32 compared with 1 in file_149398.cpp and 2 in pause_menu.cpp
+// size: s32 compared with 1 in item_column.cpp and 2 in pause_menu.cpp
 s32 D_00275BEC = 0;
 s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };
 f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };

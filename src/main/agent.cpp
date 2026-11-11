@@ -10,10 +10,10 @@
 #include "item_keeper.h"
 #include "flag_table.h"
 #include "node_query.h"
-#include "c62.h"
+#include "state_reset_object.h"
 #include "animation.h"
 #include "attachment.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "owner_message.h"
 #include "anim_curve.h"
 #include "vu0.h"
@@ -1015,7 +1015,7 @@ void FaceAgentTowardGoalPoint(Agent* self)
 
 void SetAgentGoalPoint(Agent* self, void* p);
 void FindNearestAnimationPathTime(f32 c, void* a, Agent* b, void* d, void* e, void* f, s32 g);
-Entry8B* FindEntryByObjectId(void* a, Agent* b);
+BlendSourceEntry* FindEntryByObjectId(void* a, Agent* b);
 
 void UpdateAgentGoal(Agent* self, s32 flag)
 {
@@ -1039,7 +1039,7 @@ void UpdateAgentGoal(Agent* self, s32 flag)
                     break;
                 case 1: {
                     self->f914 = self->f918;
-                    Mover8B* t = FindEntryByObjectId(self->f750, self)->mover;
+                    PoseSource* t = FindEntryByObjectId(self->f750, self)->mover;
                     t->vtbl[0](t, self, self->f914, 1.0f, 0, &q, 0);
                     break;
                 }
@@ -1060,19 +1060,19 @@ void UpdateAgentGoal(Agent* self, s32 flag)
 void IsAgentNearPathEnd(Agent* self, s32* out) { if (self->fA60 && self->f930 >= self->f92C - 2) { *out = 1; return; } *out = 0; }
 
 void CreateAnimationPlayer(void* self, void* a1, s32 a2, void* a3, s32 a4, void* a5, f32 f0, f32 f1);
-void AddAnimationPlayerRecordCallback(void* a0, C62* a1);
+void AddAnimationPlayerRecordCallback(void* a0, StateResetObject* a1);
 s32 GetEffectiveObjectId(Agent* a);
 Attachment* FindPlayerAttachmentByOwner(AnimationPlayer* a0, s32 a1);
 
 void CreateAgentAnimationPlayer(Agent* self)
 {
-    C62* sub = ((C62*)self->fA74);
+    StateResetObject* sub = ((StateResetObject*)self->fA74);
     if (sub->id2DC != 0) {
         s32 pair[2];
         pair[0] = sub->id;
         pair[1] = (s32)self;
         CreateAnimationPlayer((void*)sub->id2DC, self, 1, pair, 1, &self->f754, 0.0f, 1.0f);
-        AddAnimationPlayerRecordCallback(self->f754, ((C62*)self->fA74));
+        AddAnimationPlayerRecordCallback(self->f754, ((StateResetObject*)self->fA74));
         Attachment* node = FindPlayerAttachmentByOwner(self->f754, GetEffectiveObjectId(self));
         if ((void*)node == self->f1EC) {
             node->mode0 = 5;
@@ -1113,7 +1113,7 @@ void UpdateAgentState(Agent* self)
             f32 y = out[1];
             SetAgentFacingAngles(self, out[0], y);
         }
-        ScheduleItemTimeouts(((C62*)self->fA74)->group);
+        ScheduleItemTimeouts(((StateResetObject*)self->fA74)->group);
         break;
     case 4:
     case 5:
@@ -1163,7 +1163,7 @@ void ForceAgentState(Agent* self, s32 mode, s32 value)
 
 void StopAnimationPlayer(AnimationPlayer* p);
 f32 RandomFloatInRange(f32 a, f32 b);
-void SetStateAndNotify(C62* p, s32 z);
+void SetStateAndNotify(StateResetObject* p, s32 z);
 void InitContactPairFlags(void* world, Agent* self);
 
 void LeaveAgentState(Agent* self, s32 mode)
@@ -1193,8 +1193,8 @@ void LeaveAgentState(Agent* self, s32 mode)
             StopAnimationPlayer(self->f754);
             self->f754 = 0;
         }
-        ((C62*)self->fA74)->desc->m18(((C62*)self->fA74), self);
-        SetStateAndNotify(((C62*)self->fA74), 0);
+        ((StateResetObject*)self->fA74)->desc->m18(((StateResetObject*)self->fA74), self);
+        SetStateAndNotify(((StateResetObject*)self->fA74), 0);
         self->fA74 = 0;
         if (mode == 1) {
             self->f914 = self->f918;
@@ -1272,7 +1272,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
         }
         break;
     case 3:
-        if (((C62*)self->fA74)->id2D0 == 2) {
+        if (((StateResetObject*)self->fA74)->id2D0 == 2) {
             CreateAgentAnimationPlayer(self);
         }
         break;
@@ -1647,23 +1647,23 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
         if (msg->source != self->f754) {
             break;
         }
-        C62* obj = (C62*)msg->obj;
+        StateResetObject* obj = (StateResetObject*)msg->obj;
         self->fA74 = obj;
         obj->desc->m17(obj, self);
         self->f72C |= 1;
         self->f730 = (void*)3;
         s32 state;
-        s32 id = ((C62*)self->fA74)->id2E0;
+        s32 id = ((StateResetObject*)self->fA74)->id2E0;
         ItemKeeper* keeper;
         if (id != -1 && (keeper = (ItemKeeper*)self->f720) != 0) {
             if (keeper->f180 == -1) {
                 keeper->f180 = id;
             }
-            state = ((ItemKeeper*)self->f720)->f180 == ((C62*)self->fA74)->id2E0 ? 1 : 2;
+            state = ((ItemKeeper*)self->f720)->f180 == ((StateResetObject*)self->fA74)->id2E0 ? 1 : 2;
         } else {
             state = 2;
         }
-        SetStateAndNotify((C62*)self->fA74, state);
+        SetStateAndNotify((StateResetObject*)self->fA74, state);
         break;
     }
     case 0x16:
@@ -2526,7 +2526,7 @@ void FindWantedItems(ItemKeeper* a0)
     }
 }
 
-// The 48-byte record CreateRecord2505C0 makes for a group of C62 objects: the keeper at +0x2C.
+// The 48-byte record CreateRecord2505C0 makes for a group of StateResetObject objects: the keeper at +0x2C.
 struct ItemTimeoutGroup {
     u8 pad0[0x2C];
     void* keeper;           // 0x2C
@@ -2534,7 +2534,7 @@ struct ItemTimeoutGroup {
 // What GatherAnimationEventObjects hands back for one agent: the objects and their count.
 struct GatheredObjects {
     s32 count;
-    C62** items;
+    StateResetObject** items;
 };
 
 void PushBackMemoryMark(void);
@@ -2563,7 +2563,7 @@ void GroupAnimationEventObjects(ItemKeeper* self)
     for (i = 0; i < self->owned.count; i++) {
         GatheredObjects* e = &arr[i];
         for (j = 0; j < e->count; j++) {
-            C62* node = e->items[j];
+            StateResetObject* node = e->items[j];
             if (node->group == 0) {
                 node->group = CreateRecord2505C0();
                 ((ItemTimeoutGroup*)node->group)->keeper = self;
@@ -2572,7 +2572,7 @@ void GroupAnimationEventObjects(ItemKeeper* self)
                     for (k = i + 1; k < self->owned.count; k++) {
                         GatheredObjects* e2 = &arr[k];
                         for (m = 0; m < e2->count; m++) {
-                            C62* item = e2->items[m];
+                            StateResetObject* item = e2->items[m];
                             if (item->id2E0 == node->id2E0) {
                                 item->group = node->group;
                                 AppendToSmallList(node->group, item);

@@ -21,7 +21,7 @@ splits are taken from other projects or from the prototype
 ## Next
 
 Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-11: US at
-93.25% of code (4,760 of 4,807 functions) and 99.62% of data, PAL at 93.06% of code and 66.89% of data, 47 US
+93.25% of code (4,760 of 4,807 functions) and 99.62% of data, PAL at 93.06% of code and 76.29% of data, 47 US
 functions left, every one with a near miss in `nonmatching/`, the original assembly classified,
 every byte of code in a proved source file, PAL's own game code all defined, and names and types
 well under way. What is still open is the long tail of the matching, the readable names of the
@@ -54,13 +54,17 @@ functions left with their address names, and the disc's data.
    (23,461 bytes left), of which 21,840 are the `.vutext` section's VU microprograms, original
    assembly that counts as matched data like original-assembly functions
    (`config/<version>/original_data.tsv`, docs/ASM_CLASSIFICATION.md): 99.62% of US data counts,
-   1,621 bytes left. PAL links no C, so its data is checked at its counterparts as its
+   1,655 bytes left (the alignment padding between files is the linker's, not C). PAL links no C, so its data is checked at its counterparts as its
    functions are (`tools/version_check.py`, then `tools/data_check.py`, `config/eu/c_data_status.tsv`):
    a global counts for PAL when its bytes, with every pointer translated to PAL's addresses, equal
-   PAL's at its PAL address. On 2026-11-11, 185 of the 240 globals match (288,915 bytes, 62.19% of
-   PAL's data), 34 differ and 21 are absent (all `.bss`, which has no bytes in the file). The 34 are
-   PAL's own bytes (text, jump tables of its own functions, values and tables it changed;
-   docs/VERSIONS.md), none a placement the tools could still derive.
+   PAL's at its PAL address. A global PAL holds differently has a definition of its own, as PAL's
+   functions do (`src/versions/eu/<file>/D_XXXXXXXX.cpp`, built in the shared file's unit in place of the
+   US definition, docs/VERSIONS.md "PAL's own data"). On 2026-11-11, 223 of the 262 globals match
+   (332,568 bytes, 71.59% of PAL's data; 76.29% with the `.vutext` microprograms), 18 differ and 21 are absent (all
+   `.bss`, which has no bytes in the file). 13 PAL globals are defined (8 rows they complete, 1 more
+   they bring closer); the 18 are what needs a PAL function that has no C, a global C++ cannot
+   write (an object with a constructor), tables PAL grew past US's labels, included labels, or the hash tables of `global_tables.cpp`
+   not yet defined (docs/VERSIONS.md lists each with its cause).
 3. **Original assembly.** The functions that were not made from C (system-call stubs, crt0,
    the toolchain's own `.S` routines, the libraries' multimedia routines, frameless VU0 leaves,
    code scheduled by hand) and the linker's leftovers, in game code and in Sony's libraries, are
@@ -88,7 +92,13 @@ functions left with their address names, and the disc's data.
    `global_tables.cpp`; the build proves their place, not where one ends and the next begins).
    The one window file left, `src/lib/001F8000.cpp`, holds the constructor list the linker
    builds. Many proved files are one file between two exact edges that could be several; each
-   commit says which. What is left is splitting those when evidence appears.
+   commit says which. On 2026-11-11 the 26 files still named after their first address were
+   searched for inner edges: five splits are proved by retail (a section start after the
+   linker's padding, a vtable that GCC writes after a file's literals and jump tables, a string
+   literal another object holds), and seven more files are cut where the role plainly changes, each
+   with a head comment saying the edge is not proved and the range it could lie in; 192 files
+   now, 26 of them still named after their first address because their roles interleave or
+   the code shows none.
    A file whose range holds original assembly includes those functions at their place
    (`INCLUDE_ASM`, include/asm_func.h, tools/asm_func.py): `src/main/file_1E5378.cpp`
    (0x1E5378 to 0x1E88D0, five of its 34 functions assembly) is the first. A file is named
@@ -101,7 +111,7 @@ functions left with their address names, and the disc's data.
    `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)). On 2026-11-11, 50 PAL functions
    are left: 49 are the counterparts of functions US has left, and one is a library function
    only PAL has (func_0020A870, 68 bytes). Every game-code function only PAL has is defined.
-   `tools/version_check.py` finds 4,469 C functions matching at their PAL counterparts, 24 with
+   `tools/version_check.py` finds 4,470 C functions matching at their PAL counterparts, 24 with
    no counterpart, and one that differs (func_001366A0, its near miss in `nonmatching/eu/`).
    On 2026-11-07, 96 PAL functions
    are left (62 in game code, 34 in the libraries): two C functions differ at their counterparts
@@ -122,14 +132,15 @@ functions left with their address names, and the disc's data.
    its built-ins, and the views kept for a stated reason. The names come after: a family's
    types, fields and header are renamed in place, and its functions and globals get readable
    names as macros over their address names (`config/names/`, `include/names.h`,
-   [NAMING.md](NAMING.md)), one table per source file. On 2026-11-11, about 563 functions still
-   have only their address name, 6 views are left in game code and 29 in the libraries, and
-   `tools/decls.py` flags 73 declarations, each kept because the definition's type breaks a
-   caller's match (`TransformByMatrixWithW` is declared with three parameter orders, which may
-   be several functions under one name). On 2026-11-07, 4,660 symbols have one;
+   [NAMING.md](NAMING.md)), one table per source file. On 2026-11-11, 153 functions still
+   have only their address name (stripped leftovers whose code shows no role), no views named
+   by address are left in game code and four in the libraries (each kept for a stated reason),
+   and `tools/decls.py` flags 61 declarations, each with a comment saying which caller's match
+   the definition's type would break. On 2026-11-07, 4,660 symbols have one;
    266 game functions do not yet (255 of them original assembly, mostly VU0 routines and
-   linker leftovers, and 11 in C whose role the code does not show yet). Eight class headers
-   keep their ids, and of the views matched functions declared for themselves (`Obj_XXXXXX`,
+   linker leftovers, and 11 in C whose role the code does not show yet). Two class headers
+   keep their ids (c35.h and c52.h, whose classes only forward their draw slot to a
+   base class), and of the views matched functions declared for themselves (`Obj_XXXXXX`,
    `Sub_XXXXXX`, 2,018 of them in game code that morning) 18 are left in game code, each for a
    stated reason (a declaration retail's code needs, data only assembly reads) or a role still
    unclear; the rest are their shared types or local types named by role. The libraries' 176

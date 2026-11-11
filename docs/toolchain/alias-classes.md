@@ -1489,7 +1489,7 @@ CollectMeshHits (2026-11-10):
   each one's mover and the mover's sequence at 0x10 for FindCyclicRangeIndex. Retail keeps the
   mover in $v0 and the sequence in $a0 (`lw v0,4(v0); ... lw a0,16(v0); ... lw a1,8(a0); jal;
   lw a0,4(a0)`); per-call temporaries or locals, local-alloc's, took $v1 and $a3 (and pushed
-  the f7E0 load from $v1 to $a0). One `Mover8B* m` and one `ClipSpan8B* a` assigned for the
+  the f7E0 load from $v1 to $a0). One `PoseSource* m` and one `CyclicRanges* a` assigned for the
   first object and again for the second is EXACT; the mover variable alone reused fixes the
   mover and the f7E0 load but not the sequence (10 lines still differ).
 - **Rule.** A value retail holds in $v0 right after a call's `lw v0,N(v0)`, or in an argument
@@ -2391,7 +2391,7 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   last call loads `$f12` from the yaw's slot, then the pitch's `mov.s $f13` and `move a0` tie in
   sched1 and sched2 (priority 3, both alu); retail issues `$f13` first, which needs the out
   pointer after the floats. Its definition (matrix.cpp) and every other caller (camera,
-  file_149398, file_19E040, file_1A7FE8, hit_count_collider, tint_blend_collider) match with
+  camera_controller, file_1A3AE0, file_1A7FE8, hit_count_collider, tint_blend_collider) match with
   either order, and agent.cpp already declared it floats first, so every declaration now agrees.
 - **Diagnosing it.** Where argument moves of one call are issued in an order no rank explains,
   compare their order in the `.combine` dump with the prototype; the order of a function's own

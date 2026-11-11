@@ -123,7 +123,7 @@ The two functions before it in the file (2026-11-10):
 ### jump.c's copy of a loop test has a life of 2: three constants, two moved (func_00192DD0)
 
 Measured with `-dL` dumps (2026-11-10, the switched collider's segment walk,
-src/main/file_18F988.cpp). Retail's outer loop over the segments holds 1.0 (the walk's guard) and
+src/main/switched_collider.cpp). Retail's outer loop over the segments holds 1.0 (the walk's guard) and
 0.0001 (the length test) in f24 and f23, in that order in the preheader, and loads 5.0 in the
 else arm before the divide.
 
@@ -395,7 +395,7 @@ REGNO_POINTER_FLAG (the rule in "Alias classes": a pointer parameter's base neve
 frame stores; seen in the output, not traced in alias.c), so the read may alias the frame stores:
 sched1 kept the load after the normal's stores, and the body's order, the VU0 registers
 and global-alloc's ranking (every register one too high from the first insn) followed. Typed as a
-pointer (`Cell8B* cell`), the read has the argument's base, never conflicts with a frame store,
+pointer (`GridCell* cell`), the read has the argument's base, never conflicts with a frame store,
 and the whole first loop matches (100 lines to 7). The tell: a word read through a parameter
 scheduled late behind `sqc2 ...(sp)` stores in ours and early in retail; check the parameter's
 type before anything else. The same function needed one `i` for both outer loops (retail keeps
@@ -453,7 +453,7 @@ the curve-window search: four quadratics per curve chosen by `switch (j)` over `
 
 ### An inline's constant parameter is a variable with a life: the strip loop's UNPACK words (func_00166690)
 
-Matched 2026-11-10 (DrawModelPart, src/main/file_15F678.cpp; the form found by worker
+Matched 2026-11-10 (DrawModelPart, src/main/placed_object_model.cpp; the form found by worker
 w14-1536C8, the mechanism read from w15-166690's `-dL` dump). The part drawer's strip loop is
 333 insns in pass 1 and 304 in pass 2 and makes no call (threshold 160, less 3 a move). Retail's
 preheader holds `&D_002623E0` (s8), the constant 1 (t9, both `q.hi = 1` and `count == 1`) and

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Class 0x3A (descriptor D_0021A660, 0x570 bytes), a part with collision that is kept in a list
 // of its own (the one at D_00262708, linked at +0x558). Written for this project from what
-// retail's code does (config/us/classes.tsv; src/main/file_167D68.cpp).
+// retail's code does (config/us/classes.tsv; src/main/target_lists.cpp).
 //
 // Its fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.

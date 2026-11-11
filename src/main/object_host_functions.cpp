@@ -25,16 +25,16 @@
 #include "counted_collider.h"
 #include "lookup_object.h"
 #include "effect_spawner.h"
-#include "c5d.h"
-#include "c60.h"
-#include "c62.h"
+#include "state_walker_group.h"
+#include "scaling_volume.h"
+#include "state_reset_object.h"
 #include "step_sequence.h"
 #include "camera.h"
 #include "transform_object.h"
 #include "object_sub_group.h"
 #include "animation.h"
 #include "state_graph.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "object_pool.h"
 #include "oscillator.h"
 #include "entry_queue.h"
@@ -149,8 +149,8 @@ void ActivateSwitchedColliderUnlessActive(void* o);
 void QueueWalkerActivationOnPlayer(void* x);
 void InvokeNumberedItemCollect(void* p);
 void AddEntryRecordKey(C17* p, s32 a, s32 b);
-void SetC8BObjectVector(C8B* value, f32 x, f32 y, f32 z);
-void SetC8BObjectVectorFlagged(C8B* self, f32 x, f32 y, f32 z);
+void SetAimBlendGridVector(AimBlendGrid* value, f32 x, f32 y, f32 z);
+void SetAimBlendGridVectorFlagged(AimBlendGrid* self, f32 x, f32 y, f32 z);
 s32 AddObjectPoolEntry(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 void EnableObjectPoolEntry(void*,s32);
 void DisableObjectPoolEntry(void*,s32);
@@ -228,7 +228,7 @@ void AppendTimelineKind3Entry(Timeline* self, s32 p, f32 v);
 void AppendTimelineKind4Entry(Timeline* self, s32 p, f32 v);
 void AppendTimelineKind5Entry(Timeline* self, s32 p, f32 v);
 void ClearAttachedSetTrackedNodes(void* o);
-s32 AddStateResetEntry(C62* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 AddStateResetEntry(StateResetObject* self, s32 a1, s32 a2, s32 a3, s32 a4);
 void AddOscillatorXEntry(void*);
 void AddOscillatorYZEntry(void* x);
 void AddOscillatorEntryVectorA(void* self, f32 a, f32 b, f32 c, f32 d);
@@ -424,13 +424,13 @@ ScriptValue* SwapInScriptPlayerStandIn(ScriptValue* ret, Player* obj, s32 unused
 ScriptValue* QueueScriptPlayerWalkerActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
 ScriptValue* QueueScriptPlayerFirstActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
 ScriptValue* QueueScriptPlayerSecondActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
-ScriptValue* SetScriptC8BObjectVector(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args);
-ScriptValue* SetScriptC8BObjectVectorFlagged(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptAimBlendGridVector(ScriptValue* ret, AimBlendGrid* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptAimBlendGridVectorFlagged(ScriptValue* ret, AimBlendGrid* obj, s32 unused, ScriptValue* args);
 ScriptValue* ResetScriptCollectedItems(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args);
 ScriptValue* CollectScriptItem(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptContactListId(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptContactListKind(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* AddScriptStateResetEntry(ScriptValue* ret, C62* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptStateResetEntry(ScriptValue* ret, StateResetObject* obj, s32 unused, ScriptValue* args);
 ScriptValue* SetScriptCurrentTargetFollower(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args);
 ScriptValue* ClearScriptCurrentTargetFollower(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
@@ -447,7 +447,7 @@ ScriptValue* SetScriptStepSequenceCameraMode(ScriptValue* ret, StepSequence* obj
 ScriptValue* AddScriptSequenceExtraTarget(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
 ScriptValue* ChooseScriptStepSequenceState(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
 ScriptValue* ResetScriptStepSequence(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
-ScriptValue* QueueScriptWalkerActivationOnPlayer(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* args);
+ScriptValue* QueueScriptWalkerActivationOnPlayer(ScriptValue* ret, StateWalkerGroup* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptOscillatorXEntry(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptOscillatorYZEntry(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptOscillatorEntryVectorA(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
@@ -458,7 +458,7 @@ ScriptValue* AddScriptPathFollowerEntry(ScriptValue* ret, PathFollower* obj, s32
 ScriptValue* AddScriptPathFollowerActiveEntry(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args);
 ScriptValue* ResetScriptPathFollower(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args);
 ScriptValue* TestScriptPointAgainstObjectShape(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* TestScriptPointInsideFaceTreeObject(ScriptValue* ret, C60* obj, s32 unused, ScriptValue* args);
+ScriptValue* TestScriptPointInsideFaceTreeObject(ScriptValue* ret, ScalingVolume* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptSeekingAgentObject(ScriptValue* ret, SeekingAgent* obj, s32 unused, ScriptValue* args);
 ScriptValue* StartScriptC24ObjectPath(ScriptValue* ret, C24* obj, s32 unused, ScriptValue* args);
 ScriptValue* ResetScriptEntryQueue(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
@@ -2791,7 +2791,7 @@ ScriptValue* QueueScriptPlayerSecondActivation(ScriptValue* ret, Player* obj, s3
     return ret;
 }
 
-ScriptValue* SetScriptC8BObjectVector(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptAimBlendGridVector(ScriptValue* ret, AimBlendGrid* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -2804,14 +2804,14 @@ ScriptValue* SetScriptC8BObjectVector(ScriptValue* ret, C8B* obj, s32 unused, Sc
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetC8BObjectVector(obj, o0, o1, o2);
+    SetAimBlendGridVector(obj, o0, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* SetScriptC8BObjectVectorFlagged(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptAimBlendGridVectorFlagged(ScriptValue* ret, AimBlendGrid* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -2824,7 +2824,7 @@ ScriptValue* SetScriptC8BObjectVectorFlagged(ScriptValue* ret, C8B* obj, s32 unu
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetC8BObjectVectorFlagged(obj, o0, o1, o2);
+    SetAimBlendGridVectorFlagged(obj, o0, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2900,7 +2900,7 @@ ScriptValue* AddScriptContactListKind(ScriptValue* ret, ContactListObject* obj, 
     return ret;
 }
 
-ScriptValue* AddScriptStateResetEntry(ScriptValue* ret, C62* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptStateResetEntry(ScriptValue* ret, StateResetObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds4 kinds;
@@ -3186,7 +3186,7 @@ ScriptValue* ResetScriptStepSequence(ScriptValue* ret, StepSequence* obj, s32 un
     return ret;
 }
 
-ScriptValue* QueueScriptWalkerActivationOnPlayer(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* args)
+ScriptValue* QueueScriptWalkerActivationOnPlayer(ScriptValue* ret, StateWalkerGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3379,7 +3379,7 @@ ScriptValue* TestScriptPointAgainstObjectShape(ScriptValue* ret, TransformObject
     return ret;
 }
 
-ScriptValue* TestScriptPointInsideFaceTreeObject(ScriptValue* ret, C60* obj, s32 unused, ScriptValue* args)
+ScriptValue* TestScriptPointInsideFaceTreeObject(ScriptValue* ret, ScalingVolume* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Quad4 vec;

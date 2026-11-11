@@ -73,10 +73,9 @@ s32 WaitIpuDecodeDone(MpegDecoder* o)
     return result;
 }
 
-struct Ctx_0020E100;
-s32 DecodeIpuVariableLength(Ctx_0020E100* self, s32 kind);
+s32 DecodeIpuVariableLength(MpegDecoder* self, s32 kind);
 
-s32 DecodeIpuMotionCode(Ctx_0020E100* self)
+s32 DecodeIpuMotionCode(MpegDecoder* self)
 {
 	return DecodeIpuVariableLength(self, 3);
 }
@@ -622,16 +621,17 @@ void SendIpuCommand(MpegDecoder* obj, u32 value)
     obj->f818 = D_0027B040[index];
 }
 
-struct Dev_0020F0F0;
-
-struct Obj_0020F0F0 {
+// func_0020F0F0 is declared on its own type, not MpegDecoder: the other functions declare
+// WaitIpuCommandDone as void on MpegDecoder (retail's registers want that), and one name cannot
+// return both. Its only field is the handle at 0x858.
+struct IpuWaitView {
     u8 pad_000[0x858];     // 0x000
-    s32 dev;               // 0x858
+    MpegHandle* handle;    // 0x858
 };
 
-s32 RunMpegStallCallback(Dev_0020F0F0* d);
+s32 RunMpegStallCallback(MpegHandle* d);
 
-s32 WaitIpuCommandDone(Obj_0020F0F0* self)
+s32 WaitIpuCommandDone(IpuWaitView* self)
 {
     s32 n = 0;
     if ((s32)(*(volatile u32*)0x10002010 & 0x80004000) == (s32)0x80000000) {
@@ -639,7 +639,7 @@ s32 WaitIpuCommandDone(Obj_0020F0F0* self)
             s32 c = n;
             n = c + 1;
             if (c >= 0x1389) {
-                RunMpegStallCallback((Dev_0020F0F0*)self->dev);
+                RunMpegStallCallback(self->handle);
                 n = 0;
             }
         } while ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000);
@@ -648,11 +648,7 @@ s32 WaitIpuCommandDone(Obj_0020F0F0* self)
     return 0x80000000;
 }
 
-struct Dev_0020F198;
-struct Ctx_0020F198 { u8 pad[0x858]; Dev_0020F198* dev; };
-s32 RunMpegStallCallback(Dev_0020F198* a);
-
-s64 WaitIpuCommandResult(Ctx_0020F198* p) {
+s64 WaitIpuCommandResult(MpegDecoder* p) {
     s32 i = 0;
     s64 v = *(volatile s64*)0x10002000;
     if (v < 0 && (*(volatile u32*)0x10002010 & 0x4000) == 0) {
@@ -660,7 +656,7 @@ s64 WaitIpuCommandResult(Ctx_0020F198* p) {
             s32 old = i;
             i++;
             if (old >= 5001) {
-                RunMpegStallCallback(p->dev);
+                RunMpegStallCallback(p->handle);
                 i = 0;
             }
             v = *(volatile s64*)0x10002000;
@@ -819,11 +815,10 @@ s32 ReadIpuBits(MpegDecoder* obj, s32 a1)
     return v;
 }
 
-struct Obj_0020F708 { u8 pad[4]; };
-void WaitIpuCommandDone(Obj_0020F708* self); // stays void: retail returns a value, but declared so func_0020DF10 and func_0020F708 differs in registers
-void SkipIpuBits(Obj_0020F708* self, s32 mode);
-s32 PeekIpuBits(Obj_0020F708* self, s32 mode);
-void FindNextStartCode(Obj_0020F708* self)
+void WaitIpuCommandDone(MpegDecoder* self); // stays void: retail returns a value, but declared so func_0020DF10 and func_0020F708 differs in registers
+void SkipIpuBits(MpegDecoder* self, s32 mode);
+s32 PeekIpuBits(MpegDecoder* self, s32 mode);
+void FindNextStartCode(MpegDecoder* self)
 {
     WaitIpuCommandDone(self);
     volatile u32* reg = (volatile u32*)0x10002020;
@@ -852,17 +847,18 @@ s32 ReadSliceQuantiser(MpegDecoder* self)
     return 0;
 }
 
-struct Self_0020F7F0 { u8 pad000[0x150]; s32 f150; u8 pad154[0x828 - 0x154]; s64 f828; s64 f830; u8 pad838[0x858 - 0x838]; s32 f858; };
-struct Loc_0020F7F0 { s32 a; s64 b; s64 c; };
+// The record func_0020F7F0 hands the callback to ask for the picture's position: a kind, then two
+// words the callback fills in.
+struct MpegPositionQuery { s32 kind; s64 first; s64 second; };
 
-void FindNextStartCode(Self_0020F7F0* self);
-s32 ReadIpuBits(Self_0020F7F0* self, s32 mask);
-void ReadSequenceHeader(Self_0020F7F0* self);
-void ReadGroupOfPicturesHeader(Self_0020F7F0* self);
-void ReadPictureHeader(Self_0020F7F0* self);
-void RunMpegCallback(s32 a0, Loc_0020F7F0* out); // stays void: retail returns a value, but declared so func_0020F7F0 differs in registers
+void FindNextStartCode(MpegDecoder* self);
+s32 ReadIpuBits(MpegDecoder* self, s32 mask);
+void ReadSequenceHeader(MpegDecoder* self);
+void ReadGroupOfPicturesHeader(MpegDecoder* self);
+void ReadPictureHeader(MpegDecoder* self);
+void RunMpegCallback(MpegHandle* a0, MpegPositionQuery* out); // stays void: retail returns a value, but declared so func_0020F7F0 differs in registers
 
-s32 ParseMpegHeaders(Self_0020F7F0* self)
+s32 ParseMpegHeaders(MpegDecoder* self)
 {
     u32 v;
     for (;;) {
@@ -884,34 +880,25 @@ s32 ParseMpegHeaders(Self_0020F7F0* self)
         continue;
     c100:
         {
-            Loc_0020F7F0 loc;
+            MpegPositionQuery loc;
             ReadPictureHeader(self);
-            loc.a = 5;
-            loc.b = -1;
-            loc.c = -1;
-            RunMpegCallback(self->f858, &loc);
-            self->f830 = loc.c;
-            self->f828 = loc.b;
+            loc.kind = 5;
+            loc.first = -1;
+            loc.second = -1;
+            RunMpegCallback(self->handle, &loc);
+            self->f830 = loc.second;
+            self->f828 = loc.first;
             return self->f150;
         }
     }
 }
 
-struct Obj_0020F900 {
-    u8 pad000[0x150];
-    s32 f150;
-    s32 f154;
-    s32 f158;
-    s32 f15C;
-    s32 f160;
-};
+s32 ReadIpuBits(MpegDecoder* self, s32 bits);
+void SkipExtraInformation(MpegDecoder* self);
+void ReadExtensionsAndUserData(MpegDecoder* self);
+s32 UpdatePictureOrder(MpegDecoder* self, s32 a1);
 
-s32 ReadIpuBits(Obj_0020F900* self, s32 bits);
-void SkipExtraInformation(Obj_0020F900* self);
-void ReadExtensionsAndUserData(Obj_0020F900* self);
-s32 UpdatePictureOrder(Obj_0020F900* self, s32 a1);
-
-void ReadPictureHeader(Obj_0020F900* self)
+void ReadPictureHeader(MpegDecoder* self)
 {
     s32 first = ReadIpuBits(self, 10);
     self->f150 = ReadIpuBits(self, 3);
@@ -929,37 +916,36 @@ void ReadPictureHeader(Obj_0020F900* self)
     UpdatePictureOrder(self, first);
 }
 
-struct Self_0020F9C8;
+// The handlers of the extensions are copied out of their table as a packed head of five 8-byte
+// words and the last one, as the original's struct copy was.
+typedef void (*ExtensionHandlerFn)(MpegDecoder* self);
 
-typedef void (*Fn_0020F9C8)(struct Self_0020F9C8* self);
-
-struct __attribute__((packed)) Pack_0020F9C8 {
+struct __attribute__((packed)) ExtensionHandlerHead {
     u64 a[5];
 };
 
-struct Tbl_0020F9C8 {
-    struct Pack_0020F9C8 p;
-    Fn_0020F9C8 last;
+struct ExtensionHandlerCopy {
+    struct ExtensionHandlerHead p;
+    ExtensionHandlerFn last;
 };
 
-union TblU_0020F9C8 {
-    struct Tbl_0020F9C8 t;
-    Fn_0020F9C8 fn[11];
+union ExtensionHandlerTable {
+    struct ExtensionHandlerCopy t;
+    ExtensionHandlerFn fn[11];
 };
 
-void FindNextStartCode(struct Self_0020F9C8* self);
-void SkipIpuBits(struct Self_0020F9C8* self, s32 a1);
-s32 ReadIpuBits(struct Self_0020F9C8* self, s32 a1);
-s32 PeekIpuBits(struct Self_0020F9C8* self, s32 a1);
+void FindNextStartCode(MpegDecoder* self);
+void SkipIpuBits(MpegDecoder* self, s32 a1);
+s32 ReadIpuBits(MpegDecoder* self, s32 a1);
+s32 PeekIpuBits(MpegDecoder* self, s32 a1);
 
 // An entry of the table of extension handlers below.
 typedef void (*Fn_Table)();
 struct Ctx_20FAF0;
-struct Self_0020FF08;
 struct Bits_210000;
 void ReadPictureCodingExtension(Ctx_20FAF0* c);
 void ReadQuantiserMatrixExtension(MpegDecoder *self);
-void ReadPictureDisplayExtension(Self_0020FF08* self);
+void ReadPictureDisplayExtension(MpegDecoder* self);
 void ReadCopyrightExtension(Bits_210000* self);
 // The handlers of the extensions by their 4-bit id, the sequence's in src/lib/mpeg_decoder.cpp.
 void ReadSequenceExtension();
@@ -970,11 +956,11 @@ void RejectSpatialScalableExtension();
 void RejectTemporalScalableExtension();
 extern const Fn_Table D_00250430[12] = { (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadSequenceExtension, (Fn_Table)ReadSequenceDisplayExtension, (Fn_Table)ReadQuantiserMatrixExtension, (Fn_Table)ReadCopyrightExtension, (Fn_Table)RejectSequenceScalableExtension, (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadPictureDisplayExtension, (Fn_Table)ReadPictureCodingExtension, (Fn_Table)RejectSpatialScalableExtension, (Fn_Table)RejectTemporalScalableExtension, 0 };
 
-void ReadExtensionsAndUserData(struct Self_0020F9C8* self)
+void ReadExtensionsAndUserData(MpegDecoder* self)
 {
     s32 kA = 0x1B2;
-    union TblU_0020F9C8 t;
-    t.t = *(struct Tbl_0020F9C8*)((u8*)D_00250430);
+    union ExtensionHandlerTable t;
+    t.t = *(struct ExtensionHandlerCopy*)((u8*)D_00250430);
     s32 kB = 0x1B5;
     s32 r;
 
@@ -1032,12 +1018,10 @@ void ReadPictureCodingExtension(Ctx_20FAF0* c)
     ReadIpuBits(c, 8);
 }
 
-struct Obj_0020FCE0;
+s32 ReadIpuBits(MpegDecoder* self, s32 a1);
+void SkipIpuBits(MpegDecoder* self, s32 a1);
 
-s32 ReadIpuBits(Obj_0020FCE0* self, s32 a1);
-void SkipIpuBits(Obj_0020FCE0* self, s32 a1);
-
-void SkipExtraInformation(Obj_0020FCE0* self)
+void SkipExtraInformation(MpegDecoder* self)
 {
     while (ReadIpuBits(self, 1))
         SkipIpuBits(self, 8);
@@ -1068,22 +1052,10 @@ s32 UpdatePictureOrder(MpegDecoder* self, s32 a1)
     return v0;
 }
 
-struct Obj_0020FDA0 {
-    u8 pad000[0xE8];
-    s32 fE8;
-    u8 padEC[0x1A4 - 0xEC];
-    s32 f1A4;
-    s32 f1A8;
-    u8 pad1AC[0x84C - 0x1AC];
-    s32 f84C;
-    s32 f850;
-    s32 f854;
-};
+s32 ReadIpuBits(MpegDecoder* self, s32 bits);
+void ReadExtensionsAndUserData(MpegDecoder* self);
 
-s32 ReadIpuBits(Obj_0020FDA0* self, s32 bits);
-void ReadExtensionsAndUserData(Obj_0020FDA0* self);
-
-void ReadGroupOfPicturesHeader(Obj_0020FDA0* self)
+void ReadGroupOfPicturesHeader(MpegDecoder* self)
 {
     self->fE8 = 0;
     self->f84C = self->f850 + 1;
@@ -1134,22 +1106,9 @@ void ReadQuantiserMatrixExtension(MpegDecoder *self)
     ReportMpegError(self, "load_chroma_non_intra_quantizer_matrix == 1");
 }
 
-struct Self_0020FF08 {
-    u8 pad0[0x13C];
-    s32 f13C;
-    u8 pad1[0x174 - 0x140];
-    s32 f174;
-    s32 f178;
-    u8 pad2[0x184 - 0x17C];
-    s32 f184;
-    u8 pad3[0x18C - 0x188];
-    s32 a[3];
-    s32 b[3];
-};
+s32 ReadIpuBits(MpegDecoder* self, s32 k);
 
-s32 ReadIpuBits(Self_0020FF08* self, s32 k);
-
-void ReadPictureDisplayExtension(Self_0020FF08* self)
+void ReadPictureDisplayExtension(MpegDecoder* self)
 {
     s32 n;
     s32 i;
@@ -1162,9 +1121,9 @@ void ReadPictureDisplayExtension(Self_0020FF08* self)
         n = (self->f184 != 0) ? 3 : 2;
     }
     for (i = 0; i < n; i++) {
-        self->a[i] = ReadIpuBits(self, 0x10);
+        self->centreHorizontal[i] = ReadIpuBits(self, 0x10);
         ReadIpuBits(self, 1);
-        self->b[i] = ReadIpuBits(self, 0x10);
+        self->centreVertical[i] = ReadIpuBits(self, 0x10);
         ReadIpuBits(self, 1);
     }
 }
@@ -1337,12 +1296,12 @@ s32 SelectPictureBuffer(MpegDecoder* p, s32 flag)
     o->f38 = p->f188;
     o->f3C = p->f178;
     o->f40 = p->f184;
-    o->f44 = p->f18C;
-    o->f48 = p->f190;
-    o->f4C = p->f194;
-    o->f50 = p->f198;
-    o->f54 = p->f19C;
-    o->f58 = p->f1A0;
+    o->f44 = p->centreHorizontal[0];
+    o->f48 = p->centreHorizontal[1];
+    o->f4C = p->centreHorizontal[2];
+    o->f50 = p->centreVertical[0];
+    o->f54 = p->centreVertical[1];
+    o->f58 = p->centreVertical[2];
     o->f5C = p->f148;
     o->f60 = p->f14C;
     return ok;
@@ -1809,12 +1768,13 @@ void ConvertLargePictureColours(Self_211090* self, s32 addr, s32 size)
     RemoveDmaHandler(3, id);
 }
 
-struct Xfer_00211240 { u32 size; u32 addr; };
+// What is left of the colour conversion's input to send: its size and where it continues.
+struct PendingInput { u32 size; u32 addr; };
 
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
 
-s32 ContinueColourConversionInput(s32 unused, Xfer_00211240* p)
+s32 ContinueColourConversionInput(s32 unused, PendingInput* p)
 {
     *(volatile u32*)0x1000E010 = 0x10;
     if (p->size == 0) {

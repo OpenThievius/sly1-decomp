@@ -14,12 +14,10 @@ ASM_FUNC(func_001F9EE8);
 
 ASM_FUNC(func_001F9EF8);
 
-struct Words_001F9F08 { s32 w[1]; };
-
-s32 CopyKernelWordsSecondPatch(Words_001F9F08* dst, Words_001F9F08* src, u32 bytes)
+s32 CopyKernelWordsSecondPatch(s32* dst, s32* src, u32 bytes)
 {
-    s32* d = (s32*)dst;
-    s32* s = (s32*)src;
+    s32* d = dst;
+    s32* s = src;
     u32 n = bytes >> 2;
     u32 i;
     for (i = 0; i < n; i++) {

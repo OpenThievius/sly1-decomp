@@ -2,7 +2,7 @@
 // SIZE 368/376, checked 2026-11-11
 // DECLS (2026-11-11, w28-nmdecls): CreateLockSemaphore now s32 (defined value; callers read v0): neutral, code 84/94; the function does not call it.
 // NEAR (2026-11-08, night-gamec): registers: retail keeps the point count in s6 and -1 in s7 (swapped here) and copies each link index to v1 before its multiply
-// In the context of its file, src/main/file_1E08F8.cpp: its declarations before the function, bodies cut.
+// In the context of its file, src/main/file_1E2420.cpp: its declarations before the function, bodies cut.
 #include "common.h"
 #include "asm_func.h"
 #include "on_off_object.h"

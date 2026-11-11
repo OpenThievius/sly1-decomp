@@ -9,7 +9,7 @@
 #include "list_iter.h"
 #include "vu0.h"
 #include "transform_object.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "game_clock.h"
 
 extern f32 g_gameTime[];
@@ -142,7 +142,7 @@ struct AimPlayerItem {
 // The animation player the aim keeps at Player+0x2244.
 struct AimPlayer {
     u8 pad0[8];
-    Gr8B* anim;             // 0x08
+    BlendAnimationView* anim;             // 0x08
     u8 pad0C[0x14 - 0x0C];
     f32 time;               // 0x14
     f32 speed;              // 0x18
@@ -157,7 +157,7 @@ struct AimSlotObject { AimSlotFn* vt; };
 
 struct AimSoundSource { u8 pad0[0xAC]; s32 fAC; };
 struct AimSoundPoint { u8 pad0[0x54]; s32 f54; };
-struct AimTarget { u8 pad0[0x3E4]; Gr8B* f3E4; };
+struct AimTarget { u8 pad0[0x3E4]; BlendAnimationView* f3E4; };
 
 void StartSoundEffect(s32 id, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void TeleportStateWalker(void* p, s32 n);
@@ -234,7 +234,7 @@ void SetPlayerAimMode(Player* self, s32 state)
         anim = self->f101C;
         break;
     case 0: {
-        Gr8B* g = ((AimTarget*)self->f21C4)->f3E4;
+        BlendAnimationView* g = ((AimTarget*)self->f21C4)->f3E4;
         anim = g;
         sound = 13;
         speed = 0.0f;

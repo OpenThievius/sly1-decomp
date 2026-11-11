@@ -1,0 +1,21 @@
+symbol	name	evidence
+func_00149398	SetCameraControllerOwner	stores its argument in owner (+0x00) of a controller
+func_001493A0	IsTopCameraController	returns whether the owner's stack[0].ctl is itself
+func_001493B8	SetCameraControllerValue	stores its argument in a camera controller's word at +0x08 (ResetCamera calls it)
+func_001493C0	UpdateIdleCameraController	the every-frame slot (m04) of the base controller table D_00217398: does nothing
+func_001493C8	GetCameraControllerTargetPoint	returns a 16-byte point: from the target at 0x5C (func_001920B0), else the controlled object's position at +0x140 with D_00261BF8 added to z, else the point at +0x40 of the object D_00261990 holds
+func_00149458	GetTargetCameraControllerEyePoint	original assembly: writes a point that DeactivateTargetCameraController and UpdateTargetCameraController pass to func_00144938 with the target point (GetCameraControllerTargetPoint) after it
+func_00149508	StartCameraSounds	starts sound 0x71 into the camera's record at +0x48 and sound 0x70 into the one at +0x4C, and sets +0x44 to 1 (func_00175170 calls it with g_camera)
+func_001495E8	PushStackValue	appends a value to the counted array at +0x38 (up to 4) of a controller
+func_00149610	PopStackValue	removes and returns the last value of the counted array, -1 when empty
+func_00149638	PeekStackValue	returns the last value of the counted array without removing it, -1 when empty
+func_00149660	InitTargetCameraController	set-up of the D_002173B0 controller: SetCameraControllerOwner, an empty value stack with 0 pushed (PushStackValue), the rate divisor 10 and the numbers 0.5 and -1
+func_001496C0	ActivateTargetCameraController	slot m00 of D_002173B0 (it has become the top): takes the camera's angles, its zoom (+0x1C8) and near distance (+0x1E4) to give back later, aims at the target point and sets the near distance to 49
+func_00149760	UpdateTargetCameraController	original assembly: the every-frame slot (m04) of D_002173B0
+func_0014A7B8	DeactivateTargetCameraController	slot m01 of D_002173B0 (it has stopped being the top): stops its two sound records, places the camera at the eye and target points and gives back the zoom and the near distance ActivateTargetCameraController kept
+func_0014A888	InitFrameCameraController	set-up of the D_002173C8 controller: SetCameraControllerOwner and the identity frame (g_identityMatrix) at +0x20
+func_0014A8D0	ActivateFrameCameraController	slot m00 of D_002173C8: points the camera (func_00144B70) at +0x370 of the target of the camera stack's first entry
+func_0014A8F8	UpdateFrameCameraController	original assembly: the every-frame slot (m04) of D_002173C8
+func_0014AA90	ActivateValueCameraController	slot m00 of D_002173E0: stores its argument in the controller's word at +0x08
+func_0014AA98	DeactivateValueCameraController	slot m01 of D_002173E0: clears the controller's word at +0x08
+func_0014AAA0	UpdateValueCameraController	original assembly: the every-frame slot (m04) of D_002173E0

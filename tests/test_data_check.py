@@ -12,6 +12,7 @@ import check  # noqa: E402
 import data_check  # noqa: E402
 import elf  # noqa: E402
 import progress  # noqa: E402
+import version_src  # noqa: E402
 
 
 class FakeElf:
@@ -138,6 +139,75 @@ class TableTests(unittest.TestCase):
         status = {"A": ("00210010", 8, "match", ""), "B": ("00210020", 4, "differs", ""), "C": ("-", 4, "absent", "")}
         with mock.patch.object(data_check, "read_status", lambda: status):
             self.assertEqual(progress.c_data("eu"), [(0x210010, 8)])
+
+
+class OwnDataTests(unittest.TestCase):
+    """PAL's own definition of a global (src/versions/eu/<file>/D_XXXXXXXX.cpp)."""
+
+    SHARED = (
+        '#include "common.h"\n'
+        "extern s32 D_00200010[4];\n"
+        "void func_00100010(void) { D_00200010[0] = 1; }\n"
+        "// a comment; with a semicolon\n"
+        "s32 D_00200010[4] = { 1, 2,\n"
+        "                       3, 4 };\n"
+        "INCLUDE_DATA(D_00200020);\n"
+        "INCLUDE_ASM(func_00100030);\n"
+        "s32 D_00200030 = 5;\n"
+    )
+
+    def test_the_definition_is_found_and_the_declaration_is_not(self):
+        start, end = version_src.data_span(self.SHARED, "D_00200010")
+        self.assertEqual(self.SHARED[start:end], "s32 D_00200010[4] = { 1, 2,\n                       3, 4 };")
+        with self.assertRaises(version_src.VersionSourceError):
+            version_src.data_span("extern s32 D_00200010[4];\n", "D_00200010")
+
+    def test_an_extern_with_an_initial_value_is_a_definition(self):
+        text = 'extern s32 D_00200010[2];\nextern const char D_00200010[2] = "a;";\n'
+        start, end = version_src.data_span(text, "D_00200010")
+        self.assertEqual(text[start:end], 'extern const char D_00200010[2] = "a;";')
+
+    def test_a_definition_in_a_function_body_is_not_the_globals(self):
+        with self.assertRaises(version_src.VersionSourceError):
+            version_src.data_span("void f(void) {\n    s32 D_00200010 = 1;\n}\n", "D_00200010")
+
+    def test_a_global_is_replaced_in_the_unit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            shared, own = Path(tmp) / "shared.cpp", Path(tmp) / "D_00200010.cpp"
+            shared.write_text(self.SHARED)
+            own.write_text("// PAL\ns32 D_00200010[4] = { 9, 8, 7, 6 };\n")
+            text = version_src.unit_text(shared, {"D_00200010": own})
+        self.assertIn("{ 9, 8, 7, 6 };", text)
+        self.assertNotIn("3, 4 };", text)
+        self.assertIn("extern s32 D_00200010[4];", text)
+        self.assertIn("s32 D_00200030 = 5;", text)
+
+    def test_the_unit_that_checks_data_keeps_the_data_it_includes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            shared = Path(tmp) / "shared.cpp"
+            shared.write_text(self.SHARED)
+            plain = version_src.unit_text(shared, {})
+            kept = version_src.unit_text(shared, {}, keep_data=True)
+        self.assertNotIn("INCLUDE_DATA", plain)
+        self.assertIn("INCLUDE_DATA(D_00200020);", kept)
+        self.assertNotIn("INCLUDE_ASM", kept)
+
+    def test_only_a_global_name_is_data(self):
+        self.assertTrue(version_src.DATA_NAME.match("D_00200010"))
+        self.assertFalse(version_src.DATA_NAME.match("D_eu_00200010"))
+        self.assertFalse(version_src.DATA_NAME.match("func_00200010"))
+
+    def test_a_definition_of_its_own_is_stale_when_the_shared_file_lacks_it(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            shared = Path(tmp) / "shared.cpp"
+            shared.write_text("extern s32 D_00200010;\n")
+            own = Path(tmp) / "D_00200010.cpp"
+            own.write_text("s32 D_00200010 = 1;\n")
+            with mock.patch.object(version_src, "data_overrides", lambda key: {"D_00200010": own}), \
+                    mock.patch.object(version_src, "version_of", lambda path: ("eu", shared)):
+                problems = data_check.own_problems()
+        self.assertEqual(len(problems), 1)
+        self.assertIn("which its shared file does not", problems[0])
 
 
 if __name__ == "__main__":

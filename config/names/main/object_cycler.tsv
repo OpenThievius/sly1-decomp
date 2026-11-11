@@ -1,0 +1,17 @@
+symbol	name	evidence
+func_0015AAE0	InitObjectCycler	slot 0 of the 0x40 class: runs the base set-up, sets state -1, loads its ranges from the doubleword tables D_00262180..D_002621C0 and appends itself to the world list at +0x1C48
+func_0015AC08	LoadObjectCycler	slot 10 of the 0x40 class: runs the base load, finds the objects of kinds 0x23C..0x24B (and 0x24D..0x254 in mode 1) into its object arrays and appends itself to the world list in mode 1
+func_0015AD80	CopyObjectCycler	slot 9 of the 0x40 class: keeps the doubleword at 0x5DC across the base copy func_001BA130, then in mode 0 starts the effect handle and otherwise leaves the world list
+func_0015AE38	SetObjectCyclerHandle	slot 20 of the 0x40 class: in mode 0 stops its effect handle (func_001BF788) when flag is set and starts it again (func_001BFCD8) when not
+func_0015AEB0	StartObjectCycler	slot 16 of the 0x40 class: registers its table, draws the first check and step times in mode 1, enters its start state and sets 0x64C to twice its radius
+func_0015AF50	StepObjectCycler	original assembly: slot 0x80 of class 0x40
+func_0015B128	UpdateObjectCycler	slot 17 of the 0x40 class: moves the state on when its end time passes, steps the shown index (cycling in mode 0, back and forth in mode 1) and advances state 6
+func_0015B4D0	DrawObjectCycler	slot 37 of the 0x40 class: builds a parameter block with func_00125B70, scales it by a clamped curve of the state time and passes it to the shown object's method slot 24
+func_0015B720	HandleObjectCyclerObjectEvent	slot 45 of the 0x40 class: if not already in state 1 it enters state 1 and forwards the message's values to its group object's method 0x1B
+func_0015B7B8	SetObjectCyclerState	returns at once when the state at 0x554 is already the one given; otherwise runs the leaving case of the old state and the entering case of the new one (jump tables jtbl_0024A1D0/jtbl_0024A1F0) and stores it; StartObjectCycler passes the start state, UpdateObjectCycler and HandleObjectCyclerObjectEvent pass 0, 1, 5 or -1
+func_0015BC78	SendObjectCyclerMessage	when the receiver exists and the next-send time has passed, sends it a kind-6 message with the source's world position (or the cycler's) and the cycler's velocity negated with z cleared, then draws the next time from the delay range
+func_0015BD48	FindObjectCyclerGroundPoint	finds the world's listed frame item nearest the cycler (through descriptor slot 10), converts that point to world space and casts down from it with ColliderSpan queries, returning whether a point was found
+func_0015BEF0	ChooseObjectCyclerNextState	returns state 6 when the cycler is within f64C of its anchor, 0 (with a new check time) when any contact row is occupied, else clears the cycler's state and returns 5
+func_0015BFC0	IsActiveColliderNearObjectCycler	tests whether the point half a velocity ahead of the active switched collider lies within f684 of the cycler
+func_0015C058	IsCyclerGroundCandidate	the filter IsObjectCyclerUnsupported passes: rejects an object with flag bit 43 or the cycler's own +0x50, else accepts it when bit 0 of its +0x2CC is clear
+func_0015C0A0	IsObjectCyclerUnsupported	at most every 0.05 s: looks for a span object under the cycler, between its position and that point lowered by +0x64C (FindNearestSpanObject), and returns 1 when there is none (UpdateObjectCycler calls it)

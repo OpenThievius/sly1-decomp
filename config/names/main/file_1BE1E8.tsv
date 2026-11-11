@@ -1,0 +1,84 @@
+symbol	name	evidence
+func_001BE1E8	UnloadStagedBank	stops the voice D_00274728, unloads the bank D_0027473C (func_0011D450), waits for the IOP commands to finish and clears the state D_00274720, the voice and the handle
+func_001BE268	EnsureSoundBankLoaded	loads bank n (key from D_00244F40, via func_0011D140) unless it is the current D_00274740, unloads the previous bank with func_0011D450, and on first load fills the per-entry flags D_006047D0 for every table entry of that bank; returns the bank handle
+func_001BE4A8	EnsureSoundEntryBankLoaded	passes the bank index stored in the first word of entry idx of the sound table D_00245020 to func_001BE268
+func_001BE4D8	InitSoundParams	allocates a 0x24-byte record with func_0018D5C0 and fills it with defaults: id -1, 3000.0, 300.0, 1.0, zeroes and -1.0 (the same 3000/300/1.0 triple func_001BFCD8 callers pass as ranges and volume)
+func_001BE568	IsSoundEntryAvailable	loads the entry's bank first when D_006047B0 says it is not loaded, then returns D_006047D0[idx], the flag func_001BE268 sets from func_0011D760 or D_00246838
+func_001BE5D8	ClearStreamVoicePending	clears D_00274730; func_001BE728 registers it as the completion callback of its stream voice
+func_001BE5E8	IsStreamVoiceLocked	returns D_00274744, the lock func_001BE5F8 sets
+func_001BE5F8	StartLockedStreamVoice	unless the lock D_00274744 is set: stops the old stream voice, decodes the record's key words (xor of two pairs), starts a stream voice with func_0011E048, stores it in D_0027472C, sets the lock to 1 and ramps channels 1, 0 and 3 of func_001C06A0 to 0.5
+func_001BE708	StopLockedStreamVoice	clears the lock D_00274744 and stops the stream voice with func_001BE998
+func_001BE728	OpenKeyRecord	decodes two words of a KeyRecord (wordA^maskA, wordB^maskB), and when the second is non-zero opens a handle with func_0011E048, stores it in D_0027472C and registers func_001BE5D8 for it
+func_001BE810	CheckStreamVoicePending	0 when the stream voice is locked or absent; 1 while g_streamVoicePending is set; otherwise queues IOP command 0x2E for g_streamVoice and returns 0
+func_001BE860	ApplySoundRecordVolumePan	passes the record's voice func_0011D798 with volume f50*1024 and an angle derived from f54 ((f54+2)*179.5, minus 359 when f54 is positive)
+func_001BE8F8	PlaySoundAndApplyVolumePan	starts a sound with StartSoundEffect, applies the record's volume/pan, and clears the handle again when the caller passed no handle slot
+func_001BE980	HasStreamVoice	returns whether D_0027472C is nonzero
+func_001BE998	StopStreamVoice	does nothing when locked or without a voice; otherwise stops D_0027472C with func_0011D600, spins while func_0011D708 says it is busy, then clears D_0027472C and D_00274730
+func_001BEA28	PauseStreamVoice	sends g_streamVoice IOP command 0x13 (func_0011D640) when there is one; PushStackElement and SetTextPanelOpen call it when a screen opens
+func_001BEA50	ResumeStreamVoice	sends g_streamVoice IOP command 0x14 (func_0011D670) when there is one; PopStackElement and SetTextPanelOpen call it when a screen closes
+func_001BEA78	StopStagedBankVoice	in state 3 stops the voice D_00274728 with func_0011D600, clears it and goes back to state 2
+func_001BEAC8	StoreStagedBankHandle	load callback: stores the bank handle in D_0027473C and sets state D_00274720 to 2 (loaded), or clears the record and state to 0 when the handle is 0
+func_001BEB10	RequestStagedBank	decodes the record's key and, unless it is the same record as D_00274724 and already staged, unloads the old bank (func_001BE1E8) and starts an asynchronous bank load with func_0011D2A8 whose callback is func_001BEAC8; state D_00274720 becomes 1
+func_001BEC58	PlayStagedBank	requests the record, waits for the load with func_0011CE30 and func_001F6C20, then in state 2 starts a voice on the bank with func_0011D598 into D_00274728 and sets state 3
+func_001BECF8	SilenceVolumeChannel2	SetVolumeChannelFactor(2, 1, 0.0); RestoreVolumeChannel2 sets it back to 1.0
+func_001BED20	RestoreVolumeChannel2	SetVolumeChannelFactor(2, 1, 1.0), undoing SilenceVolumeChannel2
+func_001BED48	PauseStagedBankVoice	sends g_stagedBankVoice IOP command 0x13 (func_0011D640); SetPauseMenuOpen and SetWarpMenuOpen call it as they open
+func_001BED70	ResumeStagedBankVoice	sends g_stagedBankVoice IOP command 0x14 (func_0011D670); SetPauseMenuOpen and SetWarpMenuOpen call it as they close
+func_001BED98	AllocateSoundLevelEntry	pops a 12-byte entry from the free list at world+0x1BB8, zeroes it and appends it to the list at world+0x1BC4
+func_001BEDF8	RemoveSoundLevelEntry	removes the entry from the list at world+0x1BC4 and returns it to the free list at world+0x1BB8
+func_001BEE48	ClearSoundLevels	walks the list at world+0x1BC4 removing every entry, then applies 0x14 with func_0011D928 and zeroes D_002748EC, D_00274738 and D_00274734
+func_001BEEF8	PushSoundLevel	allocates an entry with func_001BED98, stores the argument clamped to -20..0x6B in it and raises the current level D_00274734 to it (keeping the old in D_00274738) when it is higher or the list was empty
+func_001BEF88	RecomputeSoundLevel	sets D_00274734 to 0 when the list at world+0x1BC4 is empty, else to the maximum value (first word) of its entries, starting from -20
+func_001BF048	ReleaseSoundLevel	removes the entry and, when its value was the current level D_00274734, recomputes the level, clears D_002748EC when non-negative, applies cur+0x14 with func_0011D928 and issues func_001C06A0(7,1,1.0)
+func_001BF0D8	RemoveSoundLevelAndRecompute	removes the entry and, when its value was the current level, stores it in D_00274738 and recomputes with func_001BEF88 (no apply, unlike func_001BF048)
+func_001BF130	InitSoundSystem	clears D_00604790 (0x1C bytes of bank handles), calls func_0011CBB8 (InitIopCommandChannels), loads bank 0 with func_001BE268, enables disc access with func_0011DF58 and issues the fixed func_0011D520, func_0011D558 and func_0011E3A0 set-up calls
+func_001BF1F0	IsSoundEmitterUpdateDisabled	returns the word D_00274748 (never written but its initial 0); UpdateSoundEmitters returns at once when it is nonzero
+func_001BF200	ComputeSoundVolumeAndPan	from a position's distance to the camera (+0x40) between the inner and outer ranges gives the volume (full inside, none beyond) and the pan from its direction along the camera's side axis (+0x90); ComputeSoundAttenuation and UpdateSoundEmitters call it
+func_001BF2E0	MeasureCameraWeightedDistance	the listener function ChooseSoundListenerFunction picks for one or two camera controllers: the distance between two points with the part along the camera's axis (+0x80) shrunk by the factor at +0x478
+func_001BF398	MeasureListenerDistance	the listener function ChooseSoundListenerFunction picks by default: the plain distance between two points
+func_001BF3D0	GetSoundListenerPosition	returns the +0x140 position of the active switched collider (func_001925F0) when its slot 78 says so, else the vector at D_00261990+0x40
+func_001BF428	ComputeSoundRecordDoppler	for a record with a source object (+0x30) and a factor (+0x5C) stores at +0x60 a pitch offset (func_0011E538) from the two bodies' velocities (func_001278A8) along the line from the source to the active switched collider; clears it otherwise
+func_001BF578	ChooseSoundListenerFunction	returns func_001BF398 or func_001BF2E0 depending on a count read by func_00149638 from the structure at D_00261990+0x460 (1 or 2 picks func_001BF2E0)
+func_001BF5E0	ComputeSoundListenerFactor	fetches the listener position (func_001BF3D0) and calls through the function pointer func_001BF578 chooses with it and the argument, returning a float
+func_001BF620	ComputeSoundAttenuation	with a position computes a factor with func_001BF5E0 and hands it to func_001BF200 together with the output volume and flag; without a position writes the default volume and 0
+func_001BF6B8	AllocateSoundRecord	pops a record from the free list at world+0x1BA0 (func_001B5EA0), zeroes its 0x90 bytes and appends it to the active list at world+0x1BAC
+func_001BF718	ClearSoundRecordHandle	clears the back-pointer field (+0xC) of the record the slot points to and then the slot itself
+func_001BF728	FreeSoundRecord	clears the caller's handle word, sets the record id to -1, removes it from the active list world+0x1BAC and returns it to the free list world+0x1BA0
+func_001BF788	StopSoundRecord	with n == 0 stops the voice at +0x18 (func_0011D600), otherwise starts a fade of the voice scaled by n*0.24 (func_0011D860); then frees the record with func_001BF728
+func_001BF7F8	SetSoundRecordPitch	stores the float at +0x58, computes base + f58*1524 + offset clamped to -0x8000..0x7FFF and passes it to func_0011D810 (SetVoicePitch) for the record's voice
+func_001BF8E8	SetSoundRecordVolume	stores the new base volume at +0x14, scales the attenuated volume at +0x50 by the same ratio and re-applies it with func_001BE860
+func_001BF920	InitSoundRecord	clears a 0x90-byte record keeping +0x64, links it to its parent handle, stores the unique id from D_0027474C, the ranges, volume, pitch and random byte (func_001EAA70), copies the position and calls func_001BF620 for the attenuated volume and pan
+func_001BFAF8	StartSoundRecordVoice	after a record is built: stores the entry index and bank handle, starts a voice with func_0011D598 (func_001BE4A8 handle, entry word b) when its volume is nonzero and its delay negative, then applies pitch (func_001BF7F8) and volume/pan (func_001BE860); id -2 uses the stream voice D_0027472C
+func_001BFBF8	ScheduleAmbientSoundRecord	sets the record's next start (+0x74) to the clock plus a random delay between +0x78 and +0x7C and, without a source object, places it at a random angle and a distance between +0x80 and +0x84 around the listener (GetSoundListenerPosition)
+func_001BFCD8	StartSoundEffect	starts a sound by entry index into D_00245020: skips it when the entry's bank is nonzero and differs from the world's +0x1D70, builds and links a tracked record (func_001BF6B8, func_001BF920) when a handle or position is given, otherwise starts an untracked voice with func_0011D598
+func_001BFFC8	MarkSoundRecordIfIdMatches	callback taking a record pointer and an id packed in a 64-bit key: when guard is 0 and the record's id (+4) still equals the id, sets the record's flag at +0x48 to 1
+func_001C0000	SetVolumeChannel6Factors	sets factors 0, 2 and 3 of volume channel 6 to the value, and factor 1 too when the flag is set
+func_001C0070	UpdateSoundEmitters	walks the world's emitter list, stops or restarts each entry's voice (func_0011D600 / func_0011D598) by its distance to the listener against its range, sets its volume and pan, and steps a music level ramp D_00274738 toward its target
+func_001C05D0	SetIopVolumeChannel8	sends volume channel 8 to the IOP as the value times 1024 (SetIopVolumeChannel)
+func_001C0600	ApplyVolumeChannelFactors	multiplies the 11 factors of one column of D_00274838, clamps the product to 0..1 and passes it times 1024 to SetIopVolumeChannel for that column
+func_001C06A0	SetVolumeChannelFactor	stores a float at [row][column] of D_00274838 and re-applies that column with ApplyVolumeChannelFactors
+func_001C06D8	ResetVolumeChannelFactors	copies the default table D_00274758 over D_00274838 (0xB0 bytes), sets channel 8 to full and re-applies columns 0..3
+func_001C0760	SilenceVolumeChannel3	sets factor 1 of volume channel 3 to 0.0 when the flag is set and to 1.0 otherwise
+func_001C0790	ApplySoundOptionFlag	passes whether its argument is nonzero to SetIopSoundOptionFlag; ResetVolumeChannelFactors, ResumeAtSavedLevel and ActivatePauseMenuSelection call it with the save data's option bit 0x40
+func_001C07B0	StopAllSoundsAndWait	stops the world's sound records, ClearSoundLevels, ClearCachedVoiceParams, then polls the IOP commands until none are left and syncs the disc read
+func_001C0808	StopWorldSoundRecords	walks the world's list at +0x1BAC calling StopSoundRecord on each object with item, then PollIopCommands
+func_001C08B0	PushIopChannel2Setting	while fewer than 4 pairs are stacked, applies a setting to IOP channel 2 (func_0011E328/func_0011E360) and pushes the pair on the stack at +0x2328
+func_001C0950	PopIopChannel2Setting	drops the top pair of the stack at +0x2328 (keeping one) and re-applies the pair below it to IOP channel 2
+func_001C09D8	SetIopChannel2Setting	applies a setting to IOP channel 2 and stores the pair at +0x2328 with the flag at +0x2348 set
+func_001C0A50	AddWorldSoundEntry	appends a key with two constant 8-byte values to the world's array of up to 16 entries at +0x1D84 (count at +0x1D80)
+func_001C0AB8	SetLastWorldSoundEntryFromPoint	sets the two values of the world's last sound entry (+0x1D84, count at +0x1D80) to 8000 - 50 y and 8000 - 50 x of the point
+func_001C0B08	SetLastWorldSoundEntryValues	copies an 8-byte pair into the world's last sound entry at its offset 4 (AddWorldSoundEntry appends the entries)
+func_001C0B38	StartWorldSoundEntries	calls StartSoundEffect once per entry of the array at +0x1D84 with the entry's key and its two stored 8-byte values
+func_001C0C08	SetCachedVoiceParam	stores a value in D_006053E0[index] and calls SetVoiceParam only when it differs from the cached one
+func_001C0C50	GetCachedVoiceParam	returns D_006053E0[index]
+func_001C0C68	RefreshCachedVoiceParam	reloads D_006053E0[i] from GetVoiceParam
+func_001C0CB0	ClearCachedVoiceParams	calls SetCachedVoiceParam(i, 0) for i in 0..7 (StopAllSoundsAndWait calls it)
+func_001C0CF0	StepBiasedRandomWalk	adds a table entry (picked by the random value 0..5 and the current D_00274830) to D_00274830 and returns it
+func_001C0EC0	PlaySoundWithWanderingPitch	when D_002748EC is set, starts sound 0x77 with a pitch of StepBiasedRandomWalk's value over 12
+func_001C0F30	InitIdLinkedObject	slot 0 of class 0x66 (StartIdLinkedObject is its start): InitPlacedObject, then the link id -1 at 0x32C, the colour 0x80808080 at 0x2D0 and its default sizes
+func_001C0FF0	StartIdLinkedObject	slot 16 of class 0x66: StartPlacedObject, then SetObjectLinkId with its linkId, then slot 3
+func_001C1030	SetObjectLinkId	lets go of the old link (func_001B6438), looks the new id up with func_0015A418, links to what it finds with func_001B6290 and stores the id in linkId
+func_001C10A8	InitListedPointObject	slot 0 of class 0x81: InitObject, then sets the float at 0x58 to the largest float
+func_001C10D8	RegisterListedPointObject	slot 6 of class 0x81: RegisterObject, then adds itself to the world's list at +0x1C84
+func_001C1110	UnregisterListedPointObject	slot 7 of class 0x81: UnregisterObject, then removes itself from the world's list at +0x1C84
+func_001C1148	CopyListedPointObject	slot 9 of class 0x81: saves the kept 8 bytes, runs the base copy func_001830D8 and restores them

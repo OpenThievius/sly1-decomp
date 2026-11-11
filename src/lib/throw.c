@@ -82,18 +82,19 @@ s32 SelectArgumentIfTypeNamesEqual(void* self, s32 v, s32 fallback)
 
 void func_001FD988(void) {}
 
-typedef struct Node_001FD990 {
+/* The 0x18-byte block the runtime allocates zeroed, its word at 4 pointing to its own 0x10. */
+typedef struct ExceptionBlock {
     s32 f0;
     u8* f4;
     s32 f8;
     s32 fc;
     s32 f10;
     s32 f14;
-} Node_001FD990;
+} ExceptionBlock;
 
-Node_001FD990* AllocateZeroedNodeOrTerminate(void)
+ExceptionBlock* AllocateZeroedNodeOrTerminate(void)
 {
-    Node_001FD990* p = (Node_001FD990*)EnterRuntimeLock(0x18);
+    ExceptionBlock* p = (ExceptionBlock*)EnterRuntimeLock(0x18);
     if (p == 0) {
         RunTerminateHook();
     }
@@ -273,35 +274,39 @@ none:
     return 0;
 }
 
-typedef struct Span_001FDEB0 {
+/* An entry of a handler span table: the code range it covers, its handler and the matcher's
+ * argument (0 for a cleanup). */
+typedef struct HandlerSpan {
     u32 lo;
     u32 hi;
     s32 value;
     void* cb;
-} Span_001FDEB0;
-typedef struct Ctx_001FDEB0 {
+} HandlerSpan;
+/* The record the context's word at 8 points to: the function that matches a handler. */
+typedef struct HandlerMatcher {
     void* fn;
-} Ctx_001FDEB0;
-typedef struct Cur_001FDEB0 {
+} HandlerMatcher;
+/* The pending record the context's word at 0xC points to: its count is the key to resume from. */
+typedef struct PendingHandlerRecord {
     s32 pad0;
     s32 count;
-} Cur_001FDEB0;
+} PendingHandlerRecord;
 
-s32 FindHandlerInSpanTable(s32 a0, void* a1, Ctx_001FDEB0* a2, s32 a3, s32* a4)
+s32 FindHandlerInSpanTable(s32 a0, void* a1, HandlerMatcher* a2, s32 a3, s32* a4)
 {
     s32 result = 0;
     s32 key = a0;
-    Span_001FDEB0* base;
+    HandlerSpan* base;
     s32 idx;
     s32 r;
 
     *a4 = 1;
     if (a1 != 0) {
         idx = 0;
-        base = (Span_001FDEB0*)((u8*)a1 + 8);
+        base = (HandlerSpan*)((u8*)a1 + 8);
         if (a3 != 0) {
             idx = ((u8*)a0 - (u8*)base) >> 4;
-            key = ((Cur_001FDEB0*)a0)->count - 1;
+            key = ((PendingHandlerRecord*)a0)->count - 1;
             if (base[idx].lo != 0xFFFFFFFF) {
                 idx++;
             }
@@ -312,7 +317,7 @@ s32 FindHandlerInSpanTable(s32 a0, void* a1, Ctx_001FDEB0* a2, s32 a3, s32* a4)
             if ((u32)key >= base[idx].lo && (u32)key < base[idx].hi) {
                 if (base[idx].cb != 0) {
                     if (a2->fn != 0) {
-                        r = ((s32 (*)(Ctx_001FDEB0*, void*, void*))a2->fn)(a2, base[idx].cb, a1);
+                        r = ((s32 (*)(HandlerMatcher*, void*, void*))a2->fn)(a2, base[idx].cb, a1);
                         if (r != 0) {
                             if (result == 0) {
                                 result = base[idx].value;
@@ -406,7 +411,7 @@ void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_,
     Pc_1FE198* startPc = pc;
     s32 res = 0;
     s32 pending = obj->fC != 0;
-    Ctx_001FDEB0* a8 = (Ctx_001FDEB0*)obj->f8;
+    HandlerMatcher* a8 = (HandlerMatcher*)obj->f8;
     s32 cleanup;
     s32 savedRes;
     Pc_1FE198* savedPc;
