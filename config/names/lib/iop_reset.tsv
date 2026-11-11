@@ -6,5 +6,7 @@ func_001F9D60	DisableInterrupts	original assembly: clears the status register's 
 func_001F9DA8	EnableInterrupts	original assembly: sets the status register's interrupt enable again
 func_001F9DC0	CreateLibrarySemaphores	creates the two semaphores D_002771E4 and D_002771E8 (InitKernelLibrary calls it first)
 func_001F9E08	FindKernelWord	returns the address of the first word equal to a value from 0x80000000 on
+func_001F9E40	RunKernelWordSearchSyscall	system call stub 0x83; InstallKernelWordSearch calls it with FindKernelWord right after installing that function as call 0x83 and uses its result
 func_001F9E50	InstallKernelWordSearch	installs FindKernelWord as the system call D_002771D8 names (0x83)
+func_001F9E90	SetSystemCallHandlerForWordSearch	the library's own copy of system call stub 0x74, which InstallKernelWordSearch calls with the call number D_002771D8 gives (0x83) and the handler FindKernelWord
 func_001F9EA8	InitKernelLibrary	runs the kernel library's set-ups: its semaphores, InstallKernelWordSearch, the three kernel patch installers and StartRequestThread (the program's entry func_00100008 calls it)

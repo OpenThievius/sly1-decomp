@@ -1,3 +1,7 @@
 symbol	name	evidence
+func_001F9EE8	SetSystemCallHandlerSecondPatch	the second patch installer's own copy of system call stub 0x74, called by InstallSecondKernelPatch to install the table D_00277998's handlers by call number
+func_001F9EF8	CopyKernelWordsSyscallSecondPatch	the second patch installer's own copy of system call stub 0x5A, called by InstallSecondKernelPatch to copy its code to 0x80074000
+func_001F9F08	CopyKernelWordsSecondPatch	copies bytes / 4 words from src to dst and returns 0; the second patch installer installs it as system call 0x5A and copies its code through it
+func_001F9F40	QueryPatchedHandlerSecondPatch	the second patch installer's own copy of system call stub 0x5B, called by InstallSecondKernelPatch with a call number whose result goes back to the 0x74 stub
 func_001F9F50	IsSecondKernelPatchNeeded	writes the system configuration word back with bits 13 to 15 set to 1 (WriteSystemConfig), reads it again (ReadSystemConfig), restores the original and returns whether the field came back 0 (InstallSecondKernelPatch's test)
 func_001F9FB8	InstallSecondKernelPatch	when IsSecondKernelPatchNeeded passes, copies D_002771F0 to 0x80074000 and sets the system calls D_00277998 lists (InitKernelLibrary calls it)

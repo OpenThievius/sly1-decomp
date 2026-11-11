@@ -1,6 +1,9 @@
 symbol	name	evidence
+func_001F6900	Syscall00	system call stub 0x00; nothing in retail calls it, so the name is its number
 func_001F6910	SetVideoModeSyscall	system call stub 0x02; the graphics library's GS reset func_00201A18 calls it with the interlacing, video mode and field mode it keeps
 func_001F6920	ExitProgramSyscall	system call stub 0x04; ExitProgram calls it with the exit status after the TLB set-up
+func_001F6930	Syscall08	system call stub 0x08; nothing in retail calls it, so the name is its number
+func_001F6940	Syscall0C	system call stub 0x0C; nothing in retail calls it, so the name is its number
 func_001F6950	AddInterruptHandler	system call stub 0x10, which installs a handler for an interrupt cause and returns its id; InitDisplay and InitRenderFrames install their handlers with it before EnableInterruptCause
 func_001F6960	RemoveInterruptHandler	system call stub 0x11; the GS reset func_00201A18 removes a handler by cause and id with it before DisableInterruptCause
 func_001F6970	AddDmaHandler	system call stub 0x12 with a cause, handler and argument; InitCommandChannel installs its DMA-channel 5 handler func_001FA6B0 with it
@@ -11,29 +14,48 @@ func_001F69B0	DisableInterruptCauseSyscall	system call stub 0x15; only the wrapp
 func_001F69C0	EnableDmaInterruptSyscall	system call stub 0x16; only the wrapper EnableDmaInterrupt calls it
 func_001F69D0	DisableDmaInterruptSyscall	system call stub 0x17; only the wrapper DisableDmaInterrupt calls it
 func_001F69E0	ScheduleAlarm	system call stub 0xFC, which arms a timed callback; the CD/DVD library's wait func_00202D30 and the memory card library's wait func_00209B38 call it with a delay and a handler that wakes them
+func_001F69F0	SyscallFromInterrupt1A	system call stub -0x1A, the interrupt-time form of call 0x1A; nothing in retail calls it
+func_001F6A00	SyscallFromInterruptFE	system call stub -0xFE, the interrupt-time form of call 0xFE; nothing in retail calls it
 func_001F6A10	MakeThread	system call stub 0x20; StartBackgroundJob, CreateRenderThread and StartRequestThread pass it a record of entry point, stack, stack size and priority and keep the id it returns
 func_001F6A20	RunThread	system call stub 0x22; the same callers start the thread they made with it, passing its argument
 func_001F6A30	EndOwnThread	system call stub 0x24; RunBackgroundJob ends its own thread with it when the job is done
+func_001F6A40	SyscallFromInterrupt26	system call stub -0x26, the interrupt-time form of call 0x26; nothing in retail calls it
 func_001F6A50	SetThreadPriority	system call stub 0x29; CreateRenderThread and StartRequestThread change a thread's priority with it
+func_001F6A60	SyscallFromInterrupt2A	system call stub -0x2A, the interrupt-time form of call 0x2A; nothing in retail calls it
 func_001F6A70	RotateReadyThreads	system call stub 0x2B; RunRequestThread carries out a request of kind 1 with it
+func_001F6A80	SyscallFromInterrupt2E	system call stub -0x2E, the interrupt-time form of call 0x2E; nothing in retail calls it
 func_001F6A90	GetCurrentThreadId	system call stub 0x2F; EnterRecursiveLock compares its result with the lock's last owner
 func_001F6AA0	QueryThreadStatus	system call stub 0x30; the CD/DVD library's func_002030C0 and func_002033D8 read their thread's status into a record with it
 func_001F6AB0	SleepCurrentThread	system call stub 0x32; the memory card library's wait func_00209B38 sleeps on it until its alarm wakes it
 func_001F6AC0	WakeThread	system call stub 0x33; RunRequestThread carries out a request of kind 0 with it
 func_001F6AD0	WakeThreadFromInterrupt	system call stub -0x34, the interrupt-time form of 0x33; QueueThreadRequest calls it
+func_001F6AE0	SyscallFromInterrupt36	system call stub -0x36, the interrupt-time form of call 0x36; nothing in retail calls it
 func_001F6AF0	PauseThread	system call stub 0x37; RunRequestThread carries out a request of kind 2 with it
+func_001F6B00	SyscallFromInterrupt3A	system call stub -0x3A, the interrupt-time form of call 0x3A; nothing in retail calls it
+func_001F6B10	Syscall3E	system call stub 0x3E; nothing in retail calls it, so the name is its number
 func_001F6B20	NewSemaphore	system call stub 0x40; CreateLockSemaphore and every IOP client pass it a record of count, maximum and initial count and keep the id it returns
 func_001F6B30	FreeSemaphore	system call stub 0x41; BindRemoteService and the file client delete the semaphores they made for one request with it
 func_001F6B40	PostSemaphore	system call stub 0x42; LeaveRecursiveLock and SubmitRenderFrame signal a semaphore with it
 func_001F6B50	PostSemaphoreFromInterrupt	system call stub -0x43, the interrupt-time form of 0x42; the reply handlers HandleRemoteCallReply and HandleFileReply wake their waiter with it
 func_001F6B60	AwaitSemaphore	system call stub 0x44; BeginRenderFrame, EnterRecursiveLock and RunRequestThread wait on a semaphore with it
 func_001F6B70	TrySemaphore	system call stub 0x45; the CD/DVD and memory card libraries take their command semaphores with it without waiting
+func_001F6B80	SyscallFromInterrupt46	system call stub -0x46, the interrupt-time form of call 0x46; nothing in retail calls it
 func_001F6B90	WriteSystemConfig	system call stub 0x4A; func_001F9F50 writes back the kernel word it read with ReadSystemConfig
 func_001F6BA0	ReadSystemConfig	system call stub 0x4B; func_001F9F50 reads a kernel word with it and checks a field
+func_001F6BB0	Syscall4E	system call stub 0x4E; nothing in retail calls it, so the name is its number
+func_001F6BC0	Syscall52	system call stub 0x52; nothing in retail calls it, so the name is its number
+func_001F6BD0	WriteTlbEntrySyscall	system call stub 0x56, the public copy of the call the TLB set-up func_001FAA00 makes through its file-local copy with an index, a page mask, EntryHi and two EntryLo words
+func_001F6BE0	SyscallFromInterrupt5A	system call stub -0x5A, the interrupt-time form of call 0x5A; nothing in retail calls it
+func_001F6BF0	Syscall5D	system call stub 0x5D; nothing in retail calls it, so the name is its number
+func_001F6C00	Syscall5F	system call stub 0x5F; nothing in retail calls it, so the name is its number
+func_001F6C10	Syscall62	system call stub 0x62; nothing in retail calls it, so the name is its number
 func_001F6C20	SyncDataCache	system call stub 0x64; the IOP clients, PollIopCommands and PlayStagedBank call it with 0 before handing buffers to DMA, and the first patch installer with 0 and 2 after copying code
+func_001F6C30	SyscallFromInterrupt67	system call stub -0x67, the interrupt-time form of call 0x67; nothing in retail calls it
 func_001F6C40	StopIopDma	system call stub 0x6B; SendIopReset calls it before it sends the reset command
+func_001F6C50	Syscall6C	system call stub 0x6C; nothing in retail calls it, so the name is its number
 func_001F6C60	ReadGsInterruptMask	system call stub 0x70; the graphics library's func_00202058 and func_00202120 read the GS interrupt mask with it
 func_001F6C70	WriteGsInterruptMask	system call stub 0x71; the GS reset func_00201A18 and func_00202058 write the GS interrupt mask with it
+func_001F6C80	Syscall72	system call stub 0x72; nothing in retail calls it, so the name is its number
 func_001F6C90	GetIopDmaStatus	system call stub 0x76; WriteIopRingBlock and the pad library poll a transfer's id with it until it finishes
 func_001F6CA0	StartIopDma	system call stub 0x77; WriteIopRingBlock, SendIopReset, the pad library and SendCommandPacket pass it a list of transfers to the IOP and keep the id it returns
 func_001F6CB0	StartIopDmaFromInterrupt	system call stub -0x77, the interrupt-time form of 0x77; SendCommandPacket calls it when asked from an interrupt handler
@@ -41,8 +63,10 @@ func_001F6CC0	ArmIopDmaChain	system call stub 0x78; InitCommandChannel calls it 
 func_001F6CD0	ArmIopDmaChainFromInterrupt	system call stub -0x78; the command channel's interrupt handler func_001FA6B0 re-arms the receive chain with it
 func_001F6CE0	WriteIopRegister	system call stub 0x79; InitCommandChannel and SendIopReset write a register shared with the IOP (0x80000000, 0x80000001, ...) with it
 func_001F6CF0	ReadIopRegister	system call stub 0x7A; InitCommandChannel, SendIopReset and IsIopResetDone read a register shared with the IOP with it
+func_001F6D00	Syscall7B	system call stub 0x7B; nothing in retail calls it, so the name is its number
 func_001F6D10	CallDebugService	system call stub 0x7C; PrintToDebugConsole passes it request 0x10 and a pointer to the line
 func_001F6D20	QueryMemorySize	system call stub 0x7F; the TLB set-up func_001FA9C0 compares its result with 0x2000000
+func_001F6D30	SetUpTlbSyscall	system call stub 0x82; SetUpTlbForMemory calls it instead of the C TLB set-up when QueryMemorySize does not report 0x2000000
 func_001F6D40	DisableInterruptCause	runs DisableInterruptCauseSyscall (0x15) on a cause, between DisableInterrupts and EnableInterrupts when the status register's bit 16 is set; the GS reset func_00201A18 calls it
 func_001F6DA8	EnableInterruptCause	runs EnableInterruptCauseSyscall (0x14) on a cause the same way; InitDisplay and InitRenderFrames call it after AddInterruptHandler
 func_001F6E10	DisableDmaInterrupt	runs DisableDmaInterruptSyscall (0x17) on a channel the same way; ShutDownCommandChannel and the colour conversion's set-ups call it

@@ -1,2 +1,3 @@
 symbol	name	evidence
+func_001FAC00	ResumeFromSavedContext	original assembly: calls the function whose address is stored at address 0 on a stack at 0x1000, then runs system call -0x54, restores the registers and special registers saved at D_0062A540 and returns from the exception; its table entry 0x1FAC40 is the restoring half
 func_001FAE18	RunConstructorsOnce	runs the walk func_001FAD68 over the constructor list D_0027B130 the first time (RunMainLoop calls it)

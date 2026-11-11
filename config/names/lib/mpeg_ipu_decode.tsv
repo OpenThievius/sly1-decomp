@@ -1,18 +1,49 @@
 symbol	name	evidence
 func_0020DEE8	SetIpuMpeg1Mode	sets or clears bit 23 of the IPU's control register 0x10002010, the MPEG-1 mode, as the sequence header says
 func_0020DF10	WaitIpuDecodeDone	waits for the IPU's block decode, running the decoder's callback of kind 1 while its input runs dry, refreshes the bit window and reports "Error code detected(BDEC)" and resets the IPU on an error
+func_0020E100	DecodeIpuMotionCode	decodes one value with the IPU's variable-length table 3 (the motion vector's dmvector code, which ReadMotionVector reads after each component)
+func_0020E120	ComputeDualPrimeVectors	for a frame picture (mode 3) or a field, turns a vector and a signed difference into two or four derived vectors by half and three halves of the difference, rounded toward zero, plus the vector
+func_0020E2A8	ReadMacroblockAddressIncrement	reads the macroblock address increment with the IPU's table 0, adding 33 for each escape code and skipping the stuffing code, and reports an invalid code
 func_0020E3B8	DecodeAllMacroblocks	decodes every macroblock of a picture (half of them for a field) with DecodeSliceMacroblocks, then adds the residuals, reporting "= Skip to the next picture =" on an error
+func_0020E4C0	ReadSliceStart	finds the next start code, checks it is a slice code (0x101 to 0x1AF), reads the slice's quantiser and address increment and gives the first macroblock's index
 func_0020E5F0	DecodeSliceMacroblocks	decodes macroblocks up to a count, reading each slice's start and each macroblock's address increment, and returns 1 to 3 when it has to stop
+func_0020E7E0	HandleSkippedMacroblock	sets up a skipped macroblock's motion fields by the picture structure and reports "skiped macroblock in I picure is not allowed" for an intra picture
+func_0020E8A0	DecodeMacroblock	reads a macroblock's type, motion type, quantiser and motion vectors by the picture's coding and sends the IPU the command that decodes its blocks (DecodeSliceMacroblocks calls it)
+func_0020ED48	ApplyMotionVectorDelta	adds a decoded motion code and residual to a motion vector component, wrapping it into the range of the vector size and halving it first and doubling it after for half-resolution
+func_0020EDD0	ReadFieldMotionVector	reads a motion vector of a macroblock in the MPEG-2 layout: a field select bit before each of the vector's two halves for field motion, copying the vector for the other half for frame motion
+func_0020EF70	ReadMotionVector	reads a motion vector's two components with the IPU's table 2 (with the residual bits when the size is non-zero), applies each with ApplyMotionVectorDelta and optionally a dmvector code
 func_0020F0C0	SendIpuCommand	writes a command to the IPU's command register 0x10002000 and records what its kind leaves in the bit window (D_0027B040)
 func_0020F0F0	WaitIpuCommandDone	waits while the IPU is busy, running the stall callback every 5000 polls
+func_0020F198	WaitIpuCommandResult	waits while the IPU's command register 0x10002000 reads negative and no error is set, running the stall callback every 5001 polls, and returns the register
 func_0020F248	DecodeIpuVariableLength	waits for the IPU, then sends it a variable-length decode command of a table and reads the decoded value
 func_0020F3C0	PeekIpuBits	returns the next n bits of the IPU's bit stream without consuming them
 func_0020F4C8	SkipIpuBits	sends the IPU a command that consumes n bits and refreshes the bit window
 func_0020F5B8	ReadIpuBits	returns the next n bits of the IPU's bit stream and consumes them
 func_0020F708	FindNextStartCode	aligns the IPU's bit stream to a byte and skips to the next start code prefix 0x000001
+func_0020F788	ReadSliceQuantiser	reads a slice's 5-bit quantiser scale and skips the extra slice information bytes
 func_0020F7F0	ParseMpegHeaders	reads start codes and their headers: a sequence header (0x1B3), a group of pictures (0x1B8), a picture (0x100), until the sequence's end (0x1B7)
 func_0020F900	ReadPictureHeader	reads a picture header: its temporal reference, coding type, delay and the forward and backward codes of P and B pictures
 func_0020F9C8	ReadExtensionsAndUserData	reads the extensions and user data after a header, dispatching each extension through the table D_00250430
+func_0020FAF0	ReadPictureCodingExtension	reads the picture coding extension's four 4-bit vector sizes, the intra DC precision, the picture structure and the flags of the picture's coding, setting the IPU's control register bits
+func_0020FCE0	SkipExtraInformation	skips bytes of extra information while the bit before each is set
+func_0020FD28	UpdatePictureOrder	adds the picture header's temporal reference to the group of pictures' base to get the picture's order number, raised to the highest seen
 func_0020FDA0	ReadGroupOfPicturesHeader	reads a group of pictures header: its time code, closed and broken flags
+func_0020FE40	ReadQuantiserMatrixExtension	reads the quantiser matrix extension's four load flags, loading the intra and non-intra matrices with the IPU's commands and reporting the chroma matrices as unsupported
+func_0020FF08	ReadPictureDisplayExtension	reads the picture display extension's offsets, one to three pairs of a 16-bit horizontal and vertical offset by the picture structure and flags
+func_00210000	ReadCopyrightExtension	reads and discards the copyright extension: its flags, identifier and the three numbers of 20 and 22 bits
 func_00210090	DecodePictureData	picks the output picture by the picture structure (reporting "odd number of field pictures" or "unknown picture sutructure") and decodes its macroblocks with DecodeAllMacroblocks
+func_00210160	OutputPictureIfDecoded	when its flag is set, outputs the current picture by its structure with OutputFramePicture or OutputFieldPicturePair, then moves a pending state of 1 on to 2
+func_002101F0	SelectPictureBuffer	chooses and rotates the picture buffers for the current picture, fills the chosen buffer's record from the header's fields and returns whether the references it needs are decoded
+func_002104A8	CheckPictureBufferSize	checks the output buffer is big enough for the picture, reporting "Too small buffer size for %dx%d picture" otherwise
+func_00210548	CopyPictureThroughScratchpad	copies a picture to the output buffer row by row, each through DMA channel 8 into the scratchpad and channel 9 back out, one or two passes by the picture's structure
+func_002107B8	SignalPictureReady	sets the state's mode word to 2, copies the current picture number to the output number and sets the flag at +0x820 that ends the picture loop
+func_002107E0	FillPictureOutputInfo	works out an output picture's timestamp and flags from its record and the decoder's running timestamps
+func_00210970	OutputFramePicture	outputs a frame picture: fills its timestamp and flags, checks the buffer size and, when the picture is decoded, copies or converts it to the output and signals it
+func_00210A80	OutputFieldPicturePair	outputs a pair of field pictures in the order the picture structure gives, fills the timestamps and flags, and converts or copies the interleaved fields to the output
+func_00210C38	StartBlockChainToScratchpad	builds a DMA chain of two source tags per block of the current picture in uncached memory and starts channel 9 on it with interrupts disabled
+func_00210D90	StartIpuOutputDma	with interrupts disabled, starts the IPU's output DMA channel 3 towards an address for a number of bytes
+func_00210E00	ConvertSmallPictureColours	converts a small picture's colours: starts the IPU's output DMA, sends the convert command and runs the callback of kind 4, then waits for both to end
+func_00210F18	ContinueColourConversionOutput	the DMA handler of the colour conversion's output channel: counts a chunk done, starts the next chunk of 0x3FF quadwords or the rest, and flags an error when the channel is still busy
+func_00211090	ConvertLargePictureColours	converts a large picture's colours in chunks: installs ContinueColourConversionOutput on channel 3, starts the first chunk, runs the callback of kind 4 and waits for the chunks, reporting "CSC handler error" on failure
+func_00211240	ContinueColourConversionInput	the DMA handler of the colour conversion's input channel: starts the next chunk of up to 0xFFFF quadwords to the IPU and ends with 1 when none is left
 func_00211348	ConvertPictureColours	converts a decoded picture's colours with the IPU by DMA, through interrupt handlers for large pictures
