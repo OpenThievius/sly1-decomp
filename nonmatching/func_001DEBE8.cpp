@@ -42,6 +42,20 @@
 // 3 insns longer. The pre-reload insn count over r510's span equals the final code's (144 vs 145),
 // so retail's difference is in refs or lives, not in deleted copies there. Tried: the two key reads
 // as one inline helper called twice (both addresses then formed before the first call; 82 lines).
+// W24 (2026-11-11): a --set scan of every allocno (refs +-1/+2, length +-2, x0.9, x1.1, /2, x2) on
+// top of 124:length=31 finds no other lever: only 507:length=60, 510:refs=6 or 7, 510:length=145
+// or 261. (a) needs exactly &cur >= 31 and &tgt <= 30, and the region's insns (41-126 less the
+// then-arm) are retail's final code one for one, so two insns retail had there must go after
+// global-alloc (reload's no-op copies, reload_cse, reorg, cross-jumping or flow2's dead stores).
+// (b) is sched1's order in bb 21: gcse inserts the copies 1392 (r507) and 1395 (r510) at the end
+// of bb 21, and sched1's birthing rule issues each right after its source, 394 (%hi
+// g_unitZVector, priority 6) and 452 (%hi g_unitRange, 7). r510 wins when 5 x life(r507) >
+// life(r510) in real insns; 1392 two places earlier is a tie (344 each, allocno 507 first).
+// `sched1.py --prio 394=8` or `--prio 452=5` gives it; 394 needs two more cycles on the cross
+// product's chain (394-395-415-420-430), e.g. Cross's three instructions as three asms, which is
+// not a helper. r510's refs are flow's (before combine, never recounted) and the flow dump already
+// has its five references in their final form. Tried (78 lines unless noted): the f720 test as
+// `cur != 0x352` first (107), `f720 == 2 &&` in both conditions, a switch on f720, a Vec Cross.
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"
