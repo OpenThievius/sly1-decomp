@@ -5,10 +5,10 @@ D_00244F40	00246440	15936	differs	first difference at +0x0; 30 text, 116 pointer
 D_00248D80	0024B5A0	608	match	
 D_00248FE0	0024B800	628	match	
 D_002492F0	0024BB10	308	match	
-D_00249428	0024BC48	1096	differs	first difference at +0x200; 123 text, 22 other words differ
+D_00249428	0024BC48	1096	differs	first difference at +0x448; 39 text, 4 other words differ
 D_00249870	0024C0F0	372	match	
-D_002499F0	0024C270	684	differs	first difference at +0x34; 45 pointer words differ
-D_00249CA0	0024C520	195	differs	first difference at +0x0; 17 text, 10 pointer, 14 other words differ
+D_002499F0	0024C270	684	match	
+D_00249CA0	0024C520	195	differs	first difference at +0x4; 8 text, 8 pointer, 10 other words differ
 D_00249D64	0024C594	16	match	
 D_00249D74	0024C5A4	8	match	
 D_00249D80	0024C5B0	48	match	
@@ -21,15 +21,15 @@ D_00249E50	0024C680	68	match
 D_00249EA0	0024C6D0	68	match	
 D_00249EF0	0024C720	200	match	
 D_00249FBC	0024C7EC	24	match	
-D_00249FE0	0024C810	308	differs	first difference at +0xB0; 4 pointer words differ
+D_00249FE0	0024C810	308	match	
 D_0024A120	0024C950	432	match	
 D_0024A2D0	0024C750	1220	differs	first difference at +0x0; 208 text, 16 other words differ
 D_0024A794	0024CC14	12	match	
-D_0024A7A0	0024CC20	60	differs	first difference at +0x4; 13 text, 1 other words differ
+D_0024A7A0	0024CC20	60	differs	the object has no .rodata
 D_0024A7DC	0024CC24	12	match	
 D_0024A7F0	0024CC30	88	match	
 D_0024A848	0024CC88	24	match	
-D_0024A860	0024CCA0	1936	differs	first difference at +0x40; 55 pointer words differ
+D_0024A860	0024CCA0	1936	match	
 D_0024AFF4	0024D434	4	match	
 D_0024B000	0024D440	84	match	
 D_0024B060	0024D4A0	260	match	
@@ -39,15 +39,15 @@ D_0024B1E8	0024D628	109	match
 D_0024B258	0024D698	4	match	
 D_0024B260	0024D6A0	16	match	
 D_0024B270	0024D6B0	4	match	
-D_0024B280	0024D6C0	436	differs	first difference at +0xCA; 17 text words differ
-D_0024B438	0024D878	416	differs	first difference at +0x0; 82 text, 4 pointer, 15 other words differ
+D_0024B280	0024D6C0	436	differs	first difference at +0xCA; 53 text, 13 pointer, 3 other words differ
+D_0024B438	0024D878	416	differs	first difference at +0x2C; 1 pointer words differ
 D_0024B5E0	0024D8C0	116	match	
-D_0024B660	0024D940	4608	differs	first difference at +0x0; 800 text, 215 pointer, 124 other words differ
+D_0024B660	0024D940	4608	differs	first difference at +0x0; 765 text, 232 pointer, 121 other words differ
 D_0024C860	0024DD28	12	match	
 D_0024C870	0024DD40	180	match	
 D_0024C930	0024DE00	656	match	
 D_0024CBC4	0024E094	4	match	
-D_0024CBD0	0024E0A0	1003	differs	first difference at +0x240; 95 text, 9 other words differ
+D_0024CBD0	0024E0A0	1003	differs	first difference at +0x0; 70 text, 51 pointer, 16 other words differ
 D_0024CFC0	0024E380	420	match	
 D_0024D164	0024E524	8	match	
 D_0024D170	0024E530	244	match	
@@ -57,14 +57,14 @@ D_0024D560	0024E920	40	match
 D_0024D588	0024E948	16	match	
 D_0024D5A0	0024E960	168	match	
 D_0024D650	0024EA10	1096	match	
-D_0024DAA0	0024EE60	124	differs	first difference at +0x40; 8 pointer words differ
-D_0024DB20	0024EE70	168	differs	first difference at +0x0; 21 text, 5 other words differ
+D_0024DAA0	0024EE60	124	match	
+D_0024DB20	0024EE70	168	differs	first difference at +0x0; 14 pointer words differ
 D_0024DBD0	0024EF20	188	match	
 D_0024DC90	0024EFE0	24	match	
 D_0024DCA8	0024EFF8	4	match	
-D_0024DCB0	0024F000	1287	differs	first difference at +0x490; 25 text, 3 other words differ
-D_0024E1C0	0024F4B0	1076	differs	first difference at +0x8; 119 pointer words differ
-D_0024E600	0024F8F0	570	differs	first difference at +0x78; 9 text, 7 pointer, 3 other words differ
+D_0024DCB0	0024F000	1287	match	
+D_0024E1C0	0024F4B0	1076	match	
+D_0024E600	0024F8F0	570	differs	first difference at +0x208; 8 text, 2 other words differ
 D_0024E840	0024FB10	56	match	
 D_0024E988	0024FC58	40	match	
 D_0024E9B0	0024FC80	340	match	
@@ -127,7 +127,7 @@ D_0025C2F0	0025D5F0	80	match
 D_0025C340	0025D640	19232	match	
 D_00260E60	00262160	16	match	
 D_00260E70	00262170	544	match	
-D_00261090	00262390	644	differs	first difference at +0x20; 8 pointer, 1 other words differ
+D_00261090	00262390	644	match	
 D_00261314	00262614	8	match	
 D_00261320	00262620	100	match	
 D_00261390	00262690	96	match	
@@ -140,11 +140,11 @@ D_00261BF0	00262EF0	160	match
 D_00261C90	00262F90	52	match	
 D_00261CC8	00262FC8	668	match	
 D_00261F70	00263270	1012	differs	first difference at +0x2E8; 7 other words differ
-D_002623C0	002636F0	184	differs	first difference at +0x24; 10 text, 23 other words differ
+D_002623C0	002636F0	184	match	
 D_00262480	002637B0	660	match	
 D_00262718	00263A48	684	differs	first difference at +0x178; 5 text, 71 other words differ
 D_002629C8	00263C30	104	match	
-D_00262A30	00263C98	992	differs	first difference at +0x3DD; 1 other words differ
+D_00262A30	00263C98	992	match	
 D_00262E10	00264070	3248	match	
 D_00263AC0	00264D20	884	match	
 D_00263E34	00265094	20	match	
@@ -156,15 +156,15 @@ D_00264840	00265AA0	208	match
 D_00264910	00265B70	300	match	
 D_00264A40	00265CA0	20324	match	
 D_002699A4	0026AC04	8	match	
-D_002699B0	0026AC10	416	differs	first difference at +0x10; 16 pointer words differ
+D_002699B0	0026AC10	416	match	
 D_00269B50	0026ADC0	392	match	
 D_00269CD8	0026AF48	2616	differs	first difference at +0x78; 1 text, 85 pointer, 55 other words differ
 D_0026A710	0026BB40	504	match	
 D_0026A910	0026BD40	736	match	
 D_0026ABF0	0026C020	2368	match	
 D_0026B530	0026C960	3760	match	
-D_0026C3E0	0026D810	32696	differs	first difference at +0x42; 32 other words differ
-D_002743A0	0027DAF0	280	differs	first difference at +0x90; 11 pointer words differ
+D_0026C3E0	0026D810	32696	match	
+D_002743A0	0027DAF0	280	differs	first difference at +0x110; 1 pointer words differ
 D_002744B8	0027DC08	56	match	
 D_002744F0	0027DC40	4	match	
 D_002744F8	0027DC48	80	match	
@@ -178,15 +178,15 @@ D_00274C20	0027E370	288	match
 D_00274D40	0027E490	188	match	
 D_00274E00	0027E550	252	match	
 D_00274F00	0027E650	48	match	
-D_00274F38	0027E688	104	differs	first difference at +0x20; 7 pointer words differ
+D_00274F38	0027E688	104	match	
 D_00274FA0	0027E6F0	412	match	
-D_00275140	0027E890	1516	differs	first difference at +0x4F0; 17 other words differ
+D_00275140	0027E890	1516	match	
 D_00275730	0027EEE0	416	match	
 D_002758D0	0027F080	16	match	
-D_002758E0	0027F090	96	differs	first difference at +0x28; 6 other words differ
+D_002758E0	0027F090	96	match	
 D_00275940	0027F0B8	476	differs	first difference at +0x2B; 11 text, 49 other words differ
 D_00275B28	0027F298	56	match	
-D_00275B60	0027F2D0	3264	differs	first difference at +0x463; 10 text, 9 pointer, 369 other words differ
+D_00275B60	0027F2D0	3264	differs	first difference at +0x463; 10 text, 9 pointer, 362 other words differ
 D_00276970	002800D0	16	match	
 D_00276980	002800E0	1960	match	
 D_00277128	00280888	4	match	
@@ -197,7 +197,7 @@ D_002771CC	0028092C	8	match
 D_002771D8	00280938	20	match	
 D_002771F0	00280950	1984	match	
 D_002779B0	00281110	16	match	
-D_002779C0	00281120	944	differs	first difference at +0x374; 2 other words differ
+D_002779C0	00281120	944	match	
 D_00277D70	002814D0	656	match	
 D_00278000	00281760	72	match	
 D_00278048	002817A8	1528	match	
@@ -211,7 +211,7 @@ D_00279400	00282B80	6768	match
 D_0027AE70	002845F0	72	match	
 D_0027AEB8	00284660	24	match	
 D_0027AED0	00284678	160	match	
-D_0027AF70	00284730	144	differs	first difference at +0x0; 4 text words differ
+D_0027AF70	00284730	144	match	
 D_0027B000	002847C0	64	match	
 D_0027B040	00284800	112	match	
 D_0027B0B0	00284870	128	match	

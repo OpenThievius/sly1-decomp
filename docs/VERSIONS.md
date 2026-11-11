@@ -67,14 +67,68 @@ What makes PAL differ, from the first `differs` rows read one by one:
 - **Other calls and arguments.** A call to a function only PAL has, or one more argument.
 
 PAL's data is credited the same way (`tools/data_check.py`, run by `tools/version_check.py`,
-`config/eu/c_data_status.tsv`). Each global of `config/us/c_data.tsv` is built as the US build
-builds it and its bytes, with every relocated word resolved to the PAL address of its target, are
-compared with PAL's retail bytes at the global's PAL address. A row is `match`, `differs` or
-`absent` (`.bss`, which no file holds, or no PAL address). Nothing is masked: a table whose pointers
-reach something PAL does not have, or whose bytes PAL changed, is `differs`; the row's note says
-where the bytes first differ and what the words that differ are (text, pointers, other data). The
-report counts the `match` rows' bytes as PAL's matched data (never as complete data: PAL links no
-C), on 2026-11-11 288,915 of 464,563 (62.19%).
+`config/eu/c_data_status.tsv`). Each global of `config/us/c_data.tsv` is built (a whole file's
+section, which is one row) and its bytes, with every relocated word resolved to the PAL address of
+its target, are compared with PAL's retail bytes at the global's PAL address. A row is `match`,
+`differs` or `absent` (`.bss`, which no file holds, or no PAL address). Nothing is masked: a table
+whose pointers reach something PAL does not have, or whose bytes PAL changed, is `differs`; the
+row's note says where the bytes first differ and what the words that differ are (text, pointers,
+other data). The report counts the `match` rows' bytes as PAL's matched data (never as complete
+data: PAL links no C), on 2026-11-11 332,070 of 464,563 (71.48%; 288,919, 62.19%, before PAL's own data), which with the original assembly the reports count (the `.vutext` microprograms) is 353,910 bytes, 76.18% of PAL's data (66.89% before).
+
+### PAL's own data
+
+A global PAL holds differently (another value, a string id where US has a pointer, a table with
+other rows) gets a definition of its own, the same way a function does:
+
+    src/versions/eu/<path of the shared file without .cpp>/D_XXXXXXXX.cpp
+
+holding that one definition, from its type to its `;`, under its US address name (the shared file
+may write the readable name, `config/names/`; the definition is found under either). Its type is
+the US definition's and its initial values are what PAL's bytes show, as a US global's are what
+retail's show: PAL's string ids are `(const char*)0x47`, a word PAL fills where US has a zero is
+written there, and where PAL's table has one more row than US's the extra row's words are written
+into the globals that follow (the declarations stay US's). A comment says what differs. No global,
+padding or type is invented for PAL: a definition that needs one is not written, and the row stays
+`differs` with its note (below).
+
+`version_src.unit_text` puts it in the shared file's unit in place of the shared definition
+(`version_src.data_span` finds the definition: a top-level statement, never an `extern`), so a
+PAL unit holds its functions and its globals together. The data check builds that unit for each
+file in which PAL has anything of its own (`version_src.has_own`: a function or a global in
+`src/versions/eu/`, or a declaration that reads `VERSION_EU`), built whole as the US build builds it
+(`config/us/files.tsv`) and with the data the file includes (`INCLUDE_RODATA`, `INCLUDE_DATA`),
+which the unit for a function check leaves out; any other file is built as the US build builds it.
+So PAL's rodata is what PAL's own functions and globals make: the string literals and the jump
+tables of a function PAL defines itself are PAL's, and a row of such a file can match for the
+first time (six did). The comparison is the same as ever: PAL's bytes at the PAL address, every
+pointer translated through the same placement, never masked. The shared C stays EXACT in US and
+the US build never sees these files.
+
+    python3 tools/version_src.py data      # the globals PAL defines itself, with their files
+    python3 tools/data_check.py            # (through tools/version_check.py) c_data_status.tsv
+    python3 tools/data_check.py --check    # a definition's file names a global its shared file defines
+
+Only globals both versions have are defined this way. Data only PAL has (`D_eu_XXXXXXXX`, with no
+US counterpart to replace) has no row in `c_data_status.tsv`, which lists US's globals, so PAL's
+extra data is not counted yet; it would be added at the end of the unit like a function only PAL
+has, and needs rows of its own.
+
+What stays `differs`, and why, from the last full check:
+
+| Cause | Rows | Globals |
+|---|---:|---|
+| Literals and jump tables of functions PAL has no C for: strings translated, reordered or turned into ids, floats, cases elsewhere. The named arrays of these rows that are PAL's own data are defined (`D_002495C0`, `D_002497D8`, `D_00249838`), the rest is the code's | 9 | `D_00249428`, `D_00249CA0`, `D_0024A2D0`, `D_0024A7A0`, `D_0024B280`, `D_0024B660`, `D_0024CBD0`, `D_0024DB20`, `D_0024E600` |
+| One word that no global holds, or that needs another row's section: the pad word after `g_buildFrame` (PAL has 1 in it), the pointer to the literal `"ab"`, a method table slot that holds another method, a function with no PAL pairing | 4 | `D_00261F70`, `D_002743A0` (every global of it is defined, but the literal `"ab"` moves with the rodata of `D_0024CBD0`), `D_0024B438`, `D_00217380` |
+| Objects a constructor fills in (`BoxStyle D_00262988`, `D_002629A8`): PAL's bytes there are static data, and a C++ object with a constructor has no initial value to write; a table PAL grew and moved (`D_0026A138`, the pause menu's rows and the pointers into them) | 2 | `D_00262718`, `D_00269CD8` |
+| Grown tables inside labels the file includes from the disassembly (`INCLUDE_DATA`), which are not C | 2 | `D_00275940`, `D_00275B60` |
+| Tables of hashes: about 30 `extern const` tables of `global_tables.cpp` hold other words (1,261), each a struct or hash list that needs PAL's value for every field; not defined yet | 1 | `D_00244F40` |
+
+The 18 differ in `config/eu/c_data_status.tsv` with a note of where, and the 201 matches are
+the 185 of before, 10 that PAL's own globals made (`D_00262A30`, `D_002779C0`, `D_0027AF70`,
+`D_0026C3E0`, `D_00275140`, `D_00261090`, `D_002699B0`, `D_00274F38`, `D_002758E0`, `D_002623C0`) and
+6 that the PAL unit made without any (`D_002499F0`, `D_00249FE0`, `D_0024A860`, `D_0024DAA0`,
+`D_0024E1C0`, `D_0024DCB0`: the jump tables and strings of functions PAL defines itself).
 
 Where a global is in PAL comes from the translation of its US address (`tools/check.py`,
 `Resolver`), which pairs, in this order of evidence:
@@ -94,25 +148,8 @@ A pointer into another global the check has placed is resolved through its place
 section (`config/us/files.tsv`) holds the labels the file includes from the disassembly
 (`INCLUDE_DATA`, `INCLUDE_RODATA`) at their places: they are compared as US's bytes, read from the
 US disassembly, against PAL's, like the C's own bytes, so a section counts for PAL only when the
-included labels equal PAL's too (the two retail images agree on them). Only 2 of the 34 rows that
-differ differ inside an included label (`D_00275940`, `D_00275B60`, both tables PAL grew).
-
-The 34 globals that still differ, by cause. None is a placement the tools could still derive; the one
-word that is a gap of the tools' is in the last row (`func_001AC638` has no PAL pairing, and the
-slot in PAL holds `func_001AB2B0`, which has none either):
-
-| Cause | Rows | Globals |
-|---|---:|---|
-| PAL's text differs: strings translated, moved, removed or turned into ids | 11 | `D_00249428`, `D_00249CA0`, `D_0024A2D0`, `D_0024A7A0`, `D_0024B280`, `D_0024B438`, `D_0024B660`, `D_0024CBD0`, `D_0024DB20`, `D_0024DCB0`, `D_0027AF70` |
-| Jump tables of functions PAL defines itself (`version-specific, rodata` in `c_status.tsv`): PAL's own code puts the cases elsewhere | 6 | `D_002499F0`, `D_00249FE0`, `D_0024A860`, `D_0024DAA0`, `D_0024E1C0`, `D_0024E600` |
-| String pointers PAL does not have: its table holds ids, or its own table | 5 | `D_00261090`, `D_002699B0`, `D_00269CD8`, `D_002743A0`, `D_00274F38` |
-| Values and tables PAL changed (floats, ids, hashes, an inserted row) | 11 | `D_00244F40`, `D_00261F70`, `D_002623C0`, `D_00262718`, `D_00262A30`, `D_0026C3E0`, `D_00275140`, `D_002758E0`, `D_00275940`, `D_00275B60`, `D_002779C0` |
-| Method tables: one slot holds a US function with no PAL pairing, one a different method | 1 | `D_00217380` |
-
-Four rows of the first two causes also hold words of the other (`D_0024B438`, `D_0024B660`,
-`D_00249CA0`, `D_0024E600`). What remains is not placement but PAL's own bytes, and the way to
-credit more is PAL's own definitions: the rodata a `version-specific` function carries is PAL's, and
-the data its own C defines is checked nowhere yet.
+included labels equal PAL's too (the two retail images agree on them). Only 2 of the rows that differ
+differ inside an included label (`D_00275940`, `D_00275B60`, both tables PAL grew).
 
 Code and data only PAL has are named `func_eu_XXXXXXXX` and `D_eu_XXXXXXXX`, and reach that PAL
 address alone (`tools/check.py`). So is a datum both versions have when the tools cannot pair its

@@ -21,7 +21,7 @@ splits are taken from other projects or from the prototype
 ## Next
 
 Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-11: US at
-93.25% of code (4,760 of 4,807 functions) and 99.62% of data, PAL at 93.06% of code and 66.89% of data, 47 US
+93.25% of code (4,760 of 4,807 functions) and 99.62% of data, PAL at 93.06% of code and 76.18% of data, 47 US
 functions left, every one with a near miss in `nonmatching/`, the original assembly classified,
 every byte of code in a proved source file, PAL's own game code all defined, and names and types
 well under way. What is still open is the long tail of the matching, the readable names of the
@@ -57,10 +57,14 @@ functions left with their address names, and the disc's data.
    1,621 bytes left. PAL links no C, so its data is checked at its counterparts as its
    functions are (`tools/version_check.py`, then `tools/data_check.py`, `config/eu/c_data_status.tsv`):
    a global counts for PAL when its bytes, with every pointer translated to PAL's addresses, equal
-   PAL's at its PAL address. On 2026-11-11, 185 of the 240 globals match (288,915 bytes, 62.19% of
-   PAL's data), 34 differ and 21 are absent (all `.bss`, which has no bytes in the file). The 34 are
-   PAL's own bytes (text, jump tables of its own functions, values and tables it changed;
-   docs/VERSIONS.md), none a placement the tools could still derive.
+   PAL's at its PAL address. A global PAL holds differently has a definition of its own, as PAL's
+   functions do (`src/versions/eu/<file>/D_XXXXXXXX.cpp`, built in the shared file's unit in place of the
+   US definition, docs/VERSIONS.md "PAL's own data"). On 2026-11-11, 201 of the 240 globals match
+   (332,070 bytes, 71.48% of PAL's data; 185 and 62.19% before), 18 differ and 21 are absent (all
+   `.bss`, which has no bytes in the file). 28 PAL globals are defined (10 rows they complete, 2 more
+   rows they bring closer); the 18 are what needs a PAL function that has no C, a global C++ cannot
+   write (an object with a constructor), included labels, or the hash tables of `global_tables.cpp`
+   not yet defined (docs/VERSIONS.md lists each with its cause).
 3. **Original assembly.** The functions that were not made from C (system-call stubs, crt0,
    the toolchain's own `.S` routines, the libraries' multimedia routines, frameless VU0 leaves,
    code scheduled by hand) and the linker's leftovers, in game code and in Sony's libraries, are
@@ -101,7 +105,7 @@ functions left with their address names, and the disc's data.
    `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)). On 2026-11-11, 50 PAL functions
    are left: 49 are the counterparts of functions US has left, and one is a library function
    only PAL has (func_0020A870, 68 bytes). Every game-code function only PAL has is defined.
-   `tools/version_check.py` finds 4,469 C functions matching at their PAL counterparts, 24 with
+   `tools/version_check.py` finds 4,470 C functions matching at their PAL counterparts, 24 with
    no counterpart, and one that differs (func_001366A0, its near miss in `nonmatching/eu/`).
    On 2026-11-07, 96 PAL functions
    are left (62 in game code, 34 in the libraries): two C functions differ at their counterparts
