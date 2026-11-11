@@ -6688,7 +6688,63 @@ void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, con
     }
 }
 
-INCLUDE_ASM(func_00130748);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+
+// v made unit length where it is, or fallback when shorter than 0.0001: its length.
+static inline f32 NormalizeAxis(Vec02& v, const Vec02& fallback)
+{
+    u128 len = Vu0::Length(Vu0::Q(v));
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
+        v = fallback;
+    } else {
+        Vu0::Q(v) = Vu0::DivX(Vu0::Q(v), len);
+    }
+    return Vu0::ToFloatMoved(len);
+}
+
+void func_00130748(Mat02* a, Vec02* wa, Mat02* b, Vec02* wb, Mat02* out, Vec02* outW, f32 dur, f32 t, f32 e)
+{
+    f32 u = t / dur;
+    f32 v = 1.0f - u;
+    if (out != 0) {
+        Vec02 axis;
+        Mat02 m1;
+        Mat02 m2;
+        Mat02 rot;
+        f32 uu = u * u;
+        f32 uv = u * v;
+        f32 uuu = uu * u;
+        f32 uuv = uu * v;
+        f32 uvv = uv * v;
+        f32 len;
+        Vu0::Q(axis) = Vu0::Q(*wa);
+        len = NormalizeAxis(axis, g_unitZVector);
+        BuildAxisAngleMatrix(&axis, &rot, uvv * dur * len);
+        MulRotationRowsX(&m1, rot, *a);
+        Vu0::Q(axis) = Vu0::Q(*wb);
+        len = NormalizeAxis(axis, g_unitZVector);
+        BuildAxisAngleMatrix(&axis, &rot, -uuv * dur * len);
+        MulRotationRowsX(&m2, rot, *b);
+        MultiplyMatrices3x3(&m1, &m2, &rot);
+        f32 angle;
+        MatrixToAxisAngle(&rot, &angle, &axis);
+        BuildAxisAngleMatrix(&axis, &rot, angle * (uuv * (3.0f - dur) + uuu));
+        MulRotationRowsX(out, rot, m1);
+    }
+    if (outW != 0) {
+        Mat02 d;
+        Vec02 axis;
+        f32 angle;
+        MultiplyMatrices3x3(a, b, &d);
+        MatrixToAxisAngle(&d, &angle, &axis);
+        f32 w1 = angle * u * (6.0f - u * 6.0f) / dur;
+        f32 w2 = 1.0f - u * (4.0f - u * 3.0f);
+        f32 w3 = u * (u * 3.0f + -2.0f);
+        Vu0::Q(*outW) = Vu0::MulXSum3(Vu0::Vec::Of(axis), Vu0::Vec::Scalar(w1), Vu0::Vec::Of(*wa), Vu0::Vec::Scalar(w2),
+                                      Vu0::Vec::Of(*wb), Vu0::Vec::Scalar(w3)).q;
+        Vu0::Q(*outW) = Vu0::MulX(Vu0::Vec::Of(*outW), Vu0::Vec::Scalar(e)).q;
+    }
+}
 
 void SampleCurvePoints(f32 k, SampledCurve* self, u8* a1, u8* a2, u8* a3, s32 count, CurvePoint* out, f32 start, f32 end)
 {

@@ -191,6 +191,10 @@ Read further with tools/globalalloc.py, tools/sched1.py, reload1.c and `-dR` sch
   retail's order but the dot's output reload register is vf1 again (no local VU0 placement).
   Not landed: no evidence the original wrote such a helper, and on func_00186230 the same probe
   adds a `por` (the reload copies the GPR instead of inheriting).
+- **Resolved (2026-11-10, w20).** Both products are VU_REGS when the conversion's operand adds
+  no class preference: ToFloatMoved's `"*r"` (docs/toolchain/vu0-helpers.md, "A GPR operand
+  that leaves the class to the producer"). func_001BC978 is EXACT with ToFloatMoved for roSq
+  (and with every conversion as ToFloatMoved).
 
 
 ### A second spill register from a rematerialised constant (func_0014C858)

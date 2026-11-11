@@ -219,10 +219,17 @@ struct Vu0 {
     // which it makes in each arm of an if whose arms meet at the conversion (func_0014EB10).
     // The two allocate differently: func_00187B60 matches with ToFloat and takes other VU0
     // registers with this one, which matches every other user of ToFloat.
+    // The operand is "*r": a GPR for reload, but '*' hides the letter from regclass, so the
+    // read leaves the vector's register class to the code that makes it. A dot product read
+    // only here is then a VU0 pseudo (its "=j" set is its one preference): the local allocator
+    // places it among the other VU0 values, and reload's qmfc2 brings it to a GPR. With a plain
+    // "r" the set and the read tie and regclass picks the union TI_REGS, which puts the product
+    // in a GPR and its VU0 register at the asm's output reload, after every other VU0 value
+    // (docs/toolchain/vu0-helpers.md, "A GPR operand that leaves the class to the producer").
     static f32 ToFloatMoved(u128 a)
     {
         f32 r;
-        __asm__("mtc1 %1, %0" : "=f"(r) : "r"(a));
+        __asm__("mtc1 %1, %0" : "=f"(r) : "*r"(a));
         return r;
     }
 
@@ -268,9 +275,11 @@ struct Vu0 {
     // loop: a1 after the loop's v0, v1 and a0), where ToBits' result is a pseudo of its own that
     // the local allocator gives the first free one (v0). The store is the helper's: the low
     // word of a 128-bit GPR as a u32 is a truncation, which the compiler sign-extends first.
+    // The operand is "*r" as in ToFloatMoved: a dot product stored only here stays a VU0 pseudo
+    // (func_001EDA80's last Dot in vf1, its 1.0 in vf2).
     template <class T> static void StoreX(T& dst, u128 a)
     {
-        __asm__("sw %1, %0" : "=m"(dst) : "r"(a));
+        __asm__("sw %1, %0" : "=m"(dst) : "*r"(a));
     }
 
     // The same sw for a word already in a GPR (func_001EDC08's ToBits of the length), where

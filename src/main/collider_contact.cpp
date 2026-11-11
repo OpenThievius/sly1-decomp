@@ -242,9 +242,53 @@ void FreePooledContactChain(u8* self, Contact03* head)
     }
 }
 
-INCLUDE_ASM(func_00186230);
+void MeasurePointToLine(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
+{
+    Vec02 e;
+    Vec02 w;
+    Vu0::Q(e) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
+    Vu0::Q(w) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a));
+    f32 len2 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(e), Vu0::Q(e)));
+    u128 d;
+    if (len2 < 0.0001f) {
+        *t = 0.0f;
+        d = Vu0::Dot(Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a)), Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a)));
+    } else {
+        *t = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(e), Vu0::Q(w))) / len2;
+        u128 q = Vu0::MulXSum(Vu0::Q(*a), Vu0::Scalar(1.0f), Vu0::Q(e), Vu0::Scalar(len2));
+        u128 r = Vu0::Sub(Vu0::Q(*p), q);
+        d = Vu0::Dot(r, r);
+    }
+    *(u32*)dist = Vu0::ToBits(Vu0::Sqrt(d));
+}
 
-INCLUDE_ASM(func_00186320);
+void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
+{
+    Vec02 e;
+    Vec02 d;
+    Vu0::Q(e) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
+    f32 r = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(e), Vu0::Q(e)));
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a));
+    u128 sum;
+    if (r < 0.0001f) {
+        *t = 0.0f;
+        sum = Vu0::Dot(Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a)), Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a)));
+    } else {
+        r = Vu0::ToFloat(Vu0::Dot(Vu0::Q(e), Vu0::Q(d))) / r;
+        if (r < 0.0f) {
+            *t = 0.0f;
+        } else if (1.0f < r) {
+            *t = 1.0f;
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*b));
+        } else {
+            *t = r;
+            Vu0::Q(e) = Vu0::MulAddX(Vu0::Q(*a), Vu0::Q(e), Vu0::Scalar(r));
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(e));
+        }
+        sum = Vu0::Dot(Vu0::Q(d), Vu0::Q(d));
+    }
+    *(u32*)dist = Vu0::ToBits(Vu0::Sqrt(sum));
+}
 
 extern s32 g_vif0Channel;
 extern u8 D_00211E10[];
@@ -1059,8 +1103,8 @@ s32 IntersectSegmentWithSphere(Vec02* a, Vec02* b, Vec02* c, f32* tOut, Vec02* h
     Vu0::Q(e) = ev;
     Vu0::Q(d) = dv;
     f32 dd = Vu0::ToFloatMoved(Vu0::Dot(dv, dv));
-    f32 aa = Vu0::ToFloatViaBits(Vu0::Dot(ev, ev));
-    f32 bb = Vu0::ToFloatViaBits(Vu0::Dot(ev, dv));
+    f32 aa = Vu0::ToFloatMoved(Vu0::Dot(ev, ev));
+    f32 bb = Vu0::ToFloatMoved(Vu0::Dot(ev, dv));
     f32 cc = dd - r * r;
     f32 b2 = 2.0f * bb;
     f32 disc = b2 * b2 - aa * (cc * 4.0f);

@@ -407,7 +407,74 @@ f32 ScoreTargetCurveAt(TargetCostContext* self)
     return f.result;
 }
 
-INCLUDE_ASM(func_001CEB18);
+void TransformPointAtTime(BaseObject* self, BaseObject* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
+extern const Vec02 D_00248D30;
+
+// v made unit length, or fallback when shorter than 0.0001; returns its length.
+static inline f32 NormalizeVector(Vec02& v, const Vec02& fallback)
+{
+    u128 len = Vu0::Length(Vu0::Q(v));
+    if (Vu0::ToFloat(len) < 0.0001f) {
+        v = fallback;
+    } else {
+        Vu0::Set(v, Vu0::DivX(Vu0::Q(v), len));
+    }
+    return Vu0::ToFloatMoved(len);
+}
+
+void func_001CEB18(Player* self, BaseObject* obj, Vec02* point, f32* out1, Vec02* out2, Vec02* out3, f32 t)
+{
+    Vec02 pos0;
+    Vec02 p;
+    Vec02 d;
+    Vec02 acc;
+    Vec02 vel;
+    Vu0::Set(pos0, Vu0::MulAddX2(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Scalar(t), Vu0::Q(self->gravity), Vu0::Scalar(t * (t * 0.5f))));
+    p = *point;
+    TransformPointAtTime(obj, 0, t, &p, 0, 0, 0);
+    Vu0::Set(d, Vu0::Sub(Vu0::Q(p), Vu0::Q(pos0)));
+    f32 r = D_00274E08;
+    f32 dist2 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
+    if (dist2 < r * r) {
+        if (out1 != 0) {
+            *out1 = Fpu::Sqrt(dist2) - r;
+        }
+        if (out2 != 0) {
+            *out2 = pos0;
+        }
+        if (out3 != 0) {
+            Vu0::Q(*out3) = Vu0::MulAddX(Vu0::Q(self->v150), Vu0::Q(self->gravity), Vu0::Scalar(t));
+        }
+        return;
+    }
+    f32 az = __builtin_fabsf(d.z);
+    if (r < az || t == 0.0f) {
+        if (out1 != 0) {
+            *out1 = az + 1010000.0f;
+        }
+        if (out2 != 0) {
+            *out2 = pos0;
+        }
+        if (out3 != 0) {
+            Vu0::Q(*out3) = Vu0::MulAddX(Vu0::Q(self->v150), Vu0::Q(self->gravity), Vu0::Scalar(t));
+        }
+        return;
+    }
+    d.z = 0.0f;
+    f32 l = NormalizeVector(d, D_00248D30);
+    f32 gap = l - Fpu::Sqrt(D_00274E08 * D_00274E08 - az * az);
+    Vu0::Set(acc, Vu0::MulX(Vu0::Q(d), Vu0::Scalar((gap + gap) / (t * t))));
+    Vu0::Set(vel, Vu0::MulAddX2(Vu0::Q(self->v150), Vu0::Q(self->gravity), Vu0::Scalar(t), Vu0::Q(acc), Vu0::Scalar(t)));
+    if (out1 != 0) {
+        *out1 = ((D_00274E14 + D_00274E14) * gap / t) <? 1000000.0f;
+    }
+    if (out2 != 0) {
+        Vu0::Q(*out2) = Vu0::MulAddX(Vu0::Q(pos0), Vu0::Q(acc), Vu0::Scalar(t * (t * 0.5f)));
+    }
+    if (out3 != 0) {
+        Vu0::Q(*out3) = Vu0::MulAddX2(Vu0::Q(self->v150), Vu0::Q(self->gravity), Vu0::Scalar(t), Vu0::Q(acc), Vu0::Scalar(t));
+    }
+}
 
 // func_001CEB18 also takes a float in $f12 (it reads $f12 at entry); this
 // function passes its own float parameter straight through.

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1736/1816 (95.6%), checked 2026-11-10
+// BYTES 1751/1816 (96.4%), checked 2026-11-10
 // NEAR: the first block is retail's: the statements in the order cd, ab, ca put c's load before a's and leave ab's subtraction unraised, so sched1 issues b, c, a, ca, ab and local-alloc gives retail's VU0 registers, and nn's conversion is ToFloatNow (its dot's result a VU0 pseudo). Left (docs/toolchain/sched1.md, "The side test and the half-width"): the side test's block, whose VU0 registers are retail's but whose order is not: a model of sched2 gives retail's order only with ToFloatViaBits for side, s and u and the s dot ahead of side's qmfc2 in sched1's output, which sched1's priorities (6 against 5) never give, the quadratic's head's wall (func_00141D88); and w's dot, whose retail GPR (a0, then k v0, kk v1) is reload's as ToFloat gives it, and whose order needs the compiler's qmfc2 (Moved), so retail read a VU0-allocated dot result through an "r" operand, which no plain form found gives.
 #include "common.h"
 #include "asm_func.h"
