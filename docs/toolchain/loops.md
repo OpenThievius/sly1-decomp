@@ -672,3 +672,35 @@ loop has one reduced register fewer, the bivs (removed, j, out) take the saved r
 instead of retail's caller-saved a7/t0/t1 (saved around both calls with sq/lq), and the function
 is 12 bytes short. The array form (Vec02 indexing or a bank struct of three arrays) does not
 change it.
+
+### Three invariants ranked by their place in loop.c's move list (func_001D7778, near miss)
+
+Measured on 2026-11-10 with tools/globalalloc.py and tools/sched1.py (StepPathFollower's wheel
+loop, nonmatching/func_001D7778.cpp). The loop's saved registers s6, s7, s8 go to three
+invariants moved in pass 1: the push curves' addresses D_002753D0 (pseudo 288) and D_002753E0
+(316), and the copy of PRE's `&spin` (381, `381 = 966`, 966 being PRE's `sp+112` inserted
+before the loop for delta's use after it). Each has 5 refs (a set outside the loop plus two uses
+at loop depth 2) and lives to the loop's end, so global-alloc ranks them by birth alone; the
+fourth candidate, B0's address (227, also 5 refs, born first), loses and is rematerialized.
+
+- **The ranking needed.** `--set 381:length=402 --set 288:length=400 --set 316:length=398` (or
+  381 at 404) gives retail's s8, s7, s6 with every other disposition unchanged. 381 has to be
+  born after 227 (at 406 or longer it falls to 246 and below, ties go to the lower pseudo, and
+  227 takes s8 while spin is spilled) and before 288.
+- **sched1 keeps loop.c's order.** In the preheader block every moved `lo_sum` and the copy are
+  raised to priority 2 (birthing), all have weight 1 (no deaths yet in `.regmove`), class 3 and
+  no dependents, so the LUID decides: replaying the block with the copy moved earlier in the
+  block (a small script around sched1.Replay) gives retail's birth order for any place after
+  B0's `lo_sum` and before D0's `%hi`; before B0's `lo_sum` it issues ahead of it (bad); after
+  D0's `%hi` it stays last (ours). Removing the zero copy (3060) or the load before it changes
+  nothing. Giving the copy weight 0 (its source dying) issues it at cycle 2, ahead of B0 (bad).
+- **loop.c's order is the body's.** All of 497/498 (B0), 516/517 (C0), 626 (0.0), 728/729
+  (D0), 812/813 (E0) and 1052 (the copy) move in pass 1, in insn order (the threshold falls by
+  3 per move, 80 to 50, far above what lifetimes 5 to 12 need at 189 insns). The copy sits where
+  cse1 computed `&spin`, at ApplyColliderInverseInertia's arguments after the push test; retail
+  needs it between the slip statement (B0, C0) and the push (D0), where no statement takes
+  spin's address. D0's `%hi` cannot move to pass 2 instead (it would need a lifetime of 3 in
+  both passes; its `lo_sum` and c[0] load give 9).
+- **Ruled out.** `Vec02* out = &spin;` or `Vec02& out = spin;` after the slip statement, with
+  the calls taking `out` (697 lines): the user variable's copy has lifetime 0 in loop.c ("not
+  desirable"), the loop reads PRE's 966 directly and B0's address takes s8.
