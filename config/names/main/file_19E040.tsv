@@ -136,6 +136,7 @@ func_001A5F78	RemovePairedObject	controller method for leaving state 9: moves th
 func_001A6090	PairWithNearestFreeObject	takes from the controller's free list (0x368) the object nearest in x and y within D_0024CAF4, links it and the given object as partners (+0x55C) and moves it to the used list (0x35C); RemoveFinishedHitTarget, LinkPairedObjects and ChoosePairedObjectState call it
 func_001A6168	LinkPairedObjects	sets obj->partner = node and node->partner = obj, moves the lists' entries and unlinks and re-states the partner each one had before
 func_001A6238	PairWithNearestWaitingObject	walks the chain at 0x384 for the nearest unpartnered object in state 2 within D_0024CAF8 in x and y, links the two as partners (+0x55C), moves the given one from the free list (0x368) to the used list (0x35C) and puts the found one in state 3 (SetPairedState)
+func_001A6328	AssignNearestListedObjectToPair	takes the object of the controller's list at +0x3A0 nearest in x and y to the paired object, moves it to the list at +0x3AC and stores it as the paired object's attachment; 0 when the list is empty
 func_001A63F8	RandomizePairedObjectOffset	gives a paired object a random polar offset at +0x570, up to the controller's radius at +0x348, and scales its +0x574 by the controller's +0x34C
 func_001A6480	GetPairControllerPose	returns the address of pose number poseIndex in the 0xC0-byte pose records from 0x3E0
 func_001A6498	InitPairedObject	slot 0 of the 0x42 class: after the collider set-up sets state -1, the floats at 0x584 and 0x588 to 1.0 and 2.5 and calls func_001B9AE0

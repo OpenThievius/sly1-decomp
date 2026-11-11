@@ -120,6 +120,7 @@ func_001EDC08	FindClosestPointsOnSegments	original assembly: clamps the paramete
 func_001EDDB0	GetVectorAngles	writes the wrapped atan2 of (y, x) and the wrapped atan2 of z against the length of (x, y)
 func_001EDE38	RotateVectorByTwoAngles	takes sines and cosines of two angles and writes the rotated copy of a vector from products of them
 func_001EDEF0	ComputeBallisticLaunchVelocity	original assembly: the velocity that carries an object from one point to another at a launch angle (Sine, Cosine, Tangent, ArctangentOfRatio) under its gravity (+0x350) or the world's (+0x1EE0 of D_00275710); PlacePlayerOnGround and LaunchTargetFollowerAtFollowed call it
+func_001EE090	ComputeLaunchVelocityToPoint	the velocity of a given speed that carries a body from a point to another under the gravity of the record (or the world's at +0x1EE0): straight when the gravity is nearly 0, else the lower positive root of the quadratic in the flight time; 0 when out of reach
 func_001EE290	ForwardBallisticLaunchVelocity	passes its arguments on to ComputeBallisticLaunchVelocity; func_001A8C90 calls it with a result slot on its stack
 func_001EE2B0	ClampVectorLength	scales a vector down to the given length when it is longer, else copies it; the Step functions of the agents and colliders call it
 func_001EE318	InitPacketWriter	runs func_00152888 on the writer, sets the closing-pad flag +0x10 to 1, installs the vtable D_0024A0E0 and clears +0x1C and +0x20
@@ -148,11 +149,13 @@ func_001EEB60	QueryValueListMask	asks the world's value list object (+0x1EC4) fo
 func_001EEBB0	LookupValueTreeLeaf	walks the plane tree at +0x38 (normal at 0, offset at +0x10, the two links at +0x14 and +0x18) to the leaf that holds a point and returns its value without bit 31, 0xFFFFFFF without a tree; func_00144270 calls it
 func_001EEC60	InitAttachedSet	slot 0 of class 0x1F: runs InitCollider, sets flag bit 43, +0x584 and +0x588 to 1, both rates to 1.0, its anchors to 3, 0, 3, 0 and sets up its tracked nodes at +0x590 (InitTrackedNodes) with +0x594 at 3
 func_001EECE0	StartAttachedSet	slot 16 of class 0x1F: starts the placed object, fills its tracked nodes (FillTrackedNodes), allocates the 0x80-byte item block of its set and calls its slot 50 (func_001B8540, its parts changed) when +0x278 is set
+func_001EED68	GetAttachedSetPointMotion	the position and velocity of a point of the attached set at +0x570: the point transformed to its frame (func_00127E60) plus the oscillator's displacement when it has one
 func_001EEE50	ReconcileColliderAttachments	walks an attachment list: adds or removes the collider attachment when flag bits 59 and 60 of the target differ, unlinks nodes whose bit 60 is clear, then clears both bits
 func_001EEF90	UpdateAttachedSet	slot 17 of class 0x1F
 func_001EF3A8	ForwardAttachedSetLinkStep	slot 0xDC of class 0x1F, the slot SyncPlayerTarget and IgnoreColliderAttachmentStep fill: calls slot 46 of the link's target with the set
 func_001EF3D8	HandleAttachedSetNotification	slot 13 of class 0x1F: for message kind 2 either detaches every link (when the message object is itself) or the link whose target is the message object, then RebuildAttachedSet, then the base handler func_00127378
 func_001EF520	RebuildAttachedSet	on the root object of class 0x1F, rebuilds the set at +0x554 from the object itself and the target of every attached link and registers it with the world (func_0015F8B0)
+func_001EF5B8	MeasureAttachedSetContactDepth	cuts the segment through a collider's position (the player's offset from -75 up, the others' from +0x428 to +0x438) with the attached set's tree and returns the length of the first span, with the surface normal and the hit record
 func_001EF768	UpdateAttachedSetBounds	slot 50 of class 0x1F, its override of UpdateColliderBounds
 func_001EF808	RequestAttachedSetLaunch	slot 71 of class 0x1F: offers the player a launch at its tracked nodes (OfferTrackedNodeLaunch) and returns 1
 func_001EF828	GetAttachedSetTrackedNodes	returns the tracked-node record at +0x590 of a class 0x1F object (the script built-in func_00109488 calls it)
