@@ -3208,9 +3208,9 @@ s32 IsLevelDone(void* self, s32 index)
     return g_saveData->levels[index].f448 & 0x20;
 }
 
-void RecomputeSaveCompletion(void* self)
+s32 RecomputeSaveCompletion(void* self)
 {
-    ComputeCompletionPercent(g_saveData);
+    return ComputeCompletionPercent(g_saveData);
 }
 
 void ScatterRandomObjects(void* unused, void* a, void* b, void* c)
@@ -3308,9 +3308,9 @@ void HideCountedScreenElement(World* self)
 
 LINKER_REMNANT(func_001DDBF0);
 
-void PushSoundLevelBuiltin(void* self, void* p)
+void* PushSoundLevelBuiltin(void* self, void* p)
 {
-    PushSoundLevel(p);
+    return PushSoundLevel(p);
 }
 
 void* RemoveSoundLevelBuiltin(void* unused, void* p)

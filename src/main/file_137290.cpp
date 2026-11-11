@@ -93,9 +93,9 @@ void SetStepSequenceState(void* obj, s32 mode);
 
 s32 OpenBufferedSectorStream(void* a, void* b, s32 c);
 
-void OpenBufferedSectorStreamRange(void* a, KeyId* pair)
+s32 OpenBufferedSectorStreamRange(void* a, KeyId* pair)
 {
-    OpenBufferedSectorStream(a, pair->p0, pair->second);
+    return OpenBufferedSectorStream(a, pair->p0, pair->second);
 }
 
 extern f32 g_gameClock[];

@@ -1049,7 +1049,7 @@ void func_001F4008(TransformSet* self)
     TriggerScriptEvent(self, 2, 0, 0);
 }
 
-void SetTransformObjectKeyedValue(void* self, void* a1, void* a2, void* a3, void* a4) { UpsertKeyedEntry((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
+s32 SetTransformObjectKeyedValue(void* self, void* a1, void* a2, void* a3, void* a4) { return UpsertKeyedEntry((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
 
 void StoreValueAndMarkSet(TimedValue* self, f32 value) { self->value = value; self->state = 1; }
 

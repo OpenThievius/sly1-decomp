@@ -328,10 +328,10 @@ void SetIopVolumeChannel(s32 a0, s32 a1)
     QueueIopCommand(0x9, 0x8, buf, 0, 0);
 }
 
-void GetIopVolumeChannel(s32 arg)
+s32 GetIopVolumeChannel(s32 arg)
 {
     s32 local = arg;
-    SendIopCommandAndWait(10, 4, &local);
+    return SendIopCommandAndWait(10, 4, &local);
 }
 
 
@@ -372,7 +372,7 @@ void func_0011D558(void* a0, s32 a1, s32 a2)
 
 s32 SendIopCommandAndWait(s32 a, s32 b, void* args);
 
-void StartSoundVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+s32 StartSoundVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     s32 args[6];
     args[0] = a0;
@@ -381,7 +381,7 @@ void StartSoundVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
     args[3] = a3;
     args[4] = a4;
     args[5] = a5;
-    SendIopCommandAndWait(0x11, 0x18, args);
+    return SendIopCommandAndWait(0x11, 0x18, args);
 }
 
 LINKER_REMNANT(func_0011D5D8);
@@ -426,10 +426,10 @@ void ResumeIopVoices(s32 a0)
     QueueIopCommand(0x17, 4, &buf, 0, 0);
 }
 
-void IsVoiceBusy(s32 a0)
+s32 IsVoiceBusy(s32 a0)
 {
     s32 buf = a0;
-    SendIopCommandAndWait(0x19, 4, &buf);
+    return SendIopCommandAndWait(0x19, 4, &buf);
 }
 
 void RequestVoiceCallback(s32 value, s32 a1, s32 a2)
@@ -438,12 +438,12 @@ void RequestVoiceCallback(s32 value, s32 a1, s32 a2)
     QueueIopCommand(0x19, 4, &local, a1, a2);
 }
 
-void TestSoundInBank(s32 a0, s32 a1)
+s32 TestSoundInBank(s32 a0, s32 a1)
 {
     s32 local[2];
     local[0] = a0;
     local[1] = a1;
-    SendIopCommandAndWait(0x1A, 8, local);
+    return SendIopCommandAndWait(0x1A, 8, local);
 }
 
 LINKER_REMNANT(func_0011D790);
@@ -500,12 +500,12 @@ void SetVoiceParam(void* a0, s32 a1, s32 a2)
     QueueIopCommand(0x29, 0xC, &args, 0, 0);
 }
 
-void GetVoiceParam(s32 a, s32 b)
+s32 GetVoiceParam(s32 a, s32 b)
 {
     WordPairArgs w;
     w.a = a;
     w.b = b;
-    SendIopCommandAndWait(0x28, 8, &w);
+    return SendIopCommandAndWait(0x28, 8, &w);
 }
 
 LINKER_REMNANT(func_0011D920);
@@ -799,7 +799,7 @@ LINKER_REMNANT(func_0011E3D8);
 
 s32 SendIopCommandAndWait(s32 id, s32 flags, void* args);
 
-void OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
+s32 OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     s32 args[5];
     args[0] = a0;
@@ -807,7 +807,7 @@ void OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
     args[2] = a2;
     args[3] = a3;
     args[4] = a4;
-    SendIopCommandAndWait(0x3B, 0x14, args);
+    return SendIopCommandAndWait(0x3B, 0x14, args);
 }
 
 void ResetIopRing(void)
@@ -835,9 +835,9 @@ void UpdateIopMovieStream(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
 
 s32 SendIopCommandAndWait(s32 kind, s32 a1, s32 a2);
 
-void GetIopRingPosition()
+s32 GetIopRingPosition()
 {
-    SendIopCommandAndWait(0x40, 0, 0);
+    return SendIopCommandAndWait(0x40, 0, 0);
 }
 
 LINKER_REMNANT(func_0011E520);

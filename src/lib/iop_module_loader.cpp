@@ -116,10 +116,10 @@ s32 SendModuleLoadRequest(Blob_1F9868* src, s32 size, Blob_1F9868* data, s32* ou
     return ret;
 }
 
-void LoadIopModuleFile(Blob_1F9868* src, s32 size, Blob_1F9868* data)
+s32 LoadIopModuleFile(Blob_1F9868* src, s32 size, Blob_1F9868* data)
 {
     s32 out[4];
-    SendModuleLoadRequest(src, size, data, out, 0);
+    return SendModuleLoadRequest(src, size, data, out, 0);
 }
 
 LINKER_REMNANT(func_001F9AB0);

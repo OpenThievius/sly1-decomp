@@ -3033,9 +3033,9 @@ s32 TestChildrenAccepted(PlacedObject* self, ScriptListBuilder* context)
     return 1;
 }
 
-void CreateTrackAttachment(BaseObject* item)
+Attachment* CreateTrackAttachment(BaseObject* item)
 {
-    CreatePoseSource(item->world, item, (void*)D_002197C0);
+    return CreatePoseSource(item->world, item, (void*)D_002197C0);
 }
 
 INCLUDE_RODATA(D_00249A1C);

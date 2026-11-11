@@ -1261,14 +1261,14 @@ void UppercaseString(s8* p)
     }
 }
 
-void CreateLockSemaphore(void* a, void* b)
+s32 CreateLockSemaphore(void* a, void* b)
 {
     SemaphoreParams tmp;
 
     FillMemory(&tmp, 0, 0x18);
     tmp.initCount = (s32)a;
     tmp.maxCount = (s32)b;
-    NewSemaphore(&tmp);
+    return NewSemaphore(&tmp);
 }
 
 LINKER_REMNANT(func_001E22B8);
