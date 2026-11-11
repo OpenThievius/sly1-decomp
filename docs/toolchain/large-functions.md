@@ -400,3 +400,39 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
     its constructor setting A∪B after FillMemory and a derived class's
     constructor setting f50/f60/f54: the same code (21 lines, as the near
     miss): the base constructor's `this` is the derived one's register.
+  - **The tie is the statement order of C; the second constant is not
+    needed (w26, 2026-11-11, tools/sched1.py, haifa-sched.c, alias.c and
+    toplev.c read).** With C written `f60 = 1.0f; f54 = 1.0f; f50 = 75.0f;`
+    (f50 last), A∪B at priority 5 (their constants at 7) replays to the
+    stores of A∪B, then 75.0, the guard, f50, f54, f60, with *one* 1.0
+    pseudo for A and C: f50 is the store where `this` and 75.0 die, and it
+    is not ready until two cycles after 75.0's load, so when the guard's
+    `li` has issued the ready C stores are f54 (1.0 dies, weight 0) and f60
+    (+1) against the guard's -1. The same order follows from the near
+    miss's C order when `this` does not die at f54 (its REG_DEAD note
+    removed from the dump). So retail's groups need only A∪B at priority 5
+    and that C order; with A∪B at 4, 75.0 still comes before f8. In
+    func_001D60B0 a uniform raise is not enough: with A, i0 and B all at 5
+    the replay issues f8 and i68 before i0; A and i0 at 6 and B at 5 give
+    A, i0, B, i.e. the chain A → i0 → B that a base with no known value
+    gives (2026-11-09 probe), not a raise of the whole group.
+  - **What cannot be the source (w26).** No pass between sched1 and sched2
+    merges blocks or deletes labels (toplev.c: local_alloc, global_alloc
+    with reload, reload_cse_regs, rebuild_jump_labels, the splits, then
+    sched2's own find_basic_blocks), so C was not a block of its own in
+    sched1. sched_analyze's remaining sources of a link are a call-used
+    hard register (an anti link to the last call), a pseudo with a
+    REG_EQUIV of a MEM (only the address is analysed, not the memory),
+    CLOBBERs, TRAP_IF and asm; none occurs in these blocks. A pseudo set
+    twice from `(lo_sum hi cfg)` loses its base (record_set), which makes
+    the guard conflict with C as well, so the guard comes last.
+  - **Screened (w26, all compiled with the replay; 21 lines unless
+    noted).** C's 1.0 as `f60 = f54 = f8` (20 lines: the chained store
+    order only), a `static const f32` member, a `double` literal, a static
+    inline returning 1.0f, an enumerator: each is one 1.0 pseudo after CSE
+    with the same order. -100.0 and 75.0 in one variable with C reordered:
+    22 lines (75.0 then follows f44 at once). The record as a POD with an
+    aggregate initialiser holding a non-constant element (dynamic
+    initialisation through store_constructor, guarded): constants first
+    as before, and store_constructor skips i28's zero, where retail stores
+    `sw zero,40(s0)`, so the original assigned the fields (40 lines).

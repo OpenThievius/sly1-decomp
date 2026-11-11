@@ -113,7 +113,7 @@ static inline void MulRotationRowsXW(Mat02* out, const Mat02& a, const Mat02& b)
     *out = r;
 }
 
-void PrepareFadedObjectDraw(PlacedObject* self, Camera* cam, ScaledTransform* xf)
+void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf)
 {
     ScaledTransform t;
     if (self->flags & ((u64)0x8000 << 17)) {

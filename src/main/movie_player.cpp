@@ -132,7 +132,7 @@ struct AttachedTransformFrame {
 void BuildPlacedObjectTransform(void* obj, void* c, void* out);
 void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
 void MultiplyMatrices(void* out, void* b, void* in);
-void PrepareFadedObjectDraw(void* obj, void* s, void* out);
+void ApplyPlacedObjectTransform(void* obj, void* s, void* out);
 
 extern s32 g_gifChannel;
 
@@ -343,7 +343,7 @@ void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
 
     if ((self->flags & 0x100000000ULL) == 0) {
         if (self->f1EC == 0 && self->f1F0 == 0) {
-            PrepareFadedObjectDraw(self, in1, in2);
+            ApplyPlacedObjectTransform(self, in1, in2);
         } else {
             if (self->f1EC != 0) {
                 self->f1EC->vt->getPos(self->f1EC, 0.0f, &f.q00, &f.q10);
@@ -360,7 +360,7 @@ void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
             BuildMatrixFromRotationAndTranslation(&f, &f.tbl30, &f.q60);
             MultiplyMatrices(&f.blkF0, &f.blkA0, &f.q60);
             f.blkA0 = f.blkF0;
-            PrepareFadedObjectDraw(self, in1, &f.blkA0);
+            ApplyPlacedObjectTransform(self, in1, &f.blkA0);
         }
     }
 }

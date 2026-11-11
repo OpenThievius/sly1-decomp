@@ -1088,7 +1088,7 @@
 #define TransformPointAtTime                       func_001259D8
 #define BuildPlacedObjectTransform                 func_00125B70
 #define SubmitScaledPlacedObjectTransform          func_00125BF0
-#define PrepareFadedObjectDraw                     func_00125C90
+#define ApplyPlacedObjectTransform                 func_00125C90
 #define DrawPlacedObject                           func_001261C0
 #define QueuePlacedObjectModelParts                func_00126270
 #define DrawBeamBetweenPoints                      func_001268B8
@@ -1217,7 +1217,7 @@
 #define FindOrCreateClass75Object                  func_0012A970
 #define SetClass75ObjectCount                      func_0012A9C8
 #define SetClass75ObjectScale                      func_0012AA00
-#define SetClass75ObjectMode                       func_0012AA28
+#define SetClass75ObjectField90                    func_0012AA28
 #define SetElementsScrollScale                     func_0012AA50
 #define SetCrossfadeRatioDeep                      func_0012AAE8
 #define EnsureSoundRecord                          func_0012ABA8
@@ -1347,7 +1347,7 @@
 #define BlendRotationsWithSpin                     func_00130748
 #define SampleCurvePoints                          func_00130B48
 #define MeasureCurveSegmentLength                  func_00130C20
-#define FindEarliestCubicBoundTime                 func_00130C58
+#define FindEarliestTimeWithinCurveLimits          func_00130C58
 #define InitCurveSpan                              func_00130F48
 #define EvalCurveSpan                              func_00131000
 #define InitTextPanel                              func_001310F0
@@ -2484,7 +2484,7 @@
 #define SolveArrivalTimeAtHeight                   func_0017FAC0
 #define ComputePlayerJumpVelocity                  func_0017FB78
 #define ComputeUpwardBoostVelocity                 func_0017FC48
-#define ComputeUpwardBoostVelocityAlt              func_0017FCC8
+#define ComputeUpwardBoostVelocityUnitSlope        func_0017FCC8
 #define SetPointObjectListLinkOffset               func_0017FD48
 #define ClearPointObjectList                       func_0017FD70
 #define RegisterPointObject                        func_0017FD90
@@ -3519,7 +3519,7 @@
 #define AddCompanionAgentExcludedId                func_001B7100
 #define StartCompanionAgent                        func_001B7128
 #define IsCompanionAgentBlocker                    func_001B71C8
-#define IsCompanionAgentFree                       func_001B7280
+#define IsCompanionAgentTargetReachable            func_001B7280
 #define UpdateCompanionAgent                       func_001B7608
 #define AimCompanionAgentPose                      func_001B7638
 #define EnterCompanionAgentState                   func_001B7790
@@ -3861,7 +3861,7 @@
 #define SetAgentMainClip                           func_001CB328
 #define RequestAgentLaunch                         func_001CB3C0
 #define IsAgentFree                                func_001CB3C8
-#define IsPlayerEvadingAgent                       func_001CB3D0
+#define IsPlayerUntargetableByAgent                func_001CB3D0
 #define IsAgentFacingBlocked                       func_001CB578
 #define CreateItemKeeper                           func_001CB5B8
 #define InitItemKeeper                             func_001CB618
@@ -4572,7 +4572,7 @@
 #define SetSystemCallHandlerFirstPatch             func_001F6EE0
 #define CopyKernelWordsSyscallFirstPatch           func_001F6EF0
 #define CopyKernelWords                            func_001F6F00
-#define QueryPatchedHandlerFirstPatch              func_001F6F38
+#define RunSyscall5BFirstPatch                     func_001F6F38
 #define InstallFirstKernelPatch                    func_001F6F48
 #define RunRequestThread                           func_001F7020
 #define StartRequestThread                         func_001F70F8
@@ -4630,7 +4630,7 @@
 #define SetSystemCallHandlerSecondPatch            func_001F9EE8
 #define CopyKernelWordsSyscallSecondPatch          func_001F9EF8
 #define CopyKernelWordsSecondPatch                 func_001F9F08
-#define QueryPatchedHandlerSecondPatch             func_001F9F40
+#define RunSyscall5BSecondPatch                    func_001F9F40
 #define IsSecondKernelPatchNeeded                  func_001F9F50
 #define InstallSecondKernelPatch                   func_001F9FB8
 #define SetUpTlb                                   func_001FA068
@@ -4652,7 +4652,7 @@
 #define WriteBackDataCacheRange                    func_001FA7D8
 #define CopyKernelWordsSyscallThirdPatch           func_001FA890
 #define CopyKernelWordsThirdPatch                  func_001FA8A0
-#define QueryPatchedHandlerThirdPatch              func_001FA8D8
+#define RunSyscall5BThirdPatch                     func_001FA8D8
 #define SetSystemCallHandlerThirdPatch             func_001FA8E8
 #define InstallThirdKernelPatch                    func_001FA8F8
 #define WriteTlbEntryForSetUp                      func_001FA9B0
@@ -4690,8 +4690,8 @@
 #define AllocateOrThrow                            func_001FD8A8
 #define AbortOnTerminate                           func_001FD920
 #define RunTerminateHook                           func_001FD930
-#define MatchTypeNameOrZero                        func_001FD958
-#define AllocateRuntimeNode                        func_001FD990
+#define SelectArgumentIfTypeNamesEqual             func_001FD958
+#define AllocateZeroedNodeOrTerminate              func_001FD990
 #define GetExceptionContext                        func_001FD9E8
 #define GetActiveExceptionSlot                     func_001FDA10
 #define InstallExceptionContextGetter              func_001FDA38
@@ -4700,8 +4700,8 @@
 #define ThrowToTopHandler                          func_001FDAF0
 #define PopHandlerAndThrow                         func_001FDC68
 #define ActiveExceptionMatches                     func_001FDD80
-#define GetRecordSubkind                           func_001FDDC8
-#define GetRecordKind                              func_001FDDD0
+#define GetExceptionRecordSubkind                  func_001FDDC8
+#define GetExceptionRecordKind                     func_001FDDD0
 #define FindInnermostRangeValue                    func_001FDDD8
 #define FindHandlerInSpanTable                     func_001FDEB0
 #define ResolveSavedRegisterSlot                   func_001FDFF8
@@ -4870,7 +4870,7 @@
 #define BeginDiscSCommand                          func_002033D8
 #define InitDiscLibrary                            func_00203548
 #define WaitDiscReady                              func_00203828
-#define SendDiscSValueCommand                      func_00203A20
+#define SendDiscSCommand22                         func_00203A20
 #define GetDiscReadPosition                        func_00203AE8
 #define ReadDiscSectors                            func_00203B18
 #define GetDiscStatus                              func_00203CF8
@@ -4886,8 +4886,8 @@
 #define GetPadSlotState                            func_00204590
 #define SetPadRequestMode                          func_00204610
 #define GetPadRequestMode                          func_00204678
-#define GetPadCapabilityEntry                      func_002046D0
-#define GetPadModeEntry                            func_002047F8
+#define GetPadReplyTableByte                       func_002046D0
+#define GetPadReplyListValue                       func_002047F8
 #define SendPadTwoWordRequest                      func_00204930
 #define SetPadActuatorBytes                        func_002049E8
 #define SendPadSixByteRequest                      func_00204AA8

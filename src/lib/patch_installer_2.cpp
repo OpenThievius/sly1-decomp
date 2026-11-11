@@ -119,7 +119,7 @@ s32 IsSecondKernelPatchNeeded(void);
 void SetSystemCallHandlerSecondPatch(s32 a, s32 b);
 void CopyKernelWordsSyscallSecondPatch(s32 a, void* b, s32 c);
 void SyncDataCache(s32 a);
-s32 QueryPatchedHandlerSecondPatch(s32 key);
+s32 RunSyscall5BSecondPatch(s32 key);
 
 void InstallSecondKernelPatch(void)
 {
@@ -136,7 +136,7 @@ void InstallSecondKernelPatch(void)
         do {
             s32 v;
             i++;
-            v = QueryPatchedHandlerSecondPatch(q->key);
+            v = RunSyscall5BSecondPatch(q->key);
             SetSystemCallHandlerSecondPatch(q->key, v);
             q++;
         } while (i < 3);

@@ -57,6 +57,24 @@ def read_status():
     return rows
 
 
+def whole_address(resolver, start, offset):
+    """The version's address of `offset` bytes into the whole file's section at US address `start`:
+    from where the section is placed (Resolver.place) when the check has placed it, else translated."""
+    base = getattr(resolver, "placed", {}).get(start)
+    if base is not None:
+        return base + offset
+    return resolver.translate(start + offset)
+
+
+def inside_placed(resolver, address):
+    """The version's address of a US address inside a datum the check has placed (Resolver.place),
+    at its offset there, or None."""
+    for start, size in getattr(resolver, "extent", {}).items():
+        if start <= address < start + size and start in resolver.placed:
+            return resolver.placed[start] + address - start
+    return None
+
+
 def section_target(obj, resolver, whole, rsym, addend):
     """The version's address a relocation of a data section reaches, or None.
 
@@ -72,7 +90,7 @@ def section_target(obj, resolver, whole, rsym, addend):
             base = resolver.address(secname.split(".", 2)[2])
             return None if base is None else base + addend
         if secname in WHOLE_KINDS and whole and whole.get(WHOLE_KINDS[secname]) is not None:
-            return resolver.translate(whole[WHOLE_KINDS[secname]] + addend)
+            return whole_address(resolver, whole[WHOLE_KINDS[secname]], addend)
         if secname == ".text":
             named = [s for s in obj.symbols if s["shndx"] == sec["index"] and s["name"]
                      and s["value"] <= addend and resolver.address(s["name"]) is not None]
@@ -83,11 +101,17 @@ def section_target(obj, resolver, whole, rsym, addend):
     t = resolver.address(rsym["name"])
     if t is not None:
         return t + addend
+    us = resolver.us_address(rsym["name"]) if hasattr(resolver, "us_address") else None
+    if us is not None and rsym["shndx"] == elf.SHN_UNDEF:
+        # A datum another file defines, which the check has placed: its own start and offset.
+        t = inside_placed(resolver, us + addend)
+        if t is not None:
+            return t
     if rsym["shndx"] not in (elf.SHN_UNDEF,) and rsym["shndx"] < len(obj.sections):
         # A symbol the object defines in one of its whole file's data sections.
         kind = WHOLE_KINDS.get(obj.sections[rsym["shndx"]]["name"])
         if kind and whole and whole.get(kind) is not None:
-            return resolver.translate(whole[kind] + rsym["value"] + addend)
+            return whole_address(resolver, whole[kind], rsym["value"] + addend)
     return None
 
 
@@ -115,7 +139,7 @@ def check_global(obj, row, resolver, image, whole):
     name, addr, size, section, _source = row
     if section == ".bss":
         return None, "absent", "bss: no bytes in the executable"
-    eu = resolver.translate(addr)
+    eu = resolver.place(addr, size) if hasattr(resolver, "place") else resolver.translate(addr)
     if eu is None:
         return None, "absent", "no PAL address: its US address is not inside a paired datum"
     data, note = section_bytes(obj, section, resolver, whole)
@@ -127,8 +151,25 @@ def check_global(obj, row, resolver, image, whole):
         return eu, "differs", "PAL has no bytes at 0x%08X.." % eu
     if theirs == data:
         return eu, "match", ""
-    first = next(i for i, (a, b) in enumerate(zip(data, theirs)) if a != b)
-    return eu, "differs", "first difference at +0x%X" % first
+    return eu, "differs", describe(data, theirs, {o for o, _t, _s in obj.relocations(section)})
+
+
+def printable(word):
+    """A word of text: ASCII letters and punctuation, with at most NUL padding."""
+    return all(32 <= b < 127 or b == 0 for b in word) and any(b >= 32 for b in word)
+
+
+def describe(ours, theirs, pointers):
+    """The note of a `differs` row: where the bytes first differ, and what the words that differ
+    are (text of ours, a pointer, or other data)."""
+    first = next(i for i, (a, b) in enumerate(zip(ours, theirs)) if a != b)
+    kinds = {"text": 0, "pointer": 0, "other": 0}
+    for i in range(0, len(ours) - 3, 4):
+        if ours[i:i + 4] != theirs[i:i + 4]:
+            kinds["pointer" if i in pointers else "text" if printable(ours[i:i + 4]) else "other"] += 1
+    note = "first difference at +0x%X; %s words differ" % (
+        first, ", ".join("%d %s" % (n, k) for k, n in kinds.items() if n))
+    return note
 
 
 def run():
@@ -141,6 +182,8 @@ def run():
     image = check.retail_image("eu")
     wholes = todo.whole_files()
     by_source = {}
+    for row in us_globals():
+        resolver.place(row[1], row[2])      # every datum placed before any pointer into one is resolved
     for row in us_globals():
         by_source.setdefault(row[4], []).append(row)
     rows = {}

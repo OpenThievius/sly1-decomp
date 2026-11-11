@@ -523,7 +523,7 @@ extern Rgba4 D_002623E0;
 
 f32 Cosine(f32 x);
 void SetObjectTreeRecordValue(ModeCollider* o, u32 value);
-void PrepareFadedObjectDraw(ModeCollider* o, void* s, void* out);
+void ApplyPlacedObjectTransform(ModeCollider* o, void* s, void* out);
 
 void ApplyModeColliderTint(ModeCollider* self, void* s, void* out)
 {
@@ -573,7 +573,7 @@ void ApplyModeColliderTint(ModeCollider* self, void* s, void* out)
         res = D_002623E0;
     }
     SetObjectTreeRecordValue(self, *(u32*)&res);
-    PrepareFadedObjectDraw(self, s, out);
+    ApplyPlacedObjectTransform(self, s, out);
 }
 
 // Matches retail's bytes (EXACT us and eu): the call result is tested directly with a goto to the zero return.

@@ -153,7 +153,7 @@ f32 Cosine(f32 x);
 
 void SetObjectTreeRecordValue(ModeWalker* o, u32 c);
 
-void PrepareFadedObjectDraw(ModeWalker* o, void* a, void* b);
+void ApplyPlacedObjectTransform(ModeWalker* o, void* a, void* b);
 
 f32 Cosine(f32 value);
 
@@ -453,7 +453,7 @@ void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
         c = D_002623E0[0];
     }
     SetObjectTreeRecordValue(o, *(u32*)&c);
-    PrepareFadedObjectDraw(o, a, b);
+    ApplyPlacedObjectTransform(o, a, b);
 }
 
 void CaptureModeWalkerTarget(ModeWalker* self, void* outv)

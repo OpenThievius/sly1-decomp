@@ -47,14 +47,14 @@ s32 TestPointAgainstObjectShape(s32 shape, Vec02* p);
 void* PushSoundLevel(s32 kind);
 void RemoveSoundLevelAndRecompute(void* p);
 s32 IsPointInsideObjectFaces(void* shape, Vec02* p);
-s32 IsPlayerEvadingAgent(CompanionAgent* self);
+s32 IsPlayerUntargetableByAgent(CompanionAgent* self);
 void TransformPointBetweenFrames(void* from, s32 to, void* in, void* out);
 void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(CompanionAgent*, Collider*), CompanionAgent* self, s32* n, Collider*** list);
 s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** list, ColliderSpan* out);
 
 #define F(T, o) (*(T*)((u8*)self + (o)))
 
-s32 IsCompanionAgentFree(CompanionAgent* self)
+s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0 || F(s32, 0xCCC) != 0) return 0;
     if (F(s32, 0xCC8) != 0) return 1;
@@ -97,7 +97,7 @@ s32 IsCompanionAgentFree(CompanionAgent* self)
     s32 v = GetAgentRosterState(self);
     if ((F(s32, 0xCD0) & 1) == 0) {
         if (v != 2) {
-            if (IsPlayerEvadingAgent(self) != 0) return 0;
+            if (IsPlayerUntargetableByAgent(self) != 0) return 0;
         }
     }
     if (F(s32, 0xCD0) & 2) return 1;

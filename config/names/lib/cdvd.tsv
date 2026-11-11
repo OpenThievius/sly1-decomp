@@ -14,7 +14,7 @@ func_00203368	SyncDiscSCommand	the same for the second disc client's commands, p
 func_002033D8	BeginDiscSCommand	takes the semaphore of the second disc client's commands, and binds the client to the service 0x80000593 once, printing "Scmd fail sema" when busy
 func_00203548	InitDiscLibrary	original assembly: binds the disc library to the IOP and initialises it, printing its "CD_Init" message on a bind error (LoadIopModules calls it)
 func_00203828	WaitDiscReady	original assembly: waits until the drive reports ready, with its "DiskReady" messages (LoadIopModules and EnsureSoundBankLoaded call it)
-func_00203A20	SendDiscSValueCommand	sends the second disc client command 0x22 with one word and returns the word the reply holds
+func_00203A20	SendDiscSCommand22	sends the second disc client command 0x22 with one word (BeginDiscSCommand, CallRemoteService) and returns the word the reply holds; its only caller sends 2 when the disc status is 0x14
 func_00203AE8	GetDiscReadPosition	returns the word the IOP keeps in D_0027A5C0, read through its uncached address (RefillBufferedStreamFromSectors calls it)
 func_00203B18	ReadDiscSectors	original assembly: starts a read of a count of sectors into a buffer with the first client ("call cdread cmd"); StartDiscRead forwards to it
 func_00203CF8	GetDiscStatus	the second client's command 3, returning its word (func_00140968 polls it)

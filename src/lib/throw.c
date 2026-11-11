@@ -51,7 +51,7 @@ void RunTerminateHook(void)
 
 typedef struct Obj_1FD958 Obj_1FD958;
 
-s32 MatchTypeNameOrZero(Obj_1FD958* self, s32 v, s32 fallback)
+s32 SelectArgumentIfTypeNamesEqual(Obj_1FD958* self, s32 v, s32 fallback)
 {
     s32 result = fallback;
     if (CompareStrings(self, v) != 0) {
@@ -71,7 +71,7 @@ typedef struct Node_001FD990 {
     s32 f14;
 } Node_001FD990;
 
-Node_001FD990* AllocateRuntimeNode(void)
+Node_001FD990* AllocateZeroedNodeOrTerminate(void)
 {
     Node_001FD990* p = (Node_001FD990*)EnterRuntimeLock(0x18);
     if (p == 0) {
@@ -215,12 +215,12 @@ s32 ActiveExceptionMatches(void* type)
     return match(info, type, 0) != 0;
 }
 
-s16 GetRecordSubkind(void* object)
+s16 GetExceptionRecordSubkind(void* object)
 {
     return *(s16*)((u8*)object + 6);
 }
 
-s16 GetRecordKind(void* object)
+s16 GetExceptionRecordKind(void* object)
 {
     return *(s16*)((u8*)object + 4);
 }

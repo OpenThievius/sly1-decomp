@@ -21,7 +21,7 @@ splits are taken from other projects or from the prototype
 ## Next
 
 Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-11: US at
-93.12% of code (4,759 of 4,807 functions) and 94.56% of data, PAL at 92.93% of code and 60.48% of data, 48 US
+93.12% of code (4,759 of 4,807 functions) and 94.56% of data, PAL at 93.06% of code and 62.19% of data, 48 US
 functions left, every one with a near miss in `nonmatching/`, the original assembly classified,
 every byte of code in a proved source file, PAL's own game code all defined, and names and types
 well under way. What is still open is the long tail of the matching, the readable names of the
@@ -54,9 +54,10 @@ functions left with their address names, and the disc's data.
    (23,461 bytes left). PAL links no C, so its data is checked at its counterparts as its
    functions are (`tools/version_check.py`, then `tools/data_check.py`, `config/eu/c_data_status.tsv`):
    a global counts for PAL when its bytes, with every pointer translated to PAL's addresses, equal
-   PAL's at its PAL address. On 2026-11-11, 179 of the 240 globals match (280,987 bytes, 60.48% of
-   PAL's data), 39 differ (PAL's own bytes, or pointers the translation cannot place) and 22 are
-   absent (21 are `.bss`, which has no bytes in the file, and one has no PAL address).
+   PAL's at its PAL address. On 2026-11-11, 185 of the 240 globals match (288,915 bytes, 62.19% of
+   PAL's data), 34 differ and 21 are absent (all `.bss`, which has no bytes in the file). The 34 are
+   PAL's own bytes (text, jump tables of its own functions, values and tables it changed;
+   docs/VERSIONS.md), none a placement the tools could still derive.
 3. **Original assembly.** The functions that were not made from C (system-call stubs, crt0,
    the toolchain's own `.S` routines, the libraries' multimedia routines, frameless VU0 leaves,
    code scheduled by hand) and the linker's leftovers, in game code and in Sony's libraries, are

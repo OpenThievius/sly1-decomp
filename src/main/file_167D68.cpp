@@ -397,7 +397,7 @@ s32 IsPadSelectFlagHeld(void* p);
 typedef s32 (*SlotFnRet)(void* self);
 s32 TestPointAgainstObjectShape(void* obj, Vec02* p);
 f32 ComputeAgentTargetBearing(void* self);
-s32 IsPlayerEvadingAgent(void* self);
+s32 IsPlayerUntargetableByAgent(void* self);
 
 s32 IsConeAgentFree(ConeAgent* self)
 {
@@ -449,7 +449,7 @@ s32 IsConeAgentFree(ConeAgent* self)
             return 0;
         }
     }
-    if (IsPlayerEvadingAgent(self) != 0) {
+    if (IsPlayerUntargetableByAgent(self) != 0) {
         return 0;
     }
     self->fC38 = 1;

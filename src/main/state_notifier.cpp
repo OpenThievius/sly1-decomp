@@ -22,7 +22,7 @@
 #include "shapes.h"
 #include "list_iter.h"
 
-void SetClass75ObjectMode(void* a, s32 b);
+void SetClass75ObjectField90(void* a, s32 b);
 void LoadPlacedObject(void* a, void* b);
 void ResolveObjectLinks(void* a, s32 b, void* c);
 void CopyPlacedObject(void* a, void* b);
@@ -286,7 +286,7 @@ void InitStateNotifier(StateNotifier* self)
 
 void LoadStateNotifier(StateNotifier* self, void* arg)
 {
-    SetClass75ObjectMode(self, 1);
+    SetClass75ObjectField90(self, 1);
     LoadPlacedObject(self, arg);
     ResolveObjectLinks(self, 5, g_stateNotifierLinks);
 }
@@ -844,7 +844,7 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
 void BuildScaledTransformMatrix(const void* pos, const void* rot, void* scale, void* out);
 void BuildPlacedObjectTransform(PlacedObject* self, void* src, void* dst);
 Mat4A MultiplyMatrices(const void* a, const void* b);
-void PrepareFadedObjectDraw(PlacedObject* self, void* a, void* m);
+void ApplyPlacedObjectTransform(PlacedObject* self, void* a, void* m);
 
 void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
 {
@@ -889,7 +889,7 @@ void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
         break;
     }
     }
-    PrepareFadedObjectDraw(self, a, m);
+    ApplyPlacedObjectTransform(self, a, m);
 }
 
 

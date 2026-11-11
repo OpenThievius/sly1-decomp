@@ -138,7 +138,7 @@ extern s32 (*D_00276608[6])[4];
 #include "common.h"
 
 void RemoveCameraControllers(u32, int, int, void*, int, void*);
-void PrepareFadedObjectDraw();
+void ApplyPlacedObjectTransform();
 struct TimedValue { u8 pad[0x98]; s32 state; f32 value; };
 
 void InitPlacedObject(void*);
@@ -1437,7 +1437,7 @@ void CollectTouchingObjects(ContactTracker* self) {
 
 void CopyContactTracker(ContactTracker* self) { CopyCollider(self); self->rec.owner = self; }
 
-void ApplyContactTrackerTransform() { PrepareFadedObjectDraw(); }
+void ApplyContactTrackerTransform() { ApplyPlacedObjectTransform(); }
 
 int RequestContactTrackerLaunch(ContactTracker* self) { OfferTrackedNodeLaunch(&self->rec); return 1; }
 

@@ -2,5 +2,5 @@ symbol	name	evidence
 func_001F6EE0	SetSystemCallHandlerFirstPatch	the first patch installer's own copy of system call stub 0x74, which InstallFirstKernelPatch calls with a call number and the handler (or kernel address) the table D_002770E8 gives for it
 func_001F6EF0	CopyKernelWordsSyscallFirstPatch	the first patch installer's own copy of system call stub 0x5A, which InstallFirstKernelPatch calls to copy its code into the kernel after installing CopyKernelWords as that call
 func_001F6F00	CopyKernelWords	copies bytes / 4 words from src to dst and returns 0; the first patch installer installs it as system call 0x5A and copies its code into the kernel through it
-func_001F6F38	QueryPatchedHandlerFirstPatch	the first patch installer's own copy of system call stub 0x5B, which InstallFirstKernelPatch calls with each call number of its table and passes the result back to the 0x74 stub
+func_001F6F38	RunSyscall5BFirstPatch	the first patch installer's own copy of system call stub 0x5B, which InstallFirstKernelPatch calls with each call number of its table and passes the result back to the 0x74 stub
 func_001F6F48	InstallFirstKernelPatch	unless bit 8 of the hardware word at 0x10001810 is set, copies D_00276980 to 0x80076000 and D_002770C0 to 0x82000, syncs the caches and sets the system calls D_002770E8 lists (InitKernelLibrary calls it)

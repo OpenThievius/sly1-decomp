@@ -598,7 +598,7 @@ void SetAimTarget();
 void GetAimTarget();
 void SetClass75ObjectCount();
 void SetClass75ObjectScale();
-void SetClass75ObjectMode();
+void SetClass75ObjectField90();
 void SetSoundRecordId();
 void RestartSoundWithId();
 void GetSoundRecordId();
@@ -962,7 +962,7 @@ void FillObjectPropertyTable()
     PropInit::Set1(p, (s32)SetScriptElementsScrollScale, 0, 18, 1, 2); p++;
     PropInit::Set6(p, (s32)SetClass75ObjectCount, 4127, 288, (s32)SetClass75ObjectCount); p++;
     PropInit::Set6(p, (s32)SetClass75ObjectScale, 1, 288, (s32)SetClass75ObjectScale); p++;
-    PropInit::Set6(p, (s32)SetClass75ObjectMode, 0, 288, (s32)SetClass75ObjectMode); p++;
+    PropInit::Set6(p, (s32)SetClass75ObjectField90, 0, 288, (s32)SetClass75ObjectField90); p++;
     PropInit::Set1(p, (s32)SetScriptCrossfadeRatioDeep, 0, 18, 1, 1); p++;
     PropInit::Set6(p, (s32)SetObjectRecordValue, 5, 288, (s32)SetObjectRecordValue); p++;
     PropInit::Set9(p, 32, 5, (s32)SetObjectTreeRecordValue); p++;

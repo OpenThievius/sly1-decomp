@@ -62,7 +62,7 @@ u32 D_002779C0[220] = {
 
 struct Blk_1FA8F8;
 u32 D_00277D30[16] = { 0x5A, 0x1FA8A0, 0x5B, 0x80075000, 0x54, 0x1FAC40, 0x55, 0, 0x56, 0, 0x57, 0, 0x58, 0, 0x59, 0 };
-u32 QueryPatchedHandlerThirdPatch(Blk_1FA8F8* a);
+u32 RunSyscall5BThirdPatch(Blk_1FA8F8* a);
 void SetSystemCallHandlerThirdPatch(Blk_1FA8F8* a, u32 b);
 void CopyKernelWordsSyscallThirdPatch(Blk_1FA8F8* a, void* b, s32 c);
 void SyncDataCache(s32 a);
@@ -80,7 +80,7 @@ void InstallThirdKernelPatch() {
     s1 = s0 + 6;
     do {
         k++;
-        u32 v = QueryPatchedHandlerThirdPatch((Blk_1FA8F8*)s1[0]);
+        u32 v = RunSyscall5BThirdPatch((Blk_1FA8F8*)s1[0]);
         SetSystemCallHandlerThirdPatch((Blk_1FA8F8*)s1[0], v);
         s1 += 2;
     } while (k < 8);
