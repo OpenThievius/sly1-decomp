@@ -2894,7 +2894,51 @@ f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis)
 
 INCLUDE_ASM(func_001EDA80);
 
-INCLUDE_ASM(func_001EDC08);
+void FindSegmentClosestParams(const Vec02* p0, const Vec02* p1, const Vec02* q0, const Vec02* q1, f32* st, f32* dist, Vec02* dir);
+
+// v clamped to [0, 1].
+static inline f32 ClampUnit(f32 v)
+{
+    f32 c;
+    f32 lo = 0.0f;
+    f32 hi = 1.0f;
+    if (v < lo) {
+        c = lo;
+    } else if (hi < v) {
+        c = hi;
+    } else {
+        c = v;
+    }
+    return c;
+}
+
+// The closest points of the segments p0-p1 and q0-q1, their fractions clamped to the segments:
+// the direction from the first to the second into dir (the x axis when they meet) and the
+// distance into dist.
+void FindClosestPointsOnSegments(const Vec02* p0, const Vec02* p1, const Vec02* q0, const Vec02* q1, f32* st, f32* dist, Vec02* dir)
+{
+    FindSegmentClosestParams(p0, p1, q0, q1, st, dist, dir);
+    st[0] = ClampUnit(st[0]);
+    st[1] = ClampUnit(st[1]);
+    Vu0::Vec w0 = Vu0::Vec::Scalar(st[0] - 1.0f);
+    Vu0::Vec a0 = Vu0::Vec::Of(*p0);
+    Vu0::Vec w1 = Vu0::Vec::Scalar(-st[0]);
+    Vu0::Vec a1 = Vu0::Vec::Of(*p1);
+    Vu0::Vec w2 = Vu0::Vec::Scalar(1.0f - st[1]);
+    Vu0::Vec a2 = Vu0::Vec::Of(*q0);
+    Vu0::Vec w3 = Vu0::Vec::Scalar(st[1]);
+    Vu0::Vec a3 = Vu0::Vec::Of(*q1);
+    u128 d = Vu0::MulXSum4(a0, w0, a1, w1, a2, w2, a3, w3).q;
+    Vu0::Q(*dir) = d;
+    const Vec02* fallback = &g_unitXVector;
+    u128 len = Vu0::Length(d);
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
+        *dir = *fallback;
+    } else {
+        Vu0::Q(*dir) = Vu0::DivX(d, len);
+    }
+    Vu0::StoreX(*dist, Vu0::ToBits(len));
+}
 
 void GetVectorAngles(Vec3* v, f32* a1, f32* a2)
 {
