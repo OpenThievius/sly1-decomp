@@ -170,6 +170,16 @@ Measured 2026-11-10 (w15) from the -dS and -dl dumps, with local-alloc.c and glo
   life (or one fewer before hi) that is gone by the final code. Written `y1` before `y0`,
   sched1 puts y1's subtraction last and local-alloc's registers are retail's but global-alloc's
   are not; the other way round, the reverse.
+- **Measured with the replays (w19, 2026-11-10).** tools/globalalloc.py `--pri 142=13900` (the
+  temporary's quantity just above hi's 3 * 12 / 26 = 13846) gives the four differing pseudos
+  retail's registers and changes nothing else; on the y1-first form, `--set 144:length=36` (from
+  33) gives retail's $f23/$f24 and 35 does not, so that form is three insns short, not one. In
+  the landed order the one-insn condition holds either way round: an insn between hi's birth
+  (block 1 insn 7) and y1's subtraction (20) that is gone by the final code, or the temporary's
+  `one - lo` and `* k` adjacent (life 4: 2 * 4 / 4 beats hi). tools/sched1.py shows block 1
+  bound by the single fmac unit: the multiply is ready three cycles after its subtraction, and
+  no priority change moves y1's subtraction; raising the temporary over hi (`--prio 116=12`)
+  shortens hi's life instead.
 
 ### A loop's counter as the outer loop's variable, and a counter of its own for an earlier loop (func_001D5678, near miss)
 
