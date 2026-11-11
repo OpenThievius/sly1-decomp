@@ -639,9 +639,9 @@ void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
 }
 
 
-INCLUDE_RODATA(D_00249CE0);
-INCLUDE_RODATA(D_00249CE8);
-INCLUDE_RODATA(D_00249CF0);
+extern const char D_00249CE0[8] = "%c";
+extern const char D_00249CE8[8] = "Move";
+extern const char D_00249CF0[8] = "Zoom";
 INCLUDE_ASM(func_00131F60);
 
 void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)

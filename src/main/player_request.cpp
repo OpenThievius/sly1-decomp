@@ -855,7 +855,7 @@ struct SortedTarget { u8 pad[0x10]; f32 key; };
 s32 CompareSortedTargets(SortedTarget* a, SortedTarget* b) { if (a->key < b->key) return -1; return 1; }
 
 
-INCLUDE_RODATA(D_0024DC88);
+extern const f32 D_0024DC88 = 3.4028235e38f;
 INCLUDE_ASM(func_001D5678);
 
 
