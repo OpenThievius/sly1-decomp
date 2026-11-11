@@ -1,0 +1,7 @@
+symbol	name	evidence
+func_001FFFD0	ReplaceNewHandler	stores a new out-of-memory handler in D_002789D8 and returns the old one (new_handler.cpp)
+func_001FFFE0	ReturnPlacement	returns its second argument, the address it is given (new_handler.cpp; one of the two placement allocations)
+func_001FFFE8	ReturnArrayPlacement	returns its second argument, the address it is given (new_handler.cpp; the array twin of ReturnPlacement)
+func_001FFFF0	GetAllocFailureText	returns the text of the allocation failure class (new_handler.cpp; its vtable's what slot)
+func_00200000	GetTypeInfoOfAllocFailure	returns the type information of the allocation failure class, building it on first use (new_handler.cpp)
+func_00200050	DestroyAllocFailure	destructor of the allocation failure class: resets the vtable to the exception base class's and calls the base destructor (new_handler.cpp)
