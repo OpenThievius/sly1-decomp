@@ -210,7 +210,7 @@ void* D_00261B60[28] = {
 };
 f32 D_00261BD0[4] = { 0.0f, 0.0f, 200.0f, 0.0f };
 f32 D_00261BE0 = 0.75f;
-INCLUDE_DATA(D_00261BE4);
+f32 D_00261BE4 = -1.0f;
 
 void InitScaledOffsetObject(ScaledOffsetObject* self)
 {
