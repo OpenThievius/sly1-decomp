@@ -15,6 +15,15 @@
 // 16.0 (8/35 against 39/174, 16.0's life doubled by its REG_EQUIV), the other swap. Both hold
 // only with one more insn in y1's life than ours has (or one fewer before hi in block 1):
 // retail's loop has an insn ours lacks that reload or flow2 deletes. Not found.
+// w19 (2026-11-10, tools/globalalloc.py, tools/sched1.py): re-scored 11 lines. `--pri 142=13900` (the (1 - lo)
+// temporary ranked just above hi's quantity, 13846) gives all four differing pseudos retail's registers (d and the
+// temporary $f2, hi and hi * height $f3) and changes nothing else, so the local-alloc tie is the whole difference.
+// With y1 written before y0 the gap is three insns, not one: `--set 144:length=36` (from 33) gives retail, 35 does not.
+// In this form it holds with hi's life two longer (one insn between hi at insn 7 and y1's subtraction at 20) or the
+// temporary's two shorter (its `one - lo` and `* k` adjacent). sched1's block 1 is bound by the single fmac unit:
+// no priority change in sched1.py moves y1's subtraction or the temporary's multiply (132 is ready at cycle 11,
+// three after 130); a swap of hi and the temporary (`--prio 116=12`) shortens hi instead. Tried: hi as `lo; hi += d`
+// and `d; hi += lo` (CSE merges, 11 lines), `height * lo` (12), the zoom read in the condition (14).
 // Earlier (w11): the colours as named constant pointers at the top of the loop body (g++ folds
 // their uses, so each arm keeps its own %lo with a REG_EQUAL note and jump.c does not hoist an
 // arm before reload, while the dead declarations make both %hi's anticipated, so PRE hoists

@@ -1821,6 +1821,13 @@ TurnColliderTowardRotation (2026-11-09):
     (`ringPoints >= 0`, `!(ringPoints & 0x100)`: gcse's cprop folds the jump, 7 lines) or
     not at all (`ringPoints < 256`, `(u32)ringPoints < 256`: combine keeps the `slti`, 85
     lines), and none is a plausible test in this constructor.
+- **Which of the two (w19, 2026-11-10, tools/sched1.py).** On the member-order dumps, `--prio`
+  setting only f70's and f78's stores to 1 reproduces retail's eleven stores. Deleting the 1.0
+  and -1 pseudos' REG_DEAD notes from the `.regmove` dump (weight 0) reproduces them too, but
+  then both constants are set once and live at the block's end, adjust_priority's birthing rule
+  raises their loads, and sched1 issues 1.0, -1, 750, -1500, where retail's code loads 1.0, 750,
+  -1, -1500 (our own order). So retail's stores are the late-ready kind: f70 and f78 wait on
+  something issued after f54, the constants still die there.
 
 ### A weight's store inside a short life (func_0013F290)
 
