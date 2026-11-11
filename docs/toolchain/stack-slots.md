@@ -145,6 +145,25 @@ Read further from reload1.c, reload.c and the `-dF -dG -dt -dl -dg` dumps (2026-
   reload, or a frame store cse2 could not see when it reached the asm. Neither comes from a
   plain form tried so far.
 
+Read again with tools/globalalloc.py (2026-11-10, w19):
+
+- **Not caller-saves.** d (r136) has 4 refs, 37 insns of life and crosses 2 calls, VU_REGS;
+  global-alloc leaves it to the stack because caller-saves pays only when 4 * calls < refs.
+  `--set 136:refs=9` puts it in vf6 by caller-saves, retail's register, and that is how
+  func_00126270 (the same cull in a loop, where refs count four times) gets its `qmfc2
+  a1,$vf6`: `vsub vf6` directly, then `sqc2 vf6`/`lqc2 vf6` around each call. Retail's
+  func_00125C90 writes the difference to vf3, stores it at 0x1C0 and loads it into vf6, so its
+  d is not a caller-saved register: the vf6 is a register read from the slot.
+- **What fits every line.** d a memory variable at a purge_addressof-time slot (0x1C0, after
+  fade's 0x1B0), the difference stored from vf3, one load of it (vf6, local, VU_REGS: the asm's
+  `"j"`) shared by the asm and the first call's argument, and the second call's argument the
+  memory itself (`lq a1`, after the first call invalidated memory). That needs cse1 and cse2
+  both to leave the load alone; a scan of the whole executable for an `lqc2 vfN, X(sp)`
+  followed by `qmfc2 aN, vfN` finds four functions: func_00126270 and func_0018F9D8 are
+  caller-saved loops (their difference is written straight into the saved register),
+  func_001841D0 a memory-to-memory copy (reload_override_in), so there is no other example of
+  this one's form to learn it from.
+
 ### A pointer field's type picks its store's partner (func_002042C8)
 
 Read from haifa-sched.c (priority, rank_for_schedule) and the `-dS -dl -dg -fsched-verbose-6`

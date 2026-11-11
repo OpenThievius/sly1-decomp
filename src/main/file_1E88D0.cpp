@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The source file from 0x1E88D0 to 0x1F2758, built whole (config/us/files.tsv): it starts where
 // file_1E5378.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
-// list D_0027B130). Its .rodata runs 0x24E600-0x24E840 and its .data 0x275B60-0x276658, the
-// zero-initialised D_00276654 last. Named after its first address until what it was is known.
+// list D_0027B130). Its .rodata runs 0x24E600-0x24E840 and its .data 0x275B60-0x276970, which ends
+// with the C library's state record and the pointer to it (D_0027696C). Named after its first address until what it was is known.
 #include "common.h"
 #include "switched_collider.h"
 #include "list_iter.h"
@@ -717,7 +717,20 @@ f32 D_eu_0027FDB0 = D_eu_0027FDAC * 0.75f;
 f32 D_00276648 = 24.0f;
 f32 D_00276650 = D_00276648 * 0.75f;
 #endif
-s32 D_00276654;
+s32 D_00276654 = 0;
+extern s32 D_00276864, D_002768BC, D_00276914;
+extern f32 D_0027663C[];
+char D_00276658[8] = "jojo";
+char D_00276660[16] = "08/24/02 22:06";
+char D_00276670[12] = "0824.2206";
+// The C library's state record (g_libraryState points to it): the error number, the three records
+// after it, a pointer into .rodata at +0x34 and the random seed at +0x58.
+void* D_00276680[121] = { 0, &D_00276864, &D_002768BC, &D_00276914, 0, 0, 0, 0, 0, 0, 0, 0, 0, (void*)0x0024E980,
+                          0, 0, 0, 0, 0, 0, 0, 0, (void*)1 };
+INCLUDE_DATA(D_00276864);
+INCLUDE_DATA(D_002768BC);
+INCLUDE_DATA(D_00276914);
+void* D_0027696C = D_00276680;
 
 
 void InitKeyedConeAgent(KeyedConeAgent* self)
@@ -2894,7 +2907,51 @@ f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis)
 
 INCLUDE_ASM(func_001EDA80);
 
-INCLUDE_ASM(func_001EDC08);
+void FindSegmentClosestParams(const Vec02* p0, const Vec02* p1, const Vec02* q0, const Vec02* q1, f32* st, f32* dist, Vec02* dir);
+
+// v clamped to [0, 1].
+static inline f32 ClampUnit(f32 v)
+{
+    f32 c;
+    f32 lo = 0.0f;
+    f32 hi = 1.0f;
+    if (v < lo) {
+        c = lo;
+    } else if (hi < v) {
+        c = hi;
+    } else {
+        c = v;
+    }
+    return c;
+}
+
+// The closest points of the segments p0-p1 and q0-q1, their fractions clamped to the segments:
+// the direction from the first to the second into dir (the x axis when they meet) and the
+// distance into dist.
+void FindClosestPointsOnSegments(const Vec02* p0, const Vec02* p1, const Vec02* q0, const Vec02* q1, f32* st, f32* dist, Vec02* dir)
+{
+    FindSegmentClosestParams(p0, p1, q0, q1, st, dist, dir);
+    st[0] = ClampUnit(st[0]);
+    st[1] = ClampUnit(st[1]);
+    Vu0::Vec w0 = Vu0::Vec::Scalar(st[0] - 1.0f);
+    Vu0::Vec a0 = Vu0::Vec::Of(*p0);
+    Vu0::Vec w1 = Vu0::Vec::Scalar(-st[0]);
+    Vu0::Vec a1 = Vu0::Vec::Of(*p1);
+    Vu0::Vec w2 = Vu0::Vec::Scalar(1.0f - st[1]);
+    Vu0::Vec a2 = Vu0::Vec::Of(*q0);
+    Vu0::Vec w3 = Vu0::Vec::Scalar(st[1]);
+    Vu0::Vec a3 = Vu0::Vec::Of(*q1);
+    u128 d = Vu0::MulXSum4(a0, w0, a1, w1, a2, w2, a3, w3).q;
+    Vu0::Q(*dir) = d;
+    const Vec02* fallback = &g_unitXVector;
+    u128 len = Vu0::Length(d);
+    if (Vu0::ToFloatMoved(len) < 0.0001f) {
+        *dir = *fallback;
+    } else {
+        Vu0::Q(*dir) = Vu0::DivX(d, len);
+    }
+    Vu0::StoreX(*dist, Vu0::ToBits(len));
+}
 
 void GetVectorAngles(Vec3* v, f32* a1, f32* a2)
 {
@@ -4807,7 +4864,6 @@ void DrawFontString(Font* font, const void* text, void* out, s32 zero, void* d);
 void PopFontScale(Font* font);
 extern f32 D_00276648;
 // Three floats; the first sizes the warp map's level labels.
-extern f32 D_0027663C[];
 
 // A colour of the warp map, one byte per channel, passed to DrawColoredCircle.
 struct WarpColor {

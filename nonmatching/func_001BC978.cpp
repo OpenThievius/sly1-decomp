@@ -24,6 +24,16 @@
 // ro's Rotate) and takes the first GPR, v0. Retail's v1 fits a second reload in reload's
 // round robin, i.e. offsetSq's dot in a VU0 register. Also not it: o->mass read in the
 // expression, ToFloatViaBits for offsetSq.
+// w19 (2026-11-10, tools/globalalloc.py, sched1.py, -dR dumps): retail's v1 is reload's rotation
+// (v0 for d's reload, v1 next, a0 skipped while it holds the call's argument), so offsetSq's dot
+// is a VU0 pseudo whose qmfc2 is the mtc1 asm's input reload. The second difference is roSq's
+// conversion: with the compiler's qmfc2 (unit vu0) sched2 puts the mtc1 before the t store, as
+// retail; with ToFloat's asm qmfc2 never. But ToFloatMoved makes roSq's dot TI_REGS in v0 and
+// its output reload takes vf1 (retail vf5, a local VU0 placement), so retail has both products
+// VU_REGS with "r" readers: func_00186230's wall twice. Probes, not landed: a dummy "j" operand
+// (v1, but the third reference reorders the VU0 registers); an mtc1 helper taking u64 with
+// `(u64)` of the dot (inheritance from the output reload register: every offsetSq line retail's,
+// four lines left to two; for roSq vf1 again), no evidence the original had it.
 
 struct ImpulseRow {
     Vec02 linear;           // 0x00

@@ -53,6 +53,7 @@ u8 D_002793A8[16] = { 0, 0, 0, 3, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0 };
 u8 D_002793B8[16] = { 0, 1, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 u8 D_002793C8[16] = { 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 DmaSettings g_dmaSettings = { 0 };
+u32 D_002793F0[4] = { 0 };
 
 s32 PrintFormatted(const char* format, ...);
 s32 SetDmaSettings(DmaSettings* c);

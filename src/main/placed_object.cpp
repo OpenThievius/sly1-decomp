@@ -6708,6 +6708,6 @@ void MeasureCurveSegmentLength(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y)
     AccumulateSegmentLengths(20, buf, 0);
 }
 
-INCLUDE_RODATA(D_00249C90);
+extern const f32 D_00249C90[4] = { 3.4028235e38f, 0, 0, 0 };
 
 INCLUDE_ASM(func_00130C58);

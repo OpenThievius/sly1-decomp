@@ -58,6 +58,19 @@
 // (no change), `s32 count = n - 1;` before the angles loop (s2, and issued early), and the sorts
 // through an inline `SortEntries(base, count)` (GCSE's table changes size and the four PRE'd
 // addresses take other spill slots: 557 lines).
+// w19 (tools/globalalloc.py and tools/sched1.py on the dumps; both replays agree with them):
+// the GCSE temporary (928, 2 refs over 28 insns, priority 714, 64th of 80) has no preference,
+// copy preference or regs_someone_prefers bit, and no allocno of the function prefers s2 or s3
+// at all (no local-alloc pseudo sits in a saved register). Raising or lowering its priority
+// (--set refs/length) gives s0 or s2, never s3. s2 is in regs_used_so_far long before it (the
+// offsets pointer, 11351, takes it 23rd). So retail's s3 needs a conflict with a pseudo global-
+// alloc had put in s2, live across the swap block and the angles loop; retail reads no s2 value
+// there (the offsets pointer is dead after the anchor loops; s2 is next set by the crossings'
+// `sll s2,s5,0x5`), so it would be invisible: a pseudo reload later moved to the stack, such as
+// one of the four PRE'd addresses (spilled in both builds, slots 14628-14640). Not found. The
+// user variable (`last = n - 1;` set before the angles loop and reused later) still gives s3 by
+// its later life's conflicts; its set then precedes the loop's entry test in LUID and sched1
+// breaks the priority-2 tie by LUID (slt and the set swap: one pair). Also tried: `entries + 1`.
 // In the context of its file, src/main/player_request.cpp (FLT_MAX is retail's D_0024DC88).
 #include "common.h"
 #include "shapes.h"

@@ -237,7 +237,157 @@ void ComputeMotionVectors(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type,
     }
 }
 
-INCLUDE_ASM(func_0020CAF8);
+// One prediction of a block: where it goes, its sub-position, the rows before and after the
+// source block's edge, the source's row stride and its two source rows.
+struct Part_20CAF8 {
+    u8* dst;
+    s32 offset;
+    s32 rows;
+    s32 rest;
+    s32 stride;
+    u8* src0;
+    u8* src1;
+};
+
+// A macroblock's list of predictions (up to four): the work buffer, the source macroblocks, the
+// routines and the luma and chroma parts.
+struct Pred_20CAF8 {
+    u8* work;
+    u8 pad4[4];
+    u8* src0[4];
+    u8* src1[4];
+    void (*luma[4])();
+    void (*chroma[4])();
+    Part_20CAF8 lumaPart[4];
+    Part_20CAF8 chromaPart[4];
+    u8 pad128[4];
+    s32 count;
+    u8 pad130[0x140 - 0x130];
+};
+
+struct Dec_20CAF8 {
+    u8 pad000[0x590];
+    Pred_20CAF8 preds[2];
+    u8 pad810_[0x810 - 0x590 - 2 * 0x140];
+    s32 current;
+    u8 pad814[0x81C - 0x814];
+    u8* dst;
+};
+
+// A reference frame: its macroblocks (0x180 bytes each, an address held as an int) and its
+// width in macroblocks.
+struct Frame_20CAF8 {
+    s32 data;
+    u8 pad4[0xC];
+    s32 width;
+};
+
+void PredictMacroblock(Dec_20CAF8* self, Frame_20CAF8* src, s32 srcField, s32 dstField, s32 dstY, s32 height,
+                       s32 x, s32 y, s32 dx, s32 dy, s32 half, s32 average)
+{
+    u8* dst;
+    s32 n;
+    Part_20CAF8* luma;
+    Part_20CAF8* chroma;
+    s32 xs, ys, xb, yb, xo, yo, sub;
+    s32 lumaSel, lumaBlock, chromaSel;
+    s32 cxb, cyb, cxo;
+    u8* base;
+    u8* cbase;
+    s32 cdx, cdy, ch, cY;
+    s32 fx, fy;
+
+    dst = self->dst;
+    n = self->preds[self->current].count;
+    luma = &self->preds[self->current].lumaPart[n];
+    chroma = &self->preds[self->current].chromaPart[n];
+
+    xs = (dx >> 1) + x;
+    if (half)
+        ys = ((dy >> 1) << 1) + srcField + dstY + y;
+    else
+        ys = (dy >> 1) + srcField + dstY + y;
+    xb = xs >> 4;
+    yb = ys >> 4;
+    lumaBlock = xb * src->width + yb;
+    xo = xs - (xb << 4);
+    yo = ys - (yb << 4);
+    luma->offset = xo;
+    luma->dst = dst + ((dstField + dstY) << 5);
+    fx = dx & 1;
+    fy = dy & 1;
+    if (fy) {
+        if (yo + (height << half) >= 16) {
+            sub = (16 >> half) - (yo >> half) - 1;
+            luma->rows = sub;
+            luma->rest = height - sub;
+        } else {
+            luma->rows = height;
+            luma->rest = 0;
+        }
+    } else {
+        if (yo + (height << half) > 16) {
+            sub = (16 >> half) - (yo >> half);
+            luma->rows = sub;
+            luma->rest = height - sub;
+        } else {
+            luma->rows = height;
+            luma->rest = 0;
+        }
+    }
+    base = self->preds[self->current].work + n * 0x600;
+    luma->src0 = base + (yo << 4);
+    luma->src1 = base + ((yo << 4) + 0x300);
+    luma->stride = 16 << half;
+    lumaSel = (average << 2) | (fx << 1) | fy;
+
+    cdx = dx / 2;
+    cdy = dy / 2;
+    ch = height >> 1;
+    cY = dstY >> 1;
+    xs = (cdx >> 1) + (x >> 1);
+    if (half)
+        ys = ((cdy >> 1) << 1) + srcField + cY + (y >> 1);
+    else
+        ys = (cdy >> 1) + srcField + cY + (y >> 1);
+    cyb = ys >> 3;
+    yo = ys - (cyb << 3);
+    fx = cdx & 1;
+    cxb = xs >> 3;
+    cxo = xs - (cxb << 3);
+    fy = cdy & 1;
+    chroma->offset = cxo;
+    chroma->dst = dst + (((dstField + cY) << 4) + 0x200);
+    if (fy) {
+        if (yo + (ch << half) >= 8) {
+            sub = (8 >> half) - (yo >> half) - 1;
+            chroma->rows = sub;
+            chroma->rest = ch - sub;
+        } else {
+            chroma->rows = ch;
+            chroma->rest = 0;
+        }
+    } else {
+        if (yo + (ch << half) > 8) {
+            sub = (8 >> half) - (yo >> half);
+            chroma->rows = sub;
+            chroma->rest = ch - sub;
+        } else {
+            chroma->rows = ch;
+            chroma->rest = 0;
+        }
+    }
+    cbase = base + ((cxb - xb) * 2 + (cyb - yb)) * 0x180;
+    chroma->src0 = cbase + ((yo << 3) + 0x100);
+    chroma->src1 = cbase + ((yo << 3) + 0x400);
+    chroma->stride = 8 << half;
+    self->preds[self->current].luma[n] = D_0027B000[lumaSel];
+    chromaSel = (average << 2) | (fx << 1) | fy;
+    self->preds[self->current].src0[n] = (u8*)(src->data + lumaBlock * 0x180);
+    self->preds[self->current].src1[n] = (u8*)(src->data + (lumaBlock + src->width) * 0x180);
+    self->preds[self->current].chroma[n] = D_0027B020[chromaSel];
+    self->preds[self->current].count++;
+}
 
 // A block of a macroblock's channel, handed to its routine.
 struct Blk_20CF18 {

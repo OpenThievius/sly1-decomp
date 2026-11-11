@@ -25,6 +25,12 @@
 // does not cost 2). d forced into the frame lands at 0x1C0 after fade, retail's offsets, but
 // cse2 forwards its store (vsub into vf6, no reload); a Vec02 d is forwarded by cse1; a
 // `const u128&` to d (local, or an inline helper's parameter) is purged back to one pseudo.
+// w19 (2026-11-10, tools/globalalloc.py): not caller-saves. d has 4 refs over 2 calls, so
+// global-alloc spills it; `--set 136:refs=9` gives vf6 by caller-saves, which is how
+// func_00126270 and func_0018F9D8 (loops) get their qmfc2 a1,$vf6, but there the difference is
+// written straight into vf6. Here retail writes it to vf3, stores it at 0x1C0 and loads vf6: a
+// memory d whose one load serves the asm and the first call, the second call reading memory,
+// with cse1 and cse2 both leaving that load alone (docs/toolchain/stack-slots.md).
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

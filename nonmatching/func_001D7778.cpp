@@ -16,6 +16,13 @@
 // body's top (635 lines); the loop's eight vectors as members of one struct (80 lines). The
 // curves cannot be read after the first call that takes &spin: the push is tested before it.
 //
+// Measured (2026-11-10, w19, docs/toolchain/loops.md "Three invariants ranked by their place in
+// loop.c's move list"): globalalloc.py --set 381:length=402 (or 404) gives retail's three
+// registers, so only the copy's birth differs. sched1 ties the preheader's moved insns on
+// priority 2, weight 1, class and dependents and keeps loop.c's order (LUID); loop.c moves all
+// of them in pass 1 in body order. Retail's copy of &spin was moved after B0's lo_sum and before
+// D0's %hi, i.e. the original computed spin's address between the slip statement and the push.
+// Ruled out: a pointer or reference to spin there (697 lines: lifetime 0 copy, not moved).
 // What matched (2026-11-10, docs/toolchain gcse.md, alias-classes.md, sched1.md):
 // - `s` declared once at the top and assigned by both loops: set twice, it has no base value,
 //   so the force's u128 store invalidates s->v20 in cse1 and the torque arm reloads it.

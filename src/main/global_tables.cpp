@@ -707,7 +707,7 @@ extern const Vec02 D_00248D30 = { 0.0f, 0.0f, 0.0f, 0.0f };
 extern const f32 D_00248D40[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
 extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e+38f, 0.0f };
 // Read only by func_001B8540, which is original assembly (16 bytes, then 16 no code reads).
-INCLUDE_RODATA(D_00248D60);
+extern const u32 D_00248D60[8] = { 0xFF7FFFFF, 0xFF7FFFFF, 0xFF7FFFFF, 0, 0x53DE6B03, 0xF1409707, 0x45DE6074, 0xD41837D9 };
 // The file's .data.
 u8 D_00250580[56] = { 0 };
 // The descriptor of class 0x94, the last of D_00247448: two zero words.

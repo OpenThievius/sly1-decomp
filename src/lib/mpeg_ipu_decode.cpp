@@ -1663,6 +1663,7 @@ void func_002107E0(Obj_2107E0* self, Node_2107E0* node, s64* out1, s64* out3, s6
 
 // A table of 16 words by a 4-bit code, which func_00210970 reads.
 u32 D_0027B068[16] = { 0x2, 0x0, 0x2, 0x0, 0x2, 0x3, 0x2, 0x3, 0x0, 0x0, 0x0, 0x0, 0x2, 0x4, 0x0, 0x6 };
+u32 D_0027B0A8[2] = { 0 };
 
 struct Blk_210970 { u8 p0[0x10]; s32 f10; u8 p14[0xC]; u64 f20; };
 struct Src_210970 { u8 p0[0x28]; s32 f28; u8 p2C[0x18]; s32 f44; s32 f48; s32 f4C; s32 f50; s32 f54; s32 f58; s32 f5C; s32 f60; };
