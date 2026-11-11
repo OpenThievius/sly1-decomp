@@ -704,3 +704,8 @@ fourth candidate, B0's address (227, also 5 refs, born first), loses and is rema
 - **Ruled out.** `Vec02* out = &spin;` or `Vec02& out = spin;` after the slip statement, with
   the calls taking `out` (697 lines): the user variable's copy has lifetime 0 in loop.c ("not
   desirable"), the loop reads PRE's 966 directly and B0's address takes s8.
+- **The only other ranking that works (wave 22, 2026-11-11).** With the copy born last, retail's
+  order (E0, D0, spin, then B0 left without a register) also follows if D0 and E0 each had one
+  more use in the loop (7 refs, floor_log2 2: priority 14 per life against spin's 10). Retail's
+  code rules it out: c[0] is read through the symbol's own %hi/%lo and only c[1] and c[2] through
+  the pointer, as in ours. The along and sum conversions as the "*r" ToFloatMoved change nothing.

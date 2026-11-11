@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1712/1756 (97.5%), checked 2026-11-10
+// BYTES 1712/1756 (97.5%), checked 2026-11-11
 #include "common.h"
 #include "layout_137228.h"
 #include "screen_element.h"
@@ -39,6 +39,9 @@
 // fold), the table as &D_00261190[4] (own high(sym+16) expression), an early-return clamp
 // (retail's preheader, s4 lost, 4 bytes longer), two f58 calls in an if/else (not merged).
 // docs/toolchain/sched1.md, "Spill stores between float constants".
+// w22 (2026-11-11): re-scored, unchanged (11 lines, regdiff `order`). The difference is the
+// preheader's sched1 order (loop.c's hoisted pairs), not a register or a conversion: neither the
+// "*r" ToFloatMoved nor the allocator replays bear on it. Not retried.
 // What landed here (2026-11-09): the five setters in an inline helper (ScreenLayout::Reset,
 // as PAL's func_001316E8: the layout's address formed at each call, the colour buffer's from a
 // spill slot), the font's box through the file family's StyleDrawer::Draw (retail forms &layout
