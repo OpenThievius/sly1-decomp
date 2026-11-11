@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 334/376 (88.8%), checked 2026-11-10
+// BYTES 334/376 (88.8%), checked 2026-11-11
 // Tried night-close8: n->key in a named local for both tests, for the tag test only, the tag test as an else-if: no closer (59, 34, 34 differing words).
 // Near match: the same instructions and block layout as retail; only registers differ.
 // Retail reloads n->key for the tag test through a copy ($v1), which GCC CSE does not do here
@@ -18,6 +18,8 @@
 // walk and `if (flag && n->key == key)`. A flag that is always 1 is not plausible, so it is not kept.
 // Also ruled out: continue with prev = n in the increment, do/while with goto next, the owner test
 // repeated around each key test (65), `n->key == key || n->key == tag` with the key body inside (62).
+// w22 (2026-11-11): re-scored; no new lever beyond the notes above (the tag label needs a second use that survives the first
+// CSE; no plain form of the key-match body or the loop gives one).
 #include "common.h"
 // NEAR (p58b): 34 lines, all register numbering; retail's `move v1,v0` copy of n->key for the tag test needs CSE to stop following the key-test branch. func_00183668_assert.cpp puts a compiled-out ASSERT macro (do {} while (0)) before the tag test: every register then matches, but GCC aligns one label (.p2align 3) and inserts one nop, so the branches after it are 4 bytes off. Only the do {} while (0) after `return 1` (dead code) is EXACT.
 
