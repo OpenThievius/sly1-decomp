@@ -12,24 +12,24 @@
 
 // The hand-written prediction routines (src/lib/mpeg_motion_compensation.cpp), by kind of motion: whole
 // pixel and half pixel.
-void func_0020D138();
-void func_0020D1B0();
-void func_0020D248();
-void func_0020D300();
-void func_0020D3D0();
-void func_0020D480();
-void func_0020D538();
-void func_0020D630();
-void func_0020D730();
-void func_0020D7D0();
-void func_0020D880();
-void func_0020D960();
-void func_0020DA48();
-void func_0020DB20();
-void func_0020DBF0();
-void func_0020DD10();
-void (*D_0027B000[8])() = { func_0020D138, func_0020D248, func_0020D3D0, func_0020D538, func_0020D730, func_0020D880, func_0020DA48, func_0020DBF0 };
-void (*D_0027B020[8])() = { func_0020D1B0, func_0020D300, func_0020D480, func_0020D630, func_0020D7D0, func_0020D960, func_0020DB20, func_0020DD10 };
+void FetchLumaBlock();
+void FetchChromaBlock();
+void FetchLumaBlockHalfVertical();
+void FetchChromaBlockHalfVertical();
+void FetchLumaBlockHalfHorizontal();
+void FetchChromaBlockHalfHorizontal();
+void FetchLumaBlockHalfBoth();
+void FetchChromaBlockHalfBoth();
+void BlendLumaBlock();
+void BlendChromaBlock();
+void BlendLumaBlockHalfVertical();
+void BlendChromaBlockHalfVertical();
+void BlendLumaBlockHalfHorizontal();
+void BlendChromaBlockHalfHorizontal();
+void BlendLumaBlockHalfBoth();
+void BlendChromaBlockHalfBoth();
+void (*D_0027B000[8])() = { FetchLumaBlock, FetchLumaBlockHalfVertical, FetchLumaBlockHalfHorizontal, FetchLumaBlockHalfBoth, BlendLumaBlock, BlendLumaBlockHalfVertical, BlendLumaBlockHalfHorizontal, BlendLumaBlockHalfBoth };
+void (*D_0027B020[8])() = { FetchChromaBlock, FetchChromaBlockHalfVertical, FetchChromaBlockHalfHorizontal, FetchChromaBlockHalfBoth, BlendChromaBlock, BlendChromaBlockHalfVertical, BlendChromaBlockHalfHorizontal, BlendChromaBlockHalfBoth };
 
 struct Chan_20C1A0 {
     s32 f00;
@@ -67,7 +67,7 @@ struct Dev_20C1A0 {
 
 void ReportMpegErrorFormat(Dev_20C1A0* d, const char* msg, s32 code);
 void ComputeMotionVectors(Dev_20C1A0* d, s32 a, s32 b, s32 flags);
-void func_00210C38(Dev_20C1A0* d);
+void StartBlockChainToScratchpad(Dev_20C1A0* d);
 
 s32 PrepareMacroblockPrediction(Dev_20C1A0* d, s32 n, s32 mode, s32 flags, s32 code)
 {
@@ -90,7 +90,7 @@ s32 PrepareMacroblockPrediction(Dev_20C1A0* d, s32 n, s32 mode, s32 flags, s32 c
         ComputeMotionVectors(d, rx, qx, flags);
         while ((*(volatile u32*)0x1000D400 >> 8) & 1) {
         }
-        func_00210C38(d);
+        StartBlockChainToScratchpad(d);
         d->chan[d->f810].f10 = 1;
     }
     if (mode == 1 && (flags & 2)) {
@@ -142,7 +142,7 @@ struct Dev_0020C3F0 {
 };
 
 void PredictMacroblock(Dev_0020C3F0* self, Frame_0020C3F0* src, s32 srcField, s32 dstField, s32 dstY, s32 height, s32 x, s32 y, s32 dx, s32 dy, s32 half, s32 average);
-void func_0020E120(Dev_0020C3F0* self, s32* out, s32* base, s32 dx, s32 dy);
+void ComputeDualPrimeVectors(Dev_0020C3F0* self, s32* out, s32* base, s32 dx, s32 dy);
 void ReportMpegErrorFormat(Dev_0020C3F0* self, const char* fmt, s32 value);
 
 
@@ -168,7 +168,7 @@ void ComputeMotionVectors(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type,
                 PredictMacroblock(self, self->f1B8, sel[2], 1, 0, 8, x, y, vec[4], vec[5] >> 1,
                               type, 0);
             } else if (type == 3) {
-                func_0020E120(self, dual, base, vec[0], vec[1] >> 1);
+                ComputeDualPrimeVectors(self, dual, base, vec[0], vec[1] >> 1);
                 PredictMacroblock(self, self->f1B8, 0, 0, 0, 8, x, y, vec[0], vec[1] >> 1, other, 0);
                 PredictMacroblock(self, self->f1B8, 1, 0, 0, 8, x, y, dual[0], dual[1], other, 1);
                 PredictMacroblock(self, self->f1B8, 1, 1, 0, 8, x, y, vec[0], vec[1] >> 1, other, 0);
@@ -201,7 +201,7 @@ void ComputeMotionVectors(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type,
                 other = 0;
                 if (self->f120 != 0)
                     other = 1;
-                func_0020E120(self, dual, base, vec[0], vec[1]);
+                ComputeDualPrimeVectors(self, dual, base, vec[0], vec[1]);
                 PredictMacroblock(self, refs[0][bottom], 0, 0, 0, 16, x, y, vec[0], vec[1], 0, 0);
                 PredictMacroblock(self, refs[other][!bottom], 0, 0, 0, 16, x, y, dual[0], dual[1],
                               0, 1);
@@ -420,8 +420,8 @@ struct Dev_20CF18 {
 };
 
 s32 ReportMpegError(Dev_20CF18* d, const char* msg);
-void func_0020DE88(s32 a, s32 b);
-void func_0020DE28(s32 a, s32 b, s32 c);
+void ClampMacroblock(s32 a, s32 b);
+void AddAndClampMacroblock(s32 a, s32 b, s32 c);
 
 void AddMacroblockResiduals(Dev_20CF18* d, s32 n)
 {
@@ -436,10 +436,10 @@ void AddMacroblockResiduals(Dev_20CF18* d, s32 n)
     if (d->chan[n].intra != 0 && d->chan[n].skip != 0)
         ReportMpegError(d, "intra && skip MB");
     if (d->chan[n].intra != 0) {
-        func_0020DE88(d->chan[n].f128, d->chan[n].f04);
+        ClampMacroblock(d->chan[n].f128, d->chan[n].f04);
     } else if (d->chan[n].skip != 0) {
-        func_0020DE88(d->chan[n].f128, d->f81C);
+        ClampMacroblock(d->chan[n].f128, d->f81C);
     } else {
-        func_0020DE28(d->chan[n].f128, d->f81C, d->chan[n].f04);
+        AddAndClampMacroblock(d->chan[n].f128, d->f81C, d->chan[n].f04);
     }
 }

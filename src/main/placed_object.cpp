@@ -349,10 +349,10 @@ void UpdateAnchorModeFlags(PlacedObject* self);
 
 void UpdateAttachments(u8* sub, PlacedObject* self, f32 f);
 void UpdateRangeRecord(void* p, f32 f);
-void func_00126AC8(PlacedObject* self, f32 f);
+void ApplyPulsingColorToObjectTree(PlacedObject* self, f32 f);
 void TriggerScriptEvent(PlacedObject* self, s32 a, s32 b, void** args);
 
-void func_0012C9E8(Animation* self, PlacedObject* owner, f32 start, Vec02* point, f32* outT, Vec02* outPos,
+void FindNearestAnimationPathTime(Animation* self, PlacedObject* owner, f32 start, Vec02* point, f32* outT, Vec02* outPos,
                    Vec02* outDir);
 void CreateAnimationPlayer(Animation* a, PlacedObject* b, s32 c, TargetBinding* d, f32 e, f32 f, s32 g, s32 h);
 
@@ -395,7 +395,7 @@ void TransformRotationBetweenFrames(PlacedObject* z, BaseObject* frame, void* c,
 BaseObject* FindCommonAncestor(BaseObject* a, BaseObject* b);
 void TransformDirectionBetweenFrames(BaseObject* from, BaseObject* to, void* in, void* out);
 void ComputeObjectMotionInFrame(BaseObject* from, BaseObject* to, void* pt, void* a, void* b, void* c, void* d);
-void func_00128330(BaseObject* a, BaseObject* b, void* c, void* d, void* e, s32 f, s32 g, u8* h, u8* i, s32 j, s32 k);
+void ConvertVectorsBetweenObjectFrames(BaseObject* a, BaseObject* b, void* c, void* d, void* e, s32 f, s32 g, u8* h, u8* i, s32 j, s32 k);
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
@@ -1468,7 +1468,7 @@ void ReparentPlacedObject(PlacedObject* self, BaseObject* parent)
             }
         }
     }
-    func_00124540(self);
+    SavePlacedObjectInitialFrame(self);
     self->parent = parent;
     self->desc->m02(self);
 }
@@ -1610,7 +1610,7 @@ void StartAnimationFromContext(PlacedObject* self)
         fr.tmp = ClampRange::Of(ctx->value, 0.0f, 1.0f) * node->length;
         break;
     case 2:
-        func_0012C9E8(node, self, 0.0f, &self->pos, &fr.tmp, 0, 0);
+        FindNearestAnimationPathTime(node, self, 0.0f, &self->pos, &fr.tmp, 0, 0);
         break;
     default:
         return;
@@ -1692,7 +1692,7 @@ void UpdatePlacedObject(PlacedObject* self, f32 f)
         UpdateRangeRecord(self->f284, f);
     }
     if (self->f288 != 0) {
-        func_00126AC8(self, f);
+        ApplyPulsingColorToObjectTree(self, f);
     }
     ListFrame it;
     ListWalkBegin::Of(&it, &self->list1E0);
@@ -1879,7 +1879,7 @@ void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
 typedef void (*PositionAtFn)(PlacedObject* self, f32 t, Vec02* pos, Vec02* vel);
 typedef void (*RotationAtFn)(PlacedObject* self, f32 t, Mat02* rot, Vec02* spin);
 
-void func_00125750(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
 {
     PlacedObject* chain[16];
     Vec02 P;
@@ -1935,14 +1935,14 @@ void func_00125750(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot
     }
 }
 
-void func_001259D8(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
+void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
 {
     Mat02 m;
     Vec02 p;
     Vec02 v;
     Vec02 w;
     Vec02 r;
-    func_00125750(self, top, (pos != 0 || vel != 0) ? &p : 0, &m, vel != 0 ? &v : 0,
+    ComputeObjectFrameAtTime(self, top, (pos != 0 || vel != 0) ? &p : 0, &m, vel != 0 ? &v : 0,
                              (spin != 0 || vel != 0) ? &w : 0, t);
     if (pos != 0 || vel != 0) {
         if (pos != 0) {
@@ -1976,7 +1976,7 @@ void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform
     }
 }
 
-void func_00125BF0(PlacedObject* self, void* a, Quad16* src)
+void SubmitScaledPlacedObjectTransform(PlacedObject* self, void* a, Quad16* src)
 {
     Quad16 scale;
     ScaledTransform t;
@@ -2075,9 +2075,9 @@ void MultiplyMatrices(void* out, void* a, void* b);
 void QueueDeferredRequest(void* r);
 void ApplyPoseSourceIndexedValue(void* src, s32 i);
 void DrawModelPart(void* r);
-void func_00126DE8(void* unused0, Camera* cam, void* unused2, f32* pos, Mat4A* m);
+void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, f32* pos, Mat4A* m);
 
-void func_00126270(PlacedObject* self, Camera* cam, Quad16* src)
+void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
 {
     ModelPartRequest rec;
     ModelPartState* state = 0;
@@ -2203,7 +2203,7 @@ void func_00126270(PlacedObject* self, Camera* cam, Quad16* src)
                 *(Mat4A*)&rec.block = t;
             }
             if (part->f34 != 0) {
-                func_00126DE8(self, cam, part->f34, (f32*)&rec.pos, (Mat4A*)&rec.block);
+                BuildCameraFacingMatrix(self, cam, part->f34, (f32*)&rec.pos, (Mat4A*)&rec.block);
             }
             QueueDeferredRequest(&rec);
             *(Mat4A*)&rec.block = saved;
@@ -2227,7 +2227,7 @@ void func_00126270(PlacedObject* self, Camera* cam, Quad16* src)
 
 void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
 
-void func_001268B8(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy)
+void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy)
 {
     Mat02 m;
     Vec02 e;
@@ -2279,7 +2279,7 @@ void SetObjectRecordValue(PlacedObject* state, u32 value)
 void ConvertHsv255ToRgb255(Vec02* hsv, f32* rgb);
 f32 Sine(f32 x);
 
-void func_00126AC8(PlacedObject* self)
+void ApplyPulsingColorToObjectTree(PlacedObject* self)
 {
     Vec02 hsv;
     ColorRecord* r = self->f288;
@@ -2326,7 +2326,7 @@ void EnsureObjectWorldNode(PlacedObject* self)
 // Each arm stores the rate itself: with one store after the join, GCSE copies the node pointer
 // into a pseudo for it, and that copy, scheduled between the level's load and its use, gives the
 // level the longer span in local-alloc and the constant takes $f1 first.
-void func_00126CB8(Collider* self, f32 time)
+void FadeInPlacedObject(Collider* self, f32 time)
 {
     if (!IsObjectAttached(self) || self->f298 != 0) {
         EnsureObjectWorldNode(self);
@@ -2340,7 +2340,7 @@ void func_00126CB8(Collider* self, f32 time)
     }
 }
 
-void func_00126D60(Collider* self, f32 time)
+void FadeOutPlacedObject(Collider* self, f32 time)
 {
     if (IsObjectAttached(self)) {
         EnsureObjectWorldNode(self);
@@ -2361,7 +2361,7 @@ void MultiplyMatrices(void* out, void* a, void* b);
 // k, the vector the second rotation starts from, is written as a quadword at its own address:
 // a store through Vu0::Q or Set leaves the address in a pseudo that CSE keeps in a saved register
 // for the later &k, where retail forms it again for the call.
-void func_00126DE8(void* unused0, Camera* cam, void* unused2, f32* pos, Mat4A* m)
+void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, f32* pos, Mat4A* m)
 {
     Vec02 a;
     Mat02 rot;
@@ -2559,7 +2559,7 @@ void CopyPlacedObjectFrame(PlacedObject* self, PlacedObject* other)
     TakeFrameLocals L;
     TransformPointBetweenFrames(0, self->parent, &other->v140, L.a20);
     TransformRotationBetweenFrames(0, self->parent, &other->m110, L.a50);
-    func_00128330(other->parent, self->parent, &other->v140, &other->v150, &other->v160, 0, 0, L.a30, L.a40, 0, 0);
+    ConvertVectorsBetweenObjectFrames(other->parent, self->parent, &other->v140, &other->v150, &other->v160, 0, 0, L.a30, L.a40, 0, 0);
     self->desc02()->m1D(self, (Vec02*)L.a20);
     self->desc02()->m1E(self, (Mat02*)L.a50);
     self->desc02()->m20(self, (Vec02*)L.a30);
@@ -2591,7 +2591,7 @@ void CopyPlacedObjectFrame(PlacedObject* self, PlacedObject* other)
 
 void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
-void func_001278A8(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum)
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum)
 {
     PlacedObject* chain[16];
     Vec02 V;
@@ -2664,7 +2664,7 @@ void func_001278A8(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* 
 
 void IgnoreStackLocal(Vec02* p);
 
-void func_00127B20(PlacedObject* self, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
+void AccumulateFrameChain(PlacedObject* self, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
 {
     PlacedObject* chain[16];
     Vec02 P;
@@ -2751,14 +2751,14 @@ void func_00127B20(PlacedObject* self, PlacedObject* top, s32 n, Vec02* pos, Mat
     }
 }
 
-void func_00127E60(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
+void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
 {
     Mat02 m;
     Vec02 p;
     Vec02 v;
     Vec02 w;
     Mat02 x;
-    func_00127B20(self, top, 1, (pos != 0 || vel != 0) ? &p : 0, &m, vel != 0 ? &v : 0,
+    AccumulateFrameChain(self, top, 1, (pos != 0 || vel != 0) ? &p : 0, &m, vel != 0 ? &v : 0,
                   (spin != 0 || vel != 0) ? &w : 0, t);
     if (pos != 0 || vel != 0) {
         if (pos != 0) {
@@ -2879,7 +2879,7 @@ void ReleaseAnimationDrivenAttachments(Player* self)
     }
 }
 
-void func_00128330(BaseObject* from, BaseObject* to, void* pt, void* d, void* e, s32 f, s32 g, u8* h, u8* i, s32 j, s32 k)
+void ConvertVectorsBetweenObjectFrames(BaseObject* from, BaseObject* to, void* pt, void* d, void* e, s32 f, s32 g, u8* h, u8* i, s32 j, s32 k)
 {
     Vec02 a[4];
     Vec02 b[4];
@@ -2942,7 +2942,7 @@ void func_00128330(BaseObject* from, BaseObject* to, void* pt, void* d, void* e,
 
 void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist);
 
-void func_00128598(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2)
+void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2)
 {
     Vec02 d;
     Vec02 g;
@@ -3049,7 +3049,7 @@ struct BakedRow {
     f32* values;
 };
 
-void func_001289C0(PlacedObject* self, void* r)
+void LoadPlacedObject(PlacedObject* self, void* r)
 {
     ReadBufferedRotation3(r, &self->rot);
     ReadBufferedVector3(r, &self->pos);
@@ -3153,7 +3153,7 @@ void ResolveFollowRecordObjects(PlacedObject* self)
     }
 }
 
-void func_00128E88(PlacedObject* self, Mat02* m, Vec02* v)
+void ApplyObjectFrameOffsetToPose(PlacedObject* self, Mat02* m, Vec02* v)
 {
     Rec2195_224* p = self->f224;
     if (p != 0) {
@@ -3179,7 +3179,7 @@ void func_00128E88(PlacedObject* self, Mat02* m, Vec02* v)
 // Applies the record's matrices (+0x224) to m: with its flag 1, the first one's transpose
 // times m; with flag 2, the second one (MultiplyByTransposedMatrix3x3, which returns a 3x3
 // matrix by value: retail's `daddu v0, a0`).
-void func_00128FD0(PlacedObject* self, Mat02* m)
+void RemoveObjectFrameOffsetFromPose(PlacedObject* self, Mat02* m)
 {
     Mat02 t;
     Rec2195_224* p = self->f224;
@@ -3846,13 +3846,13 @@ void GetAimFarKey(PlacedObject* self, s32* out)
     *out = v;
 }
 
-void func_0012A810(PlacedObject* self, s32 value)
+void SetAimTargetId(PlacedObject* self, s32 value)
 {
     EnsureAimAttachment(self);
     self->f200->f20 = value;
 }
 
-void func_0012A848(PlacedObject* self, s32* out)
+void GetAimTargetId(PlacedObject* self, s32* out)
 {
     s32 v = -1;
     if (self->f200 != 0) {
@@ -3916,7 +3916,7 @@ void SetClass75ObjectScale(void* self, f32 value)
     FindOrCreateClass75Object(self)->scale = value;
 }
 
-void func_0012AA28(void* self, void* value)
+void SetClass75ObjectMode(void* self, void* value)
 {
     Class75Object* ctx = FindOrCreateClass75Object(self);
     ctx->f90 = value;
@@ -4009,13 +4009,13 @@ void SetSoundRecordScale(PlacedObject* self, f32 f)
     self->f2AC->f0C = f;
 }
 
-void func_0012ADD0(PlacedObject* self, f32 value)
+void SetSoundStartParam(PlacedObject* self, f32 value)
 {
     EnsureSoundRecord(self);
     self->f2AC->f20 = value;
 }
 
-void func_0012AE08(PlacedObject* self, f32* out)
+void GetSoundStartParam(PlacedObject* self, f32* out)
 {
     f32 r = 0.0f;
     if (self->f2AC != 0) {
@@ -4851,13 +4851,13 @@ s32 HasAnimationEventKind19(Animation* a0)
 }
 
 void* FindEntryByObjectId(Gr8B* self, void* key);
-void func_0012F210(f32 end, f32 radius, Track83* track, PlacedObject* owner, Vec02* point, f32 t, f32* outT,
+void RefineNearestAnimationPathTime(f32 end, f32 radius, Track83* track, PlacedObject* owner, Vec02* point, f32 t, f32* outT,
                    Vec02* outPos, Vec02* outDir);
 
 // The time on an animation's path for the owner nearest the point: the curve of the owner's track
 // sampled from 0 to the length in steps of a tenth of it (at least 0.5), then refined from the best
 // time with func_0012F210. With no track, the owner's position, time 0 and the default direction.
-void func_0012C9E8(Animation* self, PlacedObject* owner, f32 start, Vec02* point, f32* outT, Vec02* outPos,
+void FindNearestAnimationPathTime(Animation* self, PlacedObject* owner, f32 start, Vec02* point, f32* outT, Vec02* outPos,
                    Vec02* outDir)
 {
     Vec02 sampled;
@@ -4894,7 +4894,7 @@ void func_0012C9E8(Animation* self, PlacedObject* owner, f32 start, Vec02* point
             t = limit <? t + step;
         } while (t < limit);
     }
-    func_0012F210(self->length, 3.40282347e+38f, track, owner, point, bestT, outT, outPos, outDir);
+    RefineNearestAnimationPathTime(self->length, 3.40282347e+38f, track, owner, point, bestT, outT, outPos, outDir);
 }
 
 AnimEvent* FindAnimationMarkerEvent(Animation* self, s32 key) {
@@ -4946,7 +4946,7 @@ void* FindEntryByObjectId(Gr8B* self, void* key)
 // time and scale, a vector and a second value (func_0012CD78).
 typedef void (*PoseAtFn8B)(void* src, PlacedObject* o, f32 t, f32 scale, s32 z, void* a, Vec02* b);
 
-void func_0012CD78(Gr8B* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
+void SampleAnimationFrameChain(Gr8B* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
                    Vec02* vel, Vec02* spin)
 {
     typedef Vu0::Vec Vec;
@@ -5898,7 +5898,7 @@ f32 Arccosine(f32 x);
 // up its part of dt; the events up to the new time run, the loop mode is applied (mode 0 ends the
 // player, mode 1 loops it), and the events run again. A looping player puts the followers whose
 // curves do not close back at their tracks' start.
-void func_0012EBD8(AnimationPlayer* self, f32 dt)
+void UpdateAnimationPlayer(AnimationPlayer* self, f32 dt)
 {
     ListFrame frame;
     Animation* anim = self->anim;
@@ -6077,7 +6077,7 @@ void SettleListedPoseSources(AnimationPlayer* self)
 // behind it (or back), unless the point is farther than the radius at t. A step of 0.2 either
 // way brackets it, halving narrows the bracket to 0.05, and a linear step between its ends
 // gives the time. The time, position and direction found are given where asked.
-void func_0012F210(f32 end, f32 radius, Track83* track, PlacedObject* owner, Vec02* point, f32 t, f32* outT,
+void RefineNearestAnimationPathTime(f32 end, f32 radius, Track83* track, PlacedObject* owner, Vec02* point, f32 t, f32* outT,
                    Vec02* outPos, Vec02* outDir)
 {
     Vec02 pos;
@@ -6332,7 +6332,7 @@ tail:
 void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
 void TriggerScriptEvent(void* self, s32 a, s32 b, void* c);
 
-void func_0012FB68(IdFilterObject* self, u8* table, s32 which)
+void HandleIdFilterObjectContact(IdFilterObject* self, u8* table, s32 which)
 {
     Vec02 loc;
     u8* arg;
@@ -6702,7 +6702,7 @@ static inline f32 NormalizeAxis(Vec02& v, const Vec02& fallback)
     return Vu0::ToFloatMoved(len);
 }
 
-void func_00130748(Mat02* a, Vec02* wa, Mat02* b, Vec02* wb, Mat02* out, Vec02* outW, f32 dur, f32 t, f32 e)
+void BlendRotationsWithSpin(Mat02* a, Vec02* wa, Mat02* b, Vec02* wb, Mat02* out, Vec02* outW, f32 dur, f32 t, f32 e)
 {
     f32 u = t / dur;
     f32 v = 1.0f - u;

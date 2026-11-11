@@ -66,7 +66,7 @@ void InvalidateRangeRecordPacket(RangeRecord* self)
 
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 
-void func_001B1BF8(RangeRecord* self)
+void UpdateRangeRecordBounds(RangeRecord* self)
 {
     Vec02 scaled;
     f32 half;
@@ -250,7 +250,7 @@ typedef s32 (*RangeBodyFilter)(void*, Collider*);
 void GatherCollidersInSphere(f32 radius, World* world, s32 a, Vec02* centre, RangeBodyFilter filter, s32 b, s32* count, Collider*** list);
 s32 CollectTreeNodeSpans(void* tree, Vec02* from, Vec02* to, s32 a, s32 b, MeshHit* hit);
 
-void func_001B2140(RangeRecord* self)
+void UpdateRangeRecord(RangeRecord* self)
 {
     Vec02 a;
     Vec02 b;

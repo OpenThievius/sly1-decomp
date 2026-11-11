@@ -103,7 +103,7 @@ struct PooledContact {
 void* PopZeroedFreeSlot(void* pool);
 void TransformPointBetweenFrames(void* frame, void* part, void* in, void* out);
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
-void func_001860A8(void* a0, s32 n, Contact03** list);
+void NotifyContactEnds(void* a0, s32 n, Contact03** list);
 
 s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7)
 {
@@ -158,7 +158,7 @@ s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s
             }
         }
     }
-    func_001860A8(((BaseObject*)a0)->world, 1, (Contact03**)&c);
+    NotifyContactEnds(((BaseObject*)a0)->world, 1, (Contact03**)&c);
     c->next = *(PooledContact**)a7;
     *(PooledContact**)a7 = c;
     return (s32)c;
@@ -168,7 +168,7 @@ s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s
 // (TransformPointBetweenFrames), except for the kinds whose end lies on the part's sphere, where
 // the point is the part's centre moved by its radius against the contact's normal (kinds 4 to 6
 // at end 0, kinds 7 and 9 at end 1).
-void func_00185F48(void* unused, s32 n, Contact03** list)
+void RefreshContactEndPoints(void* unused, s32 n, Contact03** list)
 {
     for (s32 i = 0; i < n; i++) {
         Contact03* c = list[i];
@@ -204,7 +204,7 @@ void func_00185F48(void* unused, s32 n, Contact03** list)
 void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
 
-void func_001860A8(void* a0, s32 n, Contact03** list)
+void NotifyContactEnds(void* a0, s32 n, Contact03** list)
 {
     for (s32 i = 0; i < n; i++) {
         Contact03* c = list[i];
@@ -388,7 +388,7 @@ struct FaceRef {
 // collider's radius) reaches the collider's centre, then for each marked face not done yet runs
 // CollectTreeNodeSpans on each edge whose far face is marked too, recording the edge in the
 // hits it adds, and clears both marks at the end. Returns the number of hits.
-s32 func_00186568(Collider* self, Collider* other, s32 n, FaceRef* list, s32 cap, MeshHit* out)
+s32 CollectMeshEdgeHitsFromFaces(Collider* self, Collider* other, s32 n, FaceRef* list, s32 cap, MeshHit* out)
 {
     s32 i;
     MeshFace* f;
@@ -584,7 +584,7 @@ static inline f32 DotFloatMoved(Vu0::Vec a, Vu0::Vec b)
     return Vu0::ToFloatMoved(Vu0::Dot(a, b));
 }
 
-void func_00186BA8(Collider* self, Collider* other, void* a2, void* a3, u8* ctx, PooledContact** list)
+void CreateMeshPairContacts(Collider* self, Collider* other, void* a2, void* a3, u8* ctx, PooledContact** list)
 {
     s32 counts[2];
     MeshHit hits[2][0x80];
@@ -604,7 +604,7 @@ void func_00186BA8(Collider* self, Collider* other, void* a2, void* a3, u8* ctx,
     MeshHit* e;
 
     counts[0] = CollectEdgeContacts((s32)other, self, ctx, 0x80, hits[0]);
-    counts[1] = func_00186568(self, other, (s32)a2, (FaceRef*)a3, 0x80, hits[1]);
+    counts[1] = CollectMeshEdgeHitsFromFaces(self, other, (s32)a2, (FaceRef*)a3, 0x80, hits[1]);
     if (counts[0] == 0 && counts[1] == 0) {
         return;
     }
@@ -766,7 +766,7 @@ struct VertexHit {
 void PushBackMemoryMark();
 void* AllocateBackMemory(s32 size);
 void PopBackMemoryMark();
-s32 func_0013E430(void* tree, Vec02* center, f32 radius, FaceRef** cursor);
+s32 QueryPlaneTreePoint(void* tree, Vec02* center, f32 radius, FaceRef** cursor);
 s32 CollectTreeNodeSpans(void* a, Vec02* b, Vec02* c, s32 d, s32 e, MeshHit* f);
 
 // The squared distance between two points.
@@ -803,7 +803,7 @@ s32 CollectMeshHits(Vec02* center, s32 count, FaceRef* list, FaceRef* cursor, Me
     if (cursor == 0) {
         FaceRef* buf = (FaceRef*)AllocateBackMemory(count * sizeof(FaceRef));
         cursor = buf;
-        if (func_0013E430(list, center, radius, &cursor) != 2) {
+        if (QueryPlaneTreePoint(list, center, radius, &cursor) != 2) {
             goto done;
         }
         list = buf;
@@ -1005,7 +1005,7 @@ void AddMeshContacts(void* a0, f32 radius, void* a1, void* a2, void* a3, void* a
     }
 }
 
-void func_00187A88(Collider* self, Collider* other, void* a2)
+void AddSphereSphereContact(Collider* self, Collider* other, void* a2)
 {
     Vec02 d;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(other->v140));
@@ -1191,7 +1191,7 @@ struct Pair_188270 {
 void PushBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 void PopBackMemoryMark(void);
-s32 func_0013E430(Item_188270* node, void* p, f32 f, Item_188270** out);
+s32 QueryPlaneTreePoint(Item_188270* node, void* p, f32 f, Item_188270** out);
 
 // A mark on the back memory for as long as it is in scope. Retail's frame has its one-byte
 // slot at 0x10, between the ordered pair and the two address-taken locals, and reads the result
@@ -1242,7 +1242,7 @@ s32 BuildObjectPairContacts(s32 unused, Pair_188270* pair, s32 arg)
                     continue;
                 }
                 cur = buf;
-                if (func_0013E430(h, ord.a->blob, ord.a->f3D4, &cur) != 2) {
+                if (QueryPlaneTreePoint(h, ord.a->blob, ord.a->f3D4, &cur) != 2) {
                     continue;
                 }
                 idx = cur - buf;

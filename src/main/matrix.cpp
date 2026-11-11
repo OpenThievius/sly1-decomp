@@ -355,7 +355,7 @@ static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
     *out = r;
 }
 
-void func_001892A0(f32 yaw, f32 pitch, Mat02* out)
+void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out)
 {
     Mat02 a;
     Mat02 b;
@@ -371,7 +371,7 @@ void BuildBasisFromX(void* self, void* value)
 
 void BuildShortestArcRotation(void* from, void* to, void* out);
 
-void func_00189378(Mat02* self, Mat02* scratch, Mat02* out)
+void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out)
 {
     Mat02 local;
     Mat02 m;
@@ -530,7 +530,7 @@ s32 InvertMatrix4x4(void* a0, void* a1)
 extern const Vec02 g_unitXVector;
 void ComputeUnitPerpendicular(Vec02* v, Vec02* out);
 
-void func_00189B18(Vec02* x, Vec02* hint, Mat02* out)
+void BuildBasisFromXAndYHint(Vec02* x, Vec02* hint, Mat02* out)
 {
     Vec02 c;
     out->r[0] = *x;
@@ -546,7 +546,7 @@ void func_00189B18(Vec02* x, Vec02* hint, Mat02* out)
     Vu0::Q(out->r[1]) = Vu0::Cross(Vu0::Q(out->r[2]), Vu0::Q(out->r[0]));
 }
 
-void func_00189C28(Vec02* x, Vec02* hint, Mat02* out)
+void BuildBasisFromXAndZHint(Vec02* x, Vec02* hint, Mat02* out)
 {
     Vec02 c;
     out->r[0] = *x;

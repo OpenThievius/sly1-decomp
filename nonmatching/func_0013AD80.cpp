@@ -96,7 +96,7 @@ struct ViewListWalk {
     }
 };
 
-void func_0013AD80(void* self)
+void WriteListedObjectParticlePacket(void* self)
 {
     DeferredRadiusRequest* req = (DeferredRadiusRequest*)self;
     ViewedFrame one;

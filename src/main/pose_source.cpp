@@ -859,7 +859,7 @@ void GetLinearWeightCurveTimes(LinearWeightCurve* self, s32* count, f32** out)
     }
 }
 
-void func_0011F6B0(WeightCurve** axis, PlacedObject* other, s32 flags, Vec02* base, f32* outValues, f32* outSlopes, f32 key, f32 scale)
+void EvaluateAxisCurves(WeightCurve** axis, PlacedObject* other, s32 flags, Vec02* base, f32* outValues, f32* outSlopes, f32 key, f32 scale)
 {
     if (outValues)
         *(Vec02*)outValues = *base;
@@ -1175,7 +1175,7 @@ void GetKeyedScaleCurveKeyTimes(KeyedScaleCurve* self, s32* outCount, f32** outT
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
 
-void func_00120470(PositionCurveKind2* o, PlacedObject* cam, s32 c, Vec02* out0, Vec02* out1, f32 dt, f32 scale)
+void EvaluateBlendedPositionCurve(PositionCurveKind2* o, PlacedObject* cam, s32 c, Vec02* out0, Vec02* out1, f32 dt, f32 scale)
 {
     Vec02 x0;
     Vec02 x1;
@@ -1264,7 +1264,7 @@ static inline void MulRotationRowsOnce(Mat02* out, const Mat02& a, const Mat02& 
 
 void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
 
-void func_00120700(RotationCurveKind2* o, PlacedObject* cam, s32 c, Mat02* out0, Vec02* out1, f32 dt, f32 scale)
+void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 c, Mat02* out0, Vec02* out1, f32 dt, f32 scale)
 {
     Vec02 x0;
     Vec02 acc0;
@@ -1902,7 +1902,7 @@ void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat02* rot, V
 }
 
 void OrthonormalizeMatrix(Mat02* m);
-void func_00130748(f32 a, f32 b, f32 c, Mat02* rot, Vec02* vel, Mat02* target, Vec02* spin, Mat02* out, Vec02* outSpin, s32 d);
+void BlendRotationsWithSpin(f32 a, f32 b, f32 c, Mat02* rot, Vec02* vel, Mat02* target, Vec02* spin, Mat02* out, Vec02* outSpin, s32 d);
 
 void ApplyPoseSourceRotation(Attachment* self)
 {
@@ -2037,7 +2037,7 @@ void ApplyPoseSourceRotation(Attachment* self)
         } else {
             Mat02 m;
             Vec02 s;
-            func_00130748(left, dt, 1.0f, &owner->rot, &owner->v160, &A, &B, &m, &s, 0);
+            BlendRotationsWithSpin(left, dt, 1.0f, &owner->rot, &owner->v160, &A, &B, &m, &s, 0);
             owner->rot = m;
             owner->v160 = s;
             if (hasValue) {
@@ -2246,7 +2246,7 @@ void InitIdentityPoseSource(T2195_5D8* self)
     d2[2] = src[2];
 }
 
-void func_00122A80(T2195_588* self, f32 t, Vec02* pos, Vec02* vec)
+void GetIdentityPosePosition(T2195_588* self, f32 t, Vec02* pos, Vec02* vec)
 {
     Attachment* p = self;
     while ((p = p->link.next) != 0) {

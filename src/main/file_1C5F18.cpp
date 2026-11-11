@@ -170,7 +170,7 @@ extern f32 D_00274B98;
 extern s32 D_00274C10;
 extern s32 D_00274C14;
 
-void func_001C61E0(Player* self, s32 state)
+void SetPlayerAimMode(Player* self, s32 state)
 {
     s32 old = self->f223C;
     if (old == state) {
@@ -395,7 +395,7 @@ void func_001C61E0(Player* self, s32 state)
 }
 
 s32 IsObjectAttached(void* p);
-void func_001C61E0(Player* self, s32 mode);
+void SetPlayerAimMode(Player* self, s32 mode);
 void TrackAimTargetObject(Player* self, s32 v, void* p);
 void TrackAimTargetPoint(Player* self, s32 v, s32 w, void* blk);
 
@@ -408,7 +408,7 @@ void UpdatePlayerAimTarget(Player* s)
         if (v != 0) {
             return;
         }
-        func_001C61E0(s, -1);
+        SetPlayerAimMode(s, -1);
     }
     if (s->f223C != 0) {
         return;
@@ -424,7 +424,7 @@ void UpdatePlayerAimTarget(Player* s)
 }
 
 void SetPlayerState(Player* self, s32 a, s32 b);
-void func_001C61E0(Player* self, s32 state);
+void SetPlayerAimMode(Player* self, s32 state);
 
 void HandlePlayerAimButton(Player* self, PadRecord* other)
 {
@@ -457,10 +457,10 @@ void HandlePlayerAimButton(Player* self, PadRecord* other)
         if (self->f2590 != 0 && self->f25AC != 0) {
             switch (self->f223C) {
             case 4:
-                func_001C61E0(self, 6);
+                SetPlayerAimMode(self, 6);
                 break;
             case 5:
-                func_001C61E0(self, 7);
+                SetPlayerAimMode(self, 7);
                 break;
             }
         }
@@ -483,7 +483,7 @@ tail:
             }
         }
     }
-    func_001C61E0(self, st);
+    SetPlayerAimMode(self, st);
 }
 
 void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f32* dir, f32 a, f32 b)

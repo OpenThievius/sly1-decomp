@@ -2,7 +2,7 @@
 // PAL copies the name with func_eu_001F7738, a function only PAL has, where US calls func_00201720
 s32 func_eu_001F7738(s8* dst, s8* src, s32 n);
 
-s32 func_0020A078(s32 a0, s32 a1, s8* a2)
+s32 RequestCardSpaceForPath(s32 a0, s32 a1, s8* a2)
 {
     Reg_0020A078* reg;
     Buf_0020A078* buf;

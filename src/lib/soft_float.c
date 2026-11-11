@@ -202,7 +202,7 @@ Unpacked* AddUnpackedDoubles(Unpacked* a, Unpacked* b, Unpacked* tmp)
     return tmp;
 }
 
-u64 func_001FCD20(u64 pa, u64 pb)
+u64 AddDoubles(u64 pa, u64 pb)
 {
     Unpacked a;
     Unpacked b;
@@ -213,7 +213,7 @@ u64 func_001FCD20(u64 pa, u64 pb)
     return PackDouble(AddUnpackedDoubles(&a, &b, &c));
 }
 
-u64 func_001FCD78(u64 pa, u64 pb)
+u64 SubtractDoubles(u64 pa, u64 pb)
 {
     Unpacked a;
     Unpacked b;
@@ -225,7 +225,7 @@ u64 func_001FCD78(u64 pa, u64 pb)
     return PackDouble(AddUnpackedDoubles(&a, &b, &c));
 }
 
-u64 func_001FE890(u64 a, u64 b);
+u64 MultiplySigned64(u64 a, u64 b);
 static inline Unpacked* Multiply(Unpacked* a, Unpacked* b, Unpacked* tmp)
 {
     u64 high;
@@ -268,10 +268,10 @@ static inline Unpacked* Multiply(Unpacked* a, Unpacked* b, Unpacked* tmp)
     ahi = a->fraction.ll >> 32;
     blo = b->fraction.ll & 0xFFFFFFFF;
     bhi = b->fraction.ll >> 32;
-    p0 = func_001FE890(blo, alo);
-    p1 = func_001FE890(bhi, alo);
-    p2 = func_001FE890(blo, ahi);
-    p3 = func_001FE890(bhi, ahi);
+    p0 = MultiplySigned64(blo, alo);
+    p1 = MultiplySigned64(bhi, alo);
+    p2 = MultiplySigned64(blo, ahi);
+    p3 = MultiplySigned64(bhi, ahi);
     mid = p1 + p2;
     hi = 0;
     if (mid < p1) {
@@ -315,7 +315,7 @@ static inline Unpacked* Multiply(Unpacked* a, Unpacked* b, Unpacked* tmp)
     return tmp;
 }
 
-u64 func_001FCDE0(u64 x, u64 y)
+u64 MultiplyDoubles(u64 x, u64 y)
 {
     Unpacked a;
     Unpacked b;
@@ -442,7 +442,7 @@ s32 CompareUnpackedDoubles(Unpacked* a, Unpacked* b)
     return 0;
 }
 
-s32 func_001FD308(u64 pa, u64 pb)
+s32 CompareDoubles(u64 pa, u64 pb)
 {
     Unpacked a;
     Unpacked b;
@@ -452,7 +452,7 @@ s32 func_001FD308(u64 pa, u64 pb)
     return CompareUnpackedDoubles(&a, &b);
 }
 
-u64 func_001FD358(s32 value)
+u64 ConvertS32ToDouble(s32 value)
 {
     Unpacked parts;
     u64 m;
@@ -566,7 +566,7 @@ u64 PackDoubleFromParts(s32 a0, s32 a1, s32 a2, u64 a3)
 
 f32 PackFloatFromParts(s32 a0, s32 a1, s32 a2, s32 a3);
 
-f32 func_001FD578(u64 bits)
+f32 ConvertDoubleToFloat(u64 bits)
 {
     Unpacked u;
     s32 fraction;

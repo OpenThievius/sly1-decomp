@@ -172,7 +172,7 @@ void InterpolatePathCurvePoint(f32 t, s32 count, Vec02* points, f32* times, s32 
 // length: as Vu0::Vec values, NormalizeOr's argument is a copy the compiler makes (its own
 // vmove, a vu0 insn of latency 2), so sched2 issues the length's dot before the first store, as
 // retail does (docs/TOOLCHAIN.md, "A compiler copy's latency in sched2").
-void func_0014D3A8(Vec02* pos, void* anchor, s32 n, Vec02* pts, Vec02* outPoint, Vec02* outDir, s32* outIdx, f32* outT)
+void FindNearestPathCurveSegment(Vec02* pos, void* anchor, s32 n, Vec02* pts, Vec02* outPoint, Vec02* outDir, s32* outIdx, f32* outT)
 {
     s32 best = -1;
     f32 frac = -1.0f;
@@ -233,7 +233,7 @@ void func_0014D3A8(Vec02* pos, void* anchor, s32 n, Vec02* pts, Vec02* outPoint,
 // only &d (its life is long enough) and leaves n - 2 and 0.0f in the loop, and the address is
 // set before the loop's NOTE_INSN_LOOP_BEG, so sched2 interleaves it with the saves
 // (docs/TOOLCHAIN.md, "Loops").
-void func_0014D680(Vec02* pos, void* anchor, s32 n, Vec02* pts, s32 idx, s32 wrap, Vec02* outPoint, Vec02* outDir, s32* outIdx, f32* outT)
+void WalkToNearestPathCurveSegment(Vec02* pos, void* anchor, s32 n, Vec02* pts, s32 idx, s32 wrap, Vec02* outPoint, Vec02* outDir, s32* outIdx, f32* outT)
 {
     s32 back = 0;
     s32 fwd = 0;

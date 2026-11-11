@@ -558,8 +558,8 @@ void UpdatePlayerLinkPose(Player* self)
     LinkPoseView* v = (LinkPoseView*)self;
     ComputePlayerLinkPose(self, &pos, &a, &b);
     *(Quad128*)&v->offset = ApproachPointWithRamp(*(Quad128*)&v->offset, *(const Quad128*)&D_00248D30, D_00274DE0, 0, g_gameClock[2]);
-    ApproachRotationWithRamp(&v->rotA, &D_002483D0, D_00274DF0, &v->rotA, 0, g_gameClock[2]);
-    ApproachRotationWithRamp(&v->rotB, &D_002483D0, D_00274DF0, &v->rotB, 0, g_gameClock[2]);
+    ApproachRotationWithRamp(&v->rotA, &g_identityMatrix, D_00274DF0, &v->rotA, 0, g_gameClock[2]);
+    ApproachRotationWithRamp(&v->rotB, &g_identityMatrix, D_00274DF0, &v->rotB, 0, g_gameClock[2]);
     Vu0::Q((*(LinkPoseTarget**)((u8*)self + 0x251C))->pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(v->offset));
     MulRotationInto(*(LinkPoseTarget**)((u8*)self + 0x251C), v->rotA, a);
     MulRotationInto(*(LinkPoseTarget**)((u8*)self + 0x2520), v->rotB, b);

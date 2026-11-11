@@ -25,7 +25,7 @@ static inline u128 WeightAt(const f32& f)
     return Vu0::Q(t);
 }
 
-void func_0014F168(PlacedObject* self, PlacedObject* other)
+void LaunchObjectFromPooledObject(PlacedObject* self, PlacedObject* other)
 {
     Vec02 d = self->v150;
     d.z = 0.0f;

@@ -99,7 +99,7 @@ s32 PostSemaphoreFromInterrupt(s32 h);
 // From an interrupt handler: wakes thread tid unless it is the current one; for the current
 // one, queues an empty request carrying its id and signals the request semaphore. Returns the
 // wake's result, -1 when there is no request thread, or the id.
-s32 func_001F71D0(s32 tid)
+s32 QueueThreadRequest(s32 tid)
 {
     s32 self = CurrentThreadIdFromInterrupt();
     if (self != tid) {

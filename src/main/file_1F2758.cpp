@@ -138,7 +138,7 @@ extern s32 (*D_00276608[6])[4];
 #include "common.h"
 
 void RemoveCameraControllers(u32, int, int, void*, int, void*);
-void func_00125C90();
+void PrepareFadedObjectDraw();
 struct TimedValue { u8 pad[0x98]; s32 state; f32 value; };
 
 void InitPlacedObject(void*);
@@ -375,7 +375,7 @@ void MultiplyMatrices(void* out, void* b, void* in);
 void BuildMatrixFromRotationAndTranslation(Vec02* pos, Mat02* rot, void* out);
 void ComputeSinCos(f32 angle, f32* a, f32* b);
 
-void func_001F2840(Oscillator* self)
+void RefreshOscillatorFrames(Oscillator* self)
 {
     for (OscPart* part = *(OscPart**)((u8*)self + 0x8E0); part != 0; part = part->next) {
         PlacedObject* obj = part->obj;
@@ -997,7 +997,7 @@ void SetObjectSubGroupState(void* obj, s32 state);
 f32 ArctangentOfRatio(f32 a, f32 b);
 f32 WrapAngle(f32 a);
 
-void func_001F4008(TransformSet* self)
+void PlaceAtArrivalPoint(TransformSet* self)
 {
     void CreateAnimationPlayerWithoutPresetTargets(void* obj, s32 a, s32 b, s32 c, f32 x, f32 y);
     Vec02 pos;
@@ -1017,7 +1017,7 @@ void func_001F4008(TransformSet* self)
         return;
     }
     who->vt->getDir(who, &rot);
-    PlaceColliderClearOfContacts(who, &pos, (void*)&D_00248D20);
+    PlaceColliderClearOfContacts(who, &pos, (void*)&g_unitZVector);
     who->vt->setVel(who, (u8*)self + 0x80);
     who->vt->setSpin(who, (void*)&D_00248D30);
     ActivateSwitchedCollider(who);
@@ -1437,7 +1437,7 @@ void CollectTouchingObjects(ContactTracker* self) {
 
 void CopyContactTracker(ContactTracker* self) { CopyCollider(self); self->rec.owner = self; }
 
-void ApplyContactTrackerTransform() { func_00125C90(); }
+void ApplyContactTrackerTransform() { PrepareFadedObjectDraw(); }
 
 int RequestContactTrackerLaunch(ContactTracker* self) { OfferTrackedNodeLaunch(&self->rec); return 1; }
 
@@ -1465,11 +1465,11 @@ s32 CollectMeshHits(f32 radius, Vec02* pos, s32 count, s32 nodes, s32 zero, void
 s32 CollectTreeNodeSpans(s32 tree, void* a1, void* a2, s32 a3, s32 a4, void* out);
 void AddSphereSphereContact(Collider* a, Collider* b, s32* out);
 void AddMeshContacts(Collider* a, f32 radius, Vec02* pos, Collider* b, s32 c, s32 d, s32 e, s32* out);
-void func_00186BA8(Collider* a, Collider* b, s32 c, s32 d, s32 e, void* f);
+void CreateMeshPairContacts(Collider* a, Collider* b, s32 c, s32 d, s32 e, void* f);
 void InitOwnerMessage(void* out, s32 kind, void* owner);
 void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out);
 void FreePooledContactChain(void* pool, s32 chain);
-s32 func_0013E658(void* a, s32 b);
+s32 FindPlaneTreeNodeForPoint(void* a, s32 b);
 
 void UpdateC37(C37* self)
 {
@@ -1503,7 +1503,7 @@ void UpdateC37(C37* self)
         if (0.0f < ((f32*)target)[0x158 / 4]) {
             return;
         }
-        if (func_0013E658(pos, (s32)self->tree.nodes) == 0) {
+        if (FindPlaneTreeNodeForPoint(pos, (s32)self->tree.nodes) == 0) {
             return;
         }
         if ((target->flags538 & ((u64)0x8000 << 25)) != 0) {
@@ -1534,7 +1534,7 @@ void UpdateC37(C37* self)
                 inside = 0;
             }
         } else {
-            inside = func_0013E658(pos, (s32)self->tree.nodes);
+            inside = FindPlaneTreeNodeForPoint(pos, (s32)self->tree.nodes);
         }
         if (inside == 0) {
             if ((target->flags538 & ((u64)0x8000 << 25)) != 0) {
@@ -1548,7 +1548,7 @@ void UpdateC37(C37* self)
             } else {
                 s32 nodes = (s32)self->tree.nodes;
                 if (nodes != 0) {
-                    func_00186BA8(target, self, (s32)self->tree.count2, nodes, nodes, &result);
+                    CreateMeshPairContacts(target, self, (s32)self->tree.count2, nodes, nodes, &result);
                 }
             }
             if (result == 0) {

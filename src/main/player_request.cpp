@@ -76,7 +76,7 @@ struct PlayerBlendCurve { u8 pad00[0x10]; void* f10; };
 void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* vals);
 void SetBlendItemWeights(Gr8B* obj, s32 a1, s32 a2, void* a3);
 
-void func_001D36F0(TurningCollider* self, PlayerBlendItem* items, Gr8B** out)
+void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, Gr8B** out)
 {
     Vec02 a0;
     Vec02 a10;
@@ -143,7 +143,7 @@ void func_001D36F0(TurningCollider* self, PlayerBlendItem* items, Gr8B** out)
 
 struct WeightedRow { f32 w; u8 pad0[0xC]; Vec02 v; u8 pad1[0x14]; f32 d; u8 pad2[0x18]; };
 
-void func_001D39E0(s32 n, WeightedRow* rows, f32* scale, Vec02* out)
+void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out)
 {
     Vec02 k;
     Vu0::Q(*out) = Vu0::Zero();
@@ -162,7 +162,7 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, s32 c, s32 d, s32* count, Collider*** list);
 
-s32 func_001D3B58(PlacedObject* self, Vec02* from, Vec02* to, f32* ratio)
+s32 FindObjectAlongSegment(PlacedObject* self, Vec02* from, Vec02* to, f32* ratio)
 {
     Vec02 a;
     Vec02 b;
@@ -179,7 +179,7 @@ s32 func_001D3B58(PlacedObject* self, Vec02* from, Vec02* to, f32* ratio)
     return found != 0;
 }
 
-f32 func_001FD578(u64 v);
+f32 ConvertDoubleToFloat(u64 v);
 
 s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     f32 rows[16];
@@ -191,14 +191,14 @@ s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     s32 changed;
     for (i = 1; i < n; i++) {
         ap++;
-        rows[i] = func_001FD578(ap[-1]);
+        rows[i] = ConvertDoubleToFloat(ap[-1]);
         sum += rows[i];
     }
     rows[0] = 1.0f - sum;
     sum = 0.0f;
     for (j = 1; j < m; j++) {
         ap++;
-        cols[j] = func_001FD578(ap[-1]);
+        cols[j] = ConvertDoubleToFloat(ap[-1]);
         sum += cols[j];
     }
     cols[0] = 1.0f - sum;
@@ -217,7 +217,7 @@ s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     return changed;
 }
 
-u64 func_001FD868(f32 x);
+u64 ConvertFloatToDouble(f32 x);
 s32 FindObjectAlongSegment(void* p, void* a, void* b, void* out);
 
 struct BlendSpan { f32 t; u8 pad4[8]; f32 len; };
@@ -230,7 +230,7 @@ void InterpolateBlendEntryPosition(void* p, void* e, f32 a, f32 b, s32 i, s32 j,
 void SetBlendItemWeights(Gr8B* obj, s32 a1, s32 a2, void* a3);
 void SumBlendEntryVectors(s32 a0, void* a1, s32 a2, void* a3);
 
-void func_001D3E00(TurningCollider* p, void* e, Gr8B* g, void* a3)
+void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, Gr8B* g, void* a3)
 {
     f32 t;
     f32 lo;
@@ -291,9 +291,9 @@ void func_001D3E00(TurningCollider* p, void* e, Gr8B* g, void* a3)
             hi = lo;
         }
     }
-    u64 hv = func_001FD868(hi);
-    u64 lv = func_001FD868(lo);
-    u64 tv = func_001FD868(t);
+    u64 hv = ConvertFloatToDouble(hi);
+    u64 lv = ConvertFloatToDouble(lo);
+    u64 tv = ConvertFloatToDouble(t);
     if (FillOuterProductTable(0x50, 3, 2, (char*)e, hv, lv, tv)) {
         SetBlendItemWeights(g, 0x50, 6, e);
         SumBlendEntryVectors(6, e, (s32)g->pC0->p8, (u8*)p + 0x640);
@@ -342,7 +342,7 @@ void SetPlayerBlendWeights(TurningCollider* a0, TurnBlendRecords* a1, Gr8B* a2, 
     SumBlendEntryVectors(6, a1, (s32)a2->pC0->p8, &a0->f640);
 }
 
-void func_001D4148(TurningCollider* self, BlendSlot* slots, Gr8B** gr)
+void CreateEightEntryBlend(TurningCollider* self, BlendSlot* slots, Gr8B** gr)
 {
     Vec02 here;
     Vec02 there;
@@ -418,7 +418,7 @@ static inline void SetSlotWeights(Player* self, BlendSlot* slots, s32 o, f32 sca
     }
 }
 
-void func_001D4348(Player* self, BlendSlot* slots, Gr8B* gr)
+void UpdateEightEntryBlendWeights(Player* self, BlendSlot* slots, Gr8B* gr)
 {
     Vec02 acc;
     f32 scale = *(f32*)((u8*)self->watched2230 + 0x18);
@@ -515,7 +515,7 @@ void AddColliderForce(Collider* self, Vec02* force);
 void SteerColliderTowardPosition(Collider* self, void* a, void* b, const Vec02* target, const f32* ramp, f32 dt);
 void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* from, f32* to);
 
-void func_001D48E8(Player* self)
+void StepPlayerRequestState(Player* self)
 {
     Vec02 force;
     switch (self->f2228) {

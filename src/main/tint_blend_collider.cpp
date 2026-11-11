@@ -178,7 +178,7 @@ static inline Mat02 MulRotationValue2(const Mat02& a, const Mat02& b) return r
     *(u128*)&r.r[2] = Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
 }
 
-void func_001DDE90(RedirectObject* self)
+void SimulateRedirectChain(RedirectObject* self)
 {
     typedef Vu0::Vec Vec;
     if (self->frameStamp == g_frameCount) {
@@ -457,13 +457,13 @@ void UpdateTintBlendCollider(TintBlendCollider* self)
 }
 
 extern f32 g_frameDt;
-void func_00128598(f32 a, f32 b, void* self, s32 c, s32 d, f32* e, f32* f, f32* g);
+void ComputeObjectSteeringHeading(f32 a, f32 b, void* self, s32 c, s32 d, f32* e, f32* f, f32* g);
 void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 
 void ResetTintBlendColliderOrientation(TintBlendCollider* self)
 {
     f32 heading, pitch, speed;
-    func_00128598(g_frameDt, self->f638, self, 0, 0, &heading, &pitch, &speed);
+    ComputeObjectSteeringHeading(g_frameDt, self->f638, self, 0, 0, &heading, &pitch, &speed);
     self->f638 = heading;
     BuildYawPitchMatrix(heading, pitch, &self->m660);
     Vu0::Q(self->v640) = Vu0::FromFloats(-speed, 0.0f, 0.0f);
@@ -502,7 +502,7 @@ struct UnitClamp {
 
 f32 Cosine(f32 x);
 void SetObjectTreeRecordValue(TintBlendCollider* s, u32 c);
-void func_00125C90(TintBlendCollider* s, void* a, void* b);
+void PrepareFadedObjectDraw(TintBlendCollider* s, void* a, void* b);
 
 void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
 {
@@ -532,7 +532,7 @@ void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
             out = D_002623E0;
         }
         SetObjectTreeRecordValue(self, *(u32*)&out);
-        func_00125C90(self, a1, a2);
+        PrepareFadedObjectDraw(self, a1, a2);
     }
 }
 
@@ -568,7 +568,7 @@ void TurnColliderTowardHeading(TintBlendCollider* self);
 void SetPlayerState(TintBlendCollider* self, s32 a, s32 b);
 f32 WrapAngle(f32 a);
 
-void func_001DF600(TintBlendCollider* self, TintBlendCollider* other)
+void ContinueTintBlendColliderRequest(TintBlendCollider* self, TintBlendCollider* other)
 {
     Vec02 d = self->v150;
     d.z = 0.0f;

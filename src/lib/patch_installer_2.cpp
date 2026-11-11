@@ -16,7 +16,7 @@ ASM_FUNC(func_001F9EF8);
 
 struct Words_001F9F08 { s32 w[1]; };
 
-s32 func_001F9F08(Words_001F9F08* dst, Words_001F9F08* src, u32 bytes)
+s32 CopyKernelWordsSecondPatch(Words_001F9F08* dst, Words_001F9F08* src, u32 bytes)
 {
     s32* d = (s32*)dst;
     s32* s = (s32*)src;
@@ -114,30 +114,30 @@ u32 D_002771F0[490] = {
 };
 
 struct Slot_1F9FB8 { s32 key; s32 value; };
-Slot_1F9FB8 D_00277998[3] = { { 0x5A, (s32)func_001F9F08 }, { 0x5B, 0x80074000 }, { (s32)0xFFFFC402, 0 } };
+Slot_1F9FB8 D_00277998[3] = { { 0x5A, (s32)CopyKernelWordsSecondPatch }, { 0x5B, 0x80074000 }, { (s32)0xFFFFC402, 0 } };
 s32 IsSecondKernelPatchNeeded(void);
-void func_001F9EE8(s32 a, s32 b);
-void func_001F9EF8(s32 a, void* b, s32 c);
+void SetSystemCallHandlerSecondPatch(s32 a, s32 b);
+void CopyKernelWordsSyscallSecondPatch(s32 a, void* b, s32 c);
 void SyncDataCache(s32 a);
-s32 func_001F9F40(s32 key);
+s32 QueryPatchedHandlerSecondPatch(s32 key);
 
 void InstallSecondKernelPatch(void)
 {
     Slot_1F9FB8* q;
     u32 i;
     if (IsSecondKernelPatchNeeded() != 0) {
-        func_001F9EE8(D_00277998[0].key, D_00277998[0].value);
-        func_001F9EF8(0x80074000, D_002771F0, 0x7A8);
+        SetSystemCallHandlerSecondPatch(D_00277998[0].key, D_00277998[0].value);
+        CopyKernelWordsSyscallSecondPatch(0x80074000, D_002771F0, 0x7A8);
         SyncDataCache(0);
         SyncDataCache(2);
-        func_001F9EE8(D_00277998[1].key, D_00277998[1].value);
+        SetSystemCallHandlerSecondPatch(D_00277998[1].key, D_00277998[1].value);
         q = &D_00277998[2];
         i = 2;
         do {
             s32 v;
             i++;
-            v = func_001F9F40(q->key);
-            func_001F9EE8(q->key, v);
+            v = QueryPatchedHandlerSecondPatch(q->key);
+            SetSystemCallHandlerSecondPatch(q->key, v);
             q++;
         } while (i < 3);
     }

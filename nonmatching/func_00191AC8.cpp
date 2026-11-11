@@ -111,7 +111,7 @@ struct Obj_191AA8 {
     u8 pad0[0x54];
     void* p54;
 };
-s32 func_001909F0(void* p);
+s32 CollectSegmentSpansInPlaneTree(void* p);
 void SyncDataCache(s32 a);
 void CopyObjectData(void* self);
 void SetListLinkOffset(void* self, s32 value);
@@ -162,14 +162,14 @@ void PopBackMemoryMark(void);
 s32 IsPointPathShortcutBlocked(void* self, s32 a, s32 b);
 s32 GetEntryName(s32 v);
 void UpdateAgentGoal(SeekingAgent* self);
-void func_001C8418(SeekingAgent* self, void* p);
+void SetAgentGoalPoint(SeekingAgent* self, void* p);
 s32 IsObjectAttached(void* p);
 s32 GetObjectWorldPosition(void* self, s32* arg);
-s32 func_001909F0(void* a, s32 b, s32 c, s32 d, ColliderSpan* e);
+s32 CollectSegmentSpansInPlaneTree(void* a, s32 b, s32 c, s32 d, ColliderSpan* e);
 typedef void (*SlotFn)(void* self);
 extern u8* g_saveData;
 void UpdateCollider(SwitchedCollider* self);
-void func_00192DD0(SwitchedCollider* self);
+void EmitSwitchedColliderTrailPoints(SwitchedCollider* self);
 struct ClampInt {
     static s32 Of(s32 v, s32 lo, s32 hi)
     {
@@ -207,7 +207,7 @@ void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
 // A matrix copied whole: the call's arguments are its parameters, substituted as constants.
 static inline void CopyMatrix(Mat02* d, const Mat02* s) { CopyBytes(d, (void*)s, 0x30); }
 
-void func_00191AC8(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)
+void FitStepToPointGraph(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)
 {
     Mat02 m;
     Vec02 p;

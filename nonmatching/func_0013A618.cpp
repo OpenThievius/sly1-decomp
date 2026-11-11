@@ -60,9 +60,9 @@ void TurnMatrixBySpin(void* spin, Vec02* out);
 s32 WaitDmaChannel(void* dma, s32 b, s32 c);
 void StartToSprChain(s32 size, ...);
 void StartFromSprChain(void* first, ...);
-s32 func_0013A498(Vec02* m, u128 s, u32 a, u32 b, u32 c, s32 n, s32 mode, Vec02* lo, Vec02* hi);
+s32 FilterParticleVerticesVu0(Vec02* m, u128 s, u32 a, u32 b, u32 c, s32 n, s32 mode, Vec02* lo, Vec02* hi);
 
-void func_0013A618(WorldListedObject* self, f32 dt)
+void StepListedObjectParticles(WorldListedObject* self, f32 dt)
 {
     Vec02 lo = {3.4028235e+38f, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
     Vec02 hi = {-3.4028235e+38f, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
@@ -93,7 +93,7 @@ void func_0013A618(WorldListedObject* self, f32 dt)
             StartToSprChain(next->count * 16, p, next->count * 16, p + 0x2C, next->count * 16, p + 0x58, 0, 0);
         }
         u128 w = Vu0::ScalarInGpr(dt);
-        s32 used = func_0013A498(mat, w, SprBlock::Of(0), SprBlock::Of(1), SprBlock::Of(2), node->count, self->f618, &lo, &hi);
+        s32 used = FilterParticleVerticesVu0(mat, w, SprBlock::Of(0), SprBlock::Of(1), SprBlock::Of(2), node->count, self->f618, &lo, &hi);
         s32 nb = (node->bank + 1) & 1;
         p = node->points[nb];
         StartFromSprChain(p, p + 0x2C, p + 0x58, 0);

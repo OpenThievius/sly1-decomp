@@ -31,7 +31,7 @@ s32 GetStringLength(const s8* s);
 void* AppendString(s8* dst, const char* src);
 s32 FormatToString(void* dst, const char* fmt, ...);
 s32 CheckDiscChanged(s32 a0, s32* out);
-u32 func_00203A20(s32 arg);
+u32 SendDiscSValueCommand(s32 arg);
 s32 ReadDiscSectors(void*, void*, void*, void*);
 s32 SyncDiscNCommand(s32);
 s32 GetDiscError(void);
@@ -117,7 +117,7 @@ INCLUDE_ASM(func_00140968);
 void SendDiscCommand22WhenReady(void)
 {
     if (g_discStatus == 0x14) {
-        func_00203A20(2);
+        SendDiscSValueCommand(2);
     }
 }
 

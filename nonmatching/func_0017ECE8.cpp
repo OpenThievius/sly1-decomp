@@ -50,19 +50,19 @@
 #include "fpu.h"
 #include "vu0.h"
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 void SolveActiveSetSystem(s32 count, u8* data, f32* values, f32* out);
-s32 func_0017ECE8(Player* self)
+s32 ShouldPlayerLaunchAtTarget(Player* self)
 {
     Vec02 acc;
     ContactRow03* row;
     Contact03* c;
     u32 bits;
     s32 n = 0;
-    f32 now = D_0026185C;
+    f32 now = g_gameTime;
     if (now - self->f222C < 1.0f) {
         return 0;
     }

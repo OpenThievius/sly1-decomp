@@ -397,7 +397,7 @@ s32 IsPadSelectFlagHeld(void* p);
 typedef s32 (*SlotFnRet)(void* self);
 s32 TestPointAgainstObjectShape(void* obj, Vec02* p);
 f32 ComputeAgentTargetBearing(void* self);
-s32 func_001CB3D0(void* self);
+s32 IsPlayerEvadingAgent(void* self);
 
 s32 IsConeAgentFree(ConeAgent* self)
 {
@@ -449,7 +449,7 @@ s32 IsConeAgentFree(ConeAgent* self)
             return 0;
         }
     }
-    if (func_001CB3D0(self) != 0) {
+    if (IsPlayerEvadingAgent(self) != 0) {
         return 0;
     }
     self->fC38 = 1;
@@ -1171,7 +1171,7 @@ void CopyTargetCurve(TargetCurve* self)
 f32 WrapAngle(f32 a);
 f32 ArctangentOfRatio(f32 y, f32 x);
 
-void func_00169E20(TargetCurve* self, Vec02* out, f32* angleOut, f32 t)
+void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t)
 {
     Vec02 pos;
     Vec02 tangent;
@@ -1299,7 +1299,7 @@ void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t)
     }
 }
 
-void func_0016A320(TargetPoint* self, Vec02* out, f32* angleOut)
+void PlaceTargetPointNearCollider(TargetPoint* self, Vec02* out, f32* angleOut)
 {
     Vec02 here;
     Vec02 d;
@@ -1447,7 +1447,7 @@ void* GetActiveSwitchedCollider(void);
 f32 WrapAngle(f32 a);
 f32 ArctangentOfRatio(f32 y, f32 x);
 
-void func_0016A910(PlacedObject* self, Vec02* out, f32* angleOut)
+void FindRingPointTowardCollider(PlacedObject* self, Vec02* out, f32* angleOut)
 {
     Vec02 d;
     PlacedObject* active = (PlacedObject*)GetActiveSwitchedCollider();

@@ -15,7 +15,7 @@ void DrawTextPanelBlocks(Obj_eu_135228* self, PacketWriter* q)
     {
         if ((u32)MaskWorldBitsBySave() & 0x800)
         {
-            func_00134B48((T217D_440*)self, q);
+            DrawTextPanelMarkers((T217D_440*)self, q);
         }
         u32 mask;
         GetCurrentLevelBit(&mask);

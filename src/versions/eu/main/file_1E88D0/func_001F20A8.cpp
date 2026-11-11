@@ -15,7 +15,7 @@ extern char D_eu_0024FAF8[];
 extern char D_eu_0024FB00[];
 void DrawFontString(Font* font, const void* text, WarpLabelLayout* out, s32 zero, void* d);
 
-void func_001F20A8(WarpMenu_eu* self)
+void DrawWarpMenu(WarpMenu_eu* self)
 {
     if (self->current == 0) {
         return;

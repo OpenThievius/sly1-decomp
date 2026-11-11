@@ -106,14 +106,14 @@ void* EnterRuntimeLock(u32 size);
 void LeaveRuntimeLock(void* p);
 void AbortProgram(void) __attribute__((noreturn));
 void* FillMemory(void* p, s32 value, s32 size);
-FrameDesc* func_001FF658(void* pc);
-u8* func_001FF740(FrameDesc* f, CommonInfo* info);
-u8* func_001FF848(u8* insn, UnwindWork* work, CommonInfo* info, u32* pc);
+FrameDesc* FindFrameDescription(void* pc);
+u8* ParseCommonFrameRecord(FrameDesc* f, CommonInfo* info);
+u8* RunUnwindInstruction(u8* insn, UnwindWork* work, CommonInfo* info, u32* pc);
 u8* ReadUnsignedLeb128(u8* input, u32* output);
-FrameDesc** func_001FF1E0(FrameList* list, s32 count);
-s32 func_001FF448(FrameDesc* p);
-void func_001FF490(FrameDesc* cur, FrameList* list, s32* lo, s32* hi);
-void func_001FFE58(KeyedArray* self, KeyedArray* out);
+FrameDesc** FinishFrameTableSort(FrameList* list, s32 count);
+s32 CountFrameDescriptions(FrameDesc* p);
+void CollectFrameDescriptions(FrameDesc* cur, FrameList* list, s32* lo, s32* hi);
+void SplitOutOfOrderFrames(KeyedArray* self, KeyedArray* out);
 
 u8* ReadUnsignedLeb128(u8* input, u32* output)
 {
@@ -157,7 +157,7 @@ u8* ReadSignedLeb128(u8* input, s32* output)
     return input;
 }
 
-void func_001FF0E0(KeyedArray* self, KeyedArray* other)
+void MergeFrameLists(KeyedArray* self, KeyedArray* other)
 {
     s32 j = other->count;
     if (j != 0) {
@@ -228,20 +228,20 @@ static inline void SortFrames(KeyedArray* erratic)
 
 /* The end of a table's sort: the records in order split from those out of it, these sorted and
  * merged back; the second list is freed. */
-FrameDesc** func_001FF1E0(FrameList* list, s32 count)
+FrameDesc** FinishFrameTableSort(FrameList* list, s32 count)
 {
     if (list->count != count)
         AbortProgram();
-    func_001FFE58((KeyedArray*)list, (KeyedArray*)&list->other);
+    SplitOutOfOrderFrames((KeyedArray*)list, (KeyedArray*)&list->other);
     if (list->count + list->unused != count)
         AbortProgram();
     SortFrames((KeyedArray*)&list->other);
-    func_001FF0E0((KeyedArray*)list, (KeyedArray*)&list->other);
+    MergeFrameLists((KeyedArray*)list, (KeyedArray*)&list->other);
     LeaveRuntimeLock(list->other);
     return list->items;
 }
 
-s32 func_001FF448(FrameDesc* p)
+s32 CountFrameDescriptions(FrameDesc* p)
 {
     s32 n = 0;
     s32 off = p->length;
@@ -260,7 +260,7 @@ s32 func_001FF448(FrameDesc* p)
     return n;
 }
 
-void func_001FF490(FrameDesc* cur, FrameList* list, s32* lo, s32* hi)
+void CollectFrameDescriptions(FrameDesc* cur, FrameList* list, s32* lo, s32* hi)
 {
     s32 mn = *lo;
     s32 mx = *hi;
@@ -285,7 +285,7 @@ void func_001FF490(FrameDesc* cur, FrameList* list, s32* lo, s32* hi)
     *hi = mx;
 }
 
-void func_001FF518(FrameTable* self)
+void BuildFrameTableIndex(FrameTable* self)
 {
     s32 count;
     FrameDesc** p;
@@ -296,12 +296,12 @@ void func_001FF518(FrameTable* self)
         count = 0;
         if (*p != 0) {
             do {
-                count += func_001FF448(*p);
+                count += CountFrameDescriptions(*p);
                 p++;
             } while (*p != 0);
         }
     } else {
-        count = func_001FF448(self->records);
+        count = CountFrameDescriptions(self->records);
     }
     self->count = count;
     acc.items = (FrameDesc**)EnterRuntimeLock(count << 2);
@@ -314,19 +314,19 @@ void func_001FF518(FrameTable* self)
         p = self->sorted;
         if (*p != 0) {
             do {
-                func_001FF490(*p, &acc, (s32*)&acc.lo, &acc.hi);
+                CollectFrameDescriptions(*p, &acc, (s32*)&acc.lo, &acc.hi);
                 p++;
             } while (*p != 0);
         }
     } else {
-        func_001FF490(self->records, &acc, (s32*)&acc.lo, &acc.hi);
+        CollectFrameDescriptions(self->records, &acc, (s32*)&acc.lo, &acc.hi);
     }
-    self->sorted = func_001FF1E0(&acc, count);
+    self->sorted = FinishFrameTableSort(&acc, count);
     self->start = acc.lo;
     self->end = acc.hi;
 }
 
-FrameDesc* func_001FF658(void* pc)
+FrameDesc* FindFrameDescription(void* pc)
 {
     FrameTable* t;
     u32 lo, hi, mid;
@@ -335,7 +335,7 @@ FrameDesc* func_001FF658(void* pc)
     LockFrameTables(&D_0062A7BC);
     for (t = D_0062A7B8; t != 0; t = t->next) {
         if (t->start == 0)
-            func_001FF518(t);
+            BuildFrameTableIndex(t);
         if ((u32)pc >= t->start && (u32)pc < t->end)
             break;
     }
@@ -358,7 +358,7 @@ FrameDesc* func_001FF658(void* pc)
     return 0;
 }
 
-u8* func_001FF740(FrameDesc* f, CommonInfo* info)
+u8* ParseCommonFrameRecord(FrameDesc* f, CommonInfo* info)
 {
     CommonInfo* common = (CommonInfo*)((char*)&f->commonDelta - f->commonDelta);
     u8* p;
@@ -387,7 +387,7 @@ u8* func_001FF740(FrameDesc* f, CommonInfo* info)
     return p;
 }
 
-u8* func_001FF848(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
+u8* RunUnwindInstruction(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
 {
     s32 offset;
     u32 reg;
@@ -529,10 +529,10 @@ UnwindState* FindFrameUnwindState(void* target, UnwindState* out)
     CommonInfo info;
     UnwindWork work;
 
-    f = func_001FF658(target);
+    f = FindFrameDescription(target);
     if (f == 0)
         return 0;
-    insn = func_001FF740(f, &info);
+    insn = ParseCommonFrameRecord(f, &info);
     if (insn == 0)
         return 0;
 
@@ -545,7 +545,7 @@ UnwindState* FindFrameUnwindState(void* target, UnwindState* out)
         end = (u8*)common + common->length + 4;
     }
     while (insn < end)
-        insn = func_001FF848(insn, &work, &info, 0);
+        insn = RunUnwindInstruction(insn, &work, &info, 0);
 
     insn = (u8*)(f + 1);
     if (info.augmentation[0] == 'z') {
@@ -557,13 +557,13 @@ UnwindState* FindFrameUnwindState(void* target, UnwindState* out)
     end = (u8*)f + f->length + 4;
     pc = f->start;
     while (insn < end && pc <= target)
-        insn = func_001FF848(insn, &work, &info, (u32*)&pc);
+        insn = RunUnwindInstruction(insn, &work, &info, (u32*)&pc);
 
     *out = work.s;
     return out;
 }
 
-void func_001FFE58(KeyedArray* self, KeyedArray* out)
+void SplitOutOfOrderFrames(KeyedArray* self, KeyedArray* out)
 {
     u32 n = self->count;
     u32 next[n];

@@ -345,7 +345,7 @@ LINKER_REMNANT(func_0011D510);
 
 void QueueIopCommand(s32 a, s32 b, void* args, void* c, void* d);
 
-void func_0011D520(s32 x, s32 y)
+void QueueIopCommandD(s32 x, s32 y)
 {
     s32 args[2];
     args[0] = x;
@@ -361,7 +361,7 @@ struct AddressCommandArgs
     s32 a2;
 };
 
-void func_0011D558(void* a0, s32 a1, s32 a2)
+void QueueIopChannelConfig(void* a0, s32 a1, s32 a2)
 {
     AddressCommandArgs args;
     args.a0 = a0;
@@ -787,7 +787,7 @@ void SetIopChannelValuePair(s32 a0, s32 a1, s32 a2)
     QueueIopCommand(0xF, 12, local, 0, 0);
 }
 
-void func_0011E3A0(s32 a0, s32 a1)
+void QueueIopCommand51(s32 a0, s32 a1)
 {
     s32 local[2];
     local[0] = a0;

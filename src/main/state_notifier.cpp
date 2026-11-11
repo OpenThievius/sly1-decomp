@@ -22,7 +22,7 @@
 #include "shapes.h"
 #include "list_iter.h"
 
-void func_0012AA28(void* a, s32 b);
+void SetClass75ObjectMode(void* a, s32 b);
 void LoadPlacedObject(void* a, void* b);
 void ResolveObjectLinks(void* a, s32 b, void* c);
 void CopyPlacedObject(void* a, void* b);
@@ -286,7 +286,7 @@ void InitStateNotifier(StateNotifier* self)
 
 void LoadStateNotifier(StateNotifier* self, void* arg)
 {
-    func_0012AA28(self, 1);
+    SetClass75ObjectMode(self, 1);
     LoadPlacedObject(self, arg);
     ResolveObjectLinks(self, 5, g_stateNotifierLinks);
 }
@@ -425,7 +425,7 @@ static inline void SetRotationProductRows(PlacedObject* o, const Mat02& a, const
     o->rot = r;
 }
 
-void func_00146518(StateNotifier* self, f32 dt, s32 quiet)
+void MoveStateNotifier(StateNotifier* self, f32 dt, s32 quiet)
 {
     switch (self->state) {
     case 4: {
@@ -590,7 +590,7 @@ void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filt
                           StateNotifier* self, s32* n, Collider*** list);
 f32 SplitVectorAlongAxis(Vec02* v, const Vec02* axis, Vec02* along, Vec02* across);
 
-void func_00146DB0(StateNotifier* self)
+void BounceStateNotifierOffSurfaces(StateNotifier* self)
 {
     typedef Vu0::Vec Vec;
     PushBackMemoryMark();
@@ -670,7 +670,7 @@ s32 MaskWorldBitsBySave(void);
 void ComputeObjectMotionInFrame(void* obj, s32 z, void* point, Vec02* out, s32 a, s32 b, s32 c);
 s32 CollectMeshHits(f32 f0, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6);
 
-void func_001471B0(StateNotifier* self)
+void TriggerStateNotifierNearPlayer(StateNotifier* self)
 {
     Vec02 hit[3];
     Vec02 p0;
@@ -727,13 +727,13 @@ extern f32 g_gameClock[];
 extern Player* g_player;
 void UpdatePlacedObject(StateNotifier* self, f32 dt);
 void TransformDirectionBetweenFrames(void* to, void* from, void* in, void* out);
-void func_00146DB0(StateNotifier* self);
-void func_001471B0(StateNotifier* self);
+void BounceStateNotifierOffSurfaces(StateNotifier* self);
+void TriggerStateNotifierNearPlayer(StateNotifier* self);
 void CompleteSoundNotifiers(World* self);
 void* GetActiveSwitchedColliderData(void);
 extern World* g_currentWorld;
 
-void func_00147428(StateNotifier* self, f32 dt)
+void UpdateStateNotifier(StateNotifier* self, f32 dt)
 {
     s32 below = 1;
     Vec02 d;
@@ -777,9 +777,9 @@ void func_00147428(StateNotifier* self, f32 dt)
     switch (self->state) {
     case 0:
         if (10000.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v300), Vu0::Q(self->v300)))) {
-            func_00146DB0(self);
+            BounceStateNotifierOffSurfaces(self);
         }
-        func_001471B0(self);
+        TriggerStateNotifierNearPlayer(self);
         break;
     case 3:
         if (D_002619EC < g_gameClock[1] - self->stateSince) {
@@ -791,13 +791,13 @@ void func_00147428(StateNotifier* self, f32 dt)
             self->desc02()->m2F(self, 0);
             break;
         }
-        func_00146DB0(self);
+        BounceStateNotifierOffSurfaces(self);
         if (!(1.0f < g_gameClock[1] - self->stateSince)) {
             break;
         }
         ((BaseObject*)self->f2EC)->desc->m02((BaseObject*)self->f2EC);
     case 6:
-        func_001471B0(self);
+        TriggerStateNotifierNearPlayer(self);
         break;
     case 4:
         if (*(s32*)GetActiveSwitchedColliderData() == 0) {
@@ -844,7 +844,7 @@ void func_00147428(StateNotifier* self, f32 dt)
 void BuildScaledTransformMatrix(const void* pos, const void* rot, void* scale, void* out);
 void BuildPlacedObjectTransform(PlacedObject* self, void* src, void* dst);
 Mat4A MultiplyMatrices(const void* a, const void* b);
-void func_00125C90(PlacedObject* self, void* a, void* m);
+void PrepareFadedObjectDraw(PlacedObject* self, void* a, void* m);
 
 void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
 {
@@ -858,7 +858,7 @@ void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
         Mat4A s;
         f32 k;
         if (state == 4) {
-            f32 v = (D_0026185C - self->stateSince) / D_002619E4;
+            f32 v = (g_gameTime - self->stateSince) / D_002619E4;
             f32 lo = 0.0f;
             f32 hi = 1.0f;
             f32 x;
@@ -870,7 +870,7 @@ void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
             k += x * (c[1] + x * c[2]);
             Vu0::Q(scale) = Vu0::Splat(k);
             } else {
-            f32 v = (D_0026185C - self->stateSince) / D_002619E8;
+            f32 v = (g_gameTime - self->stateSince) / D_002619E8;
             f32 lo = 0.0f;
             f32 hi = 1.0f;
             f32 x;
@@ -889,12 +889,12 @@ void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
         break;
     }
     }
-    func_00125C90(self, a, m);
+    PrepareFadedObjectDraw(self, a, m);
 }
 
 
 #define CAMERA_AT(T, p, off) (*(T*)((u8*)(p) + (off)))
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 extern u8 g_unitXVector[];
 void* GetActiveSwitchedColliderData(void);
 void ConvertOffsetToCylindrical(const Vec02* a, const Vec02* b, f32* angle, f32* dist, f32* height);
@@ -910,7 +910,7 @@ void AdvanceStateWalkerTime(void* h, f32 t);
 // 4 and 5, sets the vectors of the new state, tells the object at 0x2EC (add to or remove from
 // its parent's list) and starts or stops the state walker of the state's event (0x260 to 0x263,
 // or the one saved at 0x2DC in state 0).
-void func_00147AB0(Camera* self, s32 state)
+void SetStateNotifierState(Camera* self, s32 state)
 {
     s32 event = -1;
     if (CAMERA_AT(s32, self, 0x2D0) == state) {
@@ -999,7 +999,7 @@ void func_00147AB0(Camera* self, s32 state)
         }
     }
     CAMERA_AT(s32, self, 0x2D0) = state;
-    CAMERA_AT(f32, self, 0x2D4) = D_0026185C;
+    CAMERA_AT(f32, self, 0x2D4) = g_gameTime;
     if (event != -1) {
         void* h = CAMERA_AT(void*, self, 0x2E8);
         if (h == 0) {
@@ -1334,7 +1334,7 @@ struct Candidate_00148938 {
 s32 CountListItems(List01* list);
 void SortElements(void* base, s32 count, s32 size, void* cmp);
 
-s32 func_00148938(World* self, s32 kind, s32 max, StateNotifier** out)
+s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out)
 {
     Vec02 origin;
     Candidate_00148938* recs;
@@ -1555,7 +1555,7 @@ s32 GatherObjectsById(void* world, s32 a, s32 b, s32 c, s32 d, PlacedObject** ou
 // Pushes the objects of kind 0x19 near the notifier (within 500, their meshes hit from 200 above
 // it) away by 0.75 of their velocity, the push never downward, counting the hits of the active
 // switched collider up to 99, and tells the listener.
-void func_00149190(ArmedStateNotifier* self)
+void UpdateArmedNotifier(ArmedStateNotifier* self)
 {
     typedef Vu0::Vec Vec;
     Vec02 probe;

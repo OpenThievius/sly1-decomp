@@ -86,7 +86,7 @@ static inline f32 NormalizeInPlace(Vec02* v, const Vec02& fallback)
     return Vu0::ToFloatMoved(len);
 }
 
-void func_001CC818(Player* self)
+void PlacePlayerOnLinkedObject(Player* self)
 {
     Vec02 pos;
     Vec02 delta;

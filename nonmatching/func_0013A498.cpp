@@ -34,7 +34,7 @@
 f32 WrapAngle(f32 x);
 extern f32 g_gameTime;
 
-s32 func_0013A498(const f32* m, u128 scaleBits, Vec02* pos, Vec02* extra, Vec02* items, s32 count, s32 mode, void* ra, void* rb)
+s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec02* pos, Vec02* extra, Vec02* items, s32 count, s32 mode, void* ra, void* rb)
 {
     Vu0::MoveToVf<27>(scaleBits);
     s32 j = -1;

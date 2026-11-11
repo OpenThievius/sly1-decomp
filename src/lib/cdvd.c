@@ -271,7 +271,7 @@ s32 BeginDiscNCommand(s32 command)
     return 1;
 }
 
-s32 func_00203230(void)
+s32 GetDiscDriveState(void)
 {
     u32 recv;
 
@@ -497,7 +497,7 @@ s32 WaitDiscReady(s32 mode)
     return v;
 }
 
-u32 func_00203A20(u32 value)
+u32 SendDiscSValueCommand(u32 value)
 {
     u32* send = D_0027AA40;
     u32 recv;
@@ -556,7 +556,7 @@ s32 ReadDiscSectors(s32 lsn, s32 sectors, void* buffer, ReadMode* mode)
     s32 size;
 
     if (!(D_00279434 & 1)) {
-        if (func_00203230() == 6)
+        if (GetDiscDriveState() == 6)
             return 0;
     }
     if (BeginDiscNCommand(4) == 0)

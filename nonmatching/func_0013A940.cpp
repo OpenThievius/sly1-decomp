@@ -32,14 +32,14 @@
 extern f32 g_gameClock[];
 
 void DetachOwnedRecord(OwnedRecord* o);
-void func_0013A618(WorldListedObject* self, f32 dt);
+void StepListedObjectParticles(WorldListedObject* self, f32 dt);
 s32 EvaluateHermiteVectorSegment(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 t, f32 span, f32 scale, Vec02* pos, Vec02* vel, s32 flags);
 f32 WrapAngle(f32 a);
 
-void func_0013A940(WorldListedObject* self, f32 dt)
+void MoveWorldListedObject(WorldListedObject* self, f32 dt)
 {
     if (self->mode == 0) {
-        func_0013A618(self, dt);
+        StepListedObjectParticles(self, dt);
         return;
     }
     Vec02 lo = {3.4028235e+38f, 3.4028235e+38f, 3.4028235e+38f, 0.0f};

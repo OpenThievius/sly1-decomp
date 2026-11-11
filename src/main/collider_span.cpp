@@ -99,7 +99,7 @@ s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, void* p3, 
 // The spans where the segment a-b is inside the sphere of the given radius around p (the roots
 // of a quadratic in the position along the segment): the points, their directions from p and
 // the times, into out.
-s32 func_00141D88(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out)
+s32 FindSegmentSphereSpan(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out)
 {
     if (count <= 0) {
         return 0;
@@ -139,7 +139,7 @@ s32 func_00141D88(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderS
 // The cut roots: the constant in the first register of max.s and min.s, the result in its register.
 static inline f32 MaxF(f32 a, f32 b) { return a >? b; }
 static inline f32 MinF(f32 a, f32 b) { return b <? a; }
-s32 func_00141F48(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out)
+s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out)
 {
     if (count <= 0) {
         return 0;
@@ -319,11 +319,11 @@ struct SpanQuery {
     s32 count;
     void* tree;
 };
-s32 func_0013E430(void* tree, Vec02* centre, SpanRecord** end, f32 r);
-s32 func_00142278(Vec02* p, Vec02* q, u8* a, u8* b, f32 r, s32 max, ColliderSpan* out);
+s32 QueryPlaneTreePoint(void* tree, Vec02* centre, SpanRecord** end, f32 r);
+s32 IntersectSegmentWithCapsule(Vec02* p, Vec02* q, u8* a, u8* b, f32 r, s32 max, ColliderSpan* out);
 void* FillMemory(void* p, s32 value, s32 size);
 
-s32 func_00142B78(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, ColliderSpan* out, f32 radius)
+s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, ColliderSpan* out, f32 radius)
 {
     Vec02 mid;
     SpanRecord* end;
@@ -342,7 +342,7 @@ s32 func_00142B78(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, C
     end = (SpanRecord*)AllocateBackMemory(query->count * 12);
     recs = end;
     f32 halfLen = len * h;
-    s32 kind = func_0013E430(query->tree, &mid, &end, halfLen + radius);
+    s32 kind = QueryPlaneTreePoint(query->tree, &mid, &end, halfLen + radius);
     switch (kind) {
     case 1:
         total = 0;
@@ -369,7 +369,7 @@ s32 func_00142B78(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, C
                     SpanOther* other = &set->others[l->other];
                     if ((other->flags & 0x100) != 0) {
                         ColliderSpan* seg = out + total;
-                        s32 got = func_00142278(p, q, set->verts + l->vertA * 16, set->verts + l->vertB * 16, radius, max - total, seg);
+                        s32 got = IntersectSegmentWithCapsule(p, q, set->verts + l->vertA * 16, set->verts + l->vertB * 16, radius, max - total, seg);
                         if (got > 0) {
                             ColliderSpan* sp = seg;
                             ColliderSpan* segEnd = sp + got;

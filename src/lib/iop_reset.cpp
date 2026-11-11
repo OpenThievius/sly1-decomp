@@ -63,8 +63,8 @@ s32 StartRequestThread();
 void PrintBuffered(const char* fmt, ...);
 void InitRemoteCalls(s32 a);
 void ShutDownRemoteCalls(void);
-void func_001F9E90(s32 num, s32* (*handler)(s32 value));
-s32 func_001F9E40(s32* (*handler)(s32 value));
+void SetSystemCallHandlerForWordSearch(s32 num, s32* (*handler)(s32 value));
+s32 RunKernelWordSearchSyscall(s32* (*handler)(s32 value));
 void InstallSecondKernelPatch();
 void func_001FA0A0(void);
 void WriteBackDataCacheRange(Cmd_1F9AD8* a0, s32 a1);
@@ -178,8 +178,8 @@ ASM_FUNC(func_001F9E40);
 
 s32 InstallKernelWordSearch(void)
 {
-    func_001F9E90(D_002771D8.num, D_002771D8.handler);
-    s32 r = func_001F9E40(FindKernelWord);
+    SetSystemCallHandlerForWordSearch(D_002771D8.num, D_002771D8.handler);
+    s32 r = RunKernelWordSearchSyscall(FindKernelWord);
     return r - 0x20C;
 }
 

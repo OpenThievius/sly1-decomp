@@ -22,7 +22,7 @@ union RampCopy {
 f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, void* p, f32* out);
 f32 ClampToMagnitude(f32 a, f32 b);
 
-void func_001C54D0(TurningCollider* self, Contact03* c, s32 e)
+void ResolveTurningColliderGroundContact(TurningCollider* self, Contact03* c, s32 e)
 {
     Vec02 d0;
     Vec02 d1;

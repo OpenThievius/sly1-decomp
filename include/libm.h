@@ -28,10 +28,10 @@ s32 IsFinite(f32 x);
 s32 IsNotANumber(f32 x);
 double RoundToInteger(double x);
 
-double func_001FD868(f32 x);
-f32 func_001FD578(double x);
-double func_001FCD78(double a, double b);
-double func_001FCDE0(double a, double b);
-s32 func_001FD308(double a, double b);
+double ConvertFloatToDouble(f32 x);
+f32 ConvertDoubleToFloat(double x);
+double SubtractDoubles(double a, double b);
+double MultiplyDoubles(double a, double b);
+s32 CompareDoubles(double a, double b);
 
 #endif

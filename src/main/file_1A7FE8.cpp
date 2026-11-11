@@ -69,7 +69,7 @@ s32 IsPadSelectFlagHeld(void* sub);
 
 typedef void* (*VFn_1A9960)(void* self);
 void UpdateAgentGoal(GaugeBarAgent* self);
-void func_001C8418(GaugeBarAgent* self, void* p);
+void SetAgentGoalPoint(GaugeBarAgent* self, void* p);
 
 
 void UpdateAgentState(GaugeBarAgent* self);
@@ -967,16 +967,16 @@ struct PoolView_1A8C90 {
 };
 
 void GetPlacementRecordTransform(void* self, Vec02* a1, void* a2, void* a3);
-void func_001A95D0(void* self, Vec02* target, Vec02* out, void* to);
+void ComputeFrameFollowerPoint(void* self, Vec02* target, Vec02* out, void* to);
 void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
 void ComputeObjectMotionInFrame(void* obj, s32 z, void* point, Vec02* out, Vec02* spin, s32 b, s32 c);
 void GetPlacementRecordAngle(void* self, f32* out, void* x);
-void func_001A9868(void* self, f32* out, void* x);
+void GetPlacementRecordPitch(void* self, f32* out, void* x);
 void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 f32 WrapAngle(f32 a);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
 void ForwardBallisticLaunchVelocity(f32 t, Vec02* from, Vec02* to, Vec02* out, void* obj);
-s32 func_001EE090(f32 t, Vec02* from, Vec02* to, Vec02* out, void* obj);
+s32 ComputeLaunchVelocityToPoint(f32 t, Vec02* from, Vec02* to, Vec02* out, void* obj);
 s32 ComputeBallisticLaunchVelocity(f32 t, Vec02* from, Vec02* to, Vec02* out, void* obj);
 f32 RandomFloatInRange(f32 a, f32 b);
 void ChangeAgentState(void* node, s32 kind, s32 flag);
@@ -994,7 +994,7 @@ static inline u128 NormalizeVectorOr(Vec02& v, const Vec02& fallback)
     return len;
 }
 
-s32 func_001A8C90(PoolView_1A8C90* self, s32 aim)
+s32 LaunchChosenPoolObject(PoolView_1A8C90* self, s32 aim)
 {
     Vec02 pos;
     Vec02 to;
@@ -1009,7 +1009,7 @@ s32 func_001A8C90(PoolView_1A8C90* self, s32 aim)
         obj = self->chosen;
     }
     GetPlacementRecordTransform((u8*)self + 0x60, &pos, &rot, self->frame);
-    func_001A95D0((u8*)self + 0xE0, &pos, &to, self->frame);
+    ComputeFrameFollowerPoint((u8*)self + 0xE0, &pos, &to, self->frame);
     Vu0::Q(dir) = Vu0::Sub(Vu0::Q(to), Vu0::Q(pos));
     u128 len = NormalizeVectorOr(dir, g_unitXVector);
     f32 reach = self->range.Clamp(self->poly.Eval(Vu0::ToFloatMoved(len)));
@@ -1056,7 +1056,7 @@ s32 func_001A8C90(PoolView_1A8C90* self, s32 aim)
                     yaw = ArctangentOfRatio(delta.y, delta.x);
                 }
                 if (h->flags & 1) {
-                    func_001A9868(h, &pitch, self->frame);
+                    GetPlacementRecordPitch(h, &pitch, self->frame);
                 } else {
                     pitch = ArctangentOfRatio(delta.z, Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(delta), Vu0::Q(delta)))));
                 }
@@ -1081,10 +1081,10 @@ s32 func_001A8C90(PoolView_1A8C90* self, s32 aim)
                 }
                 if (self->heading.flags & 1) {
                     f32 t;
-                    func_001A9868(h, &t, self->frame);
+                    GetPlacementRecordPitch(h, &t, self->frame);
                     ForwardBallisticLaunchVelocity(t, &pos, &to, &self->velocity, obj);
                 } else if (self->heading.flags & 4) {
-                    func_001EE090(h->speed, &pos, &to, &self->velocity, obj);
+                    ComputeLaunchVelocityToPoint(h->speed, &pos, &to, &self->velocity, obj);
                 } else {
                     ComputeBallisticLaunchVelocity(0.5f, &pos, &to, &self->velocity, obj);
                 }
@@ -1213,7 +1213,7 @@ struct FrameFollower {
 
 void ComputeObjectFrameAtTime(void* object, s32 b, f32 t, Vec02* pos, Mat02* rot, s32 e, s32 f);
 
-void func_001A95D0(FrameFollower* self, Vec02* target, Vec02* out, void* to)
+void ComputeFrameFollowerPoint(FrameFollower* self, Vec02* target, Vec02* out, void* to)
 {
     Vec02 here;
     Mat02 rot;
@@ -1274,7 +1274,7 @@ void GetPlacementRecordAngle(u8* self, f32* out, int x)
     }
 }
 
-void func_001A9868(u8* self, f32* out, int x)
+void GetPlacementRecordPitch(u8* self, f32* out, int x)
 {
     f32 v[12] __attribute__((aligned(16)));
     if (*(void**)(self + 0x10) != 0) {
@@ -1306,7 +1306,7 @@ void UpdateGaugeBarAgentGoal(GaugeBarAgent* self)
     if (self->f724 == 0x10) {
         void* r = ((VFn_1A9960*)self->desc)[102](self);
         if (r != 0)
-            func_001C8418(self, (u8*)r + 0x140);
+            SetAgentGoalPoint(self, (u8*)r + 0x140);
     }
 }
 
@@ -1358,7 +1358,7 @@ s32 HandleAgentObjectEvent(GaugeBarAgent* self, ObjectEvent* ev);
 extern Player* g_player;
 extern const Vec02 g_unitXVector;
 
-s32 func_001A9AE8(GaugeBarAgent* self, ObjectEvent* ev)
+s32 HandleGaugeBarAgentObjectEvent(GaugeBarAgent* self, ObjectEvent* ev)
 {
     if (self->fC14 != 0 && (ev->eventFlags & 0x20) != 0) {
         self->fC10 = self->fC10 + 1;

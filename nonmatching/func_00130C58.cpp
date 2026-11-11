@@ -18,13 +18,13 @@
 // in case 3 (cse1 folds it), case 2: case 3: shared (a range), one call after the switch.
 #include "common.h"
 
-f32 func_001FD578(u64 v);
+f32 ConvertDoubleToFloat(u64 v);
 s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 
 // The earliest time from 0 on outside every window the given curves spend beyond their limits:
 // for each (coefficients, scale) pair, the roots of four quadratics in the coefficients, kept
 // as ordered windows; then the smallest of 0 and the windows' ends that no window covers.
-void func_00130C58(s32 n, ...)
+void FindEarliestCubicBoundTime(s32 n, ...)
 {
     f32 windows[40];
     f32* w = windows;
@@ -35,7 +35,7 @@ void func_00130C58(s32 n, ...)
 
     for (i = 0; i < n; i++) {
         f32* c = *(f32**)((ap += 8) - 8);
-        f32 t = func_001FD578(*(u64*)((ap += 8) - 8));
+        f32 t = ConvertDoubleToFloat(*(u64*)((ap += 8) - 8));
         for (j = 0; j < 4; j++) {
             switch (j) {
             case 0:

@@ -203,11 +203,11 @@ struct ContactEvent_0013D0B0 {
 extern u8 g_padRecord[];
 void StartPadRecordPattern(void* record, f32 x, s32 n);
 void SetColliderAnchors(Collider* self, s32 a, s32 b, s32 c, s32 d);
-void func_001BC0E0(Collider* self, Vec02* v, Vec02* w, f32 x);
+void ApplyColliderImpulseEvent(Collider* self, Vec02* v, Vec02* w, f32 x);
 s32 IsObjectAccepted(MaskedCollider* self, PathFollower* msg);
 void* GetActiveSwitchedCollider(void);
 
-s32 func_0013D0B0(MaskedCollider* self, ContactEvent_0013D0B0* ev)
+s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
 {
     Vec02 push;
     Vec02 k;
@@ -243,7 +243,7 @@ s32 func_0013D0B0(MaskedCollider* self, ContactEvent_0013D0B0* ev)
         Vu0::Q(k) = Vu0::FromFloatAt(self->f624);
         Vu0::Q(push) = Vu0::MulX(Vu0::Q(ev->v30), Vu0::Q(k));
         SetColliderAnchors(self, 0, 0, 0, 0);
-        func_001BC0E0(self, &ev->v20, &push, ev->f08);
+        ApplyColliderImpulseEvent(self, &ev->v20, &push, ev->f08);
     }
     if ((ev->flags & 0x10) == 0) {
         return 1;
@@ -290,7 +290,7 @@ struct ZoneSound {
 // 0x618 or the world's listener of its radius, scatters at its point and plays its sound. It
 // leaves its parent's list unless kept, marks itself done in the flag table, tells itself
 // (message 14) and its script (event 0x16 if it was done before, 2 if not).
-void func_0013D278(MaskedCollider* self)
+void HandleMaskedColliderActivation(MaskedCollider* self)
 {
     s32 wasSet;
     s32 i;
@@ -823,7 +823,7 @@ struct PlaneTreeOutput {
     PlaneTreeNode* cur;     // 0x00: the next node to write
 };
 
-s32 func_0013E430(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out)
+s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out)
 {
     f32 d;
     s32 result;
@@ -844,13 +844,13 @@ s32 func_0013E430(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out)
         PlaneTreeNode* loNode;
         PlaneTreeNode* hiNode;
         if (node->below != 0) {
-            lo = func_0013E430(node->below, p, eps, out);
+            lo = QueryPlaneTreePoint(node->below, p, eps, out);
             loNode = out->cur - 1;
         } else {
             lo = 0;
         }
         if (node->above != 0) {
-            hi = func_0013E430(node->above, p, eps, out);
+            hi = QueryPlaneTreePoint(node->above, p, eps, out);
             hiNode = out->cur - 1;
         } else {
             hi = 1;
@@ -1370,7 +1370,7 @@ static inline Vec02* RowOf(Mat02* m, s32 i)
     return &m->r[i];
 }
 
-void func_0013F290(TriggerZone* self)
+void StartTriggerZone(TriggerZone* self)
 {
     ScopedListFrame frame(&self->children);
     Vec02 v;
@@ -1657,7 +1657,7 @@ extern f32 g_gameTime;
 
 void UpdateCollider(Collider* self);
 void SetTriggerZoneMode(TriggerZone* self, s32 v);
-s32 func_0013F8A0(TriggerZone* self, f32* out);
+s32 FindNearestStoredPoint(TriggerZone* self, f32* out);
 s32 FindLargestEntryIndex(TriggerZone* self, f32* out);
 s32 PassesTriggerFilters(TriggerZone* self, void* p);
 void ClearRootTries(void* self);
@@ -1683,7 +1683,7 @@ void UpdateTriggerZone(TriggerZone* self)
     case 4: {
         s32 r = -1;
         switch (self->state) {
-        case 0: if (!func_0013F8A0(self, 0)) r = 1; break;
+        case 0: if (!FindNearestStoredPoint(self, 0)) r = 1; break;
         case 1: if (!FindLargestEntryIndex(self, 0)) r = 1; break;
         case 2:
         case 4: r = 1; break;
@@ -1729,7 +1729,7 @@ void UpdateTriggerZone(TriggerZone* self)
             s32 mode = self->zone.mode;
             r = mode;
             if (st == 0) {
-                s0 = func_0013F8A0(self, &v[0]);
+                s0 = FindNearestStoredPoint(self, &v[0]);
                 lt = v[0] < 2.0f;
             } else {
                 s0 = FindLargestEntryIndex(self, &v[1]);
@@ -1846,11 +1846,11 @@ struct ZoneTarget {
 void SetZoneColliderMode(ZoneCollider* self, s32 flag);
 void ConvertPositionToWorld(ZoneTarget* obj, Vec02* out);
 s32 GetObjectWorldPosition(ZoneTarget* obj, Vec02* out);
-s32 func_0013E658(Vec02* pos, TreeNode03* nodes);
+s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
 s32 IsObjectAttached(ZoneTarget* obj);
 void CopyMemory(void* dst, void* src, s32 size);
 
-void func_00140258(ZoneCollider* self)
+void UpdateZoneCollider(ZoneCollider* self)
 {
     ZoneTarget* found[8];
     Vec02 pos;
@@ -1897,7 +1897,7 @@ void func_00140258(ZoneCollider* self)
         }
         s32 inside = 0;
         if (((self->flags538 & 0x10000000000ULL) && Vu0::Distance(pos, self->v140) < self->radius3CC)
-            || (self->tree.nodes != 0 && func_0013E658(&pos, self->tree.nodes) != 0)) {
+            || (self->tree.nodes != 0 && FindPlaneTreeNodeForPoint(&pos, self->tree.nodes) != 0)) {
             inside = 1;
         }
         if (inside) {

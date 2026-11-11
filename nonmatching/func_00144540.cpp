@@ -38,18 +38,18 @@ extern f32 D_00261900[4];
 extern f32 D_00261910[4];
 void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out);
 void* InvertMatrix4x4(void* a0, void* a1);
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 extern u8 D_00248D40[];
 f32 Sine(f32 x);
 void BuildRotationFromVector(Vec02* v, Mat4* mat);
 void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
-void func_001443C8(Mat02* m, Vec02* out, f32 x, f32 y);
-void func_00144540(Camera* self)
+void BuildFrustumSideNormals(Mat02* m, Vec02* out, f32 x, f32 y);
+void UpdateCameraMatrices(Camera* self)
 {
     Vec02 pos;
     Vec02 dir;
     Mat02 rotation;
-    f32 f6 = D_0026185C - self->f218;
+    f32 f6 = g_gameTime - self->f218;
     if (D_002618C8 < f6) {
         BuildViewProjectionMatrix((f32*)self->f40, (f32*)self->f80, (void*)((u8*)self + 0xC0), (Quad16*)((u8*)self + 0x100));
     } else {
@@ -71,7 +71,7 @@ void func_00144540(Camera* self)
         BuildViewProjectionMatrix((f32*)&pos, (f32*)&rotation, &proj, (Quad16*)((u8*)self + 0x100));
     }
     InvertMatrix4x4((u8*)self + 0x100, (u8*)self + 0x140);
-    func_001443C8((Mat02*)self->f80, (Vec02*)((u8*)self + 0x180), self->f1F0, self->f1F4);
+    BuildFrustumSideNormals((Mat02*)self->f80, (Vec02*)((u8*)self + 0x180), self->f1F0, self->f1F4);
     {
         f32* e = (f32*)((u8*)self + 0x1B0);
         f32* d = self->planes[0];

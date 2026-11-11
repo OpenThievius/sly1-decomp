@@ -335,10 +335,10 @@ void SteerColliderTowardRotation(Agent* self, Mat02* m, void* a, const Vec02* b,
 void StepTurningCollider(Agent* self, f32 dt);
 void* CopyBytes(void* dst, void* src, s32 n);
 void ClampVectorLength(Vec02* in, Vec02* out, f32 max);
-void func_00130540(Vec02* a, Vec02* b, Vec02* c, Vec02* d, Vec02* outA, Vec02* outB, s32 e, f32 t, f32 u, f32 w);
+void EvaluateHermiteVectorSegment(Vec02* a, Vec02* b, Vec02* c, Vec02* d, Vec02* outA, Vec02* outB, s32 e, f32 t, f32 u, f32 w);
 typedef void (*AgentMotionFn)(void* self, Agent* agent, s32 a, s32 b, Vec02* out, f32 t, f32 u);
 
-void func_001C75B0(Agent* self, f32 dt)
+void StepAgent(Agent* self, f32 dt)
 {
     if (F(s32, 0xB78) != 0) {
         Vec02 motion;
@@ -374,7 +374,7 @@ void func_001C75B0(Agent* self, f32 dt)
         Vec02 w;
         Vec02 v;
         f32 left = F(f32, 0xBA4) - g_gameTime[0];
-        func_00130540(&self->pos, &self->v150, &F(Vec02, 0xBB0), &F(Vec02, 0xBC0), &p, &w, 0, left, left <? dt, 1.0f);
+        EvaluateHermiteVectorSegment(&self->pos, &self->v150, &F(Vec02, 0xBB0), &F(Vec02, 0xBC0), &p, &w, 0, left, left <? dt, 1.0f);
         Vu0::Q(v) = Vu0::DivX(Vu0::Sub(Vu0::Q(w), Vu0::Q(self->v150)), Vu0::Scalar(dt));
         ClampVectorLength(&v, &v, 20000.0f);
         AddColliderForce(self, &v);
@@ -399,7 +399,7 @@ void func_001C75B0(Agent* self, f32 dt)
     }
 }
 
-f32 func_001C7A60(Agent* self)
+f32 ComputeAgentTargetBearing(Agent* self)
 {
     PlacedObject* other = (PlacedObject*)self->desc08()->m62(self);
     if (other == 0) {
@@ -443,15 +443,15 @@ void SettleAgentState(Agent* self)
 }
 
 extern f32 g_frameDt;
-void func_00128598(f32 a, f32 b, Agent* self, s32 c, s32 d, f32* e, f32* f, f32* g);
+void ComputeObjectSteeringHeading(f32 a, f32 b, Agent* self, s32 c, s32 d, f32* e, f32* f, f32* g);
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 
-void func_001C7BE8(Agent* self)
+void FaceAgentFromAnimationMotion(Agent* self)
 {
     f32 out[3];
     f32 zero = 0.0f;
     out[1] = zero;
-    func_00128598(g_frameDt, self->f638, self, 0, 0, &out[0], self->fB1C ? &out[1] : 0, &out[2]);
+    ComputeObjectSteeringHeading(g_frameDt, self->f638, self, 0, 0, &out[0], self->fB1C ? &out[1] : 0, &out[2]);
     f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v640)));
     if (0.0001f < out[2] && 0.0001f < len) {
         self->f754->speed *= len / out[2];
@@ -462,7 +462,7 @@ void func_001C7BE8(Agent* self)
 
 void UpdateTurningCollider(Collider* self);
 s32 FindColliderFloorContact(Agent* self, s32 a, s32* out);
-void func_001CAF38(Agent* self);
+void DispatchAgentContactHits(Agent* self);
 void ClearRootTries(Agent* self);
 void BuildShortestArcRotation(const Vec02* from, Vec02* to, Mat02* out);
 extern f32 D_00274AD0[];
@@ -556,7 +556,7 @@ void UpdateAgent(Agent* self)
     if (self->f720 != 0) {
         QueueItemKeeperUpdate((ItemKeeper*)self->f720);
     }
-    func_001CAF38(self);
+    DispatchAgentContactHits(self);
     if (*(s32*)((u8*)self + 0xC08) != 0) {
         AgentBody* floor = (AgentBody*)FindColliderFloorContact(self, 0, &kind);
         if (floor != 0) {
@@ -815,7 +815,7 @@ done:
 
 void SnapPointToOwnerGraph(s32 graph, Vec02* in, Vec02* out);
 
-void func_001C8418(Agent* self, Vec02* p)
+void SetAgentGoalPoint(Agent* self, Vec02* p)
 {
     Vec02 t;
     self->vA40 = *p;
@@ -875,7 +875,7 @@ static inline s32 IsNearPoint(Vu0::Vec a, Vu0::Vec b, f32 reach)
 // The game clock's time (its second word), read through the clock's address.
 static inline f32 ClockTime(const f32* clock) { return clock[1]; }
 
-void func_001C8590(Agent* self)
+void BuildAgentPath(Agent* self)
 {
     if (F(s32, 0xA60) != 0) {
         if (!(D_00274C98[0] < ClockTime(g_gameClock) - F(f32, 0xA64))) return;
@@ -915,13 +915,13 @@ void func_001C8590(Agent* self)
         ColliderSpan span;
         s32 count;
         Collider** list;
-        Vu0::Set(d1, Vu0::MulAddX(Vu0::Q(c), Vu0::Q(D_00248D20), Vu0::Scalar(-500.0f)));
-        Vu0::Set(d4, Vu0::MulAddX(Vu0::Q(c), Vu0::Q(D_00248D20), Vu0::Scalar(500.0f)));
+        Vu0::Set(d1, Vu0::MulAddX(Vu0::Q(c), Vu0::Q(g_unitZVector), Vu0::Scalar(-500.0f)));
+        Vu0::Set(d4, Vu0::MulAddX(Vu0::Q(c), Vu0::Q(g_unitZVector), Vu0::Scalar(500.0f)));
         GatherCollidersInBox(self->world, (s32)self, &d1, &d4, IsAgentPathBlocker, self, &count, &list);
         if (FindNearestSpanObject(1, &d4, &d1, count, list, &span) != 0) {
             f32 h = -((f32*)F(void*, 0x388))[(F(s32, 0x6D0) << 2) + 2] - 1.0f;
             if (F(s32, 0xC04) != 0) h += F(f32, 0x6CC);
-            Vu0::Q(c) = Vu0::MulAddX(Vu0::Q(span.q[0]), Vu0::Q(D_00248D20), Vu0::Scalar(h));
+            Vu0::Q(c) = Vu0::MulAddX(Vu0::Q(span.q[0]), Vu0::Q(g_unitZVector), Vu0::Scalar(h));
         }
         PopBackMemoryMark();
         F(Vec02, 0x950) = c;
@@ -955,7 +955,7 @@ static inline f32 ClampTo(f32 v, const f32* r)
     return out;
 }
 
-void func_001C8920(Agent* self)
+void FaceAgentAlongPath(Agent* self)
 {
     ((void (*)(Agent*))self->desc08()->m5F)(self);
     for (;;) {
@@ -1013,8 +1013,8 @@ void FaceAgentTowardGoalPoint(Agent* self)
     SetAgentFacingAngles(self, x, y);
 }
 
-void func_001C8418(Agent* self, void* p);
-void func_0012C9E8(f32 c, void* a, Agent* b, void* d, void* e, void* f, s32 g);
+void SetAgentGoalPoint(Agent* self, void* p);
+void FindNearestAnimationPathTime(f32 c, void* a, Agent* b, void* d, void* e, void* f, s32 g);
 Entry8B* FindEntryByObjectId(void* a, Agent* b);
 
 void UpdateAgentGoal(Agent* self, s32 flag)
@@ -1027,7 +1027,7 @@ void UpdateAgentGoal(Agent* self, s32 flag)
     case 13:
     case 14: {
         void* v = self->desc08()->m62(self);
-        if (v != 0) func_001C8418(self, (u8*)v + 0x140);
+        if (v != 0) SetAgentGoalPoint(self, (u8*)v + 0x140);
         break;
     }
     case 4:
@@ -1035,7 +1035,7 @@ void UpdateAgentGoal(Agent* self, s32 flag)
             if (self->f750 != 0) {
                 switch (self->f920) {
                 case 0:
-                    func_0012C9E8(self->f918, self->f750, self, (u8*)self + 0x140, (u8*)self + 0x914, &q, 0);
+                    FindNearestAnimationPathTime(self->f918, self->f750, self, (u8*)self + 0x140, (u8*)self + 0x914, &q, 0);
                     break;
                 case 1: {
                     self->f914 = self->f918;
@@ -1048,11 +1048,11 @@ void UpdateAgentGoal(Agent* self, s32 flag)
             } else {
                 q = self->v190;
             }
-            func_001C8418(self, &q);
+            SetAgentGoalPoint(self, &q);
         }
         break;
     case 5:
-        if (flag != 0) func_001C8418(self, (u8*)self + 0x900);
+        if (flag != 0) SetAgentGoalPoint(self, (u8*)self + 0x900);
         break;
     }
 }
@@ -1085,11 +1085,11 @@ void CreateAgentAnimationPlayer(Agent* self)
 
 extern f32 g_frameDt;
 s32 HasAnimationDrivenAttachment(Agent* self);
-void func_001C7BE8(Agent* self);
-void func_00128598(f32 a, f32 b, Agent* self, s32 c, s32 d, f32* e, f32* f, f32* g);
+void FaceAgentFromAnimationMotion(Agent* self);
+void ComputeObjectSteeringHeading(f32 a, f32 b, Agent* self, s32 c, s32 d, f32* e, f32* f, f32* g);
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 void ScheduleItemTimeouts(void* n);
-void func_001C8920(Agent* self);
+void FaceAgentAlongPath(Agent* self);
 void FaceAgentTowardGoalPoint(Agent* self);
 
 void UpdateAgentState(Agent* self)
@@ -1102,14 +1102,14 @@ void UpdateAgentState(Agent* self)
     case 1:
     case 2:
         if (HasAnimationDrivenAttachment(self) != 0)
-            func_001C7BE8(self);
+            FaceAgentFromAnimationMotion(self);
         break;
     case 3:
         if (self->f754 != 0) {
             f32 out[3];
             f32 zero = 0.0f;
             out[1] = zero;
-            func_00128598(g_frameDt, self->f638, self, 0, 0, &out[0], self->fB1C ? &out[1] : 0, &out[2]);
+            ComputeObjectSteeringHeading(g_frameDt, self->f638, self, 0, 0, &out[0], self->fB1C ? &out[1] : 0, &out[2]);
             f32 y = out[1];
             SetAgentFacingAngles(self, out[0], y);
         }
@@ -1118,7 +1118,7 @@ void UpdateAgentState(Agent* self)
     case 4:
     case 5:
     case 12:
-        func_001C8920(self);
+        FaceAgentAlongPath(self);
         break;
     case 7:
     case 10:
@@ -1222,7 +1222,7 @@ void LeaveAgentState(Agent* self, s32 mode)
 
 
 
-void func_001C4D60(Agent* self, Animation* t, s32 z);
+void SetTurningColliderFollowedMesh(Agent* self, Animation* t, s32 z);
 void SetAnimationPlayerSpeed(AnimationPlayer* t, f32 x);
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 void CreateAgentAnimationPlayer(Agent* self);
@@ -1240,7 +1240,7 @@ void RemoveFromSmallList(s32 x, BaseObject* t);
 void SetFlagTableBit(u8* p, s32 x);
 void FadeOutPlacedObject(Agent* self, f32 x);
 f32 RandomFloatInRange(f32 x, f32 y);
-void func_001C8920(Agent* self);
+void FaceAgentAlongPath(Agent* self);
 void FaceAgentTowardGoalPoint(Agent* self);
 
 extern u8 g_flagTable[];
@@ -1260,7 +1260,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
     if (t == 0) {
         t = ((Animation*)self->f8F8);
     }
-    func_001C4D60(self, t, 0);
+    SetTurningColliderFollowedMesh(self, t, 0);
     self->desc08()->m5E(self, 1);
 
     switch (self->f724) {
@@ -1393,7 +1393,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
     case 4:
     case 5:
     case 12:
-        func_001C8920(self);
+        FaceAgentAlongPath(self);
         break;
     case 7:
     case 10:
@@ -1538,7 +1538,7 @@ void ApplyPendingAgentChanges(Agent* self) {
 f32 ClampToRange(void* range, f32 x);
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 
-void func_001C9AF8(Agent* self)
+void SteerAgentAlongPath(Agent* self)
 {
     s32 last = self->f92C - 1;
     s32 n = self->f930;
@@ -1628,7 +1628,7 @@ struct AgentNotification {
 void HandleSwitchedColliderNotification(Agent* self, s32 kind, void* msg);
 void SetAgentMainClip(Agent* self, void* value);
 AnimEvent* FindAnimationMarkerEvent(Animation* self, s32 key);
-s32 func_001A8C90(void* a, s32 b);
+s32 LaunchChosenPoolObject(void* a, s32 b);
 s32 GatherObjectsById(void* host, s32 a1, s32 a2, void* ctx, s32 a4, void* out);
 typedef void (*AgentSlotFn)(Agent* self);
 
@@ -1779,7 +1779,7 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
                 if (*(s32*)(g + 0x50) == -1) {
                     *(void**)(g + 0xE0) = self->desc08()->m62(self);
                 }
-                func_001A8C90(self->fB0C, 1);
+                LaunchChosenPoolObject(self->fB0C, 1);
             }
             break;
         }
@@ -1856,7 +1856,7 @@ s32 IsAgentTargetInRange(Agent* self)
     if (IsInsideRange(&self->f738, dist) == 0) {
         return 0;
     }
-    f32 bearing = __builtin_fabsf(func_001C7A60(self));
+    f32 bearing = __builtin_fabsf(ComputeAgentTargetBearing(self));
     f32 g = D_00274CE0.c[0] + dist * (D_00274CE0.c[1] + dist * D_00274CE0.c[2]);
     g = Limit(g, g_unitRange[0], g_unitRange[1]);
     if (self->f74C < g * bearing) {
@@ -2081,7 +2081,7 @@ void SetAgentSecondaryTarget(Agent* self, s32 value)
 
 s32 GatherObjectsByMode(World* host, s32 a1, s32 a2, s32 a3, s32 a4, PlacedObject** out);
 
-void func_001CAB10(Agent* self)
+void PickAgentSecondaryTarget(Agent* self)
 {
     PlacedObject* found[0x20];
     Vec02 vel;
@@ -2164,7 +2164,7 @@ void AddTurningColliderProbeContact(Agent* a, Collider* b, s32 c, s32 d);
 s32 IsObjectOfKind(Collider* a, s32 b);
 s32 IsObjectAttached(Collider* a);
 void AddMeshContacts(Collider* a, f32 f, void* b, Collider* c, s32 d, s32 e, s32 g, void* h);
-void func_00186BA8(Collider* a, Collider* b, s32 c, s32 d, s32 e, void* f);
+void CreateMeshPairContacts(Collider* a, Collider* b, s32 c, s32 d, s32 e, void* f);
 
 void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
@@ -2187,7 +2187,7 @@ void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32
                               ((Collider*)e->obj)->tree.count,
                               (s32)((Collider*)e->obj)->tree.nodes, 0, (u8*)a0 + 0xAAC);
             } else if (a3 != 0) {
-                func_00186BA8((Collider*)e->obj, a1, a2, a3, a4, (u8*)a0 + 0xAAC);
+                CreateMeshPairContacts((Collider*)e->obj, a1, a2, a3, a4, (u8*)a0 + 0xAAC);
             }
         }
     }
@@ -2219,7 +2219,7 @@ inline void InitAgentContactQuery(NodeQuery* q, Agent* self, Collider* part)
     q->p00 = self;
 }
 
-void func_001CAF38(Agent* self)
+void DispatchAgentContactHits(Agent* self)
 {
     void* target = self->desc08()->m62(self);
     if (target == 0) {
@@ -2315,7 +2315,7 @@ out:
 
 void StopAnimationPlayer(void* p);
 s32 GetAgentRosterState(void* self);
-void func_0012C9E8(void* a, void* b, f32 c, void* d, void* e, s32 f, s32 g);
+void FindNearestAnimationPathTime(void* a, void* b, f32 c, void* d, void* e, s32 f, s32 g);
 
 void SetAgentMainClip(Agent* self, void* value)
 {
@@ -2336,7 +2336,7 @@ void SetAgentMainClip(Agent* self, void* value)
     }
     p = self->f750;
     if (p != 0) {
-        func_0012C9E8(p, self, 0.0f, (u8*)self + 0x140, (u8*)self + 0x918, 0, 0);
+        FindNearestAnimationPathTime(p, self, 0.0f, (u8*)self + 0x140, (u8*)self + 0x918, 0, 0);
     }
 }
 
@@ -2363,7 +2363,7 @@ struct Blocker_23A8 {
 s32 MaskWorldBitsBySave(void);
 s32 IsObjectOfKind(void* obj, s32 kind);
 
-s32 func_001CB3D0(Agent* self)
+s32 IsPlayerEvadingAgent(Agent* self)
 {
     Player* t = (Player*)self->desc08()->m62(self);
     if (IsObjectOfKind(t, 7) == 0) {
@@ -2734,7 +2734,7 @@ f32 RandomFloatInRange(f32 a, f32 b);
 void RemoveSoundLevelAndRecompute(void* p);
 void* PushSoundLevel(s32 kind);
 void SetItemKeeperTriggerStates(ItemKeeper* self, s32 a);
-void func_001CC120(ItemKeeper* self);
+void AssignItemKeeperMemberPlaces(ItemKeeper* self);
 
 void SetItemKeeperState(ItemKeeper* self, s32 ns)
 {
@@ -2794,7 +2794,7 @@ void SetItemKeeperState(ItemKeeper* self, s32 ns)
         }
         break;
     case 1:
-        func_001CC120(self);
+        AssignItemKeeperMemberPlaces(self);
         break;
     case 0:
         SetItemKeeperTriggerStates(self, 1);
@@ -2819,7 +2819,7 @@ static inline s32 MinOfCounts(s32 a, s32 b)
 // Places the owned members: each of the first ones on the listed object nearest the target
 // (taken once, in a zeroed back-memory array), with its heading; the rest at random around the
 // target, on a ring whose radius grows with their count.
-void func_001CC120(ItemKeeper* self)
+void AssignItemKeeperMemberPlaces(ItemKeeper* self)
 {
     Vec02 offset;
     Mat02 rot;

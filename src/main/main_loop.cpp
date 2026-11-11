@@ -355,7 +355,7 @@ void SortAttachments(PlacedObject* o);
 // The aim attachment's key from the owner's distance to the target: the far key beyond the
 // range at +0x40, else the near key, after clearing the root's tries. The owner is resorted in
 // its list when the key changes.
-void func_00185498(T2195_790* self)
+void SwitchAimByTargetDistance(T2195_790* self)
 {
     PlacedObject* owner = self->owner;
     PlacedObject* target = (PlacedObject*)ResolveAimTarget(self);

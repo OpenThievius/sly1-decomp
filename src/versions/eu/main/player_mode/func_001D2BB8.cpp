@@ -2,7 +2,7 @@
 // PAL: D_002701F8's mode and state are at 0x560 and 0x570 (US 0x250 and 0x260).
 struct CaptionBox_1D2BB8_eu { u8 pad0[0x560]; s32 mode; u8 pad564[0x570 - 0x564]; s32 state; };
 
-void func_001D2BB8(Player* self, PadRecord* pad)
+void UpdateModeSelection(Player* self, PadRecord* pad)
 {
     s32 ok;
     if (g_currentMode >= 0) {

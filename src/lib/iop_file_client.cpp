@@ -95,7 +95,7 @@ struct FileCommandCall {
     void (*fn)(void* arg);  // 0x00: run when set
     void* arg;              // 0x04
 };
-void func_001F89F8(void* packet, FileCommandCall* call);
+void RunFileClientCallback(void* packet, FileCommandCall* call);
 
 void CreateFileTableLock(void)
 {
@@ -234,7 +234,7 @@ s32 LockFileRequests(s32 unused)
 void UnlockFileRequests() { PostSemaphore(D_002771BC); }
 
 // The handler of command 0x80000013: runs the call it is given, if any, and ends the handler.
-void func_001F89F8(void* packet, FileCommandCall* call)
+void RunFileClientCallback(void* packet, FileCommandCall* call)
 {
     if (call->fn != 0) {
         call->fn(call->arg);
@@ -252,7 +252,7 @@ s32 OpenFileClient(void)
     g->arg = 0;
     DisableInterrupts();
     SetCommandHandler(0x80000011, (void*)&HandleFileReply, D_00628B80);
-    SetCommandHandler(0x80000013, (void*)&func_001F89F8, (void*)g);
+    SetCommandHandler(0x80000013, (void*)&RunFileClientCallback, (void*)g);
     (s32)EnableInterrupts();
     for (;;) {
         q = (RemoteCallClient*)g_fileClient;

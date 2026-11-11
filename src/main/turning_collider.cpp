@@ -103,7 +103,7 @@ struct FollowProbe {
 };
 void TransformPointBetweenFrames(void* from, void* to, void* in, void* out);
 
-void func_001C4618(s32 a0, PlacedObject* self, s32 a2, PlacedObject* obj, FollowProbe* out, f32 radius)
+void BuildPartProbeTowardLink(s32 a0, PlacedObject* self, s32 a2, PlacedObject* obj, FollowProbe* out, f32 radius)
 {
     Vec02 pos;
     Vec02 dir;
@@ -156,7 +156,7 @@ void TransformPointBetweenFrames(void* from, void* to, void* in, void* out);
 void TransformDirectionBetweenFrames(void* from, void* to, void* in, void* out);
 void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
 
-void func_001C4848(s32 a0, PlacedObject* other, PlacedObject* self, Part07* rec)
+void PlacePartAtProbeSpan(s32 a0, PlacedObject* other, PlacedObject* self, Part07* rec)
 {
     Vec02 dir;
     Vec02 pos;
@@ -192,7 +192,7 @@ void DrawTurningCollider(void)
 
 void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
 
-void func_001C49E8(TurningCollider* self, PadRecord* pad)
+void ReadTurningColliderStickHeading(TurningCollider* self, PadRecord* pad)
 {
     D_00274B5C = (D_00274B5C - 0.25f >? 0.0f);
     if (D_00274B5C < pad->f48) {
@@ -241,7 +241,7 @@ f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
 // read by index, which loop.c reduces to the walking pointers of retail's inner loop; written
 // as pointer copies (`f32* c = (f32*)cur`), CSE after loop makes the copies canonical and the
 // increments PRE hoisted read them (docs/TOOLCHAIN.md).
-void func_001C4C20(TurningCollider* self)
+void TrackFollowedMeshVertexVelocities(TurningCollider* self)
 {
     Collider* other = (Collider*)self->f6DC;
     if (other != 0) {
@@ -270,13 +270,13 @@ struct MeshFace {
 };
 
 void ClearRootObjectStateBits(World* a, void* self, s32 n);
-void func_001BBEB8(TurningCollider* self, f32 t);
+void AdvanceColliderMeshMotion(TurningCollider* self, f32 t);
 
 // The point is a Vu0::Vec value: its temporaries are stores in the plane loop when CSE runs,
 // so cse_around_loop keeps the loop's own read of the face count, which GCSE and loop.c turn
 // into retail's `move a3,v0`. `changed = 0` after the pointers keeps jump.c from hoisting
 // `changed = 1` above the test of `other` (docs/TOOLCHAIN.md).
-void func_001C4D60(TurningCollider* self, Collider* other, s32 all)
+void SetTurningColliderFollowedMesh(TurningCollider* self, Collider* other, s32 all)
 {
     if (other == self->f6DC) {
         return;
@@ -308,7 +308,7 @@ void func_001C4D60(TurningCollider* self, Collider* other, s32 all)
     if (changed) {
         ClearRootObjectStateBits(self->world, self, 7);
         if (self->hook != 0) {
-            func_001BBEB8(self, 0.0f);
+            AdvanceColliderMeshMotion(self, 0.0f);
         }
     }
     self->f6DC = other;
@@ -320,7 +320,7 @@ void UpdateSwitchedCollider(void* self);
 void UpdateTurningCollider(TurningCollider* self)
 {
     UpdateSwitchedCollider(self);
-    func_001C4C20(self);
+    TrackFollowedMeshVertexVelocities(self);
 }
 
 s32 GetTurningColliderContactMode(void) { return 3; }
@@ -351,7 +351,7 @@ void CopyColliderMeshesInFrame(void* self);
 void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4* out);
 void TransformByMatrixWithW(Mat4* m, Vec02* in, void* out, f32 w);
 
-void func_001C4FF8(TurningCollider* self)
+void CopyTurningColliderMeshesInFrame(TurningCollider* self)
 {
     Mat4 world;
     Vec02 k;
@@ -392,7 +392,7 @@ void TurnColliderTowardRotation(TurningCollider* self, f32 t, Mat02* out, void* 
 void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
 void AddColliderForce(void* target, void* slot);
 
-void func_001C5148(TurningCollider* self)
+void ApplyTurningColliderDrive(TurningCollider* self)
 {
     TurnColliderTowardRotation(self, g_frameDt, &self->m660, &self->f6E0);
     if (self->f6DC == 0) {
@@ -534,7 +534,7 @@ static inline Vu0::Vec NormalizeOrElse(Vu0::Vec v, Vu0::Vec fallback)
     return r;
 }
 
-void func_001C57C8(TurningCollider* self)
+void CollectTurningColliderContacts(TurningCollider* self)
 {
     Contact03* freed = 0;
     Contact03* best = 0;
@@ -675,7 +675,7 @@ void TurnColliderTowardHeading(TurningCollider* self)
     self->desc02()->m21(self, &q);
 }
 
-void func_001C5DB8(TurningCollider* self, void* matrix, Vec02* out, f32 limit)
+void GetTurningColliderPose(TurningCollider* self, void* matrix, Vec02* out, f32 limit)
 {
     f32 turn;
     f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
@@ -697,7 +697,7 @@ void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
 
 void SetColliderMass(Collider* self, f32 m);
 
-void func_001C5EA8(TurningCollider* self, f32 s)
+void SetTurningColliderGravityScale(TurningCollider* self, f32 s)
 {
     f32 n = 0.1f;
     n >?= s;

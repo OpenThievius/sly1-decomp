@@ -624,7 +624,7 @@ f32 ReadBufferedFloat(void* self);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(s32 size);
 
-void func_00137FB0(BufferedStream* in, Mesh03* mesh)
+void ReadMeshFromStream(BufferedStream* in, Mesh03* mesh)
 {
     s32 i = 0;
     mesh->radius = ReadBufferedFloat(in);
@@ -1843,9 +1843,9 @@ struct LookSource {
 };
 
 void RemapQuadraticParameter(Vec3* in, f32 s, f32 t, Vec3* out);
-void func_001583E8(void* out, LookSource* src);
+void FillLookDirectionBlock(void* out, LookSource* src);
 
-void func_0013A128(WorldListedObject* self, LookSource* src)
+void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src)
 {
     LookSourceTail* t = &src->tail;
     self->f618 = src->tail.f190;
@@ -1892,7 +1892,7 @@ void func_0013A128(WorldListedObject* self, LookSource* src)
     }
     FillMemory(self->block330, 0, 0x50);
     if (self->mode == 0) {
-        func_001583E8(self->block330, src);
+        FillLookDirectionBlock(self->block330, src);
     }
 }
 
@@ -1950,14 +1950,14 @@ struct Src_13AD08 { u8 pad[0x40]; f32 scale; };
 
 void* FillMemory(void* p, s32 value, s32 size);
 void QueueDeferredRequest(void* block);
-void func_0013AD80(void* self);
+void WriteListedObjectParticlePacket(void* self);
 
 void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, Src_13AD08* src)
 {
     DeferredRadiusRequest blk;
     FillMemory(&blk, 0, (u32)0x80);
     blk.count = 0xF;
-    blk.fn = func_0013AD80;
+    blk.fn = WriteListedObjectParticlePacket;
     blk.zero = 0;
     if (src != 0) {
         blk.radius = src->scale;

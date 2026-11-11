@@ -46,15 +46,15 @@ s32 IsPadSelectFlagHeld(World* world);
 s32 TestPointAgainstObjectShape(s32 shape, Vec02* p);
 void* PushSoundLevel(s32 kind);
 void RemoveSoundLevelAndRecompute(void* p);
-s32 func_0015AA50(void* shape, Vec02* p);
-s32 func_001CB3D0(CompanionAgent* self);
+s32 IsPointInsideObjectFaces(void* shape, Vec02* p);
+s32 IsPlayerEvadingAgent(CompanionAgent* self);
 void TransformPointBetweenFrames(void* from, s32 to, void* in, void* out);
 void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(CompanionAgent*, Collider*), CompanionAgent* self, s32* n, Collider*** list);
 s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** list, ColliderSpan* out);
 
 #define F(T, o) (*(T*)((u8*)self + (o)))
 
-s32 func_001B7280(CompanionAgent* self)
+s32 IsCompanionAgentFree(CompanionAgent* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0 || F(s32, 0xCCC) != 0) return 0;
     if (F(s32, 0xCC8) != 0) return 1;
@@ -90,14 +90,14 @@ s32 func_001B7280(CompanionAgent* self)
         RemoveSoundLevelAndRecompute(self->fCC0);
         self->fCC0 = 0;
     }
-    if (func_0015AA50(self->fC14, &a) == 0) {
+    if (IsPointInsideObjectFaces(self->fC14, &a) == 0) {
         if (self->fC18 < dist) return 0;
         if (self->fC1C < __builtin_fabsf(delta.z)) return 0;
     }
     s32 v = GetAgentRosterState(self);
     if ((F(s32, 0xCD0) & 1) == 0) {
         if (v != 2) {
-            if (func_001CB3D0(self) != 0) return 0;
+            if (IsPlayerEvadingAgent(self) != 0) return 0;
         }
     }
     if (F(s32, 0xCD0) & 2) return 1;

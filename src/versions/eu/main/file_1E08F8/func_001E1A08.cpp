@@ -56,7 +56,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
                     if (j != 0) {
                         AppendToOutputBuffer(c, s5, GetStringLength(s5));
                     }
-                    FormatFloatArg(sp, c, func_001FD868(*fp++));
+                    FormatFloatArg(sp, c, ConvertFloatToDouble(*fp++));
                 }
                 AppendToOutputBuffer(c, s6, GetStringLength(s6));
                 i = next;

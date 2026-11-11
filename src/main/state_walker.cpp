@@ -173,7 +173,7 @@ static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
 // test's self+16 its reaching register, a PRE pseudo numbered by its hash bucket. The edges are
 // subtracted as u128 values (no Vec copies), which brings GCSE's table to 183 buckets, where
 // self+16 hashes before &tri[2] (docs/toolchain/gcse.md, func_001B55C0).
-void func_001B55C0(TriangleAnimator* self, PlacedObject* obj, void** part)
+void UpdateTriangleAnimatorCursor(TriangleAnimator* self, PlacedObject* obj, void** part)
 {
     if (self->cursor.record == 0 || *part != (void*)DrawModelPart) {
         return;

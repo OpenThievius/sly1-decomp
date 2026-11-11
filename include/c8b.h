@@ -62,7 +62,7 @@ struct Gr8B {
 struct PlacedObject;
 struct Vec02;
 struct Mat02;
-void func_0012CD78(Gr8B* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
+void SampleAnimationFrameChain(Gr8B* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
                    Vec02* vel, Vec02* spin);
 
 struct Slot8B {

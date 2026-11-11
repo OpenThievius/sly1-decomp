@@ -56,7 +56,7 @@
 
 extern f32 D_00274A44;
 
-void func_001C3C98(HitCountCollider* self, Contact03* c, s32 end)
+void ResolveHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
 {
     AnimationPlayer* p = self->f67C;
     if (p != 0) {

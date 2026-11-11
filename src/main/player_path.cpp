@@ -36,14 +36,14 @@ void CreatePlayerTwoEntryBlend(Player* self)
     TwoEntryBlendEntry* e = (TwoEntryBlendEntry*)self->f103C;
     s32 i = 1;
     do {
-        func_0012CD78((Gr8B*)e->p4, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, 0, 0, (Vec02*)out, 0);
+        SampleAnimationFrameChain((Gr8B*)e->p4, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, 0, 0, (Vec02*)out, 0);
         e->fC = out[2];
         e++;
         i--;
     } while (i >= 0);
     BuildCombinedBlendAnimation(self, 0x10, 2, self->f103C, 0, 0, 0, &self->f105C);
-    func_0012CD78((Gr8B*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f618, (PlacedObject*)self, 1, (Vec02*)&self->f23E0, 0, 0, 0);
-    func_0012CD78((Gr8B*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, (Vec02*)&self->f23F0, 0, 0, 0);
+    SampleAnimationFrameChain((Gr8B*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f618, (PlacedObject*)self, 1, (Vec02*)&self->f23E0, 0, 0, 0);
+    SampleAnimationFrameChain((Gr8B*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, (Vec02*)&self->f23F0, 0, 0, 0);
     f32 avg = (self->f23E0 + self->f23F0) * 0.5f;
     self->f23F4 = 0.0f;
     self->f23E4 = 0.0f;
@@ -83,7 +83,7 @@ struct PathObject {
     PathObject* guide;      // 0x68: a path the camera follows instead (ControlPlayerOnPath)
 };
 
-void func_001D1630(Player* self, PathObject* path, Mat02* out, f32 length);
+void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length);
 
 f32 WrapModulo(f32 x, f32 y);
 void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
@@ -108,7 +108,7 @@ static inline Vu0::Vec NormalizeOrElse(Vu0::Vec v, Vu0::Vec fallback)
 // out on both sides until the direction there turns less than 0.9 away from it, the shortest-arc
 // rotation of the path's offset, and the frame built from the first direction and that offset,
 // turned about when 0x221C is set.
-void func_001D1630(Player* self, PathObject* path, Mat02* out, f32 length)
+void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length)
 {
     Vec02 start;
     Vec02 first;
@@ -196,11 +196,11 @@ void func_001D1630(Player* self, PathObject* path, Mat02* out, f32 length)
 struct PathWatch { u8 pad00[8]; struct PathWatchTarget* target; u8 pad0C[8]; f32 f14; };
 struct PathWatchTarget { u8 pad00[0x34]; f32 f34; };
 
-void func_00130748(f32 a, f32 b, f32 c, Mat02* rot, Vec02* vel, Mat02* target, const Vec02* zero, Mat02* out, s32 d, s32 e);
+void BlendRotationsWithSpin(f32 a, f32 b, f32 c, Mat02* rot, Vec02* vel, Mat02* target, const Vec02* zero, Mat02* out, s32 d, s32 e);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 void MatrixToAxisAngle(Mat02* m, Vec02* angle, Vec02* axis);
 
-void func_001D1A80(Player* self)
+void StepPlayerOnPath(Player* self)
 {
     Mat02 placed;
     Mat02 goal;
@@ -208,12 +208,12 @@ void func_001D1A80(Player* self)
     Vec02 axis;
     Vec02 k;
     Vec02 angle;
-    func_001D1630(self, (PathObject*)self->f2208, &placed, self->f2410);
+    PlaceOnPathAt(self, (PathObject*)self->f2208, &placed, self->f2410);
     if (self->f2228 == 0x17 || self->f2228 == 0x1B) {
         PathWatch* w = (PathWatch*)self->watched2230;
         f32 dt = g_gameClock.dt;
         f32 t = w->target->f34 - w->f14;
-        func_00130748(dt >? t, dt, 1.0f, &self->rot, &self->v160, &placed, &D_00248D30, &goal, 0, 0);
+        BlendRotationsWithSpin(dt >? t, dt, 1.0f, &self->rot, &self->v160, &placed, &D_00248D30, &goal, 0, 0);
     } else {
         goal = placed;
     }
@@ -461,7 +461,7 @@ s32 CreatePooledContact(void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, 
 // it, each at the offset of the player's point from the path's. The float is the last parameter of
 // CreatePooledContact here, as for func_0013B9D8: the $f12 move then follows the integer argument
 // moves in insn order, which sched1's tie-break needs (docs/TOOLCHAIN.md, "local-alloc").
-void func_001D2518(Player* self)
+void PinPlayerToPath(Player* self)
 {
     Vec02 pos;
     Vec02 dir;
@@ -522,7 +522,7 @@ void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
 void TransformPointBetweenFrames(void* a, void* b, void* c, void* d);
 void SetPlayerState(void* self, s32 mode, s32 count);
 
-void func_001D2830(Player* self, PathObject* path)
+void SetPlayerPath(Player* self, PathObject* path)
 {
     Vec02 pos;
     Mat02 rot;
@@ -543,7 +543,7 @@ void func_001D2830(Player* self, PathObject* path)
             path->holder->desc->m10(path->holder, &pos, 0, 0, 0, 0, (f32*)((u8*)self + 0x220C));
         }
     }
-    func_001D1630(self, path, &rot, *(f32*)((u8*)self + 0x220C));
+    PlaceOnPathAt(self, path, &rot, *(f32*)((u8*)self + 0x220C));
     self->desc02()->m1E(self, &rot);
     if (path->holder->desc->m2 != 0) {
         path->holder->desc->m2(path->holder, &pos, *(f32*)((u8*)self + 0x220C), 0);

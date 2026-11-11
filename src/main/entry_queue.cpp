@@ -125,7 +125,7 @@ struct Aim_0017BB78 {
     Vec02 mark;             // 0x2530
 };
 
-void func_0017BB78(EntryQueue* self, BaseObject* target)
+void SetEntryQueueTargetNode(EntryQueue* self, BaseObject* target)
 {
     Aim_0017BB78* p = (Aim_0017BB78*)self->f3C;
     if (self->f54 != 0) {
@@ -192,11 +192,11 @@ void BuildAxisAngleMatrix(const void* axis, f32 angle, void* out);
 void SetPlayerState(Player* self, s32 state, s32 sub);
 s32 ChooseNearbyPlayerTarget(Player* self, BaseObject* obj, s32* out);
 void ComputePlayerJumpVelocity(Player* self, Vec02* out);
-void func_0017FCC8(Player* self, Vec02* v);
+void ComputeUpwardBoostVelocityAlt(Player* self, Vec02* v);
 void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
 s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out);
 void CreateAnimationPlayerWithoutPresetTargets(BaseObject* t, void* self, s32 mode, void* out, f32 x, f32 y);
-void func_001C61E0(Player* self, s32 n);
+void SetPlayerAimMode(Player* self, s32 n);
 void TriggerScriptEvent(void* self, s32 kind, s32 a, s32 b);
 void SetGameClockScale(f32 x);
 extern f32 g_gameTime;
@@ -322,7 +322,7 @@ void StartNextQueueEntry(EntryQueue* self)
             Vu0::Q(start) = Vu0::MulAddX2(Vu0::Q(start), Vu0::Q(vel), h, Vu0::Q(goal), h);
             drift = p->v150;
             p->v150 = goal;
-            func_0017FCC8(p, &vel);
+            ComputeUpwardBoostVelocityAlt(p, &vel);
             p->v150 = drift;
             break;
         }
@@ -365,12 +365,12 @@ void StartNextQueueEntry(EntryQueue* self)
         break;
     }
     case 10:
-        func_0017BB78(self, obj);
+        SetEntryQueueTargetNode(self, obj);
         goto done;
     case 8:
         switch (e->value) {
         case 2:
-            func_001C61E0(p, 3);
+            SetPlayerAimMode(p, 3);
             goto done;
         case 4:
             SetPlayerState(p, 2, 7);
@@ -399,7 +399,7 @@ done:
     self->f44 = g_gameTime;
 }
 
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 void* FindFirstObjectById(void* world, s32 kind, s32 id, s32 from);
 void StopAnimationPlayer(void* p);
 void SetPlayerState(Player* self, s32 a, s32 b);
@@ -414,7 +414,7 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
         done = 1;
         break;
     case 4:
-        done = e->valueF < D_0026185C - self->f44;
+        done = e->valueF < g_gameTime - self->f44;
         break;
     case 5:
         done = pl->f2220 != 2;
@@ -696,7 +696,7 @@ void UnbindEntryQueue(EntryQueue* self)
 {
     if (self->f3C != 0) {
         ReplaceQueueOnOffObject(self, 0);
-        func_0017BB78(self, 0);
+        SetEntryQueueTargetNode(self, 0);
         if (self->f50 != 0) {
             StopAnimationPlayer(self->f50);
             self->f50 = 0;

@@ -274,7 +274,7 @@ void ResetTextPointToHalf(void* p);
 struct ClampBelow { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
 void GetCurrentLevelBit(u32* out);
-void func_00134B48(T217D_440* self, PacketWriter* q);
+void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q);
 f32 Cosine(f32 x);
 f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, s32 zero);
 void BeginGifTag(PacketWriter* q, s32 a, s32 b, u64 c);
@@ -927,7 +927,7 @@ void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
     AddGifXyzfEntry(gs, 0x9400, 0x80C0, 0, 0);
 }
 
-s32 func_00134AA0(void** a, void** b)
+s32 CompareEntriesFarthestFirst(void** a, void** b)
 {
     Vec02 pa;
     Vec02 pb;
@@ -949,7 +949,7 @@ void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q)
     {
         if ((u32)MaskWorldBitsBySave() & 0x800)
         {
-            func_00134B48(self, q);
+            DrawTextPanelMarkers(self, q);
         }
         u32 mask;
         GetCurrentLevelBit(&mask);

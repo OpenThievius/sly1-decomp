@@ -16,7 +16,7 @@ s32 IsObjectOfKind(void* a, s32 b);
 void SetPlayerState(PlacedObject* self, s32 a, s32 b);
 void ConstrainVectorByParentAnchor(Collider* self, Vec02* anchor, Vec02* in, Vec02* out, Vec02* dir);
 
-void func_0013BE18(ChildGroupObject* self, Collider* other)
+void ApplyChildGroupKnockback(ChildGroupObject* self, Collider* other)
 {
     Vec02 d;
     Vec02 r;

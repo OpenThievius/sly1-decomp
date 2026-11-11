@@ -14,15 +14,15 @@
 ASM_FUNC(func_001FA9B0);
 
 s32 QueryMemorySize(void);
-s32 func_001F6D30(void);
-s32 func_001FAA00(void);
+s32 SetUpTlbSyscall(void);
+s32 SetUpTlbEntries(void);
 
 s32 SetUpTlbForMemory(void)
 {
     if (QueryMemorySize() == 0x2000000) {
-        return func_001FAA00();
+        return SetUpTlbEntries();
     }
-    return func_001F6D30();
+    return SetUpTlbSyscall();
 }
 
 // One TLB entry as the kernel's call takes it: the page mask, the virtual page (EntryHi) and
@@ -52,13 +52,13 @@ extern TlbSetup D_00277FE0;
 extern const char D_0024EC30[], D_0024EC68[], D_0024EC80[], D_0024EC98[];
 void PrintToOutputHook(const char* fmt, ...);
 void TerminateProgram(s32 code);
-void func_001FA9B0(s32 index, u32 mask, u32 hi, u32 lo0, u32 lo1);
+void WriteTlbEntryForSetUp(s32 index, u32 mask, u32 hi, u32 lo0, u32 lo1);
 
 // Reports the three ranges, writes the kernel and default entries and wires them, then the
 // extended ones, and maps every entry left with an empty page from 0xE0000000. The counter is
 // a register variable in $t9 (retail keeps it there across the calls, which only such a
 // declaration gives); its return is the entry count.
-s32 func_001FAA00(void)
+s32 SetUpTlbEntries(void)
 {
     register s32 i __asm__("$25");
     TlbEntry* e;
@@ -76,7 +76,7 @@ s32 func_001FAA00(void)
         TerminateProgram(1);
     }
     for (e = D_00277FE0.kernel; i < n; i++, e++) {
-        func_001FA9B0(i, e->mask, e->hi, e->lo0, e->lo1);
+        WriteTlbEntryForSetUp(i, e->mask, e->hi, e->lo0, e->lo1);
     }
     n = i + D_00277FE0.defaultCount;
     if (n > 0x30) {
@@ -84,7 +84,7 @@ s32 func_001FAA00(void)
         TerminateProgram(1);
     }
     for (e = D_00277FE0.defaults; i < n; i++, e++) {
-        func_001FA9B0(i, e->mask, e->hi, e->lo0, e->lo1);
+        WriteTlbEntryForSetUp(i, e->mask, e->hi, e->lo0, e->lo1);
     }
     D_00277FE0.wiredCount = i;
     SetTlbWired(i);
@@ -95,11 +95,11 @@ s32 func_001FAA00(void)
             TerminateProgram(1);
         }
         for (e = D_00277FE0.extended; i < n; i++, e++) {
-            func_001FA9B0(i, e->mask, e->hi, e->lo0, e->lo1);
+            WriteTlbEntryForSetUp(i, e->mask, e->hi, e->lo0, e->lo1);
         }
     }
     for (j = i; j < 0x30; j++) {
-        func_001FA9B0(j, 0, 0xE0000000 + (j << 13), 0, 0);
+        WriteTlbEntryForSetUp(j, 0, 0xE0000000 + (j << 13), 0, 0);
     }
     return i;
 }

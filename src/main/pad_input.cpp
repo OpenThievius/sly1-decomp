@@ -137,9 +137,9 @@ void InitPadRecord(PadRecord* self, s32 a, s32 b)
 }
 
 s32 GetPadSlotState(s32 a, s32 b);
-s32 func_002047F8(s32 a, s32 b, s32 c, s32 d);
+s32 GetPadModeEntry(s32 a, s32 b, s32 c, s32 d);
 s32 SendPadTwoWordRequest(s32 a, s32 b, s32 c, s32 d);
-s32 func_002046D0(s32 a, s32 b, s32 c, s32 d);
+s32 GetPadCapabilityEntry(s32 a, s32 b, s32 c, s32 d);
 void* FillMemory(void* p, s32 value, s32 size);
 s32 SendPadSixByteRequest(s32 a, s32 b, u8* buf);
 s32 HasFullPadMask(s32 a, s32 b);
@@ -185,10 +185,10 @@ void UpdatePadConnection(PadRecord* self)
         {
         case 0:
         {
-            s32 a = func_002047F8(self->f04, self->f08, 1, 0);
+            s32 a = GetPadModeEntry(self->f04, self->f08, 1, 0);
             if (a != 0)
             {
-                s32 b = func_002047F8(self->f04, self->f08, 2, 0);
+                s32 b = GetPadModeEntry(self->f04, self->f08, 2, 0);
                 if (b > 0)
                 {
                     a = b;
@@ -210,14 +210,14 @@ void UpdatePadConnection(PadRecord* self)
             break;
         case 2:
         {
-            s32 count = func_002046D0(self->f04, self->f08, -1, 0);
+            s32 count = GetPadCapabilityEntry(self->f04, self->f08, -1, 0);
             if (count != n
-                || func_002046D0(self->f04, self->f08, 0, 1) != mode
-                || func_002046D0(self->f04, self->f08, 0, 2) != n
-                || func_002046D0(self->f04, self->f08, 0, 3) != 0
-                || func_002046D0(self->f04, self->f08, 1, 1) != mode
-                || func_002046D0(self->f04, self->f08, 1, 2) != mode
-                || func_002046D0(self->f04, self->f08, 1, 3) != mode)
+                || GetPadCapabilityEntry(self->f04, self->f08, 0, 1) != mode
+                || GetPadCapabilityEntry(self->f04, self->f08, 0, 2) != n
+                || GetPadCapabilityEntry(self->f04, self->f08, 0, 3) != 0
+                || GetPadCapabilityEntry(self->f04, self->f08, 1, 1) != mode
+                || GetPadCapabilityEntry(self->f04, self->f08, 1, 2) != mode
+                || GetPadCapabilityEntry(self->f04, self->f08, 1, 3) != mode)
             {
                 mode = 3;
                 break;

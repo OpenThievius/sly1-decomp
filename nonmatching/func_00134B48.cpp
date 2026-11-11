@@ -88,7 +88,7 @@ void AddGifXyzfEntry(PacketWriter* q, s32 a, s32 b, s32 c, s32 d);
 void PushFontScale(Font* font, f32 x, f32 y);
 void PopFontScale(Font* font);
 void DrawFontString(Font* font, const char* text, Layout_137228* layout, s32 zero, PacketWriter* gs);
-s32 func_00134AA0(void** a, void** b);
+s32 CompareEntriesFarthestFirst(void** a, void** b);
 
 void SortElements(void* base, s32 n, s32 size, s32 (*cmp)(void**, void**));
 void ProjectPointToCamera(Camera* cam, Vec02* pos, Vec02* out);
@@ -138,7 +138,7 @@ struct ScreenLayout {
 // The labels of the text points (class 0x82) in view: each gathered point the camera sees
 // within 4000 is drawn at its place on the screen, its name with spaces for underscores, the
 // one nearest the screen's centre larger and opaque; the rest are reset (ResetTextPointToHalf).
-void func_00134B48(T217D_440* self, PacketWriter* q)
+void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
 {
     TextPointObject* objs[32];
     Vec02 pos;
@@ -147,7 +147,7 @@ void func_00134B48(T217D_440* self, PacketWriter* q)
     s32 shown = 0;
     TextPointObject* nearest = 0;
     s32 count = GatherObjectsById(*(s32*)g_currentWorld, 5, 0x82, 0, 0x20, objs);
-    SortElements(objs, count, 4, func_00134AA0);
+    SortElements(objs, count, 4, CompareEntriesFarthestFirst);
     f32 best = 3.4028235e+38f;
     for (i = 0; i < count; i++) {
         TextPointObject* obj = objs[i];

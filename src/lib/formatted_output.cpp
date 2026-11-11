@@ -61,7 +61,7 @@ void WriteConsoleChar(s32 c)
 
 PutChar_1F7588 g_outputHook = WriteConsoleChar;  // where formatted output sends each character
 
-s32 func_001F7390(double a)
+s32 RoundDoubleToInteger(double a)
 {
     union {
         double d;
@@ -96,33 +96,33 @@ s32 func_001F7390(double a)
     return m;
 }
 
-s32 func_001FD308(double a, double b);
-double func_001FCD78(double a, double b);
-double func_001FCDE0(double a, double b);
+s32 CompareDoubles(double a, double b);
+double SubtractDoubles(double a, double b);
+double MultiplyDoubles(double a, double b);
 double DivideDoubles(double a, double b);
 double ConvertDoubleToU64(double a);
-s32 func_001F7390(double a);
+s32 RoundDoubleToInteger(double a);
 void PrintToOutputHook(const char* fmt, ...);
 
 void FormatExponent(double value)
 {
     s32 exp10 = 0;
-    if (func_001FD308(value, 0.0) < 0) {
-        value = func_001FCD78(0.0, value);
+    if (CompareDoubles(value, 0.0) < 0) {
+        value = SubtractDoubles(0.0, value);
         g_outputHook('-');
     }
-    if (func_001FD308(value, 0.1) < 0) {
-        while (func_001FD308(value, 0.1) < 0) {
-            value = func_001FCDE0(value, 10.0);
+    if (CompareDoubles(value, 0.1) < 0) {
+        while (CompareDoubles(value, 0.1) < 0) {
+            value = MultiplyDoubles(value, 10.0);
             exp10--;
         }
-    } else if (func_001FD308(value, 1.0) >= 0) {
-        while (func_001FD308(value, 1.0) >= 0) {
+    } else if (CompareDoubles(value, 1.0) >= 0) {
+        while (CompareDoubles(value, 1.0) >= 0) {
             exp10++;
             value = DivideDoubles(value, 10.0);
         }
     }
-    s32 digits = func_001F7390(ConvertDoubleToU64(func_001FCDE0(value, 1000000.0)));
+    s32 digits = RoundDoubleToInteger(ConvertDoubleToU64(MultiplyDoubles(value, 1000000.0)));
     PrintToOutputHook("0.%d", digits);
     if (exp10 >= 0)
         PrintToOutputHook("e+%d", exp10);

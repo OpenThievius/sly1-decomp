@@ -110,7 +110,7 @@ struct Obj_191AA8 {
     u8 pad0[0x54];
     void* p54;
 };
-s32 func_001909F0(void* p);
+s32 CollectSegmentSpansInPlaneTree(void* p);
 void SyncDataCache(s32 a);
 void CopyObjectData(void* self);
 void SetListLinkOffset(void* self, s32 value);
@@ -169,15 +169,15 @@ void PopBackMemoryMark(void);
 s32 IsPointPathShortcutBlocked(void* self, s32 a, s32 b);
 s32 GetEntryName(s32 v);
 void UpdateAgentGoal(SeekingAgent* self);
-void func_001C8418(SeekingAgent* self, void* p);
+void SetAgentGoalPoint(SeekingAgent* self, void* p);
 s32 IsObjectAttached(void* p);
 s32 GetObjectWorldPosition(void* self, s32* arg);
 // Up to d spans between two points of the graph (0xE0 bytes for d = 2: two ColliderSpans).
-s32 func_001909F0(void* a, s32 b, s32 c, s32 d, ColliderSpan* e);
+s32 CollectSegmentSpansInPlaneTree(void* a, s32 b, s32 c, s32 d, ColliderSpan* e);
 typedef void (*SlotFn)(void* self);
 extern u8* g_saveData;
 void UpdateCollider(SwitchedCollider* self);
-void func_00192DD0(SwitchedCollider* self);
+void EmitSwitchedColliderTrailPoints(SwitchedCollider* self);
 struct ClampInt {
     static s32 Of(s32 v, s32 lo, s32 hi)
     {
@@ -289,14 +289,14 @@ void StartToSprChain(s32 size, ...);
 s32 WaitDmaChannel(void* dma, s32 b, s32 c);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
 void MultiplyMatrices(Mat4A* out, Mat4A* b, void* in);
-void func_00126DE8(void* unused0, Camera* cam, void* unused2, Vec02* pos, Mat4A* m);
+void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, Vec02* pos, Mat4A* m);
 void QueueDeferredRequest(PartRequest* r);
 void* FillMemory(void* p, s32 value, s32 size);
 extern void* g_toSprChannel;
 extern f32 g_gameClock[];
 extern const Mat4A D_00248400;
 
-void func_0018F9D8(PlacedObject* self, Camera* cam)
+void QueueModelPartDraws(PlacedObject* self, Camera* cam)
 {
     PartRequest rec;
     s32 i = 0;
@@ -400,7 +400,7 @@ void func_0018F9D8(PlacedObject* self, Camera* cam)
                 rec.m = t;
             }
             if (part->f34 != 0) {
-                func_00126DE8(self, cam, part->f34, &rec.at, &rec.m);
+                BuildCameraFacingMatrix(self, cam, part->f34, &rec.at, &rec.m);
             }
             QueueDeferredRequest(&rec);
             if (part->f68 != 0 || part->f34 != 0) {
@@ -493,7 +493,7 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
             for (i = 0, slot = self->fC14; i < self->fC10; slot++, i++) {
                 void* n = *slot;
                 if (IsObjectAttached(n) != 0) {
-                    func_001C8418(self, (u8*)n + 0x140);
+                    SetAgentGoalPoint(self, (u8*)n + 0x140);
                     break;
                 }
             }
@@ -503,9 +503,9 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
         if (self->f750 == 0) {
             if (self->fC24 != 0) {
                 GetObjectWorldPosition(self->fC24, tmp);
-                func_001C8418(self, tmp);
+                SetAgentGoalPoint(self, tmp);
             } else {
-                func_001C8418(self, &self->v140);
+                SetAgentGoalPoint(self, &self->v140);
             }
         } else {
             UpdateAgentGoal(self);
@@ -515,7 +515,7 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
     case 13:
         if (self->fC28 != 0) {
             GetObjectWorldPosition(self->fC28, tmp);
-            func_001C8418(self, tmp);
+            SetAgentGoalPoint(self, tmp);
         }
         break;
     default:
@@ -531,7 +531,7 @@ f32 WrapAngle(f32 x);
 f32 ArctangentOfRatio(f32 y, f32 x);
 s32 GetObjectWorldRotation(void* self, Vec02* out);
 
-void func_00190258(SeekingAgent* self)
+void UpdateSeekingAgentState(SeekingAgent* self)
 {
     Vec02 tmp;
     Vec02 second;
@@ -749,7 +749,7 @@ struct PlaneNode {
     s32 above;              // 0x18
 };
 
-s32 func_00190810(PlaneNode* node, Vec02* p)
+s32 FindPointGraphTriangle(PlaneNode* node, Vec02* p)
 {
     while (node != 0) {
         f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(*p), Vu0::Q(node->normal))) - node->offset;
@@ -770,7 +770,7 @@ s32 func_00190810(PlaneNode* node, Vec02* p)
     return 0;
 }
 
-s32 func_001908C0(PlaneNode* node, Vec02* p)
+s32 FindPointGraphTriangleWithin(PlaneNode* node, Vec02* p)
 {
     while (node != 0) {
         f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(*p), Vu0::Q(node->normal))) - node->offset;
@@ -788,7 +788,7 @@ s32 func_001908C0(PlaneNode* node, Vec02* p)
             if (t != 0) {
                 return t;
             }
-            t = func_001908C0((PlaneNode*)node->above, p);
+            t = FindPointGraphTriangleWithin((PlaneNode*)node->above, p);
             if (t != 0) {
                 return t;
             }
@@ -828,7 +828,7 @@ struct SegmentPoint {
     }
 };
 
-s32 func_001909F0(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans)
+s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans)
 {
     SegmentWalkEntry cur;
     SegmentWalkEntry stack[32];
@@ -926,7 +926,7 @@ s32 func_001909F0(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* sp
 s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
 {
     ColliderSpan out[2];
-    switch (func_001909F0(a, b, c, 2, out)) {
+    switch (CollectSegmentSpansInPlaneTree(a, b, c, 2, out)) {
     case 0:
         return 1;
     case 1:
@@ -977,7 +977,7 @@ static inline s32 WasSearched(PointGraph* graph, s32* seen, GraphPoint* p, Graph
 
 // The shortest path through the point graph from one point to another (A*: the open list kept
 // sorted by cost plus straight distance), written back to front into outPath.
-void func_00190EB8(PointGraph* graph, GraphPoint* from, GraphPoint* goal, s32 unused, s32* outCount, GraphPoint** outPath)
+void SearchPointGraph(PointGraph* graph, GraphPoint* from, GraphPoint* goal, s32 unused, s32* outCount, GraphPoint** outPath)
 {
     SearchNode start;
     SearchNode* open;
@@ -1110,24 +1110,24 @@ static inline s32 MinOfCounts(s32 a, s32 b)
 // it); a shared triangle is the straight path. Otherwise the start becomes a temporary point
 // linked to its triangle's corners, the goal one its triangle's corners link to (their counts
 // raised for the search and lowered after), and the search's path is simplified.
-s32 func_00191290(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out)
+s32 FindPointGraphPath(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out)
 {
     Vec02 a;
     Vec02 b;
     PathNode* faces = (PathNode*)graph->faces;
-    PathNode** tri0 = (PathNode**)func_00190810((PlaneNode*)faces, start);
+    PathNode** tri0 = (PathNode**)FindPointGraphTriangle((PlaneNode*)faces, start);
     if (tri0 != 0) {
         a = *start;
     } else {
         SnapPointToPointGraph(graph, start, &a);
-        tri0 = (PathNode**)func_001908C0((PlaneNode*)faces, &a);
+        tri0 = (PathNode**)FindPointGraphTriangleWithin((PlaneNode*)faces, &a);
     }
-    PathNode** tri1 = (PathNode**)func_00190810((PlaneNode*)faces, goal);
+    PathNode** tri1 = (PathNode**)FindPointGraphTriangle((PlaneNode*)faces, goal);
     if (tri1 != 0) {
         b = *goal;
     } else {
         SnapPointToPointGraph(graph, goal, &b);
-        tri1 = (PathNode**)func_001908C0((PlaneNode*)faces, &b);
+        tri1 = (PathNode**)FindPointGraphTriangleWithin((PlaneNode*)faces, &b);
     }
     if (tri0 == tri1) {
         out[0] = a;
@@ -1317,13 +1317,13 @@ void SnapPointToOwnerGraph(GraphQueryOwner* self, Vec02* p, Vec02* out)
 
 void TestOwnerGraphSpan(Obj_191AA8* self)
 {
-    func_001909F0(self->p54);
+    CollectSegmentSpansInPlaneTree(self->p54);
 }
 
 INCLUDE_ASM(func_00191AC8);
 
 // A random point on the graph's triangles: one picked by its area, then a point inside it.
-void func_00191C78(PointGraphObject* self, Vec02* out)
+void PickRandomPointOnPointGraph(PointGraphObject* self, Vec02* out)
 {
     Vec02 e1;
     Vec02 e2;
@@ -1754,7 +1754,7 @@ void UpdateSwitchedCollider(SwitchedCollider* self)
     }
 
     if (self->f600 == 1 || self->f600 == 3) {
-        func_00192DD0(self);
+        EmitSwitchedColliderTrailPoints(self);
     }
 }
 
@@ -1805,7 +1805,7 @@ struct TrailNode {
 // the vectors as Vu0::Vec values and the walk a `for` from step to 1.0, pass 1 sees 82 insns and
 // moves only the guard's 1.0 (jump.c's copy, life 2), pass 2 sees 79 and moves 0.0001; 5.0
 // stays, as retail's (docs/TOOLCHAIN.md, "Loops").
-void func_00192DD0(SwitchedCollider* self)
+void EmitSwitchedColliderTrailPoints(SwitchedCollider* self)
 {
     Vec02 from[9];
     Vec02 to[9];

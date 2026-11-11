@@ -110,11 +110,11 @@ s32 BindRemoteService(RemoteCallClient* client, u32 server, s32 mode);
 s32 CallRemoteService(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
                   s32 receive_size, void* end, void* end_arg);
 s32 SendPadDma(s32 port, s32 slot);
-s32 func_00204228(s32 mode);
+s32 ResetPadModule(s32 mode);
 s32 SetPadRequestMode(s32 port, s32 slot, s32 mode);
-s32 func_00204B80(s32 port, s32 slot);
+s32 GetPadButtonMask(s32 port, s32 slot);
 s32 SendPadMaskRequest(s32 port, s32 slot, s32 data);
-s32 func_00204DB8(void);
+s32 GetPadModuleVersion(void);
 void RefreshPadFrames(void* start, void* end);
 s32 GetIopDmaStatus(s32 id);
 s32 StartIopDma(PadDmaTransfer* transfers, s32 n);
@@ -176,7 +176,7 @@ s32 InitPadLibrary(s32 mode)
         for (i = 0x10000; i != -1; i--) {
         }
     }
-    version = func_00204DB8();
+    version = GetPadModuleVersion();
     major = version >> 8;
     if (major != 4) {
         if (D_0027AE84 != 0) {
@@ -185,10 +185,10 @@ s32 InitPadLibrary(s32 mode)
         }
         return 0;
     }
-    return func_00204228(mode);
+    return ResetPadModule(mode);
 }
 
-s32 func_00204228(s32 mode)
+s32 ResetPadModule(s32 mode)
 {
     s32 i;
 
@@ -304,7 +304,7 @@ u32 GetPadRequestMode(s32 port, s32 slot)
 }
 
 LINKER_REMNANT(func_002046C8);
-s32 func_002046D0(s32 port, s32 slot, s32 index, s32 kind)
+s32 GetPadCapabilityEntry(s32 port, s32 slot, s32 index, s32 kind)
 {
     PadFrame* frame;
     s32 count;
@@ -334,7 +334,7 @@ s32 func_002046D0(s32 port, s32 slot, s32 index, s32 kind)
     return 0;
 }
 LINKER_REMNANT(func_002047F0);
-s32 func_002047F8(s32 port, s32 slot, s32 kind, s32 index)
+s32 GetPadModeEntry(s32 port, s32 slot, s32 kind, s32 index)
 {
     PadFrame* frame;
 
@@ -432,7 +432,7 @@ s32 SendPadSixByteRequest(s32 port, s32 slot, u8* src)
     return request->result;
 }
 
-s32 func_00204B80(s32 port, s32 slot)
+s32 GetPadButtonMask(s32 port, s32 slot)
 {
     PadFrame* frame;
 
@@ -474,7 +474,7 @@ s32 HasFullPadMask(s32 port, s32 slot)
 {
     if (g_padSlots[port][slot].open == 0)
         return 0;
-    return func_00204B80(port, slot) == 0x3FFFF;
+    return GetPadButtonMask(port, slot) == 0x3FFFF;
 }
 
 s32 SendFullPadMask(s32 port, s32 slot)
@@ -486,7 +486,7 @@ s32 SendFullPadMask(s32 port, s32 slot)
 
 LINKER_REMNANT(func_00204DA0);
 
-s32 func_00204DB8(void)
+s32 GetPadModuleVersion(void)
 {
     PadRequest* request = (PadRequest*)g_padRequest;
 
@@ -499,7 +499,7 @@ s32 func_00204DB8(void)
 ASM_FUNC(func_00204E20);
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
-void func_00204E20(u32 start, u32 end);
+void InvalidateDataCacheRange(u32 start, u32 end);
 
 /* The data cache written back over a range, its ends rounded down to whole lines, with
  * interrupts disabled around it when they are enabled. */
@@ -509,7 +509,7 @@ void RefreshPadFrames(void* start, void* end)
     enabled &= 0x10000;
     if (enabled)
         DisableInterrupts();
-    func_00204E20((u32)start & ~0x3F, (u32)end & ~0x3F);
+    InvalidateDataCacheRange((u32)start & ~0x3F, (u32)end & ~0x3F);
     if (enabled)
         EnableInterrupts();
 }

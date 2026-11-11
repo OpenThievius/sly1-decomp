@@ -128,18 +128,18 @@ void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessag
 
 extern f32 g_gameTime;
 void UpdateCollider(Collider* self);
-void func_0013B828(ChildGroupObject* self);
-void func_0013BF68(ChildGroupObject* self);
+void RefreshChildGroupObjectContacts(ChildGroupObject* self);
+void ApplyChildGroupRepulsion(ChildGroupObject* self);
 
 void UpdateChildGroupObject(ChildGroupObject* self)
 {
     s32 slow;
     if (self->f554 <= g_gameTime || (slow = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v150))) < self->f558)) {
-        func_0013BF68(self);
+        ApplyChildGroupRepulsion(self);
     } else {
         UpdateCollider(self);
         if (self->active != 0) {
-            func_0013B828(self);
+            RefreshChildGroupObjectContacts(self);
         }
     }
 }
@@ -150,7 +150,7 @@ s32 IsObjectAttached(void* p);
 s32 GetObjectWorldPosition(void* self, Vec02* out);
 s32 CollectBoundsSpans(Vec02* a, void* b, void* c, s32 d, ColliderSpan* e, f32 x);
 
-void func_0013B828(ChildGroupObject* self)
+void RefreshChildGroupObjectContacts(ChildGroupObject* self)
 {
     ListFrame frame;
     Vec02 tmp;
@@ -232,7 +232,7 @@ Collider* GetActiveSwitchedCollider(void);
 s32 IsObjectDescendantOf(void* a, void* b);
 void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* dir);
 
-void func_0013BA70(ChildGroupObject* self, ContactPair* pair, s32 which)
+void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s32 which)
 {
     Vec02 pos;
     ColliderSpan span;
@@ -381,7 +381,7 @@ s32 CollectContactingParts(ChildGroupObject* self, s32* count, Collider*** list)
 void GatherCollidersInSphere(f32 radius, World* w, s32 a1, Vec02* center, s32 a3, s32 a4, s32* count, Collider*** list);
 s32 CollectMeshHits(f32 radius, Vec02* p, void* a, void* b, s32 c, void* mesh, s32 d, void* out);
 void InitOwnerMessage(void* msg, s32 kind, void* self);
-void func_0013BE18();
+void ApplyChildGroupKnockback();
 f32 ClampToRange(void* range, f32 x);
 void ConstrainColliderVector(Collider* c, Vec02* frame, Vec02* in, Vec02* out, s32 flag);
 f32 RandomFloatInRange(f32 lo, f32 hi);
@@ -407,7 +407,7 @@ struct BlastMessage { s32 kind; ChildGroupObject* from; u8 pad08[0x30 - 0x08]; f
 // The sound slot at +0x680.
 struct BlastSound { s32 id; f32 a; f32 b; f32 c; };
 
-void func_0013BF68(ChildGroupObject* self)
+void ApplyChildGroupRepulsion(ChildGroupObject* self)
 {
     Collider* player;
     s32 count;
@@ -459,7 +459,7 @@ void func_0013BF68(ChildGroupObject* self)
         if (IsObjectOfKind(c, 5)) {
             OwnerMessage msg;
             InitOwnerMessage(&msg, self->f67C, self);
-            msg.fn = func_0013BE18;
+            msg.fn = ApplyChildGroupKnockback;
             (*(ColliderQueryFn*)((u8*)c->desc + 0x140))(c, &msg);
             continue;
         }

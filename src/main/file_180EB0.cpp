@@ -153,7 +153,7 @@ f32 Cosine(f32 x);
 
 void SetObjectTreeRecordValue(ModeWalker* o, u32 c);
 
-void func_00125C90(ModeWalker* o, void* a, void* b);
+void PrepareFadedObjectDraw(ModeWalker* o, void* a, void* b);
 
 f32 Cosine(f32 value);
 
@@ -240,7 +240,7 @@ struct PadStick {
 };
 
 extern T217D_BF0 D_00270650;
-extern u8 D_00262D38[];
+extern u8 g_blankPadRecord[];
 extern u8 D_002708C0[];
 void ControlPathFollower(PathFollower* self, PadStick* pad, f32 dt);
 void GetStateWalkerCurrentKey(void* h, s32* out);
@@ -255,13 +255,13 @@ void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
 void ClearRootTries(void* self);
-void func_00181ED0(T217D_BF0* self, PadStick* pad);
+void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad);
 typedef void (*FrameFn)(void* self, Mat02* m);
 
 // The rotation's weight is a Scalar passed straight to MulX (its expand-time slot, a scalar's
 // memory, stored after the product as retail's is), and m2 and the axis are declared after
 // that statement: the slot is freed there and the axis takes it (retail's 0x50, between d and m2).
-void func_00181078(ModeWalker* self, PadStick* pad, f32 dt)
+void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
 {
     s32 cur;
     s32 target;
@@ -300,9 +300,9 @@ void func_00181078(ModeWalker* self, PadStick* pad, f32 dt)
     if ((u32)(cur - 0x35F) < 2) {
         if (target == -1 || target == 0x35F || target == 0x360) {
             if (self->fBB0 == 2) {
-                pad = (PadStick*)D_00262D38;
+                pad = (PadStick*)g_blankPadRecord;
             }
-            func_00181ED0(&D_00270650, pad);
+            SteerWalkerAimAtNearestTarget(&D_00270650, pad);
             Vu0::Q(m.r[2]) = Vu0::Q(self->m110.r[2]);
             u128 n = Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(m.r[2]), Vu0::Q(((Vec02*)((u8*)g_camera + 0x80))[0])), *(u128*)&self->m110.r[1]);
             Vu0::Q(m.r[1]) = n;
@@ -453,7 +453,7 @@ void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
         c = D_002623E0[0];
     }
     SetObjectTreeRecordValue(o, *(u32*)&c);
-    func_00125C90(o, a, b);
+    PrepareFadedObjectDraw(o, a, b);
 }
 
 void CaptureModeWalkerTarget(ModeWalker* self, void* outv)
@@ -609,7 +609,7 @@ void ProjectPointToCamera(Camera* cam, void* pos, Vec02* out);
 f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, f32* out);
 
 
-void func_00181ED0(T217D_BF0* self, PadStick* pad)
+void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad)
 {
     Vec02 p;
     Vec02 best;
@@ -788,7 +788,7 @@ void UpdateC24Object(C24* self, f32 dt)
 typedef void (*WeightCurveFn)(void* curve, void* owner, s32 a2, f32* out0, f32* out1, f32 x, f32 y);
 typedef void (*CurveSampleDirFn)(PathCurve* self, f32 len, Vec02* pos, Vec02* dir);
 typedef void (*ChildStepFn)(BaseObject* self, f32 dt, s32 flag);
-void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
+void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
 void BuildBasisFromXAndZHint(void* a, void* b, void* c);
 void ApproachRotationWithRamp(f32 dt, void* rot, void* target, void* ramp, void* outRot, void* outSpin);
 
@@ -827,7 +827,7 @@ void MoveC24Object(C24* self, s32 a1, f32 dt)
         Vu0::Q(vel) = Vu0::MulX(Vu0::Q(dir), w);
         void* o = *(void**)((u8*)self->x6C0 + 0x18);
         Vu0::Set(t, w);
-        func_00127E60(o, 0, &pos, 0, &vel, 0);
+        TransformStateToAncestorFrame(o, 0, &pos, 0, &vel, 0);
         Vu0::Set(t, Vu0::MulXSum(Vu0::Q(self->gravity), Vu0::Scalar(-1.0f),
                                  Vu0::Sub(Vu0::Q(vel), Vu0::Q(self->v150)), Vu0::Scalar(1.0f / dt)));
         BuildBasisFromXAndZHint(&vel, &t, &basis);
@@ -870,7 +870,7 @@ void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 bytes);
 f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
 
-void func_00182948(C24* self, PathCurveObject* path, f32 speed)
+void BuildPathSpeedProfile(C24* self, PathCurveObject* path, f32 speed)
 {
     Vec02 p0;
     Vec02 p1;

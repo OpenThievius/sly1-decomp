@@ -166,7 +166,7 @@ void AdvancePathFollowerAlongPath(PathFollower* self, s32* out);
 void ComputePathFollowerHeadingTarget(PathFollower* self);
 void UpdatePathFollowerSound(PathFollower* self, f32 t);
 void SteerPathFollower(PathFollower* self);
-void func_001D8E40(PathFollower* self);
+void EmitPathFollowerWheelParticles(PathFollower* self);
 void AdvancePathFollowerEntry(PathFollower* self, s32 v);
 void ProcessPathFollowerContacts(PathFollower* self);
 void ClearRootTries(PathFollower* self);
@@ -570,7 +570,7 @@ void FinishPlayerRequest(Player* self);
 f32 ComputeOscillatorDisplacement(void* osc, void* pos, f32 t, s32 a, Vec02* out, s32 b, s32 c);
 s32 CollectTreeNodeSpans(void* nodes, void* a, void* b, s32 c, s32 d, void* out);
 
-s32 func_001D6A18(Player* self, Collider* col, Vec02* out);
+s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out);
 
 void SwapInPlayerStandIn(Player* self);
 

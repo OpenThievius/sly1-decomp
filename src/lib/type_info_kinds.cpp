@@ -65,7 +65,7 @@ public:
 };
 
 // The type information of void (defined below with the other builtin types).
-extern "C" const type_info& func_00200E08(void);
+extern "C" const type_info& GetTypeInfoOfVoid(void);
 
 bool type_info::before(const type_info& other) const
 {
@@ -73,7 +73,7 @@ bool type_info::before(const type_info& other) const
 }
 
 // The object a handler for `want` receives when `have` is thrown at `object`, or 0.
-extern "C" void* func_00200778(const type_info* want, const type_info* have, void* object)
+extern "C" void* MatchThrownType(const type_info* want, const type_info* have, void* object)
 {
     void* found;
     const __user_type_info* user;
@@ -110,7 +110,7 @@ extern "C" void* func_00200778(const type_info* want, const type_info* have, voi
                 if ((cvFrom & 1) <= (cvTo & 1) && (cvFrom & 2) <= (cvTo & 2)) {
                     if (*subTo == *subFrom) {
                         found = object;
-                    } else if (*subTo == func_00200E08()
+                    } else if (*subTo == GetTypeInfoOfVoid()
                                && dynamic_cast<const __func_type_info*>(subFrom) == 0) {
                         found = object;
                     } else if ((user = dynamic_cast<const __user_type_info*>(subFrom)) != 0) {
@@ -167,38 +167,38 @@ done:
 }
 
 // Whether a type is a pointer type.
-extern "C" bool func_00200C40(const type_info* type)
+extern "C" bool IsPointerType(const type_info* type)
 {
     const __pointer_type_info* pointer = dynamic_cast<const __pointer_type_info*>(type);
     return pointer != 0;
 }
 
-extern "C" void func_00200C90(void* at, const char* name, const type_info* target)
+extern "C" void FillPointerTypeInfo(void* at, const char* name, const type_info* target)
 {
     new (at) __pointer_type_info(name, *target);
 }
 
-extern "C" void func_00200CB0(void* at, const char* name, int qualifiers, const type_info* target)
+extern "C" void FillQualifiedTypeInfo(void* at, const char* name, int qualifiers, const type_info* target)
 {
     new (at) __attr_type_info(name, (__attr_type_info::Qualifiers)qualifiers, *target);
 }
 
-extern "C" void func_00200CD8(void* at, const char* name)
+extern "C" void FillFunctionTypeInfo(void* at, const char* name)
 {
     new (at) __func_type_info(name);
 }
 
-extern "C" void func_00200CF8(void* at, const char* name)
+extern "C" void FillMemberFunctionPointerTypeInfo(void* at, const char* name)
 {
     new (at) __ptmf_type_info(name);
 }
 
-extern "C" void func_00200D18(void* at, const char* name)
+extern "C" void FillMemberDataPointerTypeInfo(void* at, const char* name)
 {
     new (at) __ptmd_type_info(name);
 }
 
-extern "C" void func_00200D38(void* at, const char* name)
+extern "C" void FillArrayTypeInfo(void* at, const char* name)
 {
     new (at) __array_type_info(name);
 }
@@ -230,119 +230,119 @@ void* D_00278E70[2] = { 0, 0 };
 void* D_00278E78[2] = { 0, 0 };
 void* D_00278E80[2] = { 0, 0 };
 
-extern "C" const type_info& func_00200E08(void)
+extern "C" const type_info& GetTypeInfoOfVoid(void)
 {
     if (D_00278E00[0] == 0)
         new (D_00278E00) __builtin_type_info("v");
     return *(const type_info*)D_00278E00;
 }
 
-extern "C" const type_info& func_00200E40(void)
+extern "C" const type_info& GetTypeInfoOfLongLong(void)
 {
     if (D_00278E08[0] == 0)
         new (D_00278E08) __builtin_type_info("x");
     return *(const type_info*)D_00278E08;
 }
 
-extern "C" const type_info& func_00200E78(void)
+extern "C" const type_info& GetTypeInfoOfLong(void)
 {
     if (D_00278E10[0] == 0)
         new (D_00278E10) __builtin_type_info("l");
     return *(const type_info*)D_00278E10;
 }
 
-extern "C" const type_info& func_00200EB0(void)
+extern "C" const type_info& GetTypeInfoOfInt(void)
 {
     if (D_00278E18[0] == 0)
         new (D_00278E18) __builtin_type_info("i");
     return *(const type_info*)D_00278E18;
 }
 
-extern "C" const type_info& func_00200EE8(void)
+extern "C" const type_info& GetTypeInfoOfShort(void)
 {
     if (D_00278E20[0] == 0)
         new (D_00278E20) __builtin_type_info("s");
     return *(const type_info*)D_00278E20;
 }
 
-extern "C" const type_info& func_00200F20(void)
+extern "C" const type_info& GetTypeInfoOfBool(void)
 {
     if (D_00278E28[0] == 0)
         new (D_00278E28) __builtin_type_info("b");
     return *(const type_info*)D_00278E28;
 }
 
-extern "C" const type_info& func_00200F58(void)
+extern "C" const type_info& GetTypeInfoOfChar(void)
 {
     if (D_00278E30[0] == 0)
         new (D_00278E30) __builtin_type_info("c");
     return *(const type_info*)D_00278E30;
 }
 
-extern "C" const type_info& func_00200F90(void)
+extern "C" const type_info& GetTypeInfoOfWideChar(void)
 {
     if (D_00278E38[0] == 0)
         new (D_00278E38) __builtin_type_info("w");
     return *(const type_info*)D_00278E38;
 }
 
-extern "C" const type_info& func_00200FC8(void)
+extern "C" const type_info& GetTypeInfoOfLongDouble(void)
 {
     if (D_00278E40[0] == 0)
         new (D_00278E40) __builtin_type_info("r");
     return *(const type_info*)D_00278E40;
 }
 
-extern "C" const type_info& func_00201000(void)
+extern "C" const type_info& GetTypeInfoOfDouble(void)
 {
     if (D_00278E48[0] == 0)
         new (D_00278E48) __builtin_type_info("d");
     return *(const type_info*)D_00278E48;
 }
 
-extern "C" const type_info& func_00201038(void)
+extern "C" const type_info& GetTypeInfoOfFloat(void)
 {
     if (D_00278E50[0] == 0)
         new (D_00278E50) __builtin_type_info("f");
     return *(const type_info*)D_00278E50;
 }
 
-extern "C" const type_info& func_00201070(void)
+extern "C" const type_info& GetTypeInfoOfUnsignedInt(void)
 {
     if (D_00278E58[0] == 0)
         new (D_00278E58) __builtin_type_info("Ui");
     return *(const type_info*)D_00278E58;
 }
 
-extern "C" const type_info& func_002010A8(void)
+extern "C" const type_info& GetTypeInfoOfUnsignedLong(void)
 {
     if (D_00278E60[0] == 0)
         new (D_00278E60) __builtin_type_info("Ul");
     return *(const type_info*)D_00278E60;
 }
 
-extern "C" const type_info& func_002010E0(void)
+extern "C" const type_info& GetTypeInfoOfUnsignedLongLong(void)
 {
     if (D_00278E68[0] == 0)
         new (D_00278E68) __builtin_type_info("Ux");
     return *(const type_info*)D_00278E68;
 }
 
-extern "C" const type_info& func_00201118(void)
+extern "C" const type_info& GetTypeInfoOfUnsignedShort(void)
 {
     if (D_00278E70[0] == 0)
         new (D_00278E70) __builtin_type_info("Us");
     return *(const type_info*)D_00278E70;
 }
 
-extern "C" const type_info& func_00201150(void)
+extern "C" const type_info& GetTypeInfoOfUnsignedChar(void)
 {
     if (D_00278E78[0] == 0)
         new (D_00278E78) __builtin_type_info("Uc");
     return *(const type_info*)D_00278E78;
 }
 
-extern "C" const type_info& func_00201188(void)
+extern "C" const type_info& GetTypeInfoOfSignedChar(void)
 {
     if (D_00278E80[0] == 0)
         new (D_00278E80) __builtin_type_info("Sc");

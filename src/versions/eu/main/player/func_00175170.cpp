@@ -31,7 +31,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             self->f224C = -1;
             if (self->f223C == 0 && state != 7 && state != 3) {
-                func_001C61E0(self, -1);
+                SetPlayerAimMode(self, -1);
             }
             if (self->f2438 == 0) {
                 void* m = 0;
@@ -80,7 +80,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             BaseObject* o = (BaseObject*)self->f2204;
             o->desc->m18(o, self);
             self->f2210 = self->f2204;
-            func_001C61E0(self, -1);
+            SetPlayerAimMode(self, -1);
             PS(Attachment*, 0x251C)->mode0 = -1;
             PS(Attachment*, 0x251C)->mode1 = -1;
             PlacedObject* p = (PlacedObject*)self->f61C;
@@ -111,7 +111,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if (state == 2 && self->f101C != 0) {
                 aim = 11;
             }
-            func_001C61E0(self, aim);
+            SetPlayerAimMode(self, aim);
             Vu0::Q(self->v2530) = Vu0::Sub(Vu0::Q(self->v560), Vu0::Q(self->pos));
             self->v2530.z = 0.0f;
             ResetTrailRing(self->f1520);
@@ -154,7 +154,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 break;
             case 6:
                 if (self->f223C == 0 && state != 7 && state != 3) {
-                    func_001C61E0(self, -1);
+                    SetPlayerAimMode(self, -1);
                 }
                 break;
             case 7: {
@@ -228,14 +228,14 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 0:
             switch (self->f223C) {
             case 6:
-                func_001C61E0(self, 4);
+                SetPlayerAimMode(self, 4);
                 break;
             case 7:
-                func_001C61E0(self, 5);
+                SetPlayerAimMode(self, 5);
                 break;
             case 8:
             case 9:
-                func_001C61E0(self, -1);
+                SetPlayerAimMode(self, -1);
                 break;
             }
             break;
@@ -245,7 +245,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->flags538 &= ~((u64)1 << 40);
             self->hook = self->f273C;
             if (self->f1390[13] != 0) {
-                func_001C4D60(self, self->f1390[13], 1);
+                SetTurningColliderFollowedMesh(self, self->f1390[13], 1);
             }
             break;
         }
@@ -340,7 +340,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             u128 zero = Vu0::Zero();
             sound = AT(s32, self->f2204, 0xA8);
-            func_001C61E0(self, 1);
+            SetPlayerAimMode(self, 1);
             for (Collider* c = (Collider*)AT(BaseObject*, self->f2204, 0x18); c != 0; c = (Collider*)c->parent) {
                 if (c->desc->flags & 2) {
                     if ((c->mode450 != 3 && c->f1EC != 0 && c->f1EC->mode0 == 1) ||
@@ -411,7 +411,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         }
         case 8: {
-            func_001C61E0(self, -1);
+            SetPlayerAimMode(self, -1);
             sound = 0x59;
             SetFlaggedLinkContactMask(self, self->f24A0, 1);
             Vec02 pos;
@@ -436,7 +436,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 AT(Vec02, PS(void*, 0x2494), 0x300) = *(Vec02*)D_00263970;
             }
             Vu0::Q(self->v640) = Vu0::Zero();
-            func_001C61E0(self, -1);
+            SetPlayerAimMode(self, -1);
             self->f580 = 0;
             self->f26CC = 3.40282347e+38f;
             break;
@@ -522,18 +522,18 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->f638 = ArctangentOfRatio(d.y, d.x);
             TurnColliderTowardHeading(self);
             Vu0::Q(self->v640) = Vu0::Zero();
-            func_001C61E0(self, -1);
+            SetPlayerAimMode(self, -1);
             break;
         }
         case 11:
-            func_001C61E0(self, -1);
+            SetPlayerAimMode(self, -1);
             SetColliderAnchors(self, 3, 0, 3, 0);
             SetColliderTreeContactsDropped(self, 1);
             Vu0::Q(self->v640) = Vu0::Zero();
             self->f690 = 0;
             break;
         case 10:
-            func_001C61E0(self, -1);
+            SetPlayerAimMode(self, -1);
             self->f25EC = 0;
             TurnPlayerToClass75AheadMask8(self);
             break;
@@ -546,10 +546,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->flags538 |= (u64)1 << 40;
             self->radius3CC = D_00262E30;
             if (self->f1390[13] != 0) {
-                func_001C4D60(self, 0, 0);
+                SetTurningColliderFollowedMesh(self, 0, 0);
             }
             self->v640 = D_00248D30;
-            func_001C61E0(self, -1);
+            SetPlayerAimMode(self, -1);
             break;
         case 16:
             self->v640 = D_00248D30;
@@ -664,7 +664,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         case 23:
             if (state == 7) {
-                func_001C61E0(self, self->f1018 != 0 ? 10 : 2);
+                SetPlayerAimMode(self, self->f1018 != 0 ? 10 : 2);
             }
             break;
         case 34: {
@@ -794,7 +794,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 10:
         case 11: {
             Vec02 v;
-            func_0017FC48(self, &v);
+            ComputeUpwardBoostVelocity(self, &v);
             self->desc02()->m20(self, &v);
             ((Attachment*)self->f2514)->mode0 = 4;
             self->desc02()->m2B(self);
@@ -873,7 +873,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vec02 v;
             self->f2498 = 0;
             anim = PS(void*, 0x1034);
-            func_0017FCC8(self, &v);
+            ComputeUpwardBoostVelocityAlt(self, &v);
             self->desc02()->m20(self, &v);
             break;
         }

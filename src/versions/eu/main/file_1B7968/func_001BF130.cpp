@@ -9,10 +9,10 @@ void InitSoundSystem(void)
     EnableIopDiscAccess(1, 0x2000, 1, 1);
     SendIopSoundLevel(0x14);
     ResetVolumeChannelFactors();
-    func_0011D520(0, 1);
-    func_0011D558(0, 0, 0x2F);
-    func_0011D558(1, 0x18, 0x2F);
-    func_0011D558(3, 0x18, 0x2F);
-    func_0011D558(2, 0x18, 0x2F);
-    func_0011E3A0(2, 4);
+    QueueIopCommandD(0, 1);
+    QueueIopChannelConfig(0, 0, 0x2F);
+    QueueIopChannelConfig(1, 0x18, 0x2F);
+    QueueIopChannelConfig(3, 0x18, 0x2F);
+    QueueIopChannelConfig(2, 0x18, 0x2F);
+    QueueIopCommand51(2, 4);
 }

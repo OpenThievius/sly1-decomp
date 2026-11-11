@@ -20,7 +20,7 @@ struct Column_eu_14AF38 {
 
 char* func_eu_001DDAB0(char* text);
 
-void func_0014AF38(Column_eu_14AF38* self, s32 index, char* text, f32 hold)
+void PostItemColumnEntry(Column_eu_14AF38* self, s32 index, char* text, f32 hold)
 {
     Item_eu_14AF38* item = &self->items[index];
     item->vt->m08((ScreenElement*)item, func_eu_001DDAB0(text));

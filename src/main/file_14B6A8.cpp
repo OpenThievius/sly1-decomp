@@ -151,7 +151,7 @@ void GetStateWalkerTargetKey(void* p, s32* out);
 extern u8 D_00248D30[];
 void ChooseObjectPoolItem(ObjectPool* p);
 s32 RandomIntInRange(s32 a, s32 b);
-s32 func_001A8C90(ObjectPool* h, s32 v);
+s32 LaunchChosenPoolObject(ObjectPool* h, s32 v);
 s32 GetObjectWorldPosition(void* p, f32* out);
 s32 GetObjectWorldRotation(void* p, f32* out);
 s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, void* out, f32 fa, f32 fb);
@@ -232,9 +232,9 @@ ObjectLink g_gaugeManagerLinks[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, 
 
 void SetSinCosPair(f32 value, SinCosPair* self);
 extern s32 g_frameCount;
-s32 func_001909F0(void* tree, Vec02* from, Vec02* to, s32 max, ColliderSpan* out);
+s32 CollectSegmentSpansInPlaneTree(void* tree, Vec02* from, Vec02* to, s32 max, ColliderSpan* out);
 void FindClosestPointsOnSegments(Vec02* a0, Vec02* a1, Vec02* b0, Vec02* b1, Vec02* onA, f32* dist, Vec02* onB);
-void func_001C8418(Agent* self, Vec02* goal);
+void SetAgentGoalPoint(Agent* self, Vec02* goal);
 void UpdateAgentGoal(Agent* self);
 f32 WrapAngle(f32 a);
 typedef NumberedAgent* (*TargetOfFn)(NumberedAgent* self);
@@ -260,7 +260,7 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                 if (self->f928 != 0) {
                     ColliderSpan hits[8];
                     ScopeMarker scope;
-                    s32 r = func_001909F0(*(void**)(self->f928 + 0x54), &self->v140, &probe, 8, hits);
+                    s32 r = CollectSegmentSpansInPlaneTree(*(void**)(self->f928 + 0x54), &self->v140, &probe, 8, hits);
                     switch (r) {
                     case 0:
                         frac = 1.0f;
@@ -342,12 +342,12 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                 }
                 angle = WrapAngle(next);
             }
-            func_001C8418(self, &bestPos);
+            SetAgentGoalPoint(self, &bestPos);
         }
         break;
     case 4:
         if (flag != 0) {
-            func_001C8418(self, &self->v140);
+            SetAgentGoalPoint(self, &self->v140);
         }
         break;
     default:
@@ -657,7 +657,7 @@ extern const f32 D_00249FB4;
 // stride (as DrawTrailRibbon's): its constant then lives across the loop without a register and is
 // rematerialised before the multiply, as retail's `li v1,20` shows; the position and rotation
 // pointers are set where they are used, so loop.c hoists them after the wait pointer's address.
-void func_0014C858(GaugeManager* self)
+void RunGaugeTimedEvent(GaugeManager* self)
 {
     Vec02 anchor;
     Vec02 pos;
@@ -721,7 +721,7 @@ void func_0014C858(GaugeManager* self)
         ObjectPool* h = (ObjectPool*)self->f420;
         ContactAgent* agent = (ContactAgent*)h->f48;
         slot = (GaugeSlot*)((u8*)self->slots + best * slotSize);
-        func_001A8C90(h, 0);
+        LaunchChosenPoolObject(h, 0);
         posp = &pos;
         rotp = &rot[0];
         GetObjectWorldPosition(slot->f4, (f32*)posp);
@@ -765,7 +765,7 @@ void ActivateRandomGaugeSlot(GaugeManager* self)
     ObjectPool* h = (ObjectPool*)self->f424;
     NumberedAgent* c = (NumberedAgent*)h->f48;
     GaugeSlot* s = list[idx];
-    (void)func_001A8C90(h, 0);
+    (void)LaunchChosenPoolObject(h, 0);
     GetObjectWorldPosition(s->f4, v0);
     GetObjectWorldRotation(s->f4, v1);
     c->desc02()->m1D(c, (Vec02*)v0);

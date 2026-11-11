@@ -12,7 +12,7 @@ ASM_FUNC(func_001FA890);
 
 struct Words_001FA8A0 { s32 w[1]; };
 
-s32 func_001FA8A0(Words_001FA8A0* dst, Words_001FA8A0* src, u32 bytes)
+s32 CopyKernelWordsThirdPatch(Words_001FA8A0* dst, Words_001FA8A0* src, u32 bytes)
 {
     s32* d = (s32*)dst;
     s32* s = (s32*)src;
@@ -62,26 +62,26 @@ u32 D_002779C0[220] = {
 
 struct Blk_1FA8F8;
 u32 D_00277D30[16] = { 0x5A, 0x1FA8A0, 0x5B, 0x80075000, 0x54, 0x1FAC40, 0x55, 0, 0x56, 0, 0x57, 0, 0x58, 0, 0x59, 0 };
-u32 func_001FA8D8(Blk_1FA8F8* a);
-void func_001FA8E8(Blk_1FA8F8* a, u32 b);
-void func_001FA890(Blk_1FA8F8* a, void* b, s32 c);
+u32 QueryPatchedHandlerThirdPatch(Blk_1FA8F8* a);
+void SetSystemCallHandlerThirdPatch(Blk_1FA8F8* a, u32 b);
+void CopyKernelWordsSyscallThirdPatch(Blk_1FA8F8* a, void* b, s32 c);
 void SyncDataCache(s32 a);
 
 void InstallThirdKernelPatch() {
     u32* s0 = D_00277D30;
     u32* s1;
     u32 k = 3;
-    func_001FA8E8((Blk_1FA8F8*)s0[0], s0[1]);
-    func_001FA890((Blk_1FA8F8*)0x80075000, D_002779C0, 0x328);
+    SetSystemCallHandlerThirdPatch((Blk_1FA8F8*)s0[0], s0[1]);
+    CopyKernelWordsSyscallThirdPatch((Blk_1FA8F8*)0x80075000, D_002779C0, 0x328);
     SyncDataCache(0);
     SyncDataCache(2);
-    func_001FA8E8((Blk_1FA8F8*)s0[2], s0[3]);
-    func_001FA8E8((Blk_1FA8F8*)s0[4], s0[5]);
+    SetSystemCallHandlerThirdPatch((Blk_1FA8F8*)s0[2], s0[3]);
+    SetSystemCallHandlerThirdPatch((Blk_1FA8F8*)s0[4], s0[5]);
     s1 = s0 + 6;
     do {
         k++;
-        u32 v = func_001FA8D8((Blk_1FA8F8*)s1[0]);
-        func_001FA8E8((Blk_1FA8F8*)s1[0], v);
+        u32 v = QueryPatchedHandlerThirdPatch((Blk_1FA8F8*)s1[0]);
+        SetSystemCallHandlerThirdPatch((Blk_1FA8F8*)s1[0], v);
         s1 += 2;
     } while (k < 8);
 }

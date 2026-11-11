@@ -14,9 +14,9 @@
 #include "typeinfo.h"
 
 extern void (*D_00278048)();
-u8* func_001FDA10(void);
+u8* GetActiveExceptionSlot(void);
 struct Ctx_001FE978;
-void* func_001FDA10(Ctx_001FE978* self);
+void* GetActiveExceptionSlot(Ctx_001FE978* self);
 
 typedef void (*Handler_001FE8F0)(void) __attribute__((noreturn));
 typedef void (*Handler_001FE938)(void) __attribute__((noreturn));
@@ -24,49 +24,49 @@ typedef void (*Handler_001FE938)(void) __attribute__((noreturn));
 // The unexpected handler, at first func_001FE908 (defined below, after its first use).
 extern s32 D_00278640;
 
-void func_001FE8F0(void) __attribute__((noreturn));
+void InvokeTerminateHandler(void) __attribute__((noreturn));
 
-void func_001FE8F0(void)
+void InvokeTerminateHandler(void)
 {
 	((Handler_001FE8F0)D_00278048)();
 }
 
-void func_001FE908(void) __attribute__((noreturn));
+void DefaultUnexpectedHandler(void) __attribute__((noreturn));
 
-void func_001FE908(void)
+void DefaultUnexpectedHandler(void)
 {
-	func_001FE8F0();
+	InvokeTerminateHandler();
 }
 
-Handler_001FE8F0 func_001FE918(Handler_001FE8F0 handler)
+Handler_001FE8F0 ReplaceTerminateHandler(Handler_001FE8F0 handler)
 {
 	Handler_001FE8F0 old = (Handler_001FE8F0)D_00278048;
 	D_00278048 = (void (*)())handler;
 	return old;
 }
 
-s32 func_001FE928(s32 value)
+s32 ReplaceUnexpectedHandler(s32 value)
 {
     s32 previous = D_00278640;
     D_00278640 = value;
     return previous;
 }
 
-void func_001FE938(void) __attribute__((noreturn));
+void InvokeUnexpectedHandler(void) __attribute__((noreturn));
 
-void func_001FE938(void)
+void InvokeUnexpectedHandler(void)
 {
 	((Handler_001FE938)D_00278640)();
 }
 
-s32 func_001FE950(void)
+s32 GetThrownObjectAddress(void)
 {
-	return *(s32*)func_001FDA10() + 8;
+	return *(s32*)GetActiveExceptionSlot() + 8;
 }
 
-s32 func_001FE978(Ctx_001FE978* self)
+s32 GetActiveExceptionRecord(Ctx_001FE978* self)
 {
-	return *(s32*)func_001FDA10(self);
+	return *(s32*)GetActiveExceptionSlot(self);
 }
 
 struct Obj_001FE998 {
@@ -76,9 +76,9 @@ struct Obj_001FE998 {
     s64 count;
 };
 
-Obj_001FE998* func_001FE998(void)
+Obj_001FE998* BeginCatchHandler(void)
 {
-    Obj_001FE998* obj = *(Obj_001FE998**)func_001FDA10();
+    Obj_001FE998* obj = *(Obj_001FE998**)GetActiveExceptionSlot();
     obj->flag = 1;
     obj->count++;
     return obj;
@@ -87,17 +87,17 @@ Obj_001FE998* func_001FE998(void)
 struct Arg_1FE9D0;
 s32 EnterRuntimeLock(Arg_1FE9D0* size);
 
-s32 func_001FE9D0(Arg_1FE9D0* size)
+s32 AllocateRuntimeBlockOrTerminate(Arg_1FE9D0* size)
 {
     s32 p = EnterRuntimeLock(size);
     if (p == 0)
-        func_001FE8F0();
+        InvokeTerminateHandler();
     return p;
 }
 
 s32 LeaveRuntimeLock(void);
 
-s32 func_001FE9F8(void)
+s32 FreeRuntimeBlock(void)
 {
     return LeaveRuntimeLock();
 }
@@ -119,9 +119,9 @@ struct Res_001FEA18;
 
 typedef s32 (*Fn_001FEA18)();
 
-s32 func_00200778(Res_001FEA18* a, s32 b, s32 c);
+s32 MatchThrownType(Res_001FEA18* a, s32 b, s32 c);
 
-s32 func_001FEA18(Node_001FEA18* self, void* fn, Hdr_001FEA18* a2)
+s32 MatchPendingThrowType(Node_001FEA18* self, void* fn, Hdr_001FEA18* a2)
 {
     if (a2 != 0 && a2->kind != 4) {
         return 0;
@@ -130,7 +130,7 @@ s32 func_001FEA18(Node_001FEA18* self, void* fn, Hdr_001FEA18* a2)
         return self->f8;
     }
     s32 r = ((Fn_001FEA18)fn)();
-    r = func_00200778((Res_001FEA18*)r, self->fC, self->f28);
+    r = MatchThrownType((Res_001FEA18*)r, self->fC, self->f28);
     if (r != 0) {
         self->f8 = r;
     }
@@ -152,21 +152,21 @@ struct Obj_1FEA88 {
     s32 f28;
 };
 
-struct Obj_1FEA88* func_001FE9D0(struct Size_1FEA88* n);
+struct Obj_1FEA88* AllocateRuntimeBlockOrTerminate(struct Size_1FEA88* n);
 
-void func_001FEA88(s32 a0, s32 a1, s32 a2)
+void PushThrownException(s32 a0, s32 a1, s32 a2)
 {
-    struct Obj_1FEA88* obj = func_001FE9D0((struct Size_1FEA88*)0x30);
+    struct Obj_1FEA88* obj = AllocateRuntimeBlockOrTerminate((struct Size_1FEA88*)0x30);
     obj->f0C = a1;
     obj->f10 = a2;
     obj->f08 = a0;
     obj->f28 = a0;
     obj->f20 = 0;
     obj->f14 = 0;
-    obj->f00 = (void*)func_001FEA18;
+    obj->f00 = (void*)MatchPendingThrowType;
     obj->f04 = 4;
     obj->f06 = 1;
-    s32* p = (s32*)func_001FDA10();
+    s32* p = (s32*)GetActiveExceptionSlot();
     obj->f18 = *p;
     *p = (s32)obj;
 }
@@ -183,12 +183,12 @@ struct Handle_1FEB18 {
     void* buf;
 };
 
-s32 func_001FE9F8(void*);
-s32 func_00200C40(void*);
+s32 FreeRuntimeBlock(void*);
+s32 IsPointerType(void*);
 
-void func_001FEB18(Handle_1FEB18* self)
+void PopThrownException(Handle_1FEB18* self)
 {
-    Handle_1FEB18** link = (Handle_1FEB18**)func_001FDA10();
+    Handle_1FEB18** link = (Handle_1FEB18**)GetActiveExceptionSlot();
     if (--self->refs != 0) {
         return;
     }
@@ -201,26 +201,26 @@ void func_001FEB18(Handle_1FEB18* self)
         }
     }
     if (*link == 0) {
-        func_001FE8F0();
+        InvokeTerminateHandler();
     }
     *link = self->next;
     if (self->callback != 0) {
         self->callback(self->object, 2);
     }
-    if (func_00200C40(self->data) == 0) {
-        func_001FE9F8(self->buf);
+    if (IsPointerType(self->data) == 0) {
+        FreeRuntimeBlock(self->buf);
     }
-    func_001FE9F8(self);
+    FreeRuntimeBlock(self);
 }
 
 struct Node_1FEBE0 { u8 pad[0x14]; s32 flag; };
 struct Head_1FEBE0 { Node_1FEBE0* node; };
 
-void func_001FEBE0(void)
+void AbandonCatchHandler(void)
 {
-    Node_1FEBE0* n = ((Head_1FEBE0*)func_001FDA10())->node;
+    Node_1FEBE0* n = ((Head_1FEBE0*)GetActiveExceptionSlot())->node;
     if (n == 0)
-        func_001FE8F0();
+        InvokeTerminateHandler();
     n->flag = 0;
 }
 
@@ -230,43 +230,43 @@ struct Info_001FEC10 {
     void* type;
 };
 
-void func_001FEC10(s32 count, void** allowed)
+void CheckExceptionSpecification(s32 count, void** allowed)
 {
-    Info_001FEC10* info = *(Info_001FEC10**)func_001FDA10();
+    Info_001FEC10* info = *(Info_001FEC10**)GetActiveExceptionSlot();
     s32 i;
 
     for (i = 0; i < count; i++) {
-        if (func_00200778((Res_001FEA18*)allowed[i], (s32)info->type, (s32)info->value)) {
+        if (MatchThrownType((Res_001FEA18*)allowed[i], (s32)info->type, (s32)info->value)) {
             throw;
         }
     }
     try {
-        func_001FE938();
+        InvokeUnexpectedHandler();
     } catch (...) {
         if (info != (Info_001FEC10*)__exception_info) {
             info = (Info_001FEC10*)__exception_info;
             for (i = 0; i < count; i++) {
-                if (func_00200778((Res_001FEA18*)allowed[i], (s32)info->type, (s32)info->value)) {
+                if (MatchThrownType((Res_001FEA18*)allowed[i], (s32)info->type, (s32)info->value)) {
                     throw;
                 }
             }
         }
         const type_info* type = &typeid(bad_exception);
         for (i = 0; i < count; i++) {
-            if (func_00200778((Res_001FEA18*)allowed[i], (s32)type, (s32)info->value)) {
+            if (MatchThrownType((Res_001FEA18*)allowed[i], (s32)type, (s32)info->value)) {
                 throw bad_exception();
             }
         }
-        func_001FE8F0();
+        InvokeTerminateHandler();
     }
 }
 
-void func_001FEDC8()
+void ThrowCastError()
 {
     throw bad_cast();
 }
 
-void func_001FEE48()
+void ThrowTypeidError()
 {
     throw bad_typeid();
 }
@@ -274,9 +274,9 @@ void func_001FEE48()
 struct Obj_1FEEC8 { u8 pad[0x14]; s32 count; };
 struct Slot_1FEEC8 { Obj_1FEEC8* obj; };
 
-s32 func_001FEEC8(void)
+s32 HasUncaughtException(void)
 {
-    Obj_1FEEC8* obj = ((Slot_1FEEC8*)func_001FDA10())->obj;
+    Obj_1FEEC8* obj = ((Slot_1FEEC8*)GetActiveExceptionSlot())->obj;
     s32 result = 0;
     if (obj != 0) {
         result = obj->count == 0;
@@ -289,4 +289,4 @@ const char* exception::what() const
     return typeid(*this).name();
 }
 
-s32 D_00278640 = (s32)func_001FE908;
+s32 D_00278640 = (s32)DefaultUnexpectedHandler;

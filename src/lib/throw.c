@@ -32,12 +32,12 @@ void* EnterRuntimeLock(s32 size);
 void AbortProgram(void) __attribute__((noreturn));
 
 void AbortOnTerminate(void);
-EhContext* func_001FDA60(void);
-void func_001FDA38(void);
+EhContext* GetStaticExceptionContext(void);
+void InstallExceptionContextGetter(void);
 
 /* The terminate hook, and the function that returns the exception context. */
 void (*D_00278048)(void) = AbortOnTerminate;
-EhContext* (*D_0027804C)(void) = (EhContext* (*)(void))func_001FDA38;
+EhContext* (*D_0027804C)(void) = (EhContext* (*)(void))InstallExceptionContextGetter;
 
 void AbortOnTerminate(void)
 {
@@ -51,7 +51,7 @@ void RunTerminateHook(void)
 
 typedef struct Obj_1FD958 Obj_1FD958;
 
-s32 func_001FD958(Obj_1FD958* self, s32 v, s32 fallback)
+s32 MatchTypeNameOrZero(Obj_1FD958* self, s32 v, s32 fallback)
 {
     s32 result = fallback;
     if (CompareStrings(self, v) != 0) {
@@ -71,7 +71,7 @@ typedef struct Node_001FD990 {
     s32 f14;
 } Node_001FD990;
 
-Node_001FD990* func_001FD990(void)
+Node_001FD990* AllocateRuntimeNode(void)
 {
     Node_001FD990* p = (Node_001FD990*)EnterRuntimeLock(0x18);
     if (p == 0) {
@@ -82,19 +82,19 @@ Node_001FD990* func_001FD990(void)
     return p;
 }
 
-s32 func_001FD9E8(void)
+s32 GetExceptionContext(void)
 {
     return (s32)(*D_0027804C)();
 }
 
-u8* func_001FDA10(void)
+u8* GetActiveExceptionSlot(void)
 {
     return (u8*)(*D_0027804C)() + 8;
 }
 
-void func_001FDA38(void)
+void InstallExceptionContextGetter(void)
 {
-    void (*f)(void) = (void (*)(void))func_001FDA60;
+    void (*f)(void) = (void (*)(void))GetStaticExceptionContext;
     D_0027804C = (EhContext* (*)(void))f;
     f();
 }
@@ -109,7 +109,7 @@ static Once_1FDA60 D_0062A798;
 static s32 D_0062A7A8;
 static void* D_0062A7B0[2];
 
-EhContext* func_001FDA60(void)
+EhContext* GetStaticExceptionContext(void)
 {
     if (D_0062A7A8 == 0) {
         D_0062A7A8 = 1;
@@ -119,7 +119,7 @@ EhContext* func_001FDA60(void)
     return (EhContext*)&D_0062A798;
 }
 
-u8* func_001FDAC8(void)
+u8* GetHandlerChainSlot(void)
 {
     return (u8*)(*D_0027804C)() + 4;
 }
@@ -205,9 +205,9 @@ struct Info_1FDD80 {
     void* (*match)(Info_1FDD80* info, void* type, void* extra);
 };
 
-s32 func_001FDD80(void* type)
+s32 ActiveExceptionMatches(void* type)
 {
-    Info_1FDD80* info = *(Info_1FDD80**)func_001FDA10();
+    Info_1FDD80* info = *(Info_1FDD80**)GetActiveExceptionSlot();
     void* (*match)(Info_1FDD80*, void*, void*) = info->match;
     if (match == 0) {
         return 0;
@@ -215,12 +215,12 @@ s32 func_001FDD80(void* type)
     return match(info, type, 0) != 0;
 }
 
-s16 func_001FDDC8(void* object)
+s16 GetRecordSubkind(void* object)
 {
     return *(s16*)((u8*)object + 6);
 }
 
-s16 func_001FDDD0(void* object)
+s16 GetRecordKind(void* object)
 {
     return *(s16*)((u8*)object + 4);
 }
@@ -231,7 +231,7 @@ typedef struct Range_1FDDD8 {
     s32 value;
 } Range_1FDDD8;
 
-s32 func_001FDDD8(u32 key, Range_1FDDD8* t)
+s32 FindInnermostRangeValue(u32 key, Range_1FDDD8* t)
 {
     s32 best, i;
     if (t == 0) goto none;
@@ -267,7 +267,7 @@ typedef struct Cur_001FDEB0 {
     s32 count;
 } Cur_001FDEB0;
 
-s32 func_001FDEB0(s32 a0, void* a1, Ctx_001FDEB0* a2, s32 a3, s32* a4)
+s32 FindHandlerInSpanTable(s32 a0, void* a1, Ctx_001FDEB0* a2, s32 a3, s32* a4)
 {
     s32 result = 0;
     s32 key = a0;
@@ -321,7 +321,7 @@ typedef struct Obj_1FDFF8 {
     s8 st[64];
 } Obj_1FDFF8;
 
-u8* func_001FDFF8(u32 idx, Obj_1FDFF8* self, Obj_1FDFF8* other)
+u8* ResolveSavedRegisterSlot(u32 idx, Obj_1FDFF8* self, Obj_1FDFF8* other)
 {
     while (self->st[idx] == 2) {
         idx = self->tbl[idx];
@@ -332,10 +332,10 @@ u8* func_001FDFF8(u32 idx, Obj_1FDFF8* self, Obj_1FDFF8* other)
     AbortProgram();
 }
 
-s32 func_001FE080(s32 a0, u32 a1, u32 a2)
+s32 CopySavedRegister(s32 a0, u32 a1, u32 a2)
 {
-    u8* r1 = func_001FDFF8(a0, (Obj_1FDFF8*)a1, 0);
-    u8* r2 = func_001FDFF8(a0, (Obj_1FDFF8*)a2, 0);
+    u8* r1 = ResolveSavedRegisterSlot(a0, (Obj_1FDFF8*)a1, 0);
+    u8* r2 = ResolveSavedRegisterSlot(a0, (Obj_1FDFF8*)a2, 0);
     s32 n;
     if (a0 >= 0x1F) {
         n = 8;
@@ -366,7 +366,7 @@ typedef struct __attribute__((aligned(8))) Frame_1FE198 {
 
 typedef struct Pc_1FE198 Pc_1FE198;
 
-Frame_1FE198* func_001FE100(Pc_1FE198* a0, Frame_1FE198* a1, Frame_1FE198* a2)
+Frame_1FE198* UnwindOneFrame(Pc_1FE198* a0, Frame_1FE198* a1, Frame_1FE198* a2)
 {
     Frame_1FE198* s0 = (Frame_1FE198*)FindFrameUnwindState(a0, (UnwindFrame*)a2);
     u16 idx;
@@ -375,7 +375,7 @@ Frame_1FE198* func_001FE100(Pc_1FE198* a0, Frame_1FE198* a1, Frame_1FE198* a2)
     }
     idx = s0->f298;
     if (*(s8*)((u8*)a1 + idx + 0x29C) != 0) {
-        s64 v = *(s64*)func_001FDFF8(idx, (Obj_1FDFF8*)a1, 0);
+        s64 v = *(s64*)ResolveSavedRegisterSlot(idx, (Obj_1FDFF8*)a1, 0);
         s0->f0 = (s32)v;
     } else {
         s0->f0 = a1->f0;
@@ -384,7 +384,7 @@ Frame_1FE198* func_001FE100(Pc_1FE198* a0, Frame_1FE198* a1, Frame_1FE198* a2)
     return s0;
 }
 
-void func_001FE190(void) {}
+void NoteCleanupOnlyHandler(void) {}
 
 typedef struct Obj_1FE198 {
     s32 f0;
@@ -395,7 +395,7 @@ typedef struct Obj_1FE198 {
 
 static inline Pc_1FE198* ReturnAddr_1FE198(Frame_1FE198* f, Frame_1FE198* g)
 {
-    s64 w = *(s64*)func_001FDFF8(f->f29A, (Obj_1FDFF8*)f, (Obj_1FDFF8*)g);
+    s64 w = *(s64*)ResolveSavedRegisterSlot(f->f29A, (Obj_1FDFF8*)f, (Obj_1FDFF8*)g);
     return (Pc_1FE198*)(s32)w;
 }
 
@@ -404,7 +404,7 @@ static inline s32 RegWindow_1FE198_In(s32 i, Frame_1FE198* f)
     return 0;
 }
 
-void* func_001FE198(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** pout_)
+void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** pout_)
 {
     Obj_1FE198* obj = (Obj_1FE198*)eh;
     Pc_1FE198* pc = (Pc_1FE198*)pc_;
@@ -431,7 +431,7 @@ void* func_001FE198(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** po
     for (;;) {
         Frame_1FE198* p = udata;
         s32 isNew;
-        udata = func_001FE100(pc, udata, subp);
+        udata = UnwindOneFrame(pc, udata, subp);
         subp = p;
         if (udata == 0) {
             break;
@@ -443,12 +443,12 @@ void* func_001FE198(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** po
         }
         if (pending) {
             pending = 0;
-            res = func_001FDEB0(obj->fC, udata->f4, a8, 1, &cleanup);
+            res = FindHandlerInSpanTable(obj->fC, udata->f4, a8, 1, &cleanup);
             obj->fC = 0;
         } else if (isNew) {
-            res = func_001FDEB0((s32)pc, udata->f4, a8, 0, &cleanup);
+            res = FindHandlerInSpanTable((s32)pc, udata->f4, a8, 0, &cleanup);
         } else {
-            res = func_001FDDD8((u32)pc, (Range_1FDDD8*)udata->f4);
+            res = FindInnermostRangeValue((u32)pc, (Range_1FDDD8*)udata->f4);
         }
         if (res != 0) {
             if (cleanup != 0) {
@@ -471,7 +471,7 @@ void* func_001FE198(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** po
         res = savedRes;
         pc = savedPc;
         if (onlyCleanup != 0) {
-            func_001FE190();
+            NoteCleanupOnlyHandler();
         }
     }
     if (res == 0) {
@@ -486,11 +486,11 @@ void* func_001FE198(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** po
         *udata = *fb;
         while (pc != handlerPc) {
             Frame_1FE198* p = udata;
-            udata = func_001FE100(pc, udata, subp);
+            udata = UnwindOneFrame(pc, udata, subp);
             subp = p;
             for (i = 0; i < 0x4F; i++) {
                 if (i != udata->f29A && udata->f29C[i] != 0) {
-                    func_001FE080(i, (u32)udata, (u32)fb);
+                    CopySavedRegister(i, (u32)udata, (u32)fb);
                 }
             }
             pc = (Pc_1FE198*)((s8*)ReturnAddr_1FE198(udata, subp) - 1);
@@ -498,7 +498,7 @@ void* func_001FE198(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** po
         if (udata->f29C[udata->f29A] == 2) {
             i = udata->f10[udata->f29A];
             if (RegWindow_1FE198_In(i, udata)) {
-                func_001FE080(i, (u32)udata, (u32)fb);
+                CopySavedRegister(i, (u32)udata, (u32)fb);
             }
         }
     }
@@ -507,7 +507,7 @@ void* func_001FE198(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** po
 }
 
 /* Rethrow: unwind from the caller to the handler of the exception being handled. */
-void func_001FE4C8(void)
+void RethrowActiveException(void)
 {
     EhContext* ctx = (*D_0027804C)();
     UnwindFrame mine, copy;
@@ -526,13 +526,13 @@ here:
         RunTerminateHook();
     cur->cfa = (s32)__builtin_dwarf_cfa();
     *cp = *cur;
-    handler = func_001FE198(ctx, (char*)__builtin_return_address(0) - 1, cp, &cur);
+    handler = FindHandlerAndRestoreRegisters(ctx, (char*)__builtin_return_address(0) - 1, cp, &cur);
     offset = cur->cfa - cp->cfa;
     __builtin_eh_return(ctx, offset, handler);
 }
 
 /* Throw: the same, after recording the index the thrower passes. */
-void func_001FE6A8(void* index)
+void ThrowException(void* index)
 {
     EhContext* ctx = (*D_0027804C)();
     UnwindFrame mine, copy;
@@ -552,7 +552,7 @@ here:
         RunTerminateHook();
     cur->cfa = (s32)__builtin_dwarf_cfa();
     *cp = *cur;
-    handler = func_001FE198(ctx, (char*)__builtin_return_address(0) - 1, cp, &cur);
+    handler = FindHandlerAndRestoreRegisters(ctx, (char*)__builtin_return_address(0) - 1, cp, &cur);
     offset = cur->cfa - cp->cfa;
     __builtin_eh_return(ctx, offset, handler);
 }

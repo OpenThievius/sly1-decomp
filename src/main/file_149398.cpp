@@ -350,7 +350,7 @@ void ConvertOffsetToSpherical(void* a, void* b, f32* heading, f32* pitch, f32* l
 void ComputeDirectionFromAngles(Vec02* out, f32 first, f32 second, f32 scale);
 void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
 void UpdateCameraMatrices(Camera* self);
-void func_00144BE8(Camera* cam, s32 mode, void* eye, void* target, s32 e, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5);
+void UpdateOrbitCameraPlacement(Camera* cam, s32 mode, void* eye, void* target, s32 e, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5);
 
 void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRecord* pad, f32 dt)
 {
@@ -635,7 +635,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         return;
     }
     }
-    func_00144BE8(cam, flag, &eye, &target, 0, Blend(blend, 20.0f, far), Blend(blend, -7.0f, rise),
+    UpdateOrbitCameraPlacement(cam, flag, &eye, &target, 0, Blend(blend, 20.0f, far), Blend(blend, -7.0f, rise),
                   Blend(blend, 1.0f, 0.25f), 0.0f, ease, dt);
 }
 
@@ -674,7 +674,7 @@ void ActivateFrameCameraController(FrameCameraController* self)
     SetCameraLookAnchor(parent, (u8*)parent->stack[0].target + 0x370);
 }
 
-void func_00144BE8(Camera* a, s32 b, void* c, s32 d, s32 e, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5);
+void UpdateOrbitCameraPlacement(Camera* a, s32 b, void* c, s32 d, s32 e, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5);
 
 void UpdateFrameCameraController(FrameCameraController* self, f32 dt)
 {
@@ -700,7 +700,7 @@ void UpdateFrameCameraController(FrameCameraController* self, f32 dt)
         t = d;
     }
     f32 u = 1.0f - t;
-    func_00144BE8(cam, 1, &target, (s32)&eye, 0, t * 100.0f + u * 20.0f, t * -15.0f + u * -7.0f, t * 0.25f + u, 0.0f, 0.0f, dt);
+    UpdateOrbitCameraPlacement(cam, 1, &target, (s32)&eye, 0, t * 100.0f + u * 20.0f, t * -15.0f + u * -7.0f, t * 0.25f + u, 0.0f, 0.0f, dt);
 }
 
 void ActivateValueCameraController(ValueCameraController* obj, s32 value) { obj->value = value; }
@@ -837,7 +837,7 @@ void ClearItemColumn(T217D_720* self)
     self->vt->m16(self, 0);
 }
 
-void func_0014AF38(T217D_720* self, s32 index, char* text, f32 hold)
+void PostItemColumnEntry(T217D_720* self, s32 index, char* text, f32 hold)
 {
     T217D_330* item = &self->items[index];
     for (char* p = text; *p != 0; p++) {
