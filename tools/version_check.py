@@ -118,7 +118,7 @@ def check_current():
     problems = ["%s has no row in config/eu/c_status.tsv (run tools/version_check.py)" % n for n in sorted(defined - rows)]
     problems += ["config/eu/c_status.tsv has %s, which src/ no longer defines" % n for n in sorted(rows - defined)]
     problems += ["%s defines %s, which its shared file does not" % (p.relative_to(ROOT), n)
-                 for n, p in version_src.overrides("eu").items() if n not in defined]
+                 for n, p in version_src.overrides("eu").items() if n not in defined and n not in version_src.data_overrides("eu")]
     problems += ["%s defines %s, which is not where PAL has a function of its own" % (p.relative_to(ROOT), n)
                  for n, p in only_eu().items() if version_src.version_of(p)[1] not in own_files.get(n, ())]
     for p in problems:
