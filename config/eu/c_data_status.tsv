@@ -21,7 +21,8 @@ D_00249E50	0024C680	68	match
 D_00249EA0	0024C6D0	68	match	
 D_00249EF0	0024C720	200	match	
 D_00249FBC	0024C7EC	24	match	
-D_00249FE0	0024C810	308	differs	first difference at +0xB0; 4 pointer words differ
+D_00249FE0	0024C810	288	differs	first difference at +0xB0; 4 pointer words differ
+D_0024A100	0024C930	20	match	
 D_0024A120	0024C950	432	match	
 D_0024A2D0	0024C750	1220	differs	first difference at +0x0; 208 text, 16 other words differ
 D_0024A794	0024CC14	12	match	
