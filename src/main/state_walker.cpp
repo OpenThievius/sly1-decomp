@@ -140,7 +140,7 @@ void CopyVec2(Point2* a0, Point2* a1)
     a0->y = a1->y;
 }
 
-INCLUDE_RODATA(D_0024D268);
+extern const u32 D_0024D268[6] = { 0x3F800000, 0x3DCCCCCD, 0x3DCCCCCD, 0, 0x6E614B2E, 0x002E696A };
 INCLUDE_ASM(func_001B55C0);
 
 LINKER_REMNANT(func_001B5B48);

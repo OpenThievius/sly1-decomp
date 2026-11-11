@@ -1257,7 +1257,7 @@ void ShortenEffectLife(Effect* self, f32 x)
     }
 }
 
-INCLUDE_RODATA(D_0024C9B0);
+extern const f32 D_0024C9B0 = 3.4028235e38f;
 
 INCLUDE_ASM(func_0019ED58);
 
