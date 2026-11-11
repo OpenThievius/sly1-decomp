@@ -254,19 +254,14 @@ s32 SetMpegCallback(MpegHandle* obj, s32 index, s32 value, s32 second)
     return old;
 }
 
-struct Ctx_0020B190;
-typedef s32 (*Fn_0020B190)(Ctx_0020B190*, s32*, s32);
-struct Ent_0020B190 { Fn_0020B190 fn; s32 arg; };
-struct Tab_0020B190 { u8 pad[0xC]; Ent_0020B190 e[1]; };
-struct Ctx_0020B190 { u8 pad[0x40]; Tab_0020B190* table; };
-s32 RunMpegCallback(Ctx_0020B190* p, s32* idx) {
+s32 RunMpegCallback(MpegHandle* p, s32* idx) {
     s32 r = 0;
     if (p != 0) {
-        Tab_0020B190* t = p->table;
+        MpegDecoder* t = p->decoder;
         if (t != 0) {
-            Fn_0020B190 fn = t->e[*idx].fn;
+            MpegCallbackFn fn = t->callbacks[*idx].fn;
             if (fn != 0) {
-                r = fn(p, idx, t->e[*idx].arg);
+                r = fn(p, idx, t->callbacks[*idx].arg);
             }
         }
     }
@@ -311,27 +306,18 @@ s32 RewindMpegRingToMark(s32* item)
     return value;
 }
 
-struct Owner_0020B278;
+s32 ReportMpegError(MpegDecoder* owner, const char* p);
 
-struct Pool_0020B278 {
-    u32 f00;
-    u32 f04;
-    u32 f08;
-};
-
-
-s32 ReportMpegError(Owner_0020B278* owner, const char* p);
-
-s32 AllocateFromMpegRing(Owner_0020B278* owner, Pool_0020B278* pool, u32 offset, u32 align)
+s32 AllocateFromMpegRing(MpegDecoder* owner, MpegRing* pool, u32 offset, u32 align)
 {
     u32 base;
     u32 end;
 
-    base = (pool->f08 + align - 1) / align;
+    base = (pool->cursor + align - 1) / align;
     base = base * align;
     end = base + offset;
-    if (pool->f00 + pool->f04 >= end) {
-        pool->f08 = end;
+    if (pool->start + pool->size >= end) {
+        pool->cursor = end;
         return base;
     }
     (void)ReportMpegError(owner, "work area size is too small");
@@ -474,18 +460,12 @@ s32 DecodeFramePicture(Ctx_20B458* s1, s32 a1, s32 a2)
     return s2;
 }
 
-struct Child_0020B570 { u8 pad[0x174]; s32 kind; };
-struct Owner_0020B570 {
-    u8 pad[0x40];
-    Child_0020B570* child;
-};
+s32 DecodeFramePicture(MpegHandle* self, s32 a, s32 b);
+s32 DecodeFieldPicture(MpegHandle* self, s32 a, s32 b);
 
-s32 DecodeFramePicture(Owner_0020B570* self, s32 a, s32 b);
-s32 DecodeFieldPicture(Owner_0020B570* self, s32 a, s32 b);
-
-s32 DecodePictureByStructure(Owner_0020B570* self, s32 a, s32 b)
+s32 DecodePictureByStructure(MpegHandle* self, s32 a, s32 b)
 {
-    if (self->child->kind != 3) {
+    if (self->decoder->f174 != 3) {
         return DecodeFieldPicture(self, a, b);
     }
     return DecodeFramePicture(self, a, b);
@@ -589,34 +569,19 @@ void ResetMpegPictureMode(S_20B780* s) {
     SetIpuMpeg1Mode(1);
 }
 
-struct Obj_0020B790 {
-    u8 pad000[0x118];
-    s32 f118;
-    s32 f11C;
-    s32 f120;
-    u8 pad124[0x174 - 0x124];
-    s32 f174;
-    u8 pad178[0x1BC - 0x178];
-    s32 f1BC;
-    u8 pad1C0[0x1CC - 0x1C0];
-    s32 f1CC;
-    u8 pad1D0[0x1DC - 0x1D0];
-    s32 f1DC;
-};
+s32 ReportMpegError(MpegDecoder *self, const char *msg);
+void OutputFramePicture(MpegDecoder *self, MpegPicture *a1, s32 a2);
+void OutputFieldPicturePair(MpegDecoder *self, MpegPicture *a1, MpegPicture *a2, s32 a3);
 
-s32 ReportMpegError(struct Obj_0020B790 *self, const char *msg);
-void OutputFramePicture(struct Obj_0020B790 *self, s32 a1, s32 a2);
-void OutputFieldPicturePair(struct Obj_0020B790 *self, s32 a1, s32 a2, s32 a3);
-
-void OutputPendingPicture(struct Obj_0020B790 *self)
+void OutputPendingPicture(MpegDecoder *self)
 {
     s32 n = self->f118;
     if (self->f120 != 0)
         ReportMpegError(self, "the second field is missing");
     else if (self->f174 == 3)
-        OutputFramePicture(self, self->f1BC, n - 1);
+        OutputFramePicture(self, self->pictures[1], n - 1);
     else
-        OutputFieldPicturePair(self, self->f1CC, self->f1DC, n - 1);
+        OutputFieldPicturePair(self, self->pictures[5], self->pictures[9], n - 1);
     self->f120 = 0;
 }
 
@@ -678,15 +643,13 @@ void PrintMpegError(s32 msg) {
     PrintFormatted("[MPEG ERROR]%s\n", msg);
 }
 
-struct Buf_0020B940;
-struct Ctx_0020B940;
-s32 FormatToString(Buf_0020B940* dst, const char* fmt, ...);
-s32 ReportMpegError(Ctx_0020B940* self, char* buf);
+s32 FormatToString(char* dst, const char* fmt, ...);
+s32 ReportMpegError(MpegDecoder* self, char* buf);
 
-void ReportMpegErrorFormat(Ctx_0020B940* self, const char* fmt)
+void ReportMpegErrorFormat(MpegDecoder* self, const char* fmt)
 {
     char buf[0x100];
-    FormatToString((Buf_0020B940*)buf, fmt);
+    FormatToString(buf, fmt);
     ReportMpegError(self, buf);
 }
 
@@ -895,52 +858,45 @@ void ReadSequenceDisplayExtension(struct Node_20C0A8* self)
     self->f14C = ReadIpuBits(self, 0xE);
 }
 
-struct Obj_0020C138;
-s32 ReportMpegError(Obj_0020C138* self, const void* table);
+s32 ReportMpegError(MpegDecoder* self, const void* table);
 
-void RejectSequenceScalableExtension(Obj_0020C138* self)
+void RejectSequenceScalableExtension(MpegDecoder* self)
 {
     ReportMpegError(self, "_sequenceScalableExtension() is not implemented");
 }
 
-struct Obj_0020C148;
-s32 ReportMpegError(Obj_0020C148* self, const void* table);
+s32 ReportMpegError(MpegDecoder* self, const void* table);
 
-void RejectUnknownExtension(Obj_0020C148* self)
+void RejectUnknownExtension(MpegDecoder* self)
 {
     ReportMpegError(self, "Unknown Extension");
 }
 
-struct Obj_0020C158;
-s32 ReportMpegError(Obj_0020C158* self, const void* table);
+s32 ReportMpegError(MpegDecoder* self, const void* table);
 
-void RejectSpatialScalableExtension(Obj_0020C158* self)
+void RejectSpatialScalableExtension(MpegDecoder* self)
 {
     ReportMpegError(self, "_pictureSpatialScalableExtension is not supported");
 }
 
-struct Obj_0020C168;
-s32 ReportMpegError(Obj_0020C168* self, const void* table);
+s32 ReportMpegError(MpegDecoder* self, const void* table);
 
-void RejectTemporalScalableExtension(Obj_0020C168* self)
+void RejectTemporalScalableExtension(MpegDecoder* self)
 {
     ReportMpegError(self, "_pictureTemporalScalableExtension is not supported");
 }
 
-struct Out_002118A0;
-struct Obj_0020C178 { u8 pad00[0x40]; Out_002118A0* f40; };
-void SaveIpuDmaChannels(Out_002118A0* out);
+void SaveIpuDmaChannels(IpuDmaState* out);
 
-void SaveMpegDmaState(Obj_0020C178* self)
+void SaveMpegDmaState(MpegHandle* self)
 {
-    SaveIpuDmaChannels((Out_002118A0*)((u8*)self->f40 + 0x4C));
+    SaveIpuDmaChannels(&self->decoder->dmaState);
 }
 
 struct Ctx_211988;
-struct Obj_0020C188 { u8 pad00[0x40]; u8* f40; };
 void RestoreIpuDmaChannels(Ctx_211988* s0);
 
-void RestoreMpegDmaState(Obj_0020C188* self)
+void RestoreMpegDmaState(MpegHandle* self)
 {
-    RestoreIpuDmaChannels((Ctx_211988*)(self->f40 + 0x4C));
+    RestoreIpuDmaChannels((Ctx_211988*)&self->decoder->dmaState);
 }

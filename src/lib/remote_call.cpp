@@ -99,7 +99,7 @@ s32 ReadIopRegister(u32 reg);
 u32 WriteIopRegister(u32 reg, u32 value);
 void HandleRemoteCallReply(RemoteCallPacket* reply);
 void AnswerServiceLookup(RemoteCallPacket* src, Pools_1F7BE8* pools);
-void QueueServerRequest(struct Ctx_001F8200* self);
+void QueueServerRequest(struct ServerRequestPacket* self);
 void AnswerIopCall(RemoteCallPacket* src, Pools_1F7BE8* pools);
 
 void InitRemoteCalls(void)
@@ -310,7 +310,9 @@ s32 BindRemoteService(RemoteCallClient* self, u32 cmd, s32 mode)
     return -2;
 }
 
-struct Node_001F8200 {
+// A queued request of the server (func_001F8200): the packet's words, and at 0x40 the list it is
+// queued on (its first and last entries at 0x0C and 0x10, the thread to wake at 0x00).
+struct ServerRequestEntry {
     s32 f00;
     s32 f04;
     s32 f08;
@@ -327,10 +329,12 @@ struct Node_001F8200 {
     s32 f34;
     s32 f38;
     s32 f3C;
-    Node_001F8200* f40;
+    ServerRequestEntry* f40;
 };
 
-struct Ctx_001F8200 {
+// The request packet func_001F8200 handles: RemoteCallPacket's layout, with the entry it was
+// assigned at 0x34.
+struct ServerRequestPacket {
     s32 f00;
     s32 f04;
     s32 f08;
@@ -344,19 +348,19 @@ struct Ctx_001F8200 {
     s32 f28;
     s32 f2C;
     s32 f30;
-    Node_001F8200* f34;
+    ServerRequestEntry* f34;
 };
 
 
 
-void QueueServerRequest(Ctx_001F8200* self)
+void QueueServerRequest(ServerRequestPacket* self)
 {
-    Node_001F8200* n = self->f34;
-    Node_001F8200* list = n->f40;
+    ServerRequestEntry* n = self->f34;
+    ServerRequestEntry* list = n->f40;
     if (list->f0C == 0) {
         list->f0C = (s32)n;
     } else {
-        ((Node_001F8200*)list->f10)->f3C = (s32)n;
+        ((ServerRequestEntry*)list->f10)->f3C = (s32)n;
     }
     list->f10 = (s32)n;
     s32 a = self->f14;

@@ -10,12 +10,10 @@
 
 ASM_FUNC(func_001FA890);
 
-struct Words_001FA8A0 { s32 w[1]; };
-
-s32 CopyKernelWordsThirdPatch(Words_001FA8A0* dst, Words_001FA8A0* src, u32 bytes)
+s32 CopyKernelWordsThirdPatch(s32* dst, s32* src, u32 bytes)
 {
-    s32* d = (s32*)dst;
-    s32* s = (s32*)src;
+    s32* d = dst;
+    s32* s = src;
     u32 n = bytes >> 2;
     u32 i;
     for (i = 0; i < n; i++) {

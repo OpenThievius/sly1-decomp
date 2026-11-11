@@ -196,15 +196,26 @@ s32 SetStreamCallback(Ctx_20A220* self, s32 idx, u64 key, s32 a3, s32 a4)
     return result;
 }
 
-struct Reader_0020A630 { u8 pad[0x10]; };
-struct Out_0020A630 { s32 w0; s32 w4; s32 w8; s32 wC; };
+// The bit reader as func_0020A630 sees it. The pack header's reader and the system header's
+// (SystemHeaderReader below) are separate types because their callers declare ReadBits with
+// different results (s32 here, s64 there), as retail's registers want, and one name cannot be
+// declared both ways on one type.
+struct PackHeaderReader { u8 pad[0x10]; };
+// What the pack header yields: its clock's 9-bit extension, its low 32 bits and its top bit, and
+// whether a system header follows.
+struct PackHeaderInfo {
+    s32 clockExtension;     // 0x00
+    s32 clockLow;           // 0x04
+    s32 clockHigh;          // 0x08
+    s32 hasSystemHeader;    // 0x0C
+};
 
-s32 ReadBits(Reader_0020A630* r, s32 bits);
-s64 ReadBit(Reader_0020A630* r);
-s32 PeekBits(Reader_0020A630* r, s32 bits);
-s32 ParseSystemHeader(Reader_0020A630* r, Out_0020A630* o);
+s32 ReadBits(PackHeaderReader* r, s32 bits);
+s64 ReadBit(PackHeaderReader* r);
+s32 PeekBits(PackHeaderReader* r, s32 bits);
+s32 ParseSystemHeader(PackHeaderReader* r, PackHeaderInfo* o);
 
-s32 ParsePackHeader(Reader_0020A630* r, Out_0020A630* o)
+s32 ParsePackHeader(PackHeaderReader* r, PackHeaderInfo* o)
 {
     u32 i; u32 n; u32 a; u32 b; u32 c;
     i = 0;
@@ -215,29 +226,30 @@ s32 ParsePackHeader(Reader_0020A630* r, Out_0020A630* o)
     ReadBit(r);
     c = ReadBits(r, 0xF);
     ReadBit(r);
-    o->w0 = ReadBits(r, 9);
+    o->clockExtension = ReadBits(r, 9);
     (void)ReadBits(r, 0x1E);
     n = ReadBits(r, 3);
-    o->w8 = (a >> 2) & 1;
-    o->w4 = (a << 30) | (b << 15) | c;
+    o->clockHigh = (a >> 2) & 1;
+    o->clockLow = (a << 30) | (b << 15) | c;
     for (i = 0; i < n; i++) {
         (void)ReadBits(r, 8);
     }
     if (PeekBits(r, 0x20) == 0x1BB) {
-        o->wC = 1;
+        o->hasSystemHeader = 1;
         ParseSystemHeader(r, o);
     } else {
-        o->wC = 0;
+        o->hasSystemHeader = 0;
     }
     return 1;
 }
 
-struct Obj_0020A780;
+// The system header's bit reader (see PackHeaderReader).
+struct SystemHeaderReader;
 
-s64 ReadBits(Obj_0020A780* self, s32 size);
-s32 PeekBits(Obj_0020A780* self, s32 n);
+s64 ReadBits(SystemHeaderReader* self, s32 size);
+s32 PeekBits(SystemHeaderReader* self, s32 n);
 
-s32 ParseSystemHeader(Obj_0020A780* self)
+s32 ParseSystemHeader(SystemHeaderReader* self)
 {
     ReadBits(self, 0x38);
     ReadBits(self, 0x28);

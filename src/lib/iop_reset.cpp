@@ -35,8 +35,9 @@ struct Cmd_1F9AD8 {
     u8 rest[0x418];
 };
 
-// The kernel's semaphore parameters (func_001F6B20 creates one), two of them side by side.
-struct Frame_001F9DC0 { s32 w[16]; };
+// The kernel's semaphore parameters (func_001F6B20 creates one), two of them side by side, eight
+// words apart: kept as one frame, which is what the compiler gives the two records declared together.
+struct SemaphoreParamsPair { s32 w[16]; };
 
 // A system call to install: its number and its handler.
 struct Syscall_1F9E50 {
@@ -57,7 +58,7 @@ void StopIopDma(char* text, void* q);
 s32 ReadIopRegister(u32 a0);
 u32 WriteIopRegister(u32 reg, u32 value);
 s32 StartIopDma(Span_1F9AD8* span, s32 n);
-s32 NewSemaphore(Frame_001F9DC0* q);
+s32 NewSemaphore(SemaphoreParamsPair* q);
 void InstallFirstKernelPatch();
 s32 StartRequestThread();
 void PrintBuffered(const char* fmt, ...);
@@ -157,13 +158,13 @@ ASM_FUNC(func_001F9DA8);
 
 void CreateLibrarySemaphores(void)
 {
-    Frame_001F9DC0 f;
+    SemaphoreParamsPair f;
     f.w[1] = 1;
     f.w[2] = 1;
     f.w[9] = 1;
     f.w[10] = 1;
     D_002771E4 = NewSemaphore(&f);
-    D_002771E8 = NewSemaphore((Frame_001F9DC0*)&f.w[8]);
+    D_002771E8 = NewSemaphore((SemaphoreParamsPair*)&f.w[8]);
 }
 
 s32* FindKernelWord(s32 value)

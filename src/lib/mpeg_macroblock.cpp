@@ -9,6 +9,7 @@
 // this project from retail's code.
 #include "common.h"
 #include "asm_func.h"
+#include "mpeg_decoder.h"
 
 // The hand-written prediction routines (src/lib/mpeg_motion_compensation.cpp), by kind of motion: whole
 // pixel and half pixel.
@@ -113,75 +114,47 @@ s32 PrepareMacroblockPrediction(Dev_20C1A0* d, s32 n, s32 mode, s32 flags, s32 c
 // fields and vectors for each motion type and hands each block to the
 // predictor.
 
-struct Frame_0020C3F0;
-
-struct Chan_0020C3F0 {
-    s32 f00;
-    s32 f04;
-    u8 pad08[0x140 - 0x08];
-};
-
-struct Dev_0020C3F0 {
-    u8 pad000[0x120];
-    s32 f120;
-    u8 pad124[0x150 - 0x124];
-    s32 f150;
-    u8 pad154[0x174 - 0x154];
-    s32 f174;
-    u8 pad178[0x1B8 - 0x178];
-    Frame_0020C3F0* f1B8;
-    Frame_0020C3F0* f1BC;
-    u8 pad1C0[0x1C8 - 0x1C0];
-    Frame_0020C3F0* f1C8[2];
-    u8 pad1D0[0x1D8 - 0x1D0];
-    Frame_0020C3F0* f1D8[2];
-    u8 pad1E0[0x6B8 - 0x1E0];
-    Chan_0020C3F0 chan[1];
-    u8 pad_after[0x810 - 0x6B8 - 0x140];
-    s32 f810;
-};
-
-void PredictMacroblock(Dev_0020C3F0* self, Frame_0020C3F0* src, s32 srcField, s32 dstField, s32 dstY, s32 height, s32 x, s32 y, s32 dx, s32 dy, s32 half, s32 average);
-void ComputeDualPrimeVectors(Dev_0020C3F0* self, s32* out, s32* base, s32 dx, s32 dy);
-void ReportMpegErrorFormat(Dev_0020C3F0* self, const char* fmt, s32 value);
+void PredictMacroblock(MpegDecoder* self, MpegPicture* src, s32 srcField, s32 dstField, s32 dstY, s32 height, s32 x, s32 y, s32 dx, s32 dy, s32 half, s32 average);
+void ComputeDualPrimeVectors(MpegDecoder* self, s32* out, s32* base, s32 dx, s32 dy);
+void ReportMpegErrorFormat(MpegDecoder* self, const char* fmt, s32 value);
 
 
-void ComputeMotionVectors(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type, s32* vec,
+void ComputeMotionVectors(MpegDecoder* self, s32 x, s32 y, s32 flags, s32 type, s32* vec,
                    s32* sel, s32* base)
 {
     s32 dual[4];
-    Frame_0020C3F0* refs[2][2];
+    MpegPicture* refs[2][2];
     s32 bottom;
     s32 other = 1;
     s32 average = 0;
     s32 forward;
 
-    self->chan[self->f810].f04 = 0;
+    self->channel[self->f810].f04 = 0;
     forward = flags & 8;
     if (forward || self->f150 == 2) {
         if (self->f174 == 3) {
             if (type == 2 || !forward) {
-                PredictMacroblock(self, self->f1B8, 0, 0, 0, 16, x, y, vec[0], vec[1], 0, 0);
+                PredictMacroblock(self, self->pictures[0], 0, 0, 0, 16, x, y, vec[0], vec[1], 0, 0);
             } else if (type == 1) {
-                PredictMacroblock(self, self->f1B8, sel[0], 0, 0, 8, x, y, vec[0], vec[1] >> 1,
+                PredictMacroblock(self, self->pictures[0], sel[0], 0, 0, 8, x, y, vec[0], vec[1] >> 1,
                               type, 0);
-                PredictMacroblock(self, self->f1B8, sel[2], 1, 0, 8, x, y, vec[4], vec[5] >> 1,
+                PredictMacroblock(self, self->pictures[0], sel[2], 1, 0, 8, x, y, vec[4], vec[5] >> 1,
                               type, 0);
             } else if (type == 3) {
                 ComputeDualPrimeVectors(self, dual, base, vec[0], vec[1] >> 1);
-                PredictMacroblock(self, self->f1B8, 0, 0, 0, 8, x, y, vec[0], vec[1] >> 1, other, 0);
-                PredictMacroblock(self, self->f1B8, 1, 0, 0, 8, x, y, dual[0], dual[1], other, 1);
-                PredictMacroblock(self, self->f1B8, 1, 1, 0, 8, x, y, vec[0], vec[1] >> 1, other, 0);
-                PredictMacroblock(self, self->f1B8, 0, 1, 0, 8, x, y, dual[2], dual[3], other, 1);
+                PredictMacroblock(self, self->pictures[0], 0, 0, 0, 8, x, y, vec[0], vec[1] >> 1, other, 0);
+                PredictMacroblock(self, self->pictures[0], 1, 0, 0, 8, x, y, dual[0], dual[1], other, 1);
+                PredictMacroblock(self, self->pictures[0], 1, 1, 0, 8, x, y, vec[0], vec[1] >> 1, other, 0);
+                PredictMacroblock(self, self->pictures[0], 0, 1, 0, 8, x, y, dual[2], dual[3], other, 1);
             } else {
                 ReportMpegErrorFormat(self, "(a) invalid motion_type(%d)-0", type);
             }
         } else {
             bottom = self->f174 == 2;
-            refs[0][0] = self->f1C8[0];
-            refs[0][1] = self->f1D8[0];
-            refs[1][0] = self->f1C8[1];
-            refs[1][1] = self->f1D8[1];
+            refs[0][0] = self->pictures[4];
+            refs[0][1] = self->pictures[8];
+            refs[1][0] = self->pictures[5];
+            refs[1][1] = self->pictures[9];
             if (self->f150 == 2 && self->f120 != 0 && bottom != sel[0])
                 other = 1;
             else
@@ -216,20 +189,20 @@ void ComputeMotionVectors(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type,
         if (self->f174 == 3) {
             other = 1;
             if (type == 2) {
-                PredictMacroblock(self, self->f1BC, 0, 0, 0, 16, x, y, vec[2], vec[3], 0, average);
+                PredictMacroblock(self, self->pictures[1], 0, 0, 0, 16, x, y, vec[2], vec[3], 0, average);
             } else {
-                PredictMacroblock(self, self->f1BC, sel[1], 0, 0, 8, x, y, vec[2], vec[3] >> 1,
+                PredictMacroblock(self, self->pictures[1], sel[1], 0, 0, 8, x, y, vec[2], vec[3] >> 1,
                               other, average);
-                PredictMacroblock(self, self->f1BC, sel[3], 1, 0, 8, x, y, vec[6], vec[7] >> 1,
+                PredictMacroblock(self, self->pictures[1], sel[3], 1, 0, 8, x, y, vec[6], vec[7] >> 1,
                               other, average);
             }
         } else if (type == 1) {
-            PredictMacroblock(self, sel[1] ? self->f1D8[1] : self->f1C8[1], 0, 0, 0, 16, x, y,
+            PredictMacroblock(self, sel[1] ? self->pictures[9] : self->pictures[5], 0, 0, 0, 16, x, y,
                           vec[2], vec[3], 0, average);
         } else if (type == 2) {
-            PredictMacroblock(self, sel[1] ? self->f1D8[1] : self->f1C8[1], 0, 0, 0, 8, x, y,
+            PredictMacroblock(self, sel[1] ? self->pictures[9] : self->pictures[5], 0, 0, 0, 8, x, y,
                           vec[2], vec[3], 0, average);
-            PredictMacroblock(self, sel[3] ? self->f1D8[1] : self->f1C8[1], 0, 0, 8, 8, x, y,
+            PredictMacroblock(self, sel[3] ? self->pictures[9] : self->pictures[5], 0, 0, 8, 8, x, y,
                           vec[6], vec[7], 0, average);
         } else {
             ReportMpegErrorFormat(self, "(c) invalid motion_type(%d)-2", type);

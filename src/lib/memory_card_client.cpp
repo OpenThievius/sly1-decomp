@@ -13,6 +13,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "system.h"
+#include "remote_call_client.h"
 
 // The library's identification string, 16 characters without a terminator.
 char D_0027AEB8[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'm', 'c', ' ', ' ', ' ', '2', '4', '3', '0' };
@@ -222,42 +223,42 @@ void CopyCardDirectoryReply(Pkt_2097E0* p)
     }
 }
 
-struct Dev_00209870 { u8 pad[0x4]; };
-struct Ctl_00209870 { u8 pad[0x24]; s32 busy; };
-struct Slot_00209870 { void* owner; u8 pad0[8]; void* arg2; u8 pad1[8]; void* arg1; void* tab; };
+// The record func_00209870 sends: the file's owner, the length and buffer it was given, and the
+// table of the reply's destinations.
+struct CardFileRequest { void* owner; u8 pad0[8]; void* arg2; u8 pad1[8]; void* arg1; void* tab; };
 
-s32 TrySemaphore(Dev_00209870* d);
-void PostSemaphore(Dev_00209870* d);
+s32 TrySemaphore(s32 sema);
+void PostSemaphore(s32 sema);
 void WriteBackDataCacheRange(void* a, s32 b);
-s32 CallRemoteService(Dev_00209870* a, s32 b, s32 c, void* d, s32 e, void* f, s32 g, void* h, void* i);
+s32 CallRemoteService(RemoteCallClient* a, s32 b, s32 c, void* d, s32 e, void* f, s32 g, void* h, void* i);
 
 s32 ReadCardFile(void* a0, void* a1, void* a2)
 {
-    Ctl_00209870* ctl;
-    Slot_00209870* slot;
+    RemoteCallClient* ctl;
+    CardFileRequest* slot;
     void* tab;
     s32 r;
-    if (TrySemaphore((*(Dev_00209870**)&g_cardSemaphore)) < 0) {
+    if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
-    ctl = (Ctl_00209870*)g_cardClient;
-    if (ctl->busy == 0) {
-        PostSemaphore((*(Dev_00209870**)&g_cardSemaphore));
+    ctl = (RemoteCallClient*)g_cardClient;
+    if (ctl->server == 0) {
+        PostSemaphore(g_cardSemaphore);
         return -100;
     }
     tab = D_0062B240;
-    slot = (Slot_00209870*)D_0062ADC0;
+    slot = (CardFileRequest*)D_0062ADC0;
     slot->owner = a0;
     slot->tab = tab;
     slot->arg1 = a1;
     slot->arg2 = a2;
     WriteBackDataCacheRange(a1, (s32)a2);
     WriteBackDataCacheRange(tab, 0xC0);
-    r = CallRemoteService((Dev_00209870*)ctl, 5, 1, slot, 0x30, D_0062C300, 4, (void*)CopyCardDirectoryReply, tab);
+    r = CallRemoteService(ctl, 5, 1, slot, 0x30, D_0062C300, 4, (void*)CopyCardDirectoryReply, tab);
     if (r == 0) {
         g_cardRequestInFlight = 5;
     } else {
-        PostSemaphore((*(Dev_00209870**)&g_cardSemaphore));
+        PostSemaphore(g_cardSemaphore);
     }
     return r;
 }
@@ -500,12 +501,8 @@ s32 RequestCardFormat(s32 a, s32 b)
 
 LINKER_REMNANT(func_0020A070);
 
-struct Reg_0020A078 {
-    u8 pad0[0x24];
-    s32 f24;
-};
-
-struct Buf_0020A078 {
+// The record func_0020A078 sends: two words and the path, copied to 0x14.
+struct CardPathRequest {
     s32 f0;
     s32 f4;
     u8 pad8[0xC];
@@ -514,19 +511,19 @@ struct Buf_0020A078 {
 
 s32 TrySemaphore(s32 v);
 void* CopyStringBounded(s8* dst, s8* src, s32 n);
-Buf_0020A078* CallRemoteService(Reg_0020A078* self, s32 a1, s32 a2, Buf_0020A078* a3, s32 a4, u32* a5, s32 a6, s32 a7, s32 a8);
+CardPathRequest* CallRemoteService(RemoteCallClient* self, s32 a1, s32 a2, CardPathRequest* a3, s32 a4, u32* a5, s32 a6, s32 a7, s32 a8);
 
 s32 RequestCardSpaceForPath(s32 a0, s32 a1, s8* a2)
 {
-    Reg_0020A078* reg;
-    Buf_0020A078* buf;
-    Buf_0020A078* res;
+    RemoteCallClient* reg;
+    CardPathRequest* buf;
+    CardPathRequest* res;
 
     if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
-    reg = ((Reg_0020A078*)&g_cardClient);
-    if (reg->f24 == 0) {
+    reg = ((RemoteCallClient*)&g_cardClient);
+    if (reg->server == 0) {
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
@@ -534,7 +531,7 @@ s32 RequestCardSpaceForPath(s32 a0, s32 a1, s8* a2)
         PostSemaphore(g_cardSemaphore);
         return -210;
     }
-    buf = ((Buf_0020A078*)&D_0062ADF0);
+    buf = ((CardPathRequest*)&D_0062ADF0);
     buf->f0 = a0;
     buf->f4 = a1;
     CopyStringBounded(buf->text14, a2, 0x3FF);

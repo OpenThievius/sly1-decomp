@@ -9,7 +9,39 @@
 
 #include "common.h"
 
+struct MpegHandle;
 struct MpegDecoder;
+
+// The IPU and its DMA channels as func_002118A0 saves them (and func_00211988 restores them): the
+// input channel's address, tag address, quadword count and control, the output channel's
+// address, count and control, then the IPU's bit position and control registers.
+struct IpuDmaState {
+    u32 inAddress;          // 0x00
+    u32 inTagAddress;       // 0x04
+    u32 inCount;            // 0x08
+    u32 inControl;          // 0x0C
+    u32 outAddress;         // 0x10
+    u32 outCount;           // 0x14
+    u32 outControl;         // 0x18
+    u32 bitPosition;        // 0x1C
+    u32 control;            // 0x20
+};
+
+// The ring the decoder allocates its work memory from: the area, how big it is, where the next
+// allocation starts and the mark func_0020B258 sets and func_0020B268 returns to.
+struct MpegRing {
+    u32 start;              // 0x00
+    u32 size;               // 0x04
+    u32 cursor;             // 0x08
+    u32 mark;               // 0x0C
+};
+
+// A callback of the decoder's table: func_0020B190 runs the one at an index with its argument.
+typedef s32 (*MpegCallbackFn)(MpegHandle*, s32*, s32);
+struct MpegCallback {
+    MpegCallbackFn fn;      // 0x00
+    s32 arg;                // 0x04
+};
 
 // What the library hands out: the decoder state at +0x40 and an output word at +0x08.
 struct MpegHandle {
@@ -43,13 +75,22 @@ struct MpegPicture {
     s32 f60;                // 0x60
 };
 
+// What the macroblock predictor keeps for one block: its output address and its count, in a
+// record of 0x140 bytes (func_0020C1A0, func_0020C3F0).
+struct MpegBlockChannel {
+    s32 f00;                // 0x00
+    s32 f04;                // 0x04
+    u8 pad08[0x140 - 0x08];
+};
+
 // The state of one decoder: the sequence and picture headers it has read, its pictures, and the
 // IPU's registers as it last left them.
 struct MpegDecoder {
     s32 f00;               // 0x000
     s32 f04;               // 0x004
     s32 f08;               // 0x008
-    u8 pad0C[0x070 - 0x00C];
+    MpegCallback callbacks[8];  // 0x00C: the table func_0020B168 fills in and func_0020B190 runs
+    IpuDmaState dmaState;   // 0x04C: saved and restored around the IPU's use (func_0020C178, func_0020C188)
     s32 f70;               // 0x070
     u8 pad74[0x078 - 0x074];
     s64 f78;               // 0x078
@@ -88,25 +129,29 @@ struct MpegDecoder {
     s32 f148;               // 0x148
     s32 f14C;               // 0x14C
     s32 f150;               // 0x150
-    u8 pad154[0x174 - 0x154];
+    s32 f154;               // 0x154
+    s32 f158;               // 0x158
+    s32 f15C;               // 0x15C
+    s32 f160;               // 0x160
+    u8 pad164[0x174 - 0x164];
     s32 f174;               // 0x174
     s32 f178;               // 0x178
     u8 pad17C[0x184 - 0x17C];
     s32 f184;               // 0x184
     s32 f188;               // 0x188
-    s32 f18C;               // 0x18C
-    s32 f190;               // 0x190
-    s32 f194;               // 0x194
-    s32 f198;               // 0x198
-    s32 f19C;               // 0x19C
-    s32 f1A0;               // 0x1A0
+    s32 centreHorizontal[3];  // 0x18C: the picture display extension's offsets (func_0020FF08)
+    s32 centreVertical[3];  // 0x198
     s32 f1A4;               // 0x1A4
     s32 f1A8;               // 0x1A8
     s32 f1AC;               // 0x1AC
     u8 pad1B0[0x1B4 - 0x1B0];
     s32 f1B4;               // 0x1B4
     MpegPicture* pictures[12];  // 0x1B8
-    u8 pad1E8[0x818 - 0x1E8];
+    u8 pad1E8[0x6B8 - 0x1E8];
+    MpegBlockChannel channel[1];  // 0x6B8
+    u8 pad7F8[0x810 - 0x7F8];
+    s32 f810;               // 0x810: the channel func_0020C3F0 writes to
+    u8 pad814[0x818 - 0x814];
     u32 f818;               // 0x818: the IPU's setting, as func_0020F0C0 last wrote it
     u8 pad81C[0x828 - 0x81C];
     u64 f828;               // 0x828
