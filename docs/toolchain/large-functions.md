@@ -359,3 +359,44 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
       constant, same code as the literal); loop notes around the first
       stores (a `do { } while (0)` probe: a barrier in sched2 as well,
       which retail's `lq` before -0.5's store rules out).
+  - **Dependence sources enumerated (w25, 2026-11-11, haifa-sched.c, alias.c,
+    integrate.c, cp/decl.c and reload1.c read).** In one block with no call
+    after the stores, a store gets a dependent only from: a later insn that
+    sets a register it reads (a reassigned variable, or GCSE's `(set r r)`
+    self-copy, an alu insn of priority 1, which adds nothing to a store's own
+    2); a later memory reference alias.c cannot separate (a base pseudo with
+    no known value: loaded from memory, a call's result, set twice); the
+    pending-list flush at the 33rd memory reference (sched1.md, "The 33rd
+    memory reference of a block is a barrier": these blocks peak at 12-14);
+    a barrier (volatile asm, loop or EH note); add_branch_dependences, which
+    links every insn without a dependent to a block-ending jump, call or USE
+    (a uniform +1 that reorders nothing, and the init block falls through);
+    and sched_before_next_call, which needs a call later in the block. For a
+    function-local static `this` is a constant with a REG_EQUAL note, so
+    canon_rtx resolves every address, also those that keep an inline
+    member's own `this` pseudo (`(plus r c)` is never folded by
+    find_best_addr, but its set gets the folded constant as REG_EQUAL).
+  - **The guard cannot be raised.** With tools/sched1.py on func_001D5FA8,
+    the A∪B stores at priority 4 (their constants 6) and the guard at 3
+    give retail's groups (A, the late 75.0, the guard, then f50/f60/f54).
+    A guard of priority 3 needs a dependent after `guard = 1` in the block,
+    and expand_static_init emits after it only the cleanups of the
+    initialiser's temporaries and, for a type with a destructor, the
+    atexit call: both would be calls retail does not have. So retail held
+    the C stores back instead of raising the guard.
+  - **A hidden second constant is possible.** reload_cse_regs (after
+    reload, before sched2) deletes a set of a hard register to a constant
+    it already holds (reload_cse_noop_set_p). Two 1.0 pseudos that
+    local-alloc puts in the same FPR therefore leave one `lui; mtc1` in
+    retail's code. With C's 1.0 a pseudo of its own (probe: 1.0000001f for
+    f60/f54) and A∪B at priority 5, the replay loads C's 1.0 and 75.0
+    after every A∪B store and issues the guard before f50 and f60; only
+    f54 still precedes it (C's 1.0, two dependents against 75.0's one, is
+    loaded first, and f54 then ties the guard's weight and wins on LUID):
+    retail's group order is one tie away. What
+    gives A∪B priority 5 and keeps C's constants apart from A's (CSE merges
+    equal constants in one extended block) is still not found.
+  - **Ruled out (w25).** The record as a base class holding every field,
+    its constructor setting A∪B after FillMemory and a derived class's
+    constructor setting f50/f60/f54: the same code (21 lines, as the near
+    miss): the base constructor's `this` is the derived one's register.

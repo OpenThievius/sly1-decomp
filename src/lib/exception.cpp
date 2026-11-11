@@ -137,8 +137,6 @@ s32 MatchPendingThrowType(Node_001FEA18* self, void* fn, Hdr_001FEA18* a2)
     return r;
 }
 
-struct Size_1FEA88;
-
 struct Obj_1FEA88 {
     void* f00;
     u16 f04;
@@ -152,11 +150,9 @@ struct Obj_1FEA88 {
     s32 f28;
 };
 
-struct Obj_1FEA88* AllocateRuntimeBlockOrTerminate(struct Size_1FEA88* n);
-
 void PushThrownException(s32 a0, s32 a1, s32 a2)
 {
-    struct Obj_1FEA88* obj = AllocateRuntimeBlockOrTerminate((struct Size_1FEA88*)0x30);
+    struct Obj_1FEA88* obj = (struct Obj_1FEA88*)AllocateRuntimeBlockOrTerminate((Arg_1FE9D0*)0x30);
     obj->f0C = a1;
     obj->f10 = a2;
     obj->f08 = a0;

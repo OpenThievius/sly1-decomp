@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 204/260 (78.5%), checked 2026-11-11
+// w25 (2026-11-11, w25-deps): dependence sources enumerated (docs/toolchain/large-functions.md, "Dependence sources enumerated"): the 33rd-reference flush is not reached (12-14 references), a guard of priority 3 would need a call after `guard = 1`, and reload_cse_regs could hide a second 1.0 pseudo (C's constants apart from A's, A and B at priority 5 replay to one tie from retail's groups). A base class holding the fields with a derived constructor setting f50/f60/f54: same code.
 // NEAR: order: frame, calls, constants and addresses are retail's; the constants get other
 //       registers and the stores another order. Retail keeps the stores in the constructor's
 //       order and loads 75.0 only after -100.0's last store (into its f0), as if the stores

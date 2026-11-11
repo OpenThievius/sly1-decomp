@@ -1419,3 +1419,74 @@ takes retail's a0 and vf6, but local-alloc gives the loaded pseudo v0 where reta
 a1. What is left is a source fact that makes the f63C weight wait on the -push one, or keeps its
 load out of the qmtc2 until reload; no plain form of either was found
 (nonmatching/func_001C54D0.cpp, W24).
+
+### The 33rd memory reference of a block is a barrier (WriteMemoryCardSaveHeader)
+
+Read from haifa-sched.c (sched_analyze_1, add_insn_mem_dependence, flush_pending_lists,
+compute_block_backward_dependences) and checked in the `-dS` dump (w25, 2026-11-11):
+
+- **The rule.** sched_analyze keeps every memory reference of the block (reads and writes) in
+  its pending lists, and `pending_lists_length` counts them. A *store* analysed while the count
+  is above 32 does not look for aliases: flush_pending_lists makes it depend (anti, cost 1) on
+  every pending read and write, empties the lists, and makes it `last_pending_memory_flush`,
+  which every later memory reference of the block (loads too) then depends on. The count starts
+  at 0 for each single-block region (a loop's region carries it from block to block), and every
+  call resets it (a call is itself a flush). The same happens in sched2 on the reloaded insns,
+  where spill loads and stores count as well.
+- **Where it acts.** WriteMemoryCardSaveHeader (func_0018CA10, matched, src/main/memory_card.cpp)
+  fills a 0x3C4-byte frame record after FillMemory: two loads and 34 stores in one block. Insn
+  209 (`c.f0A0 = 0.33f`, the 34th reference after the call) carries anti links to all 33
+  references before it, and every store after it (215, 221, ...) has exactly one memory link,
+  to 209. So a long run of field stores is one free group, then a barrier, then a second free
+  group: retail's order can show a "chain" there that no alias rule explains.
+- **What it means for source changes.** Adding or removing a memory reference before the flush
+  point (a field read twice, a store split, a Scalar slot, an asm's memory operand) moves the
+  barrier to another store. tools/sched1.py replays the links the dump prints, so it already
+  follows the barrier of the compiled form; a form with another count needs a new compile.
+- **Not the wall of the missing-dependence near misses.** Counting each block of the pre-sched
+  RTL (`.regmove`) and of the reloaded RTL (`.greg`) for func_001D5FA8, func_001D60B0,
+  func_001D61C8, func_001930B8, func_001549C8, func_001A1030, func_001C54D0, func_0013BE18,
+  func_0014F168 and func_00144540, the most pending references before any store is 12, 14, 12,
+  12, 12, 24, 19, 8, 10 and 28 (29 after reload): none reaches the flush. (The static records'
+  FillMemory call resets the count, so their eleven to fourteen stores are far below it.)
+
+### Invisible instructions: what the lives the allocators rank are counted over (w25, unsolved walls)
+
+Several walls need a life or a priority a little longer than ours with retail's code unchanged
+(func_001DEBE8's &cur, func_00109488's 2194, the sched1 ties of func_00142278 and
+func_0017ECE8), as if retail had insns that left no code. Read from GCC 2.95.3's source and the
+`-dr ... -dS -dl -dg` dumps of all six (2026-11-11):
+
+- **The lengths are sched1's, the references flow's.** After sched1, haifa-sched.c's
+  update_reg_usage overwrites REG_LIVE_LENGTH with find_post_sched_live's count: every insn
+  (class `i`) of each block, in sched1's order, while the register is live. REG_N_REFS is not
+  recounted (flow's, before combine). So global.c's `floor_log2(refs) * refs / length` and
+  local-alloc see every insn of sched1's output, whether or not it reaches the code.
+- **What reaches sched1 and leaves no code.** In the six functions' dumps: (1) flow's
+  `(use (const_int 0))` after a call that ends a block (gcse.md, "The nop"); (2) the copy at the
+  join of an inline's result set in several arms (a clamp's local: func_001D7778 insn 1416,
+  func_001CC818 insn 2599), which global-alloc's copy preference puts in one register, so reload
+  deletes it; (3) a copy into an argument register from a pseudo that local-alloc places in that
+  register (func_001DEBE8 insns 357, `$f13` from a float variable, and 373, `a0`; three in
+  func_001CC818, six in func_001D7778), or out of the return register into a pseudo placed there
+  (func_001D7778 insn 1795, `$f0`); (4) GCSE's copies and those of long or looped blocks
+  (loops.md; func_00109488's argument copies that survive CSE1's window flushes,
+  long-block-constants.md).
+- **Inline parameter and return copies are not among them.** integrate.c copies each argument
+  of a parameter not declared const into a new pseudo, and each inline's return value goes
+  through its own; in straight-line code cse1 and combine remove them before flow counts
+  anything. func_00142278's .rtl has 26 pseudo-to-pseudo SF and TI copies, its .cse 2, its
+  .combine none; side's dot written over `Vu0::Vec` values (`Vu0::Dot(Vu0::Vec::Of(ca),
+  Vu0::Vec::Of(n))`, the by-value struct copies of include/vu0.h) gives the same 26, 2 and 0 and
+  the same code. Inline helpers, `const` parameters and Vec copies are therefore no lever on a
+  life or a priority inside one block; only the four kinds above are.
+- **The walls.** func_001DEBE8's (a) needs two such insns where &cur and &tgt are both live
+  (the first key reads to the teleport arm's GetStateWalkerCurrentKey). None of the four fits
+  there without changing code: the then-arm's call ends in its jump over the else, the teleport
+  arm's nop (insn 1340) follows the last key read where both are dead, the region has no
+  inline's result, and every argument loads straight into its register (combine's merge).
+  Written as an inline predicate (`StickPushed(pad)` returning `0.7f < pad->f7C`, used by both
+  stick tests), the test keeps a store-flag (`li v0,1; move v0,zero; beqz`): 1724 bytes.
+  func_00142278's side conversion, func_001DEBE8's (b) and func_0017ECE8's load need a longer
+  chain inside one block, where only an argument copy could be invisible, and none of those
+  chains ends in a call's argument.
