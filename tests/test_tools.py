@@ -1003,6 +1003,52 @@ class MapFixesTest(unittest.TestCase):
             inventory.apply_fixes(pairs, self.US, {"func_C": "func_B"})
 
 
+class SimilarPairingTest(unittest.TestCase):
+    """inventory.similar: unpaired functions between paired neighbours, by shape and callees."""
+
+    BODY = ["addiu $sp, $sp, -N", "sq $ra, N($sp)", "jal N", "nop ", "lw $v0, N($a0)", "addu $v0, $v0, $a1",
+            "lq $ra, N($sp)", "jr $ra", "addiu $sp, $sp, N", "nop "]
+
+    def rows(self):
+        us = [("func_A", 0x100, 40, "code", "a"), ("func_B", 0x128, 40, "code", "b"), ("func_C", 0x150, 40, "code", "c")]
+        eu = [("func_A", 0x100, 40, "code", "a"), ("func_X", 0x128, 44, "code", "x"), ("func_C", 0x154, 40, "code", "c")]
+        pairs = [(eu[0], us[0], "fingerprint"), (eu[1], None, "none"), (eu[2], us[2], "fingerprint")]
+        return us, pairs
+
+    def test_a_changed_copy_between_paired_neighbours_is_paired(self):
+        us, pairs = self.rows()
+        us_body = {"func_B": (self.BODY, ["func_A"])}
+        eu_body = {"func_X": (self.BODY[:4] + ["lw $v0, N($a0)", "sll $v0, $v0, N"] + self.BODY[5:], ["func_A"])}
+        out = inventory.similar(pairs, us, eu_body, us_body)
+        self.assertEqual([(e[0], u and u[0], how) for e, u, how in out],
+                         [("func_A", "func_A", "fingerprint"), ("func_X", "func_B", "similar"),
+                          ("func_C", "func_C", "fingerprint")])
+
+    def test_different_code_is_left_unpaired(self):
+        us, pairs = self.rows()
+        other = ["mtc1 $a0, $f0", "mul.s $f0, $f0, $f0", "jr $ra", "nop "] * 2
+        out = inventory.similar(pairs, us, {"func_X": (other, [])}, {"func_B": (self.BODY, [])})
+        self.assertEqual(out[1][1], None)
+
+    def test_other_callees_are_left_unpaired(self):
+        us, pairs = self.rows()
+        out = inventory.similar(pairs, us, {"func_X": (self.BODY, ["func_C"])}, {"func_B": (self.BODY, ["func_A"])})
+        self.assertEqual(out[1][1], None)
+
+    def test_a_copy_outside_the_neighbours_window_is_left_unpaired(self):
+        us, pairs = self.rows()
+        pairs[1] = (("func_X", 0x200, 44, "code", "x"), None, "none")
+        out = inventory.similar(pairs, us, {"func_X": (self.BODY, [])}, {"func_B": (self.BODY, [])})
+        self.assertEqual(out[1][1], None)
+
+    def test_two_equally_good_candidates_are_not_guessed(self):
+        us, pairs = self.rows()
+        pairs.insert(2, (("func_Y", 0x140, 44, "code", "y"), None, "none"))
+        eu_body = {"func_X": (self.BODY, []), "func_Y": (self.BODY, [])}
+        out = inventory.similar(pairs, us, eu_body, {"func_B": (self.BODY, [])})
+        self.assertEqual([u for _, u, _ in out[1:3]], [None, None])
+
+
 class VolatileSlotTest(unittest.TestCase):
     def test_a_based_store_moves_into_the_call_slot(self):
         asm = "\t#.set\tvolatile\n\tsw\t$3,0($2)\n\t#.set\tnovolatile\n\tjal\tf\n\tlw\t$4,0($sp)"
