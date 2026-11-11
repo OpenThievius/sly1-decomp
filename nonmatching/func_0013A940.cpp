@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 952/964, checked 2026-11-11
 // DECLS (2026-11-11, w28-nmdecls): EvaluateHermiteVectorSegment now void (defined void): neutral, 185/241.
-// NEAR: built in src/main/file_137290.cpp it is 952 bytes of retail's 964, with retail's frame
+// NEAR: built in src/main/world_listed_object.cpp it is 952 bytes of retail's 964, with retail's frame
 //       (0x140), block layout and calls. Since the first translation: the mode tests are a switch
 //       (retail's beq 1 / beql 2 / b compare tree, the mode-1 case placed after it), the bounds
 //       are constant initialisers ({K, K, K, 0}: two sq clears, then z, x, y) and the frame push
@@ -22,7 +22,7 @@
 //       About 12 compiles this round.
 // W23 (2026-11-11): re-scored, unchanged (952/964); its walls are loop.c's giv combination, which the
 //       replay tools do not model, and func_0013A618's prologue tie. Not retried.
-// In the context of its file, src/main/file_137290.cpp.
+// In the context of its file, src/main/world_listed_object.cpp.
 #include "common.h"
 #include "list_iter.h"
 #include "owned_record.h"

@@ -1,0 +1,31 @@
+symbol	name	evidence
+func_00137290	InitBufferedStream	sets mode -1, stores the flags, clears the read, next and count words and rounds the size up to 64 into end, moving start back by the rounding; returns the record (the S137290 record)
+func_001372E0	DestroyBufferedStream	closes the record with func_001373D0 and, with bit 0 of its flags argument, frees it with func_0018D778
+func_00137328	OpenBufferedSectorStream	sets mode 1, stores the start sector at 0x48 and the byte count at 0x10, 0x14 and 0x40, and sets up the 2-or-more chunk ring (counts at 0x4C and 0x58 from the size / 0x100000)
+func_00137398	OpenBufferedMemoryStream	sets remaining and the read pointer from its two arguments and mode 2 (read straight from memory)
+func_001373B0	OpenBufferedSectorStreamRange	passes a KeyId's two words (sector and byte count) to OpenBufferedSectorStream; func_001E4EA8 calls it on the stream it loads from
+func_001373D0	CloseBufferedStream	by mode closes the file handle (func_001F8C38, mode 0) or finishes the pending sector read (mode 1), then sets mode -1 and zeroes the pointers and counts
+func_00137480	ReduceBufferedStreamBytesLeft	subtracts its count from the bytes left of a sector stream at +0x40 (set by OpenBufferedSectorStream) and returns the rest; ReadBufferedBlockHeader calls it
+func_00137490	RefillBufferedStreamFromSectors	keeps the ring of chunk buffers filled: completes or restarts the sector reads (func_00140C28 or func_00140CC8 by flags bit 2) and sets rem to at most 0x8000 available bytes
+func_001377C0	RefillBufferedStreamFromFile	reads min(0x8000, remaining) bytes at the file offset with func_001F8DB8 and stores the result in the pending count
+func_00137820	RefillBufferedStream	by mode refills from the file (func_001377C0) or the sector ring (func_00137490), reduces f14 by nextCount (floored at 0) and passes it to func_00193288 when f30 is set
+func_001378A0	UnpackBufferedStream	decompresses an LZ-style stream (flag bytes, literals, 13-bit back-references of length + 2) into a 0x2000-byte window at 0x70000000, refilling the input with func_00137820, and points cur and remaining at the output
+func_00137A60	ReadBufferedStreamBytes	copies size bytes to dst (or skips them when dst is 0), refilling through UnpackBufferedStream (flags bit 4) or RefillBufferedStream whenever the current chunk is empty
+func_00137B60	AlignBufferedStreamPosition	rounds the read pointer at 0x18 up to a multiple of n and takes the skipped bytes off the remaining count at 0x1C; func_001DBA38 calls it with 0x10
+func_00137B90	ReadBufferedU8	returns the next byte from cur, or reads one through func_00137A60 when remaining is 0
+func_00137BE0	ReadBufferedU16	returns the next little-endian unsigned halfword, via func_00137A60 when fewer than 2 bytes remain
+func_00137C40	ReadBufferedU32	returns the next little-endian word as unsigned, via func_00137A60 when fewer than 4 bytes remain
+func_00137CC0	ReadBufferedS8	returns the next byte sign-extended, via func_00137A60 when the chunk is empty
+func_00137D10	ReadBufferedS16	returns the next little-endian halfword sign-extended, via func_00137A60 when fewer than 2 bytes remain
+func_00137D78	ReadBufferedS32	returns the next little-endian word as signed, via func_00137A60 when fewer than 4 bytes remain
+func_00137DF8	ReadBufferedFloat	assembles the next four bytes into a word and returns it as a float, via func_00137A60 when fewer than 4 remain
+func_00137E70	ReadBufferedVector3	reads 12 bytes into dst with func_00137A60; func_00192068 and the load slots use it for positions
+func_00137E90	ReadBufferedVector4	reads 16 bytes into out with func_00137A60
+func_00137EB0	ReadBufferedRotation3	reads three 12-byte rows into buffer, buffer + 0x10 and buffer + 0x20 with func_00137A60
+func_00137F08	ReadBufferedMatrix4	reads four 12-byte rows into p, p+0x10, p+0x20 and p+0x30 and sets the fourth column to 0, 0, 0, 1.0
+func_00137FB0	ReadMeshFromStream	reads a radius, a vertex count and vertices, then faces, a points array, a words array and an edge list into a mesh record, filling each face's vertex and edge indices from the stream and linking shared edges
+func_00138278	ReadFaceTree	reads two counts, allocates 12-byte nodes and fills each with a face address (base + index*32) and back and front links by index (0xFFFF for none) from the buffered stream
+func_00138398	ReadLinkedItemArray	reads a count, allocates 32-byte items and fills each from the stream: a vector, a float and two links stored raw when negative or as a pointer into the array otherwise
+func_001384A0	ReadBufferedString	reads a halfword size, allocates size+1 bytes, reads them from the buffered stream and NUL-terminates
+func_00138518	SkipBufferedBlock	reads a halfword count and skips that many bytes of the buffered stream (ReadBufferedStreamBytes with no destination)
+func_00138550	ReadOptionalBufferedBlock	reads 0x20 bytes and returns a front-memory copy of them, or 0 when words 1 and 7 of the block are equal

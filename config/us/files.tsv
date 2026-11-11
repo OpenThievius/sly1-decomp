@@ -53,7 +53,10 @@ src/main/disc_access.cpp	00140790	00140D90	00249E18	002613F0	-	-
 src/main/ring_buffer.cpp	0013C988	0013CCF8	00249D80	-	-	-
 src/main/child_group_object.cpp	0013B4C0	0013C988	00249D74	00261320	-	-
 src/main/zone_collider.cpp	0013CCF8	00140790	00249DB0	00261390	-	-
-src/main/file_137290.cpp	00137290	0013B4C0	00249D64	00261314	-	-
+src/main/buffered_stream.cpp	00137290	001385A0	-	-	-	-
+src/main/world_contacts.cpp	001385A0	00138FF0	-	-	-	-
+src/main/blend_animation.cpp	00138FF0	00139B70	-	-	-	-
+src/main/world_listed_object.cpp	00139B70	0013B4C0	00249D64	00261314	-	-
 src/main/file_149398.cpp	00149398	0014B6A8	00249EA0	00261BF0	0027C008	-
 src/main/file_14B6A8.cpp	0014B6A8	0014D0A8	00249EF0	00261C90	0027C00C	-
 src/main/pose_source.cpp	0011E560	001233C0	00249870	00260E60	-	-

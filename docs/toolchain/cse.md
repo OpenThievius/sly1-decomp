@@ -78,7 +78,7 @@ max.s`: a dead constant, a dead load, and out->z read back right after it was st
 ### A constant the loop does not own: an untied product (func_001389D0)
 
 Read from local-alloc.c (block_alloc, combine_regs), loop.c, jump.c and stmt.c with `-dL -dl
--dg -dr` dumps (2026-11-08, SortSweepAxes, src/main/file_137290.cpp):
+-dg -dr` dumps (2026-11-08, SortSweepAxes, src/main/world_contacts.cpp):
 
 - **Retail's sign.** `li v0,0x1800; mult a0,a1,v0`: the constant and the product in different
   registers. In ours the constant's pseudo died in the multiply and block_alloc tied the product

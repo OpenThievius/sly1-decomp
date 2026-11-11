@@ -14,8 +14,8 @@
   "complete_code_percent": 93.25206760158217,
   "complete_data": "429454",
   "complete_data_percent": 99.62766117863215,
-  "total_units": 172,
-  "complete_units": 137
+  "total_units": 175,
+  "complete_units": 140
  },
  "units": [
   {
@@ -10200,24 +10200,24 @@
    }
   },
   {
-   "name": "game/file_137290",
+   "name": "game/buffered_stream",
    "measures": {
-    "fuzzy_match_percent": 92.59942843534175,
-    "total_code": "16796",
-    "matched_code": "12936",
-    "matched_code_percent": 77.01833769945225,
+    "fuzzy_match_percent": 100.0,
+    "total_code": "4812",
+    "matched_code": "4812",
+    "matched_code_percent": 100.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 72,
-    "matched_functions": 68,
-    "matched_functions_percent": 94.44444444444444,
-    "complete_code": "12936",
-    "complete_code_percent": 77.01833769945225,
+    "total_functions": 33,
+    "matched_functions": 33,
+    "matched_functions_percent": 100.0,
+    "complete_code": "4812",
+    "complete_code_percent": 100.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
     "total_units": 1,
-    "complete_units": 0
+    "complete_units": 1
    },
    "functions": [
     {
@@ -10546,12 +10546,42 @@
       "virtual_address": "1279312",
       "demangled_name": "ReadOptionalBufferedBlock"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": true,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/buffered_stream.cpp"
+   }
+  },
+  {
+   "name": "game/world_contacts",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "2624",
+    "matched_code": "2624",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 12,
+    "matched_functions": 12,
+    "matched_functions_percent": 100.0,
+    "complete_code": "2624",
+    "complete_code_percent": 100.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 1
+   },
+   "functions": [
     {
      "name": "func_001385A0",
      "size": "408",
      "fuzzy_match_percent": 100.0,
-     "address": "4880",
+     "address": "0",
      "metadata": {
       "virtual_address": "1279392",
       "demangled_name": "SetContactPairFlags"
@@ -10561,7 +10591,7 @@
      "name": "func_00138738",
      "size": "80",
      "fuzzy_match_percent": 100.0,
-     "address": "5288",
+     "address": "408",
      "metadata": {
       "virtual_address": "1279800",
       "demangled_name": "PushContactRow"
@@ -10571,7 +10601,7 @@
      "name": "func_00138788",
      "size": "56",
      "fuzzy_match_percent": 100.0,
-     "address": "5368",
+     "address": "488",
      "metadata": {
       "virtual_address": "1279880",
       "demangled_name": "UnlinkContactRow"
@@ -10581,7 +10611,7 @@
      "name": "func_001387C0",
      "size": "56",
      "fuzzy_match_percent": 100.0,
-     "address": "5424",
+     "address": "544",
      "metadata": {
       "virtual_address": "1279936",
       "demangled_name": "FindContactRow"
@@ -10591,7 +10621,7 @@
      "name": "func_001387F8",
      "size": "44",
      "fuzzy_match_percent": 100.0,
-     "address": "5480",
+     "address": "600",
      "metadata": {
       "virtual_address": "1279992",
       "demangled_name": "GetContactRowHead"
@@ -10601,7 +10631,7 @@
      "name": "func_00138828",
      "size": "120",
      "fuzzy_match_percent": 100.0,
-     "address": "5528",
+     "address": "648",
      "metadata": {
       "virtual_address": "1280040",
       "demangled_name": "AddColliderToSweepAxes"
@@ -10611,7 +10641,7 @@
      "name": "func_001388A0",
      "size": "292",
      "fuzzy_match_percent": 100.0,
-     "address": "5648",
+     "address": "768",
      "metadata": {
       "virtual_address": "1280160",
       "demangled_name": "RemoveColliderFromSweepAxes"
@@ -10621,7 +10651,7 @@
      "name": "func_001389C8",
      "size": "8",
      "fuzzy_match_percent": 100.0,
-     "address": "5944",
+     "address": "1064",
      "metadata": {
       "virtual_address": "1280456",
       "demangled_name": "MarkSweepAxesUnsorted"
@@ -10631,7 +10661,7 @@
      "name": "func_001389D0",
      "size": "524",
      "fuzzy_match_percent": 100.0,
-     "address": "5952",
+     "address": "1072",
      "metadata": {
       "virtual_address": "1280464",
       "demangled_name": "SortSweepAxes"
@@ -10641,7 +10671,7 @@
      "name": "func_00138BE0",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "6480",
+     "address": "1600",
      "metadata": {
       "virtual_address": "1280992",
       "demangled_name": "ClearRootObjectStateBits"
@@ -10651,7 +10681,7 @@
      "name": "func_00138C00",
      "size": "804",
      "fuzzy_match_percent": 100.0,
-     "address": "6512",
+     "address": "1632",
      "metadata": {
       "virtual_address": "1281024",
       "demangled_name": "UpdateWorldContacts"
@@ -10661,17 +10691,47 @@
      "name": "func_00138F28",
      "size": "200",
      "fuzzy_match_percent": 100.0,
-     "address": "7320",
+     "address": "2440",
      "metadata": {
       "virtual_address": "1281832",
       "demangled_name": "InitContactPairFlags"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": true,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/world_contacts.cpp"
+   }
+  },
+  {
+   "name": "game/blend_animation",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "2920",
+    "matched_code": "2920",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 8,
+    "matched_functions": 8,
+    "matched_functions_percent": 100.0,
+    "complete_code": "2920",
+    "complete_code_percent": 100.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 1
+   },
+   "functions": [
     {
      "name": "func_00138FF0",
      "size": "68",
      "fuzzy_match_percent": 100.0,
-     "address": "7520",
+     "address": "0",
      "metadata": {
       "virtual_address": "1282032",
       "demangled_name": "LoopOverMinCountNoOp"
@@ -10681,7 +10741,7 @@
      "name": "func_00139038",
      "size": "1480",
      "fuzzy_match_percent": 100.0,
-     "address": "7592",
+     "address": "72",
      "metadata": {
       "virtual_address": "1282104",
       "demangled_name": "BuildCombinedBlendAnimation"
@@ -10691,7 +10751,7 @@
      "name": "func_00139600",
      "size": "316",
      "fuzzy_match_percent": 100.0,
-     "address": "9072",
+     "address": "1552",
      "metadata": {
       "virtual_address": "1283584",
       "demangled_name": "ComputeWrappedDeltas"
@@ -10701,7 +10761,7 @@
      "name": "func_00139740",
      "size": "560",
      "fuzzy_match_percent": 100.0,
-     "address": "9392",
+     "address": "1872",
      "metadata": {
       "virtual_address": "1283904",
       "demangled_name": "ComputeBlendedDuration"
@@ -10711,7 +10771,7 @@
      "name": "func_00139970",
      "size": "124",
      "fuzzy_match_percent": 100.0,
-     "address": "9952",
+     "address": "2432",
      "metadata": {
       "virtual_address": "1284464",
       "demangled_name": "FindCyclicRangeIndex"
@@ -10721,7 +10781,7 @@
      "name": "func_001399F0",
      "size": "4",
      "fuzzy_match_percent": 100.0,
-     "address": "10080",
+     "address": "2560",
      "metadata": {
       "virtual_address": "1284592"
      }
@@ -10730,7 +10790,7 @@
      "name": "func_001399F8",
      "size": "316",
      "fuzzy_match_percent": 100.0,
-     "address": "10088",
+     "address": "2568",
      "metadata": {
       "virtual_address": "1284600",
       "demangled_name": "SetBlendItemWeights"
@@ -10740,17 +10800,47 @@
      "name": "func_00139B38",
      "size": "52",
      "fuzzy_match_percent": 100.0,
-     "address": "10408",
+     "address": "2888",
      "metadata": {
       "virtual_address": "1284920",
       "demangled_name": "SetBlendEntryRecordFlag"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": true,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/blend_animation.cpp"
+   }
+  },
+  {
+   "name": "game/world_listed_object",
+   "measures": {
+    "fuzzy_match_percent": 80.69875776397515,
+    "total_code": "6440",
+    "matched_code": "2580",
+    "matched_code_percent": 40.06211180124224,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 19,
+    "matched_functions": 15,
+    "matched_functions_percent": 78.94736842105263,
+    "complete_code": "2580",
+    "complete_code_percent": 40.06211180124224,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_00139B70",
      "size": "196",
      "fuzzy_match_percent": 100.0,
-     "address": "10464",
+     "address": "0",
      "metadata": {
       "virtual_address": "1284976",
       "demangled_name": "BuildAlphaStatePacket"
@@ -10760,7 +10850,7 @@
      "name": "func_00139C38",
      "size": "52",
      "fuzzy_match_percent": 100.0,
-     "address": "10664",
+     "address": "200",
      "metadata": {
       "virtual_address": "1285176",
       "demangled_name": "InitAlphaStatePackets"
@@ -10770,7 +10860,7 @@
      "name": "func_00139C70",
      "size": "180",
      "fuzzy_match_percent": 100.0,
-     "address": "10720",
+     "address": "256",
      "metadata": {
       "virtual_address": "1285232",
       "demangled_name": "AcquireOwnedRecord"
@@ -10780,7 +10870,7 @@
      "name": "func_00139D28",
      "size": "64",
      "fuzzy_match_percent": 100.0,
-     "address": "10904",
+     "address": "440",
      "metadata": {
       "virtual_address": "1285416",
       "demangled_name": "DetachOwnedRecord"
@@ -10790,7 +10880,7 @@
      "name": "func_00139D68",
      "size": "128",
      "fuzzy_match_percent": 100.0,
-     "address": "10968",
+     "address": "504",
      "metadata": {
       "virtual_address": "1285480",
       "demangled_name": "ResetFirstListedObject"
@@ -10800,7 +10890,7 @@
      "name": "func_00139DE8",
      "size": "148",
      "fuzzy_match_percent": 100.0,
-     "address": "11096",
+     "address": "632",
      "metadata": {
       "virtual_address": "1285608",
       "demangled_name": "InitWorldListedObject"
@@ -10810,7 +10900,7 @@
      "name": "func_00139E80",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "11248",
+     "address": "784",
      "metadata": {
       "virtual_address": "1285760",
       "demangled_name": "LeaveWorldLists"
@@ -10820,7 +10910,7 @@
      "name": "func_00139EC8",
      "size": "184",
      "fuzzy_match_percent": 100.0,
-     "address": "11320",
+     "address": "856",
      "metadata": {
       "virtual_address": "1285832",
       "demangled_name": "ReleaseWorldListedObject"
@@ -10830,7 +10920,7 @@
      "name": "func_00139F80",
      "size": "136",
      "fuzzy_match_percent": 100.0,
-     "address": "11504",
+     "address": "1040",
      "metadata": {
       "virtual_address": "1286016",
       "demangled_name": "AssignAnimRecord"
@@ -10840,7 +10930,7 @@
      "name": "func_0013A008",
      "size": "288",
      "fuzzy_match_percent": 100.0,
-     "address": "11640",
+     "address": "1176",
      "metadata": {
       "virtual_address": "1286152",
       "demangled_name": "RebuildAnimRecordEntries"
@@ -10850,7 +10940,7 @@
      "name": "func_0013A128",
      "size": "632",
      "fuzzy_match_percent": 100.0,
-     "address": "11928",
+     "address": "1464",
      "metadata": {
       "virtual_address": "1286440",
       "demangled_name": "ApplyLookSourceToListedObject"
@@ -10860,7 +10950,7 @@
      "name": "func_0013A3A0",
      "size": "120",
      "fuzzy_match_percent": 100.0,
-     "address": "12560",
+     "address": "2096",
      "metadata": {
       "virtual_address": "1287072",
       "demangled_name": "UpdateWorldListedObject"
@@ -10870,7 +10960,7 @@
      "name": "func_0013A418",
      "size": "124",
      "fuzzy_match_percent": 100.0,
-     "address": "12680",
+     "address": "2216",
      "metadata": {
       "virtual_address": "1287192",
       "demangled_name": "CopyWorldListedObject"
@@ -10880,7 +10970,7 @@
      "name": "func_0013A498",
      "size": "384",
      "fuzzy_match_percent": 52.864583333333336,
-     "address": "12808",
+     "address": "2344",
      "metadata": {
       "virtual_address": "1287320",
       "demangled_name": "FilterParticleVerticesVu0"
@@ -10890,7 +10980,7 @@
      "name": "func_0013A618",
      "size": "804",
      "fuzzy_match_percent": 93.40796019900498,
-     "address": "13192",
+     "address": "2728",
      "metadata": {
       "virtual_address": "1287704",
       "demangled_name": "StepListedObjectParticles"
@@ -10900,7 +10990,7 @@
      "name": "func_0013A940",
      "size": "964",
      "fuzzy_match_percent": 0.0,
-     "address": "14000",
+     "address": "3536",
      "metadata": {
       "virtual_address": "1288512",
       "demangled_name": "MoveWorldListedObject"
@@ -10910,7 +11000,7 @@
      "name": "func_0013AD08",
      "size": "116",
      "fuzzy_match_percent": 100.0,
-     "address": "14968",
+     "address": "4504",
      "metadata": {
       "virtual_address": "1289480",
       "demangled_name": "SubmitWorldListedObjectBlock"
@@ -10920,7 +11010,7 @@
      "name": "func_0013AD80",
      "size": "1708",
      "fuzzy_match_percent": 97.36533957845434,
-     "address": "15088",
+     "address": "4624",
      "metadata": {
       "virtual_address": "1289600",
       "demangled_name": "WriteListedObjectParticlePacket"
@@ -10930,7 +11020,7 @@
      "name": "func_0013B430",
      "size": "140",
      "fuzzy_match_percent": 100.0,
-     "address": "16800",
+     "address": "6336",
      "metadata": {
       "virtual_address": "1291312",
       "demangled_name": "UpdateMatchingListedObjects"
@@ -10942,7 +11032,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_137290.cpp"
+    "source_path": "src/main/world_listed_object.cpp"
    }
   },
   {
@@ -53104,8 +53194,8 @@
     "complete_code_percent": 92.70075040887663,
     "complete_data": "0",
     "complete_data_percent": 100.0,
-    "total_units": 77,
-    "complete_units": 49
+    "total_units": 80,
+    "complete_units": 52
    }
   },
   {
