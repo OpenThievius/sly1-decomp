@@ -3,7 +3,7 @@
 // (0, 1) and PAL's third flag (func_eu_001374E0) is cleared; the layout's alignment words are at
 // +0x18 and +0x1C (CaptionLayout's VERSION_EU word); the default title is text 0xAC
 // (func_eu_001DDAB0), drawn through a text reader (func_eu_0015DCB8, func_eu_0015E7E0) whose
-// 0xC0-byte buffer is declared after the colour's block; the cells go through func_eu_0015C778;
+// 0xC0-byte buffer is declared after the colour's block; the cells go through DrawFontString;
 // the line's y is scaled by 0.5462963f and offset by 1920.0f.
 struct __attribute__((packed)) Pk4_16BEA0 { s32 v; };
 struct Obj_16BEA0_eu {
@@ -28,7 +28,7 @@ const char* func_eu_001DDAB0(s32 id);
 void func_eu_0015DCB8(void* out, const char* p, Font* font, s32 z);
 void func_eu_0015E7E0(void* a, CaptionLayout* b, s32 c, void* d);
 void func_eu_001374E0(CaptionLayout* out, s32 v);
-void func_eu_0015C778(Font* font, const char* text, CaptionLayout* out, s32 zero, void* d);
+void DrawFontString(Font* font, const char* text, CaptionLayout* out, s32 zero, void* d);
 struct Out_eu_16BEA0 : CaptionLayout {
     void Mode(s32 v) { func_eu_001374E0(this, v); }
     void Draw(void* loc, s32 z, void* tbl) { func_eu_0015E7E0(loc, this, z, tbl); }
@@ -97,7 +97,7 @@ void DrawGridSelector(Obj_16BEA0_eu* self)
                 k = (k - (Sine(g_gameClock[4] * 10.0f) * 0.5f + 0.5f)) * 0.1f + k;
             f32 v = self->blend * (k * 1.3f);
             PushFontScale(f, v, v);
-            func_eu_0015C778(f, s, &out, 0, &g_gsPacketWriter);
+            DrawFontString(f, s, &out, 0, &g_gsPacketWriter);
             PopFontScale(f);
         }
     }

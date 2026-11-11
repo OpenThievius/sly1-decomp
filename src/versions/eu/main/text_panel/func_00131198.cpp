@@ -23,7 +23,7 @@ void SetupScreenElementText(Panel_131198_eu* self);
 void ClearTextPanel(Panel_131198_eu* self);
 void SetTextPanelState(Panel_131198_eu* self, s32 mode);
 void func_eu_0015DD18(TextReader_131198_eu* out, s32 id, Font* font, s32 zero);
-f32 func_eu_0015E438(TextReader_131198_eu* reader);
+f32 SumTextWidth(TextReader_131198_eu* reader);
 
 void SetupTextPanel(Panel_131198_eu* self)
 {
@@ -43,7 +43,7 @@ void SetupTextPanel(Panel_131198_eu* self)
     for (u32 i = 0; i < 8; i++) {
         TextReader_131198_eu reader;
         func_eu_0015DD18(&reader, ((s32*)D_00261128)[i], self->smallFont, 0);
-        D_00261310 = func_eu_0015E438(&reader) >? D_00261310;
+        D_00261310 = SumTextWidth(&reader) >? D_00261310;
     }
     self->state = -1;
     self->child = 0;

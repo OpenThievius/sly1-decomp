@@ -77,13 +77,15 @@ sits among: the file of the closest function before it that both versions have. 
 definition to replace, it is added at the end of that file's unit. `c_status.tsv` has a row for
 it under that name, noted `only in PAL`.
 
-A function only PAL has can still be a US function's counterpart that the pairing missed, because
-PAL's own changes (fields moved for its wide text, an extra call) changed its bytes too much:
-before matching one from scratch, look for a matched US function of nearly its size and shape in
-the same file and start from its C. PAL func_eu_001AD800 (780 bytes) is US DrawSlidingGlyphElement
-(func_001ACAA8, 760 bytes) with the fields 0x310 further on and func_eu_001374E0 called on the
-frame's layout; a reconstruction written from scratch with its own clamp had stayed 145 lines off,
-the US C with those two changes was EXACT at the first compile.
+A function only PAL has can still be a US function's counterpart that the position pairing missed, because
+PAL's own changes (fields moved for its wide text, an extra call) changed its bytes too much.
+`tools/inventory.py` has a last step for these (`similar` in `config/eu/map.tsv`): the unpaired PAL
+functions between the PAL copies of a US function's paired neighbours are scored by instruction
+similarity and shared callees, and a clear one-to-one match is paired. Such a counterpart is
+PAL's own definition of the US function, `src/versions/eu/<file>/<US function>.cpp`, like any
+other (PAL's func_eu_001AD800, 780 bytes, is US DrawSlidingGlyphElement, func_001ACAA8, 760
+bytes, with the fields 0x310 further on and func_eu_001374E0 called on the frame's layout). A
+function the step still leaves unpaired and that PAL has no counterpart for stays `func_eu_`.
 
 Two gaps of the tools, found on 2026-11-08. `version_src.py todo` lists game code only, so the
 library functions only PAL has are found from `config/eu/map.tsv`. And a function whose closest

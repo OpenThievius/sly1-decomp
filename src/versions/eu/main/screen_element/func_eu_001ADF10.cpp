@@ -6,7 +6,7 @@ extern u8 D_eu_0024E238[];
 extern u8 D_eu_0024E328[];
 extern s32 D_eu_0027DB80[];
 
-void func_eu_00160830(s32 id, s32* a, s32* b, s32* c);
+void CountCategoryFlags(s32 id, s32* a, s32* b, s32* c);
 s32 func_eu_001E2DD0(char* buf, const char* fmt, ...);
 const char* func_eu_001DDAB0(s32 id);
 
@@ -19,7 +19,7 @@ void func_eu_001ADF10(Obj_eu_001ADF10* self, s32 id)
     char buf1[0x80];
     char buf2[0x100];
     s32 a, b, c;
-    func_eu_00160830(id, &a, &b, &c);
+    CountCategoryFlags(id, &a, &b, &c);
     Row_eu_001ADF10* r = (Row_eu_001ADF10*)((u8*)g_saveData + 0x10 + id * 0x44C);
     char* s0 = buf1;
     buf1[0] = 0;
