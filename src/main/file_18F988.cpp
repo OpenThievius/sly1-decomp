@@ -140,7 +140,7 @@ void RotateMatrixUpright(void* sub, s32 zero, void* out);
 s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb);
 void SpawnEffectsAt(void* a, void* b, s32 c, void* d, void* e, s32 f, s32 g);
 void LoadObjectProperties(BaseObject* o, Stream8A* in);
-s32 ReadBufferedU16(Stream8A* in);
+s32 ReadBufferedU16(void* stream);
 void* AllocateZeroedFrontMemory(s32 n);
 void ReadBufferedVector3(Stream8A* in, void* p);
 s32 ReadBufferedU8(Stream8A* in);

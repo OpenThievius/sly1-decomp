@@ -35,7 +35,7 @@ struct GifWord {
 };
 u64 GetTextureRegisterBits(TextureTable* obj, s32 p1, s32 p2);
 void AddGifRegisterWrite(void* ctx, s32 kind, u64 value);
-void* FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 extern s32 g_imageRecordCountB;
 extern s32 g_imageSlotsB;
 u16 ReadBufferedU16(void* self);
@@ -122,7 +122,7 @@ s32 GetAnimatorSize(s32 type);
 void* AllocateZeroedFrontMemory(s32 size);
 void* GetAnimatorMethods(s32 type);
 void ReadBufferedStreamBytes(void* owner, s32 key, void* out);
-void* FillMemory(void* p, int zero, s32 count);
+void* FillMemory(void* p, s32 value, s32 size);
 struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
 void ConvertHsvToRgb(Quad_001B4580* p);
 f32 WrapAngle(f32 a);

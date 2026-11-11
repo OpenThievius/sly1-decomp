@@ -101,10 +101,10 @@ void* FindFirstObjectByIdMode4(void* obj, s32 id, void* owner);
 s32 IsObjectOfKind(void* node, s32 kind);
 
 
-s32 FillMemory(void* p, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 
-s32 FillMemory(void* p, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 
 void ClearObjectPoolChoice(void* self);

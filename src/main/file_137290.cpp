@@ -502,7 +502,7 @@ s32 ReadBufferedS8(BufferedStream* self)
 
 void RemoveEffect(void* handle);
 void SetEffectPhase(void* handle, s32 mode);
-void* FillMemory(void* block, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void ReadBufferedStreamBytes(void* self, s32 count, void* out);
 
@@ -594,7 +594,7 @@ void ReadBufferedMatrix4(void* self, u8* p)
     *(f32*)(c + 0xC) = 1.0f;
 }
 
-s32 ReadBufferedU16(BufferedStream* self);
+s32 ReadBufferedU16(void* stream);
 s32 ReadBufferedU8(void* self);
 f32 ReadBufferedFloat(void* self);
 void ReadBufferedVector3(void* src, void* dst);
@@ -687,7 +687,7 @@ void func_00137FB0(BufferedStream* in, Mesh03* mesh)
 }
 
 
-s32 ReadBufferedU16(void* self);
+s32 ReadBufferedU16(void* stream);
 void* AllocateZeroedFrontMemory(s32 size);
 
 void ReadFaceTree(void* self, Mesh03* in, Tree03* out)
@@ -722,7 +722,7 @@ struct LinkedItem {
     u8 pad1[0x20 - 0x1C];
 };
 
-s32 ReadBufferedU16(void* src);
+s32 ReadBufferedU16(void* stream);
 void* AllocateZeroedFrontMemory(s32 bytes);
 void ReadBufferedVector3(void* src, void* item);
 f32 ReadBufferedFloat(void* src);
@@ -773,7 +773,7 @@ void LoadCollider(void* self);
 void FindOrBuildMemberGroup(void* sub, void* self);
 
 
-s32 ReadBufferedU16(void* src);
+s32 ReadBufferedU16(void* stream);
 void ReadBufferedStreamBytes(void* self, s32 size, void* obj);
 
 void SkipBufferedBlock(void* self)
@@ -1619,7 +1619,7 @@ void InitAlphaStatePackets(void)
 
 void* PopFreeSlot(void* p);
 void PushFreeSlot(void* p, void* q);
-void* FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 void AppendToList(void* list, void* item);
 
 OwnedRecord* AcquireOwnedRecord(WorldListedObject* o)
@@ -1803,7 +1803,7 @@ void RebuildAnimRecordEntries(WorldListedObject* self)
     }
 }
 
-void* FillMemory(void* block, s32 value, u32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 // The part of the record from +0x120 that func_0013A128 reads through one pointer.
 struct LookSourceTail {
@@ -1948,7 +1948,7 @@ INCLUDE_ASM(func_0013A940);
 struct DeferredRadiusRequest { void (*fn)(void* self); s32 zero; s32 count; u8 pad0[0x50 - 0x0C]; f32 radius; u8 pad1[0x60 - 0x54]; void* owner; u8 pad2[0x80 - 0x64]; };
 struct Src_13AD08 { u8 pad[0x40]; f32 scale; };
 
-void* FillMemory(void* dst, s32 value, u32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 void QueueDeferredRequest(void* block);
 void func_0013AD80(void* self);
 

@@ -321,7 +321,7 @@ struct SpanQuery {
 };
 s32 func_0013E430(void* tree, Vec02* centre, SpanRecord** end, f32 r);
 s32 func_00142278(Vec02* p, Vec02* q, u8* a, u8* b, f32 r, s32 max, ColliderSpan* out);
-void* FillMemory(void* dst, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 
 s32 func_00142B78(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, ColliderSpan* out, f32 radius)
 {

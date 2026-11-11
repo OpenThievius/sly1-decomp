@@ -127,7 +127,7 @@ void func_0013A128(void*,void*);
 void CopyEffectOwnerMargin(void*,void*);
 f32 RandomFloatInRange(f32,f32);
 
-void* FillMemory(void*,s32,s32);
+void* FillMemory(void* p, s32 value, s32 size);
 
 
 
@@ -190,7 +190,7 @@ struct KeyedWorldView { u8 pad0[0x1CE8]; KeyedObjectList* list; };
 
 struct __attribute__((aligned(16))) SpawnBlock { Quad16 q[8]; };
 struct __attribute__((aligned(16))) SpawnTail { Quad16 q[4]; };
-void* FillMemory(void* p, s32 v, u32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 struct SpawnFlags { s32 z; s32 b; s32 c; SpawnFlags() { FillMemory(this, 0, sizeof(*this)); } };
 struct __attribute__((aligned(16))) SpawnRecord { u8 pad0[0x20]; Quad16 self_copy; u8 pad1[0x30]; Quad16 a1_copy; u8 pad2[0x30]; SpawnBlock blk; s32 f120; u8 pad3[0x8C]; SpawnTail tail; u8 pad4[0x10]; };
 

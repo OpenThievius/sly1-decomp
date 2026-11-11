@@ -140,7 +140,7 @@ s32 GetPadSlotState(s32 a, s32 b);
 s32 func_002047F8(s32 a, s32 b, s32 c, s32 d);
 s32 SendPadTwoWordRequest(s32 a, s32 b, s32 c, s32 d);
 s32 func_002046D0(s32 a, s32 b, s32 c, s32 d);
-void* FillMemory(u8* p, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 SendPadSixByteRequest(s32 a, s32 b, u8* buf);
 s32 HasFullPadMask(s32 a, s32 b);
 s32 SendFullPadMask(s32 a, s32 b);
@@ -397,7 +397,7 @@ void ReadAnalogStick(PadRecord* p, u8 x, u8 y, f32* outX, f32* outY, f32* outMag
     *prevY = y;
 }
 
-void* FillMemory(u8* p, s32 a, s32 b);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 ReadPadFrame(s32 a, s32 b, u8* c);
 void CopyMemory(u8* dst, u8* src, s32 n);
 void AdvanceButtonCodes(PadRecord* p, s32 old);

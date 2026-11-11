@@ -50,7 +50,7 @@ void EvaluateVectorKeyCurve(s32 a, s32 b, s32 c, s32 d, s32 e, f32 g, f32 h);
 
 void GetVectorKeyTimes(s32 count, VectorKey* src, s32* outCount, f32** outArr);
 
-s32 ReadBufferedU16(void* src);
+s32 ReadBufferedU16(void* stream);
 
 s32 ReadBufferedS16(void* src);
 
@@ -189,7 +189,7 @@ extern void EvaluateVectorKeyCurve(s32, VectorKey*);
 extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
 
 extern void EvaluateAxisCurves(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
-extern void* FillMemory(void*, s32, s32);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void ReadAxisCurves(WeightCurve** a, Vec02* b, Stream83* c);
 

@@ -57,7 +57,7 @@ void SetListLinkOffset(void* p, s32 n);
 
 void* PopFreeSlot(void* p);
 
-void* FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 const Vt219C* GetEffectKindTable(u32 n);
 

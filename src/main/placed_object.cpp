@@ -66,7 +66,7 @@ extern void EvaluateVectorKeyCurve(s32, VectorKey*);
 extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
 
 extern void EvaluateAxisCurves(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
-extern void* FillMemory(void*, s32, s32);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void ReadAxisCurves(WeightCurve** a, Vec02* b, Stream83* c);
 
@@ -557,7 +557,7 @@ s32 g_checksumMismatch[4];
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
 
 s32 ReadBufferedS16(Stream83* p);
-s32 ReadBufferedU16(Stream83* p);
+s32 ReadBufferedU16(void* stream);
 s32 ReadBufferedS8(Stream83* p);
 s32 ReadBufferedU8(Stream83* p);
 void MoveAnimationTrackToEnd(Animation* a, Track83* b);
@@ -595,7 +595,7 @@ extern const Fn_Table D_00219600[];
 
 
 
-void* FillMemory(void** p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 void SettlePoseSourceModes(Attachment* n);
 
 struct Sub_12BC38 { s32 w0; s32 w4; s32 w8; s32 wC; s32 w10; };
@@ -621,7 +621,7 @@ s32 ReadBufferedS16(Stream83* r);
 s32 ReadBufferedS32(Stream83* r);
 f32 ReadBufferedFloat(Stream83* r);
 s32 ReadBufferedU8(Stream83* r);
-s32 ReadBufferedU16(Stream83* r);
+s32 ReadBufferedU16(void* stream);
 void ReadBufferedStreamBytes(Stream83* r, s32 n, void* dst);
 void ReadBufferedString(Stream83* r, void* out);
 
@@ -1724,7 +1724,7 @@ void RecomputePlacedObjectFrame(PlacedObject* self)
     }
 }
 
-s32 QueryValueListMask(void* list, f32 x, void* vec, void* out);
+s32 QueryValueListMask(void* self, f32 radius, void* center, void* out);
 void SetRangeRecordPosition(RangeRecord* r, void* p);
 void SetRangeRecordDirection(RangeRecord* r, void* p);
 

@@ -25,7 +25,7 @@ typedef struct EhContext {
 } EhContext;
 
 UnwindFrame* FindFrameUnwindState(void* pc, UnwindFrame* frame);
-void* FillMemory(void* dst, s32 c, u32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 CopyBytes(void* dst, void* src, s32 n);
 s32 CompareStrings(void* self, s32 v);
 void* EnterRuntimeLock(s32 size);

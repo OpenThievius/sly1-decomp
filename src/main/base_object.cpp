@@ -998,7 +998,7 @@ void UpdateConeVolumeTangents(ConeVolume* self)
     self->f35C = 1.0f;
 }
 
-s32 QueryValueListMask(void* self, f32 radius, void* center, s32* out);
+s32 QueryValueListMask(void* self, f32 radius, void* center, void* out);
 
 void UpdateConeVolumeBounds(ConeVolume* self)
 {

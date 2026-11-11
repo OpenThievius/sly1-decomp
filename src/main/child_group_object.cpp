@@ -385,7 +385,7 @@ void func_0013BE18();
 f32 ClampToRange(void* range, f32 x);
 void ConstrainColliderVector(Collider* c, Vec02* frame, Vec02* in, Vec02* out, s32 flag);
 f32 RandomFloatInRange(f32 lo, f32 hi);
-void* FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 PlacedObject *FindNodeForQuery(void* q, s32 a, s32 b);
 void TransformPointBetweenFramesCG(void* from, void* to, Vec02* p, Vec02* out) __asm__("func_00128018");
 void SendPointEventToWorldListener(Vec02* p, f32 radius);

@@ -153,7 +153,7 @@ void SendResidentImages(void);
 
 extern const u32 g_movieKeys[128];
 
-void* FillMemory(void* dst, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 void ConsumeSpan(void* queue, s32 n);
 
 void ClearKeyId(KeyId* p);

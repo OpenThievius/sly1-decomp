@@ -292,7 +292,7 @@ void PadPacketToQuadSlot(void* s, s32 target);
 s32 WriteVifUnpackHeader(void* self, s32 a, s32 b, s32 c);
 void AddDmaRefTag(void* obj, s32 a, s32 b);
 void ReadLinkedItemArray(void* src, s32* count, void** out);
-s32 ReadBufferedU16(void* src);
+s32 ReadBufferedU16(void* stream);
 s32 ReadBufferedU32(void* src);
 void ReadPropertyRecords(void* a, void* b);
 // The message (kind 11) func_001EF3D8 sends the object it detaches.
@@ -347,7 +347,7 @@ void TriggerScriptEvent(void* self, s32 a, s32 b, s32* c);
 void ResetPadStepRepeat(void* p);
 void StartSoundEffect(s32 a0, Timeline* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 extern u8 D_00625760[];
-s32 FillMemory(Entry90* dst, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 // The dead "li v0,2" after the func_001ED090 call is the compare constant of an
 // "if (n == 2)" whose two arms compile identically: jump2 cross-jumps the arms after
 // reload, deletes the branch and leaves the constant load.
@@ -442,7 +442,7 @@ s32 GetEntryIdByKey(s32 a);
 void ShowCountedScreenElement(void* a);
 void FadeScreenToBlack(f32 t);
 struct WarpTextStyle;
-s32 FillMemory(WarpTextStyle* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 // The text style the warp menu draws with: the static initialiser (func_001F2688) zeroes it, then
 // sets its kind, two sizes given as integers, 0.3 twice and its colour.
 struct WarpTextStyle {
@@ -467,7 +467,7 @@ struct WarpTextStyle {
 extern f32 D_00276650;
 s32 IsFontLoaded(s32 n);
 Font* GetFontById(s32 n);
-void* FillMemory(void* p, s32 v, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 extern void StartPlacedObject(WarpPage* o);
 s32 IsWarpEntryReachable(WarpPage* o, s32 n);
 void SelectWarpPageEntry(WarpPage* o, s32 n);

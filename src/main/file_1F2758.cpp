@@ -267,7 +267,7 @@ void AddTrackedNode(Rec36* self, BaseObject* n);
 
 void UpdateCollider(Collider* self);
 s32 IsObjectDescendantOf(Collider* o, ContactTracker* self);
-s32 FillMemory(void* p, s32 a, s32 b);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 FindNodeForQuery(void* t, s32 a, s32 b);
 
 struct GathererQuery {

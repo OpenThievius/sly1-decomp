@@ -191,7 +191,7 @@ done:
     self->mC70 = *mat;
 }
 
-void* FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 void QueueDeferredRequest(DeferredRequest* src);
 
 void func_001C3028(TrailRing* self, u8* cam)

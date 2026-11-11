@@ -161,7 +161,7 @@ void GetNumberedItemFlag(void* obj, s32* out);
 
 void RemoveEffect(void* handle);
 void SetEffectPhase(void* handle, s32 mode);
-void* FillMemory(void* block, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 // func_00136FA8 keeps its own view: it uses the result of func_001356C0, which returns nothing.
 struct Owner_136FA8 { u8 pad0[0x324]; void* child; };

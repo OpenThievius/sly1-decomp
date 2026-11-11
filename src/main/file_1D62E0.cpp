@@ -57,7 +57,7 @@ void ResetPathFollower(void* self);
 
 void HandleChildGroupNotification(StandIn* self, s32 kind, ObjectMessage* ref);
 
-void* FillMemory(OwnerMessage* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void FlushOutputBuffer(OutputBuffer* a0, s32 a1);
 void FreeObjectMemory(OutputBuffer* a0);
@@ -86,12 +86,12 @@ void CaptureColliderPose(void);
 void SetCachedVoiceParam(void* a, void* b);
 
 void* TakePoolSlot(void* p);
-void* FillMemory(void* p, s32 value, u32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void* RefreshCachedVoiceParam(void* a, void* b);
 
 void* TakePoolSlot(void* p);
-void* FillMemory(void* p, s32 a, s32 b);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void PushFreeSlot(void* list, void* item);
 
@@ -291,7 +291,7 @@ void* GetLevelEntryByKey(void* obj);
 s32 ComputeCompletionPercent(void* p);
 
 void* TakePoolSlot(void* p);
-void* FillMemory(void* p, s32 value, u32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 extern void* g_frameCount;
 extern void* g_lightingChangeFrame;

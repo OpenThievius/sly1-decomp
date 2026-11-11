@@ -1481,7 +1481,7 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
 // What slot 76 is asked about: a kind and the object concerned.
 struct AgentRequest { s32 kind00; BaseObject* ref04; };
 
-void* FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 FindNodeForQuery(void* p, s32 a, s32 b);
 
 s32 AcceptAgentRequest(Agent* self, AgentRequest* req)
