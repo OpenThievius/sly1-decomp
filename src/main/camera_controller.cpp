@@ -1,19 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The file from 0x149398 to 0x14B6A8 (its .rodata from 0x249EA0, its .data from 0x261BF0, its
-// .bss from 0x27C008): the camera's controllers (0x149398 to 0x14ABD0, the method tables
-// D_00217398 to D_002173E0), a screen element's methods and the helpers after them (0x14ABD0 to
-// 0x14B550), class 0x10's methods, class 0x11's first two and SetSinCosPair (0x14B550 to 0x14B6A8).
-// Where it ends, retail proves only to a range. Its .rodata (func_00149760's constants and two
-// jump tables, 0x249EA0 to 0x249EE4) is followed by 12 bytes of zeros and func_0014B6A8's
-// FLT_MAX on 16 at 0x249EF0, the next file's .rodata (file_14B6A8.cpp), so a file ends between
-// func_00149760 and func_0014B6A8. But any function start from 0x14A7B8 to 0x14B6A8 links to the
-// same bytes: the functions between them read no .rodata or .data of either file, their code is
-// on 8 as every file's is, and the one .bss they use, D_0027C008 (func_0014B608, func_0014B640),
-// can be a file's whole .bss (a file of words aligns its .bss to 4), so it may lie in this file
-// or the next. Built whole, the cuts at 0x14A7B8, 0x14A888, 0x14ABD0, 0x14B608 and 0x14B6A8 all
-// printed MATCH (docs/AGENT_WORKFLOW.md, "Finding and proving a file"). The cut is at 0x14B6A8,
-// where the next file's data provably begins; the functions from 0x14A7B8 to 0x14B6A8 could
-// belong to either file or to a third. Its name is ours, after its first address.
+// The camera's controllers, 0x149398 to 0x14ABD0 (its .rodata from 0x249EA0, its .data from
+// 0x261BF0): the base controller and its value stack, and the target, frame and value
+// controllers (their method tables D_00217398 to D_002173E0). Its .rodata (func_00149760's
+// constants and two jump tables, 0x249EA0 to 0x249EE4) is followed by 12 bytes of zeros and
+// func_0014B6A8's FLT_MAX on 16 at 0x249EF0, the .rodata of file_14B6A8.cpp, so a file ends
+// between func_00149760 and func_0014B6A8. Any function start from 0x14A7B8 to 0x14B6A8 links to
+// the same bytes: the functions between read no .rodata or .data of either file, their code is
+// on 8 as every file's is, and the one .bss they use, D_0027C008, can be a file's whole .bss (a
+// file of words aligns its .bss to 4). Built whole, the cuts at 0x14A7B8, 0x14A888, 0x14ABD0,
+// 0x14B608 and 0x14B6A8 all printed MATCH (docs/AGENT_WORKFLOW.md, "Finding and proving a
+// file"). The functions between are now three files cut by role only (item_column.cpp,
+// symmetric_solve.cpp, file_14B550.cpp); this one ends at 0x14ABD0, where the item column, a
+// screen element, begins. The name is ours, after its role.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -109,8 +107,6 @@ extern f32 g_gameTime[];
 void* GetActiveSwitchedCollider(void);
 extern f32 g_gameTime[];
 
-// The file's statics (.bss from 0x27C008).
-static s32 D_0027C008;  // a running count, reset by func_0014B608
 
 f32 D_00261BF0 = 0.0f;
 f32 D_00261BF4 = 0.300000012f;
@@ -748,240 +744,4 @@ void UpdateValueCameraController(ValueCameraController* ctl)
         Vu0::Q(basis.r[2]) = r2;
     }
     SetCameraPlacement(cam, o + 0x140, &basis);
-}
-
-void InitItemColumn(T217D_720* self)
-{
-    u32 n;
-
-    InitScreenElement(self, 0x20);
-    T217D_330* e = self->items;
-    for (n = 0; n < 4; n++) {
-        e->vt = &D_00218330;
-        D_00218330.m00(e, 0x12);
-        e++;
-    }
-}
-
-void SetupItemColumn(T217D_720* self)
-{
-    T217D_330* e;
-    u32 i;
-
-    e = (T217D_330*)self;
-    SetupScreenElementText(e);
-    e = self->items;
-    for (i = 0; i < 4; i++) {
-        e->vt->m01(e);
-        e->frame = 0;
-        e->font->sx = 0.8f;
-        e->font->sy = 0.8f;
-        SetScreenElementSlideInTime(e, 1.0f);
-        SetScreenElementSlideOutTime(e, 1.0f);
-        SetScreenElementHoldTime(e, 0.0f);
-        e++;
-    }
-}
-
-void UpdateItemColumn(T217D_720* self, f32* clock)
-{
-    SetScreenElementClock(self, clock);
-    T217D_330* e = self->items;
-    for (u32 i = 0; i < 4; i++) {
-        e->vt->m17(e, clock);
-        e++;
-    }
-}
-
-void UpdateItemColumnSlide(T217D_720* self)
-{
-    UpdateScreenElementSlide(self);
-    for (s32 i = 0; i < self->count; i++) {
-        T217D_330* s = &self->items[i];
-        s->vt->m02(s);
-    }
-}
-
-void DrawItemColumn(T217D_720* self)
-{
-    if (D_00275BEC == 1) {
-        f32 acc = self->y;
-        s32 i;
-        for (i = 0; i < self->count; i++) {
-            T217D_330* e = &self->items[i];
-            f32 saved = e->blend;
-            f32 base = self->x;
-            f32 scaled = saved * g_timeScale;
-            e->y = acc;
-            e->x = base;
-            e->blend = scaled;
-            e->vt->m09(e);
-            e->blend = saved;
-            acc += e->h;
-        }
-    }
-}
-
-void ResizeItemColumn(T217D_720* self, s32 n, f32 x, f32 y)
-{
-    self->place->dx = x;
-    self->place->dy = y;
-    self->count = n;
-    Font* q = self->font;
-    SetScreenElementSize(self, self->w, (f32)q->height * q->sy * (f32)n);
-    self->vt->m16(self, 2);
-}
-
-void ClearItemColumn(T217D_720* self)
-{
-    self->vt->m16(self, 0);
-}
-
-void PostItemColumnEntry(T217D_720* self, s32 index, char* text, f32 hold)
-{
-    T217D_330* item = &self->items[index];
-    for (char* p = text; *p != 0; p++) {
-        if (*p == '_') {
-            *p = ' ';
-        }
-    }
-    item->vt->m08(item, text);
-    f32 width = 0.0f;
-    for (s32 i = 0; i < self->count; i++) {
-        width = self->items[i].w >? width;
-    }
-    Font* q = self->font;
-    SetScreenElementSize(self, width, (f32)q->height * q->sy * (f32)self->count);
-    if (hold != 0.0f) {
-        item = &self->items[index];
-        f32 span = item->vt->m11(item);
-        span += item->vt->m13(item);
-        hold -= span;
-        if (hold <= 0.0f) {
-            hold = 0.016666668f;
-        }
-        SetScreenElementHoldTime(item, hold);
-        item->vt->m14(item);
-    }
-}
-
-void FactorSymmetricMatrix(s32 n, f32* a, f32* l)
-{
-    s32 i;
-    s32 j;
-    s32 k;
-    f32 sum;
-
-    if (n == 0)
-    {
-        return;
-    }
-    for (i = 0; i < n; i++)
-    {
-        l[i] = a[i];
-    }
-    if (__builtin_fabsf(l[0]) < 1e-8f)
-    {
-        for (j = 0; j < n; j++)
-        {
-            l[j * n] = 0.0f;
-        }
-    }
-    else
-    {
-        for (j = 1; j < n; j++)
-        {
-            l[j * n] = a[j * n] / l[0];
-        }
-    }
-    for (j = 1; j < n - 1; j++)
-    {
-        for (i = j; i < n; i++)
-        {
-            sum = 0.0f;
-            for (k = 0; k < j; k++)
-            {
-                sum += l[i + k * n] * l[j * n + k];
-            }
-            l[j * n + i] = a[j * n + i] - sum;
-        }
-        if (__builtin_fabsf(l[j * n + j]) < 1e-8f)
-        {
-            for (k = j; k < n; k++)
-            {
-                l[k * n + j] = 0.0f;
-            }
-        }
-        else
-        {
-            for (k = j + 1; k < n; k++)
-            {
-                sum = 0.0f;
-                for (i = 0; i < j; i++)
-                {
-                    sum += l[j + i * n] * l[k * n + i];
-                }
-                l[k * n + j] = (a[k * n + j] - sum) / l[j * n + j];
-            }
-        }
-    }
-    sum = 0.0f;
-    for (k = 0; k < n - 1; k++)
-    {
-        sum += l[(n - 1) + k * n] * l[(n - 1) * n + k];
-    }
-    l[(n - 1) * n + (n - 1)] = a[(n - 1) * n + (n - 1)] - sum;
-    if (__builtin_fabsf(l[(n - 1) * n + (n - 1)]) < 1e-8f)
-    {
-        l[(n - 1) * n + (n - 1)] = 0.0f;
-    }
-}
-
-void SolveFactoredSystem(s32 n, f32* m, f32* b, f32* x)
-{
-    s32 i;
-    s32 k;
-    f32 sum;
-
-    for (i = 0; i < n; i++) {
-        if (m[i * n + i] == 0.0f) {
-            x[i] = 0.0f;
-        } else {
-            sum = 0.0f;
-            for (k = 0; k < i; k++) {
-                sum += m[k * n + i] * x[k];
-            }
-            x[i] = (b[i] - sum) / m[i * n + i];
-        }
-    }
-
-    for (i = n - 2; i >= 0; i--) {
-        if (m[i * n + i] != 0.0f) {
-            sum = 0.0f;
-            for (k = i + 1; k < n; k++) {
-                sum += m[k * n + i] * x[k];
-            }
-            x[i] -= sum;
-        }
-    }
-}
-
-void RegisterWorldListedAgent(WorldListedAgent* self)
-{
-    RegisterAgent(self);
-    AppendToList(&self->world->list1CCC, self);
-}
-
-void UnregisterWorldListedAgent(WorldListedAgent* self) { UnregisterAgent(self); RemoveFromList(&self->world->list1CCC, self); }
-
-void CopyWorldListedAgent(WorldListedAgent* self, void* other) { Pack10 save=self->fC10; CopyAgent(self,other); self->fC10=save; }
-
-void InitNumberedAgent(NumberedAgent* self) { InitAgent(self); self->fC24=1; D_0027C008=0; }
-
-void StartNumberedAgent(NumberedAgent* self) { StartAgent(self); self->fC2C=D_0027C008++; }
-
-void SetSinCosPair(f32 value, SinCosPair* self)
-{
-    ComputeSinCos(&self->b, self, value);
-    self->value = 0;
 }

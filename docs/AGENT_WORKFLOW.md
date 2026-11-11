@@ -257,7 +257,8 @@ Measured on this compiler; add to this list when you learn something.
     One file's literals and jump tables leave no gap of their own (a float literal is aligned
     to 4), so a 4-byte literal on 16 after a gap of zeros starts the next file's `.rodata`:
     func_0014B6A8's FLT_MAX at 0x249EF0, 12 bytes after func_00149760's last jump table, ends
-    file_149398.cpp between the two (one file built whole came out 12 bytes short).
+    file_149398.cpp (now camera_controller.cpp) between the two (one file built whole came out
+    12 bytes short).
   - A cut the data bounds only to a range is a choice, said so in both files' heads. The
     functions from 0x14A7B8 to 0x14B6A8 read no `.rodata` or `.data` of either side, code is
     on 8 in every file, and a file that holds only words aligns its `.bss` to 4 (`objdump -h`
@@ -265,6 +266,8 @@ Measured on this compiler; add to this list when you learn something.
     files' `.bss`. Built whole, the cuts at 0x14A7B8, 0x14A888, 0x14ABD0, 0x14B608 and
     0x14B6A8 all printed `MATCH`. The cut is at 0x14B6A8 (file_14B6A8.cpp), where the second
     file's data provably begins; the functions before it could belong to either file or a third.
+    They are now three files cut by role only (item_column.cpp, symmetric_solve.cpp,
+    file_14B550.cpp), and file_149398.cpp is camera_controller.cpp, ending at 0x14ABD0.
   - GCC 2.95 writes a file's vtables after everything else in its `.rodata`: a test unit built
     whole, a class with two virtuals and then a function with a jump table, puts the jump table
     first and the vtable (`.align 3`, 8 bytes per entry and 8 for the end) after it. So a GCC

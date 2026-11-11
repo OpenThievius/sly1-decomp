@@ -1,0 +1,7 @@
+symbol	name	evidence
+func_0014B550	RegisterWorldListedAgent	slot 6 of class 0x10: runs RegisterAgent then adds itself to the world's list at 0x1CCC with func_00152470
+func_0014B588	UnregisterWorldListedAgent	slot 7 of class 0x10: runs UnregisterAgent then removes itself from the world's list at 0x1CCC with func_00152600
+func_0014B5C0	CopyWorldListedAgent	slot 9 of class 0x10: keeps the Pack10 record at 0xC10 across the base CopyAgent
+func_0014B608	InitNumberedAgent	slot 0 of class 0x11: runs InitAgent, sets 0xC24 to 1 and resets the running count D_0027C008 that StartNumberedAgent draws from
+func_0014B640	StartNumberedAgent	a method of class 0x11 (overriding StartAgent): runs StartAgent and stores the running count D_0027C008, post-incremented, in 0xC2C
+func_0014B678	SetSinCosPair	writes the sine and cosine of its angle into the record's first two floats (ComputeSinCos) and clears the word after them; func_0014B6A8 of class 0x11 calls it

@@ -2391,7 +2391,7 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   last call loads `$f12` from the yaw's slot, then the pitch's `mov.s $f13` and `move a0` tie in
   sched1 and sched2 (priority 3, both alu); retail issues `$f13` first, which needs the out
   pointer after the floats. Its definition (matrix.cpp) and every other caller (camera,
-  file_149398, file_19E040, file_1A7FE8, hit_count_collider, tint_blend_collider) match with
+  camera_controller, file_19E040, file_1A7FE8, hit_count_collider, tint_blend_collider) match with
   either order, and agent.cpp already declared it floats first, so every declaration now agrees.
 - **Diagnosing it.** Where argument moves of one call are issued in an order no rank explains,
   compare their order in the `.combine` dump with the prototype; the order of a function's own

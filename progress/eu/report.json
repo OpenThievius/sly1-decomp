@@ -14,7 +14,7 @@
   "complete_code_percent": 0.0,
   "complete_data": "0",
   "complete_data_percent": 0.0,
-  "total_units": 177,
+  "total_units": 180,
   "complete_units": 0
  },
  "units": [
@@ -14204,17 +14204,17 @@
    }
   },
   {
-   "name": "game/file_149398",
+   "name": "game/camera_controller",
    "measures": {
     "fuzzy_match_percent": 100.0,
-    "total_code": "8852",
-    "matched_code": "8852",
+    "total_code": "6168",
+    "matched_code": "6168",
     "matched_code_percent": 100.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 36,
-    "matched_functions": 36,
+    "total_functions": 20,
+    "matched_functions": 20,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 0.0,
@@ -14423,12 +14423,42 @@
       "virtual_address": "1355152",
       "demangled_name": "UpdateValueCameraController"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/camera_controller.cpp"
+   }
+  },
+  {
+   "name": "game/item_column",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "1188",
+    "matched_code": "1188",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 8,
+    "matched_functions": 8,
+    "matched_functions_percent": 100.0,
+    "complete_code": "0",
+    "complete_code_percent": 0.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_0014AEC0",
      "size": "120",
      "fuzzy_match_percent": 100.0,
-     "address": "6200",
+     "address": "0",
      "metadata": {
       "virtual_address": "1355456",
       "demangled_name": "InitItemColumn"
@@ -14438,7 +14468,7 @@
      "name": "func_0014AF38",
      "size": "160",
      "fuzzy_match_percent": 100.0,
-     "address": "6320",
+     "address": "120",
      "metadata": {
       "virtual_address": "1355576",
       "demangled_name": "SetupItemColumn"
@@ -14448,7 +14478,7 @@
      "name": "func_0014AFD8",
      "size": "108",
      "fuzzy_match_percent": 100.0,
-     "address": "6480",
+     "address": "280",
      "metadata": {
       "virtual_address": "1355736",
       "demangled_name": "UpdateItemColumn"
@@ -14458,7 +14488,7 @@
      "name": "func_0014B048",
      "size": "108",
      "fuzzy_match_percent": 100.0,
-     "address": "6592",
+     "address": "392",
      "metadata": {
       "virtual_address": "1355848",
       "demangled_name": "UpdateItemColumnSlide"
@@ -14468,7 +14498,7 @@
      "name": "func_0014B0B8",
      "size": "192",
      "fuzzy_match_percent": 100.0,
-     "address": "6704",
+     "address": "504",
      "metadata": {
       "virtual_address": "1355960",
       "demangled_name": "DrawItemColumn"
@@ -14478,7 +14508,7 @@
      "name": "func_0014B178",
      "size": "112",
      "fuzzy_match_percent": 100.0,
-     "address": "6896",
+     "address": "696",
      "metadata": {
       "virtual_address": "1356152",
       "demangled_name": "ResizeItemColumn"
@@ -14488,7 +14518,7 @@
      "name": "func_0014B1E8",
      "size": "36",
      "fuzzy_match_percent": 100.0,
-     "address": "7008",
+     "address": "808",
      "metadata": {
       "virtual_address": "1356264",
       "demangled_name": "ClearItemColumn"
@@ -14498,17 +14528,47 @@
      "name": "func_0014B210",
      "size": "352",
      "fuzzy_match_percent": 100.0,
-     "address": "7048",
+     "address": "848",
      "metadata": {
       "virtual_address": "1356304",
       "demangled_name": "PostItemColumnEntry"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/item_column.cpp"
+   }
+  },
+  {
+   "name": "game/symmetric_solve",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "1164",
+    "matched_code": "1164",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 2,
+    "matched_functions": 2,
+    "matched_functions_percent": 100.0,
+    "complete_code": "0",
+    "complete_code_percent": 0.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_0014B370",
      "size": "800",
      "fuzzy_match_percent": 100.0,
-     "address": "7400",
+     "address": "0",
      "metadata": {
       "virtual_address": "1356656",
       "demangled_name": "FactorSymmetricMatrix"
@@ -14518,17 +14578,47 @@
      "name": "func_0014B690",
      "size": "364",
      "fuzzy_match_percent": 100.0,
-     "address": "8200",
+     "address": "800",
      "metadata": {
       "virtual_address": "1357456",
       "demangled_name": "SolveFactoredSystem"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/symmetric_solve.cpp"
+   }
+  },
+  {
+   "name": "game/file_14B550",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "332",
+    "matched_code": "332",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 6,
+    "matched_functions": 6,
+    "matched_functions_percent": 100.0,
+    "complete_code": "0",
+    "complete_code_percent": 0.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_0014B800",
      "size": "52",
      "fuzzy_match_percent": 100.0,
-     "address": "8568",
+     "address": "0",
      "metadata": {
       "virtual_address": "1357824",
       "demangled_name": "RegisterWorldListedAgent"
@@ -14538,7 +14628,7 @@
      "name": "func_0014B838",
      "size": "52",
      "fuzzy_match_percent": 100.0,
-     "address": "8624",
+     "address": "56",
      "metadata": {
       "virtual_address": "1357880",
       "demangled_name": "UnregisterWorldListedAgent"
@@ -14548,7 +14638,7 @@
      "name": "func_0014B870",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "8680",
+     "address": "112",
      "metadata": {
       "virtual_address": "1357936",
       "demangled_name": "CopyWorldListedAgent"
@@ -14558,7 +14648,7 @@
      "name": "func_0014B8B8",
      "size": "52",
      "fuzzy_match_percent": 100.0,
-     "address": "8752",
+     "address": "184",
      "metadata": {
       "virtual_address": "1358008",
       "demangled_name": "InitNumberedAgent"
@@ -14568,7 +14658,7 @@
      "name": "func_0014B8F0",
      "size": "56",
      "fuzzy_match_percent": 100.0,
-     "address": "8808",
+     "address": "240",
      "metadata": {
       "virtual_address": "1358064",
       "demangled_name": "StartNumberedAgent"
@@ -14578,7 +14668,7 @@
      "name": "func_0014B928",
      "size": "48",
      "fuzzy_match_percent": 100.0,
-     "address": "8864",
+     "address": "296",
      "metadata": {
       "virtual_address": "1358120",
       "demangled_name": "SetSinCosPair"
@@ -14590,7 +14680,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_149398.cpp"
+    "source_path": "src/main/file_14B550.cpp"
    }
   },
   {
@@ -53449,7 +53539,7 @@
     "complete_code_percent": 0.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
-    "total_units": 84,
+    "total_units": 87,
     "complete_units": 0
    }
   },

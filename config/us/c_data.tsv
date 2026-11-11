@@ -18,7 +18,7 @@ D_00249E3C	00249E3C	8	.rodata	src/main/flagged_object.cpp
 D_00249E44	00249E44	8	.rodata	src/main/collider_span.cpp
 D_00249E4C	00249E4C	4	.rodata	src/main/camera.cpp
 D_00249E50	00249E50	68	.rodata	src/main/state_notifier.cpp
-D_00249EA0	00249EA0	68	.rodata	src/main/file_149398.cpp
+D_00249EA0	00249EA0	68	.rodata	src/main/camera_controller.cpp
 D_00249EF0	00249EF0	200	.rodata	src/main/file_14B6A8.cpp
 D_00249FBC	00249FBC	24	.rodata	src/main/path_curve.cpp
 D_00249FE0	00249FE0	288	.rodata	src/main/file_14EE40.cpp
@@ -138,7 +138,7 @@ D_00261410	00261410	1088	.data	src/main/flagged_object.cpp
 D_00261850	00261850	48	.data	src/main/game_clock.cpp
 D_00261880	00261880	276	.data	src/main/camera.cpp
 D_002619A0	002619A0	572	.data	src/main/state_notifier.cpp
-D_00261BF0	00261BF0	160	.data	src/main/file_149398.cpp
+D_00261BF0	00261BF0	160	.data	src/main/camera_controller.cpp
 D_00261C90	00261C90	52	.data	src/main/file_14B6A8.cpp
 D_00261CC8	00261CC8	668	.data	src/main/file_14EE40.cpp
 D_00261F70	00261F70	1012	.data	src/main/file_1549C8.cpp
@@ -224,7 +224,7 @@ D_0027B0B0	0027B0B0	128	.data	src/lib/ipu_reset.cpp
 D_0027B130	0027B130	84	.data.D_0027B130	src/lib/001F8000.cpp
 D_0027B200	0027B200	56	.gcc_except_table	src/lib/allocate.cpp
 D_0027B238	0027B238	92	.gcc_except_table	src/lib/exception.cpp
-D_0027C008	0027C008	4	.bss	src/main/file_149398.cpp
+D_0027C008	0027C008	4	.bss	src/main/file_14B550.cpp
 D_0027C00C	0027C00C	4	.bss	src/main/file_14B6A8.cpp
 D_002BE460	002BE460	24	.bss	src/main/display.cpp
 D_002BE478	002BE478	20	.bss	src/main/entry_queue.cpp

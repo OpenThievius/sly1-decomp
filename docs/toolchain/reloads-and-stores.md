@@ -199,7 +199,7 @@ Read further with tools/globalalloc.py, tools/sched1.py, reload1.c and `-dR` sch
 
 ### A second spill register from a rematerialised constant (func_0014C858)
 
-GaugeManager's agent placement (src/main/file_149398.cpp), read from `-dL -dS -dl -dg` dumps
+GaugeManager's agent placement (src/main/file_14B6A8.cpp), read from `-dL -dS -dl -dg` dumps
 (2026-11-10):
 
 - **The sign: four reloads in v1 where ours has v0.** Retail's posp output reload, the first
