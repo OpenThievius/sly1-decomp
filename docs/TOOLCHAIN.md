@@ -41,9 +41,13 @@ one is EXACT with this compiler, on US and on PAL.
 | `2.95.2` (sce_ps2_sdk_24) | GCC 2.95.2 SN BUILD v2.74 | 7 EXACT |
 | `2.9-ee-991111` (sce_ps2_sdk_24) | GNU 2.9-ee-991111b/r4 (Sony's) | 2 EXACT: it makes tail calls (`j` in place of `jal`) and saves registers in 8 bytes, where retail saves 16 (`sq`) |
 
-The three SN builds agree on everything measured so far; SN BUILD 1.14 is the
-working choice because it is the one other 2002 games of the period were built
-with. A function that tells the SN builds apart is worth recording here.
+The three SN builds agree on the seven; SN BUILD 1.14 was the working choice because it
+is the one other 2002 games of the period were built with. The near misses tell them apart
+(2026-11-11): of the 48 in `nonmatching/`, 30 score the same under all three, and the other
+18 are worse under SN BUILD v2.74 and v1.07 (most change size: func_001D5678, 99.9% with
+1.14, `size differs` with both; func_001930B8 77.2% against 54.2%), never better. No near miss
+is closer with another build, so the walls in `nonmatching/` are not a file built with
+another release.
 
 What else was measured:
 
