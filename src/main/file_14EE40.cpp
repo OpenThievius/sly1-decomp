@@ -2535,7 +2535,19 @@ void ResetActiveSetSolver(ActiveSetSolver* self)
     }
 }
 
-INCLUDE_ASM(func_001536C8);
+void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item)
+{
+    for (s32 i = 0; i < self->count; i++) {
+        ActiveSetItem* e = (ActiveSetItem*)(self->items + i * 0x60);
+        f32* row = e->row;
+        if (row != 0) {
+            Vu0::Vec d = Vu0::Dot(Vu0::Vec::Of(item->axis), Vu0::Vec::Of(e->axes[*(s32*)((u8*)item->owner + 0xCC)]));
+            Vu0::StoreX(((u32*)row)[self->count], d.q);
+        }
+    }
+    AppendToList(&self->pending, item);
+    self->count++;
+}
 
 typedef void (*EndRowsFn)(Collider* body, s32 a1, void* contact, s32 end, ActiveSetItem* item, f32* rows);
 typedef void (*EndFillFn)(Collider* body, s32 a1, s32 size, s32 extra, f32* rows);
