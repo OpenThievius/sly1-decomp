@@ -1,0 +1,9 @@
+symbol	name	evidence
+func_0014ABD0	InitItemColumn	runs the base init and sets the four items' vtable to D_00218330 and calls its slot 0 with 0x12
+func_0014AC48	SetupItemColumn	slot 1 of the item column table D_00218720: sets up its text (SetupScreenElementText), then each of its four items' slot 1, font scale 0.8 and slide times 1, 1 and 0
+func_0014AD00	UpdateItemColumn	runs the base update (func_001AAF58) then slot 17 of each of the four items with the clock
+func_0014AD70	UpdateItemColumnSlide	slot 2 of the item column table D_00218720: runs UpdateScreenElementSlide, then slot 2 of each of its items up to its count
+func_0014ADE0	DrawItemColumn	when D_00275BEC is 1, stacks the four items downward from y, setting each one's x, y and a scaled blend, calling its slot 9 and restoring the blend
+func_0014AEA0	ResizeItemColumn	stores an offset and a count n and sizes the column to the font height times scale times n
+func_0014AF10	ClearItemColumn	calls the item column's slot 16 with mode 0, as ResetScreenElement does (RunAnimationEvent calls it on g_stackedCaptionGroup)
+func_0014AF38	PostItemColumnEntry	original assembly: RunAnimationEvent passes it g_stackedCaptionGroup, two words of its event and a fraction (a byte times 1/256)

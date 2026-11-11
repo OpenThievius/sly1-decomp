@@ -257,7 +257,8 @@ Measured on this compiler; add to this list when you learn something.
     One file's literals and jump tables leave no gap of their own (a float literal is aligned
     to 4), so a 4-byte literal on 16 after a gap of zeros starts the next file's `.rodata`:
     func_0014B6A8's FLT_MAX at 0x249EF0, 12 bytes after func_00149760's last jump table, ends
-    file_149398.cpp between the two (one file built whole came out 12 bytes short).
+    file_149398.cpp (now camera_controller.cpp) between the two (one file built whole came out
+    12 bytes short).
   - A cut the data bounds only to a range is a choice, said so in both files' heads. The
     functions from 0x14A7B8 to 0x14B6A8 read no `.rodata` or `.data` of either side, code is
     on 8 in every file, and a file that holds only words aligns its `.bss` to 4 (`objdump -h`
@@ -265,9 +266,18 @@ Measured on this compiler; add to this list when you learn something.
     files' `.bss`. Built whole, the cuts at 0x14A7B8, 0x14A888, 0x14ABD0, 0x14B608 and
     0x14B6A8 all printed `MATCH`. The cut is at 0x14B6A8 (file_14B6A8.cpp), where the second
     file's data provably begins; the functions before it could belong to either file or a third.
+    They are now three files cut by role only (item_column.cpp, symmetric_solve.cpp,
+    file_14B550.cpp), and file_149398.cpp is camera_controller.cpp, ending at 0x14ABD0.
+  - GCC 2.95 writes a file's vtables after everything else in its `.rodata`: a test unit built
+    whole, a class with two virtuals and then a function with a jump table, puts the jump table
+    first and the vtable (`.align 3`, 8 bytes per entry and 8 for the end) after it. So a GCC
+    vtable followed by another function's literal or jump table ends a file's `.rodata`:
+    D_0024A0E0 (PacketWriter's base, file_14EE40.cpp) before PivotActiveSet's jump table at
+    0x24A100 (active_set_solver.cpp), and D_0024A6F8 (the GIF writer's, file_15F678.cpp) before
+    ReadPlacedObjectModel's FLT_MAX at 0x24A710 (placed_object_model.cpp).
   - Functions GCC emits after the static initialiser and before `_GLOBAL_$I$` (the setters at
     0x137248 to 0x137268) look like inline functions it emitted out of line at the end of the file.
-  - The colour objects (`Clr_180E38`, four bytes set in the constructor; `ColorWord` (file_15F678), one word)
+  - The colour objects (`Clr_180E38`, four bytes set in the constructor; `ColorWord` (placed_object_model.cpp), one word)
     and the 0x1C-byte style object (zeroed, then 0x2D, 0xFF7D4B00, two sizes given as integers,
     0.3 twice) recur in many files' static initialisers.
   - The compiler has one read-only section. A test unit with a `const` table of function

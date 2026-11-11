@@ -44,7 +44,7 @@ struct FrameSource {
     s32 stride;             // 0x00
     s32 base;               // 0x04
 };
-// An entry of the mesh queue (D_0027DC20, 0x4000 of them; file_167D68.cpp): func_001694A0
+// An entry of the mesh queue (D_0027DC20, 0x4000 of them; texture_upload.cpp): func_001694A0
 // copies count quadwords from value to dst and, with a flag, marks the copy's GIF tags.
 struct FrameTarget {
     s32 count;              // 0x00: the quadwords to copy

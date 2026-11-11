@@ -78,7 +78,7 @@ max.s`: a dead constant, a dead load, and out->z read back right after it was st
 ### A constant the loop does not own: an untied product (func_001389D0)
 
 Read from local-alloc.c (block_alloc, combine_regs), loop.c, jump.c and stmt.c with `-dL -dl
--dg -dr` dumps (2026-11-08, SortSweepAxes, src/main/file_137290.cpp):
+-dg -dr` dumps (2026-11-08, SortSweepAxes, src/main/world_contacts.cpp):
 
 - **Retail's sign.** `li v0,0x1800; mult a0,a1,v0`: the constant and the product in different
   registers. In ours the constant's pseudo died in the multiply and block_alloc tied the product
@@ -414,7 +414,7 @@ against the 30 in the `.rtl` dump.
 
 ### A search loop that loop.c leaves alone: a member read at each use (func_00165AE8)
 
-Retail's strip search in CopyAttachmentPart (src/main/file_15F678.cpp) is a rolled `break`
+Retail's strip search in CopyAttachmentPart (src/main/placed_object_model.cpp) is a rolled `break`
 loop (`b` into the test, the increment above it) that reloads the mesh's count, its strips and
 its frame on every pass: loop.c moved nothing. Ours, with `StripMesh* mesh = e->mesh;` before
 the loop, had the count hoisted (`Insn 485 ... moved`), and jump2 then copied the test in

@@ -1,0 +1,14 @@
+symbol	name	evidence
+func_00168130	ApplyFieldDisplayOffset	reads the GS CSR field bit (0x12001000 side, bit 13), and when it differs from the saved field copies the frame's display and dispfb records to DISPLAY2/DISPFB2 with the height one less and the start line (or framebuffer y) one further down, then writes PMODE
+func_001682C0	HandleVblankStart	the interrupt handler InitDisplay installs for cause 2 (the start of the vertical blank): posts D_002BE460 when D_002BE46C asks for it, then by the display mode D_002626CC applies the field's display offset (ApplyFieldDisplayOffset, modes 1 and 2) or advances g_displayFrameCounter and writes the next frame's display registers (WriteDisplayRegisters, mode 3)
+func_001683B8	SignalDisplaySync	sets D_002BE46C and signals D_002BE460 (func_001F6B60); FlipDisplayFrame, ResetDisplayBuffers and FadeScreenToBlack call it
+func_001683E8	FlipDisplayFrame	per-frame: picks one of two display records by the parity of the frame counter D_002626C0, sends it with func_00202098, increments the counter, then calls ApplyFieldDisplayOffset when D_002626CC is 1 or 2
+func_001684E8	ApplyPendingDisplayFlip	when a flip is pending (D_002BE474) clears it, reads the field bit of the GS CSR and sets the display and draw buffers for the frame counter's parity (RunRenderThread calls it)
+func_001685B8	ResetDisplayBuffers	sends the display reset packet, sets the GS mode, zeroes the flip state, sets the buffers by the field bit and advances g_displayFrameCounter (InitDisplay calls it)
+func_00168698	HandleGsFinish	the interrupt handler InitDisplay installs for cause 0 (the GS): when SendGsPacketAndWait has armed D_002BE468 and the GS CSR's FINISH bit (0x12001000 bit 1) is set, clears the flag and posts the semaphore D_002BE464 it waits on
+func_001686E8	SendGsPacketAndWait	sets D_002BE468, sets the GS CSR's FINISH bit, sends a packet on a DMA channel and waits on D_002BE464 (SendMaskedImagesToGif and the render thread call it)
+func_00168770	FillScreenColor	builds a GS packet that sets the colour register from its four bytes and draws sprites in 32-pixel steps across 0x280 pixels, two strips per step, with the flag choosing between two prim values
+func_001688B8	InitDisplay	clears the display records, fills three images with a colour (func_00168770), creates two semaphores, installs the two interrupt handlers func_001682C0 and func_00168698, then runs InitMeshQueue and func_001685B8
+func_00168A48	SendPacketToBothBuffers	sends a packet on the GIF channel once for each of the two draw buffers and waits for the channel
+func_00168AF8	SendDisplayResetPacket	builds a packet that refers to the 0x2C quadwords at D_002BE1A0 and sends it to both draw buffers (SendPacketToBothBuffers)
+func_00168B68	FadeScreenToBlack	for t*60 frames draws a full-screen 640-wide quad of colour (0,0,0,alpha) with alpha = (i/n)^2*255 into a packet and calls FlipDisplayFrame, so the screen goes to black

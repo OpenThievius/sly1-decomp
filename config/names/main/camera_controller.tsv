@@ -19,19 +19,3 @@ func_0014A8F8	UpdateFrameCameraController	original assembly: the every-frame slo
 func_0014AA90	ActivateValueCameraController	slot m00 of D_002173E0: stores its argument in the controller's word at +0x08
 func_0014AA98	DeactivateValueCameraController	slot m01 of D_002173E0: clears the controller's word at +0x08
 func_0014AAA0	UpdateValueCameraController	original assembly: the every-frame slot (m04) of D_002173E0
-func_0014ABD0	InitItemColumn	runs the base init and sets the four items' vtable to D_00218330 and calls its slot 0 with 0x12
-func_0014AC48	SetupItemColumn	slot 1 of the item column table D_00218720: sets up its text (SetupScreenElementText), then each of its four items' slot 1, font scale 0.8 and slide times 1, 1 and 0
-func_0014AD00	UpdateItemColumn	runs the base update (func_001AAF58) then slot 17 of each of the four items with the clock
-func_0014AD70	UpdateItemColumnSlide	slot 2 of the item column table D_00218720: runs UpdateScreenElementSlide, then slot 2 of each of its items up to its count
-func_0014ADE0	DrawItemColumn	when D_00275BEC is 1, stacks the four items downward from y, setting each one's x, y and a scaled blend, calling its slot 9 and restoring the blend
-func_0014AEA0	ResizeItemColumn	stores an offset and a count n and sizes the column to the font height times scale times n
-func_0014AF10	ClearItemColumn	calls the item column's slot 16 with mode 0, as ResetScreenElement does (RunAnimationEvent calls it on g_stackedCaptionGroup)
-func_0014AF38	PostItemColumnEntry	original assembly: RunAnimationEvent passes it g_stackedCaptionGroup, two words of its event and a fraction (a byte times 1/256)
-func_0014B0C0	FactorSymmetricMatrix	fills an n by n factor from a matrix with running sums of products of the earlier rows and divisions by the pivot, zeroing a pivot below 1e-8
-func_0014B3E0	SolveFactoredSystem	forward substitution dividing by the diagonal (0 when it is 0), then back substitution over the columns of an n by n matrix, for the factor FactorSymmetricMatrix makes
-func_0014B550	RegisterWorldListedAgent	slot 6 of class 0x10: runs RegisterAgent then adds itself to the world's list at 0x1CCC with func_00152470
-func_0014B588	UnregisterWorldListedAgent	slot 7 of class 0x10: runs UnregisterAgent then removes itself from the world's list at 0x1CCC with func_00152600
-func_0014B5C0	CopyWorldListedAgent	slot 9 of class 0x10: keeps the Pack10 record at 0xC10 across the base CopyAgent
-func_0014B608	InitNumberedAgent	slot 0 of class 0x11: runs InitAgent, sets 0xC24 to 1 and resets the running count D_0027C008 that StartNumberedAgent draws from
-func_0014B640	StartNumberedAgent	a method of class 0x11 (overriding StartAgent): runs StartAgent and stores the running count D_0027C008, post-incremented, in 0xC2C
-func_0014B678	SetSinCosPair	writes the sine and cosine of its angle into the record's first two floats (ComputeSinCos) and clears the word after them; func_0014B6A8 of class 0x11 calls it

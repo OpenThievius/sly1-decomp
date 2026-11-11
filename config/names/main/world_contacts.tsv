@@ -1,0 +1,13 @@
+symbol	name	evidence
+func_001385A0	SetContactPairFlags	ors set and clears clr in the symmetric byte matrix at +0x1ADC for two table entries, and on reaching the linked state (low bits 0xF or bit 0x40) pushes a contact row each way with PushContactRow, on leaving it unlinks them and frees the chain
+func_00138738	PushContactRow	takes a record from the pool at world+0x1AF0, clears its first word, stores the source's value, and pushes it onto the list head
+func_00138788	UnlinkContactRow	walks a singly linked row list for the row whose other end is the key's owner, unlinks it and returns it
+func_001387C0	FindContactRow	walks the root's contact table for the row whose other end is the other object's root and returns it or 0
+func_001387F8	GetContactRowHead	returns the first word of the row FindContactRow finds, 0 when there is none
+func_00138828	AddColliderToSweepAxes	RegisterCollider calls it: appends, in each of the world's three 0x1800-byte axis lists at 0x1AD8, a start entry pointing at the collider's bound at 0x420 and an end entry at 0x430 (one float per axis), then MarkSweepAxesUnsorted
+func_001388A0	RemoveColliderFromSweepAxes	UnregisterCollider's counterpart of AddColliderToSweepAxes: takes the collider's entries out of the three axis lists at 0x1AD8
+func_001389C8	MarkSweepAxesUnsorted	clears the world's 0x1AEC, so SortSweepAxes re-sorts the axis lists; AddColliderToSweepAxes and RecomputeColliderFrame call it
+func_001389D0	SortSweepAxes	when 0x1AEC is clear, insertion-sorts each of the three axis lists at 0x1AD8 by the bound each entry points at, calling SetContactPairFlags (func_001385A0) for the pairs whose start and end entries cross; UpdateWorldContacts calls it first
+func_00138BE0	ClearRootObjectStateBits	clears the given bits of the root object's word at +0x4B8
+func_00138C00	UpdateWorldContacts	sorts the axes (SortSweepAxes), then for each pair of objects on the world's list at 0x6C rebuilds their contact chain (FreePooledContactChain, func_00188270) and calls the objects' children's slots 0x110 and 0x10C; LoadWorld, RunPendingWorldLoad and UpdateWorld call it
+func_00138F28	InitContactPairFlags	clears the object's +0x4B8 then, for each contact table in use but its own, calls func_001385A0 with a set or clear value of 8 chosen by slot 14 of either object

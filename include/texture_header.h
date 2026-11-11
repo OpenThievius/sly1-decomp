@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// A texture's header as func_00169B18 (file_167D68.cpp) and func_00152E48 (file_14EE40.cpp) read it:
+// A texture's header as func_00169B18 (texture_upload.cpp) and func_00152E48 (file_14EE40.cpp) read it:
 // the width and height, and a doubleword of GS bits at 0x18 (the layout of the GS's TEX0
 // register: func_00169B18 takes the width and height exponents out of bits 26 to 33). Written
 // for this project from what retail's code does (build/swarm/st3/groups.tsv, g1697).

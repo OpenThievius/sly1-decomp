@@ -53,7 +53,7 @@ void ReleaseVectorBPayload(void* p);
 void ReleasePairPayload(void* p);
 void ReleaseTriplePayload(void* p);
 
-// The stream reader (file_137290.cpp).
+// The stream reader (buffered_stream.cpp).
 s32 ReadBufferedU8(BufferedStream* r);
 s32 ReadBufferedU16(void* stream);
 s32 ReadBufferedS32(BufferedStream* r);

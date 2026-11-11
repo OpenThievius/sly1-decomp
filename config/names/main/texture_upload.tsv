@@ -1,0 +1,21 @@
+symbol	name	evidence
+func_00168D00	InitMeshQueue	calls InitBumpAllocator(&g_bumpAllocator, 0x1E00, 0x4000) and zeroes D_002626D0, the count of entries QueueMeshStrip and QueueNodeLink append to D_0027DC20
+func_00168D30	CeilLog2	returns the smallest count (at most 31) such that 1<<count is not below n, by doubling a value from 1 (BuildImageTexRegister uses it for the texture width and height exponents)
+func_00168D68	InitBumpAllocator	stores its first argument as the start and the cursor and its second as the limit
+func_00168D78	ResetBumpAllocator	copies the start back into the cursor
+func_00168D88	AllocateBump	returns the cursor and moves it on by the size
+func_00168D98	BeginImageTransfer	writes GS registers 0x50 to 0x53 (BITBLTBUF with dbp, dbw and dpsm, TRXPOS 0, TRXREG with width and height, TRXDIR 0) into a packet, then sends the data with func_00161958
+func_00168E78	BuildPaletteTexRegister	stores the VRAM address in the bit field at +0x10 that sits where TEX0 keeps its palette base, picks psm 0x14 or 0x13 by whether the colour count is at most 16, and sets the load-palette field to 1
+func_00168F48	StartPaletteUpload	calls BeginImageTransfer for a palette record with a width of 16 or 8 chosen by its colour count, height rounded up from it, and its VRAM address v
+func_00168FB0	BuildImageTexRegister	fills the TEX0-shaped bit field at +0x18 of an image record: base address, width in 64-pixel units, psm, CeilLog2 of the width and of the height, and the colour-component bit set
+func_00169088	StartImageUpload	calls BeginImageTransfer with an image record's psm, buffer width, width and height
+func_001690C0	PlaceMaskedImages	for each palette record and each image record whose flags contain the mask, takes its size from the bump allocator (aligned to 0x80 and 0x20), sets its register bits, and when given a packet starts the upload; returns whether the packet's write pointer moved
+func_001692B0	SendMaskedImagesToGif	places the masked images, appends TEXFLUSH and FINISH register writes, ends the packet and sends it down the GIF channel
+func_001693A8	BuildMaskedImagesPacket	places the masked images into a bump-allocated temporary packet, appends TEXFLUSH and copies the finished packet out to the caller
+func_001694A0	SubmitMeshQueueEntry	copies the entry's source block to its destination with func_0018D800 and, when its flag word is set, ORs 0x8000 and the flag into two words of the destination
+func_001694F8	QueueMeshStrip	fills a 16-byte record from a mesh strip (count, base, node index) in the pool D_0027DC20 or on the stack and, for a linked node, links it into the node's list
+func_00169608	QueueNodeLink	fills a 16-byte record for the node in the pool D_0027DC20 or on the stack and links it into the node's list
+func_001696B8	RemapMeshQueueValues	for entries from idx on, a value in [take, take+lo) is moved to give plus its offset from take
+func_00169718	FlushMeshQueue	runs SubmitMeshQueueEntry over each of the D_002626D0 entries of D_0027DC20
+func_00169780	UploadImagesByMask	for every image and palette record whose flag word contains the mask, builds the texture register and upload packet and writes it through VIF direct
+func_00169B18	SetupTextureRenderTarget	writes GS registers 0x4D (FRAME_2), 0x4F (ZBUF_2), 0x19 (XYOFFSET_2), 0x41 (SCISSOR_2), 0x48 (TEST_2) and 0x43 into a packet from a texture header's TEX0 base and size, so drawing lands in that texture
