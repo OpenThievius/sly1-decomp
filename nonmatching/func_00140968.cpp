@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 60/64, checked 2026-11-11
+// w32-sizeA (2026-11-11): not retried (60+ forms already in docs/toolchain/gcse.md); the first differing block is the compare's (retail beq with move a1,v1 in its slot, ours bnel), as above.
 // NEAR (2026-11-08, night-gamec): retail's beq with the store's address copied (move a1,v1 in its delay slot) where this has bnel and one address register; the reload after the store is the same
 // In the context of its file, src/main/disc_access.cpp: its declarations before the function, bodies cut.
 // Mechanism (2026-11-10, docs/TOOLCHAIN.md, GCSE, "A %hi copied into a second register"):
