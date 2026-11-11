@@ -10,6 +10,8 @@ func_0011D450	UnloadSoundBank	sends command 6 with a bank handle; file_1B7968.cp
 func_0011D480	SetIopVolumeChannel	sends command 9 with a channel number and a value; callers pass values scaled by 1024 (the master channel 8 from func_001C05D0, channels 0 to 3 from func_001C0600)
 func_0011D4B8	GetIopVolumeChannel	sends command 10 with a channel number and returns the reply; func_0018E940 saves channels 2 and 8 with it and func_0018EAA0 restores them with SetIopVolumeChannel
 func_0011D4E0	SetIopSoundOptionFlag	queues IOP command 11 with one word; its only caller func_001C0790 passes whether the save data's option bit 0x40 (g_saveData->f19EC) is set (ResetVolumeChannelFactors, ResumeAtSavedLevel, ActivatePauseMenuSelection)
+func_0011D520	QueueIopCommandD	queues IOP command 0xD with two words (8 bytes); the sound system's start-up sends it with 0 and 1
+func_0011D558	QueueIopChannelConfig	queues IOP command 0x4E with three words (a channel index and two values); the sound system's start-up sends it for channels 0 to 3 with 0x2F and 0 or 0x18
 func_0011D598	StartSoundVoice	sends command 0x11 with six words (bank handle, sound index and parameters) and returns the voice handle that StopSoundVoice, IsVoiceBusy and RequestVoiceCallback later take
 func_0011D600	StopSoundVoice	sends command 0x15 with a voice handle; callers use it to stop the voice (or to cut it at once when the fade time is 0)
 func_0011D640	PauseIopVoice	queues IOP command 0x13 with a voice handle; the text panel, the pause and warp menus (through func_001BEA28, func_001BED48) and the camera's sounds call it on opening, and ResumeIopVoice on closing
@@ -42,6 +44,7 @@ func_0011E2A0	CloseDiscStream	without IOP disc access calls StopDiscRead, else q
 func_0011E2E8	GetDiscReadError	with D_0025C34C zero it forwards to func_00203D90, otherwise returns the word at +0x10 of the shared packet D_00260DC0; file_137290.cpp and disc_access.cpp read it after SyncDiscRead as the read's error
 func_0011E328	SetIopChannelValue	sends command 0xE with a channel number and a value; PushIopChannel2Setting, PopIopChannel2Setting and SetIopChannel2Setting call it for channel 2 with a table entry
 func_0011E360	SetIopChannelValuePair	sends command 0xF with a channel number and two words; the channel 2 setting functions pass the same value twice
+func_0011E3A0	QueueIopCommand51	queues IOP command 0x51 with two words (8 bytes); the sound system's start-up sends it with 2 and 4 last
 func_0011E428	OpenIopRing	sends command 0x3B with five words (movie_player passes 0x6000, 0x400, 0, 2, 2) and returns the reply, which becomes the ring address handed to func_0018E678
 func_0011E460	ResetIopRing	sends command 0x3D and waits; func_0018EA48 calls it when its ring is active, then marks it and resets its two ring buffers
 func_0011E498	StopIopMovieStream	sends IOP command 0x3C without data and waits (SendIopCommandAndWait); StopMovieStream calls it

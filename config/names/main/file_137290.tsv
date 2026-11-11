@@ -23,6 +23,7 @@ func_00137E70	ReadBufferedVector3	reads 12 bytes into dst with func_00137A60; fu
 func_00137E90	ReadBufferedVector4	reads 16 bytes into out with func_00137A60
 func_00137EB0	ReadBufferedRotation3	reads three 12-byte rows into buffer, buffer + 0x10 and buffer + 0x20 with func_00137A60
 func_00137F08	ReadBufferedMatrix4	reads four 12-byte rows into p, p+0x10, p+0x20 and p+0x30 and sets the fourth column to 0, 0, 0, 1.0
+func_00137FB0	ReadMeshFromStream	reads a radius, a vertex count and vertices, then faces, a points array, a words array and an edge list into a mesh record, filling each face's vertex and edge indices from the stream and linking shared edges
 func_00138278	ReadFaceTree	reads two counts, allocates 12-byte nodes and fills each with a face address (base + index*32) and back and front links by index (0xFFFF for none) from the buffered stream
 func_00138398	ReadLinkedItemArray	reads a count, allocates 32-byte items and fills each from the stream: a vector, a float and two links stored raw when negative or as a pointer into the array otherwise
 func_001384A0	ReadBufferedString	reads a halfword size, allocates size+1 bytes, reads them from the buffered stream and NUL-terminates
@@ -57,8 +58,12 @@ func_00139E80	LeaveWorldLists	slot 6: removes itself from its world's lists at +
 func_00139EC8	ReleaseWorldListedObject	slot 7: walks the members list calling func_00139D28 on each, then removes itself from the world list at +0x1CB4 and D_002622E0
 func_00139F80	AssignAnimRecord	stores at 0x380 the record FindAnimRecord finds (g_animRecords when none), on the first call copies its four bytes at +4 halved into 0x594, then RebuildAnimRecordEntries
 func_0013A008	RebuildAnimRecordEntries	from the count in the record's block (byte at +4) picks a power of two below 0x20 for 0x384 and fills the 16-byte entries at 0x390 with func_001B2988; AssignAnimRecord and UpdateMatchingListedObjects call it
+func_0013A128	ApplyLookSourceToListedObject	copies colour count, colours (halved) and timing fields of a look record into a world-listed object, assigns its animation record, derives its rate from the register count and remaps the record's quadratic into curve2F0
 func_0013A3A0	UpdateWorldListedObject	slot 17: runs base updates then, unless the flagRecord's flags satisfy the global mask, calls its own method 3
 func_0013A418	CopyWorldListedObject	slot 23: copies from the source object and, when it is of class 0x50, keeps it as source and takes its float at 0x80
+func_0013A498	FilterParticleVerticesVu0	original assembly: loads a matrix into VU0 and runs the microprogram (vcallms 0x10) over an array of vertices, keeping those that pass the w test and wrapping the interpolated angle (WrapAngle) in kind 2 output
+func_0013A618	StepListedObjectParticles	original assembly: starts min and max bounds at plus and minus 3.4e38, moves particles in scratchpad chunks (StartToSprChain and StartFromSprChain DMA, FilterParticleVerticesVu0, TurnMatrixBySpin) and detaches the record when its list is empty
 func_0013A940	MoveWorldListedObject	class 0x4D's slot at 0x7C, the move slot of the other classes (MoveStateNotifier, MoveModeCollider)
 func_0013AD08	SubmitWorldListedObjectBlock	slot 37: builds a zeroed 0x80-byte parameter block (count 0xF, radius from the source or 1.0, owner itself) and passes it to func_0019D410
+func_0013AD80	WriteListedObjectParticlePacket	original assembly: the deferred-request function SubmitWorldListedObjectBlock installs: writes VIF unpack and STCYCL words and copies the particle words (CopyWordsToWriter) into the packet for each chunk of the listed object
 func_0013B430	UpdateMatchingListedObjects	for a nonzero mask walks the world list at +0x1CB4 and calls func_0013A008 on each object whose flag record has bit 0x10000000 or all of the mask's bits
