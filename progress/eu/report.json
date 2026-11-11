@@ -5,8 +5,8 @@
   "matched_code": "1040104",
   "matched_code_percent": 93.06152541220344,
   "total_data": "464563",
-  "matched_data": "310747",
-  "matched_data_percent": 66.89017420672761,
+  "matched_data": "311219",
+  "matched_data_percent": 66.9917750660298,
   "total_functions": 4831,
   "matched_functions": 4782,
   "matched_functions_percent": 98.98571724280687,
@@ -14,7 +14,7 @@
   "complete_code_percent": 0.0,
   "complete_data": "0",
   "complete_data_percent": 0.0,
-  "total_units": 169,
+  "total_units": 170,
   "complete_units": 0
  },
  "units": [
@@ -40162,16 +40162,16 @@
   {
    "name": "game/file_1E08F8",
    "measures": {
-    "fuzzy_match_percent": 98.06902218570255,
-    "total_code": "19472",
-    "matched_code": "19096",
-    "matched_code_percent": 98.06902218570255,
+    "fuzzy_match_percent": 100.0,
+    "total_code": "7384",
+    "matched_code": "7384",
+    "matched_code_percent": 100.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 75,
-    "matched_functions": 74,
-    "matched_functions_percent": 98.66666666666667,
+    "total_functions": 42,
+    "matched_functions": 42,
+    "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -40586,12 +40586,42 @@
       "virtual_address": "1979328",
       "demangled_name": "CreateRenderThread"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/file_1E08F8.cpp"
+   }
+  },
+  {
+   "name": "game/file_1E2420",
+   "measures": {
+    "fuzzy_match_percent": 96.88947716743878,
+    "total_code": "12088",
+    "matched_code": "11712",
+    "matched_code_percent": 96.88947716743878,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 33,
+    "matched_functions": 32,
+    "matched_functions_percent": 96.96969696969697,
+    "complete_code": "0",
+    "complete_code_percent": 0.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_001E3448",
      "size": "24",
      "fuzzy_match_percent": 100.0,
-     "address": "7464",
+     "address": "0",
      "metadata": {
       "virtual_address": "1979464",
       "demangled_name": "GetOnOffObjectBlock"
@@ -40601,7 +40631,7 @@
      "name": "func_001E3460",
      "size": "232",
      "fuzzy_match_percent": 100.0,
-     "address": "7488",
+     "address": "24",
      "metadata": {
       "virtual_address": "1979488",
       "demangled_name": "BlendOnOffCameraPoint"
@@ -40611,7 +40641,7 @@
      "name": "func_001E3548",
      "size": "216",
      "fuzzy_match_percent": 100.0,
-     "address": "7720",
+     "address": "256",
      "metadata": {
       "virtual_address": "1979720",
       "demangled_name": "InitOnOffObject"
@@ -40621,7 +40651,7 @@
      "name": "func_001E3620",
      "size": "76",
      "fuzzy_match_percent": 100.0,
-     "address": "7936",
+     "address": "472",
      "metadata": {
       "virtual_address": "1979936",
       "demangled_name": "UnregisterOnOffObject"
@@ -40631,7 +40661,7 @@
      "name": "func_001E3670",
      "size": "268",
      "fuzzy_match_percent": 100.0,
-     "address": "8016",
+     "address": "552",
      "metadata": {
       "virtual_address": "1980016",
       "demangled_name": "LoadOnOffObject"
@@ -40641,7 +40671,7 @@
      "name": "func_001E3780",
      "size": "28",
      "fuzzy_match_percent": 100.0,
-     "address": "8288",
+     "address": "824",
      "metadata": {
       "virtual_address": "1980288",
       "demangled_name": "StartOnOffObject"
@@ -40651,7 +40681,7 @@
      "name": "func_001E37A0",
      "size": "200",
      "fuzzy_match_percent": 100.0,
-     "address": "8320",
+     "address": "856",
      "metadata": {
       "virtual_address": "1980320",
       "demangled_name": "SetOnOffObjectState"
@@ -40661,7 +40691,7 @@
      "name": "func_001E3868",
      "size": "44",
      "fuzzy_match_percent": 100.0,
-     "address": "8520",
+     "address": "1056",
      "metadata": {
       "virtual_address": "1980520",
       "demangled_name": "SetOnOffObjectForcedState"
@@ -40671,7 +40701,7 @@
      "name": "func_001E3898",
      "size": "204",
      "fuzzy_match_percent": 100.0,
-     "address": "8568",
+     "address": "1104",
      "metadata": {
       "virtual_address": "1980568",
       "demangled_name": "UpdateOnOffObjectState"
@@ -40681,7 +40711,7 @@
      "name": "func_001E3968",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "8776",
+     "address": "1312",
      "metadata": {
       "virtual_address": "1980776",
       "demangled_name": "UpdateOnOffObject"
@@ -40691,7 +40721,7 @@
      "name": "func_001E39B0",
      "size": "28",
      "fuzzy_match_percent": 100.0,
-     "address": "8848",
+     "address": "1384",
      "metadata": {
       "virtual_address": "1980848",
       "demangled_name": "DrawOnOffObject"
@@ -40701,7 +40731,7 @@
      "name": "func_001E39D0",
      "size": "64",
      "fuzzy_match_percent": 100.0,
-     "address": "8880",
+     "address": "1416",
      "metadata": {
       "virtual_address": "1980880",
       "demangled_name": "SetOnOffObjectFrozen"
@@ -40711,7 +40741,7 @@
      "name": "func_001E3A10",
      "size": "24",
      "fuzzy_match_percent": 100.0,
-     "address": "8944",
+     "address": "1480",
      "metadata": {
       "virtual_address": "1980944",
       "demangled_name": "SetOnOffObjectBlockValue"
@@ -40721,7 +40751,7 @@
      "name": "func_001E3A28",
      "size": "496",
      "fuzzy_match_percent": 100.0,
-     "address": "8968",
+     "address": "1504",
      "metadata": {
       "virtual_address": "1980968",
       "demangled_name": "PlaceOnOffCameraFrame"
@@ -40731,7 +40761,7 @@
      "name": "func_001E3C18",
      "size": "632",
      "fuzzy_match_percent": 100.0,
-     "address": "9464",
+     "address": "2000",
      "metadata": {
       "virtual_address": "1981464",
       "demangled_name": "PlaceOnOffCameraOrbit"
@@ -40741,7 +40771,7 @@
      "name": "func_001E3E90",
      "size": "564",
      "fuzzy_match_percent": 100.0,
-     "address": "10096",
+     "address": "2632",
      "metadata": {
       "virtual_address": "1982096",
       "demangled_name": "ActivateOnOffCameraController"
@@ -40751,7 +40781,7 @@
      "name": "func_001E40C8",
      "size": "56",
      "fuzzy_match_percent": 100.0,
-     "address": "10664",
+     "address": "3200",
      "metadata": {
       "virtual_address": "1982664",
       "demangled_name": "DeactivateOnOffCameraController"
@@ -40761,7 +40791,7 @@
      "name": "func_001E4100",
      "size": "8",
      "fuzzy_match_percent": 100.0,
-     "address": "10720",
+     "address": "3256",
      "metadata": {
       "virtual_address": "1982720",
       "demangled_name": "NoteOnOffCameraControllerPushed"
@@ -40771,7 +40801,7 @@
      "name": "func_001E4108",
      "size": "8",
      "fuzzy_match_percent": 100.0,
-     "address": "10728",
+     "address": "3264",
      "metadata": {
       "virtual_address": "1982728",
       "demangled_name": "NoteOnOffCameraControllerRemoved"
@@ -40781,7 +40811,7 @@
      "name": "func_001E4110",
      "size": "264",
      "fuzzy_match_percent": 100.0,
-     "address": "10736",
+     "address": "3272",
      "metadata": {
       "virtual_address": "1982736",
       "demangled_name": "ComputeOnOffCameraHeading"
@@ -40791,7 +40821,7 @@
      "name": "func_001E4218",
      "size": "4996",
      "fuzzy_match_percent": 100.0,
-     "address": "11000",
+     "address": "3536",
      "metadata": {
       "virtual_address": "1983000",
       "demangled_name": "UpdateOnOffCameraController"
@@ -40801,7 +40831,7 @@
      "name": "func_001E55A0",
      "size": "776",
      "fuzzy_match_percent": 100.0,
-     "address": "16000",
+     "address": "8536",
      "metadata": {
       "virtual_address": "1988000",
       "demangled_name": "FindFreeOnOffCameraScreenSpan"
@@ -40811,7 +40841,7 @@
      "name": "func_001E58A8",
      "size": "8",
      "fuzzy_match_percent": 100.0,
-     "address": "16776",
+     "address": "9312",
      "metadata": {
       "virtual_address": "1988776",
       "demangled_name": "GetSpanCandidateValue"
@@ -40821,7 +40851,7 @@
      "name": "func_001E58B0",
      "size": "956",
      "fuzzy_match_percent": 100.0,
-     "address": "16784",
+     "address": "9320",
      "metadata": {
       "virtual_address": "1988784",
       "demangled_name": "FindFreeOnOffCameraAngle"
@@ -40831,7 +40861,7 @@
      "name": "func_001E5C70",
      "size": "376",
      "fuzzy_match_percent": 0.0,
-     "address": "17744",
+     "address": "10280",
      "metadata": {
       "virtual_address": "1989744",
       "demangled_name": "ReadMeshTables"
@@ -40841,7 +40871,7 @@
      "name": "func_001E5DE8",
      "size": "120",
      "fuzzy_match_percent": 100.0,
-     "address": "18120",
+     "address": "10656",
      "metadata": {
       "virtual_address": "1990120",
       "demangled_name": "IsPointInsideFaceTree"
@@ -40851,7 +40881,7 @@
      "name": "func_001E5E60",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "18240",
+     "address": "10776",
      "metadata": {
       "virtual_address": "1990240",
       "demangled_name": "ConstructWorldLoadRequest"
@@ -40861,7 +40891,7 @@
      "name": "func_001E5EA8",
      "size": "40",
      "fuzzy_match_percent": 100.0,
-     "address": "18312",
+     "address": "10848",
      "metadata": {
       "virtual_address": "1990312",
       "demangled_name": "QueueWorldLoad"
@@ -40871,7 +40901,7 @@
      "name": "func_001E5ED0",
      "size": "976",
      "fuzzy_match_percent": 100.0,
-     "address": "18352",
+     "address": "10888",
      "metadata": {
       "virtual_address": "1990352",
       "demangled_name": "RunPendingWorldLoad"
@@ -40881,7 +40911,7 @@
      "name": "func_001E62A0",
      "size": "176",
      "fuzzy_match_percent": 100.0,
-     "address": "19328",
+     "address": "11864",
      "metadata": {
       "virtual_address": "1991328",
       "demangled_name": "RequestWorldLoadByMode"
@@ -40891,7 +40921,7 @@
      "name": "func_001E6350",
      "size": "4",
      "fuzzy_match_percent": 100.0,
-     "address": "19504",
+     "address": "12040",
      "metadata": {
       "virtual_address": "1991504"
      }
@@ -40900,7 +40930,7 @@
      "name": "func_001E6358",
      "size": "48",
      "fuzzy_match_percent": 100.0,
-     "address": "19512",
+     "address": "12048",
      "metadata": {
       "virtual_address": "1991512",
       "demangled_name": "ConstructWorldLoadRequestGlobal"
@@ -40910,7 +40940,7 @@
      "name": "func_001E6388",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "19560",
+     "address": "12096",
      "metadata": {
       "virtual_address": "1991560",
       "demangled_name": "ConstructWorldLoadRequestGlobalAtStartup"
@@ -40922,7 +40952,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1E08F8.cpp"
+    "source_path": "src/main/file_1E2420.cpp"
    }
   },
   {
@@ -53115,8 +53145,8 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "233435",
-    "matched_data": "160355",
-    "matched_data_percent": 68.69364062801208,
+    "matched_data": "160359",
+    "matched_data_percent": 68.6953541671129,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
@@ -53142,8 +53172,8 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "209140",
-    "matched_data": "128404",
-    "matched_data_percent": 61.396193937075644,
+    "matched_data": "128872",
+    "matched_data_percent": 61.61996748589462,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
@@ -53209,7 +53239,7 @@
     "complete_code_percent": 0.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
-    "total_units": 76,
+    "total_units": 77,
     "complete_units": 0
    }
   },
@@ -53244,8 +53274,8 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "464563",
-    "matched_data": "310747",
-    "matched_data_percent": 66.89017420672761,
+    "matched_data": "311219",
+    "matched_data_percent": 66.9917750660298,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,

@@ -2,7 +2,7 @@
 // The camera controllers (CameraController), five sub-objects embedded in class 0x6D (include/c6d.h)
 // at +0x454, +0x460, +0x4C0, +0x510 and +0x520, and the stack of the ones in action. Written for
 // this project from what retail's code does (config/us/tables.tsv, src/main/state_notifier.cpp,
-// camera.cpp, file_1E08F8.cpp).
+// camera.cpp, file_1E2420.cpp).
 //
 // func_00143648 (0x6D slot 0) stores each table and calls the base set-up func_00149398 (it
 // keeps the owner) or a derived one. The camera keeps its controllers in a stack ordered by a

@@ -5,17 +5,17 @@
   "matched_code": "1037336",
   "matched_code_percent": 93.25206760158217,
   "total_data": "431059",
-  "matched_data": "429442",
-  "matched_data_percent": 99.62487733697708,
+  "matched_data": "429434",
+  "matched_data_percent": 99.62302144254035,
   "total_functions": 4807,
   "matched_functions": 4760,
   "matched_functions_percent": 99.02225920532557,
   "complete_code": "1037336",
   "complete_code_percent": 93.25206760158217,
-  "complete_data": "429442",
-  "complete_data_percent": 99.62487733697708,
-  "total_units": 171,
-  "complete_units": 135
+  "complete_data": "429434",
+  "complete_data_percent": 99.62302144254035,
+  "total_units": 172,
+  "complete_units": 136
  },
  "units": [
   {
@@ -40082,22 +40082,22 @@
   {
    "name": "game/file_1E08F8",
    "measures": {
-    "fuzzy_match_percent": 98.0168776371308,
-    "total_code": "18960",
-    "matched_code": "18584",
-    "matched_code_percent": 98.0168776371308,
+    "fuzzy_match_percent": 100.0,
+    "total_code": "6876",
+    "matched_code": "6876",
+    "matched_code_percent": 100.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 66,
-    "matched_functions": 65,
-    "matched_functions_percent": 98.48484848484848,
-    "complete_code": "18584",
-    "complete_code_percent": 98.0168776371308,
+    "total_functions": 34,
+    "matched_functions": 34,
+    "matched_functions_percent": 100.0,
+    "complete_code": "6876",
+    "complete_code_percent": 100.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
     "total_units": 1,
-    "complete_units": 0
+    "complete_units": 1
    },
    "functions": [
     {
@@ -40434,12 +40434,42 @@
       "virtual_address": "1975192",
       "demangled_name": "CreateRenderThread"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": true,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/file_1E08F8.cpp"
+   }
+  },
+  {
+   "name": "game/file_1E2420",
+   "measures": {
+    "fuzzy_match_percent": 96.88844753392917,
+    "total_code": "12084",
+    "matched_code": "11708",
+    "matched_code_percent": 96.88844753392917,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 32,
+    "matched_functions": 31,
+    "matched_functions_percent": 96.875,
+    "complete_code": "11708",
+    "complete_code_percent": 96.88844753392917,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_001E2420",
      "size": "24",
      "fuzzy_match_percent": 100.0,
-     "address": "6952",
+     "address": "0",
      "metadata": {
       "virtual_address": "1975328",
       "demangled_name": "GetOnOffObjectBlock"
@@ -40449,7 +40479,7 @@
      "name": "func_001E2438",
      "size": "232",
      "fuzzy_match_percent": 100.0,
-     "address": "6976",
+     "address": "24",
      "metadata": {
       "virtual_address": "1975352",
       "demangled_name": "BlendOnOffCameraPoint"
@@ -40459,7 +40489,7 @@
      "name": "func_001E2520",
      "size": "216",
      "fuzzy_match_percent": 100.0,
-     "address": "7208",
+     "address": "256",
      "metadata": {
       "virtual_address": "1975584",
       "demangled_name": "InitOnOffObject"
@@ -40469,7 +40499,7 @@
      "name": "func_001E25F8",
      "size": "76",
      "fuzzy_match_percent": 100.0,
-     "address": "7424",
+     "address": "472",
      "metadata": {
       "virtual_address": "1975800",
       "demangled_name": "UnregisterOnOffObject"
@@ -40479,7 +40509,7 @@
      "name": "func_001E2648",
      "size": "268",
      "fuzzy_match_percent": 100.0,
-     "address": "7504",
+     "address": "552",
      "metadata": {
       "virtual_address": "1975880",
       "demangled_name": "LoadOnOffObject"
@@ -40489,7 +40519,7 @@
      "name": "func_001E2758",
      "size": "28",
      "fuzzy_match_percent": 100.0,
-     "address": "7776",
+     "address": "824",
      "metadata": {
       "virtual_address": "1976152",
       "demangled_name": "StartOnOffObject"
@@ -40499,7 +40529,7 @@
      "name": "func_001E2778",
      "size": "200",
      "fuzzy_match_percent": 100.0,
-     "address": "7808",
+     "address": "856",
      "metadata": {
       "virtual_address": "1976184",
       "demangled_name": "SetOnOffObjectState"
@@ -40509,7 +40539,7 @@
      "name": "func_001E2840",
      "size": "44",
      "fuzzy_match_percent": 100.0,
-     "address": "8008",
+     "address": "1056",
      "metadata": {
       "virtual_address": "1976384",
       "demangled_name": "SetOnOffObjectForcedState"
@@ -40519,7 +40549,7 @@
      "name": "func_001E2870",
      "size": "204",
      "fuzzy_match_percent": 100.0,
-     "address": "8056",
+     "address": "1104",
      "metadata": {
       "virtual_address": "1976432",
       "demangled_name": "UpdateOnOffObjectState"
@@ -40529,7 +40559,7 @@
      "name": "func_001E2940",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "8264",
+     "address": "1312",
      "metadata": {
       "virtual_address": "1976640",
       "demangled_name": "UpdateOnOffObject"
@@ -40539,7 +40569,7 @@
      "name": "func_001E2988",
      "size": "28",
      "fuzzy_match_percent": 100.0,
-     "address": "8336",
+     "address": "1384",
      "metadata": {
       "virtual_address": "1976712",
       "demangled_name": "DrawOnOffObject"
@@ -40549,7 +40579,7 @@
      "name": "func_001E29A8",
      "size": "64",
      "fuzzy_match_percent": 100.0,
-     "address": "8368",
+     "address": "1416",
      "metadata": {
       "virtual_address": "1976744",
       "demangled_name": "SetOnOffObjectFrozen"
@@ -40559,7 +40589,7 @@
      "name": "func_001E29E8",
      "size": "24",
      "fuzzy_match_percent": 100.0,
-     "address": "8432",
+     "address": "1480",
      "metadata": {
       "virtual_address": "1976808",
       "demangled_name": "SetOnOffObjectBlockValue"
@@ -40569,7 +40599,7 @@
      "name": "func_001E2A00",
      "size": "496",
      "fuzzy_match_percent": 100.0,
-     "address": "8456",
+     "address": "1504",
      "metadata": {
       "virtual_address": "1976832",
       "demangled_name": "PlaceOnOffCameraFrame"
@@ -40579,7 +40609,7 @@
      "name": "func_001E2BF0",
      "size": "632",
      "fuzzy_match_percent": 100.0,
-     "address": "8952",
+     "address": "2000",
      "metadata": {
       "virtual_address": "1977328",
       "demangled_name": "PlaceOnOffCameraOrbit"
@@ -40589,7 +40619,7 @@
      "name": "func_001E2E68",
      "size": "564",
      "fuzzy_match_percent": 100.0,
-     "address": "9584",
+     "address": "2632",
      "metadata": {
       "virtual_address": "1977960",
       "demangled_name": "ActivateOnOffCameraController"
@@ -40599,7 +40629,7 @@
      "name": "func_001E30A0",
      "size": "56",
      "fuzzy_match_percent": 100.0,
-     "address": "10152",
+     "address": "3200",
      "metadata": {
       "virtual_address": "1978528",
       "demangled_name": "DeactivateOnOffCameraController"
@@ -40609,7 +40639,7 @@
      "name": "func_001E30D8",
      "size": "8",
      "fuzzy_match_percent": 100.0,
-     "address": "10208",
+     "address": "3256",
      "metadata": {
       "virtual_address": "1978584",
       "demangled_name": "NoteOnOffCameraControllerPushed"
@@ -40619,7 +40649,7 @@
      "name": "func_001E30E0",
      "size": "8",
      "fuzzy_match_percent": 100.0,
-     "address": "10216",
+     "address": "3264",
      "metadata": {
       "virtual_address": "1978592",
       "demangled_name": "NoteOnOffCameraControllerRemoved"
@@ -40629,7 +40659,7 @@
      "name": "func_001E30E8",
      "size": "264",
      "fuzzy_match_percent": 100.0,
-     "address": "10224",
+     "address": "3272",
      "metadata": {
       "virtual_address": "1978600",
       "demangled_name": "ComputeOnOffCameraHeading"
@@ -40639,7 +40669,7 @@
      "name": "func_001E31F0",
      "size": "4996",
      "fuzzy_match_percent": 100.0,
-     "address": "10488",
+     "address": "3536",
      "metadata": {
       "virtual_address": "1978864",
       "demangled_name": "UpdateOnOffCameraController"
@@ -40649,7 +40679,7 @@
      "name": "func_001E4578",
      "size": "776",
      "fuzzy_match_percent": 100.0,
-     "address": "15488",
+     "address": "8536",
      "metadata": {
       "virtual_address": "1983864",
       "demangled_name": "FindFreeOnOffCameraScreenSpan"
@@ -40659,7 +40689,7 @@
      "name": "func_001E4880",
      "size": "8",
      "fuzzy_match_percent": 100.0,
-     "address": "16264",
+     "address": "9312",
      "metadata": {
       "virtual_address": "1984640",
       "demangled_name": "GetSpanCandidateValue"
@@ -40669,7 +40699,7 @@
      "name": "func_001E4888",
      "size": "956",
      "fuzzy_match_percent": 100.0,
-     "address": "16272",
+     "address": "9320",
      "metadata": {
       "virtual_address": "1984648",
       "demangled_name": "FindFreeOnOffCameraAngle"
@@ -40679,7 +40709,7 @@
      "name": "func_001E4C48",
      "size": "376",
      "fuzzy_match_percent": 0.0,
-     "address": "17232",
+     "address": "10280",
      "metadata": {
       "virtual_address": "1985608",
       "demangled_name": "ReadMeshTables"
@@ -40689,7 +40719,7 @@
      "name": "func_001E4DC0",
      "size": "120",
      "fuzzy_match_percent": 100.0,
-     "address": "17608",
+     "address": "10656",
      "metadata": {
       "virtual_address": "1985984",
       "demangled_name": "IsPointInsideFaceTree"
@@ -40699,7 +40729,7 @@
      "name": "func_001E4E38",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "17728",
+     "address": "10776",
      "metadata": {
       "virtual_address": "1986104",
       "demangled_name": "ConstructWorldLoadRequest"
@@ -40709,7 +40739,7 @@
      "name": "func_001E4E80",
      "size": "40",
      "fuzzy_match_percent": 100.0,
-     "address": "17800",
+     "address": "10848",
      "metadata": {
       "virtual_address": "1986176",
       "demangled_name": "QueueWorldLoad"
@@ -40719,7 +40749,7 @@
      "name": "func_001E4EA8",
      "size": "976",
      "fuzzy_match_percent": 100.0,
-     "address": "17840",
+     "address": "10888",
      "metadata": {
       "virtual_address": "1986216",
       "demangled_name": "RunPendingWorldLoad"
@@ -40729,7 +40759,7 @@
      "name": "func_001E5278",
      "size": "176",
      "fuzzy_match_percent": 100.0,
-     "address": "18816",
+     "address": "11864",
      "metadata": {
       "virtual_address": "1987192",
       "demangled_name": "RequestWorldLoadByMode"
@@ -40739,7 +40769,7 @@
      "name": "func_001E5328",
      "size": "48",
      "fuzzy_match_percent": 100.0,
-     "address": "18992",
+     "address": "12040",
      "metadata": {
       "virtual_address": "1987368",
       "demangled_name": "ConstructWorldLoadRequestGlobal"
@@ -40749,7 +40779,7 @@
      "name": "func_001E5358",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "19040",
+     "address": "12088",
      "metadata": {
       "virtual_address": "1987416",
       "demangled_name": "ConstructWorldLoadRequestGlobalAtStartup"
@@ -40761,7 +40791,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1E08F8.cpp"
+    "source_path": "src/main/file_1E2420.cpp"
    }
   },
   {
@@ -53007,15 +53037,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "175156",
-    "matched_data": "174472",
-    "matched_data_percent": 99.60949096805133,
+    "matched_data": "174464",
+    "matched_data_percent": 99.60492361095253,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "174472",
-    "complete_data_percent": 99.60949096805133,
+    "complete_data": "174464",
+    "complete_data_percent": 99.60492361095253,
     "total_units": 1,
     "complete_units": 0
    },
@@ -53074,8 +53104,8 @@
     "complete_code_percent": 92.70075040887663,
     "complete_data": "0",
     "complete_data_percent": 100.0,
-    "total_units": 76,
-    "complete_units": 47
+    "total_units": 77,
+    "complete_units": 48
    }
   },
   {
@@ -53109,15 +53139,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "431059",
-    "matched_data": "429442",
-    "matched_data_percent": 99.62487733697708,
+    "matched_data": "429434",
+    "matched_data_percent": 99.62302144254035,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "429442",
-    "complete_data_percent": 99.62487733697708,
+    "complete_data": "429434",
+    "complete_data_percent": 99.62302144254035,
     "total_units": 4,
     "complete_units": 2
    }
