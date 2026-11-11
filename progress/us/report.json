@@ -4977,7 +4977,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2408",
      "metadata": {
-      "virtual_address": "1168672"
+      "virtual_address": "1168672",
+      "demangled_name": "QueueIopCommandD"
      }
     },
     {
@@ -4986,7 +4987,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2464",
      "metadata": {
-      "virtual_address": "1168728"
+      "virtual_address": "1168728",
+      "demangled_name": "QueueIopChannelConfig"
      }
     },
     {
@@ -5414,7 +5416,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "6120",
      "metadata": {
-      "virtual_address": "1172384"
+      "virtual_address": "1172384",
+      "demangled_name": "QueueIopCommand51"
      }
     },
     {
@@ -7080,7 +7083,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "10288",
      "metadata": {
-      "virtual_address": "1203184"
+      "virtual_address": "1203184",
+      "demangled_name": "SubmitScaledPlacedObjectTransform"
      }
     },
     {
@@ -7089,7 +7093,8 @@
      "fuzzy_match_percent": 99.69788519637463,
      "address": "10448",
      "metadata": {
-      "virtual_address": "1203344"
+      "virtual_address": "1203344",
+      "demangled_name": "PrepareFadedObjectDraw"
      }
     },
     {
@@ -7108,7 +7113,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "11952",
      "metadata": {
-      "virtual_address": "1204848"
+      "virtual_address": "1204848",
+      "demangled_name": "QueuePlacedObjectModelParts"
      }
     },
     {
@@ -7117,7 +7123,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "13560",
      "metadata": {
-      "virtual_address": "1206456"
+      "virtual_address": "1206456",
+      "demangled_name": "DrawBeamBetweenPoints"
      }
     },
     {
@@ -7146,7 +7153,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "14088",
      "metadata": {
-      "virtual_address": "1206984"
+      "virtual_address": "1206984",
+      "demangled_name": "ApplyPulsingColorToObjectTree"
      }
     },
     {
@@ -7195,7 +7203,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "14888",
      "metadata": {
-      "virtual_address": "1207784"
+      "virtual_address": "1207784",
+      "demangled_name": "BuildCameraFacingMatrix"
      }
     },
     {
@@ -7343,7 +7352,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "18272",
      "metadata": {
-      "virtual_address": "1211168"
+      "virtual_address": "1211168",
+      "demangled_name": "AccumulateFrameChain"
      }
     },
     {
@@ -7352,7 +7362,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "19104",
      "metadata": {
-      "virtual_address": "1212000"
+      "virtual_address": "1212000",
+      "demangled_name": "TransformStateToAncestorFrame"
      }
     },
     {
@@ -7411,7 +7422,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "20336",
      "metadata": {
-      "virtual_address": "1213232"
+      "virtual_address": "1213232",
+      "demangled_name": "ConvertVectorsBetweenObjectFrames"
      }
     },
     {
@@ -7420,7 +7432,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "20952",
      "metadata": {
-      "virtual_address": "1213848"
+      "virtual_address": "1213848",
+      "demangled_name": "ComputeObjectSteeringHeading"
      }
     },
     {
@@ -7479,7 +7492,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "23240",
      "metadata": {
-      "virtual_address": "1216136"
+      "virtual_address": "1216136",
+      "demangled_name": "ApplyObjectFrameOffsetToPose"
      }
     },
     {
@@ -7488,7 +7502,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "23568",
      "metadata": {
-      "virtual_address": "1216464"
+      "virtual_address": "1216464",
+      "demangled_name": "RemoveObjectFrameOffsetFromPose"
      }
     },
     {
@@ -8277,7 +8292,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "29776",
      "metadata": {
-      "virtual_address": "1222672"
+      "virtual_address": "1222672",
+      "demangled_name": "SetAimTargetId"
      }
     },
     {
@@ -8286,7 +8302,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "29832",
      "metadata": {
-      "virtual_address": "1222728"
+      "virtual_address": "1222728",
+      "demangled_name": "GetAimTargetId"
      }
     },
     {
@@ -8375,7 +8392,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "30312",
      "metadata": {
-      "virtual_address": "1223208"
+      "virtual_address": "1223208",
+      "demangled_name": "SetClass75ObjectMode"
      }
     },
     {
@@ -8504,7 +8522,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "31248",
      "metadata": {
-      "virtual_address": "1224144"
+      "virtual_address": "1224144",
+      "demangled_name": "SetSoundStartParam"
      }
     },
     {
@@ -8513,7 +8532,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "31304",
      "metadata": {
-      "virtual_address": "1224200"
+      "virtual_address": "1224200",
+      "demangled_name": "GetSoundStartParam"
      }
     },
     {
@@ -9061,7 +9081,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "38440",
      "metadata": {
-      "virtual_address": "1231336"
+      "virtual_address": "1231336",
+      "demangled_name": "FindNearestAnimationPathTime"
      }
     },
     {
@@ -9100,7 +9121,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "39352",
      "metadata": {
-      "virtual_address": "1232248"
+      "virtual_address": "1232248",
+      "demangled_name": "SampleAnimationFrameChain"
      }
     },
     {
@@ -9298,7 +9320,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "47128",
      "metadata": {
-      "virtual_address": "1240024"
+      "virtual_address": "1240024",
+      "demangled_name": "UpdateAnimationPlayer"
      }
     },
     {
@@ -9337,7 +9360,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "48720",
      "metadata": {
-      "virtual_address": "1241616"
+      "virtual_address": "1241616",
+      "demangled_name": "RefineNearestAnimationPathTime"
      }
     },
     {
@@ -9456,7 +9480,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "51112",
      "metadata": {
-      "virtual_address": "1244008"
+      "virtual_address": "1244008",
+      "demangled_name": "HandleIdFilterObjectContact"
      }
     },
     {
@@ -9664,7 +9689,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "54152",
      "metadata": {
-      "virtual_address": "1247048"
+      "virtual_address": "1247048",
+      "demangled_name": "BlendRotationsWithSpin"
      }
     },
     {
@@ -9693,7 +9719,8 @@
      "fuzzy_match_percent": 0.0,
      "address": "55448",
      "metadata": {
-      "virtual_address": "1248344"
+      "virtual_address": "1248344",
+      "demangled_name": "FindEarliestCubicBoundTime"
      }
     }
    ],
@@ -9822,7 +9849,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "15192",
      "metadata": {
-      "virtual_address": "1264288"
+      "virtual_address": "1264288",
+      "demangled_name": "CompareEntriesFarthestFirst"
      }
     },
     {
@@ -9831,7 +9859,8 @@
      "fuzzy_match_percent": 97.49430523917995,
      "address": "15360",
      "metadata": {
-      "virtual_address": "1264456"
+      "virtual_address": "1264456",
+      "demangled_name": "DrawTextPanelMarkers"
      }
     },
     {
@@ -10455,7 +10484,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3360",
      "metadata": {
-      "virtual_address": "1277872"
+      "virtual_address": "1277872",
+      "demangled_name": "ReadMeshFromStream"
      }
     },
     {
@@ -10822,7 +10852,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "11928",
      "metadata": {
-      "virtual_address": "1286440"
+      "virtual_address": "1286440",
+      "demangled_name": "ApplyLookSourceToListedObject"
      }
     },
     {
@@ -10851,7 +10882,8 @@
      "fuzzy_match_percent": 52.864583333333336,
      "address": "12808",
      "metadata": {
-      "virtual_address": "1287320"
+      "virtual_address": "1287320",
+      "demangled_name": "FilterParticleVerticesVu0"
      }
     },
     {
@@ -10860,7 +10892,8 @@
      "fuzzy_match_percent": 93.40796019900498,
      "address": "13192",
      "metadata": {
-      "virtual_address": "1287704"
+      "virtual_address": "1287704",
+      "demangled_name": "StepListedObjectParticles"
      }
     },
     {
@@ -10889,7 +10922,8 @@
      "fuzzy_match_percent": 97.36533957845434,
      "address": "15088",
      "metadata": {
-      "virtual_address": "1289600"
+      "virtual_address": "1289600",
+      "demangled_name": "WriteListedObjectParticlePacket"
      }
     },
     {
@@ -10998,7 +11032,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "872",
      "metadata": {
-      "virtual_address": "1292328"
+      "virtual_address": "1292328",
+      "demangled_name": "RefreshChildGroupObjectContacts"
      }
     },
     {
@@ -11057,7 +11092,8 @@
      "fuzzy_match_percent": 84.93975903614458,
      "address": "2392",
      "metadata": {
-      "virtual_address": "1293848"
+      "virtual_address": "1293848",
+      "demangled_name": "ApplyChildGroupKnockback"
      }
     },
     {
@@ -11066,7 +11102,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2728",
      "metadata": {
-      "virtual_address": "1294184"
+      "virtual_address": "1294184",
+      "demangled_name": "ApplyChildGroupRepulsion"
      }
     },
     {
@@ -11554,7 +11591,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "5944",
      "metadata": {
-      "virtual_address": "1303600"
+      "virtual_address": "1303600",
+      "demangled_name": "QueryPlaneTreePoint"
      }
     },
     {
@@ -11572,7 +11610,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "6496",
      "metadata": {
-      "virtual_address": "1304152"
+      "virtual_address": "1304152",
+      "demangled_name": "FindPlaneTreeNodeForPoint"
      }
     },
     {
@@ -11821,7 +11860,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "11176",
      "metadata": {
-      "virtual_address": "1308832"
+      "virtual_address": "1308832",
+      "demangled_name": "FindNearestStoredPoint"
      }
     },
     {
@@ -12549,7 +12589,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "928",
      "metadata": {
-      "virtual_address": "1318280"
+      "virtual_address": "1318280",
+      "demangled_name": "FindSegmentSphereSpan"
      }
     },
     {
@@ -12578,7 +12619,8 @@
      "fuzzy_match_percent": 98.89867841409692,
      "address": "2192",
      "metadata": {
-      "virtual_address": "1319544"
+      "virtual_address": "1319544",
+      "demangled_name": "IntersectSegmentWithCapsule"
      }
     },
     {
@@ -12815,7 +12857,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "728",
      "metadata": {
-      "virtual_address": "1324056"
+      "virtual_address": "1324056",
+      "demangled_name": "GetCameraTargetPlacement"
      }
     },
     {
@@ -13084,7 +13127,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2720",
      "metadata": {
-      "virtual_address": "1326048"
+      "virtual_address": "1326048",
+      "demangled_name": "FadeCameraObstructingParts"
      }
     },
     {
@@ -13103,7 +13147,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3784",
      "metadata": {
-      "virtual_address": "1327112"
+      "virtual_address": "1327112",
+      "demangled_name": "BuildCameraGroundFrame"
      }
     },
     {
@@ -13152,7 +13197,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4744",
      "metadata": {
-      "virtual_address": "1328072"
+      "virtual_address": "1328072",
+      "demangled_name": "BuildFrustumSideNormals"
      }
     },
     {
@@ -13231,7 +13277,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "6824",
      "metadata": {
-      "virtual_address": "1330152"
+      "virtual_address": "1330152",
+      "demangled_name": "UpdateOrbitCameraPlacement"
      }
     },
     {
@@ -13339,7 +13386,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "9424",
      "metadata": {
-      "virtual_address": "1332752"
+      "virtual_address": "1332752",
+      "demangled_name": "SetCameraAimOffsetFromScreenPoint"
      }
     },
     {
@@ -13348,7 +13396,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "9688",
      "metadata": {
-      "virtual_address": "1333016"
+      "virtual_address": "1333016",
+      "demangled_name": "AimCameraAtPointWithSpring"
      }
     },
     {
@@ -13367,7 +13416,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "10256",
      "metadata": {
-      "virtual_address": "1333584"
+      "virtual_address": "1333584",
+      "demangled_name": "FindNearestFreePointAround"
      }
     },
     {
@@ -13376,7 +13426,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "10792",
      "metadata": {
-      "virtual_address": "1334120"
+      "virtual_address": "1334120",
+      "demangled_name": "ComputeConstrainedPushOut"
      }
     },
     {
@@ -13395,7 +13446,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "11432",
      "metadata": {
-      "virtual_address": "1334760"
+      "virtual_address": "1334760",
+      "demangled_name": "ComputeCameraHitClearance"
      }
     },
     {
@@ -13404,7 +13456,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "11560",
      "metadata": {
-      "virtual_address": "1334888"
+      "virtual_address": "1334888",
+      "demangled_name": "PushCameraOutOfGeometry"
      }
     },
     {
@@ -13643,7 +13696,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3248",
      "metadata": {
-      "virtual_address": "1338800"
+      "virtual_address": "1338800",
+      "demangled_name": "BounceStateNotifierOffSurfaces"
      }
     },
     {
@@ -13652,7 +13706,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4272",
      "metadata": {
-      "virtual_address": "1339824"
+      "virtual_address": "1339824",
+      "demangled_name": "TriggerStateNotifierNearPlayer"
      }
     },
     {
@@ -15359,7 +15414,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4552",
      "metadata": {
-      "virtual_address": "1376264"
+      "virtual_address": "1376264",
+      "demangled_name": "ThrowHeldPooledObject"
      }
     },
     {
@@ -16115,7 +16171,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "18752",
      "metadata": {
-      "virtual_address": "1390464"
+      "virtual_address": "1390464",
+      "demangled_name": "BuildContactItemRows"
      }
     },
     {
@@ -16144,7 +16201,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "21064",
      "metadata": {
-      "virtual_address": "1392776"
+      "virtual_address": "1392776",
+      "demangled_name": "AddFrictionItemsAndSolve"
      }
     },
     {
@@ -16153,7 +16211,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "21808",
      "metadata": {
-      "virtual_address": "1393520"
+      "virtual_address": "1393520",
+      "demangled_name": "ApplySolvedImpulsesToParts"
      }
     },
     {
@@ -16222,7 +16281,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "696",
      "metadata": {
-      "virtual_address": "1395840"
+      "virtual_address": "1395840",
+      "demangled_name": "ReadSpawnMesh"
      }
     },
     {
@@ -16341,7 +16401,8 @@
      "fuzzy_match_percent": 0.0,
      "address": "3744",
      "metadata": {
-      "virtual_address": "1398888"
+      "virtual_address": "1398888",
+      "demangled_name": "WrapSpawnerParticlesIntoBox"
      }
     },
     {
@@ -16500,7 +16561,8 @@
      "fuzzy_match_percent": 93.63468634686348,
      "address": "6336",
      "metadata": {
-      "virtual_address": "1401480"
+      "virtual_address": "1401480",
+      "demangled_name": "SpawnSurfaceContactEffects"
      }
     },
     {
@@ -16519,7 +16581,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "7504",
      "metadata": {
-      "virtual_address": "1402648"
+      "virtual_address": "1402648",
+      "demangled_name": "ChooseSpawnPosition"
      }
     },
     {
@@ -16548,7 +16611,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "9936",
      "metadata": {
-      "virtual_address": "1405080"
+      "virtual_address": "1405080",
+      "demangled_name": "ComputeSpawnRingDirection"
      }
     },
     {
@@ -16557,7 +16621,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "10368",
      "metadata": {
-      "virtual_address": "1405512"
+      "virtual_address": "1405512",
+      "demangled_name": "ChooseSpawnDirectionAndLifetime"
      }
     },
     {
@@ -16576,7 +16641,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "11280",
      "metadata": {
-      "virtual_address": "1406424"
+      "virtual_address": "1406424",
+      "demangled_name": "EmitParticleChunk"
      }
     },
     {
@@ -16585,7 +16651,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "12264",
      "metadata": {
-      "virtual_address": "1407408"
+      "virtual_address": "1407408",
+      "demangled_name": "GenerateSpawnArrays"
      }
     },
     {
@@ -16594,7 +16661,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "12736",
      "metadata": {
-      "virtual_address": "1407880"
+      "virtual_address": "1407880",
+      "demangled_name": "GenerateSpawnSetupPair"
      }
     },
     {
@@ -16672,7 +16740,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "14880",
      "metadata": {
-      "virtual_address": "1410024"
+      "virtual_address": "1410024",
+      "demangled_name": "FillLookDirectionBlock"
      }
     },
     {
@@ -16901,7 +16970,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "18136",
      "metadata": {
-      "virtual_address": "1413280"
+      "virtual_address": "1413280",
+      "demangled_name": "HandleSpawnMessage"
      }
     },
     {
@@ -17208,7 +17278,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "24712",
      "metadata": {
-      "virtual_address": "1419856"
+      "virtual_address": "1419856",
+      "demangled_name": "IsPointInsideObjectFaces"
      }
     },
     {
@@ -17317,7 +17388,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "29360",
      "metadata": {
-      "virtual_address": "1424504"
+      "virtual_address": "1424504",
+      "demangled_name": "SendObjectCyclerMessage"
      }
     },
     {
@@ -17326,7 +17398,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "29568",
      "metadata": {
-      "virtual_address": "1424712"
+      "virtual_address": "1424712",
+      "demangled_name": "FindObjectCyclerGroundPoint"
      }
     },
     {
@@ -17335,7 +17408,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "29992",
      "metadata": {
-      "virtual_address": "1425136"
+      "virtual_address": "1425136",
+      "demangled_name": "ChooseObjectCyclerNextState"
      }
     },
     {
@@ -17344,7 +17418,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "30200",
      "metadata": {
-      "virtual_address": "1425344"
+      "virtual_address": "1425344",
+      "demangled_name": "IsActiveColliderNearObjectCycler"
      }
     },
     {
@@ -17791,7 +17866,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "40160",
      "metadata": {
-      "virtual_address": "1435304"
+      "virtual_address": "1435304",
+      "demangled_name": "PackFrameColors"
      }
     },
     {
@@ -20717,7 +20793,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1896",
      "metadata": {
-      "virtual_address": "1506672"
+      "virtual_address": "1506672",
+      "demangled_name": "ApplyPlayerDefaultSteering"
      }
     },
     {
@@ -20816,7 +20893,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "7216",
      "metadata": {
-      "virtual_address": "1511992"
+      "virtual_address": "1511992",
+      "demangled_name": "PosePlayerTargetPart"
      }
     },
     {
@@ -20825,7 +20903,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "9184",
      "metadata": {
-      "virtual_address": "1513960"
+      "virtual_address": "1513960",
+      "demangled_name": "MeasurePlayerFootProbe"
      }
     },
     {
@@ -20834,7 +20913,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "9848",
      "metadata": {
-      "virtual_address": "1514624"
+      "virtual_address": "1514624",
+      "demangled_name": "ProbePlayerFootGround"
      }
     },
     {
@@ -21003,7 +21083,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "15792",
      "metadata": {
-      "virtual_address": "1520568"
+      "virtual_address": "1520568",
+      "demangled_name": "FillPlayerPushRecord"
      }
     },
     {
@@ -21052,7 +21133,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "22552",
      "metadata": {
-      "virtual_address": "1527328"
+      "virtual_address": "1527328",
+      "demangled_name": "UpdatePlayerWhileAnimationDriven"
      }
     },
     {
@@ -21141,7 +21223,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "33672",
      "metadata": {
-      "virtual_address": "1538448"
+      "virtual_address": "1538448",
+      "demangled_name": "UpdatePlayerGrabs"
      }
     },
     {
@@ -21319,7 +21402,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "39600",
      "metadata": {
-      "virtual_address": "1544376"
+      "virtual_address": "1544376",
+      "demangled_name": "RecordPlayerTargetMemo"
      }
     }
    ],
@@ -21988,7 +22072,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "1561160"
+      "virtual_address": "1561160",
+      "demangled_name": "StepPlayerState2"
      }
     },
     {
@@ -21997,7 +22082,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "912",
      "metadata": {
-      "virtual_address": "1562072"
+      "virtual_address": "1562072",
+      "demangled_name": "ControlPlayerState2"
      }
     },
     {
@@ -22006,7 +22092,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2712",
      "metadata": {
-      "virtual_address": "1563872"
+      "virtual_address": "1563872",
+      "demangled_name": "ComputeLedgeEdgeOffset"
      }
     },
     {
@@ -22025,7 +22112,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3648",
      "metadata": {
-      "virtual_address": "1564808"
+      "virtual_address": "1564808",
+      "demangled_name": "ComputeLedgeOffsetForContact"
      }
     },
     {
@@ -22034,7 +22122,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4480",
      "metadata": {
-      "virtual_address": "1565640"
+      "virtual_address": "1565640",
+      "demangled_name": "FindPlayerLedgeContact"
      }
     },
     {
@@ -22053,7 +22142,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "5320",
      "metadata": {
-      "virtual_address": "1566480"
+      "virtual_address": "1566480",
+      "demangled_name": "CollectPlayerHoldQueries"
      }
     },
     {
@@ -22062,7 +22152,8 @@
      "fuzzy_match_percent": 99.75369458128078,
      "address": "6816",
      "metadata": {
-      "virtual_address": "1567976"
+      "virtual_address": "1567976",
+      "demangled_name": "ShouldPlayerLaunchAtTarget"
      }
     },
     {
@@ -22071,7 +22162,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "7632",
      "metadata": {
-      "virtual_address": "1568792"
+      "virtual_address": "1568792",
+      "demangled_name": "UpdatePlayerState2"
      }
     },
     {
@@ -22100,7 +22192,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "10752",
      "metadata": {
-      "virtual_address": "1571912"
+      "virtual_address": "1571912",
+      "demangled_name": "ComputeUpwardBoostVelocity"
      }
     },
     {
@@ -22109,7 +22202,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "10880",
      "metadata": {
-      "virtual_address": "1572040"
+      "virtual_address": "1572040",
+      "demangled_name": "ComputeUpwardBoostVelocityAlt"
      }
     },
     {
@@ -22488,7 +22582,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4128",
      "metadata": {
-      "virtual_address": "1580752"
+      "virtual_address": "1580752",
+      "demangled_name": "SteerWalkerAimAtNearestTarget"
      }
     },
     {
@@ -22547,7 +22642,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "6808",
      "metadata": {
-      "virtual_address": "1583432"
+      "virtual_address": "1583432",
+      "demangled_name": "BuildPathSpeedProfile"
      }
     }
    ],
@@ -23535,7 +23631,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "816",
      "metadata": {
-      "virtual_address": "1597256"
+      "virtual_address": "1597256",
+      "demangled_name": "RefreshContactEndPoints"
      }
     },
     {
@@ -23594,7 +23691,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2384",
      "metadata": {
-      "virtual_address": "1598824"
+      "virtual_address": "1598824",
+      "demangled_name": "CollectMeshEdgeHitsFromFaces"
      }
     },
     {
@@ -23623,7 +23721,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3984",
      "metadata": {
-      "virtual_address": "1600424"
+      "virtual_address": "1600424",
+      "demangled_name": "CreateMeshPairContacts"
      }
     },
     {
@@ -25253,7 +25352,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1888",
      "metadata": {
-      "virtual_address": "1630272"
+      "virtual_address": "1630272",
+      "demangled_name": "MoveTimedContactListObject"
      }
     },
     {
@@ -25671,7 +25771,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "80",
      "metadata": {
-      "virtual_address": "1636824"
+      "virtual_address": "1636824",
+      "demangled_name": "QueueModelPartDraws"
      }
     },
     {
@@ -25900,7 +26001,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4200",
      "metadata": {
-      "virtual_address": "1640944"
+      "virtual_address": "1640944",
+      "demangled_name": "CollectSegmentSpansInPlaneTree"
      }
     },
     {
@@ -26019,7 +26121,8 @@
      "fuzzy_match_percent": 0.0,
      "address": "8512",
      "metadata": {
-      "virtual_address": "1645256"
+      "virtual_address": "1645256",
+      "demangled_name": "FitStepToPointGraph"
      }
     },
     {
@@ -26028,7 +26131,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "8944",
      "metadata": {
-      "virtual_address": "1645688"
+      "virtual_address": "1645688",
+      "demangled_name": "PickRandomPointOnPointGraph"
      }
     },
     {
@@ -26486,7 +26590,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "13384",
      "metadata": {
-      "virtual_address": "1650128"
+      "virtual_address": "1650128",
+      "demangled_name": "EmitSwitchedColliderTrailPoints"
      }
     },
     {
@@ -26944,7 +27049,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3552",
      "metadata": {
-      "virtual_address": "1667512"
+      "virtual_address": "1667512",
+      "demangled_name": "FindHeldObjectAhead"
      }
     },
     {
@@ -27033,7 +27139,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "5808",
      "metadata": {
-      "virtual_address": "1669768"
+      "virtual_address": "1669768",
+      "demangled_name": "ApplyGaugeColliderAttachedSetContact"
      }
     },
     {
@@ -27502,7 +27609,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4464",
      "metadata": {
-      "virtual_address": "1678064"
+      "virtual_address": "1678064",
+      "demangled_name": "InvokeNumberedItemCollect"
      }
     },
     {
@@ -27841,7 +27949,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "12992",
      "metadata": {
-      "virtual_address": "1686592"
+      "virtual_address": "1686592",
+      "demangled_name": "ApplyObjectGathererLodObject"
      }
     },
     {
@@ -27860,7 +27969,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "13568",
      "metadata": {
-      "virtual_address": "1687168"
+      "virtual_address": "1687168",
+      "demangled_name": "ChooseObjectGathererCandidate"
      }
     },
     {
@@ -27879,7 +27989,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "14400",
      "metadata": {
-      "virtual_address": "1688000"
+      "virtual_address": "1688000",
+      "demangled_name": "SetObjectGathererState"
      }
     },
     {
@@ -27938,7 +28049,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "16456",
      "metadata": {
-      "virtual_address": "1690056"
+      "virtual_address": "1690056",
+      "demangled_name": "BlendCellCornerRecords"
      }
     },
     {
@@ -27987,7 +28099,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "17616",
      "metadata": {
-      "virtual_address": "1691216"
+      "virtual_address": "1691216",
+      "demangled_name": "PlaceFramePointAtTime"
      }
     },
     {
@@ -27996,7 +28109,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "17728",
      "metadata": {
-      "virtual_address": "1691328"
+      "virtual_address": "1691328",
+      "demangled_name": "PlaceFramePointInOwnerFrame"
      }
     },
     {
@@ -28005,7 +28119,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "17896",
      "metadata": {
-      "virtual_address": "1691496"
+      "virtual_address": "1691496",
+      "demangled_name": "FindPlaneTreeLeafAtPoint"
      }
     },
     {
@@ -28014,7 +28129,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "18272",
      "metadata": {
-      "virtual_address": "1691872"
+      "virtual_address": "1691872",
+      "demangled_name": "FindNearestAcceptedPointOnSegment"
      }
     },
     {
@@ -29651,7 +29767,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "33512",
      "metadata": {
-      "virtual_address": "1729320"
+      "virtual_address": "1729320",
+      "demangled_name": "AssignNearestListedObjectToPair"
      }
     },
     {
@@ -30310,7 +30427,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3240",
      "metadata": {
-      "virtual_address": "1739920"
+      "virtual_address": "1739920",
+      "demangled_name": "LaunchChosenPoolObject"
      }
     },
     {
@@ -30369,7 +30487,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "5608",
      "metadata": {
-      "virtual_address": "1742288"
+      "virtual_address": "1742288",
+      "demangled_name": "ComputeFrameFollowerPoint"
      }
     },
     {
@@ -30388,7 +30507,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "6272",
      "metadata": {
-      "virtual_address": "1742952"
+      "virtual_address": "1742952",
+      "demangled_name": "GetPlacementRecordPitch"
      }
     },
     {
@@ -32863,7 +32983,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "56",
      "metadata": {
-      "virtual_address": "1791424"
+      "virtual_address": "1791424",
+      "demangled_name": "UpdateTriangleAnimatorCursor"
      }
     },
     {
@@ -33289,7 +33410,8 @@
      "fuzzy_match_percent": 65.37610619469027,
      "address": "7416",
      "metadata": {
-      "virtual_address": "1798784"
+      "virtual_address": "1798784",
+      "demangled_name": "IsCompanionAgentFree"
      }
     },
     {
@@ -33548,7 +33670,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4648",
      "metadata": {
-      "virtual_address": "1805200"
+      "virtual_address": "1805200",
+      "demangled_name": "AddContactVertexBlendVelocity"
      }
     },
     {
@@ -33902,7 +34025,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "11336",
      "metadata": {
-      "virtual_address": "1811888"
+      "virtual_address": "1811888",
+      "demangled_name": "ApplyColliderAttachedSetContact"
      }
     },
     {
@@ -34011,7 +34135,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "14448",
      "metadata": {
-      "virtual_address": "1815000"
+      "virtual_address": "1815000",
+      "demangled_name": "SetColliderSurfaceKind"
      }
     },
     {
@@ -34170,7 +34295,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "17104",
      "metadata": {
-      "virtual_address": "1817656"
+      "virtual_address": "1817656",
+      "demangled_name": "InitColliderMeshMotion"
      }
     },
     {
@@ -34179,7 +34305,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "17744",
      "metadata": {
-      "virtual_address": "1818296"
+      "virtual_address": "1818296",
+      "demangled_name": "AdvanceColliderMeshMotion"
      }
     },
     {
@@ -34198,7 +34325,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "18296",
      "metadata": {
-      "virtual_address": "1818848"
+      "virtual_address": "1818848",
+      "demangled_name": "ApplyColliderImpulseEvent"
      }
     },
     {
@@ -34307,7 +34435,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "20496",
      "metadata": {
-      "virtual_address": "1821048"
+      "virtual_address": "1821048",
+      "demangled_name": "AddParentVelocityToChildRows"
      }
     },
     {
@@ -35603,7 +35732,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1552",
      "metadata": {
-      "virtual_address": "1849760"
+      "virtual_address": "1849760",
+      "demangled_name": "ControlHitCountCollider"
      }
     },
     {
@@ -35612,7 +35742,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1968",
      "metadata": {
-      "virtual_address": "1850176"
+      "virtual_address": "1850176",
+      "demangled_name": "StepHitCountCollider"
      }
     },
     {
@@ -35631,7 +35762,8 @@
      "fuzzy_match_percent": 79.16666666666667,
      "address": "2312",
      "metadata": {
-      "virtual_address": "1850520"
+      "virtual_address": "1850520",
+      "demangled_name": "ResolveHitCountColliderContact"
      }
     },
     {
@@ -35680,7 +35812,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2848",
      "metadata": {
-      "virtual_address": "1851056"
+      "virtual_address": "1851056",
+      "demangled_name": "PushRequesterAwayFromSender"
      }
     },
     {
@@ -35719,7 +35852,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3600",
      "metadata": {
-      "virtual_address": "1851808"
+      "virtual_address": "1851808",
+      "demangled_name": "PlaceHitCountColliderItem"
      }
     }
    ],
@@ -35788,7 +35922,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "448",
      "metadata": {
-      "virtual_address": "1852952"
+      "virtual_address": "1852952",
+      "demangled_name": "BuildPartProbeTowardLink"
      }
     },
     {
@@ -35807,7 +35942,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1008",
      "metadata": {
-      "virtual_address": "1853512"
+      "virtual_address": "1853512",
+      "demangled_name": "PlacePartAtProbeSpan"
      }
     },
     {
@@ -35826,7 +35962,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1424",
      "metadata": {
-      "virtual_address": "1853928"
+      "virtual_address": "1853928",
+      "demangled_name": "ReadTurningColliderStickHeading"
      }
     },
     {
@@ -35845,7 +35982,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1992",
      "metadata": {
-      "virtual_address": "1854496"
+      "virtual_address": "1854496",
+      "demangled_name": "TrackFollowedMeshVertexVelocities"
      }
     },
     {
@@ -35854,7 +35992,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2312",
      "metadata": {
-      "virtual_address": "1854816"
+      "virtual_address": "1854816",
+      "demangled_name": "SetTurningColliderFollowedMesh"
      }
     },
     {
@@ -36133,7 +36272,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "712",
      "metadata": {
-      "virtual_address": "1860064"
+      "virtual_address": "1860064",
+      "demangled_name": "SetPlayerAimMode"
      }
     },
     {
@@ -36362,7 +36502,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3232",
      "metadata": {
-      "virtual_address": "1866728"
+      "virtual_address": "1866728",
+      "demangled_name": "FaceAgentFromAnimationMotion"
      }
     },
     {
@@ -36391,7 +36532,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "5328",
      "metadata": {
-      "virtual_address": "1868824"
+      "virtual_address": "1868824",
+      "demangled_name": "SetAgentGoalPoint"
      }
     },
     {
@@ -36430,7 +36572,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "6616",
      "metadata": {
-      "virtual_address": "1870112"
+      "virtual_address": "1870112",
+      "demangled_name": "FaceAgentAlongPath"
      }
     },
     {
@@ -36899,7 +37042,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "16368",
      "metadata": {
-      "virtual_address": "1879864"
+      "virtual_address": "1879864",
+      "demangled_name": "DispatchAgentContactHits"
      }
     },
     {
@@ -36938,7 +37082,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "17544",
      "metadata": {
-      "virtual_address": "1881040"
+      "virtual_address": "1881040",
+      "demangled_name": "IsPlayerEvadingAgent"
      }
     },
     {
@@ -37127,7 +37272,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "20952",
      "metadata": {
-      "virtual_address": "1884448"
+      "virtual_address": "1884448",
+      "demangled_name": "AssignItemKeeperMemberPlaces"
      }
     },
     {
@@ -37395,7 +37541,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2912",
      "metadata": {
-      "virtual_address": "1895192"
+      "virtual_address": "1895192",
+      "demangled_name": "ScorePlayerLeapToPoint"
      }
     },
     {
@@ -38144,7 +38291,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "968",
      "metadata": {
-      "virtual_address": "1926824"
+      "virtual_address": "1926824",
+      "demangled_name": "NotifyPlayerGroundObject"
      }
     },
     {
@@ -38163,7 +38311,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2104",
      "metadata": {
-      "virtual_address": "1927960"
+      "virtual_address": "1927960",
+      "demangled_name": "ApplyPlayerAttachedSetContact"
      }
     },
     {
@@ -38391,7 +38540,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "11104",
      "metadata": {
-      "virtual_address": "1936960"
+      "virtual_address": "1936960",
+      "demangled_name": "EmitPathFollowerWheelParticles"
      }
     },
     {
@@ -39488,7 +39638,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "432",
      "metadata": {
-      "virtual_address": "1957520"
+      "virtual_address": "1957520",
+      "demangled_name": "SimulateRedirectChain"
      }
     },
     {
@@ -42226,7 +42377,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "22464",
      "metadata": {
-      "virtual_address": "2023568"
+      "virtual_address": "2023568",
+      "demangled_name": "ComputeLaunchVelocityToPoint"
      }
     },
     {
@@ -42524,7 +42676,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "25752",
      "metadata": {
-      "virtual_address": "2026856"
+      "virtual_address": "2026856",
+      "demangled_name": "GetAttachedSetPointMotion"
      }
     },
     {
@@ -42583,7 +42736,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "27880",
      "metadata": {
-      "virtual_address": "2028984"
+      "virtual_address": "2028984",
+      "demangled_name": "MeasureAttachedSetContactDepth"
      }
     },
     {
@@ -44119,7 +44273,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2058496"
+      "virtual_address": "2058496",
+      "demangled_name": "Syscall00"
      }
     },
     {
@@ -44148,7 +44303,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "48",
      "metadata": {
-      "virtual_address": "2058544"
+      "virtual_address": "2058544",
+      "demangled_name": "Syscall08"
      }
     },
     {
@@ -44157,7 +44313,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "64",
      "metadata": {
-      "virtual_address": "2058560"
+      "virtual_address": "2058560",
+      "demangled_name": "Syscall0C"
      }
     },
     {
@@ -44266,7 +44423,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "240",
      "metadata": {
-      "virtual_address": "2058736"
+      "virtual_address": "2058736",
+      "demangled_name": "SyscallFromInterrupt1A"
      }
     },
     {
@@ -44275,7 +44433,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "256",
      "metadata": {
-      "virtual_address": "2058752"
+      "virtual_address": "2058752",
+      "demangled_name": "SyscallFromInterruptFE"
      }
     },
     {
@@ -44314,7 +44473,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "320",
      "metadata": {
-      "virtual_address": "2058816"
+      "virtual_address": "2058816",
+      "demangled_name": "SyscallFromInterrupt26"
      }
     },
     {
@@ -44333,7 +44493,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "352",
      "metadata": {
-      "virtual_address": "2058848"
+      "virtual_address": "2058848",
+      "demangled_name": "SyscallFromInterrupt2A"
      }
     },
     {
@@ -44352,7 +44513,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "384",
      "metadata": {
-      "virtual_address": "2058880"
+      "virtual_address": "2058880",
+      "demangled_name": "SyscallFromInterrupt2E"
      }
     },
     {
@@ -44411,7 +44573,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "480",
      "metadata": {
-      "virtual_address": "2058976"
+      "virtual_address": "2058976",
+      "demangled_name": "SyscallFromInterrupt36"
      }
     },
     {
@@ -44430,7 +44593,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "512",
      "metadata": {
-      "virtual_address": "2059008"
+      "virtual_address": "2059008",
+      "demangled_name": "SyscallFromInterrupt3A"
      }
     },
     {
@@ -44439,7 +44603,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "528",
      "metadata": {
-      "virtual_address": "2059024"
+      "virtual_address": "2059024",
+      "demangled_name": "Syscall3E"
      }
     },
     {
@@ -44508,7 +44673,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "640",
      "metadata": {
-      "virtual_address": "2059136"
+      "virtual_address": "2059136",
+      "demangled_name": "SyscallFromInterrupt46"
      }
     },
     {
@@ -44537,7 +44703,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "688",
      "metadata": {
-      "virtual_address": "2059184"
+      "virtual_address": "2059184",
+      "demangled_name": "Syscall4E"
      }
     },
     {
@@ -44546,7 +44713,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "704",
      "metadata": {
-      "virtual_address": "2059200"
+      "virtual_address": "2059200",
+      "demangled_name": "Syscall52"
      }
     },
     {
@@ -44555,7 +44723,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "720",
      "metadata": {
-      "virtual_address": "2059216"
+      "virtual_address": "2059216",
+      "demangled_name": "WriteTlbEntrySyscall"
      }
     },
     {
@@ -44564,7 +44733,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "736",
      "metadata": {
-      "virtual_address": "2059232"
+      "virtual_address": "2059232",
+      "demangled_name": "SyscallFromInterrupt5A"
      }
     },
     {
@@ -44573,7 +44743,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "752",
      "metadata": {
-      "virtual_address": "2059248"
+      "virtual_address": "2059248",
+      "demangled_name": "Syscall5D"
      }
     },
     {
@@ -44582,7 +44753,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "768",
      "metadata": {
-      "virtual_address": "2059264"
+      "virtual_address": "2059264",
+      "demangled_name": "Syscall5F"
      }
     },
     {
@@ -44591,7 +44763,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "784",
      "metadata": {
-      "virtual_address": "2059280"
+      "virtual_address": "2059280",
+      "demangled_name": "Syscall62"
      }
     },
     {
@@ -44610,7 +44783,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "816",
      "metadata": {
-      "virtual_address": "2059312"
+      "virtual_address": "2059312",
+      "demangled_name": "SyscallFromInterrupt67"
      }
     },
     {
@@ -44629,7 +44803,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "848",
      "metadata": {
-      "virtual_address": "2059344"
+      "virtual_address": "2059344",
+      "demangled_name": "Syscall6C"
      }
     },
     {
@@ -44658,7 +44833,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "896",
      "metadata": {
-      "virtual_address": "2059392"
+      "virtual_address": "2059392",
+      "demangled_name": "Syscall72"
      }
     },
     {
@@ -44737,7 +44913,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1024",
      "metadata": {
-      "virtual_address": "2059520"
+      "virtual_address": "2059520",
+      "demangled_name": "Syscall7B"
      }
     },
     {
@@ -44766,7 +44943,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1072",
      "metadata": {
-      "virtual_address": "2059568"
+      "virtual_address": "2059568",
+      "demangled_name": "SetUpTlbSyscall"
      }
     },
     {
@@ -44845,7 +45023,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2060000"
+      "virtual_address": "2060000",
+      "demangled_name": "SetSystemCallHandlerFirstPatch"
      }
     },
     {
@@ -44854,7 +45033,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "16",
      "metadata": {
-      "virtual_address": "2060016"
+      "virtual_address": "2060016",
+      "demangled_name": "CopyKernelWordsSyscallFirstPatch"
      }
     },
     {
@@ -44873,7 +45053,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "88",
      "metadata": {
-      "virtual_address": "2060088"
+      "virtual_address": "2060088",
+      "demangled_name": "QueryPatchedHandlerFirstPatch"
      }
     },
     {
@@ -45021,7 +45202,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "288",
      "metadata": {
-      "virtual_address": "2061200"
+      "virtual_address": "2061200",
+      "demangled_name": "RoundDoubleToInteger"
      }
     },
     {
@@ -45329,7 +45511,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1312",
      "metadata": {
-      "virtual_address": "2066936"
+      "virtual_address": "2066936",
+      "demangled_name": "RunFileClientCallback"
      }
     },
     {
@@ -45623,7 +45806,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "872",
      "metadata": {
-      "virtual_address": "2072128"
+      "virtual_address": "2072128",
+      "demangled_name": "RunKernelWordSearchSyscall"
      }
     },
     {
@@ -45642,7 +45826,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "952",
      "metadata": {
-      "virtual_address": "2072208"
+      "virtual_address": "2072208",
+      "demangled_name": "SetSystemCallHandlerForWordSearch"
      }
     },
     {
@@ -45700,7 +45885,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2072296"
+      "virtual_address": "2072296",
+      "demangled_name": "SetSystemCallHandlerSecondPatch"
      }
     },
     {
@@ -45709,7 +45895,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "16",
      "metadata": {
-      "virtual_address": "2072312"
+      "virtual_address": "2072312",
+      "demangled_name": "CopyKernelWordsSyscallSecondPatch"
      }
     },
     {
@@ -45718,7 +45905,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "32",
      "metadata": {
-      "virtual_address": "2072328"
+      "virtual_address": "2072328",
+      "demangled_name": "CopyKernelWordsSecondPatch"
      }
     },
     {
@@ -45727,7 +45915,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "88",
      "metadata": {
-      "virtual_address": "2072384"
+      "virtual_address": "2072384",
+      "demangled_name": "QueryPatchedHandlerSecondPatch"
      }
     },
     {
@@ -46049,7 +46238,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2074768"
+      "virtual_address": "2074768",
+      "demangled_name": "CopyKernelWordsSyscallThirdPatch"
      }
     },
     {
@@ -46058,7 +46248,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "16",
      "metadata": {
-      "virtual_address": "2074784"
+      "virtual_address": "2074784",
+      "demangled_name": "CopyKernelWordsThirdPatch"
      }
     },
     {
@@ -46067,7 +46258,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "72",
      "metadata": {
-      "virtual_address": "2074840"
+      "virtual_address": "2074840",
+      "demangled_name": "QueryPatchedHandlerThirdPatch"
      }
     },
     {
@@ -46076,7 +46268,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "88",
      "metadata": {
-      "virtual_address": "2074856"
+      "virtual_address": "2074856",
+      "demangled_name": "SetSystemCallHandlerThirdPatch"
      }
     },
     {
@@ -46125,7 +46318,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2075056"
+      "virtual_address": "2075056",
+      "demangled_name": "WriteTlbEntryForSetUp"
      }
     },
     {
@@ -46144,7 +46338,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "80",
      "metadata": {
-      "virtual_address": "2075136"
+      "virtual_address": "2075136",
+      "demangled_name": "SetUpTlbEntries"
      }
     }
    ],
@@ -46183,7 +46378,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2075648"
+      "virtual_address": "2075648",
+      "demangled_name": "ResumeFromSavedContext"
      }
     },
     {
@@ -46232,7 +46428,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2076216"
+      "virtual_address": "2076216",
+      "demangled_name": "DivideSigned64"
      }
     }
    ],
@@ -46391,7 +46588,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2078608"
+      "virtual_address": "2078608",
+      "demangled_name": "RemainderSigned64"
      }
     }
    ],
@@ -46470,7 +46668,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2080256"
+      "virtual_address": "2080256",
+      "demangled_name": "DivideUnsigned64"
      }
     }
    ],
@@ -46509,7 +46708,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2081744"
+      "virtual_address": "2081744",
+      "demangled_name": "RemainderUnsigned64"
      }
     }
    ],
@@ -46578,7 +46778,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1040",
      "metadata": {
-      "virtual_address": "2084128"
+      "virtual_address": "2084128",
+      "demangled_name": "AddDoubles"
      }
     },
     {
@@ -46587,7 +46788,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1128",
      "metadata": {
-      "virtual_address": "2084216"
+      "virtual_address": "2084216",
+      "demangled_name": "SubtractDoubles"
      }
     },
     {
@@ -46596,7 +46798,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1232",
      "metadata": {
-      "virtual_address": "2084320"
+      "virtual_address": "2084320",
+      "demangled_name": "MultiplyDoubles"
      }
     },
     {
@@ -46625,7 +46828,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2552",
      "metadata": {
-      "virtual_address": "2085640"
+      "virtual_address": "2085640",
+      "demangled_name": "CompareDoubles"
      }
     },
     {
@@ -46634,7 +46838,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2632",
      "metadata": {
-      "virtual_address": "2085720"
+      "virtual_address": "2085720",
+      "demangled_name": "ConvertS32ToDouble"
      }
     },
     {
@@ -46673,7 +46878,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3176",
      "metadata": {
-      "virtual_address": "2086264"
+      "virtual_address": "2086264",
+      "demangled_name": "ConvertDoubleToFloat"
      }
     }
    ],
@@ -46761,7 +46967,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "664",
      "metadata": {
-      "virtual_address": "2087016"
+      "virtual_address": "2087016",
+      "demangled_name": "ConvertFloatToDouble"
      }
     }
    ],
@@ -46860,7 +47067,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "56",
      "metadata": {
-      "virtual_address": "2087256"
+      "virtual_address": "2087256",
+      "demangled_name": "MatchTypeNameOrZero"
      }
     },
     {
@@ -46878,7 +47086,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "112",
      "metadata": {
-      "virtual_address": "2087312"
+      "virtual_address": "2087312",
+      "demangled_name": "AllocateRuntimeNode"
      }
     },
     {
@@ -46887,7 +47096,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "200",
      "metadata": {
-      "virtual_address": "2087400"
+      "virtual_address": "2087400",
+      "demangled_name": "GetExceptionContext"
      }
     },
     {
@@ -46896,7 +47106,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "240",
      "metadata": {
-      "virtual_address": "2087440"
+      "virtual_address": "2087440",
+      "demangled_name": "GetActiveExceptionSlot"
      }
     },
     {
@@ -46905,7 +47116,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "280",
      "metadata": {
-      "virtual_address": "2087480"
+      "virtual_address": "2087480",
+      "demangled_name": "InstallExceptionContextGetter"
      }
     },
     {
@@ -46914,7 +47126,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "320",
      "metadata": {
-      "virtual_address": "2087520"
+      "virtual_address": "2087520",
+      "demangled_name": "GetStaticExceptionContext"
      }
     },
     {
@@ -46923,7 +47136,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "424",
      "metadata": {
-      "virtual_address": "2087624"
+      "virtual_address": "2087624",
+      "demangled_name": "GetHandlerChainSlot"
      }
     },
     {
@@ -46952,7 +47166,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1120",
      "metadata": {
-      "virtual_address": "2088320"
+      "virtual_address": "2088320",
+      "demangled_name": "ActiveExceptionMatches"
      }
     },
     {
@@ -46961,7 +47176,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1192",
      "metadata": {
-      "virtual_address": "2088392"
+      "virtual_address": "2088392",
+      "demangled_name": "GetRecordSubkind"
      }
     },
     {
@@ -46970,7 +47186,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1200",
      "metadata": {
-      "virtual_address": "2088400"
+      "virtual_address": "2088400",
+      "demangled_name": "GetRecordKind"
      }
     },
     {
@@ -46979,7 +47196,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1208",
      "metadata": {
-      "virtual_address": "2088408"
+      "virtual_address": "2088408",
+      "demangled_name": "FindInnermostRangeValue"
      }
     },
     {
@@ -46988,7 +47206,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1424",
      "metadata": {
-      "virtual_address": "2088624"
+      "virtual_address": "2088624",
+      "demangled_name": "FindHandlerInSpanTable"
      }
     },
     {
@@ -46997,7 +47216,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1752",
      "metadata": {
-      "virtual_address": "2088952"
+      "virtual_address": "2088952",
+      "demangled_name": "ResolveSavedRegisterSlot"
      }
     },
     {
@@ -47006,7 +47226,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1888",
      "metadata": {
-      "virtual_address": "2089088"
+      "virtual_address": "2089088",
+      "demangled_name": "CopySavedRegister"
      }
     },
     {
@@ -47015,7 +47236,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2016",
      "metadata": {
-      "virtual_address": "2089216"
+      "virtual_address": "2089216",
+      "demangled_name": "UnwindOneFrame"
      }
     },
     {
@@ -47024,7 +47246,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2160",
      "metadata": {
-      "virtual_address": "2089360"
+      "virtual_address": "2089360",
+      "demangled_name": "NoteCleanupOnlyHandler"
      }
     },
     {
@@ -47033,7 +47256,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2168",
      "metadata": {
-      "virtual_address": "2089368"
+      "virtual_address": "2089368",
+      "demangled_name": "FindHandlerAndRestoreRegisters"
      }
     },
     {
@@ -47042,7 +47266,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2984",
      "metadata": {
-      "virtual_address": "2090184"
+      "virtual_address": "2090184",
+      "demangled_name": "RethrowActiveException"
      }
     },
     {
@@ -47051,7 +47276,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3464",
      "metadata": {
-      "virtual_address": "2090664"
+      "virtual_address": "2090664",
+      "demangled_name": "ThrowException"
      }
     }
    ],
@@ -47090,7 +47316,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2091152"
+      "virtual_address": "2091152",
+      "demangled_name": "MultiplySigned64"
      }
     }
    ],
@@ -47129,7 +47356,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2091248"
+      "virtual_address": "2091248",
+      "demangled_name": "InvokeTerminateHandler"
      }
     },
     {
@@ -47138,7 +47366,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "24",
      "metadata": {
-      "virtual_address": "2091272"
+      "virtual_address": "2091272",
+      "demangled_name": "DefaultUnexpectedHandler"
      }
     },
     {
@@ -47147,7 +47376,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "40",
      "metadata": {
-      "virtual_address": "2091288"
+      "virtual_address": "2091288",
+      "demangled_name": "ReplaceTerminateHandler"
      }
     },
     {
@@ -47156,7 +47386,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "56",
      "metadata": {
-      "virtual_address": "2091304"
+      "virtual_address": "2091304",
+      "demangled_name": "ReplaceUnexpectedHandler"
      }
     },
     {
@@ -47165,7 +47396,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "72",
      "metadata": {
-      "virtual_address": "2091320"
+      "virtual_address": "2091320",
+      "demangled_name": "InvokeUnexpectedHandler"
      }
     },
     {
@@ -47174,7 +47406,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "96",
      "metadata": {
-      "virtual_address": "2091344"
+      "virtual_address": "2091344",
+      "demangled_name": "GetThrownObjectAddress"
      }
     },
     {
@@ -47183,7 +47416,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "136",
      "metadata": {
-      "virtual_address": "2091384"
+      "virtual_address": "2091384",
+      "demangled_name": "GetActiveExceptionRecord"
      }
     },
     {
@@ -47192,7 +47426,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "168",
      "metadata": {
-      "virtual_address": "2091416"
+      "virtual_address": "2091416",
+      "demangled_name": "BeginCatchHandler"
      }
     },
     {
@@ -47201,7 +47436,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "224",
      "metadata": {
-      "virtual_address": "2091472"
+      "virtual_address": "2091472",
+      "demangled_name": "AllocateRuntimeBlockOrTerminate"
      }
     },
     {
@@ -47210,7 +47446,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "264",
      "metadata": {
-      "virtual_address": "2091512"
+      "virtual_address": "2091512",
+      "demangled_name": "FreeRuntimeBlock"
      }
     },
     {
@@ -47219,7 +47456,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "296",
      "metadata": {
-      "virtual_address": "2091544"
+      "virtual_address": "2091544",
+      "demangled_name": "MatchPendingThrowType"
      }
     },
     {
@@ -47228,7 +47466,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "408",
      "metadata": {
-      "virtual_address": "2091656"
+      "virtual_address": "2091656",
+      "demangled_name": "PushThrownException"
      }
     },
     {
@@ -47237,7 +47476,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "552",
      "metadata": {
-      "virtual_address": "2091800"
+      "virtual_address": "2091800",
+      "demangled_name": "PopThrownException"
      }
     },
     {
@@ -47246,7 +47486,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "752",
      "metadata": {
-      "virtual_address": "2092000"
+      "virtual_address": "2092000",
+      "demangled_name": "AbandonCatchHandler"
      }
     },
     {
@@ -47255,7 +47496,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "800",
      "metadata": {
-      "virtual_address": "2092048"
+      "virtual_address": "2092048",
+      "demangled_name": "CheckExceptionSpecification"
      }
     },
     {
@@ -47264,7 +47506,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1240",
      "metadata": {
-      "virtual_address": "2092488"
+      "virtual_address": "2092488",
+      "demangled_name": "ThrowCastError"
      }
     },
     {
@@ -47273,7 +47516,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1368",
      "metadata": {
-      "virtual_address": "2092616"
+      "virtual_address": "2092616",
+      "demangled_name": "ThrowTypeidError"
      }
     },
     {
@@ -47282,7 +47526,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1496",
      "metadata": {
-      "virtual_address": "2092744"
+      "virtual_address": "2092744",
+      "demangled_name": "HasUncaughtException"
      }
     },
     {
@@ -47291,7 +47536,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1552",
      "metadata": {
-      "virtual_address": "2092800"
+      "virtual_address": "2092800",
+      "demangled_name": "GetExceptionTypeName"
      }
     },
     {
@@ -47300,7 +47546,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1592",
      "metadata": {
-      "virtual_address": "2092840"
+      "virtual_address": "2092840",
+      "demangled_name": "DestroyUnexpectedException"
      }
     },
     {
@@ -47309,7 +47556,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1640",
      "metadata": {
-      "virtual_address": "2092888"
+      "virtual_address": "2092888",
+      "demangled_name": "ConstructUnexpectedException"
      }
     },
     {
@@ -47318,7 +47566,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1664",
      "metadata": {
-      "virtual_address": "2092912"
+      "virtual_address": "2092912",
+      "demangled_name": "GetTypeInfoOfUnexpectedException"
      }
     },
     {
@@ -47327,7 +47576,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1744",
      "metadata": {
-      "virtual_address": "2092992"
+      "virtual_address": "2092992",
+      "demangled_name": "DestroyExceptionBase"
      }
     },
     {
@@ -47336,7 +47586,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1792",
      "metadata": {
-      "virtual_address": "2093040"
+      "virtual_address": "2093040",
+      "demangled_name": "ConstructExceptionBase"
      }
     },
     {
@@ -47345,7 +47596,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1816",
      "metadata": {
-      "virtual_address": "2093064"
+      "virtual_address": "2093064",
+      "demangled_name": "GetTypeInfoOfExceptionBase"
      }
     }
    ],
@@ -47404,7 +47656,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "152",
      "metadata": {
-      "virtual_address": "2093280"
+      "virtual_address": "2093280",
+      "demangled_name": "MergeFrameLists"
      }
     },
     {
@@ -47413,7 +47666,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "408",
      "metadata": {
-      "virtual_address": "2093536"
+      "virtual_address": "2093536",
+      "demangled_name": "FinishFrameTableSort"
      }
     },
     {
@@ -47422,7 +47676,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1024",
      "metadata": {
-      "virtual_address": "2094152"
+      "virtual_address": "2094152",
+      "demangled_name": "CountFrameDescriptions"
      }
     },
     {
@@ -47431,7 +47686,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1096",
      "metadata": {
-      "virtual_address": "2094224"
+      "virtual_address": "2094224",
+      "demangled_name": "CollectFrameDescriptions"
      }
     },
     {
@@ -47440,7 +47696,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1232",
      "metadata": {
-      "virtual_address": "2094360"
+      "virtual_address": "2094360",
+      "demangled_name": "BuildFrameTableIndex"
      }
     },
     {
@@ -47449,7 +47706,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1552",
      "metadata": {
-      "virtual_address": "2094680"
+      "virtual_address": "2094680",
+      "demangled_name": "FindFrameDescription"
      }
     },
     {
@@ -47458,7 +47716,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1784",
      "metadata": {
-      "virtual_address": "2094912"
+      "virtual_address": "2094912",
+      "demangled_name": "ParseCommonFrameRecord"
      }
     },
     {
@@ -47467,7 +47726,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2048",
      "metadata": {
-      "virtual_address": "2095176"
+      "virtual_address": "2095176",
+      "demangled_name": "RunUnwindInstruction"
      }
     },
     {
@@ -47506,7 +47766,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3600",
      "metadata": {
-      "virtual_address": "2096728"
+      "virtual_address": "2096728",
+      "demangled_name": "SplitOutOfOrderFrames"
      }
     }
    ],
@@ -47545,7 +47806,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2097104"
+      "virtual_address": "2097104",
+      "demangled_name": "ReplaceNewHandler"
      }
     },
     {
@@ -47554,7 +47816,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "16",
      "metadata": {
-      "virtual_address": "2097120"
+      "virtual_address": "2097120",
+      "demangled_name": "ReturnPlacement"
      }
     },
     {
@@ -47563,7 +47826,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "24",
      "metadata": {
-      "virtual_address": "2097128"
+      "virtual_address": "2097128",
+      "demangled_name": "ReturnArrayPlacement"
      }
     },
     {
@@ -47572,7 +47836,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "32",
      "metadata": {
-      "virtual_address": "2097136"
+      "virtual_address": "2097136",
+      "demangled_name": "GetAllocFailureText"
      }
     },
     {
@@ -47581,7 +47846,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "48",
      "metadata": {
-      "virtual_address": "2097152"
+      "virtual_address": "2097152",
+      "demangled_name": "GetTypeInfoOfAllocFailure"
      }
     },
     {
@@ -47590,7 +47856,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "128",
      "metadata": {
-      "virtual_address": "2097232"
+      "virtual_address": "2097232",
+      "demangled_name": "DestroyAllocFailure"
      }
     }
    ],
@@ -47629,7 +47896,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2097280"
+      "virtual_address": "2097280",
+      "demangled_name": "DestroyTypeInfo"
      }
     },
     {
@@ -47638,7 +47906,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "48",
      "metadata": {
-      "virtual_address": "2097328"
+      "virtual_address": "2097328",
+      "demangled_name": "TypeInfosEqual"
      }
     },
     {
@@ -47647,7 +47916,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "112",
      "metadata": {
-      "virtual_address": "2097392"
+      "virtual_address": "2097392",
+      "demangled_name": "FillClassTypeInfo"
      }
     },
     {
@@ -47656,7 +47926,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "152",
      "metadata": {
-      "virtual_address": "2097432"
+      "virtual_address": "2097432",
+      "demangled_name": "FillSingleBaseTypeInfo"
      }
     },
     {
@@ -47665,7 +47936,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "184",
      "metadata": {
-      "virtual_address": "2097464"
+      "virtual_address": "2097464",
+      "demangled_name": "FillUserTypeInfo"
      }
     },
     {
@@ -47674,7 +47946,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "216",
      "metadata": {
-      "virtual_address": "2097496"
+      "virtual_address": "2097496",
+      "demangled_name": "FindBaseInUserType"
      }
     },
     {
@@ -47683,7 +47956,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "264",
      "metadata": {
-      "virtual_address": "2097544"
+      "virtual_address": "2097544",
+      "demangled_name": "FindBaseThroughSingleBase"
      }
     },
     {
@@ -47692,7 +47966,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "416",
      "metadata": {
-      "virtual_address": "2097696"
+      "virtual_address": "2097696",
+      "demangled_name": "FindBaseThroughBaseList"
      }
     },
     {
@@ -47701,7 +47976,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "888",
      "metadata": {
-      "virtual_address": "2098168"
+      "virtual_address": "2098168",
+      "demangled_name": "ConstructClassTypeInfo"
      }
     },
     {
@@ -47710,7 +47986,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "920",
      "metadata": {
-      "virtual_address": "2098200"
+      "virtual_address": "2098200",
+      "demangled_name": "GetTypeInfoOfClassTypeInfo"
      }
     },
     {
@@ -47719,7 +47996,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1000",
      "metadata": {
-      "virtual_address": "2098280"
+      "virtual_address": "2098280",
+      "demangled_name": "DestroyClassTypeInfo"
      }
     },
     {
@@ -47728,7 +48006,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1032",
      "metadata": {
-      "virtual_address": "2098312"
+      "virtual_address": "2098312",
+      "demangled_name": "ConstructSingleBaseTypeInfo"
      }
     },
     {
@@ -47737,7 +48016,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1064",
      "metadata": {
-      "virtual_address": "2098344"
+      "virtual_address": "2098344",
+      "demangled_name": "GetTypeInfoOfSingleBaseTypeInfo"
      }
     },
     {
@@ -47746,7 +48026,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1144",
      "metadata": {
-      "virtual_address": "2098424"
+      "virtual_address": "2098424",
+      "demangled_name": "DestroySingleBaseTypeInfo"
      }
     },
     {
@@ -47755,7 +48036,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1176",
      "metadata": {
-      "virtual_address": "2098456"
+      "virtual_address": "2098456",
+      "demangled_name": "ConstructUserTypeInfo"
      }
     },
     {
@@ -47764,7 +48046,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1200",
      "metadata": {
-      "virtual_address": "2098480"
+      "virtual_address": "2098480",
+      "demangled_name": "GetTypeInfoOfUserTypeInfo"
      }
     },
     {
@@ -47773,7 +48056,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1280",
      "metadata": {
-      "virtual_address": "2098560"
+      "virtual_address": "2098560",
+      "demangled_name": "DestroyUserTypeInfo"
      }
     },
     {
@@ -47782,7 +48066,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1312",
      "metadata": {
-      "virtual_address": "2098592"
+      "virtual_address": "2098592",
+      "demangled_name": "DestroyTypeidError"
      }
     },
     {
@@ -47791,7 +48076,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1360",
      "metadata": {
-      "virtual_address": "2098640"
+      "virtual_address": "2098640",
+      "demangled_name": "ConstructTypeidError"
      }
     },
     {
@@ -47800,7 +48086,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1384",
      "metadata": {
-      "virtual_address": "2098664"
+      "virtual_address": "2098664",
+      "demangled_name": "GetTypeInfoOfTypeidError"
      }
     },
     {
@@ -47809,7 +48096,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1464",
      "metadata": {
-      "virtual_address": "2098744"
+      "virtual_address": "2098744",
+      "demangled_name": "DestroyCastError"
      }
     },
     {
@@ -47818,7 +48106,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1512",
      "metadata": {
-      "virtual_address": "2098792"
+      "virtual_address": "2098792",
+      "demangled_name": "ConstructCastError"
      }
     },
     {
@@ -47827,7 +48116,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1536",
      "metadata": {
-      "virtual_address": "2098816"
+      "virtual_address": "2098816",
+      "demangled_name": "GetTypeInfoOfCastError"
      }
     },
     {
@@ -47836,7 +48126,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1616",
      "metadata": {
-      "virtual_address": "2098896"
+      "virtual_address": "2098896",
+      "demangled_name": "TypeInfosDiffer"
      }
     },
     {
@@ -47845,7 +48136,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1648",
      "metadata": {
-      "virtual_address": "2098928"
+      "virtual_address": "2098928",
+      "demangled_name": "GetTypeInfoName"
      }
     },
     {
@@ -47854,7 +48146,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1656",
      "metadata": {
-      "virtual_address": "2098936"
+      "virtual_address": "2098936",
+      "demangled_name": "ConstructTypeInfo"
      }
     },
     {
@@ -47863,7 +48156,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1680",
      "metadata": {
-      "virtual_address": "2098960"
+      "virtual_address": "2098960",
+      "demangled_name": "GetTypeInfoOfTypeInfo"
      }
     }
    ],
@@ -47902,7 +48196,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2099024"
+      "virtual_address": "2099024",
+      "demangled_name": "TypeNameSortsBefore"
      }
     },
     {
@@ -47911,7 +48206,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "40",
      "metadata": {
-      "virtual_address": "2099064"
+      "virtual_address": "2099064",
+      "demangled_name": "MatchThrownType"
      }
     },
     {
@@ -47920,7 +48216,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1264",
      "metadata": {
-      "virtual_address": "2100288"
+      "virtual_address": "2100288",
+      "demangled_name": "IsPointerType"
      }
     },
     {
@@ -47929,7 +48226,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1344",
      "metadata": {
-      "virtual_address": "2100368"
+      "virtual_address": "2100368",
+      "demangled_name": "FillPointerTypeInfo"
      }
     },
     {
@@ -47938,7 +48236,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1376",
      "metadata": {
-      "virtual_address": "2100400"
+      "virtual_address": "2100400",
+      "demangled_name": "FillQualifiedTypeInfo"
      }
     },
     {
@@ -47947,7 +48246,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1416",
      "metadata": {
-      "virtual_address": "2100440"
+      "virtual_address": "2100440",
+      "demangled_name": "FillFunctionTypeInfo"
      }
     },
     {
@@ -47956,7 +48256,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1448",
      "metadata": {
-      "virtual_address": "2100472"
+      "virtual_address": "2100472",
+      "demangled_name": "FillMemberFunctionPointerTypeInfo"
      }
     },
     {
@@ -47965,7 +48266,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1480",
      "metadata": {
-      "virtual_address": "2100504"
+      "virtual_address": "2100504",
+      "demangled_name": "FillMemberDataPointerTypeInfo"
      }
     },
     {
@@ -47974,7 +48276,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1512",
      "metadata": {
-      "virtual_address": "2100536"
+      "virtual_address": "2100536",
+      "demangled_name": "FillArrayTypeInfo"
      }
     },
     {
@@ -47983,7 +48286,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1544",
      "metadata": {
-      "virtual_address": "2100568"
+      "virtual_address": "2100568",
+      "demangled_name": "FindTargetSubobject"
      }
     },
     {
@@ -47992,7 +48296,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1720",
      "metadata": {
-      "virtual_address": "2100744"
+      "virtual_address": "2100744",
+      "demangled_name": "GetTypeInfoOfVoid"
      }
     },
     {
@@ -48001,7 +48306,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1776",
      "metadata": {
-      "virtual_address": "2100800"
+      "virtual_address": "2100800",
+      "demangled_name": "GetTypeInfoOfLongLong"
      }
     },
     {
@@ -48010,7 +48316,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1832",
      "metadata": {
-      "virtual_address": "2100856"
+      "virtual_address": "2100856",
+      "demangled_name": "GetTypeInfoOfLong"
      }
     },
     {
@@ -48019,7 +48326,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1888",
      "metadata": {
-      "virtual_address": "2100912"
+      "virtual_address": "2100912",
+      "demangled_name": "GetTypeInfoOfInt"
      }
     },
     {
@@ -48028,7 +48336,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1944",
      "metadata": {
-      "virtual_address": "2100968"
+      "virtual_address": "2100968",
+      "demangled_name": "GetTypeInfoOfShort"
      }
     },
     {
@@ -48037,7 +48346,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2000",
      "metadata": {
-      "virtual_address": "2101024"
+      "virtual_address": "2101024",
+      "demangled_name": "GetTypeInfoOfBool"
      }
     },
     {
@@ -48046,7 +48356,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2056",
      "metadata": {
-      "virtual_address": "2101080"
+      "virtual_address": "2101080",
+      "demangled_name": "GetTypeInfoOfChar"
      }
     },
     {
@@ -48055,7 +48366,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2112",
      "metadata": {
-      "virtual_address": "2101136"
+      "virtual_address": "2101136",
+      "demangled_name": "GetTypeInfoOfWideChar"
      }
     },
     {
@@ -48064,7 +48376,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2168",
      "metadata": {
-      "virtual_address": "2101192"
+      "virtual_address": "2101192",
+      "demangled_name": "GetTypeInfoOfLongDouble"
      }
     },
     {
@@ -48073,7 +48386,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2224",
      "metadata": {
-      "virtual_address": "2101248"
+      "virtual_address": "2101248",
+      "demangled_name": "GetTypeInfoOfDouble"
      }
     },
     {
@@ -48082,7 +48396,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2280",
      "metadata": {
-      "virtual_address": "2101304"
+      "virtual_address": "2101304",
+      "demangled_name": "GetTypeInfoOfFloat"
      }
     },
     {
@@ -48091,7 +48406,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2336",
      "metadata": {
-      "virtual_address": "2101360"
+      "virtual_address": "2101360",
+      "demangled_name": "GetTypeInfoOfUnsignedInt"
      }
     },
     {
@@ -48100,7 +48416,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2392",
      "metadata": {
-      "virtual_address": "2101416"
+      "virtual_address": "2101416",
+      "demangled_name": "GetTypeInfoOfUnsignedLong"
      }
     },
     {
@@ -48109,7 +48426,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2448",
      "metadata": {
-      "virtual_address": "2101472"
+      "virtual_address": "2101472",
+      "demangled_name": "GetTypeInfoOfUnsignedLongLong"
      }
     },
     {
@@ -48118,7 +48436,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2504",
      "metadata": {
-      "virtual_address": "2101528"
+      "virtual_address": "2101528",
+      "demangled_name": "GetTypeInfoOfUnsignedShort"
      }
     },
     {
@@ -48127,7 +48446,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2560",
      "metadata": {
-      "virtual_address": "2101584"
+      "virtual_address": "2101584",
+      "demangled_name": "GetTypeInfoOfUnsignedChar"
      }
     },
     {
@@ -48136,7 +48456,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2616",
      "metadata": {
-      "virtual_address": "2101640"
+      "virtual_address": "2101640",
+      "demangled_name": "GetTypeInfoOfSignedChar"
      }
     },
     {
@@ -48145,7 +48466,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2672",
      "metadata": {
-      "virtual_address": "2101696"
+      "virtual_address": "2101696",
+      "demangled_name": "GetTypeInfoOfArrayTypeInfo"
      }
     },
     {
@@ -48154,7 +48476,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2752",
      "metadata": {
-      "virtual_address": "2101776"
+      "virtual_address": "2101776",
+      "demangled_name": "DestroyArrayTypeInfo"
      }
     },
     {
@@ -48163,7 +48486,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2784",
      "metadata": {
-      "virtual_address": "2101808"
+      "virtual_address": "2101808",
+      "demangled_name": "GetTypeInfoOfMemberDataPointerTypeInfo"
      }
     },
     {
@@ -48172,7 +48496,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2864",
      "metadata": {
-      "virtual_address": "2101888"
+      "virtual_address": "2101888",
+      "demangled_name": "DestroyMemberDataPointerTypeInfo"
      }
     },
     {
@@ -48181,7 +48506,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2896",
      "metadata": {
-      "virtual_address": "2101920"
+      "virtual_address": "2101920",
+      "demangled_name": "GetTypeInfoOfMemberFunctionPointerTypeInfo"
      }
     },
     {
@@ -48190,7 +48516,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2976",
      "metadata": {
-      "virtual_address": "2102000"
+      "virtual_address": "2102000",
+      "demangled_name": "DestroyMemberFunctionPointerTypeInfo"
      }
     },
     {
@@ -48199,7 +48526,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3008",
      "metadata": {
-      "virtual_address": "2102032"
+      "virtual_address": "2102032",
+      "demangled_name": "GetTypeInfoOfFunctionTypeInfo"
      }
     },
     {
@@ -48208,7 +48536,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3088",
      "metadata": {
-      "virtual_address": "2102112"
+      "virtual_address": "2102112",
+      "demangled_name": "DestroyFunctionTypeInfo"
      }
     },
     {
@@ -48217,7 +48546,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3120",
      "metadata": {
-      "virtual_address": "2102144"
+      "virtual_address": "2102144",
+      "demangled_name": "GetTypeInfoOfBuiltinTypeInfo"
      }
     },
     {
@@ -48226,7 +48556,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3200",
      "metadata": {
-      "virtual_address": "2102224"
+      "virtual_address": "2102224",
+      "demangled_name": "DestroyBuiltinTypeInfo"
      }
     },
     {
@@ -48235,7 +48566,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3232",
      "metadata": {
-      "virtual_address": "2102256"
+      "virtual_address": "2102256",
+      "demangled_name": "GetTypeInfoOfQualifiedTypeInfo"
      }
     },
     {
@@ -48244,7 +48576,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3312",
      "metadata": {
-      "virtual_address": "2102336"
+      "virtual_address": "2102336",
+      "demangled_name": "DestroyQualifiedTypeInfo"
      }
     },
     {
@@ -48253,7 +48586,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3344",
      "metadata": {
-      "virtual_address": "2102368"
+      "virtual_address": "2102368",
+      "demangled_name": "GetTypeInfoOfPointerTypeInfo"
      }
     },
     {
@@ -48262,7 +48596,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3424",
      "metadata": {
-      "virtual_address": "2102448"
+      "virtual_address": "2102448",
+      "demangled_name": "DestroyPointerTypeInfo"
      }
     }
    ],
@@ -48991,7 +49326,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1320",
      "metadata": {
-      "virtual_address": "2110000"
+      "virtual_address": "2110000",
+      "demangled_name": "GetDiscDriveState"
      }
     },
     {
@@ -49050,7 +49386,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3352",
      "metadata": {
-      "virtual_address": "2112032"
+      "virtual_address": "2112032",
+      "demangled_name": "SendDiscSValueCommand"
      }
     },
     {
@@ -49169,7 +49506,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "600",
      "metadata": {
-      "virtual_address": "2114088"
+      "virtual_address": "2114088",
+      "demangled_name": "ResetPadModule"
      }
     },
     {
@@ -49256,7 +49594,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1792",
      "metadata": {
-      "virtual_address": "2115280"
+      "virtual_address": "2115280",
+      "demangled_name": "GetPadCapabilityEntry"
      }
     },
     {
@@ -49274,7 +49613,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2088",
      "metadata": {
-      "virtual_address": "2115576"
+      "virtual_address": "2115576",
+      "demangled_name": "GetPadModeEntry"
      }
     },
     {
@@ -49313,7 +49653,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2992",
      "metadata": {
-      "virtual_address": "2116480"
+      "virtual_address": "2116480",
+      "demangled_name": "GetPadButtonMask"
      }
     },
     {
@@ -49361,7 +49702,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3560",
      "metadata": {
-      "virtual_address": "2117048"
+      "virtual_address": "2117048",
+      "demangled_name": "GetPadModuleVersion"
      }
     },
     {
@@ -49370,7 +49712,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3664",
      "metadata": {
-      "virtual_address": "2117152"
+      "virtual_address": "2117152",
+      "demangled_name": "InvalidateDataCacheRange"
      }
     },
     {
@@ -50914,7 +51257,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3000",
      "metadata": {
-      "virtual_address": "2138024"
+      "virtual_address": "2138024",
+      "demangled_name": "RequestCardFormat"
      }
     },
     {
@@ -50932,7 +51276,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3208",
      "metadata": {
-      "virtual_address": "2138232"
+      "virtual_address": "2138232",
+      "demangled_name": "RequestCardSpaceForPath"
      }
     }
    ],
@@ -51217,7 +51562,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1208",
      "metadata": {
-      "virtual_address": "2142808"
+      "virtual_address": "2142808",
+      "demangled_name": "MarkMpegRing"
      }
     },
     {
@@ -51226,7 +51572,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1224",
      "metadata": {
-      "virtual_address": "2142824"
+      "virtual_address": "2142824",
+      "demangled_name": "RewindMpegRingToMark"
      }
     },
     {
@@ -51255,7 +51602,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1720",
      "metadata": {
-      "virtual_address": "2143320"
+      "virtual_address": "2143320",
+      "demangled_name": "DecodeFramePicture"
      }
     },
     {
@@ -51264,7 +51612,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2000",
      "metadata": {
-      "virtual_address": "2143600"
+      "virtual_address": "2143600",
+      "demangled_name": "DecodePictureByStructure"
      }
     },
     {
@@ -51273,7 +51622,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2072",
      "metadata": {
-      "virtual_address": "2143672"
+      "virtual_address": "2143672",
+      "demangled_name": "DecodeFieldPicture"
      }
     },
     {
@@ -51282,7 +51632,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2424",
      "metadata": {
-      "virtual_address": "2144024"
+      "virtual_address": "2144024",
+      "demangled_name": "FlushPendingPicture"
      }
     },
     {
@@ -51291,7 +51642,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2528",
      "metadata": {
-      "virtual_address": "2144128"
+      "virtual_address": "2144128",
+      "demangled_name": "ResetMpegPictureMode"
      }
     },
     {
@@ -51300,7 +51652,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2544",
      "metadata": {
-      "virtual_address": "2144144"
+      "virtual_address": "2144144",
+      "demangled_name": "OutputPendingPicture"
      }
     },
     {
@@ -51309,7 +51662,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2672",
      "metadata": {
-      "virtual_address": "2144272"
+      "virtual_address": "2144272",
+      "demangled_name": "SetUpMpegScratchpadBuffers"
      }
     },
     {
@@ -51318,7 +51672,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2768",
      "metadata": {
-      "virtual_address": "2144368"
+      "virtual_address": "2144368",
+      "demangled_name": "ResetMpegDmaAndIpu"
      }
     },
     {
@@ -51357,7 +51712,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3120",
      "metadata": {
-      "virtual_address": "2144720"
+      "virtual_address": "2144720",
+      "demangled_name": "SetPictureDimensions"
      }
     },
     {
@@ -51376,7 +51732,8 @@
      "fuzzy_match_percent": 48.8235294117647,
      "address": "3448",
      "metadata": {
-      "virtual_address": "2145048"
+      "virtual_address": "2145048",
+      "demangled_name": "AllocatePictureBuffers"
      }
     },
     {
@@ -51385,7 +51742,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4128",
      "metadata": {
-      "virtual_address": "2145728"
+      "virtual_address": "2145728",
+      "demangled_name": "SetUpPictureBufferAddresses"
      }
     },
     {
@@ -51394,7 +51752,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4352",
      "metadata": {
-      "virtual_address": "2145952"
+      "virtual_address": "2145952",
+      "demangled_name": "LoadIpuQuantiserMatrix"
      }
     },
     {
@@ -51403,7 +51762,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4568",
      "metadata": {
-      "virtual_address": "2146168"
+      "virtual_address": "2146168",
+      "demangled_name": "ReadSequenceExtension"
      }
     },
     {
@@ -51412,7 +51772,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4872",
      "metadata": {
-      "virtual_address": "2146472"
+      "virtual_address": "2146472",
+      "demangled_name": "ReadSequenceDisplayExtension"
      }
     },
     {
@@ -51581,7 +51942,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
-      "virtual_address": "2150712"
+      "virtual_address": "2150712",
+      "demangled_name": "FetchLumaBlock"
      }
     },
     {
@@ -51590,7 +51952,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "120",
      "metadata": {
-      "virtual_address": "2150832"
+      "virtual_address": "2150832",
+      "demangled_name": "FetchChromaBlock"
      }
     },
     {
@@ -51599,7 +51962,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "272",
      "metadata": {
-      "virtual_address": "2150984"
+      "virtual_address": "2150984",
+      "demangled_name": "FetchLumaBlockHalfVertical"
      }
     },
     {
@@ -51608,7 +51972,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "456",
      "metadata": {
-      "virtual_address": "2151168"
+      "virtual_address": "2151168",
+      "demangled_name": "FetchChromaBlockHalfVertical"
      }
     },
     {
@@ -51617,7 +51982,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "664",
      "metadata": {
-      "virtual_address": "2151376"
+      "virtual_address": "2151376",
+      "demangled_name": "FetchLumaBlockHalfHorizontal"
      }
     },
     {
@@ -51626,7 +51992,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "840",
      "metadata": {
-      "virtual_address": "2151552"
+      "virtual_address": "2151552",
+      "demangled_name": "FetchChromaBlockHalfHorizontal"
      }
     },
     {
@@ -51635,7 +52002,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1024",
      "metadata": {
-      "virtual_address": "2151736"
+      "virtual_address": "2151736",
+      "demangled_name": "FetchLumaBlockHalfBoth"
      }
     },
     {
@@ -51644,7 +52012,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1272",
      "metadata": {
-      "virtual_address": "2151984"
+      "virtual_address": "2151984",
+      "demangled_name": "FetchChromaBlockHalfBoth"
      }
     },
     {
@@ -51653,7 +52022,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1528",
      "metadata": {
-      "virtual_address": "2152240"
+      "virtual_address": "2152240",
+      "demangled_name": "BlendLumaBlock"
      }
     },
     {
@@ -51662,7 +52032,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1688",
      "metadata": {
-      "virtual_address": "2152400"
+      "virtual_address": "2152400",
+      "demangled_name": "BlendChromaBlock"
      }
     },
     {
@@ -51671,7 +52042,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1864",
      "metadata": {
-      "virtual_address": "2152576"
+      "virtual_address": "2152576",
+      "demangled_name": "BlendLumaBlockHalfVertical"
      }
     },
     {
@@ -51680,7 +52052,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2088",
      "metadata": {
-      "virtual_address": "2152800"
+      "virtual_address": "2152800",
+      "demangled_name": "BlendChromaBlockHalfVertical"
      }
     },
     {
@@ -51689,7 +52062,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2320",
      "metadata": {
-      "virtual_address": "2153032"
+      "virtual_address": "2153032",
+      "demangled_name": "BlendLumaBlockHalfHorizontal"
      }
     },
     {
@@ -51698,7 +52072,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2536",
      "metadata": {
-      "virtual_address": "2153248"
+      "virtual_address": "2153248",
+      "demangled_name": "BlendChromaBlockHalfHorizontal"
      }
     },
     {
@@ -51707,7 +52082,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2744",
      "metadata": {
-      "virtual_address": "2153456"
+      "virtual_address": "2153456",
+      "demangled_name": "BlendLumaBlockHalfBoth"
      }
     },
     {
@@ -51716,7 +52092,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3032",
      "metadata": {
-      "virtual_address": "2153744"
+      "virtual_address": "2153744",
+      "demangled_name": "BlendChromaBlockHalfBoth"
      }
     },
     {
@@ -51725,7 +52102,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3312",
      "metadata": {
-      "virtual_address": "2154024"
+      "virtual_address": "2154024",
+      "demangled_name": "AddAndClampMacroblock"
      }
     },
     {
@@ -51734,7 +52112,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3408",
      "metadata": {
-      "virtual_address": "2154120"
+      "virtual_address": "2154120",
+      "demangled_name": "ClampMacroblock"
      }
     }
    ],
@@ -51793,7 +52172,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "536",
      "metadata": {
-      "virtual_address": "2154752"
+      "virtual_address": "2154752",
+      "demangled_name": "DecodeIpuMotionCode"
      }
     },
     {
@@ -51802,7 +52182,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "568",
      "metadata": {
-      "virtual_address": "2154784"
+      "virtual_address": "2154784",
+      "demangled_name": "ComputeDualPrimeVectors"
      }
     },
     {
@@ -51811,7 +52192,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "960",
      "metadata": {
-      "virtual_address": "2155176"
+      "virtual_address": "2155176",
+      "demangled_name": "ReadMacroblockAddressIncrement"
      }
     },
     {
@@ -51830,7 +52212,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "1496",
      "metadata": {
-      "virtual_address": "2155712"
+      "virtual_address": "2155712",
+      "demangled_name": "ReadSliceStart"
      }
     },
     {
@@ -51849,7 +52232,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2296",
      "metadata": {
-      "virtual_address": "2156512"
+      "virtual_address": "2156512",
+      "demangled_name": "HandleSkippedMacroblock"
      }
     },
     {
@@ -51858,7 +52242,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "2488",
      "metadata": {
-      "virtual_address": "2156704"
+      "virtual_address": "2156704",
+      "demangled_name": "DecodeMacroblock"
      }
     },
     {
@@ -51867,7 +52252,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3680",
      "metadata": {
-      "virtual_address": "2157896"
+      "virtual_address": "2157896",
+      "demangled_name": "ApplyMotionVectorDelta"
      }
     },
     {
@@ -51876,7 +52262,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3816",
      "metadata": {
-      "virtual_address": "2158032"
+      "virtual_address": "2158032",
+      "demangled_name": "ReadFieldMotionVector"
      }
     },
     {
@@ -51885,7 +52272,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4232",
      "metadata": {
-      "virtual_address": "2158448"
+      "virtual_address": "2158448",
+      "demangled_name": "ReadMotionVector"
      }
     },
     {
@@ -51914,7 +52302,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "4784",
      "metadata": {
-      "virtual_address": "2159000"
+      "virtual_address": "2159000",
+      "demangled_name": "WaitIpuCommandResult"
      }
     },
     {
@@ -51973,7 +52362,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "6304",
      "metadata": {
-      "virtual_address": "2160520"
+      "virtual_address": "2160520",
+      "demangled_name": "ReadSliceQuantiser"
      }
     },
     {
@@ -52012,7 +52402,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "7176",
      "metadata": {
-      "virtual_address": "2161392"
+      "virtual_address": "2161392",
+      "demangled_name": "ReadPictureCodingExtension"
      }
     },
     {
@@ -52021,7 +52412,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "7672",
      "metadata": {
-      "virtual_address": "2161888"
+      "virtual_address": "2161888",
+      "demangled_name": "SkipExtraInformation"
      }
     },
     {
@@ -52030,7 +52422,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "7744",
      "metadata": {
-      "virtual_address": "2161960"
+      "virtual_address": "2161960",
+      "demangled_name": "UpdatePictureOrder"
      }
     },
     {
@@ -52049,7 +52442,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "8024",
      "metadata": {
-      "virtual_address": "2162240"
+      "virtual_address": "2162240",
+      "demangled_name": "ReadQuantiserMatrixExtension"
      }
     },
     {
@@ -52058,7 +52452,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "8224",
      "metadata": {
-      "virtual_address": "2162440"
+      "virtual_address": "2162440",
+      "demangled_name": "ReadPictureDisplayExtension"
      }
     },
     {
@@ -52067,7 +52462,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "8472",
      "metadata": {
-      "virtual_address": "2162688"
+      "virtual_address": "2162688",
+      "demangled_name": "ReadCopyrightExtension"
      }
     },
     {
@@ -52086,7 +52482,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "8824",
      "metadata": {
-      "virtual_address": "2163040"
+      "virtual_address": "2163040",
+      "demangled_name": "OutputPictureIfDecoded"
      }
     },
     {
@@ -52095,7 +52492,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "8968",
      "metadata": {
-      "virtual_address": "2163184"
+      "virtual_address": "2163184",
+      "demangled_name": "SelectPictureBuffer"
      }
     },
     {
@@ -52104,7 +52502,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "9664",
      "metadata": {
-      "virtual_address": "2163880"
+      "virtual_address": "2163880",
+      "demangled_name": "CheckPictureBufferSize"
      }
     },
     {
@@ -52113,7 +52512,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "9824",
      "metadata": {
-      "virtual_address": "2164040"
+      "virtual_address": "2164040",
+      "demangled_name": "CopyPictureThroughScratchpad"
      }
     },
     {
@@ -52122,7 +52522,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "10448",
      "metadata": {
-      "virtual_address": "2164664"
+      "virtual_address": "2164664",
+      "demangled_name": "SignalPictureReady"
      }
     },
     {
@@ -52131,7 +52532,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "10488",
      "metadata": {
-      "virtual_address": "2164704"
+      "virtual_address": "2164704",
+      "demangled_name": "FillPictureOutputInfo"
      }
     },
     {
@@ -52140,7 +52542,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "10888",
      "metadata": {
-      "virtual_address": "2165104"
+      "virtual_address": "2165104",
+      "demangled_name": "OutputFramePicture"
      }
     },
     {
@@ -52149,7 +52552,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "11160",
      "metadata": {
-      "virtual_address": "2165376"
+      "virtual_address": "2165376",
+      "demangled_name": "OutputFieldPicturePair"
      }
     },
     {
@@ -52158,7 +52562,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "11600",
      "metadata": {
-      "virtual_address": "2165816"
+      "virtual_address": "2165816",
+      "demangled_name": "StartBlockChainToScratchpad"
      }
     },
     {
@@ -52167,7 +52572,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "11944",
      "metadata": {
-      "virtual_address": "2166160"
+      "virtual_address": "2166160",
+      "demangled_name": "StartIpuOutputDma"
      }
     },
     {
@@ -52176,7 +52582,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "12056",
      "metadata": {
-      "virtual_address": "2166272"
+      "virtual_address": "2166272",
+      "demangled_name": "ConvertSmallPictureColours"
      }
     },
     {
@@ -52185,7 +52592,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "12336",
      "metadata": {
-      "virtual_address": "2166552"
+      "virtual_address": "2166552",
+      "demangled_name": "ContinueColourConversionOutput"
      }
     },
     {
@@ -52194,7 +52602,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "12712",
      "metadata": {
-      "virtual_address": "2166928"
+      "virtual_address": "2166928",
+      "demangled_name": "ConvertLargePictureColours"
      }
     },
     {
@@ -52203,7 +52612,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "13144",
      "metadata": {
-      "virtual_address": "2167360"
+      "virtual_address": "2167360",
+      "demangled_name": "ContinueColourConversionInput"
      }
     },
     {
