@@ -53,7 +53,9 @@ D_0024CFC0	0024CFC0	420	.rodata	src/main/timed_object.cpp
 D_0024D164	0024D164	8	.rodata	src/main/range_record.cpp
 D_0024D170	0024D170	244	.rodata	src/main/anim_record.cpp
 D_0024D268	0024D268	24	.rodata	src/main/state_walker.cpp
-D_0024D280	0024D280	728	.rodata	src/main/file_1B7968.cpp
+D_0024D280	0024D280	36	.rodata	src/main/collider.cpp
+D_0024D2A8	0024D2A8	272	.rodata	src/main/file_1BE1E8.cpp
+D_0024D3C0	0024D3C0	408	.rodata	src/main/file_1C1190.cpp
 D_0024D560	0024D560	40	.rodata	src/main/hit_count_collider.cpp
 D_0024D588	0024D588	16	.rodata	src/main/turning_collider.cpp
 D_0024D5A0	0024D5A0	168	.rodata	src/main/file_1C5F18.cpp
@@ -174,7 +176,9 @@ D_002744B8	002744B8	56	.data	src/main/timed_object.cpp
 D_002744F0	002744F0	4	.data	src/main/range_record.cpp
 D_002744F8	002744F8	80	.data	src/main/anim_record.cpp
 D_00274548	00274548	376	.data	src/main/state_walker.cpp
-D_002746C0	002746C0	724	.data	src/main/file_1B7968.cpp
+D_002746C0	002746C0	96	.data	src/main/collider.cpp
+D_00274720	00274720	464	.data	src/main/file_1BE1E8.cpp
+D_002748F0	002748F0	164	.data	src/main/file_1C1190.cpp
 D_00274998	00274998	24	.data	src/main/trail_ribbon.cpp
 D_002749B0	002749B0	288	.data	src/main/hit_count_collider.cpp
 D_00274AD0	00274AD0	188	.data	src/main/turning_collider.cpp

@@ -34,7 +34,7 @@
 
 void DetachOwnedRecord(OwnedRecord* o);
 
-// One of the two scratchpad transfer buffers (file_1B7968.cpp): the blocks StartToSprChain sent.
+// One of the two scratchpad transfer buffers (file_1C1190.cpp): the blocks StartToSprChain sent.
 struct SprTransfer {
     void* tags;             // 0x00
     s32 base;               // 0x04

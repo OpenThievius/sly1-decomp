@@ -181,7 +181,7 @@ struct __attribute__((aligned(16))) PartRequest {
     ModelPartState* partState;  // 0x7C
 };
 
-// One of the two scratchpad transfer buffers (file_1B7968.cpp): the blocks StartToSprChain sent.
+// One of the two scratchpad transfer buffers (file_1C1190.cpp): the blocks StartToSprChain sent.
 struct SprTransfer {
     void* tags;             // 0x00
     s32 base;               // 0x04
