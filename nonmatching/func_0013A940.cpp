@@ -19,6 +19,8 @@
 //       caller-saves go, 912 bytes). (3) The prologue has func_0013A618's sched1 tie: both
 //       literal %hi's issue in the first cycle, so the second takes v1 (retail reuses v0).
 //       About 12 compiles this round.
+// W23 (2026-11-11): re-scored, unchanged (952/964); its walls are loop.c's giv combination, which the
+//       replay tools do not model, and func_0013A618's prologue tie. Not retried.
 // In the context of its file, src/main/file_137290.cpp.
 #include "common.h"
 #include "list_iter.h"

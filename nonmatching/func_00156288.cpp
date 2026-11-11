@@ -27,6 +27,9 @@
 // at the top: 32 lines, store order off). The tail is retail's when its 1.0 store carries a death
 // (a dying 1.0 variable: retail's single $f20 for both records leaves that open). The copy's a0 needs
 // sp+64 born after the world pointer dies (blk.up before blk.gravity gives it, breaking the FP regs).
+// W23 (2026-11-11): re-scored, unchanged (order 260/271). tools/sched1.py --check replays every block of
+// it (the burst's 50-insn block included) as the trace, so w15's emulated walls stand; no VU0 conversion
+// or Scalar slot is involved there, so wave 20's "*r" lever does not apply. No new lever found.
 #include "common.h"
 #include "effect_spawner.h"
 #include "vu0.h"

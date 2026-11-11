@@ -19,6 +19,9 @@
 // GPR for a2 (lw v0, 4(s2); por a2, zero, v0; sq v0, 0x50), which ScalarInGpr (lwc1, mfc1) does
 // not give; it would need a GPR form of ScalarAt. (3) Block order and the cross-jumped tails
 // after (1).
+// W23 (2026-11-11): re-scored, unchanged (1560/1544 without the helper). The 2026-11-10 decision allows a
+// new helper only with retail recurrence, and w17's scan found none; the "*r" operand does not help
+// (the word must reach a GPR without an FPR, which only an asm lw or reload of a memory operand gives).
 #include "common.h"
 #include "script_value.h"
 #include "vu0.h"
