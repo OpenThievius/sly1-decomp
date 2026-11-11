@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 220/276 (79.7%), checked 2026-11-10
+// BYTES 220/276 (79.7%), checked 2026-11-11
 // NEAR: order: as func_001D5FA8; it passes a 12-byte stack struct as the pointer argument;
 //       the record and its guard are a function-local static with an inline constructor
 //       (FillMemory, then the fields), at retail's labels through config/us/statics.tsv.

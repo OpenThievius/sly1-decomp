@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 195/280 (69.6%), checked 2026-11-10
+// BYTES 195/280 (69.6%), checked 2026-11-11
 // NEAR: order: as func_001D5FA8 (the stores keep the constructor's order in retail and are
 //       scheduled out of order here);
 //       the record and its guard are a function-local static with an inline constructor

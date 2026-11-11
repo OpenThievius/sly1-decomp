@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2341/2428 (96.4%), checked 2026-11-10
+// BYTES 2341/2428 (96.4%), checked 2026-11-11
 // BYTES 0/0, checked 2026-11-10
 // NEAR (PAL's own definition): python3 tools/check.py nonmatching/eu/func_001366A0.cpp func_001366A0 --version eu --unit src/main/text_panel.cpp
 // Still differs (2026-11-10, w13 round 2): only five saved registers. The record copy's address p

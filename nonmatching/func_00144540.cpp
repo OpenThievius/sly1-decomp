@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 627/772 (81.2%), checked 2026-11-10
+// BYTES 627/772 (81.2%), checked 2026-11-11
 // NEAR (2026-11-10, w14-144540): retail's size, frame, callee-saved registers and stack layout; every instruction is retail's (regdiff: order). Found: the view
 //       after the join is the expression itself (GCSE's PRE copies self+0x80 into s5 in each arm, so no `view` variable); the clamp is ValueRange::Limit; the
 //       rotation is a Mat02 (BuildRotationFromVector writes 3 rows); the weight is one named Scalar (slot at 0x50) used by pos, dir and corner, and tilt's own
