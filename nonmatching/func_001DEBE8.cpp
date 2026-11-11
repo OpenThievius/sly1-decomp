@@ -56,6 +56,12 @@
 // not a helper. r510's refs are flow's (before combine, never recounted) and the flow dump already
 // has its five references in their final form. Tried (78 lines unless noted): the f720 test as
 // `cur != 0x352` first (107), `f720 == 2 &&` in both conditions, a switch on f720, a Vec Cross.
+// w25 (2026-11-11): the lives global-alloc ranks are sched1's recount of every insn in its output
+// (docs/toolchain/sched1.md, "Invisible instructions"). Of the code-less insns that reach sched1
+// (flow's nop after a block-ending call, a clamp's join copy, an argument copy in its own
+// register, GCSE's copies) none fits (a)'s region without changing code; inline parameter and
+// Vec copies are gone after cse1 and combine. Tried: both stick tests as an inline predicate
+// `StickPushed(pad)` (keeps a store-flag sequence, 1724 bytes).
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"
