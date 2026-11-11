@@ -1386,3 +1386,23 @@ after the frame push, and declaration orders (the frame slots follow declaration
   three parameters one saved register; half and the luma part swap t4 and t5. (Resolved
   through global-alloc's pass 0 the same day: docs/toolchain/long-block-constants.md, "Pass 0
   takes no new saved register" (func_0020CAF8).)
+
+### Two weights' qmtc2s tied on priority: dependents decide local-alloc (func_001C54D0, unsolved)
+
+The tail of func_001C54D0 is `end->v30 + m110.r[2] * -push + tangent * f63C` through MulAddX2,
+with `Scalar(-push)` (insn 865, after a neg.s) and `ScalarAt(self->f63C)` (insn 901, its word an
+asm memory operand) sharing one weight slot. Retail gives the f63C weight vf5 and a1, the -push
+weight vf6 and a0; ours the reverse. tools/sched1.py replays the block exactly, and the g11
+local-alloc emulator (build/swarm/w5-1D2518/lalloc2.py) fed the replayed order with 865 moved
+ahead of 901 gives retail's VU registers (the f63C quantity is born late enough to outrank the
+-push one and take vf5, which row 0 frees), and reload's round-robin then gives 865 a0 first.
+In sched1 both are ready at cycle 4 with priority 4 and register weight 0 (865 kills the neg's
+result, 901 kills self); 901 wins on its dependents, three (the MulAddX2 asm, its slot store, and
+an anti dependence from the store to end->v30, which may alias its unflagged read) against two.
+What would flip the tie each costs something retail shows: a later use of self gives 901 weight
+1 but only by reading m110.r[2] after it (self then dies at that load, which takes the cycle);
+naming the f63C weight first puts its slot store ahead of -push's in the shared slot (retail
+stores -push's first); ScalarAtValue, ScalarAtCall and Scalar read the word the same way or
+through an FPR. Spot it with `--trace 901` and a lalloc2.py order: when a ready list holds two
+asm insns of equal priority, the dependents count (slot stores and anti dependences included)
+is the tie-break to check.

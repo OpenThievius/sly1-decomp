@@ -18,6 +18,11 @@
 //       is not plausible code. Lands with: the FLT_MAX bounds as literals, which removes the C
 //       definitions of D_00249D64 and D_00249D68 from src/main/file_137290.cpp (they are this
 //       function's literal pool, the file's .rodata +0 and +4).
+// W23 (2026-11-11): built in its file, tools/sched1.py replays the prologue block as the trace: the
+//       two literal %hi's (insns 16 and 38) both have priority 26 and issue at t = 1; retail's
+//       v0 reuse needs 38 issued no earlier than the first lwc1 (insn 19): priority 24, or 25 and
+//       losing to `move s4,a0` (insn 5). Every form docs/toolchain/sched1.md records was not
+//       re-tried; no new lever found.
 // In the context of its file, src/main/file_137290.cpp.
 #include "common.h"
 #include "asm_func.h"

@@ -526,3 +526,21 @@ and VU, with no `?` or `*`):
   holds a ready sqc2 or lqc2 for it (unit vu0): ToFloatMoved. A product in a reload register
   after every other VU0 value is still ToFloatMoved's: another `"r"` read (ToFloatY,
   ToFloatZ, a call argument) makes it TI_REGS.
+
+### A weight kept in a saved GPR with a per-iteration copy to a spilled Vec (func_00191AC8, near miss)
+
+- Retail holds the loop's scale as `mfc1 s6` (one saved register, frame 512) and copies it each
+  iteration into the slot at 304, from which the rows' `vmulx` operands, the k2 copy and the
+  vector after the loop are loaded. Forms that make the Vec itself the mfc1 output
+  (`k.q = ScalarInGprReg(scale)` in the loop) lose to loop.c, which moves the invariant set and
+  with it the Vec out of the loop: k is then a VU0 pseudo spilled at a different slot.
+- Making the GPR value a variable of its own, `u128 kg = ScalarInGprReg(scale);` before the loop,
+  and copying it per iteration, `k.q = kg;` (k declared before the loop, used after it), keeps
+  kg in a saved GPR (3 refs, TI_REGS), leaves k in memory (global-alloc gives it no register: 9
+  refs, 3 calls) and gives retail's frame and the loads from one slot. 86% by regdiff; the
+  remaining difference is the copy retail makes through v0 (`move v0,s6`, a 64-bit move: one insn
+  in the lives) which flips two priority ties in global-alloc (dir against i, both exactly
+  1428: log2(refs) * refs * 10000 / life) and the saved-register order of kg against the two
+  frame addresses.
+- A `u64` asm output and `k.q = (u128)kg` gives the `move v0,s6` but makes k a VU0 pseudo with 23
+  references (the partial sets are counted), so it is allocated.

@@ -438,3 +438,26 @@ for instance one reload later moved to the stack. Spot the case: list every allo
 (before pruning) for the two registers first; if none has them, only a conflict can explain
 retail.
 
+
+### Reading a register swap as two ranking flips with --set (func_001DEBE8, unsolved)
+
+func_001DEBE8's s1/s2/s3 differ from retail's for five pseudos: &tgt (r126), pad (r118), &cur
+(r124), and two of PRE's %hi copies, g_unitRange's (r510) and g_unitZVector's (r507).
+tools/globalalloc.py replays all 177 dispositions, and `--set` separates the swap into two
+independent flips: `--set 124:length=31 --set 126:length=30 --set 118:length=333` (two more
+pre-reload insns where &cur and &tgt both live) puts pad (11 refs over 331, priority 997) between
+&tgt (1071) and &cur, and `--set 510:refs=6` or `--set 507:length=60` puts g_unitRange's %hi
+(5 refs, life 2 x 145: update_equiv_regs doubles a REG_EQUIV constant's) ahead of g_unitZVector's
+(2 refs, 2 x 27); with both, every register is retail's. The insn count before reload over r510's
+span equals the final code's, so the second flip is a reference or a life in retail's source, not
+a deleted copy. Use the same split before writing variants: find the smallest set of --set
+changes that gives every register, then look for one source difference per change.
+
+### Macro or table? (func_00109488, w23, 2026-11-11)
+
+PAL's copy is the same instruction stream as US's (0 differing lines with symbol targets stripped),
+so the source was not edited between versions. Retail uses one running pointer (`addiu 32`, 1,178
+times) with no re-basing, shows the same three stack spill slots as ours, and its opcode mix and
+per-kind store-order spread match ours apart from the known li/lui/addiu/move loss. The registry's
+first-use order shows the table is written per class, which the code does not reflect. No evidence
+of a source form other than uniform per-entry helper calls.
