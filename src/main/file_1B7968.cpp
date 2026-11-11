@@ -28,6 +28,7 @@
 #include "mul_rotation.h"
 #include "attached_set.h"
 #include "active_set_solver.h"
+#include "sound_level.h"
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
 f32 RandomFloatInRange(f32 a, f32 b);
@@ -229,13 +230,6 @@ void SetVolumeChannelFactor(s32 a, s32 b, f32 x);
 void PauseIopVoice(s32 a);
 void ResumeIopVoice(s32 a);
 void AppendToList(u8* a, void* b);
-// A request for a sound level: a 12-byte record of the pool at World::pool1BB8, kept on
-// World::list1BC4 (func_001BEEF8 makes one). The highest level among them is the current one
-// (func_001BEF88); the IOP is sent the level plus 20.
-struct SoundLevelEntry {
-    s32 level;              // 0x00: -20 to 0x6B (PushSoundLevel)
-    u8 pad4[8];
-};
 extern s32 D_002748EC;
 extern s32 g_currentSoundLevel;
 extern s32 g_previousSoundLevel;

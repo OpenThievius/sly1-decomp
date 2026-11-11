@@ -106,10 +106,6 @@ extern u8 D_0026A210[];
 void SetupScreenElementText(void* self);
 s32 IsFontLoaded(s32 k);
 void* GetFontById(s32 k);
-struct Obj_191AA8 {
-    u8 pad0[0x54];
-    void* p54;
-};
 s32 CollectSegmentSpansInPlaneTree(void* p);
 void SyncDataCache(s32 a);
 void CopyObjectData(void* self);
@@ -1315,9 +1311,9 @@ void SnapPointToOwnerGraph(GraphQueryOwner* self, Vec02* p, Vec02* out)
     SnapPointToPointGraph(&self->graph, p, out);
 }
 
-void TestOwnerGraphSpan(Obj_191AA8* self)
+void TestOwnerGraphSpan(GraphQueryOwner* self)
 {
-    CollectSegmentSpansInPlaneTree(self->p54);
+    CollectSegmentSpansInPlaneTree(self->graph.faces);
 }
 
 INCLUDE_ASM(func_00191AC8);

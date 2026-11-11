@@ -57,10 +57,9 @@ struct Info_2093F0 {
     s32 f4;
     s32 f8;
 };
-struct Obj_209B80;
 
 s32 NewSemaphore(Req_2093F0* r);
-s32 SyncCardRequest(Obj_209B80* a0, s32* a1, s32* a2);
+s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2);
 s32 AwaitSemaphore(s32 sema);
 void InitRemoteCalls(s32 a);
 s32 BindRemoteService(Sema_2093F0* p, u32 flags, s32 z);
@@ -264,22 +263,21 @@ s32 ReadCardFile(void* a0, void* a1, void* a2)
 }
 
 struct Pool_209990 { u8 pad000[0x24]; s32 f24; };
-struct Obj_209990 { u8 pad000[0x20]; };
 struct Ctx_209990 { s32 f00; u8 p04[8]; s32 f0C; u8 p10[4]; u32 f14; s32 f18; u8 p1C[4]; u8 buf[16]; };
 
-s32 TrySemaphore(Obj_209990* a);
-void PostSemaphore(Obj_209990* a);
+s32 TrySemaphore(s32 sema);
+void PostSemaphore(s32 sema);
 void SyncDataCache(s32 a);
 s32 CallRemoteService(Pool_209990* p, s32 a1, s32 a2, Ctx_209990* a3, s32 a4, u8* a5, s32 a6, s32 a7, s32 stk);
 
 s32 WriteCardFile(s32 self, u32 src, s32 n)
 {
     s32 r;
-    if (TrySemaphore((*(Obj_209990**)&g_cardSemaphore)) < 0) {
+    if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
     if ((*(Pool_209990*)&g_cardClient).f24 == 0) {
-        PostSemaphore((*(Obj_209990**)&g_cardSemaphore));
+        PostSemaphore(g_cardSemaphore);
         return -100;
     }
     (*(Ctx_209990*)&D_0062ADC0).f00 = self;
@@ -305,7 +303,7 @@ s32 WriteCardFile(s32 self, u32 src, s32 n)
     if (r == 0) {
         g_cardRequestInFlight = 6;
     } else {
-        PostSemaphore((*(Obj_209990**)&g_cardSemaphore));
+        PostSemaphore(g_cardSemaphore);
     }
     return r;
 }
@@ -334,14 +332,15 @@ struct Dev_209B80;
 s32 IsRemoteCallPending(Q_209B80* q);
 s32 PostSemaphore(Dev_209B80* d);
 
-s32 SyncCardRequest(Obj_209B80* a0, s32* a1, s32* a2)
+// With noWait zero it waits until the request in flight is done; with it set, it only tests.
+s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2)
 {
     s32 ok;
     if (g_cardRequestInFlight == 0) {
         return -1;
     }
     ok = IsRemoteCallPending((Q_209B80*)g_cardClient);
-    if (a0 == 0 && ok != 0) {
+    if (noWait == 0 && ok != 0) {
         while (IsRemoteCallPending((Q_209B80*)g_cardClient) != 0) {
             WaitCardTicks(60);
         }
