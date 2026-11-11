@@ -940,7 +940,7 @@ s32 func_00134AA0(void** a, void** b)
     return c == 0 ? -1 : 1;
 }
 
-INCLUDE_RODATA(D_00249CF8);
+extern const f32 D_00249CF8 = 3.4028235e38f;
 INCLUDE_ASM(func_00134B48);
 
 void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q)
