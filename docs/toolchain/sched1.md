@@ -1419,3 +1419,33 @@ takes retail's a0 and vf6, but local-alloc gives the loaded pseudo v0 where reta
 a1. What is left is a source fact that makes the f63C weight wait on the -push one, or keeps its
 load out of the qmtc2 until reload; no plain form of either was found
 (nonmatching/func_001C54D0.cpp, W24).
+
+### The 33rd memory reference of a block is a barrier (WriteMemoryCardSaveHeader)
+
+Read from haifa-sched.c (sched_analyze_1, add_insn_mem_dependence, flush_pending_lists,
+compute_block_backward_dependences) and checked in the `-dS` dump (w25, 2026-11-11):
+
+- **The rule.** sched_analyze keeps every memory reference of the block (reads and writes) in
+  its pending lists, and `pending_lists_length` counts them. A *store* analysed while the count
+  is above 32 does not look for aliases: flush_pending_lists makes it depend (anti, cost 1) on
+  every pending read and write, empties the lists, and makes it `last_pending_memory_flush`,
+  which every later memory reference of the block (loads too) then depends on. The count starts
+  at 0 for each single-block region (a loop's region carries it from block to block), and every
+  call resets it (a call is itself a flush). The same happens in sched2 on the reloaded insns,
+  where spill loads and stores count as well.
+- **Where it acts.** WriteMemoryCardSaveHeader (func_0018CA10, matched, src/main/memory_card.cpp)
+  fills a 0x3C4-byte frame record after FillMemory: two loads and 34 stores in one block. Insn
+  209 (`c.f0A0 = 0.33f`, the 34th reference after the call) carries anti links to all 33
+  references before it, and every store after it (215, 221, ...) has exactly one memory link,
+  to 209. So a long run of field stores is one free group, then a barrier, then a second free
+  group: retail's order can show a "chain" there that no alias rule explains.
+- **What it means for source changes.** Adding or removing a memory reference before the flush
+  point (a field read twice, a store split, a Scalar slot, an asm's memory operand) moves the
+  barrier to another store. tools/sched1.py replays the links the dump prints, so it already
+  follows the barrier of the compiled form; a form with another count needs a new compile.
+- **Not the wall of the missing-dependence near misses.** Counting each block of the pre-sched
+  RTL (`.regmove`) and of the reloaded RTL (`.greg`) for func_001D5FA8, func_001D60B0,
+  func_001D61C8, func_001930B8, func_001549C8, func_001A1030, func_001C54D0, func_0013BE18,
+  func_0014F168 and func_00144540, the most pending references before any store is 12, 14, 12,
+  12, 12, 24, 19, 8, 10 and 28 (29 after reload): none reaches the flush. (The static records'
+  FillMemory call resets the count, so their eleven to fourteen stores are far below it.)

@@ -3246,3 +3246,30 @@ so it waits for the `sqc2` to 0(sp): retail's `lq` comes after the argument addr
 branch, storing the new velocity before the acceleration computed from it (`Q(qA0) = vel.q;
 Q(qC0) = DivX(Sub(target, vel), ..)`) keeps the qA0 store behind the Scalar slot store (both
 without a class, so they are ordered), and reorg puts it in the call's delay slot as retail does.
+
+### Where a pointer's known value can come from: the REG_EQUAL route closed (func_00144540)
+
+UpdateCameraMatrices' post-call rows load through `(plus r163 16)` and `(plus r163 32)`, r163 the
+reference `self + 0x80`, and wait for corner's frame store; retail's (through s0 = self + 0x80,
+the same address form) do not. Read from alias.c (find_base_value, record_set,
+init_alias_analysis, canon_rtx) and every 2.95.3 writer of REG_EQUAL and REG_EQUIV (w25,
+2026-11-11):
+
+- **The base is lost by construction.** find_base_value of `(plus self 128)` replaces `self` by
+  its base, the incoming argument's `(address:VOID a0)`, and then recurses into that ADDRESS,
+  which has no case: 0. Only a pseudo copied from an argument register before
+  NOTE_INSN_FUNCTION_BEG has that base, so any pointer formed from it with a PLUS has none (a
+  PLUS of a pseudo whose base is a symbol keeps it).
+- **The fallback needs a note, and no plain form makes one.** base_alias_check then tries
+  canon_rtx, which needs `reg_known_value`: a REG_EQUAL on the single set or a REG_EQUIV. The
+  writers before sched1 are cse.c (only for a constant source, `src_const`), explow.c's force_reg
+  (constants), optabs.c's add_equal_note (an operation expanded as a sequence of several insns,
+  e.g. an addition whose constant does not fit 16 bits, not 0x80), emit_libcall_block, loop.c
+  (an invariant moved out of a loop gets its source as REG_EQUAL or REG_EQUIV), and function.c's
+  REG_EQUIV for a parameter's stack home. None applies to `self + 0x80` outside a loop.
+- **Reading the rows from `self` instead (probe).** A copy of MulRotationRowsX taking the
+  object and reading `((const u128*)o->f80)[i]` gives `self`-based addresses, so the rows rise
+  above the store, but retail reads rows 1 and 2 at 16 and 32 from s0 (`lqc2 0x10($s0)`), and the
+  function loses s5 and its frame (170 lines differ against 58). So retail's own rows went
+  through the `self + 0x80` register; what let them pass the frame store is still open (the
+  near miss's other lead, a MEM_SCALAR_P corner store against MEM_IN_STRUCT_P rows, stands).
