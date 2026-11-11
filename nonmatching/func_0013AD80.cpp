@@ -24,7 +24,7 @@
 #include "effect_spawner.h"
 #include "world.h"
 #include "child_group_object.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "packet_writer.h"
 #include "owned_record.h"
 #include "object_message.h"

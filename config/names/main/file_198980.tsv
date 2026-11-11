@@ -15,12 +15,12 @@ func_00199070	InitFlaggedObjectSet	slot 0 of class 0x2D: runs InitObjectSet, the
 func_001990A8	CopyFlaggedObjectSet	slot 9 of class 0x2D: runs CopyCollider while keeping its own flag-table index at 0x5A0
 func_001990E0	GetFlaggedObjectSetActivationState	slot 72 of class 0x2D: what GetObjectSetActivationState returns, except 0 instead of 1 once its bit of g_flagTable is set
 func_00199138	CollectFlaggedObjectSet	slot 73 of class 0x2D: sets its bit of g_flagTable with SetFlagTableBit, then runs CollectObjectSet
-func_00199170	LoadC5CObject	slot 10 (+0x38) of class 0x5C: LoadPlacedObject, then resolves the one table D_0026A918 (ResolveObjectLinks)
-func_001991A8	StartC5CObject	slot 16 (+0x50) of class 0x5C: StartPlacedObject, then resolves the table D_0026A928 (ResolveObjectLinks)
-func_001991E0	LoadC5DObject	slot 10 (+0x38) of class 0x5D: LoadPlacedObject, then resolves the table D_0026A938 (ResolveObjectLinks)
-func_00199218	StartC5DObject	slot 16 (+0x50) of class 0x5D: StartPlacedObject, gathers the objects of its id list with those found in the level (GatherObjectsById, FindFirstObjectById), and gives each and itself a state walker (CreateStateWalker, SetStateWalkerTarget)
-func_00199380	SetC5DObjectMaskBit	sets the mask at +0x2D0 to the single bit after the given one
-func_00199398	AddC5DObjectId	appends an id to the array at +0x2E0 while its count at +0x2DC is below 8
+func_00199170	LoadStateWalkerObject	slot 10 (+0x38) of class 0x5C: LoadPlacedObject, then resolves the one table D_0026A918 (ResolveObjectLinks)
+func_001991A8	StartStateWalkerObject	slot 16 (+0x50) of class 0x5C: StartPlacedObject, then resolves the table D_0026A928 (ResolveObjectLinks)
+func_001991E0	LoadStateWalkerGroup	slot 10 (+0x38) of class 0x5D: LoadPlacedObject, then resolves the table D_0026A938 (ResolveObjectLinks)
+func_00199218	StartStateWalkerGroup	slot 16 (+0x50) of class 0x5D: StartPlacedObject, gathers the objects of its id list with those found in the level (GatherObjectsById, FindFirstObjectById), and gives each and itself a state walker (CreateStateWalker, SetStateWalkerTarget)
+func_00199380	SetStateWalkerGroupMaskBit	sets the mask at +0x2D0 to the single bit after the given one
+func_00199398	AddStateWalkerGroupId	appends an id to the array at +0x2E0 while its count at +0x2DC is below 8
 func_001993C0	QueueWalkerActivationOnPlayer	QueuePlayerWalkerActivation on g_player when there is one; the script built-in func_00106FA0 calls it
 func_001993F0	InitNumberedItem	slot 0 of the 0x2E class: runs InitObjectSet and stores the world counter at 0x2300, post-incremented, as the item's own number at 0x5A0
 func_00199428	LoadNumberedItem	slot 10 of the 0x2E class: runs LoadObjectSet, installs the table D_0026A948 with func_00124DF8 and looks up to 0x20 objects (ids 0x318..0x337) up with func_0015A418 into a 0x80-byte array at 0x5B0
@@ -70,14 +70,14 @@ func_0019C068	SetObjectGathererSuspended	with a non-zero flag removes the object
 func_0019C1C0	SetObjectGathererState	changes the state at +0x4: leaving state 4 restores it from its suspension, then per new state picks a wait time (random from +0x608/+0x60C, a point around +0x190, a candidate with ChooseObjectGathererCandidate, a sound and ScatterObjectsAtPoint, or suspends it) and stamps the game time at +0x554
 func_0019C3D0	RegisterC7CObject	slot 6 (+0x28) of class 0x7C: RegisterObject, then appends itself to the world's list at +0x1C6C
 func_0019C408	UnregisterC7CObject	slot 7 (+0x2C) of class 0x7C: UnregisterObject, then removes itself from the world's list at +0x1C6C
-func_0019C440	InitC8BObject	slot 0 (+0x10) of class 0x8B: InitObject, then sets its two ids at +0x34 and +0x38 to -1
-func_0019C470	LoadC8BObject	slot 10 (+0x38) of class 0x8B: reads its counts, values and records from the level stream (ReadBufferedS16, ReadBufferedS8, ReadBufferedFloat) into front memory, then its property records (ReadPropertyRecords)
-func_0019C728	StartC8BObject	slot 16 (+0x50) of class 0x8B: StartObject, then finds its objects by id (FindFirstObjectByIdMode4, FindFirstObjectByIdMode1) and sets up their links and blend records
+func_0019C440	InitAimBlendGrid	slot 0 (+0x10) of class 0x8B: InitObject, then sets its two ids at +0x34 and +0x38 to -1
+func_0019C470	LoadAimBlendGrid	slot 10 (+0x38) of class 0x8B: reads its counts, values and records from the level stream (ReadBufferedS16, ReadBufferedS8, ReadBufferedFloat) into front memory, then its property records (ReadPropertyRecords)
+func_0019C728	StartAimBlendGrid	slot 16 (+0x50) of class 0x8B: StartObject, then finds its objects by id (FindFirstObjectByIdMode4, FindFirstObjectByIdMode1) and sets up their links and blend records
 func_0019C9C8	BlendCellCornerRecords	computes for the four corners of a grid cell the weight of each from the point's position against the plane of the other three, then adds the four corners' 24-float records scaled by those weights into the slots and hands them to SetBlendItemWeights
-func_0019CC10	ComputeGridBlendWeights	writes 24 floats: the product of a 3-way weight from x (-1 to 1), a 4-way linear weight from y (0 to 3) and a 2-way weight from z (0 to 1); StartC8BObject calls it for each grid cell's coordinates from DecodeC8BGridIndex and for the two positions that fill the object's 24 slots
-func_0019CD90	DecodeC8BGridIndex	splits an index into three grid coordinates of a (2n+1) by (n+1) by (3n+1) grid with n at +0x48, each divided by n (the first centred on n); StartC8BObject calls it
-func_0019CE28	SetC8BObjectVector	stores three floats at +0x54, +0x58 and +0x5C; the script built-in func_00105F70 calls it
-func_0019CE38	SetC8BObjectVectorFlagged	sets +0x80 to 1 and stores three floats at +0x54, +0x58 and +0x5C; the script built-in func_00106048 calls it
+func_0019CC10	ComputeGridBlendWeights	writes 24 floats: the product of a 3-way weight from x (-1 to 1), a 4-way linear weight from y (0 to 3) and a 2-way weight from z (0 to 1); StartAimBlendGrid calls it for each grid cell's coordinates from DecodeAimBlendGridIndex and for the two positions that fill the object's 24 slots
+func_0019CD90	DecodeAimBlendGridIndex	splits an index into three grid coordinates of a (2n+1) by (n+1) by (3n+1) grid with n at +0x48, each divided by n (the first centred on n); StartAimBlendGrid calls it
+func_0019CE28	SetAimBlendGridVector	stores three floats at +0x54, +0x58 and +0x5C; the script built-in func_00105F70 calls it
+func_0019CE38	SetAimBlendGridVectorFlagged	sets +0x80 to 1 and stores three floats at +0x54, +0x58 and +0x5C; the script built-in func_00106048 calls it
 func_0019CE50	PlaceFramePointAtTime	places a point given in an object's frame (+0x40, the object at +0x18) in the world at a time with ComputeObjectFrameAtTime
 func_0019CEC0	PlaceFramePointInOwnerFrame	places the point with PlaceFramePointAtTime, subtracts the owner object's (+0x3C) position at the same time and rotates it back by the owner's rotation
 func_0019CF68	FindPlaneTreeLeafAtPoint	walks the plane tree at +0xD8 to the leaf record the point falls in, trying both sides when the point lies within 0.0001 of a plane and returning the first nonzero record

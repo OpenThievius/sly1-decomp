@@ -94,10 +94,10 @@ func_0015A4B8	IsClassOfKind	walks the list kept at D_00247448[index] and returns
 func_0015A4F0	GatherObjectsById	by the low byte of the flags (modes 1 to 5) collects up to max objects of the id's classes (IsClassOfKind) from the world, from the root's children or from the root's parent chain, returning the count
 func_0015A838	FindFirstObjectByIdGathered	runs GatherObjectsById with flags or 0x200 and one result wanted, and returns it
 func_0015A868	FindCommonAncestor	returns the first object on the first parent chain that also appears on the second
-func_0015A8B8	InitC60Object	slot 0x10 of class 0x60: runs InitPlacedObject and sets its two scale floats to 1 and its three-float value to 1, 0.2, 0.1
-func_0015A918	LoadC60Object	slot 0x38 of class 0x60: runs LoadPlacedObject and reads its four mesh tables (ReadMeshTables)
-func_0015A960	UpdateC60Object	slot 0x54 of class 0x60: runs UpdatePlacedObject and moves the scale at +0x2EC toward +0x2F0 (ApproachValueWithRamp)
-func_0015A9A8	DrawC60Object	slot 0xA4 of class 0x60: draws the object with its transform scaled by the scale at +0x2EC
+func_0015A8B8	InitScalingVolume	slot 0x10 of class 0x60: runs InitPlacedObject and sets its two scale floats to 1 and its three-float value to 1, 0.2, 0.1
+func_0015A918	LoadScalingVolume	slot 0x38 of class 0x60: runs LoadPlacedObject and reads its four mesh tables (ReadMeshTables)
+func_0015A960	UpdateScalingVolume	slot 0x54 of class 0x60: runs UpdatePlacedObject and moves the scale at +0x2EC toward +0x2F0 (ApproachValueWithRamp)
+func_0015A9A8	DrawScalingVolume	slot 0xA4 of class 0x60: draws the object with its transform scaled by the scale at +0x2EC
 func_0015AA50	IsPointInsideObjectFaces	returns 0 for a tiny scale, else moves the point into the object's frame, divides by the scale (+0x2EC) and tests it with IsPointInsideFaceTree against the face tree at +0x2DC
 func_0015AAE0	InitObjectCycler	slot 0 of the 0x40 class: runs the base set-up, sets state -1, loads its ranges from the doubleword tables D_00262180..D_002621C0 and appends itself to the world list at +0x1C48
 func_0015AC08	LoadObjectCycler	slot 10 of the 0x40 class: runs the base load, finds the objects of kinds 0x23C..0x24B (and 0x24D..0x254 in mode 1) into its object arrays and appends itself to the world list in mode 1

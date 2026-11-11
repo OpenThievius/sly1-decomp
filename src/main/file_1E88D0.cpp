@@ -19,7 +19,7 @@
 #include "memory_card.h"
 #include "timeline.h"
 #include "value_list_object.h"
-#include "c62.h"
+#include "state_reset_object.h"
 #include "attached_set.h"
 #include "packet_writer.h"
 #include "screen_fade.h"
@@ -340,7 +340,7 @@ struct StateChangeMsg {
     s32 old;
     s32 cur;
 };
-s32 SetGatheredWalkerTargets(World* mgr, s32 a, void* b, C62* self, s32 c);
+s32 SetGatheredWalkerTargets(World* mgr, s32 a, void* b, StateResetObject* self, s32 c);
 void GetStateWalkerCurrentKey(s32 sub, s32* out);
 void ScheduleTempoAgentBeatPress(TempoAgent* p);
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32* c);
@@ -365,7 +365,7 @@ void* MoveMemory(void* dst, void* src, s32 size);
 // An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
 // Moves n bytes of the item list down over a removed item.
 struct MoveItemsDown {
-    static void Of(C62** dst, C62** src, s32 n)
+    static void Of(StateResetObject** dst, StateResetObject** src, s32 n)
     {
         MoveMemory(dst, src, n);
     }
@@ -520,7 +520,7 @@ void AddTempoAgentEntry(TempoAgent* self, AnimationPlayer* a, s32 b);
 void RestartTimeline(Timeline* self);
 void EndTimeline(Timeline* self);
 void RunTimelineEntries(Timeline* self);
-void SetStateAndNotify(C62* self, s32 state);
+void SetStateAndNotify(StateResetObject* self, s32 state);
 s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, void* param2);
 void SetWarpPageMode(WarpPage* self, u32 next);
 void SetWarpCursor(WarpPage* self, s32 a1, s32 a2);
@@ -3780,14 +3780,14 @@ void ClearAttachedSetTrackedNodes(AttachedSet* o)
     o->trackedNodes.found = 0;
 }
 
-void InitStateResetObject(C62* self)
+void InitStateResetObject(StateResetObject* self)
 {
     InitPlacedObject(self);
     self->id2D0 = -1;
     self->id2E0 = -1;
 }
 
-void StartStateResetObject(C62* self)
+void StartStateResetObject(StateResetObject* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, D_00275E10);
@@ -3802,7 +3802,7 @@ s32 AddStateResetEntry(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a
 
 void UpdateStateResetObject(void) {}
 
-void SetStateAndNotify(C62* self, s32 state)
+void SetStateAndNotify(StateResetObject* self, s32 state)
 {
     if (self->id2D0 != state) {
         if (state != 0) {
@@ -3822,7 +3822,7 @@ void SetStateAndNotify(C62* self, s32 state)
     }
 }
 
-void HandleStateResetNotification(C62* self, s32 kind, Msg62* msg)
+void HandleStateResetNotification(StateResetObject* self, s32 kind, StateResetMsg* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 5) {
@@ -3834,14 +3834,14 @@ void HandleStateResetNotification(C62* self, s32 kind, Msg62* msg)
 
 void* CreateRecord2505C0(void)
 {
-    C62Group* p = (C62Group*)AllocateZeroedFrontMemory(48);
+    StateResetGroup* p = (StateResetGroup*)AllocateZeroedFrontMemory(48);
     p->vtbl = D_002505C0;
     return p;
 }
 
-void AppendToSmallList(C62Group* self, C62* value) { u32 i = self->count; if (i < 8) { self->items[i] = value; self->count = i + 1; } }
+void AppendToSmallList(StateResetGroup* self, StateResetObject* value) { u32 i = self->count; if (i < 8) { self->items[i] = value; self->count = i + 1; } }
 
-void RemoveFromSmallList(C62Group* self, C62* value)
+void RemoveFromSmallList(StateResetGroup* self, StateResetObject* value)
 {
     s32 i;
     for (i = 0; i < self->count; i++) {
@@ -3853,7 +3853,7 @@ void RemoveFromSmallList(C62Group* self, C62* value)
     }
 }
 
-void UpdateItemTimeouts(C62Group* s)
+void UpdateItemTimeouts(StateResetGroup* s)
 {
     s->scheduled = 0;
     if (s->owner != 0 && s->owner->f180 != -1 && s->items[0]->id2E0 == s->owner->f180) {
@@ -3870,7 +3870,7 @@ void UpdateItemTimeouts(C62Group* s)
         return;
     }
     for (s32 i = 0; i < s->count; i++) {
-        C62* it = s->items[i];
+        StateResetObject* it = s->items[i];
         if (it->id2D0 != 2) continue;
         if (it->id2DC != 0) continue;
         f32 d = g_gameClock.time - it->f2D4;
@@ -3880,7 +3880,7 @@ void UpdateItemTimeouts(C62Group* s)
     }
 }
 
-void ScheduleItemTimeouts(C62Group* self)
+void ScheduleItemTimeouts(StateResetGroup* self)
 {
     if (self->scheduled == 0) {
         self->scheduled = 1;

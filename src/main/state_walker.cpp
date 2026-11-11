@@ -15,7 +15,7 @@
 #include "queued_call.h"
 #include "globals.h"
 #include "asm_func.h"
-#include "c60.h"
+#include "scaling_volume.h"
 #include "placed_object.h"
 #include "base_object.h"
 #include "vu0.h"
@@ -1092,7 +1092,7 @@ void AimCompanionAgentPose(CompanionAgent *self) {
         f = 0.1f;
         break;
     }
-    ((C60*)self->fC14)->f2F0 = f;
+    ((ScalingVolume*)self->fC14)->f2F0 = f;
 }
 
 void EnterCompanionAgentState(CompanionAgent* self)

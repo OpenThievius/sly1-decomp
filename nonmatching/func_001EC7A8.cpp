@@ -26,7 +26,7 @@
 #include "memory_card.h"
 #include "timeline.h"
 #include "value_list_object.h"
-#include "c62.h"
+#include "state_reset_object.h"
 #include "attached_set.h"
 #include "packet_writer.h"
 #include "screen_fade.h"
@@ -346,7 +346,7 @@ struct StateChangeMsg {
     s32 old;
     s32 cur;
 };
-s32 SetGatheredWalkerTargets(World* mgr, s32 a, void* b, C62* self, s32 c);
+s32 SetGatheredWalkerTargets(World* mgr, s32 a, void* b, StateResetObject* self, s32 c);
 void GetStateWalkerCurrentKey(s32 sub, s32* out);
 void ScheduleTempoAgentBeatPress(TempoAgent* p);
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32* c);
@@ -367,7 +367,7 @@ void* MoveMemory(void* dst, void* src, s32 size);
 // An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
 // Moves n bytes of the item list down over a removed item.
 struct MoveItemsDown {
-    static void Of(C62** dst, C62** src, s32 n)
+    static void Of(StateResetObject** dst, StateResetObject** src, s32 n)
     {
         MoveMemory(dst, src, n);
     }
@@ -522,7 +522,7 @@ void AddTempoAgentEntry(TempoAgent* self, AnimationPlayer* a, s32 b);
 void RestartTimeline(Timeline* self);
 void EndTimeline(Timeline* self);
 void RunTimelineEntries(Timeline* self);
-void SetStateAndNotify(C62* self, s32 state);
+void SetStateAndNotify(StateResetObject* self, s32 state);
 s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, void* param2);
 void SetWarpPageMode(WarpPage* self, u32 next);
 void SetWarpCursor(WarpPage* self, s32 a1, s32 a2);

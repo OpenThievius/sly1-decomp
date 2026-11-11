@@ -1250,7 +1250,7 @@ ternary, an inline taking the index or returning the link) read one pseudo.
 
 Every other caller is indifferent (2026-11-10): the 22 functions of src/main that call it
 (ReadSequenceSteps, LoadGroupMembers, ReadPlacedObjectModel, LoadPointGraph, LoadObjectGroup,
-LoadC8BObject, LoadCollider, LoadWorld, LoadArrivalPoint, LoadObjectSubGroup, LoadAnimation,
+LoadAimBlendGrid, LoadCollider, LoadWorld, LoadArrivalPoint, LoadObjectSubGroup, LoadAnimation,
 LoadFollowRecord, ReadAnimationEvents, func_001289C0, the seven readers of pose_source.cpp and
 LoadStateGraph) print EXACT with every declaration of their file changed to `s16`, as with `s32`.
 So `s16` is the likely real type, and only the definition holds it back.

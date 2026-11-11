@@ -33,7 +33,7 @@
 #include "switched_collider.h"
 #include "shapes.h"
 #include "id_filter_object.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "object_message.h"
 #include "queued_call.h"
 #include "stream_reader.h"
@@ -4852,7 +4852,7 @@ s32 HasAnimationEventKind19(Animation* a0)
     return 0;
 }
 
-void* FindEntryByObjectId(Gr8B* self, void* key);
+void* FindEntryByObjectId(BlendAnimationView* self, void* key);
 void RefineNearestAnimationPathTime(f32 end, f32 radius, Track83* track, PlacedObject* owner, Vec02* point, f32 t, f32* outT,
                    Vec02* outPos, Vec02* outDir);
 
@@ -4866,7 +4866,7 @@ void FindNearestAnimationPathTime(Animation* self, PlacedObject* owner, f32 star
     f32 limit = self->length;
     f32 tenth = limit * 0.1f;
     f32 step = tenth >? 0.5f;
-    Track83* track = (Track83*)FindEntryByObjectId((Gr8B*)self, owner);
+    Track83* track = (Track83*)FindEntryByObjectId((BlendAnimationView*)self, owner);
     if (track->pos == 0) {
         if (outT != 0) {
             *outT = 0.0f;
@@ -4933,10 +4933,10 @@ f32 GetAnimationMarkerTime(void)
     return r;
 }
 
-void* FindEntryByObjectId(Gr8B* self, void* key)
+void* FindEntryByObjectId(BlendAnimationView* self, void* key)
 {
     for (s32 i = 0; i < self->f38; i++) {
-        Entry8B* e = (Entry8B*)(self->f3C + i * 0x1C);
+        BlendSourceEntry* e = (BlendSourceEntry*)(self->f3C + i * 0x1C);
         if (MatchesObjectId(key, e->key) != 0) {
             return e;
         }
@@ -4944,11 +4944,11 @@ void* FindEntryByObjectId(Gr8B* self, void* key)
     return 0;
 }
 
-// A source of an object's pose (Entry8B's mover and sub): its first method gives the pose at a
+// A source of an object's pose (BlendSourceEntry's mover and sub): its first method gives the pose at a
 // time and scale, a vector and a second value (func_0012CD78).
-typedef void (*PoseAtFn8B)(void* src, PlacedObject* o, f32 t, f32 scale, s32 z, void* a, Vec02* b);
+typedef void (*PoseSampleFn)(void* src, PlacedObject* o, f32 t, f32 scale, s32 z, void* a, Vec02* b);
 
-void SampleAnimationFrameChain(Gr8B* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
+void SampleAnimationFrameChain(BlendAnimationView* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
                    Vec02* vel, Vec02* spin)
 {
     typedef Vu0::Vec Vec;
@@ -4991,7 +4991,7 @@ void SampleAnimationFrameChain(Gr8B* self, f32 t, f32 scale, PlacedObject* o, Pl
     }
     for (k--; k >= 0; k--) {
         o = chain[k];
-        Entry8B* e = (Entry8B*)FindEntryByObjectId(self, o);
+        BlendSourceEntry* e = (BlendSourceEntry*)FindEntryByObjectId(self, o);
         void* a;
         void* b;
         if (e != 0) {
@@ -5003,14 +5003,14 @@ void SampleAnimationFrameChain(Gr8B* self, f32 t, f32 scale, PlacedObject* o, Pl
         }
         if (pos != 0 || vel != 0) {
             if (a != 0) {
-                (*(PoseAtFn8B*)*(void**)a)(a, o, t, s, 0, &p, &v);
+                (*(PoseSampleFn*)*(void**)a)(a, o, t, s, 0, &p, &v);
             } else {
                 p = o->pos;
                 v = o->v150;
             }
         }
         if (b != 0) {
-            (*(PoseAtFn8B*)*(void**)b)(b, o, t, s, 0, &R, &w);
+            (*(PoseSampleFn*)*(void**)b)(b, o, t, s, 0, &R, &w);
         } else {
             R = o->rot;
             w = o->v160;

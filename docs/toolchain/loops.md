@@ -395,7 +395,7 @@ REGNO_POINTER_FLAG (the rule in "Alias classes": a pointer parameter's base neve
 frame stores; seen in the output, not traced in alias.c), so the read may alias the frame stores:
 sched1 kept the load after the normal's stores, and the body's order, the VU0 registers
 and global-alloc's ranking (every register one too high from the first insn) followed. Typed as a
-pointer (`Cell8B* cell`), the read has the argument's base, never conflicts with a frame store,
+pointer (`GridCell* cell`), the read has the argument's base, never conflicts with a frame store,
 and the whole first loop matches (100 lines to 7). The tell: a word read through a parameter
 scheduled late behind `sqc2 ...(sp)` stores in ours and early in retail; check the parameter's
 type before anything else. The same function needed one `i` for both outer loops (retail keeps

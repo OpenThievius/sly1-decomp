@@ -8,7 +8,7 @@
 #include "effect_spawner.h"
 #include "world.h"
 #include "child_group_object.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "packet_writer.h"
 #include "owned_record.h"
 #include "object_message.h"
@@ -983,7 +983,7 @@ void RemoveColliderFromSweepAxes(World* self, void* owner)
 #include "effect_spawner.h"
 #include "world.h"
 #include "child_group_object.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "packet_writer.h"
 #include "owned_record.h"
 #include "object_message.h"
@@ -1539,7 +1539,7 @@ void CopyMemory(void* a, void* b, s32 n);
 void ComputeBlendedDuration(s32 a0, s32 a1, void* a2, s32 a3, s32 a4, s32 a5, void* a6);
 void SettleListedPoseSources(void* node);
 
-void SetBlendItemWeights(Gr8B* self, s32 a1, s32 a2, void* a3)
+void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3)
 {
     AnimationPlayer* node = (AnimationPlayer*)self->f6C;
     s32 i;
@@ -1578,7 +1578,7 @@ void* FindEntryByObjectId(void);
 
 void SetBlendEntryRecordFlag(void)
 {
-    Entry8B* o = (Entry8B*)FindEntryByObjectId();
+    BlendSourceEntry* o = (BlendSourceEntry*)FindEntryByObjectId();
     if (o) {
         if (o->sub) {
             o->sub->flag = 1;

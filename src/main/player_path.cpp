@@ -7,7 +7,7 @@
 #include "vu0.h"
 #include "placed_object.h"
 #include "collider.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 
 // The file's .data, in retail's order. D_00274F0C holds two floats (0.3, 10) under one label, which
 // GCC would align to 8 as one object: it stays included, and ControlPlayerOnPath reads its first.
@@ -36,14 +36,14 @@ void CreatePlayerTwoEntryBlend(Player* self)
     TwoEntryBlendEntry* e = (TwoEntryBlendEntry*)self->f103C;
     s32 i = 1;
     do {
-        SampleAnimationFrameChain((Gr8B*)e->p4, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, 0, 0, (Vec02*)out, 0);
+        SampleAnimationFrameChain((BlendAnimationView*)e->p4, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, 0, 0, (Vec02*)out, 0);
         e->fC = out[2];
         e++;
         i--;
     } while (i >= 0);
     BuildCombinedBlendAnimation(self, 0x10, 2, self->f103C, 0, 0, 0, &self->f105C);
-    SampleAnimationFrameChain((Gr8B*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f618, (PlacedObject*)self, 1, (Vec02*)&self->f23E0, 0, 0, 0);
-    SampleAnimationFrameChain((Gr8B*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, (Vec02*)&self->f23F0, 0, 0, 0);
+    SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f618, (PlacedObject*)self, 1, (Vec02*)&self->f23E0, 0, 0, 0);
+    SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, (Vec02*)&self->f23F0, 0, 0, 0);
     f32 avg = (self->f23E0 + self->f23F0) * 0.5f;
     self->f23F4 = 0.0f;
     self->f23E4 = 0.0f;

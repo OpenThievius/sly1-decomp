@@ -12,11 +12,11 @@
 #include "object_set.h"
 #include "object_gatherer.h"
 #include "path_curve_object.h"
-#include "c5c.h"
-#include "c5d.h"
+#include "state_walker_object.h"
+#include "state_walker_group.h"
 #include "effect_owner.h"
 #include "effect_spawner.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "world.h"
 #include "effect.h"
 #include "list_iter.h"
@@ -180,18 +180,18 @@ void PlaceFramePointInOwnerFrame(void* a, void* b, void* c, f32 d);
 void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void* e);
 // A cell of the grid func_0019D0E0 finds a point in: the indices of its four corners in the
 // point table at 0xA8 and the record table at 0xC4.
-struct Cell8B { s32 corner[4]; };
-void BlendCellCornerRecords(C8B* self, Cell8B* cell, Quad16* point);
+struct GridCell { s32 corner[4]; };
+void BlendCellCornerRecords(AimBlendGrid* self, GridCell* cell, Quad16* point);
 void UnregisterCollider(Collider* self);
 struct LoadStream;
 s32 ReadBufferedS16(LoadStream* in);
 void ReadMeshFromStream(LoadStream* in, void* p);
 void* AllocateZeroedFrontMemory(s32 n);
 s32 ReadBufferedS8(LoadStream* in);
-void DecodeC8BGridIndex(C8B* o, s32 i, f32* x, f32* y, f32* z);
-void ComputeGridBlendWeights(f32 x, f32 y, f32 z, C8B* o, void* p);
+void DecodeAimBlendGridIndex(AimBlendGrid* o, s32 i, f32* x, f32* y, f32* z);
+void ComputeGridBlendWeights(f32 x, f32 y, f32 z, AimBlendGrid* o, void* p);
 f32 ReadBufferedFloat(LoadStream* in);
-void ReadPropertyRecords(C8B* o, LoadStream* in);
+void ReadPropertyRecords(AimBlendGrid* o, LoadStream* in);
 // A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
 struct ListWalker;
 struct ListWalker {
@@ -226,7 +226,7 @@ void* FindFirstObjectByIdMode1(void* a, s32 b, void* c);
 void ComputeWrappedDeltas(s32 a, s32 b, void* c, s32 d, s32 e, void* f);
 void BuildCombinedBlendAnimation(void* self, s32 a, s32 b, void* c, s32 d, void* e, void* f, void* g);
 void SetBlendEntryRecordFlag(void* g, void* n);
-void ComputeGridBlendWeights(C8B* self, f32* out, f32 a, f32 b, f32 c);
+void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 a, f32 b, f32 c);
 void SetBlendItemWeights(void* g, s32 a, s32 b, void* c);
 
 // The file's .data, in retail's order. D_0026A910 and D_0026A914 are read by the VU0 function
@@ -470,32 +470,32 @@ void CollectFlaggedObjectSet(FlaggedObjectSet* self)
     CollectObjectSet(self);
 }
 
-void LoadC5CObject(C5C* self)
+void LoadStateWalkerObject(StateWalkerObject* self)
 {
     LoadPlacedObject(self);
     ResolveObjectLinks(self, 1, (u8*)D_0026A918);
 }
 
-void StartC5CObject(C5C* self)
+void StartStateWalkerObject(StateWalkerObject* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, (u8*)D_0026A928);
 }
 
-void LoadC5DObject(C5D* self)
+void LoadStateWalkerGroup(StateWalkerGroup* self)
 {
     LoadPlacedObject(self);
     ResolveObjectLinks(self, 1, (u8*)D_0026A938);
 }
 
-void StartC5DObject(C5D* self)
+void StartStateWalkerGroup(StateWalkerGroup* self)
 {
     StartPlacedObject(self);
     self->count300 = GatherObjectsById(self->world, 1, 0x5C, self, 8, self->objs304);
     s32 i;
-    C5C* e;
+    StateWalkerObject* e;
     for (i = 0; i < self->count2DC; i++) {
-        e = (C5C*)FindFirstObjectById(self->world, 4, self->ids2E0[i], self);
+        e = (StateWalkerObject*)FindFirstObjectById(self->world, 4, self->ids2E0[i], self);
         if (e != 0) {
             u32 k = self->count300;
             if (k < 8) {
@@ -506,7 +506,7 @@ void StartC5DObject(C5D* self)
     }
     s32 s4 = (g_currentLevelRecord->f448 & self->mask2D0) ? 0x22F : 0x22E;
     for (i = 0; i < self->count300; i++) {
-        e = (C5C*)self->objs304[i];
+        e = (StateWalkerObject*)self->objs304[i];
         e->f2D4 = CreateStateWalker(e->f2D0, e, -1, 0);
         SetStateWalkerTarget(e->f2D4, s4);
     }
@@ -514,12 +514,12 @@ void StartC5DObject(C5D* self)
     SetStateWalkerTarget(self->f2D8, s4);
 }
 
-void SetC5DObjectMaskBit(C5D* flags, u32 bit)
+void SetStateWalkerGroupMaskBit(StateWalkerGroup* flags, u32 bit)
 {
     flags->mask2D0 = 1 << (bit + 1);
 }
 
-void AddC5DObjectId(C5D* queue, void* item)
+void AddStateWalkerGroupId(StateWalkerGroup* queue, void* item)
 {
     u32 count = queue->count2DC;
     if (count < 8) {
@@ -1815,14 +1815,14 @@ void UnregisterC7CObject(BaseObject* obj)
     RemoveFromList(&obj->world->list1C6C, obj);
 }
 
-void InitC8BObject(C8B* obj)
+void InitAimBlendGrid(AimBlendGrid* obj)
 {
     InitObject(obj);
     obj->second38 = -1;
     obj->first34 = -1;
 }
 
-void LoadC8BObject(C8B* o, LoadStream* in)
+void LoadAimBlendGrid(AimBlendGrid* o, LoadStream* in)
 {
     {
         s32 i = 0x17;
@@ -1836,14 +1836,14 @@ void LoadC8BObject(C8B* o, LoadStream* in)
     s32 i = 0;
     o->f48 = ReadBufferedS16(in);
     ReadMeshFromStream(in, o->fA0);
-    o->fC4 = (Rec8B*)AllocateZeroedFrontMemory(o->fA4 * 100);
+    o->fC4 = (GridRecord*)AllocateZeroedFrontMemory(o->fA4 * 100);
     for (i = 0; i < o->fA4; i++) {
         f32 x;
         f32 y;
         f32 z;
-        Rec8B* r = &o->fC4[i];
+        GridRecord* r = &o->fC4[i];
         o->fC4[i].id = ReadBufferedS8(in);
-        DecodeC8BGridIndex(o, i, &x, &y, &z);
+        DecodeAimBlendGridIndex(o, i, &x, &y, &z);
         ComputeGridBlendWeights(x, y, z, o, r->pos);
     }
     o->fC8 = ReadBufferedS16(in);
@@ -1858,11 +1858,11 @@ void LoadC8BObject(C8B* o, LoadStream* in)
         } while (j >= 0);
     }
     o->fD0 = o->fD4 = ReadBufferedS16(in);
-    o->fD8 = (Tri8B*)AllocateZeroedFrontMemory(o->fD0 * 12);
-    o->fDC = (Edge8B*)AllocateZeroedFrontMemory(o->fD0 << 3);
+    o->fD8 = (AimPlaneNode*)AllocateZeroedFrontMemory(o->fD0 * 12);
+    o->fDC = (AimPlaneEdge*)AllocateZeroedFrontMemory(o->fD0 << 3);
     for (s32 n = 0; n < o->fD0; n++) {
-        Tri8B* t = &o->fD8[n];
-        Edge8B* e = &o->fDC[n];
+        AimPlaneNode* t = &o->fD8[n];
+        AimPlaneEdge* e = &o->fDC[n];
         s32 a = ReadBufferedS16(in);
         s32 b = ReadBufferedS16(in);
         s32 c = ReadBufferedS16(in);
@@ -1886,9 +1886,9 @@ void LoadC8BObject(C8B* o, LoadStream* in)
     ReadPropertyRecords(o, in);
 }
 
-void StartC8BObject(C8B* self)
+void StartAimBlendGrid(AimBlendGrid* self)
 {
-    Slot8B* s;
+    GridBlendSlot* s;
     s32 i;
     StartObject(self);
     self->f3C = FindFirstObjectByIdMode4(self->world, self->first34, self);
@@ -1897,7 +1897,7 @@ void StartC8BObject(C8B* self)
     if (self->f40 == 0) return;
     for (i = 0; i < 24; i++) {
         s = &self->slots[i];
-        Node8B* n = (Node8B*)FindFirstObjectByIdMode1(self->world, s->fC, self->f3C);
+        SlotObject* n = (SlotObject*)FindFirstObjectByIdMode1(self->world, s->fC, self->f3C);
         s->n4 = n;
         if (n != 0) n->vtbl[7](n);
     }
@@ -1908,7 +1908,7 @@ void StartC8BObject(C8B* self)
     if (nd != 0) SetBlendEntryRecordFlag(self->f3E4, nd);
     f32 buf[24];
     ComputeGridBlendWeights(self, buf, self->f54, self->f58, self->f5C);
-    Slot8B* d = self->slots;
+    GridBlendSlot* d = self->slots;
     f32* src = buf;
     for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
     SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
@@ -1932,7 +1932,7 @@ void StartC8BObject(C8B* self)
 // Weights of the four corners of a cell for the point, from the planes of its faces (the sides'
 // cross products), then blends the corners' 24 floats by those weights into self's slots and
 // gives them to the renderer.
-void BlendCellCornerRecords(C8B* self, Cell8B* cell, Quad16* point)
+void BlendCellCornerRecords(AimBlendGrid* self, GridCell* cell, Quad16* point)
 {
     s32 tri[3];
     Vec02 side1;
@@ -1973,7 +1973,7 @@ void BlendCellCornerRecords(C8B* self, Cell8B* cell, Quad16* point)
 
 INCLUDE_ASM(func_0019CC10);
 
-void DecodeC8BGridIndex(C8B* self, s32 p, f32* out0, f32* out1, f32* out2)
+void DecodeAimBlendGridIndex(AimBlendGrid* self, s32 p, f32* out0, f32* out1, f32* out2)
 {
     s32 n = self->f48;
     s32 q = p / ((n + 1) * (3 * n + 1));
@@ -1985,14 +1985,14 @@ void DecodeC8BGridIndex(C8B* self, s32 p, f32* out0, f32* out1, f32* out2)
     *out2 = (f32)s / (f32)self->f48;
 }
 
-void SetC8BObjectVector(C8B* value, f32 x, f32 y, f32 z)
+void SetAimBlendGridVector(AimBlendGrid* value, f32 x, f32 y, f32 z)
 {
     value->f54 = x;
     value->f58 = y;
     value->f5C = z;
 }
 
-void SetC8BObjectVectorFlagged(C8B* self, f32 x, f32 y, f32 z)
+void SetAimBlendGridVectorFlagged(AimBlendGrid* self, f32 x, f32 y, f32 z)
 {
     self->f80 = 1;
     self->f54 = x;
@@ -2041,7 +2041,7 @@ struct TreePlane {
     f32 dist;
 };
 
-u8* FindPlaneTreeLeafAtPoint(C8B* self, Tri8B* node, Vec02* pt)
+u8* FindPlaneTreeLeafAtPoint(AimBlendGrid* self, AimPlaneNode* node, Vec02* pt)
 {
     if (node == 0) {
         node = self->fD8;
@@ -2053,18 +2053,18 @@ u8* FindPlaneTreeLeafAtPoint(C8B* self, Tri8B* node, Vec02* pt)
             if (node->b == 0) {
                 return self->fDC[node - self->fD8].a;
             }
-            node = (Tri8B*)node->b;
+            node = (AimPlaneNode*)node->b;
         } else if (d > 0.0001f) {
             if (node->c == 0) {
                 return self->fDC[node - self->fD8].b;
             }
-            node = (Tri8B*)node->c;
+            node = (AimPlaneNode*)node->c;
         } else {
             u8* r;
             if (node->c == 0) {
                 r = self->fDC[node - self->fD8].b;
             } else {
-                r = FindPlaneTreeLeafAtPoint(self, (Tri8B*)node->c, pt);
+                r = FindPlaneTreeLeafAtPoint(self, (AimPlaneNode*)node->c, pt);
             }
             if (r != 0) {
                 return r;
@@ -2072,7 +2072,7 @@ u8* FindPlaneTreeLeafAtPoint(C8B* self, Tri8B* node, Vec02* pt)
             if (node->b == 0) {
                 return self->fDC[node - self->fD8].a;
             }
-            node = (Tri8B*)node->b;
+            node = (AimPlaneNode*)node->b;
         }
     }
 }
@@ -2089,7 +2089,7 @@ void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void*
     f32* dist = (f32*)e;
     Vec02 point;
     Vec02 best;
-    s32 first = (s32)FindPlaneTreeLeafAtPoint((C8B*)self, 0, from);
+    s32 first = (s32)FindPlaneTreeLeafAtPoint((AimBlendGrid*)self, 0, from);
     s32 found;
     if (first != 0) {
         if (out != 0) {
@@ -2109,7 +2109,7 @@ void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void*
     for (s32 i = 9; i >= 0; i--) {
         f32 t = (lo + hi) * 0.5f;
         Vu0::Q(point) = Vu0::MulXSum(Vu0::Q(*(Vec02*)(self + 0x90)), Vu0::Scalar(1.0f - t), Vu0::Q(*from), Vu0::Scalar(t));
-        s32 r = (s32)FindPlaneTreeLeafAtPoint((C8B*)self, 0, &point);
+        s32 r = (s32)FindPlaneTreeLeafAtPoint((AimBlendGrid*)self, 0, &point);
         if (r != 0) {
             found = r;
             lo = t;
@@ -2120,7 +2120,7 @@ void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void*
     }
     if (found == 0) {
         best = *(Vec02*)(self + 0x70);
-        found = (s32)FindPlaneTreeLeafAtPoint((C8B*)self, 0, &best);
+        found = (s32)FindPlaneTreeLeafAtPoint((AimBlendGrid*)self, 0, &best);
     }
     if (out != 0) {
         *out = best;
@@ -2133,11 +2133,11 @@ void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void*
     }
 }
 
-void TrackAimTargetObject(Player* self, C8B* x, void* y)
+void TrackAimTargetObject(Player* self, AimBlendGrid* x, void* y)
 {
     Quad16 q0;
     Quad16 q1;
-    Cell8B* w20;
+    GridCell* w20;
     s32 w24;
     if (y != 0) {
         f32 d = self->f2424 - g_gameClock[1];
@@ -2150,13 +2150,13 @@ void TrackAimTargetObject(Player* self, C8B* x, void* y)
     }
 }
 
-void TrackAimTargetPoint(void* self, C8B* dst, PathCurveObject* src, f32* k)
+void TrackAimTargetPoint(void* self, AimBlendGrid* dst, PathCurveObject* src, f32* k)
 {
     Quad16 q0;
     Quad16 q1;
     Quad16 q2;
     Quad16 q3;
-    Cell8B* w40;
+    GridCell* w40;
     s32 w44;
     TransformPointBetweenFrames(0, (s32)src->parent, (u8*)self + 0x140, &q0);
     PathCurve* o = src->curve;

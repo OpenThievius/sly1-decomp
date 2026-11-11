@@ -67,7 +67,7 @@
 #include "switched_collider.h"
 #include "shapes.h"
 #include "id_filter_object.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "object_message.h"
 #include "queued_call.h"
 #include "stream_reader.h"
