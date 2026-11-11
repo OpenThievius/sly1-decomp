@@ -157,10 +157,10 @@ void FillTrackedNodes(Rec36*);
 void ShutDownCommandChannel();
 
 s32 FindArrivalPoint(void* a, void* b);
-s32 PlaceAtArrivalPoint(void* x);
+s32 PlaceAtArrivalPoint(void* x); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 s32 GetActiveSwitchedCollider(void);
 s32 GetCurrentSwitchedCollider(void);
-s32 ActivateSwitchedCollider(void* v);
+s32 ActivateSwitchedCollider(void* v); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 
 // NEAR: only the vtbl[19] load differs: retail loads it into $v1 (lw v1,76(v1)), we use $v0 for the test and the call.
 
@@ -371,7 +371,7 @@ static inline f32 MaxA(f32 a, f32 b) { return a >? b; }
 static inline f32 MaxB(f32 a, f32 b) { return b >? a; }
 void InitIdentityMatrix(void* self);
 void* InvertMatrix4x4(void* a0, void* a1);
-void MultiplyMatrices(void* out, void* b, void* in);
+void MultiplyMatrices(void* out, void* b, void* in); // stays void: retail returns a value, but declared so func_001F2840 differs in registers
 void BuildMatrixFromRotationAndTranslation(Vec02* pos, Mat02* rot, void* out);
 void ComputeSinCos(f32 angle, f32* a, f32* b);
 
@@ -991,7 +991,7 @@ struct ArrivalWatcher {
 void PlaceCameraLookingAt(void* camera, void* eye, void* at);
 void RequestCameraSnap(void* camera, void* angle);
 void PlaceColliderClearOfContacts(void* obj, void* pos, void* up);
-void SetGatheredWalkerTargets(void* world, void* a, void* b, void* c, s32 d);
+void SetGatheredWalkerTargets(void* world, void* a, void* b, void* c, s32 d); // stays void: retail returns a value, but declared so func_001F4008 differs in registers
 ArrivalWatcher* FindFirstObjectById(void* world, s32 kind, void* id, void* ctx);
 void SetObjectSubGroupState(void* obj, s32 state);
 f32 ArctangentOfRatio(f32 a, f32 b);

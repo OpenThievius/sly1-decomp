@@ -147,7 +147,7 @@ extern u8 D_002623D8[];
 
 void StopSoundRecord(s32 a, s32 b);
 void ReleaseSoundLevel(s32 a);
-void SetGatheredWalkerTargets(void* a, s32 b, void* c, void* d, s32 e);
+void SetGatheredWalkerTargets(void* a, s32 b, void* c, void* d, s32 e); // stays void: retail returns a value, but declared so func_00123888 differs in registers
 void ReleaseCounterRef(void* p);
 void SetStateWalkerTarget(void* a, s32 b);
 void TeleportStateWalker(void* a, s32 b);
@@ -2070,10 +2070,10 @@ struct __attribute__((aligned(16))) ModelPartRequest {
     ModelPartState* state;  // 0x7C
 };
 
-void TransformByMatrixWithW(void* m, void* v, void* out, f32 w);
+void TransformByMatrixWithW(void* m, void* v, f32 w, void* out);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
 f32 ClampToRange(void* span, f32 x);
-void MultiplyMatrices(void* out, void* a, void* b);
+void MultiplyMatrices(void* out, void* a, void* b); // stays void: retail returns a value, but declared so func_00126270 and func_00126DE8 differs in registers
 void QueueDeferredRequest(void* r);
 void ApplyPoseSourceIndexedValue(void* src, s32 i);
 void DrawModelPart(void* r);
@@ -2103,7 +2103,7 @@ void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
         if (self->flags & 0x200000000ULL) {
             rec.pos = part->pos;
         } else {
-            TransformByMatrixWithW(&rec.block, part, &rec.pos, 1.0f);
+            TransformByMatrixWithW(&rec.block, part, 1.0f, &rec.pos);
         }
         u128 d = Vu0::Sub(Vu0::Q(rec.pos), Vu0::Q(cam->f40));
         if (self->bits28 == 1) {
@@ -2358,7 +2358,7 @@ void FadeOutPlacedObject(Collider* self, f32 time)
 }
 
 void BuildShortestArcRotation(void* from, void* to, void* out);
-void MultiplyMatrices(void* out, void* a, void* b);
+void MultiplyMatrices(void* out, void* a, void* b); // stays void: retail returns a value, but declared so func_00126270 and func_00126DE8 differs in registers
 
 // k, the vector the second rotation starts from, is written as a quadword at its own address:
 // a store through Vu0::Q or Set leaves the address in a pseudo that CSE keeps in a saved register
@@ -5890,7 +5890,7 @@ s32 ApplyAnimationLoopMode(AnimationPlayer* o, f32* pos, f32* vel)
     return r;
 }
 
-f32 GetMatrixRotationCosine(void* p);
+f32 GetMatrixRotationCosine(void* p); // stays float: the C definition is void, and the caller here uses the value it leaves in the register
 f32 Arccosine(f32 x);
 
 // One frame of an animation player. While an attachment that follows it belongs to an object

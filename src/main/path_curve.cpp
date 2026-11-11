@@ -43,13 +43,13 @@ typedef void (*Fn_Table)();
 extern const Fn_Table g_pathCurveKind0Methods[];
 extern const Fn_Table g_pathCurveKind1Methods[];
 
-f32 MeasureCurveSegmentLength(void* p0, void* p1, void* p2, void* p3, f32 x, f32 y);
+f32 MeasureCurveSegmentLength(void* p0, void* p1, void* p2, void* p3, f32 x, f32 y); // stays float: the C definition is void, and the caller here uses the value it leaves in the register
 void SampleCurvePoints(void* a, void* b, void* c, void* d, f32 x, f32 y, f32 z, s32 n, void* buf);
 s32 ReadBufferedU8(void* src);
 f32 ReadBufferedFloat(void* src);
 void ReadBufferedVector3(void* src, void* dst);
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
-void TransformByMatrixWithW(void* a, void* b, void* c, f32 w);
+void TransformByMatrixWithW(void* a, void* b, f32 w, void* c);
 void TransformMatrixByObject(void* self, void* arg, Quad16* out);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(u32 n);
@@ -313,7 +313,7 @@ void TransformPointArray(s32 count, Quad16* dst, void* arg, void* self)
     TransformMatrixByObject(self, arg, mat);
     if (count > 0) {
         do {
-            TransformByMatrixWithW(mat, dst, &tmp, 1.0f);
+            TransformByMatrixWithW(mat, dst, 1.0f, &tmp);
             *dst = tmp;
             dst++;
             count--;
@@ -476,8 +476,8 @@ void DrawPathCurveSegment(PathCurve* self, s32 idx, void* a2, s32 a3, void* a4, 
     } else {
         next = idx + 1;
     }
-    TransformByMatrixWithW(a2, (u8*)self->points + (idx << 4), &A, 1.0f);
-    TransformByMatrixWithW(a2, (u8*)self->points + (next << 4), &B, 1.0f);
+    TransformByMatrixWithW(a2, (u8*)self->points + (idx << 4), 1.0f, &A);
+    TransformByMatrixWithW(a2, (u8*)self->points + (next << 4), 1.0f, &B);
     C = *(U32P*)a4;
     DrawProjectedLine(&A, &B, &C, a3, a5);
 }
@@ -628,7 +628,7 @@ void TransformSplinePathPoints(SplinePathCurve* self, void* a, void* b)
     Mat02* rot = (Mat02*)m;
     for (i = 0; i < self->count; i++) {
         u8* p = (u8*)self->points + (i << 4);
-        TransformByMatrixWithW(m, p, p, 1.0f);
+        TransformByMatrixWithW(m, p, 1.0f, p);
         Vu0::Q(((Vec02*)self->inTan)[i]) = Vu0::Rotate(*rot, Vu0::Q(((Vec02*)self->inTan)[i]));
         Vu0::Q(((Vec02*)self->outTan)[i]) = Vu0::Rotate(*rot, Vu0::Q(((Vec02*)self->outTan)[i]));
     }

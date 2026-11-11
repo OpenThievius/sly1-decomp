@@ -2325,7 +2325,7 @@ s32 ComputeHullSeenFromCamera(Vec02* pos, s32 n, HullPoint* pts)
     return ComputeProjectedHull(&t, n, pts);
 }
 
-void TransformByMatrixWithW(void* m, Vec02* in, Vec02* out, f32 w);
+void TransformByMatrixWithW(void* m, Vec02* in, f32 w, Vec02* out);
 void SortElements(void* base, s32 n, s32 size, s32 (*cmp)(AngledPoint*, AngledPoint*));
 
 s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts)
@@ -2337,7 +2337,7 @@ s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts)
     HullPoint* p;
     for (i = 0; i < n; i++) {
         p = &pts[i];
-        TransformByMatrixWithW(m, &p->world, &p->screen, 1.0f);
+        TransformByMatrixWithW(m, &p->world, 1.0f, &p->screen);
         f32 z = p->screen.z;
         p->screen.y /= z;
         p->screen.x /= z;

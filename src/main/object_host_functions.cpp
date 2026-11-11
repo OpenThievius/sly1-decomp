@@ -50,7 +50,7 @@ struct Kinds6 { s32 k[6]; };
 
 
 void SetStateTriggerStateFromMessage(void* object, s32 mode);
-s32 AddStateTriggerTableEntry(StateTrigger* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 AddStateTriggerTableEntry(StateTrigger* self, s32 a1, s32 a2, s32 a3, s32 a4); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 void ClearObjectRecordValues(void* p);
 void FadeInPlacedObject(void* self, f32 value);
 void FadeOutPlacedObject(void* self, f32 value);
@@ -75,8 +75,8 @@ void ApplyListedPoseSources(void* obj, s32 v);
 s32 IsObjectOfKind(void* list, s32 value);
 void StartChildGroupDelay(void* p, f32 x);
 void ApplyChildGroupRepulsion(void*);
-s32 SetTriggerZoneEntry(TriggerZone* self, s32 a1, s32 a2, s32 a3, s32 a4);
-s32 SetZoneColliderEntry(ZoneCollider* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 SetTriggerZoneEntry(TriggerZone* self, s32 a1, s32 a2, s32 a3, s32 a4); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
+s32 SetZoneColliderEntry(ZoneCollider* self, s32 a1, s32 a2, s32 a3, s32 a4); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 s32 TestPointAgainstObjectShape(void*,void*);
 void RequestPlainCameraSnap(void* p);
 void PushCameraStackValue(void*,s32);
@@ -151,7 +151,7 @@ void InvokeNumberedItemCollect(void* p);
 void AddEntryRecordKey(C17* p, s32 a, s32 b);
 void SetC8BObjectVector(C8B* value, f32 x, f32 y, f32 z);
 void SetC8BObjectVectorFlagged(C8B* self, f32 x, f32 y, f32 z);
-s32 AddObjectPoolEntry(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 AddObjectPoolEntry(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 void EnableObjectPoolEntry(void*,s32);
 void DisableObjectPoolEntry(void*,s32);
 void SetObjectPoolEntryCount(ObjectPool* p, s32 a, s32 b);
@@ -181,7 +181,7 @@ void* GetAgentStateClip(void* obj, s32 v);
 void AddAgentExtraClip(Agent* self, s32 a, s32 b);
 void SetAgentSecondaryClipId(Agent* p, s32 a, s32 b);
 void AddAgentMeshKey(Agent* self, s32 a, s32 b);
-s32 AddAgentClipGroup(Agent* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 AddAgentClipGroup(Agent* self, s32 a1, s32 a2, s32 a3, s32 a4); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 void SetAgentMainClip(void*, s32);
 void SetPlayerPath(void*,s32);
 void SeekObjects105Animations(void*,s32);

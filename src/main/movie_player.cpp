@@ -131,7 +131,7 @@ struct AttachedTransformFrame {
 
 void BuildPlacedObjectTransform(void* obj, void* c, void* out);
 void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
-void MultiplyMatrices(void* out, void* b, void* in);
+void* MultiplyMatrices(void* out, void* b, void* in);
 void ApplyPlacedObjectTransform(void* obj, void* s, void* out);
 
 extern s32 g_gifChannel;

@@ -107,7 +107,7 @@ void InterpolatePathCurvePoint(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
 void InterpolatePathCurvePoint(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
-void TransformByMatrixWithW(void* a, void* b, void* c, f32 w);
+void TransformByMatrixWithW(void* a, void* b, f32 w, void* c);
 void DrawProjectedLine(void* a, void* b, void* c, s32 d, s32 e);
 
 void SampleCurvePoints(void* a, void* b, void* c, void* d, f32 x, f32 y, f32 z, s32 n, void* buf);
@@ -116,7 +116,7 @@ f32 AccumulateSegmentLengths(s32 n, void* buf, void* other);
 
 void InitCollider(Collider* self);
 
-void TransformByMatrixWithW(void* a, void* b, void* c, f32 w);
+void TransformByMatrixWithW(void* a, void* b, f32 w, void* c);
 
 void FindNearestPathCurveSegment(void* a0, void* a1, s32 count, void* a3, void* a4, void* a5, s32* outIdx, f32* outT);
 
@@ -580,7 +580,7 @@ extern f32 D_00261F30[16];
 
 void AddDmaRefTag(PacketWriter* obj, s32 a, s32 b);
 void* FillMemory(void* p, s32 value, s32 size);
-void MultiplyMatrices(Quad16* out, void* b, void* in);
+void* MultiplyMatrices(Quad16* out, void* b, void* in);
 void BeginDmaTag(PacketWriter* self);
 void WriteVifBaseOffset(PacketWriter* obj, s32 a, s32 b);
 void CopyWordsToWriter(PacketWriter* obj, s32 a, s32 b, void* c, s32 d);
@@ -708,7 +708,7 @@ void SendPointEventToWorldListener(Vec02* at, f32 x);
 void ComputeObjectFrameAtTime(void* self, void* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 void BuildBasisFromX(Vec02* v, Mat02* out);
 void StartSoundEffect(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void CreateAnimationPlayerWithoutPresetTargets(void* a, PooledObject* b, s32 c, void** out, f32 fa, f32 fb);
+void CreateAnimationPlayerWithoutPresetTargets(void* a, PooledObject* b, s32 c, void** out, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_0014F270 differs in registers
 
 // The query FindNodeForQuery takes for an object that touched a held one (func_0014F270).
 struct HeldTouchQuery {

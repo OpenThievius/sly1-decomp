@@ -28,7 +28,7 @@ u32 SetIpuMpeg1Mode(u32 value)
 
 struct Msg_20DF10 { s32 cmd; s32 pad[7]; };
 
-void WaitIpuCommandDone(MpegDecoder* o);
+void WaitIpuCommandDone(MpegDecoder* o); // stays void: retail returns a value, but declared so func_0020DF10 and func_0020F708 differs in registers
 s32 RunMpegCallback(MpegHandle* q, Msg_20DF10* m);
 s32 ReportMpegError(MpegDecoder* o, const char* msg);
 s32 DisableInterrupts(void);
@@ -820,7 +820,7 @@ s32 ReadIpuBits(MpegDecoder* obj, s32 a1)
 }
 
 struct Obj_0020F708 { u8 pad[4]; };
-void WaitIpuCommandDone(Obj_0020F708* self);
+void WaitIpuCommandDone(Obj_0020F708* self); // stays void: retail returns a value, but declared so func_0020DF10 and func_0020F708 differs in registers
 void SkipIpuBits(Obj_0020F708* self, s32 mode);
 s32 PeekIpuBits(Obj_0020F708* self, s32 mode);
 void FindNextStartCode(Obj_0020F708* self)
@@ -860,7 +860,7 @@ s32 ReadIpuBits(Self_0020F7F0* self, s32 mask);
 void ReadSequenceHeader(Self_0020F7F0* self);
 void ReadGroupOfPicturesHeader(Self_0020F7F0* self);
 void ReadPictureHeader(Self_0020F7F0* self);
-void RunMpegCallback(s32 a0, Loc_0020F7F0* out);
+void RunMpegCallback(s32 a0, Loc_0020F7F0* out); // stays void: retail returns a value, but declared so func_0020F7F0 differs in registers
 
 s32 ParseMpegHeaders(Self_0020F7F0* self)
 {

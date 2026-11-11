@@ -257,7 +257,7 @@ void UpdateCameraMatrices(Camera* self);
 
 void InitIdentityMatrix(void* self);
 void* InvertMatrix4x4(void* a0, void* a1);
-void MultiplyMatrices(void* out, void* b, void* in);
+void* MultiplyMatrices(void* out, void* b, void* in);
 
 
 

@@ -34,7 +34,7 @@ struct VisitNode { VisitClass* cls; u8 pad0[0x18]; VisitNode* next; u8 pad1[0x14
 
 
 void SpliceListToEnd(void* dst, void* src);
-void TransformByMatrixWithW(void* m, f32 w, const void* src, void* out);
+void TransformByMatrixWithW(void* m, const void* src, f32 w, void* out);
 void SetColliderAnchors(Collider* self, s32 a, s32 b, s32 c, s32 d);
 void FreeTouchNodes(void* owner, Touch03* node);
 
@@ -108,7 +108,7 @@ struct RefCounted
 };
 
 
-void CountGifEntry(void* self, s32 a1, s32 a2);
+void CountGifEntry(void* self, s32 a1, s32 a2); // stays void: retail returns a value, but declared so func_00161458 and five more differs in registers
 
 
 struct EntryFlags { u8 pad0[0x28]; s32 f28; };
@@ -179,13 +179,13 @@ void ClearTwoWords(void* self);
 void ClearScatterController(void* self);
 void ResetReserveCounts(void);
 
-void CountGifEntry(void* self, s32 a1, s32 a2);
+void CountGifEntry(void* self, s32 a1, s32 a2); // stays void: retail returns a value, but declared so func_00161458 and five more differs in registers
 
 
-void CountGifEntry(void* self, s32 a1, s32 a2);
+void CountGifEntry(void* self, s32 a1, s32 a2); // stays void: retail returns a value, but declared so func_00161458 and five more differs in registers
 
 
-void CountGifEntry(void* self, s32 a1, s32 a2);
+void CountGifEntry(void* self, s32 a1, s32 a2); // stays void: retail returns a value, but declared so func_00161458 and five more differs in registers
 
 struct ClearedRecord { u8 pad0[4]; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; s32 f18; };
 
@@ -197,9 +197,9 @@ void ResetGameSessionAndFade();
 
 typedef void* (*MemoryFillFn)(void*,s32,s32);
 
-void CountGifEntry(void* self, s32 a1, s32 a2);
+void CountGifEntry(void* self, s32 a1, s32 a2); // stays void: retail returns a value, but declared so func_00161458 and five more differs in registers
 
-void CountGifEntry(void* self, s32 a1, s32 a2);
+void CountGifEntry(void* self, s32 a1, s32 a2); // stays void: retail returns a value, but declared so func_00161458 and five more differs in registers
 
 struct KeyedPointSet { u8 pad0[4]; s32 count; u8* base; };
 struct KeyedEdge { s16 k0; s16 k1; u8 pad[4]; KeyedEdge* next; };
@@ -289,7 +289,7 @@ SessionKey* LookupEntryById(s32 key);
 void ClearTwoWords(void* p);
 void StartObjectFade(void* a, s32 b, s32 c);
 void SilenceVolumeChannel3(s32 flag);
-void ApplySoundOptionFlag(s32 flag);
+void ApplySoundOptionFlag(s32 flag); // stays void: retail returns a value, but declared so func_00160948 differs in registers
 Animation* FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 void StopAnimationPlayer(void* obj);
 void SetElementStackState(void* obj, s32 mode);
@@ -638,7 +638,7 @@ struct TargetFrames { Quad16 a; u8 pad0[0x30]; Quad16 b; u8 pad1[0x30]; QuadMatr
 void* FindFirstObjectByIdMode4(void* a, s32 b, void* c);
 void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
 void InvertRigidTransform(void* a, void* b, void* out);
-void MultiplyMatrices(void* out, void* b, void* in);
+void MultiplyMatrices(void* out, void* b, void* in); // stays void: retail returns a value, but declared so func_00165828 differs in registers
 
 struct AnimatorStep;
 typedef void (*AnimatorStepFn)(void* self, f32 f);
@@ -1649,15 +1649,15 @@ void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
     if (matrix != 0) {
         for (s32 i = 0; i < dst->vertCount; i++) {
             Vec02* v = &((Vec02*)dst->verts)[i];
-            TransformByMatrixWithW((void*)matrix, 1.0f, v, v);
+            TransformByMatrixWithW((void*)matrix, v, 1.0f, v);
         }
         for (s32 i = 0; i < dst->faceCount; i++) {
             u8* face = (u8*)dst->faces + (i << 5);
-            TransformByMatrixWithW((void*)matrix, 0.0f, face, face);
+            TransformByMatrixWithW((void*)matrix, face, 0.0f, face);
             Vec02* vert = (Vec02*)((*(u16*)(face + 0x1E) << 4) + (s32)dst->verts);
             *(u32*)(face + 0x10) = Vu0::ToBits(Vu0::Dot(Vu0::Q(*(Vec02*)face), Vu0::Q(*vert)));
             Vec02* p = &((Vec02*)dst->points)[i];
-            TransformByMatrixWithW((void*)matrix, 1.0f, p, p);
+            TransformByMatrixWithW((void*)matrix, p, 1.0f, p);
         }
     }
 }
@@ -4189,7 +4189,7 @@ slow:
             }
         }
         if (n308 != 0) {
-            TransformByMatrixWithW(&b, 1.0f, e, &q);
+            TransformByMatrixWithW(&b, e, 1.0f, &q);
             r = e->f10 * part->f50;
         }
         for (j = 0; j < n308; j++) {

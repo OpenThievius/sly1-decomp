@@ -349,7 +349,7 @@ void SetTurningColliderRotation(TurningCollider* self, Mat02* rot)
 
 void CopyColliderMeshesInFrame(void* self);
 void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4* out);
-void TransformByMatrixWithW(Mat4* m, Vec02* in, void* out, f32 w);
+void TransformByMatrixWithW(Mat4* m, Vec02* in, f32 w, void* out);
 
 void CopyTurningColliderMeshesInFrame(TurningCollider* self)
 {
@@ -369,7 +369,7 @@ void CopyTurningColliderMeshesInFrame(TurningCollider* self)
             self->f6D0 = i;
             Vec02* dst = (Vec02*)self->meshCopy.verts + i;
             self->f6D4 = (s32)dst;
-            TransformByMatrixWithW(&world, v, dst, 1.0f);
+            TransformByMatrixWithW(&world, v, 1.0f, dst);
         } else if (v->z < lowZ) {
             lowZ = v->z;
             lowest = i;

@@ -2050,7 +2050,7 @@ f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, s32 zero);
 u128 ApproachPointWithRamp(u128 a, u128 b, f32 dt, f32* ramp, s32 zero);
 struct PushRecord;
 void FillPlayerPushRecord(Player* self, PushRecord* out);
-void GetObjectWorldPosition(s32 obj, Vec02* out);
+void GetObjectWorldPosition(s32 obj, Vec02* out); // stays void: retail returns a value, but declared so func_00172EE0 differs in registers
 #include "value_range.h"
 typedef void (*PoseAtFn)(PoseHolder47* self, Vec02* pos, Vec02* dir, f32 t);
 

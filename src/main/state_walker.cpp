@@ -854,7 +854,7 @@ void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, s32 b)
 // func_001B6C68's result is taken as a float here, which retail's code needs: the walker is
 // seen through its own view so the declaration stays this function's.
 struct Node_1B6CF0 { u8 pad[0x24]; s32 f24; };
-f32 CommitStateWalkerArrival(Node_1B6CF0* self);
+f32 CommitStateWalkerArrival(Node_1B6CF0* self); // stays non-void: the C definition is void, but func_001B6CF0 needs the register it leaves ($f0)
 void StartNextStateWalkerEdge(Node_1B6CF0* self);
 
 void AdvanceStateWalkerTime(Node_1B6CF0* self, f32 t)

@@ -137,7 +137,7 @@ StateNotifier** AllocateBackMemory(s32 size);
 s32 GatherObjectsOfKind(World* self, s32 a1, s32 n, StateNotifier** arr);
 f32 RandomFloatInRange(f32 a, f32 b);
 void ComputePolarOffset(void* out, f32 x, f32 y, f32 z);
-void QueryValueListMask(World* a, f32 f, void* b, void* c);
+void QueryValueListMask(World* a, f32 f, void* b, void* c); // stays void: retail returns a value, but declared so func_00148AC0 differs in registers
 void PopBackMemoryMark(void);
 
 

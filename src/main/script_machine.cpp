@@ -248,7 +248,7 @@ ScriptValue* MakeScriptRefList(ScriptValue* ret, s32 count, void** values);
 // function that gives a class back, a `call` with no value (expand_call has no value register when
 // the result goes through the hidden address), which schedules the argument moves differently
 // from a call of a function returning a pointer. The plain value cannot say that.
-void MakeScriptRefList(ScriptValue* ret, s32 count, u8* values);
+void MakeScriptRefList(ScriptValue* ret, s32 count, u8* values); // stays void: retail returns a value, but declared so func_00117C48 and two more differs in registers
 ScriptValue* FindScriptObject(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* FindScriptObjectList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* FindScriptObjectById(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
@@ -650,7 +650,7 @@ struct __attribute__((aligned(16))) ScriptVectorRow {
 };
 // Declared void here: retail's calls leave v0 free for the copy that follows (a value the call
 // set would end in v0, and the next lq would take v1).
-void CopyBytes(void* dst, void* src, s32 n);
+void CopyBytes(void* dst, void* src, s32 n); // stays void (see above): retail returns a value, but func_00113240 differs in registers if declared
 struct ScriptMatrixPayload {
     ScriptVectorRow row[4];      // 0x00
     ScriptMatrixPayload() {}
@@ -673,7 +673,7 @@ static inline ScriptMatrixPayload ScaledMatrix(const ScriptMatrixPayload* m, u12
     return r;
 }
 Quad_118D20* StoreFloatAsQuadword(Quad_118D20* out, f32 f);
-void TransformByMatrixWithW(const ScriptMatrixPayload* m, const void* v, void* out, f32 w);
+void TransformByMatrixWithW(const ScriptMatrixPayload* m, const void* v, f32 w, void* out);
 ScriptMatrixPayload MultiplyMatrices(const ScriptMatrixPayload* a, const void* b);
 void FreeMatrixPayload(void* p);
 
