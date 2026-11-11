@@ -30,8 +30,8 @@ struct Obj_20DF10 { u8 pad0[0x838]; s32 f838; s32 f83C; u8 pad840[0x18]; Queue_2
 struct Msg_20DF10 { s32 cmd; s32 pad[7]; };
 
 void WaitIpuCommandDone(Obj_20DF10* o);
-void RunMpegCallback(Queue_20DF10* q, Msg_20DF10* m);
-void ReportMpegError(Obj_20DF10* o, const char* msg);
+s32 RunMpegCallback(Queue_20DF10* q, Msg_20DF10* m);
+s32 ReportMpegError(Obj_20DF10* o, const char* msg);
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
 
@@ -163,10 +163,10 @@ s32 func_0020E2A8(struct Node_20E2A8 *self) {
 struct Ctx_20E3B8 { u8 pad0[0x12C]; s32 f12C; s32 f130; u8 pad134[0x40]; s32 f174; u8 pad178[0x698]; s32 f810; s32 f814; };
 
 s32 DecodeSliceMacroblocks(Ctx_20E3B8* c, s32 n);
-void WaitIpuCommandDone(Ctx_20E3B8* c);
+s32 WaitIpuCommandDone(Ctx_20E3B8* c);
 s32 WaitIpuDecodeDone(Ctx_20E3B8* c);
 void AddMacroblockResiduals(Ctx_20E3B8* c, s32 a);
-void ReportMpegError(Ctx_20E3B8* c, const char* s);
+s32 ReportMpegError(Ctx_20E3B8* c, const char* s);
 
 s32 DecodeAllMacroblocks(Ctx_20E3B8* c)
 {
@@ -215,7 +215,7 @@ void ReportMpegErrorFormat(struct Ctx_20E4C0 *self, const char *a1, u32 a2);
 void SkipIpuBits(struct Ctx_20E4C0 *self, s32 a1);
 s32 func_0020F788(struct Ctx_20E4C0 *self);
 s32 func_0020E2A8(struct Ctx_20E4C0 *self);
-void ReportMpegError(struct Ctx_20E4C0 *self, const char *a1);
+s32 ReportMpegError(struct Ctx_20E4C0 *self, const char *a1);
 
 s32 func_0020E4C0(struct Ctx_20E4C0 *self, s32 a1, s32 *outA, s32 *outB, struct Out_20E4C0 *outC) {
     u32 s2;
@@ -266,7 +266,7 @@ s32 func_0020E4C0(Ctx_20E5F0* c, s32 n, s32* i, s32* j, Buf_20E5F0* b);
 s32 WaitIpuDecodeDone(Ctx_20E5F0* c);
 s32 PeekIpuBits(Ctx_20E5F0* c, s32 k);
 s32 func_0020E2A8(Ctx_20E5F0* c);
-void ReportMpegError(Ctx_20E5F0* c, const char* s);
+s32 ReportMpegError(Ctx_20E5F0* c, const char* s);
 s32 func_0020E8A0(Ctx_20E5F0* c, s32* a, s32* b, s32* d, Buf_20E5F0* e, Half_20E5F0* f, Half_20E5F0* g);
 s32 func_0020E7E0(Ctx_20E5F0* c, Buf_20E5F0* e, s32* b, Half_20E5F0* f, s32* a);
 s32 PrepareMacroblockPrediction(Ctx_20E5F0* c, s32 i, s32 j, s32 a, s32 b, Buf_20E5F0* e, Half_20E5F0* f, Half_20E5F0* g);
@@ -332,7 +332,7 @@ struct Node_20E7E0 {
     s32 field0;
 };
 
-void ReportMpegError(struct Node_20E7E0 *self, const char *a1);
+s32 ReportMpegError(struct Node_20E7E0 *self, const char *a1);
 
 s32 func_0020E7E0(struct Node_20E7E0 *self, s32 *a1, s32 *a2, s32 *a3, s32 *flags)
 {
@@ -390,10 +390,10 @@ struct Self_20E8A0 {
 };
 
 s16 DecodeIpuVariableLength(Self_20E8A0* self, s32 mode);
-void ReportMpegError(Self_20E8A0* self, const char* msg);
+s32 ReportMpegError(Self_20E8A0* self, const char* msg);
 s32 ReadIpuBits(Self_20E8A0* self, s32 n);
 void SkipIpuBits(Self_20E8A0* self, s32 n);
-void WaitIpuCommandDone(Self_20E8A0* self);
+s32 WaitIpuCommandDone(Self_20E8A0* self);
 void SendIpuCommand(Self_20E8A0* self, s32 v);
 void func_00210D90(s32 a, s32 b);
 void func_0020EDD0(Self_20E8A0* self, s32* b1, s32* b2, s32* o5, s32 a4, s32 a5, s32 a6, s32 a7, s32 s0, s32 s8, s32 s10);
@@ -1142,9 +1142,9 @@ struct Obj_20FE40 {
 };
 
 void* ReadIpuBits(struct Obj_20FE40 *self, s32 a1);
-void WaitIpuCommandDone(struct Obj_20FE40 *self);
+s32 WaitIpuCommandDone(struct Obj_20FE40 *self);
 void SendIpuCommand(struct Obj_20FE40 *self, u32 value);
-void ReportMpegError(struct Obj_20FE40 *self, const char *a1);
+s32 ReportMpegError(struct Obj_20FE40 *self, const char *a1);
 
 void func_0020FE40(struct Obj_20FE40 *self)
 {
@@ -1172,7 +1172,7 @@ void func_0020FE40(struct Obj_20FE40 *self)
     if (v == 0) {
         return;
     }
-    return ReportMpegError(self, "load_chroma_non_intra_quantizer_matrix == 1");
+    ReportMpegError(self, "load_chroma_non_intra_quantizer_matrix == 1");
 }
 
 struct Self_0020FF08 {

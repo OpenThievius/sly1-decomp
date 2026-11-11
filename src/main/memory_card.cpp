@@ -27,8 +27,8 @@ extern const u32 g_memoryCardIconKey[8];
 extern u8 D_002BE540[];
 extern u8 D_002BE9C0[];
 
-void InitMemoryCardClient(void);
-void* FillMemory(void* p, s32 v, s32 n);
+s32 InitMemoryCardClient(void);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 CreateLockSemaphore(s32 a, s32 b);
 s32 AwaitSemaphore(void* a);
 void PostSemaphore(void* a);

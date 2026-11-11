@@ -76,7 +76,7 @@ void SetVideoModeSyscall(s32 interlace, s32 mode, s32 field);
 void RemoveInterruptHandler(s32 cause, s32 id);
 s32 ReadGsInterruptMask(s32 mask);
 s32 WriteGsInterruptMask(u64 mask);
-void DisableInterruptCause(s32 cause);
+s32 DisableInterruptCause(s32 cause);
 GsParam* GetGsParams(void);
 void DefineDisplayEnvironment(void* env, s32 psm, s32 w, s32 h, s32 ztest, s32 zpsm);
 s32 DefineDrawEnvironment(void* env, s16 psm, s16 w, s16 h, s16 ztest, s16 zpsm);

@@ -201,7 +201,7 @@ struct Reader_0020A630 { u8 pad[0x10]; };
 struct Out_0020A630 { s32 w0; s32 w4; s32 w8; s32 wC; };
 
 s32 ReadBits(Reader_0020A630* r, s32 bits);
-void ReadBit(Reader_0020A630* r);
+s64 ReadBit(Reader_0020A630* r);
 s32 PeekBits(Reader_0020A630* r, s32 bits);
 s32 ParseSystemHeader(Reader_0020A630* r, Out_0020A630* o);
 

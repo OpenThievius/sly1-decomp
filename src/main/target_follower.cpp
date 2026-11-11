@@ -127,7 +127,7 @@ void FollowObjectById(TargetFollower* self, void* x)
     }
 }
 
-void* FillMemory(u8* p, s32 a, s32 b);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void StepCollider(Collider* self, f32 t);
 void BuildAxisAngleMatrix(const Vec02* tab, Mat3U* out, f32 v);

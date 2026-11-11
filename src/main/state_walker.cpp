@@ -33,7 +33,7 @@ void TriggerScriptEvent(StateGraph* host, s32 a, s32 b, void* args);
 // A free slot of a world pool (Pool6C): its first word links the next.
 struct FreeSlot { FreeSlot* next; };
 void* PopFreeSlot(Pool6C* pool);
-void* FillMemory(void* p, int zero, s32 count);
+void* FillMemory(void* p, s32 value, s32 size);
 void AppendToList(void* p, void* self);
 void RemoveFromList(void* p, void* self);
 void StartObject(void* self);

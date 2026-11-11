@@ -105,7 +105,7 @@ s32 GetStringLength(const char* s);
 void* EnterRuntimeLock(u32 size);
 void LeaveRuntimeLock(void* p);
 void AbortProgram(void) __attribute__((noreturn));
-void* FillMemory(void* dst, s32 c, u32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 FrameDesc* func_001FF658(void* pc);
 u8* func_001FF740(FrameDesc* f, CommonInfo* info);
 u8* func_001FF848(u8* insn, UnwindWork* work, CommonInfo* info, u32* pc);

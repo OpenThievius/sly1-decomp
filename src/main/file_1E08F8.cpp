@@ -30,7 +30,7 @@ void DestroyOutputBuffer(u8* buf, s32 n);
 
 
 
-void* FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 NewSemaphore(void* self);
 
 
@@ -155,7 +155,7 @@ struct CameraFovSource { u8 pad[0x438]; f32 f438; f32 f43C; };
 
 
 
-void* FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 extern u8 D_00275940[0x18];
 
@@ -261,7 +261,7 @@ void UppercaseString(char* p);
 
 
 
-void* FillMemory(FormatSpec* dst, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 ParseSignedDecimal(s8* s, s32* out);
 extern u8 g_charClassFlags[];
 
@@ -346,7 +346,7 @@ extern ThreadIds g_mainAndRenderThreads;
 void RunRenderThread(void);
 s32 GetCurrentThreadId(void);
 void SetThreadPriority(s32 a, s32 b);
-s32 FillMemory(ThreadParams* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 MakeThread(ThreadParams* p);
 
 
@@ -365,7 +365,7 @@ struct SpanCandidate { u8 pad[0x20]; f32 value; };
 
 
 
-void* FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 
 // The eight scrambled words that locate a level's data on the disc: the key of the sector
 // range is w[0] ^ w[5] and w[1] ^ w[7]; two blocks are the same level when w[2] ^ w[6] agree.
@@ -1261,14 +1261,14 @@ void UppercaseString(s8* p)
     }
 }
 
-void CreateLockSemaphore(void* a, void* b)
+s32 CreateLockSemaphore(void* a, void* b)
 {
     SemaphoreParams tmp;
 
     FillMemory(&tmp, 0, 0x18);
     tmp.initCount = (s32)a;
     tmp.maxCount = (s32)b;
-    NewSemaphore(&tmp);
+    return NewSemaphore(&tmp);
 }
 
 LINKER_REMNANT(func_001E22B8);

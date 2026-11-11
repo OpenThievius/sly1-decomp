@@ -89,12 +89,12 @@ void PostSemaphoreFromInterrupt(s32 sema);
 s32 AwaitSemaphore(s32 sema);
 s32 SendCommand(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
 s32 SendCommandFromInterrupt(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
-void QueueThreadRequest(void* thread);
+s32 QueueThreadRequest(void* thread);
 
 void InitCommandChannel(void);
 s32 GetChannelWord(s32 index);
 typedef void (*CommandHandler)(void);
-s32 SetCommandHandler(u32 cmd, CommandHandler handler, void* arg);
+void SetCommandHandler(u32 cmd, CommandHandler handler, void* arg);
 s32 ReadIopRegister(u32 reg);
 u32 WriteIopRegister(u32 reg, u32 value);
 void HandleRemoteCallReply(RemoteCallPacket* reply);

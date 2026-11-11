@@ -121,8 +121,8 @@ ScriptValue* GetObjectProperty(ScriptValue* out, s32 a1, s32 a2);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void GatherCollidersInSphere(void* self, f32 scale, s32 p1, s32 p2, s32 p3, s32 p4, s32* o1, u8** o2);
-s32 TransformPointBetweenFrames(void* a, s32 b, void* c, f32* d);
-s32 TransformDirectionBetweenFrames(void* a, s32 b, void* c, f32* d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, f32* d);
+void TransformDirectionBetweenFrames(void* a, s32 b, void* c, f32* d);
 void TransformRotationBetweenFrames(s32 a, s32 b, s32 c, f32* d);
 void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
 void ClearSoundRecordHandle(void* slot);
@@ -661,7 +661,7 @@ struct ScriptFloatPair {
     f32 v[2];
 };
 Quad_118D20 ScaleQuadword(Quad_118D20 s, Quad_118D20 v);
-void ScaleMatrix(ScriptMatrixPayload* out, const ScriptMatrixPayload* m, u128 s);
+s32 ScaleMatrix(ScriptMatrixPayload* out, const ScriptMatrixPayload* m, u128 s);
 // A matrix scaled by a weight in a GPR (Vu0::ScalarInGpr), returned by value: ScaleMatrix into
 // the inline's own matrix, which the return copies into the caller's with CopyBytes. Inlined, the
 // call's arguments go straight into a0-a2, so retail forms the matrix's address afresh for
@@ -3111,7 +3111,7 @@ struct __attribute__((aligned(16))) ScriptSampleRotation {
 };
 
 void* AllocateBackMemory(s32 size);
-void CopyRotationMatrix(f32* dst, ScriptSampleRotation* src);
+void *CopyRotationMatrix(f32* dst, ScriptSampleRotation* src);
 
 ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {

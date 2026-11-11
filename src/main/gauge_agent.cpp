@@ -367,7 +367,7 @@ void ShowGaugeAgentBar(GaugeAgent* self)
 }
 
 void func_001C8418(void* self, void* p);
-void GetObjectWorldPosition(void* obj, Vec02* out);
+s32 GetObjectWorldPosition(void* obj, Vec02* out);
 void UpdateAgentGoal(void* self, s32 flag);
 
 void UpdateGaugeAgentGoal(GaugeAgent* self, s32 flag)

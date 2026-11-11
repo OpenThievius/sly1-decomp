@@ -242,7 +242,7 @@ template <class T> struct NextInList {
 void PostLoadPlacedObject(PlacedObject* self);
 void TransformPointBetweenFrames(void* from, void* to, void* point, Vec02* out);
 void SetEffectSpawnerActiveForever(BaseObject* obj);
-void QueryValueListMask(void* owner, f32 radius, void* pos, void* out);
+s32 QueryValueListMask(void* self, f32 radius, void* center, void* out);
 
 // The curve object at 0x34 of a path curve object.
 struct GroupCurveObject {
@@ -1272,7 +1272,7 @@ void UpdateBlinkObject(BlinkObject* self)
 }
 
 struct TouchQuery;
-void* FillMemory(TouchQuery* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 // The 0x40-byte request frame FindNodeForQuery is handed for an object that is not the player:
 // the object, what touched it, where that is and the direction (the unit z).
 struct TouchQuery {
@@ -1295,7 +1295,7 @@ inline void TouchQuery::Init(BlinkObject* s, Collider* o, const Vec02* k)
 
 s32 IsObjectInAcceptLists(BlinkObject* self, Collider* t);
 void InitOwnerMessage(OwnerMessage* out, s32 a, BlinkObject* self);
-void FindNodeForQuery(TouchQuery* p, s32 a, s32 b);
+PlacedObject *FindNodeForQuery(TouchQuery* p, s32 a, s32 b);
 
 void ChooseBlinkObjectState(BlinkObject* self, s32* out)
 {

@@ -62,9 +62,9 @@ void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
 void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);
 void ReparentObject(void* self, void* value);
 
-s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
 
-s32 TransformRotationBetweenFrames(void* a, s32 b, void* c, s32 d);
+void TransformRotationBetweenFrames(void* a, s32 b, void* c, s32 d);
 
 void InitObject(void* self);
 
@@ -267,7 +267,7 @@ void AddTrackedNode(Rec36* self, BaseObject* n);
 
 void UpdateCollider(Collider* self);
 s32 IsObjectDescendantOf(Collider* o, ContactTracker* self);
-s32 FillMemory(void* p, s32 a, s32 b);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 FindNodeForQuery(void* t, s32 a, s32 b);
 
 struct GathererQuery {
@@ -879,12 +879,12 @@ void ConvertPointIntoObjectFrame(TransformObject* self, Vec02* p, Vec02* out)
 
 s32 GetObjectWorldPosition(BaseObject* self, s32 arg)
 {
-    return TransformPointBetweenFrames(self->parent, 0, (u8*)self + 0x40, arg);
+    TransformPointBetweenFrames(self->parent, 0, (u8*)self + 0x40, arg);
 }
 
 s32 GetObjectWorldRotation(BaseObject* self, s32 arg)
 {
-    return TransformRotationBetweenFrames(self->parent, 0, (u8*)self + 0x50, arg);
+    TransformRotationBetweenFrames(self->parent, 0, (u8*)self + 0x50, arg);
 }
 
 HoldingMember* FindArrivalPoint(s32 id, s32 parent)
@@ -1049,7 +1049,7 @@ void func_001F4008(TransformSet* self)
     TriggerScriptEvent(self, 2, 0, 0);
 }
 
-void SetTransformObjectKeyedValue(void* self, void* a1, void* a2, void* a3, void* a4) { UpsertKeyedEntry((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
+s32 SetTransformObjectKeyedValue(void* self, void* a1, void* a2, void* a3, void* a4) { return UpsertKeyedEntry((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
 
 void StoreValueAndMarkSet(TimedValue* self, f32 value) { self->value = value; self->state = 1; }
 

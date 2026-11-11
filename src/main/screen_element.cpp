@@ -53,7 +53,7 @@ void PopFontScale(Font* font);
 void* InitTextReader(void* out, void* text, Font* font);
 void DrawAlignedText(void* buf, void* out, s32 zero, void* d);
 
-void GetObjectWorldRotation(void* a, f32* out);
+s32 GetObjectWorldRotation(void* a, f32* out);
 void TransformRotationBetweenFrames(int a, int b, void* c, f32* d);
 
 extern f32 g_gameTime;
@@ -79,7 +79,7 @@ s32 IsObjectOfKind(void* node, s32 kind);
 
 void* FillMemory(void* p, s32 value, s32 size);
 
-void GetObjectWorldRotation(void* self, void* arg);
+s32 GetObjectWorldRotation(void* self, void* arg);
 void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);
 void SetListLinkOffset(void* self, s32 value);
 
@@ -110,14 +110,14 @@ void StartSoundEffect(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 
 
 f32 TruncateFloat(f32 x);
 void DrawScreenElementText();
-void GetScreenElementSlideInTime();
-void GetScreenElementHoldTime();
-void GetScreenElementSlideOutTime();
+f32 GetScreenElementSlideInTime();
+f32 GetScreenElementHoldTime();
+f32 GetScreenElementSlideOutTime();
 void ResetScreenElement();
 void ShowScreenElement();
 void HideScreenElement();
 void SetScreenElementClock();
-void AreScreenElementsTogether();
+s32 AreScreenElementsTogether();
 void SetScreenElementText();
 void SetScreenElementMode();
 void UpdateCounterCaption();

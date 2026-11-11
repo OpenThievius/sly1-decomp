@@ -419,7 +419,7 @@ struct Dev_20CF18 {
     s32 f81C;
 };
 
-void ReportMpegError(Dev_20CF18* d, const char* msg);
+s32 ReportMpegError(Dev_20CF18* d, const char* msg);
 void func_0020DE88(s32 a, s32 b);
 void func_0020DE28(s32 a, s32 b, s32 c);
 
