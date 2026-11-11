@@ -62,7 +62,12 @@ def with_aliases(text):
         # permuter_setup.py's stand-ins for g++'s minimum and maximum operators.
         text = ("#define permuter_max(a, b) ((a) >? (b))\n#define permuter_min(a, b) ((a) <? (b))\n"
                 + text)
+    import permuter_setup
+    text = permuter_setup.cpp_declarations(text)
     defines = ["#define %s %s" % m.groups() for m in ALIAS.finditer(text)]
+    for alias, real in ALIAS.findall(text):
+        if "::" in real:        # a type's typedef, which only the permuter's parser needed
+            text = re.sub(r"^typedef struct %s %s;\n" % (alias, alias), "", text, flags=re.M)
     return "\n".join(defines) + "\n" + ALIAS.sub("", text) if defines else text
 
 

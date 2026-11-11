@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Unit tests for the tools. They need no disc and no compiler."""
 
+import re
 import hashlib
 import os
 import struct
@@ -490,6 +491,64 @@ class PermuterTest(unittest.TestCase):
         plain, aliases = permuter_setup.plain_calls(body, set())
         self.assertIn("v = Vu0__Vec__Of(v);", plain)
         self.assertEqual(aliases, [("Vu0__Vec__Of", "Vu0::Vec::Of")])
+
+    def test_a_qualified_type_gets_an_alias_and_a_typedef(self):
+        body = "void func_00100040(Vec* p)\n{\n    Vu0::Vec a = Vu0::Vec::Of(*p);\n    *(Vu0::Vec*)p = a;\n}"
+        plain, aliases = permuter_setup.plain_calls(body, set())
+        self.assertIn("Vu0__Vec a = Vu0__Vec__Of(*p);", plain)
+        self.assertIn("*(Vu0__Vec*)p = a;", plain)
+        self.assertEqual(permuter_setup.scoped_types(plain, aliases), ["Vu0__Vec"])
+        text = permuter_setup.isolate(body + "\n", "func_00100040")
+        self.assertIn("typedef struct Vu0__Vec Vu0__Vec;", text)
+        compiled = permuter_compile.with_aliases(text)
+        self.assertIn("#define Vu0__Vec Vu0::Vec", compiled)
+        self.assertNotIn("typedef struct Vu0__Vec", compiled)
+        # what a candidate copied back reads like again
+        for alias, real in permuter_compile.ALIAS.findall(text):
+            plain = re.sub(r"\b%s\b" % re.escape(alias), real, plain)
+        self.assertIn("Vu0::Vec a = Vu0::Vec::Of(*p);", plain)
+        self.assertIn("*(Vu0::Vec*)p = a;", plain)
+
+    def test_a_qualified_name_in_a_string_stays(self):
+        body = 'void func_00100041()\n{\n    func_00100000("A::B");\n}'
+        plain, aliases = permuter_setup.plain_calls(body, set())
+        self.assertIn('"A::B"', plain)
+        self.assertEqual(aliases, [])
+
+    def test_a_constructor_with_arguments_is_a_call(self):
+        body = "void func_00100042(Obj* o)\n{\n    *o = Obj(1, 2);\n    sizeof(Obj);\n}"
+        plain, aliases = permuter_setup.plain_calls(body, {"Obj"})
+        self.assertIn("*o = make_Obj(1, 2);", plain)
+        self.assertIn("sizeof(Obj);", plain)
+        self.assertEqual(aliases, [("make_Obj", "Obj")])
+
+    def test_a_direct_initialisation_is_a_call_and_comes_back(self):
+        body = "void func_00100043(Obj* o)\n{\n    Obj a(o->b, f(1, 2));\n    const Obj b(3);\n    Obj c;\n}"
+        plain, _ = permuter_setup.plain_calls(body, {"Obj"})
+        self.assertIn("Obj a = permuter_ctor(o->b, f(1, 2));", plain)
+        self.assertIn("const Obj b = permuter_ctor(3);", plain)
+        self.assertIn("Obj c;", plain)
+        self.assertEqual(permuter_setup.ctor_declarations(plain), body)
+        # a declaration of another type's call, or an empty one, is left alone
+        other = "void func_00100044()\n{\n    return foo(1);\n    Obj d();\n}"
+        self.assertEqual(permuter_setup.plain_calls(other, {"Obj"})[0], other)
+
+    def test_a_local_reference_is_a_value_and_comes_back(self):
+        body = "void func_00100046(Obj* o)\n{\n    Obj& r = *o;\n    r.b = r.a & 1;\n    o->move = 1;\n}"
+        plain, _ = permuter_setup.plain_calls(body, {"Obj"})
+        self.assertIn("Obj permuter_ref_r = *o;", plain)
+        self.assertIn("permuter_ref_r.b = permuter_ref_r.a & 1;", plain)
+        self.assertEqual(permuter_setup.cpp_declarations(plain), body)
+        moved = "void func_00100047(Obj* o)\n{\n    Obj& move = *o;\n    o->move = move.a;\n}"
+        plain, _ = permuter_setup.plain_calls(moved, {"Obj"})
+        self.assertIn("o->move = permuter_ref_move.a;", plain)
+        self.assertEqual(permuter_setup.cpp_declarations(plain), moved)
+
+    def test_a_label_that_ends_a_block_gets_an_empty_statement(self):
+        body = "void func_00100045()\n{\n    goto apply;\n    switch (1) {\n    case 1:\n    default:\n        break;\n    }\napply:\n    s32 x = 1;\n}"
+        plain, _ = permuter_setup.plain_calls(body, set())
+        self.assertIn("\napply: ;\n    s32 x = 1;", plain)
+        self.assertIn("    case 1:\n    default:\n", plain)
 
     def test_only_the_function_keeps_its_body(self):
         text = permuter_compile.only_definition(self.UNIT, "func_00100010")

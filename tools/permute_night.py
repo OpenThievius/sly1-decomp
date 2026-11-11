@@ -60,7 +60,7 @@ def splice(near_miss, candidate, func):
         return None
     import permuter_compile
     import permuter_setup
-    body = permuter_setup.min_max_operators(cand[cs:ce])
+    body = permuter_setup.cpp_declarations(permuter_setup.min_max_operators(cand[cs:ce]))
     for alias, real in permuter_compile.ALIAS.findall(cand):
         body = re.sub(r"\b%s\b" % re.escape(alias), real, body)     # Fpu__Sqrt -> Fpu::Sqrt
     return text[:s] + body + text[e:]

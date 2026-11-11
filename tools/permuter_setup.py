@@ -84,25 +84,142 @@ def items(text):
     return out
 
 
+KEYWORDS = {"return", "else", "do", "case", "goto", "delete", "new", "sizeof", "throw", "typedef", "const",
+            "static", "extern", "struct", "union", "class", "enum", "public", "private", "protected"}
+SCOPED = re.compile(r"\b[A-Za-z_]\w*(?:::[A-Za-z_]\w*)+\b")
+LABEL = re.compile(r"^([ \t]*)((?!(?:case|default|public|private|protected)\b)[A-Za-z_]\w*):[ \t]*$", re.M)
+DIRECT_INIT = re.compile(r"^([ \t]*(?:const\s+)?)([A-Za-z_][\w:]*)(\s+[A-Za-z_]\w*)\(", re.M)
+CTOR = re.compile(r"((?:\bconst\s+)?[A-Za-z_][\w:]*\s+[A-Za-z_]\w*\s*)=\s*permuter_ctor\s*\(")
+
+
+def outside_strings(text, fn):
+    """fn applied to the parts of text that are not string or character literals."""
+    out, i, last = [], 0, 0
+    while i < len(text):
+        c = text[i]
+        if c in "\"'":
+            j = i + 1
+            while j < len(text) and text[j] != c:
+                j += 2 if text[j] == "\\" else 1
+            out.append(fn(text[last:i]))
+            out.append(text[i:j + 1])
+            i = last = j + 1
+            continue
+        i += 1
+    out.append(fn(text[last:]))
+    return "".join(out)
+
+
+def balanced(text, i):
+    """The index of the `)` that closes the `(` before text[i], or -1."""
+    depth = 0
+    while i < len(text):
+        c = text[i]
+        if c in "\"'":
+            j = i + 1
+            while j < len(text) and text[j] != c:
+                j += 2 if text[j] == "\\" else 1
+            i = j
+        elif c in "([":
+            depth += 1
+        elif c in ")]":
+            if depth == 0:
+                return i
+            depth -= 1
+        i += 1
+    return -1
+
+
+def direct_inits(rest, tags):
+    """`T x(a, b);`, which the permuter's parser reads as a function declaration, as
+    `T x = permuter_ctor(a, b);`; ctor_declarations puts it back for the compiler."""
+    out, pos = [], 0
+    for m in DIRECT_INIT.finditer(rest):
+        if m.start() < pos or m.group(2) in KEYWORDS or not (m.group(2) in tags or "::" in m.group(2)):
+            continue
+        close = balanced(rest, m.end())
+        if close < 0 or not rest[m.end():close].strip() or not re.match(r"\s*;", rest[close + 1:]):
+            continue
+        out.append(rest[pos:m.start()] + "%s%s%s = permuter_ctor(%s)" % (m.group(1), m.group(2), m.group(3),
+                                                                        rest[m.end():close]))
+        pos = close + 1
+    return "".join(out) + rest[pos:]
+
+
+def ctor_declarations(text):
+    """The inverse of direct_inits: `T x = permuter_ctor(a, b);` as `T x(a, b);` again, for the
+    compiler and for a candidate copied back into its near miss."""
+    while True:
+        m = CTOR.search(text)
+        if not m:
+            return text
+        close = balanced(text, m.end())
+        if close < 0:
+            return text
+        text = text[:m.start()] + "%s(%s)" % (m.group(1).rstrip(), text[m.end():close]) + text[close + 1:]
+
+
+REFERENCE = re.compile(r"^([ \t]*(?:const\s+)?[A-Za-z_][\w:]*(?:\s*\*+)?)[ \t]*&[ \t]*([A-Za-z_]\w*)[ \t]*=", re.M)
+REF_NAME = re.compile(r"\bpermuter_ref_(\w+)")
+
+
+def reference_locals(rest):
+    """A local reference `T& x = e;`, which the parser cannot read, as `T permuter_ref_x = e;` with
+    each later use of x renamed; reference_declarations puts it back."""
+    names = []
+    for m in REFERENCE.finditer(rest):
+        if m.group(1).split()[-1] not in KEYWORDS:
+            names.append(m.group(2))
+    for name in names:
+        rest = REFERENCE.sub(lambda m: "%s permuter_ref_%s =" % (m.group(1), name) if m.group(2) == name else m.group(0),
+                             rest)
+        rest = re.sub(r"(?<![\w.>:])%s\b" % re.escape(name), "permuter_ref_" + name, rest)
+    return rest
+
+
+def reference_declarations(text):
+    """The inverse of reference_locals: `T permuter_ref_x = e;` as `T& x = e;`, and x again."""
+    text = re.sub(r"((?:\bconst\s+)?[A-Za-z_][\w:]*(?:\s*\*+)?)\s+permuter_ref_(\w+)\s*=", r"\1& \2 =", text)
+    return REF_NAME.sub(r"\1", text)
+
+
+def cpp_declarations(text):
+    """Both inverses, for a candidate that goes back to the compiler or into its near miss."""
+    return reference_declarations(ctor_declarations(text))
+
+
 def plain_calls(body, tags):
-    """FUNC's body with the C++ calls in it given plain names, and the macros that turn them back:
-    `Fpu::Sqrt(x)` becomes `Fpu__Sqrt(x)` (`Vu0::Vec::Of` `Vu0__Vec__Of`), a type called like a function `T()` becomes `make_T()`."""
+    """FUNC's body with the C++ in it given plain names, and the macros that turn them back:
+    `Fpu::Sqrt(x)` becomes `Fpu__Sqrt(x)` (`Vu0::Vec::Of` `Vu0__Vec__Of`, and a type `Vu0::Vec`
+    `Vu0__Vec`, which typedefs name), a type called like a function `T(a)` becomes `make_T(a)`, a
+    declaration `T x(a);` becomes `T x = permuter_ctor(a);`, a local reference
+    `T& x = e;` becomes `T permuter_ref_x = e;`, and a label that ends a block
+    gets an empty statement for C (`done: ;`)."""
     aliases = {}
 
     def scoped(m):
-        alias = m.group(1).replace("::", "__")
-        aliases[alias] = m.group(1)
-        return alias + "("
-    body = re.sub(r"\b([A-Za-z_]\w*(?:::[A-Za-z_]\w*)+)\s*\(", scoped, body)
+        alias = m.group(0).replace("::", "__")
+        aliases[alias] = m.group(0)
+        return alias
     head, brace, rest = body.partition("{")
+    rest = reference_locals(direct_inits(rest, tags))
+    rest = LABEL.sub(r"\1\2: ;", rest)
 
     def construct(m):
         if m.group(1) not in tags:
             return m.group(0)
         aliases["make_" + m.group(1)] = m.group(1)
         return "make_%s(" % m.group(1)
-    rest = re.sub(r"(?<![\w.>])([A-Za-z_]\w*)\s*\((?=\s*\))", construct, rest)
-    return head + brace + rest, sorted(aliases.items())
+    rest = outside_strings(rest, lambda t: re.sub(r"(?<![\w.>:])([A-Za-z_]\w*)\s*\((?!\s*\*)", construct, t))
+    body = outside_strings(head + brace + rest, lambda t: SCOPED.sub(scoped, re.sub(r"(\b[A-Za-z_]\w*(?:::[A-Za-z_]\w*)+)\s+\(", r"\1(", t)))
+    return body, sorted(aliases.items())
+
+
+def scoped_types(body, aliases):
+    """The aliases of plain_calls that stand for a type in body (before a declared name, or before
+    the `*` of a cast), for the `typedef struct A A;` lines the permuter's parser needs."""
+    return sorted(a for a, real in aliases if "::" in real
+                  and re.search(r"\b%s\b(?=\s+[A-Za-z_]|\s*\*+\s*(?:\)|[A-Za-z_>])|\s*&\s*[A-Za-z_])" % a, body))
 
 
 # What ends an operand of g++'s <? and >?, which bind looser than + and - and tighter than the
@@ -197,6 +314,7 @@ def isolate(text, func):
             out.append(item)
         elif re.search(r"\b%s\s*\(" % func, stripped) and stripped.endswith("}"):
             body, aliases = plain_calls(min_max_calls(item), tags)
+            out.extend("\ntypedef struct %s %s;\n" % (t, t) for t in scoped_types(body, aliases))
             if aliases:
                 # The permuter preprocesses its input, so a #define would undo the alias before
                 # it parses; permuter_compile.py turns these strings back into #defines.
