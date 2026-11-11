@@ -119,6 +119,26 @@
 // (18 refs) starts at CSE1's third flush in entry 291; it would need both 292's and 293's 2194
 // in the window before, 25 insns earlier, which moves the value 1 landmark at 293. About 260
 // compiles; no uniform form was closer, so this file stays.
+// All ten landmarks (2026-11-10, worker w20-109488b; build/swarm/w20-109488b/: pc.py, shift.py,
+// joint2.py, walk.py; docs/toolchain/long-block-constants.md, "Why the 1065 landmark was lost";
+// re-scored DIFFER, 37,352 against 37,392). The window model was one insn off: CSE1 flushes at
+// .jump index 1002k - 1, not 1002k - 2. With that, it gives every entry's .cse2 count of this file
+// and of every variant compiled since exactly, except where a flush falls between a function
+// address's high and lo_sum (then 3 insns short; such forms are now rejected). The 1065 landmark
+// was lost because our flushes fall inside entries' argument blocks: at 291 (256), 383 (4242 and
+// 224, flush after the third of six arguments), 461 (the function address) and 937 (146) a
+// deleted argument's store lies past the flush, so its copy survives, and the values set before
+// the flush in 383 are set again in 384 and 450. That is 5 .cse2 insns by entry 1065 against
+// retail, and no single local edit gains more than 1 (5,000 per-call merges, splits and Set8m
+// undone, all screened). Uniform forms that hold all ten, found by a greedy search on the model:
+// parameter orders Set0 (v0, v4, vc), Set5 (v4, v0, v14, vc, v18), Set6 (v0, v4, v18, v14) and
+// Set14 (v4, v0, vc, v1c, v14, v18), with Set1's body flags-f10-fC-f0-f14 (entry 122) and Set14's
+// f0 first (entry 1065); or Set1's f0 and f10 and Set0's flags moved out of their helpers. 112
+// such forms compiled hold 10 of 10 as predicted. None is closer: at best 2,338 exact (this file
+// 2,990), 9,309 instructions, 73 of retail's long register holds (this file 50), and of the five
+// key holds only 256 in s5. So the windows are necessary and now reachable, but the allocation
+// (4 in s3, 2194 in s7, func_00155778 in s4) still differs. Best: build/swarm/w20-109488b/
+// best_10lm.cpp. About 125 compiles.
 //
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
