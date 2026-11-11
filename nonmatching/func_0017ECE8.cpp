@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 810/812 (99.8%), checked 2026-11-10
+// BYTES 810/812 (99.8%), checked 2026-11-11
 // NEAR: w11 (2026-11-10). 812 bytes, same code and frame; registers differ in one place only:
 //       the copy of the spilled down vector into the sum after SolveActiveSetSystem (`lq v0,32(sp);
 //       sq v0,0(sp)`, retail v1). That reload register comes from order_regs_for_reload, which
@@ -37,6 +37,9 @@
 //       one u32 for the dots' bits in both loops: set twice, it is no local-alloc quantity, so
 //       the Dot's block has two (product first: vf1, the 1.0 vf2) instead of three (the small
 //       sort's creation order: the 1.0 first).
+// w22 (2026-11-11): re-scored, unchanged. Still the sched1 tie at priority 5 decided by
+// INSN_REG_WEIGHT (the copy's -1 against the load's +1); no allocator or GCSE-table lever applies
+// (the difference is reload's register for the copy, chosen by what is live after sched1).
 #include "common.h"
 #include "point_object.h"
 #include "collider.h"
