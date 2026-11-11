@@ -103,6 +103,22 @@
 // not 2194 in s7 or func_00155778 in s4, moves the 553 landmark and halves exact (about 1,600);
 // nothing near it restored the landmark. The best form that keeps the landmarks (3,050 exact,
 // 9,340 instructions) is 8 coincidental per-call edits with no key register, so this file stays.
+// Whole-kind changes (2026-11-10, worker w19-109488; build/swarm/w19-109488/; docs/toolchain/
+// long-block-constants.md, "The CSE windows from the source"; re-scored 37,352 against 37,392,
+// 2,990 exact). Entry by entry, both codes store the same (offset, value) set in all 1,179
+// entries (421 in another order): no entry has another form. A model of the windows from the
+// source alone (win.py: per call, one insn per nonzero argument, two per function address, one
+// per store and step; CSE1 flushes at .jump index 1002k - 2; a deleted argument's copy survives
+// when its store lies past the flush) gave the landmark count of 210 of 211 compiled variants.
+// Every kind-wide merge of equal arguments (Set5 146, Set14, Set10, Set11, Set6 288, Set16, Set5
+// 162 and 290, Set4 18) removes 8 to 176 insns before entry 553, where the landmarks allow -1 to
+// +7, and only undoing Set8m adds any (+16); of 4,566 kind-wide combinations with fields moved
+// out of their helper, none holds all ten landmarks (1065 is always lost), and the 60 best
+// compiled to 9 with 2,199 to 2,686 exact and at most one key register. Moving the flags
+// parameter of Set10 and Set11 to any position compiles to this file's bytes. The 2194 pseudo
+// (18 refs) starts at CSE1's third flush in entry 291; it would need both 292's and 293's 2194
+// in the window before, 25 insns earlier, which moves the value 1 landmark at 293. About 260
+// compiles; no uniform form was closer, so this file stays.
 //
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.

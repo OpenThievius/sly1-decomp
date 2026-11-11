@@ -144,6 +144,67 @@ each point, that is the source's argument and statement shapes, and through
 the CSE windows the instruction counts before each window edge.
 func_00109488 has no call, so no callee's return type is involved.
 
+### The CSE windows from the source, and the whole-kind changes (func_00109488, w19)
+
+Worked 2026-11-10 (build/swarm/w19-109488/ in the g7 worktree: win.py,
+uni.py, reord.py, ediff.py). About 260 compiles, all screened on the
+landmarks of the near miss's notes, exact instructions and retail's long
+register holds.
+
+- **Entry by entry, retail's code and ours have the same shape.** A value
+  simulation of both final codes (li, lui, addiu, ori, move, mtc1 and the
+  $sp spill slots followed) gives every store's value: all 1,179 entries
+  store the same (offset, value) set as retail, 421 of them in another
+  order. No entry shows another form (another base, another field set, an
+  extra or missing store), so the source's entries are right field for
+  field and only the allocation and the order differ.
+- **The .jump stream is a sum over the source.** Each call costs one insn
+  per argument holding a nonzero integer or a float, two per function
+  address (high and lo_sum), none per zero (the inliner substitutes it into
+  the store), one per field stored and one for `p++`, with the parameters
+  set in parameter order. That gives the .jump count of every entry exactly
+  (all but entry 0's two insns for the table address and the last entry's
+  missing step).
+- **CSE1's flushes fall at 0-based .jump index 1002k - 2.** A constant
+  argument already in the table is deleted, unless the store that uses it
+  lies past the next flush: CSE then cannot replace the use, and the copy
+  survives into the .cse2 stream. This model (win.py) predicts the .cse2
+  count of all but 8 entries next to flushes; with the base's residue
+  added, it gave the number of landmarks held for 210 of 211 compiled
+  variants, so a whole-kind change can be judged without compiling.
+- **Every kind-wide merge of equal arguments breaks the CSE1 landmarks.**
+  The landmarks allow -1 to +7 insns before entry 553, -13 to +16 before
+  838 and -78 to +12 before 1122 (net, against this near miss). One
+  argument for fC, f14 and f18 in all flags-146 Set5 calls removes 94
+  insns before entry 553; in Set14 176, in Set10 40, in Set11 48; a
+  two-way merge half that; Set6's f14 = f18 64; Set16's fC = f18 30;
+  Set5's flags 162 and 290 12 and 18; Set4's flags 18 8. The only
+  kind-wide change that adds insns is undoing Set8m (+16). Compiled, each
+  merge alone holds 5 or 6 of 10 landmarks, as the model says.
+- **No kind-wide combination holds all ten.** The model ranked 4,566
+  combinations of kind-wide merges and fields moved out of their helper as
+  `p->f = x;` with 9 landmarks and none with 10; entry 1065's CSE2 landmark
+  is always the one lost (the 1065 old store 4 to 24 insns past the flush,
+  or 1067 short). The 60 best compiled to 9 landmarks each and 2,199 to
+  2,686 exact instructions with at most one of the five key holds
+  (2,990 and none for the near miss).
+- **Parameter order does nothing here.** Moving the flags parameter of
+  Set10 and Set11 to each position, alone or both together (22 variants),
+  compiles to the near miss's bytes: the parameter sets are scheduled by
+  sched1 from their stores, not their LUIDs. Moving the flags store in the
+  body changes the bytes (2,888 to 2,985 exact) but no key hold.
+- **The 2194 pseudo starts at a CSE1 flush.** Pseudo 1701 (2194, 18 refs,
+  entries 292-336) is the first 2194 after CSE1's third flush, which falls
+  in entry 291. With 7 to 18 insns fewer before entry 291, entry 292's set
+  falls before the flush but its store after it, so the copy rule keeps a
+  fresh pseudo there and CSE2 joins it to 293's: the start does not move.
+  Its refs fall to 16 only if both 292 and 293 join the window before
+  (25 or more insns fewer, which moves the value 1 landmark at entry 293).
+  Merging Set10 and Set11 on the last 1 to 18 of their calls before entry
+  291 gives one to three key holds in no particular order (the 2194 in s7
+  once, at 18, with the 4 lost), so the key registers follow no monotone
+  measure of the windows.
+
 ### A scratch float in a loop: local-alloc's tie against global-alloc's ranking (func_00131F60)
 
 Measured 2026-11-10 (w15) from the -dS and -dl dumps, with local-alloc.c and global.c read.
