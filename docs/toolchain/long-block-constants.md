@@ -438,3 +438,12 @@ for instance one reload later moved to the stack. Spot the case: list every allo
 (before pruning) for the two registers first; if none has them, only a conflict can explain
 retail.
 
+
+### Macro or table? (func_00109488, w23, 2026-11-11)
+
+PAL's copy is the same instruction stream as US's (0 differing lines with symbol targets stripped),
+so the source was not edited between versions. Retail uses one running pointer (`addiu 32`, 1,178
+times) with no re-basing, shows the same three stack spill slots as ours, and its opcode mix and
+per-kind store-order spread match ours apart from the known li/lui/addiu/move loss. The registry's
+first-use order shows the table is written per class, which the code does not reflect. No evidence
+of a source form other than uniform per-entry helper calls.
