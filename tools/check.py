@@ -101,6 +101,8 @@ class Resolver:
         self.symbols = load_symbols("us")
         self.translation = translation(key) if key != "us" else None
         self.paired = None
+        self.placed = {}
+        self.extent = {}
 
     def us_address(self, sym):
         if sym in self.symbols:
@@ -134,6 +136,28 @@ class Resolver:
             return a    # an absolute address below the executable (D_00000FA0) is the same in every version
         return self.inside(a)
 
+    def place(self, a, size):
+        """The version's address of the start of the datum at US address `a`, `size` bytes long.
+
+        The translation of `a`, unless the datum holds at least two paired addresses of its own
+        (a code operand names them) and every one of them implies the same start: the datum's own
+        addresses outrank the nearest one below it, because what lies between that one and the
+        datum may have changed size in the version (a string, a table). A datum whose addresses
+        disagree among themselves keep the translation's start (what changed size is not known).
+        Remembered in `placed`, for the pointers other data holds into it."""
+        guess = self.translate(a)
+        if self.translation is not None and a >= LOAD_ADDRESS:
+            if self.paired is None:
+                self.paired = sorted(self.translation)
+            lo, hi = bisect.bisect_left(self.paired, a), bisect.bisect_left(self.paired, a + size)
+            implied = {self.translation[p] - (p - a) for p in self.paired[lo:hi]}
+            if len(implied) == 1 and hi - lo >= 2 and a not in self.translation:
+                guess = implied.pop()
+        if guess is not None:
+            self.placed[a] = guess
+            self.extent[a] = size
+        return guess
+
     def inside(self, a):
         """The address of a byte inside a paired datum: the datum's own, plus the same offset.
 
@@ -153,8 +177,9 @@ class Resolver:
 
 def translation(key):
     """US address -> the version's, for every function and every datum paired code refers to."""
-    cache = ROOT / "build" / key / "translation.json"
-    sources = [ROOT / "config" / key / "map.tsv", ROOT / "asm" / "us" / "text.s", ROOT / "asm" / key / "text.s"]
+    cache = ROOT / "build" / key / "translation-2.json"
+    sources = [ROOT / "config" / key / "map.tsv", ROOT / "asm" / "us" / "text.s", ROOT / "asm" / key / "text.s",
+               versions.boot_path("us"), versions.boot_path(key)]
     if cache.exists() and all(cache.stat().st_mtime >= s.stat().st_mtime for s in sources if s.exists()):
         return {int(k): v for k, v in json.loads(cache.read_text()).items()}
     pairs = {}
@@ -178,9 +203,29 @@ def translation(key):
             for a, b in zip(a_ops, b_ops):
                 if a is not None:
                     pairs.setdefault(a, b)
+    # Each section both executables have starts where its counterpart does: their section headers.
+    for a, b in section_starts(retail_image("us"), retail_image(key)).items():
+        pairs.setdefault(a, b)
     cache.parent.mkdir(parents=True, exist_ok=True)
     cache.write_text(json.dumps(pairs))
     return pairs
+
+
+# The loaded sections of the executable that hold the game's own data (not the overlays' VU
+# microcode, whose names repeat).
+ANCHOR_SECTIONS = (".vutext", ".rodata", ".data", ".gcc_except_table", ".sbss", ".bss")
+
+
+def section_starts(us, other):
+    """{US address: the other version's} of the start of each section both executables have, from
+    their section headers (versions.py: same names, same order). A datum at a section's start is
+    exactly where the section starts, whatever the sections before it grew by."""
+    out = {}
+    for name in ANCHOR_SECTIONS:
+        a, b = us.section(name), other.section(name)
+        if a and b and a["addr"] and b["addr"]:
+            out[a["addr"]] = b["addr"]
+    return out
 
 
 def operand_symbols(key):

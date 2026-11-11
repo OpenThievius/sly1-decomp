@@ -69,12 +69,50 @@ What makes PAL differ, from the first `differs` rows read one by one:
 PAL's data is credited the same way (`tools/data_check.py`, run by `tools/version_check.py`,
 `config/eu/c_data_status.tsv`). Each global of `config/us/c_data.tsv` is built as the US build
 builds it and its bytes, with every relocated word resolved to the PAL address of its target, are
-compared with PAL's retail bytes at the global's PAL address: the translation of its US address
-(paired directly, or the nearest paired address below it plus the same offset when that stays
-short of the next one). A row is `match`, `differs` or `absent` (no PAL address, or `.bss`, which
-no file holds). Nothing is masked: a table whose pointers reach something the translation cannot
-place, or whose bytes PAL changed, is `differs`. The report counts the `match` rows' bytes as
-PAL's matched data (never as complete data: PAL links no C), on 2026-11-11 280,987 of 464,563.
+compared with PAL's retail bytes at the global's PAL address. A row is `match`, `differs` or
+`absent` (`.bss`, which no file holds, or no PAL address). Nothing is masked: a table whose pointers
+reach something PAL does not have, or whose bytes PAL changed, is `differs`; the row's note says
+where the bytes first differ and what the words that differ are (text, pointers, other data). The
+report counts the `match` rows' bytes as PAL's matched data (never as complete data: PAL links no
+C), on 2026-11-11 288,915 of 464,563 (62.19%).
+
+Where a global is in PAL comes from the translation of its US address (`tools/check.py`,
+`Resolver`), which pairs, in this order of evidence:
+
+- the addresses paired code names (the same operand of the same instruction in two paired
+  functions);
+- the start of each section both executables have (`.rodata`, `.data`, `.gcc_except_table`, `.sbss`,
+  `.bss`, `.vutext`), from their section headers: PAL's sections grew by different amounts, and a
+  datum at a section's start is exactly at its start;
+- for a datum with no pair of its own (`Resolver.place`): the start that the paired addresses
+  inside it imply, when there are at least two and every one implies the same; otherwise the
+  nearest pair below it plus the same offset, when that stays short of the next one. What lies
+  between that pair and the datum may have changed size in PAL (a string, a table), which the
+  addresses inside the datum do not suffer from.
+
+A pointer into another global the check has placed is resolved through its placement. A whole file's
+section (`config/us/files.tsv`) holds the labels the file includes from the disassembly
+(`INCLUDE_DATA`, `INCLUDE_RODATA`) at their places: they are compared as US's bytes, read from the
+US disassembly, against PAL's, like the C's own bytes, so a section counts for PAL only when the
+included labels equal PAL's too (the two retail images agree on them). Only 2 of the 34 rows that
+differ differ inside an included label (`D_00275940`, `D_00275B60`, both tables PAL grew).
+
+The 34 globals that still differ, by cause. None is a placement the tools could still derive; the one
+word that is a gap of the tools' is in the last row (`func_001AC638` has no PAL pairing, and the
+slot in PAL holds `func_001AB2B0`, which has none either):
+
+| Cause | Rows | Globals |
+|---|---:|---|
+| PAL's text differs: strings translated, moved, removed or turned into ids | 11 | `D_00249428`, `D_00249CA0`, `D_0024A2D0`, `D_0024A7A0`, `D_0024B280`, `D_0024B438`, `D_0024B660`, `D_0024CBD0`, `D_0024DB20`, `D_0024DCB0`, `D_0027AF70` |
+| Jump tables of functions PAL defines itself (`version-specific, rodata` in `c_status.tsv`): PAL's own code puts the cases elsewhere | 6 | `D_002499F0`, `D_00249FE0`, `D_0024A860`, `D_0024DAA0`, `D_0024E1C0`, `D_0024E600` |
+| String pointers PAL does not have: its table holds ids, or its own table | 5 | `D_00261090`, `D_002699B0`, `D_00269CD8`, `D_002743A0`, `D_00274F38` |
+| Values and tables PAL changed (floats, ids, hashes, an inserted row) | 11 | `D_00244F40`, `D_00261F70`, `D_002623C0`, `D_00262718`, `D_00262A30`, `D_0026C3E0`, `D_00275140`, `D_002758E0`, `D_00275940`, `D_00275B60`, `D_002779C0` |
+| Method tables: one slot holds a US function with no PAL pairing, one a different method | 1 | `D_00217380` |
+
+Four rows of the first two causes also hold words of the other (`D_0024B438`, `D_0024B660`,
+`D_00249CA0`, `D_0024E600`). What remains is not placement but PAL's own bytes, and the way to
+credit more is PAL's own definitions: the rodata a `version-specific` function carries is PAL's, and
+the data its own C defines is checked nowhere yet.
 
 Code and data only PAL has are named `func_eu_XXXXXXXX` and `D_eu_XXXXXXXX`, and reach that PAL
 address alone (`tools/check.py`). So is a datum both versions have when the tools cannot pair its
