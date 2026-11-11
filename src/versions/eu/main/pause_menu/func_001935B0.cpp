@@ -5,7 +5,6 @@
 // PAL's func_00193598, a text lookup that grew a switch): PAL's caller of func_00194190
 // calls this one.
 extern const char D_eu_0024D940[]; // "%d%% - "
-u16* func_eu_00160750(s32 key);
 s32 FormatToString(char* dst, const char* fmt, ...);
 u16* func_eu_001E3140(u16* dst, char* src);
 u16* func_eu_001E30A0(u16* dst, u16* src);
@@ -16,5 +15,5 @@ void FormatGameSummary(GameProgress* self, u16* dst)
     s32 percent = ComputeCompletionPercent(self);
     FormatToString(pct, D_eu_0024D940, percent);
     func_eu_001E3140(dst, pct);
-    func_eu_001E30A0(dst, func_eu_00160750((self->f19D8 << 8) | self->f19DC));
+    func_eu_001E30A0(dst, (u16*)GetEntryName((self->f19D8 << 8) | self->f19DC));
 }

@@ -18,9 +18,9 @@ struct Text_eu_15E7E0 {
     u8 pad1[0xA0 - 0x14]; s32 flagA0; s32 argA4;
 };
 
-f32 func_eu_0015E438(void* self);
-void func_eu_0015DDF0(void* self, void* color);
-void func_eu_0015DDA0(void* self);
+f32 SumTextWidth(void* self);
+void SetTextDefaultColor(void* self, void* color);
+void RewindTextReader(void* self);
 s32 func_eu_0015DE18(void* self);
 s32 func_eu_0015DF58(void* self);
 s32 func_eu_001E31E0(s32 ch);
@@ -44,7 +44,7 @@ void func_eu_0015E7E0(Text_eu_15E7E0* self, Box_eu_15E7E0* box, s32 a, s32 b)
         n = cnt;
     } else {
         local.start = 0;
-        f32 w = func_eu_0015E438(self);
+        f32 w = SumTextWidth(self);
         local.width = w;
         e = &local;
         end = &local + 1;
@@ -61,10 +61,10 @@ void func_eu_0015E7E0(Text_eu_15E7E0* self, Box_eu_15E7E0* box, s32 a, s32 b)
         }
     }
     Rgba_eu_15E7E0 color = box->color;
-    func_eu_0015DDF0(self, &color);
+    SetTextDefaultColor(self, &color);
     s32 started = 0;
     s32 right = 2;
-    func_eu_0015DDA0(self);
+    RewindTextReader(self);
     while ((ch = func_eu_0015DF58(self)) != 0) {
         s32 pos = func_eu_0015DE18(self);
         if (lineStart == 0) {

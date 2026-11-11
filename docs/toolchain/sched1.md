@@ -259,6 +259,11 @@ in the source changes nothing (the store is ready from the subtraction of b on, 
 insn position). Retail's form needs the mtc1 to read only the GPR, with the product in
 VU_REGS: two references for the product's class, one leaving no code.
 
+- **Resolved (2026-11-10, w20).** The second VU0 reference was never there: the conversion's
+  operand added no preference at all. ToFloatMoved now takes the vector as `"*r"`, which regclass
+  skips, and both functions are EXACT with ToFloatMoved for the length and the division
+  (docs/toolchain/vu0-helpers.md, "A GPR operand that leaves the class to the producer").
+
 ### A block-scoped struct local frees its slot for a later Scalar (func_00154088)
 
 Matched 2026-11-10 from the -dS dumps. LimitContactTangents (func_00154088) sums each contact's
@@ -1058,6 +1063,11 @@ passed on is invisible in the caller's code but shifts sched1 (as in func_0018AD
   guess: the load order changes sched1's ties and with it the order local-alloc sees.
 
 ### The quadratic's head: a priority wall between dot2's conversion and dot3 (func_00141D88, unsolved)
+
+Resolved 2026-11-10 (w20): not a priority wall but regclass's. With ToFloatMoved's operand
+`"*r"` each dot is a VU0 pseudo, and func_00141D88 and func_00141F48 are EXACT with all three
+conversions as ToFloatMoved (docs/toolchain/vu0-helpers.md, "A GPR operand that leaves the class
+to the producer"). The analysis below is kept for its reading of sched1.
 
 Read from the `-dS -fsched-verbose-6`, `.combine` and `.lreg` dumps (2026-11-10, w15), for
 func_00141D88 and func_00141F48 (the same head: `c = Dot(pa,pa) - r*r`, `hb = Dot(ab,pa)`,

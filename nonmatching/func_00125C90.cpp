@@ -31,6 +31,10 @@
 // written straight into vf6. Here retail writes it to vf3, stores it at 0x1C0 and loads vf6: a
 // memory d whose one load serves the asm and the first call, the second call reading memory,
 // with cse1 and cse2 both leaving that load alone (docs/toolchain/stack-slots.md).
+// w20 (2026-11-10): not the regclass wall of the dots (docs/toolchain/vu0-helpers.md, "A GPR operand
+// that leaves the class to the producer"): ToFloatMoved's "*r" and every conversion as ToFloatMoved leave
+// the one line (retail's `qmfc2 a1,$vf6` for the call argument, ours `lq a1,448(sp)`): d reaches the call
+// as a memory variable, not through a conversion helper.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

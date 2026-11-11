@@ -13,7 +13,7 @@ struct WarpMenu_eu {
 extern f32 D_eu_0027FDA0[];
 extern char D_eu_0024FAF8[];
 extern char D_eu_0024FB00[];
-void func_eu_0015C778(Font* font, const void* text, WarpLabelLayout* out, s32 zero, void* d);
+void DrawFontString(Font* font, const void* text, WarpLabelLayout* out, s32 zero, void* d);
 
 void func_001F20A8(WarpMenu_eu* self)
 {
@@ -103,7 +103,7 @@ void func_001F20A8(WarpMenu_eu* self)
                 L.FlagA(0);
                 L.FlagB(1);
                 L.FlagC(1);
-                func_eu_0015C778(font, (flags & 2) ? D_eu_0024FAF8 : D_eu_0024FB00, &L, 0, &g_gsPacketWriter);
+                DrawFontString(font, (flags & 2) ? D_eu_0024FAF8 : D_eu_0024FB00, &L, 0, &g_gsPacketWriter);
                 PopFontScale(font);
             }
         }

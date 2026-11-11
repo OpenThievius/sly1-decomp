@@ -33,7 +33,7 @@ struct Lines_eu_15E4A8 {
 };
 
 void* FillMemory(void* p, s32 v, s32 n);
-void func_eu_0015DDA0(void* self);
+void RewindTextReader(void* self);
 s32 func_eu_0015DE18(void* self);
 s32 func_eu_0015DEA0(void* self, s32 i);
 s32 func_eu_0015DF18(void* self, s32 n);
@@ -47,7 +47,7 @@ void func_eu_0015E4A8(Reader_eu_15E4A8* self, Lines_eu_15E4A8* t, f32 limit)
     FillMemory(t, 0, sizeof(Lines_eu_15E4A8));
     Line_eu_15E4A8* e = t->lines;
     Line_eu_15E4A8* end = t->lines + 32;
-    func_eu_0015DDA0(self);
+    RewindTextReader(self);
     s32 c;
     while ((c = func_eu_0015DF58(self)) != 0) {
         s32 pos = func_eu_0015DE18(self);

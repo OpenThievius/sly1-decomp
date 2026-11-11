@@ -75,11 +75,11 @@ struct TextReader_eu_1367B8 { u8 bytes[0xC0]; };
 
 void* func_eu_0015DCB8(void* buf, void* name, Font* v, s32 zero);  // returns buf
 s32 func_eu_001E3050(void* dst, const char* src);
-void func_eu_0015E3E0(void* reader, s32 n);
+void SeekTextReader(void* reader, s32 n);
 s32 func_eu_0015DE58(void* reader);
 void func_eu_001E3178(u16* dst, const u8* src);
 void func_eu_0015E7E0(void* reader, Layout_137228* layout, Layout_137228* frame, PacketWriter* gs);
-void func_eu_0015C778(Font* font, const char* text, Layout_137228* out, s32 zero, void* d);
+void DrawFontString(Font* font, const char* text, Layout_137228* out, s32 zero, void* d);
 void func_eu_001374E0(Layout_137228* layout, s32 value);
 
 struct PanelLayout_eu_1367B8 {
@@ -197,7 +197,7 @@ void DrawTextPanel(Obj_eu_1367B8* self)
         func_eu_001E3050(text, (const char*)self->text);
         TextReader_eu_1367B8 typed;
         func_eu_0015DCB8(&typed, text, self->font, 0);
-        func_eu_0015E3E0(&typed, shown);
+        SeekTextReader(&typed, shown);
         if (height < self->textHeight) {
             s32 at = func_eu_0015DE58(&typed);
             s32 i = 1;
@@ -252,7 +252,7 @@ void DrawTextPanel(Obj_eu_1367B8* self)
         Layout_eu_1367B8* l = (Layout_eu_1367B8*)PanelLayout_eu_1367B8::Set(&at, x, y, 0.0f, 0.0f, glyphColor, 0);
         l->f18 = (void*)1;
         l->f1C = 1;
-        func_eu_0015C778(font, glyph, l, 0, &g_gsPacketWriter);
+        DrawFontString(font, glyph, l, 0, &g_gsPacketWriter);
         PopFontScale(font);
     }
 }

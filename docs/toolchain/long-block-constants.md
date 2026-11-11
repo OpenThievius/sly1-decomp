@@ -205,6 +205,58 @@ register holds.
   once, at 18, with the 4 lost), so the key registers follow no monotone
   measure of the windows.
 
+### Why the 1065 landmark was lost, and forms that hold all ten (func_00109488, w20)
+
+Worked 2026-11-10 (build/swarm/w20-109488b/ in the g2 worktree: pc.py,
+shift.py, fdiff.py, res3.py, joint2.py, walk.py, cbatch.py). About 125
+compiles.
+
+- **CSE1's flushes fall at .jump index 1002k - 1.** The w19 model put
+  them one insn early (1002k - 2) and so missed one insn in the entry
+  after most flushes (+1 at 191, 555, 844, 937, 1032 and -1 at 291, 461:
+  +4 by entry 1065, which it carried as a residue). With 1002k - 1 and
+  the copy rule unchanged, the model gives every entry's .cse2 count of
+  the near miss and of every variant compiled since. One case it does
+  not model: a flush between a function address's high and lo_sum,
+  where both survive as copies and the next entry's do too (3 insns).
+  Such forms are now rejected rather than predicted.
+- **What sets the 1065 landmark.** It is CSE2's eighth flush, so every
+  insn CSE1 leaves before entry 1065 counts. The stores, the steps and
+  the first set of each value in each CSE1 window are fixed by the
+  values themselves (the same in retail). What is not fixed is copies:
+  where a flush falls inside an entry's argument block, an argument
+  deleted as a repeat whose store lies past the flush survives as a
+  copy, and the values set just before the flush are set again in the
+  next window. In the near miss this happens at entries 291 (256), 383
+  (4242 and 224: the fourth flush falls after the third of Set14's six
+  arguments, and 4242, 4120 and 224 are then set again in 384 and 450),
+  461 (the function address) and 937 (146). That is 5 insns by entry
+  1065, exactly what the landmark lacks. Moving the fourth flush 4 insns
+  earlier, to the start of entry 383, with one of the others, gives the
+  landmark (shift.py, fdiff.py).
+- **No single local edit does it.** Every per-call merge of equal
+  arguments, field moved out of the helper, and Set8m undone (about
+  5,000, entries 0 to 1065) moves the 1065 landmark by at most one insn.
+  The order of entry 1065's own stores gains at most two.
+- **Uniform forms do.** On the corrected model, a greedy search over
+  whole-kind rules and each helper's parameter and body order finds
+  forms holding all ten, for example the parameter orders Set0 (v0, v4,
+  vc), Set5 (v4, v0, v14, vc, v18), Set6 (v0, v4, v18, v14) and Set14
+  (v4, v0, vc, v1c, v14, v18), Set1's body flags, f10, fC, f0, f14 (for
+  entry 122) and Set14's body with f0 first (for 1065). Moving Set1's
+  f0 and f10 and Set0's flags out of their helpers is another route.
+  The parameter orders move the flushes off the argument blocks. They
+  are not inert, as w19 found for Set10 and Set11, because their kinds
+  hold the flushes.
+- **Necessary, not sufficient.** All 112 such forms compiled hold 10 of
+  10 as the model says. The best has 2,338 exact instructions (near
+  miss 2,990), 9,309 instructions (retail 9,348) and 73 of retail's
+  long register holds (near miss 50). Of the five key holds it has only
+  256 in s5. 4 is still not in s3, 2194 not in s7 and func_00155778 not
+  in s4. The windows are now reachable with a plausible uniform source,
+  but the allocation lead (the 2194 pseudo's rank, sched1's lives) is
+  still open, and it has to be searched inside this ten-landmark space.
+
 ### A scratch float in a loop: local-alloc's tie against global-alloc's ranking (func_00131F60)
 
 Measured 2026-11-10 (w15) from the -dS and -dl dumps, with local-alloc.c and global.c read.

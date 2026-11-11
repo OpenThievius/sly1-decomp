@@ -466,3 +466,63 @@ Neither near miss above can use one:
   arm's address adds and the return's `move` as retail has them, 66 differing lines against 73,
   but the prologue and the entry test are unchanged, so it is not landed. Retail's form is the
   compiler's own moves into fixed registers, i.e. register variables, which stay a user decision.
+
+### A GPR operand that leaves the class to the producer (2026-11-10, w20)
+
+The wall of func_00186230 ("A compiler's qmfc2 of a VU0 product", sched1.md) was regclass's.
+Read from regclass.c of GCC 2.95.3 and the `.lreg` dumps, with the movti_internal constraints
+from the compiler binary's strings (`=d,j,j,d,...` / `d,j,d,j,...`: every register pair of GR
+and VU, with no `?` or `*`):
+
+- **What decides the class.** record_reg_classes gives each pseudo operand, per class, the
+  cost `may_move_cost[class][operand's class]`, for outputs and inputs alike, and adds the
+  costs of the insns that mention the pseudo; ties go to the union (`reg_class_subunion`). A
+  dot product set by Dot's `"=j"` costs one VU-to-GR move as a GPR; read by ToFloatMoved's
+  `"r"` it costs the same move as a VU0 register. The two tie, regclass picks TI_REGS, and the
+  allocators put the product in a GPR (v0): the asm's output then goes to reload's VU0
+  register, chosen after every VU0 pseudo has its own, and the qmfc2 is that output reload.
+  The second pass (`alt_cost += may_move_cost[prefclass][...]`) shifts every class of a
+  single-alternative insn alike, so it cannot break the tie, and a movti copy is neutral
+  (all four GR/VU pairs are alternatives at no cost), as is a store (sqc2 or sq).
+- **Retail's form.** In each near miss retail has the product where the local allocator puts
+  a VU0 pseudo (vf1 ahead of the 1.0 and the other values in func_00186230, vf2/vf8 globally
+  in func_00130748) and a qmfc2 that is reload's input reload of a `"r"` operand: unit vu0 in
+  sched2 (so a ready sqc2 waits a cycle) and a GPR from reload's rotation (v0, v1, v1, v0 over
+  func_00130748's four conversions). That needs the product's GR cost above its VU cost with
+  nothing in the code to show for it. No hidden reference fits: the code after regclass is
+  retail's but for no-op moves (neutral) and loop notes (`do { } while (0)` around the dot
+  weights it by 4 but makes a sched barrier: the 0.0001 load no longer moves above the dot).
+- **The operand that adds no preference.** `"*r"`: '*' makes regclass skip the next letter
+  (`case '*': p++`), so the operand has no class there (`classes[i] == NO_REGS`: the
+  alternative fails and the insn adds the same cost to every class), while reload still reads
+  it as `"r"`. The product's one preference is then its `"=j"` set: VU_REGS, placed by the
+  local allocator, and reload loads the GPR with its own qmfc2. `"r#j"` (`#`: letters for
+  preferences only) does the same; the mips16 class `"e"` ({v0, v1}) gives VU_REGS too but
+  makes v0 and v1 spill registers, which moves the round robin and evicts a pseudo from v0 in
+  func_00130748. GCC's manual gives '*' exactly this use ("ignored when choosing register
+  preferences").
+- **Applied to the shared helpers.** ToFloatMoved's and StoreX's operand is now `"*r"`. With
+  that alone the US build changed in one function, func_00187D08 (IntersectSegmentWithSphere),
+  whose two ToFloatViaBits were standing in for this form: all three of its conversions as
+  ToFloatMoved are EXACT. Every other user of the two helpers builds the same (most read a
+  length that DivX also reads as `"j"`, NormalizeOr's, which was VU_REGS already). The whole
+  asm's alternative fails in regclass, so the float output gets no FP preference from it
+  either; its other uses decide, and none changed.
+  Landed with it: func_00186230 and func_00186320 (ToFloatMoved for ToFloatNow),
+  func_00130748 (ToFloatMoved at NormalizeAxis's return), func_001D4348 (ToFloatMoved for the
+  two ToFloatViaBits), func_001CEB18 (the squared distance), func_001BC978 (roSq), and
+  func_001EDA80 unchanged (StoreX's product now ranks first, vf1 with the 1.0 in vf2). Every
+  conversion of func_00186230, func_00186320, func_001BC978 and func_001D4348 as ToFloatMoved
+  is EXACT too, so the forms ToFloatNow and ToFloatViaBits stood in for were this one.
+- **The quadratic heads too.** func_00141D88 and func_00141F48 ("The quadratic's head",
+  sched1.md: 216 and 64 conversion mixes tried, none EXACT) are EXACT with all three of their
+  head's dots as ToFloatMoved: each product is a VU0 pseudo, which gives retail's vf3/vf5 for the
+  third dot without the priority change the earlier notes looked for. func_00142278 is closest
+  with its four conversions as ToFloatMoved (13 lines: the side test's product and 1.0 in each
+  other's VU0 register). func_00125C90's one line is a call argument read from memory, another
+  matter.
+- **Spotting it.** Retail's qmfc2 reads a VU0 register the local allocator would give a pseudo
+  (low, ahead of the values born after it), its GPR is reload's (v0, v1 in rotation), and sched2
+  holds a ready sqc2 or lqc2 for it (unit vu0): ToFloatMoved. A product in a reload register
+  after every other VU0 value is still ToFloatMoved's: another `"r"` read (ToFloatY,
+  ToFloatZ, a call argument) makes it TI_REGS.

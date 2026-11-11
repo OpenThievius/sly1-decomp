@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1736/1816 (95.6%), checked 2026-11-10
+// BYTES 1796/1816 (98.9%), checked 2026-11-10
 // NEAR: the first block is retail's: the statements in the order cd, ab, ca put c's load before a's and leave ab's subtraction unraised, so sched1 issues b, c, a, ca, ab and local-alloc gives retail's VU0 registers, and nn's conversion is ToFloatNow (its dot's result a VU0 pseudo). Left (docs/toolchain/sched1.md, "The side test and the half-width"): the side test's block, whose VU0 registers are retail's but whose order is not: a model of sched2 gives retail's order only with ToFloatViaBits for side, s and u and the s dot ahead of side's qmfc2 in sched1's output, which sched1's priorities (6 against 5) never give, the quadratic's head's wall (func_00141D88); and w's dot, whose retail GPR (a0, then k v0, kk v1) is reload's as ToFloat gives it, and whose order needs the compiler's qmfc2 (Moved), so retail read a VU0-allocated dot result through an "r" operand, which no plain form found gives.
+// w20 (2026-11-10): ToFloatMoved now takes its vector as "*r" (regclass skips the operand; docs/toolchain/
+// vu0-helpers.md, "A GPR operand that leaves the class to the producer"), so each dot read by it is a
+// VU0 pseudo with reload's qmfc2; all four conversions as ToFloatMoved (the best of the 16 mixes with
+// ToFloatNow/ToFloat) leave 13 lines: in the side test's block the dot's product takes vf2 and its 1.0
+// vf1 where retail has vf1/vf2 (the two-or-three-quantities order of local-alloc), which cascades to the
+// cross product's register and the two qmfc2s.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -39,13 +45,13 @@ s32 func_00142278(Vec02* a, Vec02* b, Vec02* c, Vec02* d, s32 count, ColliderSpa
     Vu0::Q(ab) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     Vu0::Q(ca) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(*c));
     Vu0::Q(n) = Vu0::Cross(Vu0::Q(cd), Vu0::Q(ab));
-    f32 nn = Vu0::ToFloatNow(Vu0::Dot(Vu0::Q(n), Vu0::Q(n)));
+    f32 nn = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(n), Vu0::Q(n)));
     if (!(nn < 0.0001f)) {
-        f32 side = Vu0::ToFloatNow(Vu0::Dot(Vu0::Q(ca), Vu0::Q(n)));
+        f32 side = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(ca), Vu0::Q(n)));
         Vu0::Q(x) = Vu0::Cross(Vu0::Q(ca), Vu0::Q(ab));
-        s = Vu0::ToFloat(Vu0::Dot(Vu0::Q(x), Vu0::Q(n))) / nn;
+        s = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(x), Vu0::Q(n))) / nn;
         Vu0::Q(x) = Vu0::Cross(Vu0::Q(ca), Vu0::Q(cd));
-        u = Vu0::ToFloatNow(Vu0::Dot(Vu0::Q(x), Vu0::Q(n))) / nn;
+        u = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(x), Vu0::Q(n))) / nn;
         if (side < 0.0f)
             Vu0::Q(n) = Vu0::MulX(Vu0::Q(n), Vu0::Scalar(-1.0f));
     }
