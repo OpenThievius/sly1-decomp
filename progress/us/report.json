@@ -1,6 +1,6 @@
 {
  "measures": {
-  "fuzzy_match_percent": 95.69318590435095,
+  "fuzzy_match_percent": 95.68914059690759,
   "total_code": "1112400",
   "matched_code": "1028832",
   "matched_code_percent": 92.48759439050701,
@@ -10173,7 +10173,7 @@
   {
    "name": "game/file_137290",
    "measures": {
-    "fuzzy_match_percent": 88.12812574422482,
+    "fuzzy_match_percent": 92.59942843534175,
     "total_code": "16796",
     "matched_code": "12936",
     "matched_code_percent": 77.01833769945225,
@@ -10857,7 +10857,7 @@
     {
      "name": "func_0013A618",
      "size": "804",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 93.40796019900498,
      "address": "13192",
      "metadata": {
       "virtual_address": "1287704"
@@ -28239,7 +28239,7 @@
   {
    "name": "game/file_19E040",
    "measures": {
-    "fuzzy_match_percent": 98.88773798954325,
+    "fuzzy_match_percent": 95.9480122324159,
     "total_code": "40548",
     "matched_code": "38564",
     "matched_code_percent": 95.10703363914374,
@@ -28430,7 +28430,7 @@
     {
      "name": "func_0019ED58",
      "size": "1588",
-     "fuzzy_match_percent": 75.06297229219143,
+     "fuzzy_match_percent": 0.0,
      "address": "3352",
      "metadata": {
       "virtual_address": "1699160",
@@ -37790,7 +37790,7 @@
   {
    "name": "game/player_request",
    "measures": {
-    "fuzzy_match_percent": 97.17166309778729,
+    "fuzzy_match_percent": 97.83190578158458,
     "total_code": "11208",
     "matched_code": "7196",
     "matched_code_percent": 64.20413990007138,
@@ -38041,7 +38041,7 @@
     {
      "name": "func_001D5678",
      "size": "2348",
-     "fuzzy_match_percent": 96.76320272572401,
+     "fuzzy_match_percent": 99.91482112436115,
      "address": "8072",
      "metadata": {
       "virtual_address": "1922680",
@@ -51487,7 +51487,7 @@
   {
    "name": "lib/mpeg_macroblock",
    "measures": {
-    "fuzzy_match_percent": 91.60804020100502,
+    "fuzzy_match_percent": 99.69849246231156,
     "total_code": "3980",
     "matched_code": "2928",
     "matched_code_percent": 73.5678391959799,
@@ -51528,7 +51528,7 @@
     {
      "name": "func_0020CAF8",
      "size": "1052",
-     "fuzzy_match_percent": 68.25095057034221,
+     "fuzzy_match_percent": 98.85931558935361,
      "address": "2392",
      "metadata": {
       "virtual_address": "2149112",
@@ -52620,7 +52620,7 @@
    "id": "game",
    "name": "Game code",
    "measures": {
-    "fuzzy_match_percent": 95.3007247538723,
+    "fuzzy_match_percent": 95.26394590000962,
     "total_code": "997856",
     "matched_code": "917568",
     "matched_code_percent": 91.95394926722894,
@@ -52642,7 +52642,7 @@
    "id": "lib",
    "name": "Libraries",
    "measures": {
-    "fuzzy_match_percent": 99.11213158262328,
+    "fuzzy_match_percent": 99.39324626344461,
     "total_code": "114544",
     "matched_code": "111264",
     "matched_code_percent": 97.13647157424221,

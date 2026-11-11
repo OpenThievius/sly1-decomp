@@ -1314,3 +1314,22 @@ times, the vertical flag in t9 both times).
   spill store points at a birthing raise that should not have happened (a variable set twice).
 - **Still differs** (85.9% "order"): fy is placed 16th and takes s0 (retail t9), which shifts
   three parameters one saved register; half and the luma part swap t4 and t5.
+
+### Two literal %hi's issued in one cycle (func_0013A618, func_0013A940, unsolved)
+
+Both bound vectors of these two functions start as `{FLT_MAX, FLT_MAX, FLT_MAX, 0}` and its
+negative, loaded from the function's literal pool (the file's .rodata). Retail: `lui v0; lwc1
+$f0; ... lui v0; lwc1 $f1`, the second `%hi` reusing v0 after the first load, the TI zero of the
+clears in v1. Ours: both `lui`s in the first cycle (v0, v1), so the clears' zero takes v0 and the
+list-frame push that follows takes other registers. In sched1 both `%hi`s have priority 26 (every
+bound store feeds the load of the list's link offset, which may alias the frame), issue_rate is 2,
+and both are ALU insns ready at t = 1, so the second is issued with the first; retail's order
+needs the second at priority 25 or less, or another insn of 26 ahead of it. Ruled out: chained
+assignments after `= {}` clears (worse store order), the initialisers (retail's z, x, y store
+order, kept), named extern const bounds (folded to the same literals), the list-head pointer as
+an OffsetList* (the load no longer waits for the stores: not retail), the bounds' assignments
+after the frame push, and declaration orders (the frame slots follow declaration order).
+
+  three parameters one saved register; half and the luma part swap t4 and t5. (Resolved
+  through global-alloc's pass 0 the same day: docs/toolchain/long-block-constants.md, "Pass 0
+  takes no new saved register" (func_0020CAF8).)

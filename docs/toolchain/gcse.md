@@ -648,6 +648,32 @@ everything reads vf2. One instruction short.
   or both arms, as a `Vu0::Vec` with Vec helpers in the arms, `Vec::Of(size)` reads, `hi = size`
   after the MulX, `Q(hi) = Q(size)` and MulX of `Q(hi)`, a second Splat in the else arm (cse1's
   jump path merges the identical asm), `s` reassigned in the else arm or after the join.
+- **Without cprop the split survives, but on the wrong side (2026-11-10, second look).** As a
+  diagnostic (never a form: one flag set per file), the named form (`u128 half = Splat(m);
+  Q(size) = half;`, the else arm `Q(hi) = half; MulX(half, ..)`) built with `-fno-gcse` keeps
+  cse1's two pseudos: vf2 for the head's store and the then arm, vf3 for the else arm
+  (`vmove vf3,vf2` in the `beqz` slot, `sqc2 vf3,32(sp)`, `vmulx vf2,vf3`). So cprop is the
+  only pass that merges them. Even so the else pseudo is `VU_REGS or none` (.lreg): with one
+  store (hi), one `j` use (the MulX) and the copy from a VU0 pseudo, regclass prefers VU0.
+  For retail's GPR (`sq v0,32(sp)`, `qmtc2 v0,vf3`) the else pseudo must be the asm's own
+  output and also carry the size store (two stores and one `j` use, as the class test above
+  found): RTL `asm -> S; H = S; size = S; then: H, H; else: S, S`. reload_cse then has
+  `vf2 = v0` from the copy and can store `size` from either; retail's `sqc2 vf2,0(sp)` after
+  `qmtc2 v0,vf2` fits.
+- **Why no plain form gets there.** cprop_insn propagates a copy into any insn whose pattern
+  is a SET (asm operands, stores) when the copy is available at the block's entry, unless the
+  copy's source is set earlier in that block; find_avail_set takes any copy in the head that
+  neither side overwrites later in the head. A then arm that reads `H` therefore always gets
+  `S`, whichever orientation cse1 leaves. The ways out in gcse.c are a use inside a PARALLEL
+  (an asm with two outputs or a clobber: the then arm's vsub and vadd are single-output
+  helpers, and retail reloads `target` between them, so they were two statements), a then arm
+  that sets `S` before reading `H` (it would also have to compute through `S`, which retail's
+  vf1 results rule out), a copy with a second predecessor into the then arm, or a copy PRE
+  makes after cprop (PRE has nothing redundant to eliminate here: the arms have no splat of
+  their own). Also ruled out tonight: the margin named as a float before the test (`f32 m =
+  self->margin;`), and the splat kept in one `u128` variable reused for the doubled splat after
+  the join (the user variable's two lives make one pseudo, and both splats go to VU0, 8
+  instructions worse).
 - **The loop is retail's.** `Vec02* pts = r->points[r->bank];` before the loop and `Vec02* p =
   &pts[i];` in its body: loop.c reduces the address to a pointer giv initialised in the
   preheader after the entry test (`addu v1,a0,s1` in the `blez` slot, `move s0,v1`), where a
@@ -791,3 +817,35 @@ copies between the variable and a use, and the block boundaries between them, to
 uses end on which pseudo (`-dG`: "COPY-PROP: Replacing reg N in insn M with reg K", pass by pass).
 Unsolved there: retail's second direction keeps its parameter copy as a register copy of the
 normal (vmove vf6,vf8 before the branch), which neither form above gives.
+
+### Copy chains one hop too long: a Vec temporary's copy, and a variable that starts as the normal (func_0019ED58, wave 17)
+
+The same function, the next two hops. Each pass of cprop moves every use one copy up its chain
+(the pass's table holds each copy as it was when the pass began, and the copies themselves are
+rewritten in the same pass), so after two passes a use reaches the pseudo two or three copies up,
+and any copy still read stays as a register copy that global-alloc must place.
+
+- `Vu0::Vec mu = Vu0::Vec::Scalar(-f);` is three copies from the qmtc2 (Scalar's u128, Vec's
+  member through its return, the variable): the MulAddX that reads mu after NormalizeOr's join
+  ends on the middle copy, which lives across the branch beside the qmtc2's register (whose slot
+  store sched2 sinks), and comes out as `vmove vf6,vf5`. `Vu0::Vec mu; mu.q = Vu0::Scalar(-f);`
+  is one copy shorter: the use reaches the qmtc2's pseudo and the vmove is gone, as in retail
+  (`vmaddx vf5,vf1,vf5x`).
+- `Vu0::Vec dir = nv; dir = Vu0::MulAddX(dir, Vu0::NormalizeOr(t, x), mu);` (the direction set
+  twice, as `d1 = nv` names the first impulse's) leaves the argument copy of the normal as
+  retail's `vmove vf6,vf8` before the branch, where `MulAddX(nv, ...)` read the spilled copy at
+  80(sp) and `Vu0::Vec n = nv;` gives the same as `dir = nv`. With that copy in place sched2's
+  order after the next call (Cross(spin, p) before Cross(c1, p), the loads in retail's
+  registers) became retail's too: the earlier difference there was this copy's register, not
+  the schedule's priorities.
+- In `-dG`, follow each use's "COPY-PROP: Replacing reg N in insn M" line through both passes; a
+  use that ends one copy short of where retail's register shows it wants one copy less in the
+  source (a member set instead of a Vec helper's return), and one that retail keeps as a copy
+  wants one more (a variable assigned before the call that reads it).
+- The last missing instruction there is a local-alloc tie, not a copy: c2 (3 refs, one call)
+  dies at the second MulXSum, combine_regs ties the sum's result into c2's quantity and adds its
+  refs, so CALLER_SAVE_PROFITABLE (4 * calls < refs) passes and c2 is caller-saved in vf6.
+  Retail ties that result to the weight s and reloads c2 from its slot, so its c2 was a global
+  pseudo. In the .lreg dump, a call-crossing local that gets a register with too few refs is
+  usually the target of such a tie: look for an asm whose REG_DEAD input has the output's
+  register.
