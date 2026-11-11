@@ -4,7 +4,7 @@ struct __attribute__((packed)) Word_eu_0015DDF0 {
     s32 v;
 };
 
-void func_eu_0015DDF0(void* self, void* src)
+void SetTextDefaultColor(void* self, void* src)
 {
     u8* o = (u8*)self;
     *(Word_eu_0015DDF0*)(o + 0xAC) = *(Word_eu_0015DDF0*)src;

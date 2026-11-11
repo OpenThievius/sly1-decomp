@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Only in PAL: SetFontClipRect's twin with PAL's vertical scale (0.546296 for NTSC's 0.454545):
 // packs the clip rectangle into a scissor register write.
-void func_eu_0015C5C0(Font* unused, Vec4U* v, PacketWriter* obj)
+void SetFontClipRect(Font* unused, Vec4U* v, PacketWriter* obj)
 {
     if (v != 0) {
         s32 pw = (s32)(v->x + v->z) - 1;

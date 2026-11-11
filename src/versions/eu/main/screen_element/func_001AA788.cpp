@@ -5,7 +5,7 @@ struct Obj_eu_1AB550 {
     f32 f51C;
 };
 
-void func_eu_001AB550(Obj_eu_1AB550* self, f32 v)
+void SetScreenElementScale(Obj_eu_1AB550* self, f32 v)
 {
     self->f51C = v;
 }

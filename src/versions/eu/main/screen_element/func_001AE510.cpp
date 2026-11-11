@@ -7,13 +7,13 @@ struct Obj_eu_1AE510;
 typedef void (*Fn_eu_1AE510)(Obj_eu_1AE510* self, Key_eu_1AE510* key);
 struct Obj_eu_1AE510 { Fn_eu_1AE510* vt; void* f4; };
 
-void func_eu_001AAFB0(Obj_1AE510* self);
+void SetupScreenElementText(Obj_1AE510* self);
 
 void InitLetterGlyphElement(Obj_1AE510* base)
 {
     Obj_eu_1AE510* self = (Obj_eu_1AE510*)base;
     Key_eu_1AE510 key;
-    func_eu_001AAFB0(base);
+    SetupScreenElementText(base);
     self->f4 = GetFontById(2);
     if ((u8*)self == (u8*)&D_00273C50) {
         key.pad = 0;

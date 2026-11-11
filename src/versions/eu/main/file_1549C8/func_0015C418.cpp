@@ -16,7 +16,7 @@ struct Self_eu_15C6F0 {
     Sub_eu_15C6F0* f4C;
 };
 
-f32 func_eu_0015C6F0(Self_eu_15C6F0* self, const u8* s)
+f32 MeasureFontString(Self_eu_15C6F0* self, const u8* s)
 {
     if (s == 0) {
         return 0.0f;

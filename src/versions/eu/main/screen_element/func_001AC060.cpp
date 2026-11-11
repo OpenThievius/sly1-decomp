@@ -2,7 +2,7 @@
 // Counts down a timer at 0x580 with the reload at 0x574 and the stage at 0x57C, then stores the progress ratio to 0x588 and a constant at 0x58C.
 extern f32 D_eu_00262B5C[];
 struct Timer_eu_1ACE58 { u8 pad[0x574]; s32 f574; s32 f578; s32 f57C; s32 f580; u8 pad2[0x588 - 0x584]; f32 f588; f32 f58C; };
-void func_eu_001ACE58(Timer_eu_1ACE58* a0)
+void DecrementGaugeCount(Timer_eu_1ACE58* a0)
 {
     a0->f580 = a0->f580 - 1;
     if (a0->f580 <= 0) {

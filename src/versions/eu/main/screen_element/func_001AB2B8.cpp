@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// PAL: fields 0x310 further on, the text goes to a local buffer handed to func_eu_001AB370
+// PAL: fields 0x310 further on, the text goes to a local buffer handed to SubstituteScreenElementGlyphs
 struct Self_1AB2B8_eu {
     u8 pad0[0x524];
     s32 f524;
@@ -8,7 +8,7 @@ struct Self_1AB2B8_eu {
     u8 pad574[4];
     s32* f578;
 };
-void func_eu_001AB370(Self_1AB2B8_eu* self, char* buf);
+void SubstituteScreenElementGlyphs(Self_1AB2B8_eu* self, char* buf);
 
 void FormatCounterCaption(Self_1AB2B8_eu* self)
 {
@@ -79,5 +79,5 @@ void FormatCounterCaption(Self_1AB2B8_eu* self)
         FormatToStringBounded(buf, 0x200, "%d%%", self->f570);
         break;
     }
-    func_eu_001AB370(self, buf);
+    SubstituteScreenElementGlyphs(self, buf);
 }

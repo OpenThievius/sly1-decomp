@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// When D_eu_0027F360 is 1, sets the +0x570 and +0x574 flags from D_eu_00263EEC and the float at +0x0C of D_eu_0026ABE8 and calls func_eu_001AED58 if they changed; then calls func_eu_001AAFE0 on self.
+// When D_eu_0027F360 is 1, sets the +0x570 and +0x574 flags from D_eu_00263EEC and the float at +0x0C of D_eu_0026ABE8 and calls func_eu_001AED58 if they changed; then calls UpdateScreenElementSlide on self.
 struct Pal_eu_001AEEA0 {
     u8 pad00[0xC];
     f32 f0C;
@@ -15,9 +15,9 @@ extern s32 D_eu_0027F360;
 extern s32 D_eu_00263EEC;
 extern Pal_eu_001AEEA0* D_eu_0026ABE8[];
 void func_eu_001AED58(void* self);
-void func_eu_001AAFE0(void* self);
+void UpdateScreenElementSlide(void* self);
 
-void func_eu_001AEEA0(Obj_eu_001AEEA0* self)
+void UpdatePromptElement(Obj_eu_001AEEA0* self)
 {
     s32 a0 = 0;
     s32 a1;
@@ -36,5 +36,5 @@ void func_eu_001AEEA0(Obj_eu_001AEEA0* self)
             func_eu_001AED58(self);
         }
     }
-    func_eu_001AAFE0(self);
+    UpdateScreenElementSlide(self);
 }

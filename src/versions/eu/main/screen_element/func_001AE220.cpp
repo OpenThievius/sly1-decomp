@@ -28,7 +28,7 @@ void func_eu_001374E0(void* out, s32 v);
 void func_eu_0015DCB8(void* buf, void* name, void* p, s32 zero);
 void func_eu_0015E7E0(void* buf, void* out, s32 zero, void* d);
 
-void func_eu_001AEF48(Prompt_eu_1AEF48* self)
+void DrawPromptElement(Prompt_eu_1AEF48* self)
 {
     LayoutBuilder out;
     T217D_Word tmp;

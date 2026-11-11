@@ -17,7 +17,7 @@ struct Font_eu_15C778 { u8 pad0[8]; s32 units; u8 pad1[0x3C]; f32 scale; Vt_eu_1
 struct Font2_eu_15C778 { u8 pad0[8]; s32 units; u8 pad1[0x3C]; f32 scale; VtW_eu_15C778* vt; };
 struct Box_eu_15C778 { f32 x; f32 y; f32 w; f32 h; s32 style; s32 pad14; s32 halign; s32 valign; };
 
-void func_eu_0015C778(Font_eu_15C778* self, u8* str, Box_eu_15C778* box, s32 a, s32 b)
+void DrawFontString(Font_eu_15C778* self, u8* str, Box_eu_15C778* box, s32 a, s32 b)
 {
     f32 x;
     f32 y;

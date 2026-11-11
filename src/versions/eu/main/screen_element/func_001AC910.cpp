@@ -14,7 +14,7 @@ struct Self_eu_1AD668 {
 s32 func_eu_001E3100(void* p, s32 c);
 void func_eu_001AB2B0(void* self, s32 c);
 
-void func_eu_001AD668(Self_eu_1AD668* self, s32 arg)
+void SetElementTextAfterSlideOut(Self_eu_1AD668* self, s32 arg)
 {
     s32 st = self->f560;
     if (st == 0) {

@@ -23,11 +23,11 @@ struct Obj_eu_1AB058 {
     void* f588;
 };
 
-void func_eu_001AAFE0(Obj_eu_1AB058* self);
+void UpdateScreenElementSlide(Obj_eu_1AB058* self);
 void FormatCounterCaption(Obj_eu_1AB058* self);
 void PushFontScale(Handle_eu_1AB058* handle, f32 a, f32 b);
 void func_eu_0015DCB8(Loc_eu_1AB058* out, u16* flag, Handle_eu_1AB058* handle, s32 zero);
-f32 func_eu_0015E438(Loc_eu_1AB058* loc);
+f32 SumTextWidth(Loc_eu_1AB058* loc);
 void SetScreenElementSize(Obj_eu_1AB058* self, f32 x, f32 y);
 void PopFontScale(Handle_eu_1AB058* handle);
 
@@ -39,7 +39,7 @@ void UpdateCounterCaption(Obj_eu_1AB058* self)
     s32 first;
     s32* p;
 
-    func_eu_001AAFE0(self);
+    UpdateScreenElementSlide(self);
     p = self->f574;
     if (self->f570 == *p) {
         return;
@@ -68,7 +68,7 @@ void UpdateCounterCaption(Obj_eu_1AB058* self)
     if (self->flag != 0) {
         PushFontScale(self->handle, self->f51c, self->f51c);
         func_eu_0015DCB8(&loc, &self->flag, self->handle, 0);
-        f32 x = func_eu_0015E438(&loc);
+        f32 x = SumTextWidth(&loc);
         f32 y = (f32)self->handle->count * self->handle->scale;
         SetScreenElementSize(self, x, y);
         PopFontScale(self->handle);

@@ -9,7 +9,7 @@ struct Obj_eu_1AD788 {
 
 void ShowScreenElement(void* self);
 
-void func_eu_001AD788(Obj_eu_1AD788* self)
+void ShowElementUnlessTextPending(Obj_eu_1AD788* self)
 {
     if (self->state != 3 || self->flag == 0) {
         ShowScreenElement(self);

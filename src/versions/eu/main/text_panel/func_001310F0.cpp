@@ -8,12 +8,12 @@ struct Obj_1310F0_eu {
     f32 f57C;
     u32 f580;
 };
-void func_eu_001AAF38(Obj_1310F0_eu* self, s32 a1);
+void InitScreenElement(Obj_1310F0_eu* self, s32 a1);
 void InitTextPanel(Obj_1310F0_eu* self, s32 a1)
 {
     self->f544 = 640.0f;
     self->f548 = 468.610168f;
     self->f57C = 15.0f;
     self->f580 = 0x80FFFFFF;
-    func_eu_001AAF38(self, a1);
+    InitScreenElement(self, a1);
 }

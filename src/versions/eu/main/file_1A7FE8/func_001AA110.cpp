@@ -3,7 +3,7 @@
 typedef void (*VFn_eu_001AAE58)(void* self);
 struct Obj_eu_001AAE58 { VFn_eu_001AAE58* vtbl; u8 pad[0x560 - 4]; s32 f560; };
 
-void func_eu_001AAE58(void)
+void QueueEachScreenElementDraw(void)
 {
     void** p = (void**)g_screenElements;
     s32 n = 0x24;

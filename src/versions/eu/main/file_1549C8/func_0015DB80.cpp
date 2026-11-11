@@ -14,7 +14,7 @@ struct Obj_eu_15DDA0 {
     W_eu_15DDA0 aC;
 };
 
-void func_eu_0015DDA0(Obj_eu_15DDA0* self)
+void RewindTextReader(Obj_eu_15DDA0* self)
 {
     if (self->mode == 0) {
         self->f8 = self->f4;

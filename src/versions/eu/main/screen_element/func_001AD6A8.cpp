@@ -19,12 +19,12 @@ struct Obj_eu_1AE400 {
     s32 f570;
 };
 
-void func_eu_001AAFB0(Obj_eu_1AE400* self);
+void SetupScreenElementText(Obj_eu_1AE400* self);
 void func_eu_001AB238(void* self, const char* s);
 
-void func_eu_001AE400(Obj_eu_1AE400* self)
+void InitHintGlyphElement(Obj_eu_1AE400* self)
 {
-    func_eu_001AAFB0(self);
+    SetupScreenElementText(self);
     Sub_eu_1AE400* sub = (Sub_eu_1AE400*)GetFontById(2);
     self->sub = (Sub_eu_1AE400*)sub->info->fn((u8*)sub + sub->info->off, 1.0f, 1.0f);
     func_eu_001AB238(self, D_eu_0024E348);

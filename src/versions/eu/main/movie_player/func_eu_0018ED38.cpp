@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Copies four words of the source record into self, picks two sets of arguments by the source kind to call func_0011E428 (PAL), and on success calls func_eu_0018EDE8.
+// Copies four words of the source record into self, picks two sets of arguments by the source kind to call func_0011E428 (PAL), and on success calls ResetIopRingSink.
 struct Src_eu_0018ED38 {
     u8 pad00[8];
     s32 kind;
@@ -19,7 +19,7 @@ struct Self_eu_0018ED38 {
 };
 
 s32 OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
-void func_eu_0018EDE8(void* self);
+void ResetIopRingSink(void* self);
 
 s32 func_eu_0018ED38(Self_eu_0018ED38* self, Src_eu_0018ED38* src)
 {
@@ -37,7 +37,7 @@ s32 func_eu_0018ED38(Self_eu_0018ED38* self, Src_eu_0018ED38* src)
         self->result = OpenIopRing(0x6000, 0, 0x400, 0, 2, 2);
     }
     if (self->result >= 0) {
-        func_eu_0018EDE8(self);
+        ResetIopRingSink(self);
         return 1;
     }
     return 0;

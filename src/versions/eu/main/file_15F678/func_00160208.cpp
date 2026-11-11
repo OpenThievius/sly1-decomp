@@ -2,7 +2,7 @@
 // Zeroes three counters, then counts the table entries whose id word has key in bits 8 and up, by the flag bits 2, 4 and 8.
 extern u8 D_eu_002490F0[];
 
-void func_eu_00160830(s32 key, s32* c1, s32* c2, s32* c3)
+void CountCategoryFlags(s32 key, s32* c1, s32* c2, s32* c3)
 {
     *c3 = 0;
     *c2 = 0;

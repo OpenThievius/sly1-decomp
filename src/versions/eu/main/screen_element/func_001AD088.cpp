@@ -3,7 +3,7 @@
 extern u8 D_eu_0024E2D0[];
 void func_eu_001AB238(void* a0, u8* a1);
 void func_eu_001ADE38(void* a0, s32 hi, u8 lo);
-void func_eu_001ADDF8(void* a0, s32 a1)
+void SetElementTextFromPackedEntry(void* a0, s32 a1)
 {
     if (a1 != -1) {
         func_eu_001ADE38(a0, a1 >> 8, (u8)a1);

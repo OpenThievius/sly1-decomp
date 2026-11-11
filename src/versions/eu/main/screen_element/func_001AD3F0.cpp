@@ -38,7 +38,7 @@ void func_eu_00161D68(void* ctx, s32 a, s64 b);
 void func_eu_00161AB8(void* ctx, s32 color);
 void func_eu_00161C50(void* ctx, s32 a, s32 b, s32 c, s32 d);
 
-void func_eu_001AE138(Actor_eu_1AE138* self)
+void DrawMessageElement(Actor_eu_1AE138* self)
 {
     PW_eu_1AE138 c;
     Out_eu_1AE138 L;

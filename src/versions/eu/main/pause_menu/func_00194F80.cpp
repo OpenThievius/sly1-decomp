@@ -37,7 +37,7 @@ Buf_eu_194F80* func_eu_0015DD18(Buf_eu_194F80* out, s32 id, Font* font, s32 zero
 Buf_eu_194F80* func_eu_0015DCB8(Buf_eu_194F80* out, void* str, Font* font, s32 zero);
 void func_eu_0015E4A8(Buf_eu_194F80* buf, Lines_eu_194F80* lines, f32 w);
 void func_eu_0015E7E0(Buf_eu_194F80* buf, Out_eu_194F80* out, s32 zero, void* data);
-f32 func_eu_0015E438(Buf_eu_194F80* buf);
+f32 SumTextWidth(Buf_eu_194F80* buf);
 void* GetMenuChoiceLabel(s32 menu, s32 id);
 
 struct Setup_eu_194F80 { static void Do(Out_eu_194F80* out, f32 x, f32 y, f32 w, f32 h, s32 color, Lines_eu_194F80* lines, s32 flag)
@@ -156,7 +156,7 @@ void DrawPauseMenu(Self_eu_194F80* self)
             }
             void* str = GetMenuChoiceLabel(page, menu->items[k]);
             func_eu_0015DCB8(&buf, str, self->f4, 0);
-            total += func_eu_0015E438(&buf);
+            total += SumTextWidth(&buf);
         }
         x = cx + (w - total) * 0.5f;
     }
@@ -186,7 +186,7 @@ void DrawPauseMenu(Self_eu_194F80* self)
         Buf_eu_194F80 buf;
         str = GetMenuChoiceLabel(page, menu->items[i]);
         func_eu_0015DCB8(&buf, str, self->f4, 0);
-        width = func_eu_0015E438(&buf);
+        width = SumTextWidth(&buf);
         if (menu->vertical != 0) {
             x = cx + (w - width) * 0.5f;
         }
@@ -195,7 +195,7 @@ void DrawPauseMenu(Self_eu_194F80* self)
             PushFontScale(self->f4, sc, sc);
         }
         func_eu_0015DCB8(&buf, str, self->f4, 0);
-        f32 width2 = func_eu_0015E438(&buf);
+        f32 width2 = SumTextWidth(&buf);
         th = (f32)self->f4->height * self->f4->sy;
         Out_eu_194F80 out;
         Setup_eu_194F80::Do(&out, x + (width - width2) * 0.5f, cy + (lineH - th) * 0.5f, w, th, *(s32*)&col, 0, 0);

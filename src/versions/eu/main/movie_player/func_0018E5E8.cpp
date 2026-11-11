@@ -5,9 +5,9 @@ struct Head_eu_18ECA8 { u8 pad0[0xC]; s32 f0C; };
 extern u8 D_eu_002CC280[];
 extern u8 D_eu_0028CA70[];
 extern s32 D_eu_0027F0DC;
-void func_eu_0018EBE8(void);
+void RunMovieDecodeThread(void);
 
-void func_eu_0018ECA8(void)
+void CreateMovieDecodeThread(void)
 {
     ThreadParams l;
     s32 v;
@@ -15,7 +15,7 @@ void func_eu_0018ECA8(void)
     D_eu_0026AC60.f144 = CreateLockSemaphore(0, (void*)1);
     ((Head_eu_18ECA8*)&D_eu_0026AC60)->f0C = 0;
     (void)FillMemory(&l, 0, sizeof(l));
-    l.entry = func_eu_0018EBE8;
+    l.entry = RunMovieDecodeThread;
     l.stack = D_eu_002CC280;
     l.gp = D_eu_0028CA70;
     l.stackSize = 0x1000;

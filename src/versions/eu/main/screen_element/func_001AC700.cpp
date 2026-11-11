@@ -36,7 +36,7 @@ extern u8 D_eu_00263590[];
 void func_eu_0015DCB8(void* buf, void* name, void* p, s32 zero);
 void func_eu_0015E7E0(void* buf, Out_eu_1AD438* out, s32 zero, void* d);
 
-void func_eu_001AD438(Actor_eu_1AD438* self)
+void DrawElementWithFadedFrame(Actor_eu_1AD438* self)
 {
     T217D_Word c;
     Out_eu_1AD438 L;

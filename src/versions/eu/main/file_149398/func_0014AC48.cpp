@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// PAL's entries start at 0x574 with a 0x570 stride, call func_eu_001AAFB0 and func_eu_001AB550(0.5) and skip the sub-object writes.
+// PAL's entries start at 0x574 with a 0x570 stride, call SetupScreenElementText and SetScreenElementScale(0.5) and skip the sub-object writes.
 typedef void (*VFn_14AC48)(void* self);
 void SetScreenElementSlideInTime(void* self, f32 v);
 void SetScreenElementSlideOutTime(void* self, f32 v);
@@ -16,20 +16,20 @@ struct Obj_14AC48_eu {
     Entry_14AC48_eu e[4];
 };
 
-void func_eu_001AAFB0(void* self);
-void func_eu_001AB550(void* self, f32 v);
+void SetupScreenElementText(void* self);
+void SetScreenElementScale(void* self, f32 v);
 
 void SetupItemColumn(Obj_14AC48_eu* self)
 {
     Entry_14AC48_eu* e;
     u32 i;
 
-    func_eu_001AAFB0(self);
+    SetupScreenElementText(self);
     e = self->e;
     for (i = 0; i < 4; i++) {
         e->vtbl[1](e);
         e->f520 = 0;
-        func_eu_001AB550(e, 0.5f);
+        SetScreenElementScale(e, 0.5f);
         SetScreenElementSlideInTime(e, 1.0f);
         SetScreenElementSlideOutTime(e, 1.0f);
         SetScreenElementHoldTime(e, 0.0f);

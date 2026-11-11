@@ -21,7 +21,7 @@ extern s32 D_eu_002636D8[];
 extern s32 D_eu_00263710;
 void func_eu_0015DD18(TextReader_1936A0_eu* out, s32 id, Font* font, s32 zero);
 void func_eu_0015E4A8(TextReader_1936A0_eu* buf, f32 w, Size_1936A0_eu* out);
-f32 func_eu_0015E438(TextReader_1936A0_eu* buf);
+f32 SumTextWidth(TextReader_1936A0_eu* buf);
 void func_eu_0015DCB8(TextReader_1936A0_eu* out, void* text, Font* font, s32 zero);
 void* GetMenuChoiceLabel(s32 page, s32 index);
 void SetScreenElementSize(Self_1936A0_eu* self, f32 w, f32 h);
@@ -163,11 +163,11 @@ void BuildPauseMenuPage(Self_1936A0_eu* self)
         if (r->mode != 0) {
             for (s32 j = 0; j < r->mode; j++) {
                 func_eu_0015DD18(&tr, r->ids[j], self->font, 0);
-                w = func_eu_0015E438(&tr) >? w;
+                w = SumTextWidth(&tr) >? w;
             }
         } else {
             func_eu_0015DCB8(&tr, GetMenuChoiceLabel(page, row->items[i]), self->font, 0);
-            w = func_eu_0015E438(&tr);
+            w = SumTextWidth(&tr);
         }
         if (row->vertical != 0) {
             items = items >? w;

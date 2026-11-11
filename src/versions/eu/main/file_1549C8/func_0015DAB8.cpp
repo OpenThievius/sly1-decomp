@@ -12,7 +12,7 @@ struct Lookup_eu_0015DBE8 {
     Entry_eu_0015DBE8* table;
 };
 
-Entry_eu_0015DBE8* func_eu_0015DBE8(Lookup_eu_0015DBE8* self, u16 key)
+Entry_eu_0015DBE8* FindFontGlyph(Lookup_eu_0015DBE8* self, u16 key)
 {
     s32 k = key;
     s32 hi = self->count - 1;

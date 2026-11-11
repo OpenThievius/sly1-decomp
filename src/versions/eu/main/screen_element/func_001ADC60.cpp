@@ -23,14 +23,14 @@ struct Obj_eu_1AE9C0 {
     s32 f570;
 };
 
-void func_eu_001AAFB0(Obj_eu_1AE9C0* self);
+void SetupScreenElementText(Obj_eu_1AE9C0* self);
 void* FindAnimRecord(s32 id);
 void SetScreenElementSize(Obj_eu_1AE9C0* self, f32 x, f32 y);
 const char* func_eu_001DDAB0(s32 id);
 
-void func_eu_001AE9C0(Obj_eu_1AE9C0* self)
+void InitTitleElement(Obj_eu_1AE9C0* self)
 {
-    func_eu_001AAFB0(self);
+    SetupScreenElementText(self);
     Sub_eu_1AE9C0* sub = self->sub;
     self->sub = (Sub_eu_1AE9C0*)sub->info->fn((u8*)sub + sub->info->off, D_eu_0027DB98, D_eu_0027DB9C);
     if (GetFontById(2) != 0) {

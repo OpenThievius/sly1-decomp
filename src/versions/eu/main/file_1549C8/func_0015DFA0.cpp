@@ -2,10 +2,10 @@
 // Initialises the object, runs func_eu_0015DF58 up to n times until it returns 0, then clears with func_eu_0015DEE0.
 s32 func_eu_0015DF58(void* self);
 void func_eu_0015DEE0(void* self, s32 v);
-void func_eu_0015DDA0(void* self);
-void func_eu_0015E3E0(void* self, s32 n)
+void RewindTextReader(void* self);
+void SeekTextReader(void* self, s32 n)
 {
-    func_eu_0015DDA0(self);
+    RewindTextReader(self);
     while (func_eu_0015DF58(self) != 0) {
         if (n == 0) {
             break;

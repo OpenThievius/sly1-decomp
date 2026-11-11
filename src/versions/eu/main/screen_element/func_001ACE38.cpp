@@ -17,7 +17,7 @@ void func_eu_001AB2B0(void* self, s32 a1);
 s32 func_eu_001E3100(void* p, s32 a1);
 void* func_eu_001E3050(void* p, s32 a1);
 
-void func_eu_001ADBA8(Obj_eu_001ADBA8* self, s32 a1)
+void SetElementTextCopiedAfterSlideOut(Obj_eu_001ADBA8* self, s32 a1)
 {
     if (self->state == 0) {
         func_eu_001AB2B0(self, a1);

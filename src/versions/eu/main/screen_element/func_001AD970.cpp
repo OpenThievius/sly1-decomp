@@ -15,7 +15,7 @@ void func_eu_001ADE38(void* ui, s32 a, s32 b);
 void SetScreenElementHoldTime(void* self, f32 v);
 void SetScreenElementMode(Obj_eu_1AE6D0* self, s32 flag);
 
-void func_eu_001AE6D0(Obj_eu_1AE6D0* self, s32 st)
+void SetElementModeFollowingFade(Obj_eu_1AE6D0* self, s32 st)
 {
     if (self->f560 != st) {
         if (D_eu_0027F700[1] == 1) {

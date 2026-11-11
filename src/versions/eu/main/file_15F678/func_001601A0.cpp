@@ -2,7 +2,7 @@
 // Returns the s32 at +0xA0 of the object func_eu_00160680 gives, or -1 when there is none.
 void* func_eu_00160680(void);
 
-s32 func_eu_001607C8(void)
+s32 GetEntryIdByKey(void)
 {
     u8* o = (u8*)func_eu_00160680();
     s32 r;

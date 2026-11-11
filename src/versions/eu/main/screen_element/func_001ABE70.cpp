@@ -22,7 +22,7 @@ extern f32 D_eu_0027DB04;
 extern f32 D_eu_0027DB08;
 extern f32 D_eu_0027DB0C;
 
-void func_eu_001AAFB0(void* self);
+void SetupScreenElementText(void* self);
 void PushFontScale(void* obj, f32 a, f32 b);
 void SetScreenElementSize(void* self, f32 a, f32 b);
 void PopFontScale(void* obj);
@@ -35,10 +35,10 @@ static inline s32 StartMenuCount(Menu_eu_1ACC68* m)
     return cells;
 }
 
-void func_eu_001ACC68(Menu_eu_1ACC68* self)
+void InitGauge(Menu_eu_1ACC68* self)
 {
     s32 n = 4;
-    func_eu_001AAFB0(self);
+    SetupScreenElementText(self);
     self->font = (Font_eu_1ACC68*)GetFontById(n);
     self->a51C = 1.0f;
     self->a588 = 1.0f;

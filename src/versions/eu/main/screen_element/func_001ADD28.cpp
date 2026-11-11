@@ -8,7 +8,7 @@ struct Obj_eu_1AEA90 {
     u8 pad2[0x570 - 0x54C]; Peer_eu_1AEA90* peer;
 };
 extern u8 D_eu_00263590[];
-void func_eu_001AB558(void* self);
+void DrawScreenElementText(void* self);
 s32 GetTextureRegisterBits(void* p, s32 a, s32 b);
 void func_eu_00161A20(void* ctx, s32 a, s32 b, u64 c);
 void func_eu_00161D68(void* ctx, s32 a, s64 b);
@@ -16,7 +16,7 @@ void func_eu_00161AB8(void* ctx, s32 color);
 void func_eu_00161B28(void* ctx, s32 a, s32 b);
 void func_eu_00161C50(void* ctx, s32 a, s32 b, s32 c, s32 d);
 
-void func_eu_001AEA90(Obj_eu_1AEA90* self)
+void DrawTitleElement(Obj_eu_1AEA90* self)
 {
     s32 tmp[4];
     if (self->peer != 0) {
@@ -38,6 +38,6 @@ void func_eu_001AEA90(Obj_eu_1AEA90* self)
         func_eu_00161C50(ctx, (s32)(((self->f52C + self->f544) + 1728.0f) * 16.0f),
                          (s32)(((self->f530 + self->f548) * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
     } else {
-        func_eu_001AB558(self);
+        DrawScreenElementText(self);
     }
 }

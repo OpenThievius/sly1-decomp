@@ -4,7 +4,7 @@
 // it; otherwise the text is cleared and the size is zero.
 struct Obj_001AAB20_eu;
 void SetScreenElementSize(Obj_001AAB20_eu* self, f32 x, f32 y);
-u32 func_eu_001E3018(u16* s);
+s32 func_eu_001E3018(u16* s);
 u16* func_eu_001E3050(u16* dst, u16* src);
 void func_eu_0015DCB8(void* buf, void* name, void* p, s32 zero);
 void func_eu_0015E4A8(void* buf, void* p, f32 v);

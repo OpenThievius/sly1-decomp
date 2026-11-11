@@ -15,7 +15,7 @@ extern u8 D_eu_0024FB49[];
 s32 FormatToString(char* dst, const char* fmt, ...);
 void func_eu_001AB238(void* self, char* buf);
 
-void func_eu_001AB370(Self_eu_1AB370* self, u8* s)
+void SubstituteScreenElementGlyphs(Self_eu_1AB370* self, u8* s)
 {
     char buf[0x200];
     char* cur = buf;

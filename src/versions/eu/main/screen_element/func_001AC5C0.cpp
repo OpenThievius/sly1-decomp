@@ -19,12 +19,12 @@ struct Obj_eu_1AD3C0 {
     s32* f520;
 };
 
-void func_eu_001AAFB0(Obj_eu_1AD3C0* self);
+void SetupScreenElementText(Obj_eu_1AD3C0* self);
 s32 IsFontLoaded(s32 a);
 
-void func_eu_001AD3C0(Obj_eu_1AD3C0* self)
+void InitFramedElement(Obj_eu_1AD3C0* self)
 {
-    func_eu_001AAFB0(self);
+    SetupScreenElementText(self);
     Sub_eu_1AD3C0* sub = self->sub;
     self->sub = (Sub_eu_1AD3C0*)sub->info->fn((u8*)sub + sub->info->off, 1.25f, 1.25f);
     if (IsFontLoaded(2) != 0) {

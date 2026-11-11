@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // When flagged, adds a GIF tag (0, 1, 0xE) and a register write of 0x40 to the packet.
-void func_eu_0015C698(void* unused, s32 flag, void* p)
+void ResetFontClipRect(void* unused, s32 flag, void* p)
 {
     if (flag != 0) {
         BeginGifTag(p, 0, 1, 0xE);

@@ -16,7 +16,7 @@ void SendGsPacketAndWait(s32 a, s32 b);
 void ApplyPendingDisplayFlip(void);
 void FlipDisplayFrame(void);
 
-void func_eu_0018EBE8(void)
+void RunMovieDecodeThread(void)
 {
     s32 i = 0;
     Glob_eu_18EBE8* g = &D_eu_0026AC60;

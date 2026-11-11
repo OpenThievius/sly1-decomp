@@ -4,7 +4,7 @@ extern s32 D_eu_00263710;
 void* func_eu_0020A810(void);
 void func_eu_00160568(void* p);
 
-void func_eu_00160538(void)
+void RunResetGameSession(void)
 {
     D_eu_00263710 = 0;
     func_eu_00160568(func_eu_0020A810());

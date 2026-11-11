@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the object's font and scroll position sit 0x28C later (0x59C, 0x5A0); each compass point is
 // a text id, read into a text reader (0xC0 bytes, func_eu_0015DD18) that is measured
-// (func_eu_0015E438) and drawn (func_eu_0015E7E0); the layout has a fourth word to clear
+// (SumTextWidth) and drawn (func_eu_0015E7E0); the layout has a fourth word to clear
 // (func_eu_001374E0) and the screen is PAL's 512 lines high.
 struct Obj_eu_1316E8 {
     u8 pad0[0x59C];
@@ -12,7 +12,7 @@ struct Obj_eu_1316E8 {
 struct TextReader_eu_1316E8 { u8 bytes[0xC0]; };
 
 void func_eu_0015DD18(TextReader_eu_1316E8* out, s32 id, Font* font, s32 zero);
-f32 func_eu_0015E438(TextReader_eu_1316E8* reader);
+f32 SumTextWidth(TextReader_eu_1316E8* reader);
 void func_eu_0015E7E0(TextReader_eu_1316E8* reader, Layout_137228* layout, s32 zero, PacketWriter* gs);
 void func_eu_001374E0(Layout_137228* layout, s32 value);
 
@@ -109,10 +109,10 @@ void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
     func_eu_0015DD18(&sCur, ((s32*)D_00261128)[cur], self->font, 0);
     func_eu_0015DD18(&sPrev, ((s32*)D_00261128)[prev], self->font, 0);
     func_eu_0015DD18(&sNext, ((s32*)D_00261128)[next], self->font, 0);
-    f32 wCur = func_eu_0015E438(&sCur);
+    f32 wCur = SumTextWidth(&sCur);
     f32 off = frac * w;
-    f32 wPrev = func_eu_0015E438(&sPrev);
-    f32 wNext = func_eu_0015E438(&sNext);
+    f32 wPrev = SumTextWidth(&sPrev);
+    f32 wNext = SumTextWidth(&sNext);
     f32 hPrev = (w - wPrev) * half;
     f32 hCur = (w - wCur) * half;
     f32 hNext = (w - wNext) * half;

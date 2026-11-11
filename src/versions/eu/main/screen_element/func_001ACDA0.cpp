@@ -20,12 +20,12 @@ struct Self_eu_1ADB10 {
 };
 
 extern s32 D_eu_0027DB60[];
-void func_eu_001AAFB0(void* self);
+void SetupScreenElementText(void* self);
 s32 IsFontLoaded(s32 i);
 
-void func_eu_001ADB10(Self_eu_1ADB10* self)
+void InitCopiedTextCaption(Self_eu_1ADB10* self)
 {
-    func_eu_001AAFB0(self);
+    SetupScreenElementText(self);
     Font* o = GetFontById(0);
     Sub_eu_1ADB10* sub = (Sub_eu_1ADB10*)o->vt;
     self->f4 = sub->fnC((u8*)o + sub->off8, 1.0f, 1.0f);

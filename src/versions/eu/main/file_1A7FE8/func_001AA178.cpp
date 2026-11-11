@@ -12,7 +12,7 @@ extern Obj_eu_1AAEC0* D_eu_0024B2F0[];
 extern u8 D_eu_0027F700[];
 extern u8 D_eu_0027CFE8[];
 
-void func_eu_001AAEC0(void)
+void DrawScreenElements(void)
 {
     for (s32 i = 0; i < 37; i++) {
         Obj_eu_1AAEC0* o = D_eu_0024B2F0[i];

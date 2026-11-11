@@ -6,7 +6,7 @@ extern const char* D_eu_0027EEA0[];
 void func_eu_001DDA10(void* a0);
 struct MapScreen_eu { u8 pad0[0x570]; WarpPage* current; };
 
-void func_eu_001DDC68(World* self, BufferedStream* s)
+void LoadWorld(World* self, BufferedStream* s)
 {
     Rgba4 color;
     ListFrame walk;

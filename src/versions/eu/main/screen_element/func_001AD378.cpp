@@ -9,7 +9,7 @@ struct Obj_eu_001AE0C0 {
 
 void ShowScreenElement(void* self);
 
-void func_eu_001AE0C0(Obj_eu_001AE0C0* self)
+void ShowElementUnlessCopiedTextPending(Obj_eu_001AE0C0* self)
 {
     if (self->state == 3) {
         if (self->flag != 0) {

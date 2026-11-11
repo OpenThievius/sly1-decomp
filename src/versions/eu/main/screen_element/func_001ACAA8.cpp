@@ -21,11 +21,11 @@ struct Element_eu_1AD800 {
     s32 mode;               // 0x560
 };
 
-void func_eu_001AB558(void* self);
+void DrawScreenElementText(void* self);
 s32 func_eu_001E3018(u16* text);
 void func_eu_001374E0(void* out, s32 v);
 
-void func_eu_001AD800(Element_eu_1AD800* self)
+void DrawSlidingGlyphElement(Element_eu_1AD800* self)
 {
     LayoutByValue out;
     s32 n;
@@ -37,7 +37,7 @@ void func_eu_001AD800(Element_eu_1AD800* self)
 
     switch (self->mode) {
     case 2:
-        func_eu_001AB558(self);
+        DrawScreenElementText(self);
         return;
     case 1:
     case 3:

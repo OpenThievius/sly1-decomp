@@ -4,7 +4,7 @@
 struct Ent_eu_001608C8 { u8 pad[0xA0]; s32 key; u8 pad2[4]; s32 flags; };
 struct Row_eu_001608C8 { s32 f0; u8 pad[0x448]; };
 
-s32 func_eu_001608C8(void)
+s32 ComputeCompletionMask(void)
 {
     Ent_eu_001608C8* e = (Ent_eu_001608C8*)g_keyedEntries;
     Ent_eu_001608C8* end = (Ent_eu_001608C8*)((u8*)g_keyedEntries + 0x1EE8);

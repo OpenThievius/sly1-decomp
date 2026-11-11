@@ -27,7 +27,7 @@ void SetTextLayoutVerticalAlign(Rect_eu_1ACEE0* out, s32 flag);
 void func_eu_001374E0(Rect_eu_1ACEE0* out, s32 flag);
 void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, u8* d);
 void PushFontScale(Text_eu_1ACEE0* handle, f32 a, f32 b);
-void func_eu_0015C778(Text_eu_1ACEE0* handle, char* str, Rect_eu_1ACEE0* r, s32 zero, u8* d);
+void DrawFontString(Text_eu_1ACEE0* handle, char* str, Rect_eu_1ACEE0* r, s32 zero, u8* d);
 void PopFontScale(Text_eu_1ACEE0* handle);
 f32 Sine(f32 x);
 f32 Cosine(f32 x);
@@ -53,7 +53,7 @@ struct LerpRgba_eu_1ACEE0 {
     }
 };
 
-void func_eu_001ACEE0(Self_eu_1ACEE0* self)
+void DrawGauge(Self_eu_1ACEE0* self)
 {
     Rect_eu_1ACEE0 out;
     f32 t = 0.0f;
@@ -111,6 +111,6 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
     out.f18 = 1;
     out.f1C = 1;
     char str[2] = { self->f57C + 0x72, 0 };
-    func_eu_0015C778(self->text, str, &out, 0, (u8*)&g_gsPacketWriter);
+    DrawFontString(self->text, str, &out, 0, (u8*)&g_gsPacketWriter);
     PopFontScale(self->text);
 }

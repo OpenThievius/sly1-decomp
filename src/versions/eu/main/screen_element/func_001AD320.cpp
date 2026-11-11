@@ -11,7 +11,7 @@ struct Obj_eu_1AE068 {
 void func_eu_001AB2B0(void* self, void* p);
 void SetScreenElementMode(Obj_eu_1AE068* self, s32 flag);
 
-void func_eu_001AE068(Obj_eu_1AE068* self, s32 flag)
+void SetElementModeApplyingCopiedText(Obj_eu_1AE068* self, s32 flag)
 {
     if (self->f570 != 0 && flag == 0) {
         self->f570 = 0;

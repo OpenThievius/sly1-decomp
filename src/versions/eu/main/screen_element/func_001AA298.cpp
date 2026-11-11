@@ -36,7 +36,7 @@ static inline f32 clamp_eu_1AAFE0(f32 v, f32 lo, f32 hi)
     return v;
 }
 
-void func_eu_001AAFE0(Obj_eu_1AAFE0* self)
+void UpdateScreenElementSlide(Obj_eu_1AAFE0* self)
 {
     f32 now = *self->clock;
     s32 state = self->state;
