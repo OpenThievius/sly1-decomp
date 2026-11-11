@@ -1819,7 +1819,7 @@ extern const ClassDescriptor<72> D_00219AF0 = { &D_00217568, 0x1E, 0x3, 0x570, {
     (Fn_Table)SaveColliderPreviousPosition, (Fn_Table)CaptureColliderPose, (Fn_Table)ApplyColliderAttachedSetContact, (Fn_Table)RequestColliderLaunch,
 } };
 // The effect kinds' tables of functions (func_0019E908 returns one per kind); their functions
-// are in src/main/file_19E040.cpp.
+// are in src/main/effect.cpp.
 extern const Fn_Table g_basicEffectMethods[8] = { (Fn_Table)InitEffect, 0, 0, (Fn_Table)MoveEffect, (Fn_Table)UpdateEffect, (Fn_Table)DrawEffect, (Fn_Table)EndEffect, (Fn_Table)HandleEffectContact };
 extern const Fn_Table g_fallingEffectMethods[8] = { (Fn_Table)InitFallingEffect, 0, 0, (Fn_Table)MoveEffect, (Fn_Table)UpdateEffect, (Fn_Table)DrawEffect, (Fn_Table)EndEffectWithImpact, (Fn_Table)HandleEffectContact };
 extern const Fn_Table g_risingEffectMethods[8] = { (Fn_Table)InitRisingEffect, 0, 0, (Fn_Table)MoveDriftingEffect, (Fn_Table)UpdateEffect, (Fn_Table)DrawEffect, (Fn_Table)EndEffectWithImpactOnExit, (Fn_Table)HandleEffectContact };

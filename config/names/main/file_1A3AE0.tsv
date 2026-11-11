@@ -1,0 +1,89 @@
+symbol	name	evidence
+func_001A3AE0	InitWalkerCollider	slot 0 of class 0x15: runs the base set-up func_001921A8, then sets the state at +0x610 and +0x614 to -1 and the float at +0x628 to 2000.0
+func_001A3B20	LoadWalkerCollider	slot 10 of class 0x15: runs LoadCollider, then ResolveObjectLinks over the two link records of D_0026B778 (offsets 0x640 and 0x650)
+func_001A3B58	StartWalkerCollider	slot 20 of class 0x15: runs StartPlacedObject, and when +0x678 is set resolves the six links of D_0026B790, sets the anchors, creates a state walker for each of the objects at +0x640 and +0x650 (CreateStateWalker) and gathers objects by id into +0x668, otherwise calls slot 7
+func_001A3C40	ControlWalkerCollider	slot 0x134 of class 0x15 (the control slot, as ControlPlayerLinkedCollider): stops its animation player, reads the input (ReadWalkerColliderInput), sets the polar drive at +0x630 and turns the object at +0x64C towards the input's angle
+func_001A3D40	UpdateWalkerCollider	slot 0x54 (update) of class 0x15: UpdateSwitchedCollider, steers by the input, then moves to the states ChooseWalkerColliderState and ChooseWalkerColliderSubState return
+func_001A3F40	ReadWalkerColliderInput	copies the input record's two magnitudes (+0x48, +0x7C) to +0x61C and +0x624 and, above 0.3 and 0.8, their camera-relative angles (func_00144FF8) to +0x618 and +0x620
+func_001A3FE0	ChooseWalkerColliderState	returns the next state of a class 0x15 object from +0x610: 0 goes to 1 when the float at +0x61C is positive, 1 goes to 0 when it is 0, 2 goes to 1 when the word at +0x684 is 0
+func_001A4070	SetWalkerColliderState	stores the state at +0x610: activates or deactivates its effect spawners (+0x66C), moves its state walker (+0x644), starts the animation of states 2 and 3 and switches its looping sound
+func_001A4258	ChooseWalkerColliderSubState	returns the next second state (+0x614) of a class 0x15 object: 0 goes to 1 when the magnitude at +0x624 reaches 0.8, 1 goes back to 0 below it
+func_001A42C8	SetWalkerColliderSubState	stores the second state at +0x614, moves its second state walker (+0x654) and switches the sound held at +0x658
+func_001A43C8	HandleWalkerColliderNotification	slot 0x44 of class 0x15: HandleSwitchedColliderNotification, then on messages 0x295 and 0x296 plays a sound and deactivates the spawner at +0x65C or +0x660, and notes when its animation player ends (code 5)
+func_001A44E8	StepWalkerCollider	slot 0x80 (step) of class 0x15: StepCollider, then func_001B9D10 with a turn by its angle at +0x618 and the table D_0026B7D8
+func_001A4538	ResolveWalkerColliderContact	slot 0x104 of class 0x15 (as ResolvePlayerContact): unless func_00128230, takes the part of its drive at +0x630 along the contact's normal out of the contact's velocity
+func_001A45B8	ComputeWalkerColliderContactValue	slot 0x100 of class 0x15: unless func_00128230, sets the contact's value at +0x94 to 20 when its ratio at +0x88 is above 0.7
+func_001A4610	ComputeWalkerColliderImpulseResponse	slot 57 (0xE8) of class 0x15: ComputeColliderImpulseResponse with the move anchor held to the z axis (mode 1, g_unitZVector) while the other side is of kind 0x42 or 0x43, then the anchor put back
+func_001A4710	IsWalkerColliderCameraFree	slot 0x138 of class 0x15, the slot IsPlayerCameraFree fills for class 0x07 (1 in the switched-collider base func_00192410): always 0
+func_001A4718	InitPairController	slot 0 of the 0x5F class: after the base set-up sets the element size of its seven lists, ids to -1, the limit 0x28, copies the pose table D_0024C9D0 into both pose arrays and stores the tuning floats 3000, 2300, 1500 and 1.46
+func_001A4858	SetPairControllerFirstTemplateId	script built-in: stores the id at 0x2D0 of the object ResolvePairControllerLinks finds and copies into the list at 0x374
+func_001A4860	SetPairControllerSecondTemplateId	script built-in: stores the id at 0x2D4 of the second object ResolvePairControllerLinks finds and copies
+func_001A4868	SetPairControllerHostId	script built-in: stores the id at 0x2D8 of the object ResolvePairControllerLinks finds into 0x354, giving it a link back at +0x678
+func_001A4870	SetPairControllerExtraId	script built-in: stores the id at 0x2DC (-1 for none) of the optional object ResolvePairControllerLinks finds into 0x358
+func_001A4878	AppendPairControllerId	appends its argument to the PairController's ids array and increments idCount
+func_001A4898	GetCurrentEntryVariant	2 when bit 2 of g_currentEntry's flags is set, else 1 or 0 by bit 1; ResolvePairControllerLinks and BlendPairControllerPose act only when it equals the controller's 0x64C
+func_001A48C0	ResolvePairControllerLinks	slot 0x4C of class 0x5F (as ResolveListIds): PostLoadPlacedObject, then finds its objects by id, copies them into its lists and gathers the class-0x44 objects
+func_001A4B30	BlendPairControllerPose	slot 16: steps the blend weight by the frame time, clamps it and mixes poseA and poseB into poseOut
+func_001A4C48	UpdatePairController	slot 17 of the 0x5F class: runs the base update, moves the state to the one func_001A4DC0 chooses, then by state spawns paired objects (func_001A5120 below the limit, func_001A54F8 on a timer) or sets its creator target to state 1
+func_001A4D60	ShowPairControllerElement	slot 0xC8 of class 0x5F (the visibility slot): shows the screen element D_0026D0C8 in state 2 while AreMenusAndFadeClear holds, hides it otherwise
+func_001A4DC0	ChoosePairControllerState	returns the PairController's next state from its link, flags, counts and the target's state and time
+func_001A4EF0	SetPairControllerState	stores the controller's state and time and does the per-state work (messages, sets partners' states 7 and 8)
+func_001A5120	SpawnPairedObject	the spawn UpdatePairController runs below its limit: places an object at a random polar offset (ComputePolarOffset, RandomFloatInRange) around the active switched collider, sets its anchors (SetColliderAnchors), puts it in a hit-target state (SetHitTargetState), moves it between the controller's lists and pairs it (PairWithNearestWaitingObject)
+func_001A54F8	StartPairedObjects	takes a PairedObject from one list and an attachment from another at random, links them, sets both to state 1 and sets the next time
+func_001A5760	UpdatePairControllerTuning	evaluates six clamped quadratic curves at dt and linearly blends the tuning pairs into +0x62C..+0x648 and the two counts at +0x624 and +0x628, re-arming the spawn timers with func_001EAAE0 when a count grows
+func_001A5B28	RemoveFinishedHitTarget	controller method called when a hit target leaves state 9: counts it done, updates the tuning with progress count/total (func_001A5760), moves it between the controller's lists, releases its partner and re-arms the spawn timer
+func_001A5C38	ReleasePairedAttachment	moves the object's attachment from the list at +0x3AC to the list at +0x3A0, sets the attachment's state to 0 with func_001A76A0 and clears the object's attachment field
+func_001A5C90	AttachPairedPartner	makes the paired object the parent of its partner (slot 15), stops the partner's velocity and spin, fixes its anchors (SetColliderAnchors 3, 3) and plays sound 0x151; SetPairedState calls it
+func_001A5D50	DetachPairedPartner	clears the partner's parent (slot 15), stops its velocity and spin and lets it move only along z (SetColliderAnchors 2 with g_unitZVector, turn 3); RemovePairedObject calls it
+func_001A5DD8	ActivatePairedAttachment	sets the object's attachment to state 1 with func_001A76A0 (SetPairedState calls it on the 5 to 6 transition)
+func_001A5DF8	FinishPairedObjectTransition	controller method for the 6 to 0 transition of a paired object: moves it, its partner and its attachment out of the controller's lists, calls the partner's and its own slot 3, counts the controller's finished objects up, re-arms both spawn timers and plays sound 0x51
+func_001A5F78	RemovePairedObject	controller method for leaving state 9: moves the object, its attachment and its partner out of the controller's lists, releases the attachment, calls the object's slot 3, re-arms the spawn timer and decrements the count at +0x39C
+func_001A6090	PairWithNearestFreeObject	takes from the controller's free list (0x368) the object nearest in x and y within D_0024CAF4, links it and the given object as partners (+0x55C) and moves it to the used list (0x35C); RemoveFinishedHitTarget, LinkPairedObjects and ChoosePairedObjectState call it
+func_001A6168	LinkPairedObjects	sets obj->partner = node and node->partner = obj, moves the lists' entries and unlinks and re-states the partner each one had before
+func_001A6238	PairWithNearestWaitingObject	walks the chain at 0x384 for the nearest unpartnered object in state 2 within D_0024CAF8 in x and y, links the two as partners (+0x55C), moves the given one from the free list (0x368) to the used list (0x35C) and puts the found one in state 3 (SetPairedState)
+func_001A6328	AssignNearestListedObjectToPair	takes the object of the controller's list at +0x3A0 nearest in x and y to the paired object, moves it to the list at +0x3AC and stores it as the paired object's attachment; 0 when the list is empty
+func_001A63F8	RandomizePairedObjectOffset	gives a paired object a random polar offset at +0x570, up to the controller's radius at +0x348, and scales its +0x574 by the controller's +0x34C
+func_001A6480	GetPairControllerPose	returns the address of pose number poseIndex in the 0xC0-byte pose records from 0x3E0
+func_001A6498	InitPairedObject	slot 0 of the 0x42 class: after the collider set-up sets state -1, the floats at 0x584 and 0x588 to 1.0 and 2.5 and calls func_001B9AE0
+func_001A64F8	LoadPairedObject	slot 10 of the 0x42 class: LoadCollider, then resolves its six object links from D_0026B7E8 and calls func_00159478 on its notify record
+func_001A6540	CopyPairedObject	slot 9 of the 0x42 class: saves the 8-byte field at 0x5B0, runs CopyCollider (func_001BA130) and restores the field
+func_001A6588	StartPairedObject	slot 16 of the 0x42 class: StartPlacedObject, sets state 0 with func_001A6BE0, then calls its own slot 7
+func_001A65C8	UpdatePairedObject	slot 0x54 (update) of class 0x42: UpdateCollider, then SetPairedState until the state is the one ChoosePairedObjectState returns, and per state moves the object (func_001A6788)
+func_001A6788	SteerPairedObjectWithinArea	the per-state motion UpdatePairedObject runs: picks a point within the controller's area (centre +0x330, radius +0x340, func_00141F48) and turns the object toward it, setting its spin (SetPlacedObjectSpinFromFloats)
+func_001A69F8	ChoosePairedObjectState	returns the next state of a PairedObject from its state at +0x550 (a jump table of 11 cases), linking it to a hit target child (FindHitTargetChild, LinkPairedObjects) where that state calls for it
+func_001A6BE0	SetPairedState	stops the handle and sound started for the old state, runs the leave function of states 1, 5, 6 and 9, stores the new state and its time, and starts the handle or sound of the new state
+func_001A6DE0	HandlePairedHit	slot 31 message handler: on a hit (flag 0x20) it moves a PairedObject in states 1-8 to state 9, sends its notify record a message and plays a sound
+func_001A6F28	FindHitTargetChild	walks the child list at +0x480 and returns the data of the first entry with a nonzero first word whose object is of class 0x43
+func_001A6F88	InitHitTarget	slot 0 of the 0x43 class: after the collider set-up sets state -1, hit limit 8, recover delay and scale polynomial x to 1.0, hit interval 0.2 and clears the polynomial's other terms
+func_001A7008	LoadHitTarget	slot 10 of the 0x43 class: LoadCollider, resolves its object link from D_0026B830 and calls func_00159478 on its notify record
+func_001A7050	CopyHitTarget	slot 9 of the 0x43 class: saves the 8-byte field at 0x5A0, runs CopyCollider and restores it
+func_001A7098	StartHitTarget	slot 16 of the 0x43 class: StartPlacedObject, resolves links from D_0026B840, copies the scaled object's pair at +0x2DC, starts its sound with func_001B6290, sets state 0 with func_001A7480 and calls its own slot 7
+func_001A7128	UpdateHitTarget	slot 17 of the 0x43 class: runs the base step, moves to the state func_001A7420 chooses, then scales the scaled object's pair at +0x2DC/+0x2E0 by a clamped quadratic of the elapsed value, enabling or disabling it with func_00155FA0 and func_00155F90
+func_001A7230	StepHitTarget	slot 0x80 (step) of class 0x43: StepCollider, then with no parent func_001B9D10 with its placement and the table D_0026B850
+func_001A7290	ComputeHitTargetContactValue	slot 0x100 of class 0x43: scales the contact's value at +0x98 by 0.6
+func_001A72B0	ApplyHitTargetHit	on a hit (flag 0x10) after the hit interval it moves the state up one, to 9 at the hit limit where it also messages its notify record
+func_001A7420	ChooseHitTargetState	returns the state a HitTarget should be in: one step lower once the recovery delay has passed since the last change, 0 from 9
+func_001A7480	SetHitTargetState	stores a HitTarget's new state and time, tells its controller when it leaves state 9 and changes the sound it plays by the state
+func_001A7520	InitSoundStateObject	slot 0 of the 0x44 class: after the collider set-up sets state -1
+func_001A7550	LoadSoundStateObject	slot 10 of the 0x44 class: LoadCollider and resolves its object link from D_0026B888
+func_001A7588	CopySoundStateObject	slot 9 of the 0x44 class: saves the 8-byte field keptBytes, runs CopyCollider and restores it
+func_001A75D0	StartSoundStateObject	slot 16 of the 0x44 class: StartPlacedObject, starts its sound with func_001B6290, finds its first child of class 0x7E and sets state 0 with func_001A76A0
+func_001A7648	UpdateSoundStateObject	slot 17 of the 0x44 class: base step then loops func_001A76A0 until the state equals what func_001A7698 returns
+func_001A7698	GetSoundStateObjectState	returns the object's state field
+func_001A76A0	SetSoundStateObjectState	stores a SoundStateObject's new state and time and switches its sound to the one in D_0026B898[state]
+func_001A7708	InitObjectCreator	slot 0 of the 0x45 class: after the collider set-up sets state -1 and calls func_001B9AE0(3,0,3,0)
+func_001A7750	LoadObjectCreator	slot 10 of the 0x45 class: LoadCollider, resolves its object link from D_0026B8A0 and calls func_00159478 on its notify record
+func_001A7798	StartObjectCreator	slot 16 of the 0x45 class: StartPlacedObject, then either calls its own slot 7 or creates an object of class 0x101/0x59 with func_0015A838 and sets state 0 with func_001A7998
+func_001A7800	UpdateObjectCreator	slot 0x54 (update) of class 0x45: UpdateCollider, then SetObjectCreatorState to the state ChooseObjectCreatorState returns
+func_001A7998	SetObjectCreatorState	stops the active handle, stores the new state and time, and in states 1 and 2 messages the notify record or calls slots 25 and 51 of the created object
+func_001A7AA0	ChooseObjectCreatorState	returns the next state of an ObjectCreator from its current one: 1 goes to 2 when the handle's time is up, and bit 1 of the game flags gives 3
+func_001A7B20	RequestPadPattern	enters state 1 when idle (state 0) and state 3 otherwise with func_001A7D98, then stores the two arguments
+func_001A7B88	UpdatePadPattern	per frame: in state 2 counts the delay down and, when it runs out, advances to the next table entry (wrapping at count) and sends its two bytes to func_002049E8, ending in state 3 when the total time is used; in states 3 and 4 keeps sending zeros until the delay ends
+func_001A7CE8	StartPadPatternFromTable	starts the pattern entry index of the 0x104-byte-entry table D_0026B8B0 with func_001A7D18
+func_001A7D18	StartPadPattern	when the object is idle and the entry has a nonzero count, and pad patterns are enabled (func_001A7EE8), stores the entry and its first delay and enters state 2 with func_001A7D98
+func_001A7D98	SetPadPatternState	state change: state 2 sends the entry's first two bytes to func_002049E8 (owner, channel); states 3 and 4 send zeros with func_001A7E40 and set the delay to 4 times D_0026186C; stores the state
+func_001A7E40	StopPadPatternOutput	sends two zero bytes for the owner and channel to func_002049E8
+func_001A7E70	InitPadPatternSetting	sets the pad pattern setting (g_padPatternSetting) to 1 when it is still 0
+func_001A7E90	ApplyPadPatternSetting	writes the setting D_0026C3DC into bit 5 of the context field at +0x19EC: state 2 clears it, state 3 sets it
+func_001A7EE8	IsPadPatternEnabled	maps the setting D_0026C3DC to a flag: 2 gives 1, 0 and 3 give 0, 1 gives the inverse of bit 5 of the context's field at +0x19EC
+func_001A7F50	TogglePadPatternSetting	by D_0026C3DC flips, sets or clears bit 5 of the context field at +0x19EC, then stores 3 in D_0026C3DC when the bit is set and 2 when clear

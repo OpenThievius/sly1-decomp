@@ -67,7 +67,8 @@ src/main/file_198980.cpp	00198980	0019D410	0024C870	0026A910	-	-
 src/main/file_16C470.cpp	0016C470	0016CE00	0024A7DC	-	-	-
 src/main/file_17D248.cpp	0017D248	0017FE00	0024B060	00263E50	-	-
 src/main/file_1793C0.cpp	001793C0	0017B998	0024AFF4	00263AC0	-	-
-src/main/file_19E040.cpp	0019E040	001A7FE8	0024C930	0026B530	-	-
+src/main/effect.cpp	0019E040	001A3AE0	0024C930	0026B530	-	-
+src/main/file_1A3AE0.cpp	001A3AE0	001A7FE8	0024C9C0	0026B778	-	-
 src/main/entry.cpp	00100000	001000C8	-	-	-	-
 src/lib/memory_compare.cpp	001F59C4	001F5A58	-	-	-	-
 src/lib/memory_copy.cpp	001F5A58	001F5B08	-	-	-	-
