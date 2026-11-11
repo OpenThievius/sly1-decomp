@@ -273,6 +273,15 @@ struct Vu0 {
         __asm__("sw %1, %0" : "=m"(dst) : "r"(a));
     }
 
+    // The same sw for a word already in a GPR (func_001EDC08's ToBits of the length), where
+    // retail stores it with the same asm sw: the qmfc2 is then ToBits' own, and the vector
+    // keeps only VU0 operands. Not a general store or a scheduling device: only where retail
+    // stores the bits of a VU0 value this way.
+    template <class T> static void StoreX(T& dst, u32 bits)
+    {
+        __asm__("sw %1, %0" : "=m"(dst) : "r"(bits));
+    }
+
     // The y of a vector in a GPR as a float: prot3w r, a (the words turned to y, z, x, w).
     // The vector goes in as "r", so the qmfc2 (or lq) that brings it to a GPR is the
     // compiler's, made once and shared with the reads of the other lanes (ToFloatMoved reads
