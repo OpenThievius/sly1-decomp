@@ -142,3 +142,92 @@ class TableTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PlacementTests(unittest.TestCase):
+    """Where the start of a datum is in PAL (check.Resolver.place, data_check.whole_address)."""
+
+    def resolver(self, translation):
+        r = check.Resolver.__new__(check.Resolver)
+        r.translation, r.paired, r.placed, r.extent = translation, None, {}, {}
+        return r
+
+    # The nearest pair below 0x200000 puts a datum at 0x210000 + 0x10; its own addresses say 0x210030.
+    TABLE = {0x1FFFF0: 0x210000, 0x200040: 0x210070, 0x200080: 0x2100B0}
+
+    def test_the_datums_own_addresses_outrank_the_nearest_below(self):
+        r = self.resolver(self.TABLE)
+        self.assertEqual(r.translate(0x200000), 0x210010)
+        self.assertEqual(r.place(0x200000, 0x100), 0x210030)
+        self.assertEqual(r.placed[0x200000], 0x210030)
+
+    def test_one_address_of_its_own_is_not_enough(self):
+        r = self.resolver({0x1FFFF0: 0x210000, 0x200040: 0x210070})
+        self.assertEqual(r.place(0x200000, 0x100), 0x210010)
+
+    def test_addresses_that_disagree_keep_the_translation(self):
+        r = self.resolver({0x1FFFF0: 0x210000, 0x200040: 0x210070, 0x200080: 0x2100C0})
+        self.assertEqual(r.place(0x200000, 0x100), 0x210010)
+
+    def test_a_directly_paired_start_stays(self):
+        r = self.resolver({0x200000: 0x210000, 0x200040: 0x210070, 0x200080: 0x2100B0})
+        self.assertEqual(r.place(0x200000, 0x100), 0x210000)
+
+    def test_a_datum_with_no_place_has_none(self):
+        r = self.resolver({0x200100: 0x210100, 0x200200: 0x210200})
+        self.assertIsNone(r.place(0x200000, 0x10))
+        self.assertNotIn(0x200000, r.placed)
+
+    def test_section_starts_pair_the_sections_both_executables_have(self):
+        class Exe:
+            def __init__(self, sections):
+                self.sections = sections
+
+            def section(self, name):
+                return self.sections.get(name)
+
+        us = Exe({".rodata": {"addr": 0x217380}, ".data": {"addr": 0x250580}, ".bss": {"addr": 0}})
+        pal = Exe({".rodata": {"addr": 0x218880}, ".data": {"addr": 0x251880}, ".bss": {"addr": 0x284B00},
+                   ".extra": {"addr": 0x300000}})
+        self.assertEqual(check.section_starts(us, pal), {0x217380: 0x218880, 0x250580: 0x251880})
+
+    def test_a_pointer_into_a_placed_whole_section_follows_its_placement(self):
+        r = self.resolver(self.TABLE)
+        r.place(0x200000, 0x100)
+        self.assertEqual(data_check.whole_address(r, 0x200000, 0x20), 0x210050)
+        self.assertEqual(data_check.whole_address(r, 0x200040, 0), 0x210070)    # not placed: translated
+
+
+class PlacedPointerTests(unittest.TestCase):
+    def test_a_label_inside_a_placed_datum_translates_by_its_offset(self):
+        r = PlacementTests().resolver(PlacementTests.TABLE)
+        r.place(0x200000, 0x100)
+        self.assertEqual(data_check.inside_placed(r, 0x200028), 0x210058)
+        self.assertIsNone(data_check.inside_placed(r, 0x200100))
+
+    def test_an_undefined_symbol_in_a_placed_datum_is_resolved_through_it(self):
+        class Placed(Resolver):
+            placed = {0x200300: 0x210800}
+            extent = {0x200300: 0x40}
+
+            def us_address(self, name):
+                return int(name[2:], 16)
+
+        obj = FakeElf(bytes(4) + (8).to_bytes(4, "little"), [(4, elf.R_MIPS_32, named("D_00200300"))], [])
+        out, note = data_check.section_bytes(obj, ".data.D_00200010", Placed(), None)
+        self.assertEqual(out[4:], (0x210808).to_bytes(4, "little"), note)
+
+
+class DescribeTests(unittest.TestCase):
+    def test_words_are_counted_by_what_they_are(self):
+        ours = b"Text" + (0x120000).to_bytes(4, "little") + (7).to_bytes(4, "little") + bytes(4)
+        theirs = b"Tent" + bytes(12)
+        note = data_check.describe(ours, theirs, {4})
+        self.assertEqual(note, "first difference at +0x2; 1 text, 1 pointer, 1 other words differ")
+
+    def test_check_global_names_the_cause_of_a_difference(self):
+        obj = FakeElf((1).to_bytes(4, "little") + bytes(4), [], [])
+        _eu, status, note = data_check.check_global(
+            obj, ROW, Resolver(), Image(0x210010, (2).to_bytes(4, "little") + bytes(4)), None)
+        self.assertEqual(status, "differs")
+        self.assertIn("1 other words differ", note)
