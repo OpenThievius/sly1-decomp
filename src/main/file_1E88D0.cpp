@@ -541,7 +541,8 @@ s32 D_00275BEC = 0;
 s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };
 f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 f32 D_00275C28[3] = { 1.0f, 0.0f, 0.1f };
-INCLUDE_DATA(D_00275C34);
+s32 D_00275C34 = 0;
+s32 D_00275C38[2] = {0};
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
 Quad16 D_00275C40 = {0};
 f32 D_00275C50[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
@@ -571,7 +572,8 @@ TempoObjectRef D_00275D48[9] = {
 s32 D_00275DB4 = 0;
 // size: s32 state compared/assigned in 001EC000
 s32 D_00275DB8 = 0;
-INCLUDE_DATA(D_00275DBC);
+s32 D_00275DBC = 0;
+s32 D_00275DC0[4] = { 1, 2, 0, 0 };
 s32 D_00275DD0[16] = { 4, 2, 1, -1, 8, 4, 2, -1, 12, 6, 3, -1, 16, 8, 4, 2 };
 s32 D_00275E10[92] = { 2, 0x2EB, 0x2DC };
 // word read whole / address only, 4 bytes to next label

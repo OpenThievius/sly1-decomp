@@ -2989,5 +2989,6 @@ u32 g_gifChannel = 0;
 u32 g_fromSprChannel = 0;
 // The fifth channel word's label runs 12 bytes to D_00261F30, more than the word its readers use
 // and more than the file's 8-byte alignment pads: included from the disassembly.
-INCLUDE_DATA(D_00261F24);
+u32 D_00261F24 = 0;
+s32 D_00261F28[2] = {0};
 f32 D_00261F30[16] = {2.0f,0,0,0,0,2.0f,0,0,0,0,0,0,-1.0f,-1.0f,0,1.0f};
