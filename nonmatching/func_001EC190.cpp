@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 392/492 (79.7%), checked 2026-11-10
+// BYTES 392/492 (79.7%), checked 2026-11-11
 // NEAR (2026-11-10, w15): the frame and saved registers are retail's with the two scales through the inline
 //       StoreScaledQuadword (docs/toolchain/gcse.md, func_001EC190); what still differs is the init block's
 //       constant stores, the open wall of the static parameter records (docs/toolchain/large-functions.md,

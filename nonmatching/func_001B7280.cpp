@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 591/904 (65.4%), checked 2026-11-10
+// BYTES 591/904 (65.4%), checked 2026-11-11
 // NEAR (2026-11-10, worker w16-1B7280): retail's size now (was 896), 591 of 904 bytes. The
 // count is a constant retail never keeps in a register: `li v0, 4; sll a0, v0, 4` for the
 // allocation, `li v0, 4; blez v0` for the loop's first test and `li s1, 4` for its counter are

@@ -12,7 +12,7 @@ steps. It follows rac2-decomp's (OpenRAC), the sister project of the same mainta
 | `python3 tools/check.py FILE.cpp FUNC --version eu` | the same function at its PAL counterpart, every address translated |
 | `python3 tools/build.py` | the full US build with every C function of `src/` linked in: `MATCH` or `DIFFER` |
 | `python3 tools/build.py --version eu` | PAL's build from its assembly: `MATCH` |
-| `python3 tools/version_check.py` | every C function of `src/` checked at its PAL counterpart; writes `config/eu/c_status.tsv` |
+| `python3 tools/version_check.py` | every C function of `src/` checked at its PAL counterpart; writes `config/eu/c_status.tsv`, then the globals' `config/eu/c_data_status.tsv` (`tools/data_check.py`) |
 | `python3 tools/progress.py` | the reports ByteMatch shows (`progress/<version>/report.json`) and the README table |
 
 A function's disassembly is in `asm/us/text.s`, at its `nonmatching func_XXXXXXXX` line (`grep -n -A80 'nonmatching func_0011A338' asm/us/text.s`).

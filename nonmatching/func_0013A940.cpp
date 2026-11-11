@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 952/964, checked 2026-11-10
+// SIZE 952/964, checked 2026-11-11
 // NEAR: built in src/main/file_137290.cpp it is 952 bytes of retail's 964, with retail's frame
 //       (0x140), block layout and calls. Since the first translation: the mode tests are a switch
 //       (retail's beq 1 / beql 2 / b compare tree, the mode-1 case placed after it), the bounds

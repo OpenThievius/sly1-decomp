@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 121/136 (89.0%), checked 2026-11-10
+// BYTES 121/136 (89.0%), checked 2026-11-11
 // NEAR: in its file, src/lib/mpeg_demultiplexer.cpp (Sony's 2.9-ee-991111). The unused entry
 //       gives retail's 16-byte frame and the key's copy at the top. The code is now retail's
 //       instruction for instruction; only the registers differ (regdiff: registers). The full
@@ -16,6 +16,9 @@
 //       own local, `r |=` after loading the entry, the operands of the or swapped, early returns,
 //       r set in an else, the key copied into a local.
 //       Written for this project from retail's code.
+// w22 (2026-11-11): globalalloc.py --check agrees with the dumps. The mask (r129, pass 0, $a2) skips $a0 because r117 (key)
+// and r119 (sh) conflict with it, are lower in the order and prefer $a0 (4 5); retail's mask takes $a0, so in retail the key
+// and sh did not both carry the $a0 preference through the dsllv. No source form found for that; not retried blindly.
 #include "common.h"
 
 struct Pair_20A538 { u64 a; u64 b; };

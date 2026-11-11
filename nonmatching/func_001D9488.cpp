@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 456/492, checked 2026-11-10
+// SIZE 456/492, checked 2026-11-11
 // NEAR (2026-11-10, w15): EXACT with this source under -mvu0-use-vf0-vf30 or -vf31 (loop.c's threshold 94-95 instead of 79); under the file's flags the loop is 91 insns in pass 1 where retail's moves need 74-76 (docs/toolchain/loops.md, func_001D9488)
 // In the context of its file, src/main/file_1D62E0.cpp: its declarations before the function, bodies cut.
 // From 0x1D62E0 to 0x1DDCE0: classes 0x07 and 0x3F, the output buffer, class 0x19, the world

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 241/312 (77.2%), checked 2026-11-10
+// BYTES 241/312 (77.2%), checked 2026-11-11
 // NEAR: order: the first block is exact with the destination pointer declared before the memset;
 //       the second differs only in the order its constants are loaded and stored.
 // See docs/TOOLCHAIN.md, "Open: constructor stores kept in source order": retail is sched2 of an order sched1 does not give here (2026-11-08).

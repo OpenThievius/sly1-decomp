@@ -27,6 +27,7 @@ procedure; read it before you match anything.
 | `config/us/generated.tsv` | the functions the compiler makes for a file (a static initialiser, the constructor that calls it), under retail's names | by hand |
 | `config/us/statics.tsv` | the labels retail has for a function's `static` variables and their guards (docs/AGENT_WORKFLOW.md) | by hand |
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
+| `config/eu/c_data_status.tsv` | each global of `config/us/c_data.tsv` checked at its PAL address (counted as PAL's matched data) | `tools/version_check.py` (`tools/data_check.py`) |
 | `config/us/original_asm.tsv`, `config/eu/original_asm.tsv` | the game-code functions that are original assembly or linker leftovers, counted as finished apart from the exact C (docs/ASM_CLASSIFICATION.md); PAL's table holds the functions only PAL has | `tools/classify_asm.py` |
 | `config/us/classes.tsv`, `methods.tsv`, `creators.tsv` | the game's class map from retail's class descriptors: each class's parent, id, flags, size and method slots (own or inherited), the classes each function is a method of, and the functions that create an object of a class | `tools/classes.py` |
 | `tools/symbols.py` | the shared name map: either name of a symbol, for the tools that read source text | by hand |

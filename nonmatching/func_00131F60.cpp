@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1420/1436 (98.9%), checked 2026-11-10
+// BYTES 1420/1436 (98.9%), checked 2026-11-11
 // NEAR (2026-11-10, w15): instruction order, frame, saved registers and the state-1 half are
 // retail's; what differs is one swap of $f2 and $f3 in the gauge loop's first block: retail's
 // `hi` is $f3 and the scratch `d` (1/15, then (1 - lo) * 55, then 372.8) with the (1 - lo)
@@ -35,6 +35,11 @@
 // before PushFontScale, and "Move"'s alignment stored through a reference made there. The
 // scratch floats `d` and `k` (55 then 0.5) keep those constants in the loop as retail does
 // (set more than once, loop.c does not move them).
+// w22 (2026-11-11): re-scored 11 lines. Every order of the x1, x0, y0/y1 groups (12, with y1 before y0 too) and the screen-y
+// conversion of y1 written inside the call or named after the screen-x one: no EXACT (11 lines at best). With y1 first the
+// remaining swap is global-alloc's (greg order 143 117 138 144 162: y1 = 144, 4 refs over 33 insns, 2*4/33 = 0.242 against
+// 16.0's 3*13/174 = 0.224); y1 needs a life of 36 insns or more, and moving its screen-y conversion later does not lengthen
+// it (sched1 puts the conversion before the calls). No new lever.
 #include "common.h"
 #include "screen_element.h"
 #include "packet_writer.h"

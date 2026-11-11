@@ -687,6 +687,10 @@ only the block's own pseudos (`used N times across M insns in block 36` in the .
   computed in place from off, and v built in two statements (the dead stores stay: flow1 keeps
   them, 52 and 57). Rotate's result stored to ang first. RotateMembers. RotateRowsTied (23).
   g computed from a named sum before v's store (23).
+- **Confirmed by replay (wave 22).** tools/globalalloc.py --local with Scalar(r)'s quantity at
+  2400 (off is 2307, ours 1875) and acc's at 17200 (the v150 chain is 17142) gives all fourteen
+  retail registers and changes nothing else: the two comparisons above are sufficient as well as
+  necessary.
 
 ### Twenty-four weight products: the statement order and local-alloc's first tie (func_0019CC10)
 
@@ -1310,6 +1314,15 @@ near miss's sched2 order of the block exactly) (2026-11-10, w15):
   "r" operand. Not reached: the Vec forms of the dot (their copies are gone before regclass), the
   dot named before or after the square root, the division written apart, and all 64 mixes of
   the four conversions for w, k and kk (Moved for all three stays best, at 8 lines).
+- **With the "*r" ToFloatMoved (wave 22, 2026-11-11), one local-alloc comparison is left.** The
+  side block's order is now retail's and 13 lines differ, all from local-alloc: side's dot
+  quantity (2 refs, life 8, priority 5000) is placed after the second cross product's (4 refs
+  over 16, 10000), which takes vf1. tools/globalalloc.py's local replay with the side dot at
+  10000 (a tie, won on the lower quantity number) gives every retail register of the block. That
+  is a death 4 earlier: side's conversion issued first in sched1's second cycle, which needs
+  priority 6 (the crosses tie at 5 and win on dependents). ToFloatViaBits for side gives exactly
+  that and retail's side registers, but its extra insn puts s's and u's dots side by side, so u's
+  1.0 takes vf6 and the global n moves to vf7 (39 lines).
 
 ### A curve's value named before the clamp that scales it (func_001A3250)
 

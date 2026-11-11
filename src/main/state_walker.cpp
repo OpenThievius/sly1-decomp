@@ -16,6 +16,10 @@
 #include "globals.h"
 #include "asm_func.h"
 #include "c60.h"
+#include "placed_object.h"
+#include "base_object.h"
+#include "vu0.h"
+#include "game_clock.h"
 
 f32 RandomFloatInRange(f32 a, f32 b);
 extern f32 g_gameTime;
@@ -140,8 +144,131 @@ void CopyVec2(Point2* a0, Point2* a1)
     a0->y = a1->y;
 }
 
-extern const u32 D_0024D268[6] = { 0x3F800000, 0x3DCCCCCD, 0x3DCCCCCD, 0, 0x6E614B2E, 0x002E696A };
-INCLUDE_ASM(func_001B55C0);
+void* MoveMemory(void* dst, void* src, s32 size);
+void TransformPointBetweenFrames(void* from, void* to, void* point, void* out);
+f32 ApproachValueWithRamp(f32 value, f32 target, f32 dt, Vec3* ramp, f32* rate);
+void SetCursorCoords(AnimCursor* cursor, f32 u, f32 v);
+void DrawModelPart();
+// Drops the first entry of a three-entry window: the other two move down.
+template <class T>
+static inline void DropFirst(T* window)
+{
+    MoveMemory(window, window + 1, 2 * sizeof(T));
+}
+
+static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
+{
+    if (v < lo) {
+        return lo;
+    }
+    if (hi < v) {
+        return hi;
+    }
+    return v;
+}
+
+// Slot 4 of the triangle animator (g_triangleAnimatorMethods): where the segment between the
+// objects at Rec2195_224::p64 and p60 crosses the strip, the strip's coordinates there, offset,
+// clamped and eased into the cursor. &self->cursor is written at the call: GCSE makes the entry
+// test's self+16 its reaching register, a PRE pseudo numbered by its hash bucket. The edges are
+// subtracted as u128 values (no Vec copies), which brings GCSE's table to 183 buckets, where
+// self+16 hashes before &tri[2] (docs/toolchain/gcse.md, func_001B55C0).
+void func_001B55C0(TriangleAnimator* self, PlacedObject* obj, void** part)
+{
+    if (self->cursor.record == 0 || *part != (void*)DrawModelPart) {
+        return;
+    }
+    Vec02 b;
+    Vec02 a;
+    Vec02 tri[3];
+    Point2 uv[3];
+    Vec02 edge[3];
+    f32 u;
+    f32 v;
+    BaseObject* end = obj->f224->p64;
+    TransformPointBetweenFrames(end->parent, obj, (u8*)end + 0x40, &b);
+    end = obj->f224->p60;
+    TransformPointBetweenFrames(end->parent, obj, (u8*)end + 0x40, &a);
+    CopyVec3((Vec3*)&tri[1], (Vec3*)&self->points[0]);
+    CopyVec3((Vec3*)&tri[2], (Vec3*)&self->points[1]);
+    CopyVec2(&uv[1], (Point2*)&self->coords[0]);
+    CopyVec2(&uv[2], (Point2*)&self->coords[1]);
+    for (s32 i = 2; i < self->count; i++) {
+        s32* order;
+        s32* next;
+        if (i & 1) {
+            order = D_00274568;
+            next = D_00274578;
+        } else {
+            order = D_00274548;
+            next = D_00274558;
+        }
+        DropFirst(tri);
+        DropFirst(uv);
+        CopyVec3((Vec3*)&tri[2], (Vec3*)&self->points[i]);
+        CopyVec2(&uv[2], (Point2*)&self->coords[i]);
+        StripPoint* pt = &self->points[i];
+        if (pt->flags & 0x8000) {
+            continue;
+        }
+        Vec02 n;
+        Vec02 p;
+        s32 j;
+        for (j = 0; j < 3; j++) {
+            Vu0::Q(edge[j]) = Vu0::Sub(Vu0::Q(tri[order[(j + 1) % 3]]), Vu0::Q(tri[order[j]]));
+        }
+        Vu0::Vec e0 = Vu0::Vec::Of(edge[0]);
+        Vu0::Vec e2 = Vu0::Vec::Of(edge[2]);
+        Vu0::Vec c;
+        {
+            Vec02 neg;
+            Vu0::Q(neg) = Vu0::FromFloat(-1.0f);
+            c = Vu0::Cross(e0, Vu0::MulX(e2, Vu0::Vec::Of(neg)));
+        }
+        Vu0::Q(n) = Vu0::DivX(c, Vu0::Length(c)).q;
+        f32 d0 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(tri[0])));
+        f32 da = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(a))) - d0;
+        f32 db = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(b))) - d0;
+        if (da >= 0.0f && db >= 0.0f) {
+            continue;
+        }
+        if (da < 0.0f && db < 0.0f) {
+            continue;
+        }
+        f32 t = da / (da - db);
+        Vu0::Q(p) = Vu0::Add(Vu0::MulX(Vu0::Vec::Of(a), Vu0::Vec::Scalar(1.0f - t)), Vu0::MulX(Vu0::Vec::Of(b), Vu0::Vec::Scalar(t))).q;
+        f32 su = 0.0f;
+        f32 sv = 0.0f;
+        for (j = 0; j < 3; j++) {
+            Vec02 m;
+            Vu0::Vec e = Vu0::Cross(Vu0::Vec::Of(edge[j]), Vu0::Vec::Of(n));
+            Vu0::Q(m) = Vu0::DivX(e, Vu0::Length(e)).q;
+            f32 dv = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(m), Vu0::Vec::Of(tri[order[j]])));
+            f32 dp = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(m), Vu0::Vec::Of(p))) - dv;
+            if (0.0f < dp) {
+                break;
+            }
+            f32 w = dp / (Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(m), Vu0::Vec::Of(tri[next[j]]))) - dv);
+            su += w * uv[next[j]].x;
+            sv += w * uv[next[j]].y;
+        }
+        if (j >= 3) {
+            u = su;
+            v = sv;
+            break;
+        }
+    }
+    Vec3 ramp = { 1.0f, 0.1f, 0.1f };
+    f32 iu = 1.0f - u;
+    f32 iv = 1.0f - v;
+    f32 cu = ClampBetween(iu - self->u0, self->uMin, self->uMax);
+    f32 cv = ClampBetween(iv - self->v0, self->vMin, self->vMax);
+    ApproachValueWithRamp(self->cursor.u, cu, g_gameClock.dt, &ramp, 0);
+    ApproachValueWithRamp(self->cursor.v, cv, g_gameClock.dt, &ramp, 0);
+    SetCursorCoords(&self->cursor, cu, cv);
+}
+
+extern const char D_0024D278[8] = ".Kanji.";
 
 LINKER_REMNANT(func_001B5B48);
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1796/1816 (98.9%), checked 2026-11-10
+// BYTES 1796/1816 (98.9%), checked 2026-11-11
 // NEAR: the first block is retail's: the statements in the order cd, ab, ca put c's load before a's and leave ab's subtraction unraised, so sched1 issues b, c, a, ca, ab and local-alloc gives retail's VU0 registers, and nn's conversion is ToFloatNow (its dot's result a VU0 pseudo). Left (docs/toolchain/sched1.md, "The side test and the half-width"): the side test's block, whose VU0 registers are retail's but whose order is not: a model of sched2 gives retail's order only with ToFloatViaBits for side, s and u and the s dot ahead of side's qmfc2 in sched1's output, which sched1's priorities (6 against 5) never give, the quadratic's head's wall (func_00141D88); and w's dot, whose retail GPR (a0, then k v0, kk v1) is reload's as ToFloat gives it, and whose order needs the compiler's qmfc2 (Moved), so retail read a VU0-allocated dot result through an "r" operand, which no plain form found gives.
 // w20 (2026-11-10): ToFloatMoved now takes its vector as "*r" (regclass skips the operand; docs/toolchain/
 // vu0-helpers.md, "A GPR operand that leaves the class to the producer"), so each dot read by it is a
@@ -7,6 +7,18 @@
 // ToFloatNow/ToFloat) leave 13 lines: in the side test's block the dot's product takes vf2 and its 1.0
 // vf1 where retail has vf1/vf2 (the two-or-three-quantities order of local-alloc), which cascades to the
 // cross product's register and the two qmfc2s.
+// w22 (2026-11-11, replayed with tools/sched1.py and tools/globalalloc.py --local): the 13 lines are
+// one local-alloc decision in the side test's block. side's dot (its quantity: 2 refs, birth 2,
+// death 10, priority 5000) is placed after the second cross product (4 refs over 16, 10000), which
+// takes vf1 first; `--pri <side dot>=10000` (tie, lower quantity number) gives every retail register
+// of the block (side vf1, its 1.0 vf2, the cross vf2, u's dot vf1). That needs a death at 6: side's
+// conversion issued first in cycle 2, ahead of both cross products (priority 5 each; at the tie the
+// crosses win on dependents, 2 against 1), so the conversion needs priority 6, which only an extra
+// insn in its chain gives (sched1.py --prio <mtc1>=6 gives order 309 522 320 461 365 ...). Compiled:
+// ToFloatViaBits for side (its ToBits has priority 6 and goes first: side's dot vf1 / 1.0 vf2 as
+// retail) moves s's and u's dots next to each other, so u's 1.0 takes vf6 and the global n moves to
+// vf7 (39 lines); ViaBits for side, s and u 37; ToFloat for side 19; ToFloatNow 30. The birthing
+// raise would also do it, but side is not live past the block's branch. Wall unchanged.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

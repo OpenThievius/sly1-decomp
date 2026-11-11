@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 276/296, checked 2026-11-10
+// SIZE 276/296, checked 2026-11-11
 #include "common.h"
 #include "system.h"
 // NEAR (2026-11-08, worker night-mmi): the receive buffer read as volatile gives retail's

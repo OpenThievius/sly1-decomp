@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 60/64, checked 2026-11-10
+// SIZE 60/64, checked 2026-11-11
 // NEAR (2026-11-08, night-gamec): retail's beq with the store's address copied (move a1,v1 in its delay slot) where this has bnel and one address register; the reload after the store is the same
 // In the context of its file, src/main/disc_access.cpp: its declarations before the function, bodies cut.
 // Mechanism (2026-11-10, docs/TOOLCHAIN.md, GCSE, "A %hi copied into a second register"):

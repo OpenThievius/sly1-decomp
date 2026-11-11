@@ -11,7 +11,8 @@ tools/version_src.py) is checked as that definition builds in its shared
 file's unit, and noted `version-specific`. The results go to config/eu/c_status.tsv, one row per C function: `match`,
 `differs` (PAL's bytes are not what this C builds), `absent` (PAL has no
 counterpart) or `error` (the check could not place it). tools/progress.py
-counts PAL's finished functions from it.
+counts PAL's finished functions from it. The globals C defines are checked the same way
+(tools/data_check.py, config/eu/c_data_status.tsv).
 
 --check needs no toolchain: it fails when a C function of src/ has no row, or
 a row names a function src/ no longer defines (CI runs it through
@@ -106,7 +107,8 @@ def run():
     for _, status, _ in rows.values():
         counts[status] = counts.get(status, 0) + 1
     print("wrote %s: %s" % (STATUS.relative_to(ROOT), ", ".join("%d %s" % (v, k) for k, v in sorted(counts.items()))))
-    return 0
+    import data_check
+    return data_check.run()   # the globals C defines: config/eu/c_data_status.tsv
 
 
 def check_current():
@@ -121,7 +123,8 @@ def check_current():
                  for n, p in only_eu().items() if version_src.version_of(p)[1] not in own_files.get(n, ())]
     for p in problems:
         print("stale: " + p)
-    return 1 if problems else 0
+    import data_check
+    return 1 if problems or data_check.check_current() else 0
 
 
 def main(argv=None):

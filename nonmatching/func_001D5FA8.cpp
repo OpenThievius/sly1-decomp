@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 204/260 (78.5%), checked 2026-11-10
+// BYTES 204/260 (78.5%), checked 2026-11-11
 // NEAR: order: frame, calls, constants and addresses are retail's; the constants get other
 //       registers and the stores another order. Retail keeps the stores in the constructor's
 //       order and loads 75.0 only after -100.0's last store (into its f0), as if the stores

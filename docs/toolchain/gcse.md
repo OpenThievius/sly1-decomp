@@ -849,3 +849,20 @@ and any copy still read stays as a register copy that global-alloc must place.
   pseudo. In the .lreg dump, a call-crossing local that gets a register with too few refs is
   usually the target of such a tie: look for an asm whose REG_DEAD input has the output's
   register.
+
+### PRE's pseudo numbers break global-alloc's ties: the table size from a pointer's bucket (func_001B55C0)
+
+global-alloc's priority is an int, `floor_log2(refs) * refs / life * 10000`, truncated, and equal
+priorities fall to the allocno number, which is the pseudo number. In func_001B55C0 the cursor
+(`&self->cursor`, 2 refs) and the PRE pseudo of `&tri[2]` (3 refs over 177 insns, doubled to 354
+by its REG_EQUIV) tie at 84 once the cursor lives 238 insns or fewer; as a user variable set at
+the top (pseudo 123) it lived 240 (83) and took s8 after `&tri[2]` had s7. Written at the call,
+`SetCursorCoords(&self->cursor, ...)`, self+16 is fully redundant with the entry test's
+`self->cursor.record` address, so PRE copies it into a reaching register at the end of the entry
+block: life 238, priority 84, but numbered after `&tri[2]`'s. PRE numbers its reaching registers
+in hash-bucket order (the `PRE: redundant insn` lines of the -dG dump), bucket = (13258 + regno +
+offset) mod T: at+64 is 13323 and self+16 is 13390, so self+16 comes first only when a multiple
+of T falls in (13323, 13390]: T = 183, 191 or 199. The table had 185 buckets; the edges written
+as u128 differences (`Vu0::Q(edge[j]) = Vu0::Sub(Vu0::Q(..), Vu0::Q(..))`, no Vec copies) bring
+max_cuid down to 183 buckets, the cursor's pseudo is numbered first, wins the tie and takes s7
+as retail. tools/globalalloc.py's `--set 123:length=238` (or `646:refs=2`) showed the tie first.

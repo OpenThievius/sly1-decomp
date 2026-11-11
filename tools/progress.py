@@ -26,8 +26,11 @@ Units follow that layout. Code units are the source files: each proved file of
 config/us/files.tsv (game/player, lib/cdvd...), and a 16 KiB window
 (game/<window>, lib/<window>) for code no proved file holds yet; PAL's functions
 take their US counterpart's file. A unit is complete when every function in it is.
-Data units are the sections with bytes (data/<section>): they measure data,
-which comes from the disassembly until C can place it (docs/ROADMAP.md).
+Data units are the sections with bytes (data/<section>): they measure data, which comes from
+the disassembly until C can place it (docs/ROADMAP.md). The US build's matched data is the
+globals C defines (config/us/c_data.tsv); PAL's is those of them whose bytes, with every
+pointer translated, equal PAL's at their PAL address (config/eu/c_data_status.tsv, from
+tools/data_check.py). PAL links no C, so none of it is complete data.
 Each unit is in one category, game, lib or data, and every category has its
 own measures.
 """
@@ -138,13 +141,20 @@ def fuzzy(key):
 
 
 def c_data(key):
-    """[(address, size)] of the globals C defines, from the last build that printed MATCH
-    (config/<key>/c_data.tsv, written by tools/build.py). Only the primary version links them."""
-    path = ROOT / "config" / key / "c_data.tsv"
-    if key != versions.primary() or not path.exists():
-        return []
-    rows = [l.split("\t") for l in path.read_text().splitlines()[1:] if l]
-    return [(int(a, 16), int(s)) for _n, a, s, _sec, _o in rows]
+    """[(address, size)] of the globals C defines whose bytes are retail's in the version.
+
+    The primary version: every global of config/<key>/c_data.tsv, from the last build that printed
+    MATCH. PAL: the globals of that table that tools/data_check.py found equal to PAL's bytes at
+    their PAL address (config/eu/c_data_status.tsv, `match` rows)."""
+    path = ROOT / "config" / "us" / "c_data.tsv"
+    if key == versions.primary():
+        if not path.exists():
+            return []
+        rows = [l.split("\t") for l in path.read_text().splitlines()[1:] if l]
+        return [(int(a, 16), int(s)) for _n, a, s, _sec, _o in rows]
+    import data_check
+    return [(int(a, 16), size) for a, size, status, _n in data_check.read_status().values()
+            if status == "match"] if key == "eu" else []
 
 
 def measures(funcs, done, linked, data=0, near=None, data_done=0):

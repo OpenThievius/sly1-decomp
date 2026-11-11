@@ -66,6 +66,16 @@ What makes PAL differ, from the first `differs` rows read one by one:
   macro's one use: it never selects code, which is PAL's own definition's job.
 - **Other calls and arguments.** A call to a function only PAL has, or one more argument.
 
+PAL's data is credited the same way (`tools/data_check.py`, run by `tools/version_check.py`,
+`config/eu/c_data_status.tsv`). Each global of `config/us/c_data.tsv` is built as the US build
+builds it and its bytes, with every relocated word resolved to the PAL address of its target, are
+compared with PAL's retail bytes at the global's PAL address: the translation of its US address
+(paired directly, or the nearest paired address below it plus the same offset when that stays
+short of the next one). A row is `match`, `differs` or `absent` (no PAL address, or `.bss`, which
+no file holds). Nothing is masked: a table whose pointers reach something the translation cannot
+place, or whose bytes PAL changed, is `differs`. The report counts the `match` rows' bytes as
+PAL's matched data (never as complete data: PAL links no C), on 2026-11-11 280,987 of 464,563.
+
 Code and data only PAL has are named `func_eu_XXXXXXXX` and `D_eu_XXXXXXXX`, and reach that PAL
 address alone (`tools/check.py`). So is a datum both versions have when the tools cannot pair its
 PAL address with the US one (no paired code names both): the comment of the definition says

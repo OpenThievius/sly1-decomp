@@ -1,0 +1,241 @@
+us_name	eu_address	size	status	note
+D_00217380	00218840	41504	differs	a pointer to func_001AC638__Fv, which has no address in PAL
+D_002215A0	00222AA0	145824	match	
+D_00244F40	00246440	15936	differs	a pointer to .data, which has no address in PAL
+D_00248D80	0024B5A0	608	match	
+D_00248FE0	0024B800	628	match	
+D_002492F0	0024BB10	308	match	
+D_00249428	0024BC48	1096	differs	first difference at +0x200
+D_00249870	0024C0F0	372	match	
+D_002499F0	0024C270	684	differs	first difference at +0x34
+D_00249CA0	0024C520	195	differs	first difference at +0x0
+D_00249D64	0024C594	16	match	
+D_00249D74	0024C5A4	8	match	
+D_00249D80	0024C5B0	48	match	
+D_00249DB0	0024C5E0	100	match	
+D_00249E18	0024C648	36	match	
+D_00249E3C	0024C66C	8	match	
+D_00249E44	0024C674	8	match	
+D_00249E4C	0024C67C	4	match	
+D_00249E50	0024C680	68	match	
+D_00249EA0	0024C6D0	68	match	
+D_00249EF0	0024C720	200	match	
+D_00249FBC	0024C7EC	24	match	
+D_00249FE0	0024C810	308	differs	first difference at +0xB0
+D_0024A120	0024C950	432	match	
+D_0024A2D0	0024CB00	1220	differs	first difference at +0x0
+D_0024A794	0024CC14	12	match	
+D_0024A7A0	0024CC20	60	differs	first difference at +0x4
+D_0024A7DC	0024CC24	12	match	
+D_0024A7F0	0024CC30	88	match	
+D_0024A848	0024CC88	24	match	
+D_0024A860	0024CCA0	1936	differs	first difference at +0x40
+D_0024AFF4	0024D434	4	match	
+D_0024B000	0024D440	84	match	
+D_0024B060	0024D4A0	260	match	
+D_0024B164	0024D5A4	12	match	
+D_0024B170	0024D5B0	0	match	
+D_0024B1E8	0024D628	109	match	
+D_0024B258	0024D698	4	match	
+D_0024B260	0024D6A0	16	match	
+D_0024B270	0024D6B0	4	match	
+D_0024B280	0024D6C0	436	differs	first difference at +0xCA
+D_0024B438	0024D878	416	differs	first difference at +0x0
+D_0024B5E0	0024D8C0	116	match	
+D_0024B660	0024D940	4608	differs	first difference at +0x0
+D_0024C860	0024DD28	12	match	
+D_0024C870	0024DD40	180	match	
+D_0024C930	0024DE00	656	match	
+D_0024CBC4	0024E094	4	match	
+D_0024CBD0	0024E0A0	1003	differs	first difference at +0x240
+D_0024CFC0	0024E380	420	match	
+D_0024D164	0024E524	8	match	
+D_0024D170	0024E530	244	match	
+D_0024D268	0024E628	24	match	
+D_0024D280	0024E640	728	match	
+D_0024D560	0024E920	40	match	
+D_0024D588	0024E948	16	match	
+D_0024D5A0	0024E960	168	match	
+D_0024D650	0024EA10	1096	match	
+D_0024DAA0	0024EE60	124	differs	first difference at +0x40
+D_0024DB20	-	168	absent	no PAL address: its US address is not inside a paired datum
+D_0024DBD0	0024EF20	188	match	
+D_0024DC90	0024EFE0	24	match	
+D_0024DCA8	0024EFF8	4	match	
+D_0024DCB0	0024F000	1287	differs	first difference at +0x490
+D_0024E1C0	0024F510	1076	differs	first difference at +0x0
+D_0024E600	0024F8F0	570	differs	first difference at +0x78
+D_0024E840	0024FB10	56	match	
+D_0024E988	0024FC58	40	match	
+D_0024E9B0	0024FC80	340	match	
+D_0024EB10	0024FDE0	109	match	
+D_0024EB80	0024FE50	12	match	
+D_0024EB90	0024FE60	160	match	
+D_0024EC30	0024FF00	128	match	
+D_0024ECB0	0024FF80	256	match	
+D_0024EDB0	00250080	256	match	
+D_0024EEB0	00250180	256	match	
+D_0024EFB0	00250280	256	match	
+D_0024F0B0	00250380	10	match	
+D_0024F0C0	00250390	75	match	
+D_0024F110	002503E0	204	match	
+D_0024F1E0	002504B0	59	match	
+D_0024F220	002504F0	267	match	
+D_0024F330	00250600	430	match	
+D_0024F4E0	002507B0	98	match	
+D_0024F548	00250818	22	match	
+D_0024F560	00250830	468	match	
+D_0024F738	00250A08	337	match	
+D_0024F890	00250B60	84	match	
+D_0024F8E4	00250BB4	4	match	
+D_0024F8E8	00250BB8	4	match	
+D_0024F8F0	00250BC0	6	match	
+D_0024F8F8	00250BC8	6	match	
+D_0024F900	00250BD0	7	match	
+D_0024F908	00250BD8	16	match	
+D_0024F918	00250BE8	16	match	
+D_0024F928	00250BF8	16	match	
+D_0024F938	00250C08	32	match	
+D_0024F958	00250C28	16	match	
+D_0024F968	00250C38	56	match	
+D_0024F9A0	00250C70	60	match	
+D_0024F9DC	00250CAC	28	match	
+D_0024F9F8	00250CC8	16	match	
+D_0024FA08	00250CD8	48	match	
+D_0024FA38	00250D08	24	match	
+D_0024FA50	00250D20	136	match	
+D_0024FAD8	00250DA8	960	match	
+D_0024FE98	00251168	8	match	
+D_0024FEA0	00251170	28	match	
+D_0024FEC0	00251190	76	match	
+D_0024FF0C	002511DC	28	match	
+D_0024FF28	002511F8	68	match	
+D_0024FF70	00251240	8	match	
+D_0024FF78	00251248	4	match	
+D_0024FF80	00251250	16	match	
+D_0024FF90	00251260	16	match	
+D_0024FFA0	002512C0	135	match	
+D_00250028	00251348	62	match	
+D_00250070	00251390	491	match	
+D_00250260	00251580	153	match	
+D_00250300	00251620	571	match	
+D_00250580	002518A0	88	match	
+D_002505D8	002518D8	37728	match	
+D_00259938	0025AC38	10520	match	
+D_0025C250	0025D550	160	match	
+D_0025C2F0	0025D5F0	80	match	
+D_0025C340	0025D640	19232	match	
+D_00260E60	00262160	16	match	
+D_00260E70	00262170	544	match	
+D_00261090	00262390	644	differs	a pointer to .rodata, which has no address in PAL
+D_00261314	00262614	8	match	
+D_00261320	00262620	100	match	
+D_00261390	00262690	96	match	
+D_002613F0	002626F0	32	match	
+D_00261410	00262710	1088	match	
+D_00261850	00262B50	48	match	
+D_00261880	00262B80	276	match	
+D_002619A0	00262CA0	568	match	
+D_00261BF0	00262EF0	160	match	
+D_00261C90	00262F90	52	match	
+D_00261CC8	00262FC8	668	match	
+D_00261F70	00263270	1012	differs	first difference at +0x2E8
+D_002623C0	002636F0	184	differs	first difference at +0x24
+D_00262480	002637B0	660	match	
+D_00262718	00263A48	684	differs	first difference at +0x178
+D_002629C8	00263C30	104	match	
+D_00262A30	00263C98	992	differs	first difference at +0x3DD
+D_00262E10	00264070	3248	match	
+D_00263AC0	00264D20	884	match	
+D_00263E34	00265094	20	match	
+D_00263E50	002650B0	580	match	
+D_00264098	002652F8	16	match	
+D_002640B0	00265310	432	match	
+D_00264260	002654C0	1500	match	
+D_00264840	00265AA0	208	match	
+D_00264910	00265B70	300	match	
+D_00264A40	00265CA0	20324	match	
+D_002699A4	0026AC04	8	match	
+D_002699B0	0026AC10	416	differs	a pointer to .rodata, which has no address in PAL
+D_00269B50	0026ADC0	392	match	
+D_00269CD8	0026AF48	2616	differs	a pointer to .rodata, which has no address in PAL
+D_0026A710	0026BB40	504	match	
+D_0026A910	0026BD40	736	match	
+D_0026ABF0	0026C020	2368	match	
+D_0026B530	0026C960	3760	match	
+D_0026C3E0	0026D810	32696	differs	first difference at +0x42
+D_002743A0	0027DAF0	280	differs	a pointer to .rodata, which has no address in PAL
+D_002744B8	0027DC08	56	match	
+D_002744F0	0027DC40	4	match	
+D_002744F8	0027DC48	80	match	
+D_00274548	0027DC98	376	match	
+D_002746C0	0027DE10	724	match	
+D_00274998	0027E0E8	24	match	
+D_002749B0	0027E100	288	match	
+D_00274AD0	0027E220	188	match	
+D_00274B90	0027E2E0	136	match	
+D_00274C20	0027E370	288	match	
+D_00274D40	0027E490	188	match	
+D_00274E00	0027E550	252	match	
+D_00274F00	0027E650	48	match	
+D_00274F38	0027E688	104	differs	a pointer to .rodata, which has no address in PAL
+D_00274FA0	0027E6F0	412	match	
+D_00275140	0027E890	1516	differs	first difference at +0x4F0
+D_00275730	0027EEE0	416	match	
+D_002758D0	0027F080	16	match	
+D_002758E0	0027F090	96	differs	first difference at +0x28
+D_00275940	0027F0B8	476	differs	first difference at +0x2B
+D_00275B28	0027F298	56	match	
+D_00275B60	0027F2D0	3252	differs	first difference at +0x463
+D_00276970	002800D0	16	match	
+D_00276980	002800E0	1960	match	
+D_00277128	00280888	4	match	
+D_0027712C	0028088C	8	match	
+D_00277134	00280894	4	match	
+D_00277138	00280898	148	match	
+D_002771CC	0028092C	8	match	
+D_002771D8	00280938	20	match	
+D_002771F0	00280950	1984	match	
+D_002779B0	00281110	16	match	
+D_002779C0	00281120	944	differs	first difference at +0x374
+D_00277D70	002814D0	656	match	
+D_00278000	00281760	72	differs	first difference at +0xC
+D_00278048	002817A8	1528	match	
+D_00278640	00281DA0	916	differs	first difference at +0x10
+D_002789D8	00282138	164	match	
+D_00278A7C	002821DC	900	match	
+D_00278E00	00282560	1280	match	
+D_00279300	00282A60	64	match	
+D_00279340	00282AA0	192	match	
+D_00279400	00282B60	6768	differs	first difference at +0x0
+D_0027AE70	002845F0	72	match	
+D_0027AEB8	00284638	24	differs	first difference at +0x7
+D_0027AED0	00284678	160	match	
+D_0027AF70	00284718	144	differs	first difference at +0x10
+D_0027B000	002847C0	64	match	
+D_0027B040	00284800	112	match	
+D_0027B0B0	00284870	128	match	
+D_0027B130	002848F0	84	match	
+D_0027B200	002849C0	56	differs	first difference at +0x0
+D_0027B238	002849F8	92	differs	PAL has no bytes at 0x002849F8..
+D_0027C008	-	4	absent	bss: no bytes in the executable
+D_0027C00C	-	4	absent	bss: no bytes in the executable
+D_002BE460	-	24	absent	bss: no bytes in the executable
+D_002BE478	-	20	absent	bss: no bytes in the executable
+D_00604700	-	128	absent	bss: no bytes in the executable
+D_00625770	-	2064	absent	bss: no bytes in the executable
+D_00625F80	-	128	absent	bss: no bytes in the executable
+D_00626000	-	6208	absent	bss: no bytes in the executable
+D_00627840	-	5000	absent	bss: no bytes in the executable
+D_00628C00	-	556	absent	bss: no bytes in the executable
+D_00628E40	-	1152	absent	bss: no bytes in the executable
+D_006292C0	-	640	absent	bss: no bytes in the executable
+D_0062A540	-	560	absent	bss: no bytes in the executable
+D_0062A770	-	24	absent	bss: no bytes in the executable
+D_0062A798	-	32	absent	bss: no bytes in the executable
+D_0062A7B8	-	8	absent	bss: no bytes in the executable
+D_0062A7C0	-	704	absent	bss: no bytes in the executable
+D_0062AA80	-	704	absent	bss: no bytes in the executable
+D_0062AD40	-	5632	absent	bss: no bytes in the executable
+D_0062C340	-	512	absent	bss: no bytes in the executable
+D_0062C540	-	24	absent	bss: no bytes in the executable

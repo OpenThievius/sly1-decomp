@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 3297/3316 (99.4%), checked 2026-11-10
+// BYTES 3297/3316 (99.4%), checked 2026-11-11
 // NEAR (2026-11-10, w15-1D7778): same size and frame; only the first loop's three saved registers differ
 //
 // Still differs (9 instructions): the first loop's saved registers. Retail keeps &spin (0x70)
@@ -23,6 +23,13 @@
 // of them in pass 1 in body order. Retail's copy of &spin was moved after B0's lo_sum and before
 // D0's %hi, i.e. the original computed spin's address between the slip statement and the push.
 // Ruled out: a pointer or reference to spin there (697 lines: lifetime 0 copy, not moved).
+// w22 (2026-11-11): re-scored (same 9 instructions). The .lreg dump confirms the ranking: pseudos
+// 227 (B0), 238 (C0), 288 (D0), 316 (E0), 381 (&spin's copy) with 5, 3, 5, 5, 5 refs over 406, 404,
+// 402, 400, 398 insns, global order 381, 316, 288, 227. Two ways out, both checked against the
+// code: the copy born between C0's and D0's lo_sum (above), or D0 and E0 with one more use each in
+// the loop (7 refs: order E0, D0, spin, B0 as retail), which retail's code rules out (c[0] is read
+// through the symbol, c[1] and c[2] through the pointer, as ours). With the "*r" ToFloatMoved, the
+// along and sum conversions as Moved change nothing (same 9). Wall unchanged.
 // What matched (2026-11-10, docs/toolchain gcse.md, alias-classes.md, sched1.md):
 // - `s` declared once at the top and assigned by both loops: set twice, it has no base value,
 //   so the force's u128 store invalidates s->v20 in cse1 and the torque arm reloads it.

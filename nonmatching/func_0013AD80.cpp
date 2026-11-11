@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1663/1708 (97.4%), checked 2026-11-10
+// BYTES 1663/1708 (97.4%), checked 2026-11-11
 // NEAR: retail's size; the view walk, the VIF packet, the spill slots (frames, count, the Ones vector,
 // then sent: `sent` declared where it is set) and the merged tails are retail's. The frame loop counts up
 // because it has no NOTE_INSN_LOOP_VTOP (check_dbra_loop reverses a loop with a non-constant bound only
@@ -12,6 +12,9 @@
 // constant is not moved at this loop size (life 1, savings 1, threshold 76-79 against 84 insns in the
 // second pass), so the giv is never found; with f declared inside the guard instead, PRE hoists &fade into
 // the new preheader block.
+// w22 (2026-11-11): re-scored, unchanged (18 lines, regdiff `order`). The difference is loop.c's
+// (where f = frames is set, and the switch's registers follow from it), with no VU0 conversion
+// for the "*r" lever and no register-only decision for the allocator replays. Not retried.
 #include "common.h"
 #include "asm_func.h"
 #include "list_iter.h"

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1320/1324 (99.7%), checked 2026-11-10
+// BYTES 1320/1324 (99.7%), checked 2026-11-11
 // NEAR (2026-11-10, worker w11-125C90): PlacedObject's slot 36 (0xA0), the base draw: the
 // culling by the camera's planes and distance fades (into the transform's two scales), the world
 // node's level, the parent's unscaling, the attachment's matrix, slot 37, then each child drawn
@@ -35,6 +35,10 @@
 // that leaves the class to the producer"): ToFloatMoved's "*r" and every conversion as ToFloatMoved leave
 // the one line (retail's `qmfc2 a1,$vf6` for the call argument, ours `lq a1,448(sp)`): d reaches the call
 // as a memory variable, not through a conversion helper.
+// w22 (2026-11-11): re-scored, unchanged. Retail's sibling IsSphereInCameraView (func_00146038)
+// writes the difference straight into vf6 and passes it with qmfc2 a1,$vf6: d never spilled
+// there. Here retail's vsub into vf3, store, lqc2 vf6 and qmfc2 still mean a second pseudo (or a
+// memory d that CSE does not forward) for the asm and the first call; not found.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 736/748, checked 2026-11-10
+// SIZE 736/748, checked 2026-11-11
 // NEAR (src/main/placed_object.cpp, where it is INCLUDE_ASM with INCLUDE_RODATA(D_00249C90)):
 // retail keeps the switch's constant 3 in s8 (loop.c moved it before the outer loop, so s8 is
 // saved too: 16 bytes more); ours loads it in the loop (li v0,3 in the case-2 branch's slot).
