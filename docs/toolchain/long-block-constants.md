@@ -257,6 +257,51 @@ compiles.
   but the allocation lead (the 2194 pseudo's rank, sched1's lives) is
   still open, and it has to be searched inside this ten-landmark space.
 
+### The key holds inside the ten-landmark space (func_00109488, w21)
+
+Worked 2026-11-10 (build/swarm/w21-109488/ in the g7 worktree: ev21.py compiles with every
+dump and scores the landmarks, exact instructions, the long holds and the five key holds;
+score.py and la.py read local-alloc's quantities from the `.lreg` dump; mwalk.py searches
+the window model). 20 compiles.
+
+- **The priorities do not move.** 17 forms that hold all ten landmarks (w20's best, its
+  start and 15 from its walks, with different parameter orders, body orders and fields moved
+  out of their helpers) give local-alloc the same priorities for the long constants: the 2194
+  of entries 292-336 157, the 146 of 321-343 150, the 146 of 572-654 158 (s3), the 18 of
+  554-650 148 or 149. Only func_00155778 moves, 155 or 163, with 20 or 21 refs: moving Set0's
+  flags and Set1's f0 and f10 out of their helpers adds a use in its window, which gives 256 in
+  s5 (the one key hold w20 found) but ranks func_00155778 above the 146 and puts it in s3.
+  These forms change the order of insns inside entries and where the CSE flushes fall in
+  them, not which entries each pseudo spans, and sched1's lives follow the entries.
+- **What retail's placements need.** Scanning local-alloc's priorities on such a form with the
+  replay: the 2194 has to rank below the 18 and below 150 (at most 147 against 157), and
+  func_00155778 between the two 146s (150 to 158). Then local-alloc gives 2194 s7 and
+  func_00155778 s4. tools/sched1.py on the same form: raising the 2194 load's priority from
+  1,978 to 2,100 (`--prio 8474=2100`, the first store about 25 entries earlier on the chain)
+  gives, through both allocators, all five key holds (4 in s3, 256 in s5, 66 in s1, 2194 in s7,
+  func_00155778 in s4). The near miss needs 2,150. So the ten-landmark forms are one lever
+  closer, and the lever is the same.
+- **The chain is the pointer step.** In the `.sched` dependence table each entry's `p++`
+  depends on that entry's stores (anti, the register they read) and the next entry's stores
+  depend on it, so the stores form one chain in entry order; a constant's load gets its first
+  store's priority plus one and issues behind every ALU insn feeding an earlier store. A
+  form that keeps the entries, their values and the step cannot move a load by 25 entries.
+- **The 2194's refs cannot fall either.** The 2194s of CSE2's window 255-392 are two pseudos:
+  one set at entry 201 (the first 2194 of CSE1's window 190-291, which CSE2 joins to the
+  window-2 pseudo up to entry 248) and used at 257-277 (5 refs, global), and the one of 292-336
+  (18 refs). Retail's holds show the same split (t6 for entries 76-248 and s7 for 78-336,
+  21 uses each, ours t6 and s4 with the same counts). With 17 refs or fewer it would rank low
+  enough, but that needs CSE1's third flush after entry 292's 2194 store. A search of the window
+  model (16,000 mutations of the ten-landmark forms) gets that store no closer than 3 insns
+  before the flush (4 to 11 in w20's forms): moving the flush needs insns taken out before
+  entry 292 and put back before 553, where the 554 landmark allows at most one insn fewer, and
+  the only kind-wide change that adds insns, Set8m undone, adds 16 (3 of them before 292).
+
+So no uniform form of the kinds searched (per-kind parameter orders, body orders, fields moved
+out of a helper) reaches retail's allocation: what retail has is a 2194 load scheduled earlier,
+or a 2194 pseudo with a longer life, from some source difference that leaves the entries, their
+values and the windows as they are.
+
 ### A scratch float in a loop: local-alloc's tie against global-alloc's ranking (func_00131F60)
 
 Measured 2026-11-10 (w15) from the -dS and -dl dumps, with local-alloc.c and global.c read.
