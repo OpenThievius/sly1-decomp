@@ -1,0 +1,2 @@
+name	address	size	kind	why
+vutext	00211E10	21840	vu-microcode	the .vutext section (flags AX in the section header): VU microprograms, made by the VU assembler; cc1plus cannot emit VU micro instructions

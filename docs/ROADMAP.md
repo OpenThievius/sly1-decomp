@@ -21,7 +21,7 @@ splits are taken from other projects or from the prototype
 ## Next
 
 Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-11: US at
-93.12% of code (4,759 of 4,807 functions) and 94.56% of data, PAL at 93.06% of code and 62.19% of data, 48 US
+93.25% of code (4,760 of 4,807 functions) and 99.62% of data, PAL at 93.06% of code and 66.89% of data, 47 US
 functions left, every one with a near miss in `nonmatching/`, the original assembly classified,
 every byte of code in a proved source file, PAL's own game code all defined, and names and types
 well under way. What is still open is the long tail of the matching, the readable names of the
@@ -51,7 +51,10 @@ functions left with their address names, and the disc's data.
    startup brings the compiler's static initialiser, which `config/us/generated.tsv` names. The
    reports count the bytes C defines as matched data (`config/us/c_data.tsv`). The rest of the
    data still comes from the disassembly: on 2026-11-11, 94.56% of US data is defined in C
-   (23,461 bytes left). PAL links no C, so its data is checked at its counterparts as its
+   (23,461 bytes left), of which 21,840 are the `.vutext` section's VU microprograms, original
+   assembly that counts as matched data like original-assembly functions
+   (`config/<version>/original_data.tsv`, docs/ASM_CLASSIFICATION.md): 99.62% of US data counts,
+   1,621 bytes left. PAL links no C, so its data is checked at its counterparts as its
    functions are (`tools/version_check.py`, then `tools/data_check.py`, `config/eu/c_data_status.tsv`):
    a global counts for PAL when its bytes, with every pointer translated to PAL's addresses, equal
    PAL's at its PAL address. On 2026-11-11, 185 of the 240 globals match (288,915 bytes, 62.19% of
