@@ -157,7 +157,8 @@ D_00264910	00265B70	300	match
 D_00264A40	00265CA0	20324	match	
 D_002699A4	0026AC04	8	match	
 D_002699B0	0026AC10	416	differs	first difference at +0x10; 16 pointer words differ
-D_00269B50	0026ADC0	392	match	
+D_00269B50	0026ADC0	100	match	
+D_00269BC0	0026AE30	280	match	
 D_00269CD8	0026AF48	2616	differs	first difference at +0x78; 1 text, 85 pointer, 55 other words differ
 D_0026A710	0026BB40	504	match	
 D_0026A910	0026BD40	736	match	

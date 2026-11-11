@@ -157,7 +157,8 @@ D_00264910	00264910	300	.data	src/main/gauge_agent.cpp
 D_00264A40	00264A40	20324	.data	src/main/memory_card.cpp
 D_002699A4	002699A4	8	.data	src/main/heap.cpp
 D_002699B0	002699B0	416	.data	src/main/movie_player.cpp
-D_00269B50	00269B50	392	.data	src/main/file_18F988.cpp
+D_00269B50	00269B50	100	.data	src/main/file_18F988.cpp
+D_00269BC0	00269BC0	280	.data	src/main/switched_collider.cpp
 D_00269CD8	00269CD8	2616	.data	src/main/pause_menu.cpp
 D_0026A710	0026A710	504	.data	src/main/file_1963D8.cpp
 D_0026A910	0026A910	736	.data	src/main/file_198980.cpp
@@ -222,7 +223,7 @@ D_0027C008	0027C008	4	.bss	src/main/file_149398.cpp
 D_0027C00C	0027C00C	4	.bss	src/main/file_14B6A8.cpp
 D_002BE460	002BE460	24	.bss	src/main/file_167D68.cpp
 D_002BE478	002BE478	20	.bss	src/main/entry_queue.cpp
-D_00604700	00604700	128	.bss	src/main/file_18F988.cpp
+D_00604700	00604700	128	.bss	src/main/switched_collider.cpp
 D_00625770	00625770	2064	.bss	src/lib/request_thread.cpp
 D_00625F80	00625F80	128	.bss	src/lib/formatted_output.cpp
 D_00626000	00626000	6208	.bss	src/lib/remote_call.cpp
