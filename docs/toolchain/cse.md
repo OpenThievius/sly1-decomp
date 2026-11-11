@@ -414,7 +414,7 @@ against the 30 in the `.rtl` dump.
 
 ### A search loop that loop.c leaves alone: a member read at each use (func_00165AE8)
 
-Retail's strip search in CopyAttachmentPart (src/main/file_15F678.cpp) is a rolled `break`
+Retail's strip search in CopyAttachmentPart (src/main/placed_object_model.cpp) is a rolled `break`
 loop (`b` into the test, the increment above it) that reloads the mesh's count, its strips and
 its frame on every pass: loop.c moved nothing. Ours, with `StripMesh* mesh = e->mesh;` before
 the loop, had the count hoisted (`Insn 485 ... moved`), and jump2 then copied the test in

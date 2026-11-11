@@ -14,8 +14,8 @@
   "complete_code_percent": 93.25206760158217,
   "complete_data": "429454",
   "complete_data_percent": 99.62766117863215,
-  "total_units": 171,
-  "complete_units": 136
+  "total_units": 172,
+  "complete_units": 137
  },
  "units": [
   {
@@ -18063,16 +18063,16 @@
    "name": "game/file_15F678",
    "measures": {
     "fuzzy_match_percent": 100.0,
-    "total_code": "34308",
-    "matched_code": "34308",
+    "total_code": "12616",
+    "matched_code": "12616",
     "matched_code_percent": 100.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 113,
-    "matched_functions": 113,
+    "total_functions": 94,
+    "matched_functions": 94,
     "matched_functions_percent": 100.0,
-    "complete_code": "34308",
+    "complete_code": "12616",
     "complete_code_percent": 100.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
@@ -19011,12 +19011,42 @@
       "virtual_address": "1452048",
       "demangled_name": "CollectNonNullRefs"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": true,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/file_15F678.cpp"
+   }
+  },
+  {
+   "name": "game/placed_object_model",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "21692",
+    "matched_code": "21692",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 19,
+    "matched_functions": 19,
+    "matched_functions_percent": 100.0,
+    "complete_code": "21692",
+    "complete_code_percent": 100.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 1
+   },
+   "functions": [
     {
      "name": "func_00162890",
      "size": "4264",
      "fuzzy_match_percent": 100.0,
-     "address": "12824",
+     "address": "0",
      "metadata": {
       "virtual_address": "1452176",
       "demangled_name": "ReadPlacedObjectModel"
@@ -19026,7 +19056,7 @@
      "name": "func_00163938",
      "size": "88",
      "fuzzy_match_percent": 100.0,
-     "address": "17088",
+     "address": "4264",
      "metadata": {
       "virtual_address": "1456440",
       "demangled_name": "WriteStripMeshMscal"
@@ -19036,7 +19066,7 @@
      "name": "func_00163990",
      "size": "88",
      "fuzzy_match_percent": 100.0,
-     "address": "17176",
+     "address": "4352",
      "metadata": {
       "virtual_address": "1456528",
       "demangled_name": "WriteMorphTargetMscal"
@@ -19046,7 +19076,7 @@
      "name": "func_001639E8",
      "size": "1260",
      "fuzzy_match_percent": 100.0,
-     "address": "17264",
+     "address": "4440",
      "metadata": {
       "virtual_address": "1456616",
       "demangled_name": "BuildMorphTargetPacket"
@@ -19056,7 +19086,7 @@
      "name": "func_00163ED8",
      "size": "2448",
      "fuzzy_match_percent": 100.0,
-     "address": "18528",
+     "address": "5704",
      "metadata": {
       "virtual_address": "1457880",
       "demangled_name": "BuildStripMeshPacket"
@@ -19066,7 +19096,7 @@
      "name": "func_00164868",
      "size": "3360",
      "fuzzy_match_percent": 100.0,
-     "address": "20976",
+     "address": "8152",
      "metadata": {
       "virtual_address": "1460328",
       "demangled_name": "BuildLitStripMeshPacket"
@@ -19076,7 +19106,7 @@
      "name": "func_00165588",
      "size": "412",
      "fuzzy_match_percent": 100.0,
-     "address": "24336",
+     "address": "11512",
      "metadata": {
       "virtual_address": "1463688",
       "demangled_name": "BuildPartVifPackets"
@@ -19086,7 +19116,7 @@
      "name": "func_00165728",
      "size": "252",
      "fuzzy_match_percent": 100.0,
-     "address": "24752",
+     "address": "11928",
      "metadata": {
       "virtual_address": "1464104",
       "demangled_name": "StartAttachments"
@@ -19096,7 +19126,7 @@
      "name": "func_00165828",
      "size": "248",
      "fuzzy_match_percent": 100.0,
-     "address": "25008",
+     "address": "12184",
      "metadata": {
       "virtual_address": "1464360",
       "demangled_name": "BindAttachmentTargets"
@@ -19106,7 +19136,7 @@
      "name": "func_00165920",
      "size": "456",
      "fuzzy_match_percent": 100.0,
-     "address": "25256",
+     "address": "12432",
      "metadata": {
       "virtual_address": "1464608",
       "demangled_name": "CopyAttachmentBlock"
@@ -19116,7 +19146,7 @@
      "name": "func_00165AE8",
      "size": "1268",
      "fuzzy_match_percent": 100.0,
-     "address": "25712",
+     "address": "12888",
      "metadata": {
       "virtual_address": "1465064",
       "demangled_name": "CopyAttachmentPart"
@@ -19126,7 +19156,7 @@
      "name": "func_00165FE0",
      "size": "192",
      "fuzzy_match_percent": 100.0,
-     "address": "26984",
+     "address": "14160",
      "metadata": {
       "virtual_address": "1466336",
       "demangled_name": "UpdateAttachments"
@@ -19136,7 +19166,7 @@
      "name": "func_001660A0",
      "size": "68",
      "fuzzy_match_percent": 100.0,
-     "address": "27176",
+     "address": "14352",
      "metadata": {
       "virtual_address": "1466528",
       "demangled_name": "UpdateLinkConstraint"
@@ -19146,7 +19176,7 @@
      "name": "func_001660E8",
      "size": "444",
      "fuzzy_match_percent": 100.0,
-     "address": "27248",
+     "address": "14424",
      "metadata": {
       "virtual_address": "1466600",
       "demangled_name": "UpdateAttachmentFrames"
@@ -19156,7 +19186,7 @@
      "name": "func_001662A8",
      "size": "944",
      "fuzzy_match_percent": 100.0,
-     "address": "27696",
+     "address": "14872",
      "metadata": {
       "virtual_address": "1467048",
       "demangled_name": "BuildAttachmentDmaChain"
@@ -19166,7 +19196,7 @@
      "name": "func_00166658",
      "size": "56",
      "fuzzy_match_percent": 100.0,
-     "address": "28640",
+     "address": "15816",
      "metadata": {
       "virtual_address": "1467992",
       "demangled_name": "FlipVifBaseOffset"
@@ -19176,7 +19206,7 @@
      "name": "func_00166690",
      "size": "5772",
      "fuzzy_match_percent": 100.0,
-     "address": "28696",
+     "address": "15872",
      "metadata": {
       "virtual_address": "1468048",
       "demangled_name": "DrawModelPart"
@@ -19186,7 +19216,7 @@
      "name": "func_00167D20",
      "size": "40",
      "fuzzy_match_percent": 100.0,
-     "address": "34472",
+     "address": "21648",
      "metadata": {
       "virtual_address": "1473824",
       "demangled_name": "ConstructDefaultRgbaColor"
@@ -19196,7 +19226,7 @@
      "name": "func_00167D48",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "34512",
+     "address": "21688",
      "metadata": {
       "virtual_address": "1473864",
       "demangled_name": "ConstructDefaultRgbaColorAtStartup"
@@ -19208,7 +19238,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_15F678.cpp"
+    "source_path": "src/main/placed_object_model.cpp"
    }
   },
   {
@@ -53074,8 +53104,8 @@
     "complete_code_percent": 92.70075040887663,
     "complete_data": "0",
     "complete_data_percent": 100.0,
-    "total_units": 76,
-    "complete_units": 48
+    "total_units": 77,
+    "complete_units": 49
    }
   },
   {

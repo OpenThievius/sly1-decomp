@@ -453,7 +453,7 @@ the curve-window search: four quadratics per curve chosen by `switch (j)` over `
 
 ### An inline's constant parameter is a variable with a life: the strip loop's UNPACK words (func_00166690)
 
-Matched 2026-11-10 (DrawModelPart, src/main/file_15F678.cpp; the form found by worker
+Matched 2026-11-10 (DrawModelPart, src/main/placed_object_model.cpp; the form found by worker
 w14-1536C8, the mechanism read from w15-166690's `-dL` dump). The part drawer's strip loop is
 333 insns in pass 1 and 304 in pass 2 and makes no call (threshold 160, less 3 a move). Retail's
 preheader holds `&D_002623E0` (s8), the constant 1 (t9, both `q.hi = 1` and `count == 1`) and

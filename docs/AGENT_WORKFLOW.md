@@ -274,7 +274,7 @@ Measured on this compiler; add to this list when you learn something.
     ReadPlacedObjectModel's FLT_MAX at 0x24A710 (placed_object_model.cpp).
   - Functions GCC emits after the static initialiser and before `_GLOBAL_$I$` (the setters at
     0x137248 to 0x137268) look like inline functions it emitted out of line at the end of the file.
-  - The colour objects (`Clr_180E38`, four bytes set in the constructor; `ColorWord` (file_15F678), one word)
+  - The colour objects (`Clr_180E38`, four bytes set in the constructor; `ColorWord` (placed_object_model.cpp), one word)
     and the 0x1C-byte style object (zeroed, then 0x2D, 0xFF7D4B00, two sizes given as integers,
     0.3 twice) recur in many files' static initialisers.
   - The compiler has one read-only section. A test unit with a `const` table of function
