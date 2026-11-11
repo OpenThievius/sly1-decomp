@@ -37,6 +37,14 @@
 // `Vu0::Vec n = nv;` (same as dir = nv), d1/nv at each of four uses (16 ways), statement order
 // after the call and in ImpulseAlong (no change), its Vec parameters by const reference (no
 // change), c2 as a Vec02 local (worse).
+// w32 (2026-11-11): the first differing block is the second impulse: retail's sqc2 vf1,112(sp) /
+// lqc2 vf1,112(sp) around Cross(c2, p) (c2 a spilled pseudo, reloaded again before the spin's
+// MulXSum), and dir caller-saved at 128(sp); ours keeps c2 in vf6 (caller-saved at 128) and dir at
+// 112. The later register shifts (p, rel, tang1 one higher) follow. For c2 to be spilled it must
+// be a non-local pseudo (REG_BASIC_BLOCK global, or REG_N_DEATHS != 1) with REG_N_REFS <= 4 per
+// call crossed, and retail's spin sum (vmaddx vf1, vf5, vf2x) ties to neither c2 nor s2, so s2
+// was not a local quantity dying there either. Tried: c2 as a reuse of `turn` (one pseudo over two
+// blocks): it becomes global but gets a register (more refs), 348/397.
 extern f32 g_gameTime;
 extern f32 D_0026B540;
 extern f32 D_0026B544;

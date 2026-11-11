@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 416/428, checked 2026-11-11
+// w32-sizeA (2026-11-11): not retried; the first differing block is the loop's head (retail's per-iteration move v0,s6; sq v0,304 and the extra saved register s8), as in (1) above.
 // DECLS (2026-11-11, w28-nmdecls): TransformPointBetweenFrames now void (defined void): neutral, 92/107. TestOwnerGraphSpan stays s32: the C uses its result (it does not compile as void) although file_18F988's definition is void.
 // w23-vuE (2026-11-11): the retail form of the scale found: 416 bytes of 428, frame 512 as retail's (86% by regdiff, 92 of 107
 // instructions). The scale is a u128 GPR value kg = ScalarInGprReg(scale), made once before the loop (mfc1 in a saved GPR across

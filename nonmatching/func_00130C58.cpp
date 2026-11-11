@@ -16,6 +16,20 @@
 // window count in found's register, the va slots read as words.
 // Tried for the 3: the case order, j <= 3, the counter's type, the switch in an inline, j == 3
 // in case 3 (cse1 folds it), case 2: case 3: shared (a range), one call after the switch.
+// w32 (2026-11-11, -dL): first differing block is the case tree's j == 2 / j == 3 tests (ours
+// `beq s3,s6; li v0,3; beql s3,v0`, retail `beql s3,s6; beql s3,s8`), the rest follows from s8.
+// loop.c's numbers: threshold 79 (call in the loop), less 3 per register moved; movables in
+// order 1, 2, 3, floats. Pass 1 (104 insns): the 1 fails (79 < 104), the 2 moves (savings 2,
+// life 2: 79*4), the 3 fails (76*1 < 104). Pass 2: 90 insns, both fail. Four calls cost 17 insns
+// per case (10 to compute, 3 float moves, a0, the call, found = v0, the jump), so with retail's four
+// calls the inner loop cannot fall to 76; and retail's crossjump shape (cases 0 and 1 kept apart,
+// case 2's tail merged into case 3's) is the four-call one. So retail's 3 had savings * life >= 2
+// in pass 1: a second SImode (or narrower) `(set (reg) (const_int 3))` inside the inner loop at
+// loop time, gone by the final code (s8 is read only by the beql). Not found. Tested: one call
+// after the switch (a, b, d set per case): the loop is 74 insns in pass 2, the 1 and the 3 both
+// move, but the args are global pseudos (live around the loop through the no-match path) in f20+
+// and 512 bytes; with `default: goto check;` around the call the frame is retail's 496 and s8 = 3,
+// but cases 0 and 1 merge (crossjump) and the case bodies go through f1-f3 temporaries (147/187).
 #include "common.h"
 
 f32 ConvertDoubleToFloat(u64 v);

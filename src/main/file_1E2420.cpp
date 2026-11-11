@@ -89,7 +89,7 @@ void SetOnOffObjectState(void* selfv, s32 state);
 
 void ReadBufferedRotation3(void* a, void* b);
 void ReadBufferedVector3(void* a, void* b);
-s32 ReadMeshTables(void* a, void* b, void* c, void* d, void* e);
+void ReadMeshTables(void* a, void* b, void* c, void* d, void* e);
 s32 ReadBufferedS8(void* a);
 void* CreatePathCurve(s32 idx);
 void ReadPropertyRecords(void* a, void* b);
@@ -1236,7 +1236,56 @@ void FindFreeOnOffCameraAngle(CameraController* self, Vec02* p, Vec02* q, Vec02*
     PopBackMemoryMark();
 }
 
-INCLUDE_ASM(func_001E4C48);
+// A point of a mesh's tables: a float and a vector (32 bytes).
+struct MeshPoint {
+    f32 f;
+    u8 pad04[0xC];
+    Vec02 v;
+};
+
+// A link of a mesh's tables: the point it starts at and two other links, or none.
+struct MeshLink {
+    MeshPoint* point;
+    MeshLink* next[2];
+};
+
+s32 ReadBufferedU16(BufferedStream* s);
+s32 ReadBufferedS16(BufferedStream* s);
+f32 ReadBufferedFloat(BufferedStream* s);
+void* AllocateFrontMemory(s32 size);
+
+// Sets a link's other link from its index in the table, -1 for none.
+static inline void SetLink(MeshLink* link, s32 which, MeshLink* links, s32 k)
+{
+    if (k == -1) {
+        link->next[which] = 0;
+    } else {
+        link->next[which] = &links[k];
+    }
+}
+
+void ReadMeshTables(void* stream, void* nOut, void* pointsOut, void* mOut, void* linksOut)
+{
+    BufferedStream* s = (BufferedStream*)stream;
+    s32 n = ReadBufferedU16(s);
+    MeshPoint* points = (MeshPoint*)AllocateFrontMemory(n * sizeof(MeshPoint));
+    for (s32 i = 0; i < n; i++) {
+        points[i].f = ReadBufferedFloat(s);
+        ReadBufferedVector3(s, &points[i].v);
+    }
+    s32 m = ReadBufferedU16(s);
+    MeshLink* links = (MeshLink*)AllocateFrontMemory(m * sizeof(MeshLink));
+    for (s32 i = 0; i < m; i++) {
+        MeshLink* link = &links[i];
+        link->point = &points[ReadBufferedU16(s)];
+        SetLink(link, 0, links, ReadBufferedS16(s));
+        SetLink(link, 1, links, ReadBufferedS16(s));
+    }
+    *(s32*)nOut = n;
+    *(MeshPoint**)pointsOut = points;
+    *(s32*)mOut = m;
+    *(MeshLink**)linksOut = links;
+}
 
 ASM_FUNC(func_001E4DC0);
 
