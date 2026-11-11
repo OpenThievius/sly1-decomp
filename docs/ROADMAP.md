@@ -21,7 +21,7 @@ splits are taken from other projects or from the prototype
 ## Next
 
 Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-11: US at
-93.25% of code (4,760 of 4,807 functions) and 99.62% of data, PAL at 93.06% of code and 76.18% of data, 47 US
+93.25% of code (4,760 of 4,807 functions) and 99.62% of data, PAL at 93.06% of code and 75.82% of data, 47 US
 functions left, every one with a near miss in `nonmatching/`, the original assembly classified,
 every byte of code in a proved source file, PAL's own game code all defined, and names and types
 well under way. What is still open is the long tail of the matching, the readable names of the
@@ -59,11 +59,11 @@ functions left with their address names, and the disc's data.
    a global counts for PAL when its bytes, with every pointer translated to PAL's addresses, equal
    PAL's at its PAL address. A global PAL holds differently has a definition of its own, as PAL's
    functions do (`src/versions/eu/<file>/D_XXXXXXXX.cpp`, built in the shared file's unit in place of the
-   US definition, docs/VERSIONS.md "PAL's own data"). On 2026-11-11, 201 of the 240 globals match
-   (332,070 bytes, 71.48% of PAL's data; 185 and 62.19% before), 18 differ and 21 are absent (all
-   `.bss`, which has no bytes in the file). 28 PAL globals are defined (10 rows they complete, 2 more
-   rows they bring closer); the 18 are what needs a PAL function that has no C, a global C++ cannot
-   write (an object with a constructor), included labels, or the hash tables of `global_tables.cpp`
+   US definition, docs/VERSIONS.md "PAL's own data"). On 2026-11-11, 199 of the 240 globals match
+   (330,370 bytes, 71.11% of PAL's data; 185 and 62.19% before), 20 differ and 21 are absent (all
+   `.bss`, which has no bytes in the file). 13 PAL globals are defined (8 rows they complete, 1 more
+   they bring closer); the 20 are what needs a PAL function that has no C, a global C++ cannot
+   write (an object with a constructor), tables PAL grew past US's labels, included labels, or the hash tables of `global_tables.cpp`
    not yet defined (docs/VERSIONS.md lists each with its cause).
 3. **Original assembly.** The functions that were not made from C (system-call stubs, crt0,
    the toolchain's own `.S` routines, the libraries' multimedia routines, frameless VU0 leaves,

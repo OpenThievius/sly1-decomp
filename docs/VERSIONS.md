@@ -74,7 +74,7 @@ its target, are compared with PAL's retail bytes at the global's PAL address. A 
 whose pointers reach something PAL does not have, or whose bytes PAL changed, is `differs`; the
 row's note says where the bytes first differ and what the words that differ are (text, pointers,
 other data). The report counts the `match` rows' bytes as PAL's matched data (never as complete
-data: PAL links no C), on 2026-11-11 332,070 of 464,563 (71.48%; 288,919, 62.19%, before PAL's own data), which with the original assembly the reports count (the `.vutext` microprograms) is 353,910 bytes, 76.18% of PAL's data (66.89% before).
+data: PAL links no C), on 2026-11-11 330,370 of 464,563 (71.11%; 288,919, 62.19%, before PAL's own data), which with the original assembly the reports count (the `.vutext` microprograms) is 352,210 bytes, 75.82% of PAL's data (66.89% before).
 
 ### PAL's own data
 
@@ -118,15 +118,16 @@ What stays `differs`, and why, from the last full check:
 
 | Cause | Rows | Globals |
 |---|---:|---|
-| Literals and jump tables of functions PAL has no C for: strings translated, reordered or turned into ids, floats, cases elsewhere. The named arrays of these rows that are PAL's own data are defined (`D_002495C0`, `D_002497D8`, `D_00249838`), the rest is the code's | 9 | `D_00249428`, `D_00249CA0`, `D_0024A2D0`, `D_0024A7A0`, `D_0024B280`, `D_0024B660`, `D_0024CBD0`, `D_0024DB20`, `D_0024E600` |
+| Literals and jump tables of functions PAL has no C for: strings translated, reordered or turned into ids, floats, cases elsewhere. PAL's message text is longer, so its strings straddle the US arrays' places (`D_002495C0`, `D_002497D8`, `D_00249838`): those are left to the disassembly, since filling a US label with whatever PAL bytes sit at its place would describe nothing | 9 | `D_00249428`, `D_00249CA0`, `D_0024A2D0`, `D_0024A7A0`, `D_0024B280`, `D_0024B660`, `D_0024CBD0`, `D_0024DB20`, `D_0024E600` |
 | One word that no global holds, or that needs another row's section: the pad word after `g_buildFrame` (PAL has 1 in it), the pointer to the literal `"ab"`, a method table slot that holds another method, a function with no PAL pairing | 4 | `D_00261F70`, `D_002743A0` (every global of it is defined, but the literal `"ab"` moves with the rodata of `D_0024CBD0`), `D_0024B438`, `D_00217380` |
 | Objects a constructor fills in (`BoxStyle D_00262988`, `D_002629A8`): PAL's bytes there are static data, and a C++ object with a constructor has no initial value to write; a table PAL grew and moved (`D_0026A138`, the pause menu's rows and the pointers into them) | 2 | `D_00262718`, `D_00269CD8` |
 | Grown tables inside labels the file includes from the disassembly (`INCLUDE_DATA`), which are not C | 2 | `D_00275940`, `D_00275B60` |
+| Tables PAL grew or laid out differently, whose extra words run into the next US globals: the clip planes (`D_002756B0`, two more planes, then `D_00275718`, `D_0027571C`, `D_00275728`) and a block of `file_15F678`'s tables (`D_002623E4` to `D_00262474`). A definition needs PAL's own layout (its own label sizes), not US's labels filled with the bytes at their places, so they stay | 2 | `D_00275140`, `D_002623C0` |
 | Tables of hashes: about 30 `extern const` tables of `global_tables.cpp` hold other words (1,261), each a struct or hash list that needs PAL's value for every field; not defined yet | 1 | `D_00244F40` |
 
-The 18 differ in `config/eu/c_data_status.tsv` with a note of where, and the 201 matches are
-the 185 of before, 10 that PAL's own globals made (`D_00262A30`, `D_002779C0`, `D_0027AF70`,
-`D_0026C3E0`, `D_00275140`, `D_00261090`, `D_002699B0`, `D_00274F38`, `D_002758E0`, `D_002623C0`) and
+The 20 differ in `config/eu/c_data_status.tsv` with a note of where, and the 199 matches are
+the 185 of before, 8 that PAL's own globals made (`D_00262A30`, `D_002779C0`, `D_0027AF70`,
+`D_0026C3E0`, `D_00261090`, `D_002699B0`, `D_00274F38`, `D_002758E0`) and
 6 that the PAL unit made without any (`D_002499F0`, `D_00249FE0`, `D_0024A860`, `D_0024DAA0`,
 `D_0024E1C0`, `D_0024DCB0`: the jump tables and strings of functions PAL defines itself).
 
