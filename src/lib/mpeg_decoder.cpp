@@ -67,10 +67,10 @@ void* FillMemory(s32 dst, s32 c, u32 n);
 s32 ReportMpegError(Inner_20AE40* a, const char* msg);
 void InitMpegRing(Ring_20AE40* r, u8* start, u32 size);
 s32 AllocateFromMpegRing(Inner_20AE40* a, Ring_20AE40* r, u32 size, u32 align);
-void func_0020B810(Inner_20AE40* a);
+void SetUpMpegScratchpadBuffers(Inner_20AE40* a);
 void ResetMpegDecoder(Outer_20AE40* a);
 s32 ReleaseMpegPictures(Outer_20AE40* a);
-void func_0020B258(Ring_20AE40* r);
+void MarkMpegRing(Ring_20AE40* r);
 void SaveMpegDmaState(void);
 void RestoreMpegDmaState(void);
 
@@ -136,7 +136,7 @@ s32 CreateMpegDecoder(Outer_20AE40* out, s32 mem, u32 size)
     in->f858 = out;
     in->f44 = r278;
     in->fB0 = 1;
-    func_0020B810(in);
+    SetUpMpegScratchpadBuffers(in);
     ResetMpegDecoder(out);
     ReleaseMpegPictures(out);
     in->planes[0][0] = &in->plane[0];
@@ -148,7 +148,7 @@ s32 CreateMpegDecoder(Outer_20AE40* out, s32 mem, u32 size)
     in->planes[2][0] = &in->plane[6];
     in->planes[2][1] = &in->plane[7];
     in->planes[2][3] = &in->plane[8];
-    func_0020B258(&in->ring);
+    MarkMpegRing(&in->ring);
     in->f850 = -1;
     in->f854 = 0;
     in->f84C = 0;
@@ -194,8 +194,8 @@ s32 GetMpegDecoderStatus(Device_20B0B0* device) {
 	return *(s32*)device->state;
 }
 
-void func_0020B780(void* s);
-void func_0020B870(void* s);
+void ResetMpegPictureMode(void* s);
+void ResetMpegDmaAndIpu(void* s);
 struct S_20B0C0 { u8 pad0[8]; s32 f8; u8 pad[0x34]; u8* st; };
 void ResetMpegDecoder(S_20B0C0* d) {
     u8* s = d->st;
@@ -205,9 +205,9 @@ void ResetMpegDecoder(S_20B0C0* d) {
     d->f8 = 0;
     *(s32*)(s + 0xAC) = 0;
     *(s32*)(s + 0x80) = -1;
-    func_0020B870(s);
+    ResetMpegDmaAndIpu(s);
     *(s32*)(s + 0x118) = 0;
-    func_0020B780(s);
+    ResetMpegPictureMode(s);
 }
 
 struct Device_20B110 {
@@ -299,11 +299,11 @@ struct Field_20B258 {
 	s32 fc;
 };
 
-s32 func_0020B258(Field_20B258* field) {
+s32 MarkMpegRing(Field_20B258* field) {
 	return field->fc = field->f8;
 }
 
-s32 func_0020B268(s32* item)
+s32 RewindMpegRingToMark(s32* item)
 {
     s32 value = item[3];
     item[2] = value;
@@ -355,8 +355,8 @@ struct Self_20B2E8 { u8 pad[0x40]; Ctx_20B2E8* ctx; };
 
 void ReportMpegErrorFormat(Ctx_20B2E8* c, s32 msg, s32 flags);
 s32 ParseMpegHeaders(Ctx_20B2E8* c);
-s32 func_0020B570(Self_20B2E8* self, s32 a, s32 b);
-s32 func_0020B718(Self_20B2E8* self);
+s32 DecodePictureByStructure(Self_20B2E8* self, s32 a, s32 b);
+s32 FlushPendingPicture(Self_20B2E8* self);
 
 s32 RunMpegPictureLoop(Self_20B2E8* self)
 {
@@ -379,23 +379,23 @@ s32 RunMpegPictureLoop(Self_20B2E8* self)
         }
         switch (s3) {
         case 0:
-            (void)func_0020B718(self);
+            (void)FlushPendingPicture(self);
             c->f0 = 1; 
             break;
         case 1:
             c->fA8 = 0;
             c->fA4 = 0;
             c->fA0 = 0;
-            s2 = func_0020B570(self, 0, c->f94);
+            s2 = DecodePictureByStructure(self, 0, c->f94);
             c->fA0++;
             break;
         case 2:
-            s2 = func_0020B570(self, c->fA4, c->f98);
+            s2 = DecodePictureByStructure(self, c->fA4, c->f98);
             c->fA4++;
             break;
         case 3:
         case 4:
-            s2 = func_0020B570(self, c->fA8, c->f9C);
+            s2 = DecodePictureByStructure(self, c->fA8, c->f9C);
             c->fA8++;
             break;
         }
@@ -425,15 +425,15 @@ struct Ctx_20B458 {
 };
 struct Ent_arg_20B458 { u32 v; };
 
-extern s32 func_002101F0(Ent_20B458* e, u32 a1);
+extern s32 SelectPictureBuffer(Ent_20B458* e, u32 a1);
 extern s32 DecodePictureData(Ent_20B458* e);
-extern void func_00210160(Ent_20B458* e, s32 a1, s32 a2);
+extern void OutputPictureIfDecoded(Ent_20B458* e, s32 a1, s32 a2);
 extern s32 RunMpegStallCallback(Ctx_20B458* c);
 
 struct Ent_ops_20B458 {
     static s8 Ready(Ent_20B458* e)
     {
-        s32 t = func_002101F0(e, 0);
+        s32 t = SelectPictureBuffer(e, 0);
         s8 r = 0;
         if (t != 0) {
             r = DecodePictureData(e) != 0;
@@ -442,7 +442,7 @@ struct Ent_ops_20B458 {
     }
 };
 
-s32 func_0020B458(Ctx_20B458* s1, s32 a1, s32 a2)
+s32 DecodeFramePicture(Ctx_20B458* s1, s32 a1, s32 a2)
 {
     s32 s2;
     Ent_20B458* s0 = s1->f40;
@@ -455,11 +455,11 @@ s32 func_0020B458(Ctx_20B458* s1, s32 a1, s32 a2)
         }
         s2 = Ent_ops_20B458::Ready(s0);
     } else {
-        s2 = func_002101F0(s0, 0);
+        s2 = SelectPictureBuffer(s0, 0);
         s3 = 1;
         (void)RunMpegStallCallback(s1);
     }
-    func_00210160(s0, s0->f118, s0->f4);
+    OutputPictureIfDecoded(s0, s0->f118, s0->f4);
     if (s0->f174 == 3) {
         ;
     } else if (s3 == 0) {
@@ -479,15 +479,15 @@ struct Owner_0020B570 {
     Child_0020B570* child;
 };
 
-s32 func_0020B458(Owner_0020B570* self, s32 a, s32 b);
-s32 func_0020B5B8(Owner_0020B570* self, s32 a, s32 b);
+s32 DecodeFramePicture(Owner_0020B570* self, s32 a, s32 b);
+s32 DecodeFieldPicture(Owner_0020B570* self, s32 a, s32 b);
 
-s32 func_0020B570(Owner_0020B570* self, s32 a, s32 b)
+s32 DecodePictureByStructure(Owner_0020B570* self, s32 a, s32 b)
 {
     if (self->child->kind != 3) {
-        return func_0020B5B8(self, a, b);
+        return DecodeFieldPicture(self, a, b);
     }
-    return func_0020B458(self, a, b);
+    return DecodeFramePicture(self, a, b);
 }
 
 struct Sub_20B5B8 {
@@ -513,14 +513,14 @@ struct Ctx_20B5B8 {
     Sub_20B5B8* sub;
 };
 
-s32 func_002101F0(Sub_20B5B8* sub, s32 flag);
+s32 SelectPictureBuffer(Sub_20B5B8* sub, s32 flag);
 s32 DecodePictureData(Sub_20B5B8* sub);
 s32 ParseMpegHeaders(Sub_20B5B8* sub);
-s32 func_0020B718(Ctx_20B5B8* ctx);
-void func_00210160(Sub_20B5B8* sub, s32 a1, s32 a2);
+s32 FlushPendingPicture(Ctx_20B5B8* ctx);
+void OutputPictureIfDecoded(Sub_20B5B8* sub, s32 a1, s32 a2);
 s32 RunMpegStallCallback(Ctx_20B5B8* ctx);
 
-s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
+s32 DecodeFieldPicture(Ctx_20B5B8* self, s32 a1, s32 a2)
 {
     s32 s3 = 0;
     Sub_20B5B8* s0;
@@ -538,7 +538,7 @@ s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
         self->f8 = 0;
         s0->f8 = 1;
     }
-    if (func_002101F0(s0, 0) != 0) {
+    if (SelectPictureBuffer(s0, 0) != 0) {
         if (s3 != 0) {
             (void)DecodePictureData(s0);
         }
@@ -546,7 +546,7 @@ s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
     s1 = 1;
     s0->f120 = s1;
     if (ParseMpegHeaders(s0) == 0) {
-        (void)func_0020B718(self);
+        (void)FlushPendingPicture(self);
         s0->f0 = s1;
         return 0;
     }
@@ -554,7 +554,7 @@ s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
     if (s0->f174 != t) {
         return -1;
     }
-    r = func_002101F0(s0, 1);
+    r = SelectPictureBuffer(s0, 1);
     s32 u = 0;
     if (r != 0) {
         u = s1;
@@ -565,7 +565,7 @@ s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
             s4 = (DecodePictureData(s0) != 0) ? s1 : 0;
         }
     }
-    func_00210160(s0, s0->f118, s0->f4);
+    OutputPictureIfDecoded(s0, s0->f118, s0->f4);
     s0->f120 = 0;
     self->f8 = s0->f118 - s0->fAC;
     s0->f118 = s0->f118 + 1;
@@ -593,16 +593,16 @@ struct Obj_20B718 {
     Inner_20B718* inner;
 };
 
-extern void func_0020B790(Inner_20B718* self);
+extern void OutputPendingPicture(Inner_20B718* self);
 
-s32 func_0020B718(Obj_20B718* self)
+s32 FlushPendingPicture(Obj_20B718* self)
 {
     s32 r = 0;
     Inner_20B718* in = self->inner;
 
     if (in->a != 0) {
         if (in->b != 0) {
-            func_0020B790(in);
+            OutputPendingPicture(in);
             self->out = in->d - in->c;
             in->a = 0;
             r = 1;
@@ -613,7 +613,7 @@ s32 func_0020B718(Obj_20B718* self)
 
 void SetIpuMpeg1Mode(s32 a);
 struct S_20B780 { u8 pad[0x848]; s32 f; };
-void func_0020B780(S_20B780* s) {
+void ResetMpegPictureMode(S_20B780* s) {
     s->f = 0;
     SetIpuMpeg1Mode(1);
 }
@@ -634,18 +634,18 @@ struct Obj_0020B790 {
 };
 
 s32 ReportMpegError(struct Obj_0020B790 *self, const char *msg);
-void func_00210970(struct Obj_0020B790 *self, s32 a1, s32 a2);
-void func_00210A80(struct Obj_0020B790 *self, s32 a1, s32 a2, s32 a3);
+void OutputFramePicture(struct Obj_0020B790 *self, s32 a1, s32 a2);
+void OutputFieldPicturePair(struct Obj_0020B790 *self, s32 a1, s32 a2, s32 a3);
 
-void func_0020B790(struct Obj_0020B790 *self)
+void OutputPendingPicture(struct Obj_0020B790 *self)
 {
     s32 n = self->f118;
     if (self->f120 != 0)
         ReportMpegError(self, "the second field is missing");
     else if (self->f174 == 3)
-        func_00210970(self, self->f1BC, n - 1);
+        OutputFramePicture(self, self->f1BC, n - 1);
     else
-        func_00210A80(self, self->f1CC, self->f1DC, n - 1);
+        OutputFieldPicturePair(self, self->f1CC, self->f1DC, n - 1);
     self->f120 = 0;
 }
 
@@ -662,7 +662,7 @@ struct Dev_20B810 {
 
 void SetIpuMpeg1Mode(s32 a);
 
-void func_0020B810(Dev_20B810* self)
+void SetUpMpegScratchpadBuffers(Dev_20B810* self)
 {
     u8* spr = (u8*)0x70000000;
     SetIpuMpeg1Mode(1);
@@ -684,7 +684,7 @@ struct Chan_20B870 {
     s32 f818;
 };
 
-void func_0020B870(Chan_20B870* c) {
+void ResetMpegDmaAndIpu(Chan_20B870* c) {
     c->f818 = 1;
     c->f1B0 = 0;
     DisableInterrupts();
@@ -750,7 +750,7 @@ s32 ReportMpegError(Self_20B978* self, s32 value)
 }
 
 struct Item_20B9D0 { u8 pad[4]; s32 x; s32 y; s32 left; s32 top; };
-s32 func_0020B9D0(Item_20B9D0* item, s32 x, s32 y)
+s32 SetPictureDimensions(Item_20B9D0* item, s32 x, s32 y)
 {
     item->x = x;
     item->y = y;
@@ -780,9 +780,9 @@ u32 ReadIpuBits(Dec_20B9F0* d, s32 bits);
 s32 ReportMpegError(Dec_20B9F0* d, const char* msg);
 s32 WaitIpuCommandDone(Dec_20B9F0* d);
 void SendIpuCommand(Dec_20B9F0* d, u32 value);
-void func_0020BEA0(Dec_20B9F0* d, u32 value, u8* table);
+void LoadIpuQuantiserMatrix(Dec_20B9F0* d, u32 value, u8* table);
 void ReadExtensionsAndUserData(Dec_20B9F0* d);
-s32 func_0020BB18(void* p);
+s32 AllocatePictureBuffers(void* p);
 
 void ReadSequenceHeader(Dec_20B9F0* d) {
     d->fD4 = 0;
@@ -801,7 +801,7 @@ void ReadSequenceHeader(Dec_20B9F0* d) {
         SendIpuCommand(d, 0x50000000);
         WaitIpuCommandDone(d);
     } else {
-        func_0020BEA0(d, 0x50000000, D_0027AF80);
+        LoadIpuQuantiserMatrix(d, 0x50000000, D_0027AF80);
     }
     d->f844 = ReadIpuBits(d, 1);
     if (d->f844) {
@@ -809,15 +809,15 @@ void ReadSequenceHeader(Dec_20B9F0* d) {
         SendIpuCommand(d, 0x58000000);
         WaitIpuCommandDone(d);
     } else {
-        func_0020BEA0(d, 0x58000000, D_0027AFC0);
+        LoadIpuQuantiserMatrix(d, 0x58000000, D_0027AFC0);
     }
     ReadExtensionsAndUserData(d);
-    func_0020BB18(d->f858);
+    AllocatePictureBuffers(d->f858);
 }
 
 INCLUDE_ASM(func_0020BB18);
 
-void func_0020BDC0(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6, u32* a7, u32* p9, u32 p10, u32 p11, u32 p12, s32 p13, s32 p14)
+void SetUpPictureBufferAddresses(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6, u32* a7, u32* p9, u32 p10, u32 p11, u32 p12, s32 p13, s32 p14)
 {
     u32 mask = 0x0FFFFFFF;
     u32 bits = 0x20000000;
@@ -848,7 +848,7 @@ void SendIpuCommand(Obj_20BEA0* self, u32 value);
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
 
-void func_0020BEA0(Obj_20BEA0* obj, u32 value, u32 mask)
+void LoadIpuQuantiserMatrix(Obj_20BEA0* obj, u32 value, u32 mask)
 {
     Req_20BEA0 req;
     req.mode = 2;
@@ -885,7 +885,7 @@ u32 SetIpuMpeg1Mode(u32 value);
 u32 ReadIpuBits(struct Obj_20BF78 *self, u32 n);
 s32 ReportMpegError(struct Obj_20BF78 *self, const void *p);
 
-void func_0020BF78(struct Obj_20BF78 *self)
+void ReadSequenceExtension(struct Obj_20BF78 *self)
 {
     u32 s2;
     u32 s0;
@@ -926,7 +926,7 @@ struct Node_20C0A8 {
     s32 f14C;
 };
 
-void func_0020C0A8(struct Node_20C0A8* self)
+void ReadSequenceDisplayExtension(struct Node_20C0A8* self)
 {
     ReadIpuBits(self, 3);
     if (ReadIpuBits(self, 1) != 0) {

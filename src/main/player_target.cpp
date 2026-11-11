@@ -106,7 +106,7 @@ void ConvertPositionToWorld(void* obj, Vec02* out);
 s32 IsObjectOfKind(void* obj, s32 kind);
 s32 GetObjectWorldPosition(void* obj, Vec02* out);
 s32 CompletesWorldBits(s32 bits);
-void func_001C61E0(Chooser_1CDFB8* self, s32 mode);
+void SetPlayerAimMode(Chooser_1CDFB8* self, s32 mode);
 void UpdatePlayerAimTarget(Chooser_1CDFB8* self);
 s32 MaskWorldBitsBySave(void);
 
@@ -221,7 +221,7 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
         self->f2204 = obj;
         self->f2200 = obj;
         self->f2208 = 0;
-        func_001C61E0(self, 0);
+        SetPlayerAimMode(self, 0);
         UpdatePlayerAimTarget(self);
         *out = 6;
         r = 0x10;
@@ -231,7 +231,7 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
         self->f220C = vectorU;
         self->f2204 = 0;
         self->f2200 = 0;
-        func_001C61E0(self, 0);
+        SetPlayerAimMode(self, 0);
         UpdatePlayerAimTarget(self);
         *out = 6;
         r = 0x10;
@@ -422,7 +422,7 @@ static inline f32 NormalizeVector(Vec02& v, const Vec02& fallback)
     return Vu0::ToFloatMoved(len);
 }
 
-void func_001CEB18(Player* self, BaseObject* obj, Vec02* point, f32* out1, Vec02* out2, Vec02* out3, f32 t)
+void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec02* point, f32* out1, Vec02* out2, Vec02* out3, f32 t)
 {
     Vec02 pos0;
     Vec02 p;
@@ -479,12 +479,12 @@ void func_001CEB18(Player* self, BaseObject* obj, Vec02* point, f32* out1, Vec02
 // func_001CEB18 also takes a float in $f12 (it reads $f12 at entry); this
 // function passes its own float parameter straight through.
 struct PathScoreArgs { s32 a; s32 b; s32 pad[2]; s32 c[4]; };
-void func_001CEB18(f32 t, s32 a, s32 b, s32* c, f32* out, s32 d, s32 e);
+void ScorePlayerLeapToPoint(f32 t, s32 a, s32 b, s32* c, f32* out, s32 d, s32 e);
 
 f32 ScoreTargetPathAt(PathScoreArgs* o, f32 t)
 {
     f32 out;
-    func_001CEB18(t, o->a, o->b, o->c, &out, 0, 0);
+    ScorePlayerLeapToPoint(t, o->a, o->b, o->c, &out, 0, 0);
     return out;
 }
 
@@ -679,7 +679,7 @@ struct PathArgs { Chooser* self; void* frame; u8 pad08[8]; Vec02 c; };
 struct NearestContext { Chooser* self; void* target; };
 
 
-void func_0017FC48(Chooser* self, Vec02* out);
+void ComputeUpwardBoostVelocity(Chooser* self, Vec02* out);
 void ScorePlayerTargetPlacement(Chooser* self, Vec02* from, void* frame, Vec02* at, Vec02* at2, f32* t, f32* cost,
                                 Vec02* a, Vec02* b);
 f32 AddRepeatTargetPenalty(Chooser* self, TargetCand* id, f32 a, f32 b);
@@ -688,12 +688,12 @@ s32 AddTargetObstructionCost(f32 limit, Chooser* self, void* a1, void* a2, void*
 f32 GetPathCurveSearchStep(TargetShape* shape);
 void FindLocalMinimum(void* fn, void* ctx, f32 start, f32 step, f32 lo, f32 hi, f32* at, f32* min);
 void PlaceOnTargetObject(Chooser* self, TargetCand* o, Vec02* a, Vec02* b, f32 t);
-void func_001CEB18(Chooser* self, void* frame, Vec02* at, s32 a, Vec02* p, Vec02* q, f32 t);
+void ScorePlayerLeapToPoint(Chooser* self, void* frame, Vec02* at, s32 a, Vec02* p, Vec02* q, f32 t);
 f32 ArctangentOfRatio(f32 y, f32 x);
 void PlaceOnTargetPoint(TargetCand* o, Vec02* out, s32 a, f32 t);
 void PlaceOnTargetCurve(TargetCand* o, Vec02* out, s32 a, f32 t);
 f32 RandomFloatInRange(f32 a, f32 b);
-void func_001C61E0(Chooser* self, s32 mode);
+void SetPlayerAimMode(Chooser* self, s32 mode);
 void UpdatePlayerAimTarget(Chooser* self);
 void StartSoundEffect(s32 sound, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
@@ -747,7 +747,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         bestCost = 3.40282347e+38f;
     }
     bestT = 0.0f;
-    func_0017FC48(self, &from);
+    ComputeUpwardBoostVelocity(self, &from);
     for (o = self->world->objects; o != 0; o = o->next50) {
         ConvertPositionToWorld(o, &at);
         if (o != keep && o->f58 < self->pos.z - at.z) {
@@ -850,7 +850,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         args.frame = o->frame;
         args.c = o->v40;
         FindLocalMinimum((void*)ScoreTargetPathAt, &args, 0.5f, 0.25f, 0.25f, 3.0f, &t, &cost);
-        func_001CEB18(self, args.frame, &args.c, 0, &cur0, &cur1, t);
+        ScorePlayerLeapToPoint(self, args.frame, &args.c, 0, &cur0, &cur1, t);
         if (o != keep) {
             if (cost >= D_00274E20) {
                 continue;
@@ -912,7 +912,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             o->shape->desc->m2(o->shape, &args.c, tVectorBest, 0);
         }
         FindLocalMinimum((void*)ScoreTargetPathAt, &args, 0.5f, 0.25f, 0.25f, 3.0f, &t, 0);
-        func_001CEB18(self, args.frame, &args.c, 0, &cur0, &cur1, t);
+        ScorePlayerLeapToPoint(self, args.frame, &args.c, 0, &cur0, &cur1, t);
         if (o != keep) {
             TransformPointBetweenFrames(o->frame, 0, &args.c, &p);
             if (AddTargetObstructionCost(t, self, 0, 0, &self->v140, &self->v150, &cur0, &cur1, &p)) {
@@ -1045,7 +1045,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         self->f2208 = 0;
         self->f2204 = bestClass75;
         self->f2200 = bestClass75;
-        func_001C61E0(self, 0);
+        SetPlayerAimMode(self, 0);
         UpdatePlayerAimTarget(self);
         state = 0xE;
         break;
@@ -1054,7 +1054,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         self->f220C = bestVectorT;
         self->f2204 = 0;
         self->f2200 = 0;
-        func_001C61E0(self, 0);
+        SetPlayerAimMode(self, 0);
         UpdatePlayerAimTarget(self);
         state = 0xF;
         break;
@@ -1398,7 +1398,7 @@ void TransformPointBetweenFrames(void* frame, void* player, void* in, void* out)
 s32 CollectBoundsSpans(void* a, void* b, void* c, s32 d, void* e, f32 x);
 
 
-void func_001D0B20(TargetPlayerView* self, TargetProbe* t, u8* out)
+void CollectPlayerTargetSpans(TargetPlayerView* self, TargetProbe* t, u8* out)
 {
     Vec02 pos;
     Vec02 local;
@@ -1435,7 +1435,7 @@ extern f32 D_00274B64;
 void UpdateEightEntryBlendWeights(Player* self, void* slots, s32 n);
 void UpdateSixEntryBlendWeights(Player* self, void* slots, s32 n, void* phase);
 void PlayPhaseCrossingSound(Player* self, void* sounds, f32 t);
-void func_001719E8(void* self, s32 a, s32 b, void* part, f32 k, void* d);
+void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d);
 
 void UpdatePlayerTargetPhase(Player* self)
 {
@@ -1496,9 +1496,9 @@ void UpdatePlayerTargetPhase(Player* self)
         if (self->f239C == 4) {
             f32 k = 5.0f;
             u8* p1 = (u8*)self + 0x1190;
-            func_001719E8(self, (s32)self->f628, (s32)self->f620, self->f250C, k, p1);
+            MeasurePlayerFootProbe(self, (s32)self->f628, (s32)self->f620, self->f250C, k, p1);
             u8* p2 = (u8*)self + 0x1290;
-            func_001719E8(self, (s32)self->f62C, (s32)self->f624, self->f2510, k, p2);
+            MeasurePlayerFootProbe(self, (s32)self->f62C, (s32)self->f624, self->f2510, k, p2);
             CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p1, (u8*)self->f250C);
             CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p2, (u8*)self->f2510);
         }
@@ -1519,7 +1519,7 @@ struct ContactPlayerView {
 void TransformDirectionBetweenFrames(void* frame, s32 a, void* in, void* out);
 void AddPlayerObjectContacts(void* self, s32 code, void* a, void* b, void* c, void* d);
 
-void func_001D0F20(Player* self)
+void PinPlayerToTarget(Player* self)
 {
     Vec02 pos;
     Vec02 local;
@@ -1632,9 +1632,9 @@ void ResetPlayerOnOffObject(Player* self)
 void TransformDirectionBetweenFrames(void* frame, s32 a, void* in, void* out);
 f32 ApproachValueWithRamp(f32 value, f32 target, f32 dt, float* ramp, f32* out);
 void AddColliderForce(Player* self, void* v);
-void func_0016FD70(Player* self);
+void ApplyPlayerDefaultSteering(Player* self);
 
-void func_001D12F0(Player* self)
+void StepPlayerAlongTarget(Player* self)
 {
     Vec02 dir;
     Vec02 force;
@@ -1666,7 +1666,7 @@ void func_001D12F0(Player* self)
             AddColliderForce(self, &force);
         }
     }
-    func_0016FD70(self);
+    ApplyPlayerDefaultSteering(self);
 }
 
 s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);

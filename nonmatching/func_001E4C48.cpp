@@ -98,8 +98,8 @@ void* FillMemory(void* p, s32 zero, s32 size);
 
 extern u8 D_00275940[0x18];
 
-u64 func_001FBE00(u64 value, u64 radix);
-s64 func_001FC3D0(u64 value, u64 radix);
+u64 DivideUnsigned64(u64 value, u64 radix);
+s64 RemainderUnsigned64(u64 value, u64 radix);
 void CopyMemory(void* dst, void* src, s32 count);
 
 extern f32 D_00275980[];
@@ -181,7 +181,7 @@ void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, s64 s);
 void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, double value);
 s32 FormatFloatDigits(char* buf, s32 n, FormatSpec* sp, double value);
 void UppercaseString(char* p);
-double func_001FD868(f32 f);
+double ConvertFloatToDouble(f32 f);
 
 struct PaddedOutput : OutputBuffer {
     void Pad(u8 ch, s32 count)
@@ -198,10 +198,10 @@ struct PaddedOutput : OutputBuffer {
 struct RegDouble { u8 pad; };
 
 f32 Power(f32 a, f32 b);
-RegDouble* func_001FCDE0(RegDouble* self, u64 v);
-RegDouble* func_001FCDE0(RegDouble* self, double v); // soft-float double in a1
+RegDouble* MultiplyDoubles(RegDouble* self, u64 v);
+RegDouble* MultiplyDoubles(RegDouble* self, double v); // soft-float double in a1
 RegDouble* TruncateDouble(RegDouble* self);
-RegDouble* func_001FCD78(RegDouble* self, RegDouble* v);
+RegDouble* SubtractDoubles(RegDouble* self, RegDouble* v);
 s32 ConvertDoubleToS32(RegDouble* self);
 
 extern u8 D_00275940[];
@@ -211,9 +211,9 @@ s32 GetStringLength(char* p);
 s32 GetDecimalExponent(double v);
 u8 GetDecimalDigit(double v, s32 e, s32 i);
 f32 Power(f32 a, f32 b);
-double func_001FD868(f32 f);
-double func_001FCDE0(double a, double b);
-double func_001FCD20(double a, double b);
+double ConvertFloatToDouble(f32 f);
+double MultiplyDoubles(double a, double b);
+double AddDoubles(double a, double b);
 
 union DoubleBits {
     double d;
@@ -232,12 +232,12 @@ void SetThreadPriority(s32 a, s32 b);
 s32 FillMemory(ThreadParams* p, s32 zero, s32 size);
 s32 MakeThread(ThreadParams* p);
 
-s32 func_001FD308(double a, double b);
-f32 func_001FD578(double a);
+s32 CompareDoubles(double a, double b);
+f32 ConvertDoubleToFloat(double a);
 f32 LogarithmBase10(f32 x);
-double func_001FD868(f32 x);
+double ConvertFloatToDouble(f32 x);
 s32 ConvertDoubleToS32(double a);
-double func_001FD358(s32 a);
+double ConvertS32ToDouble(s32 a);
 
 extern f32 g_gameClock[];
 
@@ -430,7 +430,7 @@ void NoteOnOffCameraControllerRemoved(OnOffCameraController* self, s32 arg);
 
 f32 ArctangentOfRatio(f32 y, f32 x);
 
-void func_001E30E8(OnOffCameraController* self, CameraPlacement* eye);
+void ComputeOnOffCameraHeading(OnOffCameraController* self, CameraPlacement* eye);
 
 f32 GetSpanCandidateValue(void* a0, void* a1, void* a2, SpanCandidate* a3);
 

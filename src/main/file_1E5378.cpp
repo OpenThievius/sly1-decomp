@@ -343,7 +343,7 @@ void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self)
 
 
 void HandleSwitchedColliderNotification(void* self, s32 kind, MessageBody* rec);
-s32 func_001A8C90(void* a, s32 b);
+s32 LaunchChosenPoolObject(void* a, s32 b);
 
 void HandlePlayerLinkedColliderNotification(PlayerLinkedCollider* self, s32 kind, MessageBody* rec)
 {
@@ -353,7 +353,7 @@ void HandlePlayerLinkedColliderNotification(PlayerLinkedCollider* self, s32 kind
         s32 id = rec->sourceId;
         if (id == (s32)dev->player) {
             if (rec->code == 0x35B) {
-                func_001A8C90(self->f618, 1);
+                LaunchChosenPoolObject(self->f618, 1);
             }
         } else if (((Agent*)self->f624) != 0 && id == (s32)((Agent*)self->f624)->f7E0) {
             s32 k = rec->code;
@@ -1038,7 +1038,7 @@ static inline void ClearArcQueueRequest(ArcQueueRequest* request)
 // unprojected at its depth, then (state 2 and 3) 20 above and 150 out from the camera, moved by
 // the stick in state 2, or (state 4) at the special object's point; it is placed there and the
 // outline and the ticks are queued, the camera's zoom put back.
-void func_001E7C60(T217D_3F0* self)
+void QueueArcDraw(T217D_3F0* self)
 {
     Vec02 screen;
     Vec02 world;

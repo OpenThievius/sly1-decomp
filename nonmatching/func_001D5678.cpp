@@ -141,7 +141,7 @@ void FlushVertexBatch(VertexBatch* b);
 void CloseDmaTag(PacketWriter* g);
 void DestroyVertexBatch(VertexBatch* b, s32 f);
 
-void func_001D5678(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingAnchor* anchors, RingParams* params)
+void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingAnchor* anchors, RingParams* params)
 {
     RingEntry entries[256];
     Vec02 pt;

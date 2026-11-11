@@ -136,7 +136,7 @@ f32 ApproachValueWithRamp(f32* ramp, s32 zero, f32 value, f32 target, f32 step);
 f32 ArctangentOfRatio(f32 a, f32 b);
 void TurnColliderTowardHeading(Player* self);
 
-void func_001D2BB8(Player* self, PadRecord* pad)
+void UpdateModeSelection(Player* self, PadRecord* pad)
 {
     s32 ok;
     if (g_currentMode >= 0) {
@@ -414,7 +414,7 @@ void ComputePlacedObjectWorldFrame(void* self);
 void ComputeColliderWorldFrame(Collider* self);
 void TransformMeshToWorld(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
 
-void func_001D35A8(CountedCollider* self)
+void ComputeCountedColliderWorldFrame(CountedCollider* self)
 {
     if (self->f1F4 != 0) {
         Mat02 world;

@@ -40,7 +40,7 @@ static inline u128 NormalizeOfCopy(u128 v, u128 vc, u128 fallback)
     return Vu0::DivX(v, len);
 }
 
-s32 func_00142278(Vec02* a, Vec02* b, Vec02* c, Vec02* d, s32 count, ColliderSpan* out, f32 radius)
+s32 IntersectSegmentWithCapsule(Vec02* a, Vec02* b, Vec02* c, Vec02* d, s32 count, ColliderSpan* out, f32 radius)
 {
     Vec02 cd;
     Vec02 ab;

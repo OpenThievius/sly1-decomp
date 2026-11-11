@@ -33,7 +33,7 @@
 #include "asm_func.h"
 #include "vu0.h"
 void InitCollider(void* self);
-void func_0019BE80(ObjectGatherer* self);
+void ChooseObjectGathererCandidate(ObjectGatherer* self);
 void ComputePolarOffset(void* out, f32 x, f32 y, f32 z);
 void ScatterObjectsAtPoint(void* p, void* v, s32 a, s32 b);
 extern u8 g_scatterController[];
@@ -109,7 +109,7 @@ void ResolveObjectLinks(void* self, s32 a1, void* a2);
 void* AllocateFrontMemory(s32 size);
 // What func_0019BE08 is given: two quadwords at 0x20 and 0x30.
 struct GatherTrigger { u8 pad[0x20]; Quad16 q20; Quad16 q30; };
-void func_0019C1C0(void* self, s32 mode);
+void SetObjectGathererState(void* self, s32 mode);
 s32 GetObjectSetActivationState(ObjectSet* self);
 s32 TestFlagTableBit(void* table, s32 index);
 void SetFlagTableBit(void* table, s32 index);
@@ -176,16 +176,16 @@ void InitCollider(Collider* self);
 void AppendToList(void* list, void* item);
 void RemoveFromList(void* table, void* self);
 extern f32 g_gameClock[];
-void func_0019CEC0(void* a, void* b, void* c, f32 d);
-void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
+void PlaceFramePointInOwnerFrame(void* a, void* b, void* c, f32 d);
+void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void* e);
 // A cell of the grid func_0019D0E0 finds a point in: the indices of its four corners in the
 // point table at 0xA8 and the record table at 0xC4.
 struct Cell8B { s32 corner[4]; };
-void func_0019C9C8(C8B* self, Cell8B* cell, Quad16* point);
+void BlendCellCornerRecords(C8B* self, Cell8B* cell, Quad16* point);
 void UnregisterCollider(Collider* self);
 struct LoadStream;
 s32 ReadBufferedS16(LoadStream* in);
-void func_00137FB0(LoadStream* in, void* p);
+void ReadMeshFromStream(LoadStream* in, void* p);
 void* AllocateZeroedFrontMemory(s32 n);
 s32 ReadBufferedS8(LoadStream* in);
 void DecodeC8BGridIndex(C8B* o, s32 i, f32* x, f32* y, f32* z);
@@ -714,7 +714,7 @@ void CollectNumberedItem(NumberedItem* self)
     CollectObjectSet(self);
 }
 
-void func_00199AF0(NumberedItem* p)
+void InvokeNumberedItemCollect(NumberedItem* p)
 {
     ((SlotFn*)p->desc)[77](p);
 }
@@ -784,7 +784,7 @@ void RotateMatrixUpright(Mat02* sub, s32 zero, Mat02* out);
 void BuildPlacedObjectTransform(NumberedItem* self, void* a, SpinFrame4* out);
 void BuildMatrixFromRotationAndTranslation(void* rot, void* from, SpinFrame4* out);
 void MultiplyMatrices(SpinFrame4* out, SpinFrame4* b, SpinFrame4* in);
-void func_00125C90(NumberedItem* self, void* a, SpinFrame4* m);
+void PrepareFadedObjectDraw(NumberedItem* self, void* a, SpinFrame4* m);
 
 static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
 {
@@ -842,7 +842,7 @@ void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
         MultiplyMatrices(&product, &base, &key);
         base = product;
     }
-    func_00125C90(self, a1, &base);
+    PrepareFadedObjectDraw(self, a1, &base);
 }
 
 void FlagAllNumberedItems(void)
@@ -1386,7 +1386,7 @@ void StartObjectGatherer(ObjectGatherer* self)
     ResolveObjectLinks(self, 1, (u8*)g_objectGathererStartLinks);
     StartPlacedObject(self);
     self->state = -1;
-    func_0019C1C0(self, 1);
+    SetObjectGathererState(self, 1);
     self->v650 = self->v140;
 }
 
@@ -1501,7 +1501,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
             if (self != n) {
                 s32 near = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(n->v140), Vu0::Q(self->v140)), Vu0::Sub(Vu0::Q(n->v140), Vu0::Q(self->v140)))) < self->f624 * self->f624;
                 if (near) {
-                    func_0019C1C0(n, 2);
+                    SetObjectGathererState(n, 2);
                 }
             }
         }
@@ -1582,7 +1582,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
             break;
         }
     }
-    func_0019C1C0(self, state);
+    SetObjectGathererState(self, state);
     switch (state) {
     case 1:
     case 2: {
@@ -1629,7 +1629,7 @@ ASM_FUNC(func_0019BB90);
 
 void BuildPlacedObjectTransform(void* self, void* a, void* out);
 
-void func_0019BC40(ObjectGatherer* self, void* a1, void* a2)
+void ApplyObjectGathererLodObject(ObjectGatherer* self, void* a1, void* a2)
 {
     Vec02 tmp[4];
     ListFrame frame;
@@ -1679,7 +1679,7 @@ s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
 {
     SlotMessage loc;
     if (self->state != 3) {
-        func_0019C1C0(self, 3);
+        SetObjectGathererState(self, 3);
         BaseObject* obj = (BaseObject*)self->group;
         if (obj != 0) {
             loc.kind = 6;
@@ -1696,7 +1696,7 @@ void MeasurePointToSegment(void* p, Vec02* a, Vec02* b, f32* t, f32* dist);
 
 // Picks, of the class 0x7C objects within reach, the one farthest from the active collider along
 // the segment to it, and keeps it in f660.
-void func_0019BE80(ObjectGatherer* self)
+void ChooseObjectGathererCandidate(ObjectGatherer* self)
 {
     ListFrame frame;
     Vec02 point;
@@ -1757,7 +1757,7 @@ void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
     self->desc02()->m21(self, (Vec02 *)&D_00248D30);
 }
 
-void func_0019C1C0(ObjectGatherer* self, s32 mode)
+void SetObjectGathererState(ObjectGatherer* self, s32 mode)
 {
     Vec02 offset;
     if (self->state == mode) {
@@ -1785,7 +1785,7 @@ void func_0019C1C0(ObjectGatherer* self, s32 mode)
         break;
     }
     case 2:
-        func_0019BE80(self);
+        ChooseObjectGathererCandidate(self);
         self->f558 = self->f558 + 10.0f;
         self->ring = 0;
         break;
@@ -1835,7 +1835,7 @@ void LoadC8BObject(C8B* o, LoadStream* in)
     }
     s32 i = 0;
     o->f48 = ReadBufferedS16(in);
-    func_00137FB0(in, o->fA0);
+    ReadMeshFromStream(in, o->fA0);
     o->fC4 = (Rec8B*)AllocateZeroedFrontMemory(o->fA4 * 100);
     for (i = 0; i < o->fA4; i++) {
         f32 x;
@@ -1912,7 +1912,7 @@ void StartC8BObject(C8B* self)
     f32* src = buf;
     for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
     SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
-    func_0012CD78(self->f3E4, self->f3E4->pC0->p8->f8, 0.0f, (PlacedObject*)self->f40, (PlacedObject*)self->f3C, 1,
+    SampleAnimationFrameChain(self->f3E4, self->f3E4->pC0->p8->f8, 0.0f, (PlacedObject*)self->f40, (PlacedObject*)self->f3C, 1,
                   (Vec02*)&self->q70, 0, 0, 0);
     self->f60 = self->f3E4->pC0->p8->f8;
     if (self->f80 != 0) {
@@ -1921,7 +1921,7 @@ void StartC8BObject(C8B* self)
         src = buf;
         for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
         SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
-        func_0012CD78(self->f3E4, self->f3E4->pC0->p8->f8, 0.0f, (PlacedObject*)self->f40, (PlacedObject*)self->f3C, 1,
+        SampleAnimationFrameChain(self->f3E4, self->f3E4->pC0->p8->f8, 0.0f, (PlacedObject*)self->f40, (PlacedObject*)self->f3C, 1,
                       (Vec02*)&self->q90, 0, 0, 0);
     } else {
         self->q90 = self->q70;
@@ -1932,7 +1932,7 @@ void StartC8BObject(C8B* self)
 // Weights of the four corners of a cell for the point, from the planes of its faces (the sides'
 // cross products), then blends the corners' 24 floats by those weights into self's slots and
 // gives them to the renderer.
-void func_0019C9C8(C8B* self, Cell8B* cell, Quad16* point)
+void BlendCellCornerRecords(C8B* self, Cell8B* cell, Quad16* point)
 {
     s32 tri[3];
     Vec02 side1;
@@ -2010,7 +2010,7 @@ struct FramePoint_0019CE50 {
 
 void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
 
-void func_0019CE50(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
+void PlaceFramePointAtTime(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
 {
     Vec02 pos;
     Mat02 rot;
@@ -2025,12 +2025,12 @@ struct FrameOwner_0019CEC0 {
 };
 
 // The point func_0019CE50 places at time t, in the frame of self's object at that time.
-void func_0019CEC0(void* self, void* p, void* out, f32 t)
+void PlaceFramePointInOwnerFrame(void* self, void* p, void* out, f32 t)
 {
     Vec02 pos;
     Vec02 point;
     Mat02 rot;
-    func_0019CE50(self, (FramePoint_0019CE50*)p, &point, t);
+    PlaceFramePointAtTime(self, (FramePoint_0019CE50*)p, &point, t);
     ComputeObjectFrameAtTime(((FrameOwner_0019CEC0*)self)->object, 0, &pos, &rot, 0, 0, t);
     Vu0::Q(point) = Vu0::Sub(Vu0::Q(point), Vu0::Q(pos));
     Vu0::Q(*(Vec02*)out) = Vu0::RotateTransposed(rot, Vu0::Q(point));
@@ -2041,7 +2041,7 @@ struct TreePlane {
     f32 dist;
 };
 
-u8* func_0019CF68(C8B* self, Tri8B* node, Vec02* pt)
+u8* FindPlaneTreeLeafAtPoint(C8B* self, Tri8B* node, Vec02* pt)
 {
     if (node == 0) {
         node = self->fD8;
@@ -2064,7 +2064,7 @@ u8* func_0019CF68(C8B* self, Tri8B* node, Vec02* pt)
             if (node->c == 0) {
                 r = self->fDC[node - self->fD8].b;
             } else {
-                r = func_0019CF68(self, (Tri8B*)node->c, pt);
+                r = FindPlaneTreeLeafAtPoint(self, (Tri8B*)node->c, pt);
             }
             if (r != 0) {
                 return r;
@@ -2080,7 +2080,7 @@ u8* func_0019CF68(C8B* self, Tri8B* node, Vec02* pt)
 // Bisects the segment from self's point at 0x90 to *from for the last place func_0019CF68 accepts
 // (ten halvings); the point, what it returned there and the distance from *from, into the
 // outputs that are not 0.
-void func_0019D0E0(void* a, void* b, void* c, void* d, void* e)
+void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void* e)
 {
     u8* self = (u8*)a;
     Vec02* from = (Vec02*)b;
@@ -2089,7 +2089,7 @@ void func_0019D0E0(void* a, void* b, void* c, void* d, void* e)
     f32* dist = (f32*)e;
     Vec02 point;
     Vec02 best;
-    s32 first = (s32)func_0019CF68((C8B*)self, 0, from);
+    s32 first = (s32)FindPlaneTreeLeafAtPoint((C8B*)self, 0, from);
     s32 found;
     if (first != 0) {
         if (out != 0) {
@@ -2109,7 +2109,7 @@ void func_0019D0E0(void* a, void* b, void* c, void* d, void* e)
     for (s32 i = 9; i >= 0; i--) {
         f32 t = (lo + hi) * 0.5f;
         Vu0::Q(point) = Vu0::MulXSum(Vu0::Q(*(Vec02*)(self + 0x90)), Vu0::Scalar(1.0f - t), Vu0::Q(*from), Vu0::Scalar(t));
-        s32 r = (s32)func_0019CF68((C8B*)self, 0, &point);
+        s32 r = (s32)FindPlaneTreeLeafAtPoint((C8B*)self, 0, &point);
         if (r != 0) {
             found = r;
             lo = t;
@@ -2120,7 +2120,7 @@ void func_0019D0E0(void* a, void* b, void* c, void* d, void* e)
     }
     if (found == 0) {
         best = *(Vec02*)(self + 0x70);
-        found = (s32)func_0019CF68((C8B*)self, 0, &best);
+        found = (s32)FindPlaneTreeLeafAtPoint((C8B*)self, 0, &best);
     }
     if (out != 0) {
         *out = best;
@@ -2144,9 +2144,9 @@ void TrackAimTargetObject(Player* self, C8B* x, void* y)
         if (d < g_gameClock[2]) {
             d = g_gameClock[2];
         }
-        func_0019CEC0(x, y, &q0, d);
-        func_0019D0E0(x, &q0, &q1, &w20, &w24);
-        func_0019C9C8(x, w20, &q1);
+        PlaceFramePointInOwnerFrame(x, y, &q0, d);
+        FindNearestAcceptedPointOnSegment(x, &q0, &q1, &w20, &w24);
+        BlendCellCornerRecords(x, w20, &q1);
     }
 }
 
@@ -2164,6 +2164,6 @@ void TrackAimTargetPoint(void* self, C8B* dst, PathCurveObject* src, f32* k)
         o->vt->m12(o, *k, &q0, 0, (f32*)&q1, 0, 0, k);
     }
     TransformPointBetweenFrames((void*)src->parent, (s32)self, &q1, &q2);
-    func_0019D0E0(dst, &q2, &q3, &w40, &w44);
-    func_0019C9C8(dst, w40, &q3);
+    FindNearestAcceptedPointOnSegment(dst, &q2, &q3, &w40, &w44);
+    BlendCellCornerRecords(dst, w40, &q3);
 }

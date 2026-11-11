@@ -77,7 +77,7 @@ struct TrailFrame { Mat02 rot; Vec02 pos; };
 
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
 
-void func_001C29F8(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale, f32 dt)
+void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale, f32 dt)
 {
     Vec02 pts[2];
     Vec02 motion[2];
@@ -194,7 +194,7 @@ done:
 void* FillMemory(void* p, s32 value, s32 size);
 void QueueDeferredRequest(DeferredRequest* src);
 
-void func_001C3028(TrailRing* self, u8* cam)
+void QueueTrailRibbonDraw(TrailRing* self, u8* cam)
 {
     DeferredRequest req;
     Vec02 diff;

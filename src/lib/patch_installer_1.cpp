@@ -112,23 +112,23 @@ Slot_1F6F48 D_002770E8[8] = {
     { 0x8, 0 },
 };
 
-void func_001F6EE0(s32 a, s32 b);
-void func_001F6EF0(u32 a, void* b, s32 c);
+void SetSystemCallHandlerFirstPatch(s32 a, s32 b);
+void CopyKernelWordsSyscallFirstPatch(u32 a, void* b, s32 c);
 void SyncDataCache(s32 a);
-s32 func_001F6F38(s32 key);
+s32 QueryPatchedHandlerFirstPatch(s32 key);
 
 void InstallFirstKernelPatch(void)
 {
     if ((*(volatile u32*)0x10001810 & 0x100) != 0) {
         return;
     }
-    func_001F6EE0(D_002770E8[0].key, (s32)D_002770E8[0].value);
-    func_001F6EF0(0x80076000, D_00276980, 0x740);
-    func_001F6EF0(0x82000, D_002770C0, 0x28);
+    SetSystemCallHandlerFirstPatch(D_002770E8[0].key, (s32)D_002770E8[0].value);
+    CopyKernelWordsSyscallFirstPatch(0x80076000, D_00276980, 0x740);
+    CopyKernelWordsSyscallFirstPatch(0x82000, D_002770C0, 0x28);
     SyncDataCache(0);
     SyncDataCache(2);
-    func_001F6EE0(D_002770E8[1].key, (s32)D_002770E8[1].value);
+    SetSystemCallHandlerFirstPatch(D_002770E8[1].key, (s32)D_002770E8[1].value);
     for (u32 i = 2; i < 8; i++) {
-        func_001F6EE0(D_002770E8[i].key, func_001F6F38(D_002770E8[i].key));
+        SetSystemCallHandlerFirstPatch(D_002770E8[i].key, QueryPatchedHandlerFirstPatch(D_002770E8[i].key));
     }
 }

@@ -2,6 +2,7 @@ symbol	name	evidence
 func_001F7270	WriteSerialChar	original assembly: waits on the status word at 0x1000F130 and writes a character to the serial port at 0x1000F180 (WriteConsoleChar calls it)
 func_001F72A8	BufferOutputChar	gathers characters in g_outputLine and hands the line to PrintToDebugConsole at a newline or when it is full (PrintBuffered's output)
 func_001F7358	WriteConsoleChar	writes a character to the serial port with WriteSerialChar, a newline as a carriage return and a line feed; g_outputHook's default
+func_001F7390	RoundDoubleToInteger	takes a double's bits, returns 0 for magnitudes below 2^-2, 9999 for those of 2^13 and over, else the mantissa shifted to an integer and rounded to nearest; FormatExponent turns its scaled digits into an integer with it
 func_001F7420	FormatExponent	writes a double through the output hook in the form 0.ddddddde+n (the formatter's %e and %f)
 func_001F7588	FormatOutput	the small formatter of %c %d %u %o %x %s %e %f with l, h and a zero-padded width, writing each character through its character function (PrintToOutputHook and PrintBuffered call it)
 func_001F7B50	PrintToOutputHook	formats its arguments through FormatOutput to g_outputHook (RunRequestThread and the TLB set-up print with it)

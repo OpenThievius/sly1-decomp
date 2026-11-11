@@ -180,7 +180,7 @@ void AdvancePathFollowerAlongPath(PathFollower* self, s32* out);
 void ComputePathFollowerHeadingTarget(PathFollower* self);
 void UpdatePathFollowerSound(PathFollower* self, f32 t);
 void SteerPathFollower(PathFollower* self);
-void func_001D8E40(PathFollower* self);
+void EmitPathFollowerWheelParticles(PathFollower* self);
 void AdvancePathFollowerEntry(PathFollower* self, s32 v);
 void ProcessPathFollowerContacts(PathFollower* self);
 void ClearRootTries(PathFollower* self);
@@ -679,13 +679,13 @@ struct HitMessage {
 
 void ComputeOscillatorDisplacement(void* osc, void* pos, f32 t, s32 a, Vec02* out, s32 b, s32 c);
 s32 IsObjectOfKind(void* node, s32 kind);
-s32 func_0013E658(void* a, s32 b);
-s32 func_001D6A18(Player* self, Collider* col, Vec02* out);
+s32 FindPlaneTreeNodeForPoint(void* a, s32 b);
+s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out);
 void TransformPointAtTime(void* frame, s32 a, void* point, s32 b, s32 c, s32 d, f32 t);
 typedef s32 (*MessageHandlerFn)(Collider* self, s32 a, OwnerMessage* msg);
 typedef void (*HitFn)(Collider* self, HitMessage* msg);
 
-void func_001D66A8(Player* self)
+void NotifyPlayerGroundObject(Player* self)
 {
     u32 i;
     if (self->f2438 != 0 && *(s32*)((u8*)self->f2438 + 0x58C) != 0) {
@@ -702,7 +702,7 @@ void func_001D66A8(Player* self)
             u128 s1 = Vu0::Scalar(-1.0f);
             Vu0::Q(p) = Vu0::MulXSum(Vu0::Q(p), s2, Vu0::Q(moved), s1);
         }
-        i = func_0013E658(&p, (s32)self->f2438->tree.nodes) != 0;
+        i = FindPlaneTreeNodeForPoint(&p, (s32)self->f2438->tree.nodes) != 0;
     } else {
         i = 0;
     }
@@ -714,7 +714,7 @@ void func_001D66A8(Player* self)
         }
     }
     Vec02 out;
-    if (i == 0 || func_001D6A18(self, self->f2438, &out) == 0) {
+    if (i == 0 || ProbeColliderBelowPoint(self, self->f2438, &out) == 0) {
         return;
     }
     f32 fresh = 0.05f;
@@ -770,7 +770,7 @@ void func_001D66A8(Player* self)
 
 s32 CollectTreeNodeSpans(void* nodes, void* a, void* b, s32 c, s32 d, void* out);
 
-s32 func_001D6A18(Player* self, Collider* col, Vec02* out)
+s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out)
 {
     Vec02 moved;
     Vec02 shift;
@@ -795,18 +795,18 @@ s32 func_001D6A18(Player* self, Collider* col, Vec02* out)
     return 1;
 }
 
-void func_001BA5B0(Player* self, void* other, f32 t);
-void func_001EED68(void* obj, Vec02* p, Vec02* out1, Vec02* out2);
+void ApplyColliderAttachedSetContact(Player* self, void* other, f32 t);
+void GetAttachedSetPointMotion(void* obj, Vec02* p, Vec02* out1, Vec02* out2);
 f32 ApproachValueClampingVelocity(void* table, f32* out, f32 a, f32 b, f32 c, f32 d);
 void AddColliderForce(void* a, void* b);
 
-void func_001D6B18(Player* self, Collider* other, f32 t)
+void ApplyPlayerAttachedSetContact(Player* self, Collider* other, f32 t)
 {
     switch (self->f2228) {
     case 6:
     case 0x2B:
         if (self->v150.z < 0.0f) {
-            func_001BA5B0(self, other, t);
+            ApplyColliderAttachedSetContact(self, other, t);
         }
         return;
     case 0x27:
@@ -818,11 +818,11 @@ void func_001D6B18(Player* self, Collider* other, f32 t)
         Vec02 force;
         Vec02 k;
         f32 next;
-        if (func_001D6A18(self, other, &point) == 0) {
+        if (ProbeColliderBelowPoint(self, other, &point) == 0) {
             return;
         }
         Vu0::Q(local) = Vu0::Rotate(self->m660, Vu0::Q(self->v640));
-        func_001EED68(other, &point, &q2, &q3);
+        GetAttachedSetPointMotion(other, &point, &q2, &q3);
         Vu0::Q(k) = Vu0::FromFloatAt(D_00275170[0]);
         Vu0::Set(force, Vu0::MulX(Vu0::Sub(Vu0::Add(Vu0::Q(self->v150), Vu0::Q(local)), Vu0::Q(q2)), Vu0::Q(k)));
         ApproachValueClampingVelocity(D_00275178, &next, self->v140.z + D_0027516C, self->v150.z - q2.z, point.z, t);
@@ -831,7 +831,7 @@ void func_001D6B18(Player* self, Collider* other, f32 t)
         return;
     }
     }
-    func_001BA5B0(self, other, t);
+    ApplyColliderAttachedSetContact(self, other, t);
 }
 
 void SwapInPlayerStandIn(Player* self)
@@ -887,7 +887,7 @@ static inline void StoreScaledQuadword(Vec02* dst, f32 k, u8* p)
     StoreQuadword(dst, ScaleQuadword(tv, u));
 }
 
-void func_001D6DD8(StandIn* self, f32 t)
+void StepStandIn(StandIn* self, f32 t)
 {
     Mat02 upright;
     Vec02 push;
@@ -1354,13 +1354,13 @@ struct WheelSpawn {
 };
 
 typedef void (*EmitFn)(PathEmitter* self, WheelEmit* rec);
-void func_00127E60(void* obj, s32 a1, void* a2, void* a3, void* a4, s32 a5);
+void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, void* a3, void* a4, s32 a5);
 void BuildBasisFromX(Vec02* v, Mat02* out);
 void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
 
 // The wheels' particles: the lap timer's fade, then for each wheel the emitters of its two
 // spawn counts (the first with a random turn and tilt, the second plain).
-void func_001D8E40(PathFollower* self)
+void EmitPathFollowerWheelParticles(PathFollower* self)
 {
     if (self->fB14 != 0) {
         f32 t = (g_gameTime - self->f854) / D_002751D8;
@@ -1426,7 +1426,7 @@ void func_001D8E40(PathFollower* self)
                 PathEmitter* e = (self->fAFC != 0) ? self->fAFC->f20 : self->fB18;
                 if (e != 0) {
                     if (e->f18 == 0) {
-                        func_00127E60(self, 0, &spawn.pos, &spawn.basis, &spawn.vel, 0);
+                        TransformStateToAncestorFrame(self, 0, &spawn.pos, &spawn.basis, &spawn.vel, 0);
                     }
                     ((EmitFn)e->vt[0x7C / 4])(e, &rec);
                 }
@@ -1563,7 +1563,7 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
 
 void ChangeAgentState(void* node, s32 kind, s32 flag);
 
-void func_001D9AC8(PathFollower* self)
+void ProcessPathFollowerContacts(PathFollower* self)
 {
     Vec02 pos;
     Vec02 spin;
@@ -1617,7 +1617,7 @@ void UpdatePathFollower(PathFollower* self, f32 t)
     }
     UpdatePathFollowerSound(self, t);
     SteerPathFollower(self);
-    func_001D8E40(self);
+    EmitPathFollowerWheelParticles(self);
     AdvancePathFollowerEntry(self, local);
     ProcessPathFollowerContacts(self);
     if (self->rot.r[2].z > 0.5f) {
@@ -1788,7 +1788,7 @@ s32 IsObjectAccepted(void* obj, void* by);
 void SetColliderTurnAnchorPreset(void* obj, s32 n);
 void SetColliderMoveAnchorPreset(void* obj, s32 n);
 void AddMeshContacts(Collider* a, f32 f, void* b, Collider* c, s32 d, s32 e, s32 g, void* h);
-void func_00186BA8(void* a, Collider* b, void* c, void* d, void* e, void* f);
+void CreateMeshPairContacts(void* a, Collider* b, void* c, void* d, void* e, void* f);
 
 // Whether a lies below b along axis (their dot products with it).
 static inline s32 IsLowerAlong(const Vec02& a, const Vec02& b, const Vec02& axis)
@@ -1796,7 +1796,7 @@ static inline s32 IsLowerAlong(const Vec02& a, const Vec02& b, const Vec02& axis
     return Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(a), Vu0::Q(axis))) < Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(b), Vu0::Q(axis)));
 }
 
-void func_001DA320(PathFollower* self, Collider* other, void* a2, void* a3, void* a4)
+void CollidePathFollowerWithObject(PathFollower* self, Collider* other, void* a2, void* a3, void* a4)
 {
     if ((other->flags538 & ((u64)0x8000 << 40)) != 0 || (((u32*)other->desc)[2] & 0x10) != 0) {
         for (u32 i = 0; i < 4; i++) {
@@ -1850,7 +1850,7 @@ void func_001DA320(PathFollower* self, Collider* other, void* a2, void* a3, void
             Collider* c = (Collider*)self->fB4C;
             AddMeshContacts(other, other->radius3CC, (u8*)other + 0x140, c, c->tree.count, (s32)c->tree.nodes, 0, (u8*)self + 0xB74);
         } else if (a3 != 0) {
-            func_00186BA8((Collider*)self->fB4C, other, a2, a3, a4, (u8*)self + 0xB74);
+            CreateMeshPairContacts((Collider*)self->fB4C, other, a2, a3, a4, (u8*)self + 0xB74);
         }
     }
 }
@@ -1878,7 +1878,7 @@ static inline void MulMatInto(Mat02* out, const Mat02& a, const Mat02& b)
     out->r[2] = r.r[2];
 }
 
-void func_001DA7E0(PathFollower* self)
+void UpdatePathFollowerAttachmentFrames(PathFollower* self)
 {
     u32 i = 0;
     UpdateAttachmentFrames(self);
@@ -1920,7 +1920,7 @@ void DrawCollider(Collider* self, void* a, void* m);
 void BuildPlacedObjectTransform(void* obj, void* c, void* out);
 void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
 void BuildMatrixFromRotationAndTranslation(void* pos, void* rot, void* out);
-void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+void DrawBeamBetweenPoints(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
 
 void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
 {
@@ -1949,10 +1949,10 @@ void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
             TransformPointBetweenFrames(self, 0, &self->f6B0[i].v10, &q[i]);
         }
         if (self->fB28 != 0) {
-            func_001268B8(self->fB28, a, &q[0], &q[1], 1.0f, b != 0 ? b->f40 : 1.0f);
+            DrawBeamBetweenPoints(self->fB28, a, &q[0], &q[1], 1.0f, b != 0 ? b->f40 : 1.0f);
         }
         if (self->fB2C != 0) {
-            func_001268B8(self->fB2C, a, &q[2], &q[3], 1.0f, b != 0 ? b->f40 : 1.0f);
+            DrawBeamBetweenPoints(self->fB2C, a, &q[2], &q[3], 1.0f, b != 0 ? b->f40 : 1.0f);
         }
     }
 }

@@ -293,6 +293,6 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         return;
     }
     }
-    func_00144BE8(cam, flag, &eye, &target, 0, Blend(blend, 20.0f, far), Blend(blend, -7.0f, rise),
+    UpdateOrbitCameraPlacement(cam, flag, &eye, &target, 0, Blend(blend, 20.0f, far), Blend(blend, -7.0f, rise),
                   Blend(blend, 1.0f, 0.25f), 0.0f, ease, dt);
 }

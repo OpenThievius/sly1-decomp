@@ -159,8 +159,8 @@ void* FillMemory(void* p, s32 value, s32 size);
 
 extern u8 D_00275940[0x18];
 
-u64 func_001FBE00(u64 value, u64 radix);
-s64 func_001FC3D0(u64 value, u64 radix);
+u64 DivideUnsigned64(u64 value, u64 radix);
+s64 RemainderUnsigned64(u64 value, u64 radix);
 void CopyMemory(void* dst, void* src, s32 count);
 
 
@@ -278,7 +278,7 @@ void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, s64 s);
 void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, double value);
 s32 FormatFloatDigits(char* buf, s32 n, FormatSpec* sp, double value);
 void UppercaseString(char* p);
-double func_001FD868(f32 f);
+double ConvertFloatToDouble(f32 f);
 
 
 
@@ -307,10 +307,10 @@ struct RegDouble { u8 pad; };
 
 
 f32 Power(f32 a, f32 b);
-RegDouble* func_001FCDE0(RegDouble* self, u64 v);
-RegDouble* func_001FCDE0(RegDouble* self, double v); // soft-float double in a1
+RegDouble* MultiplyDoubles(RegDouble* self, u64 v);
+RegDouble* MultiplyDoubles(RegDouble* self, double v); // soft-float double in a1
 RegDouble* TruncateDouble(RegDouble* self);
-RegDouble* func_001FCD78(RegDouble* self, RegDouble* v);
+RegDouble* SubtractDoubles(RegDouble* self, RegDouble* v);
 s32 ConvertDoubleToS32(RegDouble* self);
 
 
@@ -325,9 +325,9 @@ s32 GetStringLength(char* p);
 s32 GetDecimalExponent(double v);
 u8 GetDecimalDigit(double v, s32 e, s32 i);
 f32 Power(f32 a, f32 b);
-double func_001FD868(f32 f);
-double func_001FCDE0(double a, double b);
-double func_001FCD20(double a, double b);
+double ConvertFloatToDouble(f32 f);
+double MultiplyDoubles(double a, double b);
+double AddDoubles(double a, double b);
 
 union DoubleBits {
     double d;
@@ -351,12 +351,12 @@ s32 MakeThread(ThreadParams* p);
 
 
 
-s32 func_001FD308(double a, double b);
-f32 func_001FD578(double a);
+s32 CompareDoubles(double a, double b);
+f32 ConvertDoubleToFloat(double a);
 f32 LogarithmBase10(f32 x);
-double func_001FD868(f32 x);
+double ConvertFloatToDouble(f32 x);
 s32 ConvertDoubleToS32(double a);
-double func_001FD358(s32 a);
+double ConvertS32ToDouble(s32 a);
 
 extern f32 g_gameClock[];
 
@@ -765,10 +765,10 @@ s32 WriteIntegerDigits(u8* buf, s32 len, u64 value, u32 radixArg)
     u8* stop = end;
     u64 v = value;
     do {
-        s64 digit = func_001FC3D0(v, radix);
+        s64 digit = RemainderUnsigned64(v, radix);
         end--;
         *end = D_00275940[(s32)digit];
-        v = func_001FBE00(v, radix);
+        v = DivideUnsigned64(v, radix);
     } while (v != 0 && end >= buf);
     s32 count = stop - end;
     if (count != 0 && buf < end) {
@@ -886,10 +886,10 @@ void FormatIntegerArg(FormatSpec* self, OutputBuffer* sink, u64 value)
 s32 GetDecimalExponent(double v)
 {
     s32 i;
-    if (func_001FD308(v, 0.0) > 0) {
-        double l = func_001FD868(LogarithmBase10(func_001FD578(v)));
+    if (CompareDoubles(v, 0.0) > 0) {
+        double l = ConvertFloatToDouble(LogarithmBase10(ConvertDoubleToFloat(v)));
         i = ConvertDoubleToS32(l);
-        if (func_001FD308(l, 0.0) < 0 && func_001FD308(l, func_001FD358(i)) != 0)
+        if (CompareDoubles(l, 0.0) < 0 && CompareDoubles(l, ConvertS32ToDouble(i)) != 0)
             i--;
     } else {
         i = 0;
@@ -905,11 +905,11 @@ s8 GetDecimalDigit(RegDouble* self0, s32 a, s32 b)
         idx = 0;
     } else {
         f32 t = Power(10.0f, (f32)(-b));
-        RegDouble* p = func_001FCDE0(self, func_001FD868(t));
+        RegDouble* p = MultiplyDoubles(self, ConvertFloatToDouble(t));
         self = TruncateDouble(p);
-        p = TruncateDouble(func_001FCDE0(self, 0.1));
-        p = func_001FCDE0(p, (u64)0x4024000000000000ULL);
-        idx = ConvertDoubleToS32(func_001FCD78(self, p));
+        p = TruncateDouble(MultiplyDoubles(self, 0.1));
+        p = MultiplyDoubles(p, (u64)0x4024000000000000ULL);
+        idx = ConvertDoubleToS32(SubtractDoubles(self, p));
     }
     return ((s8*)&D_00275940)[idx];
 }
@@ -937,7 +937,7 @@ s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
     if (isE) base = e;
     s32 prec = sp->prec;
     f32 p = Power(10.0f, (f32)(base - prec));
-    double r = func_001FCD20(v, func_001FCDE0(func_001FD868(p), 0.5));
+    double r = AddDoubles(v, MultiplyDoubles(ConvertFloatToDouble(p), 0.5));
     s32 e2 = GetDecimalExponent(r);
     if (e < GetDecimalExponent(r)) e = e2;
     s32 n, i;
@@ -1100,7 +1100,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
                     if (j != 0) {
                         AppendToOutputBuffer(c, s5, GetStringLength(s5));
                     }
-                    FormatFloatArg(sp, c, func_001FD868(*fp++));
+                    FormatFloatArg(sp, c, ConvertFloatToDouble(*fp++));
                 }
                 AppendToOutputBuffer(c, s6, GetStringLength(s6));
                 i = next;
@@ -1632,16 +1632,16 @@ typedef void (*OnOffPoseFn)(Arr63* obj, Vec02* out, s32 a, s32 b, s32 c, s32 d, 
 void ConvertOffsetToCylindrical(void* camera, Vec02* point, f32* a, f32* b, f32* c);
 void ComputePolarOffset(Vec02* out, f32 a, f32 b, f32 c);
 void RequestCameraSnap(Camera* camera, s32 mode);
-void func_00145610(Camera* camera, Vec02* point, f32 a, f32 b);
+void SetCameraAimOffsetFromScreenPoint(Camera* camera, Vec02* point, f32 a, f32 b);
 void* GetOnOffObjectBlock(void* self);
-void func_001E30E8(OnOffCameraController* self, CameraPlacement* eye);
-void func_00143418(Camera* camera, s32 target, CameraPlacement* out, f32 t);
+void ComputeOnOffCameraHeading(OnOffCameraController* self, CameraPlacement* eye);
+void GetCameraTargetPlacement(Camera* camera, s32 target, CameraPlacement* out, f32 t);
 
 void TransformPointBetweenFrames(void* a0, OnOffObject* a1, void* a2, FacePoint* a3);
 extern f32 g_gameClock[];
 void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object);
 
-void func_001E2E68(OnOffCameraController* self, OnOffObject* object)
+void ActivateOnOffCameraController(OnOffCameraController* self, OnOffObject* object)
 {
     OnOffCameraView* view = (OnOffCameraView*)self;
     CameraPlacement place;
@@ -1654,7 +1654,7 @@ void func_001E2E68(OnOffCameraController* self, OnOffObject* object)
     self->ptr = object;
     s32 target = *(s32*)((u8*)cam + 0x3DC);
     void* block = GetOnOffObjectBlock(object);
-    func_00143418(cam, target, &place, 0.0f);
+    GetCameraTargetPlacement(cam, target, &place, 0.0f);
     BlendOnOffCameraPoint(block, &place, &blended, 0);
     if (object != 0) {
         if (object->obj != 0) {
@@ -1664,7 +1664,7 @@ void func_001E2E68(OnOffCameraController* self, OnOffObject* object)
                 fn(object->obj, &here, 0, 0, 0, 0, &object->angle3A0);
             }
         } else if (object->f38C != 0) {
-            func_001E30E8(self, &place);
+            ComputeOnOffCameraHeading(self, &place);
         }
         BlendOnOffCameraPoint(block, &place, &blended, object);
     }
@@ -1693,7 +1693,7 @@ void func_001E2E68(OnOffCameraController* self, OnOffObject* object)
             g_camera->f1C8 = fov;
         }
     }
-    func_00145610(cam, &sum, *(f32*)((u8*)block + 0x58), *(f32*)((u8*)block + 0x5C));
+    SetCameraAimOffsetFromScreenPoint(cam, &sum, *(f32*)((u8*)block + 0x58), *(f32*)((u8*)block + 0x5C));
 }
 
 void DeactivateOnOffCameraController(OnOffCameraController* self)
@@ -1716,7 +1716,7 @@ void NoteOnOffCameraControllerRemoved(OnOffCameraController* self, s32 arg) {}
 
 f32 ArctangentOfRatio(f32 y, f32 x);
 
-void func_001E30E8(OnOffCameraController* self, CameraPlacement* eye)
+void ComputeOnOffCameraHeading(OnOffCameraController* self, CameraPlacement* eye)
 {
     Vec02 blended;
     Vec02 here;
@@ -1769,9 +1769,9 @@ void ClearPadPressedBits(PadRecord* self, s32 mask);
 void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
 void FindFreeOnOffCameraAngle(OnOffCameraController* self, Vec02* center, Vec02* in, Vec02* out);
 void FindFreeOnOffCameraScreenSpan(OnOffCameraController* self, Vec02* center);
-void func_00145E68(Camera* cam, Vec02* from, Vec02* in, Vec02* out);
-void func_00145718(Camera* cam, Vec02* center, Vec02* pos, f32 a, f32 b);
-void func_00143BE0(Camera* cam);
+void PushCameraOutOfGeometry(Camera* cam, Vec02* from, Vec02* in, Vec02* out);
+void AimCameraAtPointWithSpring(Camera* cam, Vec02* center, Vec02* pos, f32 a, f32 b);
+void FadeCameraObstructingParts(Camera* cam);
 
 void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* eye, PadRecord* pad, f32 dt)
 {
@@ -1797,7 +1797,7 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         flags = 4;
         hold = 0;
     }
-    func_001E30E8(self, eye);
+    ComputeOnOffCameraHeading(self, eye);
     OnOffCameraParams* block = (OnOffCameraParams*)GetOnOffObjectBlock(object);
     Vec02 blended;
     Vec02 sum;
@@ -2150,7 +2150,7 @@ done:
                 FindFreeOnOffCameraAngle(self, &sum, &pos, &pos);
             }
         } else if (D_00275978 == 0) {
-            func_00145E68(cam, &view->v50, &pos, &pos);
+            PushCameraOutOfGeometry(cam, &view->v50, &pos, &pos);
         }
     }
     ConvertOffsetToCylindrical(&pos, &sum, &placeAngle, &placeDist, &placeHeight);
@@ -2159,13 +2159,13 @@ done:
     u128 len = Vu0::Length(Vu0::Q(polar));
     f32 l = Vu0::ToFloatMoved(len);
     Vu0::Q(pos) = Vu0::Add(Vu0::Q(sum), Vu0::MulX(Vu0::Q(polar), Vu0::Scalar((l + cam->f1E4) / l)));
-    func_00145718(cam, &sum, &pos, roll, pitch);
+    AimCameraAtPointWithSpring(cam, &sum, &pos, roll, pitch);
     view->f0C = placeAngle;
     view->f10 = placeDist;
     view->f14 = placeHeight;
     view->f38 = angle1;
     view->f3C = angle2;
-    func_00143BE0(cam);
+    FadeCameraObstructingParts(cam);
     view->active24 = 0;
     FindFreeOnOffCameraScreenSpan(self, &sum);
 }
@@ -2175,7 +2175,7 @@ extern s32 g_padSelectFlags;
 extern f32 D_00275970;
 extern f32 D_00275974;
 extern f32 g_gameClock[];
-extern f32 D_0026185C;
+extern f32 g_gameTime;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void ProjectPointToCamera(Camera* cam, Vec02* in, Vec02* out);
@@ -2184,7 +2184,7 @@ void QueueCameraSnap(Camera* cam);
 s32 HasColliderSecondTree(void* unused, Collider* other);
 void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, void* filter, s32 d, s32* count, Collider*** list);
 s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh, f32* lo, f32* hi);
-void func_001E4578(CameraController* self)
+void FindFreeOnOffCameraScreenSpan(CameraController* self)
 {
     Vec02 lo;
     Vec02 hi;
@@ -2198,7 +2198,7 @@ void func_001E4578(CameraController* self)
     Camera* cam = (Camera*)self->owner;
     Collider* target = (Collider*)cam->stack[0].target;
     if (g_padSelectFlags & 2) {
-        *(f32*)((u8*)self + 0x60) = D_0026185C;
+        *(f32*)((u8*)self + 0x60) = g_gameTime;
         return;
     }
     if (self->ptr != 0 && *(s32*)((u8*)self->ptr + 0x440) != 0) {
@@ -2243,9 +2243,9 @@ f32 GetSpanCandidateValue(void* a0, void* a1, void* a2, SpanCandidate* a3)
     return a3->value;
 }
 
-void func_00145950(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r);
-void func_00145B68(void* ctx, s32 count, Collider** objs, void* fn, f32 r, f32 limit, void* a4, Vec02* origin, Vec02* out);
-void func_001E4888(CameraController* self, Vec02* p, Vec02* q, Vec02* out)
+void FindNearestFreePointAround(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r);
+void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, void* fn, f32 r, f32 limit, void* a4, Vec02* origin, Vec02* out);
+void FindFreeOnOffCameraAngle(CameraController* self, Vec02* p, Vec02* q, Vec02* out)
 {
     Vec02 lo;
     Vec02 hi;
@@ -2264,7 +2264,7 @@ void func_001E4888(CameraController* self, Vec02* p, Vec02* q, Vec02* out)
     Vu0::Q(lo) = Vu0::Min(Vu0::Q(*p), Vu0::Min(Vu0::Q(*q), Vu0::Q(target->v140)));
     Vu0::Q(hi) = Vu0::Max(Vu0::Q(*p), Vu0::Max(Vu0::Q(*q), Vu0::Q(target->v140)));
     GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, (void*)HasColliderSecondTree, 0, &count, &list);
-    func_00145950(count, list, &target->v140, &pos, 500.0f);
+    FindNearestFreePointAround(count, list, &target->v140, &pos, 500.0f);
     FindFirstFreeSpan(count, list, &pos, q, 0.0f, &spanLo, &spanHi);
     if (spanHi < 1.0f) {
         Vec02 dir;
@@ -2297,7 +2297,7 @@ void func_001E4888(CameraController* self, Vec02* p, Vec02* q, Vec02* out)
     } else {
         Vu0::Q(best) = Vu0::MulXSum(Vu0::Q(pos), Vu0::Scalar(1.0f - spanHi), Vu0::Q(*q), Vu0::Scalar(spanHi));
     }
-    func_00145B68(cam, count, list, (void*)GetSpanCandidateValue, ((f32*)cam)[0x1EC / 4], ((f32*)cam)[0x1EC / 4], &best, &best, out);
+    ComputeConstrainedPushOut(cam, count, list, (void*)GetSpanCandidateValue, ((f32*)cam)[0x1EC / 4], ((f32*)cam)[0x1EC / 4], &best, &best, out);
     FindFirstFreeSpan(count, list, &best, out, 0.0f, &spanLo, &spanHi);
     if (spanHi != 1.0f) {
         f32 w = (spanLo + spanHi) * 0.5f;

@@ -17,9 +17,9 @@
 /toolchain/
 /wibo
 
-# splat writes these generic macro files on every run (generate_asm_macros_files).
+# Left in include/ by splat runs before its macro files were turned off (config/splat/,
+# generate_asm_macros_files); include/macro.inc is the project's own now.
 /include/include_asm.h
-/include/macro.inc
 /include/labels.inc
 
 # Tools each contributor fetches for themselves, never distributed (decomp-permuter).

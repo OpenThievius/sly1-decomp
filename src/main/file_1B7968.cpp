@@ -122,7 +122,7 @@ void CloneTreeNodes(Mesh03* a, Tree03* b, Mesh03* c, Tree03* d);
 
 
 s32 ReadBufferedU8(BufferedStream* in);
-void func_00137FB0(BufferedStream* in, Mesh03* p);
+void ReadMeshFromStream(BufferedStream* in, Mesh03* p);
 void ReadFaceTree(BufferedStream* in, Mesh03* a, Tree03* out);
 f32 ReadBufferedFloat(BufferedStream* in);
 void ReadBufferedRotation3(BufferedStream* in, Mat02* p);
@@ -130,7 +130,7 @@ void ReadBufferedVector3(BufferedStream* in, Vec02* p);
 void ComputeColliderInverseInertia(Collider* self, f32 x);
 void* CopyBytes(void* dst, void* src, s32 n);
 void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
-void func_001BBC38(Collider* self);
+void InitColliderMeshMotion(Collider* self);
 s32 InvertMatrix3x3(Mat02* in, Mat02* out);
 s32 ReadBufferedU16(void* stream);
 s32 ReadBufferedS16(BufferedStream* in);
@@ -166,9 +166,9 @@ s32 EnsureSoundBankLoaded(s32 a);
 s32 EnableIopDiscAccess(s32 a, s32 b, s32 c, s32 d);
 void SendIopSoundLevel(s32 a);
 void ResetVolumeChannelFactors(void);
-void func_0011D520(s32 a, s32 b);
-void func_0011D558(s32 a, s32 b, s32 c);
-void func_0011E3A0(s32 a, s32 b);
+void QueueIopCommandD(s32 a, s32 b);
+void QueueIopChannelConfig(s32 a, s32 b, s32 c);
+void QueueIopCommand51(s32 a, s32 b);
 void* PopFreeSlot(void* p);
 void* FillMemory(void* p, s32 value, s32 size);
 void AppendToList(void* list, void* item);
@@ -222,9 +222,9 @@ void FreeSoundRecord(PlayingSound* self);
 void* FillMemory(void* p, s32 value, s32 size);
 void FadeOutSoundVoice(s32 voice, s32 a, s32 b, s32 c);
 void ApplySoundRecordVolumePan(PlayingSound* self);
-void func_001BBEB8(Collider* self, f32 dt);
+void AdvanceColliderMeshMotion(Collider* self, f32 dt);
 void MovePlacedObject(Collider* self, f32 x, void* b);
-void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
+void ApplyColliderImpulseEvent(void* a0, f32 x, void* a1, void* a2);
 void SetVolumeChannelFactor(s32 a, s32 b, f32 x);
 void PauseIopVoice(s32 a);
 void ResumeIopVoice(s32 a);
@@ -892,7 +892,7 @@ struct VertexBlend03 {
     s32 (*faceVerts)[3];    // 0x08: one triple per face
 };
 
-void func_001B8B90(Collider* self, Contact03* c, s32 which)
+void AddContactVertexBlendVelocity(Collider* self, Contact03* c, s32 which)
 {
     typedef Vu0::Vec Vec;
     if (self->hook == 0) {
@@ -1607,14 +1607,14 @@ tail:
     ClearRootTries(o);
 }
 
-f32 func_001EF5B8(AttachedSet* self, Collider* o, Vec02* nOut, Vec02* hitOut);
-void func_001EED68(AttachedSet* self, void* in, Vec02* outA, Vec02* outB);
+f32 MeasureAttachedSetContactDepth(AttachedSet* self, Collider* o, Vec02* nOut, Vec02* hitOut);
+void GetAttachedSetPointMotion(AttachedSet* self, void* in, Vec02* outA, Vec02* outB);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
 void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5);
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
 void BuildShortestArcRotation(const Vec02* from, Vec02* to, Mat02* out);
 f32 Arccosine(f32 x);
-void func_00156288(Collider* self, AttachedSet* other, f32 dt, f32 a, f32 b, Vec02* hit, Vec02* point);
+void SpawnSurfaceContactEffects(Collider* self, AttachedSet* other, f32 dt, f32 a, f32 b, Vec02* hit, Vec02* point);
 
 struct Oscillated_1BA5B0 { u8 pad00[0xC]; void* oscillator; };
 struct SoundOwner_1BA5B0 { u8 pad00[0x574]; PlayingSound* sound; };
@@ -1632,7 +1632,7 @@ static inline Mat02 RotateRowsBy(const Mat02& r, const Mat02& m) return out
     out.r[2] = t.r[2];
 }
 
-void func_001BA5B0(Collider* self, AttachedSet* other, f32 dt)
+void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
 {
     Vec02 hit;
     Vec02 hitVel;
@@ -1641,7 +1641,7 @@ void func_001BA5B0(Collider* self, AttachedSet* other, f32 dt)
     Vec02 point;
     Vec02 normal;
     f32 gains[3];
-    f32 depth = func_001EF5B8(other, self, &point, &normal);
+    f32 depth = MeasureAttachedSetContactDepth(other, self, &point, &normal);
     if (depth < 0.0001f) {
         return;
     }
@@ -1673,7 +1673,7 @@ void func_001BA5B0(Collider* self, AttachedSet* other, f32 dt)
         Vec02 spinRest;
         Vec02 target3;
         Vec02 target4;
-        func_001EED68(other, &self->v140, &hit, &hitVel);
+        GetAttachedSetPointMotion(other, &self->v140, &hit, &hitVel);
         Vu0::Q(force) = Vu0::Sub(Vu0::Q(hit), Vu0::Q(self->v150));
         f32 dot = SplitVectorAlongAxis(&force, &normal, &along, &rest);
         f32 scale = 1.0f;
@@ -1717,7 +1717,7 @@ void func_001BA5B0(Collider* self, AttachedSet* other, f32 dt)
         AddColliderTorque(self, &torque);
     }
     if (0.0f < depth && depth < 1.0f && 0.9f < normal.z) {
-        func_00156288(self, other, dt, 0.1f, ((self->boundsMax.x - self->boundsMin.x) + (self->boundsMax.y - self->boundsMin.y)) * 0.25f, &hit, &point);
+        SpawnSurfaceContactEffects(self, other, dt, 0.1f, ((self->boundsMax.x - self->boundsMin.x) + (self->boundsMax.y - self->boundsMin.y)) * 0.25f, &hit, &point);
     } else if (self->desc->flags & 8) {
         StopSoundRecord(((SoundOwner_1BA5B0*)self)->sound, 0);
     }
@@ -1735,7 +1735,7 @@ void LoadCollider(Collider* self, BufferedStream* in)
     Pair03* e;
     u8 flag = ReadBufferedU8(in) & 1;
     self->flags = (self->flags & ~(1ULL << 33)) | ((u64)flag << 33);
-    func_00137FB0(in, &self->mesh);
+    ReadMeshFromStream(in, &self->mesh);
     self->radius3D0 = self->mesh.radius;
     self->radius3CC = self->mesh.radius;
     if (self->flags & (1ULL << 33)) {
@@ -1789,7 +1789,7 @@ void LoadCollider(Collider* self, BufferedStream* in)
             } while (self->meshCopy.faceCount >= j);
         }
     }
-    func_00137FB0(in, &self->mesh2);
+    ReadMeshFromStream(in, &self->mesh2);
     if (self->flags & (1ULL << 33)) {
         self->mesh2Copy = self->mesh2;
     } else {
@@ -1851,7 +1851,7 @@ void SetColliderFlagBit48(Collider* self, s32 flag)
     self->flags538 = (self->flags538 & 0xFFFEFFFFFFFFFFFFULL) | ((u64)(flag & 1) << 48);
 }
 
-void func_001BB1D8(Collider* self, u8 value) { self->b2C8 = value; }
+void SetColliderSurfaceKind(Collider* self, u8 value) { self->b2C8 = value; }
 
 void SetColliderFlagNibble36(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 36)) | ((u64)(value & 0xF) << 36); }
 
@@ -2151,7 +2151,7 @@ void* AllocateZeroedBackMemory(s32 size);
 // Builds the collider's hook: two zeroed vectors per vertex, and the three vertex indices of
 // each face gathered from the edges that bound it, then wound to face along the face's
 // normal.
-void func_001BBC38(Collider* self)
+void InitColliderMeshMotion(Collider* self)
 {
     Vec02 e1;
     Vec02 e2;
@@ -2204,7 +2204,7 @@ void func_001BBC38(Collider* self)
     PopBackMemoryMark();
 }
 
-void func_001BBEB8(Collider* self, f32 dt)
+void AdvanceColliderMeshMotion(Collider* self, f32 dt)
 {
     Vec02 a, b;
     Vec02* pts = (Vec02*)self->mesh.verts;
@@ -2245,7 +2245,7 @@ void func_001BBEB8(Collider* self, f32 dt)
 void MoveCollider(Collider* self, void* b, f32 x)
 {
     if (self->hook != 0) {
-        func_001BBEB8(self, x);
+        AdvanceColliderMeshMotion(self, x);
     }
     MovePlacedObject(self, x, b);
 }
@@ -2256,7 +2256,7 @@ void NotifyContactEnds(World* world, s32 n, Contact03** list);
 void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
 void FreePooledContactChain(void* pool, Contact03* head);
 
-void func_001BC0E0(void* a0, f32 value, void* a1, void* a2)
+void ApplyColliderImpulseEvent(void* a0, f32 value, void* a1, void* a2)
 {
     Collider* self = (Collider*)a0;
     Vec02* origin = (Vec02*)a1;
@@ -2281,7 +2281,7 @@ void func_001BC0E0(void* a0, f32 value, void* a1, void* a2)
 }
 
 
-void func_001BC260(Collider* self, f32* p, f32* out, f32 a)
+void ComputeColliderJumpVelocity(Collider* self, f32* p, f32* out, f32 a)
 {
     f32 roots[4];
     f32 m = p[2] >? self->v140.z;
@@ -2298,7 +2298,7 @@ void func_001BC260(Collider* self, f32* p, f32* out, f32 a)
 s32 HandleObjectEvent(Collider* self, ObjectEvent* shape)
 {
     if (shape->eventFlags & 0x8) {
-        func_001BC0E0(self, shape->radius, (u8*)shape + 0x20, (u8*)shape + 0x30);
+        ApplyColliderImpulseEvent(self, shape->radius, (u8*)shape + 0x20, (u8*)shape + 0x30);
     }
     return shape->eventFlags != 0;
 }
@@ -2324,7 +2324,7 @@ void CopyColliderMeshesInFrame(Collider* self, Collider* src, s32 extra)
     self->f4B8 = 0;
     CloneTreeNodes(&src->meshCopy, &src->tree, &self->meshCopy, &self->tree);
     CloneTreeNodes(&src->mesh2Copy, &src->tree2, &self->mesh2Copy, &self->tree2);
-    func_001BBC38(self);
+    InitColliderMeshMotion(self);
 }
 
 void ExtractContactsByPartMode(Collider* self, Contact03** out)
@@ -2371,7 +2371,7 @@ void ExtractContactsByPartMode(Collider* self, Contact03** out)
     }
 }
 
-s32 func_0013E658(void* a, s32 b);
+s32 FindPlaneTreeNodeForPoint(void* a, s32 b);
 
 s32 IsPointInsideCollider(Collider* self, Vec02* p)
 {
@@ -2381,7 +2381,7 @@ s32 IsPointInsideCollider(Collider* self, Vec02* p)
             return 1;
         }
     }
-    if (self->tree.nodes != 0 && func_0013E658(p, (s32)self->tree.nodes) != 0) {
+    if (self->tree.nodes != 0 && FindPlaneTreeNodeForPoint(p, (s32)self->tree.nodes) != 0) {
         return 1;
     }
     return 0;
@@ -2421,7 +2421,7 @@ struct ImpulseRow {
 void ConstrainVectorByParentAnchor(Collider* self, Vec02* anchor, Vec02* in, Vec02* out, Vec02* dir);
 void ApplyColliderInverseInertia(Collider* self, Vec02* in, Vec02* out);
 
-void func_001BC828(void* self, s32 a1, Contact03* c, s32 idx, ContactEnd03* hit, ImpulseRow* rows)
+void ComputeColliderImpulseResponse(void* self, s32 a1, Contact03* c, s32 idx, ContactEnd03* hit, ImpulseRow* rows)
 {
     Vec02 dir;
     Vec02 v;
@@ -2453,7 +2453,7 @@ void func_001BC828(void* self, s32 a1, Contact03* c, s32 idx, ContactEnd03* hit,
 
 void ComputeColliderPointVelocity(Collider* body, Vec02* point, ImpulseRow* row, Vec02* out);
 
-void func_001BC978(void* unusedA, void* unusedB, s32 n, Collider** list, ImpulseRow* rows)
+void AddParentVelocityToChildRows(void* unusedA, void* unusedB, s32 n, Collider** list, ImpulseRow* rows)
 {
     Vec02 vel;
     Vec02 ang;
@@ -2535,10 +2535,10 @@ void* FillMemory(void* p, s32 value, s32 size);
 void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
 void AddActiveSetItem(ActiveSetSolver* loc, ActiveSetItem* item);
 void RunActiveSetSolver(ActiveSetSolver* loc, s32 a1, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
-void func_00154370(f32 a, f32 b, ActiveSetSolver* loc, s32 n, s32* counts, void** lists);
+void ApplySolvedImpulsesToParts(f32 a, f32 b, ActiveSetSolver* loc, s32 n, s32* counts, void** lists);
 void ResetActiveSetSolver(ActiveSetSolver* self);
-void func_00185F48(World* world, s32 n, SolveContact_1BCD00** list);
-void func_00154088(f32 dt, ActiveSetSolver* loc, s32 flags, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
+void RefreshContactEndPoints(World* world, s32 n, SolveContact_1BCD00** list);
+void AddFrictionItemsAndSolve(f32 dt, ActiveSetSolver* loc, s32 flags, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
 f32 RandomFloatInRange(f32 a, f32 b);
 
 void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 n, Contact03** list, f32 dt, s32 flags)
@@ -2640,7 +2640,7 @@ void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 
             }
         }
         RunActiveSetSolver(&loc, 4, n, contacts, counts, lists);
-        func_00154370(100.0f, 1.0f, &loc, nParts, counts, lists);
+        ApplySolvedImpulsesToParts(100.0f, 1.0f, &loc, nParts, counts, lists);
         for (s32 j = 0; j < nParts; j++) {
             parts[j]->desc03()->m2F(parts[j], 0);
         }
@@ -2650,7 +2650,7 @@ void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 
         ResetActiveSetSolver(&loc);
     }
     if (flags & 1) {
-        func_00185F48(world, n, contacts);
+        RefreshContactEndPoints(world, n, contacts);
         NotifyContactEnds(world, n, list);
         for (s32 j = 0; j < n; j++) {
             ActiveSetItem* it = (ActiveSetItem*)(loc.items + j * 0x60);
@@ -2678,11 +2678,11 @@ void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 
             }
         }
     }
-    func_00154088(dt, &loc, flags & ~4, n, contacts, counts, lists);
+    AddFrictionItemsAndSolve(dt, &loc, flags & ~4, n, contacts, counts, lists);
     if (flags & 1) {
-        func_00154370(5000.0f, 50.0f, &loc, nParts, counts, lists);
+        ApplySolvedImpulsesToParts(5000.0f, 50.0f, &loc, nParts, counts, lists);
     } else {
-        func_00154370(5000.0f, 50.0f, &loc, nParts, counts, lists);
+        ApplySolvedImpulsesToParts(5000.0f, 50.0f, &loc, nParts, counts, lists);
     }
 done:
     for (i = 0; i < nParts; i++) {
@@ -3495,12 +3495,12 @@ void InitSoundSystem(void)
     EnableIopDiscAccess(1, 0x2000, 1, 1);
     SendIopSoundLevel(0x14);
     ResetVolumeChannelFactors();
-    func_0011D520(0, 1);
-    func_0011D558(0, 0, 0x2F);
-    func_0011D558(1, 0x18, 0x2F);
-    func_0011D558(3, 0x18, 0x2F);
-    func_0011D558(2, 0x18, 0x2F);
-    func_0011E3A0(2, 4);
+    QueueIopCommandD(0, 1);
+    QueueIopChannelConfig(0, 0, 0x2F);
+    QueueIopChannelConfig(1, 0x18, 0x2F);
+    QueueIopChannelConfig(3, 0x18, 0x2F);
+    QueueIopChannelConfig(2, 0x18, 0x2F);
+    QueueIopCommand51(2, 4);
 }
 
 LINKER_REMNANT(func_001BF1E8);

@@ -14,7 +14,7 @@ extern LightGroup g_lightGroups[16];
 
 struct LightMode { u8 pad[0x2D4]; s32 mode; };
 
-s32 func_00185150(u8* scene, const Vec02* centre, u32 skipMask, s32 maxLights, s32* flagged, s32* outCount, LightMode** out, f32 radius)
+s32 CollectLightsForSphere(u8* scene, const Vec02* centre, u32 skipMask, s32 maxLights, s32* flagged, s32* outCount, LightMode** out, f32 radius)
 {
     u32 keepOut = ~skipMask;
     s32 num = 0;

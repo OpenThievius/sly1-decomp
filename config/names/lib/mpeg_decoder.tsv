@@ -10,12 +10,28 @@ func_0020B168	SetMpegCallback	stores a callback and its argument in a decoder's 
 func_0020B190	RunMpegCallback	runs the decoder's callback for the kind a message names, with its argument
 func_0020B1E0	RunMpegStallCallback	runs the decoder's callback of kind 1; the IPU waits call it each time the IPU stays busy too long
 func_0020B240	InitMpegRing	sets a ring buffer's start, size, read and write positions
+func_0020B258	MarkMpegRing	copies a ring buffer's word at +8 into its word at +0xC, a mark CreateMpegDecoder sets after the ring is made
+func_0020B268	RewindMpegRingToMark	copies a ring buffer's word at +0xC into its word at +8, going back to the mark MarkMpegRing took (the picture buffer allocation calls it)
 func_0020B278	AllocateFromMpegRing	takes an aligned block of a size from a decoder's ring buffer, reporting an error when it does not fit
 func_0020B2E8	RunMpegPictureLoop	the decoder's picture loop: parses headers and decodes pictures until a picture is out or the stream ends (DecodeMpegPicture calls it)
+func_0020B458	DecodeFramePicture	the picture loop's step for a picture whose structure is 3: selects the output picture, decodes its data when its number is below the limit, runs the stall callback when it is not, and advances the picture counters
+func_0020B570	DecodePictureByStructure	runs DecodeFieldPicture when the current picture's structure is not 3 and DecodeFramePicture when it is
+func_0020B5B8	DecodeFieldPicture	the picture loop's step for a field picture: decodes the first field, parses the headers up to the second field's and decodes it, and returns -1 when the second field's structure is wrong
+func_0020B718	FlushPendingPicture	when a picture has been decoded and is waiting, outputs it with OutputPendingPicture, records its size in the owner and clears the waiting flag, returning 1
+func_0020B780	ResetMpegPictureMode	clears a word of the decoder's state at +0x848 and sets the IPU to MPEG-1 mode with SetIpuMpeg1Mode(1) (ResetMpegDecoder calls it)
+func_0020B790	OutputPendingPicture	outputs the decoded picture by its structure, with OutputFramePicture for 3 and OutputFieldPicturePair otherwise, reporting "the second field is missing" when a second field is still expected
+func_0020B810	SetUpMpegScratchpadBuffers	sets the IPU to MPEG-1 mode and points the decoder's two pictures' buffers at 0x70000000, +0x1800, +0x1B00 and +0x3300 in the scratchpad (CreateMpegDecoder calls it)
+func_0020B870	ResetMpegDmaAndIpu	with interrupts disabled, clears the control registers of the IPU's DMA channels 3, 4 and 8, resets the IPU (0x40000000 into its control register) and waits for it with SyncIpu
 func_0020B930	PrintMpegError	prints a message after "[MPEG ERROR]"
 func_0020B940	ReportMpegErrorFormat	formats a message into a buffer and reports it with ReportMpegError
 func_0020B978	ReportMpegError	hands a message to the decoder's callback of kind 0, or prints it with PrintMpegError when there is none
+func_0020B9D0	SetPictureDimensions	stores a width and height and the same divided by 16, the dimensions in macroblocks (AllocatePictureBuffers calls it for each picture buffer)
 func_0020B9F0	ReadSequenceHeader	reads a sequence header and its extensions (ParseMpegHeaders calls it on the start code 0x1B3)
+func_0020BB18	AllocatePictureBuffers	original assembly: after a sequence header, when the width or height in macroblocks changed, rewinds the ring, allocates three 64-byte aligned picture buffers from it, fills the pictures' plane addresses with SetUpPictureBufferAddresses and sets each plane's dimensions
+func_0020BDC0	SetUpPictureBufferAddresses	fills the addresses of a picture's luma and two chroma planes for both halves from three buffer addresses, the second half starting at a macroblock count times 0x180 into each, as uncached addresses
+func_0020BEA0	LoadIpuQuantiserMatrix	runs the callback with kinds 2 and 3 around a DMA of a 64-byte matrix to the IPU through channel 4 followed by a command (0x50000000 or 0x58000000 from the caller), waiting for the IPU each step (ReadSequenceHeader calls it for the default matrices)
+func_0020BF78	ReadSequenceExtension	reads the sequence extension: the profile and level (reporting "Unsupported profile/level"), the chroma format (it must be 420) and the high bits of the width, height and bit rate
+func_0020C0A8	ReadSequenceDisplayExtension	reads the sequence display extension: a 3-bit format, an optional colour description of three bytes, and two 14-bit display sizes
 func_0020C138	RejectSequenceScalableExtension	reports "_sequenceScalableExtension() is not implemented"
 func_0020C148	RejectUnknownExtension	reports "Unknown Extension"
 func_0020C158	RejectSpatialScalableExtension	reports "_pictureSpatialScalableExtension is not supported"

@@ -67,7 +67,7 @@ s32 FindNearestAgentKey(void* a, void* b);
 void* FindObjectHandle(s32 a, s32 b);
 void RestartAgentClip(void* a);
 typedef void* (*TargetObjectFn)(void* self);
-void func_001C8418(KeyedConeAgent* self, void* p);
+void SetAgentGoalPoint(KeyedConeAgent* self, void* p);
 void UpdateAgentGoal(KeyedConeAgent* self);
 s32 GetObjectWorldPosition(void* self, void* arg);
 void FaceAgentTowardGoalPoint(KeyedConeAgent* self);
@@ -154,7 +154,7 @@ union DoubleBits {
     double d;
     u64 u;
 };
-double func_001FCD20(double a, double b);
+double AddDoubles(double a, double b);
 // An object of the world's lists at 0x78, 0x1B70 and 0x1C30 as func_001E9EE8 walks them: the
 // slot at 0x7C of the first list's objects is called with the frame time.
 struct ListedObject;
@@ -186,7 +186,7 @@ struct EndNodeWalk {
     static void Of(ListFrame* it) { g_activeListFrames = it->prev; }
 };
 void UpdateObjectTree(ListedObject* n, f32 dt);
-void func_0012EBD8(ListedObject* n, f32 dt);
+void UpdateAnimationPlayer(ListedObject* n, f32 dt);
 void StepObjectLevelRamp(ListedObject* n, f32 dt);
 void RunQueuedCalls(World* self);
 struct BeginByteWalk {
@@ -217,7 +217,7 @@ void StepMemoryChecksum(void);
 SwitchedCollider* GetActiveSwitchedCollider(void);
 void UpdateWorldObjectLists(World* self);
 void UpdateObjectTree(u8* n, f32 dt);
-void func_0012EBD8(u8* n, f32 dt);
+void UpdateAnimationPlayer(u8* n, f32 dt);
 void StepObjectLevelRamp(u8* n, f32 dt);
 void DispatchDelayedMessages(World* self);
 void UpdateSoundEmitters(void);
@@ -284,8 +284,8 @@ typedef u64 Bits128 __attribute__((mode(TI)));
 s32 QueryValueTreeMask(ValueListObject* self, s32 node, Bits128 point, f32 radius, s32* out);
 typedef void (*AttachNotifyFn)(void* self, void* arg);
 void BuildPlacedObjectTransform(void* obj, void* c, void* out);
-void func_00125C90(void* obj, void* s, void* out);
-void func_001C8418(void* self, void* p);
+void PrepareFadedObjectDraw(void* obj, void* s, void* out);
+void SetAgentGoalPoint(void* self, void* p);
 void UpdateAgentGoal(void* self);
 void InitObject(void* self);
 void PadPacketToQuadSlot(void* s, s32 target);
@@ -730,7 +730,7 @@ void* D_00276680[121] = { 0, &D_00276864, &D_002768BC, &D_00276914, 0, 0, 0, 0, 
 INCLUDE_DATA(D_00276864);
 INCLUDE_DATA(D_002768BC);
 INCLUDE_DATA(D_00276914);
-void* D_0027696C = D_00276680;
+void* g_libraryState = D_00276680;
 
 
 void InitKeyedConeAgent(KeyedConeAgent* self)
@@ -764,7 +764,7 @@ void StartKeyedConeAgent(KeyedConeAgent* self)
 
 ASM_FUNC(func_001E89F0);
 
-void func_001E8A50(KeyedConeAgent* self, s32 a, s32 b)
+void EnterKeyedConeAgentState(KeyedConeAgent* self, s32 a, s32 b)
 {
     s32 key;
     s32 slot;
@@ -930,15 +930,15 @@ void UpdateKeyedConeAgentGoal(KeyedConeAgent* self)
     switch (self->f724) {
     case 4:
         if (self->fC40 != 0) {
-            func_001C8418(self, (u8*)self + 0x190);
+            SetAgentGoalPoint(self, (u8*)self + 0x190);
         } else {
             GetObjectWorldPosition(self->fC60, &loc);
-            func_001C8418(self, &loc);
+            SetAgentGoalPoint(self, &loc);
         }
         break;
     case 8: {
         void* r = ((TargetObjectFn*)self->desc)[102](self);
-        if (r != 0) func_001C8418(self, (u8*)r + 0x140);
+        if (r != 0) SetAgentGoalPoint(self, (u8*)r + 0x140);
         break;
     }
     default:
@@ -1350,7 +1350,7 @@ void UpdateWorldDeltaLists(World* self, f32 dt)
         ListFrame it;
         BeginByteWalk::Of(&it, (List01*)&self->f1B64);
         for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
-            func_0012EBD8(n, dt);
+            UpdateAnimationPlayer(n, dt);
         }
         EndByteWalk::Of(&it);
     }
@@ -1397,7 +1397,7 @@ void UpdateWorldStepLists(World* self, f32 dt)
     for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) UpdateObjectTree(obj, dt);
     EndNodeWalk::Of(&it);
     BeginNodeWalk::Of(&it, (List01*)&self->f1B70);
-    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_0012EBD8(obj, dt);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) UpdateAnimationPlayer(obj, dt);
     EndNodeWalk::Of(&it);
     BeginNodeWalk::Of(&it, (List01*)&self->f1C30);
     for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) StepObjectLevelRamp(obj, dt);
@@ -1761,7 +1761,7 @@ double TruncateDouble(double x)
         if ((mant & frac) == frac) {
             v.u = (v.u & ((u64)0xFFF0 << 48)) | (mant & ~frac & ((u64)-1 >> 12));
             x = v.d;
-            x = func_001FCD20(x, 1.0);
+            x = AddDoubles(x, 1.0);
         } else {
             v.u = (v.u & ((u64)0xFFF0 << 48)) | (mant & ~frac & ((u64)-1 >> 12));
             x = v.d;
@@ -2134,7 +2134,7 @@ struct FramePoint_001EBD10 {
 void GetPlacedObjectPositionAt(void* self, f32 t, Vec02* pos, Vec02* vel);
 void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, Vec02* e, Vec02* f, f32 t);
 
-void func_001EBD10(BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
+void GetBeatPressColliderPositionAt(BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
 {
     if (self->f67C == 0) {
         GetPlacedObjectPositionAt(self, t, pos, vel);
@@ -2151,7 +2151,7 @@ void func_001EBD10(BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
 
 void GetPlacedObjectRotationAt(void* self, f32 t, Mat02* rot, Vec02* spin);
 
-void func_001EBDD0(BeatPressCollider* self, f32 t, Mat02* rot, Vec02* spin)
+void GetBeatPressColliderRotationAt(BeatPressCollider* self, f32 t, Mat02* rot, Vec02* spin)
 {
     if (self->f67C == 0) {
         GetPlacedObjectRotationAt(self, t, rot, spin);
@@ -2271,7 +2271,7 @@ void ApplyTempoAgentTransform(TempoAgent* self, void* s, void* c)
         *(s32*)(tmp + 0x44) = 0;
         out = tmp;
     }
-    func_00125C90(self, s, out);
+    PrepareFadedObjectDraw(self, s, out);
 }
 
 #include "deferred_request.h"
@@ -2423,12 +2423,12 @@ struct TempoLine {
 
 void ChooseObjectPoolItem(void* timeline);
 void GetPlacementRecordTransform(void* sub, Vec02* a, Mat02* b, s32 c);
-s32 func_001A8C90(void* timeline, s32 a);
+s32 LaunchChosenPoolObject(void* timeline, s32 a);
 void HandleAgentNotification(TempoAgent* self, s32 kind, void* rec);
 void SetCachedVoiceParam(s32 a, s32 b);
 s32 GetCachedVoiceParam(s32 a);
 
-void func_001EC828(TempoAgent* self, s32 kind, TempoNoticeRec* rec)
+void HandleTempoAgentNotification(TempoAgent* self, s32 kind, TempoNoticeRec* rec)
 {
     Vec02 a;
     Mat02 b;
@@ -2454,7 +2454,7 @@ void func_001EC828(TempoAgent* self, s32 kind, TempoNoticeRec* rec)
             *(f32*)(r + 0x690) = d;
             *(f32*)(r + 0x6F0) = d;
             sub->f78 = t * 1.25f;
-            func_001A8C90(line, 1);
+            LaunchChosenPoolObject(line, 1);
             return;
         }
         break;
@@ -2591,9 +2591,9 @@ void UpdateTempoAgentGoal(TempoAgent* self)
         void* q = self->fC48;
         if (q != 0) {
             GetObjectWorldPosition(q, loc);
-            func_001C8418(self, loc);
+            SetAgentGoalPoint(self, loc);
         } else {
-            func_001C8418(self, (u8*)self + 0x140);
+            SetAgentGoalPoint(self, (u8*)self + 0x140);
         }
     }
     return;
@@ -2905,7 +2905,7 @@ f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis)
     return Arccosine(Vu0::ToFloat(Vu0::Dot(Vu0::Q(*a), Vu0::Q(*b))) / (la * lb));
 }
 
-void func_001EDA80(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out2, f32* dist, Vec02* normal)
+void FindSegmentClosestParams(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out2, f32* dist, Vec02* normal)
 {
     u128 v = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     u128 w = Vu0::Sub(Vu0::Q(*d), Vu0::Q(*c));
@@ -3044,7 +3044,7 @@ s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, 
 // The launch velocity that throws an object from `from` to `to` at the given speed under the
 // gravity of rec (the world's when null), into out: straight at the target when there is almost
 // no gravity; else 0 when the speed cannot reach it.
-s32 func_001EE090(f32 speed, Vec02* from, Vec02* to, Vec02* out, u8* rec)
+s32 ComputeLaunchVelocityToPoint(f32 speed, Vec02* from, Vec02* to, Vec02* out, u8* rec)
 {
     Vec02 d;
     u8* g;
@@ -3457,10 +3457,10 @@ void StartAttachedSet(AttachedSet* self)
 }
 
 void TransformDirectionBetweenFrames(s32 a, void* obj, void* in, void* out);
-void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, void* a5);
+void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, s32 a3, void* a4, void* a5);
 void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, void* a5);
 
-void func_001EED68(AttachedSet* self, void* in, Quad16* outA, Quad16* outB)
+void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16* outB)
 {
     Vec02 a;
     Quad16 b;
@@ -3470,7 +3470,7 @@ void func_001EED68(AttachedSet* self, void* in, Quad16* outA, Quad16* outB)
     b = *(Quad16*)((u8*)self + 0x570);
     a.z = 0.0f;
     c = *(Quad16*)&D_00248D30;
-    func_00127E60(self, 0, &a, 0, &b, &c);
+    TransformStateToAncestorFrame(self, 0, &a, 0, &b, &c);
     if (self->f278 != 0) {
         ComputeOscillatorDisplacement(50.0f, *(void**)(self->f278 + 0xC), in, 0, 0, 0, &d);
         Vu0::Q(*(Vec02*)&b) = Vu0::Add(Vu0::Q(*(Vec02*)&b), Vu0::Q(d));
@@ -3516,7 +3516,7 @@ void ReconcileColliderAttachments(void* owner, Attach03** head)
 
 void UpdateCollider(void* self);
 Attach03* TakeAttachRecord(void* world);
-f32 func_001EF5B8(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
+f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
 s32 CollectTreeNodeSpans(TreeNode03* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
 void StartSoundEffect(s32 a0, s32 a1, Collider* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void BroadcastPointEvent(void* self, void* obj, f32 x);
@@ -3542,7 +3542,7 @@ void UpdateAttachedSet(AttachedSet* self)
         if (c->flags538 & ((1ULL << 54) | (1ULL << 42))) {
             continue;
         }
-        if (func_001EF5B8(self, (TurningCollider*)c, 0, 0) == 0.0f) {
+        if (MeasureAttachedSetContactDepth(self, (TurningCollider*)c, 0, 0) == 0.0f) {
             continue;
         }
         c->flags538 |= 1ULL << 60;
@@ -3697,7 +3697,7 @@ void RebuildAttachedSet(AttachedSet* self)
 
 s32 CollectTreeNodeSpans(TreeNode03* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
 
-f32 func_001EF5B8(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut)
+f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut)
 {
     Vec02 from;
     Vec02 to;
@@ -4438,7 +4438,7 @@ void ApplyWarpPageTransform(WarpPage* obj, u8* s, void* c)
     SnapCameraZoom(p, 1.0f);
     BuildPlacedObjectTransform(obj, c, tmp);
     BuildMatrixFromRotationAndTranslation(s + 0x40, s + 0x80, tmp);
-    func_00125C90(obj, s, tmp);
+    PrepareFadedObjectDraw(obj, s, tmp);
     SnapCameraZoom(g_camera, keep1);
     g_camera->f1C8 = keep2;
 }
@@ -4933,7 +4933,7 @@ struct WarpLabelLayout {
 };
 
 
-void func_001F20A8(T217D_0F0* self)
+void DrawWarpMenu(T217D_0F0* self)
 {
     if (self->current == 0) {
         return;

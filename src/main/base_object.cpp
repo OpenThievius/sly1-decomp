@@ -781,7 +781,7 @@ void DetachPacketBuffer(PacketWriter* p, u32* outCount, u8** outBegin);
 void ConvertHsv255ToRgb255(Vec02* hsv, Vec02* rgb);
 void TransformDirectionBetweenFrames(void* frame, s32 zero, void* in, Vec02* out);
 void BuildBasisFromXAndZHint(void* x, void* z, void* out);
-void func_001443C8(Mat02* m, Vec02* out, f32 x, f32 y);
+void BuildFrustumSideNormals(Mat02* m, Vec02* out, f32 x, f32 y);
 void BuildProjectionMatrix(f32 (*out)[4], f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 void BuildViewProjectionMatrix(void* pos, void* basis, f32 (*proj)[4], f32 (*out)[4]);
 extern u8 D_00000BF0[];
@@ -838,7 +838,7 @@ void RefreshConeVolumeShape(ConeVolume* self)
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(d), Vu0::Scalar(-1.0f));
         TransformDirectionBetweenFrames(self, 0, &self->q340, &up);
         BuildBasisFromXAndZHint(&d, &up, &self->basis);
-        func_001443C8(&self->basis, self->planes, self->f350, self->f354);
+        BuildFrustumSideNormals(&self->basis, self->planes, self->f350, self->f354);
         Vec02& far = self->planes[4];
         Vec02& near = self->planes[5];
         for (s32 i = 0; i < 4; i++) {

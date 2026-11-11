@@ -21,7 +21,7 @@ static inline f32 ClampRange(f32 v, f32 lo, f32 hi)
     return v;
 }
 
-void func_001A1030(Effect* self, f32 dt)
+void MoveEmitterEffect(Effect* self, f32 dt)
 {
     Vec02 d1, d2, vel, pa, pb;
     Vec02 a = {};

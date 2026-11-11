@@ -1,6 +1,7 @@
 symbol	name	evidence
 func_001DDCE0	InitRedirectObject	slot 0 of the 0x5E class: calls the base set-up func_00123ED0 and sets the vector at 0x320 from D_00275730
 func_001DDD18	StartRedirectObject	slot 16 of class 0x5E, its override of StartPlacedObject
+func_001DDE90	SimulateRedirectChain	slot 0xC0 of class 0x5E: once a frame steps the chain of linked nodes like a rope: adds gravity to each node's velocity, limits each link's bend to the maximum angle, applies drag and bending forces, and fixes each link's length, then writes the nodes' frames back
 func_001DE768	MarkRedirectToSelf	slot 31 of the 0x5E class: sets targetIsSelf to 1 when target equals the object itself, then calls the parent func_001276C0
 func_001DE798	InitTintBlendCollider	slot 0 of the 0x14 class: runs InitTurningCollider, stores the heading from the rotation row, sets the state at 0x720 to -1 and the time at 0x72C to -10
 func_001DE808	StartTintBlendCollider	slot 16 of the 0x14 class: runs StartTurningCollider, installs the 9-entry table D_00275750, makes two links with func_00129D00 and a handle at 0x75C, and enters state 0 or 1 with SetFlashingColliderState

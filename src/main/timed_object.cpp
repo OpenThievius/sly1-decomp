@@ -463,7 +463,7 @@ struct DrawPoints {
 };
 
 void DrawCollider(TimedGroup* self, void* a1, void* a2);
-void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+void DrawBeamBetweenPoints(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 Vec02* AllocateBackMemory(s32 size);
@@ -519,7 +519,7 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
                 u128 p1 = Vu0::Q(buf[k + 1]);
                 Vu0::Q(buf[k + 1]) = Vu0::MulXSum(p0, ws, p1, wt);
             }
-            func_001268B8(fp, a1, &buf[k], &buf[k + 1], 1.0f, a2 != 0 ? *(f32*)((u8*)a2 + 0x40) : 1.0f);
+            DrawBeamBetweenPoints(fp, a1, &buf[k], &buf[k + 1], 1.0f, a2 != 0 ? *(f32*)((u8*)a2 + 0x40) : 1.0f);
             acc += len;
             if (total < acc) break;
         }
@@ -906,7 +906,7 @@ struct SequencedTransform {
 };
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, SequencedTransform* dst);
 void BuildScaledTransformMatrix(Vec02* pos, Mat02* rot, Vec02* scale, SequencedTransform* out);
-void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+void DrawBeamBetweenPoints(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
 
 static inline f32 ClampRange(f32 v, f32 lo, f32 hi)
 {
@@ -919,7 +919,7 @@ static inline f32 ClampRange(f32 v, f32 lo, f32 hi)
     return v;
 }
 
-void func_001B0838(SequencedObject* self, void* a1, Quad16* a2)
+void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
 {
     Vec02 scale;
     SequencedTransform tmp;
@@ -986,7 +986,7 @@ void func_001B0838(SequencedObject* self, void* a1, Quad16* a2)
                     }
                     Vec02 blend;
                     Vu0::Q(blend) = Vu0::MulXSum(Vu0::Q(self->v140), Vu0::Scalar(1.0f - w), Vu0::Q(((Collider*)g_player)->v140), Vu0::Scalar(w));
-                    func_001268B8((void*)self->f5D4, a1, &blend, &((Collider*)g_player)->v140, 10.0f, tmp.f40);
+                    DrawBeamBetweenPoints((void*)self->f5D4, a1, &blend, &((Collider*)g_player)->v140, 10.0f, tmp.f40);
                 }
                 r = 0.1f;
                 scale.z = scale.y = r;

@@ -159,7 +159,7 @@ extern f32 D_00263C40[];
 
 void StepCollider(ModeCollider* self, f32 t);
 void ComputeModeColliderAnchors(ModeCollider* self, Vec02* a, Vec02* b);
-void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
+void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
 void SteerColliderTowardPosition(ModeCollider* self, void* buf, f32 f, void* d1, void* d2, void* d3);
 void TurnColliderTowardRotation(ModeCollider* self, f32 scale, void* out, void* data);
 
@@ -183,7 +183,7 @@ single:
 path2:
     ComputeModeColliderAnchors(self, &a, &b);
     b = D_00248D30;
-    func_00127E60(self->f668, 0, &a, 0, &b, 0);
+    TransformStateToAncestorFrame(self->f668, 0, &a, 0, &b, 0);
     goto tail;
 path3:
     a = *(Vec02*)&self->pos;
@@ -523,7 +523,7 @@ extern Rgba4 D_002623E0;
 
 f32 Cosine(f32 x);
 void SetObjectTreeRecordValue(ModeCollider* o, u32 value);
-void func_00125C90(ModeCollider* o, void* s, void* out);
+void PrepareFadedObjectDraw(ModeCollider* o, void* s, void* out);
 
 void ApplyModeColliderTint(ModeCollider* self, void* s, void* out)
 {
@@ -573,7 +573,7 @@ void ApplyModeColliderTint(ModeCollider* self, void* s, void* out)
         res = D_002623E0;
     }
     SetObjectTreeRecordValue(self, *(u32*)&res);
-    func_00125C90(self, s, out);
+    PrepareFadedObjectDraw(self, s, out);
 }
 
 // Matches retail's bytes (EXACT us and eu): the call result is tested directly with a goto to the zero return.
@@ -603,7 +603,7 @@ struct SenderValueMessage {
 
 s32 HasSpareCount(void);
 void ComputeModeColliderAnchors(void* self, void* a, void* b);
-void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
+void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
 void SetModeColliderMode(ModeCollider* self, s32 mode);
 
 extern f32 g_gameTime;
@@ -624,7 +624,7 @@ s32 AcceptModeColliderRequest(ModeCollider* self, s32* arg)
         self->f704 = 0.0f;
         self->f708 = 3.0f;
         ComputeModeColliderAnchors(self, bufA, bufB);
-        func_00127E60(self->f668, 0, bufA, 0, bufB, 0);
+        TransformStateToAncestorFrame(self->f668, 0, bufA, 0, bufB, 0);
         self->desc02()->m20(self, (Vec02*)bufB);
     }
     if (HasSpareCount() != 0) {
@@ -706,14 +706,14 @@ void SetModeColliderMode(ModeCollider* self, s32 mode)
 }
 
 void ComputeModeColliderAnchors(void* self, void* a, void* b);
-void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
+void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
 
 void PlaceModeColliderAtAnchor(ModeCollider* self)
 {
     u8 bufA[16];
     u8 bufB[16];
     ComputeModeColliderAnchors(self, bufA, bufB);
-    func_00127E60(self->f668, 0, bufA, 0, bufB, 0);
+    TransformStateToAncestorFrame(self->f668, 0, bufA, 0, bufB, 0);
     self->desc02()->m1D(self, (Vec02*)bufA);
     self->desc02()->m20(self, (Vec02*)bufB);
 }
@@ -755,7 +755,7 @@ void StartGaugeModeObject(GaugeModeObject* self)
     PlayGaugeModeObjectLoop(self, 1);
 }
 
-void func_001B93F8(GaugeModeObject* self);
+void UpdateCollider(GaugeModeObject* self);
 void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, Vec02* e, Vec02* f, f32 t);
 f32 ComputeAngleBetweenVectors(const Vec02* a, const Vec02* b, Vec02* out);
 void StopAnimationPlayer(void* p);
@@ -765,7 +765,7 @@ static inline f32 MinF(f32 a, f32 b) { return a <? b; }
 
 // Mode 0 stores its weights unscaled and then scales them by 1 - D_00263AC0 in place: the
 // stores before the scaling stay until flow2, so the remainder's product takes k's register.
-void func_0017AF38(GaugeModeObject* self)
+void UpdateGaugeModeObject(GaugeModeObject* self)
 {
     Vec02 v0;
     Vec02 local;
@@ -774,7 +774,7 @@ void func_0017AF38(GaugeModeObject* self)
     Vec02 pos;
     Mat02 rot;
 
-    func_001B93F8(self);
+    UpdateCollider(self);
     if (self->mode >= 0) {
     if (self->mode < 2) {
         ComputeObjectMotionInFrame(self, 0, &self->v140, &v0, 0, 0, 0);

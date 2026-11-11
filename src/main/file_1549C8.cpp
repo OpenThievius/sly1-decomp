@@ -67,10 +67,10 @@ struct SpawnSetup {
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void func_001579B0(void* a, void* b, s32* out);
+void GenerateSpawnArrays(void* a, void* b, s32* out);
 void SpawnRecordEffects(void* b, void* c, void* a, s32 o0, s32 o1, s32 o2, s32 o3);
-void func_00157B88(void* a, void* b, s32* out, s32* pair);
-void func_001575D8(void* b, void* c, void* a, s32 o0, s32 o1, s32 o2, s32 o3, s32 p0, s32 p1);
+void GenerateSpawnSetupPair(void* a, void* b, s32* out, s32* pair);
+void EmitParticleChunk(void* b, void* c, void* a, s32 o0, s32 o1, s32 o2, s32 o3, s32 p0, s32 p1);
 
 struct StreamWord {
     s32 value;
@@ -92,7 +92,7 @@ void InitSpawnRecord(void* mem);
 void LoadPlacedObject(void* self, s32 count);
 s32 ReadBufferedS8(s32 count);
 PathCurve* CreatePathCurve(s32 kind);
-void func_00154C80(void* self, s32 count);
+void ReadSpawnMesh(void* self, s32 count);
 s32 ReadBufferedU16(s32 count);
 void* GetOwnSpawnRecord(void* self, s32 flag);
 void ReadCappedWordList(void* self, s32 count, void* unused, s32 src);
@@ -123,7 +123,7 @@ void SetListLinkOffset(void*,s32);
 
 void AddRangeEntry(void*,void*,void*,f32,f32,f32,f32,void*);
 
-void func_0013A128(void*,void*);
+void ApplyLookSourceToListedObject(void*,void*);
 void CopyEffectOwnerMargin(void*,void*);
 f32 RandomFloatInRange(f32,f32);
 
@@ -143,7 +143,7 @@ EffectOwner* AcquireEffectOwner(u8* ctx, s32 flag);
 void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b);
 Effect* CreateEffect(s32 a, EffectOwner* b);
 void SetTrailSegmentAnchor(EffectOwner* self, s32 kind, Effect* extra);
-void func_001583E8(Effect* a, Rec50* b);
+void FillLookDirectionBlock(Effect* a, Rec50* b);
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 IsListEmpty(void* p);
 
@@ -258,7 +258,7 @@ extern f32 g_gameClock[];
 void* PopFreeSlot(void* p);
 void ClearListLinks(void* p);
 void AppendToList(void* list, void* item);
-void func_001590A0(void* self, void* body);
+void HandleSpawnMessage(void* self, void* body);
 
 void InitSoundParams(void* p);
 
@@ -294,7 +294,7 @@ void InitSpawnRecord(void* p);
 s32 ReadBufferedS8(void* other);
 PathCurve* CreatePathCurve(s32 kind);
 void* ReadBufferedU16(void* other);
-void func_00154C80(void* p, void* other);
+void ReadSpawnMesh(void* p, void* other);
 void ReadCappedWordList(void* a, void* b, void* c, void* d);
 extern s32 g_objectCyclerStartLinks[6];
 
@@ -364,7 +364,7 @@ struct __attribute__((aligned(16))) GroupForwardMessage {
 };
 
 void SetObjectCyclerState(void* self, s32 x);
-void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
+void ApplyColliderImpulseEvent(void* a0, f32 x, void* a1, void* a2);
 
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
@@ -430,11 +430,11 @@ extern f32 g_gameClock[];
 
 void UpdateCollider(ObjectCycler* self);
 void SetObjectCyclerState(ObjectCycler* self, s32 mode);
-s32 func_0015BEF0(ObjectCycler* self);
-s32 func_0015BD48(ObjectCycler* self, Quadword128* out);
-void func_0015BC78(ObjectCycler* self);
+s32 ChooseObjectCyclerNextState(ObjectCycler* self);
+s32 FindObjectCyclerGroundPoint(ObjectCycler* self, Quadword128* out);
+void SendObjectCyclerMessage(ObjectCycler* self);
 s32 IsObjectCyclerUnsupported(ObjectCycler* self);
-s32 func_0015BFC0(ObjectCycler* self);
+s32 IsActiveColliderNearObjectCycler(ObjectCycler* self);
 f32 RandomFloatInRange(f32 a, f32 b);
 void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
@@ -443,7 +443,7 @@ void InitPlacedObject(void* self);
 extern f32 g_gameClock[];
 
 
-void func_001590A0(void* a, void* b);
+void HandleSpawnMessage(void* a, void* b);
 void RemoveFromList(List01* list, DelayedMessage* node);
 void PushFreeSlot(Pool6C* set, DelayedMessage* node);
 
@@ -847,7 +847,7 @@ struct MeshData {
     Vec02 extent;           // 0x20
 };
 
-void func_00154C80(void* p, void* other)
+void ReadSpawnMesh(void* p, void* other)
 {
     MeshData* m = (MeshData*)p;
     s32 i;
@@ -913,7 +913,7 @@ void LoadEffectSpawner(EffectSpawner* self, s32 count)
         }
     }
     if (self->rec->kind == 4) {
-        func_00154C80(&self->rec->curve20, count);
+        ReadSpawnMesh(&self->rec->curve20, count);
     }
     s32 n = ReadBufferedU16(count);
     if (n != 0) {
@@ -1108,13 +1108,13 @@ INCLUDE_ASM(func_00155868);
 void RandomizeEffectSpawnerDelay(EffectSpawner* self);
 void UpdatePlacedObject(void* self, f32 dt);
 s32 CountListItems(void* list);
-void func_00155868(EffectSpawner* self);
+void WrapSpawnerParticlesIntoBox(EffectSpawner* self);
 void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f);
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
 s32 IsEffectSpawnerActive(EffectSpawner* self);
 void SpawnEffectsFromRecord(s32 count, Rec50* rec, SpawnFlags* p);
 
-void func_00155AB0(EffectSpawner* self, f32 dt)
+void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
 {
     ListFrame frame;
 
@@ -1257,7 +1257,7 @@ timer:
         self->f328 = RandomFloatInRange(self->f2DC, self->f2E0);
         self->f330 = g_gameClock[1] + self->f32C;
     }
-    func_00155868(self);
+    WrapSpawnerParticlesIntoBox(self);
 }
 
 void InheritFlaggedAncestorValue(EffectSpawner* self)
@@ -1329,7 +1329,7 @@ void GetEffectSpawnerActive(void* self,s32* out)
 void RandomizeEffectSpawnerDelay(u8* self)
 {
     *(s32*)(self+0x34C)=0;
-    if (*(void**)(self+0x348)) func_0013A128(*(void**)(self+0x348),*(void**)(self+0x2D0));
+    if (*(void**)(self+0x348)) ApplyLookSourceToListedObject(*(void**)(self+0x348),*(void**)(self+0x2D0));
     if (*(void**)(self+0x344)) CopyEffectOwnerMargin(*(void**)(self+0x344),*(void**)(self+0x2D0));
     f32 value;
     if (*(s32*)(self+0x2D4)==3) value=RandomFloatInRange(*(f32*)(self+0x2DC),*(f32*)(self+0x2E0))*60.0f;
@@ -1500,7 +1500,7 @@ static inline Vu0::Vec NormalizedOr(Vu0::Vec v, Vu0::Vec fallback)
 // The point of a spawn shape for the index-th of count spawns, and its direction: a point, a
 // random point in a box, along a curve, on a ring of segments or on a mesh, the direction by the
 // shape's mode, then made unit length and the point moved along it by a random jitter.
-void func_00156718(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Vec02* axis)
+void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Vec02* axis)
 {
     switch (shape->kind) {
     case 0:
@@ -1673,7 +1673,7 @@ void InitSpawnRing(s32 n, SpawnSpan* span, s32 k, SpawnRing* out) { if (n > 0) {
 void ComputeDirectionFromAngles(Vec02* out, f32 first, f32 second, f32 scale);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
 
-void func_00157098(SpawnRing* ring, SpawnSpan* range, Vec02* axis, s32 index, Vec02* out, f32 jitter, f32 flatten)
+void ComputeSpawnRingDirection(SpawnRing* ring, SpawnSpan* range, Vec02* axis, s32 index, Vec02* out, f32 jitter, f32 flatten)
 {
     Vec02 dir;
     Mat02 basis;
@@ -1706,11 +1706,11 @@ struct SpawnPlacement {
     f32 hi64;               // 0x64
 };
 
-void func_00157248(SpawnPlacement* self, SpawnRing* ring, s32 unused, s32 index, Vec02* pos, Vec02* axis,
+void ChooseSpawnDirectionAndLifetime(SpawnPlacement* self, SpawnRing* ring, s32 unused, s32 index, Vec02* pos, Vec02* axis,
                    Vec02* dir, f32* start, f32* end)
 {
     Vec02 k;
-    func_00157098(ring, &self->range, axis, index, dir, self->jitter, self->flatten);
+    ComputeSpawnRingDirection(ring, &self->range, axis, index, dir, self->jitter, self->flatten);
     *start = g_gameClock[1] - RandomFloatInRange(self->lo60, self->hi64);
     *end = *start + self->life;
     f32 along = RandomFloatInRange(self->lo58, self->hi5C);
@@ -1761,7 +1761,7 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
         AT(f32, it, 0x18) = v5[i];
         AT(f32, it, 0x1C) = v6[i] - v5[i];
         AT(Quad16, it, 0x40) = AT(Quad16, self, 0x110);
-        func_001583E8((Effect*)((u8*)it + 0xB0), self);
+        FillLookDirectionBlock((Effect*)((u8*)it + 0xB0), self);
         if (AT(s32, c, 0xB8)) AT(s32, it, 0x20) = AT(s32, c, 0xB8);
         if (s7) {
             AT(Quad16, it, 0x50) = AT(Quad16, s7, 0x110);
@@ -1820,7 +1820,7 @@ struct ParticleChunk {
 // position and velocity, random frame numbers and spin, and the copy for the frame before.
 // Each array is written through its own pointer, the copy through the chunk's previous state:
 // loop.c then reduces the record's address and the copy's as two registers (docs/TOOLCHAIN.md).
-void func_001575D8(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* vel, f32* size, f32* spin, Quad16* e, Quad16* g)
+void EmitParticleChunk(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* vel, f32* size, f32* spin, Quad16* e, Quad16* g)
 {
     EffectOwner* set = 0;
     s32 i;
@@ -1839,7 +1839,7 @@ void func_001575D8(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* 
         if (h) {
             if (h->f0) *h->f0 = (s32)set;
         }
-        func_0013A128(set, self);
+        ApplyLookSourceToListedObject(set, self);
         if (h) {
             if (h->f8) {
                 typedef void (*F)(EffectOwner*, s32);
@@ -1903,7 +1903,7 @@ struct SpawnFrame {
 
 // Makes the count points of a spawn record, their directions and times, in the four arrays out
 // holds (positions, directions, starts, ends), moved to the followed object's frame.
-void func_001579B0(void* a, void* b, s32* out)
+void GenerateSpawnArrays(void* a, void* b, s32* out)
 {
     s32 n = (s32)a;
     u8* rec = (u8*)b;
@@ -1915,8 +1915,8 @@ void func_001579B0(void* a, void* b, s32* out)
     out[3] = (s32)AllocateBackMemory(n * 4);
     InitSpawnRing(*(s32*)(rec + 0xEC), (SpawnSpan*)(rec + 0xE4), n, &ring);
     for (s32 i = 0; i < n; i++) {
-        func_00156718((SpawnShape*)(rec + 0x10), i, n, (Vec02*)out[0] + i, &axis);
-        func_00157248((SpawnPlacement*)(rec + 0xA0), &ring, (s32)(rec + 0x10), i, (Vec02*)out[0] + i, &axis,
+        ChooseSpawnPosition((SpawnShape*)(rec + 0x10), i, n, (Vec02*)out[0] + i, &axis);
+        ChooseSpawnDirectionAndLifetime((SpawnPlacement*)(rec + 0xA0), &ring, (s32)(rec + 0x10), i, (Vec02*)out[0] + i, &axis,
                       (Vec02*)out[1] + i, (f32*)out[2] + i, (f32*)out[3] + i);
         SpawnFrame* o = *(SpawnFrame**)(rec + 0x78);
         if (o != 0) {
@@ -1938,7 +1938,7 @@ s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 void ComputeChainedWorldFrame(void* a, void* frame, void* out);
 void ComputeObjectFrameAtTime(void* self, void* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 
-void func_00157B88(s32 n, void* owner, SpawnSetup* first, SpawnSetup* second)
+void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* second)
 {
     SpawnFrame frame;
     Vec02 P;
@@ -1957,7 +1957,7 @@ void func_00157B88(s32 n, void* owner, SpawnSetup* first, SpawnSetup* second)
         AT(SpawnFrame*, AT(Rec50*, r, 0x90), 0x78) = &frame;
     }
     second->flag = 0;
-    func_001579B0((void*)n, AT(Rec50*, r, 0x90), second->out);
+    GenerateSpawnArrays((void*)n, AT(Rec50*, r, 0x90), second->out);
     AT(SpawnFrame*, AT(Rec50*, r, 0x90), 0x78) = 0;
     f32 last = 3.40282347e+38f;
     for (s32 i = 0; i < n; i++) {
@@ -1998,17 +1998,17 @@ void SpawnEffectsFromRecord(void* a, Rec50* b, void* c)
     }
     PushBackMemoryMark();
     f.flag = 1;
-    func_001579B0(a, b, f.out);
+    GenerateSpawnArrays(a, b, f.out);
     if (b->f120 == 1) {
         SpawnRecordEffects(b, c, a, f.out[0], f.out[1], f.out[2], f.out[3]);
     } else {
         if (b->f130 == 2) {
-            func_00157B88(a, b, f.out, f.pair);
+            GenerateSpawnSetupPair(a, b, f.out, f.pair);
         } else {
             f.pair[0] = 0;
             f.pair[1] = 0;
         }
-        func_001575D8(b, c, a, f.out[0], f.out[1], f.out[2], f.out[3], f.pair[0], f.pair[1]);
+        EmitParticleChunk(b, c, a, f.out[0], f.out[1], f.out[2], f.out[3], f.pair[0], f.pair[1]);
     }
     PopBackMemoryMark();
 }
@@ -2323,7 +2323,7 @@ void LoadRecordMember(RecordMember* self, void* stream)
     }
     Rec79* q = self->rec;
     if (q->kind == 4) {
-        func_00154C80(&q->curve20, stream);
+        ReadSpawnMesh(&q->curve20, stream);
     }
     void* t = ReadBufferedU16(stream);
     if (t != 0) {
@@ -2453,7 +2453,7 @@ void SendMessageAfterDelay(HoldingMember* self, void* message)
         }
     }
     if (done == 0) {
-        func_001590A0(self, message);
+        HandleSpawnMessage(self, message);
     }
 }
 
@@ -2531,7 +2531,7 @@ void TransformPointBetweenFrames(void* from, s32 to, Vec02* point, Vec02* out);
 extern f32 D_00262178[2];
 extern const Vec02 D_00248D30;
 
-void func_001590A0(void* self, void* body)
+void HandleSpawnMessage(void* self, void* body)
 {
     SpawnMessage* m = (SpawnMessage*)body;
     SpawnRecordView rec;
@@ -2672,7 +2672,7 @@ void DispatchDelayedMessages(World* self)
     DelayedMessage* node;
     while ((node = NextInList<DelayedMessage>::Of(&it)) != 0) {
         if (!(g_gameClock[1] < node->due)) {
-            func_001590A0(node->owner, &node->body);
+            HandleSpawnMessage(node->owner, &node->body);
             RemoveFromList(&self->list1BDC, node);
             PushFreeSlot(&self->pool1BD0, node);
         }
@@ -3279,7 +3279,7 @@ void DrawC60Object(C60* self, void* arg1, void* arg2)
 
 s32 IsPointInsideFaceTree(s32 tree, Vec02* point);
 
-s32 func_0015AA50(C60* self, void* point)
+s32 IsPointInsideObjectFaces(C60* self, void* point)
 {
     Vec02 local;
     Vec02 k;
@@ -3397,7 +3397,7 @@ void StepCollider(Collider* self, f32 dt);
 
 // k, the ramp's output, is read and written at its own address (*(u128*)&k): through Vu0::Q
 // its address stays in a saved register, where retail forms it again for each call.
-void func_0015AF50(ObjectCycler* self, f32 dt)
+void StepObjectCycler(ObjectCycler* self, f32 dt)
 {
     switch (self->state) {
     case 0:
@@ -3447,7 +3447,7 @@ void UpdateObjectCycler(ObjectCycler* self)
             a1 = 2;
             break;
         case 5:
-            a1 = func_0015BEF0(self);
+            a1 = ChooseObjectCyclerNextState(self);
             break;
         case 6:
             a1 = 0;
@@ -3474,7 +3474,7 @@ void UpdateObjectCycler(ObjectCycler* self)
             if (st == 0) {
                 if (self->nextCheckTime <= g_gameClock[1]) {
                     Quadword128 tmp;
-                    if (func_0015BD48(self, &tmp)) {
+                    if (FindObjectCyclerGroundPoint(self, &tmp)) {
                         *(Quadword128*)&self->v5F0 = tmp;
                         SetObjectCyclerState(self, 5);
                     } else {
@@ -3513,7 +3513,7 @@ void UpdateObjectCycler(ObjectCycler* self)
         break;
     }
     case 6:
-        if (IsObjectCyclerUnsupported(self) || func_0015BFC0(self)) {
+        if (IsObjectCyclerUnsupported(self) || IsActiveColliderNearObjectCycler(self)) {
             SetObjectCyclerState(self, 0);
         } else if (self->nextAdvanceTime <= g_gameClock[1]) {
             s32 idx = (self->index + 1) % self->altCount;
@@ -3534,7 +3534,7 @@ void UpdateObjectCycler(ObjectCycler* self)
     if (self->mode == 1) {
         s32 s = self->state;
         if (s == 0 || s == 5) {
-            func_0015BC78(self);
+            SendObjectCyclerMessage(self);
         }
     }
 }
@@ -3593,7 +3593,7 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
     if (self->state != 1) {
         SetObjectCyclerState(self, 1);
         if ((r->fC & 8) != 0) {
-            func_001BC0E0(self, r->f8, &r->f20, &r->f30);
+            ApplyColliderImpulseEvent(self, r->f8, &r->f20, &r->f30);
         }
         if (self->group != 0) {
             GroupForwardMessage loc;
@@ -3608,14 +3608,14 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
 
 void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
 void ComputePolarOffset(Vec02* out, f32 angle, f32 a, f32 b);
-void func_00130C58(s32 n, f32* a, double ka, f32* b, double kb, f32* c, double kc, f32* out);
+void FindEarliestCubicBoundTime(s32 n, f32* a, double ka, f32* b, double kb, f32* c, double kc, f32* out);
 void SetPlacedObjectVelocityFromFloats(PlacedObject* self, f32 x, f32 y, f32 z);
 void ScatterObjectsAtPoint(void* scatter, Vec02* at, s32 a, s32 b);
 void RotateMatrixUpright(Mat02* m, s32 zero, Mat02* out);
-extern u8 D_00261EF0[];
+extern u8 g_scatterController[];
 void StartSoundEffect(s32 a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-void func_0015B7B8(ObjectCycler* self, s32 state)
+void SetObjectCyclerState(ObjectCycler* self, s32 state)
 {
     if (self->state == state) {
         return;
@@ -3668,7 +3668,7 @@ void func_0015B7B8(ObjectCycler* self, s32 state)
             m[i][2] = r[i];
             m[i][3] = s[i];
         }
-        func_00130C58(3, m[0], 1500.0, m[1], 1500.0, m[2], 1500.0, &t);
+        FindEarliestCubicBoundTime(3, m[0], 1500.0, m[1], 1500.0, m[2], 1500.0, &t);
         t = (f32)((s32)(t * 60.0f) + 1) * 0.0166666675f;
         self->stateEnd += t;
         if (self->state == 6 && state == 0) {
@@ -3679,7 +3679,7 @@ void func_0015B7B8(ObjectCycler* self, s32 state)
     }
     case 1:
         StartSoundEffect(0x3A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        ScatterObjectsAtPoint(D_00261EF0, &self->v140, self->f690, *(s32*)((u8*)self + 0x694));
+        ScatterObjectsAtPoint(g_scatterController, &self->v140, self->f690, *(s32*)((u8*)self + 0x694));
         self->stateEnd += 2.0f;
         break;
     case 2:
@@ -3709,7 +3709,7 @@ extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};
 
 void ConvertPositionToWorld(BaseObject* self, Quad16* out);
 
-void func_0015BC78(ObjectCycler* self)
+void SendObjectCyclerMessage(ObjectCycler* self)
 {
     GroupForwardMessage loc;
     if (self->receiver678 && self->f680 <= g_gameClock[1]) {
@@ -3736,7 +3736,7 @@ typedef void (*ItemPointFn)(BaseObject* self, Vec02* in, s32 a, Vec02* out, s32 
 
 // nearest is read at its own address (*(u128*)&nearest): through Vu0::Q the address stays in
 // a pseudo that CSE keeps in a saved register across the walk, where retail forms it again.
-s32 func_0015BD48(ObjectCycler* self, Quadword128* out)
+s32 FindObjectCyclerGroundPoint(ObjectCycler* self, Quadword128* out)
 {
     ListFrame frame;
     Vec02 hit;
@@ -3775,7 +3775,7 @@ s32 func_0015BD48(ObjectCycler* self, Quadword128* out)
     return 0;
 }
 
-s32 func_0015BEF0(ObjectCycler* self)
+s32 ChooseObjectCyclerNextState(ObjectCycler* self)
 {
     s32 touching = 0;
     s32 next;
@@ -3811,7 +3811,7 @@ static inline f32 LengthSquared(u128 d)
 // the cycler. The position is named first: its load is expanded before the weight's slot store
 // and passes it in both schedules, while the velocity, read inside the sum after the Scalar,
 // waits for the store, as retail's lqc2 order shows.
-s32 func_0015BFC0(ObjectCycler* self)
+s32 IsActiveColliderNearObjectCycler(ObjectCycler* self)
 {
     Vec02 point;
     PlacedObject* active = (PlacedObject*)GetActiveSwitchedCollider();
@@ -4632,14 +4632,14 @@ f32 MeasureTextHeight(TextReader* self)
     return width * (f32)lines;
 }
 
-f32 func_0015E1F0(TextReader* self)
+f32 MeasureTextWidth(TextReader* self)
 {
     f32 best = 0.0f;
     s32 newline = 10;
-    func_0015DB80(self);
+    RewindTextReader(self);
     f32 width = best;
     s32 c;
-    while ((c = func_0015DBE0(self)) != 0) {
+    while ((c = ReadTextChar(self)) != 0) {
         if (c == newline) {
             best = (width >? best);
             width = 0.0f;
@@ -4775,7 +4775,7 @@ static inline u32 PackColor(Quad16 c)
 
 // The interrupt handler that packs the colours of the frame's record (g_drawFrameData) and moves
 // on to the next record, then lets the VIF1 go on (FBRST's STC) and ends the handler.
-s32 func_0015E6A8(s32 cause)
+s32 PackFrameColors(s32 cause)
 {
     ColorRecord_15E6A8* r = (ColorRecord_15E6A8*)g_drawFrameData;
     ColorEntry_15E6A8* begin = r->begin;

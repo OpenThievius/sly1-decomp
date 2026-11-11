@@ -12,6 +12,7 @@ func_0018DDA0	InitContactListObjectWithoutGravity	slot 0 of class 0x3D: runs Ini
 func_0018DDD8	LaunchContactListObjectWithoutGravity	slot 0x130 of class 0x3D: LaunchContactListObject, then stores the direction of its velocity times the speed at +0x6F0 as the velocity it keeps (+0x700)
 func_0018DE70	StepContactListObjectWithoutGravity	slot 0x80 (step) of class 0x3D: StepCollider, then accelerates towards the velocity at +0x700 at the rate +0x6F4 (func_001EE2B0, func_001B9AB0)
 func_0018DEE8	LaunchTimedContactListObject	slot 0x130 of class 0x3E: LaunchContactListObject, then sets its arrival time: the game time plus +0x6F0 when that is positive, else from the time func_00141D88 finds to reach the target (+0x694) at the speed +0x6F4
+func_0018E040	MoveTimedContactListObject	slot 0x7C (motion) of class 0x3E: until its arrival time (+0x6FC) moves toward the target frame with a Hermite segment (EvaluateHermiteVectorSegment) and afterwards by its velocity, turns its frame along the velocity, steps the children with slot 27 and ends with the base motion
 func_0018E410	FindKeyIndex	walks the 16 keys at D_002484B0 comparing words 2 ^ 6 with the argument's and returns the index of the match, or -1
 func_0018E480	GetMovieTitle	index below 16 returns the string in D_002699C0, -1 returns "Nil", else "(unknown)"
 func_0018E4C0	QueueMovieByIndex	queues the movie key at D_002484B0 + index * 32 with func_0018F0E8

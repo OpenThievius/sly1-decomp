@@ -65,8 +65,8 @@ void DrawC52Object(void)
 
 void SetPlacedObjectVelocity(PlacedObject* self, Vec02* v);
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void func_00127E60(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
-void func_00127B20(PlacedObject* self, PlacedObject* top, s32 count, Vec02* pos, Mat02* rot, Vec02* vel,
+void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
+void AccumulateFrameChain(PlacedObject* self, PlacedObject* top, s32 count, Vec02* pos, Mat02* rot, Vec02* vel,
                    Vec02* spin);
 f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
 f32 Arccosine(f32 x);
@@ -193,12 +193,12 @@ void ApplyLinkConstraint(PlacedObject* self)
     }
     Vec02 target = *(Vec02*)&rec->q60[0];
     Vec02 vel = D_00248D30;
-    func_00127E60(self, top, &target, 0, &vel, 0);
+    TransformStateToAncestorFrame(self, top, &target, 0, &vel, 0);
     Vec02 pos[4];
     Mat02 rot[4];
     Vec02 vels[4];
     Vec02 spins[4];
-    func_00127B20(b, top, 3, &pos[1], &rot[1], &vels[1], &spins[1]);
+    AccumulateFrameChain(b, top, 3, &pos[1], &rot[1], &vels[1], &spins[1]);
     *(Vec*)&pos[0] = Vu0::Rotate(rot[1], Vec::Of(rec->q60[1]));
     *(Vec*)&pos[0] = Vu0::Add(Vec::Of(pos[0]), Vec::Of(pos[1]));
     Vec02 u;

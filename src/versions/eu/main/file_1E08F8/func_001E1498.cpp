@@ -23,7 +23,7 @@ s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
     if (isE) base = e;
     s32 prec = sp->prec;
     f32 p = Power(10.0f, (f32)(base - prec));
-    double r = func_001FCD20(v, func_001FCDE0(func_001FD868(p), 0.5));
+    double r = AddDoubles(v, MultiplyDoubles(ConvertFloatToDouble(p), 0.5));
     s32 e2 = GetDecimalExponent(r);
     if (e < GetDecimalExponent(r)) e = e2;
     s32 n, i;

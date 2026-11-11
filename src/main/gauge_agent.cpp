@@ -79,7 +79,7 @@ void UpdateAgent(void);
 s32 AreMenusAndFadeClear(void);
 void LeaveAgentState(void*);
 void SetStateWalkerTarget(s32, s32);
-s32 func_001A8C90(void* obj, s32 v);
+s32 LaunchChosenPoolObject(void* obj, s32 v);
 void HandleAgentNotification(void* self, s32 code, void* req);
 
 void InitGaugeAgent(GaugeAgent* self)
@@ -128,9 +128,9 @@ struct AgentDrawArgs {
 void DrawAgent(Agent* self, AgentDrawArgs* args);
 void QueueDeferredRequest(DeferredRequest* request);
 void* FillMemory(void* p, s32 value, s32 size);
-void func_0018A510();
+void DrawGaugeAgentMarkerRing();
 
-void func_0018A628(GaugeAgent* self, AgentDrawArgs* args)
+void DrawGaugeAgent(GaugeAgent* self, AgentDrawArgs* args)
 {
     DrawAgent(self, args);
     if (self->fE2C) {
@@ -139,7 +139,7 @@ void func_0018A628(GaugeAgent* self, AgentDrawArgs* args)
         request.group = 0xD;
         request.f04 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(args->point)), Vu0::Q(args->weights)));
         request.arg = self;
-        request.callback = (void*)func_0018A510;
+        request.callback = (void*)DrawGaugeAgentMarkerRing;
         QueueDeferredRequest(&request);
     }
 }
@@ -366,7 +366,7 @@ void ShowGaugeAgentBar(GaugeAgent* self)
         g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
-void func_001C8418(void* self, void* p);
+void SetAgentGoalPoint(void* self, void* p);
 s32 GetObjectWorldPosition(void* obj, Vec02* out);
 void UpdateAgentGoal(void* self, s32 flag);
 
@@ -377,17 +377,17 @@ void UpdateGaugeAgentGoal(GaugeAgent* self, s32 flag)
         if (self->fE14 != 0) {
             Vec02 pos;
             GetObjectWorldPosition(self->fE14, &pos);
-            func_001C8418(self, &pos);
+            SetAgentGoalPoint(self, &pos);
         } else {
             s32 key;
             GetStateWalkerCurrentKey(self->fE10, &key);
             switch (key) {
             case 0x438:
             case 0x439:
-                func_001C8418(self, (u8*)self + 0x140);
+                SetAgentGoalPoint(self, (u8*)self + 0x140);
                 break;
             default:
-                func_001C8418(self, (u8*)g_player + 0x140);
+                SetAgentGoalPoint(self, (u8*)g_player + 0x140);
                 break;
             }
         }
@@ -535,7 +535,7 @@ void HandleGaugeAgentNotification(GaugeAgent* self, s32 a1, MessageBody* key)
                 obj->posF0[2] = obj->posF0[2] + D_00264A38;
                 break;
             }
-            func_001A8C90(obj, 1);
+            LaunchChosenPoolObject(obj, 1);
             return;
         }
         case 0x444:

@@ -24,7 +24,7 @@ struct LayoutBuilder_eu_1AE5E0 : LayoutBuilder {
     void FlagC(s32 f) { func_eu_001374E0(this, f); }
 };
 
-void func_001AE5E0(Element_eu_1AE5E0* self)
+void DrawLetterGlyphElement(Element_eu_1AE5E0* self)
 {
     PopCurve curve;
     u8 reader[0xC0];

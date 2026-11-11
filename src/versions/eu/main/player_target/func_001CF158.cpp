@@ -41,7 +41,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         bestCost = 3.40282347e+38f;
     }
     bestT = 0.0f;
-    func_0017FC48(self, &from);
+    ComputeUpwardBoostVelocity(self, &from);
     for (o = self->world->objects; o != 0; o = o->next50) {
         ConvertPositionToWorld(o, &at);
         if (o != keep && o->f58 < self->pos.z - at.z) {
@@ -144,7 +144,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         args.frame = o->frame;
         args.c = o->v40;
         FindLocalMinimum((void*)ScoreTargetPathAt, &args, 0.5f, 0.25f, 0.25f, 3.0f, &t, &cost);
-        func_001CEB18(self, args.frame, &args.c, 0, &cur0, &cur1, t);
+        ScorePlayerLeapToPoint(self, args.frame, &args.c, 0, &cur0, &cur1, t);
         if (o != keep) {
             if (cost >= D_00274E20) {
                 continue;
@@ -206,7 +206,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             o->shape->desc->m2(o->shape, &args.c, tVectorBest, 0);
         }
         FindLocalMinimum((void*)ScoreTargetPathAt, &args, 0.5f, 0.25f, 0.25f, 3.0f, &t, 0);
-        func_001CEB18(self, args.frame, &args.c, 0, &cur0, &cur1, t);
+        ScorePlayerLeapToPoint(self, args.frame, &args.c, 0, &cur0, &cur1, t);
         if (o != keep) {
             TransformPointBetweenFrames(o->frame, 0, &args.c, &p);
             if (AddTargetObstructionCost(t, self, 0, 0, &self->v140, &self->v150, &cur0, &cur1, &p)) {
@@ -339,7 +339,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         self->f2208 = 0;
         self->f2204 = bestClass75;
         self->f2200 = bestClass75;
-        func_001C61E0(self, 0);
+        SetPlayerAimMode(self, 0);
         UpdatePlayerAimTarget(self);
         state = 0xE;
         break;
@@ -348,7 +348,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         self->f220C = bestVectorT;
         self->f2204 = 0;
         self->f2200 = 0;
-        func_001C61E0(self, 0);
+        SetPlayerAimMode(self, 0);
         UpdatePlayerAimTarget(self);
         state = 0xF;
         break;

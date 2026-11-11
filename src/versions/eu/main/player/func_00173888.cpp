@@ -72,10 +72,10 @@ void ControlPlayer(Player* self, PadRecord* pad)
         if (self->entryQueue != 0) {
             UnbindEntryQueue(self->entryQueue);
         }
-        func_001C49E8(self, pad);
+        ReadTurningColliderStickHeading(self, pad);
     }
     } else {
-        func_001C49E8(self, pad);
+        ReadTurningColliderStickHeading(self, pad);
     }
     s32 skipStep = 0;
     s32 noFloor = 0;
@@ -317,19 +317,19 @@ held:
             if (ready) {
                 if (pad->flags & 0x20) {
                     ClearPadPressedBits(pad, 0x20);
-                    func_001C61E0(self, -1);
+                    SetPlayerAimMode(self, -1);
                     sub = ChoosePlayerTargetByCost(self, 0);
                     break;
                 }
                 if ((sub != 6 || self->f226C != 0.0f) && (pad->flags & 0x80)) {
-                    func_001C61E0(self, -1);
+                    SetPlayerAimMode(self, -1);
                     sub = 7;
                     ClearPadPressedBits(pad, 0x80);
                     break;
                 }
             }
             if (ready && modeKey && (MaskWorldBitsBySave() & 0x10)) {
-                func_001C61E0(self, -1);
+                SetPlayerAimMode(self, -1);
                 sub = 8;
                 break;
             }
@@ -477,7 +477,7 @@ held:
         ControlPlayerOnPath(self, pad);
         break;
     case 2:
-        func_0017D5D8(self, pad);
+        ControlPlayerState2(self, pad);
         break;
     case 6:
         ControlPlayerOnTarget(self, pad);
@@ -486,5 +486,5 @@ held:
     case 16:
         break;
     }
-    func_00177990(self);
+    UpdatePlayerGrabs(self);
 }

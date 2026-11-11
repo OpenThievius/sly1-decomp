@@ -12,7 +12,7 @@
 
 f32 WrapModulo(f32 x, f32 m);
 
-void func_00155868(EffectSpawner* self)
+void WrapSpawnerParticlesIntoBox(EffectSpawner* self)
 {
     if (!(1e-4f < self->margin)) {
         return;

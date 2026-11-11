@@ -32,9 +32,9 @@ struct Pool_0020B278 {
 };
 struct Owner_0020B278;
 struct Item_20B9D0;
-s32 func_0020B268(s32* item);
+s32 RewindMpegRingToMark(s32* item);
 s32 AllocateFromMpegRing(Owner_0020B278* owner, Pool_0020B278* pool, u32 offset, u32 align);
-s32 func_0020B9D0(Item_20B9D0* item, s32 x, s32 y);
+s32 SetPictureDimensions(Item_20B9D0* item, s32 x, s32 y);
 
 // A picture plane: its address, its size in pixels and in macroblocks.
 struct Plane_20BB18 {
@@ -81,9 +81,9 @@ struct Picture_20BB18 {
     State_20BB18* state;
 };
 
-void func_0020BDC0(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6, u32* a7, u32* p9, u32 p10, u32 p11, u32 p12, s32 p13, s32 p14);
+void SetUpPictureBufferAddresses(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6, u32* a7, u32* p9, u32 p10, u32 p11, u32 p12, s32 p13, s32 p14);
 
-void func_0020BB18(Picture_20BB18* pic)
+void AllocatePictureBuffers(Picture_20BB18* pic)
 {
     State_20BB18* st = pic->state;
     s32 w;
@@ -112,20 +112,20 @@ void func_0020BB18(Picture_20BB18* pic)
     pic->width = w;
     pic->height = h;
     size = (u32)(w * 0x180 * h) >> 8;
-    func_0020B268((s32*)&st->pool);
+    RewindMpegRingToMark((s32*)&st->pool);
     st->fFC = AllocateFromMpegRing((Owner_0020B278*)st, &st->pool, size, 0x40);
     st->f100 = AllocateFromMpegRing((Owner_0020B278*)st, &st->pool, size, 0x40);
     st->f104 = AllocateFromMpegRing((Owner_0020B278*)st, &st->pool, size, 0x40);
-    func_0020BDC0(&st->planes[0].addr, &st->planes[1].addr, &st->planes[2].addr, &st->planes[3].addr,
+    SetUpPictureBufferAddresses(&st->planes[0].addr, &st->planes[1].addr, &st->planes[2].addr, &st->planes[3].addr,
                   &st->planes[4].addr, &st->planes[5].addr, &st->planes[6].addr, &st->planes[7].addr,
                   &st->planes[8].addr, st->fFC, st->f100, st->f104, w, h);
-    func_0020B9D0((Item_20B9D0*)&st->planes[0], w, h);
-    func_0020B9D0((Item_20B9D0*)&st->planes[1], w, h);
-    func_0020B9D0((Item_20B9D0*)&st->planes[2], w, h);
-    func_0020B9D0((Item_20B9D0*)&st->planes[3], w, h >> 1);
-    func_0020B9D0((Item_20B9D0*)&st->planes[4], w, h >> 1);
-    func_0020B9D0((Item_20B9D0*)&st->planes[5], w, h >> 1);
-    func_0020B9D0((Item_20B9D0*)&st->planes[6], w, h >> 1);
-    func_0020B9D0((Item_20B9D0*)&st->planes[7], w, h >> 1);
-    func_0020B9D0((Item_20B9D0*)&st->planes[8], w, h >> 1);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[0], w, h);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[1], w, h);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[2], w, h);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[3], w, h >> 1);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[4], w, h >> 1);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[5], w, h >> 1);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[6], w, h >> 1);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[7], w, h >> 1);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[8], w, h >> 1);
 }

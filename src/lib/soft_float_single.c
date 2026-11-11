@@ -154,7 +154,7 @@ f32 PackFloatFromParts(s32 a0, s32 a1, s32 a2, s32 a3)
     return PackFloat(&args);
 }
 
-u64 func_001FD868(f32 x)
+u64 ConvertFloatToDouble(f32 x)
 {
     Packed v;
 

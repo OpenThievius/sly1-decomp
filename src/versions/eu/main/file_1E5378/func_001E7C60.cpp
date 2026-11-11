@@ -38,7 +38,7 @@ static inline void ClearArcQueueRequest(ArcQueueRequest_eu_1E7C60* request)
     FillMemory(request, 0, sizeof(*request));
 }
 
-void func_001E7C60(Arc_eu_1E7C60* self)
+void QueueArcDraw(Arc_eu_1E7C60* self)
 {
     Vec02 screen;
     Vec02 world;

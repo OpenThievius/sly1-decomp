@@ -51,7 +51,7 @@ struct ClampedQuadratic {
     }
 };
 void ShortenEffectLife(Effect* self, f32 x);
-void func_001EED68(void* self, Vec02* in, Vec02* outA, Vec02* outB);
+void GetAttachedSetPointMotion(void* self, Vec02* in, Vec02* outA, Vec02* outB);
 // The larger of two floats (max.s; through an inline function, b >? a reads a first and gives
 // the result b's register, as retail's pose counts are).
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
@@ -96,7 +96,7 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     radius *= ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, t);
     if (other->desc->flags & 0x80) {
         Vec02 target;
-        func_001EED68(other, at, &target, 0);
+        GetAttachedSetPointMotion(other, at, &target, 0);
         Vu0::Vec vel = Vu0::MulAddX(Vu0::Vec::Of(self->qA0), Vu0::Sub(Vu0::Vec::Of(target), Vu0::Vec::Of(self->qA0)), Vu0::Vec::ScalarAt(D_0026B544));
         f32 time = D_0026B540;
         Vu0::Q(self->qA0) = vel.q;

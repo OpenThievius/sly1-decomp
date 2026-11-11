@@ -1,2 +1,4 @@
 symbol	name	evidence
+func_001FA9B0	WriteTlbEntryForSetUp	the TLB set-up's own copy of system call stub 0x56, called by SetUpTlbEntries with an entry's index, page mask, EntryHi and two EntryLo words
 func_001FA9C0	SetUpTlbForMemory	sets the TLB up through func_001FAA00 when QueryMemorySize reports 0x2000000, and calls the system call stub func_001F6D30 otherwise
+func_001FAA00	SetUpTlbEntries	reports the three entry ranges, writes the kernel, default and extended tables of D_00277FE0 into the TLB with WriteTlbEntryForSetUp (wiring the first two) and maps every remaining entry empty from 0xE0000000; prints the "TLB over flow" messages and ends the program when a range passes 0x30 entries (SetUpTlbForMemory calls it)

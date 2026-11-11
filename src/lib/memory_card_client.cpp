@@ -477,7 +477,7 @@ s32 TrySemaphore(Handle_209FA8* h);
 void PostSemaphore(Handle_209FA8* h);
 s32 CallRemoteService(Pool_209FA8* p, s32 a1, s32 a2, Req_209FA8* q, s32 a4, u8* a5, s32 a6, s32 a7, s32 a8);
 
-s32 func_00209FA8(s32 a, s32 b)
+s32 RequestCardFormat(s32 a, s32 b)
 {
     s32 r = TrySemaphore((Handle_209FA8*)(*(u32*)&g_cardSemaphore));
     s32 res;
@@ -517,7 +517,7 @@ s32 TrySemaphore(s32 v);
 void* CopyStringBounded(s8* dst, s8* src, s32 n);
 Buf_0020A078* CallRemoteService(Reg_0020A078* self, s32 a1, s32 a2, Buf_0020A078* a3, s32 a4, u32* a5, s32 a6, s32 a7, s32 a8);
 
-s32 func_0020A078(s32 a0, s32 a1, s8* a2)
+s32 RequestCardSpaceForPath(s32 a0, s32 a1, s8* a2)
 {
     Reg_0020A078* reg;
     Buf_0020A078* buf;

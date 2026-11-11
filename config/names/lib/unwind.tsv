@@ -1,6 +1,15 @@
 symbol	name	evidence
 func_001FF048	ReadUnsignedLeb128	reads an unsigned number of 7-bit groups (the top bit marks a continuation) from the unwind tables and returns the position after it
 func_001FF090	ReadSignedLeb128	reads a signed number of 7-bit groups, extending the sign from bit 6 of the last byte, and returns the position after it
+func_001FF0E0	MergeFrameLists	merges the second sorted array of frame descriptions into the first, from the back, ordered by key (unwind.c)
+func_001FF1E0	FinishFrameTableSort	ends the sort of a frame table: splits off the out-of-order descriptions, heap-sorts them, merges them back and frees the spare list; aborts when the counts disagree (unwind.c)
+func_001FF448	CountFrameDescriptions	counts the frame descriptions of a block that have a common record and a start address (unwind.c)
+func_001FF490	CollectFrameDescriptions	appends a block's usable frame descriptions to a list and widens the lowest and highest code address it has seen (unwind.c)
+func_001FF518	BuildFrameTableIndex	counts and collects a registered block's frame descriptions, sorts them and stores the sorted table with the code range it covers (unwind.c)
+func_001FF658	FindFrameDescription	finds the frame description holding a code address: picks the registered block covering it (building its index on first use), then binary-searches its sorted table (unwind.c)
+func_001FF740	ParseCommonFrameRecord	reads a frame description's common record: its augmentation string, handler data, code and data alignment and return column, and returns where its instructions start; 0 for an unknown augmentation (unwind.c)
+func_001FF848	RunUnwindInstruction	runs one unwind instruction (advance the location, record a register saved at an offset, set the frame address rule, push or pop the rule state) on an unwind state and returns the next instruction (unwind.c)
 func_001FFBE0	RegisterFrameInfo	original assembly: adds an object's frame information to the runtime's list D_0062A7B8 (RegisterProgramFrameInfo calls it at startup)
 func_001FFC08	DeregisterFrameInfo	removes an object's frame information from the runtime's list D_0062A7B8, freeing its sorted table, and aborts when it is not there (ReleaseProgramFrameInfo calls it at exit)
 func_001FFC80	FindFrameUnwindState	finds the frame description of a code address and runs its unwind instructions into a state record (the throw and rethrow entries call it)
+func_001FFE58	SplitOutOfOrderFrames	moves the frame descriptions that break the key order out of an array into a second one and closes the gaps (unwind.c)

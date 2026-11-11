@@ -336,150 +336,150 @@ f32 Arcsine(f32 x);
 f32 SquareRoot(f32 x);
 MathFn_259938 g_scriptMathFunctions[8] = { SquareRoot, Sine, Cosine, Tangent, Arcsine, Arccosine, Arctangent, WrapAngle };
 // The built-ins not matched yet (INCLUDE_ASM below) have the built-in signature.
-ScriptValue* func_00112698(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00112968(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00112C38(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00113240(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00114BB0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115F70(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00115FF8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116080(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116108(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001161F8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_001162D0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116400(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116490(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116840(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00116BC8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00117FE0(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00118698(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* func_00118988(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* AddScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* SubtractScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* MultiplyScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* DivideScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* AppendScriptLists(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptDotProduct(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptCrossProduct(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptVectorLength(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptDistance(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptDistanceSquared(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* NormalizeScriptVector(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* ProjectScriptVector(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* RemoveScriptVectorComponent(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* InterpolateScriptRotation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* MakeScriptDirectionMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* FindScriptObjectsInBox(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* GetScriptPointAheadOfCamera(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptBuiltin g_scriptBuiltins[125] = {
-    { (ScriptBuiltinFn)func_00112698, 1, 1 },
-    { (ScriptBuiltinFn)func_00112968, 1, 1 },
-    { (ScriptBuiltinFn)func_00112C38, 1, 1 },
-    { (ScriptBuiltinFn)func_00113240, 1, 1 },
-    { (ScriptBuiltinFn)func_00113730, 1, 0 },
-    { (ScriptBuiltinFn)func_00113780, 0, 1 },
-    { (ScriptBuiltinFn)func_001137D0, 1, 0 },
-    { (ScriptBuiltinFn)func_00113820, 2, 0 },
-    { (ScriptBuiltinFn)func_001139E8, 2, 0 },
-    { (ScriptBuiltinFn)func_00113A18, 2, 0 },
-    { (ScriptBuiltinFn)func_00113A48, 2, 0 },
-    { (ScriptBuiltinFn)func_00113A78, 2, 0 },
-    { (ScriptBuiltinFn)func_00113AA8, 2, 0 },
-    { (ScriptBuiltinFn)func_00113E48, 2, 0 },
-    { (ScriptBuiltinFn)func_00113E78, 1, 0 },
-    { (ScriptBuiltinFn)func_00113EE0, 1, 0 },
-    { (ScriptBuiltinFn)func_00113FB0, 1, 0 },
-    { (ScriptBuiltinFn)func_00113F48, 1, 0 },
-    { (ScriptBuiltinFn)func_00114018, 1, 0 },
-    { (ScriptBuiltinFn)func_00114080, 1, 0 },
-    { (ScriptBuiltinFn)func_001140E8, 1, 0 },
-    { (ScriptBuiltinFn)func_00114150, 1, 0 },
-    { (ScriptBuiltinFn)func_001141B8, 1, 0 },
-    { (ScriptBuiltinFn)func_00114220, 1, 0 },
-    { (ScriptBuiltinFn)func_00114288, 1, 0 },
-    { (ScriptBuiltinFn)func_00114300, 1, 0 },
-    { (ScriptBuiltinFn)func_00114360, 1, 0 },
-    { (ScriptBuiltinFn)func_001143C8, 1, 0 },
-    { (ScriptBuiltinFn)func_00114438, 1, 0 },
-    { (ScriptBuiltinFn)func_001144A0, 1, 0 },
-    { (ScriptBuiltinFn)func_00114518, 3, 0 },
-    { (ScriptBuiltinFn)func_001145C8, 1, 0 },
-    { (ScriptBuiltinFn)func_00114638, 2, 0 },
-    { (ScriptBuiltinFn)func_001146E0, 1, 0 },
-    { (ScriptBuiltinFn)func_00114740, 1, 0 },
-    { (ScriptBuiltinFn)func_00114858, 2, 0 },
-    { (ScriptBuiltinFn)func_00114888, 2, 0 },
-    { (ScriptBuiltinFn)func_001148B8, 1, 0 },
-    { (ScriptBuiltinFn)func_00114950, 2, 0 },
-    { (ScriptBuiltinFn)func_001149F0, 2, 0 },
-    { (ScriptBuiltinFn)func_00114B80, 0, 1 },
-    { (ScriptBuiltinFn)func_00114BB0, 0, 1 },
-    { (ScriptBuiltinFn)func_00114D18, 2, 0 },
-    { (ScriptBuiltinFn)func_00114F48, 2, 0 },
-    { (ScriptBuiltinFn)func_001151C0, 2, 0 },
-    { (ScriptBuiltinFn)func_00115398, 1, 0 },
-    { (ScriptBuiltinFn)func_00115440, 3, 0 },
-    { (ScriptBuiltinFn)func_00115510, 0, 1 },
-    { (ScriptBuiltinFn)func_00115710, 3, 0 },
-    { (ScriptBuiltinFn)func_001157E0, 2, 0 },
-    { (ScriptBuiltinFn)func_001158B8, 3, 0 },
-    { (ScriptBuiltinFn)func_001159B8, 1, 1 },
-    { (ScriptBuiltinFn)func_00115B78, 1, 0 },
-    { (ScriptBuiltinFn)func_00115C00, 2, 0 },
-    { (ScriptBuiltinFn)func_00115D48, 1, 0 },
-    { (ScriptBuiltinFn)func_00115D78, 1, 0 },
-    { (ScriptBuiltinFn)func_00115DA8, 1, 0 },
-    { (ScriptBuiltinFn)func_00115DD8, 1, 0 },
-    { (ScriptBuiltinFn)func_00115E08, 1, 0 },
-    { (ScriptBuiltinFn)func_00115E38, 1, 0 },
-    { (ScriptBuiltinFn)func_00115E68, 1, 0 },
-    { (ScriptBuiltinFn)func_00115E98, 1, 0 },
-    { (ScriptBuiltinFn)func_00115EC8, 2, 0 },
-    { (ScriptBuiltinFn)func_00115F70, 2, 0 },
-    { (ScriptBuiltinFn)func_00115FF8, 2, 0 },
-    { (ScriptBuiltinFn)func_00116080, 1, 0 },
-    { (ScriptBuiltinFn)func_00116108, 1, 1 },
-    { (ScriptBuiltinFn)func_001161F8, 1, 1 },
-    { (ScriptBuiltinFn)func_001162D0, 1, 1 },
-    { (ScriptBuiltinFn)func_00116400, 2, 0 },
-    { (ScriptBuiltinFn)func_00116490, 2, 0 },
-    { (ScriptBuiltinFn)func_00116520, 3, 1 },
-    { (ScriptBuiltinFn)func_00116600, 2, 0 },
-    { (ScriptBuiltinFn)func_001166C0, 1, 0 },
-    { (ScriptBuiltinFn)func_00116740, 1, 0 },
-    { (ScriptBuiltinFn)func_001167C0, 2, 0 },
-    { (ScriptBuiltinFn)func_00116840, 3, 0 },
-    { (ScriptBuiltinFn)func_00116978, 1, 0 },
-    { (ScriptBuiltinFn)func_001169E8, 1, 0 },
-    { (ScriptBuiltinFn)func_00116A88, 1, 0 },
-    { (ScriptBuiltinFn)func_00116B08, 1, 0 },
-    { (ScriptBuiltinFn)func_00116BC8, 2, 1 },
-    { (ScriptBuiltinFn)func_00116C80, 1, 0 },
-    { (ScriptBuiltinFn)func_00116D20, 2, 0 },
-    { (ScriptBuiltinFn)func_00116DC8, 3, 0 },
-    { (ScriptBuiltinFn)func_00116EA8, 4, 0 },
-    { (ScriptBuiltinFn)func_00116FE8, 2, 0 },
-    { (ScriptBuiltinFn)func_00117080, 2, 0 },
-    { (ScriptBuiltinFn)func_00117118, 1, 0 },
-    { (ScriptBuiltinFn)func_00117180, 1, 0 },
-    { (ScriptBuiltinFn)func_001171F0, 1, 0 },
-    { (ScriptBuiltinFn)func_00117260, 1, 0 },
-    { (ScriptBuiltinFn)func_001172C8, 1, 0 },
-    { (ScriptBuiltinFn)func_00117360, 1, 1 },
-    { (ScriptBuiltinFn)func_00117478, 1, 1 },
-    { (ScriptBuiltinFn)func_00117598, 2, 0 },
-    { (ScriptBuiltinFn)func_00117610, 0, 0 },
-    { (ScriptBuiltinFn)func_00117668, 2, 1 },
-    { (ScriptBuiltinFn)func_00117880, 2, 0 },
-    { (ScriptBuiltinFn)func_00117A30, 3, 0 },
-    { (ScriptBuiltinFn)func_00117A60, 3, 0 },
-    { (ScriptBuiltinFn)func_00117A90, 3, 0 },
-    { (ScriptBuiltinFn)func_00117AC0, 2, 0 },
-    { (ScriptBuiltinFn)func_00117BC8, 2, 0 },
-    { (ScriptBuiltinFn)func_00117C48, 2, 0 },
-    { (ScriptBuiltinFn)func_00117D00, 2, 0 },
-    { (ScriptBuiltinFn)func_00117D78, 2, 0 },
-    { (ScriptBuiltinFn)func_00117E20, 0, 0 },
-    { (ScriptBuiltinFn)func_00117E78, 0, 0 },
-    { (ScriptBuiltinFn)func_00117ED0, 0, 0 },
-    { (ScriptBuiltinFn)func_00117F28, 2, 0 },
-    { (ScriptBuiltinFn)func_00117FE0, 2, 0 },
-    { (ScriptBuiltinFn)func_001180C0, 2, 0 },
-    { (ScriptBuiltinFn)func_001183B8, 3, 0 },
-    { (ScriptBuiltinFn)func_00118458, 3, 0 },
-    { (ScriptBuiltinFn)func_001184F8, 3, 0 },
-    { (ScriptBuiltinFn)func_00118580, 3, 0 },
-    { (ScriptBuiltinFn)func_00118608, 3, 0 },
-    { (ScriptBuiltinFn)func_00118698, 0, 0 },
-    { (ScriptBuiltinFn)func_00118720, 2, 0 },
-    { (ScriptBuiltinFn)func_001187E8, 1, 0 },
-    { (ScriptBuiltinFn)func_00118850, 2, 0 },
-    { (ScriptBuiltinFn)func_001188F0, 2, 0 },
-    { (ScriptBuiltinFn)func_00118988, 7, 0 },
-    { (ScriptBuiltinFn)func_001156B0, 2, 0 }
+    { (ScriptBuiltinFn)AddScriptValues, 1, 1 },
+    { (ScriptBuiltinFn)SubtractScriptValues, 1, 1 },
+    { (ScriptBuiltinFn)MultiplyScriptValues, 1, 1 },
+    { (ScriptBuiltinFn)DivideScriptValues, 1, 1 },
+    { (ScriptBuiltinFn)IgnoreScriptArgument, 1, 0 },
+    { (ScriptBuiltinFn)IgnoreScriptArguments, 0, 1 },
+    { (ScriptBuiltinFn)DiscardScriptArgument, 1, 0 },
+    { (ScriptBuiltinFn)TestScriptWordsEqual, 2, 0 },
+    { (ScriptBuiltinFn)TestScriptLess, 2, 0 },
+    { (ScriptBuiltinFn)TestScriptLessOrEqual, 2, 0 },
+    { (ScriptBuiltinFn)TestScriptGreater, 2, 0 },
+    { (ScriptBuiltinFn)TestScriptGreaterOrEqual, 2, 0 },
+    { (ScriptBuiltinFn)TestScriptValuesIdentical, 2, 0 },
+    { (ScriptBuiltinFn)TestScriptEqual, 2, 0 },
+    { (ScriptBuiltinFn)IsScriptBool, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptNumber, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptInt, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptFloat, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptPointer, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptVector, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptMatrix, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptVector4, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptFloatPair, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptFloatTriple, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptList, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptEmptyList, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptRef, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptNullRef, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptHostFunction, 1, 0 },
+    { (ScriptBuiltinFn)IsScriptFunction, 1, 0 },
+    { (ScriptBuiltinFn)TestScriptNearlyEqual, 3, 0 },
+    { (ScriptBuiltinFn)IsScriptFalse, 1, 0 },
+    { (ScriptBuiltinFn)PrependScriptListItem, 2, 0 },
+    { (ScriptBuiltinFn)GetScriptListHead, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptListTail, 1, 0 },
+    { (ScriptBuiltinFn)SetScriptListHead, 2, 0 },
+    { (ScriptBuiltinFn)SetScriptListTail, 2, 0 },
+    { (ScriptBuiltinFn)GetScriptListLength, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptListItem, 2, 0 },
+    { (ScriptBuiltinFn)TestScriptListContains, 2, 0 },
+    { (ScriptBuiltinFn)ReturnScriptArgument, 0, 1 },
+    { (ScriptBuiltinFn)AppendScriptLists, 0, 1 },
+    { (ScriptBuiltinFn)MapScriptList, 2, 0 },
+    { (ScriptBuiltinFn)FilterScriptList, 2, 0 },
+    { (ScriptBuiltinFn)ForEachScriptListItem, 2, 0 },
+    { (ScriptBuiltinFn)EvalScriptArgument, 1, 0 },
+    { (ScriptBuiltinFn)MakeScriptVector, 3, 0 },
+    { (ScriptBuiltinFn)MakeScriptMatrix, 0, 1 },
+    { (ScriptBuiltinFn)MakeScriptVector4FromThree, 3, 0 },
+    { (ScriptBuiltinFn)MakeScriptFloatPair, 2, 0 },
+    { (ScriptBuiltinFn)MakeScriptFloatTriple, 3, 0 },
+    { (ScriptBuiltinFn)GetScriptVectorElement, 1, 1 },
+    { (ScriptBuiltinFn)SetScriptRandomSeed, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptRandomFloat, 2, 0 },
+    { (ScriptBuiltinFn)GetScriptSquareRoot, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptSine, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptCosine, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptTangent, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptArcSine, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptArcCosine, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptArcTangent, 1, 0 },
+    { (ScriptBuiltinFn)WrapScriptAngle, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptAtan2, 2, 0 },
+    { (ScriptBuiltinFn)GetScriptDotProduct, 2, 0 },
+    { (ScriptBuiltinFn)GetScriptCrossProduct, 2, 0 },
+    { (ScriptBuiltinFn)GetScriptVectorLength, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptDistance, 1, 1 },
+    { (ScriptBuiltinFn)GetScriptDistanceSquared, 1, 1 },
+    { (ScriptBuiltinFn)NormalizeScriptVector, 1, 1 },
+    { (ScriptBuiltinFn)ProjectScriptVector, 2, 0 },
+    { (ScriptBuiltinFn)RemoveScriptVectorComponent, 2, 0 },
+    { (ScriptBuiltinFn)GetScriptBallisticVelocity, 3, 1 },
+    { (ScriptBuiltinFn)GetScriptAngleAndAxis, 2, 0 },
+    { (ScriptBuiltinFn)TransposeScriptMatrix, 1, 0 },
+    { (ScriptBuiltinFn)InvertScriptMatrix, 1, 0 },
+    { (ScriptBuiltinFn)TransformScriptMatrixByObject, 2, 0 },
+    { (ScriptBuiltinFn)InterpolateScriptRotation, 3, 0 },
+    { (ScriptBuiltinFn)GetScriptMatrixTranslation, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptMatrixRotation, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptMatrixEuler, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptMatrixAxisAngle, 1, 0 },
+    { (ScriptBuiltinFn)MakeScriptDirectionMatrix, 2, 1 },
+    { (ScriptBuiltinFn)MakeScriptUprightObjectMatrix, 1, 0 },
+    { (ScriptBuiltinFn)EvalScriptQuadratic, 2, 0 },
+    { (ScriptBuiltinFn)EvalScriptClampedQuadratic, 3, 0 },
+    { (ScriptBuiltinFn)MakeScriptVector4FromFour, 4, 0 },
+    { (ScriptBuiltinFn)ClampScriptToRange, 2, 0 },
+    { (ScriptBuiltinFn)TestScriptInsideRange, 2, 0 },
+    { (ScriptBuiltinFn)ConvertScriptFloatToInt, 1, 0 },
+    { (ScriptBuiltinFn)RoundScriptFloatUp, 1, 0 },
+    { (ScriptBuiltinFn)RoundScriptFloat, 1, 0 },
+    { (ScriptBuiltinFn)TruncateScriptFloat, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptAbsolute, 1, 0 },
+    { (ScriptBuiltinFn)GetScriptMaximum, 1, 1 },
+    { (ScriptBuiltinFn)GetScriptMinimum, 1, 1 },
+    { (ScriptBuiltinFn)GetScriptRemainder, 2, 0 },
+    { (ScriptBuiltinFn)GetScriptClock, 0, 0 },
+    { (ScriptBuiltinFn)ScheduleScriptCall, 2, 1 },
+    { (ScriptBuiltinFn)SetScriptObjectEventTimer, 2, 0 },
+    { (ScriptBuiltinFn)AddScriptObjectProperty, 3, 0 },
+    { (ScriptBuiltinFn)SetScriptExtraObjectProperty, 3, 0 },
+    { (ScriptBuiltinFn)UpdateScriptObjectProperty, 3, 0 },
+    { (ScriptBuiltinFn)GetScriptObjectProperty, 2, 0 },
+    { (ScriptBuiltinFn)FindScriptObject, 2, 0 },
+    { (ScriptBuiltinFn)FindScriptObjectList, 2, 0 },
+    { (ScriptBuiltinFn)FindScriptObjectById, 2, 0 },
+    { (ScriptBuiltinFn)FindScriptObjectListById, 2, 0 },
+    { (ScriptBuiltinFn)GetScriptControlledObject, 0, 0 },
+    { (ScriptBuiltinFn)GetScriptWorld, 0, 0 },
+    { (ScriptBuiltinFn)GetScriptCamera, 0, 0 },
+    { (ScriptBuiltinFn)GatherScriptObjectsById, 2, 0 },
+    { (ScriptBuiltinFn)FindScriptObjectsInBox, 2, 0 },
+    { (ScriptBuiltinFn)FindScriptObjectsInSphere, 2, 0 },
+    { (ScriptBuiltinFn)CollectScriptObjectHits, 3, 0 },
+    { (ScriptBuiltinFn)FindScriptObjectHit, 3, 0 },
+    { (ScriptBuiltinFn)TransformScriptPointBetweenFrames, 3, 0 },
+    { (ScriptBuiltinFn)TransformScriptDirectionBetweenFrames, 3, 0 },
+    { (ScriptBuiltinFn)TransformScriptRotationBetweenFrames, 3, 0 },
+    { (ScriptBuiltinFn)GetScriptPointAheadOfCamera, 0, 0 },
+    { (ScriptBuiltinFn)StartScriptEffect, 2, 0 },
+    { (ScriptBuiltinFn)StopScriptEffect, 1, 0 },
+    { (ScriptBuiltinFn)StartScriptPadRecordPattern, 2, 0 },
+    { (ScriptBuiltinFn)SendScriptPointEventToWorldListener, 2, 0 },
+    { (ScriptBuiltinFn)SampleScriptAnimation, 7, 0 },
+    { (ScriptBuiltinFn)SetScriptVoiceParam, 2, 0 }
 };
 MarkStacks g_markStacks;
 
@@ -2007,7 +2007,7 @@ ScriptValue* GetScriptDotProduct(ScriptValue* ret, s32 count, ScriptValue* args,
     return ret;
 }
 
-ScriptValue* func_00115FF8(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+ScriptValue* GetScriptCrossProduct(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
     InitScriptValue(&t);
@@ -3150,7 +3150,7 @@ ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* arg
     if (mask & 8) {
         q8 = (u8*)AllocateBackMemory(n * sizeof(ScriptSampleQuad));
     }
-    func_0012CD78((Gr8B*)anim, a, b, (PlacedObject*)from, (PlacedObject*)to, n, (Vec02*)positions, (Mat02*)rotations,
+    SampleAnimationFrameChain((Gr8B*)anim, a, b, (PlacedObject*)from, (PlacedObject*)to, n, (Vec02*)positions, (Mat02*)rotations,
                   (Vec02*)q4, (Vec02*)q8);
     R11B008Node* head = 0;
     R11B008Node* tail = 0;
@@ -3218,7 +3218,7 @@ ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* arg
     return ret;
 }
 
-Quad_118D20* func_00118CF0(Quad_118D20* out, f32 f)
+Quad_118D20* StoreFloatAsQuadword(Quad_118D20* out, f32 f)
 {
     *out = (Quad_118D20)Vu0::ScalarInGpr(f);
     return out;

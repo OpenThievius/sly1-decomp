@@ -453,6 +453,17 @@ span equals the final code's, so the second flip is a reference or a life in ret
 a deleted copy. Use the same split before writing variants: find the smallest set of --set
 changes that gives every register, then look for one source difference per change.
 
+Then turn each `--set` into the pass that sets it (w24, 2026-11-11). REG_N_REFS is flow's count,
+taken after gcse and before combine and never recounted (the `-df` dump prints it, the same as
+`.lreg`'s), so a reference combine folds away still counts, and one flow already shows in its
+final form has no hidden twin. The lengths are sched1's: haifa recounts them on its own order.
+Here g_unitRange's and g_unitZVector's %hi copies (1395, 1392) are inserted by gcse at the end
+of bb 21 and sched1's birthing rule issues each just after its source (452, priority 7; 394,
+priority 6), so the second flip is a scheduling question: r510 wins when 5 x life(r507) > life(r510)
+in real insns, which `sched1.py --prio 394=8` or `--prio 452=5` gives and `--prio 394=7` only
+ties (equal priorities go to the lower allocno, r507). Scanning every allocno's refs and length
+one at a time with --set (on top of the first flip) found no lever besides r507's and r510's.
+
 ### Macro or table? (func_00109488, w23, 2026-11-11)
 
 PAL's copy is the same instruction stream as US's (0 differing lines with symbol targets stripped),

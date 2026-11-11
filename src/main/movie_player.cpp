@@ -132,7 +132,7 @@ struct AttachedTransformFrame {
 void BuildPlacedObjectTransform(void* obj, void* c, void* out);
 void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
 void MultiplyMatrices(void* out, void* b, void* in);
-void func_00125C90(void* obj, void* s, void* out);
+void PrepareFadedObjectDraw(void* obj, void* s, void* out);
 
 extern s32 g_gifChannel;
 
@@ -343,7 +343,7 @@ void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
 
     if ((self->flags & 0x100000000ULL) == 0) {
         if (self->f1EC == 0 && self->f1F0 == 0) {
-            func_00125C90(self, in1, in2);
+            PrepareFadedObjectDraw(self, in1, in2);
         } else {
             if (self->f1EC != 0) {
                 self->f1EC->vt->getPos(self->f1EC, 0.0f, &f.q00, &f.q10);
@@ -360,7 +360,7 @@ void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
             BuildMatrixFromRotationAndTranslation(&f, &f.tbl30, &f.q60);
             MultiplyMatrices(&f.blkF0, &f.blkA0, &f.q60);
             f.blkA0 = f.blkF0;
-            func_00125C90(self, in1, &f.blkA0);
+            PrepareFadedObjectDraw(self, in1, &f.blkA0);
         }
     }
 }
@@ -441,7 +441,7 @@ void StepContactListObjectWithoutGravity(ContactListGlider* self, f32 dt)
 }
 
 void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
-s32 func_00141D88(const Vec02* a0, void* a1, void* a2, s32 a3, ColliderSpan* out, f32 radius);
+s32 FindSegmentSphereSpan(const Vec02* a0, void* a1, void* a2, s32 a3, ColliderSpan* out, f32 radius);
 void LaunchContactListObject(ContactListObject* self);
 extern f32 g_gameTime;
 
@@ -462,7 +462,7 @@ void LaunchTimedContactListObject(ContactListGlider* self)
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-0.5f));
         ClampVectorLength(&d, &d, self->rate6F4 * 0.75f);
         Vu0::Q(e) = Vu0::MulAddX(Vu0::Q(d), Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos)), Vu0::Scalar(1.5f));
-        func_00141D88(&D_00248D30, &d, &e, 1, &hit, self->rate6F4);
+        FindSegmentSphereSpan(&D_00248D30, &d, &e, 1, &hit, self->rate6F4);
         f32 x = hit.time[1];
         f32 m = 0.25f;
         m = m >? x;
@@ -492,7 +492,7 @@ void EvaluateHermiteVectorSegment(f32 t, f32 u, f32 v, void* a, void* b, void* c
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
 void BuildBasisFromXAndZHint(Vec02* x, Vec02* hint, Mat02* out);
 
-void func_0018E040(ContactListGlider* self, s32 hold, f32 dt)
+void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
 {
     Vec02 accel;
     f32 now = *(f32*)(g_gameClock + 4);

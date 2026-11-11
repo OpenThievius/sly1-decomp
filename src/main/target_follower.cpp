@@ -152,7 +152,7 @@ void SetTargetFollowerMode(TargetFollower* self, s32 mode);
 Collider* GetActiveSwitchedCollider(void);
 f32 ArctangentOfRatio(f32 a, f32 b);
 
-void func_0016D128(TargetFollower* self)
+void UpdateTargetFollower(TargetFollower* self)
 {
     UpdateCollider(self);
     PlayPendingFollowerSound(self);
@@ -312,7 +312,7 @@ void SetFollowedObject(TargetFollower* self, FollowableObject* x)
 extern f32 g_gameTime;
 s32 GetObjectWorldPosition(void* p, Vec02* out);
 s32 ComputeBallisticLaunchVelocity(f32 t, Vec02* from, Vec02* to, Vec02* out, void* self);
-extern const Vec02 D_00248D20;
+extern const Vec02 g_unitZVector;
 
 struct FollowPoseA {
     u8 pad00[0x50];
@@ -361,9 +361,9 @@ struct FollowTune {
 
 void GetPlacementRecordTransform(void* rec, Vec02* a, Mat02* b, s32 zero);
 s32 IsObjectOfKind(void* obj, s32 kind);
-s32 func_001A8C90(void* obj, s32 zero);
+s32 LaunchChosenPoolObject(void* obj, s32 zero);
 
-void func_0016D490(TargetFollower* self)
+void LaunchPoolItemAtTarget(TargetFollower* self)
 {
     Vec02 a;
     Vec02 b;
@@ -421,7 +421,7 @@ void func_0016D490(TargetFollower* self)
     }
     sa->f78 = tune->f320 * D_00262A28[0];
     sb->v10 = a;
-    if (func_001A8C90(self->f570, 0) != 0) {
+    if (LaunchChosenPoolObject(self->f570, 0) != 0) {
         self->f574 = g_gameTime + ((FollowTune*)self->f558->f7AC)->f31C;
     }
 }
@@ -545,7 +545,7 @@ Collider* GetActiveSwitchedCollider(void);
 s32 RandomIntInRange(s32 a, s32 b);
 void ConvertPositionToWorld(void* arg, Vec3* out);
 
-extern const Mat02 D_002483D0;
+extern const Mat02 g_identityMatrix;
 s32 GetObjectWorldPosition(void* p, Vec02* out);
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 RandomIntInRange(s32 a, s32 b);
@@ -555,7 +555,7 @@ extern GameClock g_gameClock;
 
 struct FollowerTrail { u8 pad00[0x40]; Vec02 v40; Vec02 v50; Vec02 v60; Vec02 v70; };
 
-void func_0016DAC0(TargetFollower* self, s32 mode)
+void SetTargetFollowerMode(TargetFollower* self, s32 mode)
 {
     s32 key;
     if (self->f598 == mode) {
@@ -589,9 +589,9 @@ void func_0016DAC0(TargetFollower* self, s32 mode)
             FollowerTrail* t = (FollowerTrail*)self->f594;
             t->v40 = g_player->v140;
             t = (FollowerTrail*)self->f594;
-            t->v50 = D_002483D0.r[0];
-            t->v60 = D_002483D0.r[1];
-            t->v70 = D_002483D0.r[2];
+            t->v50 = g_identityMatrix.r[0];
+            t->v60 = g_identityMatrix.r[1];
+            t->v70 = g_identityMatrix.r[2];
             self->f5D4 = RandomIntInRange(1, 3);
         } else {
             self->f590 = ChooseEntryTableObject(table);
@@ -692,7 +692,7 @@ void StartEntryTableObject(EntryTableObject* self)
 
 s32 GetObjectWorldPosition(void* p, Vec02* out);
 
-void* func_0016DE20(EntryTableObject* self)
+void* ChooseEntryTableObject(EntryTableObject* self)
 {
     if (self->entryCount > 0) {
         if (self->mode314 != 0) {

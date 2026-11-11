@@ -12,7 +12,7 @@ struct T217D_BF0Eu {
     void* target;               // 0x590
 };
 
-void func_00181ED0(T217D_BF0* element, PadStick* pad)
+void SteerWalkerAimAtNearestTarget(T217D_BF0* element, PadStick* pad)
 {
     T217D_BF0Eu* self = (T217D_BF0Eu*)element;
     Vec02 p;

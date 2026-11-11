@@ -92,10 +92,10 @@ struct SpawnSetup {
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void func_001579B0(void* a, void* b, s32* out);
+void GenerateSpawnArrays(void* a, void* b, s32* out);
 void SpawnRecordEffects(void* b, void* c, void* a, s32 o0, s32 o1, s32 o2, s32 o3);
-void func_00157B88(void* a, void* b, s32* out, s32* pair);
-void func_001575D8(void* b, void* c, void* a, s32 o0, s32 o1, s32 o2, s32 o3, s32 p0, s32 p1);
+void GenerateSpawnSetupPair(void* a, void* b, s32* out, s32* pair);
+void EmitParticleChunk(void* b, void* c, void* a, s32 o0, s32 o1, s32 o2, s32 o3, s32 p0, s32 p1);
 
 struct StreamWord {
     s32 value;
@@ -117,7 +117,7 @@ void InitSpawnRecord(void* mem);
 void LoadPlacedObject(void* self, s32 count);
 s32 ReadBufferedS8(s32 count);
 PathCurve* CreatePathCurve(s32 kind);
-void func_00154C80(void* self, s32 count);
+void ReadSpawnMesh(void* self, s32 count);
 s32 ReadBufferedU16(s32 count);
 void* GetOwnSpawnRecord(void* self, s32 flag);
 void ReadCappedWordList(void* self, s32 count, void* unused, s32 src);
@@ -148,7 +148,7 @@ void SetListLinkOffset(void*,s32);
 
 void AddRangeEntry(void*,void*,void*,f32,f32,f32,f32,void*);
 
-void func_0013A128(void*,void*);
+void ApplyLookSourceToListedObject(void*,void*);
 void CopyEffectOwnerMargin(void*,void*);
 f32 RandomFloatInRange(f32,f32);
 
@@ -168,7 +168,7 @@ EffectOwner* AcquireEffectOwner(u8* ctx, s32 flag);
 void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b);
 Effect* CreateEffect(s32 a, EffectOwner* b);
 void SetTrailSegmentAnchor(EffectOwner* self, s32 kind, Effect* extra);
-void func_001583E8(Effect* a, Rec50* b);
+void FillLookDirectionBlock(Effect* a, Rec50* b);
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 IsListEmpty(void* p);
 
@@ -263,7 +263,7 @@ void StartSoundEffect(s32 a0, void* a1, void* a2, s32 a3, f32 f12, f32 f13, f32 
 void StopSoundRecord(void* self, s32 n);
 void SpawnEffectsAt(Quad16* self, Quad16* a1, void* a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
 
-void func_00156288(BaseObject* self, u8* cfg, Quad16* p, Quad16* at, f32 chance, f32 minScale, f32 size)
+void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, Quad16* at, f32 chance, f32 minScale, f32 size)
 {
     if (AT(s32, cfg, 0x580) == 0) {
         return;

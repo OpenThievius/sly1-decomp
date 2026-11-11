@@ -12,3 +12,5 @@ func_00209B80	SyncCardRequest	waits for the request in flight to end (or tests i
 func_00209C60	CopyCardInfoReply	the completion handler that copies the card information's words out of uncached memory to where GetCardInfo was asked to put them
 func_00209CB8	GetCardInfo	sends the card server the information request (operation 1) for a port and slot with three pointers for its results (PollMemoryCard and GetMemoryCardFreeBytes call it)
 func_00209E48	ReadCardDirectory	sends the card server the directory request (operation 0xD) for a path into a table of entries (ListMemoryCardDirectory and LoadMemoryCardSaveSlots call it)
+func_00209FA8	RequestCardFormat	sends the card server operation 0x10 with a port and slot after taking its request semaphore, returning -200 when it is busy and -100 when unbound (FormatMemoryCard calls it)
+func_0020A078	RequestCardSpaceForPath	sends the card server operation 0x12 with a port, slot and a path of up to 0x3FF characters, returning -210 for an empty path (CreateMemoryCardSaveFiles calls it to learn the blocks needed)

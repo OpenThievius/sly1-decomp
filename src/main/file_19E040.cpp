@@ -85,7 +85,7 @@ void RemoveEffect(Effect* self);
 
 s32 IsObjectAttached(void* p);
 
-s32 func_0013E658(void* a, s32 b);
+s32 FindPlaneTreeNodeForPoint(void* a, s32 b);
 
 void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5);
 
@@ -380,7 +380,7 @@ void* AllocateBackMemory(s32 size);
 
 void PopBackMemoryMark(void);
 
-s32 func_0013E430(u8* a0, u8* a1, void** a2, f32 scale);
+s32 QueryPlaneTreePoint(u8* a0, u8* a1, void** a2, f32 scale);
 
 s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, ColliderSpan* a5);
 
@@ -1095,7 +1095,7 @@ void CollideEffects(EffectOwner* self)
             PushBackMemoryMark();
             if (s2->tree.count > 0) {
                 buf = AllocateBackMemory(s2->tree.count2 * 12);
-                if (func_0013E430((u8*)s2->tree.nodes, (u8*)&self->v140, &buf, self->radius3D0) != 2) goto skip;
+                if (QueryPlaneTreePoint((u8*)s2->tree.nodes, (u8*)&self->v140, &buf, self->radius3D0) != 2) goto skip;
                 buf = (u8*)buf - 12;
             } else {
                 buf = 0;
@@ -1275,7 +1275,7 @@ struct EffectFrame {
 // An effect's spin and motion over dt: the spin dragged and, when it is not negligible, turned
 // into a rotation the placement (rot50) is multiplied by; then the velocity carried through the
 // spin's frame and the position moved along it.
-void func_0019F390(Effect* self, f32 dt)
+void MoveEffect(Effect* self, f32 dt)
 {
     EffectFrame frame;
 
@@ -1320,7 +1320,7 @@ void UpdateEffect(Effect* self)
     }
     s32 flag = 0;
     if (IsObjectAttached(h) != 0) {
-        if (func_0013E658(&self->q80, (s32)self->target->tree.nodes) != 0) {
+        if (FindPlaneTreeNodeForPoint(&self->q80, (s32)self->target->tree.nodes) != 0) {
             flag = 1;
         }
     }
@@ -1328,7 +1328,7 @@ void UpdateEffect(Effect* self)
 }
 
 void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4]);
-void func_00125BF0(PlacedObject* self, Camera* cam, void* m);
+void SubmitScaledPlacedObjectTransform(PlacedObject* self, Camera* cam, void* m);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
 
 // What an effect hands its object's draw method (slot 38): the placement, then the alpha and a
@@ -1375,7 +1375,7 @@ s32 DrawEffectAt(Effect* self, Camera* cam, Vec02* pos, f32 (*rot)[4])
     f32 keep = o->f28C;
     if (0.0f < keep) {
         o->f28C = keep * b;
-        func_00125BF0(o, cam, &draw);
+        SubmitScaledPlacedObjectTransform(o, cam, &draw);
         o->f28C = keep;
     }
     return 1;
@@ -1535,7 +1535,7 @@ void InitDroppingEffect(Effect* self)
     self->i20 = v;
 }
 
-void func_0019FE50(Effect* self, f32 dt)
+void UpdateDroppingEffect(Effect* self, f32 dt)
 {
     Vec02 k;
     while (self->target != 0 && IsObjectAttached(self->target) == 0) {
@@ -1549,9 +1549,9 @@ void func_0019FE50(Effect* self, f32 dt)
     UpdateEffect(self, dt);
 }
 
-void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+void DrawBeamBetweenPoints(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
 
-void func_0019FF20(Effect* self, void* a1)
+void DrawDroppingEffect(Effect* self, void* a1)
 {
     DrawEffect(self, a1);
     u128 d = Vu0::Sub(Vu0::Q(self->q80), Vu0::Q(self->q90));
@@ -1559,7 +1559,7 @@ void func_0019FF20(Effect* self, void* a1)
         f32 t = (g_gameTime - self->start) / self->life;
         f32 x;
         ClampedQuadratic::Get(x, (const QuadraticCoeffs*)&self->q40, t);
-        func_001268B8(g_currentWorld->slot1CE8[7], a1, &self->q90, &self->q80, 0.1f, x);
+        DrawBeamBetweenPoints(g_currentWorld->slot1CE8[7], a1, &self->q90, &self->q80, 0.1f, x);
     }
 }
 
@@ -1580,7 +1580,7 @@ void InitStreakEffect(Effect* self)
     self->f120 = 0.05f;
 }
 
-void func_001A00A0(Effect* self, void* a1)
+void DrawStreakEffect(Effect* self, void* a1)
 {
     Vec02 pos;
     f32 t = g_gameTime - self->start;
@@ -1596,7 +1596,7 @@ void func_001A00A0(Effect* self, void* a1)
     if (x <= 0.0f || y <= 0.0f) {
         RemoveEffect(self);
     } else {
-        func_001268B8(self->p20, a1, &pos, &self->q80, y, x);
+        DrawBeamBetweenPoints(self->p20, a1, &pos, &self->q80, y, x);
     }
 }
 
@@ -1806,7 +1806,7 @@ void DrawTrailSegment(Effect* self, Camera* cam)
             to = &self->q90;
             break;
         }
-        func_001268B8(self->p20, cam, &self->q80, to, b * 100.0f, a * fade);
+        DrawBeamBetweenPoints(self->p20, cam, &self->q80, to, b * 100.0f, a * fade);
         return;
     }
     RemoveEffect(self);
@@ -1924,19 +1924,19 @@ void InitCameraSpaceEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->q30 = *(const Quad219C*)&p->rows[20];
 }
 
-void func_00130540(void* a, void* b, const T219C_Params* c, const f32* d, void* e, void* f, s32 g, f32 t, f32 u, f32 v);
-void func_00144128(Camera* cam, void* point, void* out);
+void EvaluateHermiteVectorSegment(void* a, void* b, const T219C_Params* c, const f32* d, void* e, void* f, s32 g, f32 t, f32 u, f32 v);
+void UnprojectCameraPoint(Camera* cam, void* point, void* out);
 
-void func_001A0D60(Effect* self, f32 f)
+void MoveCameraSpaceEffect(Effect* self, f32 f)
 {
     Quad219C a;
     Quad219C b;
     f32 t = self->start + self->life - g_gameTime;
     t = t >? f;
-    func_00130540(&self->f120, &self->qA0, self->params, self->params->rows + 4, &a, &b, 0, t, f, 1.0f);
+    EvaluateHermiteVectorSegment(&self->f120, &self->qA0, self->params, self->params->rows + 4, &a, &b, 0, t, f, 1.0f);
     *(Quad219C*)&self->f120 = a;
     self->qA0 = b;
-    func_00144128(g_camera, &a, &self->q80);
+    UnprojectCameraPoint(g_camera, &a, &self->q80);
 }
 
 
@@ -1960,7 +1960,7 @@ void DrawCameraSpaceEffect(Effect* self, Camera* cam)
     Mat02 r1;
     Mat02* c = (Mat02*)self->rot50;
 
-    func_00144128(cam, &self->f120, &point);
+    UnprojectCameraPoint(cam, &self->f120, &point);
     MultiplyMatrices3x3(c, (Mat02*)&cam->g80, &view);
     MatrixToAxisAngle(&view, &angle, &axis);
     t = (g_gameTime - self->start) / self->life;
@@ -2032,7 +2032,7 @@ void DrawEmitterEffect(Effect* self, void* a1)
     Mat02 rot;
     Vu0::Q(pos) = Vu0::Rotate(self->rot50, Vu0::Q(self->q80));
     Vu0::Q(pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(((PlacedObject*)self->p120)->v140));
-    rot = D_002483D0;
+    rot = g_identityMatrix;
     DrawEffectAt(self, a1, &pos, &rot);
 }
 
@@ -2293,12 +2293,12 @@ struct HullPoint {
 void InitIdentityMatrix(void* self);
 Mat4A MultiplyMatrices(void* m, void* in);
 void BuildBasisFromX(void* x, void* out);
-s32 func_001A2070(void* m, s32 n, HullPoint* pts);
+s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts);
 
 // The frame looking from the camera toward pos: the camera's position moved to the origin, then
 // the basis built from the direction (its rows as the columns), and the product passed to
 // ComputeProjectedHull, returned by value as a temporary.
-s32 func_001A1F40(Vec02* pos, s32 n, HullPoint* pts)
+s32 ComputeHullSeenFromCamera(Vec02* pos, s32 n, HullPoint* pts)
 {
     Mat4 m0;
     Mat4 m1;
@@ -2322,13 +2322,13 @@ s32 func_001A1F40(Vec02* pos, s32 n, HullPoint* pts)
     m1.m[1][2] = rot.r[0].y;
     m1.m[2][2] = rot.r[0].z;
     t = MultiplyMatrices(&m1, &m0);
-    return func_001A2070(&t, n, pts);
+    return ComputeProjectedHull(&t, n, pts);
 }
 
 void TransformByMatrixWithW(void* m, Vec02* in, Vec02* out, f32 w);
 void SortElements(void* base, s32 n, s32 size, s32 (*cmp)(AngledPoint*, AngledPoint*));
 
-s32 func_001A2070(void* m, s32 n, HullPoint* pts)
+s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts)
 {
     HullPoint tmp;
     f32 lowest = 3.40282347e+38f;
@@ -2377,7 +2377,7 @@ void CopyEffectSourceIds(Effect* self, Rec50* src)
     self->i124 = src->f1F0;
 }
 
-void func_001A22E0(Effect* self, void* a1)
+void DrawProjectileEffect(Effect* self, void* a1)
 {
     Vec02 dir;
     Mat02 rot;
@@ -2628,9 +2628,9 @@ void PopBackMemoryMark(void);
 void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(void*, Collider*), s32 p4, s32* n, Collider*** list);
 Collider* FindNearestSpanObject(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out);
 void BuildBasisFromX(void* x, void* out);
-extern const Vec02 D_00248D20;
+extern const Vec02 g_unitZVector;
 
-void func_001A2B48(Effect* self, Rec50* src)
+void AimEffectAtNearestObject(Effect* self, Rec50* src)
 {
     f32* poly = (f32*)((u8*)src + 0x1C0);
     f32 speed = self->m30[0];
@@ -2652,7 +2652,7 @@ void func_001A2B48(Effect* self, Rec50* src)
     f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->qA0)));
     f32 reach = speed * peak;
     Vec02* from = (Vec02*)&self->q80;
-    Vu0::Q(self->qA0) = Vu0::NormalizeOr(Vu0::Q(self->qA0), Vu0::Q(D_00248D20));
+    Vu0::Q(self->qA0) = Vu0::NormalizeOr(Vu0::Q(self->qA0), Vu0::Q(g_unitZVector));
     Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(*from), Vu0::Q(self->qA0), Vu0::Scalar(reach * 100.0f));
     PushBackMemoryMark();
     GatherCollidersInBox(g_currentWorld, 0, from, &end, (s32 (*)(void*, Collider*))IsEffectAimCandidate, (s32)src, &n, &list);
@@ -2692,7 +2692,7 @@ void DrawStreakedEffect(Effect* self, void* a1)
         Vu0::Q(dir) = v;
         Vu0::Q(dir) = Vu0::DivX(v, Vu0::Length(v));
         Vu0::Q(tail) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(dir), Vu0::Scalar(100.0f));
-        func_001268B8(tmpl, a1, &tail, &self->q80, 10.0f, 1.0f);
+        DrawBeamBetweenPoints(tmpl, a1, &tail, &self->q80, 10.0f, 1.0f);
     } else {
         Mat02 rot;
         BuildBasisFromXAndYHint(&self->qA0, (u8*)a1 + 0x80, &rot);
@@ -2763,7 +2763,7 @@ void DrawSpinningEffect(Effect* self, void* a1)
     Vec02 pos;
     Vec02 k;
     Vu0::Q(k) = Vu0::FromFloatAt(self->f120);
-    Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(D_00248D20), Vu0::Q(k));
+    Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(g_unitZVector), Vu0::Q(k));
     DrawEffectAt(self, a1, &pos, self->rot50);
 }
 
@@ -2882,7 +2882,7 @@ static inline void MulRows(Vec02* out, const Mat02& a, const Mat02& b)
 // An effect homing on its object's frame at the end of its life (once started): its position
 // and velocity steered there through func_00130540 over the time left, and its placement the
 // object's rotation then, turned about f120 by f130 times the share of its life left.
-void func_001A3730(Effect* self, f32 f)
+void MoveDelayedEffect(Effect* self, f32 f)
 {
     Vec02 pos;
     Vec02 v10;
@@ -2903,7 +2903,7 @@ void func_001A3730(Effect* self, f32 f)
         u128 w3 = Vu0::Scalar(0.25f);
         u128 c = Vu0::MulX(Vu0::Q(self->qC0), Vu0::Scalar(t));
         Vu0::Q(v10) = Vu0::MulXSum3(d, w1, Vu0::Q(self->qA0), w2, c, w3);
-        func_00130540(&self->q80, &self->qA0, (const T219C_Params*)&pos, (const f32*)&v10, &v20, &v30, 0, t, f, 1.0f);
+        EvaluateHermiteVectorSegment(&self->q80, &self->qA0, (const T219C_Params*)&pos, (const f32*)&v10, &v20, &v30, 0, t, f, 1.0f);
         BuildAxisAngleMatrix((Vec02*)&self->f120, &turn, self->f130 * t / self->life);
         self->q80 = *(Quad219C*)&v20;
         self->qA0 = *(Quad219C*)&v30;
@@ -3432,7 +3432,7 @@ void* FindFirstObjectByIdMode4(World* w, s32 id, void* self);
 s32 GatherObjectsByMode(World* w, s32 a, s32 id, void* self, s32 mode, void** out);
 void* CreateObjectCopy(void* obj, World* w, s32 n);
 
-void func_001A48C0(PairController* self)
+void ResolvePairControllerLinks(PairController* self)
 {
     PostLoadPlacedObject(self);
     if (self->id64C == GetCurrentEntryVariant()) {
@@ -3681,7 +3681,7 @@ INCLUDE_RODATA(D_0024CAEC);
 extern const f32 D_0024CAEC;
 void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
 void* GetActiveSwitchedCollider(void);
-extern const Vec02 D_00248D20;
+extern const Vec02 g_unitZVector;
 
 // Whether the spot is within reach of n: the xy distance to its position is less than the two radii.
 static inline s32 IsNearSpot(const Vec02& pos, PairedObject* n, PairedObject* o)
@@ -3696,7 +3696,7 @@ static inline s32 IsNearSpotOf(const Vec02& pos, PairedObject* n, PairedObject* 
     return near;
 }
 
-void func_001A5120(PairController* self)
+void SpawnPairedObject(PairController* self)
 {
     Vec02 pos;
     Vec02 spare;
@@ -3754,11 +3754,11 @@ void func_001A5120(PairController* self)
         pos.z = self->tune350;
         o->desc02()->m1D(o, &pos);
         f32 spin = RandomFloatInRange(0.0f, 6.2831855f);
-        BuildAxisAngleMatrix(&D_00248D20, &turn, spin);
+        BuildAxisAngleMatrix(&g_unitZVector, &turn, spin);
         o->desc02()->m1E(o, &turn);
         o->desc02()->m20(o, (Vec02*)&D_00248D30);
         o->desc02()->m21(o, (Vec02*)&D_00248D30);
-        SetColliderAnchors(o, 2, (s32)&D_00248D20, 3, 0);
+        SetColliderAnchors(o, 2, (s32)&g_unitZVector, 3, 0);
         SetHitTargetState(o, 0);
         RemoveFromList(self->list374, o);
         AppendToList(self->list368, o);
@@ -4060,7 +4060,7 @@ s32 PairWithNearestWaitingObject(void* self, void* child)
     return 1;
 }
 
-s32 func_001A6328(PairController* self, PairedObject* obj)
+s32 AssignNearestListedObjectToPair(PairController* self, PairedObject* obj)
 {
     ListFrame frame;
     if (IsListEmpty((List01*)self->list3A0) != 0) {
@@ -4296,7 +4296,7 @@ s32 ChoosePairedObjectState(PairedObject* self)
             s = 4;
             break;
         }
-        if (func_001A6328((PairController*)self->controller, self) != 0) {
+        if (AssignNearestListedObjectToPair((PairController*)self->controller, self) != 0) {
             s = 5;
         } else {
             s = 2;

@@ -72,7 +72,7 @@ s32 FindNearestAgentKey(void* a, void* b);
 void* FindObjectHandle(s32 a, s32 b);
 void RestartAgentClip(void* a);
 typedef void* (*TargetObjectFn)(void* self);
-void func_001C8418(KeyedConeAgent* self, void* p);
+void SetAgentGoalPoint(KeyedConeAgent* self, void* p);
 void UpdateAgentGoal(KeyedConeAgent* self);
 s32 GetObjectWorldPosition(void* self, void* arg);
 void FaceAgentTowardGoalPoint(KeyedConeAgent* self);
@@ -159,7 +159,7 @@ union DoubleBits {
     double d;
     u64 u;
 };
-double func_001FCD20(double a, double b);
+double AddDoubles(double a, double b);
 // An object of the world's lists at 0x78, 0x1B70 and 0x1C30 as func_001E9EE8 walks them: the
 // slot at 0x7C of the first list's objects is called with the frame time.
 struct ListedObject;
@@ -191,7 +191,7 @@ struct EndNodeWalk {
     static void Of(ListFrame* it) { g_activeListFrames = it->prev; }
 };
 void UpdateObjectTree(ListedObject* n, f32 dt);
-void func_0012EBD8(ListedObject* n, f32 dt);
+void UpdateAnimationPlayer(ListedObject* n, f32 dt);
 void StepObjectLevelRamp(ListedObject* n, f32 dt);
 void RunQueuedCalls(World* self);
 struct BeginByteWalk {
@@ -222,7 +222,7 @@ void StepMemoryChecksum(void);
 SwitchedCollider* GetActiveSwitchedCollider(void);
 void UpdateWorldObjectLists(World* self);
 void UpdateObjectTree(u8* n, f32 dt);
-void func_0012EBD8(u8* n, f32 dt);
+void UpdateAnimationPlayer(u8* n, f32 dt);
 void StepObjectLevelRamp(u8* n, f32 dt);
 void DispatchDelayedMessages(World* self);
 void UpdateSoundEmitters(void);
@@ -289,8 +289,8 @@ typedef u64 Bits128 __attribute__((mode(TI)));
 s32 QueryValueTreeMask(void* self, void* node, Bits128 q, s32* out);
 typedef void (*AttachNotifyFn)(void* self, void* arg);
 void BuildPlacedObjectTransform(void* obj, void* c, void* out);
-void func_00125C90(void* obj, void* s, void* out);
-void func_001C8418(void* self, void* p);
+void PrepareFadedObjectDraw(void* obj, void* s, void* out);
+void SetAgentGoalPoint(void* self, void* p);
 void UpdateAgentGoal(void* self);
 void InitObject(void* self);
 void PadPacketToQuadSlot(void* s, s32 target);
@@ -867,7 +867,7 @@ struct FramePoint_001EBD10 {
 void GetPlacedObjectPositionAt(void* self, f32 t, Vec02* pos, Vec02* vel);
 void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, Vec02* e, Vec02* f, f32 t);
 
-void func_001EBD10(BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel);
+void GetBeatPressColliderPositionAt(BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel);
 
 void InitTempoAgent(TempoAgent* self);
 

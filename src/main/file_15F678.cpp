@@ -209,7 +209,7 @@ struct ContactHit { EdgeHolder* holder; u8 pad[8]; };
 void PushBackMemoryMark(void);
 u8* AllocateBackMemory(s32 size);
 void PopBackMemoryMark(void);
-s32 func_0013E430(u8* a0, u8* a1, s32* a2, f32 scale);
+s32 QueryPlaneTreePoint(u8* a0, u8* a1, s32* a2, f32 scale);
 
 extern u8 D_000018C0[];
 extern u8 D_000018F8[];
@@ -1669,7 +1669,7 @@ s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 ma
     PushBackMemoryMark();
     u8* k = AllocateBackMemory(src->count * 12);
     buf[0] = (s32)k;
-    if (func_0013E430(src->base, dst->base + key * 16, buf, 1.0f) != 2) {
+    if (QueryPlaneTreePoint(src->base, dst->base + key * 16, buf, 1.0f) != 2) {
         PopBackMemoryMark();
         return 0;
     }

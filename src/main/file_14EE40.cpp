@@ -226,7 +226,7 @@ void UpdateMaskedCollider(PooledHolder* self);
 void GetStateWalkerCurrentKey(void* p, s32* out);
 void GetStateWalkerTargetKey(void* p, s32* out);
 void UpdatePooledHolderAim(PooledHolder* self, s32* state);
-void func_00150008(PooledHolder* self);
+void ThrowHeldPooledObject(PooledHolder* self);
 void SetPooledHolderWalkerState(PooledHolder* self, s32 state);
 
 extern const f32 D_00249FB8;
@@ -424,7 +424,7 @@ struct ListFrameWords {
     s32 prev;
 };
 
-void func_00153780(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6);
+void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6);
 void RemoveFromList(void* list, ActiveSetItem* n);
 void AppendToList(void* list, ActiveSetItem* n);
 extern f32 D_BC23D70A;
@@ -942,11 +942,11 @@ void UpdatePooledHolder(PooledHolder* self)
                 else UpdatePooledHolderAim(self, &st[1]);
                 break;
             case 0x2BA:
-                func_00150008(self);
+                ThrowHeldPooledObject(self);
                 st[1] = 0x2B8;
                 break;
             case 0x2BB:
-                func_00150008(self);
+                ThrowHeldPooledObject(self);
                 st[1] = 0x2B9;
                 break;
             }
@@ -1077,7 +1077,7 @@ void SendPointEventToWorldListener(Vec02* point, f32 radius);
 void TriggerScriptEvent(PooledHolder* host, s32 a, s32 b, void** args);
 void TransformDirectionBetweenFrames(void* frame, s32 zero, void* in, Vec02* out);
 
-void func_00150008(PooledHolder* self)
+void ThrowHeldPooledObject(PooledHolder* self)
 {
     Vec02 pos;
     Vec02 d;
@@ -2554,7 +2554,7 @@ typedef void (*EndFillFn)(Collider* body, s32 a1, s32 size, s32 extra, f32* rows
 void* AllocateZeroedBackMemory(u32 size);
 void ComputeColliderPointVelocity(Collider* body, Vec02* point, void* motion, Vec02* out);
 
-void func_00153780(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6)
+void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6)
 {
     Contact03* contact = (Contact03*)n->owner;
     for (s32 i = 0; i < 2; i++) {
@@ -2747,7 +2747,7 @@ void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s
     while (node != 0) {
         if (node->kind == 2) {
             if (node->row == 0) {
-                func_00153780(self, a1, node, a3, a4, a5, a6);
+                BuildContactItemRows(self, a1, node, a3, a4, a5, a6);
             }
             RemoveFromList(&self->pending, node);
             AppendToList(&self->active, node);
@@ -2771,7 +2771,7 @@ void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s
         }
         if (!sel) break;
         if (sel->row == 0) {
-            func_00153780(self, a1, sel, a3, a4, a5, a6);
+            BuildContactItemRows(self, a1, sel, a3, a4, a5, a6);
         }
         PivotActiveSet(self, (ActiveSetItem*)sel);
     }
@@ -2781,7 +2781,7 @@ typedef void (*HandlerFn)(void* handler, s32 flags, ActiveSetItem* item, s32 end
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
 void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item);
 
-void func_00154088(ActiveSetSolver* self, s32 a1, s32 n, Contact03** contacts, s32 a4, s32 a5, f32 dt)
+void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, Contact03** contacts, s32 a4, s32 a5, f32 dt)
 {
     u128 zero = Vu0::Zero();
     Vec02 best;
@@ -2880,7 +2880,7 @@ static inline void AddLimited(Vec02* acc, Vec02* v, f32 limitSq, f32 limit)
 // parts of the bodies at its contact's two ends (n groups of parts, counts[j] in group j); each
 // part then takes its own impulse, relative to its parent's motion at its position and in the
 // parent's frame when it has one, constrained and cut to maxLin and maxAng.
-void func_00154370(ActiveSetSolver* self, s32 n, s32* counts, Collider*** lists, f32 maxLin, f32 maxAng)
+void ApplySolvedImpulsesToParts(ActiveSetSolver* self, s32 n, s32* counts, Collider*** lists, f32 maxLin, f32 maxAng)
 {
     PartImpulse** bufs;
     f32 maxLinSq;

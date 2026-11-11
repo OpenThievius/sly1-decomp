@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001FE890	MultiplySigned64	multiplies two 64-bit values from their 32-bit halves: one widening product of the low halves plus the two cross products in the high word (multiply.c; MultiplyDoubles calls it four times)

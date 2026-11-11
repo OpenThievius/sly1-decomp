@@ -36,9 +36,9 @@ s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2);
 s32 AddSweptPartMeshContact(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5);
 void AddSphereSphereContact(Collider* self, Collider* other, void* a2);
 void AddMeshContacts(void* a0, f32 radius, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6);
-void func_00186BA8(Collider* self, Collider* other, void* a2, void* a3, u8* ctx, PooledContact** list);
+void CreateMeshPairContacts(Collider* self, Collider* other, void* a2, void* a3, u8* ctx, PooledContact** list);
 
-void func_00187F40(Collider* self, Collider* other, s32 sweep, void* a3, void* a4, void* a5, void* a6)
+void CollideColliderParts(Collider* self, Collider* other, s32 sweep, void* a3, void* a4, void* a5, void* a6)
 {
     for (Collider* p = (Collider*)self->parts.head; p != 0; p = (Collider*)p->link2E4.next) {
         u64 f = p->flags538;
@@ -101,7 +101,7 @@ void func_00187F40(Collider* self, Collider* other, s32 sweep, void* a3, void* a
             s32 v = p != self || p->radius3CC != p->radius3D4;
             AddMeshContacts(p, p->radius3CC, &p->v140, other, a3, v ? a5 : a4, v ? (void*)0 : a5, a6);
         } else {
-            func_00186BA8(p, other, a3, a4, (u8*)a5, (PooledContact**)a6);
+            CreateMeshPairContacts(p, other, a3, a4, (u8*)a5, (PooledContact**)a6);
         }
     }
 }

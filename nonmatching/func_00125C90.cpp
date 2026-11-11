@@ -91,7 +91,7 @@ s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x
 void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, void* out);
 void InvertRigidTransform(const Vec02* pos, const Mat02* rot, void* out);
 Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
-void func_00125BF0(PlacedObject* self, Camera* cam, ScaledTransform* xf);
+void SubmitScaledPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 
 // The parent's rotation, its scale divided out, times the transform's (MulRotationRowsX), with
 // the fourth row w that MulRotationIntoWorld's frame shows: never set, it makes the saved frame
@@ -113,7 +113,7 @@ static inline void MulRotationRowsXW(Mat02* out, const Mat02& a, const Mat02& b)
     *out = r;
 }
 
-void func_00125C90(PlacedObject* self, Camera* cam, ScaledTransform* xf)
+void PrepareFadedObjectDraw(PlacedObject* self, Camera* cam, ScaledTransform* xf)
 {
     ScaledTransform t;
     if (self->flags & ((u64)0x8000 << 17)) {
@@ -221,6 +221,6 @@ void func_00125C90(PlacedObject* self, Camera* cam, ScaledTransform* xf)
         }
     }
     if (0.0f < self->f28C) {
-        func_00125BF0(self, cam, xf);
+        SubmitScaledPlacedObjectTransform(self, cam, xf);
     }
 }

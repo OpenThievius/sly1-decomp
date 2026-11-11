@@ -19,7 +19,7 @@ typedef void (*NewHandler)(void);
 // What an allocation calls when it runs out of memory.
 NewHandler D_002789D8 = 0;
 
-NewHandler func_001FFFD0(NewHandler handler)
+NewHandler ReplaceNewHandler(NewHandler handler)
 {
     NewHandler previous = D_002789D8;
     D_002789D8 = handler;
@@ -27,12 +27,12 @@ NewHandler func_001FFFD0(NewHandler handler)
 }
 
 // Placement allocations: the memory is given.
-void* func_001FFFE0(u32 size, void* place)
+void* ReturnPlacement(u32 size, void* place)
 {
     return place;
 }
 
-void* func_001FFFE8(u32 size, void* place)
+void* ReturnArrayPlacement(u32 size, void* place)
 {
     return place;
 }

@@ -44,10 +44,10 @@ void ApplyPadPatternSetting(GameProgress* ctx);
 void ResetGameProgress(void* self);
 s32 ChecksumGameProgress(void* img);
 void ConvertStringToCharCodes(void* p, void* q);
-void* func_0020A078(void*, void*, const char*);
+void* RequestCardSpaceForPath(void*, void*, const char*);
 s32 ReadCardDirectory(void* a, void* b, const void* c, s32 d, s32 e, void* f);
 s32 GetCardInfo(void* a, void* b, s32* c, s32* d, s32* e);
-void* func_00209FA8(s32, s32);
+void* RequestCardFormat(s32, s32);
 void* MakeCardDirectory(s32, s32, void*);
 void* OpenCardFile(s32, s32, void*, void*);
 void* CloseCardFile(void*);
@@ -588,7 +588,7 @@ s32 CreateMemoryCardSaveFiles(MemoryCard* self)
 {
     char name[0x50];
     s32 info[4];
-    s32 r = FinishMemoryCardCall((s32)func_0020A078(self->port, self->slot, D_0024B340), (void*)0x12, (s32)info);
+    s32 r = FinishMemoryCardCall((s32)RequestCardSpaceForPath(self->port, self->slot, D_0024B340), (void*)0x12, (s32)info);
     if (r != 0) return r;
     s32 need = info[0] == 0 ? 2 : 1;
     s32 sz = GetKeyedDataSize((KeyRecord*)g_memoryCardIconKey);
@@ -1058,7 +1058,7 @@ s32 GetMemoryCardFreeBytes(void* p, s32* a1)
 
 s32 FormatMemoryCard(void* p)
 {
-	void* result = func_00209FA8(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8));
+	void* result = RequestCardFormat(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8));
 	return FinishMemoryCardCall((s32)result, (void*)0x10, 0);
 }
 

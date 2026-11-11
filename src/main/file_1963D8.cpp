@@ -205,7 +205,7 @@ void LeaveAgentState(void* self, void* arg);
 
 
 void EnterAgentState(void* self);
-void func_001C8920(void* self);
+void FaceAgentAlongPath(void* self);
 
 
 
@@ -543,17 +543,17 @@ f32 WrapAngle(f32 a);
 void StepCollider(void* self, f32 t);
 void TurnColliderTowardRotation(void* self, f32 scale, void* out, void* data);
 void AddColliderForce(void* self, Vec02* force);
-extern const Vec02 D_00248D20;
+extern const Vec02 g_unitZVector;
 
 
-void func_00196B78(GaugeCollider* self, f32 dt)
+void StepGaugeCollider(GaugeCollider* self, f32 dt)
 {
     Mat02 b;
     Mat02 a;
 
     StepCollider(self, dt);
-    BuildAxisAngleMatrix(&D_00248D20, &b, self->f618);
-    BuildShortestArcRotation(&D_00248D20, &self->v630, &a);
+    BuildAxisAngleMatrix(&g_unitZVector, &b, self->f618);
+    BuildShortestArcRotation(&g_unitZVector, &self->v630, &a);
     {
         u128 a0 = Vu0::Q(a.r[0]);
         u128 a1 = Vu0::Q(a.r[1]);
@@ -578,7 +578,7 @@ void func_00196B78(GaugeCollider* self, f32 dt)
     Mat02 v;
     Mat02 c;
     RotateMatrixUpright(&self->rot, &u, &v);
-    BuildAxisAngleMatrix(&D_00248D20, &c, self->f618);
+    BuildAxisAngleMatrix(&g_unitZVector, &c, self->f618);
     c = MultiplyByTransposedMatrix3x3(u, c);
     Vec02 force;
     f32 turn = __builtin_fabsf(WrapAngle(ArctangentOfRatio(v.r[0].y, v.r[0].x) - self->f618));
@@ -624,12 +624,12 @@ void PopBackMemoryMark(void);
 void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(void*, Collider*), void* p4, s32* n, Collider*** list);
 Collider* FindNearestSpanObject(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out);
 s32 AcceptColliderOfOtherRoot(void* a, Collider* self);
-extern const Vec02 D_00248D20;
+extern const Vec02 g_unitZVector;
 extern const Vec02 g_unitXVector;
 
 struct GaugeSpanOwner { u8 pad00[0x278]; u8* f278; };
 
-void func_00196EB0(GaugeCollider* self)
+void UpdateGaugeCollider(GaugeCollider* self)
 {
     Vec02 sum;
     Vec02 pos;
@@ -672,9 +672,9 @@ void func_00196EB0(GaugeCollider* self)
             if (IsObjectOfKind(hit, 0x1F) != 0 && ((GaugeSpanOwner*)hit)->f278 != 0) {
                 Vec02 pair[2];
                 Vec02 in = dir;
-                BuildPerpendicularPair(&in, pair, &g_unitXVector, &D_00248D20);
+                BuildPerpendicularPair(&in, pair, &g_unitXVector, &g_unitZVector);
                 ComputeOscillatorDisplacement(50.0f, *(void**)(((GaugeSpanOwner*)hit)->f278 + 0xC), &span, pair, 0, pair, 0);
-                Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(pair[0]), Vu0::Q(pair[1])), Vu0::Q(D_00248D20)));
+                Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(pair[0]), Vu0::Q(pair[1])), Vu0::Q(g_unitZVector)));
             }
             if (!(dir.z < 0.7f)) {
                 goto keep;
@@ -708,7 +708,7 @@ void ConvertPositionToWorld(void* obj, Vec02* out);
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
 void ComputeObjectFrameAtTime(void* self, void* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 
-GaugeHeld* func_001971B8(GaugeCollider* self)
+GaugeHeld* FindHeldObjectAhead(GaugeCollider* self)
 {
     GaugeHeld* list[0x40];
     Mat02 rot;
@@ -800,11 +800,11 @@ struct GaugeCarrier : BaseObject {
 
 void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
 void ConvertPositionToWorld(void* obj, Vec02* out);
-GaugeHeld* func_001971B8(GaugeCollider* self);
+GaugeHeld* FindHeldObjectAhead(GaugeCollider* self);
 extern f32 g_gameTime[];
 extern f32 D_0026A834;
 
-void func_001974F8(GaugeCollider* self, PadRecord* pad)
+void ControlGaugeCollider(GaugeCollider* self, PadRecord* pad)
 {
     s32 cur;
     s32 tgt;
@@ -856,7 +856,7 @@ void func_001974F8(GaugeCollider* self, PadRecord* pad)
 settled:
     if (IsObjectAttached(self->f668) != 0) {
         if (self->f674 == 0) {
-            self->f674 = func_001971B8(self);
+            self->f674 = FindHeldObjectAhead(self);
             if (self->f674 != 0) {
                 GaugeHeld* h = (GaugeHeld*)self->f674;
                 ConvertPositionToWorld(h->f554, &pos);
@@ -945,18 +945,18 @@ void ComputeGaugeColliderContactValue(GaugeCollider* ctx, Contact03* out)
     out->f94 = D_0026A840;
 }
 
-f32 func_001EF5B8(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
-void func_001EED68(AttachedSet* self, void* in, Vec02* outA, Vec02* outB);
+f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
+void GetAttachedSetPointMotion(AttachedSet* self, void* in, Vec02* outA, Vec02* outB);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
 void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, void* a5);
 void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
 f32 SplitVectorAlongAxis(const Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
 void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
 void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void func_00156288(BaseObject* self, u8* cfg, Quad16* p, f32 chance, Quad16* at, f32 minScale, f32 size);
+void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance, Quad16* at, f32 minScale, f32 size);
 void StopSoundRecord(void* self, s32 n);
 
-void func_00197A88(GaugeCollider* self, AttachedSet* set, f32 dt)
+void ApplyGaugeColliderAttachedSetContact(GaugeCollider* self, AttachedSet* set, f32 dt)
 {
     Vec02 at;
     Vec02 atVel;
@@ -965,7 +965,7 @@ void func_00197A88(GaugeCollider* self, AttachedSet* set, f32 dt)
     Vec02 point;
     Vec02 normal;
     Vec02 gains;
-    f32 depth = func_001EF5B8(set, (TurningCollider*)self, &point, &normal);
+    f32 depth = MeasureAttachedSetContactDepth(set, (TurningCollider*)self, &point, &normal);
     if (set->f278 != 0) {
         Vec02 pair[2];
         Vec02 n;
@@ -991,7 +991,7 @@ void func_00197A88(GaugeCollider* self, AttachedSet* set, f32 dt)
         Vec02 aim3;
         Vec02 aim4;
         s32 i;
-        func_001EED68(set, &self->v140, &at, &atVel);
+        GetAttachedSetPointMotion(set, &self->v140, &at, &atVel);
         Vu0::Q(v) = Vu0::Sub(Vu0::Q(at), Vu0::Q(self->v150));
         SplitVectorAlongAxis(&v, &normal, &along, &rest);
         f32 k = D_0026A844 + depth;
@@ -1019,7 +1019,7 @@ void func_00197A88(GaugeCollider* self, AttachedSet* set, f32 dt)
         SteerColliderTowardRotation(self, 0, 0, &aim4, &gains.x, dt);
     }
     if (0.0f < depth && depth < 1.0f && 0.9f < normal.z) {
-        func_00156288(self, (u8*)set, (Quad16*)&at, dt, (Quad16*)&point, 0.1f,
+        SpawnSurfaceContactEffects(self, (u8*)set, (Quad16*)&at, dt, (Quad16*)&point, 0.1f,
                       ((self->boundsMax.x - self->boundsMin.x) + (self->boundsMax.y - self->boundsMin.y)) * 0.25f);
     } else {
         StopSoundRecord(self->f574, 0);
@@ -1127,9 +1127,9 @@ s32 ChooseGaugeColliderAgentState(GaugeColliderAgent* self)
 }
 
 void UpdateAgentGoal(Agent* self);
-void func_001C8418(Agent* self, Vec02* p);
-void func_00191C78(s32 graph, Vec02* out);
-void func_00191AC8(s32 graph, Vec02* from, Vec02* step, f32 t);
+void SetAgentGoalPoint(Agent* self, Vec02* p);
+void PickRandomPointOnPointGraph(s32 graph, Vec02* out);
+void FitStepToPointGraph(s32 graph, Vec02* from, Vec02* step, f32 t);
 void SnapPointToOwnerGraph(s32 graph, Vec02* in, Vec02* out);
 
 // The agent's next goal by state: 800 on from the active collider, away on the ground (12
@@ -1149,9 +1149,9 @@ void UpdateGaugeColliderAgentGoal(GaugeColliderAgent* self, s32 pick)
         Vu0::Q(k) = Vu0::FromFloat(800.0f);
         u128 v = Vu0::Q(d);
         Vu0::Q(d) = Vu0::MulX(Vu0::DivX(v, Vu0::Length(v)), Vu0::Q(k));
-        func_00191AC8(self->f928, &self->v140, &d, 1.0f);
+        FitStepToPointGraph(self->f928, &self->v140, &d, 1.0f);
         Vu0::Q(t) = Vu0::Add(Vu0::Q(self->v140), Vu0::Q(d));
-        func_001C8418(self, &t);
+        SetAgentGoalPoint(self, &t);
         break;
     }
     case 4:
@@ -1160,18 +1160,18 @@ void UpdateGaugeColliderAgentGoal(GaugeColliderAgent* self, s32 pick)
         }
         s32 far;
         do {
-            func_00191C78(self->f928, &d);
+            PickRandomPointOnPointGraph(self->f928, &d);
             u128 e = Vu0::Sub(Vu0::Q(d), Vu0::Q(self->v140));
             far = D_0026A890.x < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(e, e)));
         } while (far == 0);
-        func_001C8418(self, &d);
+        SetAgentGoalPoint(self, &d);
         break;
     case 16:
         if (pick == 0) {
             break;
         }
         SnapPointToOwnerGraph(self->f928, &self->v140, &d);
-        func_001C8418(self, &d);
+        SetAgentGoalPoint(self, &d);
         break;
     default:
         UpdateAgentGoal(self);
@@ -1195,7 +1195,7 @@ void EnterGaugeColliderAgentState(GaugeColliderAgent* self)
 {
     EnterAgentState(self);
     if (self->f724 == 0x10) {
-        func_001C8920(self);
+        FaceAgentAlongPath(self);
     }
 }
 

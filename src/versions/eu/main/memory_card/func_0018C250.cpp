@@ -4,7 +4,7 @@ s32 CreateMemoryCardSaveFiles(MemoryCard* self)
 {
     char name[0x50];
     s32 info[4];
-    s32 r = FinishMemoryCardCall((s32)func_0020A078(self->port, self->slot, "/"), (void*)0x12, (s32)info);
+    s32 r = FinishMemoryCardCall((s32)RequestCardSpaceForPath(self->port, self->slot, "/"), (void*)0x12, (s32)info);
     if (r != 0) return r;
     s32 need = info[0] == 0 ? 2 : 1;
     s32 sz = GetKeyedDataSize((KeyRecord*)g_memoryCardIconKey);

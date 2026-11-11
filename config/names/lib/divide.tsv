@@ -1,0 +1,2 @@
+symbol	name	evidence
+func_001FAE38	DivideSigned64	divides one signed 64-bit value by another: takes the signs off, divides the magnitudes and gives the quotient the combined sign (divide.c; its table row in libcalls.tsv is the 64-bit signed divide)
