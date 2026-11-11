@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 3297/3316 (99.4%), checked 2026-11-11
+// DECLS (2026-11-11, w28-nmdecls): StoreFloatAsQuadword now returns void*: neutral, order 828/829.
 // NEAR (2026-11-10, w15-1D7778): same size and frame; only the first loop's three saved registers differ
 //
 // Still differs (9 instructions): the first loop's saved registers. Retail keeps &spin (0x70)
@@ -91,7 +92,7 @@ void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
 void AddColliderForce(void* a, void* b);
 void BuildAxisAngleMatrix(const Vec02* t, void* out, f32 x);
 f32 ClampToMagnitude(f32 a, f32 b);
-void StoreFloatAsQuadword(void* out, f32 f);
+void* StoreFloatAsQuadword(void* out, f32 f);
 void* CopyQuadword(void* out, void* in);
 void* StoreQuadword(void* dst, Quadword v);
 void StepCollider(Collider* self, f32 t);

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 952/964, checked 2026-11-11
+// DECLS (2026-11-11, w28-nmdecls): EvaluateHermiteVectorSegment now void (defined void): neutral, 185/241.
 // NEAR: built in src/main/file_137290.cpp it is 952 bytes of retail's 964, with retail's frame
 //       (0x140), block layout and calls. Since the first translation: the mode tests are a switch
 //       (retail's beq 1 / beql 2 / b compare tree, the mode-1 case placed after it), the bounds
@@ -33,7 +34,7 @@ extern f32 g_gameClock[];
 
 void DetachOwnedRecord(OwnedRecord* o);
 void StepListedObjectParticles(WorldListedObject* self, f32 dt);
-s32 EvaluateHermiteVectorSegment(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 t, f32 span, f32 scale, Vec02* pos, Vec02* vel, s32 flags);
+void EvaluateHermiteVectorSegment(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 t, f32 span, f32 scale, Vec02* pos, Vec02* vel, s32 flags);
 f32 WrapAngle(f32 a);
 
 void MoveWorldListedObject(WorldListedObject* self, f32 dt)
