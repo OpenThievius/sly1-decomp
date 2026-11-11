@@ -7130,7 +7130,7 @@
      "address": "10448",
      "metadata": {
       "virtual_address": "1203632",
-      "demangled_name": "PrepareFadedObjectDraw"
+      "demangled_name": "ApplyPlacedObjectTransform"
      }
     },
     {
@@ -8429,7 +8429,7 @@
      "address": "30312",
      "metadata": {
       "virtual_address": "1223496",
-      "demangled_name": "SetClass75ObjectMode"
+      "demangled_name": "SetClass75ObjectField90"
      }
     },
     {
@@ -9756,7 +9756,7 @@
      "address": "55464",
      "metadata": {
       "virtual_address": "1248648",
-      "demangled_name": "FindEarliestCubicBoundTime"
+      "demangled_name": "FindEarliestTimeWithinCurveLimits"
      }
     }
    ],
@@ -22266,7 +22266,7 @@
      "address": "10880",
      "metadata": {
       "virtual_address": "1573672",
-      "demangled_name": "ComputeUpwardBoostVelocityAlt"
+      "demangled_name": "ComputeUpwardBoostVelocityUnitSlope"
      }
     },
     {
@@ -33464,7 +33464,7 @@
      "address": "7416",
      "metadata": {
       "virtual_address": "1802096",
-      "demangled_name": "IsCompanionAgentFree"
+      "demangled_name": "IsCompanionAgentTargetReachable"
      }
     },
     {
@@ -37136,7 +37136,7 @@
      "address": "17544",
      "metadata": {
       "virtual_address": "1884360",
-      "demangled_name": "IsPlayerEvadingAgent"
+      "demangled_name": "IsPlayerUntargetableByAgent"
      }
     },
     {
@@ -45144,7 +45144,7 @@
      "address": "88",
      "metadata": {
       "virtual_address": "2064184",
-      "demangled_name": "QueryPatchedHandlerFirstPatch"
+      "demangled_name": "RunSyscall5BFirstPatch"
      }
     },
     {
@@ -46015,7 +46015,7 @@
      "address": "88",
      "metadata": {
       "virtual_address": "2077392",
-      "demangled_name": "QueryPatchedHandlerSecondPatch"
+      "demangled_name": "RunSyscall5BSecondPatch"
      }
     },
     {
@@ -46358,7 +46358,7 @@
      "address": "72",
      "metadata": {
       "virtual_address": "2079848",
-      "demangled_name": "QueryPatchedHandlerThirdPatch"
+      "demangled_name": "RunSyscall5BThirdPatch"
      }
     },
     {
@@ -47167,7 +47167,7 @@
      "address": "56",
      "metadata": {
       "virtual_address": "2092312",
-      "demangled_name": "MatchTypeNameOrZero"
+      "demangled_name": "SelectArgumentIfTypeNamesEqual"
      }
     },
     {
@@ -47186,7 +47186,7 @@
      "address": "112",
      "metadata": {
       "virtual_address": "2092368",
-      "demangled_name": "AllocateRuntimeNode"
+      "demangled_name": "AllocateZeroedNodeOrTerminate"
      }
     },
     {
@@ -47276,7 +47276,7 @@
      "address": "1192",
      "metadata": {
       "virtual_address": "2093448",
-      "demangled_name": "GetRecordSubkind"
+      "demangled_name": "GetExceptionRecordSubkind"
      }
     },
     {
@@ -47286,7 +47286,7 @@
      "address": "1200",
      "metadata": {
       "virtual_address": "2093456",
-      "demangled_name": "GetRecordKind"
+      "demangled_name": "GetExceptionRecordKind"
      }
     },
     {
@@ -49486,7 +49486,7 @@
      "address": "3352",
      "metadata": {
       "virtual_address": "2116960",
-      "demangled_name": "SendDiscSValueCommand"
+      "demangled_name": "SendDiscSCommand22"
      }
     },
     {
@@ -49694,7 +49694,7 @@
      "address": "1792",
      "metadata": {
       "virtual_address": "2120208",
-      "demangled_name": "GetPadCapabilityEntry"
+      "demangled_name": "GetPadReplyTableByte"
      }
     },
     {
@@ -49713,7 +49713,7 @@
      "address": "2088",
      "metadata": {
       "virtual_address": "2120504",
-      "demangled_name": "GetPadModeEntry"
+      "demangled_name": "GetPadReplyListValue"
      }
     },
     {
