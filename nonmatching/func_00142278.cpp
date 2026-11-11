@@ -19,6 +19,9 @@
 // retail) moves s's and u's dots next to each other, so u's 1.0 takes vf6 and the global n moves to
 // vf7 (39 lines); ViaBits for side, s and u 37; ToFloat for side 19; ToFloatNow 30. The birthing
 // raise would also do it, but side is not live past the block's branch. Wall unchanged.
+// w25 (2026-11-11): side's dot over Vu0::Vec values (`Vu0::Dot(Vu0::Vec::Of(ca), Vu0::Vec::Of(n))`)
+// gives the same code: the inline's struct copies (26 in .rtl) are gone after cse1 and combine, so
+// they lengthen no chain (docs/toolchain/sched1.md, "Invisible instructions"). Wall unchanged.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

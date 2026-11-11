@@ -1449,3 +1449,44 @@ compute_block_backward_dependences) and checked in the `-dS` dump (w25, 2026-11-
   func_0014F168 and func_00144540, the most pending references before any store is 12, 14, 12,
   12, 12, 24, 19, 8, 10 and 28 (29 after reload): none reaches the flush. (The static records'
   FillMemory call resets the count, so their eleven to fourteen stores are far below it.)
+
+### Invisible instructions: what the lives the allocators rank are counted over (w25, unsolved walls)
+
+Several walls need a life or a priority a little longer than ours with retail's code unchanged
+(func_001DEBE8's &cur, func_00109488's 2194, the sched1 ties of func_00142278 and
+func_0017ECE8), as if retail had insns that left no code. Read from GCC 2.95.3's source and the
+`-dr ... -dS -dl -dg` dumps of all six (2026-11-11):
+
+- **The lengths are sched1's, the references flow's.** After sched1, haifa-sched.c's
+  update_reg_usage overwrites REG_LIVE_LENGTH with find_post_sched_live's count: every insn
+  (class `i`) of each block, in sched1's order, while the register is live. REG_N_REFS is not
+  recounted (flow's, before combine). So global.c's `floor_log2(refs) * refs / length` and
+  local-alloc see every insn of sched1's output, whether or not it reaches the code.
+- **What reaches sched1 and leaves no code.** In the six functions' dumps: (1) flow's
+  `(use (const_int 0))` after a call that ends a block (gcse.md, "The nop"); (2) the copy at the
+  join of an inline's result set in several arms (a clamp's local: func_001D7778 insn 1416,
+  func_001CC818 insn 2599), which global-alloc's copy preference puts in one register, so reload
+  deletes it; (3) a copy into an argument register from a pseudo that local-alloc places in that
+  register (func_001DEBE8 insns 357, `$f13` from a float variable, and 373, `a0`; three in
+  func_001CC818, six in func_001D7778), or out of the return register into a pseudo placed there
+  (func_001D7778 insn 1795, `$f0`); (4) GCSE's copies and those of long or looped blocks
+  (loops.md; func_00109488's argument copies that survive CSE1's window flushes,
+  long-block-constants.md).
+- **Inline parameter and return copies are not among them.** integrate.c copies each argument
+  of a parameter not declared const into a new pseudo, and each inline's return value goes
+  through its own; in straight-line code cse1 and combine remove them before flow counts
+  anything. func_00142278's .rtl has 26 pseudo-to-pseudo SF and TI copies, its .cse 2, its
+  .combine none; side's dot written over `Vu0::Vec` values (`Vu0::Dot(Vu0::Vec::Of(ca),
+  Vu0::Vec::Of(n))`, the by-value struct copies of include/vu0.h) gives the same 26, 2 and 0 and
+  the same code. Inline helpers, `const` parameters and Vec copies are therefore no lever on a
+  life or a priority inside one block; only the four kinds above are.
+- **The walls.** func_001DEBE8's (a) needs two such insns where &cur and &tgt are both live
+  (the first key reads to the teleport arm's GetStateWalkerCurrentKey). None of the four fits
+  there without changing code: the then-arm's call ends in its jump over the else, the teleport
+  arm's nop (insn 1340) follows the last key read where both are dead, the region has no
+  inline's result, and every argument loads straight into its register (combine's merge).
+  Written as an inline predicate (`StickPushed(pad)` returning `0.7f < pad->f7C`, used by both
+  stick tests), the test keeps a store-flag (`li v0,1; move v0,zero; beqz`): 1724 bytes.
+  func_00142278's side conversion, func_001DEBE8's (b) and func_0017ECE8's load need a longer
+  chain inside one block, where only an argument copy could be invisible, and none of those
+  chains ends in a call's argument.
