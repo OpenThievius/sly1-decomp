@@ -26,6 +26,20 @@
 //       volatile reads give 836. Retail's ranking also puts the bit-53 constant above the a3/t0
 //       copies (global-alloc priority, which needs about twice the weighted references ours has);
 //       a named `u64 mark` makes it worse.
+// w32 (2026-11-11): block alignment (registers abstracted) differs only at the PRE'd loads: (1)
+//       the g load (ours ld a2 in the bit-40 bnezl slot and again at the 47/56 block head, then
+//       move a0,a2: PRE's reaching-reg copy; retail one ld a1 in the 47/56 beqz slot), (2) the
+//       first sweep's bit-44 test (retail ld v0,1336(s0), ours reuses f in v1), (3) the second
+//       sweep's bit-40 test and (4) the tail's other->flags538 test (retail loads at the tail head,
+//       copied by reorg into each beqzl/bnezl/bc1fl slot and shared with the |= block in the
+//       beqz slot at 0x188208; ours inserts the load after each call). 2.95's PRE is block-based
+//       (pre_insert at block ends, no edge splitting), MEM expressions are equal by address, mode
+//       and alias set only, and any store or call in a block kills every MEM expression. So retail
+//       had, at gcse time, a store or call on the path from the top's f load to the bit-44 test (or
+//       a different address pseudo / mode for those reads). Also: retail's sweep spill slot is
+//       4(sp), ours 0(sp): something else held 0(sp) in retail's frame (a slot allocated first and
+//       left unused, or a 4-byte memory local). Not tried yet: a memory local whose store sits
+//       before the sweep test.
 #include "common.h"
 #include "collider.h"
 #include "placed_object.h"
