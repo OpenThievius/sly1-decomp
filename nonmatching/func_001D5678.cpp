@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2346/2348 (99.9%), checked 2026-11-10
+// BYTES 2346/2348 (99.9%), checked 2026-11-11
 // NEAR (2026-11-10, w15): DrawAngleSortedRing (func_001D5678): the points around the anchors
 // projected into camera space, the lowest first, their angles about it and the sort, the hull (a
 // Graham scan against the z axis), the bounds' centre, the points where the hull crosses the
@@ -71,6 +71,10 @@
 // user variable (`last = n - 1;` set before the angles loop and reused later) still gives s3 by
 // its later life's conflicts; its set then precedes the loop's entry test in LUID and sched1
 // breaks the priority-2 tie by LUID (slt and the set swap: one pair). Also tried: `entries + 1`.
+// w22 (2026-11-11): re-scored, unchanged (the two s2/s3 lines). The PRE-numbering lever that
+// matched func_001B55C0 (reaching registers numbered in hash-bucket order break global-alloc's
+// priority ties) does not reach it: the n - 1 temporary is not in a tie, both s2 and s3 are free
+// over its life, so only a conflict with a pseudo in s2 gives retail's s3 (w19).
 // In the context of its file, src/main/player_request.cpp (FLT_MAX is retail's D_0024DC88).
 #include "common.h"
 #include "shapes.h"
