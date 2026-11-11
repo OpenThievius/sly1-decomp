@@ -1901,6 +1901,16 @@ TurnColliderTowardRotation (2026-11-09):
   A Vec for the product shared the same way does the opposite (the product leaves the block
   and the 1.0, alone, takes vf1). Worth trying in func_001EDA80 where a second Dot of the
   same shape exists.
+- **func_001EDA80 replayed (2026-11-10, w19, `tools/globalalloc.py --local`).** With ToBits
+  the last block's quantities are the 1.0 (0), the product (1) and the GPR (2). Raising the
+  product's priority (`--pri`) changes nothing, as the sort predicts; raising the GPR's, or
+  `--set GPR:refs=4` (floor_log2(refs) * refs must double against the product's two-word
+  size), gives retail's vf1 and vf2. One `u32 bits` set twice, the squared length's
+  (`f32 len2 = *(f32*)&bits`, which purge_addressof turns into a subreg: no stack) and the
+  distance's, gives the last block and the first, but the first block then has no reload
+  (its mtc1 is a plain move from bits' v0), so reload's round robin starts the else arm's
+  ToFloatMoved qmfc2s at v0 where retail has v1. Retail's first conversion was a reload
+  (ToFloat's `"=r"` float or ToFloatMoved's input), so no shared GPR variable reaches it.
 
 ### Loops over one list: one variable for every loop (func_0017ECE8)
 
@@ -3118,6 +3128,24 @@ FindClosestPointsOnSegments went from 49 differing lines to 2 (2026-11-10, w12, 
   the test with StoreX keep the length in VU0 but move the test's GPR (local-alloc's v0, or
   reload's mtc1 of latency 2). A Vec copy of the length for either use is folded by cse2
   before regclass (the copy survives cse1 and gcse).
+- **The store's word from an asm qmfc2 is the whole difference (2026-11-10, w19).** Keeping
+  the test's ToFloatMoved and storing the distance as an asm `sw` of ToBits' GPR (or of
+  ToFloat's `"=r"` float) is EXACT: the length then has three VU0 operands (Sqrt's `=j`,
+  DivX's and the qmfc2's `j`) against the test's one `r`, so regclass keeps it VU_REGS, the
+  test's qmfc2 stays reload's v1, and the asm sw issues beside `lq s5`. The two ways to the
+  same sequence differ only in who emits the qmfc2: StoreX of the vector needs the length in
+  a GPR class (the TI_REGS tie), ToBits plus an asm sw does not. As source it needs a store
+  helper that takes a word already in a GPR (StoreX for a u32 or an f32), whose sw the
+  compiler could emit itself: a new helper by AGENTS.md's rule, so not landed until a second
+  retail site shows the same no-unit sw after an asm qmfc2 (this epilogue order is unique).
+  Ruled out on the way: ToFloat + StoreX (one swap in the test block: reload's mtc1, on the
+  memory and flop units with latency 2, lets the vf6 slot store in before it) and
+  ToFloatViaBits + StoreX (sched1 issues the fallback's lo_sum before the qmfc2, so the %hi
+  dies first and local-alloc gives the test's GPR v0; `tools/sched1.py --trace 389`).
+- **tools/sched1.py on a sched2 dump.** The replay reads only blocks marked "before reload";
+  a copy of the `.sched2` dump relabelled so replays the post-reload blocks, but the epilogue's
+  restores are not in the dump's RTL, so its tie between `lq s6` and `lq s5` comes out the
+  other way from the trace: not usable for epilogue ties as it stands.
 
 ### A clamp's result in the variable it reads loses the arguments' preference (func_001B55C0)
 
