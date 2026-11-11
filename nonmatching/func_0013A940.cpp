@@ -22,6 +22,13 @@
 //       About 12 compiles this round.
 // W23 (2026-11-11): re-scored, unchanged (952/964); its walls are loop.c's giv combination, which the
 //       replay tools do not model, and func_0013A618's prologue tie. Not retried.
+// w32 (2026-11-11, -dL): the giv statistics of biv j: {524, 116} {200, 116} {568, 108}. 524 and
+//       200 are DEST_REG cur + 16j (200 is cse's shared base of the top's cur[0x2C + j].w, alive
+//       99 luids), 568 is DEST_REG cur + 0x580 + 16j (the rec copy). Retail's choice is the rec
+//       giv, so there 568's total beat cur + 16j's: a DEST_REG giv only absorbs an identical one,
+//       so 200 and 524 add 7 to each other; without 200 it would still be 109 > 108. Tried: the
+//       rec copy written before the .w copies (identical output), and &cur[0x2C + j] as a named
+//       pointer for the end read, the mode-1 load, the call and the .w copy (185/241, worse).
 // In the context of its file, src/main/world_listed_object.cpp.
 #include "common.h"
 #include "list_iter.h"
