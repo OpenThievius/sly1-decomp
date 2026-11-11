@@ -1,6 +1,6 @@
 {
  "measures": {
-  "fuzzy_match_percent": 95.7135922330097,
+  "fuzzy_match_percent": 95.73624595469256,
   "total_code": "1112400",
   "matched_code": "1037336",
   "matched_code_percent": 93.25206760158217,
@@ -45762,7 +45762,7 @@
   {
    "name": "lib/command_channel",
    "measures": {
-    "fuzzy_match_percent": 85.4043392504931,
+    "fuzzy_match_percent": 97.83037475345168,
     "total_code": "2028",
     "matched_code": "1732",
     "matched_code_percent": 85.4043392504931,
@@ -45987,7 +45987,7 @@
     {
      "name": "func_001FA6B0",
      "size": "296",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 85.13513513513513,
      "address": "1608",
      "metadata": {
       "virtual_address": "2074288",
@@ -52642,7 +52642,7 @@
    "id": "lib",
    "name": "Libraries",
    "measures": {
-    "fuzzy_match_percent": 99.40372258695349,
+    "fuzzy_match_percent": 99.62372538063975,
     "total_code": "114544",
     "matched_code": "112316",
     "matched_code_percent": 98.05489593518648,
