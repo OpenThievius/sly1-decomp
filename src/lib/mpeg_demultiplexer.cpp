@@ -277,7 +277,7 @@ struct Table_20A7F0
 extern const Table_20A7F0 D_00250028 = { { 0x00, 0x10, 0x08, 0x18, 0x08, 0x18, 0x10, 0x20, 0x18, 0x28, 0x20, 0x30, 0x20, 0x30, 0x28, 0x38 } };
 
 u32 ReadBits(Bits_20A7F0* bs, s32 n);
-void ReadBit(Bits_20A7F0* bs);
+void ReadBit(Bits_20A7F0* bs); // stays void: retail returns a value, but declared so func_0020A7F0 differs in registers
 void SkipBytes(Bits_20A7F0* bs, s32 n);
 s32 ReportMpegError(Ctx_20A7F0* ctx, const char* msg);
 

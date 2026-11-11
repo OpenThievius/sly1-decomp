@@ -1538,7 +1538,7 @@ extern const Vec02 D_00249DD0 = { 3.4028235e+38f, 0.0f, 0.0f, 0.0f };
 ASM_FUNC(func_0013F8A0);
 
 extern void MultiplyMatrices3x3(void*, void*, void*);
-f32 GetMatrixRotationCosine(void* p);
+f32 GetMatrixRotationCosine(void* p); // stays float: the C definition is void, and the caller here uses the value it leaves in the register
 f32 Arccosine(f32 x);
 
 s32 FindLargestEntryIndex(TriggerZone* s, f32* out)

@@ -456,7 +456,7 @@ void SetIopChannelValuePair(s32 channel, s32 value, s32 value2);
 // of `type` to it).
 struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
 void* FillMemory(void* p, s32 value, s32 size);
-void ReadPropertyValue(ScriptValue* t, s32 value, PropertyDescriptor* d);
+void ReadPropertyValue(ScriptValue* t, s32 value, PropertyDescriptor* d); // stays void: retail returns a value, but declared so func_001C1A28 differs in registers
 s32 StepBiasedRandomWalk(void);
 extern PropertyList g_classPropertyLists[];
 // func_001C0CF0's random walk: six steps for each of seven rows, and the row for each position
@@ -479,7 +479,7 @@ void* DefineScriptVariable(ScriptValue* out, s32 a, s32 b, ScriptValue* body);
 extern u32 D_00275714;
 // NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
 
-void EvalScriptExpression(ScriptValue* t, R11B008Node* node, s32 b);
+void EvalScriptExpression(ScriptValue* t, R11B008Node* node, s32 b); // stays void: retail returns a value, but declared so func_001C13E8 differs in registers
 // A type and a list of script values: func_001C1AD8 tells whether a value is among them.
 struct ScriptValueFilter { u32 type; R11B008Node* list; };
 // The payloads of script values of kind 10 and 11 (two and three words), copied word by word.

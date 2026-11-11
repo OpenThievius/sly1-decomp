@@ -42,7 +42,7 @@ void QueueEachScreenElementDraw(void);
 void StartPlacedObject(void* self);
 void ResolveObjectLinks(void* self, s32 a, void* p);
 void* CreateStateWalker(void* a, void* self, s32 b, s32 c);
-void AppendQueuedCall(void* a, void* cb, void* ctx, s32 b, s32 c);
+void AppendQueuedCall(void* a, void* cb, void* ctx, s32 b, s32 c); // stays void: retail returns a value, but declared so func_001EB598 differs in registers
 void CopyPlayerAttachBlock(BeatPressCollider* self);
 void HandleSwitchedColliderActivation(void* self);
 s32 FindFirstObjectByIdGathered(void* a, s32 b, s32 c, s32 d);

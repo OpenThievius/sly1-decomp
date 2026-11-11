@@ -322,7 +322,7 @@ struct ScaledDrawFrame { Quad16 q0; u8 pad1[0x30]; Quad16 m40[4]; u8 pad2[0x10];
 
 void BuildUniformScaleAboutPoint(s32 zero, void* out, f32 v);
 void BuildPlacedObjectTransform(void* obj, void* c, void* out);
-void MultiplyMatrices(Quad16* out, void* b, Quad16* in);
+void MultiplyMatrices(Quad16* out, void* b, Quad16* in); // stays void: retail returns a value, but declared so func_00158480 differs in registers
 void DrawPlacedObject(void* obj, void* b, void* m);
 
 
@@ -4317,16 +4317,12 @@ void DrawFontFrame(Font* self, FrameGlyph* item, FrameRect* r, PacketWriter* s)
 
 void SetFontClipRect();
 void ResetFontClipRect();
-void CloneFont();
-void HasFontGlyph();
-void GetFontCharWidth();
 void BeginFontDraw();
 void BeginFontGlyphPacket();
-void DrawFontGlyph();
 void DrawFontGlyphTurned();
 void DrawFontFrame();
 void HandleAbstractCall();
-extern const VtableEntry g_fontMethods[22] = {{0, 0}, {0, CloneFont}, {0, HasFontGlyph}, {0, GetFontCharWidth}, {0, BeginFontDraw}, {0, BeginFontGlyphPacket}, {0, DrawFontGlyph}, {0, ResetFontClipRect}, {0, DrawFontGlyphTurned}, {0, DrawFontFrame}, {0, 0}, {0, 0}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, SetFontClipRect}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, ResetFontClipRect}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, 0}};
+extern const VtableEntry g_fontMethods[22] = {{0, 0}, {0, (void (*)())CloneFont}, {0, (void (*)())HasFontGlyph}, {0, (void (*)())GetFontCharWidth}, {0, BeginFontDraw}, {0, BeginFontGlyphPacket}, {0, (void (*)())DrawFontGlyph}, {0, ResetFontClipRect}, {0, DrawFontGlyphTurned}, {0, DrawFontFrame}, {0, 0}, {0, 0}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, SetFontClipRect}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, ResetFontClipRect}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, 0}};
 
 void LoadFont(Font* obj, void* src)
 {

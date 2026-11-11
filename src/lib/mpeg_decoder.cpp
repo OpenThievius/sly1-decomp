@@ -70,7 +70,7 @@ s32 AllocateFromMpegRing(Inner_20AE40* a, Ring_20AE40* r, u32 size, u32 align);
 void SetUpMpegScratchpadBuffers(Inner_20AE40* a);
 void ResetMpegDecoder(Outer_20AE40* a);
 s32 ReleaseMpegPictures(Outer_20AE40* a);
-void MarkMpegRing(Ring_20AE40* r);
+void MarkMpegRing(Ring_20AE40* r); // stays void: retail returns a value, but declared so func_0020AE40 differs in registers
 void SaveMpegDmaState(void);
 void RestoreMpegDmaState(void);
 
@@ -611,7 +611,7 @@ s32 FlushPendingPicture(Obj_20B718* self)
     return r;
 }
 
-void SetIpuMpeg1Mode(s32 a);
+void SetIpuMpeg1Mode(s32 a); // stays void: retail returns a value, but declared so func_0020B810 differs in registers
 struct S_20B780 { u8 pad[0x848]; s32 f; };
 void ResetMpegPictureMode(S_20B780* s) {
     s->f = 0;
@@ -660,7 +660,7 @@ struct Dev_20B810 {
     u32 f810;
 };
 
-void SetIpuMpeg1Mode(s32 a);
+void SetIpuMpeg1Mode(s32 a); // stays void: retail returns a value, but declared so func_0020B810 differs in registers
 
 void SetUpMpegScratchpadBuffers(Dev_20B810* self)
 {
@@ -735,7 +735,7 @@ struct Sub_20B978;
 struct Arg_20B978;
 
 s32 RunMpegCallback(Sub_20B978* sub, Pair_20B978* pair);
-s32 PrintMpegError(Arg_20B978* arg);
+s32 PrintMpegError(Arg_20B978* arg); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 
 s32 ReportMpegError(Self_20B978* self, s32 value)
 {
@@ -843,7 +843,7 @@ struct Obj_20BEA0 { u8 pad000[0x858]; u32 field858; };
 struct Handle_20BEA0;
 struct Req_20BEA0 { s32 mode; s32 pad[7]; };
 s32 RunMpegCallback(Handle_20BEA0* h, Req_20BEA0* out);
-void WaitIpuCommandDone(Obj_20BEA0* self);
+void WaitIpuCommandDone(Obj_20BEA0* self); // stays void: retail returns a value, but declared so func_0020BEA0 differs in registers
 void SendIpuCommand(Obj_20BEA0* self, u32 value);
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);

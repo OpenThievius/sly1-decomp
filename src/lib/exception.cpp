@@ -95,7 +95,7 @@ s32 AllocateRuntimeBlockOrTerminate(Arg_1FE9D0* size)
     return p;
 }
 
-s32 LeaveRuntimeLock(void);
+s32 LeaveRuntimeLock(void); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 
 s32 FreeRuntimeBlock(void)
 {

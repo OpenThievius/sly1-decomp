@@ -88,7 +88,7 @@ void SetCachedVoiceParam(void* a, void* b);
 void* TakePoolSlot(void* p);
 void* FillMemory(void* p, s32 value, s32 size);
 
-void* RefreshCachedVoiceParam(void* a, void* b);
+void* RefreshCachedVoiceParam(void* a, void* b); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 
 void* TakePoolSlot(void* p);
 void* FillMemory(void* p, s32 value, s32 size);
@@ -141,7 +141,7 @@ void SetWorldActiveFollower(void* sub, void* self);
 void SetPathFollowerMode(void* self, s32 mode);
 
 void FindPathFollowerPathPosition(void* self);
-void GetObjectWorldPosition(void* self, void* arg);
+void GetObjectWorldPosition(void* self, void* arg); // stays void: retail returns a value, but declared so func_001D66A8 and two more differs in registers
 
 
 s32 ReduceBufferedStreamBytesLeft(void* self, s32 n);
@@ -168,7 +168,7 @@ f32 ApproachValueWithRamp(void* p, s32 zero, f32 a, f32 b, f32 c);
 f32 RandomFloatInRange(f32 a, f32 b);
 
 
-void GetObjectWorldPosition(void* item, void* out);
+void GetObjectWorldPosition(void* item, void* out); // stays void: retail returns a value, but declared so func_001D66A8 and two more differs in registers
 
 extern f32 g_gameTime;
 void* GetActiveSwitchedCollider(void);
@@ -309,7 +309,7 @@ extern u8 g_scatterController[];
 
 void SetScatterLevel(void* p);
 
-void* RemoveSoundLevelAndRecompute(void* p);
+void* RemoveSoundLevelAndRecompute(void* p); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 
 typedef void (*ActiveFollowerFn)(void* self);
 struct ActiveFollowerChild { ActiveFollowerFn* vtbl; };

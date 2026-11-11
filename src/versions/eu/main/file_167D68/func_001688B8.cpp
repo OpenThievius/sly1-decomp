@@ -29,9 +29,9 @@ void InitDisplay(void)
     FillScreenColor(D_002BDEE0, &t, 1);
     D_002BE460 = CreateLockSemaphore((void*)0, (void*)1);
     D_002BE464 = CreateLockSemaphore((void*)0, (void*)1);
-    AddInterruptHandler(2, HandleVblankStart, 0);
+    AddInterruptHandler(2, (void (*)(void))HandleVblankStart, 0);
     EnableInterruptCause(2);
-    AddInterruptHandler(0, HandleGsFinish, 0);
+    AddInterruptHandler(0, (void (*)(void))HandleGsFinish, 0);
     EnableInterruptCause(0);
     InitMeshQueue();
     ResetDisplayBuffers();

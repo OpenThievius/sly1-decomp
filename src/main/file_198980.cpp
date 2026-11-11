@@ -783,7 +783,7 @@ void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
 void RotateMatrixUpright(Mat02* sub, s32 zero, Mat02* out);
 void BuildPlacedObjectTransform(NumberedItem* self, void* a, SpinFrame4* out);
 void BuildMatrixFromRotationAndTranslation(void* rot, void* from, SpinFrame4* out);
-void MultiplyMatrices(SpinFrame4* out, SpinFrame4* b, SpinFrame4* in);
+void MultiplyMatrices(SpinFrame4* out, SpinFrame4* b, SpinFrame4* in); // stays void: retail returns a value, but declared so func_00199D08 differs in registers
 void ApplyPlacedObjectTransform(NumberedItem* self, void* a, SpinFrame4* m);
 
 static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
