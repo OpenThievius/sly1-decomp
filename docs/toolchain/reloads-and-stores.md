@@ -160,6 +160,38 @@ Read from the `-dS -dl -dg -fsched-verbose-6` dumps (2026-11-10, w15):
   compiler's latency and moves), the member read inside the expression (o->mass) nor
   ToFloatViaBits gives it.
 
+Read further with tools/globalalloc.py, tools/sched1.py, reload1.c and `-dR` sched2 dumps
+(2026-11-10, w19):
+
+- **Reload's rotation, worked through.** finish_spills lists the spill registers in register
+  order (v0, v1, a0, then the VU0 ones spilled anywhere, vf1/vf3), and allocate_reload_reg
+  starts each reload one past the last one handed out, skipping a register live in the insn
+  (a0 holds the next call's first argument here). d's mtc1 input reload takes v0; a second
+  GPR reload in the next reloading insn takes v1 (retail's offsetSq), and the one after wraps
+  past a0 and vf3 to v0 (retail's roSq). So retail's offsetSq qmfc2 is a reload, its dot in a
+  VU0 register at the conversion.
+- **Probe: the product made VU_REGS.** A test-only ToFloatMoved whose asm also takes the
+  product as a dummy `"j"` gives v1 at once (the rotation above), but the third reference ranks
+  the dot first in local-alloc (vf1 for the product, vf3 for the 1.0: retail has them the
+  other way round). Retail's product has two references and the VU0 class.
+- **The second difference is roSq's conversion.** sched2 issues the t store (`sqc2 vf7`) in the
+  same cycle as roSq's qmfc2 when the qmfc2 is ToFloat's asm (no function unit); with the
+  compiler's qmfc2 (a movti reload, unit vu0) the store waits a cycle and the mtc1 goes first,
+  retail's order. Every form with the compiler's qmfc2 for roSq (ToFloatMoved, the probe
+  below) gives retail's order; with ToFloat it never changes, whatever offsetSq does. But then
+  roSq's dot is TI_REGS in v0 and reload takes vf1 for the asm's output, where retail has vf5,
+  the register local-alloc gives the dot as a VU0 pseudo (ToFloat's): vel and the cross then
+  take vf6 for retail's vf7. So retail has both products in VU_REGS with compiler qmfc2s: the
+  wall of func_00186230 ("A compiler's qmfc2 of a VU0 product", sched1.md), twice.
+- **Probe: a 64-bit conversion.** An mtc1 helper taking `u64`, called with `(u64)` of the
+  dot, makes the asm's operand `(subreg:DI (reg:TI))`. The dot stays TI_REGS in v0, but the
+  subreg forces an input reload, reload inherits the value from the asm's output reload
+  register (vf3) and deletes the now dead output reload into v0: `qmfc2 v1,$vf3` by the
+  rotation, every offsetSq line retail's (four differing lines down to two). For roSq it gives
+  retail's order but the dot's output reload register is vf1 again (no local VU0 placement).
+  Not landed: no evidence the original wrote such a helper, and on func_00186230 the same probe
+  adds a `por` (the reload copies the GPR instead of inheriting).
+
 
 ### A second spill register from a rematerialised constant (func_0014C858)
 
