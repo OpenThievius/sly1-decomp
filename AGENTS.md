@@ -43,7 +43,8 @@ procedure; read it before you match anything.
 | `progress/<version>/report.json`, the README table | what ByteMatch shows | `tools/progress.py` |
 | `tools/`, `tests/` | setup, split, checks | by hand |
 | `docs/` | research notes and decisions | by hand |
-| `baserom/`, `asm/`, `assets/`, `build/`, `include/*.inc`, `include/include_asm.h` | your discs, and what is generated from them | never committed |
+| `include/macro.inc` | the label macros of the disassembly, for GNU as (splat's own are off) | by hand |
+| `baserom/`, `asm/`, `assets/`, `build/`, `include/labels.inc`, `include/include_asm.h` | your discs, and what is generated from them (the last two left by older splat runs) | never committed |
 
 Every tool takes `--version us|eu|may19` where it makes sense, and reads its paths from
 `tools/versions.py`.

@@ -139,7 +139,15 @@ functions left with their address names, and the disc's data.
    banks' own format; OpenThievius's extractor is then written from these readers. Unchanged
    since 2026-11-04.
 
+## Decided
+
+- **The assembly macros** (2026-11-11). `include/macro.inc` is the project's own: the label
+  macros the listings use (`glabel`, `endlabel`, `alabel`, `jlabel`, `dlabel`, `enddlabel`, and
+  `nonmatching`, which emits nothing), for GNU as. splat's generated copies are off
+  (`generate_asm_macros_files: False` in `config/splat/`). The toolchain's own 1999 assembler
+  never reads them: `tools/asm_func.py` writes the macros out for the functions a whole file
+  includes.
+
 ## Open decisions
 
-- **The assembly macros.** splat writes its own macro files into `include/`
-  (gitignored); the build will need macros written by this project instead.
+None at present.
