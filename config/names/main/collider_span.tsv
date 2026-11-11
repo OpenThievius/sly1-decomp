@@ -7,7 +7,7 @@ func_00141D00	TestColliderSegmentHit	the segment test FindNearestHitObject runs 
 func_00141D88	FindSegmentSphereSpan	solves the quadratic for the segment a to b against the sphere at p with the radius, and stores the two crossing times, points and outward unit directions in the span (flag 1); returns 0 when the discriminant is below 1e-4
 func_00141F48	CollectBoundsSpans	queries the bounds at +0x140 for spans, the call CollectColliderSpans and CollectColliderSpansInTree make when an object has no tree nodes; TestBoundsSegmentHit calls it too
 func_00142170	TestBoundsSegmentHit	TestColliderSegmentHit's test of the bounds at +0x140 with a radius, through CollectBoundsSpans
-func_00142278	IntersectSegmentWithCapsule	original assembly: tests the swept segment p to q against an edge a to b with a radius (closest-approach quadratics, end caps) and fills up to max spans; TestTreeSegmentHit calls it for each edge of a candidate set
+func_00142278	IntersectSegmentWithCapsule	tests the swept segment p to q against an edge a to b with a radius (closest-approach quadratics, end caps) and fills up to max spans; TestTreeSegmentHit calls it for each edge of a candidate set
 func_00142998	CompareSpanEndpoints	qsort comparator on (float time, int tag): -1 or 1 when the times differ by more than 0.0001, otherwise the difference of the tags
 func_001429F8	MergeOverlappingSpans	splits every 0x70-byte span into a start and an end record, sorts them with func_001F5CD0 and CompareSpanEndpoints and rebuilds the list keeping only the outermost start and end of each overlapping run; returns the new count
 func_00142B78	TestTreeSegmentHit	TestColliderSegmentHit's test of a collider's tree (0x3F0, 0x3A4) against a segment, through func_0013E430 and func_00142278
