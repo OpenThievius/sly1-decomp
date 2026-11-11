@@ -139,6 +139,18 @@
 // key holds only 256 in s5. So the windows are necessary and now reachable, but the allocation
 // (4 in s3, 2194 in s7, func_00155778 in s4) still differs. Best: build/swarm/w20-109488b/
 // best_10lm.cpp. About 125 compiles.
+// The key holds inside the ten-landmark space (2026-11-10, worker w21-109488; build/swarm/
+// w21-109488/: ev21.py, score.py, mwalk.py; docs/toolchain/long-block-constants.md, "The key holds
+// inside the ten-landmark space"). 17 such forms compiled (w20's best, its start and 15 from its
+// walks): local-alloc's priorities of the long constants are the same in all of them, 2194 157,
+// the 146 of 321-343 150, the 146 of 572-654 158, the 18 of 554-650 148 or 149, and
+// func_00155778 155 or 163 (20 or 21 refs; 163, with Set0's flags and Set1's f0 and f10 moved out,
+// gives 256 in s5 but puts func_00155778 in s3). No key hold besides 256 in s5. On such a form
+// (w/b1_2) the replays give all five key holds once the 2194 load's sched1 priority is raised from
+// 1,978 to 2,100 (2,150 for this file): 4 in s3, 256 in s5, 66 in s1, 2194 in s7, func_00155778
+// in s4. The 2194's refs cannot fall instead: that needs CSE1's third flush after entry 292's
+// 2194 store, and a model search (16,000 mutations of ten-landmark forms) gets no closer than 3
+// insns. The lever is outside the uniform forms tried. 20 compiles.
 //
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
