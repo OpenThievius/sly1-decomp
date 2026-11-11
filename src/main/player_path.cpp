@@ -14,7 +14,8 @@
 float D_00274F00 = 35.0f;
 float D_00274F04 = 100.0f;
 float D_00274F08 = 0.5f;
-INCLUDE_DATA(D_00274F0C);
+f32 D_00274F0C = 0.3f;
+f32 D_00274F10 = 10.0f;
 float D_00274F14 = 50.0f;
 float D_00274F18 = 1.0f;
 float D_00274F1C = 0.400000006f;

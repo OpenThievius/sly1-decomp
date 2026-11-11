@@ -533,7 +533,8 @@ ObjectLink D_00275B60[8] = {
 // word read whole / address only, 4 bytes to next label
 // readers pass only its address; byte buffer, size to next label
 u8 g_elementStack[4] = {0};
-INCLUDE_DATA(D_00275BC4);
+s32 D_00275BC4 = 0;
+s32 D_00275BC8[9] = {0};
 // size: s32 read as one word (file_14EE40.cpp and screen_element.cpp test bit 8)
 // size: s32 compared with 1 in file_149398.cpp and 2 in pause_menu.cpp
 s32 D_00275BEC = 0;
@@ -708,7 +709,8 @@ s32 (*D_00276608[6])[4] = { 0, (s32(*)[4])D_00276298, (s32(*)[4])D_00276348, (s3
 // sets D_00276650.
 WarpTextStyle D_00276620(2, 1);
 #endif
-INCLUDE_DATA(D_0027663C);
+f32 D_0027663C = 0.3f;
+f32 D_00276640[2] = { 0.3f, 0.6f };
 #ifdef VERSION_EU
 // PAL's own addresses for these two, which the tools do not pair with US's (VERSION_NAME).
 f32 D_eu_0027FDAC = 24.0f;
@@ -4807,7 +4809,6 @@ void DrawFontString(Font* font, const void* text, void* out, s32 zero, void* d);
 void PopFontScale(Font* font);
 extern f32 D_00276648;
 // Three floats; the first sizes the warp map's level labels.
-extern f32 D_0027663C[];
 
 // A colour of the warp map, one byte per channel, passed to DrawColoredCircle.
 struct WarpColor {
@@ -4922,7 +4923,7 @@ void func_001F20A8(T217D_0F0* self)
                 f32 scale = e->f24;
                 s32 flags = *(s32*)((u8*)g_saveData + (slot * 0x44C + i * 0x78) + 0x10);
                 Font* font = GetFontById(3);
-                f32 k = D_0027663C[0] * scale;
+                f32 k = D_0027663C * scale;
                 PushFontScale(font, k, k);
                 WarpLabelLayout L;
                 f32 x = pos[0];

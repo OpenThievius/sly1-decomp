@@ -5116,9 +5116,10 @@ void ResetPacketWriters(void)
 // (globals.h), whose labels are shorter than PacketWriter, are included from the disassembly.
 // size: s32 (lw/sw), 4-byte label
 s32 D_00261F70 = 0;
-INCLUDE_DATA(D_00261F74);
-INCLUDE_DATA(D_00261F80);
-INCLUDE_DATA(D_00262050);
+s32 D_00261F74 = 0;
+s32 D_00261F78[2] = {0};
+s32 D_00261F80[52] = { 0, 0, 0, 0, 0, 45, 0, 0, 0x41C80000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0x3F800000, 0x3F800000, 0, 0, 0, 0, 0, 0 };
+s32 D_00262050[74] = { 82, 83, 84, 85, 0, 46, 0, 0, 0x41F00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0x41A00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0 };
 f32 D_00262178[2] = { 0.5f, 2.0f };
 PackedFloatPair D_00262180 = { 0x4348000043480000ULL };
 PackedFloatPair D_00262188 = { 0x42C8000042C80000ULL };
