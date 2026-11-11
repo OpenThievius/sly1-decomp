@@ -241,8 +241,18 @@ long-lived flag next to s0-s7 holders means it was placed before them all.
   allocnos in `.greg`'s order with tools/regalloc.py, find the first that takes a saved
   register in ours and not in retail, and change its references or life length (a reused or a
   split variable) until it falls on the right side of its neighbour.
-- **Still differs:** ys and yo take t1 (retail a2): yo dies in `yo << 4`, which local-alloc puts
-  in t1 in both, so set_preference gives yo, and expand_preferences ys, a preference for t1
-  that our global-alloc honours. Retail's a2 needs t1 in their pass-0 exclusion (a
-  lower-priority conflicting allocno preferring t1) or yo alive past the shift; not found.
+- **Matched (2026-11-10): a variable's preferences from both of its lives.** ys and yo took t1
+  where retail has a2: yo dies in `yo << 4`, which local-alloc puts in t1, so set_preference
+  (an operation's first operand prefers the register of what it sets) gives yo, and through
+  expand_preferences ys, a preference for t1, which our global-alloc honoured. A
+  lower-priority conflicting allocno preferring t1 cannot help: prune_preferences takes an
+  allocno's own preferences out of `regs_someone_prefers`. tools/globalalloc.py showed that
+  dropping the two preferences gives a2 and changes nothing else. The chroma part computes the
+  same pair (cys, cyo), and its `cyo << 3` is local-alloc's a2 (`sll a2,a2,0x3`). Reusing ys
+  and yo for cys and cyo (C style, like xs, fx and fy) makes each one pseudo set twice, with
+  the preferences of both lives, {a2, t1}: find_reg's preference scan takes the lowest
+  register number of them, a2, for both lives. EXACT, and the full build matches.
+- **Spot it:** a global pseudo in a register its preference explains in one half of a function
+  and not in a parallel half: look for the other half's variable whose local register is the
+  one retail used, and reuse the variable.
 
