@@ -306,7 +306,7 @@ void StartSoundBankLoad(void* a0, s32 a1, s32 a2, s64 a3)
 
 LINKER_REMNANT(func_0011D3E8);
 
-s32 QueueIopCommand(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
+void QueueIopCommand(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
 
 void NotifyIopBanksChanged(void)
 {
@@ -338,7 +338,7 @@ void GetIopVolumeChannel(s32 arg)
 s32 SetIopSoundOptionFlag(s32 arg)
 {
     s32 local = arg;
-    return QueueIopCommand(11, 4, &local, 0, 0);
+    QueueIopCommand(11, 4, &local, 0, 0);
 }
 
 LINKER_REMNANT(func_0011D510);

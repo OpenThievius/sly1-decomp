@@ -479,7 +479,7 @@ void StoreRangeRecordVector(void* self, void* src);
 typedef u64 U128 __attribute__((mode(TI)));
 struct ScaledSpringFrame { U128 r; U128 a; U128 b; };
 
-void StoreFloatAsQuadword(U128* out, void* src);
+void *StoreFloatAsQuadword(U128* out, void* src);
 void* CopyQuadword(U128* out, void* src);
 U128 ScaleQuadword(U128 a, U128 b);
 U128 StoreQuadword(U128* out, U128 v);
@@ -715,12 +715,12 @@ void GetTrackPosition();
 void GetTrackRotation();
 void GetTrackValue();
 void GetTrackScaleMatrix();
-void GetTrackIndexedValue();
+f32 GetTrackIndexedValue();
 
 extern u8 D_00148D64[];
 void InitPlacedObject(void* self);
 
-s32 CreateAnimationPlayer(void* a, void* b, s32 c, s32 d, s32 e, s32 f);
+void CreateAnimationPlayer(void* a, void* b, s32 c, s32 d, s32 e, s32 f);
 
 void* FindEntryByObjectId(void);
 
@@ -938,7 +938,7 @@ void ApplyListedPoseSources(AnimationPlayer* o, s32 flag);
 void TriggerScriptEvent(Animation* self, s32 a, s32 b, AnimationPlayer*** c);
 
 void SampleCurvePoints(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y, f32 z, s32 n, void* buf);
-void AccumulateSegmentLengths(s32 n, void* buf, s32 zero);
+f32 AccumulateSegmentLengths(s32 n, void* buf, s32 zero);
 
 void SetTextPanelSubject(void* self, s32 arg);
 
@@ -1724,7 +1724,7 @@ void RecomputePlacedObjectFrame(PlacedObject* self)
     }
 }
 
-void QueryValueListMask(void* list, f32 x, void* vec, void* out);
+s32 QueryValueListMask(void* list, f32 x, void* vec, void* out);
 void SetRangeRecordPosition(RangeRecord* r, void* p);
 void SetRangeRecordDirection(RangeRecord* r, void* p);
 
@@ -4779,7 +4779,7 @@ void CreateAnimationPlayer(Animation* self, Animation* alt, s32 npairs, TargetBi
 
 s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, s32 d)
 {
-    return CreateAnimationPlayer(a, b, 0, 0, c, d);
+    CreateAnimationPlayer(a, b, 0, 0, c, d);
 }
 
 void* CreateAnimationPlayerReturned(void* self, s32 key, s32 a2)

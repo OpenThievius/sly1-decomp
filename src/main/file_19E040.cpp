@@ -111,7 +111,7 @@ extern Camera* g_camera;
 
 
 
-s32 TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
 
 // A list walk whose frame pushes itself when it is made and pops itself when it goes out of scope.
 struct ListWalk : ListFrame {
@@ -299,7 +299,7 @@ void PlaceEffectAtSource();
 
 void DrawStreakedEffect();
 
-void HandleStreakedEffectImpact();
+s32 HandleStreakedEffectImpact();
 
 void RandomizeEffectSpin();
 
@@ -473,7 +473,7 @@ typedef int Quadword128 __attribute__((mode(TI)));
 
 void InitEffect(Effect* self, f32 f);
 
-void StoreFloatAsQuadword(void* out, f32 f);
+void *StoreFloatAsQuadword(void* out, f32 f);
 
 void* CopyQuadword(void* out, void* in);
 
@@ -2618,7 +2618,7 @@ s32 IsEffectAimCandidate(Rec50* self, Collider* other)
 }
 
 typedef int Quadword128 __attribute__((mode(TI)));
-void StoreFloatAsQuadword(void* out, f32 f);
+void *StoreFloatAsQuadword(void* out, f32 f);
 void* CopyQuadword(void* out, void* in);
 Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 void* StoreQuadword(void* dst, Quadword128 v);
@@ -2829,7 +2829,7 @@ void InitDelayedEffect(Effect* self, f32 x)
     *(s32*)&self->m30[2] = 0;
 }
 
-s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 void MatrixToAxisAngle(Mat02* m, f32* angle, void* axis);
 

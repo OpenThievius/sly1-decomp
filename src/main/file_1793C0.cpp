@@ -666,7 +666,7 @@ s32 HasModeColliderAcceptedRequest(ModeCollider* self)
     return self->f6D0 != 0;
 }
 
-s32 ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+void ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
 void SetModeColliderMode(ModeCollider* self, s32 mode)
 {
@@ -756,7 +756,7 @@ void StartGaugeModeObject(GaugeModeObject* self)
 }
 
 void func_001B93F8(GaugeModeObject* self);
-s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, Vec02* e, Vec02* f, f32 t);
+void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, Vec02* e, Vec02* f, f32 t);
 f32 ComputeAngleBetweenVectors(const Vec02* a, const Vec02* b, Vec02* out);
 void StopAnimationPlayer(void* p);
 
@@ -875,7 +875,7 @@ s32 HandleGaugeModeObjectEvent(GaugeModeObject* self, ObjectEvent* msg)
 extern f32 g_gameTime;
 
 void SetWorldActiveFollower(void* a, void* b);
-s32 ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+void ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
 void SetGaugeModeObjectMode(GaugeModeObject* self, s32 mode)
 {
@@ -912,7 +912,7 @@ done:
     return;
 }
 
-s32 ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+void ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
 s32 PlayGaugeModeObjectLoop(GaugeModeObject* self, s32 flag)
 {
@@ -920,7 +920,7 @@ s32 PlayGaugeModeObjectLoop(GaugeModeObject* self, s32 flag)
     if (flag != 0) {
         p = self->loopHandle;
     }
-    return ReplaceAnimationPlayer(p, self, 1, self->loopPlayer, 0.0f, 1.0f);
+    ReplaceAnimationPlayer(p, self, 1, self->loopPlayer, 0.0f, 1.0f);
 }
 
 s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);

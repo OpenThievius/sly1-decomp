@@ -132,7 +132,7 @@ struct FrameSource {
 
 void ConvertPositionToWorld(void* self, void* arg);
 s32 GetObjectWorldPosition(void* self, void* arg);
-void GetObjectWorldRotation(void* self, void* arg);
+s32 GetObjectWorldRotation(void* self, void* arg);
 void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
 void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);
 
@@ -300,14 +300,14 @@ f32 TruncateFloat(f32 x);
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 void InitScreenElement();
 void DrawScreenElementText();
-void GetScreenElementSlideInTime();
-void GetScreenElementHoldTime();
-void GetScreenElementSlideOutTime();
+f32 GetScreenElementSlideInTime();
+f32 GetScreenElementHoldTime();
+f32 GetScreenElementSlideOutTime();
 void ResetScreenElement();
 void ShowScreenElement();
 void HideScreenElement();
 void SetScreenElementClock();
-void AreScreenElementsTogether();
+s32 AreScreenElementsTogether();
 void SetScreenElementText();
 void SetScreenElementMode();
 void UpdateCounterCaption();
@@ -976,8 +976,8 @@ void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 f32 WrapAngle(f32 a);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
 void ForwardBallisticLaunchVelocity(f32 t, Vec02* from, Vec02* to, Vec02* out, void* obj);
-void func_001EE090(f32 t, Vec02* from, Vec02* to, Vec02* out, void* obj);
-void ComputeBallisticLaunchVelocity(f32 t, Vec02* from, Vec02* to, Vec02* out, void* obj);
+s32 func_001EE090(f32 t, Vec02* from, Vec02* to, Vec02* out, void* obj);
+s32 ComputeBallisticLaunchVelocity(f32 t, Vec02* from, Vec02* to, Vec02* out, void* obj);
 f32 RandomFloatInRange(f32 a, f32 b);
 void ChangeAgentState(void* node, s32 kind, s32 flag);
 void TriggerScriptEvent(void* self, s32 a, s32 b, void* c);
@@ -1211,7 +1211,7 @@ struct FrameFollower {
     f32 hi;                         // 0x64
 };
 
-s32 ComputeObjectFrameAtTime(void* object, s32 b, f32 t, Vec02* pos, Mat02* rot, s32 e, s32 f);
+void ComputeObjectFrameAtTime(void* object, s32 b, f32 t, Vec02* pos, Mat02* rot, s32 e, s32 f);
 
 void func_001A95D0(FrameFollower* self, Vec02* target, Vec02* out, void* to)
 {

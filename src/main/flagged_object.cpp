@@ -314,7 +314,7 @@ void CopyFlaggedObject(FlaggedObject* self)
 extern s32 D_0026EC58;
 void UpdateCollider(Collider* self);
 PlacedObject* GetActiveSwitchedCollider();
-void GetObjectWorldPosition(void* obj, f32* out);
+s32 GetObjectWorldPosition(void* obj, f32* out);
 void RaiseObjectFlag(FlaggedObject* self);
 
 void UpdateFlaggedObject(FlaggedObject* self)

@@ -269,7 +269,7 @@ f32 RandomFloatInRange(f32 a, f32 b);
 void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
 void RotateMatrixUpright(void* sub, s32 zero, void* out);
 void SendPointEventToWorldListener(Vec02* point, f32 radius);
-s32 TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
 void ScatterObjectsAtPoint(void* scatter, Vec02* point, s32 a, s32 b);
 void StartSoundEffect(s32 sound, void* a1, s32 a2, void* pos, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void SetFlagTableBit(FlagTable* table, s32 v);
@@ -594,7 +594,7 @@ s32 TestTimedStateContact(TimedStateObject* node, Collider* src)
 }
 
 extern f32 g_gameTime;
-s32 FadeOutPlacedObject(f32 value);
+void FadeOutPlacedObject(f32 value);
 
 void SetTimedState(TimedStateObject* self, s32 state)
 {
@@ -1845,7 +1845,7 @@ struct ZoneTarget {
 
 void SetZoneColliderMode(ZoneCollider* self, s32 flag);
 void ConvertPositionToWorld(ZoneTarget* obj, Vec02* out);
-void GetObjectWorldPosition(ZoneTarget* obj, Vec02* out);
+s32 GetObjectWorldPosition(ZoneTarget* obj, Vec02* out);
 s32 func_0013E658(Vec02* pos, TreeNode03* nodes);
 s32 IsObjectAttached(ZoneTarget* obj);
 void CopyMemory(void* dst, void* src, s32 size);

@@ -310,7 +310,7 @@ s32 WriteCardFile(s32 self, u32 src, s32 n)
     return r;
 }
 
-void QueueThreadRequest(s32 thread);
+s32 QueueThreadRequest(s32 thread);
 
 // The alarm handler of WaitCardTicks: wakes the waiting thread and ends the handler.
 void WakeCardWaiter(s32 id, u16 time, s32 thread)

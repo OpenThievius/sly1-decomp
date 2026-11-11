@@ -2374,7 +2374,7 @@ struct ModelRecord {
     s32 nanimators;         // 0x50
 };
 
-void InitPacketWriter(ModelPacket* p);
+PacketWriter *InitPacketWriter(ModelPacket* p);
 
 // A packet buffer of the model reader, set up where it is declared.
 struct StripPacket : ModelPacket {

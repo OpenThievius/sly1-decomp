@@ -242,7 +242,7 @@ template <class T> struct NextInList {
 void PostLoadPlacedObject(PlacedObject* self);
 void TransformPointBetweenFrames(void* from, void* to, void* point, Vec02* out);
 void SetEffectSpawnerActiveForever(BaseObject* obj);
-void QueryValueListMask(void* owner, f32 radius, void* pos, void* out);
+s32 QueryValueListMask(void* owner, f32 radius, void* pos, void* out);
 
 // The curve object at 0x34 of a path curve object.
 struct GroupCurveObject {
@@ -1295,7 +1295,7 @@ inline void TouchQuery::Init(BlinkObject* s, Collider* o, const Vec02* k)
 
 s32 IsObjectInAcceptLists(BlinkObject* self, Collider* t);
 void InitOwnerMessage(OwnerMessage* out, s32 a, BlinkObject* self);
-void FindNodeForQuery(TouchQuery* p, s32 a, s32 b);
+PlacedObject *FindNodeForQuery(TouchQuery* p, s32 a, s32 b);
 
 void ChooseBlinkObjectState(BlinkObject* self, s32* out)
 {

@@ -63,7 +63,7 @@ void FlushOutputBuffer(OutputBuffer* a0, s32 a1);
 void FreeObjectMemory(OutputBuffer* a0);
 
 void CopyMemory(void* dst, void* src, s32 bytes);
-s32 PrintBuffered(void* a, void* b);
+void PrintBuffered(void* a, void* b);
 s32 WriteFile(s32 a, void* b, s32 n);
 
 void CopyMemory(void* dst, void* src, s32 count);
@@ -247,7 +247,7 @@ typedef int Quadword __attribute__((mode(TI)));
 
 
 
-void StoreFloatAsQuadword(void* out, f32 f);
+void *StoreFloatAsQuadword(void* out, f32 f);
 void* CopyQuadword(void* out, void* in);
 void* StoreQuadword(void* dst, Quadword v);
 Quadword AddWeightedVectors(Quadword a, Quadword b, Quadword c, Quadword d);
@@ -2892,7 +2892,7 @@ void ReadBufferedString(BufferedStream* s, void* out);
 void LoadScreenResources(BufferedStream* s);
 void ReadSlotObjects(World* self, BaseObject* parent, BufferedStream* s);
 void ReadBufferedBlockBody(BufferedStream* s);
-void EnsureSoundBankLoaded(s32 bank);
+s32 EnsureSoundBankLoaded(s32 bank);
 void SilenceVolumeChannel2(void);
 void RequestStagedBank(s32 bank);
 void SendResidentImages(void);

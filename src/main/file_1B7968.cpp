@@ -349,7 +349,7 @@ void FreePooledContactChain(u8* a, Contact03* b);
 s32 RandomIntInRange(s32 a, s32 b);
 void ComputeSoundAttenuation(Quad16* position, f32* volume, f32* pan, f32 a, f32 b, f32 c);
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-void CreatePooledContact(Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out, f32 z);
+s32 CreatePooledContact(Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out, f32 z);
 void NotifyContactEnds(World* world, s32 n, Contact03** list);
 void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
 void SetColliderForcedState(u8* node, s32 flag);
@@ -467,7 +467,7 @@ extern const RandomWalkSteps D_0024D2A8;
 extern const RandomWalkRows D_0024D350;
 extern s32 D_00274830;
 // (if/else with the small path first moved $s0/$s1)
-void ReadPropertyValue(ScriptValue* self, void* a, s32 r);
+ScriptValue *ReadPropertyValue(ScriptValue* self, void* a, s32 r);
 void SetVoiceParam(s32 voice, s32 a1, s32 a2);
 void InitObject(BaseObject* self);
 s32 ReadBufferedU32(void* src);
@@ -2251,7 +2251,7 @@ void MoveCollider(Collider* self, void* b, f32 x)
 }
 
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-void CreatePooledContact(f32 z, Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out);
+s32 CreatePooledContact(f32 z, Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out);
 void NotifyContactEnds(World* world, s32 n, Contact03** list);
 void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
 void FreePooledContactChain(void* pool, Contact03* head);

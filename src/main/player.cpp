@@ -641,7 +641,7 @@ void StepPlayerOnPath(Player* self);
 void StepPlayerRequestState(Player* self);
 void StepPlayerAlongTarget(Player* self);
 void ComputePolarOffset(Vec02* out, f32 angle, f32 dist, f32 z);
-void StoreFloatAsQuadword(void* out, f32 f);
+void *StoreFloatAsQuadword(void* out, f32 f);
 void* CopyQuadword(void* out, void* in);
 s128 ScaleQuadword(s128 a, s128 b);
 void* StoreQuadword(void* dst, s128 v);
@@ -5046,7 +5046,7 @@ void QueuePlayerWalkerActivation(Player* self, u8* other)
 void InitCollider(void* self);
 
 
-s32 ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+void ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
 
 
@@ -5379,7 +5379,7 @@ ASM_FUNC(func_00178D18);
 
 
 void SetWorldActiveFollower(void* a, void* b);
-s32 ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+void ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
 
 extern s32 D_00263E2C;

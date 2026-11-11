@@ -573,7 +573,7 @@ s32 FindObject42CStateWalker(void)
 extern s32 D_0026FA68;
 extern s32 D_0026EC58;
 extern s32 D_00269984;
-void CopyString(char* dst, const char* src);
+void *CopyString(char* dst, const char* src);
 s32 IsPadPatternEnabled(GameProgress* g);
 void OpenKeyRecord(void* rec);
 void SetScreenElementSize(void* self, f32 w, f32 h);

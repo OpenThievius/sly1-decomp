@@ -233,7 +233,7 @@ struct __attribute__((aligned(16))) PanelEntryPosition { s32 a, b, c, d; };
 struct PanelEntrySource { char pad[0x140]; PanelEntryPosition v; };
 
 
-void ComputeHullSeenFromCamera(PanelEntryPosition* v, s32 mode);
+s32 ComputeHullSeenFromCamera(PanelEntryPosition* v, s32 mode);
 
 struct PlayerListHolder { u8 pad0[0x6C]; List01 list; };
 
@@ -1416,7 +1416,7 @@ void DrawCompassStrip(T217D_440* self, PacketWriter* gs);
 void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs);
 void AddDmaRefTag(PacketWriter* gs, void* data, s32 size);
 void SeekTextReader(void* reader, s32 n);
-void AppendString(char* dst, const char* src);
+void *AppendString(char* dst, const char* src);
 void DrawAlignedText(void* reader, Layout_137228* layout, Layout_137228* frame, PacketWriter* gs);
 
 // A byte from a toward b by t, as the panel fades its alpha (the difference taken as an integer).

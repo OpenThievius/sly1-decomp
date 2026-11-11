@@ -772,7 +772,7 @@ void NoteConeVolumeLightingChange(ConeVolume* self)
     }
 }
 
-void InitPacketWriter(PacketWriter* p);
+void *InitPacketWriter(PacketWriter* p);
 void UsePacketBufferMemory(PacketWriter* p, s32 n, void* q);
 void CopyWordsToWriter(PacketWriter* p, s32 size, s32 count, void* data, s32 addr);
 void WriteVifMscal(PacketWriter* p, void* code);

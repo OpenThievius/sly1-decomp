@@ -86,7 +86,7 @@ void BuildEulerRotationMatrix(void* a, void* b);
 
 void RotateVectorByTwoAngles(void* a, void* b, void* c);
 
-extern void* EvaluateAxisCurves(void*, u32, u32, void*, u32, u32);
+extern void EvaluateAxisCurves(void*, u32, u32, void*, u32, u32);
 
 struct AxisCurveClosure {
     u8 a[0x30];
@@ -1051,7 +1051,7 @@ void EvaluateAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32
 
 void* GetAxisRotationCurve(AxisRotationCurve* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
-    return EvaluateAxisCurves(self->axis, a1, a2, &self->base, a3, a4);
+    EvaluateAxisCurves(self->axis, a1, a2, &self->base, a3, a4);
 }
 
 void ReadAxisRotationCurve(AxisRotationCurve* self, Stream83* arg)

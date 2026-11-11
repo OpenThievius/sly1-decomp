@@ -45,7 +45,7 @@ s32 IsObjectInPool(void* p, s32 v);
 s32 AcceptAgentRequest(void* self, s32* arg);
 void StartObject(void* self);
 s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-s32 TransformPointBetweenFrames(void* a0, s32 a1, void* a2, void* a3);
+void TransformPointBetweenFrames(void* a0, s32 a1, void* a2, void* a3);
 // The object a seeking agent of kind 0x10 keeps at 0xC2C: a method table, and at 0x618 what
 // func_001A8820 tests a request's argument against.
 typedef void (*ChildFn)(void* self);
@@ -100,7 +100,7 @@ void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out);
 f32 RandomFloatInRange(f32 lo, f32 hi);
 void ReadBufferedVector3(void* a, void* b);
 void ReadPropertyRecords(void* a, void* b);
-s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
 s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 extern u8 D_0026A210[];
 void SetupScreenElementText(void* self);
@@ -1444,7 +1444,7 @@ void ReparentPointObject(PointObject* self, s32 value)
 s32 ConvertPointObjectPosition(PointObject* self, void* other)
 {
     void* p = &self->pos;
-    return TransformPointBetweenFrames(other, 0, p, p);
+    TransformPointBetweenFrames(other, 0, p, p);
 }
 
 void LoadTextPointObject(TextPointObject* self, void* other)

@@ -393,7 +393,7 @@ struct FadeRequestBlock {
     s32 mid;
 };
 void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
-s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
 void SetElementTextFromEntry(T217D_3D0* self, s32 a, s32 b);
 void SetWarpPageSelectedEntry(void* self, s32 value);
 extern s32 D_00276654;
@@ -2423,7 +2423,7 @@ struct TempoLine {
 
 void ChooseObjectPoolItem(void* timeline);
 void GetPlacementRecordTransform(void* sub, Vec02* a, Mat02* b, s32 c);
-void func_001A8C90(void* timeline, s32 a);
+s32 func_001A8C90(void* timeline, s32 a);
 void HandleAgentNotification(TempoAgent* self, s32 kind, void* rec);
 void SetCachedVoiceParam(s32 a, s32 b);
 s32 GetCachedVoiceParam(s32 a);

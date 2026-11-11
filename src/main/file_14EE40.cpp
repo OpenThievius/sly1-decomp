@@ -189,7 +189,7 @@ void ComputeGaugeOutputs(GaugeManager* self);
 
 extern f32 g_gameTime[];
 
-s32 FadeOutPlacedObject(PlacedObject* sub, f32 value);
+void FadeOutPlacedObject(PlacedObject* sub, f32 value);
 
 void RaiseScatterLevels(void* self, f32 amount);
 
@@ -242,7 +242,7 @@ f32 RandomFloatInRange(f32 a, f32 b);
 void func_0014DB70(void);
 
 
-void MeasureSplinePathDistance(void);
+f32 MeasureSplinePathDistance(void);
 
 extern const GaugeParams g_defaultGaugeParams;
 extern const f32 D_00249FB0;
@@ -703,7 +703,7 @@ void InitOwnerMessage(OwnerMessage* m, s32 mode, void* owner);
 void LaunchObjectFromPooledObject(void);
 void StartPadRecordPattern(void* rec, s32 n, f32 t);
 s32 CountHeldPooledChildren(void* self);
-void FindNodeForQuery(void* query, s32 a, s32 b);
+PlacedObject *FindNodeForQuery(void* query, s32 a, s32 b);
 void SendPointEventToWorldListener(Vec02* at, f32 x);
 void ComputeObjectFrameAtTime(void* self, void* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 void BuildBasisFromX(Vec02* v, Mat02* out);
