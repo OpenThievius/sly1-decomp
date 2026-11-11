@@ -1064,6 +1064,11 @@ passed on is invisible in the caller's code but shifts sched1 (as in func_0018AD
 
 ### The quadratic's head: a priority wall between dot2's conversion and dot3 (func_00141D88, unsolved)
 
+Resolved 2026-11-10 (w20): not a priority wall but regclass's. With ToFloatMoved's operand
+`"*r"` each dot is a VU0 pseudo, and func_00141D88 and func_00141F48 are EXACT with all three
+conversions as ToFloatMoved (docs/toolchain/vu0-helpers.md, "A GPR operand that leaves the class
+to the producer"). The analysis below is kept for its reading of sched1.
+
 Read from the `-dS -fsched-verbose-6`, `.combine` and `.lreg` dumps (2026-11-10, w15), for
 func_00141D88 and func_00141F48 (the same head: `c = Dot(pa,pa) - r*r`, `hb = Dot(ab,pa)`,
 `ha = Dot(ab,ab)`, `disc = (hb+hb)^2 - ha*(c*4)`):

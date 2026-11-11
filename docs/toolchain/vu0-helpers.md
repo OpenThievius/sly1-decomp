@@ -514,6 +514,13 @@ and VU, with no `?` or `*`):
   func_001EDA80 unchanged (StoreX's product now ranks first, vf1 with the 1.0 in vf2). Every
   conversion of func_00186230, func_00186320, func_001BC978 and func_001D4348 as ToFloatMoved
   is EXACT too, so the forms ToFloatNow and ToFloatViaBits stood in for were this one.
+- **The quadratic heads too.** func_00141D88 and func_00141F48 ("The quadratic's head",
+  sched1.md: 216 and 64 conversion mixes tried, none EXACT) are EXACT with all three of their
+  head's dots as ToFloatMoved: each product is a VU0 pseudo, which gives retail's vf3/vf5 for the
+  third dot without the priority change the earlier notes looked for. func_00142278 is closest
+  with its four conversions as ToFloatMoved (13 lines: the side test's product and 1.0 in each
+  other's VU0 register). func_00125C90's one line is a call argument read from memory, another
+  matter.
 - **Spotting it.** Retail's qmfc2 reads a VU0 register the local allocator would give a pseudo
   (low, ahead of the values born after it), its GPR is reload's (v0, v1 in rotation), and sched2
   holds a ready sqc2 or lqc2 for it (unit vu0): ToFloatMoved. A product in a reload register
