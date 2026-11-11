@@ -533,16 +533,14 @@ ObjectLink D_00275B60[8] = {
 // word read whole / address only, 4 bytes to next label
 // readers pass only its address; byte buffer, size to next label
 u8 g_elementStack[4] = {0};
-s32 D_00275BC4 = 0;
-s32 D_00275BC8[9] = {0};
+INCLUDE_DATA(D_00275BC4);
 // size: s32 read as one word (file_14EE40.cpp and screen_element.cpp test bit 8)
 // size: s32 compared with 1 in file_149398.cpp and 2 in pause_menu.cpp
 s32 D_00275BEC = 0;
 s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };
 f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 f32 D_00275C28[3] = { 1.0f, 0.0f, 0.1f };
-s32 D_00275C34 = 0;
-s32 D_00275C38[2] = {0};
+INCLUDE_DATA(D_00275C34);
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
 Quad16 D_00275C40 = {0};
 f32 D_00275C50[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
@@ -572,8 +570,7 @@ TempoObjectRef D_00275D48[9] = {
 s32 D_00275DB4 = 0;
 // size: s32 state compared/assigned in 001EC000
 s32 D_00275DB8 = 0;
-s32 D_00275DBC = 0;
-s32 D_00275DC0[4] = { 1, 2, 0, 0 };
+INCLUDE_DATA(D_00275DBC);
 s32 D_00275DD0[16] = { 4, 2, 1, -1, 8, 4, 2, -1, 12, 6, 3, -1, 16, 8, 4, 2 };
 s32 D_00275E10[92] = { 2, 0x2EB, 0x2DC };
 // word read whole / address only, 4 bytes to next label
@@ -711,8 +708,7 @@ s32 (*D_00276608[6])[4] = { 0, (s32(*)[4])D_00276298, (s32(*)[4])D_00276348, (s3
 // sets D_00276650.
 WarpTextStyle D_00276620(2, 1);
 #endif
-f32 D_0027663C = 0.3f;
-f32 D_00276640[2] = { 0.3f, 0.6f };
+INCLUDE_DATA(D_0027663C);
 #ifdef VERSION_EU
 // PAL's own addresses for these two, which the tools do not pair with US's (VERSION_NAME).
 f32 D_eu_0027FDAC = 24.0f;
@@ -723,6 +719,7 @@ f32 D_00276650 = D_00276648 * 0.75f;
 #endif
 s32 D_00276654 = 0;
 extern s32 D_00276864, D_002768BC, D_00276914;
+extern f32 D_0027663C[];
 char D_00276658[8] = "jojo";
 char D_00276660[16] = "08/24/02 22:06";
 char D_00276670[12] = "0824.2206";
@@ -730,12 +727,9 @@ char D_00276670[12] = "0824.2206";
 // after it, a pointer into .rodata at +0x34 and the random seed at +0x58.
 void* D_00276680[121] = { 0, &D_00276864, &D_002768BC, &D_00276914, 0, 0, 0, 0, 0, 0, 0, 0, 0, (void*)0x0024E980,
                           0, 0, 0, 0, 0, 0, 0, 0, (void*)1 };
-s32 D_00276864 = 0;
-s32 D_00276868[21] = {0};
-s32 D_002768BC = 0;
-s32 D_002768C0[21] = {0};
-s32 D_00276914 = 0;
-s32 D_00276918[21] = {0};
+INCLUDE_DATA(D_00276864);
+INCLUDE_DATA(D_002768BC);
+INCLUDE_DATA(D_00276914);
 void* D_0027696C = D_00276680;
 
 
@@ -4940,7 +4934,7 @@ void func_001F20A8(T217D_0F0* self)
                 f32 scale = e->f24;
                 s32 flags = *(s32*)((u8*)g_saveData + (slot * 0x44C + i * 0x78) + 0x10);
                 Font* font = GetFontById(3);
-                f32 k = D_0027663C * scale;
+                f32 k = D_0027663C[0] * scale;
                 PushFontScale(font, k, k);
                 WarpLabelLayout L;
                 f32 x = pos[0];
