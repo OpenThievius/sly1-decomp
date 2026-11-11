@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 74/128 (57.8%), checked 2026-11-11
+// DECLS (2026-11-11, w28-nmdecls): AppendQueuedCall now void*, TransformPointBetweenFrames void: neutral, order 26/32.
 // NEAR (2026-11-08, night-size2): the same size as retail now: its dead `li v0,1` is the compare of an `if (dir == 1)` whose arms (the state and clip stores, the clip read before) compile alike, which jump2 cross-jumps and deletes, as the file's other dead compare (5 compiles). Still differs: registers and the order of the loads (retail: e in t1, self in a3, dir in t0, the clip in v1, the clock's high half in a2 at the top); arms over more or fewer of the statements were further off.
 // NEAR (2026-11-10, w11): kept the 2026-11-08 form above (more bytes in place); the alternative `if (dir == 1)` straight after the read of dir, each arm `self->fC40 = dir;`, then the rest in source order (54.7%): every register is retail's now (e t1, self a3, dir t0, clip v1, the clock's %hi a2, the dead `li v0,1`), only the order differs. Mechanism: jump2's cross-jumping runs after sched2 (the .sched2 dump still has the branch), so the final order is B0's schedule, then the one surviving arm, then the join block's; retail's li at 4 and lw dir at 5 are B0 = {moves, li, lw dir} exactly, and retail's join order (sll, lui, addu, lwc1 fC60, cvt, lw clip, move a1, sw fC40, sw fC20, lw fC3C, ...) is one block, so retail's arm left nothing between lw dir and sll. Ruled out: any arm that stays (a store, a call, a float load: it lands at position 6), register or float copies in the arms (jump.c's first pass or CSE remove the if before the branch survives), arms reading fC10[dir] (CSE folds dir=1 in the then arm, so they never merge), calls in the arms (flow's (use (const_int 0)) after the fall-through call blocks the merge), `dir != 1`, a scalar or g_gameClock.time read of the clock. An exhaustive search (3960 compiles) of 6 statements x arm position and arm contents (1-2 statements) gave at best 14 differing lines. Open question: what arm survives the early jump passes and then emits nothing.
 // NEAR (2026-11-10, w15): the dead li can only survive a branch deleted in jump2 or reorg (delete_computation keeps prior insns after reload when sched2 runs); an arm emptied by reload_cse lets flow2 delete the branch and the li together (`if (dir != 1) e->fC = dir;`). So retail's arm reached sched2 and vanished in jump2 (delete_noop_moves) or reorg (redundant_insn against B0's li, lw or argument moves). Ruled out (25 compiles): register copies in the arms (the jump pass after loop makes a conditional move), re-reads of e->fC (CSE), stores back to e->fC (31 lines), stack-entry stores, the whole body in both arms. A third parameter compared with 1 gives retail's B0 (16 lines) but the caller passes two arguments. docs/toolchain/alias-classes.md, "A merged arm keeps its place".
@@ -47,7 +48,7 @@ void QueueEachScreenElementDraw(void);
 void StartPlacedObject(void* self);
 void ResolveObjectLinks(void* self, s32 a, void* p);
 void* CreateStateWalker(void* a, void* self, s32 b, s32 c);
-void AppendQueuedCall(void* a, void* cb, void* ctx, s32 b, s32 c);
+void* AppendQueuedCall(void* a, void* cb, void* ctx, s32 b, s32 c);
 void CopyPlayerAttachBlock(BeatPressCollider* self);
 void HandleSwitchedColliderActivation(void* self);
 s32 FindFirstObjectByIdGathered(void* a, s32 b, s32 c, s32 d);
@@ -394,7 +395,7 @@ struct FadeRequestBlock {
     s32 mid;
 };
 void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
-s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
 void SetElementTextFromEntry(T217D_3D0* self, s32 a, s32 b);
 void SetWarpPageSelectedEntry(void* self, s32 value);
 extern s32 D_00276654;

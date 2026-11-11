@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 416/428, checked 2026-11-11
+// DECLS (2026-11-11, w28-nmdecls): TransformPointBetweenFrames now void (defined void): neutral, 92/107. TestOwnerGraphSpan stays s32: the C uses its result (it does not compile as void) although file_18F988's definition is void.
 // w23-vuE (2026-11-11): the retail form of the scale found: 416 bytes of 428, frame 512 as retail's (86% by regdiff, 92 of 107
 // instructions). The scale is a u128 GPR value kg = ScalarInGprReg(scale), made once before the loop (mfc1 in a saved GPR across
 // the three calls), and the per-iteration `k.q = kg;` copies it into the Vec k, which global-alloc leaves in memory (spill
@@ -56,7 +57,7 @@ s32 IsObjectInPool(void* p, s32 v);
 s32 AcceptAgentRequest(void* self, s32* arg);
 void StartObject(void* self);
 s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-s32 TransformPointBetweenFrames(void* a0, s32 a1, void* a2, void* a3);
+void TransformPointBetweenFrames(void* a0, s32 a1, void* a2, void* a3);
 typedef void (*ChildFn)(void* self);
 struct SeekPartner {
     ChildFn* vtbl;
@@ -101,7 +102,7 @@ s32 FindPointGraphPath(GraphQuery* part);
 void SnapPointToPointGraph(GraphQuery* part);
 void ReadBufferedVector3(void* a, void* b);
 void ReadPropertyRecords(void* a, void* b);
-s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
 s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 extern u8 D_0026A210[];
 void SetupScreenElementText(void* self);

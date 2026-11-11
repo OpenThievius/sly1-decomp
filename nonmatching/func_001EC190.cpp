@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 392/492 (79.7%), checked 2026-11-11
+// DECLS (2026-11-11, w28-nmdecls): AppendQueuedCall now void*, TransformPointBetweenFrames void, StoreFloatAsQuadword void*: neutral, order 107/123.
 // w25 (2026-11-11, w25-deps): dependence sources enumerated (docs/toolchain/large-functions.md, "Dependence sources enumerated"): the 33rd-reference flush is not reached (12-14 references), a guard of priority 3 would need a call after `guard = 1`, and reload_cse_regs could hide a second 1.0 pseudo (C's constants apart from A's, A and B at priority 5 replay to one tie from retail's groups). A base class holding the fields with a derived constructor setting f50/f60/f54: same code.
 // NEAR (2026-11-10, w15): the frame and saved registers are retail's with the two scales through the inline
 //       StoreScaledQuadword (docs/toolchain/gcse.md, func_001EC190); what still differs is the init block's
@@ -48,7 +49,7 @@ void QueueEachScreenElementDraw(void);
 void StartPlacedObject(void* self);
 void ResolveObjectLinks(void* self, s32 a, void* p);
 void* CreateStateWalker(void* a, void* self, s32 b, s32 c);
-void AppendQueuedCall(void* a, void* cb, void* ctx, s32 b, s32 c);
+void* AppendQueuedCall(void* a, void* cb, void* ctx, s32 b, s32 c);
 void CopyPlayerAttachBlock(BeatPressCollider* self);
 void HandleSwitchedColliderActivation(void* self);
 s32 FindFirstObjectByIdGathered(void* a, s32 b, s32 c, s32 d);
@@ -395,7 +396,7 @@ struct FadeRequestBlock {
     s32 mid;
 };
 void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
-s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
 void SetElementTextFromEntry(T217D_3D0* self, s32 a, s32 b);
 void SetWarpPageSelectedEntry(void* self, s32 value);
 extern s32 D_00276654;
@@ -917,7 +918,7 @@ struct __attribute__((aligned(16))) TempoRingParams {
 
 extern TempoRingParams D_006256E0;
 extern f32 D_00275070[];
-void StoreFloatAsQuadword(void* out, f32 f);
+void* StoreFloatAsQuadword(void* out, f32 f);
 void* CopyQuadword(void* out, void* in);
 Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 void* StoreQuadword(void* dst, Quadword128 v);

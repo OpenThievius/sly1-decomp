@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 456/492, checked 2026-11-11
+// DECLS (2026-11-11, w28-nmdecls): PrintBuffered, RefreshCachedVoiceParam, RemoveSoundLevelAndRecompute, ComputeOscillatorDisplacement now void, GetObjectWorldPosition s32, StoreFloatAsQuadword void*: neutral, 75/123.
 // NEAR (2026-11-10, w15): EXACT with this source under -mvu0-use-vf0-vf30 or -vf31 (loop.c's threshold 94-95 instead of 79); under the file's flags the loop is 91 insns in pass 1 where retail's moves need 74-76 (docs/toolchain/loops.md, func_001D9488)
 // In the context of its file, src/main/file_1D62E0.cpp: its declarations before the function, bodies cut.
 // From 0x1D62E0 to 0x1DDCE0: classes 0x07 and 0x3F, the output buffer, class 0x19, the world
@@ -58,7 +59,7 @@ void FlushOutputBuffer(OutputBuffer* a0, s32 a1);
 void FreeObjectMemory(OutputBuffer* a0);
 
 void CopyMemory(void* dst, void* src, s32 bytes);
-s32 PrintBuffered(void* a, void* b);
+void PrintBuffered(const char* fmt, ...);
 s32 WriteFile(s32 a, void* b, s32 n);
 
 void CopyMemory(void* dst, void* src, s32 count);
@@ -82,7 +83,7 @@ void SetCachedVoiceParam(void* a, void* b);
 void* TakePoolSlot(void* p);
 void* FillMemory(void* p, s32 value, u32 size);
 
-void* RefreshCachedVoiceParam(void* a, void* b);
+void RefreshCachedVoiceParam(void* a, void* b);
 
 void* TakePoolSlot(void* p);
 void* FillMemory(void* p, s32 a, s32 b);
@@ -130,7 +131,7 @@ void SetWorldActiveFollower(void* sub, void* self);
 void SetPathFollowerMode(void* self, s32 mode);
 
 void FindPathFollowerPathPosition(void* self);
-void GetObjectWorldPosition(void* self, void* arg);
+s32 GetObjectWorldPosition(void* self, void* arg);
 
 s32 ReduceBufferedStreamBytesLeft(void* self, s32 n);
 s32 ReadBufferedS32(void* self);
@@ -154,7 +155,7 @@ void* GetActiveSwitchedCollider(void);
 f32 ApproachValueWithRamp(void* p, s32 zero, f32 a, f32 b, f32 c);
 f32 RandomFloatInRange(f32 a, f32 b);
 
-void GetObjectWorldPosition(void* item, void* out);
+s32 GetObjectWorldPosition(void* item, void* out);
 
 extern f32 g_gameTime;
 void* GetActiveSwitchedCollider(void);
@@ -231,7 +232,7 @@ struct __attribute__((packed)) PackedWord { s32 v; };
 
 typedef int Quadword __attribute__((mode(TI)));
 
-void StoreFloatAsQuadword(void* out, f32 f);
+void* StoreFloatAsQuadword(void* out, f32 f);
 void* CopyQuadword(void* out, void* in);
 void* StoreQuadword(void* dst, Quadword v);
 Quadword AddWeightedVectors(Quadword a, Quadword b, Quadword c, Quadword d);
@@ -293,7 +294,7 @@ extern u8 g_scatterController[];
 
 void SetScatterLevel(void* p);
 
-void* RemoveSoundLevelAndRecompute(void* p);
+void RemoveSoundLevelAndRecompute(void* p);
 
 typedef void (*ActiveFollowerFn)(void* self);
 struct ActiveFollowerChild { ActiveFollowerFn* vtbl; };
@@ -567,7 +568,7 @@ void SetPlayerState(Player* self, s32 a, s32 b);
 
 void FinishPlayerRequest(Player* self);
 
-f32 ComputeOscillatorDisplacement(void* osc, void* pos, f32 t, s32 a, Vec02* out, s32 b, s32 c);
+void ComputeOscillatorDisplacement(void* osc, void* pos, f32 t, s32 a, Vec02* out, s32 b, s32 c);
 s32 CollectTreeNodeSpans(void* nodes, void* a, void* b, s32 c, s32 d, void* out);
 
 s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out);
