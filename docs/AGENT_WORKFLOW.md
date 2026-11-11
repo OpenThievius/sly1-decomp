@@ -405,6 +405,25 @@ Pick its targets with `python3 tools/regdiff.py --all`: those that differ only i
   score and wastes nothing, but a run of 20-minute slots needs every target to reach a base score
   first: start each for a few seconds and read `base score =` in its run.log.
 
+Before (or instead of) the permuter, `python3 tools/tsearch.py FUNC` searches the rewrites a
+programmer plausibly wrote, not random ones: a library of meaning-keeping transforms (for against
+while and a guarded do-while, if/else against a ternary or an early return, a result variable
+against returns, switch against an if chain, x = x + y against x += y, statement order within the
+dependences, a declaration hoisted or sunk, s32 against u32, const, a pointer local against a
+reference, an argument named before its call or a temporary written in place, an index walk
+against a pointer, an element named by a pointer, a helper of the file or its headers written in
+place or called, VU0 helper alternatives, commuted operands, zero tests; `--transforms` lists
+them). It applies each at every place it fits, compiles every result the way the function lands,
+scores it as regdiff.py does (instructions out of line, registers aside, then words that differ),
+and keeps the best `--beam` for the next step, to `--depth` steps or `--minutes`; `--beam 0` keeps
+every code reached, the closure to `--depth`, for a small function. Every improvement is written to
+`build/tsearch/FUNC/best_NN.cpp` with the chain of rewrites that made it, an EXACT as
+`EXACT.cpp`, and `log.tsv` scores every candidate. A candidate never holds more inline assembly,
+`register`, `volatile`, `do { } while (0)`, goto or empty statements than its start, nor a local
+never read or a new array (tests/test_tsearch.py runs the library over every near miss to check
+it). Its dependences are judged on the text (memory by field name), so read an EXACT before
+landing it, as any other, through `tools/check.py` and the full build.
+
 The lead keeps the closest attempt per function in `nonmatching/` (PAL's own definitions in
 `nonmatching/eu/`): `python3 tools/nonmatching.py stage 'build/swarm/*/func_*.cpp'` adds every
 attempt within 15% of retail's bytes, and `python3 tools/nonmatching.py check` re-scores them all,
