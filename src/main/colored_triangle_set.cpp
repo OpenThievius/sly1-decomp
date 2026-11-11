@@ -40,7 +40,7 @@ s32 FindFirstObjectById(void* ref, s32 mode, s32 key, void* self);
 // NEAR: only li s8,12 / ori s7 (pre-loop hoist order) swapped; the rest matches
 
 void ReadPropertyRecords(BaseObject* o, Stream8E* r);
-s32 ReadBufferedU16(Stream8E* r);
+s32 ReadBufferedU16(void* stream);
 f32 ReadBufferedFloat(Stream8E* r);
 TrianglePoint* AllocateZeroedFrontMemory(s32 bytes);
 TriangleIndices* AllocateFrontMemory(s32 bytes);

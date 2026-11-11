@@ -292,7 +292,7 @@ void PadPacketToQuadSlot(void* s, s32 target);
 s32 WriteVifUnpackHeader(void* self, s32 a, s32 b, s32 c);
 void AddDmaRefTag(void* obj, s32 a, s32 b);
 void ReadLinkedItemArray(void* src, s32* count, void** out);
-s32 ReadBufferedU16(void* src);
+s32 ReadBufferedU16(void* stream);
 s32 ReadBufferedU32(void* src);
 void ReadPropertyRecords(void* a, void* b);
 // The message (kind 11) func_001EF3D8 sends the object it detaches.
@@ -347,7 +347,7 @@ void TriggerScriptEvent(void* self, s32 a, s32 b, s32* c);
 void ResetPadStepRepeat(void* p);
 void StartSoundEffect(s32 a0, Timeline* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 extern u8 D_00625760[];
-s32 FillMemory(Entry90* dst, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 // The dead "li v0,2" after the func_001ED090 call is the compare constant of an
 // "if (n == 2)" whose two arms compile identically: jump2 cross-jumps the arms after
 // reload, deletes the branch and leaves the constant load.
@@ -393,7 +393,7 @@ struct FadeRequestBlock {
     s32 mid;
 };
 void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
-s32 TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
 void SetElementTextFromEntry(T217D_3D0* self, s32 a, s32 b);
 void SetWarpPageSelectedEntry(void* self, s32 value);
 extern s32 D_00276654;
@@ -442,7 +442,7 @@ s32 GetEntryIdByKey(s32 a);
 void ShowCountedScreenElement(void* a);
 void FadeScreenToBlack(f32 t);
 struct WarpTextStyle;
-s32 FillMemory(WarpTextStyle* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 // The text style the warp menu draws with: the static initialiser (func_001F2688) zeroes it, then
 // sets its kind, two sizes given as integers, 0.3 twice and its colour.
 struct WarpTextStyle {
@@ -467,7 +467,7 @@ struct WarpTextStyle {
 extern f32 D_00276650;
 s32 IsFontLoaded(s32 n);
 Font* GetFontById(s32 n);
-void* FillMemory(void* p, s32 v, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 extern void StartPlacedObject(WarpPage* o);
 s32 IsWarpEntryReachable(WarpPage* o, s32 n);
 void SelectWarpPageEntry(WarpPage* o, s32 n);
@@ -2423,7 +2423,7 @@ struct TempoLine {
 
 void ChooseObjectPoolItem(void* timeline);
 void GetPlacementRecordTransform(void* sub, Vec02* a, Mat02* b, s32 c);
-void func_001A8C90(void* timeline, s32 a);
+s32 func_001A8C90(void* timeline, s32 a);
 void HandleAgentNotification(TempoAgent* self, s32 kind, void* rec);
 void SetCachedVoiceParam(s32 a, s32 b);
 s32 GetCachedVoiceParam(s32 a);
@@ -3795,9 +3795,9 @@ void StartStateResetObject(C62* self)
     self->desc->m03(self);
 }
 
-void AddStateResetEntry(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
+s32 AddStateResetEntry(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
 {
-    UpsertKeyedEntry((u8*)self + 0x2E8, 4, (u8*)self + 0x2E4, a1, a2, a3, a4, a7);
+    return UpsertKeyedEntry((u8*)self + 0x2E8, 4, (u8*)self + 0x2E4, a1, a2, a3, a4, a7);
 }
 
 void UpdateStateResetObject(void) {}

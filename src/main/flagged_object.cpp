@@ -19,7 +19,7 @@ u32 g_flaggedObjectLinks[4] = { 2, 0x545, 0x5A8, 0 };
 u8 g_flagTable[528] = {0};
 u8 g_flagTableSaved[544] = {0};
 
-void* FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void ResetFlagTable(FlagTable* r)
 {
@@ -314,7 +314,7 @@ void CopyFlaggedObject(FlaggedObject* self)
 extern s32 D_0026EC58;
 void UpdateCollider(Collider* self);
 PlacedObject* GetActiveSwitchedCollider();
-void GetObjectWorldPosition(void* obj, f32* out);
+s32 GetObjectWorldPosition(void* obj, f32* out);
 void RaiseObjectFlag(FlaggedObject* self);
 
 void UpdateFlaggedObject(FlaggedObject* self)

@@ -78,7 +78,7 @@ s32 PostSemaphore(s32 sema);
 s32 PostSemaphoreFromInterrupt(s32 sema);
 s32 AwaitSemaphore(s32 sema);
 s32 TrySemaphore(s32 sema);
-s32 PrintBuffered(const char* format, ...);
+void PrintBuffered(const char* format, ...);
 void InitRemoteCalls(s32 mode);
 s32 BindRemoteService(RemoteCallClient* client, u32 server, s32 mode);
 s32 CallRemoteService(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
@@ -86,8 +86,8 @@ s32 CallRemoteService(RemoteCallClient* client, s32 function, s32 mode, void* se
 s32 IsRemoteCallPending(RemoteCallClient* client);
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
-s32 SetCommandHandler(s32 cause, void (*handler)(void), s32 next);
-s32 ClearCommandHandler(s32 cause);
+void SetCommandHandler(s32 cause, void (*handler)(void), s32 next);
+void ClearCommandHandler(s32 cause);
 void WriteBackDataCacheRange(void* start, s32 size);
 
 void WakeDiscWaiter(s32 id, u16 time, s32 sema);

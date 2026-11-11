@@ -38,9 +38,9 @@ extern f32 g_gameTime[];
 s32 IsObjectDescendantOf(Collider* e, void* b);
 void ReleaseSoundLevel(void* p);
 void TriggerScriptEvent(StateGraph* host, s32 a, s32 b, void** args);
-s32 ReadBufferedU16(void* a);
+s32 ReadBufferedU16(void* stream);
 void* AllocateZeroedFrontMemory(s32 size);
-void* FillMemory(void* p, int zero, s32 count);
+void* FillMemory(void* p, s32 value, s32 size);
 void AddColliderToSweepAxes(void* owner, void* self);
 Contacts03* TakeContactTable(void* owner, void* self);
 void InitContactPairFlags(void* owner, void* self);
@@ -132,7 +132,7 @@ void* CopyBytes(void* dst, void* src, s32 n);
 void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
 void func_001BBC38(Collider* self);
 s32 InvertMatrix3x3(Mat02* in, Mat02* out);
-s32 ReadBufferedU16(BufferedStream* in);
+s32 ReadBufferedU16(void* stream);
 s32 ReadBufferedS16(BufferedStream* in);
 s32 ReadBufferedU32(BufferedStream* in);
 void LoadPlacedObject(Collider* self, BufferedStream* in);
@@ -160,7 +160,7 @@ s32 StartSoundVoice(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f);
 void RemoveFromList(u8* a, void* b);
 void PushFreeSlot(u8* a, void* b);
 extern u8 g_soundBankHandles[];
-void* FillMemory(u8* p, s32 a, s32 b);
+void* FillMemory(void* p, s32 value, s32 size);
 void InitIopCommandChannels(void);
 s32 EnsureSoundBankLoaded(s32 a);
 s32 EnableIopDiscAccess(s32 a, s32 b, s32 c, s32 d);
@@ -170,7 +170,7 @@ void func_0011D520(s32 a, s32 b);
 void func_0011D558(s32 a, s32 b, s32 c);
 void func_0011E3A0(s32 a, s32 b);
 void* PopFreeSlot(void* p);
-void* FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 void AppendToList(void* list, void* item);
 // A sound playing in the world: a 0x90-byte record of the pool at World 0x1BA0, kept on
 // World::list1BAC. func_001BF6B8 takes one, func_001BF920 fills it, func_001BFAF8 starts its
@@ -219,7 +219,7 @@ struct PlayingSound {
 void RemoveFromList(u8* p, PlayingSound* self);
 void PushFreeSlot(u8* p, PlayingSound* self);
 void FreeSoundRecord(PlayingSound* self);
-void* FillMemory(PlayingSound* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 void FadeOutSoundVoice(s32 voice, s32 a, s32 b, s32 c);
 void ApplySoundRecordVolumePan(PlayingSound* self);
 void func_001BBEB8(Collider* self, f32 dt);
@@ -349,7 +349,7 @@ void FreePooledContactChain(u8* a, Contact03* b);
 s32 RandomIntInRange(s32 a, s32 b);
 void ComputeSoundAttenuation(Quad16* position, f32* volume, f32* pan, f32 a, f32 b, f32 c);
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-void CreatePooledContact(Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out, f32 z);
+s32 CreatePooledContact(Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out, f32 z);
 void NotifyContactEnds(World* world, s32 n, Contact03** list);
 void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
 void SetColliderForcedState(u8* node, s32 flag);
@@ -426,7 +426,7 @@ struct SprTransfer {
     s32 state;              // 0x4C: 1 sent in, 3 sending back (StartFromSprChain), 0 done
 };
 
-void* FillMemory(SprTransfer* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 
 // Transfer i's record, cleared, with its tags read uncached (0x20000000) and its first tag's
 // scratchpad address: the static initialiser (func_001C27B0) builds the two in a temporary and
@@ -455,7 +455,7 @@ void SetIopChannelValuePair(s32 channel, s32 value, s32 value2);
 // A script list being built (func_001C1530 hands one to a getter; func_001C1A28 appends a value
 // of `type` to it).
 struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
-void* FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 void ReadPropertyValue(ScriptValue* t, s32 value, PropertyDescriptor* d);
 s32 StepBiasedRandomWalk(void);
 extern PropertyList g_classPropertyLists[];
@@ -467,7 +467,7 @@ extern const RandomWalkSteps D_0024D2A8;
 extern const RandomWalkRows D_0024D350;
 extern s32 D_00274830;
 // (if/else with the small path first moved $s0/$s1)
-void ReadPropertyValue(ScriptValue* self, void* a, s32 r);
+ScriptValue *ReadPropertyValue(ScriptValue* self, void* a, s32 r);
 void SetVoiceParam(s32 voice, s32 a1, s32 a2);
 void InitObject(BaseObject* self);
 s32 ReadBufferedU32(void* src);
@@ -2251,7 +2251,7 @@ void MoveCollider(Collider* self, void* b, f32 x)
 }
 
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-void CreatePooledContact(f32 z, Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out);
+s32 CreatePooledContact(f32 z, Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out);
 void NotifyContactEnds(World* world, s32 n, Contact03** list);
 void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
 void FreePooledContactChain(void* pool, Contact03* head);
@@ -2531,7 +2531,7 @@ struct SolveHandler_1BCD00 { SolveHandlerDesc_1BCD00* desc; };
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
-void* FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
 void AddActiveSetItem(ActiveSetSolver* loc, ActiveSetItem* item);
 void RunActiveSetSolver(ActiveSetSolver* loc, s32 a1, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);

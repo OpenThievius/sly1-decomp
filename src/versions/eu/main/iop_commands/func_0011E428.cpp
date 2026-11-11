@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: one more argument (six) and size 24 passed to func_0011D968
-void OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+s32 OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     s32 args[6];
     args[0] = a0;
@@ -9,5 +9,5 @@ void OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
     args[3] = a3;
     args[4] = a4;
     args[5] = a5;
-    SendIopCommandAndWait(0x3B, 0x18, args);
+    return SendIopCommandAndWait(0x3B, 0x18, args);
 }

@@ -189,7 +189,7 @@ void ComputeGaugeOutputs(GaugeManager* self);
 
 extern f32 g_gameTime[];
 
-s32 FadeOutPlacedObject(PlacedObject* sub, f32 value);
+void FadeOutPlacedObject(PlacedObject* sub, f32 value);
 
 void RaiseScatterLevels(void* self, f32 amount);
 
@@ -242,7 +242,7 @@ f32 RandomFloatInRange(f32 a, f32 b);
 void func_0014DB70(void);
 
 
-void MeasureSplinePathDistance(void);
+f32 MeasureSplinePathDistance(void);
 
 extern const GaugeParams g_defaultGaugeParams;
 extern const f32 D_00249FB0;
@@ -323,7 +323,7 @@ void SetStepSequenceState(StepSequence* self, s32 arg);
 extern void* GetLevelEntryByKey(const char*);
 extern void* GetIndexedTargetSlot(void*, u32);
 
-extern void* FillMemory(void*, u32, u32);
+void* FillMemory(void* p, s32 value, s32 size);
 
 f32 ClampToRange(void*, f32);
 void SetScatterLevel(ScatterController* object, f32 unused);
@@ -366,14 +366,14 @@ void SkipRemainingSteps(StepSequence* self);
 
 
 void DrawPlacedObjectParts(DeferredRequest* self);
-s32 FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 void BuildPlacedObjectTransform(void* obj, void* c, void* out);
 void QueueDeferredRequest(void* p);
 
 
 void* GetListLinks(void* a, void* b);
 
-s32 FillMemory(void* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 void SetListLinkOffset(List01* self, s32 offset);
 
 
@@ -456,7 +456,7 @@ extern u8 g_elementStack[];
 void UpdatePlacedObject(StepSequence* self);
 s32 IsStreamVoiceLocked(void);
 void SetStepSequenceState(StepSequence* self, s32 mode);
-void* FillMemory(s32* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 Ent65* GetActiveSwitchedCollider(void);
 s32 IsTopCameraController(CameraController* p);
 void ChooseStepSequenceState(StepSequence* self);
@@ -579,7 +579,7 @@ struct PartDrawFrame {
 extern f32 D_00261F30[16];
 
 void AddDmaRefTag(PacketWriter* obj, s32 a, s32 b);
-void* FillMemory(PartDrawFrame* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 void MultiplyMatrices(Quad16* out, void* b, void* in);
 void BeginDmaTag(PacketWriter* self);
 void WriteVifBaseOffset(PacketWriter* obj, s32 a, s32 b);
@@ -703,7 +703,7 @@ void InitOwnerMessage(OwnerMessage* m, s32 mode, void* owner);
 void LaunchObjectFromPooledObject(void);
 void StartPadRecordPattern(void* rec, s32 n, f32 t);
 s32 CountHeldPooledChildren(void* self);
-void FindNodeForQuery(void* query, s32 a, s32 b);
+PlacedObject *FindNodeForQuery(void* query, s32 a, s32 b);
 void SendPointEventToWorldListener(Vec02* at, f32 x);
 void ComputeObjectFrameAtTime(void* self, void* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 void BuildBasisFromX(Vec02* v, Mat02* out);
@@ -2535,7 +2535,19 @@ void ResetActiveSetSolver(ActiveSetSolver* self)
     }
 }
 
-INCLUDE_ASM(func_001536C8);
+void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item)
+{
+    for (s32 i = 0; i < self->count; i++) {
+        ActiveSetItem* e = (ActiveSetItem*)(self->items + i * 0x60);
+        f32* row = e->row;
+        if (row != 0) {
+            Vu0::Vec d = Vu0::Dot(Vu0::Vec::Of(item->axis), Vu0::Vec::Of(e->axes[*(s32*)((u8*)item->owner + 0xCC)]));
+            Vu0::StoreX(((u32*)row)[self->count], d.q);
+        }
+    }
+    AppendToList(&self->pending, item);
+    self->count++;
+}
 
 typedef void (*EndRowsFn)(Collider* body, s32 a1, void* contact, s32 end, ActiveSetItem* item, f32* rows);
 typedef void (*EndFillFn)(Collider* body, s32 a1, s32 size, s32 extra, f32* rows);

@@ -50,7 +50,7 @@ void EvaluateVectorKeyCurve(s32 a, s32 b, s32 c, s32 d, s32 e, f32 g, f32 h);
 
 void GetVectorKeyTimes(s32 count, VectorKey* src, s32* outCount, f32** outArr);
 
-s32 ReadBufferedU16(void* src);
+s32 ReadBufferedU16(void* stream);
 
 s32 ReadBufferedS16(void* src);
 
@@ -86,7 +86,7 @@ void BuildEulerRotationMatrix(void* a, void* b);
 
 void RotateVectorByTwoAngles(void* a, void* b, void* c);
 
-extern void* EvaluateAxisCurves(void*, u32, u32, void*, u32, u32);
+extern void EvaluateAxisCurves(void*, u32, u32, void*, u32, u32);
 
 struct AxisCurveClosure {
     u8 a[0x30];
@@ -189,7 +189,7 @@ extern void EvaluateVectorKeyCurve(s32, VectorKey*);
 extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
 
 extern void EvaluateAxisCurves(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
-extern void* FillMemory(void*, s32, s32);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void ReadAxisCurves(WeightCurve** a, Vec02* b, Stream83* c);
 
@@ -1051,7 +1051,7 @@ void EvaluateAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32
 
 void* GetAxisRotationCurve(AxisRotationCurve* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
-    return EvaluateAxisCurves(self->axis, a1, a2, &self->base, a3, a4);
+    EvaluateAxisCurves(self->axis, a1, a2, &self->base, a3, a4);
 }
 
 void ReadAxisRotationCurve(AxisRotationCurve* self, Stream83* arg)

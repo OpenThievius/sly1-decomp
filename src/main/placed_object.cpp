@@ -66,7 +66,7 @@ extern void EvaluateVectorKeyCurve(s32, VectorKey*);
 extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
 
 extern void EvaluateAxisCurves(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
-extern void* FillMemory(void*, s32, s32);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void ReadAxisCurves(WeightCurve** a, Vec02* b, Stream83* c);
 
@@ -479,7 +479,7 @@ void StoreRangeRecordVector(void* self, void* src);
 typedef u64 U128 __attribute__((mode(TI)));
 struct ScaledSpringFrame { U128 r; U128 a; U128 b; };
 
-void StoreFloatAsQuadword(U128* out, void* src);
+void *StoreFloatAsQuadword(U128* out, void* src);
 void* CopyQuadword(U128* out, void* src);
 U128 ScaleQuadword(U128 a, U128 b);
 U128 StoreQuadword(U128* out, U128 v);
@@ -557,7 +557,7 @@ s32 g_checksumMismatch[4];
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
 
 s32 ReadBufferedS16(Stream83* p);
-s32 ReadBufferedU16(Stream83* p);
+s32 ReadBufferedU16(void* stream);
 s32 ReadBufferedS8(Stream83* p);
 s32 ReadBufferedU8(Stream83* p);
 void MoveAnimationTrackToEnd(Animation* a, Track83* b);
@@ -595,7 +595,7 @@ extern const Fn_Table D_00219600[];
 
 
 
-void* FillMemory(void** p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 void SettlePoseSourceModes(Attachment* n);
 
 struct Sub_12BC38 { s32 w0; s32 w4; s32 w8; s32 wC; s32 w10; };
@@ -621,7 +621,7 @@ s32 ReadBufferedS16(Stream83* r);
 s32 ReadBufferedS32(Stream83* r);
 f32 ReadBufferedFloat(Stream83* r);
 s32 ReadBufferedU8(Stream83* r);
-s32 ReadBufferedU16(Stream83* r);
+s32 ReadBufferedU16(void* stream);
 void ReadBufferedStreamBytes(Stream83* r, s32 n, void* dst);
 void ReadBufferedString(Stream83* r, void* out);
 
@@ -715,12 +715,12 @@ void GetTrackPosition();
 void GetTrackRotation();
 void GetTrackValue();
 void GetTrackScaleMatrix();
-void GetTrackIndexedValue();
+f32 GetTrackIndexedValue();
 
 extern u8 D_00148D64[];
 void InitPlacedObject(void* self);
 
-s32 CreateAnimationPlayer(void* a, void* b, s32 c, s32 d, s32 e, s32 f);
+void CreateAnimationPlayer(void* a, void* b, s32 c, s32 d, s32 e, s32 f);
 
 void* FindEntryByObjectId(void);
 
@@ -938,7 +938,7 @@ void ApplyListedPoseSources(AnimationPlayer* o, s32 flag);
 void TriggerScriptEvent(Animation* self, s32 a, s32 b, AnimationPlayer*** c);
 
 void SampleCurvePoints(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y, f32 z, s32 n, void* buf);
-void AccumulateSegmentLengths(s32 n, void* buf, s32 zero);
+f32 AccumulateSegmentLengths(s32 n, void* buf, s32 zero);
 
 void SetTextPanelSubject(void* self, s32 arg);
 
@@ -1724,7 +1724,7 @@ void RecomputePlacedObjectFrame(PlacedObject* self)
     }
 }
 
-void QueryValueListMask(void* list, f32 x, void* vec, void* out);
+s32 QueryValueListMask(void* self, f32 radius, void* center, void* out);
 void SetRangeRecordPosition(RangeRecord* r, void* p);
 void SetRangeRecordDirection(RangeRecord* r, void* p);
 
@@ -3033,9 +3033,9 @@ s32 TestChildrenAccepted(PlacedObject* self, ScriptListBuilder* context)
     return 1;
 }
 
-void CreateTrackAttachment(BaseObject* item)
+Attachment* CreateTrackAttachment(BaseObject* item)
 {
-    CreatePoseSource(item->world, item, (void*)D_002197C0);
+    return CreatePoseSource(item->world, item, (void*)D_002197C0);
 }
 
 INCLUDE_RODATA(D_00249A1C);
@@ -4779,7 +4779,7 @@ void CreateAnimationPlayer(Animation* self, Animation* alt, s32 npairs, TargetBi
 
 s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, s32 d)
 {
-    return CreateAnimationPlayer(a, b, 0, 0, c, d);
+    CreateAnimationPlayer(a, b, 0, 0, c, d);
 }
 
 void* CreateAnimationPlayerReturned(void* self, s32 key, s32 a2)

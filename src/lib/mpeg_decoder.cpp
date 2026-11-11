@@ -778,11 +778,11 @@ struct Dec_20B9F0 {
 
 u32 ReadIpuBits(Dec_20B9F0* d, s32 bits);
 s32 ReportMpegError(Dec_20B9F0* d, const char* msg);
-void WaitIpuCommandDone(Dec_20B9F0* d);
+s32 WaitIpuCommandDone(Dec_20B9F0* d);
 void SendIpuCommand(Dec_20B9F0* d, u32 value);
 void func_0020BEA0(Dec_20B9F0* d, u32 value, u8* table);
 void ReadExtensionsAndUserData(Dec_20B9F0* d);
-void func_0020BB18(void* p);
+s32 func_0020BB18(void* p);
 
 void ReadSequenceHeader(Dec_20B9F0* d) {
     d->fD4 = 0;
@@ -940,7 +940,7 @@ void func_0020C0A8(struct Node_20C0A8* self)
 }
 
 struct Obj_0020C138;
-void ReportMpegError(Obj_0020C138* self, const void* table);
+s32 ReportMpegError(Obj_0020C138* self, const void* table);
 
 void RejectSequenceScalableExtension(Obj_0020C138* self)
 {
@@ -948,7 +948,7 @@ void RejectSequenceScalableExtension(Obj_0020C138* self)
 }
 
 struct Obj_0020C148;
-void ReportMpegError(Obj_0020C148* self, const void* table);
+s32 ReportMpegError(Obj_0020C148* self, const void* table);
 
 void RejectUnknownExtension(Obj_0020C148* self)
 {
@@ -956,7 +956,7 @@ void RejectUnknownExtension(Obj_0020C148* self)
 }
 
 struct Obj_0020C158;
-void ReportMpegError(Obj_0020C158* self, const void* table);
+s32 ReportMpegError(Obj_0020C158* self, const void* table);
 
 void RejectSpatialScalableExtension(Obj_0020C158* self)
 {
@@ -964,7 +964,7 @@ void RejectSpatialScalableExtension(Obj_0020C158* self)
 }
 
 struct Obj_0020C168;
-void ReportMpegError(Obj_0020C168* self, const void* table);
+s32 ReportMpegError(Obj_0020C168* self, const void* table);
 
 void RejectTemporalScalableExtension(Obj_0020C168* self)
 {

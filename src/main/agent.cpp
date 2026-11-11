@@ -312,7 +312,7 @@ static inline f32 LimitToUnitRange(f32 g)
 }
 
 typedef int Quadword128 __attribute__((mode(TI)));
-void StoreFloatAsQuadword(void* out, f32 f);
+void *StoreFloatAsQuadword(void* out, f32 f);
 void* CopyQuadword(void* out, void* in);
 Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 void* StoreQuadword(void* dst, Quadword128 v);
@@ -1481,7 +1481,7 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
 // What slot 76 is asked about: a kind and the object concerned.
 struct AgentRequest { s32 kind00; BaseObject* ref04; };
 
-void* FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 FindNodeForQuery(void* p, s32 a, s32 b);
 
 s32 AcceptAgentRequest(Agent* self, AgentRequest* req)
@@ -2807,8 +2807,8 @@ void SetItemKeeperState(ItemKeeper* self, s32 ns)
     self->stateSince = g_gameClock[1];
 }
 
-void GetObjectWorldPosition(void* obj, void* out);
-void GetObjectWorldRotation(void* obj, void* out);
+s32 GetObjectWorldPosition(void* obj, void* out);
+s32 GetObjectWorldRotation(void* obj, void* out);
 void ComputePolarOffset(void* out, f32 angle, f32 dist, f32 z);
 
 static inline s32 MinOfCounts(s32 a, s32 b)

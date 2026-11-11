@@ -105,7 +105,7 @@ static u8 g_padRequest[0x80] __attribute__((aligned(64)));
 
 s32 PrintFormatted(const char* format, ...);
 void* CopyBytes(void* dst, const void* src, s32 size);
-void* FillMemory(void* dst, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 BindRemoteService(RemoteCallClient* client, u32 server, s32 mode);
 s32 CallRemoteService(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
                   s32 receive_size, void* end, void* end_arg);

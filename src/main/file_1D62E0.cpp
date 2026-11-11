@@ -57,13 +57,13 @@ void ResetPathFollower(void* self);
 
 void HandleChildGroupNotification(StandIn* self, s32 kind, ObjectMessage* ref);
 
-void* FillMemory(OwnerMessage* p, s32 zero, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void FlushOutputBuffer(OutputBuffer* a0, s32 a1);
 void FreeObjectMemory(OutputBuffer* a0);
 
 void CopyMemory(void* dst, void* src, s32 bytes);
-s32 PrintBuffered(void* a, void* b);
+void PrintBuffered(void* a, void* b);
 s32 WriteFile(s32 a, void* b, s32 n);
 
 void CopyMemory(void* dst, void* src, s32 count);
@@ -86,12 +86,12 @@ void CaptureColliderPose(void);
 void SetCachedVoiceParam(void* a, void* b);
 
 void* TakePoolSlot(void* p);
-void* FillMemory(void* p, s32 value, u32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void* RefreshCachedVoiceParam(void* a, void* b);
 
 void* TakePoolSlot(void* p);
-void* FillMemory(void* p, s32 a, s32 b);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void PushFreeSlot(void* list, void* item);
 
@@ -247,7 +247,7 @@ typedef int Quadword __attribute__((mode(TI)));
 
 
 
-void StoreFloatAsQuadword(void* out, f32 f);
+void *StoreFloatAsQuadword(void* out, f32 f);
 void* CopyQuadword(void* out, void* in);
 void* StoreQuadword(void* dst, Quadword v);
 Quadword AddWeightedVectors(Quadword a, Quadword b, Quadword c, Quadword d);
@@ -291,7 +291,7 @@ void* GetLevelEntryByKey(void* obj);
 s32 ComputeCompletionPercent(void* p);
 
 void* TakePoolSlot(void* p);
-void* FillMemory(void* p, s32 value, u32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 extern void* g_frameCount;
 extern void* g_lightingChangeFrame;
@@ -2892,7 +2892,7 @@ void ReadBufferedString(BufferedStream* s, void* out);
 void LoadScreenResources(BufferedStream* s);
 void ReadSlotObjects(World* self, BaseObject* parent, BufferedStream* s);
 void ReadBufferedBlockBody(BufferedStream* s);
-void EnsureSoundBankLoaded(s32 bank);
+s32 EnsureSoundBankLoaded(s32 bank);
 void SilenceVolumeChannel2(void);
 void RequestStagedBank(s32 bank);
 void SendResidentImages(void);
@@ -3208,9 +3208,9 @@ s32 IsLevelDone(void* self, s32 index)
     return g_saveData->levels[index].f448 & 0x20;
 }
 
-void RecomputeSaveCompletion(void* self)
+s32 RecomputeSaveCompletion(void* self)
 {
-    ComputeCompletionPercent(g_saveData);
+    return ComputeCompletionPercent(g_saveData);
 }
 
 void ScatterRandomObjects(void* unused, void* a, void* b, void* c)
@@ -3308,9 +3308,9 @@ void HideCountedScreenElement(World* self)
 
 LINKER_REMNANT(func_001DDBF0);
 
-void PushSoundLevelBuiltin(void* self, void* p)
+void* PushSoundLevelBuiltin(void* self, void* p)
 {
-    PushSoundLevel(p);
+    return PushSoundLevel(p);
 }
 
 void* RemoveSoundLevelBuiltin(void* unused, void* p)

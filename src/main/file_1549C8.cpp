@@ -32,7 +32,7 @@
 #include "vu0.h"
 
 
-s32 TransformPointBetweenFrames(void* from, void* to, void* point, Vec02* out);
+void TransformPointBetweenFrames(void* from, void* to, void* point, Vec02* out);
 
 void SetEffectSpawnerActiveForever();
 void SetEffectSpawnerInactive(EffectSpawner* self);
@@ -127,7 +127,7 @@ void func_0013A128(void*,void*);
 void CopyEffectOwnerMargin(void*,void*);
 f32 RandomFloatInRange(f32,f32);
 
-void* FillMemory(void*,s32,s32);
+void* FillMemory(void* p, s32 value, s32 size);
 
 
 
@@ -190,7 +190,7 @@ struct KeyedWorldView { u8 pad0[0x1CE8]; KeyedObjectList* list; };
 
 struct __attribute__((aligned(16))) SpawnBlock { Quad16 q[8]; };
 struct __attribute__((aligned(16))) SpawnTail { Quad16 q[4]; };
-void* FillMemory(void* p, s32 v, u32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 struct SpawnFlags { s32 z; s32 b; s32 c; SpawnFlags() { FillMemory(this, 0, sizeof(*this)); } };
 struct __attribute__((aligned(16))) SpawnRecord { u8 pad0[0x20]; Quad16 self_copy; u8 pad1[0x30]; Quad16 a1_copy; u8 pad2[0x30]; SpawnBlock blk; s32 f120; u8 pad3[0x8C]; SpawnTail tail; u8 pad4[0x10]; };
 
@@ -706,7 +706,7 @@ extern void* g_frameDoneSemaphore;
 extern void* g_mainAndRenderThreads[];
 void SetListLinkOffset(List01* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
-void EnableInterruptCause(s32 a0);
+s32 EnableInterruptCause(s32 a0);
 void* CreateLockSemaphore(s32 a, s32 b);
 void RunThread(void* a, s32 b);
 void func_0015E678(void);
@@ -2160,7 +2160,7 @@ struct SpinRecord_158480 {
 };
 extern const Mat4A D_00248400;
 void BuildAxisAngleMatrix(void* axis, Mat4A* out, f32 angle);
-void ScaleMatrix(Mat4A* out, Mat4A* in, u128 scale);
+s32 ScaleMatrix(Mat4A* out, Mat4A* in, u128 scale);
 void AddMatrices(f32* a, f32* b, f32* out);
 
 void TurnMatrixBySpin(SpinRecord_158480* spin, f32* out, f32 dt)
@@ -2520,7 +2520,7 @@ struct __attribute__((aligned(16))) ChainFrame {
     void Clear() { FillMemory(this, 0, sizeof(*this)); }
 };
 
-void StoreFloatAsQuadword(void* out, f32 f);
+void *StoreFloatAsQuadword(void* out, f32 f);
 void* CopyQuadword(void* out, void* in);
 Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 void* StoreQuadword(void* dst, Quadword128 v);

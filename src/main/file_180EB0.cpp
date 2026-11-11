@@ -604,7 +604,7 @@ void SetModeWalkerMode(ModeWalker* self, s32 mode)
 }
 
 extern u8 g_class75List[];
-void GetObjectWorldPosition(void* obj, Vec02* out);
+s32 GetObjectWorldPosition(void* obj, Vec02* out);
 void ProjectPointToCamera(Camera* cam, void* pos, Vec02* out);
 f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, f32* out);
 

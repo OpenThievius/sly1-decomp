@@ -75,7 +75,7 @@ void SyncDataCache(s32 a);
 void ArmIopDmaChain(void);
 s32 AddDmaHandler(s32 cause, void* handler, s32 arg);
 s32 RemoveDmaHandler(s32 cause, s32 id);
-void EnableDmaInterrupt(s32 cause);
+s32 EnableDmaInterrupt(s32 cause);
 s32 DisableDmaInterrupt(s32 cause);
 s32 ReadIopRegister(u32 reg);
 u32 WriteIopRegister(u32 reg, u32 value);

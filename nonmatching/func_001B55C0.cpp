@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1376/1416 (97.2%), checked 2026-11-10
+// BYTES 1410/1416 (99.6%), checked 2026-11-10
 // NEAR (2026-11-10, w11): func_001B55C0, slot 4 of the triangle animator (g_triangleAnimatorMethods):
 // where the segment between the two objects at Rec2195_224::p64 and p60 crosses the animator's
 // triangle strip, the strip's coordinates there, offset, clamped and eased into the cursor.
@@ -31,6 +31,10 @@
 //   b-dot fixes the first and renumbers its registers. Every mix of ToFloat, ToFloatMoved,
 //   ToFloatNow and ToFloatViaBits for the three dots, their order, a named Vec for n and a
 //   named 0.0 change nothing or more. Vec::Scalar(-1.0f) for `neg` grows the frame by 16.
+// w21 (2026-11-10): with ToFloatMoved's "*r" operand (wave 20), all six dots through
+// ToFloatMoved (the best of 14 mixes with ToFloat) fix the second point, sched2's order in the
+// dots' block (1376 -> 1410 of 1416). Left: the first point only, the cursor and &tri[2]'s PRE
+// pseudo in s7/s8, unchanged (globalalloc.py: 2 refs over 240 insns against 3 over 354).
 // The clamps (w15): `u = ClampBetween(..)` stored the first result in u's own pseudo, live
 // while lo is loaded, so lo conflicts with u and expand_preferences gives it none of u's
 // preferences ($f12, $f13 from the calls' arguments): lo took $f2, hi $f3, and 1 - v kept its
@@ -133,9 +137,9 @@ void func_001B55C0(TriangleAnimator* self, PlacedObject* obj, void** part)
             c = Vu0::Cross(e0, Vu0::MulX(e2, Vu0::Vec::Of(neg)));
         }
         Vu0::Q(n) = Vu0::DivX(c, Vu0::Length(c)).q;
-        f32 d0 = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(tri[0])));
-        f32 da = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(a))) - d0;
-        f32 db = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(b))) - d0;
+        f32 d0 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(tri[0])));
+        f32 da = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(a))) - d0;
+        f32 db = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(n), Vu0::Vec::Of(b))) - d0;
         if (da >= 0.0f && db >= 0.0f) {
             continue;
         }
@@ -150,12 +154,12 @@ void func_001B55C0(TriangleAnimator* self, PlacedObject* obj, void** part)
             Vec02 m;
             Vu0::Vec e = Vu0::Cross(Vu0::Vec::Of(edge[j]), Vu0::Vec::Of(n));
             Vu0::Q(m) = Vu0::DivX(e, Vu0::Length(e)).q;
-            f32 dv = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(m), Vu0::Vec::Of(tri[order[j]])));
-            f32 dp = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(m), Vu0::Vec::Of(p))) - dv;
+            f32 dv = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(m), Vu0::Vec::Of(tri[order[j]])));
+            f32 dp = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(m), Vu0::Vec::Of(p))) - dv;
             if (0.0f < dp) {
                 break;
             }
-            f32 w = dp / (Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(m), Vu0::Vec::Of(tri[next[j]]))) - dv);
+            f32 w = dp / (Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(m), Vu0::Vec::Of(tri[next[j]]))) - dv);
             su += w * uv[next[j]].x;
             sv += w * uv[next[j]].y;
         }

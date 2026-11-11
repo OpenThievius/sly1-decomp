@@ -55,7 +55,7 @@ void ReleaseTriplePayload(void* p);
 
 // The stream reader (file_137290.cpp).
 s32 ReadBufferedU8(BufferedStream* r);
-s32 ReadBufferedU16(BufferedStream* r);
+s32 ReadBufferedU16(void* stream);
 s32 ReadBufferedS32(BufferedStream* r);
 f32 ReadBufferedFloat(BufferedStream* r);
 s32 ReadBufferedU32(BufferedStream* r);

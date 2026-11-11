@@ -83,7 +83,7 @@ void PostSemaphoreFromInterrupt(s32 sema);
 s32 AwaitSemaphore(s32 sema);
 void* CopyBytes(void* dst, const void* src, s32 n);
 void* FillMemory(void* p, s32 value, s32 size);
-s32 InitRemoteCalls(s32 a);
+void InitRemoteCalls(s32 a);
 s32 BindRemoteService(RemoteCallClient* client, u32 cmd, s32 mode);
 s32 CallRemoteService(RemoteCallClient* client, s32 cmd, s32 mode, void* send, s32 send_size, void* recv, s32 recv_size, s32 a7, s32 a8);
 s32 DisableInterrupts(void);
@@ -247,7 +247,7 @@ s32 OpenFileClient(void)
     s32 i;
     RemoteCallClient* q;
     Callback_1F84D8* g = &D_00628BC0;
-    (s32)InitRemoteCalls(0);
+    InitRemoteCalls(0);
     D_00628BC0.func = 0;
     g->arg = 0;
     DisableInterrupts();

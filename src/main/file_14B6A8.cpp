@@ -649,7 +649,7 @@ void AppendGaugeSlot(GaugeManager* self, s32 value)
 
 INCLUDE_RODATA(D_00249FB4);
 
-s32 ProjectPointToCamera(void* cam, void* point, f32* out);
+void ProjectPointToCamera(void* cam, void* point, f32* out);
 extern const f32 D_00249FB4;
 
 // Picks a free gauge slot for each of up to two agents: the farthest from the player (and, for the

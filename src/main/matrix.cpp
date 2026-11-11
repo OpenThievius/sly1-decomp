@@ -13,7 +13,7 @@
 extern u8 g_unitZVector[];
 
 void ResetMatrixHomogeneous(void*);
-void* FillMemory(void* p, s32 v, s32 n);
+void* FillMemory(void* p, s32 value, s32 size);
 void ComputeSinCos(f32 angle, f32* s, f32* c);
 f32 ClampToMagnitude(f32, f32);
 f32 Arcsine(f32 x);

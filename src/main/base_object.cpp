@@ -772,7 +772,7 @@ void NoteConeVolumeLightingChange(ConeVolume* self)
     }
 }
 
-void InitPacketWriter(PacketWriter* p);
+void *InitPacketWriter(PacketWriter* p);
 void UsePacketBufferMemory(PacketWriter* p, s32 n, void* q);
 void CopyWordsToWriter(PacketWriter* p, s32 size, s32 count, void* data, s32 addr);
 void WriteVifMscal(PacketWriter* p, void* code);
@@ -998,7 +998,7 @@ void UpdateConeVolumeTangents(ConeVolume* self)
     self->f35C = 1.0f;
 }
 
-s32 QueryValueListMask(void* self, f32 radius, void* center, s32* out);
+s32 QueryValueListMask(void* self, f32 radius, void* center, void* out);
 
 void UpdateConeVolumeBounds(ConeVolume* self)
 {

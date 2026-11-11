@@ -142,7 +142,7 @@ void SetUpDoubleBuffer(void* p, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 void FillScreenColor(void* ctx, Rgba4* v, s32 flag);
 s32 CreateLockSemaphore(void* a, void* b);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
-void EnableInterruptCause(s32 a0);
+s32 EnableInterruptCause(s32 a0);
 void InitMeshQueue(void);
 void ResetDisplayBuffers(void);
 void HandleVblankStart(void);
@@ -233,7 +233,7 @@ struct CurveProbe {
 };
 
 void* GetActiveSwitchedCollider(void);
-s32 TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
 void TransformDirectionBetweenFrames(void* a, s32 b, void* c, void* d);
 void PlaceOnTargetCurve(void* a0, void* a1, void* a2, f32 f);
 

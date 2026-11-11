@@ -23,7 +23,7 @@ s32 AwaitSemaphore(s32 h);
 void RotateReadyThreads(s32 v);
 void WakeThread(s32 v);
 void PauseThread(s32 v);
-s32 PrintToOutputHook(const char* fmt, ...);
+void PrintToOutputHook(const char* fmt, ...);
 
 extern const char D_0024E988[40] = "## internel error in libkernl.a!\n";
 

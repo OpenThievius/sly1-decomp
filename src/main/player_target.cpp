@@ -1630,7 +1630,7 @@ void ResetPlayerOnOffObject(Player* self)
 }
 
 void TransformDirectionBetweenFrames(void* frame, s32 a, void* in, void* out);
-void ApproachValueWithRamp(f32 value, f32 target, f32 dt, float* ramp, f32* out);
+f32 ApproachValueWithRamp(f32 value, f32 target, f32 dt, float* ramp, f32* out);
 void AddColliderForce(Player* self, void* v);
 void func_0016FD70(Player* self);
 

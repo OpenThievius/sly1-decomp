@@ -641,7 +641,7 @@ void StepPlayerOnPath(Player* self);
 void StepPlayerRequestState(Player* self);
 void StepPlayerAlongTarget(Player* self);
 void ComputePolarOffset(Vec02* out, f32 angle, f32 dist, f32 z);
-void StoreFloatAsQuadword(void* out, f32 f);
+void *StoreFloatAsQuadword(void* out, f32 f);
 void* CopyQuadword(void* out, void* in);
 s128 ScaleQuadword(s128 a, s128 b);
 void* StoreQuadword(void* dst, s128 v);
@@ -2382,7 +2382,7 @@ s32 func_00173750(Player* self, Vec02* offset)
 
 s32 HasAnimationDrivenAttachment(void* ctx);
 void ReleaseAnimationDrivenAttachments(void* ctx);
-void* FillMemory(void* dst, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 s32 IsObjectOfKind(BaseObject* n, s32 kind);
 s32 IsTopCameraController(u8* p);
 s32 HasSpareCount(void);
@@ -3316,7 +3316,7 @@ void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
 void ResetTrailRing(void* sub);
 void PushStackElement(void* a, void* b);
 f32 WrapAngle(f32 a);
-void* FillMemory(void* dst, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 static inline void StopPlayerAnimation(Player* self)
 {
@@ -4674,7 +4674,7 @@ struct MeshHit {
 s32 CollectMeshHits(f32 radius, Vec02* point, s32 count, void* nodes, void* a3, Mesh03* mesh, s32 max, MeshHit* out);
 void HeapSortRecords(void* base, s32 count, s32 size, s32 (*compare)(FloatKeyedItem* a, FloatKeyedItem* b));
 void func_001C61E0(Player* self, s32 n);
-void* FillMemory(void* dst, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 // The player's grabs of the frame. The state picks the object it reaches with (one of the five
 // at 0x25D8) and the kinds of hold it takes (2, 4 or 8). Each class 0x75 object of those kinds
@@ -5046,7 +5046,7 @@ void QueuePlayerWalkerActivation(Player* self, u8* other)
 void InitCollider(void* self);
 
 
-s32 ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+void ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
 
 
@@ -5379,7 +5379,7 @@ ASM_FUNC(func_00178D18);
 
 
 void SetWorldActiveFollower(void* a, void* b);
-s32 ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+void ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
 
 
 extern s32 D_00263E2C;
@@ -5441,7 +5441,7 @@ void ComputeTargetArc(Player* self, TargetCandidate* e, f32 f, void* a2, void* a
 s32 CompareDistanceFromPlayer(TargetCandidate* a, TargetCandidate* b);
 void SortElements(TargetCandidate* base, s32 n, s32 size, s32 (*cmp)(TargetCandidate*, TargetCandidate*));
 f32 ScoreTargetCandidate(Player* self, void* e, s32 v, void* a3, TargetHit* a4, f32* a5);
-void* FillMemory(void* dst, s32 value, s32 size);
+void* FillMemory(void* p, s32 value, s32 size);
 
 void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHit* out, f32* outf)
 {
