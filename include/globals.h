@@ -56,7 +56,7 @@ extern ImageRecord* g_imageRecordsA;
 extern PaletteRecord* g_imageRecordsB;
 
 // List heads (List01, c01.h), defined in file_1549C8.cpp (D_002626E8, D_002626F8 and D_00262708
-// in file_167D68.cpp, D_00264088 in file_17D248.cpp): each label is 0xC bytes (D_00262300's and D_00264088's run to the next
+// in target_lists.cpp, D_00264088 in file_17D248.cpp): each label is 0xC bytes (D_00262300's and D_00264088's run to the next
 // label with a word or a pad after them).
 extern List01 D_002622E0;
 extern List01 D_002622F0;

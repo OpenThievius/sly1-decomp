@@ -45,7 +45,10 @@ src/main/commentary_best_time.cpp	001DFE80	001E08F8	0024DCB0	002758E0	-	-
 src/main/file_1DFD48.cpp	001DFD48	001DFE80	-	002758D0	-	-
 src/main/file_18F988.cpp	0018F988	00193210	0024B5E0	00269B50	00604700	-
 src/main/file_180EB0.cpp	00180EB0	00182C18	0024B164	002640B0	-	-
-src/main/file_167D68.cpp	00167D68	0016AA18	0024A794	00262480	002BE460	-
+src/main/cone_agent.cpp	00167D68	00168130	-	-	-	-
+src/main/display.cpp	00168130	00168D00	-	00262480	002BE460	-
+src/main/texture_upload.cpp	00168D00	00169C58	-	002626D0	-	-
+src/main/target_lists.cpp	00169C58	0016AA18	0024A794	002626E8	-	-
 src/main/game_clock.cpp	00142ED0	00143140	-	00261850	-	-
 src/main/collider_span.cpp	001419E8	00142ED0	00249E44	-	-	-
 src/main/flagged_object.cpp	00140D90	001419E8	00249E3C	00261410	-	-

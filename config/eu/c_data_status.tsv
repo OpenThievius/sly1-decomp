@@ -144,7 +144,9 @@ D_00261CC8	00262FC8	668	match
 D_00261F70	00263270	1012	differs	first difference at +0x2E8; 7 other words differ
 D_002623C0	002636F0	32	match	
 D_002623E0	00263718	152	match	
-D_00262480	002637B0	660	match	
+D_00262480	002637B0	592	match	
+D_002626D0	00263A00	20	match	
+D_002626E8	00263A18	44	match	
 D_00262718	00263A48	684	differs	first difference at +0x178; 5 text, 71 other words differ
 D_002629C8	00263C30	104	match	
 D_00262A30	00263C98	992	differs	first difference at +0x3DD; 1 other words differ

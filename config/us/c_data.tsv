@@ -26,7 +26,7 @@ D_0024A100	0024A100	20	.rodata	src/main/active_set_solver.cpp
 D_0024A120	0024A120	432	.rodata	src/main/file_1549C8.cpp
 D_0024A2D0	0024A2D0	1088	.rodata	src/main/file_15F678.cpp
 D_0024A710	0024A710	132	.rodata	src/main/placed_object_model.cpp
-D_0024A794	0024A794	12	.rodata	src/main/file_167D68.cpp
+D_0024A794	0024A794	12	.rodata	src/main/target_lists.cpp
 D_0024A7A0	0024A7A0	60	.rodata	src/main/file_16AA18.cpp
 D_0024A7DC	0024A7DC	12	.rodata	src/main/file_16C470.cpp
 D_0024A7F0	0024A7F0	88	.rodata	src/main/target_follower.cpp
@@ -144,7 +144,9 @@ D_00261CC8	00261CC8	668	.data	src/main/file_14EE40.cpp
 D_00261F70	00261F70	1012	.data	src/main/file_1549C8.cpp
 D_002623C0	002623C0	32	.data	src/main/file_15F678.cpp
 D_002623E0	002623E0	152	.data	src/main/placed_object_model.cpp
-D_00262480	00262480	660	.data	src/main/file_167D68.cpp
+D_00262480	00262480	592	.data	src/main/display.cpp
+D_002626D0	002626D0	20	.data	src/main/texture_upload.cpp
+D_002626E8	002626E8	44	.data	src/main/target_lists.cpp
 D_00262718	00262718	684	.data	src/main/file_16AA18.cpp
 D_002629C8	002629C8	104	.data	src/main/target_follower.cpp
 D_00262A30	00262A30	992	.data	src/main/pad_input.cpp
@@ -223,7 +225,7 @@ D_0027B200	0027B200	56	.gcc_except_table	src/lib/allocate.cpp
 D_0027B238	0027B238	92	.gcc_except_table	src/lib/exception.cpp
 D_0027C008	0027C008	4	.bss	src/main/file_149398.cpp
 D_0027C00C	0027C00C	4	.bss	src/main/file_14B6A8.cpp
-D_002BE460	002BE460	24	.bss	src/main/file_167D68.cpp
+D_002BE460	002BE460	24	.bss	src/main/display.cpp
 D_002BE478	002BE478	20	.bss	src/main/entry_queue.cpp
 D_00604700	00604700	128	.bss	src/main/file_18F988.cpp
 D_00625770	00625770	2064	.bss	src/lib/request_thread.cpp

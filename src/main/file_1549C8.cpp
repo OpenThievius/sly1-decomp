@@ -5039,7 +5039,7 @@ void DrainRenderFrames(s32 flag)
     g_drawingFrame = 0;
 }
 
-// The two display buffers' register records (file_167D68.cpp): FRAME at +0 and DISPFB-style
+// The two display buffers' register records (display.cpp): FRAME at +0 and DISPFB-style
 // words chosen by the frame counter's parity.
 extern u8 D_002624F0[];
 extern u8 D_00262500[];

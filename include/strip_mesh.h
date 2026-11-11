@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The three records func_001694F8(mesh, strip, a, b, n, node) takes (file_167D68.cpp; func_00169608
+// The three records func_001694F8(mesh, strip, a, b, n, node) takes (texture_upload.cpp; func_00169608
 // takes the node too), which func_00163ED8 and func_00164868 (placed_object_model.cpp) pass it: a mesh,
 // one of its strips and a node its hook gives. They are filled by their callers' data, so they
 // are named by what they hold and where the code reads them. Written for this project from
