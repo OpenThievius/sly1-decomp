@@ -1406,3 +1406,16 @@ stores -push's first); ScalarAtValue, ScalarAtCall and Scalar read the word the 
 through an FPR. Spot it with `--trace 901` and a lalloc2.py order: when a ready list holds two
 asm insns of equal priority, the dependents count (slot stores and anti dependences included)
 is the tie-break to check.
+
+The w24 pass closed the rank: both insns are asms, so every link into them costs 1
+(LINK_COST_FREE) and both are class 3 against whatever issued last; 901 depends on nothing in the
+block, so 865 can come first only by outranking it or by 901 gaining a predecessor. The anti
+dependence from end->v30's store stays: self and c are both incoming arguments, which alias.c
+lets alias (base ADDRESS of VOIDmode, -fargument-noalias and -fstrict-aliasing off). An edge
+865 -> 901 injected into the replay gives retail's VU registers through lalloc2.py; an edge from
+the -push slot store to 901 does not. A plain "r" u32 operand splits the f63C load into its own
+pseudo (no memory in the qmtc2, so 2 dependents against 2, and 865 wins on its LUID): -push then
+takes retail's a0 and vf6, but local-alloc gives the loaded pseudo v0 where retail has a reload's
+a1. What is left is a source fact that makes the f63C weight wait on the -push one, or keeps its
+load out of the qmtc2 until reload; no plain form of either was found
+(nonmatching/func_001C54D0.cpp, W24).
