@@ -155,7 +155,8 @@ D_00263AC0	00263AC0	884	.data	src/main/file_1793C0.cpp
 D_00263E34	00263E34	20	.data	src/main/entry_queue.cpp
 D_00263E50	00263E50	580	.data	src/main/file_17D248.cpp
 D_00264098	00264098	16	.data	src/main/colored_triangle_set.cpp
-D_002640B0	002640B0	432	.data	src/main/file_180EB0.cpp
+D_002640B0	002640B0	384	.data	src/main/file_180EB0.cpp
+D_00264230	00264230	48	.data	src/main/path_speed_collider.cpp
 D_00264260	00264260	1500	.data	src/main/main_loop.cpp
 D_00264840	00264840	208	.data	src/main/collider_contact.cpp
 D_00264910	00264910	300	.data	src/main/gauge_agent.cpp

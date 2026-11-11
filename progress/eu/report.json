@@ -14,7 +14,7 @@
   "complete_code_percent": 0.0,
   "complete_data": "0",
   "complete_data_percent": 0.0,
-  "total_units": 176,
+  "total_units": 177,
   "complete_units": 0
  },
  "units": [
@@ -22672,14 +22672,14 @@
    "name": "game/file_180EB0",
    "measures": {
     "fuzzy_match_percent": 100.0,
-    "total_code": "7480",
-    "matched_code": "7480",
+    "total_code": "5524",
+    "matched_code": "5524",
     "matched_code_percent": 100.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 26,
-    "matched_functions": 26,
+    "total_functions": 21,
+    "matched_functions": 21,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 0.0,
@@ -22898,12 +22898,42 @@
       "virtual_address": "1583120",
       "demangled_name": "DrawSpinningSpriteElement"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/file_180EB0.cpp"
+   }
+  },
+  {
+   "name": "game/path_speed_collider",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "1956",
+    "matched_code": "1956",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 5,
+    "matched_functions": 5,
+    "matched_functions_percent": 100.0,
+    "complete_code": "0",
+    "complete_code_percent": 0.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_00182AD0",
      "size": "104",
      "fuzzy_match_percent": 100.0,
-     "address": "5568",
+     "address": "0",
      "metadata": {
       "virtual_address": "1583824",
       "demangled_name": "InitC24Object"
@@ -22913,7 +22943,7 @@
      "name": "func_00182B38",
      "size": "112",
      "fuzzy_match_percent": 100.0,
-     "address": "5672",
+     "address": "104",
      "metadata": {
       "virtual_address": "1583928",
       "demangled_name": "StartC24Object"
@@ -22923,7 +22953,7 @@
      "name": "func_00182BA8",
      "size": "512",
      "fuzzy_match_percent": 100.0,
-     "address": "5784",
+     "address": "216",
      "metadata": {
       "virtual_address": "1584040",
       "demangled_name": "UpdateC24Object"
@@ -22933,7 +22963,7 @@
      "name": "func_00182DA8",
      "size": "512",
      "fuzzy_match_percent": 100.0,
-     "address": "6296",
+     "address": "728",
      "metadata": {
       "virtual_address": "1584552",
       "demangled_name": "MoveC24Object"
@@ -22943,7 +22973,7 @@
      "name": "func_00182FA8",
      "size": "716",
      "fuzzy_match_percent": 100.0,
-     "address": "6808",
+     "address": "1240",
      "metadata": {
       "virtual_address": "1585064",
       "demangled_name": "BuildPathSpeedProfile"
@@ -22955,7 +22985,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_180EB0.cpp"
+    "source_path": "src/main/path_speed_collider.cpp"
    }
   },
   {
@@ -53419,7 +53449,7 @@
     "complete_code_percent": 0.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
-    "total_units": 83,
+    "total_units": 84,
     "complete_units": 0
    }
   },
