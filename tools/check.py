@@ -122,7 +122,10 @@ class Resolver:
         if m:
             # Code or data only one version has (tools/version_src.py): its own address, there alone.
             return int(m.group(2), 16) if m.group(1) == self.key else None
-        a = self.us_address(sym)
+        return self.translate(self.us_address(sym))
+
+    def translate(self, a):
+        """The version's address of a US address (None if it has none)."""
         if a is None or self.translation is None:
             return a
         if a in self.translation:

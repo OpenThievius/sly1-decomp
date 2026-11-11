@@ -21,7 +21,7 @@ splits are taken from other projects or from the prototype
 ## Next
 
 Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-11: US at
-93.12% of code (4,759 of 4,807 functions) and 94.56% of data, PAL at 92.93% of code, 48 US
+93.12% of code (4,759 of 4,807 functions) and 94.56% of data, PAL at 92.93% of code and 60.48% of data, 48 US
 functions left, every one with a near miss in `nonmatching/`, the original assembly classified,
 every byte of code in a proved source file, PAL's own game code all defined, and names and types
 well under way. What is still open is the long tail of the matching, the readable names of the
@@ -51,8 +51,12 @@ functions left with their address names, and the disc's data.
    startup brings the compiler's static initialiser, which `config/us/generated.tsv` names. The
    reports count the bytes C defines as matched data (`config/us/c_data.tsv`). The rest of the
    data still comes from the disassembly: on 2026-11-11, 94.56% of US data is defined in C
-   (23,461 bytes left). PAL's report does not count its data yet: only US links C data, and
-   PAL's would be checked at its counterparts as its functions are (`tools/version_check.py`).
+   (23,461 bytes left). PAL links no C, so its data is checked at its counterparts as its
+   functions are (`tools/version_check.py`, then `tools/data_check.py`, `config/eu/c_data_status.tsv`):
+   a global counts for PAL when its bytes, with every pointer translated to PAL's addresses, equal
+   PAL's at its PAL address. On 2026-11-11, 179 of the 240 globals match (280,987 bytes, 60.48% of
+   PAL's data), 39 differ (PAL's own bytes, or pointers the translation cannot place) and 22 are
+   absent (21 are `.bss`, which has no bytes in the file, and one has no PAL address).
 3. **Original assembly.** The functions that were not made from C (system-call stubs, crt0,
    the toolchain's own `.S` routines, the libraries' multimedia routines, frameless VU0 leaves,
    code scheduled by hand) and the linker's leftovers, in game code and in Sony's libraries, are
