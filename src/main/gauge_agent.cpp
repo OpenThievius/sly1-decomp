@@ -12,7 +12,7 @@
 #include "deferred_request.h"
 #include "vu0.h"
 #include "value_range.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "camera.h"
 #include "attachment.h"
 #include "globals.h"
@@ -403,8 +403,8 @@ struct QuadraticCurve {
     f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
 };
 
-// The sequence an Entry8B's mover holds at 0x10 (func_0018AE38): FindCyclicRangeIndex's pairs.
-struct ClipSpan8B {
+// The sequence an BlendSourceEntry's mover holds at 0x10 (func_0018AE38): FindCyclicRangeIndex's pairs.
+struct CyclicRanges {
     u8 pad00[0x04];
     s32 count;              // 0x04
     void* pairs;            // 0x08
@@ -416,7 +416,7 @@ void GetGaugeAgentLevelFactor(GaugeAgent* a0, f32* a1);
 f32 ArctangentOfRatio(f32 y, f32 x);
 f32 WrapAngle(f32 a);
 void SetPlayerBlendWeights(f32 angle, f32 weight, void* self, void* blend, s32 table);
-void* FindEntryByObjectId(Gr8B* self, void* key);
+void* FindEntryByObjectId(BlendAnimationView* self, void* key);
 s32 FindCyclicRangeIndex(s32 count, void* pairs, f32 x, f32 period, f32* out);
 void RecordCameraTimestamp(Camera* c);
 void StartSoundEffect(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -455,14 +455,14 @@ void UpdateGaugeAgentState(GaugeAgent* self)
         SetPlayerBlendWeights(self->f638, weight * k, self, (u8*)self + 0xC20, self->fE00);
         // One mover and one sequence variable for both objects: set twice, they are left to
         // global-alloc, which gives retail's v0 and a0 (docs/TOOLCHAIN.md, local-alloc).
-        Mover8B* m;
-        ClipSpan8B* a;
-        m = ((Entry8B*)FindEntryByObjectId((Gr8B*)self->fE00, self->f610))->mover;
-        a = *(ClipSpan8B**)((u8*)m + 0x10);
-        s32 offFirst = FindCyclicRangeIndex(a->count, a->pairs, self->f7E0->time, ((Gr8B*)self->fE00)->f34, 0) == 0;
-        m = ((Entry8B*)FindEntryByObjectId((Gr8B*)self->fE00, self->f614))->mover;
-        a = *(ClipSpan8B**)((u8*)m + 0x10);
-        s32 offSecond = FindCyclicRangeIndex(a->count, a->pairs, self->f7E0->time, ((Gr8B*)self->fE00)->f34, 0) == 0;
+        PoseSource* m;
+        CyclicRanges* a;
+        m = ((BlendSourceEntry*)FindEntryByObjectId((BlendAnimationView*)self->fE00, self->f610))->mover;
+        a = *(CyclicRanges**)((u8*)m + 0x10);
+        s32 offFirst = FindCyclicRangeIndex(a->count, a->pairs, self->f7E0->time, ((BlendAnimationView*)self->fE00)->f34, 0) == 0;
+        m = ((BlendSourceEntry*)FindEntryByObjectId((BlendAnimationView*)self->fE00, self->f614))->mover;
+        a = *(CyclicRanges**)((u8*)m + 0x10);
+        s32 offSecond = FindCyclicRangeIndex(a->count, a->pairs, self->f7E0->time, ((BlendAnimationView*)self->fE00)->f34, 0) == 0;
         if (offFirst && self->fE04 == 0) {
             RecordCameraTimestamp(g_camera);
             StartSoundEffect(0x1CC, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);

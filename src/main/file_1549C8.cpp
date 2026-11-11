@@ -17,7 +17,7 @@
 #include "object_group.h"
 #include "cursor_animator.h"
 #include "object_cycler.h"
-#include "c60.h"
+#include "scaling_volume.h"
 #include "world.h"
 #include "globals.h"
 #include "deferred_request.h"
@@ -3241,7 +3241,7 @@ BaseObject* FindCommonAncestor(BaseObject* list, BaseObject* other)
 
 LINKER_REMNANT(func_0015A8B0);
 
-void InitC60Object(C60* self)
+void InitScalingVolume(ScalingVolume* self)
 {
     InitPlacedObject(self);
     f32* v = self->v;
@@ -3252,19 +3252,19 @@ void InitC60Object(C60* self)
     v[2] = 0.1f;
 }
 
-void LoadC60Object(C60* self,void* other)
+void LoadScalingVolume(ScalingVolume* self,void* other)
 {
     LoadPlacedObject(self,other);
     ReadMeshTables(other,&self->out2D0,&self->out2D4,&self->out2D8,&self->out2DC);
 }
 
-void UpdateC60Object(C60* self)
+void UpdateScalingVolume(ScalingVolume* self)
 {
     UpdatePlacedObject(self);
     self->f2EC = ApproachValueWithRamp(self->v, 0, self->f2EC, self->f2F0, g_frameDt);
 }
 
-void DrawC60Object(C60* self, void* arg1, void* arg2)
+void DrawScalingVolume(ScalingVolume* self, void* arg1, void* arg2)
 {
     ScaledDrawFrame f;
     BuildUniformScaleAboutPoint(0, &f.q0, self->f2EC);
@@ -3279,7 +3279,7 @@ void DrawC60Object(C60* self, void* arg1, void* arg2)
 
 s32 IsPointInsideFaceTree(s32 tree, Vec02* point);
 
-s32 IsPointInsideObjectFaces(C60* self, void* point)
+s32 IsPointInsideObjectFaces(ScalingVolume* self, void* point)
 {
     Vec02 local;
     Vec02 k;

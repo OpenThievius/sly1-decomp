@@ -87,7 +87,7 @@ func_00152CE0	AppendPacketQuadwords	copies a number of quadwords to the packet b
 func_00152D30	AddDmaEndTag	closes the open tag and writes an end tag (0x70000000) at the buffer's cursor
 func_00152D70	CloseDmaTag	pads the cursor to 16 bytes and ORs the open tag's quadword count (distance from the tag / 16 - 1) into its first word
 func_00152E18	SkipDisplayListWriterSlot	slot 3 of the display-list writer's base table D_0024A0E0: does nothing
-func_00152E28	InitC61Object	slot 0 of class 0x61: runs InitPlacedObject only
+func_00152E28	InitTextureRenderObject	slot 0 of class 0x61: runs InitPlacedObject only
 func_00152E48	BuildTexturePackets	for a texture, builds two DMA packets (one clearing/copying through its dimensions, one drawing edge quads) and stores their pointers and sizes at +0x2D4..+0x2E0
 func_00153328	QueuePlacedObjectDraw	builds the placed-object transform and queues func_001533A8 as a deferred request with the object as its argument
 func_001533A8	DrawPlacedObjectParts	deferred draw callback queued by func_00153328: adds DMA ref tags, writes a matrix to VIF, then runs the part drawer func_00166690 for each 0x70-byte part

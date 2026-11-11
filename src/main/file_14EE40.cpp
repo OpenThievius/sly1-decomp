@@ -14,7 +14,7 @@
 #include "scatter_controller.h"
 #include "shapes.h"
 #include "list_iter.h"
-#include "c61.h"
+#include "texture_render_object.h"
 #include "step_sequence.h"
 #include "animation.h"
 #include "attachment.h"
@@ -568,7 +568,7 @@ struct PartDrawFrame {
     u8 pad1[0x10 - 0x0C];
     DrawTransform copy;
     u8 pad2[0x70 - 0x60];
-    C61* f70;
+    TextureRenderObject* f70;
     void* f74;
     void* f78;
     u8 pad3[0x80 - 0x7C];
@@ -2355,12 +2355,12 @@ void SkipDisplayListWriterSlot() {}
 
 LINKER_REMNANT(func_00152E20);
 
-void InitC61Object(C61* self)
+void InitTextureRenderObject(TextureRenderObject* self)
 {
     InitPlacedObject(self);
 }
 
-void BuildTexturePackets(C61* self, RangeRecord* a)
+void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a)
 {
     PacketWriter pa;
     PacketWriter pb;
@@ -2450,7 +2450,7 @@ void BuildTexturePackets(C61* self, RangeRecord* a)
     PopBackMemoryMark();
 }
 
-void QueuePlacedObjectDraw(C61* self, s32 unused, void* a2)
+void QueuePlacedObjectDraw(TextureRenderObject* self, s32 unused, void* a2)
 {
     (void)unused;
     if (self->f2D0 != 0) {
@@ -2470,7 +2470,7 @@ void DrawPlacedObjectParts(DeferredRequest* self)
     PartDrawFrame f;
     s32 i;
     u8* base = (u8*)&g_vifPacketWriter;
-    C61* s1 = (C61*)self->arg;
+    TextureRenderObject* s1 = (TextureRenderObject*)self->arg;
     AddDmaRefTag((PacketWriter*)base, s1->f2D4, s1->f2D8);
     FillMemory(&f, 0, 0x80);
     f.f08 = 3;

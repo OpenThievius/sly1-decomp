@@ -1489,7 +1489,7 @@ CollectMeshHits (2026-11-10):
   each one's mover and the mover's sequence at 0x10 for FindCyclicRangeIndex. Retail keeps the
   mover in $v0 and the sequence in $a0 (`lw v0,4(v0); ... lw a0,16(v0); ... lw a1,8(a0); jal;
   lw a0,4(a0)`); per-call temporaries or locals, local-alloc's, took $v1 and $a3 (and pushed
-  the f7E0 load from $v1 to $a0). One `Mover8B* m` and one `ClipSpan8B* a` assigned for the
+  the f7E0 load from $v1 to $a0). One `PoseSource* m` and one `CyclicRanges* a` assigned for the
   first object and again for the second is EXACT; the mover variable alone reused fixes the
   mover and the f7E0 load but not the sequence (10 lines still differ).
 - **Rule.** A value retail holds in $v0 right after a call's `lw v0,N(v0)`, or in an argument

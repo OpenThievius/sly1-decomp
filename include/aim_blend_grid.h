@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// Role: the player's aim blend grid: pose records on a grid of points, blended into 24 weights for the aimed point (BlendCellCornerRecords), with a plane tree that limits the aim (FindNearestAcceptedPointOnSegment).
 // Class 0x8B (descriptor D_0021A7B8, 0x3F0 bytes), a child of the root: an object read from a
 // level stream (func_0019C470) that is made of a grid of positions, a list of points on it, and
 // triangles linked to their neighbours; after loading (func_0019C728) it finds its
@@ -7,38 +8,38 @@
 //
 // The slots are 0x20 bytes each from 0xE4; the stream's 24 ids land in their last word
 // (0xF0, stride 0x20), so the loader's own fields (0xA0..0xE0) end where the first slot starts.
-#ifndef C8B_H
-#define C8B_H
+#ifndef AIM_BLEND_GRID_H
+#define AIM_BLEND_GRID_H
 
 #include "base_object.h"
 
 #include "shapes.h"   // Quad16
 
-struct Node8B;
-typedef void (*VFn8B)(Node8B* n);
-struct Node8B { VFn8B* vtbl; };
+struct SlotObject;
+typedef void (*SlotObjectFn)(SlotObject* n);
+struct SlotObject { SlotObjectFn* vtbl; };
 
-struct Tri8B { u8* a; u8* b; u8* c; };
-struct Edge8B { u8* a; u8* b; };
-struct Rec8B { s32 id; u8 pos[96]; };
+struct AimPlaneNode { u8* a; u8* b; u8* c; };
+struct AimPlaneEdge { u8* a; u8* b; };
+struct GridRecord { s32 id; u8 pos[96]; };
 
-// An entry of a Gr8B's table at +0x3C (0x1C bytes each, f38 of them), found by object id
+// An entry of a BlendAnimationView's table at +0x3C (0x1C bytes each, f38 of them), found by object id
 // (FindEntryByObjectId, func_0012CCE8): the id, an object whose first method moves a body
 // (func_001C8C08), and a record whose flag at 0x18 func_00139B38 sets.
-struct Mover8B;
-typedef void (*MoveFn8B)(Mover8B* m, void* body, f32 x, f32 y, s32 z, void* out, s32 w);
-struct Mover8B { MoveFn8B* vtbl; };
-struct Flagged8B { u8 pad[0x18]; s32 flag; };
-struct Entry8B {
+struct PoseSource;
+typedef void (*PoseSourceFn)(PoseSource* m, void* body, f32 x, f32 y, s32 z, void* out, s32 w);
+struct PoseSource { PoseSourceFn* vtbl; };
+struct FlaggedSource { u8 pad[0x18]; s32 flag; };
+struct BlendSourceEntry {
     s32 key;                // 0x00: the object id func_0012CCE8 matches
-    Mover8B* mover;         // 0x04
-    Flagged8B* sub;         // 0x08
+    PoseSource* mover;         // 0x04
+    FlaggedSource* sub;         // 0x08
     u8 pad0C[0x1C - 0x0C];
 };
 
-struct Fl8B { u8 pad[8]; f32 f8; };
-struct In8B { u8 pad[8]; Fl8B* p8; };
-struct Gr8B {
+struct AnimTiming { u8 pad[8]; f32 f8; };
+struct AnimTimingRef { u8 pad[8]; AnimTiming* p8; };
+struct BlendAnimationView {
     u8 pad0[0x34];
     f32 f34;                // 0x34
     s32 f38;                // 0x38
@@ -53,7 +54,7 @@ struct Gr8B {
     u8 pad9C[0xB8 - 0x9C];
     void* fB8;              // 0xB8
     s32 fBC;                // 0xBC
-    In8B* pC0;              // 0xC0
+    AnimTimingRef* pC0;              // 0xC0
 };
 
 // Samples the chain of objects from o up to top (not included) at time t and scale: the n
@@ -62,18 +63,18 @@ struct Gr8B {
 struct PlacedObject;
 struct Vec02;
 struct Mat02;
-void SampleAnimationFrameChain(Gr8B* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
+void SampleAnimationFrameChain(BlendAnimationView* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
                    Vec02* vel, Vec02* spin);
 
-struct Slot8B {
+struct GridBlendSlot {
     u8 pad0[4];
-    Node8B* n4;             // 0x04: the object named by the id
+    SlotObject* n4;             // 0x04: the object named by the id
     u8 pad8[4];
     s32 fC;                 // 0x0C: the id read from the stream
     u8 pad10[0x10];
 };
 
-struct C8B : BaseObject {
+struct AimBlendGrid : BaseObject {
     s32 first34;            // 0x34: -1 at construction
     s32 second38;           // 0x38: -1 at construction
     void* f3C;              // 0x3C
@@ -98,23 +99,23 @@ struct C8B : BaseObject {
     u8 padA8[8];
     u8* fB0;                // 0xB0
     u8 padB4[0xC4 - 0xB4];
-    Rec8B* fC4;             // 0xC4: fA4 records of 100 bytes
+    GridRecord* fC4;             // 0xC4: fA4 records of 100 bytes
     s32 fC8;                // 0xC8
     u8* fCC;                // 0xCC: fC8 records of 16 bytes
     s32 fD0;                // 0xD0
     s32 fD4;                // 0xD4
-    Tri8B* fD8;             // 0xD8
-    Edge8B* fDC;            // 0xDC
+    AimPlaneNode* fD8;             // 0xD8
+    AimPlaneEdge* fDC;            // 0xDC
     f32 fE0;                // 0xE0
-    Slot8B slots[24];       // 0xE4
-    Gr8B* f3E4;             // 0x3E4
+    GridBlendSlot slots[24];       // 0xE4
+    BlendAnimationView* f3E4;             // 0x3E4
     u8 pad3E8[0x3F0 - 0x3E8];
 };
 
-typedef char check_C8B[sizeof(C8B) == 0x3F0 ? 1 : -1];
+typedef char check_AimBlendGrid[sizeof(AimBlendGrid) == 0x3F0 ? 1 : -1];
 
-void InitC8BObject(C8B* self);                  // 0x8B slot 0
+void InitAimBlendGrid(AimBlendGrid* self);                  // 0x8B slot 0
 // func_0019C470 (slot 10) takes the level stream the source file declares.
-void StartC8BObject(C8B* self);                  // 0x8B slot 16
+void StartAimBlendGrid(AimBlendGrid* self);                  // 0x8B slot 16
 
 #endif

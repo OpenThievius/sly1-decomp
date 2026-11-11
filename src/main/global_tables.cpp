@@ -712,5 +712,5 @@ extern const u32 D_00248D60[8] = { 0xFF7FFFFF, 0xFF7FFFFF, 0xFF7FFFFF, 0, 0x53DE
 u8 D_00250580[56] = { 0 };
 // The descriptor of class 0x94, the last of D_00247448: two zero words.
 ClassHead D_002505B8 = { 0, 0 };
-// The method table file_1E88D0.cpp's objects take (c62.h), zero in the image.
+// The method table file_1E88D0.cpp's objects take (state_reset_object.h), zero in the image.
 void* D_002505C0[6] = { 0 };

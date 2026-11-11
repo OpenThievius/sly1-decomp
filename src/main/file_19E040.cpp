@@ -11,7 +11,7 @@
 #include "common.h"
 #include "vu0.h"
 #include "list_iter.h"
-#include "c8b.h"
+#include "aim_blend_grid.h"
 #include "effect_owner.h"
 #include "effect_spawner.h"
 #include "world.h"
@@ -144,7 +144,7 @@ void RemoveEffect(Effect* node);
 void UnregisterCollider(Collider* self);
 
 
-void ComputeGridBlendWeights(f32 x, f32 y, f32 z, C8B* o, void* p);
+void ComputeGridBlendWeights(f32 x, f32 y, f32 z, AimBlendGrid* o, void* p);
 
 // An entry of the effect kinds' tables of functions (src/main/class_descriptors.cpp).
 typedef void (*Fn_Table)();
@@ -344,7 +344,7 @@ struct NextEffect {
 };
 
 
-void ComputeGridBlendWeights(C8B* self, f32* out, f32 a, f32 b, f32 c);
+void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 a, f32 b, f32 c);
 
 // A list walk's start: the frame takes the list and is pushed.
 struct BeginListWalk {

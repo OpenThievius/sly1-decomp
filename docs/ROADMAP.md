@@ -128,8 +128,9 @@ functions left with their address names, and the disc's data.
    caller's match (`TransformByMatrixWithW` is declared with three parameter orders, which may
    be several functions under one name). On 2026-11-07, 4,660 symbols have one;
    266 game functions do not yet (255 of them original assembly, mostly VU0 routines and
-   linker leftovers, and 11 in C whose role the code does not show yet). Eight class headers
-   keep their ids, and of the views matched functions declared for themselves (`Obj_XXXXXX`,
+   linker leftovers, and 11 in C whose role the code does not show yet). Two class headers
+   keep their ids (c35.h and c52.h, whose classes only forward their draw slot to a
+   base class), and of the views matched functions declared for themselves (`Obj_XXXXXX`,
    `Sub_XXXXXX`, 2,018 of them in game code that morning) 18 are left in game code, each for a
    stated reason (a declaration retail's code needs, data only assembly reads) or a role still
    unclear; the rest are their shared types or local types named by role. The libraries' 176
