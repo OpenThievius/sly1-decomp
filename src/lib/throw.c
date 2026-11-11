@@ -9,12 +9,34 @@
  * code. */
 #include "common.h"
 
-/* A frame's unwind state, 0x2F0 bytes: its canonical frame address first. */
-typedef struct UnwindFrame {
-    s32 cfa;
-    s32 pad4;
-    s64 rest[0x2E8 / 8];
+/* A frame's unwind table entry: its first word is 0xFFFFFFFE when the frame has no handler. */
+typedef struct Tag_1FE198 {
+    u32 word;
+} Tag_1FE198;
+
+/* A frame's unwind state, 0x2F0 bytes: its canonical frame address, the unwind table entry of
+ * its code, then the registers it saved: a table of 8-byte values (what each register held)
+ * and, from 0x29C, how each is kept (1: in memory at the address above, 2: as another
+ * register), read by ResolveSavedRegisterSlot. The 4-byte words from 0x10 are the same bytes
+ * (FindHandlerAndRestoreRegisters reads the alias of a register that way). */
+typedef struct __attribute__((aligned(8))) UnwindFrame {
+    s32 cfa;                /* 0x00 */
+    Tag_1FE198* f4;         /* 0x04 */
+    s32 f8;                 /* 0x08 */
+    s32 fC;                 /* 0x0C */
+    union {
+        s32 words[0xA2];    /* 0x10 */
+        struct {
+            u8 pad10[8];
+            s64 tbl[80];    /* 0x18 */
+        } wide;
+    } saved;
+    u16 f298;               /* 0x298 */
+    u16 f29A;               /* 0x29A */
+    s8 f29C[0x54];          /* 0x29C: 0 unsaved, 1 in memory, 2 alias */
 } UnwindFrame;
+
+typedef char check_UnwindFrame[sizeof(UnwindFrame) == 0x2F0 ? 1 : -1];
 
 /* The runtime's exception context (func_001FD9E8's): the pending object at 8, its index at 0xC. */
 typedef struct EhContext {
@@ -49,9 +71,7 @@ void RunTerminateHook(void)
     (*D_00278048)();
 }
 
-typedef struct Obj_1FD958 Obj_1FD958;
-
-s32 SelectArgumentIfTypeNamesEqual(Obj_1FD958* self, s32 v, s32 fallback)
+s32 SelectArgumentIfTypeNamesEqual(void* self, s32 v, s32 fallback)
 {
     s32 result = fallback;
     if (CompareStrings(self, v) != 0) {
@@ -313,29 +333,21 @@ s32 FindHandlerInSpanTable(s32 a0, void* a1, Ctx_001FDEB0* a2, s32 a3, s32* a4)
     return result;
 }
 
-typedef struct Obj_1FDFF8 {
-    u8* f0;
-    u8 pad[0x14];
-    s64 tbl[80];
-    s32 pad2;
-    s8 st[64];
-} Obj_1FDFF8;
-
-u8* ResolveSavedRegisterSlot(u32 idx, Obj_1FDFF8* self, Obj_1FDFF8* other)
+u8* ResolveSavedRegisterSlot(u32 idx, UnwindFrame* self, UnwindFrame* other)
 {
-    while (self->st[idx] == 2) {
-        idx = self->tbl[idx];
+    while (self->f29C[idx] == 2) {
+        idx = self->saved.wide.tbl[idx];
     }
-    if (self->st[idx] == 1) {
-        return self->f0 + self->tbl[idx];
+    if (self->f29C[idx] == 1) {
+        return (u8*)self->cfa + self->saved.wide.tbl[idx];
     }
     AbortProgram();
 }
 
 s32 CopySavedRegister(s32 a0, u32 a1, u32 a2)
 {
-    u8* r1 = ResolveSavedRegisterSlot(a0, (Obj_1FDFF8*)a1, 0);
-    u8* r2 = ResolveSavedRegisterSlot(a0, (Obj_1FDFF8*)a2, 0);
+    u8* r1 = ResolveSavedRegisterSlot(a0, (UnwindFrame*)a1, 0);
+    u8* r2 = ResolveSavedRegisterSlot(a0, (UnwindFrame*)a2, 0);
     s32 n;
     if (a0 >= 0x1F) {
         n = 8;
@@ -348,72 +360,49 @@ s32 CopySavedRegister(s32 a0, u32 a1, u32 a2)
     return CopyBytes(r2, r1, n);
 }
 
-/* A frame being unwound: the unwind table entry at 4, the register slots from 0x10. */
-typedef struct Tag_1FE198 {
-    u32 word;
-} Tag_1FE198;
-
-typedef struct __attribute__((aligned(8))) Frame_1FE198 {
-    s32 f0;
-    Tag_1FE198* f4;
-    s32 f8;
-    s32 fC;
-    s32 f10[0xA2];
-    u16 f298;
-    u16 f29A;
-    s8 f29C[0x54];
-} Frame_1FE198;
-
 typedef struct Pc_1FE198 Pc_1FE198;
 
-Frame_1FE198* UnwindOneFrame(Pc_1FE198* a0, Frame_1FE198* a1, Frame_1FE198* a2)
+UnwindFrame* UnwindOneFrame(Pc_1FE198* a0, UnwindFrame* a1, UnwindFrame* a2)
 {
-    Frame_1FE198* s0 = (Frame_1FE198*)FindFrameUnwindState(a0, (UnwindFrame*)a2);
+    UnwindFrame* s0 = FindFrameUnwindState(a0, a2);
     u16 idx;
     if (s0 == 0) {
         return 0;
     }
     idx = s0->f298;
     if (*(s8*)((u8*)a1 + idx + 0x29C) != 0) {
-        s64 v = *(s64*)ResolveSavedRegisterSlot(idx, (Obj_1FDFF8*)a1, 0);
-        s0->f0 = (s32)v;
+        s64 v = *(s64*)ResolveSavedRegisterSlot(idx, (UnwindFrame*)a1, 0);
+        s0->cfa = (s32)v;
     } else {
-        s0->f0 = a1->f0;
+        s0->cfa = a1->cfa;
     }
-    s0->f0 += s0->f8;
+    s0->cfa += s0->f8;
     return s0;
 }
 
 void NoteCleanupOnlyHandler(void) {}
 
-typedef struct Obj_1FE198 {
-    s32 f0;
-    s32 f4;
-    s32 f8;
-    s32 fC;
-} Obj_1FE198;
-
-static inline Pc_1FE198* ReturnAddr_1FE198(Frame_1FE198* f, Frame_1FE198* g)
+static inline Pc_1FE198* ReturnAddr_1FE198(UnwindFrame* f, UnwindFrame* g)
 {
-    s64 w = *(s64*)ResolveSavedRegisterSlot(f->f29A, (Obj_1FDFF8*)f, (Obj_1FDFF8*)g);
+    s64 w = *(s64*)ResolveSavedRegisterSlot(f->f29A, (UnwindFrame*)f, (UnwindFrame*)g);
     return (Pc_1FE198*)(s32)w;
 }
 
-static inline s32 RegWindow_1FE198_In(s32 i, Frame_1FE198* f)
+static inline s32 RegWindow_1FE198_In(s32 i, UnwindFrame* f)
 {
     return 0;
 }
 
 void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** pout_)
 {
-    Obj_1FE198* obj = (Obj_1FE198*)eh;
+    EhContext* obj = eh;
     Pc_1FE198* pc = (Pc_1FE198*)pc_;
-    Frame_1FE198* fb = (Frame_1FE198*)fb_;
-    Frame_1FE198** pout = (Frame_1FE198**)pout_;
-    Frame_1FE198 sub;
-    Frame_1FE198 saved;
-    Frame_1FE198* udata = *pout;
-    Frame_1FE198* subp = &sub;
+    UnwindFrame* fb = (UnwindFrame*)fb_;
+    UnwindFrame** pout = (UnwindFrame**)pout_;
+    UnwindFrame sub;
+    UnwindFrame saved;
+    UnwindFrame* udata = *pout;
+    UnwindFrame* subp = &sub;
     Pc_1FE198* startPc = pc;
     s32 res = 0;
     s32 pending = obj->fC != 0;
@@ -429,7 +418,7 @@ void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_,
     savedState = 0;
     cleanup = 0;
     for (;;) {
-        Frame_1FE198* p = udata;
+        UnwindFrame* p = udata;
         s32 isNew;
         udata = UnwindOneFrame(pc, udata, subp);
         subp = p;
@@ -485,7 +474,7 @@ void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_,
         pc = startPc;
         *udata = *fb;
         while (pc != handlerPc) {
-            Frame_1FE198* p = udata;
+            UnwindFrame* p = udata;
             udata = UnwindOneFrame(pc, udata, subp);
             subp = p;
             for (i = 0; i < 0x4F; i++) {
@@ -496,7 +485,7 @@ void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_,
             pc = (Pc_1FE198*)((s8*)ReturnAddr_1FE198(udata, subp) - 1);
         }
         if (udata->f29C[udata->f29A] == 2) {
-            i = udata->f10[udata->f29A];
+            i = udata->saved.words[udata->f29A];
             if (RegWindow_1FE198_In(i, udata)) {
                 CopySavedRegister(i, (u32)udata, (u32)fb);
             }

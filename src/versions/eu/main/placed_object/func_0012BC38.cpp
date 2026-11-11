@@ -78,20 +78,20 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
         case 21:
         case 23:
             e->a8.i = (s32)AllocateZeroedFrontMemory(0xC);
-            ((Sub_12BC38*)e->a8.i)->w0 = ReadBufferedS16(r);
-            F32(((Sub_12BC38*)e->a8.i)->w4) = ReadBufferedFloat(r);
-            F32(((Sub_12BC38*)e->a8.i)->w8) = ReadBufferedFloat(r);
+            ((EventAttachmentDrive*)e->a8.i)->owner = ReadBufferedS16(r);
+            ((EventAttachmentDrive*)e->a8.i)->f4 = ReadBufferedFloat(r);
+            ((EventAttachmentDrive*)e->a8.i)->f8 = ReadBufferedFloat(r);
             break;
         case 25:
         case 26:
             H0(e->a8.i) = ReadBufferedS16(r);
             e->aC.i = (s32)AllocateZeroedFrontMemory(0x14);
-            ((Sub_12BC38*)e->aC.i)->w0 = 1;
-            ((Sub_12BC38*)e->aC.i)->w8 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->aC.i)->wC = -1;
-            ((Sub_12BC38*)e->aC.i)->w10 = 0;
-            ((Sub_12BC38*)e->aC.i)->w4 = (s32)AllocateZeroedFrontMemory(0x20);
-            ReadBufferedStreamBytes(r, 0x20, (void*)((Sub_12BC38*)e->aC.i)->w4);
+            ((FadeRequest*)e->aC.i)->kind = 1;
+            ((FadeRequest*)e->aC.i)->f08 = ReadBufferedS16(r);
+            ((FadeRequest*)e->aC.i)->f0C = -1;
+            ((FadeRequest*)e->aC.i)->flags = 0;
+            ((FadeRequest*)e->aC.i)->text = (u8*)AllocateZeroedFrontMemory(0x20);
+            ReadBufferedStreamBytes(r, 0x20, ((FadeRequest*)e->aC.i)->text);
             break;
         case 27:
             e->a8.i = ReadBufferedU8(r);
@@ -99,10 +99,10 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
             break;
         case 28:
             e->a8.i = (s32)AllocateZeroedFrontMemory(0x10);
-            ((Sub_12BC38*)e->a8.i)->w0 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->a8.i)->w4 = ReadBufferedS16(r);
-            F32(((Sub_12BC38*)e->a8.i)->w8) = ReadBufferedFloat(r);
-            F32(((Sub_12BC38*)e->a8.i)->wC) = ReadBufferedFloat(r);
+            ((EventObjectPair*)e->a8.i)->f0 = ReadBufferedS16(r);
+            ((EventObjectPair*)e->a8.i)->f4 = ReadBufferedS16(r);
+            F32(((EventObjectPair*)e->a8.i)->f8) = ReadBufferedFloat(r);
+            ((EventObjectPair*)e->a8.i)->fC = ReadBufferedFloat(r);
             break;
         case 37:
             H0(e->a8.i) = ReadBufferedS16(r);
@@ -130,10 +130,10 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
             break;
         case 48:
             e->a8.i = (s32)AllocateZeroedFrontMemory(0x10);
-            ((Sub_12BC38*)e->a8.i)->w0 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->a8.i)->w4 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->a8.i)->w8 = ReadBufferedS16(r);
-            F32(((Sub_12BC38*)e->a8.i)->wC) = ReadBufferedFloat(r);
+            ((EventObjectPair*)e->a8.i)->f0 = ReadBufferedS16(r);
+            ((EventObjectPair*)e->a8.i)->f4 = ReadBufferedS16(r);
+            ((EventObjectPair*)e->a8.i)->f8 = ReadBufferedS16(r);
+            ((EventObjectPair*)e->a8.i)->fC = ReadBufferedFloat(r);
             break;
         case 9:
         case 10:

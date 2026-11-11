@@ -153,9 +153,6 @@ s32 DemultiplexBuffer(Ctx_20A220* ctx, s32 a, s32 b)
     return DemultiplexPacks(ctx, a, b, 0, -1);
 }
 
-struct Ent_20A538 { u64 key; u64 data; s32 value; s32 extra; };
-struct Ctx_20A538 { u8 pad[0x44]; struct Ent_20A538* ents; s32 count; };
-struct Obj_20A538 { u8 pad[0x40]; struct Ctx_20A538* ctx; };
 struct Pair_20A538 { u64 a; u64 b; };
 // The stream ids the demultiplexer knows, each with the mask of its significant bits.
 Pair_20A538 g_streamIds[10] = {
@@ -172,27 +169,29 @@ Pair_20A538 g_streamIds[10] = {
 };
 u64 GetStreamId(s32 idx, u64 key);
 
-s32 SetStreamCallback(struct Obj_20A538* self, s32 idx, u64 key, s32 a3, s32 a4)
+// Registers a handler and its argument for the stream's id in the table the demultiplexer looks
+// packets up in (the entries DemultiplexPacks runs), and returns the handler it replaces.
+s32 SetStreamCallback(Ctx_20A220* self, s32 idx, u64 key, s32 a3, s32 a4)
 {
     s32 result = 0;
-    struct Ctx_20A538* ctx = self->ctx;
-    struct Ent_20A538* ents = ctx->ents;
+    Prog_20A220* ctx = self->f40;
+    Ent_20A220* ents = ctx->f44;
     u64 k = GetStreamId(idx, key);
-    s32 count = ctx->count;
+    s32 count = ctx->f48;
     s32 i;
     for (i = 0; i < count; i++) {
-        if (k == ents[i].key) {
-            result = ents[i].value;
+        if (k == ents[i].f0) {
+            result = (s32)ents[i].f10;
             break;
         }
     }
     if (i < 0x40) {
-        struct Ent_20A538* e = &ents[i];
-        ctx->count = count + 1;
-        e->key = k;
-        e->extra = a4;
-        e->value = a3;
-        e->data = g_streamIds[idx].b;
+        Ent_20A220* e = &ents[i];
+        ctx->f48 = count + 1;
+        e->f0 = k;
+        e->f14 = (void*)a4;
+        e->f10 = (Handler_20A220)a3;
+        e->f8 = g_streamIds[idx].b;
     }
     return result;
 }

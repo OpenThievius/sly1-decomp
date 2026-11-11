@@ -6,7 +6,7 @@ void StartModeCollider(ModeCollider* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0x1A, g_modeColliderLinks);
     SetFollowObjects(self->f6E8, self->f680, self->f680);
-    ((Sub_1793F0*)self->f650)->fE0 = self->f660;
+    ((ModeColliderLinked*)self->f650)->frame = self->f660;
     self->f658 = CreateStateWalker(self->f654, self, -1, 0);
     BuildCombinedBlendAnimation(self, 0xC, 5, &self->f684, 0, 0, 0, &self->f6C0);
     self->f684 = 1.0f;

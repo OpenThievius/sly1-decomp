@@ -122,7 +122,13 @@ void InitModeCollider(ModeCollider* self)
     self->f610 = -1;
 }
 
-struct Sub_1793F0 { u8 pad0[0xE0]; void* fE0; };
+// The object the link at 0x650 of a ModeCollider resolves to: it keeps the frame object of the
+// collider (0x660) at 0xE0 and, at 0xF0, a position in that frame (StartModeCollider, UpdateModeCollider).
+struct ModeColliderLinked {
+    u8 pad0[0xE0];
+    void* frame;            // 0xE0
+};
+typedef char check_ModeColliderLinked[sizeof(ModeColliderLinked) == 0xE4 ? 1 : -1];
 
 void StartPlacedObject(void* self);
 void ResolveObjectLinks(void* self, s32 a1, void* a2);
@@ -138,7 +144,7 @@ void StartModeCollider(ModeCollider* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0x1A, g_modeColliderLinks);
     SetFollowObjects(self->f6E8, self->f680, self->f680);
-    ((Sub_1793F0*)self->f650)->fE0 = self->f660;
+    ((ModeColliderLinked*)self->f650)->frame = self->f660;
     self->f658 = CreateStateWalker(self->f654, self, -1, 0);
     BuildCombinedBlendAnimation(self, 0xC, 5, &self->f684, 0, 0, 0, &self->f6C0);
     self->f684 = 1.0f;

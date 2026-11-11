@@ -102,13 +102,26 @@ s32 FreeRuntimeBlock(void)
     return LeaveRuntimeLock();
 }
 
-struct Node_001FEA18 {
-    u8 pad0[8];
-    s32 f8;
-    s32 fC;
-    u8 pad1[0x18];
-    s32 f28;
+// The 0x30-byte record of a thrown exception (PushThrownException makes it and puts it on the
+// slot's chain, GetActiveExceptionSlot): the function that tests whether a handler takes it
+// (MatchPendingThrowType), the type it carries, the next record, and the count
+// HasUncaughtException tests.
+struct ThrownException {
+    void* f00;              // 0x00: MatchPendingThrowType
+    u16 f04;                // 0x04: 4
+    u16 f06;                // 0x06: 1
+    s32 f08;                // 0x08: the type the handler matched (set by MatchPendingThrowType)
+    s32 f0C;                // 0x0C
+    s32 f10;                // 0x10
+    s32 f14;                // 0x14: the count HasUncaughtException tests
+    s32 f18;                // 0x18: the next record in the chain
+    u8 pad1C[4];
+    u64 f20;                // 0x20
+    s32 f28;                // 0x28: the thrown value
+    u8 pad2C[4];
 };
+
+typedef char check_ThrownException[sizeof(ThrownException) == 0x30 ? 1 : -1];
 
 struct Hdr_001FEA18 {
     u8 pad0[4];
@@ -121,38 +134,25 @@ typedef s32 (*Fn_001FEA18)();
 
 s32 MatchThrownType(Res_001FEA18* a, s32 b, s32 c);
 
-s32 MatchPendingThrowType(Node_001FEA18* self, void* fn, Hdr_001FEA18* a2)
+s32 MatchPendingThrowType(ThrownException* self, void* fn, Hdr_001FEA18* a2)
 {
     if (a2 != 0 && a2->kind != 4) {
         return 0;
     }
     if (fn == (void*)-1) {
-        return self->f8;
+        return self->f08;
     }
     s32 r = ((Fn_001FEA18)fn)();
-    r = MatchThrownType((Res_001FEA18*)r, self->fC, self->f28);
+    r = MatchThrownType((Res_001FEA18*)r, self->f0C, self->f28);
     if (r != 0) {
-        self->f8 = r;
+        self->f08 = r;
     }
     return r;
 }
 
-struct Obj_1FEA88 {
-    void* f00;
-    u16 f04;
-    u16 f06;
-    s32 f08;
-    s32 f0C;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    u64 f20;
-    s32 f28;
-};
-
 void PushThrownException(s32 a0, s32 a1, s32 a2)
 {
-    struct Obj_1FEA88* obj = (struct Obj_1FEA88*)AllocateRuntimeBlockOrTerminate((Arg_1FE9D0*)0x30);
+    ThrownException* obj = (ThrownException*)AllocateRuntimeBlockOrTerminate((Arg_1FE9D0*)0x30);
     obj->f0C = a1;
     obj->f10 = a2;
     obj->f08 = a0;
@@ -267,15 +267,14 @@ void ThrowTypeidError()
     throw bad_typeid();
 }
 
-struct Obj_1FEEC8 { u8 pad[0x14]; s32 count; };
-struct Slot_1FEEC8 { Obj_1FEEC8* obj; };
+struct Slot_1FEEC8 { ThrownException* obj; };
 
 s32 HasUncaughtException(void)
 {
-    Obj_1FEEC8* obj = ((Slot_1FEEC8*)GetActiveExceptionSlot())->obj;
+    ThrownException* obj = ((Slot_1FEEC8*)GetActiveExceptionSlot())->obj;
     s32 result = 0;
     if (obj != 0) {
-        result = obj->count == 0;
+        result = obj->f14 == 0;
     }
     return result;
 }

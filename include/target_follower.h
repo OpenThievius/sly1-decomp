@@ -7,9 +7,9 @@
 #define TARGET_FOLLOWER_H
 
 #include "collider.h"
+#include "sound_level.h"
 
 struct FollowableObject;
-struct Obj_1BF0D8;
 
 // The 0x14-byte entries of the records at +0x550 (func_0016CE80 looks for the one whose two
 // ends have the ids 0x2EF and 0x2F0 and reads a float at +0x34 of the object its first word
@@ -79,7 +79,7 @@ struct TargetFollower : Collider {
         u8 sub5B0[0x28];    // 0x5B0: handed whole to func_001B9D10 by slot 28
         struct {
             Tune47 tune5B0; // 0x5B0
-            Obj_1BF0D8* f5BC;   // 0x5BC
+            SoundLevelEntry* f5BC; // 0x5BC
             s32 f5C0;       // 0x5C0
             f32 f5C4;       // 0x5C4: 3000.0 at set-up
             f32 f5C8;       // 0x5C8: 1000.0 at set-up
