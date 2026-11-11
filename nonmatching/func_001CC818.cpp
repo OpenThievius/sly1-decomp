@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1888/1916 (98.5%), checked 2026-11-10
+// BYTES 1888/1916 (98.5%), checked 2026-11-11
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call combo (source line 1+2+4); 64 differing lines before, 41 now.
 // ORDER-SWEEP (2026-11-08): Q(ang) = nd moved after the Q(v) statement; tools/permute.py --auto.
 // TAIL (2026-11-09): `*(u128*)&g =` for the result and the tail in the order v, g, p, ang; 40 differing lines before, 16 now.
@@ -35,6 +35,13 @@
 // Writing p as Add(pos, MulX(nd, Scalar(r))) gives Scalar(r) 4 refs and retail's registers up
 // to the cross product, at the cost of a second slot store (54 lines).
 // docs/toolchain/sched1.md, "The link swing's last block".
+// w22 (2026-11-11): re-scored, still 16 lines. tools/globalalloc.py's local replay on the block
+// agrees with the dump; with `--pri` the two comparisons above are confirmed as sufficient:
+// Scalar(r) at 2400 (above off's 2307, ours 1875) and acc at 17200 (above the v150 chain's 17142)
+// give all fourteen retail registers (m.r[1] vf3, Scalar(r) vf6, off vf7, acc vf2, v150 vf3,
+// gravity vf2) and nothing else moves. Scalar(r) needs a life under 26 (its slot store at least
+// four insns earlier) or off's over 32 (p's vadd later), and the v150 load one insn earlier. No
+// new form found; the conversions here are not in this block, so the "*r" lever does not apply.
 
 extern f32 D_00274D40;
 extern f32 D_00274D44;
