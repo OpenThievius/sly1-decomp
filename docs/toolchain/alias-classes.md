@@ -3135,9 +3135,9 @@ FindClosestPointsOnSegments went from 49 differing lines to 2 (2026-11-10, w12, 
   test's qmfc2 stays reload's v1, and the asm sw issues beside `lq s5`. The two ways to the
   same sequence differ only in who emits the qmfc2: StoreX of the vector needs the length in
   a GPR class (the TI_REGS tie), ToBits plus an asm sw does not. As source it needs a store
-  helper that takes a word already in a GPR (StoreX for a u32 or an f32), whose sw the
-  compiler could emit itself: a new helper by AGENTS.md's rule, so not landed until a second
-  retail site shows the same no-unit sw after an asm qmfc2 (this epilogue order is unique).
+  helper that takes a word already in a GPR. Landed (user decision, 2026-11-10) as an
+  overload of StoreX for a u32, the same single sw: `Vu0::StoreX(*dist, Vu0::ToBits(len))`.
+  It is not a general store: only where retail stores a VU0 value's bits this way.
   Ruled out on the way: ToFloat + StoreX (one swap in the test block: reload's mtc1, on the
   memory and flop units with latency 2, lets the vf6 slot store in before it) and
   ToFloatViaBits + StoreX (sched1 issues the fallback's lo_sum before the qmfc2, so the %hi
