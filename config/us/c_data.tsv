@@ -206,14 +206,14 @@ D_002789D8	002789D8	164	.data	src/lib/new_handler.cpp
 D_00278A7C	00278A7C	900	.data	src/lib/type_info.cpp
 D_00278E00	00278E00	1280	.data	src/lib/type_info_kinds.cpp
 D_00279300	00279300	64	.data	src/lib/graph.c
-D_00279340	00279340	172	.data	src/lib/dma.c
+D_00279340	00279340	192	.data	src/lib/dma.c
 D_00279400	00279400	6768	.data	src/lib/cdvd.c
 D_0027AE70	0027AE70	72	.data	src/lib/pad.c
 D_0027AEB8	0027AEB8	24	.data	src/lib/memory_card_client.cpp
 D_0027AED0	0027AED0	160	.data	src/lib/mpeg_demultiplexer.cpp
 D_0027AF70	0027AF70	144	.data	src/lib/mpeg_decoder.cpp
 D_0027B000	0027B000	64	.data	src/lib/mpeg_macroblock.cpp
-D_0027B040	0027B040	104	.data	src/lib/mpeg_ipu_decode.cpp
+D_0027B040	0027B040	112	.data	src/lib/mpeg_ipu_decode.cpp
 D_0027B0B0	0027B0B0	128	.data	src/lib/ipu_reset.cpp
 D_0027B130	0027B130	84	.data.D_0027B130	src/lib/001F8000.cpp
 D_0027B200	0027B200	56	.gcc_except_table	src/lib/allocate.cpp
