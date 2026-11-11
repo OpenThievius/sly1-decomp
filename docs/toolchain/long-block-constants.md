@@ -256,3 +256,17 @@ long-lived flag next to s0-s7 holders means it was placed before them all.
   and not in a parallel half: look for the other half's variable whose local register is the
   one retail used, and reuse the variable.
 
+### A saved register skipped with no preference: what is left (func_001D5678, unsolved)
+
+Measured 2026-11-10 (nonmatching/func_001D5678.cpp, tools/globalalloc.py). A GCSE temporary
+(`n - 1` for a sort call, live across a loop with calls) takes s2 where retail has s3, every
+other register agreeing. The replay rules out the preference routes: no allocno of the function
+prefers a saved register (a preference to s0-s7 needs a hard reference or a local-alloc pseudo
+there, and local-alloc put none), so neither the temporary's own preferences nor
+`regs_someone_prefers` can pass over s2; any priority (`--set refs=,length=`) gives s0 or s2,
+because s2 was opened long before (pass 0 takes the first used register). What is left is a
+conflict with an allocno global-alloc placed in s2 whose value retail never reads in that span,
+for instance one reload later moved to the stack. Spot the case: list every allocno's preferences
+(before pruning) for the two registers first; if none has them, only a conflict can explain
+retail.
+
