@@ -135,7 +135,7 @@ D_002613F0	002626F0	32	match
 D_00261410	00262710	1088	match	
 D_00261850	00262B50	48	match	
 D_00261880	00262B80	276	match	
-D_002619A0	00262CA0	568	match	
+D_002619A0	00262CA0	572	match	
 D_00261BF0	00262EF0	160	match	
 D_00261C90	00262F90	52	match	
 D_00261CC8	00262FC8	668	match	
@@ -186,7 +186,7 @@ D_002758D0	0027F080	16	match
 D_002758E0	0027F090	96	differs	first difference at +0x28; 6 other words differ
 D_00275940	0027F0B8	476	differs	first difference at +0x2B; 11 text, 49 other words differ
 D_00275B28	0027F298	56	match	
-D_00275B60	0027F2D0	3252	differs	first difference at +0x463; 10 text, 9 pointer, 369 other words differ
+D_00275B60	0027F2D0	3264	differs	first difference at +0x463; 10 text, 9 pointer, 369 other words differ
 D_00276970	002800D0	16	match	
 D_00276980	002800E0	1960	match	
 D_00277128	00280888	4	match	

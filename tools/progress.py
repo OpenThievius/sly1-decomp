@@ -30,7 +30,9 @@ Data units are the sections with bytes (data/<section>): they measure data, whic
 the disassembly until C can place it (docs/ROADMAP.md). The US build's matched data is the
 globals C defines (config/us/c_data.tsv); PAL's is those of them whose bytes, with every
 pointer translated, equal PAL's at their PAL address (config/eu/c_data_status.tsv, from
-tools/data_check.py). PAL links no C, so none of it is complete data.
+tools/data_check.py). PAL links no C, so none of it is complete data. Data that is original
+assembly counts as matched too, as original-assembly functions do: the sections no compiler made
+(config/<version>/original_data.tsv, by hand; the .vutext section of VU microprograms).
 Each unit is in one category, game, lib or data, and every category has its
 own measures.
 """
@@ -157,6 +159,15 @@ def c_data(key):
             if status == "match"] if key == "eu" else []
 
 
+def original_data(key):
+    """[(address, size)] of the data that is original assembly: config/<key>/original_data.tsv."""
+    path = ROOT / "config" / key / "original_data.tsv"
+    if not path.exists():
+        return []
+    rows = [l.split("\t") for l in path.read_text().splitlines()[1:] if l]
+    return [(int(r[1], 16), int(r[2])) for r in rows]
+
+
 def measures(funcs, done, linked, data=0, near=None, data_done=0):
     """objdiff's measures of some functions and some bytes of data (data_done of them matched).
 
@@ -258,7 +269,7 @@ def report(key):
     done = finished(key)
     linked = key == versions.primary()
     near = fuzzy(key)
-    globals_ = c_data(key)
+    globals_ = c_data(key) + original_data(key)
     unit = unit_of(key)
     counterparts = us_counterparts() if key == "eu" else None
     units = []

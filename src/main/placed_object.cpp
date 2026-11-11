@@ -23,6 +23,7 @@
 #include "range_record.h"
 #include "cursor_animator.h"
 #include "sound_record.h"
+#include "screen_fade.h"
 #include "object_link.h"
 #include "target_binding.h"
 #include "globals.h"
@@ -146,7 +147,7 @@ extern u8 D_002623D8[];
 
 void StopSoundRecord(s32 a, s32 b);
 void ReleaseSoundLevel(s32 a);
-void SetGatheredWalkerTargets(void* a, s32 b, void* c, void* d, s32 e);
+void SetGatheredWalkerTargets(void* a, s32 b, void* c, void* d, s32 e); // stays void: retail returns a value, but declared so func_00123888 differs in registers
 void ReleaseCounterRef(void* p);
 void SetStateWalkerTarget(void* a, s32 b);
 void TeleportStateWalker(void* a, s32 b);
@@ -598,7 +599,9 @@ extern const Fn_Table D_00219600[];
 void* FillMemory(void* p, s32 value, s32 size);
 void SettlePoseSourceModes(Attachment* n);
 
-struct Sub_12BC38 { s32 w0; s32 w4; s32 w8; s32 wC; s32 w10; };
+// The 0xC-byte payload of kinds 21 and 23: the owner id of the attachment the event drives
+// (RunAnimationEvent reads it first), then two floats.
+struct EventAttachmentDrive { s32 owner; f32 f4; f32 f8; };
 // The 0x28-byte record of a kind 0 event (a sound): up to six sound ids, one picked at random
 // each time other than the last (func_0012D5D0), the object it plays on, and its ranges.
 struct SoundChoice {
@@ -847,7 +850,6 @@ union EventScratch {
 };
 
 
-extern u8 g_screenFade[];
 
 extern u8 g_padRecord[];
 extern u8 g_moviePlayer[];
@@ -876,8 +878,8 @@ struct TrackAttachment : T2195_7C0 {
 };
 TrackAttachment* FindPlayerAttachmentByOwner(AnimationPlayer* self, s32 key);
 void ChoosePoseSourceModes(TrackAttachment* n);
-void StartScreenFade(u8* dst, s32 a, s32 b);
-void SaveFadeRequest(u8* dst, s32 a, s32 b);
+void StartScreenFade(ScreenFade* dst, FadeRequest* requests, s32 count);
+void SaveFadeRequest(ScreenFade* dst, FadeRequest* requests, s32 count);
 void BeginLevelExit(s32 a, s32 b);
 void StartTimer(T217D_510* p, f32 x);
 void StartTimerCounting(T217D_510* p);
@@ -2068,10 +2070,10 @@ struct __attribute__((aligned(16))) ModelPartRequest {
     ModelPartState* state;  // 0x7C
 };
 
-void TransformByMatrixWithW(void* m, void* v, void* out, f32 w);
+void TransformByMatrixWithW(void* m, void* v, f32 w, void* out);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
 f32 ClampToRange(void* span, f32 x);
-void MultiplyMatrices(void* out, void* a, void* b);
+void MultiplyMatrices(void* out, void* a, void* b); // stays void: retail returns a value, but declared so func_00126270 and func_00126DE8 differs in registers
 void QueueDeferredRequest(void* r);
 void ApplyPoseSourceIndexedValue(void* src, s32 i);
 void DrawModelPart(void* r);
@@ -2101,7 +2103,7 @@ void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
         if (self->flags & 0x200000000ULL) {
             rec.pos = part->pos;
         } else {
-            TransformByMatrixWithW(&rec.block, part, &rec.pos, 1.0f);
+            TransformByMatrixWithW(&rec.block, part, 1.0f, &rec.pos);
         }
         u128 d = Vu0::Sub(Vu0::Q(rec.pos), Vu0::Q(cam->f40));
         if (self->bits28 == 1) {
@@ -2356,7 +2358,7 @@ void FadeOutPlacedObject(Collider* self, f32 time)
 }
 
 void BuildShortestArcRotation(void* from, void* to, void* out);
-void MultiplyMatrices(void* out, void* a, void* b);
+void MultiplyMatrices(void* out, void* a, void* b); // stays void: retail returns a value, but declared so func_00126270 and func_00126DE8 differs in registers
 
 // k, the vector the second rotation starts from, is written as a quadword at its own address:
 // a store through Vu0::Q or Set leaves the address in a pseudo that CSE keeps in a saved register
@@ -4556,20 +4558,20 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
         case 21:
         case 23:
             e->a8.i = (s32)AllocateZeroedFrontMemory(0xC);
-            ((Sub_12BC38*)e->a8.i)->w0 = ReadBufferedS16(r);
-            F32(((Sub_12BC38*)e->a8.i)->w4) = ReadBufferedFloat(r);
-            F32(((Sub_12BC38*)e->a8.i)->w8) = ReadBufferedFloat(r);
+            ((EventAttachmentDrive*)e->a8.i)->owner = ReadBufferedS16(r);
+            ((EventAttachmentDrive*)e->a8.i)->f4 = ReadBufferedFloat(r);
+            ((EventAttachmentDrive*)e->a8.i)->f8 = ReadBufferedFloat(r);
             break;
         case 25:
         case 26:
             H0(e->a8.i) = ReadBufferedS16(r);
             e->aC.i = (s32)AllocateZeroedFrontMemory(0x14);
-            ((Sub_12BC38*)e->aC.i)->w0 = 1;
-            ((Sub_12BC38*)e->aC.i)->w8 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->aC.i)->wC = -1;
-            ((Sub_12BC38*)e->aC.i)->w10 = 0;
-            ((Sub_12BC38*)e->aC.i)->w4 = (s32)AllocateZeroedFrontMemory(0x20);
-            ReadBufferedStreamBytes(r, 0x20, (void*)((Sub_12BC38*)e->aC.i)->w4);
+            ((FadeRequest*)e->aC.i)->kind = 1;
+            ((FadeRequest*)e->aC.i)->f08 = ReadBufferedS16(r);
+            ((FadeRequest*)e->aC.i)->f0C = -1;
+            ((FadeRequest*)e->aC.i)->flags = 0;
+            ((FadeRequest*)e->aC.i)->text = (u8*)AllocateZeroedFrontMemory(0x20);
+            ReadBufferedStreamBytes(r, 0x20, ((FadeRequest*)e->aC.i)->text);
             break;
         case 27:
             e->a8.i = ReadBufferedU8(r);
@@ -4577,10 +4579,10 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
             break;
         case 28:
             e->a8.i = (s32)AllocateZeroedFrontMemory(0x10);
-            ((Sub_12BC38*)e->a8.i)->w0 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->a8.i)->w4 = ReadBufferedS16(r);
-            F32(((Sub_12BC38*)e->a8.i)->w8) = ReadBufferedFloat(r);
-            F32(((Sub_12BC38*)e->a8.i)->wC) = ReadBufferedFloat(r);
+            ((EventObjectPair*)e->a8.i)->f0 = ReadBufferedS16(r);
+            ((EventObjectPair*)e->a8.i)->f4 = ReadBufferedS16(r);
+            F32(((EventObjectPair*)e->a8.i)->f8) = ReadBufferedFloat(r);
+            ((EventObjectPair*)e->a8.i)->fC = ReadBufferedFloat(r);
             break;
         case 37:
             H0(e->a8.i) = ReadBufferedS16(r);
@@ -4602,10 +4604,10 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
             break;
         case 48:
             e->a8.i = (s32)AllocateZeroedFrontMemory(0x10);
-            ((Sub_12BC38*)e->a8.i)->w0 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->a8.i)->w4 = ReadBufferedS16(r);
-            ((Sub_12BC38*)e->a8.i)->w8 = ReadBufferedS16(r);
-            F32(((Sub_12BC38*)e->a8.i)->wC) = ReadBufferedFloat(r);
+            ((EventObjectPair*)e->a8.i)->f0 = ReadBufferedS16(r);
+            ((EventObjectPair*)e->a8.i)->f4 = ReadBufferedS16(r);
+            ((EventObjectPair*)e->a8.i)->f8 = ReadBufferedS16(r);
+            ((EventObjectPair*)e->a8.i)->fC = ReadBufferedFloat(r);
             break;
         case 9:
         case 10:
@@ -5416,10 +5418,10 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         break;
     }
     case 25:
-        StartScreenFade(g_screenFade, msg->aC.i, msg->a8.h.lo);
+        StartScreenFade(&g_screenFade, (FadeRequest*)msg->aC.i, msg->a8.h.lo);
         break;
     case 26:
-        SaveFadeRequest(g_screenFade, msg->aC.i, msg->a8.h.lo);
+        SaveFadeRequest(&g_screenFade, (FadeRequest*)msg->aC.i, msg->a8.h.lo);
         break;
     case 27: {
         Player* g = g_player;
@@ -5888,7 +5890,7 @@ s32 ApplyAnimationLoopMode(AnimationPlayer* o, f32* pos, f32* vel)
     return r;
 }
 
-f32 GetMatrixRotationCosine(void* p);
+f32 GetMatrixRotationCosine(void* p); // stays float: the C definition is void, and the caller here uses the value it leaves in the register
 f32 Arccosine(f32 x);
 
 // One frame of an animation player. While an attachment that follows it belongs to an object

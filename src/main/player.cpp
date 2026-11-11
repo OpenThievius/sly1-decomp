@@ -64,7 +64,8 @@ f32 D_00262E30 = 50.0f;
 
 // NEAR: frame, saves, the vtable call and the branch tree match; the 0xD path loads its two floats into $f1/$f0 where retail uses $f0/$f1, so the shared store tail differs
 
-struct Sub_170410 { u8 pad0[0x40]; s32 f40; };
+// The path the player follows (0x23B8, 0x23BC): its frame, its curve, and whether it is a rail.
+struct PathRecord { u8 pad00[0x18]; PlacedObject* frame; u8 pad1C[0x34 - 0x1C]; PathCurve* curve; u8 pad38[0x40 - 0x38]; s32 f40; };
 typedef s32 (*VFn_170410)(Player* self, void* out);
 
 f32 D_00262E34 = 0.8f;
@@ -732,7 +733,7 @@ void ComputePlayerSlideRates(Player* self, Contact03* out)
     } else if (self->f2220 == 7) {
         goto zero_both;
     } else if (((VFn_170410*)self->desc)[90](self, out) != 0) {
-        if (self->f2220 == 6 && self->f239C == 4 && ((Sub_170410*)self->f23BC)->f40 != 0) {
+        if (self->f2220 == 6 && self->f239C == 4 && ((PathRecord*)self->f23BC)->f40 != 0) {
             goto zero_both;
         }
         a = D_002637B8;
@@ -1230,8 +1231,6 @@ s32 AimPlayerAtTarget(Player* self)
 // A part of the player's model as func_00171238 poses it: its state (0x10) and the state asked
 // for (0x11), its offset and its rotation (BuildEulerRotationMatrix).
 struct PosedPart { u8 pad00[0x10]; s8 state; s8 next; u8 pad12[0x20 - 0x12]; Vec02 offset; u8 pad30[0x40 - 0x30]; Mat02 rotation; };
-// The path the player follows (0x23B8, 0x23BC): its frame, its curve, and whether it is a rail.
-struct PathRecord { u8 pad00[0x18]; PlacedObject* frame; u8 pad1C[0x34 - 0x1C]; PathCurve* curve; u8 pad38[0x40 - 0x38]; s32 f40; };
 
 void BuildEulerRotationMatrix(void* angles, void* out);
 void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
@@ -2051,7 +2050,7 @@ f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, s32 zero);
 u128 ApproachPointWithRamp(u128 a, u128 b, f32 dt, f32* ramp, s32 zero);
 struct PushRecord;
 void FillPlayerPushRecord(Player* self, PushRecord* out);
-void GetObjectWorldPosition(s32 obj, Vec02* out);
+void GetObjectWorldPosition(s32 obj, Vec02* out); // stays void: retail returns a value, but declared so func_00172EE0 differs in registers
 #include "value_range.h"
 typedef void (*PoseAtFn)(PoseHolder47* self, Vec02* pos, Vec02* dir, f32 t);
 

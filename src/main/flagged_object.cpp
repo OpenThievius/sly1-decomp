@@ -373,7 +373,7 @@ extern u8 g_scatterController[];
 
 void RaiseScatterLevelForObject(void* table, FlaggedObject* self);
 s32 IsObjectDescendantOf(s32 v, FlaggedObject* self);
-void CreateAnimationPlayerWithoutPresetTargets(void* p, s32 a, s32 b, s32 c, f32 x, f32 y);
+void CreateAnimationPlayerWithoutPresetTargets(void* p, s32 a, s32 b, s32 c, f32 x, f32 y); // stays void: retail returns a value, but declared so func_00141870 differs in registers
 
 void RaiseObjectFlag(FlaggedObject* self)
 {

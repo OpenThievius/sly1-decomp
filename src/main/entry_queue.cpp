@@ -195,7 +195,7 @@ void ComputePlayerJumpVelocity(Player* self, Vec02* out);
 void ComputeUpwardBoostVelocityUnitSlope(Player* self, Vec02* v);
 void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
 s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out);
-void CreateAnimationPlayerWithoutPresetTargets(BaseObject* t, void* self, s32 mode, void* out, f32 x, f32 y);
+void CreateAnimationPlayerWithoutPresetTargets(BaseObject* t, void* self, s32 mode, void* out, f32 x, f32 y); // stays void: retail returns a value, but declared so func_0017BCD0 differs in registers
 void SetPlayerAimMode(Player* self, s32 n);
 void TriggerScriptEvent(void* self, s32 kind, s32 a, s32 b);
 void SetGameClockScale(f32 x);

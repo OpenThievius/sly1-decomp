@@ -22,7 +22,7 @@
 #include "packet_writer.h"
 #include "asm_func.h"
 
-void SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
+void SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value); // stays void: retail returns a value, but declared so func_00183A90 and func_00183C38 differs in registers
 
 ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, s32* vals);
 

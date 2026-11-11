@@ -1153,45 +1153,15 @@ s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
 
 INCLUDE_ASM(func_00187F40);
 
-struct Item_188270 {
-    s32 a, b, c;
+struct ColliderPair {
+    Collider* a;
+    Collider* b;
 };
 
-struct Obj_188270;
-
-struct Node_188270 {
-    u8 pad0[0x3F0];
-    s32 f3F0;
-    s32 f3F4;
-    Item_188270* f3F8;
-    u8 pad3FC[0x13C];
-    u64 flags;
-};
-
-struct Vt_188270 {
-    u8 pad[0xF4];
-    s32 (*f0)(Obj_188270*, Node_188270*, s32, s32, Item_188270*, Item_188270*, s32*);
-    s32 (*f1)(Obj_188270*, Node_188270*, s32, Item_188270*, Item_188270*, s32*);
-};
-
-struct Obj_188270 {
-    Vt_188270* vt;
-    u8 pad4[0x3D0 - 4];
-    f32 f3D0;
-    f32 f3D4;
-    u8 pad3D8[8];
-    u8 blob[1];
-};
-
-struct Pair_188270 {
-    Obj_188270* a;
-    Obj_188270* b;
-};
-
+s32 QueryPlaneTreePoint(TreeNode03* node, void* p, f32 f, TreeNode03** out);
 void PushBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 void PopBackMemoryMark(void);
-s32 QueryPlaneTreePoint(Item_188270* node, void* p, f32 f, Item_188270** out);
 
 // A mark on the back memory for as long as it is in scope. Retail's frame has its one-byte
 // slot at 0x10, between the ordered pair and the two address-taken locals, and reads the result
@@ -1202,15 +1172,15 @@ struct BackMemoryScope {
     ~BackMemoryScope() { PopBackMemoryMark(); }
 };
 
-s32 BuildObjectPairContacts(s32 unused, Pair_188270* pair, s32 arg)
+s32 BuildObjectPairContacts(s32 unused, ColliderPair* pair, s32 arg)
 {
-    Pair_188270 ord;
-    Item_188270* cur;
+    ColliderPair ord;
+    TreeNode03* cur;
     s32 res;
-    Obj_188270* pa = pair->a;
-    Obj_188270* pb = pair->b;
-    f32 da = pa->f3D0;
-    f32 db = pb->f3D0;
+    Collider* pa = pair->a;
+    Collider* pb = pair->b;
+    f32 da = pa->radius3D0;
+    f32 db = pb->radius3D0;
     res = 0;
     if (da > db) {
         ord.a = pb;
@@ -1220,48 +1190,48 @@ s32 BuildObjectPairContacts(s32 unused, Pair_188270* pair, s32 arg)
         ord.b = pb;
     }
     s32 most = 0;
-    Node_188270* n;
-    for (n = *(Node_188270**)((u8*)ord.b + 0x2D8); n; n = *(Node_188270**)((u8*)n + 0x2E4)) {
-        if (n->f3F4 > most) {
-            most = n->f3F4;
+    Collider* n;
+    for (n = (Collider*)ord.b->parts.head; n; n = (Collider*)n->link2E4.next) {
+        if (n->tree.count2 > most) {
+            most = n->tree.count2;
         }
     }
     {
         BackMemoryScope mark;
-        Item_188270* buf = (Item_188270*)AllocateBackMemory(most * 12);
+        TreeNode03* buf = (TreeNode03*)AllocateBackMemory(most * 12);
         s32 idx;
-        for (n = *(Node_188270**)((u8*)ord.b + 0x2D8); n; n = *(Node_188270**)((u8*)n + 0x2E4)) {
-            if (n->flags & 0x80000000000ULL) {
+        for (n = (Collider*)ord.b->parts.head; n; n = (Collider*)n->link2E4.next) {
+            if (n->flags538 & 0x80000000000ULL) {
                 continue;
             }
-            if (n->flags & 0x10000000000ULL) {
+            if (n->flags538 & 0x10000000000ULL) {
                 cur = 0;
             } else {
-                Item_188270* h = n->f3F8;
+                TreeNode03* h = n->tree.nodes;
                 if (h == 0) {
                     continue;
                 }
                 cur = buf;
-                if (QueryPlaneTreePoint(h, ord.a->blob, ord.a->f3D4, &cur) != 2) {
+                if (QueryPlaneTreePoint(h, &ord.a->v3E0, ord.a->radius3D4, &cur) != 2) {
                     continue;
                 }
                 idx = cur - buf;
                 cur = cur - 1;
             }
-            ord.a->vt->f0(ord.a, n, arg, idx, buf, cur, &res);
-            if (ord.a->vt->f1) {
-                ord.a->vt->f1(ord.a, n, idx, buf, cur, &res);
+            ord.a->desc03()->m39(ord.a, n, arg, idx, buf, cur, &res);
+            if (ord.a->desc03()->m3A) {
+                ord.a->desc03()->m3A(ord.a, n, idx, buf, cur, &res);
             }
         }
-        for (n = *(Node_188270**)((u8*)ord.a + 0x2D8); n; n = *(Node_188270**)((u8*)n + 0x2E4)) {
-            if (n->flags & 0x80000000000ULL) {
+        for (n = (Collider*)ord.a->parts.head; n; n = (Collider*)n->link2E4.next) {
+            if (n->flags538 & 0x80000000000ULL) {
                 continue;
             }
-            if (!(n->flags & 0x10000000000ULL) && n->f3F8 == 0) {
+            if (!(n->flags538 & 0x10000000000ULL) && n->tree.nodes == 0) {
                 continue;
             }
-            if (ord.b->vt->f1) {
-                ord.b->vt->f1(ord.b, n, n->f3F0, n->f3F8, n->f3F8, &res);
+            if (ord.b->desc03()->m3A) {
+                ord.b->desc03()->m3A(ord.b, n, n->tree.count, n->tree.nodes, n->tree.nodes, &res);
             }
         }
     }

@@ -417,6 +417,17 @@ class ProgressCountTest(unittest.TestCase):
         self.assertTrue(pal)
         self.assertLessEqual(len(pal), len(progress.original_asm("us")))
 
+    def test_original_data_is_whole_data_units_apart_from_c(self):
+        # Data that is original assembly (the .vutext microprograms) counts as matched data: each
+        # row is a whole data unit of the layout, and no global C defines lies inside it.
+        for key in ("us", "eu"):
+            rows = progress.original_data(key)
+            self.assertTrue(rows)
+            units = {(s, e) for kind, _n, s, e, _c, _f in todo.layout(key) if kind == "data"}
+            for addr, size in rows:
+                self.assertIn((addr, addr + size), units)
+                self.assertFalse([a for a, _s in progress.c_data(key) if addr <= a < addr + size])
+
     def test_units_are_the_proved_files(self):
         files = progress.proved_files()
         self.assertTrue(files)

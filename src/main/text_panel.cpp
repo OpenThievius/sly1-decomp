@@ -145,7 +145,7 @@ struct CenterFrameMath {
 };
 
 void ResetScreenElement(void* self);
-s32 SetStepSequenceState(void* obj, s32 mode);
+s32 SetStepSequenceState(void* obj, s32 mode); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 
 void SetTextPanelState(T217D_440* self, s32 mode);
 void SetStepSequenceState(StepSequence* obj, s32 mode);
@@ -166,7 +166,7 @@ void* FillMemory(void* p, s32 value, s32 size);
 // func_00136FA8 keeps its own view: it uses the result of func_001356C0, which returns nothing.
 struct Owner_136FA8 { u8 pad0[0x324]; void* child; };
 
-s32 SetTextPanelState(Owner_136FA8* self, s32 mode);
+s32 SetTextPanelState(Owner_136FA8* self, s32 mode); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 
 // Newly matched US functions from the small-function wave.
 extern void CloseBufferedStream(void*);

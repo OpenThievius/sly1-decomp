@@ -212,7 +212,7 @@ void SetupCurrentObjectChoices(CurrentPlacedObject* self)
 void StartPlacedObject(void* self);
 void ResolveObjectLinks(void* self, s32 n, void* table);
 void SetElementStackState(void* obj, s32 mode);
-void AppendQueuedCall(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void AppendQueuedCall(void* owner, void* fn, void* arg, s32 a3, s32 a4); // stays void: retail returns a value, but declared so func_0016AED8 differs in registers
 void BecomeCurrentObject(CurrentPlacedObject* self)
 {
     StartPlacedObject(self);
@@ -287,7 +287,7 @@ void MoveCurrentObjectChoice(CurrentPlacedObject* self, void* a1)
 
 void* LookupEntryById(s32 key);
 void MarkProgressStageFlag(s32 idx);
-void CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb);
+void CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_0016B190 differs in registers
 s32 HasAnimationEventKind19(void* a);
 void StartObjectFade(void* a, s32 b, s32 c);
 void PopStackElement(void* p);

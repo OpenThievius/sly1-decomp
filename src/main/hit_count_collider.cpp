@@ -87,7 +87,7 @@ void* FindFirstObjectByIdGathered(void* a, s32 b, s32 c, s32 d);
 void SendEmptyMessage(void* x);
 void SendHitCountColliderRequest(void* self, s32 v);
 void StopAnimationPlayer(void* p);
-void CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, void* d, f32 fa, f32 fb);
+void CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, void* d, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_001C34C8 differs in registers
 f32 ArctangentOfRatio(f32 a, f32 b);
 void BuildAxisAngleMatrix(void* a, void* b, f32 f);
 void ApproachRotationWithRamp(void* a, void* b, void* c, void* d, s32 e, f32 f);

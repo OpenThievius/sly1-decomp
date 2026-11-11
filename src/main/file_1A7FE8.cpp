@@ -35,7 +35,7 @@ void UnregisterObject(void* self);
 void ClearObjectPoolChoice(void* self);
 
 
-void GetObjectWorldRotation(void* a, f32* out);
+void GetObjectWorldRotation(void* a, f32* out); // stays void: retail returns a value, but declared so func_001A97C8 differs in registers
 void TransformRotationBetweenFrames(int a, int b, void* c, f32* d);
 f32 ArctangentOfRatio(f32 x, f32 y);
 

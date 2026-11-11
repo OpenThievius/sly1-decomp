@@ -24,6 +24,15 @@ A function is exact C when `src/` defines it and the build links it and still pr
 A PAL function is original assembly when its US counterpart (`config/eu/map.tsv`) is: the
 same source, built for the other region.
 
+Data can be original assembly too. `config/<version>/original_data.tsv` (by hand) lists the
+data units no compiler made, and the reports count their bytes as matched data, as they count
+original-assembly functions as matched code. Its one row in each version is the `.vutext`
+section (0x5550 bytes; US 0x211E10, PAL 0x2132D0): the VU microprograms, an executable section
+(flags `AX` in both executables' section headers) made by the VU assembler, since cc1plus
+cannot emit VU micro instructions. Its bytes still come from the disassembly. Decided by the
+maintainer on 2026-11-11; `tests/test_tools.py` checks that each row is a whole data unit with
+no C global inside it.
+
 **Changing what the report counts is a policy change and needs the maintainers' review**
 (OpenRAC's docs say the same of theirs). The exact C count is kept visible so that nothing is
 hidden by it.

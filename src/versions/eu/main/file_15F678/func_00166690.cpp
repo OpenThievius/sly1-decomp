@@ -287,7 +287,7 @@ slow:
             }
         }
         if (n308 != 0) {
-            TransformByMatrixWithW(&b, 1.0f, e, &q);
+            TransformByMatrixWithW(&b, e, 1.0f, &q);
             r = e->f10 * part->f50;
         }
         for (j = 0; j < n308; j++) {

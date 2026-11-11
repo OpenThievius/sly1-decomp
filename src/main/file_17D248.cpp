@@ -439,7 +439,7 @@ s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdge* e, Vec02* out)
 
 void BuildPerpendicularPair(Quad16* q, void* out, const Vec02* a, const Vec02* b);
 void BuildMatrixFromRotationAndTranslation(void* a, Quad16* b, void* out);
-void TransformByMatrixWithW(void* a, f32 w, const void* b, void* c);
+void TransformByMatrixWithW(void* a, const void* b, f32 w, void* c);
 s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, void* a4);
 
 s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
@@ -451,8 +451,8 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
     BuildPerpendicularPair(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
     BuildMatrixFromRotationAndTranslation(ctx, &q, buf + 0x30);
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
-        TransformByMatrixWithW(buf + 0x30, 1.0f, &D_00263EC0[i], buf + 0x70);
-        TransformByMatrixWithW(buf + 0x30, 1.0f, &D_00263EC0[i + 1], buf + 0x80);
+        TransformByMatrixWithW(buf + 0x30, &D_00263EC0[i], 1.0f, buf + 0x70);
+        TransformByMatrixWithW(buf + 0x30, &D_00263EC0[i + 1], 1.0f, buf + 0x80);
         ContactRow03* n = self->contacts->head;
         while (n) {
             Collider* a = n->other;

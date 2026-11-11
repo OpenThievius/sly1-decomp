@@ -106,10 +106,6 @@ extern u8 D_0026A210[];
 void SetupScreenElementText(void* self);
 s32 IsFontLoaded(s32 k);
 void* GetFontById(s32 k);
-struct Obj_191AA8 {
-    u8 pad0[0x54];
-    void* p54;
-};
 s32 CollectSegmentSpansInPlaneTree(void* p);
 void SyncDataCache(s32 a);
 void CopyObjectData(void* self);
@@ -288,7 +284,7 @@ void BuildMatrixFromRotationAndTranslation(Vec02* pos, Mat02* rot, Mat4A* out);
 void StartToSprChain(s32 size, ...);
 s32 WaitDmaChannel(void* dma, s32 b, s32 c);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
-void MultiplyMatrices(Mat4A* out, Mat4A* b, void* in);
+void MultiplyMatrices(Mat4A* out, Mat4A* b, void* in); // stays void: retail returns a value, but declared so func_0018F9D8 differs in registers
 void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, Vec02* pos, Mat4A* m);
 void QueueDeferredRequest(PartRequest* r);
 void* FillMemory(void* p, s32 value, s32 size);
@@ -1315,9 +1311,9 @@ void SnapPointToOwnerGraph(GraphQueryOwner* self, Vec02* p, Vec02* out)
     SnapPointToPointGraph(&self->graph, p, out);
 }
 
-void TestOwnerGraphSpan(Obj_191AA8* self)
+void TestOwnerGraphSpan(GraphQueryOwner* self)
 {
-    CollectSegmentSpansInPlaneTree(self->p54);
+    CollectSegmentSpansInPlaneTree(self->graph.faces);
 }
 
 INCLUDE_ASM(func_00191AC8);

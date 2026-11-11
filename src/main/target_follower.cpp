@@ -277,8 +277,8 @@ void* FillMemory(void* p, s32 value, s32 size);
 struct Item_16D3F0 { u8 pad0[0x318]; s32 f318; };
 
 void ChooseObjectPoolItem(void* p);
-Obj_1BF0D8* PushSoundLevel(s32 kind);
-void RemoveSoundLevelAndRecompute(Obj_1BF0D8* p);
+SoundLevelEntry* PushSoundLevel(s32 kind);
+void RemoveSoundLevelAndRecompute(SoundLevelEntry* p);
 
 void SetFollowedObject(TargetFollower* self, FollowableObject* x)
 {

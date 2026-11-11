@@ -42,7 +42,7 @@ void QueueEachScreenElementDraw(void);
 void StartPlacedObject(void* self);
 void ResolveObjectLinks(void* self, s32 a, void* p);
 void* CreateStateWalker(void* a, void* self, s32 b, s32 c);
-void AppendQueuedCall(void* a, void* cb, void* ctx, s32 b, s32 c);
+void AppendQueuedCall(void* a, void* cb, void* ctx, s32 b, s32 c); // stays void: retail returns a value, but declared so func_001EB598 differs in registers
 void CopyPlayerAttachBlock(BeatPressCollider* self);
 void HandleSwitchedColliderActivation(void* self);
 s32 FindFirstObjectByIdGathered(void* a, s32 b, s32 c, s32 d);
@@ -540,7 +540,7 @@ s32 D_00275BEC = 0;
 s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };
 f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 f32 D_00275C28[3] = { 1.0f, 0.0f, 0.1f };
-INCLUDE_DATA(D_00275C34);
+s32 D_00275C34 = 0;
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
 Quad16 D_00275C40 = {0};
 f32 D_00275C50[4] = { 1.0f, 0.0f, 0.0f, 0.0f };

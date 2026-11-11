@@ -29,6 +29,7 @@ procedure; read it before you match anything.
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
 | `config/eu/c_data_status.tsv` | each global of `config/us/c_data.tsv` checked at its PAL address (counted as PAL's matched data) | `tools/version_check.py` (`tools/data_check.py`) |
 | `config/us/original_asm.tsv`, `config/eu/original_asm.tsv` | the game-code functions that are original assembly or linker leftovers, counted as finished apart from the exact C (docs/ASM_CLASSIFICATION.md); PAL's table holds the functions only PAL has | `tools/classify_asm.py` |
+| `config/<version>/original_data.tsv` | the data units that are original assembly (the `.vutext` VU microprograms), counted as matched data (docs/ASM_CLASSIFICATION.md) | by hand |
 | `config/us/classes.tsv`, `methods.tsv`, `creators.tsv` | the game's class map from retail's class descriptors: each class's parent, id, flags, size and method slots (own or inherited), the classes each function is a method of, and the functions that create an object of a class | `tools/classes.py` |
 | `tools/symbols.py` | the shared name map: either name of a symbol, for the tools that read source text | by hand |
 | `config/names/`, `include/names.h` | readable names for address-named functions and globals, each with its evidence, one table per source file (`config/names/main/value.tsv`) and one for globals (`data.tsv`), and the macros generated from them (docs/NAMING.md) | by hand; `names.h` by `tools/names.py header` |

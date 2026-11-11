@@ -170,8 +170,12 @@ struct Desc03 : Desc02 {
     void* m36;                                      // 0xE8: func_001BC828
     void* m37;                                      // 0xEC: func_001BC978
     s32 (*m38)(Collider* self, Collider* other);              // 0xF0: func_001B8A08
-    void* m39;                                      // 0xF4: func_00187F40
-    void* m3A;                                      // 0xF8
+    // 0xF4: collide this object with a part of another body (func_00187F40 is one);
+    // BuildObjectPairContacts hands it the part, the caller's argument, the number of nodes
+    // the query found, the node list, its last node and the result.
+    s32 (*m39)(Collider* self, Collider* part, s32 arg, s32 count, TreeNode03* nodes, TreeNode03* last, s32* result);
+    // 0xF8: the same without the argument, run after slot 0x39 when set.
+    s32 (*m3A)(Collider* self, Collider* part, s32 count, TreeNode03* nodes, TreeNode03* last, s32* result);
     void* m3B;                                      // 0xFC: func_001B8B90
     void* m3C;                                      // 0x100
     void* m3D;                                      // 0x104
@@ -206,7 +210,8 @@ struct Collider : PlacedObject {
     f32 radius3CC;          // 0x3CC: mesh.radius at load
     f32 radius3D0;          // 0x3D0: mesh.radius at load
     f32 radius3D4;          // 0x3D4: grown with radius3D0 by an attached set's swing (func_001EF768)
-    u8 pad3D8[0x3F0 - 0x3D8];
+    u8 pad3D8[0x3E0 - 0x3D8];
+    Vec02 v3E0;             // 0x3E0: the point the sweep's plane-tree query is made at (BuildObjectPairContacts)
     Tree03 tree;            // 0x3F0: meshCopy's tree
     s32 groupCount;         // 0x3FC
     Pair03* groups;         // 0x400: groupCount of them

@@ -64,7 +64,7 @@ void StartAgent(void*);
 void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
 
 s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
-void GetTargetCameraControllerEyePoint(void* out, void* self);
+void GetTargetCameraControllerEyePoint(void* out, void* self); // stays void (out pointer first): retail returns a Quad16 through its hidden pointer, but the caller's frame needs this form (the by-value call moves func_0014A7B8)
 void StopSoundRecord(void* self, s32 n);
 void PlaceCameraLookingAt(void* self, void* a, void* b);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
