@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Kind t219c: the records of class 0x1E's list (EffectOwner::list558) -- the effects a part with
 // collision shows: a spark, a flash, a ring that follows a body. Written for this project from
-// what retail's code does (config/us/tables.tsv, src/main/class_descriptors.cpp, file_19E040.cpp).
+// what retail's code does (config/us/tables.tsv, src/main/class_descriptors.cpp, effect.cpp).
 //
 // func_0019EA78(kind, owner) takes a record from the world's pool at World+0x1B2C (0x180 records
 // of 0x140 bytes), zeroes it, stores the kind's table (func_0019E908: kind 0 is D_00219C20, kind

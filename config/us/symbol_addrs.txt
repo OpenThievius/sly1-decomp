@@ -58,6 +58,9 @@ D_0024B660 = 0x0024B660;
 // The end of a proved file's .rodata inside a coarse label: remainder_unsigned.c's table of
 // significant bits (D_0024EFB0) is followed by the next object's string at 0x24F0B0.
 D_0024F0B0 = 0x0024F0B0;
+// The start of src/lib/library_state.c's .rodata: the string "C" its state record points to at
+// +0x34, after the character class table (D_0024E879).
+D_0024E980 = 0x0024E980;
 // The end of src/lib/new_handler.cpp's .rodata (its type name "9bad_alloc"), where the next
 // object's string begins.
 D_0024F220 = 0x0024F220;

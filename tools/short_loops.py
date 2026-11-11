@@ -18,7 +18,8 @@ needs no padding (a 5-instruction loop gets up to five nops, a 10-instruction on
 Where the breaks fall depends on everything before them in the section, so a function's C can be
 EXACT on its own and still break its file: func_001BC0E0's `.p2align 2` before its divide label
 moves the next break into StartSoundEffect's copy loop, which then gets five nops and moves every
-later function of file_1B7968.cpp by 0x18. Retail shows no such padding anywhere.
+later function of file_1B7968.cpp (since split into collider.cpp,
+file_1BE1E8.cpp and file_1C1190.cpp) by 0x18. Retail shows no such padding anywhere.
 
 This writes out the padding as our assembler gives it to a loop whose fragment does not break,
 which is the original's: every backward branch the compiler emits under `.set noreorder` to one of

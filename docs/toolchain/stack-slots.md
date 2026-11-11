@@ -196,7 +196,7 @@ dumps of OpenPadPort (src/lib/pad.c, 2.9-ee-991111, 2026-11-09):
 ### A stack record filled by an inline: only the constant-zero store loses the pointer (func_001A7800)
 
 Read from integrate.c (expand_inline_function, try_constants) and cse.c (find_best_addr), with
-the `-dr -ds` dumps of UpdateObjectCreator (src/main/file_19E040.cpp, 2026-11-09):
+the `-dr -ds` dumps of UpdateObjectCreator (src/main/file_1A3AE0.cpp, 2026-11-09):
 
 - **Retail's mark.** A local profile filled with three constants and passed by address: retail
   stores the first two fields frame-relative (`swc1 $f1,16(sp)`, `sw zero,20(sp)`) and the third

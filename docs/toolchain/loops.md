@@ -123,7 +123,7 @@ The two functions before it in the file (2026-11-10):
 ### jump.c's copy of a loop test has a life of 2: three constants, two moved (func_00192DD0)
 
 Measured with `-dL` dumps (2026-11-10, the switched collider's segment walk,
-src/main/file_18F988.cpp). Retail's outer loop over the segments holds 1.0 (the walk's guard) and
+src/main/switched_collider.cpp). Retail's outer loop over the segments holds 1.0 (the walk's guard) and
 0.0001 (the length test) in f24 and f23, in that order in the preheader, and loads 5.0 in the
 else arm before the divide.
 
