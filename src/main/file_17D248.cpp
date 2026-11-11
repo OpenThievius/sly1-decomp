@@ -1177,7 +1177,7 @@ void ComputeUpwardBoostVelocity(PlacedObject* self, Vec02* out)
     out->z = z;
     out->z = (z >? self->v150.z);
 }
-void ComputeUpwardBoostVelocityAlt(PlacedObject* self, Vec02* out)
+void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec02* out)
 {
     *out = self->v150;
     f32 z = EvalClampedQuadratic(D_00264070, D_00264080, out->z);

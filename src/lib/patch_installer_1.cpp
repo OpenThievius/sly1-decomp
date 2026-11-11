@@ -115,7 +115,7 @@ Slot_1F6F48 D_002770E8[8] = {
 void SetSystemCallHandlerFirstPatch(s32 a, s32 b);
 void CopyKernelWordsSyscallFirstPatch(u32 a, void* b, s32 c);
 void SyncDataCache(s32 a);
-s32 QueryPatchedHandlerFirstPatch(s32 key);
+s32 RunSyscall5BFirstPatch(s32 key);
 
 void InstallFirstKernelPatch(void)
 {
@@ -129,6 +129,6 @@ void InstallFirstKernelPatch(void)
     SyncDataCache(2);
     SetSystemCallHandlerFirstPatch(D_002770E8[1].key, (s32)D_002770E8[1].value);
     for (u32 i = 2; i < 8; i++) {
-        SetSystemCallHandlerFirstPatch(D_002770E8[i].key, QueryPatchedHandlerFirstPatch(D_002770E8[i].key));
+        SetSystemCallHandlerFirstPatch(D_002770E8[i].key, RunSyscall5BFirstPatch(D_002770E8[i].key));
     }
 }

@@ -784,7 +784,7 @@ void RotateMatrixUpright(Mat02* sub, s32 zero, Mat02* out);
 void BuildPlacedObjectTransform(NumberedItem* self, void* a, SpinFrame4* out);
 void BuildMatrixFromRotationAndTranslation(void* rot, void* from, SpinFrame4* out);
 void MultiplyMatrices(SpinFrame4* out, SpinFrame4* b, SpinFrame4* in);
-void PrepareFadedObjectDraw(NumberedItem* self, void* a, SpinFrame4* m);
+void ApplyPlacedObjectTransform(NumberedItem* self, void* a, SpinFrame4* m);
 
 static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
 {
@@ -842,7 +842,7 @@ void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
         MultiplyMatrices(&product, &base, &key);
         base = product;
     }
-    PrepareFadedObjectDraw(self, a1, &base);
+    ApplyPlacedObjectTransform(self, a1, &base);
 }
 
 void FlagAllNumberedItems(void)

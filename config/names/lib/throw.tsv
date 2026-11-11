@@ -1,8 +1,8 @@
 symbol	name	evidence
 func_001FD920	AbortOnTerminate	the default terminate hook D_00278048: calls AbortProgram
 func_001FD930	RunTerminateHook	calls the function the terminate hook D_00278048 holds (the exception runtime and HandleAbstractCall call it)
-func_001FD958	MatchTypeNameOrZero	compares a type's name with a given one through CompareStrings: returns its third argument when they are equal, 0 otherwise (throw.c; it sits in the exception runtime's unwind table with no direct caller)
-func_001FD990	AllocateRuntimeNode	allocates a 0x18-byte node under the runtime lock, terminates when that fails, zeroes it and points its field at +4 to its own +0x10 (throw.c)
+func_001FD958	SelectArgumentIfTypeNamesEqual	compares a type's name with a given one through CompareStrings (func_001F6738): returns its third argument when they are equal, 0 otherwise (throw.c; it sits in the exception runtime's unwind table with no direct caller)
+func_001FD990	AllocateZeroedNodeOrTerminate	allocates a 0x18-byte node under the runtime lock, calls RunTerminateHook when that fails, zeroes it and points its field at +4 to its own +0x10 (throw.c; it sits in the exception runtime's unwind table with no direct caller)
 func_001FD9E8	GetExceptionContext	returns the exception context by calling the getter in D_0027804C (throw.c)
 func_001FDA10	GetActiveExceptionSlot	returns the address of the active exception pointer, at +8 of the exception context (throw.c; the exception entry points read it)
 func_001FDA38	InstallExceptionContextGetter	first call of D_0027804C: replaces it with GetStaticExceptionContext and calls that (throw.c)
@@ -11,8 +11,8 @@ func_001FDAC8	GetHandlerChainSlot	returns the address of the handler chain head,
 func_001FDAF0	ThrowToTopHandler	runs the cleanups registered in the top exception handler, then jumps to that handler
 func_001FDC68	PopHandlerAndThrow	pops the top exception handler after running its cleanups, then throws again
 func_001FDD80	ActiveExceptionMatches	asks the active exception's type information to match a given type through its matcher and returns whether it did (throw.c)
-func_001FDDC8	GetRecordSubkind	reads the halfword at +6 of an exception record (throw.c; PushThrownException stores 1 there)
-func_001FDDD0	GetRecordKind	reads the halfword at +4 of an exception record (throw.c; PushThrownException stores 4 there and the matcher tests for it)
+func_001FDDC8	GetExceptionRecordSubkind	reads the halfword at +6 of an exception record (throw.c; PushThrownException stores 1 there)
+func_001FDDD0	GetExceptionRecordKind	reads the halfword at +4 of an exception record (throw.c; PushThrownException stores 4 there and the matcher tests for it)
 func_001FDDD8	FindInnermostRangeValue	looks a code address up in a table of (low, high, value) ranges ended by 0xFFFFFFFF and returns the value of the narrowest range holding it, else 0 (throw.c; FindHandlerAndRestoreRegisters calls it)
 func_001FDEB0	FindHandlerInSpanTable	walks a table of code spans with handler callbacks, asks each matching span's callback whether it takes the exception, and returns the span's value, flagging cleanup-only matches (throw.c)
 func_001FDFF8	ResolveSavedRegisterSlot	follows a register's redirections in an unwind state until it reaches a saved register, and returns its storage; aborts when it was not saved (throw.c)

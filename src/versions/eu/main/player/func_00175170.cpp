@@ -873,7 +873,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vec02 v;
             self->f2498 = 0;
             anim = PS(void*, 0x1034);
-            ComputeUpwardBoostVelocityAlt(self, &v);
+            ComputeUpwardBoostVelocityUnitSlope(self, &v);
             self->desc02()->m20(self, &v);
             break;
         }

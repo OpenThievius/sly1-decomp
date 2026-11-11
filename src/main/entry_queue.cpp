@@ -192,7 +192,7 @@ void BuildAxisAngleMatrix(const void* axis, f32 angle, void* out);
 void SetPlayerState(Player* self, s32 state, s32 sub);
 s32 ChooseNearbyPlayerTarget(Player* self, BaseObject* obj, s32* out);
 void ComputePlayerJumpVelocity(Player* self, Vec02* out);
-void ComputeUpwardBoostVelocityAlt(Player* self, Vec02* v);
+void ComputeUpwardBoostVelocityUnitSlope(Player* self, Vec02* v);
 void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
 s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out);
 void CreateAnimationPlayerWithoutPresetTargets(BaseObject* t, void* self, s32 mode, void* out, f32 x, f32 y);
@@ -322,7 +322,7 @@ void StartNextQueueEntry(EntryQueue* self)
             Vu0::Q(start) = Vu0::MulAddX2(Vu0::Q(start), Vu0::Q(vel), h, Vu0::Q(goal), h);
             drift = p->v150;
             p->v150 = goal;
-            ComputeUpwardBoostVelocityAlt(p, &vel);
+            ComputeUpwardBoostVelocityUnitSlope(p, &vel);
             p->v150 = drift;
             break;
         }

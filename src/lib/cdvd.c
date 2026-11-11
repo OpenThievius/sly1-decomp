@@ -497,7 +497,7 @@ s32 WaitDiscReady(s32 mode)
     return v;
 }
 
-u32 SendDiscSValueCommand(u32 value)
+u32 SendDiscSCommand22(u32 value)
 {
     u32* send = D_0027AA40;
     u32 recv;

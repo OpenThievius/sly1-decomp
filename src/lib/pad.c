@@ -304,7 +304,7 @@ u32 GetPadRequestMode(s32 port, s32 slot)
 }
 
 LINKER_REMNANT(func_002046C8);
-s32 GetPadCapabilityEntry(s32 port, s32 slot, s32 index, s32 kind)
+s32 GetPadReplyTableByte(s32 port, s32 slot, s32 index, s32 kind)
 {
     PadFrame* frame;
     s32 count;
@@ -334,7 +334,7 @@ s32 GetPadCapabilityEntry(s32 port, s32 slot, s32 index, s32 kind)
     return 0;
 }
 LINKER_REMNANT(func_002047F0);
-s32 GetPadModeEntry(s32 port, s32 slot, s32 kind, s32 index)
+s32 GetPadReplyListValue(s32 port, s32 slot, s32 kind, s32 index)
 {
     PadFrame* frame;
 

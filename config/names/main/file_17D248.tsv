@@ -12,7 +12,7 @@ func_0017F018	UpdatePlayerState2	UpdatePlayer's mode 2 update: by the sub-state 
 func_0017FAC0	SolveArrivalTimeAtHeight	solves the quadratic of half the gravity (+0x358) with the z differences of its four points (SolveQuadratic) and writes the later positive root; returns 0 when there is none (StartNextQueueEntry, func_001CE590)
 func_0017FB78	ComputePlayerJumpVelocity	copies the player's velocity (+0x150) and sets its z by the jump kind at +0x224C (jtbl_0024B150): a square root of the height at +0x700 times one of D_00263E80/88/8C, or twice the drop from +0x148 to +0x6A8 plus D_00263E84 times +0x358, never below the current z; SetPlayerState and StartNextQueueEntry call it
 func_0017FC48	ComputeUpwardBoostVelocity	copies the object's velocity and replaces its z with a clamped quadratic of z, never below the current z; used by the player's states 10 and 11 and the target launch
-func_0017FCC8	ComputeUpwardBoostVelocityAlt	as ComputeUpwardBoostVelocity with a second pair of curve constants (D_00264070, D_00264080); the player and the entry queue call it
+func_0017FCC8	ComputeUpwardBoostVelocityUnitSlope	as ComputeUpwardBoostVelocity with the second pair of curve constants (D_00264070 = 682 + 1.0 z, D_00264080 caps it at 682) where the first has slope 0.5; the player's state 3 and the entry queue's case 2 call it
 func_0017FD48	SetPointObjectListLinkOffset	sets the link offset 0x50 of the list D_00264088 with func_00152438
 func_0017FD70	ClearPointObjectList	zeroes the head and tail of the list D_00264088 with func_00152440
 func_0017FD90	RegisterPointObject	slot 6 of the 0x80 class: runs RegisterObject then appends itself to the list D_00264088 with func_00152470
