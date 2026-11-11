@@ -152,6 +152,13 @@
 // 2194 store, and a model search (16,000 mutations of ten-landmark forms) gets no closer than 3
 // insns. The lever is outside the uniform forms tried. 20 compiles.
 //
+// Macro or table in the original? (2026-11-11, worker w23-109488-macro): PAL's 9,348 instructions
+// are identical to US's apart from the %hi/%lo targets, so the source was not edited between
+// versions. Retail steps one pointer by 32 in all 1,178 entries with no re-basing at any boundary,
+// its opcode mix equals ours apart from li/lui/addiu/move, and its store orders inside a kind are as
+// scheduler-chaotic as ours (266 distinct orders against 290). The table is in per-class source order
+// (descriptor first-use runs in property_registry.cpp), which the code does not show. No evidence of
+// a different source form.
 // Value 4 (2026-11-07, -dl/-dg dumps): pseudo 118 is the first 4. It is the inlined flags of
 // entry 0, and CSE1 extends it to every 4 in the first window: 10 uses over 1,836 insns, to entry 89.
 // Global alloc gives it a callee-saved register (s5 here). In this form and every earlier one, no

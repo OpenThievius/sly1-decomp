@@ -452,3 +452,12 @@ pre-reload insns where &cur and &tgt both live) puts pad (11 refs over 331, prio
 span equals the final code's, so the second flip is a reference or a life in retail's source, not
 a deleted copy. Use the same split before writing variants: find the smallest set of --set
 changes that gives every register, then look for one source difference per change.
+
+### Macro or table? (func_00109488, w23, 2026-11-11)
+
+PAL's copy is the same instruction stream as US's (0 differing lines with symbol targets stripped),
+so the source was not edited between versions. Retail uses one running pointer (`addiu 32`, 1,178
+times) with no re-basing, shows the same three stack spill slots as ours, and its opcode mix and
+per-kind store-order spread match ours apart from the known li/lui/addiu/move loss. The registry's
+first-use order shows the table is written per class, which the code does not reflect. No evidence
+of a source form other than uniform per-entry helper calls.
