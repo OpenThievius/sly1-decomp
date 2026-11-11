@@ -18,6 +18,10 @@
 // w15 (2026-11-10): re-scored, unchanged. sched2's class tie is 3 for both (move v1,v0 is
 // the last insn, as in retail); the qmfc2's third dependent is a stale sched1 link. The
 // radius read before the subtraction, or r * r named first: no change (docs/toolchain/sched1.md).
+// w19 (2026-11-10): re-scored, unchanged. Both pairs are sched2's (sched1 already issues the
+//       lwc1 before the vsub). ToFloatNow (qmfc2 and mtc1 in one asm) shortens the chain to 7:
+//       the mul.s goes ahead of the dot and the qmfc2 takes v0 (10 lines). Retail needs exactly 8
+//       with a0 from reload (docs/toolchain/sched1.md, func_001CEB18).
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"

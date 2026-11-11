@@ -454,6 +454,36 @@ The player's reach test against a point carried to time t (2026-11-10) went from
   the comparison's operand; reload's mtc1 now stands between them). The radius read before
   the subtraction, or `f32 rr = r * r;` named before the distance, changes nothing (4 lines).
 
+- Replayed again with sched2's dump (2026-11-10, w19): the pass that decides both pairs is
+  sched2; sched1 already issues the lwc1 before the vsub. ToFloatNow (qmfc2 and mtc1 in one asm,
+  cost 1) makes the chain 1 + 1 + 1 + 4 = 7: the mul.s then goes ahead of the dot and the asm's
+  GPR is local-alloc's v0 (10 lines). Retail needs a chain of exactly 8 with reload's a0, which
+  only a compiler qmfc2 into a reload register followed by a one-cycle mtc1 gives.
+
+### The copy and the list's load after a call (func_0017ECE8, unsolved)
+
+Replayed with tools/sched1.py (2026-11-10). After SolveActiveSetSystem, block 34 holds the copy
+of the spilled down vector into the sum (871, `mem:TI` through the frame, no alias flag), `p =
+sol` (875), `self->contacts` (880, r307) and its `->head` (882, mem/s through r307).
+
+- **The tie.** 871 and 880 are both ready at t=4 with priority 5 (each 2 + 882's 3: 882 is a
+  true dependent of the store, since a load through a loaded pointer has no alias base), and
+  only one memory unit. INSN_REG_WEIGHT decides: 871 is -1 (down dies there), 880 +1.
+- **What retail's order needs.** `--prio 880=6` or `--prio 871=4` replays 880 875 871 882 1186:
+  r307 is then live in v0 across the copy, so reload's register for down is v1, retail's
+  `lq v1,32(sp); sq v1,0(sp)` (sched2 puts the load and store back ahead of the lw).
+- **Not reload's round robin.** The spill registers are v0, v1 and vf3 (the .greg dump's
+  "Spilling reg" lines), and the reload just before 871 in insn order is down into vf3 in the
+  rhs loop, so allocate_reload_reg's rotation starts at v0; a v1 from rotation would need
+  another reload in between, which retail does not have.
+- **Ruled out.** The weight cannot favour a load over a dying store; adjust_priority's
+  birthing raise needs r307 set once and live at the block's end (it dies at 882); every
+  insn of the block is retail's, so no other dependent can lengthen 880's chain; and the
+  store becomes MEM_SCALAR_P only as an addressable scalar (acc as a u128 read through
+  `((f32*)&acc)[2]`), which purge_addressof allocates late (frame 0xA0, an extra saved s5
+  in the 2026-11-10 probe). down as a Vec02 in memory (copy = load + store, 880 between
+  them) swaps the frame slots and renumbers the counting loop's registers.
+
 ### The rest of rank_for_schedule (func_001782C0)
 
 Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
