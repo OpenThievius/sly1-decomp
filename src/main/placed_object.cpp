@@ -3916,7 +3916,7 @@ void SetClass75ObjectScale(void* self, f32 value)
     FindOrCreateClass75Object(self)->scale = value;
 }
 
-void SetClass75ObjectMode(void* self, void* value)
+void SetClass75ObjectField90(void* self, void* value)
 {
     Class75Object* ctx = FindOrCreateClass75Object(self);
     ctx->f90 = value;

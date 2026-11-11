@@ -284,7 +284,7 @@ typedef u64 Bits128 __attribute__((mode(TI)));
 s32 QueryValueTreeMask(ValueListObject* self, s32 node, Bits128 point, f32 radius, s32* out);
 typedef void (*AttachNotifyFn)(void* self, void* arg);
 void BuildPlacedObjectTransform(void* obj, void* c, void* out);
-void PrepareFadedObjectDraw(void* obj, void* s, void* out);
+void ApplyPlacedObjectTransform(void* obj, void* s, void* out);
 void SetAgentGoalPoint(void* self, void* p);
 void UpdateAgentGoal(void* self);
 void InitObject(void* self);
@@ -2271,7 +2271,7 @@ void ApplyTempoAgentTransform(TempoAgent* self, void* s, void* c)
         *(s32*)(tmp + 0x44) = 0;
         out = tmp;
     }
-    PrepareFadedObjectDraw(self, s, out);
+    ApplyPlacedObjectTransform(self, s, out);
 }
 
 #include "deferred_request.h"
@@ -4438,7 +4438,7 @@ void ApplyWarpPageTransform(WarpPage* obj, u8* s, void* c)
     SnapCameraZoom(p, 1.0f);
     BuildPlacedObjectTransform(obj, c, tmp);
     BuildMatrixFromRotationAndTranslation(s + 0x40, s + 0x80, tmp);
-    PrepareFadedObjectDraw(obj, s, tmp);
+    ApplyPlacedObjectTransform(obj, s, tmp);
     SnapCameraZoom(g_camera, keep1);
     g_camera->f1C8 = keep2;
 }

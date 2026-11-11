@@ -502,7 +502,7 @@ struct UnitClamp {
 
 f32 Cosine(f32 x);
 void SetObjectTreeRecordValue(TintBlendCollider* s, u32 c);
-void PrepareFadedObjectDraw(TintBlendCollider* s, void* a, void* b);
+void ApplyPlacedObjectTransform(TintBlendCollider* s, void* a, void* b);
 
 void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
 {
@@ -532,7 +532,7 @@ void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
             out = D_002623E0;
         }
         SetObjectTreeRecordValue(self, *(u32*)&out);
-        PrepareFadedObjectDraw(self, a1, a2);
+        ApplyPlacedObjectTransform(self, a1, a2);
     }
 }
 

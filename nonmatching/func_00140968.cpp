@@ -45,7 +45,7 @@ s32 GetStringLength(const s8* s);
 void* AppendString(s8* dst, const char* src);
 s32 FormatToString(void* dst, const char* fmt, ...);
 s32 CheckDiscChanged(s32 a0, s32* out);
-u32 SendDiscSValueCommand(s32 arg);
+u32 SendDiscSCommand22(s32 arg);
 s32 ReadDiscSectors(void*, void*, void*, void*);
 s32 SyncDiscNCommand(s32);
 s32 GetDiscError(void);

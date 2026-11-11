@@ -3608,7 +3608,7 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
 
 void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
 void ComputePolarOffset(Vec02* out, f32 angle, f32 a, f32 b);
-void FindEarliestCubicBoundTime(s32 n, f32* a, double ka, f32* b, double kb, f32* c, double kc, f32* out);
+void FindEarliestTimeWithinCurveLimits(s32 n, f32* a, double ka, f32* b, double kb, f32* c, double kc, f32* out);
 void SetPlacedObjectVelocityFromFloats(PlacedObject* self, f32 x, f32 y, f32 z);
 void ScatterObjectsAtPoint(void* scatter, Vec02* at, s32 a, s32 b);
 void RotateMatrixUpright(Mat02* m, s32 zero, Mat02* out);
@@ -3668,7 +3668,7 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
             m[i][2] = r[i];
             m[i][3] = s[i];
         }
-        FindEarliestCubicBoundTime(3, m[0], 1500.0, m[1], 1500.0, m[2], 1500.0, &t);
+        FindEarliestTimeWithinCurveLimits(3, m[0], 1500.0, m[1], 1500.0, m[2], 1500.0, &t);
         t = (f32)((s32)(t * 60.0f) + 1) * 0.0166666675f;
         self->stateEnd += t;
         if (self->state == 6 && state == 0) {

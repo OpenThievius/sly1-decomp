@@ -290,7 +290,7 @@ typedef u64 Bits128 __attribute__((mode(TI)));
 s32 QueryValueTreeMask(void* self, void* node, Bits128 q, s32* out);
 typedef void (*AttachNotifyFn)(void* self, void* arg);
 void BuildPlacedObjectTransform(void* obj, void* c, void* out);
-void PrepareFadedObjectDraw(void* obj, void* s, void* out);
+void ApplyPlacedObjectTransform(void* obj, void* s, void* out);
 void SetAgentGoalPoint(void* self, void* p);
 void UpdateAgentGoal(void* self);
 void InitObject(void* self);

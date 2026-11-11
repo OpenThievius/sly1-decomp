@@ -9,7 +9,7 @@ void ApplyWarpPageTransform(void* obj, u8* s, void* c)
     SnapCameraZoom(p, 0.975f);
     BuildPlacedObjectTransform(obj, c, tmp);
     BuildMatrixFromRotationAndTranslation(s + 0x40, s + 0x80, tmp);
-    PrepareFadedObjectDraw(obj, s, tmp);
+    ApplyPlacedObjectTransform(obj, s, tmp);
     SnapCameraZoom(g_camera, keep1);
     g_camera->f1C8 = keep2;
 }

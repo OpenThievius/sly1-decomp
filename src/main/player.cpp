@@ -1630,7 +1630,7 @@ f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, Quad16* p, s32 zero);
 void BuildPlacedObjectTransform(void* a, void* b, void* out);
 void OrientPlayerSpinPart(void* self, void* out, f32 t);
 void AddTrailPoint(void* record, Vec02* pos, Mat02* m, s32 flag, f32 a, f32 dt);
-void PrepareFadedObjectDraw(void* self, void* a, void* b);
+void ApplyPlacedObjectTransform(void* self, void* a, void* b);
 void BlendPlayerPose(Player* self, void* a, void* b)
 {
     u8 out[0x50] __attribute__((aligned(16)));
@@ -1698,7 +1698,7 @@ void BlendPlayerPose(Player* self, void* a, void* b)
     if (D_0026FA68 != 0 && (u32)(*(s32*)((u8*)D_0026FA68 + 0x2D0) - 2) < 2) {
         return;
     }
-    PrepareFadedObjectDraw(self, a, b);
+    ApplyPlacedObjectTransform(self, a, b);
     ((Collider*)self->f61C)->flags &= ~(0x8000ULL << 17);
 }
 
@@ -3241,7 +3241,7 @@ void SendEmptyMessage(void* x);
 void SetPooledObjectPlayerHold(void* obj, s32 hold);
 void ComputePlayerJumpVelocity(Player* self, Vec02* out);
 void ComputeUpwardBoostVelocity(Player* self, Vec02* out);
-void ComputeUpwardBoostVelocityAlt(Player* self, Vec02* out);
+void ComputeUpwardBoostVelocityUnitSlope(Player* self, Vec02* out);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 void ActivateSwitchedCollider(void* obj);
 void DestroyStateWalker(void* h);
@@ -4252,7 +4252,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vec02 v;
             self->f2498 = 0;
             anim = PS(void*, 0x1034);
-            ComputeUpwardBoostVelocityAlt(self, &v);
+            ComputeUpwardBoostVelocityUnitSlope(self, &v);
             self->desc02()->m20(self, &v);
             break;
         }
@@ -5408,7 +5408,7 @@ extern Rgba4 D_002623E0;
 
 f32 Cosine(f32 x);
 void SetObjectTreeRecordValue(ModeCollider* o, u32 value);
-void PrepareFadedObjectDraw(ModeCollider* o, void* s, void* out);
+void ApplyPlacedObjectTransform(ModeCollider* o, void* s, void* out);
 
 
 // NEAR: last call (func_001B9D10) loads a2 before $f12 is moved; retail moves $f12 first. Otherwise every instruction matches.

@@ -2363,7 +2363,7 @@ struct Blocker_23A8 {
 s32 MaskWorldBitsBySave(void);
 s32 IsObjectOfKind(void* obj, s32 kind);
 
-s32 IsPlayerEvadingAgent(Agent* self)
+s32 IsPlayerUntargetableByAgent(Agent* self)
 {
     Player* t = (Player*)self->desc08()->m62(self);
     if (IsObjectOfKind(t, 7) == 0) {
