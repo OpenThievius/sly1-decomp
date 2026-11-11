@@ -1,5 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 412/428, checked 2026-11-11
+// SIZE 416/428, checked 2026-11-11
+// w23-vuE (2026-11-11): the retail form of the scale found: 416 bytes of 428, frame 512 as retail's (86% by regdiff, 92 of 107
+// instructions). The scale is a u128 GPR value kg = ScalarInGprReg(scale), made once before the loop (mfc1 in a saved GPR across
+// the three calls), and the per-iteration `k.q = kg;` copies it into the Vec k, which global-alloc leaves in memory (spill
+// slot 304): the rows load it from 304, the k2 copy is lq 304/sq 240, the vector after the loop is reloaded from the same slot.
+// The earlier forms made k itself the mfc1 output, which loop.c moves out of the loop with its set. What still differs:
+// (1) retail's per-iteration copy is `move v0,s6; sq v0,304(sp)` (a 64-bit move: a partial set of the TImode pseudo, so one
+// insn more in the lives), ours stores `sq s4,304(sp)` directly; that extra insn lengthens the lives of dir (4 refs, 56 insns)
+// and i (7 refs, 98): both have priority 1428 (log2(refs)*refs*10000/life, exactly tied) and the tie goes to the lower number
+// (dir), retail's order is i first (s1=i, s2=dir); the same shift puts retail's &p (s4) and &hit (s5) before kg (s6), ours kg
+// before them (kg s4, &hit s5, &p s6). (2) retail loads k into vf4 in the beqz's delay slot after TestOwnerGraphSpan (the post-loop
+// use kept in a register across the exit test), ours after the loop. A u64 asm output with `k.q = (u128)kg` gives the `move
+// v0,s6` but makes k a VU0 register with 23 refs (the partial sets), `*(u64*)&k.q = *(u64*)&kg` the same.
 // NEAR (2026-11-10, w16-191AC8): 81.3% by regdiff (was 80.4%), 412 bytes against 428: the four missing insns are exactly retail's mfc1 s6, the in-loop move v0,s6 and s8's save and restore (see (1)); everything else in the loop now matches. The scale is a Vu0::Vec value k (not a Vec02 in memory): global-alloc leaves it unallocated (10 refs, 3 calls crossed: 4*3 >= 10, so no caller save) and reload gives it the spill slot at 304, so the rows load it as retail does (vf2 for row 0, vf4 inherited for rows 1 and 2), the copy to k2 goes through a GPR (lq v0,304; sq v0,240) and the pos copy as a Vec value is spilled to 320 across CopyBytes, all as retail. Still differs: (1) loop.c moves k's set out of the loop (the mfc1 output is k itself after CSE; an invariant set once), where retail keeps the mfc1 in a saved GPR (s6, one saved register more: frame 512 against our 496) and per iteration copies it (move v0,s6; sq v0,304): retail's in-loop set is not invariant to loop.c (a partial set, or a second set in the loop); (2) retail loads k into vf4 right after TestOwnerGraphSpan (beqz's delay slot, before the branch: not reorg's, vf4 is live into the exit) and after the loop stores it to 192 (a temporary in rot's slot) and divides by vf4; ours reloads it at the vdiv. No source tried makes a value set after the call that lives to the exit: a separate `kz = k` after the call (loop.c moves it with k), a fresh Vec::ScalarInGpr(scale) for the divide (not CSE'd across the loop: mfc1 again), Vec::ScalarInGpr(scale) per iteration (the slot at 304 stays in the loop but k is hoisted to 320: frame 528), a FloatQuad union {f32; u128} set from scale (in memory, not a register: swc1 then lq), `= { scale }` (the same), a cast to the union (does not compile), Q((s128)k.q) for the divisor (no temporary), u128 k (identical to the Vec).
 #include "common.h"
 #include "asm_func.h"
@@ -205,10 +217,11 @@ void func_00191AC8(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)
     Vec02 k2;
     Mat02 s;
     Vu0::Vec k;
+    u128 kg = Vu0::ScalarInGprReg(scale);
     f32 best = -1.0f;
     u32 i = 0;
     do {
-        k.q = Vu0::ScalarInGprReg(scale);
+        k.q = kg;
         BuildAxisAngleMatrix(&g_unitZVector, D_00269B78[i], &m);
         *(Vu0::Vec*)&s.r[0] = Vu0::MulX(Vu0::Vec::Of(m.r[0]), k);
         *(Vu0::Vec*)&s.r[1] = Vu0::MulX(Vu0::Vec::Of(m.r[1]), k);
