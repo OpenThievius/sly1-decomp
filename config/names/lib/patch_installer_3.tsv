@@ -1,2 +1,6 @@
 symbol	name	evidence
+func_001FA890	CopyKernelWordsSyscallThirdPatch	the third patch installer's own copy of system call stub 0x5A, called by InstallThirdKernelPatch to copy its code to 0x80075000
+func_001FA8A0	CopyKernelWordsThirdPatch	copies bytes / 4 words from src to dst and returns 0; the third patch installer installs it as system call 0x5A and copies its code through it
+func_001FA8D8	QueryPatchedHandlerThirdPatch	the third patch installer's own copy of system call stub 0x5B, called by InstallThirdKernelPatch with each call number 0x55 to 0x59 of its table and the result passed back to the 0x74 stub
+func_001FA8E8	SetSystemCallHandlerThirdPatch	the third patch installer's own copy of system call stub 0x74, called by InstallThirdKernelPatch to install the table D_00277D30's handlers by call number
 func_001FA8F8	InstallThirdKernelPatch	copies D_002779C0 to 0x80075000 and sets the system calls D_00277D30 lists (InitKernelLibrary calls it)

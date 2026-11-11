@@ -5,6 +5,7 @@ func_001F85A8	HandleFileReply	the file client's reply handler: copies the reply 
 func_001F8968	CreateFileRequestLock	creates the semaphore that keeps one file request at a time (LockFileRequests calls it first)
 func_001F89B8	LockFileRequests	waits on the file client's request semaphore, creating it first when needed
 func_001F89E8	UnlockFileRequests	signals the file client's request semaphore
+func_001F89F8	RunFileClientCallback	the handler of command 0x80000013: calls the function and argument it is given when the function is set, then ends the handler with SyncAndEnableInterrupts
 func_001F8A28	OpenFileClient	once, installs HandleFileReply and func_001F89F8 for the commands 0x80000011 and 0x80000013, binds the client to the IOP's file service, clears the handle table and hands the reply buffer over
 func_001F8BF8	ForgetFileClient	clears the file client's opened flag and its binding (LoadIopModules calls it before it resets the IOP)
 func_001F8C38	CloseFile	sends the close request for a handle and waits for its reply (CloseStreamReader and CloseBufferedStream call it)

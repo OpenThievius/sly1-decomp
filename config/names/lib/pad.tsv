@@ -1,16 +1,22 @@
 symbol	name	evidence
 func_00203FD0	SendPadDma	original assembly: sends a pad slot's DMA words to the IOP, printing its message when the transfer cannot start (SetPadActuatorBytes calls it)
 func_002040E8	InitPadLibrary	binds the two pad clients to the services 0x80000100 and 0x80000101, retrying until bound, and initialises the module (InitPadSystem calls it)
+func_00204228	ResetPadModule	closes every slot of both ports, then sends the pad module command 0x10 and returns its result (InitPadLibrary's last step)
 func_002042C8	OpenPadPort	original assembly: opens a port's slot on a 64-byte aligned buffer of two frames, printing its messages on a bad buffer or a slot already open (InitPadRecord calls it)
 func_002044B0	GetNewerPadFrame	refreshes a slot's two frames from memory and returns the one with the higher count
 func_00204510	ReadPadFrame	copies the newer frame of an open slot into data and returns its size (PollPadInput calls it)
 func_00204590	GetPadSlotState	returns the state of an open slot's newer frame (5 for a stable slot with a request running), or 0x63 when closed (UpdatePadConnection polls it)
 func_00204610	SetPadRequestMode	sets the request mode of an open slot's newer frame (2 while a request runs)
 func_00204678	GetPadRequestMode	returns the request mode of an open slot's newer frame (UpdatePadConnection reads it)
+func_002046D0	GetPadCapabilityEntry	for an open slot with a valid reply, returns the count of its table of four-word entries when the index is -1, else one of the four words of the entry at index by kind 1 to 4; the game's pad connection code calls it
+func_002047F8	GetPadModeEntry	for an open slot with a valid reply, returns by kind 1 to 4 a field of the newer frame (the high nibble of a byte, the entry at a position, that position, or the entry at an index; -1 gives the count)
 func_00204930	SendPadTwoWordRequest	sends the pad module command 6 with two words for a slot and marks the request running on success (UpdatePadConnection calls it)
 func_002049E8	SetPadActuatorBytes	original assembly: stores the bytes for a slot's actuators and sends them (UpdatePadPattern and StopPadPatternOutput call it)
 func_00204AA8	SendPadSixByteRequest	sends the pad module command 8 with six bytes for a slot and marks the request running on success (UpdatePadConnection calls it)
+func_00204B80	GetPadButtonMask	for an open slot with a valid reply of at least two, returns the four bytes of the newer frame at +0x79 as one 32-bit mask (HasFullPadMask compares it with 0x3FFFF)
 func_00204C38	SendPadMaskRequest	sends the pad module command 10 with a mask for a slot and marks the request running on success
 func_00204CE8	HasFullPadMask	tells whether an open slot's button mask (func_00204B80) is 0x3FFFF (UpdatePadConnection calls it)
 func_00204D48	SendFullPadMask	sends SendPadMaskRequest with the mask 0xFFF for an open slot (UpdatePadConnection calls it)
+func_00204DB8	GetPadModuleVersion	sends the pad module command 0x12 and returns its result, the version whose major part InitPadLibrary compares with 4
+func_00204E20	InvalidateDataCacheRange	original assembly: walks both ways of every one of the 64 lines of the data cache and, for each line whose tag lies inside a range, invalidates it (RefreshPadFrames calls it)
 func_00204EC8	RefreshPadFrames	original assembly: invalidates the data cache over a slot's frames so they are read from memory (GetNewerPadFrame calls it)
