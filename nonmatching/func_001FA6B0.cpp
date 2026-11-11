@@ -1,7 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 276/296, checked 2026-11-11
+// BYTES 252/296 (85.1%), checked 2026-11-11
 #include "common.h"
 #include "system.h"
+// w23-vuE (2026-11-11): 296 bytes, retail's size, with the registers still differing (97% by regdiff, 72 of 74 insns equal by
+// shape). Retail reads the command word at 8(sp) at each use (`lw v1,8(sp); bgez`, then `lw v0,8(sp)` in the system arm and
+// `lw a1,8(sp)` in the user arm, and reorg leaves the user arm's first load out of the bgez slot): the reads of the copied
+// packet are volatile. With `volatile Packet* packet` the whole dispatch is retail's; without it CSE merges the three reads.
+// The loop as pointers (`*dst++ = *src++`, the source copied from the buffer pointer before the sb, as retail's move a2,a3)
+// gives retail's head order. Left: retail's count guard is blez (n not known non-negative to combine; a variable set twice
+// loses it: `size = (size + 15) / 16` gives blez but the loop then counts with size itself, retail copies the count: move a0,a1),
+// and the registers (retail n = a1 = size's register, counter a0, src a2, buffer a3). Needs a ruling on volatile for the packet:
+// it is an interrupt handler's own copy, but retail's reads are volatile.
 // NEAR (2026-11-08, worker night-mmi): the receive buffer read as volatile gives retail's
 // lbu and andi; still different: retail keeps the packet count's guard as blez (ours beqz: the
 // compiler here knows the count is not negative), copies the buffer pointer for the copy loop,
@@ -64,17 +73,18 @@ s32 HandleCommandInterrupt(s32 cause)
     s32 n = (size + 15) / 16;
     Quad_1FA6B0* src = (Quad_1FA6B0*)buffer;
     buffer[0] = 0;
-    for (s32 i = 0; i < n; i++) {
-        local[i] = src[i];
+    Quad_1FA6B0* dst = local;
+    for (s32 i = 0; i < n; i++, dst++, src++) {
+        *dst = *src;
     }
     ArmIopDmaChainFromInterrupt();
-    Packet_1FA068* packet = (Packet_1FA068*)local;
+    volatile Packet_1FA068* packet = (volatile Packet_1FA068*)local;
     if (packet->head[2] < 0) {
         s32 index = packet->head[2] & 0x7FFFFFFF;
         if (index < ch->system_count) {
             Slot_1FA068* slot = &ch->system[index];
             if (slot->handler != 0) {
-                slot->handler(packet, (Channel_1FA068*)slot->arg);
+                slot->handler((Packet_1FA068*)packet, (Channel_1FA068*)slot->arg);
             }
         }
     } else {
@@ -82,7 +92,7 @@ s32 HandleCommandInterrupt(s32 cause)
         if (index < ch->user_count) {
             Slot_1FA068* slot = &ch->user[index];
             if (slot->handler != 0) {
-                slot->handler(packet, (Channel_1FA068*)slot->arg);
+                slot->handler((Packet_1FA068*)packet, (Channel_1FA068*)slot->arg);
             }
         }
     }
