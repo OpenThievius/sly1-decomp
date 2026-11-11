@@ -178,7 +178,8 @@ f32 D_002619F0[4] = { 0.0f, 0.0f, -2250.0f, 0.0f };
 f32 D_00261A00[4] = { 0.0f, 75.0f, 85.0f, 0.0f };
 f32 D_00261A10[4] = { 10.0f, 0.0f, 0.25f, 0.0f };
 f32 D_00261A20[12] = { 20.0f, 5.0f, 0.150000006f, 120.0f, 800.0f, 50.0f, 0.25f, 4500.0f, 800.0f, 50.0f, 0.25f, 4500.0f };
-f32 D_00261A50[4] = { 300.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00261A50 = 300.0f;
+INCLUDE_DATA(D_00261A54);
 f32 D_00261A60[4] = { 1.0f, 1.0f, 0.0f, 0.0f };
 f32 D_00261A70[4] = { -250.0f, 0.0f, 600.0f, 0.0f };
 f32 D_00261A80[4] = { 1.0f, -0.300000012f, 0.0f, 0.0f };
@@ -678,7 +679,7 @@ void TriggerStateNotifierNearPlayer(StateNotifier* self)
         ActiveNotifierData* d = (ActiveNotifierData*)GetActiveSwitchedColliderData();
         if (d->f00 != 0 && d->f18 != 0) {
             Vec02* pos = &self->v140;
-            f32 r = D_00261A50[0];
+            f32 r = D_00261A50;
             u128 diff = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(d->f18->v140));
             f32 sq = Vu0::ToFloatMoved(Vu0::Dot(diff, diff));
             if (!(r * r < sq)) {
@@ -721,6 +722,7 @@ s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* b)
 }
 
 
+extern f32 D_00261A54;
 extern f32 g_gameClock[];
 extern Player* g_player;
 void UpdatePlacedObject(StateNotifier* self, f32 dt);
@@ -741,7 +743,7 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
         below = 0;
     }
     if (below != self->f32C) {
-        if (RandomFloatInRange(0.0f, 1.0f) < self->f320 && D_00261A50[1] < g_gameClock[1] - self->f330) {
+        if (RandomFloatInRange(0.0f, 1.0f) < self->f320 && D_00261A54 < g_gameClock[1] - self->f330) {
             PlacedObject* at;
             if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)(*(Camera**)g_camera)->f80))) < 0.0f) {
                 at = self->f324;
