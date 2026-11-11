@@ -30,6 +30,18 @@
 // for the MEM_SCALAR_P slot stores; with the rows read as Vec members (a RotateTransposed
 // variant like RotateMembers, tried only as a diagnostic, not a helper of the project yet)
 // the whole velocity tail is retail's (docs/toolchain/alias-classes.md).
+// W23 (2026-11-11, tools/globalalloc.py replays the dumps exactly: 177 of 177 dispositions): (a) is two
+// separate ranking flips, both confirmed with --set. Retail's s1/s2/s3 for &tgt (r126), pad (r118),
+// &cur (r124), %hi g_unitRange (r510) and %hi g_unitZVector (r507) all come out with
+// `--set 124:length=31 --set 126:length=30 --set 118:length=333 --set 510:refs=6` (or
+// `--set 507:length=60` in place of 510's refs). So: (1) &cur (3 refs over 29) must rank below pad
+// (11 over 331, 997): two more pre-reload insns where both &cur and &tgt live (insns 51-126: the
+// f720 == 2 tests and the teleport arm) would do it, e.g. a copy that reload deletes; the then-arm
+// (desc slot 84 only) does not count, both are dead there. (2) r510 (5 refs, life 2 x 145 by
+// update_equiv_regs) must outrank r507 (2 refs, 2 x 27): one more g_unitRange ref, or r507 living
+// 3 insns longer. The pre-reload insn count over r510's span equals the final code's (144 vs 145),
+// so retail's difference is in refs or lives, not in deleted copies there. Tried: the two key reads
+// as one inline helper called twice (both addresses then formed before the first call; 82 lines).
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"
