@@ -6,7 +6,7 @@
 // (its slots are the pure-virtual stub func_001FBDF8, except slot 4 = func_0015C2E8 and slot 7 =
 // func_0015C3C0). The class is modelled as a plain struct with an explicit vptr whose entries are
 // GCC 2.95's {s16 delta; s16 index; fn}: no `virtual`, so GCC emits no vtable or thunk of its own
-// (the tables are defined in src/main/file_1549C8.cpp, the class's own methods in the same file). A
+// (the tables are defined in src/main/font.cpp, the class's own methods in the same file). A
 // call is `self->vt->fnN((u8*)self + self->vt->adjN, ...)`, the delta adjusting `this`.
 // Entry 0 is {offset-to-top, rtti} = {0, 0, 0}, so the first virtual is entry 1.
 #ifndef FONT_H

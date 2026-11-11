@@ -5,8 +5,8 @@
   "matched_code": "1040104",
   "matched_code_percent": 93.06152541220344,
   "total_data": "464563",
-  "matched_data": "311091",
-  "matched_data_percent": 66.96422229062581,
+  "matched_data": "312043",
+  "matched_data_percent": 67.16914605769293,
   "total_functions": 4831,
   "matched_functions": 4782,
   "matched_functions_percent": 98.98571724280687,
@@ -14,7 +14,7 @@
   "complete_code_percent": 0.0,
   "complete_data": "0",
   "complete_data_percent": 0.0,
-  "total_units": 180,
+  "total_units": 183,
   "complete_units": 0
  },
  "units": [
@@ -16501,16 +16501,16 @@
   {
    "name": "game/file_1549C8",
    "measures": {
-    "fuzzy_match_percent": 94.93956341331409,
-    "total_code": "44344",
-    "matched_code": "42100",
-    "matched_code_percent": 94.93956341331409,
+    "fuzzy_match_percent": 90.88545897644191,
+    "total_code": "24620",
+    "matched_code": "22376",
+    "matched_code_percent": 90.88545897644191,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 178,
-    "matched_functions": 175,
-    "matched_functions_percent": 98.31460674157303,
+    "total_functions": 103,
+    "matched_functions": 100,
+    "matched_functions_percent": 97.0873786407767,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -17545,12 +17545,42 @@
       "virtual_address": "1420552",
       "demangled_name": "IsPointInsideObjectFaces"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/file_1549C8.cpp"
+   }
+  },
+  {
+   "name": "game/object_cycler",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "5768",
+    "matched_code": "5768",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 16,
+    "matched_functions": 16,
+    "matched_functions_percent": 100.0,
+    "complete_code": "0",
+    "complete_code_percent": 0.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_0015AD98",
      "size": "292",
      "fuzzy_match_percent": 100.0,
-     "address": "24856",
+     "address": "0",
      "metadata": {
       "virtual_address": "1420696",
       "demangled_name": "InitObjectCycler"
@@ -17560,7 +17590,7 @@
      "name": "func_0015AEC0",
      "size": "376",
      "fuzzy_match_percent": 100.0,
-     "address": "25152",
+     "address": "296",
      "metadata": {
       "virtual_address": "1420992",
       "demangled_name": "LoadObjectCycler"
@@ -17570,7 +17600,7 @@
      "name": "func_0015B038",
      "size": "184",
      "fuzzy_match_percent": 100.0,
-     "address": "25528",
+     "address": "672",
      "metadata": {
       "virtual_address": "1421368",
       "demangled_name": "CopyObjectCycler"
@@ -17580,7 +17610,7 @@
      "name": "func_0015B0F0",
      "size": "120",
      "fuzzy_match_percent": 100.0,
-     "address": "25712",
+     "address": "856",
      "metadata": {
       "virtual_address": "1421552",
       "demangled_name": "SetObjectCyclerHandle"
@@ -17590,7 +17620,7 @@
      "name": "func_0015B168",
      "size": "160",
      "fuzzy_match_percent": 100.0,
-     "address": "25832",
+     "address": "976",
      "metadata": {
       "virtual_address": "1421672",
       "demangled_name": "StartObjectCycler"
@@ -17600,7 +17630,7 @@
      "name": "func_0015B208",
      "size": "472",
      "fuzzy_match_percent": 100.0,
-     "address": "25992",
+     "address": "1136",
      "metadata": {
       "virtual_address": "1421832",
       "demangled_name": "StepObjectCycler"
@@ -17610,7 +17640,7 @@
      "name": "func_0015B3E0",
      "size": "936",
      "fuzzy_match_percent": 100.0,
-     "address": "26464",
+     "address": "1608",
      "metadata": {
       "virtual_address": "1422304",
       "demangled_name": "UpdateObjectCycler"
@@ -17620,7 +17650,7 @@
      "name": "func_0015B788",
      "size": "592",
      "fuzzy_match_percent": 100.0,
-     "address": "27400",
+     "address": "2544",
      "metadata": {
       "virtual_address": "1423240",
       "demangled_name": "DrawObjectCycler"
@@ -17630,7 +17660,7 @@
      "name": "func_0015B9D8",
      "size": "152",
      "fuzzy_match_percent": 100.0,
-     "address": "27992",
+     "address": "3136",
      "metadata": {
       "virtual_address": "1423832",
       "demangled_name": "HandleObjectCyclerObjectEvent"
@@ -17640,7 +17670,7 @@
      "name": "func_0015BA70",
      "size": "1216",
      "fuzzy_match_percent": 100.0,
-     "address": "28144",
+     "address": "3288",
      "metadata": {
       "virtual_address": "1423984",
       "demangled_name": "SetObjectCyclerState"
@@ -17650,7 +17680,7 @@
      "name": "func_0015BF30",
      "size": "208",
      "fuzzy_match_percent": 100.0,
-     "address": "29360",
+     "address": "4504",
      "metadata": {
       "virtual_address": "1425200",
       "demangled_name": "SendObjectCyclerMessage"
@@ -17660,7 +17690,7 @@
      "name": "func_0015C000",
      "size": "420",
      "fuzzy_match_percent": 100.0,
-     "address": "29568",
+     "address": "4712",
      "metadata": {
       "virtual_address": "1425408",
       "demangled_name": "FindObjectCyclerGroundPoint"
@@ -17670,7 +17700,7 @@
      "name": "func_0015C1A8",
      "size": "204",
      "fuzzy_match_percent": 100.0,
-     "address": "29992",
+     "address": "5136",
      "metadata": {
       "virtual_address": "1425832",
       "demangled_name": "ChooseObjectCyclerNextState"
@@ -17680,7 +17710,7 @@
      "name": "func_0015C278",
      "size": "152",
      "fuzzy_match_percent": 100.0,
-     "address": "30200",
+     "address": "5344",
      "metadata": {
       "virtual_address": "1426040",
       "demangled_name": "IsActiveColliderNearObjectCycler"
@@ -17690,7 +17720,7 @@
      "name": "func_0015C310",
      "size": "68",
      "fuzzy_match_percent": 100.0,
-     "address": "30352",
+     "address": "5496",
      "metadata": {
       "virtual_address": "1426192",
       "demangled_name": "IsCyclerGroundCandidate"
@@ -17700,17 +17730,47 @@
      "name": "func_0015C358",
      "size": "216",
      "fuzzy_match_percent": 100.0,
-     "address": "30424",
+     "address": "5568",
      "metadata": {
       "virtual_address": "1426264",
       "demangled_name": "IsObjectCyclerUnsupported"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/object_cycler.cpp"
+   }
+  },
+  {
+   "name": "game/font",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "9940",
+    "matched_code": "9940",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 43,
+    "matched_functions": 43,
+    "matched_functions_percent": 100.0,
+    "complete_code": "0",
+    "complete_code_percent": 0.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_0015C430",
      "size": "12",
      "fuzzy_match_percent": 100.0,
-     "address": "30640",
+     "address": "0",
      "metadata": {
       "virtual_address": "1426480",
       "demangled_name": "ClearDefaultFont"
@@ -17720,7 +17780,7 @@
      "name": "func_0015C440",
      "size": "52",
      "fuzzy_match_percent": 100.0,
-     "address": "30656",
+     "address": "16",
      "metadata": {
       "virtual_address": "1426496",
       "demangled_name": "IsFontLoaded"
@@ -17730,7 +17790,7 @@
      "name": "func_0015C478",
      "size": "60",
      "fuzzy_match_percent": 100.0,
-     "address": "30712",
+     "address": "72",
      "metadata": {
       "virtual_address": "1426552",
       "demangled_name": "GetFontById"
@@ -17740,7 +17800,7 @@
      "name": "func_0015C4B8",
      "size": "128",
      "fuzzy_match_percent": 100.0,
-     "address": "30776",
+     "address": "136",
      "metadata": {
       "virtual_address": "1426616",
       "demangled_name": "FindFontByKeyChar"
@@ -17750,7 +17810,7 @@
      "name": "func_0015C538",
      "size": "136",
      "fuzzy_match_percent": 100.0,
-     "address": "30904",
+     "address": "264",
      "metadata": {
       "virtual_address": "1426744",
       "demangled_name": "CopyFontMetrics"
@@ -17760,7 +17820,7 @@
      "name": "func_0015C5C0",
      "size": "212",
      "fuzzy_match_percent": 100.0,
-     "address": "31040",
+     "address": "400",
      "metadata": {
       "virtual_address": "1426880",
       "demangled_name": "SetFontClipRect"
@@ -17770,7 +17830,7 @@
      "name": "func_0015C698",
      "size": "84",
      "fuzzy_match_percent": 100.0,
-     "address": "31256",
+     "address": "616",
      "metadata": {
       "virtual_address": "1427096",
       "demangled_name": "ResetFontClipRect"
@@ -17780,7 +17840,7 @@
      "name": "func_0015C6F0",
      "size": "132",
      "fuzzy_match_percent": 100.0,
-     "address": "31344",
+     "address": "704",
      "metadata": {
       "virtual_address": "1427184",
       "demangled_name": "MeasureFontString"
@@ -17790,7 +17850,7 @@
      "name": "func_0015C778",
      "size": "628",
      "fuzzy_match_percent": 100.0,
-     "address": "31480",
+     "address": "840",
      "metadata": {
       "virtual_address": "1427320",
       "demangled_name": "DrawFontString"
@@ -17800,7 +17860,7 @@
      "name": "func_0015C9F0",
      "size": "68",
      "fuzzy_match_percent": 100.0,
-     "address": "32112",
+     "address": "1472",
      "metadata": {
       "virtual_address": "1427952",
       "demangled_name": "PushFontScale"
@@ -17810,7 +17870,7 @@
      "name": "func_0015CA38",
      "size": "44",
      "fuzzy_match_percent": 100.0,
-     "address": "32184",
+     "address": "1544",
      "metadata": {
       "virtual_address": "1428024",
       "demangled_name": "PopFontScale"
@@ -17820,7 +17880,7 @@
      "name": "func_0015CA68",
      "size": "128",
      "fuzzy_match_percent": 100.0,
-     "address": "32232",
+     "address": "1592",
      "metadata": {
       "virtual_address": "1428072",
       "demangled_name": "CloneFont"
@@ -17830,7 +17890,7 @@
      "name": "func_0015CAE8",
      "size": "136",
      "fuzzy_match_percent": 100.0,
-     "address": "32360",
+     "address": "1720",
      "metadata": {
       "virtual_address": "1428200",
       "demangled_name": "CopyFont"
@@ -17840,7 +17900,7 @@
      "name": "func_0015CB70",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "32496",
+     "address": "1856",
      "metadata": {
       "virtual_address": "1428336",
       "demangled_name": "HasFontGlyph"
@@ -17850,7 +17910,7 @@
      "name": "func_0015CB90",
      "size": "84",
      "fuzzy_match_percent": 100.0,
-     "address": "32528",
+     "address": "1888",
      "metadata": {
       "virtual_address": "1428368",
       "demangled_name": "GetFontCharWidth"
@@ -17860,7 +17920,7 @@
      "name": "func_0015CBE8",
      "size": "208",
      "fuzzy_match_percent": 100.0,
-     "address": "32616",
+     "address": "1976",
      "metadata": {
       "virtual_address": "1428456",
       "demangled_name": "AddFontImagesToFrame"
@@ -17870,7 +17930,7 @@
      "name": "func_0015CCB8",
      "size": "244",
      "fuzzy_match_percent": 100.0,
-     "address": "32824",
+     "address": "2184",
      "metadata": {
       "virtual_address": "1428664",
       "demangled_name": "BeginFontDraw"
@@ -17880,7 +17940,7 @@
      "name": "func_0015CDB0",
      "size": "152",
      "fuzzy_match_percent": 100.0,
-     "address": "33072",
+     "address": "2432",
      "metadata": {
       "virtual_address": "1428912",
       "demangled_name": "BeginFontGlyphPacket"
@@ -17890,7 +17950,7 @@
      "name": "func_0015CE48",
      "size": "596",
      "fuzzy_match_percent": 100.0,
-     "address": "33224",
+     "address": "2584",
      "metadata": {
       "virtual_address": "1429064",
       "demangled_name": "DrawFontGlyph"
@@ -17900,7 +17960,7 @@
      "name": "func_0015D0A0",
      "size": "964",
      "fuzzy_match_percent": 100.0,
-     "address": "33824",
+     "address": "3184",
      "metadata": {
       "virtual_address": "1429664",
       "demangled_name": "DrawFontGlyphTurned"
@@ -17910,7 +17970,7 @@
      "name": "func_0015D468",
      "size": "420",
      "fuzzy_match_percent": 100.0,
-     "address": "34792",
+     "address": "4152",
      "metadata": {
       "virtual_address": "1430632",
       "demangled_name": "DrawFontQuad"
@@ -17920,7 +17980,7 @@
      "name": "func_0015D610",
      "size": "964",
      "fuzzy_match_percent": 100.0,
-     "address": "35216",
+     "address": "4576",
      "metadata": {
       "virtual_address": "1431056",
       "demangled_name": "DrawFontFrame"
@@ -17930,7 +17990,7 @@
      "name": "func_0015D9D8",
      "size": "236",
      "fuzzy_match_percent": 100.0,
-     "address": "36184",
+     "address": "5544",
      "metadata": {
       "virtual_address": "1432024",
       "demangled_name": "LoadFont"
@@ -17940,7 +18000,7 @@
      "name": "func_0015DAC8",
      "size": "288",
      "fuzzy_match_percent": 100.0,
-     "address": "36424",
+     "address": "5784",
      "metadata": {
       "virtual_address": "1432264",
       "demangled_name": "UploadFontImages"
@@ -17950,7 +18010,7 @@
      "name": "func_0015DBE8",
      "size": "108",
      "fuzzy_match_percent": 100.0,
-     "address": "36712",
+     "address": "6072",
      "metadata": {
       "virtual_address": "1432552",
       "demangled_name": "FindFontGlyph"
@@ -17960,7 +18020,7 @@
      "name": "func_0015DC58",
      "size": "92",
      "fuzzy_match_percent": 100.0,
-     "address": "36824",
+     "address": "6184",
      "metadata": {
       "virtual_address": "1432664"
      }
@@ -17969,7 +18029,7 @@
      "name": "func_0015DCB8",
      "size": "96",
      "fuzzy_match_percent": 100.0,
-     "address": "36920",
+     "address": "6280",
      "metadata": {
       "virtual_address": "1432760"
      }
@@ -17978,7 +18038,7 @@
      "name": "func_0015DD18",
      "size": "132",
      "fuzzy_match_percent": 100.0,
-     "address": "37016",
+     "address": "6376",
      "metadata": {
       "virtual_address": "1432856"
      }
@@ -17987,7 +18047,7 @@
      "name": "func_0015DDA0",
      "size": "76",
      "fuzzy_match_percent": 100.0,
-     "address": "37152",
+     "address": "6512",
      "metadata": {
       "virtual_address": "1432992",
       "demangled_name": "RewindTextReader"
@@ -17997,7 +18057,7 @@
      "name": "func_0015DDF0",
      "size": "40",
      "fuzzy_match_percent": 100.0,
-     "address": "37232",
+     "address": "6592",
      "metadata": {
       "virtual_address": "1433072",
       "demangled_name": "SetTextDefaultColor"
@@ -18007,7 +18067,7 @@
      "name": "func_0015DE18",
      "size": "60",
      "fuzzy_match_percent": 100.0,
-     "address": "37272",
+     "address": "6632",
      "metadata": {
       "virtual_address": "1433112"
      }
@@ -18016,7 +18076,7 @@
      "name": "func_0015DE58",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "37336",
+     "address": "6696",
      "metadata": {
       "virtual_address": "1433176"
      }
@@ -18025,7 +18085,7 @@
      "name": "func_0015DEA0",
      "size": "60",
      "fuzzy_match_percent": 100.0,
-     "address": "37408",
+     "address": "6768",
      "metadata": {
       "virtual_address": "1433248"
      }
@@ -18034,7 +18094,7 @@
      "name": "func_0015DEE0",
      "size": "52",
      "fuzzy_match_percent": 100.0,
-     "address": "37472",
+     "address": "6832",
      "metadata": {
       "virtual_address": "1433312"
      }
@@ -18043,7 +18103,7 @@
      "name": "func_0015DF18",
      "size": "60",
      "fuzzy_match_percent": 100.0,
-     "address": "37528",
+     "address": "6888",
      "metadata": {
       "virtual_address": "1433368"
      }
@@ -18052,7 +18112,7 @@
      "name": "func_0015DF58",
      "size": "1084",
      "fuzzy_match_percent": 100.0,
-     "address": "37592",
+     "address": "6952",
      "metadata": {
       "virtual_address": "1433432",
       "demangled_name": "CountTextChars"
@@ -18062,7 +18122,7 @@
      "name": "func_0015E398",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "38680",
+     "address": "8040",
      "metadata": {
       "virtual_address": "1434520",
       "demangled_name": "CountTextChars"
@@ -18072,7 +18132,7 @@
      "name": "func_0015E3E0",
      "size": "88",
      "fuzzy_match_percent": 100.0,
-     "address": "38752",
+     "address": "8112",
      "metadata": {
       "virtual_address": "1434592",
       "demangled_name": "SeekTextReader"
@@ -18082,7 +18142,7 @@
      "name": "func_0015E438",
      "size": "108",
      "fuzzy_match_percent": 100.0,
-     "address": "38840",
+     "address": "8200",
      "metadata": {
       "virtual_address": "1434680",
       "demangled_name": "SumTextWidth"
@@ -18092,7 +18152,7 @@
      "name": "func_0015E4A8",
      "size": "824",
      "fuzzy_match_percent": 100.0,
-     "address": "38952",
+     "address": "8312",
      "metadata": {
       "virtual_address": "1434792"
      }
@@ -18101,7 +18161,7 @@
      "name": "func_0015E7E0",
      "size": "728",
      "fuzzy_match_percent": 100.0,
-     "address": "39776",
+     "address": "9136",
      "metadata": {
       "virtual_address": "1435616"
      }
@@ -18110,7 +18170,7 @@
      "name": "func_0015EAB8",
      "size": "136",
      "fuzzy_match_percent": 100.0,
-     "address": "40504",
+     "address": "9864",
      "metadata": {
       "virtual_address": "1436344",
       "demangled_name": "UploadAllFontImages"
@@ -18120,16 +18180,46 @@
      "name": "func_0015EB40",
      "size": "44",
      "fuzzy_match_percent": 100.0,
-     "address": "40640",
+     "address": "10000",
      "metadata": {
       "virtual_address": "1436480"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/font.cpp"
+   }
+  },
+  {
+   "name": "game/render_frame",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "4016",
+    "matched_code": "4016",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 16,
+    "matched_functions": 16,
+    "matched_functions_percent": 100.0,
+    "complete_code": "0",
+    "complete_code_percent": 0.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_0015EB70",
      "size": "356",
      "fuzzy_match_percent": 100.0,
-     "address": "40688",
+     "address": "0",
      "metadata": {
       "virtual_address": "1436528",
       "demangled_name": "PackFrameColors"
@@ -18139,7 +18229,7 @@
      "name": "func_0015ECD8",
      "size": "480",
      "fuzzy_match_percent": 100.0,
-     "address": "41048",
+     "address": "360",
      "metadata": {
       "virtual_address": "1436888",
       "demangled_name": "InitRenderFrames"
@@ -18149,7 +18239,7 @@
      "name": "func_0015EEB8",
      "size": "236",
      "fuzzy_match_percent": 100.0,
-     "address": "41528",
+     "address": "840",
      "metadata": {
       "virtual_address": "1437368",
       "demangled_name": "BeginRenderFrame"
@@ -18159,7 +18249,7 @@
      "name": "func_0015EFA8",
      "size": "60",
      "fuzzy_match_percent": 100.0,
-     "address": "41768",
+     "address": "1080",
      "metadata": {
       "virtual_address": "1437608",
       "demangled_name": "AddDmaRefTagIfChanged"
@@ -18169,7 +18259,7 @@
      "name": "func_0015EFE8",
      "size": "204",
      "fuzzy_match_percent": 100.0,
-     "address": "41832",
+     "address": "1144",
      "metadata": {
       "virtual_address": "1437672",
       "demangled_name": "WriteGsFinishPacket"
@@ -18179,7 +18269,7 @@
      "name": "func_0015F0B8",
      "size": "120",
      "fuzzy_match_percent": 100.0,
-     "address": "42040",
+     "address": "1352",
      "metadata": {
       "virtual_address": "1437880",
       "demangled_name": "CloseDrawBuffer"
@@ -18189,7 +18279,7 @@
      "name": "func_0015F130",
      "size": "232",
      "fuzzy_match_percent": 100.0,
-     "address": "42160",
+     "address": "1472",
      "metadata": {
       "virtual_address": "1438000",
       "demangled_name": "SubmitRenderFrame"
@@ -18199,7 +18289,7 @@
      "name": "func_0015F218",
      "size": "100",
      "fuzzy_match_percent": 100.0,
-     "address": "42392",
+     "address": "1704",
      "metadata": {
       "virtual_address": "1438232",
       "demangled_name": "ActivateRenderFrame"
@@ -18209,7 +18299,7 @@
      "name": "func_0015F280",
      "size": "196",
      "fuzzy_match_percent": 100.0,
-     "address": "42496",
+     "address": "1808",
      "metadata": {
       "virtual_address": "1438336",
       "demangled_name": "VerifyCodeChecksum"
@@ -18219,7 +18309,7 @@
      "name": "func_0015F348",
      "size": "264",
      "fuzzy_match_percent": 100.0,
-     "address": "42696",
+     "address": "2008",
      "metadata": {
       "virtual_address": "1438536",
       "demangled_name": "RunRenderThread"
@@ -18229,7 +18319,7 @@
      "name": "func_0015F450",
      "size": "96",
      "fuzzy_match_percent": 100.0,
-     "address": "42960",
+     "address": "2272",
      "metadata": {
       "virtual_address": "1438800",
       "demangled_name": "SendRenderFrameToDma"
@@ -18239,7 +18329,7 @@
      "name": "func_0015F4B0",
      "size": "552",
      "fuzzy_match_percent": 100.0,
-     "address": "43056",
+     "address": "2368",
      "metadata": {
       "virtual_address": "1438896",
       "demangled_name": "ReleaseFrameNodes"
@@ -18249,7 +18339,7 @@
      "name": "func_0015F6D8",
      "size": "272",
      "fuzzy_match_percent": 100.0,
-     "address": "43608",
+     "address": "2920",
      "metadata": {
       "virtual_address": "1439448",
       "demangled_name": "DrainRenderFrames"
@@ -18259,7 +18349,7 @@
      "name": "func_0015F7E8",
      "size": "756",
      "fuzzy_match_percent": 100.0,
-     "address": "43880",
+     "address": "3192",
      "metadata": {
       "virtual_address": "1439720",
       "demangled_name": "BlitFrameToDisplay"
@@ -18269,7 +18359,7 @@
      "name": "func_0015FAE0",
      "size": "60",
      "fuzzy_match_percent": 100.0,
-     "address": "44640",
+     "address": "3952",
      "metadata": {
       "virtual_address": "1440480",
       "demangled_name": "ConstructPacketWriters"
@@ -18279,7 +18369,7 @@
      "name": "func_0015FB20",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "44704",
+     "address": "4016",
      "metadata": {
       "virtual_address": "1440544",
       "demangled_name": "ResetPacketWriters"
@@ -18291,7 +18381,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1549C8.cpp"
+    "source_path": "src/main/render_frame.cpp"
    }
   },
   {
@@ -53445,8 +53535,8 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "233435",
-    "matched_data": "160507",
-    "matched_data_percent": 68.75875511384325,
+    "matched_data": "160495",
+    "matched_data_percent": 68.75361449654079,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
@@ -53472,8 +53562,8 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "209140",
-    "matched_data": "128596",
-    "matched_data_percent": 61.487998469924456,
+    "matched_data": "129560",
+    "matched_data_percent": 61.94893372860285,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
@@ -53539,7 +53629,7 @@
     "complete_code_percent": 0.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
-    "total_units": 87,
+    "total_units": 90,
     "complete_units": 0
    }
   },
@@ -53574,8 +53664,8 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "464563",
-    "matched_data": "311091",
-    "matched_data_percent": 66.96422229062581,
+    "matched_data": "312043",
+    "matched_data_percent": 67.16914605769293,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,

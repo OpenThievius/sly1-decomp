@@ -366,7 +366,7 @@ struct ColorWord
 };
 
 // The file's .data, in retail's order. It begins with the game progress pointers
-// (game_progress.h), which this file's functions read and file_1549C8's do not.
+// (game_progress.h), which this file's functions read and render_frame.cpp's do not.
 GameProgress* g_saveData = &D_0027C220;
 G27C230* g_currentLevelRecord = D_0027C230;
 G27C230* g_currentEntry = D_0027C230;

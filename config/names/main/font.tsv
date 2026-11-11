@@ -1,0 +1,41 @@
+symbol	name	evidence
+func_0015C178	ClearDefaultFont	sets the default font D_0026227C to 0
+func_0015C188	IsFontLoaded	returns 1 when the id is not -1 and D_00262268 holds a font for it
+func_0015C1C0	GetFontById	returns the font registered under the id in D_00262268, the default font D_0026227C when none, 0 for -1
+func_0015C200	FindFontByKeyChar	looks the character up in the 5-entry key table D_00262250 and returns the font at the same index of D_00262268 (the & code of the text reader), else 0
+func_0015C260	CopyFontMetrics	copies the first fields, sizes, scale stack and the three words at 0x30..0x40 from one font to another
+func_0015C2E8	SetFontClipRect	slot 4 of the abstract font base: writes the clip register (0x40) from a rectangle as x, y and the last pixel at the corner, with y scaled by 0.4545
+func_0015C3C0	ResetFontClipRect	slot 7 of the font tables: when the flag is set writes the clip register (0x40) with the full-screen rectangle constant
+func_0015C418	MeasureFontString	adds the width of each character of the string through slot 3, 0 for a null string
+func_0015C4A8	MeasureFontStringHeight	the font's height times its scale times the number of lines WrapFontString counts
+func_0015C4E8	WrapFontString	counts the lines of the string, starting a new one at a newline and, when the line passes the width limit, overwriting the last space or tab (or the current character) with a newline
+func_0015C638	DrawFontString	draws a string with the font into a rectangle: vertical position by the mode (top, centre or bottom), each line aligned left, centre or right by its measured width, drawing through slot 6 between slot 4 and slot 7
+func_0015C8B8	PushFontScale	saves the scale on the font's stack and sets the scale to the first entry times the two factors
+func_0015C900	PopFontScale	takes the top of the scale stack back into the font's scale
+func_0015C930	CloneFont	slot 1 of the font table D_0024A220: allocates 0x88 bytes, installs the table, copies the source with CopyFont and multiplies its scales by x and y
+func_0015C9B0	CopyFont	copies the metrics with CopyFontMetrics plus the id, the two images, the register words, the glyph table and the mask
+func_0015CA38	HasFontGlyph	slot 2 of the font table: returns whether FindFontGlyph finds the key
+func_0015CA60	GetFontCharWidth	slot 3 of the font table: the glyph width plus 1 times the scale, or the default advance times the scale when the key has no glyph
+func_0015CAB8	AddFontImagesToFrame	if the font's mask bit is not yet set in the build frame's flags, writes its two images' transfers into the packet and sets the bit, returning whether it did
+func_0015CB88	BeginFontDraw	slot 4 of the font table: sets the clip through the base, adds the font images to the frame with AddFontImagesToFrame and writes the texture and alpha registers for drawing glyphs
+func_0015CC80	BeginFontGlyphPacket	a slot of the font's GCC vtable D_0024A220: adds the font's images (AddFontImagesToFrame) and opens a GIF tag with its register writes
+func_0015CD18	DrawFontGlyph	slot 6 of the font table: draws one glyph as a textured sprite at x, y when it lies inside 640 by 492.8 and returns the advance
+func_0015CF70	DrawFontGlyphTurned	slot 8 of the font table: like DrawFontGlyph with the sprite's width and height swapped, as four vertices, then calls slot 7
+func_0015D338	DrawFontQuad	writes a colour (alpha scaled) and two corner texture-and-screen points of a sprite into the packet
+func_0015D4E0	DrawFontFrame	slot 9 of the font table: draws a rectangle frame as nine DrawFontQuad pieces (four corners, four edges and a centre) from one glyph of the font
+func_0015D8A8	LoadFont	reads a 16-byte header from the data, registers the font under its id in D_00262268, links the two images from the tables D_00274504 and D_0027450C and copies the glyph table
+func_0015D998	UploadFontImages	sends the font's image (and second image) to video memory with a GS packet, recording the register word and the packet words in 0x60..0x74
+func_0015DAB8	FindFontGlyph	binary search of the font's glyph table (8-byte entries sorted by key) for the key
+func_0015DB28	InitTextReader	stores the text and default font in the reader, sets its four colours to 0xFF808080, points the inline font at the font vtable and rewinds it
+func_0015DB80	RewindTextReader	puts the cursor back at the text's start, the font back to the default one and the colours back to the default colour
+func_0015DBB8	SetTextDefaultColor	stores a colour word at +0xA4 of the reader, the colour the codes in the text go back to
+func_0015DBE0	ReadTextChar	returns the next character of the reader's text, applying the ~ colour, & font and ^ scale codes it passes
+func_0015DF58	CountTextChars	rewinds the reader and counts the characters ReadTextChar returns
+func_0015DFA0	SeekTextReader	rewinds the reader, skips n characters (stopping at the end) and clears the changed-font flag
+func_0015DFF8	SumTextWidth	rewinds the reader and adds the font's width of every character ReadTextChar returns
+func_0015E068	WrapTextLines	counts the lines of the reader's text, starting a new line at a newline and, when the width passes the limit, overwriting the last space or tab (or the current character) with a newline
+func_0015E1B0	MeasureTextHeight	multiplies the default font's height times its scale by the number of lines func_0015E068 counts
+func_0015E1F0	MeasureTextWidth	rewinds the text reader (RewindTextReader) and sums each character's advance from the font's glyph-width callback until a newline (0xA), returning the widest line; MeasureText and RebuildPromptText call it
+func_0015E290	MeasureText	counts the lines, asks func_0015E1F0 for the width and writes the width and the lines times the default font's line height through its two out pointers
+func_0015E318	DrawAlignedText	measures each line of the reader's text then draws every character with the font inside a layout rectangle, aligning each line left, centre or right and the block top, centre or bottom
+func_0015E5F0	UploadAllFontImages	for each of the D_00262260 fonts at D_00262264 (0x88 bytes apart) calls UploadFontImages

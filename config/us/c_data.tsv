@@ -23,7 +23,9 @@ D_00249EF0	00249EF0	200	.rodata	src/main/file_14B6A8.cpp
 D_00249FBC	00249FBC	24	.rodata	src/main/path_curve.cpp
 D_00249FE0	00249FE0	288	.rodata	src/main/file_14EE40.cpp
 D_0024A100	0024A100	20	.rodata	src/main/active_set_solver.cpp
-D_0024A120	0024A120	432	.rodata	src/main/file_1549C8.cpp
+D_0024A120	0024A120	100	.rodata	src/main/file_1549C8.cpp
+D_0024A190	0024A190	144	.rodata	src/main/object_cycler.cpp
+D_0024A220	0024A220	176	.rodata	src/main/font.cpp
 D_0024A2D0	0024A2D0	1088	.rodata	src/main/file_15F678.cpp
 D_0024A710	0024A710	132	.rodata	src/main/placed_object_model.cpp
 D_0024A794	0024A794	12	.rodata	src/main/target_lists.cpp
@@ -141,7 +143,10 @@ D_002619A0	002619A0	572	.data	src/main/state_notifier.cpp
 D_00261BF0	00261BF0	160	.data	src/main/camera_controller.cpp
 D_00261C90	00261C90	52	.data	src/main/file_14B6A8.cpp
 D_00261CC8	00261CC8	668	.data	src/main/file_14EE40.cpp
-D_00261F70	00261F70	1012	.data	src/main/file_1549C8.cpp
+D_00261F70	00261F70	516	.data	src/main/file_1549C8.cpp
+D_00262180	00262180	208	.data	src/main/object_cycler.cpp
+D_00262250	00262250	48	.data	src/main/font.cpp
+D_00262280	00262280	240	.data	src/main/render_frame.cpp
 D_002623C0	002623C0	32	.data	src/main/file_15F678.cpp
 D_002623E0	002623E0	152	.data	src/main/placed_object_model.cpp
 D_00262480	00262480	592	.data	src/main/display.cpp

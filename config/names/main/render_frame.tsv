@@ -1,0 +1,17 @@
+symbol	name	evidence
+func_0015E6A8	PackFrameColors	draw callback: packs each colour entry's two colours and the run's colours of the current frame record into the output words with PackColor
+func_0015E810	InitRenderFrames	gives each of the two render frames its buffers and three lists, creates the empty global lists, starts the render thread and its two semaphores and fills the CRC-32 table D_002C3B00
+func_0015E9F0	BeginRenderFrame	calls func_001F6B60 on the semaphore D_002623B4, takes the next of the two RenderFrame records in turn into D_002622D8, empties it (func_0015EFE8), clears its flags and points the buffer writers D_00262280 and D_002622A8 at its two buffers
+func_0015EAE0	AddDmaRefTagIfChanged	adds a DMA ref tag of (end-value+15)/16 quadwords only when value differs from the last one remembered in D_0026230C
+func_0015EB20	WriteGsFinishPacket	builds a GIF packet with one register write to GS register 0x61 (FINISH), writes it through VIF direct, adds a DMA end tag and detaches the buffer
+func_0015EBF0	CloseDrawBuffer	finishes a GS buffer: sets its header registers (0x61), closes it with func_00161200 and func_00152D30 and submits it with func_001529E0
+func_0015EC68	SubmitRenderFrame	copies the global lists D_002622E0, D_002622F0 and D_00262300 into the current record, clears D_002622D8 and signals the semaphore D_002623B0 that func_0015EE80 waits on
+func_0015ED50	ActivateRenderFrame	sets g_drawFrameData and the image mask of a render frame, and when it has a pending list sends D_00274538 on the GIF channel (RunRenderThread and SendRenderFrameToDma call it)
+func_0015EDB8	VerifyCodeChecksum	folds the words from 0x100000 for D_00148D74 bytes through the CRC-32 table and sets D_00262310 to 1 when the result is nonzero; RunRenderThread calls it first
+func_0015EE80	RunRenderThread	loops forever: waits on D_002623B0, takes the next RenderFrame in turn, sends its two buffers to the DMA channels D_00261F18 and D_00261F1C, then signals D_002623B4
+func_0015EF88	SendRenderFrameToDma	sets up the frame with func_0015ED50, sends its buffer to the DMA channel D_00261F18 and, when the flag is set, also the second buffer to D_00261F1C
+func_0015EFE8	ReleaseFrameNodes	for each of the record's three lists, takes every node out and returns it to the pool it came from, then empties the list
+func_0015F210	DrainRenderFrames	waits on the semaphore D_002623B4 until the render thread is idle, optionally sends the last frame again a few times, then releases the nodes of both frames with ReleaseFrameNodes
+func_0015F320	BlitFrameToDisplay	after each frame's GIF packet (RunRenderThread, DrainRenderFrames) builds a GIF packet on the stack with register writes chosen by g_displayFrameCounter's parity and two UV/XYZF pairs (a textured sprite) and sends it
+func_0015F618	ConstructPacketWriters	the file's static initialiser: on the construction pass sets up g_gsPacketWriter and g_vifPacketWriter (ResetPacketWriters calls it)
+func_0015F658	ResetPacketWriters	calls func_0015F618(1, 0xFFFF), which re-initialises the GS packet writer and the VIF packet writer
