@@ -651,7 +651,7 @@ From cse.c and gcse.c of GCC 2.95.3 and the `.cse` and `.gcse` dumps (2026-11-10
   So the original took the range's address after the lean clamp and used it for the speed
   clamp; written before the lean clamp or used by the w clamp it lands in the wrong place.
 
-### A reload after an if whose body returns: follow-jumps (func_00183668, unsolved)
+### A reload after an if whose body returns: follow-jumps (func_00183668, matched)
 
 `cse_end_of_basic_block` follows a conditional jump (`-fcse-follow-jumps`, on at -O2) when its
 label has exactly one use and, walking back from the label over notes and unused labels, the
@@ -702,6 +702,13 @@ Measured again 2026-11-10 (cse.c's cse_end_of_basic_block and cse_basic_block, g
   sits between the switch's cases and the loop in both builds: find_and_verify_loops moves a
   block entered by a conditional jump and ending in a jump out of the loop to the last barrier
   before it.
+
+Matched (2026-11-12): the returning body written as a chain whose branches all return
+(`if (key >= 8) return 1; else if (key >= 6) return ...; else return 1;`) followed by the
+compiled-out assertion of a not-reached check, `ASSERT(0);` (include/debug_assert.h, an empty
+`do { } while (0)`), is EXACT on US and PAL: case 2 above, at a site where an assertion
+plausibly stood. AGENTS.md allows the macro only under those conditions. The same notes
+before the tag test, or at the top of the returning body, do not match.
 
 ### A default set in the else arm, not in the walk's test: reorg's stolen slot (func_001CD870)
 

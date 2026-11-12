@@ -139,6 +139,15 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   only where it is what the original developers wrote: a macro of a group of statements, in
   the form C macros take (`#define NAME(...) do { ... } while (0)`), that the original
   plausibly had and retail's code needs. Never a wrapper written only to move instructions.
+  One such macro is the debug build's assertion as the release build compiles it, `ASSERT(cond)`
+  (include/debug_assert.h), which expands to an empty `do { } while (0)`: GCC 2.95 keeps the
+  loop notes of an empty loop that runs once, so retail's code shows where one stood. It is
+  allowed only where all three hold: retail's code is proved to need those notes (the
+  mechanism, from the compiler's dumps, in docs/toolchain/); the site is one where an assertion
+  plausibly stood (a not-reached check after branches that all return, a check of an argument
+  or a state); and the use has a comment naming that section. It is never tried as a variant
+  across functions, and no other statements go inside it: a run-once loop around statements
+  is still a barrier.
 - **An unused local only as a type the original plausibly declared.** GCC 2.95 gives an unused
   struct local a stack slot, so retail's frames show where the original declared one. A list
   walk whose frame has an unused 16-byte gap declares the walk's frame, `ListFrame frame;`

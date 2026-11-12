@@ -2093,6 +2093,7 @@ func_00183438	func_00183A98	match
 func_00183458	func_00183AB8	match	
 func_00183478	func_00183AD8	match	
 func_001834A0	func_00183B00	match	
+func_00183668	func_00183CC8	match	rodata
 func_001837E0	func_00183E40	match	
 func_00183910	func_00183F70	match	
 func_00183990	func_00183FF0	match	
