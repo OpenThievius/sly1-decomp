@@ -286,7 +286,7 @@ explains it; search the section's title or the function. Walls that stay open ar
   and stores the members in declaration order; a union member's non-zero initialiser adds a CLOBBER that sched1
   orders every store of the record around (reload deletes it), and a member with a constructor makes the
   initialiser run at run time (docs/toolchain/large-functions.md, "A brace initialiser's union member is a
-  CLOBBER": the five ring records, func_001930B8 and func_001A1030's two locals).
+  CLOBBER": the five ring records, func_001930B8, func_001549C8 and func_001A1030's two locals).
 
 ### Process
 - Find the mechanism first: the pass in the dumps (-dS, -dl, -dg, -dL, -dG, -fsched-verbose-6) and in GCC

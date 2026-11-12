@@ -1736,7 +1736,15 @@ TurnColliderTowardRotation (2026-11-09):
   look for a parameter passed on to a callee (here a float one) that lengthens the chain behind
   the save.
 
-### A constant set in an earlier block and used once (func_001549C8)
+### A constant set in an earlier block and used once (func_001549C8, matched 2026-11-12)
+
+**Matched (w37-f3, 2026-11-12).** The two records are function-local statics with brace
+initialisers (`static Blk05 block = { { 750.0f, 750.0f, 1.0f }, ..., 200, ..., { 1.0f, 0.0f,
+-1.0f } };`), each built in a temporary and copied because a vector member is copied from a
+global. What made f70 and f78 wait is the CLOBBER of the union member at 0x70 (the block's last
+vector is a Quadratic16, include/shapes.h): docs/toolchain/large-functions.md, "A brace
+initialiser's union member is a CLOBBER". The 200 is a plain element of the initialiser; no
+variable set before the guards is needed. The notes below are kept as they were written.
 
 - **The widening blocks a register after a load's address dies.** local-alloc's first try
   widens each quantity by one insn at each end and marks the widened range taken. In

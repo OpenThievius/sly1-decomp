@@ -519,6 +519,11 @@ cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
   -1.0 is loaded after -0.5 is stored and takes its $f0, and the one before 0x00 gives the
   first vector's constants their lives. The vectors at 0x20 (-0.5) and 0x50 (0.5, 2.0) have a
   non-zero first float and no CLOBBER: they are plain (with either as a union, 1 to 3 of 8).
+- **func_001549C8, two function-local statics built the same way.** Its vectors and its spawn
+  block (the same Blk05, with 750, 750, 1.0 and 1.0, 0, -1.0 in the two Quadratic16s) are
+  `static` brace initialisers behind two guards, each through a temporary; the CLOBBER at
+  0x70 is what held f70 and f78 behind the other stores (docs/toolchain/alias-classes.md, "A
+  constant set in an earlier block and used once").
 - **A local is the same (func_001A1030).** `Quadratic16 a = { 125.0f, -25.0f, 0.0f };` on the
   stack is cleared with one `sq` and gets the same `(clobber (mem/s:BLK slot))` before its
   first float's store; two such locals in a row order their frame stores as retail's emitter
