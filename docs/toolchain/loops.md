@@ -965,7 +965,8 @@ vf31. Three near misses whose notes all read "a life-1 constant moved out of a l
   register variable that names a register not yet fixed (globalize_reg). Nothing raises it
   inside a compilation. So two thresholds in one file mean either two translation units built
   with different options (file_1D62E0.cpp "could be several", its header says), or one unit
-  whose threshold falls partway down at file-scope register declarations. Neither is proved.
+  whose threshold falls partway down at file-scope register declarations. The second is ruled
+  out for this compiler (the next section): only the first remains, and it is not proved.
   Not the cause: whether the function uses VU0 or the FPU (func_001D9488 uses neither,
   func_0013AD80 both), `-g`, `-O3`, `-fno-gcse`, `-p` (same decisions as the default).
 - **Reading it elsewhere.** A near miss whose only wall is a constant, a `%hi` or a stride that
@@ -973,3 +974,167 @@ vf31. Three near misses whose notes all read "a life-1 constant moved out of a l
   -fno-exceptions -fno-rtti -mvu0-use-vf0-vf30"` before looking for a second movable or a
   longer life. If it becomes EXACT, check which matched functions of its file change under the
   same flags; a file where none does can take the row.
+
+### The threshold by function: one value for every matched function, and where a second would cut
+
+Measured on 2026-11-12 (w39-tu): every file of src/main built whole with `tools/check.py --flags
+"-O2 -G0 -fno-exceptions -fno-rtti -mvu0-use-vf0-vfN" FILE FUNC...` for each N from 8 to 31 (94
+files with C functions, 24 builds each), every near miss in nonmatching/ but func_00109488 for N
+from 15 to 31, and every earlier version of a threshold-sensitive function's near miss in the
+git history (79 files) for N from 15 to 31. The scripts and their output are in the worker's
+scratch folder (build/swarm/w39-tu/: scan.py, nmscan.py, histscan.py, analyze2.py, fixtest.sh).
+The previous section's sampled windows (N = 16, 20, 22, 24, 26 to 30) all agree with the full
+scan.
+
+**The map.** Of the 3975 matched game functions (EXACT under their file's flags), 3930 are
+EXACT for every N from 9 (or 8, where the file compiles at 8) to 31. The other 45, and the three
+near misses that reach retail or come closest at some N (marked *), by address:
+
+| Function | File | EXACT for N |
+| --- | --- | --- |
+| func_00120470 | pose_source.cpp | 8-17 |
+| func_00127B20 | placed_object.cpp | 9-21 |
+| func_0012CD78 | placed_object.cpp | 9-25 |
+| func_00130C58* | placed_object.cpp | none; 6 lines off at 29-31 (49 at 26-28, 179 at 15-25) |
+| func_00138C00 | world_contacts.cpp | 8-29 |
+| func_0013AD80* | world_listed_object.cpp | 23-30 (matched there, row at vf30) |
+| func_0013BF68 | child_group_object.cpp | **15**-17 |
+| func_00140258 | zone_collider.cpp | 8-17 |
+| func_00142278 | collider_span.cpp | 8-19 |
+| func_00142B78 | collider_span.cpp | 12-31 |
+| func_00146518 | state_notifier.cpp | 9-31 |
+| func_0014D3A8 | path_curve.cpp | 10-31 |
+| func_0014D680 | path_curve.cpp | 8-25 |
+| func_00154370 | active_set_solver.cpp | 10-17 |
+| func_00157B88 | file_1549C8.cpp | 9-18 |
+| func_0015E318 | font.cpp | 14-31 |
+| func_0015FD78 | file_15F678.cpp | 8-17 |
+| func_0016C528 | file_16C470.cpp | 13-31 |
+| func_00177990 | player.cpp | **15**-31 |
+| func_00178678 | player.cpp | 9-20 |
+| func_0017D5D8 | file_17D248.cpp | 10-19 |
+| func_00180108 | colored_triangle_set.cpp | 8-25 |
+| func_001821B0 | file_180EB0.cpp | 11-31 |
+| func_00188B48 | matrix.cpp | 10-31 |
+| func_00192DD0 | switched_collider.cpp | **15**-17 |
+| func_001971B8 | file_1963D8.cpp | 11-22 |
+| func_0019CF68 | file_198980.cpp | 14-31 |
+| func_001A15D8 | effect.cpp | 13-**15** |
+| func_001AF108 | timed_object.cpp | 8-22 |
+| func_001B2140 | range_record.cpp | 9-31 |
+| func_001B55C0 | state_walker.cpp | 8-20 |
+| func_001BC978 | collider.cpp | 9-17 |
+| func_001C57C8 | turning_collider.cpp | 8-17 |
+| func_001C9AF8 | agent.cpp | 10-31 |
+| func_001CC120 | agent.cpp | 9-**15** |
+| func_001CC490 | player_link.cpp | 9-19 |
+| func_001CF158 | player_target.cpp | 13-18 |
+| func_001CFFD0 | player_target.cpp | 12-31 |
+| func_001D5678 | player_request.cpp | 14-31 |
+| func_001D66A8 | file_1D62E0.cpp | 9-28 |
+| func_001D7778 | file_1D62E0.cpp | 9-19 |
+| func_001D8E40 | file_1D62E0.cpp | 12-31 |
+| func_001D9488* | file_1D62E0.cpp | 30-31 |
+| func_001D9AC8 | file_1D62E0.cpp | 9-24 |
+| func_001DDE90 | tint_blend_collider.cpp | 9-**15** |
+| func_001DF520 | tint_blend_collider.cpp | 10-31 |
+| func_001F2840 | file_1F2758.cpp | 9-24 |
+| func_001F2EF0 | file_1F2758.cpp | 9-20 |
+
+A lower edge of 8 or 9 is where the file stops compiling (VU0 helpers that need more vector
+registers than N leaves), not a threshold. Every range is one interval: no function matches
+at two N with a gap between. Of the other near misses, func_00134B48 (text_panel.cpp) is best at
+15-16 (11 lines; 140 or more above), func_0013A618 (world_listed_object.cpp) is 30 lines off at
+15, 20 at 26-28 and 159 at 29-30, func_0013A940 (same file) 205 or 207 throughout, and the
+other 32 do not change.
+
+- **Proved: the default unit's threshold is exactly 79.** The 3975 matched functions have one
+  N in common, 15, the default row: func_001A15D8, func_001CC120 and func_001DDE90 stop at 16,
+  and func_0013BF68, func_00192DD0 and func_00177990 stop at 14. None of the six uses a vector
+  register above $vf9, and the dependence is the count alone: built with `-mvu0-use-vf0-vf16
+  -ffixed-$f31` (a register the function never uses fixed, so the count is that of vf15 with
+  $vf16 allocatable) the three upper ones are EXACT again, and built with `-mvu0-use-vf0-vf15
+  -ffixed-$f31` (the count of vf14) the three lower ones differ as at vf14. The same test at
+  each function's first failing N (one unused FPR fixed) gives EXACT for all 30 functions
+  with an upper edge, and at vf31 with up to 16 unused FPRs fixed, EXACT wherever the count
+  gets back into the function's range (26 of 30; the other four run out of unused FPRs). So
+  what N changes in these functions is n_non_fixed_regs, that is loop.c's two thresholds
+  (move_movables' `1 + n` and strength_reduce's `3 + n`, doubled without a call; stmt.c's
+  third use, preserve_subexpressions_p, returns 1 at -O2), never which vector registers are
+  allocatable.
+- **One cut in address order is not enough: three are needed, and they fall inside two
+  files.** Taking the proved file edges (config/us/files.tsv) as free cuts, every file but two
+  has a common N: world_listed_object.cpp (23-30, with func_0013AD80's plain form) and every
+  other file at 15. placed_object.cpp needs one cut between func_0012CD78 (at most 25) and
+  func_00130C58 (29 or more); file_1D62E0.cpp needs two, one between func_001D7778 (at most
+  19) and func_001D9488 (30-31) and one between func_001D9488 and func_001D9AC8 (at most 24).
+  func_001D8E40 (12-31) and the insensitive functions between can go either way. So the units
+  would take two values of N, 15 everywhere and 30 for three short stretches (30 is the only
+  value func_0013AD80's 23-30, func_001D9488's 30-31 and func_00130C58's 29-31 share; 15 is the
+  only one the matched functions share).
+- **Inferred, not proved: what the data says about the three cuts.** A unit's .text, .data,
+  .rodata and .bss are each contiguous, so each cut in .text needs a place in each data section
+  where its two sides' labels separate.
+  - placed_object.cpp before func_00130C58: allowed. Every label of the file's .data
+    (0x260E70 to 0x261090) is read only by functions up to func_0012B760, so the second unit
+    has no .data; its .rodata would start at 0x249B20, 0x249C10 or 0x249C90 (the two jump
+    tables and func_00130C58's FLT_MAX, each on 16), depending on where the cut is. Nothing
+    shows a boundary either: no padding gap, no vtable, no `_GLOBAL_$I$`. func_00130C58 is
+    called by func_00130C20 just before it and by func_0015B7B8 (object_cycler.cpp), so it is
+    not file-local, and func_00130C20 would go with it.
+  - file_1D62E0.cpp around func_001D9488: allowed only with a cost. func_001D9488 reads no
+    data of the file; it is called by func_001D9338 before it and by func_001D9C98 after it
+    (class 0x19's method at +0x54, a class whose method at +0x80 is func_001D7778, on the other
+    side of the first cut). For every cut between func_001D7778 and func_001D9AC8 the best
+    .data cut leaves globals defined in one unit and read only by another: at least 0x2751D4
+    and 0x2751DC (60 and 0.75, read only by func_001D9D78 and func_001DAF08 after the cut, in a
+    block of four words whose other two, 850 and 1.25, are read by functions before it), and
+    the cleanest place, 0x275518, is on 8 only while the unit after it begins with a 16-aligned
+    Vec02 at 0x275530 in our source (the type is ours: retail only shows the address). A cut
+    before func_001D8E40 adds D_00275240 to the globals read across it. The .rodata (0x24DC90
+    to 0x24DCA8) splits cleanly: the "%s" and the float are the first unit's, the pairs at
+    0x24DC98 (func_001DCD28) the last's, and func_001D9488's unit has none.
+  - None of the three cuts is where a signal of docs/AGENT_WORKFLOW.md ("Finding and proving
+    a file") puts a boundary; none is excluded by one either. A split would be proved only by
+    building the pieces whole as separate units and getting `MATCH`.
+- **Ruled out: something inside one unit lowering the count between functions.** In GCC 2.95.3
+  (regclass.c, varasm.c, toplev.c), n_non_fixed_regs is set once in init_reg_sets_1, from
+  FIXED_REGISTERS, CONDITIONAL_REGISTER_USAGE and the -ffixed-, -fcall-used- and -fcall-saved-
+  options, before the first declaration is read; afterwards only globalize_reg changes it, by
+  one for each file-scope `register` variable on a register not already fixed. Measured with
+  SN's cc1plus: such a declaration is refused with `global register variable follows a function
+  definition` even as the first line of a file (`register int g asm("s7");` alone), because
+  g++ gives its built-in functions RTL before the source is read, which sets varasm.c's
+  `function_defined`. A register variable on an already fixed register (`register u128 g
+  asm("vf20");` at vf15) is accepted and changes nothing; at vf31 it is refused the same way.
+  So no C++ file can lower the count at all, let alone between two functions, and nothing
+  raises it. The strings of cc1plus show no pragma beyond g++'s own (`interface`,
+  `implementation`, `vtable`, `unit`, `weak`) and no option that sets the VU0 range other than
+  `-mvu0-use-vf0-`. The other SN builds the toolchain has (2.95.2, 2.96-ee-001003-1) keep the
+  same count at vf15: func_001D9488 differs there and is EXACT at vf30 under both, as under
+  2.95.3, so a unit built by another release with another default is not it either. What SN
+  changed in its EE backend is not public, but every measurement fits a count fixed per unit:
+  whole files at one N reproduce retail for every matched function.
+- **The reverse risk: matched forms that compensate.** Every earlier near miss of the 30
+  functions with an upper edge (from `git log -- nonmatching/FUNC.cpp`; 72 of the 79 compile
+  today) was built at N = 15 to 31: none is EXACT at any N other than the matched function's
+  own range. Three get closer at a higher N, the candidates for a source shaped to fit 79:
+  - func_001CF158 (player_target.cpp): its last near miss before the match (3b7dde15, without
+    the `const f32&` references at the top of the loop that matched it, "Solved: the weight and
+    the limit named at the top of the loop" above) goes from 17 lines at 15 to 6 at every N
+    from 20 to 31; what is left is the round-robin of the spilled `%hi` reloads (v0, v1 against
+    v1, a0). The matched form is EXACT at 13-18 only. The strongest candidate.
+  - func_001C57C8 (turning_collider.cpp): two versions (907d7889, 9981717e) go from 86 lines to
+    31 at N = 23-24 only, and back to 86 at 25. Weak.
+  - func_0017D5D8 (file_17D248.cpp): ce5e76ad goes from 304 lines to 270 at 20-22. Weak.
+  The other 27 (and func_00177990, which has no history) show nothing. This does not show
+  they were shaped to fit: a form plainer than the matched one that is EXACT elsewhere would.
+- **Where this leaves the vf30 row.** world_listed_object.cpp holds no matched function that
+  depends on N, and func_0013AD80's plain form needs 23-30, so the row costs nothing that is
+  matched; its two other near misses do not support it (func_0013A618 is worse at 29-30 than
+  at 15, func_0013A940 the same). placed_object.cpp could take a vf30 unit for func_00130C58
+  alone (with func_00130C20, or from any function after func_0012CD78), and file_1D62E0.cpp one
+  for func_001D9488 between two vf15 units; neither has a data edge to show it, and
+  func_00130C58 also has an EXACT form at the file's own threshold (the two loop notes of the
+  section "The 3's second set"), which the rules do not allow but which shows the threshold is
+  not the only way to its code.
