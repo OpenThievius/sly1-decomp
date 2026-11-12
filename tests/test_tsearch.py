@@ -144,6 +144,26 @@ class Rewrites(unittest.TestCase):
         self.assertTrue(has(rs, "const", "s32 func_00100000(s32 c) { const s32 x = c + 1; return x; }"))
         self.assertTrue(has(rs, "const", "s32 func_00100000(const s32 c) { s32 x = c + 1; return x; }"))
 
+    def test_widths(self):
+        src = "u64 func_00100000(u32 i, u64 key) { u64 r = 0; s32 sh = 4; r = g[i] | (key << sh); return r + key; }\n"
+        rs = results(src, only={"widths"})
+        # Narrowed: a cast back to the old type where it is a shift's or arithmetic's operand.
+        self.assertTrue(has(rs, "width", "u64 func_00100000(u32 i, s32 key) { u64 r = 0; s32 sh = 4; "
+                                         "r = g[i] | ((u64)key << sh); return r + (u64)key; }"))
+        # Widened: no cast.
+        self.assertTrue(has(rs, "width", "u64 func_00100000(u64 i, u64 key) { u64 r = 0; s32 sh = 4; "
+                                         "r = g[i] | (key << sh); return r + key; }"))
+        # A local, and an assignment's target is not cast.
+        src = "s32 func_00100000(s32 c) { s32 x = c; x = x + 1; return x; }\n"
+        rs = results(src, only={"widths"})
+        self.assertTrue(has(rs, "width", "s32 func_00100000(s32 c) { s16 x = c; x = (s32)x + 1; return x; }"))
+        self.assertFalse(any("(s32)x =" in t for t in rs.values()))
+
+    def test_width_notes_name_the_callers(self):
+        cand = tsearch.Cand("", ["width@1 param key u64 -> s32"])
+        self.assertIn("callers", tsearch.width_notes(cand, "func_0020A190"))
+        self.assertEqual(tsearch.width_notes(tsearch.Cand("", ["width@1 local r u64 -> s32"]), "func_0020A190"), "")
+
     def test_pointer_and_reference(self):
         src = "struct S { s32 a; };\nextern S g_s;\ns32 func_00100000() { S* p = &g_s; return p->a; }\n"
         rs = results(src, only={"pointer-ref"})
