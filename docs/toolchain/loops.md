@@ -862,3 +862,57 @@ when D0's and E0's `lo_sum` are left by the first pass and moved by the second
   loop.c also substitutes a single-use copy into its use in a loop with calls (scan_loop's
   `reg_single_usage` case): that is why `&torque` is read from PRE's spill slot
   (`lw a1,280(sp)`).
+
+### Named constants that lose their registers: five loads reload forms again in the loop (func_00131F60)
+
+Matched on 2026-11-12 (w38-f6). The gauge loop of DrawTextPanelControlLabels loads 1/9, 1/15, 55,
+0.5 and 372.8 inside the loop (`lui at; mtc1`) and keeps 1.0, 9, 60, 320, 1728, 16, 0.4545 and
+1936 in $f27, $f31, $f30, $f26, $f25, $f23, $f29 and $f28. The near miss read the five loads as
+the loop's own: two scratch floats set more than once (`d` = 1/15, then a product, then 372.8;
+`k` = 55, then 0.5), which loop.c does not move, and the eight as locals set before the loop.
+That gave retail's code but for one local-alloc tie against a global-alloc ranking that no order
+of the statements satisfied (long-block-constants.md, "A scratch float in a loop"). Both were
+artefacts of the invented scratch variables. Read from the `-dL`, `-dl` and `-dg` dumps:
+
+- **Every constant of the loop was moved out; five got no register.** The loop holds four values
+  across its calls (x0, x1, y0, y1), so eight of the twelve saved float registers are left and
+  twelve constants want them. global-alloc ranks by `floor_log2(refs) * refs / life`, a use in
+  the loop counting 2 and the preheader's set 1: 16.0 (13 refs), 320 and 1728 (9), 1.0 (7) go
+  first; the constants with two uses (5 refs) are ranked by their life, which is the loop plus
+  their place in the preheader, so the ones loop.c moved first (the earliest in the loop) come
+  last; the ones with one use (3 refs) after them. A moved constant with no hard register has
+  a REG_EQUIV note, so reload deletes its set and loads the constant before each insn that
+  uses it, in the first register (reg_alloc_order) that no pseudo live before or after that
+  insn holds (order_regs_for_reload), and a later use in the block inherits the load: one
+  `mtc1` each for 55 ($f6, two multiplies) and 372.8 ($f2, two subtractions).
+- **A literal has a life of 1; a variable has the life of its uses.** A constant in an
+  expression is forced into a register right before the insn that uses it, so it moves only
+  when cse1 has merged several uses (55: life 6; 9, 60: life 6 and 4) and otherwise stays
+  (`79 * 1 * 1 < 94` insns in pass 1). `(f32)i * (1.0f / 9.0f)` is such a literal: pass 2 moves
+  it (`Loop from 61 to 365: 79 real insns. Insn 103: regno 133 (life 1) ... moved`, the loop
+  being 79 insns once pass 1 has emptied it), last in the preheader, with three refs.
+- **What retail's registers require.** (1) 1/15 and 0.5 are not the block's own pseudos: a
+  block-local 1/15 dies in `hi = lo + 1/15` and local-alloc ties it to hi (combine_regs tries
+  the second operand when the first does not die), putting it in hi's $f3 where retail has
+  $f2; a block-local 0.5 is issued early by sched1 (priority 9) and takes $f5 before the zoom
+  ($f6) with 55 pushed to $f7. Moved and reloaded they take the first free register at their
+  use: $f2 and $f6. (2) 372.8 is ranked under 9 and 60. In `372.8f - lo * 60.0f` the product is
+  expanded first, so 60 precedes 372.8 in the loop, 372.8 has the shorter life and outranks 9:
+  retail's loser is then 9 (measured: `lui at,0x4110` in the loop). So 372.8 was moved before
+  9 and 60: it was set before the x statements.
+- **The source.** Three variables of the loop body, `f32 step = 1.0f / 15.0f; f32 top =
+  372.800018f; f32 half = 0.5f;`, and literals everywhere else (no locals before the loop).
+  The dump: `Insn 90: regno 128 (life 10) moved`, `Insn 94: regno 129 (life 27) moved`, `Insn
+  98: regno 130 (life 28) moved` first, then 1.0 (136), 55 (138), 9 (140), 60 (150), 320, 1728,
+  16, 0.4545 and 1936; the dispositions give 128, 129, 130, 133 and 138 no register. EXACT in
+  the five placements of the three declarations tried (four orders before `lo`; `top` and
+  `half` after `hi`; `half` after the y statements), in seven of the twelve orders of the x
+  and y statements tried, and with 55 named as well; not with `mid = (lo +
+  hi) * 0.5f` (the 0.5 has life 1 again and stays the block's own: 37 lines).
+- **The tell.** Constants loaded inside a loop whose saved registers are all taken are not
+  evidence of a variable set twice: each may be a moved constant that lost its register. Rank
+  the constants by refs and by preheader place; a loser with more uses than a winner was moved
+  earlier, which a literal cannot be if its statement comes later: a named variable (or an
+  inline's parameter, loops.md, func_001D7778) is what sets a constant ahead of its use. A
+  register that seems reused for unrelated constants (`$f2`: 1/15, a difference, 372.8) is
+  reload's first free register, not one pseudo.
