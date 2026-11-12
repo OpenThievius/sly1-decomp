@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 37352/37392, checked 2026-11-11
+// SIZE 37352/37392, checked 2026-11-12
 // DECLS (2026-11-11, w28-nmdecls): the 224 host-function declarations flagged by tools/decls.py are now s32 (value in v0, as their definitions and callers); they are only stored as function pointers, so no effect: 6692/9348 before and after.
 #include "common.h"
 // NEAR (2026-11-07, kind-130 merge, worker match-00109488-b): 9,338 instructions against retail's

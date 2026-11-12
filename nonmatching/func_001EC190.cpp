@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 392/492 (79.7%), checked 2026-11-11
+// BYTES 392/492 (79.7%), checked 2026-11-12
 // DECLS (2026-11-11, w28-nmdecls): AppendQueuedCall now void*, TransformPointBetweenFrames void, StoreFloatAsQuadword void*: neutral, order 107/123.
 // w25 (2026-11-11, w25-deps): dependence sources enumerated (docs/toolchain/large-functions.md, "Dependence sources enumerated"): the 33rd-reference flush is not reached (12-14 references), a guard of priority 3 would need a call after `guard = 1`, and reload_cse_regs could hide a second 1.0 pseudo (C's constants apart from A's, A and B at priority 5 replay to one tie from retail's groups). A base class holding the fields with a derived constructor setting f50/f60/f54: same code.
 // NEAR (2026-11-10, w15): the frame and saved registers are retail's with the two scales through the inline

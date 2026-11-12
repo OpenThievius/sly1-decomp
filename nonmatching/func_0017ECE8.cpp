@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 810/812 (99.8%), checked 2026-11-11
+// BYTES 810/812 (99.8%), checked 2026-11-12
 // NEAR: w11 (2026-11-10). 812 bytes, same code and frame; registers differ in one place only:
 //       the copy of the spilled down vector into the sum after SolveActiveSetSystem (`lq v0,32(sp);
 //       sq v0,0(sp)`, retail v1). That reload register comes from order_regs_for_reload, which

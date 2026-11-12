@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 195/280 (69.6%), checked 2026-11-11
+// BYTES 195/280 (69.6%), checked 2026-11-12
 // w25 (2026-11-11, w25-deps): dependence sources enumerated (docs/toolchain/large-functions.md, "Dependence sources enumerated"): the 33rd-reference flush is not reached (12-14 references), a guard of priority 3 would need a call after `guard = 1`, and reload_cse_regs could hide a second 1.0 pseudo (C's constants apart from A's, A and B at priority 5 replay to one tie from retail's groups). A base class holding the fields with a derived constructor setting f50/f60/f54: same code.
 // w26 (2026-11-11, w26-statics): a uniform raise of A, i0 and B to priority 5 replays f8 and i68 before i0; A and i0 at 6 with B at 5 gives A, i0, B, so this one needs the chain A -> i0 -> B (a base with no known value), not a raise (docs/toolchain/large-functions.md, "The tie is the statement order of C").
 // NEAR: order: as func_001D5FA8 (the stores keep the constructor's order in retail and are

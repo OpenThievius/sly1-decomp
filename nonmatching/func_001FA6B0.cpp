@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 252/296 (85.1%), checked 2026-11-11
+// BYTES 252/296 (85.1%), checked 2026-11-12
 #include "common.h"
 #include "system.h"
 // w23-vuE (2026-11-11): 296 bytes, retail's size, with the registers still differing (97% by regdiff, 72 of 74 insns equal by

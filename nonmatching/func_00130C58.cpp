@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 736/748, checked 2026-11-11
+// SIZE 736/748, checked 2026-11-12
 // NEAR (src/main/placed_object.cpp, where it is INCLUDE_ASM with INCLUDE_RODATA(D_00249C90)):
 // retail keeps the switch's constant 3 in s8 (loop.c moved it before the outer loop, so s8 is
 // saved too: 16 bytes more); ours loads it in the loop (li v0,3 in the case-2 branch's slot).
@@ -30,6 +30,33 @@
 // move, but the args are global pseudos (live around the loop through the no-match path) in f20+
 // and 512 bytes; with `default: goto check;` around the call the frame is retail's 496 and s8 = 3,
 // but cases 0 and 1 merge (crossjump) and the case bodies go through f1-f3 temporaries (147/187).
+// w35 (2026-11-12, -dj -ds -dG -dL -dt -df -dS -dl; docs/toolchain/loops.md, "The 3's second
+// set"): both walls are the same kind of thing, the notes of a loop that never iterates, and a
+// probe with two of them is EXACT on US and PAL with the file's own flags (not plain C++ as
+// AGENTS.md has it, so not landed; kept in build/swarm/w35-fable/probes/):
+//   case 3:  do { } while (0); found = SolveQuadratic(j == 3 ? -t : t, ...same...);
+//   after the loops:  do { found = w - windows; k = -1; } while (0); best = FLT_MAX;
+// (1) The 3. cse1 stops its path at a NOTE_INSN_LOOP_END (cse_end_of_basic_block, "Don't cse
+// out the end of a loop"), so the `j == 3` behind one in case 3 keeps its own `(set X 3); bne
+// j,X`; loop.c matches X with the tree's 3 (savings 2, life 2: 76 * 4 >= 107, "moved"), which
+// deletes X's set and makes the test `bne j,H`; cse2 (after_loop, the note ignored) follows the
+// tree's `beq j,H` into the case and folds it. Flow then counts the tree's use alone (r196: 4
+// refs over 186 insns), so 2, n and 3 take s6, s7 and s8. The 1 is not moved (retail's `li v0,1`
+// is the loop's own). Only a test of j against the case's own value folds in cse2: the hoisted
+// constants are unknown registers there. Ruled out: `if (j == 3) { two dead stores }` after the
+// switch (3 moves, but its jump lives to jump2: 3 refs, 3 takes s6); an inline `switch (j)` of
+// four cases returning +-t, used in every case (cse1 follows the jumps and folds all of it: 106
+// insns, no second 3); a lone dead store under `j == 3` (jump.c makes it a conditional move).
+// (2) The block after the loops. Retail's order and registers need `found = w - windows; k = -1`
+// inside a loop's notes and `best` after its LOOP_END: flow counts the subtraction's two
+// references at depth 2 (r200: "used 4 times across 3 insns"), so local-alloc ranks it over
+// FLT_MAX's %hi (2 over 2) and it takes v0, the %hi v1 (their widened lives touch); the first
+// insn after a LOOP_BEG or LOOP_END is a barrier in sched1 and sched2, which keeps `lwc1` behind
+// `sra`. All 60 placements of one `do { } while (0)` or one dead loop over the three statements
+// were compiled: only the two with both `found` and `k` inside match. final.c aligns the first
+// label after a LOOP_BEG: retail's are 0x130DD0 and 0x130E68, both 8-aligned without a nop.
+// Not found: the plain source with these notes. The i loop cannot own them (its exit test's
+// copy jumps past its LOOP_END to 0x130E50; a break with a body is "multiple entry points").
 #include "common.h"
 
 f32 ConvertDoubleToFloat(u64 v);

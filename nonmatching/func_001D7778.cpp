@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 3297/3316 (99.4%), checked 2026-11-11
+// BYTES 3297/3316 (99.4%), checked 2026-11-12
 // DECLS (2026-11-11, w28-nmdecls): StoreFloatAsQuadword now returns void*: neutral, order 828/829.
 // NEAR (2026-11-10, w15-1D7778): same size and frame; only the first loop's three saved registers differ
 //

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 332/680 (48.8%), checked 2026-11-11
+// BYTES 332/680 (48.8%), checked 2026-11-12
 // NEAR: in its file, src/lib/mpeg_decoder.cpp (Sony's 2.9-ee-991111). The structure, the
 //       calls and the tail call match; the rows kept in a local give retail's use of the value
 //       for the height and its reload of the width, and the defaults' stores are now retail's.

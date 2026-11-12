@@ -1472,6 +1472,13 @@ func_0017ECE8), as if retail had insns that left no code. Read from GCC 2.95.3's
   (func_001D7778 insn 1795, `$f0`); (4) GCSE's copies and those of long or looped blocks
   (loops.md; func_00109488's argument copies that survive CSE1's window flushes,
   long-block-constants.md).
+- **A fifth kind, before sched1: what leaves between two passes (w35, func_00130C58).** An insn
+  can also live only from one pass to a later one: a test cse1 cannot fold because a
+  NOTE_INSN_LOOP_END ends its path, whose constant loop.c matches with another set of the same
+  value (and so moves out of a loop it would have left), and which cse2, run after loop.c, folds
+  away. And the notes of a loop that runs once leave no code but double the references flow
+  counts inside them and make the insn after each note a barrier (loops.md, "The 3's second
+  set"). Both were proved with a probe that is EXACT; the plain source is not found.
 - **Inline parameter and return copies are not among them.** integrate.c copies each argument
   of a parameter not declared const into a new pseudo, and each inline's return value goes
   through its own; in straight-line code cse1 and combine remove them before flow counts

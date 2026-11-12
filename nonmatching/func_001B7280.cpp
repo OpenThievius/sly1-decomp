@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 591/904 (65.4%), checked 2026-11-11
+// BYTES 591/904 (65.4%), checked 2026-11-12
 // Wave 23 (w23-vuD, 2026-11-11): re-scored, unchanged (591/904); not worked on this wave (the replay tools address register and order differences; this one's are structural: the case tree, the third equal set and the branching return).
 // NEAR (2026-11-10, worker w16-1B7280): retail's size now (was 896), 591 of 904 bytes. The
 // count is a constant retail never keeps in a register: `li v0, 4; sll a0, v0, 4` for the

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1320/1324 (99.7%), checked 2026-11-11
+// BYTES 1320/1324 (99.7%), checked 2026-11-12
 // NEAR (2026-11-10, worker w11-125C90): PlacedObject's slot 36 (0xA0), the base draw: the
 // culling by the camera's planes and distance fades (into the transform's two scales), the world
 // node's level, the parent's unscaling, the attachment's matrix, slot 37, then each child drawn

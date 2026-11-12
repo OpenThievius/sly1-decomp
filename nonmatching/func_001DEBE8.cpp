@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1506/1700 (88.6%), checked 2026-11-11
+// BYTES 1506/1700 (88.6%), checked 2026-11-12
 // NEAR (2026-11-10, w13-1DEBE8): ControlTintBlendCollider. Size and frame now match (0x200, s5
 // saved). The frame came from two things. (1) The second product is a by-value inline
 // (RotatedRows, g++'s named return value) passed straight to MultiplyByTransposedMatrix3x3:
@@ -62,6 +62,15 @@
 // register, GCSE's copies) none fits (a)'s region without changing code; inline parameter and
 // Vec copies are gone after cse1 and combine. Tried: both stick tests as an inline predicate
 // `StickPushed(pad)` (keeps a store-flag sequence, 1724 bytes).
+// w35 (2026-11-12): func_00130C58's walls were the notes of a loop that runs once (loop-depth
+// references, a barrier after LOOP_BEG and LOOP_END; docs/toolchain/loops.md, "The 3's second
+// set"), so the same was tried here as a probe: each of the 33 top-level statements in its own
+// `do { } while (0)`. 25 of them add the aligned label's nop (1704 bytes: no LOOP_BEG can sit
+// there in retail, as (b) already found); the 8 that keep 1700 (the first if, the f720 block,
+// the target-key test, reach, the second ComputePolarOffset(&axis), vel, the body's velocity
+// store and the last if) are no closer: the same 78 lines or more, and one more pad reference
+// at depth 2 (reach, the last if) overshoots, pad takes s1. No single such region is retail's
+// here; (a) and (b) stay as above.
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"

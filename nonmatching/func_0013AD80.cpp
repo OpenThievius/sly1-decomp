@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1663/1708 (97.4%), checked 2026-11-11
+// BYTES 1663/1708 (97.4%), checked 2026-11-12
 // NEAR: retail's size; the view walk, the VIF packet, the spill slots (frames, count, the Ones vector,
 // then sent: `sent` declared where it is set) and the merged tails are retail's. The frame loop counts up
 // because it has no NOTE_INSN_LOOP_VTOP (check_dbra_loop reverses a loop with a non-constant bound only

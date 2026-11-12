@@ -451,6 +451,87 @@ the curve-window search: four quadratics per curve chosen by `switch (j)` over `
   subtracts into v0 and loads `lui v1` right before the `lwc1`. The order of `found = w -
   windows`, `best` and `k = -1` and a named global for FLT_MAX change nothing.
 
+### The 3's second set: what cse1 cannot fold behind a LOOP_END, loop.c matches and cse2 folds (func_00130C58)
+
+Read from cse.c (cse_end_of_basic_block, record_jump_cond, fold_rtx), loop.c (scan_loop,
+combine_movables), jump.c, flow.c and haifa-sched.c of GCC 2.95.3 with the `-dj -ds -dG -dL -dt
+-df -dS -dl` dumps (2026-11-12, w35; nonmatching/func_00130C58.cpp). It answers the section
+above with a probe that is EXACT on US and PAL under the file's own flags. The probe is not
+plain C++ as AGENTS.md has it (two `do { } while (0)`), so it is a result about the compiler
+and not a match:
+
+    case 3:
+        do { } while (0);
+        found = SolveQuadratic(j == 3 ? -t : t, c[1] * -2.0f - c[3] * 4.0f, ..., w);
+        break;
+    ...
+    do { found = w - windows; k = -1; } while (0);
+    best = 3.4028234663852886e+38f;
+
+- **A second set that leaves no reference.** Retail's 3 takes s8 after n (s7) and the 2 (s6),
+  which global-alloc gives only when the hoisted 3 has the tree's use alone at flow time (the
+  probe's r196: "used 4 times across 186 insns", the set at depth 1 and the use at depth 3).
+  `if (j == 3) { k = 0; i2 = 0; }` after the switch (two dead stores, so that jump.c does not
+  make it a conditional move) does hoist the 3: loop.c matches its `(set X 3)` with the tree's
+  (savings 2, life 2), flow deletes the stores and jump2 the jump to the next insn. But the
+  jump is a third reference of the 3 until then, the 3 outranks the 2 and n, and the registers
+  come out s6 = 3, s7 = 2, s8 = n. So in retail the second set's use was gone before flow.
+- **cse1 stops at a NOTE_INSN_LOOP_END, cse2 does not.** cse_end_of_basic_block ends a path at
+  a LOOP_END note unless it runs after loop.c ("Don't cse out the end of a loop"). Behind such
+  a note in case 3, cse1 no longer knows `j == 3` from the tree's jump, so the test keeps its
+  own `(set X 3); bne j,X` through gcse (the .cse and .gcse dumps have two sets of 3). loop.c
+  matches X with the tree's pseudo ("Insn 318: regno 196 (life 2), move-insn savings 2 moved":
+  76 * 2 * 2 >= 107), deletes X's set and rewrites the test as `bne j,H`. cse2 follows the
+  tree's `beq j,H` into the case (one use, a barrier before the label), runs through the note
+  and folds the test, the jump pass after it removes the dead arm, and nothing is left: the
+  .loop, .cse2 and .flow dumps have one set of 3. The 1 is not moved; retail's `li v0,1` is the
+  loop's own.
+- **What cse2 can fold.** After the move the constants are registers set outside the loop, so
+  cse2 knows no values, only the path's facts: `j` equal to the register of the case it
+  followed, and one remembered inequality per quantity (qty_comparison_code, the last `beq`
+  not taken; read from fold_rtx, not measured). A test of j against its own case's constant
+  folds; `j == 1 ? t : -t` in case 3 does not (measured: the 1 moves too, the test stays, 114
+  lines differ). That rules out one generic expression repeated in every case.
+- **cse1 folds everything it can reach.** An inline `SignedLimit(j, t)` with a `switch (j)` of
+  four cases, used as the first argument in every case: cse1 follows the tree's jumps
+  (follow-jumps takes each label with one use behind a barrier, also the inner tree's), folds
+  all of it and deletes the sets (106 insns, no second 3, the near miss's code). What cse1
+  cannot reach is code behind a label with two uses (a join) or behind a LOOP_END.
+- **The block after the loops: loop depth and a barrier.** Retail has `subu v0; li a1,-1; sra
+  s2,v0,2; lui v1; lwc1; addiu a2`; ours had the `lwc1` between `subu` and `sra`, the `%hi` in
+  v0 and the subtraction in v1. With `found = w - windows; k = -1` inside a loop's notes and
+  `best` after its LOOP_END: (1) the first insn after a LOOP_BEG or LOOP_END note depends on
+  everything before it in sched1 and in sched2 (sched1.md, func_0014D680), so the load stays
+  behind `sra`; (2) flow counts references with the loop depth, so the subtraction's pseudo has
+  4 references over 3 insns ("Register 200 used 4 times across 3 insns in block 20") and
+  local-alloc ranks it (2 * 4 / 3) above FLT_MAX's `%hi` (1 * 2 / 1, moved back before its
+  load by update_equiv_regs): it takes v0, and the `%hi`, whose widened life touches it, v1.
+  All 60 placements of one `do { } while (0)` (or of one unreachable loop, whose two notes stay
+  when flow deletes it) over the three statements in their six orders were compiled with
+  `-fmove-all-movables` (to explore only): the two with `found` and `k` inside, in either
+  order, and `best` behind are the only ones that match. Notes around `best` alone give the
+  order and the subtraction's v0 but the `%hi` in v0 too; a dead loop between `k` and `best`
+  gives the order with v0 and v1 swapped.
+- **The alignment test passes.** final.c's shorten_branches gives the first CODE_LABEL after
+  every LOOP_BEG note the loop alignment (sched1.md, func_001DEBE8). The labels that follow the
+  probe's two notes are at 0x130DD0 and 0x130E68 in retail, both 8-aligned with no nop, so
+  retail does not contradict a LOOP_BEG at either place (the probe's assembly has `.p2align 3`
+  before both, which pads nothing; one in two by chance, each).
+- **Not found: the plain source.** The i loop cannot own the second pair of notes: the copy of
+  its exit test jumps past its LOOP_END to the subtraction, and written with the two
+  statements in a break's body (`for (i = 0; ; i++) { if (i >= n) { found = ...; k = -1;
+  break; } ...`) jump.c's copy enters the loop from outside and loop.c ignores the loop
+  ("multiple entry points": the constants stay in the loop, 161 lines differ). The search
+  after it as a `while`, a `for (;;)` with a `break` or with a `return` is rolled or reduced by
+  loop.c (retail's is neither). What retail's source needs is a loop statement that runs once
+  around the two assignments, and in case 3 a test of j against 3 behind such a statement's
+  end (or behind a join that the jump pass after cse1 removes).
+- **The tell, for other walls.** A constant hoisted with life 1 in a loop over 80 insns, a
+  pseudo ranked as if it had twice its references, or an order only a barrier gives, with
+  retail's next label 8-aligned: look for a statement the original wrote as a loop that runs
+  once. A label at 4 mod 8 with no label between it and the place rules a LOOP_BEG out there; a
+  LOOP_END aligns nothing.
+
 ### An inline's constant parameter is a variable with a life: the strip loop's UNPACK words (func_00166690)
 
 Matched 2026-11-10 (DrawModelPart, src/main/placed_object_model.cpp; the form found by worker
