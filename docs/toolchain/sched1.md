@@ -1229,18 +1229,7 @@ the block holding the first trap):
   term (a constant or a local 0, all 720 orders), the interlace arms swapped, a dh local, the
   word built in a u64 local.
 
-### Two equal clears that retail issues apart: a rank sched1 cannot give (func_001A1030, matched 2026-11-12)
-
-**Matched (w37-f3, 2026-11-12).** The two quadratics are brace initialisers of a type whose
-first float is a union's member (`Quadratic16 a = { 125.0f, -25.0f, 0.0f }; Quadratic16 b =
-{ 20.0f, 20.0f, 0.0f };`, include/shapes.h). store_constructor clears each local (`sq`), then
-emits `(clobber (mem/s:BLK slot))` for the union before the first coefficient's store; a
-BLKmode reference conflicts with every frame store, so b's CLOBBER depends on a's clear, a's
-CLOBBER and both of a's stores, and b's stores depend on it. In the `.sched` table that is
-exactly the rank asked for below: a's clear 6 and its constants 6, a's stores 4, b's clear 4,
-b's CLOBBER 3, the 20.0 4 and b's stores 2, so b's clear issues after the life load and the
-20.0 after the divide. Reload deletes the CLOBBERs (docs/toolchain/large-functions.md, "A
-brace initialiser's union member is a CLOBBER"). The analysis below is kept as it was written.
+### Two equal clears that retail issues apart: a rank sched1 cannot give (func_001A1030, unsolved)
 
 UpdateSpringEffect's first block (two quadratics' coefficients cleared and set on the
 stack, `t = (g_gameTime - start) / life`, the clamp's first test) is the only part still

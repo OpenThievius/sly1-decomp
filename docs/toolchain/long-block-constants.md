@@ -398,12 +398,6 @@ values and the windows as they are.
 
 ### A scratch float in a loop: local-alloc's tie against global-alloc's ranking (func_00131F60)
 
-Superseded on 2026-11-12: the scratch floats were the near miss's own invention, and the tie
-they left has no solution because retail has no such pseudos. The function matched with the
-constants as variables that loop.c moves and reload forms again (loops.md, "Named constants that
-lose their registers"). What follows stands as a description of local-alloc's and
-global-alloc's rankings, not of retail's source.
-
 Measured 2026-11-10 (w15) from the -dS and -dl dumps, with local-alloc.c and global.c read.
 
 - **A scratch set to a constant, then to a product, then to another constant.** The gauge loop

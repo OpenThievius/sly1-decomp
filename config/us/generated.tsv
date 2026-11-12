@@ -92,5 +92,3 @@ src/main/movie_player.cpp	Put__10IpuDmaSinkiPUc	func_0018E8C8
 src/main/movie_player.cpp	Idle__10IpuDmaSink	func_0018E938
 src/main/file_1C1190.cpp	__static_initialization_and_destruction_0	func_001C27B0
 src/main/file_1C1190.cpp	_GLOBAL_$I$*	func_001C29C8
-src/main/switched_collider.cpp	__static_initialization_and_destruction_0	func_001930B8
-src/main/switched_collider.cpp	_GLOBAL_$I$*	func_001931F0

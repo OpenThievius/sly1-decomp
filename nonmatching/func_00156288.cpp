@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1080/1084 (99.6%), checked 2026-11-12
-// w37-f3 (2026-11-12): 30 lines to 2. The two records are brace initialisers (docs/toolchain/large-functions.md, "A brace initialiser's union member is a CLOBBER"): the tail with the first float of each of its two float groups (0x10 and 0x20) a union's member, as a Quadratic16's is (scanned: of the 42 choices of up to three union members, only f10+f20 or f04+f20, each also with f24 or f30, leave 2 lines), the block the spawn block of func_001930B8 and func_001549C8 with Quadratic16s at 0x00 and 0x70 (scanned: the other seven choices leave 15 to 28), built in a temporary and copied because the gravity and the up vector are copied from memory; the position is a local of its own, which takes the temporary's slot. Left: retail stores the up vector (sq v1,240(sp)) before the gravity (sq v0,208(sp)); ours has them in member order. In sched1 both stores have priority 4 and weight 0, so LUID decides; retail's order needs the gravity's load issued after the three single-use constants (its priority 5, not 6) or its store not ready when the up vector's goes. Tried: the gravity as a Quad16 or a Quadratic16 member, the up vector as a Vec02 member (20 lines), the world pointer in a local (55), the block built in place with the two vectors assigned after it (40 to 42).
+// BYTES 1015/1084 (93.6%), checked 2026-11-12
 // DECLS (2026-11-11, w28-nmdecls): TransformPointBetweenFrames now void (defined void): neutral, order 260/271.
 // NEAR (2026-11-08, worker night-large1): an effect spawner's splash (its sound by distance, the
 // effect, and a burst through SpawnEffectsAt at 500 and beyond), retail's code up to the burst's
@@ -265,15 +264,6 @@ void StartSoundEffect(s32 a0, void* a1, void* a2, s32 a3, f32 f12, f32 f13, f32 
 void StopSoundRecord(void* self, s32 n);
 void SpawnEffectsAt(Quad16* self, Quad16* a1, void* a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
 
-// The burst's two records as the brace initialisers they are (w37-f3): the block has the layout
-// of Blk05 (include/switched_collider.h; its 0x40 group's floats are named here), its first and
-// last vectors Quadratic16s; the tail's two float groups each start with a union's member.
-struct SplashBlock {
-    Quadratic16 v00; Vec02 v10; Vec02 v20; Quad16 q30; f32 f40; f32 f44; f32 f48; s32 f4C; Vec02 v50; Quad16 q60; Quadratic16 v70;
-};
-struct __attribute__((aligned(16))) SplashTail {
-    s32 f00; s32 f04; s32 f08; s32 f0C; union { f32 f10; u32 f10Bits; }; f32 f14; s32 f18; s32 f1C; union { f32 f20; u32 f20Bits; }; f32 f24; s32 f28; s32 f2C; void* f30; s32 f34; s32 f38; s32 f3C;
-};
 void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, Quad16* at, f32 chance, f32 minScale, f32 size)
 {
     if (AT(s32, cfg, 0x580) == 0) {
@@ -330,15 +320,33 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, Quad16* at
             AT(f32, snd, 0x570) = g_gameTime;
         }
         if (AT(s32, cfg, 0x588) != 0 && 500.0f < dist) {
-            SplashTail tail = { 2, -1, 0, 0, 1.0f, 0.0f, 0, 0, 8.0f, 12.0f, 0, 0, cfg };
-            SplashBlock block = {
-                { dist * 0.5f, dist * 0.75f, 1.0f }, AT(Vec02, self->world, 0x1EE0), { 0.0f, 0.0f, 0.0f },
-                *(Quad16*)&g_unitZVector, 0.0f, 0.392699093f, 1.04719758f, 0,
-                { 1.0f, 5.0f, 0.0f }, { { 0, 0, 0, 0 } }, { 1.0f, 0.0f, -1.0f }
-            };
-            Vec02 pos = *(Vec02*)at;
-            pos.z += 30.0f;
-            SpawnEffectsAt((Quad16*)&pos, (Quad16*)&g_unitZVector, (void*)RandomIntInRange(4, 6), (SpawnTail*)&tail, (SpawnBlock*)&block, 0, 0);
+            SpawnTail tail;
+            SpawnBlock copy;
+            SpawnBlock blk;
+            f32 one = 1.0f;
+            FillMemory(&tail, 0, 0x40);
+            tail.f04 = -1;
+            tail.f00 = 2;
+            tail.f10 = one;
+            tail.f30 = cfg;
+            tail.f20 = 8.0f;
+            tail.f24 = 12.0f;
+            FillMemory(&blk, 0, 0x80);
+            blk.f08 = one;
+            blk.f00 = dist * 0.5f;
+            blk.f04 = dist * 0.75f;
+            blk.gravity = AT(Vec02, self->world, 0x1EE0);
+            blk.up = g_unitZVector;
+            blk.f54 = 5.0f;
+            blk.f48 = 1.04719758f;
+            blk.f44 = 0.392699093f;
+            blk.f50 = one;
+            blk.f70 = one;
+            blk.f78 = -1.0f;
+            copy = blk;
+            blk.q[0] = *at;
+            blk.f08 += 30.0f;
+            SpawnEffectsAt(&blk.q[0], (Quad16*)&g_unitZVector, (void*)RandomIntInRange(4, 6), &tail, &copy, 0, 0);
         }
     } else if (snd != 0) {
         StopSoundRecord(AT(void*, snd, 0x574), 0);

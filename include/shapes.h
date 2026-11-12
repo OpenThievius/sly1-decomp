@@ -18,22 +18,6 @@ struct __attribute__((aligned(16))) Quad16 {
     s32 w[4];               // 0x00
 };
 
-// The coefficients of a quadratic, constant first (c.x + t * (c.y + t * c.z)): four floats,
-// 16-aligned. Its first float is a union's member, which retail's brace initialisers show: the
-// compiler puts a CLOBBER of a union member's storage before its non-zero initialiser's store,
-// and the scheduler orders the object's other stores around it (docs/toolchain/large-functions.md,
-// "A brace initialiser's union member is a CLOBBER": a ring's rows, the spawn block's first and
-// last vectors, func_001A1030's two curves). What the union's other member was is not known.
-struct __attribute__((aligned(16))) Quadratic16 {
-    union {
-        f32 x;              // 0x00
-        u32 xBits;
-    };
-    f32 y;                  // 0x04
-    f32 z;                  // 0x08
-    f32 w;                  // 0x0C
-};
-
 // Four words moved one by one (the views that copy with four lw/sw).
 struct Quad4 {
     s32 w[4];               // 0x00
@@ -98,7 +82,6 @@ struct __attribute__((aligned(16))) Mat4A {
     f32 m[4][4];            // 0x00
 };
 
-typedef char check_Quadratic16[sizeof(Quadratic16) == 0x10 && __alignof__(Quadratic16) == 16 ? 1 : -1];
 typedef char check_Quad16[sizeof(Quad16) == 0x10 && __alignof__(Quad16) == 16 ? 1 : -1];
 typedef char check_Quad4[sizeof(Quad4) == 0x10 && __alignof__(Quad4) == 4 ? 1 : -1];
 typedef char check_QuadP[sizeof(QuadP) == 0x10 && __alignof__(QuadP) == 1 ? 1 : -1];

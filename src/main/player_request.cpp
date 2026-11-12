@@ -17,8 +17,6 @@
 #include "vertex_batch.h"
 #include "packet_writer.h"
 #include "vu0.h"
-#include "ring_params.h"
-#include "deferred_request.h"
 
 s32 D_00274FA0[2] = {286, 287};
 s32 D_00274FA8[2] = {288, 289};
@@ -39,6 +37,9 @@ f32 D_00275068[1] = { 0 };
 float D_0027506C = 0.25f;
 float D_00275070[14] = {0.0f, 1.0f, 0.781831503f, 0.623489797f, 0.974927902f, -0.222520933f, 0.433883727f, -0.90096885f, -0.433883727f, -0.90096885f, -0.974927902f, -0.222520933f, -0.781831503f, 0.623489797f};
 float D_002750A8[34] = {1.0f, 0.0f, 0.932472229f, 0.361241668f, 0.739008904f, 0.673695624f, 0.445738345f, 0.895163298f, 0.0922683626f, 0.995734155f, -0.273662984f, 0.961825669f, -0.602634609f, 0.798017204f, -0.850217164f, 0.526432157f, -0.982973099f, 0.183749512f, -0.982973099f, -0.183749512f, -0.850217164f, -0.526432157f, -0.602634609f, -0.798017204f, -0.273662984f, -0.961825669f, 0.0922683626f, -0.995734155f, 0.445738345f, -0.895163298f, 0.739008904f, -0.673695624f, 0.932472229f, -0.361241668f};
+s32 D_00275130 = 0;
+s32 D_00275134 = 0;
+s32 D_00275138 = 0;
 
 // The eight blend slots func_001D4148 fills (0x20 bytes each), the weight of slot 6 first.
 struct BlendSlotObject;
@@ -918,12 +919,36 @@ void EndPlayerRequestState(void* self)
 }
 
 struct AnimRecord;
+// A point the ring goes around: an object's position (+0x140) and how far its offsets reach.
+struct RingAnchor {
+    s32 f0;                 // 0x00
+    f32 scale;              // 0x04
+    PlacedObject* obj;      // 0x08
+};
+// A row of the ring's strip: the radius terms, the texture's v, the lift and the colour.
+struct RingRow {
+    Vec02 shape;            // 0x00: x over the depth, plus y and z times the length
+    f32 v;                  // 0x10
+    f32 lift;               // 0x14: along +z
+    Rgba4 color;            // 0x18
+    u8 pad1C[4];
+};
+// The parameter block of a ring (the DrawPlayerMarkerRing functions' static records).
+struct RingParams {
+    s32 mode;               // 0x00: 1, u from the angle's distance to pi/2; otherwise from the angle
+    f32 uScale;             // 0x04
+    f32 rate;               // 0x08: u's scroll per second
+    u8 pad0C[4];
+    RingRow rows[3];        // 0x10
+    AnimRecord* textures[2]; // 0x70: one strip drawn for each that is set
+};
 // A point of the ring in camera space and its angle about the centre.
 struct __attribute__((aligned(16))) RingEntry {
     Vec02 pos;              // 0x00
     f32 angle;              // 0x10
     u8 pad14[0x20 - 0x14];
 };
+struct Point2 { f32 x; f32 y; };
 
 s32 CompareSortedTargets(RingEntry* a, RingEntry* b) { if (a->angle < b->angle) return -1; return 1; }
 
@@ -957,7 +982,7 @@ void DestroyVertexBatch(VertexBatch* b, s32 f);
 // `base` is declared apart from its value: two more insns before GCSE, whose table then has
 // retail's 323 buckets and numbers the four hoisted addresses in retail's spill-slot order
 // (docs/toolchain/gcse.md, "One reaching register for every occurrence").
-void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingAnchor* anchors, RingParams* params, DeferredRequest* request)
+void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingAnchor* anchors, RingParams* params)
 {
     RingEntry entries[256];
     Vec02 pt;
@@ -1087,7 +1112,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
     Vec02 rows[3];
     s32 r;
     for (r = 0; r < 3; r++) {
-        rows[r] = *(Vec02*)&params->rows[r].shape;
+        rows[r] = params->rows[r].shape;
         rows[r].x = rows[r].x / center.z;
         rows[r].z = rows[r].z * center.z;
     }
@@ -1126,7 +1151,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
                 *(Vu0::Vec*)&pt = Vu0::MulAddX2(Vu0::Vec::Of(center), Vu0::Vec::Of(d), w, Vu0::Vec::Of(g_unitZVector), Vu0::Vec::ScalarAtValue(params->rows[r].lift));
                 UnprojectCameraPoint(g_camera, &pt, &pt);
                 SetVertexTexCoord(&batch, uv);
-                Rgba4 c = *(Rgba4*)&params->rows[r].color;
+                Rgba4 c = params->rows[r].color;
                 SetVertexColor(&batch, &c);
                 SetVertexPosition(&batch, &pt);
                 AddVertex(&batch, 0);
@@ -1140,59 +1165,6 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
 }
 
 
-AnimRecord* FindAnimRecord(s32 key);
-
-// The three rings each keep their parameter block as a function-local static with a brace
-// initialiser (include/ring_params.h); the textures are looked up at every call. Each is a
-// deferred request's callback (QueuePlayerMarkerRingDraw), the player the request's argument.
-void DrawPlayerMarkerRing1(DeferredRequest* request)
-{
-    Player* player = (Player*)request->arg;
-    static RingParams params = {
-        0, 5.0f, 1.0f,
-        {
-            { { 0.0f, 0.0f, 0.0f }, 0.0f, 0.0f, RingColor(0x00000000) },
-            { { 0.0f, 1.0f, 0.0f }, 0.5f, -100.0f, RingColor(0xFFFFFFFF) },
-            { { 75.0f, 1.0f, 0.0f }, 1.0f, 0.0f, RingColor(0xFFFFFFFF) },
-        },
-    };
-    params.textures[0] = 0;
-    params.textures[1] = FindAnimRecord(0x15C);
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)D_00275070, player->f26A8, (RingAnchor*)player->f26AC, &params, request);
-}
-
-void DrawPlayerMarkerRing2(DeferredRequest* request)
-{
-    Player* player = (Player*)request->arg;
-    static RingParams params = {
-        1, 5.0f, 0.5f,
-        {
-            { { 0.0f, 0.0f, 0.0f }, 0.0f, 100.0f, RingColor(0x80FFFFFF) },
-            { { 0.0f, 0.5f, 0.0f }, 0.0f, 50.0f, RingColor(0x80FFFFFF) },
-            { { 75.0f, 1.0f, 0.0f }, 1.0f, -100.0f, RingColor(0x80FFFFFF) },
-        },
-    };
-    AnimRecord* texture = FindAnimRecord(0x15D);
-    params.textures[1] = texture;
-    params.textures[0] = texture;
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)D_00275070, player->f26A8, (RingAnchor*)player->f26AC, &params, request);
-}
-
-void DrawPlayerMarkerRing3(DeferredRequest* request)
-{
-    Player* player = (Player*)request->arg;
-    static RingParams params = {
-        0, 5.0f, 1.0f,
-        {
-            { { 0.0f, 0.0f, 0.0f }, 0.0f, 0.0f, RingColor(0x00000000) },
-            { { 0.0f, 1.0f, 0.0f }, 0.5f, -100.0f, RingColor(0xFFFFFFFF) },
-            { { 25.0f, 1.0f, 0.0f }, 1.0f, 0.0f, RingColor(0xFFFFFFFF) },
-        },
-    };
-    RingAnchor anchor;
-    params.textures[0] = 0;
-    params.textures[1] = FindAnimRecord(0x15C);
-    anchor.scale = 60.0f;
-    anchor.obj = (PlacedObject*)player;
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 0x11, (Point2*)D_002750A8, 1, &anchor, &params, request);
-}
+INCLUDE_ASM(func_001D5FA8);
+INCLUDE_ASM(func_001D60B0);
+INCLUDE_ASM(func_001D61C8);

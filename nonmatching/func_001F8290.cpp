@@ -44,25 +44,6 @@
 // the load's LUID is before it, and the wall is the id store's weight, as recorded. No source
 // form found for an id that outlives its store; not searched: the client's words read through
 // a second type (a union or a cast at the store) in this function only.
-// w38-f6 (2026-11-12): not closer (2 words). With the header's types, each store's class set
-// by a cast at the store: 10,368 forms (the 24 orders of the client's four stores, the id read
-// in place or into a local first, the client's packet word as its pointer or void*, the
-// callback as its type or void*, the packet's f28, self, f34 and client words as int, their
-// pointer type or void*): 5 words at best (callback or packet written before the argument and
-// the id read in place), never the near miss's 2. Why, from the near miss's own -dR trace
-// (block 2): sched2 issues the argument's load and the andi at t=1, the id's load at t=2, the
-// argument's store at t=3 (nine dependents: the server word's `lw v0` too), and at t=4 the
-// packet's, the id's and the callback's stores are all ready with priority 7 and eight
-// dependents each, so the LUID decides. A pointer-class store has no dependent (priority 2):
-// it is issued only in a cycle with nothing else ready, and the id's store is ready at t=4
-// and the command word's at t=6. So retail's packet and callback stores each have a
-// dependence into the packet's stores, which the header's types cannot give them, and with
-// one the weight wall above is what is left. BindRemoteService does not decide the types
-// either way: with the packet word a u32 and member order it is 324 bytes (the store ahead
-// of the id's load, taken into the entry test's slot), with the pointer type the store is a
-// filler between the id's load and store. Not tried: a second use of the id or the argument
-// that a pass after sched1 deletes; `packet->id = id` written back stays in the code (496
-// bytes) and a second `self->id = id` is gone before sched1 (cse1), changing nothing.
 #include "common.h"
 
 struct Client_1F7BE8;

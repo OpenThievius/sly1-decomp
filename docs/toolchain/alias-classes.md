@@ -241,11 +241,7 @@ dump:
   local-alloc retail's VU registers (the velocity vf1, the Dot's 1.0 vf2). Spot it: retail
   loads a pointer's field before stack stores that ours issues first.
 
-### A member store that kills two registers goes first (func_001A1030, matched 2026-11-12)
-
-The head ("Ruled out for the head" below) was the missing CLOBBER of a brace initialiser's
-union member: docs/toolchain/sched1.md, "Two equal clears that retail issues apart". The tail's
-two findings stand as written.
+### A member store that kills two registers goes first (func_001A1030, near miss)
 
 UpdateSpringEffect (two clamped quadratics, a spring towards them, `vel += acc * dt;
 pos += vel * dt` with vel.y zeroed for the position) went from 81.1% to 86.1% on
@@ -1736,15 +1732,7 @@ TurnColliderTowardRotation (2026-11-09):
   look for a parameter passed on to a callee (here a float one) that lengthens the chain behind
   the save.
 
-### A constant set in an earlier block and used once (func_001549C8, matched 2026-11-12)
-
-**Matched (w37-f3, 2026-11-12).** The two records are function-local statics with brace
-initialisers (`static Blk05 block = { { 750.0f, 750.0f, 1.0f }, ..., 200, ..., { 1.0f, 0.0f,
--1.0f } };`), each built in a temporary and copied because a vector member is copied from a
-global. What made f70 and f78 wait is the CLOBBER of the union member at 0x70 (the block's last
-vector is a Quadratic16, include/shapes.h): docs/toolchain/large-functions.md, "A brace
-initialiser's union member is a CLOBBER". The 200 is a plain element of the initialiser; no
-variable set before the guards is needed. The notes below are kept as they were written.
+### A constant set in an earlier block and used once (func_001549C8)
 
 - **The widening blocks a register after a load's address dies.** local-alloc's first try
   widens each quantity by one insn at each end and marks the widened range taken. In
@@ -2908,38 +2896,6 @@ Read from the `-dS -fsched-verbose-6` dumps of CallRemoteService (Sony's 2.9-ee-
   (stored through the member or through a pointer to it): unchanged, 2 instructions off. A
   `do { } while (0)` around the id's store (loop notes are a scheduling barrier): adds code.
   The id read after the argument's store: the id takes $v0.
-
-### The header's types: fillers, and what sched2's trace says the stores need (func_001F8290)
-
-Measured 2026-11-12 (w38-f6) with the client's words typed as include/remote_call_client.h has
-them (a `RemoteCallPacket*` and a function pointer) and each store's class chosen by a cast at
-the store, 10,368 forms compiled, and the `-dR -fsched-verbose-6` trace of the near miss:
-
-- **A store with no dependent is a filler.** A pointer-class store through the client depends
-  on nothing and nothing depends on it: priority 2. It is issued in the first cycle whose
-  memory unit nothing of higher priority wants, in sched1 and again in sched2. That is where
-  BindRemoteService's `sw s0,0(s1)` sits (between the id's load and its store, the cycle the
-  load's latency leaves empty), and why here it lands wherever the int stores leave a gap:
-  after the packet's own stores in member order (11 words differ), ahead of the argument's
-  store when written first (5 words, the best of the sweep).
-- **Retail's slots are not gaps.** In sched2 the argument's load and the `andi` issue at t=1,
-  the id's load at t=2, the argument's store at t=3 (`;; 536 ... : 116 106 110 104 100 96 92 88
-  84 80 72 76 68`, `;; 68 ... : 116 106 110 104 ...`: nine dependents, the server word's load
-  through $v0 among them). At t=4 the id's store is ready (its load two cycles back) and at
-  t=6 the command word's store is. Retail has the packet's store at t=4 and the callback's at
-  t=6, so each ranked at least as high as an int store with dependents: each has a dependence
-  into the packet's stores. No choice of the header's or the packet's types gives a pointer
-  store one without making the id's load wait for it (2026-11-10's section above).
-- **So the classes are as the near miss has them, and the wall is the weight.** With all four
-  client stores at priority 7 and eight dependents each, sched2's tie at t=4 falls to the
-  LUID, sched1's order, where the id's store (weight 0) passes the packet's (+1). What would
-  land is a client whose packet and callback words are int-class in this function and
-  either class in BindRemoteService (EXACT with the header's pointer in member order, and with
-  a u32 word when the id is read into a local first; 324 bytes with a u32 word in member
-  order), with the one missing fact still the id's or the argument's second use.
-- **Probed, no change.** `packet->id = id` written back after any of the client's stores stays
-  in the code (496 bytes; neither cse1 nor reload_cse can prove it a no-op past an int store
-  through the other pointer). A second `self->id = id` is deleted by cse1 before sched1.
 
 ### A run of stores in two alias classes (func_001F7BE8)
 

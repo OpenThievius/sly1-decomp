@@ -559,9 +559,9 @@ struct RingSource {
 };
 
 typedef void (*RingDrawFn)(void* request);
-void DrawPlayerMarkerRing1(DeferredRequest* request);
-void DrawPlayerMarkerRing2(DeferredRequest* request);
-void DrawPlayerMarkerRing3(DeferredRequest* request);
+void DrawPlayerMarkerRing1(void* request);
+void DrawPlayerMarkerRing2(void* request);
+void DrawPlayerMarkerRing3(void* request);
 s32 MaskWorldBitsBySave(void);
 void QueueDeferredRequest(DeferredRequest* src);
 void SetObjectTreeRecordValue(void* obj, u32 value);
