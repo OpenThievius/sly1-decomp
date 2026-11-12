@@ -2,9 +2,103 @@
 # Constants in one very long block
 
 func_00109488 (FillObjectPropertyTable) is 9,348 instructions of stores of
-constants with no call and no branch: one basic block. How GCC 2.95 gives
-such a block its registers (2026-11-08, `-dl -dg` dumps, global.c,
-reload.c and reload1.c read):
+constants with no call and no branch: one basic block. It matched on 2026-11-12 as plain
+assignment statements ("The source form of func_00109488", next); the notes after that section
+are the history of the helper-call forms, kept for what they establish about the passes.
+
+### The source form of func_00109488 (w37, matched 2026-11-12)
+
+**What matched.** Each entry is plain assignments through one running pointer, in the field
+order type (+0), flags (+4), getter (+0xC), f10 (+0x10), putter (+0x14), offset (+0x18), target
+(+0x1C), then the default value (+8) last, with `p++;` after it. The 29 entries with flags
+0x401, which read and call the same function, set both fields in one assignment,
+`p->getter = p->f10 = (s32)Function;`. Nothing else: no helper, no macro, no merged integer.
+EXACT on US and PAL (src/main/object_host_functions.cpp).
+
+**Why inline helpers could not match.** A helper's constant arguments are all set at the start
+of the entry, in parameter order, and the stores follow; a statement sets its constant just
+before its store. Three things follow from that order, and retail shows all three:
+
+- **Where CSE2's flushes fall.** CSE2 counts what CSE1 leaves (stores, steps and the first set
+  of each value per CSE1 window), so with statements a flush falls between two stores of an
+  entry, never between an argument block and its stores, and no argument survives as a copy
+  (the near miss left eleven more insns for CSE2 than the statements do, 8,889 against 8,878,
+  which moved every later CSE2 flush). The statement form's CSE2 windows start in entry 122
+  after the flags and getter stores, in entry 657 between the type store and the flags store,
+  and in entry 1065 after its type store. Retail needs exactly
+  those: entry 122's flags 1 comes from the first window's register (a2) and entry 124's from
+  the next (t0); entries 656 and 657 store their type 18 from the register of the 18 of
+  entries 554-650 (s5) and entry 657 stores its flags 1 from the new register (t0); value 1
+  changes register at entry 1067, not 1065. With helpers the first needs two fewer `.cse` insns
+  before entry 122, which no merge of arguments gives (merging removes only insns CSE1 deletes
+  anyway, and moving CSE1's first flush far enough to save two re-set values needs about 115
+  insns fewer in the first hundred entries, where at most 85 can be merged).
+- **The reference counts local-alloc ranks.** Retail's four long constants of entries 292-657
+  are placed func_00155778 (s4), the 18 of 554-657 (s5), the 146 of 321-343 (s6), the 2194 of
+  293-336 (s7), which needs local-alloc's priorities in that order. The near miss had 155, 144,
+  150 and 157. With the windows above the 18 has 28 references instead of 26 (entries 656 and
+  657 belong to it: 154) and the 2194 has 17 instead of 18 (entry 292's store is in the CSE1
+  window before, so the pseudo starts at entry 293: 148): 155 > 154 > 150 > 148, and the first
+  4 then evicts s3, 256 keeps s5 and func_00155778 keeps s4 as retail has them. Nothing in
+  sched1's priorities differs: the lives are the same, the references are not.
+- **The order of the insns that sched1's ties go by.** With one field order for every entry,
+  1,121 of 1,179 entries already stored in retail's order (758 for the near miss).
+
+**The chained assignment.** g++ 2.95 expands `a = b = Function` with one high/lo_sum pair
+(two insns fewer than two assignments) and stores right to left, f10 before the getter. A
+chain of an integer constant sets the constant once per store, so it is the same as two
+statements; only the function entries differ. Both effects are in retail. The 58 insns fewer
+(2, 6, 10, 12, 12, 12, 16, 16, 16, 16, 16 and 30 before the twelve flushes) put CSE1's windows
+at entries 96.0, 190.4, 292.5, 383.6, 461.7, 554.0, 654.0, 751.1, 839.8, 936.9, 1030.7 and
+1124.4 (entry.insn): entry 292's 2194 store falls in the second window, and the sixth window
+starts at entry 554, whose 18 and 1 are new in retail. And the getter's store, last in the
+insn stream, carries the function's REG_DEAD note, so sched1 issues it before f10's (the
+lighter insn first): retail stores the getter before f10 in 28 of these 29 entries, where two
+statements in field order give f10 first.
+
+**How it was found** (the method carries over to any long straight-line initialiser):
+
+1. *Score the allocated pseudos, not the bytes.* With the dumps, give each store the register
+   of its pseudo (`.greg` dispositions, or tools/sched1.py and tools/globalalloc.py replayed on
+   a hypothesis) and compare it with the register retail stores from; reload's registers are
+   left out. The near miss scored 1,165 agreeing and 93 differing; two local-alloc priorities
+   overridden in the replay gave 1,318 and 7. That turned "the 2194 load needs a higher sched1
+   priority" into two priorities, and the priorities into reference counts: 16 or 17 for the
+   2194 and 28 for the 18 give the same registers with no change to the schedule.
+2. *Read sched1's births off retail's reload.* A constant whose pseudo has no register is
+   stored from the register of the nearest earlier load of that constant (find_equiv_reg), so
+   its stores change register exactly where another pseudo's load was issued. Retail's 18 of
+   entries 296-364 moves from t8 to s2 between the stores of entries 362 and 363: the load of
+   the 18 of entries 1123-1178 was issued there, as in our schedule. The same test at entries
+   656 and 657 (s5, although s2's load is nearer) shows those two stores are real uses of s5's
+   pseudo. So the schedule was right and the pseudos' use sets were not.
+3. *Turn use sets into flush positions.* A use set changes only where a flush falls, and a
+   flush position is a count of insns, so each finding is a count the source must give: here
+   CSE2's fifth window had to start at one exact insn.
+4. *Search the positions, then explain them.* With a field order fixed, a form is its twelve
+   CSE1 window starts; equal arguments merged in arbitrary entries realise any non-decreasing
+   set of them, and the allocated-pseudo score climbs where the byte count does not (helper
+   forms stalled at 1,199 and 87; statements reached 1,360 and 2, 8,295 of 9,348 instructions).
+   The fitted counts (0-6, 6, 8, 8, 11, 11, 16, 17, ...) were then those of one kind's
+   function-valued pairs, and the 29 entries whose store order was the reverse of their kind's
+   were the same kind.
+
+**Measured on the way.** An unused or folded argument of an inline function makes no insn (the
+inliner substitutes constants and only a use that needs a register sets one), so the insn
+count cannot be padded for a probe; only merges of equal values change it. sched1's priority
+falls about 2.2 per entry in this block (two for the store and the step, plus one per
+pending-list flush), not the 4.9 the earlier notes assumed, so "a first store 25 entries
+earlier" below should read 55 to 80. The earlier verdict that plain stores score worse was
+measured on forms whose windows were off; a form can only be judged with its windows right.
+
+**Spot it:** a block of thousands of stores of constants whose registers differ from retail's
+from the first instruction on. List retail's stores of each common value by register and look
+for a store that keeps the old register although a nearer load of the same value exists (a
+real use of the old pseudo), then count the insns the source must have before it.
+
+The helper-call forms, as first measured (2026-11-08, `-dl -dg` dumps, global.c,
+reload.c and reload1.c read): how GCC 2.95 gives
+such a block its registers:
 
 - **CSE starts over every 1,001 insns** (cse_basic_block), in both passes,
   so a constant gets a new pseudo in each window (nonmatching/func_00109488.cpp

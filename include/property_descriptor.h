@@ -12,10 +12,17 @@
 
 struct ScriptValue;
 
+// Returns the object that holds a property's field (PropertyDescriptor::target).
+typedef void* (*PropertyTarget)(void* obj, s32 one);
+
 struct PropertyDescriptor {
     s32 type;               // 0x00: the kind of value (func_0011E680 switches on it)
     u32 flags;              // 0x04: 0x800 a class default, read from value (func_0011EDA8)
-    u8 value[4];            // 0x08: the default value
+    union {
+        u8 value[4];        // 0x08: the default value, read by its bytes
+        s32 intValue;       // 0x08: as FillObjectPropertyTable stores an integer default
+        f32 floatValue;     // 0x08: and a float default
+    };
     union {
         void (*setter)(ScriptValue* ret, void* obj, s32 n, ScriptValue* args); // 0x0C: given the values read
         s32 getter;         // 0x0C: when read (func_001C15D8): the field's offset (flags 2), the
@@ -28,7 +35,7 @@ struct PropertyDescriptor {
                             // the setter's offset in the object's table, or (flags 0x20) the setter
     };
     s32 offset;             // 0x18: of the field (or of the method slot) in the target
-    void* (*target)(void* obj, s32 one); // 0x1C: the object holding the field, when set
+    PropertyTarget target;  // 0x1C: the object holding the field, when set
 };
 
 typedef char check_PropertyDescriptor[sizeof(PropertyDescriptor) == 0x20 ? 1 : -1];
