@@ -241,7 +241,11 @@ dump:
   local-alloc retail's VU registers (the velocity vf1, the Dot's 1.0 vf2). Spot it: retail
   loads a pointer's field before stack stores that ours issues first.
 
-### A member store that kills two registers goes first (func_001A1030, near miss)
+### A member store that kills two registers goes first (func_001A1030, matched 2026-11-12)
+
+The head ("Ruled out for the head" below) was the missing CLOBBER of a brace initialiser's
+union member: docs/toolchain/sched1.md, "Two equal clears that retail issues apart". The tail's
+two findings stand as written.
 
 UpdateSpringEffect (two clamped quadratics, a spring towards them, `vel += acc * dt;
 pos += vel * dt` with vel.y zeroed for the position) went from 81.1% to 86.1% on

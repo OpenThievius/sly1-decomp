@@ -2624,6 +2624,7 @@ func_001A0D60	func_001A1AA8	match
 func_001A0DF0	func_001A1B38	match	
 func_001A0F88	func_001A1CD0	match	
 func_001A0FE8	func_001A1D30	match	
+func_001A1030	func_001A1D78	match	
 func_001A11C0	func_001A1F08	match	
 func_001A1398	func_001A20E0	match	
 func_001A1410	func_001A2158	match	

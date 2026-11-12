@@ -519,6 +519,12 @@ cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
   -1.0 is loaded after -0.5 is stored and takes its $f0, and the one before 0x00 gives the
   first vector's constants their lives. The vectors at 0x20 (-0.5) and 0x50 (0.5, 2.0) have a
   non-zero first float and no CLOBBER: they are plain (with either as a union, 1 to 3 of 8).
+- **A local is the same (func_001A1030).** `Quadratic16 a = { 125.0f, -25.0f, 0.0f };` on the
+  stack is cleared with one `sq` and gets the same `(clobber (mem/s:BLK slot))` before its
+  first float's store; two such locals in a row order their frame stores as retail's emitter
+  has them (docs/toolchain/sched1.md, "Two equal clears that retail issues apart"). The type
+  is shared: a quadratic's coefficients (include/shapes.h's Quadratic16), which the ring's rows
+  and the spawn block's first and last vectors are too.
 - **Where the guard puts the data.** The compiler writes a static's guard out with its
   function, so a file's globals that retail has after the guard are defined after the
   function (gauge_agent.cpp's D_002649B0 on, file_1E88D0.cpp's D_00275DB8 on, declared

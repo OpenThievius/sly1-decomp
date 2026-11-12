@@ -1643,7 +1643,37 @@ void InitEmitterEffect(Effect* self)
 
 LINKER_REMNANT(func_001A1028);
 
-INCLUDE_ASM(func_001A1030);
+static inline f32 ClampRange(f32 v, f32 lo, f32 hi)
+{
+    if (v < lo) {
+        return lo;
+    }
+    if (hi < v) {
+        return hi;
+    }
+    return v;
+}
+
+// The emitter's two targets are quadratics of its age (include/shapes.h's Quadratic16, each a
+// brace initialiser: the compiler clears the local and stores the non-zero coefficients, and
+// the CLOBBER of the first one's union orders the frame stores as retail has them).
+void MoveEmitterEffect(Effect* self, f32 dt)
+{
+    Vec02 d1, d2, vel, pa, pb;
+    Quadratic16 a = { 125.0f, -25.0f, 0.0f };
+    Quadratic16 b = { 20.0f, 20.0f, 0.0f };
+    f32 t = (g_gameTime - self->start) / self->life;
+    f32 u = ClampRange(t, 0.0f, 1.0f);
+    Vu0::Q(pa) = Vu0::FromFloats(a.x + u * (a.y + u * a.z), 0.0f, 0.0f);
+    Vu0::Q(pb) = Vu0::FromFloats(0.0f, b.x + u * (b.y + u * b.z), 0.0f);
+    Vu0::Q(d1) = Vu0::Sub(Vu0::Q(pa), Vu0::Q(self->q80));
+    Vu0::Q(d2) = Vu0::Sub(Vu0::Q(pb), Vu0::Q(self->qA0));
+    Vu0::Q(d2) = Vu0::MulXSum(Vu0::Q(d1), Vu0::Scalar(25.0f), Vu0::Q(d2), Vu0::Scalar(10.0f));
+    Vu0::Q(self->qA0) = Vu0::MulAddX(Vu0::Q(self->qA0), Vu0::Q(d2), Vu0::Scalar(dt));
+    Vu0::Q(vel) = Vu0::Q(self->qA0);
+    vel.y = 0.0f;
+    Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(vel), Vu0::Scalar(dt));
+}
 
 void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
 
