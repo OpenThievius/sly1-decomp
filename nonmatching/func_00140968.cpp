@@ -14,6 +14,14 @@
 // Wave 16 (2026-11-10): about 25 more forms ruled out (docs/toolchain/gcse.md, "Also ruled out"):
 //       condition spellings, goto, switch, ?:/&&/|| statements, do-while(0), the return's forms;
 //       every loop form gives the copy but adds an aligned loop label's nop (68 bytes).
+// w37-f2 (2026-11-12): the width is 32 bits (s8/s16 add sll+sra and are 64 bytes by coincidence; u8/u16 an andi;
+//       long a dsll32/dsra32). From -da dumps of three forms: retail needs the join's %hi merged with the
+//       compare's in cse1 (the skip around the arm does that) and the store's block cut off from the
+//       compare's in cse1 AND cse2. A run-once loop before the store cuts only cse1 (cse2 ignores a loop end
+//       in its forward scan and rewrites the store to the first register; the note also aligns the join);
+//       the two-test form cuts the join instead, so store and join both go through PRE's copy. Ruled out
+//       too: the equal case returning first with a run-once loop after its return, and that inside a
+//       do/while(0) left by break. docs/toolchain/gcse.md, "A %hi copied into a second register".
 #include "common.h"
 #include "asm_func.h"
 #include "key_id.h"

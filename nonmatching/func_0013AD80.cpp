@@ -15,6 +15,13 @@
 // w22 (2026-11-11): re-scored, unchanged (18 lines, regdiff `order`). The difference is loop.c's
 // (where f = frames is set, and the switch's registers follow from it), with no VU0 conversion
 // for the "*r" lever and no register-only decision for the allocator replays. Not retried.
+// w37-f2 (2026-11-12): the `for` form with f = &frames[i] measured with -dL: the li 80 is the loop's first movable
+// (threshold 79), life 1, 95 and 84 insns: not moved in either pass. A second index expression behind a CSE break
+// is matched and moved but makes two reduced pointers (retail has one giv family, so one li 80). loop.c's luids
+// count non-line notes, so one note between the li 80 and its mult gives life 2 and moves it in pass 1; a probe
+// with the stride as an inline's constant argument (life 3) reduces the giv and gives the first loop retail's
+// s1/s2, but its early-exit tails are no longer merged (1732 bytes). Open: the plain form that puts a note there.
+// docs/toolchain/loops.md, "A count-up loop with no vtop", last item.
 #include "common.h"
 #include "asm_func.h"
 #include "list_iter.h"

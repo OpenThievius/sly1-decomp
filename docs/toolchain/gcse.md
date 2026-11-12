@@ -563,6 +563,28 @@ pre_insert_copy_insn, pre_delete) and lcm.c with `-ds -dG -dt -dl -dg` dumps (20
   (`while`, `for (; c; g = s);`, `for (;;) { if (!c) break; g = s; }`, `if (c) do g = s; while
   (c);`) gives retail's copy but 68 bytes: the extra `nop` is the aligned loop label, which
   retail does not have, so retail's function was not a loop at final.
+- **Which block each `%hi` belongs to, from the dumps (w37-f2, 2026-11-12).** Retail reads the
+  compare and the return through the first `%hi` (v1) and stores through the copy (a1). Three
+  `-da` dumps show what that needs. The plain `if`: one pseudo everywhere, PRE has nothing to
+  do. A run-once loop before the store (a probe): cse1 stops at its NOTE_INSN_LOOP_END, the
+  store's `%hi` is a pseudo of its own (121) while the join's is the compare's (118, reached
+  around the arm by `-fcse-skip-blocks`); PRE inserts 128 at the end of the compare's block
+  and makes 121 a copy of it; but cse2 runs after loop.c, where the forward scan no longer
+  stops at a loop end, so it sees `128 = 118` and the store in one block and rewrites the store
+  to 118: one register again, and the loop note aligns the join (a `nop`). The two-test form
+  (`|| status == 0x7fffffff`): cse1 merges the store's `%hi` with the compare's (around the
+  second test) and leaves the join's its own (125); PRE's 129 then becomes the canonical
+  register in cse2 (inferred: make_regs_eqv prefers a register that lives past the block), so
+  the store and the join both go
+  through the copy, where retail's join uses v1. So retail needs the join merged by cse1 (the
+  plain skip around the arm) and the store's block cut off from the compare's in cse1 and in
+  cse2: a used label at the head of the fall-through arm that is still there after loop.c and
+  gone, without code or an aligned label, by the end. No loop note gives the second half.
+- **The width (w37-f2).** Retail has no extension: `status` narrowed to s8 or s16 adds `sll; sra`
+  (64 bytes by coincidence: the shifts stand where retail has the copy), u8 or u16 an `andi`, a
+  64-bit `long` a `dsll32; dsra32` before the store (72 bytes). The value is 32 bits wide from
+  the call to the store. Also ruled out: the equal case returning first with a run-once loop
+  after its return, and the same inside a `do { } while (0)` left by `break` (other code).
 - **Spotting it.** `move aN,vM` of a `%hi` register in a branch's delay slot, the store through
   the copy and later loads through the original: the store's block was entered by a jump that
   cse folded away (a loop's back edge or a redundant second test), not by the `if` alone.

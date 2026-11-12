@@ -720,6 +720,26 @@ the `-dL -dl -dg` dumps (2026-11-10):
   as `frames[i].fade` (one mult after CSE), four WriteVifFlush calls (one after the switch is
   retail's tree and 7 insns fewer).
 
+- **The `li 80` needs a life of 2, not a second movable (w37-f2, 2026-11-12).** Three compiles
+  of the `for` form with `-dL`. (1) `ViewedFrame* f = &frames[i];` at the top of the body: the
+  `li 80` is the loop's first movable in both passes (threshold 79), life 1, 95 and 84 insns:
+  `not desirable` twice, the mult stays (1720 bytes). By my count the 84 are the final code
+  plus three argument copies (`t0 = hdr[0] + n`) and two of flow's `(use (const_int 0))`. (2) A second index expression behind a CSE path break (a probe:
+  `&frames[i]` in the call, a run-once loop, `frames[i].fade`) gives a second `li 80`, which
+  combine_movables matches (`regno 398 (life 2), move-insn savings 2 moved`, `regno 404 done
+  matches 1095`), but each expression is then a giv family of its own and loop.c reduces two
+  pointers (`move s4,v1; addiu s5,v1,64`): retail's one `addiu s2,s2,0x50` means one family, so
+  one `li 80`. (3) loop.c's luids count every note that is not a line number (the func_001D7778
+  section below), so a single `li 80` separated from its `mult` by a note has a life of 2 or
+  more and moves in pass 1 (79 x 2 >= 95). A probe with the stride as an inline's constant
+  argument (the copy to the parameter is emitted before the expansion's two block notes: life 3)
+  shows it: `Insn 1092: regno 396 (life 3), move-insn savings 1 moved`, both givs found, `giv
+  at 1123 combined with giv at 1096`, and the function's first loop then has retail's s1 and s2
+  (obj and the frame pointer), which the unreduced forms swap. That probe is 1732 bytes: from
+  the first loop's exit on, the two early-exit tails are no longer merged; not followed
+  further. What is still to find is the plain form that leaves one non-line note between the
+  `li 80` and its `mult` (or a loop of 79 insns at most in pass 2).
+
 ### Life-1 invariants that reload rematerialises: a `lui` in a loop with every saved register taken (func_0013A618, near miss)
 
 Read from loop.c (move_movables) with `-dL` dumps (2026-11-10, nonmatching/func_0013A618.cpp, the
@@ -799,12 +819,14 @@ when D0's and E0's `lo_sum` are left by the first pass and moved by the second
 (`-frerun-loop-opt`), whose insns come after everything the first pass moved.
 
 - **What decides it.** move_movables moves an invariant when `threshold * savings * lifetime >=
-  insn_count`. The loop has 189 insns in pass 1; the threshold starts at 80 and falls by 3 per
-  move, so it is 59 when D0's `lo_sum` is reached (after 163, 228, 227, 239, 238, 268 and D0's
-  `%hi`) and 56 at E0's. With a lifetime of 5 the products are 295 and 280 (moved, ours); with 3
-  they are 177 and 168, under 189, and the dump says `not desirable`. Pass 2 starts again at 80
-  with 175 insns: 240 and 231, both moved, after pass 1's copy of `&spin`. B0's `lo_sum` is
-  reached at 74, so it moves in pass 1 with either lifetime (222 at 3).
+  insn_count`. The loop has 189 insns in pass 1; this file's threshold is 79 (the func_001D9488
+  section above) and falls by 3 per move, so it is 58 when D0's `lo_sum` is reached (after 163,
+  228, 227, 239, 238, 268 and D0's `%hi`) and 55 at E0's. With a lifetime of 5 the products are
+  290 and 275 (moved, ours); with 3 they are 174 and 165, under 189, and the dump says `not
+  desirable`. Pass 2 starts again at 79 with 175 insns: 237 and 228, both moved, after pass 1's
+  copy of `&spin`. B0's `lo_sum` is reached at 73, so it moves in pass 1 with either lifetime
+  (219 at 3). The dumps give the decisions, not the threshold: any start from 69 to 83 gives the
+  same split here.
 - **Where the lifetime comes from.** loop.c's luids count every insn and every note that is not
   a line number (compute_luids), so NOTE_INSN_BLOCK_BEG and NOTE_INSN_DELETED count. An inline
   method called on a constant address (`((QuadraticCurve*)D_002753D0)->Eval(t)`) copies the
