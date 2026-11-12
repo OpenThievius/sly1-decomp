@@ -448,90 +448,88 @@ established, in the order it was found (haifa-sched.c, alias.c, expr.c, cp/typec
 cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
 
 - **The source order is the declaration order.** Read back through sched2 (after reload a
-  constant load and a store of equal priority keep sched1's order, and an FPR reused by a
-  later constant raises its first store's priority by one anti link), retail's sched1 output
-  is: the first constants; the stores up to row 1's colour (0x48), those whose constant dies
-  first, then the others in offset order; the constants of row 2; row 2's colour (0x68); the
-  guard; row 2's other stores, the dying ones first (f50, f60, [f64], f54). Every tie in it
-  is INSN_REG_WEIGHT and then LUID with the fields in *offset* order, so the "source order"
-  of the near misses (f44, f4, f40, ...) was the scheduler's, not the programmer's.
+  constant load and a store of equal priority keep sched1's order, and an FPR reused by a later
+  constant raises its first store's priority by one anti link), retail's sched1 output is: the
+  first constants; the stores up to row 1's colour (0x48), those whose constant dies first, then
+  the others in offset order; the constants of row 2; row 2's colour (0x68); the guard; row 2's
+  other stores, the dying ones first (f50, f60, [f64], f54). Every tie in it is INSN_REG_WEIGHT
+  and then LUID with the fields in *offset* order, so the "source order" of the near misses
+  (f44, f4, f40, ...) was the scheduler's, not the programmer's.
 - **One insn splits the block.** With the fields in offset order, tools/sched1.py reproduces
   that output when one insn D sits between the store at 0x48 and the store at 0x50, every
   earlier store links to D and D links to every later store (build/swarm/w37-f3/h2.py: the
-  stores before D get priority 4, the same as row 2's constants, and win the tie on weight
-  or LUID; after D the colour at 0x68, where the base and the colour die, ties the guard's
-  weight -1 and wins on LUID). D emits no code, does not hold the constants in sched2
-  (`li v1,1` for the guard and the loads of row 2's constants cross its place there) and
-  does not conflict with the guard in sched1: it is a memory reference of unknown size on
-  the record's own symbol.
-- **D is `(clobber (mem/s:BLK (plus this 80)))`.** expr.c's store_constructor emits a CLOBBER
-  of its target ("the whole union value is dead") for every UNION_TYPE constructor; for a
-  record it does so only when the constructor has as many elements as the type has
-  TYPE_FIELDS, which a C++ class never has (cp/semantics.c's build_self_reference adds the
-  class's own TYPE_DECL to TYPE_FIELDS), and for an array only when the enclosing object
-  was not cleared. A BLKmode MEM has size 0, so alias.c's memrefs_conflict_p reports a
-  conflict with every reference to the same symbol at any offset, and base_alias_check
-  still separates it from the guard's symbol. A CLOBBER emits nothing, and reload deletes
-  every CLOBBER insn when it is done (reload1.c: the `.lreg` dump still has it, `.greg` and
-  `.sched2` do not), so sched2 never sees it: there the stores through s0 are held only by
-  the guard's store and the constants move freely, as retail's do.
+  stores before D get priority 4, the same as row 2's constants, and win the tie on weight or
+  LUID; after D the colour at 0x68, where the base and the colour die, ties the guard's weight
+  -1 and wins on LUID). D emits no code, does not hold the constants in sched2 (`li v1,1` for
+  the guard and the loads of row 2's constants cross its place there) and does not conflict with
+  the guard in sched1: it is a memory reference of unknown size on the record's own symbol.
+- **D is `(clobber (mem/s:BLK (plus this 80)))`.** expr.c's store_constructor emits a CLOBBER of
+  its target ("the whole union value is dead") for every UNION_TYPE constructor; for a record it
+  does so only when the constructor has as many elements as the type has TYPE_FIELDS, which a
+  C++ class never has (cp/semantics.c's build_self_reference adds the class's own TYPE_DECL to
+  TYPE_FIELDS), and for an array only when the enclosing object was not cleared. A BLKmode MEM
+  has size 0, so alias.c's memrefs_conflict_p reports a conflict with every reference to the
+  same symbol at any offset, and base_alias_check still separates it from the guard's symbol. A
+  CLOBBER emits nothing, and reload deletes every CLOBBER insn when it is done (reload1.c: the
+  `.lreg` dump still has it, `.greg` and `.sched2` do not), so sched2 never sees it: there the
+  stores through s0 are held only by the guard's store and the constants move freely, as
+  retail's do.
 - **A brace initialiser gives the rest.** g++ expands `static T x = { ... };` at run time,
   behind the guard, when T needs constructing or an element is not a constant (typeck2.c's
-  store_init_value returns the initialiser for a TYPE_NEEDS_CONSTRUCTING type, and an
-  aggregate with a member that has a constructor is one). store_constructor then clears the whole record with the compiler's
-  own memset call (config/us/libcalls.tsv: FillMemory) because a C++ constructor never
-  lists as many elements as TYPE_FIELDS, stores the non-zero members in declaration order
-  straight into the static, and skips a zero member (is_zeros_p) unless it is a constructor
-  call: func_001D5FA8's and func_001D61C8's `sw zero,40(s0)` is row 0's colour, built by its
-  constructor from 0. A zero union member is skipped before its CLOBBER, so only row 2's
-  first float (75, 25) has one; rows 0 and 1 leave theirs zero. A union over the whole
-  vector is ruled out (row 1's y is not zero: its CLOBBER at 0x30 would hold f4 and f8
-  before f44, which retail stores first; compiled, 32 lines differ).
-- **The colour only has to be a call.** Compiled: a POD colour with a constant initialiser
-  makes the whole initialiser constant and the record static data (no guard, no init block);
-  a colour with a constructor (include/ring_params.h's RingColor, the form landed: the reader
-  copies the colour as four unaligned bytes and the initialiser stores it as one word) and a
-  POD colour returned by an inline function are both EXACT, since either makes the
-  initialiser run at run time and stores its zero. The union may likewise have other members
-  than the one written; only its place (a row's first float) and its being a union are
-  retail's.
-- **Ruled out on the way.** Compiled or replayed: a nested struct or
-  array constructor (no CLOBBER inside a cleared record: build/swarm/w37-f3/v2.cpp, v5.cpp); a
-  union over the whole vector (above); the hidden insn placed before row 2's colour instead
-  (the colour then follows the guard). Reasoned from the source only: a loop note between the
-  groups (a barrier in sched2 as well, where retail's `li v1,1` and row 2's constants cross
-  it); a second set of `this`
-  (a self copy loses the base in alias.c's record_set, so the guard would follow every store;
-  an increment keeps the base but emits an `addiu`); update_equiv_regs moving a constant's set
-  next to its use (needs a pseudo used in two blocks).
-- **Spot it:** a record cleared by a memset call and filled with constants in one block,
-  whose stores come out in two groups with the second group's constants loaded late: a
-  brace initialiser with a union member at the first offset of the second group.
+  store_init_value returns the initialiser for a TYPE_NEEDS_CONSTRUCTING type, and an aggregate
+  with a member that has a constructor is one). store_constructor then clears the whole record
+  with the compiler's own memset call (config/us/libcalls.tsv: FillMemory) because a C++
+  constructor never lists as many elements as TYPE_FIELDS, stores the non-zero members in
+  declaration order straight into the static, and skips a zero member (is_zeros_p) unless it is
+  a constructor call: func_001D5FA8's and func_001D61C8's `sw zero,40(s0)` is row 0's colour,
+  built by its constructor from 0. A zero union member is skipped before its CLOBBER, so only
+  row 2's first float (75, 25) has one; rows 0 and 1 leave theirs zero. A union over the whole
+  vector is ruled out (row 1's y is not zero: its CLOBBER at 0x30 would hold f4 and f8 before
+  f44, which retail stores first; compiled, 32 lines differ).
+- **The colour only has to be a call.** Compiled: a POD colour with a constant initialiser makes
+  the whole initialiser constant and the record static data (no guard, no init block); a colour
+  with a constructor (include/ring_params.h's RingColor, the form landed: the reader copies the
+  colour as four unaligned bytes and the initialiser stores it as one word) and a POD colour
+  returned by an inline function are both EXACT, since either makes the initialiser run at run
+  time and stores its zero. The union may likewise have other members than the one written; only
+  its place (a row's first float) and its being a union are retail's.
+- **Ruled out on the way.** Compiled or replayed: a nested struct or array constructor (no
+  CLOBBER inside a cleared record: build/swarm/w37-f3/v2.cpp, v5.cpp); a union over the whole
+  vector (above); the hidden insn placed before row 2's colour instead (the colour then follows
+  the guard). Reasoned from the source only: a loop note between the groups (a barrier in sched2
+  as well, where retail's `li v1,1` and row 2's constants cross it); a second set of `this` (a
+  self copy loses the base in alias.c's record_set, so the guard would follow every store; an
+  increment keeps the base but emits an `addiu`); update_equiv_regs moving a constant's set next
+  to its use (needs a pseudo used in two blocks).
+- **Spot it:** a record cleared by a memset call and filled with constants in one block, whose
+  stores come out in two groups with the second group's constants loaded late: a brace
+  initialiser with a union member at the first offset of the second group.
 - **func_001930B8, the file-scope records (matched the same day).** switched_collider.cpp's
   static initialiser is the compiler's own, made from `static Blk05 D_00604700 = { ... };` and
   `Blk05 D_00269C10 = { ... };` (config/us/generated.tsv names it and its `_GLOBAL_$I$`). A
-  vector member copied from a global (`*(Quad16*)&g_unitZVector`) is not safe to store
-  straight into the target (expr.c's safe_from_p: an INDIRECT_REF against a MEM), so each
-  record is built in a stack temporary and copied, as retail's are. Which members are unions
-  was read off retail's registers by compiling every choice (build/swarm/w37-f3/svar.py: the
-  constants' FPRs and the order of loads and stores, 8 of 8 only with the vectors at 0x00 and
-  0x70, or with 0x10 as well, whose first float is zero): the CLOBBER before 0x70 holds its two stores (1.0, -1.0) behind every other store, so
-  -1.0 is loaded after -0.5 is stored and takes its $f0, and the one before 0x00 gives the
-  first vector's constants their lives. The vectors at 0x20 (-0.5) and 0x50 (0.5, 2.0) have a
-  non-zero first float and no CLOBBER: they are plain (with either as a union, 1 to 3 of 8).
+  vector member copied from a global (`*(Quad16*)&g_unitZVector`) is not safe to store straight
+  into the target (expr.c's safe_from_p: an INDIRECT_REF against a MEM), so each record is built
+  in a stack temporary and copied, as retail's are. Which members are unions was read off
+  retail's registers by compiling every choice (build/swarm/w37-f3/svar.py: the constants' FPRs
+  and the order of loads and stores, 8 of 8 only with the vectors at 0x00 and 0x70, or with 0x10
+  as well, whose first float is zero): the CLOBBER before 0x70 holds its two stores (1.0, -1.0)
+  behind every other store, so -1.0 is loaded after -0.5 is stored and takes its $f0, and the
+  one before 0x00 gives the first vector's constants their lives. The vectors at 0x20 (-0.5) and
+  0x50 (0.5, 2.0) have a non-zero first float and no CLOBBER: they are plain (with either as a
+  union, 1 to 3 of 8).
 - **func_001549C8, two function-local statics built the same way.** Its vectors and its spawn
   block (the same Blk05, with 750, 750, 1.0 and 1.0, 0, -1.0 in the two Quadratic16s) are
-  `static` brace initialisers behind two guards, each through a temporary; the CLOBBER at
-  0x70 is what held f70 and f78 behind the other stores (docs/toolchain/alias-classes.md, "A
-  constant set in an earlier block and used once").
+  `static` brace initialisers behind two guards, each through a temporary; the CLOBBER at 0x70
+  is what held f70 and f78 behind the other stores (docs/toolchain/alias-classes.md, "A constant
+  set in an earlier block and used once").
 - **A local is the same (func_001A1030).** `Quadratic16 a = { 125.0f, -25.0f, 0.0f };` on the
-  stack is cleared with one `sq` and gets the same `(clobber (mem/s:BLK slot))` before its
-  first float's store; two such locals in a row order their frame stores as retail's emitter
-  has them (docs/toolchain/sched1.md, "Two equal clears that retail issues apart"). The type
-  is shared: a quadratic's coefficients (include/shapes.h's Quadratic16), which the ring's rows
-  and the spawn block's first and last vectors are too.
-- **Where the guard puts the data.** The compiler writes a static's guard out with its
-  function, so a file's globals that retail has after the guard are defined after the
-  function (gauge_agent.cpp's D_002649B0 on, file_1E88D0.cpp's D_00275DB8 on, declared
-  `extern` above for the functions that use them earlier), and the record's address is the
-  file's `.bss` entry in config/us/files.tsv.
+  stack is cleared with one `sq` and gets the same `(clobber (mem/s:BLK slot))` before its first
+  float's store; two such locals in a row order their frame stores as retail's emitter has them
+  (docs/toolchain/sched1.md, "Two equal clears that retail issues apart"). The type is shared: a
+  quadratic's coefficients (include/shapes.h's Quadratic16), which the ring's rows and the spawn
+  block's first and last vectors are too.
+- **Where the guard puts the data.** The compiler writes a static's guard out with its function,
+  so a file's globals that retail has after the guard are defined after the function
+  (gauge_agent.cpp's D_002649B0 on, file_1E88D0.cpp's D_00275DB8 on, declared `extern` above for
+  the functions that use them earlier), and the record's address is the file's `.bss` entry in
+  config/us/files.tsv.
