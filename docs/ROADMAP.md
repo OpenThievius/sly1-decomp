@@ -33,10 +33,10 @@ functions left with their address names, and the disc's data.
    assembly (item 3): compiled C around a few VU0, MMI or system instructions, matched with
    shared helpers in `include/` (AGENTS.md). The other 20 are plain C (45,804 bytes: 16 in game
    code, 4 in the libraries). The largest, func_00109488 (`FillObjectPropertyTable`, 37 KB, 49%
-   of what is left), is close but differs in code as well as registers: 9,338 instructions
-   against retail's 9,348. Its header and docs/toolchain/long-block-constants.md record why: one
-   global-alloc choice, which traces back to the schedule of a few long-lived constants in its
-   one very long block; every uniform source form tried so far keeps that choice. Models of
+   of what was left), matched on 2026-11-12 as plain assignment statements: its near miss, a
+   chain of inline helper calls, differed in one global-alloc choice that traced back to where
+   CSE's periodic flushes fall in its one very long block, which the order of a statement's
+   insns decides (docs/toolchain/long-block-constants.md). Models of
    GCC's register allocation (`tools/globalalloc.py`) and of its first scheduling pass
    (`tools/sched1.py`) replay the compiler's choices from its dumps, to find such levers without
    compiling blind. The toolchain's own runtime (`libgcc`) is C, built by `cc1` in `.c`
