@@ -186,3 +186,7 @@ D_002771C8 = 0x002771C8;
 // function the linker stripped, ending collider_span's .rodata.
 // The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): ring_buffer's
 // Named so that zone_collider can hold them (LINKER_REMNANT).
+// The end of gauge_agent.cpp's .bss: DrawGaugeAgentMarkerRing's static record (D_002BE490, 0x80
+// bytes) ends here, and the zeros up to memory_card.cpp's 64-aligned buffer (D_002BE540) are the
+// linker's padding, inside splat's label D_002BE490.
+D_002BE510 = 0x002BE510;

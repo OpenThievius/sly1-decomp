@@ -16,6 +16,7 @@
 #include "camera.h"
 #include "attachment.h"
 #include "globals.h"
+#include "ring_params.h"
 
 // The methods of class 0x0C (0xE50 bytes, an agent): its links and clips, the search for the
 // object it acts on, its states and the notifications it answers.
@@ -35,18 +36,6 @@ GaugeTarget D_00264960[6] = {
     { 0x35, 50.0f, 0 }, { 0x36, 50.0f, 0 }, { 0x38, 80.0f, 0 },
     { 0x3B, 80.0f, 0 }, { 0x60, 70.0f, 0 }, { 0x50, 220.0f, 0 }
 };
-s32 D_002649A8 = 0;
-s32 D_002649B0[5] = { 4, 5, 60, 41, 76 };
-f32 D_002649C4 = 1.5e+02f;
-f32 D_002649C8 = 0.25f;
-f32 D_002649D0[2] = { 0.0f, 0.25f };
-s32 D_002649D8[4] = { 16, 16, 11, 0 };
-s32 D_002649E8[6] = { 1083, 1085, 1087, 0, 0, 0 };
-f32 D_00264A00[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
-f32 D_00264A10[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
-f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
-f32 D_00264A34 = 20.0f;
-f32 D_00264A38 = 20.0f;
 
 extern f32 g_gameTime;
 
@@ -115,7 +104,43 @@ void StartGaugeAgent(GaugeAgent* self)
     }
 }
 
-INCLUDE_ASM(func_0018A510);
+extern f32 D_00275070[14];
+AnimRecord* FindAnimRecord(s32 key);
+void DrawAngleSortedRing(void* at, s32 nOffsets, f32* offsets, s32 nAnchors, void* anchors, RingParams* params, void* request);
+
+// DrawPlayerMarkerRing2's counterpart (player_request.cpp): the same block, built once as a
+// function-local static with a brace initialiser (include/ring_params.h). DrawGaugeAgent queues
+// it as a deferred request's callback, with the agent as the request's argument.
+void DrawGaugeAgentMarkerRing(DeferredRequest* request)
+{
+    GaugeAgent* agent = (GaugeAgent*)request->arg;
+    static RingParams params = {
+        1, 5.0f, 0.5f,
+        {
+            { { 0.0f, 0.0f, 0.0f }, 0.0f, 100.0f, RingColor(0x80FFFFFF) },
+            { { 0.0f, 0.5f, 0.0f }, 0.0f, 50.0f, RingColor(0x80FFFFFF) },
+            { { 75.0f, 1.0f, 0.0f }, 1.0f, -100.0f, RingColor(0x80FFFFFF) },
+        },
+    };
+    AnimRecord* texture = FindAnimRecord(0x15D);
+    params.textures[1] = texture;
+    params.textures[0] = texture;
+    DrawAngleSortedRing((u8*)agent + 0x140, 7, D_00275070, agent->fE20, agent->fE24, &params, request);
+}
+
+// The static's guard (D_002649A8) is written out with the function above, so the data below
+// follows it.
+s32 D_002649B0[5] = { 4, 5, 60, 41, 76 };
+f32 D_002649C4 = 1.5e+02f;
+f32 D_002649C8 = 0.25f;
+f32 D_002649D0[2] = { 0.0f, 0.25f };
+s32 D_002649D8[4] = { 16, 16, 11, 0 };
+s32 D_002649E8[6] = { 1083, 1085, 1087, 0, 0, 0 };
+f32 D_00264A00[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
+f32 D_00264A10[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
+f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
+f32 D_00264A34 = 20.0f;
+f32 D_00264A38 = 20.0f;
 
 // The record an agent's draw method is given: the point and the weights it measures against.
 struct AgentDrawArgs {
@@ -128,7 +153,6 @@ struct AgentDrawArgs {
 void DrawAgent(Agent* self, AgentDrawArgs* args);
 void QueueDeferredRequest(DeferredRequest* request);
 void* FillMemory(void* p, s32 value, s32 size);
-void DrawGaugeAgentMarkerRing();
 
 void DrawGaugeAgent(GaugeAgent* self, AgentDrawArgs* args)
 {

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 241/312 (77.2%), checked 2026-11-12
+// w37-f3 (2026-11-12): the four ring records matched as brace initialisers whose first group's stores wait for a CLOBBER: store_constructor emits `(clobber (mem:BLK ...))` for a union-typed member with a non-zero initialiser, every earlier store of the record precedes it and every later one follows (docs/toolchain/large-functions.md, "A brace initialiser's union member is a CLOBBER"). Not tried here: this record written as a brace initialiser with a union member where -1.0's group starts (0x70; 0x50 and 0x00 are candidates too), which would put -0.5's store before -1.0's load.
 // w25 (2026-11-11, w25-deps): the pending-list flush at a block's 33rd memory reference (docs/toolchain/sched1.md, "The 33rd memory reference of a block is a barrier") is not reached here (most pending: 12; FillMemory's call resets the count), so it is not what holds the late stores; the other sources of a store's dependents are listed in docs/toolchain/large-functions.md, "Dependence sources enumerated".
 // NEAR: order: the first block is exact with the destination pointer declared before the memset;
 //       the second differs only in the order its constants are loaded and stored.

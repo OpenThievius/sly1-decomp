@@ -131,7 +131,9 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
   `tools/decls.py` cannot see it, since no caller reads the value and the
   callees have no C: an original-assembly function that writes v0 in its
   return's delay slot is the evidence.
-- **Open: constructor stores kept in source order.** In func_001D5FA8,
+- **Constructor stores kept in source order (solved 2026-11-12 for the four ring records: see
+  "A brace initialiser's union member is a CLOBBER" below; func_001930B8
+  and func_001EC190 are still open).** In func_001D5FA8,
   func_001D61C8, func_001D60B0, func_0018A510 and func_001930B8 (a static
   record built by FillMemory and an inline constructor), retail keeps the
   field stores in source order and loads each constant late enough to reuse
@@ -436,3 +438,75 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
     initialisation through store_constructor, guarded): constants first
     as before, and store_constructor skips i28's zero, where retail stores
     `sw zero,40(s0)`, so the original assigned the fields (40 lines).
+
+### A brace initialiser's union member is a CLOBBER (the ring records, matched 2026-11-12)
+
+func_001D5FA8, func_001D60B0, func_001D61C8 and func_0018A510 (w37-f3) match as
+`static RingParams params = { ... };` (include/ring_params.h): the records are brace
+initialisers, and the dependence between their stores is a union member's CLOBBER. What was
+established, in the order it was found (haifa-sched.c, alias.c, expr.c, cp/typeck2.c,
+cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
+
+- **The source order is the declaration order.** Read back through sched2 (after reload a
+  constant load and a store of equal priority keep sched1's order, and an FPR reused by a
+  later constant raises its first store's priority by one anti link), retail's sched1 output
+  is: the first constants; the stores up to row 1's colour (0x48), those whose constant dies
+  first, then the others in offset order; the constants of row 2; row 2's colour (0x68); the
+  guard; row 2's other stores, the dying ones first (f50, f60, [f64], f54). Every tie in it
+  is INSN_REG_WEIGHT and then LUID with the fields in *offset* order, so the "source order"
+  of the near misses (f44, f4, f40, ...) was the scheduler's, not the programmer's.
+- **One insn splits the block.** With the fields in offset order, tools/sched1.py reproduces
+  that output when one insn D sits between the store at 0x48 and the store at 0x50, every
+  earlier store links to D and D links to every later store (build/swarm/w37-f3/h2.py: the
+  stores before D get priority 4, the same as row 2's constants, and win the tie on weight
+  or LUID; after D the colour at 0x68, where the base and the colour die, ties the guard's
+  weight -1 and wins on LUID). D emits no code, does not hold the constants in sched2
+  (`li v1,1` for the guard and the loads of row 2's constants cross its place there) and
+  does not conflict with the guard in sched1: it is a memory reference of unknown size on
+  the record's own symbol.
+- **D is `(clobber (mem/s:BLK (plus this 80)))`.** expr.c's store_constructor emits a CLOBBER
+  of its target ("the whole union value is dead") for every UNION_TYPE constructor; for a
+  record it does so only when the constructor has as many elements as the type has
+  TYPE_FIELDS, which a C++ class never has (cp/semantics.c's build_self_reference adds the
+  class's own TYPE_DECL to TYPE_FIELDS), and for an array only when the enclosing object
+  was not cleared. A BLKmode MEM has size 0, so alias.c's memrefs_conflict_p reports a
+  conflict with every reference to the same symbol at any offset, and base_alias_check
+  still separates it from the guard's symbol. A CLOBBER emits nothing, and reload deletes
+  every CLOBBER insn when it is done (reload1.c: the `.lreg` dump still has it, `.greg` and
+  `.sched2` do not), so sched2 never sees it: there the stores through s0 are held only by
+  the guard's store and the constants move freely, as retail's do.
+- **A brace initialiser gives the rest.** g++ expands `static T x = { ... };` at run time,
+  behind the guard, when T needs constructing or an element is not a constant (typeck2.c's
+  store_init_value returns the initialiser for a TYPE_NEEDS_CONSTRUCTING type, and an
+  aggregate with a member that has a constructor is one). store_constructor then clears the whole record with the compiler's
+  own memset call (config/us/libcalls.tsv: FillMemory) because a C++ constructor never
+  lists as many elements as TYPE_FIELDS, stores the non-zero members in declaration order
+  straight into the static, and skips a zero member (is_zeros_p) unless it is a constructor
+  call: func_001D5FA8's and func_001D61C8's `sw zero,40(s0)` is row 0's colour, built by its
+  constructor from 0. A zero union member is skipped before its CLOBBER, so only row 2's
+  first float (75, 25) has one; rows 0 and 1 leave theirs zero. A union over the whole
+  vector is ruled out (row 1's y is not zero: its CLOBBER at 0x30 would hold f4 and f8
+  before f44, which retail stores first; compiled, 32 lines differ).
+- **The colour only has to be a call.** Compiled: a POD colour with a constant initialiser
+  makes the whole initialiser constant and the record static data (no guard, no init block);
+  a colour with a constructor (include/ring_params.h's RingColor, the form landed: the reader
+  copies the colour as four unaligned bytes and the initialiser stores it as one word) and a
+  POD colour returned by an inline function are both EXACT, since either makes the
+  initialiser run at run time and stores its zero. The union may likewise have other members
+  than the one written; only its place (a row's first float) and its being a union are
+  retail's.
+- **Ruled out on the way.** Compiled or replayed: a nested struct or
+  array constructor (no CLOBBER inside a cleared record: build/swarm/w37-f3/v2.cpp, v5.cpp); a
+  union over the whole vector (above); the hidden insn placed before row 2's colour instead
+  (the colour then follows the guard). Reasoned from the source only: a loop note between the
+  groups (a barrier in sched2 as well, where retail's `li v1,1` and row 2's constants cross
+  it); a second set of `this`
+  (a self copy loses the base in alias.c's record_set, so the guard would follow every store;
+  an increment keeps the base but emits an `addiu`); update_equiv_regs moving a constant's set
+  next to its use (needs a pseudo used in two blocks).
+- **Spot it:** a record cleared by a memset call and filled with constants in one block,
+  whose stores come out in two groups with the second group's constants loaded late: a
+  brace initialiser with a union member at the first offset of the second group.
+  func_001930B8 (a file-scope record built in a temporary and copied, the compound literal
+  of wave 15) and func_001EC190 (the same RingParams) have the same signature and were not
+  taken further here.

@@ -244,7 +244,9 @@ D_0027C008	0027C008	4	.bss	src/main/file_14B550.cpp
 D_0027C00C	0027C00C	4	.bss	src/main/file_14B6A8.cpp
 D_002BE460	002BE460	24	.bss	src/main/display.cpp
 D_002BE478	002BE478	20	.bss	src/main/entry_queue.cpp
+D_002BE490	002BE490	128	.bss	src/main/gauge_agent.cpp
 D_00604700	00604700	128	.bss	src/main/switched_collider.cpp
+D_00605550	00605550	384	.bss	src/main/player_request.cpp
 D_00625770	00625770	2064	.bss	src/lib/request_thread.cpp
 D_00625F80	00625F80	128	.bss	src/lib/formatted_output.cpp
 D_00626000	00626000	6208	.bss	src/lib/remote_call.cpp

@@ -244,7 +244,9 @@ D_0027C008	-	4	absent	bss: no bytes in the executable
 D_0027C00C	-	4	absent	bss: no bytes in the executable
 D_002BE460	-	24	absent	bss: no bytes in the executable
 D_002BE478	-	20	absent	bss: no bytes in the executable
+D_002BE490	-	128	absent	bss: no bytes in the executable
 D_00604700	-	128	absent	bss: no bytes in the executable
+D_00605550	-	384	absent	bss: no bytes in the executable
 D_00625770	-	2064	absent	bss: no bytes in the executable
 D_00625F80	-	128	absent	bss: no bytes in the executable
 D_00626000	-	6208	absent	bss: no bytes in the executable

@@ -14,6 +14,8 @@
 #include "game_clock.h"
 #include "aim_blend_grid.h"
 #include "vu0.h"
+#include "ring_params.h"
+#include "deferred_request.h"
 
 s32 D_00274FA0[2] = {286, 287};
 s32 D_00274FA8[2] = {288, 289};
@@ -34,9 +36,6 @@ f32 D_00275068[1] = { 0 };
 float D_0027506C = 0.25f;
 float D_00275070[14] = {0.0f, 1.0f, 0.781831503f, 0.623489797f, 0.974927902f, -0.222520933f, 0.433883727f, -0.90096885f, -0.433883727f, -0.90096885f, -0.974927902f, -0.222520933f, -0.781831503f, 0.623489797f};
 float D_002750A8[34] = {1.0f, 0.0f, 0.932472229f, 0.361241668f, 0.739008904f, 0.673695624f, 0.445738345f, 0.895163298f, 0.0922683626f, 0.995734155f, -0.273662984f, 0.961825669f, -0.602634609f, 0.798017204f, -0.850217164f, 0.526432157f, -0.982973099f, 0.183749512f, -0.982973099f, -0.183749512f, -0.850217164f, -0.526432157f, -0.602634609f, -0.798017204f, -0.273662984f, -0.961825669f, 0.0922683626f, -0.995734155f, 0.445738345f, -0.895163298f, 0.739008904f, -0.673695624f, 0.932472229f, -0.361241668f};
-s32 D_00275130 = 0;
-s32 D_00275134 = 0;
-s32 D_00275138 = 0;
 
 // The eight blend slots func_001D4148 fills (0x20 bytes each), the weight of slot 6 first.
 struct BlendSlotObject;
@@ -923,6 +922,60 @@ extern const f32 D_0024DC88 = 3.4028235e38f;
 INCLUDE_ASM(func_001D5678);
 
 
-INCLUDE_ASM(func_001D5FA8);
-INCLUDE_ASM(func_001D60B0);
-INCLUDE_ASM(func_001D61C8);
+AnimRecord* FindAnimRecord(s32 key);
+void DrawAngleSortedRing(void* at, s32 nOffsets, f32* offsets, s32 nAnchors, void* anchors, RingParams* params, void* request);
+
+// The three rings each keep their parameter block as a function-local static with a brace
+// initialiser (include/ring_params.h); the textures are looked up at every call. Each is a
+// deferred request's callback (QueuePlayerMarkerRingDraw), the player the request's argument.
+void DrawPlayerMarkerRing1(DeferredRequest* request)
+{
+    Player* player = (Player*)request->arg;
+    static RingParams params = {
+        0, 5.0f, 1.0f,
+        {
+            { { 0.0f, 0.0f, 0.0f }, 0.0f, 0.0f, RingColor(0x00000000) },
+            { { 0.0f, 1.0f, 0.0f }, 0.5f, -100.0f, RingColor(0xFFFFFFFF) },
+            { { 75.0f, 1.0f, 0.0f }, 1.0f, 0.0f, RingColor(0xFFFFFFFF) },
+        },
+    };
+    params.textures[0] = 0;
+    params.textures[1] = FindAnimRecord(0x15C);
+    DrawAngleSortedRing((u8*)player + 0x140, 7, D_00275070, player->f26A8, player->f26AC, &params, request);
+}
+
+void DrawPlayerMarkerRing2(DeferredRequest* request)
+{
+    Player* player = (Player*)request->arg;
+    static RingParams params = {
+        1, 5.0f, 0.5f,
+        {
+            { { 0.0f, 0.0f, 0.0f }, 0.0f, 100.0f, RingColor(0x80FFFFFF) },
+            { { 0.0f, 0.5f, 0.0f }, 0.0f, 50.0f, RingColor(0x80FFFFFF) },
+            { { 75.0f, 1.0f, 0.0f }, 1.0f, -100.0f, RingColor(0x80FFFFFF) },
+        },
+    };
+    AnimRecord* texture = FindAnimRecord(0x15D);
+    params.textures[1] = texture;
+    params.textures[0] = texture;
+    DrawAngleSortedRing((u8*)player + 0x140, 7, D_00275070, player->f26A8, player->f26AC, &params, request);
+}
+
+void DrawPlayerMarkerRing3(DeferredRequest* request)
+{
+    Player* player = (Player*)request->arg;
+    static RingParams params = {
+        0, 5.0f, 1.0f,
+        {
+            { { 0.0f, 0.0f, 0.0f }, 0.0f, 0.0f, RingColor(0x00000000) },
+            { { 0.0f, 1.0f, 0.0f }, 0.5f, -100.0f, RingColor(0xFFFFFFFF) },
+            { { 25.0f, 1.0f, 0.0f }, 1.0f, 0.0f, RingColor(0xFFFFFFFF) },
+        },
+    };
+    RingAnchor anchor;
+    params.textures[0] = 0;
+    params.textures[1] = FindAnimRecord(0x15C);
+    anchor.scale = 60.0f;
+    anchor.obj = (PlacedObject*)player;
+    DrawAngleSortedRing((u8*)player + 0x140, 0x11, D_002750A8, 1, &anchor, &params, request);
+}
