@@ -275,7 +275,6 @@ func_001FA0B0	001FA0B0	36	remnant	stripped-function leftover
 func_001FA108	001FA108	52	remnant	stripped-function leftover
 func_001FA168	001FA168	36	remnant	stripped-function leftover
 func_001FA1D8	001FA1D8	12	remnant	stripped-function leftover
-func_001FA6B0	001FA6B0	296	inline	C with inline assembly: marked handwritten by the disassembler in the compiler's frame
 func_001FA7D8	001FA7D8	172	handwritten	marked handwritten by the disassembler
 func_001FA884	001FA884	8	remnant	stripped-function epilogue
 func_001FA890	001FA890	16	handwritten	marked handwritten by the disassembler

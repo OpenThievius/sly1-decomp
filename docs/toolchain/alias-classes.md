@@ -1032,6 +1032,51 @@ MoveTumblingEffect matched on 2026-11-10 from 32.7%. Three mechanisms, each read
   and from a pointer initialised with the face (`MeshFace* face = &faces[f]`), see "The
   operand order of an address sum".
 
+### One int for a size, a count and an index: a later life's conflict makes the counter a copy (func_001FA6B0)
+
+Matched on 2026-11-12 (w38-f6), Sony's 2.9-ee-991111, from the `-dL -dl -dg` dumps.
+HandleCommandInterrupt copies the received packet with `blez a1; move a0,a1` and a loop that
+counts $a0 down, then dispatches on the command with its index in $a1 and the handler in $a2.
+The near miss (33 words off) had a `u8 size`, a count `n`, an `index` in each arm and the
+handler read through a `slot` pointer: every value a fresh pseudo.
+
+- **What retail's registers say.** $a1 holds the size byte, then the quadword count, then the
+  index in both arms: one variable. Written so (`n = buffer[0]; ... n = (n + 15) / 16; ... n =
+  packet->head[2] & 0x7FFFFFFF;`), n is set four times and is global-alloc's. In the arms it
+  is live while $a0 holds the table's count and then the call's first argument, so it
+  conflicts with hard register 4 (`;; 122 conflicts: ... 2 3 4 29`). The quotient's temporary
+  (expand_divmod's, placed in $a0 by local-alloc) gives n a preference for $a0 that the
+  conflict refuses: n takes $a1.
+- **The counter keeps the preference.** `for (i = 0; i < n; i++)` is reversed by loop.c
+  (`Reversed loop and added reg_nonneg`), which sets i from n in the preheader. i does not
+  conflict with n (n dies in the copy), so it inherits n's preference for $a0 and, unlike n,
+  can have it: `move a0,a1` stays, with the alignment nop after it. A variable used for the
+  count only has no later conflict, takes $a0 itself, and the copy is a `move a0,a0` that
+  disappears (measured with a size set twice and an `index` of its own: 2 instructions short).
+- **A variable set several times keeps `blez`.** combine only knows the bits of a register set
+  once, so the guard of the multiply-set n stays `blez` where a single-set count (a byte plus
+  15, divided) is known non-negative and gives `beqz` (inferred from the two forms' code, not
+  read in the dump).
+- **The rest of the head.** `buffer[0] = 0` written before `src = buffer`: sched1 issues the
+  copy first, the buffer pointer is still live at the store, and the two take $a3 and $a2
+  (after the copy cse would store through src). The destination as `local[i]` is loop.c's
+  giv, set in the preheader after the guard, so reorg's slot takes the counter's copy.
+- **The handler in one variable.** `handler = ch->system[n].handler; if (handler != 0)
+  handler(packet, ch->system[n].arg);` with one `handler` for both arms: set twice, it is
+  global-alloc's and takes $a2 (measured; with a variable in each arm 8 words differ, and
+  through a `slot` pointer the handler is in $v1 and the address's operands swap in the
+  `addu`).
+- **A call that returns a value moves the next load to $v1.** Retail reads the command word
+  for its sign into $v1 right after `jal ArmIopDmaChainFromInterrupt`. Declared `void`, the
+  load takes $v0; declared `s32` (a system call stub: its value is in $v0), $v1: EXACT.
+  Inferred: the call sets $v0 with a REG_UNUSED note, and local-alloc's first try places a
+  quantity over its life widened by one insn at each end ("The widened lives decide the
+  neighbour's register" above), which here reaches the call.
+- **The tell.** One register carrying unrelated values in order (a size, a count, an index)
+  where each use could have had the lowest free register: a variable the original reused,
+  typical of C written with its declarations at the top. Its conflicts are those of all its
+  lives, so a value may be kept out of a register by a use a hundred instructions later.
+
 ### An expression split into two statements adds references (func_001F7390)
 
 - Sony's library compiler ranks global-alloc's pseudos the same way: floor_log2(refs) * refs /

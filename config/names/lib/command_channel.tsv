@@ -14,5 +14,5 @@ func_001FA4D0	ClearCommandHandler	clears a command's handler in the channel's sy
 func_001FA4F8	SendCommandPacket	sends a command packet, and optionally a block of data, to the IOP by DMA with StartIopDma, or StartIopDmaFromInterrupt when asked from an interrupt handler
 func_001FA630	SendCommand	sends a command packet with SendCommandPacket outside interrupts (BindRemoteService and CallRemoteService send through it)
 func_001FA670	SendCommandFromInterrupt	sends a command packet with SendCommandPacket from an interrupt handler (AnswerIopCall and AnswerServiceLookup send through it)
-func_001FA6B0	HandleCommandInterrupt	original assembly: the command channel's DMA handler, which runs the handler of each received command and re-arms the receive chain
+func_001FA6B0	HandleCommandInterrupt	the command channel's DMA handler, which runs the handler of each received command and re-arms the receive chain
 func_001FA7D8	WriteBackDataCacheRange	original assembly: writes back and invalidates the data cache lines of a range, 64 bytes at a time (the IOP clients call it before a transfer)
