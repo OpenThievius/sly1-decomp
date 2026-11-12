@@ -3482,6 +3482,7 @@ func_001D7190	func_001D7E78	match
 func_001D72C8	func_001D7FB0	match	rodata
 func_001D73A8	func_001D8090	match	
 func_001D7440	func_001D8128	match	version-specific
+func_001D7778	func_001D8460	match	
 func_001D8470	func_001D9158	match	rodata
 func_001D8578	func_001D9260	match	
 func_001D86F8	func_001D93E0	match	

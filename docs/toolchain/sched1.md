@@ -394,6 +394,24 @@ Read from cse.c, jump.c and haifa-sched.c of GCC 2.95.3 with dumps and probes (2
   already in its register, so sched2 can see an insn that the final code lacks: a candidate for
   the missing dependence of `addiu a1`, not found.
 
+- **What a stale link would have to be (w37-f2, 2026-11-12).** haifa-sched.c only drops the
+  LOG_LINKS that point into another block when a pass starts (schedule_insns, the
+  `INSN_BLOCK (x) != b` loop) and skips links to deleted insns when it builds the forward
+  lists, so every same-block dependence sched1 computed is still a dependence in sched2. In
+  ours' sched2 trace the join block issues 301 and 171 in cycle 5, 228 and 205 in 6, 224 and
+  251 in 7, 131 and 233 in 8, then 181 alone in 9; `addiu a1,sp,16` (253) lands where retail
+  has it, after 181, if it waits for the weights' qmtc2s (171, 205), unit Z's load (228),
+  `move a0,s0` (251) or the MulXSum asm (233); a link to the table load (131), d's reload (224)
+  or the slot store (181) leaves it after r's store. But sched1 gives the insn `a1 = sp + 16`
+  only what it names: the last users and setters of hard register 5 and the setter of the
+  address pseudo. None of the five candidates names a1 or sets an address, and combine's
+  distribute_links keeps a merged insn's links only on insns that still use the linked
+  register. A loop note is no help either (reasoned from the two passes' rules, not compiled):
+  with the first insn after it a barrier in both passes, every placement puts a slot store, r's store or `move a0,s0` on the wrong side of it
+  (the slot stores are expanded before the asm, the call's own moves after r's store). So a
+  dependence, stale or not, is not what holds the insn back; the block's contents at sched2 are
+  (the per-arm stores above).
+
 ### The compiler's qmfc2 again, and a rescale's divide order (func_001D4348)
 
 The player's blend weights (2026-11-09) compute three slot weights, each a dot product over

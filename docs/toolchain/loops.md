@@ -720,6 +720,26 @@ the `-dL -dl -dg` dumps (2026-11-10):
   as `frames[i].fade` (one mult after CSE), four WriteVifFlush calls (one after the switch is
   retail's tree and 7 insns fewer).
 
+- **The `li 80` needs a life of 2, not a second movable (w37-f2, 2026-11-12).** Three compiles
+  of the `for` form with `-dL`. (1) `ViewedFrame* f = &frames[i];` at the top of the body: the
+  `li 80` is the loop's first movable in both passes (threshold 79), life 1, 95 and 84 insns:
+  `not desirable` twice, the mult stays (1720 bytes). By my count the 84 are the final code
+  plus three argument copies (`t0 = hdr[0] + n`) and two of flow's `(use (const_int 0))`. (2) A second index expression behind a CSE path break (a probe:
+  `&frames[i]` in the call, a run-once loop, `frames[i].fade`) gives a second `li 80`, which
+  combine_movables matches (`regno 398 (life 2), move-insn savings 2 moved`, `regno 404 done
+  matches 1095`), but each expression is then a giv family of its own and loop.c reduces two
+  pointers (`move s4,v1; addiu s5,v1,64`): retail's one `addiu s2,s2,0x50` means one family, so
+  one `li 80`. (3) loop.c's luids count every note that is not a line number (the func_001D7778
+  section below), so a single `li 80` separated from its `mult` by a note has a life of 2 or
+  more and moves in pass 1 (79 x 2 >= 95). A probe with the stride as an inline's constant
+  argument (the copy to the parameter is emitted before the expansion's two block notes: life 3)
+  shows it: `Insn 1092: regno 396 (life 3), move-insn savings 1 moved`, both givs found, `giv
+  at 1123 combined with giv at 1096`, and the function's first loop then has retail's s1 and s2
+  (obj and the frame pointer), which the unreduced forms swap. That probe is 1732 bytes: from
+  the first loop's exit on, the two early-exit tails are no longer merged; not followed
+  further. What is still to find is the plain form that leaves one non-line note between the
+  `li 80` and its `mult` (or a loop of 79 insns at most in pass 2).
+
 ### Life-1 invariants that reload rematerialises: a `lui` in a loop with every saved register taken (func_0013A618, near miss)
 
 Read from loop.c (move_movables) with `-dL` dumps (2026-11-10, nonmatching/func_0013A618.cpp, the
@@ -754,7 +774,7 @@ instead of retail's caller-saved a7/t0/t1 (saved around both calls with sq/lq), 
 is 12 bytes short. The array form (Vec02 indexing or a bank struct of three arrays) does not
 change it.
 
-### Three invariants ranked by their place in loop.c's move list (func_001D7778, near miss)
+### Three invariants ranked by their place in loop.c's move list (func_001D7778, solved below)
 
 Measured on 2026-11-10 with tools/globalalloc.py and tools/sched1.py (StepPathFollower's wheel
 loop, nonmatching/func_001D7778.cpp). The loop's saved registers s6, s7, s8 go to three
@@ -790,3 +810,55 @@ fourth candidate, B0's address (227, also 5 refs, born first), loses and is rema
   more use in the loop (7 refs, floor_log2 2: priority 14 per life against spin's 10). Retail's
   code rules it out: c[0] is read through the symbol's own %hi/%lo and only c[1] and c[2] through
   the pointer, as in ours. The along and sum conversions as the "*r" ToFloatMoved change nothing.
+
+### Solved: a curve indexed in place has a life of 3, and loop.c's second pass moves it (func_001D7778)
+
+Matched on 2026-11-12 (w37-f2). The copy of `&spin` was never out of place: the push curves'
+addresses were. Retail's preheader order (B0, C0, the copy, then D0 and E0) is what loop.c gives
+when D0's and E0's `lo_sum` are left by the first pass and moved by the second
+(`-frerun-loop-opt`), whose insns come after everything the first pass moved.
+
+- **What decides it.** move_movables moves an invariant when `threshold * savings * lifetime >=
+  insn_count`. The loop has 189 insns in pass 1; this file's threshold is 79 (the func_001D9488
+  section above) and falls by 3 per move, so it is 58 when D0's `lo_sum` is reached (after 163,
+  228, 227, 239, 238, 268 and D0's `%hi`) and 55 at E0's. With a lifetime of 5 the products are
+  290 and 275 (moved, ours); with 3 they are 174 and 165, under 189, and the dump says `not
+  desirable`. Pass 2 starts again at 79 with 175 insns: 237 and 228, both moved, after pass 1's
+  copy of `&spin`. B0's `lo_sum` is reached at 73, so it moves in pass 1 with either lifetime
+  (219 at 3). The dumps give the decisions, not the threshold: any start from 69 to 83 gives the
+  same split here.
+- **Where the lifetime comes from.** loop.c's luids count every insn and every note that is not
+  a line number (compute_luids), so NOTE_INSN_BLOCK_BEG and NOTE_INSN_DELETED count. An inline
+  method called on a constant address (`((QuadraticCurve*)D_002753D0)->Eval(t)`) copies the
+  address into its `this` before the two block notes of the inline expansion (integrate.c:
+  process_reg_param runs before expand_start_bindings): `lo_sum`, BLOCK_BEG, BLOCK_BEG, load
+  c[2], mult, load c[1] is a lifetime of 5. The global array indexed in place
+  (`D_002753D0[0] + t * (D_002753D0[1] + t * D_002753D0[2])`) forms the base address at the
+  first element with an offset, right before its load: `lo_sum`, load, mult, load is 3 (the
+  second element's own `%hi`/`lo_sum` pair folds into the first in cse1). Both forms read c[0]
+  through the symbol's own `%hi`/`%lo` and c[1], c[2] through the base, so the loop's code is
+  the same; only the pass that moves the base differs.
+- **Confirmed.** With the two push curves indexed in place the loop dump reads `Insn 796: regno
+  306 (life 3), move-insn savings 1 not desirable` and `Insn 822: regno 324 (life 3) ... not
+  desirable` in pass 1, both `moved` in the second `Loop from 94`, and tools/check.py prints
+  EXACT on us and eu. A pointer local inside the inline (`const f32* p = c;`) changes nothing
+  (the copy folds into `this`, lifetime 5).
+- **Reading it elsewhere.** An invariant address that retail's preheader issues after a later
+  statement's invariants, with the same loop code, may be a second-pass move: check its
+  lifetime against `threshold * lifetime < insn_count` at its place in the first pass, and
+  count the block notes between its set and its uses. Two notes are the difference between an
+  inline's parameter and an expression written in place.
+- **A second route, probed and not needed.** A dead early copy of PRE's reg also reorders the
+  list: with `Vec02* out = &spin;` after the slip statement and the calls still taking `&spin`,
+  the pointer's `247 = 966` is a movable of lifetime 0 that the calls' `382 = 966` matches
+  (combine_movables: same source), so the pair moves at the pointer's place (`Insn 551: regno
+  247 (life 12), savings 2 moved`, `Insn 1056: regno 382 done matches 551`) and global-alloc
+  gives retail's s8, s7, s6. It needs a use that keeps the pointer through cse1's dead-insn
+  pass and leaves no code, which no plain source gave (the probe used an extra call). Why the
+  earlier pointer attempt failed is GCSE's second copy-propagation pass: a copy of PRE's reg set
+  in an earlier block than its uses is propagated into them (`a2 = 966`), the pointer is left
+  with no use, and the loop reads the spilled 966. A copy in the same block as its uses (ours,
+  at the first call) is not propagated: cprop only uses sets available at a block's start.
+  loop.c also substitutes a single-use copy into its use in a loop with calls (scan_loop's
+  `reg_single_usage` case): that is why `&torque` is read from PRE's spill slot
+  (`lw a1,280(sp)`).
