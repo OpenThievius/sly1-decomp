@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 282/332 (84.9%), checked 2026-11-11
+// BYTES 282/332 (84.9%), checked 2026-11-12
 // w25 (2026-11-11, w25-deps): the pending-list flush at a block's 33rd memory reference (docs/toolchain/sched1.md, "The 33rd memory reference of a block is a barrier") is not reached in this function (most pending: 8), so it is not the missing dependence.
 // Wave 23 (w23-vuD, 2026-11-11): same join-block mechanism as func_0014F168 (see its notes): in sched2 the frame address (addiu s0,sp,16) has no dependence and fills the free ALU slot while the memory unit serializes the loads; retail's must depend on the sum's asm or the first slot store, or (the per-arm store hypothesis) the store at the join's head was not in the block when sched2 ran.
 // Re-scored 2026-11-10 (w15-14F168): unchanged. A reused u128 n (first set to the Sub result in the first else arm, then `n = x; *p = n;` / `n = DivX(..); *p = n;` in the normalize's arms) still stores the fallback's GPR in arm A (sq v0,0(sp)): CSE's path from block 0 follows the first if's arms, so n is not canonical; p set in the same block is replaced by the frame pointer. docs/toolchain/sched1.md, "Why the arms' stores cannot be written plainly".

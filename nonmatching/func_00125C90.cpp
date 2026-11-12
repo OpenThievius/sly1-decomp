@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1320/1324 (99.7%), checked 2026-11-11
+// BYTES 1320/1324 (99.7%), checked 2026-11-12
 // NEAR (2026-11-10, worker w11-125C90): PlacedObject's slot 36 (0xA0), the base draw: the
 // culling by the camera's planes and distance fades (into the transform's two scales), the world
 // node's level, the parent's unscaling, the attachment's matrix, slot 37, then each child drawn
@@ -39,6 +39,25 @@
 // writes the difference straight into vf6 and passes it with qmfc2 a1,$vf6: d never spilled
 // there. Here retail's vsub into vf3, store, lqc2 vf6 and qmfc2 still mean a second pseudo (or a
 // memory d that CSE does not forward) for the asm and the first call; not found.
+// w37-f1 (2026-11-12): re-scored, unchanged (1 word). Read from stmt.c, function.c, cse.c and
+// reload1.c with the -da dumps; docs/toolchain/stack-slots.md, "A by-value result's slot".
+// - Retail's vsub into vf3 is an output reload: a local pseudo for the difference would be tied
+//   to the dying input (vf1), so the asm's own output is the spilled value. An asm cannot write a
+//   frame variable directly: expand_asm_operands gives a "=j" output that is a MEM a pseudo and
+//   copies it, and fixup_var_refs_1 does the same when purge_addressof moves the variable to the
+//   frame afterwards, so with d in memory cse2 always has a register to forward (measured: an
+//   asm statement naming d as its output, d forced to the frame at purge time, still gives vsub
+//   straight into vf6).
+// - The first call's `qmfc2 a1,$vf6` therefore reads a second pseudo that holds d in vf6 for the
+//   asm and the call, set by a copy from the spilled one (the lqc2). cse1 and cse2 fold such a
+//   copy whenever the spilled pseudo's last use is later than the copy's (make_regs_eqv keeps
+//   the older register canonical), and it is: the second call reads it.
+// - Ruled out as probes: PlaneSigns with d as an input tied to an output (`"=j"(v) .. "1"(v)`,
+//   the copy that survives because it is modified): the reference forces a frame slot, 32
+//   bytes more. A reused temporary for the difference and the first plane (`v = Sub(..); d = v;
+//   v = planes[0]`): cse1 keeps the inline's own result register, which is never reset.
+// - Not checked: an inline function holding the cull and the first fade call whose by-value
+//   parameter is modified before the call; reload_cse with another REGISTER_MOVE_COST.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

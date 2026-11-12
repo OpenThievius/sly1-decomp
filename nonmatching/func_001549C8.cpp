@@ -1,6 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 576/580 (99.3%), checked 2026-11-11
+// BYTES 576/580 (99.3%), checked 2026-11-12
 // w25 (2026-11-11, w25-deps): the pending-list flush at a block's 33rd memory reference (docs/toolchain/sched1.md, "The 33rd memory reference of a block is a barrier") is not reached here (most pending: 12; FillMemory's call resets the count), so it is not what holds the late stores; the other sources of a store's dependents are listed in docs/toolchain/large-functions.md, "Dependence sources enumerated".
+// w37-f1 (2026-11-12): re-scored, unchanged. Read the sched1 table of the member-order form
+// (block 5): the four constant loads are memory-unit insns of cost 2 and every store is a leaf
+// of priority 2, so the store order is weight then LUID. Retail's load order (1.0, 750, the lq,
+// -1, -1500) is what rank_for_schedule's dependent count gives with 1.0 read by four stores and
+// -1 by two, so f70 and f78 read the same pseudos as the others (inferred, not compiled: a second pair of
+// constant loads, which reload_cse would delete as no-ops, would count three and one and put
+// -1500 before -1). That leaves only a dependence that makes f70 and f78 wait, as w15's pointer
+// showed: an address the alias test cannot place. By the mechanism this function already
+// has for the 200 (set before the guards, used once, put back by update_equiv_regs after
+// sched1), an address formed in an earlier block and used once would leave no register; not
+// tried, and no source reason for one found.
 #include "common.h"
 // NEAR (w4-1549C8): 2 lines: only the f00 and f20 stores swap (ours f20, f08, f00; retail f00, f08, f20); every register now matches. Mechanism: the 200 is a variable set before the guards and used once in the B block, so local-alloc's update_equiv_regs moves its `li` to just before the store and the widened life no longer meets the address of g_unitZVector (docs/TOOLCHAIN.md, "A constant set in an earlier block and used once"). The store order: sched1 issues dead stores (weight 0) first in LUID order; retail's f00, f08, f20, f50, f54, f70, f78 after i4C is LUID order with no dead store among them, so no order of these statements gives it (a hill-climb from the natural order and three random restarts floor at 2); the 1.0 and -1 constants would have to die outside these stores, and the function has no later float code. Also tried (2026-11-08): chained assignments in five groupings (5-10 lines), a span setter with two float parameters (7, same as literals), the floats as named locals or constructor arguments (they cross the call into saved FPRs, over 100 lines).
 // w8 (2026-11-09): retail's order is the four dead stores then the seven live ones in LUID order, so sched1 saw 1.0 and -1 live past f54: a region boundary between f54 and f70 or f70/f78 waiting on earlier stores through memory dependences. A do-while(0) barrier after f54 (probe only) gives retail's eleven stores exactly but holds the copy loop's `move a0,sp`/`addiu a1,sp,128` below it (42 lines). Ruled out: overwritten dead stores (flow1 deletes frame stores, flow2 never deletes sp stores), a branch over a dead local (gone by the first jump), static locals (constructed in place, ~145 lines), an inline maker returning by value (two copies, 147). docs/TOOLCHAIN.md, "A constant set in an earlier block and used once".

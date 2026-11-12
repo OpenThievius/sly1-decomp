@@ -394,6 +394,24 @@ Read from cse.c, jump.c and haifa-sched.c of GCC 2.95.3 with dumps and probes (2
   already in its register, so sched2 can see an insn that the final code lacks: a candidate for
   the missing dependence of `addiu a1`, not found.
 
+- **What a stale link would have to be (w37-f2, 2026-11-12).** haifa-sched.c only drops the
+  LOG_LINKS that point into another block when a pass starts (schedule_insns, the
+  `INSN_BLOCK (x) != b` loop) and skips links to deleted insns when it builds the forward
+  lists, so every same-block dependence sched1 computed is still a dependence in sched2. In
+  ours' sched2 trace the join block issues 301 and 171 in cycle 5, 228 and 205 in 6, 224 and
+  251 in 7, 131 and 233 in 8, then 181 alone in 9; `addiu a1,sp,16` (253) lands where retail
+  has it, after 181, if it waits for the weights' qmtc2s (171, 205), unit Z's load (228),
+  `move a0,s0` (251) or the MulXSum asm (233); a link to the table load (131), d's reload (224)
+  or the slot store (181) leaves it after r's store. But sched1 gives the insn `a1 = sp + 16`
+  only what it names: the last users and setters of hard register 5 and the setter of the
+  address pseudo. None of the five candidates names a1 or sets an address, and combine's
+  distribute_links keeps a merged insn's links only on insns that still use the linked
+  register. A loop note is no help either (reasoned from the two passes' rules, not compiled):
+  with the first insn after it a barrier in both passes, every placement puts a slot store, r's store or `move a0,s0` on the wrong side of it
+  (the slot stores are expanded before the asm, the call's own moves after r's store). So a
+  dependence, stale or not, is not what holds the insn back; the block's contents at sched2 are
+  (the per-arm stores above).
+
 ### The compiler's qmfc2 again, and a rescale's divide order (func_001D4348)
 
 The player's blend weights (2026-11-09) compute three slot weights, each a dot product over
@@ -488,6 +506,17 @@ sol` (875), `self->contacts` (880, r307) and its `->head` (882, mem/s through r3
   `((f32*)&acc)[2]`), which purge_addressof allocates late (frame 0xA0, an extra saved s5
   in the 2026-11-10 probe). down as a Vec02 in memory (copy = load + store, 880 between
   them) swaps the frame slots and renumbers the counting loop's registers.
+
+- **No barrier (w37, 2026-11-12).** A loop note between the contacts load and the copy (`ct =
+  self->contacts; do { } while (0); Vu0::Q(acc) = down.q;`, a probe) makes the copy wait for
+  the load in sched1 and reload then takes v1, but the note binds sched2 as well: the `lw`
+  stays ahead of the `lq`/`sq` and the call's argument moves come out in another order, where
+  retail has `lq v1; sq v1; lw v0`. So retail's sched1 order came from a rank, with nothing
+  sched2 still sees. A frame variable for down is ruled out by the rest of the function (the
+  product's vf3 is an output reload's register; local-alloc would tie a pseudo's to vf1), and
+  the callee's return type by measurement. What would give the rank and leave no code: a copy
+  between the contacts load and the head load (880's chain one insn longer, priority 6), a
+  TImode copy feeding the store (871 ready a cycle later), or the birthing raise.
 
 ### The rest of rank_for_schedule (func_001782C0)
 
@@ -1472,6 +1501,13 @@ func_0017ECE8), as if retail had insns that left no code. Read from GCC 2.95.3's
   (func_001D7778 insn 1795, `$f0`); (4) GCSE's copies and those of long or looped blocks
   (loops.md; func_00109488's argument copies that survive CSE1's window flushes,
   long-block-constants.md).
+- **A fifth kind, before sched1: what leaves between two passes (w35, func_00130C58).** An insn
+  can also live only from one pass to a later one: a test cse1 cannot fold because a
+  NOTE_INSN_LOOP_END ends its path, whose constant loop.c matches with another set of the same
+  value (and so moves out of a loop it would have left), and which cse2, run after loop.c, folds
+  away. And the notes of a loop that runs once leave no code but double the references flow
+  counts inside them and make the insn after each note a barrier (loops.md, "The 3's second
+  set"). Both were proved with a probe that is EXACT; the plain source is not found.
 - **Inline parameter and return copies are not among them.** integrate.c copies each argument
   of a parameter not declared const into a new pseudo, and each inline's return value goes
   through its own; in straight-line code cse1 and combine remove them before flow counts

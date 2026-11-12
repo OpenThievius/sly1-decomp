@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 260/380 (68.4%), checked 2026-11-11
+// BYTES 260/380 (68.4%), checked 2026-11-12
 // NEAR: order: the statements written z weight by z weight (for each of z3, z, z1, z2: xa, xb, x,
 //       each with ny then y) give retail's x, xa and xb registers ($f15, $f16, $f17), the copy of
 //       x at entry and y left in $f13, and the whole branch code but z1 and ny. Left (about 50

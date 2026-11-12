@@ -651,7 +651,7 @@ From cse.c and gcse.c of GCC 2.95.3 and the `.cse` and `.gcse` dumps (2026-11-10
   So the original took the range's address after the lean clamp and used it for the speed
   clamp; written before the lean clamp or used by the w clamp it lands in the wrong place.
 
-### A reload after an if whose body returns: follow-jumps (func_00183668, unsolved)
+### A reload after an if whose body returns: follow-jumps (func_00183668, matched)
 
 `cse_end_of_basic_block` follows a conditional jump (`-fcse-follow-jumps`, on at -O2) when its
 label has exactly one use and, walking back from the label over notes and unused labels, the
@@ -702,6 +702,13 @@ Measured again 2026-11-10 (cse.c's cse_end_of_basic_block and cse_basic_block, g
   sits between the switch's cases and the loop in both builds: find_and_verify_loops moves a
   block entered by a conditional jump and ending in a jump out of the loop to the last barrier
   before it.
+
+Matched (2026-11-12): the returning body written as a chain whose branches all return
+(`if (key >= 8) return 1; else if (key >= 6) return ...; else return 1;`) followed by the
+compiled-out assertion of a not-reached check, `ASSERT(0);` (include/debug_assert.h, an empty
+`do { } while (0)`), is EXACT on US and PAL: case 2 above, at a site where an assertion
+plausibly stood. AGENTS.md allows the macro only under those conditions. The same notes
+before the tag test, or at the top of the returning body, do not match.
 
 ### A default set in the else arm, not in the walk's test: reorg's stolen slot (func_001CD870)
 
@@ -1192,6 +1199,12 @@ tails). The mechanism, from the .rtl and .cse dumps:
 - **A float in memory into a 128-bit GPR.** Retail loads the float operand's word with lw straight
   into the GPR it passes (`lw v0, 4(s2); por a2, zero, v0; sq v0, 0x50(sp)`); ScalarInGpr's
   operand would be lwc1 then mfc1. Vu0::ScalarInGprAt is that lw, as FromFloatAt is to FromFloat.
+  It has one site: a scan of every `lw` in retail whose register then reaches a `por` argument
+  move, `qmtc2`, `sq` or a 128-bit MMI operand found only this function's 0x112F90 (the other
+  hits are false, the register redefined by a call or across a branch), and of ScaleMatrix's
+  five calls only 0x112FA4 loads its weight so; the others use mfc1. A helper must recur
+  across retail's functions, so this one is a named exception in AGENTS.md, allowed by the
+  maintainer for func_00112C38 alone on 2026-11-12.
 
 ### A case that seems to store the compare's register: reorg's redundant constant (func_001E8A50)
 

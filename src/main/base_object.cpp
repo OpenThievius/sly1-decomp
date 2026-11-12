@@ -8,6 +8,8 @@
 #include "path_curve_object.h"
 #include "cone_volume.h"
 #include "world.h"
+#include "queued_call.h"
+#include "debug_assert.h"
 #include "masked_collider.h"
 #include "object_link.h"
 #include "message_body.h"
@@ -542,9 +544,71 @@ void RunScriptEventHandler(BaseObject* self, s32 key, R11B008Node* list)
     DestroyScriptValue(&q0, 2);
 }
 
-// Its jump table, retail's, until the function is matched.
-INCLUDE_RODATA(jtbl_0024B170);
-INCLUDE_ASM(func_00183668);
+// The record a queued script handler carries at +0x0C: the value its event was raised with.
+struct ScriptEventArg { s32 pad0; s32 value; };
+
+// Whether TriggerScriptEvent should drop an event: a timer still running (1), a handler for the
+// same event already queued (6 and 7 only with the same value), or, for 4 and 5, the opposite
+// event's queued handler, which is taken out of the world's list and released.
+s32 SuppressScriptEvent(BaseObject* self, s32 key, s32 flag, void* out)
+{
+    s32** p = (s32**)out;
+    s32 tag = -1;
+    switch (key) {
+    case 1: {
+        f32 f = *(f32*)((u8*)self + 0x29C);
+        if (f <= 0.0f) return 0;
+        f32 g = f - *(f32*)p[0];
+        s32 r = 1;
+        *(f32*)((u8*)self + 0x29C) = g;
+        if (!(0.0f < g)) r = 0;
+        return r;
+    }
+    case 4:
+        tag = 5;
+        break;
+    case 5:
+        tag = 4;
+        break;
+    case 6:
+    case 7:
+        break;
+    case 0:
+    case 29:
+    default:
+        return 0;
+    }
+    QueuedCall* prev = 0;
+    for (QueuedCall* n = self->world->f1EC8; n != 0; n = n->next) {
+        if ((void*)n->fn == (void*)RunScriptEventHandler && (BaseObject*)n->k1 == self) {
+            if (n->k2 == key) {
+                if (key >= 8) return 1;
+                else if (key >= 6) { s32* q = p[0]; return ((ScriptEventArg*)n->p0C)->value == *q; }
+                else return 1;
+                // Not reached. Retail's code keeps the loop notes of the compiled-out macro
+                // (docs/toolchain/cse.md, "A reload after an if whose body returns").
+                ASSERT(0);
+            }
+            if (n->k2 == tag) {
+                if (prev != 0) {
+                    prev->next = n->next;
+                    if (n->next == 0) self->world->f1ECC = prev;
+                } else if (n->next != 0) {
+                    self->world->f1EC8 = n->next;
+                } else {
+                    World* c = self->world;
+                    c->f1ECC = 0;
+                    c->f1EC8 = 0;
+                }
+                n->next = 0;
+                ReleaseCallRecords(self->world, n);
+                return 1;
+            }
+        }
+        prev = n;
+    }
+    return 0;
+}
 
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, s32* out)
 {

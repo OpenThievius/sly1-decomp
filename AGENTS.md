@@ -109,7 +109,12 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   one register variable allowed, because retail holds it in a caller-saved register across
   calls, which nothing else gives; and the two system sequences only they issue, `SetTlbWired`
   and `CurrentThreadIdFromInterrupt` (include/system.h), are helpers although each occurs in one
-  function. No other function may do either. The other exception is `MUL_WIDE` (include/mul_wide.h),
+  function. No other function may do either. One game function, func_00112C38
+  (MultiplyScriptValues), uses `Vu0::ScalarInGprAt` (include/vu0.h), a helper of one site: it
+  is compiled C around a load the compiler cannot emit, a float's word loaded with `lw` straight
+  into a 128-bit GPR for a VU0 routine's weight, and a scan of retail proved the sequence occurs
+  only there (docs/toolchain/cse.md); the maintainer allowed it by name on 2026-11-12, and no
+  other function may use it. The other exception is `MUL_WIDE` (include/mul_wide.h),
   one `multu` whose halves are read from lo and hi, which the toolchain's runtime multiplied with
   and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
   The toolchain's own runtime (`libgcc`, config/us/libcalls.tsv) was compiled as C, so its C is a
@@ -139,6 +144,15 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   only where it is what the original developers wrote: a macro of a group of statements, in
   the form C macros take (`#define NAME(...) do { ... } while (0)`), that the original
   plausibly had and retail's code needs. Never a wrapper written only to move instructions.
+  One such macro is the debug build's assertion as the release build compiles it, `ASSERT(cond)`
+  (include/debug_assert.h), which expands to an empty `do { } while (0)`: GCC 2.95 keeps the
+  loop notes of an empty loop that runs once, so retail's code shows where one stood. It is
+  allowed only where all three hold: retail's code is proved to need those notes (the
+  mechanism, from the compiler's dumps, in docs/toolchain/); the site is one where an assertion
+  plausibly stood (a not-reached check after branches that all return, a check of an argument
+  or a state); and the use has a comment naming that section. It is never tried as a variant
+  across functions, and no other statements go inside it: a run-once loop around statements
+  is still a barrier.
 - **An unused local only as a type the original plausibly declared.** GCC 2.95 gives an unused
   struct local a stack slot, so retail's frames show where the original declared one. A list
   walk whose frame has an unused 16-byte gap declares the walk's frame, `ListFrame frame;`

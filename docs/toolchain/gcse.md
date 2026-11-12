@@ -563,6 +563,28 @@ pre_insert_copy_insn, pre_delete) and lcm.c with `-ds -dG -dt -dl -dg` dumps (20
   (`while`, `for (; c; g = s);`, `for (;;) { if (!c) break; g = s; }`, `if (c) do g = s; while
   (c);`) gives retail's copy but 68 bytes: the extra `nop` is the aligned loop label, which
   retail does not have, so retail's function was not a loop at final.
+- **Which block each `%hi` belongs to, from the dumps (w37-f2, 2026-11-12).** Retail reads the
+  compare and the return through the first `%hi` (v1) and stores through the copy (a1). Three
+  `-da` dumps show what that needs. The plain `if`: one pseudo everywhere, PRE has nothing to
+  do. A run-once loop before the store (a probe): cse1 stops at its NOTE_INSN_LOOP_END, the
+  store's `%hi` is a pseudo of its own (121) while the join's is the compare's (118, reached
+  around the arm by `-fcse-skip-blocks`); PRE inserts 128 at the end of the compare's block
+  and makes 121 a copy of it; but cse2 runs after loop.c, where the forward scan no longer
+  stops at a loop end, so it sees `128 = 118` and the store in one block and rewrites the store
+  to 118: one register again, and the loop note aligns the join (a `nop`). The two-test form
+  (`|| status == 0x7fffffff`): cse1 merges the store's `%hi` with the compare's (around the
+  second test) and leaves the join's its own (125); PRE's 129 then becomes the canonical
+  register in cse2 (inferred: make_regs_eqv prefers a register that lives past the block), so
+  the store and the join both go
+  through the copy, where retail's join uses v1. So retail needs the join merged by cse1 (the
+  plain skip around the arm) and the store's block cut off from the compare's in cse1 and in
+  cse2: a used label at the head of the fall-through arm that is still there after loop.c and
+  gone, without code or an aligned label, by the end. No loop note gives the second half.
+- **The width (w37-f2).** Retail has no extension: `status` narrowed to s8 or s16 adds `sll; sra`
+  (64 bytes by coincidence: the shifts stand where retail has the copy), u8 or u16 an `andi`, a
+  64-bit `long` a `dsll32; dsra32` before the store (72 bytes). The value is 32 bits wide from
+  the call to the store. Also ruled out: the equal case returning first with a run-once loop
+  after its return, and the same inside a `do { } while (0)` left by `break` (other code).
 - **Spotting it.** `move aN,vM` of a `%hi` register in a branch's delay slot, the store through
   the copy and later loads through the original: the store's block was entered by a jump that
   cse folded away (a loop's back edge or a redundant second test), not by the `if` alone.
@@ -866,3 +888,42 @@ of T falls in (13323, 13390]: T = 183, 191 or 199. The table had 185 buckets; th
 as u128 differences (`Vu0::Q(edge[j]) = Vu0::Sub(Vu0::Q(..), Vu0::Q(..))`, no Vec copies) bring
 max_cuid down to 183 buckets, the cursor's pseudo is numbered first, wins the tie and takes s7
 as retail. tools/globalalloc.py's `--set 123:length=238` (or `646:refs=2`) showed the tie first.
+
+### One reaching register for every occurrence: a count written again gives the first its register (func_001D5678)
+
+DrawAngleSortedRing was two words from retail (w37, 2026-11-12): `n - 1`, the first sort's count,
+hoisted by PRE to the end of the swap's block, sat in s2 where retail has s3, with both free over
+its life. Read from the `-dG`, `-dl` and `-dg` dumps and tools/globalalloc.py:
+
+- **PRE has one reaching register per expression, not per occurrence.** `(plus n -1)` is one
+  entry of the expression table however often n changes between its uses. Every occurrence PRE
+  deletes is replaced by a copy from the entry's reaching register, every insertion sets it, and
+  an occurrence that is available on the way to a deleted one gets a copy into it after itself
+  (pre_insert_copy_insn). So two unrelated uses of the same text share one pseudo, with one life
+  each.
+- **Retail's shape said so.** Before the angles-about-the-centre loop retail has `addiu s0,s5,-1`
+  ... `move s3,s0`, and in the second sort's delay slot `move s0,s3`: i's own `n - 1`, a copy
+  into s3, and i set again from s3. The near miss had that from a variable (`s32 last = n - 1;
+  for (i = last; ..)`, then `for (i = last; ..)` for the gap loop), which is a pseudo of its own
+  and leaves the first sort's count alone in the expression's reaching register: 2 refs over 28
+  insns, no conflict with anything in s2, so global-alloc's first free register used so far, s2.
+- **Written at each use**, `for (i = n - 1; i >= 0; i--)` and, after the sort,
+  `for (i = n - 1; i >= 0;)`, the second is fully redundant with the first (n does not change
+  between them), PRE deletes it (`PRE: redundant insn 1571 (expression 44) in bb 21, reaching reg
+  is 936`, beside `redundant insn 533 (expression 44) in bb 8`, the first sort's argument) and
+  copies i into the reaching register after the first. The register now has 4 refs over 52
+  insns in two lives, the second across the angles loop and the sort where `n << 5` (PRE's too)
+  holds s2: `;; 936 conflicts: ... 938 ...`, and it takes s3. The copies are retail's two moves.
+- **The table size moved with it.** Without `last` the function has one insn less before GCSE
+  (642), the expression table 321 buckets instead of 323, and the four hoisted addresses
+  (sp+32, sp+8288, params+112, sp+14512; bucket = (13258 + regno + offset) mod T) come out in
+  the order C B A D: two spill slots swap. The table has ((n + 1) / 2) | 1 buckets for n insns
+  in the `.cse` dump here, so 643 to 646 insns give 323. A Vec local declared apart from its
+  value costs two insns (`Vu0::Vec base; .. base = Vu0::Vec::Of(..);`): any one of the anchor
+  loop's five or of the crossings' four gives 644 and retail's bytes (tools/tsearch.py found all
+  nine); two give 646 and still 323 (the pair tried, p0 and p1, moved a slot store in sched1),
+  four 650 and 325 buckets. `half` named or written twice makes no difference to the count.
+- **The tell.** A PRE'd value in the "wrong" free register, where retail later computes the same
+  expression into another register and copies it (`addiu X; move Y,X`, then `move X,Y`): look
+  for a local the near miss invented to carry the value, and write the expression again.
+

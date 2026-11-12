@@ -3,7 +3,6 @@ func_00100000	00100000	4	remnant	padding before the entry routine
 func_00100008	00100008	172	handwritten	marked handwritten by the disassembler
 func_001000B8	001000B8	8	handwritten	a tail jump, which the game's compiler never writes
 func_001000C0	001000C0	8	handwritten	marked handwritten by the disassembler
-func_00112C38	00112C38	1544	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_00118D30	00118D30	20	handwritten	VU0 macro instruction
 func_0011C610	0011C610	4	remnant	stripped-function leftover
 func_0011C850	0011C850	4	remnant	stripped-function leftover
@@ -156,9 +155,7 @@ func_001C54D0	001C54D0	756	inline	C with inline assembly: VU0 macro instruction 
 func_001CC3F8	001CC3F8	20	handwritten	VU0 macro instruction
 func_001CC818	001CC818	1916	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D3A38	001D3A38	288	handwritten	VU0 macro instruction
-func_001D5678	001D5678	2348	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001D70E8	001D70E8	20	handwritten	VU0 macro instruction
-func_001D7778	001D7778	3316	inline	C with inline assembly: VU0 macro instruction in the compiler's frame
 func_001DA6E0	001DA6E0	252	handwritten	VU0 macro instruction
 func_001DB448	001DB448	20	handwritten	VU0 macro instruction
 func_001DB460	001DB460	32	handwritten	VU0 macro instruction

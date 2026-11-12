@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 488/492 (99.2%), checked 2026-11-11
+// BYTES 488/492 (99.2%), checked 2026-11-12
 // NEAR: in its file, src/lib/remote_call.cpp (Sony's 2.9-ee-991111). Left: only the packet's
 //       and the id's stores are swapped (retail: argument, packet, id, callback); every register
 //       and every other instruction is retail's. The client's packet and callback words are
@@ -30,6 +30,20 @@
 //       HandleRemoteCallReply, whose delay slots hold the callback's argument and the packet,
 //       which a volatile reference never fills. A nested header struct for the first four
 //       words, and a loop note around the id's store, do not help.
+// w37-f1 (2026-11-12): re-scored, unchanged. Two facts for the next attempt. (1) This near miss
+// cannot land as it is: include/remote_call_client.h, which BindRemoteService and
+// HandleRemoteCallReply match with, has the packet as a RemoteCallPacket* and the callback as
+// a function pointer. Written with those types in src/lib/remote_call.cpp (stores in member
+// order: packet, id, callback, argument) the size is retail's and 11 lines differ: the packet's
+// and the callback's stores fall behind the packet's int stores (priority 2), as the first line
+// above says. (2) With this file's u32 words and the stores in member order (`self->packet`
+// before `self->id = packet->id`), sched1 gives retail's relative order (packet, argument, id,
+// callback) but the int load now waits for the packet's store, sched2 issues that store first
+// and reorg takes it into the entry test's delay slot (`bnezl s0; sw s0,0(s1)`, 496 bytes). So
+// retail's packet store is int-class for the later stores yet does not hold the id's load:
+// the load's LUID is before it, and the wall is the id store's weight, as recorded. No source
+// form found for an id that outlives its store; not searched: the client's words read through
+// a second type (a union or a cast at the store) in this function only.
 #include "common.h"
 
 struct Client_1F7BE8;

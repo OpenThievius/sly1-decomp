@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 804/812, checked 2026-11-11
+// SIZE 804/812, checked 2026-11-12
 // NEAR: the control flow, the conditional moves (movz for the mesh contact's last two arguments),
 //       the delay slots and both VU0 sequences are retail's; the registers are not. Retail keeps
 //       the object in $s7, the two argument pointers in $s6 and $s5, the bit-53 constant in $s4 and

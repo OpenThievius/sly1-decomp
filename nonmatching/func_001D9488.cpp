@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 456/492, checked 2026-11-11
+// SIZE 456/492, checked 2026-11-12
 // w32-sizeA (2026-11-11): the final code's blocks align with retail's except the preheader (retail's six constants outside the loop, ours kept inside: 36 bytes). -dL on this source: `Loop from 17 to 322: 91 real insns` in pass 1, 89 in pass 2, every constant `savings 1 not desirable`. One lead not yet tried: loop.c's combine_movables adds the savings of matching movables (the same constant set twice), which doubles T*savings for that constant; retail's pass-1 moves (the giv's li 40 and the kind test's 1) would follow if the source set each of those twice (two kind tests against 1, or &self->f874[i] taken twice), instead of a 15-insn smaller loop.
 // DECLS (2026-11-11, w28-nmdecls): PrintBuffered, RefreshCachedVoiceParam, RemoveSoundLevelAndRecompute, ComputeOscillatorDisplacement now void, GetObjectWorldPosition s32, StoreFloatAsQuadword void*: neutral, 75/123.
 // NEAR (2026-11-10, w15): EXACT with this source under -mvu0-use-vf0-vf30 or -vf31 (loop.c's threshold 94-95 instead of 79); under the file's flags the loop is 91 insns in pass 1 where retail's moves need 74-76 (docs/toolchain/loops.md, func_001D9488)

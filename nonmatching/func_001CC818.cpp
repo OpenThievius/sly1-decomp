@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1888/1916 (98.5%), checked 2026-11-11
+// BYTES 1888/1916 (98.5%), checked 2026-11-12
 // DECLS (2026-11-11, w28-nmdecls): GetObjectWorldRotation declared s32 (defined value) shrinks the function by 8 bytes (1888 -> 1886 of 1916, 98.5% -> 98.4%) with the same 478/479 order score; kept void.
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call combo (source line 1+2+4); 64 differing lines before, 41 now.
 // ORDER-SWEEP (2026-11-08): Q(ang) = nd moved after the Q(v) statement; tools/permute.py --auto.
@@ -43,6 +43,11 @@
 // gravity vf2) and nothing else moves. Scalar(r) needs a life under 26 (its slot store at least
 // four insns earlier) or off's over 32 (p's vadd later), and the v150 load one insn earlier. No
 // new form found; the conversions here are not in this block, so the "*r" lever does not apply.
+// w37-f2 (2026-11-12), read only (dumps of the block, no new form): the pairs of added dependences the emulators
+// accept (the v150 load waiting for Scalar(r)'s slot store; p's store before the f22AC load) cannot be memory
+// dependences: retail's final code has lqc2 vf3,336(s4) and lw v0,8876(s4) before sqc2 vf6,416(sp), and sched2
+// would keep a load behind a store it depends on. They would have to be register dependences of sched1 that
+// leave no trace after reload; none identified. Nothing closer found.
 
 extern f32 D_00274D40;
 extern f32 D_00274D44;

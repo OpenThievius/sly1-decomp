@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 241/312 (77.2%), checked 2026-11-11
+// BYTES 241/312 (77.2%), checked 2026-11-12
 // w25 (2026-11-11, w25-deps): the pending-list flush at a block's 33rd memory reference (docs/toolchain/sched1.md, "The 33rd memory reference of a block is a barrier") is not reached here (most pending: 12; FillMemory's call resets the count), so it is not what holds the late stores; the other sources of a store's dependents are listed in docs/toolchain/large-functions.md, "Dependence sources enumerated".
 // NEAR: order: the first block is exact with the destination pointer declared before the memset;
 //       the second differs only in the order its constants are loaded and stored.

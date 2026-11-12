@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1420/1436 (98.9%), checked 2026-11-11
+// BYTES 1420/1436 (98.9%), checked 2026-11-12
 // NEAR (2026-11-10, w15): instruction order, frame, saved registers and the state-1 half are
 // retail's; what differs is one swap of $f2 and $f3 in the gauge loop's first block: retail's
 // `hi` is $f3 and the scratch `d` (1/15, then (1 - lo) * 55, then 372.8) with the (1 - lo)

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1584/1588, checked 2026-11-11
+// SIZE 1584/1588, checked 2026-11-12
 #include "common.h"
 #include "vu0.h"
 #include "collider.h"
