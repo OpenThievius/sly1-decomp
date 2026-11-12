@@ -40,6 +40,22 @@
 // w22 (2026-11-11): re-scored, unchanged. Still the sched1 tie at priority 5 decided by
 // INSN_REG_WEIGHT (the copy's -1 against the load's +1); no allocator or GCSE-table lever applies
 // (the difference is reload's register for the copy, chosen by what is live after sched1).
+// w37-f1 (2026-11-12): re-scored, unchanged (2 words). Established: (1) the order needs no
+// barrier. `ct = self->contacts; do { } while (0); Vu0::Q(acc) = down.q;` (a probe: the copy is
+// then the first insn after a loop note and waits for the load) gives sched1's 880 before 871
+// and reload's `lq v1`, but the note holds in sched2 too: the lw stays ahead of the lq/sq and
+// the call's argument moves change order (7 lines), where retail has lq, sq, lw. So retail's
+// sched1 had the load first with nothing between them that sched2 still sees. (2) down is a
+// spilled pseudo, not a frame variable: with `Vec02 down` the product is written to vf1 by
+// local-alloc's tie and the rhs loop's load moves (about 150 lines); retail's vf3 is the output
+// reload's register. (3) The callee's return type (s32, f32*, void*, f32) changes nothing:
+// a result nobody reads dies at the call. (4) The load's place in the source (`ct =
+// self->contacts` before or after the copy, `row = self->contacts->head` before it) changes
+// nothing or moves the head's load before the copy (5 lines): the tie is the weight. What is
+// left, each needing an insn that leaves no code: a register copy between the contacts load and
+// the head load (880's priority 6), a TImode copy feeding the store (871 ready a cycle late), or
+// the contacts pointer live at the block's end and set once (the birthing raise). Not found
+// in plain source; docs/toolchain/sched1.md, "The copy and the list's load after a call".
 #include "common.h"
 #include "point_object.h"
 #include "collider.h"
