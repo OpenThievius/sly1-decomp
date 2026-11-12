@@ -2,9 +2,10 @@
 // The parameter block of a ring drawn around a set of anchors by DrawAngleSortedRing
 // (func_001D5678, player_request.cpp), and the anchors it is given. Written for this project
 // from what retail's code does: the reader's offsets give the layout, and the functions that
-// build a block (func_001D5FA8, func_001D60B0, func_001D61C8, func_0018A510) give the form of
-// its members, since each builds it once as a function-local static with a brace initialiser
-// (docs/toolchain/large-functions.md, "A brace initialiser's union member is a CLOBBER"):
+// build a block (func_001D5FA8, func_001D60B0, func_001D61C8, func_0018A510, func_001EC190)
+// give the form of its members, since each builds it once as a function-local static with a
+// brace initialiser (docs/toolchain/large-functions.md, "A brace initialiser's union member is
+// a CLOBBER"):
 //  - the compiler clears the block with its own memset call and stores the non-zero members in
 //    declaration order, which is the order retail's stores have before the scheduler;
 //  - a colour is stored as one word even when it is zero, so it is a member with a constructor

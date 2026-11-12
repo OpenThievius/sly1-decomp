@@ -34,6 +34,8 @@
 #include "ramp_profile.h"
 #include "mul_rotation.h"
 #include "vu0.h"
+#include "ring_params.h"
+#include "deferred_request.h"
 #include "asm_func.h"
 #include "vu0.h"
 
@@ -567,162 +569,42 @@ TempoObjectRef D_00275D48[9] = {
     { 0x60, 70.0f, 0 }, { 0x50, 220.0f, 0 }, { 0x52, 80.0f, 0 }, { 0x53, 80.0f, 0 },
     { 0x54, 80.0f, 0 }
 };
-// word read whole / address only, 4 bytes to next label
-s32 D_00275DB4 = 0;
-// size: s32 state compared/assigned in 001EC000
-s32 D_00275DB8 = 0;
-INCLUDE_DATA(D_00275DBC);
-s32 D_00275DD0[16] = { 4, 2, 1, -1, 8, 4, 2, -1, 12, 6, 3, -1, 16, 8, 4, 2 };
-s32 D_00275E10[92] = { 2, 0x2EB, 0x2DC };
-// word read whole / address only, 4 bytes to next label
-ScreenFade g_screenFade = { 0 };
-f32 D_00275FC0 = 0.5f;
-// Globals defined from C.
-s32 D_00275FC8[6] = { 0, 2, 4, 4, 4, 0 };
-ObjectLink D_00275FE0[52] = {
-    { 0x2, 0x1CB, 0x2E4 },
-    { 0x2, 0x1CC, 0x2E8 },
-    { 0x2, 0x1CD, 0x2F8 },
-    { 0x2, 0x1CE, 0x32C },
-    { 0x2, 0x1CF, 0x360 },
-    { 0x2, 0x1D0, 0x394 },
-    { 0x2, 0x1D1, 0x3C8 },
-    { 0x2, 0x1D2, 0x3FC },
-    { 0x2, 0x1D3, 0x430 },
-    { 0x2, 0x1D4, 0x464 },
-    { 0x2, 0x1D5, 0x498 },
-    { 0x2, 0x1D6, 0x500 },
-    { 0x2, 0x1E2, 0x304 },
-    { 0x2, 0x1E3, 0x338 },
-    { 0x2, 0x1E4, 0x36C },
-    { 0x2, 0x1E5, 0x3A0 },
-    { 0x2, 0x1E6, 0x3D4 },
-    { 0x2, 0x1E7, 0x408 },
-    { 0x2, 0x1E8, 0x43C },
-    { 0x2, 0x1E9, 0x470 },
-    { 0x2, 0x1EA, 0x4A4 },
-    { 0x2, 0x1EC, 0x50C },
-    { 0x2, 0x1EB, 0x4D8 },
-    { 0x2, 0x1D7, 0x2FC },
-    { 0x2, 0x1D8, 0x330 },
-    { 0x2, 0x1D9, 0x364 },
-    { 0x2, 0x1DA, 0x398 },
-    { 0x2, 0x1DB, 0x3CC },
-    { 0x2, 0x1DC, 0x400 },
-    { 0x2, 0x1DD, 0x434 },
-    { 0x2, 0x1DE, 0x468 },
-    { 0x2, 0x1DF, 0x49C },
-    { 0x2, 0x1E1, 0x504 },
-    { 0x2, 0x1E0, 0x4D0 },
-    { 0x2, 0x1F8, 0x310 },
-    { 0x2, 0x1F9, 0x378 },
-    { 0x2, 0x1FA, 0x3AC },
-    { 0x2, 0x1FB, 0x3E0 },
-    { 0x2, 0x1FC, 0x414 },
-    { 0x2, 0x1FD, 0x448 },
-    { 0x2, 0x1FE, 0x47C },
-    { 0x2, 0x1FF, 0x4B0 },
-    { 0x2, 0x1ED, 0x30C },
-    { 0x2, 0x1EE, 0x340 },
-    { 0x2, 0x1EF, 0x374 },
-    { 0x2, 0x1F0, 0x3A8 },
-    { 0x2, 0x1F1, 0x3DC },
-    { 0x2, 0x1F2, 0x410 },
-    { 0x2, 0x1F3, 0x444 },
-    { 0x2, 0x1F4, 0x478 },
-    { 0x2, 0x1F5, 0x4AC },
-    { 0x2, 0x1F7, 0x514 },
-};
-s32 D_00276250 = -1;
-f32 D_00276258[4] = { 600.0f, 0.0f, 0.25f, 0.0f };
-f32 D_00276268[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00276278[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00276288[4] = { 1.0f, 0.0f, 0.200000003f, 0.0f };
-s32 D_00276298[11][4] = {
-    { 1, 10, 10, 5 },
-    { 2, 0, 3, 5 },
-    { -1, 1, 3, 5 },
-    { 2, 10, -1, 1 },
-    { 8, -1, 5, 7 },
-    { 2, 0, 1, 4 },
-    { -1, 7, 7, 8 },
-    { 6, 8, 4, 6 },
-    { 6, -1, 7, -1 },
-    { -1, -1, -1, -1 },
-    { 0, -1, -1, 0 }
-};
-s32 D_00276348[11][4] = {
-    { 4, 10, 4, 10 },
-    { 8, 0, 4, 3 },
-    { 5, 3, 1, -1 },
-    { 2, 10, 1, -1 },
-    { 7, 0, -1, 1 },
-    { 8, 2, 8, -1 },
-    { 8, 7, -1, 8 },
-    { 6, 4, -1, 1 },
-    { -1, 1, 6, 5 },
-    { -1, -1, -1, -1 },
-    { 3, -1, 0, -1 }
-};
-s32 D_002763F8[11][4] = {
-    { 1, 10, 10, 1 },
-    { 3, 0, 7, 2 },
-    { 4, 0, 1, -1 },
-    { 8, 1, 1, 4 },
-    { 3, 2, 1, 2 },
-    { 6, 10, -1, 8 },
-    { -1, 5, -1, 8 },
-    { -1, 0, 8, 1 },
-    { -1, 7, 5, 7 },
-    { -1, -1, -1, -1 },
-    { 5, -1, -1, 0 }
-};
-s32 D_002764A8[11][4] = {
-    { 1, 10, 10, 2 },
-    { 7, 0, 4, 2 },
-    { 5, 0, 1, 5 },
-    { 8, 4, -1, 4 },
-    { 3, 10, 3, 1 },
-    { 6, 2, 1, -1 },
-    { -1, 5, 7, -1 },
-    { 8, 1, 8, 6 },
-    { -1, 4, 3, 1 },
-    { -1, -1, -1, -1 },
-    { 4, -1, -1, 0 }
-};
-s32 D_00276558[11][4] = {
-    { 2, 10, 2, 4 },
-    { -1, -1, -1, -1 },
-    { 3, 0, -1, 3 },
-    { 8, 0, 2, 4 },
-    { 5, 0, 3, 5 },
-    { 6, 4, 4, -1 },
-    { 8, 5, 8, -1 },
-    { -1, -1, -1, -1 },
-    { -1, 3, -1, 6 },
-    { -1, -1, -1, -1 },
-    { 0, -1, -1, 0 }
-};
-s32 (*D_00276608[6])[4] = { 0, (s32(*)[4])D_00276298, (s32(*)[4])D_00276348, (s32(*)[4])D_002763F8, (s32(*)[4])D_002764A8, (s32(*)[4])D_00276558 };
+// The data from D_00275DB8 on is defined after DrawTempoAgentRing (func_001EC190), whose static's
+// guard (D_00275DB4) retail's .data has before it: the compiler writes a guard out with its
+// function. Declared here for the functions above that.
+extern s32 D_00275DB8;
+extern s32 D_00275DD0[16];
+extern s32 D_00275E10[92];
+extern ScreenFade g_screenFade;
+extern f32 D_00275FC0;
+extern s32 D_00275FC8[6];
+extern ObjectLink D_00275FE0[52];
+extern s32 D_00276250;
+extern f32 D_00276258[4];
+extern f32 D_00276268[4];
+extern f32 D_00276278[4];
+extern f32 D_00276288[4];
+extern s32 D_00276298[11][4];
+extern s32 D_00276348[11][4];
+extern s32 D_002763F8[11][4];
+extern s32 D_002764A8[11][4];
+extern s32 D_00276558[11][4];
+extern s32 (*D_00276608[6])[4];
 #ifndef VERSION_EU
-// PAL has no style here (its func_001F1960 draws without one): its static initialiser only
-// sets D_00276650.
-WarpTextStyle D_00276620(2, 1);
+extern WarpTextStyle D_00276620;
 #endif
-INCLUDE_DATA(D_0027663C);
 #ifdef VERSION_EU
-// PAL's own addresses for these two, which the tools do not pair with US's (VERSION_NAME).
-f32 D_eu_0027FDAC = 24.0f;
-f32 D_eu_0027FDB0 = D_eu_0027FDAC * 0.75f;
+extern f32 D_eu_0027FDAC;
+extern f32 D_eu_0027FDB0;
 #else
-f32 D_00276648 = 24.0f;
-f32 D_00276650 = D_00276648 * 0.75f;
+extern f32 D_00276648;
+extern f32 D_00276650;
 #endif
-s32 D_00276654 = 0;
+extern s32 D_00276654;
 extern f32 D_0027663C[];
-char D_00276658[8] = "jojo";
-char D_00276660[16] = "08/24/02 22:06";
-char D_00276670[12] = "0824.2206";
+extern char D_00276658[8];
+extern char D_00276660[16];
+extern char D_00276670[12];
 
 
 void InitKeyedConeAgent(KeyedConeAgent* self)
@@ -2252,7 +2134,207 @@ s32 IsTempoAgentFree(void)
     return 1;
 }
 
-INCLUDE_ASM(func_001EC190);
+typedef int Quadword128 __attribute__((mode(TI)));
+void* StoreFloatAsQuadword(void* out, f32 f);
+void* CopyQuadword(void* out, void* in);
+Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
+void* StoreQuadword(void* dst, Quadword128 v);
+AnimRecord* FindAnimRecord(s32 key);
+void DrawAngleSortedRing(void* at, s32 nOffsets, f32* offsets, s32 nAnchors, void* anchors, RingParams* params, void* request);
+extern f32 D_00275070[14];
+
+// k times the quadword at p, into dst (the quadword helpers' product).
+static inline void StoreScaledQuadword(void* dst, f32 k, void* p)
+{
+    Quadword128 t;
+    StoreFloatAsQuadword(&t, k);
+    Quadword128 tv = t;
+    Quadword128 u;
+    CopyQuadword(&u, p);
+    StoreQuadword(dst, ScaleQuadword(tv, u));
+}
+
+// The tempo agent's ring: the block's defaults are built once, as a function-local static with
+// a brace initialiser (include/ring_params.h), and copied for each draw, where rows 1 and 2 are
+// scaled by the agent's level. DrawTempoAgent queues it as a deferred request's callback, the
+// agent the request's argument.
+void DrawTempoAgentRing(DeferredRequest* request)
+{
+    TempoAgent* agent = (TempoAgent*)request->arg;
+    static RingParams defaults = {
+        1, 10.0f, 0.25f,
+        {
+            { { 0.0f, 0.0f, 0.0f }, 0.0f, 100.0f, RingColor(0x80FFFFFF) },
+            { { 0.0f, 0.5f, 0.0f }, 0.0f, 50.0f, RingColor(0x80FFFFFF) },
+            { { 500.0f, 1.0f, 0.0f }, 1.0f, -100.0f, RingColor(0x80FFFFFF) },
+        },
+    };
+    if (agent->f298 != 0) {
+        RingParams params = defaults;
+        params.textures[0] = 0;
+        params.textures[1] = FindAnimRecord(0x15D);
+        f32 level = agent->f298->level;
+        StoreScaledQuadword(&params.rows[1].shape, level * level, &params.rows[1].shape);
+        StoreScaledQuadword(&params.rows[2].shape, agent->f298->level, &params.rows[2].shape);
+        DrawAngleSortedRing(&agent->v140, 7, D_00275070, agent->fC98, agent->fC9C, &params, request);
+    }
+}
+
+// The file's data from here on follows the static's guard (D_00275DB4) in retail's .data.
+// size: s32 state compared/assigned in 001EC000
+s32 D_00275DB8 = 0;
+INCLUDE_DATA(D_00275DBC);
+s32 D_00275DD0[16] = { 4, 2, 1, -1, 8, 4, 2, -1, 12, 6, 3, -1, 16, 8, 4, 2 };
+s32 D_00275E10[92] = { 2, 0x2EB, 0x2DC };
+// word read whole / address only, 4 bytes to next label
+ScreenFade g_screenFade = { 0 };
+f32 D_00275FC0 = 0.5f;
+// Globals defined from C.
+s32 D_00275FC8[6] = { 0, 2, 4, 4, 4, 0 };
+ObjectLink D_00275FE0[52] = {
+    { 0x2, 0x1CB, 0x2E4 },
+    { 0x2, 0x1CC, 0x2E8 },
+    { 0x2, 0x1CD, 0x2F8 },
+    { 0x2, 0x1CE, 0x32C },
+    { 0x2, 0x1CF, 0x360 },
+    { 0x2, 0x1D0, 0x394 },
+    { 0x2, 0x1D1, 0x3C8 },
+    { 0x2, 0x1D2, 0x3FC },
+    { 0x2, 0x1D3, 0x430 },
+    { 0x2, 0x1D4, 0x464 },
+    { 0x2, 0x1D5, 0x498 },
+    { 0x2, 0x1D6, 0x500 },
+    { 0x2, 0x1E2, 0x304 },
+    { 0x2, 0x1E3, 0x338 },
+    { 0x2, 0x1E4, 0x36C },
+    { 0x2, 0x1E5, 0x3A0 },
+    { 0x2, 0x1E6, 0x3D4 },
+    { 0x2, 0x1E7, 0x408 },
+    { 0x2, 0x1E8, 0x43C },
+    { 0x2, 0x1E9, 0x470 },
+    { 0x2, 0x1EA, 0x4A4 },
+    { 0x2, 0x1EC, 0x50C },
+    { 0x2, 0x1EB, 0x4D8 },
+    { 0x2, 0x1D7, 0x2FC },
+    { 0x2, 0x1D8, 0x330 },
+    { 0x2, 0x1D9, 0x364 },
+    { 0x2, 0x1DA, 0x398 },
+    { 0x2, 0x1DB, 0x3CC },
+    { 0x2, 0x1DC, 0x400 },
+    { 0x2, 0x1DD, 0x434 },
+    { 0x2, 0x1DE, 0x468 },
+    { 0x2, 0x1DF, 0x49C },
+    { 0x2, 0x1E1, 0x504 },
+    { 0x2, 0x1E0, 0x4D0 },
+    { 0x2, 0x1F8, 0x310 },
+    { 0x2, 0x1F9, 0x378 },
+    { 0x2, 0x1FA, 0x3AC },
+    { 0x2, 0x1FB, 0x3E0 },
+    { 0x2, 0x1FC, 0x414 },
+    { 0x2, 0x1FD, 0x448 },
+    { 0x2, 0x1FE, 0x47C },
+    { 0x2, 0x1FF, 0x4B0 },
+    { 0x2, 0x1ED, 0x30C },
+    { 0x2, 0x1EE, 0x340 },
+    { 0x2, 0x1EF, 0x374 },
+    { 0x2, 0x1F0, 0x3A8 },
+    { 0x2, 0x1F1, 0x3DC },
+    { 0x2, 0x1F2, 0x410 },
+    { 0x2, 0x1F3, 0x444 },
+    { 0x2, 0x1F4, 0x478 },
+    { 0x2, 0x1F5, 0x4AC },
+    { 0x2, 0x1F7, 0x514 },
+};
+s32 D_00276250 = -1;
+f32 D_00276258[4] = { 600.0f, 0.0f, 0.25f, 0.0f };
+f32 D_00276268[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00276278[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00276288[4] = { 1.0f, 0.0f, 0.200000003f, 0.0f };
+s32 D_00276298[11][4] = {
+    { 1, 10, 10, 5 },
+    { 2, 0, 3, 5 },
+    { -1, 1, 3, 5 },
+    { 2, 10, -1, 1 },
+    { 8, -1, 5, 7 },
+    { 2, 0, 1, 4 },
+    { -1, 7, 7, 8 },
+    { 6, 8, 4, 6 },
+    { 6, -1, 7, -1 },
+    { -1, -1, -1, -1 },
+    { 0, -1, -1, 0 }
+};
+s32 D_00276348[11][4] = {
+    { 4, 10, 4, 10 },
+    { 8, 0, 4, 3 },
+    { 5, 3, 1, -1 },
+    { 2, 10, 1, -1 },
+    { 7, 0, -1, 1 },
+    { 8, 2, 8, -1 },
+    { 8, 7, -1, 8 },
+    { 6, 4, -1, 1 },
+    { -1, 1, 6, 5 },
+    { -1, -1, -1, -1 },
+    { 3, -1, 0, -1 }
+};
+s32 D_002763F8[11][4] = {
+    { 1, 10, 10, 1 },
+    { 3, 0, 7, 2 },
+    { 4, 0, 1, -1 },
+    { 8, 1, 1, 4 },
+    { 3, 2, 1, 2 },
+    { 6, 10, -1, 8 },
+    { -1, 5, -1, 8 },
+    { -1, 0, 8, 1 },
+    { -1, 7, 5, 7 },
+    { -1, -1, -1, -1 },
+    { 5, -1, -1, 0 }
+};
+s32 D_002764A8[11][4] = {
+    { 1, 10, 10, 2 },
+    { 7, 0, 4, 2 },
+    { 5, 0, 1, 5 },
+    { 8, 4, -1, 4 },
+    { 3, 10, 3, 1 },
+    { 6, 2, 1, -1 },
+    { -1, 5, 7, -1 },
+    { 8, 1, 8, 6 },
+    { -1, 4, 3, 1 },
+    { -1, -1, -1, -1 },
+    { 4, -1, -1, 0 }
+};
+s32 D_00276558[11][4] = {
+    { 2, 10, 2, 4 },
+    { -1, -1, -1, -1 },
+    { 3, 0, -1, 3 },
+    { 8, 0, 2, 4 },
+    { 5, 0, 3, 5 },
+    { 6, 4, 4, -1 },
+    { 8, 5, 8, -1 },
+    { -1, -1, -1, -1 },
+    { -1, 3, -1, 6 },
+    { -1, -1, -1, -1 },
+    { 0, -1, -1, 0 }
+};
+s32 (*D_00276608[6])[4] = { 0, (s32(*)[4])D_00276298, (s32(*)[4])D_00276348, (s32(*)[4])D_002763F8, (s32(*)[4])D_002764A8, (s32(*)[4])D_00276558 };
+#ifndef VERSION_EU
+// PAL has no style here (its func_001F1960 draws without one): its static initialiser only
+// sets D_00276650.
+WarpTextStyle D_00276620(2, 1);
+#endif
+INCLUDE_DATA(D_0027663C);
+#ifdef VERSION_EU
+// PAL's own addresses for these two, which the tools do not pair with US's (VERSION_NAME).
+f32 D_eu_0027FDAC = 24.0f;
+f32 D_eu_0027FDB0 = D_eu_0027FDAC * 0.75f;
+#else
+f32 D_00276648 = 24.0f;
+f32 D_00276650 = D_00276648 * 0.75f;
+#endif
+s32 D_00276654 = 0;
+extern f32 D_0027663C[];
+char D_00276658[8] = "jojo";
+char D_00276660[16] = "08/24/02 22:06";
+char D_00276670[12] = "0824.2206";
 
 void ApplyTempoAgentTransform(TempoAgent* self, void* s, void* c)
 {

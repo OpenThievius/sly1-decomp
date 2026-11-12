@@ -131,9 +131,9 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
   `tools/decls.py` cannot see it, since no caller reads the value and the
   callees have no C: an original-assembly function that writes v0 in its
   return's delay slot is the evidence.
-- **Constructor stores kept in source order (solved 2026-11-12 for the four ring records: see
+- **Constructor stores kept in source order (solved 2026-11-12 for the five ring records: see
   "A brace initialiser's union member is a CLOBBER" below; func_001930B8
-  and func_001EC190 are still open).** In func_001D5FA8,
+  is still open).** In func_001D5FA8,
   func_001D61C8, func_001D60B0, func_0018A510 and func_001930B8 (a static
   record built by FillMemory and an inline constructor), retail keeps the
   field stores in source order and loads each constant late enough to reuse
@@ -441,8 +441,8 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
 
 ### A brace initialiser's union member is a CLOBBER (the ring records, matched 2026-11-12)
 
-func_001D5FA8, func_001D60B0, func_001D61C8 and func_0018A510 (w37-f3) match as
-`static RingParams params = { ... };` (include/ring_params.h): the records are brace
+func_001D5FA8, func_001D60B0, func_001D61C8, func_0018A510 and func_001EC190 (w37-f3) match
+as `static RingParams params = { ... };` (include/ring_params.h): the records are brace
 initialisers, and the dependence between their stores is a union member's CLOBBER. What was
 established, in the order it was found (haifa-sched.c, alias.c, expr.c, cp/typeck2.c,
 cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
@@ -508,5 +508,9 @@ cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
   whose stores come out in two groups with the second group's constants loaded late: a
   brace initialiser with a union member at the first offset of the second group.
   func_001930B8 (a file-scope record built in a temporary and copied, the compound literal
-  of wave 15) and func_001EC190 (the same RingParams) have the same signature and were not
-  taken further here.
+  of wave 15) has the same signature and was not taken further here.
+- **Where the guard puts the data.** The compiler writes a static's guard out with its
+  function, so a file's globals that retail has after the guard are defined after the
+  function (gauge_agent.cpp's D_002649B0 on, file_1E88D0.cpp's D_00275DB8 on, declared
+  `extern` above for the functions that use them earlier), and the record's address is the
+  file's `.bss` entry in config/us/files.tsv.
