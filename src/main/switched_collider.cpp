@@ -104,16 +104,21 @@ struct ClampInt {
 };
 
 void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other);
-s32 ConstructSwitchedColliderDefaults(s32 a, s32 b);
 f32 D_00269BC0[3] = { 1000.0f, 10.0f, 1.0f };
 s32 g_activeSwitchedCollider = -1;
 EffectSpawnParams D_00269BD0 = { 0x18, -1, 0, 0, 1.0f, 2.0f, 0, 0, 1.0f, 2.0f, 0, 0, 0, 1, 0, 0 };
-// Built by the static initialiser (func_001930B8, still assembly below): each as a whole block,
-// D_00604700 zero but its last vector, D_00269C10 with its own values. Until that C matches they
-// are defined without their initialisers, which leaves them where retail has them: the static in
-// .bss, the global with the uninitialised ones at the end of .data.
-static Blk05 D_00604700;
-Blk05 D_00269C10;
+// Built by the file's static initialiser (func_001930B8, which the compiler makes from these two
+// brace initialisers): a vector member copied from a global makes an initialiser run at run
+// time, into a temporary that is then copied whole. Both stay where retail has them: the static
+// in .bss, the global with the uninitialised ones at the end of .data.
+static Blk05 D_00604700 = {
+    { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { { 0, 0, 0, 0 } }, { 0 }, 0,
+    { 0.0f, 0.0f, 0.0f }, *(Quad16*)&D_00248D30, { 0.0f, 0.0f, 0.0f }
+};
+Blk05 D_00269C10 = {
+    { 1000.0f, 1200.0f, 1.0f }, { 0.0f, 0.0f, -1750.0f }, { -0.5f, 0.0f, 0.0f }, *(Quad16*)&g_unitZVector, { 0 }, 1,
+    { 0.5f, 2.0f, 0.0f }, { { 0, 0, 0, 0 } }, { 1.0f, -1.0f, 0.0f }
+};
 s32 g_switchedColliderCount;
 void* g_switchedColliders[16];
 extern f32 g_gameClock[];
@@ -534,10 +539,5 @@ void* GetSwitchedColliderTarget(SwitchedCollider* p)
     return p;
 }
 
-// The static initialiser, which builds D_00604700 and D_00269C10 (nonmatching/func_001930B8.cpp).
-INCLUDE_ASM(func_001930B8);
-
-s32 ConstructSwitchedColliderDefaultsAtStartup(void)
-{
-    return ConstructSwitchedColliderDefaults(1, 0xFFFF);
-}
+// The file's static initialiser (func_001930B8) and its _GLOBAL_$I$ (func_001931F0) follow: the
+// compiler makes them from D_00604700's and D_00269C10's initialisers (config/us/generated.tsv).

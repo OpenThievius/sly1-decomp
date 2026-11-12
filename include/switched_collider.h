@@ -30,10 +30,36 @@ struct EntryQueue;       // class 0x8F (entry_queue.h)
 struct Timeline;         // class 0x90 (timeline.h)
 struct PadRecord;        // pad_record.h
 
-// 0x80 bytes at 0x580 of class 0x05, which class 0x17's slot 72 copies as one block.
-struct Blk05 {
-    Vec02 q[8];
+// Four floats, 16-aligned, the first a union's member: the form of the two vectors of Blk05
+// whose non-zero first float retail's initialiser stores after a CLOBBER (the union's, which
+// the scheduler orders the block's other stores around: docs/toolchain/large-functions.md, "A
+// brace initialiser's union member is a CLOBBER"). The vectors at 0x20 and 0x50 have a first
+// float too and no CLOBBER, so they are plain.
+struct __attribute__((aligned(16))) Lead05 {
+    union {
+        f32 x;              // 0x00
+        u32 xBits;
+    };
+    f32 y;                  // 0x04
+    f32 z;                  // 0x08
+    f32 w;                  // 0x0C
 };
+
+// 0x80 bytes at 0x580 of class 0x05, which class 0x17's slot 72 copies as one block: the data
+// GetActiveSwitchedColliderData gives, D_00604700 when no collider is active. Its members are
+// known only from the file's two brace initialisers (switched_collider.cpp).
+struct Blk05 {
+    Lead05 v00;             // 0x00
+    Vec02 v10;              // 0x10
+    Vec02 v20;              // 0x20
+    Quad16 q30;             // 0x30: a vector copied whole (g_unitZVector in D_00269C10)
+    u8 pad40[0x4C - 0x40];
+    s32 f4C;                // 0x4C
+    Vec02 v50;              // 0x50
+    Quad16 q60;             // 0x60: a vector copied whole (the zero vector in D_00604700)
+    Lead05 v70;             // 0x70
+};
+typedef char check_Blk05[sizeof(Blk05) == 0x80 ? 1 : -1];
 
 // Records of class 0x08: the targets at 0x758 and 0x870 (an id and the object it resolves
 // to), the id groups at 0x7E8, the entries at 0xA7C.

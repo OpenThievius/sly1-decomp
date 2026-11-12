@@ -131,9 +131,9 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
   `tools/decls.py` cannot see it, since no caller reads the value and the
   callees have no C: an original-assembly function that writes v0 in its
   return's delay slot is the evidence.
-- **Constructor stores kept in source order (solved 2026-11-12 for the five ring records: see
-  "A brace initialiser's union member is a CLOBBER" below; func_001930B8
-  is still open).** In func_001D5FA8,
+- **Constructor stores kept in source order (solved 2026-11-12: see "A brace initialiser's
+  union member is a CLOBBER" below, for the five ring records and
+  func_001930B8).** In func_001D5FA8,
   func_001D61C8, func_001D60B0, func_0018A510 and func_001930B8 (a static
   record built by FillMemory and an inline constructor), retail keeps the
   field stores in source order and loads each constant late enough to reuse
@@ -507,8 +507,18 @@ cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
 - **Spot it:** a record cleared by a memset call and filled with constants in one block,
   whose stores come out in two groups with the second group's constants loaded late: a
   brace initialiser with a union member at the first offset of the second group.
-  func_001930B8 (a file-scope record built in a temporary and copied, the compound literal
-  of wave 15) has the same signature and was not taken further here.
+- **func_001930B8, the file-scope records (matched the same day).** switched_collider.cpp's
+  static initialiser is the compiler's own, made from `static Blk05 D_00604700 = { ... };` and
+  `Blk05 D_00269C10 = { ... };` (config/us/generated.tsv names it and its `_GLOBAL_$I$`). A
+  vector member copied from a global (`*(Quad16*)&g_unitZVector`) is not safe to store
+  straight into the target (expr.c's safe_from_p: an INDIRECT_REF against a MEM), so each
+  record is built in a stack temporary and copied, as retail's are. Which members are unions
+  was read off retail's registers by compiling every choice (build/swarm/w37-f3/svar.py: the
+  constants' FPRs and the order of loads and stores, 8 of 8 only with the vectors at 0x00 and
+  0x70, or with 0x10 as well, whose first float is zero): the CLOBBER before 0x70 holds its two stores (1.0, -1.0) behind every other store, so
+  -1.0 is loaded after -0.5 is stored and takes its $f0, and the one before 0x00 gives the
+  first vector's constants their lives. The vectors at 0x20 (-0.5) and 0x50 (0.5, 2.0) have a
+  non-zero first float and no CLOBBER: they are plain (with either as a union, 1 to 3 of 8).
 - **Where the guard puts the data.** The compiler writes a static's guard out with its
   function, so a file's globals that retail has after the guard are defined after the
   function (gauge_agent.cpp's D_002649B0 on, file_1E88D0.cpp's D_00275DB8 on, declared
