@@ -57,6 +57,7 @@
 // label after a LOOP_BEG: retail's are 0x130DD0 and 0x130E68, both 8-aligned without a nop.
 // Not found: the plain source with these notes. The i loop cannot own them (its exit test's
 // copy jumps past its LOOP_END to 0x130E50; a break with a body is "multiple entry points").
+// w38-f5 (2026-11-12): this source (no `do { } while (0)`) is 6 differing lines with -mvu0-use-vf0-vf29, vf30 or vf31 (49 at vf27, 179 at the file's vf15): the range sets loop.c's threshold (64 + N), and at 93 or more the 2 and the 3 move and the 1 is rematerialised, as retail. The 6 lines are the block after the outer loop (lui/subu order, v0 and v1). func_001D9488 and func_0013AD80 give the same threshold, 94. This is the file's last function; func_00127B20 and func_0012CD78 of the same file stop matching by N = 22 and 26, so the file's row cannot change as it stands. docs/toolchain/loops.md, "A threshold of 94".
 #include "common.h"
 
 f32 ConvertDoubleToFloat(u64 v);
