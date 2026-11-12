@@ -424,7 +424,10 @@ long-lived flag next to s0-s7 holders means it was placed before them all.
   and not in a parallel half: look for the other half's variable whose local register is the
   one retail used, and reuse the variable.
 
-### A saved register skipped with no preference: what is left (func_001D5678, unsolved)
+### A saved register skipped with no preference: what is left (func_001D5678, solved since)
+
+Solved 2026-11-12: the conflict looked for below is the reaching register's own second life
+(gcse.md, "One reaching register for every occurrence"). What follows is the state before.
 
 Measured 2026-11-10 (nonmatching/func_001D5678.cpp, tools/globalalloc.py). A GCSE temporary
 (`n - 1` for a sort call, live across a loop with calls) takes s2 where retail has s3, every
