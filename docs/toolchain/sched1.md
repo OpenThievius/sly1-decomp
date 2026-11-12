@@ -507,6 +507,17 @@ sol` (875), `self->contacts` (880, r307) and its `->head` (882, mem/s through r3
   in the 2026-11-10 probe). down as a Vec02 in memory (copy = load + store, 880 between
   them) swaps the frame slots and renumbers the counting loop's registers.
 
+- **No barrier (w37, 2026-11-12).** A loop note between the contacts load and the copy (`ct =
+  self->contacts; do { } while (0); Vu0::Q(acc) = down.q;`, a probe) makes the copy wait for
+  the load in sched1 and reload then takes v1, but the note binds sched2 as well: the `lw`
+  stays ahead of the `lq`/`sq` and the call's argument moves come out in another order, where
+  retail has `lq v1; sq v1; lw v0`. So retail's sched1 order came from a rank, with nothing
+  sched2 still sees. A frame variable for down is ruled out by the rest of the function (the
+  product's vf3 is an output reload's register; local-alloc would tie a pseudo's to vf1), and
+  the callee's return type by measurement. What would give the rank and leave no code: a copy
+  between the contacts load and the head load (880's chain one insn longer, priority 6), a
+  TImode copy feeding the store (871 ready a cycle later), or the birthing raise.
+
 ### The rest of rank_for_schedule (func_001782C0)
 
 Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):

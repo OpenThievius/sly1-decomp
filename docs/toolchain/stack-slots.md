@@ -164,6 +164,20 @@ Read again with tools/globalalloc.py (2026-11-10, w19):
   func_001841D0 a memory-to-memory copy (reload_override_in), so there is no other example of
   this one's form to learn it from.
 
+Read again from stmt.c, function.c and cse.c (2026-11-12, w37):
+
+- **An asm never writes a frame variable directly.** expand_asm_operands gives a register-only
+  output (`"=j"`) whose lvalue is a MEM a fresh pseudo and copies it to the lvalue afterwards;
+  fixup_var_refs_1 does the same to `(set var (asm_operands))` when purge_addressof moves var
+  to the frame. Either way a register holds the stored value and cse2 forwards it to the next
+  read (measured with the asm statement naming d itself as its output). So retail's
+  `vsub vf3; sqc2 vf3,448(sp)` is an output reload and d a spilled pseudo, as in the near miss.
+- **The vf6 value is then a second pseudo**, a copy of d read by the asm and the first call.
+  make_regs_eqv keeps the register whose last use is later as the class's canonical one, and
+  that is d (the second call), so cse1 and cse2 fold any plain copy; a copy survives them only
+  if it is modified before its uses or its uses are behind a join. Neither was found in a form
+  that keeps the frame (an input tied to an output forces a slot through its reference).
+
 ### A pointer field's type picks its store's partner (func_002042C8)
 
 Read from haifa-sched.c (priority, rank_for_schedule) and the `-dS -dl -dg -fsched-verbose-6`

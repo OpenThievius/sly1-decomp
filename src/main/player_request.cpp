@@ -13,6 +13,9 @@
 #include "globals.h"
 #include "game_clock.h"
 #include "aim_blend_grid.h"
+#include "placed_object.h"
+#include "vertex_batch.h"
+#include "packet_writer.h"
 #include "vu0.h"
 
 s32 D_00274FA0[2] = {286, 287};
@@ -915,12 +918,251 @@ void EndPlayerRequestState(void* self)
     SpendReserveUnit();
 }
 
-struct SortedTarget { u8 pad[0x10]; f32 key; };
-s32 CompareSortedTargets(SortedTarget* a, SortedTarget* b) { if (a->key < b->key) return -1; return 1; }
+struct AnimRecord;
+// A point the ring goes around: an object's position (+0x140) and how far its offsets reach.
+struct RingAnchor {
+    s32 f0;                 // 0x00
+    f32 scale;              // 0x04
+    PlacedObject* obj;      // 0x08
+};
+// A row of the ring's strip: the radius terms, the texture's v, the lift and the colour.
+struct RingRow {
+    Vec02 shape;            // 0x00: x over the depth, plus y and z times the length
+    f32 v;                  // 0x10
+    f32 lift;               // 0x14: along +z
+    Rgba4 color;            // 0x18
+    u8 pad1C[4];
+};
+// The parameter block of a ring (the DrawPlayerMarkerRing functions' static records).
+struct RingParams {
+    s32 mode;               // 0x00: 1, u from the angle's distance to pi/2; otherwise from the angle
+    f32 uScale;             // 0x04
+    f32 rate;               // 0x08: u's scroll per second
+    u8 pad0C[4];
+    RingRow rows[3];        // 0x10
+    AnimRecord* textures[2]; // 0x70: one strip drawn for each that is set
+};
+// A point of the ring in camera space and its angle about the centre.
+struct __attribute__((aligned(16))) RingEntry {
+    Vec02 pos;              // 0x00
+    f32 angle;              // 0x10
+    u8 pad14[0x20 - 0x14];
+};
+struct Point2 { f32 x; f32 y; };
+
+s32 CompareSortedTargets(RingEntry* a, RingEntry* b) { if (a->angle < b->angle) return -1; return 1; }
 
 
-extern const f32 D_0024DC88 = 3.4028235e38f;
-INCLUDE_ASM(func_001D5678);
+extern PacketWriter g_vifPacketWriter;
+void ProjectPointToCamera(void* cam, Vec02* in, void* out);
+void UnprojectCameraPoint(void* cam, Vec02* in, Vec02* out);
+f32 ArctangentOfRatio(f32 y, f32 x);
+f32 WrapAngle(f32 a);
+f32 WrapModulo(f32 a, f32 m);
+void SortElements(void* base, s32 n, s32 size, s32 (*cmp)(RingEntry*, RingEntry*));
+void* InitVertexBatch(VertexBatch* b);
+void BeginDmaTag(PacketWriter* g);
+void SetVertexBatchTransform(VertexBatch* b, u8* a, u8* c);
+void SetVertexBatchMode(VertexBatch* b, AnimRecord* r);
+void SetVertexTexCoord(VertexBatch* b, f32* uv);
+void SetVertexColor(VertexBatch* b, Rgba4* c);
+void SetVertexPosition(VertexBatch* b, Vec02* v);
+void AddVertex(VertexBatch* b, s32 z);
+void FlushVertexBatch(VertexBatch* b);
+void CloseDmaTag(PacketWriter* g);
+void DestroyVertexBatch(VertexBatch* b, s32 f);
+
+// The ring around a set of anchors: the points projected into camera space, the lowest first,
+// sorted by angle about it, the hull (a Graham scan against the z axis), the points where the
+// hull crosses the centre's x, the angles about the centre, the gaps filled every D_0027506C
+// radians, then the strip drawn once per texture with two rows of the three.
+// `n - 1` is written at each use and never kept in a variable: the first sort's count and the
+// gap loop's start are then two redundant occurrences of one expression, PRE gives them one
+// reaching register, and its second life (beside n << 5 in s2) is what puts the first in s3.
+// `base` is declared apart from its value: two more insns before GCSE, whose table then has
+// retail's 323 buckets and numbers the four hoisted addresses in retail's spill-slot order
+// (docs/toolchain/gcse.md, "One reaching register for every occurrence").
+void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingAnchor* anchors, RingParams* params)
+{
+    RingEntry entries[256];
+    Vec02 pt;
+    Vec02 center;
+    f32 lowest = 3.4028235e+38f;
+    RingEntry* low = 0;
+    s32 n = 0;
+    s32 i;
+    s32 next;
+    RingEntry* e;
+    Vu0::Vec base;
+    ProjectPointToCamera(g_camera, at, &center);
+    for (s32 j = 0; j < nAnchors; j++) {
+        RingAnchor* anchor = &anchors[j];
+        for (s32 k = 0; k < nOffsets; k++) {
+            Point2* off = &offsets[k];
+            f32 s = anchor->scale;
+            u8* cam = (u8*)g_camera;
+            base = Vu0::Vec::Of(anchor->obj->v140);
+            Vu0::Vec sx = Vu0::Vec::Scalar(off->x * s);
+            Vu0::Vec ax = Vu0::Vec::Of(*(Vec02*)(cam + 0x90));
+            Vu0::Vec sy = Vu0::Vec::Scalar(off->y * s);
+            Vu0::Vec ay = Vu0::Vec::Of(*(Vec02*)(cam + 0xA0));
+            *(Vu0::Vec*)&pt = Vu0::MulAddX2(base, ax, sx, ay, sy);
+            e = &entries[n];
+            ProjectPointToCamera(g_camera, &pt, e);
+            n++;
+            e->pos.z = center.z;
+            if (e->pos.y < lowest) {
+                lowest = e->pos.y;
+                low = e;
+            }
+        }
+    }
+    {
+        RingEntry t = *low;
+        *low = entries[0];
+        entries[0] = t;
+    }
+    for (s32 j = 1; j < n; j++) {
+        Vec02 d;
+        e = &entries[j];
+        *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(e->pos), Vu0::Vec::Of(entries[0].pos));
+        e->angle = ArctangentOfRatio(d.y, d.x);
+    }
+    SortElements(&entries[1], n - 1, 0x20, CompareSortedTargets);
+    RingEntry* top = entries;
+    for (i = 0; i < n;) {
+        next = i + 1;
+        e = &entries[i];
+        while (top >= &entries[2]) {
+            Vu0::Vec c = Vu0::Cross(Vu0::Sub(Vu0::Vec::Of(top[-1].pos), Vu0::Vec::Of(top[-2].pos)), Vu0::Vec::Of(g_unitZVector));
+            if (Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Vec::Of(e->pos), Vu0::Vec::Of(top[-2].pos)), c)) < 0.0f) {
+                break;
+            }
+            top--;
+        }
+        *top = *e;
+        top++;
+        i = next;
+    }
+    n = top - entries;
+    entries[n] = entries[0];
+    Vec02 lo;
+    Vec02 hi;
+    lo = hi = center;
+    for (i = n - 1; i >= 0; i--) {
+        e = &entries[i];
+        *(Vu0::Vec*)&lo = Vu0::Min(Vu0::Vec::Of(lo), Vu0::Vec::Of(e->pos));
+        *(Vu0::Vec*)&hi = Vu0::Max(Vu0::Vec::Of(hi), Vu0::Vec::Of(e->pos));
+    }
+    *(Vu0::Vec*)&center = Vu0::MulXSum(Vu0::Vec::Of(lo), Vu0::Vec::Scalar(0.5f), Vu0::Vec::Of(hi), Vu0::Vec::Scalar(0.5f));
+    for (i = n - 1; i >= 0; i--) {
+        e = &entries[i];
+        f32 x0 = e[0].pos.x;
+        f32 x1 = e[1].pos.x;
+        if ((x0 - center.x) * (x1 - center.x) < 0.0f) {
+            f32 t = (center.x - x0) / (x1 - x0);
+            Vu0::Vec s0 = Vu0::Vec::Scalar(1.0f - t);
+            Vu0::Vec p0 = Vu0::Vec::Of(e[0].pos);
+            Vu0::Vec s1 = Vu0::Vec::Scalar(t);
+            Vu0::Vec p1 = Vu0::Vec::Of(e[1].pos);
+            *(Vu0::Vec*)&entries[n++].pos = Vu0::MulXSum(p0, s0, p1, s1);
+        }
+    }
+    for (i = n - 1; i >= 0; i--) {
+        Vec02 d;
+        e = &entries[i];
+        *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(e->pos), Vu0::Vec::Of(center));
+        e->angle = WrapAngle(ArctangentOfRatio(d.y, d.x));
+    }
+    SortElements(entries, n, 0x20, CompareSortedTargets);
+    entries[n] = entries[0];
+    {
+        Vu0::Vec prev = Vu0::Vec::Of(e[n].pos);
+        f32 prevAngle = e[n].angle;
+        for (i = n - 1; i >= 0;) {
+            s32 down = i - 1;
+            Vu0::Vec from;
+            Vu0::Vec to;
+            from = prev;
+            to = Vu0::Vec::Of(entries[i].pos);
+            prev = to;
+            f32 a = prevAngle;
+            prevAngle = entries[i].angle;
+            s32 steps = (s32)(__builtin_fabsf(WrapAngle(a - prevAngle)) / D_0027506C);
+            if (steps > 0) {
+                for (i = 0; i < steps;) {
+                    i++;
+                    f32 t = (f32)i / (f32)(steps + 1);
+                    Vec02 d;
+                    e = &entries[n++];
+                    *(Vu0::Vec*)&e->pos = Vu0::MulXSum(to, Vu0::Vec::Scalar(1.0f - t), from, Vu0::Vec::Scalar(t));
+                    *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(e->pos), Vu0::Vec::Of(center));
+                    e->angle = ArctangentOfRatio(d.y, d.x);
+                }
+            }
+            i = down;
+        }
+    }
+    SortElements(entries, n, 0x20, CompareSortedTargets);
+    entries[n] = entries[0];
+    VertexBatch batch;
+    InitVertexBatch(&batch);
+    BeginDmaTag(&g_vifPacketWriter);
+    SetVertexBatchTransform(&batch, (u8*)&D_00248D30, (u8*)&g_identityMatrix);
+    Vec02 rows[3];
+    s32 r;
+    for (r = 0; r < 3; r++) {
+        rows[r] = params->rows[r].shape;
+        rows[r].x = rows[r].x / center.z;
+        rows[r].z = rows[r].z * center.z;
+    }
+    for (s32 s = 0; s < 2; s++) {
+        AnimRecord* tex = params->textures[s];
+        if (tex == 0) {
+            continue;
+        }
+        f32 prev = -3.1415927f;
+        SetVertexBatchMode(&batch, tex);
+        f32 u0 = WrapModulo(g_gameClock.time * params->rate, 1.0f);
+        for (i = 0; i <= n;) {
+            Vec02 d;
+            f32 uv[2];
+            next = i + 1;
+            e = &entries[i];
+            *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(e->pos), Vu0::Vec::Of(center));
+            f32 a = e->angle;
+            while (a < prev) {
+                a += 6.2831855f;
+            }
+            prev = a;
+            switch (params->mode) {
+            case 0:
+            default:
+                uv[0] = u0 + params->uScale * a * 0.15915494f;
+                break;
+            case 1:
+                uv[0] = u0 + params->uScale * __builtin_fabsf(WrapAngle(a - 1.5707964f)) * 0.15915494f;
+                break;
+            }
+            for (r = s; r <= s + 1; r++) {
+                uv[1] = params->rows[r].v;
+                f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Vec::Of(d)));
+                Vu0::Vec w = Vu0::Vec::Scalar(((rows + r)->x + len * ((rows + r)->y + len * (rows + r)->z)) / len);
+                *(Vu0::Vec*)&pt = Vu0::MulAddX2(Vu0::Vec::Of(center), Vu0::Vec::Of(d), w, Vu0::Vec::Of(g_unitZVector), Vu0::Vec::ScalarAtValue(params->rows[r].lift));
+                UnprojectCameraPoint(g_camera, &pt, &pt);
+                SetVertexTexCoord(&batch, uv);
+                Rgba4 c = params->rows[r].color;
+                SetVertexColor(&batch, &c);
+                SetVertexPosition(&batch, &pt);
+                AddVertex(&batch, 0);
+            }
+            i = next;
+        }
+        FlushVertexBatch(&batch);
+    }
+    CloseDmaTag(&g_vifPacketWriter);
+    DestroyVertexBatch(&batch, 2);
+}
 
 
 INCLUDE_ASM(func_001D5FA8);
