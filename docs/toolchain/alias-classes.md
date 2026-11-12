@@ -1077,6 +1077,61 @@ handler read through a `slot` pointer: every value a fresh pseudo.
   typical of C written with its declarations at the top. Its conflicts are those of all its
   lives, so a value may be kept out of a register by a use a hundred instructions later.
 
+### A stack word loaded at each use beside an empty branch slot is a volatile read (func_001FA6B0)
+
+Established on 2026-11-12 (w39-1FA6B0), Sony's 2.9-ee-991111, from the `-da` dumps and GCC
+2.95.3's cse.c, gcse.c, reorg.c and resource.c. No match came of it: it is the proof that the
+handler's reads of its own stack copy of the packet are volatile reads, and that no
+non-volatile source gives retail's code. Whether the original had that volatile is the
+maintainer's decision.
+
+- **What retail shows.** After the copy loop and the call: `lw v1,8(sp); bgez v1,else; nop`,
+  then `lw v0,8(sp)` at the head of the fall-through arm and `lw a1,8(sp)` at the head of the
+  else arm. Two facts: the word is loaded three times, and the branch's delay slot is empty
+  although both arms start with a one-instruction load from the frame.
+- **Three loads: cse1 merges any non-volatile form.** The three reads expand to the same
+  `(mem:SI (plus (reg) (const_int 8)))` and no insn stands between them (no store, no call).
+  In the `.cse` dump of the form without the volatile, insns 140 (system arm) and 196 (user
+  arm) are gone and insn 144 reads pseudo 135, the test's load: cse1 alone does it, following
+  the jump into the else arm (and still with `-fno-cse-follow-jumps -fno-cse-skip-blocks
+  -fno-gcse -fno-rerun-cse-after-loop`, tried as a probe). cse.c's hash of a MEM takes its
+  address only: the alias set, the `/s` flag and the type the read was written with are not
+  in it, so no way of typing the read keeps the loads apart. The one thing that does is
+  canon_hash's `if (MEM_VOLATILE_P (x)) { do_not_record = 1; return 0; }`: a volatile source
+  is never looked up and never recorded (gcse.c's hash_expr_1 has the same test).
+- **Measured.** One load of 8(sp) in each of: the test through `((s32*)local)[2]` and the
+  index through `u32*` and the struct field; the local as a union of quadwords, words and the
+  packet; the local as the packet struct, filled through a quadword pointer; a void pointer
+  with a cast at each read; a one-bit field over a 31-bit field for the test and the index
+  (fold makes the same word load and sign test); inline accessors taking the pointer by value
+  and by const reference; the pointer set through its own address; the source read as
+  `volatile Quad*` with the local plain (the qualifier does not travel with the copied
+  value). A structure returned by value from an inline copies the packet (the function grows).
+- **The empty slot: reorg refuses only a volatile load.** This is independent of how the
+  loads survive. fill_eager_delay_slots tries the head of the target thread, then of the
+  fall-through. Either `lw` would be taken: the else arm's with an annulled branch (the form
+  without the volatile gives `bgezl a0; lw v0,24(s0)`, a load in a branch-likely slot), or
+  unannulled, since neither sets a register live in the other arm and a frame address cannot
+  trap. fill_slots_from_thread's first test is insn_references_resource_p against an empty
+  set, and resource_conflicts_p returns 1 for an empty set only by `res1->volatil ||
+  res2->volatil`; resource.c sets `volatil` from MEM_VOLATILE_P (and from an asm or an
+  UNSPEC_VOLATILE, which a `lw` is not). The refused insn's resources then join `set`, so
+  nothing after it is taken either: the nop.
+- **Measured.** With the three reads on three different words (`head[2]`, `head[3]`,
+  `head[1]`: nothing for cse to merge), the plain form gives `bgez v1; lw a1,4(sp)` and the
+  volatile form `bgez v1; nop`. So even a plain form that kept its three loads would not be
+  retail's: the slot would hold one of them.
+- **Where the qualifier can sit.** The reads of the stack copy must go through a
+  volatile-qualified lvalue. Two forms are EXACT on US and PAL: the landed one (`volatile
+  Packet* packet = (volatile Packet*)local`), and one volatile quadword type for the DMA data
+  used for the source pointer and the array alike (`volatile Quad local[7]; volatile Quad*
+  src;`) with the same volatile packet pointer. A volatile array read through a plain packet
+  pointer merges the loads again. The receive buffer's volatile alone is never enough.
+- **The tell.** A frame word reloaded at each use with nothing between the loads, and a
+  branch whose slot is a nop while its arms begin with those loads. Either half alone has
+  other causes (a store or call between the loads; a slot candidate that sets a live
+  register); together they are MEM_VOLATILE_P.
+
 ### An expression split into two statements adds references (func_001F7390)
 
 - Sony's library compiler ranks global-alloc's pseudos the same way: floor_log2(refs) * refs /
