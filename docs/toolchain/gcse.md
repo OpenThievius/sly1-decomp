@@ -926,4 +926,9 @@ its life. Read from the `-dG`, `-dl` and `-dg` dumps and tools/globalalloc.py:
 - **The tell.** A PRE'd value in the "wrong" free register, where retail later computes the same
   expression into another register and copies it (`addiu X; move Y,X`, then `move X,Y`): look
   for a local the near miss invented to carry the value, and write the expression again.
-
+- **Audit, 2026-11-12 (w38-f6).** The 24 near misses nobody held were checked for the tell:
+  a `move Y,X` in retail answered later by `move X,Y`. Every such pair, in retail and in ours
+  alike, is an argument saved to a saved register and passed on again (`move s5,a1` ...
+  `move a1,s5`); none is a PRE copy. func_0017ECE8, the only one tools/regdiff.py classes
+  `registers`, has no pair at all. func_00131F60 had no copy either: its invented locals
+  were of another kind (loops.md, "Named constants that lose their registers").
