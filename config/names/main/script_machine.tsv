@@ -1,7 +1,7 @@
 symbol	name	evidence
 func_00112698	AddScriptValues	built-in (original assembly): sums its arguments by tag, ints and floats with add.s, 16-byte vectors with vadd, matrices element by element, and returns an int, float, vector or matrix
 func_00112968	SubtractScriptValues	built-in (original assembly): the same shape as AddScriptValues with sub.s and vsub: subtracts the later arguments from the first by tag
-func_00112C38	MultiplyScriptValues	built-in (original assembly): multiplies its arguments by tag: numbers with mul.s, a vector by a number (vmulx, func_00118D30), matrices with MultiplyMatrices, into vector, pair or matrix payloads
+func_00112C38	MultiplyScriptValues	built-in: multiplies its arguments by tag: numbers with mul.s, a vector by a number (vmulx, func_00118D30), matrices with MultiplyMatrices, into vector, pair or matrix payloads
 func_00113240	DivideScriptValues	built-in (original assembly): divides the first argument by the others by tag with div.s, a vector or matrix by a number through its reciprocal
 func_00113730	IgnoreScriptArgument	built-in of one argument (record 4 of D_00259958) that returns the empty result (tag 0x22) without reading it; EvalScriptAssert calls it after printing its message
 func_00113780	IgnoreScriptArguments	built-in (record 5 of D_00259958, no fixed arguments and the rest gathered) that returns the empty result (tag 0x22) without reading them

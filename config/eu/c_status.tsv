@@ -204,6 +204,7 @@ func_00109308	func_00109308	match
 func_001093B8	func_001093B8	match	
 func_00112698	func_00112698	match	
 func_00112968	func_00112968	match	
+func_00112C38	func_00112C38	match	rodata
 func_00113240	func_00113240	match	rodata
 func_00113730	func_00113730	match	
 func_00113780	func_00113780	match	

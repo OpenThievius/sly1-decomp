@@ -109,7 +109,12 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   one register variable allowed, because retail holds it in a caller-saved register across
   calls, which nothing else gives; and the two system sequences only they issue, `SetTlbWired`
   and `CurrentThreadIdFromInterrupt` (include/system.h), are helpers although each occurs in one
-  function. No other function may do either. The other exception is `MUL_WIDE` (include/mul_wide.h),
+  function. No other function may do either. One game function, func_00112C38
+  (MultiplyScriptValues), uses `Vu0::ScalarInGprAt` (include/vu0.h), a helper of one site: it
+  is compiled C around a load the compiler cannot emit, a float's word loaded with `lw` straight
+  into a 128-bit GPR for a VU0 routine's weight, and a scan of retail proved the sequence occurs
+  only there (docs/toolchain/cse.md); the maintainer allowed it by name on 2026-11-12, and no
+  other function may use it. The other exception is `MUL_WIDE` (include/mul_wide.h),
   one `multu` whose halves are read from lo and hi, which the toolchain's runtime multiplied with
   and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
   The toolchain's own runtime (`libgcc`, config/us/libcalls.tsv) was compiled as C, so its C is a

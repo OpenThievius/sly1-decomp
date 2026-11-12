@@ -1199,6 +1199,12 @@ tails). The mechanism, from the .rtl and .cse dumps:
 - **A float in memory into a 128-bit GPR.** Retail loads the float operand's word with lw straight
   into the GPR it passes (`lw v0, 4(s2); por a2, zero, v0; sq v0, 0x50(sp)`); ScalarInGpr's
   operand would be lwc1 then mfc1. Vu0::ScalarInGprAt is that lw, as FromFloatAt is to FromFloat.
+  It has one site: a scan of every `lw` in retail whose register then reaches a `por` argument
+  move, `qmtc2`, `sq` or a 128-bit MMI operand found only this function's 0x112F90 (the other
+  hits are false, the register redefined by a call or across a branch), and of ScaleMatrix's
+  five calls only 0x112FA4 loads its weight so; the others use mfc1. A helper must recur
+  across retail's functions, so this one is a named exception in AGENTS.md, allowed by the
+  maintainer for func_00112C38 alone on 2026-11-12.
 
 ### A case that seems to store the compare's register: reorg's redundant constant (func_001E8A50)
 
