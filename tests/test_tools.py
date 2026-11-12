@@ -467,7 +467,13 @@ class PermuterTest(unittest.TestCase):
     def test_the_parser_sees_only_c(self):
         text = permuter_setup.isolate(self.UNIT, "func_00100010")
         self.assertIn("typedef int s32;", text)
-        self.assertIn("PERM_IGNORE(struct Obj : Base { s32 b; void Run(); };)", text)
+        # a struct's fields are visible (a base class's first, no method), the original comes back
+        # at compile time
+        self.assertIn("struct Obj {\n s32 a; \ns32 b;\n};", text)
+        self.assertIn('permuter_struct_Obj[] = "struct Obj : Base { s32 b; void Run(); };"', text)
+        compiled = permuter_compile.with_aliases(text)
+        self.assertIn("struct Obj : Base { s32 b; void Run(); };", compiled)
+        self.assertNotIn("permuter_struct_", compiled)
         self.assertIn("PERM_IGNORE(void Obj::Run()", text)
         self.assertIn("void func_00100010(Obj* o)\n{\n    func_00100000(o);\n}", text)
         self.assertNotIn("PERM_IGNORE(void func_00100010", text)
@@ -525,13 +531,69 @@ class PermuterTest(unittest.TestCase):
     def test_a_direct_initialisation_is_a_call_and_comes_back(self):
         body = "void func_00100043(Obj* o)\n{\n    Obj a(o->b, f(1, 2));\n    const Obj b(3);\n    Obj c;\n}"
         plain, _ = permuter_setup.plain_calls(body, {"Obj"})
-        self.assertIn("Obj a = permuter_ctor(o->b, f(1, 2));", plain)
-        self.assertIn("const Obj b = permuter_ctor(3);", plain)
+        self.assertIn("Obj a = permuter_ctor_Obj(o->b, f(1, 2));", plain)
+        self.assertIn("const Obj b = permuter_ctor_Obj(3);", plain)
         self.assertIn("Obj c;", plain)
         self.assertEqual(permuter_setup.ctor_declarations(plain), body)
         # a declaration of another type's call, or an empty one, is left alone
         other = "void func_00100044()\n{\n    return foo(1);\n    Obj d();\n}"
         self.assertEqual(permuter_setup.plain_calls(other, {"Obj"})[0], other)
+
+    def test_a_for_loops_declaration_is_hoisted_and_comes_back(self):
+        body = ("void func_00100050(s32 n)\n{\n    for (s32 j = 0; j < n; j++) {\n"
+                "        for (u8* k = 0; k < 4; k++) g(j, k);\n    }\n    if (n) for (s32 q = 0; q < 2; q++) h(q);\n"
+                "    for (s32 j = 1, m = 2; j < n; j++) h(m);\n}")
+        plain, _ = permuter_setup.plain_calls(body, set())
+        self.assertIn("{ s32 permuter_for_j; for (permuter_for_j = 0; permuter_for_j < n; permuter_for_j++) {", plain)
+        self.assertIn("{ u8* permuter_for_k; for (permuter_for_k = 0;", plain)
+        self.assertIn("if (n) for (s32 q = 0;", plain)         # a braceless body stays
+        self.assertIn("for (s32 j = 1, m = 2;", plain)         # two variables stay
+        self.assertEqual(permuter_setup.cpp_declarations(plain), body)
+        # something else in the block, the loop's variable declared apart under its own name
+        moved = plain.replace("{ s32 permuter_for_j; for", "{ s32 permuter_for_j; z(); for", 1)
+        back = permuter_setup.cpp_declarations(moved)
+        self.assertIn("{ s32 j; z(); for (j = 0; j < n; j++) {", back)
+        self.assertNotIn("permuter_", back)
+
+    def test_declarations_the_parser_needs_are_visible(self):
+        unit = ("typedef int s32;\ntypedef float f32;\n"
+                "struct __attribute__((aligned(16))) Vec { f32 x, y; };\n"
+                "struct Rec : Vec { s32 n; f32 Len() { return x; } static s32 Count(); };\n"
+                "struct Cls { static s32 K(s32 a) { return a; } };\n"
+                "extern s32 D_00200000;\nextern s32 D_00200010[];\ns32 func_00100001(s32 a);\n"
+                "s32 g = 4;\nvoid F(s32& r);\n"
+                "void func_00100060(Rec* r)\n{\n    r->n = __builtin_fabsf(1.0f);\n}\n")
+        text = permuter_setup.isolate(unit, "func_00100060")
+        self.assertIn("permuter_struct_Vec[]", text)       # aligned: the plain view, the original at compile time
+        self.assertIn("struct Rec {\n", text)
+        self.assertIn("f32 x, y;", text)
+        self.assertIn("extern s32 D_00200000;", text)
+        self.assertNotIn("PERM_IGNORE(extern s32 D_00200000;)", text)
+        self.assertIn("extern s32 D_00200010[];", text)
+        self.assertIn("s32 func_00100001(s32 a);", text)
+        self.assertIn("f32 __builtin_fabsf(f32 x);", text)
+        self.assertIn("PERM_IGNORE(s32 g = 4;)", text)         # an initialiser: not a declaration
+        self.assertIn("PERM_IGNORE(void F(s32& r);)", text)    # a reference: C++
+        self.assertIn("PERM_IGNORE(struct Cls {", text)        # no field: nothing to learn
+        # with nothing visible, the old base
+        plain = permuter_setup.isolate(unit, "func_00100060", visible=False)
+        self.assertIn("PERM_IGNORE(extern s32 D_00200000;)", plain)
+        self.assertNotIn("permuter_struct_", plain)
+
+    def test_cpp_functions_the_parser_calls_have_a_return_type(self):
+        unit = ("typedef float f32;\ntypedef unsigned u128;\n"
+                "struct Vu0 { static u128 Dot(u128 a, u128 b) { return a; } static f32 ToFloat(u128 a) { return 0; }\n"
+                "  struct Vec { u128 q; static Vec Of(u128 v) { Vec r; return r; } }; };\n"
+                "void func_00100061(u128 a)\n{\n    f32 x = Vu0::ToFloat(Vu0::Dot(a, a));\n"
+                "    Vu0::Vec v = Vu0::Vec::Of(a);\n}\n")
+        text = permuter_setup.isolate(unit, "func_00100061")
+        self.assertIn("f32 Vu0__ToFloat();", text)
+        self.assertIn("u128 Vu0__Dot();", text)
+        self.assertIn("Vu0__Vec Vu0__Vec__Of();", text)
+        compiled = permuter_compile.with_aliases(text)
+        self.assertNotIn("Vu0__ToFloat();", compiled)
+        self.assertNotIn("Vu0__Vec__Of();", compiled)
+        self.assertIn("#define Vu0__ToFloat Vu0::ToFloat", compiled)
 
     def test_a_local_reference_is_a_value_and_comes_back(self):
         body = "void func_00100046(Obj* o)\n{\n    Obj& r = *o;\n    r.b = r.a & 1;\n    o->move = 1;\n}"

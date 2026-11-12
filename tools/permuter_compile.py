@@ -51,6 +51,9 @@ ALIAS = re.compile(r'static const char permuter_alias_\d+\[\] = "(\w+)=([^"]+)";
 TYPEDEF = re.compile(r'static const char permuter_typedef_(\w+)\[\] = "((?:[^"\\\\]|\\\\.)*)";')
 
 
+STRUCT_DEF = re.compile(r'static const char permuter_struct_(\w+)\[\] = "((?:[^"\\]|\\.)*)";')
+
+
 def with_aliases(text):
     """The candidate with permuter_setup.py's call aliases as #defines again (Fpu__Sqrt -> Fpu::Sqrt),
     and each attributed typedef (u128's mode(TI)) as it was written."""
@@ -58,13 +61,31 @@ def with_aliases(text):
         name, original = m.group(1), m.group(2).replace('\\"', '"')
         text = re.sub(r"\btypedef\b[^;]*\b%s\s*;" % re.escape(name), lambda _: original, text, count=1)
     text = TYPEDEF.sub("", text)
+    originals = [(m.group(1), re.sub(r"\\(.)", lambda c: "\n" if c.group(1) == "n" else c.group(1), m.group(2)))
+                 for m in STRUCT_DEF.finditer(text)]
+    text = STRUCT_DEF.sub("", text)         # before the views: the strings hold the originals' text
+    for name, original in originals:
+        head = re.search(r"\bstruct\s+%s\s*\{" % re.escape(name), text)
+        if head:
+            depth, i = 0, head.end() - 1
+            while i < len(text):
+                depth += {"{": 1, "}": -1}.get(text[i], 0)
+                if depth == 0:
+                    break
+                i += 1
+            end = text.index(";", i) + 1
+            text = text[:head.start()] + original + text[end:]
     if "permuter_max" in text or "permuter_min" in text:
         # permuter_setup.py's stand-ins for g++'s minimum and maximum operators.
         text = ("#define permuter_max(a, b) ((a) >? (b))\n#define permuter_min(a, b) ((a) <? (b))\n"
                 + text)
+    text = re.sub(r"^[A-Za-z_]\w*\s+permuter_ctor_\w+\s*\(\s*\)\s*;[ \t]*\n", "", text, flags=re.M)
     import permuter_setup
     text = permuter_setup.cpp_declarations(text)
     defines = ["#define %s %s" % m.groups() for m in ALIAS.finditer(text)]
+    for alias, _real in ALIAS.findall(text):
+        # The declarations permuter_setup.py gave the parser for a call's return type.
+        text = re.sub(r"^[A-Za-z_][\w ]*\s+%s\s*\(\s*\)\s*;[ \t]*\n" % re.escape(alias), "", text, flags=re.M)
     for alias, real in ALIAS.findall(text):
         if "::" in real:        # a type's typedef, which only the permuter's parser needed
             text = re.sub(r"^typedef struct %s %s;\n" % (alias, alias), "", text, flags=re.M)
