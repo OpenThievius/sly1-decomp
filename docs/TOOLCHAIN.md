@@ -282,6 +282,11 @@ explains it; search the section's title or the function. Walls that stay open ar
 - **A flag tested twice and recomputed at the second test** came from a variable copied from a loaded temporary:
   GCSE's copy propagation splits the two tests into two expressions (func_001F8DB8, func_001F9028).
 - **A local reused by two loops is one register;** retail's loops in different registers had their own variables.
+- **A record cleared by a memset call and filled with constants is a brace initialiser.** The compiler clears it
+  and stores the members in declaration order; a union member's non-zero initialiser adds a CLOBBER that sched1
+  orders every store of the record around (reload deletes it), and a member with a constructor makes the
+  initialiser run at run time (docs/toolchain/large-functions.md, "A brace initialiser's union member is a
+  CLOBBER": the five ring records, func_001930B8, func_001549C8 and func_001A1030's two locals).
 
 ### Process
 - Find the mechanism first: the pass in the dumps (-dS, -dl, -dg, -dL, -dG, -fsched-verbose-6) and in GCC
@@ -293,8 +298,7 @@ explains it; search the section's title or the function. Walls that stay open ar
 
 ### Still open
 func_00186230, func_00186320, func_00130748 and func_001D4348 (a compiler-made `qmfc2` that an asm one does not
-reproduce); the static-record constructor wall (func_0018A510, func_001D61C8, func_001D5FA8, func_001D60B0);
-func_0013BE18 and func_0014F168 (a store in each arm merged only after sched2); func_0020A190,
+reproduce); func_0013BE18 and func_0014F168 (a store in each arm merged only after sched2); func_0020A190,
 func_00183668 (a pass-ordering effect no plain form gives); func_0014B6A8, func_001DC4D0, func_001DC238 and
 func_0015A198 (an unread small object that only an empty destructor reproduces).
 

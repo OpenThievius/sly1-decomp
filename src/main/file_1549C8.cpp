@@ -814,7 +814,45 @@ s32 AwaitSemaphore(void* a);
 void UsePacketBufferMemory(void* self, s32 count, void* base);
 void BeginDmaTag(void* self);
 
-INCLUDE_ASM(func_001549C8);
+// The spawn record (SpawnRecord above, 0x200 bytes) as InitSpawnRecord fills it: nine vectors,
+// an effect's spawn block (Blk05, the block SpawnBlock is a view of) and a table of thirteen
+// quadwords.
+struct SpawnVectors {
+    Quad16 q[9];
+};
+struct SpawnTable {
+    Quad16 q[13];
+};
+struct SpawnRecordParts {
+    s32 f0;                 // 0x00
+    SpawnVectors vectors;   // 0x10
+    Blk05 block;            // 0xA0
+    SpawnTable table;       // 0x120
+    u8 pad1F0[0x200 - 0x1F0];
+};
+typedef char check_SpawnRecordParts[sizeof(SpawnRecordParts) == 0x200 ? 1 : -1];
+extern SpawnTable D_00261F80;
+
+// The vectors and the block are built once each, as function-local statics with brace
+// initialisers: a vector copied from a global makes each run at run time, through a temporary
+// (docs/toolchain/large-functions.md, "A brace initialiser's union member is a CLOBBER").
+void InitSpawnRecord(void* mem)
+{
+    SpawnRecordParts* self = (SpawnRecordParts*)mem;
+    static SpawnVectors vectors = { {
+        { { 0, 0, 0, 0 } }, *(Quad16*)&D_00248D30, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } },
+        *(Quad16*)&g_unitXVector, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } }, *(Quad16*)&D_00248D30
+    } };
+    static Blk05 block = {
+        { 750.0f, 750.0f, 1.0f }, { 0.0f, 0.0f, -1500.0f }, { -1.0f, 0.0f, 0.0f }, *(Quad16*)&g_unitZVector, { 0 }, 200,
+        { 1.0f, 1.0f, 0.0f }, { { 0, 0, 0, 0 } }, { 1.0f, 0.0f, -1.0f }
+    };
+    FillMemory(self, 0, 0x200);
+    self->f0 = 1;
+    self->vectors = vectors;
+    self->block = block;
+    self->table = D_00261F80;
+}
 
 void InitEffectSpawner(EffectSpawner* self)
 {
@@ -3299,12 +3337,25 @@ extern f32 D_002621F8[6];
 extern f32 D_00262210[4];
 extern f32 D_00262220[4];
 
-// The file's .data, 0x261F70 to 0x262180, in retail's order. The labels only func_001549C8 (not
-// matched yet) and the original assembly func_00156288 use, and the two packet streams
+// The file's .data, 0x261F70 to 0x262180, in retail's order. The labels only the original
+// assembly func_00156288 uses, and the two packet streams
 // (globals.h), whose labels are shorter than PacketWriter, are included from the disassembly.
-// size: s32 (lw/sw), 4-byte label
-s32 D_00261F70 = 0;
-INCLUDE_DATA(D_00261F74);
-s32 D_00261F80[52] = { 0, 0, 0, 0, 0, 45, 0, 0, 0x41C80000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0x3F800000, 0x3F800000, 0, 0, 0, 0, 0, 0 };
+// The spawn record's table, copied whole by InitSpawnRecord (func_001549C8), whose two statics'
+// guards (D_00261F70, D_00261F74) the compiler writes out with the function, ahead of it.
+SpawnTable D_00261F80 = { {
+    { { 0, 0, 0, 0 } },
+    { { 0, 45, 0, 0 } },
+    { { 0x41C80000, 0, 0, 0 } },
+    { { 0, 0, 0, 0 } },
+    { { 0, 0x3F800000, 0, 0 } },
+    { { 1, 0, 0, 0 } },
+    { { 0, 0, 0xFFFFFFFF, 0 } },
+    { { 0, 0x3F800000, 0, 0 } },
+    { { 0, 0, 0, 0 } },
+    { { 0xFFFFFFFF, 0xFFFFFFFF, 0, 0 } },
+    { { 0x3F800000, 0, 0, 0 } },
+    { { 0x3F800000, 0x3F800000, 0, 0 } },
+    { { 0, 0, 0, 0 } },
+} };
 s32 D_00262050[74] = { 82, 83, 84, 85, 0, 46, 0, 0, 0x41F00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0x41A00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0 };
 f32 D_00262178[2] = { 0.5f, 2.0f };
