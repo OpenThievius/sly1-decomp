@@ -12,7 +12,7 @@ library of rewrites that keep the function's meaning and that a programmer plaus
 applied at every place it fits (`--transforms` lists them): loop forms, if/else against a
 ternary or an early return, switch against an if chain, compound assignments, statement order
 within the dependences, where and in what order the locals are declared, a local's integer type
-and const, a pointer local against a reference, a call's arguments named first or a temporary
+and const, a parameter's or local's integer width (with a cast back where it is narrowed), a pointer local against a reference, a call's arguments named first or a temporary
 written in place, an index walk against a pointer walk, a single-expression helper of the file
 or its headers written in place or called, VU0 helpers of include/vu0.h against their
 alternatives, commuted operands and zero tests.
@@ -1419,6 +1419,60 @@ def t_types(ctx):
             yield ctx.label("const", s, "-param " + name), [(u.cstart(s), u.cstart(s) + 6, "")]
 
 
+WIDTH_BITS = {"s8": 8, "u8": 8, "s16": 16, "u16": 16, "s32": 32, "u32": 32, "int": 32, "s64": 64, "u64": 64}
+WIDTH_TYPES = ["s8", "u8", "s16", "u16", "s32", "u32", "s64", "u64"]
+ARITH_OPS = {"<<", "+", "-", "*", "|", "&", "^"}
+
+
+def _widen_casts(u, name, orig, skip_at):
+    """Edits that write `(orig)name` at the uses of `name` that are an operand of a shift or of
+    arithmetic: a variable narrowed from `orig` keeps its old width there."""
+    edits = []
+    for i in _uses(u, name):
+        if i == skip_at or i + 1 >= len(u.toks):
+            continue
+        prev, nxt = u.toks[i - 1], u.toks[i + 1].text
+        before = u.toks[i - 2] if i >= 2 else None
+        binary_prev = prev.text in ARITH_OPS and before is not None and (
+            (before.kind in ("id", "num") and before.text not in KEYWORDS) or before.text in (")", "]"))
+        if nxt in ASSIGN or nxt in ("++", "--", "(", "[", ".", "->") or prev.text in ("++", "--") \
+                or (prev.text in ("&", "*") and not binary_prev) \
+                or (prev.text == ")" and i >= 2 and u.toks[i - 2].text in BUILTIN_TYPES):
+            continue
+        if nxt in ARITH_OPS or binary_prev:
+            edits.append((u.cstart(i), u.cstart(i), "(%s)" % orig))
+    return edits
+
+
+def t_widths(ctx):
+    """A parameter's or local's integer width changed among s8/u8/s16/u16/s32/u32/s64/u64, with a
+    cast back to the old type where it is a shift's or arithmetic's operand and the new type is
+    narrower (func_0020A190: a u64 key as `s32 key`, `(u64)key << sh`). A parameter's new width
+    changes its callers' code too."""
+    u = ctx.u
+    targets = []
+    for st in _local_decl_types(u):
+        ts, te = st.p["type"]
+        words = [u.toks[i].text for i in range(ts, te) if u.toks[i].text not in ("const", "static")]
+        if len(words) == 1 and words[0] in WIDTH_BITS and not st.p["dims"]:
+            i = next(i for i in range(ts, te) if u.toks[i].text == words[0])
+            targets.append((words[0], i, st.p["name"], st.p["name_at"], st.s, "local "))
+    for ty, s, name in u.params:
+        words = [w for w in ty.split() if w != "const"]
+        if len(words) == 1 and words[0] in WIDTH_BITS:
+            i = next((i for i in range(s, u.open) if u.toks[i].text == words[0]), None)
+            if i is not None:
+                targets.append((words[0], i, name, next(k for k in range(i, u.open) if u.toks[k].text == name), s, "param "))
+    for cur, i, name, name_at, at, what in targets:
+        for new in WIDTH_TYPES:
+            if new == cur or (cur == "int" and new == "s32"):
+                continue
+            edits = [(u.cstart(i), u.cend(i + 1), new)]
+            if WIDTH_BITS[new] < WIDTH_BITS[cur]:
+                edits += _widen_casts(u, name, cur, name_at)
+            yield ctx.label("width", at, "%s%s %s -> %s" % (what, name, cur, new)), edits
+
+
 def t_pointer_ref(ctx):
     """A pointer local only used as p->m written as a reference (T& p = *e), and back."""
     u = ctx.u
@@ -1991,6 +2045,7 @@ TRANSFORMS = [
     ("zero-tests", t_zero_tests),
     ("decls", t_decls),
     ("types", t_types),
+    ("widths", t_widths),
     ("pointer-ref", t_pointer_ref),
     ("arguments", t_arguments),
     ("switch", t_switch),
@@ -2168,10 +2223,41 @@ class Cand:
         self.text, self.chain, self.score, self.code = text, chain, score, code
 
 
+def callers_of(func):
+    """The files of src/ (and the lines) that mention FUNC by its address name or its readable name,
+    its declarations and callers, whose code a changed parameter changes too."""
+    import symbols
+    names = {func, symbols.readable(func)}
+    names.discard(None)
+    pat = re.compile(r"\b(?:%s)\b" % "|".join(re.escape(n) for n in sorted(names)))
+    found = []
+    for path in sorted((ROOT / "src").rglob("*.cpp")) + sorted((ROOT / "src").rglob("*.c")):
+        try:
+            lines = path.read_text().splitlines()
+        except OSError:
+            continue
+        for n, line in enumerate(lines, 1):
+            if pat.search(line):
+                found.append("%s:%d" % (path.relative_to(ROOT), n))
+    return found
+
+
+def width_notes(cand, func):
+    """A header comment for a candidate that changed a parameter's width: its callers change too."""
+    if not any(c.startswith("width@") and " param " in c for c in cand.chain):
+        return ""
+    callers = callers_of(func)
+    return "// NOTE: a parameter's width changed: every caller's code changes too (declaration and callers):\n" + \
+        "".join("//   %s\n" % c for c in callers[:12]) + ("//   (none found in src/)\n" if not callers else "")
+
+
 def write_result(outdir, name, cand, func, base_score):
     path = outdir / name
     header = "// tsearch %s: score %s (start %s)\n// chain: %s\n" % (
         func, cand.score, base_score, "; ".join(cand.chain) or "(start)")
+    notes = width_notes(cand, func)
+    if notes:
+        header += notes
     text = cand.text
     if text.startswith("// SPDX"):
         first, rest = text.split("\n", 1)
