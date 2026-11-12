@@ -711,8 +711,8 @@ everything reads vf2. One instruction short.
   0x140). Through the file's inline `StoreScaledQuadword(dst, k, p)` (the one file_1D62E0.cpp
   and agent.cpp use), called with the member's address for both `dst` and `p`, integrate.c
   substitutes each address at its use and retail's frame and saved registers follow; the
-  remaining difference is the block's constructor stores ("What retail's order needs",
-  large-functions.md).
+  remaining difference was the block's constructor stores, matched 2026-11-12 as a brace
+  initialiser ("A brace initialiser's union member is a CLOBBER", large-functions.md).
 
 ### PRE hoists an exit block's expressions above a loop; a variable whose address is taken keeps them (func_0015F320)
 

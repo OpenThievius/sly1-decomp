@@ -241,7 +241,11 @@ dump:
   local-alloc retail's VU registers (the velocity vf1, the Dot's 1.0 vf2). Spot it: retail
   loads a pointer's field before stack stores that ours issues first.
 
-### A member store that kills two registers goes first (func_001A1030, near miss)
+### A member store that kills two registers goes first (func_001A1030, matched 2026-11-12)
+
+The head ("Ruled out for the head" below) was the missing CLOBBER of a brace initialiser's
+union member: docs/toolchain/sched1.md, "Two equal clears that retail issues apart". The tail's
+two findings stand as written.
 
 UpdateSpringEffect (two clamped quadratics, a spring towards them, `vel += acc * dt;
 pos += vel * dt` with vel.y zeroed for the position) went from 81.1% to 86.1% on
@@ -1732,7 +1736,15 @@ TurnColliderTowardRotation (2026-11-09):
   look for a parameter passed on to a callee (here a float one) that lengthens the chain behind
   the save.
 
-### A constant set in an earlier block and used once (func_001549C8)
+### A constant set in an earlier block and used once (func_001549C8, matched 2026-11-12)
+
+**Matched (w37-f3, 2026-11-12).** The two records are function-local statics with brace
+initialisers (`static Blk05 block = { { 750.0f, 750.0f, 1.0f }, ..., 200, ..., { 1.0f, 0.0f,
+-1.0f } };`), each built in a temporary and copied because a vector member is copied from a
+global. What made f70 and f78 wait is the CLOBBER of the union member at 0x70 (the block's last
+vector is a Quadratic16, include/shapes.h): docs/toolchain/large-functions.md, "A brace
+initialiser's union member is a CLOBBER". The 200 is a plain element of the initialiser; no
+variable set before the guards is needed. The notes below are kept as they were written.
 
 - **The widening blocks a register after a load's address dies.** local-alloc's first try
   widens each quantity by one insn at each end and marks the widened range taken. In
