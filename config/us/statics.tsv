@@ -1,5 +1,8 @@
 file	function	variable	object	guard
-src/main/gauge_agent.cpp	func_0018A510	cfg	D_002BE490	D_002649A8
-src/main/player_request.cpp	func_001D5FA8	cfg	D_00605550	D_00275130
-src/main/player_request.cpp	func_001D60B0	cfg	D_006055D0	D_00275134
-src/main/player_request.cpp	func_001D61C8	cfg	D_00605650	D_00275138
+src/main/gauge_agent.cpp	func_0018A510	params	D_002BE490	D_002649A8
+src/main/player_request.cpp	func_001D5FA8	params	D_00605550	D_00275130
+src/main/player_request.cpp	func_001D60B0	params	D_006055D0	D_00275134
+src/main/player_request.cpp	func_001D61C8	params	D_00605650	D_00275138
+src/main/file_1E88D0.cpp	func_001EC190	defaults	D_006256E0	D_00275DB4
+src/main/file_1549C8.cpp	func_001549C8	vectors	D_0027C010	D_00261F70
+src/main/file_1549C8.cpp	func_001549C8	block	D_0027C0A0	D_00261F74

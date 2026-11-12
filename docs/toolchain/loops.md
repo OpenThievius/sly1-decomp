@@ -685,7 +685,7 @@ in s0 and the new loop's in s1, with the five member addresses in s4-fp: the new
 of its own. `for (s32 k = 0; k < 14; k++)` instead of `for (i = 0; ...)` was EXACT. Spot it: a
 counter in a different saved register in one loop than in the loops before it.
 
-### A count-up loop with no vtop, and a giv loop.c never finds (func_0013AD80, near miss)
+### A count-up loop with no vtop, and a giv loop.c never finds (func_0013AD80, solved below)
 
 The draw of the frames list in func_0013AD80 (for each mesh, `for i < count` over 0x50-byte
 frames, ten calls in the body) counts up in retail (`addiu s4,1; lw v1,count; slt; bnez`,
@@ -739,6 +739,10 @@ the `-dL -dl -dg` dumps (2026-11-10):
   the first loop's exit on, the two early-exit tails are no longer merged; not followed
   further. What is still to find is the plain form that leaves one non-line note between the
   `li 80` and its `mult` (or a loop of 79 insns at most in pass 2).
+- **Solved (w38-f5, 2026-11-12): neither; the threshold is 94 in this file.** The `for` form
+  of item (1) is EXACT once the file builds with `-mvu0-use-vf0-vf30`: the `li 80` stays in
+  pass 1 (94 < 95) and moves in pass 2 (94 >= 84). See "A threshold of 94" at the end of this
+  chapter.
 
 ### Life-1 invariants that reload rematerialises: a `lui` in a loop with every saved register taken (func_0013A618, near miss)
 
@@ -862,3 +866,110 @@ when D0's and E0's `lo_sum` are left by the first pass and moved by the second
   loop.c also substitutes a single-use copy into its use in a loop with calls (scan_loop's
   `reg_single_usage` case): that is why `&torque` is read from PRE's spill slot
   (`lw a1,280(sp)`).
+
+### Named constants that lose their registers: five loads reload forms again in the loop (func_00131F60)
+
+Matched on 2026-11-12 (w38-f6). The gauge loop of DrawTextPanelControlLabels loads 1/9, 1/15, 55,
+0.5 and 372.8 inside the loop (`lui at; mtc1`) and keeps 1.0, 9, 60, 320, 1728, 16, 0.4545 and
+1936 in $f27, $f31, $f30, $f26, $f25, $f23, $f29 and $f28. The near miss read the five loads as
+the loop's own: two scratch floats set more than once (`d` = 1/15, then a product, then 372.8;
+`k` = 55, then 0.5), which loop.c does not move, and the eight as locals set before the loop.
+That gave retail's code but for one local-alloc tie against a global-alloc ranking that no order
+of the statements satisfied (long-block-constants.md, "A scratch float in a loop"). Both were
+artefacts of the invented scratch variables. Read from the `-dL`, `-dl` and `-dg` dumps:
+
+- **Every constant of the loop was moved out; five got no register.** The loop holds four values
+  across its calls (x0, x1, y0, y1), so eight of the twelve saved float registers are left and
+  twelve constants want them. global-alloc ranks by `floor_log2(refs) * refs / life`, a use in
+  the loop counting 2 and the preheader's set 1: 16.0 (13 refs), 320 and 1728 (9), 1.0 (7) go
+  first; the constants with two uses (5 refs) are ranked by their life, which is the loop plus
+  their place in the preheader, so the ones loop.c moved first (the earliest in the loop) come
+  last; the ones with one use (3 refs) after them. A moved constant with no hard register has
+  a REG_EQUIV note, so reload deletes its set and loads the constant before each insn that
+  uses it, in the first register (reg_alloc_order) that no pseudo live before or after that
+  insn holds (order_regs_for_reload), and a later use in the block inherits the load: one
+  `mtc1` each for 55 ($f6, two multiplies) and 372.8 ($f2, two subtractions).
+- **A literal has a life of 1; a variable has the life of its uses.** A constant in an
+  expression is forced into a register right before the insn that uses it, so it moves only
+  when cse1 has merged several uses (55: life 6; 9, 60: life 6 and 4) and otherwise stays
+  (`79 * 1 * 1 < 94` insns in pass 1). `(f32)i * (1.0f / 9.0f)` is such a literal: pass 2 moves
+  it (`Loop from 61 to 365: 79 real insns. Insn 103: regno 133 (life 1) ... moved`, the loop
+  being 79 insns once pass 1 has emptied it), last in the preheader, with three refs.
+- **What retail's registers require.** (1) 1/15 and 0.5 are not the block's own pseudos: a
+  block-local 1/15 dies in `hi = lo + 1/15` and local-alloc ties it to hi (combine_regs tries
+  the second operand when the first does not die), putting it in hi's $f3 where retail has
+  $f2; a block-local 0.5 is issued early by sched1 (priority 9) and takes $f5 before the zoom
+  ($f6) with 55 pushed to $f7. Moved and reloaded they take the first free register at their
+  use: $f2 and $f6. (2) 372.8 is ranked under 9 and 60. In `372.8f - lo * 60.0f` the product is
+  expanded first, so 60 precedes 372.8 in the loop, 372.8 has the shorter life and outranks 9:
+  retail's loser is then 9 (measured: `lui at,0x4110` in the loop). So 372.8 was moved before
+  9 and 60: it was set before the x statements.
+- **The source.** Three variables of the loop body, `f32 step = 1.0f / 15.0f; f32 top =
+  372.800018f; f32 half = 0.5f;`, and literals everywhere else (no locals before the loop).
+  The dump: `Insn 90: regno 128 (life 10) moved`, `Insn 94: regno 129 (life 27) moved`, `Insn
+  98: regno 130 (life 28) moved` first, then 1.0 (136), 55 (138), 9 (140), 60 (150), 320, 1728,
+  16, 0.4545 and 1936; the dispositions give 128, 129, 130, 133 and 138 no register. EXACT in
+  the five placements of the three declarations tried (four orders before `lo`; `top` and
+  `half` after `hi`; `half` after the y statements), in seven of the twelve orders of the x
+  and y statements tried, and with 55 named as well; not with `mid = (lo +
+  hi) * 0.5f` (the 0.5 has life 1 again and stays the block's own: 37 lines).
+- **The tell.** Constants loaded inside a loop whose saved registers are all taken are not
+  evidence of a variable set twice: each may be a moved constant that lost its register. Rank
+  the constants by refs and by preheader place; a loser with more uses than a winner was moved
+  earlier, which a literal cannot be if its statement comes later: a named variable (or an
+  inline's parameter, loops.md, func_001D7778) is what sets a constant ahead of its use. A
+  register that seems reused for unrelated constants (`$f2`: 1/15, a difference, 372.8) is
+  reload's first free register, not one pseudo.
+
+### A threshold of 94: functions that only a wider VU0 range builds (func_0013AD80, matched; func_001D9488, func_00130C58)
+
+Measured on 2026-11-12 (w38-f5) with `tools/check.py --flags` and `-dL` dumps. loop.c's
+threshold is `1 + n_non_fixed_regs`, and `-mvu0-use-vf0-vfN` un-fixes $vf1..$vfN, so the
+threshold of a loop with a call is 64 + N: 79 with the default row (vf15), 94 with vf30, 95 with
+vf31. Three near misses whose notes all read "a life-1 constant moved out of a loop too big for
+79" are retail's code under one value of N, with their plain sources:
+
+- **func_001D9488** (the section "Two passes in the preheader" above). The near miss unchanged
+  is EXACT for N = 30 and 31 and for no smaller N. Its decisions give the window: pass 1 has 91
+  insns and moves the `li 40` and the 1 and leaves the -1, so `T >= 91`, `T - 3 >= 91` and
+  `T - 6 < 91`: T is 94, 95 or 96. Pass 2 (87 insns) then moves the rest at 94, 91, 88.
+- **func_0013AD80** (the section "A count-up loop with no vtop" above). The plain form that
+  section names as retail's shape, `for (s32 i = 0; i < count; i++) { ViewedFrame* f =
+  &frames[i]; ... }`, is EXACT for every N from 23 to 30 (on US and PAL at 30), and not at 22
+  or below (15, 18 to 22 tried) nor at 31. The `li 80` is the loop's first movable, life 1:
+  it must stay in pass 1 (95 insns: `T < 95`) and move in pass 2 (84 insns), after which the
+  giv is found and its start value is emitted behind GCSE's insertions. At 95 it moves in
+  pass 1 (1732 bytes). The lower edge, 87, is measured and not derived.
+- **func_00130C58** (the sections on its switch constants above). The near miss with no
+  `do { } while (0)` goes from 179 differing lines to 49 at N = 27 and to 6 at N = 29, 30 and
+  31: the 2 and the 3 move and the 1 is rematerialised, as retail. The 6 lines left are the
+  block after the outer loop (the `%hi` of FLT_MAX against the window count's subtraction),
+  which the threshold does not touch.
+- **One value fits all three: 94, `-mvu0-use-vf0-vf30`.** 001D9488 needs 94 to 96, 0013AD80 87
+  to 94, 00130C58 93 or more.
+- **It is not the game's threshold.** Thirty matched functions in 26 files stop matching at
+  some N between 16 and 30 (measured with `tools/check.py --flags "-O2 -G0 -fno-exceptions
+  -fno-rtti -mvu0-use-vf0-vfN" FILE FUNC` for N = 16, 20, 22, 24, 26 to 30): func_001A15D8,
+  func_001CC120 and func_001DDE90 at 16 already (T = 80), fourteen more by 20, and every one
+  of them by 30 (func_00138C00 only there). Those functions hold retail's decisions of a
+  threshold of 79 to 93 the same way the three above hold 94.
+- **Both kinds sit in one file.** src/main/file_1D62E0.cpp has func_001D66A8 (matches up to
+  N = 28), func_001D7778 (up to 16 to 19) and func_001D9AC8 (up to 24 or 25) around
+  func_001D9488 (30 or 31 only), all four methods of the path follower's family;
+  src/main/placed_object.cpp has func_00127B20 (up to 20 or 21) and func_0012CD78 (up to 24 or
+  25) before func_00130C58, which is its last function. src/main/world_listed_object.cpp has
+  no function that changes for any N from 15 to 31, so its row in config/cflags.tsv now reads
+  vf30 and func_0013AD80 is matched there; nothing else in the build moves.
+- **What can make the threshold differ, read from regclass.c.** `n_non_fixed_regs` is counted
+  once from the options (init_reg_sets_1) and only falls afterwards, by one for each file-scope
+  register variable that names a register not yet fixed (globalize_reg). Nothing raises it
+  inside a compilation. So two thresholds in one file mean either two translation units built
+  with different options (file_1D62E0.cpp "could be several", its header says), or one unit
+  whose threshold falls partway down at file-scope register declarations. Neither is proved.
+  Not the cause: whether the function uses VU0 or the FPU (func_001D9488 uses neither,
+  func_0013AD80 both), `-g`, `-O3`, `-fno-gcse`, `-p` (same decisions as the default).
+- **Reading it elsewhere.** A near miss whose only wall is a constant, a `%hi` or a stride that
+  retail moved out of a loop of 80 to 94 insns with calls: build it with `--flags "-O2 -G0
+  -fno-exceptions -fno-rtti -mvu0-use-vf0-vf30"` before looking for a second movable or a
+  longer life. If it becomes EXACT, check which matched functions of its file change under the
+  same flags; a file where none does can take the row.

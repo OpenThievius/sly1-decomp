@@ -148,7 +148,7 @@ D_002619A0	002619A0	572	.data	src/main/state_notifier.cpp
 D_00261BF0	00261BF0	160	.data	src/main/camera_controller.cpp
 D_00261C90	00261C90	52	.data	src/main/file_14B6A8.cpp
 D_00261CC8	00261CC8	668	.data	src/main/file_14EE40.cpp
-D_00261F70	00261F70	516	.data	src/main/file_1549C8.cpp
+D_00261F70	00261F70	528	.data	src/main/file_1549C8.cpp
 D_00262180	00262180	208	.data	src/main/object_cycler.cpp
 D_00262250	00262250	48	.data	src/main/font.cpp
 D_00262280	00262280	240	.data	src/main/render_frame.cpp
@@ -242,9 +242,13 @@ D_0027B200	0027B200	56	.gcc_except_table	src/lib/allocate.cpp
 D_0027B238	0027B238	92	.gcc_except_table	src/lib/exception.cpp
 D_0027C008	0027C008	4	.bss	src/main/file_14B550.cpp
 D_0027C00C	0027C00C	4	.bss	src/main/file_14B6A8.cpp
+D_0027C010	0027C010	272	.bss	src/main/file_1549C8.cpp
 D_002BE460	002BE460	24	.bss	src/main/display.cpp
 D_002BE478	002BE478	20	.bss	src/main/entry_queue.cpp
+D_002BE490	002BE490	128	.bss	src/main/gauge_agent.cpp
 D_00604700	00604700	128	.bss	src/main/switched_collider.cpp
+D_00605550	00605550	384	.bss	src/main/player_request.cpp
+D_006256E0	006256E0	128	.bss	src/main/file_1E88D0.cpp
 D_00625770	00625770	2064	.bss	src/lib/request_thread.cpp
 D_00625F80	00625F80	128	.bss	src/lib/formatted_output.cpp
 D_00626000	00626000	6208	.bss	src/lib/remote_call.cpp

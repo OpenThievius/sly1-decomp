@@ -56,6 +56,11 @@
 // the head load (880's priority 6), a TImode copy feeding the store (871 ready a cycle late), or
 // the contacts pointer live at the block's end and set once (the birthing raise). Not found
 // in plain source; docs/toolchain/sched1.md, "The copy and the list's load after a call".
+// w38-f6 (2026-11-12): audited for PRE's copy pattern (docs/toolchain/gcse.md, "One reaching
+// register for every occurrence"): not present. Retail has no `move Y,X` answered by a later
+// `move X,Y`, and the one difference is reload's register for the copy, not a pseudo's.
+// `bits` (one u32 set in two loops) is the only variable here that carries two values; it
+// is what gives the Dot block its two quantities, so it stays.
 #include "common.h"
 #include "point_object.h"
 #include "collider.h"
