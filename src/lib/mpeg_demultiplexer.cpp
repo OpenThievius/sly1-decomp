@@ -10,7 +10,30 @@
 #include "common.h"
 #include "asm_func.h"
 
-INCLUDE_ASM(func_0020A190);
+struct Pair_20A538 { u64 a; u64 b; };
+extern Pair_20A538 g_streamIds[10];
+
+u64 GetStreamId(u32 idx, s32 key)
+{
+    u64 r = 0;
+    s32 sh = 0;
+    if (idx < 10) {
+        Pair_20A538 e;
+        switch (g_streamIds[idx].b) {
+        case 0xFFFFFFFFFFULL:
+            sh = 0;
+            break;
+        case 0xFFFF000000ULL:
+            sh = 24;
+            break;
+        case 0xFF00000000ULL:
+            sh = 32;
+            break;
+        }
+        r = g_streamIds[idx].a | ((u64)key << sh);
+    }
+    return r;
+}
 
 LINKER_REMNANT(func_0020A218);
 
@@ -153,7 +176,6 @@ s32 DemultiplexBuffer(Ctx_20A220* ctx, s32 a, s32 b)
     return DemultiplexPacks(ctx, a, b, 0, -1);
 }
 
-struct Pair_20A538 { u64 a; u64 b; };
 // The stream ids the demultiplexer knows, each with the mask of its significant bits.
 Pair_20A538 g_streamIds[10] = {
     { 0xE000000000ULL, 0xFF00000000ULL },
@@ -167,11 +189,10 @@ Pair_20A538 g_streamIds[10] = {
     { 0xBD88000000ULL, 0xFFFF000000ULL },
     { 0xBD90000000ULL, 0xFFFF000000ULL },
 };
-u64 GetStreamId(s32 idx, u64 key);
 
 // Registers a handler and its argument for the stream's id in the table the demultiplexer looks
 // packets up in (the entries DemultiplexPacks runs), and returns the handler it replaces.
-s32 SetStreamCallback(Ctx_20A220* self, s32 idx, u64 key, s32 a3, s32 a4)
+s32 SetStreamCallback(Ctx_20A220* self, s32 idx, s32 key, s32 a3, s32 a4)
 {
     s32 result = 0;
     Prog_20A220* ctx = self->f40;
