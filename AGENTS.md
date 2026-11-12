@@ -135,7 +135,11 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   original had: a hardware register, at a fixed address (`*(volatile u32*)0x10002010`) or
   through a pointer to a register block (a DMA channel's), and data shared with hardware, an
   interrupt handler or another thread (a library's semaphore ids and state flags, a field an
-  interrupt handler sets), where retail's code reads and writes it as volatile.
+  interrupt handler sets), where retail's code reads and writes it as volatile. A copy of
+  such data declared with the data's own volatile type is allowed where retail's code is proved
+  to read the copy as volatile and no plain form gives it: func_001FA6B0's stack copy of a
+  DMA-written packet (docs/toolchain/alias-classes.md), by the maintainer's decision of
+  2026-11-12. A volatile cast on an otherwise plain local is not.
   `do { } while (0)` is one too, except in the math library's bit-access macros
   (`FLOAT_TO_BITS`, `BITS_TO_FLOAT`, and `DOUBLE_TO_WORDS`, `WORDS_TO_DOUBLE`, `DOUBLE_HIGH`,
   `SET_DOUBLE_HIGH` for a double's words, in include/float_bits.h): retail's math library was

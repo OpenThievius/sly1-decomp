@@ -1122,10 +1122,12 @@ maintainer's decision.
   volatile form `bgez v1; nop`. So even a plain form that kept its three loads would not be
   retail's: the slot would hold one of them.
 - **Where the qualifier can sit.** The reads of the stack copy must go through a
-  volatile-qualified lvalue. Two forms are EXACT on US and PAL: the landed one (`volatile
-  Packet* packet = (volatile Packet*)local`), and one volatile quadword type for the DMA data
-  used for the source pointer and the array alike (`volatile Quad local[7]; volatile Quad*
-  src;`) with the same volatile packet pointer. A volatile array read through a plain packet
+  volatile-qualified lvalue. Two forms are EXACT on US and PAL: a volatile
+  pointer to a plain array (`volatile Packet* packet = (volatile Packet*)local`), and one
+  volatile quadword type for the DMA data used for the source pointer and the array alike
+  (`volatile Quad local[7]; volatile Quad* src;`), read through a packet pointer that keeps
+  the array's qualifier. The second is landed (the maintainer's choice, 2026-11-12): the
+  qualifier belongs to the type of DMA-written data, and the copy is declared with it. A volatile array read through a plain packet
   pointer merges the loads again. The receive buffer's volatile alone is never enough.
 - **The tell.** A frame word reloaded at each use with nothing between the loads, and a
   branch whose slot is a nop while its arms begin with those loads. Either half alone has
