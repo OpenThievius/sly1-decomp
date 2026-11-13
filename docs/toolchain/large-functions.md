@@ -441,6 +441,12 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
 
 ### A brace initialiser's union member is a CLOBBER (the ring records, matched 2026-11-12)
 
+(Also the two FLT_MAX bound vectors of func_0013A618 and func_0013A940, 2026-11-12, w40-fb:
+written as brace-initialised `Quadratic16` locals their prologues are retail's; see
+docs/toolchain/sched1.md, "Two literal %hi's issued in one cycle". A wall of the form "two
+constants' `%hi`s issue in one cycle" or "one object's stores come out interleaved with
+another's" is this one when the objects are constant-initialised vectors.)
+
 func_001D5FA8, func_001D60B0, func_001D61C8, func_0018A510 and func_001EC190 (w37-f3) match
 as `static RingParams params = { ... };` (include/ring_params.h): the records are brace
 initialisers, and the dependence between their stores is a union member's CLOBBER. What was

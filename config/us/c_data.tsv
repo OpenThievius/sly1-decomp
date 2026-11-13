@@ -7,7 +7,8 @@ D_00248FE0	00248FE0	756	.rodata	src/main/script_machine.cpp
 D_002492F0	002492F0	308	.rodata	src/main/value.cpp
 D_00249428	00249428	1096	.rodata	src/main/iop_commands.cpp
 D_00249870	00249870	372	.rodata	src/main/pose_source.cpp
-D_002499F0	002499F0	684	.rodata	src/main/placed_object.cpp
+D_002499F0	002499F0	668	.rodata	src/main/placed_object.cpp
+D_00249C90	00249C90	16	.rodata	src/main/curve_segment.cpp
 D_00249CA0	00249CA0	195	.rodata	src/main/text_panel.cpp
 D_00249D64	00249D64	16	.rodata	src/main/world_listed_object.cpp
 D_00249D74	00249D74	8	.rodata	src/main/child_group_object.cpp
@@ -67,7 +68,8 @@ D_0024D650	0024D650	1096	.rodata	src/main/agent.cpp
 D_0024DAA0	0024DAA0	124	.rodata	src/main/player_target.cpp
 D_0024DB20	0024DB20	168	.rodata	src/main/player_mode.cpp
 D_0024DBD0	0024DBD0	188	.rodata	src/main/player_request.cpp
-D_0024DC90	0024DC90	24	.rodata	src/main/file_1D62E0.cpp
+D_0024DC90	0024DC90	8	.rodata	src/main/file_1D62E0.cpp
+D_0024DC98	0024DC98	16	.rodata	src/main/file_1D9AC8.cpp
 D_0024DCA8	0024DCA8	4	.rodata	src/main/tint_blend_collider.cpp
 D_0024DCB0	0024DCB0	1287	.rodata	src/main/commentary_best_time.cpp
 D_0024E1C0	0024E1C0	1072	.rodata	src/main/file_1E08F8.cpp
@@ -200,7 +202,9 @@ D_00274E00	00274E00	252	.data	src/main/player_target.cpp
 D_00274F00	00274F00	48	.data	src/main/player_path.cpp
 D_00274F38	00274F38	104	.data	src/main/player_mode.cpp
 D_00274FA0	00274FA0	412	.data	src/main/player_request.cpp
-D_00275140	00275140	1516	.data	src/main/file_1D62E0.cpp
+D_00275140	00275140	956	.data	src/main/file_1D62E0.cpp
+D_00275500	00275500	252	.data	src/main/file_1D8E40.cpp
+D_00275600	00275600	300	.data	src/main/file_1D9AC8.cpp
 D_00275730	00275730	416	.data	src/main/tint_blend_collider.cpp
 D_002758D0	002758D0	16	.data	src/main/file_1DFD48.cpp
 D_002758E0	002758E0	96	.data	src/main/commentary_best_time.cpp

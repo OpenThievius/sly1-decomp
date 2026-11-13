@@ -20,7 +20,7 @@
 #include "font.h"
 
 // The world: 28 views in 15 files agree with class 0x6C (c6c.h), and every one of them reaches
-// it through this pointer. file_1D62E0.cpp defines it (= 0).
+// it through this pointer. file_1D9AC8.cpp defines it (= 0).
 extern World* g_currentWorld;
 
 // The camera, class 0x6D (c6d.h): 22 views in 5 files. camera.cpp defines it (= 0).

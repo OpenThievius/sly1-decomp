@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 736/748, checked 2026-11-12
+// BYTES 729/748 (97.5%), checked 2026-11-12
 // NEAR (src/main/placed_object.cpp, where it is INCLUDE_ASM with INCLUDE_RODATA(D_00249C90)):
 // retail keeps the switch's constant 3 in s8 (loop.c moved it before the outer loop, so s8 is
 // saved too: 16 bytes more); ours loads it in the loop (li v0,3 in the case-2 branch's slot).
@@ -58,6 +58,17 @@
 // Not found: the plain source with these notes. The i loop cannot own them (its exit test's
 // copy jumps past its LOOP_END to 0x130E50; a break with a body is "multiple entry points").
 // w38-f5 (2026-11-12): this source (no `do { } while (0)`) is 6 differing lines with -mvu0-use-vf0-vf29, vf30 or vf31 (49 at vf27, 179 at the file's vf15): the range sets loop.c's threshold (64 + N), and at 93 or more the 2 and the 3 move and the 1 is rematerialised, as retail. The 6 lines are the block after the outer loop (lui/subu order, v0 and v1). func_001D9488 and func_0013AD80 give the same threshold, 94. This is the file's last function; func_00127B20 and func_0012CD78 of the same file stop matching by N = 22 and 26, so the file's row cannot change as it stands. docs/toolchain/loops.md, "A threshold of 94".
+// w40-fb (2026-11-12, at -mvu0-use-vf0-vf30; docs/toolchain/loops.md, "Where a loop's notes count"): with one run-once loop,
+// `do { found = w - windows; k = -1; } while (0);` before `best` (the case-3 one is not needed at 94), this source is EXACT on US;
+// a probe, not plain C++ (build/swarm/w40-fb/v/p1.cpp). What the loop does: recompute_reg_usage (before local-alloc) counts each
+// reference by the loop depth at its place in the insn stream, so the subtraction has 4 references and outranks the %hi (2.0
+// against 1.0; 0.5 without); the %hi is PRE's, moved back before its load by update_equiv_regs only at depth 0 (a LOOP_BEG before
+// `best` leaves it a spilled pseudo: lui v0, 2 lines); a loop with no label after its LOOP_BEG is "phony" to loop.c. Nothing
+// else raises the count (a tied quantity would, but w and found are not block-local). The loop must hold exactly the two
+// statements: drawn from `i = 0` 5 lines differ (s5/s6), from before the outer for 31, from the function's top 35. The outer
+// loop cannot own them: a break body at its top is rolled inside the notes but jump.c's copy of the exit code enters the loop
+// ("multiple entry points", 161 lines); at its bottom expand_end_loop puts the LOOP_END before it; a copy merged by jump2 would
+// split the block before local-alloc. The search as while / for / for (;;) with break, with continue or goto: 76 and 59 lines.
 #include "common.h"
 
 f32 ConvertDoubleToFloat(u64 v);

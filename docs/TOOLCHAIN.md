@@ -132,11 +132,15 @@ What else was measured:
   in for a constant, and written plainly they match with the option and not
   without it. Retail's compiled C uses up to $vf13; vf13 to vf29 build the
   same, vf30 and vf31 change func_00138C00. See "The VU0 helpers".
-  One file has a row of its own: src/main/world_listed_object.cpp builds with
-  `-mvu0-use-vf0-vf30`, because the range also sets loop.c's threshold (64 + N
-  for a loop with a call) and func_0013AD80's frame loop is retail's only
-  from 87 to 94; no other function of that file changes with the range
-  (docs/toolchain/loops.md, "A threshold of 94").
+  Some files have a row of their own: src/main/world_listed_object.cpp builds
+  with `-mvu0-use-vf0-vf30`, because the range also sets loop.c's threshold
+  (64 + N for a loop with a call) and func_0013AD80's frame loop is retail's
+  only from 87 to 94; no other function of that file changes with the range.
+  src/main/file_1D8E40.cpp, cut out on 2026-11-12 for func_001D9488 (retail's
+  only at 94 to 96) between two files whose functions need 79 to 83 and 79 to
+  88, has the same row, and so has src/main/curve_segment.cpp, cut from
+  placed_object.cpp for func_00130C58 (docs/toolchain/loops.md, "A threshold of
+  94" and "The splits on the threshold").
 - **The preprocessor** is the toolchain's `cpp.exe`, given the macros the
   compiler driver defines (tools/compile.py).
 
