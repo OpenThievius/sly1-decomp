@@ -189,7 +189,7 @@ void ReadMeshFromStream(LoadStream* in, void* p);
 void* AllocateZeroedFrontMemory(s32 n);
 s32 ReadBufferedS8(LoadStream* in);
 void DecodeAimBlendGridIndex(AimBlendGrid* o, s32 i, f32* x, f32* y, f32* z);
-void ComputeGridBlendWeights(f32 x, f32 y, f32 z, AimBlendGrid* o, void* p);
+void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 x, f32 y, f32 z);
 f32 ReadBufferedFloat(LoadStream* in);
 void ReadPropertyRecords(AimBlendGrid* o, LoadStream* in);
 // A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
@@ -1844,7 +1844,7 @@ void LoadAimBlendGrid(AimBlendGrid* o, LoadStream* in)
         GridRecord* r = &o->fC4[i];
         o->fC4[i].id = ReadBufferedS8(in);
         DecodeAimBlendGridIndex(o, i, &x, &y, &z);
-        ComputeGridBlendWeights(x, y, z, o, r->pos);
+        ComputeGridBlendWeights(o, (f32*)r->pos, x, y, z);
     }
     o->fC8 = ReadBufferedS16(in);
     o->fCC = (u8*)AllocateZeroedFrontMemory(o->fC8 << 4);
@@ -1971,7 +1971,63 @@ void BlendCellCornerRecords(AimBlendGrid* self, GridCell* cell, Quad16* point)
     SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
 }
 
-INCLUDE_ASM(func_0019CC10);
+void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 x, f32 y, f32 z)
+{
+    f32 xa, xb;
+    f32 z1, z2, z3;
+    f32 ny = 1.0f - y;
+    if (x < 0.0f) {
+        xb = x + 1.0f;
+        xa = -x;
+        x = 0.0f;
+    } else {
+        xb = 1.0f - x;
+        xa = 0.0f;
+    }
+    if (z < 1.0f) {
+        z3 = 1.0f - z;
+        z2 = 0.0f;
+        z1 = 0.0f;
+    } else if (z < 2.0f) {
+        z = 2.0f - z;
+        z2 = 0.0f;
+        z1 = 1.0f - z;
+        z3 = 0.0f;
+    } else {
+        z1 = 3.0f - z;
+        z = 0.0f;
+        z2 = 1.0f - z1;
+        z3 = 0.0f;
+    }
+    // The 24 weights in retail's order: every xa and xb product but out[7] and out[15] first,
+    // then the x products with out[7] and out[15] among them. sched1 orders these products by
+    // register weight, then by source order (docs/toolchain/sched1.md, "Thirty-two products of
+    // equal priority"), and only this order gives retail's registers.
+    out[0] = z3 * ny * xa;
+    out[4] = z3 * y * xa;
+    out[8] = z3 * ny * xb;
+    out[1] = z * ny * xa;
+    out[5] = z * y * xa;
+    out[12] = z3 * y * xb;
+    out[9] = z * ny * xb;
+    out[13] = z * y * xb;
+    out[2] = z1 * ny * xa;
+    out[6] = z1 * y * xa;
+    out[3] = z2 * ny * xa;
+    out[10] = z1 * ny * xb;
+    out[14] = z1 * y * xb;
+    out[11] = z2 * ny * xb;
+    out[16] = z3 * ny * x;
+    out[20] = z3 * y * x;
+    out[17] = z * ny * x;
+    out[21] = z * y * x;
+    out[7] = z2 * y * xa;
+    out[15] = z2 * y * xb;
+    out[18] = z1 * ny * x;
+    out[22] = z1 * y * x;
+    out[19] = z2 * ny * x;
+    out[23] = z2 * y * x;
+}
 
 void DecodeAimBlendGridIndex(AimBlendGrid* self, s32 p, f32* out0, f32* out1, f32* out2)
 {

@@ -1456,7 +1456,19 @@ the block holding the first trap):
   the HImode load in a register (the `lhu`) and the later tests extend it (`sll; sra`),
   retail's code (the dump: "PRE: redundant insn 143 (expression 10) in bb 6").
 
-### Thirty-two products of equal priority: the order is the deaths (func_0019CC10, unsolved)
+### Thirty-two products of equal priority: the order is the deaths (func_0019CC10, matched 2026-11-13)
+
+**Matched (w49-g, 2026-11-13).** The statements in this order: `0 4 8 1 5 12 9 13 2 6 3 10 14
+11`, then `16 20 17 21 7 15 18 22 19 23` (out indexes). The deaths are those asked for below:
+every pair still dies in its x product, xa in out[7], xb in out[15], x in out[23], and out[7]
+and out[15] come before z1's x products. But that alone is not enough: the order of the weight +1
+products (the first fourteen) decides which of them fill the cycles while the pairs' later
+products are not yet ready, and every swap of two neighbours in the first fourteen changes the
+registers (from 4 to 43 lines). It was found by a hill climb over insertions and swaps of
+the 24 statements, scored by bytes against retail (build/swarm/w49-g/f2/climb2.py; about
+2,000 compiles from the near miss's order, the step that mattered being z3's ny and y products
+exchanged). The fourteen are a diagonal walk (xa ahead of xb by a z weight) rather than a nest,
+which is why the 1,728 regular nests missed it. The analysis below is kept as it was written.
 
 Read from the `.sched` trace of ComputeGridBlendWeights' last block (file_198980.cpp,
 2026-11-13, w46-d): eight pair products (priority 8), 24 triple products (5) and 24 stores,
