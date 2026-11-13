@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 796/804, checked 2026-11-12
+// BYTES 783/804 (97.4%), checked 2026-11-12
 // NEAR: retail's size (804 bytes), 30 differing lines when built in src/main/world_listed_object.cpp (and
 //       standalone). New this round:
 //       the bank pointer `p` is one variable reused by the three transfers (C style), so it is a
@@ -24,6 +24,20 @@
 //       losing to `move s4,a0` (insn 5). Every form docs/toolchain/sched1.md records was not
 //       re-tried; no new lever found.
 // w38-f5 (2026-11-12): the file's row is now -mvu0-use-vf0-vf30 (loop.c's threshold 94, proved by func_0013AD80; docs/toolchain/loops.md, "A threshold of 94"), which answers mechanism (2): this source now moves the loop's invariants as retail does (li s8,80 and li s7,2112 in the preheader, the %hi of g_toSprChannel and the 1 rematerialised in the loop) and is two instructions short (796 of 804), 40 lines by an aligned diff. Left: the prologue (mechanism 1, unchanged); the state store, where retail forms D_002748F0 + i * 80 and stores at offset 76 (`SprTransfer* t = &D_002748F0[D_00274990]; t->state = 2;` gives exactly that); and the block addresses, where retail's preheader has `lui v0; move v1,v0; addiu v1,v1,%lo(D_002748F0); addiu s5,v1,8` (the array's address in a register, plus 8) for this source's one `addiu s5,v0,%lo(D_002748F0+8)`. With the element pointer the address is one pseudo for both and the loop is 94 and 85 insns: the first movable then moves in pass 1 and pass 2 hoists &hi (sp+32), which retail keeps in the loop; retail's counts with that form are 95 or more and 86 to 88, one insn more than any form tried (a pointer, a reference, `D_002748F0 + i`, a local for the index, a class with Current() and Block(): all 94 and 85).
+// w40-fb (2026-11-12): 17 lines by an aligned diff, retail's size, the literal pool exact. (1) The prologue is solved: the bounds are
+//       brace-initialised union-first vectors (Quadratic16, include/shapes.h): the union member's CLOBBER orders each bound's stores
+//       and the second %hi waits for the first load (docs/toolchain/large-functions.md, "A brace initialiser's union member is a
+//       CLOBBER"); every prologue line is retail's. (2) The loop: loop.c counts the `(use (const_int 0))` that flow's
+//       find_basic_blocks (run for GCSE) puts after a call that ends a basic block, and an argument read from memory through a
+//       named local (a load and a copy until local-alloc ties them); a copy between pseudos or a dead copy is gone before loop.c.
+//       Retail's decisions (the %hi of g_toSprChannel and the 1 moved in pass 2, the 2 and &hi left) need 97 to 99 insns in pass 1
+//       and 89 to 91 in pass 2 (docs/toolchain/loops.md, "What loop.c counts"). With the element pointer `t` this source has 94 and
+//       85; `ch` and `mode` below are two such locals (96 and 88: the preheader, the frame and the block addresses are retail's,
+//       the 2 still moves). A third (`s32 count = node->count;`, or an inline accessor) gives 97 and 89 and retail's loop top to
+//       the instruction (lui a3, li a1,2, lw a2), but its pseudo reorders the filter call's block (24 lines). Not found: the
+//       third counted insn that leaves that block alone. Ruled out as counted: copies of pseudos (q = ...; p = q), an unused
+//       result (s32 ok = WaitDmaChannel(...)), a local for dt, bank, the index or the offset. Counted but wrong elsewhere: the
+//       detach in the else arm (a use after the call: 95, but blez/b for bgtzl), node = next in both arms (s1/s2/s3 rotate).
 // In the context of its file, src/main/world_listed_object.cpp.
 #include "common.h"
 #include "asm_func.h"
@@ -31,6 +45,7 @@
 #include "owned_record.h"
 #include "world_listed_object.h"
 #include "vu0.h"
+#include "shapes.h"
 #include "placed_object.h"
 
 void DetachOwnedRecord(OwnedRecord* o);
@@ -65,8 +80,8 @@ s32 FilterParticleVerticesVu0(Vec02* m, u128 s, u32 a, u32 b, u32 c, s32 n, s32 
 
 void StepListedObjectParticles(WorldListedObject* self, f32 dt)
 {
-    Vec02 lo = {3.4028235e+38f, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
-    Vec02 hi = {-3.4028235e+38f, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
+    Quadratic16 lo = {{3.4028235e+38f}, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
+    Quadratic16 hi = {{-3.4028235e+38f}, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
     Vec02 mat[4];
     WordListFrame fr;
     s32 e = (s32)&self->members.head;
@@ -84,9 +99,11 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
     Vec02* p = node->points[node->bank];
     StartToSprChain(node->count * 16, p, node->count * 16, p + 0x2C, node->count * 16, p + 0x58, 0, 0);
     while (node != 0) {
-        WaitDmaChannel(g_toSprChannel, 0, 0);
+        void* ch = g_toSprChannel;
+        WaitDmaChannel(ch, 0, 0);
         D_00274990 = 1 - D_00274990;
-        D_002748F0[D_00274990].state = 2;
+        SprTransfer* t = &D_002748F0[D_00274990];
+        t->state = 2;
         OwnedRecord* next = *(OwnedRecord**)fr.link;
         fr.link = (s32)next + fr.offset;
         if (next != 0) {
@@ -94,7 +111,8 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
             StartToSprChain(next->count * 16, p, next->count * 16, p + 0x2C, next->count * 16, p + 0x58, 0, 0);
         }
         u128 w = Vu0::ScalarInGpr(dt);
-        s32 used = FilterParticleVerticesVu0(mat, w, SprBlock::Of(0), SprBlock::Of(1), SprBlock::Of(2), node->count, self->f618, &lo, &hi);
+        s32 mode = self->f618;
+        s32 used = FilterParticleVerticesVu0(mat, w, SprBlock::Of(0), SprBlock::Of(1), SprBlock::Of(2), node->count, mode, (Vec02*)&lo, (Vec02*)&hi);
         s32 nb = (node->bank + 1) & 1;
         p = node->points[nb];
         StartFromSprChain(p, p + 0x2C, p + 0x58, 0);
@@ -113,7 +131,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
         Vec02 center;
         Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(lo), Vu0::Scalar(0.5f), Vu0::Q(hi), Vu0::Scalar(0.5f));
         self->desc02()->m1D(self, &center);
-        self->f2A4 = self->f2A8 = Vu0::Distance(center, hi);
+        self->f2A4 = self->f2A8 = Vu0::Distance(center, *(Vec02*)&hi);
     }
     *(s32*)&g_activeListFrames = fr.prev;
 }

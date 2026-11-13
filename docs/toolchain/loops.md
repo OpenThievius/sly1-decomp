@@ -921,6 +921,122 @@ artefacts of the invented scratch variables. Read from the `-dL`, `-dl` and `-dg
   register that seems reused for unrelated constants (`$f2`: 1/15, a difference, 372.8) is
   reload's first free register, not one pseudo.
 
+### Where a loop's notes count, and why the outer loop cannot own the last block (func_00130C58)
+
+Read from stmt.c (expand_end_loop), jump.c (duplicate_loop_exit_test), loop.c (mark_loop_jump,
+scan_loop), flow.c (recompute_reg_usage), local-alloc.c (update_equiv_regs, block_alloc) and
+reload1.c of GCC 2.95.3, with dumps and probes at `-mvu0-use-vf0-vf30` (2026-11-12, w40-fb).
+At that range the near miss needs no notes for its 3 and the probe with one run-once loop
+(`do { found = w - windows; k = -1; } while (0);` before `best`) is EXACT; this section says
+what that loop does and which sources cannot stand in for it.
+
+- **The references local-alloc ranks are counted by position in the insn stream.** toplev.c
+  calls `recompute_reg_usage (insns, ! optimize_size)` just before local-alloc: it walks every
+  insn in sched1's order and adds the loop depth at that place (1 outside, +1 per LOOP_BEG seen,
+  -1 per LOOP_END) to REG_N_REFS for each set and use. flow's own count takes one depth for a
+  whole basic block (its head's); this one changes inside a block. So a pseudo set and used
+  between a LOOP_BEG and its LOOP_END has twice the references of the same pseudo after the
+  LOOP_END, in one block: the subtraction's 4 against the `%hi`'s 2 (`.lreg`: "Register 198
+  used 4 times across 3 insns in block 20", "Register 233 used 2 times across 2 insns").
+- **REG_N_REFS is raised by nothing else that fits.** local-alloc's combine_regs adds the
+  references of a pseudo tied to another (a copy or an operand that dies where the result is
+  set, both local to the block), which would also give 4: but the subtraction's operand (w)
+  and the shift's result (found) both live across blocks and have no quantity, so nothing can
+  be tied to it. The priority is `floor_log2 (refs) * refs / (death - birth)` in doubled insn
+  numbers: 2 references over the three insns `subu; li; sra` is 0.5 against the `%hi`'s 1.0
+  (it is moved back before its load, a life of one insn), and 4 references is 2.0.
+- **The `%hi` is PRE's, moved back only outside a loop.** GCSE hoists `(high $LC0)` to the end
+  of block 0 (it is anticipated on every path), and update_equiv_regs moves a REG_EQUIV set
+  with one use back before that use only when the use's loop depth is 0 and REG_N_REFS is 2.
+  With a LOOP_BEG before `best` the use counts 2, the `%hi` stays a pseudo across the five
+  calls, gets no register and reload forms it in v0 before the load (measured: the two lines
+  `lui v0` / `lwc1 $f3,..(v0)` against retail's v1). So retail's `best` is at depth 0 and the
+  `%hi` is a block-local quantity that takes v1 because the subtraction took v0 first and their
+  lives, widened by one insn each for scheduling, touch.
+- **A run-once loop is "phony" to loop.c.** scan_loop gives up on a loop whose first
+  non-note after the LOOP_BEG is not a label or a jump to one ("Loop from 368 to 390 is
+  phony"): nothing is moved out of it, its notes stay, and it is not counted as a loop that
+  encloses anything. That is why the probe's loop leaves loop.c's decisions for the two real
+  loops alone.
+- **The loop must hold exactly the two statements.** Measured with the same run-once loop
+  drawn wider (all else equal): from `i = 0` to after `k = -1` (the outer loop inside it) the
+  tail is retail's but the 2 and `i + 1` swap s5 and s6 (5 lines: every reference in the real
+  loops counts one depth more); from before the outer loop's `for` 31 lines differ and from
+  the function's first statement 35 (the first insn after the LOOP_BEG is a scheduling barrier
+  in the prologue). A lone LOOP_BEG before `best` is the reload case above.
+- **The outer loop cannot own the block.** Three ways to put statements between a loop's exit
+  test and its LOOP_END, each read from the source and the first compiled:
+  (1) a `break` with a body at the top of `for (;;)`: expand_end_loop rolls everything from the
+  loop's start label to the last jump to the end label (conditional or not, within 30 insns)
+  to the bottom, so the body does sit before the LOOP_END; but duplicate_loop_exit_test then
+  copies the whole exit code, body included, in front of the LOOP_BEG, and the copy's
+  conditional jump enters the loop past its note: mark_loop_jump invalidates the loop
+  ("Loop at 54 ignored due to multiple entry points", 161 lines). If the copy is not made (a
+  label, a call or more than 20 insns in the exit code) the loop is entered by a jump to its
+  test and retail's `blez n` in front of the hoisted constants cannot arise.
+  (2) a `break` with a body at the bottom (`if (++i >= n) { ...; break; }`): expand_end_loop's
+  first rewrite ends the loop at the conditional jump and leaves the body behind the LOOP_END
+  ("optional cleanup"), outside.
+  (3) the exit label inside the notes with the entry test jumping to it: any jump from outside
+  into a loop invalidates it, and the hoisted 2, 3 and float constants sit after retail's
+  entry test, so that test is outside the loop loop.c processed.
+  A merge after loop.c does not help: with a copy of the two statements outside (merged by
+  jump2's cross-jumping after reload) the block after the LOOP_END would start at a label with
+  two uses at local-alloc time, a block of its own, and the `%hi` would take v0.
+- **The search loop, written as a loop, is not retail's at 94 either.** `while (k < found)`,
+  `for (k = -1; k < found; )`, `for (;;)` with `if (k >= found) break;` and the three
+  assignments as the `for`'s initialiser, each with `continue` for both jumps or with the inner
+  jump a `goto`: 76 and 59 differing lines (rolled, and windows[k] reduced), as at 79.
+- **What is left.** The front end emits loop notes for `while`, `do`, `for` and for the
+  element loop of an array of class objects (cp/init.c), nothing else; so the original had a
+  loop statement around `found = w - windows; k = -1;` whose body ran once: in practice a
+  statement macro. Which macro held two assignments is not known; no plain form exists.
+
+### What loop.c counts: a `use` after a call that ends a block, and an argument through a local (func_0013A618, near miss)
+
+Measured and read from flow.c (find_basic_blocks) and loop.c on 2026-11-12 (w40-fb). loop.c's
+"N real insns" is every INSN, JUMP_INSN and CALL_INSN between the notes when it runs, and two
+kinds of insn are in that count that the final code never shows:
+
+- **`(use (const_int 0))` after a call that ends a basic block.** GCSE runs find_basic_blocks,
+  which emits that insn after every CALL_INSN directly followed by a label ("so that the
+  CALL_INSN itself is not at basic_block_end"). It stays in the stream through loop.c (uid just
+  above jump's, e.g. 794 after the StartToSprChain call that ends the `if (next != 0)` arm) and
+  emits nothing. A call that is the last statement of an `if` arm, of an `else` arm before the
+  join, or of an inline with an early return costs one counted insn; the same call followed by
+  a jump (the then-arm of an if/else) does not.
+- **An argument read from memory into a named local.** `f(g_x)` expands to one insn, the load
+  into the argument register (a simple MEM costs 2, not over 2, so expand_call does not copy
+  it); `T v = g_x; f(v);` is a load into v's pseudo and a copy to the hard register until
+  local-alloc ties them: one more insn at loop time, the same code. A copy between two
+  pseudos (`q = ...; p = q;`), a dead copy (`s32 ok = f();`) and a local for a parameter or a
+  loaded value used again are gone before loop.c (cse1 and its dead-insn sweep) and count
+  nothing (measured: 94 each time).
+- **Retail's window for func_0013A618.** The movables in order: the `%hi` of g_toSprChannel
+  (life 1), the `%hi` of D_00274990, the 1, 80, the base of D_002748F0 and its `%hi`, the 2
+  (life 1), 2112, the block base, &hi (life 1). Retail moved the first `%hi` and the 1 (reload
+  forms them again in the loop, s0-s8 being taken), left the 2 in the loop as a local-alloc
+  quantity (a1, with the link in a2: when the 2 is moved reload forms it in v1 and the link
+  takes a1) and left &hi. At a threshold of 94, less 3 per register moved, that is: the first
+  `%hi` not in pass 1 (95 or more insns), and in pass 2 `N <= 91` for the 1 and `N > 88` for
+  the 2, with pass 2 eight insns shorter than pass 1: **97 to 99 and 89 to 91**. Confirmed:
+  with three extra counted insns (97 and 89) the loop's top is retail's to the instruction
+  (`lui a3` for both rematerialised addresses, `li a1,2`, `lw a2,116(sp)`); with two (96 and
+  88) only the 2 differs (moved, `li v1,2`); with one (95 and 87) the same; with none (94 and
+  85) &hi is hoisted to a stack slot and the frame grows.
+- **The preheader's `lui v0; move v1,v0; addiu v1,v1,%lo; addiu s5,v1,8`.** With the element
+  pointer (`SprTransfer* t = &D_002748F0[D_00274990]; t->state = 2;`) the array's address is a
+  movable; cse (use_related_value) rewrites the block base `&D_002748F0[0].addrs` as that
+  register plus 8; the address gets no register over the loop, so reload deletes its init
+  (leaving the `%hi`'s `lui v0` dead in the preheader), forms it again for the `+ 8`
+  (`lui v1; addiu v1,v1,%lo`, the form movsi takes during reload) and reload_cse turns that
+  `lui` into `move v1,v0`. It appears as soon as pass 1 has 95 insns.
+- **Not found.** The third counted insn that leaves the filter call's block alone: the count
+  argument through a local or an inline accessor gives 97 and 89 but its pseudo changes that
+  block's registers; the detach call moved to the else arm gives the `use` but the wrong
+  branch; `node = next` in both arms rotates s1, s2 and s3. The near miss keeps two locals
+  (the channel and the mode) and is 17 lines from retail, all of them the moved 2.
+
 ### A threshold of 94: functions that only a wider VU0 range builds (func_0013AD80, matched; func_001D9488, func_00130C58)
 
 Measured on 2026-11-12 (w38-f5) with `tools/check.py --flags` and `-dL` dumps. loop.c's

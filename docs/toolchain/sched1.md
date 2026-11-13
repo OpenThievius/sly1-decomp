@@ -1408,7 +1408,7 @@ times, the vertical flag in t9 both times).
 - **Still differs** (85.9% "order"): fy is placed 16th and takes s0 (retail t9), which shifts
   three parameters one saved register; half and the luma part swap t4 and t5.
 
-### Two literal %hi's issued in one cycle (func_0013A618, func_0013A940, unsolved)
+### Two literal %hi's issued in one cycle (func_0013A618, func_0013A940; solved 2026-11-12, see the end)
 
 Both bound vectors of these two functions start as `{FLT_MAX, FLT_MAX, FLT_MAX, 0}` and its
 negative, loaded from the function's literal pool (the file's .rodata). Retail: `lui v0; lwc1
@@ -1422,6 +1422,14 @@ assignments after `= {}` clears (worse store order), the initialisers (retail's 
 order, kept), named extern const bounds (folded to the same literals), the list-head pointer as
 an OffsetList* (the load no longer waits for the stores: not retail), the bounds' assignments
 after the frame push, and declaration orders (the frame slots follow declaration order).
+
+Solved on 2026-11-12 (w40-fb): the bounds are brace-initialised union-first vectors
+(`Quadratic16 lo = { { FLT_MAX }, FLT_MAX, FLT_MAX, 0 };`, include/shapes.h). store_constructor
+puts a CLOBBER before the union member's store (docs/toolchain/large-functions.md, "A brace
+initialiser's union member is a CLOBBER"), each bound's stores hang on it, and the second
+`%hi` no longer shares the first's priority: both prologues are retail's, with the clears' zero
+in v1, the second `lui v0` after the first load and the frame push's registers (e in v1, &fr in
+a3, the `%hi` of g_activeListFrames in a2). The functions' literal pools check exact with it.
 
   three parameters one saved register; half and the luma part swap t4 and t5. (Resolved
   through global-alloc's pass 0 the same day: docs/toolchain/long-block-constants.md, "Pass 0

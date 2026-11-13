@@ -29,6 +29,11 @@
 //       so 200 and 524 add 7 to each other; without 200 it would still be 109 > 108. Tried: the
 //       rec copy written before the .w copies (identical output), and &cur[0x2C + j] as a named
 //       pointer for the end read, the mode-1 load, the call and the .w copy (185/241, worse).
+// w40-fb (2026-11-12): wall (3) is solved: the bounds are brace-initialised union-first vectors (Quadratic16), as in
+//       func_0013A618 (docs/toolchain/large-functions.md, "A brace initialiser's union member is a CLOBBER"): the prologue
+//       up to the list walk is retail's but for the saved registers the loop's givs decide, and the literal pool is exact
+//       (151 lines by an aligned diff, from 166). Walls (1) and (2) are unchanged: combine_givs still lets the cur + 16j giv of
+//       insn 526 absorb the memory givs (-dL: "giv at 606/602/572/550/528/346/255/206/202 combined with giv at 526").
 // In the context of its file, src/main/world_listed_object.cpp.
 #include "common.h"
 #include "list_iter.h"
@@ -36,6 +41,7 @@
 #include "world_listed_object.h"
 #include "placed_object.h"
 #include "vu0.h"
+#include "shapes.h"
 
 extern f32 g_gameClock[];
 
@@ -50,8 +56,8 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
         StepListedObjectParticles(self, dt);
         return;
     }
-    Vec02 lo = {3.4028235e+38f, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
-    Vec02 hi = {-3.4028235e+38f, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
+    Quadratic16 lo = {{3.4028235e+38f}, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
+    Quadratic16 hi = {{-3.4028235e+38f}, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
     WordListFrame fr;
     s32 e = (s32)&self->members.head;
     fr.list = e;
@@ -120,7 +126,7 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
         Vec02 center;
         Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(lo), Vu0::Scalar(0.5f), Vu0::Q(hi), Vu0::Scalar(0.5f));
         self->desc02()->m1D(self, &center);
-        self->f2A4 = self->f2A8 = Vu0::Distance(center, hi);
+        self->f2A4 = self->f2A8 = Vu0::Distance(center, *(Vec02*)&hi);
     }
     *(s32*)&g_activeListFrames = fr.prev;
 }
