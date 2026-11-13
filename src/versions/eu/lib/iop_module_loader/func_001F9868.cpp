@@ -27,7 +27,7 @@ s32 SendModuleLoadRequest(Blob_1F9868* src, s32 size, Blob_1F9868* data, s32* ou
         q->f0 = 0;
     }
     Buf_1F9868* buf = &g_moduleLoaderBuffer;
-    if (CallRemoteService(g_moduleLoaderClient, cmd, 0, buf, 0x200, buf, 8, 0, 0) < 0) {
+    if (CallRemoteService((RemoteCallClient*)g_moduleLoaderClient, cmd, 0, buf, 0x200, buf, 8, 0, 0) < 0) {
         return -0x10001;
     }
     s32 v = buf->f4;

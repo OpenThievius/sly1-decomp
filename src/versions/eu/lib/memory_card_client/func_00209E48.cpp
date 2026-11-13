@@ -28,7 +28,7 @@ s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, s32 a5)
     if (a4 >= 0) {
         WriteBackDataCacheRange(a5, a4 << 6);
     }
-    s32 r = CallRemoteService(mgr, 0xD, 1, rec, 0x414, D_0062C300, 4, 0, 0);
+    s32 r = CallRemoteService((RemoteCallClient*)mgr, 0xD, 1, rec, 0x414, D_0062C300, 4, 0, 0);
     if (r == 0) {
         g_cardRequestInFlight = 0xD;
     } else {

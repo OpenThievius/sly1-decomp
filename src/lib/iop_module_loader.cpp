@@ -28,13 +28,11 @@ extern char D_00276970[16];
 s32 CompareMemory(const void* a, const void* b, s32 n);
 void* CopyBytes(void* dst, const void* src, s32 n);
 void* FillMemory(void* p, s32 value, s32 size);
-s32 CallRemoteService(u8* a, s32 b, s32 c, Buf_1F9868* d, s32 e, Buf_1F9868* f, s32 g, s32 h, s32 i);
 void* CopyStringBounded(Blob_1F9868* dst, Blob_1F9868* src, s32 n);
 s32 BindModuleLoader(void);
 
 struct __attribute__((packed)) Word_1F9690 { u32 v; };
 
-s32 BindRemoteService(RemoteCallClient* client, u32 cmd, s32 mode);
 
 s32 BindModuleLoader(void)
 {
@@ -49,7 +47,7 @@ s32 BindModuleLoader(void)
             }
             if (c->server != 0) {
                 g_moduleLoaderBound = 0;
-                if (CallRemoteService(g_moduleLoaderClient, 0xFF, 0, 0, 0, &g_moduleLoaderBuffer, 4, 0, 0) < 0) {
+                if (CallRemoteService((RemoteCallClient*)g_moduleLoaderClient, 0xFF, 0, 0, 0, &g_moduleLoaderBuffer, 4, 0, 0) < 0) {
                     return 0xFFFEFFFF;
                 }
                 *(Word_1F9690*)&g_moduleLoaderVersion = *(Word_1F9690*)&g_moduleLoaderBuffer;
@@ -107,7 +105,7 @@ s32 SendModuleLoadRequest(Blob_1F9868* src, s32 size, Blob_1F9868* data, s32* ou
         q->f0 = 0;
     }
     Buf_1F9868* buf = &g_moduleLoaderBuffer;
-    if (CallRemoteService(g_moduleLoaderClient, cmd, 0, buf, 0x200, buf, 8, 0, 0) < 0) {
+    if (CallRemoteService((RemoteCallClient*)g_moduleLoaderClient, cmd, 0, buf, 0x200, buf, 8, 0, 0) < 0) {
         return -0x10001;
     }
     s32 v = buf->f4;

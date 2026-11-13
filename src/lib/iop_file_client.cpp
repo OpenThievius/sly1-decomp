@@ -84,9 +84,6 @@ s32 AwaitSemaphore(s32 sema);
 void* CopyBytes(void* dst, const void* src, s32 n);
 void* FillMemory(void* p, s32 value, s32 size);
 void InitRemoteCalls(s32 a);
-s32 BindRemoteService(RemoteCallClient* client, u32 cmd, s32 mode);
-s32 CallRemoteService(RemoteCallClient* client, s32 cmd, s32 mode, void* send, s32 send_size, void* recv, s32 recv_size,
-                      RemoteCallEndFn end, void* end_arg);
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
 void SetCommandHandler(u32 cmd, void* handler, void* arg);

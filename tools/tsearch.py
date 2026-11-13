@@ -2262,7 +2262,7 @@ def _match_pattern(pu, pat, u, x, binds):
 
 
 VU0_GROUPS = [["ToFloat", "ToFloatMoved", "ToFloatNow", "ToFloatViaBits"],
-              ["Scalar", "ScalarAt", "ScalarAtValue", "ScalarAtCall", "ScalarInGpr", "ScalarInGprReg"],
+              ["Scalar", "ScalarAt", "ScalarAtValue", "ScalarAtCall", "ScalarInGpr"],
               ["FromFloat", "FromFloatAt", "FromFloatAtCall"],
               ["NormalizeOr", "NormalizeOrMoved"],
               ["RotateRows", "RotateRowsTied"]]
