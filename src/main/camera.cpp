@@ -18,6 +18,8 @@ extern void SetCameraFogColor(void*);
 extern void SetCameraPlacement(void*, s32, void*);
 #include "list_iter.h"
 #include "game_clock.h"
+#include "mul_rotation.h"
+#include "value_range.h"
 
 
 void SetCameraNearDistance(void* arg);
@@ -914,7 +916,59 @@ void BuildFrustumSideNormals(Mat02* m, Vec02* out, f32 x, f32 y)
     Vu0::Q(out[3]) = Vu0::Cross(Vu0::Q(m->r[1]), Unit(Vu0::MulAddX(Vu0::Q(m->r[0]), Vu0::Q(m->r[2]), Vu0::Scalar(ny))));
 }
 
-INCLUDE_ASM(func_00144540);
+extern const f32 D_00248D40[4];
+f32 Sine(f32 x);
+void BuildRotationFromVector(Vec02* v, Mat4* mat);
+
+// For D_002618C8 seconds after self->f218 the view swings by a sine of the time since then,
+// scaled by a curve of that time. The weight is written at each use: each
+// Vu0::Scalar(swing) stores its slot again, and the repeat (dir's before the call, tilt's
+// after the product) is what holds the first store ahead of the other stores and leaves no
+// code (docs/toolchain/sched1.md, "A weight written again in the next statement"). corner
+// comes after the product, so the product's rows are read before corner's store.
+void UpdateCameraMatrices(Camera* self)
+{
+    Vec02 pos;
+    Vec02 dir;
+    Mat02 rotation;
+    f32 f6 = g_gameTime - self->f218;
+    if (D_002618C8 < f6) {
+        BuildViewProjectionMatrix((f32*)self->f40, (f32*)self->f80, (void*)((u8*)self + 0xC0), (Quad16*)((u8*)self + 0x100));
+    } else {
+        f32 t = f6 / D_002618C8;
+        f32 amount = g_unitRange.Limit(D_002618D0[0] + t * (D_002618D0[1] + t * D_002618D0[2]));
+        f32 swing = Sine(f6 * D_002618CC) * amount;
+        u128 turn = Vu0::Rotate(*(Mat02*)self->f80, Vu0::Q(*(Vec02*)D_002618E0));
+        Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(*(Vec02*)self->f40), turn, Vu0::Scalar(swing));
+        Vu0::Q(dir) = Vu0::MulX(Vu0::Q(*(Vec02*)D_002618F0), Vu0::Scalar(swing));
+        BuildRotationFromVector(&dir, (Mat4*)&rotation);
+        MulRotationRowsX(&rotation, *(Mat02*)self->f80, rotation);
+        Vec02 corner;
+        Vec02 tilt;
+        Mat4 proj;
+        Vu0::Q(corner) = Vu0::MulAddX(Vu0::Q(*(Vec02*)D_00248D40), Vu0::Q(*(Vec02*)D_00261900), Vu0::Scalar(swing));
+        Vu0::Q(tilt) = Vu0::MulX(Vu0::Q(*(Vec02*)D_00261910), Vu0::Scalar(swing));
+        BuildProjectionMatrix(&proj, corner.x * 640.0f / (self->f1F0 * 4096.0f), corner.y * 224.0f / (self->f1F4 * 4096.0f), tilt.x, tilt.y, self->f1E4, self->f1E8);
+        BuildViewProjectionMatrix((f32*)&pos, (f32*)&rotation, &proj, (Quad16*)((u8*)self + 0x100));
+    }
+    InvertMatrix4x4((u8*)self + 0x100, (u8*)self + 0x140);
+    BuildFrustumSideNormals((Mat02*)self->f80, (Vec02*)((u8*)self + 0x180), self->f1F0, self->f1F4);
+    {
+        f32* e = (f32*)((u8*)self + 0x1B0);
+        f32* d = self->planes[0];
+        f32* c = (f32*)((u8*)self + 0x1A0);
+        f32* b = (f32*)((u8*)self + 0x190);
+        f32* a = (f32*)((u8*)self + 0x180);
+        s32 n = 2;
+        do {
+            d[0] = *a++;
+            d[1] = *b++;
+            d[2] = *c++;
+            d[3] = *e++;
+            d += 4;
+        } while (--n >= 0);
+    }
+}
 
 void WriteCameraMatricesPacket(u8* self)
 {
