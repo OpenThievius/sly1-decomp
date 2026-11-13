@@ -1028,7 +1028,9 @@ struct Vu0 {
     // The interface of a VU0 microprogram: the game's microprograms read and write fixed
     // registers, which the compiler (it allocates $vf1..$vf15) cannot pick. One instruction
     // each, volatile with a memory clobber so that they keep their order with each other and
-    // with the loads and stores around them. Used by func_0013A498 and func_00185150.
+    // with the loads and stores around them. func_00185150 uses LoadVf, ReadViWait,
+    // MoveToVi and CallMs, with NextLightGroup (below) for its set-up block; func_0013A498 has
+    // ParticleFilter (below).
 
     // A quadword from memory into $vfN (N 16..31): lqc2.
     template <int N> static void LoadVf(const void* p)
@@ -1087,6 +1089,97 @@ struct Vu0 {
     {
         __asm__ volatile("vnop" : : : "memory");
     }
+
+    // The set-up of the light test's microprograms (0x60 and 0x168), which func_00185150
+    // (CollectLightsForSphere) runs once per light group; no other function may use it
+    // (AGENTS.md's named exception, the maintainer's decision of 2026-11-12: retail writes
+    // $vi3 and $vi4 in that one function). One statement, as the original's was
+    // (docs/toolchain/vu0-helpers.md, "func_00185150's vi block was one non-volatile asm"):
+    // ctc2.i waits for the group before to finish and gives the next group's first slot,
+    // ctc2.ni its count, cfc2.ni reads the mask the group before left in $vi2 (one bit per
+    // light that reaches the sphere), and the vnop lets the writes settle before the caller
+    // starts the microprogram. The mask is its output, so the statement is not volatile.
+    static u32 NextLightGroup(u32 firstSlot, u32 count)
+    {
+        u32 mask;
+        __asm__("ctc2.i %1, $vi3\n\tctc2.ni %2, $vi4\n\tcfc2.ni %0, $vi2\n\tvnop" : "=r"(mask) : "r"(firstSlot), "r"(count));
+        return mask;
+    }
+
+    // The interface of the microprogram at 0x10, which func_0013A498
+    // (FilterParticleVerticesVu0) runs once per particle; no other function may use it
+    // (AGENTS.md's named exception, the maintainer's decision of 2026-11-12: retail starts this
+    // microprogram in that one function, so its interface cannot recur). The microprogram
+    // reads a matrix's rows in $vf31..$vf28, a scale in $vf27, two running bounds in $vf26 and
+    // $vf25 and one particle's two vectors in $vf24 and $vf23; it leaves that particle's two
+    // results in $vf22 and $vf21 and the bounds updated. Each call holds its vectors in those
+    // registers as local register variables, so the loads and stores are the compiler's own
+    // moves (retail schedules its register saves and spills among them, which no asm of ours
+    // allows), and the vcallms names all nine as its inputs: the seven that stay from one run
+    // to the next are then live through the caller's loop, as retail's order of its first
+    // loads needs (docs/toolchain/vu0-helpers.md, "func_0013A498 matched").
+    struct ParticleFilter {
+        // Load all nine registers and start the microprogram on the first particle.
+        static void Start(u128 row0, u128 row1, u128 row2, u128 row3, u128 scale, u128 boundA, u128 boundB,
+                          u128 extra, u128 pos)
+        {
+            register u128 vf31 __asm__("vf31") = row0;
+            register u128 vf30 __asm__("vf30") = row1;
+            register u128 vf29 __asm__("vf29") = row2;
+            register u128 vf28 __asm__("vf28") = row3;
+            register u128 vf27 __asm__("vf27") = scale;
+            register u128 vf26 __asm__("vf26") = boundA;
+            register u128 vf25 __asm__("vf25") = boundB;
+            register u128 vf24 __asm__("vf24") = extra;
+            register u128 vf23 __asm__("vf23") = pos;
+            __asm__ volatile("vcallms 0x10" : : "j"(vf31), "j"(vf30), "j"(vf29), "j"(vf28), "j"(vf27), "j"(vf26),
+                             "j"(vf25), "j"(vf24), "j"(vf23));
+        }
+
+        // Start it on the next particle: the matrix, the scale and the bounds stay where Start
+        // and the last run left them.
+        static void Next(u128 extra, u128 pos)
+        {
+            register u128 vf31 __asm__("vf31");
+            register u128 vf30 __asm__("vf30");
+            register u128 vf29 __asm__("vf29");
+            register u128 vf28 __asm__("vf28");
+            register u128 vf27 __asm__("vf27");
+            register u128 vf26 __asm__("vf26");
+            register u128 vf25 __asm__("vf25");
+            register u128 vf24 __asm__("vf24") = extra;
+            register u128 vf23 __asm__("vf23") = pos;
+            __asm__ volatile("vcallms 0x10" : : "j"(vf31), "j"(vf30), "j"(vf29), "j"(vf28), "j"(vf27), "j"(vf26),
+                             "j"(vf25), "j"(vf24), "j"(vf23));
+        }
+
+        // Wait until the microprogram has ended: an interlocked read of $vi0 (always zero) into
+        // $v0, a scratch register the statement does not declare. Retail's allocation says so:
+        // an output the compiler chose would be a quantity of its block and take $v0 from the
+        // address computed after it (docs/toolchain/vu0-helpers.md).
+        static void Wait()
+        {
+            __asm__ volatile("cfc2.i $2, $vi0");
+        }
+
+        // The particle's two results, read after Wait.
+        static void Results(u128& extra, u128& pos)
+        {
+            register u128 vf22 __asm__("vf22");
+            register u128 vf21 __asm__("vf21");
+            extra = vf22;
+            pos = vf21;
+        }
+
+        // The two bounds as the last run left them.
+        static void Bounds(u128& boundA, u128& boundB)
+        {
+            register u128 vf26 __asm__("vf26");
+            register u128 vf25 __asm__("vf25");
+            boundA = vf26;
+            boundB = vf25;
+        }
+    };
 
     // RotateRows with its result tied to v ("0") as Rotate's is: the rows are values the caller
     // loaded before it computed v, and the result takes v's register. Loaded first, the rows

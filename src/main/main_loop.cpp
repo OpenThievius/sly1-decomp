@@ -23,7 +23,8 @@
 // the word at 0x2D0 (a placed object's subclass).
 struct SortKeyedObject : PlacedObject {
     s32 f2D0;               // 0x2D0
-    u8 pad2D4[0x304 - 0x2D4];
+    s32 f2D4;               // 0x2D4: a light's mode, of which CollectLightsForSphere returns the highest
+    u8 pad2D8[0x304 - 0x2D8];
     s32 f304;               // 0x304
     s32 f308;               // 0x308
 };
@@ -314,7 +315,67 @@ void UploadLightVolumes(World* world)
     PopBackMemoryMark();
 }
 
-INCLUDE_ASM(func_00185150);
+// The lights that reach a sphere: each group's lights are tested on VU0 (the microprogram at
+// 0x60 for kind 1, at 0x168 for kind 2; kind 0 passes them all), a group whose flags meet
+// skipMask is left out, and the mask of a group is read when the next one is set up, or
+// after the last. Writes up to maxLights lights, their number, and how many have the flag
+// bit 0; returns the highest mode among them (at least 1 when the world's +0x1D6C is set).
+s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 skipMask, s32 maxLights, s32* flagged, s32* outCount,
+                  LightObject** out)
+{
+    u32 keepOut = ~skipMask;
+    s32 num = 0;
+    s32 flaggedCount = 0;
+    LightGroup* prev = 0;
+    u32 mask;
+    s32 strongest = world->f1D6C != 0.0f;
+    Vec02 sphere = *centre;
+    sphere.w = radius;
+    Vu0::LoadVf<31>(&sphere);
+    for (s32 i = 0; i < g_lightGroupCount + 1; i++) {
+        LightGroup* grp;
+        if (i == g_lightGroupCount) {
+            mask = Vu0::ReadViWait<2>();
+        } else {
+            grp = &g_lightGroups[i];
+            if (grp->flags & keepOut) {
+                continue;
+            }
+            mask = Vu0::NextLightGroup((u16)grp->fE, grp->count);
+            switch (grp->kind) {
+            case 0:
+                Vu0::MoveToVi<2>(0xFFFF);
+                break;
+            case 1:
+                Vu0::CallMs<0x60>();
+                break;
+            case 2:
+                Vu0::CallMs<0x168>();
+                break;
+            }
+        }
+        if (prev) {
+            s32 bit = 1 << prev->count;
+            for (s32 k = 0; k < prev->count; k++) {
+                bit >>= 1;
+                if (((s32)mask & bit) && num < maxLights) {
+                    LightObject* l = (LightObject*)prev->lights[k];
+                    out[num++] = l;
+                    if (strongest < l->f2D4) {
+                        strongest = l->f2D4;
+                    }
+                    flaggedCount += prev->flags & 1;
+                }
+            }
+        }
+        prev = grp;
+    }
+    *outCount = num;
+    if (flagged) {
+        *flagged = flaggedCount;
+    }
+    return strongest;
+}
 
 void InitAim(T2195_790* self)
 {
