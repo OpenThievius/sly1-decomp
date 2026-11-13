@@ -518,6 +518,23 @@ sol` (875), `self->contacts` (880, r307) and its `->head` (882, mem/s through r3
   between the contacts load and the head load (880's chain one insn longer, priority 6), a
   TImode copy feeding the store (871 ready a cycle later), or the birthing raise.
 
+- **The order is not the lever (w40-fa, 2026-11-12).** A CLOBBER of the sum's slot before the
+  copy (the sum as a union built in place by a brace initialiser at the copy, from a `const`
+  source so that expr.c's safe_from_p allows it) gives exactly the order asked for above:
+  the contacts load issues in the cycle after the call, the copy's store a cycle later, and
+  reload takes v1. sched2 then keeps the `lw` ahead of the `sq`: after reload the load is
+  through a hard register, which has no alias base, so it conflicts with the frame store and
+  the two keep sched1's order (the -dR table lists the store among the load's dependents;
+  in the near miss the link runs the other way). Even without the link the `lw` would issue
+  between the `lq` and the `sq`, which waits two cycles for the `lq`. Retail has `lq v1; sq v1;
+  lw v0`, so its sched1 had the store first, as ours has, and the loop-note probe above failed
+  for this reason, not because of the note. What retail needs is in reload only: when
+  order_regs_for_reload ranks the hard registers for insn 871, v0 is either forbidden (live as
+  a hard register before or after the insn) or counted as holding a live pseudo, although the
+  contacts pointer is not set yet. No instruction of retail's shows what that is. The
+  candidates of the last paragraph (a copy, a TImode copy, the birthing raise, a CLOBBER) all
+  work by moving the load first and are closed with this.
+
 ### The rest of rank_for_schedule (func_001782C0)
 
 Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
