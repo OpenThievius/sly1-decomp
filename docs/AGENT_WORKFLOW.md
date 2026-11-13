@@ -427,7 +427,23 @@ dependences, a declaration hoisted or sunk, s32 against u32, const, a pointer lo
 reference, an argument named before its call or a temporary written in place, an index walk
 against a pointer, an element named by a pointer, a helper of the file or its headers written in
 place or called, VU0 helper alternatives, commuted operands, zero tests; `--transforms` lists
-them). It applies each at every place it fits, compiles every result the way the function lands,
+them). It also knows the source forms that matched in November 2026, each proved by finding a real
+match again (docs/toolchain/*.md has the mechanisms): a constant named by a local of a loop body or
+of the function, and back (`named-constant`, func_00131F60); a local that only carries an
+expression written as the expression at each use, and back (`repeat-expression`, func_001D5678); a
+struct's single-expression method on a cast of a global array written as the array's elements in
+place, and back (`helpers`, func_001D7778); a float parameter moved among integer ones, or the
+reverse, with the file's declarations and calls following (`param-order`, func_00185150); a
+callee's prototype between `void` and `s32` where its result is unused (`callee-return`,
+func_001FA6B0); two locals with separate lives merged and one split, one index for two loops
+(`reuse-variable`, func_001B7280, func_001FA6B0); a test of a variable both arms set written in
+each arm, and back (`test-in-each-arm`, func_00187F40); a switch's arms reordered and a variable
+set in every arm instead of before the switch, and back (`case-order`, func_001B7280); `a = v;
+b = v;` against `a = b = v;` (`chained-assignment`, func_00109488's form); a vector stored through
+`Vu0::Q` against a `Vu0::Vec` structure cast (`struct-store`, func_0019ED58). A candidate that
+changes a parameter's order or a callee's return type lists in its header the declarations and
+callers in other files that must follow before it can land. It applies each at every place it
+fits, compiles every result the way the function lands,
 scores it as regdiff.py does (instructions out of line, registers aside, then words that differ),
 and keeps the best `--beam` for the next step, to `--depth` steps or `--minutes`; `--beam 0` keeps
 every code reached, the closure to `--depth`, for a small function. Every improvement is written to

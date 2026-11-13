@@ -17,6 +17,22 @@ written in place, an index walk against a pointer walk, a single-expression help
 or its headers written in place or called, VU0 helpers of include/vu0.h against their
 alternatives, commuted operands and zero tests.
 
+The source forms that matched in November 2026 are rewrites too (docs/toolchain/*.md has the
+mechanism of each): a constant named by a local of a loop body or of the function, and a named
+constant written as its literal (named-constant); a local that only carries an expression removed
+and the expression written at each use, and a repeated expression named once (repeat-expression);
+a struct's single-expression member function called on an object written in place, a cast of a
+global array read as its elements, and back (helpers); a parameter moved past parameters of the
+other register file, every declaration and call in the file following (param-order); a callee's
+prototype between void and s32 where its result is unused (callee-return); two locals whose lives
+do not overlap merged into one, one local split at an assignment that starts a new life
+(reuse-variable); a test of a variable both arms of an if/else set written in each arm, and back
+(test-in-each-arm); a switch's arms and labels reordered, a variable set before a switch set in
+each arm, and back (case-order); `a = v; b = v;` as `a = b = v;`, and back (chained-assignment); a
+VU0 vector stored through Vu0::Q against through a structure cast (struct-store). A candidate that
+changes a parameter's order or a callee's declaration names, in its header, the declarations and
+calls in the other files of src/ that would have to follow.
+
 The search is a beam: every rewrite of the start is compiled and scored, the best --beam
 candidates (distinct code first) are rewritten again, to --depth steps or --minutes. Each
 candidate is compiled the way the function lands (check.source_for: its src/ file's compiler and
@@ -382,6 +398,7 @@ class Unit:
         while j > first and self.toks[j].text != ")":
             j -= 1
         popen = next(k for k, v in self._match.items() if v == j)
+        self.pspan = (popen + 1, j)
         self.params = self.split_decls(popen + 1, j)
         self.locals_hint = {p[2] for p in self.params}
         self.ret_type = self.text_of(first, popen - 1) if popen - 1 > first else ""
@@ -802,7 +819,9 @@ class Ctx:
 
     def __init__(self, unit, path=None):
         self.u = unit
+        self.headers = _header_texts(unit.text, path)
         self.helpers = find_helpers(unit.text, path)
+        self.methods = find_methods(unit.text, path)
         pure = {n for n, h in self.helpers.items() if h["pure"]}
         self.eff = Effects(unit, pure)
         self.protos = find_prototypes(unit.text, path)
@@ -1539,13 +1558,182 @@ def find_prototypes(text, path=None):
     return out
 
 
+_HEADERS = {}
+
+
 def _header_texts(text, path=None):
     out = []
     for m in re.finditer(r'^\s*#\s*include\s+"([^"]+)"', text, re.M):
         h = ROOT / "include" / m.group(1)
-        if h.exists() and m.group(1) not in ("common.h", "names.h"):
-            out.append(h.read_text(errors="replace"))
+        if m.group(1) in ("common.h", "names.h"):
+            continue
+        if h not in _HEADERS:
+            _HEADERS[h] = h.read_text(errors="replace") if h.exists() else None
+        if _HEADERS[h] is not None:
+            out.append(_HEADERS[h])
     return out
+
+
+_METHODS = {}
+
+
+def _struct_bodies(src):
+    """(name, body text) of every struct or class definition in a text."""
+    for m in re.finditer(r"\b(?:struct|class)\s+(\w+)\s*(?::[^{;()]*)?\{", src):
+        depth, i = 0, m.end() - 1
+        while i < len(src):
+            if src[i] == "{":
+                depth += 1
+            elif src[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+            i += 1
+        yield m.group(1), src[m.end():i]
+
+
+def _struct_fields(body):
+    """[(type, name, dims)] of a struct body's data members, in order."""
+    flat, depth = [], 0
+    for ch in body:
+        if ch == "{":
+            depth += 1
+            if depth == 1:
+                flat.append(";")
+        elif ch == "}":
+            depth -= 1
+        elif depth == 0:
+            flat.append(ch)
+    out = []
+    for piece in "".join(flat).split(";"):
+        piece = re.sub(r"^\s*(?:public|private|protected)\s*:", "", _strip_comments(piece)).strip()
+        if not piece or "(" in piece or re.match(r"(static|typedef|friend|enum|using|template)\b", piece):
+            continue
+        m = re.match(r"^((?:const\s+|unsigned\s+|signed\s+|struct\s+)*[\w:]+)\s*(.*)$", piece, re.S)
+        if not m:
+            continue
+        for d in m.group(2).split(","):
+            dm = re.match(r"^\s*(\**)\s*(\w+)\s*((?:\[[^\]]*\])*)\s*$", d)
+            if dm:
+                out.append(((m.group(1) + dm.group(1)).strip(), dm.group(2), dm.group(3)))
+    return out
+
+
+def find_methods(text, path=None):
+    """{method name: [{struct, params, body, fields}]} of the single-expression member functions
+    (not static) of the structs of the file and of the project headers it includes, with the
+    struct's data members [(type, name, dims)] in order."""
+    out = {}
+    pat = re.compile(r"(?:^|(?<=[;{}:]))\s*(?:inline\s+)?((?:const\s+)?[\w:]+(?:\s*[\*&])*)\s+(\w+)\s*\(([^()]*)\)\s*"
+                     r"(?:const\s*)?\{\s*return\s+([^;{}]*);\s*\}")
+    for src in [text] + _header_texts(text, path):
+        key = hashlib.sha1(src.encode()).hexdigest()
+        if key not in _METHODS:
+            found = []
+            for sname, body in _struct_bodies(src):
+                fields = None
+                for m in pat.finditer(body):
+                    mbody = m.group(4).strip()
+                    if "asm" in mbody or re.search(r"\bthis\b", mbody) or m.group(2) in KEYWORDS:
+                        continue
+                    params = []
+                    for p in [p.strip() for p in m.group(3).split(",")] if m.group(3).strip() not in ("", "void") else []:
+                        pm = re.match(r"^(.*?[\s\*&])(\w+)$", p)
+                        if not pm:
+                            params = None
+                            break
+                        params.append((pm.group(1).strip(), pm.group(2)))
+                    if params is None:
+                        continue
+                    if fields is None:
+                        fields = _struct_fields(body)
+                    found.append((m.group(2), {"struct": sname, "params": params, "body": mbody, "fields": fields}))
+            _METHODS[key] = found
+        for name, meth in _METHODS[key]:
+            if not any(x["struct"] == meth["struct"] for x in out.get(name, [])):
+                out.setdefault(name, []).append(meth)
+    return out
+
+
+def _array_alias(u, meth, g):
+    """Whether the global array `g` may stand for the method's object: its first member is an
+    array of g's element type."""
+    if not meth["fields"] or not meth["fields"][0][2]:
+        return False
+    et = _element_type(u, g)
+    return et is not None and _canon(et) == _canon(meth["fields"][0][0])
+
+
+def _method_in_place(u, meth, base, op, args):
+    """A member function's body written for the object `base` (reached by `op`) and the
+    arguments; the struct's first array member read straight from a global array the object is
+    a cast of."""
+    b = base
+    while b.kind == "paren":
+        b = b.kids[0]
+    arr = None
+    if b.kind == "cast" and b.kids[0].kind == "id" and _array_alias(u, meth, b.kids[0].op):
+        arr = (meth["fields"][0][1], b.kids[0].op)
+    fields = {f[1] for f in meth["fields"]}
+    params = {p: a for (_, p), a in zip(meth["params"], args)}
+    body = meth["body"]
+    toks = tokenize(body)
+    pieces, pos = [], 0
+    for n, t in enumerate(toks):
+        if t.kind != "id" or n and toks[n - 1].text in (".", "->", "::"):
+            continue
+        nxt = toks[n + 1].text if n + 1 < len(toks) else ""
+        if t.text in params:
+            rep = wrap(u, params[t.text])
+        elif t.text in fields:
+            rep = arr[1] if arr and t.text == arr[0] and nxt == "[" else wrap(u, base) + op + t.text
+        else:
+            continue
+        pieces += [body[pos:t.start], rep]
+        pos = t.end
+    pieces.append(body[pos:])
+    return "".join(pieces)
+
+
+def _match_method(pu, pat, u, x, binds, meth, obj):
+    """_match_pattern for a member function's body: its members match the same object's members,
+    or (the first array member) a global array's elements; obj[0] records the object."""
+    while x.kind == "paren":
+        x = x.kids[0]
+    while pat.kind == "paren":
+        pat = pat.kids[0]
+    fields = {f[1] for f in meth["fields"]}
+
+    def same_obj(form):
+        if obj[0] is None:
+            obj[0] = form
+        return obj[0] == form
+    if pat.kind == "id" and pat.op in binds:
+        t = u.text_of(x.s, x.e)
+        if binds[pat.op] is None:
+            binds[pat.op] = (t, x)
+            return True
+        return binds[pat.op][0] == t
+    if pat.kind == "index" and pat.kids[0].kind == "id" and pat.kids[0].op in fields:
+        if x.kind != "index":
+            return False
+        root, f = x.kids[0], pat.kids[0].op
+        if root.kind == "id" and f == meth["fields"][0][1] and _array_alias(u, meth, root.op):
+            ok = same_obj(("arr", root.op))
+        elif root.kind == "member" and root.extra == f:
+            ok = same_obj(("mem", wrap(u, root.kids[0]), root.op))
+        else:
+            return False
+        return ok and _match_method(pu, pat.kids[1], u, x.kids[1], binds, meth, obj)
+    if pat.kind == "id" and pat.op in fields:
+        return x.kind == "member" and x.extra == pat.op and same_obj(("mem", wrap(u, x.kids[0]), x.op))
+    if pat.kind != x.kind or pat.op != x.op or len(pat.kids) != len(x.kids):
+        return False
+    if pat.kind == "member" and pat.extra != x.extra:
+        return False
+    if pat.kind == "cast" and pu.text_of(*pat.extra) != u.text_of(*x.extra):
+        return False
+    return all(_match_method(pu, p, u, k, binds, meth, obj) for p, k in zip(pat.kids, x.kids))
 
 
 def find_helpers(text, path=None):
@@ -1815,8 +2003,12 @@ def t_walks(ctx):
 
 def t_helpers(ctx):
     """A call of a single-expression helper (of the file, or of a project header it includes)
-    written in place, and an expression of a helper's shape written as its call."""
+    written in place, and an expression of a helper's shape written as its call; the same for a
+    struct's single-expression member function called on an object, a cast of a global array
+    read as the array's elements in place (func_001D7778, docs/toolchain/loops.md: a pointer
+    passed to an inline lives longer)."""
     u = ctx.u
+    yield from _methods_both_ways(ctx)
     if not ctx.helpers:
         return
     # in place
@@ -1860,6 +2052,70 @@ def t_helpers(ctx):
                 if _match_pattern(pu, pat, u, x, binds) and all(binds.values()):
                     args = ", ".join(binds[p][0] for _, p in h["params"])
                     yield ctx.label("call-helper", x.s, name), [(u.cstart(x.s), u.cend(x.e), "%s(%s)" % (qual.get(name, name), args))]
+
+
+def _methods_both_ways(ctx):
+    u = ctx.u
+    if not ctx.methods:
+        return
+    for st, part, top in _all_exprs(u):
+        for x in top.walk():
+            if x.kind != "call" or x.kids[0].kind != "member":
+                continue
+            callee = x.kids[0]
+            cands = ctx.methods.get(callee.extra, [])
+            base = callee.kids[0]
+            b = base
+            while b.kind == "paren":
+                b = b.kids[0]
+            if b.kind == "cast":
+                cty = _canon(u.text_of(*b.extra)).rstrip("*").strip()
+                cands = [m for m in cands if m["struct"] == cty.split("::")[-1]]
+            elif len(cands) != 1:
+                continue
+            args = x.kids[1:]
+            for meth in cands:
+                if len(meth["params"]) != len(args):
+                    continue
+                if any(len(re.findall(r"\b%s\b" % re.escape(p), meth["body"])) != 1 and not simple_rvalue(a)
+                       for (_, p), a in zip(meth["params"], args)):
+                    continue
+                if base.kind not in PRIMARY_KINDS and not simple_rvalue(base) and \
+                        len(re.findall(r"\b(?:%s)\b" % "|".join(re.escape(f[1]) for f in meth["fields"]) or "^$",
+                                       meth["body"])) > 1:
+                    continue
+                text = _method_in_place(u, meth, base, callee.op, args)
+                yield ctx.label("inline-method", x.s, "%s::%s" % (meth["struct"], callee.extra)), [
+                    (u.cstart(x.s), u.cend(x.e), "(%s)" % text)]
+    # an expression of a member function's shape as its call
+    patterns = []
+    for name, meths in ctx.methods.items():
+        for meth in meths:
+            try:
+                pu = _ExprUnit(meth["body"], {p for _, p in meth["params"]} | {f[1] for f in meth["fields"]} | u.locals,
+                               u.types)
+                pat = pu.expr(0, len(pu.toks))
+            except ParseError:
+                continue
+            if pat.kind in ("id", "member", "index", "num"):
+                continue
+            patterns.append((name, meth, pu, pat))
+    if not patterns:
+        return
+    for st, part, top in _all_exprs(u):
+        for x in top.walk():
+            if x.kind == "paren":
+                continue
+            for name, meth, pu, pat in patterns:
+                binds = {p: None for _, p in meth["params"]}
+                obj = [None]
+                if _match_method(pu, pat, u, x, binds, meth, obj) and all(binds.values()) and obj[0] is not None:
+                    args = ", ".join(binds[p][0] for _, p in meth["params"])
+                    if obj[0][0] == "arr":
+                        call = "((%s*)%s)->%s(%s)" % (meth["struct"], obj[0][1], name, args)
+                    else:
+                        call = "%s%s%s(%s)" % (obj[0][1], obj[0][2], name, args)
+                    yield ctx.label("call-method", x.s, "%s::%s" % (meth["struct"], name)), [(u.cstart(x.s), u.cend(x.e), call)]
 
 
 def _qualified_names(text):
@@ -2036,6 +2292,1028 @@ def t_vu0(ctx):
                 yield ctx.label("vu0", x.s, "%s->%s" % (name, alt)), [(u.cstart(f.s), u.cend(f.e), "Vu0::" + alt)]
 
 
+# ---------------------------------------------------------------------------------------------
+# The source forms that matched in November 2026 (docs/toolchain/*.md cite each one).
+
+CANON_TYPE = {"float": "f32", "int": "s32", "double": "f64"}
+SCALAR_WORDS = set(WIDTH_BITS) | {"int", "unsigned", "signed", "long", "short", "char", "bool"}
+LOOSE_BEFORE = ASSIGN | {"(", ",", "return"}
+
+
+def _canon(ty):
+    """A type's text without qualifiers, float and int written f32 and s32, spaces normalised."""
+    words = [w for w in ty.replace("*", " * ").replace("&", " & ").split()
+             if w not in ("const", "static", "extern", "volatile", "register", "inline")]
+    return " ".join(CANON_TYPE.get(w, w) for w in words).replace(" *", "*").replace(" &", "&")
+
+
+def _placed(u, s, e, text, x):
+    """`text`, the expression x, written over tokens s..e: in parentheses unless x is primary or
+    the place takes a whole expression (an assignment's right side, an argument, a return)."""
+    if x.kind in PRIMARY_KINDS:
+        return text
+    prev = u.toks[s - 1].text if s > 0 else ";"
+    nxt = u.toks[e].text if e < len(u.toks) else ";"
+    if not (x.kind == "binary" and x.op == ",") and x.kind != "assign" and \
+            (prev in LOOSE_BEFORE and nxt in (";", ")", ",") or prev == "[" and nxt == "]"):
+        return text
+    return "(" + text + ")"
+
+
+def _toks_key(u, s, e):
+    return " ".join(t.text for t in u.toks[s:e])
+
+
+def _const_expr(x):
+    """Whether x is built of numbers only (a literal or a constant expression of literals)."""
+    if x.kind == "num":
+        return True
+    if x.kind == "paren" or x.kind == "unary" and x.op in ("-", "+"):
+        return _const_expr(x.kids[0])
+    if x.kind == "binary" and x.op in ("+", "-", "*", "/"):
+        return all(_const_expr(k) for k in x.kids)
+    return False
+
+
+def _is_float_num(t):
+    t = t.lower()
+    return not t.startswith("0x") and ("." in t or "e" in t or t.endswith("f"))
+
+
+def _const_type(x):
+    """f32, u32 or s32 for a constant expression (None for a 64-bit one)."""
+    nums = [n.op.lower() for n in x.walk() if n.kind == "num"]
+    if any(_is_float_num(n) for n in nums):
+        return "f32"
+    if any("ll" in n for n in nums):
+        return None
+    return "u32" if any(n.rstrip("l").endswith("u") for n in nums) else "s32"
+
+
+def _written_through(u, i):
+    """Whether the operand ending at token i is the base of a member or element that is assigned
+    or incremented (x.f = ..., x[2]++, ...), or is itself assigned."""
+    j = i + 1
+    while j < len(u.toks):
+        t = u.toks[j].text
+        if t in (".", "->") and j + 1 < len(u.toks):
+            j += 2
+        elif t == "[" and j in u._match:
+            j = u.match(j) + 1
+        else:
+            break
+    t = u.toks[j].text if j < len(u.toks) else ""
+    return t in ASSIGN or t in ("++", "--")
+
+
+def _constants(u):
+    """The maximal constant subexpressions of the function: the float ones, and the integer ones
+    (but 0) that are an operand of arithmetic or a comparison, an assignment's or initialiser's
+    value, a return's or a call's argument; not a shift count, a mask, an index, a case label, a
+    template's or an upper-case macro's argument."""
+    out, seen = [], set()
+
+    def visit(x, parent):
+        if _const_expr(x):
+            ty = _const_type(x)
+            if ty is None or (x.s, x.e) in seen:
+                return
+            prev = u.toks[x.s - 1].text if x.s > 0 else ""
+            nxt = u.toks[x.e].text if x.e < len(u.toks) else ""
+            if prev == "<" and nxt == ">":
+                return
+            if ty != "f32":
+                if x.kind == "num" and ZERO.match(x.op):
+                    return
+                if parent is not None and (parent.kind in ("index", "unary", "cast") or parent.kind == "binary" and
+                                           parent.op not in ("+", "-", "*", "/", "<", ">", "<=", ">=", "==", "!=")):
+                    return
+            if parent is not None and parent.kind == "call" and parent.kids[0].kind == "id" and \
+                    (parent.kids[0].op.isupper() or len(parent.kids[0].op) == 1):
+                return
+            seen.add((x.s, x.e))
+            out.append(x)
+            return
+        for k in x.kids:
+            if k is not None:
+                visit(k, x)
+    for st, part, top in _all_exprs(u):
+        if st.kind != "label":
+            visit(top, None)
+    return out
+
+
+def _ndecls(u, name):
+    """How many declarations of `name` the function has (a for loop's own counted once)."""
+    return len({id(d) for d in u.decls if d.kind == "decl" and d.p["name"] == name})
+
+
+def _single_decl(u, name):
+    return _ndecls(u, name) == 1 and name not in {p[2] for p in u.params}
+
+
+def _block_decls(u):
+    """(block, index, decl) of every declaration that is an item of a block."""
+    for b in blocks(u):
+        for k, st in enumerate(b.p["items"]):
+            if st.kind == "decl":
+                yield b, k, st
+
+
+def _plain_value_local(u, st):
+    """A declaration `T x = e;` whose x is never assigned again nor has its address taken."""
+    if not st.p["init"] or st.p["multi"] or st.p["dims"] or st.p["ctor"]:
+        return False
+    ty = u.text_of(*st.p["type"])
+    name = st.p["name"]
+    if "&" in ty or re.search(r"\bstatic\b", ty) or name in u.addr_taken or not _single_decl(u, name):
+        return False
+    if u.text_of(*st.p["init"]).lstrip().startswith("{"):
+        return False
+    return not _assigned(u, name, st.p["name_at"])
+
+
+def t_named_constants(ctx):
+    """A constant used in a loop body named by a local of that body (`f32 half = 0.5f;`, at the
+    body's top or before its first use), a constant used more than once named by one local at the
+    function's top, and the reverse: a local set to a constant and never changed written as the
+    constant at each use (func_00131F60, docs/toolchain/loops.md, "Named constants that lose their
+    registers")."""
+    u = ctx.u
+    groups = {}
+    for x in _constants(u):
+        groups.setdefault(_toks_key(u, x.s, x.e), []).append(x)
+    pos, top_ind, _ = _top_insert(u)
+    loops = [st for st in u.body.walk() if st.kind in ("for", "while", "do") and st.p["body"].kind == "block"
+             and st.p["body"].p["items"]]
+    for key, xs in groups.items():
+        ty = _const_type(xs[0])
+        text = u.text_of(xs[0].s, xs[0].e)
+        name = _fresh(u, "k")
+        if len(xs) >= 2:
+            edits = [(u.cstart(x.s), u.cend(x.e), name) for x in xs]
+            edits.append((pos, pos, "\n%s%s %s = %s;" % (top_ind, ty, name, text)))
+            yield ctx.label("name-constant", xs[0].s, "%s at the top" % short(text, 24)), edits
+        for loop in loops:
+            b = loop.p["body"]
+            inside = [x for x in xs if b.s < x.s and x.e < b.e]
+            if not inside:
+                continue
+            items = b.p["items"]
+            ind = u.indent_at(items[0].s)
+            first = next(k for k, it in enumerate(items) if it.s <= inside[0].s < it.e)
+            for k, what in sorted({0: "top", first: "use"}.items()):
+                at = u.cstart(items[k].s)
+                edits = [(u.cstart(x.s), u.cend(x.e), name) for x in inside]
+                edits.append((at, at, "%s %s = %s;\n%s" % (ty, name, text, u.indent_at(items[k].s) if k else ind)))
+                yield ctx.label("name-constant", inside[0].s, "%s in the loop of line %d (%s)" % (
+                    short(text, 24), u.line_of(loop.s), what)), edits
+    # the reverse: a named constant written as its literal
+    for b, k, st in _block_decls(u):
+        if not _plain_value_local(u, st):
+            continue
+        try:
+            init = u.expr(*st.p["init"])
+        except ParseError:
+            continue
+        if not _const_expr(init):
+            continue
+        uses = [i for i in _uses(u, st.p["name"]) if i != st.p["name_at"]]
+        if not uses:
+            continue
+        itext = u.text_of(init.s, init.e)
+        edits = [_replace_stmt(u, st, "")] + [(u.cstart(i), u.cend(i + 1), _placed(u, i, i + 1, itext, init)) for i in uses]
+        yield ctx.label("literal", st.s, st.p["name"]), edits
+
+
+def _dup_ok(ctx, x):
+    """Whether x may be evaluated again where it was evaluated once: no assignment or increment,
+    and calls only of VU0 helpers or of the file's pure helpers."""
+    for n in x.walk():
+        if n.kind == "assign" or n.kind in ("unary", "postfix") and n.op in ("++", "--"):
+            return False
+        if n.kind == "call":
+            c = n.kids[0]
+            if c.kind != "id" or not (c.op.startswith("Vu0::") or c.op.split("::")[-1] in ctx.eff.pure):
+                return False
+    return True
+
+
+def _value_effects(ctx, x):
+    """x's effects, its VU0 and helper calls read as values (they touch no memory of their own)."""
+    names = {n.kids[0].op.split("::")[-1] for n in x.walk() if n.kind == "call" and n.kids[0].kind == "id"}
+    return Effects(ctx.u, ctx.eff.pure | names).expr(x)
+
+
+def _untouched(ctx, eff, items, k, j, start, uses):
+    """Whether an expression (its effects `eff`) evaluated at token `start` has the same value at
+    each of `uses` (token indices, in items k..j of a block): no local it reads is written between
+    `start` and the last use, nor in a loop that holds a use and starts after `start`; no
+    statement of items k..j writes memory it reads."""
+    u = ctx.u
+    loops = [L for L in u.body.walk() if L.kind in ("for", "while", "do") and L.s >= start and
+             any(L.s <= i < L.e and not (L.kind == "for" and L.p["init_span"][0] <= i < L.p["init_span"][1])
+                 for i in uses)]
+    for name in eff.reads:
+        if name not in u.locals:
+            continue
+        for w in _uses(u, name):
+            nxt = u.toks[w + 1].text if w + 1 < len(u.toks) else ""
+            if not (nxt in ASSIGN or nxt in ("++", "--") or u.toks[w - 1].text in ("++", "--")):
+                continue
+            if start < w < max(uses) or any(L.s <= w < L.e for L in loops):
+                return False
+    if eff.mr:
+        for m in range(k, j + 1):
+            if _mem_conflict(ctx.eff.stmt(items[m]).mw, eff.mr):
+                return False
+    return True
+
+
+def _local_type(u, name):
+    ds = list({id(d): d for d in u.decls if d.kind == "decl" and d.p["name"] == name}.values())
+    if len(ds) == 1 and not ds[0].p["dims"]:
+        return _canon(u.text_of(*ds[0].p["type"]))
+    for ty, _, pname in u.params:
+        if pname == name:
+            return _canon(ty)
+    return None
+
+
+def _return_type(ctx, name):
+    """The return type of a function or helper named in a call, from the file and its headers."""
+    if name.startswith("Vu0::Vec::"):
+        return "Vu0::Vec"
+    if not hasattr(ctx, "_rtypes"):
+        ctx._rtypes = {}
+    base = name.split("::")[-1]
+    if base not in ctx._rtypes:
+        found = None
+        pat = re.compile(r"(?:^|[;{}\n])\s*(?:template\s*<[^>]*>\s*)?(?:static\s+|inline\s+|extern\s+|virtual\s+)*"
+                         r"((?:const\s+)?[\w:]+(?:\s*[\*&])*)\s+%s\s*\(" % re.escape(base))
+        for src in [ctx.u.text] + ctx.headers:
+            for m in pat.finditer(src):
+                ty = m.group(1)
+                if ty.split()[-1] not in KEYWORDS and ty not in ("else", "return"):
+                    found = _canon(ty).rstrip("&").strip()
+                    break
+            if found:
+                break
+        ctx._rtypes[base] = found
+    return ctx._rtypes[base]
+
+
+def _type_of(ctx, x):
+    """The type of an expression where the text tells it, else None."""
+    k = x.kind
+    if k == "num":
+        return _const_type(x)
+    if k == "paren":
+        return _type_of(ctx, x.kids[0])
+    if k == "id":
+        return _local_type(ctx.u, x.op)
+    if k == "cast":
+        return _canon(ctx.u.text_of(*x.extra))
+    if k == "unary":
+        if x.op == "!":
+            return "s32"
+        t = _type_of(ctx, x.kids[0])
+        if x.op == "*":
+            return t[:-1].strip() if t and t.endswith("*") else None
+        return t if x.op in ("-", "~", "+") else None
+    if k == "binary":
+        if x.op in ("==", "!=", "<", ">", "<=", ">=", "&&", "||"):
+            return "s32"
+        a, b = (_type_of(ctx, kk) for kk in x.kids)
+        if x.op in ("<<", ">>"):
+            return a
+        if "f32" in (a, b):
+            return "f32"
+        if a and a.endswith("*"):
+            return "s32" if b and b.endswith("*") else a
+        t = a if a == b or b is None else (a if a is not None and WIDTH_BITS.get(a, 0) >= WIDTH_BITS.get(b, 0) else b)
+        return "s32" if t in ("s8", "u8", "s16", "u16") else t
+    if k == "ternary":
+        return _type_of(ctx, x.kids[1])
+    if k == "call" and x.kids[0].kind == "id":
+        return _return_type(ctx, x.kids[0].op)
+    return None
+
+
+def _lvalue_place(u, x):
+    """Whether x is written or has its address taken where it stands, or is a method's callee."""
+    prev = u.toks[x.s - 1] if x.s > 0 else None
+    nxt = u.toks[x.e].text if x.e < len(u.toks) else ""
+    if prev is not None and prev.text in ("++", "--"):
+        return True
+    if prev is not None and prev.text == "&" and x.s >= 2 and (u.toks[x.s - 2].kind == "op" and
+                                                               u.toks[x.s - 2].text not in (")", "]")):
+        return True
+    return _written_through(u, x.e - 1) or x.kind == "member" and nxt == "("
+
+
+def _innermost_block(u, lo, hi):
+    best = None
+    for b in blocks(u):
+        if b.s < lo and hi <= b.e - 1 and (best is None or b.e - b.s < best.e - best.s):
+            best = b
+    return best
+
+
+def t_repeat_expression(ctx):
+    """A local that only carries an expression used several times removed and the expression
+    written at each use, and the reverse: an expression written several times named once by a
+    local before its first use (func_001D5678, docs/toolchain/gcse.md, "One reaching register for
+    every occurrence")."""
+    u = ctx.u
+    for b, k, st in _block_decls(u):
+        if not _plain_value_local(u, st):
+            continue
+        try:
+            init = u.expr(*st.p["init"])
+        except ParseError:
+            continue
+        if _const_expr(init) or not _dup_ok(ctx, init):
+            continue
+        name = st.p["name"]
+        uses = [i for i in _uses(u, name) if i != st.p["name_at"]]
+        if len(uses) < 2 or any(_written_through(u, i) for i in uses):
+            continue
+        items = b.p["items"]
+        j = next((j for j in range(k + 1, len(items)) if items[j].s <= uses[-1] < items[j].e), None)
+        if j is None or not _untouched(ctx, _value_effects(ctx, init), items, k + 1, j, st.e - 1, uses):
+            continue
+        itext = u.text_of(init.s, init.e)
+        edits = [_replace_stmt(u, st, "")] + [(u.cstart(i), u.cend(i + 1), _placed(u, i, i + 1, itext, init)) for i in uses]
+        yield ctx.label("write-at-uses", st.s, name), edits
+    # the reverse: name an expression written several times
+    groups, seen = {}, set()
+    for st, part, top in _all_exprs(u):
+        if st.kind == "label":
+            continue
+        for x in top.walk():
+            if x.kind not in ("binary", "call", "member", "index", "cast", "unary") or (x.s, x.e) in seen:
+                continue
+            seen.add((x.s, x.e))
+            if x.kind == "unary" and x.op in ("&", "++", "--") or x.kind == "binary" and x.op in (",", "&&", "||"):
+                continue
+            if x.e - x.s < 3 or _const_expr(x) or not _dup_ok(ctx, x) or _lvalue_place(u, x):
+                continue
+            groups.setdefault(_toks_key(u, x.s, x.e), []).append(x)
+    for key, every in groups.items():
+        every.sort(key=lambda x: x.s)
+        # every run of two or more consecutive occurrences
+        for a in range(len(every)):
+            for c in range(a + 2, len(every) + 1):
+                yield from _name_repeat(ctx, u, key, every[a:c])
+
+
+def _name_repeat(ctx, u, key, xs):
+    b = _innermost_block(u, xs[0].s, xs[-1].e)
+    if b is None:
+        return
+    items = b.p["items"]
+    k = next((k for k, it in enumerate(items) if it.s <= xs[0].s < it.e), None)
+    j = next((j for j, it in enumerate(items) if it.s <= xs[-1].s < it.e), None)
+    if k is None or j is None:
+        return
+    ids = {n.op for n in xs[0].walk() if n.kind == "id" and n.op in u.locals}
+    if any(not any(d.kind == "decl" and d.p["name"] == n and d.p["name_at"] < items[k].s for d in u.decls)
+           and n not in {p[2] for p in u.params} for n in ids):
+        return
+    ty = _type_of(ctx, xs[0])
+    if ty is None or ty == "void" or \
+            not _untouched(ctx, _value_effects(ctx, xs[0]), items, k, j, items[k].s, [x.s for x in xs]):
+        return
+    name = _fresh(u, "t")
+    at = u.cstart(items[k].s)
+    edits = [(at, at, "%s %s = %s;\n%s" % (ty, name, u.text_of(xs[0].s, xs[0].e), u.indent_at(items[k].s)))]
+    edits += [(u.cstart(x.s), u.cend(x.e), name) for x in xs]
+    yield ctx.label("name-repeat", xs[0].s, "%dx %s" % (len(xs), short(key, 30))), edits
+
+
+def _split_top(toks, s, e):
+    """The token ranges of the comma-separated parts of tokens s..e, at depth 0."""
+    out, i, start, depth = [], s, s, 0
+    while i < e:
+        t = toks[i].text
+        if t in ("(", "[", "{"):
+            depth += 1
+        elif t in (")", "]", "}"):
+            depth -= 1
+        elif t == "," and depth == 0:
+            out.append((start, i))
+            start = i + 1
+        i += 1
+    if e > s:
+        out.append((start, e))
+    return out
+
+
+_FILE_TOKS = {}
+
+
+def _file_tokens(text):
+    """Every token of a whole file and its bracket pairs (both ways), cached by text."""
+    key = hashlib.sha1(text.encode()).hexdigest()
+    if key not in _FILE_TOKS:
+        if len(_FILE_TOKS) > 64:
+            _FILE_TOKS.clear()
+        toks = tokenize(text)
+        match, back, stack = {}, {}, []
+        for i, t in enumerate(toks):
+            if t.kind == "op" and t.text in "([{":
+                stack.append(i)
+            elif t.kind == "op" and t.text in ")]}" and stack:
+                o = stack.pop()
+                match[o], back[i] = i, o
+        _FILE_TOKS[key] = (toks, match, back)
+    return _FILE_TOKS[key]
+
+
+def _name_aliases(name):
+    names = {name}
+    try:
+        import symbols
+        c = symbols.canonical(name)
+        names |= {c, symbols.readable(c)}
+    except Exception:
+        pass
+    names.discard(None)
+    return names
+
+
+def t_param_order(ctx):
+    """One parameter of the definition moved to another place where the calling convention does
+    not change: past parameters of the other register file only (a float among integers and
+    pointers, or one of those among floats), with every declaration and call in the file
+    reordered to follow (func_00185150, docs/toolchain/vu0-helpers.md). The candidate's header
+    names the callers in the other files."""
+    u = ctx.u
+    ps, pe = u.pspan
+    spans = _split_top(u.toks, ps, pe)
+    if len(spans) < 2 or len(spans) != len(u.params):
+        return
+    kinds = []
+    for s, e in spans:
+        words = [t.text for t in u.toks[s:e - 1]]
+        if "..." in words or u.toks[e - 1].kind != "id":
+            return
+        if "*" in words or "&" in words:
+            kinds.append("i")
+        elif any(w in ("f32", "float") for w in words):
+            kinds.append("f")
+        elif words and all(w in SCALAR_WORDS or w == "const" for w in words):
+            kinds.append("i")
+        else:
+            return
+    if kinds.count("i") > 8 or kinds.count("f") > 8 or len(set(kinds)) < 2:
+        return
+    texts = [u.text_of(s, e) for s, e in spans]
+    names = _name_aliases(u.toks[ps - 2].text)
+    toks, match, _ = _file_tokens(u.text)
+    own = u.toks[ps - 1].start
+    sites = []
+    for i, t in enumerate(toks):
+        if t.kind == "id" and t.text in names and i + 1 < len(toks) and toks[i + 1].text == "(" and \
+                toks[i + 1].start != own and not (i > 0 and toks[i - 1].text in (".", "->")) and i + 1 in match:
+            parts = _split_top(toks, i + 2, match[i + 1])
+            if len(parts) == len(spans) and all(a < b for a, b in parts):
+                sites.append([u.text[toks[a].start:toks[b - 1].end] for a, b in parts] +
+                             [(toks[i + 2].start, toks[match[i + 1] - 1].end)])
+    n = len(spans)
+    for k in range(n):
+        for j in range(n):
+            if j == k or any(kinds[m] == kinds[k] for m in range(min(k, j), max(k, j) + 1) if m != k):
+                continue
+            order = list(range(n))
+            order.pop(k)
+            order.insert(j, k)
+            edits = [(u.cstart(ps), u.cend(pe), ", ".join(texts[m] for m in order))]
+            for site in sites:
+                edits.append((site[-1][0], site[-1][1], ", ".join(site[m] for m in order)))
+            yield ctx.label("param-order", ps, "%s to %d" % (u.params[k][2], j + 1)), edits
+
+
+def _prototypes_in_file(u, name):
+    """[(start, end, type)] of the return types of the file's prototypes of `name` (outside the
+    definition being searched), or None when the file defines it or declares it otherwise."""
+    out = []
+    pat = re.compile(r"(?m)^[ \t]*(?:extern\s+)?(void|s32|int)\s+%s\s*\(" % re.escape(name))
+    for m in pat.finditer(u.text):
+        if u.span[0] <= m.start() < u.span[1]:
+            continue
+        depth, i = 0, m.end() - 1
+        while i < len(u.text):
+            if u.text[i] == "(":
+                depth += 1
+            elif u.text[i] == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+            i += 1
+        rest = u.text[i + 1:i + 40].lstrip()
+        if not rest.startswith(";"):
+            return None
+        out.append((m.start(1), m.end(1), m.group(1)))
+    if len({t for _, _, t in out}) != 1:
+        return None
+    return out
+
+
+def _results_unused(text, names):
+    """Whether every call in the file of a function named `names` is a statement of its own."""
+    toks, match, back = _file_tokens(text)
+    for i, t in enumerate(toks):
+        if t.kind != "id" or t.text not in names or i + 1 >= len(toks) or toks[i + 1].text != "(":
+            continue
+        prev = toks[i - 1].text if i else ";"
+        if prev in ("void", "s32", "int", "u32", "extern", "*", "::", ".", "->"):
+            continue
+        close = match.get(i + 1)
+        if close is None or close + 1 >= len(toks) or toks[close + 1].text != ";":
+            return False
+        if prev in (";", "{", "}", "else", ":"):
+            continue
+        if prev == ")" and i - 1 in back and back[i - 1] > 0 and toks[back[i - 1] - 1].text in ("if", "while", "for"):
+            continue
+        return False
+    return True
+
+
+def t_callee_return(ctx):
+    """A called function's prototype in the file changed between void and s32, where the call's
+    result is unused (and, for void, every call of it in the file is a statement): a callee
+    declared s32 leaves $v0 to the caller's next value (func_001FA6B0, docs/toolchain/
+    alias-classes.md). The candidate's header names the other declarations in src/."""
+    u = ctx.u
+    done = set()
+    for st in u.body.walk():
+        if st.kind != "expr":
+            continue
+        try:
+            x = u.expr(*st.p["value"])
+        except ParseError:
+            continue
+        if x.kind != "call" or x.kids[0].kind != "id" or "::" in x.kids[0].op or x.kids[0].op in done:
+            continue
+        name = x.kids[0].op
+        done.add(name)
+        protos = _prototypes_in_file(u, name)
+        if not protos:
+            continue
+        old = protos[0][2]
+        new = "s32" if old == "void" else "void"
+        if new == "void" and not _results_unused(u.text, {name}):
+            continue
+        yield ctx.label("callee-return", st.s, "%s %s -> %s" % (name, old, new)), [(s, e, new) for s, e, _ in protos]
+
+
+def _decl_uses(u):
+    """[(decl, its uses as token indices, its declaration's included)] of every local declared as
+    an item of a block or in a for loop's head, each use given to the innermost declaration of its
+    name whose scope holds it."""
+    scopes = []
+    for st in u.body.walk():
+        if st.kind == "block":
+            for it in st.p["items"]:
+                if it.kind == "decl":
+                    scopes.append((it, it.p["name_at"], st.e - 1))
+        elif st.kind == "for" and st.p["init"] is not None and st.p["init"].kind == "decl":
+            scopes.append((st.p["init"], st.p["init"].p["name_at"], st.e))
+    out = []
+    for d, s, e in scopes:
+        same = [x for x in scopes if x[0].p["name"] == d.p["name"]]
+        uses = [i for i in _uses(u, d.p["name"], s, e)
+                if min((x for x in same if x[1] <= i < x[2]), key=lambda x: x[2] - x[1])[0] is d]
+        out.append((d, uses, (s, e)))
+    return out
+
+
+def _decl_as_assignment(u, d, name):
+    """The edit that turns a declaration into an assignment of its initialiser to `name` (or
+    removes it when it has none); a for loop's own declaration stays in the loop's head."""
+    in_for = u.toks[d.e - 1].text != ";"
+    if d.p["init"]:
+        text = "%s = %s" % (name, u.text_of(*d.p["init"]))
+        return (u.cstart(d.s), u.cend(d.e), text + ("" if in_for else ";"))
+    if in_for:
+        return (u.cstart(d.s), u.cend(d.e), "")
+    return _replace_stmt(u, d, "")
+
+
+def t_reuse_variable(ctx):
+    """Two locals of one type whose lives do not overlap merged into one (declared at the top, the
+    second's declaration an assignment): one index for two loops, one int for a size, a count and
+    an index; and one local with separate uses split into two at an assignment that starts a new
+    life (func_001B7280, func_001FA6B0, docs/toolchain/alias-classes.md, "One int for a size, a
+    count and an index")."""
+    u = ctx.u
+    simple = []
+    for d, uses, scope in _decl_uses(u):
+        ty = u.text_of(*d.p["type"])
+        if d.p["multi"] or d.p["dims"] or d.p["ctor"] or d.p["name"] in u.addr_taken or \
+                re.search(r"\b(const|static)\b", ty) or "&" in ty or \
+                d.p["init"] and u.text_of(*d.p["init"]).lstrip().startswith("{"):
+            continue
+        # its life: its uses, its declaration only when that sets it
+        life = [i for i in uses if i != d.p["name_at"] or d.p["init"]] or uses
+        simple.append((d, life, _canon(ty), ty, scope))
+    loops = [st for st in u.body.walk() if st.kind in ("for", "while", "do")]
+    pnames = {p[2] for p in u.params}
+    pos, top_ind, _ = _top_insert(u)
+    body_items = set(id(x) for x in u.body.p["items"])
+    for da, ua, ta, tya, _ in simple:
+        for db, ub, tb, _, scb in simple:
+            if da is db or ta != tb or max(ua) >= min(ub):
+                continue
+            if any(any(L.s < i < L.e for i in ua) and any(L.s < i < L.e for i in ub) for L in loops):
+                continue
+            na, nb = da.p["name"], db.p["name"]
+            others = [d for d, _, _, _, _ in simple if d is not da and d is not db]
+            if na not in pnames and not any(d.p["name"] == na for d in others) and \
+                    _ndecls(u, na) <= (2 if na == nb else 1):
+                edits = []
+                if id(da) not in body_items:
+                    edits.append((pos, pos, "\n%s%s %s;" % (top_ind, tya, na)))
+                    edits.append(_decl_as_assignment(u, da, na))
+                edits.append(_decl_as_assignment(u, db, na))
+                if na != nb:
+                    edits += [(u.cstart(i), u.cend(i + 1), na) for i in ub if i != db.p["name_at"]]
+                yield ctx.label("reuse-variable", db.s, "%s for %s" % (na, nb)), edits
+            # the later one declared (without a value) before the first's life, in a scope that
+            # holds it: the first's uses take its name
+            if na != nb and not db.p["init"] and db.p["name_at"] < min(ua) and scb[0] <= min(ua) and \
+                    max(ua) < scb[1] and not any(d.p["name"] == nb for d in others) and nb not in pnames and \
+                    _ndecls(u, nb) == 1:
+                edits = [_decl_as_assignment(u, da, nb)]
+                edits += [(u.cstart(i), u.cend(i + 1), nb) for i in ua if i != da.p["name_at"]]
+                yield ctx.label("reuse-variable", da.s, "%s for %s" % (nb, na)), edits
+    # split: a new life from a plain assignment on
+    for d, us, _, ty, _ in simple:
+        name = d.p["name"]
+        if _ndecls(u, name) != 1:
+            continue
+        new = _fresh(u, name)
+        points = []
+        for b in blocks(u):
+            for it in b.p["items"]:
+                if it.kind == "expr" and it.s > d.p["name_at"]:
+                    points.append((it, b.e - 1, True))
+        for st in u.body.walk():
+            if st.kind == "for" and st.p["init"] is not None and st.p["init"].kind == "expr" and st.s > d.p["name_at"]:
+                points.append((st.p["init"], st.e, False))
+        stores = {}
+        for p, end, whole in points:
+            try:
+                x = _assign_of(u, p) if whole else u.expr(*p.p["value"])
+            except ParseError:
+                continue
+            if x is not None and x.kind == "assign" and x.op == "=" and x.kids[0].kind == "id" and \
+                    x.kids[0].op == name and not _uses(u, name, x.kids[1].s, x.kids[1].e):
+                stores[x.kids[0].s] = (p, end, whole, x)
+        for p, end, whole, x in stores.values():
+            before = [i for i in us if i < p.s and i != d.p["name_at"]]
+            after = [i for i in us if p.e <= i < end]
+            if not after or not any(not _is_plain_store(u, i) for i in before):
+                continue
+            if any(L.s < p.s < L.e and any(L.s < i < p.s for i in us) for L in loops):
+                continue
+            # the uses after this life's block must each be reached only from a later store of
+            # their own (one at the head of a block that holds every use after it)
+            rest, ok = [i for i in us if i >= end], True
+            while rest and ok:
+                nxt = stores.get(rest[0])
+                ok = nxt is not None and not any(L.s < rest[0] < L.e and any(L.s < i < rest[0] for i in us)
+                                                 for L in loops)
+                if ok:
+                    rest = [i for i in rest if i >= nxt[1]]
+            if not ok:
+                continue
+            edits = [(u.cstart(p.s), u.cend(p.e), "%s %s = %s%s" % (ty, new, u.text_of(x.kids[1].s, x.kids[1].e),
+                                                                     ";" if whole else ""))]
+            edits += [(u.cstart(i), u.cend(i + 1), new) for i in after]
+            yield ctx.label("split-variable", p.s, "%s from line %d" % (name, u.line_of(p.s))), edits
+
+
+def _last_stmt(st):
+    if st is None:
+        return None
+    if st.kind == "block":
+        return st.p["items"][-1] if st.p["items"] else None
+    return st
+
+
+def t_test_in_arms(ctx):
+    """A test of a variable that each arm of the if/else before it sets (`if (a) hit = F(); else
+    hit = G(); if (hit) S`) written in each arm instead (`if (a) { if (F()) S } else { if (G()) S }`),
+    and the reverse (func_00187F40, docs/toolchain/gcse.md, "A test written in each arm")."""
+    u = ctx.u
+    for b in blocks(u):
+        items = b.p["items"]
+        for k, st in enumerate(items):
+            if st.kind != "if" or st.p["other"] is None or st.p["other"].kind == "if":
+                continue
+            try:
+                yield from _test_into_arms(ctx, u, items, k, st)
+                yield from _test_out_of_arms(ctx, u, st)
+            except ParseError:
+                continue
+
+
+def _test_into_arms(ctx, u, items, k, st):
+    if k + 1 >= len(items) or items[k + 1].kind != "if":
+        return
+    test = items[k + 1]
+    arms = [st.p["then"], st.p["other"]]
+    lasts = [_last_stmt(a) for a in arms]
+    xs = [_assign_of(u, s) for s in lasts]
+    if any(x is None or x.kids[0].kind != "id" for x in xs) or xs[0].kids[0].op != xs[1].kids[0].op:
+        return
+    v = xs[0].kids[0].op
+    if v not in u.locals or v in u.addr_taken:
+        return
+    cs, ce = test.p["cond"]
+    mine = [(d, us, e - s) for d, us, (s, e) in _decl_uses(u) if d.p["name"] == v and s <= cs < e]
+    if not mine:
+        return
+    decl, uses, _ = min(mine, key=lambda m: m[2])
+    occ = [i for i in uses if cs <= i < ce]
+    if len(occ) != 1 or decl.p["init"] or u.toks[decl.e - 1].text != ";":
+        return
+    if [i for i in uses if i not in (decl.p["name_at"], xs[0].kids[0].s, xs[1].kids[0].s, occ[0])]:
+        return
+    rest = u.text[u.cend(test.p["cond"][1] + 1):u.cend(test.e)]
+    edits = [_replace_stmt(u, test, ""), _replace_stmt(u, decl, "")]
+    for last, x in zip(lasts, xs):
+        val = x.kids[1]
+        cond = u.text[u.cstart(cs):u.cstart(occ[0])] + _placed(u, occ[0], occ[0] + 1, u.text_of(val.s, val.e), val) + \
+            u.text[u.cend(occ[0] + 1):u.cend(ce)]
+        text = "if (%s)%s" % (cond, reindent(rest, u.indent_at(test.s), u.indent_at(last.s)))
+        edits.append((u.cstart(last.s), u.cend(last.e), text))
+    yield ctx.label("test-in-each-arm", test.s, v), edits
+
+
+def _diff_part(u, a, b):
+    """The one pair of subexpressions where two expressions differ, or None."""
+    if _toks_key(u, a.s, a.e) == _toks_key(u, b.s, b.e):
+        return None
+    if a.kind == b.kind and a.op == b.op and len(a.kids) == len(b.kids) and a.kind in ("binary", "unary", "paren"):
+        diff = [(x, y) for x, y in zip(a.kids, b.kids) if _toks_key(u, x.s, x.e) != _toks_key(u, y.s, y.e)]
+        if len(diff) == 1:
+            return _diff_part(u, *diff[0]) or diff[0]
+    return (a, b)
+
+
+def _test_out_of_arms(ctx, u, st):
+    arms = [st.p["then"], st.p["other"]]
+    inner = [_last_stmt(a) for a in arms]
+    if any(i is None or i.kind != "if" for i in inner):
+        return
+    t1, t2 = inner
+
+    def key(s):
+        return None if s is None else _toks_key(u, s.s, s.e)
+    if key(t1.p["then"]) != key(t2.p["then"]) or key(t1.p["other"]) != key(t2.p["other"]):
+        return
+    c1, c2 = u.expr(*t1.p["cond"]), u.expr(*t2.p["cond"])
+    d = _diff_part(u, c1, c2)
+    if d is None or d[0].kind != "call" or d[1].kind != "call":
+        return
+    ty = _type_of(ctx, d[0]) or "s32"
+    if ty == "void":
+        return
+    name = _fresh(u, "hit")
+    ind = u.indent_at(st.s)
+    cond = u.text[u.cstart(t1.p["cond"][0]):u.cstart(d[0].s)] + name + u.text[u.cend(d[0].e):u.cend(t1.p["cond"][1])]
+    rest = u.text[u.cend(t1.p["cond"][1] + 1):u.cend(t1.e)]
+    edits = [(u.cstart(st.s), u.cstart(st.s), "%s %s;\n%s" % (ty, name, ind)),
+             (u.cend(st.e), u.cend(st.e), "\n%sif (%s)%s" % (ind, cond, reindent(rest, u.indent_at(t1.s), ind)))]
+    for t, x in zip(inner, d):
+        edits.append((u.cstart(t.s), u.cend(t.e), "%s = %s;" % (name, u.text_of(x.s, x.e))))
+    yield ctx.label("test-after-arms", st.s, name), edits
+
+
+def _switch_groups(u, sw):
+    """A switch's arms as [(first item, end item)] of its body, or None when an arm falls through
+    or the body is not a list of labelled arms."""
+    if sw.p["body"].kind != "block":
+        return None
+    items = sw.p["body"].p["items"]
+    if not items or items[0].kind != "label":
+        return None
+    groups, k = [], 0
+    while k < len(items):
+        s = k
+        while k < len(items) and items[k].kind == "label":
+            k += 1
+        while k < len(items) and items[k].kind != "label":
+            k += 1
+        if k == s or items[k - 1].kind not in ("break", "return", "continue") or items[k - 1].kind == "label":
+            return None
+        groups.append((s, k))
+    return groups
+
+
+def t_cases(ctx):
+    """The order of a switch's arms (none falling through) and of the labels of one arm; a
+    variable set before the switch set in every arm instead (a default arm added where there is
+    none), and the reverse (func_001B7280, docs/toolchain/loops.md, "A count set in each arm")."""
+    u = ctx.u
+    for b in blocks(u):
+        for k, sw in enumerate(b.p["items"]):
+            if sw.kind != "switch":
+                continue
+            groups = _switch_groups(u, sw)
+            if not groups:
+                continue
+            items = sw.p["body"].p["items"]
+            ind = u.indent_at(items[0].s)
+            texts = [u.text[u.cstart(items[s].s):u.cend(items[e - 1].e)] for s, e in groups]
+            span = (u.cstart(items[0].s), u.cend(items[-1].e))
+            n = len(groups)
+            for a in range(n):
+                for c in range(n):
+                    if a == c:
+                        continue
+                    order = list(range(n))
+                    order.pop(a)
+                    order.insert(c, a)
+                    yield ctx.label("case-order", items[groups[a][0]].s, "arm %d to %d" % (a + 1, c + 1)), [
+                        (span[0], span[1], ("\n" + ind).join(texts[m] for m in order))]
+            for s, e in groups:
+                labels = [it for it in items[s:e] if it.kind == "label"]
+                if len(labels) > 1:
+                    yield ctx.label("case-order", labels[0].s, "labels reversed"), [
+                        (u.cstart(labels[0].s), u.cend(labels[-1].e),
+                         ("\n" + ind).join(u.text_of(l.s, l.e) for l in reversed(labels)))]
+            try:
+                yield from _set_in_arms(ctx, u, b.p["items"], k, sw, groups)
+            except ParseError:
+                continue
+
+
+def _arm_store(u, items, s, e, v):
+    """The first statement of an arm that is `v = ...;` with nothing reading v before it."""
+    for it in items[s:e]:
+        if it.kind == "label":
+            continue
+        if it.kind == "expr":
+            x = _assign_of(u, it)
+            if x is not None and x.kids[0].kind == "id" and x.kids[0].op == v and not _uses(u, v, x.kids[1].s, x.kids[1].e):
+                return it, x
+        if _uses(u, v, it.s, it.e):
+            return None
+    return None
+
+
+def _set_in_arms(ctx, u, outer, k, sw, groups):
+    items = sw.p["body"].p["items"]
+    ind = u.indent_at(items[groups[0][0] + 1].s) if groups[0][0] + 1 < len(items) else u.indent_at(items[0].s) + "    "
+    lind = u.indent_at(items[0].s)
+    has_default = any(it.kind == "label" and u.toks[it.s].text == "default" for it in items)
+    # forward: `T v = K;` or `v = K;` just before the switch
+    if k > 0:
+        prev = outer[k - 1]
+        v = val = None
+        if prev.kind == "decl" and prev.p["init"] and not prev.p["multi"]:
+            v, val = prev.p["name"], u.expr(*prev.p["init"])
+        elif prev.kind == "expr":
+            x = _assign_of(u, prev)
+            if x is not None and x.kids[0].kind == "id":
+                v, val = x.kids[0].op, x.kids[1]
+        if v is not None and v in u.locals and v not in u.addr_taken and (_const_expr(val) or val.kind == "id") and \
+                not _uses(u, v, sw.p["cond"][0], sw.p["cond"][1]):
+            vt = u.text_of(val.s, val.e)
+            edits = []
+            if prev.kind == "decl":
+                edits.append((u.cstart(prev.s), u.cend(prev.e), "%s %s;" % (u.text_of(*prev.p["type"]), v)))
+            else:
+                edits.append(_replace_stmt(u, prev, ""))
+            for s, e in groups:
+                if _arm_store(u, items, s, e, v) is None:
+                    first = next(it for it in items[s:e] if it.kind != "label")
+                    at = u.cstart(first.s)
+                    edits.append((at, at, "%s = %s;\n%s" % (v, vt, u.indent_at(first.s))))
+            if not has_default:
+                # without a default arm v is left unset for the values no arm takes (where the
+                # original never reads it), or set there by a new default arm
+                yield ctx.label("set-in-arms", sw.s, v + " (no default)"), list(edits)
+                at = u.cend(items[-1].e)
+                edits.append((at, at, "\n%sdefault:\n%s%s = %s;\n%sbreak;" % (lind, ind, v, vt, ind)))
+            yield ctx.label("set-in-arms", sw.s, v), edits
+    # reverse: every arm sets v to one value first
+    cands = {}
+    for s, e in groups:
+        names = set()
+        for it in items[s:e]:
+            if it.kind == "expr":
+                x = _assign_of(u, it)
+                if x is not None and x.kids[0].kind == "id":
+                    names.add(x.kids[0].op)
+        for v in names:
+            cands[v] = cands.get(v, 0) + 1
+    for v, count in cands.items():
+        if count != len(groups) or v not in u.locals or v in u.addr_taken:
+            continue
+        stores = [_arm_store(u, items, s, e, v) for s, e in groups]
+        if any(x is None for x in stores):
+            continue
+        vals = {_toks_key(u, x.kids[1].s, x.kids[1].e) for _, x in stores}
+        if len(vals) != 1:
+            continue
+        val = stores[0][1].kids[1]
+        if not (_const_expr(val) or val.kind == "id" and val.op not in u.locals):
+            continue
+        vt = u.text_of(val.s, val.e)
+        edits = [_replace_stmt(u, it, "") for it, _ in stores]
+        prev = outer[k - 1] if k > 0 else None
+        if prev is not None and prev.kind == "decl" and prev.p["name"] == v and not prev.p["init"] and not prev.p["multi"]:
+            edits.append((u.cstart(prev.s), u.cend(prev.e), "%s %s = %s;" % (u.text_of(*prev.p["type"]), v, vt)))
+        else:
+            at = u.cstart(sw.s)
+            edits.append((at, at, "%s = %s;\n%s" % (v, vt, u.indent_at(sw.s))))
+        yield ctx.label("set-before-switch", sw.s, v), edits
+
+
+def t_chained(ctx):
+    """`a = v; b = v;` with one value written `b = a = v;` or `a = b = v;` (and `a = v; b = a;`), and
+    the reverse (func_00109488, docs/toolchain/long-block-constants.md, "The source form of
+    func_00109488": a chain expands with one constant and stores its inner target first)."""
+    u = ctx.u
+    for b in blocks(u):
+        items = b.p["items"]
+        for k, st in enumerate(items):
+            if st.kind != "expr":
+                continue
+            try:
+                x = _assign_of(u, st)
+                y = _assign_of(u, items[k + 1]) if k + 1 < len(items) and items[k + 1].kind == "expr" else None
+            except ParseError:
+                continue
+            if x is None:
+                continue
+            ind = u.indent_at(st.s)
+            span = (u.cstart(st.s), u.cend(st.e))
+            if x.kids[1].kind == "assign" and x.kids[1].op == "=":
+                a, (bb, v) = x.kids[0], x.kids[1].kids
+                if v.kind == "assign" or not all(simple_rvalue(n) for n in (a, bb, v)):
+                    continue
+                at, bt, vt = (u.text_of(n.s, n.e) for n in (a, bb, v))
+                for what, text in (("inner first", "%s = %s;\n%s%s = %s;" % (bt, vt, ind, at, vt)),
+                                   ("outer first", "%s = %s;\n%s%s = %s;" % (at, vt, ind, bt, vt)),
+                                   ("copied", "%s = %s;\n%s%s = %s;" % (bt, vt, ind, at, bt))):
+                    yield ctx.label("unchain", st.s, what), [(span[0], span[1], text)]
+                continue
+            if y is None or y.kids[1].kind == "assign" or not simple_rvalue(x.kids[1]) or \
+                    not simple_rvalue(x.kids[0]) or not simple_rvalue(y.kids[0]):
+                continue
+            at, bt = u.text_of(x.kids[0].s, x.kids[0].e), u.text_of(y.kids[0].s, y.kids[0].e)
+            vt = u.text_of(x.kids[1].s, x.kids[1].e)
+            if at == bt:
+                continue
+            both = (u.cstart(st.s), u.cend(items[k + 1].e))
+            same = _toks_key(u, x.kids[1].s, x.kids[1].e) == _toks_key(u, y.kids[1].s, y.kids[1].e)
+            a_key = _toks_key(u, x.kids[0].s, x.kids[0].e)
+            reads_a = a_key in _toks_key(u, y.kids[1].s, y.kids[1].e) or a_key in _toks_key(u, y.kids[0].s, y.kids[0].e)
+            if same and not reads_a:
+                yield ctx.label("chain", st.s, "b first"), [(both[0], both[1], "%s = %s = %s;" % (at, bt, vt))]
+                yield ctx.label("chain", st.s, "a first"), [(both[0], both[1], "%s = %s = %s;" % (bt, at, vt))]
+            elif _toks_key(u, y.kids[1].s, y.kids[1].e) == a_key and \
+                    a_key not in _toks_key(u, y.kids[0].s, y.kids[0].e):
+                yield ctx.label("chain", st.s, "copy"), [(both[0], both[1], "%s = %s = %s;" % (bt, at, vt))]
+
+
+def t_struct_store(ctx):
+    """A VU0 vector stored through Vu0::Q (`Vu0::Q(x) = v.q;`) against through a structure cast
+    of the same address (`*(Vu0::Vec*)&x = v;`): a structure store does not hold a scalar load in
+    sched1 (func_0019ED58, docs/toolchain/sched1.md, "Which of two sums issues first")."""
+    u = ctx.u
+    for st in u.body.walk():
+        if st.kind != "expr":
+            continue
+        try:
+            x = _assign_of(u, st)
+        except ParseError:
+            continue
+        if x is None:
+            continue
+        l, r = x.kids
+        if l.kind == "call" and l.kids[0].kind == "id" and l.kids[0].op == "Vu0::Q" and len(l.kids) == 2 and \
+                r.kind == "member" and r.op == "." and r.extra == "q":
+            lv = l.kids[1]
+            if lv.kind not in ("id", "member", "index"):
+                continue
+            yield ctx.label("struct-store", st.s, short(u.text_of(lv.s, lv.e), 24)), [
+                (u.cstart(x.s), u.cend(x.e), "*(Vu0::Vec*)&%s = %s" % (u.text_of(lv.s, lv.e), u.text_of(r.kids[0].s, r.kids[0].e)))]
+        elif l.kind == "unary" and l.op == "*" and l.kids[0].kind == "cast" and \
+                u.text_of(*l.kids[0].extra).replace(" ", "") == "Vu0::Vec*" and \
+                l.kids[0].kids[0].kind == "unary" and l.kids[0].kids[0].op == "&":
+            lv = l.kids[0].kids[0].kids[0]
+            yield ctx.label("q-store", st.s, short(u.text_of(lv.s, lv.e), 24)), [
+                (u.cstart(x.s), u.cend(x.e), "Vu0::Q(%s) = %s.q" % (u.text_of(lv.s, lv.e), wrap(u, r)))]
+
+
 TRANSFORMS = [
     ("reorder", t_reorder),
     ("loops", t_loops),
@@ -2054,6 +3332,15 @@ TRANSFORMS = [
     ("returns", t_returns),
     ("helpers", t_helpers),
     ("vu0", t_vu0),
+    ("named-constant", t_named_constants),
+    ("repeat-expression", t_repeat_expression),
+    ("param-order", t_param_order),
+    ("callee-return", t_callee_return),
+    ("reuse-variable", t_reuse_variable),
+    ("test-in-each-arm", t_test_in_arms),
+    ("case-order", t_cases),
+    ("chained-assignment", t_chained),
+    ("struct-store", t_struct_store),
 ]
 
 
@@ -2243,12 +3530,43 @@ def callers_of(func):
 
 
 def width_notes(cand, func):
-    """A header comment for a candidate that changed a parameter's width: its callers change too."""
-    if not any(c.startswith("width@") and " param " in c for c in cand.chain):
-        return ""
-    callers = callers_of(func)
-    return "// NOTE: a parameter's width changed: every caller's code changes too (declaration and callers):\n" + \
-        "".join("//   %s\n" % c for c in callers[:12]) + ("//   (none found in src/)\n" if not callers else "")
+    """A header comment for a candidate that changed a parameter's width or order, or a callee's
+    return type: the declarations and callers elsewhere in src/ that would have to follow."""
+    out = ""
+    if any(c.startswith("width@") and " param " in c for c in cand.chain):
+        callers = callers_of(func)
+        out += "// NOTE: a parameter's width changed: every caller's code changes too (declaration and callers):\n" + \
+            "".join("//   %s\n" % c for c in callers[:12]) + ("//   (none found in src/)\n" if not callers else "")
+    if any(c.startswith("param-order@") for c in cand.chain):
+        callers = callers_of(func)
+        out += "// NOTE: the parameters' order changed (the registers do not): every declaration and call\n" + \
+            "// in the other files must follow:\n" + \
+            "".join("//   %s\n" % c for c in callers[:20]) + ("//   (none found in src/)\n" if not callers else "")
+    for c in cand.chain:
+        m = re.match(r"callee-return@\d+ (\S+) (\w+) -> (\w+)", c)
+        if m:
+            decls = declarations_of(m.group(1))
+            out += "// NOTE: %s declared %s here (%s before): its other declarations in src/ must agree:\n" % (
+                m.group(1), m.group(3), m.group(2)) + \
+                "".join("//   %s\n" % d for d in decls[:20]) + ("//   (none found in src/)\n" if not decls else "")
+    return out
+
+
+def declarations_of(name):
+    """The lines of src/ that declare or define the function `name` (either of its names)."""
+    names = _name_aliases(name)
+    pat = re.compile(r"\b(?:void|s32|int|u32|u8|s8|u16|s16|f32|bool)\s*\*?\s+(?:%s)\s*\(" %
+                     "|".join(re.escape(n) for n in sorted(names)))
+    found = []
+    for path in sorted((ROOT / "src").rglob("*.cpp")) + sorted((ROOT / "src").rglob("*.c")):
+        try:
+            lines = path.read_text().splitlines()
+        except OSError:
+            continue
+        for n, line in enumerate(lines, 1):
+            if pat.search(line):
+                found.append("%s:%d: %s" % (path.relative_to(ROOT), n, line.strip()))
+    return found
 
 
 def write_result(outdir, name, cand, func, base_score):
