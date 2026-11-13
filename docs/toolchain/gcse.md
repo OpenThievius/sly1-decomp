@@ -939,3 +939,31 @@ its life. Read from the `-dG`, `-dl` and `-dg` dumps and tools/globalalloc.py:
   `move a1,s5`); none is a PRE copy. func_0017ECE8, the only one tools/regdiff.py classes
   `registers`, has no pair at all. func_00131F60 had no copy either: its invented locals
   were of another kind (loops.md, "Named constants that lose their registers").
+
+### A test written in each arm: PRE shares nothing behind a call, and cross-jumping hides the copies (func_00187F40, near miss)
+
+CollideColliderParts (src/main/collider_contact.cpp) reloads `p->flags538` and
+`other->flags538` at every read after the top of its loop body, where our form kept them in
+registers through PRE, and ranks its bit-53 constant above three argument copies. Both follow
+from one source fact (w40-fc, 2026-11-12, `-dG -dl -dg` dumps and jump.c):
+
+- **Retail's `b join; nop` after the first of two calls is cross-jumping's mark.** The swept
+  test is written in each arm, `if (g & SPHERE) { if (AddSweptPartSphereContact(..) != 0) {
+  p->flags538 |= HIT; continue; } } else { if (AddSweptPartMeshContact(..) != 0) { p->flags538
+  |= HIT; continue; } }`, not once on a shared `hit`. jump2 runs after sched2 and merges the
+  two identical tails (test, load, or, store, jump), so the final code has one tail and an
+  unconditional branch to it from the first arm, exactly what a shared variable would give.
+- **Until then each tail is a block that starts behind a call.** gcse.c marks every block
+  holding a call or a store (mem_set_in_block), which makes no MEM expression anticipatable or
+  transparent there. With the calls in four blocks of their own and each followed by its own
+  reload, PRE finds no load of flags538 to delete after the top of the body: the 12 bytes our
+  form was short.
+- **The references flow counts are the unmerged ones.** The bit-53 constant has four uses
+  (two per sweep) instead of two, so loop.c's hoisted pseudo ranks above a3, a4 and self in
+  global-alloc: retail's s4 for it, s5 to s7 for the others.
+- 152 differing lines to 3. What is left is the sweep flag's spill slot (4(sp) for our 0(sp)):
+  a 4-byte, non-BLKmode frame object allocated before reload that the code never touches
+  (docs/toolchain/stack-slots.md, "A 4-byte slot nothing touches").
+- **Spot it:** two calls in the arms of an if, a `b` with an empty delay slot after the first,
+  and loads that PRE should have shared; or a hoisted constant that outranks values with more
+  visible uses. Write the statements after the calls in each arm.

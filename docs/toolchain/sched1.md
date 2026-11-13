@@ -97,6 +97,24 @@ From haifa-sched.c of GCC 2.95.3 (sched_analyze, sched_analyze_insn) and the `-d
   the block's registers). The only plain-C++ barrier is ruled out, so the argument moves must be
   held back by a dependence of their own, not a barrier.
 
+- **A block boundary there gives retail's order with no loop note (w40-fc, 2026-11-12, a
+  probe).** `if (self != 0) k = 0.0f;` between `rot = m;` and the third call, with k assigned
+  again on every later path, is a conditional over a store flow1 deletes as dead (the reading
+  that fits: k has other uses, so it is not trivially dead after cse, and a float has no
+  conditional move; in func_001EC7A8 the same store of a float used only in its own block was
+  gone before reload, branch and compare with it). The branch
+  and its label stay through sched1, both allocators and sched2, so the call's `lui`, `a1`,
+  `lwc1` and `a0` are the first insns of a block of their own and issue in retail's order;
+  jump2 then deletes the branch to the next insn, and a test of a register alone leaves
+  nothing behind (jump.c's delete_computation keeps a compare's operands after reload, so a
+  test that loads or builds a constant would leave that insn in the code). The probe is 1700
+  bytes with (b) gone (build/swarm/w40-fc/a2.cpp, 56 lines, registers only). With the block
+  split, block A's VU0 registers move: local-alloc now wants the tilt's second row to live at
+  least 9 insns (7 in the probe, 10 when the three argument insns were scheduled among the
+  loads) and the first row with the product's last row at least 25 (23), so retail's block
+  holds two more insns between the tilt loads and the last row's product that leave no code.
+  What the original had at the boundary is not found; a test of pad there takes pad to s1.
+
 ### sched2 keeps sched1's dependences (func_001358D0)
 
 - **LOG_LINKS are never cleared.** haifa-sched.c's sched_analyze only adds to an insn's
@@ -518,6 +536,23 @@ sol` (875), `self->contacts` (880, r307) and its `->head` (882, mem/s through r3
   between the contacts load and the head load (880's chain one insn longer, priority 6), a
   TImode copy feeding the store (871 ready a cycle later), or the birthing raise.
 
+- **The order is not the lever (w40-fa, 2026-11-12).** A CLOBBER of the sum's slot before the
+  copy (the sum as a union built in place by a brace initialiser at the copy, from a `const`
+  source so that expr.c's safe_from_p allows it) gives exactly the order asked for above:
+  the contacts load issues in the cycle after the call, the copy's store a cycle later, and
+  reload takes v1. sched2 then keeps the `lw` ahead of the `sq`: after reload the load is
+  through a hard register, which has no alias base, so it conflicts with the frame store and
+  the two keep sched1's order (the -dR table lists the store among the load's dependents;
+  in the near miss the link runs the other way). Even without the link the `lw` would issue
+  between the `lq` and the `sq`, which waits two cycles for the `lq`. Retail has `lq v1; sq v1;
+  lw v0`, so its sched1 had the store first, as ours has, and the loop-note probe above failed
+  for this reason, not because of the note. What retail needs is in reload only: when
+  order_regs_for_reload ranks the hard registers for insn 871, v0 is either forbidden (live as
+  a hard register before or after the insn) or counted as holding a live pseudo, although the
+  contacts pointer is not set yet. No instruction of retail's shows what that is. The
+  candidates of the last paragraph (a copy, a TImode copy, the birthing raise, a CLOBBER) all
+  work by moving the load first and are closed with this.
+
 ### The rest of rank_for_schedule (func_001782C0)
 
 Read from haifa-sched.c and the `-dS -fsched-verbose-6` dumps (2026-11-08):
@@ -656,6 +691,10 @@ What it showed, with `-1.0`, `5.0`, `1.047` and `0.39` the block's four constant
   burst (`&blk` substituted as a constant: two insns short); the gravity through a `const
   Vec02&` (CSE folds the address back); one float variable reused for 5.0 and -1.0 (they
   share a register, but its first set rises to priority 7 and loads too early).
+
+**Matched 2026-11-12 (w40-fa).** The last two lines (the up vector's store before the
+gravity's) were a second CLOBBER in the block's brace initialiser, before the angles at 0x44:
+docs/toolchain/large-functions.md, "A brace initialiser's union member is a CLOBBER".
 
 ### Emulating sched1 to read local-alloc's registers backwards (func_001CC818)
 
@@ -1545,3 +1584,31 @@ func_0017ECE8), as if retail had insns that left no code. Read from GCC 2.95.3's
   func_00142278's side conversion, func_001DEBE8's (b) and func_0017ECE8's load need a longer
   chain inside one block, where only an argument copy could be invisible, and none of those
   chains ends in a call's argument.
+
+### Which of two sums issues first: a structure store ends a chain that a u128 store extends (func_0019ED58, near miss)
+
+HandleEffectContact (src/main/effect.cpp) adds an impulse to the effect's velocity and its spin
+after MeasurePointToSegment, then tests the velocity's z against a floor. Read from the `-dS
+-dR -fsched-verbose-6` dumps and alias.c (w40-fc, 2026-11-12):
+
+- **The chain behind each sum decides the order.** The velocity sum feeds its add, the store
+  to qA0 and the z load the test reads (a true dependence: 168 is inside 160..175). The spin
+  sum feeds its MulAddX and the store to v100. Stored through a u128 pointer (no alias flag)
+  that store holds the load of the floor D_0026B54C behind it, the spin chain is as long as
+  the velocity's (priority 10 each) and the later statement's sum issues first. Stored as a
+  structure (`*(Vu0::Vec*)&self->v100 = ...`, MEM_IN_STRUCT_P at a varying address) it cannot
+  alias a scalar at a fixed address (fixed_scalar_and_varying_struct_p), the spin chain ends
+  at the store (priority 4) and the velocity sum issues first, as written.
+- **That order frees c2.** With the velocity sum first, the weight s dies at the spin sum,
+  local-alloc ties the sum's result to s (retail's vf1) and c2's quantity keeps its own 3
+  references: 4 x 1 call is not below 3, so local-alloc refuses it a call-clobbered register
+  and reload keeps it at 112(sp), loaded at each use. c2 is a local pseudo; it only had to
+  stop being tied to the sum.
+- **A scalar global against a member store.** `ShortenEffectLife(self, D_0026B550)` after
+  `((Vec02*)&self->qA0)->z = D_0026B54C` loads the life before the z store only when the
+  store is a member's (mem/s) and D_0026B550 a scalar float (mem/f): as an array element it
+  is mem/s itself and waits. Retail's `lui; swc1; lwc1; move a0; jal` with the caller-save of
+  vf8 in the delay slot is the independent form.
+- 141 differing lines to 38 at retail's size. Left: sched2's order of the reloads after the
+  call (retail reloads c2 into vf5 while the velocity sum's vf3 is live, ours into vf3), the
+  third slot store against the MulAddX, and the first impulse's constant and slot store.

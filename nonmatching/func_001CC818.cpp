@@ -4,6 +4,14 @@
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call combo (source line 1+2+4); 64 differing lines before, 41 now.
 // ORDER-SWEEP (2026-11-08): Q(ang) = nd moved after the Q(v) statement; tools/permute.py --auto.
 // TAIL (2026-11-09): `*(u128*)&g =` for the result and the tail in the order v, g, p, ang; 40 differing lines before, 16 now.
+// w40-fa (2026-11-12), reasoned from dumps, nothing compiled: a brace initialiser's CLOBBER of
+// a frame object cannot be either of the two added dependences. Both loads the emulators want
+// held (self->v150 and self->f22AC) go through self, a parameter, and a parameter's base never
+// aliases a stack base (alias.c's base_alias_check): in func_00156288's burst block, which has
+// two such CLOBBERs, the load through self lists only the call among its predecessors while
+// the load through a pointer read from memory waits for the CLOBBER and every frame store. A
+// CLOBBER would hold these loads only if its memory had no base (an object reached through a
+// loaded pointer) or were part of self; this block builds no such object.
 #include "common.h"
 #include "vu0.h"
 #include "globals.h"

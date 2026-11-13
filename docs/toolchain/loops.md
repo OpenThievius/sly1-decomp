@@ -1044,6 +1044,50 @@ kinds of insn are in that count that the final code never shows:
   branch; `node = next` in both arms rotates s1, s2 and s3. The near miss keeps two locals
   (the channel and the mode) and is 17 lines from retail, all of them the moved 2.
 
+### A count set in each arm: `li v0,4` at every use, and a bound both loops share (func_001B7280, matched 2026-11-12)
+
+IsCompanionAgentTargetReachable (src/main/state_walker.cpp) allocates `n << 4` bytes, walks n
+corners and then tests n spans, and retail never folds the 4: `li v0,4; sll a0,v0,4`, `li v0,4;
+blez v0`, `li s1,4` for the first loop's counter, `slti s2,s1,4` in the second. Read from the
+`-dl -dg` dumps and local-alloc.c, global.c, reload1.c, jump.c and gcse.c of GCC 2.95.3:
+
+- **The count is a variable set in each arm of a switch with no default.** `case 2: table =
+  ...; n = 4; break; case 0: case 1: table = ...; n = 4; break;` leaves a path on which n is
+  never set, so the set is not available at the uses and gcse's cprop leaves them (with `s32 n
+  = 4;` or a default arm every path sets it and the uses fold: `li s4,3; bgez`). Both sets
+  carry the same REG_EQUAL constant, so update_equiv_regs keeps the equivalence and doubles the
+  pseudo's life once per set.
+- **It bounds the second loop and the last test too.** With the second loop written `i < 4` n
+  dies at the first loop: 5 references over 130 x 4 insns, priority 0.0192, above the table's
+  0.0118, and n takes s1. With `i < n` in both loops and in `if (i < n) return 1;` it lives to
+  the end (7 references over 684 insns, crossing 14 calls): it is still placed before the
+  table (0.0204 against 0.0119, the last two of 20), but every saved register is taken
+  somewhere over that life, so it gets none, the table takes s1, and reload writes n's
+  constant at each use. Where the insn has an immediate alternative reload uses it: `slt
+  s2,s1,n` becomes `slti s2,s1,4`, which reads as a literal in retail. Spot it: a constant
+  reloaded with `li` before a shift or a branch and the same constant as an immediate in a
+  later compare are one variable.
+- **The case order is the arm order.** Retail tests `bltz`, `slti 2`, then `bnel v,2` over the
+  arm for 2, which falls into the arm for 0 and 1: the source has `case 2` first. With the
+  cases in numeric order the arms swap and the tree needs a `beq` and a `b` (912 bytes).
+- **One index for both loops.** `s32 i; for (i = 0; ...) ...; for (i = 0; ...) ...` is one
+  pseudo for the first loop's counter (loop.c reverses that loop on it) and the second loop's
+  index: 14 references over 32 insns, placed in s1 for both lives, as retail's `li s1,4` and
+  `move s1,zero` are. PRE's register for `i < n` (5 references over 13 insns) then takes s2,
+  free once self is dead: retail's `slti s2,s1,4`. With a second `s32 i` the counter and the
+  index are two pseudos (7 over 18, 7 over 28), the flag outranks the index and takes s1, and
+  the index s2 (9 differing lines).
+- **The last test stays a branch because the `return 0` is shared.** jump.c turns `if (c) x =
+  1; else x = 0;` into a store-flag only when every use of the label before `x = 0` is found
+  walking back from the test without meeting a call or another jump. With the body inside `if
+  (target != 0) { ... if (i < n) return 1; } return 0;` that label is also the target of the
+  outer test, far above, so the pattern is refused in every jump pass, PRE replaces the
+  compare with its reaching register and retail's `bnez s2; li v0,1; move v0,zero` is left.
+  Every form tried with the returns at the top level (`return i < 4;`, `if (i < 4) return 1;
+  return 0;`, a `?:`, a bool return type) is `move v0,s1`. The block is the target test's: with the
+  select test, the mode test or the range test holding the body instead, `if (busy) return 1;`
+  above it becomes a `bnezl` (one line each).
+
 ### A threshold of 94: functions that only a wider VU0 range builds (func_0013AD80, matched; func_001D9488, func_00130C58)
 
 Measured on 2026-11-12 (w38-f5) with `tools/check.py --flags` and `-dL` dumps. loop.c's

@@ -3043,6 +3043,32 @@ the store, 10,368 forms compiled, and the `-dR -fsched-verbose-6` trace of the n
   in the code (496 bytes; neither cse1 nor reload_cse can prove it a no-op past an int store
   through the other pointer). A second `self->id = id` is deleted by cse1 before sched1.
 
+### The id's load one cycle late would do it too (func_001F8290, 2026-11-12, w40-fa)
+
+Replayed by hand on the near miss's `-dS -fsched-verbose-6` table (the client's words as
+ints), not confirmed by a compile:
+
+- **The cycle.** The id's load has priority 9 and issues at t=1; its store is ready at t=3 and
+  beats the packet's store on weight. If the load cannot issue before t=2, the argument's
+  store (weight 0) takes t=1, the load t=2, and at t=3 only the packet's and the callback's
+  stores are ready (both +1, LUID: packet). The id's store follows at t=4 (weight 0 against
+  the callback's +1). That is argument, packet, id, callback, with no weight changed, and the
+  argument's quantity still dies in the insn before the id's is born, so v0 and v1 stand.
+- **What it needs.** An insn that emits no code, issues at t=1 and has the load as a
+  dependent at a cost of one: a CLOBBER the load follows, or a reader of the register the load
+  sets (an anti dependence).
+- **Forms that do not survive to sched1.** The id read through a union-typed local
+  (`IdWord id = { packet->id };`): store_constructor emits `(clobber (reg id))`, loads the
+  member into a temporary and copies it; cse1 keeps the temporary (the older register), the
+  copy is dead and flow deletes it and the CLOBBER. The packet as a checked pointer copied
+  into the variable after the test: cse1 folds the copy for the same reason. The stack
+  argument's variable reused for the id (the load anti-dependent on the argument's store):
+  a pseudo set twice has no REG_EQUIV move, crosses the first call in a saved register and
+  mode goes to the stack (125 lines).
+- **Open.** Whether the library's file was C: a C record constructor that lists every field
+  emits the CLOBBER a C++ one never does (expr.c compares the element count with TYPE_FIELDS,
+  which in C++ holds the class's own TYPE_DECL too).
+
 ### A run of stores in two alias classes (func_001F7BE8)
 
 Read from the `-dS -dl -fsched-verbose-6` dumps of InitRemoteCalls (src/lib/remote_call.cpp,

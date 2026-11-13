@@ -534,6 +534,25 @@ cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
   (docs/toolchain/sched1.md, "Two equal clears that retail issues apart"). The type is shared: a
   quadratic's coefficients (include/shapes.h's Quadratic16), which the ring's rows and the spawn
   block's first and last vectors are too.
+- **A CLOBBER raises the stores before it to the constants' priority (func_00156288, matched
+  2026-11-12, w40-fa).** The splash's burst block is the same Blk05 as a local, with the
+  gravity (0x10) and the up vector (0x30) copied from memory and two angles at 0x44 and 0x48.
+  Retail stores the up vector before the gravity. With plain floats at 0x40 both stores have
+  priority 4 (store, the CLOBBER at 0x70, its two stores) against 6 for the loads of the
+  block's single-use constants, so both wait until every constant is loaded, are then both
+  ready, and go in LUID order: gravity first. With 0x44 (or 0x48) a union's member there is a
+  second `(clobber (mem/s:BLK (plus at 0x104)))` before the angles' stores, every earlier
+  store links to it and it links to the CLOBBER at 0x70: the two vector stores rise to 6, the
+  constants' own priority, and the first of them that is ready takes the memory unit ahead of
+  the constants still to load (LUID). That is the up vector's: its load issued one cycle before
+  the gravity's, which waits two cycles for the last store before it (the world pointer is
+  loaded from memory, no base). `-dS -fsched-verbose-6`: `521 r224=[r222]` at 21, `515
+  r221=[r220+0x1ee0]` at 22, `523 [$1+0xf0]=r224` at 23, `517 [$1+0xd0]=r221` at 24, then the
+  1.047 and 5.0 loads. The registers do not change. Read it backwards: two stores that tie
+  on priority and weight but come out in ready order, ahead of constant loads that outrank
+  them, have a CLOBBER between them and the next group. Which of the two angles is the union's
+  member cannot be told (both are EXACT; include/switched_collider.h keeps 0x44); a union over
+  the whole group at 0x40 is ruled out (79 lines).
 - **Where the guard puts the data.** The compiler writes a static's guard out with its function,
   so a file's globals that retail has after the guard are defined after the function
   (gauge_agent.cpp's D_002649B0 on, file_1E88D0.cpp's D_00275DB8 on, declared `extern` above for

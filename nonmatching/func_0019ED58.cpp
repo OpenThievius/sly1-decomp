@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 1584/1588, checked 2026-11-12
+// BYTES 1456/1588 (91.7%), checked 2026-11-12
 #include "common.h"
 #include "vu0.h"
 #include "collider.h"
@@ -45,12 +45,32 @@
 // call crossed, and retail's spin sum (vmaddx vf1, vf5, vf2x) ties to neither c2 nor s2, so s2
 // was not a local quantity dying there either. Tried: c2 as a reuse of `turn` (one pseudo over two
 // blocks): it becomes global but gets a register (more refs), 348/397.
+// w40-fc (2026-11-12): 141 differing lines to 38, at retail's size. c2 is not a global pseudo:
+// it is local and local-alloc refuses it (3 refs, 1 call) once the spin sum no longer ties to
+// it. Three changes, each read off sched1's dependence table. (1) The velocity update is
+// written before the spin update and both are stored as Vec structure assignments
+// (`*(Vu0::Vec*)&self->qA0 = ...`): a mem/s store at a varying address does not hold the
+// scalar load of D_0026B54C (alias.c, fixed_scalar_and_varying_struct_p), so the spin chain
+// ends at its store (priority 4 against the velocity sum's 10) and sched1 issues the velocity
+// sum first; s then dies at the spin sum, which ties to s (retail's vf1) and leaves c2 alone.
+// (2) The floor test reads and writes z as a member (`((Vec02*)&self->qA0)->z`) and
+// D_0026B550 is a scalar float, not an array: the life's load then does not wait for the z
+// store, sched2 issues lui, swc1, lwc1, a0 and the caller-save of vf8 falls into the call's
+// delay slot, as retail's (landing this needs effect.cpp's definition as `f32 D_0026B550 =
+// 0.25f;` with the 12 bytes after it as padding or the next object's alignment; nothing else
+// reads it). Still differs: sched order in the first impulse (the 1e-4 constant, the slot
+// store at 16(sp), g_unitXVector's lq), the vf8 save before MeasurePointToSegment, and after
+// the call the reload registers (c2 in vf3 for retail's vf5: retail's spin sum is issued while
+// the velocity sum's vf3 is still live) and S3 against the MulAddX. Ruled out: an invisible
+// block split (a dead conditional store, six places: 114 to 173 lines); D_0026B54C read into
+// a local before the sums (38 to 151); D_0026B54C's load independent of the slot stores
+// (replayed with build/swarm/w40-fc/whatif.py: the load would issue first after the call).
 extern f32 g_gameTime;
 extern f32 D_0026B540;
 extern f32 D_0026B544;
 extern f32 D_0026B548;
 extern f32 D_0026B54C;
-extern f32 D_0026B550[4];
+extern f32 D_0026B550;
 struct QuadraticCoeffs { f32 a, b, c; };
 struct ClampedQuadratic {
     static f32 Eval(const QuadraticCoeffs* p, f32 t)
@@ -163,11 +183,11 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     f32 one = 1.0f;
     Vu0::Vec s = Vu0::Vec::Scalar((one - along) * j1);
     Vu0::Vec s2 = Vu0::Vec::Scalar(along * j2);
-    Vu0::Q(self->v100) = Vu0::MulAddX(Vu0::Vec::Of(self->v100), Vu0::MulXSum(c1, s, c2, s2), Vu0::Vec::Scalar(k)).q;
-    Vu0::Q(self->qA0) = Vu0::Add(Vu0::Vec::Of(self->qA0), Vu0::MulXSum(d1, s, dir, s2)).q;
-    if (((f32*)&self->qA0)[2] < D_0026B54C) {
-        ((f32*)&self->qA0)[2] = D_0026B54C;
-        ShortenEffectLife(self, D_0026B550[0]);
+    *(Vu0::Vec*)&self->qA0 = Vu0::Add(Vu0::Vec::Of(self->qA0), Vu0::MulXSum(d1, s, dir, s2));
+    *(Vu0::Vec*)&self->v100 = Vu0::MulAddX(Vu0::Vec::Of(self->v100), Vu0::MulXSum(c1, s, c2, s2), Vu0::Vec::Scalar(k));
+    if (((Vec02*)&self->qA0)->z < D_0026B54C) {
+        ((Vec02*)&self->qA0)->z = D_0026B54C;
+        ShortenEffectLife(self, D_0026B550);
     }
     f32 depth = MaxF(0.0f, Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Vec::Of(*at), Vu0::Vec::Of(self->q80)), nv))) + one;
     Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Vec::Of(self->q80), nv, Vu0::Vec::Scalar(depth)).q;

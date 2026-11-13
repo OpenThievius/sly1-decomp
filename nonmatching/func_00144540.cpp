@@ -13,6 +13,7 @@
 //       (a VOIDmode argument ADDRESS through a register without REGNO_POINTER_FLAG), while row 0 at 0x80(self) passes); (2) the projection's float
 //       registers ($f0/$f3 for 4096/640 swapped), which follow from sched1's order in the same block. Tried for (1): a Mat02* local for the rows (before or after
 //       the clamp), the rows read as Vu0::Vec members, corner stored as a Vec member, corner as u128 (ICE). ~35 compiles.
+// w40-fc (2026-11-12): two probes for wall (1), both no closer: the product's a rows read as Vu0::Vec members (mem/s) with corner unchanged (58 lines, the same), and with corner a u128 stored through a cast's copy (`(const f32*)&(s128)cq`, a mem/f slot): the frame grows 16 bytes and the rows still wait (121 lines). A u128 corner read as floats is the ICE at expr.c:614.
 #include "common.h"
 #include "shapes.h"
 #include "collider.h"

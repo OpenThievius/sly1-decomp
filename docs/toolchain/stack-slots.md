@@ -178,6 +178,25 @@ Read again from stmt.c, function.c and cse.c (2026-11-12, w37):
   if it is modified before its uses or its uses are behind a join. Neither was found in a form
   that keeps the frame (an input tied to an output forces a slot through its reference).
 
+Read again with the brace initialiser's CLOBBER (2026-11-12, w40-fa):
+
+- **A CLOBBER between the store and the cull keeps the load.** cse's invalidate treats a
+  `(clobber (mem:BLK frame))` as a store of unknown size, so it drops every frame MEM's
+  equivalence. With d a Vec02 in the frame and the radius a union holding a Vec02, built in
+  place after d is stored (`RadiusU r = { rq };`), cse1 does not forward the difference: the
+  asm reads one load (vf6), the first call's argument is that register (`qmfc2 a1,$vf6`) and
+  the second call's the memory (`lq a1`), which are retail's three lines. The same source
+  without the union forwards (`vsub` into vf6). This is the first plain form that gives the
+  shared load.
+- **What it does not give.** A Vec02 d is allocated when declared (0x50; retail 0x1C0, after
+  fade) and the stored difference is a local pseudo that takes vf1 from the dying input, where
+  retail's vf3 is an output reload's register. A u128 d is a pseudo, which a CLOBBER does not
+  touch. A u128 d forced to the frame at purge time (a probe reading one of its words) lands
+  at 0x1C0 with the vsub in vf3, but the two reads are then separate loads: cse1 does not
+  record `(mem (addressof))` and cse2 did not merge them. So retail's d is memory to cse1,
+  is allocated after fade, and its stored value has no register of its own; no form found
+  with all three.
+
 ### A pointer field's type picks its store's partner (func_002042C8)
 
 Read from haifa-sched.c (priority, rank_for_schedule) and the `-dS -dl -dg -fsched-verbose-6`
@@ -527,3 +546,23 @@ of GCC 2.95.3 (2026-11-10), with the frame dumped (`-dr`; virtual-stack-vars is 
   and is still allocated when the segment end (0xB0) and the weight's Scalar frame (0xC0) are:
   only a local declared there gives that, and no walk frame belongs inside a loop's body. The
   near miss keeps the ListFrame and leaves that slot open (97.1%, the frame 0x170).
+
+### A 4-byte slot nothing touches (func_00187F40, near miss)
+
+Retail spills CollideColliderParts' sweep flag at 4(sp) and never touches 0(sp); ours spills it
+at 0(sp). Read from reload1.c, function.c and caller-save.c of GCC 2.95.3 (w40-fc, 2026-11-12):
+
+- reload gives the pseudos without a register their slots first, in register order (the
+  alter_reg loop before the first pass over the insns), and the caller-save areas and
+  secondary memory only later. The flag is the third parameter's pseudo, and the two before it
+  have registers, so no spilled pseudo comes ahead of it: the slot at 0(sp) was allocated
+  before reload, at RTL generation or by purge_addressof.
+- A BLKmode object does not fit: a 4-byte `struct { u8 r, g, b, a; }` local takes a slot
+  rounded to 16 bytes (the frame grows to 208). An unused `s32 x[1]`, an SImode struct or a
+  union takes no slot at all. A scalar that lives in memory does: an unused `volatile s32` at
+  the top is EXACT (a probe only: build/swarm/w40-fc/b4.cpp), so the object is a scalar of at
+  most 4 bytes homed on the stack whose every access is gone from the final code.
+- Not found: the source that leaves such a scalar. A `bool` local whose address is taken and
+  never used (a pointer local, or passed to an empty inline by pointer or by reference) takes
+  no slot, nor does an `s32` one; a `const f32&` inline for the 1.0 compare keeps a store-flag
+  (836 bytes).
