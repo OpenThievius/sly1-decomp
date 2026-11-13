@@ -691,11 +691,35 @@ void SetPooledObjectState(PooledObject* self, s32 state)
     }
 }
 
-INCLUDE_ASM(func_0014F168);
+extern f32 D_00261CD4;
+extern f32 D_00261CD8;
+void SetPlayerState(PlacedObject* self, s32 a, s32 b);
+
+// The owner-message callback of a pooled object's launch: gives the other object, through its
+// slot 36, the pooled object's horizontal direction (its velocity with z cleared, unit length,
+// or X when it has none) times D_00261CD4 plus D_00261CD8 upward; a kind-7 object is put in
+// state 0x2B.
+// As ApplyChildGroupKnockback: the unit vector is stored through a pointer as a structure and
+// the weights are read as the floats themselves, so the first weight's load does not wait for
+// that store in sched2 (docs/toolchain/sched1.md, "Why the arms' stores cannot be written
+// plainly").
+void LaunchObjectFromPooledObject(PlacedObject* self, PlacedObject* other)
+{
+    Vec02 d = self->v150;
+    d.z = 0.0f;
+    Vec02* p = &d;
+    Vec02 r;
+    *(Vu0::Vec*)p = Vu0::NormalizeOr(Vu0::Vec::Of(d), Vu0::Vec::Of(g_unitXVector));
+    const Desc02* desc = other->desc02();
+    Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(D_00261CD4), Vu0::Q(g_unitZVector), Vu0::ScalarAtValue(D_00261CD8));
+    desc->m20(other, &r);
+    if (IsObjectOfKind(other, 7) != 0) {
+        SetPlayerState(other, 4, 0x2B);
+    }
+}
 
 Collider* FindContactingPart(void* self);
 void InitOwnerMessage(OwnerMessage* m, s32 mode, void* owner);
-void LaunchObjectFromPooledObject(void);
 void StartPadRecordPattern(void* rec, s32 n, f32 t);
 s32 CountHeldPooledChildren(void* self);
 PlacedObject *FindNodeForQuery(void* query, s32 a, s32 b);
@@ -735,7 +759,7 @@ void UpdateHeldPooledObject(PooledObject* self)
         if (c == (Collider*)g_player && (g_player->f2220 != 6 || g_player->f239C != 2)) {
             OwnerMessage m;
             InitOwnerMessage(&m, 0, self);
-            m.fn = LaunchObjectFromPooledObject;
+            m.fn = (void (*)())LaunchObjectFromPooledObject;
             ((s32 (*)(void*, void*))((void**)g_player->desc)[0x140 / 4])(g_player, &m);
         } else if (IsObjectOfKind(c, 0x3A)) {
             StartSoundEffect(0x34, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);

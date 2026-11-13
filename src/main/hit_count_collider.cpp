@@ -282,7 +282,18 @@ void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
     if (MatchesObjectId((s32)e->body, 0x52F)) self->f688 = e->body;
 }
 
-INCLUDE_ASM(func_001C3C98);
+// The velocity is read first, and each of the three references to the end takes its address
+// again through Q (docs/toolchain/reloads-and-stores.md, "Three adds of one address").
+void ResolveHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
+{
+    AnimationPlayer* p = self->f67C;
+    if (p != 0) {
+        u128 vel = Vu0::Q(c->end[end].v30);
+        u128 k = Vu0::Scalar((D_00274A44 - self->f68C) / p->anim->length);
+        u128 d = Vu0::Sub(Vu0::Q(c->end[end].v10), Vu0::Q(self->v140));
+        Vu0::Q(c->end[end].v30) = Vu0::MulAddX(vel, Vu0::DivX(d, Vu0::Length(d)), k);
+    }
+}
 
 extern s32 g_buttonCodeFlags;
 s32 IsPadSelectFlagHeld(void* p);

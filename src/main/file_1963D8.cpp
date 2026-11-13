@@ -1129,7 +1129,7 @@ s32 ChooseGaugeColliderAgentState(GaugeColliderAgent* self)
 void UpdateAgentGoal(Agent* self);
 void SetAgentGoalPoint(Agent* self, Vec02* p);
 void PickRandomPointOnPointGraph(s32 graph, Vec02* out);
-void FitStepToPointGraph(s32 graph, Vec02* from, Vec02* step, f32 t);
+void FitStepToPointGraph(s32 graph, f32 scale, Vec02* from, Vec02* step);
 void SnapPointToOwnerGraph(s32 graph, Vec02* in, Vec02* out);
 
 // The agent's next goal by state: 800 on from the active collider, away on the ground (12
@@ -1149,7 +1149,7 @@ void UpdateGaugeColliderAgentGoal(GaugeColliderAgent* self, s32 pick)
         Vu0::Q(k) = Vu0::FromFloat(800.0f);
         u128 v = Vu0::Q(d);
         Vu0::Q(d) = Vu0::MulX(Vu0::DivX(v, Vu0::Length(v)), Vu0::Q(k));
-        FitStepToPointGraph(self->f928, &self->v140, &d, 1.0f);
+        FitStepToPointGraph(self->f928, 1.0f, &self->v140, &d);
         Vu0::Q(t) = Vu0::Add(Vu0::Q(self->v140), Vu0::Q(d));
         SetAgentGoalPoint(self, &t);
         break;

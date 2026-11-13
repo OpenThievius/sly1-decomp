@@ -3100,6 +3100,66 @@ ints), not confirmed by a compile:
   emits the CLOBBER a C++ one never does (expr.c compares the element count with TYPE_FIELDS,
   which in C++ holds the class's own TYPE_DECL too).
 
+### A union member's alias set 0 gives retail's order (func_001F8290, 2026-11-13, w46-b, a probe)
+
+- **The class no sweep had.** c_get_alias_set returns 0 for a COMPONENT_REF whose object is a
+  union: such a store or load conflicts with every other class. With three classes per word
+  (int, `void*`, a union member) over the client's argument, packet and callback and the
+  packet's self, client, f28 and f34 (and the client's f24), 150 of 8,748 forms are EXACT, on
+  US and PAL. Every one has the client's packet word a union member, the packet's f28 a
+  `void*`, f34 and the client's f24 union members, the callback an int or `void*` word and
+  the id read into a local first.
+- **Not traced.** Which dependence the union member adds was not read from the dumps; the
+  earlier sched2 reading (the packet's store needs dependents the id's does not have) fits.
+- **Why it is a probe.** The types are the file's, shared with twelve matched functions: with
+  the header's packet word in a union BindRemoteService needs its id read into a local first
+  (EXACT then, 324 bytes otherwise); f28 as a `void*` moves AnswerIopCall and
+  AnswerServiceLookup; the header's callback is a function pointer and its store comes last.
+  The next step is one set of types for the whole file, checked on all thirteen functions.
+
+### A store that conflicts with two classes: one more dependent in sched2 (func_001F8290, matched 2026-11-13, w47-e)
+
+- **The dependence, read from the dumps.** Retail's order of the client's stores is argument,
+  packet, id, callback. sched1 does not give it and does not have to: it issues the argument,
+  the id (its value dies there, INSN_REG_WEIGHT 0), the packet, the callback, as the near miss
+  did. sched2 decides. After reload the weight is not compared; at t=4 the packet's and the
+  id's stores are both ready with priority 7, and rank_for_schedule falls to the count of
+  dependents before the LUID. In the near miss (every word an int) each has the same
+  dependents, the packet's int stores, and the LUID keeps the id first. In the exact form the
+  packet's store is a union member's (alias set 0) and one of the packet's stores in the
+  block is in a class that is neither int nor 0: the packet's store has that store as a
+  dependent, the id's (int) does not, eight against seven, and the packet's store goes first.
+  The .sched2 table of the landed form: `68 (packet): 116 106 110 100 96 92 88 84`,
+  `72 (id): 116 106 110 96 92 88 84`; 100 is `packet->self = packet`.
+- **What each word needs.** The client's packet word: alias set 0, and nothing else does it
+  (as its pointer type it has no int dependents and priority 2; as an int it ties with the
+  id). One of the packet's words stored in the block: a class of its own; that store's
+  priority must not move it in sched1 (the self word's is the last store before the load of
+  the client's server word, so at priority 2 it is still issued in the cycle that load
+  waits for; the receive buffer's or the client word's need the server's load in set 0 as
+  well, to keep priority 6). The callback's store: priority 7 and no more dependents than
+  the id's, so an int word; a function pointer (its own class) has no dependent and comes
+  last, a `void*` needs a `void*` packet word with priority 6, a union member has the
+  packet's count and passes the id. The id: read into a local before the packet's store,
+  which would otherwise hold its load (set 0 conflicts with the int load).
+- **The whole file.** The packet's self word as `RemoteCallPacket*` moves AnswerIopCall and
+  AnswerServiceLookup (its store there has no dependent and falls behind): those two handle
+  the IOP's packets, whose self and client words are the IOP's, so they have their own
+  type with plain words (`IopCallPacket`). BindRemoteService needs its id in a local for
+  the same reason as above (324 bytes otherwise). With that all thirteen functions are EXACT
+  on US and PAL. One change each from the landed form, all thirteen checked on both: the
+  packet word not in a union, the self word a u32, the callback a function pointer or a
+  `void*`, the id read in place in CallRemoteService: func_001F8290 differs; the id read in
+  place in BindRemoteService: func_001F80C0 is 324 bytes; the self word a `void*`, the
+  union with one member, the argument's store first instead of last: all EXACT (choices).
+- **A second whole-file form.** The call's packet as its own type with the receive buffer a
+  `void*`, the client's server word a union member too (an int or a `void*` server word
+  differs; a `void*` one also moves HandleRemoteCallReply), everything else int: all thirteen
+  EXACT as well. Not landed: it puts a second union in the header and changes the word every
+  other library reads.
+- **Carries over.** A "two stores swapped, same priority, same registers" wall after reload is
+  a count of dependents: look for a store that should conflict with one more class.
+
 ### A run of stores in two alias classes (func_001F7BE8)
 
 Read from the `-dS -dl -fsched-verbose-6` dumps of InitRemoteCalls (src/lib/remote_call.cpp,
@@ -3152,7 +3212,12 @@ sceGsSetDefDispEnv's DISPLAY register (src/lib/graph.c, func_00202140):
   the size and every block but the division's are retail's. A second lever: `magh` declared in
   each arm, not once for the function; one variable assigned in four arms is a global pseudo,
   which local-alloc cannot tie the quotient to (`mflo v1; move v0,v1`).
-- **Unsolved: the zero trap's place.** In both interlaced arms retail issues the division's
+- **Solved 2026-11-13 (w47-h): the division is written at each use.** With the magnification a
+  macro of the width, `((w) + 0x9FF) / (w)`, used three times in the register's arguments, and
+  no `magh` local at all, the function is exact: the two extra `trap_if`s leave no code and
+  raise the first trap's sched2 priority (docs/toolchain/sched1.md, "The zero trap of
+  func_00202140"). The note below is the wall as it stood.
+- **Was unsolved: the zero trap's place.** In both interlaced arms retail issues the division's
   `beqzl/break` before dy's `dsll a3,v1,12`; sched2 gives the shift priority 5 (an anti
   dependence: the dx term's `daddiu` writes the v1 it reads) and the trap 4 (`1 +` the field
   load it orders), with retail's own registers, so retail's sched2 had a dependence ours lacks

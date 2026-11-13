@@ -478,15 +478,219 @@ s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec02* pos, Vec02* e
     return dropped;
 }
 
-// The bounds the assembly func_0013A618 and func_0013A940 start from: the file's .rodata.
-extern const f32 D_00249D64 = 3.4028235e+38f;
-extern const f32 D_00249D68 = -3.4028235e+38f;
-extern const f32 D_00249D6C = 3.4028235e+38f;
-extern const f32 D_00249D70 = -3.4028235e+38f;
+// One of the two scratchpad transfer buffers (file_1C1190.cpp): the blocks StartToSprChain sent.
+struct SprTransfer {
+    void* tags;             // 0x00
+    s32 base;               // 0x04
+    u32 addrs[8];           // 0x08: each block's scratchpad address
+    s32 sizes[8];           // 0x28
+    s32 count;              // 0x48
+    s32 state;              // 0x4C: 2 while its blocks are worked on
+};
 
-INCLUDE_ASM(func_0013A618);
+extern s32 D_00274990;
+extern SprTransfer D_002748F0[2];
+extern void* g_toSprChannel;
 
-INCLUDE_ASM(func_0013A940);
+// Block n of the current scratchpad transfer.
+struct SprBlock {
+    static u32 Of(s32 n)
+    {
+        return D_002748F0[D_00274990].addrs[n];
+    }
+};
+
+void TurnMatrixBySpin(void* spin, Vec02* out);
+s32 WaitDmaChannel(void* dma, s32 b, s32 c);
+void StartToSprChain(s32 size, ...);
+void StartFromSprChain(void* first, ...);
+
+// The object's filter mode (0x618), read into the caller's variable.
+static inline void GetParticleMode(const WorldListedObject* self, s32* mode)
+{
+    *mode = self->f618;
+}
+
+// Steps the object's particles: each owned record's three arrays go to the scratchpad (the
+// next record's are sent while this one's are filtered), FilterParticleVerticesVu0 drops the
+// expired particles and packs the rest into the record's other bank with the bounds updated,
+// and an emptied record is detached. With no particle left the object ends itself (slot 3);
+// otherwise its centre and radius are set from the bounds.
+//
+// The bounds are brace-initialised union-first vectors: the union member's CLOBBER orders each
+// bound's stores (docs/toolchain/large-functions.md, "A brace initialiser's union member is a
+// CLOBBER"). The loop's registers follow from loop.c's count of the body, 97 insns in its first
+// pass (docs/toolchain/loops.md, "What loop.c counts"): the channel is read through a local (a
+// load and a copy to the argument register), and the mode through GetParticleMode, whose
+// out-parameter makes the variable an ADDRESSOF until purge_addressof, after cse1: its read is
+// then a copy that loop.c counts and cse2 folds.
+void StepListedObjectParticles(WorldListedObject* self, f32 dt)
+{
+    Quadratic16 lo = {{3.4028235e+38f}, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
+    Quadratic16 hi = {{-3.4028235e+38f}, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
+    Vec02 mat[4];
+    WordListFrame fr;
+    s32 e = (s32)&self->members.head;
+    fr.list = e;
+    fr.link = e;
+    s32 old = *(s32*)&g_activeListFrames;
+    s32 link = *(s32*)(e + 8);
+    fr.prev = old;
+    fr.offset = link;
+    *(s32*)&g_activeListFrames = (s32)&fr;
+    TurnMatrixBySpin((u8*)self + 0x330, mat);
+    s32 head = *(s32*)fr.link;
+    fr.link = head + fr.offset;
+    OwnedRecord* node = (OwnedRecord*)head;
+    Vec02* p = node->points[node->bank];
+    StartToSprChain(node->count * 16, p, node->count * 16, p + 0x2C, node->count * 16, p + 0x58, 0, 0);
+    while (node != 0) {
+        void* ch = g_toSprChannel;
+        WaitDmaChannel(ch, 0, 0);
+        D_00274990 = 1 - D_00274990;
+        SprTransfer* t = &D_002748F0[D_00274990];
+        t->state = 2;
+        OwnedRecord* next = *(OwnedRecord**)fr.link;
+        fr.link = (s32)next + fr.offset;
+        if (next != 0) {
+            p = next->points[next->bank];
+            StartToSprChain(next->count * 16, p, next->count * 16, p + 0x2C, next->count * 16, p + 0x58, 0, 0);
+        }
+        u128 w = Vu0::ScalarInGpr(dt);
+        s32 mode;
+        GetParticleMode(self, &mode);
+        s32 used = FilterParticleVerticesVu0((const f32*)mat, w, (Vec02*)SprBlock::Of(0), (Vec02*)SprBlock::Of(1), (Vec02*)SprBlock::Of(2),
+                                             node->count, mode, &lo, &hi);
+        s32 nb = (node->bank + 1) & 1;
+        p = node->points[nb];
+        StartFromSprChain(p, p + 0x2C, p + 0x58, 0);
+        node->count -= used;
+        self->f620 -= used;
+        if (node->count <= 0) {
+            DetachOwnedRecord(node);
+        } else {
+            node->bank = nb;
+        }
+        node = next;
+    }
+    if (self->f620 <= 0) {
+        self->desc->m03(self);
+    } else {
+        Vec02 center;
+        Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(lo), Vu0::Scalar(0.5f), Vu0::Q(hi), Vu0::Scalar(0.5f));
+        self->desc02()->m1D(self, &center);
+        self->f2A4 = self->f2A8 = Vu0::Distance(center, *(Vec02*)&hi);
+    }
+    *(s32*)&g_activeListFrames = fr.prev;
+}
+
+extern f32 g_gameClock[];
+void StepListedObjectParticles(WorldListedObject* self, f32 dt);
+void EvaluateHermiteVectorSegment(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 t, f32 span, f32 scale, Vec02* pos, Vec02* vel, s32 flags);
+
+// One entry of a record's extra block: the two vectors a mode-2 point's segment ends on.
+struct VecPair { Vec02 a; Vec02 b; };
+
+// Class 0x4D's move slot. Mode 0 steps the particles (StepListedObjectParticles). Otherwise
+// each member record's live points are copied from the bank in use to the other, closing the
+// gaps of the points whose time has come: a mode-1 point moves by its velocity, a mode-2 point
+// along its Hermite segment (its extra pair moves down with it); the w's and the third
+// vector follow, the angle advanced when f618 is 2. The record then switches banks, or is
+// detached when empty. The object's centre and radius are set from the points' bounds, or the
+// object is removed when it has none left.
+//
+// The four pointers named at the top of the loop body and the two named before the third
+// vector's copy are what loop.c's giv combination needs (docs/toolchain/loops.md, "Which giv
+// absorbs the memory references"): each address of the body is then a pointer plus a
+// constant, no `base + 16j` is computed twice, and the third vector's pointers, used more
+// than once, take every memory reference of their array; the first two pairs are left as
+// registers of their own for the call. The time left is the end's own variable, and the
+// record's extra block is read from the record at each use.
+void MoveWorldListedObject(WorldListedObject* self, f32 dt)
+{
+    if (self->mode == 0) {
+        StepListedObjectParticles(self, dt);
+        return;
+    }
+    Quadratic16 lo = {{3.4028235e+38f}, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
+    Quadratic16 hi = {{-3.4028235e+38f}, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
+    WordListFrame fr;
+    s32 e = (s32)&self->members.head;
+    fr.list = e;
+    fr.link = e;
+    s32 old = *(s32*)&g_activeListFrames;
+    s32 link = *(s32*)(e + 8);
+    fr.prev = old;
+    fr.offset = link;
+    *(s32*)&g_activeListFrames = (s32)&fr;
+    s32 head = *(s32*)fr.link;
+    fr.link = head + fr.offset;
+    OwnedRecord* node = (OwnedRecord*)head;
+    while (node != 0) {
+        Vec02* cur = node->points[node->bank];
+        s32 out = 0;
+        s32 removed = 0;
+        s32 nb = (node->bank + 1) & 1;
+        Vec02* nxt = node->points[nb];
+        for (s32 j = 0; j < node->count; j++) {
+            Vec02* pos = &cur[j];
+            Vec02* vel = &cur[0x2C + j];
+            Vec02* npos = &nxt[out];
+            Vec02* nvel = &nxt[0x2C + out];
+            f32 end = vel->w;
+            if (end <= g_gameClock[1]) {
+                removed++;
+                continue;
+            }
+            switch (self->mode) {
+            case 1: {
+                Vu0::Vec v = Vu0::Vec::Of(*vel);
+                *(Vu0::Vec*)nvel = v;
+                *(Vu0::Vec*)npos = Vu0::MulAddX(Vu0::Vec::Of(*pos), v, Vu0::Vec::Scalar(dt));
+                break;
+            }
+            case 2: {
+                end -= g_gameClock[1];
+                EvaluateHermiteVectorSegment(pos, vel, &((VecPair*)node->extraRecord)[j].a, &((VecPair*)node->extraRecord)[j].b, end, end <? dt, 1.0f, npos, nvel, 0);
+                if (out != j) {
+                    ((VecPair*)node->extraRecord)[out] = ((VecPair*)node->extraRecord)[j];
+                }
+                break;
+            }
+            }
+            npos->w = pos->w;
+            nvel->w = vel->w;
+            Vec02* rec = &cur[0x58 + j];
+            Vec02* nrec = &nxt[0x58 + out];
+            *nrec = *rec;
+            if (self->f618 == 2) {
+                nrec->w = WrapAngle(rec->w + rec->z * dt);
+            }
+            Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(*npos));
+            Vu0::Q(hi) = Vu0::Max(Vu0::Q(hi), Vu0::Q(*npos));
+            out++;
+        }
+        node->count -= removed;
+        self->f620 -= removed;
+        if (node->count <= 0) {
+            DetachOwnedRecord(node);
+        } else {
+            node->bank = nb;
+        }
+        s32 next = *(s32*)fr.link;
+        fr.link = next + fr.offset;
+        node = (OwnedRecord*)next;
+    }
+    if (self->f620 <= 0) {
+        self->desc->m03(self);
+    } else {
+        Vec02 center;
+        Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(lo), Vu0::Scalar(0.5f), Vu0::Q(hi), Vu0::Scalar(0.5f));
+        self->desc02()->m1D(self, &center);
+        self->f2A4 = self->f2A8 = Vu0::Distance(center, *(Vec02*)&hi);
+    }
+    *(s32*)&g_activeListFrames = fr.prev;
+}
 
 struct DeferredRadiusRequest { void (*fn)(void* self); s32 zero; s32 count; u8 pad0[0x50 - 0x0C]; f32 radius; u8 pad1[0x60 - 0x54]; void* owner; u8 pad2[0x80 - 0x64]; };
 struct Src_13AD08 { u8 pad[0x40]; f32 scale; };

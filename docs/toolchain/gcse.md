@@ -762,6 +762,44 @@ everything reads vf2. One instruction short.
   fall-through one and the other arm's last statement computes into the copy's register. Read
   the head's order: asm, another live insn, copy, store.
 
+### Two passes of copy propagation, one step each: a copy that outlives gcse (func_00191AC8)
+
+Read from the `-da` dumps of FitStepToPointGraph (file_18F988.cpp, 2026-11-13, w46-d; the near
+miss is 96 of 107 instructions with it):
+
+- **purge_addressof runs after cse1.** The `.cse` dump still has `(mem (addressof (reg k)))`
+  for every read of a struct local (`Vu0::Vec k`); the `.addressof` dump after it has a fresh
+  copy `tmp = k` at each read. cse1 never sees those copies, gcse's copy propagation leaves a
+  copy whose destination is set in the same block, and cse2 canonicalises them.
+- **cprop moves a use one copy per pass, and there are two passes** (before PRE and the final
+  one): "COPY-PROP: Replacing reg 193 in insn 476 with reg 194", then "Replacing reg 194 in
+  insn 476 with reg 191". A use two copies from its source ends on the source (`kz = k` for a
+  Vec is `tmp = k; kz = tmp`); a use three or more away ends on a pseudo in between, whose
+  set stays where the copy was written (`ka = k; kz = ka;`, or `kz = Vu0::Vec::Of(k);`, whose
+  own temporaries make the chain: the exit reads the second pseudo).
+- **Where sched1 puts such a copy.** A pseudo that crosses no call in the source's order is
+  tied to the last call before it (haifa's REG_N_CALLS_CROSSED test), so a copy written after
+  the block's last call is the block's last insn, and reorg takes it into the delay slot of
+  the branch that ends the block (retail's `beqz v0; lqc2 vf4,304(sp)`). Written before a
+  call, the copy has nothing to wait for and issues at the block's top; its pseudo then
+  crosses the calls and is the one spilled.
+- **Which pseudo the body reads (cse2, make_regs_eqv).** The loop's `k.q = (u128)kg` is a
+  no-conflict block into a temporary and a copy to k. With every mention of k inside the loop
+  block the temporary stays canonical and each body use becomes the temporary (24 refs, a VU0
+  register with a caller save). With k mentioned before the block (a set before the loop, dead
+  and deleted by flow) k is canonical: 12 refs over 3 calls, no register, loads from its slot.
+- **The frame.** A local of the loop body (expand_decl uses assign_temp for a memory variable)
+  frees its slot at the body's end, and a cast copy made after the loop takes the first one
+  that fits (rot's, 192): 16 bytes of frame less than with the locals at function scope.
+- **What the copy was (2026-11-13, w50-g; the function is matched).** Not a copy in the
+  source: the scale's conversion is written again after the loop, an asm that gcse takes as an
+  expression, and PRE inserts it at the end of the loop's first block, where cse2 makes it a
+  copy of the loop's own conversion (docs/toolchain/loops.md, "An asm kept in its loop"). The
+  facts above about cprop, sched1 and the frame hold; the copy chain is not what retail had.
+- **Not solved in this form.** The conversion's temporary gets v0 from global-alloc and reload gives its
+  `(set (subreg:DI T 0) kg)` a reload register of its own (v1), copied back (`por v0,zero,v1`);
+  retail has `move v0,s6; sq v0,304(sp)`, the reload register v0 inherited by the store.
+
 ### The same lever for a parameter block's two quadwords (func_001EC190)
 
 - The scale of a static parameter block's two quadwords (`StoreFloatAsQuadword(&t, k);

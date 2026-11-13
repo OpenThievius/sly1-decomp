@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1506/1700 (88.6%), checked 2026-11-12
+// BYTES 1533/1700 (90.2%), checked 2026-11-13
 // NEAR (2026-11-10, w13-1DEBE8): ControlTintBlendCollider. Size and frame now match (0x200, s5
 // saved). The frame came from two things. (1) The second product is a by-value inline
 // (RotatedRows, g++'s named return value) passed straight to MultiplyByTransposedMatrix3x3:
@@ -104,6 +104,80 @@
 // loads did not wait for row 0's store: the address pseudo had a known value for alias.c
 // (a REG_EQUAL or REG_EQUIV note on its set), the wall func_00144540 has too. Also ruled out:
 // `rot = m` through an inline with a self-assignment test (folded before cse, no change).
+// w46-c (2026-11-13), about 45 compiles, all probes on top of w44-fc's (build/swarm/w46-c/f1/): (1) the
+// velocity tail is exact with the rows of frame->m110 read as Vu0::Vec members in a copy of
+// RotateTransposed (t1.cpp, 42 lines to 28; here 78 to 64, as RotateTransposedMembers below:
+// a twin of Vu0::RotateMembers that would belong in include/vu0.h, the maintainer's call). (2) The 660 rows' store order is not an alias fact: with
+// the row loads cut from row 0's store (and from each other's) the replay puts row 0's store
+// last, after m's. What gives retail's order of the whole second half of block A (0x670,
+// 0x680, 0x660, m's rows, offset, the two row loads, the product, rot's rows around v640's
+// store) is rank_for_schedule's register weight: rows 1 and 2's products dying at their
+// stores to self (`wif.py t1.d 28 w:631=0 w:673=0`). A priority does it too in the replay,
+// but a real one passes down the chain: rows 1 and 2 stored a second time right after the
+// product (w_t1_q.cpp) leave no code (1700 bytes) and put row 1's store first, with its
+// product ahead of row 0's, which retail does not have. So in retail m's and rot's rows 1
+// and 2 are stored from other pseudos than the products, in the same registers: two copies
+// that leave no code, which is also block A's two insns. `m = *p` with p a pointer local
+// (t3.cpp) gives the deaths and retail's order of the three stores, but its copies are
+// lq/sq through a GPR. (3) The tilt's rows loaded in the order 1, 2, 0 (t2.cpp, values
+// passed to RotateRows) give retail's vf3/vf2 for tilt row 1 and turn row 2 (23 lines): row
+// 1 then lives 9 insns. Left there: row 0's quantity against the product's result (vf6
+// against vf5; it needs 5 more insns of life, or the product's result stored at once) and
+// the three stores. (4) The product helpers of include/mul_rotation.h in place of
+// RotateRowsBy, m and rot declared after them: 44 lines or more, their copies go through
+// the out pointer. Not tried: (a), (b) and r507 beyond w44-fc's probes.
+// w49-f (2026-11-13), 33 compiles (build/swarm/w49-f/f/), no closer. Established from
+// haifa-sched.c: INSN_REG_WEIGHT is the pattern's SETs less its REG_DEAD/REG_UNUSED notes, so a
+// store weighs 1, or 0 where a register dies in it (base: all six block-A stores weigh 1; `wif.py
+// base.d 25 w:610=0 w:652=0` gives retail's order from 0x670 to rot's last row). And haifa
+// reattaches the deaths after scheduling (attach_deaths_insn), so local-alloc sees the new order.
+// Ruled out by reasoning, each checked against the dumps: (1) a code-less copy X1 = P1 ahead of
+// the 0x670 store in the stream: cse makes one of the two canonical and rewrites the other's
+// uses, and the copy would feed m's store (priority 61) so sched1 issues it first; both
+// registers then live and the copy is code (s1: Vec by-value parameters, 1704 bytes). (2) m's
+// rows reloaded after the 660 stores and deleted by reload_cse in the product's register (the
+// t3 shape): a pseudo only loaded and stored is TI_REGS (movti and stores are neutral in
+// regclass) and local-alloc gives it a GPR (v1/v0, as in t3); only a "j" use makes it VU0, and
+// that use is code. (3) m and rot stored before the 660 stores (a1-a3): the frame stores still
+// feed RotateTransposed's loads (priority 61) and rot's go early; rot written after
+// RotateTransposed always holds the last use of P1 and P2. Also no change: products and stores
+// as Vu0::Vec values (v1-v4, cse folds every copy), RotateTransposedMembers for the first
+// product's transpose (e1-e3: Vec-member loads still wait for the mem/s frame stores), m copied
+// through a pointer or u128 rows (p1-p6, 1708 bytes or GPR copies), RotatedRows for the first
+// product and chained assignments (q1-q4, 1712-1752 bytes). Left: retail's rows 1 and 2 of m
+// and rot come from a register that is not the product's, with no code, and no plain C++ form
+// that gives that is known; (a), (b) and r507 as above.
+// w50-f (2026-11-13), about 30 compiles (build/swarm/w50-f/): the 660 rows' order is not a
+// weight. In the dumps the six stores (three to self, three to m) tie on priority (61), weight
+// and dependents, so sched1 issues them in LUID order as each becomes ready; retail's order
+// (0x670, 0x680, 0x660, m's rows) is the order of the stream when row 0's store to self is
+// emitted after rows 1 and 2 (either order of those two) and before `m = self->m660`. Written
+// so (below: the first product kept in a local, stored last), block A is retail's insn for
+// insn except for the three argument insns of wall (b) that sit among its loads: the same 64
+// lines here, but with w40-fc's and w44-fc's probes for (a) and (b) on top, 26 lines, all
+// registers (build/swarm/w50-f/f/f2.cpp; 28 without it). No pseudo other than the products is
+// needed: the weights of w46-c and w49-f were another way to the same order in the replay.
+// What is left, each measured on that probe: (1) (a)'s `addiu a1,sp,368; move s3,a1` (the
+// probe's own artefact); (2) s1/s3 (r507 against r510, as W23); (3) block A's VU0 registers:
+// tools/globalalloc.py's local-alloc replay gives the tilt's row 1 priority 11428 (4 refs over
+// 7 insns) against 10000 for turn's row 2 (2 over 2), and the quantity of tilt's row 0 and the
+// last product 10434 (8 refs over 23) against 10000 for the transposed product's result;
+// retail has both the other way, so 9 insns for the first and 25 for the second (w40-fc's two
+// insns between the tilt loads and the last product), or turn's row 2 loaded directly before
+// its product and v640 stored directly after the transposed product in sched1's order.
+// (b) holds after reload too: in our sched2 the call's `addiu a1` and `move a0` again take
+// the idle alu slots beside the tilt loads, where retail's slots are idle, so the boundary is
+// not a CLOBBER (reload deletes those before sched2); a jump that jump2 deletes, or an asm
+// without operands, are what is left. Ruled out, compiled: a run-once loop from each of six
+// starts (the heading call, reach, the first ComputePolarOffset, lean, the first
+// BuildAxisAngleMatrix, HandleStepSequenceSkipButtons) to `rot = m` with the new store order
+// (1704 bytes, or 52 lines with VU0 registers vf10/vf11: depth 2 is not retail's); the w
+// clamp written in both arms of the speed test for cross-jumping to merge (one more pad and
+// g_unitRange reference each, but the copies schedule differently and stay: 1796 bytes);
+// the key tests as switches (1704 to 1716 bytes); one u128 reused for the cross product and
+// the rows (a vmove, 1704 bytes). From toplev.c: jump runs again before cse2, so an arm
+// emptied after cse1 (an inline's unused result) leaves no jump for sched1; only an arm flow1
+// or a later pass empties does.
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"
@@ -160,14 +234,6 @@ static inline f32 Quadratic(const f32* poly, f32 z)
     return poly[0] + z * (poly[1] + z * poly[2]);
 }
 
-// The rows of m, each turned by r.
-static inline void RotateRowsBy(Mat02* out, const Mat02& r, const Mat02& m)
-{
-    Vu0::Q(out->r[0]) = Vu0::RotateUntied(r, Vu0::Q(m.r[0]));
-    Vu0::Q(out->r[1]) = Vu0::RotateUntied(r, Vu0::Q(m.r[1]));
-    Vu0::Q(out->r[2]) = Vu0::RotateUntied(r, Vu0::Q(m.r[2]));
-}
-
 // The rows of m, each turned by r, returned by value (g++'s named return value).
 static inline Mat02 RotatedRows(const Mat02& r, const Mat02& m) return out
 {
@@ -179,6 +245,21 @@ static inline Mat02 RotatedRows(const Mat02& r, const Mat02& m) return out
     out.r[1] = t.r[1];
     Vu0::Q(t.r[2]) = Vu0::RotateUntied(r, q[2]);
     out.r[2] = t.r[2];
+}
+
+// Vu0::RotateTransposed with the rows read as Vu0::Vec members (mem/s at a varying address), as
+// Vu0::RotateMembers reads Rotate's: the loads then do not wait for the weights' slot stores
+// (alias.c, fixed_scalar_and_varying_struct_p). Kept here until the function matches.
+template <class M> static inline u128 RotateTransposedMembers(const M& m, u128 v)
+{
+    const Vu0::Vec* r = (const Vu0::Vec*)&m;
+    u128 out, p0, p1, p2, one;
+    __asm__("vmul.xyzw %2, %5, %8\n\tvmaxw.xyzw %1, vf0, vf0w\n\tvmul.xyzw %3, %6, %8\n\tvmul.xyzw %4, %7, %8\n\t"
+            "vadday.x ACC, %2, %2y\n\tvmaddz.x %0, %1, %2z\n\tvaddax.y ACC, %3, %3x\n\tvmaddz.y %0, %1, %3z\n\t"
+            "vaddax.z ACC, %4, %4x\n\tvmaddy.z %0, %1, %4y"
+            : "=&j"(out), "=&j"(one), "=&j"(p0), "=&j"(p1), "=&j"(p2)
+            : "j"(r[0].q), "j"(r[1].q), "j"(r[2].q), "j"(v));
+    return out;
 }
 
 void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
@@ -231,7 +312,10 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     ValueRange* unit = &g_unitRange;
     BuildAxisAngleMatrix(&axis, &tilt, D_00275810[0] * lean);
     BuildAxisAngleMatrix(&g_unitZVector, &turn, self->f638);
-    RotateRowsBy(&self->m660, tilt, turn);
+    u128 p0 = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[0]));
+    Vu0::Q(self->m660.r[1]) = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[1]));
+    Vu0::Q(self->m660.r[2]) = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[2]));
+    Vu0::Q(self->m660.r[0]) = p0;
     m = self->m660;
     Vu0::Q(self->v640) = Vu0::RotateTransposed(self->m660, Vu0::Q(offset));
     rot = m;
@@ -251,7 +335,7 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     ComputePolarOffset(&axis, stick, 1.0f, 0.0f);
     Vec02 vel;
     Vu0::Q(vel) = Vu0::MulXSum(Vu0::Q(self->v150), Vu0::Scalar(k), Vu0::Q(axis), Vu0::Scalar(w));
-    Vu0::Q(((TintBody_1DEBE8*)self->f74C)->v20) = Vu0::RotateTransposed(((TintPart_1DEBE8*)self->f748)->frame->m110, Vu0::Q(vel));
+    Vu0::Q(((TintBody_1DEBE8*)self->f74C)->v20) = RotateTransposedMembers(((TintPart_1DEBE8*)self->f748)->frame->m110, Vu0::Q(vel));
     if (self->f73C != 0 && g_player != 0 && (pad->flags & 0x40)) {
         ClearPadPressedBits(pad, 0x40);
         SetTintBlendColliderState(self, 0);

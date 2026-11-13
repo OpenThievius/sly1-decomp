@@ -149,7 +149,10 @@ else arm before the divide.
   cast array indexed at each use gives `move s0,s3` and offset 1436 in each load. The giv's add
   value must be a register: the array named once, `void** nodes = (void**)((u8*)self + 0x59C);`.
 
-### A call's frame-address arguments that GCSE does not hoist (func_00191AC8, unsolved)
+### A call's frame-address arguments that GCSE does not hoist (func_00191AC8)
+
+(The function is matched since 2026-11-13: "An asm kept in its loop" below. These are the
+notes of the first attempts.)
 
 Read from the `-dF` dumps (2026-11-10, nonmatching/func_00191AC8.cpp). In a loop, a call's argument
 `&local` is expanded into a pseudo (`(set (reg) (plus sp N))`) that PRE hoists to the function's entry
@@ -763,7 +766,7 @@ D_00274990` (`li v0,1` with the result in the loaded register's v1, where ours t
 the constant's pseudo) is probably the same: a moved, rematerialised constant. As func_00130C58
 above: what gives retail's life-1 invariants their move is not found.
 
-### Memory givs absorbed by a multi-use address giv (func_0013A940, near miss)
+### Memory givs absorbed by a multi-use address giv (func_0013A940, matched 2026-11-13: "Which giv absorbs the memory references" below)
 
 Read from loop.c (combine_givs, combine_givs_p) with `-dL` (2026-11-10). Retail's particle loop
 keeps the four call-argument addresses (&cur->pos[j], &cur->vel[j], &nxt->pos[out],
@@ -777,6 +780,73 @@ loop has one reduced register fewer, the bivs (removed, j, out) take the saved r
 instead of retail's caller-saved a7/t0/t1 (saved around both calls with sq/lq), and the function
 is 12 bytes short. The array form (Vec02 indexing or a bank struct of three arrays) does not
 change it.
+
+#### Which giv absorbs the memory references (func_0013A940, matched 2026-11-13, w46-a)
+
+The recount, from combine_givs and the `-dL` dumps of some thirty forms. The 116 against 108
+was not a tie to break: the two 116s were *twins*.
+
+- **What each total is.** A giv that may host (a DEST_ADDR giv, or a DEST_REG giv used in more
+  than one insn: reg_single_usage) gets its own benefit, +1 when its addend has no constant,
+  and `benefit + 3` for every giv it can absorb: every DEST_ADDR giv of the family (an address
+  a constant away), and every DEST_REG giv *identical* to it, single-use ones included. The
+  eight memory references are worth 97 to any host. So the hosts differ only by their own
+  benefit (7 or 8 for `cur + 16j`, 10 for `cur + 0x2C0 + 16j`, 11 for `cur + 0x580 + 16j`),
+  the +1, and their twins. Alone, `cur + 16j` scores 8 + 1 + 97 = 106 and loses to the third
+  array's 108. It scored 116 because it existed twice.
+- **Where the twins come from.** An rvalue `cur[K + j].f` expands as `((16j + cur) + 16K)`
+  and the memory reference: the sum `16j + cur` is a pseudo, cse shares it among the accesses
+  of one extended block, and the loop body is two such blocks (the label after the switch
+  starts the second), each with its own shared `cur + 16j` used several times. gcse does not
+  merge them: after its copy propagation the two sums read different pseudos for `16j`, and
+  there is one pass. Each twin adds 10 or 11 to the other: 116 and 116. The `nxt` family had
+  the same (140 for the mode-1 store's reference parameter with two twins, 132 for `nxt +
+  16out`), and its third-array giv was used once and could not host at all.
+- **What retail's registers require.** The host is the third array's giv in both families
+  (s1, s0, every reference at a negative offset), and the first two pairs are registers of
+  their own that only the call reads (fp, s6, s7, s5): givs that lost to the host, were
+  reduced alone, and kept the one use the host could not take. The preheader says which insns
+  they were: loop.c emits the initial values in descending order of the givs' insns, and
+  retail's `addiu s6,a1,0x2C0` still reads `cur` itself, so it was emitted before `fp = cur`
+  (cse2 would otherwise have rewritten it to read fp, as ours did: `addiu s8,s6,704`). The
+  `+0x2C0` giv's insn is therefore later in the loop than the `+0` giv's, and both precede
+  everything else: two pointers set at the top of the body, position first.
+- **The source.** Named element pointers, each a plain `base + (16j + 16K)` that leaves no
+  shared `base + 16j` behind:
+
+      Vec02* pos = &cur[j];           Vec02* npos = &nxt[out];
+      Vec02* vel = &cur[0x2C + j];    Vec02* nvel = &nxt[0x2C + out];
+      ... the test, the switch ...
+      Vec02* rec = &cur[0x58 + j];    Vec02* nrec = &nxt[0x58 + out];
+      *nrec = *rec; ...
+
+  Every access is then a pointer plus a constant; each pointer is one DEST_REG giv with
+  several uses and no twin. The dump: `{501, 112} {212, 111} {202, 109}` for j (rec, vel,
+  pos) and `{511, 105} {230, 104} {220, 102}` for out: the third array's pointers win by one.
+  The four at the top must be set on every iteration (ahead of the `continue`): a pointer
+  set after the test is not always computed, its references are not givs, and the function
+  grows to 1040-1052 bytes. rec named at the top with the others ties vel at 109 and loses on
+  order. With the bivs then in a7, t0 and t1 the size is retail's.
+- **The rest, each from retail's code once the loop was right.** The extra block is read from
+  the record at each use, as an array of 32-byte pairs (`node->extra[j].a`, `.b`, and the pair
+  assigned whole when the point moves down): retail reloads it after the call and keeps only
+  `j << 5`. The time left is the end's own variable (`end -= now`), which puts it in $f12
+  from the first read. The list walk reads the next link into a word and sets the frame
+  before the node, as the walk's start does. The mode-1 step holds its vectors as Vu0::Vec
+  and stores through the pointers as structures, which gives retail's order and registers there
+  (the last 12 lines: with `Vu0::Q` loads and stores the weight's slot store came before the
+  position's load; measured, the dependence not traced in the dumps).
+- **Landing.** The function's two FLT_MAX literals replace the placeholders D_00249D6C and
+  D_00249D70. The two that are left (func_0013A618's) had to move above the function before
+  it: INCLUDE_ASM leaves the assembler in .text without the compiler knowing, and a compiler
+  that last emitted .rodata does not switch to it again for the next function's literals,
+  which then land in .text (the build said `lands at 0x13A948`).
+
+The tell for a loop whose registers are off by one saved register: `-dL`'s first "Sorted
+combine statistics" of each biv. Retail's host is the giv whose register every memory
+reference is an offset from; if ours ranks another first, look for two equal totals at the
+top: twins from two extended blocks. func_0013A618, the same file's other loop over these
+records, was not re-tried with named pointers.
 
 ### Three invariants ranked by their place in loop.c's move list (func_001D7778, solved below)
 
@@ -999,7 +1069,7 @@ that form plausible for this function; the search after it, with its `next:` lab
 reads like code written around such macros. Its only caller, func_0015B7B8, now declares it
 variadic as the definition is, and is still EXACT on both versions.
 
-### What loop.c counts: a `use` after a call that ends a block, and an argument through a local (func_0013A618, near miss)
+### What loop.c counts: a `use` after a call that ends a block, an argument through a local, and an ADDRESSOF variable's read (func_0013A618, matched 2026-11-13)
 
 Measured and read from flow.c (find_basic_blocks) and loop.c on 2026-11-12 (w40-fb). loop.c's
 "N real insns" is every INSN, JUMP_INSN and CALL_INSN between the notes when it runs, and two
@@ -1026,6 +1096,15 @@ kinds of insn are in that count that the final code never shows:
   pseudos (`q = ...; p = q;`), a dead copy (`s32 ok = f();`) and a local for a parameter or a
   loaded value used again are gone before loop.c (cse1 and its dead-insn sweep) and count
   nothing (measured: 94 each time).
+- **The read of a variable whose address is taken** (func_0013A618, matched by w46-b). A
+  scalar local passed by address to an inline (`s32 mode; GetParticleMode(self, &mode);`, or
+  bound to a `const s32&` parameter or local) is `(mem (addressof (reg)))` through cse1.
+  purge_addressof, which runs after cse1's dead-insn sweep, turns the inline's store into
+  `(set (reg mode) (reg loaded))` and the read into the argument's copy: three insns where a
+  plain local has two. gcse's cprop leaves the copy and loop.c counts it; cse2 then reads the
+  loaded register at the argument and deletes the copy, so the stream after cse2 is the plain
+  local's and no register or schedule changes. This is the counted insn that leaves the
+  block alone, with the callee's prototype as its definition has it (`s32 mode`).
 - **Retail's window for func_0013A618.** The movables in order: the `%hi` of g_toSprChannel
   (life 1), the `%hi` of D_00274990, the 1, 80, the base of D_002748F0 and its `%hi`, the 2
   (life 1), 2112, the block base, &hi (life 1). Retail moved the first `%hi` and the 1 (reload
@@ -1045,11 +1124,15 @@ kinds of insn are in that count that the final code never shows:
   (leaving the `%hi`'s `lui v0` dead in the preheader), forms it again for the `+ 8`
   (`lui v1; addiu v1,v1,%lo`, the form movsi takes during reload) and reload_cse turns that
   `lui` into `move v1,v0`. It appears as soon as pass 1 has 95 insns.
-- **Not found.** The third counted insn that leaves the filter call's block alone: the count
+- **Found: the ADDRESSOF read above.** Before it, tried as the third counted insn: the count
   argument through a local or an inline accessor gives 97 and 89 but its pseudo changes that
   block's registers; the detach call moved to the else arm gives the `use` but the wrong
-  branch; `node = next` in both arms rotates s1, s2 and s3. The near miss keeps two locals
-  (the channel and the mode) and is 17 lines from retail, all of them the moved 2.
+  branch; `node = next` in both arms rotates s1, s2 and s3; a narrower type for the flipped
+  bank index (`u8 nb`: the truncation is pushed into the load, `lbu`; `bool`: no insn); any
+  of the block addresses through a local (14 to 24 lines); the filter call in a wrapper
+  inline (its 128-bit by-value parameter changes the frame). With two locals (the channel
+  and the mode) the source was 17 lines from retail, all of them the moved 2; with the mode
+  read through the out-parameter it is 97 and 89 and EXACT on US and PAL.
 
 ### A count set in each arm: `li v0,4` at every use, and a bound both loops share (func_001B7280, matched 2026-11-12)
 
@@ -1353,3 +1436,62 @@ built whole and the full builds print `MATCH` on US and PAL.
   EnsureKeyedList, GetObjectClassId) to the curves. func_00127B20 and func_0012CD78 EXACT at
   vf15; the six matched curve helpers EXACT at vf30 (US, and func_00130540 and func_00130C20 on
   PAL).
+
+### An asm kept in its loop: a float operand may trap, and a call has been passed (func_00191AC8, matched)
+
+loop.c moves `(set (reg) (asm_operands ...))` out of a loop like any other invariant set when the
+asm is not volatile, its inputs are invariant, and the output is set once in the loop
+(`scan_loop`: `set_in_loop == 1`, or consecutive sets that are all invariant). func_00191AC8's
+conversion of its float parameter (`move v0,s6; sq v0,304(sp)` at the loop's top, eleven times) is
+such an asm and stays in the loop. What keeps it there is the last condition of the same test:
+
+    && ! ((maybe_never || call_passed) && may_trap_p (src))
+
+`may_trap_p` (rtlanal.c) answers 1 for anything of a floating mode that it does not know, and it
+walks an ASM_OPERANDS's vectors: the `(asm_input:SF ("r"))` of a float operand is such an rtx. So
+**an asm with a float input may trap, and loop.c never moves it once a call (or a jump or label)
+has been passed in the loop**. The original wrote the conversion where it is used, after the call
+that builds the matrix it scales; written before that call it is moved ("Insn 48: regno 132 (life
+88), savings 1 moved to 493", 432 bytes). In the matched form loop.c's log lists two movables and
+the asm (insn 67) is not among them. sched1 then issues the asm ahead of the call (its output
+crosses calls, so nothing ties it to the call before it), in the gap the angle's load leaves:
+retail's `move v0,s6; lwc1 $f12,0(s3); move a1,sp; sq v0,304(sp); jal`.
+
+The second half is gcse. A non-volatile ASM_OPERANDS is an expression to it (`want_to_gcse_p`
+refuses only registers, constants and calls; `hash_expr_1` only a volatile asm), and two
+expansions of one inline's asm are equal: same template, constraints, operands, file and line.
+The function converts the scale again for the division after the loop. That occurrence is
+redundant; 2.95.3's PRE (`pre_lcm`) deletes it and inserts the expression at the end of the
+loop's first block, before the branch on the test's result (`pre_insert_insns`,
+`insert_insn_end_bb`), although that block computes it at its top:
+
+    .cse    insn 67 (loop, after the first call) and insn 438 (after the loop): the asm twice
+    .loop   insn 67; insn 504 before jump_insn 320 (set (reg:TI 242) (asm_operands ...));
+            insn 438 is (set (reg/v:TI 229) (reg:TI 242))
+    .cse2   insn 504 is (set (reg:TI 242) (reg/v:TI 132))
+
+loop.c does not move insn 504 either (three calls passed), and cse2 makes it a copy of the first
+asm's output, which sits in the same block. That output has 12 references over three calls and no
+register, so the copy is a load from its home: retail's `lqc2 vf4,304(sp)` in the `beqz`'s delay
+slot, the register the code after the loop stores and divides by. No statement stands between
+the call and the `if`.
+
+The same source with a volatile asm shows why retail's is not volatile. haifa-sched's
+`sched_analyze_2` makes a volatile asm depend on every earlier insn and every later insn on it,
+in sched1 and again in sched2. Retail's first block is `move v0,s6; lwc1 $f12,0(s3); move a1,sp;
+sq v0,304(sp); jal; addiu a0,s8,lo`: the angle's load and `a1` are issued between the reload that
+feeds the asm and the store of its output. With a barrier at the block's top the load waits for
+the asm and (a spill slot has no alias flag) for the store, and the order is `move v0; sq; move
+a1; addiu a0; jal; lwc1`.
+
+History. Before the trap rule was read, the function was exact only as a probe that set the
+variable a second time in the body (`k = Vu0::Vec::Of(k)` after the last call: `set_in_loop` 2,
+and a copy chain gcse's two passes of copy propagation left one step short, gcse.md, "Two passes
+of copy propagation"). That statement had no meaning and was never landed; three passes looked
+for a second set with one. The second set was not the fact: the asm's place after a call and the
+second conversion were.
+
+Where else to look: an asm that retail repeats in a loop although its inputs do not change,
+with no sign of a barrier around it. Ask whether it has a float operand and a call before it in
+the source; and where a value is loaded just before a loop's branch and used only after the
+loop, whether the code after the loop writes an expression the loop already has.

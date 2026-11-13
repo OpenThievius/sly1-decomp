@@ -130,6 +130,64 @@ From haifa-sched.c of GCC 2.95.3 (sched_analyze, sched_analyze_insn) and the `-d
   slots with the next call's `lui`, `addiu a1` and `move a0`; so the label is still there when
   flow2 rebuilds the blocks.
 
+- **What a register weight is, and why the 660 rows' order has no plain form yet (w49-f,
+  2026-11-13).** haifa-sched.c's find_insn_reg_weight counts the SETs and CLOBBERs of an insn's
+  pattern less its REG_DEAD and REG_UNUSED notes, so a store weighs 1, or 0 where a register
+  dies in it, and rank_for_schedule issues the lower weight first at equal priority. After a
+  block is scheduled, attach_deaths_insn puts the deaths back in the new order, so local-alloc
+  ties copies by sched1's order, not the source's. Retail's order (0x670, 0x680, 0x660, then
+  m's rows) is the replay's with the stores of rows 1 and 2 at weight 0, so their products die
+  there, while m's and rot's rows 1 and 2 are stored later from the same VU0 registers. The
+  three ways to a second register with the same value were each ruled out against the dumps:
+  a copy ahead of the store in the stream (cse rewrites both stores to its canonical register,
+  and the copy feeds m's store at priority 61, so it issues before the 0x670 store and both
+  registers live: a `vmove`); a reload of the row after the store that reload_cse would delete
+  in the product's register (a pseudo only loaded and stored ties in regclass, movti and
+  stores being neutral, so it is TI_REGS and local-alloc gives it a GPR); m and rot stored
+  before the 660 rows (frame stores feed RotateTransposed's loads at priority 61, so rot's go
+  early, and rot written after the transpose holds the products' last use).
+
+- **The 660 rows' order is the stream's order; what block A still needs (w50-f, 2026-11-13).**
+  The six stores of the block (three rows to `self + 0x660`, three to m) have one priority
+  (61: the transposed product's row loads wait for the frame stores as well as the stores to
+  self; read from alias.c and not tested, the reason is that their address register has no
+  pointer flag, so find_base_term gives it no base), one weight and the same number of dependents, so rank_for_schedule
+  falls through to the LUID: as each becomes ready, the earliest in the stream goes. Retail's
+  order (0x670, 0x680, 0x660, then m's rows) is therefore the stream's with row 0's store to
+  self written after rows 1 and 2 and before `m = self->m660`; no register weight and no
+  second pseudo is needed (the weights of the entry above were another way to the same order
+  in the replay). Compiled: with the first product kept in a local and stored last, block A
+  is retail's insn for insn but for the three argument insns of this section's wall, and with
+  the two probes above (the if/else between the key reads, the test before the third call)
+  26 lines differ, registers only (build/swarm/w50-f/f/f2.cpp). What original statement put
+  row 0's store last is not known; a structure copy whose first row cse forwards issues its
+  rows 1, 2, 0 as well (the copy of the call's result into rot further down), but there it is
+  the deaths of rows 1 and 2, which the products here cannot have: their registers stay busy
+  to rot's stores (the transposed product's scratch registers are vf8 to vf11 in retail).
+  On that probe local-alloc's replay (tools/globalalloc.py's LocalModel) gives the two ranks
+  that are still wrong: tilt's row 1 (4 references over 7 insns, 11428) against turn's row 2
+  (2 over 2, 10000), and the quantity of tilt's row 0 and the last product (8 over 23, 10434)
+  against the transposed product's result (2 over 2, 10000). Retail has each pair the other
+  way: two more insns in sched1's order between the tilt loads and the last product (9 and
+  25), or turn's row 2 loaded directly before its product (a tie between that load and the
+  second product would give it, the product's weight being lower: reasoned, not replayed) and v640 stored directly
+  after the transposed product. Three tied copies of the products would not do: the last
+  product's quantity then has 10 references over 26 insns (11538).
+- **The boundary is there after reload (w50-f).** In our sched2 the third call's `addiu a1`
+  and `move a0` take the idle alu slots beside the tilt loads again, whatever sched1 did, and
+  retail's slots are idle; so what holds them exists in sched2. A CLOBBER of a brace
+  initialiser (docs/toolchain/large-functions.md) is deleted by reload and cannot be it. Left:
+  a jump that jump2 deletes, or an asm without operands. From toplev.c's pass order, jump runs
+  after cse1, delete_trivially_dead_insns after that, and jump again before cse2: an arm that
+  only holds an inline's unused result is emptied and its jump removed before sched1. A jump
+  survives to jump2 only where flow1 or a later pass empties the arm (a register that is used
+  elsewhere and dead here). flow.c also ends a block after every call inside an exception
+  region, with no code, but the file is built without exceptions. Compiled and ruled out as
+  the common cause of this function's walls: a run-once loop from each of six statements to
+  `rot = m` (1704 bytes, or VU0 registers vf10/vf11); the w clamp in both arms of the speed
+  test (the copies are scheduled differently, so cross-jumping leaves both: 1796 bytes); the
+  two key tests as switches (1704 to 1716 bytes).
+
 ### sched2 keeps sched1's dependences (func_001358D0)
 
 - **LOG_LINKS are never cleared.** haifa-sched.c's sched_analyze only adds to an insn's
@@ -220,6 +278,138 @@ dumps of func_0020BB18 (src/lib/mpeg_decoder.cpp, Sony's 2.9-ee-991111, 2026-11-
   completely), the plane array through a local pointer (102 after the test, 42 at the top: the
   pointer is kept in s5), the size test as an inline (134), the body as an inline (not
   inlined: over the integration threshold).
+- **Third pass (w47-h, 2026-11-13): what this compiler's insns that leave no code are, and
+  none is here.** Measured on the 36 library files this cc1 builds (their `.sched2`, `.jump2`
+  and `.dbr` dumps and the verbose trace): (1) a `trap_if` with an anti dependence on another
+  trap prints nothing (func_00202140, matched with it: the section "The zero trap of
+  func_00202140"); this function has no division by a variable, so no trap to repeat. (2)
+  flow's `(use (const_int 0))` follows a call that is the last insn before a label; the
+  scheduler ties it behind that call at its block's end. (3) `blockage` (an
+  `unspec_volatile`, a true barrier that prints nothing) stands only before the stack
+  pointer's adjustment in each epilogue, the tail call's included. (4) jump2 deletes
+  conditional jumps, labels and no-op moves that sched2 still saw, and no dead single set
+  reaches sched2 in any of the 36 files, so a dead re-read is not kept. (5) In no block of
+  the 36 files does one insn issue alone in the first cycle while an ALU insn with no
+  predecessor waits for the second: retail's body is the only one, so its first cycle is
+  not a rank this scheduler gives a single block. gcse here is edge-based
+  (`PRE/HOIST: edge (6,8), copying expression 16`): a probe that makes the last plane's
+  address partly available (a jump into the body from a block that computes it) has PRE
+  compute it on both edges into the body, which is retail's test and both delay slots, but
+  copy propagation then leaves one pseudo for the address (it took `s5` in the probe, whose
+  extra block freed a register; spilled, its store would follow its set), where retail's
+  `sw v0,68(sp)` sits in the body after the two picture stores. The address set in each arm
+  of the test by hand (`if (w != pic->width) last = ...; else { if (h == pic->height) return;
+  last = ...; }`) gives the same: test and slots exact, 35 lines left, the spill store
+  beside the address and in slot 48. So retail's shape is the address alone in a block
+  ahead of the body with its spill store inside the body: the value in `v0` crosses a
+  boundary that leaves no code, and the stored pseudo is the last one made. Compiled and
+  ruled out (102 lines or worse): the callees' return types (void or s32, three ways), the
+  test as nested ifs, as two gotos, as a flag local (116, 134), one variable for the rows
+  and the height (64 lines but with s6 and s7 swapped: not closer), one for the rows and
+  the size (79, the same), the height set in each arm (136), the size kept in `w` (135).
+- **Fourth pass (w49-i, 2026-11-13): retail's body block is ours without the address, and
+  what that excludes.** Replayed by hand on our own `.sched2` dependency table of the body
+  (block 8 of the near miss; issue rate 2, one memory unit): delete insn 345 (`addiu
+  v0,s8,1320`) and let `v0` be live into the block, so that 659 (`sw v0,68(sp)`, priority
+  64) is ready at once. The scheduler then issues 142+146, 138+148, 659+163, 335+165,
+  662+329, 337+150, 665+331, 339+333, 668+472, 341+152, 671, 343, 674 and the call: retail's
+  order insn for insn up to the first `jal` (the sort at each cycle is the one the table
+  gives; nothing else changes). So in sched2 the address is set outside the body's block, or
+  shares cycle 1 with an insn that leaves no code and takes the second issue slot ahead of
+  the stores. Each reading needs something no allowed form has given:
+  (1) *A value set before the body's label and copied inside it* (two pseudos: R in `v0`, set
+  ahead of the label, and the spilled one, set in the body by `Q = R`). PRE cannot place R:
+  with lazy code motion the address is anticipatable only at the body (the return path does
+  not use it), so it is inserted on the two edges only when it is available on some other
+  incoming path, which retail's code would show (it has no other computation of it). And
+  cse2 removes the copy: in make_regs_eqv (cse.c) a new register becomes the class's
+  canonical one only if it lives outside the current cse block, so R stays canonical, Q's
+  uses become R and R is the pseudo spilled, with its store beside its set. Measured: the
+  PRE probe built with `-fno-rerun-cse-after-loop` keeps both pseudos, Q spilled to slot 68
+  (retail's slot) with its copy's store in the body (`sw s2,68(sp)`; R took s2 there). So
+  this reading needs a label inside the body at cse2 that is gone by sched2, or Q
+  referenced before the body's label; no plain source found does either (a named label
+  before the last call is deleted and changes nothing, 133 lines in the PRE probe).
+  (2) *An insn that leaves no code in cycle 1.* The only candidate reorg removes is a re-read
+  of the width identical to the test's `lw v1,0(a1)` (redundant_insn on both paths, deleted
+  from the beq's own thread), but redundant_insn refuses an insn with a REG_UNUSED note and
+  flow2 deletes a dead set, so the re-read needs a reader that also vanishes before final;
+  no such reader (a no-op move, a USE of a register other than the return value, a silent
+  trap) arises from this function's statements.
+  Also compiled (no closer): one named local for the last plane's address set at the top, before the test,
+  after it or before the set-up call, with the last call using it or not (146, 122, 107,
+  107); the probe that sets the address in each arm with a body copy whose source is
+  reassigned after it (cse2 then keeps the copy: 48 lines, the copy late and slot 48).
+  Not kept: the size written at each of its three uses scores 40 lines, but it computes the
+  size after the first call where retail computes it before, so it trades this wall for a
+  structural difference.
+- **Fifth pass (w50-i, 2026-11-13): two of the three readings are out, and combine makes
+  the insn the third needs.** About 75 compiles, with the `-da` dumps (scratch
+  `build/swarm/w50-i/`).
+  (1) *The address set on the edges is out by its register.* A pseudo set on the two edges
+  into the body and copied there into the spilled one dies in the copy, so global-alloc
+  hands it the copy's preferences (expand_preferences): the spilled pseudo is copied to
+  `a0` for the tail call and the edge pseudo takes `a0` (`;; 122 preferences: 4`), not
+  retail's `v0` (three probes: the arms by hand, the copy written before the first call).
+  With the copy written at the set-up call sched1 moves it above the calls, but haifa
+  never lowers REG_N_CALLS_CROSSED of a pseudo that lives in more than one block
+  (`Register 122 ... across 10 insns ... crosses 4 calls`), so the edge pseudo takes a
+  call-saved register (`s2`, the fourth pass's `s2`). gcse's own copy propagation folds a
+  body copy whose source is not set again, as cse2 does (a label later in the body does
+  not keep it). Retail's `v0` is what reload's first spill register gives the near miss:
+  the address is computed in the body's block.
+  (2) *A barrier at the address is out by the stores.* With the address the first insn of
+  the block's stream its spill store follows it (reload emits it there), the picture
+  stores come later in the stream and so depend on that store (two stores that may
+  alias), and `sw v0,68(sp)` issues ahead of them. Compiled: an insn that prints nothing,
+  loop notes, then the address (`do { } while (0); p8 = ...` with six pointer locals
+  declared in slot order) scores 21 lines with exactly that order (address, spill store,
+  picture stores); retail has the picture stores first. So in retail's stream the picture
+  stores precede the address and its store, as in the near miss, and the address is free
+  to issue first: no barrier.
+  (3) *What is left: the near miss's stream with an insn that prints nothing ahead of the
+  picture stores, which they must wait for.* A read of memory they may alias does it: it
+  holds both stores, takes the second issue slot of cycle 1 beside the address, and the
+  block then schedules as retail's, insn for insn (replayed by hand on the near miss's
+  table: the fourth pass's replay with the slot taken instead of the address removed).
+  combine makes such an insn. When a combination removes the last reference to a register
+  that is live into the block, distribute_notes finds no insn for its REG_DEAD note and
+  emits `(use (reg N))` after the block's label (combine.c, "insert a USE insn for the
+  register at that label"). Measured: an uninitialised local read in an expression
+  combine folds away (`x & (w & 15)`, `w` a multiple of 16) leaves `(insn 667 134 664
+  (use (reg/v:SI 212)))` at the body's label; it reaches sched2 (a USE issues
+  `on unit none` and counts against the issue rate, as `(use (const_int 0))` does in
+  func_00204AA8), reorg skips it and final prints nothing. A register that crosses calls
+  gets no hard register here (the nine call-saved ones are taken) and reload makes the
+  insn `(use (mem:SI (plus sp 72)))`, a seventh slot inside the same frame, or
+  `(use (mem (plus sp 68)))` when the register is the last plane's own variable.
+  (4) *Why no probe matched: sched1 decides where the USE lands, and it must land ahead of
+  the picture stores (priority 42: the first call waits for every store).* A USE of a
+  register that crosses no call is tied before the next call (42, and its death gives it
+  the lower weight: measured, `(use (reg a3))` issued between the mult and the height
+  store), but such a register gets a hard register, and a USE of a register holds no
+  store. A USE of a register that crosses calls has the priority of that register's next
+  set in the block (35 for the last plane's variable, 3 for a register never set), so it
+  lands after the stores and depends on them. Retail therefore needs a register that ends
+  in memory and whose USE has priority 42 or more in sched1: its next set in the block
+  tied before the first call (a copy from a temporary that crosses no call, or a value
+  an early store needs), with its old value's last reference removed by combine. No
+  source form found; a temporary and a copy do not survive (cse's swap of `(set T E)
+  (set Q T)`, then combine).
+  (5) *Measured on the way.* A conditional around dead code leaves no block boundary
+  (flow removes the arm and the branch before sched2: the base's code), so only jump2's
+  cross-jumping of identical arms could hide a boundary from the final code. An empty
+  loop at the head of the body only adds the loop's alignment nop (its notes lead the
+  block: 123). The early return as a value (the last plane's address) puts the address
+  in the `beq` slot from the return path but restructures the exit (121). A copy of the
+  picture pointer that survives cse (`p = pic`, `p` set earlier) issues alone ahead of
+  both stores and is copied into both slots (`move v0,a1`): the dependence retail's
+  first cycle needs, from an insn that prints. The size written at each use lands after
+  the first call because sched1 ties a temporary that crosses no call behind the
+  previous call, so retail's size before the call is its source order. No flag gives the
+  function (`-fno-expensive-optimizations` 42 lines, `-fno-schedule-insns2` 56: other
+  code). Eighteen plain statements at the head of the body (blocks, casts to void, empty
+  ifs and switches, labels, empty or early-returning inlines) leave the base's code.
 
 ### A value negated into itself crosses the call (func_001A2380)
 
@@ -324,7 +514,7 @@ order:
 The handler at slot 0x108 takes `(self, flags, item, end, dt)`: retail's `mov.s $f12` fills the
 call's delay slot after the a1-a3 moves, as in func_001BCD00; with dt second it goes first.
 
-### An argument's frame address that sched2 holds back (func_0014F168, unsolved)
+### An argument's frame address that sched2 holds back (func_0014F168, matched 2026-11-13: see the end of the third section below)
 
 Read from haifa-sched.c, flow.c, reload1.c and toplev.c of GCC 2.95.3 and the `-dS -dR -dl
 -dg -df -fsched-verbose-6` dumps (2026-11-09):
@@ -356,7 +546,7 @@ Read from haifa-sched.c, flow.c, reload1.c and toplev.c of GCC 2.95.3 and the `-
   as a two-element array breaks block 0. What retail had is outside this model: look for a
   construct that leaves an insn naming a1 (or a group) that the final code does not show.
 
-### A store in each arm leaves the join block to sched2 (func_0013BE18, unsolved)
+### A store in each arm leaves the join block to sched2 (func_0013BE18, matched 2026-11-13: the theory was wrong, see the end of the next section)
 
 func_0013BE18 (src/main/child_group_object.cpp) has func_0014F168's tail (2026-11-09): d
 normalized through NormalizeOr into `*p`, then `r = d * w1 + Z * w2` (MulXSum of two ScalarAt
@@ -389,7 +579,7 @@ earlier insn touches, so no dependence on &r explains it; the issue slots do.
   Spot it: a join block whose first insn is a store common to both arms, and an ALU insn that
   retail issues later than ours although nothing it reads or writes is touched before.
 
-### Why the arms' stores cannot be written plainly (func_0014F168, func_0013BE18, unsolved)
+### Why the arms' stores cannot be written plainly (func_0014F168, func_0013BE18; matched 2026-11-13 another way)
 
 Read from cse.c, jump.c and haifa-sched.c of GCC 2.95.3 with dumps and probes (2026-11-10):
 
@@ -444,6 +634,46 @@ Read from cse.c, jump.c and haifa-sched.c of GCC 2.95.3 with dumps and probes (2
   (the slot stores are expanded before the asm, the call's own moves after r's store). So a
   dependence, stale or not, is not what holds the insn back; the block's contents at sched2 are
   (the per-arm stores above).
+
+**What it was (w46-a, 2026-11-13): one memory dependence of the join's store, not its place.**
+Both functions matched with the store where the near misses had it, at the join. The sched2
+replay (w44-fc's s2.py over tools/sched1.py's Replay, which reproduces every block of the near
+miss) with one edge cut, from the store of `*p` to the first weight's load, issues the join
+block in retail's exact order (func_0013BE18: 197 254 220 244 245 390 393 226 283 260 279 204
+288 236 314 298 270 308 310 312 316); dropping the store from the block, the per-arm theory,
+does not (the three `lui` and the two `lw` come out in another order). With the edge, the
+load waits three cycles for the store (`Ready-->Q: insn 390: queued for 2 cycles` after its
+`lui`), and the free issue slot beside `addiu v0` goes to the next ready ALU insn, `&r`;
+without it the weight's `lw` takes that slot and every later slot is filled by the chain, so
+`&r` and the argument moves come where retail has them. The second weight's edge may stay:
+its load is not ready before the fourth cycle either way.
+
+alias.c gives the edge its condition (true_dependence, fixed_scalar_and_varying_struct_p): a
+load does not depend on an earlier store when one is a scalar (MEM_SCALAR_P) at a fixed
+address and the other a structure member (MEM_IN_STRUCT_P) at a varying one. Ours had
+neither flag on either side: `Vu0::Q(*p) = ...` stores through a `u128*` (no flag), and
+ScalarAt reads the weight's word through a cast pointer (no flag). The source that gives
+both:
+
+    Vec02* p = &d;
+    *(Vu0::Vec*)p = Vu0::NormalizeOr(Vu0::Vec::Of(d), Vu0::Vec::Of(g_unitXVector));
+    Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(D_00261360), ...);
+
+The store is a structure's through the pointer (`(set (mem/s:TI (reg/v:SI 3 v1)) (reg:TI 80
+vf1))` in `.sched2`), and ScalarAtValue's operand is the float variable itself, a scalar at
+its symbol's address (a `lo_sum` is not a varying address). Measured on each function, the
+store as `Q(*p)`, as a Vec through the pointer, or as `p->q` of a `Vu0::Vec*`, against
+ScalarAt or ScalarAtValue for each weight: EXACT exactly when the store is a structure's and
+the *first* weight is ScalarAtValue (four of twelve forms in func_0013BE18, two of four in
+func_0014F168); the second weight may be either. Either change alone leaves the near miss's
+15 (12) lines.
+
+The tell, for other near misses: an ALU insn (a frame address, an argument move) that ours
+issues early in a block headed by a store through a pointer, with retail's loads of globals
+packed right behind the store. Look at the store's dependents in the `.sched2` table: a load
+of a global scalar among them is an edge that a structure store and a plain scalar read do
+not have. The per-arm stores and jump2's cross-jumping were a consistent explanation of the
+head, but not the cause.
 
 ### The compiler's qmfc2 again, and a rescale's divide order (func_001D4348)
 
@@ -790,6 +1020,32 @@ only the block's own pseudos (`used N times across M insns in block 36` in the .
   retail registers and changes nothing else: the two comparisons above are sufficient as well as
   necessary.
 
+- **The tail's order is the birthing raise, not a weight (w46-b, 2026-11-13).** Retail issues
+  p's `vadd` before g's last `vsub`; the near miss had the reverse. In the `-dS` trace and the
+  replay (`tools/sched1.py FILE func_001CC818 --block 36 --trace 2468 --trace 2503`) both are
+  ready in cycle 21 with the same weight (one birth, two deaths) and the same table priority
+  (3). The vsub's output is read by the else arm after the block, so it is set once and live
+  at the block's end: adjust_priority raises it to 4, the priority of the DivX just issued,
+  and it goes first; sched2 keeps that order. The earlier weight explanation (the vsub killing
+  one value) is wrong. The raise is retail's too, so the vadd has to be issued a cycle before
+  the two meet, which is p's statement written first.
+- **Matched (w46-b, 2026-11-13): p first, and the offset written at each use.** The source is
+  `p = pos + nd * Scalar(r); v = v2 + cross(acc, nd * Scalar(r)) + nd * rate; g = ...; ang =
+  nd`, with no local for the offset. cse1 merges the two `vmulx` and the two `qmtc2`; the
+  second Scalar's slot store stays through `.lreg` and depends on the first, so Scalar(r) has
+  one more reference and its first store outranks the block's other stores (the first of the
+  two rankings above), and reload deletes the repeat (the section "A weight written again in
+  the next statement" below, func_00144540, whose worker gave the lead). With p's statement
+  first its load and `vadd` are ahead of g's in insn order, which is the second ranking and
+  the tail's order. The earlier trial of the second Scalar(r) (54 lines, "a second slot
+  store") had p's statement after v's: rate's Scalar had taken the slot between the two, so
+  the repeat was a real store. A grid of the offset named or in place at each use and of p's
+  place: EXACT with p first and the offset in place at either or both uses, and with the
+  offset in place in v only and p before g; 2 lines with p last; 54 with p's Scalar after
+  rate's. Tried before the lead and not it: a twice-set variable for g's value (sched1's
+  order of the two insns is retail's, but a pseudo of two blocks is global-alloc's and the
+  early block moves), p's value live out of the block.
+
 ### Twenty-four weight products: the statement order and local-alloc's first tie (func_0019CC10)
 
 ComputeGridBlendWeights writes out[i*8 + j*4 + k] = zk * yj * xi for three x weights, two y
@@ -814,6 +1070,26 @@ weights and four z weights (2026-11-10, still a near miss):
   ours, and shows that out[23]'s store one insn later in sched1 gives retail's z2*y and z2*y*x;
   but the store is issued on the memory unit the cycle its product is ready, and no statement
   order, named product, extra weight variable or re-association tried moves it.
+
+- **Block A's three stores are ranked by register weight, not by an alias fact (w46-c,
+  2026-11-13).** Replayed on the probe's block (the row loads through `self + 0x660`, insns
+  725 and 726; the stores of rows 0, 1, 2 to self, 589, 631, 673; m's rows 686 to 694): with
+  the loads cut from row 0's store, and from each other's row, row 0's store falls to
+  priority 2 and issues last, after rot's rows, where retail has it third. Retail's order of
+  the block's whole second half (0x670, 0x680, 0x660, m's rows, the offset, the two row
+  loads, the product, rot's row 0, v640, rot's rows 1 and 2) comes out when the stores of
+  rows 1 and 2 weigh one less than row 0's, i.e. carry their products' REG_DEAD notes: the
+  three tie on priority 6 with m's rows, and rank_for_schedule's second key is the weight.
+  Row 0's product lives on (the transposed rotation reads it from its register). A raised
+  priority gives the same order in the replay but not in a compile: rows 1 and 2 stored a
+  second time right after the product leave no code and put row 1's store first, and its
+  product ahead of row 0's with it (the priority passes down the chain). So m's and rot's
+  rows 1 and 2 are stored from two other pseudos in the same registers, two copies that
+  leave no code: the two insns local-alloc's lives asked for. What makes them is open; a
+  copy through a pointer local (`m = *p`) gives the deaths and the order, but moves the rows
+  through a GPR (lq, sq). The tilt's rows loaded in the order 1, 2, 0 give tilt row 1 and
+  turn row 2 retail's vf3 and vf2 (row 1 then lives 9 insns). The tail is exact with the
+  rows of frame->m110 read as Vu0::Vec members (the near miss's RotateTransposedMembers).
 
 ### A Scalar's slot store after the load it would block (func_0014A8F8)
 
@@ -1268,7 +1544,27 @@ pseudo (global, `$f1`), and sched2 is free to issue the multiply first. In the s
 torque's cross product before the accel's division (`vdiv` first in retail) is the source order
 force, torque, accel: their asms tie on priority and LUID decides.
 
-### The zero trap of func_00202140: what sched2 needs (unsolved)
+### The zero trap of func_00202140: what sched2 needs (matched 2026-11-13)
+
+**Matched (w47-h, 2026-11-13).** The magnification is not a local: it is written out at each
+of its three uses in the register's macro (`#define MAGH(w) (((w) + 0x9FF) / (w))`, in
+`dx * MAGH(w)`, `MAGH(w) - 1` and `MAGH(w) * w - 1`). Each use expands its own `divmodsi4` and
+its own `trap_if`. cse1 folds the three divisions into one (12 `div` in `.jump`, 4 in `.cse`), but
+nothing deletes a `trap_if`: all three live to the `.dbr` dump (12 in the
+function against 4 with a local), and only the first of a run writes code (the `.s` has one
+`beql/break` per arm): a trap whose LOG_LINKS hold an anti dependence on another trap prints
+nothing (the `div_trap` pattern's output code in GCC's public mips.md looks for exactly that
+link; in the `.dbr` dump the second trap carries `(insn_list:REG_DEP_ANTI 158)` and the third
+`169`). Two divisions by one divisor in a block share a trap the same way. In sched2 each trap waits for the one before it (a TRAP_IF flushes the
+pending memory lists) and the field load waits for the last, so the first trap's priority is
+`1 + 1 + 1 + 3 = 6` where the single trap had 4: above dy's shift (5), level with dy's mask
+and after it on luid, which is retail's `div; andi; beqzl/break; dsll`. The two later traps
+issue after the shift and leave no code. So the "dependence ours lacks" below was a chain of
+two insns that emit nothing, between the trap and the field load. The tell for other
+functions: a zero trap issued earlier than its priority allows, or a memory load held back
+after a division, where the quotient is used more than once: write the division at each use.
+The analysis below is kept as it was written.
+
 
 Measured 2026-11-10 with 2.9-ee-991111's `-dS -dR -fsched-verbose-6` dumps of the near miss
 (src/lib/graph.c's DISPLAY register; build/swarm/w15-202140/tp.sh prints the sched2 table of
@@ -1297,6 +1593,62 @@ the block holding the first trap):
   as a product or through a (u32) or (s64) cast, the dy mask after the shift, a sixth MAGV
   term (a constant or a local 0, all 720 orders), the interlace arms swapped, a dh local, the
   word built in a u64 local.
+
+- **Second look (w46-d, 2026-11-13): the shift is not in the arms; the block ends before it.**
+  reorg.c's fill_simple_delay_slots takes a conditional branch's slot from the insns before
+  the branch first. With dw's shift at the head of each arm the slot would hold the block's
+  last insn and the arms would start `sll v0,s3,1; dsll32` (the dh chain ranks above the
+  shift); compiled with the shift in the ternary's text over a dw local, that is what comes
+  out (`beqz; andi`). Retail's `addiu a0,a0,-1; beqz a2; dsll32 v1,a0,0` has the shift as the
+  last insn before the branch, so the third option above is out as stated. What the
+  priorities need is the trap level with dy's shift and below dy's mask (retail issues
+  div+andi, then trap+dsll). A block that ends before dw's shift does it: without the
+  `dsll32 v1` and the jump in the block the chain shift -> daddiu -> andi is 3 and the trap ->
+  lh is 3, the trap wins on luid, and the rest replays to retail's order (the dx term's andi
+  must be in the first block: with it in the second the trap rises above dy's mask and issues
+  a cycle early). So retail's sched2 saw `[... lh field ...] | [dsll32 v1,a0,0; beqz]`, a
+  boundary that leaves no code, with the field loaded and sign extended before dw's shift was
+  expanded. A probe with a dead if/else between the product and its shift (a statement
+  expression, not a form) puts the trap first. Not found: a source form. This cc1 is a late
+  1999 snapshot (its dumps carry `[bb N]` notes): jump turns an if/else of two plain sets
+  into a conditional move (movn/movz; CountFrameBufferPages' `/ 64` is one), so an emptied
+  if/else needs arms that are not plain sets, and fold treats `w * magh` and `magh * w` as
+  equal. The interlace word needs no local: written `p->interlace` at each test, PRE keeps
+  the HImode load in a register (the `lhu`) and the later tests extend it (`sll; sra`),
+  retail's code (the dump: "PRE: redundant insn 143 (expression 10) in bb 6").
+
+### Thirty-two products of equal priority: the order is the deaths (func_0019CC10, matched 2026-11-13)
+
+**Matched (w49-g, 2026-11-13).** The statements in this order: `0 4 8 1 5 12 9 13 2 6 3 10 14
+11`, then `16 20 17 21 7 15 18 22 19 23` (out indexes). The deaths are those asked for below:
+every pair still dies in its x product, xa in out[7], xb in out[15], x in out[23], and out[7]
+and out[15] come before z1's x products. But that alone is not enough: the order of the weight +1
+products (the first fourteen) decides which of them fill the cycles while the pairs' later
+products are not yet ready, and every swap of two neighbours in the first fourteen changes the
+registers (from 4 to 43 lines). It was found by a hill climb over insertions and swaps of
+the 24 statements, scored by bytes against retail (build/swarm/w49-g/f2/climb2.py; about
+2,000 compiles from the near miss's order, the step that mattered being z3's ny and y products
+exchanged). The fourteen are a diagonal walk (xa ahead of xb by a z weight) rather than a nest,
+which is why the 1,728 regular nests missed it. The analysis below is kept as it was written.
+
+Read from the `.sched` trace of ComputeGridBlendWeights' last block (file_198980.cpp,
+2026-11-13, w46-d): eight pair products (priority 8), 24 triple products (5) and 24 stores,
+one multiply a cycle and a store beside it.
+
+- **The tie-break is INSN_REG_WEIGHT, then LUID.** The weight is the sets less the REG_DEAD
+  notes of the source's order. Pairs: `z2*y`, the last pair written, has z2 and y dying (-1)
+  and goes first; a z weight's second product and `z2*ny` (ny dies) are 0; the rest +1.
+  Triples: out[23] has its pair and x dying (-1); every x product is its pair's last use (0),
+  out[7] and out[15] are xa's and xb's last uses (0); the rest +1. The trace is exactly that:
+  `z2*y z3*y z*y z1*y z2*ny z3*ny z*ny z1*ny | 23 16 20 17 21 18 22 7 15 19 | 0 4 8 12 ...`.
+- **What retail's registers need.** local-alloc ranks `z2*y` (4 refs over 22 insns, 3636)
+  below `z2*y*x` (2 refs over 4, 5000), so the triple takes f0 and the pair f1; retail has
+  them the other way round. The pair's life must be 15 insns or less: out[7] and out[15]
+  issued within the first eight triples, as retail's final order has them (23, 16, 20, 17, 7,
+  18, 15, 22). In the weights' terms: out[7] and out[15] still the last uses of xa and xb, but
+  written before z1's x products. No regular nest order has that (all 1728 were compiled).
+- **ny.** global-alloc's first pass over the registers only takes one already in use; ours
+  gives ny f10 because `z1*ny`'s quantity used it first, retail's ny has f2 and z1 f10.
 
 ### Two equal clears that retail issues apart: a rank sched1 cannot give (func_001A1030, matched 2026-11-12)
 
@@ -1347,7 +1699,7 @@ off (2026-11-10, `-dS -fsched-verbose-6` dumps, haifa-sched.c and alias.c read):
   clamp's parameters by const reference, dt's weight through a `const f32&` inline, and the
   whole update as an inline taking `(self, a, b, dt)` (the frame moves).
 
-### Spill stores between float constants: counting a preheader's %hi/%lo pairs (func_00134B48, unsolved)
+### Spill stores between float constants: counting a preheader's %hi/%lo pairs (func_00134B48, matched 2026-11-12)
 
 Wave 15 (2026-11-10). The second loop's preheader differs from retail's only in where two
 spill stores fall among four float constants (`sw a1,540(sp)` / `sw a2,544(sp)`, &pos's and
@@ -1385,6 +1737,37 @@ alias-classes.md ("Confirmed in US func_00134B48"); what this wave added:
   but g_unitRange's `%hi` takes s4, as the else-arm clamp did, and the code grows 4 bytes);
   two ApproachValueWithRamp calls in an if/else for f58 (not cross-jumped back, 1764-1772
   bytes).
+
+Matched on 2026-11-12 (w46-a). The count above was right but its conclusion was not: a third
+pair does not have to go, it has to come *before the constants*. All six insns of three pairs
+rank ahead of the first constant when each `%lo` either ends its `%hi` (weight 0) or has an
+earlier LUID than the constants (weight 1, no dependents, as a constant: the LUID decides).
+Then cycles 1 to 3 hold the three pairs and cycle 4 the first constant with &pos, which is
+retail's order. Our third `%lo` (Limit's `this`) lost that tie only because loop.c moved it in
+its second pass, to the end of the preheader, after the constants the first pass had moved.
+
+Why the second pass: move_movables lowers its threshold by 3 for every insn it moves
+(`threshold -= 3`), so the 79 the pass starts with is 22 by the time it reaches the clamp (18
+PRE-hoisted insns and the table's `%lo` moved before it): `22 x 1 x 4 = 88 < 282` insns, "not
+desirable"; the second pass starts at 79 again and moves it (`79 x 4 >= 234`). A life of 13 or
+more is moved in the first pass. The source is the form the coefficient table already had:
+
+    const f32* k = D_002611A0;
+    const ValueRange* lim = &g_unitRange;
+    ProjectPointToCamera(...);
+    ...
+    f32 alpha = lim->Limit(scale);
+
+The pointer is named before the projection, so its life spans the call (`Insn 709: regno 292
+(life 47), move-insn savings 1 moved to 1459` in the first pass, between the table's `%lo` at
+1457 and the clock's at 1461); cse1 still
+folds the `lo` read into `%lo(g_unitRange)` because the declaration and the clamp are in one
+extended block (the call between them does not end it), which a pointer at the top of the
+body, above the string loop's labels, did not give. Named before `k` the code differs in 6
+lines (its `%lo` is then issued before the table's and the two address pairs swap); named
+after the projection it is EXACT as well. The tell: an insn of a preheader that retail issues
+earlier than ours, when ours was moved by the second pass; `-dL` prints the pass, and the
+threshold at an insn is 79 less three times the insns moved before it.
 
 ### The side test and the half-width: what retail's order needs of each conversion (func_00142278, unsolved)
 
@@ -1504,7 +1887,7 @@ a3, the `%hi` of g_activeListFrames in a2). The functions' literal pools check e
   through global-alloc's pass 0 the same day: docs/toolchain/long-block-constants.md, "Pass 0
   takes no new saved register" (func_0020CAF8).)
 
-### Two weights' qmtc2s tied on priority: dependents decide local-alloc (func_001C54D0, unsolved)
+### Two weights' qmtc2s tied on priority: dependents decide local-alloc (func_001C54D0, matched 2026-11-12)
 
 The tail of func_001C54D0 is `end->v30 + m110.r[2] * -push + tangent * f63C` through MulAddX2,
 with `Scalar(-push)` (insn 865, after a neg.s) and `ScalarAt(self->f63C)` (insn 901, its word an
@@ -1536,6 +1919,33 @@ takes retail's a0 and vf6, but local-alloc gives the loaded pseudo v0 where reta
 a1. What is left is a source fact that makes the f63C weight wait on the -push one, or keeps its
 load out of the qmtc2 until reload; no plain form of either was found
 (nonmatching/func_001C54D0.cpp, W24).
+
+Matched on 2026-11-12 (w46-a) by the rank's second field, the register weight, which the
+passes above had tied at 0 against 0. An insn's weight is its sets less the REG_DEAD notes it
+carries *in the insn stream's order, before sched1*. With the tangent in a local ahead of the
+sum, the f63C read was self's last use in that order, so 901 weighed 0 and the dependents
+decided. Written as one expression with each weight before its vector,
+
+    Vu0::Q(end->v30) = Vu0::MulAddX2WeightFirst(Vu0::Vec::Of(end->v30).q, Vu0::Scalar(-push),
+        Vu0::Vec::Of(self->m110.r[2]).q, Vu0::ScalarAt(self->f63C),
+        RemoveAlong(Vu0::RotateMembers(self->m660, Vu0::Vec::Of(self->v640).q),
+                    Vu0::Vec::Of(c->v80).q));
+
+the inline call emits its arguments in parameter order, so the rotation's loads follow both
+weights and the up axis in the insn stream. Self then dies at the rotation's first row: the
+f63C qmtc2 weighs 1 (a set, no death) and the -push one 0, so -push issues first at the tie
+(retail's a0 and vf6); the up axis's load weighs 1 as well and loses to the f63C qmtc2 on
+dependents (2 against 3), so it stays the later use of self and reload's `lw` takes a1 rather
+than self's own register. The same order explains the second difference, which the tied form
+had only approximated with RotateRowsTied: v640 is read before the rows (RotateMembers takes
+it by value, its rows as Vec members that no weight slot holds back), row 0 carries self's
+death (weight 0) and wins the first cycle over v640, row 2 carries the row pointer's death and
+wins the second, and v640 then beats row 1 on its LUID: retail's row 0, row 2, v640, row 1.
+RemoveAlong is a file-level inline (the rotated vector is used twice). The tell for other
+near misses: when two insns tie on priority and the wrong one wins on dependents, look at
+which statement holds the last use, in source order, of a register one of them reads; moving
+a later statement's loads behind it (one expression instead of named locals, or the reverse)
+changes the weight and is decided before the dependents are.
 
 ### The 33rd memory reference of a block is a barrier (WriteMemoryCardSaveHeader)
 
@@ -1687,3 +2097,38 @@ sets and uses: it reproduces every block of the function):
 - **The tell.** A reload register one higher than the first free one, or a store that retail
   issues one cycle late with nothing in the gap: look for a weight (or any Scalar) the near
   miss named in a local and used twice, and write it at each use.
+
+### A weight written again in the next statement, and the rows read before a later store (func_00144540, matched)
+
+UpdateCameraMatrices (src/main/camera.cpp) had two walls that earlier passes read as one alias
+fact: the product's rows `0x10(s0)`, `0x20(s0)` loaded before corner's store, and the weight in
+vf5. Read from the `-da -fsched-verbose-6` dumps and the replay (w46-c, 2026-11-13):
+
+- **The rows needed no known value.** A load through a pointer of unknown base waits for every
+  frame store before it in the insn stream, and every frame store after it waits for the load
+  (an anti dependence, cost 1). Retail's two row loads come before corner's store, row 0
+  (`0x80(s4)`, a parameter's base) long after: the loads were ahead of corner's store in the
+  insn stream, so the store's priority (17) passed to them (18) and left row 0 at its own (11).
+  The source order is the product first and corner after it. No REG_EQUAL note is involved;
+  the same reading applies wherever a row load "must not wait" for a store: ask first whether
+  the store was written after the load.
+- **corner after the product kept the dead row store only because of its slot.** flow1 deletes
+  the product's `r.r[2]` store when the next store to that slot (0xB0) follows with no load
+  through a pseudo address between. A Scalar's slot is the first free one when its statement
+  is expanded: with `Vec02 tilt; Mat4 proj;` declared before corner's statement they take
+  0x60 and 0x70, and corner's Scalar gets 0xB0 right after the product (its vector loads are
+  expanded after the slot store, as an inline's by-value memory arguments are). Declared after
+  corner's statement, the Scalar takes 0x60 and the row store stays (780 bytes).
+- **The weight at each use.** `Vu0::Scalar(swing)` in pos, dir, corner and tilt: cse1 merges
+  the four `qmtc2`, and each Scalar stores its slot. The `.sched` dump has four slot stores,
+  two to 0x50 (insns 193 and 254, priorities 24 and 23) and two to 0xB0 (493 and 556, 6 and
+  5): the repeat depends on the first (an output dependence), so the first outranks the other
+  stores of its group and issues ahead of them, where retail has `sqc2 vf5,80(sp)` before the
+  stores of pos and dir and `sqc2 vf5,176(sp)` before the product's. Both repeats are in
+  `.lreg` and gone in `.greg` (reload deletes a store of what the slot holds). With the weight
+  in a named local the slot store ties with the others and loses on register weight (it is
+  not the weight's death): it came last, and local-alloc gave the weight vf7.
+- A grid over the four uses (named or in place) and the place of corner's declaration: EXACT
+  with all four in place and corner, tilt and proj declared together after the product (and
+  with corner declared before the product, or pos on a named weight). PAL's projection uses
+  256 where US has 224 (src/versions/eu/main/camera/func_00144540.cpp).

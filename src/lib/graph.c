@@ -78,7 +78,7 @@ s32 ReadGsInterruptMask(s32 mask);
 s32 WriteGsInterruptMask(u64 mask);
 s32 DisableInterruptCause(s32 cause);
 GsParam* GetGsParams(void);
-void DefineDisplayEnvironment(void* env, s32 psm, s32 w, s32 h, s32 ztest, s32 zpsm);
+void DefineDisplayEnvironment(GsDispEnv* env, s16 psm, s16 w, s16 h, s16 dx, s16 dy);
 s32 DefineDrawEnvironment(void* env, s16 psm, s16 w, s16 h, s16 ztest, s16 zpsm);
 s32 DefineClearPacket(void* env, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j);
 s32 CountFrameBufferPages(s16 psm, s16 w, s16 h);
@@ -175,8 +175,8 @@ void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 
     u64* mode = (u64*)GetGsParams();
     s32 r;
 
-    DefineDisplayEnvironment(self, a1, w, h, 0, 0);
-    DefineDisplayEnvironment(base + 0x28, a1, w, h, 0, 0);
+    DefineDisplayEnvironment((GsDispEnv*)self, a1, w, h, 0, 0);
+    DefineDisplayEnvironment((GsDispEnv*)(base + 0x28), a1, w, h, 0, 0);
     DefineDrawEnvironment(base + 0x60, a1, w, h, a4, a5);
     DefineDrawEnvironment(base + 0x150, a1, w, h, a4, a5);
     if (flag) {
@@ -253,10 +253,51 @@ s32 GetGsInterruptMask(s32 mask)
     return ReadGsInterruptMask(mask);
 }
 
-INCLUDE_ASM(func_00202140);
+/* The display register of a mode: position, magnification, size. */
+#define GS_DISPLAY(dx, dy, magh, dw, dh) \
+    (((u64)(magh) << 23) | ((u64)(dh) << 44) | (u64)(dx) | ((u64)(dy) << 12) | ((u64)(dw) << 32))
 
-/* The message of func_00202140, defined here while it is assembly. */
-const char D_0024F510[] = "sceGsDefDispEnv:Not support displaymode for %d!!\n";
+/* The horizontal magnification of a width: how many times it fits in 2560 GS units, rounded
+ * up. It is written out at each use, not kept in a local: each use expands its own division
+ * and zero trap, cse folds the quotients into one, and the traps left over order the block
+ * as retail's is (docs/toolchain/sched1.md, "The zero trap of func_00202140"). */
+#define MAGH(w) (((w) + 0x9FF) / (w))
+
+void DefineDisplayEnvironment(GsDispEnv* env, s16 psm, s16 w, s16 h, s16 dx, s16 dy)
+{
+    GsParam* p = GetGsParams();
+
+    env->pmode = 0x66;
+    if (p->interlace != 0) {
+        if (p->field != 0)
+            env->smode2 = 3;
+        else
+            env->smode2 = 1;
+    } else {
+        env->smode2 = 2;
+    }
+    env->dispfb = ((u64)(psm & 0xF) << 15) | ((u64)(((w + 63) >> 6) & 0x3F) << 9);
+    if (p->mode == 2) {
+        if (p->interlace == 1) {
+            env->display = GS_DISPLAY(((u64)(dx * MAGH(w)) + 0x27C) & 0xFFF, (dy + 0x32) & 0xFFF, MAGH(w) - 1,
+                                      MAGH(w) * w - 1, p->field != 0 ? h * 2 - 1 : h - 1);
+        } else {
+            env->display = GS_DISPLAY(((u64)(dx * MAGH(w)) + 0x27C) & 0xFFF, (dy + 0x19) & 0xFFF, MAGH(w) - 1,
+                                      MAGH(w) * w - 1, h - 1);
+        }
+    } else if (p->mode == 3) {
+        if (p->interlace == 1) {
+            env->display = GS_DISPLAY(((u64)(dx * MAGH(w)) + 0x290) & 0xFFF, (dy + 0x48) & 0xFFF, MAGH(w) - 1,
+                                      MAGH(w) * w - 1, p->field != 0 ? h * 2 - 1 : h - 1);
+        } else {
+            env->display = GS_DISPLAY(((u64)(dx * MAGH(w)) + 0x290) & 0xFFF, (dy + 0x24) & 0xFFF, MAGH(w) - 1,
+                                      MAGH(w) * w - 1, h - 1);
+        }
+    } else {
+        PrintFormatted("sceGsDefDispEnv:Not support displaymode for %d!!\n", p->mode);
+    }
+    env->bgcolor = 0;
+}
 
 s32 CountFrameBufferPages(s16 px, s16 py, s16 pz)
 {

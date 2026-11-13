@@ -250,3 +250,69 @@ GaugeManager's agent placement (src/main/file_14B6A8.cpp), read from `-dL -dS -d
   break the rest. Assigning `posp = &pos; rotp = &rot[0];` inside the loop, before their calls,
   removes the copy, and loop.c hoists both to the preheader, after the wait pointer's address
   set at its declaration: the order wait, posp, rotp, and the match.
+
+### Three adds of one address: reload_cse deletes one and copies another (func_001C3C98, matched 2026-11-13, w47-e)
+
+- **Retail's code.** `addu v0,v1,a1` (the end's address from its index), the velocity read at
+  0x30(v0), `move v1,v0`, the position read at 0x10(v0) after the weight's slot store, the
+  result stored at 0x30(v1). Local-alloc gives the address v0 ahead of `p->anim` (a0).
+- **What the dumps of the matched form show.** Three adds of the same sum at local-alloc,
+  one for each reference to `c->end[end]` through `Vu0::Q`: the reference parameter of an
+  inline is a user variable, and cse does not replace one user variable's sum with
+  another's. .lreg: `Register 121 used 2 times across 3 insns` (the velocity's address),
+  `Register 131 used 2 times across 5 insns` (`p->anim`), `Register 139 used 2 times across
+  7 insns` (the position's), `Register 148 used 2 times across 11 insns` (the store's).
+  121 outranks 131 and takes $2, 131 takes $4 with $2 and $3 (the index) busy, 139 takes $2
+  again once 121 is dead, and 148 is tied to the index, which dies in its add, in $3.
+  reload_cse then finds `$2 = $3 + $5` while $2 still holds that sum and deletes it, and
+  turns `$3 = $3 + $5` into `$3 = $2`: retail's `move v1,v0`.
+- **The source fact.** The velocity is read into a local before the weight is made, so its
+  load is first in the block and sched1 issues it straight after its add: the first address
+  dies after two insns, which is what puts it ahead of `p->anim`. With the velocity read
+  inside the store's statement the first address lives to the position's load behind the
+  slot store (3 references over 9 insns) and loses, the near miss's 11 instructions.
+  The grid that found it: the position, the velocity and the store each through Q, a u128
+  cast, a Vec cast or Vec::Of, the velocity named before the weight: the 16 forms with both
+  loads through Q or Vec::Of are EXACT, whatever the store's form; with the velocity named
+  after the weight none is.
+- **Carries over.** A `move` between two registers that hold one address is reload_cse's
+  rewrite of a repeated add; count the adds retail needs from its registers' lives before
+  looking for a copy that cse keeps.
+
+
+### A SUBREG of a 128-bit register always takes a reload register (func_00191AC8)
+
+A TImode value sits in one GPR here (`HARD_REGNO_NREGS` 1) though it is two words wide. reload.c
+(`find_reloads` and `push_reload`) forces a reload for any `(subreg:DI (reg:TI hard) n)`: the
+inner register is reloaded whole, in and out, into a register of its own. So the first insn of a
+64-to-128-bit zero extension, `(set (subreg:DI T 0) kg)`, never becomes a plain move into T:
+
+| T | Code for `T = (u128)kg; k = T` (kg in s6, k at 304) |
+| --- | --- |
+| a GPR (v0) | `move v1,s6; por v0,zero,v1; sq v0,304(sp)` |
+| a VU0 register | `move v0,s6; qmtc2 v0,$vf6` |
+| no register (T is k) | `move v0,s6; sd v0,304(sp); move v0,zero; sd v0,312(sp)` |
+
+(The second word's insn is `(set (reg:DI regno+1) 0)` after reload, a write to the next
+register; it is dead and deleted where T has a register.) Retail's `move v0,s6; sq v0,304(sp)`
+is none of them, so its conversion is not `(u128)` of a 64-bit value, and a low-doubleword store
+(`*(u64*)&k = kg`, one such insn) gives `sd` as well.
+
+What gives it is an asm whose output is the 128-bit value and whose input is the float in a GPR:
+`__asm__("" : "=r"(r) : "0"(f))` (or `"move %0, %1"` with `"r"(f)`: the same bytes). With the
+output spilled, reload takes v0 for it, copies the input there (`move v0,s6`, movsf between
+GPRs) and stores it (`sq v0,304(sp)`). Two things follow from the float being a GPR operand:
+regclass gives the float parameter GR_REGS, so its copy from `$f12` is an `mfc1` into a saved
+GPR, issued last in the first block; and it has 3 references (the copy and the asm at depth 2),
+the lowest priority of the function's saved registers. An asm with two outputs holds its inputs
+once per SET and counts them twice (5 references).
+
+The matched form is that asm with its instruction written (`Vu0::ScalarMovedReg`,
+`"move %0, %1"` with `"r"`, as Splat takes its float), at each of the function's two uses of the
+scale: loops.md, "An asm kept in its loop", says why the first stays in the loop and where the
+second goes.
+
+One more reload fact from the same function: an input reload for a GPR class finds a spilled
+value in a VU0 register and copies it (`qmfc2 v0,$vf4`) where retail loads the slot
+(`lq v0,304(sp)`). Retail's VU0 register had been set again by then: the statement that loads it
+(`pc = *pos`) is written before the copy, not after.
