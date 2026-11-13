@@ -90,9 +90,9 @@ functions left with their address names, and the disc's data.
    the 16 KiB windows defined is in its files too: in the proved files that read it, and in three
    files of data only that open .rodata (`class_descriptors.cpp`, `property_registry.cpp`,
    `global_tables.cpp`; the build proves their place, not where one ends and the next begins).
-   The one window file left, `src/lib/001F8000.cpp`, holds the constructor list the linker
-   builds. Many proved files are one file between two exact edges that could be several; each
-   commit says which. On 2026-11-11 the 26 files still named after their first address were
+   The one window file left, `src/lib/001F8000.cpp` (now `src/lib/constructor_list.cpp`), holds
+   the constructor list the linker builds. Many proved files are one file between two exact
+   edges that could be several; each commit says which. On 2026-11-11 the 26 files still named after their first address were
    searched for inner edges: five splits are proved by retail (a section start after the
    linker's padding, a vtable that GCC writes after a file's literals and jump tables, a string
    literal another object holds), and seven more files are cut where the role plainly changes, each

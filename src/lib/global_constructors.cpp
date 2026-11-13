@@ -5,7 +5,8 @@
 // D_0062A540 and the special registers after it, and holds a second entry, func_001FAD68, which
 // calls the functions of the constructor list D_0027B130 from the last to the first; and
 // func_001FAE18, which calls func_001FAD68 once. Its .bss, 0x62A540 to 0x62A770, is the saved
-// registers and the flag of func_001FAE18.
+// registers and the flag of func_001FAE18. Its name is ours, after its role: its C and its
+// assembly's second entry run the constructor list.
 #include "common.h"
 #include "asm_func.h"
 
