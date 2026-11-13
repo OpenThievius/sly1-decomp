@@ -12,6 +12,17 @@
 // the load through a pointer read from memory waits for the CLOBBER and every frame store. A
 // CLOBBER would hold these loads only if its memory had no base (an object reached through a
 // loaded pointer) or were part of self; this block builds no such object.
+// w44-fb (2026-11-13): not closer (16 lines). The one order difference is in the last block:
+// retail issues p's `vadd` (pos + off) before g's last `vsub` (minus gravity), ours the vsub
+// first; the vf2/vf3 and vf6/vf7 exchanges all follow from it. Measured: the alias flag of the
+// tail's four stores is not the lever (v, g, p and ang each written through Vu0::Q, a u128
+// cast, Vu0::Set and a Vu0::Vec member: 256 forms, none under 16 lines). BuildRotationFromVector, the
+// call before the block, is void by its definition, so no return register is involved.
+// Inferred from rank_for_schedule and not checked in a -dS trace: both insns are ready in the
+// cycle after DivX and each kills two values (weight -1), so the earlier LUID wins; retail's
+// order needs the vsub to kill one value only (gravity not a pseudo that dies there: an asm
+// operand reloaded from self->gravity, or a value that lives on), which no helper in vu0.h
+// gives. Not tried: the test of self->f22AC written in each arm; parameter order.
 #include "common.h"
 #include "vu0.h"
 #include "globals.h"

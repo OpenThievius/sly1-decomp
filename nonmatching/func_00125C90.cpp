@@ -74,6 +74,25 @@
 // needs d in memory when cse1 runs yet allocated after fade, and its stored value without a
 // register of its own. The inline holding the cull and the first fade call was not built: by
 // the header's own reasoning its parameter copy folds unless its uses are behind a join.
+// w44-fb (2026-11-13): the mechanism is proved by an EXACT probe, with no allowed source form
+// yet. Retail has two pseudos: d (spilled, 0x1C0, the vsub's output reload and the second
+// call's `lq a1`) and a copy q of it (`lqc2 $vf6,448(sp)` is `q = d`, the cull and the first
+// call read q: `qmfc2 a1,$vf6`). cse keeps such a copy only when make_regs_eqv makes q the
+// class's first register: q must be mentioned after d's last use (the second call's argument)
+// and live past the cse path. And the second call must still read d, so q's equivalence has
+// to end between the calls: cse-skip-blocks carries the path round `if (fade != 1.0f) {...}`
+// to the second call, so without that q replaces d there too and q is the one spilled (probe
+// p1: `lq a1` again). The probe (build/swarm/w44-fb/probe_125C90_exact.cpp): a function-scope
+// `u128 q; q = d;` before the cull, q passed to PlaneSigns and the first fade call, and q set
+// (a dead load, which flow deletes) inside each `if (fade != 1.0f)` block: the first set
+// invalidates q in the skipped block, the second is the mention after d's last use. EXACT on
+// US. It is not landed: the two sets are dead stores with no live counterpart. What the
+// original needs is a 128-bit variable that holds d for the cull and the first call, is
+// assigned again in the first fade block and is named again after the second call's
+// argument. Not it (measured): the same q with one later mention at the function's end and no
+// set between the calls (1 word, q spilled); an inline holding the cull and the first call
+// whose by-value parameter the cull's asm lists as an in/out operand (the output is a third
+// pseudo, a vmove). docs/toolchain/cse.md, "A copy that must outlive its source".
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

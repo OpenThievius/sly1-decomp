@@ -501,7 +501,7 @@ The player's reach test against a point carried to time t (2026-11-10) went from
   GPR is local-alloc's v0 (10 lines). Retail needs a chain of exactly 8 with reload's a0, which
   only a compiler qmfc2 into a reload register followed by a one-cycle mtc1 gives.
 
-### The copy and the list's load after a call (func_0017ECE8, unsolved)
+### The copy and the list's load after a call (func_0017ECE8)
 
 Replayed with tools/sched1.py (2026-11-10). After SolveActiveSetSystem, block 34 holds the copy
 of the spilled down vector into the sum (871, `mem:TI` through the frame, no alias flag), `p =
@@ -552,6 +552,21 @@ sol` (875), `self->contacts` (880, r307) and its `->head` (882, mem/s through r3
   contacts pointer is not set yet. No instruction of retail's shows what that is. The
   candidates of the last paragraph (a copy, a TImode copy, the birthing raise, a CLOBBER) all
   work by moving the load first and are closed with this.
+
+- **Solved (w44-fb, 2026-11-13): it is the round robin, and the reload in between is one whose
+  code is the same either way.** Nothing occupies v0. finish_spills gives insn 871 every spill
+  register of the function that no live pseudo holds (v0, v1, vf3), and allocate_reload_reg
+  starts one past the register the previous reload took. The dots were written `bits =
+  Vu0::ToBits(...); *(u32*)p++ = bits;`: the qmfc2's v0 was a pseudo's, so the last reload
+  before 871 was the product's vf3 and the rotation wrapped to v0. Retail stored each dot with
+  the asm store (`Vu0::StoreX(*p, Vu0::Dot(na, nb).q); p++;`, as its sibling
+  ComputeConstrainedPushOut does): the qmfc2 is then StoreX's input reload, in v0 because the
+  loop's pseudos leave it free, and the instructions are the same `qmfc2 v0,$vf1; sw
+  v0,0(a3)`. The last reload before 871 is that v0, so 871 takes v1. Both loops need it (the
+  Gram loop alone or the rhs loop alone: 5 lines differ). EXACT on US and PAL. The "not
+  reload's round robin" entry above looked for a reload retail has and ours lacks in the
+  final code; a reload that replaces a pseudo with the same register shows no difference
+  there (docs/toolchain/reloads-and-stores.md, "A reload where ours had a pseudo").
 
 ### The rest of rank_for_schedule (func_001782C0)
 

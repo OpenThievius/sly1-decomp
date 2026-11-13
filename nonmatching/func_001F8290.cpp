@@ -80,6 +80,16 @@
 // store): set twice, the variable is global-alloc's, takes a saved register across the first
 // call and pushes mode to the stack (125 lines). Not tried: the file built as C (a C record
 // constructor that lists every field emits a CLOBBER, a C++ one never does).
+// w44-fb (2026-11-13): not closer (2 words). Built as C (this near miss with typedefs and the
+// id's declaration at the block's top, Sony's cc1.exe of the same release, the file's flags;
+// build/swarm/w44-fb/c1.c): the same code, the same two words swapped. The C front end changes
+// nothing in this block, so the language is not the lever by itself; a C-only construct (a
+// record constructor's CLOBBER) was not built, and the whole file would have to become C
+// (it is C++ in every other respect that was checked: its matched functions were not rebuilt
+// as C). Read again from the weights: the id's store ties with the packet's store on priority
+// and wins on INSN_REG_WEIGHT; a stored value that is a copy dying at the packet's store would
+// make that weight 0 too, but cse makes the longer-lived packet variable the class's first
+// register on either side of such a copy, so no source order gives it.
 #include "common.h"
 
 struct Client_1F7BE8;

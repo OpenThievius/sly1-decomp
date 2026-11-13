@@ -1053,6 +1053,36 @@ DrawGridSelector, src/main/file_16AA18.cpp):
 - **Spot it.** Two loads of one float constant in a block, one into an argument register:
   the argument came through an inline's parameter (or was otherwise never a pseudo).
 
+### A copy that must outlive its source: two pseudos for one value (func_00125C90, near miss)
+
+Retail computes the object's offset from the camera into a spilled pseudo (`vsub` into vf3 by
+an output reload, `sqc2 $vf3,448(sp)`), loads it once (`lqc2 $vf6,448(sp)`) for the plane
+test and the first fade call (`qmfc2 a1,$vf6`), and reads the slot again for the second fade
+call (`lq a1,448(sp)`). Ours read the slot at both calls. Reload does not make the
+difference: `(set (reg a1) (reg d))` with d spilled matches movti's memory alternative with no
+reload, so nothing is inherited from the asm's vf6, and reload_cse does not replace the load.
+Retail had a second pseudo q, a copy of d, in vf6 (w44-fb, 2026-11-13).
+
+- **When cse keeps a copy.** At `(set q d)` make_regs_eqv puts q in d's class and leaves d the
+  first register, so every later read of q in the path becomes a read of d and the copy dies,
+  unless q is mentioned later than d's last mention in the function (REGNO_LAST_UID, sets
+  included) and lives outside the path: then q is first and reads of d become reads of q.
+- **And the source must still be read afterwards.** With q first, the second call's `d`
+  becomes q too when it is in the same path, and it is: -fcse-skip-blocks takes the path round
+  `if (fade != 1.0f) { ... }` to the second call. q then crosses the first call and is the
+  one spilled (measured: one later mention of q at the function's end, 1 word off as before).
+  A set of q inside the skipped block ends the equivalence (invalidate_skipped_block), and
+  the second call reads d.
+- **The probe.** `u128 q; ... q = d;` before the cull, q given to PlaneSigns and to the first
+  fade call, and `q = <a load>` inside each of the two `if (fade != 1.0f)` blocks (flow deletes
+  both as dead): EXACT. Not allowed as it stands (two dead stores); it shows what the
+  original's variable did: it held d for the cull and the first call, was assigned again in
+  the first fade block, and was named again after the second call's argument.
+
+For other near misses: a value loaded once into a register for two uses and read from its
+slot again later is this shape (a copy that is first in its class up to a reset), not a
+reload inheritance.
+
 ### A stored product's two-operand mult: what combine needs (US func_001ABE70, PAL func_eu_001ACC68)
 
 Retail's `mult $zero,v0,v1` with a later `mflo a0` (the two-operand form, the product in LO)

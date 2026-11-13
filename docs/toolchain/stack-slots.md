@@ -547,10 +547,11 @@ of GCC 2.95.3 (2026-11-10), with the frame dumped (`-dr`; virtual-stack-vars is 
   only a local declared there gives that, and no walk frame belongs inside a loop's body. The
   near miss keeps the ListFrame and leaves that slot open (97.1%, the frame 0x170).
 
-### A 4-byte slot nothing touches (func_00187F40, near miss)
+### A 4-byte slot nothing touches (func_00187F40)
 
-Retail spills CollideColliderParts' sweep flag at 4(sp) and never touches 0(sp); ours spills it
-at 0(sp). Read from reload1.c, function.c and caller-save.c of GCC 2.95.3 (w40-fc, 2026-11-12):
+Retail spills CollideColliderParts' sweep flag at 4(sp) and never touches 0(sp); without the
+object below, ours spills it at 0(sp). Read from reload1.c, function.c and caller-save.c of
+GCC 2.95.3 (w40-fc, 2026-11-12):
 
 - reload gives the pseudos without a register their slots first, in register order (the
   alter_reg loop before the first pass over the insns), and the caller-save areas and
@@ -560,9 +561,39 @@ at 0(sp). Read from reload1.c, function.c and caller-save.c of GCC 2.95.3 (w40-f
 - A BLKmode object does not fit: a 4-byte `struct { u8 r, g, b, a; }` local takes a slot
   rounded to 16 bytes (the frame grows to 208). An unused `s32 x[1]`, an SImode struct or a
   union takes no slot at all. A scalar that lives in memory does: an unused `volatile s32` at
-  the top is EXACT (a probe only: build/swarm/w40-fc/b4.cpp), so the object is a scalar of at
-  most 4 bytes homed on the stack whose every access is gone from the final code.
-- Not found: the source that leaves such a scalar. A `bool` local whose address is taken and
-  never used (a pointer local, or passed to an empty inline by pointer or by reference) takes
-  no slot, nor does an `s32` one; a `const f32&` inline for the 1.0 compare keeps a store-flag
-  (836 bytes).
+  the top is EXACT (a probe only), so the object is a scalar of at most 4 bytes homed on the
+  stack whose every access is gone from the final code.
+
+**The object is narrower than a word** (w44-fb, 2026-11-13). put_var_into_stack (function.c)
+turns a register variable whose address is taken into `(mem (addressof (reg)))` and leaves the
+decision to purge_addressof, which gives the register back when every use is a plain load or
+store. That is why an address-taken `s32` or `bool` (4 bytes here) that nothing then uses gets
+no slot. But it does so only when `decl_mode == promoted_mode` ("FIXME make it work for
+promoted modes too"): PROMOTE_MODE widens every integer narrower than a word to SImode, so a
+QImode or HImode variable whose address is taken after its declaration goes through
+put_reg_into_stack at once, `assign_stack_local (decl_mode, GET_MODE_SIZE (decl_mode), 0)`:
+one or two bytes at the frame's next offset, at RTL generation, before any other slot. The
+next SImode slot is aligned to 4. If the address then goes nowhere (an inline that does not
+use it), the copies of the frame address are dead and nothing is left but the slot. Measured:
+
+| local at the top of the function | slot |
+| --- | --- |
+| `bool hit; bool* q = &hit;`, or passed to an empty inline by pointer or reference | none |
+| `u8 hit; u8* q = &hit;` | 0(sp): EXACT |
+| `s16 hit;` passed by pointer to an empty inline; `u8` by reference | 0(sp): EXACT |
+| an empty class with no constructor, with an empty inline constructor only, or with an empty method called | none |
+| an empty class with an empty inline destructor (with or without a constructor, or one taking a string) | 0(sp): EXACT |
+
+An empty class is one byte, QImode. With a destructor the `-dr` dump has `(set (reg 123)
+(reg 112))`, a `this` copied from virtual-stack-vars and deleted later as dead: the object is
+on the stack at RTL generation. Why a constructor or a method alone does not do it is inferred,
+not read from a dump: the constructor's call is built by cp_finish_decl before expand_decl
+gives the variable its pseudo, so that address marks the tree only, where a class with a
+destructor is put in memory when its cleanup is set up. The match declares such an object, `ScopeMarker
+scope;` (include/scope_marker.h, the class four other functions already use for the same kind
+of slot): a scope object whose body is compiled out, at the top of the collision's inner
+routine. US and PAL are EXACT.
+
+What this gives other functions: an untouched hole below a slot aligned to 4, 8 or 16 bytes
+that no declared record explains may be a one-byte object of this kind; a u128 or record slot
+after it starts at the next 16, so it reads as an untouched 16-byte slot.
