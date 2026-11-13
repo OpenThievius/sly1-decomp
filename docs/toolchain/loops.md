@@ -1433,3 +1433,40 @@ built whole and the full builds print `MATCH` on US and PAL.
   EnsureKeyedList, GetObjectClassId) to the curves. func_00127B20 and func_0012CD78 EXACT at
   vf15; the six matched curve helpers EXACT at vf30 (US, and func_00130540 and func_00130C20 on
   PAL).
+
+### An asm kept in its loop: an output set twice is not moved (func_00191AC8, exact as a probe)
+
+loop.c moves `(set (reg) (asm_operands ...))` out of a loop like any other invariant set when the
+asm is not volatile, its inputs are invariant, and the output is set once in the loop
+(`scan_loop`: `set_in_loop == 1`, or consecutive sets that are all invariant). func_00191AC8's
+conversion of its float parameter (`move v0,s6; sq v0,304(sp)` at the loop's top, eleven times) is
+such an asm and stays in the loop. What keeps it there, each tried on the same source:
+
+| The asm | loop.c | Result |
+| --- | --- | --- |
+| one output, not volatile, output set once | "Insn 40: regno 124 (life 283), global savings 2 moved to 481" | the conversion before the loop |
+| `__asm__ volatile` | not a candidate (`invariant_p`) | in the loop, but a barrier in both schedulers: three lines differ |
+| a second, unused output | not a `single_set`, never a candidate | in the loop, but the input is in both SETs: 5 refs, another saved register |
+| one output, the variable set again later in the body | not listed: `set_in_loop` is 2 and the sets are not consecutive | retail's code |
+
+The volatile form shows why retail's is not volatile. haifa-sched's `sched_analyze_2` makes a
+volatile asm depend on every earlier insn and every later insn on it, in sched1 and again in
+sched2. Retail's first block is `move v0,s6; lwc1 $f12,0(s3); move a1,sp; sq v0,304(sp); jal;
+addiu a0,s8,lo`: the angle's load and `a1` are issued between the reload that feeds the asm and
+the store of its output. With a barrier at the block's top the load waits for the asm and (a
+spill slot has no alias flag) for the store, and the order is `move v0; sq; move a1; addiu a0;
+jal; lwc1`. Without one, sched1 issues the three argument insns before the asm (their
+priorities are higher), and sched2's cycles give retail's: the reload (priority 23) and the load
+(22) share cycle 1, the asm and `move a1` cycle 2, the store and `addiu a0` cycle 3.
+
+A set that follows directly is no help when both are invariant: a brace initialiser
+`Vu0::Vec k = { F(scale) };` is `k = 0` then `k = asm`, loop.c's first pass leaves them (the
+asm's own temporary sits between and is folded into its one use, "used exactly once in a loop
+with calls"), and the second pass moves both ("Insn 73: regno 133 (life 197), consec 1, global
+savings 2 moved to 508 moved to 509"). A first set that is not invariant (a dead load) keeps
+both in the loop, and flow then deletes it. In the probe the second set is the copy after the
+last call, `k = Vu0::Vec::Of(k)`, which is also the copy the exit's use ends on
+(gcse.md, "Two passes of copy propagation").
+
+Where else to look: an asm that retail repeats in a loop although its inputs do not change,
+with no sign of a barrier around it. Ask which later statement of the body writes its variable.
