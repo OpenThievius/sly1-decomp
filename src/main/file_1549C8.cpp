@@ -1463,8 +1463,8 @@ extern s32 D_00262050[74];
 s32 RandomIntInRange(s32 a, s32 b);
 void SpawnEffectsAt(Quad16* self, Quad16* a1, void* a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
 
-// The parameters are in the order of file_1963D8.cpp's caller; collider.cpp's caller is matched
-// with the floats before the two points, and this definition is retail's under either order.
+// Both callers (file_1963D8.cpp and collider.cpp) declare it with these parameters and are
+// retail's code with them; a float takes its register wherever it is declared.
 void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance, Quad16* at, f32 minScale, f32 size)
 {
     if (AT(s32, cfg, 0x580) == 0) {
