@@ -141,13 +141,13 @@ D_00260E60	00260E60	16	.data	src/main/pose_source.cpp
 D_00260E70	00260E70	544	.data	src/main/placed_object.cpp
 D_00261090	00261090	644	.data	src/main/text_panel.cpp
 D_00261314	00261314	8	.data	src/main/world_listed_object.cpp
-D_00261320	00261320	100	.data	src/main/child_group_object.cpp
+D_00261320	00261320	112	.data	src/main/child_group_object.cpp
 D_00261390	00261390	96	.data	src/main/zone_collider.cpp
 D_002613F0	002613F0	32	.data	src/main/disc_access.cpp
 D_00261410	00261410	1088	.data	src/main/flagged_object.cpp
 D_00261850	00261850	48	.data	src/main/game_clock.cpp
 D_00261880	00261880	276	.data	src/main/camera.cpp
-D_002619A0	002619A0	572	.data	src/main/state_notifier.cpp
+D_002619A0	002619A0	584	.data	src/main/state_notifier.cpp
 D_00261BF0	00261BF0	160	.data	src/main/camera_controller.cpp
 D_00261C90	00261C90	52	.data	src/main/gauge_manager.cpp
 D_00261CC8	00261CC8	668	.data	src/main/pooled_object.cpp
@@ -210,7 +210,7 @@ D_00275730	00275730	416	.data	src/main/tint_blend_collider.cpp
 D_002758D0	002758D0	16	.data	src/main/class75_list.cpp
 D_002758E0	002758E0	96	.data	src/main/commentary_best_time.cpp
 D_00275940	00275940	40	.data	src/main/text_format.cpp
-D_00275970	00275970	428	.data	src/main/on_off_object.cpp
+D_00275970	00275970	436	.data	src/main/on_off_object.cpp
 D_00275B28	00275B28	56	.data	src/main/arc_element.cpp
 D_00275B60	00275B60	2772	.data	src/main/warp_menu.cpp
 D_00276680	00276680	752	.data	src/lib/library_state.c

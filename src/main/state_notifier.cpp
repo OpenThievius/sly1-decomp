@@ -179,8 +179,10 @@ f32 D_00261A00[4] = { 0.0f, 75.0f, 85.0f, 0.0f };
 f32 D_00261A10[4] = { 10.0f, 0.0f, 0.25f, 0.0f };
 f32 D_00261A20[12] = { 20.0f, 5.0f, 0.150000006f, 120.0f, 800.0f, 50.0f, 0.25f, 4500.0f, 800.0f, 50.0f, 0.25f, 4500.0f };
 f32 D_00261A50 = 300.0f;
-INCLUDE_DATA(D_00261A54);
-f32 D_00261A60[4] = { 1.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00261A54 = 1.0f;
+// The direction UpdateStateNotifier converts out of the object's frame (TransformDirectionBetweenFrames
+// takes a Vec02): aligned to 16, which leaves the 8 bytes of zeros retail has after D_00261A54.
+Vec02 D_00261A60 = { 1.0f, 1.0f, 0.0f, 0.0f };
 f32 D_00261A70[4] = { -250.0f, 0.0f, 600.0f, 0.0f };
 f32 D_00261A80[4] = { 1.0f, -0.300000012f, 0.0f, 0.0f };
 f32 D_00261A90[4] = { 0.699999988f, -0.400000006f, 0.0f, 0.0f };
@@ -738,7 +740,7 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
     s32 below = 1;
     Vec02 d;
     UpdatePlacedObject(self, dt);
-    TransformDirectionBetweenFrames(self, 0, D_00261A60, &d);
+    TransformDirectionBetweenFrames(self, 0, &D_00261A60, &d);
     if (!(Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)(*(Camera**)g_camera)->f90))) < 0.0f)) {
         below = 0;
     }

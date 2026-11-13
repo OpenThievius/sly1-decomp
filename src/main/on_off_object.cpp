@@ -227,8 +227,8 @@ void UpdateCamera(s32 q, s32 n, f32 v);
 void SetGameClockScale(f32 x);
 void ResetVolumeChannelFactors(void);
 void ClearScreenOwner(s32 a);
-INCLUDE_DATA(D_00275970);
-INCLUDE_DATA(D_00275974);
+f32 D_00275970 = 0.5f;
+f32 D_00275974 = 2.0f;
 s32 D_00275978 = 0;
 f32 D_00275980[16] = { -450.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 1.0f, 0, 0, 125.0f, 1.0f, 0, 0 };
 f32 D_002759C0[20] = { -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, 0, -0.1f,

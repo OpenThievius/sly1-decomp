@@ -22,11 +22,12 @@ Quad3B D_00261340 = { 0x3F000000, 0x3E4CCCCD, 0, 0 };
 Pair3B D_00261350 = { 0x44160000, 0x44AF0000 };
 Pair3B D_00261358 = { 0x41A00000, 0x42480000 };
 f32 D_00261360 = 600.0f;
-// The knockback's upward weight (800.0f): its label runs 12 bytes to D_00261370, more than the
-// float its reader uses, so it is included from the disassembly.
-INCLUDE_DATA(D_00261364);
-f32 D_00261370[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
-f32 D_00261380[4] = { 2.0f, -1.5f, 0.0f, 0.0f };
+f32 D_00261364 = 800.0f;
+// The two polynomials the knockback evaluates (TimePolynomial), aligned to 16 as the object's own
+// polynomials at 0x5D0 and 0x5F0 are (Quad3B): retail has the 8 bytes of zeros that alignment
+// leaves after the knockback's upward weight, D_00261364.
+f32 D_00261370[4] __attribute__((aligned(16))) = { 1.0f, -1.0f, 0.0f, 0.0f };
+f32 D_00261380[4] __attribute__((aligned(16))) = { 2.0f, -1.5f, 0.0f, 0.0f };
 
 void InitCollider(Collider* self);
 

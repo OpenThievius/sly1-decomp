@@ -91,6 +91,7 @@ address	size	align	before
 002754FC	4	16	src/main/path_follower_helpers.cpp .data
 002755FC	4	16	src/main/world.cpp .data
 0027572C	4	16	src/main/tint_blend_collider.cpp .data
+00275968	8	16	src/main/on_off_object.cpp .data
 00275B24	4	8	src/main/arc_element.cpp .data
 0027667C	4	8	src/lib/library_state.c .data
 002771D4	4	8	src/lib/iop_reset.cpp .data
