@@ -400,8 +400,8 @@ class OriginalAsmTableTest(unittest.TestCase):
 class ProgressCountTest(unittest.TestCase):
     def test_original_assembly_counts_as_finished_but_not_as_exact_c(self):
         asm = progress.original_asm("us")
-        inline = progress.inline_asm("us")
-        self.assertTrue(asm and inline)
+        inline = progress.inline_asm("us")  # empty once the last such function is matched from C
+        self.assertTrue(asm)
         self.assertEqual(progress.finished("us"), progress.exact_c("us") | (asm - inline))
         self.assertEqual(progress.exact_c("us") & asm, set())
 
