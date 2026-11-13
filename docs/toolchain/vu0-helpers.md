@@ -359,8 +359,9 @@ ReadVi<N>/ReadViWait<N> (cfc2.ni/.i; ReadViWait<0> is the game's wait), CallMs<a
 and VuNop (vnop). All are volatile with a "memory" clobber, so they keep their order with each
 other and with the loads and stores around them. The C around them sets and reads the registers in
 retail's order. A float the caller passes in a GPR with a 128-bit `por` is a u128 parameter
-(MoveToVf takes it, ToFloatMoved reads it). Neither function matches yet (nonmatching/): the
-bodies are retail's apart from register allocation.
+(MoveToVf takes it, ToFloatMoved reads it). func_0013A498 no longer uses them: it matched on
+2026-11-12 with an interface of its own ("func_0013A498 matched" below). func_00185150 is still
+a near miss (nonmatching/).
 
 ### func_00185150's vi block was one non-volatile asm (2026-11-10)
 
@@ -437,6 +438,55 @@ func_0013A498 shows the same thing for the loads and stores around its vcallms, 
   `blez`, which combine gives only with no volatile insn between kept's set and the test
   (can_combine_p). Tried with the helpers: kept's `= 0` at the top gives the slt back (392
   bytes, 96 differing lines); `if (count > 0)` around a do-while makes loop.c count up (100).
+
+### func_0013A498 matched: local register variables named by the vcallms (2026-11-12, w40-fd)
+
+The maintainer decided on 2026-11-12 that these two functions may have an interface used by one
+function, in a form their programmer plausibly wrote. func_0013A498 is EXACT (US and PAL) with
+`Vu0::ParticleFilter` (include/vu0.h), and each step to it was a prediction from the dumps:
+
+- **A local register variable must be an operand.** `register u128 vf28 asm("vf28") = ...;`
+  inside the function is a local register variable: flow deletes its set as dead unless a later
+  insn uses the register. With the w13 scratch's assignments on local variables and the old
+  `CallMs` (no operands) every load but vf25's and vf26's disappears. Named as `"j"` inputs of
+  the vcallms asm they stay, and `"j"` accepts every one of $vf21..$vf31 as a hard register,
+  $vf31 too (it is outside `-mvu0-use-vf0-vf30`'s allocatable set, which does not matter for a
+  register the source names). The loads are then movti insns, free to move: 27 differing lines
+  against the helpers' 73, with the folded `blez` (no volatile insn before the first vcallms).
+- **All nine inputs at both calls.** Retail's first block needs sched1 to issue the four matrix
+  loads before the copy of the mode parameter (reload's `sw t2,0(sp)` comes after them: a load
+  and a later store never swap in sched2) and vf26's load after it. A load into a register that
+  is live at the end of the block and set once in the function has its priority raised when it
+  becomes ready (haifa-sched.c, adjust_priority's birthing rule; tools/sched1.py replays it), so
+  the rows rise above the parameter copies only if $vf28..$vf31 are live out of the block: the
+  loop's vcallms must name them too. With two inputs there ($vf24, $vf23, the two it reloads)
+  the rows are dead after the first call and stay behind the copies; with all nine, and the
+  registers set in descending order (rows 0 to 3 into $vf31..$vf28, the scale, the two bounds,
+  the particle's two vectors), the block is retail's, the order `vf28, vf31, vf30, vf29` included
+  (the last row's load ends the matrix pointer's life, so its register weight puts it first).
+  The dropped count then takes a0, freed by that load. An asm takes at most ten operands, so
+  the two results cannot be outputs of the same vcallms.
+- **Helpers with the variables inside.** A helper that takes the vectors by value and declares
+  the register variables itself (`Start`, `Next`) gives the same RTL as assignments in the
+  function: combine folds each argument's load into the copy to the hard register, at the
+  copy's place, so the loads come out in the helper's declaration order. `Next` declares the
+  seven registers it does not set, only to name them as inputs. A helper that takes them by
+  value with no register variable of its own (`"j"(a)` on a parameter) is not an interface at
+  all: the compiler loads the vectors into $vf1 and $vf2.
+- **The wait has no output.** After the wait the else arm computes two addresses, retail's in v0
+  then v1. `Vu0::ReadViWait<0>` makes its unused result a pseudo of that block, the block's
+  third quantity; local-alloc sorts three quantities by hand (local-alloc.c: quantities 0, 1
+  and 2 compared by number whatever was exchanged), the wait's goes first and takes v0, and the
+  first address, whose life is tried one insn wider, gets v1. Retail's allocation has no such
+  quantity: either the read went to a variable of the function (global-alloc then gives it v0
+  after local-alloc; EXACT in scratch with the asm written in the function, c3) or the
+  statement names v0 itself and declares nothing (`cfc2.i $2, $vi0`, EXACT, c4). A declared
+  clobber of `$2`, or a register variable for v0, makes v0 live at the wait and gives v1 again.
+  An output through a reference parameter puts the variable in memory. `ParticleFilter::Wait`
+  is the second form, the only one a helper can have.
+
+Scratch: build/swarm/w40-fd/ in the g1 worktree (a2: two inputs; b2: nine inputs; c3, c4, c5: the
+wait; d1: by-value helper; x1: the landed form).
 
 ### New microprogram helpers fail the recurrence rule (2026-11-10, w16)
 

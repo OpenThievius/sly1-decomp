@@ -114,7 +114,15 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   is compiled C around a load the compiler cannot emit, a float's word loaded with `lw` straight
   into a 128-bit GPR for a VU0 routine's weight, and a scan of retail proved the sequence occurs
   only there (docs/toolchain/cse.md); the maintainer allowed it by name on 2026-11-12, and no
-  other function may use it. The other exception is `MUL_WIDE` (include/mul_wide.h),
+  other function may use it. Another, func_0013A498 (FilterParticleVerticesVu0), runs the VU0
+  microprogram at 0x10 through `Vu0::ParticleFilter` (include/vu0.h), that microprogram's
+  interface: small inline helpers (`Start`, `Next`, `Wait`, `Results`, `Bounds`) that hold its
+  vectors in local register variables for $vf21 to $vf31, the registers it reads and writes,
+  and start it with a `vcallms` naming the nine it reads as inputs. The loads and stores are
+  then the compiler's own moves, which retail's code shows they were, and only that function
+  starts that microprogram (docs/toolchain/vu0-helpers.md); the maintainer allowed an
+  interface of one function, in the form its programmer plausibly wrote, on 2026-11-12, and
+  no other function may use it. The other exception is `MUL_WIDE` (include/mul_wide.h),
   one `multu` whose halves are read from lo and hi, which the toolchain's runtime multiplied with
   and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
   The toolchain's own runtime (`libgcc`, config/us/libcalls.tsv) was compiled as C, so its C is a

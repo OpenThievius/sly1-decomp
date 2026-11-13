@@ -445,7 +445,38 @@ void CopyWorldListedObject(WorldListedObject* self, BaseObject* src)
     }
 }
 
-INCLUDE_ASM(func_0013A498);
+f32 WrapAngle(f32 x);
+extern f32 g_gameTime;
+
+// Runs the microprogram at 0x10 over count particles (Vu0::ParticleFilter): a particle whose
+// extra.w has passed is dropped, the others are packed down in all three arrays with the
+// microprogram's results, and the two bounds come back updated. Returns how many were dropped.
+s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec02* pos, Vec02* extra, Vec02* items, s32 count, s32 mode,
+                              void* boundA, void* boundB)
+{
+    s32 j = -1;
+    s32 dropped = 0;
+    f32 now = g_gameTime;
+    Vu0::ParticleFilter::Start(*(u128*)m, *(u128*)(m + 4), *(u128*)(m + 8), *(u128*)(m + 12), scaleBits, *(u128*)boundA,
+                               *(u128*)boundB, *(u128*)extra, *(u128*)pos);
+    for (s32 i = 0; i < count; i++) {
+        if (extra[i].w <= now) {
+            dropped++;
+            Vu0::ParticleFilter::Wait();
+        } else {
+            j++;
+            items[j] = items[i];
+            if (mode == 2) {
+                items[j].w = WrapAngle(items[i].w + items[i].z * Vu0::ToFloatMoved(scaleBits));
+            }
+            Vu0::ParticleFilter::Wait();
+            Vu0::ParticleFilter::Results(*(u128*)&extra[j], *(u128*)&pos[j]);
+        }
+        Vu0::ParticleFilter::Next(*(u128*)&extra[i + 1], *(u128*)&pos[i + 1]);
+    }
+    Vu0::ParticleFilter::Bounds(*(u128*)boundA, *(u128*)boundB);
+    return dropped;
+}
 
 // The bounds the assembly func_0013A618 and func_0013A940 start from: the file's .rodata.
 extern const f32 D_00249D64 = 3.4028235e+38f;
