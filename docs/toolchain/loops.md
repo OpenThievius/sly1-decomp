@@ -1470,3 +1470,9 @@ last call, `k = Vu0::Vec::Of(k)`, which is also the copy the exit's use ends on
 
 Where else to look: an asm that retail repeats in a loop although its inputs do not change,
 with no sign of a barrier around it. Ask which later statement of the body writes its variable.
+
+Checked on 2026-11-13 (w49-g): the conversion written again after the call is no second set.
+cse1 makes the second asm a copy of the first, k is invariant again and loop.c moves the asm.
+The tied empty asm is not Vu0::ScalarInGpr in another shape either: written so, every one of
+ScalarInGpr's users differs, and retail's ten other functions that store a float moved to a
+GPR with sq all have the mfc1 at the use. The form is this function's alone.
