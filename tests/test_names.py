@@ -70,6 +70,38 @@ class TablesTest(unittest.TestCase):
         self.assertIn("belongs in config/names/main/button.tsv", errs[0])
 
 
+class OwnFunctionsTest(unittest.TestCase):
+    """A function only PAL has (func_eu_XXXXXXXX) is named like any other, in its shared file's table."""
+
+    FILES = TablesTest.FILES
+    OWN = {"func_eu_0016F600": "config/names/main/button.tsv"}
+
+    def test_a_pal_only_function_takes_a_row_and_a_macro(self):
+        rows = [row("func_eu_0016F600", "ReadWideButtonCode")]
+        self.assertEqual(names.problems(rows, FUNCS | {"func_eu_0016F600"}), [])
+        self.assertIn("#define ReadWideButtonCode func_eu_0016F600", names.header_text(rows))
+
+    def test_it_must_be_a_function_only_that_version_has(self):
+        errs = names.problems([row("func_eu_0016F700", "ReadWideButtonCode")], FUNCS)
+        self.assertEqual(len(errs), 1, errs)
+        self.assertIn("config/eu/map.tsv", errs[0])
+        errs = names.problems([row("func_EU_0016F600", "ReadWideButtonCode")], FUNCS)
+        self.assertTrue(any("not an address name" in e for e in errs), errs)
+
+    def test_its_row_goes_to_its_shared_files_table(self):
+        self.assertEqual(names.table_for("func_eu_0016F600", self.FILES, self.OWN), "config/names/main/button.tsv")
+        self.assertEqual(names.table_for("func_eu_0016F700", self.FILES, self.OWN), "config/names/other.tsv")
+        rows = [dict(row("func_eu_0016F600", "ReadWideButtonCode"), table="config/names/data.tsv")]
+        errs = names.problems(rows, FUNCS | {"func_eu_0016F600"}, files=self.FILES, own=self.OWN)
+        self.assertEqual(len(errs), 1, errs)
+        self.assertIn("belongs in config/names/main/button.tsv", errs[0])
+
+    def test_the_committed_pal_only_functions_have_tables(self):
+        own = names.own_tables(names.proved_files())
+        self.assertEqual(own.get("func_eu_0015DF58"), "config/names/main/font.tsv")
+        self.assertTrue(all(t.startswith("config/names/") and t != "config/names/other.tsv" for t in own.values()))
+
+
 class UseOrDefinitionTest(unittest.TestCase):
     """_is_use tells a use of the macro from a source's own identifier of the same name."""
 

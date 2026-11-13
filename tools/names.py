@@ -13,7 +13,9 @@ turns it back, so the objects are byte for byte the same, and the tools find a s
 name (tools/symbols.py).
 
 A function's row is in the table of the source file that holds it (config/us/files.tsv):
-src/main/value.cpp's in config/names/main/value.tsv. A global's row is in config/names/data.tsv.
+src/main/value.cpp's in config/names/main/value.tsv. A function only PAL has (func_eu_XXXXXXXX) is
+in the table of the shared file its own definition under src/versions/eu/ is built in. A global's
+row is in config/names/data.tsv.
 `header` moves each row to its table and sorts every table by symbol, so a row may be added to any
 of them first.
 
@@ -44,7 +46,10 @@ OTHER_TABLE = TABLES / "other.tsv"
 HEADER = ROOT / "include" / "names.h"
 COLUMNS = ["symbol", "name", "evidence"]
 
-SYMBOL = re.compile(r"^(func|D)_[0-9A-F]{8}$")
+SYMBOL = re.compile(r"^(func(_[a-z]+)?|D)_[0-9A-F]{8}$")
+# A function only one version has (func_eu_XXXXXXXX, tools/version_src.py): its table is the shared
+# file's its own definition is built in, or the one of the closest function before it both have.
+OWN = re.compile(r"^func_([a-z]+)_([0-9A-F]{8})$")
 FUNC_NAME = re.compile(r"^[A-Z][A-Za-z0-9]*$")        # PascalCase: RegisterButtonCodes
 DATA_NAME = re.compile(r"^g_[a-z][A-Za-z0-9]*$")      # g_ and camelCase: g_buttonCodes
 # The original developers wrote a Hungarian prefix on every identifier (a pointer p, an array a, a
@@ -92,23 +97,65 @@ def proved_files():
     return sorted((int(r[1], 16), int(r[2], 16), r[0]) for r in rows if int(r[2], 16) > int(r[1], 16))
 
 
-def table_for(symbol, files):
-    """The table a symbol's row belongs in, relative to the root: its source file's, or data.tsv."""
+def table_for(symbol, files, own=None):
+    """The table a symbol's row belongs in, relative to the root: its source file's, or data.tsv.
+    A function only one version has goes in the table `own` ({symbol: table}, own_tables()) gives."""
     if not symbol.startswith("func_"):
         return _relative(DATA_TABLE)
+    if OWN.match(symbol):
+        own = own_tables(files) if own is None else own
+        return own.get(symbol, _relative(OTHER_TABLE))
     addr = int(symbol[5:], 16)
     i = bisect.bisect_right([f[0] for f in files], addr) - 1
     if i < 0 or addr >= files[i][1]:
         return _relative(OTHER_TABLE)
-    source = Path(files[i][2])                          # src/main/value.cpp
+    return source_table(files[i][2])                    # src/main/value.cpp
+
+
+def source_table(source):
+    """The table of a source file (src/main/value.cpp -> config/names/main/value.tsv)."""
+    source = Path(_relative(source))
     return _relative(TABLES / source.parent.relative_to("src") / (source.stem + ".tsv"))
 
 
-def table_texts(rows, files):
+def own_functions():
+    """[(version key, func_<key>_XXXXXXXX, the address of the closest function before it that
+    the version shares with US, or None)] of the functions only a version has (config/<key>/map.tsv
+    rows without a US name)."""
+    out = []
+    for path in sorted((ROOT / "config").glob("*/map.tsv")):
+        key = path.parent.name
+        rows = [l.split("\t") for l in path.read_text().splitlines()[1:] if l]
+        before = None
+        for r in sorted(rows, key=lambda r: int(r[1], 16)):
+            if r[3] != "-":
+                before = int(r[4], 16)
+            else:
+                out.append((key, "func_%s_%s" % (key, r[1].upper()), before))
+    return out
+
+
+def own_tables(files):
+    """{func_<key>_XXXXXXXX: table} of the functions only a version has: the table of the shared file
+    that its own definition (src/versions/<key>/<shared file>/<function>.cpp) is built in, or, with no
+    definition, of the file that holds the closest function before it that both versions have."""
+    import version_src
+    out = {}
+    for key, name, before in own_functions():
+        definition = version_src.overrides(key).get(name)
+        if definition is not None:
+            out[name] = source_table(version_src.version_of(definition)[1])
+        elif before is not None:
+            out[name] = table_for("func_%08X" % before, files)
+    return out
+
+
+def table_texts(rows, files, own=None):
     """{table path: text} with every row in its table, each table sorted by symbol."""
+    own = own_tables(files) if own is None and any(OWN.match(r["symbol"]) for r in rows) else own
     tables = {}
     for r in rows:
-        tables.setdefault(table_for(r["symbol"], files), []).append(r)
+        tables.setdefault(table_for(r["symbol"], files, own), []).append(r)
     return {path: "\n".join(["\t".join(COLUMNS)] +
                              ["\t".join(r[c] for c in COLUMNS) for r in sorted(rs, key=lambda r: r["symbol"])]) + "\n"
             for path, rs in tables.items()}
@@ -133,8 +180,9 @@ def header_text(rows):
 
 
 def known_functions():
+    """Every US function, and every function only a version has (func_eu_XXXXXXXX)."""
     rows = (ROOT / "config" / "us" / "functions.tsv").read_text().splitlines()[1:]
-    return {r.split("\t")[0] for r in rows if r}
+    return {r.split("\t")[0] for r in rows if r} | {name for _, name, _ in own_functions()}
 
 
 def identifiers_in_sources():
@@ -154,16 +202,22 @@ def _where(r):
     return "%s:%d" % (r.get("table", "config/names"), r["line"])
 
 
-def problems(rows, functions=None, idents=None, header=None, files=None):
+def problems(rows, functions=None, idents=None, header=None, files=None, own=None):
     """What is wrong with the tables, and with names.h against them: a list of messages."""
     functions = known_functions() if functions is None else functions
+    if files is not None and own is None and any(OWN.match(r["symbol"]) for r in rows):
+        own = own_tables(files)
     errs = []
     seen_symbol, seen_name = {}, {}
     for r in rows:
         where = _where(r)
         sym, name = r["symbol"], r["name"]
         if not SYMBOL.match(sym):
-            errs.append("%s: %s is not an address name (func_XXXXXXXX or D_XXXXXXXX)" % (where, sym))
+            errs.append("%s: %s is not an address name (func_XXXXXXXX, func_eu_XXXXXXXX or D_XXXXXXXX)"
+                        % (where, sym))
+        elif OWN.match(sym) and sym not in functions:
+            errs.append("%s: %s is not a function only that version has (config/%s/map.tsv)"
+                        % (where, sym, OWN.match(sym).group(1)))
         elif sym.startswith("func_") and sym not in functions:
             errs.append("%s: %s is not in config/us/functions.tsv" % (where, sym))
         style = FUNC_NAME if sym.startswith("func_") else DATA_NAME
@@ -179,8 +233,9 @@ def problems(rows, functions=None, idents=None, header=None, files=None):
         if name in seen_name:
             errs.append("%s: %s names two symbols (also %s)" % (where, name, seen_name[name]))
         seen_symbol[sym], seen_name[name] = where, where
-        if files is not None and "table" in r and r["table"] != table_for(sym, files):
-            errs.append("%s: %s belongs in %s: run python3 tools/names.py header" % (where, sym, table_for(sym, files)))
+        if files is not None and "table" in r and r["table"] != table_for(sym, files, own):
+            errs.append("%s: %s belongs in %s: run python3 tools/names.py header"
+                        % (where, sym, table_for(sym, files, own)))
     if idents is not None:
         for r in rows:
             other = idents.get(r["name"])
