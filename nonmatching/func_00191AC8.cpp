@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 432/428, checked 2026-11-13
+// BYTES 416/428 (97.2%), checked 2026-11-13
+// w47-g (2026-11-13), about 90 compiles, the dumps and GCC 2.95.3's reload.c, loop.c and haifa-sched.c read beside them: EXACT on us and eu as a probe (build/swarm/w47-g/f1_exact.cpp: this file with `volatile` taken off FloatInGpr's asm), not landed: `k = Vu0::Vec::Of(k);` after the call is a statement with no meaning in C, and FloatInGpr and SlotCopy are helpers of this one function. What retail's code is, piece by piece. (1) The conversion is not a 64-to-128-bit extension: a `(set (subreg:DI T 0) kg)` of a TImode hard register always gets a reload register of its own (reload.c, push_reload: 16 / 8 words against HARD_REGNO_NREGS 1), so `move v1,s6; por v0,zero,v1` when T has a GPR, `sd v0,304; sd zero,312` when it is spilled, never retail's `move v0,s6; sq v0,304`. Retail's is a one-output asm whose input is the float itself in a GPR ("0", an empty template; `move %0, %1` with "r" gives the same bytes): the parameter scale then has GR_REGS as its class (3 refs, the last saved register, s6), its parameter copy is the `mfc1 s6,$f12` (issued last in the first block, as retail's), reload copies it into the output's reload register (`move v0,s6`) and stores that to k's home (`sq v0,304`). That alone fixes the prologue, s2/s3 and the 4 bytes. (2) The asm is in the loop without being volatile. Volatile, it is a barrier in sched2 (every insn after it waits for it, and the lwc1 for its store): the three lines this file still differs by. Not volatile, loop.c moves it out unless k is set twice in the loop (scan_loop: set_in_loop == 1 or consecutive invariant sets); a second output on the asm keeps it in too, but the input is then counted in both SETs (5 refs) and scale takes s1. The second set that works is the copy after the call, written back to k itself. (3) That copy must be three register copies long (`k = Vu0::Vec::Of(k)`, `k.q = Vu0::Q(k)`, `k = AsVec(k.q)` through a by-value inline all do; `k = k`, `kz = k` and the conversion written again do not: gcse.md) and must be written between the call and the `if` (written before the call, after the k2 store or between the rows it is not exact: w46-d found such a copy issued at the block's top). k then has 12 refs over 3 calls and no register; the copy's middle pseudo takes vf4 (the beqz slot's `lqc2 vf4,304`) and lives to the exit. (4) `u128 pc = Vu0::Q(*pos)` is read before the k2 store: reload then finds vf4 taken and loads k again (`lq v0,304`) where it inherited vf4 (`qmfc2`). Also exact, as evidence of the same facts: a dead first set of k in the body (`k.q = Vu0::Q(*pos); k.q = FloatInGpr(scale);`) with `kz = Vu0::Vec::Of(k)` after the call; `kz.q = FloatInGpr(scale); Vu0::Vec k = kz; ... kz = Vu0::Vec::Of(k);`. Ruled out: the float last in the signature (file_1963D8.cpp declares it so: 8 lines), `*(u128*)&(s128)k.q` written in place for SlotCopy (11 lines), a brace initialiser `Vu0::Vec k = { ... }` (k = 0 and the asm are consecutive sets at loop.c's second pass and both are moved), a union for k (memory), k in memory (one load for the rows), the conversion at each use, loop forms (for, while, for (;;)), a clobber list on the asm, the float by reference. Open for the maintainer: what the original wrote after the call. docs/toolchain/loops.md, "An asm kept in its loop"; reloads-and-stores.md, "A SUBREG of a 128-bit register".
 // w46-d (2026-11-13), about 170 compiles (two grids of 60 over stated forms) and the dumps: (2) is solved in shape and (1) but for one move. The copy after the call survives gcse because copy propagation replaces a use by its reaching copy's source once per pass and gcse runs two passes ("COPY-PROP: Replacing reg 193 in insn 476 with reg 194", then "reg 194 ... with reg 191"): a use three copies from k ends on the middle pseudo. purge_addressof runs after cse1 here, so every read of a Vec local is its own copy: `kz = k` is two copies and ends on k, `ka = k; kz = ka;` or `kz = Vu0::Vec::Of(k);` (as written below) is four and ends on the second. sched1 keeps the copy after TestOwnerGraphSpan only when it is written there (a pseudo that crosses no call is tied to the last call before it): written before CopyBytes it issues at the block's top and the copy is the one spilled. The exit then stores kz's cast copy (the slot: `sqc2 vf4,192(sp)`) and divides by vf4. rot, k2 and s are the loop body's own locals: their slots are free at the exit, the cast copy takes rot's (192), the frame is 512 and k's home 304. cse2 makes the conversion's temporary canonical for every body use (24 refs, vf4 with a caller save) unless k is mentioned outside the loop block; with k set before the loop (`= Vec::Zero()`, dead, flow deletes it) k is canonical: 12 refs over 3 calls, no register, retail's loads from 304. pc as a u128 keeps the loop at 80 insns at loop.c's second pass, so 1.0f is moved (f21). Left (432 bytes, 19 lines): `move v1,s6; por v0,zero,v1` for `move v0,s6` (the temporary gets v0 from global-alloc and reload gives its subreg set a reload register v1, copied back; retail's reload register is v0 and the store inherits it), s2/s3 swapped (i and the table pointer), the k2 store inherits vf4 (`qmfc2 v0,vf4`) where retail loads 304, `lqc2 vf4,304` one insn early, mfc1 early in the prologue. Rules: the dead `= Vec::Zero()`, the copy through Vec::Of and the two helpers defined here (an mfc1 with a 64-bit output, the cast copy of a u128) are probes, not forms; the original's variable and its copies are not known.
 // w44-fa (2026-11-12), 5 compiles, from the dumps: (2) is a real insn, not reload's or caller-save's. vf4's caller-save slot is 320 (pc around CopyBytes) and vf4 holds p before the third call, so nothing saves k there; the exit is a label with two predecessors, so no reload is inherited. Retail's first loop block ends with `K4 = k` (k unallocated, hence `lqc2 vf4,304(sp)`, reorg takes it into the beqz slot) and the exit uses K4 (sqc2 vf4,192; vdiv vf4). k then has 12 refs (its set 2, the rows 6, k2 2, the copy 2) over 3 calls: not worth a caller save (4 * 3 >= 12), as the body needs. (1) is the temporary of a 64-to-128-bit conversion: with the mfc1's output a u64 and `k.q = (u128)kg`, expand makes a no-conflict block (`(set (subreg:DI T 0) kg)`, `(set (subreg:DI T 1) 0)`, `(set T T)` with REG_EQUAL zero_extend), T takes v0 (`move v0,s6`) and `k = T` stores it when k has no register; loop.c does not move it. Compiled: with that alone k gets vf6 with a caller save (its refs rise above 12: the exit's uses count on top), whose restore at the block's end is retail's beqz-slot load in shape (save slot 320 or 336, not 304). Ruled out: PRE (a Vec02 k in memory, written at the loop's top: one load in the body, the exit's load stays at the exit; the conversion written again at the exit is not made redundant, gcse does not take a libcall's REG_EQUAL as an expression: `por v0,zero,s1` at the exit), haifa's interblock motion (every region is one block), a Vec02 in memory read back into k after the first call (k crosses two calls and gets vf6 with a caller save). Open: the source of a copy of k after TestOwnerGraphSpan that gcse's copy propagation does not fold into the exit's uses (a plain `kz = k` is folded: the copy is available at the exit). The rewrite sweep's hint (a narrower `i`, 1.0f as a local in the body: 104 to 88 words) is not followed here: retail's loop has `addiu s1,s1,1; sltiu v0,s1,11` with no extension, so the index is 32 bits wide.
 // w32-sizeA (2026-11-11): not retried; the first differing block is the loop's head (retail's per-iteration move v0,s6; sq v0,304 and the extra saved register s8), as in (1) above.
@@ -211,12 +212,16 @@ void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
 // A matrix copied whole: the call's arguments are its parameters, substituted as constants.
 static inline void CopyMatrix(Mat02* d, const Mat02* s) { CopyBytes(d, (void*)s, 0x30); }
 
-static inline u64 FloatBitsInGpr(f32 f)
+// The float's bits as a 128-bit GPR value: no instruction of its own. The float is the asm's
+// input in a GPR ("0": the output's register), so the compiler brings it there (the parameter
+// lives in a saved GPR, its copy is the mfc1) and reload copies it into the output's register.
+static inline u128 FloatInGpr(f32 f)
 {
-    u64 r;
-    __asm__("mfc1 %0, %1" : "=r"(r) : "f"(f));
+    u128 r;
+    __asm__ volatile("" : "=r"(r) : "0"(f));
     return r;
 }
+// The copy g++ makes of a cast bound by reference (Vu0::ScalarInGpr's slot), of a value.
 static inline u128 SlotCopy(u128 v)
 {
     const s128& slot = (s128)v;
@@ -228,26 +233,24 @@ void FitStepToPointGraph(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)
     Vec02 p;
     Vec02 hit;
     ColliderSpan span;
-    Vu0::Vec k = Vu0::Vec::Zero();
-    Vu0::Vec kz;
-    u64 kg = FloatBitsInGpr(scale);
+    Vu0::Vec k;
     f32 best = -1.0f;
     u32 i = 0;
     do {
         Mat02 rot;
         Vec02 k2;
         Mat02 s;
-        k.q = (u128)kg;
+        k.q = FloatInGpr(scale);
         BuildAxisAngleMatrix(&g_unitZVector, D_00269B78[i], &m);
         *(Vu0::Vec*)&s.r[0] = Vu0::MulX(Vu0::Vec::Of(m.r[0]), k);
         *(Vu0::Vec*)&s.r[1] = Vu0::MulX(Vu0::Vec::Of(m.r[1]), k);
         *(Vu0::Vec*)&s.r[2] = Vu0::MulX(Vu0::Vec::Of(m.r[2]), k);
-        *(Vu0::Vec*)&k2 = k;
         u128 pc = Vu0::Q(*pos);
+        *(Vu0::Vec*)&k2 = k;
         CopyMatrix(&rot, &s);
         Vu0::Q(p) = Vu0::Add(pc, Vu0::Rotate(rot, Vu0::Q(*dir)));
         s32 r = TestOwnerGraphSpan(self, pos, &p, 1, &span);
-        kz = Vu0::Vec::Of(k);
+        k = Vu0::Vec::Of(k);
         if (r != 0 && best < span.time[1]) {
             best = span.time[1];
             Vu0::Q(hit) = Vu0::Q(span.q[1]);
@@ -255,5 +258,5 @@ void FitStepToPointGraph(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)
         }
         i++;
     } while (i < 11);
-    Vu0::Q(*dir) = Vu0::DivX(Vu0::Sub(Vu0::Q(hit), Vu0::Q(*pos)), SlotCopy(kz.q));
+    Vu0::Q(*dir) = Vu0::DivX(Vu0::Sub(Vu0::Q(hit), Vu0::Q(*pos)), SlotCopy(k.q));
 }

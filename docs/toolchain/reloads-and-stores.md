@@ -250,3 +250,35 @@ GaugeManager's agent placement (src/main/file_14B6A8.cpp), read from `-dL -dS -d
   break the rest. Assigning `posp = &pos; rotp = &rot[0];` inside the loop, before their calls,
   removes the copy, and loop.c hoists both to the preheader, after the wait pointer's address
   set at its declaration: the order wait, posp, rotp, and the match.
+
+### A SUBREG of a 128-bit register always takes a reload register (func_00191AC8)
+
+A TImode value sits in one GPR here (`HARD_REGNO_NREGS` 1) though it is two words wide. reload.c
+(`find_reloads` and `push_reload`) forces a reload for any `(subreg:DI (reg:TI hard) n)`: the
+inner register is reloaded whole, in and out, into a register of its own. So the first insn of a
+64-to-128-bit zero extension, `(set (subreg:DI T 0) kg)`, never becomes a plain move into T:
+
+| T | Code for `T = (u128)kg; k = T` (kg in s6, k at 304) |
+| --- | --- |
+| a GPR (v0) | `move v1,s6; por v0,zero,v1; sq v0,304(sp)` |
+| a VU0 register | `move v0,s6; qmtc2 v0,$vf6` |
+| no register (T is k) | `move v0,s6; sd v0,304(sp); move v0,zero; sd v0,312(sp)` |
+
+(The second word's insn is `(set (reg:DI regno+1) 0)` after reload, a write to the next
+register; it is dead and deleted where T has a register.) Retail's `move v0,s6; sq v0,304(sp)`
+is none of them, so its conversion is not `(u128)` of a 64-bit value, and a low-doubleword store
+(`*(u64*)&k = kg`, one such insn) gives `sd` as well.
+
+What gives it is an asm whose output is the 128-bit value and whose input is the float in a GPR:
+`__asm__("" : "=r"(r) : "0"(f))` (or `"move %0, %1"` with `"r"(f)`: the same bytes). With the
+output spilled, reload takes v0 for it, copies the input there (`move v0,s6`, movsf between
+GPRs) and stores it (`sq v0,304(sp)`). Two things follow from the float being a GPR operand:
+regclass gives the float parameter GR_REGS, so its copy from `$f12` is an `mfc1` into a saved
+GPR, issued last in the first block; and it has 3 references (the copy and the asm at depth 2),
+the lowest priority of the function's saved registers. An asm with two outputs holds its inputs
+once per SET and counts them twice (5 references).
+
+One more reload fact from the same function: an input reload for a GPR class finds a spilled
+value in a VU0 register and copies it (`qmfc2 v0,$vf4`) where retail loads the slot
+(`lq v0,304(sp)`). Retail's VU0 register had been set again by then: the statement that loads it
+(`pc = *pos`) is written before the copy, not after.
