@@ -71,6 +71,21 @@
 // store and the last if) are no closer: the same 78 lines or more, and one more pad reference
 // at depth 2 (reach, the last if) overshoots, pad takes s1. No single such region is retail's
 // here; (a) and (b) stay as above.
+// w40-fc (2026-11-12): (b) is a block boundary, not a barrier. Probe (not a match, the store is
+// invented): `if (self != 0) k = 0.0f;` between `rot = m;` and the third BuildAxisAngleMatrix,
+// k declared at the top and assigned again on both later paths. flow1 deletes the store, the
+// branch and label split the block through sched1, the allocators and sched2, and jump2 deletes
+// the branch to the next insn (a register-only test leaves nothing): the call's lui, a1, lwc1,
+// a0 come out in retail's order, 1700 bytes, 56 lines, registers only
+// (build/swarm/w40-fc/a2.cpp; with `pad != 0` pad takes s1, 61 lines). With the split, block
+// A's VU0 registers move (tilt rows vf5/vf2 for retail's vf6/vf3): replaying local-alloc
+// (build/swarm/w40-fc/lq.py), retail needs the tilt's second row live over at least 9 insns
+// (7 in the probe) and the first row with the product's last row over at least 25 (23), i.e.
+// two more sched1 insns between the tilt loads and the last row's product that leave no code;
+// the unsplit form had them only because the three argument insns were scheduled there. So
+// retail's block A holds two invisible insns, r507's life three and &cur's two: the same kind
+// of thing in three blocks, still unidentified (docs/toolchain/sched1.md, "Argument moves
+// held back").
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"
