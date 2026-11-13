@@ -6,7 +6,9 @@
 // empty and never read; nothing else of that size and kind fits (docs/TOOLCHAIN.md, "An object
 // with a destructor keeps a slot"). The original's class is unknown, plausibly a scope object
 // whose body is compiled out in release builds. Used only where a retail frame shows exactly
-// this slot: func_0014B6A8, func_001DC238, func_001DC4D0 and func_0015A198.
+// this slot: func_0014B6A8, func_001DC238, func_001DC4D0, func_0015A198 and func_00187F40 (whose
+// slot is at the bottom of the frame: docs/toolchain/stack-slots.md, "A 4-byte slot nothing
+// touches", says why a one-byte object whose address a destructor takes is homed at once).
 #ifndef SCOPE_MARKER_H
 #define SCOPE_MARKER_H
 

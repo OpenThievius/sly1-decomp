@@ -589,9 +589,10 @@ An empty class is one byte, QImode. With a destructor the `-dr` dump has `(set (
 on the stack at RTL generation. Why a constructor or a method alone does not do it is inferred,
 not read from a dump: the constructor's call is built by cp_finish_decl before expand_decl
 gives the variable its pseudo, so that address marks the tree only, where a class with a
-destructor is put in memory when its cleanup is set up. The match declares such an object, `DebugScope
-scope;` (include/debug_scope.h): the scope object of a debug build, a timer or trace compiled
-to nothing in release, at the top of the collision's inner routine. US and PAL are EXACT.
+destructor is put in memory when its cleanup is set up. The match declares such an object, `ScopeMarker
+scope;` (include/scope_marker.h, the class four other functions already use for the same kind
+of slot): a scope object whose body is compiled out, at the top of the collision's inner
+routine. US and PAL are EXACT.
 
 What this gives other functions: an untouched hole below a slot aligned to 4, 8 or 16 bytes
 that no declared record explains may be a one-byte object of this kind; a u128 or record slot

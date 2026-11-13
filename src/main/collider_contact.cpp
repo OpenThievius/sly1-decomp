@@ -5,7 +5,7 @@
 #include "vu0.h"
 #include "collider.h"
 #include "cone_volume.h"
-#include "debug_scope.h"
+#include "scope_marker.h"
 #include "placed_object.h"
 #include "shapes.h"
 
@@ -1159,9 +1159,9 @@ s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
 void CollideColliderParts(Collider* self, Collider* other, s32 sweep, void* a3, void* a4, void* a5, void* a6)
 {
     // Retail's frame has a slot at 0(sp) that nothing touches, under the sweep flag's spill at
-    // 4(sp): a scope object of the debug build (include/debug_scope.h;
+    // 4(sp): a scope object whose body is compiled out (include/scope_marker.h;
     // docs/toolchain/stack-slots.md, "A 4-byte slot nothing touches").
-    DebugScope scope;
+    ScopeMarker scope;
     for (Collider* p = (Collider*)self->parts.head; p != 0; p = (Collider*)p->link2E4.next) {
         u64 f = p->flags538;
         if (f & (1ULL << 43)) {
