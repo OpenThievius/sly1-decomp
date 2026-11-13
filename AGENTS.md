@@ -133,9 +133,15 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   compiler keep the copy apart from its source as retail's code has it (docs/toolchain/cse.md,
   "A copy that must outlive its source"); no live form was found, the maintainer allowed the
   two stores for this function on 2026-11-12, and no other function may hold a dead store on
-  that ground. The other exception is `MUL_WIDE` (include/mul_wide.h),
-  one `multu` whose halves are read from lo and hi, which the toolchain's runtime multiplied with
-  and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
+  that ground. One game function, func_00191AC8 (FitStepToPointGraph), uses
+  `Vu0::ScalarMovedReg` and `Vu0::ScalarMoved` (include/vu0.h), helpers of one function: one
+  `move` between GPRs that puts a float the compiler has brought to a GPR into a 128-bit value
+  (and, in the second, its copy in a slot, as `Vu0::ScalarInGpr`'s), where a scan of retail
+  proved that only this function moves a float to a GPR once and copies it at each use
+  (docs/toolchain/loops.md, "An asm kept in its loop"); the lead allowed them by name on
+  2026-11-13 under the maintainer's delegation, and no other function may use them. The other
+  exception is `MUL_WIDE` (include/mul_wide.h), one `multu` whose halves are read from lo and
+  hi, which the toolchain's runtime multiplied with and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
   The toolchain's own runtime (`libgcc`, config/us/libcalls.tsv) was compiled as C, so its C is a
   `.c` file under `src/lib/`, built by Sony's Linux `cc1` with its own row in config/cflags.tsv
   (docs/TOOLCHAIN.md); its statement macros (`do { } while (0)`) are allowed as in the math

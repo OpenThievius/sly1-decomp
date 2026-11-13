@@ -73,7 +73,8 @@ void ReadBufferedVector3(void* a, void* b);
 void ReadPropertyRecords(void* a, void* b);
 void TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
 s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-s32 CollectSegmentSpansInPlaneTree(void* p);
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void* CopyBytes(void* dst, void* src, s32 n);
 void SyncDataCache(s32 a);
 void CopyObjectData(void* self);
 void SetListLinkOffset(void* self, s32 value);
@@ -1234,12 +1235,54 @@ void SnapPointToOwnerGraph(GraphQueryOwner* self, Vec02* p, Vec02* out)
     SnapPointToPointGraph(&self->graph, p, out);
 }
 
-void TestOwnerGraphSpan(GraphQueryOwner* self)
+s32 TestOwnerGraphSpan(GraphQueryOwner* self, Vec02* from, Vec02* to, s32 max, ColliderSpan* out)
 {
-    CollectSegmentSpansInPlaneTree(self->graph.faces);
+    return CollectSegmentSpansInPlaneTree((PlaneNode*)self->graph.faces, from, to, max, out);
 }
 
-INCLUDE_ASM(func_00191AC8);
+// A matrix copied whole: the call's arguments are its parameters, substituted as constants.
+static inline void CopyMatrix(Mat02* d, const Mat02* s) { CopyBytes(d, (void*)s, 0x30); }
+
+// A step fitted to the graph: the step turned about Z by each of eleven angles in turn (none,
+// then half a radian more to either side each time) and scaled, the span from the position to
+// its end tested against the graph, and the furthest point reached kept (a whole step ends the
+// search). The step becomes the way to that point, divided by the scale.
+// The scale is made a vector where the turned matrix is scaled, after the matrix's call, and
+// again for the division after the loop (Vu0::ScalarMovedReg and Vu0::ScalarMoved, this
+// function's own under AGENTS.md's named exception). loop.c leaves the first in the loop: an
+// asm with a float operand may trap, and a call has been passed. gcse puts the second at the
+// end of the loop's first block, where cse2 makes it a copy of the first: the load before the
+// branch on the test's result (docs/toolchain/loops.md, "An asm kept in its loop"). Retail
+// stores a copy of the scale beside the scaled matrix (0xF0), which nothing reads.
+void FitStepToPointGraph(GraphQueryOwner* self, f32 scale, Vec02* pos, Vec02* step)
+{
+    Mat02 turn;
+    Vec02 end;
+    Vec02 reached;
+    ColliderSpan span;
+    f32 best = -1.0f;
+    for (u32 i = 0; i < 11; i++) {
+        Mat02 scaled;
+        Vec02 weight;
+        Mat02 rows;
+        BuildAxisAngleMatrix(&g_unitZVector, &turn, D_00269B78[i]);
+        Vu0::Vec k;
+        k.q = Vu0::ScalarMovedReg(scale);
+        *(Vu0::Vec*)&rows.r[0] = Vu0::MulX(Vu0::Vec::Of(turn.r[0]), k);
+        *(Vu0::Vec*)&rows.r[1] = Vu0::MulX(Vu0::Vec::Of(turn.r[1]), k);
+        *(Vu0::Vec*)&rows.r[2] = Vu0::MulX(Vu0::Vec::Of(turn.r[2]), k);
+        u128 from = Vu0::Q(*pos);
+        *(Vu0::Vec*)&weight = k;
+        CopyMatrix(&scaled, &rows);
+        Vu0::Q(end) = Vu0::Add(from, Vu0::Rotate(scaled, Vu0::Q(*step)));
+        if (TestOwnerGraphSpan(self, pos, &end, 1, &span) != 0 && best < span.time[1]) {
+            best = span.time[1];
+            Vu0::Q(reached) = Vu0::Q(span.q[1]);
+            if (1.0f <= best) break;
+        }
+    }
+    Vu0::Q(*step) = Vu0::DivX(Vu0::Sub(Vu0::Q(reached), Vu0::Q(*pos)), Vu0::ScalarMoved(scale));
+}
 
 // A random point on the graph's triangles: one picked by its area, then a point inside it.
 void PickRandomPointOnPointGraph(PointGraphObject* self, Vec02* out)

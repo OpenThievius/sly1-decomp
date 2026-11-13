@@ -791,7 +791,12 @@ miss is 96 of 107 instructions with it):
 - **The frame.** A local of the loop body (expand_decl uses assign_temp for a memory variable)
   frees its slot at the body's end, and a cast copy made after the loop takes the first one
   that fits (rot's, 192): 16 bytes of frame less than with the locals at function scope.
-- **Not solved.** The conversion's temporary gets v0 from global-alloc and reload gives its
+- **What the copy was (2026-11-13, w50-g; the function is matched).** Not a copy in the
+  source: the scale's conversion is written again after the loop, an asm that gcse takes as an
+  expression, and PRE inserts it at the end of the loop's first block, where cse2 makes it a
+  copy of the loop's own conversion (docs/toolchain/loops.md, "An asm kept in its loop"). The
+  facts above about cprop, sched1 and the frame hold; the copy chain is not what retail had.
+- **Not solved in this form.** The conversion's temporary gets v0 from global-alloc and reload gives its
   `(set (subreg:DI T 0) kg)` a reload register of its own (v1), copied back (`por v0,zero,v1`);
   retail has `move v0,s6; sq v0,304(sp)`, the reload register v0 inherited by the store.
 

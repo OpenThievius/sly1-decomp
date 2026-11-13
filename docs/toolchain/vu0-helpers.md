@@ -340,7 +340,8 @@ What retail shows, and what the compiler does:
 The sequences still without a helper: a float stored as a quadword (func_00191AC8,
 func_00118CF0: mfc1 once into a saved GPR, then per use a copy (`daddu`) and sq,
 read back with lqc2; an asm `sq` of an "r" float gives the sq straight from the saved
-GPR, without the copy). The rest have helpers: the Q-register forms (Sqrt, DivX,
+GPR, without the copy; func_00191AC8's is now `Vu0::ScalarMovedReg`, a move between GPRs
+of an "r" float, that function's own helper). The rest have helpers: the Q-register forms (Sqrt, DivX,
 Length, NormalizeOr), the matrix forms (Transform, Transform4, RotateRows and
 RotateUntied, RotateTransposed, MulTransposed, Transpose), the weighted sums (MulXSum,
 MulXSum3, MulXSum4, MulAddX, MulAddX2), the dots (Dot, DotXY), the view test
@@ -611,7 +612,14 @@ and VU, with no `?` or `*`):
   after every other VU0 value is still ToFloatMoved's: another `"r"` read (ToFloatY,
   ToFloatZ, a call argument) makes it TI_REGS.
 
-### A weight kept in a saved GPR with a per-iteration copy to a spilled Vec (func_00191AC8, near miss)
+### A weight kept in a saved GPR with a per-iteration copy to a spilled Vec (func_00191AC8, matched)
+
+- Matched on 2026-11-13 (w50-g). The float is the operand of a move between GPRs
+  (`Vu0::ScalarMovedReg`; with the slot `Vu0::ScalarMoved`), written where the matrix is scaled,
+  after the call that builds it, and again for the division after the loop. Why that gives the
+  mfc1 once and a move per iteration: docs/toolchain/loops.md, "An asm kept in its loop", and
+  reloads-and-stores.md, "A SUBREG of a 128-bit register". The two helpers are this function's
+  alone (AGENTS.md's named exception). The notes below are the earlier attempts.
 
 - Retail holds the loop's scale as `mfc1 s6` (one saved register, frame 512) and copies it each
   iteration into the slot at 304, from which the rows' `vmulx` operands, the k2 copy and the

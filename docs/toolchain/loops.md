@@ -149,7 +149,10 @@ else arm before the divide.
   cast array indexed at each use gives `move s0,s3` and offset 1436 in each load. The giv's add
   value must be a register: the array named once, `void** nodes = (void**)((u8*)self + 0x59C);`.
 
-### A call's frame-address arguments that GCSE does not hoist (func_00191AC8, unsolved)
+### A call's frame-address arguments that GCSE does not hoist (func_00191AC8)
+
+(The function is matched since 2026-11-13: "An asm kept in its loop" below. These are the
+notes of the first attempts.)
 
 Read from the `-dF` dumps (2026-11-10, nonmatching/func_00191AC8.cpp). In a loop, a call's argument
 `&local` is expanded into a pseudo (`(set (reg) (plus sp N))`) that PRE hoists to the function's entry
@@ -1434,45 +1437,61 @@ built whole and the full builds print `MATCH` on US and PAL.
   vf15; the six matched curve helpers EXACT at vf30 (US, and func_00130540 and func_00130C20 on
   PAL).
 
-### An asm kept in its loop: an output set twice is not moved (func_00191AC8, exact as a probe)
+### An asm kept in its loop: a float operand may trap, and a call has been passed (func_00191AC8, matched)
 
 loop.c moves `(set (reg) (asm_operands ...))` out of a loop like any other invariant set when the
 asm is not volatile, its inputs are invariant, and the output is set once in the loop
 (`scan_loop`: `set_in_loop == 1`, or consecutive sets that are all invariant). func_00191AC8's
 conversion of its float parameter (`move v0,s6; sq v0,304(sp)` at the loop's top, eleven times) is
-such an asm and stays in the loop. What keeps it there, each tried on the same source:
+such an asm and stays in the loop. What keeps it there is the last condition of the same test:
 
-| The asm | loop.c | Result |
-| --- | --- | --- |
-| one output, not volatile, output set once | "Insn 40: regno 124 (life 283), global savings 2 moved to 481" | the conversion before the loop |
-| `__asm__ volatile` | not a candidate (`invariant_p`) | in the loop, but a barrier in both schedulers: three lines differ |
-| a second, unused output | not a `single_set`, never a candidate | in the loop, but the input is in both SETs: 5 refs, another saved register |
-| one output, the variable set again later in the body | not listed: `set_in_loop` is 2 and the sets are not consecutive | retail's code |
+    && ! ((maybe_never || call_passed) && may_trap_p (src))
 
-The volatile form shows why retail's is not volatile. haifa-sched's `sched_analyze_2` makes a
-volatile asm depend on every earlier insn and every later insn on it, in sched1 and again in
-sched2. Retail's first block is `move v0,s6; lwc1 $f12,0(s3); move a1,sp; sq v0,304(sp); jal;
-addiu a0,s8,lo`: the angle's load and `a1` are issued between the reload that feeds the asm and
-the store of its output. With a barrier at the block's top the load waits for the asm and (a
-spill slot has no alias flag) for the store, and the order is `move v0; sq; move a1; addiu a0;
-jal; lwc1`. Without one, sched1 issues the three argument insns before the asm (their
-priorities are higher), and sched2's cycles give retail's: the reload (priority 23) and the load
-(22) share cycle 1, the asm and `move a1` cycle 2, the store and `addiu a0` cycle 3.
+`may_trap_p` (rtlanal.c) answers 1 for anything of a floating mode that it does not know, and it
+walks an ASM_OPERANDS's vectors: the `(asm_input:SF ("r"))` of a float operand is such an rtx. So
+**an asm with a float input may trap, and loop.c never moves it once a call (or a jump or label)
+has been passed in the loop**. The original wrote the conversion where it is used, after the call
+that builds the matrix it scales; written before that call it is moved ("Insn 48: regno 132 (life
+88), savings 1 moved to 493", 432 bytes). In the matched form loop.c's log lists two movables and
+the asm (insn 67) is not among them. sched1 then issues the asm ahead of the call (its output
+crosses calls, so nothing ties it to the call before it), in the gap the angle's load leaves:
+retail's `move v0,s6; lwc1 $f12,0(s3); move a1,sp; sq v0,304(sp); jal`.
 
-A set that follows directly is no help when both are invariant: a brace initialiser
-`Vu0::Vec k = { F(scale) };` is `k = 0` then `k = asm`, loop.c's first pass leaves them (the
-asm's own temporary sits between and is folded into its one use, "used exactly once in a loop
-with calls"), and the second pass moves both ("Insn 73: regno 133 (life 197), consec 1, global
-savings 2 moved to 508 moved to 509"). A first set that is not invariant (a dead load) keeps
-both in the loop, and flow then deletes it. In the probe the second set is the copy after the
-last call, `k = Vu0::Vec::Of(k)`, which is also the copy the exit's use ends on
-(gcse.md, "Two passes of copy propagation").
+The second half is gcse. A non-volatile ASM_OPERANDS is an expression to it (`want_to_gcse_p`
+refuses only registers, constants and calls; `hash_expr_1` only a volatile asm), and two
+expansions of one inline's asm are equal: same template, constraints, operands, file and line.
+The function converts the scale again for the division after the loop. That occurrence is
+redundant; 2.95.3's PRE (`pre_lcm`) deletes it and inserts the expression at the end of the
+loop's first block, before the branch on the test's result (`pre_insert_insns`,
+`insert_insn_end_bb`), although that block computes it at its top:
+
+    .cse    insn 67 (loop, after the first call) and insn 438 (after the loop): the asm twice
+    .loop   insn 67; insn 504 before jump_insn 320 (set (reg:TI 242) (asm_operands ...));
+            insn 438 is (set (reg/v:TI 229) (reg:TI 242))
+    .cse2   insn 504 is (set (reg:TI 242) (reg/v:TI 132))
+
+loop.c does not move insn 504 either (three calls passed), and cse2 makes it a copy of the first
+asm's output, which sits in the same block. That output has 12 references over three calls and no
+register, so the copy is a load from its home: retail's `lqc2 vf4,304(sp)` in the `beqz`'s delay
+slot, the register the code after the loop stores and divides by. No statement stands between
+the call and the `if`.
+
+The same source with a volatile asm shows why retail's is not volatile. haifa-sched's
+`sched_analyze_2` makes a volatile asm depend on every earlier insn and every later insn on it,
+in sched1 and again in sched2. Retail's first block is `move v0,s6; lwc1 $f12,0(s3); move a1,sp;
+sq v0,304(sp); jal; addiu a0,s8,lo`: the angle's load and `a1` are issued between the reload that
+feeds the asm and the store of its output. With a barrier at the block's top the load waits for
+the asm and (a spill slot has no alias flag) for the store, and the order is `move v0; sq; move
+a1; addiu a0; jal; lwc1`.
+
+History. Before the trap rule was read, the function was exact only as a probe that set the
+variable a second time in the body (`k = Vu0::Vec::Of(k)` after the last call: `set_in_loop` 2,
+and a copy chain gcse's two passes of copy propagation left one step short, gcse.md, "Two passes
+of copy propagation"). That statement had no meaning and was never landed; three passes looked
+for a second set with one. The second set was not the fact: the asm's place after a call and the
+second conversion were.
 
 Where else to look: an asm that retail repeats in a loop although its inputs do not change,
-with no sign of a barrier around it. Ask which later statement of the body writes its variable.
-
-Checked on 2026-11-13 (w49-g): the conversion written again after the call is no second set.
-cse1 makes the second asm a copy of the first, k is invariant again and loop.c moves the asm.
-The tied empty asm is not Vu0::ScalarInGpr in another shape either: written so, every one of
-ScalarInGpr's users differs, and retail's ten other functions that store a float moved to a
-GPR with sq all have the mfc1 at the use. The form is this function's alone.
+with no sign of a barrier around it. Ask whether it has a float operand and a call before it in
+the source; and where a value is loaded just before a loop's branch and used only after the
+loop, whether the code after the loop writes an expression the loop already has.

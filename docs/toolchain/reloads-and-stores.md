@@ -307,6 +307,11 @@ GPR, issued last in the first block; and it has 3 references (the copy and the a
 the lowest priority of the function's saved registers. An asm with two outputs holds its inputs
 once per SET and counts them twice (5 references).
 
+The matched form is that asm with its instruction written (`Vu0::ScalarMovedReg`,
+`"move %0, %1"` with `"r"`, as Splat takes its float), at each of the function's two uses of the
+scale: loops.md, "An asm kept in its loop", says why the first stays in the loop and where the
+second goes.
+
 One more reload fact from the same function: an input reload for a GPR class finds a spilled
 value in a VU0 register and copies it (`qmfc2 v0,$vf4`) where retail loads the slot
 (`lq v0,304(sp)`). Retail's VU0 register had been set again by then: the statement that loads it

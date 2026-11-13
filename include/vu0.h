@@ -400,13 +400,43 @@ struct Vu0 {
         return *(const u128*)&slot;
     }
 
-    // The same mfc1 with no slot: the value stays in a register of its own (func_00191AC8
-    // holds it in a saved GPR across its loop and copies it to the stack per use).
+    // The same mfc1 with no slot: the value stays in a register of its own. (Written for
+    // func_00191AC8 before its form was known; that function's is ScalarMovedReg below.)
     static u128 ScalarInGprReg(f32 f)
     {
         u128 r;
         __asm__("mfc1 %0, %1" : "=r"(r) : "f"(f));
         return r;
+    }
+
+    // A weight whole in a GPR where the float is the instruction's operand in a GPR ("r"): one
+    // move between GPRs into the 128-bit value. The mfc1 that brings the float to a GPR is the
+    // compiler's, as Splat's is; the float is then a GPR value everywhere (a parameter's copy
+    // from $f12 is the mfc1, into a saved register), and the move repeats at each use. As an
+    // asm with a float operand it may trap for loop.c (may_trap_p), so written after a call in
+    // a loop it stays there, and gcse shares it between two uses of the same float
+    // (docs/toolchain/loops.md, "An asm kept in its loop").
+    // Used by func_00191AC8 (FitStepToPointGraph) only, under AGENTS.md's named exception
+    // (the lead's decision of 2026-11-13 under the maintainer's delegation): of the eleven
+    // functions whose retail code stores a float moved to a GPR with sq, it alone has the mfc1
+    // once and a move per use (the others have ScalarInGpr's mfc1 at the use), so the helper
+    // does not meet the rule that a helper recurs. No other function may use it.
+    static u128 ScalarMovedReg(f32 f)
+    {
+        u128 r;
+        __asm__("move %0, %1" : "=r"(r) : "r"(f));
+        return r;
+    }
+
+    // ScalarMovedReg stored to a slot of its own, as ScalarInGpr's value is (the copy g++ makes
+    // of a cast bound by reference): retail stores the divisor of func_00191AC8's last
+    // statement so (sqc2 vf4, 0xC0(sp), never read back).
+    // Used by func_00191AC8 only, under the same named exception. No other function may use it.
+    static u128 ScalarMoved(f32 f)
+    {
+        u128 r = ScalarMovedReg(f);
+        const s128& slot = (s128)r;
+        return *(const u128*)&slot;
     }
 
     // a * s.x: vmulx.xyzw.
