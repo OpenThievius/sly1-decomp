@@ -145,6 +145,31 @@ Which GPR reloads a spilled pseudo is not decided at that insn alone
   pointer set in an inner loop too is no giv of the outer loop") made a1 a spill register and
   shifted every qmfc2 temporary of the function's first loop, 1,400 bytes before it.
 
+### A reload where ours had a pseudo: the rotation's hidden step (func_0017ECE8)
+
+A reload register that differs from retail's (`lq v0,32(sp); sq v0,0(sp)` for retail's v1,
+the copy of a spilled vector after a call) with every other instruction equal looks like a
+value held in v0 across the insn. It need not be: order_regs_for_reload only decides which
+registers become spill registers; the register a reload gets is allocate_reload_reg's
+rotation over all of them that are free at the insn ("The reload register's round robin"
+above). So the question is which reload came last before it, and a reload leaves no mark in
+the final code when ours computes the same value into the same register as a pseudo.
+
+Here the two loops before the call stored a dot product's bits. Written `bits =
+Vu0::ToBits(dot); *(u32*)p++ = bits;` the qmfc2's target is a pseudo, in v0. Written
+`Vu0::StoreX(*p, dot); p++;` the vector is the asm store's "*r" input and the qmfc2 is its
+input reload, in v0 as well (the first spill register free there). The code of the loops is
+identical; `last_spill_reg` is not. With StoreX the last reload before the copy took v0 and
+the copy takes v1 (w44-fb, 2026-11-13; the .greg dump's `Spilling reg` lines show the spill
+registers but not the rotation, so list the reloads in insn order by hand: every asm operand
+that reaches its class through a move, every spilled pseudo's use).
+
+To check on a near miss whose only difference is a reload register: find the previous
+reload in insn order in retail's code (an asm input moved to a GPR by qmfc2 or mfc1, a
+spilled value's load) and ask whether ours makes that move as a pseudo's set (ToBits,
+ToFloatViaBits, a named local) where a helper with an "r" input would make it a reload, or
+the reverse.
+
 ### Which dot reaches a GPR through local-alloc (func_001BC978)
 
 Read from the `-dS -dl -dg -fsched-verbose-6` dumps (2026-11-10, w15):

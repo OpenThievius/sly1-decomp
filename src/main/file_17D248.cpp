@@ -806,7 +806,93 @@ void CollectPlayerHoldQueries(Player* self)
     g_activeListFrames = fr.prev;
 }
 
-INCLUDE_ASM(func_0017ECE8);
+void* AllocateBackMemory(s32 size);
+void SolveActiveSetSystem(s32 count, u8* data, f32* values, f32* out);
+// Whether the contacts hold the player down: the least-squares push of the contact normals
+// against straight down (the Gram matrix of the normals, the dots with down, the bounded solve),
+// summed from down; true when the sum still points up by more than 0.1.
+// Each dot is stored with Vu0::StoreX: the qmfc2 is then a reload, in v0, and reload hands its
+// registers out in turn (allocate_reload_reg starts after the last one it gave), so the copy of
+// the spilled down vector after the solve takes v1 (docs/toolchain/reloads-and-stores.md,
+// "A reload where ours had a pseudo").
+s32 ShouldPlayerLaunchAtTarget(Player* self)
+{
+    Vec02 acc;
+    ContactRow03* row;
+    Contact03* c;
+    s32 n = 0;
+    f32 now = g_gameTime;
+    if (now - self->f222C < 1.0f) {
+        return 0;
+    }
+    if (now - *(f32*)((u8*)self + 0x2238) < 1.0f) {
+        return 0;
+    }
+    *(f32*)((u8*)self + 0x2238) = now;
+    if (self->f690 != 0) {
+        return 0;
+    }
+    Contacts03* ct = self->contacts;
+    if (ct != 0) {
+        for (row = ct->head; row != 0; row = row->next) {
+            for (c = row->head; c != 0; c = c->next) {
+                n++;
+            }
+        }
+    }
+    if (n == 0) {
+        return 0;
+    }
+    PushBackMemoryMark();
+    Vu0::Vec down = Vu0::MulX(Vu0::Vec::Of(g_unitZVector), Vu0::Vec::Scalar(-1.0f));
+    f32* gram = (f32*)AllocateBackMemory(n * n * 4);
+    f32* rhs = (f32*)AllocateBackMemory(n * 4);
+    f32* sol = (f32*)AllocateBackMemory(n * 4);
+    f32* p = gram;
+    for (row = self->contacts->head; row != 0; row = row->next) {
+        for (c = row->head; c != 0; c = c->next) {
+            Vu0::Vec na = Vu0::Vec::Of(c->v80);
+            if (c->end[0].body != (Collider*)self) {
+                na = Vu0::MulX(na, Vu0::Vec::Scalar(-1.0f));
+            }
+            for (ContactRow03* rb = self->contacts->head; rb != 0; rb = rb->next) {
+                for (Contact03* b = rb->head; b != 0; b = b->next) {
+                    Vu0::Vec nb = Vu0::Vec::Of(b->v80);
+                    if (b->end[0].body != (Collider*)self) {
+                        nb = Vu0::MulX(nb, Vu0::Vec::Scalar(-1.0f));
+                    }
+                    Vu0::StoreX(*p, Vu0::Dot(na, nb).q);
+                    p++;
+                }
+            }
+        }
+    }
+    p = rhs;
+    for (row = self->contacts->head; row != 0; row = row->next) {
+        for (c = row->head; c != 0; c = c->next) {
+            Vu0::Vec na = Vu0::Vec::Of(c->v80);
+            if (c->end[0].body != (Collider*)self) {
+                na = Vu0::MulX(na, Vu0::Vec::Scalar(-1.0f));
+            }
+            Vu0::StoreX(*p, Vu0::Dot(na, down).q);
+            p++;
+        }
+    }
+    SolveActiveSetSystem(n, (u8*)gram, rhs, sol);
+    Vu0::Q(acc) = down.q;
+    p = sol;
+    for (row = self->contacts->head; row != 0; row = row->next) {
+        for (c = row->head; c != 0; c = c->next) {
+            Vu0::Vec na = Vu0::Vec::Of(c->v80);
+            if (c->end[0].body != (Collider*)self) {
+                na = Vu0::MulX(na, Vu0::Vec::Scalar(-1.0f));
+            }
+            Vu0::Q(acc) = Vu0::MulAddX(Vu0::Vec::Of(acc), na, Vu0::Vec::Scalar(*p++)).q;
+        }
+    }
+    PopBackMemoryMark();
+    return -0.1f < acc.z;
+}
 
 extern f32 D_00263E50;
 extern f32 D_00263E54;
