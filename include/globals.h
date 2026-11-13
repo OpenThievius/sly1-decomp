@@ -44,8 +44,9 @@ extern const Vec02 g_unitZVector;  // 0 0 1 0
 extern const Vec02 D_00248D30;  // 0 0 0 0
 
 // The two packet streams (PacketWriter, packet_writer.h): 20 views of D_002622A8 in 6 files, 6 of D_00262280 in
-// 4. Their labels are 0x24 and 0x28 bytes: the stream's last words are not used here. Both are
-// zeros in render_frame.cpp's .data, included there from the disassembly.
+// 4. Their objects are 0x24 and 0x28 bytes (the VIF writer ends with the count at 0x20, the GS
+// writer, a GIF writer, with the entry count at 0x24): render_frame.cpp, which does not include
+// this header, defines both at those sizes.
 extern PacketWriter g_vifPacketWriter;
 extern PacketWriter g_gsPacketWriter;
 

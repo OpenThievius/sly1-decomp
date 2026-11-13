@@ -23,17 +23,59 @@
 #include "object_cycler.h"
 #include "scaling_volume.h"
 #include "world.h"
-#include "globals.h"
 #include "deferred_request.h"
 #include "color_fade.h"
 #include "base_object.h"
 #include "packet_writer.h"
+#include "camera.h"
 #include "font.h"
 #include "render_frame.h"
 #include "text_reader.h"
 #include "layout_137228.h"
 #include "scope_marker.h"
 #include "vu0.h"
+
+// The world and the camera (globals.h, which this file does not include: it defines the packet
+// writers that header declares as PacketWriter, at their own sizes, below).
+extern World* g_currentWorld;
+extern Camera* g_camera;
+
+// The two packet writers this file defines, as retail lays them out: labels of 0x28 and 0x24
+// bytes. The GS writer is a GIF writer: InitGifPacket sets its fields through the entry count at
+// 0x24 (CountGifEntry, CloseGifTag). The VIF writer ends with the count at 0x20 (InitPacketWriter
+// sets it, SubmitDeferredRequests sets it to 1). The other files and the functions take both as
+// PacketWriter (packet_writer.h), which has the stack frames' 0x30 bytes (UploadFontImages,
+// FadeScreenToBlack, the masked-image packets); these are its first 0x28 and 0x24 bytes.
+struct GsWriterState {
+    u8* end;                    // 0x00
+    u8* begin;                  // 0x04
+    s32* f08;                   // 0x08
+    u8* cur;                    // 0x0C
+    s32 f10;                    // 0x10
+    s32 f14;                    // 0x14
+    const PacketWriterVt* vt;   // 0x18
+    u32* f1C;                   // 0x1C
+    u32 f20;                    // 0x20
+    u32 f24;                    // 0x24: the GIF entry count
+};
+
+struct VifWriterState {
+    u8* end;                    // 0x00
+    u8* begin;                  // 0x04
+    s32* f08;                   // 0x08
+    u8* cur;                    // 0x0C
+    s32 f10;                    // 0x10
+    s32 f14;                    // 0x14
+    const PacketWriterVt* vt;   // 0x18
+    u32* f1C;                   // 0x1C
+    u32 f20;                    // 0x20
+};
+
+typedef char check_GsWriterState[sizeof(GsWriterState) == 0x28 ? 1 : -1];
+typedef char check_VifWriterState[sizeof(VifWriterState) == 0x24 ? 1 : -1];
+
+extern GsWriterState g_gsPacketWriter;
+extern VifWriterState g_vifPacketWriter;
 
 void SetListLinkOffset(void*,s32);
 s32 IsListEmpty(void* p);
@@ -341,12 +383,12 @@ void BeginRenderFrame(void)
         slot->flags = 0;
         slot->f44 = v;
         slot->f1C = 0;
-        UsePacketBufferMemory(&g_gsPacketWriter, 0x8000, slot->bufA);
+        UsePacketBufferMemory((PacketWriter*)&g_gsPacketWriter, 0x8000, slot->bufA);
     }
-    UsePacketBufferMemory(&g_vifPacketWriter, 0x10000, g_buildFrame->bufB);
+    UsePacketBufferMemory((PacketWriter*)&g_vifPacketWriter, 0x10000, g_buildFrame->bufB);
     g_buildFrameData = g_buildFrame->i10;
-    BeginDmaTag(&g_gsPacketWriter);
-    BeginDmaTag(&g_vifPacketWriter);
+    BeginDmaTag((PacketWriter*)&g_gsPacketWriter);
+    BeginDmaTag((PacketWriter*)&g_vifPacketWriter);
 }
 
 void AddDmaRefTagIfChanged(void* list, s32 value, s32 end)
@@ -385,8 +427,8 @@ void CloseDrawBuffer(void* obj, void* a, s32 b)
 
 void SubmitRenderFrame(void)
 {
-    WriteGsFinishPacket(&g_vifPacketWriter, (u8*)g_buildFrame + 8, 0);
-    CloseDrawBuffer(&g_gsPacketWriter, g_buildFrame, 0);
+    WriteGsFinishPacket((PacketWriter*)&g_vifPacketWriter, (u8*)g_buildFrame + 8, 0);
+    CloseDrawBuffer((PacketWriter*)&g_gsPacketWriter, g_buildFrame, 0);
     g_buildFrame->l20 = D_002622E0;
     ClearList(&D_002622E0);
     g_buildFrame->l2C = D_002622F0;
@@ -587,8 +629,8 @@ void BlitFrameToDisplay(void)
 void ConstructPacketWriters(s32 flag, s32 code)
 {
     if (code == 0xFFFF && flag != 0) {
-        InitGifPacket(&g_gsPacketWriter);
-        InitPacketWriter(&g_vifPacketWriter);
+        InitGifPacket((PacketWriter*)&g_gsPacketWriter);
+        InitPacketWriter((PacketWriter*)&g_vifPacketWriter);
     }
 }
 
@@ -598,8 +640,8 @@ void ResetPacketWriters(void)
 }
 
 // The file's .data, 0x262280 to 0x2623C0, in retail's order.
-INCLUDE_DATA(D_00262280);
-INCLUDE_DATA(D_002622A8);
+GsWriterState g_gsPacketWriter = {0};
+VifWriterState g_vifPacketWriter = {0};
 s32 g_frameCount = 1;
 // size: s32 (lw/sw), 4-byte label
 s32 g_buildFrameData = 0;

@@ -155,7 +155,7 @@ D_00261F30	00261F30	64	.data	src/main/active_set_solver.cpp
 D_00261F70	00261F70	528	.data	src/main/effect_spawner.cpp
 D_00262180	00262180	208	.data	src/main/object_cycler.cpp
 D_00262250	00262250	48	.data	src/main/font.cpp
-D_00262280	00262280	240	.data	src/main/render_frame.cpp
+D_00262280	00262280	316	.data	src/main/render_frame.cpp
 D_002623C0	002623C0	32	.data	src/main/game_progress.cpp
 D_002623E0	002623E0	152	.data	src/main/placed_object_model.cpp
 D_00262480	00262480	592	.data	src/main/display.cpp
