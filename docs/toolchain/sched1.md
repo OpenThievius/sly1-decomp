@@ -509,6 +509,72 @@ dumps of func_0020BB18 (src/lib/mpeg_decoder.cpp, Sony's 2.9-ee-991111, 2026-11-
   memory location to itself; the 36 library files have no same-register move after
   reload, and every insn jump2 removes there after sched2 is a cross-jumped duplicate or
   flow's nop.
+- **Seventh pass (w52-b, 2026-11-13): the function read again from retail's bytes alone, and
+  what the two readings differ in.** The function was decompiled from the disassembly, the
+  file's other functions and its callers before the near miss, this section or any earlier
+  scratch folder was opened (about 140 compiles and one grid of 720; scratch
+  `build/swarm/w52-b/`, the first form in `phase1_final.txt`).
+  (1) *The independent form is the near miss's shape, at the same 102 lines.* Blocks, in
+  retail's order: the decoder from the handle and its MPEG-2 flag (kept in `a2` for the second
+  test: PRE's reaching register, as in ours); the six MPEG-1 defaults; the macroblock width
+  stored; the rows by `flag && !progressive` and stored; `h = rows << 4`, the stored width
+  read back, `w = that << 4`; the two tests against the handle's width and height; the body
+  as one block from the two stores to the jump; the epilogue. Every value that lives across a
+  call is accounted for: `s8` the decoder, `s7`/`s6` w and h, `s0` the size, `s1` the pool,
+  `s2` h >> 1, `s3` to `s5` planes 0 to 2, slots 48 to 68 planes 3 to 8 in plane order. The
+  frame is 48 bytes of stack arguments (six of 8), 24 of spill slots, 8 of padding and ten
+  16-byte saves: a local homed in the frame (a struct, an address-taken scalar, a one-byte
+  object) would take slot 48 ahead of the spills, so the original had none. Nothing in retail
+  is computed and left unused, loaded twice on one path or stored where nothing reads; the
+  buffers are read back from the decoder for the set-up call, and the handle sits in `a1`
+  because local-alloc gives `v0`, `v1` and `a0` to the defaults' three constants while it is
+  live (`;; 116 conflicts: ... 2 3 4`), both as in ours.
+  (2) *The differences between the readings, each moved both ways: all 102.* The rows as a
+  conditional expression stored straight into the field against the `rows` local in two arms;
+  the body inside `if (w != pic->width || h != pic->height)` against the early return; an
+  `s32` function that falls off its end against `void`; the size as `t = h * 0x180;
+  (u32)(w * t) >> 8` against `(u32)(w * 0x180 * h) >> 8` (retail's two multiplies, `h * 0x180`
+  then `w * that`, come from both and from `0x180 * w * h`; `w * (h * 0x180)` written as one
+  expression, `h * 0x180 * w` and the unsigned forms give the other order); the three buffers
+  as an array; the planes as nine named pointers declared in plane order and set before the
+  stores, after them, after the size or before the set-up call (16 placements: 102, and 108
+  with the planes set in reverse); the two stores through an inline member or a static inline
+  (102; the test as an inline member too, 116). So no variable, test structure, width or
+  argument of the near miss is the wrong assumption: an independent reading of the bytes
+  makes the same choices, and what retail needs is not in the visible statements.
+  (3) *Measured on the way.* Of the 720 orders of the six default stores exactly four give
+  retail's order (f13C, f140, f188 in that order, then f17C, then f144, with f174 anywhere
+  ahead of f17C). The height store written first issues the width store first (104): the two
+  picture stores tie and go by LUID, so the source order is width, height. `return
+  SetPictureDimensions(...)` as the last statement keeps the `jal` and a single epilogue
+  (113), and so does `-fhandle-exceptions` (113): this cc1 turns a call into a jump only when
+  the call is the last statement and its value is not used, and it does so when it threads
+  the epilogue (in `.sched2` the body's block already ends with the restores, the blockage,
+  the stack adjustment, the jump and flow's `(use (const_int 0))`); so the original's last
+  call was a plain statement and the function returns nothing on that path. A sweep of about 70
+  flags, with this cc1's own `-fedge-lm`, `-fedge-sm`, `-fedge-lcm`, `-fsched-interblock`,
+  `-fsched-spec`, `-fsched-spec-load`, `-foptimize-comparisons`, `-fbranch-count-reg`,
+  `-flive-range` and `-g` among them, leaves 102 or moves away (`-fno-edge-lcm` 146,
+  `-fforce-addr` 143, `-Os` 61 with other code).
+  (4) *gcse here is classical edge LCM.* The address assigned to a local on one earlier path
+  (in the defaults' block or in an else added to it, dead there because the body sets it
+  again) does not make the body's computation partly redundant: nothing is put on the edges
+  (no PRE line for the expression; 24 forms: 102 with the planes as named locals, 107 with
+  only the last one named). Lazy code motion inserts on the two edges
+  only when a third predecessor of the body has the address available, which is the third
+  pass's probe; an earlier computation on some of the paths through the same two edges does
+  nothing.
+  (5) *Where that leaves the two readings (reasoned from the passes above and from cse.c's
+  make_regs_eqv as recalled, not compiled).* The USE of memory is closed twice over: a
+  register that ends in a stack slot has its USE placed by its next set's priority, which is
+  below the picture stores unless the new value is used before the first call (retail has no
+  such use), and a memory equivalence needs a register local to one block. The other reading
+  (the address in `v0` ahead of a boundary that leaves no code, copied to the spilled pseudo
+  in the body) needs three things at once: the copy must survive cse2, which make_regs_eqv
+  allows only when the source is a hard register or the destination is referenced outside the
+  cse block; the source must take `v0`, not the `a0` the destination prefers; and the
+  boundary must still stand after flow2, which in this compiler only a cross-jumped duplicate
+  does. No statement of a plain reading gives any of the three.
 
 ### A value negated into itself crosses the call (func_001A2380)
 
