@@ -1138,3 +1138,31 @@ other 32 do not change.
   func_00130C58 also has an EXACT form at the file's own threshold (the two loop notes of the
   section "The 3's second set"), which the rules do not allow but which shows the threshold is
   not the only way to its code.
+
+### The splits on the threshold (2026-11-12)
+
+The maintainer decided on 2026-11-12 to split the files the map above shows needing two values
+of N, on the threshold evidence alone: no boundary signal of docs/AGENT_WORKFLOW.md ("Finding and
+proving a file") shows these edges, and none excludes them. The new units build at
+`-mvu0-use-vf0-vf30`, as world_listed_object.cpp; every other unit keeps the default. Each was
+built whole and the full builds print `MATCH` on US and PAL.
+
+- **file_1D62E0.cpp in three.** file_1D62E0.cpp (0x1D62E0 to 0x1D8E40, vf15),
+  file_1D8E40.cpp (0x1D8E40 to 0x1D9AC8, vf30) and file_1D9AC8.cpp (0x1D9AC8 to 0x1DDCE0,
+  vf15). func_001D9488 is matched in the middle one from its near miss, unchanged. The calls
+  give no edge: func_001D9488 calls func_001D9338 before it, and it, func_001D8E40 and
+  func_001D9678 are called only by UpdatePathFollower (func_001D9C98, class 0x19's method at
+  +0x54) after it, func_001D92F0 only by ControlPathFollower (+0x134). The edges are the data's.
+  The middle unit holds the 16-aligned Vec02 at 0x275530 (retail has eight zero bytes before it,
+  after D_00275524: an object on 16, or a new file's `.data`), so its `.data` starts on 16;
+  0x275518, the place with the fewest crossings, would need D_00275524 to be a 12-byte object
+  that no reader shows. Of the places on 16, 0x275500 (the middle unit from func_001D8E40, whose
+  three range pairs start there) leaves three globals defined in file_1D62E0.cpp and read only
+  across (D_00275240 by func_001D8E40; D_002751D4 and D_002751DC, 60 and 0.75, by
+  func_001D9D78 and func_001DAF08 in file_1D9AC8.cpp), and D_002751D8 read on both sides;
+  0x275530 (from func_001D92F0) leaves four (D_00275518 and D_00275524, read only by
+  func_001D9678, and the same two). The middle unit has no `.rodata` and file_1D9AC8.cpp's
+  starts at 0x24DC98, its pairs (on 8; the unit has no jump table). The functions that
+  constrain N, each checked in its unit: func_001D66A8 and func_001D7778 EXACT at vf15,
+  func_001D8E40 and func_001D9488 at vf30, func_001D9AC8 at vf15. func_001D92F0, func_001D9338
+  and func_001D9678 could sit on either side of their unit's edges as far as N goes.

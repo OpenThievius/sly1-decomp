@@ -1,21 +1,21 @@
 {
  "measures": {
-  "fuzzy_match_percent": 99.27283351312478,
+  "fuzzy_match_percent": 99.3170622078389,
   "total_code": "1112400",
-  "matched_code": "1090956",
-  "matched_code_percent": 98.0722761596548,
+  "matched_code": "1091448",
+  "matched_code_percent": 98.11650485436893,
   "total_data": "431059",
-  "matched_data": "429664",
-  "matched_data_percent": 99.67637840759618,
+  "matched_data": "429656",
+  "matched_data_percent": 99.67452251315945,
   "total_functions": 4807,
-  "matched_functions": 4779,
-  "matched_functions_percent": 99.41751612232162,
-  "complete_code": "1090956",
-  "complete_code_percent": 98.0722761596548,
-  "complete_data": "429664",
-  "complete_data_percent": 99.67637840759618,
-  "total_units": 190,
-  "complete_units": 164
+  "matched_functions": 4780,
+  "matched_functions_percent": 99.43831911795299,
+  "complete_code": "1091448",
+  "complete_code_percent": 98.11650485436893,
+  "complete_data": "429656",
+  "complete_data_percent": 99.67452251315945,
+  "total_units": 192,
+  "complete_units": 167
  },
  "units": [
   {
@@ -38807,22 +38807,22 @@
   {
    "name": "game/file_1D62E0",
    "measures": {
-    "fuzzy_match_percent": 98.4106473704613,
-    "total_code": "30956",
-    "matched_code": "30464",
-    "matched_code_percent": 98.4106473704613,
+    "fuzzy_match_percent": 100.0,
+    "total_code": "11048",
+    "matched_code": "11048",
+    "matched_code_percent": 100.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 133,
-    "matched_functions": 132,
-    "matched_functions_percent": 99.24812030075188,
-    "complete_code": "30464",
-    "complete_code_percent": 98.4106473704613,
+    "total_functions": 28,
+    "matched_functions": 28,
+    "matched_functions_percent": 100.0,
+    "complete_code": "11048",
+    "complete_code_percent": 100.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
     "total_units": 1,
-    "complete_units": 0
+    "complete_units": 1
    },
    "functions": [
     {
@@ -39103,12 +39103,42 @@
       "virtual_address": "1936784",
       "demangled_name": "SteerPathFollower"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": true,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/file_1D62E0.cpp"
+   }
+  },
+  {
+   "name": "game/file_1D8E40",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "3192",
+    "matched_code": "3192",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 5,
+    "matched_functions": 5,
+    "matched_functions_percent": 100.0,
+    "complete_code": "3192",
+    "complete_code_percent": 100.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 1
+   },
+   "functions": [
     {
      "name": "func_001D8E40",
      "size": "1196",
      "fuzzy_match_percent": 100.0,
-     "address": "11104",
+     "address": "0",
      "metadata": {
       "virtual_address": "1936960",
       "demangled_name": "EmitPathFollowerWheelParticles"
@@ -39118,7 +39148,7 @@
      "name": "func_001D92F0",
      "size": "68",
      "fuzzy_match_percent": 100.0,
-     "address": "12304",
+     "address": "1200",
      "metadata": {
       "virtual_address": "1938160",
       "demangled_name": "CountDownPathFollowerLap"
@@ -39128,7 +39158,7 @@
      "name": "func_001D9338",
      "size": "332",
      "fuzzy_match_percent": 100.0,
-     "address": "12376",
+     "address": "1272",
      "metadata": {
       "virtual_address": "1938232",
       "demangled_name": "RecordPathFollowerProgress"
@@ -39137,8 +39167,8 @@
     {
      "name": "func_001D9488",
      "size": "492",
-     "fuzzy_match_percent": 0.0,
-     "address": "12712",
+     "fuzzy_match_percent": 100.0,
+     "address": "1608",
      "metadata": {
       "virtual_address": "1938568",
       "demangled_name": "AdvancePathFollowerEntry"
@@ -39148,17 +39178,47 @@
      "name": "func_001D9678",
      "size": "1104",
      "fuzzy_match_percent": 100.0,
-     "address": "13208",
+     "address": "2104",
      "metadata": {
       "virtual_address": "1939064",
       "demangled_name": "UpdatePathFollowerSound"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": true,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/file_1D8E40.cpp"
+   }
+  },
+  {
+   "name": "game/file_1D9AC8",
+   "measures": {
+    "fuzzy_match_percent": 100.0,
+    "total_code": "16716",
+    "matched_code": "16716",
+    "matched_code_percent": 100.0,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 100,
+    "matched_functions": 100,
+    "matched_functions_percent": 100.0,
+    "complete_code": "16716",
+    "complete_code_percent": 100.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 1
+   },
+   "functions": [
     {
      "name": "func_001D9AC8",
      "size": "464",
      "fuzzy_match_percent": 100.0,
-     "address": "14312",
+     "address": "0",
      "metadata": {
       "virtual_address": "1940168",
       "demangled_name": "ProcessPathFollowerContacts"
@@ -39168,7 +39228,7 @@
      "name": "func_001D9C98",
      "size": "224",
      "fuzzy_match_percent": 100.0,
-     "address": "14776",
+     "address": "464",
      "metadata": {
       "virtual_address": "1940632",
       "demangled_name": "UpdatePathFollower"
@@ -39178,7 +39238,7 @@
      "name": "func_001D9D78",
      "size": "1012",
      "fuzzy_match_percent": 100.0,
-     "address": "15000",
+     "address": "688",
      "metadata": {
       "virtual_address": "1940856",
       "demangled_name": "ControlPathFollower"
@@ -39188,7 +39248,7 @@
      "name": "func_001DA170",
      "size": "416",
      "fuzzy_match_percent": 100.0,
-     "address": "16016",
+     "address": "1704",
      "metadata": {
       "virtual_address": "1941872",
       "demangled_name": "UpdatePathFollowerScreenElements"
@@ -39198,7 +39258,7 @@
      "name": "func_001DA310",
      "size": "16",
      "fuzzy_match_percent": 100.0,
-     "address": "16432",
+     "address": "2120",
      "metadata": {
       "virtual_address": "1942288",
       "demangled_name": "ReleasePathFollowerContacts"
@@ -39208,7 +39268,7 @@
      "name": "func_001DA320",
      "size": "956",
      "fuzzy_match_percent": 100.0,
-     "address": "16448",
+     "address": "2136",
      "metadata": {
       "virtual_address": "1942304",
       "demangled_name": "CollidePathFollowerWithObject"
@@ -39218,7 +39278,7 @@
      "name": "func_001DA6E0",
      "size": "252",
      "fuzzy_match_percent": 100.0,
-     "address": "17408",
+     "address": "3096",
      "metadata": {
       "virtual_address": "1943264",
       "demangled_name": "ComputePathFollowerContactValue"
@@ -39228,7 +39288,7 @@
      "name": "func_001DA7E0",
      "size": "568",
      "fuzzy_match_percent": 100.0,
-     "address": "17664",
+     "address": "3352",
      "metadata": {
       "virtual_address": "1943520",
       "demangled_name": "UpdatePathFollowerAttachmentFrames"
@@ -39238,7 +39298,7 @@
      "name": "func_001DAA18",
      "size": "516",
      "fuzzy_match_percent": 100.0,
-     "address": "18232",
+     "address": "3920",
      "metadata": {
       "virtual_address": "1944088",
       "demangled_name": "DrawPathFollower"
@@ -39248,7 +39308,7 @@
      "name": "func_001DAC20",
      "size": "144",
      "fuzzy_match_percent": 100.0,
-     "address": "18752",
+     "address": "4440",
      "metadata": {
       "virtual_address": "1944608",
       "demangled_name": "UpdatePathFollowerBounds"
@@ -39258,7 +39318,7 @@
      "name": "func_001DACB0",
      "size": "120",
      "fuzzy_match_percent": 100.0,
-     "address": "18896",
+     "address": "4584",
      "metadata": {
       "virtual_address": "1944752",
       "demangled_name": "StartPathFollowerEffect"
@@ -39268,7 +39328,7 @@
      "name": "func_001DAD28",
      "size": "236",
      "fuzzy_match_percent": 100.0,
-     "address": "19016",
+     "address": "4704",
      "metadata": {
       "virtual_address": "1944872",
       "demangled_name": "FindPathFollowerPathPosition"
@@ -39278,7 +39338,7 @@
      "name": "func_001DAE18",
      "size": "44",
      "fuzzy_match_percent": 100.0,
-     "address": "19256",
+     "address": "4944",
      "metadata": {
       "virtual_address": "1945112",
       "demangled_name": "RecomputePathFollowerFrame"
@@ -39288,7 +39348,7 @@
      "name": "func_001DAE48",
      "size": "28",
      "fuzzy_match_percent": 100.0,
-     "address": "19304",
+     "address": "4992",
      "metadata": {
       "virtual_address": "1945160",
       "demangled_name": "CapturePathFollowerPose"
@@ -39298,7 +39358,7 @@
      "name": "func_001DAE68",
      "size": "160",
      "fuzzy_match_percent": 100.0,
-     "address": "19336",
+     "address": "5024",
      "metadata": {
       "virtual_address": "1945192",
       "demangled_name": "HandlePathFollowerActivation"
@@ -39308,7 +39368,7 @@
      "name": "func_001DAF08",
      "size": "172",
      "fuzzy_match_percent": 100.0,
-     "address": "19496",
+     "address": "5184",
      "metadata": {
       "virtual_address": "1945352",
       "demangled_name": "HandlePathFollowerNotification"
@@ -39318,7 +39378,7 @@
      "name": "func_001DAFB8",
      "size": "268",
      "fuzzy_match_percent": 100.0,
-     "address": "19672",
+     "address": "5360",
      "metadata": {
       "virtual_address": "1945528",
       "demangled_name": "SetPathFollowerPath"
@@ -39328,7 +39388,7 @@
      "name": "func_001DB0C8",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "19944",
+     "address": "5632",
      "metadata": {
       "virtual_address": "1945800",
       "demangled_name": "SetPathFollowerSecondPath"
@@ -39338,7 +39398,7 @@
      "name": "func_001DB110",
      "size": "212",
      "fuzzy_match_percent": 100.0,
-     "address": "20016",
+     "address": "5704",
      "metadata": {
       "virtual_address": "1945872",
       "demangled_name": "AddPathFollowerEntry"
@@ -39348,7 +39408,7 @@
      "name": "func_001DB1E8",
      "size": "80",
      "fuzzy_match_percent": 100.0,
-     "address": "20232",
+     "address": "5920",
      "metadata": {
       "virtual_address": "1946088",
       "demangled_name": "AddPathFollowerActiveEntry"
@@ -39358,7 +39418,7 @@
      "name": "func_001DB238",
      "size": "88",
      "fuzzy_match_percent": 100.0,
-     "address": "20312",
+     "address": "6000",
      "metadata": {
       "virtual_address": "1946168",
       "demangled_name": "SetPathFollowerMode"
@@ -39368,7 +39428,7 @@
      "name": "func_001DB290",
      "size": "436",
      "fuzzy_match_percent": 100.0,
-     "address": "20400",
+     "address": "6088",
      "metadata": {
       "virtual_address": "1946256",
       "demangled_name": "ResetPathFollower"
@@ -39378,7 +39438,7 @@
      "name": "func_001DB448",
      "size": "20",
      "fuzzy_match_percent": 100.0,
-     "address": "20840",
+     "address": "6528",
      "metadata": {
       "virtual_address": "1946696"
      }
@@ -39387,7 +39447,7 @@
      "name": "func_001DB460",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "20864",
+     "address": "6552",
      "metadata": {
       "virtual_address": "1946720",
       "demangled_name": "AddWeightedVectors"
@@ -39397,7 +39457,7 @@
      "name": "func_001DB480",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "20896",
+     "address": "6584",
      "metadata": {
       "virtual_address": "1946752",
       "demangled_name": "InitWorldHashLists"
@@ -39407,7 +39467,7 @@
      "name": "func_001DB4C8",
      "size": "876",
      "fuzzy_match_percent": 100.0,
-     "address": "20968",
+     "address": "6656",
      "metadata": {
       "virtual_address": "1946824",
       "demangled_name": "InitWorldPools"
@@ -39417,7 +39477,7 @@
      "name": "func_001DB838",
      "size": "236",
      "fuzzy_match_percent": 100.0,
-     "address": "21848",
+     "address": "7536",
      "metadata": {
       "virtual_address": "1947704",
       "demangled_name": "ResetWorldSubsystems"
@@ -39427,7 +39487,7 @@
      "name": "func_001DB928",
      "size": "268",
      "fuzzy_match_percent": 100.0,
-     "address": "22088",
+     "address": "7776",
      "metadata": {
       "virtual_address": "1947944",
       "demangled_name": "ReadBufferedBlockHeader"
@@ -39437,7 +39497,7 @@
      "name": "func_001DBA38",
      "size": "88",
      "fuzzy_match_percent": 100.0,
-     "address": "22360",
+     "address": "8048",
      "metadata": {
       "virtual_address": "1948216",
       "demangled_name": "ReadBufferedBlockBody"
@@ -39447,7 +39507,7 @@
      "name": "func_001DBA90",
      "size": "44",
      "fuzzy_match_percent": 100.0,
-     "address": "22448",
+     "address": "8136",
      "metadata": {
       "virtual_address": "1948304",
       "demangled_name": "SetWorldGravityZ"
@@ -39457,7 +39517,7 @@
      "name": "func_001DBAC0",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "22496",
+     "address": "8184",
      "metadata": {
       "virtual_address": "1948352",
       "demangled_name": "SetCachedVoiceParamBuiltin"
@@ -39467,7 +39527,7 @@
      "name": "func_001DBAE0",
      "size": "28",
      "fuzzy_match_percent": 100.0,
-     "address": "22528",
+     "address": "8216",
      "metadata": {
       "virtual_address": "1948384",
       "demangled_name": "GetCachedVoiceParamBuiltin"
@@ -39477,7 +39537,7 @@
      "name": "func_001DBB00",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "22560",
+     "address": "8248",
      "metadata": {
       "virtual_address": "1948416",
       "demangled_name": "RefreshCachedVoiceParamBuiltin"
@@ -39487,7 +39547,7 @@
      "name": "func_001DBB20",
      "size": "44",
      "fuzzy_match_percent": 100.0,
-     "address": "22592",
+     "address": "8280",
      "metadata": {
       "virtual_address": "1948448",
       "demangled_name": "IsWorldBodyLimitReached"
@@ -39497,7 +39557,7 @@
      "name": "func_001DBB50",
      "size": "60",
      "fuzzy_match_percent": 100.0,
-     "address": "22640",
+     "address": "8328",
      "metadata": {
       "virtual_address": "1948496",
       "demangled_name": "TakeAttachRecord"
@@ -39507,7 +39567,7 @@
      "name": "func_001DBB90",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "22704",
+     "address": "8392",
      "metadata": {
       "virtual_address": "1948560",
       "demangled_name": "ReleaseAttachRecords"
@@ -39517,7 +39577,7 @@
      "name": "func_001DBBD8",
      "size": "60",
      "fuzzy_match_percent": 100.0,
-     "address": "22776",
+     "address": "8464",
      "metadata": {
       "virtual_address": "1948632",
       "demangled_name": "TakeCallRecord"
@@ -39527,7 +39587,7 @@
      "name": "func_001DBC18",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "22840",
+     "address": "8528",
      "metadata": {
       "virtual_address": "1948696",
       "demangled_name": "ReleaseCallRecords"
@@ -39537,7 +39597,7 @@
      "name": "func_001DBC60",
      "size": "100",
      "fuzzy_match_percent": 100.0,
-     "address": "22912",
+     "address": "8600",
      "metadata": {
       "virtual_address": "1948768",
       "demangled_name": "AppendQueuedCallOnce"
@@ -39547,7 +39607,7 @@
      "name": "func_001DBCC8",
      "size": "120",
      "fuzzy_match_percent": 100.0,
-     "address": "23016",
+     "address": "8704",
      "metadata": {
       "virtual_address": "1948872",
       "demangled_name": "AppendQueuedCall"
@@ -39557,7 +39617,7 @@
      "name": "func_001DBD40",
      "size": "260",
      "fuzzy_match_percent": 100.0,
-     "address": "23136",
+     "address": "8824",
      "metadata": {
       "virtual_address": "1948992",
       "demangled_name": "RemoveQueuedCalls"
@@ -39567,7 +39627,7 @@
      "name": "func_001DBE48",
      "size": "128",
      "fuzzy_match_percent": 100.0,
-     "address": "23400",
+     "address": "9088",
      "metadata": {
       "virtual_address": "1949256",
       "demangled_name": "RunQueuedCalls"
@@ -39577,7 +39637,7 @@
      "name": "func_001DBEC8",
      "size": "508",
      "fuzzy_match_percent": 100.0,
-     "address": "23528",
+     "address": "9216",
      "metadata": {
       "virtual_address": "1949384",
       "demangled_name": "RunDueDelayedScriptCalls"
@@ -39587,7 +39647,7 @@
      "name": "func_001DC0C8",
      "size": "60",
      "fuzzy_match_percent": 100.0,
-     "address": "24040",
+     "address": "9728",
      "metadata": {
       "virtual_address": "1949896",
       "demangled_name": "AllocateTouchNode"
@@ -39597,7 +39657,7 @@
      "name": "func_001DC108",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "24104",
+     "address": "9792",
      "metadata": {
       "virtual_address": "1949960",
       "demangled_name": "FreeTouchNodes"
@@ -39607,7 +39667,7 @@
      "name": "func_001DC150",
      "size": "180",
      "fuzzy_match_percent": 100.0,
-     "address": "24176",
+     "address": "9864",
      "metadata": {
       "virtual_address": "1950032",
       "demangled_name": "PushCloneBatch"
@@ -39617,7 +39677,7 @@
      "name": "func_001DC208",
      "size": "44",
      "fuzzy_match_percent": 100.0,
-     "address": "24360",
+     "address": "10048",
      "metadata": {
       "virtual_address": "1950216",
       "demangled_name": "PopSpawnedClone"
@@ -39627,7 +39687,7 @@
      "name": "func_001DC238",
      "size": "660",
      "fuzzy_match_percent": 100.0,
-     "address": "24408",
+     "address": "10096",
      "metadata": {
       "virtual_address": "1950264",
       "demangled_name": "GatherCollidersInBox"
@@ -39637,7 +39697,7 @@
      "name": "func_001DC4D0",
      "size": "576",
      "fuzzy_match_percent": 100.0,
-     "address": "25072",
+     "address": "10760",
      "metadata": {
       "virtual_address": "1950928",
       "demangled_name": "GatherCollidersInSphere"
@@ -39647,7 +39707,7 @@
      "name": "func_001DC710",
      "size": "48",
      "fuzzy_match_percent": 100.0,
-     "address": "25648",
+     "address": "11336",
      "metadata": {
       "virtual_address": "1951504",
       "demangled_name": "UnlinkContactTable"
@@ -39657,7 +39717,7 @@
      "name": "func_001DC740",
      "size": "112",
      "fuzzy_match_percent": 100.0,
-     "address": "25696",
+     "address": "11384",
      "metadata": {
       "virtual_address": "1951552",
       "demangled_name": "InitContactTables"
@@ -39667,7 +39727,7 @@
      "name": "func_001DC7B0",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "25808",
+     "address": "11496",
      "metadata": {
       "virtual_address": "1951664",
       "demangled_name": "PushContactTable"
@@ -39677,7 +39737,7 @@
      "name": "func_001DC7D0",
      "size": "88",
      "fuzzy_match_percent": 100.0,
-     "address": "25840",
+     "address": "11528",
      "metadata": {
       "virtual_address": "1951696",
       "demangled_name": "TakeContactTable"
@@ -39687,7 +39747,7 @@
      "name": "func_001DC828",
      "size": "376",
      "fuzzy_match_percent": 100.0,
-     "address": "25928",
+     "address": "11616",
      "metadata": {
       "virtual_address": "1951784",
       "demangled_name": "ReleaseContactTable"
@@ -39697,7 +39757,7 @@
      "name": "func_001DC9A0",
      "size": "800",
      "fuzzy_match_percent": 100.0,
-     "address": "26304",
+     "address": "11992",
      "metadata": {
       "virtual_address": "1952160",
       "demangled_name": "CreateConeVolumes"
@@ -39707,7 +39767,7 @@
      "name": "func_001DCCC0",
      "size": "100",
      "fuzzy_match_percent": 100.0,
-     "address": "27104",
+     "address": "12792",
      "metadata": {
       "virtual_address": "1952960",
       "demangled_name": "SkipBufferedBlocks"
@@ -39717,7 +39777,7 @@
      "name": "func_001DCD28",
      "size": "372",
      "fuzzy_match_percent": 100.0,
-     "address": "27208",
+     "address": "12896",
      "metadata": {
       "virtual_address": "1953064",
       "demangled_name": "SpawnListedObjectCopies"
@@ -39727,7 +39787,7 @@
      "name": "func_001DCEA0",
      "size": "884",
      "fuzzy_match_percent": 100.0,
-     "address": "27584",
+     "address": "13272",
      "metadata": {
       "virtual_address": "1953440",
       "demangled_name": "LoadWorld"
@@ -39737,7 +39797,7 @@
      "name": "func_001DD218",
      "size": "456",
      "fuzzy_match_percent": 100.0,
-     "address": "28472",
+     "address": "14160",
      "metadata": {
       "virtual_address": "1954328",
       "demangled_name": "ClipSegmentToPlanes"
@@ -39747,7 +39807,7 @@
      "name": "func_001DD3E0",
      "size": "356",
      "fuzzy_match_percent": 100.0,
-     "address": "28928",
+     "address": "14616",
      "metadata": {
       "virtual_address": "1954784",
       "demangled_name": "DrawProjectedLine"
@@ -39757,7 +39817,7 @@
      "name": "func_001DD548",
      "size": "176",
      "fuzzy_match_percent": 100.0,
-     "address": "29288",
+     "address": "14976",
      "metadata": {
       "virtual_address": "1955144",
       "demangled_name": "DrawProjectedCurve"
@@ -39767,7 +39827,7 @@
      "name": "func_001DD5F8",
      "size": "24",
      "fuzzy_match_percent": 100.0,
-     "address": "29464",
+     "address": "15152",
      "metadata": {
       "virtual_address": "1955320",
       "demangled_name": "SetWorldLightingParamA"
@@ -39777,7 +39837,7 @@
      "name": "func_001DD610",
      "size": "24",
      "fuzzy_match_percent": 100.0,
-     "address": "29488",
+     "address": "15176",
      "metadata": {
       "virtual_address": "1955344",
       "demangled_name": "SetWorldLightingParamB"
@@ -39787,7 +39847,7 @@
      "name": "func_001DD628",
      "size": "100",
      "fuzzy_match_percent": 100.0,
-     "address": "29512",
+     "address": "15200",
      "metadata": {
       "virtual_address": "1955368",
       "demangled_name": "SetWorldSoundLevel"
@@ -39797,7 +39857,7 @@
      "name": "func_001DD690",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "29616",
+     "address": "15304",
      "metadata": {
       "virtual_address": "1955472",
       "demangled_name": "TestLevelEntryFlag1"
@@ -39807,7 +39867,7 @@
      "name": "func_001DD6B0",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "29648",
+     "address": "15336",
      "metadata": {
       "virtual_address": "1955504",
       "demangled_name": "TestLevelEntryFlag2"
@@ -39817,7 +39877,7 @@
      "name": "func_001DD6D0",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "29680",
+     "address": "15368",
      "metadata": {
       "virtual_address": "1955536",
       "demangled_name": "TestLevelEntryFlag4"
@@ -39827,7 +39887,7 @@
      "name": "func_001DD6F0",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "29712",
+     "address": "15400",
      "metadata": {
       "virtual_address": "1955568",
       "demangled_name": "TestLevelEntryFlag8"
@@ -39837,7 +39897,7 @@
      "name": "func_001DD710",
      "size": "68",
      "fuzzy_match_percent": 100.0,
-     "address": "29744",
+     "address": "15432",
      "metadata": {
       "virtual_address": "1955600",
       "demangled_name": "CheckEntryOneBitRequirement"
@@ -39847,7 +39907,7 @@
      "name": "func_001DD758",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "29816",
+     "address": "15504",
      "metadata": {
       "virtual_address": "1955672",
       "demangled_name": "CheckEntryTwoBitRequirement"
@@ -39857,7 +39917,7 @@
      "name": "func_001DD7A0",
      "size": "72",
      "fuzzy_match_percent": 100.0,
-     "address": "29888",
+     "address": "15576",
      "metadata": {
       "virtual_address": "1955744",
       "demangled_name": "CheckEntryThreeBitRequirement"
@@ -39867,7 +39927,7 @@
      "name": "func_001DD7E8",
      "size": "156",
      "fuzzy_match_percent": 100.0,
-     "address": "29960",
+     "address": "15648",
      "metadata": {
       "virtual_address": "1955816",
       "demangled_name": "SetEntrySlotValue"
@@ -39877,7 +39937,7 @@
      "name": "func_001DD888",
      "size": "92",
      "fuzzy_match_percent": 100.0,
-     "address": "30120",
+     "address": "15808",
      "metadata": {
       "virtual_address": "1955976",
       "demangled_name": "GetEntrySlotValue"
@@ -39887,7 +39947,7 @@
      "name": "func_001DD8E8",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "30216",
+     "address": "15904",
      "metadata": {
       "virtual_address": "1956072",
       "demangled_name": "IsLevelRecordComplete"
@@ -39897,7 +39957,7 @@
      "name": "func_001DD908",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "30248",
+     "address": "15936",
      "metadata": {
       "virtual_address": "1956104",
       "demangled_name": "IsLevelDone"
@@ -39907,7 +39967,7 @@
      "name": "func_001DD928",
      "size": "36",
      "fuzzy_match_percent": 100.0,
-     "address": "30280",
+     "address": "15968",
      "metadata": {
       "virtual_address": "1956136",
       "demangled_name": "RecomputeSaveCompletion"
@@ -39917,7 +39977,7 @@
      "name": "func_001DD950",
      "size": "76",
      "fuzzy_match_percent": 100.0,
-     "address": "30320",
+     "address": "16008",
      "metadata": {
       "virtual_address": "1956176",
       "demangled_name": "ScatterRandomObjects"
@@ -39927,7 +39987,7 @@
      "name": "func_001DD9A0",
      "size": "32",
      "fuzzy_match_percent": 100.0,
-     "address": "30400",
+     "address": "16088",
      "metadata": {
       "virtual_address": "1956256",
       "demangled_name": "SetScatterLevelBuiltin"
@@ -39937,7 +39997,7 @@
      "name": "func_001DD9C0",
      "size": "20",
      "fuzzy_match_percent": 100.0,
-     "address": "30432",
+     "address": "16120",
      "metadata": {
       "virtual_address": "1956288",
       "demangled_name": "GetGameStateDeltaTime"
@@ -39947,7 +40007,7 @@
      "name": "func_001DD9D8",
      "size": "44",
      "fuzzy_match_percent": 100.0,
-     "address": "30456",
+     "address": "16144",
      "metadata": {
       "virtual_address": "1956312",
       "demangled_name": "SetCurrentScatterLevel"
@@ -39957,7 +40017,7 @@
      "name": "func_001DDA08",
      "size": "20",
      "fuzzy_match_percent": 100.0,
-     "address": "30504",
+     "address": "16192",
      "metadata": {
       "virtual_address": "1956360",
       "demangled_name": "GetCurrentScatterLevel"
@@ -39967,7 +40027,7 @@
      "name": "func_001DDA20",
      "size": "48",
      "fuzzy_match_percent": 100.0,
-     "address": "30528",
+     "address": "16216",
      "metadata": {
       "virtual_address": "1956384",
       "demangled_name": "AcquirePadSelectFlag"
@@ -39977,7 +40037,7 @@
      "name": "func_001DDA50",
      "size": "44",
      "fuzzy_match_percent": 100.0,
-     "address": "30576",
+     "address": "16264",
      "metadata": {
       "virtual_address": "1956432",
       "demangled_name": "ReleasePadSelectFlag"
@@ -39987,7 +40047,7 @@
      "name": "func_001DDA80",
      "size": "12",
      "fuzzy_match_percent": 100.0,
-     "address": "30624",
+     "address": "16312",
      "metadata": {
       "virtual_address": "1956480",
       "demangled_name": "IsPadSelectFlagHeld"
@@ -39997,7 +40057,7 @@
      "name": "func_001DDA90",
      "size": "40",
      "fuzzy_match_percent": 100.0,
-     "address": "30640",
+     "address": "16328",
      "metadata": {
       "virtual_address": "1956496",
       "demangled_name": "GetHasStreamVoice"
@@ -40007,7 +40067,7 @@
      "name": "func_001DDAB8",
      "size": "12",
      "fuzzy_match_percent": 100.0,
-     "address": "30680",
+     "address": "16368",
      "metadata": {
       "virtual_address": "1956536",
       "demangled_name": "SetWorldValueAndTarget"
@@ -40017,7 +40077,7 @@
      "name": "func_001DDAC8",
      "size": "8",
      "fuzzy_match_percent": 100.0,
-     "address": "30696",
+     "address": "16384",
      "metadata": {
       "virtual_address": "1956552",
       "demangled_name": "SetWorldValueTarget"
@@ -40027,7 +40087,7 @@
      "name": "func_001DDAD0",
      "size": "80",
      "fuzzy_match_percent": 100.0,
-     "address": "30704",
+     "address": "16392",
      "metadata": {
       "virtual_address": "1956560",
       "demangled_name": "PopActiveSequenceElement"
@@ -40037,7 +40097,7 @@
      "name": "func_001DDB20",
      "size": "52",
      "fuzzy_match_percent": 100.0,
-     "address": "30784",
+     "address": "16472",
      "metadata": {
       "virtual_address": "1956640",
       "demangled_name": "ShowPauseMenuPageWith"
@@ -40047,7 +40107,7 @@
      "name": "func_001DDB58",
      "size": "92",
      "fuzzy_match_percent": 100.0,
-     "address": "30840",
+     "address": "16528",
      "metadata": {
       "virtual_address": "1956696",
       "demangled_name": "ShowCountedScreenElement"
@@ -40057,7 +40117,7 @@
      "name": "func_001DDBB8",
      "size": "56",
      "fuzzy_match_percent": 100.0,
-     "address": "30936",
+     "address": "16624",
      "metadata": {
       "virtual_address": "1956792",
       "demangled_name": "HideCountedScreenElement"
@@ -40067,7 +40127,7 @@
      "name": "func_001DDBF0",
      "size": "4",
      "fuzzy_match_percent": 100.0,
-     "address": "30992",
+     "address": "16680",
      "metadata": {
       "virtual_address": "1956848"
      }
@@ -40076,7 +40136,7 @@
      "name": "func_001DDBF8",
      "size": "28",
      "fuzzy_match_percent": 100.0,
-     "address": "31000",
+     "address": "16688",
      "metadata": {
       "virtual_address": "1956856",
       "demangled_name": "PushSoundLevelBuiltin"
@@ -40086,7 +40146,7 @@
      "name": "func_001DDC18",
      "size": "28",
      "fuzzy_match_percent": 100.0,
-     "address": "31032",
+     "address": "16720",
      "metadata": {
       "virtual_address": "1956888",
       "demangled_name": "RemoveSoundLevelBuiltin"
@@ -40096,7 +40156,7 @@
      "name": "func_001DDC38",
      "size": "8",
      "fuzzy_match_percent": 100.0,
-     "address": "31064",
+     "address": "16752",
      "metadata": {
       "virtual_address": "1956920",
       "demangled_name": "SetWorldActiveFollower"
@@ -40106,7 +40166,7 @@
      "name": "func_001DDC40",
      "size": "56",
      "fuzzy_match_percent": 100.0,
-     "address": "31072",
+     "address": "16760",
      "metadata": {
       "virtual_address": "1956928",
       "demangled_name": "NotifyWorldActiveFollower"
@@ -40116,7 +40176,7 @@
      "name": "func_001DDC78",
      "size": "24",
      "fuzzy_match_percent": 100.0,
-     "address": "31128",
+     "address": "16816",
      "metadata": {
       "virtual_address": "1956984",
       "demangled_name": "SetWorldFlagBit"
@@ -40126,7 +40186,7 @@
      "name": "func_001DDC90",
      "size": "28",
      "fuzzy_match_percent": 100.0,
-     "address": "31152",
+     "address": "16840",
      "metadata": {
       "virtual_address": "1957008",
       "demangled_name": "ClearWorldFlagBit"
@@ -40136,7 +40196,7 @@
      "name": "func_001DDCB0",
      "size": "20",
      "fuzzy_match_percent": 100.0,
-     "address": "31184",
+     "address": "16872",
      "metadata": {
       "virtual_address": "1957040",
       "demangled_name": "GetSaveSpareCount"
@@ -40146,7 +40206,7 @@
      "name": "func_001DDCC8",
      "size": "20",
      "fuzzy_match_percent": 100.0,
-     "address": "31208",
+     "address": "16896",
      "metadata": {
       "virtual_address": "1957064",
       "demangled_name": "GetReserveUnitCount"
@@ -40154,11 +40214,11 @@
     }
    ],
    "metadata": {
-    "complete": false,
+    "complete": true,
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1D62E0.cpp"
+    "source_path": "src/main/file_1D9AC8.cpp"
    }
   },
   {
@@ -53577,15 +53637,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "175156",
-    "matched_data": "174468",
-    "matched_data_percent": 99.60720728950193,
+    "matched_data": "174460",
+    "matched_data_percent": 99.60263993240312,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "174468",
-    "complete_data_percent": 99.60720728950193,
+    "complete_data": "174460",
+    "complete_data_percent": 99.60263993240312,
     "total_units": 1,
     "complete_units": 0
    },
@@ -53630,22 +53690,22 @@
    "id": "game",
    "name": "Game code",
    "measures": {
-    "fuzzy_match_percent": 99.22664192027707,
+    "fuzzy_match_percent": 99.27594763172242,
     "total_code": "997856",
-    "matched_code": "978208",
-    "matched_code_percent": 98.03097841772761,
+    "matched_code": "978700",
+    "matched_code_percent": 98.08028412917295,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 4176,
-    "matched_functions": 4151,
-    "matched_functions_percent": 99.40134099616859,
-    "complete_code": "978208",
-    "complete_code_percent": 98.03097841772761,
+    "matched_functions": 4152,
+    "matched_functions_percent": 99.42528735632185,
+    "complete_code": "978700",
+    "complete_code_percent": 98.08028412917295,
     "complete_data": "0",
     "complete_data_percent": 100.0,
-    "total_units": 95,
-    "complete_units": 74
+    "total_units": 97,
+    "complete_units": 77
    }
   },
   {
@@ -53679,15 +53739,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "431059",
-    "matched_data": "429664",
-    "matched_data_percent": 99.67637840759618,
+    "matched_data": "429656",
+    "matched_data_percent": 99.67452251315945,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "429664",
-    "complete_data_percent": 99.67637840759618,
+    "complete_data": "429656",
+    "complete_data_percent": 99.67452251315945,
     "total_units": 4,
     "complete_units": 2
    }
