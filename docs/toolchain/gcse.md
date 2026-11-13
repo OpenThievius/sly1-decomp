@@ -520,7 +520,7 @@ Three independent causes, each fixed at its own pass; the function matched once 
   reducing both) instead of walking pointers kept the order and the size; the near miss's
   pointer walks reused one `l` and one `tp` for both loops, which ties their registers.
 
-### A `%hi` copied into a second register: the store's block began with a label when cse ran (func_00140968, unsolved)
+### A `%hi` copied into a second register: the store's block began with a label when cse ran (func_00140968, matched 2026-11-12)
 
 RefreshDiscStatus (`if (g_discStatus != status) g_discStatus = status; return g_discStatus ==
 0x14;`), read from cse.c (cse_end_of_basic_block, cse_main), gcse.c (pre_insert,
@@ -595,6 +595,26 @@ pre_insert_copy_insn, pre_delete) and lcm.c with `-ds -dG -dt -dl -dg` dumps (20
   loaded, which no volatile read allows, and the one reload is PRE's on the store's path.
   Compiled as a check: `volatile s32 g_discStatus` gives this near miss's code unchanged
   (bnel, one address register, the reload at the join), not retail's.
+
+- **Solved: the loop's shape without its notes (w44-fc, 2026-11-12).** The `while` form was
+  retail's code but for two things, and both are a loop note's. The aligned label: final
+  aligns the first label after a NOTE_INSN_LOOP_BEG, here reorg's label past the reload (the
+  `nop`). The registers: flow counts a reference inside the notes at the loop's depth, so
+  `status` (set, compared, stored) is "used 4 times across 6 insns" where the `%hi` is used 4
+  times across 12, ranks first in global-alloc and takes v1; without the notes it is used 3
+  times, the `%hi` goes first and takes v1, status a0, as retail (`-dl`: `Register 116 used 3
+  times across 6 insns`, `Register 118 used 4 times across 12 insns`). A back edge written
+  with `goto` has no notes: `if (g != status) { again: g = status; if (g != status) goto
+  again; }` is EXACT on US and PAL. cse1 sees the label `again` used by the back edge, so the
+  store's block starts there; it folds the second test (the word was just stored), the jump
+  pass after it drops the label, and PRE and cse2 go on as described above. The same store
+  with the label before the first test, or with `if (g == status) goto done;` before it, is
+  EXACT too. A back edge whose test is the top one (`again: if (c) { g = s; goto again; }`)
+  is not: nothing folds its jump.
+- **The tell, corrected.** `move aN,vM` of a `%hi` in a branch's delay slot with the store
+  through the copy says the store's block was entered by a back edge that cse folded. Whether
+  it was a `while` or a hand-made edge shows in the label after it: 8-aligned (or a `nop`
+  before it) with the loop's value in the first register for a `while`, neither for a `goto`.
 
 ### Eight spilled frame addresses: the table size from their slot order (func_001CC490)
 
