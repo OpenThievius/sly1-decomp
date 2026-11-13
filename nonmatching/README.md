@@ -5,19 +5,18 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 
 | Function | Version | Match | Checked |
 |---|---|---:|---|
-| [func_00125C90](func_00125C90.cpp) | us | 99.7% | 2026-11-12 |
-| [func_001F8290](func_001F8290.cpp) | us | 99.2% | 2026-11-12 |
-| [func_001CC818](func_001CC818.cpp) | us | 98.5% | 2026-11-12 |
-| [func_00134B48](func_00134B48.cpp) | us | 97.5% | 2026-11-12 |
-| [func_0013A618](func_0013A618.cpp) | us | 97.4% | 2026-11-12 |
-| [func_00202140](func_00202140.c) | us | 96.8% | 2026-11-12 |
-| [func_001366A0](eu/func_001366A0.cpp) | eu | 96.4% | 2026-11-12 |
-| [func_001DEBE8](func_001DEBE8.cpp) | us | 88.6% | 2026-11-12 |
-| [func_0013BE18](func_0013BE18.cpp) | us | 84.9% | 2026-11-12 |
-| [func_0014F168](func_0014F168.cpp) | us | 84.2% | 2026-11-12 |
-| [func_00144540](func_00144540.cpp) | us | 81.2% | 2026-11-12 |
-| [func_001C3C98](func_001C3C98.cpp) | us | 79.2% | 2026-11-12 |
-| [func_0019CC10](func_0019CC10.cpp) | us | 68.4% | 2026-11-12 |
-| [func_0020BB18](func_0020BB18.cpp) | us | 48.8% | 2026-11-12 |
-| [func_0013A940](func_0013A940.cpp) | us | size differs | 2026-11-12 |
-| [func_00191AC8](func_00191AC8.cpp) | us | size differs | 2026-11-12 |
+| [func_00125C90](func_00125C90.cpp) | us | 99.7% | 2026-11-13 |
+| [func_001F8290](func_001F8290.cpp) | us | 99.2% | 2026-11-13 |
+| [func_001CC818](func_001CC818.cpp) | us | 98.5% | 2026-11-13 |
+| [func_0013A618](func_0013A618.cpp) | us | 97.4% | 2026-11-13 |
+| [func_00202140](func_00202140.c) | us | 96.8% | 2026-11-13 |
+| [func_001366A0](eu/func_001366A0.cpp) | eu | 96.4% | 2026-11-13 |
+| [func_001DEBE8](func_001DEBE8.cpp) | us | 88.6% | 2026-11-13 |
+| [func_0013BE18](func_0013BE18.cpp) | us | 84.9% | 2026-11-13 |
+| [func_0014F168](func_0014F168.cpp) | us | 84.2% | 2026-11-13 |
+| [func_00144540](func_00144540.cpp) | us | 81.2% | 2026-11-13 |
+| [func_001C3C98](func_001C3C98.cpp) | us | 79.2% | 2026-11-13 |
+| [func_0019CC10](func_0019CC10.cpp) | us | 68.4% | 2026-11-13 |
+| [func_0020BB18](func_0020BB18.cpp) | us | 48.8% | 2026-11-13 |
+| [func_0013A940](func_0013A940.cpp) | us | size differs | 2026-11-13 |
+| [func_00191AC8](func_00191AC8.cpp) | us | size differs | 2026-11-13 |

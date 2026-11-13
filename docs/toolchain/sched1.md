@@ -1347,7 +1347,7 @@ off (2026-11-10, `-dS -fsched-verbose-6` dumps, haifa-sched.c and alias.c read):
   clamp's parameters by const reference, dt's weight through a `const f32&` inline, and the
   whole update as an inline taking `(self, a, b, dt)` (the frame moves).
 
-### Spill stores between float constants: counting a preheader's %hi/%lo pairs (func_00134B48, unsolved)
+### Spill stores between float constants: counting a preheader's %hi/%lo pairs (func_00134B48, matched 2026-11-12)
 
 Wave 15 (2026-11-10). The second loop's preheader differs from retail's only in where two
 spill stores fall among four float constants (`sw a1,540(sp)` / `sw a2,544(sp)`, &pos's and
@@ -1385,6 +1385,37 @@ alias-classes.md ("Confirmed in US func_00134B48"); what this wave added:
   but g_unitRange's `%hi` takes s4, as the else-arm clamp did, and the code grows 4 bytes);
   two ApproachValueWithRamp calls in an if/else for f58 (not cross-jumped back, 1764-1772
   bytes).
+
+Matched on 2026-11-12 (w46-a). The count above was right but its conclusion was not: a third
+pair does not have to go, it has to come *before the constants*. All six insns of three pairs
+rank ahead of the first constant when each `%lo` either ends its `%hi` (weight 0) or has an
+earlier LUID than the constants (weight 1, no dependents, as a constant: the LUID decides).
+Then cycles 1 to 3 hold the three pairs and cycle 4 the first constant with &pos, which is
+retail's order. Our third `%lo` (Limit's `this`) lost that tie only because loop.c moved it in
+its second pass, to the end of the preheader, after the constants the first pass had moved.
+
+Why the second pass: move_movables lowers its threshold by 3 for every insn it moves
+(`threshold -= 3`), so the 79 the pass starts with is 22 by the time it reaches the clamp (18
+PRE-hoisted insns and the table's `%lo` moved before it): `22 x 1 x 4 = 88 < 282` insns, "not
+desirable"; the second pass starts at 79 again and moves it (`79 x 4 >= 234`). A life of 13 or
+more is moved in the first pass. The source is the form the coefficient table already had:
+
+    const f32* k = D_002611A0;
+    const ValueRange* lim = &g_unitRange;
+    ProjectPointToCamera(...);
+    ...
+    f32 alpha = lim->Limit(scale);
+
+The pointer is named before the projection, so its life spans the call (`Insn 709: regno 292
+(life 47), move-insn savings 1 moved to 1459` in the first pass, between the table's `%lo` at
+1457 and the clock's at 1461); cse1 still
+folds the `lo` read into `%lo(g_unitRange)` because the declaration and the clamp are in one
+extended block (the call between them does not end it), which a pointer at the top of the
+body, above the string loop's labels, did not give. Named before `k` the code differs in 6
+lines (its `%lo` is then issued before the table's and the two address pairs swap); named
+after the projection it is EXACT as well. The tell: an insn of a preheader that retail issues
+earlier than ours, when ours was moved by the second pass; `-dL` prints the pass, and the
+threshold at an insn is 79 less three times the insns moved before it.
 
 ### The side test and the half-width: what retail's order needs of each conversion (func_00142278, unsolved)
 
