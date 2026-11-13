@@ -815,6 +815,26 @@ weights and four z weights (2026-11-10, still a near miss):
   but the store is issued on the memory unit the cycle its product is ready, and no statement
   order, named product, extra weight variable or re-association tried moves it.
 
+- **Block A's three stores are ranked by register weight, not by an alias fact (w46-c,
+  2026-11-13).** Replayed on the probe's block (the row loads through `self + 0x660`, insns
+  725 and 726; the stores of rows 0, 1, 2 to self, 589, 631, 673; m's rows 686 to 694): with
+  the loads cut from row 0's store, and from each other's row, row 0's store falls to
+  priority 2 and issues last, after rot's rows, where retail has it third. Retail's order of
+  the block's whole second half (0x670, 0x680, 0x660, m's rows, the offset, the two row
+  loads, the product, rot's row 0, v640, rot's rows 1 and 2) comes out when the stores of
+  rows 1 and 2 weigh one less than row 0's, i.e. carry their products' REG_DEAD notes: the
+  three tie on priority 6 with m's rows, and rank_for_schedule's second key is the weight.
+  Row 0's product lives on (the transposed rotation reads it from its register). A raised
+  priority gives the same order in the replay but not in a compile: rows 1 and 2 stored a
+  second time right after the product leave no code and put row 1's store first, and its
+  product ahead of row 0's with it (the priority passes down the chain). So m's and rot's
+  rows 1 and 2 are stored from two other pseudos in the same registers, two copies that
+  leave no code: the two insns local-alloc's lives asked for. What makes them is open; a
+  copy through a pointer local (`m = *p`) gives the deaths and the order, but moves the rows
+  through a GPR (lq, sq). The tilt's rows loaded in the order 1, 2, 0 give tilt row 1 and
+  turn row 2 retail's vf3 and vf2 (row 1 then lives 9 insns). The tail is exact with the
+  rows of frame->m110 read as Vu0::Vec members (the near miss's RotateTransposedMembers).
+
 ### A Scalar's slot store after the load it would block (func_0014A8F8)
 
 Read from the `-dS -fsched-verbose-6` dumps of UpdateFrameCameraController (2026-11-08):
