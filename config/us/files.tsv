@@ -38,8 +38,8 @@ src/main/selection_menus.cpp	0016AA18	0016C470	0024A7A0	00262718	-	-
 src/main/warp_menu.cpp	001E88D0	001F2758	0024E600	00275B60	006256E0	-
 src/main/oscillator.cpp	001F2758	001F59C4	0024E840	-	-	-
 src/main/screen_element.cpp	001AA268	001AECB0	0024CBD0	002743A0	-	-
-src/main/pooled_object.cpp	0014EE40	00153528	00249FE0	00261CC8	-	-
-src/main/active_set_solver.cpp	00153528	001549C8	0024A100	-	-	-
+src/main/pooled_object.cpp	0014EE40	001533A8	00249FE0	00261CC8	-	-
+src/main/active_set_solver.cpp	001533A8	001549C8	0024A100	00261F30	-	-
 src/main/effect_spawner.cpp	001549C8	0015AAE0	0024A120	00261F70	0027C010	-
 src/main/object_cycler.cpp	0015AAE0	0015C178	0024A190	00262180	-	-
 src/main/font.cpp	0015C178	0015E6A8	0024A220	00262250	-	-

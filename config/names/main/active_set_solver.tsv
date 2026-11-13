@@ -1,4 +1,5 @@
 symbol	name	evidence
+func_001533A8	DrawPlacedObjectParts	deferred draw callback queued by func_00153328: adds DMA ref tags, writes a matrix to VIF, then runs the part drawer func_00166690 for each 0x70-byte part
 func_00153528	InitActiveSetSolver	clears the 0x50-byte solver record, allocates 2n items of 0x60 bytes, makes its four lists and allocates the matrix, factor, right-hand-side and solution arrays
 func_00153608	ResetActiveSetSolver	empties its four lists, clears each 0x60-byte item's two floats and eight bytes and files every item in the free list at +0x30
 func_001536C8	AddActiveSetItem	appends an item to the active-set solver: fills the new column of every existing item's row (+0x44) with the dot product of the item's vector (+0x10) and the row's vector, appends it to the list at +0x30 and counts it (+0x4); func_00154088 and func_001BCD00 call it

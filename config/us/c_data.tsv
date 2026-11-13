@@ -150,7 +150,8 @@ D_00261880	00261880	276	.data	src/main/camera.cpp
 D_002619A0	002619A0	584	.data	src/main/state_notifier.cpp
 D_00261BF0	00261BF0	160	.data	src/main/camera_controller.cpp
 D_00261C90	00261C90	52	.data	src/main/gauge_manager.cpp
-D_00261CC8	00261CC8	668	.data	src/main/pooled_object.cpp
+D_00261CC8	00261CC8	608	.data	src/main/pooled_object.cpp
+D_00261F30	00261F30	64	.data	src/main/active_set_solver.cpp
 D_00261F70	00261F70	528	.data	src/main/effect_spawner.cpp
 D_00262180	00262180	208	.data	src/main/object_cycler.cpp
 D_00262250	00262250	48	.data	src/main/font.cpp

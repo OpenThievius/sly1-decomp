@@ -5,15 +5,15 @@
   "matched_code": "1112400",
   "matched_code_percent": 100.0,
   "total_data": "431059",
-  "matched_data": "430867",
-  "matched_data_percent": 99.95545853351861,
+  "matched_data": "430879",
+  "matched_data_percent": 99.9582423751737,
   "total_functions": 4807,
   "matched_functions": 4807,
   "matched_functions_percent": 100.0,
   "complete_code": "1112400",
   "complete_code_percent": 100.0,
-  "complete_data": "430867",
-  "complete_data_percent": 99.95545853351861,
+  "complete_data": "430879",
+  "complete_data_percent": 99.9582423751737,
   "total_units": 193,
   "complete_units": 191
  },
@@ -15382,16 +15382,16 @@
    "name": "game/pooled_object",
    "measures": {
     "fuzzy_match_percent": 100.0,
-    "total_code": "17944",
-    "matched_code": "17944",
+    "total_code": "17560",
+    "matched_code": "17560",
     "matched_code_percent": 100.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 95,
-    "matched_functions": 95,
+    "total_functions": 94,
+    "matched_functions": 94,
     "matched_functions_percent": 100.0,
-    "complete_code": "17944",
+    "complete_code": "17560",
     "complete_code_percent": 100.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
@@ -16335,16 +16335,6 @@
       "virtual_address": "1389352",
       "demangled_name": "QueuePlacedObjectDraw"
      }
-    },
-    {
-     "name": "func_001533A8",
-     "size": "384",
-     "fuzzy_match_percent": 100.0,
-     "address": "17768",
-     "metadata": {
-      "virtual_address": "1389480",
-      "demangled_name": "DrawPlacedObjectParts"
-     }
     }
    ],
    "metadata": {
@@ -16359,16 +16349,16 @@
    "name": "game/active_set_solver",
    "measures": {
     "fuzzy_match_percent": 100.0,
-    "total_code": "5268",
-    "matched_code": "5268",
+    "total_code": "5652",
+    "matched_code": "5652",
     "matched_code_percent": 100.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 9,
-    "matched_functions": 9,
+    "total_functions": 10,
+    "matched_functions": 10,
     "matched_functions_percent": 100.0,
-    "complete_code": "5268",
+    "complete_code": "5652",
     "complete_code_percent": 100.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
@@ -16377,10 +16367,20 @@
    },
    "functions": [
     {
+     "name": "func_001533A8",
+     "size": "384",
+     "fuzzy_match_percent": 100.0,
+     "address": "0",
+     "metadata": {
+      "virtual_address": "1389480",
+      "demangled_name": "DrawPlacedObjectParts"
+     }
+    },
+    {
      "name": "func_00153528",
      "size": "224",
      "fuzzy_match_percent": 100.0,
-     "address": "0",
+     "address": "384",
      "metadata": {
       "virtual_address": "1389864",
       "demangled_name": "InitActiveSetSolver"
@@ -16390,7 +16390,7 @@
      "name": "func_00153608",
      "size": "192",
      "fuzzy_match_percent": 100.0,
-     "address": "224",
+     "address": "608",
      "metadata": {
       "virtual_address": "1390088",
       "demangled_name": "ResetActiveSetSolver"
@@ -16400,7 +16400,7 @@
      "name": "func_001536C8",
      "size": "184",
      "fuzzy_match_percent": 100.0,
-     "address": "416",
+     "address": "800",
      "metadata": {
       "virtual_address": "1390280",
       "demangled_name": "AddActiveSetItem"
@@ -16410,7 +16410,7 @@
      "name": "func_00153780",
      "size": "716",
      "fuzzy_match_percent": 100.0,
-     "address": "600",
+     "address": "984",
      "metadata": {
       "virtual_address": "1390464",
       "demangled_name": "BuildContactItemRows"
@@ -16420,7 +16420,7 @@
      "name": "func_00153A50",
      "size": "1136",
      "fuzzy_match_percent": 100.0,
-     "address": "1320",
+     "address": "1704",
      "metadata": {
       "virtual_address": "1391184",
       "demangled_name": "PivotActiveSet"
@@ -16430,7 +16430,7 @@
      "name": "func_00153EC0",
      "size": "456",
      "fuzzy_match_percent": 100.0,
-     "address": "2456",
+     "address": "2840",
      "metadata": {
       "virtual_address": "1392320",
       "demangled_name": "RunActiveSetSolver"
@@ -16440,7 +16440,7 @@
      "name": "func_00154088",
      "size": "744",
      "fuzzy_match_percent": 100.0,
-     "address": "2912",
+     "address": "3296",
      "metadata": {
       "virtual_address": "1392776",
       "demangled_name": "AddFrictionItemsAndSolve"
@@ -16450,7 +16450,7 @@
      "name": "func_00154370",
      "size": "1292",
      "fuzzy_match_percent": 100.0,
-     "address": "3656",
+     "address": "4040",
      "metadata": {
       "virtual_address": "1393520",
       "demangled_name": "ApplySolvedImpulsesToParts"
@@ -16460,7 +16460,7 @@
      "name": "func_00154880",
      "size": "324",
      "fuzzy_match_percent": 100.0,
-     "address": "4952",
+     "address": "5336",
      "metadata": {
       "virtual_address": "1394816",
       "demangled_name": "SolveActiveSetSystem"
@@ -53678,15 +53678,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "175156",
-    "matched_data": "174984",
-    "matched_data_percent": 99.90180182237549,
+    "matched_data": "174996",
+    "matched_data_percent": 99.9086528580237,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "174984",
-    "complete_data_percent": 99.90180182237549,
+    "complete_data": "174996",
+    "complete_data_percent": 99.9086528580237,
     "total_units": 1,
     "complete_units": 0
    },
@@ -53780,15 +53780,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "431059",
-    "matched_data": "430867",
-    "matched_data_percent": 99.95545853351861,
+    "matched_data": "430879",
+    "matched_data_percent": 99.9582423751737,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "430867",
-    "complete_data_percent": 99.95545853351861,
+    "complete_data": "430879",
+    "complete_data_percent": 99.9582423751737,
     "total_units": 4,
     "complete_units": 2
    }

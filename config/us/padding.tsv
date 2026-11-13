@@ -69,6 +69,7 @@ address	size	align	before
 00261994	12	16	src/main/state_notifier.cpp .data
 00261BE8	8	16	src/main/camera_controller.cpp .data
 00261CC4	4	8	src/main/pooled_object.cpp .data
+00261F28	8	16	src/main/active_set_solver.cpp .data
 002623BC	4	8	src/main/game_progress.cpp .data
 00262478	8	16	src/main/display.cpp .data
 002626E4	4	8	src/main/target_lists.cpp .data
