@@ -23,7 +23,7 @@ s32 OpenCardFile(s32 a0, s32 a1, const char* a2, s32 a3)
     r->f08 = a3;
     r->f04 = a1;
     r->name[0x3FF] = 0;
-    s32 result = CallRemoteService((Pool_2095B0*)pool, 2, 1, r, 0x414, D_0062C300, 4, 0, 0);
+    s32 result = CallRemoteService((RemoteCallClient*)pool, 2, 1, r, 0x414, D_0062C300, 4, 0, 0);
     if (result == 0) {
         g_cardRequestInFlight = 2;
     } else {
