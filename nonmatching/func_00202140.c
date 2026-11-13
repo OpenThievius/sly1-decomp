@@ -25,6 +25,17 @@
  * `h + h`, the dw term as a product or a (u32)/(s64) cast, the dy mask after the shift, a
  * sixth MAGV term (a constant or a local 0: 720 orders), the interlace arms swapped, a dh
  * local, a u64 local for the word. */
+/* w44-fa (2026-11-12), 96 compiles in two grids of 48 (a first grid of 48 that also changed the
+ * plain arms is discarded), each testing one stated form of "dw's shift computed in each field
+ * arm": the ternary written around the pair `((u64)dw << 32) |
+ * ((u64)dh << 44)` (either order inside) at each place among magh, dx and dy (24 orders), in the
+ * interlaced arms only, with dw the product itself or a local. fold (fold-const.c, the
+ * COND_EXPR rule of a binary operator) saves every operand ORed with the ternary unless it is a
+ * VAR_DECL, a PARM_DECL or a SAVE_EXPR, so a shift reaches the arms only from the ternary's own
+ * text. None is near: 86 lines at best with the product in the pair (the multiply moves into
+ * the arms), 102 with dw a local (the multiplies move, as the note above says for a local).
+ * So the pair-in-the-ternary form is not it; the per-term ternary with every term saved stays
+ * the closest (6 lines). */
 #include "common.h"
 
 typedef struct GsParam {
