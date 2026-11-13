@@ -14,8 +14,30 @@
 #include "asm_func.h"
 
 
-// A packet of the command channel: the channel's header, then the request.
+// A packet of the command channel: the channel's header, then the request. This is a request of
+// this side, taken from the pool of TakeRequestPacket: its self word is its own address, and a
+// pointer (CallRemoteService's code needs that store in a class of its own:
+// docs/toolchain/alias-classes.md, "A store that conflicts with two classes").
 struct RemoteCallPacket {
+    u32 head[4];
+    u32 flags;
+    RemoteCallPacket* self;
+    s32 id;
+    u32 client;
+    u32 cmd;
+    s32 f24;
+    s32 f28;
+    s32 f2C;
+    s32 f30;
+    s32 f34;
+    s32 f38;
+    s32 f3C;
+};
+
+// A packet the IOP sent, and the reply to one: the same layout, with the sender's self and
+// client words, which are the IOP's and plain words here (AnswerIopCall's and
+// AnswerServiceLookup's code needs them in the int class).
+struct IopCallPacket {
     u32 head[4];
     u32 flags;
     u32 self;
@@ -60,7 +82,7 @@ struct Pools_1F7BE8 {
     s32 packet_count;
     s32 fC;
     s32 f10;
-    RemoteCallPacket* replies;
+    IopCallPacket* replies;
     s32 reply_count;
     RemoteCallPacket* f1C;
     s32 f20;
@@ -90,6 +112,7 @@ s32 AwaitSemaphore(s32 sema);
 s32 SendCommand(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
 s32 SendCommandFromInterrupt(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);
 s32 QueueThreadRequest(void* thread);
+void WriteBackDataCacheRange(void* data, s32 size);
 
 void InitCommandChannel(void);
 s32 GetChannelWord(s32 index);
@@ -98,9 +121,9 @@ void SetCommandHandler(u32 cmd, CommandHandler handler, void* arg);
 s32 ReadIopRegister(u32 reg);
 u32 WriteIopRegister(u32 reg, u32 value);
 void HandleRemoteCallReply(RemoteCallPacket* reply);
-void AnswerServiceLookup(RemoteCallPacket* src, Pools_1F7BE8* pools);
+void AnswerServiceLookup(IopCallPacket* src, Pools_1F7BE8* pools);
 void QueueServerRequest(struct ServerRequestPacket* self);
-void AnswerIopCall(RemoteCallPacket* src, Pools_1F7BE8* pools);
+void AnswerIopCall(IopCallPacket* src, Pools_1F7BE8* pools);
 
 void InitRemoteCalls(void)
 {
@@ -118,7 +141,7 @@ void InitRemoteCalls(void)
     s->packet_count = 0x20;
     s->fC = 0;
     s->f10 = 0;
-    s->replies = (RemoteCallPacket*)((u32)D_00626800 | 0x20000000);
+    s->replies = (IopCallPacket*)((u32)D_00626800 | 0x20000000);
     s->reply_count = 0x20;
     s->f1C = (RemoteCallPacket*)((u32)D_00627000 | 0x20000000);
     s->f20 = 0x20;
@@ -165,7 +188,7 @@ RemoteCallPacket* TakeRequestPacket(Pools_1F7BE8* self)
                 } else {
                     id = self->next_id;
                 }
-                item->self = (u32)item;
+                item->self = item;
                 item->id = id;
                 EnableInterrupts();
                 return item;
@@ -184,12 +207,12 @@ void FreeRequestPacket(RemoteCallPacket* packet)
     packet->flags &= ~1u;
 }
 
-RemoteCallPacket* NextReplyPacket(Pools_1F7BE8* r)
+IopCallPacket* NextReplyPacket(Pools_1F7BE8* r)
 {
     s32 index = r->cursor % r->reply_count;
     s32 off = index << 6;
     r->cursor = index + 1;
-    return (RemoteCallPacket*)((u8*)r->replies + off);
+    return (IopCallPacket*)((u8*)r->replies + off);
 }
 
 void HandleRemoteCallReply(RemoteCallPacket* reply)
@@ -207,7 +230,7 @@ void HandleRemoteCallReply(RemoteCallPacket* reply)
 call_path:
     s0 = (RemoteCallClient*)reply->client;
     if (s0->callback != 0) {
-        s0->callback(s0->callbackArg);
+        ((RemoteCallEndFn)s0->callback)((void*)s0->callbackArg);
         s0 = (RemoteCallClient*)reply->client;
     }
     goto after;
@@ -219,13 +242,13 @@ set_fields:
 after:
     s32 sema = s0->sema;
     if (sema >= 0) PostSemaphoreFromInterrupt(sema);
-    FreeRequestPacket(s0->packet);
-    s0->packet = 0;
+    FreeRequestPacket(s0->packet.ptr);
+    s0->packet.ptr = 0;
 }
 
-void AnswerIopCall(RemoteCallPacket* src, Pools_1F7BE8* pools)
+void AnswerIopCall(IopCallPacket* src, Pools_1F7BE8* pools)
 {
-    RemoteCallPacket* m = NextReplyPacket(pools);
+    IopCallPacket* m = NextReplyPacket(pools);
     u32 a = src->self;
     u32 b = src->client;
     m->self = a;
@@ -248,9 +271,9 @@ Entry_1F7FC0* FindRemoteService(u32 key, Pools_1F7BE8* pools)
     return 0;
 }
 
-void AnswerServiceLookup(RemoteCallPacket* src, Pools_1F7BE8* pools)
+void AnswerServiceLookup(IopCallPacket* src, Pools_1F7BE8* pools)
 {
-    RemoteCallPacket* m = NextReplyPacket(pools);
+    IopCallPacket* m = NextReplyPacket(pools);
     u32 a = src->self;
     u32 b = src->client;
     m->self = a;
@@ -279,10 +302,14 @@ s32 BindRemoteService(RemoteCallClient* self, u32 cmd, s32 mode)
     self->server = 0;
     packet = TakeRequestPacket(&g_remoteCallState);
     if (packet == 0) return -1;
-    self->packet = packet;
-    self->id = packet->id;
+    // The id is read before the client's packet word is written: that word is a union member,
+    // whose store holds every later load (docs/toolchain/alias-classes.md, "A store that
+    // conflicts with two classes").
+    s32 id = packet->id;
+    self->packet.ptr = packet;
+    self->id = id;
     packet->cmd = cmd;
-    packet->self = (u32)packet;
+    packet->self = packet;
     packet->client = (u32)self;
     if ((mode & 1) == 0) {
         params.initCount = 0;
@@ -382,11 +409,71 @@ void QueueServerRequest(ServerRequestPacket* self)
     QueueThreadRequest((void*)list->f00);
 }
 
-INCLUDE_ASM(func_001F8290);
+s32 CallRemoteService(RemoteCallClient* self, s32 cmd, s32 mode, void* send, s32 sendSize, void* recv, s32 recvSize,
+                      RemoteCallEndFn callback, void* callbackArg)
+{
+    SemaphoreParams params;
+    RemoteCallPacket* packet;
+    s32 sema;
+
+    packet = TakeRequestPacket(&g_remoteCallState);
+    if (packet == 0) return -1;
+    // As in BindRemoteService, the id is read before the client's packet word is written.
+    s32 id = packet->id;
+    self->packet.ptr = packet;
+    self->id = id;
+    self->callback = (u32)callback;
+    self->callbackArg = (s32)callbackArg;
+    packet->cmd = cmd;
+    packet->f24 = sendSize;
+    packet->f28 = (s32)recv;
+    packet->f2C = recvSize;
+    packet->self = packet;
+    packet->f34 = self->server;
+    packet->client = (u32)self;
+    if ((mode & 2) == 0) {
+        if (send == recv) {
+            WriteBackDataCacheRange(send, sendSize < recvSize ? recvSize : sendSize);
+        } else {
+            if (sendSize > 0) WriteBackDataCacheRange(send, sendSize);
+            if (recvSize > 0) WriteBackDataCacheRange(recv, recvSize);
+        }
+    }
+    if (mode & 1) {
+        if (callback == 0) {
+            packet->f30 = 0;
+        } else {
+            packet->f30 = 1;
+        }
+        self->sema = -1;
+        if (SendCommand(0x8000000A, packet, 0x40, (s32)send, self->f14, sendSize) != 0) {
+            return 0;
+        }
+        FreeRequestPacket(packet);
+        return -2;
+    }
+    params.initCount = 0;
+    params.maxCount = 1;
+    sema = NewSemaphore(&params);
+    self->sema = sema;
+    if (sema < 0) {
+        FreeRequestPacket(packet);
+        return -3;
+    }
+    packet->f30 = 1;
+    if (SendCommand(0x8000000A, packet, 0x40, (s32)send, self->f14, sendSize) == 0) {
+        FreeSemaphore(self->sema);
+        FreeRequestPacket(packet);
+        return -2;
+    }
+    AwaitSemaphore(self->sema);
+    FreeSemaphore(self->sema);
+    return 0;
+}
 
 s32 IsRemoteCallPending(RemoteCallClient* self)
 {
-    RemoteCallPacket* p = self->packet;
+    RemoteCallPacket* p = self->packet.ptr;
     if (p != 0 && self->id == p->id) {
         u32 f = p->flags & 1;
         if (f != 0) goto yes;

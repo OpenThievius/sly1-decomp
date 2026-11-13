@@ -207,6 +207,9 @@ explains it; search the section's title or the function. Walls that stay open ar
 - **Store then scale in place** (`Q(*o) = Sum(..); Q(*o) = MulX(Q(*o), w)`): the dead store lives until flow2
   and keeps the product out of the sum's register (func_00130540, func_001C6028).
 - **sched1's weight puts a dying value's store first** (Sony's compiler, func_001F8290).
+- **After reload a tie goes to the store with more dependents**: a union member's store (alias set 0) has the
+  stores of every class behind it (func_001F8290; docs/toolchain/alias-classes.md, "A store that conflicts
+  with two classes").
 
 ### Register allocation (local-alloc, global-alloc, reload)
 - **Global ranking is log2(refs) x refs / live length.** Split an expression into two statements, or name an
