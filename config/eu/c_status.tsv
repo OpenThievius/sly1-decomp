@@ -4045,6 +4045,7 @@ func_001F7FC0	func_001F8FC0	match
 func_001F8010	func_001F9010	match	
 func_001F80C0	func_001F90C0	match	
 func_001F8200	func_001F9200	match	
+func_001F8290	func_001F9290	match	
 func_001F8480	func_001F9480	match	
 func_001F84D8	func_001F94D8	match	
 func_001F8538	func_001F95C0	match	

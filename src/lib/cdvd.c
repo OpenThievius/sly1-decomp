@@ -82,7 +82,7 @@ void PrintBuffered(const char* format, ...);
 void InitRemoteCalls(s32 mode);
 s32 BindRemoteService(RemoteCallClient* client, u32 server, s32 mode);
 s32 CallRemoteService(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
-                  s32 receive_size, void (*end)(void*), void* end_arg);
+                  s32 receive_size, RemoteCallEndFn end, void* end_arg);
 s32 IsRemoteCallPending(RemoteCallClient* client);
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);

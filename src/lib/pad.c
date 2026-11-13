@@ -108,7 +108,7 @@ void* CopyBytes(void* dst, const void* src, s32 size);
 void* FillMemory(void* p, s32 value, s32 size);
 s32 BindRemoteService(RemoteCallClient* client, u32 server, s32 mode);
 s32 CallRemoteService(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 send_size, void* receive,
-                  s32 receive_size, void* end, void* end_arg);
+                  s32 receive_size, RemoteCallEndFn end, void* end_arg);
 s32 SendPadDma(s32 port, s32 slot);
 s32 ResetPadModule(s32 mode);
 s32 SetPadRequestMode(s32 port, s32 slot, s32 mode);
