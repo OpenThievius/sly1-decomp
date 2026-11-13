@@ -115,6 +115,21 @@ From haifa-sched.c of GCC 2.95.3 (sched_analyze, sched_analyze_insn) and the `-d
   holds two more insns between the tilt loads and the last row's product that leave no code.
   What the original had at the boundary is not found; a test of pad there takes pad to s1.
 
+- **The invisible insns can be jumps (w44-fc, 2026-11-12).** An if/else whose two arms only
+  set a register that is set again before its use is emptied by flow1, and its two jumps (the
+  conditional one and the then-arm's jump over the else) stay in the insn stream through
+  sched1, local-alloc, global-alloc and sched2 until jump2 deletes them: two insns that leave
+  no code and count in every life around them, and two block boundaries (func_001EC7A8,
+  alias-classes.md, "A merged arm keeps its place"). As a probe here, one such if/else on
+  `self != 0` between the two key reads gives the two insns W23 asked for (&cur and pad two
+  longer, &tgt not): pad in s2 and &cur in s3, 56 lines to 42 on top of the boundary probe.
+  The probe is not the original (the first key read's address comes out as `addiu a1` with a
+  copy to s3), and what tested a register for free there is not known. In sched2 retail's
+  block shows the boundary as well: three loads in a row with their alu slots idle
+  (`lqc2 vf1,64(sp); lqc2 vf6,32(sp); lqc2 vf4,80(sp); lqc2 vf7,96(sp)`), where ours fills the
+  slots with the next call's `lui`, `addiu a1` and `move a0`; so the label is still there when
+  flow2 rebuilds the blocks.
+
 ### sched2 keeps sched1's dependences (func_001358D0)
 
 - **LOG_LINKS are never cleared.** haifa-sched.c's sched_analyze only adds to an insn's
@@ -1600,7 +1615,7 @@ func_0017ECE8), as if retail had insns that left no code. Read from GCC 2.95.3's
   chain inside one block, where only an argument copy could be invisible, and none of those
   chains ends in a call's argument.
 
-### Which of two sums issues first: a structure store ends a chain that a u128 store extends (func_0019ED58, near miss)
+### Which of two sums issues first: a structure store ends a chain that a u128 store extends (func_0019ED58)
 
 HandleEffectContact (src/main/effect.cpp) adds an impulse to the effect's velocity and its spin
 after MeasurePointToSegment, then tests the velocity's z against a floor. Read from the `-dS
@@ -1627,3 +1642,48 @@ after MeasurePointToSegment, then tests the velocity's z against a floor. Read f
 - 141 differing lines to 38 at retail's size. Left: sched2's order of the reloads after the
   call (retail reloads c2 into vf5 while the velocity sum's vf3 is live, ours into vf3), the
   third slot store against the MulAddX, and the first impulse's constant and slot store.
+
+### A weight written again repeats its slot store, which takes an issue slot and leaves no code (func_0019ED58, matched)
+
+What was left of HandleEffectContact after the section above (w44-fc, 2026-11-12), read from
+the `-da -fsched-verbose-6` dumps, reload1.c's order_regs_for_reload and a replay of sched2
+(tools/sched1.py's Replay on the `.sched2` trace, the dependence kinds taken from the insns'
+sets and uses: it reproduces every block of the function):
+
+- **What retail needed.** c2 is a spilled pseudo, loaded for the spin's MulXSum. Reload takes
+  the first register of REG_ALLOC_ORDER that no live pseudo holds: retail's vf5 means the new
+  velocity (vf3) was still live there, so in sched1's output the spin sum came after the
+  velocity's add and before the store to qA0. With the weights in locals (`Vu0::Vec s`, `s2`)
+  the store (priority 8) and the second weight's slot store (9) both beat the spin sum (4):
+  the store issued first and reload took the freed vf3. sched2's order after the call (the
+  restores of dir and d1 before the loads of qA0 and v100, c1's before the weights) followed
+  from that register: the reload's `lqc2 vf5` is an output dependence on the velocity sum's
+  chain, where `lqc2 vf3` hung on the store.
+- **The source form.** The weights written at each use:
+  `MulXSum(d1, Scalar((1 - along) * j1), dir, Scalar(along * j2))` in the velocity's statement
+  and the same two Scalars again in the spin's. cse1 merges each second qmtc2 with the first,
+  but each Scalar is a statement of its own slot store: the insn stream has the slot stores of
+  s, s2, s again, s2 again, then k's. The repeat of s is a deleted note by the `.flow` dump
+  (it is there in `.cse2`). The repeat of s2 stores what the slot holds: it stays through
+  sched1 (`(insn 2211 ... (set (mem/f:TI (plus fp 48)) (reg/v:TI 795))`, priority 9) and
+  reload deletes it as a no-op store (`(note 2211 ... NOTE_INSN_DELETED)` in `.greg`). In
+  sched1 it takes the issue slot beside the spin sum in the cycle after the velocity's add,
+  and the store to qA0 waits one cycle: velocity sum, s's slot, add, s2's slot, s2's repeat,
+  spin sum, store. One more insn that leaves no code (large-functions.md's CLOBBER, loops.md's
+  `(use (const_int 0))`): a value stored twice to a slot nothing reads.
+- **The impulses as statements, their dot products through ToFloatMoved.** The inline
+  ImpulseAlong evaluated all its arguments before its body and added insns: with the weights
+  at each use PRE's expression table had 251 buckets, which numbers the hoisted frame
+  addresses sp+64, sp+68, sp+16, sp+32 (bucket = (13259 + offset) mod 251 wraps between 32
+  and 64) and gave s3, s4, s5 in another order than retail (gcse.md, "One reaching
+  register"). Written out twice the table has 239 buckets and retail's order. The last twelve
+  lines were sched2's: retail issues `sub.s` (-1 - bounce) right after the first dot product's
+  `mtc1` and the product before the second dot product. ToFloat's `mtc1` is the compiler's own
+  move (units memory and flop, latency 2), which blocks the `sub.s` (fmac, flop) in its cycle
+  and the next move's; ToFloatMoved's is an asm (no unit, latency 1). Both dot products of
+  each impulse go through ToFloatMoved.
+- EXACT on US and PAL with `f32 D_0026B550 = 0.25f` (a scalar, which the life's load needs) and
+  the size curve after it a Vec02, whose alignment leaves retail's twelve zero bytes.
+- **The tell.** A reload register one higher than the first free one, or a store that retail
+  issues one cycle late with nothing in the gap: look for a weight (or any Scalar) the near
+  miss named in a local and used twice, and write it at each use.

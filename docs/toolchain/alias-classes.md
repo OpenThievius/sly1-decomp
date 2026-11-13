@@ -1222,7 +1222,7 @@ maintainer's decision.
   references, and a branch to a shared tail (`b L; <delay>`) or two branches to one store.
   Write the tail in each arm before trying loop structures.
 
-### A merged arm keeps its place: B0, the arm, the join (func_001EC7A8, unsolved)
+### A merged arm keeps its place: B0, the arm, the join (func_001EC7A8, matched 2026-11-12)
 
 - jump2's cross-jumping runs after sched2 (the .sched2 dump still has the branch and both
   arms), so where two identical arms merge, the final order is B0's schedule, the surviving
@@ -1265,6 +1265,37 @@ maintainer's decision.
   e->fC; else dir = e->fC;`: the surviving load is retail's `lw t0` and the `li` sits before it,
   16 lines, the join scheduled differently), but RunTimelineEntry, the only caller, passes two
   arguments, so that is not the original either.
+- **Solved: two arms that flow empties (w44-fc, 2026-11-12).** Read from flow.c
+  (tidy_fallthru_edge, make_edges) and the `-da` dumps of five probes. (1) One dead arm, `if
+  (dir == 1) clip = self->fC10[0];` before `clip = self->fC10[dir];`: flow1 deletes the load,
+  and the result is retail's code without the `li` (124 bytes, every other instruction and
+  register in place). The `.flow2` dump no longer has the constant: with the arm empty the
+  branch and its fall-through reach the same block, and flow.c's tidy_fallthru_edge deletes a
+  jump to the next real insn of a block with one successor (inferred from the source; the
+  dump shows only the result). (2) An uninitialised local compared
+  with 1 and `dir = e->fC` in both arms: retail's bytes but for the order of the two
+  parameter copies, which needs the load of `e->fC` in the first block (its copy of a1 then
+  has a dependent and issues first). So retail's first block is the copies, the constant, the
+  load and a test of the loaded value, and the arms hold nothing at the end. (3) An if/else
+  whose two arms each set `clip` from a load, with `clip = self->fC10[dir];` after it: flow1
+  deletes both loads as dead (the variable is set again before any use, and is not trivially
+  dead to cse: it has its use), but the branch now has two successors, each an empty block
+  (the then-arm keeps its jump over the else), so flow2 leaves it; `.sched`, `.greg` and
+  `.sched2` have the two jumps and four blocks, and jump2 deletes both jumps and, after
+  reload, not the compare's constant. EXACT on US and PAL.
+- **What does not work, and why.** The arms' value in a variable of its own (no later use:
+  delete_trivially_dead_insns removes both sets after cse, the jump pass the branch, flow the
+  constant); constants in the arms (a store-flag); one arm only (above).
+- **The source.** `if (dir == 1) clip = self->fC10[1]; else clip = self->fC10[0];` and then
+  `clip = self->fC10[dir];`: the choice written out for the two directions and again by
+  index. A dead assignment, kept under the project's rule for one (a copy of the live
+  statement beside it, no live form known after some 4,000 compiles); the file's other dead
+  constant (`li v0,2` after func_001ED090's call) is an if/else of the same kind.
+- **The tell.** A dead `li` of a compare constant with no branch after it and nothing of an
+  arm in the code: an if/else on that constant whose arms only set a register that the next
+  statement sets again. The test of a register against zero leaves nothing at all, only a
+  block boundary through sched1, both allocators and sched2 (func_001DEBE8's wall (b) asks for
+  one; its probe had a single arm).
 
 ### A named float argument lengthens a long life by one insn (func_eu_001AB2B0)
 

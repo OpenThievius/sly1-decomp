@@ -112,7 +112,22 @@ s32 NormalizeDiscPath(s8* path)
     return count;
 }
 
-INCLUDE_ASM(func_00140968);
+s32 GetDiscStatus(void);
+
+// Takes the drive's status into g_discStatus and says whether it is 0x14. The store is
+// repeated until the word reads back as the status: a back edge made by hand, so no loop notes
+// (a `while` gives the same code with the loop's aligned label and its weighted references;
+// docs/toolchain/gcse.md, "A %hi copied into a second register").
+s32 RefreshDiscStatus(void)
+{
+    s32 status = GetDiscStatus();
+    if (g_discStatus != status) {
+again:
+        g_discStatus = status;
+        if (g_discStatus != status) goto again;
+    }
+    return g_discStatus == 0x14;
+}
 
 void SendDiscCommand22WhenReady(void)
 {

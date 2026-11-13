@@ -86,6 +86,24 @@
 // retail's block A holds two invisible insns, r507's life three and &cur's two: the same kind
 // of thing in three blocks, still unidentified (docs/toolchain/sched1.md, "Argument moves
 // held back").
+// w44-fc (2026-11-12): the invisible insns of (a) are two jumps. func_001EC7A8 matched with an
+// if/else whose arms flow1 deletes (docs/toolchain/alias-classes.md, "A merged arm keeps its
+// place"): the conditional jump and the then-arm's jump over the else stay through sched1, both
+// allocators and sched2 and leave no code (a test of a register against zero leaves nothing at
+// all). Probe here (invented, not a match): on top of w40-fc's probe for (b), `if (self != 0)
+// reach = pad->f48; else reach = pad->f7C;` between the two key reads, reach set again where
+// it is computed. W23's numbers come out as predicted, &cur and pad two insns longer and &tgt
+// not: pad takes s2 and &cur s3 everywhere, 56 lines to 42 (build/swarm/w44-fc/f2/s1.cpp). It
+// is not retail's form: the first key read becomes `addiu a1,sp,368` with `move s3,a1` in the
+// call's slot (retail `addiu s3`, `move a1,s3`). The same if/else after the second key read
+// overshoots (63 lines); with a real test (`self->f720 == 2`, `cur == 0x352`) its operands stay
+// (1708 bytes). Still open: the s1/s3 pair (r507 against r510), block A's two insns and the
+// 660 rows' store order, the velocity tail. For the store order (retail 0x670, 0x680, 0x660):
+// replaying sched1 with the two row loads through `self + 0x660` (insns 704, 705) depending
+// only on their own rows' stores gives retail's order of the three stores, so in retail those
+// loads did not wait for row 0's store: the address pseudo had a known value for alias.c
+// (a REG_EQUAL or REG_EQUIV note on its set), the wall func_00144540 has too. Also ruled out:
+// `rot = m` through an inline with a self-assignment test (folded before cse, no change).
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"
