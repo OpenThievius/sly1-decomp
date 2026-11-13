@@ -126,6 +126,27 @@
 // the three stores. (4) The product helpers of include/mul_rotation.h in place of
 // RotateRowsBy, m and rot declared after them: 44 lines or more, their copies go through
 // the out pointer. Not tried: (a), (b) and r507 beyond w44-fc's probes.
+// w49-f (2026-11-13), 33 compiles (build/swarm/w49-f/f/), no closer. Established from
+// haifa-sched.c: INSN_REG_WEIGHT is the pattern's SETs less its REG_DEAD/REG_UNUSED notes, so a
+// store weighs 1, or 0 where a register dies in it (base: all six block-A stores weigh 1; `wif.py
+// base.d 25 w:610=0 w:652=0` gives retail's order from 0x670 to rot's last row). And haifa
+// reattaches the deaths after scheduling (attach_deaths_insn), so local-alloc sees the new order.
+// Ruled out by reasoning, each checked against the dumps: (1) a code-less copy X1 = P1 ahead of
+// the 0x670 store in the stream: cse makes one of the two canonical and rewrites the other's
+// uses, and the copy would feed m's store (priority 61) so sched1 issues it first; both
+// registers then live and the copy is code (s1: Vec by-value parameters, 1704 bytes). (2) m's
+// rows reloaded after the 660 stores and deleted by reload_cse in the product's register (the
+// t3 shape): a pseudo only loaded and stored is TI_REGS (movti and stores are neutral in
+// regclass) and local-alloc gives it a GPR (v1/v0, as in t3); only a "j" use makes it VU0, and
+// that use is code. (3) m and rot stored before the 660 stores (a1-a3): the frame stores still
+// feed RotateTransposed's loads (priority 61) and rot's go early; rot written after
+// RotateTransposed always holds the last use of P1 and P2. Also no change: products and stores
+// as Vu0::Vec values (v1-v4, cse folds every copy), RotateTransposedMembers for the first
+// product's transpose (e1-e3: Vec-member loads still wait for the mem/s frame stores), m copied
+// through a pointer or u128 rows (p1-p6, 1708 bytes or GPR copies), RotatedRows for the first
+// product and chained assignments (q1-q4, 1712-1752 bytes). Left: retail's rows 1 and 2 of m
+// and rot come from a register that is not the product's, with no code, and no plain C++ form
+// that gives that is known; (a), (b) and r507 as above.
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"
