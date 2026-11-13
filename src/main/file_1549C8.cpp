@@ -844,7 +844,7 @@ void InitSpawnRecord(void* mem)
         *(Quad16*)&g_unitXVector, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } }, *(Quad16*)&D_00248D30
     } };
     static Blk05 block = {
-        { 750.0f, 750.0f, 1.0f }, { 0.0f, 0.0f, -1500.0f }, { -1.0f, 0.0f, 0.0f }, *(Quad16*)&g_unitZVector, { 0 }, 200,
+        { 750.0f, 750.0f, 1.0f }, { 0.0f, 0.0f, -1500.0f }, { -1.0f, 0.0f, 0.0f }, *(Quad16*)&g_unitZVector, 0.0f, 0.0f, 0.0f, 200,
         { 1.0f, 1.0f, 0.0f }, { { 0, 0, 0, 0 } }, { 1.0f, 0.0f, -1.0f }
     };
     FillMemory(self, 0, 0x200);
@@ -1429,7 +1429,112 @@ void SetOwnedSpawnRecordKind(void* a0, s32 a1)
     SetSpawnRecordKind(r, a1);
 }
 
-INCLUDE_ASM(func_00156288);
+// The splash of an object on a surface: its sound by distance, the effect, and from 500 on a
+// burst through SpawnEffectsAt. The burst's two records are brace initialisers
+// (docs/toolchain/large-functions.md, "A brace initialiser's union member is a CLOBBER"): the
+// tail's two float groups each start with a union's member, and the block is the spawn block
+// (Blk05), built in a temporary and copied because two of its vectors are copied from memory;
+// the position is a local of its own, which takes the temporary's slot.
+struct __attribute__((aligned(16))) SplashTail {
+    s32 f00;                // 0x00
+    s32 f04;                // 0x04
+    s32 f08;                // 0x08
+    s32 f0C;                // 0x0C
+    union {
+        f32 f10;            // 0x10
+        u32 f10Bits;
+    };
+    f32 f14;                // 0x14
+    s32 f18;                // 0x18
+    s32 f1C;                // 0x1C
+    union {
+        f32 f20;            // 0x20
+        u32 f20Bits;
+    };
+    f32 f24;                // 0x24
+    s32 f28;                // 0x28
+    s32 f2C;                // 0x2C
+    void* f30;              // 0x30
+    s32 f34;                // 0x34
+    s32 f38;                // 0x38
+    s32 f3C;                // 0x3C
+};
+extern s32 D_00262050[74];
+s32 RandomIntInRange(s32 a, s32 b);
+void SpawnEffectsAt(Quad16* self, Quad16* a1, void* a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
+
+// The parameters are in the order of file_1963D8.cpp's caller; collider.cpp's caller is matched
+// with the floats before the two points, and this definition is retail's under either order.
+void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance, Quad16* at, f32 minScale, f32 size)
+{
+    if (AT(s32, cfg, 0x580) == 0) {
+        return;
+    }
+    f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*p), Vu0::Q(AT(Quad16, self, 0x150)))));
+    f32 zero = 0.0f;
+    s32 go = RandomFloatInRange(zero, 3.0f) < chance;
+    u8* snd = 0;
+    if (self->desc->flags & 8) {
+        snd = (u8*)self;
+    }
+    if (10.0f < dist || go) {
+        f32 hi = 1.0f;
+        f32 t = (dist - 10.0f) * 0.00126582279f;
+        f32 k;
+        if (t < zero) {
+            k = zero;
+        } else if (hi < t) {
+            k = hi;
+        } else {
+            k = t;
+        }
+        if (snd != 0 && AT(s32, cfg, 0x584) != 0) {
+            f32 vol = k * 0.9f + 0.1f;
+            void* rec = AT(void*, snd, 0x574);
+            if (rec != 0) {
+                AT(f32, rec, 0x14) = vol;
+            } else {
+                StartSoundEffect(D_00262050[RandomIntInRange(0, 3)], snd + 0x574, (s32)snd, 0, 10.0f, 1.0f, vol,
+                                 0.0f, 0.0f, 0, 0);
+            }
+        }
+        if (!go) {
+            f32 period = 1.0f - k * (1.0f - minScale);
+            if (snd != 0) {
+                go = period < g_gameTime - AT(f32, snd, 0x570);
+            } else {
+                f32 now = g_gameTime;
+                s32 a = (s32)(now / period);
+                s32 b = (s32)((now + chance) / period);
+                go = a != b;
+            }
+            if (!go) {
+                return;
+            }
+        }
+        Effect* e = (Effect*)CreateEffect(4, 0);
+        if (e == 0) {
+            return;
+        }
+        ((EffectStartFn)e->vt->m00)(e, at, 0, size);
+        if (snd != 0) {
+            AT(f32, snd, 0x570) = g_gameTime;
+        }
+        if (AT(s32, cfg, 0x588) != 0 && 500.0f < dist) {
+            SplashTail tail = { 2, -1, 0, 0, 1.0f, 0.0f, 0, 0, 8.0f, 12.0f, 0, 0, cfg };
+            Blk05 block = {
+                { dist * 0.5f, dist * 0.75f, 1.0f }, AT(Vec02, self->world, 0x1EE0), { 0.0f, 0.0f, 0.0f },
+                *(Quad16*)&g_unitZVector, 0.0f, 0.392699093f, 1.04719758f, 0,
+                { 1.0f, 5.0f, 0.0f }, { { 0, 0, 0, 0 } }, { 1.0f, 0.0f, -1.0f }
+            };
+            Vec02 pos = *(Vec02*)at;
+            pos.z += 30.0f;
+            SpawnEffectsAt((Quad16*)&pos, (Quad16*)&g_unitZVector, (void*)RandomIntInRange(4, 6), (SpawnTail*)&tail, (SpawnBlock*)&block, 0, 0);
+        }
+    } else if (snd != 0) {
+        StopSoundRecord(AT(void*, snd, 0x574), 0);
+    }
+}
 
 void SendPointEventToWorldListener(Quad16* a0, f32 f)
 {
@@ -3337,8 +3442,7 @@ extern f32 D_002621F8[6];
 extern f32 D_00262210[4];
 extern f32 D_00262220[4];
 
-// The file's .data, 0x261F70 to 0x262180, in retail's order. The labels only the original
-// assembly func_00156288 uses, and the two packet streams
+// The file's .data, 0x261F70 to 0x262180, in retail's order. The two packet streams
 // (globals.h), whose labels are shorter than PacketWriter, are included from the disassembly.
 // The spawn record's table, copied whole by InitSpawnRecord (func_001549C8), whose two statics'
 // guards (D_00261F70, D_00261F74) the compiler writes out with the function, ahead of it.

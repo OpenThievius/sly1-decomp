@@ -657,6 +657,10 @@ What it showed, with `-1.0`, `5.0`, `1.047` and `0.39` the block's four constant
   Vec02&` (CSE folds the address back); one float variable reused for 5.0 and -1.0 (they
   share a register, but its first set rises to priority 7 and loads too early).
 
+**Matched 2026-11-12 (w40-fa).** The last two lines (the up vector's store before the
+gravity's) were a second CLOBBER in the block's brace initialiser, before the angles at 0x44:
+docs/toolchain/large-functions.md, "A brace initialiser's union member is a CLOBBER".
+
 ### Emulating sched1 to read local-alloc's registers backwards (func_001CC818)
 
 Worked out on the link swing's last block (2026-11-09):
