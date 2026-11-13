@@ -17,6 +17,8 @@
 #include "shapes.h"
 #include "active_set_solver.h"
 #include "list_iter.h"
+#include "owned_record.h"
+#include "world_listed_object.h"
 #include "transform_object.h"
 #include "object_group.h"
 #include "cursor_animator.h"
@@ -1145,7 +1147,62 @@ void AddSpawnRangeEntry(void* self,void* a,void* b,f32 x,f32 y,f32 z,f32 w)
     AddRangeEntry(p+16,a,b,x,y,z,w,self);
 }
 
-INCLUDE_ASM(func_00155868);
+f32 WrapModulo(f32 x, f32 m);
+
+// Wraps the spawner's particles into a box of half-side `margin` around its target (or around
+// the origin): every coordinate outside the box comes back in on the other side.
+void WrapSpawnerParticlesIntoBox(EffectSpawner* self)
+{
+    if (!(1e-4f < self->margin)) {
+        return;
+    }
+    Vec02 size;
+    Vec02 lo;
+    Vec02 hi;
+    // One register value serves the box: the margin on every axis, then, with no target, its
+    // negative for the low corner. The record is read between the splat and the copy
+    // (docs/toolchain/gcse.md, "A splat split between a GPR and a VU0 copy").
+    u128 margin = Vu0::Splat(self->margin);
+    Rec50* rec = self->rec;
+    u128 half = margin;
+    Vu0::Q(size) = half;
+    if (rec->target != 0) {
+        Vu0::Q(lo) = Vu0::Sub(Vu0::Q(((PlacedObject*)rec->target)->v140), half);
+        Vu0::Q(hi) = Vu0::Add(Vu0::Q(((PlacedObject*)rec->target)->v140), half);
+    } else {
+        Vu0::Q(hi) = half;
+        half = Vu0::MulX(half, Vu0::Scalar(-1.0f));
+        Vu0::Q(lo) = half;
+    }
+    Vu0::Q(size) = Vu0::Splat(self->margin + self->margin);
+    if (self->rec->f120 != 0) {
+        return;
+    }
+    WorldListedObject* w = (WorldListedObject*)self->held348;
+    if (w == 0) {
+        return;
+    }
+    for (OwnedRecord* r = (OwnedRecord*)w->members.head; r != 0; r = r->next) {
+        Vec02* pts = r->points[r->bank];
+        for (s32 i = 0; i < r->count; i++) {
+            Vec02* p = &pts[i];
+            Vec02 delta;
+            ListFrame frame;
+            if (p->x < lo.x || hi.x < p->x) {
+                delta.x = lo.x + WrapModulo(p->x - lo.x, size.x) - p->x;
+                p->x += delta.x;
+            }
+            if (p->y < lo.y || hi.y < p->y) {
+                delta.y = lo.y + WrapModulo(p->y - lo.y, size.y) - p->y;
+                p->y += delta.y;
+            }
+            if (p->z < lo.z || hi.z < p->z) {
+                delta.z = lo.z + WrapModulo(p->z - lo.z, size.z) - p->z;
+                p->z += delta.z;
+            }
+        }
+    }
+}
 
 void RandomizeEffectSpawnerDelay(EffectSpawner* self);
 void UpdatePlacedObject(void* self, f32 dt);
