@@ -1033,7 +1033,110 @@ s32 IsCompanionAgentBlocker(CompanionAgent* self, Collider* ent)
     return 1;
 }
 
-INCLUDE_ASM(func_001B7280);
+s32 IsPadSelectFlagHeld(World* world);
+s32 TestPointAgainstObjectShape(s32 shape, Vec02* p);
+void* PushSoundLevel(s32 kind);
+void RemoveSoundLevelAndRecompute(void* p);
+s32 IsPointInsideObjectFaces(void* shape, Vec02* p);
+s32 IsPlayerUntargetableByAgent(CompanionAgent* self);
+void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(CompanionAgent*, Collider*), CompanionAgent* self, s32* n, Collider*** list);
+s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** list, ColliderSpan* out);
+
+#define F(T, o) (*(T*)((u8*)self + (o)))
+
+// Whether the companion can reach its target (slot 0x16C of class 0x09): not while select is
+// held or the agent is busy; the target must be near enough (or inside the agent's volume), the
+// player targetable, and no blocking collider may lie between the agent and each of the four
+// corners of the target's box for its roster state. The target test is one block that falls to
+// the shared `return 0`, which keeps the last test a branch (jump.c makes a store-flag of
+// `if (c) return 1; return 0;` only when nothing else reaches that return). The corner count is
+// set in each arm of the switch and never on the default path, so it stays a variable equal to
+// 4 that global-alloc leaves without a register (retail's `li v0,4` at each use), and it bounds
+// both loops, which share one index (docs/toolchain/loops.md, "A count set in each arm").
+s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
+{
+    if (IsPadSelectFlagHeld(self->world) != 0 || F(s32, 0xCCC) != 0) return 0;
+    if (F(s32, 0xCC8) != 0) return 1;
+    PlacedObject* target = (PlacedObject*)self->desc08()->m62(self);
+    if (target != 0) {
+        if (self->fC14 == 0 || self->f724 == 0xB || self->f724 == 0x10) return 0;
+        Vec02 a;
+        if (IsObjectOfKind(target, 6) != 0) {
+            if (*(s32*)((u8*)target + 0x690) != 0) {
+                a = *(Vec02*)((u8*)target + 0x6A0);
+            } else {
+                a = target->v140;
+                a.z -= 70.0f;
+            }
+        } else {
+            a = target->v140;
+        }
+        Vec02 delta;
+        Vu0::Q(delta) = Vu0::Sub(Vu0::Q(a), Vu0::Q(self->v140));
+        f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(delta), Vu0::Q(delta))));
+        s32 near;
+        if (self->fC2C != 0) {
+            near = TestPointAgainstObjectShape(self->fC2C, &a);
+        } else {
+            near = 0;
+            if (dist < self->fC20) {
+                if (__builtin_fabsf(delta.z) < self->fC24) near = 1;
+            }
+        }
+        if (near != 0) {
+            if (self->fCC0 == 0) self->fCC0 = PushSoundLevel(-0x14);
+        } else {
+            RemoveSoundLevelAndRecompute(self->fCC0);
+            self->fCC0 = 0;
+        }
+        if (IsPointInsideObjectFaces(self->fC14, &a) == 0) {
+            if (self->fC18 < dist) return 0;
+            if (self->fC1C < __builtin_fabsf(delta.z)) return 0;
+        }
+        s32 v = GetAgentRosterState(self);
+        if ((F(s32, 0xCD0) & 1) == 0) {
+            if (v != 2) {
+                if (IsPlayerUntargetableByAgent(self) != 0) return 0;
+            }
+        }
+        if (F(s32, 0xCD0) & 2) return 1;
+        f32* table;
+        s32 n;
+        switch (v) {
+        case 2:
+            table = D_00274620;
+            n = 4;
+            break;
+        case 0:
+        case 1:
+            table = D_00274660;
+            n = 4;
+            break;
+        }
+        Vec02* pos = F(PlacedObject*, 0x734) != 0 ? &F(PlacedObject*, 0x734)->v140 : &self->v140;
+        PushBackMemoryMark();
+        Vec02 lo = *pos;
+        Vec02 hi = *pos;
+        Vec02* buf = (Vec02*)AllocateBackMemory(n << 4);
+        s32 count;
+        Collider** list;
+        s32 i;
+        for (i = 0; i < n; i++) {
+            TransformPointBetweenFrames(target, 0, table + i * 4, &buf[i]);
+            Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(buf[i]));
+            Vu0::Q(hi) = Vu0::Max(Vu0::Q(hi), Vu0::Q(buf[i]));
+        }
+        GatherCollidersInBox(self->world, 0, &lo, &hi, IsCompanionAgentBlocker, self, &count, &list);
+        for (i = 0; i < n; i++) {
+            if (FindNearestSpanObject(0, pos, &buf[i], count, list, 0) == 0) break;
+        }
+        PopBackMemoryMark();
+        if (i < n) return 1;
+    }
+    return 0;
+}
+
+#undef F
 
 void UpdateCompanionAgent(CompanionAgent* self)
 {

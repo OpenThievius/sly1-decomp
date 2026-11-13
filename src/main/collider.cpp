@@ -1329,7 +1329,7 @@ void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
 void BuildShortestArcRotation(const Vec02* from, Vec02* to, Mat02* out);
 f32 Arccosine(f32 x);
-void SpawnSurfaceContactEffects(Collider* self, AttachedSet* other, f32 dt, f32 a, f32 b, Vec02* hit, Vec02* point);
+void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance, Quad16* at, f32 minScale, f32 size);
 
 struct Oscillated_1BA5B0 { u8 pad00[0xC]; void* oscillator; };
 struct SoundOwner_1BA5B0 { u8 pad00[0x574]; PlayingSound* sound; };
@@ -1432,7 +1432,7 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
         AddColliderTorque(self, &torque);
     }
     if (0.0f < depth && depth < 1.0f && 0.9f < normal.z) {
-        SpawnSurfaceContactEffects(self, other, dt, 0.1f, ((self->boundsMax.x - self->boundsMin.x) + (self->boundsMax.y - self->boundsMin.y)) * 0.25f, &hit, &point);
+        SpawnSurfaceContactEffects((BaseObject*)self, (u8*)other, (Quad16*)&hit, dt, (Quad16*)&point, 0.1f, ((self->boundsMax.x - self->boundsMin.x) + (self->boundsMax.y - self->boundsMin.y)) * 0.25f);
     } else if (self->desc->flags & 8) {
         StopSoundRecord(((SoundOwner_1BA5B0*)self)->sound, 0);
     }

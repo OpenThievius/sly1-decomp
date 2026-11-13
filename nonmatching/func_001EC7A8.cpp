@@ -10,6 +10,7 @@
 // list D_0027B130). Its .rodata runs 0x24E600-0x24E840 and its .data 0x275B60-0x276658, the
 // zero-initialised D_00276654 last. Named after its first address until what it was is known.
 // Tried (order-class pass 2): the fC60 float read first, the empty if kept, entry stores first, entry stores after the load of the clock: 21 to 31 words, baseline 19.
+// w40-fc (2026-11-12): the form that splits func_001DEBE8's block (a dead float store under the test: `f32 t; if (dir == 1) t = 0.0f;` straight after the read of dir, t assigned again before its one use) does not survive here: t's later value is forwarded by cse in the same block, both sets are trivially dead, and the branch and its `li` are gone before reload (retail's registers, no dead li, 25 lines). The arm needs a set that is dead to flow1 but not to cse: a variable with a use in another block or before the test.
 #include "common.h"
 #include "switched_collider.h"
 #include "list_iter.h"
