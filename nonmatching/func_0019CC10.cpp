@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 260/380 (68.4%), checked 2026-11-12
+// BYTES 260/380 (68.4%), checked 2026-11-13
 // w44-fa (2026-11-12), 1 compile (the dumps): nothing new. sched2 delays z*y in ours as in retail (its priority drops to 13 against 23 to 25 for the other seven products, through the registers' anti dependences), so the pair products' order after reload follows the registers, and the wall stays local-alloc's ranking of z2*y against z2*y*x on sched1's order.
 // NEAR: order: the statements written z weight by z weight (for each of z3, z, z1, z2: xa, xb, x,
 //       each with ny then y) give retail's x, xa and xb registers ($f15, $f16, $f17), the copy of

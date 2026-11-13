@@ -478,13 +478,115 @@ s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec02* pos, Vec02* e
     return dropped;
 }
 
-// The bounds the assembly func_0013A618 and func_0013A940 start from: the file's .rodata.
-extern const f32 D_00249D64 = 3.4028235e+38f;
-extern const f32 D_00249D68 = -3.4028235e+38f;
+// One of the two scratchpad transfer buffers (file_1C1190.cpp): the blocks StartToSprChain sent.
+struct SprTransfer {
+    void* tags;             // 0x00
+    s32 base;               // 0x04
+    u32 addrs[8];           // 0x08: each block's scratchpad address
+    s32 sizes[8];           // 0x28
+    s32 count;              // 0x48
+    s32 state;              // 0x4C: 2 while its blocks are worked on
+};
+
+extern s32 D_00274990;
+extern SprTransfer D_002748F0[2];
+extern void* g_toSprChannel;
+
+// Block n of the current scratchpad transfer.
+struct SprBlock {
+    static u32 Of(s32 n)
+    {
+        return D_002748F0[D_00274990].addrs[n];
+    }
+};
+
+void TurnMatrixBySpin(void* spin, Vec02* out);
+s32 WaitDmaChannel(void* dma, s32 b, s32 c);
+void StartToSprChain(s32 size, ...);
+void StartFromSprChain(void* first, ...);
+
+// The object's filter mode (0x618), read into the caller's variable.
+static inline void GetParticleMode(const WorldListedObject* self, s32* mode)
+{
+    *mode = self->f618;
+}
+
+// Steps the object's particles: each owned record's three arrays go to the scratchpad (the
+// next record's are sent while this one's are filtered), FilterParticleVerticesVu0 drops the
+// expired particles and packs the rest into the record's other bank with the bounds updated,
+// and an emptied record is detached. With no particle left the object ends itself (slot 3);
+// otherwise its centre and radius are set from the bounds.
+//
+// The bounds are brace-initialised union-first vectors: the union member's CLOBBER orders each
+// bound's stores (docs/toolchain/large-functions.md, "A brace initialiser's union member is a
+// CLOBBER"). The loop's registers follow from loop.c's count of the body, 97 insns in its first
+// pass (docs/toolchain/loops.md, "What loop.c counts"): the channel is read through a local (a
+// load and a copy to the argument register), and the mode through GetParticleMode, whose
+// out-parameter makes the variable an ADDRESSOF until purge_addressof, after cse1: its read is
+// then a copy that loop.c counts and cse2 folds.
+void StepListedObjectParticles(WorldListedObject* self, f32 dt)
+{
+    Quadratic16 lo = {{3.4028235e+38f}, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
+    Quadratic16 hi = {{-3.4028235e+38f}, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
+    Vec02 mat[4];
+    WordListFrame fr;
+    s32 e = (s32)&self->members.head;
+    fr.list = e;
+    fr.link = e;
+    s32 old = *(s32*)&g_activeListFrames;
+    s32 link = *(s32*)(e + 8);
+    fr.prev = old;
+    fr.offset = link;
+    *(s32*)&g_activeListFrames = (s32)&fr;
+    TurnMatrixBySpin((u8*)self + 0x330, mat);
+    s32 head = *(s32*)fr.link;
+    fr.link = head + fr.offset;
+    OwnedRecord* node = (OwnedRecord*)head;
+    Vec02* p = node->points[node->bank];
+    StartToSprChain(node->count * 16, p, node->count * 16, p + 0x2C, node->count * 16, p + 0x58, 0, 0);
+    while (node != 0) {
+        void* ch = g_toSprChannel;
+        WaitDmaChannel(ch, 0, 0);
+        D_00274990 = 1 - D_00274990;
+        SprTransfer* t = &D_002748F0[D_00274990];
+        t->state = 2;
+        OwnedRecord* next = *(OwnedRecord**)fr.link;
+        fr.link = (s32)next + fr.offset;
+        if (next != 0) {
+            p = next->points[next->bank];
+            StartToSprChain(next->count * 16, p, next->count * 16, p + 0x2C, next->count * 16, p + 0x58, 0, 0);
+        }
+        u128 w = Vu0::ScalarInGpr(dt);
+        s32 mode;
+        GetParticleMode(self, &mode);
+        s32 used = FilterParticleVerticesVu0((const f32*)mat, w, (Vec02*)SprBlock::Of(0), (Vec02*)SprBlock::Of(1), (Vec02*)SprBlock::Of(2),
+                                             node->count, mode, &lo, &hi);
+        s32 nb = (node->bank + 1) & 1;
+        p = node->points[nb];
+        StartFromSprChain(p, p + 0x2C, p + 0x58, 0);
+        node->count -= used;
+        self->f620 -= used;
+        if (node->count <= 0) {
+            DetachOwnedRecord(node);
+        } else {
+            node->bank = nb;
+        }
+        node = next;
+    }
+    if (self->f620 <= 0) {
+        self->desc->m03(self);
+    } else {
+        Vec02 center;
+        Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(lo), Vu0::Scalar(0.5f), Vu0::Q(hi), Vu0::Scalar(0.5f));
+        self->desc02()->m1D(self, &center);
+        self->f2A4 = self->f2A8 = Vu0::Distance(center, *(Vec02*)&hi);
+    }
+    *(s32*)&g_activeListFrames = fr.prev;
+}
+
+// The bounds the assembly func_0013A940 starts from: the file's .rodata.
 extern const f32 D_00249D6C = 3.4028235e+38f;
 extern const f32 D_00249D70 = -3.4028235e+38f;
-
-INCLUDE_ASM(func_0013A618);
 
 INCLUDE_ASM(func_0013A940);
 

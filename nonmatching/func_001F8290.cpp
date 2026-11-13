@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 488/492 (99.2%), checked 2026-11-12
+// BYTES 488/492 (99.2%), checked 2026-11-13
 // NEAR: in its file, src/lib/remote_call.cpp (Sony's 2.9-ee-991111). Left: only the packet's
 //       and the id's stores are swapped (retail: argument, packet, id, callback); every register
 //       and every other instruction is retail's. The client's packet and callback words are
