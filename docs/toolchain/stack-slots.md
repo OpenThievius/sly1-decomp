@@ -178,6 +178,25 @@ Read again from stmt.c, function.c and cse.c (2026-11-12, w37):
   if it is modified before its uses or its uses are behind a join. Neither was found in a form
   that keeps the frame (an input tied to an output forces a slot through its reference).
 
+Read again with the brace initialiser's CLOBBER (2026-11-12, w40-fa):
+
+- **A CLOBBER between the store and the cull keeps the load.** cse's invalidate treats a
+  `(clobber (mem:BLK frame))` as a store of unknown size, so it drops every frame MEM's
+  equivalence. With d a Vec02 in the frame and the radius a union holding a Vec02, built in
+  place after d is stored (`RadiusU r = { rq };`), cse1 does not forward the difference: the
+  asm reads one load (vf6), the first call's argument is that register (`qmfc2 a1,$vf6`) and
+  the second call's the memory (`lq a1`), which are retail's three lines. The same source
+  without the union forwards (`vsub` into vf6). This is the first plain form that gives the
+  shared load.
+- **What it does not give.** A Vec02 d is allocated when declared (0x50; retail 0x1C0, after
+  fade) and the stored difference is a local pseudo that takes vf1 from the dying input, where
+  retail's vf3 is an output reload's register. A u128 d is a pseudo, which a CLOBBER does not
+  touch. A u128 d forced to the frame at purge time (a probe reading one of its words) lands
+  at 0x1C0 with the vsub in vf3, but the two reads are then separate loads: cse1 does not
+  record `(mem (addressof))` and cse2 did not merge them. So retail's d is memory to cse1,
+  is allocated after fade, and its stored value has no register of its own; no form found
+  with all three.
+
 ### A pointer field's type picks its store's partner (func_002042C8)
 
 Read from haifa-sched.c (priority, rank_for_schedule) and the `-dS -dl -dg -fsched-verbose-6`
