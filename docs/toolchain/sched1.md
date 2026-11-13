@@ -130,6 +130,23 @@ From haifa-sched.c of GCC 2.95.3 (sched_analyze, sched_analyze_insn) and the `-d
   slots with the next call's `lui`, `addiu a1` and `move a0`; so the label is still there when
   flow2 rebuilds the blocks.
 
+- **What a register weight is, and why the 660 rows' order has no plain form yet (w49-f,
+  2026-11-13).** haifa-sched.c's find_insn_reg_weight counts the SETs and CLOBBERs of an insn's
+  pattern less its REG_DEAD and REG_UNUSED notes, so a store weighs 1, or 0 where a register
+  dies in it, and rank_for_schedule issues the lower weight first at equal priority. After a
+  block is scheduled, attach_deaths_insn puts the deaths back in the new order, so local-alloc
+  ties copies by sched1's order, not the source's. Retail's order (0x670, 0x680, 0x660, then
+  m's rows) is the replay's with the stores of rows 1 and 2 at weight 0, so their products die
+  there, while m's and rot's rows 1 and 2 are stored later from the same VU0 registers. The
+  three ways to a second register with the same value were each ruled out against the dumps:
+  a copy ahead of the store in the stream (cse rewrites both stores to its canonical register,
+  and the copy feeds m's store at priority 61, so it issues before the 0x670 store and both
+  registers live: a `vmove`); a reload of the row after the store that reload_cse would delete
+  in the product's register (a pseudo only loaded and stored ties in regclass, movti and
+  stores being neutral, so it is TI_REGS and local-alloc gives it a GPR); m and rot stored
+  before the 660 rows (frame stores feed RotateTransposed's loads at priority 61, so rot's go
+  early, and rot written after the transpose holds the products' last use).
+
 ### sched2 keeps sched1's dependences (func_001358D0)
 
 - **LOG_LINKS are never cleared.** haifa-sched.c's sched_analyze only adds to an insn's
