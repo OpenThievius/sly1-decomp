@@ -1,33 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2341/2428 (96.4%), checked 2026-11-13
-// BYTES 0/0, checked 2026-11-10
-// NEAR (PAL's own definition): python3 tools/check.py nonmatching/eu/func_001366A0.cpp func_001366A0 --version eu --unit src/main/text_panel.cpp
-// Still differs (2026-11-10, w13 round 2): only five saved registers. The record copy's address p
-// is in s0 where retail has s5, and so shown, text, typed and total each sit one register off
-// (retail s0, s1, s3, s4). In the .lreg dump p has 4 refs over 62 insns, which ranks it first in
-// global-alloc. Retail's p has 3 refs: it is set from the block move's destination register
-// (`addiu a2,sp,0x520 ... move s5,a2`), where ours sets a2 from p (`move a2,s0`), so it ranks
-// below total. The loop is solved: the cut written as an explicit walk (`for (s32* start =
-// &p->lines[1].start; ...; i++, start += 2)`) is retail's loop insn for insn, with the count
-// reloaded on each pass. With `break`, the rolled exit test's copy enters the loop from outside
-// and loop.c ignores the loop (docs/TOOLCHAIN.md). `goto` (func_0015FD78's fix) keeps the loop
-// valid, but it hoists the count and loses the peeled first pass (598 bytes). The base must be a
-// register: `*p = self->lines` through `p = &lines` keeps it, while `lines = self->lines` then
-// `p = &lines`, or `&(lines = ...)`, lets CSE fold p to the frame (608 bytes). Declaring p earlier
-// (before the first reader call) fixes shown and text but leaves p in s3.
-// Round 3: inlines that copy the record and return its address do not give retail's p either.
-// `{ *d = *s; return d; }`, the same with references (`d = s; return &d;`), and one taking the
-// object fold p to the frame (608 bytes): the copy's destination is the substituted frame
-// constant, so p carries it too. `{ T* out = d; *out = *s; return out; }` keeps the register,
-// but out is set before the copy, so this is X1 again (four references). Retail's p is set from
-// the block move's own address register (`move s5,a2`) and never becomes a frame equivalent,
-// which no form tried reproduces.
-// PAL: the panel's fields sit later (state 0x570, frame 0x520, colour 0x580, glyph 0x584, bands
-// 0x5A4); its text is 16-bit (a reader of 0xC0 bytes, func_eu_0015DCB8, and PAL's copy and append,
-// func_eu_001E3050, func_eu_001E3178); the line breaks are a record of their own (0x408, laid out by
-// func_eu_0015E4A8 in SetTextPanelText), copied whole and cut at the line being typed when the text
-// is taller than the panel (0x548); the layout has a fourth word (func_eu_001374E0), the text's
-// layout takes the copied record in its first word, and the screen is PAL's 512 lines high.
+// PAL's own definition: the panel's fields sit later (state 0x570, frame 0x520, colour 0x580, glyph
+// 0x584, bands 0x5A4); its text is 16-bit (a reader of 0xC0 bytes, func_eu_0015DCB8, and PAL's copy
+// and append, func_eu_001E3050, func_eu_001E3178); the line breaks are a record of their own (0x408,
+// laid out by func_eu_0015E4A8 in SetTextPanelText), copied whole and cut at the line being typed
+// when the text is taller than the panel (0x548); the layout has a fourth word (func_eu_001374E0),
+// the text's layout takes the copied record in its first word, and the screen is PAL's 512 lines
+// high.
+//
+// The record is copied first and its address taken after, before the cut: retail sets the pointer
+// from the block move's own destination register (`addiu a2,sp,0x520 ... move s5,a2`), the copy
+// PRE makes of a frame address computed again after the move. That needs the first CSE to see the
+// pointer's set and the walk in different paths, or it folds the walk's base into the frame
+// (`addiu a0,sp,0x538`) and nothing is left for PRE. Retail's code holds no label there; the
+// compiled-out assertion before the walk ends the path with its loop notes (docs/toolchain/gcse.md,
+// "A frame address computed after a block move").
+#include "debug_assert.h"
+
 struct TextLines_eu_1367B8 {
     u8 pad0[8];
     f32 height;                 // 0x08: the lines' height, cut with the count
@@ -187,9 +175,7 @@ void DrawTextPanel(Obj_eu_1367B8* self)
         s32 total = CountTextChars(&all);
         s32 shown = (s32)((g_gameClock[1] - self->textSince) * self->charsPerSecond);
         u16 text[0x200];
-        TextLines_eu_1367B8 lines;
-        TextLines_eu_1367B8* p = &lines;
-        *p = self->lines;
+        TextLines_eu_1367B8 lines = self->lines;
         if (!(shown < total)) {
             shown = total;
         }
@@ -200,6 +186,10 @@ void DrawTextPanel(Obj_eu_1367B8* self)
         SeekTextReader(&typed, shown);
         if (height < self->textHeight) {
             s32 at = func_eu_0015DE58(&typed);
+            TextLines_eu_1367B8* p = &lines;
+            // The walk reads at most the record's 32 lines. Retail's code keeps the compiled-out
+            // macro's loop notes (docs/toolchain/gcse.md, "A frame address computed after a block move").
+            ASSERT(p->count <= 32);
             s32 i = 1;
             for (s32* start = &p->lines[1].start; i < lines.count; i++, start += 2) {
                 if (at < *start) {

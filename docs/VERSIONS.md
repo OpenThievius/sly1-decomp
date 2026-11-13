@@ -175,10 +175,12 @@ function the step still leaves unpaired and that PAL has no counterpart for stay
 
 Two gaps of the tools, found on 2026-11-08. `version_src.py todo` lists game code only, so the
 library functions only PAL has are found from `config/eu/map.tsv`. And a function whose closest
-shared function lies in a `.c` file (PAL's four routines after libm's copy_sign.c, 0x20A730 to
+shared function lies in a `.c` file (PAL's three routines after libm's copy_sign.c, 0x20A730 to
 0x20A870) cannot be built in that file's unit: they are defined in the unit of the library file
 whose code they belong with (src/lib/memory_card_client.cpp, the "rom0:ROMVER" reader), which
-builds and checks them the same way. A function only PAL has whose bytes are one of US's
+builds and checks them the same way. The 68 bytes after them, func_0020A870, are not code but a
+stripped function's leftover words (`insn; nop` pairs), classified `remnant` by
+tools/classify_asm.py as US's are. A function only PAL has whose bytes are one of US's
 original-assembly functions (func_001F7738, US func_00201720's routine linked a second time) is
 classified as that by tools/classify_asm.py, as US's is.
 

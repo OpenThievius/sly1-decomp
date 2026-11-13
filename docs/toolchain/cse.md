@@ -333,7 +333,7 @@ differed (37.4%).
   (loop.c's reduced giv: `addu s2,v0,s3`, index first) rather than a walking pointer, and
   `radius` declared before `step` (retail loads 1/(2pi) before 2pi).
 
-### A break with a body: the copied exit test enters the loop from outside (PAL func_001366A0, unsolved)
+### A break with a body: the copied exit test enters the loop from outside (PAL func_001366A0, matched 2026-11-13)
 
 PAL's DrawTextPanel cuts a copied lines record at the line being typed:
 `for (i = 1; i < lines.count; i++) if (at < lines.lines[i].start) { lines.count = i; lines.height
@@ -352,7 +352,9 @@ record through a pointer, `TextLines* p = &lines; *p = self->lines;`, keeps the 
 (`lw 24(s0)`, `addiu a0,s0,24`): the whole function is then retail's code but for five saved
 registers, because p has one reference more than retail's (ours sets the block move's address
 from p, retail sets p from it) and global-alloc ranks it first. Writing the copy first and taking
-`&lines` after lets CSE fold p to the frame. Still open.
+`&lines` after lets CSE fold p to the frame, unless the first CSE's path ends between p and
+the walk: matched so, with the copy first and PRE's reaching register for p (gcse.md, "A frame
+address computed after a block move").
 
 ### A search loop that leaves by `goto`: breaks roll the body into the exit test (func_0015FD78)
 
