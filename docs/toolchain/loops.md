@@ -763,7 +763,7 @@ D_00274990` (`li v0,1` with the result in the loaded register's v1, where ours t
 the constant's pseudo) is probably the same: a moved, rematerialised constant. As func_00130C58
 above: what gives retail's life-1 invariants their move is not found.
 
-### Memory givs absorbed by a multi-use address giv (func_0013A940, near miss)
+### Memory givs absorbed by a multi-use address giv (func_0013A940, matched 2026-11-13: "Which giv absorbs the memory references" below)
 
 Read from loop.c (combine_givs, combine_givs_p) with `-dL` (2026-11-10). Retail's particle loop
 keeps the four call-argument addresses (&cur->pos[j], &cur->vel[j], &nxt->pos[out],
@@ -777,6 +777,73 @@ loop has one reduced register fewer, the bivs (removed, j, out) take the saved r
 instead of retail's caller-saved a7/t0/t1 (saved around both calls with sq/lq), and the function
 is 12 bytes short. The array form (Vec02 indexing or a bank struct of three arrays) does not
 change it.
+
+#### Which giv absorbs the memory references (func_0013A940, matched 2026-11-13, w46-a)
+
+The recount, from combine_givs and the `-dL` dumps of some thirty forms. The 116 against 108
+was not a tie to break: the two 116s were *twins*.
+
+- **What each total is.** A giv that may host (a DEST_ADDR giv, or a DEST_REG giv used in more
+  than one insn: reg_single_usage) gets its own benefit, +1 when its addend has no constant,
+  and `benefit + 3` for every giv it can absorb: every DEST_ADDR giv of the family (an address
+  a constant away), and every DEST_REG giv *identical* to it, single-use ones included. The
+  eight memory references are worth 97 to any host. So the hosts differ only by their own
+  benefit (7 or 8 for `cur + 16j`, 10 for `cur + 0x2C0 + 16j`, 11 for `cur + 0x580 + 16j`),
+  the +1, and their twins. Alone, `cur + 16j` scores 8 + 1 + 97 = 106 and loses to the third
+  array's 108. It scored 116 because it existed twice.
+- **Where the twins come from.** An rvalue `cur[K + j].f` expands as `((16j + cur) + 16K)`
+  and the memory reference: the sum `16j + cur` is a pseudo, cse shares it among the accesses
+  of one extended block, and the loop body is two such blocks (the label after the switch
+  starts the second), each with its own shared `cur + 16j` used several times. gcse does not
+  merge them: after its copy propagation the two sums read different pseudos for `16j`, and
+  there is one pass. Each twin adds 10 or 11 to the other: 116 and 116. The `nxt` family had
+  the same (140 for the mode-1 store's reference parameter with two twins, 132 for `nxt +
+  16out`), and its third-array giv was used once and could not host at all.
+- **What retail's registers require.** The host is the third array's giv in both families
+  (s1, s0, every reference at a negative offset), and the first two pairs are registers of
+  their own that only the call reads (fp, s6, s7, s5): givs that lost to the host, were
+  reduced alone, and kept the one use the host could not take. The preheader says which insns
+  they were: loop.c emits the initial values in descending order of the givs' insns, and
+  retail's `addiu s6,a1,0x2C0` still reads `cur` itself, so it was emitted before `fp = cur`
+  (cse2 would otherwise have rewritten it to read fp, as ours did: `addiu s8,s6,704`). The
+  `+0x2C0` giv's insn is therefore later in the loop than the `+0` giv's, and both precede
+  everything else: two pointers set at the top of the body, position first.
+- **The source.** Named element pointers, each a plain `base + (16j + 16K)` that leaves no
+  shared `base + 16j` behind:
+
+      Vec02* pos = &cur[j];           Vec02* npos = &nxt[out];
+      Vec02* vel = &cur[0x2C + j];    Vec02* nvel = &nxt[0x2C + out];
+      ... the test, the switch ...
+      Vec02* rec = &cur[0x58 + j];    Vec02* nrec = &nxt[0x58 + out];
+      *nrec = *rec; ...
+
+  Every access is then a pointer plus a constant; each pointer is one DEST_REG giv with
+  several uses and no twin. The dump: `{501, 112} {212, 111} {202, 109}` for j (rec, vel,
+  pos) and `{511, 105} {230, 104} {220, 102}` for out: the third array's pointers win by one.
+  The four at the top must be set on every iteration (ahead of the `continue`): a pointer
+  set after the test is not always computed, its references are not givs, and the function
+  grows to 1040-1052 bytes. rec named at the top with the others ties vel at 109 and loses on
+  order. With the bivs then in a7, t0 and t1 the size is retail's.
+- **The rest, each from retail's code once the loop was right.** The extra block is read from
+  the record at each use, as an array of 32-byte pairs (`node->extra[j].a`, `.b`, and the pair
+  assigned whole when the point moves down): retail reloads it after the call and keeps only
+  `j << 5`. The time left is the end's own variable (`end -= now`), which puts it in $f12
+  from the first read. The list walk reads the next link into a word and sets the frame
+  before the node, as the walk's start does. The mode-1 step holds its vectors as Vu0::Vec
+  and stores through the pointers as structures, which gives retail's order and registers there
+  (the last 12 lines: with `Vu0::Q` loads and stores the weight's slot store came before the
+  position's load; measured, the dependence not traced in the dumps).
+- **Landing.** The function's two FLT_MAX literals replace the placeholders D_00249D6C and
+  D_00249D70. The two that are left (func_0013A618's) had to move above the function before
+  it: INCLUDE_ASM leaves the assembler in .text without the compiler knowing, and a compiler
+  that last emitted .rodata does not switch to it again for the next function's literals,
+  which then land in .text (the build said `lands at 0x13A948`).
+
+The tell for a loop whose registers are off by one saved register: `-dL`'s first "Sorted
+combine statistics" of each biv. Retail's host is the giv whose register every memory
+reference is an offset from; if ours ranks another first, look for two equal totals at the
+top: twins from two extended blocks. func_0013A618, the same file's other loop over these
+records, was not re-tried with named pointers.
 
 ### Three invariants ranked by their place in loop.c's move list (func_001D7778, solved below)
 
