@@ -147,6 +147,37 @@
 // product and chained assignments (q1-q4, 1712-1752 bytes). Left: retail's rows 1 and 2 of m
 // and rot come from a register that is not the product's, with no code, and no plain C++ form
 // that gives that is known; (a), (b) and r507 as above.
+// w50-f (2026-11-13), about 30 compiles (build/swarm/w50-f/): the 660 rows' order is not a
+// weight. In the dumps the six stores (three to self, three to m) tie on priority (61), weight
+// and dependents, so sched1 issues them in LUID order as each becomes ready; retail's order
+// (0x670, 0x680, 0x660, m's rows) is the order of the stream when row 0's store to self is
+// emitted after rows 1 and 2 (either order of those two) and before `m = self->m660`. Written
+// so (below: the first product kept in a local, stored last), block A is retail's insn for
+// insn except for the three argument insns of wall (b) that sit among its loads: the same 64
+// lines here, but with w40-fc's and w44-fc's probes for (a) and (b) on top, 26 lines, all
+// registers (build/swarm/w50-f/f/f2.cpp; 28 without it). No pseudo other than the products is
+// needed: the weights of w46-c and w49-f were another way to the same order in the replay.
+// What is left, each measured on that probe: (1) (a)'s `addiu a1,sp,368; move s3,a1` (the
+// probe's own artefact); (2) s1/s3 (r507 against r510, as W23); (3) block A's VU0 registers:
+// tools/globalalloc.py's local-alloc replay gives the tilt's row 1 priority 11428 (4 refs over
+// 7 insns) against 10000 for turn's row 2 (2 over 2), and the quantity of tilt's row 0 and the
+// last product 10434 (8 refs over 23) against 10000 for the transposed product's result;
+// retail has both the other way, so 9 insns for the first and 25 for the second (w40-fc's two
+// insns between the tilt loads and the last product), or turn's row 2 loaded directly before
+// its product and v640 stored directly after the transposed product in sched1's order.
+// (b) holds after reload too: in our sched2 the call's `addiu a1` and `move a0` again take
+// the idle alu slots beside the tilt loads, where retail's slots are idle, so the boundary is
+// not a CLOBBER (reload deletes those before sched2); a jump that jump2 deletes, or an asm
+// without operands, are what is left. Ruled out, compiled: a run-once loop from each of six
+// starts (the heading call, reach, the first ComputePolarOffset, lean, the first
+// BuildAxisAngleMatrix, HandleStepSequenceSkipButtons) to `rot = m` with the new store order
+// (1704 bytes, or 52 lines with VU0 registers vf10/vf11: depth 2 is not retail's); the w
+// clamp written in both arms of the speed test for cross-jumping to merge (one more pad and
+// g_unitRange reference each, but the copies schedule differently and stay: 1796 bytes);
+// the key tests as switches (1704 to 1716 bytes); one u128 reused for the cross product and
+// the rows (a vmove, 1704 bytes). From toplev.c: jump runs again before cse2, so an arm
+// emptied after cse1 (an inline's unused result) leaves no jump for sched1; only an arm flow1
+// or a later pass empties does.
 #include "common.h"
 #include "vu0.h"
 #include "asm_func.h"
@@ -201,14 +232,6 @@ typedef void (*TintSelfFn_1DEBE8)(void* self);
 static inline f32 Quadratic(const f32* poly, f32 z)
 {
     return poly[0] + z * (poly[1] + z * poly[2]);
-}
-
-// The rows of m, each turned by r.
-static inline void RotateRowsBy(Mat02* out, const Mat02& r, const Mat02& m)
-{
-    Vu0::Q(out->r[0]) = Vu0::RotateUntied(r, Vu0::Q(m.r[0]));
-    Vu0::Q(out->r[1]) = Vu0::RotateUntied(r, Vu0::Q(m.r[1]));
-    Vu0::Q(out->r[2]) = Vu0::RotateUntied(r, Vu0::Q(m.r[2]));
 }
 
 // The rows of m, each turned by r, returned by value (g++'s named return value).
@@ -289,7 +312,10 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     ValueRange* unit = &g_unitRange;
     BuildAxisAngleMatrix(&axis, &tilt, D_00275810[0] * lean);
     BuildAxisAngleMatrix(&g_unitZVector, &turn, self->f638);
-    RotateRowsBy(&self->m660, tilt, turn);
+    u128 p0 = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[0]));
+    Vu0::Q(self->m660.r[1]) = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[1]));
+    Vu0::Q(self->m660.r[2]) = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[2]));
+    Vu0::Q(self->m660.r[0]) = p0;
     m = self->m660;
     Vu0::Q(self->v640) = Vu0::RotateTransposed(self->m660, Vu0::Q(offset));
     rot = m;
