@@ -1066,7 +1066,7 @@ that form plausible for this function; the search after it, with its `next:` lab
 reads like code written around such macros. Its only caller, func_0015B7B8, now declares it
 variadic as the definition is, and is still EXACT on both versions.
 
-### What loop.c counts: a `use` after a call that ends a block, and an argument through a local (func_0013A618, near miss)
+### What loop.c counts: a `use` after a call that ends a block, an argument through a local, and an ADDRESSOF variable's read (func_0013A618, matched 2026-11-13)
 
 Measured and read from flow.c (find_basic_blocks) and loop.c on 2026-11-12 (w40-fb). loop.c's
 "N real insns" is every INSN, JUMP_INSN and CALL_INSN between the notes when it runs, and two
@@ -1093,6 +1093,15 @@ kinds of insn are in that count that the final code never shows:
   pseudos (`q = ...; p = q;`), a dead copy (`s32 ok = f();`) and a local for a parameter or a
   loaded value used again are gone before loop.c (cse1 and its dead-insn sweep) and count
   nothing (measured: 94 each time).
+- **The read of a variable whose address is taken** (func_0013A618, matched by w46-b). A
+  scalar local passed by address to an inline (`s32 mode; GetParticleMode(self, &mode);`, or
+  bound to a `const s32&` parameter or local) is `(mem (addressof (reg)))` through cse1.
+  purge_addressof, which runs after cse1's dead-insn sweep, turns the inline's store into
+  `(set (reg mode) (reg loaded))` and the read into the argument's copy: three insns where a
+  plain local has two. gcse's cprop leaves the copy and loop.c counts it; cse2 then reads the
+  loaded register at the argument and deletes the copy, so the stream after cse2 is the plain
+  local's and no register or schedule changes. This is the counted insn that leaves the
+  block alone, with the callee's prototype as its definition has it (`s32 mode`).
 - **Retail's window for func_0013A618.** The movables in order: the `%hi` of g_toSprChannel
   (life 1), the `%hi` of D_00274990, the 1, 80, the base of D_002748F0 and its `%hi`, the 2
   (life 1), 2112, the block base, &hi (life 1). Retail moved the first `%hi` and the 1 (reload
@@ -1112,11 +1121,15 @@ kinds of insn are in that count that the final code never shows:
   (leaving the `%hi`'s `lui v0` dead in the preheader), forms it again for the `+ 8`
   (`lui v1; addiu v1,v1,%lo`, the form movsi takes during reload) and reload_cse turns that
   `lui` into `move v1,v0`. It appears as soon as pass 1 has 95 insns.
-- **Not found.** The third counted insn that leaves the filter call's block alone: the count
+- **Found: the ADDRESSOF read above.** Before it, tried as the third counted insn: the count
   argument through a local or an inline accessor gives 97 and 89 but its pseudo changes that
   block's registers; the detach call moved to the else arm gives the `use` but the wrong
-  branch; `node = next` in both arms rotates s1, s2 and s3. The near miss keeps two locals
-  (the channel and the mode) and is 17 lines from retail, all of them the moved 2.
+  branch; `node = next` in both arms rotates s1, s2 and s3; a narrower type for the flipped
+  bank index (`u8 nb`: the truncation is pushed into the load, `lbu`; `bool`: no insn); any
+  of the block addresses through a local (14 to 24 lines); the filter call in a wrapper
+  inline (its 128-bit by-value parameter changes the frame). With two locals (the channel
+  and the mode) the source was 17 lines from retail, all of them the moved 2; with the mode
+  read through the out-parameter it is 97 and 89 and EXACT on US and PAL.
 
 ### A count set in each arm: `li v0,4` at every use, and a bound both loops share (func_001B7280, matched 2026-11-12)
 

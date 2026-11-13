@@ -3100,6 +3100,23 @@ ints), not confirmed by a compile:
   emits the CLOBBER a C++ one never does (expr.c compares the element count with TYPE_FIELDS,
   which in C++ holds the class's own TYPE_DECL too).
 
+### A union member's alias set 0 gives retail's order (func_001F8290, 2026-11-13, w46-b, a probe)
+
+- **The class no sweep had.** c_get_alias_set returns 0 for a COMPONENT_REF whose object is a
+  union: such a store or load conflicts with every other class. With three classes per word
+  (int, `void*`, a union member) over the client's argument, packet and callback and the
+  packet's self, client, f28 and f34 (and the client's f24), 150 of 8,748 forms are EXACT, on
+  US and PAL. Every one has the client's packet word a union member, the packet's f28 a
+  `void*`, f34 and the client's f24 union members, the callback an int or `void*` word and
+  the id read into a local first.
+- **Not traced.** Which dependence the union member adds was not read from the dumps; the
+  earlier sched2 reading (the packet's store needs dependents the id's does not have) fits.
+- **Why it is a probe.** The types are the file's, shared with twelve matched functions: with
+  the header's packet word in a union BindRemoteService needs its id read into a local first
+  (EXACT then, 324 bytes otherwise); f28 as a `void*` moves AnswerIopCall and
+  AnswerServiceLookup; the header's callback is a function pointer and its store comes last.
+  The next step is one set of types for the whole file, checked on all thirteen functions.
+
 ### A run of stores in two alias classes (func_001F7BE8)
 
 Read from the `-dS -dl -fsched-verbose-6` dumps of InitRemoteCalls (src/lib/remote_call.cpp,

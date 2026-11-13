@@ -440,7 +440,9 @@ class Guard(unittest.TestCase):
                     nu = tsearch.Unit(new, path.stem, base=u)
                     self.assertEqual(tsearch.forbidden(text, new, path.stem, u, nu), [], "%s %s" % (path.name, label))
                     total += 1
-        self.assertGreater(total, 1000)
+        # The corpus shrinks as near misses match (it skips itself when none is left), so the
+        # floor is per file: the library offers well over twenty rewrites of any real function.
+        self.assertGreater(total, 20 * len(files))
 
 
 class Score(unittest.TestCase):

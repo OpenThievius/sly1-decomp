@@ -90,6 +90,29 @@
 // and wins on INSN_REG_WEIGHT; a stored value that is a copy dying at the packet's store would
 // make that weight 0 too, but cse makes the longer-lived packet variable the class's first
 // register on either side of such a copy, so no source order gives it.
+// w46-b (2026-11-13): an EXACT form exists in this near miss's own types (US and PAL), not yet
+// one that agrees with the file. The earlier sweeps gave each word two or three classes of its
+// own; none gave a word alias set 0, which a member read or written through a union has (it
+// conflicts with every class). Three classes per word (int, void*, a union member) for the
+// client's argument, packet and callback and the packet's self, client, f28 and f34 (with the
+// client's f24), the stores in this order or member order, the id in a local or in place:
+// 8,748 forms, 150 EXACT. All of them have: the client's packet word a union member, the
+// packet's f28 (the receive buffer) a void*, f34 and the client's f24 union members, the
+// callback an int or void* word, the id read into a local first; the others are free
+// (build/swarm/w46-b/probe_1F8290_exact.cpp, sweep290c.py). Why it works was not traced; by
+// the earlier sched2 reading the packet's store then has dependents in both classes and the
+// id's only in one. It cannot land as it is: built in src/lib/remote_call.cpp with the
+// header's packet word in a union, BindRemoteService is 324 bytes unless its id is read into
+// a local first (then EXACT); f28 as a void* moves AnswerIopCall (func_001F7F60) and
+// AnswerServiceLookup (func_001F8010); and the header's callback is a function pointer, a
+// class of its own, whose store then comes last here. A form has to be found for the file's
+// thirteen functions together. Also compiled, unchanged at 2 words: TakeRequestPacket
+// returning void* or u32; the packet as a checked void* copied into the variable before or
+// after the client's stores (cse1 keeps the copy, gcse's copy propagation and cse2 remove
+// it); 5,184 forms of int, void* and the words' own pointer types for the same seven words
+// together (the earlier sweeps had varied the client's and the packet's separately); 2,048
+// forms of union members with every word an int (no change: an int already conflicts with
+// every int).
 #include "common.h"
 
 struct Client_1F7BE8;

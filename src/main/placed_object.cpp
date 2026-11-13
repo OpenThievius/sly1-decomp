@@ -1984,7 +1984,165 @@ void SubmitScaledPlacedObjectTransform(PlacedObject* self, void* a, Quad16* src)
     }
 }
 
-INCLUDE_ASM(func_00125C90);
+// PlacedObject's slot 36 (0xA0), the base draw: the culling by the camera's planes and the
+// distance fades (into the transform's two scales), the world node's level, the parent's
+// unscaling, the attachment's matrix, slot 37, then each child drawn with its transform. The
+// child's matrix is MultiplyMatrices by value, nested where the child is relative to its parent:
+// the outer call's return slot is a temporary whose address the call and the copy into ct use,
+// so loop.c moves it (retail's s7).
+//
+// The offset from the camera is in two variables, d and its copy q. Retail spills d (the vsub's
+// output reload, 0x1C0, read again for the second fade call) and holds q in $vf6 for the plane
+// test and the first fade call (`lqc2 $vf6,448(sp)`, `qmfc2 a1,$vf6`). cse keeps a copy only
+// while it is its class's first register: q has to be named after d's last use, and its
+// equivalence has to end between the two calls (docs/toolchain/cse.md, "A copy that must
+// outlive its source"). The two assignments to q marked DEAD below do that and nothing else:
+// each recomputes the offset from the rebuilt transform, as the statement that sets d does, and
+// is never read, so flow deletes it. No live form was found (docs/toolchain/cse.md lists what
+// was tried: an inline's by-value parameter, a reference to a temporary, a record, one variable
+// recomputed), and the maintainer allowed these two dead stores for this function on
+// 2026-11-12 (AGENTS.md).
+s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, void* out);
+void InvertRigidTransform(const Vec02* pos, const Mat02* rot, void* out);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
+
+// The parent's rotation, its scale divided out, times the transform's (MulRotationRowsX), with
+// the fourth row w that MulRotationIntoWorld's frame shows: never set, it makes the saved frame
+// 112 bytes, and the child walk's locals sit after it (docs/TOOLCHAIN.md, "Stack slots").
+static inline void MulRotationRowsXW(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    const u128* p = (const u128*)&a;
+    u128 a0 = p[0];
+    u128 a1 = p[1];
+    u128 a2 = p[2];
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Mat02 r;
+    Vec02 w;    // the fourth row: never set
+    Vu0::Q(x) = Vu0::Q(r.r[0]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
+    Vu0::Q(y) = Vu0::Q(r.r[1]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
+    Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
+    *out = r;
+}
+
+void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf)
+{
+    ScaledTransform t;
+    if (self->flags & ((u64)0x8000 << 17)) {
+        return;
+    }
+    if ((self->flags & 0xC000000) == 0x8000000) {
+        if ((self->f88 & cam->f21C) != cam->f21C) {
+            return;
+        }
+    }
+    if ((self->flags & 0x30000000) == 0x20000000) {
+        Vec02 r;
+        f32 fade;
+        Vec02* p = &self->v140;
+        if (xf != 0) {
+            p = (Vec02*)&xf->q[3];
+        }
+        u128 d = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*(Vec02*)cam->f40));
+        u128 ones = Vu0::Ones();
+        Vu0::Q(r) = Vu0::FromFloat(self->f2A8);
+        u128 q = d;
+        if ((Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), q, ones, Vu0::Q(r)) ^ 0xF0) != 0) {
+            return;
+        }
+        if (ComputeCameraDistanceFade(cam, q, &fade, self->f2A8, self->f80) == 0) {
+            return;
+        }
+        if (fade != 1.0f) {
+            BuildPlacedObjectTransform(self, (Quad16*)xf, &t);
+            xf = &t;
+            t.f40 *= fade;
+            // DEAD: ends q's equivalence with d before the second call (see above).
+            q = Vu0::Sub(Vu0::Q(*(Vec02*)&xf->q[3]), Vu0::Q(*(Vec02*)cam->f40));
+        }
+        if (self->f84 < self->f80) {
+            if (ComputeCameraDistanceFade(cam, d, &fade, self->f2A8, self->f84) == 0) {
+                fade = 0.0f;
+            }
+            if (fade != 1.0f) {
+                BuildPlacedObjectTransform(self, (Quad16*)xf, &t);
+                xf = &t;
+                t.f44 *= fade;
+                // DEAD: names q after d's last use (see above).
+                q = Vu0::Sub(Vu0::Q(*(Vec02*)&xf->q[3]), Vu0::Q(*(Vec02*)cam->f40));
+            }
+        }
+    }
+    if (self->f298 != 0) {
+        BuildPlacedObjectTransform(self, (Quad16*)xf, &t);
+        xf = &t;
+        t.f40 *= self->f298->level;
+    }
+    if (xf != 0) {
+        Rec2195_224* rec = self->f224;
+        if (rec != 0 && (rec->fB0 & 0x80) && rec->fA0 != 0) {
+            PlacedObject* parent = (PlacedObject*)self->parent;
+            if (parent != 0) {
+                Attachment* a = (Attachment*)parent->f1F4;
+                if (a != 0 && parent->f224 != 0 && (parent->f224->fB0 & 0x80)) {
+                    Mat02 m;
+                    Mat02 rot;
+                    a->vt->getMatrix(a, &m);
+                    m.r[0].x = 1.0f / m.r[0].x;
+                    m.r[1].y = 1.0f / m.r[1].y;
+                    m.r[2].z = 1.0f / m.r[2].z;
+                    BuildPlacedObjectTransform(self, (Quad16*)xf, &t);
+                    MulRotationRowsXW(&rot, m, *(Mat02*)&t);
+                    BuildMatrixFromRotationAndTranslation((Vec02*)&t.q[3], &rot, &t);
+                    xf = &t;
+                }
+            }
+        }
+    }
+    Attachment* a = (Attachment*)self->f1F4;
+    if (a != 0) {
+        Mat02 m;
+        Mat4A m4;
+        a->vt->getMatrix(a, &m);
+        BuildMatrixFromRotationAndTranslation(&D_00248D30, &m, &m4);
+        BuildPlacedObjectTransform(self, (Quad16*)xf, &t);
+        *(Mat4A*)&t = MultiplyMatrices(*(Mat4A*)&t, m4);
+        xf = &t;
+    }
+    self->desc02()->m25(self, cam, xf);
+    PlacedObject* o = (PlacedObject*)self->children.head;
+    if (xf == 0) {
+        for (; o != 0; o = (PlacedObject*)o->next) {
+            if (o->desc->flags & 1) {
+                o->desc02()->m24(o, cam, 0);
+            }
+        }
+    } else {
+        for (; o != 0; o = (PlacedObject*)o->next) {
+            if (o->desc->flags & 1) {
+                ScaledTransform ct;
+                Mat4A local;
+                ScaledTransform inv;
+                if (o->f224 != 0 && (o->f224->fB0 & 0xC)) {
+                    BuildMatrixFromRotationAndTranslation(&o->v140, &o->m110, &local);
+                    InvertRigidTransform(&self->v140, &self->m110, &inv);
+                    *(Mat4A*)&ct = MultiplyMatrices(MultiplyMatrices(*(Mat4A*)xf, *(Mat4A*)&inv), local);
+                } else {
+                    BuildMatrixFromRotationAndTranslation(&o->pos, &o->rot, &local);
+                    *(Mat4A*)&ct = MultiplyMatrices(*(Mat4A*)xf, local);
+                }
+                ct.f40 = xf->f40;
+                ct.f44 = xf->f44;
+                o->desc02()->m24(o, cam, &ct);
+            }
+        }
+    }
+    if (0.0f < self->f28C) {
+        SubmitScaledPlacedObjectTransform(self, cam, (Quad16*)xf);
+    }
+}
 
 void DrawPlacedObject(PlacedObject* self, void* b, void* m)
 {
