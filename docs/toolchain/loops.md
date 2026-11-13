@@ -992,6 +992,13 @@ what that loop does and which sources cannot stand in for it.
   loop statement around `found = w - windows; k = -1;` whose body ran once: in practice a
   statement macro. Which macro held two assignments is not known; no plain form exists.
 
+Landed (2026-11-13): func_00130C58 is EXACT on US and PAL in curve_segment.cpp (vf30) with the
+two statements as a statement macro, `BEGIN_WINDOW_SCAN(found, k, w, windows)`, which expands to
+`do { (count) = (end) - (base); (cursor) = -1; } while (0)`. The maintainer judged a macro of
+that form plausible for this function; the search after it, with its `next:` label and gotos,
+reads like code written around such macros. Its only caller, func_0015B7B8, now declares it
+variadic as the definition is, and is still EXACT on both versions.
+
 ### What loop.c counts: a `use` after a call that ends a block, and an argument through a local (func_0013A618, near miss)
 
 Measured and read from flow.c (find_basic_blocks) and loop.c on 2026-11-12 (w40-fb). loop.c's

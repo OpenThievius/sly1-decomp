@@ -518,7 +518,7 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
 
 void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
 void ComputePolarOffset(Vec02* out, f32 angle, f32 a, f32 b);
-void FindEarliestTimeWithinCurveLimits(s32 n, f32* a, double ka, f32* b, double kb, f32* c, double kc, f32* out);
+void FindEarliestTimeWithinCurveLimits(s32 n, ...);
 void SetPlacedObjectVelocityFromFloats(PlacedObject* self, f32 x, f32 y, f32 z);
 void ScatterObjectsAtPoint(void* scatter, Vec02* at, s32 a, s32 b);
 void RotateMatrixUpright(Mat02* m, s32 zero, Mat02* out);

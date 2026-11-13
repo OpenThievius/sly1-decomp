@@ -8,7 +8,7 @@ D_002492F0	0024BB10	308	match
 D_00249428	0024BC48	1096	differs	first difference at +0x200; 162 text, 26 other words differ
 D_00249870	0024C0F0	372	match	
 D_002499F0	0024C270	668	match	
-D_00249C90	0024C510	16	match	
+D_00249C90	0024C510	4	match	
 D_00249CA0	0024C520	195	differs	first difference at +0x4; 8 text, 8 pointer, 10 other words differ
 D_00249D64	0024C594	16	match	
 D_00249D74	0024C5A4	8	match	

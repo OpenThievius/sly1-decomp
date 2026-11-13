@@ -912,6 +912,7 @@ func_00130540	func_00130670	match
 func_00130748	func_00130878	match	
 func_00130B48	func_00130C78	match	
 func_00130C20	func_00130D50	match	
+func_00130C58	func_00130D88	match	rodata
 func_00130F48	func_00131078	match	
 func_00131000	func_00131130	match	
 func_001310F0	func_00131220	match	version-specific

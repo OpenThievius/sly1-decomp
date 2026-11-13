@@ -242,6 +242,74 @@ void MeasureCurveSegmentLength(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y)
     AccumulateSegmentLengths(20, buf, 0);
 }
 
-extern const f32 D_00249C90[4] = { 3.4028235e38f, 0, 0, 0 };
 
-INCLUDE_ASM(func_00130C58);
+f32 ConvertDoubleToFloat(u64 v);
+s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
+
+// The search's start, a statement macro: how many window ends there are, and the cursor before
+// the first. It is the original's run-once loop: its loop notes make flow count the count's
+// references at loop depth 2 and keep the next insn behind it, which is retail's block after the
+// loops, and no other form gives it (docs/toolchain/loops.md, "Where a loop's notes count").
+// The maintainer judged a macro of this form plausible for this function on 2026-11-13.
+#define BEGIN_WINDOW_SCAN(count, cursor, end, base) do { (count) = (end) - (base); (cursor) = -1; } while (0)
+
+// The earliest time from 0 on outside every window the given curves spend beyond their limits:
+// for each (coefficients, scale) pair, the roots of four quadratics in the coefficients, kept
+// as ordered windows; then the smallest of 0 and the windows' ends that no window covers.
+void FindEarliestTimeWithinCurveLimits(s32 n, ...)
+{
+    f32 windows[40];
+    f32* w = windows;
+    char* ap = (char*)__builtin_next_arg(n) - 56;
+    s32 i;
+    s32 j;
+    s32 found;
+    s32 k;
+
+    for (i = 0; i < n; i++) {
+        f32* c = *(f32**)((ap += 8) - 8);
+        f32 t = ConvertDoubleToFloat(*(u64*)((ap += 8) - 8));
+        for (j = 0; j < 4; j++) {
+            switch (j) {
+            case 0:
+                found = SolveQuadratic(t, c[1] * 4.0f + c[3] * 2.0f, c[0] * 6.0f - c[2] * 6.0f, w);
+                break;
+            case 1:
+                found = SolveQuadratic(-t, c[1] * 4.0f + c[3] * 2.0f, c[0] * 6.0f - c[2] * 6.0f, w);
+                break;
+            case 2:
+                found = SolveQuadratic(t, c[1] * -2.0f - c[3] * 4.0f, c[0] * -6.0f + c[2] * 6.0f, w);
+                break;
+            case 3:
+                found = SolveQuadratic(-t, c[1] * -2.0f - c[3] * 4.0f, c[0] * -6.0f + c[2] * 6.0f, w);
+                break;
+            }
+            if (found == 2) {
+                f32 a = w[0];
+                f32 b = w[1];
+                if (b < a) {
+                    w[0] = b;
+                    w[1] = a;
+                }
+                w += 2;
+            }
+        }
+    }
+    BEGIN_WINDOW_SCAN(found, k, w, windows);
+    f32 best = 3.4028234663852886e+38f;
+next:
+    if (k < found) {
+        f32 x = k < 0 ? 0.0f : windows[k];
+        k += 2;
+        if (best < x)
+            goto next;
+        s32 m;
+        for (m = 0; m < found; m += 2) {
+            if (windows[m] + 1e-4f < x && x < windows[m + 1] - 1e-4f)
+                goto next;
+        }
+        best = x;
+        goto next;
+    }
+    **(f32**)((ap += 8) - 8) = best;
+}
