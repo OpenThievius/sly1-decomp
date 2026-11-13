@@ -634,6 +634,15 @@ dumps of func_0020BB18 (src/lib/mpeg_decoder.cpp, Sony's 2.9-ee-991111, 2026-11-
   combine drops at that block's label stays first in the stream through sched1 and
   allocation. Grep `.sched` for a block that is one `pc=L` insn.
 
+Landed (2026-11-13) as a named exception: func_0020BB18 is EXACT on US and PAL with the probe's
+test at the head of the body, `if ((u32)p3 & (w & 15)) pic->width = 0;`, with p3 the fourth
+plane's pointer named as a local. The statement is a stand-in: it reproduces the USE, and it is
+not claimed to be what the original's programmer wrote (it reads a variable that has no value
+yet). It is commented as such in src/lib/mpeg_decoder.cpp and named in AGENTS.md. What the
+original's statement was stays open: within this mechanism it must be a test that only combine
+can fold, at the head of the body, whose condition reads one of the six plane pointers before
+its assignment.
+
 ### A value negated into itself crosses the call (func_001A2380)
 
 - **sched1's call rule.** sched_analyze makes an insn that sets a pseudo depend (anti) on the
