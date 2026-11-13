@@ -527,3 +527,23 @@ of GCC 2.95.3 (2026-11-10), with the frame dumped (`-dr`; virtual-stack-vars is 
   and is still allocated when the segment end (0xB0) and the weight's Scalar frame (0xC0) are:
   only a local declared there gives that, and no walk frame belongs inside a loop's body. The
   near miss keeps the ListFrame and leaves that slot open (97.1%, the frame 0x170).
+
+### A 4-byte slot nothing touches (func_00187F40, near miss)
+
+Retail spills CollideColliderParts' sweep flag at 4(sp) and never touches 0(sp); ours spills it
+at 0(sp). Read from reload1.c, function.c and caller-save.c of GCC 2.95.3 (w40-fc, 2026-11-12):
+
+- reload gives the pseudos without a register their slots first, in register order (the
+  alter_reg loop before the first pass over the insns), and the caller-save areas and
+  secondary memory only later. The flag is the third parameter's pseudo, and the two before it
+  have registers, so no spilled pseudo comes ahead of it: the slot at 0(sp) was allocated
+  before reload, at RTL generation or by purge_addressof.
+- A BLKmode object does not fit: a 4-byte `struct { u8 r, g, b, a; }` local takes a slot
+  rounded to 16 bytes (the frame grows to 208). An unused `s32 x[1]`, an SImode struct or a
+  union takes no slot at all. A scalar that lives in memory does: an unused `volatile s32` at
+  the top is EXACT (a probe only: build/swarm/w40-fc/b4.cpp), so the object is a scalar of at
+  most 4 bytes homed on the stack whose every access is gone from the final code.
+- Not found: the source that leaves such a scalar. A `bool` local whose address is taken and
+  never used (a pointer local, or passed to an empty inline by pointer or by reference) takes
+  no slot, nor does an `s32` one; a `const f32&` inline for the 1.0 compare keeps a store-flag
+  (836 bytes).

@@ -1,6 +1,6 @@
 {
  "measures": {
-  "fuzzy_match_percent": 99.30097087378641,
+  "fuzzy_match_percent": 99.50458468176915,
   "total_code": "1112400",
   "matched_code": "1091860",
   "matched_code_percent": 98.15354189140596,
@@ -24027,7 +24027,7 @@
   {
    "name": "game/collider_contact",
    "measures": {
-    "fuzzy_match_percent": 92.18328840970351,
+    "fuzzy_match_percent": 99.97112052368117,
     "total_code": "10388",
     "matched_code": "9576",
     "matched_code_percent": 92.18328840970351,
@@ -24248,7 +24248,7 @@
     {
      "name": "func_00187F40",
      "size": "812",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 99.63054187192118,
      "address": "9000",
      "metadata": {
       "virtual_address": "1605440",
@@ -28835,7 +28835,7 @@
   {
    "name": "game/effect",
    "measures": {
-    "fuzzy_match_percent": 93.10284920083392,
+    "fuzzy_match_percent": 99.4266851980542,
     "total_code": "23024",
     "matched_code": "21436",
     "matched_code_percent": 93.10284920083392,
@@ -29026,7 +29026,7 @@
     {
      "name": "func_0019ED58",
      "size": "1588",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 91.68765743073048,
      "address": "3352",
      "metadata": {
       "virtual_address": "1699160",
@@ -53630,7 +53630,7 @@
    "id": "game",
    "name": "Game code",
    "measures": {
-    "fuzzy_match_percent": 99.25800917166404,
+    "fuzzy_match_percent": 99.4849958310618,
     "total_code": "997856",
     "matched_code": "979112",
     "matched_code_percent": 98.12157265176539,
