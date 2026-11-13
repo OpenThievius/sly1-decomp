@@ -448,6 +448,13 @@ void CopyWorldListedObject(WorldListedObject* self, BaseObject* src)
 f32 WrapAngle(f32 x);
 extern f32 g_gameTime;
 
+// The bounds the assembly func_0013A618 starts from: the file's .rodata. They are defined
+// ahead of the function before it, which has no literals, so that the compiler is in .text
+// when it reaches MoveWorldListedObject's own literals after the included assembly (the
+// include leaves the assembler in .text without the compiler knowing).
+extern const f32 D_00249D64 = 3.4028235e+38f;
+extern const f32 D_00249D68 = -3.4028235e+38f;
+
 // Runs the microprogram at 0x10 over count particles (Vu0::ParticleFilter): a particle whose
 // extra.w has passed is dropped, the others are packed down in all three arrays with the
 // microprogram's results, and the two bounds come back updated. Returns how many were dropped.
@@ -478,15 +485,115 @@ s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec02* pos, Vec02* e
     return dropped;
 }
 
-// The bounds the assembly func_0013A618 and func_0013A940 start from: the file's .rodata.
-extern const f32 D_00249D64 = 3.4028235e+38f;
-extern const f32 D_00249D68 = -3.4028235e+38f;
-extern const f32 D_00249D6C = 3.4028235e+38f;
-extern const f32 D_00249D70 = -3.4028235e+38f;
-
 INCLUDE_ASM(func_0013A618);
 
-INCLUDE_ASM(func_0013A940);
+extern f32 g_gameClock[];
+void StepListedObjectParticles(WorldListedObject* self, f32 dt);
+void EvaluateHermiteVectorSegment(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 t, f32 span, f32 scale, Vec02* pos, Vec02* vel, s32 flags);
+
+// One entry of a record's extra block: the two vectors a mode-2 point's segment ends on.
+struct VecPair { Vec02 a; Vec02 b; };
+
+// Class 0x4D's move slot. Mode 0 steps the particles (StepListedObjectParticles). Otherwise
+// each member record's live points are copied from the bank in use to the other, closing the
+// gaps of the points whose time has come: a mode-1 point moves by its velocity, a mode-2 point
+// along its Hermite segment (its extra pair moves down with it); the w's and the third
+// vector follow, the angle advanced when f618 is 2. The record then switches banks, or is
+// detached when empty. The object's centre and radius are set from the points' bounds, or the
+// object is removed when it has none left.
+//
+// The four pointers named at the top of the loop body and the two named before the third
+// vector's copy are what loop.c's giv combination needs (docs/toolchain/loops.md, "Which giv
+// absorbs the memory references"): each address of the body is then a pointer plus a
+// constant, no `base + 16j` is computed twice, and the third vector's pointers, used more
+// than once, take every memory reference of their array; the first two pairs are left as
+// registers of their own for the call. The time left is the end's own variable, and the
+// record's extra block is read from the record at each use.
+void MoveWorldListedObject(WorldListedObject* self, f32 dt)
+{
+    if (self->mode == 0) {
+        StepListedObjectParticles(self, dt);
+        return;
+    }
+    Quadratic16 lo = {{3.4028235e+38f}, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
+    Quadratic16 hi = {{-3.4028235e+38f}, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
+    WordListFrame fr;
+    s32 e = (s32)&self->members.head;
+    fr.list = e;
+    fr.link = e;
+    s32 old = *(s32*)&g_activeListFrames;
+    s32 link = *(s32*)(e + 8);
+    fr.prev = old;
+    fr.offset = link;
+    *(s32*)&g_activeListFrames = (s32)&fr;
+    s32 head = *(s32*)fr.link;
+    fr.link = head + fr.offset;
+    OwnedRecord* node = (OwnedRecord*)head;
+    while (node != 0) {
+        Vec02* cur = node->points[node->bank];
+        s32 out = 0;
+        s32 removed = 0;
+        s32 nb = (node->bank + 1) & 1;
+        Vec02* nxt = node->points[nb];
+        for (s32 j = 0; j < node->count; j++) {
+            Vec02* pos = &cur[j];
+            Vec02* vel = &cur[0x2C + j];
+            Vec02* npos = &nxt[out];
+            Vec02* nvel = &nxt[0x2C + out];
+            f32 end = vel->w;
+            if (end <= g_gameClock[1]) {
+                removed++;
+                continue;
+            }
+            switch (self->mode) {
+            case 1: {
+                Vu0::Vec v = Vu0::Vec::Of(*vel);
+                *(Vu0::Vec*)nvel = v;
+                *(Vu0::Vec*)npos = Vu0::MulAddX(Vu0::Vec::Of(*pos), v, Vu0::Vec::Scalar(dt));
+                break;
+            }
+            case 2: {
+                end -= g_gameClock[1];
+                EvaluateHermiteVectorSegment(pos, vel, &((VecPair*)node->extraRecord)[j].a, &((VecPair*)node->extraRecord)[j].b, end, end <? dt, 1.0f, npos, nvel, 0);
+                if (out != j) {
+                    ((VecPair*)node->extraRecord)[out] = ((VecPair*)node->extraRecord)[j];
+                }
+                break;
+            }
+            }
+            npos->w = pos->w;
+            nvel->w = vel->w;
+            Vec02* rec = &cur[0x58 + j];
+            Vec02* nrec = &nxt[0x58 + out];
+            *nrec = *rec;
+            if (self->f618 == 2) {
+                nrec->w = WrapAngle(rec->w + rec->z * dt);
+            }
+            Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(*npos));
+            Vu0::Q(hi) = Vu0::Max(Vu0::Q(hi), Vu0::Q(*npos));
+            out++;
+        }
+        node->count -= removed;
+        self->f620 -= removed;
+        if (node->count <= 0) {
+            DetachOwnedRecord(node);
+        } else {
+            node->bank = nb;
+        }
+        s32 next = *(s32*)fr.link;
+        fr.link = next + fr.offset;
+        node = (OwnedRecord*)next;
+    }
+    if (self->f620 <= 0) {
+        self->desc->m03(self);
+    } else {
+        Vec02 center;
+        Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(lo), Vu0::Scalar(0.5f), Vu0::Q(hi), Vu0::Scalar(0.5f));
+        self->desc02()->m1D(self, &center);
+        self->f2A4 = self->f2A8 = Vu0::Distance(center, *(Vec02*)&hi);
+    }
+    *(s32*)&g_activeListFrames = fr.prev;
+}
 
 struct DeferredRadiusRequest { void (*fn)(void* self); s32 zero; s32 count; u8 pad0[0x50 - 0x0C]; f32 radius; u8 pad1[0x60 - 0x54]; void* owner; u8 pad2[0x80 - 0x64]; };
 struct Src_13AD08 { u8 pad[0x40]; f32 scale; };
