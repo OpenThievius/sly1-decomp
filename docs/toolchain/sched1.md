@@ -815,6 +815,26 @@ weights and four z weights (2026-11-10, still a near miss):
   but the store is issued on the memory unit the cycle its product is ready, and no statement
   order, named product, extra weight variable or re-association tried moves it.
 
+- **Block A's three stores are ranked by register weight, not by an alias fact (w46-c,
+  2026-11-13).** Replayed on the probe's block (the row loads through `self + 0x660`, insns
+  725 and 726; the stores of rows 0, 1, 2 to self, 589, 631, 673; m's rows 686 to 694): with
+  the loads cut from row 0's store, and from each other's row, row 0's store falls to
+  priority 2 and issues last, after rot's rows, where retail has it third. Retail's order of
+  the block's whole second half (0x670, 0x680, 0x660, m's rows, the offset, the two row
+  loads, the product, rot's row 0, v640, rot's rows 1 and 2) comes out when the stores of
+  rows 1 and 2 weigh one less than row 0's, i.e. carry their products' REG_DEAD notes: the
+  three tie on priority 6 with m's rows, and rank_for_schedule's second key is the weight.
+  Row 0's product lives on (the transposed rotation reads it from its register). A raised
+  priority gives the same order in the replay but not in a compile: rows 1 and 2 stored a
+  second time right after the product leave no code and put row 1's store first, and its
+  product ahead of row 0's with it (the priority passes down the chain). So m's and rot's
+  rows 1 and 2 are stored from two other pseudos in the same registers, two copies that
+  leave no code: the two insns local-alloc's lives asked for. What makes them is open; a
+  copy through a pointer local (`m = *p`) gives the deaths and the order, but moves the rows
+  through a GPR (lq, sq). The tilt's rows loaded in the order 1, 2, 0 give tilt row 1 and
+  turn row 2 retail's vf3 and vf2 (row 1 then lives 9 insns). The tail is exact with the
+  rows of frame->m110 read as Vu0::Vec members (the near miss's RotateTransposedMembers).
+
 ### A Scalar's slot store after the load it would block (func_0014A8F8)
 
 Read from the `-dS -fsched-verbose-6` dumps of UpdateFrameCameraController (2026-11-08):
@@ -1687,3 +1707,38 @@ sets and uses: it reproduces every block of the function):
 - **The tell.** A reload register one higher than the first free one, or a store that retail
   issues one cycle late with nothing in the gap: look for a weight (or any Scalar) the near
   miss named in a local and used twice, and write it at each use.
+
+### A weight written again in the next statement, and the rows read before a later store (func_00144540, matched)
+
+UpdateCameraMatrices (src/main/camera.cpp) had two walls that earlier passes read as one alias
+fact: the product's rows `0x10(s0)`, `0x20(s0)` loaded before corner's store, and the weight in
+vf5. Read from the `-da -fsched-verbose-6` dumps and the replay (w46-c, 2026-11-13):
+
+- **The rows needed no known value.** A load through a pointer of unknown base waits for every
+  frame store before it in the insn stream, and every frame store after it waits for the load
+  (an anti dependence, cost 1). Retail's two row loads come before corner's store, row 0
+  (`0x80(s4)`, a parameter's base) long after: the loads were ahead of corner's store in the
+  insn stream, so the store's priority (17) passed to them (18) and left row 0 at its own (11).
+  The source order is the product first and corner after it. No REG_EQUAL note is involved;
+  the same reading applies wherever a row load "must not wait" for a store: ask first whether
+  the store was written after the load.
+- **corner after the product kept the dead row store only because of its slot.** flow1 deletes
+  the product's `r.r[2]` store when the next store to that slot (0xB0) follows with no load
+  through a pseudo address between. A Scalar's slot is the first free one when its statement
+  is expanded: with `Vec02 tilt; Mat4 proj;` declared before corner's statement they take
+  0x60 and 0x70, and corner's Scalar gets 0xB0 right after the product (its vector loads are
+  expanded after the slot store, as an inline's by-value memory arguments are). Declared after
+  corner's statement, the Scalar takes 0x60 and the row store stays (780 bytes).
+- **The weight at each use.** `Vu0::Scalar(swing)` in pos, dir, corner and tilt: cse1 merges
+  the four `qmtc2`, and each Scalar stores its slot. The `.sched` dump has four slot stores,
+  two to 0x50 (insns 193 and 254, priorities 24 and 23) and two to 0xB0 (493 and 556, 6 and
+  5): the repeat depends on the first (an output dependence), so the first outranks the other
+  stores of its group and issues ahead of them, where retail has `sqc2 vf5,80(sp)` before the
+  stores of pos and dir and `sqc2 vf5,176(sp)` before the product's. Both repeats are in
+  `.lreg` and gone in `.greg` (reload deletes a store of what the slot holds). With the weight
+  in a named local the slot store ties with the others and loses on register weight (it is
+  not the weight's death): it came last, and local-alloc gave the weight vf7.
+- A grid over the four uses (named or in place) and the place of corner's declaration: EXACT
+  with all four in place and corner, tilt and proj declared together after the product (and
+  with corner declared before the product, or pos on a named weight). PAL's projection uses
+  256 where US has 224 (src/versions/eu/main/camera/func_00144540.cpp).
