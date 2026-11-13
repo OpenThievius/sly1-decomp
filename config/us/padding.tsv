@@ -81,6 +81,8 @@ address	size	align	before
 00264A3C	4	8	src/main/memory_card.cpp .data
 002699AC	4	8	src/main/movie_player.cpp .data
 00269BB4	12	16	src/main/switched_collider.cpp .data
+0026A908	8	16	src/main/object_gatherer.cpp .data
+00274398	8	16	src/main/screen_element.cpp .data
 002744F4	4	8	src/main/anim_record.cpp .data
 00274994	4	8	src/main/trail_ribbon.cpp .data
 00274B8C	4	8	src/main/player_aim.cpp .data
