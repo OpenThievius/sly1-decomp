@@ -1504,7 +1504,7 @@ a3, the `%hi` of g_activeListFrames in a2). The functions' literal pools check e
   through global-alloc's pass 0 the same day: docs/toolchain/long-block-constants.md, "Pass 0
   takes no new saved register" (func_0020CAF8).)
 
-### Two weights' qmtc2s tied on priority: dependents decide local-alloc (func_001C54D0, unsolved)
+### Two weights' qmtc2s tied on priority: dependents decide local-alloc (func_001C54D0, matched 2026-11-12)
 
 The tail of func_001C54D0 is `end->v30 + m110.r[2] * -push + tangent * f63C` through MulAddX2,
 with `Scalar(-push)` (insn 865, after a neg.s) and `ScalarAt(self->f63C)` (insn 901, its word an
@@ -1536,6 +1536,33 @@ takes retail's a0 and vf6, but local-alloc gives the loaded pseudo v0 where reta
 a1. What is left is a source fact that makes the f63C weight wait on the -push one, or keeps its
 load out of the qmtc2 until reload; no plain form of either was found
 (nonmatching/func_001C54D0.cpp, W24).
+
+Matched on 2026-11-12 (w46-a) by the rank's second field, the register weight, which the
+passes above had tied at 0 against 0. An insn's weight is its sets less the REG_DEAD notes it
+carries *in the insn stream's order, before sched1*. With the tangent in a local ahead of the
+sum, the f63C read was self's last use in that order, so 901 weighed 0 and the dependents
+decided. Written as one expression with each weight before its vector,
+
+    Vu0::Q(end->v30) = Vu0::MulAddX2WeightFirst(Vu0::Vec::Of(end->v30).q, Vu0::Scalar(-push),
+        Vu0::Vec::Of(self->m110.r[2]).q, Vu0::ScalarAt(self->f63C),
+        RemoveAlong(Vu0::RotateMembers(self->m660, Vu0::Vec::Of(self->v640).q),
+                    Vu0::Vec::Of(c->v80).q));
+
+the inline call emits its arguments in parameter order, so the rotation's loads follow both
+weights and the up axis in the insn stream. Self then dies at the rotation's first row: the
+f63C qmtc2 weighs 1 (a set, no death) and the -push one 0, so -push issues first at the tie
+(retail's a0 and vf6); the up axis's load weighs 1 as well and loses to the f63C qmtc2 on
+dependents (2 against 3), so it stays the later use of self and reload's `lw` takes a1 rather
+than self's own register. The same order explains the second difference, which the tied form
+had only approximated with RotateRowsTied: v640 is read before the rows (RotateMembers takes
+it by value, its rows as Vec members that no weight slot holds back), row 0 carries self's
+death (weight 0) and wins the first cycle over v640, row 2 carries the row pointer's death and
+wins the second, and v640 then beats row 1 on its LUID: retail's row 0, row 2, v640, row 1.
+RemoveAlong is a file-level inline (the rotated vector is used twice). The tell for other
+near misses: when two insns tie on priority and the wrong one wins on dependents, look at
+which statement holds the last use, in source order, of a register one of them reads; moving
+a later statement's loads behind it (one expression instead of named locals, or the reverse)
+changes the weight and is decided before the dependents are.
 
 ### The 33rd memory reference of a block is a barrier (WriteMemoryCardSaveHeader)
 

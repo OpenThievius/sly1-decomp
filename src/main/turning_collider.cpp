@@ -485,12 +485,12 @@ void BuildTurningColliderHeadingMatrix(TurningCollider* self)
     BuildAxisAngleMatrix(&g_unitZVector, self->f638, (u8*)self + 0x660);
 }
 
-void ResolveTurningColliderGroundContact(TurningCollider* self, void* b, s32 c);
+void ResolveTurningColliderGroundContact(TurningCollider* self, Contact03* c, s32 e);
 
 void ResolveTurningColliderContact(TurningCollider* self, void* b, s32 c)
 {
     if (((ContactTestFn*)self->desc)[90](self)) {
-        ResolveTurningColliderGroundContact(self, b, c);
+        ResolveTurningColliderGroundContact(self, (Contact03*)b, c);
     }
 }
 
@@ -517,7 +517,78 @@ void RecomputeTurningColliderFrame(TurningCollider* self)
     self->f63C = v;
 }
 
-INCLUDE_ASM(func_001C54D0);
+// A ramp's three words copied to the stack, read back as floats.
+union RampCopy {
+    ThreeWords w;
+    f32 f[3];
+};
+
+f32 ClampToMagnitude(f32 a, f32 b);
+
+// v less its part along the unit vector n.
+static inline u128 RemoveAlong(u128 v, u128 n)
+{
+    return Vu0::Sub(v, Vu0::MulX(n, Vu0::Dot(v, n)));
+}
+
+// The ground contact's push along the collider's up axis (m110.r[2]) at end e: none when the
+// collider has no ground vertex or no push speed; else the ends' closing speed over the
+// contact's weight, raised to the ramp's value toward -f6CC and eased toward the ramp's value
+// toward rest. A contact deeper than 2 is first moved out to the ground vertex's height. The
+// end's velocity then gains the push and the heading's velocity (m660 times v640) less its part
+// along the contact's normal, scaled by f63C.
+//
+// The frame (208 bytes: the ground push's weight at 32, the tail's weights at 64, out1 and
+// out2 at 80 and 84) needs d0 and d1 declared at the top and the ramp copies at function scope
+// after the ground push, live through the tail: the zero-push path jumps over them with a
+// goto (docs/toolchain/stack-slots.md, "Ramp copies live through a tail: a goto over
+// function-scope locals"). The tail is one expression, each weight before its vector, so the
+// rotation's loads follow the weights in the insn stream and self dies at its first row
+// (docs/toolchain/sched1.md, "Two weights' qmtc2s tied on priority").
+void ResolveTurningColliderGroundContact(TurningCollider* self, Contact03* c, s32 e)
+{
+    Vec02 d0;
+    Vec02 d1;
+    f32 push;
+    f32 w;
+    f32 cur;
+    if (self->f6DC == 0 || self->f6CC == 0.0f) {
+        push = 0.0f;
+        goto apply;
+    }
+    w = Vu0::ToFloat(Vu0::Dot(Vu0::Q(c->v80), Vu0::Q(self->m110.r[2]))) * D_00274AD0[e];
+    if (c->f90 < -2.0f) {
+        f32 f90 = c->f90;
+        u128 v = Vu0::Q(c->end[e].v10);
+        f32 t = (f90 + 1.0f) / w;
+        f32 ground = ((Vec02*)self->mesh.verts)[self->f6D0].z + 10.0f;
+        f32 m = ground >? t;
+        Vu0::Q(c->end[e].v10) = Vu0::MulAddX(v, Vu0::Q(self->m110.r[2]), Vu0::Scalar(-m));
+        Vu0::Q(d0) = Vu0::Sub(Vu0::Q(c->end[0].v10), Vu0::Q(c->end[1].v10));
+        Vu0::StoreX(c->f90, Vu0::Dot(Vu0::Q(d0), Vu0::Q(c->v80)));
+    }
+    RampCopy A;
+    RampCopy B;
+    f32 out1;
+    f32 out2;
+    Vu0::Q(d0) = Vu0::Sub(Vu0::Q(*(Vec02*)self->f6D4), Vu0::Q(c->end[e].v10));
+    Vu0::Q(d1) = Vu0::Sub(Vu0::Q(c->end[0].v30), Vu0::Q(c->end[1].v30));
+    cur = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d0), Vu0::Q(self->m110.r[2])));
+    push = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d1), Vu0::Q(c->v80))) / w;
+    A.w = *(ThreeWords*)self->f710;
+    B.w = *(ThreeWords*)self->f704;
+    A.f[0] = A.f[0] * self->f700;
+    B.f[0] = B.f[0] * self->f700;
+    ApproachValueWithRamp(cur, 0.0f, g_gameClock.dt, (RampProfile*)&A, &out1);
+    ApproachValueWithRamp(cur, -self->f6CC, g_gameClock.dt, (RampProfile*)&B, &out2);
+    if (push < out2) {
+        push = out2;
+    }
+    push = push + ClampToMagnitude(out1 - push, g_gameClock.dt * (B.f[0] - B.f[1]) / B.f[2]);
+apply:
+    ContactEnd03* end = &c->end[e];
+    Vu0::Q(end->v30) = Vu0::MulAddX2WeightFirst(Vu0::Vec::Of(end->v30).q, Vu0::Scalar(-push), Vu0::Vec::Of(self->m110.r[2]).q, Vu0::ScalarAt(self->f63C), RemoveAlong(Vu0::RotateMembers(self->m660, Vu0::Vec::Of(self->v640).q), Vu0::Vec::Of(c->v80).q));
+}
 
 s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 void FreePooledContactChain(World* w, Contact03* head);
