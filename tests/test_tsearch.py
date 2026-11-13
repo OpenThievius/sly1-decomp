@@ -215,6 +215,164 @@ class Rewrites(unittest.TestCase):
         rs = results(src, only={"helpers"})
         self.assertTrue(any(l.startswith("call-helper") and "return M::X(a);" in t for l, t in rs.items()))
 
+    def test_named_constants(self):
+        src = "void h(f32);\nvoid func_00100000(f32* p) { for (s32 i = 0; i < 8; i++) { h(p[i]); h(p[i] * 0.5f); } }\n"
+        rs = results(src, only={"named-constant"})
+        self.assertTrue(has(rs, "name-constant", "void func_00100000(f32* p) { for (s32 i = 0; i < 8; i++) { "
+                                                 "f32 k = 0.5f; h(p[i]); h(p[i] * k); } }"))
+        self.assertTrue(has(rs, "name-constant", "void func_00100000(f32* p) { for (s32 i = 0; i < 8; i++) { "
+                                                 "h(p[i]); f32 k = 0.5f; h(p[i] * k); } }"))
+        # used twice in the function: one local at the top
+        src = "void h(f32);\nvoid func_00100000(f32 x) { h(x * 9.0f); h(x - 9.0f); }\n"
+        rs = results(src, only={"named-constant"})
+        self.assertTrue(has(rs, "name-constant", "void func_00100000(f32 x) { f32 k = 9.0f; h(x * k); h(x - k); }"))
+        # the reverse, parenthesised where the place needs it
+        src = "void h(f32);\nvoid func_00100000(f32 x) { f32 step = 1.0f / 15.0f; h(x + step); h(step); }\n"
+        rs = results(src, only={"named-constant"})
+        self.assertTrue(has(rs, "literal", "void func_00100000(f32 x) { h(x + (1.0f / 15.0f)); h(1.0f / 15.0f); }"))
+        # not a shift count, a mask, an index or a template argument
+        src = "void h(s32);\nvoid func_00100000(s32* p) { h(p[3] << 4); h(p[3] & 7); }\n"
+        self.assertEqual(results(src, only={"named-constant"}), {})
+
+    def test_repeat_expression(self):
+        src = "void h(s32);\nvoid func_00100000(s32 n) { s32 last = n - 1; h(last); h(last * 2); }\n"
+        rs = results(src, only={"repeat-expression"})
+        self.assertTrue(has(rs, "write-at-uses", "void func_00100000(s32 n) { h(n - 1); h((n - 1) * 2); }"))
+        src = "void h(s32);\nvoid func_00100000(s32 n) { h(n - 1); h(n - 1); }\n"
+        rs = results(src, only={"repeat-expression"})
+        self.assertTrue(has(rs, "name-repeat", "void func_00100000(s32 n) { s32 t = n - 1; h(t); h(t); }"))
+        # not across a change of what it reads
+        src = "void h(s32);\nvoid func_00100000(s32 n) { s32 last = n - 1; h(last); n++; h(last); }\n"
+        self.assertFalse(any(l.startswith("write-at-uses") for l in results(src, only={"repeat-expression"})))
+        src = "void h(s32);\nvoid func_00100000(s32 n) { h(n - 1); n++; h(n - 1); }\n"
+        self.assertFalse(any(l.startswith("name-repeat") for l in results(src, only={"repeat-expression"})))
+
+    def test_inline_method_in_place(self):
+        src = ("extern float D_00200000[];\nstruct Q { f32 c[3]; f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); } };\n"
+               "f32 func_00100000(f32 t) { return ((Q*)D_00200000)->Eval(t); }\n")
+        rs = results(src, only={"helpers"})
+        self.assertTrue(has(rs, "inline-method", "f32 func_00100000(f32 t) { return (D_00200000[0] + t * "
+                                                 "(D_00200000[1] + t * D_00200000[2])); }"))
+        src = ("struct Q { f32 c[3]; f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); } };\n"
+               "f32 func_00100000(Q* q, f32 t) { return q->Eval(t); }\n")
+        rs = results(src, only={"helpers"})
+        self.assertTrue(has(rs, "inline-method", "f32 func_00100000(Q* q, f32 t) { return (q->c[0] + t * (q->c[1] + t * q->c[2])); }"))
+        src = ("extern float D_00200000[];\nstruct Q { f32 c[3]; f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); } };\n"
+               "f32 func_00100000(f32 t) { return D_00200000[0] + t * (D_00200000[1] + t * D_00200000[2]); }\n")
+        rs = results(src, only={"helpers"})
+        self.assertTrue(has(rs, "call-method", "f32 func_00100000(f32 t) { return ((Q*)D_00200000)->Eval(t); }"))
+
+    def whole(self, src, only):
+        """{label: the unit's text after HEAD} of every rewrite, for rewrites outside the definition."""
+        text = HEAD + re.sub(r"\) \{ ", ") {\n", src)
+        return {l: body(t[len(HEAD):]) for l, t in tsearch.rewrites(text, "func_00100000", only=only)}
+
+    def test_param_order(self):
+        src = ("s32 func_00100000(s32 a, s32* b, f32 r);\ns32 g2() { return func_00100000(1, 0, 2.0f); }\n"
+               "s32 func_00100000(s32 a, s32* b, f32 r) { return a + (s32)r; }\n")
+        rs = self.whole(src, {"param-order"})
+        want = body("s32 func_00100000(s32 a, f32 r, s32* b);\ns32 g2() {\nreturn func_00100000(1, 2.0f, 0); }\n"
+                    "s32 func_00100000(s32 a, f32 r, s32* b) {\nreturn a + (s32)r; }")
+        self.assertIn(want, rs.values())
+        # a float never passes a float, nor an integer an integer
+        self.assertFalse(any("a to" in l for l in rs))
+        src = "s32 func_00100000(f32 a, f32 b) { return (s32)(a + b); }\n"
+        self.assertEqual(self.whole(src, {"param-order"}), {})
+
+    def test_callee_return(self):
+        src = "void g(s32);\nvoid h(void) { g(2); }\nvoid func_00100000(s32 n) { g(n); }\n"
+        rs = self.whole(src, {"callee-return"})
+        self.assertIn("s32 g(s32);", list(rs.values())[0])
+        # s32 to void only where no call uses the result
+        src = "s32 g(s32);\ns32 h(void) { return g(2); }\nvoid func_00100000(s32 n) { g(n); }\n"
+        self.assertEqual(self.whole(src, {"callee-return"}), {})
+        src = "s32 g(s32);\nvoid h(void) { if (1) g(2); }\nvoid func_00100000(s32 n) { g(n); }\n"
+        self.assertIn("void g(s32);", list(self.whole(src, {"callee-return"}).values())[0])
+        # a function the file defines is left alone
+        src = "void g(s32 x) {\n}\nvoid func_00100000(s32 n) { g(n); }\n"
+        self.assertEqual(self.whole(src, {"callee-return"}), {})
+        cand = tsearch.Cand("", ["callee-return@3 func_00100000 void -> s32"])
+        self.assertIn("other declarations", tsearch.width_notes(cand, "func_00100000"))
+
+    def test_reuse_variable(self):
+        src = "void h(s32);\nvoid func_00100000(s32 n) { for (s32 i = 0; i < n; i++) h(i); s32 j = 0; while (j < 4) { h(j); j++; } }\n"
+        rs = results(src, only={"reuse-variable"})
+        self.assertTrue(has(rs, "reuse-variable", "void func_00100000(s32 n) { s32 i; for (i = 0; i < n; i++) h(i); "
+                                                  "i = 0; while (i < 4) { h(i); i++; } }"))
+        # the later one declared first: the loop takes its name
+        src = "void h(s32);\nvoid func_00100000(s32 n) { s32 i; for (s32 j = 0; j < n; j++) h(j); for (i = 0; i < 4; i++) h(i); }\n"
+        rs = results(src, only={"reuse-variable"})
+        self.assertTrue(has(rs, "reuse-variable", "void func_00100000(s32 n) { s32 i; for (i = 0; i < n; i++) h(i); "
+                                                  "for (i = 0; i < 4; i++) h(i); }"))
+        # split at an assignment that starts a new life
+        src = "void h(s32);\ns32 f(void);\nvoid func_00100000(s32 n) { s32 x = f(); h(x); x = f(); h(x + 1); }\n"
+        rs = results(src, only={"reuse-variable"})
+        self.assertTrue(has(rs, "split-variable", "void func_00100000(s32 n) { s32 x = f(); h(x); s32 x2 = f(); h(x2 + 1); }"))
+        # not where the lives overlap, nor where a loop carries one past the other
+        src = "void h(s32);\nvoid func_00100000(s32 n) { s32 a = n; s32 b = n + 1; h(a); h(b); }\n"
+        self.assertFalse(any(l.startswith("reuse-variable") for l in results(src, only={"reuse-variable"})))
+        src = "void h(s32);\ns32 f(void);\nvoid func_00100000(s32 n) { s32 x = 0; while (n--) { h(x); x = f(); h(x); } }\n"
+        self.assertFalse(any(l.startswith("split-variable") for l in results(src, only={"reuse-variable"})))
+        # nor where a use after the block reads the value either arm set
+        src = "void h(s32);\nvoid func_00100000(s32 n) { s32 x = n; h(x); if (n) { x = 1; h(x); } else { x = 2; } h(x); }\n"
+        self.assertFalse(any(l.startswith("split-variable") for l in results(src, only={"reuse-variable"})))
+
+    def test_in_each_arm(self):
+        src = ("s32 F(void);\ns32 G(void);\nvoid h(void);\n"
+               "void func_00100000(s32 a) { s32 hit; if (a) { hit = F(); } else { hit = G(); } if (hit != 0) { h(); } }\n")
+        rs = results(src, only={"test-in-each-arm"})
+        self.assertTrue(has(rs, "test-in-each-arm", "void func_00100000(s32 a) { if (a) { if (F() != 0) { h(); } } "
+                                                    "else { if (G() != 0) { h(); } } }"))
+        src = ("s32 F(void);\ns32 G(void);\nvoid h(void);\n"
+               "void func_00100000(s32 a) { if (a) { if (F() != 0) { h(); } } else { if (G() != 0) { h(); } } }\n")
+        rs = results(src, only={"test-in-each-arm"})
+        self.assertTrue(has(rs, "test-after-arms", "void func_00100000(s32 a) { s32 hit; if (a) { hit = F(); } "
+                                                   "else { hit = G(); } if (hit != 0) { h(); } }"))
+        # not when the variable is read again after the test
+        src = ("s32 F(void);\ns32 G(void);\nvoid h(s32);\n"
+               "void func_00100000(s32 a) { s32 hit; if (a) { hit = F(); } else { hit = G(); } if (hit != 0) { h(hit); } }\n")
+        self.assertEqual(results(src, only={"test-in-each-arm"}), {})
+
+    def test_case_order(self):
+        src = "s32 func_00100000(s32 k) { s32 n = 4; switch (k) { case 0: case 1: n = 2; break; case 2: n = 3; break; } return n; }\n"
+        rs = results(src, only={"case-order"})
+        self.assertTrue(has(rs, "case-order", "s32 func_00100000(s32 k) { s32 n = 4; switch (k) { case 2: n = 3; break; "
+                                              "case 0: case 1: n = 2; break; } return n; }"))
+        self.assertTrue(has(rs, "case-order", "s32 func_00100000(s32 k) { s32 n = 4; switch (k) { case 1: case 0: n = 2; break; "
+                                              "case 2: n = 3; break; } return n; }"))
+        self.assertTrue(has(rs, "set-in-arms", "s32 func_00100000(s32 k) { s32 n; switch (k) { case 0: case 1: n = 2; break; "
+                                               "case 2: n = 3; break; default: n = 4; break; } return n; }"))
+        src = "s32 func_00100000(s32 k) { s32 n; switch (k) { case 0: n = 4; k = 1; break; case 2: n = 4; break; } return n + k; }\n"
+        rs = results(src, only={"case-order"})
+        self.assertTrue(has(rs, "set-before-switch", "s32 func_00100000(s32 k) { s32 n = 4; switch (k) { case 0: k = 1; break; "
+                                                     "case 2: break; } return n + k; }"))
+        # an arm that falls through is never moved
+        src = "s32 func_00100000(s32 k) { s32 n = 0; switch (k) { case 0: n = 2; case 1: n++; break; } return n; }\n"
+        self.assertFalse(any(l.startswith("case-order") for l in results(src, only={"case-order"})))
+
+    def test_chained_assignment(self):
+        src = "struct S { f32 a; f32 b; };\nvoid func_00100000(S* p) { p->a = 1.0f; p->b = 1.0f; }\n"
+        rs = results(src, only={"chained-assignment"})
+        self.assertTrue(has(rs, "chain", "void func_00100000(S* p) { p->a = p->b = 1.0f; }"))
+        self.assertTrue(has(rs, "chain", "void func_00100000(S* p) { p->b = p->a = 1.0f; }"))
+        src = "struct S { f32 a; f32 b; };\nvoid func_00100000(S* p) { p->a = p->b = 1.0f; }\n"
+        rs = results(src, only={"chained-assignment"})
+        self.assertTrue(has(rs, "unchain", "void func_00100000(S* p) { p->b = 1.0f; p->a = 1.0f; }"))
+        self.assertTrue(has(rs, "unchain", "void func_00100000(S* p) { p->b = 1.0f; p->a = p->b; }"))
+        # not when the second target reads the first one
+        src = "void func_00100000(s32* p, s32 x) { x = 1; p[x] = 1; }\n"
+        self.assertFalse(any(l.startswith("chain@") for l in results(src, only={"chained-assignment"})))
+
+    def test_struct_store(self):
+        src = ("#include \"vu0.h\"\nstruct S { Vec02 q; };\n"
+               "void func_00100000(S* p, Vu0::Vec v) { Vu0::Q(p->q) = Vu0::Add(v, v).q; }\n")
+        rs = results(src, only={"struct-store"})
+        self.assertTrue(has(rs, "struct-store", "void func_00100000(S* p, Vu0::Vec v) { *(Vu0::Vec*)&p->q = Vu0::Add(v, v); }"))
+        src = ("#include \"vu0.h\"\nstruct S { Vec02 q; };\n"
+               "void func_00100000(S* p, Vu0::Vec v) { *(Vu0::Vec*)&p->q = Vu0::Add(v, v); }\n")
+        rs = results(src, only={"struct-store"})
+        self.assertTrue(has(rs, "q-store", "void func_00100000(S* p, Vu0::Vec v) { Vu0::Q(p->q) = Vu0::Add(v, v).q; }"))
+
     def test_vu0_alternatives(self):
         src = "#include \"vu0.h\"\nf32 func_00100000(u128 v, f32 s) { return Vu0::ToFloat(Vu0::MulX(v, Vu0::Scalar(s))); }\n"
         rs = results(src, only={"vu0"})
@@ -251,6 +409,18 @@ class Guard(unittest.TestCase):
         self.assertTrue(any(r.startswith("a new array local") for r in reasons), reasons)
         reasons = self.check("s32 func_00100000(s32 a) { s32 x = a + 1; x = x; return x; }\n")
         self.assertTrue(any(r.startswith("a self-assignment") for r in reasons), reasons)
+
+    def test_new_groups_stay_plain(self):
+        """The rewrites that remove or move declarations never leave a local unread, and the guard
+        still turns away a candidate that would."""
+        src = HEAD + ("s32 F(void);\ns32 G(void);\nvoid h(void);\n"
+                      "void func_00100000(s32 a) {\n s32 hit; if (a) { hit = F(); } else { hit = G(); } if (hit != 0) { h(); } }\n")
+        for label, new in tsearch.rewrites(src, "func_00100000"):
+            self.assertEqual(tsearch.forbidden(src, new, "func_00100000"), [], label)
+        old = HEAD + "s32 func_00100000(s32 a) {\n s32 i; for (i = 0; i < a; i++) {} return i; }\n"
+        new = HEAD + "s32 func_00100000(s32 a) {\n s32 i; s32 j; for (i = 0; i < a; i++) {} return i; }\n"
+        self.assertTrue(any(r.startswith("a local never read (j)") for r in tsearch.forbidden(old, new, "func_00100000")))
+        self.test_each_forbidden_construct()
 
     def test_library_over_the_near_misses(self):
         """Every rewrite of every near miss (but the one very long function) parses again and
