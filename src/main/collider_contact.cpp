@@ -5,6 +5,7 @@
 #include "vu0.h"
 #include "collider.h"
 #include "cone_volume.h"
+#include "debug_scope.h"
 #include "placed_object.h"
 #include "shapes.h"
 
@@ -1151,7 +1152,83 @@ s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
     return 1;
 }
 
-INCLUDE_ASM(func_00187F40);
+// Class 0x03's contact method: each part of this collider against another body. The hit test is
+// written in each arm of both sweeps: the two tails are separate blocks until jump2 merges them
+// after sched2, so PRE shares no load of the flags across them and the bit-53 constant has four
+// uses (docs/toolchain/gcse.md, "A test written in each arm").
+void CollideColliderParts(Collider* self, Collider* other, s32 sweep, void* a3, void* a4, void* a5, void* a6)
+{
+    // Retail's frame has a slot at 0(sp) that nothing touches, under the sweep flag's spill at
+    // 4(sp): a scope object of the debug build (include/debug_scope.h;
+    // docs/toolchain/stack-slots.md, "A 4-byte slot nothing touches").
+    DebugScope scope;
+    for (Collider* p = (Collider*)self->parts.head; p != 0; p = (Collider*)p->link2E4.next) {
+        u64 f = p->flags538;
+        if (f & (1ULL << 43)) {
+            continue;
+        }
+        if (!(f & (1ULL << 40)) && p->tree.nodes == 0) {
+            continue;
+        }
+        u64 g = other->flags538;
+        if (f & ((1ULL << 47) | (1ULL << 56))) {
+            if (g & ((1ULL << 47) | (1ULL << 56))) {
+                if (f & (1ULL << 56)) {
+                    continue;
+                }
+                if (g & (1ULL << 56)) {
+                    continue;
+                }
+            }
+        }
+        if (sweep != 0) {
+            if (!(p->flags538 & (1ULL << 44))) {
+                u128 d = Vu0::Sub(Vu0::Q(p->v370), Vu0::Q(p->v140));
+                if (1.0f < Vu0::ToFloat(Vu0::Dot(d, d))) {
+                    if (g & (1ULL << 40)) {
+                        if (AddSweptPartSphereContact(p, other, a6) != 0) {
+                            p->flags538 |= (1ULL << 53);
+                            continue;
+                        }
+                    } else {
+                        if (AddSweptPartMeshContact(p, other, a3, a4, a5, a6) != 0) {
+                            p->flags538 |= (1ULL << 53);
+                            continue;
+                        }
+                    }
+                }
+            }
+            if (!(other->flags538 & (1ULL << 44))) {
+                u128 d = Vu0::Sub(Vu0::Q(other->v370), Vu0::Q(other->v140));
+                if (1.0f < Vu0::ToFloat(Vu0::Dot(d, d))) {
+                    if (p->flags538 & (1ULL << 40)) {
+                        if (AddSweptPartSphereContact(other, p, a6) != 0) {
+                            other->flags538 |= (1ULL << 53);
+                            continue;
+                        }
+                    } else {
+                        if (AddSweptPartMeshContact(other, p, (void*)p->tree.count, (void*)p->tree.nodes, (void*)p->tree.nodes, a6) != 0) {
+                            other->flags538 |= (1ULL << 53);
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+        if (other->flags538 & (1ULL << 40)) {
+            if (p->flags538 & (1ULL << 40)) {
+                AddSphereSphereContact(p, other, a6);
+            } else {
+                AddMeshContacts(other, other->radius3CC, &other->v140, p, (void*)p->tree.count2, (void*)p->tree.nodes, 0, a6);
+            }
+        } else if (p->flags538 & (1ULL << 40)) {
+            s32 v = p != self || p->radius3CC != p->radius3D4;
+            AddMeshContacts(p, p->radius3CC, &p->v140, other, a3, v ? a5 : a4, v ? (void*)0 : a5, a6);
+        } else {
+            CreateMeshPairContacts(p, other, a3, a4, (u8*)a5, (PooledContact**)a6);
+        }
+    }
+}
 
 struct ColliderPair {
     Collider* a;
