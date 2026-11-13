@@ -1126,6 +1126,7 @@ func_00140770	func_00140A70	match
 func_00140790	func_00140A90	match	
 func_001407A0	func_00140AA0	match	
 func_001407A8	func_00140AA8	match	version-specific, rodata
+func_00140968	func_00140C68	match	
 func_001409A8	func_00140CA8	match	
 func_001409D8	func_00140CD8	match	
 func_001409E0	func_00140CE0	match	
