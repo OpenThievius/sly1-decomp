@@ -302,6 +302,73 @@ dumps of func_0020BB18 (src/lib/mpeg_decoder.cpp, Sony's 2.9-ee-991111, 2026-11-
   Not kept: the size written at each of its three uses scores 40 lines, but it computes the
   size after the first call where retail computes it before, so it trades this wall for a
   structural difference.
+- **Fifth pass (w50-i, 2026-11-13): two of the three readings are out, and combine makes
+  the insn the third needs.** About 75 compiles, with the `-da` dumps (scratch
+  `build/swarm/w50-i/`).
+  (1) *The address set on the edges is out by its register.* A pseudo set on the two edges
+  into the body and copied there into the spilled one dies in the copy, so global-alloc
+  hands it the copy's preferences (expand_preferences): the spilled pseudo is copied to
+  `a0` for the tail call and the edge pseudo takes `a0` (`;; 122 preferences: 4`), not
+  retail's `v0` (three probes: the arms by hand, the copy written before the first call).
+  With the copy written at the set-up call sched1 moves it above the calls, but haifa
+  never lowers REG_N_CALLS_CROSSED of a pseudo that lives in more than one block
+  (`Register 122 ... across 10 insns ... crosses 4 calls`), so the edge pseudo takes a
+  call-saved register (`s2`, the fourth pass's `s2`). gcse's own copy propagation folds a
+  body copy whose source is not set again, as cse2 does (a label later in the body does
+  not keep it). Retail's `v0` is what reload's first spill register gives the near miss:
+  the address is computed in the body's block.
+  (2) *A barrier at the address is out by the stores.* With the address the first insn of
+  the block's stream its spill store follows it (reload emits it there), the picture
+  stores come later in the stream and so depend on that store (two stores that may
+  alias), and `sw v0,68(sp)` issues ahead of them. Compiled: an insn that prints nothing,
+  loop notes, then the address (`do { } while (0); p8 = ...` with six pointer locals
+  declared in slot order) scores 21 lines with exactly that order (address, spill store,
+  picture stores); retail has the picture stores first. So in retail's stream the picture
+  stores precede the address and its store, as in the near miss, and the address is free
+  to issue first: no barrier.
+  (3) *What is left: the near miss's stream with an insn that prints nothing ahead of the
+  picture stores, which they must wait for.* A read of memory they may alias does it: it
+  holds both stores, takes the second issue slot of cycle 1 beside the address, and the
+  block then schedules as retail's, insn for insn (replayed by hand on the near miss's
+  table: the fourth pass's replay with the slot taken instead of the address removed).
+  combine makes such an insn. When a combination removes the last reference to a register
+  that is live into the block, distribute_notes finds no insn for its REG_DEAD note and
+  emits `(use (reg N))` after the block's label (combine.c, "insert a USE insn for the
+  register at that label"). Measured: an uninitialised local read in an expression
+  combine folds away (`x & (w & 15)`, `w` a multiple of 16) leaves `(insn 667 134 664
+  (use (reg/v:SI 212)))` at the body's label; it reaches sched2 (a USE issues
+  `on unit none` and counts against the issue rate, as `(use (const_int 0))` does in
+  func_00204AA8), reorg skips it and final prints nothing. A register that crosses calls
+  gets no hard register here (the nine call-saved ones are taken) and reload makes the
+  insn `(use (mem:SI (plus sp 72)))`, a seventh slot inside the same frame, or
+  `(use (mem (plus sp 68)))` when the register is the last plane's own variable.
+  (4) *Why no probe matched: sched1 decides where the USE lands, and it must land ahead of
+  the picture stores (priority 42: the first call waits for every store).* A USE of a
+  register that crosses no call is tied before the next call (42, and its death gives it
+  the lower weight: measured, `(use (reg a3))` issued between the mult and the height
+  store), but such a register gets a hard register, and a USE of a register holds no
+  store. A USE of a register that crosses calls has the priority of that register's next
+  set in the block (35 for the last plane's variable, 3 for a register never set), so it
+  lands after the stores and depends on them. Retail therefore needs a register that ends
+  in memory and whose USE has priority 42 or more in sched1: its next set in the block
+  tied before the first call (a copy from a temporary that crosses no call, or a value
+  an early store needs), with its old value's last reference removed by combine. No
+  source form found; a temporary and a copy do not survive (cse's swap of `(set T E)
+  (set Q T)`, then combine).
+  (5) *Measured on the way.* A conditional around dead code leaves no block boundary
+  (flow removes the arm and the branch before sched2: the base's code), so only jump2's
+  cross-jumping of identical arms could hide a boundary from the final code. An empty
+  loop at the head of the body only adds the loop's alignment nop (its notes lead the
+  block: 123). The early return as a value (the last plane's address) puts the address
+  in the `beq` slot from the return path but restructures the exit (121). A copy of the
+  picture pointer that survives cse (`p = pic`, `p` set earlier) issues alone ahead of
+  both stores and is copied into both slots (`move v0,a1`): the dependence retail's
+  first cycle needs, from an insn that prints. The size written at each use lands after
+  the first call because sched1 ties a temporary that crosses no call behind the
+  previous call, so retail's size before the call is its source order. No flag gives the
+  function (`-fno-expensive-optimizations` 42 lines, `-fno-schedule-insns2` 56: other
+  code). Eighteen plain statements at the head of the body (blocks, casts to void, empty
+  ifs and switches, labels, empty or early-returning inlines) leave the base's code.
 
 ### A value negated into itself crosses the call (func_001A2380)
 
