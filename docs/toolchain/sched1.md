@@ -324,7 +324,7 @@ order:
 The handler at slot 0x108 takes `(self, flags, item, end, dt)`: retail's `mov.s $f12` fills the
 call's delay slot after the a1-a3 moves, as in func_001BCD00; with dt second it goes first.
 
-### An argument's frame address that sched2 holds back (func_0014F168, unsolved)
+### An argument's frame address that sched2 holds back (func_0014F168, matched 2026-11-13: see the end of the third section below)
 
 Read from haifa-sched.c, flow.c, reload1.c and toplev.c of GCC 2.95.3 and the `-dS -dR -dl
 -dg -df -fsched-verbose-6` dumps (2026-11-09):
@@ -356,7 +356,7 @@ Read from haifa-sched.c, flow.c, reload1.c and toplev.c of GCC 2.95.3 and the `-
   as a two-element array breaks block 0. What retail had is outside this model: look for a
   construct that leaves an insn naming a1 (or a group) that the final code does not show.
 
-### A store in each arm leaves the join block to sched2 (func_0013BE18, unsolved)
+### A store in each arm leaves the join block to sched2 (func_0013BE18, matched 2026-11-13: the theory was wrong, see the end of the next section)
 
 func_0013BE18 (src/main/child_group_object.cpp) has func_0014F168's tail (2026-11-09): d
 normalized through NormalizeOr into `*p`, then `r = d * w1 + Z * w2` (MulXSum of two ScalarAt
@@ -389,7 +389,7 @@ earlier insn touches, so no dependence on &r explains it; the issue slots do.
   Spot it: a join block whose first insn is a store common to both arms, and an ALU insn that
   retail issues later than ours although nothing it reads or writes is touched before.
 
-### Why the arms' stores cannot be written plainly (func_0014F168, func_0013BE18, unsolved)
+### Why the arms' stores cannot be written plainly (func_0014F168, func_0013BE18; matched 2026-11-13 another way)
 
 Read from cse.c, jump.c and haifa-sched.c of GCC 2.95.3 with dumps and probes (2026-11-10):
 
@@ -444,6 +444,46 @@ Read from cse.c, jump.c and haifa-sched.c of GCC 2.95.3 with dumps and probes (2
   (the slot stores are expanded before the asm, the call's own moves after r's store). So a
   dependence, stale or not, is not what holds the insn back; the block's contents at sched2 are
   (the per-arm stores above).
+
+**What it was (w46-a, 2026-11-13): one memory dependence of the join's store, not its place.**
+Both functions matched with the store where the near misses had it, at the join. The sched2
+replay (w44-fc's s2.py over tools/sched1.py's Replay, which reproduces every block of the near
+miss) with one edge cut, from the store of `*p` to the first weight's load, issues the join
+block in retail's exact order (func_0013BE18: 197 254 220 244 245 390 393 226 283 260 279 204
+288 236 314 298 270 308 310 312 316); dropping the store from the block, the per-arm theory,
+does not (the three `lui` and the two `lw` come out in another order). With the edge, the
+load waits three cycles for the store (`Ready-->Q: insn 390: queued for 2 cycles` after its
+`lui`), and the free issue slot beside `addiu v0` goes to the next ready ALU insn, `&r`;
+without it the weight's `lw` takes that slot and every later slot is filled by the chain, so
+`&r` and the argument moves come where retail has them. The second weight's edge may stay:
+its load is not ready before the fourth cycle either way.
+
+alias.c gives the edge its condition (true_dependence, fixed_scalar_and_varying_struct_p): a
+load does not depend on an earlier store when one is a scalar (MEM_SCALAR_P) at a fixed
+address and the other a structure member (MEM_IN_STRUCT_P) at a varying one. Ours had
+neither flag on either side: `Vu0::Q(*p) = ...` stores through a `u128*` (no flag), and
+ScalarAt reads the weight's word through a cast pointer (no flag). The source that gives
+both:
+
+    Vec02* p = &d;
+    *(Vu0::Vec*)p = Vu0::NormalizeOr(Vu0::Vec::Of(d), Vu0::Vec::Of(g_unitXVector));
+    Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(D_00261360), ...);
+
+The store is a structure's through the pointer (`(set (mem/s:TI (reg/v:SI 3 v1)) (reg:TI 80
+vf1))` in `.sched2`), and ScalarAtValue's operand is the float variable itself, a scalar at
+its symbol's address (a `lo_sum` is not a varying address). Measured on each function, the
+store as `Q(*p)`, as a Vec through the pointer, or as `p->q` of a `Vu0::Vec*`, against
+ScalarAt or ScalarAtValue for each weight: EXACT exactly when the store is a structure's and
+the *first* weight is ScalarAtValue (four of twelve forms in func_0013BE18, two of four in
+func_0014F168); the second weight may be either. Either change alone leaves the near miss's
+15 (12) lines.
+
+The tell, for other near misses: an ALU insn (a frame address, an argument move) that ours
+issues early in a block headed by a store through a pointer, with retail's loads of globals
+packed right behind the store. Look at the store's dependents in the `.sched2` table: a load
+of a global scalar among them is an edge that a structure store and a plain scalar read do
+not have. The per-arm stores and jump2's cross-jumping were a consistent explanation of the
+head, but not the cause.
 
 ### The compiler's qmfc2 again, and a rescale's divide order (func_001D4348)
 
@@ -1367,7 +1407,7 @@ off (2026-11-10, `-dS -fsched-verbose-6` dumps, haifa-sched.c and alias.c read):
   clamp's parameters by const reference, dt's weight through a `const f32&` inline, and the
   whole update as an inline taking `(self, a, b, dt)` (the frame moves).
 
-### Spill stores between float constants: counting a preheader's %hi/%lo pairs (func_00134B48, unsolved)
+### Spill stores between float constants: counting a preheader's %hi/%lo pairs (func_00134B48, matched 2026-11-12)
 
 Wave 15 (2026-11-10). The second loop's preheader differs from retail's only in where two
 spill stores fall among four float constants (`sw a1,540(sp)` / `sw a2,544(sp)`, &pos's and
@@ -1405,6 +1445,37 @@ alias-classes.md ("Confirmed in US func_00134B48"); what this wave added:
   but g_unitRange's `%hi` takes s4, as the else-arm clamp did, and the code grows 4 bytes);
   two ApproachValueWithRamp calls in an if/else for f58 (not cross-jumped back, 1764-1772
   bytes).
+
+Matched on 2026-11-12 (w46-a). The count above was right but its conclusion was not: a third
+pair does not have to go, it has to come *before the constants*. All six insns of three pairs
+rank ahead of the first constant when each `%lo` either ends its `%hi` (weight 0) or has an
+earlier LUID than the constants (weight 1, no dependents, as a constant: the LUID decides).
+Then cycles 1 to 3 hold the three pairs and cycle 4 the first constant with &pos, which is
+retail's order. Our third `%lo` (Limit's `this`) lost that tie only because loop.c moved it in
+its second pass, to the end of the preheader, after the constants the first pass had moved.
+
+Why the second pass: move_movables lowers its threshold by 3 for every insn it moves
+(`threshold -= 3`), so the 79 the pass starts with is 22 by the time it reaches the clamp (18
+PRE-hoisted insns and the table's `%lo` moved before it): `22 x 1 x 4 = 88 < 282` insns, "not
+desirable"; the second pass starts at 79 again and moves it (`79 x 4 >= 234`). A life of 13 or
+more is moved in the first pass. The source is the form the coefficient table already had:
+
+    const f32* k = D_002611A0;
+    const ValueRange* lim = &g_unitRange;
+    ProjectPointToCamera(...);
+    ...
+    f32 alpha = lim->Limit(scale);
+
+The pointer is named before the projection, so its life spans the call (`Insn 709: regno 292
+(life 47), move-insn savings 1 moved to 1459` in the first pass, between the table's `%lo` at
+1457 and the clock's at 1461); cse1 still
+folds the `lo` read into `%lo(g_unitRange)` because the declaration and the clamp are in one
+extended block (the call between them does not end it), which a pointer at the top of the
+body, above the string loop's labels, did not give. Named before `k` the code differs in 6
+lines (its `%lo` is then issued before the table's and the two address pairs swap); named
+after the projection it is EXACT as well. The tell: an insn of a preheader that retail issues
+earlier than ours, when ours was moved by the second pass; `-dL` prints the pass, and the
+threshold at an insn is 79 less three times the insns moved before it.
 
 ### The side test and the half-width: what retail's order needs of each conversion (func_00142278, unsolved)
 
@@ -1524,7 +1595,7 @@ a3, the `%hi` of g_activeListFrames in a2). The functions' literal pools check e
   through global-alloc's pass 0 the same day: docs/toolchain/long-block-constants.md, "Pass 0
   takes no new saved register" (func_0020CAF8).)
 
-### Two weights' qmtc2s tied on priority: dependents decide local-alloc (func_001C54D0, unsolved)
+### Two weights' qmtc2s tied on priority: dependents decide local-alloc (func_001C54D0, matched 2026-11-12)
 
 The tail of func_001C54D0 is `end->v30 + m110.r[2] * -push + tangent * f63C` through MulAddX2,
 with `Scalar(-push)` (insn 865, after a neg.s) and `ScalarAt(self->f63C)` (insn 901, its word an
@@ -1556,6 +1627,33 @@ takes retail's a0 and vf6, but local-alloc gives the loaded pseudo v0 where reta
 a1. What is left is a source fact that makes the f63C weight wait on the -push one, or keeps its
 load out of the qmtc2 until reload; no plain form of either was found
 (nonmatching/func_001C54D0.cpp, W24).
+
+Matched on 2026-11-12 (w46-a) by the rank's second field, the register weight, which the
+passes above had tied at 0 against 0. An insn's weight is its sets less the REG_DEAD notes it
+carries *in the insn stream's order, before sched1*. With the tangent in a local ahead of the
+sum, the f63C read was self's last use in that order, so 901 weighed 0 and the dependents
+decided. Written as one expression with each weight before its vector,
+
+    Vu0::Q(end->v30) = Vu0::MulAddX2WeightFirst(Vu0::Vec::Of(end->v30).q, Vu0::Scalar(-push),
+        Vu0::Vec::Of(self->m110.r[2]).q, Vu0::ScalarAt(self->f63C),
+        RemoveAlong(Vu0::RotateMembers(self->m660, Vu0::Vec::Of(self->v640).q),
+                    Vu0::Vec::Of(c->v80).q));
+
+the inline call emits its arguments in parameter order, so the rotation's loads follow both
+weights and the up axis in the insn stream. Self then dies at the rotation's first row: the
+f63C qmtc2 weighs 1 (a set, no death) and the -push one 0, so -push issues first at the tie
+(retail's a0 and vf6); the up axis's load weighs 1 as well and loses to the f63C qmtc2 on
+dependents (2 against 3), so it stays the later use of self and reload's `lw` takes a1 rather
+than self's own register. The same order explains the second difference, which the tied form
+had only approximated with RotateRowsTied: v640 is read before the rows (RotateMembers takes
+it by value, its rows as Vec members that no weight slot holds back), row 0 carries self's
+death (weight 0) and wins the first cycle over v640, row 2 carries the row pointer's death and
+wins the second, and v640 then beats row 1 on its LUID: retail's row 0, row 2, v640, row 1.
+RemoveAlong is a file-level inline (the rotated vector is used twice). The tell for other
+near misses: when two insns tie on priority and the wrong one wins on dependents, look at
+which statement holds the last use, in source order, of a register one of them reads; moving
+a later statement's loads behind it (one expression instead of named locals, or the reverse)
+changes the weight and is decided before the dependents are.
 
 ### The 33rd memory reference of a block is a barrier (WriteMemoryCardSaveHeader)
 

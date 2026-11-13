@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 604/624 (96.8%), checked 2026-11-12
+// BYTES 604/624 (96.8%), checked 2026-11-13
 /* NEAR (src/lib/graph.c, where it is INCLUDE_ASM; built as C by 2.9-ee-991111): six
  * instructions off, two pairs in the interlaced arms. Found 2026-11-10 (docs/TOOLCHAIN.md,
  * "Sony's compiler balances a chain of | and +"): the libraries' compiler re-associates a chain

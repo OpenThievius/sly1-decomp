@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1888/1916 (98.5%), checked 2026-11-12
+// BYTES 1888/1916 (98.5%), checked 2026-11-13
 // DECLS (2026-11-11, w28-nmdecls): GetObjectWorldRotation declared s32 (defined value) shrinks the function by 8 bytes (1888 -> 1886 of 1916, 98.5% -> 98.4%) with the same 478/479 order score; kept void.
 // CONV-SWAP (2026-11-08): ToFloat and ToFloatMoved swapped at call combo (source line 1+2+4); 64 differing lines before, 41 now.
 // ORDER-SWEEP (2026-11-08): Q(ang) = nd moved after the Q(v) statement; tools/permute.py --auto.
