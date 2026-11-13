@@ -791,20 +791,30 @@ only the block's own pseudos (`used N times across M insns in block 36` in the .
   necessary.
 
 - **The tail's order is the birthing raise, not a weight (w46-b, 2026-11-13).** Retail issues
-  p's `vadd` before g's last `vsub`; ours the reverse. In the `-dS` trace and the replay
-  (`tools/sched1.py FILE func_001CC818 --block 36 --trace 2468 --trace 2503`) both are ready in
-  cycle 21 with the same weight (one birth, two deaths) and the same table priority (3). The
-  vsub's output is read by the else arm after the block, so it is set once and live at the
-  block's end: adjust_priority raises it to 4, the priority of the DivX just issued, and it
-  goes first. sched2 has both ready in cycle 27 with equal rank and keeps sched1's order. The
-  earlier note's weight explanation (the vsub killing one value) is wrong: nothing about
-  gravity's operand decides it. Retail's order needs the vsub's output to be a pseudo set more
-  than once (a variable that held another value earlier), and then p's statement first.
-  Measured: with g's value in a u128 that also holds the gravity's perpendicular part earlier
-  and p written before g, sched1 issues the vadd then the vsub in cycle 21; but that pseudo is
-  global-alloc's in both of its blocks, the early block's registers move, and with them p's
-  load in sched2 (36 lines against 16). A variable first set in this block is not its class's
-  first register in cse1 and is folded (off or nd reused, a quotient built in three steps).
+  p's `vadd` before g's last `vsub`; the near miss had the reverse. In the `-dS` trace and the
+  replay (`tools/sched1.py FILE func_001CC818 --block 36 --trace 2468 --trace 2503`) both are
+  ready in cycle 21 with the same weight (one birth, two deaths) and the same table priority
+  (3). The vsub's output is read by the else arm after the block, so it is set once and live
+  at the block's end: adjust_priority raises it to 4, the priority of the DivX just issued,
+  and it goes first; sched2 keeps that order. The earlier weight explanation (the vsub killing
+  one value) is wrong. The raise is retail's too, so the vadd has to be issued a cycle before
+  the two meet, which is p's statement written first.
+- **Matched (w46-b, 2026-11-13): p first, and the offset written at each use.** The source is
+  `p = pos + nd * Scalar(r); v = v2 + cross(acc, nd * Scalar(r)) + nd * rate; g = ...; ang =
+  nd`, with no local for the offset. cse1 merges the two `vmulx` and the two `qmtc2`; the
+  second Scalar's slot store stays through `.lreg` and depends on the first, so Scalar(r) has
+  one more reference and its first store outranks the block's other stores (the first of the
+  two rankings above), and reload deletes the repeat (the section "A weight written again in
+  the next statement" below, func_00144540, whose worker gave the lead). With p's statement
+  first its load and `vadd` are ahead of g's in insn order, which is the second ranking and
+  the tail's order. The earlier trial of the second Scalar(r) (54 lines, "a second slot
+  store") had p's statement after v's: rate's Scalar had taken the slot between the two, so
+  the repeat was a real store. A grid of the offset named or in place at each use and of p's
+  place: EXACT with p first and the offset in place at either or both uses, and with the
+  offset in place in v only and p before g; 2 lines with p last; 54 with p's Scalar after
+  rate's. Tried before the lead and not it: a twice-set variable for g's value (sched1's
+  order of the two insns is retail's, but a pseudo of two blocks is global-alloc's and the
+  early block moves), p's value live out of the block.
 
 ### Twenty-four weight products: the statement order and local-alloc's first tie (func_0019CC10)
 
