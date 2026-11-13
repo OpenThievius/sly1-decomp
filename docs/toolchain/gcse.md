@@ -1057,3 +1057,37 @@ from one source fact (w40-fc, 2026-11-12, `-dG -dl -dg` dumps and jump.c):
 - **Spot it:** two calls in the arms of an if, a `b` with an empty delay slot after the first,
   and loads that PRE should have shared; or a hoisted constant that outranks values with more
   visible uses. Write the statements after the calls in each arm.
+
+### A frame address computed after a block move (PAL func_001366A0, matched 2026-11-13)
+
+PAL's DrawTextPanel copies the panel's line record (0x110 bytes, at 0x408) into a local and cuts
+the copy at the line being typed, walking `&p->lines[1].start` with p the copy's address.
+Retail's p is `move s5,a2` in the delay slot of the block move's alignment test, a2 being the
+move's destination (`addiu a2,sp,0x520`); written `TextLines* p = &lines; *p = self->lines;` the
+move's destination is a copy of p (`addiu s0,sp,0x520 ... move a2,s0`), p has one reference more
+and takes s0 in global-alloc, and shown, typed, text and total each sit one register off
+(pal13-b, 2026-11-13, `-da` dumps):
+
+- **Retail's copy is PRE's.** With the record copied first (`TextLines lines = self->lines;`)
+  and `p = &lines` after, the expression `(plus fp 1312)` is computed twice: by the block move's
+  copy_addr_to_reg and by p's set. The second is fully redundant; PRE deletes it and copies the
+  first into the reaching register right after it (`PRE: redundant insn 784 (expression 72) in
+  bb 50, reaching reg is 467`, `PRE/HOIST: end of bb 43, insn 1452, copying expression 72 to reg
+  467`): `addiu a2,sp,0x520`, `move s5,a2`, retail's code and p's three references.
+- **Only if the first CSE cannot fold p.** cse's paths end only at a CODE_LABEL or a
+  NOTE_INSN_LOOP_END, and jump.c's first pass has already made the clamp before p
+  (`if (!(shown < total)) shown = total;`) a conditional move, so p's set and the walk share a
+  path: CSE folds the walk's base into the frame (`addiu a0,sp,0x538`, `lw v0,0x538(sp)`), p's
+  set dies, and PRE has nothing to copy (299 lines differ). Written before the copy, p is behind
+  the move's loop labels and stays a register, but it is then the move's source.
+- **The path end.** A compiled-out assertion (`ASSERT`, include/debug_assert.h) after the
+  reader calls and before the walk ends the first CSE's path with its loop notes and is EXACT;
+  the same notes right after the copy or after the scroll's zero move the clamp's `movz` past
+  the copy's tail (a scheduling barrier: 29 to 34 lines), after the text copy or after the
+  walk's `i = 1` 2 lines. Retail's code holds no label there, so its source ended the path
+  without code; no plain form tried does: the clamp as `>=`, `?:` or `<?` (jump.c converts the
+  first two before CSE; `<?` is other code), p declared at three places after the copy, and the
+  walk indexed through p (loop.c then ignores the loop, cse.md, "A break with a body").
+- **Spot it:** a pointer set in a delay slot from a block move's destination register, before
+  the move's loop: the pointer was taken after the move, and something ended CSE's path between
+  it and its uses.
