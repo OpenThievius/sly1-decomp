@@ -1005,6 +1005,13 @@ Measured and read from flow.c (find_basic_blocks) and loop.c on 2026-11-12 (w40-
 "N real insns" is every INSN, JUMP_INSN and CALL_INSN between the notes when it runs, and two
 kinds of insn are in that count that the final code never shows:
 
+- **An extension between a load and its use** (func_0013A618, w44-fb 2026-11-13). A value read
+  into a local of another width (`s16 mode = self->f618;`) or passed to a parameter of another
+  width (`s64 mode` in the callee's prototype) is a load and a `sign_extend` until combine, which
+  folds the two into one load: one counted insn that leaves no code when the load's width is
+  retail's. Check the width against retail's load (lw, lh, lb) and against the callee's own
+  code before using it: in func_0013A618 the 64-bit parameter is exact for the caller and
+  wrong for the callee, which keeps the value in a 4-byte slot.
 - **`(use (const_int 0))` after a call that ends a basic block.** GCSE runs find_basic_blocks,
   which emits that insn after every CALL_INSN directly followed by a label ("so that the
   CALL_INSN itself is not at basic_block_end"). It stays in the stream through loop.c (uid just

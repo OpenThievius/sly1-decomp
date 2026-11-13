@@ -38,6 +38,18 @@
 //       third counted insn that leaves that block alone. Ruled out as counted: copies of pseudos (q = ...; p = q), an unused
 //       result (s32 ok = WaitDmaChannel(...)), a local for dt, bank, the index or the offset. Counted but wrong elsewhere: the
 //       detach in the else arm (a use after the call: 95, but blez/b for bgtzl), node = next in both arms (s1/s2/s3 rotate).
+// w44-fb (2026-11-13): the third counted insn is identified; no form with agreeing declarations yet.
+//       (1) tsearch's lead (`s16 mode = self->f618;`, 1 word) is a coincidence of width: retail reads the field with
+//       `lw t2,1560(s4)` and the s16 local gives `lh t2`, the one word left; the value is 32 bits. What the narrow local adds
+//       is an extension insn between the load and the argument's copy, which loop.c counts and combine folds into the load.
+//       (2) The same insn with a 32-bit load: declared `s64 mode` in FilterParticleVerticesVu0's prototype (the local an s32
+//       as below), the argument is `(sign_extend:DI (reg:SI))`, combine folds it into the lw, and this function is EXACT with
+//       its literal pool (build/swarm/w44-fb/probe_13A618_exact.cpp). Not landable: the callee (func_0013A498, matched in
+//       this file) keeps mode in a 4-byte slot (`sw t2,0(sp)`, `lw v1,0(sp)`); defined with `s64 mode` it stores 8 bytes
+//       (sd/ld, the next slot at 8: 4 lines), so the two declarations cannot agree. (3) Not it: an `s64` or `long` local
+//       passed to the s32 parameter (the truncation stays: dsll32/dsra32, 812 bytes); a 64-bit count parameter (no change
+//       here, and the callee's loop changes); `const s32& mode`; a 32-bit bitfield read (signed or unsigned): all 14 lines
+//       as before. Wanted: a conversion of a 32-bit value at this call that is an insn until combine and no code after.
 // In the context of its file, src/main/world_listed_object.cpp.
 #include "common.h"
 #include "asm_func.h"
