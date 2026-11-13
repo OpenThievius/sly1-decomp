@@ -224,6 +224,7 @@ func_0012B4C8	SetPlacedObjectFrameStepClock	sets +0x294, which puts a parentless
 func_0012B550	SetPlacedObjectSpecialFlag	sets or clears bit 32 of the flags, the bit SetArcSpecialObject sets on its special object and UpdateSwitchedCollider tests
 func_0012B590	GetPlacedObjectSpecialFlag	1 or 0 through the pointer by bit 32 of the flags (the getter of SetPlacedObjectSpecialFlag)
 func_0012B5B8	SetFollowObjects	makes the +0x224 record when either argument is set, stores them as the followed objects (flag bits 4 and 8, none when it is the parent) and refreshes the two matrices
+func_0012B6A0	StoreVectorTailPlacedObject	original assembly with no entry and no return: 20 bytes after SetFollowObjects's jr that free 16 bytes of stack, store $a1's quadword at $v0 and move VU0 register vf1 into $v0 (qmfc2.ni); nothing calls or names it. The same words sit after eight other functions (StoreVectorTail and a file's role), the tail of a stripped vector function; it is classified handwritten only for its VU0 instruction
 func_0012B6B8	InitCodeChecksum	slot 0: sets range 0x100018 .. D_00148D64, crc to 0xFFFFFFFF and fills table with the CRC-32 table
 func_0012B760	UpdateCodeChecksum	slot 17: folds up to 64 words of the range into crc and flags a mismatch when the sum is nonzero at the end
 func_0012B868	InitPlacedObjectModule	the first entry of g_startupInitializers (D_002647C0[0]); its body is empty

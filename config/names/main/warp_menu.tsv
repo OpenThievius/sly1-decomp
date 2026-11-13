@@ -109,6 +109,7 @@ func_001ED5B8	AppendTimelineKind2Entry	appends a timeline entry of kind 2 with A
 func_001ED5D8	AppendTimelineKind3Entry	appends a timeline entry of kind 3 with AppendTimelineEntry
 func_001ED5F8	AppendTimelineKind4Entry	appends a timeline entry of kind 4 with AppendTimelineEntry
 func_001ED618	AppendTimelineKind5Entry	appends a timeline entry of kind 5 with AppendTimelineEntry
+func_001ED638	StoreVectorTailWarpMenu	original assembly with no entry and no return: 20 bytes after AppendTimelineKind5Entry's jr that free 16 bytes of stack, store $a1's quadword at $v0 and move VU0 register vf1 into $v0 (qmfc2.ni); nothing calls or names it. The same words sit after eight other functions (StoreVectorTail and a file's role), the tail of a stripped vector function; it is classified handwritten only for its VU0 instruction
 func_001ED650	ComputePolarOffset	takes sin and cos of its angle (ComputeSinCos) and writes cos*scale, sin*scale and z to the output vector
 func_001ED6B0	ComputeDirectionFromAngles	takes the sine and cosine of two angles and writes (cos b cos a, cos b sin a, sin b) times a scale
 func_001ED738	SplitVectorAlongAxis	returns the dot product of a vector with an axis and writes, when asked, its part along the axis and the rest
