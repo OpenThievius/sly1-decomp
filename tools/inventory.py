@@ -17,6 +17,15 @@ run replaced by one of the same length pairs by position. Unpaired functions
 are PAL's own. config/eu/map_fixes.tsv corrects the pairs position gets wrong
 where PAL moved a function (`fixed`), each with retail's evidence.
 
+Two steps correct what position gets wrong. A PAL function that moved (it sits elsewhere than
+its US copy, so the alignment pairs its neighbours by position) is found by its code: when a
+US function and a PAL function that are not paired by fingerprint have the same instructions,
+relocated fields masked and the padding behind the last `jr` ignored, and no other function of
+either version has them, they are a pair (`moved`), and the functions they were paired with by
+position are unpaired. And a pair by position whose sizes differ more than SIZE_RATIO times is
+no pair (a stripped function's 4-byte leftover is not the counterpart of a 644-byte function):
+PAL's function is its own.
+
 A last step, `similar`, pairs what is still unpaired on both sides: for each US function with
 no counterpart, the unpaired PAL functions that lie between the PAL copies of its nearest paired
 neighbours, of 0.6 to 1.6 times its size, are scored by the similarity of their instructions
@@ -78,13 +87,7 @@ def functions_from_asm(key):
                 vram, word, mnemonic, operands = int(m.group(1), 16), m.group(2), m.group(3), m.group(4)
                 if current[1] is None:
                     current[1] = vram
-                insn = int.from_bytes(bytes.fromhex(word), "little")  # splat prints the bytes in file order
-                if RELOCATED.search(operands):
-                    if mnemonic in ("jal", "j"):
-                        insn &= 0xFC000000                    # opcode kept, 26-bit target masked
-                    else:
-                        insn &= 0xFFFF0000                    # %hi/%lo immediate masked
-                words.append("%08X" % insn)
+                words.append(masked_word(m))               # opcode kept on a call, relocated fields masked
         close()
     out = [f for f in out if f[1] is not None]
     out.sort(key=lambda f: f[1])
@@ -96,6 +99,43 @@ def write_functions(key, funcs):
     lines = ["name\taddress\tsize\tkind\tfingerprint"]
     lines += ["%s\t%08X\t%d\t%s\t%s" % (n, a, s, k, h) for n, a, s, k, h in funcs]
     return path, "\n".join(lines) + "\n"
+
+
+def masked_word(m):
+    """One instruction's word as the fingerprints hash it: relocated fields masked."""
+    insn = int.from_bytes(bytes.fromhex(m.group(2)), "little")  # splat prints the bytes in file order
+    if RELOCATED.search(m.group(4)):
+        insn &= 0xFC000000 if m.group(3) in ("jal", "j") else 0xFFFF0000
+    return "%08X" % insn
+
+
+def core_fingerprints(key):
+    """{name: hash of the function's masked instructions without the padding words behind them}:
+    the same code, whatever the alignment after it (PAL pads functions differently)."""
+    out, current, words = {}, None, []
+
+    def close():
+        if current:
+            while words and words[-1] == "00000000":
+                words.pop()
+            out[current] = hashlib.sha1(" ".join(words).encode()).hexdigest()[:16]
+
+    for path in sorted((ROOT / "asm" / key).rglob("*.s")):
+        text = path.read_text()
+        if ".section .text" not in text[:1000]:
+            continue
+        for line in text.splitlines():
+            m = NONMATCHING.match(line)
+            if m:
+                close()
+                current, words = m.group(1), []
+                continue
+            m = INSN.match(line)
+            if m and current is not None:
+                words.append(masked_word(m))
+        close()
+        current, words = None, []
+    return out
 
 
 def read_functions(key):
@@ -125,6 +165,43 @@ def pair(eu, us):
         else:
             result += [(r, None, "none") for r in eu[e0:e1]]
     return result
+
+
+POSITION = ("none", "order", "order-size")    # the pairings position makes, which `moved` may correct
+SIZE_RATIO = 4                                # how far apart a pair by position's sizes may be
+
+
+def drop_implausible(pairs):
+    """`pairs` without the pairs by position whose sizes differ more than SIZE_RATIO times."""
+    return [(e, None, "none") if how in ("order", "order-size") and not (
+        u[2] <= SIZE_RATIO * e[2] and e[2] <= SIZE_RATIO * u[2]) else (e, u, how) for e, u, how in pairs]
+
+
+def moved(pairs, us, core_us, core_eu):
+    """`pairs` with the functions that moved paired by their code (see the module docstring).
+    core_us and core_eu are core_fingerprints' tables."""
+    count_us, count_eu = collections.Counter(core_us.values()), collections.Counter(core_eu.values())
+    movable_eu = {e[0]: i for i, (e, u, how) in enumerate(pairs) if how in POSITION}
+    where_us = {u[0]: i for i, (e, u, how) in enumerate(pairs) if u}
+    by_core = {core_eu[n]: n for n in movable_eu if n in core_eu and count_eu[core_eu[n]] == 1}
+    found = []
+    for u in us:
+        i = where_us.get(u[0])
+        if i is not None and pairs[i][2] not in POSITION:
+            continue
+        core = core_us.get(u[0])
+        e_name = by_core.get(core) if core is not None and count_us[core] == 1 else None
+        # A pair of two unpaired functions is `similar`'s to make; this step corrects position's pairs.
+        if e_name and i != movable_eu[e_name] and (i is not None or pairs[movable_eu[e_name]][1]):
+            found.append((movable_eu[e_name], u))
+    out = list(pairs)
+    for j, u in found:                                         # unpair what position paired with them
+        out[j] = (out[j][0], None, "none")
+        if u[0] in where_us:
+            out[where_us[u[0]]] = (out[where_us[u[0]]][0], None, "none")
+    for j, u in found:
+        out[j] = (out[j][0], u, "moved")
+    return out
 
 
 SIMILAR_MIN = 0.6        # instruction similarity a pair needs
@@ -278,6 +355,7 @@ def main(argv=None):
         if key == "eu":
             us_funcs = functions_from_asm("us")
             pairs = apply_fixes(pair(functions_from_asm("eu"), us_funcs), us_funcs)
+            pairs = moved(drop_implausible(pairs), us_funcs, core_fingerprints("us"), core_fingerprints("eu"))
             pairs = similar(pairs, us_funcs, bodies_from_asm("eu"), bodies_from_asm("us"))
             outputs.append(write_map(pairs))
         for path, text in outputs:

@@ -5120,8 +5120,9 @@
 #define IsWideCharSpace                            func_eu_001E31E0
 #define IsWideCharDigit                            func_eu_001E3210
 #define UppercaseByteString                        func_eu_001E3248
-#define CopyStringBoundedForIopClients             func_eu_001F7738
 #define ClaimFreeFileHandle                        func_eu_001F9538
+#define IsFileServiceVersionUnknown                func_eu_001F9C78
+#define OpenFile                                   func_eu_001F9D40
 #define ReadRomVersion                             func_eu_0020A730
 #define IsRomVersionRegionT                        func_eu_0020A7D0
 #define GetSystemLanguage                          func_eu_0020A810

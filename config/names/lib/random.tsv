@@ -1,4 +1,3 @@
 symbol	name	evidence
 func_001F66F8	SeedRandom	stores its argument as the seed at +0x58 of g_libraryState's record (SetScriptRandomSeed calls it)
 func_001F6708	NextRandom	advances the seed at +0x58 of g_libraryState's record by state * 0x41C64E6D + 0x3039 and returns its low 31 bits (RandomIntInRange and RandomFloatInRange call it)
-func_eu_001F7738	CopyStringBoundedForIopClients	only in PAL: original assembly with the bytes of US CopyStringBounded (func_00201720), placed where US has CompareStrings and FindSubstring; PAL's SendModuleLoadRequest, OpenCardFile, ReadCardDirectory and RequestCardSpaceForPath copy their names with it (config/eu/map.tsv pairs CopyStringBounded with PAL's func_00202ADC instead)
