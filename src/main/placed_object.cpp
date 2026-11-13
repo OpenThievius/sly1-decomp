@@ -3191,9 +3191,6 @@ Attachment* CreateTrackAttachment(BaseObject* item)
     return CreatePoseSource(item->world, item, (void*)D_002197C0);
 }
 
-INCLUDE_RODATA(D_00249A1C);
-
-extern const f32 D_00249A1C;
 void LoadFollowRecord(PlacedObject* self, void* a1);
 void ReadPlacedObjectModel(void* record, void* stream, PlacedObject* owner);
 void ReadSlotObjects(World* world, PlacedObject* self, void* stream);
@@ -3214,10 +3211,10 @@ void LoadPlacedObject(PlacedObject* self, void* r)
     self->f84 = ReadBufferedFloat(r);
     self->f2A4 = ReadBufferedFloat(r);
     self->f2A8 = ReadBufferedFloat(r);
-    if (self->f80 == D_00249A1C) {
+    if (self->f80 == 3.4028235e+38f) {
         self->f80 = 10000000000.0f;
     }
-    if (self->f84 == D_00249A1C) {
+    if (self->f84 == 3.4028235e+38f) {
         f32 m = self->f80;
         f32 c = 2000.0f;
         self->f84 = c <? m;
