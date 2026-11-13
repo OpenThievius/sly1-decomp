@@ -169,7 +169,11 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   plausibly stood (a not-reached check after branches that all return, a check of an argument
   or a state); and the use has a comment naming that section. It is never tried as a variant
   across functions, and no other statements go inside it: a run-once loop around statements
-  is still a barrier.
+  is still a barrier. One statement macro around statements is allowed by the maintainer's
+  decision of 2026-11-13: func_00130C58's `BEGIN_WINDOW_SCAN` (src/main/curve_segment.cpp),
+  which sets a search's count and cursor, where retail is proved to need its loop notes and
+  every other form was measured or ruled out (docs/toolchain/loops.md, "Where a loop's notes
+  count"). Another function needing such a macro is a new decision.
 - **An unused local only as a type the original plausibly declared.** GCC 2.95 gives an unused
   struct local a stack slot, so retail's frames show where the original declared one. A list
   walk whose frame has an unused 16-byte gap declares the walk's frame, `ListFrame frame;`
