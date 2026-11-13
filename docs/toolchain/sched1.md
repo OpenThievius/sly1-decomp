@@ -249,6 +249,42 @@ dumps of func_0020BB18 (src/lib/mpeg_decoder.cpp, Sony's 2.9-ee-991111, 2026-11-
   test as nested ifs, as two gotos, as a flag local (116, 134), one variable for the rows
   and the height (64 lines but with s6 and s7 swapped: not closer), one for the rows and
   the size (79, the same), the height set in each arm (136), the size kept in `w` (135).
+- **Fourth pass (w49-i, 2026-11-13): retail's body block is ours without the address, and
+  what that excludes.** Replayed by hand on our own `.sched2` dependency table of the body
+  (block 8 of the near miss; issue rate 2, one memory unit): delete insn 345 (`addiu
+  v0,s8,1320`) and let `v0` be live into the block, so that 659 (`sw v0,68(sp)`, priority
+  64) is ready at once. The scheduler then issues 142+146, 138+148, 659+163, 335+165,
+  662+329, 337+150, 665+331, 339+333, 668+472, 341+152, 671, 343, 674 and the call: retail's
+  order insn for insn up to the first `jal` (the sort at each cycle is the one the table
+  gives; nothing else changes). So in sched2 the address is set outside the body's block, or
+  shares cycle 1 with an insn that leaves no code and takes the second issue slot ahead of
+  the stores. Each reading needs something no allowed form has given:
+  (1) *A value set before the body's label and copied inside it* (two pseudos: R in `v0`, set
+  ahead of the label, and the spilled one, set in the body by `Q = R`). PRE cannot place R:
+  with lazy code motion the address is anticipatable only at the body (the return path does
+  not use it), so it is inserted on the two edges only when it is available on some other
+  incoming path, which retail's code would show (it has no other computation of it). And
+  cse2 removes the copy: in make_regs_eqv (cse.c) a new register becomes the class's
+  canonical one only if it lives outside the current cse block, so R stays canonical, Q's
+  uses become R and R is the pseudo spilled, with its store beside its set. Measured: the
+  PRE probe built with `-fno-rerun-cse-after-loop` keeps both pseudos, Q spilled to slot 68
+  (retail's slot) with its copy's store in the body (`sw s2,68(sp)`; R took s2 there). So
+  this reading needs a label inside the body at cse2 that is gone by sched2, or Q
+  referenced before the body's label; no plain source found does either (a named label
+  before the last call is deleted and changes nothing, 133 lines in the PRE probe).
+  (2) *An insn that leaves no code in cycle 1.* The only candidate reorg removes is a re-read
+  of the width identical to the test's `lw v1,0(a1)` (redundant_insn on both paths, deleted
+  from the beq's own thread), but redundant_insn refuses an insn with a REG_UNUSED note and
+  flow2 deletes a dead set, so the re-read needs a reader that also vanishes before final;
+  no such reader (a no-op move, a USE of a register other than the return value, a silent
+  trap) arises from this function's statements.
+  Also compiled (no closer): one named local for the last plane's address set at the top, before the test,
+  after it or before the set-up call, with the last call using it or not (146, 122, 107,
+  107); the probe that sets the address in each arm with a body copy whose source is
+  reassigned after it (cse2 then keeps the copy: 48 lines, the copy late and slot 48).
+  Not kept: the size written at each of its three uses scores 40 lines, but it computes the
+  size after the first call where retail computes it before, so it trades this wall for a
+  structural difference.
 
 ### A value negated into itself crosses the call (func_001A2380)
 
