@@ -6,7 +6,7 @@ s32 RequestCardSpaceForPath(s32 a0, s32 a1, s8* a2)
 {
     RemoteCallClient* reg;
     CardPathRequest* buf;
-    CardPathRequest* res;
+    s32 res;
 
     if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
@@ -31,5 +31,5 @@ s32 RequestCardSpaceForPath(s32 a0, s32 a1, s8* a2)
     } else {
         PostSemaphore(g_cardSemaphore);
     }
-    return (s32)res;
+    return res;
 }

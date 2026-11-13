@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "remote_call_client.h"
 #include "asm_func.h"
 #include "anim_curve.h"
 #include "world.h"
@@ -68,22 +69,14 @@ volatile IopSharedPacket g_iopSharedPacket = { 0 };
 IopRpcResult g_iopChannel2Result = { 0 };
 s32 g_iopChannel2Args[8] = { 0 };
 
-// An RPC client of the IOP: InitIopCommandChannels binds the two (func_001F80C0) and waits for
-// the word at 0x24, which the bind fills in once the IOP's server answers; func_001F8480 tells
-// whether a call is still in progress and func_001F8290 makes one.
-struct IopRpcClient {
-    u8 pad00[0x24];         // 0x00
-    s32 server;             // 0x24: 0 until the bind has reached the IOP's server
-};
-
-extern IopRpcClient g_iopCommandRpc;
-extern IopRpcClient g_iopBankLoadRpc;
+// The RPC clients of the IOP: InitIopCommandChannels binds the two (func_001F80C0) and waits for
+// the client's server word, which the bind fills in once the IOP's server answers; func_001F8480
+// tells whether a call is still in progress and func_001F8290 makes one.
+extern RemoteCallClient g_iopCommandRpc;
+extern RemoteCallClient g_iopBankLoadRpc;
 s32 PrintFormatted(const char* fmt, ...);
-s32 IsRemoteCallPending(IopRpcClient* client);
-s32 CallRemoteService(IopRpcClient* client, s32 id, s32 mode, void* send, s32 sendSize, void* receive, s32 receiveSize, s32 a7, s32 a8);
 
 void InitRemoteCalls(s32 mode);
-s32 BindRemoteService(IopRpcClient* rpc, u32 id, s32 mode);
 s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
 #define ASSERT_0011CBB8(cond, line) \
