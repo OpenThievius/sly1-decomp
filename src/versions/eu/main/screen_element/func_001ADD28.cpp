@@ -10,11 +10,6 @@ struct Obj_eu_1AEA90 {
 extern u8 D_eu_00263590[];
 void DrawScreenElementText(void* self);
 s32 GetTextureRegisterBits(void* p, s32 a, s32 b);
-void func_eu_00161A20(void* ctx, s32 a, s32 b, u64 c);
-void func_eu_00161D68(void* ctx, s32 a, s64 b);
-void func_eu_00161AB8(void* ctx, s32 color);
-void func_eu_00161B28(void* ctx, s32 a, s32 b);
-void func_eu_00161C50(void* ctx, s32 a, s32 b, s32 c, s32 d);
 
 void DrawTitleElement(Obj_eu_1AEA90* self)
 {
@@ -22,20 +17,20 @@ void DrawTitleElement(Obj_eu_1AEA90* self)
     if (self->peer != 0) {
         Inner_eu_1AEA90* r = *self->peer->link->rect;
         s32 id = GetTextureRegisterBits(self->peer->link, 0, 0);
-        u8* ctx = D_eu_00263590;
-        func_eu_00161A20(ctx, 0x156, 10, 0x43431EEEEEULL);
-        func_eu_00161D68(ctx, 0x47, 0x33001);
-        func_eu_00161D68(ctx, 0x42, 0x44);
-        func_eu_00161D68(ctx, 6, id);
-        func_eu_00161D68(ctx, 0x14, 0x60);
-        func_eu_00161D68(ctx, 8, 5);
+        PacketWriter* ctx = (PacketWriter*)D_eu_00263590;
+        BeginGifTag(ctx, 0x156, 10, 0x43431EEEEEULL);
+        AddGifRegisterWrite(ctx, 0x47, 0x33001);
+        AddGifRegisterWrite(ctx, 0x42, 0x44);
+        AddGifRegisterWrite(ctx, 6, id);
+        AddGifRegisterWrite(ctx, 0x14, 0x60);
+        AddGifRegisterWrite(ctx, 8, 5);
         tmp[0] = (s32)0x80808080;
-        func_eu_00161AB8(ctx, tmp[0]);
-        func_eu_00161B28(ctx, 0, r->y << 4);
-        func_eu_00161C50(ctx, (s32)((self->f52C + 1728.0f) * 16.0f),
+        AddGifRgbaEntry(ctx, tmp[0]);
+        AddGifUvEntry(ctx, 0, r->y << 4);
+        AddGifXyzfEntry(ctx, (s32)((self->f52C + 1728.0f) * 16.0f),
                          (s32)((self->f530 * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-        func_eu_00161B28(ctx, r->x << 4, 0);
-        func_eu_00161C50(ctx, (s32)(((self->f52C + self->f544) + 1728.0f) * 16.0f),
+        AddGifUvEntry(ctx, r->x << 4, 0);
+        AddGifXyzfEntry(ctx, (s32)(((self->f52C + self->f544) + 1728.0f) * 16.0f),
                          (s32)(((self->f530 + self->f548) * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
     } else {
         DrawScreenElementText(self);
