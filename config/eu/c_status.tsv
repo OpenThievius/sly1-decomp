@@ -4280,6 +4280,7 @@ func_00201FF8	func_00203338	match
 func_00202058	func_00203398	match	
 func_00202098	func_002033D8	match	
 func_00202120	func_00203460	match	
+func_00202140	func_00203480	match	rodata
 func_002023B0	func_002036F0	match	
 func_00202478	func_002037B8	match	
 func_00202768	func_00203AA8	match	
