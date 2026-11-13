@@ -147,6 +147,47 @@ From haifa-sched.c of GCC 2.95.3 (sched_analyze, sched_analyze_insn) and the `-d
   before the 660 rows (frame stores feed RotateTransposed's loads at priority 61, so rot's go
   early, and rot written after the transpose holds the products' last use).
 
+- **The 660 rows' order is the stream's order; what block A still needs (w50-f, 2026-11-13).**
+  The six stores of the block (three rows to `self + 0x660`, three to m) have one priority
+  (61: the transposed product's row loads wait for the frame stores as well as the stores to
+  self; read from alias.c and not tested, the reason is that their address register has no
+  pointer flag, so find_base_term gives it no base), one weight and the same number of dependents, so rank_for_schedule
+  falls through to the LUID: as each becomes ready, the earliest in the stream goes. Retail's
+  order (0x670, 0x680, 0x660, then m's rows) is therefore the stream's with row 0's store to
+  self written after rows 1 and 2 and before `m = self->m660`; no register weight and no
+  second pseudo is needed (the weights of the entry above were another way to the same order
+  in the replay). Compiled: with the first product kept in a local and stored last, block A
+  is retail's insn for insn but for the three argument insns of this section's wall, and with
+  the two probes above (the if/else between the key reads, the test before the third call)
+  26 lines differ, registers only (build/swarm/w50-f/f/f2.cpp). What original statement put
+  row 0's store last is not known; a structure copy whose first row cse forwards issues its
+  rows 1, 2, 0 as well (the copy of the call's result into rot further down), but there it is
+  the deaths of rows 1 and 2, which the products here cannot have: their registers stay busy
+  to rot's stores (the transposed product's scratch registers are vf8 to vf11 in retail).
+  On that probe local-alloc's replay (tools/globalalloc.py's LocalModel) gives the two ranks
+  that are still wrong: tilt's row 1 (4 references over 7 insns, 11428) against turn's row 2
+  (2 over 2, 10000), and the quantity of tilt's row 0 and the last product (8 over 23, 10434)
+  against the transposed product's result (2 over 2, 10000). Retail has each pair the other
+  way: two more insns in sched1's order between the tilt loads and the last product (9 and
+  25), or turn's row 2 loaded directly before its product (a tie between that load and the
+  second product would give it, the product's weight being lower: reasoned, not replayed) and v640 stored directly
+  after the transposed product. Three tied copies of the products would not do: the last
+  product's quantity then has 10 references over 26 insns (11538).
+- **The boundary is there after reload (w50-f).** In our sched2 the third call's `addiu a1`
+  and `move a0` take the idle alu slots beside the tilt loads again, whatever sched1 did, and
+  retail's slots are idle; so what holds them exists in sched2. A CLOBBER of a brace
+  initialiser (docs/toolchain/large-functions.md) is deleted by reload and cannot be it. Left:
+  a jump that jump2 deletes, or an asm without operands. From toplev.c's pass order, jump runs
+  after cse1, delete_trivially_dead_insns after that, and jump again before cse2: an arm that
+  only holds an inline's unused result is emptied and its jump removed before sched1. A jump
+  survives to jump2 only where flow1 or a later pass empties the arm (a register that is used
+  elsewhere and dead here). flow.c also ends a block after every call inside an exception
+  region, with no code, but the file is built without exceptions. Compiled and ruled out as
+  the common cause of this function's walls: a run-once loop from each of six statements to
+  `rot = m` (1704 bytes, or VU0 registers vf10/vf11); the w clamp in both arms of the speed
+  test (the copies are scheduled differently, so cross-jumping leaves both: 1796 bytes); the
+  two key tests as switches (1704 to 1716 bytes).
+
 ### sched2 keeps sched1's dependences (func_001358D0)
 
 - **LOG_LINKS are never cleared.** haifa-sched.c's sched_analyze only adds to an insn's
