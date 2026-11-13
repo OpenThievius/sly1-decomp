@@ -2921,7 +2921,7 @@ void AppendTimelineKind5Entry(void* self, s32 p)
     AppendTimelineEntry(self, 5, p);
 }
 
-ASM_FUNC(func_001ED638);
+LINKER_REMNANT(func_001ED638);
 
 void ComputePolarOffset(Vec3* out, f32 unused, f32 scale, f32 z)
 {

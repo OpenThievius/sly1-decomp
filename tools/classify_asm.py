@@ -195,14 +195,17 @@ def classify(funcs, bodies, references, sdk=None, key="us"):
         lines = bodies.get(name, [])
         tags = todo.tags_of(lines, kind)
         ops = ops_of(lines)
-        why = sdk.get(name) or handwritten(ops, kind, lines) or game_tail_jump(addr, lines, key)
+        leftover = (name not in sdk and "fragment" in tags and ok and addr % 8 == 0
+                    and not any(BRANCH.match(o) for o in ops) and references.get(name, 0) == 0)
+        # The leftover rules come before the VU0 rule: a run with no entry, no return and no caller is
+        # what the linker left whatever its instructions are (a stripped vector function's tail).
+        why = sdk.get(name) or (None if leftover else handwritten(ops, kind, lines)) or game_tail_jump(addr, lines, key)
         if why:
             shaped = None if name in sdk else inline(why, lines)
             out.append((name, addr, size, "inline", shaped) if shaped else (name, addr, size, "handwritten", why))
             ok = ends_finished(ops)
             continue
-        if ("fragment" in tags and ok and addr % 8 == 0 and not any(BRANCH.match(o) for o in ops)
-                and references.get(name, 0) == 0):
+        if leftover:
             out.append((name, addr, size, "remnant", "stripped-function leftover"))
             continue  # the chain stays finished across a remnant
         if addr == CODE_START and ops and all(o == "nop" for o in ops):

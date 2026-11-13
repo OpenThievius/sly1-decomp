@@ -2874,7 +2874,7 @@ void AssignItemKeeperMemberPlaces(ItemKeeper* self)
     }
 }
 
-ASM_FUNC(func_001CC3F8);
+LINKER_REMNANT(func_001CC3F8);
 
 
 

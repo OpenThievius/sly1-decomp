@@ -61,7 +61,8 @@ func_001F9638 and func_0020B208). Counts are of `config/us/original_asm.tsv` as 
 The function holds an instruction the compiler cannot emit, or other evidence says it was
 written as assembly:
 
-- a VU0 macro-mode instruction (COP2: `vaddx`, `lqc2`, `ctc2`, ...): 563 functions;
+- a VU0 macro-mode instruction (COP2: `vaddx`, `lqc2`, `ctc2`, ...): 563 functions on 2026-11-01, 44 in the table today (the others are `inline`
+  below, or leftovers since 2026-11-13: see "remnant");
 - a 128-bit multimedia (MMI) instruction that no function matched in C contains: 40. `mult1`
   is not one: the compiler issues the second of two multiplies to the EE's second pipeline as
   `mult1` (the 64-bit product, func_001FE890 in src/lib/multiply.c, and the pad library's slot
@@ -134,8 +135,16 @@ A run of words the linker left of a function it stripped. It counts when:
 4. the code before it is finished: going back over earlier remnants, there is a `jr` and its
    delay slot, a tail `j`, or the start of game code.
 
+The leftover rules come before the instruction rules (VU0, MMI, system): a run that has no entry,
+no return and no caller is what the linker left, whatever its words are. On 2026-11-13 nine VU0
+fragments moved from `handwritten` to `remnant` this way (func_0012B6A0, func_00159668,
+func_001782A8, func_001A3AC8, func_001B8FE0, func_001CC3F8, func_001D70E8, func_001DB448,
+func_001ED638: a stripped vector function's `addiu $sp` / `sq $a1` / `qmfc2.ni $v0, $vf1` tail, one
+a lone `sqc2`; each after the `jr` of the function before, with no caller and no label in code or
+data). No other row changed. They keep their address names and are written `LINKER_REMNANT(...)`.
+
 Fragments that fail a test stay unmatched, with the `fragment` blocker in `tools/todo.py`, as
-a boundary for a person to look at. 113 remnants pass.
+a boundary for a person to look at. 151 remnants are in the table today.
 
 ### Two kernel-library functions examined (2026-11-08)
 

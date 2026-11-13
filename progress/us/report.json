@@ -8902,8 +8902,7 @@
      "fuzzy_match_percent": 100.0,
      "address": "33504",
      "metadata": {
-      "virtual_address": "1226400",
-      "demangled_name": "StoreVectorTailPlacedObject"
+      "virtual_address": "1226400"
      }
     },
     {
@@ -17241,8 +17240,7 @@
      "fuzzy_match_percent": 100.0,
      "address": "19616",
      "metadata": {
-      "virtual_address": "1414760",
-      "demangled_name": "StoreVectorTailEffectSpawner"
+      "virtual_address": "1414760"
      }
     },
     {
@@ -21785,8 +21783,7 @@
      "fuzzy_match_percent": 100.0,
      "address": "36000",
      "metadata": {
-      "virtual_address": "1540776",
-      "demangled_name": "StoreVectorTailPlayer"
+      "virtual_address": "1540776"
      }
     },
     {
@@ -29851,8 +29848,7 @@
      "fuzzy_match_percent": 100.0,
      "address": "23176",
      "metadata": {
-      "virtual_address": "1718984",
-      "demangled_name": "StoreVectorTailEffect"
+      "virtual_address": "1718984"
      }
     }
    ],
@@ -34224,8 +34220,7 @@
      "fuzzy_match_percent": 100.0,
      "address": "5752",
      "metadata": {
-      "virtual_address": "1806304",
-      "demangled_name": "StoreVectorTailCollider"
+      "virtual_address": "1806304"
      }
     },
     {
@@ -37887,8 +37882,7 @@
      "fuzzy_match_percent": 100.0,
      "address": "21680",
      "metadata": {
-      "virtual_address": "1885176",
-      "demangled_name": "StoreVectorTailAgent"
+      "virtual_address": "1885176"
      }
     }
    ],
@@ -38987,8 +38981,7 @@
      "fuzzy_match_percent": 100.0,
      "address": "3592",
      "metadata": {
-      "virtual_address": "1929448",
-      "demangled_name": "StoreVectorTailPathFollower"
+      "virtual_address": "1929448"
      }
     },
     {
@@ -39477,8 +39470,7 @@
      "fuzzy_match_percent": 100.0,
      "address": "6528",
      "metadata": {
-      "virtual_address": "1946696",
-      "demangled_name": "StoreVectorTailWorld"
+      "virtual_address": "1946696"
      }
     },
     {
@@ -42947,8 +42939,7 @@
      "fuzzy_match_percent": 100.0,
      "address": "19816",
      "metadata": {
-      "virtual_address": "2020920",
-      "demangled_name": "StoreVectorTailWarpMenu"
+      "virtual_address": "2020920"
      }
     },
     {

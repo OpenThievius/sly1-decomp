@@ -2747,7 +2747,7 @@ void SendEffectMessagesAtRate(Effect* self, f32 scale)
     } while (1.0f <= nv);
 }
 
-ASM_FUNC(func_001A3AC8);
+LINKER_REMNANT(func_001A3AC8);
 
 #define F(o, off) (*(f32*)((u8*)(o) + (off)))
 #define W(o, off) (*(s32*)((u8*)(o) + (off)))
