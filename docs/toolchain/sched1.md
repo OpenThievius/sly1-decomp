@@ -576,6 +576,64 @@ dumps of func_0020BB18 (src/lib/mpeg_decoder.cpp, Sony's 2.9-ee-991111, 2026-11-
   boundary must still stand after flow2, which in this compiler only a cross-jumped duplicate
   does. No statement of a plain reading gives any of the three.
 
+- **Seventh pass (w52-a, 2026-11-13): the mechanism, and an exact probe whose source is not
+  plausible.** About 60 compiles with the `-da` dumps (scratch `build/swarm/w52-a/`).
+  (1) *What the silent insn must be, by replay.* One insn added at the head of the near
+  miss's `.sched2` table and the block replayed (`wi.py`) gives retail's order in two cases
+  only: an insn on no unit that both picture stores wait for (a USE of memory), or an insn
+  on the memory unit that one of them waits for (the unit holds the other). Nothing on the
+  memory unit prints nothing: reorg's redundant_insn needs an identical insn after the last
+  label before the branch, and the only store there (`sw v0,304(s8)`) has its register
+  reused, the only load valid at both branches (`lw v1,0(a1)`) would need a reader; jump2
+  deletes a copy or a constant load only when an insn of the same block already made the
+  equivalence. So it is the USE of memory.
+  (2) *A block of its own pins the USE.* The fifth pass's objection was sched1: a USE at the
+  body's label has the priority of nothing and sinks below the stores. It does not sink
+  when the body starts with a conditional that combine folds and whose arm is not
+  if-converted (a store). Probe: `if ((u32)p3 & (w & 15)) pic->width = 0;` ahead of the
+  picture stores, with `p3` a named local assigned only later (`p3 =
+  &st->planes[3].addr;`). By pass: `.combine` has `(insn 669 135 663 (use (reg/v:SI 122)))`
+  with `REG_DEAD 122` right after the body's label (the test held 122's last reference
+  before its assignment; `w & 15` is zero by nonzero_bits, which cse cannot know across
+  blocks) and the test is now `pc=L149`, a jump over the arm; `.sched` schedules block 8 as
+  `669` and `143 pc=L149` alone, block 9 as the dead arm (`148 [r116]=0x0`), the body as
+  block 10, so the USE cannot move; 122 is spilled for its later life and `.greg` has
+  `(use (mem:SI (plus:SI (reg:SI 29 sp) (const_int 48))))`; flow2 deletes the jump and the
+  arm and the body is one block again; `.sched2` gives the USE priority 66 with the two
+  picture stores and `sw v0,48(sp)` as dependents and issues `669` and `360` (the address)
+  at t=1, `157` and `161` at t=2, `153` and `163` at t=3, `676` and `182` at t=4: retail's
+  order. reorg passes over a USE at the head of a thread without losing, so both branches
+  get the address. `tools/check.py` prints EXACT for US and PAL, and for the function and
+  its caller in a scratch copy of the real file (`infile/mpeg_decoder.cpp`).
+  (3) *What the form needs.* The read of the pointer in the condition (without it: the base,
+  102; in the arm only: 102); an arm that stays a block (an arithmetic arm is a conditional
+  move, 102; a call moves registers, 44; a return keeps the test as code, 125); the test at
+  the head (after the picture stores 9 lines, between them 2); and the named pointer in the
+  first slot: a user variable is numbered ahead of the temporaries of the other planes, so
+  with one named pointer it is plane 3's (plane 4's: 6 lines, two slots swapped), or all
+  six (or all nine) named in plane order with any of the six read (plane 0's, a
+  register: 12 lines). Exact too: `h` for `w`, `& 1`,
+  `p3 != p3 + (w & 15)`, `(w & 15) * (u32)p3`, a store to a decoder field in the arm.
+  (4) *What is open.* The read is of a local that has no value yet, in a test that is never
+  true: the register must end in memory, the only registers that do are the six pointers,
+  and an initialised one would print its store ahead of the body. No natural statement
+  with that shape was found, so the probe is not landed (AGENTS.md: nothing written only
+  to move instructions).
+  (5) *Also measured.* The frame has 8 bytes of alignment at 72(sp) and nothing else
+  unexplained, the caller passes one argument, and the file's data (identification string,
+  two quantiser matrices) has nothing unread. The address written in the condition, in
+  each arm, in a conditional expression or in a loop header is 122, 121, 35, 111, 130; a
+  do-while around the test 52. A frame array of the six pointers keeps the frame and the
+  slots but takes other registers (99). This compiler is later than 2.95.3 (its first dump
+  has basic-block notes and the tail call is a `call_insn/j` from the start), so the
+  2.95.3 source is a guide, not the text. Local-alloc's update_equiv_regs gives a register
+  the memory it is stored into as its home (`REG_EQUIV (mem (plus sp 24))` on the load of
+  the twelfth argument): another way a register can be memory with no slot of its own.
+- **Spot it.** A conditional at the head of a block that only combine can fold (known zero
+  bits of a value set in another block) leaves a jump over its arm until flow2: whatever
+  combine drops at that block's label stays first in the stream through sched1 and
+  allocation. Grep `.sched` for a block that is one `pc=L` insn.
+
 ### A value negated into itself crosses the call (func_001A2380)
 
 - **sched1's call rule.** sched_analyze makes an insn that sets a pseudo depend (anti) on the
