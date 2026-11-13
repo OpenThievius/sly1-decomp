@@ -1,6 +1,6 @@
 {
  "measures": {
-  "fuzzy_match_percent": 99.3170622078389,
+  "fuzzy_match_percent": 99.38259618842143,
   "total_code": "1112400",
   "matched_code": "1091448",
   "matched_code_percent": 98.11650485436893,
@@ -14,7 +14,7 @@
   "complete_code_percent": 98.11650485436893,
   "complete_data": "429656",
   "complete_data_percent": 99.67452251315945,
-  "total_units": 192,
+  "total_units": 193,
   "complete_units": 167
  },
  "units": [
@@ -6619,18 +6619,18 @@
   {
    "name": "game/placed_object",
    "measures": {
-    "fuzzy_match_percent": 98.64835717880509,
-    "total_code": "55636",
-    "matched_code": "53564",
-    "matched_code_percent": 96.27579265223956,
+    "fuzzy_match_percent": 99.99232186732186,
+    "total_code": "52096",
+    "matched_code": "50772",
+    "matched_code_percent": 97.45853808353809,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 309,
-    "matched_functions": 307,
-    "matched_functions_percent": 99.35275080906149,
-    "complete_code": "53564",
-    "complete_code_percent": 96.27579265223956,
+    "total_functions": 302,
+    "matched_functions": 301,
+    "matched_functions_percent": 99.66887417218543,
+    "complete_code": "50772",
+    "complete_code_percent": 97.45853808353809,
     "complete_data": "0",
     "complete_data_percent": 100.0,
     "total_units": 1,
@@ -9652,12 +9652,42 @@
       "virtual_address": "1245528",
       "demangled_name": "GetObjectClassId"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/placed_object.cpp"
+   }
+  },
+  {
+   "name": "game/curve_segment",
+   "measures": {
+    "fuzzy_match_percent": 99.46327683615819,
+    "total_code": "3540",
+    "matched_code": "2792",
+    "matched_code_percent": 78.87005649717514,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 7,
+    "matched_functions": 6,
+    "matched_functions_percent": 85.71428571428571,
+    "complete_code": "2792",
+    "complete_code_percent": 78.87005649717514,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_00130168",
      "size": "644",
      "fuzzy_match_percent": 100.0,
-     "address": "52648",
+     "address": "0",
      "metadata": {
       "virtual_address": "1245544",
       "demangled_name": "SolveBezierSegment"
@@ -9667,7 +9697,7 @@
      "name": "func_001303F0",
      "size": "336",
      "fuzzy_match_percent": 100.0,
-     "address": "53296",
+     "address": "648",
      "metadata": {
       "virtual_address": "1246192",
       "demangled_name": "EvaluateHermiteSegment"
@@ -9677,7 +9707,7 @@
      "name": "func_00130540",
      "size": "516",
      "fuzzy_match_percent": 100.0,
-     "address": "53632",
+     "address": "984",
      "metadata": {
       "virtual_address": "1246528",
       "demangled_name": "EvaluateHermiteVectorSegment"
@@ -9687,7 +9717,7 @@
      "name": "func_00130748",
      "size": "1024",
      "fuzzy_match_percent": 100.0,
-     "address": "54152",
+     "address": "1504",
      "metadata": {
       "virtual_address": "1247048",
       "demangled_name": "BlendRotationsWithSpin"
@@ -9697,7 +9727,7 @@
      "name": "func_00130B48",
      "size": "216",
      "fuzzy_match_percent": 100.0,
-     "address": "55176",
+     "address": "2528",
      "metadata": {
       "virtual_address": "1248072",
       "demangled_name": "SampleCurvePoints"
@@ -9707,7 +9737,7 @@
      "name": "func_00130C20",
      "size": "56",
      "fuzzy_match_percent": 100.0,
-     "address": "55392",
+     "address": "2744",
      "metadata": {
       "virtual_address": "1248288",
       "demangled_name": "MeasureCurveSegmentLength"
@@ -9716,8 +9746,8 @@
     {
      "name": "func_00130C58",
      "size": "748",
-     "fuzzy_match_percent": 0.0,
-     "address": "55448",
+     "fuzzy_match_percent": 97.45989304812834,
+     "address": "2800",
      "metadata": {
       "virtual_address": "1248344",
       "demangled_name": "FindEarliestTimeWithinCurveLimits"
@@ -9729,7 +9759,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/placed_object.cpp"
+    "source_path": "src/main/curve_segment.cpp"
    }
   },
   {
@@ -53690,7 +53720,7 @@
    "id": "game",
    "name": "Game code",
    "measures": {
-    "fuzzy_match_percent": 99.27594763172242,
+    "fuzzy_match_percent": 99.34900426514447,
     "total_code": "997856",
     "matched_code": "978700",
     "matched_code_percent": 98.08028412917295,
@@ -53704,7 +53734,7 @@
     "complete_code_percent": 98.08028412917295,
     "complete_data": "0",
     "complete_data_percent": 100.0,
-    "total_units": 97,
+    "total_units": 98,
     "complete_units": 77
    }
   },

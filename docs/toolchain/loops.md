@@ -1166,3 +1166,16 @@ built whole and the full builds print `MATCH` on US and PAL.
   constrain N, each checked in its unit: func_001D66A8 and func_001D7778 EXACT at vf15,
   func_001D8E40 and func_001D9488 at vf30, func_001D9AC8 at vf15. func_001D92F0, func_001D9338
   and func_001D9678 could sit on either side of their unit's edges as far as N goes.
+- **curve_segment.cpp out of placed_object.cpp.** placed_object.cpp (0x1233C0 to 0x130168,
+  vf15) and curve_segment.cpp (0x130168 to 0x130F48, vf30: the seven curve segment helpers,
+  func_00130168 to func_00130C58). func_00130C58 stays `INCLUDE_ASM`; its near miss is 6 lines
+  off at the new unit's flags. Contrary to the map's note above, func_00130C20 does not call it
+  (it calls func_00130B48 and func_0014D0A8); its one caller is func_0015B7B8 (object_cycler.cpp),
+  so the calls bind nothing to it. The data allows any start from 0x12E5D0 (after
+  func_0012E4E0's jump table, `.rodata` from 0x249C90, func_00130C58's FLT_MAX) to 0x130C58,
+  and the unit reads no `.data` or `.bss` of the file, so nothing crosses the cut; the earlier
+  starts (0x249B20, 0x249C10) would carry func_0012D5D0's or func_0012E4E0's jump table across
+  with no reason. The edge is where the role changes, from the object helpers (IsObjectOfKind,
+  EnsureKeyedList, GetObjectClassId) to the curves. func_00127B20 and func_0012CD78 EXACT at
+  vf15; the six matched curve helpers EXACT at vf30 (US, and func_00130540 and func_00130C20 on
+  PAL).

@@ -138,8 +138,9 @@ What else was measured:
   only from 87 to 94; no other function of that file changes with the range.
   src/main/file_1D8E40.cpp, cut out on 2026-11-12 for func_001D9488 (retail's
   only at 94 to 96) between two files whose functions need 79 to 83 and 79 to
-  88, has the same row (docs/toolchain/loops.md, "A threshold of 94" and "The
-  splits on the threshold").
+  88, has the same row, and so has src/main/curve_segment.cpp, cut from
+  placed_object.cpp for func_00130C58 (docs/toolchain/loops.md, "A threshold of
+  94" and "The splits on the threshold").
 - **The preprocessor** is the toolchain's `cpp.exe`, given the macros the
   compiler driver defines (tools/compile.py).
 

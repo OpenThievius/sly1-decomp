@@ -14,7 +14,7 @@
   "complete_code_percent": 0.0,
   "complete_data": "0",
   "complete_data_percent": 0.0,
-  "total_units": 190,
+  "total_units": 191,
   "complete_units": 0
  },
  "units": [
@@ -6655,16 +6655,16 @@
   {
    "name": "game/placed_object",
    "measures": {
-    "fuzzy_match_percent": 96.27686336519801,
-    "total_code": "55652",
-    "matched_code": "53580",
-    "matched_code_percent": 96.27686336519801,
+    "fuzzy_match_percent": 97.45931839115751,
+    "total_code": "52112",
+    "matched_code": "50788",
+    "matched_code_percent": 97.45931839115751,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
-    "total_functions": 309,
-    "matched_functions": 307,
-    "matched_functions_percent": 99.35275080906149,
+    "total_functions": 302,
+    "matched_functions": 301,
+    "matched_functions_percent": 99.66887417218543,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -9688,12 +9688,42 @@
       "virtual_address": "1245832",
       "demangled_name": "GetObjectClassId"
      }
-    },
+    }
+   ],
+   "metadata": {
+    "complete": false,
+    "progress_categories": [
+     "game"
+    ],
+    "source_path": "src/main/placed_object.cpp"
+   }
+  },
+  {
+   "name": "game/curve_segment",
+   "measures": {
+    "fuzzy_match_percent": 78.87005649717514,
+    "total_code": "3540",
+    "matched_code": "2792",
+    "matched_code_percent": 78.87005649717514,
+    "total_data": "0",
+    "matched_data": "0",
+    "matched_data_percent": 100.0,
+    "total_functions": 7,
+    "matched_functions": 6,
+    "matched_functions_percent": 85.71428571428571,
+    "complete_code": "0",
+    "complete_code_percent": 0.0,
+    "complete_data": "0",
+    "complete_data_percent": 100.0,
+    "total_units": 1,
+    "complete_units": 0
+   },
+   "functions": [
     {
      "name": "func_00130298",
      "size": "644",
      "fuzzy_match_percent": 100.0,
-     "address": "52664",
+     "address": "0",
      "metadata": {
       "virtual_address": "1245848",
       "demangled_name": "SolveBezierSegment"
@@ -9703,7 +9733,7 @@
      "name": "func_00130520",
      "size": "336",
      "fuzzy_match_percent": 100.0,
-     "address": "53312",
+     "address": "648",
      "metadata": {
       "virtual_address": "1246496",
       "demangled_name": "EvaluateHermiteSegment"
@@ -9713,7 +9743,7 @@
      "name": "func_00130670",
      "size": "516",
      "fuzzy_match_percent": 100.0,
-     "address": "53648",
+     "address": "984",
      "metadata": {
       "virtual_address": "1246832",
       "demangled_name": "EvaluateHermiteVectorSegment"
@@ -9723,7 +9753,7 @@
      "name": "func_00130878",
      "size": "1024",
      "fuzzy_match_percent": 100.0,
-     "address": "54168",
+     "address": "1504",
      "metadata": {
       "virtual_address": "1247352",
       "demangled_name": "BlendRotationsWithSpin"
@@ -9733,7 +9763,7 @@
      "name": "func_00130C78",
      "size": "216",
      "fuzzy_match_percent": 100.0,
-     "address": "55192",
+     "address": "2528",
      "metadata": {
       "virtual_address": "1248376",
       "demangled_name": "SampleCurvePoints"
@@ -9743,7 +9773,7 @@
      "name": "func_00130D50",
      "size": "56",
      "fuzzy_match_percent": 100.0,
-     "address": "55408",
+     "address": "2744",
      "metadata": {
       "virtual_address": "1248592",
       "demangled_name": "MeasureCurveSegmentLength"
@@ -9753,7 +9783,7 @@
      "name": "func_00130D88",
      "size": "748",
      "fuzzy_match_percent": 0.0,
-     "address": "55464",
+     "address": "2800",
      "metadata": {
       "virtual_address": "1248648",
       "demangled_name": "FindEarliestTimeWithinCurveLimits"
@@ -9765,7 +9795,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/placed_object.cpp"
+    "source_path": "src/main/curve_segment.cpp"
    }
   },
   {
@@ -53839,7 +53869,7 @@
     "complete_code_percent": 0.0,
     "complete_data": "0",
     "complete_data_percent": 100.0,
-    "total_units": 97,
+    "total_units": 98,
     "complete_units": 0
    }
   },

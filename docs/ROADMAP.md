@@ -98,10 +98,11 @@ functions left with their address names, and the disc's data.
    literal another object holds), and seven more files are cut where the role plainly changes, each
    with a head comment saying the edge is not proved and the range it could lie in; 192 files
    then, 26 of them still named after their first address because their roles interleave or
-   the code shows none. On 2026-11-12 file_1D62E0.cpp was cut in three where no signal shows an
-   edge, by the maintainer's decision, so that func_001D9488, retail's only at loop.c's
-   threshold of 94, builds in a unit of its own at `-mvu0-use-vf0-vf30` (docs/toolchain/loops.md,
-   "The splits on the threshold"): 194 files, 28 named after their first address.
+   the code shows none. On 2026-11-12 file_1D62E0.cpp was cut in three and curve_segment.cpp
+   cut from placed_object.cpp where no signal shows an edge, by the maintainer's decision, so
+   that func_001D9488 and func_00130C58, retail's only at loop.c's threshold of 94, build in
+   units of their own at `-mvu0-use-vf0-vf30` (docs/toolchain/loops.md, "The splits on the
+   threshold"): 195 files, 28 named after their first address.
    A file whose range holds original assembly includes those functions at their place
    (`INCLUDE_ASM`, include/asm_func.h, tools/asm_func.py): `src/main/file_1E5378.cpp`
    (0x1E5378 to 0x1E88D0, five of its 34 functions assembly) is the first. A file is named

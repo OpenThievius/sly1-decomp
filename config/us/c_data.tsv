@@ -7,7 +7,8 @@ D_00248FE0	00248FE0	756	.rodata	src/main/script_machine.cpp
 D_002492F0	002492F0	308	.rodata	src/main/value.cpp
 D_00249428	00249428	1096	.rodata	src/main/iop_commands.cpp
 D_00249870	00249870	372	.rodata	src/main/pose_source.cpp
-D_002499F0	002499F0	684	.rodata	src/main/placed_object.cpp
+D_002499F0	002499F0	668	.rodata	src/main/placed_object.cpp
+D_00249C90	00249C90	16	.rodata	src/main/curve_segment.cpp
 D_00249CA0	00249CA0	195	.rodata	src/main/text_panel.cpp
 D_00249D64	00249D64	16	.rodata	src/main/world_listed_object.cpp
 D_00249D74	00249D74	8	.rodata	src/main/child_group_object.cpp
