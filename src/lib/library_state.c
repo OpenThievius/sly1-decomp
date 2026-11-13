@@ -17,15 +17,21 @@
  * other files (config/cflags.tsv, docs/TOOLCHAIN.md). Written for this project from retail's
  * data. */
 #include "common.h"
-#include "asm_func.h"
 
-extern s32 D_00276864, D_002768BC, D_00276914;
+/* One of the three stream records at the record's end (0x58 bytes each, at +0x1E4, +0x23C and
+ * +0x294), which its words at +4, +8 and +0xC point at. No code of the game reads their fields
+ * and retail holds them as zeros: a byte array of each one's size. */
+typedef struct {
+    u8 b[0x58];
+} LibraryStream;
 
-/* The error number, the three records after it, the string "C" at +0x34 and the random seed at
- * +0x58. */
-void* D_00276680[121] = { 0, &D_00276864, &D_002768BC, &D_00276914, 0, 0, 0, 0, 0, 0, 0, 0, 0, (void*)"C",
-                          0, 0, 0, 0, 0, 0, 0, 0, (void*)1 };
-INCLUDE_DATA(D_00276864);
-INCLUDE_DATA(D_002768BC);
-INCLUDE_DATA(D_00276914);
-void* g_libraryState = D_00276680;
+/* The error number, the three stream pointers after it, the string "C" at +0x34 and the random
+ * seed at +0x58; the three streams at the end. */
+typedef struct {
+    void* words[121];
+    LibraryStream streams[3];
+} LibraryState;
+
+LibraryState D_00276680 = { { 0, &D_00276680.streams[0], &D_00276680.streams[1], &D_00276680.streams[2],
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, (void*)"C", 0, 0, 0, 0, 0, 0, 0, 0, (void*)1 } };
+void* g_libraryState = &D_00276680;

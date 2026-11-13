@@ -76,6 +76,7 @@ D_0024E1C0	0024E1C0	1072	.rodata	src/main/text_format.cpp
 D_0024E5F0	0024E5F0	4	.rodata	src/main/on_off_object.cpp
 D_0024E600	0024E600	570	.rodata	src/main/warp_menu.cpp
 D_0024E840	0024E840	56	.rodata	src/main/oscillator.cpp
+D_0024E878	0024E878	257	.rodata	src/lib/char_class_table.c
 D_0024E980	0024E980	2	.rodata	src/lib/library_state.c
 D_0024E988	0024E988	40	.rodata	src/lib/request_thread.cpp
 D_0024E9B0	0024E9B0	340	.rodata	src/lib/formatted_output.cpp
@@ -212,7 +213,7 @@ D_00275940	00275940	40	.data	src/main/text_format.cpp
 D_00275970	00275970	428	.data	src/main/on_off_object.cpp
 D_00275B28	00275B28	56	.data	src/main/arc_element.cpp
 D_00275B60	00275B60	2772	.data	src/main/warp_menu.cpp
-D_00276680	00276680	488	.data	src/lib/library_state.c
+D_00276680	00276680	752	.data	src/lib/library_state.c
 D_00276970	00276970	16	.data	src/lib/system_calls.cpp
 D_00276980	00276980	1960	.data	src/lib/patch_installer_1.cpp
 D_00277128	00277128	4	.data	src/lib/request_thread.cpp
@@ -241,7 +242,8 @@ D_0027AF70	0027AF70	144	.data	src/lib/mpeg_decoder.cpp
 D_0027B000	0027B000	64	.data	src/lib/mpeg_macroblock.cpp
 D_0027B040	0027B040	112	.data	src/lib/mpeg_ipu_decode.cpp
 D_0027B0B0	0027B0B0	128	.data	src/lib/ipu_reset.cpp
-D_0027B130	0027B130	84	.data.D_0027B130	src/lib/constructor_list.cpp
+D_0027B130	0027B130	104	.data.D_0027B130	src/lib/constructor_list.cpp
+D_0027B198	0027B198	28	.data.D_0027B198	src/lib/constructor_list.cpp
 D_0027B200	0027B200	56	.gcc_except_table	src/lib/allocate.cpp
 D_0027B238	0027B238	92	.gcc_except_table	src/lib/exception.cpp
 D_0027C008	0027C008	4	.bss	src/main/agent_registration.cpp

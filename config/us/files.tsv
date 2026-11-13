@@ -114,6 +114,7 @@ src/lib/graph.c	002018E0	00202768	0024F4E0	00279300	-	-
 src/lib/dma.c	00202768	00202D08	0024F548	00279340	-	-
 src/lib/cdvd.c	00202D08	00203FD0	0024F560	00279400	0062A7C0	-
 src/lib/global_constructors.cpp	001FAC00	001FAE38	-	-	0062A540	-
+src/lib/char_class_table.c	001F6900	001F6900	0024E878	-	-	-
 src/lib/library_state.c	001F6900	001F6900	0024E980	00276680	-	-
 src/lib/system_calls.cpp	001F6900	001F6EE0	-	00276970	-	-
 src/main/colored_triangle_set.cpp	0017FE00	00180EB0	-	00264098	-	-

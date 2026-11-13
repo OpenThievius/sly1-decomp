@@ -39,6 +39,7 @@ address	size	align	before
 0024E1B7	9	16	src/main/text_format.cpp .rodata
 0024E5F4	12	16	src/main/warp_menu.cpp .rodata
 0024E83A	6	16	src/main/oscillator.cpp .rodata
+0024E979	7	8	src/lib/library_state.c .rodata
 0024E982	6	8	src/lib/request_thread.cpp .rodata
 0024EB04	12	16	src/lib/iop_file_client.cpp .rodata
 0024EB7D	3	8	src/lib/iop_module_loader.cpp .rodata
