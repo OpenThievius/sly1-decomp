@@ -139,7 +139,16 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   (and, in the second, its copy in a slot, as `Vu0::ScalarInGpr`'s), where a scan of retail
   proved that only this function moves a float to a GPR once and copies it at each use
   (docs/toolchain/loops.md, "An asm kept in its loop"); the lead allowed them by name on
-  2026-11-13 under the maintainer's delegation, and no other function may use them. The other
+  2026-11-13 under the maintainer's delegation, and no other function may use them. One
+  library function, func_0020BB18 (AllocatePictureBuffers, src/lib/mpeg_decoder.cpp), holds a
+  statement that is known not to be the original's: a test that reads a pointer variable
+  before it has a value, is never true and leaves no instruction. Retail's code needs, at
+  that point, a USE that combine leaves when it folds a test holding the last reference to a
+  variable that later lives on the stack (docs/toolchain/sched1.md, "A block whose first
+  cycle holds one insn"); the test stands in for a statement of the original that is not
+  known, after eight passes, an independent re-decompilation and a sweep of the build
+  settings found no other form. It is commented as such where it stands, and no other
+  function may hold a stand-in. The other
   exception is `MUL_WIDE` (include/mul_wide.h), one `multu` whose halves are read from lo and
   hi, which the toolchain's runtime multiplied with and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
   The toolchain's own runtime (`libgcc`, config/us/libcalls.tsv) was compiled as C, so its C is a

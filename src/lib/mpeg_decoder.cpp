@@ -715,7 +715,8 @@ s32 WaitIpuCommandDone(Dec_20B9F0* d);
 void SendIpuCommand(Dec_20B9F0* d, u32 value);
 void LoadIpuQuantiserMatrix(Dec_20B9F0* d, u32 value, u8* table);
 void ReadExtensionsAndUserData(Dec_20B9F0* d);
-s32 AllocatePictureBuffers(void* p);
+struct Picture_20BB18;
+void AllocatePictureBuffers(Picture_20BB18* pic);
 
 void ReadSequenceHeader(Dec_20B9F0* d) {
     d->fD4 = 0;
@@ -745,10 +746,117 @@ void ReadSequenceHeader(Dec_20B9F0* d) {
         LoadIpuQuantiserMatrix(d, 0x58000000, D_0027AFC0);
     }
     ReadExtensionsAndUserData(d);
-    AllocatePictureBuffers(d->f858);
+    AllocatePictureBuffers((Picture_20BB18*)d->f858);
 }
 
-INCLUDE_ASM(func_0020BB18);
+
+// A picture plane: its address, its size in pixels and in macroblocks.
+struct Plane_20BB18 {
+    u32 addr;
+    s32 width;
+    s32 height;
+    s32 mbWidth;
+    s32 mbHeight;
+    u8 pad14[0x68 - 0x14];
+};
+
+struct State_20BB18 {
+    u8 pad0[0xFC];
+    u32 fFC;
+    u32 f100;
+    u32 f104;
+    u32 pool[3];
+    u32 f114;
+    u8 pad118[0x124 - 0x118];
+    s32 f124;
+    s32 f128;
+    s32 f12C;
+    s32 f130;
+    u8 pad134[0x13C - 0x134];
+    s32 f13C;
+    s32 f140;
+    s32 f144;
+    u8 pad148[0x174 - 0x148];
+    s32 f174;
+    u8 pad178[4];
+    s32 f17C;
+    u8 pad180[8];
+    s32 f188;
+    u8 pad18C[0x1E8 - 0x18C];
+    Plane_20BB18 planes[9];
+    u8 pad590[0x848 - 0x590];
+    s32 f848;
+};
+
+struct Picture_20BB18 {
+    s32 width;
+    s32 height;
+    u8 pad8[0x38];
+    State_20BB18* state;
+};
+
+void SetUpPictureBufferAddresses(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6, u32* a7, u32* p9, u32 p10, u32 p11, u32 p12, s32 p13, s32 p14);
+
+void AllocatePictureBuffers(Picture_20BB18* pic)
+{
+    State_20BB18* st = pic->state;
+    s32 w;
+    s32 h;
+    u32 size;
+    s32 rows;
+    u32* p3;
+
+    if (st->f848 == 0) {
+        st->f174 = 3;
+        st->f13C = 1;
+        st->f140 = 1;
+        st->f188 = 1;
+        st->f17C = 1;
+        st->f144 = 5;
+    }
+    st->f12C = (st->f124 + 15) >> 4;
+    if (st->f848 != 0 && st->f13C == 0)
+        rows = ((st->f128 + 31) >> 5) << 1;
+    else
+        rows = (st->f128 + 15) >> 4;
+    st->f130 = rows;
+    h = rows << 4;
+    w = st->f12C << 4;
+    if (w == pic->width && h == pic->height)
+        return;
+    // NOT THE ORIGINAL'S STATEMENT: a stand-in for it. This test reads p3 before it has a
+    // value and is never true (w is a multiple of 16), and it leaves no instruction. Retail's
+    // code shows that the original had, at this point, a test only combine could fold whose
+    // condition held the last reference to a variable that later lives on the stack: combine
+    // then leaves a USE of that variable at the body's head, which the two picture stores
+    // must wait for, so the last plane's address issues alone in the body's first cycle
+    // (docs/toolchain/sched1.md, "A block whose first cycle holds one insn"). Eight passes,
+    // an independent re-decompilation and a sweep of 2,247 build settings found no other
+    // form; what the original's statement was is not known. Allowed for this one function
+    // (AGENTS.md's named exceptions).
+    if ((u32)p3 & (w & 15))
+        pic->width = 0;
+    pic->width = w;
+    pic->height = h;
+    size = (u32)(w * 0x180 * h) >> 8;
+    p3 = &st->planes[3].addr;
+    RewindMpegRingToMark((s32*)&st->pool);
+    st->fFC = AllocateFromMpegRing((MpegDecoder*)st, (MpegRing*)&st->pool, size, 0x40);
+    st->f100 = AllocateFromMpegRing((MpegDecoder*)st, (MpegRing*)&st->pool, size, 0x40);
+    st->f104 = AllocateFromMpegRing((MpegDecoder*)st, (MpegRing*)&st->pool, size, 0x40);
+    SetUpPictureBufferAddresses(&st->planes[0].addr, &st->planes[1].addr, &st->planes[2].addr, p3,
+                  &st->planes[4].addr, &st->planes[5].addr, &st->planes[6].addr, &st->planes[7].addr,
+                  &st->planes[8].addr, st->fFC, st->f100, st->f104, w, h);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[0], w, h);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[1], w, h);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[2], w, h);
+    SetPictureDimensions((Item_20B9D0*)p3, w, h >> 1);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[4], w, h >> 1);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[5], w, h >> 1);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[6], w, h >> 1);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[7], w, h >> 1);
+    SetPictureDimensions((Item_20B9D0*)&st->planes[8], w, h >> 1);
+}
 
 void SetUpPictureBufferAddresses(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6, u32* a7, u32* p9, u32 p10, u32 p11, u32 p12, s32 p13, s32 p14)
 {
