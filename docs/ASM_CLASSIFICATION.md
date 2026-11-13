@@ -50,7 +50,11 @@ PAL's functions that US has count through their US counterpart. The game-code fu
 has (docs/VERSIONS.md) have no counterpart, so the same rules run over PAL's own code
 (`asm/eu/`) and write `config/eu/original_asm.tsv` for them: on 2026-11-05, 7 remnants (stray
 stack increments and lone words, like US's) and 2 handwritten (`max.s`, `min.s`).
-`tools/version_src.py todo` leaves them out. Counts are of `config/us/original_asm.tsv` as written on 2026-11-01.
+`tools/version_src.py todo` leaves them out. The library functions only PAL has (a `-` row of
+`config/eu/map.tsv`; `version_src.only_here` lists game code only) go through the same rules
+after the test for US's bytes: on 2026-11-13 one more remnant, func_0020A870 (68 bytes after PAL's
+own "rom0:ROMVER" routines, `insn; nop` pairs of stack increments, stores and an `andi`, like US's
+func_001F9638 and func_0020B208). Counts are of `config/us/original_asm.tsv` as written on 2026-11-01.
 
 ### handwritten
 

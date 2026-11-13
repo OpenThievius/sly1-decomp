@@ -299,7 +299,8 @@ def derive_only_eu():
     funcs = todo.functions("eu")
     refs = references_of([f[0] for f in funcs], "eu")
     # Every PAL function takes part, so a remnant sees the code before it.
-    rows = [r for r in classify(funcs, todo.bodies("eu"), refs, key="eu") if r[0] in only]
+    ruled = classify(funcs, todo.bodies("eu"), refs, key="eu")
+    rows = [r for r in ruled if r[0] in only]
     # A function only PAL has whose bytes are one of US's original-assembly functions (the same
     # libc routine linked twice) is that, whatever the archive's member names could not say.
     import check
@@ -319,7 +320,11 @@ def derive_only_eu():
             if us_img.read_vaddr(us_addr, size) == body:
                 rows.append((name, addr, size, kind, "the bytes of US %s (%s)" % (us_name, kind)))
                 break
-    return rows
+    # The libraries' functions only PAL has that are not US's bytes go through the same rules as
+    # game code's (a stripped function's leftover words after PAL's own routines, func_0020A870).
+    have = {r[0] for r in rows}
+    rows += [r for r in ruled if r[0] in unpaired and r[0] not in have]
+    return sorted(rows, key=lambda r: r[1])
 
 
 def render(rows):
