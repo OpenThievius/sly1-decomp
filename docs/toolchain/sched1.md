@@ -468,6 +468,47 @@ dumps of func_0020BB18 (src/lib/mpeg_decoder.cpp, Sony's 2.9-ee-991111, 2026-11-
   function (`-fno-expensive-optimizations` 42 lines, `-fno-schedule-insns2` 56: other
   code). Eighteen plain statements at the head of the body (blocks, casts to void, empty
   ifs and switches, labels, empty or early-returning inlines) leave the base's code.
+- **Sixth pass (w51-i, 2026-11-13): what the USE of memory implies, and what this compiler
+  leaves of unused and folded statements.** About 110 compiles (scratch `build/swarm/w51-i/`).
+  (1) *A USE of a stack slot is a read of an uninitialised variable.* Retail stores nothing
+  to its frame ahead of the body, so `(use (mem (plus sp N)))` at the body's label names a
+  slot nothing has written. A register that is initialised ahead of the body and ends in
+  memory prints that store (measured: the macroblock width kept in a local, its last use
+  late and folded, does not even end in memory: global-alloc gives it `s5` and a plane goes
+  to slot 72, 121 lines; the rows the same, 118). The other memory a USE could name is a
+  register's equivalent location (`REG_EQUIV (mem st+N)`, alias set 15 like the picture's
+  fields, so it would hold both stores, and its load would be the reload retail already
+  has); but update_equiv_regs gives a memory equivalence only to a register local to one
+  block, and a register with a USE at the body's label is live at the end of the body's
+  predecessors, which haifa's find_post_sched_live marks global. So within combine's
+  mechanism the original read an uninitialised local in an expression combine folds, and
+  no initialised value fits.
+  (2) *A USE of a hard register holds only that register's next setter* (priority: the
+  setter's plus one; measured on `(use (reg a3))`, 54, tied to the first call). In the
+  body the only setter at 65 is the address itself, which a USE of `v0` would hold back.
+  (3) *An unused value leaves nothing here.* Sony's compiler removes a dead integer
+  computation with its tests completely (twelve forms: conditional expressions, if/else
+  chains, a switch, reads through the last plane; at the head of the body, after the
+  stores, after the size: the base's code but for two argument moves swapped), where the
+  game's compiler keeps a block boundary (func_001DEBE8). A dead division keeps its trap
+  as code (103, 106), a dead float clamp its compares as code (131, 138), a dead float
+  if/else nothing.
+  (4) *Alignment statements fold and leave no USE.* `if (w & 15)` (or `h`, or both) around
+  a store, a reset of the size or a rounding of `w`, and second roundings of the size
+  (`(size + 0x3F) & ~0x3F`, `size &= ~0x3F`, `(size >> 6) << 6`) and of the dimensions
+  (`(w + 15) & ~15`, `(w >> 4) << 4` in the stores) give the base's code: combine folds
+  them from the known zero bits, but every register they drop is read again later in the
+  block, so no REG_DEAD note is left without an insn. With a `return` in the arm the test
+  stays as code (103 to 125); with a call in the arm it folds, and the dead arm's call
+  moves `h` and the pool's address to other registers (104 to 119).
+  (5) *Small struct locals are not registers here*: `{ s32 w, h; }` and `{ s16 w, h; }`
+  live in the frame (frame 256, the planes' slots after them), so a field-by-field
+  initialisation makes no USE of the old value.
+  (6) *jump2's other deletions do not apply*: besides `(set N N)` it deletes a register
+  copy whose destination already equals its source (find_equiv_reg) and a move of a
+  memory location to itself; the 36 library files have no same-register move after
+  reload, and every insn jump2 removes there after sched2 is a cross-jumped duplicate or
+  flow's nop.
 
 ### A value negated into itself crosses the call (func_001A2380)
 
