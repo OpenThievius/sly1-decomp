@@ -20,7 +20,7 @@
 #include "font.h"
 
 // The world: 28 views in 15 files agree with class 0x6C (c6c.h), and every one of them reaches
-// it through this pointer. file_1D9AC8.cpp defines it (= 0).
+// it through this pointer. world.cpp defines it (= 0).
 extern World* g_currentWorld;
 
 // The camera, class 0x6D (c6d.h): 22 views in 5 files. camera.cpp defines it (= 0).
@@ -56,7 +56,7 @@ extern ImageRecord* g_imageRecordsA;
 extern PaletteRecord* g_imageRecordsB;
 
 // List heads (List01, c01.h), defined in render_frame.cpp (D_002626E8, D_002626F8 and D_00262708
-// in target_lists.cpp, D_00264088 in file_17D248.cpp): each label is 0xC bytes (D_00262300's and D_00264088's run to the next
+// in target_lists.cpp, D_00264088 in player_state2.cpp): each label is 0xC bytes (D_00262300's and D_00264088's run to the next
 // label with a word or a pad after them).
 extern List01 D_002622E0;
 extern List01 D_002622F0;

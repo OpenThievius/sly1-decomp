@@ -2781,7 +2781,7 @@ one register each (95.5%).
   a constant, as Limit's `this`; two calls for the f58 ramp, which would raise the clock's
   references, are not cross-jumped into retail's single call).
 
-### Three of file_1D62E0's near misses closed by known levers (func_001D6DD8, func_001D9AC8, func_001DA320)
+### Three of path_follower's near misses closed by known levers (func_001D6DD8, func_001D9AC8, func_001DA320)
 
 Wave 14 (2026-11-10). None needed a new mechanism; each was a lever above applied where the
 near miss's notes had stopped.

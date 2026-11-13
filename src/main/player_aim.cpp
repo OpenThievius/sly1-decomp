@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// From 0x1C5F18 to 0x1C6F48: the two pose sources that sum their children's offsets and rotations,
+// the player's aim, and the turn toward the nearest class 0x75 object ahead. Its name is ours,
+// after the player's aim, which holds most of its code.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"

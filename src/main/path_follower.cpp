@@ -2,8 +2,10 @@
 // From 0x1D62E0 to 0x1D8E40: classes 0x07 and 0x3F, the output buffer and the first of class
 // 0x19's functions. Its .data runs from 0x275140 to 0x2754FC; its .rodata is the "%s" of
 // func_001D72C8 and the float of func_001D8470 (0x24DC90 to 0x24DC98). Its start is an edge retail
-// proves. Its end is a choice: the cut before file_1D8E40.cpp, made on loop.c's threshold (that
+// proves. Its end is a choice: the cut before path_follower_helpers.cpp, made on loop.c's threshold (that
 // file's head), which no boundary signal shows. Between the two it could still be several files.
+// Its name is ours, after its largest family, the path follower's start and steps (class 0x19),
+// whose other functions follow in path_follower_helpers.cpp and world.cpp.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

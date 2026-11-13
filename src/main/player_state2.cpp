@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// From 0x17D248 to 0x17FE00: the player's mode 2 (StepPlayerState2, ControlPlayerState2,
+// UpdatePlayerState2) with its ledge contacts and jump velocities, then the point objects' list.
+// Its name is ours, after the player's mode 2, which holds nearly all of its code.
 #include "common.h"
 #include "point_object.h"
 #include "collider.h"

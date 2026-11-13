@@ -47,7 +47,7 @@ skip path keeps the count. Both are needed.
 
 Read from jump.c (delete_jump, delete_computation), reload1.c (reload_cse_regs), reorg.c and
 local-alloc.c (block_alloc's widened lifetimes) with `-ds -dG -dl -dg -dR -dJ` dumps and the
-`-dp` assembly (2026-11-10, ComputePlayerJumpVelocity, src/main/file_17D248.cpp). Retail's tail
+`-dp` assembly (2026-11-10, ComputePlayerJumpVelocity, src/main/player_state2.cpp). Retail's tail
 is `lq; li v1,3; sq; swc1 $f0,8(a1); lw v0,0x2220(a2); lwc1 $f1,0x158(a2); lwc1 $f0,8(a1);
 max.s`: a dead constant, a dead load, and out->z read back right after it was stored.
 
@@ -211,7 +211,7 @@ params at 4*17/438 = 0.155 against nOffsets at 2*5/68 = 0.147 took s8 from it.
 
 ### A weight's address hoisted out of the loop: a reference's block notes (func_0017E3C8)
 
-func_0017E3C8 (src/main/file_17D248.cpp) went from 92.5% to EXACT on one change, a float
+func_0017E3C8 (src/main/player_state2.cpp) went from 92.5% to EXACT on one change, a float
 weight passed to its helper by value instead of by reference (2026-11-09). Its loop body
 ends `p = from + tmp * -D_00264020 + unitZ * D_00264024` (MulAddX2); retail loads the second
 weight `lui v1; lw v1, %lo(D_00264024)(v1); qmtc2 v1, vf5`, and gives `from` and the result

@@ -3,8 +3,9 @@
 // the world (class 0x6C) and its script functions. Its .data runs from 0x275600 to the zeroed
 // globals D_00275710 (g_currentWorld) to D_00275728 that close it; its .rodata is the pairs of
 // func_001DCD28 (0x24DC98 to 0x24DCA8). Its end is an edge retail proves. Its start is a choice:
-// the cut after file_1D8E40.cpp (that file's head), which no boundary signal shows. It reads
-// D_002751D4 and D_002751DC, which file_1D62E0.cpp defines.
+// the cut after path_follower_helpers.cpp (that file's head), which no boundary signal shows. It reads
+// D_002751D4 and D_002751DC, which path_follower.cpp defines. Its name is ours, after its largest
+// family, the world and its script functions; it opens with the rest of the path follower.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

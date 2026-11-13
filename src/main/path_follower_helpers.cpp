@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // From 0x1D8E40 to 0x1D9AC8: five of class 0x19's helpers (the wheels' particles, the laps, the
 // entry markers and the sound), called from UpdatePathFollower and ControlPathFollower in
-// file_1D9AC8.cpp but func_001D9338, which func_001D9488 and func_00195958 call. Built at
+// world.cpp but func_001D9338, which func_001D9488 and func_00195958 call. Built at
 // -mvu0-use-vf0-vf30 (config/cflags.tsv), a threshold of 94 for loop.c, where the files around
 // it take the default (79).
 // Evidence: func_001D9488 is retail's code only at N = 30 or 31, while func_001D7778 before it
@@ -14,9 +14,10 @@
 // because it holds the Vec02 at 0x275530 (retail's eight zero bytes before it show an object on
 // 16 or a new file there; the type is ours). Starting it at 0x275518, past func_001D8E40's ranges,
 // would need D_00275524 to be a 12-byte object no reader shows; starting at 0x275530 would leave
-// D_00275518 and D_00275524 in file_1D62E0.cpp, read only here. As cut, D_002751D8 (also read
-// there) and D_00275240 are file_1D62E0.cpp's, declared extern; file_1D9AC8.cpp starts its .data
-// at 0x275600. No .rodata, no .bss.
+// D_00275518 and D_00275524 in path_follower.cpp, read only here. As cut, D_002751D8 (also read
+// there) and D_00275240 are path_follower.cpp's, declared extern; world.cpp starts its .data
+// at 0x275600. No .rodata, no .bss. Its name is ours, after its role: five of the path follower's
+// helpers.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

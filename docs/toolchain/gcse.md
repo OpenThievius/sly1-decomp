@@ -805,7 +805,7 @@ miss is 96 of 107 instructions with it):
 - The scale of a static parameter block's two quadwords (`StoreFloatAsQuadword(&t, k);
   CopyQuadword(&u, &params.q30); StoreQuadword(&params.q30, ScaleQuadword(t, u));`, twice)
   kept `&params.q30` and `&params.q50` in two saved registers (a 0x160 frame for retail's
-  0x140). Through the file's inline `StoreScaledQuadword(dst, k, p)` (the one file_1D62E0.cpp
+  0x140). Through the file's inline `StoreScaledQuadword(dst, k, p)` (the one path_follower.cpp
   and agent.cpp use), called with the member's address for both `dst` and `p`, integrate.c
   substitutes each address at its use and retail's frame and saved registers follow; the
   remaining difference was the block's constructor stores, matched 2026-11-12 as a brace

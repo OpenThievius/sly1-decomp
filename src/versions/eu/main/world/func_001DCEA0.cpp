@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// PAL's copy of LoadWorld (US func_001DCEA0, src/main/file_1D62E0.cpp): it also reads the text table
+// PAL's copy of LoadWorld (US func_001DCEA0, src/main/path_follower.cpp): it also reads the text table
 // (func_eu_001DDA10) after SkipBufferedBlocks and the 14 entries of D_eu_0027EEA0 after f1D74,
 // and finds the map screen's current page at 0x570 (US 0x260).
 extern const char* D_eu_0027EEA0[];

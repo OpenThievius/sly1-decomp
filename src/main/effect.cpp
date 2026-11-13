@@ -2291,7 +2291,7 @@ void SetRandomEffectSpin(Effect* self)
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
 
 // A quadratic in z (poly[0] + poly[1] z + poly[2] z^2), clamped to range[0]..range[1]; the same
-// inline as file_17D248.cpp's.
+// inline as player_state2.cpp's.
 static inline f32 EvalClampedQuadratic(const f32* poly, const f32* range, f32 z)
 {
     f32 v = poly[0] + z * (poly[1] + z * poly[2]);

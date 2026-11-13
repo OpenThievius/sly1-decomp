@@ -274,8 +274,8 @@ Measured on this compiler; add to this list when you learn something.
   - A cut no signal shows, made because one unit at one set of flags cannot build its
     functions, is a choice too, decided by the maintainer: on 2026-11-12, on loop.c's threshold
     (docs/toolchain/loops.md, "A threshold of 94" and "The splits on the threshold"),
-    file_1D8E40.cpp (0x1D8E40 to 0x1D9AC8, `-mvu0-use-vf0-vf30`) was cut out of file_1D62E0.cpp
-    for func_001D9488, leaving file_1D62E0.cpp (to 0x1D8E40) and file_1D9AC8.cpp (from 0x1D9AC8),
+    path_follower_helpers.cpp (0x1D8E40 to 0x1D9AC8, `-mvu0-use-vf0-vf30`) was cut out of path_follower.cpp
+    for func_001D9488, leaving path_follower.cpp (to 0x1D8E40) and world.cpp (from 0x1D9AC8),
     and curve_segment.cpp (0x130168 to 0x130F48, the same flags) out of placed_object.cpp for
     func_00130C58, where the role changes inside the range the data allows.
     Its edges are where each data section separates with the fewest globals defined in one unit

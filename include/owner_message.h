@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Three words and a function, the first parameter of func_001D7098 (file_1D62E0.cpp): its callers
+// Three words and a function, the first parameter of func_001D7098 (path_follower.cpp): its callers
 // (func_001DE910, func_001EB748, func_001F5C0C's users) build it on their stacks. Written for this
 // project from what retail's code does (build/swarm/st3/groups.tsv, g3274).
 #ifndef OWNER_MESSAGE_H

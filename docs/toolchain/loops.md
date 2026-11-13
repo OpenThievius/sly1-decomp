@@ -1210,7 +1210,7 @@ vf31. Three near misses whose notes all read "a life-1 constant moved out of a l
   func_001CC120 and func_001DDE90 at 16 already (T = 80), fourteen more by 20, and every one
   of them by 30 (func_00138C00 only there). Those functions hold retail's decisions of a
   threshold of 79 to 93 the same way the three above hold 94.
-- **Both kinds sit in one file.** src/main/file_1D62E0.cpp has func_001D66A8 (matches up to
+- **Both kinds sit in one file.** src/main/path_follower.cpp has func_001D66A8 (matches up to
   N = 28), func_001D7778 (up to 16 to 19) and func_001D9AC8 (up to 24 or 25) around
   func_001D9488 (30 or 31 only), all four methods of the path follower's family;
   src/main/placed_object.cpp has func_00127B20 (up to 20 or 21) and func_0012CD78 (up to 24 or
@@ -1221,7 +1221,7 @@ vf31. Three near misses whose notes all read "a life-1 constant moved out of a l
   once from the options (init_reg_sets_1) and only falls afterwards, by one for each file-scope
   register variable that names a register not yet fixed (globalize_reg). Nothing raises it
   inside a compilation. So two thresholds in one file mean either two translation units built
-  with different options (file_1D62E0.cpp "could be several", its header says), or one unit
+  with different options (path_follower.cpp "could be several", its header says), or one unit
   whose threshold falls partway down at file-scope register declarations. The second is ruled
   out for this compiler (the next section): only the first remains, and it is not proved.
   Not the cause: whether the function uses VU0 or the FPU (func_001D9488 uses neither,
@@ -1269,7 +1269,7 @@ near misses that reach retail or come closest at some N (marked *), by address:
 | func_0016C528 | link_constraint.cpp | 13-31 |
 | func_00177990 | player.cpp | **15**-31 |
 | func_00178678 | player.cpp | 9-20 |
-| func_0017D5D8 | file_17D248.cpp | 10-19 |
+| func_0017D5D8 | player_state2.cpp | 10-19 |
 | func_00180108 | colored_triangle_set.cpp | 8-25 |
 | func_001821B0 | mode_walker.cpp | 11-31 |
 | func_00188B48 | matrix.cpp | 10-31 |
@@ -1288,11 +1288,11 @@ near misses that reach retail or come closest at some N (marked *), by address:
 | func_001CF158 | player_target.cpp | 13-18 |
 | func_001CFFD0 | player_target.cpp | 12-31 |
 | func_001D5678 | player_request.cpp | 14-31 |
-| func_001D66A8 | file_1D62E0.cpp | 9-28 |
-| func_001D7778 | file_1D62E0.cpp | 9-19 |
-| func_001D8E40 | file_1D62E0.cpp | 12-31 |
-| func_001D9488* | file_1D62E0.cpp | 30-31 |
-| func_001D9AC8 | file_1D62E0.cpp | 9-24 |
+| func_001D66A8 | path_follower.cpp | 9-28 |
+| func_001D7778 | path_follower.cpp | 9-19 |
+| func_001D8E40 | path_follower.cpp | 12-31 |
+| func_001D9488* | path_follower.cpp | 30-31 |
+| func_001D9AC8 | path_follower.cpp | 9-24 |
 | func_001DDE90 | tint_blend_collider.cpp | 9-**15** |
 | func_001DF520 | tint_blend_collider.cpp | 10-31 |
 | func_001F2840 | oscillator.cpp | 9-24 |
@@ -1323,7 +1323,7 @@ other 32 do not change.
   files.** Taking the proved file edges (config/us/files.tsv) as free cuts, every file but two
   has a common N: world_listed_object.cpp (23-30, with func_0013AD80's plain form) and every
   other file at 15. placed_object.cpp needs one cut between func_0012CD78 (at most 25) and
-  func_00130C58 (29 or more); file_1D62E0.cpp needs two, one between func_001D7778 (at most
+  func_00130C58 (29 or more); path_follower.cpp needs two, one between func_001D7778 (at most
   19) and func_001D9488 (30-31) and one between func_001D9488 and func_001D9AC8 (at most 24).
   func_001D8E40 (12-31) and the insensitive functions between can go either way. So the units
   would take two values of N, 15 everywhere and 30 for three short stretches (30 is the only
@@ -1339,7 +1339,7 @@ other 32 do not change.
     shows a boundary either: no padding gap, no vtable, no `_GLOBAL_$I$`. func_00130C58 is
     called by func_00130C20 just before it and by func_0015B7B8 (object_cycler.cpp), so it is
     not file-local, and func_00130C20 would go with it.
-  - file_1D62E0.cpp around func_001D9488: allowed only with a cost. func_001D9488 reads no
+  - path_follower.cpp around func_001D9488: allowed only with a cost. func_001D9488 reads no
     data of the file; it is called by func_001D9338 before it and by func_001D9C98 after it
     (class 0x19's method at +0x54, a class whose method at +0x80 is func_001D7778, on the other
     side of the first cut). For every cut between func_001D7778 and func_001D9AC8 the best
@@ -1383,14 +1383,14 @@ other 32 do not change.
     v1, a0). The matched form is EXACT at 13-18 only. The strongest candidate.
   - func_001C57C8 (turning_collider.cpp): two versions (907d7889, 9981717e) go from 86 lines to
     31 at N = 23-24 only, and back to 86 at 25. Weak.
-  - func_0017D5D8 (file_17D248.cpp): ce5e76ad goes from 304 lines to 270 at 20-22. Weak.
+  - func_0017D5D8 (player_state2.cpp): ce5e76ad goes from 304 lines to 270 at 20-22. Weak.
   The other 27 (and func_00177990, which has no history) show nothing. This does not show
   they were shaped to fit: a form plainer than the matched one that is EXACT elsewhere would.
 - **Where this leaves the vf30 row.** world_listed_object.cpp holds no matched function that
   depends on N, and func_0013AD80's plain form needs 23-30, so the row costs nothing that is
   matched; its two other near misses do not support it (func_0013A618 is worse at 29-30 than
   at 15, func_0013A940 the same). placed_object.cpp could take a vf30 unit for func_00130C58
-  alone (with func_00130C20, or from any function after func_0012CD78), and file_1D62E0.cpp one
+  alone (with func_00130C20, or from any function after func_0012CD78), and path_follower.cpp one
   for func_001D9488 between two vf15 units; neither has a data edge to show it, and
   func_00130C58 also has an EXACT form at the file's own threshold (the two loop notes of the
   section "The 3's second set"), which the rules do not allow but which shows the threshold is
@@ -1404,8 +1404,8 @@ proving a file") shows these edges, and none excludes them. The new units build 
 `-mvu0-use-vf0-vf30`, as world_listed_object.cpp; every other unit keeps the default. Each was
 built whole and the full builds print `MATCH` on US and PAL.
 
-- **file_1D62E0.cpp in three.** file_1D62E0.cpp (0x1D62E0 to 0x1D8E40, vf15),
-  file_1D8E40.cpp (0x1D8E40 to 0x1D9AC8, vf30) and file_1D9AC8.cpp (0x1D9AC8 to 0x1DDCE0,
+- **path_follower.cpp in three.** path_follower.cpp (0x1D62E0 to 0x1D8E40, vf15),
+  path_follower_helpers.cpp (0x1D8E40 to 0x1D9AC8, vf30) and world.cpp (0x1D9AC8 to 0x1DDCE0,
   vf15). func_001D9488 is matched in the middle one from its near miss, unchanged. The calls
   give no edge: func_001D9488 calls func_001D9338 before it, and it, func_001D8E40 and
   func_001D9678 are called only by UpdatePathFollower (func_001D9C98, class 0x19's method at
@@ -1414,11 +1414,11 @@ built whole and the full builds print `MATCH` on US and PAL.
   after D_00275524: an object on 16, or a new file's `.data`), so its `.data` starts on 16;
   0x275518, the place with the fewest crossings, would need D_00275524 to be a 12-byte object
   that no reader shows. Of the places on 16, 0x275500 (the middle unit from func_001D8E40, whose
-  three range pairs start there) leaves three globals defined in file_1D62E0.cpp and read only
+  three range pairs start there) leaves three globals defined in path_follower.cpp and read only
   across (D_00275240 by func_001D8E40; D_002751D4 and D_002751DC, 60 and 0.75, by
-  func_001D9D78 and func_001DAF08 in file_1D9AC8.cpp), and D_002751D8 read on both sides;
+  func_001D9D78 and func_001DAF08 in world.cpp), and D_002751D8 read on both sides;
   0x275530 (from func_001D92F0) leaves four (D_00275518 and D_00275524, read only by
-  func_001D9678, and the same two). The middle unit has no `.rodata` and file_1D9AC8.cpp's
+  func_001D9678, and the same two). The middle unit has no `.rodata` and world.cpp's
   starts at 0x24DC98, its pairs (on 8; the unit has no jump table). The functions that
   constrain N, each checked in its unit: func_001D66A8 and func_001D7778 EXACT at vf15,
   func_001D8E40 and func_001D9488 at vf30, func_001D9AC8 at vf15. func_001D92F0, func_001D9338

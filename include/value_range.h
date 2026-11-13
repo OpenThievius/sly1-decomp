@@ -53,7 +53,7 @@ struct ValueRange {
 
 typedef char check_ValueRange[sizeof(ValueRange) == 8 ? 1 : -1];
 
-extern ValueRange D_002754C8;      // file_1D62E0.cpp defines it; file_1E88D0.cpp
+extern ValueRange D_002754C8;      // path_follower.cpp defines it; file_1E88D0.cpp
 extern ValueRange g_unitRange;      // file_1E88D0.cpp defines it (and D_00275C68 after it); placed_object.cpp, pooled_object.cpp, trail_ribbon.cpp
 
 #endif
