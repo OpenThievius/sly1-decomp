@@ -3,7 +3,7 @@
 // (func_eu_001DDA10) after SkipBufferedBlocks and the 14 entries of D_eu_0027EEA0 after f1D74,
 // and finds the map screen's current page at 0x570 (US 0x260).
 extern const char* D_eu_0027EEA0[];
-void func_eu_001DDA10(void* a0);
+void LoadTextTable(void* a0);
 struct MapScreen_eu { u8 pad0[0x570]; WarpPage* current; };
 
 void LoadWorld(World* self, BufferedStream* s)
@@ -17,7 +17,7 @@ void LoadWorld(World* self, BufferedStream* s)
     D_00275714 = ReadBufferedU8(s);
     self->f1D70 = ReadBufferedS16(s);
     SkipBufferedBlocks(s);
-    func_eu_001DDA10(s);
+    LoadTextTable(s);
     g_camera = (Camera*)CreateTypedRecord(0x6D, self, 0, 4, -1);
     for (i = 0; i < 10; i++) {
         BaseObject* o = (BaseObject*)CreateTypedRecord(0x1E, self, 0, 0xA, -1);

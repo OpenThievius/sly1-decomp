@@ -16,7 +16,7 @@ struct Self_18EB98_eu {
 };
 
 struct Obj_eu_18F210;
-void func_eu_0018F210(Obj_eu_18F210* p);
+void UpdateIopRingSinkByKind(Obj_eu_18F210* p);
 
 void UpdateMovieStream(MovieStream* self_)
 {
@@ -36,7 +36,7 @@ void UpdateMovieStream(MovieStream* self_)
         break;
     case 3: {
         void* s0 = (u8*)&self->f50 + 0x20;
-        func_eu_0018F210((Obj_eu_18F210*)s0);
+        UpdateIopRingSinkByKind((Obj_eu_18F210*)s0);
         DrainRingBuffer(&self->f50, self->f94, s0);
         break;
     }

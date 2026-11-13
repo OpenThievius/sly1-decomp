@@ -11,7 +11,7 @@ extern Game_eu_1AE6D0* D_eu_002636F0;
 extern s32 D_eu_00276448;
 extern Ui_eu_1AE6D0 D_eu_00273978;
 extern Ui_eu_1AE6D0 D_eu_0027CFE8;
-void func_eu_001ADE38(void* ui, s32 a, s32 b);
+void SetElementWideTextFromEntry(void* ui, s32 a, s32 b);
 void SetScreenElementHoldTime(void* self, f32 v);
 void SetScreenElementMode(Obj_eu_1AE6D0* self, s32 flag);
 
@@ -32,7 +32,7 @@ void SetElementModeFollowingFade(Obj_eu_1AE6D0* self, s32 st)
                         Ui_eu_1AE6D0* ui = &D_eu_00273978;
                         ui->f570 = 0;
                         ui->vtbl->fn40(ui, 0);
-                        func_eu_001ADE38(ui, D_eu_002636F0->f19D8, D_eu_002636F0->f19DC);
+                        SetElementWideTextFromEntry(ui, D_eu_002636F0->f19D8, D_eu_002636F0->f19DC);
                         ui->f974 = 1;
                         SetScreenElementHoldTime(ui, 0.0f);
                         ui->vtbl->fn40(ui, 2);

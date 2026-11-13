@@ -98,3 +98,6 @@ func_001DDC78	SetWorldFlagBit	sets bit n in the word at 0x235C
 func_001DDC90	ClearWorldFlagBit	clears bit n in the word at 0x235C
 func_001DDCB0	GetSaveSpareCount	writes g_saveData's count at +0x19E4 (the one PlaceSpareSoundNotifier raises) through its out pointer, for the script built-ins
 func_001DDCC8	GetReserveUnitCount	writes g_saveData's count at +0x19E0 (the one AddReserveUnitNow raises) through its out pointer, for the script built-ins
+func_eu_001DDA10	LoadTextTable	only in PAL: reads a halfword count into D_eu_0027EE8C, allocates a pointer per entry at D_eu_0027ED80 and reads each entry with ReadBufferedWideString; LoadWorld calls it
+func_eu_001DDAB0	GetTextTableEntry	only in PAL: returns entry i of the text table LoadTextTable read when i is in range, else the empty text D_eu_0027F0B0; menus, captions and screen elements take their texts from it
+func_eu_001DE018	GetLoadedKeyRecord	only in PAL: returns the i-th of the 14 KeyRecords LoadWorld reads into D_eu_0027EEA0 (ReadOptionalBufferedBlock) for i below 14, else the empty record D_eu_0027EDF8; StartRandomStreamVoice opens the result with OpenKeyRecord where US picks from its static KeyRecords D_002482D8, and ChangePauseMenuPage and SetCurrentObjectChoice call it too

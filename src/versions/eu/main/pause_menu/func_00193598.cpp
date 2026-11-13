@@ -20,7 +20,7 @@ extern Slot_193598_eu D_eu_00265CD0[];
 extern u8 D_eu_0026B530[][0x200];
 s32 IsPadPatternEnabled(Pad_193598_eu* p);
 void FormatGameSummary(Slot_193598_eu* a, void* b);
-const char* func_eu_001DDAB0(s32 i);
+const char* GetTextTableEntry(s32 i);
 
 void* GetMenuChoiceLabel(s32 x, s32 index)
 {
@@ -76,7 +76,7 @@ void* GetMenuChoiceLabel(s32 x, s32 index)
     }
     }
     if (id != -1) {
-        out = (void*)func_eu_001DDAB0(id);
+        out = (void*)GetTextTableEntry(id);
     }
     return out;
 }

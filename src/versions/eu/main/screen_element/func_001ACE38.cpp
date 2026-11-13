@@ -13,14 +13,14 @@ struct Obj_eu_001ADBA8 {
     u16 value;
 };
 
-void func_eu_001AB2B0(void* self, s32 a1);
-s32 func_eu_001E3100(void* p, s32 a1);
-void* func_eu_001E3050(void* p, s32 a1);
+void SetScreenElementWideText(void* self, s32 a1);
+s32 CompareWideStrings(void* p, s32 a1);
+void* CopyWideString(void* p, s32 a1);
 
 void SetElementTextCopiedAfterSlideOut(Obj_eu_001ADBA8* self, s32 a1)
 {
     if (self->state == 0) {
-        func_eu_001AB2B0(self, a1);
+        SetScreenElementWideText(self, a1);
         return;
     }
     if (self->state < 0) {
@@ -30,13 +30,13 @@ void SetElementTextCopiedAfterSlideOut(Obj_eu_001ADBA8* self, s32 a1)
         return;
     }
     if (self->flag == 0) {
-        if (func_eu_001E3100(self->sub008, a1) == 0) {
+        if (CompareWideStrings(self->sub008, a1) == 0) {
             return;
         }
     }
     self->flag = 1;
     if (a1 != 0) {
-        func_eu_001E3050((u8*)self + 0x574, a1);
+        CopyWideString((u8*)self + 0x574, a1);
     } else {
         self->value = 0;
     }

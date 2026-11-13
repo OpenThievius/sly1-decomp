@@ -10,7 +10,7 @@ extern f32 D_eu_0026BB38;
 extern f32 D_eu_0026BB3C;
 s32 HasStreamVoice(void);
 void OpenKeyRecord(void* slot);
-void* func_eu_001DE018(s32 n);
+void* GetLoadedKeyRecord(s32 n);
 
 void ChangePauseMenuPage(Self_193EE8_eu* self, s32 a, s32 b)
 {
@@ -45,7 +45,7 @@ void ChangePauseMenuPage(Self_193EE8_eu* self, s32 a, s32 b)
         if (HasStreamVoice() != 0) {
             return;
         }
-        OpenKeyRecord(func_eu_001DE018(6));
+        OpenKeyRecord(GetLoadedKeyRecord(6));
         self->f288 = HasStreamVoice();
         break;
     case 24: {

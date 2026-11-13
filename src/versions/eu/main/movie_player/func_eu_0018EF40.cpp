@@ -15,10 +15,10 @@ struct Obj_eu_18EF40 {
     s32 f2C;
 };
 
-void func_eu_0018EE08(Obj_eu_18EF40* self, s32 len, u8* dst);
-s32 func_eu_0018F118(Obj_eu_18EF40* self, s32 size, u8* buf);
+void GroupRingBlockColumns(Obj_eu_18EF40* self, s32 len, u8* dst);
+s32 WriteIopRingBlockByKind(Obj_eu_18EF40* self, s32 size, u8* buf);
 
-s32 func_eu_0018EF40(Obj_eu_18EF40* self, s32 count, u8* buf)
+s32 PutIopRingSinkByKind(Obj_eu_18EF40* self, s32 count, u8* buf)
 {
     s32 n = count;
     s32 total = 0;
@@ -30,7 +30,7 @@ s32 func_eu_0018EF40(Obj_eu_18EF40* self, s32 count, u8* buf)
     }
     if (self->kind == 0x10) {
         left &= -(self->cols << 10);
-        func_eu_0018EE08(self, left, buf);
+        GroupRingBlockColumns(self, left, buf);
     } else {
         left &= -0x400;
     }
@@ -53,7 +53,7 @@ s32 func_eu_0018EF40(Obj_eu_18EF40* self, s32 count, u8* buf)
                 dst[0x3F1] = slot;
             }
         }
-        r = func_eu_0018F118(self, chunk, dst);
+        r = WriteIopRingBlockByKind(self, chunk, dst);
         if (r == 0) {
             break;
         }

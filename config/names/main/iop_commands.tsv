@@ -51,3 +51,5 @@ func_0011E498	StopIopMovieStream	sends IOP command 0x3C without data and waits (
 func_0011E4C0	UpdateIopMovieStream	sends IOP command 0x3E with five words and waits; UpdateMovieStream calls it with its two stream words
 func_0011E4F8	GetIopRingPosition	sends command 0x40 and returns the reply; func_0018E838 masks it with 0xFFFFFF to find the IOP's position in its ring
 func_0011E538	ConvertSpeedToPitchOffset	returns its argument times 1524 / 741; ComputeSoundRecordDoppler converts the bodies' relative speed with it into the pitch offset at +0x60
+func_eu_0011E5F8	SendIopRingBlockSlot	only in PAL: sends IOP command 0x5A with two words through SendIopCommandAndWait; WriteIopRingBlockByKind passes a block's size and its place in the ring (its slot << 10 plus its column << 12) for a stream of kind 0x10; US sends no command 0x5A
+func_eu_0011E628	GetIopRingBlockIndex	only in PAL: sends IOP command 0x5B with no data through SendIopCommandAndWait, leaving its reply in $v0; UpdateIopRingSinkByKind multiplies that by the column count to find the IOP's position in the ring for kind 0x10, where US asks GetIopRingPosition (command 0x40)

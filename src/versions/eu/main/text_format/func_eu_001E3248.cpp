@@ -2,7 +2,7 @@
 // Upper-cases a zero-terminated string in place, for the characters the table flags with bit 2.
 extern u8 D_eu_0024FB49[];
 
-void func_eu_001E3248(u8* s)
+void UppercaseByteString(u8* s)
 {
     u8* p = s;
     while (*p != 0) {

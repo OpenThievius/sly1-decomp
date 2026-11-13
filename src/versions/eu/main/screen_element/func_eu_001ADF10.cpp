@@ -8,13 +8,13 @@ extern s32 D_eu_0027DB80[];
 
 void CountCategoryFlags(s32 id, s32* a, s32* b, s32* c);
 s32 func_eu_001E2DD0(char* buf, const char* fmt, ...);
-const char* func_eu_001DDAB0(s32 id);
+const char* GetTextTableEntry(s32 id);
 
 struct Row_eu_001ADF10 { u8 pad[0x438]; s32 f438; s32 f43C; s32 f440; };
 typedef void (*VFnB_eu_001ADF10)(void* self, char* text);
 struct Obj_eu_001ADF10 { VFnB_eu_001ADF10* vtbl; };
 
-void func_eu_001ADF10(Obj_eu_001ADF10* self, s32 id)
+void SetElementWideTextFromIndexedCounts(Obj_eu_001ADF10* self, s32 id)
 {
     char buf1[0x80];
     char buf2[0x100];
@@ -32,7 +32,7 @@ void func_eu_001ADF10(Obj_eu_001ADF10* self, s32 id)
     if (c != 0) {
         func_eu_001E2DD0(s0, (const char*)D_eu_0024E328, (s32)((a != 0 || b != 0) ? (const char*)D_eu_0024E2E0 : (const char*)D_eu_0024E238), r->f440, c);
     }
-    func_eu_001E3050(buf2, (s32)func_eu_001DDAB0(D_eu_0027DB80[id]));
-    func_eu_001E3178(buf2, buf1);
+    CopyWideString(buf2, (s32)GetTextTableEntry(D_eu_0027DB80[id]));
+    AppendStringToWide(buf2, buf1);
     self->vtbl[8](self, buf2);
 }

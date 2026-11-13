@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the decoded string is formatted with a PAL-only function and handed to func_eu_001AB238, then the object's size is set and its virtual at 0x38 called.
 extern u8 D_eu_0024AFF8[];
-void func_eu_001AB238(void* self, const char* s);
+void SetScreenElementByteText(void* self, const char* s);
 
 void ShowPasswordMessage(void)
 {
@@ -18,7 +18,7 @@ void ShowPasswordMessage(void)
                     p++;
                 }
                 FormatToString(text, (const u8*)D_0024A848, buf);
-                func_eu_001AB238(&g_buttonHintElement, text);
+                SetScreenElementByteText(&g_buttonHintElement, text);
                 SetScreenElementHoldTime(&g_buttonHintElement, 10.0f);
                 g_buttonHintElement.vt->m14(&g_buttonHintElement);
             }

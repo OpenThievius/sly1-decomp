@@ -20,13 +20,13 @@ struct Obj_eu_1AE400 {
 };
 
 void SetupScreenElementText(Obj_eu_1AE400* self);
-void func_eu_001AB238(void* self, const char* s);
+void SetScreenElementByteText(void* self, const char* s);
 
 void InitHintGlyphElement(Obj_eu_1AE400* self)
 {
     SetupScreenElementText(self);
     Sub_eu_1AE400* sub = (Sub_eu_1AE400*)GetFontById(2);
     self->sub = (Sub_eu_1AE400*)sub->info->fn((u8*)sub + sub->info->off, 1.0f, 1.0f);
-    func_eu_001AB238(self, D_eu_0024E348);
+    SetScreenElementByteText(self, D_eu_0024E348);
     self->f570 = 0;
 }

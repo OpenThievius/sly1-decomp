@@ -5015,7 +5015,7 @@ void SetTextLayoutColor(WarpLabelLayout* self, s32* c);
 void SetTextLayoutHorizontalAlign(WarpLabelLayout* self, s32 f);
 void SetTextLayoutVerticalAlign(WarpLabelLayout* self, s32 f);
 #ifdef VERSION_EU
-void func_eu_001374E0(WarpLabelLayout* self, s32 f);  // only PAL has this setter
+void SetTextLayoutVerticalPlacement(WarpLabelLayout* self, s32 f);  // only PAL has this setter
 #endif
 struct WarpLabelLayout {
     f32 x, y;
@@ -5029,7 +5029,7 @@ struct WarpLabelLayout {
     void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
     void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
 #ifdef VERSION_EU
-    void FlagC(s32 f) { func_eu_001374E0(this, f); }
+    void FlagC(s32 f) { SetTextLayoutVerticalPlacement(this, f); }
 #endif
 };
 

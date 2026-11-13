@@ -13,7 +13,7 @@ u8* AllocateBackMemory(s32 n);
 void CopyMemory(u8* dst, u8* src, u32 bytes);
 void PopBackMemoryMark(void);
 
-void func_eu_0018EE08(Obj_eu_18EE08* self, s32 len, u8* dst)
+void GroupRingBlockColumns(Obj_eu_18EE08* self, s32 len, u8* dst)
 {
     if (self->kind != 0x10) {
         return;

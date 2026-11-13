@@ -6,7 +6,7 @@ struct Writer_eu_15DEE0 {
     void* target;
 };
 
-void func_eu_0015DEE0(Writer_eu_15DEE0* self, u16 v)
+void StoreTextReaderChar(Writer_eu_15DEE0* self, u16 v)
 {
     switch (self->mode) {
     case 0:

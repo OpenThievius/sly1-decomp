@@ -8,7 +8,7 @@ struct Hud_150DC0_eu {
     u32 f2F4;
 };
 
-u32 func_eu_001E3018(u16* a);
+u32 GetWideStringLength(u16* a);
 void SetTextPanelValuePercent(Hud_150DC0_eu* a, f32 b);
 void SetTextPanelSubject(Hud_150DC0_eu* a, s32 b);
 
@@ -105,7 +105,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
                 f20 = msg->f8.f;
             }
             if (0.0f < f20) {
-                (*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F0 = (f32)(func_eu_001E3018((u16*)msg->f14) + 10) / f20;
+                (*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F0 = (f32)(GetWideStringLength((u16*)msg->f14) + 10) / f20;
             } else {
                 Hud_150DC0_eu* h3 = &(*(Hud_150DC0_eu*)&g_typedTextCaptionBox);
                 h3->f2F0 = 15.0f;

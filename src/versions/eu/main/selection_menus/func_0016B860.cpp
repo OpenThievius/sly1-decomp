@@ -27,12 +27,12 @@ void* InitTextReader(void* out, void* p, s32 handle);
 void DrawAlignedText(void* a, void* b, s32 c, void* d);
 void PopFontScale(s32 handle);
 
-void func_eu_0015DCB8(void* out, void* p, s32 handle, s32 z);
-void func_eu_0015E7E0(void* a, void* b, s32 c, void* d);
-void func_eu_001374E0(CaptionLayout* out, s32 v);
+void InitWideTextReader(void* out, void* p, s32 handle, s32 z);
+void DrawWrappedAlignedText(void* a, void* b, s32 c, void* d);
+void SetTextLayoutVerticalPlacement(CaptionLayout* out, s32 v);
 struct Out_eu_16B860 : CaptionLayout {
-    void Mode(s32 v) { func_eu_001374E0(this, v); }
-    void Draw(void* loc, s32 z, void* tbl) { func_eu_0015E7E0(loc, this, z, tbl); }
+    void Mode(s32 v) { SetTextLayoutVerticalPlacement(this, v); }
+    void Draw(void* loc, s32 z, void* tbl) { DrawWrappedAlignedText(loc, this, z, tbl); }
 };
 
 void DrawSelectionCaption(Obj_16B860_eu* self)
@@ -68,7 +68,7 @@ void DrawSelectionCaption(Obj_16B860_eu* self)
         f32 k = (1.0f - t) * 0.9f + t;
         f32 v = self->f51c * k;
         PushFontScale(self->f4, v, v);
-        func_eu_0015DCB8(loc, &self->f8, self->f4, 0);
+        InitWideTextReader(loc, &self->f8, self->f4, 0);
         out.Draw(loc, 0, &g_gsPacketWriter);
         PopFontScale(self->f4);
     }

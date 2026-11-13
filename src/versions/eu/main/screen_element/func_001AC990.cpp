@@ -6,7 +6,7 @@ struct Obj_eu_001AD6E8 {
     s32 value;
 };
 
-void func_eu_001AB2B0(void* self, s32 v);
+void SetScreenElementWideText(void* self, s32 v);
 void SetScreenElementMode(void* self, s32 a1);
 
 void SetElementModeApplyingPendingText(Obj_eu_001AD6E8* self, s32 a1)
@@ -17,7 +17,7 @@ void SetElementModeApplyingPendingText(Obj_eu_001AD6E8* self, s32 a1)
         if (a1 == 0) {
             v = self->value;
             self->flag = 0;
-            func_eu_001AB2B0(self, v);
+            SetScreenElementWideText(self, v);
             a1 = 1;
         }
     }

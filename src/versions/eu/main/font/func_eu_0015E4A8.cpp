@@ -34,13 +34,13 @@ struct Lines_eu_15E4A8 {
 
 void* FillMemory(void* p, s32 v, s32 n);
 void RewindTextReader(void* self);
-s32 func_eu_0015DE18(void* self);
-s32 func_eu_0015DEA0(void* self, s32 i);
-s32 func_eu_0015DF18(void* self, s32 n);
-s32 func_eu_0015DF58(void* self);
-s32 func_eu_001E31E0(s32 ch);
+s32 GetTextReaderOffset(void* self);
+s32 PeekTextReaderChar(void* self, s32 i);
+s32 AdvanceTextReader(void* self, s32 n);
+s32 ReadTextCharAnyWidth(void* self);
+s32 IsWideCharSpace(s32 ch);
 
-void func_eu_0015E4A8(Reader_eu_15E4A8* self, Lines_eu_15E4A8* t, f32 limit)
+void BreakTextIntoLines(Reader_eu_15E4A8* self, Lines_eu_15E4A8* t, f32 limit)
 {
     f32 width = 0.0f;
     f32 trail = width;
@@ -49,11 +49,11 @@ void func_eu_0015E4A8(Reader_eu_15E4A8* self, Lines_eu_15E4A8* t, f32 limit)
     Line_eu_15E4A8* end = t->lines + 32;
     RewindTextReader(self);
     s32 c;
-    while ((c = func_eu_0015DF58(self)) != 0) {
-        s32 pos = func_eu_0015DE18(self);
+    while ((c = ReadTextCharAnyWidth(self)) != 0) {
+        s32 pos = GetTextReaderOffset(self);
         Font_eu_15E4A8* f = self->font;
         f32 w = f->vt->width((u8*)f + f->vt->off, c);
-        if (func_eu_001E31E0(c) != 0) {
+        if (IsWideCharSpace(c) != 0) {
             if (c == '\n') {
             newline:
                 if (e >= end) {
@@ -94,20 +94,20 @@ void func_eu_0015E4A8(Reader_eu_15E4A8* self, Lines_eu_15E4A8* t, f32 limit)
                 if (pos + k < e->start) {
                     break;
                 }
-                s32 ch = func_eu_0015DEA0(self, k - 1);
+                s32 ch = PeekTextReaderChar(self, k - 1);
                 if (ch == '\n') {
                     break;
                 }
-                if (func_eu_001E31E0(ch) != 0 || ch == '-') {
+                if (IsWideCharSpace(ch) != 0 || ch == '-') {
                     width = w;
-                    if (func_eu_001E31E0(ch) != 0) {
+                    if (IsWideCharSpace(ch) != 0) {
                         Font_eu_15E4A8* s = self->font;
                         trail = (f32)s->cellWidth * s->sx;
                     } else {
                         trail = 0.0f;
                     }
-                    func_eu_0015DF18(self, k);
-                    pos = func_eu_0015DE18(self);
+                    AdvanceTextReader(self, k);
+                    pos = GetTextReaderOffset(self);
                     goto newline;
                 }
                 k--;
@@ -117,9 +117,9 @@ void func_eu_0015E4A8(Reader_eu_15E4A8* self, Lines_eu_15E4A8* t, f32 limit)
             if (!(0.0f < w)) {
                 continue;
             }
-            func_eu_0015DF18(self, -1);
+            AdvanceTextReader(self, -1);
             width = before;
-            pos = func_eu_0015DE18(self);
+            pos = GetTextReaderOffset(self);
             goto newline;
         }
     }

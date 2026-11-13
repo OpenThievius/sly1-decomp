@@ -12,3 +12,4 @@ func_001F8C38	CloseFile	sends the close request for a handle and waits for its r
 func_001F8DB8	ReadFile	sends a read request for a handle into a buffer and waits for its reply (StartChunkRead and RefillBufferedStreamFromFile call it)
 func_001F9028	WriteFile	sends a write request of a buffer to a handle and waits for its reply (FlushOutputBuffer calls it)
 func_001F92E8	ControlFile	sends request 5 with a mode and a block of data for a handle, answering modes 1 to 3 from the client's own state (PollChunkRead asks whether a read finished with it)
+func_eu_001F9538	ClaimFreeFileHandle	only in PAL: under the file table's semaphore (CreateFileTableLock, D_002771C0) marks the first free entry of the 32 handles at D_00628940 used (0x10000000) and returns it, 0 when all are taken; PAL's open request func_001F9D40, which the map pairs with US's 4-byte leftover func_001F8C30, calls it

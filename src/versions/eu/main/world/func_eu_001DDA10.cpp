@@ -5,12 +5,12 @@ extern s32 D_eu_0027EE8C;
 extern s32* D_eu_0027ED80;
 s32 ReadBufferedU16(void* self);
 void* AllocateFrontMemory(s32 size);
-void func_eu_001387C8(void* a0, void** a1);
-void func_eu_001DDA10(void* a0)
+void ReadBufferedWideString(void* a0, void** a1);
+void LoadTextTable(void* a0)
 {
     D_eu_0027EE8C = ReadBufferedU16(a0);
     D_eu_0027ED80 = (s32*)AllocateFrontMemory(D_eu_0027EE8C * 4);
     for (s32 i = 0; i < D_eu_0027EE8C; i++) {
-        func_eu_001387C8(a0, (void**)&D_eu_0027ED80[i]);
+        ReadBufferedWideString(a0, (void**)&D_eu_0027ED80[i]);
     }
 }

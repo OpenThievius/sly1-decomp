@@ -17,13 +17,13 @@ struct Mgr_1E86E0_eu {
     s32 f570;
 };
 
-void func_eu_001AB238(void* self, s32 v);
+void SetScreenElementByteText(void* self, s32 v);
 
 void SetArcTarget(Obj_1E86E0_eu* self, s32 value)
 {
     if (value == self->f580) return;
     if (self->f580 == 0) {
-        func_eu_001AB238(&g_typedTextCaptionBox, 0);
+        SetScreenElementByteText(&g_typedTextCaptionBox, 0);
     }
     self->f580 = value;
     if (((Mgr_1E86E0_eu*)&g_typedTextCaptionBox)->f570 == 4) {

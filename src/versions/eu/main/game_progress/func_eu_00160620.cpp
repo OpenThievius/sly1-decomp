@@ -3,7 +3,7 @@
 extern s32 D_eu_002636D8[];
 extern s32 D_eu_00263710;
 
-void func_eu_00160620(s32 p)
+void SelectLanguage(s32 p)
 {
     s32 key = p;
     u32 i = 0;

@@ -4,7 +4,7 @@ extern s32 D_eu_0027EE8C;
 extern s32* D_eu_0027ED80;
 extern char D_eu_0027F0B0[];
 
-const char* func_eu_001DDAB0(s32 i)
+const char* GetTextTableEntry(s32 i)
 {
     if (i >= 0 && i < D_eu_0027EE8C) {
         return (const char*)D_eu_0027ED80[i];

@@ -13,7 +13,7 @@ extern char D_eu_0024E0A8[];
 extern char D_eu_0024E0B8[];
 extern u8 D_eu_0024FB49[];
 s32 FormatToString(char* dst, const char* fmt, ...);
-void func_eu_001AB238(void* self, char* buf);
+void SetScreenElementByteText(void* self, char* buf);
 
 void SubstituteScreenElementGlyphs(Self_eu_1AB370* self, u8* s)
 {
@@ -54,5 +54,5 @@ void SubstituteScreenElementGlyphs(Self_eu_1AB370* self, u8* s)
         s++;
     }
     *cur = 0;
-    func_eu_001AB238(self, buf);
+    SetScreenElementByteText(self, buf);
 }

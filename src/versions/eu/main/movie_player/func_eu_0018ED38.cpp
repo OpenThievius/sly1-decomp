@@ -21,7 +21,7 @@ struct Self_eu_0018ED38 {
 s32 OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 void ResetIopRingSink(void* self);
 
-s32 func_eu_0018ED38(Self_eu_0018ED38* self, Src_eu_0018ED38* src)
+s32 InitIopRingSinkByKind(Self_eu_0018ED38* self, Src_eu_0018ED38* src)
 {
     s32 kind = src->kind;
     self->kind = kind;

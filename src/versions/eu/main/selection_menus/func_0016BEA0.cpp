@@ -24,14 +24,14 @@ struct Obj_16BEA0_eu {
     s32 cursor;
 };
 
-const char* func_eu_001DDAB0(s32 id);
-void func_eu_0015DCB8(void* out, const char* p, Font* font, s32 z);
-void func_eu_0015E7E0(void* a, CaptionLayout* b, s32 c, void* d);
-void func_eu_001374E0(CaptionLayout* out, s32 v);
+const char* GetTextTableEntry(s32 id);
+void InitWideTextReader(void* out, const char* p, Font* font, s32 z);
+void DrawWrappedAlignedText(void* a, CaptionLayout* b, s32 c, void* d);
+void SetTextLayoutVerticalPlacement(CaptionLayout* out, s32 v);
 void DrawFontString(Font* font, const char* text, CaptionLayout* out, s32 zero, void* d);
 struct Out_eu_16BEA0 : CaptionLayout {
-    void Mode(s32 v) { func_eu_001374E0(this, v); }
-    void Draw(void* loc, s32 z, void* tbl) { func_eu_0015E7E0(loc, this, z, tbl); }
+    void Mode(s32 v) { SetTextLayoutVerticalPlacement(this, v); }
+    void Draw(void* loc, s32 z, void* tbl) { DrawWrappedAlignedText(loc, this, z, tbl); }
 };
 
 void DrawGridSelector(Obj_16BEA0_eu* self)
@@ -62,12 +62,12 @@ void DrawGridSelector(Obj_16BEA0_eu* self)
             *(Pk4_16BEA0*)((u8*)self->frame + 0x18) = slot;
         }
     }
-    const char* title = func_eu_001DDAB0(0xAC);
+    const char* title = GetTextTableEntry(0xAC);
     if (TestGridEntryBit(self->cursor) != 0)
         title = GetMovieTitle(self->cursor);
     f32 half = 0.5f;
     u8 loc[0xC0];
-    func_eu_0015DCB8(loc, title, self->font, 0);
+    InitWideTextReader(loc, title, self->font, 0);
     Out_eu_16BEA0* o = &out;
     o->Draw(loc, 0, &g_gsPacketWriter);
     f32 left = 18.0f;

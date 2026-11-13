@@ -3,7 +3,7 @@
 extern const char* D_eu_0027EEA0[];
 extern char D_eu_0027EDF8[];
 
-const char* func_eu_001DE018(u32 i)
+const char* GetLoadedKeyRecord(u32 i)
 {
     if (i < 0xE) {
         return D_eu_0027EEA0[i];

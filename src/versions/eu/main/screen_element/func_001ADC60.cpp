@@ -26,7 +26,7 @@ struct Obj_eu_1AE9C0 {
 void SetupScreenElementText(Obj_eu_1AE9C0* self);
 void* FindAnimRecord(s32 id);
 void SetScreenElementSize(Obj_eu_1AE9C0* self, f32 x, f32 y);
-const char* func_eu_001DDAB0(s32 id);
+const char* GetTextTableEntry(s32 id);
 
 void InitTitleElement(Obj_eu_1AE9C0* self)
 {
@@ -42,7 +42,7 @@ void InitTitleElement(Obj_eu_1AE9C0* self)
     if (r != 0) {
         SetScreenElementSize(self, 366.75f, 165.75f);
     } else {
-        const char* text = func_eu_001DDAB0(0xB);
+        const char* text = GetTextTableEntry(0xB);
         ((void (*)(void*, const char*))self->vt[8])(self, text);
     }
 }

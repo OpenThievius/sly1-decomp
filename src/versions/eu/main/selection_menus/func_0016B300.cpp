@@ -5,7 +5,7 @@
 struct Gl_eu_16B300 { u8 pad[0x578]; f32 f578; };
 extern s32 D_eu_00263BC0[];
 extern s32 D_eu_00275374;
-ChoiceSound* func_eu_001DE018(s32 id);
+ChoiceSound* GetLoadedKeyRecord(s32 id);
 
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
 {
@@ -14,13 +14,13 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
         ChoiceSound* slot = 0;
         if (g_saveData->levels[a].f448 & 1) {
             if (!(g_saveData->f19EC & 2)) {
-                slot = func_eu_001DE018(5);
+                slot = GetLoadedKeyRecord(5);
                 g_saveData->f19EC |= 2;
             }
         } else {
             Gl_eu_16B300* gp = (Gl_eu_16B300*)&D_0026FA90;
             if (D_00262970 <= g_gameClock[1] - gp->f578) {
-                slot = func_eu_001DE018(D_eu_00263BC0[a]);
+                slot = GetLoadedKeyRecord(D_eu_00263BC0[a]);
                 gp->f578 = g_gameClock[1];
             }
         }

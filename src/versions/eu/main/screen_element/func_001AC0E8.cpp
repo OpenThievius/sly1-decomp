@@ -24,7 +24,7 @@ void SetTextLayoutSize(Rect_eu_1ACEE0* out, f32 x, f32 y);
 void SetTextLayoutColor(Rect_eu_1ACEE0* out, Col_eu_1ACEE0* value);
 void SetTextLayoutHorizontalAlign(Rect_eu_1ACEE0* out, s32 flag);
 void SetTextLayoutVerticalAlign(Rect_eu_1ACEE0* out, s32 flag);
-void func_eu_001374E0(Rect_eu_1ACEE0* out, s32 flag);
+void SetTextLayoutVerticalPlacement(Rect_eu_1ACEE0* out, s32 flag);
 void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, u8* d);
 void PushFontScale(Text_eu_1ACEE0* handle, f32 a, f32 b);
 void DrawFontString(Text_eu_1ACEE0* handle, char* str, Rect_eu_1ACEE0* r, s32 zero, u8* d);
@@ -78,7 +78,7 @@ void DrawGauge(Self_eu_1ACEE0* self)
     }
     SetTextLayoutHorizontalAlign(&out, 0);
     SetTextLayoutVerticalAlign(&out, 0);
-    func_eu_001374E0(&out, 0);
+    SetTextLayoutVerticalPlacement(&out, 0);
     {
     Rgba_eu_1ACEE0 col;
     col.c[0] = 0x20; col.c[1] = 0x20; col.c[2] = 0x20; col.c[3] = 0xC0;

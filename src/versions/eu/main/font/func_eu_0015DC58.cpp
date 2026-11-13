@@ -2,7 +2,7 @@
 // Sets up an object's fields from four arguments, points its vtable at D_eu_0024CA50, runs RewindTextReader and returns the object.
 extern u8 D_eu_0024CA50[];
 void RewindTextReader(void* self);
-void* func_eu_0015DC58(void* self, s32 a1, s32 a2, s32 a3)
+void* InitByteTextReader(void* self, s32 a1, s32 a2, s32 a3)
 {
     *(s32*)((u8*)self + 0x0) = 0;
     *(void**)((u8*)self + 0x64) = D_eu_0024CA50;

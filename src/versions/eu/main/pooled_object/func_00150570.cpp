@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: case 3 calls func_eu_001387C8 (a 16-bit string reader) instead of func_001384A0.
-void func_eu_001387C8(BufferedStream* r, void* out);
+void ReadBufferedWideString(BufferedStream* r, void* out);
 
 void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, SequenceStep** outArr)
 {
@@ -29,7 +29,7 @@ void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, Sequence
             e->w1C = ReadBufferedS16(rd);
             e->w20 = ReadBufferedS16(rd);
             e->w24 = ReadBufferedS16(rd);
-            func_eu_001387C8(rd, e->w14);
+            ReadBufferedWideString(rd, e->w14);
             break;
         case 4:
             e->w4 = ReadBufferedS16(rd);

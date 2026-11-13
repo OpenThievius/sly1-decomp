@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL picks an id from a word table and resolves it with a PAL-only function instead of indexing 32-byte slots.
 extern s32 D_eu_0024AFD8[];
-KeyRecord* func_eu_001DE018(s32 id);
+KeyRecord* GetLoadedKeyRecord(s32 id);
 
 void StartRandomStreamVoice(TargetFollower* self)
 {
@@ -20,6 +20,6 @@ void StartRandomStreamVoice(TargetFollower* self)
     }
     tbl = D_eu_0024AFD8;
     r = RandomIntInRange(0, 6);
-    OpenKeyRecord(func_eu_001DE018(tbl[r]));
+    OpenKeyRecord(GetLoadedKeyRecord(tbl[r]));
     self->f5CC = 1;
 }

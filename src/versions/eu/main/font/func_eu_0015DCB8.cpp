@@ -18,7 +18,7 @@ struct Obj_eu_15DCB8 {
 extern u8 D_eu_0024CA50[];
 void RewindTextReader(Obj_eu_15DCB8* self);
 
-Obj_eu_15DCB8* func_eu_0015DCB8(Obj_eu_15DCB8* self, s32 a1, s32 a2, s32 a3)
+Obj_eu_15DCB8* InitWideTextReader(Obj_eu_15DCB8* self, s32 a1, s32 a2, s32 a3)
 {
     self->table = D_eu_0024CA50;
     self->kind = 1;

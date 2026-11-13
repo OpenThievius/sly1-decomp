@@ -3,13 +3,13 @@
 extern char D_eu_0027F0B0[];
 struct Obj_eu_00160750 { u8 pad[0xA4]; s32 fA4; };
 void* FindEntryById(s32 key);
-const char* func_eu_001DDAB0(s32 id);
+const char* GetTextTableEntry(s32 id);
 
 const char* GetEntryName(s32 key)
 {
     Obj_eu_00160750* o = (Obj_eu_00160750*)FindEntryById(key);
     if (o != 0) {
-        return func_eu_001DDAB0(o->fA4);
+        return GetTextTableEntry(o->fA4);
     }
     return D_eu_0027F0B0;
 }

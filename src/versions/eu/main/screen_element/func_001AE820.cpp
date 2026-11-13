@@ -21,9 +21,9 @@ struct Obj_1AE820_eu {
     u8 pad4[0x570 - 0x568];
     s32 f260;
 };
-void func_eu_001374E0(void* out, s32 flag);
+void SetTextLayoutVerticalPlacement(void* out, s32 flag);
 void* InitTextReader(void* out, void* p, void* handle, s32 extra);
-void func_eu_0015E7E0(void* buf, void* out, s32 zero, void* data);
+void DrawWrappedAlignedText(void* buf, void* out, s32 zero, void* data);
 
 void DrawCyclingGlyphElement(Obj_1AE820_eu* self)
 {
@@ -70,13 +70,13 @@ void DrawCyclingGlyphElement(Obj_1AE820_eu* self)
     SetTextLayoutColor(out, tmp);
     SetTextLayoutHorizontalAlign(out, 0);
     SetTextLayoutVerticalAlign(out, 0);
-    func_eu_001374E0(out, 0);
+    SetTextLayoutVerticalPlacement(out, 0);
     fmt = "%c&1^07~b2a83d%d%%&.";
     sp = str;
     c = GetCyclingGlyph();
     FormatToString(sp, fmt, c, ComputeCompletionPercent(g_saveData));
     PushFontScale(self->f4, self->f20c, self->f20c);
     InitTextReader(buf, sp, self->f4, 0);
-    func_eu_0015E7E0(buf, out, 0, &g_gsPacketWriter);
+    DrawWrappedAlignedText(buf, out, 0, &g_gsPacketWriter);
     PopFontScale(self->f4);
 }

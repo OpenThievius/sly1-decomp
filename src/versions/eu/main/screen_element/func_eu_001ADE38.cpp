@@ -13,24 +13,24 @@ struct Frame_eu_1ADE38 {
 
 s32 GetEntryFlags(s32 key);
 s32 GetEntryName(s32 key);
-void* func_eu_001E3050(void* out, s32 v);
+void* CopyWideString(void* out, s32 v);
 void FormatFlagGlyphs(void* a, u8* rec, s32 c);
 s32 GetStringLength(const void* s);
-void func_eu_001E3178(void* a, const void* b);
+void AppendStringToWide(void* a, const void* b);
 
-void func_eu_001ADE38(void* self, s32 a1, s32 a2)
+void SetElementWideTextFromEntry(void* self, s32 a1, s32 a2)
 {
     Frame_eu_1ADE38 f;
     s32 key = (a1 << 8) | a2;
     u8* rec = ((u8*)D_eu_002636F0 + (a1 * 0x44C + 0x10)) + a2 * 0x78;
     s32 s2 = GetEntryFlags(key);
     s32 name = GetEntryName(key);
-    func_eu_001E3050(f.first, name);
+    CopyWideString(f.first, name);
     u8* text = f.second;
     FormatFlagGlyphs(text, rec, s2);
     if (GetStringLength(text) != 0) {
-        func_eu_001E3178(f.first, D_eu_0024E2E0);
-        func_eu_001E3178(f.first, text);
+        AppendStringToWide(f.first, D_eu_0024E2E0);
+        AppendStringToWide(f.first, text);
     }
     void** vt = *(void***)self;
     ((void (*)(void*, void*))vt[8])(self, f.first);

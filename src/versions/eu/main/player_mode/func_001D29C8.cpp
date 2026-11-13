@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL's own definition: restores the mode, resets the camera sub-object and sets the mode's music/state.
-const char* func_eu_001DDAB0(s32 id);
+const char* GetTextTableEntry(s32 id);
 
 void ShowModeLabel(u32 mode)
 {
@@ -36,7 +36,7 @@ tail:
     if (mode != g_saveData->f19FC && mode < 7) {
         SetScreenElementHoldTime(&g_buttonHintElement, ((*(Player**)&g_player) != 0 && (void*)(*(Player**)&g_player) == GetActiveSwitchedCollider()) ? 3.0f : 8.0f);
         SetScreenElementScale(&g_buttonHintElement, 0.6f);
-        g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0((s32)g_modeLabels[mode]));
+        g_buttonHintElement.vt->m08(&g_buttonHintElement, GetTextTableEntry((s32)g_modeLabels[mode]));
         g_buttonHintElement.vt->m14(&g_buttonHintElement);
         g_saveData->f19FC = mode;
     }

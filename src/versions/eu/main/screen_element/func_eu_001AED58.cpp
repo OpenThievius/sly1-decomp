@@ -14,12 +14,12 @@ struct Obj_eu_1AED58 {
 extern s32 D_eu_0027DBC8[];
 extern u8 D_eu_0024E358[];
 extern s32 D_eu_002636EC;
-const char* func_eu_001DDAB0(s32 id);
-u16* func_eu_001E3050(u16* dst, const char* src);
-u16* func_eu_001E3178(u16* dst, const u8* src);
-u16* func_eu_001E30A0(u16* dst, const char* src);
+const char* GetTextTableEntry(s32 id);
+u16* CopyWideString(u16* dst, const char* src);
+u16* AppendStringToWide(u16* dst, const u8* src);
+u16* AppendWideString(u16* dst, const char* src);
 
-void func_eu_001AED58(Obj_eu_1AED58* self)
+void RebuildPromptWideText(Obj_eu_1AED58* self)
 {
     u16 buf[256];
     Rgba_eu_1AED58 c;
@@ -29,12 +29,12 @@ void func_eu_001AED58(Obj_eu_1AED58* self)
         c.b = 0x6F;
         c.a = 0xFF;
         self->color = c;
-        func_eu_001E3050(buf, func_eu_001DDAB0(D_eu_0027DBC8[self->f574 != 0]));
-        func_eu_001E3178(buf, D_eu_0024E358);
-        func_eu_001E30A0(buf, func_eu_001DDAB0(D_eu_0027DBC8[2]));
+        CopyWideString(buf, GetTextTableEntry(D_eu_0027DBC8[self->f574 != 0]));
+        AppendStringToWide(buf, D_eu_0024E358);
+        AppendWideString(buf, GetTextTableEntry(D_eu_0027DBC8[2]));
         if (D_eu_002636EC >= 2) {
-            func_eu_001E3178(buf, D_eu_0024E358);
-            func_eu_001E30A0(buf, func_eu_001DDAB0(5));
+            AppendStringToWide(buf, D_eu_0024E358);
+            AppendWideString(buf, GetTextTableEntry(5));
         }
     } else {
         c.r = 0x6F;
@@ -42,7 +42,7 @@ void func_eu_001AED58(Obj_eu_1AED58* self)
         c.b = 0x1F;
         c.a = 0xFF;
         self->color = c;
-        func_eu_001E3050(buf, func_eu_001DDAB0(4));
+        CopyWideString(buf, GetTextTableEntry(4));
     }
     ((void (*)(void*, u16*))self->vt[8])(self, buf);
 }

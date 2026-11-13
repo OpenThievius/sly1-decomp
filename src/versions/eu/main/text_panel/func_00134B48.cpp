@@ -25,10 +25,10 @@ struct Obj_eu_134CE0 {
 
 struct TextReader_eu_134CE0 { u8 bytes[0xC0]; };
 
-void func_eu_0015DCB8(TextReader_eu_134CE0* out, u8* text, Font* font, s32 zero);
-void func_eu_0015E4A8(TextReader_eu_134CE0* reader, TextLines_eu_134CE0* lines, f32 w);
-void func_eu_0015E7E0(TextReader_eu_134CE0* reader, Layout_137228* layout, s32 zero, PacketWriter* gs);
-void func_eu_001374E0(Layout_137228* layout, s32 value);
+void InitWideTextReader(TextReader_eu_134CE0* out, u8* text, Font* font, s32 zero);
+void BreakTextIntoLines(TextReader_eu_134CE0* reader, TextLines_eu_134CE0* lines, f32 w);
+void DrawWrappedAlignedText(TextReader_eu_134CE0* reader, Layout_137228* layout, s32 zero, PacketWriter* gs);
+void SetTextLayoutVerticalPlacement(Layout_137228* layout, s32 value);
 
 struct Gfx_eu_134CE0 {
     static s32 ScreenX(f32 x)
@@ -57,7 +57,7 @@ struct ScreenLayout_eu_134CE0 {
         l->Color(Words(col));
         l->SetF14(0);
         l->SetF18(0);
-        func_eu_001374E0(l, 0);
+        SetTextLayoutVerticalPlacement(l, 0);
     }
 };
 
@@ -115,8 +115,8 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
         obj->f58 = ApproachValueWithRamp(obj->f58, obj == nearest ? D_00261184 : D_00261188, g_gameClock[5], D_002611C0, 0);
         PushFontScale(self->font, obj->f58, obj->f58);
         ScreenLayout_eu_134CE0::Reset(&layout);
-        func_eu_0015DCB8(&reader, obj->text, self->font, 0);
-        func_eu_0015E4A8(&reader, &self->lines, D_002611CC * obj->f58);
+        InitWideTextReader(&reader, obj->text, self->font, 0);
+        BreakTextIntoLines(&reader, &self->lines, D_002611CC * obj->f58);
         f32 h = self->lines.height;
         f32 x = screen.x * 320.0f + 320.0f + D_002611D0 * obj->f58;
         f32 y = screen.y * -234.305084f + 234.305084f + D_002611D4 * obj->f58 - h;
@@ -133,7 +133,7 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
         style.fC *= obj->f58;
         StyleDrawer::Draw((Font**)&style, &layout, q);
         ((u8*)&layout.color)[3] = (s32)(alpha * (f32)((u8*)&layout.color)[3]);
-        func_eu_0015E7E0(&reader, &layout, 0, q);
+        DrawWrappedAlignedText(&reader, &layout, 0, q);
         BeginGifTag(q, 0xC1, 3, 0x441);
         AddGifRgbaEntry(q, ((u32*)self->frame)[6]);
         AddGifXyzfEntry(q, Gfx_eu_134CE0::ScreenX(x + D_002611D8 * obj->f58), Gfx_eu_134CE0::ScreenY(y + self->lines.height + D_002611DC * obj->f58), 0, 0);
