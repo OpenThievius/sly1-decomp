@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 1712/1756 (97.5%), checked 2026-11-12
+// w40-fa (2026-11-12): not closer (11 lines). The clamp written in place instead of through
+// Limit (lo and hi in locals; the members read in the conditions; the value clamped in its own
+// variable; a conditional expression) leaves the preheader's order as it is and breaks the
+// body (85 to 275 lines): retail's `mov.s $f13,..` three times and `mov.s $f23,$f13` are the
+// inline's result copied to alpha, so the clamp is Limit and its `this` is the third pair
+// either way. The default row's threshold (79) stays: vf30 was not tried, as the scan in
+// docs/toolchain/loops.md has this function best at 15 and 16.
 #include "common.h"
 #include "layout_137228.h"
 #include "screen_element.h"

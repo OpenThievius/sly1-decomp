@@ -58,6 +58,22 @@
 //   v = planes[0]`): cse1 keeps the inline's own result register, which is never reset.
 // - Not checked: an inline function holding the cull and the first fade call whose by-value
 //   parameter is modified before the call; reload_cse with another REGISTER_MOVE_COST.
+// w40-fa (2026-11-12): not closer (1 word). New: a CLOBBER is what keeps one load of a
+// memory d for the asm and the first call. With d a Vec02 in the frame and the radius a union
+// built in place between d's store and the cull (`RadiusU r = { rq };`, the union holding a
+// Vec02 so its CLOBBER is `(mem:BLK)`, which cse's invalidate takes as conflicting with every
+// frame reference), cse1 no longer forwards the stored difference: the asm's operand is one
+// load into vf6 and the first call's argument is `qmfc2 a1,$vf6`, the second call's `lq a1`,
+// retail's three lines; without the union the same source gives `vsub` straight into vf6
+// (the control). That form is 121 lines off for two reasons that remain: a Vec02 d has an
+// expand-time slot (0x50, retail 0x1C0) and its stored value is a local pseudo that takes the
+// dying input's vf1 (retail vf3, an output reload's register). With d a u128 the CLOBBER
+// changes nothing (a pseudo is not memory; 9 lines, the radius and the first plane swap
+// vf3/vf4), and with a u128 d forced to a purge-time slot by a word read (a probe) the slot
+// is 0x1C0 and the vsub is in vf3, but cse2 then leaves two loads (`lq a1` again). So retail
+// needs d in memory when cse1 runs yet allocated after fade, and its stored value without a
+// register of its own. The inline holding the cull and the first fade call was not built: by
+// the header's own reasoning its parameter copy folds unless its uses are behind a join.
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"

@@ -35,13 +35,20 @@ struct PadRecord;        // pad_record.h
 // known only from the file's two brace initialisers (switched_collider.cpp): the vectors at 0x00
 // and 0x70 are Quadratic16s (include/shapes.h: retail's initialiser has the CLOBBER of a union
 // member before each one's first float); those at 0x20 and 0x50 have a first float too and no
-// CLOBBER, so they are plain.
+// CLOBBER, so they are plain. The floats at 0x40 are zero in both; SpawnSurfaceContactEffects
+// (file_1549C8.cpp) fills 0x44 and 0x48 with two angles, and its initialiser has a CLOBBER
+// before them: one of the two is a union's member (either gives retail's code; 0x44 is kept).
 struct Blk05 {
     Quadratic16 v00;        // 0x00
     Vec02 v10;              // 0x10
     Vec02 v20;              // 0x20
     Quad16 q30;             // 0x30: a vector copied whole (g_unitZVector in D_00269C10)
-    u8 pad40[0x4C - 0x40];
+    f32 f40;                // 0x40
+    union {
+        f32 f44;            // 0x44
+        u32 f44Bits;
+    };
+    f32 f48;                // 0x48
     s32 f4C;                // 0x4C
     Vec02 v50;              // 0x50
     Quad16 q60;             // 0x60: a vector copied whole (the zero vector in D_00604700)

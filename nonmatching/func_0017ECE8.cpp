@@ -61,6 +61,26 @@
 // `move X,Y`, and the one difference is reload's register for the copy, not a pseudo's.
 // `bits` (one u32 set in two loops) is the only variable here that carries two values; it
 // is what gives the Dot block its two quantities, so it stays.
+// w40-fa (2026-11-12): not closer (2 words); the recorded theory is refuted. (1) A CLOBBER
+// before the copy does what the theory asked for: with acc a union declared at the copy and
+// built in place from a const down (`AccU acc = { down };`, safe_from_p needs the source
+// readonly or the constructor goes through a temporary), sched1 issues the CLOBBER and the
+// contacts load in the cycle after the call, the store one cycle later, and reload takes v1.
+// (2) But sched2 then keeps `lw v0,1152(s1)` ahead of `sq v1,0(sp)`: after reload the load
+// through s1 and the frame store conflict (a hard register has no base), so whichever is
+// first in sched1's order stays first (-dR trace: 856 lists 847 among its dependents; the
+// near miss has the link the other way). Without the link the lw would still go between the
+// lq and the sq (it is ready and the sq waits two cycles for the lq). Retail has lq, sq, lw:
+// its sched1 kept the store ahead of the contacts load, as ours does. w37's loop-note probe
+// showed the same and blamed the note. (3) So what is left is reload alone: at insn 871
+// order_regs_for_reload must find v0 forbidden (the hard register live before or after the
+// insn) or holding a pseudo that is live there, with r307 not yet set. Nothing visible in
+// retail's code is in v0 between the jal and the lw. Not found: what that value is. Checked and
+// not it: the copy as a struct assignment from down's storage (`acc = *(Vec02*)&down`: the same
+// TImode move, v0); a union or compound-literal accumulator assigned after the call (two
+// temporaries, 64 lines); acc declared at the copy takes the Scalar slot's freed sp+0 and
+// moves that slot before the copy (6 lines). An empty union initialiser (`U e = {};`) hangs
+// this compiler; do not try it.
 #include "common.h"
 #include "point_object.h"
 #include "collider.h"
