@@ -589,6 +589,13 @@ pre_insert_copy_insn, pre_delete) and lcm.c with `-ds -dG -dt -dl -dg` dumps (20
   the copy and later loads through the original: the store's block was entered by a jump that
   cse folded away (a loop's back edge or a redundant second test), not by the `if` alone.
 
+- **Not a volatile word (2026-11-12, w40-fb).** The signature of a volatile read
+  (alias-classes.md, func_001FA6B0: the word loaded again at each use, an empty branch slot)
+  is absent: retail's equal path jumps past the second `lw` and compares the value the test
+  loaded, which no volatile read allows, and the one reload is PRE's on the store's path.
+  Compiled as a check: `volatile s32 g_discStatus` gives this near miss's code unchanged
+  (bnel, one address register, the reload at the join), not retail's.
+
 ### Eight spilled frame addresses: the table size from their slot order (func_001CC490)
 
 SolvePlayerLinkSystem matched from a size difference (932 against 904 bytes) with `-dF -dG -dL

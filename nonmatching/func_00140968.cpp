@@ -22,6 +22,7 @@
 //       the two-test form cuts the join instead, so store and join both go through PRE's copy. Ruled out
 //       too: the equal case returning first with a run-once loop after its return, and that inside a
 //       do/while(0) left by break. docs/toolchain/gcse.md, "A %hi copied into a second register".
+// w40-fb (2026-11-12): the volatile signature is absent (retail's equal path skips the second lw and uses the test's load; a volatile read is never reused) and `volatile s32 g_discStatus` compiles to this near miss's code unchanged. docs/toolchain/gcse.md, same section.
 #include "common.h"
 #include "asm_func.h"
 #include "key_id.h"
