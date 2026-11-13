@@ -115,6 +115,21 @@ From haifa-sched.c of GCC 2.95.3 (sched_analyze, sched_analyze_insn) and the `-d
   holds two more insns between the tilt loads and the last row's product that leave no code.
   What the original had at the boundary is not found; a test of pad there takes pad to s1.
 
+- **The invisible insns can be jumps (w44-fc, 2026-11-12).** An if/else whose two arms only
+  set a register that is set again before its use is emptied by flow1, and its two jumps (the
+  conditional one and the then-arm's jump over the else) stay in the insn stream through
+  sched1, local-alloc, global-alloc and sched2 until jump2 deletes them: two insns that leave
+  no code and count in every life around them, and two block boundaries (func_001EC7A8,
+  alias-classes.md, "A merged arm keeps its place"). As a probe here, one such if/else on
+  `self != 0` between the two key reads gives the two insns W23 asked for (&cur and pad two
+  longer, &tgt not): pad in s2 and &cur in s3, 56 lines to 42 on top of the boundary probe.
+  The probe is not the original (the first key read's address comes out as `addiu a1` with a
+  copy to s3), and what tested a register for free there is not known. In sched2 retail's
+  block shows the boundary as well: three loads in a row with their alu slots idle
+  (`lqc2 vf1,64(sp); lqc2 vf6,32(sp); lqc2 vf4,80(sp); lqc2 vf7,96(sp)`), where ours fills the
+  slots with the next call's `lui`, `addiu a1` and `move a0`; so the label is still there when
+  flow2 rebuilds the blocks.
+
 ### sched2 keeps sched1's dependences (func_001358D0)
 
 - **LOG_LINKS are never cleared.** haifa-sched.c's sched_analyze only adds to an insn's
