@@ -924,7 +924,7 @@ func_00131F60	func_001320D0	error	a reference to , which has no address in this 
 func_00132500	func_00132698	match	version-specific
 func_00133B58	func_00133CF0	match	version-specific
 func_00134AA0	func_00134C38	match	
-func_00134B48	func_00134CE0	differs	the .rodata literal at +0x0 is not retail's constant at 0x500053
+func_00134B48	func_00134CE0	match	version-specific, rodata
 func_00135228	func_00135388	match	version-specific
 func_00135550	func_001356B0	match	version-specific
 func_001356C0	func_00135820	match	version-specific

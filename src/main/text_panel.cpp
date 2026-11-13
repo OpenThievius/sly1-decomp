@@ -294,6 +294,9 @@ struct PanelStyle {
     f32 f10;
     f32 f14;
     u32 f18;
+    PanelStyle()
+    {
+    }
     PanelStyle(f32 w)
     {
         FillMemory(this, 0, 0x1C);
