@@ -220,6 +220,35 @@ dumps of func_0020BB18 (src/lib/mpeg_decoder.cpp, Sony's 2.9-ee-991111, 2026-11-
   completely), the plane array through a local pointer (102 after the test, 42 at the top: the
   pointer is kept in s5), the size test as an inline (134), the body as an inline (not
   inlined: over the integration threshold).
+- **Third pass (w47-h, 2026-11-13): what this compiler's insns that leave no code are, and
+  none is here.** Measured on the 36 library files this cc1 builds (their `.sched2`, `.jump2`
+  and `.dbr` dumps and the verbose trace): (1) a `trap_if` with an anti dependence on another
+  trap prints nothing (func_00202140, matched with it: the section "The zero trap of
+  func_00202140"); this function has no division by a variable, so no trap to repeat. (2)
+  flow's `(use (const_int 0))` follows a call that is the last insn before a label; the
+  scheduler ties it behind that call at its block's end. (3) `blockage` (an
+  `unspec_volatile`, a true barrier that prints nothing) stands only before the stack
+  pointer's adjustment in each epilogue, the tail call's included. (4) jump2 deletes
+  conditional jumps, labels and no-op moves that sched2 still saw, and no dead single set
+  reaches sched2 in any of the 36 files, so a dead re-read is not kept. (5) In no block of
+  the 36 files does one insn issue alone in the first cycle while an ALU insn with no
+  predecessor waits for the second: retail's body is the only one, so its first cycle is
+  not a rank this scheduler gives a single block. gcse here is edge-based
+  (`PRE/HOIST: edge (6,8), copying expression 16`): a probe that makes the last plane's
+  address partly available (a jump into the body from a block that computes it) has PRE
+  compute it on both edges into the body, which is retail's test and both delay slots, but
+  copy propagation then leaves one pseudo for the address (it took `s5` in the probe, whose
+  extra block freed a register; spilled, its store would follow its set), where retail's
+  `sw v0,68(sp)` sits in the body after the two picture stores. The address set in each arm
+  of the test by hand (`if (w != pic->width) last = ...; else { if (h == pic->height) return;
+  last = ...; }`) gives the same: test and slots exact, 35 lines left, the spill store
+  beside the address and in slot 48. So retail's shape is the address alone in a block
+  ahead of the body with its spill store inside the body: the value in `v0` crosses a
+  boundary that leaves no code, and the stored pseudo is the last one made. Compiled and
+  ruled out (102 lines or worse): the callees' return types (void or s32, three ways), the
+  test as nested ifs, as two gotos, as a flag local (116, 134), one variable for the rows
+  and the height (64 lines but with s6 and s7 swapped: not closer), one for the rows and
+  the size (79, the same), the height set in each arm (136), the size kept in `w` (135).
 
 ### A value negated into itself crosses the call (func_001A2380)
 
@@ -1362,7 +1391,10 @@ of its three uses in the register's macro (`#define MAGH(w) (((w) + 0x9FF) / (w)
 its own `trap_if`. cse1 folds the three divisions into one (12 `div` in `.jump`, 4 in `.cse`), but
 nothing deletes a `trap_if`: all three live to the `.dbr` dump (12 in the
 function against 4 with a local), and only the first of a run writes code (the `.s` has one
-`beql/break` per arm). In sched2 each trap waits for the one before it (a TRAP_IF flushes the
+`beql/break` per arm): a trap whose LOG_LINKS hold an anti dependence on another trap prints
+nothing (the `div_trap` pattern's output code in GCC's public mips.md looks for exactly that
+link; in the `.dbr` dump the second trap carries `(insn_list:REG_DEP_ANTI 158)` and the third
+`169`). Two divisions by one divisor in a block share a trap the same way. In sched2 each trap waits for the one before it (a TRAP_IF flushes the
 pending memory lists) and the field load waits for the last, so the first trap's priority is
 `1 + 1 + 1 + 3 = 6` where the single trap had 4: above dy's shift (5), level with dy's mask
 and after it on luid, which is retail's `div; andi; beqzl/break; dsll`. The two later traps
