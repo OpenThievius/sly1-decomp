@@ -345,7 +345,7 @@ struct StateChangeMsg {
 };
 s32 SetGatheredWalkerTargets(World* mgr, s32 a, void* b, StateResetObject* self, s32 c);
 void GetStateWalkerCurrentKey(s32 sub, s32* out);
-void ScheduleTempoAgentBeatPress(TempoAgent* p);
+void ScheduleTempoAgentBeatPress(TempoAgent* self, Entry90* e);
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32* c);
 void ResetPadStepRepeat(void* p);
 void StartSoundEffect(s32 a0, Timeline* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -2470,7 +2470,31 @@ void EnterTempoAgentState(TempoAgent* self, s32 a, s32 b)
     }
 }
 
-INCLUDE_ASM(func_001EC7A8);
+// A timeline entry of kind 0: the entry's direction and the clip for it become the agent's, the
+// time is noted, and the beat (four per bar, after the agent's offset) is queued with its
+// direction on the beat-press collider.
+// The dead "li v0,1" is the compare constant of the if/else below. Both arms set clip, which the
+// next statement sets again (the same choice, by index): flow deletes the two loads as dead,
+// but the branch keeps its two empty arms through reload and sched2, and jump2, which deletes
+// it, leaves the constant (docs/toolchain/alias-classes.md, "A merged arm keeps its place").
+void ScheduleTempoAgentBeatPress(TempoAgent* self, Entry90* e)
+{
+    s32 dir = e->fC;
+    Ent1C entry;
+    s32 clip;
+    if (dir == 1) {
+        clip = self->fC10[1];
+    } else {
+        clip = self->fC10[0];
+    }
+    clip = self->fC10[dir];
+    self->fC40 = dir;
+    self->fC20 = clip;
+    self->fC44 = g_gameTime[0];
+    entry.dir = dir;
+    entry.t = (f32)e->f4 * 4.0f + e->f8 + (f32)self->fC60;
+    AppendBeatPressEntry(self->fC3C, (const U64P*)&entry);
+}
 
 void RemoveTempoAgentEntry(TempoAgent* self, AnimationPlayer* key);
 
@@ -2821,7 +2845,7 @@ void RunTimelineEntry(Timeline* self, Entry90* msg)
 {
     switch (msg->f0) {
     case 0:
-        ScheduleTempoAgentBeatPress((TempoAgent*)self->found);
+        ScheduleTempoAgentBeatPress((TempoAgent*)self->found, msg);
         break;
     case 1: {
         s32* loc = &msg->fC;

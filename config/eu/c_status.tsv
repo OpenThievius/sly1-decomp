@@ -3820,6 +3820,7 @@ func_001EC3D8	func_001ED450	match
 func_001EC478	func_001ED4F0	match	
 func_001EC528	func_001ED5A0	match	version-specific
 func_001EC570	func_001ED5E8	match	rodata
+func_001EC7A8	func_001ED820	match	
 func_001EC828	func_001ED8A0	match	rodata
 func_001ECB18	func_001EDB90	match	
 func_001ECBC8	func_001EDC40	match	
