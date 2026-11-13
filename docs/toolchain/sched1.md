@@ -643,6 +643,45 @@ original's statement was stays open: within this mechanism it must be a test tha
 can fold, at the head of the body, whose condition reads one of the six plane pointers before
 its assignment.
 
+Enumerated (2026-11-13, enum-0020BB18): `tools/sitesearch.py head-test` wrote 20,644 candidate
+statements at that site, each in the real file with the stand-in removed, and scored them with
+the Scorer of tools/tsearch.py (log in `build/sitesearch/head-test/`). The grid: which planes are
+named (plane 3 alone, any other plane alone, planes 3 to 8, all nine, each also as a
+`Plane_20BB18*` to the plane) and which named pointer is read; the read (`(u32)p`, `(s32)p`, `p`
+in pointer arithmetic, `*p`, `p->addr`, `p->width`); the value (`w & 15`, `h & 15`, `w & 7`,
+`w & 1`, `h & 1`, `(u32)w % 16`, `w % 16`, `(w | h) & 15`, `(w & 15) | (h & 15)`,
+`(w + h) & 15`, and `size & 63`, `size & 15`, `size % 64` with size computed first); the operator
+(`&` either way round, `& ... != 0`, `*` either way round, `p + v != p`, `p != p + v`,
+`p + v < p` as integers and as pointers, `v ? p : 0`, `&&` either way round, and the pointer
+alone: `(p << 4) & 15`, `(p * 16) & 15`, `(p & ~15) & 15`, `(p & 15) & w`, `(p % 16) & w`,
+`(p * w) & 15`); the arm (a store to `pic->width`, `pic->height`, `st->f130`, `st->f12C`,
+`st->f848`, both picture fields chained, a local, through the pointer, nothing, `return`, a
+`ReportMpegError` call); the form (`if`, a conditional expression with the store, the condition
+as an expression statement, an assertion `!(c) ? (void)0 : (void)Report(...)`).
+
+3,589 are EXACT on US, and all 3,589 on PAL; all compile to the same code. Each one is the
+mechanism above and nothing else: no candidate predicted to leave no USE is exact (0 of 10,290),
+none whose arm is a return, a call, a local or nothing (0 of 2,388), and of the other 7,966
+predicted to leave one, 3,589 are. What every exact candidate has: (1) the read
+of a pointer to plane 3 to 8 that has no value yet (plane 0 to 2 never: the seventh pass found
+plane 0's in a register; a single local for any plane but 3 never; a `Plane_20BB18*` only with a cast to u32);
+(2) a cast or pointer arithmetic, never a dereference (a load is code); (3) a value zero by w's
+or h's known bits (`w % 16` on the signed w is not, and size computed before the test moves the
+body: 0 of 1,178); (4) an arm that is one store to a field (both picture fields chained, a
+local, nothing, a return or a call are not), in an `if` or a conditional expression. The
+library's own checks report through `ReportMpegError` (`if ((c->fD8 & 0x3F) != 0)` in
+func_0020B2E8, RunMpegPictureLoop): with that call as the arm, or as an assertion, the best is 2 lines from retail,
+so the original's statement was not a check of the library's usual kind.
+
+Ranked as original code, the exact forms are all of one kind, a read of a pointer before its
+assignment in arithmetic with a value that is always zero, and none has a meaning that the
+stand-in lacks: `((u32)p3 & (w & 15)) != 0` (the library's `!= 0` style of alignment test),
+`(u32)p3 & (w & 15)` (the stand-in), `((u32)p3 & 15) & w`, `p3 != p3 + (w & 15)`,
+`(u32)p3 + (w & 15) < (u32)p3`, `(w & 15) * (u32)p3`, `((u32)p3 << 4) & 15`. None is clearly
+more plausible than the stand-in, so it stays. What the bytes do say: the statement read one of
+planes 3 to 8 before it had a value, its test was always false by w's or h's low bits, and its
+arm stored one field.
+
 ### A value negated into itself crosses the call (func_001A2380)
 
 - **sched1's call rule.** sched_analyze makes an insn that sets a pseudo depend (anti) on the

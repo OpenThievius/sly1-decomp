@@ -63,6 +63,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/version_check.py` | every C function at its PAL counterpart: `config/eu/c_status.tsv` |
 | `python3 tools/check.py src/versions/eu/FILE/FUNC.cpp FUNC` | PAL's own definition, built in its shared file's unit, against PAL |
 | `python3 tools/version_src.py todo` | the functions only PAL has, not yet defined, with their tags and file |
+| `python3 tools/sitesearch.py GENERATOR [--eu] [--summary]` | candidate statements inserted at one site of a function (a generator per site), each compiled and scored; resumable, `build/sitesearch/` |
 | `python3 tools/permute.py FILE FUNC [--auto]` | every order of the lines marked `/*P*/` (or of each run of simple statements), compiled and scored; stops at EXACT |
 | `python3 tools/permuter_setup.py FILE FUNC` | sets a near miss up for decomp-permuter (fetched into the gitignored `tools/ext/`, never committed) |
 | `python3 tools/permute_night.py FUNC ...` | decomp-permuter on near misses one after another, unattended, with the barrier-making rewrites off; keeps each zero, spliced back and checked, in `build/permute_night/` |
