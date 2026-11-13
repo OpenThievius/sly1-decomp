@@ -359,9 +359,11 @@ ReadVi<N>/ReadViWait<N> (cfc2.ni/.i; ReadViWait<0> is the game's wait), CallMs<a
 and VuNop (vnop). All are volatile with a "memory" clobber, so they keep their order with each
 other and with the loads and stores around them. The C around them sets and reads the registers in
 retail's order. A float the caller passes in a GPR with a 128-bit `por` is a u128 parameter
-(MoveToVf takes it, ToFloatMoved reads it). func_0013A498 no longer uses them: it matched on
-2026-11-12 with an interface of its own ("func_0013A498 matched" below). func_00185150 is still
-a near miss (nonmatching/).
+(MoveToVf takes it, ToFloatMoved reads it). Both functions matched on 2026-11-12, after the
+maintainer allowed an interface used by one function: func_0013A498 with an interface of its
+own ("func_0013A498 matched" below), func_00185150 with LoadVf, ReadViWait, MoveToVi and CallMs
+and one statement for its set-up block ("func_00185150 matched" below). StoreVf, MoveToVf,
+MoveToViWait, ReadVi and VuNop have no user left.
 
 ### func_00185150's vi block was one non-volatile asm (2026-11-10)
 
@@ -487,6 +489,37 @@ function, in a form their programmer plausibly wrote. func_0013A498 is EXACT (US
 
 Scratch: build/swarm/w40-fd/ in the g1 worktree (a2: two inputs; b2: nine inputs; c3, c4, c5: the
 wait; d1: by-value helper; x1: the landed form).
+
+### func_00185150 matched: the radius is the third parameter (2026-11-12, w40-fd)
+
+With the set-up block as one statement (`Vu0::NextLightGroup`, the form of "func_00185150's vi
+block was one non-volatile asm" above, allowed by the same decision) what was left was the
+global-alloc tie between the light table's address and the out-count pointer (s5/s6). Its
+numbers, from the `.lreg` dump and tools/globalalloc.py:
+
+- The table's address (set before the loop by loop.c, one use in it) has 3 references over 67
+  insns, doubled to 134 by update_equiv_regs for its REG_EQUIV constant: priority 3/134.
+  outCount (its parameter copy and the store after the loop) has 2 over 90: 2/90, just below.
+  An insn inside the loop adds 2 to the first and 1 to the second, so the loop needs two more
+  (a tie, which the lower pseudo wins) or outCount's life one insn fewer outside the table's.
+- outCount's life starts at its parameter copy in the first block. sched1 issues that block's
+  alu insns two a cycle in LUID order behind the float load and the 0.0 (both priority 6), and
+  the parameter copies come in the order the parameters are declared. With `f32 radius`
+  declared last, its copy (`$f12` to a pseudo that gets `$f12`: no code) follows outCount's.
+  Declared before it, the copy takes a slot ahead of outCount's, which then also falls behind
+  the float compare: its life starts two insns later.
+- So the radius is not the last parameter: `(world, centre, radius, skipMask, maxLights,
+  flagged, outCount, out)`. A float parameter takes `$f12` wherever it is declared, so the
+  callers' code is the same, and their declarations (placed_object_model.cpp, file_15F678.cpp)
+  already had it third, after the centre it belongs with. outCount is then 2 references over
+  88 insns (priority 227 against 223) and the function is EXACT, US and PAL.
+- The four one-instruction helpers with the new signature still differ in the two places the
+  section above explains (the count's load first, the join's addiu in the case-0 delay slot):
+  the one statement is needed.
+
+A parameter's place in the signature is invisible in the callers when it is the only float
+(or the only one of its register class) and worth trying where an allocation is one insn of
+life from retail's: it moves the parameter copies' LUIDs in the first block.
 
 ### New microprogram helpers fail the recurrence rule (2026-11-10, w16)
 

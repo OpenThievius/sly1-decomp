@@ -1028,8 +1028,9 @@ struct Vu0 {
     // The interface of a VU0 microprogram: the game's microprograms read and write fixed
     // registers, which the compiler (it allocates $vf1..$vf15) cannot pick. One instruction
     // each, volatile with a memory clobber so that they keep their order with each other and
-    // with the loads and stores around them. Used by func_00185150 (func_0013A498 has
-    // ParticleFilter, below).
+    // with the loads and stores around them. func_00185150 uses LoadVf, ReadViWait,
+    // MoveToVi and CallMs, with NextLightGroup (below) for its set-up block; func_0013A498 has
+    // ParticleFilter (below).
 
     // A quadword from memory into $vfN (N 16..31): lqc2.
     template <int N> static void LoadVf(const void* p)
@@ -1087,6 +1088,22 @@ struct Vu0 {
     static void VuNop()
     {
         __asm__ volatile("vnop" : : : "memory");
+    }
+
+    // The set-up of the light test's microprograms (0x60 and 0x168), which func_00185150
+    // (CollectLightsForSphere) runs once per light group; no other function may use it
+    // (AGENTS.md's named exception, the maintainer's decision of 2026-11-12: retail writes
+    // $vi3 and $vi4 in that one function). One statement, as the original's was
+    // (docs/toolchain/vu0-helpers.md, "func_00185150's vi block was one non-volatile asm"):
+    // ctc2.i waits for the group before to finish and gives the next group's first slot,
+    // ctc2.ni its count, cfc2.ni reads the mask the group before left in $vi2 (one bit per
+    // light that reaches the sphere), and the vnop lets the writes settle before the caller
+    // starts the microprogram. The mask is its output, so the statement is not volatile.
+    static u32 NextLightGroup(u32 firstSlot, u32 count)
+    {
+        u32 mask;
+        __asm__("ctc2.i %1, $vi3\n\tctc2.ni %2, $vi4\n\tcfc2.ni %0, $vi2\n\tvnop" : "=r"(mask) : "r"(firstSlot), "r"(count));
+        return mask;
     }
 
     // The interface of the microprogram at 0x10, which func_0013A498

@@ -122,7 +122,12 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   then the compiler's own moves, which retail's code shows they were, and only that function
   starts that microprogram (docs/toolchain/vu0-helpers.md); the maintainer allowed an
   interface of one function, in the form its programmer plausibly wrote, on 2026-11-12, and
-  no other function may use it. The other exception is `MUL_WIDE` (include/mul_wide.h),
+  no other function may use it. By the same decision func_00185150 (CollectLightsForSphere)
+  sets up each run of its light test with `Vu0::NextLightGroup` (include/vu0.h): one asm
+  statement of four instructions (`ctc2.i` to $vi3, `ctc2.ni` to $vi4, `cfc2.ni` from $vi2,
+  `vnop`) whose output is the mask it reads, which retail's schedule and delay slots show was
+  one statement and not volatile (docs/toolchain/vu0-helpers.md); only that function writes
+  $vi3 and $vi4, and no other function may use it. The other exception is `MUL_WIDE` (include/mul_wide.h),
   one `multu` whose halves are read from lo and hi, which the toolchain's runtime multiplied with
   and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
   The toolchain's own runtime (`libgcc`, config/us/libcalls.tsv) was compiled as C, so its C is a
