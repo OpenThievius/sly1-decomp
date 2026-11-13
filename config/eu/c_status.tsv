@@ -1032,6 +1032,7 @@ func_0013BA70	func_0013BD70	match
 func_0013BBA0	func_0013BEA0	match	
 func_0013BC80	func_0013BF80	match	
 func_0013BE00	func_0013C100	match	
+func_0013BE18	func_0013C118	match	
 func_0013BF68	func_0013C268	match	rodata
 func_0013C950	func_0013CC50	match	
 func_0013C988	func_0013CC88	match	

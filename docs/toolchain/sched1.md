@@ -324,7 +324,7 @@ order:
 The handler at slot 0x108 takes `(self, flags, item, end, dt)`: retail's `mov.s $f12` fills the
 call's delay slot after the a1-a3 moves, as in func_001BCD00; with dt second it goes first.
 
-### An argument's frame address that sched2 holds back (func_0014F168, unsolved)
+### An argument's frame address that sched2 holds back (func_0014F168, matched 2026-11-13: see the end of the third section below)
 
 Read from haifa-sched.c, flow.c, reload1.c and toplev.c of GCC 2.95.3 and the `-dS -dR -dl
 -dg -df -fsched-verbose-6` dumps (2026-11-09):
@@ -356,7 +356,7 @@ Read from haifa-sched.c, flow.c, reload1.c and toplev.c of GCC 2.95.3 and the `-
   as a two-element array breaks block 0. What retail had is outside this model: look for a
   construct that leaves an insn naming a1 (or a group) that the final code does not show.
 
-### A store in each arm leaves the join block to sched2 (func_0013BE18, unsolved)
+### A store in each arm leaves the join block to sched2 (func_0013BE18, matched 2026-11-13: the theory was wrong, see the end of the next section)
 
 func_0013BE18 (src/main/child_group_object.cpp) has func_0014F168's tail (2026-11-09): d
 normalized through NormalizeOr into `*p`, then `r = d * w1 + Z * w2` (MulXSum of two ScalarAt
@@ -389,7 +389,7 @@ earlier insn touches, so no dependence on &r explains it; the issue slots do.
   Spot it: a join block whose first insn is a store common to both arms, and an ALU insn that
   retail issues later than ours although nothing it reads or writes is touched before.
 
-### Why the arms' stores cannot be written plainly (func_0014F168, func_0013BE18, unsolved)
+### Why the arms' stores cannot be written plainly (func_0014F168, func_0013BE18; matched 2026-11-13 another way)
 
 Read from cse.c, jump.c and haifa-sched.c of GCC 2.95.3 with dumps and probes (2026-11-10):
 
@@ -444,6 +444,46 @@ Read from cse.c, jump.c and haifa-sched.c of GCC 2.95.3 with dumps and probes (2
   (the slot stores are expanded before the asm, the call's own moves after r's store). So a
   dependence, stale or not, is not what holds the insn back; the block's contents at sched2 are
   (the per-arm stores above).
+
+**What it was (w46-a, 2026-11-13): one memory dependence of the join's store, not its place.**
+Both functions matched with the store where the near misses had it, at the join. The sched2
+replay (w44-fc's s2.py over tools/sched1.py's Replay, which reproduces every block of the near
+miss) with one edge cut, from the store of `*p` to the first weight's load, issues the join
+block in retail's exact order (func_0013BE18: 197 254 220 244 245 390 393 226 283 260 279 204
+288 236 314 298 270 308 310 312 316); dropping the store from the block, the per-arm theory,
+does not (the three `lui` and the two `lw` come out in another order). With the edge, the
+load waits three cycles for the store (`Ready-->Q: insn 390: queued for 2 cycles` after its
+`lui`), and the free issue slot beside `addiu v0` goes to the next ready ALU insn, `&r`;
+without it the weight's `lw` takes that slot and every later slot is filled by the chain, so
+`&r` and the argument moves come where retail has them. The second weight's edge may stay:
+its load is not ready before the fourth cycle either way.
+
+alias.c gives the edge its condition (true_dependence, fixed_scalar_and_varying_struct_p): a
+load does not depend on an earlier store when one is a scalar (MEM_SCALAR_P) at a fixed
+address and the other a structure member (MEM_IN_STRUCT_P) at a varying one. Ours had
+neither flag on either side: `Vu0::Q(*p) = ...` stores through a `u128*` (no flag), and
+ScalarAt reads the weight's word through a cast pointer (no flag). The source that gives
+both:
+
+    Vec02* p = &d;
+    *(Vu0::Vec*)p = Vu0::NormalizeOr(Vu0::Vec::Of(d), Vu0::Vec::Of(g_unitXVector));
+    Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(D_00261360), ...);
+
+The store is a structure's through the pointer (`(set (mem/s:TI (reg/v:SI 3 v1)) (reg:TI 80
+vf1))` in `.sched2`), and ScalarAtValue's operand is the float variable itself, a scalar at
+its symbol's address (a `lo_sum` is not a varying address). Measured on each function, the
+store as `Q(*p)`, as a Vec through the pointer, or as `p->q` of a `Vu0::Vec*`, against
+ScalarAt or ScalarAtValue for each weight: EXACT exactly when the store is a structure's and
+the *first* weight is ScalarAtValue (four of twelve forms in func_0013BE18, two of four in
+func_0014F168); the second weight may be either. Either change alone leaves the near miss's
+15 (12) lines.
+
+The tell, for other near misses: an ALU insn (a frame address, an argument move) that ours
+issues early in a block headed by a store through a pointer, with retail's loads of globals
+packed right behind the store. Look at the store's dependents in the `.sched2` table: a load
+of a global scalar among them is an edge that a structure store and a plain scalar read do
+not have. The per-arm stores and jump2's cross-jumping were a consistent explanation of the
+head, but not the cause.
 
 ### The compiler's qmfc2 again, and a rescale's divide order (func_001D4348)
 

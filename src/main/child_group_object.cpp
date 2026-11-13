@@ -22,6 +22,8 @@ Quad3B D_00261340 = { 0x3F000000, 0x3E4CCCCD, 0, 0 };
 Pair3B D_00261350 = { 0x44160000, 0x44AF0000 };
 Pair3B D_00261358 = { 0x41A00000, 0x42480000 };
 f32 D_00261360 = 600.0f;
+// The knockback's upward weight (800.0f): its label runs 12 bytes to D_00261370, more than the
+// float its reader uses, so it is included from the disassembly.
 INCLUDE_DATA(D_00261364);
 f32 D_00261370[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
 f32 D_00261380[4] = { 2.0f, -1.5f, 0.0f, 0.0f };
@@ -363,7 +365,38 @@ void StartChildGroupDelay(ChildGroupObject* self, f32 delta)
     self->f554 = g_gameTime + delta;
 }
 
-INCLUDE_ASM(func_0013BE18);
+extern f32 D_00261364;
+void SetPlayerState(PlacedObject* self, s32 a, s32 b);
+void ConstrainVectorByParentAnchor(Collider* self, Vec02* anchor, Vec02* in, Vec02* out, Vec02* dir);
+
+// The owner-message callback of a group's knockback: pushes the object away from the group
+// (from the group to it, flat and unit length, or along X when they coincide; a kind-0x3D
+// group's own direction at 0x700 instead), by D_00261360 along it and D_00261364 upward,
+// constrained by the object's parent anchor, through the object's slot 36; a kind-7 object is
+// put in state 0x2B.
+// The unit vector is stored through a pointer as a structure, and the first weight is read as
+// the float itself: a scalar at a fixed address does not wait for a structure store at a
+// varying one, so sched2 loads the weight in the store's shadow and no argument move takes
+// the slot (docs/toolchain/sched1.md, "A store in each arm leaves the join block to sched2").
+void ApplyChildGroupKnockback(ChildGroupObject* self, Collider* other)
+{
+    Vec02 d;
+    Vec02 r;
+    if (IsObjectOfKind(self, 0x3D) != 0) {
+        d = *(Vec02*)((u8*)self + 0x700);
+    } else {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(other->v140), Vu0::Q(self->v140));
+    }
+    d.z = 0.0f;
+    Vec02* p = &d;
+    *(Vu0::Vec*)p = Vu0::NormalizeOr(Vu0::Vec::Of(d), Vu0::Vec::Of(g_unitXVector));
+    Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(D_00261360), Vu0::Q(g_unitZVector), Vu0::ScalarAtValue(D_00261364));
+    ConstrainVectorByParentAnchor(other, &other->v440, &r, &r, 0);
+    other->desc02()->m20(other, &r);
+    if (IsObjectOfKind(other, 7) != 0) {
+        SetPlayerState(other, 4, 0x2B);
+    }
+}
 
 void RecordChildGroupPose(ChildGroupObject* self, s32 a, s32 b, Vec02* dir);
 void StartChildGroupDelay(ChildGroupObject* self, f32 delta);
@@ -381,7 +414,6 @@ s32 CollectContactingParts(ChildGroupObject* self, s32* count, Collider*** list)
 void GatherCollidersInSphere(f32 radius, World* w, s32 a1, Vec02* center, s32 a3, s32 a4, s32* count, Collider*** list);
 s32 CollectMeshHits(f32 radius, Vec02* p, void* a, void* b, s32 c, void* mesh, s32 d, void* out);
 void InitOwnerMessage(void* msg, s32 kind, void* self);
-void ApplyChildGroupKnockback();
 f32 ClampToRange(void* range, f32 x);
 void ConstrainColliderVector(Collider* c, Vec02* frame, Vec02* in, Vec02* out, s32 flag);
 f32 RandomFloatInRange(f32 lo, f32 hi);
@@ -459,7 +491,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
         if (IsObjectOfKind(c, 5)) {
             OwnerMessage msg;
             InitOwnerMessage(&msg, self->f67C, self);
-            msg.fn = ApplyChildGroupKnockback;
+            msg.fn = (void (*)())ApplyChildGroupKnockback;
             (*(ColliderQueryFn*)((u8*)c->desc + 0x140))(c, &msg);
             continue;
         }
