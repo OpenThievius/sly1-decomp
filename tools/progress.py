@@ -33,6 +33,9 @@ pointer translated, equal PAL's at their PAL address (config/eu/c_data_status.ts
 tools/data_check.py). PAL links no C, so none of it is complete data. Data that is original
 assembly counts as matched too, as original-assembly functions do: the sections no compiler made
 (config/<version>/original_data.tsv, by hand; the .vutext section of VU microprograms).
+So does the US build's alignment padding between the data it credits: zeros the assembler or
+the linker put before a C section or global up to its alignment (config/us/padding.tsv, from
+tools/padding.py, which says the rule).
 Each unit is in one category, game, lib or data, and every category has its
 own measures.
 """
@@ -168,6 +171,15 @@ def original_data(key):
     return [(int(r[1], 16), int(r[2])) for r in rows]
 
 
+def padding(key):
+    """[(address, size)] of the alignment padding between credited data: config/us/padding.tsv
+    (tools/padding.py) in the primary version; none in PAL, which links no C."""
+    if key != versions.primary():
+        return []
+    import padding as pad
+    return pad.read_table()
+
+
 def measures(funcs, done, linked, data=0, near=None, data_done=0):
     """objdiff's measures of some functions and some bytes of data (data_done of them matched).
 
@@ -269,7 +281,7 @@ def report(key):
     done = finished(key)
     linked = key == versions.primary()
     near = fuzzy(key)
-    globals_ = c_data(key) + original_data(key)
+    globals_ = c_data(key) + original_data(key) + padding(key)
     unit = unit_of(key)
     counterparts = us_counterparts() if key == "eu" else None
     units = []
