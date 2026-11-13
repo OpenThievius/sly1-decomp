@@ -537,7 +537,7 @@ ObjectLink D_00275B60[8] = {
 // readers pass only its address; byte buffer, size to next label
 u8 g_elementStack[4] = {0};
 INCLUDE_DATA(D_00275BC4);
-// size: s32 read as one word (file_14EE40.cpp and screen_element.cpp test bit 8)
+// size: s32 read as one word (pooled_object.cpp and screen_element.cpp test bit 8)
 // size: s32 compared with 1 in item_column.cpp and 2 in pause_menu.cpp
 s32 D_00275BEC = 0;
 s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };

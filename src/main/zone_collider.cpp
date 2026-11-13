@@ -262,7 +262,7 @@ s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
     return 1;
 }
 
-// The larger of two floats, b first in max.s (retail's operand order, as file_1A3AE0.cpp's).
+// The larger of two floats, b first in max.s (retail's operand order, as pair_controller.cpp's).
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
 s32 IsWorldBodyLimitReached(void* world, MaskedCollider* node, s32 match);
 f32 RandomFloatInRange(f32 a, f32 b);

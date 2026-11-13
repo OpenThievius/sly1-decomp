@@ -2,7 +2,7 @@
 // The object cycler (class 0x40), 0x15AAE0 to 0x15C178 (its .rodata from 0x24A190, its .data
 // from 0x262180): its set-up, load, copy, start, step, update, draw, events, states and the
 // ground and support tests. Its edges are not proved by retail, only by the change of role:
-// file_1549C8.cpp's scaling volume (class 0x60) before it and the fonts (font.cpp) after it.
+// effect_spawner.cpp's scaling volume (class 0x60) before it and the fonts (font.cpp) after it.
 // Its .rodata (four jump tables, a double and FLT_MAX) and .data (its ranges, link tables and
 // vectors) sit between theirs in code order, read by its functions only, and fall on the
 // alignment its own objects ask for, so the cut before could lie from 0x15AA50 to 0x15AAE0 and

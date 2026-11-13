@@ -2,14 +2,14 @@
 // The active-set solver, 0x153528 to 0x1549C8 (its .rodata from 0x24A100; no .data or .bss of
 // its own): InitActiveSetSolver to SolveActiveSetSystem, the bounded linear solve the contact
 // code runs for its impulses. Its .rodata provably starts a file: the display-list writer's
-// base vtable D_0024A0E0, which file_14EE40.cpp's PacketWriter (its one virtual func_00152E18)
+// base vtable D_0024A0E0, which pooled_object.cpp's PacketWriter (its one virtual func_00152E18)
 // brings, lies just before PivotActiveSet's jump table at 0x24A100, and GCC 2.95 writes a
 // file's vtables after all of its functions' literals and jump tables (a test unit built whole
 // puts its vtable after the jump table of a function defined after the class's methods), so
 // that vtable ends the previous file's .rodata. Its start in the code is a choice: any function
 // start from 0x152E20 (after the vtable's method) to 0x153A50 (PivotActiveSet) links to the
 // same bytes, since the functions between read no .rodata of either file and DrawPlacedObjectParts'
-// D_00261F30 ends file_14EE40.cpp's .data whichever file follows. The cut is at
+// D_00261F30 ends pooled_object.cpp's .data whichever file follows. The cut is at
 // InitActiveSetSolver, where the solver's functions begin. The name is ours, after its role.
 #include "common.h"
 #include "gauge_manager.h"

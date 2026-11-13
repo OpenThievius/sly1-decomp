@@ -5,7 +5,7 @@
 // src/main/class_descriptors.cpp), with their VU0 helpers. It starts at an exact edge
 // (group_marker.cpp's end). Its end is NOT proved by retail: the cut at 0x1A3AE0 follows the change
 // of role only, from the effects to the walker collider (class 0x15) and the unrelated families
-// of file_1A3AE0.cpp, which no function on either side calls across. Retail's data allows it:
+// of pair_controller.cpp, which no function on either side calls across. Retail's data allows it:
 // the last of this file's .rodata (FLT_MAX at 0x24C9BC) and .data (D_0026B770) are read before
 // 0x1A3598, the next file's first (0x24C9C0, D_0026B778) from 0x1A3B20 on, and no gap of
 // padding marks either edge, so the cut could lie at any function start from 0x1A3598 to

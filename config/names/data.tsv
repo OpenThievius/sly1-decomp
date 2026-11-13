@@ -180,7 +180,7 @@ D_00261F24	g_toSprChannel	handle from func_002027A0(9) (DMA channel 9, toSPR); f
 D_002621C8	g_objectCyclerLoadLinks	two-entry link table LoadObjectCycler installs through func_00124DF8
 D_002621E0	g_objectCyclerStartLinks	two-entry link table StartObjectCycler installs through func_00124DF8
 D_00262250	g_fontEscapeKeys	the characters '0','2','1','3','4': func_0015C200 maps a key character to a font slot and screen_element.cpp writes entries 3 and 4 into text escapes
-D_00262260	g_fontCount	number of font records: set by func_001B2DF8 (anim_record.cpp) from ReadBufferedU16, which then allocates g_fontRecords with it; looped over in func_0015E5F0 (file_1549C8.cpp)
+D_00262260	g_fontCount	number of font records: set by func_001B2DF8 (anim_record.cpp) from ReadBufferedU16, which then allocates g_fontRecords with it; looped over in func_0015E5F0 (effect_spawner.cpp)
 D_00262264	g_fontRecords	array allocated with new for g_fontCount entries; func_0015D8A8 initialises each and registers it by id in g_fonts
 D_00262268	g_fonts	five font pointers by id, filled by func_0015D8A8 and read by GetFontById
 D_0026227C	g_defaultFont	font GetFontById returns when an id has none; set from func_0015C1C0(0) and read by screen_element.cpp as the default font
@@ -236,7 +236,7 @@ D_00263AC8	g_modeColliderLinks	26-entry link table StartModeCollider (class 0x1B
 D_00263D58	g_gaugeHolderLinks	13-entry link table StartGaugeHolder (class 0x4A) installs through func_00124DF8
 D_00263E04	g_timeoutLimit	the float 3.0 that UpdateCountdown compares the time elapsed since the object's start time against
 D_00263E08	g_countdownTable	the three-entry table StartCountdown hands to func_00124DF8
-D_00263E30	g_timeoutFired	defined in file_1793C0.cpp only: InitCountdown clears it and UpdateCountdown sets it to 1 once, calling func_00160578(2), when the elapsed time passes the limit
+D_00263E30	g_timeoutFired	defined in mode_collider.cpp only: InitCountdown clears it and UpdateCountdown sets it to 1 once, calling func_00160578(2), when the elapsed time passes the limit
 D_00264088	g_pointObjects	the list head RegisterPointObject and UnregisterPointObject append to and unlink from for the 0x80 class (ClearPointObjectList empties it)
 D_00264098	g_triangleGroupGrey	the colour (0xBF, 0xBF, 0xBF, 0x7F) DrawTriangleGroups gives the groups of kinds 3 and 4
 D_002640A0	g_triangleGroupBlue	the colour (0x00, 0x87, 0xFF, 0x7F) DrawTriangleGroups gives the other groups
@@ -352,7 +352,7 @@ D_00275958	g_mainAndRenderThreads	func_001E2398 stores the current thread id in 
 D_00275964	g_movieDecodeThread	CreateMovieDecodeThread stores the id returned by the thread-create call (entry RunMovieDecodeThread) there and then starts it.
 D_00275AF0	g_worldLoadRequest	the WorldLoadRequest built at start-up by its constructor (func_001E4E38) that QueueWorldLoad fills and RunPendingWorldLoad consumes
 D_00275BC0	g_elementStack	the stack object InitGlobalElementStack, func_0016B580, func_0016BBA8, func_001940E8 and func_001DB838 pass to PushStackElement, PopStackElement, SetElementStackState and ResetElementStack
-D_00275C60	g_unitRange	an ValueRange range {0.0, 1.0} that func_001EB0F8 clamps the level record's word 0x10 to (file_14EE40.cpp) and func_001EB460 clamps its blend factor to.
+D_00275C60	g_unitRange	an ValueRange range {0.0, 1.0} that func_001EB0F8 clamps the level record's word 0x10 to (pooled_object.cpp) and func_001EB460 clamps its blend factor to.
 D_00275F80	g_screenFade	the one ScreenFade record: func_001EFFA0 starts a fade on it, func_001EFD10 advances it, func_001EFEE0 draws it
 D_0027696C	g_libraryState	the C library's state record: its first word is the error number (GetErrorNumberAddress returns it), +0x58 the random seed SeedRandom and NextRandom use, +0x1D4 the signal table MakeSignalTable allocates
 D_00277128	g_requestThreadId	the request thread's id; StartRequestThread returns early when it is already positive

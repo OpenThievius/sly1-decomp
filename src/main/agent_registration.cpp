@@ -2,12 +2,13 @@
 // The file from 0x14B550 to 0x14B6A8 (its .bss from 0x27C008): class 0x10's register, unregister
 // and copy, class 0x11's first two methods (InitNumberedAgent and StartNumberedAgent, which share
 // the running count D_0027C008) and SetSinCosPair. Its start is not proved by retail, only by the
-// change of role from the symmetric solve (symmetric_solve.cpp). Its end is file_14B6A8.cpp's
+// change of role from the symmetric solve (symmetric_solve.cpp). Its end is gauge_manager.cpp's
 // .rodata start, the one edge here retail proves in the data; but any function start from
-// 0x14A7B8 to 0x14B6A8 links to the same bytes (file_14B6A8.cpp says why), so these functions
-// could as well open file_14B6A8.cpp, which holds the rest of class 0x11: D_0027C008 can be
-// either file's .bss, since a file of words aligns its .bss to 4. Its name is ours, after its
-// first address.
+// 0x14A7B8 to 0x14B6A8 links to the same bytes (gauge_manager.cpp says why), so these functions
+// could as well open gauge_manager.cpp, which holds the rest of class 0x11: D_0027C008 can be
+// either file's .bss, since a file of words aligns its .bss to 4. Its name is ours, by its main
+// role: five of its six functions put an agent of class 0x10 on the world's list or give one of
+// class 0x11 its number; SetSinCosPair is the odd one out.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"

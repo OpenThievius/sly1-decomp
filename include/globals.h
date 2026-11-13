@@ -65,7 +65,7 @@ extern List01 g_targetCurveList;
 extern List01 g_targetPointList;
 extern List01 g_partList;       // its head is the first object of class 0x46 (Node_150298, Iter_16A820)
 extern List01 g_pointObjects;
-// A list head (func_00152438(D_00269BA8, 0x38) sets it up, file_18F988.cpp defines it): 0xC
+// A list head (func_00152438(D_00269BA8, 0x38) sets it up, point_graph.cpp defines it): 0xC
 // bytes like every other; its label runs to D_00269BC0 because switched_collider.cpp's .data
 // starts there, after the linker's padding.
 struct List_269BA8 {

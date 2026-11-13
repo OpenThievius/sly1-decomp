@@ -86,7 +86,7 @@ functions left with their address names, and the disc's data.
    (`config/us/files.tsv`). The first, `src/main/value.cpp` (0x11AE78 to 0x11C128), is one.
    On 2026-11-07 every byte of code, 0x100000 to 0x211E0C, is in one of 167 proved files (74 of
    game code, 93 of the libraries, the math library and the toolchain's runtime; 168 since
-   `src/main/file_14B6A8.cpp` was cut from its neighbour on 2026-11-10), and the data
+   `src/main/gauge_manager.cpp` was cut from its neighbour on 2026-11-10), and the data
    the 16 KiB windows defined is in its files too: in the proved files that read it, and in three
    files of data only that open .rodata (`class_descriptors.cpp`, `property_registry.cpp`,
    `global_tables.cpp`; the build proves their place, not where one ends and the next begins).

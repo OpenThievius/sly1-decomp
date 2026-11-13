@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// From 0x16C470 to 0x16CE00. Its name is ours, after ApplyLinkConstraint, nearly all of its code
+// (0x8D4 of 0x990 bytes); the small overrides before it are described below.
 #include "common.h"
 #include "c52.h"
 #include "vu0.h"

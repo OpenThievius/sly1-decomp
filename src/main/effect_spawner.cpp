@@ -5,8 +5,8 @@
 // id and the scaling volume (class 0x60). Its start is exact; it ends where the object cycler
 // begins (object_cycler.cpp), a cut by role only, which that file's head explains. The spawner
 // and the member objects share the spawn record and its helpers, so they are not cut apart; the
-// smaller groups after them could be files of their own. Its name is ours, after its first
-// address.
+// smaller groups after them could be files of their own. Its name is ours, after its largest
+// family, the effect spawner, whose spawn record the member objects share.
 #include "common.h"
 #include "effect_spawner.h"
 #include "vu0.h"
@@ -1520,7 +1520,7 @@ extern s32 D_00262050[74];
 s32 RandomIntInRange(s32 a, s32 b);
 void SpawnEffectsAt(Quad16* self, Quad16* a1, void* a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
 
-// Both callers (file_1963D8.cpp and collider.cpp) declare it with these parameters and are
+// Both callers (gauge_collider.cpp and collider.cpp) declare it with these parameters and are
 // retail's code with them; a float takes its register wherever it is declared.
 void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance, Quad16* at, f32 minScale, f32 size)
 {

@@ -5,7 +5,9 @@
 // that vtable at 0x24A100: GCC 2.95 writes a file's vtables after all of its functions' literals
 // and jump tables, so PivotActiveSet's jump table after it starts the next file
 // (active_set_solver.cpp, which says why its start in the code is a choice). One file between
-// two edges otherwise; it could be several.
+// two edges otherwise; it could be several. Its name is ours, after its first and largest family,
+// the pooled objects and their holder; the step sequence is nearly as large, and none of its
+// families names the whole.
 #include "common.h"
 #include "gauge_manager.h"
 #include "asm_func.h"

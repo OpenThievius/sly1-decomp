@@ -6,9 +6,9 @@
 // padding before a new file's .rodata. Its start in the code is a choice: any function start
 // from 0x14A7B8 to 0x14B6A8 links to the same bytes, and the functions between them could belong
 // to camera_controller.cpp, to this file or to a third (camera_controller.cpp says why; they
-// are now item_column.cpp, symmetric_solve.cpp and file_14B550.cpp, cut by role only). Classes 0x11, 0x12
+// are now item_column.cpp, symmetric_solve.cpp and agent_registration.cpp, cut by role only). Classes 0x11, 0x12
 // and 0x68 share it, since all three read the static D_0027C00C. Its name is ours, after its
-// first address.
+// largest family, the gauge manager (class 0x68), which holds most of its code.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"

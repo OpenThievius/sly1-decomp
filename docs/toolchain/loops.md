@@ -1263,19 +1263,19 @@ near misses that reach retail or come closest at some N (marked *), by address:
 | func_0014D3A8 | path_curve.cpp | 10-31 |
 | func_0014D680 | path_curve.cpp | 8-25 |
 | func_00154370 | active_set_solver.cpp | 10-17 |
-| func_00157B88 | file_1549C8.cpp | 9-18 |
+| func_00157B88 | effect_spawner.cpp | 9-18 |
 | func_0015E318 | font.cpp | 14-31 |
 | func_0015FD78 | file_15F678.cpp | 8-17 |
-| func_0016C528 | file_16C470.cpp | 13-31 |
+| func_0016C528 | link_constraint.cpp | 13-31 |
 | func_00177990 | player.cpp | **15**-31 |
 | func_00178678 | player.cpp | 9-20 |
 | func_0017D5D8 | file_17D248.cpp | 10-19 |
 | func_00180108 | colored_triangle_set.cpp | 8-25 |
-| func_001821B0 | file_180EB0.cpp | 11-31 |
+| func_001821B0 | mode_walker.cpp | 11-31 |
 | func_00188B48 | matrix.cpp | 10-31 |
 | func_00192DD0 | switched_collider.cpp | **15**-17 |
-| func_001971B8 | file_1963D8.cpp | 11-22 |
-| func_0019CF68 | file_198980.cpp | 14-31 |
+| func_001971B8 | gauge_collider.cpp | 11-22 |
+| func_0019CF68 | object_gatherer.cpp | 14-31 |
 | func_001A15D8 | effect.cpp | 13-**15** |
 | func_001AF108 | timed_object.cpp | 8-22 |
 | func_001B2140 | range_record.cpp | 9-31 |
@@ -1295,8 +1295,8 @@ near misses that reach retail or come closest at some N (marked *), by address:
 | func_001D9AC8 | file_1D62E0.cpp | 9-24 |
 | func_001DDE90 | tint_blend_collider.cpp | 9-**15** |
 | func_001DF520 | tint_blend_collider.cpp | 10-31 |
-| func_001F2840 | file_1F2758.cpp | 9-24 |
-| func_001F2EF0 | file_1F2758.cpp | 9-20 |
+| func_001F2840 | oscillator.cpp | 9-24 |
+| func_001F2EF0 | oscillator.cpp | 9-20 |
 
 A lower edge of 8 or 9 is where the file stops compiling (VU0 helpers that need more vector
 registers than N leaves), not a threshold. Every range is one interval: no function matches

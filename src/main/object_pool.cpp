@@ -5,8 +5,8 @@
 // it defines. Its .rodata is the FLT_MAX literal of func_001A7FE8 (0x24CBC4); its .data
 // (0x26C3E0 to 0x274398) is the per-element placement table D_0026C3E0, then the 37 screen
 // objects, uninitialised (zero, filled at run time by func_001A9C68), which GCC puts at the end
-// of the file's .data in definition order. Named after its first address until what it was is
-// known.
+// of the file's .data in definition order. Its name is ours, after its first and largest family,
+// the object pool.
 #include "common.h"
 #include "switched_collider.h"
 #include "list_iter.h"

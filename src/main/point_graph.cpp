@@ -7,7 +7,8 @@
 // last global, g_targetVectors (D_00269BA8, read by UnregisterTargetVector at 0x191FA0), ends
 // before it, so any function start from 0x191FD8 to 0x192380 (CaptureSwitchedColliderPose, the
 // first reader of 0x269BC0) can begin the next file. The cut is at 0x1921A8, where the switched
-// collider's functions begin. Its name is ours, after its first address.
+// collider's functions begin. Its name is ours, after its largest family, the point graph and its
+// searches.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"

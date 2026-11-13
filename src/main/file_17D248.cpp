@@ -658,7 +658,7 @@ s32 RandomIntInRange(s32 lo, s32 hi);
 extern List01 g_class75List;
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
-// (list_iter.h) and each step reads the next item through the link (as file_1549C8.cpp's).
+// (list_iter.h) and each step reads the next item through the link (as effect_spawner.cpp's).
 struct BeginListWalk {
     static void Of(ListFrame* it, List01* list)
     {
@@ -680,7 +680,7 @@ template <class T> struct NextInList {
 };
 
 // v made unit length, or fallback when v is shorter than 0.0001, over vector values (as
-// file_1549C8.cpp's): this function's search loop leaves cse2 a jump to change, so jump.c runs
+// effect_spawner.cpp's): this function's search loop leaves cse2 a jump to change, so jump.c runs
 // again after it and would turn the u128 NormalizeOr's arms into a preset of the fallback
 // (docs/toolchain/conditional-moves.md); the copies of the vector values keep the arms.
 static inline Vu0::Vec NormalizedOr(Vu0::Vec v, Vu0::Vec fallback)

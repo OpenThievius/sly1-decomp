@@ -3,7 +3,7 @@
 // text formatter (ParseFormatSpec to FormatToStringBounded, its digits D_00275940, its jump
 // tables and strings), the string functions, the recursive lock and the render thread. It starts
 // at an exact edge (commentary_best_time.cpp's end) and could itself be several files. Its end in
-// the code is a choice: file_1E2420.cpp's .data provably starts at 0x275970 (that file says why);
+// the code is a choice: on_off_object.cpp's .data provably starts at 0x275970 (that file says why);
 // this file's .rodata ends with FormatConversionArg's jump table (0x24E4A0), and no function from
 // 0x1E1DB8 to 0x1E2420 reads the next file's data, so any function start in that range can begin
 // the next file. The cut is at 0x1E2420, after CreateRenderThread, the last reader of this file's

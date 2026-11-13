@@ -377,7 +377,7 @@ struct T217D_720 : ScreenElement {
     T217D_330 items[4];         // 0x264: 0x260 bytes each (func_0014ABD0)
 };
 
-// The base's functions (src/main/file_1A7FE8.cpp and screen_element.cpp).
+// The base's functions (src/main/object_pool.cpp and screen_element.cpp).
 void InitScreenElement(ScreenElement* self, s32 index);
 void SetupScreenElementText(ScreenElement* self);
 void UpdateScreenElementSlide(ScreenElement* self);

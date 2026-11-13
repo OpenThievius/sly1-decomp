@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The 0x60-byte record func_00159CA0 and func_00159D00 (file_1549C8.cpp) take as the first
+// The 0x60-byte record func_00159CA0 and func_00159D00 (effect_spawner.cpp) take as the first
 // parameter (func_00152600 takes it out of its list): an object at +0, three colours and the
 // times to go from the first to the second, hold the second and go to the third, then the
 // start time. Written for this project from what retail's code does (build/swarm/st3/groups.tsv,

@@ -5,8 +5,9 @@
 // gatherer (class 0x41), class 0x7C and class 0x8B with the VU0 helpers only it and
 // func_0019D2A8/func_0019D338 call. Its .rodata (0x24C870 to 0x24C930) is the jump tables of
 // func_0019A6A8, func_0019B378 and func_0019C1C0 and the FLT_MAX literal of
-// func_0019AF00; its .data (0x26A910 to 0x26ABF0) is the globals below, all initialised. Named
-// after its first address until what it was is known.
+// func_0019AF00; its .data (0x26A910 to 0x26ABF0) is the globals below, all initialised. Its name
+// is ours, after its largest family, the object gatherer (class 0x41); none of its families names
+// the whole.
 #include "common.h"
 #include "switched_collider.h"
 #include "object_set.h"

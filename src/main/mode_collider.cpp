@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// From 0x1793C0 to 0x17B998: the mode collider, the gauge mode object and the countdown. Its name
+// is ours, after the mode collider, which holds most of its code.
 #include "common.h"
 #include "switched_collider.h"
 #include "gauge_mode_object.h"

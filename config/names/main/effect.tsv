@@ -1,7 +1,7 @@
 symbol	name	evidence
 func_0019E040	AcquireEffectOwner	takes the first free object from the world's list at +0x1B38 (advancing it through +0x564), stores its flag word at 0x550, runs its slot 2, and with flag 0 caches it at +0x1B3C and returns that one on later calls
 func_0019E0B8	InitEffectOwner	slot 0 of class 0x1E: runs the collider set-up func_001B7968, makes the list at +0x558 (the effect list) with func_00152438 and sets its flag bits
-func_0019E158	CopyEffectOwnerMargin	stores the source record's float at +0x1E8 in the effect owner's +0x554, the margin MoveEffectsAndBounds adds to its box (file_1549C8's spawners call it)
+func_0019E158	CopyEffectOwnerMargin	stores the source record's float at +0x1E8 in the effect owner's +0x554, the margin MoveEffectsAndBounds adds to its box (effect_spawner's spawners call it)
 func_0019E168	ReleaseEffectOwner	slot 11 of class 0x1E: removes every effect of the list at +0x558 with RemoveEffect, pushes itself back on the world's free list at +0x1B38 and clears the cache at +0x1B3C
 func_0019E220	MoveEffectsAndBounds	slot 0x7C of class 0x1E: runs slot 3 (motion) of every started effect of the list at +0x558 and grows the box at +0x420/+0x430 over each effect's two points, then widens it by +0x554
 func_0019E418	KeepEffectOwnerBounds	slot 0xD8 of class 0x1E (the bounds update other classes fill, UpdateColliderBounds): empty, as MoveEffectsAndBounds already keeps the box

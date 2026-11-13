@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Class 0x5E (RedirectObject) and class 0x14 (TintBlendCollider), from 0x1DDCE0 to 0x1DFD48. Its .data opens
 // with the vector func_001DDCE0 reads (0x275730), just after the zeroed globals that close the
-// previous file's, and ends at 0x2758D0, where file_1DFD48.cpp's starts; its .rodata is the one
+// previous file's, and ends at 0x2758D0, where class75_list.cpp's starts; its .rodata is the one
 // float func_001DFBE0 reads (0x24DCA8).
 #include "common.h"
 #include "vu0.h"

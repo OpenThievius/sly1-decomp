@@ -2530,13 +2530,13 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   the roots first, the curve-window search's four calls set a0 before $f12 in cases 0 and 2,
   where retail copies t into $f12 first; with the roots last every case's moves are retail's.
   Its definition (file_1E88D0) and its other callers (func_0017FAC0, func_001BC260,
-  func_001EA4B8) match with either order; func_00156718 (file_1549C8) already declared the roots
+  func_001EA4B8) match with either order; func_00156718 (effect_spawner) already declared the roots
   last, so every declaration now agrees.
 - **BuildYawPitchMatrix is `(f32 yaw, f32 pitch, Mat02* out)` (func_00185538).** GetAimRotation's
   last call loads `$f12` from the yaw's slot, then the pitch's `mov.s $f13` and `move a0` tie in
   sched1 and sched2 (priority 3, both alu); retail issues `$f13` first, which needs the out
   pointer after the floats. Its definition (matrix.cpp) and every other caller (camera,
-  camera_controller, file_1A3AE0, file_1A7FE8, hit_count_collider, tint_blend_collider) match with
+  camera_controller, pair_controller, object_pool, hit_count_collider, tint_blend_collider) match with
   either order, and agent.cpp already declared it floats first, so every declaration now agrees.
 - **Diagnosing it.** Where argument moves of one call are issued in an order no rank explains,
   compare their order in the `.combine` dump with the prototype; the order of a function's own
@@ -2648,7 +2648,7 @@ before the integer arguments, as calls.c's reversed evaluation does for a last p
 its three floats first (`(f32, f32, f32, RampProfile*, f32*)`, as the file's other callers
 declare it), which gives retail's argument order around its call. The ramp record is filled
 `y` before `x`, as the same file's other ramp fill does (func_001CFFD0's `i.y = ...; i.x = ...`),
-and the clamp of the dot is file_1793C0.cpp's ClampBetween, which returns each outcome into one
+and the clamp of the dot is mode_collider.cpp's ClampBetween, which returns each outcome into one
 value (retail's merge in $f0).
 
 ### A call's result register ends a use's dependences in sched2 (func_00131198)
@@ -2811,7 +2811,7 @@ near miss's notes had stopped.
   the flag on both paths. The mesh object `self->fB4C` is read at each use (retail reloads it).
   The last instruction, `lwc1 $f12, 0x3CC(a0)` where ours read `(s0)`, is AddMeshContacts'
   parameter order: declared `(Collider* a, f32 radius, ...)` the move to a0 comes before the
-  float's load, and CSE takes the base from a0. Every other caller (agent.cpp, file_1F2758.cpp,
+  float's load, and CSE takes the base from a0. Every other caller (agent.cpp, oscillator.cpp,
   player.cpp) and the definition (collider_contact.cpp, which never reads the float) match with
   that order, so all now declare it.
 

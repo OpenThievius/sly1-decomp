@@ -2,7 +2,7 @@
 // The path-speed collider (class 0x24, under 0x21), 0x182470 to 0x182C18 (its .data from
 // 0x264230): its set-up, start, update and per-frame motion, and BuildPathSpeedProfile, the
 // travel-time table its motion steps through. Its end is base_object.cpp's proved start; its
-// start is not proved by retail, only by the change of role from file_180EB0.cpp's mode walker
+// start is not proved by retail, only by the change of role from mode_walker.cpp's mode walker
 // (class 0x1A) and its sprite element: none of these functions reads the other side's .data,
 // which follows the code's order (this file's from D_00264230, its link table), and neither
 // side has .rodata here, so the cut could lie from 0x1821B0 to 0x182470. The name is ours,

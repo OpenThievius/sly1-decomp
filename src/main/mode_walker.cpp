@@ -4,7 +4,7 @@
 // ends where the path-speed collider begins (path_speed_collider.cpp), a cut by role only, which
 // that file's head explains. One file between an exact edge and a chosen one; it could be
 // several (class 0x72's methods have no role in common with the walker). Its name is ours, after
-// its first address.
+// the mode walker, which holds most of its code.
 #include "common.h"
 #include "vu0.h"
 #include "list_iter.h"

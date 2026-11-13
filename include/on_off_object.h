@@ -26,7 +26,7 @@ struct __attribute__((packed)) Pack63 {
 
 // A list of floats the loader finds by index (func_0014D9A8): its count and its values. It is
 // the key-frame curve PathCurve (include/path_curve.h): count is PathCurve::count and data is
-// PathCurve::lengths; func_001E2648 (file_1E2420.cpp) can read it as a PathCurve through `curve`.
+// PathCurve::lengths; func_001E2648 (on_off_object.cpp) can read it as a PathCurve through `curve`.
 struct Arr63 { u8 pad0[0xC]; s32 count; u8 pad1[4]; f32* data; };
 
 struct OnOffObject : PlacedObject {

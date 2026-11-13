@@ -79,7 +79,7 @@ func_001AE510	InitLetterGlyphElement	slot 1 of the screen-element table D_002185
 func_001AE5E0	DrawLetterGlyphElement	slot 9 of the table D_002185B0: draws its one-letter glyph at its scale
 func_001AE758	InitCyclingGlyphElement	slot 1 of the screen-element table D_00218600: SetupScreenElementText, slide-in and slide-out of 0.25, no hold, font 1 at the scale D_002744AC and the glyph GetCyclingGlyph returns
 func_001AE7F8	SetElementModeClearingFlag	slot 16 (set mode) of the screen-element table D_00218600: clears the element's flag when the mode is 0, then runs SetScreenElementMode
-func_001AE820	DrawCyclingGlyphElement	draws the cycling-glyph element D_00273EB0 (file_1A7FE8's element drawing calls it last): raised while its flag holds, hiding itself a second into mode 2 once the background job has ended
+func_001AE820	DrawCyclingGlyphElement	draws the cycling-glyph element D_00273EB0 (object_pool's element drawing calls it last): raised while its flag holds, hiding itself a second into mode 2 once the background job has ended
 func_001AEA08	GetCyclingGlyph	returns the character of the table behind D_002744B0 at index (clock * 5) modulo its length
 func_001AEA70	ConstructScreenTextStyles	the file's static initialiser: clears three arrays (0x38, 0x38 and 3 entries) and builds five 0x1C-byte text styles (D_002743D0 to D_00274488: kind 0x2D or 0x3D, 2.0, 0.3 twice, colour 0xFF7D4B00)
 func_001AEC90	ConstructScreenTextStylesAtStartup	the file's _GLOBAL_$I$: calls ConstructScreenTextStyles with (1, 0xFFFF); an entry of the startup init-list D_0027B130

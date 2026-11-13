@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// From 0x1963D8 to 0x198980: the object group's methods, the gauge collider, its agent and the
+// gauge-counted object's start. Its name is ours, after the gauge collider and its agent, which
+// hold most of its code.
 #include "common.h"
 #include "switched_collider.h"
 #include "asm_func.h"

@@ -89,7 +89,7 @@ Which GPR reloads a spilled pseudo is not decided at that insn alone
   a0 to vf1 and vf3 before each use). Copying the value through a Vu0::Vec
   local and normalizing the Vec values, `n.q = FromFloats(...); *(Vec*)&stick
   = n; *(Vec*)&stick = NormalizeOr(Vec::Of(stick), Vec::Of(g_unitXVector))`
-  (file_1793C0.cpp's form), gives the pseudo equal costs (`TI_REGS` in the
+  (mode_collider.cpp's form), gives the pseudo equal costs (`TI_REGS` in the
   .lreg dump), global-alloc puts it in a0, and no reload needs a0. The .greg
   dump's `Spilling for insn N. / Spilling reg R.` lines list every insn's
   spill registers: one `Spilling reg 4` in a function shows where a0 came
@@ -224,7 +224,7 @@ Read further with tools/globalalloc.py, tools/sched1.py, reload1.c and `-dR` sch
 
 ### A second spill register from a rematerialised constant (func_0014C858)
 
-GaugeManager's agent placement (src/main/file_14B6A8.cpp), read from `-dL -dS -dl -dg` dumps
+GaugeManager's agent placement (src/main/gauge_manager.cpp), read from `-dL -dS -dl -dg` dumps
 (2026-11-10):
 
 - **The sign: four reloads in v1 where ours has v0.** Retail's posp output reload, the first

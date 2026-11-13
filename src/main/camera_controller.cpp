@@ -3,14 +3,14 @@
 // 0x261BF0): the base controller and its value stack, and the target, frame and value
 // controllers (their method tables D_00217398 to D_002173E0). Its .rodata (func_00149760's
 // constants and two jump tables, 0x249EA0 to 0x249EE4) is followed by 12 bytes of zeros and
-// func_0014B6A8's FLT_MAX on 16 at 0x249EF0, the .rodata of file_14B6A8.cpp, so a file ends
+// func_0014B6A8's FLT_MAX on 16 at 0x249EF0, the .rodata of gauge_manager.cpp, so a file ends
 // between func_00149760 and func_0014B6A8. Any function start from 0x14A7B8 to 0x14B6A8 links to
 // the same bytes: the functions between read no .rodata or .data of either file, their code is
 // on 8 as every file's is, and the one .bss they use, D_0027C008, can be a file's whole .bss (a
 // file of words aligns its .bss to 4). Built whole, the cuts at 0x14A7B8, 0x14A888, 0x14ABD0,
 // 0x14B608 and 0x14B6A8 all printed MATCH (docs/AGENT_WORKFLOW.md, "Finding and proving a
 // file"). The functions between are now three files cut by role only (item_column.cpp,
-// symmetric_solve.cpp, file_14B550.cpp); this one ends at 0x14ABD0, where the item column, a
+// symmetric_solve.cpp, agent_registration.cpp); this one ends at 0x14ABD0, where the item column, a
 // screen element, begins. The name is ours, after its role.
 #include "common.h"
 #include "asm_func.h"

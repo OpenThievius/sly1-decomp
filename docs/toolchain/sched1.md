@@ -1863,7 +1863,7 @@ the 24 statements, scored by bytes against retail (build/swarm/w49-g/f2/climb2.p
 exchanged). The fourteen are a diagonal walk (xa ahead of xb by a z weight) rather than a nest,
 which is why the 1,728 regular nests missed it. The analysis below is kept as it was written.
 
-Read from the `.sched` trace of ComputeGridBlendWeights' last block (file_198980.cpp,
+Read from the `.sched` trace of ComputeGridBlendWeights' last block (object_gatherer.cpp,
 2026-11-13, w46-d): eight pair products (priority 8), 24 triple products (5) and 24 stores,
 one multiply a cycle and a store beside it.
 

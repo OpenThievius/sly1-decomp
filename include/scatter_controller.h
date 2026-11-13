@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The scatter controller, the 0x24-byte record at D_00261EF0 (g_scatterController; file_14EE40.cpp
+// The scatter controller, the 0x24-byte record at D_00261EF0 (g_scatterController; pooled_object.cpp
 // defines it as zeros): ResetScatterController (func_00151A88) sets its count ranges and picks
 // its table of level bands, ScatterObjectsAtPoint (func_00152010) counts its two countdowns down
 // and scatters objects of kind 0x58 (and 0x57) when they run out, RaiseScatterLevelForObject
@@ -57,6 +57,6 @@ struct ScatterController {
 
 typedef char check_ScatterController[sizeof(ScatterController) == 0x24 ? 1 : -1];
 
-extern ScatterController g_scatterController;      // file_14EE40.cpp
+extern ScatterController g_scatterController;      // pooled_object.cpp
 
 #endif

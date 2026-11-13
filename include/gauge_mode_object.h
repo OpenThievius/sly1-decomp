@@ -4,7 +4,7 @@
 // world's gauge object and starts the handle it keeps for modes 0 and 1), shows or hides the
 // gauge bar by its mode (ShowGaugeModeObjectBar) and hands out three handles it makes when it
 // starts (StartGaugeModeObject). Written for this project from what retail's code does
-// (config/us/classes.tsv; src/main/file_1793C0.cpp).
+// (config/us/classes.tsv; src/main/mode_collider.cpp).
 //
 // Its fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.

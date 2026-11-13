@@ -4,7 +4,7 @@
 // inlined, as trail_ribbon.cpp has it). Written for this project from what retail's code does.
 //
 // Ranges sit at Agent+0x738, in D_002754C8, D_00275C60 (the clamp of the D_002623C8 record's
-// word 0x10, file_14EE40.cpp) and eight times in PadRecord (g262c70.h). placed_object.cpp copies
+// word 0x10, pooled_object.cpp) and eight times in PadRecord (g262c70.h). placed_object.cpp copies
 // D_00275C60 as one unaligned doubleword (U64_12A678, U64_12A748): that view stays the file's.
 #ifndef VALUE_RANGE_H
 #define VALUE_RANGE_H
@@ -54,6 +54,6 @@ struct ValueRange {
 typedef char check_ValueRange[sizeof(ValueRange) == 8 ? 1 : -1];
 
 extern ValueRange D_002754C8;      // file_1D62E0.cpp defines it; file_1E88D0.cpp
-extern ValueRange g_unitRange;      // file_1E88D0.cpp defines it (and D_00275C68 after it); placed_object.cpp, file_14EE40.cpp, trail_ribbon.cpp
+extern ValueRange g_unitRange;      // file_1E88D0.cpp defines it (and D_00275C68 after it); placed_object.cpp, pooled_object.cpp, trail_ribbon.cpp
 
 #endif

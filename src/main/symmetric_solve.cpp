@@ -3,7 +3,7 @@
 // FactorSymmetricMatrix and SolveFactoredSystem, the factor and the forward and back
 // substitution the active-set solver (active_set_solver.cpp) runs each round. Its edges are not
 // proved by retail, only by the change of role from the item column (item_column.cpp) and to
-// the class 0x10 and 0x11 methods (file_14B550.cpp): none of these functions reads .rodata or
+// the class 0x10 and 0x11 methods (agent_registration.cpp): none of these functions reads .rodata or
 // .data, so the cut before could lie from 0x14AF38 to 0x14B0C0 and the one after at 0x14B550 or
 // later, up to 0x14B6A8. The name is ours, after its role.
 #include "common.h"

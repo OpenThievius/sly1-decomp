@@ -21,8 +21,8 @@ struct ObjectMessage {
 };
 
 // A message an object receives through its slot 27 (Desc01::m1B), built in a 0x50-byte local:
-// its kind, and the sender (kind 1) or quadwords (kinds 4 and 6; file_198980.cpp, effect.cpp,
-// file_1A3AE0.cpp).
+// its kind, and the sender (kind 1) or quadwords (kinds 4 and 6; object_gatherer.cpp, effect.cpp,
+// pair_controller.cpp).
 struct SlotMessage {
     union {
         s32 kind;           // 0x00

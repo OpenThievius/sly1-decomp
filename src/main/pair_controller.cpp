@@ -2,12 +2,13 @@
 // The file from 0x1A3AE0 to 0x1A7FE8 (its .rodata from 0x24C9C0, its .data from 0x26B778): class
 // 0x15 (the walker collider), the pair controller (class 0x5F) and the paired objects (class
 // 0x42), classes 0x43, 0x44 and 0x45 (the hit target, the sound state object, the object
-// creator) and the pad pattern player. It ends at an exact edge (file_1A7FE8.cpp's start). Its
+// creator) and the pad pattern player. It ends at an exact edge (object_pool.cpp's start). Its
 // start is NOT proved by retail: the cut from effect.cpp at 0x1A3AE0 follows the change of role
 // only (effect.cpp says what range retail's data allows), and these families could themselves
 // be several files. Its .rodata is the FLT_MAX constants of its functions (literals in their code),
 // the jump tables, the triangle func_001A3C40 copies and the pose table func_001A4718 copies; its
-// .data is the globals below. Named after its first address: none of its families names the whole.
+// .data is the globals below. Its name is ours, after its largest family, the pair controller and
+// the paired objects (classes 0x5F and 0x42); none of its families names the whole.
 #include "common.h"
 #include "vu0.h"
 #include "list_iter.h"

@@ -4,8 +4,9 @@
 // Its .rodata is the two jump tables of its assembly at 0x24E840 and 0x24E860; it has no .data
 // or .bss. Its .rodata range runs to 0x24E980, where src/lib/library_state.c's begins, and holds
 // after the jump tables the character class table (0x24E878 to 0x24E979, from the disassembly),
-// which could be this file's, library_state.c's or a library file's of its own. Named after its
-// first address until what it was is known.
+// which could be this file's, library_state.c's or a library file's of its own. Its name is ours,
+// after its first and largest family, the oscillator; the transform objects, arrival points,
+// object sub-groups and contact trackers after it are smaller.
 #include "transform_object.h"
 #include "warp_page.h"
 #include "oscillator.h"

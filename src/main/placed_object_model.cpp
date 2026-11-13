@@ -11,7 +11,7 @@
 // so the vtable ends file_15F678.cpp's .rodata. Its start in the code is a choice: any function
 // start from 0x1612E8 (after CloseGifTag) to 0x162890 links to the same bytes, since the
 // functions between read no .rodata or .data of either file. The cut is at
-// ReadPlacedObjectModel, where this file's data provably begins (file_14B6A8.cpp's precedent);
+// ReadPlacedObjectModel, where this file's data provably begins (gauge_manager.cpp's precedent);
 // the vertex batch before it (0x1619C0 to 0x162890) could belong to either file or to a third.
 // The name is ours, after its role.
 #include "common.h"
