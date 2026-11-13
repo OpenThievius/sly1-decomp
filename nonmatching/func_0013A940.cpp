@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 952/964, checked 2026-11-12
+// SIZE 952/964, checked 2026-11-13
 // DECLS (2026-11-11, w28-nmdecls): EvaluateHermiteVectorSegment now void (defined void): neutral, 185/241.
 // NEAR: built in src/main/world_listed_object.cpp it is 952 bytes of retail's 964, with retail's frame
 //       (0x140), block layout and calls. Since the first translation: the mode tests are a switch

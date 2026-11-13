@@ -1298,6 +1298,50 @@ the block holding the first trap):
   term (a constant or a local 0, all 720 orders), the interlace arms swapped, a dh local, the
   word built in a u64 local.
 
+- **Second look (w46-d, 2026-11-13): the shift is not in the arms; the block ends before it.**
+  reorg.c's fill_simple_delay_slots takes a conditional branch's slot from the insns before
+  the branch first. With dw's shift at the head of each arm the slot would hold the block's
+  last insn and the arms would start `sll v0,s3,1; dsll32` (the dh chain ranks above the
+  shift); compiled with the shift in the ternary's text over a dw local, that is what comes
+  out (`beqz; andi`). Retail's `addiu a0,a0,-1; beqz a2; dsll32 v1,a0,0` has the shift as the
+  last insn before the branch, so the third option above is out as stated. What the
+  priorities need is the trap level with dy's shift and below dy's mask (retail issues
+  div+andi, then trap+dsll). A block that ends before dw's shift does it: without the
+  `dsll32 v1` and the jump in the block the chain shift -> daddiu -> andi is 3 and the trap ->
+  lh is 3, the trap wins on luid, and the rest replays to retail's order (the dx term's andi
+  must be in the first block: with it in the second the trap rises above dy's mask and issues
+  a cycle early). So retail's sched2 saw `[... lh field ...] | [dsll32 v1,a0,0; beqz]`, a
+  boundary that leaves no code, with the field loaded and sign extended before dw's shift was
+  expanded. A probe with a dead if/else between the product and its shift (a statement
+  expression, not a form) puts the trap first. Not found: a source form. This cc1 is a late
+  1999 snapshot (its dumps carry `[bb N]` notes): jump turns an if/else of two plain sets
+  into a conditional move (movn/movz; CountFrameBufferPages' `/ 64` is one), so an emptied
+  if/else needs arms that are not plain sets, and fold treats `w * magh` and `magh * w` as
+  equal. The interlace word needs no local: written `p->interlace` at each test, PRE keeps
+  the HImode load in a register (the `lhu`) and the later tests extend it (`sll; sra`),
+  retail's code (the dump: "PRE: redundant insn 143 (expression 10) in bb 6").
+
+### Thirty-two products of equal priority: the order is the deaths (func_0019CC10, unsolved)
+
+Read from the `.sched` trace of ComputeGridBlendWeights' last block (file_198980.cpp,
+2026-11-13, w46-d): eight pair products (priority 8), 24 triple products (5) and 24 stores,
+one multiply a cycle and a store beside it.
+
+- **The tie-break is INSN_REG_WEIGHT, then LUID.** The weight is the sets less the REG_DEAD
+  notes of the source's order. Pairs: `z2*y`, the last pair written, has z2 and y dying (-1)
+  and goes first; a z weight's second product and `z2*ny` (ny dies) are 0; the rest +1.
+  Triples: out[23] has its pair and x dying (-1); every x product is its pair's last use (0),
+  out[7] and out[15] are xa's and xb's last uses (0); the rest +1. The trace is exactly that:
+  `z2*y z3*y z*y z1*y z2*ny z3*ny z*ny z1*ny | 23 16 20 17 21 18 22 7 15 19 | 0 4 8 12 ...`.
+- **What retail's registers need.** local-alloc ranks `z2*y` (4 refs over 22 insns, 3636)
+  below `z2*y*x` (2 refs over 4, 5000), so the triple takes f0 and the pair f1; retail has
+  them the other way round. The pair's life must be 15 insns or less: out[7] and out[15]
+  issued within the first eight triples, as retail's final order has them (23, 16, 20, 17, 7,
+  18, 15, 22). In the weights' terms: out[7] and out[15] still the last uses of xa and xb, but
+  written before z1's x products. No regular nest order has that (all 1728 were compiled).
+- **ny.** global-alloc's first pass over the registers only takes one already in use; ours
+  gives ny f10 because `z1*ny`'s quantity used it first, retail's ny has f2 and z1 f10.
+
 ### Two equal clears that retail issues apart: a rank sched1 cannot give (func_001A1030, matched 2026-11-12)
 
 **Matched (w37-f3, 2026-11-12).** The two quadratics are brace initialisers of a type whose

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 604/624 (96.8%), checked 2026-11-12
+// BYTES 604/624 (96.8%), checked 2026-11-13
 /* NEAR (src/lib/graph.c, where it is INCLUDE_ASM; built as C by 2.9-ee-991111): six
  * instructions off, two pairs in the interlaced arms. Found 2026-11-10 (docs/TOOLCHAIN.md,
  * "Sony's compiler balances a chain of | and +"): the libraries' compiler re-associates a chain
@@ -43,6 +43,26 @@
  * the arms), 102 with dw a local (the multiplies move, as the note above says for a local).
  * So the pair-in-the-ternary form is not it; the per-term ternary with every term saved stays
  * the closest (6 lines). */
+/* w46-d (2026-11-13), 9 compiles, the sched2 trace and reorg.c read against retail. (1) The
+ * dw shift in the arms is refuted: reorg fills a conditional branch's slot from the insns
+ * before it first, so with the shift in the arms the slot takes the block's last insn and the
+ * arms start `sll v0,s3,1; dsll32` (sched2 ranks the dh chain above the shift). Compiled with
+ * the shift in the ternary's text over a dw local: `beqz; andi` and that arm order. Retail's
+ * `addiu a0,a0,-1; beqz a2; dsll32 v1,a0,0` has the shift as the last insn before the branch.
+ * (2) What retail's sched2 needs, from the priorities: the trap exactly level with dy's shift
+ * and below dy's mask (retail issues div+andi, then trap+dsll). With the block ending before
+ * dw's shift (the field load, the dx term's andi and dw's addiu before the end; the shift and
+ * the beqz after) the chain shift -> daddiu -> andi is 3 and the trap -> lh is 3: a tie the
+ * trap wins on luid, and the rest of the block replays to retail's order. So retail's sched2
+ * had a block boundary that leaves no code between the field's load and `dsll32 v1,a0,0`: the
+ * field was read (sign extended, combined in the first block) before dw's shift was expanded.
+ * A probe with a dead if/else between the product and its shift (a statement expression, not
+ * a form) puts the trap first. (3) This cc1 turns an if/else of two assignments into a
+ * conditional move in jump (movn/movz), so such a boundary needs arms that are not plain
+ * sets; `f ? w * magh - 1 : magh * w - 1` folds (operand_equal_p knows the product commutes).
+ * (4) The u16 local for the interlace word is not needed: `p->interlace` written at each test
+ * gives the same code (PRE keeps the HImode load in a register: the lhu, and sll/sra at the
+ * later tests); the body below is written so. No source form for (2) found. */
 #include "common.h"
 
 typedef struct GsParam {
@@ -74,9 +94,7 @@ extern const char D_0024F510[];
 void DefineDisplayEnvironment(GsDispEnv* env, s16 psm, s16 w, s16 h, s16 dx, s16 dy)
 {
     GsParam* p = GetGsParams();
-    u16 interlace;
 
-    interlace = p->interlace;
     env->pmode = 0x66;
     if (p->interlace != 0) {
         if (p->field != 0)
@@ -88,7 +106,7 @@ void DefineDisplayEnvironment(GsDispEnv* env, s16 psm, s16 w, s16 h, s16 dx, s16
     }
     env->dispfb = ((u64)(psm & 0xF) << 15) | ((u64)(((w + 63) >> 6) & 0x3F) << 9);
     if (p->mode == 2) {
-        if ((s16)interlace == 1) {
+        if (p->interlace == 1) {
             s32 magh = (w + 0x9FF) / w;
             env->display = GS_DISPLAY(((u64)(dx * magh) + 0x27C) & 0xFFF, (dy + 0x32) & 0xFFF, magh - 1,
                                       magh * w - 1, p->field != 0 ? h * 2 - 1 : h - 1);
@@ -98,7 +116,7 @@ void DefineDisplayEnvironment(GsDispEnv* env, s16 psm, s16 w, s16 h, s16 dx, s16
                                       magh * w - 1, h - 1);
         }
     } else if (p->mode == 3) {
-        if ((s16)interlace == 1) {
+        if (p->interlace == 1) {
             s32 magh = (w + 0x9FF) / w;
             env->display = GS_DISPLAY(((u64)(dx * magh) + 0x290) & 0xFFF, (dy + 0x48) & 0xFFF, magh - 1,
                                       magh * w - 1, p->field != 0 ? h * 2 - 1 : h - 1);

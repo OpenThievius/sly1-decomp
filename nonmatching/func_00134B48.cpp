@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1712/1756 (97.5%), checked 2026-11-12
+// BYTES 1712/1756 (97.5%), checked 2026-11-13
 // w40-fa (2026-11-12): not closer (11 lines). The clamp written in place instead of through
 // Limit (lo and hi in locals; the members read in the conditions; the value clamped in its own
 // variable; a conditional expression) leaves the preheader's order as it is and breaks the

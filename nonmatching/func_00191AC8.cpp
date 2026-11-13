@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 416/428, checked 2026-11-12
+// SIZE 432/428, checked 2026-11-13
+// w46-d (2026-11-13), about 170 compiles (two grids of 60 over stated forms) and the dumps: (2) is solved in shape and (1) but for one move. The copy after the call survives gcse because copy propagation replaces a use by its reaching copy's source once per pass and gcse runs two passes ("COPY-PROP: Replacing reg 193 in insn 476 with reg 194", then "reg 194 ... with reg 191"): a use three copies from k ends on the middle pseudo. purge_addressof runs after cse1 here, so every read of a Vec local is its own copy: `kz = k` is two copies and ends on k, `ka = k; kz = ka;` or `kz = Vu0::Vec::Of(k);` (as written below) is four and ends on the second. sched1 keeps the copy after TestOwnerGraphSpan only when it is written there (a pseudo that crosses no call is tied to the last call before it): written before CopyBytes it issues at the block's top and the copy is the one spilled. The exit then stores kz's cast copy (the slot: `sqc2 vf4,192(sp)`) and divides by vf4. rot, k2 and s are the loop body's own locals: their slots are free at the exit, the cast copy takes rot's (192), the frame is 512 and k's home 304. cse2 makes the conversion's temporary canonical for every body use (24 refs, vf4 with a caller save) unless k is mentioned outside the loop block; with k set before the loop (`= Vec::Zero()`, dead, flow deletes it) k is canonical: 12 refs over 3 calls, no register, retail's loads from 304. pc as a u128 keeps the loop at 80 insns at loop.c's second pass, so 1.0f is moved (f21). Left (432 bytes, 19 lines): `move v1,s6; por v0,zero,v1` for `move v0,s6` (the temporary gets v0 from global-alloc and reload gives its subreg set a reload register v1, copied back; retail's reload register is v0 and the store inherits it), s2/s3 swapped (i and the table pointer), the k2 store inherits vf4 (`qmfc2 v0,vf4`) where retail loads 304, `lqc2 vf4,304` one insn early, mfc1 early in the prologue. Rules: the dead `= Vec::Zero()`, the copy through Vec::Of and the two helpers defined here (an mfc1 with a 64-bit output, the cast copy of a u128) are probes, not forms; the original's variable and its copies are not known.
 // w44-fa (2026-11-12), 5 compiles, from the dumps: (2) is a real insn, not reload's or caller-save's. vf4's caller-save slot is 320 (pc around CopyBytes) and vf4 holds p before the third call, so nothing saves k there; the exit is a label with two predecessors, so no reload is inherited. Retail's first loop block ends with `K4 = k` (k unallocated, hence `lqc2 vf4,304(sp)`, reorg takes it into the beqz slot) and the exit uses K4 (sqc2 vf4,192; vdiv vf4). k then has 12 refs (its set 2, the rows 6, k2 2, the copy 2) over 3 calls: not worth a caller save (4 * 3 >= 12), as the body needs. (1) is the temporary of a 64-to-128-bit conversion: with the mfc1's output a u64 and `k.q = (u128)kg`, expand makes a no-conflict block (`(set (subreg:DI T 0) kg)`, `(set (subreg:DI T 1) 0)`, `(set T T)` with REG_EQUAL zero_extend), T takes v0 (`move v0,s6`) and `k = T` stores it when k has no register; loop.c does not move it. Compiled: with that alone k gets vf6 with a caller save (its refs rise above 12: the exit's uses count on top), whose restore at the block's end is retail's beqz-slot load in shape (save slot 320 or 336, not 304). Ruled out: PRE (a Vec02 k in memory, written at the loop's top: one load in the body, the exit's load stays at the exit; the conversion written again at the exit is not made redundant, gcse does not take a libcall's REG_EQUAL as an expression: `por v0,zero,s1` at the exit), haifa's interblock motion (every region is one block), a Vec02 in memory read back into k after the first call (k crosses two calls and gets vf6 with a caller save). Open: the source of a copy of k after TestOwnerGraphSpan that gcse's copy propagation does not fold into the exit's uses (a plain `kz = k` is folded: the copy is available at the exit). The rewrite sweep's hint (a narrower `i`, 1.0f as a local in the body: 104 to 88 words) is not followed here: retail's loop has `addiu s1,s1,1; sltiu v0,s1,11` with no extension, so the index is 32 bits wide.
 // w32-sizeA (2026-11-11): not retried; the first differing block is the loop's head (retail's per-iteration move v0,s6; sq v0,304 and the extra saved register s8), as in (1) above.
 // DECLS (2026-11-11, w28-nmdecls): TransformPointBetweenFrames now void (defined void): neutral, 92/107. TestOwnerGraphSpan stays s32: the C uses its result (it does not compile as void) although file_18F988's definition is void.
@@ -210,35 +211,49 @@ void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
 // A matrix copied whole: the call's arguments are its parameters, substituted as constants.
 static inline void CopyMatrix(Mat02* d, const Mat02* s) { CopyBytes(d, (void*)s, 0x30); }
 
+static inline u64 FloatBitsInGpr(f32 f)
+{
+    u64 r;
+    __asm__("mfc1 %0, %1" : "=r"(r) : "f"(f));
+    return r;
+}
+static inline u128 SlotCopy(u128 v)
+{
+    const s128& slot = (s128)v;
+    return *(const u128*)&slot;
+}
 void FitStepToPointGraph(Obj_191AA8* self, f32 scale, Vec02* pos, Vec02* dir)
 {
     Mat02 m;
     Vec02 p;
     Vec02 hit;
     ColliderSpan span;
-    Mat02 rot;
-    Vec02 k2;
-    Mat02 s;
-    Vu0::Vec k;
-    u128 kg = Vu0::ScalarInGprReg(scale);
+    Vu0::Vec k = Vu0::Vec::Zero();
+    Vu0::Vec kz;
+    u64 kg = FloatBitsInGpr(scale);
     f32 best = -1.0f;
     u32 i = 0;
     do {
-        k.q = kg;
+        Mat02 rot;
+        Vec02 k2;
+        Mat02 s;
+        k.q = (u128)kg;
         BuildAxisAngleMatrix(&g_unitZVector, D_00269B78[i], &m);
         *(Vu0::Vec*)&s.r[0] = Vu0::MulX(Vu0::Vec::Of(m.r[0]), k);
         *(Vu0::Vec*)&s.r[1] = Vu0::MulX(Vu0::Vec::Of(m.r[1]), k);
         *(Vu0::Vec*)&s.r[2] = Vu0::MulX(Vu0::Vec::Of(m.r[2]), k);
         *(Vu0::Vec*)&k2 = k;
-        Vu0::Vec pc = Vu0::Vec::Of(*pos);
+        u128 pc = Vu0::Q(*pos);
         CopyMatrix(&rot, &s);
-        *(Vu0::Vec*)&p = Vu0::Add(pc, Vu0::Rotate(rot, Vu0::Vec::Of(*dir)));
-        if (TestOwnerGraphSpan(self, pos, &p, 1, &span) != 0 && best < span.time[1]) {
+        Vu0::Q(p) = Vu0::Add(pc, Vu0::Rotate(rot, Vu0::Q(*dir)));
+        s32 r = TestOwnerGraphSpan(self, pos, &p, 1, &span);
+        kz = Vu0::Vec::Of(k);
+        if (r != 0 && best < span.time[1]) {
             best = span.time[1];
             Vu0::Q(hit) = Vu0::Q(span.q[1]);
             if (1.0f <= best) break;
         }
         i++;
     } while (i < 11);
-    *(Vu0::Vec*)dir = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(hit), Vu0::Vec::Of(*pos)), k);
+    Vu0::Q(*dir) = Vu0::DivX(Vu0::Sub(Vu0::Q(hit), Vu0::Q(*pos)), SlotCopy(kz.q));
 }

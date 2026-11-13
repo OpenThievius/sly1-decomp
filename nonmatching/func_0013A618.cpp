@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 783/804 (97.4%), checked 2026-11-12
+// BYTES 783/804 (97.4%), checked 2026-11-13
 // NEAR: retail's size (804 bytes), 30 differing lines when built in src/main/world_listed_object.cpp (and
 //       standalone). New this round:
 //       the bank pointer `p` is one variable reused by the three transfers (C style), so it is a

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1506/1700 (88.6%), checked 2026-11-12
+// BYTES 1506/1700 (88.6%), checked 2026-11-13
 // NEAR (2026-11-10, w13-1DEBE8): ControlTintBlendCollider. Size and frame now match (0x200, s5
 // saved). The frame came from two things. (1) The second product is a by-value inline
 // (RotatedRows, g++'s named return value) passed straight to MultiplyByTransposedMatrix3x3:
