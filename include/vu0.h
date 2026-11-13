@@ -400,15 +400,6 @@ struct Vu0 {
         return *(const u128*)&slot;
     }
 
-    // The same mfc1 with no slot: the value stays in a register of its own. (Written for
-    // func_00191AC8 before its form was known; that function's is ScalarMovedReg below.)
-    static u128 ScalarInGprReg(f32 f)
-    {
-        u128 r;
-        __asm__("mfc1 %0, %1" : "=r"(r) : "f"(f));
-        return r;
-    }
-
     // A weight whole in a GPR where the float is the instruction's operand in a GPR ("r"): one
     // move between GPRs into the 128-bit value. The mfc1 that brings the float to a GPR is the
     // compiler's, as Splat's is; the float is then a GPR value everywhere (a parameter's copy
@@ -1075,56 +1066,25 @@ struct Vu0 {
         __asm__ volatile("lqc2 $vf%1, %0" : : "m"(*(const u128*)p), "i"(N) : "memory");
     }
 
-    // $vfN (N 16..31) to memory: sqc2.
-    template <int N> static void StoreVf(void* p)
-    {
-        __asm__ volatile("sqc2 $vf%1, %0" : "=m"(*(u128*)p) : "i"(N) : "memory");
-    }
-
-    // A GPR's word (a vector or float in a GPR, as a caller passes it) into $vfN (N 16..31):
-    // qmtc2.ni (the .ni form does not wait for the microprogram).
-    template <int N> static void MoveToVf(u128 bits)
-    {
-        __asm__ volatile("qmtc2.ni %0, $vf%1" : : "r"(bits), "i"(N) : "memory");
-    }
-
     // Start the microprogram at address N: vcallms.
     template <int N> static void CallMs()
     {
         __asm__ volatile("vcallms %0" : : "i"(N) : "memory");
     }
 
-    // A GPR into the integer register $viN (N 1..15): ctc2.ni, or ctc2.i (the interlocked
-    // form, which first waits for the microprogram) from MoveToViWait.
+    // A GPR into the integer register $viN (N 1..15): ctc2.ni.
     template <int N> static void MoveToVi(u32 v)
     {
         __asm__ volatile("ctc2.ni %0, $vi%1" : : "r"(v), "i"(N) : "memory");
     }
-    template <int N> static void MoveToViWait(u32 v)
-    {
-        __asm__ volatile("ctc2.i %0, $vi%1" : : "r"(v), "i"(N) : "memory");
-    }
 
-    // $viN (N 0..15) into a GPR: cfc2.ni, or cfc2.i (interlocked: it stalls until the
-    // microprogram has ended) from ReadViWait. ReadViWait<0> reads zero: the game's wait.
-    template <int N> static u32 ReadVi()
-    {
-        u32 r;
-        __asm__ volatile("cfc2.ni %0, $vi%1" : "=r"(r) : "i"(N) : "memory");
-        return r;
-    }
+    // $viN (N 0..15) into a GPR: cfc2.i (interlocked: it stalls until the microprogram has
+    // ended). ReadViWait<0> reads zero: the game's wait.
     template <int N> static u32 ReadViWait()
     {
         u32 r;
         __asm__ volatile("cfc2.i %0, $vi%1" : "=r"(r) : "i"(N) : "memory");
         return r;
-    }
-
-    // The VU0 no-operation, a vnop (upper and lower nop) the game puts between a register
-    // write and the use the microprogram will make of it.
-    static void VuNop()
-    {
-        __asm__ volatile("vnop" : : : "memory");
     }
 
     // The set-up of the light test's microprograms (0x60 and 0x168), which func_00185150

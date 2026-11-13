@@ -355,16 +355,16 @@ func_0013A498 and func_00185150 start VU0 microprograms with `vcallms`, which re
 registers ($vf21..$vf31, $vi2..$vi4) that the compiler, allocating only $vf1..$vf15, cannot
 pick. include/vu0.h has one-instruction helpers on named registers, as templates on the
 register number (the assembler takes `$vf%1` from an "i" operand): LoadVf<N> (lqc2),
-StoreVf<N> (sqc2), MoveToVf<N> (qmtc2.ni), MoveToVi<N>/MoveToViWait<N> (ctc2.ni/.i),
-ReadVi<N>/ReadViWait<N> (cfc2.ni/.i; ReadViWait<0> is the game's wait), CallMs<addr> (vcallms)
-and VuNop (vnop). All are volatile with a "memory" clobber, so they keep their order with each
+MoveToVi<N> (ctc2.ni), ReadViWait<N> (cfc2.i; ReadViWait<0> is the game's wait) and
+CallMs<addr> (vcallms). All are volatile with a "memory" clobber, so they keep their order with each
 other and with the loads and stores around them. The C around them sets and reads the registers in
 retail's order. A float the caller passes in a GPR with a 128-bit `por` is a u128 parameter
-(MoveToVf takes it, ToFloatMoved reads it). Both functions matched on 2026-11-12, after the
+(ToFloatMoved reads it). Both functions matched on 2026-11-12, after the
 maintainer allowed an interface used by one function: func_0013A498 with an interface of its
 own ("func_0013A498 matched" below), func_00185150 with LoadVf, ReadViWait, MoveToVi and CallMs
-and one statement for its set-up block ("func_00185150 matched" below). StoreVf, MoveToVf,
-MoveToViWait, ReadVi and VuNop have no user left.
+and one statement for its set-up block ("func_00185150 matched" below). The helpers neither
+function uses any more (StoreVf, MoveToVf, MoveToViWait, ReadVi and VuNop) were removed from
+include/vu0.h on 2026-11-13, as was ScalarInGprReg, which nothing used.
 
 ### func_00185150's vi block was one non-volatile asm (2026-11-10)
 
@@ -405,7 +405,7 @@ func_0013A498 shows the same thing for the loads and stores around its vcallms, 
   `slt kept,count` with kept's `= 0` into retail's `blez count` only when no volatile insn lies
   between them (can_combine_p), so `kept = 0` written just before the loop, after the last helper,
   gives retail's size (384 bytes); written above the helpers, the slt and its beqz stay (392).
-- **The barriers.** LoadVf and MoveToVf have no outputs, which stmt.c always makes volatile, and a
+- **The barriers.** LoadVf (and MoveToVf, when it existed) has no outputs, which stmt.c always makes volatile, and a
   volatile asm is a full barrier in sched1 and sched2. Retail moves across its lqc2s and sqc2s:
   `sw t2,0(sp)` (the mode parameter's spill, emitted at its copy at the top) comes after the four
   matrix lqc2s, `move v0,a0` (the return) before the sqc2 of $vf26, and the else arm computes both
@@ -624,7 +624,7 @@ and VU, with no `?` or `*`):
 - Retail holds the loop's scale as `mfc1 s6` (one saved register, frame 512) and copies it each
   iteration into the slot at 304, from which the rows' `vmulx` operands, the k2 copy and the
   vector after the loop are loaded. Forms that make the Vec itself the mfc1 output
-  (`k.q = ScalarInGprReg(scale)` in the loop) lose to loop.c, which moves the invariant set and
+  (`k.q = ScalarInGprReg(scale)` in the loop; the helper, `mfc1` with no slot, is since removed) lose to loop.c, which moves the invariant set and
   with it the Vec out of the loop: k is then a VU0 pseudo spilled at a different slot.
 - Making the GPR value a variable of its own, `u128 kg = ScalarInGprReg(scale);` before the loop,
   and copying it per iteration, `k.q = kg;` (k declared before the loop, used after it), keeps
