@@ -23,6 +23,26 @@
 // order needs the vsub to kill one value only (gravity not a pseudo that dies there: an asm
 // operand reloaded from self->gravity, or a value that lives on), which no helper in vu0.h
 // gives. Not tried: the test of self->f22AC written in each arm; parameter order.
+// w46-b (2026-11-13): not closer (16 lines); the w44 inference is checked and corrected. In the
+// -dS trace and tools/sched1.py's replay the tail's two insns are ready in the same cycle (21)
+// with equal weights (each births one value and kills two) and equal table priority (3). The
+// vsub goes first on priority: its output is read by the else arm, so it is set once and live
+// at the block's end, and adjust_priority's birthing raise lifts it to 4 (the DivX just
+// issued); p's vadd births a value that dies at its store and stays at 3. sched2 then finds
+// both ready in cycle 27 with nothing to tell them apart and keeps sched1's order. So retail's
+// order needs the vsub's output not to be a pseudo set once (a variable assigned elsewhere
+// too), and then p's statement before g's (equal priority falls to insn order). Compiled:
+// g's value in a u128 that also holds the gravity's perpendicular part earlier, p before g:
+// sched1 issues vadd then vsub in cycle 21, retail's order, but the twice-set pseudo is
+// global-alloc's in both blocks, the early block's registers change and p's load moves in
+// sched2 (36 lines); the same with g before p (29); the Vec gp assigned again through its
+// member (an ADDRESSOF, folded by cse2: 16 and 22); a u128 set first in this block (off or nd
+// reused, or the quotient built in one variable in three steps): not the class's first
+// register, folded by cse1 (16 with g first, 22 with p first); p before g alone (22: the
+// raise still puts the vsub first and p's load issues a cycle early). Open: which variable
+// of the original held both an earlier value and this one without moving the early block
+// (its early life must be one global-alloc gives retail's register). The parameter-order
+// lead does not apply: the block has no call and the function one parameter.
 #include "common.h"
 #include "vu0.h"
 #include "globals.h"

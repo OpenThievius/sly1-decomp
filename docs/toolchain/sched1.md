@@ -790,6 +790,22 @@ only the block's own pseudos (`used N times across M insns in block 36` in the .
   retail registers and changes nothing else: the two comparisons above are sufficient as well as
   necessary.
 
+- **The tail's order is the birthing raise, not a weight (w46-b, 2026-11-13).** Retail issues
+  p's `vadd` before g's last `vsub`; ours the reverse. In the `-dS` trace and the replay
+  (`tools/sched1.py FILE func_001CC818 --block 36 --trace 2468 --trace 2503`) both are ready in
+  cycle 21 with the same weight (one birth, two deaths) and the same table priority (3). The
+  vsub's output is read by the else arm after the block, so it is set once and live at the
+  block's end: adjust_priority raises it to 4, the priority of the DivX just issued, and it
+  goes first. sched2 has both ready in cycle 27 with equal rank and keeps sched1's order. The
+  earlier note's weight explanation (the vsub killing one value) is wrong: nothing about
+  gravity's operand decides it. Retail's order needs the vsub's output to be a pseudo set more
+  than once (a variable that held another value earlier), and then p's statement first.
+  Measured: with g's value in a u128 that also holds the gravity's perpendicular part earlier
+  and p written before g, sched1 issues the vadd then the vsub in cycle 21; but that pseudo is
+  global-alloc's in both of its blocks, the early block's registers move, and with them p's
+  load in sched2 (36 lines against 16). A variable first set in this block is not its class's
+  first register in cse1 and is folded (off or nd reused, a quotient built in three steps).
+
 ### Twenty-four weight products: the statement order and local-alloc's first tie (func_0019CC10)
 
 ComputeGridBlendWeights writes out[i*8 + j*4 + k] = zk * yj * xi for three x weights, two y
