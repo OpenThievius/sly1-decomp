@@ -74,7 +74,7 @@ struct ActiveColliderData {
 };
 // One of the nine 0x78-byte records at the start of a level's record (G27C230): its flags.
 struct LevelTaskRecord { s32 flags; u8 rest[0x74]; };
-// The element stack (g_elementStack), as file_15F678.cpp and file_16AA18.cpp view it.
+// The element stack (g_elementStack), as game_progress.cpp and selection_menus.cpp view it.
 struct ElementStackState { u8 pad0[0x30]; s32 f30; };
 extern ElementStackState g_elementStack;
 void MarkLevelRecordComplete(s32 index);

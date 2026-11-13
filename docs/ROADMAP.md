@@ -83,33 +83,38 @@ functions left with their address names, and the disc's data.
    compiler-generated functions (static initialisers) that end a file. The 16 KiB windows of
    `src/main/` then give way to real files, with names that are ours. A file is proved by
    building it whole, as the original was, and linking each of its sections in one piece
-   (`config/us/files.tsv`). The first, `src/main/value.cpp` (0x11AE78 to 0x11C128), is one.
-   On 2026-11-07 every byte of code, 0x100000 to 0x211E0C, is in one of 167 proved files (74 of
+   (`config/us/files.tsv`). The first, `src/main/value.cpp` (0x11AE78 to 0x11C128), is one. On
+   2026-11-07 every byte of code, 0x100000 to 0x211E0C, is in one of 167 proved files (74 of
    game code, 93 of the libraries, the math library and the toolchain's runtime; 168 since
-   `src/main/gauge_manager.cpp` was cut from its neighbour on 2026-11-10), and the data
-   the 16 KiB windows defined is in its files too: in the proved files that read it, and in three
-   files of data only that open .rodata (`class_descriptors.cpp`, `property_registry.cpp`,
-   `global_tables.cpp`; the build proves their place, not where one ends and the next begins).
-   The one window file left, `src/lib/001F8000.cpp` (now `src/lib/constructor_list.cpp`), holds
-   the constructor list the linker builds. Many proved files are one file between two exact
-   edges that could be several; each commit says which. On 2026-11-11 the 26 files still named after their first address were
-   searched for inner edges: five splits are proved by retail (a section start after the
-   linker's padding, a vtable that GCC writes after a file's literals and jump tables, a string
-   literal another object holds), and seven more files are cut where the role plainly changes, each
-   with a head comment saying the edge is not proved and the range it could lie in; 192 files
-   then, 26 of them still named after their first address because their roles interleave or
-   the code shows none. On 2026-11-12 path_follower.cpp was cut in three and curve_segment.cpp
-   cut from placed_object.cpp where no signal shows an edge, by the maintainer's decision, so
-   that func_001D9488 and func_00130C58, retail's only at loop.c's threshold of 94, build in
-   units of their own at `-mvu0-use-vf0-vf30` (docs/toolchain/loops.md, "The splits on the
-   threshold"): 195 files, 28 named after their first address.
-   A file whose range holds original assembly includes those functions at their place
-   (`INCLUDE_ASM`, include/asm_func.h, tools/asm_func.py): `src/main/file_1E5378.cpp`
-   (0x1E5378 to 0x1E88D0, five of its 34 functions assembly) is the first. A file is named
-   after its first address until what it was is known. A function of its range not matched yet
-   is included the same way, so that a file is proved before all of its C is: it still counts
-   as unmatched, and its C replaces the line when it matches. Retail's constructor list
-   (`D_0027B130`) gives the exact end of every file with a static initialiser.
+   `src/main/file_14B6A8.cpp`, now `gauge_manager.cpp`, was cut from its neighbour on
+   2026-11-10), and the data the 16 KiB windows defined is in its files too: in the proved files
+   that read it, and in three files of data only that open .rodata (`class_descriptors.cpp`,
+   `property_registry.cpp`, `global_tables.cpp`; the build proves their place, not where one
+   ends and the next begins). The one window file left, `src/lib/001F8000.cpp` (now
+   `src/lib/constructor_list.cpp`), holds the constructor list the linker builds. Many proved
+   files are one file between two exact edges that could be several; each commit says which. On
+   2026-11-11 the 26 files still named after their first address were searched for inner edges:
+   five splits are proved by retail (a section start after the linker's padding, a vtable that
+   GCC writes after a file's literals and jump tables, a string literal another object holds),
+   and seven more files are cut where the role plainly changes, each with a head comment saying
+   the edge is not proved and the range it could lie in; 192 files then, 26 of them still named
+   after their first address because their roles interleave or the code shows none. On
+   2026-11-12 file_1D62E0.cpp (now path_follower.cpp) was cut in three and curve_segment.cpp cut
+   from placed_object.cpp where no signal shows an edge, by the maintainer's decision, so that
+   func_001D9488 and func_00130C58, retail's only at loop.c's threshold of 94, build in units of
+   their own at `-mvu0-use-vf0-vf30` (docs/toolchain/loops.md, "The splits on the threshold"):
+   195 files, 28 named after their first address. On 2026-11-13 those 28 (27 of game code and
+   `src/lib/file_1FAC00.cpp`) and the window file `src/lib/001F8000.cpp` were named by role:
+   each takes the name of what it holds, or of the family that holds most of its code where
+   several share it, and its head says which (the `refactor(files)` commits). All 195 files now
+   have names by role. A file whose range holds original assembly includes those functions at
+   their place (`INCLUDE_ASM`, include/asm_func.h, tools/asm_func.py):
+   `src/main/arc_element.cpp` (0x1E5378 to 0x1E88D0, five of its 34 functions assembly, then
+   named `file_1E5378.cpp`) is the first. A new file is named after its first address until
+   what it was is known. A function of its range not matched yet is included the same way, so that a
+   file is proved before all of its C is: it still counts as unmatched, and its C replaces the
+   line when it matches. Retail's constructor list (`D_0027B130`) gives the exact end of every
+   file with a static initialiser.
 5. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
    counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C, in
    `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)). On 2026-11-11, 50 PAL functions

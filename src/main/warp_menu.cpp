@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The source file from 0x1E88D0 to 0x1F2758, built whole (config/us/files.tsv): it starts where
-// file_1E5378.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
+// arc_element.cpp's _GLOBAL_$I$ ends and ends with its own (func_001F2738, in retail's constructor
 // list D_0027B130). Its .rodata runs 0x24E600-0x24E840 and its .data 0x275B60-0x276680, which ends
 // with a build stamp no code reads; the C library's state record after it is
-// src/lib/library_state.c's (that file says why). Named after its first address until what it was is known.
+// src/lib/library_state.c's (that file says why). Its name is ours, after its largest family, the
+// warp page and menu, whose text styles its static initialiser builds. That is about a fifth of
+// its code: it also holds the keyed cone agent, the element stack, the world's update, the math
+// helpers, the tempo agent with its beat presses and timelines, the VIF writer, the attached set
+// and the screen fade.
 #include "common.h"
 #include "switched_collider.h"
 #include "list_iter.h"

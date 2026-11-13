@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// From 0x16AA18 to 0x16C470: the current object's choices, the selection caption and the grid
+// selector (three pick-one screens, each with its input, opening and drawing), and the box styles
+// its static initialiser builds. Its name is ours, after that role.
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"

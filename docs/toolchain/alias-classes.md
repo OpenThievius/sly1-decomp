@@ -2518,7 +2518,7 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   declared (in, out, s, t) the second call set a1 before $f13; declared (s, t, in, out), $f13
   before a0. Declared `(Vec3* in, f32 s, f32 t, Vec3* out)` all three match (the third's a0
   goes first in sched2 because the `still = 0` after the call, allocated to a0, is one
-  dependent more). The definition (file_1E88D0) matches with either order, so it takes the
+  dependent more). The definition (warp_menu) matches with either order, so it takes the
   order its caller proves.
 - **A function-pointer type is a prototype too (func_0012F210).** The position curves'
   evaluate slot was declared (owner, mode, key, scale, ...): func_0012F210's first two calls
@@ -2529,7 +2529,7 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
 - **SolveQuadratic is `(f32 a, f32 b, f32 c, f32* roots)` (func_00130C58).** Declared with
   the roots first, the curve-window search's four calls set a0 before $f12 in cases 0 and 2,
   where retail copies t into $f12 first; with the roots last every case's moves are retail's.
-  Its definition (file_1E88D0) and its other callers (func_0017FAC0, func_001BC260,
+  Its definition (warp_menu) and its other callers (func_0017FAC0, func_001BC260,
   func_001EA4B8) match with either order; func_00156718 (effect_spawner) already declared the roots
   last, so every declaration now agrees.
 - **BuildYawPitchMatrix is `(f32 yaw, f32 pitch, Mat02* out)` (func_00185538).** GetAimRotation's

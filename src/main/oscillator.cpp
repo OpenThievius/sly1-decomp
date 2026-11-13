@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The source file from 0x1F2758 to 0x1F59C4, built whole (config/us/files.tsv): it starts where
-// file_1E88D0.cpp's _GLOBAL_$I$ ends and ends where the libraries begin (config/us/layout.tsv).
+// warp_menu.cpp's _GLOBAL_$I$ ends and ends where the libraries begin (config/us/layout.tsv).
 // Its .rodata is the two jump tables of its assembly at 0x24E840 and 0x24E860; it has no .data
 // or .bss. Its .rodata range runs to 0x24E980, where src/lib/library_state.c's begins, and holds
 // after the jump tables the character class table (0x24E878 to 0x24E979, from the disassembly),

@@ -7,8 +7,8 @@
 // this file's .rodata ends with FormatConversionArg's jump table (0x24E4A0), and no function from
 // 0x1E1DB8 to 0x1E2420 reads the next file's data, so any function start in that range can begin
 // the next file. The cut is at 0x1E2420, after CreateRenderThread, the last reader of this file's
-// .data (g_mainAndRenderThreads), where the on-off objects begin. Its name is ours, after its
-// first address.
+// .data (g_mainAndRenderThreads), where the on-off objects begin. Its name is ours, after the text
+// formatter, which holds most of its code.
 #include "common.h"
 #include "asm_func.h"
 #include "on_off_object.h"

@@ -5,7 +5,7 @@
 // provably starts at 0x275970: the word before it, g_movieDecodeThread (D_00275964), ends at
 // 0x275968, where D_00275970 (a float, aligned to 4) would follow in one file; retail has 8 bytes
 // of zeros and puts it on 16, the linker's padding before a new file's .data. Its start in the
-// code is a choice, any function start from 0x1E1DB8 to 0x1E2420 (file_1E08F8.cpp says why); the
+// code is a choice, any function start from 0x1E1DB8 to 0x1E2420 (text_format.cpp says why); the
 // cut is at 0x1E2420, the first on-off object function. It holds several families; its name is
 // ours, after the largest, the on-off object and its camera controller.
 #include "common.h"

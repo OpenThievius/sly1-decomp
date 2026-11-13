@@ -289,7 +289,7 @@ ChoosePlayerTargetByCost's curve loop, nonmatching/func_001CF158.cpp):
   loop (statement order, named locals and the loop variable leave the count at 137).
 - **A function's parameter order shows in its callers' moves.** The same function's vector loop
   sets `$f14` (the low end, 50.0) after a0 and a1: FindLocalMinimum's prototype is (fn, ctx,
-  start, step, lo, hi, outX, outY), which its definition (file_1E88D0) and its other callers
+  start, step, lo, hi, outX, outY), which its definition (warp_menu) and its other callers
   match as well as the old order (the moves follow it, docs above, func_0013A128).
 
 ### Solved: the weight and the limit named at the top of the loop (func_001CF158)
@@ -1265,7 +1265,7 @@ near misses that reach retail or come closest at some N (marked *), by address:
 | func_00154370 | active_set_solver.cpp | 10-17 |
 | func_00157B88 | effect_spawner.cpp | 9-18 |
 | func_0015E318 | font.cpp | 14-31 |
-| func_0015FD78 | file_15F678.cpp | 8-17 |
+| func_0015FD78 | game_progress.cpp | 8-17 |
 | func_0016C528 | link_constraint.cpp | 13-31 |
 | func_00177990 | player.cpp | **15**-31 |
 | func_00178678 | player.cpp | 9-20 |

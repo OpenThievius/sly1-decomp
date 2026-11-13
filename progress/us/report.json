@@ -18360,7 +18360,7 @@
    }
   },
   {
-   "name": "game/file_15F678",
+   "name": "game/game_progress",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "12616",
@@ -19318,7 +19318,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_15F678.cpp"
+    "source_path": "src/main/game_progress.cpp"
    }
   },
   {
@@ -20302,7 +20302,7 @@
    }
   },
   {
-   "name": "game/file_16AA18",
+   "name": "game/selection_menus",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "6700",
@@ -20537,7 +20537,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_16AA18.cpp"
+    "source_path": "src/main/selection_menus.cpp"
    }
   },
   {
@@ -35079,7 +35079,7 @@
    }
   },
   {
-   "name": "game/file_1BE1E8",
+   "name": "game/sound_system",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "12048",
@@ -35953,11 +35953,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1BE1E8.cpp"
+    "source_path": "src/main/sound_system.cpp"
    }
   },
   {
-   "name": "game/file_1C1190",
+   "name": "game/object_properties",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "6188",
@@ -36192,7 +36192,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1C1190.cpp"
+    "source_path": "src/main/object_properties.cpp"
    }
   },
   {
@@ -40710,7 +40710,7 @@
    }
   },
   {
-   "name": "game/file_1E08F8",
+   "name": "game/text_format",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "6876",
@@ -41071,7 +41071,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1E08F8.cpp"
+    "source_path": "src/main/text_format.cpp"
    }
   },
   {
@@ -41425,7 +41425,7 @@
    }
   },
   {
-   "name": "game/file_1E5378",
+   "name": "game/arc_element",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "13588",
@@ -41791,11 +41791,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1E5378.cpp"
+    "source_path": "src/main/arc_element.cpp"
    }
   },
   {
-   "name": "game/file_1E88D0",
+   "name": "game/warp_menu",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "40164",
@@ -43933,7 +43933,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1E88D0.cpp"
+    "source_path": "src/main/warp_menu.cpp"
    }
   },
   {

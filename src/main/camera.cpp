@@ -1186,7 +1186,7 @@ void* MoveMemory(void* dst, void* src, s32 bytes);
 
 // Moves the entries from the given one on up by one, to open a slot for a new entry.
 // Its parameter copies give retail its (i * 16 + self) base shared by both pointers
-// (as RemoveFromSmallList's helper in file_1E88D0.cpp).
+// (as RemoveFromSmallList's helper in warp_menu.cpp).
 struct MoveEntriesUp {
     static void Of(CameraControllerEntry* dst, CameraControllerEntry* src, s32 n)
     {

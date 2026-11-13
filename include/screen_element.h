@@ -447,7 +447,7 @@ typedef char check_T217D_330[sizeof(T217D_330) == 0x260 ? 1 : -1];
 
 // The stack of screen elements the menus push and pop (g_elementStack, D_00275BC0): its state
 // (SetElementStackState), and the elements, whose top gets the pad each frame
-// (UpdateElementStack, file_1E88D0.cpp).
+// (UpdateElementStack, warp_menu.cpp).
 struct ElementStack {
     u8 pad00[4];
     s32 state;              // 0x04: 0 .. 8 (SetElementStackState)

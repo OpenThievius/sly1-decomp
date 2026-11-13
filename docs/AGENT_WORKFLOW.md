@@ -287,7 +287,7 @@ Measured on this compiler; add to this list when you learn something.
     first and the vtable (`.align 3`, 8 bytes per entry and 8 for the end) after it. So a GCC
     vtable followed by another function's literal or jump table ends a file's `.rodata`:
     D_0024A0E0 (PacketWriter's base, pooled_object.cpp) before PivotActiveSet's jump table at
-    0x24A100 (active_set_solver.cpp), and D_0024A6F8 (the GIF writer's, file_15F678.cpp) before
+    0x24A100 (active_set_solver.cpp), and D_0024A6F8 (the GIF writer's, game_progress.cpp) before
     ReadPlacedObjectModel's FLT_MAX at 0x24A710 (placed_object_model.cpp).
   - Functions GCC emits after the static initialiser and before `_GLOBAL_$I$` (the setters at
     0x137248 to 0x137268) look like inline functions it emitted out of line at the end of the file.

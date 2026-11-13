@@ -2,7 +2,7 @@
 // A buffered writer: func_001D7190(w, text, n) writes into it, func_001D72C8 flushes the
 // 0x80-byte buffer at 0x18, and func_001D7148(w, flags) is its destructor (it flushes, and with
 // flags & 1 frees it with func_0018D778). func_001E0CD0, func_001E1028, func_001E17A8,
-// func_001E1A08 and func_001E1DB8 (file_1E08F8.cpp) write through it. Written for this project
+// func_001E1A08 and func_001E1DB8 (text_format.cpp) write through it. Written for this project
 // from what retail's code does (build/swarm/st3/groups.tsv, g3275).
 #ifndef OUTPUT_BUFFER_H
 #define OUTPUT_BUFFER_H

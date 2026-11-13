@@ -5,7 +5,8 @@
 // GCC 2.95 writes a file's vtables after all of its functions' literals and jump tables, so the
 // FLT_MAX after it starts the next file (placed_object_model.cpp, which says why its start in
 // the code is a choice). One file between two edges otherwise; it could be several. Its name is
-// ours, after its first address.
+// ours, after its largest family, the game progress (the level entries, the completion and the
+// saved counts); the object groups, the GIF packet writer and the vertex batch share it.
 #include "common.h"
 #include "id_lookup_object.h"
 #include "placed_object.h"

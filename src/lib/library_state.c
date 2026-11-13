@@ -4,11 +4,11 @@
  * table (signal.c). A file with no code (an empty range in config/us/files.tsv), its .data from
  * 0x276680 and its .rodata, the string "C" the record points to at +0x34, at 0x24E980. That
  * string proves the file: a literal is emitted in the object that uses it, and 0x24E980 lies after
- * oscillator.cpp's .rodata (from 0x24E840), so the record cannot be in file_1E88D0.cpp, whose
+ * oscillator.cpp's .rodata (from 0x24E840), so the record cannot be in warp_menu.cpp, whose
  * .rodata ends before it; it is a later file, of the libraries, whose .data comes after
- * file_1E88D0.cpp's and before system_calls.cpp's. Where it starts in .data is a choice: the
- * strings from 0x276658 to 0x27667C, which nothing reads, could be the end of file_1E88D0.cpp or
- * the start of this file; they stay in file_1E88D0.cpp. Its place among the libraries' code is a
+ * warp_menu.cpp's and before system_calls.cpp's. Where it starts in .data is a choice: the
+ * strings from 0x276658 to 0x27667C, which nothing reads, could be the end of warp_menu.cpp or
+ * the start of this file; they stay in warp_menu.cpp. Its place among the libraries' code is a
  * choice too (any point from 0x1F59C4 to 0x1F6900 links the same; its range is at 0x1F6900).
  * Between oscillator.cpp's jump tables and the string lies the character class table
  * (0x24E878 to 0x24E979, read through g_charClassFlags), which could be the end of

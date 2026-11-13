@@ -4,7 +4,7 @@
 // solving of collider groups, then the heap sort of records (SwapSortRecords, HeapSortRecords)
 // that other files call. It starts at an exact edge (state_walker.cpp's end). Its end is NOT
 // proved by retail: the cut at 0x1BE1E8 follows the change of role only, from the collider to the
-// sound system of file_1BE1E8.cpp. Retail's data allows it (this file's last .rodata, 0x24D2A0,
+// sound system of sound_system.cpp. Retail's data allows it (this file's last .rodata, 0x24D2A0,
 // is read by 0x1BB290 and its last .data, D_002746E0, by 0x1BB028; the next file's first,
 // 0x24D2A8 and 0x274720, from 0x1BE1E8 on, with no gap of padding at either), so the cut could
 // lie at any function start from 0x1BB378 to 0x1BE1E8 (0x1BE068 would give the sort to the next

@@ -13,8 +13,8 @@
 // 0x1C1190, where the script entries begin. The cut from collider.cpp at 0x1BE1E8 is the change
 // from the collider to sound (collider.cpp says what range retail's data allows). The sound
 // system alone cannot be a file: a cut at 0x1C0F30 would begin the next file's .rodata with that
-// FLT_MAX, off 16, so classes 0x66 and 0x81 stay here unless they were a file of their own. Named
-// after its first address: its families have no one name.
+// FLT_MAX, off 16, so classes 0x66 and 0x81 stay here unless they were a file of their own. Its
+// name is ours, after the sound system, which holds most of its code.
 #include "common.h"
 #include "sound_record.h"
 #include "script_value.h"

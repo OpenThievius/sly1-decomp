@@ -4,8 +4,9 @@
 // transfers with the static initialiser that builds them (func_001C27B0, its _GLOBAL_$I$
 // func_001C29C8 in retail's constructor list). It ends at an exact edge. Its start is NOT proved
 // by retail: the cut at 0x1C1190 follows the change of role, inside the range retail's .rodata
-// allows (file_1BE1E8.cpp says why: from 0x1C10D8 to 0x1C15D8), and its two families could be
-// two files. Named after its first address: none of its families names the whole.
+// allows (sound_system.cpp says why: from 0x1C10D8 to 0x1C15D8), and its two families could be
+// two files. Its name is ours, after the script entries and object properties, which hold most of
+// its code.
 #include "common.h"
 #include "sound_record.h"
 #include "script_value.h"

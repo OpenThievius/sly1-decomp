@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// From 0x1E5378 to 0x1E88D0: the player-linked collider, the arc (a screen element of 57 points on
+// a half circle, with its outline and ticks) and the grey colour its static initialiser builds.
+// Its name is ours, after the arc, which holds most of its code.
 #include "common.h"
 #include "switched_collider.h"
 #include "asm_func.h"

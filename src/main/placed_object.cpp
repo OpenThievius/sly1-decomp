@@ -676,7 +676,7 @@ extern const Fn_Table D_002195B0[10];
 extern const Fn_Table D_002195D8[10];
 extern const Fn_Table D_00219600[26];
 
-// The script list a property getter fills (file_1C1190 defines it; AppendPropertyToScriptList).
+// The script list a property getter fills (object_properties defines it; AppendPropertyToScriptList).
 struct ScriptListBuilder;
 s32 AppendPropertyToScriptList(ScriptListBuilder* context, PlacedObject** obj);
 

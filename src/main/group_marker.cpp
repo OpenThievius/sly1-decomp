@@ -59,7 +59,7 @@ void UploadProjectionConstants(void);
 void UploadCameraOncePerFrame(void);
 void AddDmaRefTagIfChanged(void* self, void* a, void* b);
 void WriteVifFlushA(void* self);
-extern WarpPage* D_0026FA68;   // the warp page on view (file_1E88D0 sets its mode and cursor)
+extern WarpPage* D_0026FA68;   // the warp page on view (warp_menu sets its mode and cursor)
 extern s32 g_maskImageUploads[];
 extern Camera* g_camera;
 void SnapCameraZoom(Camera* self, f32 v);
