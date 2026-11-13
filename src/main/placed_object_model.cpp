@@ -4,14 +4,14 @@
 // morph-target packet builders, the attachments (start, bind, copy, update, their DMA chain),
 // UpdateLinkConstraint and DrawModelPart, ending with the static initialiser that builds the
 // default colour D_002623E0 (config/us/generated.tsv). Its .rodata provably starts a file:
-// file_15F678.cpp's range holds the GIF writer's GCC vtable D_0024A6F8 (its one virtual is
+// game_progress.cpp's range holds the GIF writer's GCC vtable D_0024A6F8 (its one virtual is
 // CloseGifTag), and after it ReadPlacedObjectModel's FLT_MAX at 0x24A710 and the jump tables of
 // BuildStripMeshPacket and DrawModelPart; GCC 2.95 writes a file's vtables after all of its
 // functions' literals and jump tables (docs/AGENT_WORKFLOW.md, "Finding and proving a file"),
-// so the vtable ends file_15F678.cpp's .rodata. Its start in the code is a choice: any function
+// so the vtable ends game_progress.cpp's .rodata. Its start in the code is a choice: any function
 // start from 0x1612E8 (after CloseGifTag) to 0x162890 links to the same bytes, since the
 // functions between read no .rodata or .data of either file. The cut is at
-// ReadPlacedObjectModel, where this file's data provably begins (file_14B6A8.cpp's precedent);
+// ReadPlacedObjectModel, where this file's data provably begins (gauge_manager.cpp's precedent);
 // the vertex batch before it (0x1619C0 to 0x162890) could belong to either file or to a third.
 // The name is ours, after its role.
 #include "common.h"

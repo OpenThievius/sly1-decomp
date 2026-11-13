@@ -5,7 +5,7 @@
 // (config/us/classes.tsv).
 //
 // The fields are the ones the class's own methods (src/main/collider.cpp, collider_contact.cpp,
-// file_15F678.cpp) and the families under it read. A 0x03 object is a part of a body: the
+// game_progress.cpp) and the families under it read. A 0x03 object is a part of a body: the
 // topmost 0x03 object above it (PlacedObject::root, root03()) is the body, which keeps the list of its
 // parts, the contacts between bodies and the flags that sum up its parts.
 #ifndef COLLIDER_H

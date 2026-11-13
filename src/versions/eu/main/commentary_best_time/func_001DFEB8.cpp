@@ -9,7 +9,7 @@ struct Ent_11A338_eu { u32 pad0; f32 f4; void* w8; };
 struct Obj_11A338_eu;
 struct VTab_11A338_eu { u8 pad[0x20]; void (*f20)(Obj_11A338_eu*, const char*); u8 pad2[0x38 - 0x24]; void (*f38)(Obj_11A338_eu*); };
 struct Obj_11A338_eu { VTab_11A338_eu* vt; u8 pad0[0x518 - 4]; s32 color; u8 pad1[4]; void** slot; u8 pad2[0x57C - 0x524]; s32 f26c; s32 f270; };
-const char* func_eu_001DDAB0(s32 id);
+const char* GetTextTableEntry(s32 id);
 
 void InitCommentaryPromptElement(Obj_11A338_eu* self)
 {
@@ -38,7 +38,7 @@ void InitCommentaryPromptElement(Obj_11A338_eu* self)
     }
     if (g_currentEntry->bits & 8) {
         if (((CommentaryRecord*)g_currentWorld->f2310)->differs()) {
-            self->vt->f20(self, func_eu_001DDAB0(0xAA));
+            self->vt->f20(self, GetTextTableEntry(0xAA));
             SetScreenElementHoldTime(self, 5.0f);
             self->vt->f38(self);
             self->f26c = 1;

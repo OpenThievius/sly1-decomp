@@ -18,12 +18,12 @@ struct Column_eu_14AF38 {
     Item_eu_14AF38 items[4];    // 0x574
 };
 
-char* func_eu_001DDAB0(char* text);
+char* GetTextTableEntry(char* text);
 
 void PostItemColumnEntry(Column_eu_14AF38* self, s32 index, char* text, f32 hold)
 {
     Item_eu_14AF38* item = &self->items[index];
-    item->vt->m08((ScreenElement*)item, func_eu_001DDAB0(text));
+    item->vt->m08((ScreenElement*)item, GetTextTableEntry(text));
     f32 width = 0.0f;
     for (s32 i = 0; i < self->count; i++) {
         width = self->items[i].w >? width;

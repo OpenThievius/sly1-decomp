@@ -9,7 +9,7 @@ struct Obj_136530_eu {
     f32 scale;
 };
 
-void func_eu_0015DCB8(void* out, void* p, s32 handle, s32 d);
+void InitWideTextReader(void* out, void* p, s32 handle, s32 d);
 
 s32 IsTextPanelTextTyped(Obj_136530_eu* self)
 {
@@ -18,7 +18,7 @@ s32 IsTextPanelTextTyped(Obj_136530_eu* self)
     if (self->flag == 0) {
         return 1;
     }
-    func_eu_0015DCB8(buf, &self->flag, self->handle, 0);
+    InitWideTextReader(buf, &self->flag, self->handle, 0);
     s32 n = CountTextChars(buf);
     s32 v = (s32)((g_gameTime - self->f578) * self->scale);
     return v >= n;

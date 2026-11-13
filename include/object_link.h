@@ -12,7 +12,7 @@
 // theirs. A few labels end with one more word after the entries (D_00262718: nine entries and a
 // word; D_00262E40: 151 and a word; D_00275750: nine and a word): the next table's alignment on
 // 8, so player.cpp defines D_00262E40 with its 151 entries. D_0026AA50 ends with two zero words
-// that are not alignment (its 26 entries end on 8); file_198980.cpp defines it over its whole
+// that are not alignment (its 26 entries end on 8); object_gatherer.cpp defines it over its whole
 // label, as a struct, so it is not declared here.
 #ifndef OBJECT_LINK_H
 #define OBJECT_LINK_H

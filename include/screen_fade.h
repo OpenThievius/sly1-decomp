@@ -4,11 +4,11 @@
 // and g3641).
 //
 // D_00275F80 is not an object of class 0x67 (0x570 bytes): its label is a word, the next one
-// (D_00275F84, which file_14EE40.cpp reads) runs to D_00275FC0, and every reader stays inside
+// (D_00275F84, which pooled_object.cpp reads) runs to D_00275FC0, and every reader stays inside
 // those 0x40 bytes. Its functions are func_001EFCE8, func_001EFD10, func_001EFEE0, func_001EFFA0
-// (file_1E88D0.cpp), func_001F00C0, func_001F00F0 and func_001F0220 (file_1E88D0.cpp), each taking it
+// (warp_menu.cpp), func_001F00C0, func_001F00F0 and func_001F0220 (warp_menu.cpp), each taking it
 // as the first parameter; func_001AD970, func_001F3C38 and func_001F4408 name it.
-// file_1E88D0.cpp defines it whole, as zeros; D_00275F84 is its mode.
+// warp_menu.cpp defines it whole, as zeros; D_00275F84 is its mode.
 //
 // A black fade over the screen: `opacity` goes from 0 to 1 over the time since
 // modeStartTime (func_001EFD10), func_001EFEE0 draws the black rectangle with it, and the

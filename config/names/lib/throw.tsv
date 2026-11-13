@@ -2,6 +2,7 @@ symbol	name	evidence
 func_001FD920	AbortOnTerminate	the default terminate hook D_00278048: calls AbortProgram
 func_001FD930	RunTerminateHook	calls the function the terminate hook D_00278048 holds (the exception runtime and HandleAbstractCall call it)
 func_001FD958	SelectArgumentIfTypeNamesEqual	compares a type's name with a given one through CompareStrings (func_001F6738): returns its third argument when they are equal, 0 otherwise (throw.c; it sits in the exception runtime's unwind table with no direct caller)
+func_001FD988	DoNothingForExceptionRuntime	an empty function of throw.c (jr $ra and a nop) with no caller: only the exception runtime's unwind table D_00278050 names it, between SelectArgumentIfTypeNamesEqual and AllocateZeroedNodeOrTerminate
 func_001FD990	AllocateZeroedNodeOrTerminate	allocates a 0x18-byte node under the runtime lock, calls RunTerminateHook when that fails, zeroes it and points its field at +4 to its own +0x10 (throw.c; it sits in the exception runtime's unwind table with no direct caller)
 func_001FD9E8	GetExceptionContext	returns the exception context by calling the getter in D_0027804C (throw.c)
 func_001FDA10	GetActiveExceptionSlot	returns the address of the active exception pointer, at +8 of the exception context (throw.c; the exception entry points read it)

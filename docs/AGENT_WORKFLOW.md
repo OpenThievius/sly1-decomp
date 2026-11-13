@@ -267,15 +267,15 @@ Measured on this compiler; add to this list when you learn something.
     on 8 in every file, and a file that holds only words aligns its `.bss` to 4 (`objdump -h`
     of file_149398.o: `.bss 2**2`), so the two statics D_0027C008 and D_0027C00C can be two
     files' `.bss`. Built whole, the cuts at 0x14A7B8, 0x14A888, 0x14ABD0, 0x14B608 and
-    0x14B6A8 all printed `MATCH`. The cut is at 0x14B6A8 (file_14B6A8.cpp), where the second
+    0x14B6A8 all printed `MATCH`. The cut is at 0x14B6A8 (gauge_manager.cpp), where the second
     file's data provably begins; the functions before it could belong to either file or a third.
     They are now three files cut by role only (item_column.cpp, symmetric_solve.cpp,
-    file_14B550.cpp), and file_149398.cpp is camera_controller.cpp, ending at 0x14ABD0.
+    agent_registration.cpp), and file_149398.cpp is camera_controller.cpp, ending at 0x14ABD0.
   - A cut no signal shows, made because one unit at one set of flags cannot build its
     functions, is a choice too, decided by the maintainer: on 2026-11-12, on loop.c's threshold
     (docs/toolchain/loops.md, "A threshold of 94" and "The splits on the threshold"),
-    file_1D8E40.cpp (0x1D8E40 to 0x1D9AC8, `-mvu0-use-vf0-vf30`) was cut out of file_1D62E0.cpp
-    for func_001D9488, leaving file_1D62E0.cpp (to 0x1D8E40) and file_1D9AC8.cpp (from 0x1D9AC8),
+    path_follower_helpers.cpp (0x1D8E40 to 0x1D9AC8, `-mvu0-use-vf0-vf30`) was cut out of path_follower.cpp
+    for func_001D9488, leaving path_follower.cpp (to 0x1D8E40) and world.cpp (from 0x1D9AC8),
     and curve_segment.cpp (0x130168 to 0x130F48, the same flags) out of placed_object.cpp for
     func_00130C58, where the role changes inside the range the data allows.
     Its edges are where each data section separates with the fewest globals defined in one unit
@@ -286,8 +286,8 @@ Measured on this compiler; add to this list when you learn something.
     whole, a class with two virtuals and then a function with a jump table, puts the jump table
     first and the vtable (`.align 3`, 8 bytes per entry and 8 for the end) after it. So a GCC
     vtable followed by another function's literal or jump table ends a file's `.rodata`:
-    D_0024A0E0 (PacketWriter's base, file_14EE40.cpp) before PivotActiveSet's jump table at
-    0x24A100 (active_set_solver.cpp), and D_0024A6F8 (the GIF writer's, file_15F678.cpp) before
+    D_0024A0E0 (PacketWriter's base, pooled_object.cpp) before PivotActiveSet's jump table at
+    0x24A100 (active_set_solver.cpp), and D_0024A6F8 (the GIF writer's, game_progress.cpp) before
     ReadPlacedObjectModel's FLT_MAX at 0x24A710 (placed_object_model.cpp).
   - Functions GCC emits after the static initialiser and before `_GLOBAL_$I$` (the setters at
     0x137248 to 0x137268) look like inline functions it emitted out of line at the end of the file.
@@ -305,8 +305,8 @@ Measured on this compiler; add to this list when you learn something.
   - The first stretch of `.rodata` (0x217380 to 0x248D80) is three such files, linked between
     entry.cpp and object_host_functions.cpp (an empty range at 0x1000C8): class_descriptors.cpp
     (the class descriptors and method tables, grouped by the file of their methods but in no
-    order of those files: file_1F2758's classes at 0x2178C0, zone_collider's at 0x218970,
-    file_1F2758's again at 0x21C038), property_registry.cpp (the property lists by class id),
+    order of those files: oscillator's classes at 0x2178C0, zone_collider's at 0x218970,
+    oscillator's again at 0x21C038), property_registry.cpp (the property lists by class id),
     and global_tables.cpp (tables read all over: the sound table, the classes by id, the disc
     check's checksum table, keys, the level table whose names are in commentary_best_time.cpp's
     own `.rodata`). The last also holds the first 0x58 bytes of `.data`, just before

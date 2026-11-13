@@ -47,7 +47,7 @@ skip path keeps the count. Both are needed.
 
 Read from jump.c (delete_jump, delete_computation), reload1.c (reload_cse_regs), reorg.c and
 local-alloc.c (block_alloc's widened lifetimes) with `-ds -dG -dl -dg -dR -dJ` dumps and the
-`-dp` assembly (2026-11-10, ComputePlayerJumpVelocity, src/main/file_17D248.cpp). Retail's tail
+`-dp` assembly (2026-11-10, ComputePlayerJumpVelocity, src/main/player_state2.cpp). Retail's tail
 is `lq; li v1,3; sq; swc1 $f0,8(a1); lw v0,0x2220(a2); lwc1 $f1,0x158(a2); lwc1 $f0,8(a1);
 max.s`: a dead constant, a dead load, and out->z read back right after it was stored.
 
@@ -211,7 +211,7 @@ params at 4*17/438 = 0.155 against nOffsets at 2*5/68 = 0.147 took s8 from it.
 
 ### A weight's address hoisted out of the loop: a reference's block notes (func_0017E3C8)
 
-func_0017E3C8 (src/main/file_17D248.cpp) went from 92.5% to EXACT on one change, a float
+func_0017E3C8 (src/main/player_state2.cpp) went from 92.5% to EXACT on one change, a float
 weight passed to its helper by value instead of by reference (2026-11-09). Its loop body
 ends `p = from + tmp * -D_00264020 + unitZ * D_00264024` (MulAddX2); retail loads the second
 weight `lui v1; lw v1, %lo(D_00264024)(v1); qmtc2 v1, vf5`, and gives `from` and the result
@@ -578,7 +578,7 @@ by one), 2026-11-10:
   The rotated first test still reads `980(s1)`: CSE folds i = 0.
 - **Two pointers from one base, copied: an inline's parameters.** Retail's `addu a0,s0,s1;
   move a1,a0; addiu a0,a0,996; addiu a1,a1,980` is two equal sums that CSE kept apart, the
-  second made a `move` by reload_cse, as in RemoveFromSmallList (file_1E88D0.cpp, its
+  second made a `move` by reload_cse, as in RemoveFromSmallList (warp_menu.cpp, its
   MoveItemsDown helper) and the section above: MoveMemory called through a small inline whose
   parameters are the two entry pointers (`MoveEntriesUp::Of(&self->stack[i + 1],
   &self->stack[i], n)`). Called directly, CSE shares one `i*16 + self` and combine folds the adds
@@ -1038,7 +1038,7 @@ func_001D36F0 (2026-11-10, src/main/player_request.cpp):
 ### A constant passed through an inline is no pseudo for cse2 to copy (func_0016BEA0)
 
 Read from calls.c, integrate.c and cse.c with `-dt -dL -dS -dl` dumps (2026-11-10,
-DrawGridSelector, src/main/file_16AA18.cpp):
+DrawGridSelector, src/main/selection_menus.cpp):
 
 - **Retail's sign.** `lui/ori/mtc1 $f12` for the push's 1.3 after GetFontById, a second
   `lui/ori/mtc1 $f27` for the loop's 1.3, and `mov.s $f13,$f12` in the call's delay slot. Ours
@@ -1262,7 +1262,7 @@ tails). The mechanism, from the .rtl and .cse dumps:
 
 ### A case that seems to store the compare's register: reorg's redundant constant (func_001E8A50)
 
-The keyed cone agent's state hook (src/main/file_1E88D0.cpp) was 8 bytes long. Read from cse.c
+The keyed cone agent's state hook (src/main/warp_menu.cpp) was 8 bytes long. Read from cse.c
 and reorg.c with `-dj -dJ -dd` dumps (2026-11-10):
 
 - **The size was a wrong constant.** In its inner switch, retail's case 0x2DA is `b S; li s3,2`,

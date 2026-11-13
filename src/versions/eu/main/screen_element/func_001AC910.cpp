@@ -11,14 +11,14 @@ struct Self_eu_1AD668 {
     s32 f574;
 };
 
-s32 func_eu_001E3100(void* p, s32 c);
-void func_eu_001AB2B0(void* self, s32 c);
+s32 CompareWideStrings(void* p, s32 c);
+void SetScreenElementWideText(void* self, s32 c);
 
 void SetElementTextAfterSlideOut(Self_eu_1AD668* self, s32 arg)
 {
     s32 st = self->f560;
     if (st == 0) {
-        func_eu_001AB2B0(self, arg);
+        SetScreenElementWideText(self, arg);
         return;
     }
     if (st < 0) {
@@ -27,7 +27,7 @@ void SetElementTextAfterSlideOut(Self_eu_1AD668* self, s32 arg)
     if (st >= 4) {
         return;
     }
-    if (func_eu_001E3100((u8*)self + 8, arg) == 0) {
+    if (CompareWideStrings((u8*)self + 8, arg) == 0) {
         return;
     }
     self->f574 = arg;

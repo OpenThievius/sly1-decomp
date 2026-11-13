@@ -34,8 +34,19 @@ Three things keep the address name always. The markers `INCLUDE_ASM`, `ASM_FUNC`
 `LINKER_REMNANT_AFTER_INIT`, `INCLUDE_RODATA` and `INCLUDE_DATA` name the disassembly file they
 include, and the build checks them against `config/us/original_asm.tsv`. Comments that cite an
 address on purpose stay as they are. File names (`src/versions/eu/.../func_00142F10.cpp`,
-`nonmatching/func_X.cpp`) stay address names too, and so do the names only PAL has
-(`func_eu_XXXXXXXX`), which have no row.
+`nonmatching/func_X.cpp`) stay address names too.
+
+The functions only PAL has (`func_eu_XXXXXXXX`, docs/VERSIONS.md) are named the same way. Their
+row is in the table of the shared file their own definition under `src/versions/eu/` is built in
+(`func_eu_0015DF58`, defined in `src/versions/eu/main/font/`, in `config/names/main/font.tsv`), or,
+for one with no definition of its own, in the table of the file that holds the closest function
+before it that both versions have. `check` requires the symbol to be a row of `config/eu/map.tsv`
+without a US name, and the name follows every other rule (one symbol per name, no Hungarian
+prefix). `header` writes its macro into `include/names.h` with the others, and `apply` writes
+the readable name in the definitions under `src/versions/eu/`, whose file names stay address
+names. Where a PAL-only function is PAL's version of something US does another way, its evidence
+says so. The leftovers of stripped functions (`remnant` in `config/us/original_asm.tsv` and
+`config/eu/original_asm.tsv`) have no role and keep their address names, in both versions.
 
 ### Writing the readable name everywhere
 

@@ -2,7 +2,7 @@
 // Class 0x41 (descriptor D_0021D3B8, 0x670 bytes), an object with collision that gathers the
 // objects of ids 0x269..0x287 around it when it is loaded (func_0019B0A0) and keeps a record
 // for one of them (func_00159478) at 0x5F8. Written for this project from what retail's code
-// does (config/us/classes.tsv; src/main/file_198980.cpp).
+// does (config/us/classes.tsv; src/main/object_gatherer.cpp).
 //
 // Its fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.

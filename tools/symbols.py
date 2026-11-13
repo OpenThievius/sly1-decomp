@@ -29,7 +29,7 @@ import versions  # noqa: E402
 
 ROOT = versions.ROOT
 TABLES = ROOT / "config" / "names"
-ADDRESS = re.compile(r"^(?:func|D)_[0-9A-F]{8}$")
+ADDRESS = re.compile(r"^(?:func(?:_[a-z]+)?|D)_[0-9A-F]{8}$")    # func_eu_XXXXXXXX: only PAL has it
 IDENT = re.compile(r"\b[A-Za-z_]\w*\b")
 MARKERS = ("INCLUDE_ASM", "ASM_FUNC", "LINKER_REMNANT", "LINKER_REMNANT_AFTER_INIT",
            "INCLUDE_RODATA", "INCLUDE_DATA")

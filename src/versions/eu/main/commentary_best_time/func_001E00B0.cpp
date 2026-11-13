@@ -2,7 +2,7 @@
 // PAL has the object fields 0x310 bytes later (0x570..0x57C) and calls func_eu_001AB238 where US calls vt->m20.
 struct VT_1E00B0 { u8 pad[0x20]; void (*m20)(void*, void*); u8 pad24[0x14]; void (*m38)(void*); void (*m3C)(void*); };
 struct Obj_1E00B0_eu { VT_1E00B0* vt; u8 pad04[0x56C]; s32 f570; u8 pad574[4]; f32 f578; s32 f57C; };
-void func_eu_001AB238(Obj_1E00B0_eu* q, void* p);
+void SetScreenElementByteText(Obj_1E00B0_eu* q, void* p);
 void UpdateScreenElementSlide(Obj_1E00B0_eu* q);
 void SetScreenElementHoldTime(Obj_1E00B0_eu* q, f32 v);
 void SetBestTimeState(Obj_1E00B0_eu* q, s32 n);
@@ -21,7 +21,7 @@ void UpdateBestTimeState(Obj_1E00B0_eu* self)
             StartLockedStreamVoice((s32)g_currentWorld->f2310);
             if (g_currentWorld->f2314 != 0) {
                 SetScreenElementHoldTime(self, 15.0f);
-                func_eu_001AB238(self, g_currentWorld->f2314);
+                SetScreenElementByteText(self, g_currentWorld->f2314);
             } else {
                 self->vt->m3C(self);
             }

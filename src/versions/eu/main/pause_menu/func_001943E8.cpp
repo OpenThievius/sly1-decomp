@@ -29,7 +29,7 @@ extern f32 D_eu_0026BB30;
 extern f32 D_eu_0026BB34;
 extern u8 D_eu_00263550[];
 extern u16 D_eu_00263558[];
-const char* func_eu_001DDAB0(s32 id);
+const char* GetTextTableEntry(s32 id);
 #define HUD_EU ((Hud_1943E8_eu*)&D_00274118)
 void UpdatePauseMenu(Self_1943E8_eu* self)
 {
@@ -169,11 +169,11 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
             if ((u32)(id - 10) < 3) {
                 CardSlot* e = &D_eu_00255538[id];
                 if (self->f570 == 16) {
-                    if (e->f0C != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(157)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(158)); }
+                    if (e->f0C != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, GetTextTableEntry(157)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, GetTextTableEntry(158)); }
                 } else if (self->f570 == 17) {
-                    if (e->f0C != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(159)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(158)); }
+                    if (e->f0C != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, GetTextTableEntry(159)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, GetTextTableEntry(158)); }
                 } else {
-                    if (e->f0C != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(160)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, func_eu_001DDAB0(161)); }
+                    if (e->f0C != 0.0f) { g_buttonHintElement.vt->m08(&g_buttonHintElement, GetTextTableEntry(160)); } else { g_buttonHintElement.vt->m08(&g_buttonHintElement, GetTextTableEntry(161)); }
                 }
                 g_buttonHintElement.vt->m14(&g_buttonHintElement);
             } else {
@@ -193,7 +193,7 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
             CancelPauseMenuPage(self);
         }
         found = 0;
-        p = (u16*)func_eu_001DDAB0((s32)row->title);
+        p = (u16*)GetTextTableEntry((s32)row->title);
         for (;;) {
             u16 c = p[0];
             u16 d;

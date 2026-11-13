@@ -4,12 +4,12 @@
 
 extern s32 D_eu_0026AC20[];
 extern u8 D_eu_0027F0B0[];
-const char* func_eu_001DDAB0(s32 id);
+const char* GetTextTableEntry(s32 id);
 
 u8* GetMovieTitle(s32 index)
 {
     if ((u32)index < 16) {
-        return (u8*)func_eu_001DDAB0(D_eu_0026AC20[index]);
+        return (u8*)GetTextTableEntry(D_eu_0026AC20[index]);
     }
     return D_eu_0027F0B0;
 }

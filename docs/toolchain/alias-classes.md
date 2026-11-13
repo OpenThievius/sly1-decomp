@@ -2518,7 +2518,7 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   declared (in, out, s, t) the second call set a1 before $f13; declared (s, t, in, out), $f13
   before a0. Declared `(Vec3* in, f32 s, f32 t, Vec3* out)` all three match (the third's a0
   goes first in sched2 because the `still = 0` after the call, allocated to a0, is one
-  dependent more). The definition (file_1E88D0) matches with either order, so it takes the
+  dependent more). The definition (warp_menu) matches with either order, so it takes the
   order its caller proves.
 - **A function-pointer type is a prototype too (func_0012F210).** The position curves'
   evaluate slot was declared (owner, mode, key, scale, ...): func_0012F210's first two calls
@@ -2529,14 +2529,14 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
 - **SolveQuadratic is `(f32 a, f32 b, f32 c, f32* roots)` (func_00130C58).** Declared with
   the roots first, the curve-window search's four calls set a0 before $f12 in cases 0 and 2,
   where retail copies t into $f12 first; with the roots last every case's moves are retail's.
-  Its definition (file_1E88D0) and its other callers (func_0017FAC0, func_001BC260,
-  func_001EA4B8) match with either order; func_00156718 (file_1549C8) already declared the roots
+  Its definition (warp_menu) and its other callers (func_0017FAC0, func_001BC260,
+  func_001EA4B8) match with either order; func_00156718 (effect_spawner) already declared the roots
   last, so every declaration now agrees.
 - **BuildYawPitchMatrix is `(f32 yaw, f32 pitch, Mat02* out)` (func_00185538).** GetAimRotation's
   last call loads `$f12` from the yaw's slot, then the pitch's `mov.s $f13` and `move a0` tie in
   sched1 and sched2 (priority 3, both alu); retail issues `$f13` first, which needs the out
   pointer after the floats. Its definition (matrix.cpp) and every other caller (camera,
-  camera_controller, file_1A3AE0, file_1A7FE8, hit_count_collider, tint_blend_collider) match with
+  camera_controller, pair_controller, object_pool, hit_count_collider, tint_blend_collider) match with
   either order, and agent.cpp already declared it floats first, so every declaration now agrees.
 - **Diagnosing it.** Where argument moves of one call are issued in an order no rank explains,
   compare their order in the `.combine` dump with the prototype; the order of a function's own
@@ -2648,7 +2648,7 @@ before the integer arguments, as calls.c's reversed evaluation does for a last p
 its three floats first (`(f32, f32, f32, RampProfile*, f32*)`, as the file's other callers
 declare it), which gives retail's argument order around its call. The ramp record is filled
 `y` before `x`, as the same file's other ramp fill does (func_001CFFD0's `i.y = ...; i.x = ...`),
-and the clamp of the dot is file_1793C0.cpp's ClampBetween, which returns each outcome into one
+and the clamp of the dot is mode_collider.cpp's ClampBetween, which returns each outcome into one
 value (retail's merge in $f0).
 
 ### A call's result register ends a use's dependences in sched2 (func_00131198)
@@ -2781,7 +2781,7 @@ one register each (95.5%).
   a constant, as Limit's `this`; two calls for the f58 ramp, which would raise the clock's
   references, are not cross-jumped into retail's single call).
 
-### Three of file_1D62E0's near misses closed by known levers (func_001D6DD8, func_001D9AC8, func_001DA320)
+### Three of path_follower's near misses closed by known levers (func_001D6DD8, func_001D9AC8, func_001DA320)
 
 Wave 14 (2026-11-10). None needed a new mechanism; each was a lever above applied where the
 near miss's notes had stopped.
@@ -2811,7 +2811,7 @@ near miss's notes had stopped.
   the flag on both paths. The mesh object `self->fB4C` is read at each use (retail reloads it).
   The last instruction, `lwc1 $f12, 0x3CC(a0)` where ours read `(s0)`, is AddMeshContacts'
   parameter order: declared `(Collider* a, f32 radius, ...)` the move to a0 comes before the
-  float's load, and CSE takes the base from a0. Every other caller (agent.cpp, file_1F2758.cpp,
+  float's load, and CSE takes the base from a0. Every other caller (agent.cpp, oscillator.cpp,
   player.cpp) and the definition (collider_contact.cpp, which never reads the float) match with
   that order, so all now declare it.
 

@@ -26,9 +26,9 @@ struct Glob_1AB198_eu {
 void SetTextLayoutHorizontalAlign(void* out, void* p);
 void PushFontScale(s32 handle, f32 a, f32 b);
 void PopFontScale(s32 handle);
-void func_eu_001374E0(void* out, s32 flag);
-void func_eu_0015DCB8(void* buf, void* out, s32 handle, s32 zero);
-void func_eu_0015E7E0(void* buf, void* out, s32 zero, void* data);
+void SetTextLayoutVerticalPlacement(void* out, s32 flag);
+void InitWideTextReader(void* buf, void* out, s32 handle, s32 zero);
+void DrawWrappedAlignedText(void* buf, void* out, s32 zero, void* data);
 
 void DrawCounterCaption(Obj_1AB198_eu* self)
 {
@@ -62,9 +62,9 @@ void DrawCounterCaption(Obj_1AB198_eu* self)
     SetTextLayoutColor(out, &tmp[0]);
     SetTextLayoutHorizontalAlign(out, q);
     SetTextLayoutVerticalAlign(out, 0);
-    func_eu_001374E0(out, 0);
+    SetTextLayoutVerticalPlacement(out, 0);
     PushFontScale(self->f4, self->f51c, self->f51c);
-    func_eu_0015DCB8(buf, &self->f8, self->f4, 0);
-    func_eu_0015E7E0(buf, out, 0, &g_gsPacketWriter);
+    InitWideTextReader(buf, &self->f8, self->f4, 0);
+    DrawWrappedAlignedText(buf, out, 0, &g_gsPacketWriter);
     PopFontScale(self->f4);
 }

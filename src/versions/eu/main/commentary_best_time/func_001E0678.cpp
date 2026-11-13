@@ -25,15 +25,15 @@ struct Obj_eu_1E0678 {
 
 extern f32 D_eu_0027939C;
 void SetTextLayoutHorizontalAlign(TextLayout* out, void* tex);
-void func_eu_001374E0(TextLayout* out, s32 flag);
+void SetTextLayoutVerticalPlacement(TextLayout* out, s32 flag);
 void PushFontScale(s32 handle, f32 a, f32 b);
-void func_eu_0015DCB8(void* out, void* p, s32 handle, s32 z);
-void func_eu_0015E7E0(void* a, void* b, s32 c, void* d);
+void InitWideTextReader(void* out, void* p, s32 handle, s32 z);
+void DrawWrappedAlignedText(void* a, void* b, s32 c, void* d);
 void PopFontScale(s32 handle);
 
 struct OutT_eu_1E0678 : TextLayout {
     void Tex(void* t) { SetTextLayoutHorizontalAlign(this, t); }
-    void FlagC(s32 f) { func_eu_001374E0(this, f); }
+    void FlagC(s32 f) { SetTextLayoutVerticalPlacement(this, f); }
 };
 
 struct Hd_eu_1E0678 {
@@ -76,8 +76,8 @@ void DrawFramedText(Obj_eu_1E0678* self)
             Hd_eu_1E0678::Draw(self->f520, &out, &g_gsPacketWriter);
             *(Pk4_1E0678*)((u8*)self->f520 + 0x18) = slot;
         }
-        func_eu_0015DCB8(loc, &self->f8, self->f4, 0);
-        func_eu_0015E7E0(loc, &out, 0, &g_gsPacketWriter);
+        InitWideTextReader(loc, &self->f8, self->f4, 0);
+        DrawWrappedAlignedText(loc, &out, 0, &g_gsPacketWriter);
         PopFontScale(self->f4);
     }
 }

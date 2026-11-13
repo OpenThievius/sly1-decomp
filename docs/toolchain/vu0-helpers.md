@@ -335,7 +335,7 @@ What retail shows, and what the compiler does:
   (EXACT alone), our assembler padded StartSoundEffect's copy loop with five nops in the whole
   file's build; the cause was its fragment breaks, not the code, and tools/short_loops.py now
   pads short loops as the original did (see "The assembler matters"): file_1B7968.cpp (now collider.cpp
-  and file_1BE1E8.cpp) places.
+  and sound_system.cpp) places.
 
 The sequences still without a helper: a float stored as a quadword (func_00191AC8,
 func_00118CF0: mfc1 once into a saved GPR, then per use a copy (`daddu`) and sq,
@@ -511,7 +511,7 @@ numbers, from the `.lreg` dump and tools/globalalloc.py:
   the float compare: its life starts two insns later.
 - So the radius is not the last parameter: `(world, centre, radius, skipMask, maxLights,
   flagged, outCount, out)`. A float parameter takes `$f12` wherever it is declared, so the
-  callers' code is the same, and their declarations (placed_object_model.cpp, file_15F678.cpp)
+  callers' code is the same, and their declarations (placed_object_model.cpp, game_progress.cpp)
   already had it third, after the centre it belongs with. outCount is then 2 references over
   88 insns (priority 227 against 223) and the function is EXACT, US and PAL.
 - The four one-instruction helpers with the new signature still differ in the two places the

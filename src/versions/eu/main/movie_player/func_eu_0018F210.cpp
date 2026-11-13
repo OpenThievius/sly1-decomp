@@ -13,13 +13,13 @@ struct Obj_eu_18F210 {
     s32 f24;
     s32 f28;
 };
-s32 func_eu_0011E628(void);
+s32 GetIopRingBlockIndex(void);
 s32 GetIopRingPosition(void);
 
-void func_eu_0018F210(Obj_eu_18F210* self)
+void UpdateIopRingSinkByKind(Obj_eu_18F210* self)
 {
     if (self->kind == 0x10) {
-        s32 t = func_eu_0011E628() * self->cols;
+        s32 t = GetIopRingBlockIndex() * self->cols;
         if (t >= 0 && self->f18 >= t) {
             s32 r = t % self->f18;
             self->f20 = r;

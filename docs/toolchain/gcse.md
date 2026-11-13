@@ -764,7 +764,7 @@ everything reads vf2. One instruction short.
 
 ### Two passes of copy propagation, one step each: a copy that outlives gcse (func_00191AC8)
 
-Read from the `-da` dumps of FitStepToPointGraph (file_18F988.cpp, 2026-11-13, w46-d; the near
+Read from the `-da` dumps of FitStepToPointGraph (point_graph.cpp, 2026-11-13, w46-d; the near
 miss is 96 of 107 instructions with it):
 
 - **purge_addressof runs after cse1.** The `.cse` dump still has `(mem (addressof (reg k)))`
@@ -805,7 +805,7 @@ miss is 96 of 107 instructions with it):
 - The scale of a static parameter block's two quadwords (`StoreFloatAsQuadword(&t, k);
   CopyQuadword(&u, &params.q30); StoreQuadword(&params.q30, ScaleQuadword(t, u));`, twice)
   kept `&params.q30` and `&params.q50` in two saved registers (a 0x160 frame for retail's
-  0x140). Through the file's inline `StoreScaledQuadword(dst, k, p)` (the one file_1D62E0.cpp
+  0x140). Through the file's inline `StoreScaledQuadword(dst, k, p)` (the one path_follower.cpp
   and agent.cpp use), called with the member's address for both `dst` and `p`, integrate.c
   substitutes each address at its use and retail's frame and saved registers follow; the
   remaining difference was the block's constructor stores, matched 2026-11-12 as a brace
@@ -860,7 +860,7 @@ emulation of pre_lcm over the `-dG` dump (build/swarm/w15-17E088/lcm.py, 2026-11
   expression and so one reaching register; loop 2's copy crosses RandomIntInRange's call in one
   arm, and the pseudo takes a saved register.
 - **The form.** The clear as an inline method of the record, `void Clear() { FillMemory(this,
-  0, sizeof(*this)); }` (node_query.h, as file_14EE40.cpp's HeldTouchQuery has one): `this` is
+  0, sizeof(*this)); }` (node_query.h, as pooled_object.cpp's HeldTouchQuery has one): `this` is
   substituted as a constant and set straight into `$a0`, which gcse never records, so the
   query's `&q` is the only occurrence. A free inline function does the same only if its pointer
   parameter is `const` (`NodeQuery* const q`); a plain parameter is copied into a pseudo.

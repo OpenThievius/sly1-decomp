@@ -29,3 +29,4 @@ func_00138398	ReadLinkedItemArray	reads a count, allocates 32-byte items and fil
 func_001384A0	ReadBufferedString	reads a halfword size, allocates size+1 bytes, reads them from the buffered stream and NUL-terminates
 func_00138518	SkipBufferedBlock	reads a halfword count and skips that many bytes of the buffered stream (ReadBufferedStreamBytes with no destination)
 func_00138550	ReadOptionalBufferedBlock	reads 0x20 bytes and returns a front-memory copy of them, or 0 when words 1 and 7 of the block are equal
+func_eu_001387C8	ReadBufferedWideString	only in PAL: reads a halfword count, allocates count + 1 halfwords of front memory, reads count halfwords from the buffered stream into them, zero-terminates them and stores the pointer through its second argument: the 16-bit counterpart of ReadBufferedString; LoadTextTable, LoadTextPointObject and ReadSequenceSteps call it

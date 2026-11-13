@@ -7,7 +7,7 @@
 // list head of 0xC bytes like every other (include/globals.h), so D_00269BC0 (f32[3], aligned to
 // 8) would follow it at 0x269BB8 in one file; retail has 8 more bytes of zeros and puts it on 16,
 // the linker's padding before a new file's .data (aligned to 16 by Blk05's vectors). Its start in
-// the code is a choice: any function start from 0x191FD8 to 0x192380 (file_18F988.cpp says why);
+// the code is a choice: any function start from 0x191FD8 to 0x192380 (point_graph.cpp says why);
 // the cut is at 0x1921A8, the first switched collider function. Its name is ours, after the class.
 #include "common.h"
 #include "asm_func.h"

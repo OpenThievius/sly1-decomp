@@ -4,7 +4,7 @@
 // project from what retail's code does (config/us/classes.tsv).
 //
 // The fields are the ones the class's own methods (src/main/pose_source.cpp,
-// placed_object.cpp, file_15F678.cpp) and the families under it read. Records only the class points
+// placed_object.cpp, game_progress.cpp) and the families under it read. Records only the class points
 // to, which its readers see in different shapes, stay `void*` until their own types exist.
 #ifndef PLACED_OBJECT_H
 #define PLACED_OBJECT_H

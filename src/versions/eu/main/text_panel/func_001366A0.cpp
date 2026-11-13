@@ -61,14 +61,14 @@ struct Layout_eu_1367B8 : Layout_137228 {
 
 struct TextReader_eu_1367B8 { u8 bytes[0xC0]; };
 
-void* func_eu_0015DCB8(void* buf, void* name, Font* v, s32 zero);  // returns buf
-s32 func_eu_001E3050(void* dst, const char* src);
+void* InitWideTextReader(void* buf, void* name, Font* v, s32 zero);  // returns buf
+s32 CopyWideString(void* dst, const char* src);
 void SeekTextReader(void* reader, s32 n);
-s32 func_eu_0015DE58(void* reader);
-void func_eu_001E3178(u16* dst, const u8* src);
-void func_eu_0015E7E0(void* reader, Layout_137228* layout, Layout_137228* frame, PacketWriter* gs);
+s32 GetTextReaderLength(void* reader);
+void AppendStringToWide(u16* dst, const u8* src);
+void DrawWrappedAlignedText(void* reader, Layout_137228* layout, Layout_137228* frame, PacketWriter* gs);
 void DrawFontString(Font* font, const char* text, Layout_137228* out, s32 zero, void* d);
-void func_eu_001374E0(Layout_137228* layout, s32 value);
+void SetTextLayoutVerticalPlacement(Layout_137228* layout, s32 value);
 
 struct PanelLayout_eu_1367B8 {
     static s32* Words(Quad4& q)
@@ -85,7 +85,7 @@ struct PanelLayout_eu_1367B8 {
         l->Color(Words(col));
         l->SetF14(first);
         l->SetF18(0);
-        func_eu_001374E0(l, 0);
+        SetTextLayoutVerticalPlacement(l, 0);
         return l;
     }
 };
@@ -171,7 +171,7 @@ void DrawTextPanel(Obj_eu_1367B8* self)
     }
     if (self->text[0] != 0) {
         TextReader_eu_1367B8 all;
-        func_eu_0015DCB8(&all, self->text, self->font, 0);
+        InitWideTextReader(&all, self->text, self->font, 0);
         s32 total = CountTextChars(&all);
         s32 shown = (s32)((g_gameClock[1] - self->textSince) * self->charsPerSecond);
         u16 text[0x200];
@@ -180,12 +180,12 @@ void DrawTextPanel(Obj_eu_1367B8* self)
             shown = total;
         }
         f32 scroll = 0.0f;
-        func_eu_001E3050(text, (const char*)self->text);
+        CopyWideString(text, (const char*)self->text);
         TextReader_eu_1367B8 typed;
-        func_eu_0015DCB8(&typed, text, self->font, 0);
+        InitWideTextReader(&typed, text, self->font, 0);
         SeekTextReader(&typed, shown);
         if (height < self->textHeight) {
-            s32 at = func_eu_0015DE58(&typed);
+            s32 at = GetTextReaderLength(&typed);
             TextLines_eu_1367B8* p = &lines;
             // The walk reads at most the record's 32 lines. Retail's code keeps the compiled-out
             // macro's loop notes (docs/toolchain/gcse.md, "A frame address computed after a block move").
@@ -212,14 +212,14 @@ void DrawTextPanel(Obj_eu_1367B8* self)
             cursor = (s32)(g_gameClock[1] * 4.0f) & 1;
         }
         if (cursor != 0) {
-            func_eu_001E3178(text, (const u8*)"&.~ffffff|");
+            AppendStringToWide(text, (const u8*)"&.~ffffff|");
         }
         f32 y = ((f32)lines.count + scroll) * ((f32)self->font->height * self->font->sy);
         Layout_eu_1367B8 layout;
         f32 noScroll = 0.0f;
         PanelLayout_eu_1367B8::Set(&layout, offX + 180.0f, (offY + 362.610168f) - (noScroll >? (y - height)),
                                    width, y, *(s32*)&color, (s32)&lines);
-        func_eu_0015E7E0(&typed, &layout, &box, &g_gsPacketWriter);
+        DrawWrappedAlignedText(&typed, &layout, &box, &g_gsPacketWriter);
     }
     PopFontScale(self->font);
     if (self->glyph != 0) {

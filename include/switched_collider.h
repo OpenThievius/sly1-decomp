@@ -36,7 +36,7 @@ struct PadRecord;        // pad_record.h
 // and 0x70 are Quadratic16s (include/shapes.h: retail's initialiser has the CLOBBER of a union
 // member before each one's first float); those at 0x20 and 0x50 have a first float too and no
 // CLOBBER, so they are plain. The floats at 0x40 are zero in both; SpawnSurfaceContactEffects
-// (file_1549C8.cpp) fills 0x44 and 0x48 with two angles, and its initialiser has a CLOBBER
+// (effect_spawner.cpp) fills 0x44 and 0x48 with two angles, and its initialiser has a CLOBBER
 // before them: one of the two is a union's member (either gives retail's code; 0x44 is kept).
 struct Blk05 {
     Quadratic16 v00;        // 0x00

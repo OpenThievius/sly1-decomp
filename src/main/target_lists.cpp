@@ -2,7 +2,7 @@
 // The target lists, 0x169C58 to 0x16AA18 (its .rodata from 0x24A794, its .data from 0x2626E8):
 // the three object lists SetObjectListLinkOffsets sets up and their classes, the target curve
 // (0x6F), the target point (0x7F) and the listed collision part (0x3A), then the pooled
-// children's hold helpers and FindRingPointTowardCollider. Its end is file_16AA18.cpp's proved
+// children's hold helpers and FindRingPointTowardCollider. Its end is selection_menus.cpp's proved
 // start; its start is not proved by retail, only by the change of role from the texture upload
 // (texture_upload.cpp): the lists are this file's .data and only its functions read them, so
 // the cut could lie from 0x169B18 to 0x169C58. The name is ours, after its role.

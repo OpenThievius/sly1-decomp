@@ -5,7 +5,7 @@ struct Layout_eu_1374E0 {
     s32 f1C;
 };
 
-void func_eu_001374E0(Layout_eu_1374E0* self, s32 v)
+void SetTextLayoutVerticalPlacement(Layout_eu_1374E0* self, s32 v)
 {
     self->f1C = v;
 }

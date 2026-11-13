@@ -9,7 +9,7 @@ struct Step_eu_0015DF18 {
     s32 pos;
 };
 
-s32 func_eu_0015DF18(Step_eu_0015DF18* self, s32 n)
+s32 AdvanceTextReader(Step_eu_0015DF18* self, s32 n)
 {
     s32 r = 1;
     switch (self->kind) {

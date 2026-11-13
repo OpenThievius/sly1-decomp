@@ -80,7 +80,7 @@ s32 SelectArgumentIfTypeNamesEqual(void* self, s32 v, s32 fallback)
     return result;
 }
 
-void func_001FD988(void) {}
+void DoNothingForExceptionRuntime(void) {}
 
 /* The 0x18-byte block the runtime allocates zeroed, its word at 4 pointing to its own 0x10. */
 typedef struct ExceptionBlock {

@@ -18,31 +18,31 @@ struct Text_eu_15DF58 {
     s32 done;
 };
 
-s32 func_eu_0015DEA0(Text_eu_15DF58* t, s32 i);
-void func_eu_0015DF18(Text_eu_15DF58* t, s32 n);
-s32 func_eu_001E3210(s32 c);
+s32 PeekTextReaderChar(Text_eu_15DF58* t, s32 i);
+void AdvanceTextReader(Text_eu_15DF58* t, s32 n);
+s32 IsWideCharDigit(s32 c);
 void CopyFont(Font_eu_15DF58* src, Font_eu_15DF58* dst);
 void PopFontScale(Font_eu_15DF58* f);
 void PushFontScale(Font_eu_15DF58* f, f32 x, f32 y);
 
-s32 func_eu_0015DF58(Text_eu_15DF58* t)
+s32 ReadTextCharAnyWidth(Text_eu_15DF58* t)
 {
     s32 done = t->done;
     while (!done) {
-        s32 c = func_eu_0015DEA0(t, 0);
+        s32 c = PeekTextReaderChar(t, 0);
         switch (c) {
         case '~':
-            if (func_eu_0015DEA0(t, 1) == c) {
-                func_eu_0015DF18(t, 1);
+            if (PeekTextReaderChar(t, 1) == c) {
+                AdvanceTextReader(t, 1);
                 done = 1;
-            } else if (func_eu_0015DEA0(t, 1) == '.') {
+            } else if (PeekTextReaderChar(t, 1) == '.') {
                 t->tint = t->deftint;
                 t->colour = t->tint;
-                func_eu_0015DF18(t, 2);
+                AdvanceTextReader(t, 2);
             } else {
                 s32 i = 1;
                 u32 v = 0;
-                s32 d = func_eu_0015DEA0(t, 1);
+                s32 d = PeekTextReaderChar(t, 1);
                 while (d != 0 && i < 7) {
                     if ((u16)(d - '0') < 10) {
                         d = d - '0';
@@ -55,14 +55,14 @@ s32 func_eu_0015DF58(Text_eu_15DF58* t)
                     }
                     v = v * 16 + d;
                     i++;
-                    d = func_eu_0015DEA0(t, i);
+                    d = PeekTextReaderChar(t, i);
                 }
                 if (i >= 7) {
                     t->tint.r = (((v >> 16) & 0xFF) + 1) >> 1;
                     t->tint.g = (((v & 0xFF00) >> 8) + 1) >> 1;
                     t->tint.b = ((v & 0xFF) + 1) >> 1;
                     t->colour = t->tint;
-                    func_eu_0015DF18(t, 7);
+                    AdvanceTextReader(t, 7);
                 } else {
                     t->font = t->base;
                     t->colour = t->deftint;
@@ -71,20 +71,20 @@ s32 func_eu_0015DF58(Text_eu_15DF58* t)
             }
             break;
         case '&':
-            if (func_eu_0015DEA0(t, 1) == c) {
-                func_eu_0015DF18(t, 1);
+            if (PeekTextReaderChar(t, 1) == c) {
+                AdvanceTextReader(t, 1);
                 done = 1;
-            } else if (func_eu_0015DEA0(t, 1) == '.') {
+            } else if (PeekTextReaderChar(t, 1) == '.') {
                 t->font = t->base;
                 t->colour = t->tint;
                 t->fA0 = 1;
-                func_eu_0015DF18(t, 2);
-            } else if (func_eu_001E3210(func_eu_0015DEA0(t, 1))) {
-                Font_eu_15DF58* f = (Font_eu_15DF58*)FindFontByKeyChar(func_eu_0015DEA0(t, 1));
+                AdvanceTextReader(t, 2);
+            } else if (IsWideCharDigit(PeekTextReaderChar(t, 1))) {
+                Font_eu_15DF58* f = (Font_eu_15DF58*)FindFontByKeyChar(PeekTextReaderChar(t, 1));
                 if (f) {
                     Font_eu_15DF58* own = &t->own;
                     CopyFont(f, own);
-                    func_eu_0015DF18(t, 2);
+                    AdvanceTextReader(t, 2);
                     Font_eu_15DF58* b = t->base;
                     f32 r = ((f32)b->f8 * b->f48) / ((f32)own->f8 * own->f48);
                     t->own.f44 *= r;
@@ -104,18 +104,18 @@ s32 func_eu_0015DF58(Text_eu_15DF58* t)
             }
             break;
         case '^':
-            if (func_eu_0015DEA0(t, 1) == c) {
-                func_eu_0015DF18(t, 1);
+            if (PeekTextReaderChar(t, 1) == c) {
+                AdvanceTextReader(t, 1);
                 done = 1;
-            } else if (func_eu_0015DEA0(t, 1) == '.') {
+            } else if (PeekTextReaderChar(t, 1) == '.') {
                 PopFontScale(t->font);
-                func_eu_0015DF18(t, 2);
-            } else if (func_eu_001E3210(func_eu_0015DEA0(t, 1)) && func_eu_001E3210(func_eu_0015DEA0(t, 2))) {
-                s32 a = func_eu_0015DEA0(t, 1);
-                s32 b = func_eu_0015DEA0(t, 2);
+                AdvanceTextReader(t, 2);
+            } else if (IsWideCharDigit(PeekTextReaderChar(t, 1)) && IsWideCharDigit(PeekTextReaderChar(t, 2))) {
+                s32 a = PeekTextReaderChar(t, 1);
+                s32 b = PeekTextReaderChar(t, 2);
                 f32 s = (f32)(a - '0') + (f32)(b - '0') * 0.1f;
                 PushFontScale(t->font, s * t->font->f44, s * t->font->f48);
-                func_eu_0015DF18(t, 3);
+                AdvanceTextReader(t, 3);
             } else {
                 done = 1;
             }
@@ -125,7 +125,7 @@ s32 func_eu_0015DF58(Text_eu_15DF58* t)
             break;
         }
     }
-    s32 c = func_eu_0015DEA0(t, 0);
-    func_eu_0015DF18(t, 1);
+    s32 c = PeekTextReaderChar(t, 0);
+    AdvanceTextReader(t, 1);
     return c;
 }

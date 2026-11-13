@@ -31,12 +31,12 @@ void SetTextLayoutPosition(Out_eu_194F80* out, f32 x, f32 y);
 void SetTextLayoutSize(Out_eu_194F80* out, f32 x, f32 y);
 void SetTextLayoutColor(Out_eu_194F80* out, Rgba_137248* value);
 void SetTextLayoutVerticalAlign(Out_eu_194F80* out, s32 flag);
-void func_eu_001374E0(Out_eu_194F80* out, s32 v);
+void SetTextLayoutVerticalPlacement(Out_eu_194F80* out, s32 v);
 void SetTextLayoutHorizontalAlign(Out_eu_194F80* out, Lines_eu_194F80* lines);
-Buf_eu_194F80* func_eu_0015DD18(Buf_eu_194F80* out, s32 id, Font* font, s32 zero);
-Buf_eu_194F80* func_eu_0015DCB8(Buf_eu_194F80* out, void* str, Font* font, s32 zero);
-void func_eu_0015E4A8(Buf_eu_194F80* buf, Lines_eu_194F80* lines, f32 w);
-void func_eu_0015E7E0(Buf_eu_194F80* buf, Out_eu_194F80* out, s32 zero, void* data);
+Buf_eu_194F80* InitTextReaderFromTextTable(Buf_eu_194F80* out, s32 id, Font* font, s32 zero);
+Buf_eu_194F80* InitWideTextReader(Buf_eu_194F80* out, void* str, Font* font, s32 zero);
+void BreakTextIntoLines(Buf_eu_194F80* buf, Lines_eu_194F80* lines, f32 w);
+void DrawWrappedAlignedText(Buf_eu_194F80* buf, Out_eu_194F80* out, s32 zero, void* data);
 f32 SumTextWidth(Buf_eu_194F80* buf);
 void* GetMenuChoiceLabel(s32 menu, s32 id);
 
@@ -49,7 +49,7 @@ struct Setup_eu_194F80 { static void Do(Out_eu_194F80* out, f32 x, f32 y, f32 w,
     SetTextLayoutColor(out, &tmp);
     SetTextLayoutHorizontalAlign(out, lines);
     SetTextLayoutVerticalAlign(out, flag);
-    func_eu_001374E0(out, 0);
+    SetTextLayoutVerticalPlacement(out, 0);
 } };
 
 void DrawPauseMenu(Self_eu_194F80* self)
@@ -103,7 +103,7 @@ void DrawPauseMenu(Self_eu_194F80* self)
         }
         SetTextLayoutHorizontalAlign(&out, 0);
         SetTextLayoutVerticalAlign(&out, 0);
-        func_eu_001374E0(&out, 0);
+        SetTextLayoutVerticalPlacement(&out, 0);
         Rgba4 saved = self->f210->color;
         {
             Rgba4 t = saved;
@@ -130,14 +130,14 @@ void DrawPauseMenu(Self_eu_194F80* self)
         Rgba4 c;
         f32 sc = menu->titleScale * self->f23C;
         PushFontScale(self->f4, sc, sc);
-        func_eu_0015DD18(&buf, menu->title, self->f4, 0);
-        func_eu_0015E4A8(&buf, &self->lines, self->f23C * 500.0f);
+        InitTextReaderFromTextTable(&buf, menu->title, self->f4, 0);
+        BreakTextIntoLines(&buf, &self->lines, self->f23C * 500.0f);
         c.r = 0x7F;
         c.g = 0x7F;
         c.b = 0x7F;
         c.a = alpha;
         Setup_eu_194F80::Do(&out, cx, cy, w, h, *(s32*)&c, &self->lines, 1);
-        func_eu_0015E7E0(&buf, &out, 0, g_gsPacketWriter);
+        DrawWrappedAlignedText(&buf, &out, 0, g_gsPacketWriter);
         cy += self->lines.height;
         PopFontScale(self->f4);
     }
@@ -155,7 +155,7 @@ void DrawPauseMenu(Self_eu_194F80* self)
                 total += (f32)self->f4->advance * self->f4->sx + (f32)self->f4->advance * self->f4->sx;
             }
             void* str = GetMenuChoiceLabel(page, menu->items[k]);
-            func_eu_0015DCB8(&buf, str, self->f4, 0);
+            InitWideTextReader(&buf, str, self->f4, 0);
             total += SumTextWidth(&buf);
         }
         x = cx + (w - total) * 0.5f;
@@ -185,7 +185,7 @@ void DrawPauseMenu(Self_eu_194F80* self)
         }
         Buf_eu_194F80 buf;
         str = GetMenuChoiceLabel(page, menu->items[i]);
-        func_eu_0015DCB8(&buf, str, self->f4, 0);
+        InitWideTextReader(&buf, str, self->f4, 0);
         width = SumTextWidth(&buf);
         if (menu->vertical != 0) {
             x = cx + (w - width) * 0.5f;
@@ -194,12 +194,12 @@ void DrawPauseMenu(Self_eu_194F80* self)
             f32 sc = menu->itemScale * self->f23C * grow;
             PushFontScale(self->f4, sc, sc);
         }
-        func_eu_0015DCB8(&buf, str, self->f4, 0);
+        InitWideTextReader(&buf, str, self->f4, 0);
         f32 width2 = SumTextWidth(&buf);
         th = (f32)self->f4->height * self->f4->sy;
         Out_eu_194F80 out;
         Setup_eu_194F80::Do(&out, x + (width - width2) * 0.5f, cy + (lineH - th) * 0.5f, w, th, *(s32*)&col, 0, 0);
-        func_eu_0015E7E0(&buf, &out, 0, g_gsPacketWriter);
+        DrawWrappedAlignedText(&buf, &out, 0, g_gsPacketWriter);
         PopFontScale(self->f4);
         if (menu->vertical != 0) {
             cy += (f32)self->f4->height * self->f4->sy;

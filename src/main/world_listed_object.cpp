@@ -478,7 +478,7 @@ s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec02* pos, Vec02* e
     return dropped;
 }
 
-// One of the two scratchpad transfer buffers (file_1C1190.cpp): the blocks StartToSprChain sent.
+// One of the two scratchpad transfer buffers (object_properties.cpp): the blocks StartToSprChain sent.
 struct SprTransfer {
     void* tags;             // 0x00
     s32 base;               // 0x04

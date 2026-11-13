@@ -98,7 +98,7 @@ void TerminateProgram(s32 status)
     ExitProgramSyscall(status);
 }
 
-void func_001FA0A0(void)
+void ClearImageEndRecordWord(void)
 {
     D_002779B0.a = 0;
 }

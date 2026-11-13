@@ -23,9 +23,9 @@ struct IopDmaTransfer_eu {
 void SyncDataCache(s32 a);
 void* StartIopDma(IopDmaTransfer_eu* span, s32 n);
 s32 GetIopDmaStatus(void* obj);
-void func_eu_0011E5F8(s32 a, s32 b);
+void SendIopRingBlockSlot(s32 a, s32 b);
 
-s32 func_eu_0018F118(Obj_eu_18F118* self, s32 size, u8* buf)
+s32 WriteIopRingBlockByKind(Obj_eu_18F118* self, s32 size, u8* buf)
 {
     IopDmaTransfer_eu span;
     void* obj;
@@ -47,7 +47,7 @@ s32 func_eu_0018F118(Obj_eu_18F118* self, s32 size, u8* buf)
         s32 q = t / self->cols;
         s32 r = t % self->cols;
         s32 slot = q % 4;
-        func_eu_0011E5F8(size, (slot << 10) + (r << 12));
+        SendIopRingBlockSlot(size, (slot << 10) + (r << 12));
     }
     return size;
 }

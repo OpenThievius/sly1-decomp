@@ -3,10 +3,10 @@
 struct Actor_001AB710_eu { u8 pad0[4]; Font* p4; u16 f08; u8 pad1[0x518 - 0xA]; s32 f518; f32 f51C; void* f520; u8 pad2[8]; f32 f52C; f32 f530; u8 pad3[0x10]; f32 f544; f32 f548; u8 pad4[0x40]; T217D_Word w58C; u8 pad5[4]; s32 f594; };
 
 void SetTextLayoutColor(void* out, void* p);
-void func_eu_001374E0(void* out, s32 v);
+void SetTextLayoutVerticalPlacement(void* out, s32 v);
 void DrawFontString(void* p, void* name, void* out, s32 zero, void* d);
-void func_eu_0015DCB8(void* buf, void* name, void* p, s32 zero);
-void func_eu_0015E7E0(void* buf, void* out, s32 zero, void* d);
+void InitWideTextReader(void* buf, void* name, void* p, s32 zero);
+void DrawWrappedAlignedText(void* buf, void* out, s32 zero, void* d);
 
 void DrawTimerElement(Actor_001AB710_eu* self)
 {
@@ -24,7 +24,7 @@ void DrawTimerElement(Actor_001AB710_eu* self)
         SetTextLayoutColor(&L, &tag.w[0]);
         SetTextLayoutHorizontalAlign(&L, 0);
         SetTextLayoutVerticalAlign(&L, 0);
-        func_eu_001374E0(&L, 0);
+        SetTextLayoutVerticalPlacement(&L, 0);
         void* obj = self->f520;
         if (obj != 0) {
             Font* sub = *(Font**)obj;
@@ -47,8 +47,8 @@ void DrawTimerElement(Actor_001AB710_eu* self)
             warn = self->w58C;
             *(T217D_Word*)&L.color = warn;
         }
-        func_eu_0015DCB8(buf, (u8*)self + 10, self->p4, 0);
-        func_eu_0015E7E0(buf, &L, 0, dp);
+        InitWideTextReader(buf, (u8*)self + 10, self->p4, 0);
+        DrawWrappedAlignedText(buf, &L, 0, dp);
         PopFontScale(self->p4);
     }
 }

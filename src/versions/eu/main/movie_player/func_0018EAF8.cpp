@@ -16,7 +16,7 @@ struct Stream_18EAF8_eu {
 extern s32 D_eu_00263710;
 struct Self_eu_0018ED38;
 struct Src_eu_0018ED38;
-s32 func_eu_0018ED38(void* a, void* b);
+s32 InitIopRingSinkByKind(void* a, void* b);
 
 s32 FeedMovieStream(MovieStream* self_, s32 left, u8* right)
 {
@@ -45,7 +45,7 @@ s32 FeedMovieStream(MovieStream* self_, s32 left, u8* right)
         if (self->v40 > 0) {
             return 1;
         }
-        if (func_eu_0018ED38(self->sub70, self->sub8) != 0) {
+        if (InitIopRingSinkByKind(self->sub70, self->sub8) != 0) {
             self->mode = 2;
         } else {
             self->mode = 0;

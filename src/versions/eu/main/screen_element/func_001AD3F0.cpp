@@ -14,7 +14,7 @@ void SetTextLayoutSize(Out_eu_1AE138* out, f32 x, f32 y);
 void SetTextLayoutColor(Out_eu_1AE138* out, s32* value);
 void SetTextLayoutHorizontalAlign(Out_eu_1AE138* out, s32 flag);
 void SetTextLayoutVerticalAlign(Out_eu_1AE138* out, s32 flag);
-void func_eu_001374E0(Out_eu_1AE138* out, s32 v);
+void SetTextLayoutVerticalPlacement(Out_eu_1AE138* out, s32 v);
 struct Out_eu_1AE138 {
     u8 d[0x20];
     void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
@@ -22,7 +22,7 @@ struct Out_eu_1AE138 {
     void Color(s32* c) { SetTextLayoutColor(this, c); }
     void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
     void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
-    void Fin(s32 v) { func_eu_001374E0(this, v); }
+    void Fin(s32 v) { SetTextLayoutVerticalPlacement(this, v); }
 };
 struct Globals_eu_1AE138 { u8 pad0[0x560]; s32 f560; u8 pad1[0xC]; s32 f570; };
 struct Mode_eu_1AE138 { u8 pad0[0x56C]; s32 f56C; struct Owner_eu_1AE138* f570; };
@@ -31,8 +31,8 @@ extern Globals_eu_1AE138 D_eu_00275E98;
 extern Mode_eu_1AE138 D_eu_00274868;
 extern f32 D_eu_0027939C;
 extern u8 D_eu_00263590[];
-void func_eu_0015DCB8(void* buf, void* name, void* p, s32 zero);
-void func_eu_0015E7E0(void* buf, Out_eu_1AE138* out, s32 zero, void* d);
+void InitWideTextReader(void* buf, void* name, void* p, s32 zero);
+void DrawWrappedAlignedText(void* buf, Out_eu_1AE138* out, s32 zero, void* d);
 void func_eu_00161A20(void* ctx, s32 a, s32 b, u64 c);
 void func_eu_00161D68(void* ctx, s32 a, s64 b);
 void func_eu_00161AB8(void* ctx, s32 color);
@@ -99,7 +99,7 @@ void DrawMessageElement(Actor_eu_1AE138* self)
     }
     f12 = self->f51C;
     PushFontScale(self->p4, f12, f12);
-    func_eu_0015DCB8(buf, (u8*)self + 8, self->p4, 0);
-    func_eu_0015E7E0(buf, &L, 0, D_eu_00263590);
+    InitWideTextReader(buf, (u8*)self + 8, self->p4, 0);
+    DrawWrappedAlignedText(buf, &L, 0, D_eu_00263590);
     PopFontScale(self->p4);
 }

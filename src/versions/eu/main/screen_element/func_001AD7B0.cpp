@@ -9,7 +9,7 @@ void DrawScreenElementText(void* self);
 f32 WrapAngle(f32 x);
 f32 Cosine(f32 x);
 f32 MeasureFontString(void* font, char* text);
-void func_eu_001374E0(void* out, s32 v);
+void SetTextLayoutVerticalPlacement(void* out, s32 v);
 void DrawFontString(void* font, char* text, void* out, s32 zero, void* d);
 
 void DrawHintGlyphElement(Obj_eu_1AE500* self)
@@ -36,7 +36,7 @@ void DrawHintGlyphElement(Obj_eu_1AE500* self)
     SetTextLayoutColor(out, tmp);
     SetTextLayoutHorizontalAlign(out, 0);
     SetTextLayoutVerticalAlign(out, 0);
-    func_eu_001374E0(out, 0);
+    SetTextLayoutVerticalPlacement(out, 0);
     DrawFontString(font, D_eu_0024E350, out, 0, D_eu_00263590);
     PopFontScale((Font*)font);
 }

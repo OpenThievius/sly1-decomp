@@ -1268,6 +1268,7 @@
 #define SetPlacedObjectSpecialFlag                 func_0012B550
 #define GetPlacedObjectSpecialFlag                 func_0012B590
 #define SetFollowObjects                           func_0012B5B8
+#define StoreVectorTailPlacedObject                func_0012B6A0
 #define InitCodeChecksum                           func_0012B6B8
 #define UpdateCodeChecksum                         func_0012B760
 #define InitPlacedObjectModule                     func_0012B868
@@ -2010,6 +2011,7 @@
 #define HandleSpawnMessage                         func_001590A0
 #define FindOrBuildMemberGroup                     func_00159478
 #define DispatchDelayedMessages                    func_00159588
+#define StoreVectorTailEffectSpawner               func_00159668
 #define LoadCrossfadeAnimator                      func_00159680
 #define BindCrossfadeAnimator                      func_001596E0
 #define SetCrossfadeMode                           func_00159770
@@ -2407,6 +2409,7 @@
 #define QueuePlayerWalkerActivation                func_001781E0
 #define QueuePlayerFirstActivation                 func_00178258
 #define QueuePlayerSecondActivation                func_00178280
+#define StoreVectorTailPlayer                      func_001782A8
 #define ComputeTargetArc                           func_001782C0
 #define LaunchPlayerAtTarget                       func_00178598
 #define ChooseTargetArcTime                        func_00178678
@@ -3137,6 +3140,7 @@
 #define DrawDelayedEffect                          func_001A3990
 #define ResolveEffectTarget                        func_001A39C8
 #define SendEffectMessagesAtRate                   func_001A3A18
+#define StoreVectorTailEffect                      func_001A3AC8
 #define InitWalkerCollider                         func_001A3AE0
 #define LoadWalkerCollider                         func_001A3B20
 #define StartWalkerCollider                        func_001A3B58
@@ -3543,6 +3547,7 @@
 #define NotifyContactHandlers                      func_001B8A48
 #define ComputeSegmentParameter                    func_001B8B30
 #define AddContactVertexBlendVelocity              func_001B8B90
+#define StoreVectorTailCollider                    func_001B8FE0
 #define ApplyColliderInverseInertia                func_001B8FE8
 #define SteerColliderTowardPosition                func_001B9058
 #define SteerColliderTowardRotation                func_001B91A8
@@ -3881,6 +3886,7 @@
 #define SetItemKeeperTriggerStates                 func_001CBE70
 #define SetItemKeeperState                         func_001CBEE8
 #define AssignItemKeeperMemberPlaces               func_001CC120
+#define StoreVectorTailAgent                       func_001CC3F8
 #define CreateThreeEntryBlend                      func_001CC410
 #define SolvePlayerLinkSystem                      func_001CC490
 #define PlacePlayerOnLinkedObject                  func_001CC818
@@ -3972,6 +3978,7 @@
 #define StopStandIn                                func_001D7018
 #define HandleStandInNotification                  func_001D7040
 #define InitOwnerMessage                           func_001D7098
+#define StoreVectorTailPathFollower                func_001D70E8
 #define InitOutputBuffer                           func_001D7100
 #define InitStringOutputBuffer                     func_001D7120
 #define DestroyOutputBuffer                        func_001D7148
@@ -4014,6 +4021,7 @@
 #define AddPathFollowerActiveEntry                 func_001DB1E8
 #define SetPathFollowerMode                        func_001DB238
 #define ResetPathFollower                          func_001DB290
+#define StoreVectorTailWorld                       func_001DB448
 #define AddWeightedVectors                         func_001DB460
 #define InitWorldHashLists                         func_001DB480
 #define InitWorldPools                             func_001DB4C8
@@ -4330,6 +4338,7 @@
 #define AppendTimelineKind3Entry                   func_001ED5D8
 #define AppendTimelineKind4Entry                   func_001ED5F8
 #define AppendTimelineKind5Entry                   func_001ED618
+#define StoreVectorTailWarpMenu                    func_001ED638
 #define ComputePolarOffset                         func_001ED650
 #define ComputeDirectionFromAngles                 func_001ED6B0
 #define SplitVectorAlongAxis                       func_001ED738
@@ -4635,6 +4644,7 @@
 #define InstallSecondKernelPatch                   func_001F9FB8
 #define SetUpTlb                                   func_001FA068
 #define TerminateProgram                           func_001FA078
+#define ClearImageEndRecordWord                    func_001FA0A0
 #define GetProcessId                               func_001FA0D8
 #define SignalProcess                              func_001FA0E0
 #define PrintToDebugConsole                        func_001FA140
@@ -4691,6 +4701,7 @@
 #define AbortOnTerminate                           func_001FD920
 #define RunTerminateHook                           func_001FD930
 #define SelectArgumentIfTypeNamesEqual             func_001FD958
+#define DoNothingForExceptionRuntime               func_001FD988
 #define AllocateZeroedNodeOrTerminate              func_001FD990
 #define GetExceptionContext                        func_001FD9E8
 #define GetActiveExceptionSlot                     func_001FDA10
@@ -5078,5 +5089,50 @@
 #define ResetIpu                                   func_00211BA8
 #define RegisterProgramFrameInfo                   func_00211DE0
 #define ReleaseProgramFrameInfo                    func_00211DF8
+#define SendIopRingBlockSlot                       func_eu_0011E5F8
+#define GetIopRingBlockIndex                       func_eu_0011E628
+#define SetTextLayoutVerticalPlacement             func_eu_001374E0
+#define ReadBufferedWideString                     func_eu_001387C8
+#define InitByteTextReader                         func_eu_0015DC58
+#define InitWideTextReader                         func_eu_0015DCB8
+#define InitTextReaderFromTextTable                func_eu_0015DD18
+#define GetTextReaderOffset                        func_eu_0015DE18
+#define GetTextReaderLength                        func_eu_0015DE58
+#define PeekTextReaderChar                         func_eu_0015DEA0
+#define StoreTextReaderChar                        func_eu_0015DEE0
+#define AdvanceTextReader                          func_eu_0015DF18
+#define ReadTextCharAnyWidth                       func_eu_0015DF58
+#define BreakTextIntoLines                         func_eu_0015E4A8
+#define DrawWrappedAlignedText                     func_eu_0015E7E0
+#define SelectLanguageFromSystem                   func_eu_00160568
+#define SelectLanguage                             func_eu_00160620
+#define FindKeyEntryByAnyKey                       func_eu_00160680
+#define InitIopRingSinkByKind                      func_eu_0018ED38
+#define GroupRingBlockColumns                      func_eu_0018EE08
+#define PutIopRingSinkByKind                       func_eu_0018EF40
+#define WriteIopRingBlockByKind                    func_eu_0018F118
+#define UpdateIopRingSinkByKind                    func_eu_0018F210
+#define SetScreenElementByteText                   func_eu_001AB238
+#define SetScreenElementWideText                   func_eu_001AB2B0
+#define SetElementWideTextFromEntry                func_eu_001ADE38
+#define SetElementWideTextFromIndexedCounts        func_eu_001ADF10
+#define RebuildPromptWideText                      func_eu_001AED58
+#define LoadTextTable                              func_eu_001DDA10
+#define GetTextTableEntry                          func_eu_001DDAB0
+#define GetLoadedKeyRecord                         func_eu_001DE018
+#define GetWideStringLength                        func_eu_001E3018
+#define CopyWideString                             func_eu_001E3050
+#define AppendWideString                           func_eu_001E30A0
+#define CompareWideStrings                         func_eu_001E3100
+#define CopyStringToWide                           func_eu_001E3140
+#define AppendStringToWide                         func_eu_001E3178
+#define IsWideCharSpace                            func_eu_001E31E0
+#define IsWideCharDigit                            func_eu_001E3210
+#define UppercaseByteString                        func_eu_001E3248
+#define CopyStringBoundedForIopClients             func_eu_001F7738
+#define ClaimFreeFileHandle                        func_eu_001F9538
+#define ReadRomVersion                             func_eu_0020A730
+#define IsRomVersionRegionT                        func_eu_0020A7D0
+#define GetSystemLanguage                          func_eu_0020A810
 
 #endif

@@ -21,11 +21,11 @@ struct Text_eu_15E7E0 {
 f32 SumTextWidth(void* self);
 void SetTextDefaultColor(void* self, void* color);
 void RewindTextReader(void* self);
-s32 func_eu_0015DE18(void* self);
-s32 func_eu_0015DF58(void* self);
-s32 func_eu_001E31E0(s32 ch);
+s32 GetTextReaderOffset(void* self);
+s32 ReadTextCharAnyWidth(void* self);
+s32 IsWideCharSpace(s32 ch);
 
-void func_eu_0015E7E0(Text_eu_15E7E0* self, Box_eu_15E7E0* box, s32 a, s32 b)
+void DrawWrappedAlignedText(Text_eu_15E7E0* self, Box_eu_15E7E0* box, s32 a, s32 b)
 {
     Entry_eu_15E7E0 local;
     Entry_eu_15E7E0* e;
@@ -65,8 +65,8 @@ void func_eu_0015E7E0(Text_eu_15E7E0* self, Box_eu_15E7E0* box, s32 a, s32 b)
     s32 started = 0;
     s32 right = 2;
     RewindTextReader(self);
-    while ((ch = func_eu_0015DF58(self)) != 0) {
-        s32 pos = func_eu_0015DE18(self);
+    while ((ch = ReadTextCharAnyWidth(self)) != 0) {
+        s32 pos = GetTextReaderOffset(self);
         if (lineStart == 0) {
             if (e < end && pos >= e->start) {
                 lineStart = 1;
@@ -95,7 +95,7 @@ void func_eu_0015E7E0(Text_eu_15E7E0* self, Box_eu_15E7E0* box, s32 a, s32 b)
             self->flagA0 = 0;
         }
         if (pending != 0) {
-            if (func_eu_001E31E0(ch) != 0) {
+            if (IsWideCharSpace(ch) != 0) {
                 continue;
             }
         }

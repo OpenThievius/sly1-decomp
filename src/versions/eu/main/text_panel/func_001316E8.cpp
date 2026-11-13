@@ -11,10 +11,10 @@ struct Obj_eu_1316E8 {
 
 struct TextReader_eu_1316E8 { u8 bytes[0xC0]; };
 
-void func_eu_0015DD18(TextReader_eu_1316E8* out, s32 id, Font* font, s32 zero);
+void InitTextReaderFromTextTable(TextReader_eu_1316E8* out, s32 id, Font* font, s32 zero);
 f32 SumTextWidth(TextReader_eu_1316E8* reader);
-void func_eu_0015E7E0(TextReader_eu_1316E8* reader, Layout_137228* layout, s32 zero, PacketWriter* gs);
-void func_eu_001374E0(Layout_137228* layout, s32 value);
+void DrawWrappedAlignedText(TextReader_eu_1316E8* reader, Layout_137228* layout, s32 zero, PacketWriter* gs);
+void SetTextLayoutVerticalPlacement(Layout_137228* layout, s32 value);
 
 struct Gfx_eu_1316E8 {
     static s32 ScreenX(f32 x)
@@ -49,7 +49,7 @@ struct ScreenLayout_eu_1316E8 {
         l->Color(Words(col));
         l->SetF14(0);
         l->SetF18(0);
-        func_eu_001374E0(l, 0);
+        SetTextLayoutVerticalPlacement(l, 0);
     }
 };
 
@@ -106,9 +106,9 @@ void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
     s32 prev = (cur + 7) & 7;
     s32 next = (cur + 1) & 7;
     f32 frac = WrapModulo(a, 0.78539819f) / 0.78539819f;
-    func_eu_0015DD18(&sCur, ((s32*)D_00261128)[cur], self->font, 0);
-    func_eu_0015DD18(&sPrev, ((s32*)D_00261128)[prev], self->font, 0);
-    func_eu_0015DD18(&sNext, ((s32*)D_00261128)[next], self->font, 0);
+    InitTextReaderFromTextTable(&sCur, ((s32*)D_00261128)[cur], self->font, 0);
+    InitTextReaderFromTextTable(&sPrev, ((s32*)D_00261128)[prev], self->font, 0);
+    InitTextReaderFromTextTable(&sNext, ((s32*)D_00261128)[next], self->font, 0);
     f32 wCur = SumTextWidth(&sCur);
     f32 off = frac * w;
     f32 wPrev = SumTextWidth(&sPrev);
@@ -127,10 +127,10 @@ void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
     *(PanelColor*)&L.color = PanelColor(D_002610D8);
     L.x = xPrev;
     L.y = row;
-    func_eu_0015E7E0(&sPrev, &L, 0, gs);
+    DrawWrappedAlignedText(&sPrev, &L, 0, gs);
     L.x = xNext;
     L.y = row;
-    func_eu_0015E7E0(&sNext, &L, 0, gs);
+    DrawWrappedAlignedText(&sNext, &L, 0, gs);
 
     {
         SpanHead q = { 0.0f, 4.0f, -4.0f };
@@ -139,7 +139,7 @@ void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
     }
     L.x = xCur;
     L.y = row;
-    func_eu_0015E7E0(&sCur, &L, 0, gs);
+    DrawWrappedAlignedText(&sCur, &L, 0, gs);
 
     BeginGifTag(gs, 0, 1, 0xE);
     AddGifRegisterWrite(gs, 0x40, 0xFF0000027F0000);

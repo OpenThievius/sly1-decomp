@@ -24,7 +24,7 @@ void SetPauseMenuLayerPage(Menu_195958_eu* self, s32 a, s32 b);
 void ExitLevelFromPauseMenu(Menu_195958_eu* self, s32 a, s32 b);
 void BuildPauseMenuPage(Menu_195958_eu* self);
 void PushStackElement(u8* a, Sub_195958_eu* b);
-void func_eu_00160620(s32 a);
+void SelectLanguage(s32 a);
 u8* LookupEntryById(s32 a);
 
 void ActivatePauseMenuSelection(Menu_195958_eu* self)
@@ -217,7 +217,7 @@ void ActivatePauseMenuSelection(Menu_195958_eu* self)
         if (sel < 0x1B) {
             return;
         }
-        func_eu_00160620(sel - 0x1B);
+        SelectLanguage(sel - 0x1B);
         StartObjectFade(LookupEntryById(3), 0x1BE, 1);
         return;
     case 34:

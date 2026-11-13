@@ -1,0 +1,39 @@
+symbol	name	evidence
+func_001E08F8	ParseSignedDecimal	reads an optional '-' and decimal digits from the string, stores the value and returns the number of characters used; func_001E0978 uses it for width and precision
+func_001E0978	ParseFormatSpec	state machine over a '%' conversion: flags '-', '+', ' ', '#', '0', width and precision (or '*' from the argument list), length letters, then the conversion character, filling the 0x34-byte spec and returning the characters consumed
+func_001E0CD0	FormatStringArg	writes a string argument ("(null)" if 0) to the output buffer, cut to the precision and padded to the width with spaces (or zeros) on the left or right
+func_001E0E18	ExtractIntegerSign	widens an unsigned short argument for length 1, and for %d / %i makes a negative value positive in place (by its length 0, 1 or 2), returning whether it was negative
+func_001E0EF8	GetConversionRadix	returns 10 for d, i and u, 2 for b, 8 for o and 16 for x
+func_001E0F58	WriteIntegerDigits	writes value in the given radix into the buffer from the digit table D_00275940 (most significant first) and returns the digit count
+func_001E1028	FormatIntegerArg	builds the sign or 0b / 0 / 0x prefix, the digits and the zero padding for an integer conversion and writes them with the width padding to the output buffer
+func_001E1330	GetDecimalExponent	returns floor of the base-10 logarithm of a positive double (0 for non-positive values)
+func_001E13D0	GetDecimalDigit	returns the digit character of the double at decimal position index, or '0' outside 15 digits of the leading one
+func_001E1498	FormatFloatDigits	writes the digits of a double for e, f and g conversions (rounding, decimal point, trailing-zero trimming for g, e+NNN exponent) into the buffer, or "(nan)" / "(inf)"
+func_001E17A8	FormatFloatArg	defaults the precision to 6, takes the sign, formats the digits with FormatFloatDigits and writes sign, padding and digits to the output buffer
+func_001E1A08	FormatConversionArg	switch on the conversion character: % and c write one byte, s calls FormatStringArg, p / b / d / i / o / u / x take an integer argument and call FormatIntegerArg, e / f / g call FormatFloatArg, n stores the output count
+func_001E1DB8	FormatToOutputBuffer	copies the text between '%' signs to the output buffer, parses each conversion with ParseFormatSpec and writes it with FormatConversionArg, flushes and returns the count
+func_001E1EB0	PrintFormattedVa	formats through an output buffer with no memory target (capacity -1) that FlushOutputBuffer sends to the console write, returning the count
+func_001E1F10	PrintFormatted	the variadic entry of PrintFormattedVa: builds the argument pointer from its own frame
+func_001E1F58	FormatToStringVa	formats into dst through an output buffer, NUL-terminates it and returns the length
+func_001E1FD0	FormatToString	the variadic entry of FormatToStringVa
+func_001E2018	FormatToStringBoundedVa	formats into dst limited to cap bytes; returns -1 and terminates at cap - 1 when it did not fit
+func_001E20B8	FormatToStringBounded	the variadic entry of FormatToStringBoundedVa
+func_001E2100	GetStringLength	counts bytes up to the NUL
+func_001E2138	CopyString	copies the string and its NUL with func_0018D800 and returns dst
+func_001E2180	AppendString	copies src after the end of dst and returns dst
+func_001E21D8	FindCharInString	returns the first position of the character in the string, or 0
+func_001E2218	UppercaseString	subtracts 0x20 from each character whose class bit 2 is set in D_0024E879 (lower-case letters)
+func_001E2268	CreateLockSemaphore	zeroes a 0x18-byte record, stores its two arguments and hands it to func_001F6B20 (a kernel create call), returning the id
+func_001E22C0	InitRecursiveLock	sets last to -1 and the semaphore to CreateLockSemaphore(1, 1); the callers pass D_002C2A28
+func_001E22F8	EnterRecursiveLock	takes the current thread id (func_001F6A90); when it differs from last it waits on the semaphore (func_001F6B60) and sets count to 1, otherwise adds 1 to count
+func_001E2358	LeaveRecursiveLock	subtracts 1 from count and, at 0, clears last to -1 and signals the semaphore with func_001F6B40
+func_001E2398	CreateRenderThread	fills a thread init record (entry RunRenderThread, 0x20000-byte stack D_006056D0, priority 2, global pointer) and creates the thread into g_mainAndRenderThreads
+func_eu_001E3018	GetWideStringLength	only in PAL: the number of halfwords before the zero that ends a 16-bit string; the wide-string functions, GetTextReaderLength, SetTextPanelText and DrawSlidingGlyphElement call it
+func_eu_001E3050	CopyWideString	only in PAL: copies a 16-bit string with its zero (CopyMemory of twice its length plus 2 bytes) and returns the destination; the screen-element setters, DrawTextPanel, SetTextPanelText and SetBestTimeState call it
+func_eu_001E30A0	AppendWideString	only in PAL: copies a 16-bit string with its zero after the end of another and returns the destination; FormatGameSummary and RebuildPromptWideText call it
+func_eu_001E3100	CompareWideStrings	only in PAL: compares two 16-bit strings and returns the difference at the first unequal halfword, or 0; SetElementTextAfterSlideOut and SetElementTextCopiedAfterSlideOut call it where US calls CompareStrings
+func_eu_001E3140	CopyStringToWide	only in PAL: copies an 8-bit string into a 16-bit one, each byte widened, with a zero halfword after it, and returns the destination; SetScreenElementByteText and FormatGameSummary call it
+func_eu_001E3178	AppendStringToWide	only in PAL: appends an 8-bit string, each byte widened, after the end of a 16-bit one and returns the destination; DrawTextPanel, SetBestTimeState and the screen-element text builders call it
+func_eu_001E31E0	IsWideCharSpace	only in PAL: for a character below 0x80 returns bit 3 of its byte in the class table D_eu_0024FB49, for any other whether it is 0x3000; BreakTextIntoLines and DrawWrappedAlignedText treat such characters as spaces
+func_eu_001E3210	IsWideCharDigit	only in PAL: for a character below 0x80 returns bit 2 of its byte in the class table D_eu_0024FB49, for any other whether it lies in 0xFF10 to 0xFF19; ReadTextCharAnyWidth checks the & and ^ codes' digits with it
+func_eu_001E3248	UppercaseByteString	only in PAL, in place of US UppercaseString (func_001E2218, absent from PAL): subtracts 0x20 from each byte whose class bit 1 (mask 2) is set in D_eu_0024FB49, reading each byte unsigned where US reads it signed, so bytes from 0x80 are looked up too; FormatFloatArg, FormatIntegerArg and NormalizeDiscPath call it

@@ -8938,7 +8938,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "33504",
      "metadata": {
-      "virtual_address": "1226688"
+      "virtual_address": "1226688",
+      "demangled_name": "StoreVectorTailPlacedObject"
      }
     },
     {
@@ -14624,7 +14625,7 @@
    }
   },
   {
-   "name": "game/file_14B550",
+   "name": "game/agent_registration",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "332",
@@ -14710,11 +14711,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_14B550.cpp"
+    "source_path": "src/main/agent_registration.cpp"
    }
   },
   {
-   "name": "game/file_14B6A8",
+   "name": "game/gauge_manager",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "6632",
@@ -14960,7 +14961,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_14B6A8.cpp"
+    "source_path": "src/main/gauge_manager.cpp"
    }
   },
   {
@@ -15432,7 +15433,7 @@
    }
   },
   {
-   "name": "game/file_14EE40",
+   "name": "game/pooled_object",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "17948",
@@ -16405,7 +16406,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_14EE40.cpp"
+    "source_path": "src/main/pooled_object.cpp"
    }
   },
   {
@@ -16529,7 +16530,7 @@
    }
   },
   {
-   "name": "game/file_1549C8",
+   "name": "game/effect_spawner",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "24620",
@@ -17294,7 +17295,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "19616",
      "metadata": {
-      "virtual_address": "1415456"
+      "virtual_address": "1415456",
+      "demangled_name": "StoreVectorTailEffectSpawner"
      }
     },
     {
@@ -17582,7 +17584,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1549C8.cpp"
+    "source_path": "src/main/effect_spawner.cpp"
    }
   },
   {
@@ -18415,7 +18417,7 @@
    }
   },
   {
-   "name": "game/file_15F678",
+   "name": "game/game_progress",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "13028",
@@ -19381,7 +19383,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_15F678.cpp"
+    "source_path": "src/main/game_progress.cpp"
    }
   },
   {
@@ -20365,7 +20367,7 @@
    }
   },
   {
-   "name": "game/file_16AA18",
+   "name": "game/selection_menus",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "6684",
@@ -20600,11 +20602,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_16AA18.cpp"
+    "source_path": "src/main/selection_menus.cpp"
    }
   },
   {
-   "name": "game/file_16C470",
+   "name": "game/link_constraint",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "2428",
@@ -20689,7 +20691,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_16C470.cpp"
+    "source_path": "src/main/link_constraint.cpp"
    }
   },
   {
@@ -21846,7 +21848,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "36016",
      "metadata": {
-      "virtual_address": "1542408"
+      "virtual_address": "1542408",
+      "demangled_name": "StoreVectorTailPlayer"
      }
     },
     {
@@ -21929,7 +21932,7 @@
    }
   },
   {
-   "name": "game/file_1793C0",
+   "name": "game/mode_collider",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "9636",
@@ -22265,7 +22268,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1793C0.cpp"
+    "source_path": "src/main/mode_collider.cpp"
    }
   },
   {
@@ -22559,7 +22562,7 @@
    }
   },
   {
-   "name": "game/file_17D248",
+   "name": "game/player_state2",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "11152",
@@ -22765,7 +22768,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_17D248.cpp"
+    "source_path": "src/main/player_state2.cpp"
    }
   },
   {
@@ -22879,7 +22882,7 @@
    }
   },
   {
-   "name": "game/file_180EB0",
+   "name": "game/mode_walker",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "5524",
@@ -23115,7 +23118,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_180EB0.cpp"
+    "source_path": "src/main/mode_walker.cpp"
    }
   },
   {
@@ -26283,7 +26286,7 @@
    }
   },
   {
-   "name": "game/file_18F988",
+   "name": "game/point_graph",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "10152",
@@ -26839,7 +26842,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_18F988.cpp"
+    "source_path": "src/main/point_graph.cpp"
    }
   },
   {
@@ -27501,7 +27504,7 @@
    }
   },
   {
-   "name": "game/file_1963D8",
+   "name": "game/gauge_collider",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "9560",
@@ -27857,11 +27860,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1963D8.cpp"
+    "source_path": "src/main/gauge_collider.cpp"
    }
   },
   {
-   "name": "game/file_198980",
+   "name": "game/object_gatherer",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "18912",
@@ -28737,7 +28740,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_198980.cpp"
+    "source_path": "src/main/object_gatherer.cpp"
    }
   },
   {
@@ -29916,7 +29919,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "23176",
      "metadata": {
-      "virtual_address": "1722384"
+      "virtual_address": "1722384",
+      "demangled_name": "StoreVectorTailEffect"
      }
     }
    ],
@@ -29929,7 +29933,7 @@
    }
   },
   {
-   "name": "game/file_1A3AE0",
+   "name": "game/pair_controller",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "17524",
@@ -30835,11 +30839,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1A3AE0.cpp"
+    "source_path": "src/main/pair_controller.cpp"
    }
   },
   {
-   "name": "game/file_1A7FE8",
+   "name": "game/object_pool",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "8740",
@@ -31295,7 +31299,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1A7FE8.cpp"
+    "source_path": "src/main/object_pool.cpp"
    }
   },
   {
@@ -34273,7 +34277,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "5752",
      "metadata": {
-      "virtual_address": "1809616"
+      "virtual_address": "1809616",
+      "demangled_name": "StoreVectorTailCollider"
      }
     },
     {
@@ -35132,7 +35137,7 @@
    }
   },
   {
-   "name": "game/file_1BE1E8",
+   "name": "game/sound_system",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "12056",
@@ -36006,11 +36011,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1BE1E8.cpp"
+    "source_path": "src/main/sound_system.cpp"
    }
   },
   {
-   "name": "game/file_1C1190",
+   "name": "game/object_properties",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "6188",
@@ -36245,7 +36250,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1C1190.cpp"
+    "source_path": "src/main/object_properties.cpp"
    }
   },
   {
@@ -36879,7 +36884,7 @@
    }
   },
   {
-   "name": "game/file_1C5F18",
+   "name": "game/player_aim",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "4132",
@@ -36995,7 +37000,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1C5F18.cpp"
+    "source_path": "src/main/player_aim.cpp"
    }
   },
   {
@@ -37935,7 +37940,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "21680",
      "metadata": {
-      "virtual_address": "1888496"
+      "virtual_address": "1888496",
+      "demangled_name": "StoreVectorTailAgent"
      }
     }
    ],
@@ -38888,7 +38894,7 @@
    }
   },
   {
-   "name": "game/file_1D62E0",
+   "name": "game/path_follower",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "11048",
@@ -39034,7 +39040,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "3592",
      "metadata": {
-      "virtual_address": "1932752"
+      "virtual_address": "1932752",
+      "demangled_name": "StoreVectorTailPathFollower"
      }
     },
     {
@@ -39193,11 +39200,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1D62E0.cpp"
+    "source_path": "src/main/path_follower.cpp"
    }
   },
   {
-   "name": "game/file_1D8E40",
+   "name": "game/path_follower_helpers",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "3192",
@@ -39273,11 +39280,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1D8E40.cpp"
+    "source_path": "src/main/path_follower_helpers.cpp"
    }
   },
   {
-   "name": "game/file_1D9AC8",
+   "name": "game/world",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "17040",
@@ -39523,7 +39530,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "6528",
      "metadata": {
-      "virtual_address": "1950000"
+      "virtual_address": "1950000",
+      "demangled_name": "StoreVectorTailWorld"
      }
     },
     {
@@ -40328,7 +40336,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1D9AC8.cpp"
+    "source_path": "src/main/world.cpp"
    }
   },
   {
@@ -40572,7 +40580,7 @@
    }
   },
   {
-   "name": "game/file_1DFD48",
+   "name": "game/class75_list",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "300",
@@ -40658,7 +40666,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1DFD48.cpp"
+    "source_path": "src/main/class75_list.cpp"
    }
   },
   {
@@ -40790,7 +40798,7 @@
    }
   },
   {
-   "name": "game/file_1E08F8",
+   "name": "game/text_format",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "7384",
@@ -41223,11 +41231,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1E08F8.cpp"
+    "source_path": "src/main/text_format.cpp"
    }
   },
   {
-   "name": "game/file_1E2420",
+   "name": "game/on_off_object",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "12088",
@@ -41582,11 +41590,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1E2420.cpp"
+    "source_path": "src/main/on_off_object.cpp"
    }
   },
   {
-   "name": "game/file_1E5378",
+   "name": "game/arc_element",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "13580",
@@ -41952,11 +41960,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1E5378.cpp"
+    "source_path": "src/main/arc_element.cpp"
    }
   },
   {
-   "name": "game/file_1E88D0",
+   "name": "game/warp_menu",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "40108",
@@ -43100,7 +43108,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "19896",
      "metadata": {
-      "virtual_address": "2025136"
+      "virtual_address": "2025136",
+      "demangled_name": "StoreVectorTailWarpMenu"
      }
     },
     {
@@ -44094,11 +44103,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1E88D0.cpp"
+    "source_path": "src/main/warp_menu.cpp"
    }
   },
   {
-   "name": "game/file_1F2758",
+   "name": "game/oscillator",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "12812",
@@ -44764,7 +44773,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1F2758.cpp"
+    "source_path": "src/main/oscillator.cpp"
    }
   },
   {
@@ -46793,7 +46802,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "56",
      "metadata": {
-      "virtual_address": "2077744"
+      "virtual_address": "2077744",
+      "demangled_name": "ClearImageEndRecordWord"
      }
     },
     {
@@ -47141,7 +47151,7 @@
    }
   },
   {
-   "name": "lib/file_1FAC00",
+   "name": "lib/global_constructors",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "568",
@@ -47187,7 +47197,7 @@
     "progress_categories": [
      "lib"
     ],
-    "source_path": "src/lib/file_1FAC00.cpp"
+    "source_path": "src/lib/global_constructors.cpp"
    }
   },
   {
@@ -47866,7 +47876,8 @@
      "fuzzy_match_percent": 100.0,
      "address": "104",
      "metadata": {
-      "virtual_address": "2092360"
+      "virtual_address": "2092360",
+      "demangled_name": "DoNothingForExceptionRuntime"
      }
     },
     {

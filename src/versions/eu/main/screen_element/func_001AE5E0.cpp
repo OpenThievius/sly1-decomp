@@ -16,12 +16,12 @@ struct Element_eu_1AE5E0 {
     f32 since;                  // 0x564
 };
 
-void func_eu_0015DCB8(void* reader, const char* text, Font* font, s32 zero);
-void func_eu_001374E0(void* layout, s32 flag);
-void func_eu_0015E7E0(void* buf, void* out, s32 zero, void* d);
+void InitWideTextReader(void* reader, const char* text, Font* font, s32 zero);
+void SetTextLayoutVerticalPlacement(void* layout, s32 flag);
+void DrawWrappedAlignedText(void* buf, void* out, s32 zero, void* d);
 
 struct LayoutBuilder_eu_1AE5E0 : LayoutBuilder {
-    void FlagC(s32 f) { func_eu_001374E0(this, f); }
+    void FlagC(s32 f) { SetTextLayoutVerticalPlacement(this, f); }
 };
 
 void DrawLetterGlyphElement(Element_eu_1AE5E0* self)
@@ -45,7 +45,7 @@ void DrawLetterGlyphElement(Element_eu_1AE5E0* self)
     size *= self->scale;
     if (!(size <= 0.0f)) {
         PushFontScale(self->font, size, size);
-        func_eu_0015DCB8(reader, self->text, self->font, 0);
+        InitWideTextReader(reader, self->text, self->font, 0);
         s32 held = self->color;
         out.Pos(self->x, self->y);
         out.Size(w, h);
@@ -54,7 +54,7 @@ void DrawLetterGlyphElement(Element_eu_1AE5E0* self)
         out.FlagA(0);
         out.FlagB(0);
         out.FlagC(0);
-        func_eu_0015E7E0(reader, &out, 0, &g_gsPacketWriter);
+        DrawWrappedAlignedText(reader, &out, 0, &g_gsPacketWriter);
         PopFontScale(self->font);
     }
 }

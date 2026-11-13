@@ -4,7 +4,7 @@
 // draw, resize and clear, and PostItemColumnEntry. Its edges are not proved by retail, only by
 // the change of role: the camera's controllers before it (camera_controller.cpp) and the
 // symmetric solve after it (symmetric_solve.cpp). The functions from 0x14A7B8 to 0x14B6A8 read
-// no .rodata or .data of either neighbour (file_14B6A8.cpp's head), so the cut before could lie
+// no .rodata or .data of either neighbour (gauge_manager.cpp's head), so the cut before could lie
 // from 0x14A7B8 to 0x14ABD0 and the one after from 0x14AF38 to 0x14B0C0. The name is ours,
 // after its role.
 #include "common.h"

@@ -14,7 +14,7 @@ struct Obj_eu_001AEEA0 {
 extern s32 D_eu_0027F360;
 extern s32 D_eu_00263EEC;
 extern Pal_eu_001AEEA0* D_eu_0026ABE8[];
-void func_eu_001AED58(void* self);
+void RebuildPromptWideText(void* self);
 void UpdateScreenElementSlide(void* self);
 
 void UpdatePromptElement(Obj_eu_001AEEA0* self)
@@ -33,7 +33,7 @@ void UpdatePromptElement(Obj_eu_001AEEA0* self)
         if (((a0 == 0) != (self->flag == 0)) || ((a1 == 0) != (self->value == 0))) {
             self->flag = a0;
             self->value = a1;
-            func_eu_001AED58(self);
+            RebuildPromptWideText(self);
         }
     }
     UpdateScreenElementSlide(self);

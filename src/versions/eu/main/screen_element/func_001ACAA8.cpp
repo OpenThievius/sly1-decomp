@@ -22,8 +22,8 @@ struct Element_eu_1AD800 {
 };
 
 void DrawScreenElementText(void* self);
-s32 func_eu_001E3018(u16* text);
-void func_eu_001374E0(void* out, s32 v);
+s32 GetWideStringLength(u16* text);
+void SetTextLayoutVerticalPlacement(void* out, s32 v);
 
 void DrawSlidingGlyphElement(Element_eu_1AD800* self)
 {
@@ -45,7 +45,7 @@ void DrawSlidingGlyphElement(Element_eu_1AD800* self)
     default:
         return;
     }
-    n = func_eu_001E3018(self->text);
+    n = GetWideStringLength(self->text);
     if (n == 0) {
         return;
     }
@@ -62,7 +62,7 @@ void DrawSlidingGlyphElement(Element_eu_1AD800* self)
         out.Color(grey);
         out.FlagA(0);
         out.FlagB(0);
-        func_eu_001374E0(&out, 0);
+        SetTextLayoutVerticalPlacement(&out, 0);
         Font* o = *self->frame;
         if (o != 0) {
             o->vt->drawBox((Font*)((u8*)o + o->vt->adj9), self->frame, &out, &g_gsPacketWriter);

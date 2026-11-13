@@ -16,14 +16,14 @@ struct Holder_eu_15E438 {
 };
 
 void RewindTextReader(void* self);
-s32 func_eu_0015DF58(void* self);
+s32 ReadTextCharAnyWidth(void* self);
 
 f32 SumTextWidth(Holder_eu_15E438* self)
 {
     f32 total = 0.0f;
     RewindTextReader(self);
     s32 r;
-    while ((r = func_eu_0015DF58(self)) != 0) {
+    while ((r = ReadTextCharAnyWidth(self)) != 0) {
         Node_eu_15E438* n = self->node;
         total += n->info->fn((u8*)n + n->info->off, r);
     }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // A copy of words: the odd ones one at a time, then four at a time, each four read before they
-// are written. Retail's packet builders inline it (FlushVertexBatch in file_15F678.cpp,
+// are written. Retail's packet builders inline it (FlushVertexBatch in game_progress.cpp,
 // UploadLightVolumes in main_loop.cpp): with a constant count the first loop folds away and the
 // second counts down by four to a `bgez`. Written for this project from what retail's code does.
 #ifndef WORD_COPY_H

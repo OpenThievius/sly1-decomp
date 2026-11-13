@@ -7,7 +7,7 @@
 // A plain struct with an explicit vptr: the entries are GCC 2.95's {s16 delta; s16 index; fn},
 // entry 0 being {offset-to-top, rtti} = {0, 0, 0}, so the one virtual is entry 1, called as
 // `vt->close.fn((u8*)self + vt->adj1, flag)`. No `virtual`, so GCC emits no vtable of its own
-// (the tables are defined in file_14EE40.cpp and file_15F678.cpp).
+// (the tables are defined in pooled_object.cpp and game_progress.cpp).
 //
 // The writer appends 64-bit words at `cur`; a packet starts with a header word whose count
 // func_00161278 patches when the packet is closed.

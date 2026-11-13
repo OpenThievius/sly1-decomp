@@ -24,6 +24,6 @@ struct IdentityKey {
 typedef char check_IdentityKey[sizeof(IdentityKey) == 0x20 ? 1 : -1];
 
 extern const IdentityKey D_00248490;    // global_tables.cpp
-extern IdentityKey D_00275B04;      // file_1E88D0.cpp, file_1F2758.cpp, file_15F678.cpp (label of 0x1C bytes)
+extern IdentityKey D_00275B04;      // warp_menu.cpp, oscillator.cpp, game_progress.cpp (label of 0x1C bytes)
 
 #endif

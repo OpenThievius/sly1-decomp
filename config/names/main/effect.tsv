@@ -1,7 +1,7 @@
 symbol	name	evidence
 func_0019E040	AcquireEffectOwner	takes the first free object from the world's list at +0x1B38 (advancing it through +0x564), stores its flag word at 0x550, runs its slot 2, and with flag 0 caches it at +0x1B3C and returns that one on later calls
 func_0019E0B8	InitEffectOwner	slot 0 of class 0x1E: runs the collider set-up func_001B7968, makes the list at +0x558 (the effect list) with func_00152438 and sets its flag bits
-func_0019E158	CopyEffectOwnerMargin	stores the source record's float at +0x1E8 in the effect owner's +0x554, the margin MoveEffectsAndBounds adds to its box (file_1549C8's spawners call it)
+func_0019E158	CopyEffectOwnerMargin	stores the source record's float at +0x1E8 in the effect owner's +0x554, the margin MoveEffectsAndBounds adds to its box (effect_spawner's spawners call it)
 func_0019E168	ReleaseEffectOwner	slot 11 of class 0x1E: removes every effect of the list at +0x558 with RemoveEffect, pushes itself back on the world's free list at +0x1B38 and clears the cache at +0x1B3C
 func_0019E220	MoveEffectsAndBounds	slot 0x7C of class 0x1E: runs slot 3 (motion) of every started effect of the list at +0x558 and grows the box at +0x420/+0x430 over each effect's two points, then widens it by +0x554
 func_0019E418	KeepEffectOwnerBounds	slot 0xD8 of class 0x1E (the bounds update other classes fill, UpdateColliderBounds): empty, as MoveEffectsAndBounds already keeps the box
@@ -94,3 +94,4 @@ func_001A38F0	UpdateDelayedEffect	slot 4 of the kind-26 table: once started runs
 func_001A3990	DrawDelayedEffect	slot 5 of the kind-26 table: DrawEffect once the start time has come
 func_001A39C8	ResolveEffectTarget	slot 1 of the 0x219F60 effect table: stores FindFirstObjectById(world, 0x104, source's id at +0x1F0, source's link at +0x7C) in +0x120 and copies the source's float at +0x1F4 to +0x124
 func_001A3A18	SendEffectMessagesAtRate	slot 4 of the 0x219F60 effect table: runs the shared update, then adds time*rate (+0x124) to the counter at +0x128 and for each whole unit calls slot 31 (message handler) of the object at +0x120 with a 4-word record holding the effect's position
+func_001A3AC8	StoreVectorTailEffect	original assembly with no entry and no return: 20 bytes after SendEffectMessagesAtRate's jr that free 16 bytes of stack, store $a1's quadword at $v0 and move VU0 register vf1 into $v0 (qmfc2.ni); nothing calls or names it. The same words sit after eight other functions (StoreVectorTail and a file's role), the tail of a stripped vector function; it is classified handwritten only for its VU0 instruction

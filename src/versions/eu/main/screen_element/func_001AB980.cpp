@@ -19,7 +19,7 @@ struct Clock_1AB980_eu
     Cb_1AB980_eu onEnd;
 };
 void SetTimerState(Clock_1AB980_eu* self, s32 state);
-void func_eu_001AB238(void* self, const char* s);
+void SetScreenElementByteText(void* self, const char* s);
 
 void StepTimer(Clock_1AB980_eu* self, f32 dt)
 {
@@ -118,6 +118,6 @@ void StepTimer(Clock_1AB980_eu* self, f32 dt)
     if (show)
     {
         FormatToStringBounded(buf, 0x10, "%c%d%c%s%d", 0x54, hi, sep, (lo < 10 && !tenths) ? "0" : "", lo);
-        func_eu_001AB238(self, buf);
+        SetScreenElementByteText(self, buf);
     }
 }

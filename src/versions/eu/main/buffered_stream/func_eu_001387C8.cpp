@@ -6,7 +6,7 @@
 s32 ReadBufferedU16(void* self);
 void ReadBufferedStreamBytes(void* self, s32 bytes, void* buf);
 void* AllocateFrontMemory(s32 size);
-void func_eu_001387C8(void* a0, void** a1)
+void ReadBufferedWideString(void* a0, void** a1)
 {
     s32 n = ReadBufferedU16(a0);
     u16* buf = (u16*)AllocateFrontMemory((n + 1) * 2);

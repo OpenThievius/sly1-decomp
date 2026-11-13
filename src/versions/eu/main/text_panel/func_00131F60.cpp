@@ -19,9 +19,9 @@ struct TextReader_eu_131F60 { u8 bytes[0xC0]; };
 
 extern const char D_eu_0024C520[]; // "%c", US D_00249CE0
 
-void func_eu_0015DD18(TextReader_eu_131F60* out, s32 id, Font* font, s32 zero);
-void func_eu_0015E7E0(TextReader_eu_131F60* reader, Layout_137228* layout, s32 zero, PacketWriter* gs);
-void func_eu_001374E0(Layout_137228* layout, s32 value);
+void InitTextReaderFromTextTable(TextReader_eu_131F60* out, s32 id, Font* font, s32 zero);
+void DrawWrappedAlignedText(TextReader_eu_131F60* reader, Layout_137228* layout, s32 zero, PacketWriter* gs);
+void SetTextLayoutVerticalPlacement(Layout_137228* layout, s32 value);
 
 struct Gfx_eu_131F60 {
     static s32 ScreenX(f32 x)
@@ -52,7 +52,7 @@ struct ScreenLayout_eu_131F60 {
         l->Color(word);
         l->SetF14(0);
         l->SetF18(0);
-        func_eu_001374E0(l, 0);
+        SetTextLayoutVerticalPlacement(l, 0);
     }
 };
 
@@ -127,13 +127,13 @@ void DrawTextPanelControlLabels(Obj_eu_131F60* self, PacketWriter* gs)
     L.x = (f32)(320 - D_00261090[0]);
     L.y = row;
     TextReader_eu_131F60 moveText;
-    func_eu_0015DD18(&moveText, 0x4F, text, 0);
-    func_eu_0015E7E0(&moveText, &L, 0, gs);
+    InitTextReaderFromTextTable(&moveText, 0x4F, text, 0);
+    DrawWrappedAlignedText(&moveText, &L, 0, gs);
     L.f18 = 0;
     L.x = (f32)(D_00261090[0] + 320);
     L.y = row;
     TextReader_eu_131F60 zoomText;
-    func_eu_0015DD18(&zoomText, 0x50, text, 0);
-    func_eu_0015E7E0(&zoomText, &L, 0, gs);
+    InitTextReaderFromTextTable(&zoomText, 0x50, text, 0);
+    DrawWrappedAlignedText(&zoomText, &L, 0, gs);
     PopFontScale(text);
 }

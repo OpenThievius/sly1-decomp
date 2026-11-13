@@ -9,9 +9,9 @@
 compiler	2.95.3
 default	-O2 -G0 -fno-exceptions -fno-rtti -mvu0-use-vf0-vf15
 src/main/world_listed_object.cpp	-O2 -G0 -fno-exceptions -fno-rtti -mvu0-use-vf0-vf30
-src/main/file_1D8E40.cpp	-O2 -G0 -fno-exceptions -fno-rtti -mvu0-use-vf0-vf30
+src/main/path_follower_helpers.cpp	-O2 -G0 -fno-exceptions -fno-rtti -mvu0-use-vf0-vf30
 src/main/curve_segment.cpp	-O2 -G0 -fno-exceptions -fno-rtti -mvu0-use-vf0-vf30
-src/lib/001F8000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/constructor_list.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/divide.c	-O2 -G0	2.9-ee-991111-01
 src/lib/divide_unsigned.c	-O2 -G0	2.9-ee-991111-01
 src/lib/remainder.c	-O2 -G0	2.9-ee-991111-01
@@ -99,7 +99,7 @@ src/lib/pad.c	-O2 -G0	2.9-ee-991111
 src/lib/graph.c	-O2 -G0	2.9-ee-991111
 src/lib/dma.c	-O2 -G0	2.9-ee-991111
 src/lib/cdvd.c	-O2 -G0	2.9-ee-991111
-src/lib/file_1FAC00.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/global_constructors.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/remote_call.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/system_calls.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/command_channel.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111

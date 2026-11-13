@@ -1,0 +1,102 @@
+symbol	name	evidence
+func_001549C8	InitSpawnRecord	fills a 0x200-byte spawn record from a default template it builds once (D_00261F70 set, the template at D_0027C010 and D_0027C0A0 cleared to 0x90 and 0xC8 bytes with unit vectors); LoadEffectSpawner, SpawnEffectsAt and LoadRecordMember call it
+func_00154C10	InitEffectSpawner	slot 0 of class 0x50: runs InitPlacedObject, sets the ids at 0x2F8..0x30C and 0x310 and the states at 0x2D4 and 0x2D8 to -1, the floats at 0x2DC and 0x2E0 to 10.0 and the deadline at 0x340 to -1.0
+func_00154C80	ReadSpawnMesh	reads a vertex count and vertices, a triangle count and triangles (three corner indices and an area each), sums the areas and accumulates face normals into per-vertex normals
+func_00154EE0	ReadCappedWordList	caps the count at 32, allocates cap*4 bytes, reads a byte and then count words from the stream and stores the first cap of them
+func_00154F98	LoadEffectSpawner	slot 10 of class 0x50: allocates its 0x200-byte spawn record, runs LoadPlacedObject, reads a curve index and creates the curve (CreatePathCurve) and then reads a word list into the record
+func_00155080	CopyEffectSpawner	slot 9 of class 0x50: runs CopyPlacedObject and counts one more user of the shared spawn record
+func_001550B8	ReparentEffectSpawnerToSource	calls the spawner's slot 25 (0x64, reparent) with the word at +0x7C of the object at +0x2D0 (ResolveEffectSpawnerLinks calls it)
+func_001550E8	ResolveEffectSpawnerLinks	slot 15 of class 0x50: runs PostLoadPlacedObject, then finds the objects named by the ids at 0x2F8..0x30C with FindFirstObjectById and stores them in the spawn record's target and found slots
+func_00155270	StartEffectSpawner	original assembly: slot 0x50 of class 0x50
+func_00155678	ReleaseEffectSpawnerHeld	slot 13 of class 0x50: in mode 2 calls slot 6 of the held object at 0x344 or 0x348 when it is the one passed, and clears that field
+func_001556E8	CloneSharedSpawnRecord	returns the spawn record unchanged when only one object uses it, otherwise makes a 0x200-byte copy (and a copy of its 0x28-byte entries), lowers the user count and returns the copy
+func_00155778	GetOwnSpawnRecord	with mode 1 marks the spawner changed (0x34C) and replaces its shared spawn record by CloneSharedSpawnRecord before returning it
+func_001557B8	MarkEffectSpawnerChanged	sets the changed word at 0x34C when the value is 1 and returns the object
+func_001557D0	AddSpawnRangeEntry	passes the spawner's own record (+16) to AddRangeEntry together with four floats and itself
+func_00155868	WrapSpawnerParticlesIntoBox	original assembly: builds a box of half-size f338 around the spawner's source (or a default one) and, for each particle in each chunk of the owner's list (0x840-byte chunks of 16-byte positions), wraps any coordinate outside the box back in with WrapModulo
+func_00155AB0	UpdateEffectSpawner	original assembly: slot 0x54 of class 0x50
+func_00155F28	InheritFlaggedAncestorValue	unless it has the 0x0C000000 flag pattern 0x08000000 itself, walks up the parent chain to the first node that has it and copies that node's float at 0x88
+func_00155F78	SetEffectSpawnerActiveFor	stores the game clock D_0026185C plus the argument as the deadline at 0x340
+func_00155F90	SetEffectSpawnerActiveForever	stores the largest float as the deadline at 0x340
+func_00155FA0	SetEffectSpawnerInactive	stores -1 as the deadline at 0x340, so IsEffectSpawnerActive fails on the clock (script built-ins and five other functions call it)
+func_00155FB0	IsEffectSpawnerActive	1 while the clock D_0026185C is below the deadline at 0x340, or when state 0x2D4 is 0 or 1 and 0x2D8 is 0
+func_00156000	SetEffectSpawnerDisabled	with a nonzero argument makes the spawner inactive (SetEffectSpawnerInactive), else active forever (SetEffectSpawnerActiveForever); a script built-in of func_00109488
+func_00156030	GetEffectSpawnerInactive	writes the negation of IsEffectSpawnerActive through its out pointer (a script built-in of func_00109488)
+func_00156060	GetEffectSpawnerActive	writes IsEffectSpawnerActive through its out pointer
+func_00156088	RandomizeEffectSpawnerDelay	clears the dirty flag and stores a random value in [f2DC, f2E0], times 60 when mode f2D4 is 3, into f328
+func_00156108	SetEffectSpawnerLimit	stores its argument at 0x2D8 while the state 0x2D4 is -1; in state 0 maps 0 to active forever, -1 to inactive and stores other values; marks the spawner changed (+0x34C)
+func_00156178	SetEffectSpawnerContinuous	stores its argument at +0x308 and marks the spawner changed (+0x34C); with +0x308 set StartEffectSpawner and UpdateEffectSpawner make the spawner active forever (SetEffectSpawnerActiveForever) instead of drawing a random delay; a script built-in of func_00109488
+func_00156188	SetSpawnRecordKind	stores the kind at 0x1B0 of the record, clears 12 bytes at 0x1F0 and sets defaults (-1 and 10.0 for kind 27, 25.0 and 0.8 twice for kind 24)
+func_00156218	SetEffectSpawnerKind	gets the spawner's own record (GetOwnSpawnRecord) and passes it to SetSpawnRecordKind
+func_00156250	SetOwnedSpawnRecordKind	gets the spawner's owned record (GetOwnedSpawnRecord) and passes it to SetSpawnRecordKind
+func_00156288	SpawnSurfaceContactEffects	original assembly: draws random numbers against a chance scaled by the step and, on success, creates effects (CreateEffect) at points around the contact with sizes from the given scale and starts a sound; the 0x1963D8 collider calls it while partly submerged and upright
+func_001566C8	SendPointEventToWorldListener	sends message kind 12 with a point and a float to the world's object at +0x1D0C through its slot 31, when there is one
+func_00156718	ChooseSpawnPosition	picks a spawn position (and axis) for index of count from the shape by its kind: a point, a random point in a box, a point along a curve in the index's slice of its length, or a point on a mesh or other solid
+func_00156F08	ConvertSpawnToAnchorSpace	when the spawn setup has an anchor object (+0x6C), converts a position (func_00128018) and, unless the mode +0x70 is 3, a velocity (func_001280C0) into its space, adding the anchor's own motion (func_001278A8) in modes 0 and 1
+func_00156FC8	InitSpawnRing	sets count = min(n, k), rate 2 pi / count, a step from the span's width over the number of passes, a start phase half a step in, and a random start angle in 0..2 pi
+func_00157098	ComputeSpawnRingDirection	splits an index into a ring step and a position along it, jitters the two angles, wraps them and makes a direction of random length in the range from the angles, flattened in z and rotated into a basis built around the axis
+func_00157248	ChooseSpawnDirectionAndLifetime	gets the spawn direction from ComputeSpawnRingDirection, draws a start time before now and an end time life later, and moves the position along the direction by a random distance
+func_00157320	SpawnRecordEffects	acquires or reuses an effect owner, then CreateEffect for each of n positions, runs the kind's slot 0 and sets velocity, life, start and colour fields from the spawn record, registers the entry with func_001583E8 and finally flushes the owner
+func_001575D8	EmitParticleChunk	gets the effect owner from the slot (or takes one from the world's listed objects and sets it up with ApplyLookSourceToListedObject) and appends a chunk of n particles with positions, velocities, sizes and spins
+func_001579B0	GenerateSpawnArrays	allocates four arrays of n entries and fills each with a position (ChooseSpawnPosition), direction, start and end time (ChooseSpawnDirectionAndLifetime), then moves positions and velocities into the source frame's world space with its rotation, velocity and spin
+func_00157B88	GenerateSpawnSetupPair	builds the source frame of the owner's chained world frame and runs GenerateSpawnArrays for the second setup, then pairs each of the n entries with the first setup's arrays for the time-ordered emit
+func_00157E00	SpawnEffectsFromRecord	under a front-memory scope, derives the setup with func_001579B0 and spawns the effects with SpawnRecordEffects when the record's 0x120 word is 1, else through func_001575D8 (with a pair from func_00157B88 when 0x130 is 2)
+func_00157EF8	SpawnEffectsAt	builds a spawn record on the stack from its position and block arguments (set word 0x120 to 1) and passes it to SpawnEffectsFromRecord
+func_00157FF8	BroadcastPointEvent	sends each object of the world's list a message with the point: kind 4, or 0x14 with a float or 0x24 with an object as its +0x90 record asks (func_001EEF90 calls it)
+func_00158108	SpawnBriefEffectAt	creates an effect of kind 4 (CreateEffect) at a point, gives it 0.75 of life and the owner's +0x278 record's +0x0C (func_0019ED58 calls it)
+func_00158198	AddRangeEntry	sets kind 3, allocates 0x500 bytes of 0x28-byte entries once, and appends up to 0x20 entries of two ints and two start/end float pairs (a negative end defaults to the start)
+func_00158288	ResolveSpawnRecordTargets	looks up the spawn record's ids (from 0x120 and 0x188, storing the object at 0x18C, then its entries') with FindFirstObjectById; ResolveEffectSpawnerLinks and ResolveRecordMemberTargets call it
+func_001583E8	FillLookDirectionBlock	original assembly: copies a colour quadword, a float, the normalised direction (+0xD0, falling back to a default when its length is tiny) and two words of a look record into a 0x50-byte block; ApplyLookSource's setup calls it when mode is 0
+func_00158480	TurnMatrixBySpin	a spin record (angular rate at +0x20, axis at +0x30, mode +0x40 = 1 with a frame object at +0x44 takes the axis into world space with TransformDirectionBetweenFrames) and a time step: builds the axis-angle matrix (BuildAxisAngleMatrix) for rate times step, scales and combines it with the matrix passed in (MultiplyMatrices, ScaleMatrix, AddMatrices); MoveEffect turns the effect's placement by its spin at +0x100 with it
+func_001585F8	StartMemberObject	slot 0x50 of class 0x77: runs StartObject, then the object's slot 3
+func_00158630	ComputeChainedWorldFrame	writes a frame's world position and rotation by composing its local position (+0x40) and rotation (+0x50..+0x70) with each parent's along the chain at +0x80; func_00157B88 and func_001590A0 call it
+func_00158730	SendEmptyMessage	builds a zeroed 0x50-byte block and passes it to the object's message slot 27
+func_00158778	SendTwoVectorMessage	fills a 0x50-byte block with two words, two 16-byte vectors and two floats and passes it to message slot 27
+func_001587C0	SendMemberObjectMessage	slot 0x7C of class 0x77: does nothing (0x78 and 0x7A override it)
+func_001587C8	LoadGroupMembers	slot 10 of class 0x78: for each entry in the stream creates an object with func_0011E580, loads it and keeps it (or its members) as a group member when it is of class 0x78 or 0x7A, up to 8
+func_00158980	CopyGroupMembers	slot 9 of class 0x78: replaces each member by a copy made with func_00183058, starts it through slot 3 and points its group back at itself
+func_00158A10	ResolveGroupMembers	slot 0x4C of class 0x78: calls the resolve slot (15) of each of its members
+func_00158A80	BroadcastMessageToMembers	slot 27 of class 0x78: passes the message to slot 27 of every member
+func_00158B00	InitRecordMember	slot 0 of class 0x79: runs the base set-up and sets both object ids (0x94, 0x98) to -1
+func_00158B30	LoadRecordMember	slot 10 of class 0x79: allocates the 0x200-byte shared record, reads a path-curve kind index and builds the curve with CreatePathCurve and its slot 0, and reads more for record kind 4
+func_00158C28	CopyRecordMember	slot 9 of class 0x79: runs CopyObjectData and counts one more user of the shared record
+func_00158C60	ResolveRecordMemberTargets	slot 15 of class 0x79: finds the objects for the ids at 0x94 and 0x98 (func_0015A418) into the record's target and value, then runs func_00158288
+func_00158D38	SendRecordMemberMessage	slot 0x7C of class 0x79: does nothing
+func_00158D40	AddRecordMemberRangeEntry	makes the object's own record and adds a range entry to it with AddRangeEntry
+func_00158DD8	GetOwnedSpawnRecord	with own set, replaces the shared record by a copy (func_001556E8) before returning it
+func_00158E10	InitHoldingMember	slot 0 of class 0x7A: runs InitRecordMember and sets the three ids at 0xAC, 0xB0, 0xB4 to -1
+func_00158E48	ResolveHoldingMemberTargets	slot 15 of class 0x7A: runs ResolveRecordMemberTargets, then looks up the objects for its three ids into the record's found array (the third only if of kind 3)
+func_00158F10	ReleaseHeldObject	slot 13 of class 0x7A: on message kind 2 calls slot 18 of the object it holds (0xC0 or 0xC4) and clears that field
+func_00158F80	SendMessageAfterDelay	slot 27 of class 0x7A: with a positive delay copies the message into a pooled record due at now plus the delay and appends it to the world list at 0x1BDC, else sends it at once
+func_00159068	GetOrCreateSoundParams	returns the record at 0xA0, first making it with InitSoundParams when it is 0
+func_001590A0	HandleSpawnMessage	copies the spawn record at +0x90, applies the fields the message's flags select (count, target, vectors, kind, ranges), draws the count when none is given and spawns the effects through the generated arrays
+func_00159478	FindOrBuildMemberGroup	gathers the class 0x77 objects under the object with func_0015A4F0; none gives 0, one is returned, more are collected (up to 8) into a new class 0x78 object that becomes their owner
+func_00159588	DispatchDelayedMessages	walks the world's list at 0x1BDC and for each record whose due time has passed sends its message with func_001590A0, unlinks it and returns it to the pool
+func_00159668	StoreVectorTailEffectSpawner	original assembly with no entry and no return: 20 bytes after DispatchDelayedMessages's jr that free 16 bytes of stack, store $a1's quadword at $v0 and move VU0 register vf1 into $v0 (qmfc2.ni); nothing calls or names it. The same words sit after eight other functions (StoreVectorTail and a file's role), the tail of a stripped vector function; it is classified handwritten only for its VU0 instruction
+func_00159680	LoadCrossfadeAnimator	slot 0 of D_0021E438: LoadAnimatorBase, copies the flags to the second cursor, reads the second record's key and the fade parameters from the block
+func_001596E0	BindCrossfadeAnimator	slot 1 of D_0021E438: binds both records, takes ownership of the second, sets count to the larger frameCount and mode to 0
+func_00159770	SetCrossfadeMode	switches the animator's mode (0 to 3), initialising pos, step and level for the new mode and stamping the time
+func_00159890	StepCrossfadeAnimator	slot 2 of D_0021E438: advances pos by mode and sets the frames of both cursors
+func_00159A00	SetCrossfadeRatio	stores the ratio, selects mode 2 when it is at least 1 else mode 0, and sets both cursors' frames from pos
+func_00159A80	FindCrossfadeCursor	slot 5 of D_0021E438: the first cursor by FindAnimatorCursor, else the second cursor when the key matches recordKey2
+func_00159AD0	StepObjectLevelRamp	moves a level (0x4) by its rate (0x8) times dt; reaching 0 calls the object's slot 7, and reaching 0 or 1 (or the object not being live) removes the node with RemoveObjectNodeFromWorld
+func_00159BB0	AddObjectNodeToWorld	takes a node from the world pool at 0x1C18, stores the object in it and appends it to the list at 0x1C30 or 0x1C24 by the flag at 0x294
+func_00159C28	RemoveObjectNodeFromWorld	removes the node from the list at 0x1C30 or 0x1C24 by the owner's flag at 0x294, clears the flag at 0x298 and returns it to the pool at 0x1C18
+func_00159CA0	DrawScreenFill	callback of the colour-fade object: fills a packet with the colour at +0x60 through FillScreenColor and writes it as VIF direct inside a DMA tag
+func_00159D00	UpdateColorFade	blends the fade record's start, hold and end colours by the time since its start time and sends the colour request, or clears the running flag and unlinks it when the fade is over
+func_00159ED0	StartColorFade	if the fade record is not running, sets its running flag, stores the clock as its start time and links it into the list at D_00275710 + 0x1CD8
+func_00159F20	GetHashedSlot	returns base plus 0x84 plus 12 times ((n * 0x95675) and 0x1FF)
+func_00159F48	CollectObjectByMode	switch on a collection mode (parent chain, level bits, alias ids) that appends self to a bounded array and counts it when it passes and is attached
+func_0015A198	GatherObjectsByMode	collects objects for a mode and an id into an array (CollectObjectByMode), as FindFirstObjectById and the two finders after it call it with one result wanted
+func_0015A418	FindFirstObjectById	runs func_0015A198 with flags or 0x200, one result wanted, and returns that object
+func_0015A448	FindFirstObjectByIdMode4	runs GatherObjectsByMode with mode 0x204, one result wanted, and returns that object (SetStepSequenceState and some thirty others call it)
+func_0015A480	FindFirstObjectByIdMode1	runs GatherObjectsByMode with mode 0x201, one result wanted, and returns that object
+func_0015A4B8	IsClassOfKind	walks the list kept at D_00247448[index] and returns 1 when it holds the value
+func_0015A4F0	GatherObjectsById	by the low byte of the flags (modes 1 to 5) collects up to max objects of the id's classes (IsClassOfKind) from the world, from the root's children or from the root's parent chain, returning the count
+func_0015A838	FindFirstObjectByIdGathered	runs GatherObjectsById with flags or 0x200 and one result wanted, and returns it
+func_0015A868	FindCommonAncestor	returns the first object on the first parent chain that also appears on the second
+func_0015A8B8	InitScalingVolume	slot 0x10 of class 0x60: runs InitPlacedObject and sets its two scale floats to 1 and its three-float value to 1, 0.2, 0.1
+func_0015A918	LoadScalingVolume	slot 0x38 of class 0x60: runs LoadPlacedObject and reads its four mesh tables (ReadMeshTables)
+func_0015A960	UpdateScalingVolume	slot 0x54 of class 0x60: runs UpdatePlacedObject and moves the scale at +0x2EC toward +0x2F0 (ApproachValueWithRamp)
+func_0015A9A8	DrawScalingVolume	slot 0xA4 of class 0x60: draws the object with its transform scaled by the scale at +0x2EC
+func_0015AA50	IsPointInsideObjectFaces	returns 0 for a tiny scale, else moves the point into the object's frame, divides by the scale (+0x2EC) and tests it with IsPointInsideFaceTree against the face tree at +0x2DC

@@ -8,7 +8,7 @@ struct Pal_eu_001AEEA0;
 // load waits behind the stores to self, as retail's does.
 extern Pal_eu_001AEEA0* D_eu_0026ABE8[];
 void SetupScreenElementText(void* self);
-void func_eu_001AED58(void* self);
+void RebuildPromptWideText(void* self);
 
 typedef void* (*FnG_eu_001AEC90)(void* p, f32 a, f32 b);
 struct Sub_eu_001AEC90 { u8 pad[8]; s16 f8; u8 pad2[2]; FnG_eu_001AEC90 fC; };
@@ -35,5 +35,5 @@ void InitPromptElement(Obj_eu_001AEC90* self)
         }
     }
     self->f574 = flag;
-    func_eu_001AED58(self);
+    RebuildPromptWideText(self);
 }

@@ -136,7 +136,7 @@ What else was measured:
   with `-mvu0-use-vf0-vf30`, because the range also sets loop.c's threshold
   (64 + N for a loop with a call) and func_0013AD80's frame loop is retail's
   only from 87 to 94; no other function of that file changes with the range.
-  src/main/file_1D8E40.cpp, cut out on 2026-11-12 for func_001D9488 (retail's
+  src/main/path_follower_helpers.cpp, cut out on 2026-11-12 for func_001D9488 (retail's
   only at 94 to 96) between two files whose functions need 79 to 83 and 79 to
   88, has the same row, and so has src/main/curve_segment.cpp, cut from
   placed_object.cpp for func_00130C58 (docs/toolchain/loops.md, "A threshold of

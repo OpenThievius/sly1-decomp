@@ -10,7 +10,7 @@ s32 ReadFile(s32 handle, char* buf, s32 size);
 s32 CloseFile(s32 handle);
 s32 PrintFormatted(const char* msg);
 
-char* func_eu_0020A730(void)
+char* ReadRomVersion(void)
 {
     if (D_eu_00284650[0] == 0) {
         s32 h = func_001F8C30(D_eu_00251270, 1);

@@ -6,7 +6,7 @@
 // sum, then the data): after a 0x10-byte head come six records of 0x44C bytes, one per level
 // (func_001603E8 reaches record n's word 0x448 at 0x458 + n * 0x44C), and the game's own words
 // at 0x19D8..0x19FC. D_002623C0 points to the block; D_002623C4 and D_002623C8 both point to a
-// record, the first one at D_0027C230 to begin with (file_15F678.cpp defines all three pointers).
+// record, the first one at D_0027C230 to begin with (game_progress.cpp defines all three pointers).
 #ifndef GAME_PROGRESS_H
 #define GAME_PROGRESS_H
 
@@ -30,7 +30,7 @@ struct G27C230 {
     s32 count70;            // 0x70: the bits of bits74 (func_00151ED8, func_001D9338)
     u8 bits74[0x438 - 0x74]; // 0x74: no code bounds it; it runs to the next known word
     s32 f438;               // 0x438: func_00148598
-    s32 f43C;               // 0x43C: file_198980.cpp (Ctx_002623C4)
+    s32 f43C;               // 0x43C: object_gatherer.cpp (Ctx_002623C4)
     s32 f440;               // 0x440: commentary_best_time.cpp (Cnt_1E02C8)
     f32 f444;               // 0x444: func_00160690 (Obj_002623C4)
     s32 f448;               // 0x448: func_00199218; func_001603E8 sets 0x20 in record n's
@@ -71,8 +71,8 @@ typedef char check_GameProgress[sizeof(GameProgress) == 0x1A00 ? 1 : -1];
 
 extern GameProgress D_0027C220;      // .bss: the head (label D_0027C220, 0x10) and D_0027C230 (0x19F0)
 extern G27C230 D_0027C230[];    // .bss: D_0027C220.levels, the label the two record pointers name
-extern GameProgress* g_saveData;     // file_15F678.cpp: = D_0027C220
-extern G27C230* g_currentLevelRecord;     // file_15F678.cpp: = D_0027C230
-extern G27C230* g_currentEntry;     // file_15F678.cpp: = D_0027C230
+extern GameProgress* g_saveData;     // game_progress.cpp: = D_0027C220
+extern G27C230* g_currentLevelRecord;     // game_progress.cpp: = D_0027C230
+extern G27C230* g_currentEntry;     // game_progress.cpp: = D_0027C230
 
 #endif

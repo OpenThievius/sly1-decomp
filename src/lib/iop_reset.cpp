@@ -67,7 +67,7 @@ void ShutDownRemoteCalls(void);
 void SetSystemCallHandlerForWordSearch(s32 num, s32* (*handler)(s32 value));
 s32 RunKernelWordSearchSyscall(s32* (*handler)(s32 value));
 void InstallSecondKernelPatch();
-void func_001FA0A0(void);
+void ClearImageEndRecordWord(void);
 void WriteBackDataCacheRange(Cmd_1F9AD8* a0, s32 a1);
 void InstallThirdKernelPatch();
 
@@ -111,7 +111,7 @@ s32 SendIopReset(char* text, void* q)
 s32 IsIopResetDone(void)
 {
     if ((ReadIopRegister(4) & 0x40000) != 0) {
-        func_001FA0A0();
+        ClearImageEndRecordWord();
         return 1;
     }
     return 0;

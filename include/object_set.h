@@ -3,7 +3,7 @@
 // objects of its world when it is loaded and keeps them (func_00198A88 finds them by id,
 // func_00198B28 lets go of them), and its two subclasses 0x2D (0x5B0) and 0x2E (0x5C0), whose
 // loaders keep one more value each. Written for this project from what retail's code does
-// (config/us/classes.tsv; src/main/file_198980.cpp).
+// (config/us/classes.tsv; src/main/object_gatherer.cpp).
 //
 // Each class derives from its parent's, with every field at its retail offset and the pads
 // that keep it there, up to the size the descriptor gives.
