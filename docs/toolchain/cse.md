@@ -1079,6 +1079,23 @@ Retail had a second pseudo q, a copy of d, in vf6 (w44-fb, 2026-11-13).
   original's variable did: it held d for the cull and the first call, was assigned again in
   the first fade block, and was named again after the second call's argument.
 
+- **Landed (w46-b, 2026-11-12), with the dead stores, by the maintainer's decision for this
+  function.** The search for a live form first, each a compile of a prediction from
+  make_regs_eqv's rule, and each as predicted: `q = d` again in the two blocks (1 word: with q
+  first, cse rewrites it `q = q` and deletes it, so cse2 sees no set); the first block's set
+  alone, or the second's alone (1 word each: both conditions are needed); the cull and the
+  first call in an inline taking the offset by value, and the same inline taking the position
+  and subtracting into its parameter (a modified parameter is a copy, but its last mention is
+  before d's: `lq a1` again, and the inline's return moves the registers); the cull's vector
+  as a `const u128&` to a temporary (purged to a pseudo, folded by cse2: 1 word); d and fade
+  in one record (an expand-time slot: 275 lines); one variable recomputed in each block (the
+  second call then reads the recomputed value: live vsubs, 282 lines). A live form would need
+  a 128-bit variable really set in the first fade block and really mentioned after the second
+  call's argument, and retail's code has no 128-bit value in either place: the fade blocks
+  hold a call and a float product, and the later vectors are an inline's locals. What is
+  landed is the probe with each dead store written as the statement that sets d, on the
+  rebuilt transform (`q = Vu0::Sub(xf's position, the camera's)`): EXACT on US and PAL.
+
 For other near misses: a value loaded once into a register for two uses and read from its
 slot again later is this shape (a copy that is first in its class up to a reset), not a
 reload inheritance.
