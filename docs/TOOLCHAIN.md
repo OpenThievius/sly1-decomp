@@ -144,6 +144,63 @@ What else was measured:
 - **The preprocessor** is the toolchain's `cpp.exe`, given the macros the
   compiler driver defines (tools/compile.py).
 
+## The mpeg library's flags
+
+Measured on 2026-11-13 (w52-c) to settle whether func_0020BB18, the last unmatched function
+(nonmatching/func_0020BB18.cpp, 102 differing words), was built with settings other than the
+row the six mpeg files share (`-O2 -G0 -fno-exceptions`, 2.9-ee-991111). Each setting built
+src/lib/mpeg_decoder.cpp whole with the near miss in place of its INCLUDE_ASM (a scratch copy)
+and the other five files as they are, and scored every function against retail. Differing
+words by position overstate a one-instruction shift, so func_0020BB18 is also scored by
+instruction edits (difflib over the disassembly): the row gives 15 edits. The scripts and
+results are in the worker's scratch folder (build/swarm/w52-c/: sweep.py, run.py, dd.py).
+
+- **Swept:** every `-f` option of this cc1plus's `--help` on and off (about 70 pairs), -O0,
+  -O1, -O2, -O3, -Os, -G1 to -G64, the MIPS target switches its option table holds (int64,
+  long64, long32, split-addresses, mips-as, gas, rnames, gpOPT, stats, memcpy, soft-, hard-,
+  single-, double-float, fp32/64, gp32/64, abicalls, half-pic, long-calls, embedded-pic and
+  -data, mad, fix4300, 4650, 3900, 5900, 5400, check-zero- and check-range-division, debug
+  and debuga to debugi, entry, align-loops/-jumps/-functions, -mips1 to 4, -mabi= and every
+  -mcpu= it accepts, -mvu0-use-vf0-vf15/30/31), -g in seven forms, -p, -a, -ffixed- and
+  -fcall-saved/used- of free registers: 252 single settings, then each of the ten settings
+  that moved the function at all paired with every other one (1995 pairs). The same singles
+  with the Linux 2.9-ee-991111-01 cc1plus, with SN's 2.95.3 as a control (2.95.2 and
+  2.96-ee-001003-1 only at the row), and with the function alone compiled as C by `cc1` of
+  both 2.9 builds (its structs given typedefs; the whole file does not compile as C without
+  rewriting most of it: declarations after statements, distinct struct types in prototypes).
+- **What the matched functions pin down.** The library has 104 matched C functions (38 in
+  mpeg_decoder.cpp, 48 in mpeg_ipu_decode.cpp, 7 each in mpeg_bit_reader.cpp and
+  mpeg_demultiplexer.cpp, 4 in mpeg_macroblock.cpp; mpeg_motion_compensation.cpp is all
+  assembly). 66 settings change at least one of them: -O level, the schedulers, delayed
+  branches, the frame pointer, -mcpu, -mlong-calls, -fpic, -G16 and above, gcse and edge-lcm,
+  strict aliasing and the argument-alias family, expensive-optimizations, force-mem, regmove,
+  the cse jump-following options, rerun-cse-after-loop, thread-jumps, inline and
+  inline-functions, -fvolatile and -fvolatile-global, sched-interblock and sched-spec, among
+  others. mpeg_ipu_decode.cpp notices almost all of them, so for the library as one unit the
+  row is well determined; mpeg_decoder.cpp's own functions notice fewer (not -fno-gcse,
+  -fno-edge-lcm, -O3, -finline-functions).
+- **What they do not.** 137 settings change none of the 104: besides the defaults restated,
+  -G1 to -G8, -fno-peephole, -fno-caller-saves, -fno-function-cse, -fno-defer-pop,
+  -fno-strength-reduce, -fno-rerun-loop-opt, -fno-edge-lm/-sm, -fno-move-all-movables,
+  -ffast-math, -ffloat-store, -fno-live-range, -mlong64, -mgp64, -mfp32, -mips4, -mabi=64,
+  -msingle-float, -mno-mad, the VU0 range and -g. func_0020BB18's bytes are the row's under
+  every one of them: it is no witness to any of them either.
+- **What func_0020BB18 does.** Under 176 of the single settings it is byte for byte the row's;
+  under every other one it is further from retail (16 edits at best: -fstack-check and
+  -malign-jumps=3, then -fno-gcse and -fno-edge-lcm at 19), and no pair beats the row. The
+  settings the earlier note gave as closer by differing words are farther by edits:
+  -fno-expensive-optimizations (42 words, 32 edits), -mcpu=r3900 (49, 28),
+  -fno-schedule-insns2 (56, 48), -Os (61, 37). Each drops one instruction, which realigns
+  the listing, and moves the `li s0,384` into the `bne` slot, not the address: retail's
+  feature, `addiu v0,s8,1320` alone in the body's first cycle and copied into the slots of
+  both the `bne` and the `beq`, appears under no setting, single or paired, of either 2.9
+  build, in C++ or in C. The Linux -01 build gives the same bytes as the Windows build under
+  every setting both accept; SN's builds are at 63 edits whatever the flags.
+- **Verdict.** No build setting is the cause. The row is pinned by the library's matched
+  functions, the settings it leaves open do not touch func_0020BB18, and the ones that do
+  break the file's matched functions and move the function away from retail. Its wall is in
+  its source (docs/toolchain/sched1.md, "A block whose first cycle holds one insn").
+
 ## Index of the techniques that matched
 
 What matched functions overnight on 2026-11-08/09 (about 80 of them), grouped by the compiler pass each

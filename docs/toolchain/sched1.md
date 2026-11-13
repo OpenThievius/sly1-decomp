@@ -67,7 +67,65 @@ as retail does.
   the buffer does not fit, and the buffer declared at function level after the block give that
   layout; the buffer in a block of its own is freed and the temporary moves into it.
 
-### Argument moves held back to a call's own block: what is and is not a barrier (func_001DEBE8, unsolved)
+### Argument moves held back to a call's own block: an unused clamp before the call (func_001DEBE8, matched 2026-11-13)
+
+**The answer (w51-f, 2026-11-13): a value computed and never used, whose computation holds a
+test.** One statement stands before the third BuildAxisAngleMatrix call:
+`f32 lean2 = g_unitRange.Limit(Quadratic(D_00275820, pad->f48));`, the second tuning curve's
+amount, which nothing reads (the call takes the first curve's `lean`). It leaves no
+instruction and is every wall this section and the near miss's header describe:
+
+- *What the compiler does with it.* The clamp's result has no use, so the sets in its arms
+  go and the inner test with them (`.cse` has two jumps to the clamp's join label, `.cse2`
+  and `.flow` one, and the arm's block is empty in `.flow`), but the outer test stays: its
+  compare sets `$fcc0`, a hard register, and its branch, now a jump to the next insn, reads
+  it. flow1 keeps both and what they read, so the evaluation, twelve insns from
+  `(high D_00275820)` to `(set $fcc0 (lt ...))`, and the branch go through combine, sched1,
+  local-alloc, global-alloc and reload as live code (`.greg`: `(insn 751 (set (reg a0) (high
+  D_00275820)))`, `(jump_insn 779 ... (label_ref 797))`, the label with one use). Between
+  global-alloc and flow2 the jump is deleted and flow2's life analysis deletes the chain
+  behind it (`.flow2`: no reference to D_00275820, `(code_label 797 [num uses: 0])`); the
+  label is still there in sched2 and jump2 removes it. Nothing is printed.
+- *Wall (b), the argument moves.* The branch ends the block before the call's own statement
+  in sched1 and the unused label ends it in sched2, so the call's `lui`, `addiu a1`, `lwc1`
+  and `move a0` are the first insns of a block of their own in both passes.
+- *Block A's two insns.* The chain's `(high D_00275820)` and its `lo_sum` depend on nothing
+  but the previous call, so sched1 issues them in the idle alu slots of cycles 12 and 13
+  beside the tilt loads (the slots the next call's argument insns took in the near miss);
+  the chain's loads wait for the stores and follow them. Those two are the insns the
+  local-alloc replay asked for between the tilt loads and the last product (lives of 9 and
+  25).
+- *Wall (a), pad's register and the s1/s3 pair.* The chain reads `pad->f48` and
+  `g_unitRange` (its address and its first word), and recompute_reg_usage counts what is in
+  the stream before local-alloc: pad has 12 references over 344 insns (between &tgt's 3 over
+  28 and &cur's 3 over 29) and the hoisted `%hi(g_unitRange)` 6 over 316 (W23's
+  `510:refs=6`). No insn was missing around the key reads.
+- *The address in s5.* cse1 gives the speed clamp's `&g_unitRange` the pseudo of an earlier
+  identical `lo_sum` in the same extended block; in the near miss that was an invented local
+  (`ValueRange* unit = &g_unitRange;` after the lean clamp), and it is the unused clamp's own
+  `this`, which outlives the clamp because the speed clamp uses it. An address computed for
+  no visible use, long before its one reader, is the tell of a deleted computation.
+- *The evidence in retail's data.* The curve at 0x275820 ({0, 1, 0, 0}, the shape of the one
+  at 0x275800) sits between the two scales (0x275810, 0x275830) and no instruction of the
+  game refers to it: where data holds a table entry nothing reads, ask whether the source
+  read it into a variable it then did not use.
+- *What was not the cause.* combine's USE (the section above this one's fifth pass): neither
+  the near miss's nor the probes' `.combine` to `.sched2` dumps hold a `(use (reg ...))` or
+  `(use (mem ...))` (only flow's three `(use (const_int 0))`), and none can arise: the
+  registers live into the blocks in question are `self`, `pad` and the hoisted addresses,
+  none of which dies there, and a USE keeps its register's set alive as code. A test that
+  combine folds (`s32 f = pad->flags; if (f < 0) ...`) is a second code-less block boundary
+  (the jump becomes unconditional, reload's jump pass deletes it, the label stays to jump2);
+  it was a probe, not the form. The unused clamp is retail's only as `Limit` before the third
+  call: as `Clamp` (v changed in place) it is 1740 bytes, written straight after the lean
+  clamp it gives pad's register and the s1/s3 pair but not (b) (47 lines), and reading
+  D_00275800 there instead 59.
+- The store order of the 660 rows (row 0 written last) and the velocity's rows read as Vec
+  members (Vu0::RotateTransposedMembers) are still needed and stay as they were found.
+
+The history below is kept as it was written; its "block boundary" and "two invisible insns"
+readings were right, its candidates for what made them were not.
+
 
 From haifa-sched.c of GCC 2.95.3 (sched_analyze, sched_analyze_insn) and the `-dS -dR
 -fsched-verbose-6` dumps (2026-11-10):
@@ -410,6 +468,171 @@ dumps of func_0020BB18 (src/lib/mpeg_decoder.cpp, Sony's 2.9-ee-991111, 2026-11-
   function (`-fno-expensive-optimizations` 42 lines, `-fno-schedule-insns2` 56: other
   code). Eighteen plain statements at the head of the body (blocks, casts to void, empty
   ifs and switches, labels, empty or early-returning inlines) leave the base's code.
+- **Sixth pass (w51-i, 2026-11-13): what the USE of memory implies, and what this compiler
+  leaves of unused and folded statements.** About 110 compiles (scratch `build/swarm/w51-i/`).
+  (1) *A USE of a stack slot is a read of an uninitialised variable.* Retail stores nothing
+  to its frame ahead of the body, so `(use (mem (plus sp N)))` at the body's label names a
+  slot nothing has written. A register that is initialised ahead of the body and ends in
+  memory prints that store (measured: the macroblock width kept in a local, its last use
+  late and folded, does not even end in memory: global-alloc gives it `s5` and a plane goes
+  to slot 72, 121 lines; the rows the same, 118). The other memory a USE could name is a
+  register's equivalent location (`REG_EQUIV (mem st+N)`, alias set 15 like the picture's
+  fields, so it would hold both stores, and its load would be the reload retail already
+  has); but update_equiv_regs gives a memory equivalence only to a register local to one
+  block, and a register with a USE at the body's label is live at the end of the body's
+  predecessors, which haifa's find_post_sched_live marks global. So within combine's
+  mechanism the original read an uninitialised local in an expression combine folds, and
+  no initialised value fits.
+  (2) *A USE of a hard register holds only that register's next setter* (priority: the
+  setter's plus one; measured on `(use (reg a3))`, 54, tied to the first call). In the
+  body the only setter at 65 is the address itself, which a USE of `v0` would hold back.
+  (3) *An unused value leaves nothing here.* Sony's compiler removes a dead integer
+  computation with its tests completely (twelve forms: conditional expressions, if/else
+  chains, a switch, reads through the last plane; at the head of the body, after the
+  stores, after the size: the base's code but for two argument moves swapped), where the
+  game's compiler keeps a block boundary (func_001DEBE8). A dead division keeps its trap
+  as code (103, 106), a dead float clamp its compares as code (131, 138), a dead float
+  if/else nothing.
+  (4) *Alignment statements fold and leave no USE.* `if (w & 15)` (or `h`, or both) around
+  a store, a reset of the size or a rounding of `w`, and second roundings of the size
+  (`(size + 0x3F) & ~0x3F`, `size &= ~0x3F`, `(size >> 6) << 6`) and of the dimensions
+  (`(w + 15) & ~15`, `(w >> 4) << 4` in the stores) give the base's code: combine folds
+  them from the known zero bits, but every register they drop is read again later in the
+  block, so no REG_DEAD note is left without an insn. With a `return` in the arm the test
+  stays as code (103 to 125); with a call in the arm it folds, and the dead arm's call
+  moves `h` and the pool's address to other registers (104 to 119).
+  (5) *Small struct locals are not registers here*: `{ s32 w, h; }` and `{ s16 w, h; }`
+  live in the frame (frame 256, the planes' slots after them), so a field-by-field
+  initialisation makes no USE of the old value.
+  (6) *jump2's other deletions do not apply*: besides `(set N N)` it deletes a register
+  copy whose destination already equals its source (find_equiv_reg) and a move of a
+  memory location to itself; the 36 library files have no same-register move after
+  reload, and every insn jump2 removes there after sched2 is a cross-jumped duplicate or
+  flow's nop.
+- **Seventh pass (w52-b, 2026-11-13): the function read again from retail's bytes alone, and
+  what the two readings differ in.** The function was decompiled from the disassembly, the
+  file's other functions and its callers before the near miss, this section or any earlier
+  scratch folder was opened (about 140 compiles and one grid of 720; scratch
+  `build/swarm/w52-b/`, the first form in `phase1_final.txt`).
+  (1) *The independent form is the near miss's shape, at the same 102 lines.* Blocks, in
+  retail's order: the decoder from the handle and its MPEG-2 flag (kept in `a2` for the second
+  test: PRE's reaching register, as in ours); the six MPEG-1 defaults; the macroblock width
+  stored; the rows by `flag && !progressive` and stored; `h = rows << 4`, the stored width
+  read back, `w = that << 4`; the two tests against the handle's width and height; the body
+  as one block from the two stores to the jump; the epilogue. Every value that lives across a
+  call is accounted for: `s8` the decoder, `s7`/`s6` w and h, `s0` the size, `s1` the pool,
+  `s2` h >> 1, `s3` to `s5` planes 0 to 2, slots 48 to 68 planes 3 to 8 in plane order. The
+  frame is 48 bytes of stack arguments (six of 8), 24 of spill slots, 8 of padding and ten
+  16-byte saves: a local homed in the frame (a struct, an address-taken scalar, a one-byte
+  object) would take slot 48 ahead of the spills, so the original had none. Nothing in retail
+  is computed and left unused, loaded twice on one path or stored where nothing reads; the
+  buffers are read back from the decoder for the set-up call, and the handle sits in `a1`
+  because local-alloc gives `v0`, `v1` and `a0` to the defaults' three constants while it is
+  live (`;; 116 conflicts: ... 2 3 4`), both as in ours.
+  (2) *The differences between the readings, each moved both ways: all 102.* The rows as a
+  conditional expression stored straight into the field against the `rows` local in two arms;
+  the body inside `if (w != pic->width || h != pic->height)` against the early return; an
+  `s32` function that falls off its end against `void`; the size as `t = h * 0x180;
+  (u32)(w * t) >> 8` against `(u32)(w * 0x180 * h) >> 8` (retail's two multiplies, `h * 0x180`
+  then `w * that`, come from both and from `0x180 * w * h`; `w * (h * 0x180)` written as one
+  expression, `h * 0x180 * w` and the unsigned forms give the other order); the three buffers
+  as an array; the planes as nine named pointers declared in plane order and set before the
+  stores, after them, after the size or before the set-up call (16 placements: 102, and 108
+  with the planes set in reverse); the two stores through an inline member or a static inline
+  (102; the test as an inline member too, 116). So no variable, test structure, width or
+  argument of the near miss is the wrong assumption: an independent reading of the bytes
+  makes the same choices, and what retail needs is not in the visible statements.
+  (3) *Measured on the way.* Of the 720 orders of the six default stores exactly four give
+  retail's order (f13C, f140, f188 in that order, then f17C, then f144, with f174 anywhere
+  ahead of f17C). The height store written first issues the width store first (104): the two
+  picture stores tie and go by LUID, so the source order is width, height. `return
+  SetPictureDimensions(...)` as the last statement keeps the `jal` and a single epilogue
+  (113), and so does `-fhandle-exceptions` (113): this cc1 turns a call into a jump only when
+  the call is the last statement and its value is not used, and it does so when it threads
+  the epilogue (in `.sched2` the body's block already ends with the restores, the blockage,
+  the stack adjustment, the jump and flow's `(use (const_int 0))`); so the original's last
+  call was a plain statement and the function returns nothing on that path. A sweep of about 70
+  flags, with this cc1's own `-fedge-lm`, `-fedge-sm`, `-fedge-lcm`, `-fsched-interblock`,
+  `-fsched-spec`, `-fsched-spec-load`, `-foptimize-comparisons`, `-fbranch-count-reg`,
+  `-flive-range` and `-g` among them, leaves 102 or moves away (`-fno-edge-lcm` 146,
+  `-fforce-addr` 143, `-Os` 61 with other code).
+  (4) *gcse here is classical edge LCM.* The address assigned to a local on one earlier path
+  (in the defaults' block or in an else added to it, dead there because the body sets it
+  again) does not make the body's computation partly redundant: nothing is put on the edges
+  (no PRE line for the expression; 24 forms: 102 with the planes as named locals, 107 with
+  only the last one named). Lazy code motion inserts on the two edges
+  only when a third predecessor of the body has the address available, which is the third
+  pass's probe; an earlier computation on some of the paths through the same two edges does
+  nothing.
+  (5) *Where that leaves the two readings (reasoned from the passes above and from cse.c's
+  make_regs_eqv as recalled, not compiled).* The USE of memory is closed twice over: a
+  register that ends in a stack slot has its USE placed by its next set's priority, which is
+  below the picture stores unless the new value is used before the first call (retail has no
+  such use), and a memory equivalence needs a register local to one block. The other reading
+  (the address in `v0` ahead of a boundary that leaves no code, copied to the spilled pseudo
+  in the body) needs three things at once: the copy must survive cse2, which make_regs_eqv
+  allows only when the source is a hard register or the destination is referenced outside the
+  cse block; the source must take `v0`, not the `a0` the destination prefers; and the
+  boundary must still stand after flow2, which in this compiler only a cross-jumped duplicate
+  does. No statement of a plain reading gives any of the three.
+
+- **Seventh pass (w52-a, 2026-11-13): the mechanism, and an exact probe whose source is not
+  plausible.** About 60 compiles with the `-da` dumps (scratch `build/swarm/w52-a/`).
+  (1) *What the silent insn must be, by replay.* One insn added at the head of the near
+  miss's `.sched2` table and the block replayed (`wi.py`) gives retail's order in two cases
+  only: an insn on no unit that both picture stores wait for (a USE of memory), or an insn
+  on the memory unit that one of them waits for (the unit holds the other). Nothing on the
+  memory unit prints nothing: reorg's redundant_insn needs an identical insn after the last
+  label before the branch, and the only store there (`sw v0,304(s8)`) has its register
+  reused, the only load valid at both branches (`lw v1,0(a1)`) would need a reader; jump2
+  deletes a copy or a constant load only when an insn of the same block already made the
+  equivalence. So it is the USE of memory.
+  (2) *A block of its own pins the USE.* The fifth pass's objection was sched1: a USE at the
+  body's label has the priority of nothing and sinks below the stores. It does not sink
+  when the body starts with a conditional that combine folds and whose arm is not
+  if-converted (a store). Probe: `if ((u32)p3 & (w & 15)) pic->width = 0;` ahead of the
+  picture stores, with `p3` a named local assigned only later (`p3 =
+  &st->planes[3].addr;`). By pass: `.combine` has `(insn 669 135 663 (use (reg/v:SI 122)))`
+  with `REG_DEAD 122` right after the body's label (the test held 122's last reference
+  before its assignment; `w & 15` is zero by nonzero_bits, which cse cannot know across
+  blocks) and the test is now `pc=L149`, a jump over the arm; `.sched` schedules block 8 as
+  `669` and `143 pc=L149` alone, block 9 as the dead arm (`148 [r116]=0x0`), the body as
+  block 10, so the USE cannot move; 122 is spilled for its later life and `.greg` has
+  `(use (mem:SI (plus:SI (reg:SI 29 sp) (const_int 48))))`; flow2 deletes the jump and the
+  arm and the body is one block again; `.sched2` gives the USE priority 66 with the two
+  picture stores and `sw v0,48(sp)` as dependents and issues `669` and `360` (the address)
+  at t=1, `157` and `161` at t=2, `153` and `163` at t=3, `676` and `182` at t=4: retail's
+  order. reorg passes over a USE at the head of a thread without losing, so both branches
+  get the address. `tools/check.py` prints EXACT for US and PAL, and for the function and
+  its caller in a scratch copy of the real file (`infile/mpeg_decoder.cpp`).
+  (3) *What the form needs.* The read of the pointer in the condition (without it: the base,
+  102; in the arm only: 102); an arm that stays a block (an arithmetic arm is a conditional
+  move, 102; a call moves registers, 44; a return keeps the test as code, 125); the test at
+  the head (after the picture stores 9 lines, between them 2); and the named pointer in the
+  first slot: a user variable is numbered ahead of the temporaries of the other planes, so
+  with one named pointer it is plane 3's (plane 4's: 6 lines, two slots swapped), or all
+  six (or all nine) named in plane order with any of the six read (plane 0's, a
+  register: 12 lines). Exact too: `h` for `w`, `& 1`,
+  `p3 != p3 + (w & 15)`, `(w & 15) * (u32)p3`, a store to a decoder field in the arm.
+  (4) *What is open.* The read is of a local that has no value yet, in a test that is never
+  true: the register must end in memory, the only registers that do are the six pointers,
+  and an initialised one would print its store ahead of the body. No natural statement
+  with that shape was found, so the probe is not landed (AGENTS.md: nothing written only
+  to move instructions).
+  (5) *Also measured.* The frame has 8 bytes of alignment at 72(sp) and nothing else
+  unexplained, the caller passes one argument, and the file's data (identification string,
+  two quantiser matrices) has nothing unread. The address written in the condition, in
+  each arm, in a conditional expression or in a loop header is 122, 121, 35, 111, 130; a
+  do-while around the test 52. A frame array of the six pointers keeps the frame and the
+  slots but takes other registers (99). This compiler is later than 2.95.3 (its first dump
+  has basic-block notes and the tail call is a `call_insn/j` from the start), so the
+  2.95.3 source is a guide, not the text. Local-alloc's update_equiv_regs gives a register
+  the memory it is stored into as its home (`REG_EQUIV (mem (plus sp 24))` on the load of
+  the twelfth argument): another way a register can be memory with no slot of its own.
+- **Spot it.** A conditional at the head of a block that only combine can fold (known zero
+  bits of a value set in another block) leaves a jump over its arm until flow2: whatever
+  combine drops at that block's label stays first in the stream through sched1 and
+  allocation. Grep `.sched` for a block that is one `pc=L` insn.
 
 ### A value negated into itself crosses the call (func_001A2380)
 

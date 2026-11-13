@@ -633,6 +633,11 @@ From the `.flow`, `.sched` and `.lreg` dumps and alias.c, flow.c and function.c 
 
 ### An address taken after a clamp's join reaches a later arm: a fifth saved register (func_001DEBE8)
 
+What took the address (2026-11-13; sched1.md, "Argument moves held back"): not a local
+(`ValueRange* unit`), but the `this` of a clamp whose result nothing uses, written before the
+third BuildAxisAngleMatrix call. CSE gives the speed clamp that `this`, and it outlives the
+clamp, which flow2 deletes. An address formed long before its one reader is the tell.
+
 From cse.c and gcse.c of GCC 2.95.3 and the `.cse` and `.gcse` dumps (2026-11-10):
 
 - **Each inline method call on a global makes its own address.** `g_unitRange.Clamp(x)` in
