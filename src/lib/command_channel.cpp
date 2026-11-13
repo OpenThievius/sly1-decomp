@@ -8,10 +8,11 @@
 // the table of 32 handler slots D_006293C0 and the 32 words D_006294C0, the receive buffers
 // D_006292C0 and D_00629340, the interrupt handler func_001FA6B0), func_001FA4A0 and
 // func_001FA4D0 set and clear a command's handler, and func_001FA4F8 (through func_001FA630 and
-// func_001FA670) sends a packet by DMA. func_001FA6B0 and func_001FA7D8 are original assembly,
-// and the six leftovers are LINKER_REMNANT (config/us/original_asm.tsv).
+// func_001FA670) sends a packet by DMA. func_001FA7D8 is original assembly, and the six
+// leftovers are LINKER_REMNANT (config/us/original_asm.tsv).
 #include "common.h"
 #include "asm_func.h"
+#include "system.h"
 
 struct Packet_1FA068 {
     s32 head[4];
@@ -287,7 +288,72 @@ s32 SendCommandFromInterrupt(u32 cmd, void* packet, s32 size, void* data, s32 ad
     return SendCommandPacket(cmd, 1, (Header_1FA4F8*)packet, size, data, addr, count);
 }
 
-INCLUDE_ASM(func_001FA6B0);
+s32 ArmIopDmaChainFromInterrupt(void);
+
+// A quadword, moved with lq and sq.
+typedef unsigned int Quad_1FA6B0 __attribute__((mode(TI)));
+
+// The DMA interrupt handler of the command channel: with interrupts enabled again, takes the
+// packet from the receive buffer (the low byte of its first word is its size; zero when none
+// came), frees the buffer, re-arms the DMA chain and runs the handler of the packet's command,
+// a system command (the top bit set) or a user one, then ends the handler.
+// The receive buffer is written by the DMA channel, so its quadwords are volatile, and the
+// stack copy is declared with the same volatile quadword type: retail loads the copy's command
+// word again at each use (three `lw 8(sp)`) and leaves the branch's delay slot empty, which
+// only a volatile read gives (docs/toolchain/alias-classes.md, "A stack word loaded at each
+// use beside an empty branch slot is a volatile read"). The maintainer accepted this placement
+// on 2026-11-12: the qualifier belongs to the type of DMA-written data. One
+// int holds the size in bytes, then in quadwords, then the command's index, and one pointer
+// the handler of either table: each is a variable set several times, which is global-alloc's
+// ($a1 and $a2 throughout). As the index it lives beside the table's count in $a0, so the
+// quadword count cannot take $a0 and the loop's counter is a copy of it
+// (docs/toolchain/alias-classes.md, "One int for a size, a count and an index").
+s32 HandleCommandInterrupt(s32 cause)
+{
+    volatile Quad_1FA6B0 local[7];
+    Channel_1FA068* ch;
+    volatile u8* buffer;
+    volatile Packet_1FA068* packet;
+    volatile Quad_1FA6B0* src;
+    Handler_1FA068 handler;
+    s32 n;
+    s32 i;
+
+    EnableInterrupts();
+    ch = &D_00629398;
+    buffer = (volatile u8*)ch->buffer;
+    n = buffer[0];
+    if (n == 0) {
+        return 0;
+    }
+    n = (n + 15) / 16;
+    buffer[0] = 0;
+    src = (volatile Quad_1FA6B0*)buffer;
+    for (i = 0; i < n; i++) {
+        local[i] = *src++;
+    }
+    ArmIopDmaChainFromInterrupt();
+    packet = (volatile Packet_1FA068*)local;
+    if (packet->head[2] < 0) {
+        n = packet->head[2] & 0x7FFFFFFF;
+        if (n < ch->system_count) {
+            handler = ch->system[n].handler;
+            if (handler != 0) {
+                handler((Packet_1FA068*)packet, (Channel_1FA068*)ch->system[n].arg);
+            }
+        }
+    } else {
+        n = packet->head[2];
+        if (n < ch->user_count) {
+            handler = ch->user[n].handler;
+            if (handler != 0) {
+                handler((Packet_1FA068*)packet, (Channel_1FA068*)ch->user[n].arg);
+            }
+        }
+    }
+    SyncAndEnableInterrupts();
+    return 0;
+}
 
 ASM_FUNC(func_001FA7D8);
 

@@ -1032,6 +1032,108 @@ MoveTumblingEffect matched on 2026-11-10 from 32.7%. Three mechanisms, each read
   and from a pointer initialised with the face (`MeshFace* face = &faces[f]`), see "The
   operand order of an address sum".
 
+### One int for a size, a count and an index: a later life's conflict makes the counter a copy (func_001FA6B0)
+
+Matched on 2026-11-12 (w38-f6), Sony's 2.9-ee-991111, from the `-dL -dl -dg` dumps.
+HandleCommandInterrupt copies the received packet with `blez a1; move a0,a1` and a loop that
+counts $a0 down, then dispatches on the command with its index in $a1 and the handler in $a2.
+The near miss (33 words off) had a `u8 size`, a count `n`, an `index` in each arm and the
+handler read through a `slot` pointer: every value a fresh pseudo.
+
+- **What retail's registers say.** $a1 holds the size byte, then the quadword count, then the
+  index in both arms: one variable. Written so (`n = buffer[0]; ... n = (n + 15) / 16; ... n =
+  packet->head[2] & 0x7FFFFFFF;`), n is set four times and is global-alloc's. In the arms it
+  is live while $a0 holds the table's count and then the call's first argument, so it
+  conflicts with hard register 4 (`;; 122 conflicts: ... 2 3 4 29`). The quotient's temporary
+  (expand_divmod's, placed in $a0 by local-alloc) gives n a preference for $a0 that the
+  conflict refuses: n takes $a1.
+- **The counter keeps the preference.** `for (i = 0; i < n; i++)` is reversed by loop.c
+  (`Reversed loop and added reg_nonneg`), which sets i from n in the preheader. i does not
+  conflict with n (n dies in the copy), so it inherits n's preference for $a0 and, unlike n,
+  can have it: `move a0,a1` stays, with the alignment nop after it. A variable used for the
+  count only has no later conflict, takes $a0 itself, and the copy is a `move a0,a0` that
+  disappears (measured with a size set twice and an `index` of its own: 2 instructions short).
+- **A variable set several times keeps `blez`.** combine only knows the bits of a register set
+  once, so the guard of the multiply-set n stays `blez` where a single-set count (a byte plus
+  15, divided) is known non-negative and gives `beqz` (inferred from the two forms' code, not
+  read in the dump).
+- **The rest of the head.** `buffer[0] = 0` written before `src = buffer`: sched1 issues the
+  copy first, the buffer pointer is still live at the store, and the two take $a3 and $a2
+  (after the copy cse would store through src). The destination as `local[i]` is loop.c's
+  giv, set in the preheader after the guard, so reorg's slot takes the counter's copy.
+- **The handler in one variable.** `handler = ch->system[n].handler; if (handler != 0)
+  handler(packet, ch->system[n].arg);` with one `handler` for both arms: set twice, it is
+  global-alloc's and takes $a2 (measured; with a variable in each arm 8 words differ, and
+  through a `slot` pointer the handler is in $v1 and the address's operands swap in the
+  `addu`).
+- **A call that returns a value moves the next load to $v1.** Retail reads the command word
+  for its sign into $v1 right after `jal ArmIopDmaChainFromInterrupt`. Declared `void`, the
+  load takes $v0; declared `s32` (a system call stub: its value is in $v0), $v1: EXACT.
+  Inferred: the call sets $v0 with a REG_UNUSED note, and local-alloc's first try places a
+  quantity over its life widened by one insn at each end ("The widened lives decide the
+  neighbour's register" above), which here reaches the call.
+- **The tell.** One register carrying unrelated values in order (a size, a count, an index)
+  where each use could have had the lowest free register: a variable the original reused,
+  typical of C written with its declarations at the top. Its conflicts are those of all its
+  lives, so a value may be kept out of a register by a use a hundred instructions later.
+
+### A stack word loaded at each use beside an empty branch slot is a volatile read (func_001FA6B0)
+
+Established on 2026-11-12 (w39-1FA6B0), Sony's 2.9-ee-991111, from the `-da` dumps and GCC
+2.95.3's cse.c, gcse.c, reorg.c and resource.c. No match came of it: it is the proof that the
+handler's reads of its own stack copy of the packet are volatile reads, and that no
+non-volatile source gives retail's code. Whether the original had that volatile is the
+maintainer's decision.
+
+- **What retail shows.** After the copy loop and the call: `lw v1,8(sp); bgez v1,else; nop`,
+  then `lw v0,8(sp)` at the head of the fall-through arm and `lw a1,8(sp)` at the head of the
+  else arm. Two facts: the word is loaded three times, and the branch's delay slot is empty
+  although both arms start with a one-instruction load from the frame.
+- **Three loads: cse1 merges any non-volatile form.** The three reads expand to the same
+  `(mem:SI (plus (reg) (const_int 8)))` and no insn stands between them (no store, no call).
+  In the `.cse` dump of the form without the volatile, insns 140 (system arm) and 196 (user
+  arm) are gone and insn 144 reads pseudo 135, the test's load: cse1 alone does it, following
+  the jump into the else arm (and still with `-fno-cse-follow-jumps -fno-cse-skip-blocks
+  -fno-gcse -fno-rerun-cse-after-loop`, tried as a probe). cse.c's hash of a MEM takes its
+  address only: the alias set, the `/s` flag and the type the read was written with are not
+  in it, so no way of typing the read keeps the loads apart. The one thing that does is
+  canon_hash's `if (MEM_VOLATILE_P (x)) { do_not_record = 1; return 0; }`: a volatile source
+  is never looked up and never recorded (gcse.c's hash_expr_1 has the same test).
+- **Measured.** One load of 8(sp) in each of: the test through `((s32*)local)[2]` and the
+  index through `u32*` and the struct field; the local as a union of quadwords, words and the
+  packet; the local as the packet struct, filled through a quadword pointer; a void pointer
+  with a cast at each read; a one-bit field over a 31-bit field for the test and the index
+  (fold makes the same word load and sign test); inline accessors taking the pointer by value
+  and by const reference; the pointer set through its own address; the source read as
+  `volatile Quad*` with the local plain (the qualifier does not travel with the copied
+  value). A structure returned by value from an inline copies the packet (the function grows).
+- **The empty slot: reorg refuses only a volatile load.** This is independent of how the
+  loads survive. fill_eager_delay_slots tries the head of the target thread, then of the
+  fall-through. Either `lw` would be taken: the else arm's with an annulled branch (the form
+  without the volatile gives `bgezl a0; lw v0,24(s0)`, a load in a branch-likely slot), or
+  unannulled, since neither sets a register live in the other arm and a frame address cannot
+  trap. fill_slots_from_thread's first test is insn_references_resource_p against an empty
+  set, and resource_conflicts_p returns 1 for an empty set only by `res1->volatil ||
+  res2->volatil`; resource.c sets `volatil` from MEM_VOLATILE_P (and from an asm or an
+  UNSPEC_VOLATILE, which a `lw` is not). The refused insn's resources then join `set`, so
+  nothing after it is taken either: the nop.
+- **Measured.** With the three reads on three different words (`head[2]`, `head[3]`,
+  `head[1]`: nothing for cse to merge), the plain form gives `bgez v1; lw a1,4(sp)` and the
+  volatile form `bgez v1; nop`. So even a plain form that kept its three loads would not be
+  retail's: the slot would hold one of them.
+- **Where the qualifier can sit.** The reads of the stack copy must go through a
+  volatile-qualified lvalue. Two forms are EXACT on US and PAL: a volatile
+  pointer to a plain array (`volatile Packet* packet = (volatile Packet*)local`), and one
+  volatile quadword type for the DMA data used for the source pointer and the array alike
+  (`volatile Quad local[7]; volatile Quad* src;`), read through a packet pointer that keeps
+  the array's qualifier. The second is landed (the maintainer's choice, 2026-11-12): the
+  qualifier belongs to the type of DMA-written data, and the copy is declared with it. A volatile array read through a plain packet
+  pointer merges the loads again. The receive buffer's volatile alone is never enough.
+- **The tell.** A frame word reloaded at each use with nothing between the loads, and a
+  branch whose slot is a nop while its arms begin with those loads. Either half alone has
+  other causes (a store or call between the loads; a slot candidate that sets a live
+  register); together they are MEM_VOLATILE_P.
+
 ### An expression split into two statements adds references (func_001F7390)
 
 - Sony's library compiler ranks global-alloc's pseudos the same way: floor_log2(refs) * refs /
