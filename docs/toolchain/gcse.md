@@ -634,7 +634,7 @@ SolvePlayerLinkSystem matched from a size difference (932 against 904 bytes) wit
   `*p`, into pointer arithmetic, whose address inside a memory reference has the index first; an
   array member (`target->v[j]`) stays an ARRAY_REF, base first, as a local array's.
 
-### A splat split between a GPR and a VU0 copy: what gcse's copy propagation does (func_00155868, unsolved)
+### A splat split between a GPR and a VU0 copy: what gcse's copy propagation does (func_00155868, matched 2026-11-12)
 
 Read from cse.c (make_regs_eqv, the copy swap at the end of cse_insn, cse_end_of_basic_block),
 gcse.c (hash_scan_set, cprop_insn), reload.c (find_equiv_reg) and reload1.c (reload_cse_regs_1)
@@ -709,6 +709,38 @@ everything reads vf2. One instruction short.
   pointer stepped by the `for` (`p++`) is the variable itself. With it the loop and the tail
   equal retail's instruction for instruction; only the head's missing instruction is left (it
   also moves the loop label's alignment `nop`).
+
+- **Solved (w44-fa, 2026-11-12): cse2 remakes the split, and its choice is a register's last
+  use.** The notes above stop at cprop; the pass that decides is cse2, by cse.c's
+  make_regs_eqv. On a path, a copy `V = S` makes V the class's canonical register only when V
+  lives past the path's last insn (or was born before its first) *and* V's last use
+  (REGNO_LAST_UID, from the reg_scan before the pass) is later than S's. cse walks the head
+  twice: first with the jump taken (head and else arm, whose range runs to the join), then with
+  it not taken (head and then arm). Retail's code (`qmtc2 v0,vf2; sqc2 vf2,0(sp)`, the then arm
+  on vf2, the else arm on v0) is `S = asm; V = S; size = V; then: V, V; else: S, S`, so V must
+  be canonical on the then path and not on the else path: its last use lies *inside the else
+  arm, after S's last use*. cprop has by then rewritten every use of V it can reach to S (and
+  cse1's else path every mention in the else arm), so the only reference that survives to
+  cse2's reg_scan is one cprop skips: a use after V is *set again* in that arm
+  (oprs_not_set_p). That is one variable reused: `half = MulX(half, Scalar(-1.0f)); Q(lo) =
+  half;`. The product is then V too (retail's `vmulx vf2,vf3,vf1x`: vf2 is V's register in
+  both arms, and the input's reload cannot take the output's register, hence vf3). On the then
+  path cse2 canonicalises the head's store and the arm's two uses back to V; on the else path
+  S stays. regclass then sees S with the asm's `=r`, the hi store and one `j` use: a GPR.
+- **The copy must not follow the asm directly.** cse_insn's swap (`(set REG0 REG1)` after the
+  insn that set REG1, REG0 canonical) turns `S = asm; V = S` into `V = asm; S = V`, which
+  gives the asm's output to the VU0 pseudo (`pextlw v0,v0,v0`, `vmove vf3,vf2` in the slot:
+  the 563-byte forms). Dead copies between them do not help: delete_trivially_dead_insns
+  removes them before cse2, which then swaps. A live insn must sit there. In the matched form
+  it is the load of the record (`u128 margin = Splat(self->margin); Rec50* rec = self->rec;
+  u128 half = margin; Q(size) = half;`): retail's head has that load between the pextlw and
+  the qmtc2. With the store first (`Q(size) = Splat(..); u128 half = Q(size);`) the store is
+  that insn but is then made from S (`sq v0,0(sp)`, 527 of 580). Compiled: without
+  the load between, 563 bytes through a second named copy and 572 with the copy straight
+  after the asm (cse1 already swaps).
+- **Spot it:** a value kept in two registers by arm, where the arm that keeps the copy is the
+  fall-through one and the other arm's last statement computes into the copy's register. Read
+  the head's order: asm, another live insn, copy, store.
 
 ### The same lever for a parameter block's two quadwords (func_001EC190)
 
