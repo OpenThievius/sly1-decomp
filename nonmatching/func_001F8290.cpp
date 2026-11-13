@@ -63,6 +63,23 @@
 // filler between the id's load and store. Not tried: a second use of the id or the argument
 // that a pass after sched1 deletes; `packet->id = id` written back stays in the code (496
 // bytes) and a second `self->id = id` is gone before sched1 (cse1), changing nothing.
+// w40-fa (2026-11-12): not closer (2 words). A third way to retail's order, replayed by hand
+// on the near miss's table and not yet seen in a compile: the id's load one cycle late. If the
+// load (priority 9) cannot issue at t=1, the argument's store takes t=1 (weight 0), the load
+// t=2, the packet's store t=3 (the id's store is ready at t=4 only), then id, callback:
+// retail's order with the weights as they are, and the argument still dies right before the
+// id is born (v0, v1). It needs an insn of no code, issued at t=1, that the load depends on
+// with a cost of one. Tried: (1) a `(clobber (reg))` from the id read through a union-typed
+// local (`IdWord id = { packet->id };`): the constructor loads into a temporary and copies,
+// cse1 makes the temporary canonical, the copy and then the CLOBBER are deleted by flow before
+// sched1 (2 words, unchanged). (2) The packet as a checked pointer copied into the variable
+// (`void* p = Take(); if (p == 0) return -1; packet = (Packet*)p;`): cse1 folds the copy the
+// same way (written in member order the store lands in the entry test's slot, 496 bytes).
+// (3) The stack argument's variable reused for the id (`self->callback_arg = callback_arg;
+// callback_arg = packet->id; self->id = callback_arg;`, the load anti-dependent on the
+// store): set twice, the variable is global-alloc's, takes a saved register across the first
+// call and pushes mode to the stack (125 lines). Not tried: the file built as C (a C record
+// constructor that lists every field emits a CLOBBER, a C++ one never does).
 #include "common.h"
 
 struct Client_1F7BE8;
