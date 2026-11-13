@@ -3169,7 +3169,12 @@ sceGsSetDefDispEnv's DISPLAY register (src/lib/graph.c, func_00202140):
   the size and every block but the division's are retail's. A second lever: `magh` declared in
   each arm, not once for the function; one variable assigned in four arms is a global pseudo,
   which local-alloc cannot tie the quotient to (`mflo v1; move v0,v1`).
-- **Unsolved: the zero trap's place.** In both interlaced arms retail issues the division's
+- **Solved 2026-11-13 (w47-h): the division is written at each use.** With the magnification a
+  macro of the width, `((w) + 0x9FF) / (w)`, used three times in the register's arguments, and
+  no `magh` local at all, the function is exact: the two extra `trap_if`s leave no code and
+  raise the first trap's sched2 priority (docs/toolchain/sched1.md, "The zero trap of
+  func_00202140"). The note below is the wall as it stood.
+- **Was unsolved: the zero trap's place.** In both interlaced arms retail issues the division's
   `beqzl/break` before dy's `dsll a3,v1,12`; sched2 gives the shift priority 5 (an anti
   dependence: the dx term's `daddiu` writes the v1 it reads) and the trap 4 (`1 +` the field
   load it orders), with retail's own registers, so retail's sched2 had a dependence ours lacks

@@ -1354,7 +1354,24 @@ pseudo (global, `$f1`), and sched2 is free to issue the multiply first. In the s
 torque's cross product before the accel's division (`vdiv` first in retail) is the source order
 force, torque, accel: their asms tie on priority and LUID decides.
 
-### The zero trap of func_00202140: what sched2 needs (unsolved)
+### The zero trap of func_00202140: what sched2 needs (matched 2026-11-13)
+
+**Matched (w47-h, 2026-11-13).** The magnification is not a local: it is written out at each
+of its three uses in the register's macro (`#define MAGH(w) (((w) + 0x9FF) / (w))`, in
+`dx * MAGH(w)`, `MAGH(w) - 1` and `MAGH(w) * w - 1`). Each use expands its own `divmodsi4` and
+its own `trap_if`. cse1 folds the three divisions into one (12 `div` in `.jump`, 4 in `.cse`), but
+nothing deletes a `trap_if`: all three live to the `.dbr` dump (12 in the
+function against 4 with a local), and only the first of a run writes code (the `.s` has one
+`beql/break` per arm). In sched2 each trap waits for the one before it (a TRAP_IF flushes the
+pending memory lists) and the field load waits for the last, so the first trap's priority is
+`1 + 1 + 1 + 3 = 6` where the single trap had 4: above dy's shift (5), level with dy's mask
+and after it on luid, which is retail's `div; andi; beqzl/break; dsll`. The two later traps
+issue after the shift and leave no code. So the "dependence ours lacks" below was a chain of
+two insns that emit nothing, between the trap and the field load. The tell for other
+functions: a zero trap issued earlier than its priority allows, or a memory load held back
+after a division, where the quotient is used more than once: write the division at each use.
+The analysis below is kept as it was written.
+
 
 Measured 2026-11-10 with 2.9-ee-991111's `-dS -dR -fsched-verbose-6` dumps of the near miss
 (src/lib/graph.c's DISPLAY register; build/swarm/w15-202140/tp.sh prints the sched2 table of
