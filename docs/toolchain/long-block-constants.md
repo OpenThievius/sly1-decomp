@@ -542,7 +542,11 @@ for instance one reload later moved to the stack. Spot the case: list every allo
 retail.
 
 
-### Reading a register swap as two ranking flips with --set (func_001DEBE8, unsolved)
+### Reading a register swap as two ranking flips with --set (func_001DEBE8, matched 2026-11-13)
+
+Solved (sched1.md, "Argument moves held back"): both flips are reference counts, one more
+for pad and one more for `%hi(g_unitRange)`, from an unused clamp of the second curve whose
+insns are still in the stream when the references are counted. What follows is as written.
 
 func_001DEBE8's s1/s2/s3 differ from retail's for five pseudos: &tgt (r126), pad (r118), &cur
 (r124), and two of PRE's %hi copies, g_unitRange's (r510) and g_unitZVector's (r507).

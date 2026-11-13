@@ -793,6 +793,13 @@ struct Vu0 {
     // func_001C75B0 loads row 0 before the weight's store and rows 1 and 2 after v's.
     template <class M> static u128 RotateMembers(const M& m, u128 v);
 
+    // RotateTransposed with the rows read as Vec members, as RotateMembers reads Rotate's: a
+    // structure member's load at a varying address does not wait for the Scalar slot stores
+    // of the weights that made v (alias.c, fixed_scalar_and_varying_struct_p), where
+    // RotateTransposed's u128 reads wait for every store to the frame (func_001DEBE8's
+    // velocity; docs/toolchain/alias-classes.md).
+    template <class M> static u128 RotateTransposedMembers(const M& m, u128 v);
+
     template <class M> static u128 RotateUntied(const M& m, u128 v)
     {
         const u128* r = (const u128*)&m;
@@ -1239,6 +1246,19 @@ template <class M> inline u128 Vu0::RotateMembers(const M& m, u128 v)
     u128 out;
     __asm__("vmulax.xyz ACC, %1, %4x\n\tvmadday.xyz ACC, %2, %4y\n\tvmaddz.xyz %0, %3, %4z"
             : "=j"(out) : "j"(r[0].q), "j"(r[1].q), "j"(r[2].q), "0"(v));
+    return out;
+}
+
+// Vu0::RotateTransposedMembers, out of the class for the same reason.
+template <class M> inline u128 Vu0::RotateTransposedMembers(const M& m, u128 v)
+{
+    const Vec* r = (const Vec*)&m;
+    u128 out, p0, p1, p2, one;
+    __asm__("vmul.xyzw %2, %5, %8\n\tvmaxw.xyzw %1, vf0, vf0w\n\tvmul.xyzw %3, %6, %8\n\tvmul.xyzw %4, %7, %8\n\t"
+            "vadday.x ACC, %2, %2y\n\tvmaddz.x %0, %1, %2z\n\tvaddax.y ACC, %3, %3x\n\tvmaddz.y %0, %1, %3z\n\t"
+            "vaddax.z ACC, %4, %4x\n\tvmaddy.z %0, %1, %4y"
+            : "=&j"(out), "=&j"(one), "=&j"(p0), "=&j"(p1), "=&j"(p2)
+            : "j"(r[0].q), "j"(r[1].q), "j"(r[2].q), "j"(v));
     return out;
 }
 

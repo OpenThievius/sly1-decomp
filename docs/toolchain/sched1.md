@@ -67,7 +67,65 @@ as retail does.
   the buffer does not fit, and the buffer declared at function level after the block give that
   layout; the buffer in a block of its own is freed and the temporary moves into it.
 
-### Argument moves held back to a call's own block: what is and is not a barrier (func_001DEBE8, unsolved)
+### Argument moves held back to a call's own block: an unused clamp before the call (func_001DEBE8, matched 2026-11-13)
+
+**The answer (w51-f, 2026-11-13): a value computed and never used, whose computation holds a
+test.** One statement stands before the third BuildAxisAngleMatrix call:
+`f32 lean2 = g_unitRange.Limit(Quadratic(D_00275820, pad->f48));`, the second tuning curve's
+amount, which nothing reads (the call takes the first curve's `lean`). It leaves no
+instruction and is every wall this section and the near miss's header describe:
+
+- *What the compiler does with it.* The clamp's result has no use, so the sets in its arms
+  go and the inner test with them (`.cse` has two jumps to the clamp's join label, `.cse2`
+  and `.flow` one, and the arm's block is empty in `.flow`), but the outer test stays: its
+  compare sets `$fcc0`, a hard register, and its branch, now a jump to the next insn, reads
+  it. flow1 keeps both and what they read, so the evaluation, twelve insns from
+  `(high D_00275820)` to `(set $fcc0 (lt ...))`, and the branch go through combine, sched1,
+  local-alloc, global-alloc and reload as live code (`.greg`: `(insn 751 (set (reg a0) (high
+  D_00275820)))`, `(jump_insn 779 ... (label_ref 797))`, the label with one use). Between
+  global-alloc and flow2 the jump is deleted and flow2's life analysis deletes the chain
+  behind it (`.flow2`: no reference to D_00275820, `(code_label 797 [num uses: 0])`); the
+  label is still there in sched2 and jump2 removes it. Nothing is printed.
+- *Wall (b), the argument moves.* The branch ends the block before the call's own statement
+  in sched1 and the unused label ends it in sched2, so the call's `lui`, `addiu a1`, `lwc1`
+  and `move a0` are the first insns of a block of their own in both passes.
+- *Block A's two insns.* The chain's `(high D_00275820)` and its `lo_sum` depend on nothing
+  but the previous call, so sched1 issues them in the idle alu slots of cycles 12 and 13
+  beside the tilt loads (the slots the next call's argument insns took in the near miss);
+  the chain's loads wait for the stores and follow them. Those two are the insns the
+  local-alloc replay asked for between the tilt loads and the last product (lives of 9 and
+  25).
+- *Wall (a), pad's register and the s1/s3 pair.* The chain reads `pad->f48` and
+  `g_unitRange` (its address and its first word), and recompute_reg_usage counts what is in
+  the stream before local-alloc: pad has 12 references over 344 insns (between &tgt's 3 over
+  28 and &cur's 3 over 29) and the hoisted `%hi(g_unitRange)` 6 over 316 (W23's
+  `510:refs=6`). No insn was missing around the key reads.
+- *The address in s5.* cse1 gives the speed clamp's `&g_unitRange` the pseudo of an earlier
+  identical `lo_sum` in the same extended block; in the near miss that was an invented local
+  (`ValueRange* unit = &g_unitRange;` after the lean clamp), and it is the unused clamp's own
+  `this`, which outlives the clamp because the speed clamp uses it. An address computed for
+  no visible use, long before its one reader, is the tell of a deleted computation.
+- *The evidence in retail's data.* The curve at 0x275820 ({0, 1, 0, 0}, the shape of the one
+  at 0x275800) sits between the two scales (0x275810, 0x275830) and no instruction of the
+  game refers to it: where data holds a table entry nothing reads, ask whether the source
+  read it into a variable it then did not use.
+- *What was not the cause.* combine's USE (the section above this one's fifth pass): neither
+  the near miss's nor the probes' `.combine` to `.sched2` dumps hold a `(use (reg ...))` or
+  `(use (mem ...))` (only flow's three `(use (const_int 0))`), and none can arise: the
+  registers live into the blocks in question are `self`, `pad` and the hoisted addresses,
+  none of which dies there, and a USE keeps its register's set alive as code. A test that
+  combine folds (`s32 f = pad->flags; if (f < 0) ...`) is a second code-less block boundary
+  (the jump becomes unconditional, reload's jump pass deletes it, the label stays to jump2);
+  it was a probe, not the form. The unused clamp is retail's only as `Limit` before the third
+  call: as `Clamp` (v changed in place) it is 1740 bytes, written straight after the lean
+  clamp it gives pad's register and the s1/s3 pair but not (b) (47 lines), and reading
+  D_00275800 there instead 59.
+- The store order of the 660 rows (row 0 written last) and the velocity's rows read as Vec
+  members (Vu0::RotateTransposedMembers) are still needed and stay as they were found.
+
+The history below is kept as it was written; its "block boundary" and "two invisible insns"
+readings were right, its candidates for what made them were not.
+
 
 From haifa-sched.c of GCC 2.95.3 (sched_analyze, sched_analyze_insn) and the `-dS -dR
 -fsched-verbose-6` dumps (2026-11-10):
