@@ -8,25 +8,25 @@
 // which 0x27B184 is not. Its name is ours, after that role (it was the window file 001F8000.cpp).
 #include "common.h"
 
-void ConstructScriptMachineStaticsAtStartup();
+extern "C" void ConstructScriptMachineStaticsAtStartup();
 void ConstructValuePoolsAtStartup();
-void ConstructTextPanelStaticsAtStartup();
-void ConstructCameraStaticColorAtStartup();
+extern "C" void ConstructTextPanelStaticsAtStartup();
+extern "C" void ConstructCameraStaticColorAtStartup();
 void ResetPacketWriters();
 void ConstructDefaultRgbaColorAtStartup();
-void ConstructBoxStylesAtStartup();
-void ConstructMenuBoxStyleAtStartup();
+extern "C" void ConstructBoxStylesAtStartup();
+extern "C" void ConstructMenuBoxStyleAtStartup();
 void ConstructScreenTextStylesAtStartup();
 void ConstructBestTimeTextStyleAtStartup();
-void ConstructWarpTextStyleGlobalsAtStartup();
-void ConstructTriangleGroupColorsAtStartup();
-void ConstructMovieRingSinkAtStartup();
+extern "C" void ConstructWarpTextStyleGlobalsAtStartup();
+extern "C" void ConstructTriangleGroupColorsAtStartup();
+extern "C" void ConstructMovieRingSinkAtStartup();
 s32 ConstructSwitchedColliderDefaultsAtStartup();
-void ConstructScratchpadTransfersAtStartup();
-void ConstructWorldLoadRequestGlobalAtStartup();
+extern "C" void ConstructScratchpadTransfersAtStartup();
+extern "C" void ConstructWorldLoadRequestGlobalAtStartup();
 void ConstructGreyColorAtStartup();
 void RegisterProgramFrameInfo();
-void DestroyScriptMachineStaticsAtExit();
+extern "C" void DestroyScriptMachineStaticsAtExit();
 void DestroyValuePoolsAtExit();
 void ReleaseProgramFrameInfo();
 void* D_0027B130[26] = {

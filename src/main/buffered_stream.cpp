@@ -31,6 +31,10 @@
 #include "list_iter.h"
 #include "buffered_stream.h"
 #include "key_id.h"
+#include "object_finder.h"
+
+// Types other files define, named by the parameters of their functions declared here.
+struct LoadProgress;
 
 
 f32 WrapModulo(f32 x, f32 y);
@@ -54,11 +58,11 @@ BufferedStream* InitBufferedStream(BufferedStream* self, s32 a1, s32 a2, s32 a3)
 
 // Newly matched US functions from the small-function wave.
 extern void ConstructTextPanelStatics(s32, s32);
-extern void CloseBufferedStream(void*);
+extern void CloseBufferedStream(BufferedStream* self);
 extern void FreeObjectMemory(void*);
-extern void ReadBufferedStreamBytes(void*, s32, void*);
+extern void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
-void DestroyBufferedStream(void* self, s32 flags)
+void DestroyBufferedStream(BufferedStream* self, s32 flags)
 {
     CloseBufferedStream(self);
     if (flags & 1) FreeObjectMemory(self);
@@ -85,40 +89,45 @@ s32 OpenBufferedSectorStream(BufferedStream* r, s32 a1, s32 a2)
     return 1;
 }
 
-void OpenBufferedMemoryStream(BufferedStream* self, s32 a1, s32 a2) { self->remaining = a1; self->ptr = a2; self->mode = 2; }
+void OpenBufferedMemoryStream(BufferedStream* self, s32 size, u8* data) { self->remaining = size; self->cur = data; self->mode = 2; }
 
 #include "common.h"
 #include "list_iter.h"
 #include "buffered_stream.h"
 #include "key_id.h"
+struct TextPointObject;
+
+struct Effect;
+
 
 void ResetScreenElement(void* self);
-void SetStepSequenceState(void* obj, s32 mode);
+void SetStepSequenceState(StepSequence* self, s32 next);
 
 
 
-s32 OpenBufferedSectorStream(void* a, void* b, s32 c);
+s32 OpenBufferedSectorStream(BufferedStream* r, s32 a1, s32 a2);
 
-s32 OpenBufferedSectorStreamRange(void* a, KeyId* pair)
+s32 OpenBufferedSectorStreamRange(BufferedStream* a, KeyId* pair)
 {
-    return OpenBufferedSectorStream(a, pair->p0, pair->second);
+    return OpenBufferedSectorStream(a, pair->first, pair->second);
 }
 
 extern f32 g_gameClock[];
 
-s32 GetStringLength(const char* s);
+extern "C" s32 GetStringLength(const char* s);
 void* CopyString(void* dst, const char* src);
 void PushFontScale(s32 a, f32 x, f32 y);
-void* InitTextReader(void* buf, void* p, s32 v);
-s32 WrapTextLines(void* buf, f32 x);
+struct TextReader;
+void* InitTextReader(TextReader* self, char* text, Font* font);
+s32 WrapTextLines(TextReader* self, f32 limit);
 void PopFontScale(s32 v);
-void RewindTextReader(void* buf);
-s32 ReadTextChar(void* buf);
+void RewindTextReader(TextReader* self);
+s32 ReadTextChar(TextReader* self);
 
-s32 ReadFile(s32 p, s32 a, s32 b);
+s32 ReadFile(s32 fd, void* buf, s32 size);
 
 s32 CloseFile(s32 p);
-s32 StopDiscRead(void);
+extern "C" s32 StopDiscRead();
 s32 CloseDiscStream(void);
 
 void CloseBufferedStream(BufferedStream* self)
@@ -153,7 +162,8 @@ void CloseBufferedStream(BufferedStream* self)
 
 s32 IsObjectAttached(void* obj);
 
-void GetNumberedItemFlag(void* obj, s32* out);
+struct NumberedItem;
+void GetNumberedItemFlag(NumberedItem* self, s32* out);
 
 s32 ReduceBufferedStreamBytesLeft(BufferedStream* self, s32 n)
 {
@@ -161,16 +171,17 @@ s32 ReduceBufferedStreamBytesLeft(BufferedStream* self, s32 n)
 }
 
 void GetCurrentLevelBit(u32* out);
-f32 Cosine(f32 x);
-f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, s32 zero);
+struct RampProfile;
+extern "C" f32 Cosine(f32 x);
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 struct SectorStreamState {
     s32 flags;      // 0x00
     s32 f04;
-    s32 base;       // 0x08
+    u8* base;       // 0x08
     s32 total;      // 0x0C
     u8 pad10[0x10];
-    s32 pos;        // 0x20
+    u8* pos;        // 0x20
     s32 rem;        // 0x24
     u8 pad28[0x10];
     s32 done;       // 0x38
@@ -188,16 +199,16 @@ struct MinOf {
     static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
 };
 
-s32 GetDiscReadPosition(void);
-s32 SyncDiscNCommand(s32 a);
+extern "C" s32 GetDiscReadPosition();
+extern "C" s32 SyncDiscNCommand(s32 mode);
 s32 SyncDiscRead(s32 a);
-s32 GetDiscError(void);
+extern "C" s32 GetDiscError();
 s32 GetDiscReadError(void);
-void StartLowLevelDiscReadUntilAccepted(s32 a, s32 b, s32 c);
-void StartDiscReadUntilAccepted(s32 a, s32 b, s32 c);
+void StartLowLevelDiscReadUntilAccepted(s32 sector, s32 count, void* buffer);
+void StartDiscReadUntilAccepted(s32 sector, s32 count, void* buffer);
 
 struct SectorReadIssue {
-    static void Read(SectorStreamState* self, s32 sector, s32 len, s32 dst)
+    static void Read(SectorStreamState* self, s32 sector, s32 len, void* dst)
     {
         if (self->flags & 2) StartLowLevelDiscReadUntilAccepted(sector, len, dst);
         else StartDiscReadUntilAccepted(sector, len, dst);
@@ -243,7 +254,7 @@ void RefillBufferedStreamFromSectors(SectorStreamState* self)
                         self->start = 0;
                     } else {
                         s32 done = self->done;
-                        s32 dst = self->base + self->writeIdx * chunk + done;
+                        u8* dst = self->base + self->writeIdx * chunk + done;
                         s32 len = ((self->size - done + 0x7FF) & -0x800) / 0x800;
                         self->start = done;
                         s32 sector = self->sector + done / 0x800;
@@ -260,7 +271,7 @@ void RefillBufferedStreamFromSectors(SectorStreamState* self)
             s32 n = (self->writeIdx + 1) % self->count;
             self->cur = cur + 1;
             s32 len = ((size + 0x7FF) & -0x800) / 0x800;
-            s32 dst = self->base + n * chunk;
+            u8* dst = self->base + n * chunk;
             s32 sector = self->sector;
             self->writeIdx = n;
             SectorReadIssue::Read(self, sector, len, dst);
@@ -277,8 +288,8 @@ void RefillBufferedStreamFromSectors(SectorStreamState* self)
     } while (self->rem == 0 && self->left > 0);
 }
 
-extern s32 ReadFile(void*, s32, s32);
-struct FileStreamState { u8 pad0[8]; s32 f8; s32 fC; u8 pad10[4]; s32 f14; u8 pad18[8]; s32 f20; s32 f24; u8 pad28[0xC]; void* f34; };
+extern s32 ReadFile(s32 fd, void* buf, s32 size);
+struct FileStreamState { u8 pad0[8]; void* f8; s32 fC; u8 pad10[4]; s32 f14; u8 pad18[8]; void* f20; s32 f24; u8 pad28[0xC]; s32 f34; };
 void RefillBufferedStreamFromFile(FileStreamState* self)
 {
     s32 size = self->fC;
@@ -289,28 +300,27 @@ void RefillBufferedStreamFromFile(FileStreamState* self)
 }
 
 struct MaxOf { static s32 Of(s32 a, s32 b) { return a < b ? b : a; } };
-void RefillBufferedStreamFromFile(void* self);
-void RefillBufferedStreamFromSectors(void* self);
-void UpdateLoadProgress(void* self, s32 value);
+void RefillBufferedStreamFromFile(FileStreamState* self);
+void RefillBufferedStreamFromSectors(SectorStreamState* self);
+void UpdateLoadProgress(LoadProgress* self, s32 value);
 void RefillBufferedStream(BufferedStream* self)
 {
     switch (self->mode) {
-    case 0: RefillBufferedStreamFromFile(self); break;
-    case 1: RefillBufferedStreamFromSectors(self); break;
+    case 0: RefillBufferedStreamFromFile((FileStreamState*)self); break;
+    case 1: RefillBufferedStreamFromSectors((SectorStreamState*)self); break;
     }
     s32 value = self->f14 - self->nextCount;
     value = MaxOf::Of(0, value);
     self->f14 = value;
-    if (self->f30) UpdateLoadProgress((void*)self->f30, value);
+    if (self->f30) UpdateLoadProgress((LoadProgress*)self->f30, value);
 }
 
 
-s32 GatherObjectsById(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
-void ResetTextPointToHalf(void* p);
+void ResetTextPointToHalf(TextPointObject* self);
 
 
 void RefillBufferedStream(BufferedStream* d);
-void* CopyBytes(void* dst, void* src, s32 n);
+extern "C" void* CopyBytes(void* dst, void* src, s32 n);
 
 void UnpackBufferedStream(BufferedStream* d)
 {
@@ -375,7 +385,11 @@ void UnpackBufferedStream(BufferedStream* d)
 
 extern f32 g_gameTime;
 
-void StartSoundEffect(s32 a, s32 b, s32 c, s32 d, f32 g, f32 h, f32 i, f32 j, f32 k, s32 e, s32 f);
+struct BaseObject;
+struct PlayingSound;
+struct Vec02;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 extern u8 func_00135E20[];
 extern u8 func_00135E40[];
@@ -386,10 +400,11 @@ s32 MaskWorldBitsBySave(void);
 // and keeps the loaded count in $a2 where retail uses $v1.
 void UnpackBufferedStream(BufferedStream* self);
 void RefillBufferedStream(BufferedStream* self);
-void CopyMemory(void* dst, void* src, s32 count);
+void CopyMemory(void* dst, void* src, u32 size);
 
-void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, u8* dst)
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out)
 {
+    u8* dst = (u8*)out;
     if (self->remaining < 0) {
         return;
     }
@@ -458,7 +473,7 @@ s32 ReadBufferedU8(BufferedStream* self)
     return value;
 }
 
-s32 ReadBufferedU16(BufferedStream* self)
+u16 ReadBufferedU16(BufferedStream* self)
 {
     s32 count = self->remaining;
     if (count >= 2) {
@@ -506,11 +521,11 @@ s32 ReadBufferedS8(BufferedStream* self)
 }
 
 
-void RemoveEffect(void* handle);
-void SetEffectPhase(void* handle, s32 mode);
-void* FillMemory(void* p, s32 value, s32 size);
+void RemoveEffect(Effect* self);
+void SetEffectPhase(Effect* self, s32 mode);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-void ReadBufferedStreamBytes(void* self, s32 count, void* out);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
 s32 ReadBufferedS16(BufferedStream* self)
 {
@@ -544,7 +559,7 @@ s32 ReadBufferedS32(BufferedStream* self)
 
 LINKER_REMNANT(func_00137DF0);
 
-void ReadBufferedStreamBytes(void* self, s32 size, void* dst);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
 f32 ReadBufferedFloat(BufferedStream* r)
 {
@@ -561,17 +576,18 @@ f32 ReadBufferedFloat(BufferedStream* r)
     return tmp;
 }
 
-void ReadBufferedStreamBytes(void* self, s32 size, void* dst);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
-void ReadBufferedVector3(void* src, void* dst)
+void ReadBufferedVector3(BufferedStream* src, void* dst)
 {
     ReadBufferedStreamBytes(src, 12, dst);
 }
 
-void ReadBufferedVector4(void* self, void* out) { ReadBufferedStreamBytes(self, 0x10, out); }
+void ReadBufferedVector4(BufferedStream* self, void* out) { ReadBufferedStreamBytes(self, 0x10, out); }
 
-void ReadBufferedRotation3(void* self, u8* buffer)
+void ReadBufferedRotation3(BufferedStream* self, void* out)
 {
+    u8* buffer = (u8*)out;
     ReadBufferedStreamBytes(self, 0xC, buffer);
     ReadBufferedStreamBytes(self, 0xC, buffer + 0x10);
     ReadBufferedStreamBytes(self, 0xC, buffer + 0x20);
@@ -579,13 +595,16 @@ void ReadBufferedRotation3(void* self, u8* buffer)
 
 extern f32 g_gameTime;
 
-void* InitTextReader(void* out, void* p, s32 handle);
+struct Font;
+struct TextReader;
+void* InitTextReader(TextReader* self, char* text, Font* font);
 s32 CountTextChars(void* self);
 
-void ReadBufferedStreamBytes(void* self, s32 size, void* obj);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
-void ReadBufferedMatrix4(void* self, u8* p)
+void ReadBufferedMatrix4(BufferedStream* self, void* out)
 {
+    u8* p = (u8*)out;
     u8* a = p + 0x10;
     u8* b = p + 0x20;
     u8* c = p + 0x30;
@@ -600,10 +619,10 @@ void ReadBufferedMatrix4(void* self, u8* p)
     *(f32*)(c + 0xC) = 1.0f;
 }
 
-s32 ReadBufferedU16(void* stream);
-s32 ReadBufferedU8(void* self);
-f32 ReadBufferedFloat(void* self);
-void ReadBufferedVector3(void* src, void* dst);
+u16 ReadBufferedU16(BufferedStream* self);
+s32 ReadBufferedU8(BufferedStream* self);
+f32 ReadBufferedFloat(BufferedStream* r);
+void ReadBufferedVector3(BufferedStream* src, void* dst);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(s32 size);
 
@@ -625,8 +644,8 @@ struct MeshFace03 {
     u16 vert;
 };
 
-s32 ReadBufferedU8(void* self);
-f32 ReadBufferedFloat(void* self);
+s32 ReadBufferedU8(BufferedStream* self);
+f32 ReadBufferedFloat(BufferedStream* r);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(s32 size);
 
@@ -693,10 +712,10 @@ void ReadMeshFromStream(BufferedStream* in, Mesh03* mesh)
 }
 
 
-s32 ReadBufferedU16(void* stream);
+u16 ReadBufferedU16(BufferedStream* self);
 void* AllocateZeroedFrontMemory(s32 size);
 
-void ReadFaceTree(void* self, Mesh03* in, Tree03* out)
+void ReadFaceTree(BufferedStream* self, Mesh03* in, Tree03* out)
 {
     s32 x = ReadBufferedU16(self);
     out->count = x;
@@ -718,7 +737,7 @@ void ReadFaceTree(void* self, Mesh03* in, Tree03* out)
     }
 }
 
-void CopyCollider(void* self, void* other);
+void CopyCollider(Collider* self, Collider* other);
 
 struct LinkedItem {
     u8 pad0[0x10];
@@ -728,13 +747,13 @@ struct LinkedItem {
     u8 pad1[0x20 - 0x1C];
 };
 
-s32 ReadBufferedU16(void* stream);
+u16 ReadBufferedU16(BufferedStream* self);
 void* AllocateZeroedFrontMemory(s32 bytes);
-void ReadBufferedVector3(void* src, void* item);
-f32 ReadBufferedFloat(void* src);
-s32 ReadBufferedU32(void* src);
+void ReadBufferedVector3(BufferedStream* src, void* dst);
+f32 ReadBufferedFloat(BufferedStream* r);
+u32 ReadBufferedU32(BufferedStream* self);
 
-void ReadLinkedItemArray(void* src, s32* count, LinkedItem** out)
+void ReadLinkedItemArray(BufferedStream* src, s32* count, LinkedItem** out)
 {
     s32 n = ReadBufferedU16(src);
     *count = n;
@@ -761,7 +780,7 @@ void ReadLinkedItemArray(void* src, s32* count, LinkedItem** out)
 }
 
 void* AllocateFrontMemory(s32 size);
-void ReadBufferedString(void* self, u8** out)
+void ReadBufferedString(BufferedStream* self, u8** out)
 {
     s32 size = ReadBufferedU16(self);
     u8* buffer = (u8*)AllocateFrontMemory(size + 1);
@@ -775,14 +794,14 @@ LINKER_REMNANT(func_00138510);
 extern f32 g_gameTime;
 
 
-void LoadCollider(void* self);
-void FindOrBuildMemberGroup(void* sub, void* self);
+void LoadCollider(Collider* self, BufferedStream* in);
+void FindOrBuildMemberGroup(void** out, void* self);
 
 
-s32 ReadBufferedU16(void* stream);
-void ReadBufferedStreamBytes(void* self, s32 size, void* obj);
+u16 ReadBufferedU16(BufferedStream* self);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
-void SkipBufferedBlock(void* self)
+void SkipBufferedBlock(BufferedStream* self)
 {
     s32 n = ReadBufferedU16(self);
     ReadBufferedStreamBytes(self, n, 0);
@@ -792,10 +811,10 @@ struct OptionalBlock {
     s32 w[8];
 };
 
-void ReadBufferedStreamBytes(void* self, s32 size, void* obj);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 u32 CopyToFrontMemory(s32 size, void* src);
 
-void ReadOptionalBufferedBlock(void* self, u32* out)
+void ReadOptionalBufferedBlock(BufferedStream* self, u32* out)
 {
     OptionalBlock r;
     ReadBufferedStreamBytes(self, 0x20, &r);

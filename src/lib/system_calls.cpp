@@ -146,14 +146,14 @@ ASM_FUNC(func_001F6D20);
 
 ASM_FUNC(func_001F6D30);
 
-s32 DisableInterrupts(void);
-s32 EnableInterrupts(void);
+extern "C" s32 DisableInterrupts(void);
+extern "C" s32 EnableInterrupts(void);
 s32 DisableInterruptCauseSyscall(s32 n);
 s32 EnableInterruptCauseSyscall(s32 n);
 s32 DisableDmaInterruptSyscall(s32 n);
 s32 EnableDmaInterruptSyscall(s32 n);
 
-s32 DisableInterruptCause(s32 n)
+extern "C" s32 DisableInterruptCause(s32 n)
 {
     u32 enabled = ReadCop0Status();
     enabled &= 0x10000;

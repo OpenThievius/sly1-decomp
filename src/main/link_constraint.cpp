@@ -8,6 +8,7 @@
 #include "attachment.h"
 #include "fpu.h"
 #include "asm_func.h"
+#include "c35.h"
 
 // Small overrides of three classes (0x76's set-up and transform read, the slot 0xA4 of 0x35 and
 // of 0x52) and ApplyLinkConstraint, a two-bone IK solver on VU0. Its .rodata is
@@ -42,38 +43,40 @@ void InitC76Object(void* a0)
 extern const f32 D_0024A7E0 = -3.40282347e+38f;
 extern const f32 D_0024A7E4 = -3.40282347e+38f;
 
-void ReadTransformObject(void);
+struct TransformObject;
+void ReadTransformObject(TransformObject* self, void* stream);
 
-void LoadC76Object(void)
+void LoadC76Object(TransformObject* self, void* stream)
 {
-    ReadTransformObject();
+    ReadTransformObject(self, stream);
 }
 
 LINKER_REMNANT(func_0016C4D8);
 
-void DrawCollider(void);
+void DrawCollider(Collider* self, void* arg1, void* arg2);
 
-void DrawC35Collider(void)
+void DrawC35Collider(C35* self, void* arg1, void* arg2)
 {
-    DrawCollider();
+    DrawCollider(self, arg1, arg2);
 }
 
-void DrawPlacedObject(void);
+void DrawPlacedObject(PlacedObject* self, void* arg1, void* arg2);
 
-void DrawC52Object(void)
+void DrawC52Object(C52* self, void* arg1, void* arg2)
 {
-    DrawPlacedObject();
+    DrawPlacedObject(self, arg1, arg2);
 }
 
 void SetPlacedObjectVelocity(PlacedObject* self, Vec02* v);
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
-void AccumulateFrameChain(PlacedObject* self, PlacedObject* top, s32 count, Vec02* pos, Mat02* rot, Vec02* vel,
-                   Vec02* spin);
+void AccumulateFrameChain(PlacedObject* self, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
-f32 Arccosine(f32 x);
-void BuildAxisAngleMatrix(f32 angle, Vec02* axis, Mat02* out);
-void BuildRotationBetweenVectors(Vec02* from, Vec02* to, Mat02* out);
+extern "C" f32 Arccosine(f32 x);
+void BuildAxisAngleMatrix(f32 angle, const Vec02* v, Mat02* out);
+void BuildRotationBetweenVectors(Vec02* a, Vec02* b, f32* m);
+// The definition takes the angle last; the EE passes it in its own register, and retail's
+// caller evaluates it first, as this order does.
 Mat02 MultiplyByTransposedMatrix3x3(const Mat02& a, const Mat02& b);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance);
 extern Vec02 D_00248D30;
@@ -227,7 +230,7 @@ void ApplyLinkConstraint(PlacedObject* self)
     *(Vec*)&w = *(Vec*)&bent = Vu0::Rotate(bend, Vec::Of(w));
     *(Vec*)&reachv = Vu0::Add(Vec::Of(u), Vec::Of(bent));
     Mat02 swing;
-    BuildRotationBetweenVectors(&reachv, &t, &swing);
+    BuildRotationBetweenVectors(&reachv, &t, (f32*)&swing);
     Mat02 twist;
     Vec02 dir;
     dir = t;

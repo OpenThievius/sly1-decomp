@@ -66,8 +66,9 @@ typedef char check_WorldListedObject[sizeof(WorldListedObject) == 0x640 ? 1 : -1
 void InitWorldListedObject(WorldListedObject* self);                       // slot 0
 void LeaveWorldLists(WorldListedObject* self);                       // slot 6
 void ReleaseWorldListedObject(WorldListedObject* self);                       // slot 7
-void UpdateWorldListedObject(WorldListedObject* self);                       // slot 17
+void UpdateWorldListedObject(WorldListedObject* self, f32 dt);                       // slot 17
 void CopyWorldListedObject(WorldListedObject* self, BaseObject* src);             // slot 23
-void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, void* src); // slot 37
+struct Src_13AD08;
+void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, Src_13AD08* src); // slot 37
 
 #endif

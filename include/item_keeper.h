@@ -10,6 +10,7 @@
 #include "base_object.h"
 #include "placed_object.h"
 
+struct StateTrigger;
 struct Agent;     // the agents it finds (switched_collider.h); an owned one keeps it at Agent::f720
 
 // A group of up to sixteen found objects: the ones found so far, then the ids still to find
@@ -29,7 +30,7 @@ struct ItemKeeper : BaseObject {
     ItemGroup owned;          // 0x58: the ones that become its own (their owner is set to it)
     ItemGroup listed;         // 0xE0: the ones it only keeps
     s32 triggerCount;       // 0x168: the state triggers at 0x16C (func_001CBE20 adds one once)
-    s32 triggers[4];        // 0x16C
+    StateTrigger* triggers[4]; // 0x16C
     s32 queued;             // 0x17C: an update is queued (func_001CBAA0; func_001CBB20 clears it)
     s32 f180;               // 0x180: -1 from the start
     void* soundLevel;       // 0x184: pushed in state 2 (func_001CBEE8)

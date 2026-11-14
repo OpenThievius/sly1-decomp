@@ -29,36 +29,41 @@
 #include "transform_object.h"
 #include "ramp_profile.h"
 #include "path_curve.h"
+struct Mat02;
 
 
-void StartMaskedCollider(void* self);
 
-void ResolveObjectLinks(void* self, s32 a, void* table);
+void StartMaskedCollider(MaskedCollider* self);
 
-s32 CreateStateWalker(void* a0, void* self, s32 b, s32 c);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-s32 CreateWeightCurve(s32 a);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+
+s32 CreateWeightCurve(u32 kind);
 
 void* AllocateFrontMemory(s32 size);
 
-void InitPlayerFlaggedCollider(void* self);
+void InitPlayerFlaggedCollider(PlayerFlaggedCollider* self);
 
-void InitOwnerMessage(void* out, s32 mode, void* owner);
+struct OwnerMessage;
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
-void InitOwnerMessage(void* out, s32 mode, Collider* c);
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
-void ResolveObjectLinks(void* self, s32 a1, void* a2);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-void SetStateWalkerTarget(void* p, s32 n);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 
-void TeleportStateWalker(void* p, s32 n);
-void GetStateWalkerCurrentKey(void* h, s32* out);
-void GetStateWalkerTargetKey(void* h, s32* out);
-void BuildBasisFromXAndZHint(void* a, void* b, void* c);
-void ApproachRotationWithRamp(f32 dt, void* rot, void* target, void* ramp, void* outRot, void* outSpin);
-void ClearRootTries(void* self);
-void BuildBasisFromXAndZHint(void* a, void* b, void* c);
-f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, f32* out);
+void TeleportStateWalker(StateWalker* self, s32 key);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
+void ApproachRotationWithRamp(f32 limit, Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin);
+void ClearRootTries(PlacedObject* self);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 
 // The file's .data, 0x264230 to 0x264260, in retail's order.
@@ -82,22 +87,22 @@ void StartC24Object(C24* self)
 {
     StartMaskedCollider(self);
     ResolveObjectLinks(self, 2, D_00264230);
-    self->x6C8 = (StateWalker*)CreateStateWalker(self->x6C4, self, 0x36E, 0);
+    self->x6C8 = (StateWalker*)CreateStateWalker((StateGraph*)self->x6C4, self, 0x36E, 0);
     Alloc24* n = (Alloc24*)CreateWeightCurve(0);
     self->x6E8 = n;
     n->field8 = 0;
     self->x6E8->field_c = AllocateFrontMemory(0xC00);
 }
 
-void UpdateMaskedCollider(C24* self, f32 dt);
+void UpdateMaskedCollider(MaskedCollider* self, f32 dt);
 void* GetActiveSwitchedCollider(void);
-s32 IsObjectOfKind(void* obj, s32 kind);
-void GetStateWalkerTargetKey(void* h, s32* out);
-void GetStateWalkerCurrentKey(void* h, s32* out);
-void SendEmptyMessage(void* p);
-void TriggerScriptEvent(void* obj, s32 a, s32 b, s32 c);
-void ClearRootTries(void* self);
-void SetStateWalkerTarget(void* p, s32 n);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void SendEmptyMessage(MemberObject* a0);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void ClearRootTries(PlacedObject* self);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 void UpdateC24Object(C24* self, f32 dt)
 {
@@ -130,9 +135,9 @@ void UpdateC24Object(C24* self, f32 dt)
             hold = 1;
         }
         if (hold) {
-            InitOwnerMessage(msg, ((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 0x505 ? 2 : 0, self);
+            InitOwnerMessage((OwnerMessage*)msg, ((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 0x505 ? 2 : 0, self);
             target->desc05()->m4C(target, msg);
-            SendEmptyMessage(self->x6EC);
+            SendEmptyMessage((MemberObject*)self->x6EC);
             self->desc->m03(self);
             TriggerScriptEvent(self, 2, 0, 0);
             return;
@@ -147,9 +152,11 @@ void UpdateC24Object(C24* self, f32 dt)
 typedef void (*WeightCurveFn)(void* curve, void* owner, s32 a2, f32* out0, f32* out1, f32 x, f32 y);
 typedef void (*CurveSampleDirFn)(PathCurve* self, f32 len, Vec02* pos, Vec02* dir);
 typedef void (*ChildStepFn)(BaseObject* self, f32 dt, s32 flag);
-void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
-void BuildBasisFromXAndZHint(void* a, void* b, void* c);
-void ApproachRotationWithRamp(f32 dt, void* rot, void* target, void* ramp, void* outRot, void* outSpin);
+void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
+void ApproachRotationWithRamp(f32 limit, Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin);
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
 
 struct ScopedListFrame {
     void* list;
@@ -186,13 +193,13 @@ void MoveC24Object(C24* self, s32 a1, f32 dt)
         Vu0::Q(vel) = Vu0::MulX(Vu0::Q(dir), w);
         void* o = *(void**)((u8*)self->x6C0 + 0x18);
         Vu0::Set(t, w);
-        TransformStateToAncestorFrame(o, 0, &pos, 0, &vel, 0);
+        TransformStateToAncestorFrame((PlacedObject*)o, 0, &pos, 0, &vel, 0);
         Vu0::Set(t, Vu0::MulXSum(Vu0::Q(self->gravity), Vu0::Scalar(-1.0f),
                                  Vu0::Sub(Vu0::Q(vel), Vu0::Q(self->v150)), Vu0::Scalar(1.0f / dt)));
         BuildBasisFromXAndZHint(&vel, &t, &basis);
         self->pos = pos;
         self->v150 = vel;
-        ApproachRotationWithRamp(dt, &self->rot, &basis, D_00264250, &self->rot, &self->v160);
+        ApproachRotationWithRamp(dt, &self->rot, &basis, (RampProfile*)D_00264250, &self->rot, &self->v160);
     }
     ScopedListFrame frame(&self->children);
     void* head = *(void**)((u8*)self + 0x34);
@@ -227,7 +234,7 @@ typedef void (*CurveSampleFn)(PathCurve* self, s32 zero, Vec02* out, f32 t);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 bytes);
-f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 void BuildPathSpeedProfile(C24* self, PathCurveObject* path, f32 speed)
 {
@@ -253,7 +260,7 @@ void BuildPathSpeedProfile(C24* self, PathCurveObject* path, f32 speed)
         }
         f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(p0), Vu0::Q(p1))));
         lens[i] = Fpu::Sqrt(self->f6D8 / len);
-        ApproachValueWithRamp(curve->lengths[i], total + 100.0f, 0.0f, (RampProfile*)&self->f6CC, &out);
+        ApproachValueWithRamp((RampProfile*)&self->f6CC, &out, curve->lengths[i], total + 100.0f, 0.0f);
         lens[i] = out <? lens[i];
     }
     CurveEntry* e;

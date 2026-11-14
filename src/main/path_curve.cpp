@@ -8,6 +8,8 @@
 #include "shapes.h"
 #include "placed_object.h"
 #include "vu0.h"
+struct PackedColor;
+struct ClipPoint;
 
 // What the nearest-time search (func_001EB168) passes its measure: the curve and the two points
 // of the segment MeasurePathCurveDistance measures against (FindPathCurveNearestTime,
@@ -43,26 +45,30 @@ typedef void (*Fn_Table)();
 extern const Fn_Table g_pathCurveKind0Methods[];
 extern const Fn_Table g_pathCurveKind1Methods[];
 
-f32 MeasureCurveSegmentLength(void* p0, void* p1, void* p2, void* p3, f32 x, f32 y); // stays float: the C definition is void, and the caller here uses the value it leaves in the register
-void SampleCurvePoints(void* a, void* b, void* c, void* d, f32 x, f32 y, f32 z, s32 n, void* buf);
-s32 ReadBufferedU8(void* src);
-f32 ReadBufferedFloat(void* src);
-void ReadBufferedVector3(void* src, void* dst);
+f32 MeasureCurveSegmentLength(const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 dur, f32 end);
+struct CurvePoint;
+void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, s32 count,
+                       CurvePoint* out, f32 start, f32 end);
+struct BufferedStream;
+s32 ReadBufferedU8(BufferedStream* self);
+f32 ReadBufferedFloat(BufferedStream* r);
+struct BufferedStream;
+void ReadBufferedVector3(BufferedStream* src, void* dst);
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
-void TransformByMatrixWithW(void* a, void* b, f32 w, void* c);
-void TransformMatrixByObject(void* self, void* arg, Quad16* out);
+void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
+void TransformMatrixByObject(u8* self, void* arg, Quad16* out);
 void* AllocateFrontMemory(s32 size);
-void* AllocateZeroedFrontMemory(u32 n);
-void DrawProjectedLine(void* a, void* b, void* c, s32 d, s32 e);
-void DrawProjectedCurve(void* a, void* b, void* c, void* d, void* color, s32 e, s32 f, f32 x);
-void FindLocalMinimum(void* fn, void* ctx, f32 f12, f32 f13, f32 f14, f32 f15, void* out, s32 a3);
+void* AllocateZeroedFrontMemory(s32 n);
+void DrawProjectedLine(ClipPoint* a, ClipPoint* b, PackedColor* color, u8* d, s32 e);
+void DrawProjectedCurve(void* a, void* b, void* c, void* d, void* color, u8* e, s32 f, f32 x);
+typedef f32 (*MinimumFn)(void* ctx, f32 x);
+void FindLocalMinimum(MinimumFn fn, void* ctx, f32 x, f32 step, f32 lo, f32 hi, f32* outX, f32* outY);
 
 f32 AccumulateSegmentLengths(s32 n, void* buf, void* other);
 f32 WrapCurveTime(s32 count, f32* table, s32 wrap, f32 x);
 s32 FindPathCurveSegment(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi);
-void InterpolatePathCurvePoint(s32 count, void* points, f32* times, s32 wrap, s32 a4, s32 a5);
-void FindNearestPathCurveSegment(void* a0, void* a1, s32 count, void* a3, void* a4, void* a5, s32* outIdx, f32* outT);
-void WalkToNearestPathCurveSegment(void* a0, void* a1, s32 a2, void* a3, s32 idx, s32 a5, f32* a6, f32* a7, s32* p9, f32* p10);
+void FindNearestPathCurveSegment(Vec02* pos, void* anchor, s32 n, Vec02* pts, Vec02* outPoint, Vec02* outDir, s32* outIdx, f32* outT);
+void WalkToNearestPathCurveSegment(Vec02* pos, void* anchor, s32 n, Vec02* pts, s32 idx, s32 wrap, Vec02* outPoint, Vec02* outDir, s32* outIdx, f32* outT);
 void TransformPointArray(s32 count, Quad16* dst, void* arg, void* self);
 PathCurve* CreatePathCurve(s32 kind);
 f32 GetBaseCurveLengthAtTime(void);
@@ -74,12 +80,12 @@ f32 GetPathCurveEndTime(PathCurve* obj);
 f32 GetPathCurveEndLength(PathCurve* obj);
 void func_0014DB70(void);
 f32 MeasurePathCurveDistance(NearestTimeQuery* self);
-void FindPathCurveNearestTime(PathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
+void FindPathCurveNearestTime(PathCurve* self, Vec02* a1, Vec02* a2, Vec02* a3, Vec02* a4, f32* a5, f32* a6, f32 f12);
 f32 GetPathCurveSearchStep(PathCurve* self);
 void ReadPathCurve(PathCurve* self, void* src);
-void SamplePathCurveAtTime(PathCurve* self, s32 a1, s32 a2);
-void SamplePathCurveAtLength(PathCurve* self, s32 a1, s32 a2);
-void DrawPathCurveSegment(PathCurve* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5);
+void SamplePathCurveAtTime(PathCurve* self, f32 t, Vec02* pos, Vec02* tan);
+void SamplePathCurveAtLength(PathCurve* self, f32 t, Vec02* pos, Vec02* tan);
+void DrawPathCurveSegment(PathCurve* self, s32 idx, void* a2, u8* a3, void* a4, s32 a5);
 void TransformPathCurvePoints(PathCurve* self, void* a, void* b);
 f32 GetPathCurveLengthAtTime(PathCurve* self, f32 t);
 f32 GetPathCurveTimeAtLength(PathCurve* self, f32 t);
@@ -149,7 +155,8 @@ s32 FindPathCurveSegment(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi)
     return i;
 }
 
-void ConstrainVectorByAnchor(void* self, void* a, void* b, s32 c);
+struct VectorConstraint;
+void ConstrainVectorByAnchor(VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
 extern const Vec02 g_unitXVector;
 
 void InterpolatePathCurvePoint(f32 t, s32 count, Vec02* points, f32* times, s32 wrap, Vec02* pos, Vec02* tan)
@@ -183,8 +190,8 @@ void FindNearestPathCurveSegment(Vec02* pos, void* anchor, s32 n, Vec02* pts, Ve
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(pts[i]));
         Vu0::Q(e) = Vu0::Sub(Vu0::Q(pts[i + 1]), Vu0::Q(pts[i]));
         if (anchor != 0) {
-            ConstrainVectorByAnchor(anchor, &d, &d, 0);
-            ConstrainVectorByAnchor(anchor, &e, &e, 0);
+            ConstrainVectorByAnchor((VectorConstraint*)anchor, &d, &d, 0);
+            ConstrainVectorByAnchor((VectorConstraint*)anchor, &e, &e, 0);
         }
         Vu0::Vec ev = Vu0::Vec::Of(e);
         Vu0::Vec len = Vu0::Length(ev);
@@ -244,8 +251,8 @@ void WalkToNearestPathCurveSegment(Vec02* pos, void* anchor, s32 n, Vec02* pts, 
         *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(*pos), Vu0::Vec::Of(pts[idx]));
         *(Vu0::Vec*)&e = Vu0::Sub(Vu0::Vec::Of(pts[idx + 1]), Vu0::Vec::Of(pts[idx]));
         if (anchor != 0) {
-            ConstrainVectorByAnchor(anchor, &d, &d, 0);
-            ConstrainVectorByAnchor(anchor, &e, &e, 0);
+            ConstrainVectorByAnchor((VectorConstraint*)anchor, &d, &d, 0);
+            ConstrainVectorByAnchor((VectorConstraint*)anchor, &e, &e, 0);
         }
         Vu0::Vec ev = Vu0::Vec::Of(e);
         Vu0::Vec len = Vu0::Length(ev);
@@ -310,10 +317,10 @@ void TransformPointArray(s32 count, Quad16* dst, void* arg, void* self)
     Quad16 mat[4];
     Quad16 tmp;
 
-    TransformMatrixByObject(self, arg, mat);
+    TransformMatrixByObject((u8*)self, arg, mat);
     if (count > 0) {
         do {
-            TransformByMatrixWithW(mat, dst, 1.0f, &tmp);
+            TransformByMatrixWithW(mat, (Vec02*)dst, 1.0f, (Vec02*)&tmp);
             *dst = tmp;
             dst++;
             count--;
@@ -375,7 +382,7 @@ f32 MeasureSplinePathDistance(NearestTimeQuery* self)
         ((CurveSamplePointFn)self->curve->vt->m01)(self->curve, &p, 0);
     if (self->b != 0) {
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(p), Vu0::Q(*self->a));
-        ConstrainVectorByAnchor(self->b, &d, &d, 0);
+        ConstrainVectorByAnchor((VectorConstraint*)self->b, &d, &d, 0);
         return Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
     }
     u128 e = Vu0::Sub(Vu0::Q(p), Vu0::Q(*self->a));
@@ -399,7 +406,7 @@ f32 MeasurePathCurveDistance(NearestTimeQuery* self)
     return o2;
 }
 
-void FindPathCurveNearestTime(PathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
+void FindPathCurveNearestTime(PathCurve* self, Vec02* a1, Vec02* a2, Vec02* a3, Vec02* a4, f32* a5, f32* a6, f32 f12)
 {
     NearestTimeQuery ctx;
     NearestTimeResult out;
@@ -408,15 +415,15 @@ void FindPathCurveNearestTime(PathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f
     void* fn;
 
     ctx.curve = self;
-    ctx.a = (Vec02*)a1;
-    ctx.b = (Vec02*)a2;
+    ctx.a = a1;
+    ctx.b = a2;
     f14 = self->times[0];
     f13 = (self->times[1] - f14) * 0.1f;
-    FindLocalMinimum((void*)MeasurePathCurveDistance, &ctx, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &out, 0);
+    FindLocalMinimum((MinimumFn)MeasurePathCurveDistance, &ctx, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], (f32*)&out, 0);
     if (a3 != 0 || a4 != 0) {
         fn = (void*)self->vt->m01;
         if (fn != 0) {
-            ((void (*)(PathCurve*, s32, s32, f32))fn)(self, a3, a4, out.time);
+            ((void (*)(PathCurve*, Vec02*, Vec02*, f32))fn)(self, a3, a4, out.time);
         }
     }
     if (a5 != 0) {
@@ -437,31 +444,31 @@ f32 GetPathCurveSearchStep(PathCurve* self)
 
 void ReadPathCurve(PathCurve* self, void* src)
 {
-    self->wrap = ReadBufferedU8(src);
-    s32 n = ReadBufferedU8(src);
+    self->wrap = ReadBufferedU8((BufferedStream*)src);
+    s32 n = ReadBufferedU8((BufferedStream*)src);
     self->count = n;
     self->times = (f32*)AllocateFrontMemory(n * 4);
     self->lengths = (f32*)AllocateFrontMemory(self->count * 4);
     self->points = AllocateFrontMemory(self->count * 16);
     for (s32 i = 0; i < self->count; i++) {
-        self->times[i] = ReadBufferedFloat(src);
-        ReadBufferedVector3(src, (u8*)self->points + i * 16);
+        self->times[i] = ReadBufferedFloat((BufferedStream*)src);
+        ReadBufferedVector3((BufferedStream*)src, (u8*)self->points + i * 16);
     }
     f32 (*fn)(PathCurve*) = self->vt->m09;
     if (fn) fn(self);
 }
 
-void SamplePathCurveAtTime(PathCurve* self, s32 a1, s32 a2)
+void SamplePathCurveAtTime(PathCurve* self, f32 t, Vec02* pos, Vec02* tan)
 {
-    InterpolatePathCurvePoint(self->count, self->points, self->times, self->wrap, a1, a2);
+    InterpolatePathCurvePoint(t, self->count, (Vec02*)self->points, self->times, self->wrap, pos, tan);
 }
 
-void SamplePathCurveAtLength(PathCurve* self, s32 a1, s32 a2)
+void SamplePathCurveAtLength(PathCurve* self, f32 t, Vec02* pos, Vec02* tan)
 {
-    InterpolatePathCurvePoint(self->count, self->points, self->lengths, self->wrap, a1, a2);
+    InterpolatePathCurvePoint(t, self->count, (Vec02*)self->points, self->lengths, self->wrap, pos, tan);
 }
 
-void DrawPathCurveSegment(PathCurve* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
+void DrawPathCurveSegment(PathCurve* self, s32 idx, void* a2, u8* a3, void* a4, s32 a5)
 {
     Quad16 A;
     Quad16 B;
@@ -476,10 +483,10 @@ void DrawPathCurveSegment(PathCurve* self, s32 idx, void* a2, s32 a3, void* a4, 
     } else {
         next = idx + 1;
     }
-    TransformByMatrixWithW(a2, (u8*)self->points + (idx << 4), 1.0f, &A);
-    TransformByMatrixWithW(a2, (u8*)self->points + (next << 4), 1.0f, &B);
+    TransformByMatrixWithW((const Quad16*)a2, (const Vec02*)((u8*)self->points + (idx << 4)), 1.0f, (Vec02*)&A);
+    TransformByMatrixWithW((const Quad16*)a2, (const Vec02*)((u8*)self->points + (next << 4)), 1.0f, (Vec02*)&B);
     C = *(U32P*)a4;
-    DrawProjectedLine(&A, &B, &C, a3, a5);
+    DrawProjectedLine((ClipPoint*)&A, (ClipPoint*)&B, (PackedColor*)&C, a3, a5);
 }
 
 void TransformPathCurvePoints(PathCurve* self,void* a,void* b) { TransformPointArray(self->count,(Quad16*)self->points,a,b); }
@@ -508,7 +515,7 @@ f32 FillPathCurveLengths(PathCurve* self)
 void FindPathCurveNearestPoint(PathCurve* self, void* a1, void* a2, void* a3, void* a4, f32* out0, f32* out1)
 {
     SegmentFraction f;
-    FindNearestPathCurveSegment(a1, a2, self->count, self->points, a3, a4, &f.idx, &f.t);
+    FindNearestPathCurveSegment((Vec02*)a1, a2, self->count, (Vec02*)self->points, (Vec02*)a3, (Vec02*)a4, &f.idx, &f.t);
     if (out1) {
         *out1 = (1.0f - f.t) * self->lengths[f.idx] + f.t * self->lengths[f.idx + 1];
     }
@@ -522,7 +529,7 @@ void ProjectOntoPathCurveNearTime(PathCurve* self, f32 t, void* a1, void* a2, f3
     s32 idx = FindPathCurveSegment(t, self->count, self->times, self->wrap, 0, 0);
     s32 ia;
     f32 fb;
-    WalkToNearestPathCurveSegment(a1, a2, self->count, self->points, idx, self->wrap, a3, a4, &ia, &fb);
+    WalkToNearestPathCurveSegment((Vec02*)a1, a2, self->count, (Vec02*)self->points, idx, self->wrap, (Vec02*)a3, (Vec02*)a4, &ia, &fb);
     if (a6) *a6 = (1.0f - fb) * self->lengths[ia] + fb * self->lengths[ia + 1];
     if (a5) *a5 = (1.0f - fb) * self->times[ia] + fb * self->times[ia + 1];
 }
@@ -532,15 +539,15 @@ void ProjectOntoPathCurveNearLength(PathCurve* self, f32 t, void* a1, void* a2, 
     s32 idx = FindPathCurveSegment(t, self->count, self->lengths, self->wrap, 0, 0);
     s32 ia;
     f32 fb;
-    WalkToNearestPathCurveSegment(a1, a2, self->count, self->points, idx, self->wrap, a3, a4, &ia, &fb);
+    WalkToNearestPathCurveSegment((Vec02*)a1, a2, self->count, (Vec02*)self->points, idx, self->wrap, (Vec02*)a3, (Vec02*)a4, &ia, &fb);
     if (a6) *a6 = (1.0f - fb) * self->lengths[ia] + fb * self->lengths[ia + 1];
     if (a5) *a5 = (1.0f - fb) * self->times[ia] + fb * self->times[ia + 1];
 }
 
 void ReadSplinePathCurve(SplinePathCurve* self, void* src)
 {
-    self->wrap = ReadBufferedU8(src);
-    s32 n = ReadBufferedU8(src);
+    self->wrap = ReadBufferedU8((BufferedStream*)src);
+    s32 n = ReadBufferedU8((BufferedStream*)src);
     self->count = n;
     self->times = (f32*)AllocateFrontMemory(n * 4);
     self->lengths = (f32*)AllocateFrontMemory(self->count * 4);
@@ -548,10 +555,10 @@ void ReadSplinePathCurve(SplinePathCurve* self, void* src)
     self->inTan = AllocateFrontMemory(self->count * 16);
     self->outTan = AllocateFrontMemory(self->count * 16);
     for (s32 i = 0; i < self->count; i++) {
-        self->times[i] = ReadBufferedFloat(src);
-        ReadBufferedVector3(src, (u8*)self->points + i * 16);
-        ReadBufferedVector3(src, (u8*)self->inTan + i * 16);
-        ReadBufferedVector3(src, (u8*)self->outTan + i * 16);
+        self->times[i] = ReadBufferedFloat((BufferedStream*)src);
+        ReadBufferedVector3((BufferedStream*)src, (u8*)self->points + i * 16);
+        ReadBufferedVector3((BufferedStream*)src, (u8*)self->inTan + i * 16);
+        ReadBufferedVector3((BufferedStream*)src, (u8*)self->outTan + i * 16);
     }
     f32 (*fn)(PathCurve*) = self->vt->m09;
     if (fn) fn(self);
@@ -565,8 +572,7 @@ void SampleSplineSegment(SplinePathCurve* self, s32 i)
     if (i != self->idx1C0) {
         f32 d = self->times[i + 1] - self->times[i];
         s32 off = i * 16;
-        SampleCurvePoints((u8*)self->points + off, (u8*)self->outTan + off, (u8*)self->points + (off + 16),
-                      (u8*)self->inTan + (off + 16), d, 0.0f, d, 20, self->pts30);
+        SampleCurvePoints(d, (const Vec02*)((u8*)self->points + off), (const Vec02*)((u8*)self->outTan + off), (const Vec02*)((u8*)self->points + (off + 16)), (const Vec02*)((u8*)self->inTan + (off + 16)), 20, (CurvePoint*)self->pts30, 0.0f, d);
         AccumulateSegmentLengths(20, self->pts30, self->len170);
         self->idx1C0 = i;
     }
@@ -574,7 +580,7 @@ void SampleSplineSegment(SplinePathCurve* self, s32 i)
 
 // The Hermite evaluation (func_00130540) with its three floats first: retail sets $f12 and
 // $f13 among the pointer arguments, which the floats' place in the list decides.
-void EvaluateHermiteVectorSegment(f32 u, f32 v, f32 w, void* p0, void* t0, void* p1, void* t1, void* a4, void* a5, s32 a6);
+void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
 
 void SampleSplinePathAtTime(SplinePathCurve* self, f32 t, void* a1, Vec02* a2)
 {
@@ -583,7 +589,7 @@ void SampleSplinePathAtTime(SplinePathCurve* self, f32 t, void* a1, Vec02* a2)
     s32 i = FindPathCurveSegmentByTime(self, t, &a, &b);
     s32 off = i * 16;
     s32 next = off + 16;
-    EvaluateHermiteVectorSegment(b, a, 1.0f, (u8*)self->points + off, (u8*)self->outTan + off, (u8*)self->points + next, (u8*)self->inTan + next, a1, a2, 0);
+    EvaluateHermiteVectorSegment(b, (const Vec02*)((u8*)self->points + off), (const Vec02*)((u8*)self->outTan + off), (const Vec02*)((u8*)self->points + next), (const Vec02*)((u8*)self->inTan + next), a, 1.0f, (Vec02*)a1, a2, 0);
     if (a2) {
         u128 v = Vu0::Q(*a2);
         u128 fb = Vu0::Q(g_unitXVector);
@@ -602,7 +608,7 @@ void SampleSplinePathAtLength(SplinePathCurve* self, s32 a1, void* a2)
 
 // The segment from key idx to the next as a curve through the matrix m: its two points and
 // their tangents, drawn in the color at a4.
-void DrawSplinePathSegment(SplinePathCurve* self, s32 idx, Quad16* m, s32 a3, void* a4)
+void DrawSplinePathSegment(SplinePathCurve* self, s32 idx, Quad16* m, u8* a3, void* a4)
 {
     Vec02 a;
     Vec02 b;
@@ -624,11 +630,11 @@ void TransformSplinePathPoints(SplinePathCurve* self, void* a, void* b)
 {
     Vec02 m[4];
     s32 i;
-    TransformMatrixByObject(b, a, (Quad16*)m);
+    TransformMatrixByObject((u8*)b, a, (Quad16*)m);
     Mat02* rot = (Mat02*)m;
     for (i = 0; i < self->count; i++) {
         u8* p = (u8*)self->points + (i << 4);
-        TransformByMatrixWithW(m, p, 1.0f, p);
+        TransformByMatrixWithW((const Quad16*)m, (const Vec02*)p, 1.0f, (Vec02*)p);
         Vu0::Q(((Vec02*)self->inTan)[i]) = Vu0::Rotate(*rot, Vu0::Q(((Vec02*)self->inTan)[i]));
         Vu0::Q(((Vec02*)self->outTan)[i]) = Vu0::Rotate(*rot, Vu0::Q(((Vec02*)self->outTan)[i]));
     }
@@ -640,8 +646,8 @@ f32 GetSplineLengthAtTime(SplinePathCurve* self, f32 t0)
     f32 a, b;
     s32 i = FindPathCurveSegmentByTime(self, t0, &a, &b);
     u32 off = i * 16;
-    f32 r = MeasureCurveSegmentLength((u8*)self->points + off, (u8*)self->outTan + off,
-                          (u8*)self->points + (off + 16), (u8*)self->inTan + (off + 16), b, a);
+    f32 r = MeasureCurveSegmentLength((const Vec02*)((u8*)self->points + off), (const Vec02*)((u8*)self->outTan + off),
+                          (const Vec02*)((u8*)self->points + (off + 16)), (const Vec02*)((u8*)self->inTan + (off + 16)), b, a);
     return r + self->lengths[i];
 }
 
@@ -663,8 +669,8 @@ void FillSplinePathLengths(SplinePathCurve* self)
     for (s32 i = 0; i < m; i++) {
         f32 d = self->times[i + 1] - self->times[i];
         s32 off = i * 16;
-        f32 r = MeasureCurveSegmentLength((u8*)self->points + off, (u8*)self->outTan + off,
-                              (u8*)self->points + (off + 16), (u8*)self->inTan + (off + 16), d, d);
+        f32 r = MeasureCurveSegmentLength((const Vec02*)((u8*)self->points + off), (const Vec02*)((u8*)self->outTan + off),
+                              (const Vec02*)((u8*)self->points + (off + 16)), (const Vec02*)((u8*)self->inTan + (off + 16)), d, d);
         self->lengths[i + 1] = self->lengths[i] + r;
     }
 }
@@ -679,7 +685,7 @@ void FindSplinePathNearestPoint(SplinePathCurve* self, Vec02* pos, void* anchor,
         f32 dist;
         if (anchor != 0) {
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(((Vec02*)self->points)[i]));
-            ConstrainVectorByAnchor(anchor, &d, &d, 0);
+            ConstrainVectorByAnchor((VectorConstraint*)anchor, &d, &d, 0);
             dist = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
         } else {
             u128 e = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(((Vec02*)self->points)[i]));
@@ -706,7 +712,7 @@ void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s3
     ctx.b = (Vec02*)a2;
     f14 = self->times[0];
     f13 = (self->times[1] - f14) * 0.1f;
-    FindLocalMinimum((void*)MeasureSplinePathDistance, &ctx, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], &out, 0);
+    FindLocalMinimum((MinimumFn)MeasureSplinePathDistance, &ctx, f12, f13, self->wrap ? -3.4028235e+38f : f14, self->wrap ? 3.4028235e+38f : self->times[self->count - 1], (f32*)&out, 0);
     if (a3 != 0 || a4 != 0) {
         fn = (void*)self->vt->m01;
         if (fn != 0) {

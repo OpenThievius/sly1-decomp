@@ -42,8 +42,12 @@ void PopFontScale(Font_eu_15D4E0* p);
 void DrawFontQuad(Self_eu_15D4E0* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, Strm_eu_15D4E0* s);
 
-void DrawFontFrame(Self_eu_15D4E0* self, Item_eu_15D4E0* item, Rect_eu_15D4E0* r, Strm_eu_15D4E0* s)
+void DrawFontFrame(Font* font, FrameGlyph* glyph, FrameRect* rect, PacketWriter* stream)
 {
+    Self_eu_15D4E0* self = (Self_eu_15D4E0*)font;
+    Item_eu_15D4E0* item = (Item_eu_15D4E0*)glyph;
+    Rect_eu_15D4E0* r = (Rect_eu_15D4E0*)rect;
+    Strm_eu_15D4E0* s = (Strm_eu_15D4E0*)stream;
     Entry_eu_15D4E0* e = FindFontGlyph(self, item->key);
     if (e != 0) {
         PushFontScale(item->f0, item->f10, item->f14);

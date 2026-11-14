@@ -20,6 +20,6 @@ typedef char check_CameraPositionedObject[sizeof(CameraPositionedObject) == 0x2E
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void StartCameraPositionedObject(CameraPositionedObject* self);   // 0x54 slot 16
-void MoveObjectToCamera(CameraPositionedObject* self);   // 0x54 slot 17
+void MoveObjectToCamera(CameraPositionedObject* self, f32 dt);   // 0x54 slot 17
 
 #endif

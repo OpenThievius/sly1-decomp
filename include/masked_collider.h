@@ -43,7 +43,7 @@ struct MaskedCollider : Collider {
     s32 count550;           // 0x550: entries of slots
     Slot20 slots[16];       // 0x554: func_0013D868, 0013D8B0, 0013D900, 0013D950 append (kind 0, 1, 2, 3)
     s32 f614;               // 0x614: a key for func_0015A418, -1 at set-up
-    s32 f618;               // 0x618: the object it found (slot 10, func_00159478 when f614 is -1)
+    BaseObject* f618;       // 0x618: the object it found (slot 10, func_00159478 when f614 is -1)
     s32 radiusKind;         // 0x61C: which radius slot 72 sends (0 radius3CC or f2A4, 1 radius3D0 or f2A8)
     f32 f620;               // 0x620: sent to f618 with the radius (slot 72)
     f32 f624;               // 0x624: 1.0 at set-up
@@ -54,9 +54,9 @@ struct MaskedCollider : Collider {
     s32 key638;             // 0x638: the id key slot 72 checks each with (func_001833F0)
     s32 mask;               // 0x63C: which objects func_0013DB28 accepts: 0 any, bit 0 the player, bit 1 those in the lists, bit 2 those flagged 0x20
     s32 count640;           // 0x640
-    void* list644[4];       // 0x644: func_0013DA48 appends (sets bit 1 of mask)
+    s32 list644[4];         // 0x644: object ids; func_0013DA48 appends (sets bit 1 of mask)
     s32 count654;           // 0x654
-    void* list658[4];       // 0x658: func_0013DA80 appends
+    s32 list658[4];         // 0x658: the accepted object kinds (func_0013DA80 appends)
     s32 count668;           // 0x668
     void* list66C[3];       // 0x66C: func_0013DAB8 appends
     s32 f678;               // 0x678: busy; slot 17 clears it and calls slot 72
@@ -109,7 +109,7 @@ struct PooledHolder : PlayerFlaggedCollider {
     void* p73C;             // 0x73C
     void* p740;             // 0x740
     s32 count744;           // 0x744
-    void* items748[8];      // 0x748
+    s32 items748[8];        // 0x748: object ids
     s32 count768;           // 0x768
     void* items76C[8];      // 0x76C
     s32 f78C;               // 0x78C
@@ -147,13 +147,13 @@ struct MassScalingCollider : MaskedCollider {
     f32 scale;              // 0x6C0
     s32 sel6C4;             // 0x6C4: -1 at set-up
     s32 sel6C8;             // 0x6C8: -1 at set-up
-    s32 cur;                // 0x6CC
+    BaseObject* cur;        // 0x6CC
 };
 
 typedef char check_MassScalingCollider[sizeof(MassScalingCollider) == 0x6D0 ? 1 : -1];
 
 struct LatchedSwitchCollider : MassScalingCollider {
-    void* f6D0;             // 0x6D0
+    s32 f6D0;               // 0x6D0: the mode of the owner message it sends (InitOwnerMessage)
     SwitchedCollider* sel6D4;            // 0x6D4
     u8 pad6D8[0x6E0 - 0x6D8];
 };

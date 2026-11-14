@@ -38,10 +38,10 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
     case 4:
         anim = self->f6CC;
         self->f6D8 = 3.4028235e+38f;
-        SetFollowObjects(self->f6E8, (s32)self, (s32)self);
+        SetFollowObjects((PlacedObject*)self->f6E8, self, self);
         break;
     }
     self->f610 = mode;
     self->f614 = g_gameClock[1];
-    ReplaceAnimationPlayer(anim, self, 1, &self->f618, 0.0f, 1.0f);
+    ReplaceAnimationPlayer((Animation*)anim, self, 1, (AnimationPlayer**)&self->f618, 0.0f, 1.0f);
 }

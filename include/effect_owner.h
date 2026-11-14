@@ -31,6 +31,6 @@ typedef char check_EffectOwner[sizeof(EffectOwner) == 0x570 ? 1 : -1];
 void InitEffectOwner(EffectOwner* self);                      // 0x1E slot 0
 void ReleaseEffectOwner(EffectOwner* self);                      // 0x1E slot 7
 void UpdateEffectOwner(EffectOwner* self, f32 t);               // 0x1E slot 17
-void DrawEffects(EffectOwner* self, void* arg);           // 0x1E slot 37
+void DrawEffects(EffectOwner* self, void* arg, void* arg2);           // 0x1E slot 37
 
 #endif

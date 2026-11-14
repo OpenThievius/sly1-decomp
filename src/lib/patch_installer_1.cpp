@@ -114,7 +114,7 @@ Slot_1F6F48 D_002770E8[8] = {
 
 void SetSystemCallHandlerFirstPatch(s32 a, s32 b);
 void CopyKernelWordsSyscallFirstPatch(u32 a, void* b, s32 c);
-void SyncDataCache(s32 a);
+extern "C" void SyncDataCache(s32 a);
 s32 RunSyscall5BFirstPatch(s32 key);
 
 void InstallFirstKernelPatch(void)

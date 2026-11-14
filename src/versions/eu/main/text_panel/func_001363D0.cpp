@@ -6,6 +6,6 @@ void ResetTextPanel(Node_1363D0_eu* self)
 {
     ResetScreenElement(self);
     if (self->child != 0) {
-        SetStepSequenceState(self->child, 2);
+        SetStepSequenceState((StepSequence*)self->child, 2);
     }
 }

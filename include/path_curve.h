@@ -24,7 +24,7 @@ struct PathCurveVt {
     void (*m00)(PathCurve* self, void* stream);                                  // 0x00: load, then calls m09
     void (*m01)(PathCurve* self, s32 a1, s32 a2);                                // 0x04
     void (*m02)(PathCurve* self, s32 a1, s32 a2);                                // 0x08
-    void (*m03)(PathCurve* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5);  // 0x0C
+    void (*m03)(PathCurve* self, s32 idx, void* a2, u8* a3, void* a4, s32 a5);  // 0x0C
     void (*m04)(PathCurve* self, void* a, void* b);                              // 0x10: moves the points by a matrix
     f32 (*m05)(PathCurve* self, f32 t);                                          // 0x14: arc length at a time
     f32 (*m06)(PathCurve* self, f32 t);                                          // 0x18: the time of an arc length

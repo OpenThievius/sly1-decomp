@@ -7,21 +7,25 @@
 #include "fpu.h"
 #include "globals.h"
 
-s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, s32 a4);
-s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans);
-s32 CollectTreeNodeSpans(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
-s32 CollectBoundsSpans(void* a, void* b, void* c, f32 x, s32 d, s32 e);
-s32 TestTreeSegmentHit(void* a, void* b, void* c, void* d, s32 e, s32 f, f32 x);
-s32 TestBoundsSegmentHit(void* a, void* b, void* c, void* d, s32 e, f32 fa, f32 fb);
+// Types other files define, named by the parameters of their functions declared here.
+struct SpanQuery;
+struct SpanSet;
 
-Collider* FindNearestSpanObject(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out)
+s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderSpan* a4);
+s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans);
+s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
+s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
+s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, ColliderSpan* out, f32 radius);
+s32 TestBoundsSegmentHit(void* p, void* a, void* b, s32 d, ColliderSpan* e, f32 fa, f32 fb);
+
+Collider* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out)
 {
     f32 bestKey = 3.4028235e+38f;
     Collider* best = 0;
     ColliderSpan buf[2];
     for (s32 i = 0; i < count; i++) {
         Collider* obj = list[i];
-        s32 n = CollectColliderSpans(obj, a1, a2, 2, (s32)buf);
+        s32 n = CollectColliderSpans(obj, a1, a2, 2, buf);
         s32 idx = 0;
         if (n > 0 && buf[0].time[0] == 0.0f) {
             if (flags & 1) idx = 1;
@@ -38,7 +42,7 @@ Collider* FindNearestSpanObject(s32 flags, void* a1, void* a2, s32 count, Collid
 }
 
 
-s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4, s32 a5)
+s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4, ColliderSpan* a5)
 {
     s32 result = 0;
     if (count > 0) {
@@ -48,10 +52,10 @@ s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4,
         do {
             Collider* e = *p;
             if ((e->flags538 & mask) == 0) {
-                s32 r = CollectColliderSpans(e, a0, a1, a4 - result, a5 + result * 0x70);
+                s32 r = CollectColliderSpans(e, (Vec02*)a0, (Vec02*)a1, a4 - result, a5 + result);
                 if (r != 0) {
                     if (result != 0) {
-                        r = MergeOverlappingSpans(result + r, (ColliderSpan*)a5);
+                        r = MergeOverlappingSpans(result + r, a5);
                     }
                     result = r;
                 }
@@ -63,32 +67,32 @@ s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4,
     return result;
 }
 
-s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, s32 a4)
+s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderSpan* a4)
 {
     if (self->tree.nodes != 0) {
-        return CollectTreeNodeSpans((void*)self->tree.nodes, a1, a2, 0, a3, (void*)a4);
+        return CollectTreeNodeSpans((TreeNode03*)self->tree.nodes, (Vec02*)a1, (Vec02*)a2, 0, a3, (ColliderSpan*)a4);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return CollectBoundsSpans((u8*)self + 0x140, a1, a2, self->radius3CC, a3, a4);
+        return CollectBoundsSpans((Vec02*)((u8*)self + 0x140), a1, a2, self->radius3CC, a3, a4);
     }
     return 0;
 }
 
-s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, void* a5)
+s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, ColliderSpan* a5)
 {
     if (a1 != 0) {
-        return CollectTreeNodeSpans(a1, a2, a3, 0, a4, a5);
+        return CollectTreeNodeSpans((TreeNode03*)a1, (Vec02*)a2, (Vec02*)a3, 0, a4, (ColliderSpan*)a5);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return CollectBoundsSpans((u8*)self + 0x140, a2, a3, self->radius3CC, a4, (s32)a5);
+        return CollectBoundsSpans((Vec02*)((u8*)self + 0x140), (Vec02*)a2, (Vec02*)a3, self->radius3CC, a4, a5);
     }
     return 0;
 }
 
-s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, void* p3, s32 p4)
+s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, s32 p3, ColliderSpan* p4)
 {
     if (self->tree.nodes != 0) {
-        return TestTreeSegmentHit((u8*)self + 0x3F0, (u8*)self + 0x3A4, p1, p2, (s32)p3, p4, x);
+        return TestTreeSegmentHit((SpanQuery*)((u8*)self + 0x3F0), (SpanSet*)((u8*)self + 0x3A4), (Vec02*)p1, (Vec02*)p2, p3, p4, x);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
         return TestBoundsSegmentHit((u8*)self + 0x140, p1, p2, p3, p4, self->radius3CC, x);
@@ -188,7 +192,7 @@ void ClampVectorLength(Vec02* in, Vec02* out, f32 max);
 
 // Whether the segment a-b, moved toward p's bounds by the offset from its nearest point to p
 // (at most fb long), hits them (CollectBoundsSpans).
-s32 TestBoundsSegmentHit(void* p, void* a, void* b, void* d, s32 e, f32 fa, f32 fb)
+s32 TestBoundsSegmentHit(void* p, void* a, void* b, s32 d, ColliderSpan* e, f32 fa, f32 fb)
 {
     Vec02 nearest;
     Vec02 off;
@@ -202,7 +206,7 @@ s32 TestBoundsSegmentHit(void* p, void* a, void* b, void* d, s32 e, f32 fa, f32 
     ClampVectorLength(&off, &off, fb);
     Vu0::Q(a2) = Vu0::Add(Vu0::Q(*(Vec02*)a), Vu0::Q(off));
     Vu0::Q(b2) = Vu0::Add(Vu0::Q(*(Vec02*)b), Vu0::Q(off));
-    return CollectBoundsSpans(p, &a2, &b2, fa, (s32)d, e);
+    return CollectBoundsSpans((Vec02*)p, &a2, &b2, fa, d, e);
 }
 
 f32 SplitVectorAlongAxis(const Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
@@ -354,7 +358,7 @@ s32 CompareSpanEndpoints(SpanEvent* a, SpanEvent* b)
 void PushBackMemoryMark(void);
 SpanEvent* AllocateBackMemory(s32 size);
 void PopBackMemoryMark(void);
-void SortElements(SpanEvent* base, s32 n, s32 size, s32 (*cmp)(SpanEvent*, SpanEvent*));
+void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
 
 s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans)
 {
@@ -379,7 +383,7 @@ s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans)
         }
     }
 
-    SortElements(mem, count * 2, 0x30, CompareSpanEndpoints);
+    SortElements(mem, count * 2, 0x30, (s32 (*)(const void*, const void*))CompareSpanEndpoints);
 
     dst = spans;
     end = rec;
@@ -443,8 +447,10 @@ struct SpanQuery {
     s32 count;
     void* tree;
 };
-s32 QueryPlaneTreePoint(void* tree, Vec02* centre, SpanRecord** end, f32 r);
-void* FillMemory(void* p, s32 value, s32 size);
+struct PlaneTreeNode;
+struct PlaneTreeOutput;
+s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, ColliderSpan* out, f32 radius)
 {
@@ -465,7 +471,7 @@ s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 m
     end = (SpanRecord*)AllocateBackMemory(query->count * 12);
     recs = end;
     f32 halfLen = len * h;
-    s32 kind = QueryPlaneTreePoint(query->tree, &mid, &end, halfLen + radius);
+    s32 kind = QueryPlaneTreePoint((PlaneTreeNode*)query->tree, &mid, halfLen + radius, (PlaneTreeOutput*)&end);
     switch (kind) {
     case 1:
         total = 0;
@@ -480,7 +486,7 @@ s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 m
     case 2:
     default:
         n = end - recs;
-        total = CollectTreeNodeSpans((void*)(end - 1), p, q, 0, max, out);
+        total = CollectTreeNodeSpans((TreeNode03*)((void*)(end - 1)), p, q, 0, max, out);
         for (i = 0; i < n; i++) {
             recs[i].obj->flags |= 0x100;
         }

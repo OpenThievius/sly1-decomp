@@ -32,8 +32,8 @@ struct Lines_eu_15E4A8 {
     Line_eu_15E4A8 lines[32];
 };
 
-void* FillMemory(void* p, s32 v, s32 n);
-void RewindTextReader(void* self);
+extern "C" void* FillMemory(void* p, s32 v, s32 n);
+void RewindTextReader(TextReader* self);
 s32 GetTextReaderOffset(void* self);
 s32 PeekTextReaderChar(void* self, s32 i);
 s32 AdvanceTextReader(void* self, s32 n);
@@ -47,7 +47,7 @@ void BreakTextIntoLines(Reader_eu_15E4A8* self, Lines_eu_15E4A8* t, f32 limit)
     FillMemory(t, 0, sizeof(Lines_eu_15E4A8));
     Line_eu_15E4A8* e = t->lines;
     Line_eu_15E4A8* end = t->lines + 32;
-    RewindTextReader(self);
+    RewindTextReader((TextReader*)self);
     s32 c;
     while ((c = ReadTextCharAnyWidth(self)) != 0) {
         s32 pos = GetTextReaderOffset(self);

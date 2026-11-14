@@ -12,6 +12,8 @@
 
 #include "base_object.h"
 #include "path_curve.h"
+struct MemberGroup;
+
 
 struct __attribute__((aligned(16))) Vec4_73 { f32 x, y, z, w; };
 struct __attribute__((aligned(16))) Mat3_73 { Vec4_73 row[3]; };
@@ -109,7 +111,7 @@ struct Class75Object : TransformObject {
     Class75Link link;       // 0x80
     s32 count;              // 0x88: 30 at set-up; func_0012A9C8
     f32 scale;              // 0x8C: 25.0 at set-up; func_0012AA00
-    void* f90;              // 0x90: func_0012AA28
+    s32 f90;                // 0x90: func_0012AA28
     u8 pad94[0xA0 - 0x94];
 };
 
@@ -130,12 +132,12 @@ void ReparentObjectKeepingTransform(TransformObject* self, BaseObject* other);  
 void TransformObjectIntoFrame(TransformObject* self, BaseObject* other);          // 0x73 slot 22
 void StartMemberObject(MemberObject* self);                       // 0x77 slot 16
 void SendMemberObjectMessage();                                // 0x77 slot 27 (empty)
-void CopyGroupMembers(MemberGroup* self);                       // 0x78 slot 9
-void LoadGroupMembers(MemberGroup* self, void* stream);         // 0x78 slot 10
+void CopyGroupMembers(MemberGroup* self, MemberGroup* src);                       // 0x78 slot 9
+void LoadGroupMembers(MemberGroup* self, void* src);         // 0x78 slot 10
 void ResolveGroupMembers(MemberGroup* self);                       // 0x78 slot 15
 void BroadcastMessageToMembers(MemberGroup* self, void* message);        // 0x78 slot 27
 void InitRecordMember(RecordMember* self);                       // 0x79 slot 0
-void CopyRecordMember(RecordMember* self);                       // 0x79 slot 9
+void CopyRecordMember(RecordMember* self, RecordMember* src);                       // 0x79 slot 9
 void LoadRecordMember(RecordMember* self, void* stream);         // 0x79 slot 10
 void ResolveRecordMemberTargets(RecordMember* self);                       // 0x79 slot 15
 void SendRecordMemberMessage(void);                            // 0x79 slot 27 (empty)

@@ -14,11 +14,15 @@
 #include "memory_card.h"
 #include "background_job.h"
 #include "screen_fade.h"
+#include "object_finder.h"
 
-void SendDisplayResetPacket(LoadProgress*);
+struct BaseObject;
+struct PairController;
+// Types other files define, named by the parameters of their functions declared here.
+
+void SendDisplayResetPacket();
 void DrawLoadProgressBar(LoadProgress*);
 
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 
 s32 IsFontLoaded(s32 k);
 Font* GetFontById(s32 k);
@@ -48,30 +52,30 @@ s32 FormatToString(char* dst, const char* fmt, ...);
 struct BarPacket { u8 bytes[0x400]; PacketWriter f; };
 
 void* InitGifPacket(PacketWriter* f);
-void UsePacketBufferMemory(PacketWriter* f, s32 n, BarPacket* b);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void BeginDmaTag(PacketWriter* f);
 f32 TruncateFloat(f32 x);
-void WriteColoredSpritePacket(s32 a, s32 b, s32 c, s32 d, PacketWriter* e, f32 x, f32 y, f32 z, f32 w);
+// The definition takes the four floats first; the EE passes them in their own registers, and
+// retail's caller evaluates them after the integers, as this order does.
+void WriteColoredSpritePacket(s32 r, s32 g, s32 b, s32 a, PacketWriter* p, f32 x0, f32 y0, f32 x1, f32 y1);
 void EndGifPacket(PacketWriter* f);
 void AddDmaEndTag(PacketWriter* f);
 void CloseDmaTag(PacketWriter* f);
-void DetachPacketBuffer(PacketWriter* f, s32 a, s32 b);
-void SendPacketToBothBuffers(BarPacket* b);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
+void SendPacketToBothBuffers(void* chain);
 
 void ShowScreenElement(void* self);
 
 void HideScreenElement(void* self);
 
-void BuildPauseMenuPage(void* self, s32 v);
 
 
-extern void* g_currentWorld;
+extern World* g_currentWorld;
 
-void SetPauseMenuLayerPage(void* self, s32 a, s32 b);
-void StartScreenFade(void* obj, void* rec, s32 n);
-void* FindFirstObjectByIdGathered(void* a, s32 b, s32 c, s32 d);
-void SetPairControllerState(void* p, s32 mode);
-void BeginLevelExit(void* a, s32 b);
+void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
+void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
+void SetPairControllerState(PairController* self, s32 state);
+void BeginLevelExit(s32 flag, s32 n);
 
 void BuildPauseMenuPage(T217D_6D0* self);
 void SetPauseMenuPage(void* self, s32 v);
@@ -81,12 +85,12 @@ extern u8 g_elementStack[];
 
 void ChangePauseMenuPage(void* self, s32 a, s32 b);
 void SetPauseMenuPage(void* self, s32 v);
-void PopStackElement(void* q);
-void PushStackElement(void* a, void* b);
+void PopStackElement(ElementStack* g);
+void PushStackElement(ElementStack* self, ScreenElement* node);
 
 extern u8 D_00247AB0[];
 
-void StartScreenFade(void* dst, void* args, s32 count);
+void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
 
 
 extern u8 g_unitZVector[];
@@ -106,8 +110,8 @@ extern DisplayRegs D_00262490;
 extern s32 D_00275BF0;
 extern f32 D_0026A708;
 extern f32 D_0026A70C;
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 a, s32 b);
-s32 ConvertFloatToU32(f32 x);
+void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
+extern "C" s32 ConvertFloatToU32(f32 value);
 
 
 extern u8 g_elementStack[];
@@ -115,13 +119,13 @@ extern u8 D_00247AD0[];
 extern CardSlot D_002542D8[];
 
 void CancelPauseMenuPage(T217D_6D0* self);
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 a, s32 b);
-void ExitLevelFromPauseMenu(T217D_6D0* self, s32 a, s32 b);
-void PushStackElement(u8* a, void* b);
-void BeginLevelExit(s32 a, s32 b);
-void StartObjectFade(u8* a, s32 b, s32 c);
+void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
+void ExitLevelFromPauseMenu(T217D_6D0* a0, s32 a1, s32 a2);
+void PushStackElement(ElementStack* self, ScreenElement* node);
+void BeginLevelExit(s32 flag, s32 n);
+void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
 void SetMemoryCardDisplayMode(MemoryCard* a, s32 b);
-void StartBackgroundJob(BackgroundJob* a, void* fn, MemoryCard* self);
+void StartBackgroundJob(BackgroundJob* job, void* fn, void* arg);
 s32 SaveGameToMemoryCardSlot(MemoryCard* self);
 s32 RunMemoryCardFormatJob(MemoryCard* self);
 s32 CreateMemoryCardSaveFiles(MemoryCard* self);
@@ -130,18 +134,24 @@ s32 ApplyMemoryCardImage(MemoryCard* self);
 void ResumeAtSavedLevel(void);
 void BuildPauseMenuPage(T217D_6D0* self);
 void* GetActiveSwitchedCollider(void);
-s32 IsObjectOfKind(void* node, s32 kind);
-void GetStateWalkerCurrentKey(void* ptr, s32* out);
-void RecordPathFollowerProgress(void* p);
-void TeleportStateWalker(void* h, s32 arg);
-void SetStateWalkerTarget(s32 a, s32 b);
+struct PathFollower;
+struct StateWalker;
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void RecordPathFollowerProgress(PathFollower* self);
+void TeleportStateWalker(StateWalker* self, s32 key);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 s32 ComputeCompletionMask(void);
 void FadeOutAndQueueMovie(s32 n);
 void StartPauseMenuExitFade(void);
 void TogglePadPatternSetting(GameProgress* g);
 void SilenceVolumeChannel3(s32 flag);
-s32 ApplySoundOptionFlag(s32 flag);
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void ApplySoundOptionFlag(s32 flag);
+struct PlayingSound;
+struct BaseObject;
+struct Vec02;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // The glyph mark FindSubstring finds in a page title: the glyph is its third byte.
 struct GlyphMark {
@@ -159,24 +169,25 @@ extern ScreenAdjustRate D_0026A230;
 extern f32 D_0026A700;
 extern f32 D_0026A704;
 
-s32 ComputeCompletionPercent(GameProgress* g);
+s32 ComputeCompletionPercent(GameProgress* progress);
 s32 CheckStreamVoicePending(void);
 s32 PollIopCommands(void);
 s32 HasStreamVoice(void);
 s32 GetPadVerticalStep(PadRecord* p);
 s32 GetPadHorizontalStep(PadRecord* p);
-void ClearPadPressedBits(PadRecord* p, s32 mask);
+void ClearPadPressedBits(PadRecord* self, u32 mask);
 f32 GetPadButtonAnalog(PadRecord* p, s32 idx);
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 a, s32 b);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
+void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
 void ActivatePauseMenuSelection(T217D_6D0* self);
 void CancelPauseMenuPage(T217D_6D0* self);
 void StartPauseMenuExitFade(void);
 s32 IsBackgroundJobRunning(BackgroundJob* p);
-void StartBackgroundJob(BackgroundJob* p, void* fn, void* arg);
-GlyphMark* FindSubstring(void* a, const char* name);
+void StartBackgroundJob(BackgroundJob* job, void* fn, void* arg);
+GlyphMark* FindSubstring(char* s, char* t);
 s32 GetCyclingGlyph(void);
-s32 ConvertFloatToU32(f32 x);
+extern "C" s32 ConvertFloatToU32(f32 value);
 
 struct ClampFloat {
     static f32 Of(f32 x, f32 lo, f32 hi)
@@ -200,15 +211,15 @@ extern u8* D_0027051C;
 
 void PauseStagedBankVoice(void);
 void ResumeStagedBankVoice(void);
-void SetElementStackState(void* self, s32 mode);
+void SetElementStackState(ElementStack* self, s32 state);
 void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b);
-s32 SetPadSelectFlags(PadSelectBits bits);
-void ClearPadSelectFlags(PadSelectBits n);
+s32 SetPadSelectFlags(s32 bits);
+void ClearPadSelectFlags(u32 mask);
 void ResetPadStepRepeat(PadRecord* p);
 
 // func_0015DB28 builds a text buffer and returns it (a constructor's `this`).
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // The style of the menu's box (D_0026A210, the element's frame): the font that draws it and
 // its colour; the static initialiser builds it.
@@ -243,31 +254,27 @@ extern f32 D_00262CEC;
 extern u8 g_fadeRampProfile[];
 extern u8 g_gsPacketWriter[];
 
-f32 Sine(f32 x);
-void SetTextLayoutPosition(Layout_137228* out, f32 x, f32 y);
-void SetTextLayoutSize(Layout_137228* out, f32 x, f32 y);
-void SetTextLayoutColor(Layout_137228* out, Quad4* value);
-void SetTextLayoutHorizontalAlign(Layout_137228* out, s32 flag);
-void SetTextLayoutVerticalAlign(Layout_137228* out, s32 flag);
-f32 ApproachValueWithRamp(void* p, s32 zero, f32 a, f32 b, f32 c);
+extern "C" f32 Sine(f32 x);
+struct RampProfile;
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 void PushFontScale(Font* font, f32 a, f32 b);
-TextReader* InitTextReader(TextReader* out, void* str, Font* font);
-void DrawAlignedText(TextReader* buf, Layout_137228* out, s32 zero, void* data);
+TextReader* InitTextReader(TextReader* self, char* text, Font* font);
+void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
 f32 MeasureTextHeight(TextReader* buf, f32 w);
 void PopFontScale(Font* font);
 f32 SumTextWidth(TextReader* buf);
 char* GetMenuChoiceLabel(s32 index);
-void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, Rgba4* c, s32 k);
+void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* color, s32 flag);
 
 struct SetupLayout { static void Do(Layout_137228* out, f32 x, f32 y, f32 w, f32 h, s32 color, s32 flag)
 {
-    SetTextLayoutPosition(out, x, y);
-    SetTextLayoutSize(out, w, h);
+    ((Layout_137228*)out)->Pos(x, y);
+    ((Layout_137228*)out)->Size(w, h);
     Quad4 tmp;
     tmp.w[0] = color;
-    SetTextLayoutColor(out, &tmp);
-    SetTextLayoutHorizontalAlign(out, flag);
-    SetTextLayoutVerticalAlign(out, 0);
+    ((Layout_137228*)out)->Color(tmp.w);
+    ((Layout_137228*)out)->SetF14(flag);
+    ((Layout_137228*)out)->SetF18(0);
 } };
 
 struct DrawBoxWithFont { static void Do(MenuBoxStyle* o, Layout_137228* out, void* d)
@@ -299,7 +306,7 @@ struct LerpColor { static void Do(Rgba4* out, Rgba4 a, Rgba4 b, f32 t)
     *out = r;
 } };
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // The file's .data, in retail's order from 0x269CD8, and the strings of its menus, which open
 // its .rodata. The style (func_00196330, the static initialiser, builds it) and the buffers the
@@ -460,7 +467,7 @@ s32 FindObject42CStateWalker(void);
 void InitPauseMenu(T217D_6D0* self);
 void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b);
 void SetPauseMenuOpen(T217D_6D0* self, s32 mode);
-void ExitLevelFromPauseMenu(void* a0, s32 a1, s32 a2);
+void ExitLevelFromPauseMenu(T217D_6D0* a0, s32 a1, s32 a2);
 void StartPauseMenuExitFade(void);
 void UpdatePauseMenu(T217D_6D0* self);
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
@@ -491,7 +498,7 @@ void BeginLoadProgress(LoadProgress* p) { p->active=0; p->stalls=0; p->current=0
 void UpdateLoadProgress(LoadProgress* self, s32 value)
 {
 	if (self->active != 0) {
-		if (self->total == 0) { self->scale = value << 1; self->total = value; SendDisplayResetPacket(self); }
+		if (self->total == 0) { self->scale = value << 1; self->total = value; SendDisplayResetPacket(); }
 		else if (self->current == value) self->stalls++;
 		else self->stalls = 0;
 		self->current = value;
@@ -560,12 +567,12 @@ void FormatGameSummary(GameProgress* self, char* dst)
 
 s32 FindObject42CStateWalker(void)
 {
-    s32 r = FindFirstObjectById(g_currentWorld, 5, 0x42C, 0);
+    BaseObject* r = FindFirstObjectById(g_currentWorld, 5, 0x42C, 0);
     s32 v;
     if (r == 0) {
         v = 0;
     } else {
-        v = *(s32*)(r + 0x48);
+        v = *(s32*)((u8*)r + 0x48);
     }
     return v;
 }
@@ -573,9 +580,10 @@ s32 FindObject42CStateWalker(void)
 extern s32 D_0026FA68;
 extern s32 D_0026EC58;
 extern s32 D_00269984;
-void *CopyString(char* dst, const char* src);
+void *CopyString(void* dst, const char* src);
 s32 IsPadPatternEnabled(GameProgress* g);
-void OpenKeyRecord(void* rec);
+struct KeyRecord;
+void OpenKeyRecord(KeyRecord* self);
 void SetScreenElementSize(void* self, f32 w, f32 h);
 void MeasureText(TextReader* buf, f32 w, f32* outW, f32* outH);
 
@@ -610,7 +618,7 @@ void BuildPauseMenuPage(T217D_6D0* self)
                 s32 walker = FindObject42CStateWalker();
                 if (walker != 0) {
                     s32 code;
-                    GetStateWalkerCurrentKey((void*)walker, &code);
+                    GetStateWalkerCurrentKey((StateWalker*)walker, &code);
                     if (code < 0x431) {
                         show = code >= 0x42F;
                     }
@@ -747,7 +755,7 @@ void BuildPauseMenuPage(T217D_6D0* self)
         break;
     case 20:
         if (HasStreamVoice() == 0) {
-            OpenKeyRecord(D_0026A118);
+            OpenKeyRecord((KeyRecord*)D_0026A118);
             self->sound = HasStreamVoice();
         }
         break;
@@ -872,15 +880,15 @@ void SetPauseMenuOpen(T217D_6D0* self, s32 mode) {
         s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
         if (key == 0x308) {
             PauseStagedBankVoice();
-            SetElementStackState(g_elementStack, 5);
+            SetElementStackState((ElementStack*)g_elementStack, 5);
         } else if (D_0027051C != 0) {
-            SetElementStackState(g_elementStack, 5);
+            SetElementStackState((ElementStack*)g_elementStack, 5);
         } else {
             u8* base = g_elementStack;
             if (((s32*)base)[1] == 3) {
-                SetElementStackState(base, 4);
+                SetElementStackState((ElementStack*)base, 4);
             } else {
-                SetElementStackState(base, 5);
+                SetElementStackState((ElementStack*)base, 5);
             }
         }
         ChangePauseMenuPage(self, -1, self->page);
@@ -891,13 +899,13 @@ void SetPauseMenuOpen(T217D_6D0* self, s32 mode) {
         s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
         if (key == 0x308) {
             ResumeStagedBankVoice();
-            SetElementStackState(g_elementStack, 3);
+            SetElementStackState((ElementStack*)g_elementStack, 3);
         } else if (D_0027051C != 0) {
-            SetElementStackState(g_elementStack, 3);
+            SetElementStackState((ElementStack*)g_elementStack, 3);
         } else if (self->page != 0) {
-            SetElementStackState(g_elementStack, 3);
+            SetElementStackState((ElementStack*)g_elementStack, 3);
         } else {
-            SetElementStackState(g_elementStack, 6);
+            SetElementStackState((ElementStack*)g_elementStack, 6);
         }
         ChangePauseMenuPage(self, self->page, -1);
         self->vt->m15(self);
@@ -906,7 +914,7 @@ void SetPauseMenuOpen(T217D_6D0* self, s32 mode) {
     self->open = mode;
 }
 
-void ExitLevelFromPauseMenu(void* a0, s32 a1, s32 a2)
+void ExitLevelFromPauseMenu(T217D_6D0* a0, s32 a1, s32 a2)
 {
     SetPauseMenuLayerPage(a0, 0, -1);
     GameProgress* g = g_saveData;
@@ -921,8 +929,8 @@ void ExitLevelFromPauseMenu(void* a0, s32 a1, s32 a2)
             r.flags = 0;
             StartScreenFade(&g_screenFade, &r, a2);
         } else {
-            void* p = FindFirstObjectByIdGathered(g_currentWorld, 5, 0x5F, 0);
-            SetPairControllerState(p, 6);
+            void* p = FindFirstObjectByIdGathered((World*)g_currentWorld, 5, 0x5F, 0);
+            SetPairControllerState((PairController*)p, 6);
         }
         return;
     }
@@ -1231,11 +1239,11 @@ void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value)
     }
     if (s2 == -1) {
         if (self->open != 0) {
-            PopStackElement(g_elementStack);
+            PopStackElement((ElementStack*)g_elementStack);
         }
     } else {
         if (self->open == 0) {
-            PushStackElement(g_elementStack, self);
+            PushStackElement((ElementStack*)g_elementStack, self);
         }
     }
 }
@@ -1314,20 +1322,20 @@ void DrawPauseMenu(T217D_6D0* self)
     if (self->page == 0 && D_00275BEC == 2) {
         fade = 1.0f - D_00262CEC;
     }
-    self->fade = ApproachValueWithRamp(g_fadeRampProfile, 0, self->fade, fade, g_gameClock[5]);
+    self->fade = ApproachValueWithRamp((RampProfile*)g_fadeRampProfile, 0, self->fade, fade, g_gameClock[5]);
     alpha = (u8)(s32)(self->fade * 255.0f);
     if (((MenuBoxStyle*)self->frame) != 0) {
         Layout_137228 out;
         s32 backColor = 0xFF808080;
-        SetTextLayoutPosition(&out, cx, cy);
-        SetTextLayoutSize(&out, w, h);
+        ((Layout_137228*)&out)->Pos(cx, cy);
+        ((Layout_137228*)&out)->Size(w, h);
         {
             Quad4 tmp;
             tmp.w[0] = backColor;
-            SetTextLayoutColor(&out, &tmp);
+            ((Layout_137228*)&out)->Color(tmp.w);
         }
-        SetTextLayoutHorizontalAlign(&out, 0);
-        SetTextLayoutVerticalAlign(&out, 0);
+        ((Layout_137228*)&out)->SetF14(0);
+        ((Layout_137228*)&out)->SetF18(0);
         Rgba4 saved = ((MenuBoxStyle*)self->frame)->color;
         {
             Rgba4 t = saved;
@@ -1360,7 +1368,7 @@ void DrawPauseMenu(T217D_6D0* self)
         c.b = 0x7F;
         c.a = alpha;
         SetupLayout::Do(&out, cx, cy, w, h, *(s32*)&c, 1);
-        DrawAlignedText(&buf, &out, 0, g_gsPacketWriter);
+        DrawAlignedText(&buf, &out, 0, (PacketWriter*)g_gsPacketWriter);
         cy += MeasureTextHeight(&buf, 500.0f);
         PopFontScale(self->font);
     }
@@ -1378,7 +1386,7 @@ void DrawPauseMenu(T217D_6D0* self)
                 total += (f32)self->font->advance * self->font->sx + (f32)self->font->advance * self->font->sx;
             }
             void* str = GetMenuChoiceLabel(menu->items[k]);
-            InitTextReader(&buf, str, self->font);
+            InitTextReader(&buf, (char*)str, self->font);
             total += SumTextWidth(&buf);
         }
         x = cx + (w - total) * 0.5f;
@@ -1408,7 +1416,7 @@ void DrawPauseMenu(T217D_6D0* self)
         }
         TextReader buf;
         str = GetMenuChoiceLabel(menu->items[i]);
-        InitTextReader(&buf, str, self->font);
+        InitTextReader(&buf, (char*)str, self->font);
         width = SumTextWidth(&buf);
         if (menu->vertical != 0) {
             x = cx + (w - width) * 0.5f;
@@ -1417,12 +1425,12 @@ void DrawPauseMenu(T217D_6D0* self)
             f32 sc = menu->itemScale * self->blend * grow;
             PushFontScale(self->font, sc, sc);
         }
-        InitTextReader(&buf, str, self->font);
+        InitTextReader(&buf, (char*)str, self->font);
         f32 width2 = SumTextWidth(&buf);
         th = (f32)self->font->height * self->font->sy;
         Layout_137228 out;
         SetupLayout::Do(&out, x + (width - width2) * 0.5f, cy + (lineH - th) * 0.5f, w, th, *(s32*)&col, 0);
-        DrawAlignedText(&buf, &out, 0, g_gsPacketWriter);
+        DrawAlignedText(&buf, &out, 0, (PacketWriter*)g_gsPacketWriter);
         PopFontScale(self->font);
         if (menu->vertical != 0) {
             cy += (f32)self->font->height * self->font->sy;
@@ -1435,7 +1443,7 @@ void DrawPauseMenu(T217D_6D0* self)
         Rgba4 c = D_0026A210.color;
         c.a = alpha;
         s32 y = (s32)((base * 0.45454547f + 1936.0f) * 16.0f);
-        DrawLineSegment((s32)((cx + 1728.0f) * 16.0f), y, 0, (s32)((cx + w + 1728.0f) * 16.0f), y, 0, &c, 0);
+        DrawLineSegment((s32)((cx + 1728.0f) * 16.0f), y, 0, (s32)((cx + w + 1728.0f) * 16.0f), y, 0, (u8*)&c, 0);
     }
 }
 
@@ -1443,7 +1451,7 @@ void SetPauseMenuPage(T217D_6D0* self, s32 v)
 {
     if (self->page != v) {
         self->page = v;
-        if (v != -1) BuildPauseMenuPage(self, v);
+        if (v != -1) BuildPauseMenuPage(self);
     }
 }
 
@@ -1464,7 +1472,7 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
             T217D_0F0* s = &g_mapScreenList;
             if (s->current != 0) {
                 SetPauseMenuLayerPage(self, 0, -1);
-                PushStackElement(g_elementStack, s);
+                PushStackElement((ElementStack*)g_elementStack, s);
                 return;
             }
             StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -1474,12 +1482,12 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
             s32 v;
             void* s2 = (void*)FindObject42CStateWalker();
             void* s0 = GetActiveSwitchedCollider();
-            if (s2 != 0 && s0 != 0 && IsObjectOfKind(s0, 0x19) != 0) {
-                GetStateWalkerCurrentKey(s2, &v);
+            if (s2 != 0 && s0 != 0 && IsObjectOfKind((BaseObject*)s0, 0x19) != 0) {
+                GetStateWalkerCurrentKey((StateWalker*)s2, &v);
                 if (v < 0x431) {
                     if (v >= 0x42F) {
-                        RecordPathFollowerProgress(s0);
-                        TeleportStateWalker(s2, 0x42E);
+                        RecordPathFollowerProgress((PathFollower*)s0);
+                        TeleportStateWalker((StateWalker*)s2, 0x42E);
                     }
                 }
             }
@@ -1496,7 +1504,7 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
             return;
         case 22:
             SetPauseMenuLayerPage(self, 0, -1);
-            StartObjectFade(D_00247AD0, -1, 2);
+            StartObjectFade((IdentityKey*)D_00247AD0, -1, 2);
             return;
         case 9:
             SetPauseMenuLayerPage(self, 0, 2);
@@ -1581,7 +1589,7 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
     case 25: {
         s32 a = self->f280;
         self->f280 = 0;
-        SetStateWalkerTarget(a, sel == 0 ? 0x434 : 0x435);
+        SetStateWalkerTarget((StateWalker*)a, sel == 0 ? 0x434 : 0x435);
         SetPauseMenuLayerPage(self, 0, -1);
         return;
     }

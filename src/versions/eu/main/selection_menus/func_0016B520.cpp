@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "object_finder.h"
 // PAL: Obj_16B520.field25C is at 0x56C (US 0x25C).
 struct Obj_16B520_eu { u8 pad0[0x56C]; s32 field56C; };
 

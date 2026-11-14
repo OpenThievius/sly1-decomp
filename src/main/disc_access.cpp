@@ -3,6 +3,9 @@
 #include "asm_func.h"
 #include "key_id.h"
 
+// Types other files define, named by the parameters of their functions declared here.
+struct T217D_6D0;
+
 // The sector check's state, the word before this file's .data: GCC aligns the read errors
 // (24 bytes) to 8, so a .data that started at 0x2613EC would put them at 0x261400.
 extern s32 g_discSectorCheckState;
@@ -23,21 +26,22 @@ extern u8 g_discCheckSectorBuffer[];
 extern u32 g_crc32Table[];
 extern u8 g_pauseMenuElement[];
 
-s32 StartDiscRead(s32 a0, s32 a1, void* a2, void* a3);
+struct ReadMode;
+s32 StartDiscRead(s32 a0, s32 a1, void* a2, ReadMode* a3);
 s32 SyncDiscRead(s32 mode);
 s32 GetDiscReadError(void);
-void UppercaseString(s8* p);
-s32 GetStringLength(const s8* s);
-void* AppendString(s8* dst, const char* src);
-s32 FormatToString(void* dst, const char* fmt, ...);
-s32 CheckDiscChanged(s32 a0, s32* out);
-u32 SendDiscSCommand22(s32 arg);
-s32 ReadDiscSectors(void*, void*, void*, void*);
-s32 SyncDiscNCommand(s32);
-s32 GetDiscError(void);
+void UppercaseString(char* p);
+extern "C" s32 GetStringLength(const char* s);
+void* AppendString(void* dst, const char* src);
+s32 FormatToString(char* dst, const char* fmt, ...);
+extern "C" s32 CheckDiscChanged(s32 value, s32* out);
+extern "C" u32 SendDiscSCommand22(u32 value);
+extern "C" s32 ReadDiscSectors(s32 lsn, s32 sectors, void* buffer, ReadMode* mode);
+extern "C" s32 SyncDiscNCommand(s32 mode);
+extern "C" s32 GetDiscError();
 s32 RefreshDiscStatus(void);
 s32 TestDiscReadDone(s32 value);
-void SetPauseMenuLayerPage(void* self, s32 a, s32 b);
+void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
 
 void ResetDiscSectorCheck(void)
 {
@@ -52,13 +56,13 @@ s32 GetKeyIdSecond(KeyId* key)
 
 s32 NormalizeDiscPath(s8* path)
 {
-    UppercaseString(path);
-    s32 len = GetStringLength(path);
+    UppercaseString((char*)path);
+    s32 len = GetStringLength((const char*)path);
     if (len != 0) {
         s8 last = path[len - 1];
         if (last != '\\' && last != '/') {
             AppendString(path, ";1");
-            len = GetStringLength(path);
+            len = GetStringLength((const char*)path);
         }
     }
     s8* end = path + len;
@@ -112,7 +116,7 @@ s32 NormalizeDiscPath(s8* path)
     return count;
 }
 
-s32 GetDiscStatus(void);
+extern "C" s32 GetDiscStatus();
 
 // Takes the drive's status into g_discStatus and says whether it is 0x14. The store is
 // repeated until the word reads back as the status: a back edge made by hand, so no loop notes
@@ -147,7 +151,7 @@ void StepDiscSectorCheck(void)
         if (CheckDiscChanged(2, tmp) != 0) {
             if (tmp[0] != 0) {
                 if (RefreshDiscStatus() == 0) {
-                    SetPauseMenuLayerPage(g_pauseMenuElement, 2, 0x16);
+                    SetPauseMenuLayerPage((T217D_6D0*)g_pauseMenuElement, 2, 0x16);
                     g_discSectorCheckState = 1;
                 }
             }
@@ -157,7 +161,7 @@ void StepDiscSectorCheck(void)
         s1 = *(s32*)D_002701B8;
         if (s1 == 2) {
             if (RefreshDiscStatus() != 0) {
-                if (StartDiscRead((s32)D_00247AA4, 1, g_discCheckSectorBuffer, (void*)&D_00247AA0) == 1) {
+                if (StartDiscRead((s32)D_00247AA4, 1, g_discCheckSectorBuffer, (ReadMode*)&D_00247AA0) == 1) {
                     g_discSectorCheckState = s1;
                 }
             }
@@ -177,7 +181,7 @@ void StepDiscSectorCheck(void)
             if ((s32)crc != (s32)D_00247AA8[0]) {
                 g_discSectorCheckState = 1;
             } else {
-                SetPauseMenuLayerPage(g_pauseMenuElement, 2, -1);
+                SetPauseMenuLayerPage((T217D_6D0*)g_pauseMenuElement, 2, -1);
                 g_discSectorCheckState = 3;
             }
         }
@@ -191,35 +195,35 @@ extern const char D_00249E28[8] = "%s\\%s";
 extern const char D_00249E30[8] = "cdrom0:";
 extern const char D_00249E38[4] = "";
 
-void FormatDiscPath(void* self, s8* a1, s32 flag)
+void FormatDiscPath(void* self, const char* name, s32 flag)
 {
     char buf[256];
     *(u16*)buf = D_00249E20[0];
-    AppendString((s8*)buf, (const char*)a1);
+    AppendString((s8*)buf, name);
     s32 n = NormalizeDiscPath((s8*)buf);
     char* p = buf;
     for (s32 i = 1; i < n; i++) {
-        p[GetStringLength((s8*)p)] = 0x5C;
+        p[GetStringLength((const char*)p)] = 0x5C;
     }
-    FormatToString(self, D_00249E28,
+    FormatToString((char*)self, D_00249E28,
                   flag ? (void*)D_00249E30 : (void*)D_00249E38, buf);
 }
 
-void StartDiscReadUntilAccepted(void* a, void* b, void* c)
+void StartDiscReadUntilAccepted(s32 sector, s32 count, void* buffer)
 {
     s32 result;
     do {
-        result = StartDiscRead((s32)a, (s32)b, c, (void*)&D_00247AA0);
+        result = StartDiscRead(sector, count, buffer, (ReadMode*)&D_00247AA0);
         g_lastDiscReadResult = result;
         if (result != 1) { SyncDiscRead(0); g_discReadErrors[0] = GetDiscReadError(); }
     } while (result != 1);
 }
 
-void StartLowLevelDiscReadUntilAccepted(void* a, void* b, void* c)
+void StartLowLevelDiscReadUntilAccepted(s32 sector, s32 count, void* buffer)
 {
     s32 result;
     do {
-        result = ReadDiscSectors(a, b, c, (void*)&D_00247AA0);
+        result = ReadDiscSectors(sector, count, buffer, (ReadMode*)&D_00247AA0);
         g_lastDiscReadResult = result;
         if (result != 1) { SyncDiscNCommand(0); g_discReadErrors[0] = GetDiscError(); }
     } while (result != 1);

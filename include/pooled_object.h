@@ -6,6 +6,7 @@
 #define POOLED_OBJECT_H
 
 #include "collider.h"
+struct BufferedStream;
 
 // Eight bytes at an odd word offset, which slot 9 keeps across the copy (func_0014EF40).
 struct __attribute__((packed)) Keep46 {
@@ -45,7 +46,7 @@ void InitPooledObject(PooledObject* self);                          // slot 0
 void AddToWorldQueue(PooledObject* self);                          // slot 3
 void RemoveFromWorldQueue(PooledObject* self);                          // slot 6
 void CopyPooledObject(PooledObject* self, Collider* other);              // slot 9
-void LoadPooledObject(PooledObject* self);                          // slot 10
+void LoadPooledObject(PooledObject* self, BufferedStream* stream);                          // slot 10
 void HandlePooledObjectNotification(PooledObject* self, s32 kind, void* msg);     // slot 13
 void StartPooledObject(PooledObject* self);                          // slot 16
 void UpdatePooledObject(PooledObject* self, f32 dt);                  // slot 17

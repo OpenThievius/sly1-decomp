@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "key_id.h"
+struct RecursiveLock;
+
 
 // The game's memory: the heap's bounds, its permanent, front and back cursors (the back one
 // with a stack of marks, under a lock), the copy routines, and the allocation hooks the
@@ -21,21 +24,21 @@ extern u8 g_heapLock[];
 extern s32 g_backMarkIndex;
 extern u8 g_backMarks[];
 
-void* FillMemory(void* p, s32 value, s32 size);
-void InitRecursiveLock(void* self);
-void EnterRecursiveLock(void* obj);
-void LeaveRecursiveLock(void* obj);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void InitRecursiveLock(RecursiveLock* self);
+void EnterRecursiveLock(RecursiveLock* self);
+void LeaveRecursiveLock(RecursiveLock* self);
 
 void CheckAllocationSize(s32 size);
 u8* AllocateFrontMemory(s32 size);
-void* AllocateZeroedFrontMemory(u32 n);
+void* AllocateZeroedFrontMemory(s32 n);
 u8* AllocateBackMemory(s32 size);
 
 typedef u64 Q18D780 __attribute__((mode(TI)));
 
-void CopyQuadwords(void* dst, void* src, u32 count);
+void CopyQuadwords(void* dst, void* src, s32 n);
 
-void ClearKeyId(void* p)
+void ClearKeyId(KeyId* p)
 {
     FillMemory(p, 0, 8);
 }
@@ -48,7 +51,7 @@ void InitHeap(void)
     D_002C2A10 = *(s32*)&g_permanentCursor = *(s32*)&g_frontResetMark = *(s32*)&g_frontCursor = g_heapStart;
     *(s32*)&g_backCursor = D_002C2A24 = g_heapEnd;
     g_backMarkIndex = -1;
-    InitRecursiveLock(g_heapLock);
+    InitRecursiveLock((RecursiveLock*)g_heapLock);
 }
 
 u8* ReservePermanentMemory(s32 size)
@@ -91,7 +94,7 @@ void ResetFrontMemory(void)
     g_frontCursor = g_frontResetMark;
 }
 
-void CopyMemory(u8* dst, void* src, s32 count);
+void CopyMemory(void* dst, void* src, u32 size);
 
 u8* CopyToFrontMemory(s32 size, void* src)
 {
@@ -103,7 +106,7 @@ u8* CopyToFrontMemory(s32 size, void* src)
     return result;
 }
 
-void* AllocateZeroedFrontMemory(u32 n)
+void* AllocateZeroedFrontMemory(s32 n)
 {
     void* p = AllocateFrontMemory(n);
     if (p) {
@@ -114,7 +117,7 @@ void* AllocateZeroedFrontMemory(u32 n)
 
 void PushBackMemoryMark(void)
 {
-    EnterRecursiveLock(g_heapLock);
+    EnterRecursiveLock((RecursiveLock*)g_heapLock);
     g_backMarkIndex = g_backMarkIndex + 1;
     ((u8**)g_backMarks)[g_backMarkIndex] = g_backCursor;
 }
@@ -149,17 +152,21 @@ void PopBackMemoryMark(void)
     n = n - 1;
     g_backMarkIndex = n;
     g_backCursor = *slot;
-    LeaveRecursiveLock(g_heapLock);
+    LeaveRecursiveLock((RecursiveLock*)g_heapLock);
 }
 
-int EnterRuntimeLock(void)
+// The allocation hooks the C runtime calls (throw.c, unwind.c, signal.c): a size in, nothing
+// allocated.
+struct LibcState;
+
+extern "C" void* EnterRuntimeLock(u32 size)
 {
     return 0;
 }
 
-s32 AllocateSignalTable() { return 0; }
+extern "C" void* AllocateSignalTable(LibcState* state, s32 size) { return 0; }
 
-void LeaveRuntimeLock() {}
+extern "C" void LeaveRuntimeLock(void* p) {}
 
 void* AllocateObjectMemory(u32 n)
 {
@@ -170,10 +177,10 @@ void FreeObjectMemory(void* self)
 {
 }
 
-void CopyQuadwords(Q18D780* dst, Q18D780* src, s32 n)
+void CopyQuadwords(void* dst, void* src, s32 n)
 {
-    Q18D780* d = dst;
-    Q18D780* s = src;
+    Q18D780* d = (Q18D780*)dst;
+    Q18D780* s = (Q18D780*)src;
     s32 rem = n & 3;
     s32 total = n - rem;
     s32 k;
@@ -201,14 +208,16 @@ void CopyQuadwords(Q18D780* dst, Q18D780* src, s32 n)
     }
 }
 
-void CopyMemory(u8* dst, u8* src, u32 size)
+void CopyMemory(void* dst, void* src, u32 size)
 {
     u32 any = (u32)dst | (u32)src | size;
     if (any & 3) {
         u32 i = 0;
         if (size != 0) {
+            u8* d = (u8*)dst;
+            u8* s = (u8*)src;
             do {
-                *dst++ = *src++;
+                *d++ = *s++;
                 i++;
             } while (i < size);
         }

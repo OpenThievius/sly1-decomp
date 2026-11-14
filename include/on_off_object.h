@@ -78,8 +78,8 @@ void InitOnOffObject(OnOffObject* self);                  // 0x63 slot 0
 void UnregisterOnOffObject(OnOffObject* self);                  // 0x63 slot 7
 void LoadOnOffObject(OnOffObject* self, void* stream);    // 0x63 slot 10
 void StartOnOffObject(OnOffObject* self);                  // 0x63 slot 16
-void UpdateOnOffObject(OnOffObject* self);                  // 0x63 slot 17
-void SetOnOffObjectFrozen(OnOffObject* self, void* p);         // 0x63 slot 20
-void DrawOnOffObject(void);                       // 0x63 slot 37 (calls the common slot)
+void UpdateOnOffObject(OnOffObject* self, f32 dt);                  // 0x63 slot 17
+void SetOnOffObjectFrozen(OnOffObject* self, s32 p);           // 0x63 slot 20
+void DrawOnOffObject(OnOffObject* self, void* arg1, void* arg2);                       // 0x63 slot 37 (calls the common slot)
 
 #endif

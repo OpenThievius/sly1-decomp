@@ -30,8 +30,8 @@ Quad_27B0C0 D_0027B110[2] = {
     { 0x7C00294A2529001FULL, 0x39CE7FFF35AD318CULL },
 };
 
-s32 DisableInterrupts(void);
-s32 EnableInterrupts(void);
+extern "C" s32 DisableInterrupts(void);
+extern "C" s32 EnableInterrupts(void);
 
 void StartIpuInputForReset(u32 value)
 {

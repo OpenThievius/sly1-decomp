@@ -21,19 +21,20 @@ struct TriplePayload { U64P xy; s32 z; };
 
 void FreeObjectMemory(void* p);
 void* AllocateZeroedFrontMemory(s32 size);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 s32 CompareMemory(void* a, void* b, s32 n);
 void* TakePoolEntry(EntryPool* pool);
 void InitEntryPool(EntryPool* pool, s32 size, s32 count);
 void ShutDownEntryPool(EntryPool* pool);
 R11B008Key* NewKeyedValue(void);
 void CopyKeyedValueChain(R11B008Key* src, R11B008Key* dst, s32 zero);
-void DestroyKeyedValue(void);
+void DestroyKeyedValue(R11B008Key* a);
 void InitPayloadPools(void);
 void ShutDownPayloadPools(void);
 extern u8 g_markStacks[];
-void ResetMarkRoots(void* p);
-void ShutDownMarkRoots(void* p);
+struct MarkStacks;
+void ResetMarkRoots(MarkStacks* self);
+void ShutDownMarkRoots(MarkStacks* stacks);
 void ReleaseScriptScope(void);
 
 // The pooled payloads (value_pools.cpp): each tag's allocator, reference and release.
@@ -55,7 +56,7 @@ void ReleaseTriplePayload(void* p);
 
 // The stream reader (buffered_stream.cpp).
 s32 ReadBufferedU8(BufferedStream* r);
-s32 ReadBufferedU16(void* stream);
+u16 ReadBufferedU16(BufferedStream* self);
 s32 ReadBufferedS32(BufferedStream* r);
 f32 ReadBufferedFloat(BufferedStream* r);
 s32 ReadBufferedU32(BufferedStream* r);
@@ -607,7 +608,7 @@ R11B008List* NewKeyedList(void)
 
 void InitScriptValuePools(void)
 {
-    ResetMarkRoots(g_markStacks);
+    ResetMarkRoots((MarkStacks*)g_markStacks);
     InitEntryPool(&g_valueNodePool, 0xC, 0x2000);
     g_valueNodePool.removeCallback = (void*)DestroyScriptValueNode;
     InitEntryPool(&g_scopePool, 0x1C, 0x190);
@@ -627,5 +628,5 @@ void ShutDownScriptValuePools(void)
     ShutDownEntryPool(&g_payloadPool);
     ShutDownPayloadPools();
     ShutDownEntryPool(&g_propertyRefPool);
-    ShutDownMarkRoots(g_markStacks);
+    ShutDownMarkRoots((MarkStacks*)g_markStacks);
 }

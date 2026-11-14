@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "object_finder.h"
 // StartPathFollower, PAL's definition: starts the placed object, its links, heading, state walker,
 // engine sounds and partner as US does (config/names/main/path_follower.tsv), at PAL's addresses.
 struct Blk_eu_1D7440 {
@@ -19,7 +20,7 @@ void StartPathFollower(PathFollower* self)
     ResolveObjectLinks(self, 0x14, D_002752A0);
     self->f694 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     if (self->fB44 != 0) {
-        StateTrigger* v = CreateStateWalker(self->fB44, self, -1, 0);
+        StateWalker* v = CreateStateWalker((StateGraph*)self->fB44, self, -1, 0);
         self->fB48 = v;
         SetStateWalkerTarget(v, self->fB30 == 1 ? 0x484 : 0x384);
     }
@@ -39,9 +40,9 @@ void StartPathFollower(PathFollower* self)
         id1 = 0x2DB;
         id2 = 0x2DD;
     spawn:
-        StartSoundEffect(id0, self->fB80, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
-        StartSoundEffect(id1, self->fB84, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
-        StartSoundEffect(id2, self->fB7C, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id0, (PlayingSound**)self->fB80, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id1, (PlayingSound**)self->fB84, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id2, (PlayingSound**)self->fB7C, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
         {
             f32 r = RandomFloatInRange(-0.1f, 0.1f);
             self->fB8C = self->fB90 = self->fB94 = self->fB98 = r;

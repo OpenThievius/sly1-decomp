@@ -15,6 +15,7 @@
 #include "level_entry.h"
 #include "pad_record.h"
 #include "memory_card.h"
+#include "layout_137228.h"
 
 extern const char D_0024DCB0[24] = "Nate Fox\nHokyo Lim";
 extern const char D_0024DCC8[32] = "Rob McDaniel\nSuzanne Kaufmann";
@@ -48,7 +49,7 @@ extern const char D_0024E0C8[48] = "Matthew Morgaine\nMatt Olsen\nChris Bentzel"
 extern const char D_0024E0F8[32] = "Suzanne Kaufmann\nChris Bentzel";
 extern const char D_0024E118[40] = "Rob McDaniel\nDev Madan\nTravis Kotzesbue";
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // The text style the best time draws with: the static initialiser (func_001E0848) zeroes it,
 // then sets its kind, two sizes given as integers, 0.3 twice and its colour.
@@ -96,10 +97,10 @@ struct CommentaryRecord { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 diffe
 
 
 void* FindLevelEntry(s32 k);
-s32 GetStringLength(void* p);
+extern "C" s32 GetStringLength(const char* s);
 s32 IsFontLoaded(s32 k);
 Font* GetFontById(s32 k);
-s32 CheckEntryThreeBitRequirement(World* g, s32 k);
+s32 CheckEntryThreeBitRequirement(void* self, s32 obj);
 void SetBestTimeState(T217D_1380* self, s32 n);
 
 void InitCommentaryPromptElement(T217D_1380* self)
@@ -115,7 +116,7 @@ void InitCommentaryPromptElement(T217D_1380* self)
         if (!(((CommentaryRecord*)g_currentWorld->f2310)->differs())) {
             g_currentWorld->f2310 = (CommentaryRecord*)e->record;
         }
-        if (g_currentWorld->f2314 == 0 || !GetStringLength(g_currentWorld->f2314)) {
+        if (g_currentWorld->f2314 == 0 || !GetStringLength((const char*)g_currentWorld->f2314)) {
             g_currentWorld->f2314 = (void*)e->credits;
         }
     }
@@ -145,18 +146,19 @@ void InitCommentaryPromptElement(T217D_1380* self)
     self->f270 = 0;
 }
 
-void SetBestTimeState(void* self, s32 n);
+void SetBestTimeState(T217D_1380* self, s32 n);
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 extern f32 g_gameTime;
 extern s32 D_002701C4;
 extern s32 D_002623DC;
 
-void ClearPadPressedBits(PadRecord* q, s32 n);
-void StartLockedStreamVoice(s32 q);
-void SetBestTimeState(T217D_1380* q, s32 n);
-f32 Power(f32 a, f32 b);
+struct KeyRecord;
+void ClearPadPressedBits(PadRecord* self, u32 mask);
+void StartLockedStreamVoice(KeyRecord* self);
+void SetBestTimeState(T217D_1380* self, s32 n);
+extern "C" f32 Power(f32 x, f32 y);
 void SetTimerRate(T217D_510* q, f32 v);
 s32 AreMenusAndFadeClear(void);
 
@@ -170,7 +172,7 @@ void UpdateBestTimeState(T217D_1380* self)
         if (self->pressed != 0) {
         if (g_padRecord.flags & 4) {
             ClearPadPressedBits(&g_padRecord, 4);
-            StartLockedStreamVoice((s32)g_currentWorld->f2310);
+            StartLockedStreamVoice((KeyRecord*)g_currentWorld->f2310);
             if (g_currentWorld->f2314 != 0) {
                 SetScreenElementHoldTime(self, 15.0f);
                 self->vt->m08(self, (const char*)g_currentWorld->f2314);
@@ -209,20 +211,22 @@ void UpdateBestTimeState(T217D_1380* self)
 extern s32 D_002623DC;
 
 void StopTimer(T217D_510* o);
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void SetSpareCount(s32 v);
 void PopActiveSequenceElement(World* g);
 void StartTimer(T217D_510* o, f32 v);
-f32 Power(f32 a, f32 b);
+extern "C" f32 Power(f32 x, f32 y);
 void SetTimerRate(T217D_510* o, f32 v);
-void SetTimerLimit(T217D_510* o, f32 v, void* fn);
+void SetTimerLimit(T217D_510* self, f32 limit, T217D_510_Fn onEnd);
 void StartTimerCounting(T217D_510* o);
-s32 FormatToString(BestTimeTextBuffer* dst, const char* fmt, ...);
+s32 FormatToString(char* dst, const char* fmt, ...);
 void StartMemoryCardSave(MemoryCard* x);
 s32 ComputeCompletionMask(void);
 void ApplyCompletionFlags(s32 m);
 void SetPauseMenuLayerPage(T217D_6D0* y, s32 a, s32 b);
-void CompleteSoundNotifiers(World* g);
+void CompleteSoundNotifiers(World* self);
 
 void SetBestTimeState(T217D_1380* self, s32 n)
 {
@@ -257,12 +261,12 @@ void SetBestTimeState(T217D_1380* self, s32 n)
         if (cam->flags & 8) {
             f32 t = cam->f08;
             if (t < one) {
-                FormatToString(&g_bestTimeText, "Best time: &10.%d", (s32)(t * 10.0f));
+                FormatToString((char*)&g_bestTimeText, "Best time: &10.%d", (s32)(t * 10.0f));
             } else {
                 s32 s = (s32)t;
                 s32 minutes = s / 60;
                 s32 seconds = s % 60;
-                FormatToString(&g_bestTimeText, "Best time: &1%d:%02d", minutes, seconds);
+                FormatToString((char*)&g_bestTimeText, "Best time: &1%d:%02d", minutes, seconds);
             }
             SetScreenElementHoldTime(self, zero);
             self->vt->m08(self, g_bestTimeText.c);
@@ -316,18 +320,13 @@ void SetBestTimeState(T217D_1380* self, s32 n)
 }
 
 struct TextLayout;
-void SetTextLayoutPosition(TextLayout* out, f32 x, f32 y);
-void SetTextLayoutSize(TextLayout* out, f32 x, f32 y);
-void SetTextLayoutColor(TextLayout* out, s32* value);
-void SetTextLayoutHorizontalAlign(TextLayout* out, s32 flag);
-void SetTextLayoutVerticalAlign(TextLayout* out, s32 flag);
 struct TextLayout {
     u8 b[32];
-    void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
-    void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
-    void Color(s32* c) { SetTextLayoutColor(this, c); }
-    void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
-    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
+    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
+    void Color(s32* c) { ((Layout_137228*)this)->Color(c); }
+    void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
+    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
 };
 struct FrameFont {
     static void Draw(Font** h, TextLayout* out, void* tbl)
@@ -339,10 +338,17 @@ struct FrameFont {
     }
 };
 
+struct Font;
 extern f32 D_0027240C;
 void PushFontScale(Font* font, f32 a, f32 b);
-void* InitTextReader(void* out, void* p, Font* font);
-void DrawAlignedText(void* a, void* b, s32 c, void* d);
+struct TextReader;
+struct Layout_137228;
+void* InitTextReader(TextReader* self, char* text, Font* font);
+struct Layout_137228;
+struct PacketWriter;
+struct TextReader;
+struct Vec4U;
+void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
 void PopFontScale(Font* font);
 
 void DrawFramedText(T217D_1380* self)
@@ -373,8 +379,8 @@ void DrawFramedText(T217D_1380* self)
             FrameFont::Draw(self->frame, &out, &g_gsPacketWriter);
             *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
         }
-        InitTextReader(loc, &self->text[0], self->font);
-        DrawAlignedText(loc, &out, 0, &g_gsPacketWriter);
+        InitTextReader((TextReader*)loc, &self->text[0], self->font);
+        DrawAlignedText((TextReader*)loc, (Layout_137228*)&out, 0, &g_gsPacketWriter);
         PopFontScale(self->font);
     }
 }
@@ -383,7 +389,7 @@ LINKER_REMNANT(func_001E0820);
 
 void FinishBestTimeRun(void* self)
 {
-    SetBestTimeState(self, 3);
+    SetBestTimeState((T217D_1380*)self, 3);
 }
 
 // The style above is built by the static initialiser GCC writes here (func_001E0848), and its

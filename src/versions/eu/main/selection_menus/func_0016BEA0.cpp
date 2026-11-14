@@ -28,7 +28,7 @@ const char* GetTextTableEntry(s32 id);
 void InitWideTextReader(void* out, const char* p, Font* font, s32 z);
 void DrawWrappedAlignedText(void* a, CaptionLayout* b, s32 c, void* d);
 void SetTextLayoutVerticalPlacement(CaptionLayout* out, s32 v);
-void DrawFontString(Font* font, const char* text, CaptionLayout* out, s32 zero, void* d);
+void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 struct Out_eu_16BEA0 : CaptionLayout {
     void Mode(s32 v) { SetTextLayoutVerticalPlacement(this, v); }
     void Draw(void* loc, s32 z, void* tbl) { DrawWrappedAlignedText(loc, this, z, tbl); }
@@ -97,7 +97,7 @@ void DrawGridSelector(Obj_16BEA0_eu* self)
                 k = (k - (Sine(g_gameClock[4] * 10.0f) * 0.5f + 0.5f)) * 0.1f + k;
             f32 v = self->blend * (k * 1.3f);
             PushFontScale(f, v, v);
-            DrawFontString(f, s, &out, 0, &g_gsPacketWriter);
+            DrawFontString(f, s, (StringLayout*)&out, 0, &g_gsPacketWriter);
             PopFontScale(f);
         }
     }

@@ -39,58 +39,67 @@
 #include "attached_set.h"
 #include "active_set_solver.h"
 #include "sound_level.h"
+struct TrackedNodeOffer;
+struct Mat02;
+struct Matrix3x4;
+
+struct ScriptListBuilder;
+struct ScriptValueFilter;
+
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
 f32 RandomFloatInRange(f32 a, f32 b);
-f32 ArctangentOfRatio(f32 a, f32 b);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern f32 g_gameTime[];
-s32 IsObjectDescendantOf(Collider* e, void* b);
-void TriggerScriptEvent(StateGraph* host, s32 a, s32 b, void** args);
-s32 ReadBufferedU16(void* stream);
+s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+u16 ReadBufferedU16(BufferedStream* self);
 void* AllocateZeroedFrontMemory(s32 size);
-void* FillMemory(void* p, s32 value, s32 size);
-void AddColliderToSweepAxes(void* owner, void* self);
-Contacts03* TakeContactTable(void* owner, void* self);
-void InitContactPairFlags(void* owner, void* self);
-void AppendToList(void* p, void* self);
-void RegisterPlacedObject(void* self);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void AddColliderToSweepAxes(World* self, void* arg);
+Contacts03* TakeContactTable(World* owner, Collider* self);
+void InitContactPairFlags(World* self, Collider* obj);
+void AppendToList(List01* self, void* item);
+void RegisterPlacedObject(PlacedObject* self);
 void SetColliderPartListed(Collider* self, s32 flag);
-void UpdateAnchorModeFlags(void* p);
-void ResolveContactHandler(void* self);
-void UnregisterPlacedObject(void* self);
-void RemoveColliderFromSweepAxes(void* owner, void* self);
-void ReleaseContactTable(void* owner, Contacts03* contacts);
-void RemoveFromList(void* p, void* self);
-void FreeTouchNodes(void* owner, Touch03* list);
-void ClearRootObjectStateBits(void* owner, void* self, s32 n);
-void RemoveFromList(void* a, void* b);
-void TriggerScriptEvent(void* a, s32 b, s32 c, s32 d);
-void SetListLinkOffset(void* self, s32 value);
-void InitPlacedObject(void* self);
-void ClearRecordBody(Mesh03* mesh);
-void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
-s32 LookupScriptVariable(void* a, s32 b, s32 c, ScriptValue* d);
+void UpdateAnchorModeFlags(Collider* self);
+void ResolveContactHandler(Collider* self);
+void UnregisterPlacedObject(PlacedObject* self);
+void RemoveColliderFromSweepAxes(World* self, void* owner);
+void ReleaseContactTable(World* owner, Contacts03* handle);
+void RemoveFromList(List01* list, void* item);
+void FreeTouchNodes(World* owner, Touch03* node);
+void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask);
+void RemoveFromList(List01* list, void* item);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void SetListLinkOffset(List01* self, s32 offset);
+void InitPlacedObject(PlacedObject* self);
+struct ClearedRecord;
+void ClearRecordBody(ClearedRecord* self);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
+struct ScriptScope;
+s32 LookupScriptVariable(ScriptScope* scope, s32 key, s32 flag, ScriptValue* out);
 void* AllocateFrontMemory(s32 size);
-void UpdatePlacedObject(void* self);
-void AppendToList(List01* list, StateWalker* item);
-void TriggerScriptEvent(StateGraph* self, s32 a, s32 b, void* c);
+void UpdatePlacedObject(PlacedObject* self, f32 f);
+void AppendToList(List01* self, void* item);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(u32 bytes);
 void* AllocateBackMemory(s32 size);
-void RecomputePlacedObjectFrame(Collider* self);
-void ClearRootObjectStateBits(void* a, void* b, s32 c);
+void RecomputePlacedObjectFrame(PlacedObject* self);
+void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask);
 void SetPlacedObjectVelocity(PlacedObject* self, Vec02* v);
 void SetPlacedObjectSpin(PlacedObject* self, Vec02* v);
 void UpdateWorldContacts(World* w, s32 arg);
-void MarkSweepAxesUnsorted(void* a);
+void MarkSweepAxesUnsorted(World* a0);
 void DropColliderContacts(Collider* self, s32 value);
-void InitContactPairFlags(void* a, void* b);
-s32 ScriptListContainsValue(s32 value, void* out);
-s32 AppendPropertyToScriptList(s32 value, void* out);
+void InitContactPairFlags(World* self, Collider* obj);
+s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
 void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
 void AddColliderForce(void* a, void* b);
-void DrawPlacedObject(Collider* self, void* a, void* m);
+void DrawPlacedObject(PlacedObject* self, void* b, void* m);
 // What a vector is constrained by: an axis, and how (0 none, 1 the part along the axis removed,
 // 2 only the part along it kept, 3 zero).
 struct VectorConstraint {
@@ -98,26 +107,26 @@ struct VectorConstraint {
     s32 kind;               // 0x10
 };
 void ConstrainVectorByAnchor(VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
-void ClearRootTries(void* self);
+void ClearRootTries(PlacedObject* self);
 // A quadword passed by value in one register (func_001B8820's position).
 typedef u64 Qword128 __attribute__((mode(TI)));
-void ComputePlacedObjectWorldFrame(void* self);
+void ComputePlacedObjectWorldFrame(PlacedObject* self);
 void TransformMeshToWorld(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
-void TransformDirectionBetweenFrames(void* a, void* b, void* c, void* d);
-void ReparentPlacedObject(void* self, void* p);
-s32 IsObjectDescendantOf(void* e, void* b);
-void SendObjectNotification(void* self, s32 kind, void* arg);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void ReparentPlacedObject(PlacedObject* self, BaseObject* parent);
+s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
+void SendObjectNotification(BaseObject* self, s32 kind, void* arg);
 // An anchor preset (func_001BB028): a direction and a mode.
 struct AnchorPreset { const Vec02* quad; s32 value; };
 extern AnchorPreset D_002746E0[8];
 void* AllocateBackMemory(s32 n);
-s32 GetContactRowHead(void* self, void* other);
+s32 GetContactRowHead(Collider* self, Collider* other);
 // Matched by indexing the end as (u32)e + (i << 6).
 
-void TriggerScriptEvent(void* self, s32 a, s32 b, void* c);
-void FreeTouchNodes(void* pool, Touch03* m);
-Touch03* AllocateTouchNode(void* pool);
-void CopyPlacedObject(Collider* self, Collider* other);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void FreeTouchNodes(World* owner, Touch03* node);
+Touch03* AllocateTouchNode(World* self);
+void CopyPlacedObject(PlacedObject* self, PlacedObject* src);
 void CopyMeshTransformed(Mesh03* a, s32 b, Mesh03* c);
 void CloneTreeNodes(Mesh03* a, Tree03* b, Mesh03* c, Tree03* d);
 // NEAR: 14 lines: retail preloads f400/f40C into s0 (lw s0 before loop and in the bnel delay slot), we load into v1; f408 loop test reload; last loop pointer s2 vs index
@@ -127,18 +136,18 @@ s32 ReadBufferedU8(BufferedStream* in);
 void ReadMeshFromStream(BufferedStream* in, Mesh03* p);
 void ReadFaceTree(BufferedStream* in, Mesh03* a, Tree03* out);
 f32 ReadBufferedFloat(BufferedStream* in);
-void ReadBufferedRotation3(BufferedStream* in, Mat02* p);
-void ReadBufferedVector3(BufferedStream* in, Vec02* p);
+void ReadBufferedRotation3(BufferedStream* self, void* out);
+void ReadBufferedVector3(BufferedStream* src, void* dst);
 void ComputeColliderInverseInertia(Collider* self, f32 x);
-void* CopyBytes(void* dst, void* src, s32 n);
-void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
+extern "C" void* CopyBytes(void* dst, void* src, s32 n);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 void InitColliderMeshMotion(Collider* self);
-s32 InvertMatrix3x3(Mat02* in, Mat02* out);
-s32 ReadBufferedU16(void* stream);
+s32 InvertMatrix3x3(Matrix3x4* in, Matrix3x4* out);
+u16 ReadBufferedU16(BufferedStream* self);
 s32 ReadBufferedS16(BufferedStream* in);
 s32 ReadBufferedU32(BufferedStream* in);
-void LoadPlacedObject(Collider* self, BufferedStream* in);
-void InitContactPairFlags(void* a, Collider* b);
+void LoadPlacedObject(PlacedObject* self, void* r);
+void InitContactPairFlags(World* self, Collider* obj);
 // What class 0x03's slot 69 (func_001B9F30) writes of a collider.
 struct ColliderPose {
     s32 f00;                // 0x00: 0
@@ -150,13 +159,13 @@ struct ColliderPose {
     f32 time;               // 0x38: g_gameTime
     s32 f3C;                // 0x3C: 0
 };
-void RotateMatrixUpright(Mat02* m, s32 zero, Vec02* out);
-void FreePooledContactChain(void* pool, Contact03* head);
-void SyncDataCache(s32 a);
-void RemoveFromList(u8* a, void* b);
-void* FillMemory(void* p, s32 value, s32 size);
-void* FillMemory(void* p, s32 value, s32 size);
-void AppendToList(void* list, void* item);
+void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
+void FreePooledContactChain(World* world, Contact03* head);
+extern "C" void SyncDataCache(s32 a);
+void RemoveFromList(List01* list, void* item);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void AppendToList(List01* self, void* item);
 // A sound playing in the world: a 0x90-byte record of the pool at World 0x1BA0, kept on
 // World::list1BAC. func_001BF6B8 takes one, func_001BF920 fills it, func_001BFAF8 starts its
 // voice, func_001C0070 updates each one every frame and func_001BF728 gives it back.
@@ -201,19 +210,19 @@ struct PlayingSound {
         return v;
     }
 };
-void RemoveFromList(u8* p, PlayingSound* self);
-void* FillMemory(void* p, s32 value, s32 size);
+void RemoveFromList(List01* list, void* item);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void AdvanceColliderMeshMotion(Collider* self, f32 dt);
 void MovePlacedObject(Collider* self, f32 x, void* b);
 void ApplyColliderImpulseEvent(void* a0, f32 x, void* a1, void* a2);
-void AppendToList(u8* a, void* b);
+void AppendToList(List01* self, void* item);
 typedef signed int s32;
 typedef unsigned char u8;
 void* AllocateZeroedFrontMemory(s32 bytes);
 // The comparison func_001BE0A8's heap sort orders its records by.
 typedef s32 (*SortCompareFn)(void* a, void* b);
 void SwapSortRecords(u8* base, s32 stride, s32 rowB, s32 rowA);
-void CopyMemory(void* dst, void* src, s32 count);
+void CopyMemory(void* dst, void* src, u32 size);
 extern f32 g_gameClock[];
 // The counts func_001BD678 fills for func_001BDD00 (its two lists of connected colliders).
 struct ConnectedCounts { s32 pad; s32 n1; s32 n2; };
@@ -228,8 +237,8 @@ void PushBackMemoryMark();
 void PopBackMemoryMark();
 void CollectConnectedColliders(Collider* n, s32* c1, Collider** a1, s32* c2, Collider** a2);
 void ProcessColliderGroup(World* ctx, s32 n, Collider** arr, f32 f, s32 flags);
-s32 IsObjectTreeAtRest(Collider* n);
-void ClearRootTries(Collider* n);
+s32 IsObjectTreeAtRest(Actor6C* self);
+void ClearRootTries(PlacedObject* self);
 // The list walk of list_iter.h over a List01: push the frame, take each element, pop the frame.
 struct ListWalk {
     static void Begin(ListFrame* it, List01* list)
@@ -248,29 +257,30 @@ struct ListWalk {
     }
     static void End(ListFrame* it) { g_activeListFrames = it->prev; }
 };
-Contact03* TakePoolSlot(u8* p);
-void FreePooledContactChain(u8* a, Contact03* b);
+void* TakePoolSlot(Pool6C* pool);
+void FreePooledContactChain(World* world, Contact03* head);
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-s32 CreatePooledContact(Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out, f32 z);
+struct PooledContact;
+PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 void NotifyContactEnds(World* world, s32 n, Contact03** list);
 void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
-void SetColliderForcedState(u8* node, s32 flag);
+void SetColliderForcedState(Collider* obj, s32 mode);
 void StopSoundRecord(PlayingSound* self, s32 n);
-void RemoveFromList(void* table, void* self);
-void AppendToList(void* table, void* self);
+void RemoveFromList(List01* list, void* item);
+void AppendToList(List01* self, void* item);
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 // A script list being built (func_001C1530 hands one to a getter; func_001C1A28 appends a value
 // of `type` to it).
 struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
-void* FillMemory(void* p, s32 value, s32 size);
-s32 ReadBufferedU32(void* src);
-void* AllocateFrontMemory(u32 size); // stays void: retail returns a value, but declared so func_001C13E8 differs in registers
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+s32 ReadBufferedU32(BufferedStream* self);
+void* AllocateFrontMemory(u32 size);
 // A type and a list of script values: func_001C1AD8 tells whether a value is among them.
 struct ScriptValueFilter { u32 type; R11B008Node* list; };
-void StopSoundRecord(u8* obj, void* item);
-s32 AppendPropertyToScriptList(ScriptListBuilder* self, s32 value);
-s32 ScriptListContainsValue(ScriptValueFilter* filter, s32* val);
+void StopSoundRecord(PlayingSound* self, s32 n);
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
+s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
 
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
 
@@ -295,7 +305,7 @@ void InitCollider(Collider* self)
     InitScriptValue(&local);
     SetListLinkOffset(&self->parts, 0x2E4);
     InitPlacedObject(self);
-    ClearRecordBody(&self->mesh);
+    ClearRecordBody((ClearedRecord*)&self->mesh);
     self->meshCopy = self->mesh;
     if (self->parent != 0) {
         SetColliderAnchors(self, 3, 0, 3, 0);
@@ -303,8 +313,8 @@ void InitCollider(Collider* self)
     self->f4BC = -1;
     self->index = -1;
     if (self->f2C != 0) {
-        s0 = LookupScriptVariable(self->f2C, 6, 1, &local);
-        s0 |= LookupScriptVariable(self->f2C, 7, 1, &local);
+        s0 = LookupScriptVariable((ScriptScope*)self->f2C, 6, 1, &local);
+        s0 |= LookupScriptVariable((ScriptScope*)self->f2C, 7, 1, &local);
         if (s0 != 0) {
             self->flags538 |= (u64)0x8000 << 48;
         }
@@ -374,7 +384,7 @@ void SetColliderPartListed(Collider* self, s32 flag)
 }
 
 void SettlePoseSourceModes(Attachment* a);
-void BuildRotationFromVector(Vec02* v, Mat02* m);
+void BuildRotationFromVector(Vec02* v, Mat02* mat);
 
 void ApplyColliderPendingMove(Collider* self, s32 quiet)
 {
@@ -596,8 +606,8 @@ f32 ComputeSegmentParameter(const Vec02* a, const Vec02* b, const Vec02* p)
     return Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(ap), Vu0::Q(ab))) / Vu0::ToFloat(Vu0::Dot(Vu0::Q(ab), Vu0::Q(ab)));
 }
 
-void TransformDirectionBetweenFrames(void* a, void* b, void* c, void* d);
-void CopyMemory(void* dst, void* src, s32 count);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void CopyMemory(void* dst, void* src, u32 size);
 
 // What Collider::hook points at for a mesh that blends per-vertex vectors (func_001B8B90): a
 // vector for each vertex, and the three vertex indices of each face.
@@ -828,9 +838,9 @@ void DrawCollider(Collider* self, void* a, void* m)
     DrawPlacedObject(self, a, m);
 }
 
-void UpdateCollider(Collider* self)
+void UpdateCollider(Collider* self, f32 dt)
 {
-    UpdatePlacedObject(self);
+    UpdatePlacedObject(self, dt);
 }
 
 void SetColliderMass(Collider* self, f32 v)
@@ -852,7 +862,7 @@ void ComputeColliderInverseInertia(Collider* self, f32 scale)
     Vu0::Q(s.r[2]) = Vu0::MulX(Vu0::Q(self->inertia.r[2]), Vu0::Q(k));
     CopyBytes(&m, &s, 0x30);
     self->inertia = m;
-    if (!InvertMatrix3x3(&self->inertia, &self->invInertia)) {
+    if (!InvertMatrix3x3((Matrix3x4*)&self->inertia, (Matrix3x4*)&self->invInertia)) {
         FillMemory(&self->invInertia, 0, 0x30);
     }
 }
@@ -921,7 +931,7 @@ struct ColliderMoveNote {
     Vec02 before;           // 0x10
     Vec02 q20;              // 0x20: not written by SetColliderPosition
 };
-void RequestCameraSnap(Camera* camera, s32 mode);
+void RequestCameraSnap(Camera* self, f32* src);
 
 void SetColliderPosition(Collider* self, Vec02* pos)
 {
@@ -1058,11 +1068,11 @@ void ReparentCollider(Collider* self, BaseObject* p)
         return;
     }
     Collider* s5 = self->root03();
-    TransformDirectionBetweenFrames(self->parent, 0, &self->v440, &local0);
-    TransformDirectionBetweenFrames(self->parent, 0, &self->v460, &local1);
+    TransformDirectionBetweenFrames((PlacedObject*)self->parent, 0, &self->v440, &local0);
+    TransformDirectionBetweenFrames((PlacedObject*)self->parent, 0, &self->v460, &local1);
     ReparentPlacedObject(self, p);
-    TransformDirectionBetweenFrames(0, p, &local0, &self->v440);
-    TransformDirectionBetweenFrames(0, p, &local1, &self->v460);
+    TransformDirectionBetweenFrames(0, (PlacedObject*)p, &local0, &self->v440);
+    TransformDirectionBetweenFrames(0, (PlacedObject*)p, &local1, &self->v460);
     if (self->root != 0) {
         if ((self->flags538 & (1ULL << 54)) != 0 && s5 != 0) {
             UpdateAnchorModeFlags(s5);
@@ -1077,7 +1087,7 @@ void ReparentCollider(Collider* self, BaseObject* p)
     ResolveContactHandler(self);
 }
 
-void ReframePlacedObject(void* self, PlacedObject* frame);
+void ReframePlacedObject(PlacedObject* self, BaseObject* frame);
 
 void ReframeColliderAnchors(Collider* self, PlacedObject* frame)
 {
@@ -1093,7 +1103,7 @@ LINKER_REMNANT(func_001B9D08);
 
 f32 ClampToMagnitude(f32 value, f32 limit);
 
-void TurnColliderTowardRotation(Collider* self, Mat02* target, f32* gain, f32 dt)
+void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain)
 {
     Mat02 m;
     Vec02 axis;
@@ -1137,7 +1147,7 @@ void CaptureColliderPose(Collider* self, ColliderPose* out)
     Vec02 tmp[3];
     out->position = self->v140;
     out->v150 = self->v150;
-    RotateMatrixUpright(&self->m110, 0, &tmp[0]);
+    RotateMatrixUpright(&self->m110, 0, (Mat02*)&tmp[0]);
     out->heading = ArctangentOfRatio(-tmp[0].y, -tmp[0].x);
     out->f34 = 100.0f;
     out->f00 = 0;
@@ -1147,14 +1157,14 @@ void CaptureColliderPose(Collider* self, ColliderPose* out)
 
 s32 IsContactBetweenParts(Collider* self, void* other)
 {
-    s32 key;
+    PlacedObject* key;
     Contact03* n;
-    for (n = (Contact03*)GetContactRowHead(self, other), key = (s32)self->root; n != 0; n = n->next) {
-        s32 s1 = (key ^ (s32)n->end[0].body) != 0;
+    for (n = (Contact03*)GetContactRowHead(self, (Collider*)other), key = self->root; n != 0; n = n->next) {
+        s32 s1 = key != n->end[0].body;
         s32 o0 = s1 * 64;
-        if (IsObjectDescendantOf(*(void**)((u8*)n + o0 + 4), self) != 0) {
+        if (IsObjectDescendantOf((BaseObject*)(*(void**)((u8*)n + o0 + 4)), self) != 0) {
             s32 o1 = (1 - s1) * 64;
-            if (IsObjectDescendantOf(*(void**)((u8*)n + o1 + 4), other) != 0) {
+            if (IsObjectDescendantOf((BaseObject*)(*(void**)((u8*)n + o1 + 4)), (BaseObject*)other) != 0) {
                 return 1;
             }
         }
@@ -1170,7 +1180,7 @@ void* FindContactingPart(Collider* self)
         Contact03* s0 = s2->head;
         while (s0 != 0) {
             s32 s1 = ((u32)s3 ^ (u32)s0->end[0].body) != 0;
-            if (IsObjectDescendantOf(*(void**)((u8*)(s0) + (s1 << 6) + 4), self) != 0) {
+            if (IsObjectDescendantOf((BaseObject*)(*(void**)((u8*)(s0) + (s1 << 6) + 4)), self) != 0) {
                 return *(void**)((u8*)(s0) + ((1 - s1) << 6) + 4);
             }
             s0 = s0->next;
@@ -1322,13 +1332,14 @@ tail:
     ClearRootTries(o);
 }
 
-f32 MeasureAttachedSetContactDepth(AttachedSet* self, Collider* o, Vec02* nOut, Vec02* hitOut);
-void GetAttachedSetPointMotion(AttachedSet* self, void* in, Vec02* outA, Vec02* outB);
+f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
+void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16* outB);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
-void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5);
+struct Oscillator;
+void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB);
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
-void BuildShortestArcRotation(const Vec02* from, Vec02* to, Mat02* out);
-f32 Arccosine(f32 x);
+void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
+extern "C" f32 Arccosine(f32 x);
 void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance, Quad16* at, f32 minScale, f32 size);
 
 struct Oscillated_1BA5B0 { u8 pad00[0xC]; void* oscillator; };
@@ -1356,7 +1367,7 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
     Vec02 point;
     Vec02 normal;
     f32 gains[3];
-    f32 depth = MeasureAttachedSetContactDepth(other, self, &point, &normal);
+    f32 depth = MeasureAttachedSetContactDepth(other, (TurningCollider*)self, &point, &normal);
     if (depth < 0.0001f) {
         return;
     }
@@ -1364,7 +1375,7 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
         Vec02 axes[2];
         Vec02 dir = normal;
         BuildPerpendicularPair(&dir, &axes[0], &g_unitXVector, &g_unitZVector);
-        ComputeOscillatorDisplacement(50.0f, ((Oscillated_1BA5B0*)other->f278)->oscillator, &point, &axes[0], 0, &axes[0], 0);
+        ComputeOscillatorDisplacement((Oscillator*)(((Oscillated_1BA5B0*)other->f278)->oscillator), 50.0f, &point, &axes[0], 0, &axes[0], 0);
         Vu0::Set(normal, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(axes[0]), Vu0::Q(axes[1])), Vu0::Q(g_unitZVector)));
     }
     f32 push;
@@ -1388,7 +1399,7 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
         Vec02 spinRest;
         Vec02 target3;
         Vec02 target4;
-        GetAttachedSetPointMotion(other, &self->v140, &hit, &hitVel);
+        GetAttachedSetPointMotion(other, &self->v140, (Quad16*)&hit, (Quad16*)&hitVel);
         Vu0::Q(force) = Vu0::Sub(Vu0::Q(hit), Vu0::Q(self->v150));
         f32 dot = SplitVectorAlongAxis(&force, &normal, &along, &rest);
         f32 scale = 1.0f;
@@ -1528,7 +1539,7 @@ void SetColliderOverrideRadius(Collider* self, f32 v)
 
 void ResetColliderAnchors(void* self)
 {
-    SetColliderAnchors(self, 3, 0, 3, 0);
+    SetColliderAnchors((Collider*)self, 3, 0, 3, 0);
 }
 
 void GetAnchorPreset(s32 index, s32* out, Vec02* dst)
@@ -1724,8 +1735,8 @@ s32 CollectContactingPartsToScriptList(Collider* self, s32 value)
             ContactEnd03* s = &e->end[idx];
             if (s->part == self) {
                 void* tmp = e->end[1 - idx].part;
-                if (ScriptListContainsValue(value, &tmp) == 0) {
-                    if (AppendPropertyToScriptList(value, &tmp) == 0) return 0;
+                if (ScriptListContainsValue((ScriptValueFilter*)value, &tmp) == 0) {
+                    if (AppendPropertyToScriptList((ScriptListBuilder*)value, &tmp) == 0) return 0;
                 }
             }
             e = e->next;
@@ -1744,7 +1755,7 @@ s32 CollectContactingParts(Collider* obj, s32* outCount, void*** outArr)
     for (nd = own->contacts->head; nd; nd = nd->next) {
         for (it = nd->head; it; it = it->next) {
             s32 g = it->end[0].body != own;
-            if (IsObjectDescendantOf(*(void**)((u8*)it + (g << 6) + 4), obj))
+            if (IsObjectDescendantOf((BaseObject*)(*(void**)((u8*)it + (g << 6) + 4)), obj))
                 n++;
         }
     }
@@ -1753,7 +1764,7 @@ s32 CollectContactingParts(Collider* obj, s32* outCount, void*** outArr)
     for (nd = own->contacts->head; nd; nd = nd->next) {
         for (Contact03* it2 = nd->head; it2; it2 = it2->next) {
             s32 f = it2->end[0].body != own;
-            if (IsObjectDescendantOf(*(void**)((u8*)it2 + (f << 6) + 4), obj)) {
+            if (IsObjectDescendantOf((BaseObject*)(*(void**)((u8*)it2 + (f << 6) + 4)), obj)) {
                 void* v = *(void**)((u8*)it2 + ((1 - f) << 6) + 4);
                 void** p;
                 for (p = arr; p < end; p++)
@@ -1833,7 +1844,7 @@ void UpdateTouchingParts(Collider* self)
     }
 }
 
-s32 RequestColliderLaunch(Collider* self)
+s32 RequestColliderLaunch(Collider* self, void* source, TrackedNodeOffer* offer)
 {
     return 0;
 }
@@ -1957,7 +1968,7 @@ void AdvanceColliderMeshMotion(Collider* self, f32 dt)
     }
 }
 
-void MoveCollider(Collider* self, void* b, f32 x)
+void MoveCollider(Collider* self, f32 x, void* b)
 {
     if (self->hook != 0) {
         AdvanceColliderMeshMotion(self, x);
@@ -1966,10 +1977,10 @@ void MoveCollider(Collider* self, void* b, f32 x)
 }
 
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-s32 CreatePooledContact(f32 z, Collider* self, s32 a, Vec02* origin, Vec02* dir, s32 kind, s32 b, s32 c, Contact03** out);
+PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 void NotifyContactEnds(World* world, s32 n, Contact03** list);
 void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
-void FreePooledContactChain(void* pool, Contact03* head);
+void FreePooledContactChain(World* world, Contact03* head);
 
 void ApplyColliderImpulseEvent(void* a0, f32 value, void* a1, void* a2)
 {
@@ -2022,7 +2033,7 @@ void CopyColliderMeshesInFrame(Collider* self, Collider* src, s32 extra)
 {
     Vec02 m[4];
     Mesh03 tmp;
-    BuildMatrixFromRotationAndTranslation((u8*)src + 0x100, (u8*)src + 0xD0, m);
+    BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)src + 0x100), (const Mat02*)((u8*)src + 0xD0), (Mat4A*)m);
     f32 maxDist = 0.0f;
     for (s32 i = 0; i < src->mesh.vertCount; i++) {
         f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(((Vec02*)src->mesh.verts)[i]), Vu0::Q(((Vec02*)src->mesh.verts)[i])));
@@ -2034,7 +2045,7 @@ void CopyColliderMeshesInFrame(Collider* self, Collider* src, s32 extra)
     tmp = src->mesh;
     tmp.vertCount = tmp.vertCount + extra;
     CopyMeshTransformed(&tmp, (s32)m, &self->mesh);
-    BuildMatrixFromRotationAndTranslation((u8*)self + 0x140, (u8*)self + 0x110, m);
+    BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)self + 0x140), (const Mat02*)((u8*)self + 0x110), (Mat4A*)m);
     CopyMeshTransformed(&self->mesh, (s32)m, &self->meshCopy);
     self->f4B8 = 0;
     CloneTreeNodes(&src->meshCopy, &src->tree, &self->meshCopy, &self->tree);
@@ -2058,7 +2069,7 @@ void ExtractContactsByPartMode(Collider* self, Contact03** out)
                     if (e) {
                         switch (e->f4E0) {
                         case 1: {
-                            Contact03* c = TakePoolSlot((u8*)self->world + 0x1AFC);
+                            Contact03* c = (Contact03*)TakePoolSlot(&self->world->pool1AFC);
                             *c = *n;
                             c->next = *out;
                             *out = c;
@@ -2082,11 +2093,12 @@ void ExtractContactsByPartMode(Collider* self, Contact03** out)
                 h = h->next;
             } while (h);
         }
-        FreePooledContactChain((u8*)self->world, freed);
+        FreePooledContactChain((World*)self->world, freed);
     }
 }
 
-s32 FindPlaneTreeNodeForPoint(void* a, s32 b);
+struct TreeNode03;
+s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
 
 s32 IsPointInsideCollider(Collider* self, Vec02* p)
 {
@@ -2096,7 +2108,7 @@ s32 IsPointInsideCollider(Collider* self, Vec02* p)
             return 1;
         }
     }
-    if (self->tree.nodes != 0 && FindPlaneTreeNodeForPoint(p, (s32)self->tree.nodes) != 0) {
+    if (self->tree.nodes != 0 && FindPlaneTreeNodeForPoint((Vec02*)p, self->tree.nodes) != 0) {
         return 1;
     }
     return 0;
@@ -2133,7 +2145,7 @@ struct ImpulseRow {
     Vec02 angular;          // 0x10
 };
 
-void ConstrainVectorByParentAnchor(Collider* self, Vec02* anchor, Vec02* in, Vec02* out, Vec02* dir);
+void ConstrainVectorByParentAnchor(Collider* self, VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
 void ApplyColliderInverseInertia(Collider* self, Vec02* in, Vec02* out);
 
 void ComputeColliderImpulseResponse(void* self, s32 a1, Contact03* c, s32 idx, ContactEnd03* hit, ImpulseRow* rows)
@@ -2158,11 +2170,11 @@ void ComputeColliderImpulseResponse(void* self, s32 a1, Contact03* c, s32 idx, C
         }
         ImpulseRow* row = &rows[b->index];
         Vu0::Set(arm, Vu0::Cross(Vu0::Sub(Vu0::Q(e->v10), Vu0::Q(b->v140)), Vu0::Q(dir)));
-        ConstrainVectorByParentAnchor(b, &b->v440, &dir, &v, &dir);
+        ConstrainVectorByParentAnchor(b, (VectorConstraint*)&b->v440, &dir, &v, &dir);
         Vu0::Q(k) = Vu0::FromFloat(1.0f / b->mass);
         Vu0::Q(row->linear) = Vu0::MulX(Vu0::Q(v), Vu0::Q(k));
         ApplyColliderInverseInertia(b, &arm, &row->angular);
-        ConstrainVectorByParentAnchor(b, &b->v460, &row->angular, &row->angular, 0);
+        ConstrainVectorByParentAnchor(b, (VectorConstraint*)&b->v460, &row->angular, &row->angular, 0);
     }
 }
 
@@ -2188,8 +2200,8 @@ void AddParentVelocityToChildRows(void* unusedA, void* unusedB, s32 n, Collider*
             Vu0::Q(mine->angular) = Vu0::Add(Vu0::Vec::Of(mine->angular), Vu0::Vec::Of(par->angular)).q;
             continue;
         }
-        ConstrainVectorByParentAnchor(o, &o->v440, &vel, 0, &vel);
-        ConstrainVectorByParentAnchor(o, &o->v460, &par->angular, 0, &ang);
+        ConstrainVectorByParentAnchor(o, (VectorConstraint*)&o->v440, &vel, 0, &vel);
+        ConstrainVectorByParentAnchor(o, (VectorConstraint*)&o->v460, &par->angular, 0, &ang);
         if (o->mode470 != 3) {
             s32 still = __builtin_fabsf(Vu0::ToFloatMoved(Vu0::Vec::Of(o->offset))) < 0.0001f
                 && __builtin_fabsf(Vu0::ToFloatY(Vu0::Vec::Of(o->offset))) < 0.0001f
@@ -2213,7 +2225,7 @@ void AddParentVelocityToChildRows(void* unusedA, void* unusedB, s32 n, Collider*
                     f32 roSq = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(ro), Vu0::Vec::Of(ro)));
                     Vu0::Q(t) = Vu0::Cross(Vu0::Vec::Of(vel), Vu0::Vec::Of(ro)).q;
                     Vu0::Q(t) = Vu0::MulX(Vu0::Vec::Of(t), Vu0::Vec::Scalar(mass / (mass + d / offsetSq) / roSq)).q;
-                    ConstrainVectorByParentAnchor(o, &o->v460, &t, &t, 0);
+                    ConstrainVectorByParentAnchor(o, (VectorConstraint*)&o->v460, &t, &t, 0);
                     Vu0::Q(ang) = Vu0::Add(Vu0::Vec::Of(ang), Vu0::Vec::Of(t)).q;
                 }
             }
@@ -2246,13 +2258,14 @@ struct SolveHandler_1BCD00 { SolveHandlerDesc_1BCD00* desc; };
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
 void AddActiveSetItem(ActiveSetSolver* loc, ActiveSetItem* item);
-void RunActiveSetSolver(ActiveSetSolver* loc, s32 a1, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
-void ApplySolvedImpulsesToParts(f32 a, f32 b, ActiveSetSolver* loc, s32 n, s32* counts, void** lists);
+// Left with pointers: RunActiveSetSolver takes the contact list, the counts and the lists as s32.
+void RunActiveSetSolver(ActiveSetSolver* self, s32 flags, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
+void ApplySolvedImpulsesToParts(ActiveSetSolver* self, s32 n, s32* counts, Collider*** lists, f32 maxLin, f32 maxAng);
 void ResetActiveSetSolver(ActiveSetSolver* self);
-void RefreshContactEndPoints(World* world, s32 n, SolveContact_1BCD00** list);
+void RefreshContactEndPoints(World* world, s32 n, Contact03** list);
 void AddFrictionItemsAndSolve(f32 dt, ActiveSetSolver* loc, s32 flags, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
 f32 RandomFloatInRange(f32 a, f32 b);
 
@@ -2355,7 +2368,7 @@ void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 
             }
         }
         RunActiveSetSolver(&loc, 4, n, contacts, counts, lists);
-        ApplySolvedImpulsesToParts(100.0f, 1.0f, &loc, nParts, counts, lists);
+        ApplySolvedImpulsesToParts(&loc, nParts, counts, (Collider***)lists, 100.0f, 1.0f);
         for (s32 j = 0; j < nParts; j++) {
             parts[j]->desc03()->m2F(parts[j], 0);
         }
@@ -2365,7 +2378,7 @@ void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 
         ResetActiveSetSolver(&loc);
     }
     if (flags & 1) {
-        RefreshContactEndPoints(world, n, contacts);
+        RefreshContactEndPoints(world, n, (Contact03**)contacts);
         NotifyContactEnds(world, n, list);
         for (s32 j = 0; j < n; j++) {
             ActiveSetItem* it = (ActiveSetItem*)(loc.items + j * 0x60);
@@ -2395,9 +2408,9 @@ void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 
     }
     AddFrictionItemsAndSolve(dt, &loc, flags & ~4, n, contacts, counts, lists);
     if (flags & 1) {
-        ApplySolvedImpulsesToParts(5000.0f, 50.0f, &loc, nParts, counts, lists);
+        ApplySolvedImpulsesToParts(&loc, nParts, counts, (Collider***)lists, 5000.0f, 50.0f);
     } else {
-        ApplySolvedImpulsesToParts(5000.0f, 50.0f, &loc, nParts, counts, lists);
+        ApplySolvedImpulsesToParts(&loc, nParts, counts, (Collider***)lists, 5000.0f, 50.0f);
     }
 done:
     for (i = 0; i < nParts; i++) {
@@ -2601,7 +2614,7 @@ void ProcessColliderGroup(World* ctx, s32 n, Collider** arr, f32 f, s32 ex)
     for (i = half; i < n; i++) {
         ListWalk::Begin(&it, &arr[i]->parts);
         for (p = ListWalk::Next(&it); p; p = ListWalk::Next(&it)) {
-            SetColliderForcedState(p, 1);
+            SetColliderForcedState((Collider*)p, 1);
         }
         ListWalk::End(&it);
     }
@@ -2609,7 +2622,7 @@ void ProcessColliderGroup(World* ctx, s32 n, Collider** arr, f32 f, s32 ex)
     for (i = half; i < n; i++) {
         ListWalk::Begin(&it, &arr[i]->parts);
         for (p = ListWalk::Next(&it); p; p = ListWalk::Next(&it)) {
-            SetColliderForcedState(p, 0);
+            SetColliderForcedState((Collider*)p, 0);
         }
         ListWalk::End(&it);
     }
@@ -2675,7 +2688,7 @@ void ProcessColliderGroups(World* self, s32 flags, f32 f)
         }
         ProcessColliderGroup(self, c.n1, arr1, f, flags);
         for (i = 0; i < c.n1; i++) {
-            if (!IsObjectTreeAtRest(arr1[i])) {
+            if (!IsObjectTreeAtRest((Actor6C*)arr1[i])) {
                 ClearRootTries(arr1[i]);
             }
         }
@@ -2700,8 +2713,9 @@ void SwapSortRecords(u8* base, s32 stride, s32 rowB, s32 rowA)
     }
 }
 
-void HeapSortRecords(u8* base, s32 n, s32 size, SortCompareFn cmp)
+void HeapSortRecords(void* records, s32 n, s32 size, SortCompareFn cmp)
 {
+    u8* base = (u8*)records;
     if (n < 2) return;
     s32 end = n - 1;
     s32 start = n / 2;

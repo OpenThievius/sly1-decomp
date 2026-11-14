@@ -12,6 +12,9 @@
 #include "asm_func.h"
 #include "fpu.h"
 
+// Types other files define, named by the parameters of their functions declared here.
+struct PadPatternPlayer;
+
 // The pad and button-code file: the pad records D_00262C70 and D_00262D38, their connection
 // state machine and input polling, the repeating step readers, and the cheat-code list with its
 // nine slots. Its .rodata is the password message (0x24A848); its .data runs from 0x262A30 to
@@ -29,7 +32,7 @@ void ClearButtonCodeFlags(void);
 void SetButtonCodeFlags(s32 flags);
 void ShowPasswordMessage(void);
 void FlagAllNumberedItems(void);
-void SetSavedWorldBits(void);
+void SetSavedWorldBits(u32 value);
 void MarkAllLevelRecordsComplete(void);
 ButtonCodeSlot g_worldLoadButtonCode = { { (const u16*)g_worldLoadButtonSequence, 0xB, (ButtonCodeFn)RequestWorldLoadByMode, 0x0 } };
 u32 g_clearFlagsButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800 };
@@ -65,7 +68,7 @@ struct ButtonCodeTimer { f32 time; f32 pad[3]; };
 ButtonCodeTimer D_00262E00 = { 0.0f, { 0.0f, 0.0f, 0.0f } };
 
 void UpdatePadRouting(void);
-s32 InitPadLibrary(void* a);
+extern "C" s32 InitPadLibrary(s32 mode);
 void InitPadRecord(PadRecord* self, s32 a, s32 b);
 
 void InitPadSystem(void)
@@ -118,9 +121,9 @@ void UpdatePadRouting()
     g_padRouting = 7;
 }
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void* ReservePermanentMemory(s32 size);
-s32 OpenPadPort(s32 a, s32 b, s32 c);
+extern "C" s32 OpenPadPort(s32 port, s32 slot, u8* buffer);
 void SetPadConnectionState(PadRecord* self, s32 mode, s32 n);
 
 void InitPadRecord(PadRecord* self, s32 a, s32 b)
@@ -129,24 +132,24 @@ void InitPadRecord(PadRecord* self, s32 a, s32 b)
     SetPadConnectionState(self, 1, 0);
     self->f04 = a;
     self->f08 = b;
-    s32 size = ((s32)ReservePermanentMemory(0x140) + 0x3F) & -0x40;
-    self->f0C = size;
-    OpenPadPort(self->f04, self->f08, size);
+    u8* buffer = (u8*)(((s32)ReservePermanentMemory(0x140) + 0x3F) & -0x40);
+    self->f0C = buffer;
+    OpenPadPort(self->f04, self->f08, buffer);
     self->fBC = ReservePermanentMemory(0x20);
     self->fC0 = 1;
 }
 
-s32 GetPadSlotState(s32 a, s32 b);
-s32 GetPadReplyListValue(s32 a, s32 b, s32 c, s32 d);
-s32 SendPadTwoWordRequest(s32 a, s32 b, s32 c, s32 d);
-s32 GetPadReplyTableByte(s32 a, s32 b, s32 c, s32 d);
-void* FillMemory(void* p, s32 value, s32 size);
-s32 SendPadSixByteRequest(s32 a, s32 b, u8* buf);
-s32 HasFullPadMask(s32 a, s32 b);
-s32 SendFullPadMask(s32 a, s32 b);
-s32 GetPadRequestMode(s32 a, s32 b);
+extern "C" s32 GetPadSlotState(s32 port, s32 slot);
+extern "C" s32 GetPadReplyListValue(s32 port, s32 slot, s32 kind, s32 index);
+extern "C" s32 SendPadTwoWordRequest(s32 port, s32 slot, s32 a2, s32 a3);
+extern "C" s32 GetPadReplyTableByte(s32 port, s32 slot, s32 index, s32 kind);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+extern "C" s32 SendPadSixByteRequest(s32 port, s32 slot, u8* src);
+extern "C" s32 HasFullPadMask(s32 port, s32 slot);
+extern "C" s32 SendFullPadMask(s32 port, s32 slot);
+extern "C" s32 GetPadRequestMode(s32 port, s32 slot);
 s32 PollPadInput(PadRecord* self);
-void UpdatePadPattern(void* p);
+void UpdatePadPattern(PadPatternPlayer* s);
 void SetPadConnectionState(PadRecord* self, s32 mode, s32 n);
 
 void UpdatePadConnection(PadRecord* self)
@@ -284,7 +287,7 @@ void UpdatePadConnection(PadRecord* self)
         {
             if (self->fC0 != 0 && self->f18 >= 3)
             {
-                UpdatePadPattern(self->fBC);
+                UpdatePadPattern((PadPatternPlayer*)self->fBC);
             }
         }
         else
@@ -297,7 +300,7 @@ void UpdatePadConnection(PadRecord* self)
     SetPadConnectionState(self, mode, n);
 }
 
-void RequestPadPattern(void* a, s32 b, s32 c);
+void RequestPadPattern(PadPatternPlayer* self, s32 a1, s32 a2);
 
 void SetPadConnectionState(PadRecord* self, s32 mode, s32 n)
 {
@@ -316,7 +319,7 @@ void SetPadConnectionState(PadRecord* self, s32 mode, s32 n)
     }
     if (self->f18 < 3 && n >= 3)
     {
-        RequestPadPattern(self->fBC, self->f04, self->f08);
+        RequestPadPattern((PadPatternPlayer*)self->fBC, self->f04, self->f08);
     }
     if (next == 3)
     {
@@ -397,9 +400,9 @@ void ReadAnalogStick(PadRecord* p, u8 x, u8 y, f32* outX, f32* outY, f32* outMag
     *prevY = y;
 }
 
-void* FillMemory(void* p, s32 value, s32 size);
-s32 ReadPadFrame(s32 a, s32 b, u8* c);
-void CopyMemory(u8* dst, u8* src, s32 n);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+extern "C" s32 ReadPadFrame(s32 port, s32 slot, u8* data);
+void CopyMemory(void* dst, void* src, u32 size);
 void AdvanceButtonCodes(PadRecord* p, s32 old);
 
 s32 PollPadInput(PadRecord* self)
@@ -468,14 +471,15 @@ void ClearPadPressedBits(PadRecord* self, u32 mask)
     self->flags &= (u16)~m;
 }
 
-void StartPadPatternFromTable(void* p);
+struct PadPatternPlayer;
+void StartPadPatternFromTable(PadPatternPlayer* self, s32 index, f32 time);
 
-void StartPadRecordPattern(PadRecord* self)
+void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration)
 {
     if (self->pC0 == 0) return;
     if (self->f18 < 3) return;
     if (self->f14 != 3) return;
-    StartPadPatternFromTable(self->fBC);
+    StartPadPatternFromTable((PadPatternPlayer*)self->fBC, pattern, duration);
 }
 
 LINKER_REMNANT(func_0016EC80);
@@ -562,7 +566,7 @@ done:
     return self->f28;
 }
 
-void ClearPadPressedBits(PadRecord* self, s32 mask);
+void ClearPadPressedBits(PadRecord* self, u32 mask);
 
 s32 GetPadVerticalStep(PadRecord* self)
 {
@@ -723,7 +727,9 @@ void AdvanceButtonCodes(PadRecord* self, s32 value)
 }
 
 void ResetButtonCodes(void);
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 void RunCompletedButtonCode(void)
 {
@@ -753,7 +759,7 @@ void RunCompletedButtonCode(void)
         p = *link;
     }
     if (best != 0) {
-        StartSoundEffect(0x79, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
+        StartSoundEffect(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         best->fn(best->arg);
     }
     ResetButtonCodes();
@@ -788,8 +794,8 @@ LINKER_REMNANT(func_0016F470);
 extern const char D_002483B8[24];
 
 s32 ComputeCompletionMask(void);
-void* CopyString(char* dst, const u8* src);
-s32 FormatToString(char* dst, const u8* fmt, ...);
+void* CopyString(void* dst, const char* src);
+s32 FormatToString(char* dst, const char* fmt, ...);
 
 void ShowPasswordMessage(void)
 {
@@ -800,12 +806,12 @@ void ShowPasswordMessage(void)
         if ((ComputeCompletionMask() & 6) == 6) {
             if (g_saveData->f19E8 == 99 && g_saveData->f19E0 == 0) {
                 char* p = buf;
-                CopyString(p, (const u8*)D_002483B8);
+                CopyString(p, (const char*)D_002483B8);
                 while (*p != 0) {
                     *p ^= 0x23;
                     p++;
                 }
-                FormatToString(text, (const u8*)D_0024A848, buf);
+                FormatToString(text, (const char*)D_0024A848, buf);
                 g_buttonHintElement.vt->m08(&g_buttonHintElement, text);
                 SetScreenElementHoldTime(&g_buttonHintElement, 10.0f);
                 g_buttonHintElement.vt->m14(&g_buttonHintElement);

@@ -31,7 +31,7 @@ void DrawTextPanelBlocks(Obj_eu_135228* self, PacketWriter* q)
             f32 t = Cosine(g_gameClock[1] * D_00261260[0]) * 0.5f + 0.5f;
             for (u32 i = 0; i < 4; i++)
             {
-                f32 r = ApproachValueWithRamp(self->f5CC[i], self->f5BC[i] ? 1.0f : 0.0f, g_gameClock[2], &D_00261260[2], 0);
+                f32 r = ApproachValueWithRamp(self->f5CC[i], self->f5BC[i] ? 1.0f : 0.0f, g_gameClock[2], (RampProfile*)&D_00261260[2], 0);
                 self->f5CC[i] = r;
                 for (s32 j = 0; j < 4; j++)
                 {

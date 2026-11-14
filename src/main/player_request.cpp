@@ -19,13 +19,17 @@
 #include "vu0.h"
 #include "ring_params.h"
 #include "deferred_request.h"
+#include "object_finder.h"
+
+// Types other files define, named by the parameters of their functions declared here.
+struct TargetArcSource;
 
 s32 D_00274FA0[2] = {286, 287};
 s32 D_00274FA8[2] = {288, 289};
 s32 D_00274FB0[2] = {2, 2};
 s32 D_00274FB8[2] = {48, 64};
 
-struct PlayerTableEntry { s32 id; f32 v; s32 object; };
+struct PlayerTableEntry { s32 id; f32 v; BaseObject* object; };
 PlayerTableEntry g_playerObjectTable[8] = {
     { 0x35, 30.0f, 0 }, { 0x36, 30.0f, 0 }, { 0x37, 30.0f, 0 }, { 0x3A, 30.0f, 0 },
     { 0x50, 60.0f, 0 }, { 0x58, 30.0f, 0 }, { 0x170, 30.0f, 0 }, { 0, 0.0f, 0 }
@@ -59,8 +63,10 @@ struct BlendSlotObject {
     SlotMoverHolder* holder; // 0x9C
 };
 
-BlendSourceEntry* FindEntryByObjectId(void* object, void* body);
-void BuildCombinedBlendAnimation(TurningCollider* self, s32 stride, s32 count, BlendSlot* slots, s32 a, s32 b, s32 c, BlendAnimationView** gr);
+struct BlendAnimation;
+struct Collider;
+BlendSourceEntry* FindEntryByObjectId(BlendAnimationView* self, BaseObject* key);
+void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
 
 struct PlayerBlendItem {
     f32 weight;             // 0x00
@@ -103,16 +109,16 @@ void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAni
             (*m->vtbl)((PoseSource*)m, self, o->f34, one, 0, &a10, 0);
             *(Vu0::Vec*)&it->v10 = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(a0), Vu0::Vec::Of(a10)), Vu0::Vec::ScalarAt(o->f34));
             Vec02 a20;
-            m = (SlotMover*)FindEntryByObjectId(it->object, self->f610)->mover;
+            m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)it->object, (BaseObject*)self->f610)->mover;
             (*m->vtbl)((PoseSource*)m, self->f610, it->f30, one, 0, &a20, 0);
             Vec02 a30;
-            m = (SlotMover*)FindEntryByObjectId(it->object, self->f614)->mover;
+            m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)it->object, (BaseObject*)self->f614)->mover;
             (*m->vtbl)((PoseSource*)m, self->f614, it->f40, one, 0, &a30, 0);
             Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
             *(Vu0::Vec*)&it->v20 = Vu0::MulXSum(Vu0::Vec::Of(a20), h, Vu0::Vec::Of(a30), h);
         }
     }
-    BuildCombinedBlendAnimation((TurningCollider*)self, 0x50, 6, (BlendSlot*)items, 2, (s32)D_00274FB8, (s32)D_00274FB0, &blend);
+    BuildCombinedBlendAnimation((TurningCollider*)self, 0x50, 6, (u8*)items, 2, D_00274FB8, D_00274FB0, (BlendAnimation**)&blend);
     for (s32 j = 0; j < blend->f38; j++) {
         BlendSourceEntry* e = (BlendSourceEntry*)(blend->f3C + j * 0x1C);
         s32 k = e->key;
@@ -159,10 +165,10 @@ void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out)
     }
 }
 ASM_FUNC(func_001D3A38);
-s32 FindNearestSpanObject(void* a, Vec02* from, Vec02* to, s32 count, Collider** list, void* out);
+s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, s32 c, s32 d, s32* count, Collider*** list);
+void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 s32 FindObjectAlongSegment(PlacedObject* self, Vec02* from, Vec02* to, f32* ratio)
 {
@@ -174,14 +180,14 @@ s32 FindObjectAlongSegment(PlacedObject* self, Vec02* from, Vec02* to, f32* rati
     a = *from;
     b = *to;
     PushBackMemoryMark();
-    GatherCollidersInBox(self->world, self, &a, &b, 0, 0, &count, &list);
+    GatherCollidersInBox(self->world, (Collider*)self, &a, &b, 0, 0, &count, &list);
     s32 found = FindNearestSpanObject(0, &a, &b, count, list, &hit);
     *ratio = found != 0 ? Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.q[0]), Vu0::Q(a)))) / Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(b)))) : 1.0f;
     PopBackMemoryMark();
     return found != 0;
 }
 
-f32 ConvertDoubleToFloat(u64 v);
+extern "C" f32 ConvertDoubleToFloat(u64 bits);
 
 s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     f32 rows[16];
@@ -219,8 +225,8 @@ s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     return changed;
 }
 
-u64 ConvertFloatToDouble(f32 x);
-s32 FindObjectAlongSegment(void* p, void* a, void* b, void* out);
+extern "C" u64 ConvertFloatToDouble(f32 x);
+s32 FindObjectAlongSegment(PlacedObject* self, Vec02* from, Vec02* to, f32* ratio);
 
 struct BlendSpan { f32 t; u8 pad4[8]; f32 len; };
 struct BlendSpans { u8 pad0[8]; BlendSpan* a; u8 padC[8]; BlendSpan* b; };
@@ -230,7 +236,7 @@ struct BlendSpans { u8 pad0[8]; BlendSpan* a; u8 padC[8]; BlendSpan* b; };
 
 void InterpolateBlendEntryPosition(void* p, void* e, f32 a, f32 b, s32 i, s32 j, void* out);
 void SetBlendItemWeights(BlendAnimationView* obj, s32 a1, s32 a2, void* a3);
-void SumBlendEntryVectors(s32 a0, void* a1, s32 a2, void* a3);
+void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out);
 
 void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView* g, void* a3)
 {
@@ -276,12 +282,12 @@ void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView*
         lo = (r <? q);
         InterpolateBlendEntryPosition(p, e, lo, t, 2, 3, &va);
         InterpolateBlendEntryPosition(p, e, lo, t, 0, 1, &vb);
-        if (FindObjectAlongSegment(p, &va, &vb, &vc)) {
+        if (FindObjectAlongSegment(p, &va, &vb, (f32*)&vc)) {
             lo = 0.0f;
             hi = 1.0f - vc.x;
         } else if (W(e, 0x144) != 0) {
             InterpolateBlendEntryPosition(p, e, lo, t, 4, 5, &vd);
-            if (FindObjectAlongSegment(p, &vb, &vd, &vc)) {
+            if (FindObjectAlongSegment(p, &vb, &vd, (f32*)&vc)) {
                 lo = vc.x;
                 hi = 0.0f;
             } else {
@@ -298,7 +304,7 @@ void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView*
     u64 tv = ConvertFloatToDouble(t);
     if (FillOuterProductTable(0x50, 3, 2, (char*)e, hv, lv, tv)) {
         SetBlendItemWeights(g, 0x50, 6, e);
-        SumBlendEntryVectors(6, e, (s32)g->pC0->p8, (u8*)p + 0x640);
+        SumBlendEntryVectors(6, (WeightedRow*)e, (f32*)g->pC0->p8, (Vec02*)((u8*)p + 0x640));
     }
 }
 
@@ -323,9 +329,9 @@ struct TurnBlendRecords {
 };
 
 void SetBlendItemWeights(BlendAnimationView* obj, s32 a1, s32 a2, void* a3);
-void SumBlendEntryVectors(s32 a0, void* a1, s32 a2, void* a3);
+void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out);
 
-void SetPlayerBlendWeights(TurningCollider* a0, TurnBlendRecords* a1, BlendAnimationView* a2, f32 f12, f32 f13)
+void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecords* a1, BlendAnimationView* a2)
 {
     a0->f638 = f12;
     if (a1->f54 == 0) {
@@ -341,7 +347,7 @@ void SetPlayerBlendWeights(TurningCollider* a0, TurnBlendRecords* a1, BlendAnima
     a1->fF0 = 0;
     a1->f190 = 0;
     SetBlendItemWeights(a2, 0x50, 6, a1);
-    SumBlendEntryVectors(6, a1, (s32)a2->pC0->p8, &a0->f640);
+    SumBlendEntryVectors(6, (WeightedRow*)a1, (f32*)a2->pC0->p8, (Vec02*)&a0->f640);
 }
 
 void CreateEightEntryBlend(TurningCollider* self, BlendSlot* slots, BlendAnimationView** gr)
@@ -369,7 +375,7 @@ void CreateEightEntryBlend(TurningCollider* self, BlendSlot* slots, BlendAnimati
             case 2:
             case 4:
             case 6: {
-                SlotMover* m = (SlotMover*)FindEntryByObjectId(e->object, self->f610)->mover;
+                SlotMover* m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)e->object, (BaseObject*)self->f610)->mover;
                 (*m->vtbl)((PoseSource*)m, self->f610, 0.0f, 1.0f, 0, 0, &e->v10);
                 break;
             }
@@ -377,14 +383,14 @@ void CreateEightEntryBlend(TurningCollider* self, BlendSlot* slots, BlendAnimati
             case 3:
             case 5:
             case 7: {
-                SlotMover* m = (SlotMover*)FindEntryByObjectId(e->object, self->f614)->mover;
+                SlotMover* m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)e->object, (BaseObject*)self->f614)->mover;
                 (*m->vtbl)((PoseSource*)m, self->f614, 0.0f, 1.0f, 0, 0, &e->v10);
                 break;
             }
             }
         }
     }
-    BuildCombinedBlendAnimation(self, 0x20, 8, slots, 0, 0, 0, gr);
+    BuildCombinedBlendAnimation(self, 0x20, 8, (u8*)slots, 0, 0, 0, (BlendAnimation**)gr);
     SetBlendItemWeights(*gr, 0x20, 8, slots);
 }
 // The three weights of the slots base[0], base[2] and base[4] that follow self->v640: each is
@@ -454,14 +460,14 @@ void UpdateEightEntryBlendWeights(Player* self, BlendSlot* slots, BlendAnimation
 }
 static inline f32 MinF(f32 a, f32 b) { return b <? a; }
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
-void ComputePolarOffset(Vec02* out, f32 angle, f32 radius, f32 z);
+void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 
 // The velocity of a heading and speed, from six axes of the basis: forward (y) by the
 // heading's length ahead, and right or left by its side (x), the set picked by the walk mode.
-void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, f32 heading, f32 speed)
+void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, BlendAnimationView* blend, f32 heading, f32 speed)
 {
     Vec02 h;
-    ComputePolarOffset(&h, heading - self->f638, speed, 0.0f);
+    ComputePolarOffset((Vec3*)&h, heading - self->f638, speed, 0.0f);
     f32 m;
     if (10.0f < h.y) {
         if (self->fA14 == 0) {
@@ -500,7 +506,6 @@ void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, f32 heading,
 
 
 u8* CopyToFrontMemory(s32 size, void* src);
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 
 void ResolvePlayerTableObjects(Player* self)
 {
@@ -514,8 +519,8 @@ void ResolvePlayerTableObjects(Player* self)
 
 
 void AddColliderForce(Collider* self, Vec02* force);
-void SteerColliderTowardPosition(Collider* self, void* a, void* b, const Vec02* target, const f32* ramp, f32 dt);
-void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* from, f32* to);
+void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
+void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
 
 void StepPlayerRequestState(Player* self)
 {
@@ -527,7 +532,7 @@ void StepPlayerRequestState(Player* self)
         Vu0::Q(k) = Vu0::FromFloat(-1.0f);
         Vu0::Q(force) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(k));
         AddColliderForce(self, &force);
-        SteerColliderTowardPosition(self, 0, 0, &D_00248D30, D_00275020, g_gameClock.dt);
+        SteerColliderTowardPosition(self, 0, 0, (Vec02*)&D_00248D30, D_00275020, g_gameClock.dt);
         break;
     }
     case 0x29:
@@ -557,19 +562,21 @@ void StepPlayerRequestState(Player* self)
     TurnColliderTowardRotation(self, g_gameClock.dt, &self->m660, &self->f6E0);
 }
 
-f32 ArctangentOfRatio(f32 a, f32 b);
-f32 ApproachAngleWithRamp(f32* p, s32 a, f32 b, f32 c, f32 d);
-s32 IsObjectOfKind(void* e, s32 k);
+struct TargetCand;
+struct Chooser;
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
+f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 void RunPlayerCallback(Player* self);
 void SetPlayerState(Player* self, s32 a, s32 b);
-s32 ChoosePlayerTargetByCost(Player* self, void* b);
-void ComputeTargetArc(Player* self, void* s2, f32 f, void* a2, void* a3, void* a4);
+s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep);
+void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Vec02* pos, Vec02* acc);
 
 void UpdatePlayerRequestSubState(Player* self) {
     switch (self->f2228) {
     case 0x2B: {
         f32 t = ArctangentOfRatio(self->v150.y, self->v150.x);
-        self->f638 = ApproachAngleWithRamp(D_00275030, 0, self->f638, t + 3.1415927f, g_gameClock.dt);
+        self->f638 = ApproachAngleWithRamp(self->f638, t + 3.1415927f, g_gameClock.dt, D_00275030, 0);
         if (0.25f < g_gameClock.time - self->f222C && self->f690 != 0) {
 
             RunPlayerCallback(self);
@@ -580,31 +587,31 @@ void UpdatePlayerRequestSubState(Player* self) {
         if (*(f32*)((u8*)self->f2514 + 0x18) < g_gameClock.time) {
             RunPlayerCallback(self);
         } else if (self->f2B70 != 0 && *(f32*)((u8*)self->f2514 + 0x18) < g_gameClock.time + 0.25f &&
-                   (IsObjectOfKind(self->f2B70, 0x76) || IsObjectOfKind(self->f2B70, 0x70) ||
-                    IsObjectOfKind(self->f2B70, 0x71) || IsObjectOfKind(self->f2B70, 0x81) ||
-                    IsObjectOfKind(self->f2B70, 0x6F) || IsObjectOfKind(self->f2B70, 0x7F))) {
+                   (IsObjectOfKind((BaseObject*)self->f2B70, 0x76) || IsObjectOfKind((BaseObject*)self->f2B70, 0x70) ||
+                    IsObjectOfKind((BaseObject*)self->f2B70, 0x71) || IsObjectOfKind((BaseObject*)self->f2B70, 0x81) ||
+                    IsObjectOfKind((BaseObject*)self->f2B70, 0x6F) || IsObjectOfKind((BaseObject*)self->f2B70, 0x7F))) {
             if (self->f26B0 != 0) {
                 RunPlayerCallback(self);
             } else {
                 void* o = self->f2B70;
                 SetPlayerState(self, 2, 2);
-                s32 r = ChoosePlayerTargetByCost(self, o);
+                s32 r = ChoosePlayerTargetByCost((Chooser*)self, (TargetCand*)o);
                 SetPlayerState(self, 2, r);
             }
         } else {
-            ComputeTargetArc(self, &self->f2B70, *(f32*)((u8*)self->f2514 + 0x18) - g_gameClock.time, 0, (u8*)self->f2514 + 0x20, 0);
+            ComputeTargetArc(self, (TargetArcSource*)&self->f2B70, *(f32*)((u8*)self->f2514 + 0x18) - g_gameClock.time, 0, (Vec02*)((u8*)self->f2514 + 0x20), 0);
         }
         break;
     }
     }
 }
 
-void SetPlayerCallback(Player* self, s32 value)
+void SetPlayerCallback(Player* self, void (*value)(Player* self))
 {
-    self->f26B0 = value;
+    self->cb26B0 = value;
 }
 
-extern void EndPlayerRequestState(Player* self);
+extern void EndPlayerRequestState(void* self);
 extern void SetPlayerState(Player* self, s32 mode, s32 count);
 
 void RunPlayerCallback(Player* self)
@@ -631,18 +638,19 @@ void ContinuePlayerRequestKind0(Player* self);
 void ContinuePlayerRequestKind6(Player* self);
 void ContinuePlayerSubState2A(Player* self);
 void ContinuePlayerRequestKind1Or2(Player* self);
-void FinishPlayerRequest(void);
+void FinishPlayerRequest(Player* self);
 
 typedef void (*PlayerRequestFn)(s32 data, Player* self);
 struct PlayerRequestMessage { Player* self; s32 v; };
 
-void TriggerScriptEvent(s32 target, s32 a, s32 b, Ev07** c);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 void SetPlayerState(Player* self, s32 a, s32 b);
-void SetPlayerCallback(Player* self, s32 value);
-s32 IsPadSelectFlagHeld(s32 p);
+s32 IsPadSelectFlagHeld(World* self);
 s32 MaskWorldBitsBySave(void);
 s32 HasSpareCount(void);
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 extern u32 g_buttonCodeFlags;
 extern f32 g_gameTime[];
 
@@ -653,13 +661,13 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
     }
     if (self->f2220 == 6 && self->f239C == 2) {
         Ev07* tmp = msg;
-        TriggerScriptEvent((s32)self->heldObject, 0x13, 1, &tmp);
+        TriggerScriptEvent((BaseObject*)self->heldObject, 0x13, 1, &tmp);
         SetPlayerState(self, 2, 5);
         return 0;
     }
     self->f26B4 = *msg;
     if (self->f2220 != 4 && self->f2220 != 0xB && self->f26C4 == 0 && (g_buttonCodeFlags & 1) == 0 &&
-        IsPadSelectFlagHeld((s32)self->world) == 0) {
+        IsPadSelectFlagHeld(self->world) == 0) {
         s32 c;
         switch (self->f26B4.kind) {
         case 3:
@@ -696,7 +704,7 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
                 SetPlayerState(self, 4, 0x2B);
             }
         }
-        SetPlayerCallback(self, (s32)ContinuePlayerRequestKind0);
+        SetPlayerCallback(self, ContinuePlayerRequestKind0);
         break;
     case 6:
         {
@@ -711,7 +719,7 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
         if (400.0f < self->v150.z) {
             StartSoundEffect(0xA3, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
-        SetPlayerCallback(self, (s32)ContinuePlayerRequestKind6);
+        SetPlayerCallback(self, ContinuePlayerRequestKind6);
         break;
     case 1:
     case 2: {
@@ -733,13 +741,13 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
             break;
         }
         SetPlayerState(self, 4, id);
-        SetPlayerCallback(self, (s32)ContinuePlayerRequestKind1Or2);
+        SetPlayerCallback(self, ContinuePlayerRequestKind1Or2);
         break;
     }
     case 3:
         if (self->f2730 == 0 || HasSpareCount() != 0) {
             SetPlayerState(self, 4, 0x27);
-            SetPlayerCallback(self, (s32)FinishPlayerRequest);
+            SetPlayerCallback(self, FinishPlayerRequest);
         } else {
             SetPlayerState(self, 4, 0x2F);
         }
@@ -748,7 +756,7 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
         self->desc02()->m20(self, (Vec02*)D_00275040);
         if (HasSpareCount() != 0) {
             SetPlayerState(self, 4, 0x28);
-            SetPlayerCallback(self, (s32)FinishPlayerRequest);
+            SetPlayerCallback(self, FinishPlayerRequest);
         } else {
             SetPlayerState(self, 4, 0x31);
         }
@@ -756,7 +764,7 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
     case 5:
         if (self->f2730 == 0 || HasSpareCount() != 0) {
             SetPlayerState(self, 4, 0x29);
-            SetPlayerCallback(self, (s32)FinishPlayerRequest);
+            SetPlayerCallback(self, FinishPlayerRequest);
         } else {
             SetPlayerState(self, 4, 0x30);
         }
@@ -772,31 +780,32 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
 }
 
 s32 HasSpareCount(void);
-void FinishSwitchedCollider(Player* o);
+void FinishSwitchedCollider(SwitchedCollider* self);
 void SetPlayerState(Player* o, s32 a, s32 b);
-s32 ChoosePlayerTargetByCost(Player* o, void* p);
-void SetPlayerCallback(Player* o, s32 value);
-void FinishPlayerRequest(void);
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep);
+void SetPlayerCallback(Player* self, void (*value)(Player* self));
+void FinishPlayerRequest(Player* self);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 void ContinuePlayerRequestKind0(Player* self)
 {
     if (self->f2228 == 0x2C && self->f2B70 != 0 &&
-        (IsObjectOfKind(self->f2B70, 0x70) || IsObjectOfKind(self->f2B70, 0x71) ||
-         IsObjectOfKind(self->f2B70, 0x81) || IsObjectOfKind(self->f2B70, 0x6F) ||
-         IsObjectOfKind(self->f2B70, 0x7F) || IsObjectOfKind(self->f2B70, 0x76))) {
+        (IsObjectOfKind((BaseObject*)self->f2B70, 0x70) || IsObjectOfKind((BaseObject*)self->f2B70, 0x71) ||
+         IsObjectOfKind((BaseObject*)self->f2B70, 0x81) || IsObjectOfKind((BaseObject*)self->f2B70, 0x6F) ||
+         IsObjectOfKind((BaseObject*)self->f2B70, 0x7F) || IsObjectOfKind((BaseObject*)self->f2B70, 0x76))) {
         if (HasSpareCount()) {
             FinishSwitchedCollider(self);
             void* p = self->f2B70;
             SetPlayerState(self, 2, 2);
-            SetPlayerState(self, 2, ChoosePlayerTargetByCost(self, p));
+            SetPlayerState(self, 2, ChoosePlayerTargetByCost((Chooser*)self, (TargetCand*)p));
         } else {
             SetPlayerState(self, 4, 0x2D);
         }
     } else {
         if (HasSpareCount()) {
             SetPlayerState(self, 4, 0x24);
-            SetPlayerCallback(self, (s32)FinishPlayerRequest);
+            SetPlayerCallback(self, FinishPlayerRequest);
         } else {
             SetPlayerState(self, 4, 0x2D);
         }
@@ -816,13 +825,14 @@ void ContinuePlayerRequestKind0(Player* self)
     }
 }
 
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 void ContinuePlayerRequestKind6(Player* self)
 {
-    StartSoundEffect(0xA6, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
+    StartSoundEffect(0xA6, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     SetPlayerState(self, 4, 0x2A);
-    SetPlayerCallback(self, (s32)ContinuePlayerSubState2A);
+    SetPlayerCallback(self, ContinuePlayerSubState2A);
 }
 
 void ContinuePlayerSubState2A(Player* self)
@@ -846,7 +856,7 @@ void ContinuePlayerRequestKind1Or2(Player* self)
 }
 
 struct PlayerWorld;
-s32 IsPadSelectFlagHeld(PlayerWorld* k);
+s32 IsPadSelectFlagHeld(World* self);
 extern u32 g_buttonCodeFlags;
 
 s32 IsPlayerRequestBlocked(Player* self, s32 n)
@@ -883,7 +893,7 @@ s32 IsPlayerRequestBlocked(Player* self, s32 n)
         default: {
             s32 r = 0;
             if (self->f2220 == 11) goto set;
-            if (IsPadSelectFlagHeld((PlayerWorld*)self->world) != 0) {
+            if (IsPadSelectFlagHeld((World*)self->world) != 0) {
 set:
                 r = 1;
             }
@@ -900,7 +910,7 @@ set:
     if (v == 11) goto one;
     if (self->f26C4 != 0) goto one;
     if ((g_buttonCodeFlags & 1) != 0) goto one;
-    if (IsPadSelectFlagHeld((PlayerWorld*)self->world) != 0) goto one;
+    if (IsPadSelectFlagHeld((World*)self->world) != 0) goto one;
     goto zero;
 one:
     return 1;
@@ -908,12 +918,12 @@ zero:
     return 0;
 }
 
-void SetCrossfadeRatioDeep(void* self, f32 value);
+void SetCrossfadeRatioDeep(PlacedObject* self, f32 value);
 void SpendReserveUnit(void);
 
 void EndPlayerRequestState(void* self)
 {
-    SetCrossfadeRatioDeep(self, 1.0f);
+    SetCrossfadeRatioDeep((PlacedObject*)self, 1.0f);
     SpendReserveUnit();
 }
 
@@ -929,19 +939,19 @@ s32 CompareSortedTargets(RingEntry* a, RingEntry* b) { if (a->angle < b->angle) 
 
 
 extern PacketWriter g_vifPacketWriter;
-void ProjectPointToCamera(void* cam, Vec02* in, void* out);
-void UnprojectCameraPoint(void* cam, Vec02* in, Vec02* out);
-f32 ArctangentOfRatio(f32 y, f32 x);
+void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
+void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 f32 WrapAngle(f32 a);
 f32 WrapModulo(f32 a, f32 m);
-void SortElements(void* base, s32 n, s32 size, s32 (*cmp)(RingEntry*, RingEntry*));
+void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
 void* InitVertexBatch(VertexBatch* b);
 void BeginDmaTag(PacketWriter* g);
-void SetVertexBatchTransform(VertexBatch* b, u8* a, u8* c);
-void SetVertexBatchMode(VertexBatch* b, AnimRecord* r);
-void SetVertexTexCoord(VertexBatch* b, f32* uv);
-void SetVertexColor(VertexBatch* b, Rgba4* c);
-void SetVertexPosition(VertexBatch* b, Vec02* v);
+void SetVertexBatchTransform(VertexBatch* batch, void* a1, void* a2);
+void SetVertexBatchMode(VertexBatch* batch, u8* value);
+void SetVertexTexCoord(VertexBatch* dst, U64P* src);
+void SetVertexColor(VertexBatch* batch, void* src);
+void SetVertexPosition(VertexBatch* body, Vec3* v);
 void AddVertex(VertexBatch* b, s32 z);
 void FlushVertexBatch(VertexBatch* b);
 void CloseDmaTag(PacketWriter* g);
@@ -969,7 +979,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
     s32 next;
     RingEntry* e;
     Vu0::Vec base;
-    ProjectPointToCamera(g_camera, at, &center);
+    ProjectPointToCamera(g_camera, at, (f32*)&center);
     for (s32 j = 0; j < nAnchors; j++) {
         RingAnchor* anchor = &anchors[j];
         for (s32 k = 0; k < nOffsets; k++) {
@@ -983,7 +993,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
             Vu0::Vec ay = Vu0::Vec::Of(*(Vec02*)(cam + 0xA0));
             *(Vu0::Vec*)&pt = Vu0::MulAddX2(base, ax, sx, ay, sy);
             e = &entries[n];
-            ProjectPointToCamera(g_camera, &pt, e);
+            ProjectPointToCamera(g_camera, &pt, (f32*)e);
             n++;
             e->pos.z = center.z;
             if (e->pos.y < lowest) {
@@ -1003,7 +1013,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
         *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(e->pos), Vu0::Vec::Of(entries[0].pos));
         e->angle = ArctangentOfRatio(d.y, d.x);
     }
-    SortElements(&entries[1], n - 1, 0x20, CompareSortedTargets);
+    SortElements(&entries[1], n - 1, 0x20, (s32 (*)(const void*, const void*))CompareSortedTargets);
     RingEntry* top = entries;
     for (i = 0; i < n;) {
         next = i + 1;
@@ -1049,7 +1059,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
         *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(e->pos), Vu0::Vec::Of(center));
         e->angle = WrapAngle(ArctangentOfRatio(d.y, d.x));
     }
-    SortElements(entries, n, 0x20, CompareSortedTargets);
+    SortElements(entries, n, 0x20, (s32 (*)(const void*, const void*))CompareSortedTargets);
     entries[n] = entries[0];
     {
         Vu0::Vec prev = Vu0::Vec::Of(e[n].pos);
@@ -1078,7 +1088,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
             i = down;
         }
     }
-    SortElements(entries, n, 0x20, CompareSortedTargets);
+    SortElements(entries, n, 0x20, (s32 (*)(const void*, const void*))CompareSortedTargets);
     entries[n] = entries[0];
     VertexBatch batch;
     InitVertexBatch(&batch);
@@ -1097,7 +1107,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
             continue;
         }
         f32 prev = -3.1415927f;
-        SetVertexBatchMode(&batch, tex);
+        SetVertexBatchMode(&batch, (u8*)tex);
         f32 u0 = WrapModulo(g_gameClock.time * params->rate, 1.0f);
         for (i = 0; i <= n;) {
             Vec02 d;
@@ -1124,11 +1134,11 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
                 f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Vec::Of(d)));
                 Vu0::Vec w = Vu0::Vec::Scalar(((rows + r)->x + len * ((rows + r)->y + len * (rows + r)->z)) / len);
                 *(Vu0::Vec*)&pt = Vu0::MulAddX2(Vu0::Vec::Of(center), Vu0::Vec::Of(d), w, Vu0::Vec::Of(g_unitZVector), Vu0::Vec::ScalarAtValue(params->rows[r].lift));
-                UnprojectCameraPoint(g_camera, &pt, &pt);
-                SetVertexTexCoord(&batch, uv);
+                UnprojectCameraPoint(g_camera, (f32*)&pt, &pt);
+                SetVertexTexCoord(&batch, (U64P*)uv);
                 Rgba4 c = *(Rgba4*)&params->rows[r].color;
                 SetVertexColor(&batch, &c);
-                SetVertexPosition(&batch, &pt);
+                SetVertexPosition(&batch, (Vec3*)&pt);
                 AddVertex(&batch, 0);
             }
             i = next;

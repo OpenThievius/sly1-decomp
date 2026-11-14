@@ -1,3 +1,5 @@
+
+struct PacketWriter;
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: draws a gauge box (dark frame, a bar fading from red to grey), then one glyph over it that shakes while the timer runs.
 
@@ -19,18 +21,13 @@ struct Col_eu_1ACEE0 { s32 v[4]; };
 extern Q3_eu_1ACEE0 D_eu_0027DB10;
 
 f32 ApproachValueWithRamp(Q3_eu_1ACEE0* p, s32 a1, f32 f12, f32 f13, f32 f14);
-void SetTextLayoutPosition(Rect_eu_1ACEE0* out, f32 x, f32 y);
-void SetTextLayoutSize(Rect_eu_1ACEE0* out, f32 x, f32 y);
-void SetTextLayoutColor(Rect_eu_1ACEE0* out, Col_eu_1ACEE0* value);
-void SetTextLayoutHorizontalAlign(Rect_eu_1ACEE0* out, s32 flag);
-void SetTextLayoutVerticalAlign(Rect_eu_1ACEE0* out, s32 flag);
 void SetTextLayoutVerticalPlacement(Rect_eu_1ACEE0* out, s32 flag);
-void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, u8* d);
+void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p);
 void PushFontScale(Text_eu_1ACEE0* handle, f32 a, f32 b);
-void DrawFontString(Text_eu_1ACEE0* handle, char* str, Rect_eu_1ACEE0* r, s32 zero, u8* d);
+void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 void PopFontScale(Text_eu_1ACEE0* handle);
 f32 Sine(f32 x);
-f32 Cosine(f32 x);
+extern "C" f32 Cosine(f32 x);
 
 struct Lerp_eu_1ACEE0 {
     static u8 Of(s32 a, s32 b, f32 t)
@@ -69,20 +66,20 @@ void DrawGauge(Self_eu_1ACEE0* self)
     f32 h = self->f584 * y;
     y -= h;
     f32 w = self->f598;
-    SetTextLayoutPosition(&out, self->f52C + self->f590, self->f530 + self->f594);
-    SetTextLayoutSize(&out, w, y);
+    ((Layout_137228*)&out)->Pos(self->f52C + self->f590, self->f530 + self->f594);
+    ((Layout_137228*)&out)->Size(w, y);
     {
         Col_eu_1ACEE0 tmp;
         tmp.v[0] = grey;
-        SetTextLayoutColor(&out, &tmp);
+        ((Layout_137228*)&out)->Color((s32*)&tmp);
     }
-    SetTextLayoutHorizontalAlign(&out, 0);
-    SetTextLayoutVerticalAlign(&out, 0);
+    ((Layout_137228*)&out)->SetF14(0);
+    ((Layout_137228*)&out)->SetF18(0);
     SetTextLayoutVerticalPlacement(&out, 0);
     {
     Rgba_eu_1ACEE0 col;
     col.c[0] = 0x20; col.c[1] = 0x20; col.c[2] = 0x20; col.c[3] = 0xC0;
-    WriteColoredSpritePacket(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, (u8*)&g_gsPacketWriter);
+    WriteColoredSpritePacket(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, (PacketWriter*)&g_gsPacketWriter);
     {
         out.x = self->f52C + self->f590;
         out.y = self->f530 + self->f594 + y;
@@ -93,7 +90,7 @@ void DrawGauge(Self_eu_1ACEE0* self)
         b.c[0] = 0xC0; b.c[1] = 0xC0; b.c[2] = 0xC0; b.c[3] = 0xFF;
         LerpRgba_eu_1ACEE0::Do(&col, &a, &b, t);
     }
-    WriteColoredSpritePacket(out.x, out.y, out.x + out.w, out.y + out.h, col.c[0], col.c[1], col.c[2], col.c[3], (u8*)&g_gsPacketWriter);
+    WriteColoredSpritePacket(out.x, out.y, out.x + out.w, out.y + out.h, col.c[0], col.c[1], col.c[2], col.c[3], (PacketWriter*)&g_gsPacketWriter);
     }
     PushFontScale(self->text, self->f51C, self->f51C);
     VEnt_eu_1ACEE0* ve = &self->text->vtbl[8];
@@ -111,6 +108,6 @@ void DrawGauge(Self_eu_1ACEE0* self)
     out.f18 = 1;
     out.f1C = 1;
     char str[2] = { self->f57C + 0x72, 0 };
-    DrawFontString(self->text, str, &out, 0, (u8*)&g_gsPacketWriter);
+    DrawFontString((Font*)self->text, str, (StringLayout*)&out, 0, (PacketWriter*)&g_gsPacketWriter);
     PopFontScale(self->text);
 }

@@ -9,6 +9,7 @@
 #define LISTED_COLLISION_PART_H
 
 #include "collider.h"
+struct BufferedStream;
 
 // 0x3A: slot 6 appends it to the list (func_00152470), slot 7 removes it (func_00152600),
 // slot 9 keeps the link across the copy.
@@ -27,8 +28,8 @@ typedef char check_ListedCollisionPart[sizeof(ListedCollisionPart) == 0x570 ? 1 
 void InitListedCollisionPart(ListedCollisionPart* self);                       // 0x3A slot 0
 void AddToPartList(ListedCollisionPart* self);                       // 0x3A slot 6
 void RemoveFromPartList(ListedCollisionPart* self);                       // 0x3A slot 7
-void CopyKeepingListLink(ListedCollisionPart* self);                       // 0x3A slot 9
-void LoadListedCollisionPart(ListedCollisionPart* self);                       // 0x3A slot 10
+void CopyKeepingListLink(ListedCollisionPart* self, ListedCollisionPart* src);                       // 0x3A slot 9
+void LoadListedCollisionPart(ListedCollisionPart* self, BufferedStream* stream);                       // 0x3A slot 10
 void StepListedCollisionPart(ListedCollisionPart* self, f32 t);                // 0x3A slot 28
 s32 TestListedCollisionPartMayContact(Collider* self, Collider* other);            // 0x3A slot 56
 

@@ -9,8 +9,8 @@ void ResetMovieStream(MovieStream* self_)
         ResetIopRing();
         self->flag = 1;
         self->f4 = -1;
-        ResetRingBuffer((u8*)self + 0x30);
-        ResetRingBuffer((u8*)self + 0x50);
+        ResetRingBuffer((RingBuffer*)((u8*)self + 0x30));
+        ResetRingBuffer((RingBuffer*)((u8*)self + 0x50));
         ResetIopRingSink((u8*)self + 0x70);
     }
 }

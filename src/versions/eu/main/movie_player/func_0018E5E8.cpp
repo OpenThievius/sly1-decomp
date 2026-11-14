@@ -12,7 +12,7 @@ void CreateMovieDecodeThread(void)
     ThreadParams l;
     s32 v;
 
-    D_eu_0026AC60.f144 = CreateLockSemaphore(0, (void*)1);
+    D_eu_0026AC60.f144 = CreateLockSemaphore(0, 1);
     ((Head_eu_18ECA8*)&D_eu_0026AC60)->f0C = 0;
     (void)FillMemory(&l, 0, sizeof(l));
     l.entry = RunMovieDecodeThread;

@@ -50,7 +50,7 @@ void DrawLetterGlyphElement(Element_eu_1AE5E0* self)
         out.Pos(self->x, self->y);
         out.Size(w, h);
         tmp = held;
-        out.Color(&tmp);
+        out.Color((s32*)&tmp);
         out.FlagA(0);
         out.FlagB(0);
         out.FlagC(0);

@@ -34,14 +34,14 @@ void InitMoviePlayback(MoviePlayer* self_, void* v)
     self->fC = v;
     self->f58 = D_eu_002F52C0;
     self->f5C = D_eu_00478240;
-    InitRingBuffer((u8*)self + 0x60, 0x30000, (void*)((s32)D_eu_00448240 | 0x20000000));
+    InitRingBuffer((RingBuffer*)((u8*)self + 0x60), 0x30000, (u8*)((s32)D_eu_00448240 | 0x20000000));
     StartMovieStream((MovieStream*)((u8*)self + 0x80));
     InitMpegLibrary();
     CreateMpegDecoder((u8*)self + 0x10, self->f58, 0x152F68);
-    SetStreamCallback((u8*)self + 0x10, 0, 0, (void*)AcceptMovieDataIntoRing, self);
+    SetStreamCallback((Ctx_20A220*)((u8*)self + 0x10), 0, 0, (Handler_20A220)AcceptMovieDataIntoRing, self);
     for (n = 0; D_eu_002636EC >= n; n++) {
-        SetStreamCallback((u8*)self + 0x10, 2, n, (void*)PassMovieDataToStream, self);
-        SetStreamCallback((u8*)self + 0x10, 3, n, (void*)PassMovieDataToStream, self);
+        SetStreamCallback((Ctx_20A220*)((u8*)self + 0x10), 2, n, (Handler_20A220)PassMovieDataToStream, self);
+        SetStreamCallback((Ctx_20A220*)((u8*)self + 0x10), 3, n, (Handler_20A220)PassMovieDataToStream, self);
     }
     SetMpegCallback((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
     SetMpegCallback((u8*)self + 0x10, 4, (void*)FeedMovieDecoderWithoutWaiting, self);

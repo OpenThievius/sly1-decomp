@@ -9,8 +9,8 @@ void PlayMovie(MoviePlayer* self, IdentityKey* key)
     InitStreamReader(&loc, D_002C3B00);
     if (KeyIdOfMovie::Of(&pr, key) && OpenSectorStreamRange(&loc, &pr)) {
         InitMoviePlayback(self, &loc);
-        while (!GetMpegDecoderStatus(&self->decoder)) {
-            AdvanceGameClockElapsed(((u8*)g_gameClock));
+        while (!GetMpegDecoderStatus((Device_20B0B0*)&self->decoder)) {
+            AdvanceGameClockElapsed((GameClock*)g_gameClock);
             UpdatePadConnection(&g_padRecord);
             s32 flag = 0;
             if (SameMovieKey::Of(key, &D_00248490)) flag = g_keyedMovieWatched != 0;
@@ -20,7 +20,7 @@ void PlayMovie(MoviePlayer* self, IdentityKey* key)
             if (g_saveData->f19F8 & m) flag = 1;
             if (flag) {
                 s32 stop = 0;
-                if (RestoreFadeRequest(g_screenFade, &g_padRecord, 2)) {
+                if (RestoreFadeRequest((ScreenFade*)g_screenFade, &g_padRecord, 2)) {
                     stop = 1;
                 } else if (g_padRecord.flags & 0x91F) {
                     ClearPadPressedBits(&g_padRecord, 0x91F);

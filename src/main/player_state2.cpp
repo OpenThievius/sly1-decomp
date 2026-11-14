@@ -14,6 +14,16 @@
 #include "node_query.h"
 #include "list_iter.h"
 #include "transform_object.h"
+struct BaseObject;
+
+struct BaseObject;
+
+struct BaseObject;
+
+
+// Types other files define, named by the parameters of their functions declared here.
+struct TargetHit;
+struct TargetCurve;
 
 // From 0x17D248 to colored_triangle_set: player helpers in VU0 code, the probe test func_0017DE88, and the
 // point-object list of class 0x80. Its .data runs from 0x263E50 to 0x264094 (tuning floats the
@@ -82,10 +92,10 @@ f32 D_00264080[2] = { -3.40282347e+38f, 682.0f };
 List01 g_pointObjects = {0};
 
 extern f32 g_gameClock[];
-void TurnColliderTowardRotation(void* self, Mat02* rot, void* data, f32 scale);
-void ComputePolarOffset(Vec02* out, f32 heading, f32 distance, f32 z);
-void SteerColliderTowardPosition(void* self, s32 a, s32 b, Vec02* pos, void* params, f32 dt);
-f32 GetAnimationMarkerTime(void* obj, s32 id);
+void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
+void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
+void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
+f32 GetAnimationMarkerTime(Animation* self, s32 key);
 void AddColliderForce(void* target, Vec02* force);
 void BuildBasisFromX(Vec02* x, Mat02* out);
 
@@ -93,19 +103,19 @@ void StepPlayerState2(Player* self)
 {
     Vec02 a;
     Vec02 b;
-    TurnColliderTowardRotation(self, &self->m660, &self->f6E0, g_gameClock[2]);
+    TurnColliderTowardRotation(self, g_gameClock[2], &self->m660, &self->f6E0);
     switch (self->f2228) {
     case 6:
         if (0.0001f < self->f634) {
-            ComputePolarOffset(&a, self->f630, self->f634 * self->f226C, 0.0f);
+            ComputePolarOffset((Vec3*)&a, self->f630, self->f634 * self->f226C, 0.0f);
             Vu0::Q(b) = Vu0::Add(Vu0::Q(self->v2290), Vu0::Q(a));
             b.z = self->v150.z;
             SteerColliderTowardPosition(self, 0, 0, &b, D_00263E90, g_gameClock[2]);
         }
         break;
     case 8: {
-        f32 t0 = GetAnimationMarkerTime(self->f25C8, 0x1BA);
-        f32 t1 = GetAnimationMarkerTime(self->f25C8, 0x1BB);
+        f32 t0 = GetAnimationMarkerTime((Animation*)self->f25C8, 0x1BA);
+        f32 t1 = GetAnimationMarkerTime((Animation*)self->f25C8, 0x1BB);
         if (*(f32*)((u8*)self->watched2230 + 0x14) < t1) {
             Vu0::Q(a) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Scalar(-1.0f));
             AddColliderForce(self, &a);
@@ -184,12 +194,12 @@ void StepPlayerState2(Player* self)
 }
 
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
-void ConvertPositionToWorld(void* obj, Vec02* out);
-void ComputeObjectMotionInFrame(void* obj, s32 z, void* point, Vec02* out, s32 a, s32 b, s32 c);
-void MeasurePointToSegment(const Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
-void InitContactPairFlags(void* world, void* obj);
+void ConvertPositionToWorld(BaseObject* self, Vec02* out);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
+void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
+void InitContactPairFlags(World* self, Collider* obj);
 void SetPlayerState(Player* self, s32 a, s32 b);
-void ScorePlayerTargetPlacement(Player* p, Vec02* vel, void* target, Vec02* at, s32 zero, f32* t, f32* cost, Vec02* aim, Vec02* land);
+void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec02* start, Vec02* extra, f32* outTime, f32* outCost, Vec02* outPoint, Vec02* outVel);
 extern f32 g_gameTime;
 
 struct LeapPart_17D5D8 {
@@ -243,7 +253,7 @@ static inline f32 GroundDistanceSquared(const Vec02& a, const Vec02& b)
 
 static inline f32 MinF(f32 a, f32 b) { return a <? b; }
 
-void ControlPlayerState2(Player* p)
+void ControlPlayerState2(Player* p, PadRecord* pad)
 {
     Vec02 aim;
     switch (p->f2228) {
@@ -258,7 +268,7 @@ void ControlPlayerState2(Player* p)
     case 15:
         break;
     default:
-        ComputePolarOffset(&aim, p->f630, p->f634 * p->f226C, 0.0f);
+        ComputePolarOffset((Vec3*)&aim, p->f630, p->f634 * p->f226C, 0.0f);
         Vu0::Q(p->v640) = Vu0::MulX(Vu0::RotateTransposed(p->m660, Vu0::Q(aim)), Vu0::Scalar(-1.0f));
         if ((p->f2228 != 0 || p->f2270 == 3) && p->f2268 == 0) {
             Vec02 dir;
@@ -300,7 +310,7 @@ void ControlPlayerState2(Player* p)
             if (q->v140.z + q->height < p->v140.z) {
                 continue;
             }
-            ScorePlayerTargetPlacement(p, &p->v150, q, &q->v140, 0, &t, &cost, &aim, &land);
+            ScorePlayerTargetPlacement(p, &p->v150, (BaseObject*)q, &q->v140, 0, &t, &cost, &aim, &land);
             if (bestCost < cost) {
                 continue;
             }
@@ -313,7 +323,7 @@ void ControlPlayerState2(Player* p)
             Vu0::Q(dv) = Vu0::Sub(Vu0::Q(p->v150), Vu0::Q(q->v150));
             Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(rel), Vu0::Q(dv), Vu0::Scalar(MinF(0.25f, t)));
             rel.z = end.z = 0.0f;
-            MeasurePointToSegment(&D_00248D30, &rel, &end, &a, &b);
+            MeasurePointToSegment((Vec02*)&D_00248D30, &rel, &end, &a, &b);
             if ((100.0f < b || a == 0.0f) && (25.0f < b || 0.0f < p->v150.z)) {
                 continue;
             }
@@ -333,20 +343,20 @@ void ControlPlayerState2(Player* p)
             Vec02 end;
             f32 a;
             f32 b;
-            ConvertPositionToWorld(q, &pos);
+            ConvertPositionToWorld((BaseObject*)q, &pos);
             if (360000.0f < GroundDistanceSquared(pos, p->v140)) {
                 continue;
             }
-            ScorePlayerTargetPlacement(p, &p->v150, q->parent, &pos, 0, &t, &cost, &aim, &land);
+            ScorePlayerTargetPlacement(p, (Vec02*)&p->v150, (BaseObject*)q->parent, &pos, 0, &t, &cost, &aim, &land);
             if (bestCost < cost) {
                 continue;
             }
-            ComputeObjectMotionInFrame(q->parent, 0, &pos, &vel, 0, 0, 0);
+            ComputeObjectMotionInFrame((PlacedObject*)q->parent, 0, &pos, &vel, 0, 0, 0);
             Vu0::Q(rel) = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(pos));
             Vu0::Q(dv) = Vu0::Sub(Vu0::Q(p->v150), Vu0::Q(vel));
             Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(rel), Vu0::Q(dv), Vu0::Scalar(MinF(0.25f, t)));
             rel.z = end.z = 0.0f;
-            MeasurePointToSegment(&D_00248D30, &rel, &end, &a, &b);
+            MeasurePointToSegment((Vec02*)&D_00248D30, &rel, &end, &a, &b);
             if ((b > q->radius || a == 0.0f) && (q->radius * 0.25f < b || 0.0f < p->v150.z)) {
                 continue;
             }
@@ -361,9 +371,9 @@ void ControlPlayerState2(Player* p)
             if (p->f2220 != 2 || p->f2228 != 5) {
                 void* held = p->heldObject;
                 if (held != best) {
-                    InitContactPairFlags(p->world, best);
+                    InitContactPairFlags(p->world, (Collider*)best);
                     if (held != 0) {
-                        InitContactPairFlags(p->world, held);
+                        InitContactPairFlags(p->world, (Collider*)held);
                     }
                 }
                 StartPlayerLeap(p, bestT, bestAim, bestLand);
@@ -441,9 +451,9 @@ s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdge* e, Vec02* out)
 
 
 void BuildPerpendicularPair(Quad16* q, void* out, const Vec02* a, const Vec02* b);
-void BuildMatrixFromRotationAndTranslation(void* a, Quad16* b, void* out);
-void TransformByMatrixWithW(void* a, const void* b, f32 w, void* c);
-s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, void* a4);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
+void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
+s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderSpan* a4);
 
 s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
 {
@@ -452,10 +462,10 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
     q = *src;
     s32 hits = 0;
     BuildPerpendicularPair(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
-    BuildMatrixFromRotationAndTranslation(ctx, &q, buf + 0x30);
+    BuildMatrixFromRotationAndTranslation((const Vec02*)ctx, (const Mat02*)&q, (Mat4A*)(buf + 0x30));
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
-        TransformByMatrixWithW(buf + 0x30, &D_00263EC0[i], 1.0f, buf + 0x70);
-        TransformByMatrixWithW(buf + 0x30, &D_00263EC0[i + 1], 1.0f, buf + 0x80);
+        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &D_00263EC0[i], 1.0f, (Vec02*)(buf + 0x70));
+        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &D_00263EC0[i + 1], 1.0f, (Vec02*)(buf + 0x80));
         ContactRow03* n = self->contacts->head;
         while (n) {
             Collider* a = n->other;
@@ -463,7 +473,7 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
                 Collider* c = (Collider*)a->parts.head;
                 while (c) {
                     if (!(c->flags538 & 0x80000000000ULL)) {
-                        if (CollectColliderSpans(c, buf + 0x70, buf + 0x80, 1, buf + 0x90) > 0) {
+                        if (CollectColliderSpans(c, (Vec02*)(buf + 0x70), (Vec02*)(buf + 0x80), 1, (ColliderSpan*)(buf + 0x90)) > 0) {
                             if (i < 4) return 0;
                             if (*(f32*)(buf + 0xD0) == 0.0f) return 0;
                             if (0.7f < *(f32*)(buf + 0xB8)) hits++;
@@ -489,8 +499,10 @@ struct EdgeGroup {
     EdgeNode* list14;
     EdgeNode* list18;
 };
-s32 CollectEntriesForKey(Mesh03* mesh, Tree03* tree, s32 index, s32 max, MeshEdge** out);
-s32 CollectTreeNodeSpans(TreeNode03* nodes, Vec02* a, Vec02* b, s32 c, s32 d, ColliderSpan* out);
+struct KeyedPointSet;
+struct KeyedEdge;
+s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out);
+s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s32 kind, void* arg, Vec02* out)
 {
     u8 buf[0x100] __attribute__((aligned(16)));
@@ -500,7 +512,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
         Mesh03* mesh = &part->meshCopy;
         u128 acc = Vu0::Q(D_00248D30);
         s32 found = 0;
-        s32 n = CollectEntriesForKey(mesh, &part->tree, (Vec02*)arg - (Vec02*)mesh->verts, 0x40, (MeshEdge**)buf);
+        s32 n = CollectEntriesForKey((KeyedPointSet*)mesh, (KeyedPointSet*)&part->tree, (Vec02*)arg - (Vec02*)mesh->verts, 0x40, (KeyedEdge**)buf);
         for (s32 i = 0; i < n; i++) {
             if (ComputeLedgeEdgeOffset(self, part, ((MeshEdge**)buf)[i], &gap) != 0) {
                 found = 1;
@@ -558,7 +570,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
 
 extern f32 g_gameTime;
 extern f32 D_00274AD0[];
-void NotifyContactEnds(void* world, s32 n, Contact03** list);
+void NotifyContactEnds(World* world, s32 n, Contact03** list);
 s32 FindPlaneTreeNodeForPoint(Vec02* p, void* tree);
 Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
 {
@@ -641,22 +653,24 @@ s32 ChoosePlayerNextState(Player* self)
     return r;
 }
 
-s32 IsObjectAttached(void* p);
+s32 IsObjectAttached(BaseObject* self);
 void RecordCameraTimestamp(Camera* camera);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInSphere(void* world, void* self, Vec02* center, void* filter, void* ctx, s32* count,
-                             Collider*** list, f32 radius);
-s32 IsObjectOfKind(void* object, s32 kind);
-s32 GetObjectWorldPosition(void* object, Vec02* out);
+void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
 PlacedObject* FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 // A hit CollectMeshHits gives (0x30 bytes): its point first.
 struct MeshPointHit {
     Vec02 point;
     u8 pad10[0x30 - 0x10];
 };
-s32 CollectMeshHits(f32 radius, Vec02* point, s32 count, void* nodes, void* a3, Mesh03* mesh, s32 max, MeshPointHit* out);
-s32 IsInsideRange(f32* range, f32 value);
+struct FaceRef;
+struct MeshHitEntry;
+struct ValueRange;
+s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out);
+s32 IsInsideRange(ValueRange* span, f32 x);
 s32 RandomIntInRange(s32 lo, s32 hi);
 extern List01 g_class75List;
 
@@ -710,12 +724,12 @@ void CollectPlayerHoldQueries(Player* self)
     Class75Object* n;
     s32 i;
 
-    if (!IsObjectAttached(self->f25D8[3])) {
+    if (!IsObjectAttached((BaseObject*)self->f25D8[3])) {
         return;
     }
     RecordCameraTimestamp(g_camera);
     PushBackMemoryMark();
-    GatherCollidersInSphere(self->world, self, &self->v140, 0, 0, &count, &list, D_00264028);
+    GatherCollidersInSphere(self->world, self, D_00264028, &self->v140, 0, 0, &count, &list);
     for (i = 0; i < count; i++) {
         list[i]->flags538 |= (u64)0x8000 << 47;
     }
@@ -774,10 +788,10 @@ void CollectPlayerHoldQueries(Player* self)
             }
         } else if (o->tree.nodes != 0) {
             MeshPointHit hits[32];
-            s32 hitCount = CollectMeshHits(D_00264028, &self->v6A0, o->tree.count2, o->tree.nodes, 0, &o->meshCopy, 32, hits);
+            s32 hitCount = CollectMeshHits(&self->v6A0, D_00264028, o->tree.count2, (FaceRef*)o->tree.nodes, 0, &o->meshCopy, 32, (MeshHitEntry*)hits);
             s32 j;
             for (j = 0; j < hitCount; j++) {
-                if (IsInsideRange(band, hits[j].point.z)) {
+                if (IsInsideRange((ValueRange*)band, hits[j].point.z)) {
                     break;
                 }
             }
@@ -904,23 +918,25 @@ extern f32 D_00263E74;
 extern f32 D_00264040;
 extern f32 D_00264044;
 extern f32 D_00264048[2];
-void PlaceOnTargetCurve(void* curve, Vec02* out, s32 a, f32 t);
-void PlaceOnTargetPoint(void* point, Vec02* out, s32 a, f32 t);
-s32 AimPlayerAtTarget(void* self);
+void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t);
+void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t);
+s32 AimPlayerAtTarget(Player* self);
 Contact03* FindPlayerLedgeContact(Player* self, s32* end, Vec02* at);
 s32 ShouldPlayerLaunchAtTarget(Player* self);
-void LaunchPlayerAtTarget(Player* self, void* s2, f32 f);
-void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, s32 c, Vec02* vel, s32 d, f32 t);
+void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 s32 ChoosePlayerNextState(Player* self);
-f32 GetAnimationMarkerTime(void* obj, s32 id);
+f32 GetAnimationMarkerTime(Animation* self, s32 key);
 void CollectPlayerHoldQueries(Player* self);
-void SeekAnimationPlayer(void* obj, s32 a1, f32 fa, f32 fb);
-void TransformPointAtTime(void* frame, s32 a, Vec02* point, s32 b, Vec02* vel, s32 d, f32 t);
-void ScorePlayerLeapToPoint(f32 t, Player* p, void* frame, void* point, s32 a, Vec02* aim, Vec02* land);
-void EvaluateHermiteVectorSegment(f32 t, f32 u, f32 v, void* p0, void* v0, void* p1, void* v1, Vec02* pos, s32 a, Vec02* vel);
+void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b);
+void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
+void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec02* point, f32* out1, Vec02* out2, Vec02* out3, f32 t);
+void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
 void SetPlayerState(Player* self, s32 a, s32 b);
-void TransformPointBetweenFrames(void* a, void* b, void* c, void* d);
-f32 ArctangentOfRatio(f32 a, f32 b);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern f32 g_gameTime;
 extern f32 g_gameClock[];
 extern u16 D_00262D18;
@@ -994,7 +1010,7 @@ void UpdatePlayerState2(Player* p)
         ContactEnd03* e = &hit->end[1 - end];
         void* part = e->part;
         p->f24A0 = part;
-        TransformPointBetweenFrames(0, part, &e->v10, p->f24B0);
+        TransformPointBetweenFrames(0, (PlacedObject*)part, &e->v10, (Vec02*)p->f24B0);
         p->f24F0 = hit->kind;
         s32 key;
         if (end == 0) {
@@ -1052,7 +1068,7 @@ void UpdatePlayerState2(Player* p)
             SetPlayerState(p, 6, 0x10);
             break;
         }
-        ComputeObjectFrameAtTime(p->heldObject, 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
+        ComputeObjectFrameAtTime((PlacedObject*)p->heldObject, 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
         ((Leap_17F018*)p->f2514)->aim = b;
         ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
         ((Leap_17F018*)p->f2514)->land = c;
@@ -1066,10 +1082,10 @@ void UpdatePlayerState2(Player* p)
         break;
     case 8:
         if (p->f690 != 0 && D_00264044 < g_gameTime - p->f222C) {
-            f32 t = GetAnimationMarkerTime(p->f25C8, 0x1BB);
+            f32 t = GetAnimationMarkerTime((Animation*)p->f25C8, 0x1BB);
             if (((Anim_17F018*)p->watched2230)->f14 < t) {
                 CollectPlayerHoldQueries(p);
-                SeekAnimationPlayer(p->watched2230, 0, t, ((Anim_17F018*)p->watched2230)->f18);
+                SeekAnimationPlayer((AnimationPlayer*)p->watched2230, 0, t, ((Anim_17F018*)p->watched2230)->f18);
             }
         }
         break;
@@ -1082,7 +1098,7 @@ void UpdatePlayerState2(Player* p)
         }
         b = ((LeapTarget_17F018*)p->f23B4)->pos;
         c = D_00248D30;
-        TransformPointAtTime(((LeapTarget_17F018*)p->f23B4)->frame, 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
+        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->f23B4)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
         ((Leap_17F018*)p->f2514)->aim = b;
         ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
         ((Leap_17F018*)p->f2514)->land = c;
@@ -1099,7 +1115,7 @@ void UpdatePlayerState2(Player* p)
         }
         b = ((LeapTarget_17F018*)p->f23B8)->pos;
         c = D_00248D30;
-        TransformPointAtTime(((LeapTarget_17F018*)p->f23B8)->frame, 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
+        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->f23B8)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
         ((Leap_17F018*)p->f2514)->aim = b;
         ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
         ((Leap_17F018*)p->f2514)->land = c;
@@ -1118,7 +1134,7 @@ void UpdatePlayerState2(Player* p)
         if (t->desc->m1 != 0) {
             t->desc->m1(t, p->f23C0, &b, 0);
         }
-        TransformPointAtTime(((TrackOwner_17F018*)p->f23BC)->frame, 0, &b, 0, 0, 0, ((Leap_17F018*)p->f2514)->time - g_gameClock[1]);
+        TransformPointAtTime((PlacedObject*)(((TrackOwner_17F018*)p->f23BC)->frame), 0, &b, 0, 0, 0, ((Leap_17F018*)p->f2514)->time - g_gameClock[1]);
         ((Leap_17F018*)p->f2514)->aim = b;
         ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
         break;
@@ -1131,10 +1147,10 @@ void UpdatePlayerState2(Player* p)
             SetPlayerState(p, 6, 0x10);
             break;
         }
-        PlaceOnTargetPoint(p->f23A8, &b, 0, p->f23AC);
-        TransformPointBetweenFrames(0, ((LeapTarget_17F018*)p->f23A8)->frame, &b, &b);
+        PlaceOnTargetPoint((TargetPoint*)p->f23A8, &b, 0, p->f23AC);
+        TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTarget_17F018*)p->f23A8)->frame), &b, &b);
         c = D_00248D30;
-        TransformPointAtTime(((LeapTarget_17F018*)p->f23A8)->frame, 0, &b, 0, &c, 0, ((Leap_17F018*)p->f2514)->time - g_gameClock[1]);
+        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->f23A8)->frame), 0, &b, 0, &c, 0, ((Leap_17F018*)p->f2514)->time - g_gameClock[1]);
         ((Leap_17F018*)p->f2514)->aim = b;
         ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
         ((Leap_17F018*)p->f2514)->land = c;
@@ -1149,10 +1165,10 @@ void UpdatePlayerState2(Player* p)
             SetPlayerState(p, 6, 0x10);
             break;
         }
-        PlaceOnTargetCurve(p->f23A0, &b, 0, p->f23A4);
-        TransformPointBetweenFrames(0, ((LeapTarget_17F018*)p->f23A0)->frame, &b, &b);
+        PlaceOnTargetCurve((TargetCurve*)p->f23A0, &b, 0, p->f23A4);
+        TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTarget_17F018*)p->f23A0)->frame), &b, &b);
         c = D_00248D30;
-        TransformPointAtTime(((LeapTarget_17F018*)p->f23A0)->frame, 0, &b, 0, &c, 0, ((Leap_17F018*)p->f2514)->time - g_gameClock[1]);
+        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->f23A0)->frame), 0, &b, 0, &c, 0, ((Leap_17F018*)p->f2514)->time - g_gameClock[1]);
         ((Leap_17F018*)p->f2514)->aim = b;
         ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
         ((Leap_17F018*)p->f2514)->land = c;
@@ -1164,7 +1180,7 @@ void UpdatePlayerState2(Player* p)
         if (rec->time < g_gameTime) {
             SetPlayerState(p, 3, 0x33);
         } else {
-            ScorePlayerLeapToPoint(rec->time - g_gameTime, p, ((TrackOwner_17F018*)p->f2204)->frame, (u8*)p->f2204 + 0x40, 0, &rec->aim, &rec->land);
+            ScorePlayerLeapToPoint(p, (BaseObject*)(((TrackOwner_17F018*)p->f2204)->frame), (Vec02*)((u8*)p->f2204 + 0x40), 0, &rec->aim, &rec->land, rec->time - g_gameTime);
         }
         break;
     }
@@ -1274,22 +1290,22 @@ void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec02* out)
     out->z = (z >? self->v150.z);
 }
 
-void SetListLinkOffset(void* self, s32 value);
+void SetListLinkOffset(List01* self, s32 offset);
 
 void SetPointObjectListLinkOffset(void)
 {
     SetListLinkOffset(&g_pointObjects, 0x50);
 }
 
-void ClearList(void* p);
+void ClearList(List01* p);
 
 void ClearPointObjectList(void)
 {
     ClearList(&g_pointObjects);
 }
 
-void RegisterObject(void* self);
-void AppendToList(void* table, void* self);
+void RegisterObject(BaseObject* self);
+void AppendToList(List01* self, void* item);
 
 void RegisterPointObject(C80* self)
 {
@@ -1297,8 +1313,8 @@ void RegisterPointObject(C80* self)
     AppendToList(&g_pointObjects, self);
 }
 
-void UnregisterObject(void* self);
-void RemoveFromList(void* table, void* self);
+void UnregisterObject(BaseObject* self);
+void RemoveFromList(List01* list, void* item);
 
 void UnregisterPointObject(C80* self)
 {

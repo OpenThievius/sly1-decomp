@@ -51,7 +51,7 @@ struct TlbSetup {
 extern TlbSetup D_00277FE0;
 extern const char D_0024EC30[], D_0024EC68[], D_0024EC80[], D_0024EC98[];
 void PrintToOutputHook(const char* fmt, ...);
-void TerminateProgram(s32 code);
+extern "C" void TerminateProgram(s32 status);
 void WriteTlbEntryForSetUp(s32 index, u32 mask, u32 hi, u32 lo0, u32 lo1);
 
 // Reports the three ranges, writes the kernel and default entries and wires them, then the

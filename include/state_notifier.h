@@ -12,6 +12,10 @@
 #define STATE_NOTIFIER_H
 
 #include "placed_object.h"
+struct Camera;
+struct ContactObject;
+struct StateNotifier;
+
 
 // A thing that takes a message in its class's slot 31 (0x10 + 4 * 31 = 0x8C).
 struct StateListener {
@@ -103,15 +107,15 @@ typedef char check_ArmedStateNotifier[sizeof(ArmedStateNotifier) == 0x390 ? 1 : 
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitStateNotifier(StateNotifier* self);                       // 0x55 slot 0
-void LoadStateNotifier(StateNotifier* self, void* stream);         // 0x55 slot 10
-void CopyStateNotifier(StateNotifier* self, void* other);          // 0x55 slot 9
+void LoadStateNotifier(StateNotifier* self, void* arg);         // 0x55 slot 10
+void CopyStateNotifier(StateNotifier* self, void* arg);          // 0x55 slot 9
 void StartStateNotifier(StateNotifier* self);                       // 0x55 slot 16
-s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* other);           // 0x55 slot 45
-void UpdateStateNotifier(StateNotifier* self);                       // 0x55 slot 17 (original assembly)
-void SetStateNotifierState(StateNotifier* self, s32 mode);             // 0x55 slot 47
+s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* b);           // 0x55 slot 45
+void UpdateStateNotifier(StateNotifier* self, f32 dt);                     // 0x55 slot 17 (original assembly)
+void SetStateNotifierState(Camera* self, s32 state);             // 0x55 slot 47
 void InitTimeRangeNotifier(TimeRangeNotifier* self);                       // 0x58 slot 0
 void HandleTimeRangeNotifierNotification(TimeRangeNotifier* self, s32 kind, void* target);
-void UpdateTimeRangeNotifier(TimeRangeNotifier* self);
+void UpdateTimeRangeNotifier(TimeRangeNotifier* self, f32 dt);
 void SetEffectNotifierState(TimeRangeNotifier* self, s32 mode);
 void InitSoundNotifier(SoundNotifier* self);
 void SetSoundNotifierState(SoundNotifier* self, s32 mode);
@@ -120,11 +124,11 @@ void SetSaveNotifierState(SaveNotifier* self, s32 mode);
 void InitDeadlineNotifier(DeadlineNotifier* self);
 void StartDeadlineNotifier(DeadlineNotifier* self);
 void HandleDeadlineNotifierNotification(DeadlineNotifier* self, s32 kind, void* msg);
-void UpdateNotifierWorldDeadline(DeadlineNotifier* self);
+void UpdateNotifierWorldDeadline(DeadlineNotifier* self, f32 dt);
 void SetDeadlineNotifierState(DeadlineNotifier* self, s32 mode);
 void InitCountdownNotifier(CountdownNotifier* self);
 void HandleCountdownNotifierNotification(CountdownNotifier* self, s32 kind, void* msg);
-void CountDownNotifierTimer(CountdownNotifier* self);
+void CountDownNotifierTimer(CountdownNotifier* self, f32 dt);
 void SetCountdownNotifierState(CountdownNotifier* self, s32 mode);
 void InitArmedStateNotifier(ArmedStateNotifier* self);
 

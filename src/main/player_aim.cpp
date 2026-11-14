@@ -14,17 +14,20 @@
 #include "transform_object.h"
 #include "aim_blend_grid.h"
 #include "game_clock.h"
+struct BaseObject;
+
 
 extern f32 g_gameTime[];
 extern u8 g_class75List[];
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
-void MultiplyMatrices3x3(void* a, void* b, void* out);
-void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
-void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, f32 t, s32 e, s32 f);
-s32 GetObjectWorldPosition(void* p, Vec02* out);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, f32 t, Vec02* vel, Vec02* spin);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
+// Left in this order: retail's call here evaluates the time before the pointers.
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
 f32 WrapAngle(f32 a);
-f32 ArctangentOfRatio(f32 a, f32 b);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern const T2195_Vt D_00219560;
 
 // The pose source that adds up the offsets of the attachments after it (D_0021A9A8): the number
@@ -162,11 +165,15 @@ struct AimSoundSource { u8 pad0[0xAC]; s32 fAC; };
 struct AimSoundPoint { u8 pad0[0x54]; s32 f54; };
 struct AimTarget { u8 pad0[0x3E4]; BlendAnimationView* f3E4; };
 
-void StartSoundEffect(s32 id, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void TeleportStateWalker(void* p, s32 n);
-s32 FindStateEntryIndex(void* p, s32 n);
-void SetPlayerClass75AheadBlend(Player* self, void* blend, void* anim);
-void ReplaceAnimationPlayer(void* anim, Player* self, s32 c, void* slot, f32 start, f32 speed);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
+void TeleportStateWalker(StateWalker* self, s32 key);
+struct StateGraph;
+s32 FindStateEntryIndex(StateGraph* self, s32 key);
+struct TwoBlendWeights;
+void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx);
+void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 extern f32 D_00274B90;
 extern f32 D_00274B94;
 extern f32 D_00274B98;
@@ -205,7 +212,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     case 8:
     case 9:
         if (self->f2220 == 0) {
-            TeleportStateWalker(self->f2234, 0x146);
+            TeleportStateWalker((StateWalker*)self->f2234, 0x146);
         }
         break;
     case -1:
@@ -252,7 +259,7 @@ void SetPlayerAimMode(Player* self, s32 state)
         Vec02 v;
         self->f25EC = 0;
         self->f21C8 = -1.0f;
-        TransformPointBetweenFrames(0, self, (u8*)self->f23D4 + 0x140, &v);
+        TransformPointBetweenFrames(0, self, (Vec02*)((u8*)self->f23D4 + 0x140), &v);
         Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
         Vu0::Q(v) = Vu0::MulXSum(Vu0::Vec::Of(v), h, Vu0::Vec::Of(*(Vec02*)((u8*)self->f61C + 0x100)), h).q;
         if (self->f2220 == 0) {
@@ -290,7 +297,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     case 4:
     aim4:
         self->f25EC = 0;
-        SetPlayerClass75AheadBlend(self, self->f2540, self->f2558);
+        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->f2540, self->f2558);
         sound = 11;
         delay = D_00274B90;
         anim = self->f2558;
@@ -299,7 +306,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     case 5:
     aim5:
         self->f25EC = 0;
-        SetPlayerClass75AheadBlend(self, self->f255C, self->f2574);
+        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->f255C, self->f2574);
         sound = 11;
         delay = D_00274B90;
         anim = self->f2574;
@@ -308,24 +315,24 @@ void SetPlayerAimMode(Player* self, s32 state)
     case 6:
     aim6:
         self->f25EC = 0;
-        SetPlayerClass75AheadBlend(self, self->f2578, (void*)self->f2590);
+        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->f2578, (void*)self->f2590);
         sound = 11;
         delay = D_00274B90;
         anim = (void*)self->f2590;
-        if (FindStateEntryIndex(self->f1188, 0x14F) >= 0) {
-            TeleportStateWalker(self->f2234, 0x14F);
+        if (FindStateEntryIndex((StateGraph*)self->f1188, 0x14F) >= 0) {
+            TeleportStateWalker((StateWalker*)self->f2234, 0x14F);
         }
         self->f2424 = g_gameClock.time + D_00274B94;
         break;
     case 7:
     aim7:
         self->f25EC = 0;
-        SetPlayerClass75AheadBlend(self, self->f2594, (void*)self->f25AC);
+        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->f2594, (void*)self->f25AC);
         sound = 11;
         delay = D_00274B90;
         anim = (void*)self->f25AC;
-        if (FindStateEntryIndex(self->f1188, 0x14F) >= 0) {
-            TeleportStateWalker(self->f2234, 0x14F);
+        if (FindStateEntryIndex((StateGraph*)self->f1188, 0x14F) >= 0) {
+            TeleportStateWalker((StateWalker*)self->f2234, 0x14F);
         }
         self->f2424 = g_gameClock.time + D_00274B98;
         break;
@@ -375,7 +382,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     self->f223C = state;
     self->f2240 = g_gameClock.time;
     self->f21CC = 0;
-    ReplaceAnimationPlayer(anim, self, 1, &self->f2244, start, speed);
+    ReplaceAnimationPlayer((Animation*)anim, self, 1, (AnimationPlayer**)&self->f2244, start, speed);
     if (delay != 0.0f) {
         AimPlayerItem* it = ((AimPlayer*)self->f2244)->items;
         if (it != 0) {
@@ -397,14 +404,14 @@ void SetPlayerAimMode(Player* self, s32 state)
     }
 }
 
-s32 IsObjectAttached(void* p);
+s32 IsObjectAttached(BaseObject* self);
 void SetPlayerAimMode(Player* self, s32 mode);
-void TrackAimTargetObject(Player* self, s32 v, void* p);
-void TrackAimTargetPoint(Player* self, s32 v, s32 w, void* blk);
+void TrackAimTargetObject(Player* self, AimBlendGrid* x, void* y);
+void TrackAimTargetPoint(Player* self, AimBlendGrid* dst, PathCurveObject* src, f32* k);
 
 void UpdatePlayerAimTarget(Player* s)
 {
-    if (s->f2200 != 0 && IsObjectAttached(s->f2200) == 0) {
+    if (s->f2200 != 0 && IsObjectAttached((BaseObject*)s->f2200) == 0) {
         s32 v = s->f223C;
         s->f2200 = 0;
         s->f2204 = 0;
@@ -422,7 +429,7 @@ void UpdatePlayerAimTarget(Player* s)
         return;
     }
     if (s->f2208 != 0) {
-        TrackAimTargetPoint(s, s->f21C4, s->f2208, s->pad220C);
+        TrackAimTargetPoint(s, s->f21C4, (PathCurveObject*)s->f2208, &s->f220C);
     }
 }
 
@@ -511,7 +518,7 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
         Vu0::Q(k) = Vu0::FromFloat(a);
         Vu0::Q(eye) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Q(k));
     }
-    TransformPointBetweenFrames(self, 0, tbl, &here);
+    TransformPointBetweenFrames(self, 0, (Vec02*)tbl, &here);
     Vu0::Q(world) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(*(Vec02*)tbl)), Vu0::Q(eye));
     Vu0::Q(local) = Vu0::Sub(Vu0::Q(world), Vu0::Q(here));
     for (Class75Object* n = *(Class75Object**)list; n != 0; n = *(Class75Object**)((u8*)n + 0x80)) {
@@ -520,7 +527,7 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
         if ((n->count & mode) == 0) {
             continue;
         }
-        ComputeObjectFrameAtTime(n->parent, 0, &objOrigin, &objRot, a, 0, 0);
+        ComputeObjectFrameAtTime((PlacedObject*)n->parent, 0, &objOrigin, &objRot, a, 0, 0);
         GetObjectWorldPosition(n, &delta);
         Vu0::Q(delta) = Vu0::Add(Vu0::Q(delta), Vu0::Q(local));
         Vu0::Q(hitPoint) = Vu0::Add(Vu0::Rotate(objRot, Vu0::Q(*(Vec02*)((u8*)n + 0x40))), Vu0::Q(objOrigin));
@@ -556,9 +563,9 @@ struct NearestAhead {
 struct TwoBlendWeights { f32 a; u8 pad[0xC - 4]; f32 b; };
 
 void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f32* dir, f32 a, f32 b);
-void SetBlendItemWeights(void* ctx, s32 n, s32 m, TwoBlendWeights* out);
-f32 ArctangentOfRatio(f32 a, f32 b);
-void TurnColliderTowardHeading(Player* self);
+void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
+void TurnColliderTowardHeading(TurningCollider* self);
 
 void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
 {
@@ -588,7 +595,7 @@ void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
     }
     out->a = 1.0f - t;
     out->b = t;
-    SetBlendItemWeights(ctx, 0xC, 2, out);
+    SetBlendItemWeights((BlendAnimationView*)ctx, 0xC, 2, out);
     s->f2204 = 0;
     s->f2200 = fr.found;
     s->f2208 = 0;

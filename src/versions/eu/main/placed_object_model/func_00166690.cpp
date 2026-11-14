@@ -24,7 +24,7 @@ void DrawModelPart(Frame_166690* self)
     f32 r;
 
     b.m = self->m;
-    InvertRigidTransform(&self->m.m[3], &self->m, &b.m40);
+    InvertRigidTransform(&self->m.m[3], &self->m, (Quad16*)&b.m40);
     b.f80 = part->f40;
     n300 = 0;
     n304 = 0;
@@ -37,15 +37,15 @@ void DrawModelPart(Frame_166690* self)
             b.mode = 4;
             b.f9C = 2;
         } else if (part->f28 != 0) {
-            b.f9C = CollectLightsForSphere(g_currentWorld, &self->f60, part->f10, 1, 0x80, &n300, &n304, (s32*)lights);
+            b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 1, 0x80, &n300, &n304, (LightObject**)lights);
             b.fA0 = self->f60;
             b.mode = 4;
         } else if (cache == 0) {
-            b.f9C = CollectLightsForSphere(g_currentWorld, &self->f60, part->f10, 3, 0x80, &n300, &n304, (s32*)lights);
+            b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 3, 0x80, &n300, &n304, (LightObject**)lights);
             b.mode = 2;
         } else if (cache->f8 >= g_lightingChangeFrame) {
             if (g_lightCount != 0) {
-                b.f9C = CollectLightsForSphere(g_currentWorld, &self->f60, part->f10, 2, 0x80, 0, &n304, (s32*)lights);
+                b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 2, 0x80, 0, &n304, (LightObject**)lights);
             }
             if (n304 != 0) {
                 b.mode = 1;
@@ -57,7 +57,7 @@ void DrawModelPart(Frame_166690* self)
                 b.f9C = cache->fC;
             }
         } else {
-            b.f9C = CollectLightsForSphere(g_currentWorld, &self->f60, part->f10, 7, 0x80, &n300, &n304, (s32*)lights);
+            b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 7, 0x80, &n300, &n304, (LightObject**)lights);
             if (n300 == 0 && n304 > 0) {
                 b.mode = 2;
             } else {
@@ -74,7 +74,7 @@ void DrawModelPart(Frame_166690* self)
     useCache = cache != 0 && (owner->cls->flags & 2) && owner->f410 != 0;
     n308 = 0;
     if (!useCache && (part->flags & 3)) {
-        CollectRangeRecordsInReach(g_currentWorld, &self->f60, 0x10, &n308, nodes, part->f10);
+        CollectRangeRecordsInReach(g_currentWorld, &self->f60, 0x10, &n308, (RangeRecord**)nodes, part->f10);
     }
     b.f90 = self->f50;
     b.f98 = 1;
@@ -287,7 +287,7 @@ slow:
             }
         }
         if (n308 != 0) {
-            TransformByMatrixWithW(&b, e, 1.0f, &q);
+            TransformByMatrixWithW((const Quad16*)&b, (const Vec02*)e, 1.0f, (Vec02*)&q);
             r = e->f10 * part->f50;
         }
         for (j = 0; j < n308; j++) {
@@ -296,12 +296,12 @@ slow:
                 node = c->nodes[j];
             } else {
                 node = nodes[j];
-                if (RangeRecordMatchesKinds(node, part->flags) == 0) {
+                if (RangeRecordMatchesKinds((RangeRecord*)node, part->flags) == 0) {
                     continue;
                 }
             }
             if (RangeRecordReachesSphere(node, &q, r) != 0) {
-                QueueRangeRecordPacket(node);
+                QueueRangeRecordPacket((RangeRecord*)node);
             }
         }
     }

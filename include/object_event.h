@@ -10,7 +10,7 @@
 #include "placed_object.h"
 
 struct ObjectEvent {
-    s32 type;               // 0x00: func_001417F0
+    void* source;           // 0x00: the object it came from; func_001417F0 compares it with the active switched collider
     s32 id;                 // 0x04: compared with the receiver's id word (func_0017B3A8)
     f32 radius;             // 0x08: func_001BC320
     s32 eventFlags;         // 0x0C: func_001BC320, func_0017B7A8, func_00199C78 (bits tested, 0x20 cleared once handled)

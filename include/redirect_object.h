@@ -46,6 +46,6 @@ typedef char check_RedirectObject[sizeof(RedirectObject) == 0x340 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitRedirectObject(RedirectObject* self);                       // 0x5E slot 0
-void MarkRedirectToSelf(RedirectObject* self);                       // 0x5E slot 31
+void MarkRedirectToSelf(RedirectObject* self, PlacedObject* other);                       // 0x5E slot 31
 
 #endif

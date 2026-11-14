@@ -22,20 +22,20 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         GetTextPanelCenter(&g_typedTextCaptionBox, &cx, &cy);
         Vu0::Set(a, Vu0::FromFloats(cx * 0.003125f - 1.0f, 1.0f - cy * 0.00426794f, 10.0f));
         Vu0::Set(b, Vu0::FromFloats(cx * 0.003125f - 1.0f, 1.0f - cy * 0.00426794f, 80000.0f));
-        UnprojectCameraPoint(g_camera, &a, &lo);
-        UnprojectCameraPoint(g_camera, &b, &hi);
+        UnprojectCameraPoint(g_camera, (f32*)&a, &lo);
+        UnprojectCameraPoint(g_camera, (f32*)&b, &hi);
         Vec02 pos;
         SpanHit hit;
         PushBackMemoryMark();
         GatherCollidersInBox(self->world, 0, &lo, &hi, IsPlayerLinkedColliderCandidate, self, &n, &list);
-        u8* found = FindNearestSpanObject(0, &lo, &hi, n, list, &hit);
+        u8* found = FindNearestSpanObject(0, &lo, &hi, n, (Collider**)list, (ColliderSpan*)&hit);
         if (found != 0 && *(s32*)(found + 8) != 1) {
             *(u8**)e0 = found;
-            TransformPointBetweenFrames(0, found, &hit, &pool->fF0);
+            TransformPointBetweenFrames(0, (PlacedObject*)found, (Vec02*)&hit, (Vec02*)&pool->fF0);
             pos = hit.point;
-            if (IsObjectOfKind(*(void**)(found + 0x50), 0xE) != 0 || IsObjectOfKind(*(void**)(found + 0x50), 7) != 0) {
+            if (IsObjectOfKind((BaseObject*)(*(void**)(found + 0x50)), 0xE) != 0 || IsObjectOfKind((BaseObject*)(*(void**)(found + 0x50)), 7) != 0) {
                 ((Cap_eu_1E5938*)&g_typedTextCaptionBox)->palette = 2;
-            } else if (IsObjectOfKind(*(void**)(found + 0x50), 8) != 0) {
+            } else if (IsObjectOfKind((BaseObject*)(*(void**)(found + 0x50)), 8) != 0) {
                 ((Cap_eu_1E5938*)&g_typedTextCaptionBox)->palette = 1;
             } else {
                 u8* c = found;
@@ -67,7 +67,7 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         Vec02 c0;
         Mat02 rot;
         Vec02 d;
-        GetPlacementRecordTransform(place, &c0, rot.r, 0);
+        GetPlacementRecordTransform((FrameSource*)place, &c0, rot.r, 0);
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(c0));
         *(f32*)(ang + 8) = ArctangentOfRatio(d.y, d.x);
         *(f32*)(ang + 4) = ArctangentOfRatio(d.z, Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d)))));

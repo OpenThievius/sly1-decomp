@@ -85,7 +85,7 @@ typedef char check_PairController[sizeof(PairController) == 0x660 ? 1 : -1];
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitPairController(PairController* self);                       // 0x5F slot 0
 void BlendPairControllerPose(PairController* self);                       // 0x5F slot 16
-void UpdatePairController(PairController* self);                       // 0x5F slot 17
+void UpdatePairController(PairController* self, f32 dt);                       // 0x5F slot 17
 void ShowPairControllerElement(PairController* self);                       // 0x5F slot 46
 
 #endif

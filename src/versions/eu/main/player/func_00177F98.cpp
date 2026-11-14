@@ -6,7 +6,7 @@ void ReceivePlayerNode(Player* self, InteractTarget* node)
 {
     if ((u32)(node->mode - 1) < 2) {
         ((Global_177F98_eu*)&g_typedTextCaptionBox)->f5B0 = node;
-        PushStackElement(g_elementStack, &g_typedTextCaptionBox);
+        PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
         return;
     }
     if (self->f2220 != 0xC) {

@@ -26,7 +26,7 @@ void InitCamera(Camera* self)
     *(struct FrameRow*)(s + 0x80) = *(struct FrameRow*)g_identityMatrix;
     *(struct FrameRow*)(s + 0x90) = *(struct FrameRow*)(g_identityMatrix + 0x10);
     *(struct FrameRow*)(s + 0xA0) = *(struct FrameRow*)(g_identityMatrix + 0x20);
-    UpdateCameraProjection(self);
+    UpdateCameraProjection((Camera*)self);
     self->ctl454.vt = (const CameraControllerVt*)D_00217398;
     SetCameraControllerOwner(&self->ctl454, self);
     self->ctl460.vt = (const CameraControllerVt*)D_002173B0;

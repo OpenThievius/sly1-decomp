@@ -13,7 +13,7 @@ void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, Sequence
         switch (e->type) {
         case 0:
         case 7:
-            ReadOptionalBufferedBlock(rd, &e->w4);
+            ReadOptionalBufferedBlock(rd, (u32*)&e->w4);
             break;
         case 1:
         case 2:

@@ -13,7 +13,7 @@ u64 g_lastCycleCount = 0;
 
 void SetGameClockRunning(GameClock* clock, s32 running);
 s64 ReadCycleCounter(void);
-f32 ConvertS64ToFloat(s64 value);
+extern "C" f32 ConvertS64ToFloat(s64 x);
 
 void SetGameClockScale(f32 x)
 {

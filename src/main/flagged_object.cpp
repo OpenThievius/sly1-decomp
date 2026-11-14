@@ -9,6 +9,15 @@
 #include "screen_fade.h"
 #include "flag_table.h"
 #include "vu0.h"
+#include "object_finder.h"
+struct BaseObject;
+struct TransformObject;
+struct Vec02;
+
+
+// Types other files define, named by the parameters of their functions declared here.
+struct ObjectLink;
+struct AnimationPlayer;
 
 // The file's .rodata: the FLT_MAX literal of ResetFlagTable (func_00140D90), then the literal of
 // UpdateFlaggedObject (func_00141690).
@@ -19,7 +28,7 @@ u32 g_flaggedObjectLinks[4] = { 2, 0x545, 0x5A8, 0 };
 u8 g_flagTable[528] = {0};
 u8 g_flagTableSaved[544] = {0};
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void ResetFlagTable(FlagTable* r)
 {
@@ -117,32 +126,33 @@ done:
     }
 }
 
-void ReadBufferedRotation3(void* a, void* b);
-void ReadBufferedVector3(void* a, void* b);
-s32 ReadMeshTables(void*, void*, void*, void*, void*);
+struct BufferedStream;
+void ReadBufferedRotation3(BufferedStream* self, void* out);
+void ReadBufferedVector3(BufferedStream* src, void* dst);
+void ReadMeshTables(void*, void*, void*, void*, void*);
 void ReadPropertyRecords(void* a, void* b);
 
 void ReadObjectTransformAndTables(void* a0, void* a1)
 {
-    ReadBufferedRotation3(a1, (u8*)a0 + 0x50);
-    ReadBufferedVector3(a1, (u8*)a0 + 0x40);
+    ReadBufferedRotation3((BufferedStream*)a1, (u8*)a0 + 0x50);
+    ReadBufferedVector3((BufferedStream*)a1, (u8*)a0 + 0x40);
     ReadMeshTables(a1, (u8*)a0 + 0x80, (u8*)a0 + 0x84, (u8*)a0 + 0x88, (u8*)a0 + 0x8C);
     ReadPropertyRecords(a0, a1);
 }
 
 struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
-void ConvertPointIntoObjectFrame(void* self, void* value, void* out);
+void ConvertPointIntoObjectFrame(TransformObject* self, Vec02* p, Vec02* out);
 s32 IsPointInsideFaceTree(void* self, void* value);
 
 s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value)
 {
     Quad_00141170 local;
-    ConvertPointIntoObjectFrame(self, value, &local);
+    ConvertPointIntoObjectFrame((TransformObject*)self, (Vec02*)value, (Vec02*)&local);
     return IsPointInsideFaceTree(self->f8C, &local);
 }
 
 void InitCollider(Collider* self);
-void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
 void InitFlaggedObject(FlaggedObject* self)
 {
@@ -173,15 +183,15 @@ struct ScopedListFrame {
     ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
-void LoadCollider(Collider* self);
-void ResolveObjectLinks(void* self, s32 a, void* b);
-s32 IsObjectOfKind(void* node, s32 kind);
-void ResolveAndStartObject(void* node);
+void LoadCollider(Collider* self, BufferedStream* stream);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void ResolveAndStartObject(BaseObject* self);
 
-void CollectChildLists(FlaggedObject* self)
+void CollectChildLists(FlaggedObject* self, BufferedStream* stream)
 {
-    LoadCollider(self);
-    ResolveObjectLinks(self, 1, g_flaggedObjectLinks);
+    LoadCollider(self, stream);
+    ResolveObjectLinks(self, 1, (ObjectLink*)g_flaggedObjectLinks);
 
     ScopedListFrame frame(&self->children);
     void* head = *(void**)((u8*)self + 0x34);
@@ -189,19 +199,19 @@ void CollectChildLists(FlaggedObject* self)
     void* node = head;
     if (node != 0) {
         do {
-            if (IsObjectOfKind(node, 0x7B)) {
+            if (IsObjectOfKind((BaseObject*)node, 0x7B)) {
                 s32 n = self->countB;
                 self->objsB[n] = node;
                 self->countB = n + 1;
             } else {
-                if (!IsObjectOfKind(node, 0x83)) {
+                if (!IsObjectOfKind((BaseObject*)node, 0x83)) {
                     goto skip;
                 }
                 s32 n = self->countA;
                 self->objsA[n] = node;
                 self->countA = n + 1;
             }
-            ResolveAndStartObject(node);
+            ResolveAndStartObject((BaseObject*)node);
 skip:
             void* next = *(void**)frame.cursor;
             frame.cursor = (void*)((s32)next + frame.next_off);
@@ -210,8 +220,7 @@ skip:
     }
 }
 
-void PostLoadPlacedObject(void* self);
-void* FindFirstObjectByIdMode4(void* host, s32 id, void* ctx);
+void PostLoadPlacedObject(PlacedObject* self);
 
 void ResolveListIds(FlaggedObject* self)
 {
@@ -257,25 +266,26 @@ struct ListWalkBegin {
     }
 };
 
-void StartPlacedObject(FlaggedObject* self);
-s32 GetAliasId(u8* node);
-void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
-void SetStateWalkerTarget(void* p, s32 n);
+struct StateGraph;
+void StartPlacedObject(PlacedObject* self);
+s32 GetAliasId(BaseObject* self);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 void StartFlaggedObject(FlaggedObject* self)
 {
     StartPlacedObject(self);
     for (s32 i = 0; i < self->countA; i++)
-        ResolveAndStartObject(self->objsA[i]);
+        ResolveAndStartObject((BaseObject*)self->objsA[i]);
     for (s32 i = 0; i < self->countB; i++)
-        ResolveAndStartObject(self->objsB[i]);
+        ResolveAndStartObject((BaseObject*)self->objsB[i]);
     if (self->childId == -1) {
         ListFrame it;
         u8* obj;
         ListWalkBegin::Of(&it, (List01*)&self->children);
         while ((obj = ListWalkNext::Of(&it)) != 0) {
-            if (IsObjectOfKind(obj, 0x74) != 0) {
-                self->childId = GetAliasId(obj);
+            if (IsObjectOfKind((BaseObject*)obj, 0x74) != 0) {
+                self->childId = GetAliasId((BaseObject*)obj);
                 if (self->childId == -1)
                     self->childId = *(s32*)(obj + 8);
                 self->child = obj;
@@ -286,40 +296,40 @@ void StartFlaggedObject(FlaggedObject* self)
         self->child = FindFirstObjectByIdMode4(self->world, self->childId, self);
     }
     if (self->f5A8 != 0) {
-        self->handle = (StateWalker*)CreateStateWalker(self->f5A8, self, 0x546, 0);
+        self->handle = (StateWalker*)CreateStateWalker((StateGraph*)self->f5A8, self, 0x546, 0);
 
         if (TestFlagTableBit((FlagTable*)g_flagTable, self->flagIndex) != 0)
             SetStateWalkerTarget(self->handle, 0x547);
     }
 }
 
-void CopyCollider(Collider* self);
-void* CreateObjectCopy(void* item, void* x, FlaggedObject* self);
+void CopyCollider(Collider* self, Collider* src);
+void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 
-void CopyFlaggedObject(FlaggedObject* self)
+void CopyFlaggedObject(FlaggedObject* self, FlaggedObject* src)
 {
     s32 keepB = self->flagIndex;
     s32 keepA = self->ordinal;
-    CopyCollider(self);
+    CopyCollider(self, src);
     self->flagIndex = keepB;
     self->ordinal = keepA;
     for (s32 i = 0; i < self->countA; i++) {
-        self->objsA[i] = CreateObjectCopy(self->objsA[i], self->world, self);
+        self->objsA[i] = CreateObjectCopy((BaseObject*)self->objsA[i], self->world, self);
     }
     for (s32 j = 0; j < self->countB; j++) {
-        self->objsB[j] = CreateObjectCopy(self->objsB[j], self->world, self);
+        self->objsB[j] = CreateObjectCopy((BaseObject*)self->objsB[j], self->world, self);
     }
 }
 
 extern s32 D_0026EC58;
-void UpdateCollider(Collider* self);
+void UpdateCollider(Collider* self, f32 dt);
 PlacedObject* GetActiveSwitchedCollider();
-s32 GetObjectWorldPosition(void* obj, f32* out);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
 void RaiseObjectFlag(FlaggedObject* self);
 
-void UpdateFlaggedObject(FlaggedObject* self)
+void UpdateFlaggedObject(FlaggedObject* self, f32 dt)
 {
-    UpdateCollider(self);
+    UpdateCollider(self, dt);
     if (D_0026EC58 >= 2) {
         self->desc->m03(self);
         return;
@@ -342,7 +352,7 @@ void UpdateFlaggedObject(FlaggedObject* self)
     for (s32 i = 0; i < self->countB; i++) {
         void* obj = self->objsB[i];
         if (TestPointAgainstObjectShape((ObjectGatherer*)obj, &player->v140)) {
-            GetObjectWorldPosition(obj, (f32*)g_flagTableSaved);
+            GetObjectWorldPosition((BaseObject*)obj, (Vec02*)g_flagTableSaved);
             RaiseObjectFlag(self);
             break;
         }
@@ -352,16 +362,16 @@ void UpdateFlaggedObject(FlaggedObject* self)
 extern u8 g_padRecord[];
 
 void RaiseObjectFlag(FlaggedObject* self);
-s32 GetActiveSwitchedCollider(void* self, ObjectEvent* ev);
-s32 HandleObjectEvent(void* self, ObjectEvent* ev);
-void StartPadRecordPattern(void* p, f32 f, s32 n);
+struct PadRecord;
+s32 HandleObjectEvent(Collider* self, ObjectEvent* shape);
+void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration);
 
 s32 HandleFlaggedObjectEvent(FlaggedObject* self, ObjectEvent* ev)
 {
-    s32 r = GetActiveSwitchedCollider(self, ev);
-    if (ev->type == r) {
+    void* r = GetActiveSwitchedCollider();
+    if (ev->source == r) {
         if ((ev->extraFlags & 0x10) == 0) {
-            StartPadRecordPattern(g_padRecord, 0.2f, 2);
+            StartPadRecordPattern((PadRecord*)g_padRecord, 2, 0.2f);
         }
         RaiseObjectFlag(self);
         return 1;
@@ -371,20 +381,22 @@ s32 HandleFlaggedObjectEvent(FlaggedObject* self, ObjectEvent* ev)
 
 extern u8 g_scatterController[];
 
-void RaiseScatterLevelForObject(void* table, FlaggedObject* self);
-s32 IsObjectDescendantOf(s32 v, FlaggedObject* self);
-void CreateAnimationPlayerWithoutPresetTargets(void* p, s32 a, s32 b, s32 c, f32 x, f32 y); // stays void: retail returns a value, but declared so func_00141870 differs in registers
+struct ScatterController;
+struct FlaggedObject;
+void RaiseScatterLevelForObject(ScatterController* obj, FlaggedObject* node);
+s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_00141870 differs in registers
 
 void RaiseObjectFlag(FlaggedObject* self)
 {
-    RaiseScatterLevelForObject(g_scatterController, self);
+    RaiseScatterLevelForObject((ScatterController*)g_scatterController, self);
     s32 sel;
     if (self->handle != 0) {
         sel = TestFlagTableBit((FlagTable*)g_flagTable, self->flagIndex) ? 0x549 : 0x548;
     }
     s32 idx = -1;
     SetFlagTableBit((FlagTable*)g_flagTable, self->flagIndex);
-    if (IsObjectDescendantOf((s32)self->child, self)) {
+    if (IsObjectDescendantOf((BaseObject*)self->child, self)) {
         for (BaseObject* n = self; n != 0; n = n->parent) {
             Alias01* sl = n->alias;
             if (sl != 0) {
@@ -397,7 +409,7 @@ void RaiseObjectFlag(FlaggedObject* self)
     }
     SaveFlagTableSnapshot((FlagTable*)g_flagTable, self->childId, idx);
     for (s32 i = 0; i < self->countA; i++) {
-        CreateAnimationPlayerWithoutPresetTargets(self->objsA[i], 0, 0, 0, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)self->objsA[i], 0, 0, 0, 0.0f, 1.0f);
     }
     if (self->handle != 0) {
         SetStateWalkerTarget(self->handle, sel);

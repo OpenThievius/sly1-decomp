@@ -33,40 +33,45 @@
 #include "pad_record.h"
 #include "asm_func.h"
 #include "vu0.h"
-void InitCollider(void* self);
+#include "object_finder.h"
+struct BufferedStream;
+struct MemoryCard;
+struct ScaledTransform;
+struct Mat4A;
+// Types other files define, named by the parameters of their functions declared here.
+void InitCollider(Collider* self);
+
 void ChooseObjectGathererCandidate(ObjectGatherer* self);
-void ComputePolarOffset(void* out, f32 x, f32 y, f32 z);
-void ScatterObjectsAtPoint(void* p, void* v, s32 a, s32 b);
+struct ScatterController;
+void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
+void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag);
 extern u8 g_scatterController[];
 void SetObjectGathererSuspended(ObjectGatherer* self, s32 a1);
-void PostLoadPlacedObject(void* self);
-void* FindFirstObjectByIdMode4(void* a, void* b, void* c);
+void PostLoadPlacedObject(PlacedObject* self);
 // A descriptor slot called by its index (the slots past class 0x01's, whose types the
 // descriptors give differently).
 typedef s32 (*SlotTest)(void* self);
-void StartPlacedObject(void* self);
-s32 HasAnimationEventKind19(void* node);
-void ResolveAndStartObject(void* node);
+void StartPlacedObject(PlacedObject* self);
+s32 HasAnimationEventKind19(Animation* a0);
+void ResolveAndStartObject(BaseObject* self);
 typedef void (*SlotFn)(void* self);
-void* FindOrCreateSeekedAnimationPlayer(void* item, s32 a, f32 x, s32 b, f32 y, s32 c);
-void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
-s32 IsObjectAttached(void* self);
-void CopyCollider(void*);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+s32 IsObjectAttached(BaseObject* self);
+void CopyCollider(Collider* self, Collider* other);
 void InitObjectSet(ObjectSet*);
-void ApplyColliderPendingImpulse(void);
-void RegisterObject(void*);
-void AppendToList(void*, void*);
-void UnregisterObject(void*);
-void RemoveFromList(void*, void*);
-void StartObject(void*);
-void* FindFirstObjectById(void*, s32, s32, void*);
-void RegisterCollider(void*);
-void UnregisterCollider(void*);
-void InitObject(void*);
-void HandlePlacedObjectNotification(ObjectSet* self, s32 msg, ObjectMessage* m);
-s32 IsObjectOfKind(void* obj, s32 kind);
+void ApplyColliderPendingImpulse(Collider* self, s32 moved);
+void RegisterObject(BaseObject* self);
+void AppendToList(List01* self, void* item);
+void UnregisterObject(BaseObject* self);
+void RemoveFromList(List01* list, void* item);
+void StartObject(BaseObject* self);
+void RegisterCollider(Collider* self);
+void UnregisterCollider(Collider* self);
+void InitObject(BaseObject* self);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 void* GetActiveSwitchedColliderData();
-s32 IsObjectDescendantOf(void* e, void* b);
+s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
 // The active switched collider's data block (SwitchedCollider + 0x580): at 0x18 the collider.
 struct ActiveColliderData {
     u8 pad0[0x18];
@@ -79,82 +84,79 @@ struct ElementStackState { u8 pad0[0x30]; s32 f30; };
 extern ElementStackState g_elementStack;
 void MarkLevelRecordComplete(s32 index);
 void RequestWorldLoadByMode(s32 mode);
-void InitSwitchedCollider(C17* self);
+void InitSwitchedCollider(SwitchedCollider* self);
 // One of C17's three markers at 0x61C (StartC17Marker): its owner, the object found for it and
 // that object's state walker.
-struct C17Marker { s32 owner; s32 object; s32 walker; };
-s32 FindFirstObjectById(s32 a, s32 b, s32 c, s32 d);
-void ResolveAndStartObject(s32 a);
-s32 CreateStateWalker(s32 a, s32 b, s32 c, s32 d);
-void GetStateWalkerTargetKey(void* dev, s32* out);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
-void SetStateWalkerTarget(void* dev, s32 value);
+struct StateWalker;
+struct C17Marker { s32 owner; BaseObject* object; StateWalker* walker; };
+struct StateGraph;
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 void ActivateSwitchedCollider(void* value);
-void ShowModeLabel(u32 mode);
+void ShowModeLabel(s32 mode);
 s32 GetPadHorizontalStep(PadRecord* p);
 s32 GetPadVerticalStep(PadRecord* p);
-void ClearPadPressedBits(PadRecord* p, s32 mask);
+void ClearPadPressedBits(PadRecord* self, u32 mask);
 void RecordC17ColliderCompletion(C17* self);
-void CopyMemory(void* dst, void* src, s32 size);
-void ResetPadStepRepeat(void* p);
+void CopyMemory(void* dst, void* src, u32 size);
+void ResetPadStepRepeat(PadRecord* p);
 s32 ComputeCompletionMask(void);
 void FadeOutAndQueueMovie(s32 value);
-void* FindFirstObjectByIdMode4(void* a, s32 code, void* c);
-void CopyObjectData(void* self);
-void ResolveObjectLinks(void* self, s32 n, void* table);
+void CopyObjectData(BaseObject* self, BaseObject* src);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 extern u8 g_flagTable[];
 void InitObjectSet(ObjectSet* self);
-void* TakeFlagTableIndex(void* p);
-void LoadObjectSet(ObjectSet* self);
-void ResolveObjectLinks(void* self, s32 a1, void* a2);
+struct FlagTable;
+s32 TakeFlagTableIndex(FlagTable* c);
+void LoadObjectSet(ObjectSet* self, BufferedStream* stream);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 void* AllocateFrontMemory(s32 size);
 // What func_0019BE08 is given: two quadwords at 0x20 and 0x30.
 struct GatherTrigger { u8 pad[0x20]; Quad16 q20; Quad16 q30; };
-void SetObjectGathererState(void* self, s32 mode);
+void SetObjectGathererState(ObjectGatherer* self, s32 mode);
 s32 GetObjectSetActivationState(ObjectSet* self);
-s32 TestFlagTableBit(void* table, s32 index);
-void SetFlagTableBit(void* table, s32 index);
+s32 TestFlagTableBit(FlagTable* table, s32 index);
+void SetFlagTableBit(FlagTable* self, s32 bit);
 void CollectObjectSet(ObjectSet* self);
 typedef void (*SlotFnInt)(void* self, s32 a);
-void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
-s32 HandleObjectEvent(void* self, ObjectEvent* ev);
-void CopyCollider(void* self);
-void LoadPlacedObject(void* self);
-s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-void FlagNumberedItem(void* obj);
-s32 IsObjectOfKind(void* node, s32 kind);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
+s32 HandleObjectEvent(Collider* self, ObjectEvent* shape);
+void CopyCollider(Collider* self, Collider* other);
+void LoadPlacedObject(PlacedObject* self, void* r);
+void FlagNumberedItem(NumberedItem* self);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 extern f32 g_gameTime[];
 f32 RandomGaussian(f32 a, f32 b, f32 c);
-void LoadCollider(void* self);
-void FindOrBuildMemberGroup(void* sub, void* self);
-void* FindFirstObjectByIdMode1(void* self, s32 kind, void* arg);
+void LoadCollider(Collider* self, BufferedStream* in);
+void FindOrBuildMemberGroup(void** out, void* self);
 extern s32 D_00270454;
 extern u8 g_memoryCard[];
-void SetStateWalkerTarget(void* a, s32 b);
-void PopStackElement(void* q);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
+void PopStackElement(ElementStack* g);
 void ApplyCompletionFlags(s32 mode);
-void StartMemoryCardSave(void* p);
-void* FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
+void StartMemoryCardSave(MemoryCard* self);
 extern s32 D_00275C34;
 void StartObjectSet(ObjectSet* self);
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 RandomIntInRange(s32 a, s32 b);
-void StartSoundEffect(s32 a0, void* a1, void* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void TransformPointBetweenFrames(void* a0, s32 a1, void* a2, void* a3);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 Effect* CreateEffect(s32 kind, EffectOwner* sys);
 void SetNumberedItemFlag(NumberedItem* self);
-void ChooseStepSequenceState(s32 x);
-void StartPlacedObject(C17* o);
-void ResolveObjectLinks(C17* o, s32 n, u8* t);
-void StartC17Marker(void* p, s32 x);
-s32 CreateStateWalker(s32 a, C17* b, s32 c, s32 d);
-void SetStateWalkerTarget(s32 a, s32 b);
-BaseObject* FindFirstObjectByIdMode4(World* a, s32 b, C17* c);
-void GetCurrentLevelBit(s32* p);
-void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
-void SetStateWalkerTarget(void* p, s32 n);
-void* FindOrCreateSeekedAnimationPlayer(void* self, s32 key, s32 a2, s32 a3, f32 fa, f32 fb);
-void QueuePlayerWalkerActivation(Player* a, s32 v);
+void StartPlacedObject(PlacedObject* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+void StartC17Marker(C17Marker* self, s32 x);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
+void GetCurrentLevelBit(u32* out);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
+void* FindOrCreateSeekedAnimationPlayer(void* self, BaseObject* key, s32 a2, s32 a3, f32 fa, f32 fb);
+void QueuePlayerWalkerActivation(Player* self, u8* other);
 // A list walk's frame (as ListFrame), pushed by its constructor.
 struct ListWalkFrame {
     s32 list; s32 cursor; s32 link; s32 prev;
@@ -166,16 +168,16 @@ struct ListWalkFrame {
         *(s32*)&g_activeListFrames = (s32)this;
     }
 };
-void ResolveAndStartObject(BaseObject* n);
-s32 IsObjectOfKind(void* key, s32 kind);
-s32 IsObjectAttached(void* p);
-void HandleSwitchedColliderNotification(void* self, s32 code, s32* rec);
-void SetPlayerState(void* self, s32 a, s32 b);
+void ResolveAndStartObject(BaseObject* self);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+s32 IsObjectAttached(BaseObject* self);
+void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
+void SetPlayerState(Player* self, s32 state, s32 sub);
 s32 CompletesWorldBits(s32 bits);
 void ChooseStepSequenceState(StepSequence* s);
 void InitCollider(Collider* self);
-void AppendToList(void* list, void* item);
-void RemoveFromList(void* table, void* self);
+void AppendToList(List01* self, void* item);
+void RemoveFromList(List01* list, void* item);
 extern f32 g_gameClock[];
 void PlaceFramePointInOwnerFrame(void* a, void* b, void* c, f32 d);
 void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void* e);
@@ -185,14 +187,17 @@ struct GridCell { s32 corner[4]; };
 void BlendCellCornerRecords(AimBlendGrid* self, GridCell* cell, Quad16* point);
 void UnregisterCollider(Collider* self);
 struct LoadStream;
-s32 ReadBufferedS16(LoadStream* in);
-void ReadMeshFromStream(LoadStream* in, void* p);
+struct BufferedStream;
+s32 ReadBufferedS16(BufferedStream* self);
+struct BufferedStream;
+struct Mesh03;
+void ReadMeshFromStream(BufferedStream* in, Mesh03* mesh);
 void* AllocateZeroedFrontMemory(s32 n);
-s32 ReadBufferedS8(LoadStream* in);
+s32 ReadBufferedS8(BufferedStream* self);
 void DecodeAimBlendGridIndex(AimBlendGrid* o, s32 i, f32* x, f32* y, f32* z);
 void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 x, f32 y, f32 z);
-f32 ReadBufferedFloat(LoadStream* in);
-void ReadPropertyRecords(AimBlendGrid* o, LoadStream* in);
+f32 ReadBufferedFloat(BufferedStream* r);
+void ReadPropertyRecords(void* self, void* obj);
 // A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
 struct ListWalker;
 struct ListWalker {
@@ -216,19 +221,18 @@ struct ListWalker {
         return n;
     }
 };
-void RemoveFromList(List01 *a, ObjectGatherer *b);
-void AppendToList(List01 *a, ObjectGatherer *b);
-void TransformPointBetweenFrames(void *a, s32 b, void *c, Quad4 *d);
-void PlaceColliderClearOfContacts(ObjectGatherer *a, Quad4 *b, void *c);
-void SetColliderPartListed(ObjectGatherer *self, s32 flag);
-void StartObject(void* self);
-void* FindFirstObjectByIdMode4(void* a, s32 b, void* c);
-void* FindFirstObjectByIdMode1(void* a, s32 b, void* c);
-void ComputeWrappedDeltas(s32 a, s32 b, void* c, s32 d, s32 e, void* f);
-void BuildCombinedBlendAnimation(void* self, s32 a, s32 b, void* c, s32 d, void* e, void* f, void* g);
-void SetBlendEntryRecordFlag(void* g, void* n);
+void RemoveFromList(List01* list, void* item);
+void AppendToList(List01* self, void* item);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void PlaceColliderClearOfContacts(Collider* self, Vec02* start, Vec02* step);
+void SetColliderPartListed(Collider* self, s32 flag);
+void StartObject(BaseObject* self);
+struct BlendAnimation;
+void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* vals);
+void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
+void SetBlendEntryRecordFlag(BlendAnimationView* blend, void* key);
 void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 a, f32 b, f32 c);
-void SetBlendItemWeights(void* g, s32 a, s32 b, void* c);
+void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
 
 // The file's .data, in retail's order. D_0026A910 and D_0026A914 are read by the VU0 function
 // func_00198BD8, D_0026A968 by func_00199698, D_0026ABB0 and D_0026ABC0 by func_0019B298 and
@@ -264,9 +268,9 @@ void InitObjectSet(ObjectSet* self)
     self->f554 = 1;
 }
 
-void LoadObjectSet(ObjectSet* self)
+void LoadObjectSet(ObjectSet* self, BufferedStream* stream)
 {
-    LoadCollider(self);
+    LoadCollider(self, stream);
     FindOrBuildMemberGroup(&self->f584, self);
     ListWalkFrame fr(&self->children);
     fr.cursor = (s32)self->children.head + fr.link;
@@ -305,17 +309,17 @@ void StartObjectSet(ObjectSet* self)
     StartPlacedObject(self);
     for (i = 0; i < self->count570; i++) {
         void* node = self->found574[i];
-        if (HasAnimationEventKind19(node)) {
+        if (HasAnimationEventKind19((Animation*)node)) {
             self->f558 = 1;
         }
-        ResolveAndStartObject(node);
+        ResolveAndStartObject((BaseObject*)node);
     }
     if (((SlotTest*)self->desc)[76](self) == 0) {
         self->desc->m03(self);
     }
 }
 
-void UpdateCollider(void* self);
+void UpdateCollider(Collider* self, f32 dt);
 void* GetActiveSwitchedCollider();
 
 // The part of the active collider's block at 0x580 that UpdateObjectSet reads.
@@ -328,10 +332,10 @@ struct ActiveReach {
 
 // Each frame while the active collider is near: the set moves to a point 100 out from its
 // target, on the ground away from the set.
-void UpdateObjectSet(ObjectSet* self)
+void UpdateObjectSet(ObjectSet* self, f32 dt)
 {
     Vec02 d;
-    UpdateCollider(self);
+    UpdateCollider(self, dt);
     s32 held = self->f59C;
     self->f59C = 0;
     SwitchedCollider* a = (SwitchedCollider*)GetActiveSwitchedCollider();
@@ -373,7 +377,7 @@ void CollectObjectSet(ObjectSet* self)
     s32 i = self->count570;
     i--;
     for (; i >= 0; i--) {
-        (void)FindOrCreateSeekedAnimationPlayer(self->found574[i], 0, 0.0f, 1, 1.0f, 0);
+        (void)FindOrCreateSeekedAnimationPlayer(self->found574[i], 0, 1, 0, 0.0f, 1.0f);
     }
     ((SlotFn*)self->desc)[78](self);
     (void)TriggerScriptEvent(self, 2, 0, 0);
@@ -398,7 +402,7 @@ s32 GetObjectSetActivationState(ObjectSet* self)
     return 0;
 }
 
-void AddObjectSetKey(ObjectSet* queue, void* item)
+void AddObjectSetKey(ObjectSet* queue, s32 item)
 {
     queue->keys560[queue->n55C++] = item;
 }
@@ -424,7 +428,7 @@ void HandleObjectSetNotification(ObjectSet* self, s32 msg, ObjectMessage* m)
 
 s32 TestObjectSetMayContact(ObjectSet* unused, void* obj)
 {
-    if (IsObjectOfKind(obj, 8) != 0 || IsObjectOfKind(obj, 0x3B) != 0) {
+    if (IsObjectOfKind((BaseObject*)obj, 8) != 0 || IsObjectOfKind((BaseObject*)obj, 0x3B) != 0) {
         return 1;
     }
     return 0;
@@ -437,7 +441,7 @@ void LatchObjectSetContact(ObjectSet* self, Contact03* elems, s32 idx)
     {
         s32 one = 1;
         ContactEnd03* e = (ContactEnd03*)((u8*)elems + ((one - idx) << 6));
-        if (IsObjectDescendantOf(e->part, r->f18) != 0) {
+        if (IsObjectDescendantOf(e->part, (BaseObject*)r->f18) != 0) {
             self->f59C = one;
         }
     }
@@ -446,13 +450,13 @@ void LatchObjectSetContact(ObjectSet* self, Contact03* elems, s32 idx)
 void InitFlaggedObjectSet(FlaggedObjectSet* self)
 {
     InitObjectSet(self);
-    self->f5A0 = (s32)TakeFlagTableIndex(g_flagTable);
+    self->f5A0 = TakeFlagTableIndex((FlagTable*)g_flagTable);
 }
 
-void CopyFlaggedObjectSet(FlaggedObjectSet* obj)
+void CopyFlaggedObjectSet(FlaggedObjectSet* obj, FlaggedObjectSet* src)
 {
     s32 value = obj->f5A0;
-    CopyCollider(obj);
+    CopyCollider(obj, src);
     obj->f5A0 = value;
 }
 
@@ -460,33 +464,33 @@ s32 GetFlaggedObjectSetActivationState(FlaggedObjectSet* self)
 {
     s32 r = GetObjectSetActivationState(self);
     if (r == 1) {
-        r = TestFlagTableBit(g_flagTable, self->f5A0) ? 0 : r;
+        r = TestFlagTableBit((FlagTable*)g_flagTable, self->f5A0) ? 0 : r;
     }
     return r;
 }
 
 void CollectFlaggedObjectSet(FlaggedObjectSet* self)
 {
-    SetFlagTableBit(g_flagTable, self->f5A0);
+    SetFlagTableBit((FlagTable*)g_flagTable, self->f5A0);
     CollectObjectSet(self);
 }
 
-void LoadStateWalkerObject(StateWalkerObject* self)
+void LoadStateWalkerObject(StateWalkerObject* self, BufferedStream* stream)
 {
-    LoadPlacedObject(self);
-    ResolveObjectLinks(self, 1, (u8*)D_0026A918);
+    LoadPlacedObject(self, stream);
+    ResolveObjectLinks(self, 1, D_0026A918);
 }
 
 void StartStateWalkerObject(StateWalkerObject* self)
 {
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 1, (u8*)D_0026A928);
+    ResolveObjectLinks(self, 1, D_0026A928);
 }
 
-void LoadStateWalkerGroup(StateWalkerGroup* self)
+void LoadStateWalkerGroup(StateWalkerGroup* self, BufferedStream* stream)
 {
-    LoadPlacedObject(self);
-    ResolveObjectLinks(self, 1, (u8*)D_0026A938);
+    LoadPlacedObject(self, stream);
+    ResolveObjectLinks(self, 1, D_0026A938);
 }
 
 void StartStateWalkerGroup(StateWalkerGroup* self)
@@ -508,11 +512,11 @@ void StartStateWalkerGroup(StateWalkerGroup* self)
     s32 s4 = (g_currentLevelRecord->f448 & self->mask2D0) ? 0x22F : 0x22E;
     for (i = 0; i < self->count300; i++) {
         e = (StateWalkerObject*)self->objs304[i];
-        e->f2D4 = CreateStateWalker(e->f2D0, e, -1, 0);
-        SetStateWalkerTarget(e->f2D4, s4);
+        e->f2D4 = CreateStateWalker((StateGraph*)e->f2D0, e, -1, 0);
+        SetStateWalkerTarget((StateWalker*)e->f2D4, s4);
     }
-    self->f2D8 = CreateStateWalker(self->f2D4, self, -1, 0);
-    SetStateWalkerTarget(self->f2D8, s4);
+    self->f2D8 = CreateStateWalker((StateGraph*)self->f2D4, self, -1, 0);
+    SetStateWalkerTarget((StateWalker*)self->f2D8, s4);
 }
 
 void SetStateWalkerGroupMaskBit(StateWalkerGroup* flags, u32 bit)
@@ -529,9 +533,12 @@ void AddStateWalkerGroupId(StateWalkerGroup* queue, void* item)
     }
 }
 
-void QueueWalkerActivationOnPlayer(s32 a0) {
+// Left with an integer: QueueWalkerActivationOnPlayer takes the walker as an s32.
+void QueuePlayerWalkerActivation(Player* self, s32 other);
+
+void QueueWalkerActivationOnPlayer(StateWalkerGroup* group) {
     if (g_player != 0) {
-        (void)QueuePlayerWalkerActivation(g_player, a0);
+        (void)QueuePlayerWalkerActivation(g_player, (u8*)group);
     }
 }
 
@@ -541,29 +548,29 @@ void InitNumberedItem(NumberedItem* obj)
     obj->f5A0 = obj->world->count2300++;
 }
 
-void LoadNumberedItem(NumberedItem* self)
+void LoadNumberedItem(NumberedItem* self, BufferedStream* stream)
 {
-    LoadObjectSet(self);
+    LoadObjectSet(self, stream);
     s32 i = 0x318;
-    ResolveObjectLinks(self, 1, (u8*)g_numberedItemLinks);
+    ResolveObjectLinks(self, 1, g_numberedItemLinks);
     self->f5B0 = AllocateFrontMemory(0x80);
     while (i < 0x338) {
-        s32 r = (s32)FindFirstObjectById(self->world, 1, i, self);
+        void* r = FindFirstObjectById(self->world, 1, i, self);
         if (r == 0) {
             break;
         }
         s32 count = self->n5AC;
         i++;
-        ((s32*)self->f5B0)[count] = r;
+        ((void**)self->f5B0)[count] = r;
         self->n5AC = count + 1;
-        ResolveAndStartObject(r);
+        ResolveAndStartObject((BaseObject*)r);
     }
 }
 
-void CopyNumberedItem(NumberedItem* obj)
+void CopyNumberedItem(NumberedItem* obj, NumberedItem* src)
 {
     s32 value = obj->f5A0;
-    CopyCollider(obj);
+    CopyCollider(obj, src);
     obj->f5A0 = value;
 }
 
@@ -613,16 +620,16 @@ struct ActiveColliderTarget {
     PlacedObject* f18;
 };
 s32 MaskWorldBitsBySave(void);
-void ComputeObjectMotionInFrame(void* obj, s32 a, void* pos, Vec02* out, s32 b, s32 c, s32 d);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 
 // The reach test reads the target's position at the use (*(const u128*)&...), not through Q's
 // reference: the reference's address is a pseudo that CSE then reuses for the &target->v140
 // passed after the test, where retail forms it afresh (docs/TOOLCHAIN.md, "CSE").
-void UpdateNumberedItem(NumberedItem* self)
+void UpdateNumberedItem(NumberedItem* self, f32 dt)
 {
     Vec02 first;
     Vec02 second;
-    UpdateObjectSet(self);
+    UpdateObjectSet(self, dt);
     if ((MaskWorldBitsBySave() & 0x20000) == 0) {
         return;
     }
@@ -687,7 +694,7 @@ void SetNumberedItemFlag(NumberedItem* self)
     StartSoundEffect(0x6A, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 L980:
     g_saveData->f19EC = g_saveData->f19EC | s1;
-    s32 r = (s32)FindFirstObjectById((void*)g_currentWorld, 1, s0, 0);
+    StepSequence* r = (StepSequence*)FindFirstObjectById(g_currentWorld, 1, s0, 0);
     if (r != 0) {
         ChooseStepSequenceState(r);
     }
@@ -706,7 +713,7 @@ void CollectNumberedItem(NumberedItem* self)
         }
         n->p134 = self;
         n->params = &D_0026A970;
-        TransformPointBetweenFrames(self, 0, self->f5BC + 0x100, &loc);
+        TransformPointBetweenFrames(self, 0, (Vec02*)(self->f5BC + 0x100), (Vec02*)&loc);
         n->vt->m00(n, &loc, 1.0f, 0);
         n->i20 = *(s32*)&self->f5BC;
     } else {
@@ -752,9 +759,9 @@ void GetNumberedItemFlag(NumberedItem* self, s32* out)
     *out = (b & mask) != 0;
 }
 
-void ApplyNumberedItemPendingImpulse(void)
+void ApplyNumberedItemPendingImpulse(NumberedItem* self, s32 moved)
 {
-    ApplyColliderPendingImpulse();
+    ApplyColliderPendingImpulse(self, moved);
 }
 
 s32 HandleNumberedItemObjectEvent(NumberedItem* self, ObjectEvent* a1)
@@ -780,12 +787,12 @@ struct SpinKeyframe {
     u8 to[0x10];            // 0x50
 };
 
-void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
-void RotateMatrixUpright(Mat02* sub, s32 zero, Mat02* out);
-void BuildPlacedObjectTransform(NumberedItem* self, void* a, SpinFrame4* out);
-void BuildMatrixFromRotationAndTranslation(void* rot, void* from, SpinFrame4* out);
-void MultiplyMatrices(SpinFrame4* out, SpinFrame4* b, SpinFrame4* in); // stays void: retail returns a value, but declared so func_00199D08 differs in registers
-void ApplyPlacedObjectTransform(NumberedItem* self, void* a, SpinFrame4* m);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
+void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
+void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
+SpinFrame4 MultiplyMatrices(const SpinFrame4& a, const SpinFrame4& b);
+void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 
 static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
 {
@@ -818,16 +825,15 @@ void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
         return;
     }
     self->f5B8 = self->f5B8 + self->f5B4 * g_gameClock[2];
-    BuildAxisAngleMatrix(&g_unitZVector, self->f5B8, &axis);
+    BuildAxisAngleMatrix(&g_unitZVector, &axis, self->f5B8);
     MulRotation(&turned, *(const Mat02*)((u8*)self + 0x110), axis);
     if (self->parent != 0) {
         RotateMatrixUpright(&turned, 0, &turned);
     }
-    BuildPlacedObjectTransform(self, a2, &base);
-    BuildMatrixFromRotationAndTranslation(&self->v140, &turned, &base);
+    BuildPlacedObjectTransform(self, (Quad16*)a2, (ScaledTransform*)&base);
+    BuildMatrixFromRotationAndTranslation(&self->v140, &turned, (Mat4A*)&base);
     if (self->n5AC > 0) {
         SpinFrame4 key;
-        SpinFrame4 product;
         self->f5A4 = self->f5A4 + g_gameClock[2];
         while (self->f5A8 + self->f5A8 <= self->f5A4) {
             self->f5A4 = self->f5A4 - (self->f5A8 + self->f5A8);
@@ -839,21 +845,20 @@ void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
             index = twice - m;
         }
         SpinKeyframe* k = ((SpinKeyframe**)self->f5B0)[index];
-        BuildMatrixFromRotationAndTranslation(k->from, k->to, &key);
-        MultiplyMatrices(&product, &base, &key);
-        base = product;
+        BuildMatrixFromRotationAndTranslation((const Vec02*)k->from, (const Mat02*)k->to, (Mat4A*)&key);
+        base = MultiplyMatrices(base, key);
     }
-    ApplyPlacedObjectTransform(self, a1, &base);
+    ApplyPlacedObjectTransform(self, (Camera*)a1, (ScaledTransform*)&base);
 }
 
 void FlagAllNumberedItems(void)
 {
     void* arr[0x100];
-    s32 i = GatherObjectsById((void*)g_currentWorld, 0x105, 0x2E, 0, 0x100, arr) - 1;
+    s32 i = GatherObjectsById(g_currentWorld, 0x105, 0x2E, 0, 0x100, arr) - 1;
     if (i >= 0) {
         void** p = (void**)(i * 4 + (s32)arr);
         do {
-            FlagNumberedItem(*p);
+            FlagNumberedItem((NumberedItem*)*p);
             if (((BaseObject*)*p)->parent != 0) {
                 if (IsObjectOfKind(((BaseObject*)*p)->parent, 0x20) != 0) {
                     BaseObject* s = ((BaseObject*)*p)->parent;
@@ -920,21 +925,21 @@ void InitC17Collider(C17* self)
 
 void StartC17Marker(C17Marker* self, s32 x)
 {
-    self->object = FindFirstObjectById((s32)g_currentWorld, 0x101, 0x37A, self->owner);
+    self->object = FindFirstObjectById(g_currentWorld, 0x101, 0x37A, (void*)self->owner);
     ResolveAndStartObject(self->object);
-    self->walker = CreateStateWalker(self->object, self->owner, x, 0);
+    self->walker = CreateStateWalker((StateGraph*)self->object, (void*)self->owner, x, 0);
 }
 
 void StartC17Collider(C17* o)
 {
     u32 i;
     StartPlacedObject(o);
-    ResolveObjectLinks(o, 0x1A, (u8*)D_0026AA50.e);
+    ResolveObjectLinks(o, 0x1A, D_0026AA50.e);
     for (i = 0; i < 3; i++)
-        StartC17Marker(o->f61C + i * 12, 0x390);
-    s32 h = CreateStateWalker(o->f610, o, 0x384, 1);
+        StartC17Marker((C17Marker*)(o->f61C + i * 12), 0x390);
+    StateWalker* h = CreateStateWalker((StateGraph*)o->f610, o, 0x384, 1);
     o->f764 = -1;
-    o->f614 = (StateWalker*)h;
+    o->f614 = h;
 
     if (g_currentEntry->bits & 4) {
         SetStateWalkerTarget(h, 0x38F);
@@ -959,7 +964,7 @@ void StartC17Collider(C17* o)
     if (((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 3) {
         o->f760 = 1;
     } else {
-        GetCurrentLevelBit(&o->f760);
+        GetCurrentLevelBit((u32*)&o->f760);
         if (o->f760 & 0xF000FFFFl) {
             s32 cnt = 0;
             LevelTaskRecord* p = (LevelTaskRecord*)g_currentLevelRecord;
@@ -1001,7 +1006,7 @@ lookup:
         o->f764 = -1;
 }
 
-void HandleC17ColliderActivation(C17* self, s32 flag)
+void HandleC17ColliderActivation(C17* self, void* flag)
 {
     s32 r;
     s32 flags;
@@ -1019,12 +1024,12 @@ void HandleC17ColliderActivation(C17* self, s32 flag)
         ResetPadStepRepeat(&g_padRecord);
         flags = g_saveData->f19EC;
         if ((flags & 8) == 0) {
-            a = FindFirstObjectByIdMode4((void*)g_currentWorld, 0x39A, self);
+            a = FindFirstObjectByIdMode4(g_currentWorld, 0x39A, self);
         } else {
             if ((flags & 0x10) != 0) {
                 goto tail;
             }
-            a = FindFirstObjectByIdMode4((void*)g_currentWorld, 0x39B, self);
+            a = FindFirstObjectByIdMode4(g_currentWorld, 0x39B, self);
         }
         if (a != 0) {
             n = self->f7D8;
@@ -1056,7 +1061,7 @@ tail:
 // The combination lock: the pad turns the three dials (each key 0x385..0x38D a dial and a digit
 // band, 0x38E open, 0x38F done), the dials matching f640's digits open it, and the queued step
 // sequences run one at a time.
-void ControlC17Collider(C17* self, PadRecord* pad)
+void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
 {
     s32 cur;
     s32 target;
@@ -1183,10 +1188,10 @@ void ControlC17Collider(C17* self, PadRecord* pad)
             C17Marker* m = &((C17Marker*)self->f61C)[i];
             s32 t;
             s32 c;
-            GetStateWalkerTargetKey((void*)m->walker, &t);
+            GetStateWalkerTargetKey(m->walker, &t);
             if (t != -1)
                 break;
-            GetStateWalkerCurrentKey((void*)m->walker, &c);
+            GetStateWalkerCurrentKey(m->walker, &c);
             if (c - 0x390 != code / 100 % 10)
                 break;
         }
@@ -1244,12 +1249,12 @@ void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
     }
 }
 
-void AddEntryRecordKey(C17* list, u32 index, void* item)
+void AddEntryRecordKey(C17* list, u32 index, s32 key)
 {
     Ent17* record = (Ent17*)((u8*)list + 0x658 + index * 0x2C);
     u32 count = record->count;
     if (count < 4) {
-        record->keys[count] = (s32)item;
+        record->keys[count] = key;
         record->count = count + 1;
     }
 }
@@ -1273,7 +1278,7 @@ void RecordC17ColliderCompletion(C17* self)
     }
 
     if (D_00270454 != 0) {
-        PopStackElement((void*)&g_elementStack);
+        PopStackElement((ElementStack*)&g_elementStack);
     }
     if ((self->f760 & (s64)0xF000FFFF) != 0) {
         G27C230* ctx = g_currentLevelRecord;
@@ -1299,7 +1304,7 @@ void RecordC17ColliderCompletion(C17* self)
         sel = 0x37E;
         if (self->f760 != 1) {
             sel = 0x37F;
-            StartMemoryCardSave(g_memoryCard);
+            StartMemoryCardSave((MemoryCard*)g_memoryCard);
         }
 
         r = (BaseObject*)FindFirstObjectById(self->world, 0x101, sel, self);
@@ -1342,15 +1347,15 @@ void StartC71Object(C71* obj)
 {
     StartObject(obj);
     if (obj->targetId != -1)
-        obj->target = (s32)FindFirstObjectById(obj->world, 4, obj->targetId, obj);
+        obj->target = FindFirstObjectById(obj->world, 4, obj->targetId, obj);
 }
 
-void CopyC71Object(C71* self)
+void CopyC71Object(C71* self, C71* src)
 {
     PathCurveKeptBits tmp;
 
     tmp = self->keep;
-    CopyObjectData(self);
+    CopyObjectData(self, src);
     self->keep = tmp;
 }
 
@@ -1363,16 +1368,16 @@ void InitObjectGatherer(ObjectGatherer* self)
     self->f664 = -1;
 }
 
-void LoadObjectGatherer(ObjectGatherer* self)
+void LoadObjectGatherer(ObjectGatherer* self, BufferedStream* stream)
 {
     s32 k = 0x269;
-    LoadCollider(self);
+    LoadCollider(self, stream);
     FindOrBuildMemberGroup(&self->group, self);
-    ResolveObjectLinks(self, 1, (u8*)g_objectGathererLoadLinks);
+    ResolveObjectLinks(self, 1, g_objectGathererLoadLinks);
     for (; k < 0x288; k++) {
         void* node = FindFirstObjectByIdMode1(self->world, k, self);
         if (node != 0) {
-            ResolveAndStartObject(node);
+            ResolveAndStartObject((BaseObject*)node);
             if (k < 0x279) {
                 self->lowObjects[self->lowCount++] = node;
             } else {
@@ -1384,7 +1389,7 @@ void LoadObjectGatherer(ObjectGatherer* self)
 
 void StartObjectGatherer(ObjectGatherer* self)
 {
-    ResolveObjectLinks(self, 1, (u8*)g_objectGathererStartLinks);
+    ResolveObjectLinks(self, 1, g_objectGathererStartLinks);
     StartPlacedObject(self);
     self->state = -1;
     SetObjectGathererState(self, 1);
@@ -1403,18 +1408,18 @@ void RemoveObjectGatherer(ObjectGatherer* obj)
     RemoveFromList(&obj->world->list1C60, obj);
 }
 
-void CopyObjectGatherer(ObjectGatherer* self)
+void CopyObjectGatherer(ObjectGatherer* self, ObjectGatherer* src)
 {
     PackedS64 tmp;
     tmp = self->q600;
-    CopyCollider(self);
+    CopyCollider(self, src);
     self->q600 = tmp;
 }
 
 void StepCollider(Collider* self, f32 t);
-void SteerColliderTowardRotation(Collider* self, void* a, s32 b, void* table, s32 c, f32 t);
-void TurnColliderTowardRotation(Collider* self, f32 scale, void* basis, void* data);
-void BuildBasisFromX(void* self, void* value);
+void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
+void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
+void BuildBasisFromX(Vec02* x, Mat02* out);
 
 void StepObjectGatherer(ObjectGatherer* self, f32 dt)
 {
@@ -1430,14 +1435,14 @@ void StepObjectGatherer(ObjectGatherer* self, f32 dt)
         TurnColliderTowardRotation(self, dt, &basis, D_0026ABB0);
         break;
     case 2:
-        TransformPointBetweenFrames(*(void**)((u8*)self->f660 + 0x18), 0, (u8*)self->f660 + 0x40, &target);
+        TransformPointBetweenFrames((PlacedObject*)(*(void**)((u8*)self->f660 + 0x18)), 0, (Vec02*)((u8*)self->f660 + 0x40), &target);
         Vu0::Q(delta) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
         delta.z = 0.0f;
         BuildBasisFromX(&delta, &basis);
         TurnColliderTowardRotation(self, dt, &basis, D_0026ABB0);
         break;
     default:
-        SteerColliderTowardRotation(self, 0, 0, (void*)&D_00248D30, (s32)self->p214, dt);
+        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, (f32*)self->p214, dt);
         break;
     }
 }
@@ -1473,8 +1478,8 @@ struct GatherCandidate {
 
 void UpdateCollider(Collider* self, f32 dt);
 void* FindColliderFloorContact(void* self, s32 key, s32* out);
-s32 TestPointAgainstObjectShape(void* obj, Vec02* p);
-void ClearRootTries(void* self);
+s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value);
+void ClearRootTries(PlacedObject* self);
 
 // Each update: the state's sound, push and speed.
 void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
@@ -1552,7 +1557,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
                 state = 1;
                 break;
             }
-            if (self->f660 != 0 && TestPointAgainstObjectShape(self->f660, &self->v140) != 0) {
+            if (self->f660 != 0 && TestPointAgainstObjectShape((ObjectGatherer*)self->f660, &self->v140) != 0) {
                 state = 4;
             }
             break;
@@ -1594,7 +1599,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         } else {
             speed = self->f618;
             Vec02 at;
-            TransformPointBetweenFrames(((GatherCandidate*)self->f660)->frame, 0, &((GatherCandidate*)self->f660)->pos, (Quad4*)&at);
+            TransformPointBetweenFrames((PlacedObject*)(((GatherCandidate*)self->f660)->frame), 0, &((GatherCandidate*)self->f660)->pos, &at);
             u128 d = Vu0::Sub(Vu0::Q(at), Vu0::Q(self->v140));
             f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d, d)));
             if (dist < 500.0f) {
@@ -1628,7 +1633,7 @@ ASM_FUNC(func_0019BB10);
 
 ASM_FUNC(func_0019BB90);
 
-void BuildPlacedObjectTransform(void* self, void* a, void* out);
+void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 
 void ApplyObjectGathererLodObject(ObjectGatherer* self, void* a1, void* a2)
 {
@@ -1641,7 +1646,7 @@ void ApplyObjectGathererLodObject(ObjectGatherer* self, void* a1, void* a2)
     if (self->flags & 0x100000000ULL) {
         return;
     }
-    BuildPlacedObjectTransform(self, a2, tmp);
+    BuildPlacedObjectTransform(self, (Quad16*)a2, (ScaledTransform*)tmp);
     switch (self->state) {
     case 0:
         obj = (PlacedObject*)self->base5EC;
@@ -1693,7 +1698,7 @@ s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
 }
 
 void* GetActiveSwitchedCollider();
-void MeasurePointToSegment(void* p, Vec02* a, Vec02* b, f32* t, f32* dist);
+void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
 
 // Picks, of the class 0x7C objects within reach, the one farthest from the active collider along
 // the segment to it, and keeps it in f660.
@@ -1715,13 +1720,13 @@ void ChooseObjectGathererCandidate(ObjectGatherer* self)
     BeginListWalk::Of(&frame, &self->world->list1C6C);
     GatherCandidate* node;
     while ((node = NextInList<GatherCandidate>::Of(&frame)) != 0) {
-        TransformPointBetweenFrames(node->frame, 0, &node->pos, (Quad4*)&point);
+        TransformPointBetweenFrames((PlacedObject*)node->frame, 0, &node->pos, &point);
         f32 reach = *(f32*)((u8*)self + 0x624);
         f32 reach2 = reach * reach;
         u128 off = Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140));
         s32 far = reach2 < Vu0::ToFloatMoved(Vu0::Dot(off, off));
         if (!far) {
-            MeasurePointToSegment((u8*)GetActiveSwitchedCollider() + 0x140, &self->v140, &point, &t, &dist);
+            MeasurePointToSegment((Vec02*)((u8*)GetActiveSwitchedCollider() + 0x140), &self->v140, &point, &t, &dist);
             f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140))));
             if (bestDist < dist || (t < 0.0001f && bestT < 0.0001f && len < bestLen)) {
                 bestT = t;
@@ -1743,9 +1748,9 @@ void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
         Quad4 buf;
         AppendToList(&self->world->list1C60, self);
         ((BaseObject *)self->f5FC)->desc->m02((BaseObject *)self->f5FC);
-        TransformPointBetweenFrames(*(void **)((u8 *)self->f660 + 0x18), 0,
-                      (u8 *)self->f660 + 0x40, &buf);
-        PlaceColliderClearOfContacts(self, &buf, (void*)&g_unitZVector);
+        TransformPointBetweenFrames(*(PlacedObject **)((u8 *)self->f660 + 0x18), 0,
+                      (Vec02 *)((u8 *)self->f660 + 0x40), (Vec02 *)&buf);
+        PlaceColliderClearOfContacts((Collider*)self, (Vec02*)&buf, (Vec02*)&g_unitZVector);
     }
     SetColliderPartListed(self, a1 == 0);
     ListWalker it(&self->parts);
@@ -1779,7 +1784,7 @@ void SetObjectGathererState(ObjectGatherer* self, s32 mode)
     case 1: {
         f32 angle = RandomFloatInRange(0.0f, 6.2831855f);
         f32 radius = RandomFloatInRange(0.0f, self->f610);
-        ComputePolarOffset(&offset, angle, radius, 0.0f);
+        ComputePolarOffset((Vec3*)&offset, angle, radius, 0.0f);
         Vu0::Q(self->v640) = Vu0::Add(Vu0::Q(self->v190), Vu0::Q(offset));
         self->ring = 0;
         self->f558 = self->f558 + RandomFloatInRange(3.0f, 5.0f);
@@ -1791,8 +1796,8 @@ void SetObjectGathererState(ObjectGatherer* self, s32 mode)
         self->ring = 0;
         break;
     case 3:
-        StartSoundEffect(0x3A, 0, 0, (s32)&self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        ScatterObjectsAtPoint(g_scatterController, &self->v140, self->f664, self->f668);
+        StartSoundEffect(0x3A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->f664, self->f668);
         self->desc->m03(self);
         break;
     case 4:
@@ -1830,43 +1835,43 @@ void LoadAimBlendGrid(AimBlendGrid* o, LoadStream* in)
         s32* p = (s32*)((u8*)o + 0xF0);
         do {
             i--;
-            *p = ReadBufferedS16(in);
+            *p = ReadBufferedS16((BufferedStream*)in);
             p += 8;
         } while (i >= 0);
     }
     s32 i = 0;
-    o->f48 = ReadBufferedS16(in);
-    ReadMeshFromStream(in, o->fA0);
+    o->f48 = ReadBufferedS16((BufferedStream*)in);
+    ReadMeshFromStream((BufferedStream*)in, (Mesh03*)o->fA0);
     o->fC4 = (GridRecord*)AllocateZeroedFrontMemory(o->fA4 * 100);
     for (i = 0; i < o->fA4; i++) {
         f32 x;
         f32 y;
         f32 z;
         GridRecord* r = &o->fC4[i];
-        o->fC4[i].id = ReadBufferedS8(in);
+        o->fC4[i].id = ReadBufferedS8((BufferedStream*)in);
         DecodeAimBlendGridIndex(o, i, &x, &y, &z);
         ComputeGridBlendWeights(o, (f32*)r->pos, x, y, z);
     }
-    o->fC8 = ReadBufferedS16(in);
+    o->fC8 = ReadBufferedS16((BufferedStream*)in);
     o->fCC = (u8*)AllocateZeroedFrontMemory(o->fC8 << 4);
     for (s32 e = 0; e < o->fC8; e++) {
         s32* r = (s32*)(o->fCC + (e << 4));
         s32 j = 3;
         do {
             j--;
-            *r = ReadBufferedS16(in);
+            *r = ReadBufferedS16((BufferedStream*)in);
             r++;
         } while (j >= 0);
     }
-    o->fD0 = o->fD4 = ReadBufferedS16(in);
+    o->fD0 = o->fD4 = ReadBufferedS16((BufferedStream*)in);
     o->fD8 = (AimPlaneNode*)AllocateZeroedFrontMemory(o->fD0 * 12);
     o->fDC = (AimPlaneEdge*)AllocateZeroedFrontMemory(o->fD0 << 3);
     for (s32 n = 0; n < o->fD0; n++) {
         AimPlaneNode* t = &o->fD8[n];
         AimPlaneEdge* e = &o->fDC[n];
-        s32 a = ReadBufferedS16(in);
-        s32 b = ReadBufferedS16(in);
-        s32 c = ReadBufferedS16(in);
+        s32 a = ReadBufferedS16((BufferedStream*)in);
+        s32 b = ReadBufferedS16((BufferedStream*)in);
+        s32 c = ReadBufferedS16((BufferedStream*)in);
         t->a = o->fB0 + (a << 5);
         if (b > 0) {
             b--;
@@ -1883,7 +1888,7 @@ void LoadAimBlendGrid(AimBlendGrid* o, LoadStream* in)
             e->b = o->fCC + (c << 4);
         }
     }
-    o->fE0 = ReadBufferedFloat(in);
+    o->fE0 = ReadBufferedFloat((BufferedStream*)in);
     ReadPropertyRecords(o, in);
 }
 
@@ -1902,8 +1907,8 @@ void StartAimBlendGrid(AimBlendGrid* self)
         s->n4 = n;
         if (n != 0) n->vtbl[7](n);
     }
-    ComputeWrappedDeltas(0x20, 0x18, self->slots, 0x10, 2, D_0026ABD0);
-    BuildCombinedBlendAnimation(self->f3C, 0x20, 0x18, self->slots, 1, D_0026ABE0, D_0026ABD8, &self->f3E4);
+    ComputeWrappedDeltas(0x20, 0x18, (u8*)self->slots, 0x10, 2, D_0026ABD0);
+    BuildCombinedBlendAnimation((Collider*)self->f3C, 0x20, 0x18, (u8*)self->slots, 1, D_0026ABE0, D_0026ABD8, (BlendAnimation**)&self->f3E4);
     if (self->f3E4->f78 == 0) self->f3E4->f78 = 1;
     void* nd = FindFirstObjectByIdMode1(self->world, 0x36, self->f3C);
     if (nd != 0) SetBlendEntryRecordFlag(self->f3E4, nd);
@@ -2065,13 +2070,13 @@ struct FramePoint_0019CE50 {
     Vec02 point;            // 0x40
 };
 
-void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 
 void PlaceFramePointAtTime(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
 {
     Vec02 pos;
     Mat02 rot;
-    ComputeObjectFrameAtTime(p->object, 0, &pos, &rot, 0, 0, t);
+    ComputeObjectFrameAtTime((PlacedObject*)p->object, 0, &pos, &rot, 0, 0, t);
     Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(p->point)), Vu0::Q(pos));
 }
 
@@ -2088,7 +2093,7 @@ void PlaceFramePointInOwnerFrame(void* self, void* p, void* out, f32 t)
     Vec02 point;
     Mat02 rot;
     PlaceFramePointAtTime(self, (FramePoint_0019CE50*)p, &point, t);
-    ComputeObjectFrameAtTime(((FrameOwner_0019CEC0*)self)->object, 0, &pos, &rot, 0, 0, t);
+    ComputeObjectFrameAtTime((PlacedObject*)(((FrameOwner_0019CEC0*)self)->object), 0, &pos, &rot, 0, 0, t);
     Vu0::Q(point) = Vu0::Sub(Vu0::Q(point), Vu0::Q(pos));
     Vu0::Q(*(Vec02*)out) = Vu0::RotateTransposed(rot, Vu0::Q(point));
 }
@@ -2207,7 +2212,7 @@ void TrackAimTargetObject(Player* self, AimBlendGrid* x, void* y)
     }
 }
 
-void TrackAimTargetPoint(void* self, AimBlendGrid* dst, PathCurveObject* src, f32* k)
+void TrackAimTargetPoint(Player* self, AimBlendGrid* dst, PathCurveObject* src, f32* k)
 {
     Quad16 q0;
     Quad16 q1;
@@ -2215,12 +2220,12 @@ void TrackAimTargetPoint(void* self, AimBlendGrid* dst, PathCurveObject* src, f3
     Quad16 q3;
     GridCell* w40;
     s32 w44;
-    TransformPointBetweenFrames(0, (s32)src->parent, (u8*)self + 0x140, &q0);
+    TransformPointBetweenFrames(0, (PlacedObject*)src->parent, (Vec02*)((u8*)self + 0x140), (Vec02*)&q0);
     PathCurve* o = src->curve;
     if (o->vt->m12 != 0) {
         o->vt->m12(o, *k, &q0, 0, (f32*)&q1, 0, 0, k);
     }
-    TransformPointBetweenFrames((void*)src->parent, (s32)self, &q1, &q2);
+    TransformPointBetweenFrames((PlacedObject*)src->parent, (PlacedObject*)self, (Vec02*)&q1, (Vec02*)&q2);
     FindNearestAcceptedPointOnSegment(dst, &q2, &q3, &w40, &w44);
     BlendCellCornerRecords(dst, w40, &q3);
 }

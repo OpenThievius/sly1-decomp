@@ -17,22 +17,30 @@
 #include "asm_func.h"
 #include "mpeg_decoder.h"
 #include "system.h"
+struct Node_20C0A8;
 
-u32 SetIpuMpeg1Mode(u32 value)
+struct Self_20B978;
+
+struct Dec_20B9F0;
+struct Q_0020B1E0;
+struct Self_20B978;
+
+
+void SetIpuMpeg1Mode(u32 value)
 {
     u32* setting = (u32*)0x10002010;
     u32 result = (*setting & 0xFF7FFFFFu) | (value << 23);
     *setting = result;
-    return result;
 }
 
 struct Msg_20DF10 { s32 cmd; s32 pad[7]; };
 
+struct IpuWaitView;
 void WaitIpuCommandDone(MpegDecoder* o); // stays void: retail returns a value, but declared so func_0020DF10 and func_0020F708 differs in registers
 s32 RunMpegCallback(MpegHandle* q, Msg_20DF10* m);
-s32 ReportMpegError(MpegDecoder* o, const char* msg);
-s32 DisableInterrupts(void);
-s32 EnableInterrupts(void);
+void ReportMpegError(Self_20B978* self, const char* value);
+extern "C" s32 DisableInterrupts(void);
+extern "C" s32 EnableInterrupts(void);
 
 s32 WaitIpuDecodeDone(MpegDecoder* o)
 {
@@ -57,7 +65,7 @@ s32 WaitIpuDecodeDone(MpegDecoder* o)
     }
     if ((*(volatile u32*)0x10002010 & 0x4000) != 0) {
         result = 0;
-        ReportMpegError(o, "Error code detected(BDEC)");
+        ReportMpegError((Self_20B978*)o, "Error code detected(BDEC)");
         n.cmd = 2;
         RunMpegCallback(o->handle, &n);
         *(volatile u32*)0x10002010 = 0x40000000;
@@ -73,11 +81,12 @@ s32 WaitIpuDecodeDone(MpegDecoder* o)
     return result;
 }
 
-s32 DecodeIpuVariableLength(MpegDecoder* self, s32 kind);
+struct Self_20F248;
+s16 DecodeIpuVariableLength(Self_20F248* self, s32 mode);
 
 s32 DecodeIpuMotionCode(MpegDecoder* self)
 {
-	return DecodeIpuVariableLength(self, 3);
+	return DecodeIpuVariableLength((Self_20F248*)self, 3);
 }
 
 struct Mode_E120 { u8 pad[0x174]; s32 mode; s32 flag; };
@@ -119,16 +128,17 @@ struct Node_20E2A8 {
     s32 field848;
 };
 
-s32 DecodeIpuVariableLength(struct Node_20E2A8 *self, s32 a1);
-s32 PeekIpuBits(struct Node_20E2A8 *self, s32 a1);
-void SkipIpuBits(struct Node_20E2A8 *self, s32 a1);
+s16 DecodeIpuVariableLength(Self_20F248* self, s32 mode);
+s32 PeekIpuBits(MpegDecoder* obj, s32 a1);
+struct Ctx_20F4C8;
+void SkipIpuBits(Ctx_20F4C8* s0, u32 s1);
 void ReportMpegErrorFormat(struct Node_20E2A8 *self, const char *a1, s32 a2);
 
 s32 ReadMacroblockAddressIncrement(struct Node_20E2A8 *self) {
     s32 total = 0;
     s32 again;
     do {
-        s32 tok = DecodeIpuVariableLength(self, 0);
+        s32 tok = DecodeIpuVariableLength((Self_20F248*)self, 0);
         switch ((u32)tok) {
         case 0x22:
             again = 1;
@@ -138,9 +148,9 @@ s32 ReadMacroblockAddressIncrement(struct Node_20E2A8 *self) {
             total += 0x21;
             break;
         case 0: {
-            s32 v3 = PeekIpuBits(self, 0xB);
+            s32 v3 = PeekIpuBits((MpegDecoder*)self, 0xB);
             if (self->field848 != 0 && v3 == 0xF) {
-                SkipIpuBits(self, 0xB);
+                SkipIpuBits((Ctx_20F4C8*)self, 0xB);
                 again = 1;
             } else {
                 ReportMpegErrorFormat(self, "Invalid macroblock_address_increment code(0x%08x)", tok);
@@ -160,11 +170,13 @@ s32 ReadMacroblockAddressIncrement(struct Node_20E2A8 *self) {
 
 struct Ctx_20E3B8 { u8 pad0[0x12C]; s32 f12C; s32 f130; u8 pad134[0x40]; s32 f174; u8 pad178[0x698]; s32 f810; s32 f814; };
 
-s32 DecodeSliceMacroblocks(Ctx_20E3B8* c, s32 n);
-s32 WaitIpuCommandDone(Ctx_20E3B8* c);
-s32 WaitIpuDecodeDone(Ctx_20E3B8* c);
-void AddMacroblockResiduals(Ctx_20E3B8* c, s32 a);
-s32 ReportMpegError(Ctx_20E3B8* c, const char* s);
+struct Ctx_20E5F0;
+s32 DecodeSliceMacroblocks(Ctx_20E5F0* c, s32 n);
+void WaitIpuCommandDone(Ctx_20E3B8* c);
+struct Dev_20CF18;
+s32 WaitIpuDecodeDone(MpegDecoder* o);
+void AddMacroblockResiduals(Dev_20CF18* self, s32 next);
+void ReportMpegError(Self_20B978* self, const char* value);
 
 s32 DecodeAllMacroblocks(Ctx_20E3B8* c)
 {
@@ -176,13 +188,13 @@ s32 DecodeAllMacroblocks(Ctx_20E3B8* c)
     n = c->f12C * c->f130;
     if (c->f174 != 3) n = n >> 1;
     do {
-        r = DecodeSliceMacroblocks(c, n);
+        r = DecodeSliceMacroblocks((Ctx_20E5F0*)c, n);
     } while (r == 1 || r == 3);
     WaitIpuCommandDone(c);
-    if (WaitIpuDecodeDone(c) == 0) r = 2;
+    if (WaitIpuDecodeDone((MpegDecoder*)c) == 0) r = 2;
     while ((*(volatile u32*)0x1000D400 >> 8) & 1) {}
-    if (r == 0) AddMacroblockResiduals(c, c->f810 == 0);
-    if ((u32)(r - 1) < 2) ReportMpegError(c, "= Skip to the next picture =");
+    if (r == 0) AddMacroblockResiduals((Dev_20CF18*)c, c->f810 == 0);
+    if ((u32)(r - 1) < 2) ReportMpegError((Self_20B978*)c, "= Skip to the next picture =");
     res = (r == 0);
     return res;
 }
@@ -207,13 +219,13 @@ struct Out_20E4C0 {
     s32 f1C;
 };
 
-void FindNextStartCode(struct Ctx_20E4C0 *self);
-s32 PeekIpuBits(struct Ctx_20E4C0 *self, s32 a1);
-void ReportMpegErrorFormat(struct Ctx_20E4C0 *self, const char *a1, u32 a2);
-void SkipIpuBits(struct Ctx_20E4C0 *self, s32 a1);
-s32 ReadSliceQuantiser(struct Ctx_20E4C0 *self);
-s32 ReadMacroblockAddressIncrement(struct Ctx_20E4C0 *self);
-s32 ReportMpegError(struct Ctx_20E4C0 *self, const char *a1);
+void FindNextStartCode(MpegDecoder* self);
+s32 PeekIpuBits(MpegDecoder* obj, s32 a1);
+void ReportMpegErrorFormat(struct Ctx_20E4C0 *self, const char *a1, s32 a2);
+void SkipIpuBits(Ctx_20F4C8* s0, u32 s1);
+s32 ReadSliceQuantiser(MpegDecoder* self);
+s32 ReadMacroblockAddressIncrement(struct Node_20E2A8 *self);
+void ReportMpegError(Self_20B978* self, const char* value);
 
 s32 ReadSliceStart(struct Ctx_20E4C0 *self, s32 a1, s32 *outA, s32 *outB, struct Out_20E4C0 *outC) {
     u32 s2;
@@ -221,18 +233,18 @@ s32 ReadSliceStart(struct Ctx_20E4C0 *self, s32 a1, s32 *outA, s32 *outB, struct
     s32 e;
 
     self->f11C = 0;
-    FindNextStartCode(self);
-    s2 = (u32)PeekIpuBits(self, 0x20);
+    FindNextStartCode((MpegDecoder*)self);
+    s2 = (u32)PeekIpuBits((MpegDecoder*)self, 0x20);
     if (s2 - 0x101 >= 0xAF) {
         ReportMpegErrorFormat(self, "slice_start_code(0x%08x) out of range", s2);
         return 2;
     }
-    SkipIpuBits(self, 0x20);
-    s3 = ReadSliceQuantiser(self);
-    e = ReadMacroblockAddressIncrement(self);
+    SkipIpuBits((Ctx_20F4C8*)self, 0x20);
+    s3 = ReadSliceQuantiser((MpegDecoder*)self);
+    e = ReadMacroblockAddressIncrement((struct Node_20E2A8*)self);
     *outB = e;
     if (self->f11C != 0) {
-        ReportMpegError(self, "_sliceA0(): error happens");
+        ReportMpegError((Self_20B978*)self, "_sliceA0(): error happens");
         return 1;
     }
     *outA = ((s3 << 7) + (s2 & 0xFF) - 1) * self->f12C + e - 1;
@@ -260,15 +272,17 @@ struct Ctx_20E5F0 {
 struct Buf_20E5F0 { s32 w[8]; };
 struct Half_20E5F0 { s32 w[4]; };
 
-s32 ReadSliceStart(Ctx_20E5F0* c, s32 n, s32* i, s32* j, Buf_20E5F0* b);
-s32 WaitIpuDecodeDone(Ctx_20E5F0* c);
-s32 PeekIpuBits(Ctx_20E5F0* c, s32 k);
-s32 ReadMacroblockAddressIncrement(Ctx_20E5F0* c);
-s32 ReportMpegError(Ctx_20E5F0* c, const char* s);
-s32 DecodeMacroblock(Ctx_20E5F0* c, s32* a, s32* b, s32* d, Buf_20E5F0* e, Half_20E5F0* f, Half_20E5F0* g);
-s32 HandleSkippedMacroblock(Ctx_20E5F0* c, Buf_20E5F0* e, s32* b, Half_20E5F0* f, s32* a);
-s32 PrepareMacroblockPrediction(Ctx_20E5F0* c, s32 i, s32 j, s32 a, s32 b, Buf_20E5F0* e, Half_20E5F0* f, Half_20E5F0* g);
-void AddMacroblockResiduals(Ctx_20E5F0* c, s32 v);
+struct Self_20E8A0;
+s32 ReadSliceStart(struct Ctx_20E4C0 *self, s32 a1, s32 *outA, s32 *outB, struct Out_20E4C0 *outC);
+s32 WaitIpuDecodeDone(MpegDecoder* o);
+s32 PeekIpuBits(MpegDecoder* obj, s32 a1);
+s32 ReadMacroblockAddressIncrement(struct Node_20E2A8 *self);
+void ReportMpegError(Self_20B978* self, const char* value);
+s32 DecodeMacroblock(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s32* o5, s32* b2);
+s32 HandleSkippedMacroblock(struct Node_20E7E0 *self, s32 *a1, s32 *a2, s32 *a3, s32 *flags);
+struct Dev_20C1A0;
+s32 PrepareMacroblockPrediction(Dev_20C1A0* d, s32 n, s32 mode, s32 flags, s32 code, s32* vec, s32* sel,
+                                s32* base);
 
 s32 DecodeSliceMacroblocks(Ctx_20E5F0* c, s32 n)
 {
@@ -278,15 +292,15 @@ s32 DecodeSliceMacroblocks(Ctx_20E5F0* c, s32 n)
     s32 i, j, a, b, d;
     i = 0;
     j = 0;
-    s32 r = ReadSliceStart(c, n, &i, &j, &e);
+    s32 r = ReadSliceStart((struct Ctx_20E4C0*)c, n, &i, &j, (struct Out_20E4C0*)&e);
     if (r != 0) return r;
     c->f11c = 0;
     for (;;) {
         if (!(i < n)) return 0;
         *(s32*)((u8*)c + c->f810 * 0x140 + 0x6CC) = 0;
-        if (WaitIpuDecodeDone(c) == 0) return 2;
+        if (WaitIpuDecodeDone((MpegDecoder*)c) == 0) return 2;
         if (j == 0) {
-            if (PeekIpuBits(c, 0x17) == 0) {
+            if (PeekIpuBits((MpegDecoder*)c, 0x17) == 0) {
                 c->f11c = 0;
                 return 3;
             }
@@ -294,32 +308,32 @@ s32 DecodeSliceMacroblocks(Ctx_20E5F0* c, s32 n)
                 c->f11c = 0;
                 return 3;
             }
-            j = ReadMacroblockAddressIncrement(c);
+            j = ReadMacroblockAddressIncrement((struct Node_20E2A8*)c);
             if (c->f11c != 0) {
                 c->f11c = 0;
                 return 1;
             }
         }
         if (!(i < n)) {
-            ReportMpegError(c, "Too many macroblocks in picture");
+            ReportMpegError((Self_20B978*)c, "Too many macroblocks in picture");
             return 2;
         }
         if (j == 1) {
-            if (DecodeMacroblock(c, &a, &b, &d, &e, &f, &g) == 0) {
+            if (DecodeMacroblock((Self_20E8A0*)c, &a, &b, &d, (s32*)&e, (s32*)&f, (s32*)&g) == 0) {
                 c->f11c = 0;
                 return 1;
             }
         } else {
-            if (HandleSkippedMacroblock(c, &e, &b, &f, &a) == 0) {
+            if (HandleSkippedMacroblock((struct Node_20E7E0*)c, (s32*)&e, &b, (s32*)&f, &a) == 0) {
                 c->f11c = 0;
                 return 2;
             }
         }
-        if (PrepareMacroblockPrediction(c, i, j, a, b, &e, &f, &g) == 0) {
+        if (PrepareMacroblockPrediction((Dev_20C1A0*)c, i, j, a, b, e.w, f.w, g.w) == 0) {
             c->f11c = 0;
             return 2;
         }
-        if (i != 0) AddMacroblockResiduals(c, c->f810 ^ 1);
+        if (i != 0) AddMacroblockResiduals((Dev_20CF18*)c, c->f810 ^ 1);
         i = i + 1;
         c->f810 = c->f810 ^ 1;
         j = j - 1;
@@ -330,7 +344,7 @@ struct Node_20E7E0 {
     s32 field0;
 };
 
-s32 ReportMpegError(struct Node_20E7E0 *self, const char *a1);
+void ReportMpegError(Self_20B978* self, const char* value);
 
 s32 HandleSkippedMacroblock(struct Node_20E7E0 *self, s32 *a1, s32 *a2, s32 *a3, s32 *flags)
 {
@@ -354,7 +368,7 @@ s32 HandleSkippedMacroblock(struct Node_20E7E0 *self, s32 *a1, s32 *a2, s32 *a3,
         a3[0] = t;
     }
     if (*(s32 *)((u8 *)self + 0x150) == 1) {
-        ReportMpegError(self, "skiped macroblock in I picure is not allowed");
+        ReportMpegError((Self_20B978*)self, "skiped macroblock in I picure is not allowed");
         ret = 0;
     }
     *flags &= -2;
@@ -387,15 +401,18 @@ struct Self_20E8A0 {
     s32 f848;
 };
 
-s16 DecodeIpuVariableLength(Self_20E8A0* self, s32 mode);
-s32 ReportMpegError(Self_20E8A0* self, const char* msg);
-s32 ReadIpuBits(Self_20E8A0* self, s32 n);
-void SkipIpuBits(Self_20E8A0* self, s32 n);
-s32 WaitIpuCommandDone(Self_20E8A0* self);
-void SendIpuCommand(Self_20E8A0* self, s32 v);
-void StartIpuOutputDma(s32 a, s32 b);
-void ReadFieldMotionVector(Self_20E8A0* self, s32* b1, s32* b2, s32* o5, s32 a4, s32 a5, s32 a6, s32 a7, s32 s0, s32 s8, s32 s10);
-void ReadMotionVector(Self_20E8A0* self, s32* b1, s32* b2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
+struct Ctx_20EDD0;
+struct Node_20EF70;
+struct Self_20EF70;
+s16 DecodeIpuVariableLength(Self_20F248* self, s32 mode);
+void ReportMpegError(Self_20B978* self, const char* value);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
+void SkipIpuBits(Ctx_20F4C8* s0, u32 s1);
+void WaitIpuCommandDone(Self_20E8A0* self);
+void SendIpuCommand(MpegDecoder* obj, u32 value);
+void StartIpuOutputDma(u32 a, s32 b);
+void ReadFieldMotionVector(Ctx_20EDD0* c, u8* arr, s32* a2, s32* out, s32 i, s32 mode, s32 a6, s32 a7, s32 s6, s32 s3, s32 fp);
+void ReadMotionVector(Self_20EF70* self, Node_20EF70* n, s32* out, s32 p3, s32 p4, s32 want, s32 shift, s32 p7);
 
 s32 DecodeMacroblock(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s32* o5, s32* b2)
 {
@@ -403,10 +420,10 @@ s32 DecodeMacroblock(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s3
     s32 v;
 
     *(volatile u32*)0x10002010 = (*(volatile u32*)0x10002010 & 0xF8FFFFFF) | (self->f150 << 24);
-    v = DecodeIpuVariableLength(self, 1);
+    v = DecodeIpuVariableLength((Self_20F248*)self, 1);
     *st = v;
     if (v == 0) {
-        ReportMpegError(self, "Invalid macroblock_type code: 0");
+        ReportMpegError((Self_20B978*)self, "Invalid macroblock_type code: 0");
         self->f11C = 1;
         return 0;
     }
@@ -414,7 +431,7 @@ s32 DecodeMacroblock(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s3
         if (self->f174 == 3 && self->f17C != 0) {
             *mode = 2;
         } else {
-            *mode = ReadIpuBits(self, 2);
+            *mode = ReadIpuBits((MpegDecoder*)self, 2);
         }
     } else if (v & 1) {
         if (self->f180 != 0) {
@@ -436,7 +453,7 @@ s32 DecodeMacroblock(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s3
     s32 w;
     if (self->f174 == 3 && self->f17C == 0) {
         if ((*st & 3) != 0) {
-            w = ReadIpuBits(self, 1);
+            w = ReadIpuBits((MpegDecoder*)self, 1);
         } else {
             w = 0;
         }
@@ -445,14 +462,14 @@ s32 DecodeMacroblock(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s3
     }
     *o3 = w;
     if (*st & 0x10) {
-        self->f1B4 = ReadIpuBits(self, 5);
+        self->f1B4 = ReadIpuBits((MpegDecoder*)self, 5);
     }
     if ((*st & 8) || ((*st & 1) && self->f180)) {
         if (self->f848) {
-            ReadFieldMotionVector(self, b1, b2, o5, 0, m3, m4, self->f164 - 1, self->f168 - 1, mfp, m7);
+            ReadFieldMotionVector((Ctx_20EDD0*)self, (u8*)b1, b2, o5, 0, m3, m4, self->f164 - 1, self->f168 - 1, mfp, m7);
         } else {
             s32 t = self->f158 - 1;
-            ReadMotionVector(self, b1, b2, t, t, 0, 0, self->f154);
+            ReadMotionVector((Self_20EF70*)self, (Node_20EF70*)b1, b2, t, t, 0, 0, self->f154);
         }
     }
     if (self->f11C) {
@@ -460,17 +477,17 @@ s32 DecodeMacroblock(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s3
     }
     if (*st & 4) {
         if (self->f848) {
-            ReadFieldMotionVector(self, b1, b2, o5, 1, m3, m4, self->f16C - 1, self->f170 - 1, 0, m7);
+            ReadFieldMotionVector((Ctx_20EDD0*)self, (u8*)b1, b2, o5, 1, m3, m4, self->f16C - 1, self->f170 - 1, 0, m7);
         } else {
             s32 t = self->f160 - 1;
-            ReadMotionVector(self, b1 + 2, b2, t, t, 0, 0, self->f15C);
+            ReadMotionVector((Self_20EF70*)self, (Node_20EF70*)(b1 + 2), b2, t, t, 0, 0, self->f15C);
         }
     }
     if (self->f11C) {
         return 0;
     }
     if ((*st & 1) && self->f180) {
-        SkipIpuBits(self, 1);
+        SkipIpuBits((Ctx_20F4C8*)self, 1);
     }
     if (*st & 3) {
         StartIpuOutputDma(*(s32*)((u8*)self + self->f810 * 0x140 + 0x594), 0x300);
@@ -478,7 +495,7 @@ s32 DecodeMacroblock(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s3
         s32 x = ((*st & 1) << 27) | (self->f1B4 << 16);
         s32 y = (self->f1B0 << 26) | 0x20000000;
         s32 z = *o3 << 25;
-        SendIpuCommand(self, x | y | z);
+        SendIpuCommand((MpegDecoder*)self, x | y | z);
     } else {
         *(s32*)((u8*)self + self->f810 * 0x140 + 0x6CC) = 1;
     }
@@ -540,22 +557,22 @@ void ApplyMotionVectorDelta(Node_20EF70* n, s32 rsize, s32 code, s32 residual, s
 
 
 struct Ctx_20EDD0;
-s32 ReadIpuBits(Ctx_20EDD0* c, s32 n);
-void ReadMotionVector(Ctx_20EDD0* c, u8* p, s32 a2, s32 a3, s32 a4, s32 a5, s32* a6, s32 a7);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
+void ReadMotionVector(Self_20EF70* self, Node_20EF70* n, s32* out, s32 p3, s32 p4, s32 want, s32 shift, s32 p7);
 
-void ReadFieldMotionVector(Ctx_20EDD0* c, u8* arr, s32 a2, s32* out, s32 i, s32 mode, s32 a6, s32 a7, s32 s6, s32 s3, s32* fp)
+void ReadFieldMotionVector(Ctx_20EDD0* c, u8* arr, s32* a2, s32* out, s32 i, s32 mode, s32 a6, s32 a7, s32 s6, s32 s3, s32 fp)
 {
     s32 v;
     s32* o;
 
     if (mode == 1) {
         if (a6 == 0 && s3 == 0) {
-            v = ReadIpuBits(c, 1);
+            v = ReadIpuBits((MpegDecoder*)c, 1);
             out[i] = v;
             out[i + 2] = v;
         }
         i <<= 3;
-        ReadMotionVector(c, arr + i, a2, a7, s6, s3, fp, 0);
+        ReadMotionVector((Self_20EF70*)c, (Node_20EF70*)(arr + i), a2, a7, s6, s3, fp, 0);
         u32* q = (u32*)(arr + i);
         u32 x = q[0];
         u32 y = q[1];
@@ -563,39 +580,39 @@ void ReadFieldMotionVector(Ctx_20EDD0* c, u8* arr, s32 a2, s32* out, s32 i, s32 
         q[5] = y;
     } else {
         s32 j = i << 3;
-        v = ReadIpuBits(c, 1);
+        v = ReadIpuBits((MpegDecoder*)c, 1);
         out[i] = v;
         o = out + i;
-        ReadMotionVector(c, arr + j, a2, a7, s6, s3, fp, 0);
-        o[2] = ReadIpuBits(c, 1);
-        ReadMotionVector(c, arr + (j + 16), a2, a7, s6, s3, fp, 0);
+        ReadMotionVector((Self_20EF70*)c, (Node_20EF70*)(arr + j), a2, a7, s6, s3, fp, 0);
+        o[2] = ReadIpuBits((MpegDecoder*)c, 1);
+        ReadMotionVector((Self_20EF70*)c, (Node_20EF70*)(arr + (j + 16)), a2, a7, s6, s3, fp, 0);
     }
 }
 
 struct Self_20EF70 { s32 f00; };
 
-s32 DecodeIpuVariableLength(Self_20EF70* self, s32 mode);
-s32 ReadIpuBits(Self_20EF70* self, s32 x);
-s32 DecodeIpuMotionCode(Self_20EF70* self);
+s16 DecodeIpuVariableLength(Self_20F248* self, s32 mode);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
+s32 DecodeIpuMotionCode(MpegDecoder* self);
 
 void ReadMotionVector(Self_20EF70* self, Node_20EF70* n, s32* out, s32 p3, s32 p4, s32 want, s32 shift, s32 p7)
 {
     s32 s0;
     s32 a3;
 
-    s0 = DecodeIpuVariableLength(self, 2);
+    s0 = DecodeIpuVariableLength((Self_20F248*)self, 2);
     if (p3 != 0 && s0 != 0) {
-        a3 = ReadIpuBits(self, p3);
+        a3 = ReadIpuBits((MpegDecoder*)self, p3);
     } else {
         a3 = 0;
     }
     ApplyMotionVectorDelta(n, p3, s0, a3, p7);
     if (want != 0) {
-        out[0] = DecodeIpuMotionCode(self);
+        out[0] = DecodeIpuMotionCode((MpegDecoder*)self);
     }
-    s0 = DecodeIpuVariableLength(self, 2);
+    s0 = DecodeIpuVariableLength((Self_20F248*)self, 2);
     if (p4 != 0 && s0 != 0) {
-        a3 = ReadIpuBits(self, p4);
+        a3 = ReadIpuBits((MpegDecoder*)self, p4);
     } else {
         a3 = 0;
     }
@@ -607,7 +624,7 @@ void ReadMotionVector(Self_20EF70* self, Node_20EF70* n, s32* out, s32 p3, s32 p
         n->f04 = n->f04 << 1;
     }
     if (want != 0) {
-        out[1] = DecodeIpuMotionCode(self);
+        out[1] = DecodeIpuMotionCode((MpegDecoder*)self);
     }
 }
 
@@ -629,9 +646,9 @@ struct IpuWaitView {
     MpegHandle* handle;    // 0x858
 };
 
-s32 RunMpegStallCallback(MpegHandle* d);
+s32 RunMpegStallCallback(Q_0020B1E0* q);
 
-s32 WaitIpuCommandDone(IpuWaitView* self)
+void WaitIpuCommandDone(IpuWaitView* self)
 {
     s32 n = 0;
     if ((s32)(*(volatile u32*)0x10002010 & 0x80004000) == (s32)0x80000000) {
@@ -639,13 +656,11 @@ s32 WaitIpuCommandDone(IpuWaitView* self)
             s32 c = n;
             n = c + 1;
             if (c >= 0x1389) {
-                RunMpegStallCallback(self->handle);
+                RunMpegStallCallback((Q_0020B1E0*)self->handle);
                 n = 0;
             }
         } while ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000);
-        return n;
     }
-    return 0x80000000;
 }
 
 s64 WaitIpuCommandResult(MpegDecoder* p) {
@@ -656,7 +671,7 @@ s64 WaitIpuCommandResult(MpegDecoder* p) {
             s32 old = i;
             i++;
             if (old >= 5001) {
-                RunMpegStallCallback(p->handle);
+                RunMpegStallCallback((Q_0020B1E0*)p->handle);
                 i = 0;
             }
             v = *(volatile s64*)0x10002000;
@@ -679,7 +694,7 @@ struct Self_20F248 {
     MpegHandle* f858;
 };
 
-s32 RunMpegStallCallback(MpegHandle* s);
+s32 RunMpegStallCallback(Q_0020B1E0* q);
 
 s16 DecodeIpuVariableLength(Self_20F248* self, s32 mode)
 {
@@ -692,7 +707,7 @@ s16 DecodeIpuVariableLength(Self_20F248* self, s32 mode)
     if ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000) {
         do {
             if (n++ >= 5001) {
-                RunMpegStallCallback(self->f858);
+                RunMpegStallCallback((Q_0020B1E0*)self->f858);
                 n = 0;
             }
         } while ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000);
@@ -704,7 +719,7 @@ s16 DecodeIpuVariableLength(Self_20F248* self, s32 mode)
     if (st < 0) {
         do {
             if (m++ >= 5001) {
-                RunMpegStallCallback(self->f858);
+                RunMpegStallCallback((Q_0020B1E0*)self->f858);
                 m = 0;
             }
             st = *(volatile s64*)0x10002000;
@@ -724,7 +739,7 @@ s16 DecodeIpuVariableLength(Self_20F248* self, s32 mode)
 
 
 s64 WaitIpuCommandResult(MpegDecoder* obj);
-s32 RunMpegStallCallback(u8* p);
+s32 RunMpegStallCallback(Q_0020B1E0* q);
 
 extern u32 D_0027B040[];
 
@@ -734,7 +749,7 @@ s32 PeekIpuBits(MpegDecoder* obj, s32 a1)
         s32 cnt = 0;
         while ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000) {
             if (cnt++ > 0x1388) {
-                RunMpegStallCallback(obj->handle);
+                RunMpegStallCallback((Q_0020B1E0*)obj->handle);
                 cnt = 0;
             }
         }
@@ -758,7 +773,7 @@ struct Ctx_20F4C8 {
 struct Arg_20F4C8 { u32 v; };
 
 extern u32 D_0027B040[];
-extern s32 RunMpegStallCallback(Arg_20F4C8* a);
+extern s32 RunMpegStallCallback(Q_0020B1E0* q);
 extern s64 WaitIpuCommandResult(Ctx_20F4C8* c, u32* v);
 
 void SkipIpuBits(Ctx_20F4C8* s0, u32 s1)
@@ -769,7 +784,7 @@ void SkipIpuBits(Ctx_20F4C8* s0, u32 s1)
 
     while ((*(volatile u32*)0x10002010 & 0x80004000u) == 0x80000000u) {
         if (cnt++ > 0x1388) {
-            RunMpegStallCallback((Arg_20F4C8*)s0->f858);
+            RunMpegStallCallback((Q_0020B1E0*)s0->f858);
             cnt = 0;
         }
     }
@@ -783,7 +798,7 @@ void SkipIpuBits(Ctx_20F4C8* s0, u32 s1)
 
 
 s64 WaitIpuCommandResult(MpegDecoder* obj);
-s32 RunMpegStallCallback(u8* p);
+s32 RunMpegStallCallback(Q_0020B1E0* q);
 
 extern u32 D_0027B040[];
 
@@ -796,13 +811,13 @@ struct Cmd_20F5B8 {
     }
 };
 
-s32 ReadIpuBits(MpegDecoder* obj, s32 a1)
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1)
 {
     s32 cnt = 0;
     u32 v;
     while ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000) {
         if (cnt++ > 0x1388) {
-            RunMpegStallCallback(obj->handle);
+            RunMpegStallCallback((Q_0020B1E0*)obj->handle);
             cnt = 0;
         }
     }
@@ -816,24 +831,24 @@ s32 ReadIpuBits(MpegDecoder* obj, s32 a1)
 }
 
 void WaitIpuCommandDone(MpegDecoder* self); // stays void: retail returns a value, but declared so func_0020DF10 and func_0020F708 differs in registers
-void SkipIpuBits(MpegDecoder* self, s32 mode);
-s32 PeekIpuBits(MpegDecoder* self, s32 mode);
+void SkipIpuBits(Ctx_20F4C8* s0, u32 s1);
+s32 PeekIpuBits(MpegDecoder* obj, s32 a1);
 void FindNextStartCode(MpegDecoder* self)
 {
     WaitIpuCommandDone(self);
     volatile u32* reg = (volatile u32*)0x10002020;
     s32 mask = -(*reg & 7) & 7;
     if (mask != 0) {
-        SkipIpuBits(self, mask);
+        SkipIpuBits((Ctx_20F4C8*)self, mask);
     }
     while (PeekIpuBits(self, 0x18) != 1) {
-        SkipIpuBits(self, 8);
+        SkipIpuBits((Ctx_20F4C8*)self, 8);
     }
 }
 
 
-s32 ReadIpuBits(MpegDecoder* self, s32 arg);
-void SkipIpuBits(MpegDecoder* self, s32 arg);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
+void SkipIpuBits(Ctx_20F4C8* s0, u32 s1);
 void SkipExtraInformation(MpegDecoder* self);
 
 s32 ReadSliceQuantiser(MpegDecoder* self)
@@ -841,7 +856,7 @@ s32 ReadSliceQuantiser(MpegDecoder* self)
     self->f1B4 = ReadIpuBits(self, 5);
     if (ReadIpuBits(self, 1) != 0) {
         ReadIpuBits(self, 1);
-        SkipIpuBits(self, 7);
+        SkipIpuBits((Ctx_20F4C8*)self, 7);
         SkipExtraInformation(self);
     }
     return 0;
@@ -852,11 +867,11 @@ s32 ReadSliceQuantiser(MpegDecoder* self)
 struct MpegPositionQuery { s32 kind; s64 first; s64 second; };
 
 void FindNextStartCode(MpegDecoder* self);
-s32 ReadIpuBits(MpegDecoder* self, s32 mask);
-void ReadSequenceHeader(MpegDecoder* self);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
+void ReadSequenceHeader(Dec_20B9F0* d);
 void ReadGroupOfPicturesHeader(MpegDecoder* self);
 void ReadPictureHeader(MpegDecoder* self);
-void RunMpegCallback(MpegHandle* a0, MpegPositionQuery* out); // stays void: retail returns a value, but declared so func_0020F7F0 differs in registers
+s32 RunMpegCallback(MpegHandle* a0, MpegPositionQuery* out);
 
 s32 ParseMpegHeaders(MpegDecoder* self)
 {
@@ -873,7 +888,7 @@ s32 ParseMpegHeaders(MpegDecoder* self)
         if (v == 0x1B8) goto c1B8;
         continue;
     c1B3:
-        ReadSequenceHeader(self);
+        ReadSequenceHeader((Dec_20B9F0*)self);
         continue;
     c1B8:
         ReadGroupOfPicturesHeader(self);
@@ -886,14 +901,14 @@ s32 ParseMpegHeaders(MpegDecoder* self)
             loc.first = -1;
             loc.second = -1;
             RunMpegCallback(self->handle, &loc);
-            self->f830 = loc.second;
             self->f828 = loc.first;
+            self->f830 = loc.second;
             return self->f150;
         }
     }
 }
 
-s32 ReadIpuBits(MpegDecoder* self, s32 bits);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 void SkipExtraInformation(MpegDecoder* self);
 void ReadExtensionsAndUserData(MpegDecoder* self);
 s32 UpdatePictureOrder(MpegDecoder* self, s32 a1);
@@ -935,9 +950,9 @@ union ExtensionHandlerTable {
 };
 
 void FindNextStartCode(MpegDecoder* self);
-void SkipIpuBits(MpegDecoder* self, s32 a1);
-s32 ReadIpuBits(MpegDecoder* self, s32 a1);
-s32 PeekIpuBits(MpegDecoder* self, s32 a1);
+void SkipIpuBits(Ctx_20F4C8* s0, u32 s1);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
+s32 PeekIpuBits(MpegDecoder* obj, s32 a1);
 
 // An entry of the table of extension handlers below.
 typedef void (*Fn_Table)();
@@ -948,12 +963,13 @@ void ReadQuantiserMatrixExtension(MpegDecoder *self);
 void ReadPictureDisplayExtension(MpegDecoder* self);
 void ReadCopyrightExtension(Bits_210000* self);
 // The handlers of the extensions by their 4-bit id, the sequence's in src/lib/mpeg_decoder.cpp.
-void ReadSequenceExtension();
-void ReadSequenceDisplayExtension();
-void RejectSequenceScalableExtension();
-void RejectUnknownExtension();
-void RejectSpatialScalableExtension();
-void RejectTemporalScalableExtension();
+struct Node_20C0A8;
+void ReadSequenceExtension(MpegDecoder *self);
+void ReadSequenceDisplayExtension(struct Node_20C0A8* self);
+void RejectSequenceScalableExtension(MpegDecoder* self);
+void RejectUnknownExtension(MpegDecoder* self);
+void RejectSpatialScalableExtension(MpegDecoder* self);
+void RejectTemporalScalableExtension(MpegDecoder* self);
 extern const Fn_Table D_00250430[12] = { (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadSequenceExtension, (Fn_Table)ReadSequenceDisplayExtension, (Fn_Table)ReadQuantiserMatrixExtension, (Fn_Table)ReadCopyrightExtension, (Fn_Table)RejectSequenceScalableExtension, (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadPictureDisplayExtension, (Fn_Table)ReadPictureCodingExtension, (Fn_Table)RejectSpatialScalableExtension, (Fn_Table)RejectTemporalScalableExtension, 0 };
 
 void ReadExtensionsAndUserData(MpegDecoder* self)
@@ -968,7 +984,7 @@ void ReadExtensionsAndUserData(MpegDecoder* self)
     u32 limit = 10;
     while ((r = PeekIpuBits(self, 0x20)) == kB || r == kA) {
         if (r == kB) {
-            SkipIpuBits(self, 0x20);
+            SkipIpuBits((Ctx_20F4C8*)self, 0x20);
             u32 idx = (u32)ReadIpuBits(self, 4);
             if (limit < idx) {
                 idx = 0;
@@ -976,7 +992,7 @@ void ReadExtensionsAndUserData(MpegDecoder* self)
             t.fn[idx](self);
             FindNextStartCode(self);
         } else {
-            SkipIpuBits(self, 0x20);
+            SkipIpuBits((Ctx_20F4C8*)self, 0x20);
             FindNextStartCode(self);
         }
     }
@@ -989,42 +1005,42 @@ struct Ctx_20FAF0 {
     s32 f164, f168, f16c, f170, f174, f178, f17c, f180, f184, f188;
 };
 
-s32 ReadIpuBits(Ctx_20FAF0* c, s32 n);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 
 void ReadPictureCodingExtension(Ctx_20FAF0* c)
 {
-    c->f164 = ReadIpuBits(c, 4);
-    c->f168 = ReadIpuBits(c, 4);
-    c->f16c = ReadIpuBits(c, 4);
-    c->f170 = ReadIpuBits(c, 4);
-    *(u32*)0x10002010 = (*(u32*)0x10002010 & 0xFFFCFFFF) | (ReadIpuBits(c, 2) << 16);
-    s32 v = ReadIpuBits(c, 2);
+    c->f164 = ReadIpuBits((MpegDecoder*)c, 4);
+    c->f168 = ReadIpuBits((MpegDecoder*)c, 4);
+    c->f16c = ReadIpuBits((MpegDecoder*)c, 4);
+    c->f170 = ReadIpuBits((MpegDecoder*)c, 4);
+    *(u32*)0x10002010 = (*(u32*)0x10002010 & 0xFFFCFFFF) | (ReadIpuBits((MpegDecoder*)c, 2) << 16);
+    s32 v = ReadIpuBits((MpegDecoder*)c, 2);
     c->f174 = v;
     if (c->f_d4 == 0) c->f_d4 = v;
-    c->f178 = ReadIpuBits(c, 1);
-    c->f17c = ReadIpuBits(c, 1);
-    c->f180 = ReadIpuBits(c, 1);
-    *(volatile u32*)0x10002010 = (*(volatile u32*)0x10002010 & 0xFFBFFFFF) | (ReadIpuBits(c, 1) << 22);
-    *(volatile u32*)0x10002010 = (*(volatile u32*)0x10002010 & 0xFFDFFFFF) | (ReadIpuBits(c, 1) << 21);
-    *(volatile u32*)0x10002010 = (*(volatile u32*)0x10002010 & 0xFFEFFFFF) | (ReadIpuBits(c, 1) << 20);
-    c->f184 = ReadIpuBits(c, 1);
-    ReadIpuBits(c, 1);
-    c->f188 = ReadIpuBits(c, 1);
-    if (ReadIpuBits(c, 1) == 0) return;
-    ReadIpuBits(c, 1);
-    ReadIpuBits(c, 3);
-    ReadIpuBits(c, 1);
-    ReadIpuBits(c, 7);
-    ReadIpuBits(c, 8);
+    c->f178 = ReadIpuBits((MpegDecoder*)c, 1);
+    c->f17c = ReadIpuBits((MpegDecoder*)c, 1);
+    c->f180 = ReadIpuBits((MpegDecoder*)c, 1);
+    *(volatile u32*)0x10002010 = (*(volatile u32*)0x10002010 & 0xFFBFFFFF) | (ReadIpuBits((MpegDecoder*)c, 1) << 22);
+    *(volatile u32*)0x10002010 = (*(volatile u32*)0x10002010 & 0xFFDFFFFF) | (ReadIpuBits((MpegDecoder*)c, 1) << 21);
+    *(volatile u32*)0x10002010 = (*(volatile u32*)0x10002010 & 0xFFEFFFFF) | (ReadIpuBits((MpegDecoder*)c, 1) << 20);
+    c->f184 = ReadIpuBits((MpegDecoder*)c, 1);
+    ReadIpuBits((MpegDecoder*)c, 1);
+    c->f188 = ReadIpuBits((MpegDecoder*)c, 1);
+    if (ReadIpuBits((MpegDecoder*)c, 1) == 0) return;
+    ReadIpuBits((MpegDecoder*)c, 1);
+    ReadIpuBits((MpegDecoder*)c, 3);
+    ReadIpuBits((MpegDecoder*)c, 1);
+    ReadIpuBits((MpegDecoder*)c, 7);
+    ReadIpuBits((MpegDecoder*)c, 8);
 }
 
-s32 ReadIpuBits(MpegDecoder* self, s32 a1);
-void SkipIpuBits(MpegDecoder* self, s32 a1);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
+void SkipIpuBits(Ctx_20F4C8* s0, u32 s1);
 
 void SkipExtraInformation(MpegDecoder* self)
 {
     while (ReadIpuBits(self, 1))
-        SkipIpuBits(self, 8);
+        SkipIpuBits((Ctx_20F4C8*)self, 8);
 }
 
 
@@ -1052,7 +1068,7 @@ s32 UpdatePictureOrder(MpegDecoder* self, s32 a1)
     return v0;
 }
 
-s32 ReadIpuBits(MpegDecoder* self, s32 bits);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 void ReadExtensionsAndUserData(MpegDecoder* self);
 
 void ReadGroupOfPicturesHeader(MpegDecoder* self)
@@ -1072,10 +1088,10 @@ void ReadGroupOfPicturesHeader(MpegDecoder* self)
 }
 
 
-s32 ReadIpuBits(MpegDecoder *self, s32 a1);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 void WaitIpuCommandDone(MpegDecoder *self);
-void SendIpuCommand(MpegDecoder *self, u32 value);
-s32 ReportMpegError(MpegDecoder *self, const char *a1);
+void SendIpuCommand(MpegDecoder* obj, u32 value);
+void ReportMpegError(Self_20B978* self, const char* value);
 
 void ReadQuantiserMatrixExtension(MpegDecoder *self)
 {
@@ -1097,16 +1113,16 @@ void ReadQuantiserMatrixExtension(MpegDecoder *self)
     }
     v = ReadIpuBits(self, 1);
     if (v != 0) {
-        ReportMpegError(self, "load_chroma_intra_quantizer_matrix == 1");
+        ReportMpegError((Self_20B978*)self, "load_chroma_intra_quantizer_matrix == 1");
     }
     v = ReadIpuBits(self, 1);
     if (v == 0) {
         return;
     }
-    ReportMpegError(self, "load_chroma_non_intra_quantizer_matrix == 1");
+    ReportMpegError((Self_20B978*)self, "load_chroma_non_intra_quantizer_matrix == 1");
 }
 
-s32 ReadIpuBits(MpegDecoder* self, s32 k);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 
 void ReadPictureDisplayExtension(MpegDecoder* self)
 {
@@ -1129,25 +1145,25 @@ void ReadPictureDisplayExtension(MpegDecoder* self)
 }
 
 struct Bits_210000;
-u32 ReadIpuBits(Bits_210000* self, u32 n);
+u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 
 void ReadCopyrightExtension(Bits_210000* self)
 {
-    ReadIpuBits(self, 1);
-    ReadIpuBits(self, 8);
-    ReadIpuBits(self, 1);
-    ReadIpuBits(self, 7);
-    ReadIpuBits(self, 1);
-    ReadIpuBits(self, 0x14);
-    ReadIpuBits(self, 1);
-    ReadIpuBits(self, 0x16);
-    ReadIpuBits(self, 1);
-    ReadIpuBits(self, 0x16);
+    ReadIpuBits((MpegDecoder*)self, 1);
+    ReadIpuBits((MpegDecoder*)self, 8);
+    ReadIpuBits((MpegDecoder*)self, 1);
+    ReadIpuBits((MpegDecoder*)self, 7);
+    ReadIpuBits((MpegDecoder*)self, 1);
+    ReadIpuBits((MpegDecoder*)self, 0x14);
+    ReadIpuBits((MpegDecoder*)self, 1);
+    ReadIpuBits((MpegDecoder*)self, 0x16);
+    ReadIpuBits((MpegDecoder*)self, 1);
+    ReadIpuBits((MpegDecoder*)self, 0x16);
 }
 
 
-s32 ReportMpegError(MpegDecoder* self, void* a1);
-s32 DecodeAllMacroblocks(MpegDecoder* self);
+void ReportMpegError(Self_20B978* self, const char* value);
+s32 DecodeAllMacroblocks(Ctx_20E3B8* c);
 
 s32 DecodePictureData(MpegDecoder* self)
 {
@@ -1155,7 +1171,7 @@ s32 DecodePictureData(MpegDecoder* self)
     s32 v;
     s32 mode = self->f174;
     if (mode == 3 && self->f120 != 0) {
-        ReportMpegError(self, (u8*)"odd number of field pictures");
+        ReportMpegError((Self_20B978*)self, (const char*)((u8*)"odd number of field pictures"));
         self->f120 = 0;
         mode = self->f174;
     }
@@ -1171,16 +1187,18 @@ s32 DecodePictureData(MpegDecoder* self)
         break;
     default:
         s1 = self->pictures[2];
-        ReportMpegError(self, (u8*)"unknown picture sutructure");
+        ReportMpegError((Self_20B978*)self, (const char*)((u8*)"unknown picture sutructure"));
         break;
     }
-    v = DecodeAllMacroblocks(self);
+    v = DecodeAllMacroblocks((Ctx_20E3B8*)self);
     if (v != 0) {
         s1->f28 = 1;
     }
     return v;
 }
 
+struct Src_210970;
+struct Src_210A80;
 struct Node_210160 {
     u8 pad000[0xF8];
     s32 f0F8;
@@ -1189,35 +1207,37 @@ struct Node_210160 {
     u8 pad154[0x20];
     s32 f174;
     u8 pad178[0x40];
-    s32 f1B8;
+    Src_210970* f1B8;
     u8 pad1BC[0x8];
-    s32 f1C4;
-    s32 f1C8;
+    Src_210970* f1C4;
+    Src_210A80* f1C8;
     u8 pad1CC[0x8];
-    s32 f1D4;
-    s32 f1D8;
+    Src_210A80* f1D4;
+    Src_210A80* f1D8;
     u8 pad1DC[0x8];
-    s32 f1E4;
+    Src_210A80* f1E4;
 };
 
-void OutputFramePicture(struct Node_210160* a, s32 b, s32 c);
-void OutputFieldPicturePair(struct Node_210160* a, s32 b, s32 c, s32 d);
+struct Ctx_210970;
+void OutputFramePicture(Ctx_210970* c, Src_210970* s, s32 count);
+struct Ctx_210A80;
+void OutputFieldPicturePair(Ctx_210A80* c, Src_210A80* a, Src_210A80* b, s32 count);
 
 void OutputPictureIfDecoded(struct Node_210160* self, s32 count, s32 flag)
 {
     s32 n = count;
     if (flag != 0) {
         if (self->f174 == 3) {
-            s32 x;
+            Src_210970* x;
             if (self->f150 == 3) {
                 x = self->f1C4;
             } else {
                 x = self->f1B8;
             }
-            OutputFramePicture(self, x, n - 1);
+            OutputFramePicture((Ctx_210970*)self, x, n - 1);
         } else {
-            s32 x;
-            s32 y;
+            Src_210A80* x;
+            Src_210A80* y;
             if (self->f150 == 3) {
                 x = self->f1D4;
                 y = self->f1E4;
@@ -1226,7 +1246,7 @@ void OutputPictureIfDecoded(struct Node_210160* self, s32 count, s32 flag)
                 y = self->f1D8;
             }
             n = n - 1;
-            OutputFieldPicturePair(self, x, y, n);
+            OutputFieldPicturePair((Ctx_210A80*)self, x, y, n);
         }
     }
     if (self->f0F8 == 1) {
@@ -1322,8 +1342,8 @@ struct Rec_2104A8 {
     s32 f10;
 };
 
-s32 FormatToString(char *dst, const char *fmt, ...);
-s32 ReportMpegError(struct Node_2104A8 *self, char *buf);
+s32 FormatToString(char* dst, const char* fmt, ...);
+void ReportMpegError(Self_20B978* self, const char* value);
 
 s32 CheckPictureBufferSize(struct Node_2104A8 *self, struct Rec_2104A8 *rec) {
     char buf[0x100];
@@ -1334,7 +1354,7 @@ s32 CheckPictureBufferSize(struct Node_2104A8 *self, struct Rec_2104A8 *rec) {
         flag = self->fE4 >= rec->fC * rec->f10;
     if (flag == 0) {
         FormatToString(buf, "Too small buffer size for %dx%d picture\n", rec->f4, rec->f8);
-        ReportMpegError(self, buf);
+        ReportMpegError((Self_20B978*)self, buf);
     }
     return flag;
 }
@@ -1442,7 +1462,7 @@ struct Node_2107E0 {
 };
 
 
-s64 MultiplySigned64(s64 a, s64 b);
+extern "C" s64 MultiplySigned64(s64 u, s64 v);
 
 void FillPictureOutputInfo(MpegDecoder* self, Node_2107E0* node, s64* out1, s64* out3, s64* out4)
 {
@@ -1500,15 +1520,17 @@ struct Ctx_210970 {
     u8 p0[0x80]; s32 f80; u8 p84[4]; u64 f88; u8 p90[0x20]; s32 fB0; s32 fB4; s32 fB8; s32 fBC; s32 fC0; s32 fC4; s32 fC8; s32 fCC; s32 fD0;
     u8 pD4[0x858 - 0xD4]; Blk_210970* f858;
 };
-void FillPictureOutputInfo(Ctx_210970* c, Src_210970* s, void* a, void* b, void* d);
-s32 CheckPictureBufferSize(Ctx_210970* c, Src_210970* s);
-void ConvertPictureColours(Ctx_210970* c, Src_210970* s);
-void CopyPictureThroughScratchpad(Ctx_210970* c, Src_210970* s);
-s32 SignalPictureReady(Ctx_210970* c);
+void FillPictureOutputInfo(MpegDecoder* self, Node_2107E0* node, s64* out1, s64* out3, s64* out4);
+s32 CheckPictureBufferSize(struct Node_2104A8 *self, struct Rec_2104A8 *rec);
+struct Desc_211348;
+struct Self_211348;
+void ConvertPictureColours(Self_211348* self, Desc_211348* d);
+void CopyPictureThroughScratchpad(Ctx_210548* c, Pic_210548* pic);
+s32 SignalPictureReady(Object_2107B8* obj);
 
-void OutputFramePicture(Ctx_210970* c, Src_210970* s)
+void OutputFramePicture(Ctx_210970* c, Src_210970* s, s32 count)
 {
-    FillPictureOutputInfo(c, s, (u8*)c->f858 + 0x10, (u8*)c->f858 + 0x18, (u8*)c->f858 + 0x20);
+    FillPictureOutputInfo((MpegDecoder*)c, (Node_2107E0*)s, (s64*)((u8*)c->f858 + 0x10), (s64*)((u8*)c->f858 + 0x18), (s64*)((u8*)c->f858 + 0x20));
     Blk_210970* p = c->f858;
     u32 idx = (u32)(p->f20 >> 5) & 0xF;
     c->f80 = p->f10;
@@ -1521,14 +1543,14 @@ void OutputFramePicture(Ctx_210970* c, Src_210970* s)
     c->fC0 = s->f50;
     c->fC4 = s->f54;
     c->fC8 = s->f58;
-    if (CheckPictureBufferSize(c, s)) {
+    if (CheckPictureBufferSize((struct Node_2104A8*)c, (struct Rec_2104A8*)s)) {
         if (s->f28 == 1) {
             if (c->fB0) {
-                ConvertPictureColours(c, s);
+                ConvertPictureColours((Self_211348*)c, (Desc_211348*)s);
             } else {
-                CopyPictureThroughScratchpad(c, s);
+                CopyPictureThroughScratchpad((Ctx_210548*)c, (Pic_210548*)s);
             }
-            SignalPictureReady(c);
+            SignalPictureReady((Object_2107B8*)c);
         }
     }
 }
@@ -1540,13 +1562,13 @@ struct Ctx_210A80 {
     u8 pD4[0x174 - 0xD4]; s32 f174; u8 p178[0x858 - 0x178]; Blk_210A80* f858;
 };
 
-void FillPictureOutputInfo(Ctx_210A80* c, Src_210A80* s, void* a, void* b, void* d);
-s32 CheckPictureBufferSize(Ctx_210A80* c, Src_210A80* s);
-void ConvertPictureColours(Ctx_210A80* c, Src_210A80* s);
-void CopyPictureThroughScratchpad(Ctx_210A80* c, Src_210A80* s);
-s32 SignalPictureReady(Ctx_210A80* c);
+void FillPictureOutputInfo(MpegDecoder* self, Node_2107E0* node, s64* out1, s64* out3, s64* out4);
+s32 CheckPictureBufferSize(struct Node_2104A8 *self, struct Rec_2104A8 *rec);
+void ConvertPictureColours(Self_211348* self, Desc_211348* d);
+void CopyPictureThroughScratchpad(Ctx_210548* c, Pic_210548* pic);
+s32 SignalPictureReady(Object_2107B8* obj);
 
-void OutputFieldPicturePair(Ctx_210A80* c, Src_210A80* a, Src_210A80* b)
+void OutputFieldPicturePair(Ctx_210A80* c, Src_210A80* a, Src_210A80* b, s32 count)
 {
     Src_210A80* s3;
     Src_210A80* s4;
@@ -1559,10 +1581,10 @@ void OutputFieldPicturePair(Ctx_210A80* c, Src_210A80* a, Src_210A80* b)
         s3 = b;
         s4 = a;
     }
-    (void)FillPictureOutputInfo(c, s3, (u8*)c->f858 + 0x10, (u8*)c->f858 + 0x18, (u8*)c->f858 + 0x20);
+    (void)FillPictureOutputInfo((MpegDecoder*)c, (Node_2107E0*)s3, (s64*)((u8*)c->f858 + 0x10), (s64*)((u8*)c->f858 + 0x18), (s64*)((u8*)c->f858 + 0x20));
     c->f80 = c->f858->f10;
     c->f88.d = 1;
-    (void)FillPictureOutputInfo(c, s4, (u8*)c->f858 + 0x28, (u8*)c->f858 + 0x30, (u8*)c->f858 + 0x38);
+    (void)FillPictureOutputInfo((MpegDecoder*)c, (Node_2107E0*)s4, (s64*)((u8*)c->f858 + 0x28), (s64*)((u8*)c->f858 + 0x30), (s64*)((u8*)c->f858 + 0x38));
     c->f80 = c->f858->f28;
     c->f88.d = 1;
     Blk_210A80* p = c->f858;
@@ -1578,16 +1600,16 @@ void OutputFieldPicturePair(Ctx_210A80* c, Src_210A80* a, Src_210A80* b)
     c->fB8 = s4->f48;
     c->fC0 = s3->f50;
     c->fC4 = s4->f54;
-    if (CheckPictureBufferSize(c, a)) {
+    if (CheckPictureBufferSize((struct Node_2104A8*)c, (struct Rec_2104A8*)a)) {
         if (a->f28 == 1 && b->f28 == 1) {
             a->f10 <<= 1;
             if (c->fB0) {
-                ConvertPictureColours(c, a);
+                ConvertPictureColours((Self_211348*)c, (Desc_211348*)a);
             } else {
-                CopyPictureThroughScratchpad(c, a);
+                CopyPictureThroughScratchpad((Ctx_210548*)c, (Pic_210548*)a);
             }
             a->f10 >>= 1;
-            SignalPictureReady(c);
+            SignalPictureReady((Object_2107B8*)c);
         }
     }
 
@@ -1596,8 +1618,8 @@ void OutputFieldPicturePair(Ctx_210A80* c, Src_210A80* a, Src_210A80* b)
 // The DMA chain func_00210C38 builds, which only it reads.
 static u8 D_0062C340[0x200];
 
-s32 DisableInterrupts(void);
-s32 EnableInterrupts(void);
+extern "C" s32 DisableInterrupts(void);
+extern "C" s32 EnableInterrupts(void);
 
 // One of the decoder's two pictures, 0x140 bytes from +0x590 (the one in use at +0x810).
 struct Pic_210C38 {
@@ -1728,11 +1750,11 @@ s32 AddDmaHandlerAlt(s32 channel, s32 (*handler)(s32, void*), s32 next, void* ar
 s32 RemoveDmaHandler(s32 channel, s32 id);
 s32 DisableDmaInterrupt(s32 channel);
 s32 EnableDmaInterrupt(s32 channel);
-s32 DisableInterrupts(void);
-s32 EnableInterrupts(void);
+extern "C" s32 DisableInterrupts(void);
+extern "C" s32 EnableInterrupts(void);
 s32 ContinueColourConversionOutput(s32 channel, void* arg);
 s32 RunMpegCallback(Queue_211090* q, Msg_211090* m);
-s32 ReportMpegError(Self_211090* self, u8* msg);
+void ReportMpegError(Self_20B978* self, const char* value);
 
 void ConvertLargePictureColours(Self_211090* self, s32 addr, s32 size)
 {
@@ -1760,7 +1782,7 @@ void ConvertLargePictureColours(Self_211090* self, s32 addr, s32 size)
     while (xfer.done < xfer.total) {
     }
     if (xfer.error != 0) {
-        ReportMpegError(self, (u8*)"CSC handler error\n");
+        ReportMpegError((Self_20B978*)self, (const char*)((u8*)"CSC handler error\n"));
     }
     while (*(volatile s32*)0x10002010 < 0) {
     }
@@ -1771,8 +1793,8 @@ void ConvertLargePictureColours(Self_211090* self, s32 addr, s32 size)
 // What is left of the colour conversion's input to send: its size and where it continues.
 struct PendingInput { u32 size; u32 addr; };
 
-s32 DisableInterrupts(void);
-s32 EnableInterrupts(void);
+extern "C" s32 DisableInterrupts(void);
+extern "C" s32 EnableInterrupts(void);
 
 s32 ContinueColourConversionInput(s32 unused, PendingInput* p)
 {
@@ -1831,13 +1853,13 @@ s32 AddDmaHandlerAlt(s32 channel, s32 (*handler)(s32, void*), s32 next, void* ar
 s32 RemoveDmaHandler(s32 channel, s32 id);
 s32 DisableDmaInterrupt(s32 channel);
 s32 EnableDmaInterrupt(s32 channel);
-s32 DisableInterrupts(void);
-s32 EnableInterrupts(void);
-s32 ContinueColourConversionInput(s32 unused, void* p);
+extern "C" s32 DisableInterrupts(void);
+extern "C" s32 EnableInterrupts(void);
+s32 ContinueColourConversionInput(s32 unused, PendingInput* p);
 s32 RunMpegCallback(Queue_211348* q, Msg_211348* m);
-void SendIpuCommand(Self_211348* self, u32 value);
-void ConvertSmallPictureColours(Self_211348* self, u32 addr, u32 size);
-void ConvertLargePictureColours(Self_211348* self, s32 addr, s32 size);
+void SendIpuCommand(MpegDecoder* obj, u32 value);
+void ConvertSmallPictureColours(MpegDecoder* self, u32 a1, u32 a2);
+void ConvertLargePictureColours(Self_211090* self, s32 addr, s32 size);
 
 void ConvertPictureColours(Self_211348* self, Desc_211348* d)
 {
@@ -1852,7 +1874,7 @@ void ConvertPictureColours(Self_211348* self, Desc_211348* d)
     s32 small = count < 0x400;
     while (*(volatile s32*)0x10002010 < 0) {
     }
-    SendIpuCommand(self, 0);
+    SendIpuCommand((MpegDecoder*)self, 0);
     u32 addr = d->addr;
     while (*(volatile s32*)0x10002010 < 0) {
     }
@@ -1871,9 +1893,9 @@ void ConvertPictureColours(Self_211348* self, Desc_211348* d)
         xfer.addr = (xfer.addr + 0xFFFF0) & 0xFFFFFFF;
         xfer.size = xfer.size - chunk;
         if (small) {
-            ConvertSmallPictureColours(self, self->fD8, count);
+            ConvertSmallPictureColours((MpegDecoder*)self, self->fD8, count);
         } else {
-            ConvertLargePictureColours(self, self->fD8, count);
+            ConvertLargePictureColours((Self_211090*)self, self->fD8, count);
         }
         DisableDmaInterrupt(4);
         RemoveDmaHandler(4, id);
@@ -1885,9 +1907,9 @@ void ConvertPictureColours(Self_211348* self, Desc_211348* d)
         (void)EnableInterrupts();
         xfer.size = 0;
         if (small) {
-            ConvertSmallPictureColours(self, self->fD8, count);
+            ConvertSmallPictureColours((MpegDecoder*)self, self->fD8, count);
         } else {
-            ConvertLargePictureColours(self, self->fD8, count);
+            ConvertLargePictureColours((Self_211090*)self, self->fD8, count);
         }
     }
     msg.cmd = 3;

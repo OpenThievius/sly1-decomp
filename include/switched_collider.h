@@ -9,6 +9,8 @@
 
 #include "collider.h"
 
+struct PointGraphObject;
+struct BlendAnimationView;
 struct SwitchedCollider;
 struct TurningCollider;
 // An object the player hit and the clock when (Player::f26D8).
@@ -23,6 +25,7 @@ struct World3BeatPressCollider;
 struct Agent;
 struct OnOffObject;     // an object of class 0x63 (c63.h)
 struct PathCurveObject;   // path_curve_object.h
+struct AimBlendGrid;      // aim_blend_grid.h
 struct StateTrigger;      // state_trigger.h
 struct StateWalker; // a handle func_001B6290 makes (s1b6290.h)
 struct AnimationPlayer;  // an animation's player (t2195.h)
@@ -235,7 +238,7 @@ struct TurningCollider : SwitchedCollider {
     void* f61C;             // 0x61C
     void* f620;             // 0x620
     void* f624;             // 0x624
-    void* f628;             // 0x628
+    EntryQueue* f628;       // 0x628: the entry queue it binds to the player (func_001EB748)
     void* f62C;             // 0x62C
     f32 f630;               // 0x630
     f32 f634;               // 0x634
@@ -287,9 +290,9 @@ struct PlayerBlendEntry {
 
 struct Player : TurningCollider {
     u8 pad720[0x900 - 0x720];
-    s32 f900;               // 0x900
+    BlendAnimationView* f900; // 0x900
     u8 pad904[0xA10 - 0x904];
-    s32 fA10;               // 0xA10
+    BlendAnimationView* fA10; // 0xA10
     s32 fA14;               // 0xA14: -1, 0 or 1: which three of the blend slots take the weights (func_001D4348)
     u8 padA18[0x1018 - 0xA18];
     void* f1018;            // 0x1018: the animation of aim state 10 (func_001C61E0)
@@ -328,15 +331,15 @@ struct Player : TurningCollider {
     u8 f151C[4];            // 0x151C: given to func_001BC4D8
     u8 f1520[0x21C0 - 0x1520];  // 0x1520: a record func_001C29E8 and func_001C3028 work on
     s32 f21C0;              // 0x21C0
-    s32 f21C4;              // 0x21C4
+    AimBlendGrid* f21C4;    // 0x21C4: the aim grid TrackAimTargetObject and TrackAimTargetPoint blend
     f32 f21C8;              // 0x21C8
     s32 f21CC;              // 0x21CC
     Vec02 v21D0[3];         // 0x21D0
     void* f2200;            // 0x2200
-    s32 f2204;              // 0x2204
+    BaseObject* f2204;      // 0x2204: the object aimed at (player_target.cpp)
     s32 f2208;              // 0x2208
-    u8 pad220C[0x2210 - 0x220C];
-    s32 f2210;              // 0x2210: cleared by aim state 0 (func_001C61E0)
+    f32 f220C;              // 0x220C: the time along the aim path (TrackAimTargetPoint)
+    BaseObject* f2210;      // 0x2210: the last f2204; cleared by aim state 0 (func_001C61E0)
     s32 f2214;              // 0x2214: the same
     u8 pad2218[0x221C - 0x2218];
     s32 f221C;              // 0x221C: set, the path's frame is turned about (func_001D1630)
@@ -527,7 +530,7 @@ struct Player : TurningCollider {
     void* f2BD0;            // 0x2BD0
     s32 f2BD4;              // 0x2BD4: ControlPlayer's step-sequence skip reads it with the pad's 0xC bits
     s32 f2BD8;              // 0x2BD8
-    s32 penalizedTargetId;  // 0x2BDC: AddRepeatTargetPenalty adds a cost to the candidate with this id
+    void* penalizedTarget;  // 0x2BDC: AddRepeatTargetPenalty adds a cost to this candidate
     void* walkerActivation; // 0x2BE0: QueuePlayerWalkerActivation, taken by RunPlayerQueuedActivations
     void* firstActivation;  // 0x2BE4: QueuePlayerFirstActivation
     void* secondActivation; // 0x2BE8: QueuePlayerSecondActivation
@@ -539,7 +542,7 @@ struct Agent : TurningCollider {
     s32 f724;               // 0x724
     f32 f728;               // 0x728
     s32 f72C;               // 0x72C
-    void* f730;             // 0x730: what func_001C9A58 hands to func_001C8F20 (0 from func_001CB328)
+    s32 f730;               // 0x730: the state func_001C9A58 hands to func_001C8F20 (0 from func_001CB328)
     u8 pad734[0x738 - 0x734];
     s32 f738;               // 0x738
     f32 f73C;               // 0x73C
@@ -565,7 +568,7 @@ struct Agent : TurningCollider {
     f32 f91C;               // 0x91C
     s32 f920;               // 0x920
     s32 f924;               // 0x924
-    s32 f928;               // 0x928
+    PointGraphObject* f928; // 0x928: the point graph of f924 (FindFirstObjectByIdMode4)
     s32 f92C;               // 0x92C: func_001C84C0 compares it with f930
     s32 f930;               // 0x930
     u8 pad934[0xA40 - 0x934];
@@ -588,7 +591,7 @@ struct Agent : TurningCollider {
     Pend08 fAC8[4];         // 0xAC8
     s32 fAF8;               // 0xAF8
     s32 fAFC;               // 0xAFC
-    s32 fB00;               // 0xB00
+    BaseObject* fB00;       // 0xB00: the object of id fAFC, or the member group (PostLoadAgent)
     s32 fB04;               // 0xB04: a flag (1 from func_001CA888, tested by func_001C72A0)
     s32 fB08;               // 0xB08
     void* fB0C;             // 0xB0C
@@ -609,7 +612,7 @@ struct Agent : TurningCollider {
     s32 fB5C;               // 0xB5C
     u8 fB60[0x10];          // 0xB60
     s32 fB70;               // 0xB70
-    s32 fB74;               // 0xB74
+    void* fB74;             // 0xB74: the object CopyAgent copied it from, where its clips are looked up
     s32 fB78;               // 0xB78
     s32 fB7C;               // 0xB7C
     s32 fB80;               // 0xB80
@@ -636,6 +639,7 @@ struct Agent : TurningCollider {
     const Desc08* desc08() const { return (const Desc08*)desc; }
 };
 
+struct ObjectGatherer;
 struct CompanionAgent : Agent {
     s32 fC10;               // 0xC10
     void* fC14;             // 0xC14
@@ -644,7 +648,7 @@ struct CompanionAgent : Agent {
     f32 fC20;               // 0xC20
     f32 fC24;               // 0xC24
     s32 fC28;               // 0xC28
-    s32 fC2C;               // 0xC2C
+    ObjectGatherer* fC2C;   // 0xC2C: the object of id fC28, whose shape func_001B7280 tests
     s32 fC30;               // 0xC30
     void* fC34;             // 0xC34
     Slot08 fC38[17];        // 0xC38: ids -1 at set-up (func_001B6EC8), resolved by func_001B6F50
@@ -659,13 +663,13 @@ struct ConeAgent : Agent {
     f32 fC10;               // 0xC10
     f32 fC14;               // 0xC14
     s32 fC18;               // 0xC18
-    s32 fC1C;               // 0xC1C
+    ObjectGatherer* fC1C;   // 0xC1C: the object of id fC18, whose shape func_00167F10 tests
     f32 fC20;               // 0xC20
     f32 fC24;               // 0xC24
     f32 fC28;               // 0xC28
     f32 fC2C;               // 0xC2C
     s32 fC30;               // 0xC30
-    s32 fC34;               // 0xC34
+    ObjectGatherer* fC34;   // 0xC34: the object of id fC30, whose shape func_00167F10 tests
     union {
         s32 fC38;           // 0xC38: set when the target was found free (func_00167F10)
         s64 fC38q;          // 0xC38: the same, tested as a doubleword
@@ -683,8 +687,8 @@ struct World1Boss : ConeAgent {
     s32 fC5C;               // 0xC5C: the count it lowers (ChooseWorld1BossState stops at 0)
     void* fC60;             // 0xC60
     PlacedObject* fC64[6];  // 0xC64: the roots whose colliders slot 56 refuses (func_001E9038)
-    s32 fC7C;               // 0xC7C
-    void* fC80[4];          // 0xC80
+    PlacedObject* fC7C;     // 0xC7C: the nearest of fC64 (FindNearestAgentKey)
+    s32 fC80[4];            // 0xC80: the flag table bits it takes (TakeFlagTableIndex)
     s32 fC90;               // 0xC90
     u8 padC94[0xCA0 - 0xC94];
 };
@@ -692,7 +696,7 @@ struct World1Boss : ConeAgent {
 struct World2Boss : Agent {
     s32 fC10;               // 0xC10
     u8 padC14[0xE00 - 0xC14];
-    s32 fE00;               // 0xE00
+    BlendAnimationView* fE00; // 0xE00
     s32 fE04;               // 0xE04: its first clip was in range last frame (func_0018AE38)
     s32 fE08;               // 0xE08: the second's
     void* fE0C;             // 0xE0C
@@ -711,9 +715,9 @@ struct World2Boss : Agent {
 
 struct World4Boss : Agent {
     s32 fC10;               // 0xC10
-    s32 fC14;               // 0xC14
-    s32 fC18;               // 0xC18
-    s32 fC1C;               // 0xC1C
+    Animation* fC14;        // 0xC14: the animations the script gives (SetWorld4BossValues)
+    Animation* fC18;        // 0xC18
+    Animation* fC1C;        // 0xC1C
     u8 padC20[0xC24 - 0xC20];
     s32 fC24;               // 0xC24
     u8 padC28[0xC30 - 0xC28];
@@ -1077,7 +1081,7 @@ struct World5ModeCollider : SwitchedCollider {
     u8 pad66C[0x674 - 0x66C];
     PlacedObject* f674[2];  // 0x674: the two objects func_00179A68 turns toward the aimed point
     PlacedObject* f67C;     // 0x67C: a third, turned by its own attachment's frame (func_00179A68)
-    s32 f680;               // 0x680
+    BaseObject* f680;       // 0x680: an object g_modeColliderLinks links (func_00124DF8)
     f32 f684;               // 0x684
     u8 pad688[0x690 - 0x688];
     f32 f690;               // 0x690
@@ -1114,7 +1118,7 @@ struct World3BeatPressCollider : SwitchedCollider {
     void* f610;             // 0x610
     void* f614;             // 0x614
     void* f618[4];          // 0x618: the objects func_001EC828 places the tempo agent's timelines by
-    void* f628;             // 0x628
+    EntryQueue* f628;       // 0x628: the entry queue it binds to the player (func_001EB748)
     s32 f62C;               // 0x62C
     s32 f630;               // 0x630
     Ent1C f634[8];          // 0x634: f630 of them, f62C the next (slot 77)
@@ -1149,13 +1153,13 @@ struct HitCountCollider : SwitchedCollider {
     void* f678;             // 0x678
     AnimationPlayer* f67C;  // 0x67C: the player func_001C34C8 starts from f678 and stops at speed 0
     s32 f680;               // 0x680
-    s32 f684;               // 0x684
+    BaseObject* f684;       // 0x684: an object of kind 0x21 that touched it; slot 3 sends it a request
     BaseObject* f688;       // 0x688: an object id 0x52F that hit it (func_001C3C00); slot 3 takes it out
     f32 f68C;               // 0x68C
     s32 f690;               // 0x690
     s32 f694;               // 0x694
-    s32 f698;               // 0x698
-    s32 f69C[1];            // 0x69C
+    s32 f698;               // 0x698: the objects in f69C
+    BaseObject* f69C[1];    // 0x69C: objects the script adds (AddHitCountColliderId)
     u8 pad6A0[0x71C - 0x6A0];
     s32 f71C;               // 0x71C
     void* f720[16];         // 0x720

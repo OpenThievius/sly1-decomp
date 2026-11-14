@@ -78,12 +78,14 @@ s32 PostSemaphore(s32 sema);
 s32 PostSemaphoreFromInterrupt(s32 sema);
 s32 AwaitSemaphore(s32 sema);
 s32 TrySemaphore(s32 sema);
-void PrintBuffered(const char* format, ...);
+void PrintBuffered(const char* fmt, ...);
 void InitRemoteCalls(s32 mode);
 s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
-void SetCommandHandler(s32 cause, void (*handler)(void), s32 next);
-void ClearCommandHandler(s32 cause);
+struct Packet_1FA068;
+struct Channel_1FA068;
+void SetCommandHandler(s32 cmd, void (*handler)(struct Packet_1FA068* packet, struct Channel_1FA068* channel), void* arg);
+void ClearCommandHandler(s32 cmd);
 void WriteBackDataCacheRange(void* start, s32 size);
 
 void WakeDiscWaiter(s32 id, u16 time, s32 sema);
@@ -209,7 +211,7 @@ s32 InstallDiscCallbackHandler(void)
 {
     D_00279424 = 1;
     DisableInterrupts();
-    SetCommandHandler(0x80000012, RunDiscCallback, 0);
+    SetCommandHandler(0x80000012, (void (*)(struct Packet_1FA068*, struct Channel_1FA068*))RunDiscCallback, 0);
     EnableInterrupts();
     D_00279424 = 0;
     D_0027943C = 1;

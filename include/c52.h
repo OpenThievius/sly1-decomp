@@ -14,6 +14,6 @@ typedef char check_C52[sizeof(C52) == 0x2D0 ? 1 : -1];
 
 // The methods (config/us/classes.tsv). Slot 37 only calls the shared func_001261C0 and uses
 // no argument.
-void DrawC52Object(void);                            // 0x52 slot 37
+void DrawC52Object(C52* self, void* arg1, void* arg2);                            // 0x52 slot 37
 
 #endif

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "object_finder.h"
 
 #include "list_iter.h"
 #pragma implementation "layout_137228.h"
@@ -17,6 +18,14 @@
 #include "camera.h"
 #include "point_object.h"
 #include "value_range.h"
+struct BaseObject;
+struct Vec02;
+
+struct BaseObject;
+
+struct Effect;
+struct PlacedObject;
+
 
 struct SpanHead {
     f32 c0, c1, c2, c3;
@@ -33,7 +42,7 @@ struct CurveSpan {
     f32 q;
 };
 
-void SetTextPanelSubject(T217D_440* self, s32 arg);
+void SetTextPanelSubject(T217D_440* self, BaseObject* arg);
 
 struct PanelColor
 {
@@ -46,12 +55,12 @@ struct PanelColor
     PanelColor(u8 r_, u8 g_, u8 b_, u8 a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
 
-f32 Cosine(f32 x);
-void ConvertPositionToWorld(void* obj, Vec02* out);
-void BeginGifTag(PacketWriter* gs, s32 a, s32 b, u64 c);
+extern "C" f32 Cosine(f32 x);
+void ConvertPositionToWorld(BaseObject* self, Vec02* out);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRgbaEntry(PacketWriter* gs, u32 c);
-void AddGifXyzfNoDrawEntry(PacketWriter* gs, s32 x, s32 y, s32 a3, s32 a4);
-void AddGifXyzfEntry(PacketWriter* gs, s32 x, s32 y, s32 a3, s32 a4);
+void AddGifXyzfNoDrawEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 
 struct BorderColorMix
 {
@@ -100,13 +109,13 @@ extern s32 g_padRouting;
 extern f32 g_frameDt;
 extern CameraHeading* g_camera;
 
-void BeginGifTag(PacketWriter* gs, s32 a, s32 b, u64 c);
-void AddGifRegisterWrite(PacketWriter* gs, s32 reg, u64 value);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void AddGifRgbaEntry(PacketWriter* gs, u32 color);
-void AddGifXyzfNoDrawEntry(PacketWriter* gs, s32 x, s32 y, s32 z, s32 f);
-void AddGifXyzfEntry(PacketWriter* gs, s32 x, s32 y, s32 z, s32 f);
+void AddGifXyzfNoDrawEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 f32 WrapAngle(f32 a);
-f32 Cosine(f32 a);
+extern "C" f32 Cosine(f32 x);
 void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
 
 struct CenterFrameMath {
@@ -148,7 +157,6 @@ struct CenterFrameMath {
 };
 
 void ResetScreenElement(void* self);
-s32 SetStepSequenceState(void* obj, s32 mode); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
 
 void SetTextPanelState(T217D_440* self, s32 mode);
 void SetStepSequenceState(StepSequence* obj, s32 mode);
@@ -158,23 +166,20 @@ struct SortEntry {
     f32 key;
 };
 
-s32 IsObjectAttached(void* obj);
+s32 IsObjectAttached(BaseObject* self);
 
-void GetNumberedItemFlag(void* obj, s32* out);
+struct NumberedItem;
+void GetNumberedItemFlag(NumberedItem* self, s32* out);
 
-void RemoveEffect(void* handle);
-void SetEffectPhase(void* handle, s32 mode);
-void* FillMemory(void* p, s32 value, s32 size);
-
-// func_00136FA8 keeps its own view: it uses the result of func_001356C0, which returns nothing.
-struct Owner_136FA8 { u8 pad0[0x324]; void* child; };
-
-s32 SetTextPanelState(Owner_136FA8* self, s32 mode); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
+void RemoveEffect(Effect* self);
+void SetEffectPhase(Effect* self, s32 mode);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // Newly matched US functions from the small-function wave.
-extern void CloseBufferedStream(void*);
+struct BufferedStream;
+extern void CloseBufferedStream(BufferedStream* self);
 extern void FreeObjectMemory(void*);
-extern void ReadBufferedStreamBytes(void*, s32, void*);
+extern void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
 struct PercentClamp {
     static void Set(T217D_440* self, f32 x, f32 lo, f32 hi) {
@@ -186,7 +191,10 @@ struct PercentClamp {
 
 extern f32 g_gameTime;
 
-Font* InitTextReader(void* out, void* p, Font* font);
+struct TextReader;
+struct StringLayout;
+struct Vec4U;
+Font* InitTextReader(TextReader* self, char* text, Font* font);
 s32 CountTextChars(void* self);
 
 extern f32 g_gameClock[];
@@ -195,21 +203,24 @@ struct TextScratch {
     u8 bytes[0xB0];
 };
 
-s32 GetStringLength(const char* s);
+extern "C" s32 GetStringLength(const char* s);
 void* CopyString(void* dst, const char* src);
 void PushFontScale(Font* font, f32 x, f32 y);
-s32 WrapTextLines(void* buf, f32 x);
+s32 WrapTextLines(TextReader* self, f32 limit);
 void PopFontScale(Font* font);
-void RewindTextReader(void* buf);
-s32 ReadTextChar(void* buf);
+void RewindTextReader(TextReader* self);
+s32 ReadTextChar(TextReader* self);
 
 struct __attribute__((packed)) Tail_1356C0 { u8 pad0[0x464]; s32 v; };
 extern f32 g_gameTime;
 
 void ClearTextPanel(T217D_440* self);
-void StartSoundEffect(s32 a, s32 b, s32 c, s32 d, f32 g, f32 h, f32 i, f32 j, f32 k, s32 e, s32 f);
+struct PlayingSound;
+struct BaseObject;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
-extern u8 g_currentWorld[];
+extern World* g_currentWorld;
 extern u8 func_00135E20[];
 extern u8 func_00135E40[];
 
@@ -217,7 +228,7 @@ extern u8 func_00135E40[];
 
 // The bit of the current level GetCurrentLevelBit (func_00160D30) gives back.
 struct LevelBit { s32 v; };
-void GetCurrentLevelBit(LevelBit* p);
+void GetCurrentLevelBit(u32* out);
 s32 MaskWorldBitsBySave(void);
 void CollectPanelEntriesOfClass(T217D_440* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
 
@@ -228,7 +239,8 @@ struct __attribute__((aligned(16))) Vec_136040 { f32 x, y, z, w; };
 extern const StickLimits D_00249D00;
 extern const StickLimits D_00249D10;
 
-Quad_136040 ApproachPointWithRamp(Quad_136040 a, Quad_136040 b, StickLimits* c, s32 d, f32 f12);
+struct RampProfile;
+Quad_136040 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel);
 f32 WrapModulo(f32 x, f32 y);
 void RefreshPanelEntries(T217D_440* self, PadRecord* p);
 
@@ -260,29 +272,29 @@ struct ListWalkBegin {
     }
 };
 
-PlayerListHolder* FindFirstObjectById(World* host, s32 a1, s32 a2, void* ctx);
 void SetAnimationPlayerSpeed(AnimationPlayer* item, f32 x);
 
 
-extern u8 g_currentWorld[];
+extern World* g_currentWorld;
 
 void ResumeStreamVoice(void);
 void PauseStreamVoice(void);
-void GetCurrentLevelBit(LevelBit* p);
+void GetCurrentLevelBit(u32* out);
 s32 MaskWorldBitsBySave(void);
 void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag);
-s32 GatherObjectsById(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
-void ResetTextPointToHalf(void* p);
+void ResetTextPointToHalf(TextPointObject* self);
 
 struct ClampBelow { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
 void GetCurrentLevelBit(u32* out);
 void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q);
-f32 Cosine(f32 x);
-f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, s32 zero);
-void BeginGifTag(PacketWriter* q, s32 a, s32 b, u64 c);
+extern "C" f32 Cosine(f32 x);
+f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
 void AddGifRgbaEntry(PacketWriter* q, u32 v);
-void AddGifXyzfEntry(PacketWriter* q, s32 a, s32 b, s32 c, s32 d);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 
 // The file's .data, in retail's order from 0x261090. The colours and the two styles are built
 // by the static initialiser (func_00136FE8); their bytes are zero until then.
@@ -382,19 +394,19 @@ s32 CompareEntriesFlaggedLast(SortEntry* a, SortEntry* b);
 void ReadPanelEntryPosition(PanelEntrySource* self, PanelEntryPosition* out, s32* flag);
 void ReadAdjustedPanelEntryPosition(PanelEntrySource* self, s32 unused, PanelEntryPosition* out);
 void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag);
-void RefreshPanelEntries(T217D_440* self);
+void RefreshPanelEntries(T217D_440* self, PadRecord* pad);
 void UpdatePanelStick(T217D_440* self, PadRecord* p);
 void SetTextPanelOpen(T217D_440* self, s32 on);
 void ResetTextPanel(T217D_440* self);
 void SetTextPanelText(T217D_440* self, const char* name);
 s32 IsTextPanelTextTyped(T217D_440* self);
-void SetTextPanelSubject(T217D_440* self, s32 value);
+void SetTextPanelSubject(T217D_440* self, BaseObject* value);
 void SetTextPanelValuePercent(T217D_440* self, f32 value);
 f32 GetTextPanelSlideInTime(T217D_440* self);
 f32 GetTextPanelSlideOutTime(T217D_440* s);
 void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
 void ChooseTextPanelState(T217D_440* self);
-s32 EndTextPanelState(Owner_136FA8* self);
+void EndTextPanelState(T217D_440* self);
 
 void InitCurveSpan(CurveSpan* d, const SpanHead* src, f32 x, f32 y, s32 n)
 {
@@ -457,7 +469,7 @@ void ClearTextPanel(T217D_440* self)
     self->f314 = 0.4f;
 }
 
-void SetupScreenElementText(T217D_440* self);
+void SetupScreenElementText(ScreenElement* self);
 s32 IsFontLoaded(s32 id);
 Font* GetFontById(s32 id);
 void PushBackMemoryMark(void);
@@ -466,7 +478,7 @@ void* AllocateBackMemory(s32 size);
 // Returns its writer (retail sets v0 from it), as a constructor does.
 void* InitGifPacket(PacketWriter* gs);
 void UsePacketBufferMemory(PacketWriter* gs, s32 n, void* mem);
-void DetachPacketBufferCopy(PacketWriter* gs, void* a, s32 b, void* c, s32 d);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
 f32 MeasureFontString(Font* font, const char* text);
 
 // Sets a text panel up: its two fonts, the widest compass point, and the GS packet of the two
@@ -534,7 +546,7 @@ void SetupTextPanel(T217D_440* self)
     }
     AddGifXyzfEntry(&gs, 0x9400, 0x8700, 0x0FFFFFF0, 0);
     AddGifXyzfEntry(&gs, 0x9400, 0x80FA, 0x0FFFFFF0, 0);
-    DetachPacketBufferCopy(&gs, &self->bands, 0, &self->bandsSize, 0x15);
+    DetachPacketBufferCopy(&gs, (s32*)&self->bands, 0, &self->bandsSize, 0x15);
     PopBackMemoryMark();
 }
 
@@ -546,7 +558,7 @@ struct PanelFont {
 };
 
 f32 MeasureFontString(Font* font, const char* text);
-void DrawFontString(Font* font, const char* text, Layout_137228* layout, s32 zero, PacketWriter* gs);
+void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 
 void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
 {
@@ -626,10 +638,10 @@ void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
     *(PanelColor*)&L.color = PanelColor(D_002610D8);
     L.x = xPrev;
     L.y = row;
-    DrawFontString(PanelFont::Of(self), D_00261128[prev], &L, 0, gs);
+    DrawFontString(PanelFont::Of(self), D_00261128[prev], (StringLayout*)&L, 0, gs);
     L.x = xNext;
     L.y = row;
-    DrawFontString(PanelFont::Of(self), D_00261128[next], &L, 0, gs);
+    DrawFontString(PanelFont::Of(self), D_00261128[next], (StringLayout*)&L, 0, gs);
 
     {
         SpanHead q = { 0.0f, 4.0f, -4.0f };
@@ -638,7 +650,7 @@ void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
     }
     L.x = xCur;
     L.y = row;
-    DrawFontString(PanelFont::Of(self), D_00261128[cur], &L, 0, gs);
+    DrawFontString(PanelFont::Of(self), D_00261128[cur], (StringLayout*)&L, 0, gs);
 
     BeginGifTag(gs, 0, 1, 0xE);
     AddGifRegisterWrite(gs, 0x40, 0xDF0000027F0000);
@@ -648,7 +660,7 @@ void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
 extern const char D_00249CE0[8] = "%c";
 extern const char D_00249CE8[8] = "Move";
 extern const char D_00249CF0[8] = "Zoom";
-s32 FormatToString(void* dst, const char* fmt, ...);
+s32 FormatToString(char* dst, const char* fmt, ...);
 
 struct ScreenLayout {
     static void Reset(Layout_137228* l, s32 color)
@@ -727,7 +739,7 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     FormatToString(buf, D_00249CE0, 0x28);
     Layout_137228* lay = &L;
     lay->f14 = 1;
-    lay->f18 = (void*)1;
+    lay->f18 = 1;
     L.w = 0.0f;
     L.h = 0.0f;
     f32 s = 0.4f;
@@ -737,7 +749,7 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     PushFontScale(glyphs, s, s);
     L.x = 265.0f;
     L.y = row;
-    DrawFontString(glyphs, buf, &L, 0, gs);
+    DrawFontString(glyphs, buf, (StringLayout*)&L, 0, gs);
     PopFontScale(glyphs);
     FormatToString(buf, D_00249CE0, 0x29);
     s = 0.4f;
@@ -747,7 +759,7 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     PushFontScale(glyphs, s, s);
     L.x = 375.0f;
     L.y = row;
-    DrawFontString(glyphs, buf, &L, 0, gs);
+    DrawFontString(glyphs, buf, (StringLayout*)&L, 0, gs);
     PopFontScale(glyphs);
     *(PanelColor*)&L.color = PanelColor(0x32, 0x84, 0xB0, 0x80);
     PushFontScale(text, 0.6f, 0.6f);
@@ -755,11 +767,11 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     move.f14 = 2;
     L.x = (f32)(320 - D_00261090[0]);
     L.y = row;
-    DrawFontString(text, D_00249CE8, &L, 0, gs);
+    DrawFontString(text, D_00249CE8, (StringLayout*)&L, 0, gs);
     L.f14 = 0;
     L.x = (f32)(D_00261090[0] + 320);
     L.y = row;
-    DrawFontString(text, D_00249CF0, &L, 0, gs);
+    DrawFontString(text, D_00249CF0, (StringLayout*)&L, 0, gs);
     PopFontScale(text);
 }
 
@@ -1050,8 +1062,8 @@ s32 CompareEntriesFarthestFirst(void** a, void** b)
 {
     Vec02 pa;
     Vec02 pb;
-    ConvertPositionToWorld(*a, &pa);
-    ConvertPositionToWorld(*b, &pb);
+    ConvertPositionToWorld((BaseObject*)*a, &pa);
+    ConvertPositionToWorld((BaseObject*)*b, &pb);
     u128 cam = Vu0::Q(g_camera->f40);
     u128 da = Vu0::Sub(cam, Vu0::Q(pa));
     u128 db = Vu0::Sub(cam, Vu0::Q(pb));
@@ -1069,9 +1081,9 @@ struct StyleDrawer {
     }
 };
 
-void SortElements(void* base, s32 n, s32 size, s32 (*cmp)(void**, void**));
-void ProjectPointToCamera(Camera* cam, Vec02* pos, Vec02* out);
-f32 MeasureFontStringHeight(Font* font, const char* text, f32 w);
+void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
+void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
+f32 MeasureFontStringHeight(Font* self, u8* s, f32 width);
 
 // The labels of the text points (class 0x82) in view: each gathered point the camera sees
 // within 4000 is drawn at its place on the screen, its name with spaces for underscores, the
@@ -1088,8 +1100,8 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
     s32 i;
     s32 shown = 0;
     TextPointObject* nearest = 0;
-    s32 count = GatherObjectsById(*(s32*)g_currentWorld, 5, 0x82, 0, 0x20, objs);
-    SortElements(objs, count, 4, CompareEntriesFarthestFirst);
+    s32 count = GatherObjectsById(g_currentWorld, 5, 0x82, 0, 0x20, objs);
+    SortElements(objs, count, 4, (s32 (*)(const void*, const void*))CompareEntriesFarthestFirst);
     f32 best = 3.4028235e+38f;
     for (i = 0; i < count; i++) {
         TextPointObject* obj = objs[i];
@@ -1105,7 +1117,7 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
             ResetTextPointToHalf(obj);
         } else {
             objs[shown++] = obj;
-            ProjectPointToCamera((Camera*)g_camera, &pos, &screen);
+            ProjectPointToCamera((Camera*)g_camera, &pos, (f32*)&screen);
             Vu0::Vec e = Vu0::Sub(Vu0::Vec::Of(screen), Vu0::Vec::Of(D_00261190));
             f32 c = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(e, e)));
             if (c < best) {
@@ -1135,7 +1147,7 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
         *t = 0;
         const f32* k = D_002611A0;
         const ValueRange* lim = &g_unitRange;
-        ProjectPointToCamera((Camera*)g_camera, &pos, &screen);
+        ProjectPointToCamera((Camera*)g_camera, &pos, (f32*)&screen);
         Vu0::Vec e = Vu0::Vec::Of(screen);
         f32 len = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(e.q, e.q)));
         f32 scale = k[0] + len * (k[1] + len * k[2]);
@@ -1143,11 +1155,11 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
         if (obj != nearest) {
             alpha *= D_002611BC;
         }
-        obj->f54 = ApproachValueWithRamp(obj->f54, alpha, g_gameClock[5], D_002611B0, 0);
-        obj->f58 = ApproachValueWithRamp(obj->f58, obj == nearest ? D_00261184 : D_00261188, g_gameClock[5], D_002611C0, 0);
+        obj->f54 = ApproachValueWithRamp(obj->f54, alpha, g_gameClock[5], (RampProfile*)D_002611B0, 0);
+        obj->f58 = ApproachValueWithRamp(obj->f58, obj == nearest ? D_00261184 : D_00261188, g_gameClock[5], (RampProfile*)D_002611C0, 0);
         PushFontScale(self->font, obj->f58, obj->f58);
         ScreenLayout::Reset(&layout);
-        f32 h = MeasureFontStringHeight(self->font, buf, D_002611CC * obj->f58);
+        f32 h = MeasureFontStringHeight(self->font, (u8*)buf, D_002611CC * obj->f58);
         f32 x = screen.x * 320.0f + 320.0f + D_002611D0 * obj->f58;
         f32 y = screen.y * -246.400009f + 246.400009f + D_002611D4 * obj->f58 - h;
         layout.x = x;
@@ -1162,7 +1174,7 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
         style.fC *= obj->f58;
         StyleDrawer::Draw((Font**)&style, &layout, q);
         ((u8*)&layout.color)[3] = (s32)(alpha * (f32)((u8*)&layout.color)[3]);
-        DrawFontString(self->font, buf, &layout, 0, q);
+        DrawFontString(self->font, buf, (StringLayout*)&layout, 0, q);
         BeginGifTag(q, 0xC1, 3, 0x441);
         AddGifRgbaEntry(q, ((u32*)self->frame)[6]);
         AddGifXyzfEntry(q, CenterFrameMath::ScreenX(x + D_002611D8 * obj->f58), CenterFrameMath::ScreenY(y + h + D_002611DC * obj->f58), 0, 0);
@@ -1195,7 +1207,7 @@ void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q)
             f32 t = Cosine(g_gameClock[1] * D_00261260[0]) * 0.5f + 0.5f;
             for (u32 i = 0; i < 4; i++)
             {
-                f32 r = ApproachValueWithRamp(self->blockB[i], self->blockA[i] ? 1.0f : 0.0f, g_gameClock[2], &D_00261260[2], 0);
+                f32 r = ApproachValueWithRamp(self->blockB[i], self->blockA[i] ? 1.0f : 0.0f, g_gameClock[2], (RampProfile*)&D_00261260[2], 0);
                 self->blockB[i] = r;
                 for (s32 j = 0; j < 4; j++)
                 {
@@ -1221,7 +1233,7 @@ void SetTextPanelMode(T217D_440* self, s32 value)
         return;
     }
     if (self->mode == 0) {
-        PlayerListHolder* g = FindFirstObjectById((*(World**)&g_currentWorld), 0x105, 0x495, 0);
+        PlayerListHolder* g = (PlayerListHolder*)FindFirstObjectById(g_currentWorld, 0x105, 0x495, 0);
         if (g != 0) {
             ListFrame it;
             ListWalkBegin::Of(&it, &g->list);
@@ -1233,7 +1245,7 @@ void SetTextPanelMode(T217D_440* self, s32 value)
         }
     }
     if (value == 0) {
-        PlayerListHolder* g = FindFirstObjectById((*(World**)&g_currentWorld), 0x105, 0x495, 0);
+        PlayerListHolder* g = (PlayerListHolder*)FindFirstObjectById(g_currentWorld, 0x105, 0x495, 0);
         if (g != 0) {
             ListFrame it;
             ListWalkBegin::Of(&it, &g->list);
@@ -1279,10 +1291,10 @@ void SetTextPanelState(T217D_440* self, s32 mode)
 
 s32 CompareEntriesByAttachedKey(SortEntry* a, SortEntry* b)
 {
-    if (IsObjectAttached(a->obj) == 0) {
+    if (IsObjectAttached((BaseObject*)a->obj) == 0) {
         return 1;
     }
-    if (IsObjectAttached(b->obj) == 0) {
+    if (IsObjectAttached((BaseObject*)b->obj) == 0) {
         return -1;
     }
     if (a->key < b->key) {
@@ -1295,11 +1307,11 @@ s32 CompareEntriesFlaggedLast(SortEntry* a, SortEntry* b)
 {
     s32 flag;
 
-    GetNumberedItemFlag(a->obj, &flag);
+    GetNumberedItemFlag((NumberedItem*)a->obj, &flag);
     if (flag != 0) {
         return 1;
     }
-    GetNumberedItemFlag(b->obj, &flag);
+    GetNumberedItemFlag((NumberedItem*)b->obj, &flag);
     if (flag != 0) {
         return -1;
     }
@@ -1317,10 +1329,11 @@ struct PanelEntry {
     PanelEntryPosition v;   // 0x10
 };
 
-void HeapSortRecords(void* base, s32 count, s32 size, s32 (*cmp)(SortEntry* a, SortEntry* b));
-f32 ArctangentOfRatio(f32 y, f32 x);
+typedef s32 (*SortCompareFn)(void* a, void* b);
+void HeapSortRecords(void* records, s32 n, s32 size, SortCompareFn cmp);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void CopyMemory(void* dst, void* src, u32 size);
-void* CreateEffect(s32 kind, s32 owner);
+void* CreateEffect(s32 kind, EffectOwner* sys);
 
 void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s32 limit, s32 a5, f32 range)
 {
@@ -1329,7 +1342,7 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
     Vec02 d;
     s32 want;
     s32 i = 0;
-    s32 n = GatherObjectsById(*(s32*)g_currentWorld, 0x105, kind, 0, 0x80, objs);
+    s32 n = GatherObjectsById(g_currentWorld, 0x105, kind, 0, 0x80, objs);
     PanelEntry* e;
     for (; i < n; i++) {
         e = &entries[i];
@@ -1346,10 +1359,10 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
     for (i = 0; i < n;) {
         e = &entries[i];
         if (kind == 0x2E) {
-            GetNumberedItemFlag(e->obj, &want);
+            GetNumberedItemFlag((NumberedItem*)e->obj, &want);
             want = want == 0 && self->state == 1 && i < limit && e->key < range;
         } else {
-            want = self->state == 1 && IsObjectAttached(e->obj) && i < limit && e->key < range;
+            want = self->state == 1 && IsObjectAttached((BaseObject*)e->obj) && i < limit && e->key < range;
         }
         CameraHeading* cam = g_camera;
         u128 ones = Vu0::Ones();
@@ -1383,7 +1396,7 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
         }
         if (effect != 0) {
             if (!want) {
-                SetEffectPhase(effect, 2);
+                SetEffectPhase((Effect*)effect, 2);
                 CopyMemory(&self->markers[j], &self->markers[j + 1], (self->count - j - 1) * 8);
                 self->count--;
             }
@@ -1395,7 +1408,7 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
                 *(s32*)((u8*)fx + 0x20) = a5;
                 *(void**)((u8*)fx + 0x130) = a3;
                 *(void**)((u8*)fx + 0x134) = e->obj;
-                SetEffectPhase(fx, 0);
+                SetEffectPhase((Effect*)fx, 0);
                 *(f32*)&self->countA = g_gameClock[1];
                 self->markers[self->count].obj = e->obj;
                 self->markers[self->count].effect = fx;
@@ -1433,10 +1446,10 @@ void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag)
         T217D_440_Slot* e = self->entries;
         do {
             if (flag != 0) {
-                RemoveEffect(e->handle);
+                RemoveEffect((Effect*)e->handle);
                 FillMemory(self->blockB, 0, 16);
             } else {
-                SetEffectPhase(e->handle, 2);
+                SetEffectPhase((Effect*)e->handle, 2);
             }
             i++;
             e++;
@@ -1448,10 +1461,10 @@ void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag)
     self->bankState = state;
 }
 
-void RefreshPanelEntries(T217D_440* self)
+void RefreshPanelEntries(T217D_440* self, PadRecord* pad)
 {
     LevelBit flag;
-    GetCurrentLevelBit(&flag);
+    GetCurrentLevelBit((u32*)&flag);
     if ((MaskWorldBitsBySave() & flag.v) == 0) {
         ReleasePanelEntries(self, 0, 1);
         return;
@@ -1459,9 +1472,9 @@ void RefreshPanelEntries(T217D_440* self)
     ReleasePanelEntries(self, 1, 0);
     if (self->bankState == 1) {
         f32 k = 3.4028235e38f;
-        World* world = *(World**)g_currentWorld;
+        World* world = g_currentWorld;
         CollectPanelEntriesOfClass(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, (s32)world->slot1CE8[23], k);
-        CollectPanelEntriesOfClass(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (s32)(*(World**)g_currentWorld)->slot1CE8[27], k);
+        CollectPanelEntriesOfClass(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (s32)(g_currentWorld)->slot1CE8[27], k);
     }
 }
 
@@ -1494,7 +1507,7 @@ void UpdatePanelStick(T217D_440* self, PadRecord* p)
         vb.y = v * 50.0f;
         vb.z = 0;
         f32* g = ((f32*)g_gameClock);
-        *(Quad_136040*)&r = ApproachPointWithRamp(*(Quad_136040*)&va, *(Quad_136040*)&vb, (0.0001f < p->f48 + p->f7C) ? &t0 : &t1, 0, g[2]);
+        *(Quad_136040*)&r = ApproachPointWithRamp(*(Quad_136040*)&va, *(Quad_136040*)&vb, g[2], (RampProfile*)((0.0001f < p->f48 + p->f7C) ? &t0 : &t1), 0);
         self->f314 += u * -0.08f;
         self->stickX = r.x;
         self->stickY = r.y;
@@ -1524,17 +1537,17 @@ void SetTextPanelOpen(T217D_440* self, s32 on)
     self->palette = 0;
     if (on != 0) {
         self->vt->m16(self, 2);
-        GetCurrentLevelBit(&in);
+        GetCurrentLevelBit((u32*)&in);
         if (MaskWorldBitsBySave() & in.v) {
             if (MaskWorldBitsBySave() & D_00261120[self->savedBank]) ReleasePanelEntries(self, self->savedBank, 1);
         }
         if (MaskWorldBitsBySave() & 0x800) {
-            n = GatherObjectsById(*(s32*)g_currentWorld, 0x205, 0x82, 0, 0x100, arr);
+            n = GatherObjectsById(g_currentWorld, 0x205, 0x82, 0, 0x100, arr);
             n = ClampBelow::Of(n, 0x100);
             if (n > 0) {
                 void** p = arr;
                 s32 i = n;
-                do { i--; ResetTextPointToHalf(*p); p++; } while (i != 0);
+                do { i--; ResetTextPointToHalf((TextPointObject*)*p); p++; } while (i != 0);
             }
         }
     } else {
@@ -1548,7 +1561,7 @@ void ResetTextPanel(T217D_440* self)
 {
     ResetScreenElement(self);
     if (self->child != 0) {
-        SetStepSequenceState(self->child, 2);
+        SetStepSequenceState((StepSequence*)self->child, 2);
     }
 }
 
@@ -1570,14 +1583,14 @@ void SetTextPanelText(T217D_440* self, const char* name)
     scale = 1.0f;
     if ((r = self->state) == s1) scale = 0.8f;
     PushFontScale(self->font, scale, scale);
-    InitTextReader(&buf, self->text, self->font);
+    InitTextReader((TextReader*)&buf, self->text, self->font);
     lim = 280.0f;
     if ((r = self->state) == s1) lim = 380.0f;
     s1 = 0;
-    WrapTextLines(&buf, lim);
+    WrapTextLines((TextReader*)&buf, lim);
     PopFontScale(self->font);
-    RewindTextReader(&buf);
-    while ((r = ReadTextChar(&buf)) != 0) {
+    RewindTextReader((TextReader*)&buf);
+    while ((r = ReadTextChar((TextReader*)&buf)) != 0) {
         if (r == 10) {
             idx = self->lineCount;
             self->lineBreaks[idx] = s1;
@@ -1600,13 +1613,13 @@ s32 IsTextPanelTextTyped(T217D_440* self)
     if (self->text[0] == 0) {
         return 1;
     }
-    InitTextReader(buf, &self->text[0], self->font);
+    InitTextReader((TextReader*)buf, &self->text[0], self->font);
     s32 n = CountTextChars(buf);
     s32 v = (s32)((g_gameTime - self->textSince) * self->charsPerSecond);
     return v >= n;
 }
 
-void SetTextPanelSubject(T217D_440* self, s32 value) { self->f2FC = value; }
+void SetTextPanelSubject(T217D_440* self, BaseObject* value) { self->f2FC = value; }
 
 void SetTextPanelValuePercent(T217D_440* self, f32 value)
 {
@@ -1645,9 +1658,9 @@ s32 AreMenusClosed(void);
 void DrawCompassStrip(T217D_440* self, PacketWriter* gs);
 void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs);
 void AddDmaRefTag(PacketWriter* gs, void* data, s32 size);
-void SeekTextReader(void* reader, s32 n);
-void *AppendString(char* dst, const char* src);
-void DrawAlignedText(void* reader, Layout_137228* layout, Layout_137228* frame, PacketWriter* gs);
+void SeekTextReader(TextReader* self, s32 n);
+void *AppendString(void* dst, const char* src);
+void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
 
 // A byte from a toward b by t, as the panel fades its alpha (the difference taken as an integer).
 struct ByteLerp {
@@ -1766,7 +1779,7 @@ void DrawTextPanel(T217D_440* self)
     }
     if (self->text[0] != 0) {
         TextScratch all;
-        InitTextReader(&all, self->text, self->font);
+        InitTextReader((TextReader*)&all, self->text, self->font);
         s32 total = CountTextChars(&all);
         s32 shown = (s32)((g_gameClock[1] - self->textSince) * self->charsPerSecond);
         if (!(shown < total)) {
@@ -1790,8 +1803,8 @@ void DrawTextPanel(T217D_440* self)
         CopyString(text, self->text);
         row++;
         TextScratch typed;
-        InitTextReader(&typed, text, self->font);
-        SeekTextReader(&typed, shown);
+        InitTextReader((TextReader*)&typed, text, self->font);
+        SeekTextReader((TextReader*)&typed, shown);
         s32 cursor;
         if (shown < total) {
             cursor = 1;
@@ -1806,7 +1819,7 @@ void DrawTextPanel(T217D_440* self)
         f32 noScroll = 0.0f;
         PanelLayout::Set(&lines, offX + 180.0f, (offY + 386.800018f) - (noScroll >? (y - height)), width, y,
                          *(s32*)&color);
-        DrawAlignedText(&typed, &lines, &box, &g_gsPacketWriter);
+        DrawAlignedText((TextReader*)&typed, &lines, (Vec4U*)&box, &g_gsPacketWriter);
     }
     PopFontScale(self->font);
     if (self->f2F8 != 0) {
@@ -1828,8 +1841,8 @@ void DrawTextPanel(T217D_440* self)
         Layout_137228 at;
         Layout_137228* l = PanelLayout::Set(&at, x, y, 0.0f, 0.0f, glyphColor);
         l->f14 = 1;
-        l->f18 = (void*)1;
-        DrawFontString(font, glyph, l, 0, &g_gsPacketWriter);
+        l->f18 = 1;
+        DrawFontString(font, glyph, (StringLayout*)l, 0, &g_gsPacketWriter);
         PopFontScale(font);
     }
 }
@@ -1860,16 +1873,13 @@ void ChooseTextPanelState(T217D_440* self)
     }
 }
 
-s32 EndTextPanelState(Owner_136FA8* self)
+void EndTextPanelState(T217D_440* self)
 {
-    s32 r;
     if (self->child != 0) {
-        r = SetStepSequenceState(self->child, 4);
-        goto done;
+        SetStepSequenceState((StepSequence*)self->child, 4);
+    } else {
+        SetTextPanelState(self, 0);
     }
-    r = SetTextPanelState(self, 0);
-done:
-    return r;
 }
 
 // The text layout's setters (layout_137228.h): defined after their callers, which call them,
@@ -1893,7 +1903,7 @@ inline void Layout_137228::Color(s32* value)
 
 inline void Layout_137228::SetF14(s32 value) { f14 = value; }
 
-inline void Layout_137228::SetF18(void* value)
+inline void Layout_137228::SetF18(s32 value)
 {
     f18 = value;
 }

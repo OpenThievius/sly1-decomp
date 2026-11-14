@@ -35,7 +35,7 @@
 
 
 f32 WrapModulo(f32 x, f32 y);
-void CopyMemory(void* dst, void* src, s32 count);
+void CopyMemory(void* dst, void* src, u32 size);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(s32 size);
 void* AllocateFrontMemory(s32 size);
@@ -44,7 +44,6 @@ void* AllocateZeroedFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(s32 bytes);
 
 void* AllocateFrontMemory(s32 size);
-u32 CopyToFrontMemory(s32 size, void* src);
 
 
 void LoopOverMinCountNoOp(s32 a, s32 b, s32 c, s32 d)
@@ -75,14 +74,14 @@ struct BlendAnimation {
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-BlendAnimation* CreateTypedRecord(s32 kind, s32 a, Collider* ctx, s32 b, s32 c);
+BlendAnimation* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(s32 size);
 BlendTrack* AllocateZeroedBackMemory(s32 size);
-BlendTrack* CopyToFrontMemory(s32 size, BlendTrack* src);
+u8* CopyToFrontMemory(s32 size, void* src);
 BlendCurveView* CreatePositionCurve(s32 kind);
 BlendCurveView* CreateRotationCurve(s32 kind);
-BlendCurveView* CreateWeightCurve(s32 kind);
+BlendCurveView* CreateWeightCurve(u32 kind);
 void LoopOverMinCountNoOp(s32 a, s32 b, s32 c, s32 d);
 
 void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out)
@@ -100,7 +99,7 @@ void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items
     }
     BlendSourceAnim* src = item->src;
     PushBackMemoryMark();
-    BlendAnimation* anim = CreateTypedRecord(0x84, (s32)ctx->world, ctx, -1, -1);
+    BlendAnimation* anim = CreateTypedRecord(0x84, ctx->world, ctx, -1, -1);
     anim->vtbl[7](anim);
     anim->nitems = count;
     anim->stride = stride;
@@ -193,7 +192,7 @@ void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items
         }
     }
     anim->count = used;
-    anim->grps = CopyToFrontMemory(used * 0x1C, buf);
+    anim->grps = (BlendTrack*)CopyToFrontMemory(used * 0x1C, buf);
     anim->f44 = src->f44;
     anim->f78 = src->f78;
     anim->f7C = src->f7C;
@@ -210,7 +209,7 @@ void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items
     PopBackMemoryMark();
 }
 
-f32 GetAnimationMarkerTime(BlendSource* a, s32 b);
+f32 GetAnimationMarkerTime(Animation* self, s32 key);
 
 void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* vals)
 {
@@ -229,7 +228,7 @@ void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, 
             n = count2;
             do {
                 n--;
-                s1->a = GetAnimationMarkerTime(e->sub, *v);
+                s1->a = GetAnimationMarkerTime((Animation*)e->sub, *v);
                 v++;
                 s1++;
             } while (n != 0);
@@ -252,9 +251,9 @@ void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, 
     }
 }
 
-void ComputeBlendedDuration(s32 stride, s32 count, void* items, s32 offset, s32 nKeys, s32 pairs, void* out)
+void ComputeBlendedDuration(s32 stride, s32 count, void* items, s32 offset, s32 nKeys, BlendTimeScale* pairs, void* out)
 {
-    BlendTimeScale* keys = (BlendTimeScale*)pairs;
+    BlendTimeScale* keys = pairs;
     f32* duration = (f32*)out;
     f32 total = 0.0f;
     s32 j;
@@ -319,7 +318,7 @@ void ComputeBlendedDuration(s32 stride, s32 count, void* items, s32 offset, s32 
     }
 }
 
-s32 FindCyclicRangeIndex(s32 count, BlendTimeScale* p, f32 x, f32 period, f32* out)
+s32 FindCyclicRangeIndex(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out)
 {
     s32 i;
     for (i = 0; i < count; p++, i++) {
@@ -344,9 +343,9 @@ LINKER_REMNANT(func_001399F0);
 #include "list_iter.h"
 
 
-void CopyMemory(void* a, void* b, s32 n);
-void ComputeBlendedDuration(s32 a0, s32 a1, void* a2, s32 a3, s32 a4, s32 a5, void* a6);
-void SettleListedPoseSources(void* node);
+void CopyMemory(void* dst, void* src, u32 size);
+void ComputeBlendedDuration(s32 stride, s32 count, void* items, s32 offset, s32 nKeys, BlendTimeScale* pairs, void* out);
+void SettleListedPoseSources(AnimationPlayer* self);
 
 void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3)
 {
@@ -369,7 +368,7 @@ void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3)
     } else {
         for (i = 0; i < count; i++) {
             ent = (BlendSequence*)((u8*)self->pC0 + i * 12);
-            ComputeBlendedDuration(a1, a2, a3, ent->stride, ent->count, (s32)ent->pairs, &self->f34);
+            ComputeBlendedDuration(a1, a2, a3, ent->stride, ent->count, ent->pairs, &self->f34);
         }
     }
     node = (AnimationPlayer*)self->f6C;
@@ -383,11 +382,11 @@ void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3)
 }
 
 
-void* FindEntryByObjectId(void);
+void* FindEntryByObjectId(BlendAnimationView* self, void* key);
 
-void SetBlendEntryRecordFlag(void)
+void SetBlendEntryRecordFlag(BlendAnimationView* blend, void* key)
 {
-    BlendSourceEntry* o = (BlendSourceEntry*)FindEntryByObjectId();
+    BlendSourceEntry* o = (BlendSourceEntry*)FindEntryByObjectId(blend, key);
     if (o) {
         if (o->sub) {
             o->sub->flag = 1;

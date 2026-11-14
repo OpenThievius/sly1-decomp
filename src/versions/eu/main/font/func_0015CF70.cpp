@@ -49,7 +49,7 @@ void DrawFontGlyphTurned(Font* self, u16 key, u32 color, PacketWriter* s, f32 x,
             AddGifXyzfRegListEntry(s, sx2, sy, self->f40, 0);
             AddGifUvRegListEntry(s, u1, v1);
             AddGifXyzfRegListEntry(s, sx2, sy2, self->f40, 0);
-            self->vt->end((Font*)((u8*)self + self->vt->adj7), 0, (s32)&g_gsPacketWriter);
+            self->vt->end((Font*)((u8*)self + self->vt->adj7), 0, &g_gsPacketWriter);
         }
     }
 }

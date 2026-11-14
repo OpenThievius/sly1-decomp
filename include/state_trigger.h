@@ -9,6 +9,8 @@
 #include "collider.h"
 
 struct TimedObject;     // class 0x30 (timed_object.h)
+struct PlayingSound;
+struct SoundLevelEntry;
 struct StateWalker;     // a handle func_001B6290 makes (s1b6290.h)
 
 struct StateTrigger : Collider {
@@ -26,8 +28,8 @@ struct StateTrigger : Collider {
     s32 count3;             // 0x600
     s32 items3[6];          // 0x604: func_00123CE0 appends; objects of kind 8 are told func_001CAD40
     s32 done;               // 0x61C: counted up by func_00123B18; state 1 follows when it equals count1
-    s32 f620;               // 0x620: handed to func_001BF788 when state 2 ends
-    s32 f624;               // 0x624: handed to func_001BF048 when state 2 ends
+    PlayingSound* f620;     // 0x620: handed to func_001BF788 when state 2 ends
+    SoundLevelEntry* f624;  // 0x624: handed to func_001BF048 when state 2 ends
     s32 f628;               // 0x628
     s32 count62C;           // 0x62C: the entries of table630 (func_0013EC00)
     u8 table630[0x6B0 - 0x630];  // 0x630: func_0013ECB0 and func_0013EC00 work on it
@@ -38,9 +40,9 @@ struct StateTrigger : Collider {
 typedef char check_StateTrigger[sizeof(StateTrigger) == 0x6C0 ? 1 : -1];
 
 void InitStateTrigger(StateTrigger* self);                  // slot 0
-void CopyStateTrigger(StateTrigger* self);                  // slot 9
+void CopyStateTrigger(StateTrigger* self, StateTrigger* src);                  // slot 9
 void StartStateTrigger(StateTrigger* self);                  // slot 16
-void UpdateStateTrigger(StateTrigger* self);                  // slot 17
+void UpdateStateTrigger(StateTrigger* self, f32 dt);                  // slot 17
 void ResolveStateTriggerObjects(StateTrigger* self);                  // the callback func_00123448 queues
 void SetStateTriggerState(StateTrigger* self, s32 mode);        // sets the state
 void SetStateTriggerStateFromMessage(StateTrigger* self, s32 mode);        // sets the state from a message's mode

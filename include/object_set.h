@@ -17,7 +17,7 @@ struct ObjectSet : Collider {
     s32 f554;               // 0x554: slot 0 (func_00198980) sets 1; func_00198E98 (slot 72) tests it
     s32 f558;               // 0x558: func_00198B28 (slot 16) sets 1 when a kept object answers
     s32 n55C;               // 0x55C: how many ids follow; func_00198ED8 appends at keys560[n55C++]
-    void* keys560[4];       // 0x560: the ids func_00198A88 (slot 15) looks up in the world
+    s32 keys560[4];         // 0x560: the ids func_00198A88 (slot 15) looks up in the world
     s32 count570;           // 0x570: how many objects were found
     void* found574[4];      // 0x574: the found objects (slots 15, 16, 73, 13: func_00198EF8 compares
                             //        a message's key with each)

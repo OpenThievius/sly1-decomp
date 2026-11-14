@@ -6,6 +6,8 @@
 #define SCALED_OFFSET_OBJECT_H
 
 #include "collider.h"
+struct ScaledOffsetObject;
+
 
 struct ScaledOffsetObject : Collider {
     f32 scale;              // 0x550: 100.0 at set-up (slot 0); func_00146240 changes it
@@ -17,7 +19,7 @@ struct ScaledOffsetObject : Collider {
 typedef char check_ScaledOffsetObject[sizeof(ScaledOffsetObject) == 0x560 ? 1 : -1];
 
 void InitScaledOffsetObject(ScaledOffsetObject* self);                  // slot 0
-void LoadScaledOffsetObject(ScaledOffsetObject* self, void* stream);    // slot 10
+void LoadScaledOffsetObject(ScaledOffsetObject* self, void* p);    // slot 10
 void StartScaledOffsetObject(ScaledOffsetObject* self);                  // slot 16
 
 #endif

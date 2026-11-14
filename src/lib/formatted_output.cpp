@@ -14,7 +14,6 @@
 
 typedef void (*PutChar_1F7588)(s32 c);
 
-struct Buf_1F72A8;
 
 static u8 g_outputLine[0x80];
 s32 g_outputLineLength = 0;
@@ -27,7 +26,7 @@ s32 WriteSerialChar(s32 c)
     return c;
 }
 
-void PrintToDebugConsole(Buf_1F72A8* b);
+void PrintToDebugConsole(const u8* text);
 
 void BufferOutputChar(s32 c)
 {
@@ -35,14 +34,14 @@ void BufferOutputChar(s32 c)
     if (pos >= 0x7E) {
         g_outputLineLength = 0;
         g_outputLine[0x7F] = 0;
-        PrintToDebugConsole((Buf_1F72A8*)g_outputLine);
+        PrintToDebugConsole(g_outputLine);
         pos = g_outputLineLength;
     }
     if (c == 0xA) {
         g_outputLineLength = 0;
         g_outputLine[pos] = (u8)c;
         g_outputLine[pos + 1] = 0;
-        PrintToDebugConsole((Buf_1F72A8*)g_outputLine);
+        PrintToDebugConsole(g_outputLine);
         return;
     }
     g_outputLineLength = pos + 1;
@@ -96,11 +95,11 @@ s32 RoundDoubleToInteger(double a)
     return m;
 }
 
-s32 CompareDoubles(double a, double b);
-double SubtractDoubles(double a, double b);
-double MultiplyDoubles(double a, double b);
-double DivideDoubles(double a, double b);
-double ConvertDoubleToU64(double a);
+extern "C" s32 CompareDoubles(double a, double b);
+extern "C" double SubtractDoubles(double a, double b);
+extern "C" double MultiplyDoubles(double a, double b);
+extern "C" double DivideDoubles(double a, double b);
+extern "C" double ConvertDoubleToU64(double a);
 s32 RoundDoubleToInteger(double a);
 void PrintToOutputHook(const char* fmt, ...);
 
@@ -402,7 +401,7 @@ void PrintToOutputHook(const char* fmt, ...)
 
 void BufferOutputChar(s32 c);
 
-void PrintBuffered(const char* fmt, ...)
+extern "C" void PrintBuffered(const char* fmt, ...)
 {
     char* ap = (char*)__builtin_next_arg(fmt) - 56;
     PutChar_1F7588 saved = g_outputHook;

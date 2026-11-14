@@ -39,7 +39,7 @@ s32 FeedMovieStream(MovieStream* self_, s32 left, u8* right)
     left -= 4;
     right += 4;
     if (self->mode == 1) {
-        n = FillRingBufferFromMemory(self->sub30, left, right);
+        n = FillRingBufferFromMemory((RingBuffer*)self->sub30, left, right);
         left -= n;
         right += n;
         if (self->v40 > 0) {
@@ -52,7 +52,7 @@ s32 FeedMovieStream(MovieStream* self_, s32 left, u8* right)
         }
     }
     if (self->v60 >= left) {
-        FillRingBufferFromMemory(self->sub50, left, right);
+        FillRingBufferFromMemory((RingBuffer*)self->sub50, left, right);
         return 1;
     }
     return 0;

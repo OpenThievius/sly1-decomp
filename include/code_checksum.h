@@ -29,6 +29,6 @@ typedef char check_CodeChecksum[sizeof(CodeChecksum) == 0x6E0 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitCodeChecksum(CodeChecksum* self);                       // 0x6B slot 0
-void UpdateCodeChecksum(CodeChecksum* self);                       // 0x6B slot 17
+void UpdateCodeChecksum(CodeChecksum* self, f32 dt);                       // 0x6B slot 17
 
 #endif

@@ -13,12 +13,13 @@ extern u8 D_0027B198[];
 // The runtime's record of the registered frame information.
 static u8 D_0062C540[0x18];
 
-void RegisterFrameInfo(u8* begin, u8* object);
-void* DeregisterFrameInfo(u8* begin);
+struct FrameTable;
+extern "C" void RegisterFrameInfo(void* begin, FrameTable* ob);
+extern "C" void* DeregisterFrameInfo(void* value);
 
 void RegisterProgramFrameInfo(void)
 {
-    RegisterFrameInfo(D_0027B198, D_0062C540);
+    RegisterFrameInfo(D_0027B198, (FrameTable*)D_0062C540);
 }
 
 void ReleaseProgramFrameInfo(void)

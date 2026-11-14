@@ -23,12 +23,9 @@ struct MemoryReaderMethods {
 struct MemoryReader {
     const MemoryReaderMethods* methods;   // 0x00
     u8* base;               // 0x04: the bytes
-    void* f08;              // 0x08: the owner's pointer (set, never read)
+    s32 size;               // 0x08: how many bytes it was made with (set, never read)
     s32 pos;                // 0x0C: how far it has read
-    union {
-        void* f10;          // 0x10: the object func_0013CC00 makes it from
-        s32 remain;         // 0x10: bytes left (func_0013CC80)
-    };
+    s32 remain;             // 0x10: bytes left (func_0013CC80)
 };
 
 #endif

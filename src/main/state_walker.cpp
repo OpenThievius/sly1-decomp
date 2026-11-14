@@ -20,89 +20,91 @@
 #include "base_object.h"
 #include "vu0.h"
 #include "game_clock.h"
+#include "object_finder.h"
 
 f32 RandomFloatInRange(f32 a, f32 b);
 extern f32 g_gameTime;
 // Two floats (CopyVec2).
 struct Point2 { f32 x; f32 y; };
-void SetAnimationPlayerSpeed(void* p);
-s32 IsObjectOfKind(void* a, s32 b);
-s32 IsObjectDescendantOf(Collider* e, void* b);
-void SetColliderFrozen(CompanionAgent* self, void* p);
-void ReleaseSoundLevel(void* p);
+void SetAnimationPlayerSpeed(AnimationPlayer* self, f32 speed);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
+void SetColliderFrozen(Collider* self, s32 flag);
+struct SoundLevelEntry;
+void ReleaseSoundLevel(SoundLevelEntry* self);
 void NotifyStateWalkerChange(StateWalker* self, s32 a, s32 b);
 void CommitStateWalkerArrival(StateWalker* self);
 void StartNextStateWalkerEdge(StateWalker* self);
-void TriggerScriptEvent(StateGraph* host, s32 a, s32 b, void* args);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 // A free slot of a world pool (Pool6C): its first word links the next.
 struct FreeSlot { FreeSlot* next; };
 void* PopFreeSlot(Pool6C* pool);
-void* FillMemory(void* p, s32 value, s32 size);
-void AppendToList(void* p, void* self);
-void RemoveFromList(void* p, void* self);
-void StartObject(void* self);
-void SpawnInitialStateWalker(void* self);
-void* AppendQueuedCall(void* owner, void* fn, void* arg, s32 a3, s32 a4);
-s32 FindStateEntryIndex(void* self, s32 key);
-void StopAnimationPlayer(void* p);
-void ReleaseCallRecords(void* a, void* b);
-void RemoveFromList(void* a, void* b);
-void PushFreeSlot(void* a, void* b);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void AppendToList(List01* self, void* item);
+void RemoveFromList(List01* list, void* item);
+void StartObject(BaseObject* self);
+struct T219CHook;
+struct World;
+void SpawnInitialStateWalker(StateGraph* self);
+void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+s32 FindStateEntryIndex(StateGraph* self, s32 key);
+void StopAnimationPlayer(AnimationPlayer* self);
+void ReleaseCallRecords(World* self, T219CHook* node);
+void RemoveFromList(List01* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
 struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
 s32 IsAgentSlotIndex(s32 index);
-void StartPlacedObject(void* self);
+void StartPlacedObject(PlacedObject* self);
 void* AllocateFrontMemory(s32 size);
-void BuildFreeList(void* s, s32 v, s32 n);
-void AddCallbackNode(void* a, void* b, s32 c, void* d);
-void StartAgent(void* self);
-void ResolveCompanionAgentObjects(void* self);
-s32 FindFirstObjectByIdMode4(void* host, s32 id, void* ctx);
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-void UpdateAgent(void* self);
-void AimCompanionAgentPose(void* self);
-void EnterAgentState(void* self);
+void BuildFreeList(Pool6C* s, s32 v, s32 n);
+void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx);
+void StartAgent(Agent* self);
+void ResolveCompanionAgentObjects(CompanionAgent* self);
+void UpdateAgent(Agent* self, f32 dt);
+void AimCompanionAgentPose(CompanionAgent *self);
+void EnterAgentState(Agent* self, s32 evt, Animation* arg);
 typedef s32 (*VFn_1B7818)(void* self);
-s32 IsAgentTargetInRange(void* self);
-void HandleAgentNotification(void* self, s32 code, void* req);
-void UpdatePlacedObject(void* self);
-void InitAgent(void* self);
-s32 FindFirstObjectByIdMode4(void* owner, s32 value, void* bank);
-void* CreateStateWalker(void* bank, s32 r, s32 minus_one, s32 zero);
+s32 IsAgentTargetInRange(Agent* self);
+struct AgentNotification;
+struct Agent;
+void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
+void UpdatePlacedObject(PlacedObject* self, f32 f);
+void InitAgent(Agent* self);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 u16 MapCharToCode(u8 ch);
-s32 GetStringLength(void* p);
+extern "C" s32 GetStringLength(const char* s);
 void StartNextStateWalkerEdge(StateWalker* self);
-void SeekAnimationPlayer(void* a, f32 b, f32 c, s32 d);
+void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b);
 s32 FindStateEntryIndexOrZero(void* self, s32 key);
 void NotifyStateWalkerChange(StateWalker* self, s32 a, s32 b);
 void StartNextStateWalkerEdge(StateWalker* self);
-s32 FindStateEntryIndexOrZero(StateGraph* self, s32 key);
+s32 FindStateEntryIndexOrZero(void* self, s32 key);
 void CommitStateWalkerArrival(StateWalker* self);
-void StopAnimationPlayer(AnimationPlayer* obj);
+void StopAnimationPlayer(AnimationPlayer* self);
 void StartNextStateWalkerEdge(StateWalker* self);
 // A class descriptor of two words: the parent's and the class id (config/us/classes.tsv, kind head).
 // A class descriptor of two words, the parent's and the class id (classes.tsv, kind head).
 extern const ClassHead g_stateWalkerMethods;
 void* PopZeroedFreeSlot(Pool6C* pool);
-void AppendToList(List01* list, StateWalker* item);
+void AppendToList(List01* self, void* item);
 extern u8 D_0021A790[];
-s32 GatherObjectsById(World* a0, s32 a1, s32 a2, CompanionAgent* a3, s32 a4, void* a5);
 s32 MatchesObjectId(BaseObject* a, s32 b);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(u32 bytes);
-void* CreatePoseSource(World* root, s32 value, void* table);
-void InsertAttachment(PlacedObject* self, void* src);
+void* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* table);
+void InsertAttachment(PlacedObject* self, Attachment* src);
 extern f32 D_002746A0[8];
-s32 GetAgentRosterState(CompanionAgent *self);
-s32 IsAgentFacingBlocked(CompanionAgent *self);
+s32 GetAgentRosterState(Agent* self);
+s32 IsAgentFacingBlocked(Agent* self);
 void* AllocateBackMemory(s32 size);
 void NotifyStateWalkerChange(StateWalker* self, s32 a, s32 b);
-s32 CreateAnimationPlayerWithoutPresetTargets(Animation* track, s32 a1, s32 a2, AnimationPlayer** out, f32 fa, f32 fb);
-void AddAnimationPlayerCallback(void* obj, void (*fn)(StateWalker*, s32, s32), StateWalker* self);
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
+void AddAnimationPlayerCallback(AnimationPlayer* a0, void* a1, void* a2);
 void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, s32 b);
-void ApplyListedPoseSources(void* obj, s32 zero);
-void StopAnimationPlayer(void* obj);
-void CallStateWalkerListeners(StateWalker* self, s32 a, StateWalker* b);
+void ApplyListedPoseSources(AnimationPlayer* a0, s32 flag);
+void StopAnimationPlayer(AnimationPlayer* self);
+void CallStateWalkerListeners(StateWalker* self, s32 a, void* b);
 
 // A Shift-JIS code and the character it stands for (MapCharToCode).
 // A Shift-JIS code and the character it stands for (MapCharToCode reads the tables).
@@ -145,10 +147,14 @@ void CopyVec2(Point2* a0, Point2* a1)
 }
 
 void* MoveMemory(void* dst, void* src, s32 size);
-void TransformPointBetweenFrames(void* from, void* to, void* point, void* out);
-f32 ApproachValueWithRamp(f32 value, f32 target, f32 dt, Vec3* ramp, f32* rate);
+struct RampProfile;
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
 void SetCursorCoords(AnimCursor* cursor, f32 u, f32 v);
-void DrawModelPart();
+struct Frame_166690;
+void DrawModelPart(Frame_166690* self);
 // Drops the first entry of a three-entry window: the other two move down.
 template <class T>
 static inline void DropFirst(T* window)
@@ -186,9 +192,9 @@ void UpdateTriangleAnimatorCursor(TriangleAnimator* self, PlacedObject* obj, voi
     f32 u;
     f32 v;
     BaseObject* end = obj->f224->p64;
-    TransformPointBetweenFrames(end->parent, obj, (u8*)end + 0x40, &b);
+    TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec02*)((u8*)end + 0x40), &b);
     end = obj->f224->p60;
-    TransformPointBetweenFrames(end->parent, obj, (u8*)end + 0x40, &a);
+    TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec02*)((u8*)end + 0x40), &a);
     CopyVec3((Vec3*)&tri[1], (Vec3*)&self->points[0]);
     CopyVec3((Vec3*)&tri[2], (Vec3*)&self->points[1]);
     CopyVec2(&uv[1], (Point2*)&self->coords[0]);
@@ -263,8 +269,8 @@ void UpdateTriangleAnimatorCursor(TriangleAnimator* self, PlacedObject* obj, voi
     f32 iv = 1.0f - v;
     f32 cu = ClampBetween(iu - self->u0, self->uMin, self->uMax);
     f32 cv = ClampBetween(iv - self->v0, self->vMin, self->vMax);
-    ApproachValueWithRamp(self->cursor.u, cu, g_gameClock.dt, &ramp, 0);
-    ApproachValueWithRamp(self->cursor.v, cv, g_gameClock.dt, &ramp, 0);
+    ApproachValueWithRamp(self->cursor.u, cu, g_gameClock.dt, (RampProfile*)&ramp, 0);
+    ApproachValueWithRamp(self->cursor.v, cv, g_gameClock.dt, (RampProfile*)&ramp, 0);
     SetCursorCoords(&self->cursor, cu, cv);
 }
 
@@ -305,7 +311,7 @@ u16 MapCharToCode(u8 ch)
 
 void ConvertStringToCharCodes(u8* src, u16* dst)
 {
-    s32 n = GetStringLength(src);
+    s32 n = GetStringLength((const char*)src);
     s32 i;
     for (i = 0; i < n; i++) {
         u32 r = MapCharToCode(src[i]);
@@ -322,9 +328,9 @@ void StartCameraPositionedObject(CameraPositionedObject* self)
     self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
 }
 
-void MoveObjectToCamera(CameraPositionedObject* self)
+void MoveObjectToCamera(CameraPositionedObject* self, f32 dt)
 {
-    UpdatePlacedObject(self);
+    UpdatePlacedObject(self, dt);
     Vec02* src = (Vec02*)g_camera->f40;
     Vec02 q = *src;
     if (self->followHeight == 0) {
@@ -384,10 +390,10 @@ void* PopZeroedFreeSlot(Pool6C* pool)
     return p;
 }
 
-void PushFreeSlot(Pool6C* list, Attachment* item)
+void PushFreeSlot(Pool6C* list, void* item)
 {
     if (item) {
-        item->vt = (const T2195_Vt*)list->head;
+        ((FreeSlot*)item)->next = (FreeSlot*)list->head;
         list->head = item;
     }
 }
@@ -400,8 +406,8 @@ s32 ReadBufferedS8(BufferedStream* s);
 s32 ReadBufferedS16(BufferedStream* s);
 s32 ReadBufferedS32(BufferedStream* s);
 f32 ReadBufferedFloat(BufferedStream* s);
-void ReadPropertyRecords(void* self, BufferedStream* s);
-BaseObject* CreateTypedRecord(s32 kind, World* world, BaseObject* parent, s32 b, s32 c);
+void ReadPropertyRecords(void* self, void* obj);
+BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 void ResolveAndStartObject(BaseObject* o);
 
 void LoadStateGraph(StateGraph* self, BufferedStream* s)
@@ -469,16 +475,16 @@ void SpawnInitialStateWalker(StateGraph* self)
             p++;
         } while (i < n && e == 0);
     }
-    s32 r;
+    BaseObject* r;
     if (self->edgeCount > 0 && e != 0 && e->id != -1) {
         r = FindFirstObjectByIdMode4(self->world, e->id, self);
     } else {
         r = 0;
     }
-    CreateStateWalker(self, r, -1, 0);
+    CreateStateWalker(self, (void*)r, -1, 0);
 }
 
-StateWalker* CreateStateWalker(StateGraph* self, s32 a1, s32 a2, s32 a3)
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3)
 {
     StateWalker* obj = (StateWalker*)PopZeroedFreeSlot(&self->world->pool1B88);
     obj->f1C = a1;
@@ -502,7 +508,7 @@ StateWalker* CreateStateWalker(StateGraph* self, s32 a1, s32 a2, s32 a3)
     return obj;
 }
 
-void* FindListNodeByKey(StateGraph* self, s32 key)
+void* FindListNodeByKey(StateGraph* self, void* key)
 {
     ListFrame frame;
     StateWalker* node = (StateWalker*)self->walkers.head;
@@ -536,7 +542,7 @@ s32 FindStateEntryIndex(StateGraph* self, s32 key)
 
 s32 FindStateEntryIndexOrZero(void* self, s32 key)
 {
-    s32 r = FindStateEntryIndex(self, key);
+    s32 r = FindStateEntryIndex((StateGraph*)self, key);
     return r < 0 ? 0 : r;
 }
 
@@ -553,11 +559,11 @@ void DestroyStateWalker(StateWalker* self)
         StopAnimationPlayer(self->player);
         self->player = 0;
     }
-    ReleaseCallRecords(self->owner->world, self->calls);
+    ReleaseCallRecords(self->owner->world, (T219CHook*)self->calls);
     self->calls = 0;
     RemoveFromList(&self->owner->walkers, self);
-    RemoveFromList((u8*)self->owner->world + 0x1B94, self);
-    PushFreeSlot((u8*)self->owner->world + 0x1B88, self);
+    RemoveFromList((List01*)((u8*)self->owner->world + 0x1B94), self);
+    PushFreeSlot(&self->owner->world->pool1B88, self);
     TriggerScriptEvent(owner, 0x12, 0, 0);
 }
 
@@ -620,7 +626,7 @@ void SetStateWalkerSpeed(StateWalker* self, f32 v)
 {
     self->f38 = v;
     if (self->player != 0) {
-        SetAnimationPlayerSpeed(self->player);
+        SetAnimationPlayerSpeed(self->player, v);
     }
 }
 
@@ -639,6 +645,7 @@ void TeleportStateWalker(StateWalker* self, s32 key)
     self->f2C = -1;
     StartNextStateWalkerEdge(self);
 }
+
 
 void StartNextStateWalkerEdge(StateWalker* self)
 {
@@ -804,7 +811,7 @@ void StartNextStateWalkerEdge(StateWalker* self)
             self->player = 0;
             if (e->anim != 0)
             {
-                CreateAnimationPlayerWithoutPresetTargets(e->anim, self->f1C, self->f20, &self->player, fa, fb);
+                CreateAnimationPlayerWithoutPresetTargets(e->anim, (BaseObject*)self->f1C, self->f20, &self->player, fa, fb);
                 if (self->player != 0)
                 {
                     AddAnimationPlayerCallback(self->player, HandleStateWalkerTrackEnd, self);
@@ -812,8 +819,8 @@ void StartNextStateWalkerEdge(StateWalker* self)
             }
             if (old != 0)
             {
-                ApplyListedPoseSources(old, 0);
-                StopAnimationPlayer(old);
+                ApplyListedPoseSources((AnimationPlayer*)old, 0);
+                StopAnimationPlayer((AnimationPlayer*)old);
             }
             goto done;
         }
@@ -851,40 +858,33 @@ void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, s32 b)
     }
 }
 
-// func_001B6C68's result is taken as a float here, which retail's code needs: the walker is
-// seen through its own view so the declaration stays this function's.
-struct Node_1B6CF0 { u8 pad[0x24]; s32 f24; };
-f32 CommitStateWalkerArrival(Node_1B6CF0* self); // stays non-void: the C definition is void, but func_001B6CF0 needs the register it leaves ($f0)
-void StartNextStateWalkerEdge(Node_1B6CF0* self);
-
-void AdvanceStateWalkerTime(Node_1B6CF0* self, f32 t)
+void AdvanceStateWalkerTime(StateWalker* self, f32 t)
 {
     f32 rem = t;
-    AnimationPlayer* item = (AnimationPlayer*)self->f24;
-    while (item) {
+    AnimationPlayer* item;
+    while ((item = self->player) != 0) {
         f32 diff = item->anim->length - item->time;
         if (rem < diff) {
-            SeekAnimationPlayer(item, rem, 1.0f, 1);
+            SeekAnimationPlayer(item, 1, rem, 1.0f);
             break;
         }
         rem = rem - diff;
-        (void)CommitStateWalkerArrival(self);
+        CommitStateWalkerArrival(self);
         StartNextStateWalkerEdge(self);
-        item = (AnimationPlayer*)self->f24;
     }
 }
 
-void CallStateWalkerListeners(StateWalker* self, s32 a, s32 b)
+void CallStateWalkerListeners(StateWalker* self, s32 a, void* b)
 {
     BaseObject* o = (BaseObject*)self->f1C;
     if (o != 0) {
-        o->desc->m0E(o, a, (void*)b);
+        o->desc->m0E(o, a, b);
     }
     QueuedCall* link = self->calls;
     if (link != 0) {
         do {
-            s32 obj = link->k1;
-            void (*fn)(s32 a, s32 b, s32 c) = link->fn;
+            void* obj = link->arg;
+            void (*fn)(void* arg, s32 kind, void* payload) = link->notify;
             link = link->next;
             fn(obj, a, b);
         } while (link != 0);
@@ -893,7 +893,7 @@ void CallStateWalkerListeners(StateWalker* self, s32 a, s32 b)
 
 void AddStateWalkerListener(StateWalker* self, PlacedObject** p)
 {
-    AddCallbackNode(self->owner->world, &self->calls, (s32)(*p)->link40.prev, p);
+    AddCallbackNode(self->owner->world, (Callback01**)&self->calls, (void*)(*p)->link40.prev, p);
 }
 
 void NotifyStateWalkerChange(StateWalker* self, s32 idx1, s32 idx2)
@@ -971,11 +971,11 @@ void ResolveCompanionAgentObjects(CompanionAgent* self)
     self->fC14 = (void*)best;
     PopBackMemoryMark();
     if (self->fC14 != 0) {
-        self->fC34 = CreatePoseSource(self->world, (s32)self->fC14, D_0021A790);
+        self->fC34 = CreatePoseSource(self->world, (PlacedObject*)self->fC14, (const T2195_Vt*)D_0021A790);
         ((T2195_790*)self->fC34)->mode1 = 2;
         ((T2195_790*)self->fC34)->hasTarget = 1;
         ((T2195_790*)self->fC34)->f84 = ((T2195_790*)self->fC34)->f80 = 0;
-        InsertAttachment((PlacedObject*)self->fC14, self->fC34);
+        InsertAttachment((PlacedObject*)self->fC14, (Attachment*)self->fC34);
         self->fBF0 = (s32)self->fC14;
     }
 }
@@ -1001,7 +1001,7 @@ void StartCompanionAgent(CompanionAgent* self)
     StartAgent(self);
     ResolveCompanionAgentObjects(self);
     if (self->fC28 != -1) {
-        self->fC2C = FindFirstObjectByIdMode4(self->world, self->fC28, self);
+        self->fC2C = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->fC28, self);
     }
     if (self->fCD4 > 0) {
         s32 i = 0;
@@ -1026,7 +1026,7 @@ s32 IsCompanionAgentBlocker(CompanionAgent* self, Collider* ent)
         return 0;
     }
     for (s32 i = 0; i < self->fCD4; i++) {
-        if (IsObjectDescendantOf(ent, self->fCD8[i].obj) != 0) {
+        if (IsObjectDescendantOf(ent, (BaseObject*)self->fCD8[i].obj) != 0) {
             return 0;
         }
     }
@@ -1034,13 +1034,14 @@ s32 IsCompanionAgentBlocker(CompanionAgent* self, Collider* ent)
 }
 
 s32 IsPadSelectFlagHeld(World* world);
-s32 TestPointAgainstObjectShape(s32 shape, Vec02* p);
-void* PushSoundLevel(s32 kind);
-void RemoveSoundLevelAndRecompute(void* p);
-s32 IsPointInsideObjectFaces(void* shape, Vec02* p);
-s32 IsPlayerUntargetableByAgent(CompanionAgent* self);
-void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(CompanionAgent*, Collider*), CompanionAgent* self, s32* n, Collider*** list);
-s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** list, ColliderSpan* out);
+struct ObjectGatherer;
+s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value);
+SoundLevelEntry* PushSoundLevel(s32 kind);
+void RemoveSoundLevelAndRecompute(SoundLevelEntry* self);
+s32 IsPointInsideObjectFaces(ScalingVolume* self, void* point);
+s32 IsPlayerUntargetableByAgent(Agent* self);
+void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 
 #define F(T, o) (*(T*)((u8*)self + (o)))
 
@@ -1086,10 +1087,10 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
         if (near != 0) {
             if (self->fCC0 == 0) self->fCC0 = PushSoundLevel(-0x14);
         } else {
-            RemoveSoundLevelAndRecompute(self->fCC0);
+            RemoveSoundLevelAndRecompute((SoundLevelEntry*)self->fCC0);
             self->fCC0 = 0;
         }
-        if (IsPointInsideObjectFaces(self->fC14, &a) == 0) {
+        if (IsPointInsideObjectFaces((ScalingVolume*)self->fC14, &a) == 0) {
             if (self->fC18 < dist) return 0;
             if (self->fC1C < __builtin_fabsf(delta.z)) return 0;
         }
@@ -1122,7 +1123,7 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
         Collider** list;
         s32 i;
         for (i = 0; i < n; i++) {
-            TransformPointBetweenFrames(target, 0, table + i * 4, &buf[i]);
+            TransformPointBetweenFrames(target, 0, (Vec02*)(table + i * 4), &buf[i]);
             Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(buf[i]));
             Vu0::Q(hi) = Vu0::Max(Vu0::Q(hi), Vu0::Q(buf[i]));
         }
@@ -1138,9 +1139,9 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
 
 #undef F
 
-void UpdateCompanionAgent(CompanionAgent* self)
+void UpdateCompanionAgent(CompanionAgent* self, f32 dt)
 {
-    UpdateAgent(self);
+    UpdateAgent(self, dt);
     AimCompanionAgentPose(self);
 }
 
@@ -1198,9 +1199,9 @@ void AimCompanionAgentPose(CompanionAgent *self) {
     ((ScalingVolume*)self->fC14)->f2F0 = f;
 }
 
-void EnterCompanionAgentState(CompanionAgent* self)
+void EnterCompanionAgentState(CompanionAgent* self, s32 evt, Animation* arg)
 {
-    EnterAgentState(self);
+    EnterAgentState(self, evt, arg);
     switch (self->f724) {
     case 6:
         self->fCC4 = 0;
@@ -1210,7 +1211,7 @@ void EnterCompanionAgentState(CompanionAgent* self)
         if (p != 0) {
             p->desc->m03(p);
         }
-        ReleaseSoundLevel(self->fCC0);
+        ReleaseSoundLevel((SoundLevelEntry*)self->fCC0);
         self->fCC0 = 0;
         break;
     }
@@ -1251,7 +1252,7 @@ ret0:
 
 void HandleCompanionAgentNotification(CompanionAgent* self, s32 code, void* req)
 {
-    HandleAgentNotification(self, code, req);
+    HandleAgentNotification(self, code, (AgentNotification*)req);
     if (code == 7) {
         if (req == self->f7E0) {
             self->fCC4++;
@@ -1259,11 +1260,11 @@ void HandleCompanionAgentNotification(CompanionAgent* self, s32 code, void* req)
     }
 }
 
-void SetCompanionAgentFrozen(CompanionAgent* self, void* p)
+void SetCompanionAgentFrozen(CompanionAgent* self, s32 p)
 {
     SetColliderFrozen(self, p);
     if (p != 0) {
-        ReleaseSoundLevel(self->fCC0);
+        ReleaseSoundLevel((SoundLevelEntry*)self->fCC0);
         self->fCC0 = 0;
     }
 }

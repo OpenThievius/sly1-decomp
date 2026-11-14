@@ -90,6 +90,6 @@ void SetupTextPanel(Panel_131198_eu* self)
     }
     AddGifXyzfEntry(&gs, 0x9400, 0x8800, 0x0FFFFFF0, 0);
     AddGifXyzfEntry(&gs, 0x9400, 0x80C2, 0x0FFFFFF0, 0);
-    DetachPacketBufferCopy(&gs, &self->bands, 0, &self->bandsSize, 0x15);
+    DetachPacketBufferCopy(&gs, (s32*)&self->bands, 0, &self->bandsSize, 0x15);
     PopBackMemoryMark();
 }

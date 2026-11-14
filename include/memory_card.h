@@ -30,8 +30,8 @@ typedef char check_CardSlot[sizeof(CardSlot) == 0x1A5C ? 1 : -1];
 
 struct MemoryCard {
     s32 f00;                // 0x00: func_0018D0A0
-    void* port;             // 0x04: func_0018C250, func_0018D0A0 (first argument of the card query)
-    void* slot;             // 0x08: func_0018C250, func_0018D0A0 (second argument of the card query)
+    s32 port;               // 0x04: func_0018C250, func_0018D0A0 (first argument of the card query)
+    s32 slot;               // 0x08: func_0018C250, func_0018D0A0 (second argument of the card query)
     s32 state;              // 0x0C: func_0018BDC8, func_0018C028, func_001E9108
     f32 stateTime;          // 0x10: func_0018BDC8, func_0018C028 (the clock when state was set)
     s32 targetState;        // 0x14: func_0018BDC8, func_0018C1A8, func_0018C250, func_0018D0A0

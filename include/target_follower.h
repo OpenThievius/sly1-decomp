@@ -8,6 +8,7 @@
 
 #include "collider.h"
 #include "sound_level.h"
+struct BufferedStream;
 
 struct FollowableObject;
 
@@ -95,7 +96,7 @@ struct TargetFollower : Collider {
 typedef char check_TargetFollower[sizeof(TargetFollower) == 0x5E0 ? 1 : -1];
 
 void InitTargetFollower(TargetFollower* self);                          // slot 0
-void LoadTargetFollowerRecords(TargetFollower* self);                          // slot 10
+void LoadTargetFollowerRecords(TargetFollower* self, BufferedStream* stream);                          // slot 10
 void HandleTargetFollowerNotification(TargetFollower* self, s32 type, Packet47* packet);  // slot 13
 void ResolveTargetFollowerLinks(TargetFollower* self);                          // slot 16
 void StepTargetFollower(TargetFollower* self, f32 t);                   // slot 28

@@ -53,8 +53,8 @@
 #include "vu0.h"
 #include "fpu.h"
 
-extern u8* AllocateBackMemory(u32);
-void* FillMemory(void* p, s32 value, s32 size);
+extern u8* AllocateBackMemory(s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void SetListLinkOffset(List01* self, s32 offset);
 void ClearList(List01* node);
 
@@ -77,13 +77,14 @@ struct PartDrawFrame {
 
 
 void AddDmaRefTag(PacketWriter* obj, s32 a, s32 b);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void* MultiplyMatrices(Quad16* out, void* b, void* in);
 void BeginDmaTag(PacketWriter* self);
-void WriteVifBaseOffset(PacketWriter* obj, s32 a, s32 b);
-void CopyWordsToWriter(PacketWriter* obj, s32 a, s32 b, void* c, s32 d);
+void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
+void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void CloseDmaTag(PacketWriter* self);
-void DrawModelPart(PartDrawFrame* frame);
+struct Frame_166690;
+void DrawModelPart(Frame_166690* self);
 
 // The file's .data: the view matrix DrawPlacedObjectParts multiplies the object's transform by.
 Mat4A D_00261F30 = { { { 2.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 2.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f }, { -1.0f, -1.0f, 0.0f, 1.0f } } };
@@ -109,14 +110,14 @@ void DrawPlacedObjectParts(DeferredRequest* self)
     f.q80[3] = f.qC0[3];
     BeginDmaTag((PacketWriter*)&g_vifPacketWriter);
     WriteVifBaseOffset((PacketWriter*)&g_vifPacketWriter, 0, 0);
-    CopyWordsToWriter((PacketWriter*)&g_vifPacketWriter, 0xC, 4, f.q80, 4);
+    CopyWordsToWriter(&g_vifPacketWriter, 0xC, 4, (u32*)f.q80, 4);
     CloseDmaTag((PacketWriter*)&g_vifPacketWriter);
     if (s1->drawPartCount > 0) {
         s32 off = 0;
         do {
             i++;
             f.f78 = (u8*)s1->drawParts + off;
-            DrawModelPart(&f);
+            DrawModelPart((Frame_166690*)&f);
             off += 0x70;
         } while (i < s1->drawPartCount);
     }
@@ -132,19 +133,19 @@ struct ListFrameWords {
 };
 
 void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6);
-void RemoveFromList(void* list, ActiveSetItem* n);
-void AppendToList(void* list, ActiveSetItem* n);
-void ClearList(void* p);
-void AppendToList(void* list, void* item);
-void RemoveFromList(List01* list, ActiveSetItem* n);
-void AppendToList(List01* list, ActiveSetItem* n);
+void RemoveFromList(List01* list, void* item);
+void AppendToList(List01* self, void* item);
+void ClearList(List01* p);
+void AppendToList(List01* self, void* item);
+void RemoveFromList(List01* list, void* item);
+void AppendToList(List01* self, void* item);
 void FactorSymmetricMatrix(s32 n, f32* mat, f32* vec);
 void SolveFactoredSystem(s32 n, f32* a, f32* b, f32* c);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void CopyMemory(void* dst, void* src, s32 size);
+void CopyMemory(void* dst, void* src, u32 size);
 void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
-void RunActiveSetSolver(ActiveSetSolver* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6);
 
 void InitActiveSetSolver(ActiveSetSolver* self, s32 count)
 {
@@ -197,7 +198,7 @@ void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item)
 
 typedef void (*EndRowsFn)(Collider* body, s32 a1, void* contact, s32 end, ActiveSetItem* item, f32* rows);
 typedef void (*EndFillFn)(Collider* body, s32 a1, s32 size, s32 extra, f32* rows);
-void* AllocateZeroedBackMemory(u32 size);
+void* AllocateZeroedBackMemory(s32 size);
 void ComputeColliderPointVelocity(Collider* body, Vec02* point, void* motion, Vec02* out);
 
 void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6)
@@ -375,7 +376,7 @@ void PivotActiveSet(ActiveSetSolver* self, ActiveSetItem* x)
     } while (iter < 10);
 }
 
-void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
+void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6)
 {
     ListFrameWords fr;
     ListFrame frame;
@@ -501,7 +502,7 @@ void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, Contact03** 
     }
 }
 
-void ConstrainColliderVector(Collider* body, Vec02* limits, Vec02* in, Vec02* out, s32 mode);
+void ConstrainColliderVector(void* self, void* a, void* b, void* c, s32 d);
 
 // A part's share of the solved impulses: a linear and an angular one.
 struct PartImpulse {

@@ -14,7 +14,7 @@ s32 g_vectorBPayloadCapacity = 64;
 s32 g_pairPayloadCapacity = 64;
 s32 g_triplePayloadCapacity[16] = { 32 };
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void* AllocateZeroedFrontMemory(s32 size);
 
 void* AllocateFrontMemory(s32 bytes);
@@ -42,7 +42,7 @@ void InitEntryPool(EntryPool* p, s32 count, s32 size)
     p->high = 0;
 }
 
-void ShutDownEntryPool(void* p)
+void ShutDownEntryPool(EntryPool* p)
 {
 }
 
@@ -55,13 +55,14 @@ struct PoolEntryHeader {
 };
 
 extern u8 g_markStacks[];
-void CollectScriptPools(void* p);
-void* GetPoolEntryPayload(void* base);
+struct MarkStacks;
+void CollectScriptPools(MarkStacks* w);
+void* GetPoolEntryPayload(PoolEntryHeader* entry);
 
 void* PopPoolFreeEntry(EntryPool* self)
 {
     if (self->freeList == 0) {
-        CollectScriptPools(g_markStacks);
+        CollectScriptPools((MarkStacks*)g_markStacks);
     }
     PoolEntryHeader* n = (PoolEntryHeader*)self->freeList;
     if (n != 0) {
@@ -74,14 +75,11 @@ void* PopPoolFreeEntry(EntryPool* self)
 }
 
 // Newly matched US functions from the small-function wave.
-extern void* PopPoolFreeEntry(void*);
 
-
-
-void* TakePoolEntry(void* self)
+void* TakePoolEntry(EntryPool* self)
 {
     void* result = PopPoolFreeEntry(self);
-    FillMemory(result, 0, *(s32*)self - 8);
+    FillMemory(result, 0, self->stride - 8);
     return result;
 }
 
@@ -140,9 +138,9 @@ void ReleaseDeadPoolEntries(EntryPool* self)
     self->liveMark = s2->next;
 }
 
-void* GetPoolEntryPayload(u8* base)
+void* GetPoolEntryPayload(PoolEntryHeader* entry)
 {
-    return base + 8;
+    return (u8*)entry + 8;
 }
 
 PoolEntryHeader* GetPoolEntryHeader(u8* base)
@@ -150,16 +148,14 @@ PoolEntryHeader* GetPoolEntryHeader(u8* base)
     return (PoolEntryHeader*)(base - 8);
 }
 
-PoolEntryHeader* GetPoolEntryHeader(void);
-
-s32 IsPoolEntryUnmarked(void)
+s32 IsPoolEntryUnmarked(void* payload)
 {
-    return GetPoolEntryHeader()->state == 0;
+    return GetPoolEntryHeader((u8*)payload)->state == 0;
 }
 
-void MarkPoolEntryUsed(u8* base)
+void MarkPoolEntryUsed(void* payload)
 {
-    GetPoolEntryHeader(base)->state = 1;
+    GetPoolEntryHeader((u8*)payload)->state = 1;
 }
 
 extern s32 D_0025C268;
@@ -181,8 +177,8 @@ void CopyKeyedValueChain(R11B008Key* a, R11B008Key* b, s32 c)
     }
 }
 
-void* TakePoolEntry(void* pool);
-void* FillMemory(void* p, s32 value, s32 size);
+void* TakePoolEntry(EntryPool* pool);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 R11B008Key* NewKeyedValue(void)
 {
@@ -199,126 +195,127 @@ void DestroyKeyedValue(R11B008Key* a)
 }
 
 extern s32 g_vectorAPayloadPool;
-void* PopFreeSlot(void* pool);
-void* PopZeroedFreeSlot(void* pool);
-void CollectScriptPools(void* arg);
+struct Pool6C;
+void* PopFreeSlot(Pool6C* pool);
+void* PopZeroedFreeSlot(Pool6C* pool);
+void CollectScriptPools(MarkStacks* w);
 
 void* AcquireVectorAPayload(void)
 {
-    void* p = PopFreeSlot(&g_vectorAPayloadPool);
+    void* p = PopFreeSlot((Pool6C*)&g_vectorAPayloadPool);
     if (p != 0) {
         FillMemory(p, 0, g_vectorAPayloadPool);
     } else {
-        CollectScriptPools(g_markStacks);
-        p = PopZeroedFreeSlot(&g_vectorAPayloadPool);
+        CollectScriptPools((MarkStacks*)g_markStacks);
+        p = PopZeroedFreeSlot((Pool6C*)&g_vectorAPayloadPool);
     }
     return p;
 }
 
-extern u32 D_0062C55C;
+extern u8* D_0062C55C;
 extern u8* g_payloadRefCounts[];
 
-s32 AddRefVectorAPayload(u32 addr)
+s32 AddRefVectorAPayload(void* payload)
 {
-    u8* p = g_payloadRefCounts[0] + ((addr - D_0062C55C) >> 4);
+    u8* p = g_payloadRefCounts[0] + ((u32)((u8*)payload - D_0062C55C) >> 4);
     s32 v = *p;
     v++;
     *p = v;
     return v;
 }
 
-void PushFreeSlot(void* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
 
-void ReleaseVectorAPayload(u32 addr)
+void ReleaseVectorAPayload(void* payload)
 {
     u8* pool = (u8*)&g_vectorAPayloadPool;
-    u8* p = g_payloadRefCounts[0] + ((addr - *(u32*)(pool + 4)) >> 4);
+    u8* p = g_payloadRefCounts[0] + ((u32)((u8*)payload - *(u8**)(pool + 4)) >> 4);
     s32 v = *p - 1;
     *p = v;
     if ((u8)v == 0) {
-        PushFreeSlot(pool, (void*)addr);
+        PushFreeSlot((Pool6C*)pool, payload);
     }
 }
 
 LINKER_REMNANT(func_0011C610);
 
-void ShutDownEntryPool(void* p);
+void ShutDownEntryPool(EntryPool* p);
 void ShutDownPayloadPools(void);
 extern u8 g_matrixPayloadPool[];
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void* AcquireMatrixPayload(void)
 {
-    void* s0 = PopFreeSlot(g_matrixPayloadPool);
+    void* s0 = PopFreeSlot((Pool6C*)g_matrixPayloadPool);
     if (s0 != 0) {
         FillMemory(s0, 0, *(u32*)g_matrixPayloadPool);
     } else {
-        CollectScriptPools(g_markStacks);
-        s0 = PopZeroedFreeSlot(g_matrixPayloadPool);
+        CollectScriptPools((MarkStacks*)g_markStacks);
+        s0 = PopZeroedFreeSlot((Pool6C*)g_matrixPayloadPool);
     }
     return s0;
 }
 
-extern u32 D_0062C56C;
+extern u8* D_0062C56C;
 
-s32 AddRefMatrixPayload(u32 addr)
+s32 AddRefMatrixPayload(void* payload)
 {
-    u8* p = g_payloadRefCounts[1] + ((addr - D_0062C56C) >> 6);
+    u8* p = g_payloadRefCounts[1] + ((u32)((u8*)payload - D_0062C56C) >> 6);
     s32 v = *p;
     v++;
     *p = v;
     return v;
 }
 
-void ReleaseMatrixPayload(s32 a)
+void ReleaseMatrixPayload(void* payload)
 {
     u8* base = g_matrixPayloadPool;
-    s32 idx = (s32)((u32)(a - *(s32*)(base + 4)) >> 6);
+    s32 idx = (s32)((u32)((u8*)payload - *(u8**)(base + 4)) >> 6);
     u8* p = (u8*)(*(s32*)((u8*)g_payloadRefCounts + 4) + idx);
     *p = *p - 1;
     if (*p == 0) {
-        PushFreeSlot(base, (void*)a);
+        PushFreeSlot((Pool6C*)base, payload);
     }
 }
 
 void FreeMatrixPayload(void* item)
 {
-    PushFreeSlot(g_matrixPayloadPool, item);
+    PushFreeSlot((Pool6C*)g_matrixPayloadPool, item);
 }
 
 extern u8 g_vectorBPayloadPool[];
 
 void* AcquireVectorBPayload(void)
 {
-    void* s0 = PopFreeSlot(g_vectorBPayloadPool);
+    void* s0 = PopFreeSlot((Pool6C*)g_vectorBPayloadPool);
     if (s0 != 0) {
         FillMemory(s0, 0, *(u32*)g_vectorBPayloadPool);
     } else {
-        CollectScriptPools(g_markStacks);
-        s0 = PopZeroedFreeSlot(g_vectorBPayloadPool);
+        CollectScriptPools((MarkStacks*)g_markStacks);
+        s0 = PopZeroedFreeSlot((Pool6C*)g_vectorBPayloadPool);
     }
     return s0;
 }
 
-extern u32 D_0062C57C;
+extern u8* D_0062C57C;
 
-s32 AddRefVectorBPayload(u32 addr)
+s32 AddRefVectorBPayload(void* payload)
 {
-    u8* p = g_payloadRefCounts[2] + ((addr - D_0062C57C) >> 4);
+    u8* p = g_payloadRefCounts[2] + ((u32)((u8*)payload - D_0062C57C) >> 4);
     s32 v = *p;
     v++;
     *p = v;
     return v;
 }
 
-void ReleaseVectorBPayload(u32 addr)
+void ReleaseVectorBPayload(void* payload)
 {
     u8* pool = g_vectorBPayloadPool;
-    u8* p = g_payloadRefCounts[2] + ((addr - *(u32*)(pool + 4)) >> 4);
+    u8* p = g_payloadRefCounts[2] + ((u32)((u8*)payload - *(u8**)(pool + 4)) >> 4);
     s32 v = *p - 1;
     *p = v;
     if ((u8)v == 0) {
-        PushFreeSlot(pool, (void*)addr);
+        PushFreeSlot((Pool6C*)pool, payload);
     }
 }
 
@@ -328,35 +325,35 @@ extern u8 g_pairPayloadPool[];
 
 void* AcquirePairPayload(void)
 {
-    void* s0 = PopFreeSlot(g_pairPayloadPool);
+    void* s0 = PopFreeSlot((Pool6C*)g_pairPayloadPool);
     if (s0 != 0) {
         FillMemory(s0, 0, *(u32*)g_pairPayloadPool);
     } else {
-        CollectScriptPools(g_markStacks);
-        s0 = PopZeroedFreeSlot(g_pairPayloadPool);
+        CollectScriptPools((MarkStacks*)g_markStacks);
+        s0 = PopZeroedFreeSlot((Pool6C*)g_pairPayloadPool);
     }
     return s0;
 }
 
-extern u32 D_0062C58C;
+extern u8* D_0062C58C;
 
-s32 AddRefPairPayload(u32 addr)
+s32 AddRefPairPayload(void* payload)
 {
-    u8* p = g_payloadRefCounts[3] + ((addr - D_0062C58C) >> 3);
+    u8* p = g_payloadRefCounts[3] + ((u32)((u8*)payload - D_0062C58C) >> 3);
     s32 v = *p;
     v++;
     *p = v;
     return v;
 }
 
-void ReleasePairPayload(u32 addr)
+void ReleasePairPayload(void* payload)
 {
     u8* pool = g_pairPayloadPool;
-    u8* p = g_payloadRefCounts[3] + ((addr - *(u32*)(pool + 4)) >> 3);
+    u8* p = g_payloadRefCounts[3] + ((u32)((u8*)payload - *(u8**)(pool + 4)) >> 3);
     s32 v = *p - 1;
     *p = v;
     if ((u8)v == 0) {
-        PushFreeSlot(pool, (void*)addr);
+        PushFreeSlot((Pool6C*)pool, payload);
     }
 }
 
@@ -364,30 +361,30 @@ LINKER_REMNANT(func_0011C960);
 
 extern s32 g_triplePayloadPool[];
 struct TriplePayloadSlot;
-TriplePayloadSlot* PopFreeSlot(s32* pool);
-void* FillMemory(void* p, s32 value, s32 size);
-void CollectScriptPools(u8* p);
-TriplePayloadSlot* PopZeroedFreeSlot(s32* pool);
+void* PopFreeSlot(Pool6C* pool);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void CollectScriptPools(MarkStacks* w);
+void* PopZeroedFreeSlot(Pool6C* pool);
 
 TriplePayloadSlot* AcquireTriplePayload(void)
 {
-    TriplePayloadSlot* p = PopFreeSlot(g_triplePayloadPool);
+    TriplePayloadSlot* p = (TriplePayloadSlot*)PopFreeSlot((Pool6C*)g_triplePayloadPool);
     if (p) {
         FillMemory(p, 0, g_triplePayloadPool[0]);
     } else {
-        CollectScriptPools(g_markStacks);
-        p = PopZeroedFreeSlot(g_triplePayloadPool);
+        CollectScriptPools((MarkStacks*)g_markStacks);
+        p = (TriplePayloadSlot*)PopZeroedFreeSlot((Pool6C*)g_triplePayloadPool);
     }
     return p;
 }
 
-extern s32 D_0062C59C;
+extern u8* D_0062C59C;
 extern u8* g_triplePayloadRefCounts;
 
-s32 AddRefTriplePayload(u32 offset)
+s32 AddRefTriplePayload(void* payload)
 {
     u32 n = 12;
-    u8* p = g_triplePayloadRefCounts + (offset - D_0062C59C) / n;
+    u8* p = g_triplePayloadRefCounts + (u32)((u8*)payload - D_0062C59C) / n;
     s32 v = *p + 1;
     *p = v;
     return v;
@@ -396,32 +393,32 @@ s32 AddRefTriplePayload(u32 offset)
 // A slot pool's head: the slot size, then the first slot's address (func_0011CA20 indexes by it).
 struct SlotPool {
     s32 slotSize;           // 0x00
-    u32 origin;             // 0x04
+    u8* origin;             // 0x04
 };
 
-void PushFreeSlot(SlotPool* t, u8* item);
+void PushFreeSlot(Pool6C* list, void* item);
 
-void ReleaseTriplePayload(u8* p)
+void ReleaseTriplePayload(void* payload)
 {
     SlotPool* t = (SlotPool*)((u8*)&g_triplePayloadPool);
-    u32 index = ((u32)p - t->origin) / 12;
+    u32 index = (u32)((u8*)payload - t->origin) / 12;
     u8* cell = g_triplePayloadRefCounts + index;
     *cell = (u8)(*cell - 1);
     if (*cell != 0) {
         return;
     }
-    PushFreeSlot(t, p);
+    PushFreeSlot((Pool6C*)t, payload);
 }
 
 extern u8* D_0027B304;
 extern u8* D_0027B308;
 extern u8* D_0027B30C;
-void InitSlotPool(SlotPool* p, s32 size, s32 val);
+void InitSlotPool(Pool6C* s, s32 size, s32 count);
 
 struct PayloadPoolInit {
     static void Load(void* buf, s32 size, s32* id, u8** out)
     {
-        InitSlotPool((SlotPool*)buf, size, *id);
+        InitSlotPool((Pool6C*)buf, size, *id);
         *out = (u8*)AllocateZeroedFrontMemory(*id);
     }
 };

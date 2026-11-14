@@ -76,18 +76,21 @@ static s32 D_00628B68;
 static u8 D_00628B80[0x40] __attribute__((aligned(64)));
 static Callback_1F84D8 D_00628BC0 __attribute__((aligned(64)));
 
-s32 NewSemaphore(SemaphoreParams* params);
-s32 FreeSemaphore(s32 sema);
-s32 PostSemaphore(s32 sema);
-void PostSemaphoreFromInterrupt(s32 sema);
-s32 AwaitSemaphore(s32 sema);
-void* CopyBytes(void* dst, const void* src, s32 n);
-void* FillMemory(void* p, s32 value, s32 size);
-void InitRemoteCalls(s32 a);
-s32 DisableInterrupts(void);
-s32 EnableInterrupts(void);
-void SetCommandHandler(u32 cmd, void* handler, void* arg);
-void WriteBackDataCacheRange(void* data, s32 size);
+extern "C" s32 NewSemaphore(SemaphoreParams* params);
+extern "C" s32 FreeSemaphore(s32 sema);
+extern "C" s32 PostSemaphore(s32 sema);
+extern "C" void PostSemaphoreFromInterrupt(s32 sema);
+extern "C" s32 AwaitSemaphore(s32 sema);
+extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void InitRemoteCalls(s32 mode);
+extern "C" s32 DisableInterrupts(void);
+extern "C" s32 EnableInterrupts(void);
+struct Packet_1FA068;
+struct Channel_1FA068;
+typedef void (*CommandHandler)(Packet_1FA068* packet, Channel_1FA068* channel);
+extern "C" void SetCommandHandler(s32 cmd, CommandHandler handler, void* arg);
+extern "C" void WriteBackDataCacheRange(void* data, s32 size);
 // What the command handler func_001F89F8 is given with a command: a function and its argument.
 struct FileCommandCall {
     void (*fn)(void* arg);  // 0x00: run when set
@@ -249,8 +252,8 @@ s32 OpenFileClient(void)
     D_00628BC0.func = 0;
     g->arg = 0;
     DisableInterrupts();
-    SetCommandHandler(0x80000011, (void*)&HandleFileReply, D_00628B80);
-    SetCommandHandler(0x80000013, (void*)&RunFileClientCallback, (void*)g);
+    SetCommandHandler(0x80000011, (CommandHandler)&HandleFileReply, D_00628B80);
+    SetCommandHandler(0x80000013, (CommandHandler)&RunFileClientCallback, (void*)g);
     (s32)EnableInterrupts();
     for (;;) {
         q = (RemoteCallClient*)g_fileClient;

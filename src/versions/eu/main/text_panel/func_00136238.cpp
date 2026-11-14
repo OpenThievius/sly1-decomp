@@ -1,3 +1,9 @@
+
+#include "object_finder.h"
+struct TextPointObject;
+
+struct PlacedObject;
+struct World;
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: fields shifted (0x56C/0x5AC/0x5B0/0x5B4/0x5B8); toggles the menu state and its callbacks.
 struct Obj_136238_eu;
@@ -18,8 +24,7 @@ void ResumeStreamVoice(void);
 void PauseStreamVoice(void);
 s32 MaskWorldBitsBySave(void);
 void ReleasePanelEntries(Obj_136238_eu* self, s32 state, s32 flag);
-s32 GatherObjectsById(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
-void ResetTextPointToHalf(void* p);
+void ResetTextPointToHalf(TextPointObject* self);
 
 struct Min_136238_eu { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
@@ -37,17 +42,17 @@ void SetTextPanelOpen(Obj_136238_eu* self, s32 on)
     self->f5AC = 0;
     if (on != 0) {
         self->vt->f40(self, 2);
-        GetCurrentLevelBit(&in);
+        GetCurrentLevelBit((u32*)&in);
         if (MaskWorldBitsBySave() & in.v) {
             if (MaskWorldBitsBySave() & D_00261120[self->f5B8]) ReleasePanelEntries(self, self->f5B8, 1);
         }
         if (MaskWorldBitsBySave() & 0x800) {
-            n = GatherObjectsById(*(s32*)g_currentWorld, 0x205, 0x82, 0, 0x100, arr);
+            n = GatherObjectsById(g_currentWorld, 0x205, 0x82, 0, 0x100, arr);
             n = Min_136238_eu::Of(n, 0x100);
             if (n > 0) {
                 void** p = arr;
                 s32 i = n;
-                do { i--; ResetTextPointToHalf(*p); p++; } while (i != 0);
+                do { i--; ResetTextPointToHalf((TextPointObject*)*p); p++; } while (i != 0);
             }
         }
     } else {

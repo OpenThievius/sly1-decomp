@@ -27,7 +27,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         }
     }
     if (pad->keyA8 & 0x80) {
-        GetStateWalkerCurrentKey(self->f658, &key);
+        GetStateWalkerCurrentKey((StateWalker*)self->f658, &key);
         if (key >= 0x44F) {
             if (key < 0x451) {
                 key = 0x451;
@@ -35,7 +35,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
                 key = 0x44F;
             }
         }
-        SetStateWalkerTarget(self->f658, key);
+        SetStateWalkerTarget((StateWalker*)self->f658, key);
     }
     switch (self->f610) {
     case 2:
@@ -43,13 +43,13 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     case 4: {
         Vec02 at;
         Vec02 pos;
-        TransformPointBetweenFrames(0, self->f660, &self->f664->v140, &at);
+        TransformPointBetweenFrames(0, (PlacedObject*)self->f660, &self->f664->v140, &at);
         f32 u = (at.y - D_00263CA0[0]) / D_00263CA0[1];
         f32 v = (at.z - D_00263CB0[0]) / D_00263CB0[1];
-        ApproachValueWithRamp(self->f6EC, u + D_00263C78[1], 0.0f, D_00263C58, &hiX);
-        ApproachValueWithRamp(self->f6EC, u + D_00263C78[0], 0.0f, D_00263C58, &loX);
-        ApproachValueWithRamp(self->f6F0, v + D_00263C78[1], 0.0f, D_00263C58, &hiY);
-        ApproachValueWithRamp(self->f6F0, v + D_00263C78[0], 0.0f, D_00263C58, &loY);
+        ApproachValueWithRamp(self->f6EC, u + D_00263C78[1], 0.0f, (RampProfile*)D_00263C58, &hiX);
+        ApproachValueWithRamp(self->f6EC, u + D_00263C78[0], 0.0f, (RampProfile*)D_00263C58, &loX);
+        ApproachValueWithRamp(self->f6F0, v + D_00263C78[1], 0.0f, (RampProfile*)D_00263C58, &hiY);
+        ApproachValueWithRamp(self->f6F0, v + D_00263C78[0], 0.0f, (RampProfile*)D_00263C58, &loY);
         f32 stickY = pad->f44;
         if (g_saveData->f19EC & 0x800) {
             stickY = -stickY;
@@ -63,27 +63,27 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
             tx = (loX + hiX) * 0.5f;
             ty = (loY + hiY) * 0.5f;
         }
-        self->f6F4 = ApproachValueWithRamp(self->f6F4, tx, dt, D_00263C68, 0);
-        self->f6F8 = ApproachValueWithRamp(self->f6F8, ty, dt, D_00263C68, 0);
+        self->f6F4 = ApproachValueWithRamp(self->f6F4, tx, dt, (RampProfile*)D_00263C68, 0);
+        self->f6F8 = ApproachValueWithRamp(self->f6F8, ty, dt, (RampProfile*)D_00263C68, 0);
         self->f6EC = ClampBetween(self->f6EC + dt * self->f6F4, u + D_00263C78[0], u + D_00263C78[1]);
         f32 w = ClampBetween(self->f6F0 + dt * self->f6F8, v + D_00263C78[0], v + D_00263C78[1]);
         self->f6F0 = w;
         f32 h = self->f6EC;
         Vu0::Q(pos) = Vu0::FromFloats(at.x, D_00263CA0[0] + h * (D_00263CA0[1] + h * D_00263CA0[2]),
                                       D_00263CB0[0] + w * (D_00263CB0[1] + w * D_00263CB0[2]));
-        TransformPointBetweenFrames(self->f660, 0, &pos, &pos);
-        TransformPointBetweenFrames(0, self->f660, &pos, (u8*)self->f650 + 0xF0);
+        TransformPointBetweenFrames((PlacedObject*)self->f660, 0, &pos, &pos);
+        TransformPointBetweenFrames(0, (PlacedObject*)self->f660, &pos, (Vec02*)((u8*)self->f650 + 0xF0));
         ProjectPointToCamera(g_camera, &pos, (f32*)((u8*)&D_00270650 + 0x580));
         for (i = 0; i < 2; i++) {
             Vec02 dir;
             *(Vu0::Vec*)&dir = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->f674[i]->v140));
             BuildBasisFromXAndZHint(&dir, &g_unitZVector, &mats[i]);
-            TransformRotationBetweenFrames(0, self->f674[i]->parent, &mats[i], &mats[i]);
+            TransformRotationBetweenFrames(0, (PlacedObject*)self->f674[i]->parent, &mats[i], &mats[i]);
         }
-        ApproachValueWithRamp(self->f6FC, D_00263C90[1], 0.0f, D_00263C58, &hiX);
-        ApproachValueWithRamp(self->f6FC, D_00263C90[0], 0.0f, D_00263C58, &loX);
-        ApproachValueWithRamp(self->f700, D_00263C90[1], 0.0f, D_00263C58, &hiY);
-        ApproachValueWithRamp(self->f700, D_00263C90[0], 0.0f, D_00263C58, &loY);
+        ApproachValueWithRamp(self->f6FC, D_00263C90[1], 0.0f, (RampProfile*)D_00263C58, &hiX);
+        ApproachValueWithRamp(self->f6FC, D_00263C90[0], 0.0f, (RampProfile*)D_00263C58, &loX);
+        ApproachValueWithRamp(self->f700, D_00263C90[1], 0.0f, (RampProfile*)D_00263C58, &hiY);
+        ApproachValueWithRamp(self->f700, D_00263C90[0], 0.0f, (RampProfile*)D_00263C58, &loY);
         RampProfile3 prof = *(RampProfile3*)D_00263C80;
         if (self->f610 == 2) {
             tx = loX + (pad->f40 + 1.0f) * ((hiX - loX) * 0.5f);
@@ -97,8 +97,8 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
             prof.maxSpeed *= s;
             prof.endSpeed *= s;
         }
-        self->f704 = ApproachValueWithRamp(self->f704, tx, dt, &prof, 0);
-        self->f708 = ApproachValueWithRamp(self->f708, ty, dt, &prof, 0);
+        self->f704 = ApproachValueWithRamp(self->f704, tx, dt, (RampProfile*)&prof, 0);
+        self->f708 = ApproachValueWithRamp(self->f708, ty, dt, (RampProfile*)&prof, 0);
         self->f6FC = ClampBetween(self->f6FC + dt * self->f704, D_00263C90[0], D_00263C90[1]);
         self->f700 = ClampBetween(self->f700 + dt * self->f708, D_00263C90[0], D_00263C90[1]);
 
@@ -109,7 +109,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         Vec02 rel;
         Mat02 tilt;
         Vec02 axis;
-        TransformPointBetweenFrames(0, self->f668, &((PlacedObject*)self->f660)->v140, &rel);
+        TransformPointBetweenFrames(0, (PlacedObject*)self->f668, &((PlacedObject*)self->f660)->v140, &rel);
         f32 sx = pad->f40;
         if (rel.x < 0.0f) {
             sx = -sx;
@@ -135,7 +135,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         self->m620 = m3;
         Vu0::Q(to) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->f67C->v140)).q;
         BuildBasisFromXAndZHint(&to, &g_unitZVector, &aim);
-        TransformRotationBetweenFrames(0, self->f67C->f224->p60, &aim, &aim);
+        TransformRotationBetweenFrames(0, (PlacedObject*)self->f67C->f224->p60, &aim, &aim);
         break;
     }
     default:
@@ -148,12 +148,12 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     }
     Mat02 rot;
     for (i = 0; i < 2; i++) {
-        ApproachRotationWithRamp(&self->f674[i]->rot, &mats[i], D_00263D08, dt, &rot, 0);
+        ApproachRotationWithRamp(&self->f674[i]->rot, &mats[i], (RampProfile*)D_00263D08, dt, &rot, 0);
         self->f674[i]->desc02()->m1E(self->f674[i], &rot);
     }
     if (self->f67C->f1F0 == 0) {
         MulRotationRowsIndexed(&aim, aim, self->f67C->m1A0);
-        ApproachRotationWithRamp(&self->f67C->rot, &aim, D_00263D18, dt, &rot, 0);
+        ApproachRotationWithRamp(&self->f67C->rot, &aim, (RampProfile*)D_00263D18, dt, &rot, 0);
         self->f67C->desc02()->m1E(self->f67C, &rot);
     }
     HandleStepSequenceSkipButtons(self, pad);

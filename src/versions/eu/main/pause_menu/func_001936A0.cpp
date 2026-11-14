@@ -55,7 +55,7 @@ void BuildPauseMenuPage(Self_1936A0_eu* self)
                 s32 walker = FindObject42CStateWalker();
                 if (walker != 0) {
                     s32 code;
-                    GetStateWalkerCurrentKey((void*)walker, &code);
+                    GetStateWalkerCurrentKey((StateWalker*)walker, &code);
                     if (code < 0x431) {
                         show = code >= 0x42F;
                     }

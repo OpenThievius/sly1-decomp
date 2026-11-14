@@ -2,6 +2,10 @@
 #include "common.h"
 #include "asm_func.h"
 
+// Types other files define, named by the parameters of their functions declared here.
+struct ScaledTransform;
+struct NodeQuery;
+
 #include "list_iter.h"
 #include "timed_object.h"
 #include "switched_collider.h"
@@ -12,37 +16,40 @@
 #include "owner_message.h"
 #include "vu0.h"
 #include "path_curve.h"
+struct BufferedStream;
+struct EffectSpawner;
+
 
 void InitCollider(Collider* self);
-void UpdateCollider(Collider* self);
-TrackPlayer* FindTrackPlayer(TimedObject* self);
+void UpdateCollider(Collider* self, f32 dt);
+TrackPlayer* FindTrackPlayer(PlacedObject* node);
 // Slot 17 takes the frame time (Desc01::m11); func_001AEFA0 ignores it, but func_001AF5C8's call
 // passes it (retail's frame shows the argument live).
 void UpdateTimedObject(TimedObject* self, f32 dt);
 
 ObjectLink g_timedGroupLinks[2] = { { 2, 0x28A, 0xAE4 }, { 2, 0x28B, 0xAE8 } };
 
-void LoadCollider(Collider* self);
-void ResolveObjectLinks(void* self, s32 n, void* table);
+void LoadCollider(Collider* self, BufferedStream* stream);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-s32 MatchesObjectId(void* key, s32 item);
-s32 IsObjectOfKind(void* key, s32 item);
+s32 MatchesObjectId(BaseObject* self, s32 id);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 extern f32 g_gameClock[];
 s32 g_groupStaggerDirty = 0;
 
-void SetColliderFrozen(void* self, void* p);
-void AppendToList(void* list, void* item);
-void RemoveFromList(void* list, void* item);
+void SetColliderFrozen(Collider* self, s32 flag);
+void AppendToList(List01* self, void* item);
+void RemoveFromList(List01* list, void* item);
 
 void StartPlacedObject(PlacedObject* self);
-void* CreateObjectCopy(void* a, void* b, void* c);
+void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 
 s32 IsObjectExcluded(TimedObject* self, void* key);
 s32 MaskWorldBitsBySave();
 
 extern f32 g_gameTime[];
-void TriggerScriptEvent(PlacedObject* self, s32 a, s32 b, s32 c);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 ObjectLink g_sequencedObjectLinks[2] = {
     { 2, 0x28C, 0x5D0 },
@@ -57,15 +64,19 @@ struct Record200 {
     s32 f44;
 };
 
-s32 GetActiveSwitchedCollider(void);
+void* GetActiveSwitchedCollider(void);
 
-void StopSoundRecord(void* snd, s32 n);
-void StartSoundEffect(s32 kind, void* snd, void* owner, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+struct PlayingSound;
+void StopSoundRecord(PlayingSound* self, s32 n);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void SetEffectSpawnerActiveForever(void* p);
+void SetEffectSpawnerActiveForever(EffectSpawner* self);
 
-void InitOwnerMessage(void* buf, s32 n, void* self);
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
-void SetCursorFrame(s32 a, s32 frame);
+struct AnimCursor;
+void SetCursorFrame(AnimCursor* a0, s32 a1);
 
 void EnterSequencedSubstate(SequencedObject* self, s32 arg);
 void StopTrackPlayer(TimedObject* self);
@@ -108,12 +119,12 @@ s32 IsObjectInAcceptLists(TimedObject* self, void* value)
         return 0;
     }
     for (s32 i = 0; i < self->ids564.count; i++) {
-        if (MatchesObjectId(value, self->ids564.items[i]) != 0) {
+        if (MatchesObjectId((BaseObject*)value, self->ids564.items[i]) != 0) {
             return 1;
         }
     }
     for (s32 i = 0; i < self->ids58C.count; i++) {
-        if (IsObjectOfKind(value, self->ids58C.items[i]) != 0) {
+        if (IsObjectOfKind((BaseObject*)value, self->ids58C.items[i]) != 0) {
             return 1;
         }
     }
@@ -123,12 +134,12 @@ s32 IsObjectInAcceptLists(TimedObject* self, void* value)
 s32 IsObjectExcluded(TimedObject* self, void* key)
 {
     for (s32 i = 0; i < self->ids578.count; i++) {
-        if (MatchesObjectId(key, self->ids578.items[i]) != 0) {
+        if (MatchesObjectId((BaseObject*)key, self->ids578.items[i]) != 0) {
             return 1;
         }
     }
     for (s32 i = 0; i < self->ids5A0.count; i++) {
-        if (IsObjectOfKind(key, self->ids5A0.items[i]) != 0) {
+        if (IsObjectOfKind((BaseObject*)key, self->ids5A0.items[i]) != 0) {
             return 1;
         }
     }
@@ -138,7 +149,7 @@ s32 IsObjectExcluded(TimedObject* self, void* key)
 s32 IsSoleAcceptedObject(TimedObject* o, void* p)
 {
     if (p == 0) return 0;
-    if (o->f5B4 == 0 && o->ids564.count == 1 && o->ids58C.count == 0 && MatchesObjectId(p, o->ids564.items[0]) != 0) return 1;
+    if (o->f5B4 == 0 && o->ids564.count == 1 && o->ids58C.count == 0 && MatchesObjectId((BaseObject*)p, o->ids564.items[0]) != 0) return 1;
     return 0;
 }
 
@@ -153,9 +164,9 @@ void StopTrackPlayer(TimedObject* self)
     }
 }
 
-void UpdateTimedObject(TimedObject* self)
+void UpdateTimedObject(TimedObject* self, f32 dt)
 {
-    UpdateCollider(self);
+    UpdateCollider(self, dt);
     TrackPlayer* sink = self->f5C8;
     if (sink != 0) {
         Player* g = g_player;
@@ -211,9 +222,9 @@ void InitTimedGroup(TimedGroup* self)
     self->fB04 = 1.0f;
 }
 
-void LoadTimedGroup(TimedGroup* self)
+void LoadTimedGroup(TimedGroup* self, BufferedStream* stream)
 {
-    LoadCollider(self);
+    LoadCollider(self, stream);
     ResolveObjectLinks(self, 2, g_timedGroupLinks);
 }
 
@@ -240,9 +251,11 @@ template <class T> struct NextInList {
 };
 
 void PostLoadPlacedObject(PlacedObject* self);
-void TransformPointBetweenFrames(void* from, void* to, void* point, Vec02* out);
-void SetEffectSpawnerActiveForever(BaseObject* obj);
-s32 QueryValueListMask(void* self, f32 radius, void* center, void* out);
+struct ValueListObject;
+struct Bits128;
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void SetEffectSpawnerActiveForever(EffectSpawner* self);
+void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
 
 // The curve object at 0x34 of a path curve object.
 struct GroupCurveObject {
@@ -276,7 +289,7 @@ void PostLoadTimedGroup(TimedGroup* self)
                     }
                     *widest = w;
                     for (s32 i = 0; i < curve->count; i++) {
-                        TransformPointBetweenFrames(self, 0, (u8*)curve->points + i * 16, &point);
+                        TransformPointBetweenFrames(self, 0, (Vec02*)((u8*)curve->points + i * 16), &point);
                         f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(point))));
                         if (self->f2A8 < d) {
                             self->f2A8 = d;
@@ -289,12 +302,12 @@ void PostLoadTimedGroup(TimedGroup* self)
                 TimedGroupEntry* e = &self->groups[0].items[self->groups[0].count++];
                 e->obj = node;
                 e->value = node->id == 0x289;
-                SetEffectSpawnerActiveForever(node);
+                SetEffectSpawnerActiveForever((EffectSpawner*)node);
             }
         }
     }
     if ((self->flags & 0x3000000) != 0x2000000) {
-        QueryValueListMask(*(void**)((u8*)self->world + 0x1EC4), self->f2A8, &self->v140, (u8*)self + 0x88);
+        QueryValueListMask((ValueListObject*)(*(void**)((u8*)self->world + 0x1EC4)), self->f2A8, (Bits128*)&self->v140, (s32*)((u8*)self + 0x88));
     }
     PlacedObject* o = self;
     if (o->parent != 0) {
@@ -306,7 +319,7 @@ void PostLoadTimedGroup(TimedGroup* self)
             }
             up->f2A8 = reach;
             if ((up->flags & 0x3000000) != 0x2000000) {
-                QueryValueListMask(*(void**)((u8*)up->world + 0x1EC4), reach, &up->v140, (u8*)up + 0x88);
+                QueryValueListMask((ValueListObject*)(*(void**)((u8*)up->world + 0x1EC4)), reach, (Bits128*)&up->v140, (s32*)((u8*)up + 0x88));
             }
             o = (PlacedObject*)o->parent;
         } while (o->parent != 0);
@@ -440,7 +453,7 @@ void UpdateTimedGroup(TimedGroup* self, f32 amount)
     self->desc30()->m4D(self, cmd);
 }
 
-void SetStaggeredColliderFrozen(TimedGroup* self, void* p)
+void SetStaggeredColliderFrozen(TimedGroup* self, s32 p)
 {
     SetColliderFrozen(self, p);
     if (p != 0) {
@@ -462,8 +475,8 @@ struct DrawPoints {
     Vec02* points;
 };
 
-void DrawCollider(TimedGroup* self, void* a1, void* a2);
-void DrawBeamBetweenPoints(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+void DrawCollider(Collider* self, void* a, void* m);
+void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 Vec02* AllocateBackMemory(s32 size);
@@ -502,7 +515,7 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
         s32 next = i + 1;
         s32 k;
         for (k = 0; k < n; k++) {
-            TransformPointBetweenFrames(self, (void*)0, &src->points[k], &buf[k]);
+            TransformPointBetweenFrames(self, 0, &src->points[k], &buf[k]);
         }
         if (*(s32*)((u8*)g + 0xC) != 0) {
             buf[*(s32*)((u8*)g + 0x20) + 1] = *(Vec02*)((u8*)g + 0x10);
@@ -519,7 +532,7 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
                 u128 p1 = Vu0::Q(buf[k + 1]);
                 Vu0::Q(buf[k + 1]) = Vu0::MulXSum(p0, ws, p1, wt);
             }
-            DrawBeamBetweenPoints(fp, a1, &buf[k], &buf[k + 1], 1.0f, a2 != 0 ? *(f32*)((u8*)a2 + 0x40) : 1.0f);
+            DrawBeamBetweenPoints((PlacedObject*)fp, (PlacedObject*)a1, &buf[k], &buf[k + 1], 1.0f, a2 != 0 ? *(f32*)((u8*)a2 + 0x40) : 1.0f);
             acc += len;
             if (total < acc) break;
         }
@@ -555,11 +568,11 @@ s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
 
 }
 
-s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** list, ColliderSpan* out);
-void GatherCollidersInSphere(World* world, f32 radius, s32 zero, Vec02* at, s32 (*filter)(TimedObject*, Collider*), TimedObject* self, s32* n, Collider*** list);
-void* GetOwnSpawnRecord(BaseObject* obj, s32 mode);
-void SetEffectSpawnerInactive(BaseObject* obj);
-void InitOwnerMessage(OwnerMessage* out, s32 a, TimedObject* self);
+s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
+void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+void* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
+void SetEffectSpawnerInactive(EffectSpawner* self);
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
 // Slot 72 of class 0x31: walks each group's points (its child's curve, in the world) in pieces,
 // looks for the nearest object across each piece that is in view (the player first when the
@@ -590,7 +603,7 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
         s32 n = src->count;
         *(Collider**)((u8*)g + 0xC) = 0;
         for (k = 0; k < n; k++) {
-            TransformPointBetweenFrames(self, (void*)0, &src->points[k], &pts[k]);
+            TransformPointBetweenFrames(self, 0, &src->points[k], &pts[k]);
         }
         for (k = 0; k < n - 1; k++) {
             s32 look = 1;
@@ -617,7 +630,7 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
                 s32 count;
                 Collider** list;
                 PushBackMemoryMark();
-                GatherCollidersInSphere(self->world, radius, 0, &mid, IsTimedGroupCandidate, self, &count, &list);
+                GatherCollidersInSphere(self->world, 0, radius, &mid, (s32 (*)(void*, Collider*))IsTimedGroupCandidate, self, &count, &list);
                 hit = (Collider*)FindNearestSpanObject(0, &p0, &p1, count, list, &span);
                 PopBackMemoryMark();
             }
@@ -665,13 +678,13 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
             u64 m = 0x8000;
             m <<= 41;
             if (active && (h = *(Collider**)((u8*)g + 0xC)) != 0 && ((h->flags538 & m) != 0 || e->value == 0)) {
-                Quad16* rec = (Quad16*)GetOwnSpawnRecord(e->obj, 1);
+                Quad16* rec = (Quad16*)GetOwnSpawnRecord((EffectSpawner*)e->obj, 1);
                 rec[6] = span.q[2];
-                TransformPointBetweenFrames((void*)0, self, &span.q[0], &p0);
+                TransformPointBetweenFrames(0, self, (Vec02*)&span.q[0], &p0);
                 ((void (*)(BaseObject*, Vec02*))((void**)e->obj->desc)[33])(e->obj, &p0);
-                SetEffectSpawnerInactive(e->obj);
+                SetEffectSpawnerInactive((EffectSpawner*)e->obj);
             } else {
-                SetEffectSpawnerActiveForever(e->obj);
+                SetEffectSpawnerActiveForever((EffectSpawner*)e->obj);
             }
         }
         i = next;
@@ -718,20 +731,20 @@ void EnterTimedGroupState(TimedGroup* self, s32 s)
     if (st == -1 || st == 8) {
         f32 z = 0.0f;
         f32 a = 1000.0f, c = 100.0f, d = 0.4f;
-        StartSoundEffect(0x1A, &self->f5C4, self, 0, a, c, d, z, z, 0, 0);
+        StartSoundEffect(0x1A, (PlayingSound**)&self->f5C4, self, 0, a, c, d, z, z, 0, 0);
     }
     switch (s) {
     case 3:
     case 7:
         for (s32 i = 0; i < self->groupCount; i++) {
             TimedGroupChild* e = &self->groups[i];
-            for (s32 j = 0; j < e->count; j++) SetEffectSpawnerActiveForever(e->items[j].obj);
+            for (s32 j = 0; j < e->count; j++) SetEffectSpawnerActiveForever((EffectSpawner*)e->items[j].obj);
         }
         break;
     case 8: {
         f32 v;
         if (self->f554 == 0) v = self->f5BC; else v = self->fAEC;
-        StopSoundRecord(self->f5C4, (s32)v * 1000);
+        StopSoundRecord((PlayingSound*)self->f5C4, (s32)v * 1000);
         self->desc->m03(self);
         g_groupStaggerDirty = 1;
         break;
@@ -827,10 +840,10 @@ void SetupSequencedObject(SequencedObject* self)
     self->desc30()->m4D(self, self->f560);
 }
 
-void UpdateSequencedObject(SequencedObject* self) {
+void UpdateSequencedObject(SequencedObject* self, f32 dt) {
     s32 st;
     s32 s1;
-    UpdateTimedObject(self);
+    UpdateTimedObject(self, dt);
     st = self->state;
     switch (self->state) {
     case 0:
@@ -860,7 +873,7 @@ void UpdateSequencedObject(SequencedObject* self) {
             } else if (self->f5E0 < g_gameTime[0] - self->f5DC) {
                 if (g_player) {
                     u8 buf[16];
-                    InitOwnerMessage(buf, 2, self);
+                    InitOwnerMessage((OwnerMessage*)buf, 2, self);
                     if (g_player->desc06()->m4C(g_player, buf)) {
                         s1 = 1;
                         StopTrackPlayer(self);
@@ -904,9 +917,9 @@ struct SequencedTransform {
     f32 f44;
     u8 pad48[8];
 };
-void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, SequencedTransform* dst);
-void BuildScaledTransformMatrix(Vec02* pos, Mat02* rot, Vec02* scale, SequencedTransform* out);
-void DrawBeamBetweenPoints(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
+void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4]);
+void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy);
 
 static inline f32 ClampRange(f32 v, f32 lo, f32 hi)
 {
@@ -925,7 +938,7 @@ void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
     SequencedTransform tmp;
     Collider* tgt;
     if (self->state != 8) {
-        BuildPlacedObjectTransform(self, a2, &tmp);
+        BuildPlacedObjectTransform(self, a2, (ScaledTransform*)&tmp);
         switch (self->state) {
         case 0:
         case 4: {
@@ -986,7 +999,7 @@ void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
                     }
                     Vec02 blend;
                     Vu0::Q(blend) = Vu0::MulXSum(Vu0::Q(self->v140), Vu0::Scalar(1.0f - w), Vu0::Q(((Collider*)g_player)->v140), Vu0::Scalar(w));
-                    DrawBeamBetweenPoints((void*)self->f5D4, a1, &blend, &((Collider*)g_player)->v140, 10.0f, tmp.f40);
+                    DrawBeamBetweenPoints((PlacedObject*)self->f5D4, (PlacedObject*)a1, &blend, &(g_player)->v140, 10.0f, tmp.f40);
                 }
                 r = 0.1f;
                 scale.z = scale.y = r;
@@ -1011,7 +1024,7 @@ void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
                 tgt = self->f5D0;
             }
         }
-        BuildScaledTransformMatrix(&self->v140, &self->m110, &scale, &tmp);
+        BuildScaledTransformMatrix((f32*)&self->v140, (f32 (*)[4])&self->m110, (f32*)&scale, (f32 (*)[4])&tmp);
         tgt->desc02()->m26(tgt, a1, &tmp);
     }
 }
@@ -1020,7 +1033,7 @@ s32 TestSequencedObjectMayContact() { return 1; }
 
 s32 IsSequencedObjectCandidate(TimedObject* self, Collider* other)
 {
-    if ((other->flags538 & (1UL << 43)) != 0 || (s32)other->root == GetActiveSwitchedCollider() || other->root == self->root || IsObjectExcluded(self, other) != 0) {
+    if ((other->flags538 & (1UL << 43)) != 0 || (void*)other->root == GetActiveSwitchedCollider() || other->root == self->root || IsObjectExcluded(self, other) != 0) {
         return 0;
     }
     s64 t = (s64)other->flagsHi;
@@ -1030,8 +1043,8 @@ s32 IsSequencedObjectCandidate(TimedObject* self, Collider* other)
 s32 IsPointInsideCollider(Collider* self, Vec02* p);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(TimedObject*, Collider*), TimedObject* self, s32* n, Collider*** list);
-s32 FindNearestSpanObject(s32 flags, Vec02* a, Vec02* b, s32 count, Collider** list, ColliderSpan* out);
+void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 extern const Vec02 g_unitXVector;
 
 // Slot 72 of class 0x32: picks the state from the player's place (inside the object or not, and
@@ -1152,7 +1165,7 @@ void EnterSequencedSubstate(SequencedObject* self, s32 arg)
     case 0:
         break;
     case 1:
-        StopSoundRecord(self->f5C4, 0);
+        StopSoundRecord((PlayingSound*)self->f5C4, 0);
         break;
     case 2:
         break;
@@ -1166,7 +1179,7 @@ void EnterSequencedSubstate(SequencedObject* self, s32 arg)
         }
         break;
     case 1:
-        StartSoundEffect(0x1B, &self->f5C4, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x1B, (PlayingSound**)&self->f5C4, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     case 2:
         if (self->f200 != 0) {
@@ -1203,11 +1216,11 @@ void SetupBlinkObject(BlinkObject* self)
     self->desc30()->m4D(self, self->f560);
 }
 
-void UpdateBlinkObject(BlinkObject* self)
+void UpdateBlinkObject(BlinkObject* self, f32 dt)
 {
     s32 state;
 
-    UpdateTimedObject(self);
+    UpdateTimedObject(self, dt);
     state = self->state;
     switch (state) {
     case 0:
@@ -1272,7 +1285,7 @@ void UpdateBlinkObject(BlinkObject* self)
 }
 
 struct TouchQuery;
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 // The 0x40-byte request frame FindNodeForQuery is handed for an object that is not the player:
 // the object, what touched it, where that is and the direction (the unit z).
 struct TouchQuery {
@@ -1293,9 +1306,9 @@ inline void TouchQuery::Init(BlinkObject* s, Collider* o, const Vec02* k)
     q30 = *k;
 }
 
-s32 IsObjectInAcceptLists(BlinkObject* self, Collider* t);
-void InitOwnerMessage(OwnerMessage* out, s32 a, BlinkObject* self);
-PlacedObject *FindNodeForQuery(TouchQuery* p, s32 a, s32 b);
+s32 IsObjectInAcceptLists(TimedObject* self, void* value);
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
+PlacedObject *FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
 void ChooseBlinkObjectState(BlinkObject* self, s32* out)
 {
@@ -1325,7 +1338,7 @@ void ChooseBlinkObjectState(BlinkObject* self, s32* out)
                                 }
                             } else {
                                 req.Init(self, o, &g_unitZVector);
-                                FindNodeForQuery(&req, 0, 0);
+                                FindNodeForQuery((NodeQuery*)&req, 0, 0);
                             }
                         }
                     }
@@ -1380,7 +1393,7 @@ void EnterBlinkObjectState(BlinkObject* self, s32 n)
     switch (self->state) {
     case 1:
     case 5:
-        StopSoundRecord(self->f5C4, 0);
+        StopSoundRecord((PlayingSound*)self->f5C4, 0);
         self->f614 = self->f55C;
         break;
     case 8:
@@ -1390,7 +1403,7 @@ void EnterBlinkObjectState(BlinkObject* self, s32 n)
     }
     switch (n) {
     case 1:
-        StartSoundEffect(15, &self->f5C4, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(15, (PlayingSound**)&self->f5C4, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     case 2:
     case 6:
@@ -1401,7 +1414,7 @@ void EnterBlinkObjectState(BlinkObject* self, s32 n)
     case 7:
         break;
     case 5:
-        StartSoundEffect(27, &self->f5C4, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(27, (PlayingSound**)&self->f5C4, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     }
     EnterTimedObjectState(self, n);
@@ -1486,5 +1499,5 @@ void SetBlinkObjectFrame(BlinkObject* self)
         }
         frame += first;
     }
-    SetCursorFrame((s32)self->f610 + 0x10, frame);
+    SetCursorFrame((AnimCursor*)((u8*)self->f610 + 0x10), frame);
 }

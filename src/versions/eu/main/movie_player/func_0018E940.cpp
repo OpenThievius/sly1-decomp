@@ -26,6 +26,6 @@ s32 StartMovieStream(MovieStream* self_)
     SetIopVolumeChannel(0x10, 0x200);
     self->f00 = 1;
     self->f04 = -1;
-    InitRingBuffer(self->sub30, 0x28, self->f08);
-    InitRingBuffer(self->sub50, 0x20000, D_002CBB40);
+    InitRingBuffer((RingBuffer*)self->sub30, 0x28, (u8*)self->f08);
+    InitRingBuffer((RingBuffer*)self->sub50, 0x20000, D_002CBB40);
 }

@@ -19,30 +19,30 @@
 #include "texture_header.h"
 #include "shapes.h"
 #include "vu0.h"
+#include "object_finder.h"
 
 
-void DrawAgent(void);
+void DrawAgent(Agent* self, void* arg1, void* arg2);
 
 struct GatheredEventObject { u8 pad0[0x328]; s32 f328; };
 struct GatheredObjects { s32 count; GatheredEventObject** items; };
 
-void StartAgent(void* self);
-void* FindFirstObjectByIdMode4(void* a, s32 b, void* c);
+void StartAgent(Agent* self);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherAnimationEventObjects(void* a, void* b, s32* c, void** d);
+void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount, BaseObject*** outArr);
 void* CreateRecord2505C0(void);
-void AppendToSmallList(void* a, void* b);
+struct StateResetObject;
+struct StateResetGroup;
+void AppendToSmallList(StateResetGroup* self, StateResetObject* value);
 
-void InitAgent(void* self);
+void InitAgent(Agent* self);
 void InitConeAgent(ConeAgent* self);
 
-void* FindFirstObjectByIdMode4(void* obj, s32 id, s32 flags);
-
-void* FindFirstObjectByIdMode4(void* a, s32 b, s32 c);
 
 
-void* IsObjectOfKind(void* node, s32 flags);
+
+void* IsObjectOfKind(BaseObject* list, s32 key);
 
 
 void InitConeAgent(ConeAgent* self)
@@ -68,36 +68,37 @@ void StartConeAgent(ConeAgent* self)
 
     StartAgent(self);
     if (self->fC18 != -1) {
-        self->fC1C = (s32)FindFirstObjectByIdMode4(self->world, self->fC18, self);
+        self->fC1C = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->fC18, self);
     }
     if (self->fC30 != -1) {
-        self->fC34 = (s32)FindFirstObjectByIdMode4(self->world, self->fC30, self);
+        self->fC34 = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->fC30, self);
     }
     if (self->f750 != 0) {
         PushBackMemoryMark();
-        GatherAnimationEventObjects(self->f750, self, &out.count, (void**)&out.items);
+        GatherAnimationEventObjects((Animation*)self->f750, self, &out.count, (BaseObject***)&out.items);
         for (i = 0; i < out.count; i++) {
             GatheredEventObject* e = out.items[i];
             if (e->f328 == 0) {
                 void* t = CreateRecord2505C0();
                 e->f328 = (s32)t;
-                AppendToSmallList(t, e);
+                AppendToSmallList((StateResetGroup*)t, (StateResetObject*)e);
             }
         }
         PopBackMemoryMark();
     }
 }
 
-void DrawConeAgent(void)
+void DrawConeAgent(ConeAgent* self, void* arg1, void* arg2)
 {
-    DrawAgent();
+    DrawAgent(self, arg1, arg2);
 }
 
-s32 IsPadSelectFlagHeld(void* p);
+s32 IsPadSelectFlagHeld(World* self);
 typedef s32 (*SlotFnRet)(void* self);
-s32 TestPointAgainstObjectShape(void* obj, Vec02* p);
-f32 ComputeAgentTargetBearing(void* self);
-s32 IsPlayerUntargetableByAgent(void* self);
+struct ObjectGatherer;
+s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value);
+f32 ComputeAgentTargetBearing(Agent* self);
+s32 IsPlayerUntargetableByAgent(Agent* self);
 
 s32 IsConeAgentFree(ConeAgent* self)
 {
@@ -117,7 +118,7 @@ s32 IsConeAgentFree(ConeAgent* self)
     } else if (IsObjectOfKind(target, 5) != 0 && ((SlotFnRet*)target->desc)[81](target) == 2) {
         inside = 1;
     } else if (self->fC1C != 0) {
-        inside = TestPointAgainstObjectShape((void*)self->fC1C, &target->v140) == 0;
+        inside = TestPointAgainstObjectShape(self->fC1C, &target->v140) == 0;
     } else if (__builtin_fabsf(target->v140.z - self->v190.z) > self->fC14) {
         inside = 1;
     } else {
@@ -132,7 +133,7 @@ s32 IsConeAgentFree(ConeAgent* self)
     if (self->fC38q != 0) {
         return 1;
     }
-    if (self->fC34 == 0 || TestPointAgainstObjectShape((void*)self->fC34, &target->v140) == 0) {
+    if (self->fC34 == 0 || TestPointAgainstObjectShape(self->fC34, &target->v140) == 0) {
         u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(target->v140));
         f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
         if (!(len < self->fC24)) {

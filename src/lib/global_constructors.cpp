@@ -21,7 +21,7 @@ static s32 D_0062A76C;
 
 ASM_FUNC(func_001FAC00);
 
-void func_001FAD68(void);
+extern "C" void func_001FAD68(void);
 
 void RunConstructorsOnce(void)
 {

@@ -12,11 +12,11 @@ struct Layout_137228 {
     f32 w, h;
     Rgba_137248 color;
     s32 f14;
-    void* f18;
+    s32 f18;
 
     void Pos(f32 x_, f32 y_);
     void Size(f32 w_, f32 h_);
     void Color(s32* value);
     void SetF14(s32 value);
-    void SetF18(void* value);
+    void SetF18(s32 value);
 };

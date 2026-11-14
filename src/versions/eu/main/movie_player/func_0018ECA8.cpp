@@ -19,7 +19,7 @@ s32 FlushMovieToIpu(void* u0, void* u1, MoviePlayer* self)
     {
         IpuDmaSink dma;
         ConsumeSpan(&self->videoRing, 0);
-        DrainRingBuffer(&self->videoRing, 0, &dma);
+        DrainRingBuffer(&self->videoRing, 0, (StreamSink*)&dma);
     }
     return 1;
 }

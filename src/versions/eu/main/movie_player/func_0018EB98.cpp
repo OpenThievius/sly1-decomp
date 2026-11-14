@@ -23,7 +23,7 @@ void UpdateMovieStream(MovieStream* self_)
     Self_18EB98_eu* self = (Self_18EB98_eu*)self_;
     switch (self->state) {
     case 2:
-        DrainRingBuffer(&self->f50, self->f94, (u8*)&self->f50 + 0x20);
+        DrainRingBuffer(&self->f50, self->f94, (StreamSink*)((u8*)&self->f50 + 0x20));
         if (self->f94 != 0) {
             break;
         }
@@ -37,7 +37,7 @@ void UpdateMovieStream(MovieStream* self_)
     case 3: {
         void* s0 = (u8*)&self->f50 + 0x20;
         UpdateIopRingSinkByKind((Obj_eu_18F210*)s0);
-        DrainRingBuffer(&self->f50, self->f94, s0);
+        DrainRingBuffer(&self->f50, self->f94, (StreamSink*)s0);
         break;
     }
     }

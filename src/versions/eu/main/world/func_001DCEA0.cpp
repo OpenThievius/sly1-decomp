@@ -12,7 +12,7 @@ void LoadWorld(World* self, BufferedStream* s)
     ListFrame walk;
     ListFrame frame;
     s32 i;
-    ResetScatterController(g_scatterController);
+    ResetScatterController((ScatterController*)g_scatterController);
     InitScriptValuePools();
     D_00275714 = ReadBufferedU8(s);
     self->f1D70 = ReadBufferedS16(s);
@@ -29,11 +29,11 @@ void LoadWorld(World* self, BufferedStream* s)
     }
     LoadScriptEntryTable(self, s);
     ReadPropertyRecords(self, s);
-    ReadOptionalBufferedBlock(s, &self->f2310);
-    ReadBufferedString(s, &self->f2314);
-    ReadOptionalBufferedBlock(s, &self->f1D74);
+    ReadOptionalBufferedBlock(s, (u32*)&self->f2310);
+    ReadBufferedString(s, (u8**)&self->f2314);
+    ReadOptionalBufferedBlock(s, (u32*)&self->f1D74);
     for (s32 k = 0; k < 14; k++) {
-        ReadOptionalBufferedBlock(s, &D_eu_0027EEA0[k]);
+        ReadOptionalBufferedBlock(s, (u32*)&D_eu_0027EEA0[k]);
     }
     LoadScreenResources(s);
     ReadSlotObjects(self, 0, s);
@@ -78,7 +78,7 @@ void LoadWorld(World* self, BufferedStream* s)
     }
     g_activeListFrames = frame.prev;
     RunQueuedCalls(self);
-    UpdateScatterLevelLimits(g_scatterController);
+    UpdateScatterLevelLimits((ScatterController*)g_scatterController);
     ResumeElementStackState(g_elementStack);
     if (((MapScreen_eu*)&g_mapScreenList)->current == 0 && g_saveData->f19D8 != 0) {
         AllocateZeroedFrontMemory(0x80000);

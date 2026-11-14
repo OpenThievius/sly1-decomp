@@ -8,6 +8,7 @@
 #define TRIGGER_ZONE_H
 
 #include "collider.h"
+struct BufferedStream;
 
 // Up to sixteen values, counted (func_0013E8F8 appends).
 struct Queue28 {
@@ -15,10 +16,16 @@ struct Queue28 {
     s32 values[16];         // 0x04
 };
 
-// The objects one side of the zone has seen and the ones queued for it.
+// The objects queued for one side of the zone (func_0013E8D8 appends, func_0013EDC8 runs them).
+struct ObjectQueue28 {
+    s32 count;              // 0x00
+    BaseObject* values[16]; // 0x04
+};
+
+// The ids one side of the zone has seen and the objects queued for it.
 struct Pair28 {
     Queue28 seen;           // 0x00: func_0013E868 looks an object up in it
-    Queue28 queued;         // 0x44: func_0013E8D8 appends
+    ObjectQueue28 queued;   // 0x44: func_0013E8D8 appends
 };
 
 // The zone record (0x1CC bytes) the zone classes embed, at +0x554 in 0x28 (and +0x5C0 in the
@@ -87,10 +94,10 @@ typedef char check_Zone28[sizeof(Zone28) == 0x1CC ? 1 : -1];
 typedef char check_TriggerZone[sizeof(TriggerZone) == 0x890 ? 1 : -1];
 
 void InitTriggerZone(TriggerZone* self);                          // slot 0
-void CopyTriggerZone(TriggerZone* self);                          // slot 9
-void LoadTriggerZone(TriggerZone* self);                          // slot 10
+void CopyTriggerZone(TriggerZone* self, TriggerZone* src);                          // slot 9
+void LoadTriggerZone(TriggerZone* self, BufferedStream* stream);                          // slot 10
 void StepTriggerZone(TriggerZone* self, f32 t);                   // slot 28
-void UpdateTriggerZone(TriggerZone* self);                          // slot 17
+void UpdateTriggerZone(TriggerZone* self, f32 dt);                          // slot 17
 s32 HandleTriggerZoneEvent(TriggerZone* self, void* event);              // slot 48 (m30)
 
 #endif

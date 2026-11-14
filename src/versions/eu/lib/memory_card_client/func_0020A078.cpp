@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL copies the name with its own copy of CopyStringBounded (func_001F7738, the same bytes), placed elsewhere
-void* CopyStringBounded(s8* dst, s8* src, s32 n);
+void* CopyStringBounded(s8* dst, const char* src, s32 n);
 
-s32 RequestCardSpaceForPath(s32 a0, s32 a1, s8* a2)
+s32 RequestCardSpaceForPath(s32 a0, s32 a1, const char* a2)
 {
     RemoteCallClient* reg;
     CardPathRequest* buf;

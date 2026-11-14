@@ -25,7 +25,7 @@ s32 TestStepWaitConditions(StepSequence* self)
         if (HasStreamVoice() == 0) flags &= 0xFFFFFFF7;
     }
     if (flags & 0x10) {
-        if (self->value2F8 == 0) flags &= 0xFFFFFFEF;
+        if (self->player2F8 == 0) flags &= 0xFFFFFFEF;
     }
     if (flags & 0x20) {
         if (IsTextPanelTextTyped(&g_typedTextCaptionBox) != 0) flags &= 0xFFFFFFDF;

@@ -6,9 +6,9 @@ extern const char D_eu_00251280[];
 extern const char D_eu_00251298[];
 
 s32 func_001F8C30(const char* name, s32 mode);
-s32 ReadFile(s32 handle, char* buf, s32 size);
+s32 ReadFile(s32 fd, void* buf, s32 size);
 s32 CloseFile(s32 handle);
-s32 PrintFormatted(const char* msg);
+extern "C" s32 PrintFormatted(const char* fmt, ...);
 
 char* ReadRomVersion(void)
 {

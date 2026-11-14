@@ -10,7 +10,7 @@ void SetSelectionCaptionOpen(Obj_16B7A8_eu* self, s32 v)
         return;
     }
     if (v != 0) {
-        SetCurrentObjectChoice(self->f570, ((CurrentPlacedObject*)self->f570)->choice, 0);
+        SetCurrentObjectChoice((CurrentPlacedObject*)self->f570, ((CurrentPlacedObject*)self->f570)->choice, 0);
         SetPadSelectFlags(1);
         ResetPadStepRepeat(&g_padRecord);
     } else {

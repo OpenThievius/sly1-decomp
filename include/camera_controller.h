@@ -20,7 +20,7 @@
 struct Camera;     // the camera, class 0x6D (include/c6d.h), the owner of its controllers
 struct CameraController;
 
-typedef void (*CameraControllerFn)(CameraController* self, s32 arg);
+typedef void (*CameraControllerFn)(CameraController* self, void* arg);
 
 // The slots of a controller's table (6 slots, slot 5 empty in all five).
 struct CameraControllerVt {
@@ -111,7 +111,7 @@ struct CameraControllerEntry {
     s32 key;                // 0x00: the entries are ordered by it (func_00145088)
     CameraController* ctl;             // 0x04: the controller
     void* target;           // 0x08: an object it works on (func_00143E40 calls its slot 73)
-    s32 arg;                // 0x0C: passed to the controller's slots
+    void* arg;              // 0x0C: passed to the controller's slots
 };
 
 typedef char check_CameraController[sizeof(CameraController) == 0xC ? 1 : -1];

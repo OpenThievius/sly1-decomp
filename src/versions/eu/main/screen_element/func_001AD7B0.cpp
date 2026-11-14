@@ -7,10 +7,10 @@ extern char D_eu_0024E350[];
 extern u8 D_eu_00263590[];
 void DrawScreenElementText(void* self);
 f32 WrapAngle(f32 x);
-f32 Cosine(f32 x);
-f32 MeasureFontString(void* font, char* text);
+extern "C" f32 Cosine(f32 x);
+f32 MeasureFontString(Font* self, const char* s);
 void SetTextLayoutVerticalPlacement(void* out, s32 v);
-void DrawFontString(void* font, char* text, void* out, s32 zero, void* d);
+void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 
 void DrawHintGlyphElement(Obj_eu_1AE500* self)
 {
@@ -27,16 +27,15 @@ void DrawHintGlyphElement(Obj_eu_1AE500* self)
     font = (Font_eu_1AE500*)GetFontById(1);
     s = s1 * 0.1f + 0.5f;
     PushFontScale((Font*)font, s, s);
-    w = MeasureFontString(font, D_eu_0024E350);
+    w = MeasureFontString((Font*)font, D_eu_0024E350);
     h = (f32)font->units * font->scale;
-    SetTextLayoutPosition(out, ((self->f52C + 2.0f) + self->f544 * half) - w * half,
-                  ((self->f530 + 14.0f) + self->f548 * half) - h * half);
-    SetTextLayoutSize(out, w, h);
+    ((Layout_137228*)out)->Pos(((self->f52C + 2.0f) + self->f544 * half) - w * half, ((self->f530 + 14.0f) + self->f548 * half) - h * half);
+    ((Layout_137228*)out)->Size(w, h);
     tmp[0] = color;
-    SetTextLayoutColor(out, tmp);
-    SetTextLayoutHorizontalAlign(out, 0);
-    SetTextLayoutVerticalAlign(out, 0);
+    ((Layout_137228*)out)->Color(tmp);
+    ((Layout_137228*)out)->SetF14(0);
+    ((Layout_137228*)out)->SetF18(0);
     SetTextLayoutVerticalPlacement(out, 0);
-    DrawFontString(font, D_eu_0024E350, out, 0, D_eu_00263590);
+    DrawFontString((Font*)font, D_eu_0024E350, (StringLayout*)out, 0, (PacketWriter*)D_eu_00263590);
     PopFontScale((Font*)font);
 }

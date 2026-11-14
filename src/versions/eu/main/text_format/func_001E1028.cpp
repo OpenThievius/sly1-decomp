@@ -1,3 +1,5 @@
+
+struct FormatSpec;
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL reads the format character as an unsigned byte (lbu where US has lb)
 struct Fmt_1E1028_eu {
@@ -14,7 +16,7 @@ struct Fmt_1E1028_eu {
     u8 pad2D[3];
     s32 f30;
 };
-s32 ExtractIntegerSign(Fmt_1E1028_eu* self, IntegerArg* v);
+s32 ExtractIntegerSign(FormatSpec* self, void* dst);
 s32 GetConversionRadix(u8 c);
 
 void FormatIntegerArg(Fmt_1E1028_eu* self, OutputBuffer* sink, u64 value)
@@ -40,7 +42,7 @@ void FormatIntegerArg(Fmt_1E1028_eu* self, OutputBuffer* sink, u64 value)
         zeros = 0;
         ndig = 0;
     } else {
-        s32 neg = ExtractIntegerSign(self, &val);
+        s32 neg = ExtractIntegerSign((FormatSpec*)self, &val);
         zeros = self->f1C;
         pfx[0] = 0;
         switch ((u8)self->mode) {
@@ -72,7 +74,7 @@ void FormatIntegerArg(Fmt_1E1028_eu* self, OutputBuffer* sink, u64 value)
             break;
         }
         plen = GetStringLength(pfx);
-        ndig = WriteIntegerDigits(buf, 0x40, val.v, GetConversionRadix(self->mode));
+        ndig = WriteIntegerDigits((u8*)buf, 0x40, val.v, GetConversionRadix(self->mode));
         zeros -= ndig;
         zeros = zeros >= 0 ? zeros : 0;
     }

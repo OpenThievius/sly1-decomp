@@ -22,38 +22,43 @@
 #include "texture_header.h"
 #include "shapes.h"
 #include "vu0.h"
+struct FrameTarget;
+struct ImageRecord;
+struct PacketWriter;
+struct PaletteRecord;
+
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 
 struct DmaChainBlock { u8 bytes[0x20]; };
-void UsePacketBufferMemory(DmaChainBlock* a, s32 n, DmaChainBlock* b);
-void AddDmaRefTag(DmaChainBlock* a, s32 n, void* table);
-void AddDmaEndTag(DmaChainBlock* a);
-void DetachPacketBuffer(DmaChainBlock* a, s32 x, s32 y);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
+void AddDmaEndTag(PacketWriter* self);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-struct TexturePacket : PacketWriter { s32 value; };
+struct TexturePacket : PacketWriter { u8* packet; };
 
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
 extern s32 g_gifChannel;
 
 void* InitGifPacket(PacketWriter* f);
-void AllocateTempPacketBuffer(PacketWriter* f, s32 size);
+void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
 void BeginDmaTag(PacketWriter* f);
-s32 PlaceMaskedImages(void* self, void* arg, TexturePacket* f);
-void BeginGifTag(PacketWriter* f, s32 a, s32 b, s32 c);
-void AddGifRegisterWrite(PacketWriter* f, s32 a, u64 b);
+s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void EndGifPacket(PacketWriter* f);
 void AddDmaEndTag(PacketWriter* f);
-void DetachPacketBuffer(PacketWriter* f, s32 a, s32* out);
-void SendGsPacketAndWait(s32 a, s32 b);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
+void SendGsPacketAndWait(s32 channel, void* b);
 
 extern FrameTarget D_0027DC20[];
 
-void BeginGifTag(void* p, s32 a, s32 b, s32 c);
-void AddGifRegisterWrite(void* p, s32 a, u64 b);
-void AddGifImageTag(void* p, s32 x);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
+void AddGifImageTag(PacketWriter* self, s32 count);
 
 // The GS register TEX0 an image or palette record keeps (ImageRecord at 0x18, PaletteRecord
 // at 0x10), as func_00168E78 and func_00168FB0 fill it: the base, width and format, the size
@@ -82,38 +87,38 @@ void BeginImageTransfer(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, voi
 s32 g_meshQueueCount = 0;
 BumpAllocator g_bumpAllocator = { 0 };
 
-void SubmitMeshQueueEntry(void* p);
+void SubmitMeshQueueEntry(FrameTarget* self);
 void* AllocateZeroedFrontMemory(u32 n);
 void InitMeshQueue(void);
 
 extern s32 g_gifChannel;
 
-void InitBumpAllocator(BumpAllocator*,s32,s32);
+void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
 
 struct TextureUploadPacket : PacketWriter { u8 span[0x10]; s32 out; };
 
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
 
-void InitBumpAllocator(void* p, s32 a, s32 b);
-s32 PlaceMaskedImages(void* self, void* arg, TextureUploadPacket* f);
-void DetachPacketBufferCopy(PacketWriter* f, s32 a1, s32 a2, s32* out, s32 a4);
+void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
+s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
 void BuildAnimRecordGifPackets(void* self);
 
 extern s32 g_gifChannel;
 
-void UsePacketBufferMemory(PacketWriter* f, s32 n, s32* p);
-void DetachPacketBuffer(PacketWriter* f, s32 a, s32 b);
-void SendGsPacketAndWait(s32 a, s32* b);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
+void SendGsPacketAndWait(s32 channel, void* b);
 
 extern s32 g_imageRecordCountA;
 extern s32 g_imageRecordCountB;
-s32 AllocateBump(void* self, s32 size);
-void BuildPaletteTexRegister(PaletteRecord* e, s32 v);
+s32 AllocateBump(s32* self,s32 size);
+void BuildPaletteTexRegister(PaletteRecord* self, u32 a1);
 void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx);
-void AddDmaRefTag(void* self, s32 lo, s32 hi);
-void BuildImageTexRegister(ImageRecord* e, s32 v);
-void StartImageUpload(ImageRecord* e, s32 v, void* ctx);
+void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
+void BuildImageTexRegister(ImageRecord* self, u32 a1);
+void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx);
 
 
 // The start of what a queue entry copies: two GIF tags whose words func_001694A0 marks (bit
@@ -124,34 +129,34 @@ struct QueuedGifTags {
     s32 f10;
 };
 
-void CopyMemory(QueuedGifTags* dst, void* src, s32 count);
+void CopyMemory(void* dst, void* src, u32 size);
 void* AllocateZeroedFrontMemory(s32 bytes);
 
 struct TransferBase { s32 v; };
 
 void BeginImageTransfer(TransferBase dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
 
-void UsePacketBufferMemory(PacketWriter* f, s32 n, PacketWriter* p);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 
 extern s32 g_imageRecordCountB;
 extern s32 g_imageRecordCountA;
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
 
-void InitBumpAllocator(BumpAllocator* p, s32 a, s32 b);
+void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
 void* InitPacketWriter(PacketWriter* f);
 void WriteVifFlush(PacketWriter* f);
 void RewindPacketBuffer(PacketWriter* f);
-void UsePacketBufferMemory(PacketWriter* f, s32 n, u8* buf);
-s32 AllocateBump(BumpAllocator* p, s32 size);
-void StartPaletteUpload(PaletteRecord* e, s32 v, PacketWriter* f);
-void StartImageUpload(ImageRecord* e, s32 v, PacketWriter* f);
-void DetachPacketBuffer(PacketWriter* f, s32* o0, s32* o1);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+s32 AllocateBump(s32* self,s32 size);
+void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx);
+void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void WriteVifDirect(PacketWriter* f, s32 a, s32 b, s32 c);
 void WriteVifDirectRef(PacketWriter* f, s32 a, s32 b, s32 c);
 void CloseDmaTag(PacketWriter* f);
-void DetachPacketBufferCopy(PacketWriter* f, s32 a, s32 b, s32* out, s32 c);
-void BuildAnimRecordGifPackets(u32 mask);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
+void BuildAnimRecordGifPackets(s32 mask);
 
 
 void InitMeshQueue()
@@ -175,12 +180,12 @@ s32 AllocateBump(s32* self,s32 size)
 
 void BeginImageTransfer(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx)
 {
-    BeginGifTag(ctx, 0, 1, 0xE);
-    AddGifRegisterWrite(ctx, 0x50, ((u64)dbp << 32) | ((u64)dbw << 48) | ((u64)dpsm << 56));
-    AddGifRegisterWrite(ctx, 0x51, 0);
-    AddGifRegisterWrite(ctx, 0x52, rrw | ((u64)rrh << 32));
-    AddGifRegisterWrite(ctx, 0x53, 0);
-    AddGifImageTag(ctx, x);
+    BeginGifTag((PacketWriter*)ctx, 0, 1, 0xE);
+    AddGifRegisterWrite((PacketWriter*)ctx, 0x50, ((u64)dbp << 32) | ((u64)dbw << 48) | ((u64)dpsm << 56));
+    AddGifRegisterWrite((PacketWriter*)ctx, 0x51, 0);
+    AddGifRegisterWrite((PacketWriter*)ctx, 0x52, rrw | ((u64)rrh << 32));
+    AddGifRegisterWrite((PacketWriter*)ctx, 0x53, 0);
+    AddGifImageTag((PacketWriter*)ctx, x);
 }
 
 void BuildPaletteTexRegister(PaletteRecord* self, u32 a1){
@@ -226,7 +231,7 @@ s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c)
     for (s32 i = 0; i < g_imageRecordCountB; i++) {
         PaletteRecord* e = &g_imageRecordsB[i];
         if ((e->f0 & mask) == mask) {
-            s32 v = AllocateBump(b, e->f6);
+            s32 v = AllocateBump((s32*)b, e->f6);
             BuildPaletteTexRegister(e, v);
             if (c != 0) {
                 StartPaletteUpload(e, v, c);
@@ -235,16 +240,16 @@ s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c)
         }
     }
     if ((b->next & 0x7F) != 0) {
-        AllocateBump(b, 0x80 - (b->next & 0x7F));
+        AllocateBump((s32*)b, 0x80 - (b->next & 0x7F));
     }
     for (s32 i = 0; i < g_imageRecordCountA; i++) {
         ImageRecord* e = &g_imageRecordsA[i];
         if ((e->f4 & mask) == mask) {
             s32 v;
             if (e->f8 == 0 && (b->next & 0x1F) != 0) {
-                AllocateBump(b, 0x20 - (b->next & 0x1F));
+                AllocateBump((s32*)b, 0x20 - (b->next & 0x1F));
             }
-            v = AllocateBump(b, e->f0A);
+            v = AllocateBump((s32*)b, e->f0A);
             BuildImageTexRegister(e, v);
             if (c != 0) {
                 StartImageUpload(e, v, c);
@@ -258,7 +263,7 @@ s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c)
     return (c->curS ^ saved) != 0;
 }
 
-void SendMaskedImagesToGif(void* self, void* arg)
+void SendMaskedImagesToGif(s32 self, BumpAllocator* arg)
 {
     TexturePacket f;
 
@@ -275,23 +280,23 @@ void SendMaskedImagesToGif(void* self, void* arg)
         AddGifRegisterWrite(&f, 0x61, 0);
         EndGifPacket(&f);
         AddDmaEndTag(&f);
-        DetachPacketBuffer(&f, 0, &f.value);
-        SendGsPacketAndWait(g_gifChannel, f.value);
+        DetachPacketBuffer(&f, 0, &f.packet);
+        SendGsPacketAndWait(g_gifChannel, f.packet);
     }
     PopBackMemoryMark();
 }
 
-s32 BuildMaskedImagesPacket(void* self)
+s32 BuildMaskedImagesPacket(s32 self)
 {
     TextureUploadPacket f;
 
     InitGifPacket(&f);
     f.out = 0;
-    InitBumpAllocator(f.span, 0x1400, 0x1E00);
+    InitBumpAllocator((BumpAllocator*)f.span, 0x1400, 0x1E00);
     PushBackMemoryMark();
     AllocateTempPacketBuffer(&f, ((g_imageSlotsB * 2 + g_imageSlotsB + g_imageSlotsA) * 8) | 4);
     BeginDmaTag(&f);
-    if (PlaceMaskedImages(self, f.span, &f) != 0) {
+    if (PlaceMaskedImages(self, (BumpAllocator*)f.span, &f) != 0) {
         BeginGifTag(&f, 0, 1, 0xE);
         AddGifRegisterWrite(&f, 0x3F, 0);
         EndGifPacket(&f);
@@ -458,11 +463,11 @@ s32 UploadImagesByMask(u32 mask)
         if ((e->f0 & mask) == mask) {
             RewindPacketBuffer(&fa);
             UsePacketBufferMemory(&fa, 0xA, buf);
-            s32 n = AllocateBump(&span, e->f6);
+            s32 n = AllocateBump((s32*)&span, e->f6);
             BuildPaletteTexRegister(e, n);
             StartPaletteUpload(e, n, &fa);
             *(u64*)(fa.curS - 0x10) |= 0x8000;
-            DetachPacketBuffer(&fa, &o0, &o1);
+            DetachPacketBuffer(&fa, (u32*)&o0, (u8**)&o1);
             WriteVifDirect(&fb, o0, o1, 0);
             WriteVifDirectRef(&fb, e->fC, e->f8, 0);
             if (e->f0 & 0x40000000) {
@@ -477,11 +482,11 @@ s32 UploadImagesByMask(u32 mask)
             if ((e->f4 & mask) == mask) {
                 RewindPacketBuffer(&fa);
                 UsePacketBufferMemory(&fa, 0xA, buf);
-                s32 n = AllocateBump(&span, e->f0A);
+                s32 n = AllocateBump((s32*)&span, e->f0A);
                 BuildImageTexRegister(e, n);
                 StartImageUpload(e, n, &fa);
                 *(u64*)(fa.curS - 0x10) |= 0x8000;
-                DetachPacketBuffer(&fa, &o0, &o1);
+                DetachPacketBuffer(&fa, (u32*)&o0, (u8**)&o1);
                 WriteVifDirect(&fb, o0, o1, 0);
                 WriteVifDirectRef(&fb, e->f14, e->f10, 0);
                 if (e->f4 & 0x40000000) {
@@ -497,7 +502,7 @@ s32 UploadImagesByMask(u32 mask)
         BeginGifTag(&fa, 0, 1, 0xE);
         AddGifRegisterWrite(&fa, 0x3F, 0);
         EndGifPacket(&fa);
-        DetachPacketBuffer(&fa, &o0, &o1);
+        DetachPacketBuffer(&fa, (u32*)&o0, (u8**)&o1);
         WriteVifDirect(&fb, o0, o1, 0);
         WriteVifFlush(&fb);
         CloseDmaTag(&fb);
@@ -517,11 +522,11 @@ void SetupTextureRenderTarget(TextureHeader* src, void* dst)
     if (cap < w) cap = w;
     s32 f = (s32)(src->tex0 & 0x3FFF) >> 5;
     s32 m = 1 << (s32)((src->tex0 >> 30) & 0xF);
-    BeginGifTag(dst, 0x200, 1, 0xE);
-    AddGifRegisterWrite(dst, 0x4D, (u64)(cap / 64) << 16 | (u64)f);
-    AddGifRegisterWrite(dst, 0x4F, 0x30000000 | (u64)f | (u64)0x8000 << 17);
-    AddGifRegisterWrite(dst, 0x19, 0);
-    AddGifRegisterWrite(dst, 0x41, (u64)(w - 1) << 16 | (u64)(m - 1) << 48);
-    AddGifRegisterWrite(dst, 0x48, 0x31001);
-    AddGifRegisterWrite(dst, 0x43, 0x44);
+    BeginGifTag((PacketWriter*)dst, 0x200, 1, 0xE);
+    AddGifRegisterWrite((PacketWriter*)dst, 0x4D, (u64)(cap / 64) << 16 | (u64)f);
+    AddGifRegisterWrite((PacketWriter*)dst, 0x4F, 0x30000000 | (u64)f | (u64)0x8000 << 17);
+    AddGifRegisterWrite((PacketWriter*)dst, 0x19, 0);
+    AddGifRegisterWrite((PacketWriter*)dst, 0x41, (u64)(w - 1) << 16 | (u64)(m - 1) << 48);
+    AddGifRegisterWrite((PacketWriter*)dst, 0x48, 0x31001);
+    AddGifRegisterWrite((PacketWriter*)dst, 0x43, 0x44);
 }

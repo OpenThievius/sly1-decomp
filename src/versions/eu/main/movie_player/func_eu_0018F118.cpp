@@ -13,21 +13,13 @@ struct Obj_eu_18F118 {
     s32 f2C;
 };
 
-struct IopDmaTransfer_eu {
-    s32 src;
-    s32 dest;
-    void* size;
-    s32 attr;
-};
-
-void SyncDataCache(s32 a);
-void* StartIopDma(IopDmaTransfer_eu* span, s32 n);
-s32 GetIopDmaStatus(void* obj);
+extern "C" void SyncDataCache(s32 a);
+extern "C" s32 GetIopDmaStatus(void* obj);
 void SendIopRingBlockSlot(s32 a, s32 b);
 
 s32 WriteIopRingBlockByKind(Obj_eu_18F118* self, s32 size, u8* buf)
 {
-    IopDmaTransfer_eu span;
+    IopDmaTransfer span;
     void* obj;
     s32 pos = 0;
 

@@ -37,24 +37,32 @@
 #include "attached_set.h"
 #include "active_set_solver.h"
 #include "sound_level.h"
+struct HomogeneousMatrix;
+
+struct ScriptListBuilder;
+struct ScriptValueFilter;
+
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void* AllocateFrontMemory(s32 size);
-s32 ScriptListContainsValue(s32 value, void* out);
-s32 AppendPropertyToScriptList(s32 value, void* out);
+s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, s32 value);
 s32 ReadBufferedU32(BufferedStream* in);
-void* FillMemory(void* p, s32 value, s32 size);
-void* FillMemory(void* p, s32 value, s32 size);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 typedef signed int s32;
 typedef unsigned char u8;
-void EnsureKeyedList(void* p);
+void EnsureKeyedList(BaseObject* self);
 // An entry of World::f1EF4: an expression read from the level and the scope it was evaluated in
 // (0 until func_001C13E8 evaluates it).
-struct WorldScriptEntry { R11B008Node* expr; s32 scope; };
+struct ScriptScope;
+struct WorldScriptEntry { R11B008Node* expr; ScriptScope* scope; };
 extern u8 g_markStacks[];
-void AddUniqueMarkRoot(void* a, void* b);
+struct MarkEntry;
+struct MarkStacks;
+void AddUniqueMarkRoot(MarkStacks* self, MarkEntry* value);
 // A property's getter (PropertyDescriptor::getter with flags 4, or the method at that offset of
 // the object's table): fills `out` with the value of `obj`.
 typedef void (*PropertyGetter)(void* obj, void* out);
@@ -80,7 +88,7 @@ struct SprTransfer {
     s32 state;              // 0x4C: 1 sent in, 3 sending back (StartFromSprChain), 0 done
 };
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // Transfer i's record, cleared, with its tags read uncached (0x20000000) and its first tag's
 // scratchpad address: the static initialiser (func_001C27B0) builds the two in a temporary and
@@ -100,26 +108,32 @@ struct SprDmaChannel {
     s32 sadr;               // 0x80: the scratchpad address
 };
 extern SprDmaChannel* g_fromSprChannel;
-s32 WaitDmaChannel(SprDmaChannel* d, s32 b, s32 c);
-void StartDmaChainToMemory(SprDmaChannel* d);
+struct DmaChannel;
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
+extern "C" void StartDmaChainToMemory(DmaChannel* ch);
 // A script list being built (func_001C1530 hands one to a getter; func_001C1A28 appends a value
 // of `type` to it).
 struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
-void* FillMemory(void* p, s32 value, s32 size);
-void ReadPropertyValue(ScriptValue* t, s32 value, PropertyDescriptor* d);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+// Declared void with an integer: retail's func_001C1A28 schedules its call as one whose result
+// is unused (the definition, below, returns out and takes the address as void*).
+void ReadPropertyValue(ScriptValue* out, s32 base, PropertyDescriptor* d);
 extern PropertyList g_classPropertyLists[];
 // (if/else with the small path first moved $s0/$s1)
-ScriptValue *ReadPropertyValue(ScriptValue* self, void* a, s32 r);
-s32 ReadBufferedU32(void* src);
+ScriptValue *ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d);
+s32 ReadBufferedU32(BufferedStream* self);
 void* AllocateFrontMemory(u32 size);
-void SkipBufferedBlock(void* self);
-s32 NewScriptScope(void);
-void AddUniqueMarkRoot(u8* a, s32 b);
-void* DefineScriptVariable(ScriptValue* out, s32 a, s32 b, ScriptValue* body);
+void SkipBufferedBlock(BufferedStream* self);
+ScriptScope* NewScriptScope(void);
+void AddUniqueMarkRoot(MarkStacks* self, MarkEntry* value);
+struct ScriptScope;
+struct ScriptValue;
+void* DefineScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value);
 extern u32 D_00275714;
 // NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
 
-void EvalScriptExpression(ScriptValue* t, R11B008Node* node, s32 b); // stays void: retail returns a value, but declared so func_001C13E8 differs in registers
+struct R11B008Node;
+void EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope); // stays void: retail returns a value, but declared so func_001C13E8 differs in registers
 // A type and a list of script values: func_001C1AD8 tells whether a value is among them.
 struct ScriptValueFilter { u32 type; R11B008Node* list; };
 // The payloads of script values of kind 10 and 11 (two and three words), copied word by word.
@@ -127,14 +141,14 @@ struct ScriptPair { s32 w[2]; };
 struct ScriptTriple { s32 w[3]; };
 extern void* AcquireVectorAPayload(void);
 extern void* AcquireMatrixPayload(void);
-extern void* CopyRotationMatrix(void* d, void* s);
-extern void ResetMatrixHomogeneous(void* d);
+extern void* CopyRotationMatrix(Quad16* destination, const Quad16* source);
+extern void ResetMatrixHomogeneous(HomogeneousMatrix* self);
 extern void* AcquireVectorBPayload(void);
 extern void* AcquirePairPayload(void);
 extern void* AcquireTriplePayload(void);
 extern SprDmaChannel* g_toSprChannel;
-s32 WaitDmaChannel(void* p, s32 a, s32 b);
-void StartDmaChain(SprDmaChannel* c, u32 addr);
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
+extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
 void LoadScriptEntryTable(World* self, BufferedStream* arg);
 void* GetScriptEntryScope(s32 index, World* self);
 ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx);
@@ -142,7 +156,7 @@ PropertyDescriptor* FindPropertyDescriptor(BaseObject* self, s32 key);
 ScriptValue* BuildScriptListFromCallback(ScriptValue* self, void* ctx, s32 v, PropertyGetter cb);
 ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d);
 s32 AppendPropertyToScriptList(ScriptListBuilder* self, s32 value);
-s32 ScriptListContainsValue(ScriptValueFilter* filter, s32* val);
+s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
 ScriptValue* StoreScriptArguments(ScriptValue* out, s32 n, ScriptValue* args, const u32* kinds, void** dsts);
 ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, s32* vals);
 ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n);
@@ -151,10 +165,10 @@ ScriptValue* AddObjectProperty(ScriptValue* self, BaseObject* p, s32 key, Script
 ScriptValue* SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
 ScriptValue* StoreScriptArgumentsVa(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...);
 void StartToSprChain(s32 size, ...);
-void StartFromSprChain(s32 first, ...);
+void StartFromSprChain(void* first, ...);
 SprTransfer D_002748F0[2] = { MakeSprTransfer(0), MakeSprTransfer(1) };
 s32 D_00274990 = 0;
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void LoadScriptEntryTable(World* self, BufferedStream* arg) {
     ScriptValue q0;
@@ -182,13 +196,13 @@ void LoadScriptEntryTable(World* self, BufferedStream* arg) {
         if (n1 > 0) { s32 k = n1; do SkipBufferedBlock(arg); while (--k); }
         if (n2 > 0) { s32 k = n2; do SkipBufferedBlock(arg); while (--k); }
     }
-    s32 r = NewScriptScope();
+    ScriptScope* r = NewScriptScope();
     i = 0;
-    self->f2C = (void*)r;
-    AddUniqueMarkRoot(g_markStacks, r);
+    self->f2C = r;
+    AddUniqueMarkRoot((MarkStacks*)g_markStacks, (MarkEntry*)r);
     self->f1EF8 = n1;
     SetScriptValueTag(&q0, 0);
-    DefineScriptVariable(&q1, (s32)self->f2C, self->f1EF8, &q0);
+    DefineScriptVariable(&q1, (ScriptScope*)self->f2C, self->f1EF8, &q0);
     DestroyScriptValue(&q1, 2);
     if (self->f1EF0 > 0) {
         do {
@@ -209,8 +223,8 @@ void* GetScriptEntryScope(s32 index, World* self)
         return 0;
     } else {
         WorldScriptEntry* e = (WorldScriptEntry*)((index << 3) + (u32)self->f1EF4);
-        void* p = (void*)e->scope;
-        if (p != 0) AddUniqueMarkRoot(g_markStacks, p);
+        void* p = e->scope;
+        if (p != 0) AddUniqueMarkRoot((MarkStacks*)g_markStacks, (MarkEntry*)p);
         return p;
     }
 }
@@ -316,7 +330,7 @@ ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor*
         }
         case 4: {
             void* r = AcquireMatrixPayload();
-            CopyRotationMatrix(r, p);
+            CopyRotationMatrix((Quad16*)r, (const Quad16*)p);
             SetScriptValueMatrix(&q, (f32*)r);
             break;
         }
@@ -382,7 +396,7 @@ ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor*
         case 4: {
             void* r = AcquireMatrixPayload();
             fn(p, r);
-            ResetMatrixHomogeneous(r);
+            ResetMatrixHomogeneous((HomogeneousMatrix*)r);
             SetScriptValueMatrix(&q, (f32*)r);
             break;
         }
@@ -447,7 +461,7 @@ s32 AppendPropertyToScriptList(ScriptListBuilder* self, s32 value)
     return 1;
 }
 
-s32 ScriptListContainsValue(ScriptValueFilter* filter, s32* val) {
+s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val) {
     ScriptValue q;
     R11B008Node* l;
     InitScriptValue(&q);
@@ -458,7 +472,7 @@ s32 ScriptListContainsValue(ScriptValueFilter* filter, s32* val) {
             SetScriptValueFloat(&q, *(f32*)val);
             break;
         case 0:
-            SetScriptValueBool(&q, *val);
+            SetScriptValueBool(&q, *(s32*)val);
             break;
         case 2: case 4: case 9: case 10: case 11: case 13:
             break;
@@ -466,9 +480,9 @@ s32 ScriptListContainsValue(ScriptValueFilter* filter, s32* val) {
             if (filter->type & 0x1000) {
         case 5: case 6: case 7: case 8:
         case 14: case 15: case 16: case 17:
-                SetScriptValueInt(&q, *val);
+                SetScriptValueInt(&q, *(s32*)val);
             } else if (filter->type & 0x2000) {
-                SetScriptValuePointerB(&q, (void*)*val);
+                SetScriptValuePointerB(&q, *(void**)val);
             }
             break;
         }
@@ -671,7 +685,7 @@ ScriptValue* WritePropertyValue(ScriptValue* out, void* base, PropertyDescriptor
 ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n)
 {
     if (n < 0x495) {
-        s32 r = (s32)FindPropertyDescriptor(p, n);
+        PropertyDescriptor* r = FindPropertyDescriptor(p, n);
         ReadPropertyValue(self, p, r);
     } else {
         ScriptValue q;
@@ -735,7 +749,7 @@ void StartToSprChain(s32 size, ...)
     ap = (char*)__builtin_next_arg(size) - (8 - __builtin_args_info(0)) * 8;
     u32 addr = e->base;
     if (e->state == 3) {
-        WaitDmaChannel((*(void**)&g_fromSprChannel), 0, 0);
+        WaitDmaChannel((DmaChannel*)((*(void**)&g_fromSprChannel)), 0, 0);
     }
     e->state = 1;
     s32 data = VA_ARG_WORD(ap, s32);
@@ -760,16 +774,16 @@ void StartToSprChain(s32 size, ...)
     SprDmaChannel* c = g_toSprChannel;
     c->chcr |= 0x40;
     c->sadr = (e->base & 0x0FFFFFFF) | 0x80000000;
-    StartDmaChain(c, (u32)e->tags & 0x0FFFFFFF);
+    StartDmaChain((DmaChannel*)c, (void*)((u32)e->tags & 0x0FFFFFFF));
 }
 
-void StartFromSprChain(s32 first, ...) {
+void StartFromSprChain(void* first, ...) {
     s32 buf[8];
     SprTransfer* r = &D_002748F0[D_00274990];
     s32 n = 0;
-    s32 x = first;
+    s32 x = (s32)first;
     r->state = 3;
-    WaitDmaChannel(g_fromSprChannel, 0, 0);
+    WaitDmaChannel((DmaChannel*)g_fromSprChannel, 0, 0);
     void* ap = (char*)__builtin_next_arg(first) - 56;
     while (x) {
         buf[n] = x;
@@ -788,7 +802,7 @@ void StartFromSprChain(s32 first, ...) {
     *(u64*)(r->addrs[n] - 0x10) = ((r->sizes[n] >> 4) | 0x70000000) | ((u64)buf[i] << 32);
     d->chcr &= ~0x40;
     d->sadr = (r->base & 0xFFFFFFF) + 0x80000000;
-    StartDmaChainToMemory(d);
+    StartDmaChainToMemory((DmaChannel*)d);
     r = &D_002748F0[1 - D_00274990];
     if (r->state == 3) r->state = 0;
 }

@@ -18,6 +18,7 @@
 #define SCREEN_ELEMENT_H
 
 #include "common.h"
+struct BaseObject;
 
 struct Font;       // the font (include/font.h): a game object with a GCC vtable at +0x4C
 struct WarpPage;    // a warp page, class 0x67 (include/warp_page.h)
@@ -291,7 +292,7 @@ struct T217D_440 : ScreenElement {
     u32 highlight;              // 0x2F4: 0x80FFFFFF (func_001310F0)
     char f2F8;              // 0x2F8: the button glyph drawn beside the text (0 none)
     u8 pad2F9[0x2FC - 0x2F9];
-    s32 f2FC;                   // 0x2FC: set by func_001365A0
+    BaseObject* f2FC;           // 0x2FC: the subject, set by func_001365A0
     f32 value;                  // 0x300: 0 to 1 (func_001365A8: a percent / 100)
     f32 stickX;                 // 0x304: the smoothed pad direction (func_00136040)
     f32 stickY;                 // 0x308

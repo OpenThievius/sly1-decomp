@@ -21,47 +21,64 @@
 #include "texture_header.h"
 #include "shapes.h"
 #include "vu0.h"
+#include "object_finder.h"
+struct BufferedStream;
+struct BaseObject;
+struct Vec02;
 
-void DrawAgent(void);
+struct BaseObject;
+
+struct FrameTarget;
+struct ImageRecord;
+struct PacketWriter;
+struct PaletteRecord;
+
+struct Mat02;
+struct Vec02;
+
+struct PacketWriter;
+
+
 
 struct GatheredEventObject { u8 pad0[0x328]; s32 f328; };
 struct GatheredObjects { s32 count; GatheredEventObject** items; };
 
-void StartAgent(void* self);
-void* FindFirstObjectByIdMode4(void* a, s32 b, void* c);
+void StartAgent(Agent* self);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherAnimationEventObjects(void* a, void* b, s32* c, void** d);
+void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount, BaseObject*** outArr);
 void* CreateRecord2505C0(void);
-void AppendToSmallList(void* a, void* b);
+struct StateResetObject;
+struct StateResetGroup;
+void AppendToSmallList(StateResetGroup* self, StateResetObject* value);
 
-void InitAgent(void* self);
+void InitAgent(Agent* self);
 void InitConeAgent(ConeAgent* self);
 
-void UnregisterCollider(void* self);
-void RemoveFromList(void* data, void* self);
+void UnregisterCollider(Collider* self);
+void RemoveFromList(List01* list, void* item);
 
-void CopyCollider(void* self);
+void CopyCollider(Collider* self, Collider* other);
 
 s32 TestCollidersMayContact(Collider* a, Collider* b);
 
-void* FindFirstObjectByIdMode4(void* obj, s32 id, s32 flags);
 
 void SendDisplayResetPacket(void);
 void SignalDisplaySync(void);
-void ResetGs(s32 a0, s32 a1, s32 a2, s32 a3);
-void SetFieldDrawOffset(void* p, s32 a1, s32 a2, s32 a3);
-void SyncDataCache(s32 a0);
-s32 SwapDoubleBuffer(void* p, s32 a1);
+extern "C" void ResetGs(s16 mode, s16 x, s16 y, s16 flag);
+struct GsOffset;
+extern "C" void SetFieldDrawOffset(GsOffset* self, s16 a1, s16 a2, s16 a3);
+extern "C" void SyncDataCache(s32 a0);
+extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 
 struct DmaChainBlock { u8 bytes[0x20]; };
 
 extern u8 D_002BE1A0[];
-void* InitPacketBuffer(DmaChainBlock* a);
-void UsePacketBufferMemory(DmaChainBlock* a, s32 n, DmaChainBlock* b);
+void* InitPacketBuffer(PacketWriter* self);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void AddDmaRefTag(DmaChainBlock* a, s32 n, void* table);
-void AddDmaEndTag(DmaChainBlock* a);
-void DetachPacketBuffer(DmaChainBlock* a, s32 x, s32 y);
+void AddDmaEndTag(PacketWriter* self);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void SendPacketToBothBuffers(DmaChainBlock* b);
 
 struct TexturePacket : PacketWriter { s32 value; };
@@ -71,42 +88,41 @@ extern s32 g_imageSlotsA;
 extern s32 g_gifChannel;
 
 void* InitGifPacket(PacketWriter* f);
-void AllocateTempPacketBuffer(PacketWriter* f, s32 size);
+void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
 void BeginDmaTag(PacketWriter* f);
-s32 PlaceMaskedImages(void* self, void* arg, TexturePacket* f);
-void BeginGifTag(PacketWriter* f, s32 a, s32 b, s32 c);
+s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c);
+void BeginGifTag(PacketWriter* f, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(PacketWriter* f, s32 a, u64 b);
 void EndGifPacket(PacketWriter* f);
 void AddDmaEndTag(PacketWriter* f);
-void DetachPacketBuffer(PacketWriter* f, s32 a, s32* out);
-void SendGsPacketAndWait(s32 a, s32 b);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
+void SendGsPacketAndWait(s32 channel, void* b);
 
 extern FrameTarget D_0027DC20[];
 
-void RegisterObject(void* self);
-void AppendToList(void* table, void* self);
+void RegisterObject(BaseObject* self);
+void AppendToList(List01* self, void* item);
+void UnregisterObject(BaseObject* self);
+void RemoveFromList(List01* list, void* item);
 
-void UnregisterObject(void* self);
-void RemoveFromList(void* table, void* self);
 
 struct TargetedObject {
     u8 pad_00[0x398];
     s32 f398;
 };
 
-void* FindFirstObjectByIdMode4(void* a, s32 b, s32 c);
 
-void CopyObjectData(void* self);
+void CopyObjectData(BaseObject* self, BaseObject* src);
 
-void InitCollider(void* self);
-void SetScaledRotationSpring(void* self, f32 k);
-void SetScaledSpinSpring(void* self, f32 k);
-void SetScaledPositionRamp(void* self, f32 k);
+void InitCollider(Collider* self);
+void SetScaledRotationSpring(PlacedObject* self, f32 scale);
+void SetScaledSpinSpring(PlacedObject* self, f32 scale);
+void SetScaledPositionRamp(PlacedObject* self, f32 scale);
 void SetScaledRotationRamp(void* self, f32 k);
 
-void RegisterCollider(void* self);
+void RegisterCollider(Collider* self);
 
-void BeginGifTag(void* p, s32 a, s32 b, s32 c);
+void BeginGifTag(void* p, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(void* p, s32 a, u64 b);
 void AddGifImageTag(void* p, s32 x);
 
@@ -132,12 +148,12 @@ u32 CeilLog2(u32 n);
 
 void BeginImageTransfer(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
 
-void SetListLinkOffset(void* self, s32 value);
+void SetListLinkOffset(List01* self, s32 offset);
 
-void ClearList(void* self);
+void ClearList(List01* p);
 
 
-void SubmitMeshQueueEntry(void* p);
+void SubmitMeshQueueEntry(FrameTarget* self);
 void* AllocateZeroedFrontMemory(u32 n);
 
 
@@ -145,9 +161,10 @@ extern u8 D_002BDC20[];
 extern u8 D_002BE1A0[];
 extern u8 D_002BDEE0[];
 
-void SetUpDoubleBuffer(void* p, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
-void FillScreenColor(void* ctx, Rgba4* v, s32 flag);
-s32 CreateLockSemaphore(void* a, void* b);
+struct GsDBuff;
+extern "C" void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag);
+void FillScreenColor(u8* buffer, Rgba4* color, s32 flag);
+s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
 s32 EnableInterruptCause(s32 a0);
 void InitMeshQueue(void);
@@ -157,11 +174,12 @@ s32 HandleGsFinish(s32 cause);
 
 extern s32 g_gifChannel;
 
-s32 SendDrawEnvironment(void* p);
-void StartDmaChain(s32 a, void* b);
-s32 WaitDmaChannel(s32 a, s32 b, s32 c);
+extern "C" s32 SendDrawEnvironment(void* self);
+struct DmaChannel;
+extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
-void InitBumpAllocator(BumpAllocator*,s32,s32);
+void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
 
 void ApplyFieldDisplayOffset(void);
 s32 WaitGsPaths(s32 a0, s32 a1);
@@ -171,32 +189,32 @@ struct TextureUploadPacket : PacketWriter { u8 span[0x10]; s32 out; };
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
 
-void InitBumpAllocator(void* p, s32 a, s32 b);
-s32 PlaceMaskedImages(void* self, void* arg, TextureUploadPacket* f);
-void DetachPacketBufferCopy(PacketWriter* f, s32 a1, s32 a2, s32* out, s32 a4);
+void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
+s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
 void BuildAnimRecordGifPackets(void* self);
 
 struct FadePacket : PacketWriter { s32 value; u8 pad[0x3F0]; };
 
 extern s32 g_gifChannel;
 
-void UsePacketBufferMemory(PacketWriter* f, s32 n, s32* p);
-void WriteColoredSpritePacket(f32 x, f32 y, f32 z, f32 w, s32 a, s32 b, s32 c, s32 d, FadePacket* e);
-void DetachPacketBuffer(PacketWriter* f, s32 a, s32 b);
-void SendGsPacketAndWait(s32 a, s32* b);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
+void SendGsPacketAndWait(s32 channel, void* b);
 void FlipDisplayFrame(void);
 
 extern s32 g_imageRecordCountA;
 extern s32 g_imageRecordCountB;
-s32 AllocateBump(void* self, s32 size);
-void BuildPaletteTexRegister(PaletteRecord* e, s32 v);
+s32 AllocateBump(s32* self,s32 size);
+void BuildPaletteTexRegister(PaletteRecord* self, u32 a1);
 void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx);
 void AddDmaRefTag(void* self, s32 lo, s32 hi);
-void BuildImageTexRegister(ImageRecord* e, s32 v);
-void StartImageUpload(ImageRecord* e, s32 v, void* ctx);
+void BuildImageTexRegister(ImageRecord* self, u32 a1);
+void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx);
 
 
-void* IsObjectOfKind(void* node, s32 flags);
+void* IsObjectOfKind(BaseObject* list, s32 key);
 
 struct ChildListWalk {
     List01* iter;
@@ -227,7 +245,7 @@ struct ChildListWalk {
     }
 };
 
-void InitObject(void* self);
+void InitObject(BaseObject* self);
 
 // What FindTargetCurveLengthNearCollider asks the curve (slot 10): a point and a direction in
 // the curve's parent's frame, and the arc length it answers.
@@ -240,9 +258,9 @@ struct CurveProbe {
 };
 
 void* GetActiveSwitchedCollider(void);
-void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
-void TransformDirectionBetweenFrames(void* a, s32 b, void* c, void* d);
-void PlaceOnTargetCurve(void* a0, void* a1, void* a2, f32 f);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t);
 
 struct HoldMatrices {
     u8 a[0x30];
@@ -254,11 +272,11 @@ struct HoldMatrices {
 
 extern f32 g_gameTime[];
 
-void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
-void TriggerScriptEvent(void* obj, s32 kind, s32 a, s32 b);
-void RotateMatrixUpright(void* sub, void* a, void* out);
-void MatrixToAxisAngle(void* a, void* b, void* c);
-void MultiplyMatrices3x3(void* a, void* b, s32 c);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 
 
 // The start of what a queue entry copies: two GIF tags whose words func_001694A0 marks (bit
@@ -271,24 +289,24 @@ struct QueuedGifTags {
 
 void CopyMemory(QueuedGifTags* dst, void* src, s32 count);
 
-s32 GetGsInterruptMask(void);
-s32 SwapGsInterruptMask(s32 a);
-void SyncDataCache(s32 a);
-s32 AwaitSemaphore(s32 a);
+extern "C" s32 GetGsInterruptMask(s32 mask);
+extern "C" s32 SwapGsInterruptMask(s32 mask);
+extern "C" void SyncDataCache(s32 a);
+extern "C" s32 AwaitSemaphore(s32 a);
 
-void LoadCollider(Collider* self);
+void LoadCollider(Collider* self, BufferedStream* stream);
 void* AllocateZeroedFrontMemory(s32 bytes);
 
 void StepCollider(Collider* self, f32 t);
-void RotateMatrixUpright(Mat02* sub, s32 zero, Mat3U* out);
-void SteerColliderTowardRotation(Collider* self, Mat3U* out, s32 a, void* table, s32 b, f32 t);
+void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
+void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
 extern f32 g_gameTime[];
 
 struct TransferBase { s32 v; };
 
 void BeginImageTransfer(TransferBase dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
 
-void UsePacketBufferMemory(PacketWriter* f, s32 n, PacketWriter* p);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 
 struct GsPmode { u32 en1 : 1; u32 rest : 31; u32 hi : 32; };
 struct GsDispFb { u32 fbp : 9; u32 fbw : 6; u32 psm : 5; u32 pad0 : 12; u32 dbx : 11; u32 dby : 11; u32 pad1 : 10; };
@@ -306,19 +324,19 @@ extern s32 g_imageRecordCountA;
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
 
-void InitBumpAllocator(BumpAllocator* p, s32 a, s32 b);
+void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
 void* InitPacketWriter(PacketWriter* f);
 void WriteVifFlush(PacketWriter* f);
 void RewindPacketBuffer(PacketWriter* f);
-void UsePacketBufferMemory(PacketWriter* f, s32 n, u8* buf);
-s32 AllocateBump(BumpAllocator* p, s32 size);
-void StartPaletteUpload(PaletteRecord* e, s32 v, PacketWriter* f);
-void StartImageUpload(ImageRecord* e, s32 v, PacketWriter* f);
-void DetachPacketBuffer(PacketWriter* f, s32* o0, s32* o1);
-void WriteVifDirect(PacketWriter* f, s32 a, s32 b, s32 c);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+s32 AllocateBump(s32* self,s32 size);
+void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx);
+void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
+void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
 void WriteVifDirectRef(PacketWriter* f, s32 a, s32 b, s32 c);
 void CloseDmaTag(PacketWriter* f);
-void DetachPacketBufferCopy(PacketWriter* f, s32 a, s32 b, s32* out, s32 c);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
 void BuildAnimRecordGifPackets(u32 mask);
 
 // The file's .data, in retail's order (0x2626E8 to 0x262714): the three object lists.
@@ -370,15 +388,15 @@ void PostLoadTargetCurve(TargetCurve* self)
     }
 }
 
-void CopyTargetCurve(TargetCurve* self)
+void CopyTargetCurve(TargetCurve* self, TargetCurve* src)
 {
     PathCurveKeptBits saved = self->keep;
-    CopyObjectData(self);
+    CopyObjectData(self, src);
     self->keep = saved;
 }
 
 f32 WrapAngle(f32 a);
-f32 ArctangentOfRatio(f32 y, f32 x);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t)
 {
@@ -388,8 +406,8 @@ void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t)
     if (o->vt->m02 != 0) {
         ((void (*)(PathCurve*, f32, void*, void*))o->vt->m02)(o, t, &pos, &tangent);
     }
-    TransformPointBetweenFrames(self->parent, 0, &pos, &pos);
-    TransformDirectionBetweenFrames(self->parent, 0, &tangent, &tangent);
+    TransformPointBetweenFrames((PlacedObject*)self->parent, 0, &pos, &pos);
+    TransformDirectionBetweenFrames((PlacedObject*)self->parent, 0, &tangent, &tangent);
     f32 radius;
     switch (self->mode40) {
     case 0:
@@ -421,8 +439,8 @@ void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, vo
     u8* node = (u8*)GetActiveSwitchedCollider();
     PathCurve* o = self->curve;
     f.c = 1;
-    TransformPointBetweenFrames(0, (s32)self->parent, node + 0x140, &f.a);
-    TransformDirectionBetweenFrames(0, (s32)self->parent, (void*)&g_unitZVector, &f.b);
+    TransformPointBetweenFrames(0, (PlacedObject*)self->parent, (Vec02*)(node + 0x140), (Vec02*)&f.a);
+    TransformDirectionBetweenFrames(0, (PlacedObject*)self->parent, (Vec02*)&g_unitZVector, (Vec02*)&f.b);
     if (o->vt->m10 != 0) {
         o->vt->m10(o, &f.a, &f.b, 0, 0, 0, &f.x);
     }
@@ -437,7 +455,7 @@ void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, vo
         }
         f.x = r;
     }
-    PlaceOnTargetCurve(self, a2, a3, f.x);
+    PlaceOnTargetCurve(self, (Vec02*)a2, (f32*)a3, f.x);
     *out = f.x;
 }
 
@@ -471,17 +489,17 @@ void PostLoadTargetPoint(TargetPoint* self)
     }
 }
 
-void CopyTargetPoint(TargetPoint* self)
+void CopyTargetPoint(TargetPoint* self, TargetPoint* src)
 {
     KeptBits saved = self->keep;
-    CopyObjectData(self);
+    CopyObjectData(self, src);
     self->keep = saved;
 }
 
 void ConvertPositionToWorld(BaseObject* self, Vec02* out);
-void ComputePolarOffset(Vec02* out, f32 x, f32 y, f32 z);
+void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 f32 WrapAngle(f32 a);
-f32 ArctangentOfRatio(f32 y, f32 x);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t)
 {
@@ -497,7 +515,7 @@ void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t)
             radius += 70.0f;
             break;
         }
-        ComputePolarOffset(&offset, angle, radius, 0.0f);
+        ComputePolarOffset((Vec3*)&offset, angle, radius, 0.0f);
         ConvertPositionToWorld(self, out);
         Vu0::Q(*out) = Vu0::Add(Vu0::Q(*out), Vu0::Q(offset));
     }
@@ -529,13 +547,13 @@ void InitListedCollisionPart(ListedCollisionPart* self)
     self->f568 = 300.0f;
 }
 
-void LoadListedCollisionPart(ListedCollisionPart* self)
+void LoadListedCollisionPart(ListedCollisionPart* self, BufferedStream* stream)
 {
     Rec2195_224* b;
     Quad16* dst;
     Quad16* src;
 
-    LoadCollider(self);
+    LoadCollider(self, stream);
     if (self->f224 == 0) {
         self->f224 = (Rec2195_224*)AllocateZeroedFrontMemory(0xC0);
 
@@ -561,10 +579,10 @@ void RemoveFromPartList(ListedCollisionPart* self)
     RemoveFromList(&g_partList, self);
 }
 
-void CopyKeepingListLink(ListedCollisionPart* self)
+void CopyKeepingListLink(ListedCollisionPart* self, ListedCollisionPart* src)
 {
     Link02 tmp = self->listLink;
-    CopyCollider(self);
+    CopyCollider(self, src);
     self->listLink = tmp;
 }
 
@@ -584,8 +602,8 @@ void StepListedCollisionPart(ListedCollisionPart* self, f32 t)
     if (self->f550 != 0) {
         return;
     }
-    RotateMatrixUpright((Mat02*)((u8*)self + 0xD0), 0, &buf);
-    SteerColliderTowardRotation(self, &buf, (s32)self->p214, (void*)&D_00248D30, (s32)self->p218, t);
+    RotateMatrixUpright((Mat02*)((u8*)self + 0xD0), 0, (Mat02*)&buf);
+    SteerColliderTowardRotation(self, (Mat02*)&buf, (f32*)self->p214, (Vec02*)&D_00248D30, (f32*)self->p218, t);
 }
 
 void SetPooledObjectPlayerHold(PooledObject* self, s32 v)
@@ -605,10 +623,10 @@ void SetPooledObjectPlayerHold(PooledObject* self, s32 v)
         self->desc02()->m20(self, (Vec02*)&D_00248D30);
         self->desc02()->m21(self, (Vec02*)&D_00248D30);
         SetColliderAnchors(self, 3, 0, 3, 0);
-        RotateMatrixUpright((u8*)g_player + 0x110, 0, f.a);
-        RotateMatrixUpright((u8*)self + 0x110, f.c, f.b);
-        MatrixToAxisAngle(f.c, f.e, f.d);
-        MultiplyMatrices3x3(f.a, f.b, (s32)self->f224);
+        RotateMatrixUpright((Mat02*)((u8*)g_player + 0x110), 0, (Mat02*)f.a);
+        RotateMatrixUpright((Mat02*)((u8*)self + 0x110), (Mat02*)f.c, (Mat02*)f.b);
+        MatrixToAxisAngle((Mat02*)f.c, (f32*)f.e, (Vec02*)f.d);
+        MultiplyMatrices3x3((Mat02*)f.a, (Mat02*)f.b, (Mat02*)self->f224);
         TriggerScriptEvent(self, 2, 0, 0);
     }
     self->state = v;
@@ -621,7 +639,7 @@ s32 CountHeldPooledChildren(PlacedObject* self)
     s32 count = 0;
     void* node = w.First();
     while (node != 0) {
-        if (IsObjectOfKind(node, 70)) {
+        if (IsObjectOfKind((BaseObject*)node, 70)) {
             s32 x = ((PooledObject*)node)->state;
             if (1 < (u32)(x - 3)) {
             } else {
@@ -640,7 +658,7 @@ void* FindEarliestPooledChild(PlacedObject* self)
     f32 bestF = 3.4028235e+38f;
     void* node = w.First();
     while (node != 0) {
-        if (IsObjectOfKind(node, 0x46)) {
+        if (IsObjectOfKind((BaseObject*)node, 0x46)) {
             PooledObject* n = (PooledObject*)node;
             if (n->state == 4 && n->stateTime < bestF) {
                 best = node;
@@ -654,7 +672,7 @@ void* FindEarliestPooledChild(PlacedObject* self)
 
 void* GetActiveSwitchedCollider(void);
 f32 WrapAngle(f32 a);
-f32 ArctangentOfRatio(f32 y, f32 x);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 void FindRingPointTowardCollider(PlacedObject* self, Vec02* out, f32* angleOut)
 {

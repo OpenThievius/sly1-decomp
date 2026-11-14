@@ -30,7 +30,7 @@ func_001DBA38	ReadBufferedBlockBody	when D_0027571C is set, aligns the stream (A
 func_001DBA90	SetWorldGravityZ	stores the vector (0, 0, z) as the world's gravity at +0x1EE0; InitWorldPools calls it
 func_001DBAC0	SetCachedVoiceParamBuiltin	the script built-in func_00104220 calls: passes its two arguments to SetCachedVoiceParam
 func_001DBAE0	GetCachedVoiceParamBuiltin	returns GetCachedVoiceParam of the index, for the script built-ins
-func_001DBB00	RefreshCachedVoiceParamBuiltin	returns RefreshCachedVoiceParam of its two arguments, for the script built-ins
+func_001DBB00	RefreshCachedVoiceParamBuiltin	calls RefreshCachedVoiceParam with its two arguments, for the script built-ins
 func_001DBB20	IsWorldBodyLimitReached	returns 1 when the object's class has flag bit 2, the world already counts 0xF7 or more bodies (+0x38) and the value is 0; func_0013D278 asks it
 func_001DBB50	TakeAttachRecord	takes a 0x10-byte entry from the world's pool at +0x1B08 and clears 16 bytes; its callers store it as an Attach03 link
 func_001DBB90	ReleaseAttachRecords	walks an Attach03 chain by nextOwn and pushes each node back on the world's pool at +0x1B08
@@ -90,7 +90,7 @@ func_001DDB20	ShowPauseMenuPageWith	the script built-in func_00103EB0 calls: sto
 func_001DDB58	ShowCountedScreenElement	increments the counter at 0x2320 and, on reaching 1, sets the hold time of the screen element D_002721D0 to 0 and calls its slot 14
 func_001DDBB8	HideCountedScreenElement	decrements the counter at 0x2320 and, on reaching 0, calls slot 15 of the screen element D_002721D0
 func_001DDBF8	PushSoundLevelBuiltin	passes the record to PushSoundLevel, for the script built-ins
-func_001DDC18	RemoveSoundLevelBuiltin	returns RemoveSoundLevelAndRecompute of the record, for the script built-ins
+func_001DDC18	RemoveSoundLevelBuiltin	calls RemoveSoundLevelAndRecompute on the record, for the script built-ins
 func_001DDC38	SetWorldActiveFollower	stores the object at +0x2324 of the world; HandlePathFollowerActivation passes the activated class 0x19 follower
 func_001DDC40	NotifyWorldActiveFollower	calls the slot at word 50 of the table of the object at +0x2324 of the world, when it has one (func_001EA118 calls it)
 func_001DDC78	SetWorldFlagBit	sets bit n in the word at 0x235C

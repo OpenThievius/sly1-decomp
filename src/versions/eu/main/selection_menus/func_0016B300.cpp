@@ -25,7 +25,7 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
             }
         }
         if (slot) {
-            OpenKeyRecord(slot);
+            OpenKeyRecord((KeyRecord*)slot);
             D_eu_00275374 = HasStreamVoice();
         }
     }
@@ -33,11 +33,11 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
     if (h) {
         if (self->choice == -1) {
             if (a != 0) {
-                TeleportStateWalker(h, D_00262860[a].targetKey);
+                TeleportStateWalker((StateWalker*)h, D_00262860[a].targetKey);
                 SetStateWalkerTarget(self->walkers[0].walker, D_00262860[a].walkerKey);
             }
         } else {
-            SetStateWalkerTarget(h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
+            SetStateWalkerTarget((StateWalker*)h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
         }
     }
     self->choice = a;

@@ -145,19 +145,19 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
                 WalkerHost* h = ((WalkerHost*)self->f26D4)->list[i];
                 if (i < g_currentLevelRecord->f438) {
                     if (all) {
-                        SetStateWalkerTarget(h->f2D4, 0x22F);
+                        SetStateWalkerTarget((StateWalker*)h->f2D4, 0x22F);
                     } else {
-                        SetStateWalkerTarget(h->f2D4, 0x230);
+                        SetStateWalkerTarget((StateWalker*)h->f2D4, 0x230);
                     }
                 } else {
-                    SetStateWalkerTarget(h->f2D4, 0x231);
+                    SetStateWalkerTarget((StateWalker*)h->f2D4, 0x231);
                 }
             }
             if (all) {
-                SetStateWalkerTarget(((WalkerHost*)self->f26D4)->f2D8, 0x22F);
+                SetStateWalkerTarget((StateWalker*)(((WalkerHost*)self->f26D4)->f2D8), 0x22F);
                 g_currentLevelRecord->f448 |= ((WalkerHost*)self->f26D4)->f2D0;
             } else {
-                SetStateWalkerTarget(((WalkerHost*)self->f26D4)->f2D8, 0x230);
+                SetStateWalkerTarget((StateWalker*)(((WalkerHost*)self->f26D4)->f2D8), 0x230);
             }
             f32* e = FindAnimationMarkerEvent(((PlayerNoticePlayer*)self->watched2230)->anim, 0x13F);
             if (e == 0) {

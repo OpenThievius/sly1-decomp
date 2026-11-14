@@ -46,7 +46,10 @@ struct Timer68 {
 // func_0014CBA8 hands a free slot to the pool's chosen agent (NumberedAgent::fC28), which
 // clears `taken` when it is done with it (func_0014BD38, func_0014BF88 through ContactAgent::fC20).
 struct GaugeSlot {
-    void* obj;              // 0x00
+    union {
+        s32 id;             // 0x00: the object's id, until PostLoad finds it
+        BaseObject* obj;    // 0x00
+    };
     void* f4;               // 0x04: the object whose position and rotation the agent takes
     void* f8;               // 0x08
     void* key;              // 0x0C
@@ -99,7 +102,7 @@ typedef char check_GaugeManager[sizeof(GaugeManager) == 0x6A0 ? 1 : -1];
 void InitGaugeManager(GaugeManager* self);                       // slot 0
 void HandleGaugeManagerNotification(GaugeManager* self, s32 kind, void* key);  // slot 13
 void BlendParamSets(GaugeManager* self);                       // slot 16
-void UpdateGaugeManager(GaugeManager* self);                       // slot 17
+void UpdateGaugeManager(GaugeManager* self, f32 dt);                       // slot 17
 void ShowGaugeManagerDisplays(GaugeManager* self);                       // slot 46
 
 #endif

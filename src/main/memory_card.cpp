@@ -28,50 +28,50 @@ extern u8 D_002BE540[];
 extern u8 D_002BE9C0[];
 
 s32 InitMemoryCardClient(void);
-void* FillMemory(void* p, s32 value, s32 size);
-s32 CreateLockSemaphore(s32 a, s32 b);
-s32 AwaitSemaphore(void* a);
-void PostSemaphore(void* a);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
+extern "C" s32 AwaitSemaphore(void* a);
+extern "C" void PostSemaphore(void* a);
 s32 EndOwnThread();
 void SetThreadPriority(s32 thread, s32 b);
-s32 SyncCardRequest(void* a0, s32* a1, s32* a2);
+s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2);
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 a, s32 b);
-s32 GetStringLength(void* p);
-void* CopyString(void* dst, void* src);
+extern "C" s32 GetStringLength(const char* s);
+void* CopyString(void* dst, const char* src);
 s32 FormatToString(char* dst, const char* fmt, ...);
-s32 GetKeyIdSecond(void* p);
+s32 GetKeyIdSecond(KeyId* key);
 void ApplyPadPatternSetting(GameProgress* ctx);
-void ResetGameProgress(void* self);
-s32 ChecksumGameProgress(void* img);
-void ConvertStringToCharCodes(void* p, void* q);
-void* RequestCardSpaceForPath(void*, void*, const char*);
-s32 ReadCardDirectory(void* a, void* b, const void* c, s32 d, s32 e, void* f);
-s32 GetCardInfo(void* a, void* b, s32* c, s32* d, s32* e);
-void* RequestCardFormat(s32, s32);
-void* MakeCardDirectory(s32, s32, void*);
-void* OpenCardFile(s32, s32, void*, void*);
-void* CloseCardFile(void*);
-s32 ReadCardFile(void* a, void* b, void* c);
-void* WriteCardFile(void*, void*, void*);
-void ClearKeyId(void* p);
+void ResetGameProgress(GameProgress* self);
+s32 ChecksumGameProgress(GameProgress* s);
+void ConvertStringToCharCodes(u8* src, u16* dst);
+s32 RequestCardSpaceForPath(s32 a0, s32 a1, const char* a2);
+s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, void* buf);
+s32 GetCardInfo(s32 port, s32 slot, s32* type, s32* freeBlocks, s32* format);
+s32 RequestCardFormat(s32 port, s32 slot);
+s32 MakeCardDirectory(s32 a0, s32 a1, const char* a2);
+s32 OpenCardFile(s32 port, s32 slot, const char* name, s32 mode);
+s32 CloseCardFile(s32 fd);
+s32 ReadCardFile(s32 fd, void* buf, s32 size);
+s32 WriteCardFile(s32 fd, const void* src, s32 n);
+void ClearKeyId(KeyId* p);
 void PushBackMemoryMark(void);
 u8* AllocateBackMemory(s32 size);
 void PopBackMemoryMark(void);
 s32 InitBufferedStream(BufferedStream* o, s32 a, u8* b, s32 c);
 s32 OpenBufferedSectorStreamRange(BufferedStream* o, KeyId* p);
-void ReadBufferedStreamBytes(BufferedStream* o, s32 n, u8* d);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 void CloseBufferedStream(BufferedStream* o);
 void DestroyBufferedStream(BufferedStream* o, s32 f);
 
 void InitBackgroundJob(BackgroundJob* self);
 void StartBackgroundJob(BackgroundJob* job, void* fn, void* arg);
 void WaitForBackgroundJob(BackgroundJob* job);
-s32 IsBackgroundJobRunning(void* p);
+s32 IsBackgroundJobRunning(BackgroundJob* p);
 s32 ClassifyMemoryCardCallResult(s32 value);
 s32 ClassifyMemoryCardSyncResult(s32 value);
 s32 MapMemoryCardErrorCode(s32 a, s32 b);
-s32 SyncMemoryCardResult(void* a0, void* a1, s32* a2);
-s32 FinishMemoryCardCall(s32 value, void* first, s32 second);
+s32 SyncMemoryCardResult(s32 noWait, s32 call, s32* out);
+s32 FinishMemoryCardCall(s32 value, s32 call, s32* out);
 void InitMemoryCard(MemoryCard* self, s32 a, s32 b);
 s32 CompareMemoryCardEntryTimes(void* lhs, void* rhs);
 void SetMemoryCardState(MemoryCard* self, s32 value);
@@ -81,8 +81,8 @@ s32 SaveGameToMemoryCardSlot(MemoryCard* self);
 s32 ListMemoryCardDirectory(void* a, u8* b, s32 c, u8* d, s32* e);
 s32 CheckMemoryCardFileExists(void* a0, void* a1, void* a2);
 s32 WriteMemoryCardSaveHeader(void* owner, void* a1, void* a2);
-s32 WriteMemoryCardIcon(void* self, void* b);
-s32 WriteMemoryCardKeyedFile(void* self, s32 a1, void* key, s32 a3);
+s32 WriteMemoryCardIcon(void* self, const char* dir);
+s32 WriteMemoryCardKeyedFile(void* self, const char* dir, void* key, const char* name);
 s32 ReadMemoryCardSlotFile(void* a0, void* a1, GameProgress* out, void* info);
 s32 WriteMemoryCardSlotFile(void* owner, void* name, void* state);
 s32 WriteMemoryCardSlot(void* a0, void* a1, void* a2, void* a3);
@@ -90,10 +90,10 @@ s32 PollMemoryCard(MemoryCard* o);
 s32 GetMemoryCardFreeBytes(void* a0, s32* a1);
 s32 FormatMemoryCard(void* p);
 s32 CreateMemoryCardDirectory(void* p, void* value);
-s32 OpenMemoryCardFile(void* p, void* a1, void* a2, void* a3);
-s32 CloseMemoryCardFile(void* unused, void* value);
-s32 ReadMemoryCardFile(void* a0, void* a1, void* a2, void* a3, void* a4);
-s32 WriteMemoryCardFile(void* unused, void* a1, void* a2, void* a3, void* a4);
+s32 OpenMemoryCardFile(void* p, const char* name, s32 mode, s32* fd);
+s32 CloseMemoryCardFile(void* unused, s32 fd);
+s32 ReadMemoryCardFile(void* unused, s32 fd, void* buf, s32 size, s32* got);
+s32 WriteMemoryCardFile(void* unused, s32 fd, const void* data, s32 n, s32* got);
 s32 CreateMemoryCardFile(void* self, void* code, void* data, s32 version);
 
 void InitMemoryCardSystem(void)
@@ -155,7 +155,7 @@ void WaitForBackgroundJob(BackgroundJob* job)
     PostSemaphore(job->semaphore);
 }
 
-s32 IsBackgroundJobRunning(void* p)
+s32 IsBackgroundJobRunning(BackgroundJob* p)
 {
 	return *(s32*)((char*)p + 4) != -1;
 }
@@ -212,7 +212,7 @@ struct CardFileInfo {
 void ConvertMemoryCardDirEntry(CardDirEntry* s, CardFileInfo* d)
 {
     FillMemory(d, 0, 0x5C);
-    CopyString(d, s->sub20);
+    CopyString(d, (const char*)s->sub20);
     d->f44 = s->f10;
     if (s->f14 & 0x1) {
         d->flags |= 0x1;
@@ -419,24 +419,24 @@ s32 MapMemoryCardErrorCode(s32 a, s32 b)
     return r;
 }
 
-s32 SyncMemoryCardResult(void* a0, void* a1, s32* a2)
+s32 SyncMemoryCardResult(s32 noWait, s32 call, s32* out)
 {
     CardCallResult t;
-    s32 r = ClassifyMemoryCardSyncResult(SyncCardRequest(a0, &t.a, &t.b));
-    if (a2) {
-        *a2 = t.b;
+    s32 r = ClassifyMemoryCardSyncResult(SyncCardRequest(noWait, &t.a, &t.b));
+    if (out) {
+        *out = t.b;
     }
     if (r == 0x21) {
-        r = MapMemoryCardErrorCode((s32)a1, t.b);
+        r = MapMemoryCardErrorCode(call, t.b);
     }
     return r;
 }
 
-s32 FinishMemoryCardCall(s32 value, void* first, s32 second)
+s32 FinishMemoryCardCall(s32 value, s32 call, s32* out)
 {
 	s32 result = ClassifyMemoryCardCallResult(value);
 	if (result == 29)
-		result = SyncMemoryCardResult(0, first, (s32*)second);
+		result = SyncMemoryCardResult(0, call, out);
 	return result;
 }
 
@@ -446,8 +446,8 @@ void InitMemoryCard(MemoryCard* self, s32 a, s32 b)
     self->state = -1;
     self->targetState = 0;
     SetMemoryCardDisplayMode(self, 0);
-    self->port = (void*)a;
-    self->slot = (void*)b;
+    self->port = a;
+    self->slot = b;
     self->i4F48 = 0;
     self->i4F44 = 0;
 }
@@ -521,7 +521,7 @@ loop: {
             s32 r = CompareMemoryCardEntryTimes((u8*)self->f4F48 + 0x1A00, p);
             if (r < 0) self->f4F48 = e;
         } else {
-            ResetGameProgress(e);
+            ResetGameProgress((GameProgress*)e);
         }
         p = (CardSlot*)((u8*)p + 0x1A5C);
         e = (CardSlot*)((u8*)e + 0x1A5C);
@@ -554,23 +554,23 @@ s32 RunMemoryCardFormatJob(MemoryCard* self)
 }
 
 // The 16 bytes func_0018C1E8 hands func_001407A0: a KeyId and two words it leaves alone.
-struct KeyIdSlot { s32 w0; s32 w4; s32 w8; s32 wC; };
+struct KeyIdSlot { KeyId id; s32 w8; s32 wC; };
 
 s32 GetKeyedDataSize(KeyRecord* self)
 {
     KeyIdSlot key;
     s32 flag;
-    ClearKeyId(&key);
+    ClearKeyId(&key.id);
     if (self == 0) {
         flag = 0;
     } else {
         s32 x = self->wordB ^ self->maskB;
-        key.w0 = self->wordA ^ self->maskA;
-        key.w4 = x;
+        key.id.first = self->wordA ^ self->maskA;
+        key.id.second = x;
         flag = x != 0;
     }
     if (flag != 0) {
-        return GetKeyIdSecond(&key);
+        return GetKeyIdSecond((KeyId*)&key);
     }
     return 0;
 }
@@ -588,7 +588,7 @@ s32 CreateMemoryCardSaveFiles(MemoryCard* self)
 {
     char name[0x50];
     s32 info[4];
-    s32 r = FinishMemoryCardCall((s32)RequestCardSpaceForPath(self->port, self->slot, D_0024B340), (void*)0x12, (s32)info);
+    s32 r = FinishMemoryCardCall(RequestCardSpaceForPath(self->port, self->slot, D_0024B340), 0x12, info);
     if (r != 0) return r;
     s32 need = info[0] == 0 ? 2 : 1;
     s32 sz = GetKeyedDataSize((KeyRecord*)g_memoryCardIconKey);
@@ -604,7 +604,7 @@ s32 CreateMemoryCardSaveFiles(MemoryCard* self)
         if (r == 0) {
             r = WriteMemoryCardSaveHeader(self, (void*)dir, (void*)title);
             if (r == 0) {
-                r = WriteMemoryCardIcon(self, (void*)dir);
+                r = WriteMemoryCardIcon(self, dir);
                 if (r == 0) {
                     for (s32 i = 0; i < 3; i++) {
                         FormatToString(name, D_0024B3A0, D_0024B3B0, D_0024B3C8, i + 1);
@@ -632,7 +632,7 @@ s32 LoadMemoryCardSaveSlots(void* p) {
         s32 local50;
     s32 local54;
 
-    r = FinishMemoryCardCall(ReadCardDirectory(self->port, self->slot, D_0024B348, 0, -1, 0), (void*)0xD, (s32)&local50);
+    r = FinishMemoryCardCall(ReadCardDirectory(self->port, self->slot, D_0024B348, 0, -1, 0), 0xD, &local50);
     if (local50 <= 0) {
         GetMemoryCardFreeBytes(self, &local54);
         if (local54 <= 0xC3FF) {
@@ -731,10 +731,10 @@ s32 ListMemoryCardDirectory(void* ctx, u8* b, s32 c, u8* d, s32* e)
         return 0x25;
     }
     if (b != 0) {
-        if ((u32)GetStringLength(b) >= 0x41) {
+        if ((u32)GetStringLength((const char*)b) >= 0x41) {
             return 0xD;
         }
-        CopyString(D_002BE9C0, b);
+        CopyString(D_002BE9C0, (const char*)b);
         flag = 0;
     } else {
         flag = 1;
@@ -742,7 +742,7 @@ s32 ListMemoryCardDirectory(void* ctx, u8* b, s32 c, u8* d, s32* e)
     }
     buf = D_002BE540;
     FillMemory(buf, 0, 0x480);
-    r = FinishMemoryCardCall(ReadCardDirectory(a->port, a->slot, b, flag, c, buf), (void*)0xD, (s32)e);
+    r = FinishMemoryCardCall(ReadCardDirectory(a->port, a->slot, (const char*)b, flag, c, buf), 0xD, e);
     if (r != 0) {
         return r;
     }
@@ -885,7 +885,7 @@ s32 WriteMemoryCardSaveHeader(void* owner, void* a1, void* a2)
     c.f0B0 = 0.5f;
     c.f0B4 = 0.5f;
     c.f0B8 = 0.5f;
-    ConvertStringToCharCodes(a2, (u8*)&c + 0xC0);
+    ConvertStringToCharCodes((u8*)a2, (u16*)((u8*)&c + 0xC0));
     c.f104 = (*(IconFileName*)&D_0024B3D8);
     c.f144 = (*(IconFileName*)&D_0024B3D8);
     c.f184 = (*(IconFileName*)&D_0024B3D8);
@@ -893,9 +893,9 @@ s32 WriteMemoryCardSaveHeader(void* owner, void* a1, void* a2)
     return CreateMemoryCardFile(owner, &buf, &c, 0x3C4);
 }
 
-s32 WriteMemoryCardIcon(void* self, void* b)
+s32 WriteMemoryCardIcon(void* self, const char* dir)
 {
-    return WriteMemoryCardKeyedFile(self, (s32)b, (void*)g_memoryCardIconKey, (s32)D_0024B3D8);
+    return WriteMemoryCardKeyedFile(self, dir, (void*)g_memoryCardIconKey, D_0024B3D8);
 }
 
 struct KeyIdFromRecord : KeyId {
@@ -915,7 +915,7 @@ struct KeyIdFromRecord : KeyId {
     }
 };
 
-s32 WriteMemoryCardKeyedFile(void* self, s32 a1, void* k, s32 a3)
+s32 WriteMemoryCardKeyedFile(void* self, const char* dir, void* k, const char* name)
 {
     KeyRecord* key = (KeyRecord*)k;
     char text[0x50];
@@ -929,8 +929,8 @@ s32 WriteMemoryCardKeyedFile(void* self, s32 a1, void* k, s32 a3)
     PushBackMemoryMark();
     code = -1;
     (void)InitBufferedStream(&obj, 0x8040, AllocateBackMemory(0x8040), 0);
-    FormatToString(text, D_0024B3E0, a1, a3);
-    status = OpenMemoryCardFile(self, text, (void*)0x202, &code);
+    FormatToString(text, D_0024B3E0, dir, name);
+    status = OpenMemoryCardFile(self, text, 0x202, &code);
     if (status == 0) {
         if (!pair.Set(key) || !OpenBufferedSectorStreamRange(&obj, &pair)) {
             status = 0x27;
@@ -940,7 +940,7 @@ s32 WriteMemoryCardKeyedFile(void* self, s32 a1, void* k, s32 a3)
                 s32 n = 0x1000;
                 if (left <= 0xFFF) n = left;
                 ReadBufferedStreamBytes(&obj, n, data);
-                status = WriteMemoryCardFile(self, (void*)code, data, (void*)n, &got);
+                status = WriteMemoryCardFile(self, code, data, n, &got);
                 if (status) goto done;
                 left -= got;
                 if (got != n) { status = 7; goto done; }
@@ -949,7 +949,7 @@ s32 WriteMemoryCardKeyedFile(void* self, s32 a1, void* k, s32 a3)
         }
     done:
         CloseBufferedStream(&obj);
-        s32 r = CloseMemoryCardFile(self, (void*)code);
+        s32 r = CloseMemoryCardFile(self, code);
         if (status == 0) status = r;
         PopBackMemoryMark();
     }
@@ -975,9 +975,9 @@ s32 ReadMemoryCardSlotFile(void* a0, void* a1, GameProgress* out, void* i)
     if ((info->flags & 0xD4) != 4) return 20;
     size = info->f44;
     if (size != 0x1A00) return 28;
-    r = OpenMemoryCardFile(a0, a1, (void*)1, &handle);
+    r = OpenMemoryCardFile(a0, (const char*)a1, 1, &handle);
     if (r != 0) return r;
-    r = ReadMemoryCardFile(a0, (void*)handle, &buf, (void*)0x1A00, &got);
+    r = ReadMemoryCardFile(a0, handle, &buf, 0x1A00, &got);
     if (r == 0) {
         r = 8;
         if (got == size) {
@@ -989,7 +989,7 @@ s32 ReadMemoryCardSlotFile(void* a0, void* a1, GameProgress* out, void* i)
             }
         }
     }
-    CloseMemoryCardFile(a0, (void*)handle);
+    CloseMemoryCardFile(a0, handle);
     return r;
 }
 
@@ -1003,13 +1003,13 @@ s32 WriteMemoryCardSlotFile(void* owner, void* name, void* s)
     state->type = 18;
     state->size = 0x1A00;
     return CreateMemoryCardFile(owner, name,
-        (state->handle = ChecksumGameProgress(state), state), 0x1A00);
+        (state->handle = ChecksumGameProgress((GameProgress*)state), state), 0x1A00);
 }
 
 s32 WriteMemoryCardSlot(void* a0, void* a1, void* a2, void* a3)
 {
     u8 local[0x60];
-    ResetGameProgress(a2);
+    ResetGameProgress((GameProgress*)a2);
     if (a3 == 0) a3 = local;
     s32 result = WriteMemoryCardSlotFile(a0, a1, (ProgressHeader*)a2);
     if (result != 0) return result;
@@ -1018,7 +1018,7 @@ s32 WriteMemoryCardSlot(void* a0, void* a1, void* a2, void* a3)
 
 s32 PollMemoryCard(MemoryCard* o)
 {
-    s32 r = FinishMemoryCardCall(GetCardInfo(o->port, o->slot, &o->f24, &o->freeBlocks, &o->f2C), (void*)1, 0);
+    s32 r = FinishMemoryCardCall(GetCardInfo(o->port, o->slot, &o->f24, &o->freeBlocks, &o->f2C), 1, 0);
     switch (r) {
     case 9:
     case 11:
@@ -1047,7 +1047,7 @@ s32 PollMemoryCard(MemoryCard* o)
 s32 GetMemoryCardFreeBytes(void* p, s32* a1)
 {
     MemoryCard* a0 = (MemoryCard*)p;
-    s32 v = FinishMemoryCardCall(GetCardInfo(a0->port, a0->slot, &a0->f24, &a0->freeBlocks, &a0->f2C), (void*)1, 0);
+    s32 v = FinishMemoryCardCall(GetCardInfo(a0->port, a0->slot, &a0->f24, &a0->freeBlocks, &a0->f2C), 1, 0);
     switch (v) {
     case 9: v = 0; break;
     case 10: v = 12; break;
@@ -1058,36 +1058,36 @@ s32 GetMemoryCardFreeBytes(void* p, s32* a1)
 
 s32 FormatMemoryCard(void* p)
 {
-	void* result = RequestCardFormat(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8));
-	return FinishMemoryCardCall((s32)result, (void*)0x10, 0);
+	s32 result = RequestCardFormat(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8));
+	return FinishMemoryCardCall(result, 0x10, 0);
 }
 
 s32 CreateMemoryCardDirectory(void* p, void* value)
 {
-	s32 result = FinishMemoryCardCall((s32)MakeCardDirectory(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), value), (void*)0xB, 0);
+	s32 result = FinishMemoryCardCall(MakeCardDirectory(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), (const char*)value), 0xB, 0);
 	return result == 0x18 ? 0 : result;
 }
 
-s32 OpenMemoryCardFile(void* p, void* a1, void* a2, void* a3)
+s32 OpenMemoryCardFile(void* p, const char* name, s32 mode, s32* fd)
 {
-	return FinishMemoryCardCall((s32)OpenCardFile(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), a1, a2), (void*)2, (s32)a3);
+	return FinishMemoryCardCall(OpenCardFile(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), name, mode), 2, fd);
 }
 
-s32 CloseMemoryCardFile(void* unused, void* value)
+s32 CloseMemoryCardFile(void* unused, s32 fd)
 {
-	return FinishMemoryCardCall((s32)CloseCardFile(value), (void*)3, 0);
+	return FinishMemoryCardCall(CloseCardFile(fd), 3, 0);
 }
 
 LINKER_REMNANT(func_0018D2E0);
 
-s32 ReadMemoryCardFile(void* a0, void* a1, void* a2, void* a3, void* a4)
+s32 ReadMemoryCardFile(void* unused, s32 fd, void* buf, s32 size, s32* got)
 {
-    return FinishMemoryCardCall(ReadCardFile(a1, a2, a3), (void*)5, (s32)a4);
+    return FinishMemoryCardCall(ReadCardFile(fd, buf, size), 5, got);
 }
 
-s32 WriteMemoryCardFile(void* unused, void* a1, void* a2, void* a3, void* a4)
+s32 WriteMemoryCardFile(void* unused, s32 fd, const void* data, s32 n, s32* got)
 {
-	return FinishMemoryCardCall((s32)WriteCardFile(a1, a2, a3), (void*)6, (s32)a4);
+	return FinishMemoryCardCall(WriteCardFile(fd, data, n), 6, got);
 }
 
 
@@ -1095,11 +1095,11 @@ s32 CreateMemoryCardFile(void* self, void* code, void* data, s32 version)
 {
     CardCallResult result;
     result.a = -1;
-    s32 status = OpenMemoryCardFile(self, code, (void*)514, &result.a);
+    s32 status = OpenMemoryCardFile(self, (const char*)code, 514, &result.a);
     if (status != 0) return status;
-    status = WriteMemoryCardFile(self, (void*)result.a, data, (void*)version, &result.b);
+    status = WriteMemoryCardFile(self, result.a, data, version, &result.b);
     if (status == 0) status = result.b == version ? 0 : 7;
-    CloseMemoryCardFile(self, (void*)result.a);
+    CloseMemoryCardFile(self, result.a);
     return status;
 }
 

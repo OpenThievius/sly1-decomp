@@ -11,7 +11,7 @@ struct LibcState {
 
 extern s32 g_systemCallError;
 
-s32 SignalProcess(s32 pid, s32 sig);
+s32 SignalProcess(s32 mode, s32 status);
 s32 GetProcessId(void);
 
 s32 SendSignalFor(struct LibcState* state, s32 pid, s32 sig)

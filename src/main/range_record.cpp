@@ -13,9 +13,12 @@
 #include "game_clock.h"
 #include "cursor_animator.h"
 #include "asm_func.h"
+struct Mat02;
+struct Vec02;
+
 
 void InvalidateRangeRecordPacket(RangeRecord* o);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern s32 g_meshQueueCount;
 extern u8 D_0027DC20[];
 void LinkRangeRecord(RangeRecord* self, s32 code);
@@ -24,15 +27,16 @@ void StoreRangeRecordNear(RangeRecord* self, f32 v);
 void StoreRangeRecordFar(RangeRecord* self, f32 v);
 AnimRecord* FindAnimRecord(s32 key);
 void UpdateRangeRecordBounds(RangeRecord* o);
-s32 ReadBufferedU8(void* src);
+struct BufferedStream;
+s32 ReadBufferedU8(BufferedStream* self);
 PathCurve* CreatePathCurve(s32 kind);
 void ReadPropertyRecords(void* self, void* obj);
 void BuildRangeRecordPacket(void* o);
 s32 RangeRecordReachesSphere(RangeRecord* node, void* a1, f32 f);
-f32 Tangent(RangeRecord* o, f32 s);
+extern "C" f32 Tangent(f32 x);
 extern u8 D_00248400[];
-void BuildMatrixFromRotationAndTranslation(void* a, void* b, Mat4A* dst);
-void ReparentObject(BaseObject* self, void* other);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
+void ReparentObject(BaseObject* self, BaseObject* parent);
 
 // The file's .data, in retail's order.
 f32 D_002744F0 = 50.0f;
@@ -183,7 +187,7 @@ void StoreRangeRecordOuter(RangeRecord* o, f32 v)
 }
 
 void ScaleRangeRecordByAngle(RangeRecord* o, f32 s) {
-    f32 t = Tangent(o, s * 0.00872664712f);
+    f32 t = Tangent(s * 0.00872664712f);
     o->f04 = t * o->f40;
     o->f08 = t * o->f44;
     InvalidateRangeRecordPacket(o);
@@ -247,17 +251,17 @@ struct RangeFacePair { s32 part; s32 slot; };
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 typedef s32 (*RangeBodyFilter)(void*, Collider*);
-void GatherCollidersInSphere(f32 radius, World* world, s32 a, Vec02* centre, RangeBodyFilter filter, s32 b, s32* count, Collider*** list);
-s32 CollectTreeNodeSpans(void* tree, Vec02* from, Vec02* to, s32 a, s32 b, MeshHit* hit);
+void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 
-void UpdateRangeRecord(RangeRecord* self)
+void UpdateRangeRecord(RangeRecord* self, f32 dt)
 {
     Vec02 a;
     Vec02 b;
     s32 count;
     Collider** list;
     PushBackMemoryMark();
-    GatherCollidersInSphere(self->f60, g_currentWorld, 0, &self->v50, IsRangeRecordBodyCandidate, 0, &count, &list);
+    GatherCollidersInSphere(g_currentWorld, 0, self->f60, &self->v50, (s32 (*)(void*, Collider*))IsRangeRecordBodyCandidate, 0, &count, &list);
     if (count != 0) {
         *(Vu0::Vec*)&a = Vu0::MulAddX(Vu0::Vec::Of(self->v10), Vu0::Vec::Of(self->v20), Vu0::Vec::ScalarAt(self->f40));
         *(Vu0::Vec*)&b = Vu0::MulAddX(Vu0::Vec::Of(self->v10), Vu0::Vec::Of(self->v20), Vu0::Vec::ScalarAt(self->f44));
@@ -265,7 +269,7 @@ void UpdateRangeRecord(RangeRecord* self)
     MeshHit hit;
     for (s32 i = 0; i < count; i++) {
         Collider* obj = list[i];
-        if (CollectTreeNodeSpans(obj->tree.nodes, &a, &b, 0, 1, &hit) != 0) {
+        if (CollectTreeNodeSpans(obj->tree.nodes, &a, &b, 0, 1, (ColliderSpan*)&hit) != 0) {
             if (hit.part != 0) {
                 s32 face = ((u8*)hit.part - (u8*)obj->meshCopy.faces) >> 5;
                 s32 end = obj->faceStarts[face + 1];
@@ -305,17 +309,17 @@ struct RangeUniforms {
 };
 void* InitPacketWriter(PacketWriter* p);
 void UsePacketBufferMemory(PacketWriter* b, s32 n, void* q);
-void ReserveVifUnpack(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifFlushE(PacketWriter* s);
-void DetachPacketBuffer(PacketWriter* s, void* a, s32 b);
-void SubmitMeshQueueEntry(void* p);
-void BuildBasisFromXAndZHint(void* x, void* z, void* out);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
+void SubmitMeshQueueEntry(FrameTarget* self);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
-void InitIdentityMatrix(Mat4A* m);
-void BuildProjectionMatrix(Mat4A* out, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
-void BuildViewProjectionMatrix(void* pos, void* basis, Mat4A* proj, void* out);
-void CopyMemory(void* dst, void* src, s32 n);
+void InitIdentityMatrix(Mat4* self);
+void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
+void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out);
+void CopyMemory(void* dst, void* src, u32 size);
 extern u8 D_000003B0[];
 extern f32 D_002744F0;
 
@@ -343,20 +347,20 @@ void BuildRangeRecordPacket(RangeRecord* self)
                 dst = spare;
             }
             UsePacketBufferMemory(&pw, 0x20, (u8*)self + 0xD0);
-            ReserveVifUnpack(&pw, 0xC, 6, 0x16, 0, &p);
+            ReserveVifUnpack(&pw, 0xC, 6, 0x16, 0, (u8**)&p);
             AnimRecordEntry* ents = self->link->ents;
-            ReserveVifUnpack(&pw, 0xC, ents->type, 0x1C, dst, dst + 8);
+            ReserveVifUnpack(&pw, 0xC, ents->type, 0x1C, (s32*)dst, (u8**)(dst + 8));
             *(s32*)(dst + 4) = ents->addr;
             *(s32*)(dst + 0xC) = 0;
-            SubmitMeshQueueEntry(dst);
+            SubmitMeshQueueEntry((FrameTarget*)dst);
             WriteVifMscal(&pw, D_000003B0);
             WriteVifFlushE(&pw);
-            DetachPacketBuffer(&pw, &self->fC0, 0);
+            DetachPacketBuffer(&pw, (u32*)&self->fC0, 0);
             axis = self->v20;
             BuildBasisFromXAndZHint(&axis, &self->v30, &basis);
             if (AreFloatsNearlyEqual(self->f04, self->f08, 0.0001f) != 0) {
                 pos = self->v10;
-                InitIdentityMatrix(&proj);
+                InitIdentityMatrix((Mat4*)&proj);
                 f32 half = 0.5f;
                 f32 q = half / self->f04;
                 proj.m[0][0] = q;
@@ -371,7 +375,7 @@ void BuildRangeRecordPacket(RangeRecord* self)
                 f32 lo = self->f40 - k;
                 Vu0::Set(pos, Vu0::MulAddX(Vu0::Q(self->v10), Vu0::Q(axis), Vu0::Scalar(k)));
                 f32 hi = self->f44 - k;
-                BuildProjectionMatrix(&proj, 0.5f / (self->f04 / lo), 0.5f / (self->f04 / lo), 0.5f, 0.5f, lo, hi);
+                BuildProjectionMatrix((Mat4*)&proj, 0.5f / (self->f04 / lo), 0.5f / (self->f04 / lo), 0.5f, 0.5f, lo, hi);
                 if (lo < hi) {
                     p->nearZ = lo;
                     p->farZ = hi;
@@ -381,7 +385,7 @@ void BuildRangeRecordPacket(RangeRecord* self)
                 }
                 p->clipZ = p->nearZ - D_002744F0;
             }
-            BuildViewProjectionMatrix(&pos, &basis, &proj, (u8*)self + 0x70);
+            BuildViewProjectionMatrix((f32*)&pos, (f32*)&basis, &proj, (Quad16*)((u8*)self + 0x70));
             CopyMemory(p, (u8*)self + 0x70, 0x40);
             for (s32 i = 0; i < 4; i++) {
                 p->sizes[i] = ((((u8*)self->link) + i)[4] + 1) >> 1;
@@ -448,7 +452,7 @@ void CollectRangeRecordsInReach(World* self, void* a1, s32 max, s32* outCount, R
 
 void LoadPathCurveObject(PathCurveObject* self, void* obj)
 {
-    PathCurve* p = CreatePathCurve(ReadBufferedU8(obj));
+    PathCurve* p = CreatePathCurve(ReadBufferedU8((BufferedStream*)obj));
     self->curve = p;
     void (*fn)(PathCurve* self, void* stream) = p->vt->m00;
     if (fn != 0) {
@@ -463,12 +467,12 @@ void ReparentPathCurveObject(PathCurveObject* self, BaseObject* other)
     Mat4A b;
     PathCurve* h;
     if (self->parent) {
-        BuildMatrixFromRotationAndTranslation((u8*)self->parent + 0x140, (u8*)self->parent + 0x110, &a);
+        BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)self->parent + 0x140), (const Mat02*)((u8*)self->parent + 0x110), &a);
     } else {
         a = *(Mat4A*)D_00248400;
     }
     if (other) {
-        BuildMatrixFromRotationAndTranslation((u8*)other + 0x140, (u8*)other + 0x110, &b);
+        BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)other + 0x140), (const Mat02*)((u8*)other + 0x110), &b);
     } else {
         b = *(Mat4A*)D_00248400;
     }

@@ -10,10 +10,11 @@
 #include "globals.h"
 #include "packet_writer.h"
 #include "switched_collider.h"
+#include "object_finder.h"
 
 
 
-void InitObject(void* self);
+void InitObject(BaseObject* self);
 
 
 
@@ -26,22 +27,22 @@ struct TriangleGroupColor {
 };
 TriangleGroupColor g_triangleGroupGrey(0xBF, 0xBF, 0xBF, 0x7F);
 TriangleGroupColor g_triangleGroupBlue(0x00, 0x87, 0xFF, 0x7F);
-void* g_coloredTriangleSet;
+ColoredTriangleSet* g_coloredTriangleSet;
 
-void CopyObjectData(void* self);
+void CopyObjectData(BaseObject* self, BaseObject* src);
 
 
 
-void StartObject(void* self);
-s32 FindFirstObjectById(void* ref, s32 mode, s32 key, void* self);
+void StartObject(BaseObject* self);
 
 
 
 // NEAR: only li s8,12 / ori s7 (pre-loop hoist order) swapped; the rest matches
 
-void ReadPropertyRecords(BaseObject* o, Stream8E* r);
-s32 ReadBufferedU16(void* stream);
-f32 ReadBufferedFloat(Stream8E* r);
+struct BufferedStream;
+void ReadPropertyRecords(void* self, void* obj);
+u16 ReadBufferedU16(BufferedStream* self);
+f32 ReadBufferedFloat(BufferedStream* r);
 TrianglePoint* AllocateZeroedFrontMemory(s32 bytes);
 TriangleIndices* AllocateFrontMemory(s32 bytes);
 TriangleColor* FindAnimRecord(s32 key);
@@ -61,19 +62,19 @@ union Quad128Floats {
     f32 f[4];
 };
 
-void BuildUniformScaleAboutPoint(s32 zero, void* out, f32 v);
-void BeginGifTag(PacketWriter* p, s32 a, s32 b, u64 c);
-void AddGifRegisterWrite(PacketWriter* p, s32 a, u64 v);
+void BuildUniformScaleAboutPoint(void* point, void* out, f32 s);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void AddGifRgbaEntry(PacketWriter* p, u32 c);
-void AddGifXyzfEntry(PacketWriter* p, s32 a, s32 b, s32 c, s32 d);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 Quad128 TransformVector4(void* m, Quad128 v);
 
 void DrawTriangleGroups(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d);
 
-void CopyPointObject(C80* self)
+void CopyPointObject(C80* self, C80* src)
 {
     KeptBits tmp = self->keep;
-    CopyObjectData(self);
+    CopyObjectData(self, src);
     self->keep = tmp;
 }
 
@@ -99,18 +100,18 @@ void LoadColoredTriangles(ColoredTriangleSet* self, Stream8E* rd)
     s32 k;
 
     ReadPropertyRecords(self, rd);
-    self->pointCount = ReadBufferedU16(rd);
+    self->pointCount = ReadBufferedU16((BufferedStream*)rd);
     self->points = AllocateZeroedFrontMemory(self->pointCount << 4);
     for (i = 0; i < self->pointCount; i++) {
-        self->points[i].x = ReadBufferedFloat(rd);
-        self->points[i].y = -ReadBufferedFloat(rd);
+        self->points[i].x = ReadBufferedFloat((BufferedStream*)rd);
+        self->points[i].y = -ReadBufferedFloat((BufferedStream*)rd);
         self->points[i].w = 1.0f;
     }
-    self->minX = ReadBufferedFloat(rd);
-    self->minY = ReadBufferedFloat(rd);
+    self->minX = ReadBufferedFloat((BufferedStream*)rd);
+    self->minY = ReadBufferedFloat((BufferedStream*)rd);
     self->f4C = 1.0f;
-    self->maxX = ReadBufferedFloat(rd);
-    self->maxY = ReadBufferedFloat(rd);
+    self->maxX = ReadBufferedFloat((BufferedStream*)rd);
+    self->maxY = ReadBufferedFloat((BufferedStream*)rd);
     self->width = self->maxX - self->minX;
     self->f5C = 1.0f;
     m = 0;
@@ -127,13 +128,13 @@ void LoadColoredTriangles(ColoredTriangleSet* self, Stream8E* rd)
             *(u32*)&d = 0x80808080;
             r->col = d;
         }
-        r->count = ReadBufferedU16(rd);
+        r->count = ReadBufferedU16((BufferedStream*)rd);
         r->triangles = AllocateFrontMemory(r->count * 12);
         for (j = 0; j < r->count; j++) {
             TriangleIndices* e = &r->triangles[j];
-            e->a = ReadBufferedU16(rd);
-            e->b = ReadBufferedU16(rd);
-            e->c = ReadBufferedU16(rd);
+            e->a = ReadBufferedU16((BufferedStream*)rd);
+            e->b = ReadBufferedU16((BufferedStream*)rd);
+            e->c = ReadBufferedU16((BufferedStream*)rd);
         }
     }
 }
@@ -203,7 +204,7 @@ struct BlendColor {
 
 SwitchedCollider* GetActiveSwitchedCollider(void);
 extern Camera* g_camera;
-void ProjectPointToCamera(Camera* cam, void* pos, Vec02* out);
+void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
 
 void DrawColoredTriangles(ColoredTriangleSet* self, f32 t)
 {
@@ -215,7 +216,7 @@ void DrawColoredTriangles(ColoredTriangleSet* self, f32 t)
     if (o != 0 && (o = o->desc05()->m53(o)) != 0 && o->desc05()->m4D(o) == 2) {
         Vec02 v;
         f32 x, y;
-        ProjectPointToCamera(g_camera, &o->v140, &v);
+        ProjectPointToCamera(g_camera, &o->v140, (f32*)&v);
         x = ClampHelper::Clamp(v.x * 320.0f + 320.0f, 10.0f, 630.0f);
         mat[12] = (1.0f - t) * 320.0f + t * x;
         y = ClampHelper::Clamp(v.y * -246.40001f + 246.40001f, 16.0f, 476.80002f);

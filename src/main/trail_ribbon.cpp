@@ -10,6 +10,9 @@
 #include "hit_target.h"
 #include "deferred_request.h"
 #include "vu0.h"
+struct Mat02;
+struct Vec02;
+
 
 // A point of the ring: the time it was added, its alpha, and the ribbon's two edges.
 struct TrailPoint { f32 f0; f32 f4; u8 pad8[8]; f32 v10[4]; f32 v20[4]; };
@@ -18,7 +21,7 @@ struct TrailPoint { f32 f0; f32 f4; u8 pad8[8]; f32 v10[4]; f32 v20[4]; };
 // curve over age at +0x50.
 struct TrailRing {
     PlacedObject* f0;
-    s32 f4;
+    u8* f4;                 // the batch mode SetVertexBatchMode takes
     s32 f8;
     s32 fC;
     f32 f10;
@@ -44,12 +47,12 @@ struct TrailOwner {
 
 void* InitVertexBatch(VertexBatch* b);
 void BeginDmaTag(PacketWriter* g);
-void SetVertexBatchTransform(VertexBatch* b, u8* a, u8* c);
-void SetVertexBatchMode(VertexBatch* b, s32 v);
-void SelectVertexBatchLights(VertexBatch* b, u8* a, f32 f);
-void SetVertexTexCoord(VertexBatch* b, u8* src);
-void SetVertexColor(VertexBatch* b, Rgba4* c);
-void SetVertexPosition(VertexBatch* b, void* v);
+void SetVertexBatchTransform(VertexBatch* batch, void* a1, void* a2);
+void SetVertexBatchMode(VertexBatch* batch, u8* value);
+void SelectVertexBatchLights(VertexBatch* batch, void* center, f32 radius);
+void SetVertexTexCoord(VertexBatch* dst, U64P* src);
+void SetVertexColor(VertexBatch* batch, void* src);
+void SetVertexPosition(VertexBatch* body, Vec3* v);
 void AddVertex(VertexBatch* b, s32 z);
 void FlushVertexBatch(VertexBatch* b);
 void CloseDmaTag(PacketWriter* g);
@@ -67,10 +70,10 @@ void ResetTrailRing(TrailRing* o)
     o->f8 = 0;
 }
 
-void ComputeObjectMotionInFrame(void* obj, PlacedObject* top, void* point, Vec02* out, s32 a, s32 b, s32 c);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
-void BuildAxisAngleMatrix(Vec02* axis, Mat02* out, f32 angle);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 // A point's frame as func_001C29F8 steps it from the last placement to the new one.
 struct TrailFrame { Mat02 rot; Vec02 pos; };
@@ -191,7 +194,7 @@ done:
     self->mC70 = *mat;
 }
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void QueueDeferredRequest(DeferredRequest* src);
 
 void QueueTrailRibbonDraw(TrailRing* self, u8* cam)
@@ -248,17 +251,17 @@ void DrawTrailRibbon(TrailOwner* self)
             } else {
                 c.a = 0;
             }
-            SetVertexTexCoord(&b, g_trailEdgeTexCoord);
+            SetVertexTexCoord(&b, (U64P*)g_trailEdgeTexCoord);
             idx++;
             c2 = c;
             SetVertexColor(&b, &c2);
-            SetVertexPosition(&b, e->v10);
+            SetVertexPosition(&b, (Vec3*)e->v10);
             AddVertex(&b, 0);
             c.a = (s32)((f32)c.a * r->f10);
-            SetVertexTexCoord(&b, g_trailZeroTexCoord);
+            SetVertexTexCoord(&b, (U64P*)g_trailZeroTexCoord);
             c2 = c;
             SetVertexColor(&b, &c2);
-            SetVertexPosition(&b, e->v20);
+            SetVertexPosition(&b, (Vec3*)e->v20);
             AddVertex(&b, 0);
             if (idx >= 0x40)
                 idx = 0;

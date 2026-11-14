@@ -12,7 +12,7 @@ void DrawColoredTriangles(ColoredTriangleSet* self, f32 t)
     if (o != 0 && (o = o->desc05()->m53(o)) != 0 && o->desc05()->m4D(o) == 2) {
         Vec02 v;
         f32 x, y;
-        ProjectPointToCamera(g_camera, &o->v140, &v);
+        ProjectPointToCamera(g_camera, &o->v140, (f32*)&v);
         x = ClampHelper::Clamp(v.x * 320.0f + 320.0f, 10.0f, 630.0f);
         mat[12] = (1.0f - t) * 320.0f + t * x;
         y = ClampHelper::Clamp(v.y * -234.30508f + 234.30508f, 16.0f, 452.61017f);

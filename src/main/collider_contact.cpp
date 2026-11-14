@@ -8,6 +8,7 @@
 #include "scope_marker.h"
 #include "placed_object.h"
 #include "shapes.h"
+#include "world.h"
 
 // Contacts between colliders: the friction and bounce of a pair of surface kinds, the pooled
 // contact chains, the searches over a collider's edges, and class 0x03's contact method
@@ -47,7 +48,7 @@ SurfaceWeight g_surfaceBounce[13] = {
     {1.0f, 0.5f},
     {1.0f, 1.0f}
 };
-void InitPoseSource(void* self);
+void InitPoseSource(Attachment* self, PlacedObject* value);
 
 // Two surface kinds, indexes into the weight tables.
 struct SurfacePair { s32 a; s32 b; };
@@ -95,25 +96,26 @@ struct PooledContact {
     f32 f94;                // 0x94
     f32 f98;                // 0x98
     s32 kind;               // 0x9C
-    s32 fA0;                // 0xA0
-    s32 fA4;                // 0xA4
+    void* fA0;              // 0xA0
+    void* fA4;              // 0xA4
     u8 padA8[0xD0 - 0xA8];
     PooledContact* next;    // 0xD0
 };
 
-void* PopZeroedFreeSlot(void* pool);
-void TransformPointBetweenFrames(void* frame, void* part, void* in, void* out);
+struct Pool6C;
+void* PopZeroedFreeSlot(Pool6C* pool);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
-void NotifyContactEnds(void* a0, s32 n, Contact03** list);
+void NotifyContactEnds(World* world, s32 n, Contact03** list);
 
-s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7)
+PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7)
 {
     s32 surfaces[2];
     Vec02 k;
     PooledContact* c;
     s32 e;
     Collider* part;
-    c = (PooledContact*)PopZeroedFreeSlot((u8*)((BaseObject*)a0)->world + 0x1AFC);
+    c = (PooledContact*)PopZeroedFreeSlot((Pool6C*)((u8*)((BaseObject*)a0)->world + 0x1AFC));
     c->f90 = f;
     c->v80 = *(Vec02*)a3;
     PooledEnd* end = c->end;
@@ -162,14 +164,14 @@ s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s
     NotifyContactEnds(((BaseObject*)a0)->world, 1, (Contact03**)&c);
     c->next = *(PooledContact**)a7;
     *(PooledContact**)a7 = c;
-    return (s32)c;
+    return c;
 }
 
 // Carries each contact's end points into the world: an end on a part takes the part's frame
 // (TransformPointBetweenFrames), except for the kinds whose end lies on the part's sphere, where
 // the point is the part's centre moved by its radius against the contact's normal (kinds 4 to 6
 // at end 0, kinds 7 and 9 at end 1).
-void RefreshContactEndPoints(void* unused, s32 n, Contact03** list)
+void RefreshContactEndPoints(World* world, s32 n, Contact03** list)
 {
     for (s32 i = 0; i < n; i++) {
         Contact03* c = list[i];
@@ -202,17 +204,17 @@ void RefreshContactEndPoints(void* unused, s32 n, Contact03** list)
     }
 }
 
-void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
 
-void NotifyContactEnds(void* a0, s32 n, Contact03** list)
+void NotifyContactEnds(World* world, s32 n, Contact03** list)
 {
     for (s32 i = 0; i < n; i++) {
         Contact03* c = list[i];
         s32 e;
         for (e = 0; e < 2; e++) {
             if (c->end[e].part != 0) {
-                ComputeObjectMotionInFrame(c->end[e].part, 0, &c->end[e].v10, (u8*)&c->end[e] + 0x30, 0, 0, 0);
+                ComputeObjectMotionInFrame(c->end[e].part, 0, &c->end[e].v10, (Vec02*)((u8*)&c->end[e] + 0x30), 0, 0, 0);
                 ((void (*)(Collider*, Contact03*, s32))c->end[e].part->desc03()->m3B)(c->end[e].part, c, e);
             }
         }
@@ -229,15 +231,15 @@ void NotifyContactEnds(void* a0, s32 n, Contact03** list)
     }
 }
 
-void PushFreeSlot(u8* a, void* b);
+void PushFreeSlot(Pool6C* list, void* item);
 
-void FreePooledContactChain(u8* self, Contact03* head)
+void FreePooledContactChain(World* world, Contact03* head)
 {
     if (head != 0) {
         Contact03* cur = head;
         do {
             Contact03* next = cur->next;
-            PushFreeSlot(self + 0x1AFC, cur);
+            PushFreeSlot(&world->pool1AFC, cur);
             cur = next;
         } while (cur != 0);
     }
@@ -293,16 +295,17 @@ void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
 
 extern s32 g_vif0Channel;
 extern u8 D_00211E10[];
-void SyncDataCache(s32 unused);
-void StartDmaChain(void* dma, void* addr);
-s32 WaitDmaChannel(void* dma, s32 b, s32 c);
+extern "C" void SyncDataCache(s32 unused);
+struct DmaChannel;
+extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 extern u8 g_vif1Channel[];
 extern u8 D_00212110[];
 
-void SyncDataCache(s32 a);
-void StartDmaChain(void* a, void* b);
-s32 WaitDmaChannel(void* a, s32 b, s32 c);
+extern "C" void SyncDataCache(s32 a);
+extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 // An edge of a collision mesh (Mesh03::edges): its two vertex indices first.
 struct MeshEdge {
@@ -355,9 +358,9 @@ struct MeshHit {
 
 typedef char check_MeshHit[sizeof(MeshHit) == 0x70 ? 1 : -1];
 
-s32 CollectTreeNodeSpans(void* a, u8* b, u8* c, s32 d, s32 e, MeshHit* f);
+s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 
-s32 CollectEdgeContacts(s32 unused, Collider* self, u8* ctx, s32 cap, MeshHit* out)
+s32 CollectEdgeContacts(Collider* other, Collider* self, u8* ctx, s32 cap, MeshHit* out)
 {
     s32 i = self->meshCopy.edgeCount;
     i--;
@@ -368,7 +371,7 @@ s32 CollectEdgeContacts(s32 unused, Collider* self, u8* ctx, s32 cap, MeshHit* o
 
     while (i >= 0) {
         MeshEdge* e = &table[i];
-        total += CollectTreeNodeSpans(ctx, base + e->x * 16, base + e->y * 16, 0, cap - total, &out[total]);
+        total += CollectTreeNodeSpans((TreeNode03*)ctx, (Vec02*)(base + e->x * 16), (Vec02*)(base + e->y * 16), 0, cap - total, (ColliderSpan*)&out[total]);
         if (filled < total) {
             for (; filled < total; filled++)
                 out[filled].edge = e;
@@ -418,7 +421,7 @@ s32 CollectMeshEdgeHitsFromFaces(Collider* self, Collider* other, s32 n, FaceRef
                 if (!(far->flags & 1)) {
                     continue;
                 }
-                total += CollectTreeNodeSpans(self->tree.nodes, verts + e->x * 16, verts + e->y * 16, 0, cap - total, &out[total]);
+                total += CollectTreeNodeSpans((TreeNode03*)self->tree.nodes, (Vec02*)(verts + e->x * 16), (Vec02*)(verts + e->y * 16), 0, cap - total, (ColliderSpan*)&out[total]);
                 if (filled < total) {
                     for (; filled < total; filled++) {
                         out[filled].edge = e;
@@ -585,7 +588,7 @@ static inline f32 DotFloatMoved(Vu0::Vec a, Vu0::Vec b)
     return Vu0::ToFloatMoved(Vu0::Dot(a, b));
 }
 
-void CreateMeshPairContacts(Collider* self, Collider* other, void* a2, void* a3, u8* ctx, PooledContact** list)
+void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3, u8* ctx, PooledContact** list)
 {
     s32 counts[2];
     MeshHit hits[2][0x80];
@@ -604,8 +607,8 @@ void CreateMeshPairContacts(Collider* self, Collider* other, void* a2, void* a3,
     s32 j;
     MeshHit* e;
 
-    counts[0] = CollectEdgeContacts((s32)other, self, ctx, 0x80, hits[0]);
-    counts[1] = CollectMeshEdgeHitsFromFaces(self, other, (s32)a2, (FaceRef*)a3, 0x80, hits[1]);
+    counts[0] = CollectEdgeContacts(other, self, ctx, 0x80, hits[0]);
+    counts[1] = CollectMeshEdgeHitsFromFaces(self, other, a2, a3, 0x80, hits[1]);
     if (counts[0] == 0 && counts[1] == 0) {
         return;
     }
@@ -653,15 +656,15 @@ void CreateMeshPairContacts(Collider* self, Collider* other, void* a2, void* a3,
                 c->face54->flags &= ~8;
             }
             CreatePooledContact(bestDot - bestFace->dist, objs[0], objs[1], kp, bestFace, 1,
-                                (s32)&((Vec02*)objs[0]->meshCopy.verts)[key], (s32)bestFace, list);
+                                &((Vec02*)objs[0]->meshCopy.verts)[key], bestFace, list);
             for (h = g; h != 0; h = h->next) {
                 if (h->face54 == bestFace) {
                     continue;
                 }
                 f32 d = DotFloat(Vu0::Vec::Of(h->r1), Vu0::Vec::Of(bestFace->normal));
                 if (d < bestDot) {
-                    CreatePooledContact(d - bestFace->dist, objs[0], objs[1], &h->r1, bestFace, 2, (s32)h->edge,
-                                        (s32)bestFace, list);
+                    CreatePooledContact(d - bestFace->dist, objs[0], objs[1], &h->r1, bestFace, 2, h->edge,
+                                        bestFace, list);
                 }
             }
         }
@@ -701,7 +704,7 @@ void CreateMeshPairContacts(Collider* self, Collider* other, void* a2, void* a3,
                 Vu0::Vec t1 = Vu0::Vec::Scalar(params[1]);
                 Vu0::Vec b1 = Vu0::Vec::Of(*seg[3]);
                 *(Vu0::Vec*)&pts[1] = Vu0::MulXSum(a1, s1, b1, t1);
-                CreatePooledContact(-depth, self, other, pts, &normal, 3, (s32)e->edge, (s32)h->edge, list);
+                CreatePooledContact(-depth, self, other, pts, &normal, 3, e->edge, h->edge, list);
             }
         } else {
             MeshEdge* edge = e->edge;
@@ -729,7 +732,7 @@ void CreateMeshPairContacts(Collider* self, Collider* other, void* a2, void* a3,
             Vec02* p = &((Vec02*)self->meshCopy.verts)[edge->v[end]];
             PooledContact* c;
             for (c = *list; c != 0; c = c->next) {
-                if (c->kind == 1 && c->fA0 == (s32)p && c->fA4 == (s32)face) {
+                if (c->kind == 1 && c->fA0 == p && c->fA4 == face) {
                     break;
                 }
             }
@@ -737,7 +740,7 @@ void CreateMeshPairContacts(Collider* self, Collider* other, void* a2, void* a3,
                 continue;
             }
             CreatePooledContact(DotFloatMoved(Vu0::Vec::Of(*p), Vu0::Vec::Of(face->normal)) - face->dist, self, other,
-                                p, face, 1, (s32)p, (s32)face, list);
+                                p, face, 1, p, face, list);
         }
     next:;
     }
@@ -767,8 +770,10 @@ struct VertexHit {
 void PushBackMemoryMark();
 void* AllocateBackMemory(s32 size);
 void PopBackMemoryMark();
-s32 QueryPlaneTreePoint(void* tree, Vec02* center, f32 radius, FaceRef** cursor);
-s32 CollectTreeNodeSpans(void* a, Vec02* b, Vec02* c, s32 d, s32 e, MeshHit* f);
+struct PlaneTreeNode;
+struct PlaneTreeOutput;
+s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out);
+s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 
 // The squared distance between two points.
 static inline f32 DistanceSquared(const Vec02& a, const Vec02& b)
@@ -783,8 +788,7 @@ static inline f32 DistanceSquared(const Vec02& a, const Vec02& b)
 // the edge hits of the marked faces not hit whole (0x20), keeping the vertex hits found on the
 // way, and last the vertex hits no edge hit ends at. The list comes from func_0013E430 when no
 // cursor is given. The marks are cleared on the way out.
-s32 CollectMeshHits(Vec02* center, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out,
-                    f32 radius)
+s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out)
 {
     VertexHit verts[64];
     s32 n;
@@ -804,7 +808,7 @@ s32 CollectMeshHits(Vec02* center, s32 count, FaceRef* list, FaceRef* cursor, Me
     if (cursor == 0) {
         FaceRef* buf = (FaceRef*)AllocateBackMemory(count * sizeof(FaceRef));
         cursor = buf;
-        if (QueryPlaneTreePoint(list, center, radius, &cursor) != 2) {
+        if (QueryPlaneTreePoint((PlaneTreeNode*)list, center, radius, (PlaneTreeOutput*)&cursor) != 2) {
             goto done;
         }
         list = buf;
@@ -845,7 +849,7 @@ s32 CollectMeshHits(Vec02* center, s32 count, FaceRef* list, FaceRef* cursor, Me
         Vec02 pt;
         Vu0::Set(top, Vu0::MulAddX(Vu0::Q(*center), Vu0::Q(face->normal), Vu0::Scalar(radius)));
         Vu0::Set(bottom, Vu0::MulAddX(Vu0::Q(*center), Vu0::Q(face->normal), Vu0::Scalar(-radius)));
-        s32 m = CollectTreeNodeSpans(cursor, &top, &bottom, 0, 0x10, spans);
+        s32 m = CollectTreeNodeSpans((TreeNode03*)cursor, &top, &bottom, 0, 0x10, (ColliderSpan*)spans);
         s32 k;
         for (k = 0; k < m; k++) {
             MeshHit* h = &spans[k];
@@ -993,16 +997,15 @@ done:
     return n;
 }
 
-s32 CollectMeshHits(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, MeshHitEntry* a6);
-s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
-void AddMeshContacts(void* a0, f32 radius, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6)
+void AddMeshContacts(Collider* a0, f32 radius, Vec02* a1, Collider* a2, s32 a3, FaceRef* a4, FaceRef* a5, PooledContact** a6)
 {
     MeshHitEntry ents[64];
-    s32 n = CollectMeshHits(a1, a3, a4, a5, (u8*)a2 + 0x3A4, 0x40, ents);
+    s32 n = CollectMeshHits(a1, radius, a3, a4, a5, (Mesh03*)((u8*)a2 + 0x3A4), 0x40, ents);
     for (s32 i = n - 1; i >= 0; i--) {
         MeshHitEntry* e = &ents[i];
-        CreatePooledContact(e->depth, a0, a2, e, &e->normal, e->kind, 0, (s32)e->part, a6);
+        CreatePooledContact(e->depth, a0, a2, e, &e->normal, e->kind, 0, e->part, a6);
     }
 }
 
@@ -1064,16 +1067,16 @@ void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f)
 }
 
 
-s32 CollectTreeNodeSpans(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f);
-s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, void* a6, void* a7);
+PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
-s32 AddSweptPartMeshContact(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5)
+s32 AddSweptPartMeshContact(void* a0, void* a1, s32 a2, void* a3, void* a4, void* a5)
 {
     MeshHit recs[2];
     Vec4U v1;
     Vec4U v2;
-    s32 count = CollectTreeNodeSpans(a4, (u8*)a0 + 0x370, (u8*)a0 + 0x140, 0, 2, recs);
+    s32 count = CollectTreeNodeSpans((TreeNode03*)a4, (Vec02*)((u8*)a0 + 0x370), (Vec02*)((u8*)a0 + 0x140), 0, 2, (ColliderSpan*)recs);
     s32 idx = 0;
     if (count > 0) {
         idx = (recs[0].p50 == 0);
@@ -1137,14 +1140,14 @@ s32 IntersectSegmentWithSphere(Vec02* a, Vec02* b, Vec02* c, f32* tOut, Vec02* h
 // func_00187E88's locals: the support point, the sphere hit, its distance and the contact's.
 struct SphereHitFrame { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
 
-s32 IntersectSegmentWithSphere(void* a0, void* a1, void* a2, s32 a3, void* a4, void* a5, void* a6, f32 f);
+s32 IntersectSegmentWithSphere(Vec02* a, Vec02* b, Vec02* c, f32* tOut, Vec02* hitOut, Vec02* nOut, f32* dOut, f32 r);
 void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f);
-s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
 s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
 {
     SphereHitFrame loc;
-    if (IntersectSegmentWithSphere((u8*)a1 + 0x140, (u8*)a0 + 0x370, (u8*)a0 + 0x140, 0, &loc, loc.b, &loc.fa, *(f32*)((u8*)a1 + 0x3CC)) == 0) {
+    if (IntersectSegmentWithSphere((Vec02*)((u8*)a1 + 0x140), (Vec02*)((u8*)a0 + 0x370), (Vec02*)((u8*)a0 + 0x140), 0, (Vec02*)&loc, (Vec02*)loc.b, &loc.fa, *(f32*)((u8*)a1 + 0x3CC)) == 0) {
         return 0;
     }
     FindPartSupportPoint(a0, loc.b, loc.a, &loc.fb, loc.fa);
@@ -1156,7 +1159,7 @@ s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
 // written in each arm of both sweeps: the two tails are separate blocks until jump2 merges them
 // after sched2, so PRE shares no load of the flags across them and the bit-53 constant has four
 // uses (docs/toolchain/gcse.md, "A test written in each arm").
-void CollideColliderParts(Collider* self, Collider* other, s32 sweep, void* a3, void* a4, void* a5, void* a6)
+void CollideColliderParts(Collider* self, Collider* other, s32 sweep, s32 a3, FaceRef* a4, FaceRef* a5, PooledContact** a6)
 {
     // Retail's frame has a slot at 0(sp) that nothing touches, under the sweep flag's spill at
     // 4(sp): a scope object whose body is compiled out (include/scope_marker.h;
@@ -1207,7 +1210,7 @@ void CollideColliderParts(Collider* self, Collider* other, s32 sweep, void* a3, 
                             continue;
                         }
                     } else {
-                        if (AddSweptPartMeshContact(other, p, (void*)p->tree.count, (void*)p->tree.nodes, (void*)p->tree.nodes, a6) != 0) {
+                        if (AddSweptPartMeshContact(other, p, p->tree.count, p->tree.nodes, p->tree.nodes, a6) != 0) {
                             other->flags538 |= (1ULL << 53);
                             continue;
                         }
@@ -1219,13 +1222,13 @@ void CollideColliderParts(Collider* self, Collider* other, s32 sweep, void* a3, 
             if (p->flags538 & (1ULL << 40)) {
                 AddSphereSphereContact(p, other, a6);
             } else {
-                AddMeshContacts(other, other->radius3CC, &other->v140, p, (void*)p->tree.count2, (void*)p->tree.nodes, 0, a6);
+                AddMeshContacts(other, other->radius3CC, &other->v140, p, p->tree.count2, (FaceRef*)p->tree.nodes, 0, a6);
             }
         } else if (p->flags538 & (1ULL << 40)) {
             s32 v = p != self || p->radius3CC != p->radius3D4;
-            AddMeshContacts(p, p->radius3CC, &p->v140, other, a3, v ? a5 : a4, v ? (void*)0 : a5, a6);
+            AddMeshContacts(p, p->radius3CC, &p->v140, other, a3, v ? a5 : a4, v ? (FaceRef*)0 : a5, a6);
         } else {
-            CreateMeshPairContacts(p, other, a3, a4, (u8*)a5, (PooledContact**)a6);
+            CreateMeshPairContacts(p, other, a3, a4, (u8*)a5, a6);
         }
     }
 }
@@ -1235,7 +1238,7 @@ struct ColliderPair {
     Collider* b;
 };
 
-s32 QueryPlaneTreePoint(TreeNode03* node, void* p, f32 f, TreeNode03** out);
+s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out);
 void PushBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 void PopBackMemoryMark(void);
@@ -1249,7 +1252,7 @@ struct BackMemoryScope {
     ~BackMemoryScope() { PopBackMemoryMark(); }
 };
 
-s32 BuildObjectPairContacts(s32 unused, ColliderPair* pair, s32 arg)
+s32 BuildObjectPairContacts(World* world, ColliderPair* pair, s32 arg)
 {
     ColliderPair ord;
     TreeNode03* cur;
@@ -1289,7 +1292,7 @@ s32 BuildObjectPairContacts(s32 unused, ColliderPair* pair, s32 arg)
                     continue;
                 }
                 cur = buf;
-                if (QueryPlaneTreePoint(h, &ord.a->v3E0, ord.a->radius3D4, &cur) != 2) {
+                if (QueryPlaneTreePoint((PlaneTreeNode*)h, &ord.a->v3E0, ord.a->radius3D4, (PlaneTreeOutput*)&cur) != 2) {
                     continue;
                 }
                 idx = cur - buf;

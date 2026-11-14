@@ -55,7 +55,7 @@ u8 D_002793C8[16] = { 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 DmaSettings g_dmaSettings = { 0 };
 u32 D_002793F0[4] = { 0 };
 
-s32 PrintFormatted(const char* format, ...);
+s32 PrintFormatted(const char* fmt, ...);
 s32 SetDmaSettings(DmaSettings* c);
 
 void ClearBytes(u8* p, s32 n)
@@ -140,7 +140,7 @@ s32 SetDmaSettings(DmaSettings* c)
     return 0;
 }
 
-void StartDmaChain(DmaChannel* ch, u32 tadr)
+void StartDmaChain(DmaChannel* ch, void* tadr)
 {
     s32 timeout = 0x1000000;
     s32 cur;
@@ -160,7 +160,7 @@ void StartDmaChain(DmaChannel* ch, u32 tadr)
         }
     }
     if (ch->tadr != 0xFFFFFFFF) {
-        ch->tadr = tadr;
+        ch->tadr = (u32)tadr;
     }
     ch->qwc = 0;
     ch->chcr = (ch->chcr & ~0xC) | 0x105;

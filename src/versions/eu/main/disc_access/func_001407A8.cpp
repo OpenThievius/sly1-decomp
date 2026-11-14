@@ -3,13 +3,13 @@
 s32 NormalizeDiscPath(s8* path)
 {
     u8* p = (u8*)path;
-    UppercaseString(path);
-    s32 len = GetStringLength(path);
+    UppercaseString((char*)path);
+    s32 len = GetStringLength((const char*)path);
     if (len != 0) {
         u8 last = p[len - 1];
         if (last != '\\' && last != '/') {
             AppendString(path, ";1");
-            len = GetStringLength(path);
+            len = GetStringLength((const char*)path);
         }
     }
     u8* end = p + len;

@@ -13,6 +13,10 @@
 #include "world.h"
 #include "object_event.h"
 #include "vu0.h"
+#include "object_finder.h"
+struct BufferedStream;
+struct Quad16;
+
 
 // The file's .data, in retail's order: two boxes (the corners 0 and the size -1e8 or 1e8) and
 // the records that point at them, which func_0013E430 reads, then the disc code's sector check
@@ -22,11 +26,11 @@ f32 D_002613B0[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 100000000.0f, 0.0f, 0.0f, 0.0f };
 f32* D_002613D0[4] = { D_00261390, 0, 0, 0 };
 f32* D_002613E0[3] = { D_002613B0, 0, 0 };
 s32 g_discSectorCheckState = 0;
-void TriggerScriptEvent(void* obj, s32 kind, s32 a, s32 b);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 extern u8 g_flagTable[];
-void InitCollider(void* self);
-void* TakeFlagTableIndex(FlagTable* p);
+void InitCollider(Collider* self);
+s32 TakeFlagTableIndex(FlagTable* p);
 
 void InitMaskedCollider(MaskedCollider* self)
 {
@@ -41,30 +45,29 @@ void InitMaskedCollider(MaskedCollider* self)
     o->tint[2] = 16;
     o->tint[1] = 16;
     o->tint[0] = 16;
-    o->id688 = (s32)TakeFlagTableIndex((FlagTable*)g_flagTable);
+    o->id688 = TakeFlagTableIndex((FlagTable*)g_flagTable);
     o->f614 = -1;
 }
 
-void LoadCollider(void* self);
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-void FindOrBuildMemberGroup(void* sub, void* self);
-void ResolveAndStartObject(s32 a);
+void LoadCollider(Collider* self, BufferedStream* in);
+void FindOrBuildMemberGroup(void** out, void* self);
+void ResolveAndStartObject(BaseObject* self);
 
-void LoadMaskedCollider(MaskedCollider* self)
+void LoadMaskedCollider(MaskedCollider* self, BufferedStream* stream)
 {
-    LoadCollider(self);
+    LoadCollider(self, stream);
     if (self->f614 == -1) {
-        FindOrBuildMemberGroup(&self->f618, self);
+        FindOrBuildMemberGroup((void**)&self->f618, self);
         return;
     }
-    s32 v = FindFirstObjectById(self->world, 0x101, self->f614, self);
+    BaseObject* v = (BaseObject*)FindFirstObjectById(self->world, 0x101, self->f614, self);
     self->f618 = v;
     if (v != 0) {
         ResolveAndStartObject(v);
     }
 }
 
-void CopyCollider(MaskedCollider* self, MaskedCollider* other);
+void CopyCollider(Collider* self, Collider* other);
 void* CopyToFrontMemory(s32 size, void* owner);
 
 void CopyMaskedCollider(MaskedCollider* self, MaskedCollider* other)
@@ -86,16 +89,26 @@ void CopyMaskedCollider(MaskedCollider* self, MaskedCollider* other)
 #include "switched_collider.h"
 #include "memory_reader.h"
 #include "object_message.h"
+struct BaseObject;
+struct Vec02;
 
-void InitSoundParams(void* p);
+struct BaseObject;
+
+struct BaseObject;
+struct Vec02;
+
+struct Mat02;
+
+
+void InitSoundParams(SoundRecord** self);
 
 
 
 typedef void (*Hook_CE40)(void* self);
 
-void StartPlacedObject(MaskedCollider* self);
+void StartPlacedObject(PlacedObject* self);
 void AttachMaskedColliderChildren(MaskedCollider* self);
-void* AppendQueuedCall(void* target, Hook_CE40 fn, MaskedCollider* ctx, s32 a3, s32 a4);
+void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 void StartMaskedCollider(MaskedCollider* self)
 {
@@ -109,9 +122,10 @@ extern u8 g_flagTable[];
 // func_00199C10 reads for each child.
 struct ListFrameWithFlag { s32 list; s32 cursor; s32 link; s32 prev; s32 out; };
 s32 TestFlagTableBit(FlagTable* t, s32 v);
-s32 IsObjectOfKind(MaskedCollider* n, s32 kind);
-void GetNumberedItemFlag(MaskedCollider* n, s32* out);
-s32 MatchesObjectId(MaskedCollider* n, s32 key);
+struct NumberedItem;
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void GetNumberedItemFlag(NumberedItem* self, s32* out);
+s32 MatchesObjectId(BaseObject* self, s32 id);
 
 void AttachMaskedColliderChildren(MaskedCollider* self)
 {
@@ -134,7 +148,7 @@ void AttachMaskedColliderChildren(MaskedCollider* self)
     while (n != 0) {
         if (self->f678) {
             if (!IsObjectOfKind(n, 0x2E)) goto next;
-            GetNumberedItemFlag(n, &fr.out);
+            GetNumberedItemFlag((NumberedItem*)n, &fr.out);
             if (fr.out) goto next;
         }
         if (IsObjectOfKind(n, 0x75)) goto next;
@@ -173,11 +187,11 @@ void AttachMaskedColliderChildren(MaskedCollider* self)
     *(s32*)&g_activeListFrames = fr.prev;
 }
 
-void UpdateCollider(void* self);
+void UpdateCollider(Collider* self, f32 dt);
 
-void UpdateMaskedCollider(MaskedCollider* self)
+void UpdateMaskedCollider(MaskedCollider* self, f32 dt)
 {
-    UpdateCollider(self);
+    UpdateCollider(self, dt);
     if (self->f678 != 0) {
         self->f678 = 0;
         self->desc20()->m48(self);
@@ -201,10 +215,10 @@ struct ContactEvent_0013D0B0 {
 };
 
 extern u8 g_padRecord[];
-void StartPadRecordPattern(void* record, f32 x, s32 n);
-void SetColliderAnchors(Collider* self, s32 a, s32 b, s32 c, s32 d);
-void ApplyColliderImpulseEvent(Collider* self, Vec02* v, Vec02* w, f32 x);
-s32 IsObjectAccepted(MaskedCollider* self, PathFollower* msg);
+void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
+void ApplyColliderImpulseEvent(void* a0, f32 value, void* a1, void* a2);
+s32 IsObjectAccepted(MaskedCollider* self, BaseObject* msg);
 void* GetActiveSwitchedCollider(void);
 
 s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
@@ -243,19 +257,19 @@ s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
         Vu0::Q(k) = Vu0::FromFloatAt(self->f624);
         Vu0::Q(push) = Vu0::MulX(Vu0::Q(ev->v30), Vu0::Q(k));
         SetColliderAnchors(self, 0, 0, 0, 0);
-        ApplyColliderImpulseEvent(self, &ev->v20, &push, ev->f08);
+        ApplyColliderImpulseEvent(self, ev->f08, &ev->v20, &push);
     }
     if ((ev->flags & 0x10) == 0) {
         return 1;
     }
     if (ev->obj == GetActiveSwitchedCollider()) {
         if ((ev->flags10 & 0x10) == 0) {
-            StartPadRecordPattern(g_padRecord, 0.3f, 9);
+            StartPadRecordPattern((PadRecord*)g_padRecord, 9, 0.3f);
         }
     }
     counter = &(*(s32*)((u8*)self + 0x690));
     (*(s32*)((u8*)self + 0x690))++;
-    TriggerScriptEvent(self, 0x14, 1, (s32)&counter);
+    TriggerScriptEvent(self, 0x14, 1, &counter);
     if ((*(s32*)((u8*)self + 0x690)) >= self->f68C) {
         self->desc20()->m48(self);
     }
@@ -264,14 +278,17 @@ s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
 
 // The larger of two floats, b first in max.s (retail's operand order, as pair_controller.cpp's).
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
-s32 IsWorldBodyLimitReached(void* world, MaskedCollider* node, s32 match);
+s32 IsWorldBodyLimitReached(World* self, BaseObject* obj, u32 value);
 f32 RandomFloatInRange(f32 a, f32 b);
-void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
-void RotateMatrixUpright(void* sub, s32 zero, void* out);
-void SendPointEventToWorldListener(Vec02* point, f32 radius);
-void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
-void ScatterObjectsAtPoint(void* scatter, Vec02* point, s32 a, s32 b);
-void StartSoundEffect(s32 sound, void* a1, s32 a2, void* pos, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
+void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
+void SendPointEventToWorldListener(Quad16* a0, f32 f);
+struct ScatterController;
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void SetFlagTableBit(FlagTable* table, s32 v);
 extern u8 g_scatterController[];
 extern u8 D_00248D30[];
@@ -377,7 +394,7 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
                 radius = MaxF(self->f2A8, self->radius3D0);
                 break;
             }
-            other = (BaseObject*)self->f618;
+            other = self->f618;
             if (other != 0) {
                 release.kind = 9;
                 release.owner = self;
@@ -385,10 +402,10 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
                 release.f34 = radius;
                 other->desc->m1B(other, &release);
             } else {
-                SendPointEventToWorldListener(&self->v140, radius);
+                SendPointEventToWorldListener((Quad16*)&self->v140, radius);
             }
             TransformPointBetweenFrames(self, 0, &self->point6A0, &point);
-            ScatterObjectsAtPoint(g_scatterController, &point, self->f698, self->scatter6B0);
+            ScatterObjectsAtPoint((ScatterController*)g_scatterController, &point, self->f698, self->scatter6B0);
             ZoneSound* sound = (ZoneSound*)self->f6B4;
             if (sound != 0) {
                 StartSoundEffect(sound->sound, 0, 0, &self->v140, sound->f4, sound->f8, sound->fC, 0.0f, 0.0f, 0, 0);
@@ -491,13 +508,13 @@ void GetAcceptsFlaggedObjects(MaskedCollider* state, s32* result) {
 	*result = (state->mask >> 2) & 1;
 }
 
-void AddAcceptedObjectId(MaskedCollider* obj, s32 value) { if ((u32)obj->count640 < 4) { obj->list644[obj->count640++] = (void*)value; obj->mask |= 2; } }
+void AddAcceptedObjectId(MaskedCollider* obj, s32 value) { if ((u32)obj->count640 < 4) { obj->list644[obj->count640++] = value; obj->mask |= 2; } }
 
 void AddAcceptedKind(MaskedCollider* r, s32 value)
 {
     s32 n = r->count654;
     if ((u32)n < 4) {
-        r->list658[n] = (void*)value;
+        r->list658[n] = value;
         r->count654 = n + 1;
         r->mask |= 2;
     }
@@ -507,15 +524,15 @@ void AddMaskedColliderListEntry(MaskedCollider* obj, s32 value) { if ((u32)obj->
 
 void* GetMaskedColliderSoundParams(MaskedCollider* self)
 {
-    if (!self->f6B4) InitSoundParams(&self->f6B4);
+    if (!self->f6B4) InitSoundParams((SoundRecord**)&self->f6B4);
     return self->f6B4;
 }
 
 void* GetActiveSwitchedCollider(void);
-s32 MatchesObjectId(void* msg, void* item);
-s32 IsObjectOfKind(void* msg, void* item);
+s32 MatchesObjectId(BaseObject* self, s32 id);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
-s32 IsObjectAccepted(MaskedCollider* self, PathFollower* msg)
+s32 IsObjectAccepted(MaskedCollider* self, BaseObject* msg)
 {
 
 
@@ -549,13 +566,13 @@ s32 IsObjectAccepted(MaskedCollider* self, PathFollower* msg)
 }
 
 extern f32 g_gameTime;
-void UpdateCollider(Collider* self);
+void UpdateCollider(Collider* self, f32 dt);
 
-void UpdateTimedState(TimedStateObject* self)
+void UpdateTimedState(TimedStateObject* self, f32 dt)
 {
     s32 next;
 
-    UpdateCollider(self);
+    UpdateCollider(self, dt);
     next = self->state;
     if (next != 0) {
         if (next == 1) {
@@ -567,7 +584,7 @@ void UpdateTimedState(TimedStateObject* self)
     SetTimedState(self, next);
 }
 
-void HandlePlacedObjectNotification(TimedStateObject* self, s32 kind, ObjectMessage* msg);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
 
 void HandleTimedStateNotification(TimedStateObject* self, s32 kind, ObjectMessage* msg)
 {
@@ -579,7 +596,7 @@ void HandleTimedStateNotification(TimedStateObject* self, s32 kind, ObjectMessag
     }
 }
 
-s32 IsObjectOfKind(Collider* src, s32 kind);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 s32 TestTimedStateContact(TimedStateObject* node, Collider* src)
 {
     s32 r;
@@ -594,7 +611,7 @@ s32 TestTimedStateContact(TimedStateObject* node, Collider* src)
 }
 
 extern f32 g_gameTime;
-void FadeOutPlacedObject(f32 value);
+void FadeOutPlacedObject(Collider* self, f32 time);
 
 void SetTimedState(TimedStateObject* self, s32 state)
 {
@@ -603,7 +620,7 @@ void SetTimedState(TimedStateObject* self, s32 state)
         f32 t = g_gameTime;
         self->stamp = t;
         if (state == 2) {
-            (void)FadeOutPlacedObject(self->param);
+            (void)FadeOutPlacedObject(self, self->param);
         }
     }
 }
@@ -626,17 +643,17 @@ void InitMassScalingCollider(MassScalingCollider* self)
     self->sel6C8 = -1;
 }
 
-s32 IsObjectAccepted(MaskedCollider* self, s32 value);
-void SetColliderTurnAnchorPreset(MassScalingCollider* self, s32 sel);
-void SetColliderMoveAnchorPreset(MassScalingCollider* self, s32 sel);
+s32 IsObjectAccepted(MaskedCollider* self, BaseObject* msg);
+void SetColliderTurnAnchorPreset(Collider* self, s32 index);
+void SetColliderMoveAnchorPreset(Collider* self, s32 index);
 void LatchContactObject(MassScalingCollider* self, u8* table, s32 index)
 {
-    s32 value;
+    BaseObject* value;
     s32 one;
 
     if (self->hold != 0) return;
     one = 1;
-    value = *(s32*)(table + ((one - index) << 6));
+    value = *(BaseObject**)(table + ((one - index) << 6));
     if (self->f678 != 0) return;
     if (IsObjectAccepted(self, value) == 0) return;
     if (self->sel6C4 != -1) SetColliderTurnAnchorPreset(self, self->sel6C4);
@@ -647,37 +664,38 @@ void LatchContactObject(MassScalingCollider* self, u8* table, s32 index)
 }
 
 void LatchContactObject(MassScalingCollider* self, u8* table, s32 index);
-s32 IsObjectAccepted(MaskedCollider* self, s32 value);
-s32 IsObjectOfKind(void* node, s32 kind);
+s32 IsObjectAccepted(MaskedCollider* self, BaseObject* msg);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 void LatchAcceptedSwitchedCollider(LatchedSwitchCollider* self, u8* table, s32 index)
 {
-    s32 value;
+    BaseObject* value;
 
     LatchContactObject(self, table, index);
     if (self->hold != 0) return;
-    value = *(s32*)(table + ((1 - index) << 6));
-    if (IsObjectOfKind((void*)value, 5) != 0) {
+    value = *(BaseObject**)(table + ((1 - index) << 6));
+    if (IsObjectOfKind(value, 5) != 0) {
         if (IsObjectAccepted(self, value) != 0) {
             self->sel6D4 = (SwitchedCollider*)value;
         }
     }
 }
 
-void UpdateMaskedCollider(MaskedCollider* self);
+void UpdateMaskedCollider(MaskedCollider* self, f32 dt);
 void* GetActiveSwitchedCollider(void);
-void InitOwnerMessage(void* out, void* a1, void* self);
+struct OwnerMessage;
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
-void UpdateLatchedSwitchCollider(LatchedSwitchCollider* self)
+void UpdateLatchedSwitchCollider(LatchedSwitchCollider* self, f32 dt)
 {
     s32 local[4];
-    UpdateMaskedCollider(self);
+    UpdateMaskedCollider(self, dt);
     if (self->sel6D4 != 0) {
         if (self->sel6D4 != GetActiveSwitchedCollider()) {
             self->sel6D4 = 0;
             return;
         }
-        InitOwnerMessage(local, self->f6D0, self);
+        InitOwnerMessage((OwnerMessage*)local, self->f6D0, self);
         SwitchedCollider* p = self->sel6D4;
         p->desc05()->m4C(p, local);
         self->sel6D4 = 0;
@@ -698,7 +716,7 @@ struct TreeWalkEntry {
     TreeFace* face;         // 0x0C: the face crossed at t
 };
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // The spans of the segment a-b behind the faces of the tree at root, at most max of them, into
 // spans: each run of the segment behind one solid node (of the group groups gives it, when given),
@@ -912,24 +930,23 @@ void CloneTreeNodes(Mesh03* self, Tree03* src, Mesh03* base, Tree03* dst)
     }
 }
 
-void* FindFirstObjectById(void*, s32, void*, void*);
-bool AppendToQueuedObjects(Pair28*, void*);
-void ResolveAndStartObject(void*);
+bool AppendToQueuedObjects(Pair28* pair, BaseObject* value);
+void ResolveAndStartObject(BaseObject* self);
 
 void ResolveZoneObjects(void* self, Pair28* list, void* context)
 {
     s32 n = list->seen.count;
-    void** items = (void**)list->seen.values;
+    s32* items = list->seen.values;
     for (s32 i = 0; i < n; i++) {
-        void* object = FindFirstObjectById(self, 0x104, items[i], context);
+        void* object = FindFirstObjectById((World*)self, 0x104, items[i], context);
         if (object) {
-            AppendToQueuedObjects(list, object);
-            ResolveAndStartObject(object);
+            AppendToQueuedObjects(list, (BaseObject*)object);
+            ResolveAndStartObject((BaseObject*)object);
         }
     }
 }
 
-s32 MatchesObjectId(void* key, s32 item);
+s32 MatchesObjectId(BaseObject* self, s32 id);
 
 s32 IsObjectInIdList(Queue28* set, void* key)
 {
@@ -938,7 +955,7 @@ s32 IsObjectInIdList(Queue28* set, void* key)
     if (i >= 0) {
         s32* p = (s32*)(i * 4 + (s32)base);
         do {
-            if (MatchesObjectId(key, *p) != 0) {
+            if (MatchesObjectId((BaseObject*)key, *p) != 0) {
                 return 1;
             }
             i--;
@@ -948,7 +965,7 @@ s32 IsObjectInIdList(Queue28* set, void* key)
     return 0;
 }
 
-bool AppendToQueuedObjects(Pair28* pair, s32 value) {
+bool AppendToQueuedObjects(Pair28* pair, BaseObject* value) {
 	pair->queued.values[pair->queued.count++] = value;
 	return pair->queued.count < 16;
 }
@@ -959,12 +976,11 @@ bool AppendToObjectQueue(Queue28* queue, s32 value) {
 }
 
 extern u8 g_flagTable[];
-void* TakeFlagTableIndex(FlagTable* p);
+s32 TakeFlagTableIndex(FlagTable* p);
 
-void InitZoneRecord(void* self)
+void InitZoneRecord(Zone28* s)
 {
-    Zone28* s = (Zone28*)self;
-    s->id120 = (s32)TakeFlagTableIndex((FlagTable*)g_flagTable);
+    s->id120 = TakeFlagTableIndex((FlagTable*)g_flagTable);
     s->f140 = -1;
 }
 
@@ -972,7 +988,6 @@ void InitZoneRecord(void* self)
 
 
 s32 IsObjectInIdList(Queue28* set, void* key);
-bool AppendToQueuedObjects(Pair28* pair, void* value);
 
 struct ListWalkNext {
     static BaseObject* Of(ListFrame* it)
@@ -1016,7 +1031,7 @@ extern u8 g_flagTable[];
 
 void ResolveZoneObjects(void* a, void* b, void* c);
 s32 TestFlagTableBit(FlagTable* table, s32 v);
-void* AppendQueuedCall(void* a, void* fn, void* c, s32 d, s32 e);
+void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void DeferZoneRecordActivation(void* self, s32 mode);
 
 void StartZoneRecord(Zone28* self)
@@ -1035,13 +1050,13 @@ void StartZoneRecord(Zone28* self)
     } while (--n >= 0);
     if (self->f11C != 0) {
         if (TestFlagTableBit((FlagTable*)g_flagTable, self->id120)) {
-            AppendQueuedCall(target, (void*)DeferZoneRecordActivation, self, 0, 0);
+            AppendQueuedCall((World*)target, (void*)DeferZoneRecordActivation, self, 0, 0);
         }
     }
 }
 
-void* AppendQueuedCall(void* a, void* fn, void* c, s32 d, s32 e);
-void ActivateZoneRecord(void* self, s32 a, s32 b);
+void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void ActivateZoneRecord(Zone28* self, s32 p, s32 q);
 
 void DeferZoneRecordActivation(void* selfp, s32 mode)
 {
@@ -1053,20 +1068,20 @@ void DeferZoneRecordActivation(void* selfp, s32 mode)
     }
 }
 
-s32 UpsertKeyedEntry(void* list, s32 size, void* count, s32 a, s32 b, s32 c, s32 d);
+struct ZoneTargetEntry;
+s32 UpsertKeyedEntry(ZoneTargetEntry* tab, s32 cap, s32* count, s32 flag, s32 k1, s32 k2, s32 val);
 void SetZoneEntry(Zone28* self, s32 a, s32 b, s32 c, s32 d)
 {
-    UpsertKeyedEntry(self->table14C, 8, &self->count148, a, b, c, d);
+    UpsertKeyedEntry((ZoneTargetEntry*)self->table14C, 8, &self->count148, a, b, c, d);
 }
 
 extern f32 g_gameTime;
-void ClearRootTries(void* self);
-void ActivateZoneRecord(void* self, s32 a, s32 b);
-void DeactivateZoneRecord(void* self, void* p);
+void ClearRootTries(PlacedObject* self);
+void ActivateZoneRecord(Zone28* self, s32 p, s32 q);
+void DeactivateZoneRecord(Zone28* self, s32 p);
 
-void SetZoneMode(void* a, s32 b)
+void SetZoneMode(Zone28* self, s32 b)
 {
-    Zone28* self = (Zone28*)a;
     s32 old = self->mode;
     if (b == old) {
         return;
@@ -1132,23 +1147,20 @@ s32 UpsertKeyedEntry(ZoneTargetEntry* tab, s32 cap, s32* count, s32 flag, s32 k1
     return 1;
 }
 
-s32 GatherObjectsByMode(void* self, s32 kind, s32 key, void* arg, s32 flags, void* out);
-void* FindObjectHandle(void* a, s32 b);
-void SetStateWalkerTarget(void* a, s32 b);
+void* FindObjectHandle(PlacedObject* self, s32 key);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 
-s32 SetGatheredWalkerTargets(void* self, s32 n, ZoneTargetEntry* ent, void* arg, s32 flag)
+void SetGatheredWalkerTargets(void* self, s32 n, ZoneTargetEntry* ent, void* arg, s32 flag)
 {
     s32 count = 0;
-    s32 more;
     void* out;
     if (n > 0) {
         ZoneTargetEntry* p = ent;
         do {
-            s32 r = GatherObjectsByMode(self, 0x304, p->id, arg, 1, &out);
-            if (r != 1) {
-                return r;
+            if (GatherObjectsByMode((World*)self, 0x304, p->id, arg, 1, &out) != 1) {
+                return;
             }
-            void* v = FindObjectHandle(out, p->key);
+            void* v = FindObjectHandle((PlacedObject*)out, p->key);
             if (v == 0) {
                 count++;
             } else {
@@ -1159,34 +1171,32 @@ s32 SetGatheredWalkerTargets(void* self, s32 n, ZoneTargetEntry* ent, void* arg,
                     k = p->offState;
                 }
                 if (k != -1) {
-                    SetStateWalkerTarget(v, k);
+                    SetStateWalkerTarget((StateWalker*)v, k);
                 }
                 count++;
             }
             p++;
-            more = count < n;
-        } while (more != 0);
+        } while (count < n);
     }
-    return more;
 }
 
-void* FindFirstObjectByIdMode4(void* world, s32 key, void* requester);
-s32 MatchesObjectId(void* owner, s32 key);
-void* FindOrCreateSeekedAnimationPlayer(void* obj, void* other, s32 a2, s32 a3, f32 fa, f32 fb);
-void ChooseStepSequenceState(void* t);
-void ResetStepSequence(void* t);
+struct StepSequence;
+s32 MatchesObjectId(BaseObject* self, s32 id);
+void* FindOrCreateSeekedAnimationPlayer(void* self, BaseObject* key, s32 a2, s32 a3, f32 fa, f32 fb);
+void ChooseStepSequenceState(StepSequence* self);
+void ResetStepSequence(StepSequence* self);
 
 // An object queued in a zone (func_0013ED90): the id of the object it goes to and a flag.
 struct ZoneQueuedObject { u8 pad[0x40]; s32 key40; s32 flag44; };
 
-void RunZoneRecordEntries(Zone28* self, s32 mode, void* p, void* q)
+void RunZoneRecordEntries(Zone28* self, s32 mode, s32 p, s32 q)
 {
     s32 n = self->pairs[mode].queued.count;
     {
-        s32* list = self->pairs[mode].queued.values;
+        BaseObject** list = self->pairs[mode].queued.values;
         s32 i;
         for (i = 0; i < n; i++) {
-            ZoneQueuedObject* obj = *(ZoneQueuedObject**)&list[i];
+            ZoneQueuedObject* obj = (ZoneQueuedObject*)list[i];
             void* other;
             s32 dir;
             if (MatchesObjectId(self->owner, obj->key40)) {
@@ -1202,16 +1212,16 @@ void RunZoneRecordEntries(Zone28* self, s32 mode, void* p, void* q)
                 if (t >= 0.0f) {
                     dir = 2;
                 }
-                FindOrCreateSeekedAnimationPlayer(obj, other, dir, 0, 0.0f, t);
+                FindOrCreateSeekedAnimationPlayer(obj, (BaseObject*)other, dir, 0, 0.0f, t);
             } else if (self->f138 != 0) {
                 f32 t = self->f118;
                 dir = 0;
                 if (t < 0.0f) {
                     dir = 2;
                 }
-                FindOrCreateSeekedAnimationPlayer(obj, other, dir, 0, 0.0f, t);
+                FindOrCreateSeekedAnimationPlayer(obj, (BaseObject*)other, dir, 0, 0.0f, t);
             } else {
-                FindOrCreateSeekedAnimationPlayer(obj, other, 1, 0, 0.0f, self->f118);
+                FindOrCreateSeekedAnimationPlayer(obj, (BaseObject*)other, 1, 0, 0.0f, self->f118);
             }
         }
     }
@@ -1220,11 +1230,11 @@ void RunZoneRecordEntries(Zone28* self, s32 mode, void* p, void* q)
         void* t = FindFirstObjectByIdMode4(self->owner->world, self->f140, self->owner);
         if (mode != 0) {
             if (mode == 1) {
-                ResetStepSequence(t);
+                ResetStepSequence((StepSequence*)t);
             }
             return;
         }
-        ChooseStepSequenceState(t);
+        ChooseStepSequenceState((StepSequence*)t);
     }
 }
 
@@ -1232,12 +1242,13 @@ enum Kind_13EF50 { kind_13EF50_2 = 2 };
 
 extern u8 g_flagTable[];
 
-void StartSoundEffect(Kind_13EF50 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void RunZoneRecordEntries(Zone28* self, s32 mode, void* p, void* q);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
+void RunZoneRecordEntries(Zone28* self, s32 mode, s32 p, s32 q);
 void SetZoneMode(Zone28* self, s32 k);
 void SetFlagTableBit(FlagTable* t, s32 v);
 
-void ActivateZoneRecord(Zone28* self, void* p, void* q)
+void ActivateZoneRecord(Zone28* self, s32 p, s32 q)
 {
     if (q != 0) {
         TriggerScriptEvent(self->owner, 0x16, 0, 0);
@@ -1246,7 +1257,7 @@ void ActivateZoneRecord(Zone28* self, void* p, void* q)
     }
     if (self->f134 == 0) {
         if (q == 0) {
-            StartSoundEffect(kind_13EF50_2, 0, (s32)self->owner, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(kind_13EF50_2, 0, self->owner, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
     }
     RunZoneRecordEntries(self, 0, p, q);
@@ -1259,10 +1270,10 @@ void ActivateZoneRecord(Zone28* self, void* p, void* q)
     self->owner->desc->m0E(self->owner, 0xC, self);
 }
 
-void TriggerScriptEvent(void* obj, s32 kind, s32 a, s32 b);
-void RunZoneRecordEntries(Zone28* self, s32 mode, void* p, void* q);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void RunZoneRecordEntries(Zone28* self, s32 mode, s32 p, s32 q);
 
-void DeactivateZoneRecord(Zone28* self, void* p)
+void DeactivateZoneRecord(Zone28* self, s32 p)
 {
     TriggerScriptEvent(self->owner, 3, 0, 0);
     RunZoneRecordEntries(self, 1, p, 0);
@@ -1279,23 +1290,23 @@ void InitTriggerZone(TriggerZone* self)
     InitZoneRecord(&self->zone);
 }
 
-void LoadCollider(Collider* self);
+void LoadCollider(Collider* self, BufferedStream* in);
 void CollectZoneChildren(Zone28* p, Collider* self);
 
-void LoadTriggerZone(TriggerZone* self)
+void LoadTriggerZone(TriggerZone* self, BufferedStream* stream)
 {
-    LoadCollider(self);
+    LoadCollider(self, stream);
     CollectZoneChildren(&self->zone, self);
 }
 
-s32 MatchesObjectId(void* a, s32 n);
+s32 MatchesObjectId(BaseObject* self, s32 id);
 void* MoveMemory(void* end, void* begin, s32 bytes);
 
 void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q)
 {
     s32 n = self->f7B4;
     s32 idx;
-    if (MatchesObjectId(a1, 0x200)) {
+    if (MatchesObjectId((BaseObject*)a1, 0x200)) {
         idx = 0;
         if (n > 0) {
             u8* p = (u8*)self + n * 16;
@@ -1316,7 +1327,7 @@ struct __attribute__((aligned(16))) Rotation30 { u8 b[0x30]; };
 // again apart from the destination's.
 static inline void MoveRotations(void* dst, void* src, s32 n) { MoveMemory(dst, src, n * 0x30); }
 
-void AddTriggerZoneRotation(TriggerZone* self, void* a1, Entry28* e)
+void AddTriggerZoneRotation(TriggerZone* self, BaseObject* a1, Mat02* e)
 {
     s32 n = self->count7E0;
     s32 idx;
@@ -1351,16 +1362,16 @@ struct ScopedListFrame {
     ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
-void StartPlacedObject(TriggerZone* self);
+void StartPlacedObject(PlacedObject* self);
 void StartZoneRecord(Zone28* self);
 void SetTriggerZoneMode(TriggerZone* self, s32 v);
-s32 IsObjectOfKind(void* node, s32 kind);
-void TransformPointBetweenFrames(void* to, void* from, void* in, void* out);
-void TransformRotationBetweenFrames(void* to, void* from, void* in, void* out);
-void TransformDirectionBetweenFrames(void* to, void* from, void* in, void* out);
-void AddTriggerZoneRotation(TriggerZone* self, void* a1, Mat02* m);
-void ConstrainColliderVector(void* self, Vec02* limit, Vec02* in, Vec02* out, s32 a);
-void CopyMemory(void* dst, void* src, s32 n);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void AddTriggerZoneRotation(TriggerZone* self, BaseObject* a1, Mat02* e);
+void ConstrainColliderVector(void* self, void* a, void* b, void* c, s32 d);
+void CopyMemory(void* dst, void* src, u32 size);
 extern const Vec02 g_unitXVector;
 extern const Vec02 g_unitYVector;
 extern const Vec02 g_unitZVector;
@@ -1384,11 +1395,11 @@ void StartTriggerZone(TriggerZone* self)
     if (node != 0) {
         do {
             if (state == 0 && IsObjectOfKind(node, 0x7E)) {
-                TransformPointBetweenFrames(self, self->parent, (u8*)node + 0x40, &v);
+                TransformPointBetweenFrames(self, (PlacedObject*)self->parent, (Vec02*)((u8*)node + 0x40), &v);
                 AddTriggerZoneQuad(self, node, (Quad28*)&v);
             } else if (state == 1 && IsObjectOfKind(node, 0x73) && !IsObjectOfKind(node, 0x75)) {
                 Mat02 m;
-                TransformRotationBetweenFrames(self, self->parent, (u8*)node + 0x50, &m);
+                TransformRotationBetweenFrames(self, (PlacedObject*)self->parent, (Mat02*)((u8*)node + 0x50), &m);
                 AddTriggerZoneRotation(self, node, &m);
                 node->desc->m03(node);
             }
@@ -1420,7 +1431,7 @@ void StartTriggerZone(TriggerZone* self)
         Vec02 b;
         Vec02 dir;
         s32 k = self->count7E0 - 1;
-        TransformDirectionBetweenFrames(self->parent, self, &self->v460, &dir);
+        TransformDirectionBetweenFrames((PlacedObject*)self->parent, self, &self->v460, &dir);
         Vec02* side;
         Vec02* last;
         const Vec02* up;
@@ -1466,31 +1477,31 @@ void StartTriggerZone(TriggerZone* self)
     }
 }
 
-void CopyCollider(Collider* self);
+void CopyCollider(Collider* self, Collider* src);
 
-void CopyTriggerZone(TriggerZone* self)
+void CopyTriggerZone(TriggerZone* self, TriggerZone* src)
 {
     s32 keep = self->zone.id120;
-    CopyCollider(self);
+    CopyCollider(self, src);
     self->zone.id120 = keep;
     self->zone.owner = self;
 }
 
-extern void SetZoneMode(void* state);
+void SetZoneMode(Zone28* self, s32 k);
 
-void SetTriggerZoneMode(TriggerZone* state) {
-	SetZoneMode(&state->zone);
+void SetTriggerZoneMode(TriggerZone* state, s32 mode) {
+	SetZoneMode(&state->zone, mode);
 }
 
-s32 MatchesObjectId(void* node, s32 key);
-s32 IsObjectOfKind(void* node, s32 kind);
+s32 MatchesObjectId(BaseObject* self, s32 id);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 s32 PassesTriggerFilters(TriggerZone* self, void* arg)
 {
     if (self->countIdsIn > 0) {
         s32 i;
         for (i = 0; i < self->countIdsIn; i++) {
-            if (MatchesObjectId(arg, self->idsIn[i]) != 0) {
+            if (MatchesObjectId((BaseObject*)arg, self->idsIn[i]) != 0) {
                 break;
             }
         }
@@ -1500,7 +1511,7 @@ s32 PassesTriggerFilters(TriggerZone* self, void* arg)
     } else if (self->countIdsOut > 0) {
         s32 i;
         for (i = 0; i < self->countIdsOut; i++) {
-            if (MatchesObjectId(arg, self->idsOut[i]) != 0) {
+            if (MatchesObjectId((BaseObject*)arg, self->idsOut[i]) != 0) {
                 break;
             }
         }
@@ -1511,7 +1522,7 @@ s32 PassesTriggerFilters(TriggerZone* self, void* arg)
     if (self->countKindsIn > 0) {
         s32 i;
         for (i = 0; i < self->countKindsIn; i++) {
-            if (IsObjectOfKind(arg, self->kindsIn[i]) != 0) {
+            if (IsObjectOfKind((BaseObject*)arg, self->kindsIn[i]) != 0) {
                 break;
             }
         }
@@ -1521,7 +1532,7 @@ s32 PassesTriggerFilters(TriggerZone* self, void* arg)
     } else if (self->countKindsOut > 0) {
         s32 i;
         for (i = 0; i < self->countKindsOut; i++) {
-            if (IsObjectOfKind(arg, self->kindsOut[i]) != 0) {
+            if (IsObjectOfKind((BaseObject*)arg, self->kindsOut[i]) != 0) {
                 break;
             }
         }
@@ -1537,9 +1548,9 @@ extern const Vec02 D_00249DD0 = { 3.4028235e+38f, 0.0f, 0.0f, 0.0f };
 
 ASM_FUNC(func_0013F8A0);
 
-extern void MultiplyMatrices3x3(void*, void*, void*);
-f32 GetMatrixRotationCosine(void* p); // stays float: the C definition is void, and the caller here uses the value it leaves in the register
-f32 Arccosine(f32 x);
+extern void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+f32 GetMatrixRotationCosine(f32* p); // stays float: the C definition is void, and the caller here uses the value it leaves in the register
+extern "C" f32 Arccosine(f32 x);
 
 s32 FindLargestEntryIndex(TriggerZone* s, f32* out)
 {
@@ -1553,8 +1564,8 @@ s32 FindLargestEntryIndex(TriggerZone* s, f32* out)
     }
     for (i = s->count7E0 - 1; i >= 0; i--) {
         Entry28* e = (Entry28*)((u8*)s + 0x7F0 + i * 0x30);
-        MultiplyMatrices3x3(&s->rot, e, &loc);
-        f32 t = GetMatrixRotationCosine(&loc);
+        MultiplyMatrices3x3(&s->rot, (Mat02*)e, (Mat02*)&loc);
+        f32 t = GetMatrixRotationCosine((f32*)&loc);
         if (best < t) {
             best = t;
             idx = i;
@@ -1569,8 +1580,8 @@ s32 FindLargestEntryIndex(TriggerZone* s, f32* out)
 extern u8 D_00248D30[];
 
 void StepCollider(Collider* self, f32 t);
-void SteerColliderTowardPosition(Collider* self, void* buf, s32 a, void* table, s32 b, f32 t);
-void SteerColliderTowardRotation(Collider* self, void* buf, s32 a, void* table, s32 b, f32 t);
+void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
+void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
 
 void StepTriggerZone(TriggerZone* self, f32 t)
 {
@@ -1582,7 +1593,7 @@ void StepTriggerZone(TriggerZone* self, f32 t)
             if (self->zone.mode != 4) {
                 p += self->f7B0 << 4;
             }
-            SteerColliderTowardPosition(self, p, (s32)self->p20C, D_00248D30, (s32)self->p210, t);
+            SteerColliderTowardPosition(self, (Vec02*)p, (f32*)self->p20C, (Vec02*)D_00248D30, (f32*)self->p210, t);
         }
         break;
     case 1:
@@ -1591,14 +1602,15 @@ void StepTriggerZone(TriggerZone* self, f32 t)
             if (self->zone.mode != 4) {
                 p += self->f7B0 * 0x30;
             }
-            SteerColliderTowardRotation(self, p, (s32)self->p214, D_00248D30, (s32)self->p218, t);
+            SteerColliderTowardRotation(self, (Mat02*)p, (f32*)self->p214, (Vec02*)D_00248D30, (f32*)self->p218, t);
         }
         break;
     }
 }
 
-void FreePooledContactChain(World* w, Contact03* chain);
-Contact03* CreatePooledContact(void* self, s32 a, void* pos, void* plane, s32 kind, s32 b, s32 c, void* chain, f32 depth);
+void FreePooledContactChain(World* world, Contact03* head);
+struct PooledContact;
+PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
 void ReleaseTriggerZoneContacts(TriggerZone* self)
 {
@@ -1621,9 +1633,9 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
     }
     for (i = 0; i < 2; i++) {
         if (i < self->f7B4) {
-            TransformPointBetweenFrames(self->parent, 0, (u8*)self + 0x7C0 + i * 16, &v[i]);
+            TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)((u8*)self + 0x7C0 + i * 16), &v[i]);
         }
-        TransformDirectionBetweenFrames(self->parent, 0, (u8*)self + 0x860 + i * 16, &w[i]);
+        TransformDirectionBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)((u8*)self + 0x860 + i * 16), &w[i]);
     }
     if (self->state == 0) {
         where = &self->v140;
@@ -1632,7 +1644,7 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
         gb = Vu0::ToFloat(Vu0::Dot(Vu0::Q(v[1]), Vu0::Q(w[1])));
         fb = -fa;
     } else {
-        TransformPointBetweenFrames(self, 0, (u8*)self + 0x850, &p);
+        TransformPointBetweenFrames(self, 0, (Vec02*)((u8*)self + 0x850), &p);
         where = &p;
         ga = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(w[0])));
         gb = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(w[1])));
@@ -1641,12 +1653,12 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
     }
     f32 x = fa - ga;
     if (x < -1e-4f) {
-        Contact03* c = CreatePooledContact(self, 0, where, &w[0], 10, 0, 0, &self->contacts4B4, x);
+        Contact03* c = (Contact03*)CreatePooledContact(x, self, 0, where, &w[0], 10, 0, 0, &self->contacts4B4);
         c->f98 = 0.0f;
     } else {
         x = fb - gb;
         if (x < -1e-4f) {
-            Contact03* c = CreatePooledContact(self, 0, where, &w[1], 10, 0, 0, &self->contacts4B4, x);
+            Contact03* c = (Contact03*)CreatePooledContact(x, self, 0, where, &w[1], 10, 0, 0, &self->contacts4B4);
             c->f98 = 0.0f;
         }
     }
@@ -1655,16 +1667,16 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
 extern u8* g_player;
 extern f32 g_gameTime;
 
-void UpdateCollider(Collider* self);
+void UpdateCollider(Collider* self, f32 dt);
 void SetTriggerZoneMode(TriggerZone* self, s32 v);
 s32 FindNearestStoredPoint(TriggerZone* self, f32* out);
 s32 FindLargestEntryIndex(TriggerZone* self, f32* out);
 s32 PassesTriggerFilters(TriggerZone* self, void* p);
-void ClearRootTries(void* self);
+void ClearRootTries(PlacedObject* self);
 
-void UpdateTriggerZone(TriggerZone* self)
+void UpdateTriggerZone(TriggerZone* self, f32 dt)
 {
-    UpdateCollider(self);
+    UpdateCollider(self, dt);
     switch (self->zone.mode) {
     case 2: {
         u8* g = g_player;
@@ -1753,12 +1765,12 @@ void UpdateTriggerZone(TriggerZone* self)
     }
 }
 
-s32 HandleObjectEvent(void* self, void* ev);
+s32 HandleObjectEvent(Collider* self, ObjectEvent* shape);
 void SetTriggerZoneMode(TriggerZone* state, s32 mode);
 
 s32 HandleTriggerZoneEvent(TriggerZone* a0, void* a1)
 {
-    s32 r = HandleObjectEvent(a0, a1);
+    s32 r = HandleObjectEvent(a0, (ObjectEvent*)a1);
     if (r != 0 && (*(s32*)((u8*)a1 + 0xC) & 4) == 0 && a0->state == 3 && a0->zone.mode == 0) {
         SetTriggerZoneMode(a0, 1);
     }
@@ -1767,7 +1779,7 @@ s32 HandleTriggerZoneEvent(TriggerZone* a0, void* a1)
 
 void InitZoneRecord(Zone28* p);
 void InitCollider(Collider* self);
-void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
 void InitZoneCollider(ZoneCollider* self)
 {
@@ -1779,22 +1791,21 @@ void InitZoneCollider(ZoneCollider* self)
     SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
-void LoadCollider(void* self);
+void LoadCollider(Collider* self, BufferedStream* in);
 void CollectZoneChildren(void* p, void* self);
 
-void LoadZoneCollider(ZoneCollider* self)
+void LoadZoneCollider(ZoneCollider* self, BufferedStream* stream)
 {
-    LoadCollider(self);
+    LoadCollider(self, stream);
     CollectZoneChildren(&self->zone, self);
     if (self->f790 != 0) {
         self->zone.f13C = 1;
     }
 }
 
-void StartPlacedObject(void* self);
+void StartPlacedObject(PlacedObject* self);
 void StartZoneRecord(void* p);
 void SetZoneColliderMode(ZoneCollider* self, s32 flag);
-void* FindFirstObjectByIdMode4(void* obj, s32 id, void* ctx);
 
 
 void StartZoneCollider(ZoneCollider* self)
@@ -1815,23 +1826,23 @@ void StartZoneCollider(ZoneCollider* self)
     }
 }
 
-void CopyCollider(void* self);
+void CopyCollider(void* self, void* src);
 
 
-void CopyZoneCollider(ZoneCollider* self)
+void CopyZoneCollider(ZoneCollider* self, ZoneCollider* src)
 {
     s32 saved = self->zone.id120;
-    CopyCollider(self);
+    CopyCollider(self, src);
     self->zone.id120 = saved;
     self->zone.owner = self;
 }
 
 
-extern void SetZoneMode(void* state);
+void SetZoneMode(Zone28* self, s32 k);
 
 void SetZoneColliderMode(ZoneCollider* self, s32 flag)
 {
-    SetZoneMode(&self->zone);
+    SetZoneMode(&self->zone, flag);
 }
 
 // An object the zone watches (ZoneCollider's objs): its class, and the two places its position is.
@@ -1844,18 +1855,18 @@ struct ZoneTarget {
 };
 
 void SetZoneColliderMode(ZoneCollider* self, s32 flag);
-void ConvertPositionToWorld(ZoneTarget* obj, Vec02* out);
-s32 GetObjectWorldPosition(ZoneTarget* obj, Vec02* out);
+void ConvertPositionToWorld(BaseObject* self, Vec02* out);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
 s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
-s32 IsObjectAttached(ZoneTarget* obj);
-void CopyMemory(void* dst, void* src, s32 size);
+s32 IsObjectAttached(BaseObject* self);
+void CopyMemory(void* dst, void* src, u32 size);
 
-void UpdateZoneCollider(ZoneCollider* self)
+void UpdateZoneCollider(ZoneCollider* self, f32 dt)
 {
     ZoneTarget* found[8];
     Vec02 pos;
     ZoneTarget* obj;
-    UpdateCollider(self);
+    UpdateCollider(self, dt);
     switch (self->zone.mode) {
     case 2:
         if (0.0f <= self->zone.duration && self->zone.duration < g_gameTime - self->zone.stamp) {
@@ -1891,9 +1902,9 @@ void UpdateZoneCollider(ZoneCollider* self)
         } else if (IsObjectOfKind((Collider*)obj, 0x6D)) {
             pos = obj->v40;
         } else if (IsObjectOfKind((Collider*)obj, 0x7E)) {
-            ConvertPositionToWorld(obj, &pos);
+            ConvertPositionToWorld((BaseObject*)obj, &pos);
         } else if (IsObjectOfKind((Collider*)obj, 0x73)) {
-            GetObjectWorldPosition(obj, &pos);
+            GetObjectWorldPosition((BaseObject*)obj, &pos);
         }
         s32 inside = 0;
         if (((self->flags538 & 0x10000000000ULL) && Vu0::Distance(pos, self->v140) < self->radius3CC)
@@ -1905,7 +1916,7 @@ void UpdateZoneCollider(ZoneCollider* self)
             if (self->f790 == 0) {
                 break;
             }
-            if (IsObjectAttached(obj) != 0) {
+            if (IsObjectAttached((BaseObject*)obj) != 0) {
                 found[n++] = obj;
             }
         }
@@ -1941,14 +1952,16 @@ void UpdateZoneCollider(ZoneCollider* self)
 #include "world.h"
 #include "game_clock.h"
 #include "object_event.h"
+struct ScriptListBuilder;
 
 
-s32 AppendPropertyToScriptList(void* a, void* b);
+
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
 
 s32 TestListedEntriesAccepted(ZoneCollider* self, void* arg)
 {
     for (s32 i = 0; i < self->countInside; i++) {
-        if (AppendPropertyToScriptList(arg, &self->inside[i]) == 0) {
+        if (AppendPropertyToScriptList((ScriptListBuilder*)arg, &self->inside[i]) == 0) {
             return 0;
         }
     }
@@ -1956,11 +1969,11 @@ s32 TestListedEntriesAccepted(ZoneCollider* self, void* arg)
 }
 
 
-bool AppendToObjectQueue(void* a, s32 b);
+bool AppendToObjectQueue(Queue28* queue, s32 value);
 
 void AppendZoneFirstQueue(void* a, void* b, s32 c)
 {
-    AppendToObjectQueue((u8*)a + 0x8, c);
+    AppendToObjectQueue((Queue28*)((u8*)a + 0x8), c);
 }
 
 
@@ -1977,11 +1990,11 @@ void AppendZoneColliderFirstQueue(void* self, int value)
     AppendZoneFirstQueue((u8*)self + 0x5C0, self, value);
 }
 
-bool AppendToObjectQueue(void* a, int b);
+bool AppendToObjectQueue(Queue28* queue, s32 value);
 
 void AppendZoneSecondQueue(void* self, void* unused, int value)
 {
-    AppendToObjectQueue((u8*)self + 0x90, value);
+    AppendToObjectQueue((Queue28*)((u8*)self + 0x90), value);
 }
 
 void AppendZoneSecondQueue(void* self, void* unused, int value);
@@ -1991,10 +2004,8 @@ void AppendTriggerZoneSecondQueue(TriggerZone* self, int value)
     AppendZoneSecondQueue(&self->zone, self, value);
 }
 
-void SetZoneEntry(void* p);
-void AppendZoneSecondQueue(void* a, void* b, void* c);
 
-void AppendZoneColliderSecondQueue(void* self, void* b)
+void AppendZoneColliderSecondQueue(ZoneCollider* self, s32 b)
 {
     AppendZoneSecondQueue((u8*)self + 0x5C0, self, b);
 }
@@ -2019,36 +2030,33 @@ void AddIncludedKind(TriggerZone* self, s32 value)
 }
 
 // Newly matched US functions from the small-function wave.
-extern void SetZoneEntry(void*);
 extern s32 SyncDiscRead(s32);
-extern void SetCameraFogNear(void*);
-extern void SetCameraFogFar(void*);
-extern void SetCameraFogStrength(void*);
-extern void SetCameraFogColor(void*);
+struct Camera;
+extern void SetCameraFogNear(Camera* self, f32 value);
+extern void SetCameraFogFar(Camera* self, f32 value);
+extern void SetCameraFogStrength(void* ptr, f32 value);
+extern void SetCameraFogColor(void* self, void* value);
 extern void* g_camera;
-extern void SetCameraPlacement(void*, s32, void*);
+extern void SetCameraPlacement(Camera* self, Quad16* a, Quad16* b);
 
-void AddExcludedKind(TriggerZone* self, void* value)
+void AddExcludedKind(TriggerZone* self, s32 value)
 {
     s32 i = self->countKindsOut;
-    u32 address = (u32)self + (u32)(i << 2);
-    *(u32*)(address + 0x790) = (u32)value;
+    self->kindsOut[i] = value;
     self->countKindsOut = i + 1;
 }
 
-void AddZoneColliderId(void* self, void* value)
+void AddZoneColliderId(ZoneCollider* self, s32 value)
 {
     s32 i = *(s32*)((u8*)self + 0x550);
     u32 address = (u32)self + (u32)(i << 2);
-    *(u32*)(address + 0x554) = (u32)value;
+    *(s32*)(address + 0x554) = value;
     *(s32*)((u8*)self + 0x550) = i + 1;
 }
 
-void SetZoneEntry(void* p);
-
-void SetTriggerZoneEntry(void* self)
+void SetTriggerZoneEntry(TriggerZone* self, s32 a, s32 b, s32 c, s32 d)
 {
-    SetZoneEntry((u8*)self + 0x554);
+    SetZoneEntry((Zone28*)((u8*)self + 0x554), a, b, c, d);
 }
 
-void SetZoneColliderEntry(void* self) { SetZoneEntry((u8*)self + 0x5C0); }
+void SetZoneColliderEntry(ZoneCollider* self, s32 a, s32 b, s32 c, s32 d) { SetZoneEntry((Zone28*)((u8*)self + 0x5C0), a, b, c, d); }

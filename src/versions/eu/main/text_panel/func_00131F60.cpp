@@ -97,7 +97,7 @@ void DrawTextPanelControlLabels(Obj_eu_131F60* self, PacketWriter* gs)
     Font* text = GetFontById(0);
     FormatToString(buf, D_eu_0024C520, 0x28);
     Layout_eu_131F60* lay = &L;
-    lay->f18 = (void*)1;
+    lay->f18 = 1;
     lay->f1C = (void*)1;
     L.w = 0.0f;
     L.h = 0.0f;
@@ -108,7 +108,7 @@ void DrawTextPanelControlLabels(Obj_eu_131F60* self, PacketWriter* gs)
     PushFontScale(glyphs, s, s);
     L.x = 265.0f;
     L.y = row;
-    DrawFontString(glyphs, buf, &L, 0, gs);
+    DrawFontString(glyphs, buf, (StringLayout*)&L, 0, gs);
     PopFontScale(glyphs);
     FormatToString(buf, D_eu_0024C520, 0x29);
     s = 0.4f;
@@ -118,12 +118,12 @@ void DrawTextPanelControlLabels(Obj_eu_131F60* self, PacketWriter* gs)
     PushFontScale(glyphs, s, s);
     L.x = 375.0f;
     L.y = row;
-    DrawFontString(glyphs, buf, &L, 0, gs);
+    DrawFontString(glyphs, buf, (StringLayout*)&L, 0, gs);
     PopFontScale(glyphs);
     *(PanelColor*)&L.color = PanelColor(0x32, 0x84, 0xB0, 0x80);
     PushFontScale(text, 0.6f, 0.6f);
     Layout_eu_131F60& move = L;
-    move.f18 = (void*)2;
+    move.f18 = 2;
     L.x = (f32)(320 - D_00261090[0]);
     L.y = row;
     TextReader_eu_131F60 moveText;

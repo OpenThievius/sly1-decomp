@@ -32,12 +32,23 @@
 #include "mul_rotation.h"
 #include "pad_record.h"
 #include "ramp_profile.h"
+#include "object_finder.h"
+struct ColliderSpan;
+struct PlaneNode;
+struct Vec02;
 
-s32 IsObjectOfKind(void* node, s32 kind);
+struct PlacedObject;
 
-void EnterAgentState(NumberedAgent* self);
+struct BaseObject;
+struct Mat02;
+struct Vec02;
 
-void SetAnimationPlayerSpeed(void* handle, f32 scale);
+
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+
+void EnterAgentState(Agent* self, s32 evt, Animation* arg);
+
+void SetAnimationPlayerSpeed(AnimationPlayer* self, f32 x);
 // An agent of the world's list at +0x1CCC (linked at +0xC10), seen as its table of slots:
 // slot 0x50 takes an owner message (func_0014BDC8, func_0014BEF8).
 typedef void (*AgentMessageFn)(void* self, void* arg);
@@ -54,77 +65,78 @@ struct Scratch_0014BDC8 {
     s32 words[8];
 };
 
-s32 ChooseAgentState(ContactAgent* self);
+s32 ChooseAgentState(Agent* self);
 
-s32 IsContactBetweenParts(void* a, void* b);
-void InitOwnerMessage(void* out, s32 mode, ContactAgent* owner);
-void ChangeAgentState(void* node, s32 kind, s32 flag);
-s32 IsPadSelectFlagHeld(void* p);
+s32 IsContactBetweenParts(Collider* self, void* other);
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
+void ChangeAgentState(Agent* self, s32 state, void* context);
+s32 IsPadSelectFlagHeld(World* self);
 
-s32 HandleAgentObjectEvent(ContactAgent* self, ListedAgentView** slot);
-void InitOwnerMessage(void* out, s32 mode, ContactAgent* owner);
+struct AgentHit;
+struct Agent;
+s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev);
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
-void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 
 // What SetSinCosPair fills: the two results of ComputeSinCos and a word it clears.
 struct SinCosPair { f32 a; f32 b; s32 value; };
 
-void ComputeSinCos(void* a, void* b, f32 value);
-void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
+void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 
-void EnterAgentState(void* self);
-void CountDownGaugeContacts(void* mgr, void* self);
-void SetAnimationPlayerSpeed(void* sub, f32 x);
+void EnterAgentState(Agent* self, s32 evt, Animation* arg);
+void CountDownGaugeContacts(GaugeManager* self, ContactAgent* agent);
+void SetAnimationPlayerSpeed(AnimationPlayer* self, f32 x);
 f32 RandomFloatInRange(f32 a, f32 b);
 
-s32 HandleAgentObjectEvent(NumberedAgent* self);
+s32 HandleAgentObjectEvent(NumberedAgent* self, void* event);
 extern u8 g_camera[];
 extern u8 D_00248D30[];
 f32 RandomFloatInRange(f32 a, f32 b);
 extern u8 D_00248D30[];
 f32 RandomFloatInRange(f32 a, f32 b);
-s32 IsObjectOfKind(void* a, s32 b);
-void StartPlacedObject(void* self);
-void ResolveObjectLinks(void* self, s32 idx, void* table);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void StartPlacedObject(PlacedObject* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-void GetStateWalkerTargetKey(void* dev, s32* out);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
-void SetStateWalkerTarget(void* dev, s32 value);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 void ApplyGaugeRatioToEffect(GaugeManager* self);
 extern f32 g_gameClock[];
-void UpdatePlacedObject(void* self);
-void RunGaugeTimedEvent(void* self);
-void ActivateRandomGaugeSlot(void* self);
+void UpdatePlacedObject(PlacedObject* self, f32 f);
+void RunGaugeTimedEvent(GaugeManager* self);
+void ActivateRandomGaugeSlot(GaugeManager* self);
 void* GetActiveSwitchedCollider(void);
 // The active collider seen as its table of slots: slot 81 (func_0014C6E0, func_0014CDC8).
 typedef void (*ColliderSlotFn)(void* self);
 
 struct ColliderSlots { ColliderSlotFn* vtbl; };
 
-void* AreMenusAndFadeClear(void* zero);
+s32 AreMenusAndFadeClear(void);
 extern f32 g_gameTime[];
 f32 RandomFloatInRange(f32 a, f32 b);
 
-void* FindFirstObjectByIdMode4(void* a, void* b, void* c);
-s32 IsObjectOfKind(void* obj, s32 kind);
-void GetStateWalkerCurrentKey(void* h, s32* out);
-void GetStateWalkerTargetKey(void* h, s32* out);
-void SetStateWalkerTarget(void* h, s32 code);
-void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
-void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
-void GetStateWalkerTargetKey(void* dev, s32* out);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
 
-void ResolveObjectLinks(void* self, s32 n, void* table);
-BaseObject* FindFirstObjectByIdMode1(void* a, s32 kind, void* arg);
-void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
+struct StateGraph;
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 
-void StartPlacedObject(GaugeManager* self);
-void ResolveObjectLinks(GaugeManager* self, s32 n, void* table);
-void* CreateStateWalker(void* a, s32 b, s32 c, s32 d);
-void GetStateWalkerCurrentKey(void* a, void* b);
-void AddStateWalkerListener(void* a, void* b);
+void StartPlacedObject(PlacedObject* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void AddStateWalkerListener(StateWalker* self, PlacedObject** p);
 void ComputeGaugeOutputs(GaugeManager* self);
 extern f32 g_gameTime[];
 
@@ -134,40 +146,39 @@ typedef s32 (*ColliderQueryFn)(void* self);
 struct ColliderQuerySlots { ColliderQueryFn* vtbl; };
 
 f32 RandomFloatInRange(f32 a, f32 b);
-void GetStateWalkerTargetKey(void* dev, s32* out);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 void* GetActiveSwitchedCollider(void);
-void SetStateWalkerTarget(void* dev, s32 value);
-s32 GatherObjectsById(void* obj, s32 a1, s32 a2, s32 a3, s32 a4, s32* out);
-void ChangeAgentState(s32 value, s32 a1, s32 a2);
-void StopTimer(void* obj);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
+void ChangeAgentState(Agent* self, s32 state, void* context);
+void StopTimer(T217D_510* self);
 void ComputeGaugeOutputs(GaugeManager* self);
 extern f32 g_gameTime[];
-void RaiseScatterLevels(void* self, f32 amount);
+void RaiseScatterLevels(ScatterController* self, f32 amount);
 extern u8 D_00248D30[];
 extern u8 D_00248D30[];
-void GetStateWalkerCurrentKey(void* p, s32* out);
-void GetStateWalkerTargetKey(void* p, s32* out);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
 
 extern u8 D_00248D30[];
 void ChooseObjectPoolItem(ObjectPool* p);
 s32 RandomIntInRange(s32 a, s32 b);
 s32 LaunchChosenPoolObject(ObjectPool* h, s32 v);
-s32 GetObjectWorldPosition(void* p, f32* out);
-s32 GetObjectWorldRotation(void* p, f32* out);
-s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, void* out, f32 fa, f32 fb);
-void AddAnimationPlayerRecordCallback(void* a, GaugeManager* self);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
+void GetObjectWorldRotation(BaseObject* self, Mat02* out);
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
+void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1);
 f32 RandomFloatInRange(f32 a, f32 b);
 
-void InitPlacedObject(GaugeManager* self);
+void InitPlacedObject(PlacedObject* self);
 typedef void (*TimerDoneFn)(void* self);
-void HandlePlacedObjectNotification(GaugeManager* self, s32 kind, void* key);
-void GetStateWalkerCurrentKey(void* key, s32* out);
-void SetWorldActiveFollower(void* sub, GaugeManager* self);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void SetWorldActiveFollower(World* self, void* v);
 void StartTimer(T217D_510* self, f32 v);
-void SetTimerLimit(T217D_510* self, f32 v, TimerDoneFn cb);
+void SetTimerLimit(T217D_510* self, f32 limit, T217D_510_Fn onEnd);
 void StartTimerCounting(T217D_510* self);
-void FinishGaugeOnTimeout(void* self);
+void FinishGaugeOnTimeout(T217D_510* timer, s32 mode);
 
 // The coefficients of a quadratic in the gauge fraction (GaugeCurve::Eval).
 struct Quadratic {
@@ -233,10 +244,10 @@ ObjectLink g_gaugeManagerLinks[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, 
 
 void SetSinCosPair(f32 value, SinCosPair* self);
 extern s32 g_frameCount;
-s32 CollectSegmentSpansInPlaneTree(void* tree, Vec02* from, Vec02* to, s32 max, ColliderSpan* out);
-void FindClosestPointsOnSegments(Vec02* a0, Vec02* a1, Vec02* b0, Vec02* b1, Vec02* onA, f32* dist, Vec02* onB);
+s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans);
+void FindClosestPointsOnSegments(const Vec02* p0, const Vec02* p1, const Vec02* q0, const Vec02* q1, f32* st, f32* dist, Vec02* dir);
 void SetAgentGoalPoint(Agent* self, Vec02* goal);
-void UpdateAgentGoal(Agent* self);
+void UpdateAgentGoal(Agent* self, s32 flag);
 f32 WrapAngle(f32 a);
 typedef NumberedAgent* (*TargetOfFn)(NumberedAgent* self);
 
@@ -261,7 +272,7 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                 if (self->f928 != 0) {
                     ColliderSpan hits[8];
                     ScopeMarker scope;
-                    s32 r = CollectSegmentSpansInPlaneTree(*(void**)(self->f928 + 0x54), &self->v140, &probe, 8, hits);
+                    s32 r = CollectSegmentSpansInPlaneTree((PlaneNode*)(*(void**)((u8*)self->f928 + 0x54)), &self->v140, &probe, 8, hits);
                     switch (r) {
                     case 0:
                         frac = 1.0f;
@@ -301,7 +312,7 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                     Vec02 onA;
                     Vec02 onB;
                     f32 d;
-                    FindClosestPointsOnSegments(&self->v140, &probe, &tgt->v140, &other, &onA, &d, &onB);
+                    FindClosestPointsOnSegments(&self->v140, &probe, &tgt->v140, &other, (f32*)&onA, &d, &onB);
                     f32 q = d / ((tgt->radius3D0 + self->radius3D0) * 5.0f);
                     f32 hi = 1.0f;
                     if (q < 0.0f) {
@@ -325,7 +336,7 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                     Vec02 onA;
                     Vec02 onB;
                     f32 d;
-                    FindClosestPointsOnSegments(&self->v140, &probe, &o->v140, &other, &onA, &d, &onB);
+                    FindClosestPointsOnSegments(&self->v140, &probe, &o->v140, &other, (f32*)&onA, &d, &onB);
                     f32 q = d / ((o->radius3D0 + self->radius3D0) + (o->radius3D0 + self->radius3D0));
                     f32 hi = 1.0f;
                     if (q < 0.0f) {
@@ -352,7 +363,7 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
         }
         break;
     default:
-        UpdateAgentGoal(self);
+        UpdateAgentGoal(self, flag);
         break;
     }
 }
@@ -394,7 +405,7 @@ s32 IsNumberedAgentFree(NumberedAgent* self)
     return self->fC20;
 }
 
-s32 HandleNumberedAgentObjectEvent(NumberedAgent* self)
+s32 HandleNumberedAgentObjectEvent(NumberedAgent* self, void* event)
 {
     if (self->f724 == 0x10) {
         return 1;
@@ -402,16 +413,16 @@ s32 HandleNumberedAgentObjectEvent(NumberedAgent* self)
     if (self->f724 == 0xB) {
         return 1;
     }
-    if (HandleAgentObjectEvent(self) == 0) {
+    if (HandleAgentObjectEvent(self, event) == 0) {
         return 0;
     }
     self->fC20 = 0;
     return 1;
 }
 
-void EnterNumberedAgentState(NumberedAgent* self)
+void EnterNumberedAgentState(NumberedAgent* self, s32 evt, Animation* arg)
 {
-    EnterAgentState(self);
+    EnterAgentState(self, evt, arg);
     switch (self->f724) {
     case 0xB:
         AddToGaugeAmount(D_0027C00C, self);
@@ -431,13 +442,13 @@ s32 ChooseAgentStateByContact(ContactAgent* self)
     ListedAgentView* n = (ListedAgentView*)GetActiveSwitchedCollider();
     if (n != 0 && IsContactBetweenParts(self, n) != 0) {
         Scratch_0014BDC8 buf;
-        InitOwnerMessage(&buf, 0, self);
+        InitOwnerMessage((OwnerMessage*)&buf, 0, self);
         result = 0xB;
         n->vtbl[0x50](n, &buf);
     }
     for (ListedAgentView* x = (ListedAgentView*)self->world->list1CCC.head; x != 0; x = x->next) {
-        if ((void*)x != (void*)self && IsObjectOfKind(x, 0x12) != 0 && IsContactBetweenParts(self, x) != 0) {
-            ChangeAgentState(x, 0xB, 0);
+        if (x != (void*)self && IsObjectOfKind((BaseObject*)x, 0x12) != 0 && IsContactBetweenParts(self, x) != 0) {
+            ChangeAgentState((Agent*)x, 0xB, 0);
         }
     }
     return result;
@@ -453,7 +464,7 @@ s32 IsContactAgentFree(ContactAgent* self)
 s32 HandleContactAgentObjectEvent(ContactAgent* self, ListedAgentView** slot)
 {
     if (self->f724 == 0x10 || self->f724 == 0xB) return 1;
-    if (HandleAgentObjectEvent(self, slot) == 0) return 0;
+    if (HandleAgentObjectEvent(self, (AgentHit*)slot) == 0) return 0;
     ListedAgentView* found = (ListedAgentView*)GetActiveSwitchedCollider();
     ListedAgentView* n = *slot;
     if (n == found) {
@@ -464,12 +475,12 @@ s32 HandleContactAgentObjectEvent(ContactAgent* self, ListedAgentView** slot)
     return 1;
 }
 
-void EnterContactAgentState(ContactAgent* self)
+void EnterContactAgentState(ContactAgent* self, s32 evt, Animation* arg)
 {
-    EnterAgentState(self);
+    EnterAgentState(self, evt, arg);
     switch (self->f724) {
     case 0xB:
-        CountDownGaugeContacts((void*)D_0027C00C, self);
+        CountDownGaugeContacts(D_0027C00C, self);
         if (((GaugeSlot*)self->fC20) != 0) {
             ((GaugeSlot*)self->fC20)->taken = 0;
             self->fC20 = 0;
@@ -513,12 +524,12 @@ void BlendParamSets(GaugeManager* self)
     s32 i = 0;
     StartPlacedObject(self);
     ResolveObjectLinks(self, 3, g_gaugeManagerLinks);
-    self->device = CreateStateWalker(self->f428, 0, 0x3FB, 0);
-    GetStateWalkerCurrentKey(self->device, self->buf430);
-    AddStateWalkerListener(self->device, self);
+    self->device = CreateStateWalker((StateGraph*)self->f428, 0, 0x3FB, 0);
+    GetStateWalkerCurrentKey((StateWalker*)self->device, (s32*)self->buf430);
+    AddStateWalkerListener((StateWalker*)self->device, (PlacedObject**)self);
     for (; i < self->slotCount; i++) {
         GaugeSlot* s = &self->slots[i];
-        BaseObject* n = (BaseObject*)FindFirstObjectByIdMode4(self->world, s->obj, self);
+        BaseObject* n = FindFirstObjectByIdMode4(self->world, s->id, self);
         s->obj = n;
         s->f8 = FindFirstObjectByIdMode1(n->world, 0x3F7, n);
         s->f4 = FindFirstObjectByIdMode1(n->world, 0x3F6, n);
@@ -588,24 +599,24 @@ void ApplyGaugeRatioToEffect(GaugeManager* self)
     RaiseScatterLevels(&g_scatterController, 1.0f - c * 0.8f);
 }
 
-void FinishGaugeOnTimeout(void* unused, s32 mode)
+void FinishGaugeOnTimeout(T217D_510* timer, s32 mode)
 {
     if (mode == 1) {
         s32 t[2];
-        GetStateWalkerTargetKey(D_0027C00C->device, &t[0]);
-        GetStateWalkerCurrentKey(D_0027C00C->device, &t[1]);
+        GetStateWalkerTargetKey((StateWalker*)D_0027C00C->device, &t[0]);
+        GetStateWalkerCurrentKey((StateWalker*)D_0027C00C->device, &t[1]);
         if (t[0] != 0x3FE && t[1] != 0x3FE) {
-            SetStateWalkerTarget(D_0027C00C->device, 0x3FF);
+            SetStateWalkerTarget((StateWalker*)D_0027C00C->device, 0x3FF);
             ApplyGaugeRatioToEffect(D_0027C00C);
         }
     }
 }
 
-void UpdateGaugeManager(GaugeManager* self)
+void UpdateGaugeManager(GaugeManager* self, f32 dt)
 {
     s32 tag;
-    UpdatePlacedObject(self);
-    GetStateWalkerCurrentKey(self->device, &tag);
+    UpdatePlacedObject(self, dt);
+    GetStateWalkerCurrentKey((StateWalker*)self->device, &tag);
     if (tag == 0x3FD) {
         if (self->f45C < g_gameClock[1]) {
             RunGaugeTimedEvent(self);
@@ -622,10 +633,10 @@ void UpdateGaugeManager(GaugeManager* self)
 void ShowGaugeManagerDisplays(GaugeManager* self)
 {
     s32 tag;
-    GetStateWalkerCurrentKey(self->device, &tag);
-    void* p = 0;
+    GetStateWalkerCurrentKey((StateWalker*)self->device, &tag);
+    s32 p = 0;
     if (tag == 0x3FD) {
-        p = AreMenusAndFadeClear(p);
+        p = AreMenusAndFadeClear();
     }
     if (p) {
         g_gaugeAmountCaption.vt->m14(&g_gaugeAmountCaption);
@@ -645,10 +656,10 @@ void AppendGaugeSlot(GaugeManager* self, s32 value)
 {
     s32 i = self->slotCount;
     self->slotCount = i + 1;
-    self->slots[i].obj = (void*)value;
+    self->slots[i].id = value;
 }
 
-void ProjectPointToCamera(void* cam, void* point, f32* out);
+void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
 
 // Picks a free gauge slot for each of up to two agents: the farthest from the player (and, for the
 // second, from the first's place) among the slots on screen, then any. The slot's size is a named
@@ -692,9 +703,9 @@ void RunGaugeTimedEvent(GaugeManager* self)
                 if (cand->taken != 0 || cand->key != 0) {
                     continue;
                 }
-                GetObjectWorldPosition(cand->f4, (f32*)&pos);
+                GetObjectWorldPosition((BaseObject*)cand->f4, (Vec02*)&pos);
                 if (pass == 0) {
-                    ProjectPointToCamera(*(void**)g_camera, (u8*)cand->obj + 0x140, screen);
+                    ProjectPointToCamera(*(Camera**)g_camera, (Vec02*)((u8*)cand->obj + 0x140), screen);
                     if (screen[0] < -1.0f || 1.0f < screen[0] || screen[1] < -1.0f || 1.0f < screen[1]) {
                         continue;
                     }
@@ -722,8 +733,8 @@ void RunGaugeTimedEvent(GaugeManager* self)
         LaunchChosenPoolObject(h, 0);
         posp = &pos;
         rotp = &rot[0];
-        GetObjectWorldPosition(slot->f4, (f32*)posp);
-        GetObjectWorldRotation(slot->f4, (f32*)rotp);
+        GetObjectWorldPosition((BaseObject*)slot->f4, (Vec02*)posp);
+        GetObjectWorldRotation((BaseObject*)slot->f4, (Mat02*)rotp);
         agent->desc02()->m1D(agent, posp);
         agent->desc02()->m1E(agent, (Mat02*)rotp);
         agent->desc02()->m20(agent, (Vec02*)D_00248D30);
@@ -731,9 +742,9 @@ void RunGaugeTimedEvent(GaugeManager* self)
         if (made == 0) {
             anchor = pos;
         }
-        CreateAnimationPlayerWithoutPresetTargets(slot->f8, slot->obj, 0, &slot->key, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)slot->f8, (BaseObject*)slot->obj, 0, (AnimationPlayer**)&slot->key, 0.0f, 1.0f);
         made++;
-        AddAnimationPlayerRecordCallback(slot->key, self);
+        AddAnimationPlayerRecordCallback((AnimationPlayer*)slot->key, (PlacedObject**)self);
         self->f458 = self->f458 + 1;
         self->f45C = g_gameClock[1] + RandomFloatInRange(self->f43C, wait[1]);
         agent->fC20 = slot;
@@ -764,14 +775,14 @@ void ActivateRandomGaugeSlot(GaugeManager* self)
     NumberedAgent* c = (NumberedAgent*)h->f48;
     GaugeSlot* s = list[idx];
     (void)LaunchChosenPoolObject(h, 0);
-    GetObjectWorldPosition(s->f4, v0);
-    GetObjectWorldRotation(s->f4, v1);
+    GetObjectWorldPosition((BaseObject*)s->f4, (Vec02*)v0);
+    GetObjectWorldRotation((BaseObject*)s->f4, (Mat02*)v1);
     c->desc02()->m1D(c, (Vec02*)v0);
     c->desc02()->m1E(c, (Mat02*)v1);
     c->desc02()->m20(c, (Vec02*)D_00248D30);
     c->desc02()->m21(c, (Vec02*)D_00248D30);
-    CreateAnimationPlayerWithoutPresetTargets(s->f8, s->obj, 0, &s->key, 0.0f, 1.0f);
-    AddAnimationPlayerRecordCallback(s->key, self);
+    CreateAnimationPlayerWithoutPresetTargets((Animation*)s->f8, (BaseObject*)s->obj, 0, (AnimationPlayer**)&s->key, 0.0f, 1.0f);
+    AddAnimationPlayerRecordCallback((AnimationPlayer*)s->key, (PlacedObject**)self);
     self->f454 = self->f454 + 1;
     f32 r = RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
     self->f460 = (*(f32*)&g_gameTime) + r;
@@ -779,7 +790,7 @@ void ActivateRandomGaugeSlot(GaugeManager* self)
     s->taken = 1;
 }
 
-void CountDownGaugeContacts(GaugeManager* self)
+void CountDownGaugeContacts(GaugeManager* self, ContactAgent* agent)
 {
     if (self->f458 == self->f450) {
         self->f45C = g_gameTime[0] + RandomFloatInRange(self->f43C, self->f440);
@@ -803,19 +814,19 @@ void AddToGaugeAmount(GaugeManager* self, NumberedAgent* arg)
         s32 arr[32];
         s32 t1;
         s32 t2;
-        GetStateWalkerCurrentKey(self->device, &t1);
-        GetStateWalkerTargetKey(self->device, &t2);
+        GetStateWalkerCurrentKey((StateWalker*)self->device, &t1);
+        GetStateWalkerTargetKey((StateWalker*)self->device, &t2);
         void* p = GetActiveSwitchedCollider();
         ColliderQuerySlots* o = (ColliderQuerySlots*)p;
         s32 r = o->vtbl[81](p);
         if (t1 != 0x3FF && t2 != 0x3FF && r != 2) {
-            SetStateWalkerTarget(self->device, 0x3FE);
+            SetStateWalkerTarget((StateWalker*)self->device, 0x3FE);
             s32 n = GatherObjectsById(self->world, 5, 0x12, 0, 0x20, arr);
             if (n > 0) {
                 s32 cnt = n;
                 s32* q = arr;
                 do {
-                    ChangeAgentState(*q, 0xB, 0);
+                    ChangeAgentState((Agent*)*q, 0xB, 0);
                     q++;
                 } while (--cnt != 0);
             }
@@ -848,7 +859,7 @@ void HandleGaugeManagerNotification(GaugeManager* self, s32 kind, void* key)
     case 0x14:
         if (key == self->device) {
             s32 out;
-            GetStateWalkerCurrentKey(key, &out);
+            GetStateWalkerCurrentKey((StateWalker*)key, &out);
             if (out == 0x3FD) {
                 g_gaugeAmountCaption.target = &self->amount;
                 g_gaugeAmountCaption.limit = &self->maxAmount;

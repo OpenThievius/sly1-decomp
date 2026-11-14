@@ -21,6 +21,16 @@
 #include "vu0.h"
 #include "pad_record.h"
 #include "camera.h"
+#include "object_finder.h"
+struct BaseObject;
+
+struct BaseObject;
+
+struct TransformSet;
+
+struct BaseObject;
+struct TransformSet;
+
 
 // The entry queue (class 0x8F): its set-up, the functions that start, advance, bind and fill it,
 // and the script commands that add entries. Its .rodata (0x24B000-0x24B054) is the jump tables
@@ -33,7 +43,7 @@ f32 D_00263E3C = 15.0f;
 f32 D_00263E40 = 0.200000003f;
 f32 D_00263E44 = 0.5f;
 
-void InitObject(void* self);
+void InitObject(BaseObject* self);
 void* AllocateFrontMemory(int size);
 
 void InitEntryQueue(EntryQueue* self)
@@ -43,13 +53,13 @@ void InitEntryQueue(EntryQueue* self)
     self->flag68 = 1;
 }
 
-s32 IsObjectOfKind(BaseObject* n, s32 kind);
-void ConvertPositionToWorld(BaseObject* n, Vec02* out);
-s32 GetObjectWorldPosition(BaseObject* n, Vec02* out);
-s32 GetObjectWorldRotation(BaseObject* n, Vec02* out);
-f32 ArctangentOfRatio(f32 a, f32 b);
-void TransformPointBetweenFrames(void* a, void* b, void* c, Vec02* d);
-void TransformDirectionBetweenFrames(void* a, void* b, Vec02* c, Vec02* d);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void ConvertPositionToWorld(BaseObject* self, Vec02* out);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
+void GetObjectWorldRotation(BaseObject* self, Mat02* out);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* outf)
 {
@@ -72,12 +82,12 @@ void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* o
     else if (IsObjectOfKind(n, 0x73))
     {
         GetObjectWorldPosition(n, &v);
-        GetObjectWorldRotation(n, &a);
+        GetObjectWorldRotation(n, (Mat02*)&a);
         r = ArctangentOfRatio(a.y, a.x);
     }
     else if (IsObjectOfKind(n, 0x6E))
     {
-        TransformPointBetweenFrames(0, n->parent, &s1->pos, &a);
+        TransformPointBetweenFrames(0, (PlacedObject*)n->parent, &s1->pos, &a);
         {
             PathCurve* curve = ((PathCurveObject*)n)->curve;
             void (*fn)(void*, Vec02*, s32, Vec02*, Vec02*, s32, s32) =
@@ -87,8 +97,8 @@ void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* o
                 fn(curve, &a, 0, &a, &b, 0, 0);
             }
         }
-        TransformPointBetweenFrames(n->parent, 0, &a, &v);
-        TransformDirectionBetweenFrames(n->parent, 0, &b, &c);
+        TransformPointBetweenFrames((PlacedObject*)n->parent, 0, &a, &v);
+        TransformDirectionBetweenFrames((PlacedObject*)n->parent, 0, &b, &c);
         r = ArctangentOfRatio(c.y, c.x);
     }
     else if (IsObjectOfKind(n, 2))
@@ -145,7 +155,7 @@ void SetEntryQueueTargetNode(EntryQueue* self, BaseObject* target)
 
 
 void SetOnOffObjectForcedState(void* p, s32 n);
-s32 IsObjectAttached(void* p);
+s32 IsObjectAttached(BaseObject* self);
 
 void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next)
 {
@@ -186,18 +196,18 @@ struct QueueTargetHolder {
     QueueTargetDriver* driver;  // 0x34
 };
 
-void* FindFirstObjectById(void* world, s32 kind, s32 id, s32 from);
-void PlaceAtArrivalPoint(BaseObject* self);
-void BuildAxisAngleMatrix(const void* axis, f32 angle, void* out);
+void PlaceAtArrivalPoint(TransformSet* self);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 void SetPlayerState(Player* self, s32 state, s32 sub);
-s32 ChooseNearbyPlayerTarget(Player* self, BaseObject* obj, s32* out);
+struct Chooser_1CDFB8;
+s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out);
 void ComputePlayerJumpVelocity(Player* self, Vec02* out);
-void ComputeUpwardBoostVelocityUnitSlope(Player* self, Vec02* v);
-void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
+void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec02* out);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out);
-void CreateAnimationPlayerWithoutPresetTargets(BaseObject* t, void* self, s32 mode, void* out, f32 x, f32 y); // stays void: retail returns a value, but declared so func_0017BCD0 differs in registers
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_0017BCD0 differs in registers
 void SetPlayerAimMode(Player* self, s32 n);
-void TriggerScriptEvent(void* self, s32 kind, s32 a, s32 b);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 void SetGameClockScale(f32 x);
 extern f32 g_gameTime;
 
@@ -213,14 +223,14 @@ void StartNextQueueEntry(EntryQueue* self)
     BaseObject* obj = (BaseObject*)FindFirstObjectById(self->world, 0x104, e->id, self->f4C);
     switch (e->kind) {
     case 0:
-        self->f4C = (s32)obj;
+        self->f4C = obj;
         break;
     case 1: {
         Vec02 pos;
         Mat02 rot;
         f32 heading;
         if (obj != 0 && IsObjectOfKind(obj, 0x74)) {
-            PlaceAtArrivalPoint(obj);
+            PlaceAtArrivalPoint((TransformSet*)obj);
             goto done;
         }
         GetNodeAnchorAndHeading(self, obj, &pos, &heading);
@@ -229,7 +239,7 @@ void StartNextQueueEntry(EntryQueue* self)
         p->v560 = pos;
         p->desc02()->m1D(p, &pos);
         p->f638 = heading;
-        BuildAxisAngleMatrix(&g_unitZVector, heading, &rot);
+        BuildAxisAngleMatrix(&g_unitZVector, &rot, heading);
         p->desc02()->m1E(p, &rot);
         p->desc02()->m20(p, (Vec02*)&D_00248D30);
         p->desc02()->m21(p, (Vec02*)&D_00248D30);
@@ -245,7 +255,7 @@ void StartNextQueueEntry(EntryQueue* self)
         }
         if (IsObjectOfKind(obj, 0x7F) || IsObjectOfKind(obj, 0x6F) || IsObjectOfKind(obj, 0x3A)
             || IsObjectOfKind(obj, 0x70) || IsObjectOfKind(obj, 0x76)) {
-            s32 t = ChooseNearbyPlayerTarget(p, obj, &p->f239C);
+            s32 t = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)p, obj, &p->f239C);
             if (t != -1) {
                 SetPlayerState(p, 6, t);
             }
@@ -253,7 +263,7 @@ void StartNextQueueEntry(EntryQueue* self)
         if (p->f2220 == 6 && p->f239C == 4) {
             Vec02 pos;
             GetNodeAnchorAndHeading(self, obj, &pos, 0);
-            TransformPointBetweenFrames(0, ((QueueTargetHolder*)p->f23BC)->frame, &pos, &pos);
+            TransformPointBetweenFrames(0, (PlacedObject*)(((QueueTargetHolder*)p->f23BC)->frame), &pos, &pos);
             QueueTargetDriver* d = ((QueueTargetHolder*)p->f23BC)->driver;
             if (d->vt->m0A == 0) {
                 break;
@@ -266,7 +276,7 @@ void StartNextQueueEntry(EntryQueue* self)
         Vec02 pos;
         self->f48 = e;
         GetNodeAnchorAndHeading(self, obj, &pos, 0);
-        TransformPointBetweenFrames(0, ((QueueTargetHolder*)p->f2208)->frame, &pos, &pos);
+        TransformPointBetweenFrames(0, (PlacedObject*)(((QueueTargetHolder*)p->f2208)->frame), &pos, &pos);
         QueueTargetDriver* d = ((QueueTargetHolder*)p->f2208)->driver;
         if (d->vt->m0A == 0) {
             break;
@@ -330,7 +340,7 @@ void StartNextQueueEntry(EntryQueue* self)
             break;
         }
         GetNodeAnchorAndHeading(self, obj, &goal, 0);
-        ComputeObjectMotionInFrame(obj->parent, 0, &goal, &drift, 0, 0, 0);
+        ComputeObjectMotionInFrame((PlacedObject*)obj->parent, 0, &goal, &drift, 0, 0, 0);
         Vu0::Q(goal) = Vu0::MulAddX(Vu0::Vec::Of(goal), Vu0::Vec::Of(drift), Vu0::Vec::Scalar(rise)).q;
         if (IsObjectOfKind(obj, 0x76)) {
             goal.z += D_00263E34;
@@ -357,7 +367,7 @@ void StartNextQueueEntry(EntryQueue* self)
         if (obj == 0 || !IsObjectOfKind(obj, 0x83)) {
             break;
         }
-        CreateAnimationPlayerWithoutPresetTargets(obj, 0, 0, &player, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)obj, 0, 0, (AnimationPlayer**)&player, 0.0f, 1.0f);
         if (e->state != 0) {
             goto done;
         }
@@ -382,7 +392,7 @@ void StartNextQueueEntry(EntryQueue* self)
         goto done;
     case 2: {
         s32* arg = &e->value;
-        TriggerScriptEvent(self, 0x18, 1, (s32)&arg);
+        TriggerScriptEvent(self, 0x18, 1, &arg);
         goto done;
     }
     case 3:
@@ -400,8 +410,7 @@ done:
 }
 
 extern f32 g_gameTime;
-void* FindFirstObjectById(void* world, s32 kind, s32 id, s32 from);
-void StopAnimationPlayer(void* p);
+void StopAnimationPlayer(AnimationPlayer* self);
 void SetPlayerState(Player* self, s32 a, s32 b);
 
 s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
@@ -437,7 +446,7 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
         void* p = self->f50;
         done = p == 0 || ((f32*)p)[6] == 0.0f;
         if (done && p != 0) {
-            StopAnimationPlayer(p);
+            StopAnimationPlayer((AnimationPlayer*)p);
             self->f50 = 0;
         }
         break;
@@ -488,9 +497,11 @@ void AdvanceEntryQueue(EntryQueue* self)
         self->f48 = 0;
 }
 
-s32 ChoosePlayerTargetByCost(Player* self, void* target);
+struct TargetCand;
+struct Chooser;
+s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep);
 f32 WrapAngle(f32 a);
-void ProjectPointToCamera(Camera* self, Vec02* in, Vec02* out);
+void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
 extern f32 g_gameTime;
 extern f32 D_00274F14;
 
@@ -540,7 +551,7 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
             if (p->f2220 == 2 && o != 0) {
                 if ((p->f2228 == 2 && D_00263E40 < g_gameTime - p->f222C) || (p->f2228 == 3 && D_00263E44 < g_gameTime - p->f222C)) {
                     if (IsObjectOfKind(o, 0x81) || IsObjectOfKind(o, 0x71) || IsObjectOfKind(o, 0x6F) || IsObjectOfKind(o, 0x7F) || IsObjectOfKind(o, 0x70) || IsObjectOfKind(o, 0x76)) {
-                        SetPlayerState(p, 2, ChoosePlayerTargetByCost(p, o));
+                        SetPlayerState(p, 2, ChoosePlayerTargetByCost((Chooser*)p, (TargetCand*)o));
                     }
                 }
             }
@@ -558,8 +569,8 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
                     if (s->desc->m1 != 0) {
                         s->desc->m1(s, p->f23C0, &a, &b);
                     }
-                    TransformPointBetweenFrames(frame, 0, &a, &c);
-                    TransformDirectionBetweenFrames(frame, 0, &b, &d);
+                    TransformPointBetweenFrames((PlacedObject*)frame, 0, &a, &c);
+                    TransformDirectionBetweenFrames((PlacedObject*)frame, 0, &b, &d);
                     d.z = 0.0f;
                     Vu0::Set(d, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_unitXVector)));
                     s32 flip = 0;
@@ -604,10 +615,10 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
                     s->desc->m2(s, p->f2410 - D_00274F14, &b, 0);
                 }
             }
-            TransformPointBetweenFrames(((TrackRecord_17C718*)p->f2208)->frame, 0, &a, &a);
-            TransformPointBetweenFrames(((TrackRecord_17C718*)p->f2208)->frame, 0, &b, &b);
-            ProjectPointToCamera(g_camera, &a, &c);
-            ProjectPointToCamera(g_camera, &b, &d);
+            TransformPointBetweenFrames((PlacedObject*)(((TrackRecord_17C718*)p->f2208)->frame), 0, &a, &a);
+            TransformPointBetweenFrames((PlacedObject*)(((TrackRecord_17C718*)p->f2208)->frame), 0, &b, &b);
+            ProjectPointToCamera(g_camera, &a, (f32*)&c);
+            ProjectPointToCamera(g_camera, &b, (f32*)&d);
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(c), Vu0::Q(d));
             dir.z = 0.0f;
             Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Q(dir), Vu0::Q(g_unitYVector)));
@@ -668,16 +679,15 @@ void ResetEntryQueue(EntryQueue* self)
     self->f40 = 0;
 }
 
-void TriggerScriptEvent(void* self, s32 kind, s32 a, s32 b);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 s32 SetPadSelectFlags(s32 a);
-void AcquirePadSelectFlag(void* a);
+void AcquirePadSelectFlag(World* a0);
 
 
-void BindEntryQueueToObject(void* a0, void* a1)
+void BindEntryQueueToObject(EntryQueue* self, Player* player)
 {
-    EntryQueue* self = (EntryQueue*)a0;
-    ((Player*)a1)->entryQueue = self;
-    self->f3C = a1;
+    player->entryQueue = self;
+    self->f3C = player;
     self->f40 = -1;
     TriggerScriptEvent(self, 0x17, 0, 0);
     if (self->flag68 != 0) {
@@ -688,9 +698,9 @@ void BindEntryQueueToObject(void* a0, void* a1)
 
 
 void SetGameClockScale(f32 x);
-void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
-void ClearPadSelectFlags(s32 n);
-void ReleasePadSelectFlag(void* p);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void ClearPadSelectFlags(u32 mask);
+void ReleasePadSelectFlag(World* self);
 
 void UnbindEntryQueue(EntryQueue* self)
 {
@@ -698,7 +708,7 @@ void UnbindEntryQueue(EntryQueue* self)
         ReplaceQueueOnOffObject(self, 0);
         SetEntryQueueTargetNode(self, 0);
         if (self->f50 != 0) {
-            StopAnimationPlayer(self->f50);
+            StopAnimationPlayer((AnimationPlayer*)self->f50);
             self->f50 = 0;
         }
         SetGameClockScale(1.0f);
@@ -717,7 +727,7 @@ void UnbindEntryQueue(EntryQueue* self)
 
 // The entry AddQueueEntry hands out once the queue's 0x80 entries are used (0x14 bytes).
 static u8 D_002BE478[0x14];
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void* AddQueueEntry(EntryQueue* pool, s32 a, s32 b, s32 c)
 {
@@ -768,27 +778,27 @@ void AddQueueEntryKind4(void* self, s32 a, f32 value)
     o->valueF = value;
 }
 
-void* AddQueueEntryKind9(void* self, s32 value, s32 c)
+void* AddQueueEntryKind9(EntryQueue* self, s32 value, s32 c)
 {
-    return AddQueueEntry((EntryQueue*)self, 9, value, c);
+    return AddQueueEntry(self, 9, value, c);
 }
 
-void AddQueueEntryKind5(void* self, s32 b, s32 c, s32 d, s32 e)
+void AddQueueEntryKind5(EntryQueue* self, s32 b, s32 c, s32 d, s32 e)
 {
-    QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 5, b, e);
+    QueueEntry* o = (QueueEntry*)AddQueueEntry(self, 5, b, e);
     o->value = c;
     o->value10 = d;
 }
 
-void AddQueueEntryKind6(void* self, s32 a, s32 b, f32 value)
+void AddQueueEntryKind6(EntryQueue* self, s32 a, s32 b, f32 value)
 {
-    QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 6, a, b);
+    QueueEntry* o = (QueueEntry*)AddQueueEntry(self, 6, a, b);
     o->valueF = value;
 }
 
-void AddQueueEntryKind7(void* self, s32 b, s32 c, f32 value)
+void AddQueueEntryKind7(EntryQueue* self, s32 b, s32 c, f32 value)
 {
-    QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 7, b, c);
+    QueueEntry* o = (QueueEntry*)AddQueueEntry(self, 7, b, c);
     o->valueF = value;
 }
 

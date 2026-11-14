@@ -25,21 +25,34 @@
 #include "effect.h"
 #include "vu0.h"
 #include "object_message.h"
-void InitCollider(void* self);
-void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
-void InitAgent(void* self);
-void StartAgent(void* self);
-void ResolveObjectLinks(void* self, s32 n, void* table);
-s32 ResolveAgentClip(void* self, s32 id);
-void RemoveItemKeeperMember(void* a, void* b);
-void EnterAgentState(void* self, s32 a, s32 b);
-s32 IsObjectAttached();
+#include "object_finder.h"
+#include "agent_request.h"
+struct ColliderSpan;
+struct PlaneNode;
+struct Vec02;
+struct BaseObject;
+struct Mat02;
+struct Mat4A;
+struct DeferredRequest;
+struct ItemKeeper;
+struct AgentRequest;
+struct Agent;
+void InitCollider(Collider* self);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
+
+void InitAgent(Agent* self);
+void StartAgent(Agent* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+s32 ResolveAgentClip(Agent* self, s32 id);
+void RemoveItemKeeperMember(ItemKeeper* self, Agent* value);
+void EnterAgentState(Agent* self, s32 evt, Animation* arg);
 void* GetActiveSwitchedCollider();
-s32 IsObjectInPool(void* p, s32 v);
-s32 AcceptAgentRequest(void* self, s32* arg);
-void StartObject(void* self);
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-void TransformPointBetweenFrames(void* a0, s32 a1, void* a2, void* a3);
+struct ObjectPool;
+s32 IsObjectInPool(ObjectPool* list, BaseObject* query);
+s32 AcceptAgentRequest(Agent* self, AgentRequest* req);
+void StartObject(BaseObject* self);
+s32 IsObjectAttached();
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 // The object a seeking agent of kind 0x10 keeps at 0xC2C: a method table, and at 0x618 what
 // func_001A8820 tests a request's argument against.
 typedef void (*ChildFn)(void* self);
@@ -48,62 +61,65 @@ struct SeekPartner {
     u8 pad04[0x618 - 0x04];
     void* p618;
 };
-void LeaveAgentState(void* self);
+void LeaveAgentState(Agent* self, s32 mode);
 extern s32 g_buttonCodeFlags;
-s32 IsPadSelectFlagHeld(void* p);
-s32 IsAgentRequestBlocked(void* self, s32 a);
-s32 IsObjectAttached(void* p);
-s32 IsObjectOfKind(void* a, s32 b);
-void ReparentObject(void* self, s32 value);
-void ReadBufferedString(void* other, void* sub);
-void InitCollider(void* self);
-extern void ChangeAgentState(SeekingAgent* self, s32 mode, s32 value);
+struct BufferedStream;
+s32 IsPadSelectFlagHeld(World* self);
+s32 IsAgentRequestBlocked(Agent* self, s32 unused1);
+s32 IsObjectAttached(BaseObject* self);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void ReparentObject(BaseObject* self, BaseObject* value);
+void ReadBufferedString(BufferedStream* self, u8** out);
+void InitCollider(Collider* self);
+extern void ChangeAgentState(Agent* self, s32 state, void* context);
 // Notification 0x13: its source and an id.
 struct SourceNotice { s32 f_0; u8 pad4[4]; s32 f_8; };
-extern void HandleAgentNotification(SeekingAgent* self, s32 code, SourceNotice* req);
+struct AgentNotification;
+extern void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
 extern void SpendReserveUnit(void);
 void* GetActiveSwitchedCollider(void);
 // The point graph FindPointGraphPath and SnapPointToPointGraph take, at 0x34 of its owner.
-struct GraphQueryOwner { u8 head[0x34]; PointGraph graph; };
 s32 FindPointGraphPath(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out);
-s32 FindPointGraphTriangleWithin(GraphFace* faces, Vec02* p);
+s32 FindPointGraphTriangleWithin(PlaneNode* node, Vec02* p);
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
 void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out);
 f32 RandomFloatInRange(f32 lo, f32 hi);
-void ReadBufferedVector3(void* a, void* b);
+void ReadBufferedVector3(BufferedStream* src, void* dst);
 void ReadPropertyRecords(void* a, void* b);
-void TransformPointBetweenFrames(void* a, s32 b, void* c, s32 d);
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
-void* CopyBytes(void* dst, void* src, s32 n);
-void SyncDataCache(s32 a);
-void CopyObjectData(void* self);
-void SetListLinkOffset(void* self, s32 value);
-void ClearList(void* p);
-void RegisterObject(void* self);
-void AppendToList(void* table, void* self);
-void UnregisterObject(void* self);
-void RemoveFromList(void* table, void* self);
-s32 IsPadSelectFlagHeld(void* p);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
+extern "C" void* CopyBytes(void* dst, void* src, s32 n);
+extern "C" void SyncDataCache(s32 a);
+void CopyObjectData(BaseObject* self, BaseObject* src);
+void SetListLinkOffset(List01* self, s32 offset);
+void ClearList(List01* p);
+void RegisterObject(BaseObject* self);
+void AppendToList(List01* self, void* item);
+void UnregisterObject(BaseObject* self);
+void RemoveFromList(List01* list, void* item);
+s32 IsPadSelectFlagHeld(World* self);
 // func_001EA4B8 takes its float arguments first: the caller then sets $f14 before $a0.
-f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, Quad16* p, s32 zero);
+struct RampProfile;
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 // An object event, and notification 0x17 that passes its id on.
 struct AgentEvent { s32 id; };
 struct EventNotice {
     SeekingAgent* self;
     s32 id;
 };
-s32 HasSpareCount(void* a, void* b);
-s32 HandleAgentObjectEvent(void* a, void* b);
+struct BufferedStream;
+struct AgentHit;
+s32 HasSpareCount(void);
+s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev);
 extern s32 g_buttonCodeFlags;
-void LoadObjectProperties(BaseObject* o, Stream8A* in);
-s32 ReadBufferedU16(void* stream);
+void LoadObjectProperties(BaseObject* self, void* stream);
+u16 ReadBufferedU16(BufferedStream* self);
 void* AllocateZeroedFrontMemory(s32 n);
-void ReadBufferedVector3(Stream8A* in, void* p);
-s32 ReadBufferedU8(Stream8A* in);
+void ReadBufferedVector3(BufferedStream* src, void* dst);
+s32 ReadBufferedU8(BufferedStream* self);
 void* AllocateFrontMemory(s32 n);
-f32 ReadBufferedFloat(Stream8A* in);
-s32 ReadBufferedS16(Stream8A* in);
+f32 ReadBufferedFloat(BufferedStream* r);
+s32 ReadBufferedS16(BufferedStream* self);
 void MeasurePointGraphEdges(PointGraph* m);
 void* GetActiveSwitchedCollider(void);
 void InitObject(BaseObject* self);
@@ -111,15 +127,15 @@ void InitObject(BaseObject* self);
 
 void PushBackMemoryMark(void);
 s32* AllocateBackMemory(s32 bytes);
-void CopyMemory(void* dst, void* src, s32 bytes);
+void CopyMemory(void* dst, void* src, u32 size);
 void PopBackMemoryMark(void);
 s32 IsPointPathShortcutBlocked(void* self, s32 a, s32 b);
-void UpdateAgentGoal(SeekingAgent* self);
-void SetAgentGoalPoint(SeekingAgent* self, void* p);
-s32 IsObjectAttached(void* p);
-s32 GetObjectWorldPosition(void* self, s32* arg);
+void UpdateAgentGoal(Agent* self, s32 flag);
+void SetAgentGoalPoint(Agent* self, Vec02* p);
+s32 IsObjectAttached(BaseObject* self);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
 // Up to d spans between two points of the graph (0xE0 bytes for d = 2: two ColliderSpans).
-s32 CollectSegmentSpansInPlaneTree(void* a, s32 b, s32 c, s32 d, ColliderSpan* e);
+s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans);
 
 void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other);
 
@@ -204,15 +220,17 @@ struct SprBlock {
     }
 };
 
-void DrawModelPart(PartRequest* r);
-void BuildMatrixFromRotationAndTranslation(Vec02* pos, Mat02* rot, Mat4A* out);
+struct Frame_166690;
+void DrawModelPart(Frame_166690* self);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 void StartToSprChain(s32 size, ...);
-s32 WaitDmaChannel(void* dma, s32 b, s32 c);
+struct DmaChannel;
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
-void MultiplyMatrices(Mat4A* out, Mat4A* b, void* in); // stays void: retail returns a value, but declared so func_0018F9D8 differs in registers
-void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, Vec02* pos, Mat4A* m);
-void QueueDeferredRequest(PartRequest* r);
-void* FillMemory(void* p, s32 value, s32 size);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
+void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, f32* pos, Mat4A* m);
+void QueueDeferredRequest(DeferredRequest* src);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern void* g_toSprChannel;
 extern f32 g_gameClock[];
 extern const Mat4A D_00248400;
@@ -234,7 +252,7 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
     }
     StartToSprChain(n * 0x70, self->drawParts, n * 0x28, self->partStates, 0, 0);
     while (i < self->drawPartCount) {
-        WaitDmaChannel(g_toSprChannel, 0, 0);
+        WaitDmaChannel((DmaChannel*)g_toSprChannel, 0, 0);
         s32 next = i + n;
         D_00274990 = 1 - D_00274990;
         D_002748F0[D_00274990].state = 2;
@@ -277,7 +295,7 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
             }
             if (target != st->alpha) {
                 ModelPartState* home = (ModelPartState*)((u8*)self->partStates + (j + i) * 0x28);
-                f32 a = ApproachValueWithRamp(st->alpha, target, g_gameClock[2], (Quad16*)D_00269B50, 0);
+                f32 a = ApproachValueWithRamp((RampProfile*)D_00269B50, 0, st->alpha, target, g_gameClock[2]);
                 st->alpha = a;
                 home->alpha = a;
             }
@@ -316,14 +334,12 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
                 }
             }
             if (part->f68 != 0) {
-                Mat4A t;
-                MultiplyMatrices(&t, &rec.m, part->f68);
-                rec.m = t;
+                rec.m = MultiplyMatrices(rec.m, *(Mat4A*)part->f68);
             }
             if (part->f34 != 0) {
-                BuildCameraFacingMatrix(self, cam, part->f34, &rec.at, &rec.m);
+                BuildCameraFacingMatrix(self, cam, part->f34, (f32*)&rec.at, &rec.m);
             }
-            QueueDeferredRequest(&rec);
+            QueueDeferredRequest((DeferredRequest*)&rec);
             if (part->f68 != 0 || part->f34 != 0) {
                 rec.m = D_00248400;
             }
@@ -373,20 +389,20 @@ void EnterSeekingAgentState(SeekingAgent* self, s32 a1, s32 a2)
             a2v = self->fC38;
         }
         if (self->f720 != 0) {
-            RemoveItemKeeperMember(self->f720, self);
+            RemoveItemKeeperMember((ItemKeeper*)self->f720, self);
         }
         break;
     }
-    EnterAgentState(self, a1, a2v);
+    EnterAgentState(self, a1, (Animation*)a2v);
     s32 kind = self->f724;
     if (kind == 0xB || kind == 0x10) {
         self->fC04 = 0;
     }
 }
 
-void LeaveSeekingAgentState(SeekingAgent* self)
+void LeaveSeekingAgentState(SeekingAgent* self, s32 mode)
 {
-    LeaveAgentState(self);
+    LeaveAgentState(self, mode);
     s32 kind = self->f724;
     if (kind != 8) {
         if (kind == 0x10) {
@@ -413,8 +429,8 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
             void** slot;
             for (i = 0, slot = self->fC14; i < self->fC10; slot++, i++) {
                 void* n = *slot;
-                if (IsObjectAttached(n) != 0) {
-                    SetAgentGoalPoint(self, (u8*)n + 0x140);
+                if (IsObjectAttached((BaseObject*)n) != 0) {
+                    SetAgentGoalPoint(self, (Vec02*)((u8*)n + 0x140));
                     break;
                 }
             }
@@ -423,34 +439,34 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
     case 4:
         if (self->f750 == 0) {
             if (self->fC24 != 0) {
-                GetObjectWorldPosition(self->fC24, tmp);
-                SetAgentGoalPoint(self, tmp);
+                GetObjectWorldPosition((BaseObject*)self->fC24, (Vec02*)tmp);
+                SetAgentGoalPoint(self, (Vec02*)tmp);
             } else {
                 SetAgentGoalPoint(self, &self->v140);
             }
         } else {
-            UpdateAgentGoal(self);
+            UpdateAgentGoal(self, flag);
         }
         break;
     case 12:
     case 13:
         if (self->fC28 != 0) {
-            GetObjectWorldPosition(self->fC28, tmp);
-            SetAgentGoalPoint(self, tmp);
+            GetObjectWorldPosition((BaseObject*)self->fC28, (Vec02*)tmp);
+            SetAgentGoalPoint(self, (Vec02*)tmp);
         }
         break;
     default:
-        UpdateAgentGoal(self);
+        UpdateAgentGoal(self, flag);
         break;
     }
 }
 
-void FaceAgentTowardGoalPoint(SeekingAgent* self);
-void UpdateAgentState(SeekingAgent* self);
-void SetAgentFacingAngles(SeekingAgent* self, f32 a, f32 b);
+void FaceAgentTowardGoalPoint(Agent* self);
+void UpdateAgentState(Agent* self);
+void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 f32 WrapAngle(f32 x);
-f32 ArctangentOfRatio(f32 y, f32 x);
-s32 GetObjectWorldRotation(void* self, Vec02* out);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
+void GetObjectWorldRotation(BaseObject* self, Mat02* out);
 
 void UpdateSeekingAgentState(SeekingAgent* self)
 {
@@ -469,7 +485,7 @@ void UpdateSeekingAgentState(SeekingAgent* self)
             break;
         }
         if (self->fC24 != 0) {
-            GetObjectWorldRotation(self->fC24, &tmp);
+            GetObjectWorldRotation((BaseObject*)self->fC24, (Mat02*)&tmp);
             a = ArctangentOfRatio(tmp.y, tmp.x);
             SetAgentFacingAngles(self, a, 0.0f);
         } else {
@@ -486,7 +502,7 @@ void UpdateSeekingAgentState(SeekingAgent* self)
         if (self->fC28 == 0) {
             break;
         }
-        GetObjectWorldRotation(self->fC28, &tmp);
+        GetObjectWorldRotation((BaseObject*)self->fC28, (Mat02*)&tmp);
         a = ArctangentOfRatio(tmp.y, tmp.x);
         SetAgentFacingAngles(self, a, 0.0f);
         break;
@@ -529,15 +545,15 @@ s32 IsSeekingAgentRequestBlocked(SeekingAgent* self, s32 a1)
     return 1;
 }
 
-s32 AcceptSeekingAgentRequest(SeekingAgent* self, s32* arg)
+s32 AcceptSeekingAgentRequest(SeekingAgent* self, AgentRequest* arg)
 {
-    if (self->desc05()->m4B(self, arg[0])) {
+    if (self->desc05()->m4B(self, arg->kind00)) {
         return 0;
     }
     self->fC34 = 0;
-    self->fC30 = arg[0];
-    if (arg[0] == 0 && arg[1] != 0) {
-        if (IsObjectInPool(((SeekPartner*)self->fC2C)->p618, arg[1])) {
+    self->fC30 = arg->kind00;
+    if (arg->kind00 == 0 && arg->ref04 != 0) {
+        if (IsObjectInPool((ObjectPool*)((SeekPartner*)self->fC2C)->p618, arg->ref04)) {
             self->fC34 = 1;
         }
     }
@@ -547,12 +563,12 @@ s32 AcceptSeekingAgentRequest(SeekingAgent* self, s32* arg)
 s32 HandleSeekingAgentObjectEvent(SeekingAgent* self, AgentEvent* msg)
 {
     EventNotice args;
-    if (HasSpareCount(self, msg) != 0 && self->fC34 == 0) {
+    if (HasSpareCount() != 0 && self->fC34 == 0) {
         self->fA68 = 1;
     } else {
         self->fA68 = 0;
     }
-    if (HandleAgentObjectEvent(self, msg) == 0) {
+    if (HandleAgentObjectEvent(self, (AgentHit*)msg) == 0) {
         return 0;
     }
     args.self = self;
@@ -622,7 +638,7 @@ void StartSeekingAgentEffect(SeekingAgent* self, s32 flag, PlacedObject* extra)
 {
     StartSwitchedColliderEffect(self, flag, extra);
     if (flag == 0) {
-        ChangeAgentState(self, 8, (s32)self->f5F0);
+        ChangeAgentState(self, 8, self->f5F0);
     }
 }
 
@@ -639,7 +655,7 @@ s32 GetSeekingAgentStateKind(SeekingAgent* self)
 
 void HandleSeekingAgentNotification(SeekingAgent* self, s32 code, SourceNotice* req)
 {
-    HandleAgentNotification(self, code, req);
+    HandleAgentNotification(self, code, (AgentNotification*)req);
     if (code == 0x13) {
         if (req->f_0 == (s32)self->f7E0) {
             if (req->f_8 == 0x53A) {
@@ -847,7 +863,7 @@ s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max,
 s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
 {
     ColliderSpan out[2];
-    switch (CollectSegmentSpansInPlaneTree(a, b, c, 2, out)) {
+    switch (CollectSegmentSpansInPlaneTree((PlaneNode*)a, (Vec02*)b, (Vec02*)c, 2, out)) {
     case 0:
         return 1;
     case 1:
@@ -1110,7 +1126,7 @@ s32 FindPointGraphPath(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut,
 // operands in insn order").
 void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out)
 {
-    if (FindPointGraphTriangleWithin(self->faces, p) != 0) {
+    if (FindPointGraphTriangleWithin((PlaneNode*)self->faces, p) != 0) {
         *out = *p;
         return;
     }
@@ -1148,24 +1164,24 @@ void LoadPointGraph(PointGraphObject* o, Stream8A* in)
     s32 j;
     LoadObjectProperties(o, in);
     i = 0;
-    o->graph.pointCount = ReadBufferedU16(in);
+    o->graph.pointCount = ReadBufferedU16((BufferedStream*)in);
     m->points = (GraphPoint*)AllocateZeroedFrontMemory(o->graph.pointCount << 5);
-    m->nA = ReadBufferedU16(in);
-    m->linkCount = ReadBufferedU16(in) + m->nA;
+    m->nA = ReadBufferedU16((BufferedStream*)in);
+    m->linkCount = ReadBufferedU16((BufferedStream*)in) + m->nA;
     m->links = (u8*)AllocateZeroedFrontMemory(m->linkCount * 12);
-    m->triCount = ReadBufferedU16(in);
+    m->triCount = ReadBufferedU16((BufferedStream*)in);
     m->tris = (u8*)AllocateZeroedFrontMemory(m->triCount * 12);
     if (o->graph.pointCount > 0) {
         do {
             GraphPoint* v = (GraphPoint*)((u8*)m->points + (i << 5));
             s32 k = i + 1;
             j = 0;
-            ReadBufferedVector3(in, v);
-            v->linkCount = ReadBufferedU8(in);
+            ReadBufferedVector3((BufferedStream*)in, v);
+            v->linkCount = ReadBufferedU8((BufferedStream*)in);
             v->links = (GraphLink**)AllocateFrontMemory((v->linkCount + 1) << 2);
             if (v->linkCount > 0) {
                 do {
-                    v->links[j] = (GraphLink*)(m->links + ReadBufferedU16(in) * 12);
+                    v->links[j] = (GraphLink*)(m->links + ReadBufferedU16((BufferedStream*)in) * 12);
                     j++;
                 } while (j < v->linkCount);
             }
@@ -1179,7 +1195,7 @@ void LoadPointGraph(PointGraphObject* o, Stream8A* in)
             j = 1;
             do {
                 j--;
-                *p = (GraphPoint*)((u8*)m->points + (ReadBufferedU16(in) << 5));
+                *p = (GraphPoint*)((u8*)m->points + (ReadBufferedU16((BufferedStream*)in) << 5));
                 p++;
             } while (j >= 0);
         }
@@ -1188,19 +1204,19 @@ void LoadPointGraph(PointGraphObject* o, Stream8A* in)
             j = 2;
             do {
                 j--;
-                *p = (GraphPoint*)((u8*)m->points + (ReadBufferedU16(in) << 5));
+                *p = (GraphPoint*)((u8*)m->points + (ReadBufferedU16((BufferedStream*)in) << 5));
                 p++;
             } while (j >= 0);
         }
     }
-    m->faceCount = ReadBufferedU16(in);
+    m->faceCount = ReadBufferedU16((BufferedStream*)in);
     m->faces = (GraphFace*)AllocateZeroedFrontMemory(m->faceCount << 5);
     for (s32 e = 0; e < m->faceCount; e++) {
         s32 a;
         GraphFace* f = (GraphFace*)((u8*)m->faces + (e << 5));
-        ReadBufferedVector3(in, f);
-        f->f10 = ReadBufferedFloat(in);
-        a = ReadBufferedS16(in);
+        ReadBufferedVector3((BufferedStream*)in, f);
+        f->f10 = ReadBufferedFloat((BufferedStream*)in);
+        a = ReadBufferedS16((BufferedStream*)in);
         if (a == -1) {
             f->neighbourA = 0;
         } else if (a >= 0) {
@@ -1210,7 +1226,7 @@ void LoadPointGraph(PointGraphObject* o, Stream8A* in)
             a = -a;
             f->neighbourA = (void*)((u32)(m->tris + a * 12) | 1);
         }
-        a = ReadBufferedS16(in);
+        a = ReadBufferedS16((BufferedStream*)in);
         if (a == -1) {
             f->neighbourB = 0;
         } else if (a >= 0) {
@@ -1226,17 +1242,17 @@ void LoadPointGraph(PointGraphObject* o, Stream8A* in)
 
 ASM_FUNC(func_001919F8);
 
-s32 FindOwnerGraphPath(GraphQueryOwner* self, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out)
+s32 FindOwnerGraphPath(PointGraphObject* self, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out)
 {
     return FindPointGraphPath(&self->graph, start, goal, maxOut, out);
 }
 
-void SnapPointToOwnerGraph(GraphQueryOwner* self, Vec02* p, Vec02* out)
+void SnapPointToOwnerGraph(PointGraphObject* self, Vec02* p, Vec02* out)
 {
     SnapPointToPointGraph(&self->graph, p, out);
 }
 
-s32 TestOwnerGraphSpan(GraphQueryOwner* self, Vec02* from, Vec02* to, s32 max, ColliderSpan* out)
+s32 TestOwnerGraphSpan(PointGraphObject* self, Vec02* from, Vec02* to, s32 max, ColliderSpan* out)
 {
     return CollectSegmentSpansInPlaneTree((PlaneNode*)self->graph.faces, from, to, max, out);
 }
@@ -1255,7 +1271,7 @@ static inline void CopyMatrix(Mat02* d, const Mat02* s) { CopyBytes(d, (void*)s,
 // end of the loop's first block, where cse2 makes it a copy of the first: the load before the
 // branch on the test's result (docs/toolchain/loops.md, "An asm kept in its loop"). Retail
 // stores a copy of the scale beside the scaled matrix (0xF0), which nothing reads.
-void FitStepToPointGraph(GraphQueryOwner* self, f32 scale, Vec02* pos, Vec02* step)
+void FitStepToPointGraph(PointGraphObject* self, f32 scale, Vec02* pos, Vec02* step)
 {
     Mat02 turn;
     Vec02 end;
@@ -1332,7 +1348,7 @@ void SetScreenOwner(s32 value)
     }
 }
 
-void ClearScreenOwner(void)
+void ClearScreenOwner(s32 owner)
 {
     g_screenOwner = 0;
 }
@@ -1378,42 +1394,42 @@ void StartTargetVector(TargetVector* self)
     }
 }
 
-void CopyTargetVector(TargetVector* self)
+void CopyTargetVector(TargetVector* self, TargetVector* src)
 {
     PathCurveKeptBits tmp;
     tmp = self->keep;
-    CopyObjectData(self);
+    CopyObjectData(self, src);
     self->keep = tmp;
 }
 
 void LoadPointObject(PointObject* self, void* other)
 {
-    ReadBufferedVector3(other, &self->pos);
+    ReadBufferedVector3((BufferedStream*)other, &self->pos);
     ReadPropertyRecords(self, other);
 }
 
-void ConvertPositionToWorld(BaseObject* self, s32 arg)
+void ConvertPositionToWorld(BaseObject* self, Vec02* out)
 {
-    TransformPointBetweenFrames((void*)self->parent, 0, (u8*)self + 0x40, arg);
+    TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)((u8*)self + 0x40), out);
 }
 
-void ReparentPointObject(PointObject* self, s32 value)
+void ReparentPointObject(PointObject* self, BaseObject* value)
 {
     void* sub = &self->pos;
-    TransformPointBetweenFrames(self->parent, value, sub, sub);
+    TransformPointBetweenFrames((PlacedObject*)self->parent, (PlacedObject*)value, (Vec02*)sub, (Vec02*)sub);
     ReparentObject(self, value);
 }
 
 s32 ConvertPointObjectPosition(PointObject* self, void* other)
 {
     void* p = &self->pos;
-    TransformPointBetweenFrames(other, 0, p, p);
+    TransformPointBetweenFrames((PlacedObject*)other, 0, (Vec02*)p, (Vec02*)p);
 }
 
 void LoadTextPointObject(TextPointObject* self, void* other)
 {
     LoadPointObject(self, other);
-    ReadBufferedString(other, &self->text);
+    ReadBufferedString((BufferedStream*)other, &self->text);
 }
 
 void ResetTextPointToHalf(TextPointObject* self)

@@ -5,7 +5,7 @@ struct Obj_1E00B0_eu { VT_1E00B0* vt; u8 pad04[0x56C]; s32 f570; u8 pad574[4]; f
 void SetScreenElementByteText(Obj_1E00B0_eu* q, void* p);
 void UpdateScreenElementSlide(Obj_1E00B0_eu* q);
 void SetScreenElementHoldTime(Obj_1E00B0_eu* q, f32 v);
-void SetBestTimeState(Obj_1E00B0_eu* q, s32 n);
+void SetBestTimeState(T217D_1380* self, s32 n);
 void SetTimerRate(Obj_1E00B0_eu* q, f32 v);
 
 void UpdateBestTimeState(Obj_1E00B0_eu* self)
@@ -18,7 +18,7 @@ void UpdateBestTimeState(Obj_1E00B0_eu* self)
         if (self->f57C != 0) {
         if (g_padRecord.flags & 4) {
             ClearPadPressedBits(&g_padRecord, 4);
-            StartLockedStreamVoice((s32)g_currentWorld->f2310);
+            StartLockedStreamVoice((KeyRecord*)g_currentWorld->f2310);
             if (g_currentWorld->f2314 != 0) {
                 SetScreenElementHoldTime(self, 15.0f);
                 SetScreenElementByteText(self, g_currentWorld->f2314);
@@ -38,7 +38,7 @@ void UpdateBestTimeState(Obj_1E00B0_eu* self)
         Obj_1E00B0_eu* o = (Obj_1E00B0_eu*)&g_timerElement;
         s32 r;
         if (o->f570 == 0) {
-            SetBestTimeState(self, 3);
+            SetBestTimeState((T217D_1380*)self, 3);
             return;
         }
         SetTimerRate(o, -Power(2.0f, (f32)D_002623DC));

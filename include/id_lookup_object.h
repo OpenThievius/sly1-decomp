@@ -14,7 +14,7 @@ struct FoundList {
     u8 pad0[8];
     s32 count;              // 0x08
     union {
-        s32* items;         // 0x0C
+        BaseObject** items; // 0x0C
         PlacedObject** objects; // (func_0015F7D8, func_0015F8B0, func_0015F9A0)
     };
 };

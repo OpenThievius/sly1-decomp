@@ -12,12 +12,12 @@ void ShowPasswordMessage(void)
         if ((ComputeCompletionMask() & 6) == 6) {
             if (g_saveData->f19E8 == 99 && g_saveData->f19E0 == 0) {
                 u8* p = buf;
-                CopyString((char*)p, D_eu_0024AFF8);
+                CopyString((char*)p, (const char*)D_eu_0024AFF8);
                 while (*p != 0) {
                     *p ^= 0x23;
                     p++;
                 }
-                FormatToString(text, (const u8*)D_0024A848, buf);
+                FormatToString(text, (const char*)D_0024A848, buf);
                 SetScreenElementByteText(&g_buttonHintElement, text);
                 SetScreenElementHoldTime(&g_buttonHintElement, 10.0f);
                 g_buttonHintElement.vt->m14(&g_buttonHintElement);

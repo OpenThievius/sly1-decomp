@@ -37,5 +37,5 @@ void BlitFrameToDisplay(void)
     EndGifPacket(&w);
     AddDmaEndTag(&w);
     CloseDmaTag(&w);
-    SendGsPacketAndWait(g_gifChannel, (s32)buf);
+    SendGsPacketAndWait(g_gifChannel, buf);
 }

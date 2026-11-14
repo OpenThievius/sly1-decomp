@@ -7,7 +7,7 @@ extern u8 D_eu_0024E328[];
 extern s32 D_eu_0027DB80[];
 
 void CountCategoryFlags(s32 id, s32* a, s32* b, s32* c);
-s32 FormatToString(char* buf, const char* fmt, ...);
+s32 FormatToString(char* dst, const char* fmt, ...);
 const char* GetTextTableEntry(s32 id);
 
 struct Row_eu_001ADF10 { u8 pad[0x438]; s32 f438; s32 f43C; s32 f440; };

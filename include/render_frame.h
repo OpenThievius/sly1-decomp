@@ -16,15 +16,9 @@
 
 struct RenderFrame {
     u8 pad00[0x04];
-    union {
-        u8* bufA;           // 0x04: render_frame.cpp (g_renderFrames), func_0015E810
-        s32 bufAAddr;       // 0x04: func_0015EE80
-    };
+    u8* bufA;               // 0x04: render_frame.cpp (g_renderFrames), func_0015E810, func_0015EE80
     u8 pad08[0x0C - 0x08];
-    union {
-        u8* bufB;           // 0x0C: render_frame.cpp, func_0015E810
-        s32 bufBAddr;       // 0x0C: func_0015EE80
-    };
+    u8* bufB;               // 0x0C: render_frame.cpp, func_0015E810, func_0015EE80
     union {
         u8* f10;            // 0x10: render_frame.cpp, func_0015E810
         s32 i10;            // 0x10: func_0015ED50

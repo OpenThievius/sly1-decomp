@@ -6,6 +6,6 @@ void SetPauseMenuPage(Ctl_195928_eu* self, s32 v)
 {
     if (self->f570 != v) {
         self->f570 = v;
-        if (v != -1) BuildPauseMenuPage(self, v);
+        if (v != -1) BuildPauseMenuPage((T217D_6D0*)self);
     }
 }

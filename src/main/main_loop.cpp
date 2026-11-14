@@ -4,6 +4,9 @@
 #include "common.h"
 #include "asm_func.h"
 
+// Types other files define, named by the parameters of their functions declared here.
+struct LoadProgress;
+
 #include "fpu.h"
 #include "attachment.h"
 #include "globals.h"
@@ -32,24 +35,25 @@ struct SortKeyedObject : PlacedObject {
 
 
 
-void InitPoseSource(Attachment* self);
+void InitPoseSource(Attachment* self, PlacedObject* value);
 
 
 
 extern s32 g_vif0Channel;
 extern u8 D_00211E10[];
-void SyncDataCache(s32 unused);
-void StartDmaChain(void* dma, void* addr);
-s32 WaitDmaChannel(void* dma, s32 b, s32 c);
+extern "C" void SyncDataCache(s32 unused);
+struct DmaChannel;
+extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 
 
 extern u8 g_vif1Channel[];
 extern u8 D_00212110[];
 
-void SyncDataCache(s32 a);
-void StartDmaChain(void* a, void* b);
-s32 WaitDmaChannel(void* a, s32 b, s32 c);
+extern "C" void SyncDataCache(s32 a);
+extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 // The first word of a DMA channel's register block (CHCR), which g_vif1Channel points to.
 struct DmaChannelFlags {
@@ -66,19 +70,21 @@ void RunConstructorsOnce(void);
 void RunStartupInitializers(void);
 void DrainRenderFrames(s32 flag);
 void PlayQueuedMovies(MoviePlayer* self);
-void RunPendingWorldLoad(void* p);
-void UpdatePadConnection(void* p);
+struct WorldLoadRequest;
+void RunPendingWorldLoad(WorldLoadRequest* self);
+void UpdatePadConnection(PadRecord* self);
 void RunCompletedButtonCode(void);
-void UpdateMemoryCard(void* p);
-void UpdateElementStack(void* p);
+struct ElementStack;
+void UpdateMemoryCard(MemoryCard* self);
+void UpdateElementStack(ElementStack* obj);
 void AddElapsedTime(f32 dt);
-void UpdateCameraLocation(void* p);
+void UpdateCameraLocation(Camera* self);
 void BeginRenderFrame(void);
-void AdvanceGameClock(void* p);
+void AdvanceGameClock(GameClock* self);
 void RunWorldFrameLists(World* o, void* a);
-void QueueScreenElementDraws(void* p);
+void QueueScreenElementDraws(ElementStack* stack);
 void SubmitDeferredRequests(World* o, void* a);
-void DrawAllScreenElements(void* p);
+void DrawAllScreenElements(ElementStack* stack);
 void SubmitRenderFrame(void);
 
 
@@ -91,39 +97,40 @@ typedef void (*StartupFn)(void);
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 
-s32 InitLoadProgress(void* a, void* b, void* c, void* d, void* e);
+s32 InitLoadProgress(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
 void SetScreenOwner(s32 value);
-void BeginLoadProgress(void* p);
-void UpdateLoadProgress(void* self, s32 value);
-void EndLoadProgress(void* p);
-void ClearScreenOwner(s32 value);
+void BeginLoadProgress(LoadProgress* p);
+void UpdateLoadProgress(LoadProgress* self, s32 value);
+void EndLoadProgress(LoadProgress* p);
+void ClearScreenOwner(s32 owner);
 
 
 
-s32 GetActiveSwitchedCollider(void);
+void* GetActiveSwitchedCollider(void);
 
 
 
 
 
 
-void FormatDiscPath(void* buf, const u8* name, s32 n);
-void InitRemoteCalls(s32 a);
-s32 InitDiscLibrary(s32 a);
+void FormatDiscPath(void* self, const char* name, s32 flag);
+extern "C" void InitRemoteCalls(s32 mode);
+extern "C" s32 InitDiscLibrary(s32 mode);
 s32 RefreshDiscStatus();
 void SendDiscCommand22WhenReady();
 s32 ForgetFileClient();
-s32 ResetIop(void* buf);
+s32 ResetIop(char* arg);
 s32 IsIopResetDone();
 s32 ForgetModuleLoader();
-s32 WaitDiscReady(s32 a);
+extern "C" s32 WaitDiscReady(s32 mode);
 s32 TestDiscReadDone(s32 a);
-s32 LoadIopModuleFile(void* buf, s32 a, s32 b);
+struct Blob_1F9868;
+s32 LoadIopModuleFile(Blob_1F9868* src, s32 size, Blob_1F9868* data);
 
 s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b);
-void InitAim(T2195_790* self);
+void InitAim(T2195_790* self, PlacedObject* owner);
 void AssignAimTarget(T2195_790* self, void* obj, Vec02* src);
-s32 ResolveAimTarget(T2195_790* a0);
+void* ResolveAimTarget(T2195_790* a0);
 void RunMainLoop(s32 a, s32 b);
 void LoadIopModules();
 void SendVif0StartupPacket(void);
@@ -171,9 +178,9 @@ Vec02 D_00264770 = { 0.0f, 1.0f, 0.0f, 0.0f };
 Vec02 D_00264780 = { -3.4028234663852886e38f, 3.4028234663852886e38f, 0.0f, 0.0f };
 Vec02 D_00264790 = { 0.0f, 1.0f, 0.0f, 0.0f };
 ValueRange D_002647A0 = { -1.0f, 1.0f };
-const u8* g_iopModuleNames[6] = {
-    (const u8*)"sio2man.irx", (const u8*)"padman.irx", (const u8*)"mcman.irx",
-    (const u8*)"mcserv.irx", (const u8*)"libsd.irx", (const u8*)"989snd.irx",
+const char* g_iopModuleNames[6] = {
+    "sio2man.irx", "padman.irx", "mcman.irx",
+    "mcserv.irx", "libsd.irx", "989snd.irx",
 };
 Fn_Table g_startupInitializers[29] = { (Fn_Table)InitPlacedObjectModule, (Fn_Table)InitHeap, (Fn_Table)InitDmaChannels, (Fn_Table)CreateRenderThread, (Fn_Table)InitDisplay, (Fn_Table)LoadIopModules, (Fn_Table)InitDiscAccessModule, (Fn_Table)ResetDiscSectorCheck, (Fn_Table)InitPadSystem, (Fn_Table)RegisterButtonCodes, (Fn_Table)InitRenderFrames, (Fn_Table)ClearDefaultFont, (Fn_Table)InitObjectBuiltinTable, (Fn_Table)InitCameraModule, (Fn_Table)InitSoundSystem, (Fn_Table)InstallScreenElements, (Fn_Table)InitGlobalElementStack, (Fn_Table)InitClass75List, (Fn_Table)SetPointObjectListLinkOffset, (Fn_Table)SetTargetVectorListLinkOffset, (Fn_Table)SetObjectListLinkOffsets, (Fn_Table)SendVif0StartupPacket, (Fn_Table)SendVif1StartupPacket, (Fn_Table)InitAlphaStatePackets, (Fn_Table)InitGroupMarkers, (Fn_Table)ResetGameClockTick, (Fn_Table)InitMemoryCardSystem, (Fn_Table)RunResetGameSession, (Fn_Table)CreateMovieDecodeThread };
 s32 D_00264834;
@@ -213,16 +220,17 @@ struct LightObject : SortKeyedObject {
     LightObject* next;      // 0x410
 };
 
-void HeapSortRecords(void* base, s32 count, s32 size, s32 (*cmp)(SortKeyedObject**, SortKeyedObject**));
+typedef s32 (*SortCompareFn)(void* a, void* b);
+void HeapSortRecords(void* records, s32 n, s32 size, SortCompareFn cmp);
 void* InitPacketWriter(PacketWriter* p);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void AllocateTempPacketBuffer(PacketWriter* p, s32 n);
+void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
 void BeginDmaTag(PacketWriter* p);
-void ReserveVifUnpack(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 void AddDmaEndTag(PacketWriter* p);
 void SubmitPacketBuffer(PacketWriter* p, s32 dma);
-s32 WaitDmaChannel(s32 dma, s32 b, s32 c);
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 // Sorts the world's lights, groups the runs of one kind and flags (at most 16 to a group) and
 // sends each light's direction or volume to VU0 in one unpack.
@@ -311,7 +319,7 @@ void UploadLightVolumes(World* world)
     }
     AddDmaEndTag(&pw);
     SubmitPacketBuffer(&pw, g_vif0Channel);
-    WaitDmaChannel(g_vif0Channel, 0, 0);
+    WaitDmaChannel((DmaChannel*)g_vif0Channel, 0, 0);
     PopBackMemoryMark();
 }
 
@@ -377,9 +385,9 @@ s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 sk
     return strongest;
 }
 
-void InitAim(T2195_790* self)
+void InitAim(T2195_790* self, PlacedObject* owner)
 {
-    InitPoseSource(self);
+    InitPoseSource(self, owner);
     self->f20 = -1;
     self->f40 = 800.0f;
     self->v50 = *(Vec02*)&D_00264770;
@@ -403,11 +411,11 @@ void AssignAimTarget(T2195_790* self, void* obj, Vec02* src)
     }
 }
 
-s32 ResolveAimTarget(T2195_790* a0) {
+void* ResolveAimTarget(T2195_790* a0) {
     if (a0->hasTarget == 0) {
         return GetActiveSwitchedCollider();
     }
-    return (s32)a0->target;
+    return a0->target;
 }
 
 void ClearRootTries(PlacedObject* o);
@@ -452,9 +460,9 @@ struct AimAxis {
 
 typedef char check_AimAxis[sizeof(AimAxis) == 0x20 ? 1 : -1];
 
-void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
-void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
-void GetVectorAngles(Vec02* v, f32* yaw, f32* pitch);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void GetVectorAngles(Vec3* v, f32* a1, f32* a2);
 void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 
 // The aim's rotation: the owner's own while the aim is held, its +0x1A0 matrix when the target
@@ -474,16 +482,16 @@ void GetAimRotation(T2195_790* self, f32 dt, Mat02* rot, Vec02* vec)
         *rot = owner->rot;
         return;
     }
-    ComputeObjectFrameAtTime((void*)ResolveAimTarget(self), 0, &pos, &m, 0, 0, dt);
+    ComputeObjectFrameAtTime((PlacedObject*)(ResolveAimTarget(self)), 0, &pos, &m, 0, 0, dt);
     Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(m, Vu0::Q(self->point)), Vu0::Q(pos));
-    TransformPointBetweenFrames(0, self->owner->parent, &pos, &pos);
+    TransformPointBetweenFrames(0, (PlacedObject*)self->owner->parent, &pos, &pos);
     *(u128*)&d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->owner->pos));
     s32 outside = self->f40 < Vu0::ToFloat(Vu0::Length(*(u128*)&d));
     if (outside) {
         *rot = owner->m1A0;
         return;
     }
-    GetVectorAngles(&d, &angles[0], &angles[1]);
+    GetVectorAngles((Vec3*)&d, &angles[0], &angles[1]);
     angles[0] = ((AimAxis*)&self->v50)->Apply(angles[0]);
     angles[1] = ((AimAxis*)&self->v70)->Apply(angles[1]);
     BuildYawPitchMatrix(angles[0], angles[1], rot);
@@ -502,7 +510,7 @@ void RunMainLoop(s32 a, s32 b)
         }
         if (g_worldLoadRequest != 0) {
             DrainRenderFrames(1);
-            RunPendingWorldLoad(&g_worldLoadRequest);
+            RunPendingWorldLoad((WorldLoadRequest*)&g_worldLoadRequest);
         }
         if (g_moviePlayer.queued != 0 && g_screenFade.mode != 1) {
             DrainRenderFrames(1);
@@ -511,7 +519,7 @@ void RunMainLoop(s32 a, s32 b)
         UpdatePadConnection(&g_padRecord);
         RunCompletedButtonCode();
         UpdateMemoryCard(&g_memoryCard);
-        UpdateElementStack(g_elementStack);
+        UpdateElementStack((ElementStack*)g_elementStack);
         AddElapsedTime(g_gameClock.dt);
         if (g_currentWorld != 0) {
             UpdateCameraLocation(g_camera);
@@ -520,9 +528,9 @@ void RunMainLoop(s32 a, s32 b)
             if (g_currentWorld->desc->m11 != 0)
                 g_currentWorld->desc->m11(g_currentWorld, g_gameClock.dt);
             RunWorldFrameLists(g_currentWorld, g_camera);
-            QueueScreenElementDraws(g_elementStack);
+            QueueScreenElementDraws((ElementStack*)g_elementStack);
             SubmitDeferredRequests(g_currentWorld, g_camera);
-            DrawAllScreenElements(g_elementStack);
+            DrawAllScreenElements((ElementStack*)g_elementStack);
             SubmitRenderFrame();
         }
         g_frameCount++;
@@ -532,7 +540,7 @@ void RunMainLoop(s32 a, s32 b)
 void LoadIopModules()
 {
     u8 buf[0x100];
-    FormatDiscPath(buf, (const u8*)"ioprp243.img", 1);
+    FormatDiscPath(buf, "ioprp243.img", 1);
     InitRemoteCalls(0);
     InitDiscLibrary(0);
     if (RefreshDiscStatus() == 0) {
@@ -541,7 +549,7 @@ void LoadIopModules()
     }
     SendDiscCommand22WhenReady();
     ForgetFileClient();
-    while (ResetIop(buf) == 0) {
+    while (ResetIop((char*)buf) == 0) {
     }
     while (IsIopResetDone() == 0) {
     }
@@ -558,7 +566,7 @@ void LoadIopModules()
     TestDiscReadDone(1);
     for (u32 i = 0; i < 6; i++) {
         FormatDiscPath(buf, g_iopModuleNames[i], 1);
-        while (LoadIopModuleFile(buf, 0, 0) < 0) {
+        while (LoadIopModuleFile((Blob_1F9868*)buf, 0, 0) < 0) {
         }
     }
 }
@@ -568,8 +576,8 @@ void SendVif0StartupPacket(void)
     s32* p = (s32*)g_vif0Channel;
     *p |= 0x40;
     SyncDataCache(0);
-    StartDmaChain((void*)g_vif0Channel, D_00211E10);
-    WaitDmaChannel((void*)g_vif0Channel, 0, 0);
+    StartDmaChain((DmaChannel*)g_vif0Channel, D_00211E10);
+    WaitDmaChannel((DmaChannel*)g_vif0Channel, 0, 0);
     s32* q = (s32*)g_vif0Channel;
     *q &= ~0x40;
 }
@@ -579,8 +587,8 @@ void SendVif1StartupPacket()
     DmaChannelFlags* p = *(DmaChannelFlags**)g_vif1Channel;
     p->flags |= 0x40;
     SyncDataCache(0);
-    StartDmaChain(*(void**)g_vif1Channel, D_00212110);
-    WaitDmaChannel(*(void**)g_vif1Channel, 0, 0);
+    StartDmaChain((DmaChannel*)(*(void**)g_vif1Channel), D_00212110);
+    WaitDmaChannel((DmaChannel*)(*(void**)g_vif1Channel), 0, 0);
     (*(DmaChannelFlags**)g_vif1Channel)->flags &= ~0x40;
 }
 
@@ -595,21 +603,21 @@ void RunStartupInitializers(void)
     fr.w[16] = 0x3F3F3F;
     fr.w[20] = 0x3F3F;
     fr.w[24] = 0x3F;
-    (void)InitLoadProgress(&fr, &fr.w[12], &fr.w[16], &fr.w[20], &fr.w[24]);
+    (void)InitLoadProgress((LoadProgress*)&fr, (U32P*)&fr.w[12], (U32P*)&fr.w[16], (U32P*)&fr.w[20], (U32P*)&fr.w[24]);
     idx = 0x1A;
     SetScreenOwner(1);
-    BeginLoadProgress(&fr);
+    BeginLoadProgress((LoadProgress*)&fr);
     tbl = (StartupFn*)((u8*)g_startupInitializers);
     i = 0;
     do {
         if ((s32)i >= 3) {
-            UpdateLoadProgress(&fr, idx);
+            UpdateLoadProgress((LoadProgress*)&fr, idx);
         }
         tbl[i]();
         i++;
         idx--;
     } while (i < 0x1D);
-    UpdateLoadProgress(&fr, 0);
-    EndLoadProgress(&fr);
+    UpdateLoadProgress((LoadProgress*)&fr, 0);
+    EndLoadProgress((LoadProgress*)&fr);
     ClearScreenOwner(1);
 }

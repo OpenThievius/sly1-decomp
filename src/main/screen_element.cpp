@@ -28,6 +28,12 @@
 #include "ramp_profile.h"
 #include "asm_func.h"
 #include "fpu.h"
+struct BaseObject;
+struct Mat02;
+
+
+// Types other files define, named by the parameters of their functions declared here.
+struct BackgroundJob;
 
 extern void* const g_screenElements[];
 
@@ -45,15 +51,19 @@ struct TextStyle {
 };
 
 // The font object's calls.
+struct Font;
 Font* GetFontById(s32 k);
 void PushFontScale(Font* font, f32 x, f32 y);
-f32 MeasureFontString(Font* font, void* text);
-void DrawFontString(Font* font, void* text, void* out, s32 zero, void* d);
+f32 MeasureFontString(Font* self, const char* s);
+struct PacketWriter;
+struct StringLayout;
+struct Vec4U;
+void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 void PopFontScale(Font* font);
-void* InitTextReader(void* out, void* text, Font* font);
-void DrawAlignedText(void* buf, void* out, s32 zero, void* d);
+void* InitTextReader(TextReader* self, char* text, Font* font);
+void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
 
-s32 GetObjectWorldRotation(void* a, f32* out);
+void GetObjectWorldRotation(BaseObject* self, Mat02* out);
 void TransformRotationBetweenFrames(int a, int b, void* c, f32* d);
 
 extern f32 g_gameTime;
@@ -66,27 +76,19 @@ extern s32 g_defaultFont;
 typedef void (*VirtualCall_1AA790)(void* a, void* b, void* c, void* d);
 
 
-void SetTextLayoutPosition(void* out, f32 x, f32 y);
-void SetTextLayoutSize(void* out, f32 x, f32 y);
-void SetTextLayoutColor(void* out, s32* value);
-void SetTextLayoutHorizontalAlign(void* out, s32 flag);
-void SetTextLayoutVerticalAlign(void* out, s32 flag);
 
 typedef void* (*VFn_1A9960)(void* self);
 
 extern ElementPlaceTable g_elementPlaces;
-s32 IsObjectOfKind(void* node, s32 kind);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-s32 GetObjectWorldRotation(void* self, void* arg);
+void GetObjectWorldRotation(BaseObject* self, Mat02* out);
 void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);
-void SetListLinkOffset(void* self, s32 value);
+void SetListLinkOffset(List01* self, s32 offset);
 
 
-void SetTextLayoutColor(void* out, void* p);
-void SetTextLayoutHorizontalAlign(void* out, s32 v);
-void SetTextLayoutVerticalAlign(void* out, s32 v);
 
 extern u8 g_padRouting[];
 
@@ -96,8 +98,8 @@ typedef void (*Fn_Table)();
 extern s8 g_fontEscapeKeys[];
 extern u8 g_charClassFlags[];
 s32 FormatToString(char* dst, const char* fmt, ...);
-void* CopyString(void* dst, void* src);
-void SetListLinkOffset(void* p, s32 a);
+void* CopyString(void* dst, const char* src);
+void SetListLinkOffset(List01* self, s32 offset);
 PlacedObject* CreateObjectCopy(PlacedObject* a, World* b, BaseObject* c);
 
 void DrawCyclingGlyphElement(u8* a);
@@ -106,7 +108,9 @@ extern Quadratic16 D_002743A0;
 s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...);
 extern s32 D_002751D4;
 
-void StartSoundEffect(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 f32 TruncateFloat(f32 x);
 void DrawScreenElementText();
@@ -153,8 +157,8 @@ void DrawLetterGlyphElement();
 void InitCyclingGlyphElement();
 void SetElementModeClearingFlag();
 
-s32 GetStringLength(const char*);
-void* CopyString(char*, const char*);
+extern "C" s32 GetStringLength(const char* s);
+void* CopyString(void* dst, const char* src);
 void MeasureText(TextReader*, f32, f32*, f32*);
 
 void FormatCounterCaption(T217D_E30* self);
@@ -170,9 +174,9 @@ struct MeasuredText {
     f32 y;
 };
 
-s32 GetStringLength(const char* p);
-void* CopyString(char* dst, const char* p);
-void MeasureText(void* out, f32 t, f32* a, f32* b);
+extern "C" s32 GetStringLength(const char* s);
+void* CopyString(void* dst, const char* src);
+void MeasureText(TextReader* self, f32 f, f32* out1, f32* out2);
 
 void RebuildPromptText(T217D_4C0* self);
 
@@ -182,13 +186,13 @@ extern TextStyle D_002743D0;
 
 extern TextStyle D_002743F0;
 
-s32 CompareStrings(const char* a, const char* b);
+extern "C" s32 CompareStrings(const char* a, const char* b);
 
 
 extern u8 g_elementStack[];
 
 s32 MatchesObjectId(void* key, s32 item);
-s32 IsObjectOfKind(void* key, s32 item);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 
 extern TextStyle D_00274410;
@@ -218,7 +222,7 @@ extern f32 D_00274470[2];
 extern TextStyle D_00274488;
 
 s32 MatchesObjectId(s32 value, s32 item);
-s32 IsObjectOfKind(s32 value, s32 item);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 s32 MatchesObjectId(void* a, s32 b);
 
@@ -230,8 +234,8 @@ extern f32 D_0027240C;
 extern s32 D_00272420;
 extern u8 g_backgroundJob[];
 
-s32 IsBackgroundJobRunning(void* p);
-void* ComputeCompletionPercent(void* p);
+s32 IsBackgroundJobRunning(BackgroundJob* p);
+void* ComputeCompletionPercent(GameProgress* progress);
 
 
 void SetElementTextFromEntry(ScreenElement* self, s32 hi, s32 lo);
@@ -251,16 +255,16 @@ struct ProgressEntry {
     f32 time;
 };
 
-extern s32 FormatToString(char*, const char*, ...);
-extern s32 AppendString(char*, const char*);
+extern s32 FormatToString(char* dst, const char* fmt, ...);
+extern s32 AppendString(void* dst, const char* src);
 
 
 
-u32 GetEntryFlags(u32 packed);
-char* GetEntryName(u32 packed);
+u32 GetEntryFlags(s32 id);
+char* GetEntryName(s32 id);
 
 f32 WrapAngle(f32 a);
-f32 Cosine(f32 x);
+extern "C" f32 Cosine(f32 x);
 
 extern const char* D_00274478[];
 extern const char* D_00274484;
@@ -268,48 +272,43 @@ extern const char* D_00274484;
 // A colour and a text reader, one frame slot (func_001ADFF0).
 struct ColoredText { T217D_Rgba col; u8 pad[12]; TextReader reader; };
 
-s32 FormatToString(char *dst, const char *fmt, ...);
-void* CopyString(char *dst, const char *src);
-f32 MeasureTextWidth(void *obj);
-f32 MeasureTextHeight(void *obj, f32 a);
+s32 FormatToString(char* dst, const char* fmt, ...);
+void* CopyString(void* dst, const char* src);
+f32 MeasureTextWidth(TextReader* self);
+f32 MeasureTextHeight(TextReader* self, f32 limit);
 
 
 extern const char* D_00274430[];
 
 void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3);
-s32 GetStringLength(void* p);
+extern "C" s32 GetStringLength(const char* s);
 
 struct GlyphCycleTable { s8* p; s32 pad; };
 extern GlyphCycleTable D_002744B0;
 
 
 
-void BeginGifTag(PacketWriter* p, s32 a, s32 b, u64 c);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* p, u64 a, u64 b);
 void AddGifRgbaEntry(PacketWriter* p, u32 value);
-void AddGifXyzfEntry(PacketWriter* p, s32 a1, s32 a2, s32 a3, s32 a4);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 
 
-void BeginGifTag(PacketWriter* p, s32 a, s32 b, u64 c);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* p, u64 a, u64 b);
 void AddGifRgbaEntry(PacketWriter* p, u32 value);
-void AddGifXyzfEntry(PacketWriter* p, s32 a1, s32 a2, s32 a3, s32 a4);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 void CloseGifTag(PacketWriter* p, s32 a);
 
 extern u8 D_00275B00[];
 
-void SetTextLayoutPosition(Layout_137228* out, f32 x, f32 y);
-void SetTextLayoutSize(Layout_137228* out, f32 x, f32 y);
-void SetTextLayoutColor(Layout_137228* out, s32* value);
-void SetTextLayoutHorizontalAlign(Layout_137228* out, s32 flag);
-void SetTextLayoutVerticalAlign(Layout_137228* out, s32 flag);
 // A layout with its setters as calls (SetTextLayoutPosition and the others).
 struct LayoutBuilder : Layout_137228 {
-    void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
-    void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
-    void Color(s32* c) { SetTextLayoutColor(this, c); }
-    void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
-    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
+    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
+    void Color(s32* c) { ((Layout_137228*)this)->Color(c); }
+    void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
+    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
 };
 struct StyleDrawer {
     static void Draw(Font** h, LayoutBuilder* out, void* tbl)
@@ -324,32 +323,32 @@ struct StyleDrawer {
 
 
 
-void BeginGifTag(PacketWriter* p, s32 a, s32 b, u64 c);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* p, u64 a, u64 b);
 void AddGifRgbaEntry(PacketWriter* p, u32 rgba);
 void AddGifUvEntry(PacketWriter* p, s32 a, s32 b);
-void AddGifXyzfEntry(PacketWriter* p, s32 a, s32 b, s32 c, s32 d);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 u64 GetTextureRegisterBits(TextureTable* t, s32 i, s32 j);
 
 
 
-void BeginGifTag(PacketWriter* f, s32 a, s32 b, u64 c);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* f, u64 a, u64 b);
 void AddGifRgbaEntry(PacketWriter* f, u32 v);
-void AddGifXyzfEntry(PacketWriter* f, s32 a, s32 b, s32 c, s32 d);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 struct LayoutByValue : Layout_137228 {
-    void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
-    void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
-    void Color(s32 c) { SetTextLayoutColor(this, &c); }
-    void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
-    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
+    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
+    void Color(s32 c) { ((Layout_137228*)this)->Color(&c); }
+    void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
+    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
 };
 
 struct FontCalls {
     static f32 Advance(Font* f, s32 ch) { return f->vt->width((Font*)((u8*)f + f->vt->adj3), ch); }
-    static void Begin(Font* f, s32 a, void* d) { f->vt->begin((Font*)((u8*)f + f->vt->adj4), a, (s32)d); }
-    static void Glyph(Font* f, s32 ch, s32 color, void* d, f32 x, f32 y) { f->vt->draw(x, y, (Font*)((u8*)f + f->vt->adj6), ch, color, (s32)d); }
-    static void End(Font* f, s32 a, void* d) { f->vt->end((Font*)((u8*)f + f->vt->adj7), a, (s32)d); }
+    static void Begin(Font* f, Vec4U* clip, PacketWriter* d) { f->vt->begin((Font*)((u8*)f + f->vt->adj4), clip, d); }
+    static void Glyph(Font* f, s32 ch, s32 color, PacketWriter* d, f32 x, f32 y) { f->vt->draw(x, y, (Font*)((u8*)f + f->vt->adj6), ch, color, d); }
+    static void End(Font* f, Vec4U* clip, PacketWriter* d) { f->vt->end((Font*)((u8*)f + f->vt->adj7), clip, d); }
 };
 
 struct ClampFloat {
@@ -363,10 +362,9 @@ struct VEnt_1AC0E8 { s16 delta; s16 index; void (*fn)(void* self, f32 x, f32 y, 
 struct Text_1AC0E8 { u8 pad[0x4C]; VEnt_1AC0E8* vtbl; };
 extern RampProfile D_002743C0;
 
-f32 ApproachValueWithRamp(RampProfile* p, s32 a1, f32 f12, f32 f13, f32 f14);
-void SetTextLayoutColor(Layout_137228* out, Quad4* value);
-void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* d);
-f32 Sine(f32 x);
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
+void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p);
+extern "C" f32 Sine(f32 x);
 
 struct ChannelLerp {
     static u8 Of(s32 a, s32 b, f32 t)
@@ -529,12 +527,12 @@ void DrawScreenElementText(ScreenElement* self)
         f32 p = self->w;
         f32 q = self->h;
         s32 held = self->color;
-        SetTextLayoutPosition(out, self->x, self->y);
-        SetTextLayoutSize(out, p, q);
+        ((Layout_137228*)out)->Pos(self->x, self->y);
+        ((Layout_137228*)out)->Size(p, q);
         tmp = held;
-        SetTextLayoutColor(out, &tmp);
-        SetTextLayoutHorizontalAlign(out, 0);
-        SetTextLayoutVerticalAlign(out, 0);
+        ((Layout_137228*)out)->Color(&tmp);
+        ((Layout_137228*)out)->SetF14(0);
+        ((Layout_137228*)out)->SetF18(0);
 
         handle = self->frame;
         if (handle != 0) {
@@ -548,7 +546,7 @@ void DrawScreenElementText(ScreenElement* self)
         }
         x = self->scale;
         PushFontScale(self->font, x, x);
-        DrawFontString(self->font, &self->text[0], out, 0, &g_gsPacketWriter);
+        DrawFontString(self->font, &self->text[0], (StringLayout*)out, 0, &g_gsPacketWriter);
         PopFontScale(self->font);
     }
 }
@@ -882,15 +880,15 @@ void DrawCounterCaption(T217D_E30* self)
     held = packed.v;
     px = self->w;
     py = self->h;
-    SetTextLayoutPosition(out, self->x, self->y);
-    SetTextLayoutSize(out, px, py);
+    ((Layout_137228*)out)->Pos(self->x, self->y);
+    ((Layout_137228*)out)->Size(px, py);
     tmp[0] = held;
-    SetTextLayoutColor(out, &tmp[0]);
-    SetTextLayoutHorizontalAlign(out, 0);
-    SetTextLayoutVerticalAlign(out, 0);
+    ((Layout_137228*)out)->Color(&tmp[0]);
+    ((Layout_137228*)out)->SetF14(0);
+    ((Layout_137228*)out)->SetF18(0);
     PushFontScale(self->font, self->scale, self->scale);
-    InitTextReader(buf, &self->text[0], self->font);
-    DrawAlignedText(buf, out, 0, &g_gsPacketWriter);
+    InitTextReader((TextReader*)buf, &self->text[0], self->font);
+    DrawAlignedText((TextReader*)buf, (Layout_137228*)out, 0, &g_gsPacketWriter);
     PopFontScale(self->font);
 }
 
@@ -1007,12 +1005,12 @@ void DrawTimerElement(T217D_510* self)
         f32 f234 = self->w;
         f32 f238 = self->h;
         s32 s0v = self->color;
-        SetTextLayoutPosition(&L, self->x, self->y);
-        SetTextLayoutSize(&L, f234, f238);
+        ((Layout_137228*)&L)->Pos(self->x, self->y);
+        ((Layout_137228*)&L)->Size(f234, f238);
         tag.w[0] = s0v;
-        SetTextLayoutColor(&L, &tag.w[0]);
-        SetTextLayoutHorizontalAlign(&L, 0);
-        SetTextLayoutVerticalAlign(&L, 0);
+        ((Layout_137228*)&L)->Color(&tag.w[0]);
+        ((Layout_137228*)&L)->SetF14(0);
+        ((Layout_137228*)&L)->SetF18(0);
         void* obj = self->frame;
         if (obj != 0) {
             Font* sub = *(Font**)obj;
@@ -1026,8 +1024,8 @@ void DrawTimerElement(T217D_510* self)
         PushFontScale(self->font, v, v);
         ((u8*)&tag)[0] = 0x54;
         ((u8*)&tag)[1] = 0;
-        DrawFontString(self->font, &tag, &L, 0, dp);
-        f32 r = MeasureFontString(self->font, &tag);
+        DrawFontString(self->font, (const char*)&tag, (StringLayout*)&L, 0, (PacketWriter*)dp);
+        f32 r = MeasureFontString(self->font, (const char*)&tag);
         f32 a = self->x + r;
         L.y = self->y;
         L.x = a;
@@ -1035,7 +1033,7 @@ void DrawTimerElement(T217D_510* self)
             warn = self->warnColor;
             *(T217D_Word*)&L.color = warn;
         }
-        DrawFontString(self->font, (u8*)self + 9, &L, 0, dp);
+        DrawFontString(self->font, (const char*)((u8*)self + 9), (StringLayout*)&L, 0, (PacketWriter*)dp);
         PopFontScale(self->font);
     }
 }
@@ -1063,7 +1061,7 @@ void SetTimerRate(T217D_510* self, f32 value)
     self->rate = value;
 }
 
-void SetTimerLimit(T217D_510* self, T217D_510_Fn onEnd, f32 limit)
+void SetTimerLimit(T217D_510* self, f32 limit, T217D_510_Fn onEnd)
 {
     self->limit = limit;
     self->onEnd = onEnd;
@@ -1315,15 +1313,15 @@ void DrawGauge(T217D_2E0* self)
     f32 h = self->fill * y;
     y -= h;
     f32 w = self->barW;
-    SetTextLayoutPosition(&out, self->x + self->barX, self->y + self->barY);
-    SetTextLayoutSize(&out, w, y);
+    ((Layout_137228*)&out)->Pos(self->x + self->barX, self->y + self->barY);
+    ((Layout_137228*)&out)->Size(w, y);
     {
         Quad4 tmp;
         tmp.w[0] = grey;
-        SetTextLayoutColor(&out, &tmp);
+        ((Layout_137228*)&out)->Color(tmp.w);
     }
-    SetTextLayoutHorizontalAlign(&out, 0);
-    SetTextLayoutVerticalAlign(&out, 0);
+    ((Layout_137228*)&out)->SetF14(0);
+    ((Layout_137228*)&out)->SetF18(0);
     {
     Rgba4 col;
     col.r = 0x20; col.g = 0x20; col.b = 0x20; col.a = 0xC0;
@@ -1355,9 +1353,9 @@ void DrawGauge(T217D_2E0* self)
     out.w = 0.0f;
     out.h = 0.0f;
     out.f14 = 1;
-    out.f18 = (void*)1;
+    out.f18 = 1;
     char str[2] = { self->letter + 0x72, 0 };
-    DrawFontString(self->font, str, &out, 0, &g_gsPacketWriter);
+    DrawFontString(self->font, str, (StringLayout*)&out, 0, &g_gsPacketWriter);
     PopFontScale(self->font);
 }
 
@@ -1423,8 +1421,8 @@ void DrawElementWithFadedFrame(T217D_330* self)
             *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
         }
         PushFontScale(self->font, self->scale, self->scale);
-        InitTextReader(loc, &self->text[0], self->font);
-        DrawAlignedText(loc, &out, 0, &g_gsPacketWriter);
+        InitTextReader((TextReader*)loc, &self->text[0], self->font);
+        DrawAlignedText((TextReader*)loc, &out, 0, &g_gsPacketWriter);
         PopFontScale(self->font);
     }
 }
@@ -1824,16 +1822,15 @@ void DrawHintGlyphElement(T217D_420* self)
     Font* h = GetFontById(1);
     f32 s2 = sc * 0.1f + half;
     PushFontScale(h, s2, s2);
-    f32 w = MeasureFontString(h, (void*)"L");
+    f32 w = MeasureFontString(h, (const char*)((void*)"L"));
     f32 ht = (f32)h->height * h->sy;
-    SetTextLayoutPosition(&buf, self->x + 2.0f + self->w * half - w * half,
-                  self->y + 14.0f + self->h * half - ht * half);
-    SetTextLayoutSize(&buf, w, ht);
+    ((Layout_137228*)&buf)->Pos(self->x + 2.0f + self->w * half - w * half, self->y + 14.0f + self->h * half - ht * half);
+    ((Layout_137228*)&buf)->Size(w, ht);
     tmp.w[0] = mask;
-    SetTextLayoutColor(&buf, &tmp.w[0]);
-    SetTextLayoutHorizontalAlign(&buf, 0);
-    SetTextLayoutVerticalAlign(&buf, 0);
-    DrawFontString(h, (void*)"L", &buf, 0, &g_gsPacketWriter);
+    ((Layout_137228*)&buf)->Color(&tmp.w[0]);
+    ((Layout_137228*)&buf)->SetF14(0);
+    ((Layout_137228*)&buf)->SetF18(0);
+    DrawFontString(h, "L", (StringLayout*)&buf, 0, &g_gsPacketWriter);
     PopFontScale(h);
 }
 
@@ -2061,13 +2058,14 @@ void DrawPromptElement(T217D_4C0* self)
         StyleDrawer::Draw(self->frame, &out, &g_gsPacketWriter);
     }
     PushFontScale(self->font, self->scale, self->scale);
-    InitTextReader(loc, &self->text[0], self->font);
-    DrawAlignedText(loc, &out, 0, &g_gsPacketWriter);
+    InitTextReader((TextReader*)loc, &self->text[0], self->font);
+    DrawAlignedText((TextReader*)loc, &out, 0, &g_gsPacketWriter);
     PopFontScale(self->font);
 }
 
-void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8* rgba, s32 flag)
+void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* color, s32 flag)
 {
+    u8* rgba = (u8*)color;
     BeginGifTag(&g_gsPacketWriter, rgba[3] < 0xFF ? 0x41 : 1, 4, 0x441E);
 
     AddGifRegisterWrite(&g_gsPacketWriter, 0x47, (u64)(flag ? 0x11001 : 0x11000) | (flag ? 0x60000 : 0x20000));
@@ -2136,7 +2134,7 @@ void DrawLetterGlyphElement(ScreenElement* self)
         out.Color(&tmp);
         out.FlagA(0);
         out.FlagB(0);
-        DrawFontString(self->font, text, &out, 0, &g_gsPacketWriter);
+        DrawFontString(self->font, text, (StringLayout*)&out, 0, &g_gsPacketWriter);
         PopFontScale(self->font);
     }
 }
@@ -2202,7 +2200,7 @@ void DrawCyclingGlyphElement(T217D_600* self)
         adj = 0.0f;
         if (self->mode == 2) {
             if (1.0f < d) {
-                if (IsBackgroundJobRunning(g_backgroundJob) == 0) {
+                if (IsBackgroundJobRunning((BackgroundJob*)g_backgroundJob) == 0) {
                     self->vt->m15(self);
                 }
             }
@@ -2211,19 +2209,19 @@ void DrawCyclingGlyphElement(T217D_600* self)
     held = self->color;
     px = self->w;
     py = self->h;
-    SetTextLayoutPosition(out, self->x, self->y + adj);
-    SetTextLayoutSize(out, px, py);
+    ((Layout_137228*)out)->Pos(self->x, self->y + adj);
+    ((Layout_137228*)out)->Size(px, py);
     tmp[0] = held;
-    SetTextLayoutColor(out, tmp);
-    SetTextLayoutHorizontalAlign(out, 0);
-    SetTextLayoutVerticalAlign(out, 0);
+    ((Layout_137228*)out)->Color(tmp);
+    ((Layout_137228*)out)->SetF14(0);
+    ((Layout_137228*)out)->SetF18(0);
     fmt = "%c&1^07~b2a83d%d%%&.";
     sp = str;
     c = GetCyclingGlyph();
     FormatToString(sp, fmt, c, ComputeCompletionPercent(g_saveData));
     PushFontScale(self->font, self->scale, self->scale);
-    InitTextReader(buf, sp, self->font);
-    DrawAlignedText(buf, out, 0, &g_gsPacketWriter);
+    InitTextReader((TextReader*)buf, sp, self->font);
+    DrawAlignedText((TextReader*)buf, (Layout_137228*)out, 0, &g_gsPacketWriter);
     PopFontScale(self->font);
 }
 

@@ -21,7 +21,7 @@ void ResetDisplayBuffers(void)
         ptr = D_002625E0;
     }
     s16 half = *(s16*)&D_002626C4;
-    SetFieldDrawOffset(ptr, 0x800, 0x800, half);
+    SetFieldDrawOffset((GsOffset*)ptr, 0x800, 0x800, half);
     SyncDataCache(0);
     g_displayFrameCounter = g_displayFrameCounter + 1;
     SwapDoubleBuffer(D_00262490, g_displayFrameCounter);

@@ -12,21 +12,21 @@ void RunStartupInitializers(void)
     fr.w[16] = 0x3F3F3F;
     fr.w[20] = 0x3F3F;
     fr.w[24] = 0x3F;
-    (void)InitLoadProgress(&fr, &fr.w[12], &fr.w[16], &fr.w[20], &fr.w[24]);
+    (void)InitLoadProgress((LoadProgress*)&fr, (U32P*)&fr.w[12], (U32P*)&fr.w[16], (U32P*)&fr.w[20], (U32P*)&fr.w[24]);
     idx = 0x1D;
     SetScreenOwner(1);
-    BeginLoadProgress(&fr);
+    BeginLoadProgress((LoadProgress*)&fr);
     tbl = (StartupFn*)g_startupInitializers;
     i = 0;
     do {
         if (D_eu_0026321C != 0) {
-            UpdateLoadProgress(&fr, idx);
+            UpdateLoadProgress((LoadProgress*)&fr, idx);
         }
         tbl[i]();
         i++;
         idx--;
     } while (i < 0x1D);
-    UpdateLoadProgress(&fr, 0);
-    EndLoadProgress(&fr);
+    UpdateLoadProgress((LoadProgress*)&fr, 0);
+    EndLoadProgress((LoadProgress*)&fr);
     ClearScreenOwner(1);
 }

@@ -9,19 +9,14 @@ struct Actor_eu_1AE138 {
     u8 pad4[0x974 - 0x550]; void* f974;
 };
 struct Out_eu_1AE138;
-void SetTextLayoutPosition(Out_eu_1AE138* out, f32 x, f32 y);
-void SetTextLayoutSize(Out_eu_1AE138* out, f32 x, f32 y);
-void SetTextLayoutColor(Out_eu_1AE138* out, s32* value);
-void SetTextLayoutHorizontalAlign(Out_eu_1AE138* out, s32 flag);
-void SetTextLayoutVerticalAlign(Out_eu_1AE138* out, s32 flag);
 void SetTextLayoutVerticalPlacement(Out_eu_1AE138* out, s32 v);
 struct Out_eu_1AE138 {
     u8 d[0x20];
-    void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
-    void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
-    void Color(s32* c) { SetTextLayoutColor(this, c); }
-    void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
-    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
+    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
+    void Color(s32* c) { ((Layout_137228*)this)->Color(c); }
+    void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
+    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
     void Fin(s32 v) { SetTextLayoutVerticalPlacement(this, v); }
 };
 struct Globals_eu_1AE138 { u8 pad0[0x560]; s32 f560; u8 pad1[0xC]; s32 f570; };
