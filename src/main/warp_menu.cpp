@@ -120,8 +120,8 @@ extern u8 g_flagTable[];
 struct FlagTable;
 void SetWorldActiveFollower(World* self, void* v);
 s32 AreMenusAndFadeClear(void);
-extern s32 D_00270458;
-extern s32 D_00275DBC;
+extern s32 g_displayMode;
+extern s32 g_world3BossPendingVoice;
 void InitAgent(Agent* self);
 void* AllocateFrontMemory(s32 size);
 void PopStackElement(ElementStack* g);
@@ -171,7 +171,7 @@ extern s32 D_00275C34;
 extern u32* g_memoryChecksumCursor;
 extern s32 g_memoryChecksumRemaining;
 extern u32 g_memoryChecksumValue;
-extern u8 D_00148D7C[];
+extern u8 g_memoryChecksumEnd[];
 extern u32 g_crc32Table[];
 struct Crc32 {
     static u32 Step(u32 h, u8 b) { return g_crc32Table[(h ^ b) & 0xFF] ^ (h >> 8); }
@@ -429,7 +429,7 @@ struct SameKeys {
         return ((o->signedWords[2] ^ o->signedWords[6]) ^ (t->signedWords[2] ^ t->signedWords[6])) == 0;
     }
 };
-extern void* D_0026FA68;
+extern void* g_currentWarpPage;
 extern s32 g_previousLevelIndex;
 struct WorldLoadRequest;
 struct WorldKeyBlock;
@@ -459,7 +459,7 @@ struct WarpTextStyle {
         color = (s32)0xFF7D4B00;
     }
 };
-extern f32 D_00276650;
+extern f32 g_warpInnerCircleScale;
 s32 IsFontLoaded(s32 n);
 Font* GetFontById(s32 n);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -535,22 +535,22 @@ s32 D_00275BF0 = 0;
 // Unread and unexplained: a zero word and the table {3, 10, 6, 63, 3, 11, 5, 31} follow it up to
 // D_00275C18, which nothing reads; their bytes come from the disassembly.
 INCLUDE_DATA(D_00275BF4);
-f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
-f32 D_00275C28[3] = { 1.0f, 0.0f, 0.1f };
+f32 g_worldValueFallRamp[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
+f32 g_worldValueRiseRamp[3] = { 1.0f, 0.0f, 0.1f };
 s32 D_00275C34 = 0;
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
 Quad16 g_zeroQuad = {0};
 f32 g_unitXQuad[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
 ValueRange g_unitRange = { 0.0f, 1.0f };
 ValueRange D_00275C68 = { -1.0f, 1.0f };
-f32 D_00275C70[4] = { 0.5f, 0.8f, 0.0f, 0.0f };
-f32 D_00275C80[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 g_beatPressTimingWindowRange[4] = { 0.5f, 0.8f, 0.0f, 0.0f };
+f32 g_beatPressTimingCurve[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 ObjectLink g_world3BeatPressLoadLinks[1] = { { 0, 0x4C9, 0x610 } };
 ObjectLink g_world3BeatPressStartLinks[4] = {
     { 4, 0x4D0, 0x618 }, { 4, 0x4D1, 0x61C }, { 4, 0x4D2, 0x620 }, { 4, 0x4D3, 0x624 }
 };
-f32 D_00275CD0 = 700.0f;
-f32 D_00275CD4 = 650.0f;
+f32 g_beatPressRequestSideSpeed = 700.0f;
+f32 g_beatPressRequestUpSpeed = 650.0f;
 s32 g_world3BeatPressWalkerTargets[4] = { 1228, 1230, 1229, 1231 };
 s32 g_world3BeatPressSoundIds[4] = { 574, 576, 575, 577 };
 s32 g_world3BossClipIds[4] = { 1247, 1248, 1249, 1250 };
@@ -566,23 +566,23 @@ TempoObjectRef g_world3BossObjectRefs[9] = {
 // The data from D_00275DB8 on is defined after DrawWorld3BossRing (func_001EC190), whose static's
 // guard (D_00275DB4) retail's .data has before it: the compiler writes a guard out with its
 // function. Declared here for the functions above that.
-extern s32 D_00275DB8;
-extern s32 D_00275DD0[16];
+extern s32 g_world3BossVoiceState;
+extern s32 g_unpackBytesPerElement[16];
 extern s32 g_stateResetObjectLinks[92];
 extern ScreenFade g_screenFade;
-extern f32 D_00275FC0;
-extern s32 D_00275FC8[6];
+extern f32 g_scaleTargetSmall;
+extern s32 g_warpSlotKindMasks[6];
 extern ObjectLink g_warpPageLinks[52];
 extern s32 g_pendingWarpEntry;
-extern f32 D_00276258[4];
-extern f32 D_00276268[4];
-extern f32 D_00276278[4];
-extern f32 D_00276288[4];
-extern s32 D_00276298[11][4];
-extern s32 D_00276348[11][4];
-extern s32 D_002763F8[11][4];
-extern s32 D_002764A8[11][4];
-extern s32 D_00276558[11][4];
+extern f32 g_warpPointRamp[4];
+extern f32 g_warpDimRamp[4];
+extern f32 g_warpLevelRampKind2[4];
+extern f32 g_warpLevelRamp[4];
+extern s32 g_warpCursorTable1[11][4];
+extern s32 g_warpCursorTable2[11][4];
+extern s32 g_warpCursorTable3[11][4];
+extern s32 g_warpCursorTable4[11][4];
+extern s32 g_warpCursorTable5[11][4];
 extern s32 (*g_warpCursorTables[6])[4];
 #ifndef VERSION_EU
 extern WarpTextStyle g_warpTextStyle;
@@ -591,11 +591,11 @@ extern WarpTextStyle g_warpTextStyle;
 extern f32 D_eu_0027FDAC;
 extern f32 D_eu_0027FDB0;
 #else
-extern f32 D_00276648;
-extern f32 D_00276650;
+extern f32 g_warpCircleScale;
+extern f32 g_warpInnerCircleScale;
 #endif
 extern s32 g_pendingWarpEntryAtEnd;
-extern f32 D_0027663C[];
+extern f32 g_warpLabelFontScale[];
 extern char D_00276658[8];
 extern char D_00276660[16];
 extern char D_00276670[12];
@@ -1161,9 +1161,9 @@ s32 AreMenusAndFadeClear(void)
     if (g_pauseMenuElement.open != 0 && g_pauseMenuElement.page != 0) goto fail;
     if (g_mapScreenList.open != 0) goto fail;
     if (g_mapScreenList.mode != 0) goto fail;
-    if (D_00270458 == 2) goto fail;
-    if (D_00270458 == 1) goto fail;
-    if (D_00270458 != 4) goto ok;
+    if (g_displayMode == 2) goto fail;
+    if (g_displayMode == 1) goto fail;
+    if (g_displayMode != 4) goto ok;
 fail:
     return 0;
 ok:
@@ -1194,7 +1194,7 @@ s32 IsArcDrawAllowed(void)
     if (g_pauseMenuElement.mode != 0) goto fail;
     if (g_mapScreenList.open != 0) goto fail;
     if (g_mapScreenList.mode != 0) goto fail;
-    m = D_00270458;
+    m = g_displayMode;
     if (m == 4) goto fail;
     if (m != 1) goto ok;
 fail:
@@ -1225,7 +1225,7 @@ void StepMemoryChecksum(void) {
     if (D_00275C34 == 0) {
         if (g_memoryChecksumRemaining == 0) {
             g_memoryChecksumCursor = (u32*)0x100004;
-            g_memoryChecksumRemaining = (s32)D_00148D7C;
+            g_memoryChecksumRemaining = (s32)g_memoryChecksumEnd;
             g_memoryChecksumValue = 0xFFFFFFFF;
         }
     }
@@ -1355,9 +1355,9 @@ void StepWorldValueTowardTarget(World* self, f32 x)
     f32 a = o->value;
     f32 b = o->valueTarget;
     if (b < a) {
-        o->value = ApproachValueWithRamp((RampProfile*)D_00275C18, 0, a, b, x);
+        o->value = ApproachValueWithRamp((RampProfile*)g_worldValueFallRamp, 0, a, b, x);
     } else if (a < b) {
-        o->value = ApproachValueWithRamp((RampProfile*)D_00275C28, 0, a, b, x);
+        o->value = ApproachValueWithRamp((RampProfile*)g_worldValueRiseRamp, 0, a, b, x);
     }
 }
 
@@ -1563,7 +1563,7 @@ u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec
         return Vu0::MulAddX(f, d, Vu0::Vec::Scalar(travel / len)).q;
     }
     if (vel != 0) {
-        *vel = D_00248D30;
+        *vel = g_zeroVector;
     }
     return to;
 }
@@ -1918,7 +1918,7 @@ void InitWorld3BeatPressCollider(World3BeatPressCollider* self)
 {
     InitSwitchedCollider(self);
     f32 t = g_currentEntry->dt;
-    f32 x = D_00275C80[0] + t * (D_00275C80[1] + t * D_00275C80[2]);
+    f32 x = g_beatPressTimingCurve[0] + t * (g_beatPressTimingCurve[1] + t * g_beatPressTimingCurve[2]);
     f32 lo = g_unitRange.lo;
     f32 hi = g_unitRange.hi;
     f32 c;
@@ -1929,7 +1929,7 @@ void InitWorld3BeatPressCollider(World3BeatPressCollider* self)
     } else {
         c = x;
     }
-    self->timingWindow = (1.0f - c) * D_00275C70[0] + c * D_00275C70[1];
+    self->timingWindow = (1.0f - c) * g_beatPressTimingWindowRange[0] + c * g_beatPressTimingWindowRange[1];
 }
 
 // Slot 10 of the beat-press collider: loads the collider and resolves its link.
@@ -1979,7 +1979,7 @@ void HandleWorld3BeatPressColliderActivation(World3BeatPressCollider* self, void
 void ContinueWorld3BeatPressColliderRequest(PlacedObject* from, Player* self)
 {
     Vec02 dir;
-    Vu0::Q(dir) = Vu0::MulXSum(Vu0::Q(from->m110.r[0]), Vu0::Scalar(-D_00275CD0), Vu0::Q(from->m110.r[2]), Vu0::ScalarAt(D_00275CD4));
+    Vu0::Q(dir) = Vu0::MulXSum(Vu0::Q(from->m110.r[0]), Vu0::Scalar(-g_beatPressRequestSideSpeed), Vu0::Q(from->m110.r[2]), Vu0::ScalarAt(g_beatPressRequestUpSpeed));
     self->desc02()->m20(self, &dir);
     self->heading = WrapAngle(ArctangentOfRatio(dir.y, dir.x) + 3.1415927f);
     TurnColliderTowardHeading(self);
@@ -2190,8 +2190,8 @@ void InitWorld3Boss(World3Boss* self)
     self->players = (TempoPlayerEntry*)AllocateFrontMemory(0x400);
     self->world->f2358 = 1;
     StopStagedBankVoice();
-    D_00275DB8 = 2;
-    D_00275DBC = 0;
+    g_world3BossVoiceState = 2;
+    g_world3BossPendingVoice = 0;
 }
 
 s32 ResolveAgentClip(Agent* self, s32 id);
@@ -2327,15 +2327,15 @@ void DrawWorld3BossRing(DeferredRequest* request)
 
 // The file's data from here on follows the static's guard (D_00275DB4) in retail's .data.
 // size: s32 state compared/assigned in 001EC000
-s32 D_00275DB8 = 0;
+s32 g_world3BossVoiceState = 0;
 INCLUDE_DATA(D_00275DBC);
-s32 D_00275DD0[16] = { 4, 2, 1, -1, 8, 4, 2, -1, 12, 6, 3, -1, 16, 8, 4, 2 };
+s32 g_unpackBytesPerElement[16] = { 4, 2, 1, -1, 8, 4, 2, -1, 12, 6, 3, -1, 16, 8, 4, 2 };
 s32 g_stateResetObjectLinks[92] = { 2, 0x2EB, 0x2DC };
 // word read whole / address only, 4 bytes to next label
 ScreenFade g_screenFade = { 0 };
-f32 D_00275FC0 = 0.5f;
+f32 g_scaleTargetSmall = 0.5f;
 // Globals defined from C.
-s32 D_00275FC8[6] = { 0, 2, 4, 4, 4, 0 };
+s32 g_warpSlotKindMasks[6] = { 0, 2, 4, 4, 4, 0 };
 ObjectLink g_warpPageLinks[52] = {
     { 0x2, 0x1CB, 0x2E4 },
     { 0x2, 0x1CC, 0x2E8 },
@@ -2391,11 +2391,11 @@ ObjectLink g_warpPageLinks[52] = {
     { 0x2, 0x1F7, 0x514 },
 };
 s32 g_pendingWarpEntry = -1;
-f32 D_00276258[4] = { 600.0f, 0.0f, 0.25f, 0.0f };
-f32 D_00276268[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00276278[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00276288[4] = { 1.0f, 0.0f, 0.200000003f, 0.0f };
-s32 D_00276298[11][4] = {
+f32 g_warpPointRamp[4] = { 600.0f, 0.0f, 0.25f, 0.0f };
+f32 g_warpDimRamp[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 g_warpLevelRampKind2[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 g_warpLevelRamp[4] = { 1.0f, 0.0f, 0.200000003f, 0.0f };
+s32 g_warpCursorTable1[11][4] = {
     { 1, 10, 10, 5 },
     { 2, 0, 3, 5 },
     { -1, 1, 3, 5 },
@@ -2408,7 +2408,7 @@ s32 D_00276298[11][4] = {
     { -1, -1, -1, -1 },
     { 0, -1, -1, 0 }
 };
-s32 D_00276348[11][4] = {
+s32 g_warpCursorTable2[11][4] = {
     { 4, 10, 4, 10 },
     { 8, 0, 4, 3 },
     { 5, 3, 1, -1 },
@@ -2421,7 +2421,7 @@ s32 D_00276348[11][4] = {
     { -1, -1, -1, -1 },
     { 3, -1, 0, -1 }
 };
-s32 D_002763F8[11][4] = {
+s32 g_warpCursorTable3[11][4] = {
     { 1, 10, 10, 1 },
     { 3, 0, 7, 2 },
     { 4, 0, 1, -1 },
@@ -2434,7 +2434,7 @@ s32 D_002763F8[11][4] = {
     { -1, -1, -1, -1 },
     { 5, -1, -1, 0 }
 };
-s32 D_002764A8[11][4] = {
+s32 g_warpCursorTable4[11][4] = {
     { 1, 10, 10, 2 },
     { 7, 0, 4, 2 },
     { 5, 0, 1, 5 },
@@ -2447,7 +2447,7 @@ s32 D_002764A8[11][4] = {
     { -1, -1, -1, -1 },
     { 4, -1, -1, 0 }
 };
-s32 D_00276558[11][4] = {
+s32 g_warpCursorTable5[11][4] = {
     { 2, 10, 2, 4 },
     { -1, -1, -1, -1 },
     { 3, 0, -1, 3 },
@@ -2460,7 +2460,7 @@ s32 D_00276558[11][4] = {
     { -1, -1, -1, -1 },
     { 0, -1, -1, 0 }
 };
-s32 (*g_warpCursorTables[6])[4] = { 0, (s32(*)[4])D_00276298, (s32(*)[4])D_00276348, (s32(*)[4])D_002763F8, (s32(*)[4])D_002764A8, (s32(*)[4])D_00276558 };
+s32 (*g_warpCursorTables[6])[4] = { 0, (s32(*)[4])g_warpCursorTable1, (s32(*)[4])g_warpCursorTable2, (s32(*)[4])g_warpCursorTable3, (s32(*)[4])g_warpCursorTable4, (s32(*)[4])g_warpCursorTable5 };
 #ifndef VERSION_EU
 // PAL has no style here (its func_001F1960 draws without one): its static initialiser only
 // sets D_00276650.
@@ -2472,11 +2472,11 @@ INCLUDE_DATA(D_0027663C);
 f32 D_eu_0027FDAC = 24.0f;
 f32 D_eu_0027FDB0 = D_eu_0027FDAC * 0.75f;
 #else
-f32 D_00276648 = 24.0f;
-f32 D_00276650 = D_00276648 * 0.75f;
+f32 g_warpCircleScale = 24.0f;
+f32 g_warpInnerCircleScale = g_warpCircleScale * 0.75f;
 #endif
 s32 g_pendingWarpEntryAtEnd = 0;
-extern f32 D_0027663C[];
+extern f32 g_warpLabelFontScale[];
 char D_00276658[8] = "jojo";
 char D_00276660[16] = "08/24/02 22:06";
 char D_00276670[12] = "0824.2206";
@@ -2746,8 +2746,8 @@ void HandleWorld3BossNotification(World3Boss* self, s32 kind, TempoNoticeRec* re
             case 0x4F8: voice = 10; break;
             }
             if (voice != GetCachedVoiceParam(0)) {
-                D_00275DBC = voice;
-                D_00275DB8 = 1;
+                g_world3BossPendingVoice = voice;
+                g_world3BossVoiceState = 1;
                 SetCachedVoiceParam(0, voice);
             }
         }
@@ -2785,7 +2785,7 @@ void UpdateWorld3Boss(World3Boss* self, f32 dt)
     s32 code;
 
     UpdateAgent(self, dt);
-    if (D_00275DB8 == 2) {
+    if (g_world3BossVoiceState == 2) {
         if (self->beatLength != self->newBeatLength) {
             self->beatLength = self->newBeatLength;
             self->spanSeconds = self->newBeatLength * (f32)self->spanBeats;
@@ -2801,7 +2801,7 @@ void UpdateWorld3Boss(World3Boss* self, f32 dt)
             self->heldTimeline = sub;
             RestartWorld3Timeline(sub);
         }
-        D_00275DB8 = 0;
+        g_world3BossVoiceState = 0;
     }
     if (self->nextBeatTime <= g_gameClock.time) {
         s32 a = self->beat + 1;
@@ -2825,9 +2825,9 @@ void UpdateWorld3Boss(World3Boss* self, f32 dt)
     }
     self->barPosition = (f32)self->beatInBar + (g_gameClock.time - self->lastBeatTime) / self->beatLength;
     if (self->heldTimeline != 0) RunWorld3TimelineEntries(self->heldTimeline);
-    if (D_00275DB8 == 1) {
+    if (g_world3BossVoiceState == 1) {
         RefreshCachedVoiceParam(1, 0);
-        if (GetCachedVoiceParam(1) == D_00275DBC) D_00275DB8 = 2;
+        if (GetCachedVoiceParam(1) == g_world3BossPendingVoice) g_world3BossVoiceState = 2;
     }
     AppendQueuedCall(self->world, (void*)(void (*)(World3Boss*))SyncWorld3BossEntries, self, 0, 0);
 }
@@ -3049,23 +3049,23 @@ void RunWorld3TimelineEntry(World3Timeline* self, Entry90* msg)
     }
     case 2:
         ((World3Boss*)self->found)->beatPressCollider->judging = 1;
-        D_00273C50.vt->m16(&D_00273C50, 2);
+        g_beatPressGlyphElement.vt->m16(&g_beatPressGlyphElement, 2);
         ResetPadStepRepeat(&g_padRecord);
         StartSoundEffect(0, 0, 0, 0, 80000.0f, 70000.0f, 1.5f, 0.5f, 0.0f, 0, 0);
         break;
     case 3:
         ((World3Boss*)self->found)->beatPressCollider->judging = 0;
         ((World3Boss*)self->found)->beatPressCollider->runEnded = 0;
-        D_00273C50.vt->m16(&D_00273C50, 0);
+        g_beatPressGlyphElement.vt->m16(&g_beatPressGlyphElement, 0);
         break;
     case 4:
         ((World3Boss*)self->found)->fC4C = 1;
-        D_002739F0.vt->m16(&D_002739F0, 2);
+        g_bossBeatGlyphElement.vt->m16(&g_bossBeatGlyphElement, 2);
         StartSoundEffect(0, 0, 0, 0, 80000.0f, 70000.0f, 1.5f, -0.25f, 0.0f, 0, 0);
         break;
     case 5:
         ((World3Boss*)self->found)->fC4C = 0;
-        D_002739F0.vt->m16(&D_002739F0, 0);
+        g_bossBeatGlyphElement.vt->m16(&g_bossBeatGlyphElement, 0);
         break;
     }
 }
@@ -3374,7 +3374,7 @@ s32 ComputeLaunchVelocityToPoint(f32 speed, Vec02* from, Vec02* to, Vec02* out, 
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*to), Vu0::Q(*from));
     if (__builtin_fabsf(grav) < 1.0f) {
         u128 k = Vu0::Scalar(speed);
-        u128 n = Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(D_00248D30));
+        u128 n = Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_zeroVector));
         Vu0::Q(*out) = Vu0::MulX(n, k);
         return 1;
     }
@@ -3571,7 +3571,7 @@ s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c)
     if (self->openTag != 0) {
         *p = tag | 0x10000000;
     }
-    return D_00275DD0[a] * b;
+    return g_unpackBytesPerElement[a] * b;
 }
 
 // Writes a VIF unpack header and reserves its data in the packet; gives back the start of the data
@@ -3821,7 +3821,7 @@ void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16
     TransformDirectionBetweenFrames(0, self, (Vec02*)in, &a);
     b = *(Quad16*)&self->f570;
     a.z = 0.0f;
-    c = *(Quad16*)&D_00248D30;
+    c = *(Quad16*)&g_zeroVector;
     TransformStateToAncestorFrame(self, 0, &a, 0, (Vec02*)&b, (Vec02*)&c);
     if (self->f278 != 0) {
         ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->f278 + 0xC)), 50.0f, (Vec02*)in, 0, 0, 0, &d);
@@ -3930,7 +3930,7 @@ void UpdateAttachedSet(AttachedSet* self, f32 dt)
             ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->f278 + 0xC)), 50.0f, &c->v140, 0, &d, 0, 0);
             Vu0::Q(off) = Vu0::Sub(Vu0::Vec::Of(d), Vu0::Vec::Of(c->v140)).q;
         } else {
-            off = D_00248D30;
+            off = g_zeroVector;
         }
         Vu0::Q(from) = Vu0::Sub(Vu0::Vec::Of(c->v370), Vu0::Vec::Of(off)).q;
         Vu0::Q(to) = Vu0::Sub(Vu0::Vec::Of(c->v140), Vu0::Vec::Of(off)).q;
@@ -4445,8 +4445,8 @@ void SetScreenFadeMode(ScreenFade* self, s32 mode)
 {
     if (self->mode == mode) goto L0410;
     if (self->mode == 2) {
-        if (D_0026FA68 != 0) {
-            SetWarpPageMode((WarpPage*)D_0026FA68, 0);
+        if (g_currentWarpPage != 0) {
+            SetWarpPageMode((WarpPage*)g_currentWarpPage, 0);
         }
     }
     if (mode == 1) goto L02E0;
@@ -4486,11 +4486,11 @@ L0300:
         s32 v = GetEntryIdByKey((KeyedEntry*)self->active.key);
         s32 a3 = v >> 8;
         s32 a2 = v & 0xFF;
-        if (D_0026FA68 == 0) goto L034C;
+        if (g_currentWarpPage == 0) goto L034C;
         if (v == -1) goto L034C;
         s32 a1 = 10;
         if (a3 != 0) a1 = a2;
-        SetWarpCursor((WarpPage*)D_0026FA68, a1, 3);
+        SetWarpCursor((WarpPage*)g_currentWarpPage, a1, 3);
         ShowCountedScreenElement(g_currentWorld);
         goto L0364;
     }
@@ -4594,7 +4594,7 @@ s32 IsWarpEntryAvailable(WarpPage* self, s32 kind, s32* outA, s32* outB)
                 // address arithmetic over a variable index
                 if (*(s32*)((u8*)g_saveData + m + 0x88) & 1) {
                     s32 q = g_saveData->levels[mode].f448;
-                    flag = (q & D_00275FC8[mode]) != 0;
+                    flag = (q & g_warpSlotKindMasks[mode]) != 0;
                 }
             }
         } else {
@@ -4798,7 +4798,7 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
             self->lastCursor = self->cursor;
         }
         *(u128*)&self->smoothPoint = ApproachPointWithRamp(*(u128*)&self->smoothPoint, *(u128*)&self->targetPoint, g_gameClock.step,
-                                                     (RampProfile*)D_00276258, 0);
+                                                     (RampProfile*)g_warpPointRamp, 0);
         break;
     case 3:
         if (self->lastCursor != self->cursor) {
@@ -4847,17 +4847,17 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
     if (self->mode != 0) {
         for (s32 i = 0; i < 11; i++) {
             WarpEntry* e = &self->entries[i];
-            e->dim = ApproachValueWithRamp(e->dim, e->dimTarget, g_gameClock.step, (RampProfile*)D_00276268, 0);
+            e->dim = ApproachValueWithRamp(e->dim, e->dimTarget, g_gameClock.step, (RampProfile*)g_warpDimRamp, 0);
             e->phase = WrapAngle(e->phase + e->speed * g_gameClock.step);
             PlacedObject* a = (PlacedObject*)e->availableObject;
             PlacedObject* b = (PlacedObject*)e->cursorObject;
             if (a != 0) {
                 a->rampNode->level = ApproachValueWithRamp(a->rampNode->level, e->availableLevel, dt,
-                                                       (RampProfile*)(self->openKind == 2 ? D_00276278 : D_00276288), 0);
+                                                       (RampProfile*)(self->openKind == 2 ? g_warpLevelRampKind2 : g_warpLevelRamp), 0);
             }
             if (b != 0) {
                 b->rampNode->level = ApproachValueWithRamp(b->rampNode->level, e->cursorLevel, dt,
-                                                       (RampProfile*)(self->openKind == 2 ? D_00276278 : D_00276288), 0);
+                                                       (RampProfile*)(self->openKind == 2 ? g_warpLevelRampKind2 : g_warpLevelRamp), 0);
             }
         }
     }
@@ -5187,7 +5187,7 @@ void SetWarpPageSelectedEntry(WarpPage* self, s32 idx) {
     if (r != 0) {
         TransformPointBetweenFrames((PlacedObject*)r->parent, self, (Vec02*)&((TransformObject*)r)->pos, (Vec02*)((base + 0x550)));
     } else {
-        *(Quad16*)(base + 0x550) = *(Quad16*)&D_00248D30;
+        *(Quad16*)(base + 0x550) = *(Quad16*)&g_zeroVector;
     }
     u8* arr = base + 0x320;
     u8* slot = arr + idx * 0x34;
@@ -5199,7 +5199,7 @@ void SetWarpPageSelectedEntry(WarpPage* self, s32 idx) {
     *(s32*)(base + 0x534) = idx;
 }
 
-extern const char D_0024E808[40] = "&2T&. : Back\n&2(&. : Move\n&2X&. : Warp";
+extern const char g_warpMenuHint[40] = "&2T&. : Back\n&2(&. : Move\n&2X&. : Warp";
 void InitWarpMenu(T217D_0F0* self) {
     SetupScreenElementText(self);
     if (IsFontLoaded(2) != 0) {
@@ -5209,7 +5209,7 @@ void InitWarpMenu(T217D_0F0* self) {
     SetScreenElementHoldTime(self, 0.0f);
     SetScreenElementScale(self, 0.6f);
     self->color = 0xDF7F7F7F;
-    self->vt->m08(self, D_0024E808);
+    self->vt->m08(self, g_warpMenuHint);
     self->current = 0;
     FillMemory(self->nodes, 0, 0x18);
 }
@@ -5264,9 +5264,9 @@ void HandleWarpMenuInput(T217D_0F0* self, PadRecord* t)
     if (s3 != 0) {
         self->scaleTarget = 1.0f;
     } else {
-        self->scaleTarget = D_00275FC0;
+        self->scaleTarget = g_scaleTargetSmall;
     }
-    self->scale = ApproachValueWithRamp((RampProfile*)D_00276278, 0, self->scale, self->scaleTarget, g_gameClock.step);
+    self->scale = ApproachValueWithRamp((RampProfile*)g_warpLevelRampKind2, 0, self->scale, self->scaleTarget, g_gameClock.step);
 }
 
 void SetWarpMenuOpen(T217D_0F0* self, s32 a1)
@@ -5350,7 +5350,7 @@ struct StringLayout;
 struct Vec4U;
 void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 void PopFontScale(Font* font);
-extern f32 D_00276648;
+extern f32 g_warpCircleScale;
 // Three floats; the first sizes the warp map's level labels.
 
 // A colour of the warp map, one byte per channel, passed to DrawColoredCircle.
@@ -5451,17 +5451,17 @@ void DrawWarpMenu(T217D_0F0* self)
         }
         WarpColor a = c0;
         WarpColor b = c1;
-        DrawColoredCircle(pos[0], pos[1], size * D_00276648, e->phase, 14, (s32*)&a, (s32*)&b, 3);
+        DrawColoredCircle(pos[0], pos[1], size * g_warpCircleScale, e->phase, 14, (s32*)&a, (s32*)&b, 3);
         b = c0;
         a = c1;
-        DrawColoredCircle(pos[0], pos[1], size * D_00276650, -e->phase, 10, (s32*)&b, (s32*)&a, 3);
+        DrawColoredCircle(pos[0], pos[1], size * g_warpInnerCircleScale, -e->phase, 10, (s32*)&b, (s32*)&a, 3);
         if (i < 9) {
             s32 slot = self->current->slot;
             if (GetEntryFlags((slot << 8) | i) & 2) {
                 f32 scale = e->dim;
                 s32 flags = *(s32*)((u8*)g_saveData + (slot * 0x44C + i * 0x78) + 0x10);
                 Font* font = GetFontById(3);
-                f32 k = D_0027663C[0] * scale;
+                f32 k = g_warpLabelFontScale[0] * scale;
                 PushFontScale(font, k, k);
                 WarpLabelLayout L;
                 f32 x = pos[0];

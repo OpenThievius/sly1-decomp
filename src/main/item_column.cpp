@@ -33,7 +33,7 @@
 
 extern s32 D_00275BEC;
 extern f32 g_timeScale;
-extern T217D_Vt D_00218330;
+extern T217D_Vt g_buttonHintElementMethods;
 
 
 // Initialiser of the item column: a screen element that owns four items of the item's method
@@ -45,8 +45,8 @@ void InitItemColumn(T217D_720* self)
     InitScreenElement(self, 0x20);
     T217D_330* e = self->items;
     for (n = 0; n < 4; n++) {
-        e->vt = &D_00218330;
-        D_00218330.m00(e, 0x12);
+        e->vt = &g_buttonHintElementMethods;
+        g_buttonHintElementMethods.m00(e, 0x12);
         e++;
     }
 }

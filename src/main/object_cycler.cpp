@@ -168,7 +168,7 @@ struct GroundCandidate { u8 pad0[0x50]; s32 root; u8 pad1[0x278]; u32 flagsHigh;
 
 
 typedef unsigned long u64;
-extern const Vec02 D_00248D30;
+extern const Vec02 g_zeroVector;
 
 
 // Initialises the collider part, sets the state to -1, points the cycler's random ranges (target
@@ -317,8 +317,8 @@ void StepObjectCycler(ObjectCycler* self, f32 dt)
     }
     case 1:
         AddColliderForce(self, &self->gravity);
-        SteerColliderTowardPosition(self, 0, 0, (Vec02*)&D_00248D30, g_cyclerFallPositionSteer, dt);
-        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, g_cyclerFallRotationSteer, dt);
+        SteerColliderTowardPosition(self, 0, 0, (Vec02*)&g_zeroVector, g_cyclerFallPositionSteer, dt);
+        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&g_zeroVector, g_cyclerFallRotationSteer, dt);
         break;
     case 6:
         StepCollider(self, dt);
@@ -596,8 +596,8 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
         Mat02 m;
         RotateMatrixUpright(&self->m110, 0, &m);
         self->desc02()->m1E(self, &m);
-        self->desc02()->m20(self, (Vec02*)&D_00248D30);
-        self->desc02()->m21(self, (Vec02*)&D_00248D30);
+        self->desc02()->m20(self, (Vec02*)&g_zeroVector);
+        self->desc02()->m21(self, (Vec02*)&g_zeroVector);
         SetColliderAnchors(self, 3, 0, 3, 0);
         self->index = 0;
         self->nextAdvanceTime = g_gameClock[1] + RandomFloatInRange(self->p658.a, self->p658.b);

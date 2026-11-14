@@ -27,7 +27,7 @@ struct PadPatternPlayer;
 // the code sequences with their slots, the flags, the two records, the list head and the timer.
 
 extern const char g_passwordMessageFormat[24] = "The password is: %s";
-f32 D_00262A30[8] = { 1.0f, 0.0f, 0.0f, 1.0f, 0.699999988f, 0.699999988f, 0.699999988f, -0.699999988f };
+f32 g_stickDirectionAxes[8] = { 1.0f, 0.0f, 0.0f, 1.0f, 0.699999988f, 0.699999988f, 0.699999988f, -0.699999988f };
 
 u16 g_padButtonMasks[12] = { 0x2000, 0x8000, 0x1000, 0x4000, 0x0010, 0x0020, 0x0040, 0x0080, 0x0004, 0x0008, 0x0001, 0x0002 };
 u32 g_worldLoadButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x100 };
@@ -388,7 +388,7 @@ void ReadAnalogStick(PadRecord* p, u8 x, u8 y, f32* outX, f32* outY, f32* outMag
     f32 len;
     f32 frac;
     for (u32 i = 0; i < 4; i++) {
-        len = nx * D_00262A30[i * 2] + ny * D_00262A30[i * 2 + 1];
+        len = nx * g_stickDirectionAxes[i * 2] + ny * g_stickDirectionAxes[i * 2 + 1];
         if (0.0f <= len) {
             if (range[i].hi < len) range[i].hi = len;
             frac = len / range[i].hi;

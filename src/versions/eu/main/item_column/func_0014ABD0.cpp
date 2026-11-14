@@ -12,8 +12,8 @@ void InitItemColumn(PalItemEntry* self)
     InitScreenElement(self, 0x20);
     self = (PalItemEntry*)((u8*)self + 0x574);
     for (n = 0; n < 4; n++) {
-        self->link = (void*)&D_00218330;
-        D_00218330.m00((ScreenElement*)self, 0x12);
+        self->link = (void*)&g_buttonHintElementMethods;
+        g_buttonHintElementMethods.m00((ScreenElement*)self, 0x12);
         self = (PalItemEntry*)((u8*)self + 0x570);
     }
 }

@@ -553,14 +553,14 @@ void CreateArcSprite(T217D_3F0* self)
 // the 57 points, centred.
 void GetArcVisibleRange(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 
 // Writes the GIF vertices of the arc's outline: in display mode 4 a plain rectangle at the
 // element's shown position and size (with the y scale for the screen), otherwise the visible part
 // of the arc, between the arc's two edges, as a strip.
 void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
 {
-    if (D_00270458 == 4) {
+    if (g_displayMode == 4) {
         f32 y = self->shownY;
         f32 x = self->shownX;
         s32 x0 = (s32)((x + 1728.0f) * 16.0f);
@@ -782,7 +782,7 @@ void SetArcFade(T217D_3F0* a0, s32 a1)
     }
 }
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 
 // Makes the arc's target its current object: the old one gets its method 3 (unless it is the
 // special object in display mode 4), the new one its method 2, the tree-records value (not in mode
@@ -794,14 +794,14 @@ void ApplyArcTarget(T217D_3F0* self)
         return;
     }
     if (cur != 0) {
-        if (!(D_00270458 == 4 && cur == (PlacedObject*)self->special)) {
+        if (!(g_displayMode == 4 && cur == (PlacedObject*)self->special)) {
             cur->desc->m03(cur);
         }
     }
     self->current = self->target;
     if (self->current != 0) {
         ((PlacedObject*)self->current)->desc->m02((PlacedObject*)self->current);
-        if (D_00270458 != 4) {
+        if (g_displayMode != 4) {
             SetObjectTreeRecordsValue((PlacedObject*)self->current, self);
         }
         ((PlacedObject*)self->current)->flags |= 0x100000000UL;
@@ -848,7 +848,7 @@ void SetArcPhase(T217D_3F0* self, s32 mode)
     self->phaseSince = g_gameClock[4];
 }
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 
 // Sets the arc's screen element mode; on leaving mode 0 it sets the element's offset and size by
 // the display mode (640 by 360 in mode 4, 160 by 125.4 otherwise), and with mode 2 it restarts the
@@ -859,7 +859,7 @@ void SetArcMode(T217D_3F0* self, s32 value)
     SetScreenElementMode(self, value);
     if (old == value) return;
     if (old != 0) goto done;
-    if (D_00270458 == 4) {
+    if (g_displayMode == 4) {
         self->place->dy = 0.0f;
         SetScreenElementSize(self, 640.0f, 360.0f);
     } else {
@@ -868,14 +868,14 @@ void SetArcMode(T217D_3F0* self, s32 value)
     }
 done:
     if (value != 2) return;
-    if (D_00270458 == 4) return;
+    if (g_displayMode == 4) return;
     self->phase = -1;
     SetArcPhase(self, 3);
 }
 
 extern f32 g_gameClock[];
 extern s32 D_00270448;
-extern s32 D_00270458;
+extern s32 g_displayMode;
 
 struct RampProfile;
 
@@ -938,7 +938,7 @@ void UpdateArc(T217D_3F0* self)
             }
             break;
         }
-        if (D_00270458 != 4)
+        if (g_displayMode != 4)
         {
             self->pulse = ApproachValueWithRamp((RampProfile*)&self->pulseA, 0, self->pulse, self->pulseTarget, g_gameClock[5]);
             if (AreFloatsNearlyEqual(self->pulse, self->pulseTarget, 1e-4f) != 0)
@@ -1190,7 +1190,7 @@ void DrawArcOutlinePacket(ArcDrawRequest* request)
     if (first == last) {
         return;
     }
-    if (D_00270458 != 4) {
+    if (g_displayMode != 4) {
         if (AreFloatsNearlyEqual(g_camera->zoom, ((ArcHeld*)self->current)->zoom, 1e-4f) == 0) {
             f32 zoom = g_camera->zoom;
             f32 f1C8 = g_camera->zoomGoal;

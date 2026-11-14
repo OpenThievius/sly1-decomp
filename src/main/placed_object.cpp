@@ -114,15 +114,15 @@ struct ZoneTargetEntry;
 #include "base_object.h"
 #include "stream_reader_window.h"
 
-f32 D_00260E70[4] = { 0.0f, 15.0f, 0.0149999997f, 0.0f };
-f32 D_00260E80[4] = { 0.0f, 2.5f, 0.00249999994f, 0.0f };
-f32 D_00260E90[4] = { 0.0f, 15.0f, 1.5f, 0.0f };
-f32 D_00260EA0[4] = { 0.0f, 2.5f, 0.25f, 0.0f };
-f32 D_00260EB0[4] = { 1500.0f, 0.0f, 0.5f, 4500.0f };
-f32 D_00260EC0[4] = { 15.0f, 0.0f, 0.5f, 45.0f };
+f32 g_defaultPositionSpring[4] = { 0.0f, 15.0f, 0.0149999997f, 0.0f };
+f32 g_defaultVelocitySpring[4] = { 0.0f, 2.5f, 0.00249999994f, 0.0f };
+f32 g_defaultRotationSpring[4] = { 0.0f, 15.0f, 1.5f, 0.0f };
+f32 g_defaultSpinSpring[4] = { 0.0f, 2.5f, 0.25f, 0.0f };
+f32 g_defaultPositionRamp[4] = { 1500.0f, 0.0f, 0.5f, 4500.0f };
+f32 g_defaultRotationRamp[4] = { 15.0f, 0.0f, 0.5f, 45.0f };
 f32 g_fadeRampProfile[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00260EE0[4] = { -50.0f, 4.0f, 0.0f, 0.0f };
-f32 D_00260EF0[4] = { 0.0f, 400.0f, 0.0f, 0.0f };
+f32 g_steeringHeadingCurve[4] = { -50.0f, 4.0f, 0.0f, 0.0f };
+f32 g_steeringHeadingLimits[4] = { 0.0f, 400.0f, 0.0f, 0.0f };
 
 AnimationPlayer* NewAnimationPlayer(World* pool);
 void CloseStreamReader(StreamReader* a0);
@@ -320,7 +320,7 @@ void CopyMemory(void* dst, void* src, u32 size);
 // storing them (and computes the loop end in $v0), ours interleaves load and store.
 
 
-extern u8 D_00248D40[];
+extern u8 g_unitScale[];
 
 
 
@@ -663,7 +663,7 @@ void GetTrackValue();
 void GetTrackScaleMatrix();
 f32 GetTrackIndexedValue();
 
-extern u8 D_00148D64[];
+extern u8 g_codeChecksumEnd[];
 void InitPlacedObject(void* self);
 
 
@@ -1169,12 +1169,12 @@ void InitPlacedObject(PlacedObject* self)
     self->fadeDistanceNear = 3.4028235e+38f;
     SetupStores::SetB2CA(self, -1);
     self->b2C9 = -1;
-    self->p20C = (u8*)D_00260E70;
-    self->p210 = (u8*)D_00260E80;
-    self->p214 = (u8*)D_00260E90;
-    self->p218 = (u8*)D_00260EA0;
-    self->p21C = (u8*)D_00260EB0;
-    self->p220 = (u8*)D_00260EC0;
+    self->p20C = (u8*)g_defaultPositionSpring;
+    self->p210 = (u8*)g_defaultVelocitySpring;
+    self->p214 = (u8*)g_defaultRotationSpring;
+    self->p218 = (u8*)g_defaultSpinSpring;
+    self->p21C = (u8*)g_defaultPositionRamp;
+    self->p220 = (u8*)g_defaultRotationRamp;
     self->b2C8 = 0;
     SetupStores::Copy(&self->rot, &g_identityMatrix);
     SetupStores::Copy(&self->m110, &g_identityMatrix);
@@ -1844,9 +1844,9 @@ void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos,
         }
     }
     M = g_identityMatrix;
-    P = D_00248D30;
-    V = D_00248D30;
-    W = D_00248D30;
+    P = g_zeroVector;
+    V = g_zeroVector;
+    W = g_zeroVector;
     for (n--; n >= 0; n--) {
         PlacedObject* o = self = chain[n];
         if (pos != 0 || vel != 0) {
@@ -1893,7 +1893,7 @@ void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat
             Vu0::Q(r) = Vu0::Rotate(m, Vu0::Q(*pos));
             Vu0::Q(*pos) = Vu0::Add(Vu0::Q(p), Vu0::Q(r));
         } else {
-            r = D_00248D30;
+            r = g_zeroVector;
         }
     }
     if (vel != 0) {
@@ -1916,7 +1916,7 @@ void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform
             *dst = *(ScaledTransform*)src;
         }
     } else {
-        BuildScaledTransformMatrix((f32*)&self->v140, (float (*)[4])&self->m110, (f32*)D_00248D40, (float (*)[4])dst);
+        BuildScaledTransformMatrix((f32*)&self->v140, (float (*)[4])&self->m110, (f32*)g_unitScale, (float (*)[4])dst);
         dst->innerFade = 1.0f;
         dst->outerFade = 1.0f;
     }
@@ -2061,7 +2061,7 @@ void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform
         Mat02 m;
         Mat4A m4;
         a->vt->getMatrix(a, &m);
-        BuildMatrixFromRotationAndTranslation((const Vec02*)&D_00248D30, (const Mat02*)&m, (Mat4A*)&m4);
+        BuildMatrixFromRotationAndTranslation((const Vec02*)&g_zeroVector, (const Mat02*)&m, (Mat4A*)&m4);
         BuildPlacedObjectTransform(self, (Quad16*)xf, &t);
         *(Mat4A*)&t = MultiplyMatrices(*(Mat4A*)&t, m4);
         xf = &t;
@@ -2207,7 +2207,7 @@ void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
         if (part->fade != 0) {
             Vec02 n;
             ScaledTransform* m = &rec.block;
-            u128 fb = Vu0::Q(D_00248D30);
+            u128 fb = Vu0::Q(g_zeroVector);
             u128 v = Vu0::Rotate(*m, Vu0::Q(part->fade->axis));
             u128 len = Vu0::Length(v);
             if (Vu0::ToFloatMoved(len) < 0.0001f) {
@@ -2298,7 +2298,7 @@ void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02*
     Mat02 m;
     Vec02 e;
     ScaledTransform out;
-    const Vec02* fallback = &D_00248D30;
+    const Vec02* fallback = &g_zeroVector;
     Vu0::Q(m.r[2]) = Vu0::Sub(Vu0::Q(*q), Vu0::Q(*p));
     Vu0::Q(e) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*(Vec02*)&b->link40));
     u128 c = Vu0::Cross(Vu0::Q(e), Vu0::Q(m.r[2]));
@@ -2452,7 +2452,7 @@ void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, f32* pos
     local.m[3][0] -= pos[0];
     local.m[3][1] -= pos[1];
     local.m[3][2] -= pos[2];
-    BuildMatrixFromRotationAndTranslation((const Vec02*)&D_00248D30, (const Mat02*)&rot, (Mat4A*)&t);
+    BuildMatrixFromRotationAndTranslation((const Vec02*)&g_zeroVector, (const Mat02*)&rot, (Mat4A*)&t);
     {
         Mat4A r = MultiplyMatrices(t, local);
         *m = r;
@@ -2542,10 +2542,10 @@ void CopyPlacedObject(PlacedObject* self, PlacedObject* src)
             AddCameraObject(g_camera, self);
         }
     }
-    if (self->p20C != (u8*)D_00260E70) self->p20C = (u8*)CopyToFrontMemory(0x10, self->p20C);
-    if (self->p210 != (u8*)D_00260E80) self->p210 = (u8*)CopyToFrontMemory(0x10, self->p210);
-    if (self->p214 != (u8*)D_00260E90) self->p214 = (u8*)CopyToFrontMemory(0x10, self->p214);
-    if (self->p218 != (u8*)D_00260EA0) self->p218 = (u8*)CopyToFrontMemory(0x10, self->p218);
+    if (self->p20C != (u8*)g_defaultPositionSpring) self->p20C = (u8*)CopyToFrontMemory(0x10, self->p20C);
+    if (self->p210 != (u8*)g_defaultVelocitySpring) self->p210 = (u8*)CopyToFrontMemory(0x10, self->p210);
+    if (self->p214 != (u8*)g_defaultRotationSpring) self->p214 = (u8*)CopyToFrontMemory(0x10, self->p214);
+    if (self->p218 != (u8*)g_defaultSpinSpring) self->p218 = (u8*)CopyToFrontMemory(0x10, self->p218);
 }
 
 // On notification 1 (attached), starts the object's sound if it has a record, is not yet playing
@@ -2793,10 +2793,10 @@ void AccumulateFrameChain(PlacedObject* self, PlacedObject* top, s32 n, Vec02* p
             self = (PlacedObject*)self->parent;
         }
     }
-    P = D_00248D30;
+    P = g_zeroVector;
     M = g_identityMatrix;
-    V = D_00248D30;
-    W = D_00248D30;
+    V = g_zeroVector;
+    W = g_zeroVector;
     while (i < n) {
         n--;
         if (pos != 0) {
@@ -2874,7 +2874,7 @@ void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02*
             Vu0::Q(x.r[0]) = Vu0::Rotate(m, Vu0::Q(*pos));
             Vu0::Q(*pos) = Vu0::Add(Vu0::Q(p), Vu0::Q(x.r[0]));
         } else {
-            x.r[0] = D_00248D30;
+            x.r[0] = g_zeroVector;
         }
     }
     if (vel != 0) {
@@ -3070,10 +3070,10 @@ void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32
     Vec02 w;
     Mat02 R;
     if (p1 == 0) {
-        p1 = D_00260EE0;
+        p1 = g_steeringHeadingCurve;
     }
     if (p3 == 0) {
-        p3 = D_00260EF0;
+        p3 = g_steeringHeadingLimits;
     }
     Attachment* pa = self->positionAttachment;
     Attachment* ra = self->orientationAttachment;
@@ -3081,13 +3081,13 @@ void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32
         pa->vt->getPos(pa, 0.0f, &pos, &vel);
     } else {
         pos = self->pos;
-        vel = D_00248D30;
+        vel = g_zeroVector;
     }
     if (ra != 0) {
         ra->vt->getRot(ra, 0.0f, &R, &w);
     } else {
         R = self->rot;
-        w = D_00248D30;
+        w = g_zeroVector;
     }
     Vu0::Set(d, Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos)));
     if (out1 == 0) {
@@ -3765,7 +3765,7 @@ void ClearRootTries(PlacedObject* self)
 void SetScaledPositionSpring(PlacedObject* self, f32 scale)
 {
     ScaledSpringFrame f;
-    u8* p = (u8*)D_00260E70;
+    u8* p = (u8*)g_defaultPositionSpring;
     StoreFloatAsQuadword(&f.a, scale);
     U128 av = f.a;
     CopyQuadword((u128*)&f.b, p);
@@ -3776,7 +3776,7 @@ void SetScaledPositionSpring(PlacedObject* self, f32 scale)
 // Stores the position spring; its own 16-byte copy on first use, as SetPositionRamp.
 void SetPositionSpring(PlacedObject* self, Quad16* value)
 {
-    if (self->p20C == (u8*)D_00260E70)
+    if (self->p20C == (u8*)g_defaultPositionSpring)
         self->p20C = (u8*)AllocateFrontMemory(16);
     *(Quad16*)self->p20C = *value;
 }
@@ -3786,7 +3786,7 @@ void SetPositionSpring(PlacedObject* self, Quad16* value)
 void SetScaledVelocitySpring(PlacedObject* self, f32 scale)
 {
     ScaledSpringFrame f;
-    u8* p = (u8*)D_00260E80;
+    u8* p = (u8*)g_defaultVelocitySpring;
     StoreFloatAsQuadword(&f.a, scale);
     U128 av = f.a;
     CopyQuadword((u128*)&f.b, p);
@@ -3797,7 +3797,7 @@ void SetScaledVelocitySpring(PlacedObject* self, f32 scale)
 // Stores the velocity spring (own copy on first use).
 void SetVelocitySpring(PlacedObject* self, Quad16* src)
 {
-    if (self->p210 == (u8*)D_00260E80) self->p210 = (u8*)AllocateFrontMemory(16);
+    if (self->p210 == (u8*)g_defaultVelocitySpring) self->p210 = (u8*)AllocateFrontMemory(16);
     *(Quad16*)self->p210 = *src;
 }
 
@@ -3806,7 +3806,7 @@ void SetVelocitySpring(PlacedObject* self, Quad16* src)
 void SetScaledRotationSpring(PlacedObject* self, f32 scale)
 {
     ScaledSpringFrame f;
-    u8* p = (u8*)D_00260E90;
+    u8* p = (u8*)g_defaultRotationSpring;
     StoreFloatAsQuadword(&f.a, scale);
     U128 av = f.a;
     CopyQuadword((u128*)&f.b, p);
@@ -3817,7 +3817,7 @@ void SetScaledRotationSpring(PlacedObject* self, f32 scale)
 // Stores the rotation spring (own copy on first use).
 void SetRotationSpring(PlacedObject* self, Quad16* src)
 {
-    if (self->p214 == (u8*)D_00260E90) self->p214 = (u8*)AllocateFrontMemory(16);
+    if (self->p214 == (u8*)g_defaultRotationSpring) self->p214 = (u8*)AllocateFrontMemory(16);
     *(Quad16*)self->p214 = *src;
 }
 
@@ -3825,7 +3825,7 @@ void SetRotationSpring(PlacedObject* self, Quad16* src)
 void SetScaledSpinSpring(PlacedObject* self, f32 scale)
 {
     ScaledSpringFrame f;
-    u8* p = (u8*)D_00260EA0;
+    u8* p = (u8*)g_defaultSpinSpring;
     StoreFloatAsQuadword(&f.a, scale);
     U128 av = f.a;
     CopyQuadword((u128*)&f.b, p);
@@ -3836,7 +3836,7 @@ void SetScaledSpinSpring(PlacedObject* self, f32 scale)
 // Stores the spin spring (own copy on first use).
 void SetSpinSpring(PlacedObject* self, Quad16* src)
 {
-    if (self->p218 == (u8*)D_00260EA0) self->p218 = (u8*)AllocateFrontMemory(16);
+    if (self->p218 == (u8*)g_defaultSpinSpring) self->p218 = (u8*)AllocateFrontMemory(16);
     *(Quad16*)self->p218 = *src;
 }
 
@@ -3845,10 +3845,10 @@ void SetSpinSpring(PlacedObject* self, Quad16* src)
 void SetScaledPositionRamp(PlacedObject* self, f32 scale)
 {
     Vec4U tmp;
-    tmp.x = D_00260EB0[0] * scale;
-    tmp.y = D_00260EB0[1] * scale;
-    tmp.z = D_00260EB0[2];
-    tmp.w = D_00260EB0[3] * scale;
+    tmp.x = g_defaultPositionRamp[0] * scale;
+    tmp.y = g_defaultPositionRamp[1] * scale;
+    tmp.z = g_defaultPositionRamp[2];
+    tmp.w = g_defaultPositionRamp[3] * scale;
     SetPositionRamp(self, (PackedRampProfile*)&tmp);
 }
 
@@ -3864,7 +3864,7 @@ void SetPositionRampAccelScale(PlacedObject* self, f32 scale)
 // first time (it points to a shared default until then).
 void SetPositionRamp(PlacedObject* self, PackedRampProfile* src)
 {
-    if (self->p21C == (u8*)D_00260EB0) {
+    if (self->p21C == (u8*)g_defaultPositionRamp) {
         self->p21C = (u8*)AllocateFrontMemory(16);
     }
     *(PackedRampProfile*)self->p21C = *src;
@@ -3875,7 +3875,7 @@ void SetPositionRamp(PlacedObject* self, PackedRampProfile* src)
 void SetScaledRotationRamp(void* self, f32 s)
 {
     f32 v[4];
-    f32* m = (f32*)D_00260EC0;
+    f32* m = (f32*)g_defaultRotationRamp;
     v[0] = m[0] * s;
     v[1] = m[1] * s;
     v[2] = m[2];
@@ -3896,7 +3896,7 @@ void SetRotationRampAccelScale(PlacedObject* self, f32 scale)
 // SetPositionRamp.
 void SetRotationRamp(PlacedObject* self, PackedRampProfile* src)
 {
-    if (self->p220 == (u8*)D_00260EC0) {
+    if (self->p220 == (u8*)g_defaultRotationRamp) {
         self->p220 = (u8*)AllocateFrontMemory(0x10);
     }
     *(PackedRampProfile*)self->p220 = *src;
@@ -4093,7 +4093,7 @@ void GetAimTargetId(PlacedObject* self, s32* out)
 // Makes b the aim attachment's target, with the default offset.
 void SetAimTarget(PlacedObject* self, void* b)
 {
-    AssignAimTarget(self->aimAttachment, b, (Vec02*)&D_00248D30);
+    AssignAimTarget(self->aimAttachment, b, (Vec02*)&g_zeroVector);
 }
 
 // Gives the object the aim attachment currently targets (resolved from its id), in *out.
@@ -4398,7 +4398,7 @@ void SetColorRecordFirstColor(PlacedObject* self, Quad16* input)
 // Gives the colour record's first colour (a default vector when none).
 void GetColorRecordFirstColor(PlacedObject* self, Quad16* out)
 {
-    u8* src = self->colorRecord ? (u8*)&self->colorRecord->c10 : (u8*)&D_00248D30;
+    u8* src = self->colorRecord ? (u8*)&self->colorRecord->c10 : (u8*)&g_zeroVector;
     *out = *(Quad16*)src;
 }
 
@@ -4412,7 +4412,7 @@ void SetColorRecordSecondColor(PlacedObject* self, Quad16* input)
 // Gives the colour record's second colour (a default vector when none).
 void GetColorRecordSecondColor(PlacedObject* self, Quad16* out)
 {
-    u8* src = self->colorRecord ? (u8*)&self->colorRecord->c20 : (u8*)&D_00248D30;
+    u8* src = self->colorRecord ? (u8*)&self->colorRecord->c20 : (u8*)&g_zeroVector;
     *out = *(Quad16*)src;
 }
 
@@ -4634,7 +4634,7 @@ void InitCodeChecksum(CodeChecksum* self)
     u32 c;
     InitPlacedObject(self);
     self->start = 0x100018;
-    self->end = D_00148D64;
+    self->end = g_codeChecksumEnd;
     self->crc = 0xFFFFFFFF;
     for (s32 i = 0; i < 256; i++) {
         c = (u32)i;
@@ -5198,7 +5198,7 @@ void FindNearestAnimationPathTime(Animation* self, PlacedObject* owner, f32 star
             *outPos = owner->pos;
         }
         if (outDir != 0) {
-            *outDir = D_00248D30;
+            *outDir = g_zeroVector;
         }
         return;
     }
@@ -5300,10 +5300,10 @@ void SampleAnimationFrameChain(BlendAnimationView* self, f32 t, f32 scale, Place
         }
         o = (PlacedObject*)o->parent;
     }
-    P = D_00248D30;
+    P = g_zeroVector;
     M = g_identityMatrix;
-    V = D_00248D30;
-    W = D_00248D30;
+    V = g_zeroVector;
+    W = g_zeroVector;
     while (k < n) {
         n--;
         if (pos != 0) {
@@ -6689,8 +6689,8 @@ void UpdateIdFilterObject(IdFilterObject* self, f32 dt)
     PlacedObject* cur;
     UpdateCollider(self, dt);
     if (self->pendingTarget != 0) {
-        self->pendingTarget->desc02()->m20(self->pendingTarget, (Vec02*)&D_00248D30);
-        self->pendingTarget->desc02()->m21(self->pendingTarget, (Vec02*)&D_00248D30);
+        self->pendingTarget->desc02()->m20(self->pendingTarget, (Vec02*)&g_zeroVector);
+        self->pendingTarget->desc02()->m21(self->pendingTarget, (Vec02*)&g_zeroVector);
         switch (self->mode) {
         case 1:
             self->pendingTarget->desc02()->m1D(self->pendingTarget, &self->pos);

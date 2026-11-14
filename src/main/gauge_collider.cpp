@@ -232,10 +232,10 @@ struct NodeQueryFrame {
 s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
 // The file's .data, in retail's order.
-f32 D_0026A710 = 2200.0f;
-f32 D_0026A714 = 4000.0f;
-f32 D_0026A718 = 2000.0f;
-f32 D_0026A71C = 4000.0f;
+f32 g_gaugeNoticeTopSpeed = 2200.0f;
+f32 g_gaugeNoticePushStrength = 4000.0f;
+f32 g_gaugeGroundTopSpeed = 2000.0f;
+f32 g_gaugeGroundPushStrength = 4000.0f;
 s32 g_gaugeAgentCountLimit = 5;
 ObjectLink g_gaugeColliderLoadLinks[1] = { { 0, 0x3D9, 0x610 } };
 ObjectLink g_gaugeColliderStartLinks[13] = {
@@ -261,11 +261,11 @@ f32 D_0026A820 = 60.0f;
 f32 D_0026A824 = -30.0f;
 f32 D_0026A828 = 0.25f;
 f32 D_0026A82C = 0.7f;
-f32 D_0026A830 = 250.0f;
-f32 D_0026A834 = 0.25f;
-f32 D_0026A838 = 0.5f;
-f32 D_0026A83C = 0.2f;
-f32 D_0026A840 = 0.1f;
+f32 g_gaugeNearestRange = 250.0f;
+f32 g_gaugePickDelay = 0.25f;
+f32 g_gaugePlaceCooldown = 0.5f;
+f32 g_gaugeBounce = 0.2f;
+f32 g_gaugeFriction = 0.1f;
 f32 D_0026A844 = 1.3f;
 Vec02 D_0026A850 = { 0.0f, 3.0f, 0.0f, 0.0f };
 Vec02 D_0026A860 = { 0.0f, 0.75f, 0.0f, 0.0f };
@@ -494,8 +494,8 @@ void InitGaugeCollider(GaugeCollider* self)
     self->lastGroundTime = -10.0f;
     (*(Quad16*)&self->groundNormal) = *(Quad16*)&g_unitZVector;
     self->timeLimit = 120.0f;
-    self->pushStrength = D_0026A71C;
-    self->topSpeed = D_0026A718;
+    self->pushStrength = g_gaugeGroundPushStrength;
+    self->topSpeed = g_gaugeGroundTopSpeed;
     SetListLinkOffset(&self->usedNodes, 0x568);
     SetListLinkOffset(&self->freeNodes, 0x568);
     g_gaugeCollider = self;
@@ -525,7 +525,7 @@ void StartGaugeCollider(GaugeCollider* self)
     InsertAttachment((PlacedObject*)self->poseObject, (Attachment*)self->poseSource);
     ((T2195_790*)self->poseSource)->hasTarget = 1;
     ((T2195_790*)self->poseSource)->target = self->restTarget;
-    *(Quad16*)&((T2195_790*)self->poseSource)->point = *(Quad16*)&D_00248D30;
+    *(Quad16*)&((T2195_790*)self->poseSource)->point = *(Quad16*)&g_zeroVector;
     s32 n1 = GatherObjectsById(self->world, 0x305, 0xF, 0, 0, 0);
     self->agentCount = n1;
     void* buf = AllocateFrontMemory(n1 * 4);
@@ -607,10 +607,10 @@ s32 AcceptColliderOfOtherRoot(void* root, Collider* self)
 }
 
 extern float g_gameTime[];
-extern f32 D_0026A710;
-extern f32 D_0026A714;
-extern f32 D_0026A718;
-extern f32 D_0026A71C;
+extern f32 g_gaugeNoticeTopSpeed;
+extern f32 g_gaugeNoticePushStrength;
+extern f32 g_gaugeGroundTopSpeed;
+extern f32 g_gaugeGroundPushStrength;
 extern f32 D_0026A820;
 extern f32 D_0026A824;
 void PushBackMemoryMark(void);
@@ -646,14 +646,14 @@ void UpdateGaugeCollider(GaugeCollider* self, f32 dt)
     UpdateSwitchedCollider(self, dt);
     if (FindColliderFloorContact(self, 0, 0) != 0) {
         self->lastGroundTime = g_gameTime[0];
-        self->topSpeed = D_0026A718;
-        self->pushStrength = D_0026A71C;
+        self->topSpeed = g_gaugeGroundTopSpeed;
+        self->pushStrength = g_gaugeGroundPushStrength;
     } else if (self->noticeValue != 0) {
         self->lastGroundTime = g_gameTime[0];
-        self->topSpeed = D_0026A710;
-        self->pushStrength = D_0026A714;
+        self->topSpeed = g_gaugeNoticeTopSpeed;
+        self->pushStrength = g_gaugeNoticePushStrength;
     }
-    sum = *(Vec02*)&D_00248D30;
+    sum = *(Vec02*)&g_zeroVector;
     s32* np;
     Collider*** lp;
     Vec02* pp;
@@ -725,7 +725,7 @@ GaugeHeld* FindHeldObjectAhead(GaugeCollider* self)
     ConvertPositionToWorld((BaseObject*)self->carryNode, &here);
     Vu0::Q(start) = Vu0::Add(Vu0::Rotate(rot, Vu0::Vec::Of(((GaugeNodeRec*)self->carryNode)->q40)), Vu0::Vec::Of(ahead)).q;
     Vu0::Q(diff) = Vu0::Sub(Vu0::Vec::Of(start), Vu0::Vec::Of(here)).q;
-    f32 nearest = D_0026A830;
+    f32 nearest = g_gaugeNearestRange;
     s32 n = GatherObjectsById(self->world, 5, 0x48, 0, 0x40, list);
     for (s32 i = 0; i < n; i++) {
         Vec02 framePos;
@@ -807,7 +807,7 @@ struct GaugeCarrier : BaseObject {
 
 GaugeHeld* FindHeldObjectAhead(GaugeCollider* self);
 extern f32 g_gameTime[];
-extern f32 D_0026A834;
+extern f32 g_gaugePickDelay;
 
 // Pad control: the stick sets the heading (camera-relative) and the push. A button press (0xC0) at
 // the carry walker's rest key with agents waiting drops the held object and starts a delivery;
@@ -841,7 +841,7 @@ void ControlGaugeCollider(GaugeCollider* self, PadRecord* pad, f32 dt)
         }
     }
     GaugeHeld* held = (GaugeHeld*)self->held;
-    if (held != 0 && self->pickTime + D_0026A834 < g_gameTime[0]) {
+    if (held != 0 && self->pickTime + g_gaugePickDelay < g_gameTime[0]) {
         held->taken = 1;
         BaseObject* o = ((GaugeHeld*)self->held)->object;
         o->desc->m02(o);
@@ -878,7 +878,7 @@ settled:
         }
     } else {
         ((T2195_790*)self->poseSource)->target = self->restTarget;
-        *(Quad16*)&((T2195_790*)self->poseSource)->point = *(Quad16*)&D_00248D30;
+        *(Quad16*)&((T2195_790*)self->poseSource)->point = *(Quad16*)&g_zeroVector;
     }
     GetStateWalkerCurrentKey((StateWalker*)self->phaseWalker, &cur3);
     if (cur3 == 0x3F3) {
@@ -936,12 +936,12 @@ void PlaceObjectAtRandomNode(GaugeCollider* self)
     o->desc->m02(o);
     o->desc02()->m1D(o, &nd->v140);
     o->desc02()->m1E(o, &nd->m110);
-    o->desc02()->m20(o, (Vec02*)&D_00248D30);
-    o->desc02()->m21(o, (Vec02*)&D_00248D30);
+    o->desc02()->m20(o, (Vec02*)&g_zeroVector);
+    o->desc02()->m21(o, (Vec02*)&g_zeroVector);
     ChangeAgentState(o, 0x10, 0);
     o->node = nd;
     SetSoundStateObjectState(nd, 1);
-    self->nextPlaceTime = g_gameClock[1] + D_0026A838;
+    self->nextPlaceTime = g_gameClock[1] + g_gaugePlaceCooldown;
 }
 
 
@@ -960,8 +960,8 @@ void ReleaseObjectNode(GaugeCollider* self, GaugeColliderAgent* ctx)
 void ComputeGaugeColliderContactValue(GaugeCollider* ctx, Contact03* out)
 {
     (void)ctx;
-    out->bounce = D_0026A83C;
-    out->friction = D_0026A840;
+    out->bounce = g_gaugeBounce;
+    out->friction = g_gaugeFriction;
 }
 
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
@@ -1021,7 +1021,7 @@ void ApplyGaugeColliderAttachedSetContact(GaugeCollider* self, AttachedSet* set,
         }
         Vu0::Q(aim2) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(rest));
         SteerColliderTowardPosition(self, 0, 0, &aim2, &gains.x, dt);
-        Vu0::Q(w) = Vu0::Sub(Vu0::Q(D_00248D30), Vu0::Q(self->v160));
+        Vu0::Q(w) = Vu0::Sub(Vu0::Q(g_zeroVector), Vu0::Q(self->v160));
         SplitVectorAlongAxis(&w, &normal, &spinAlong, &spinRest);
         for (i = 0; i < 3; i++) {
             (&gains.x)[i] = (&D_0026A860.x)[i] * depth * hold;
@@ -1295,7 +1295,7 @@ void UpdateGaugeColliderAgent(GaugeColliderAgent* s1, f32 f)
                         }
                         s0->waitingCount = n;
                         if (s0->nextPlaceTime == 3.4028235e+38f) {
-                            s0->nextPlaceTime = g_gameTime[0] + D_0026A838;
+                            s0->nextPlaceTime = g_gameTime[0] + g_gaugePlaceCooldown;
                         }
                     }
                 }

@@ -38,7 +38,7 @@ void BuildPauseMenuPage(Self_1936A0_eu* self)
             s32 show = 1;
             switch (item) {
             case 4:
-                if (D_0026FA68 == 0) {
+                if (g_currentWarpPage == 0) {
                     show = 0;
                 }
                 break;

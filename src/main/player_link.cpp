@@ -289,7 +289,7 @@ void PlacePlayerOnLinkedObject(Player* self)
             ComputePositionSpringAcceleration(o, ClockDt((LinkClock*)g_gameClock), &p, &v, &lin);
             TransformDirectionBetweenFrames((PlacedObject*)o->parent, 0, &lin, &lin);
         } else {
-            lin = D_00248D30;
+            lin = g_zeroVector;
         }
         a = o->orientationAttachment;
         if (a != 0 && a->mode1 == 1) {
@@ -299,7 +299,7 @@ void PlacePlayerOnLinkedObject(Player* self)
             ComputeRotationSpringAcceleration(o, ClockDt((LinkClock*)g_gameClock), &m, &w, &ang);
             TransformDirectionBetweenFrames((PlacedObject*)o->parent, 0, &ang, &ang);
         } else {
-            ang = D_00248D30;
+            ang = g_zeroVector;
         }
         u128 h = Vu0::ScalarAt(ClockDt((LinkClock*)g_gameClock));
         Vu0::Q(v2) = Vu0::MulAddX2(Vu0::Q(vel), Vu0::Q(lin), h, Vu0::Cross(Vu0::Q(ang), Vu0::Sub(Vu0::Q(pos), Vu0::Q(o->v140))), h);
@@ -687,7 +687,7 @@ void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB)
     u128 here = Vu0::Q(a);
     u128 reach = Vu0::FromFloatAt(((LinkSource*)self->boundObject)->reach);
     Vu0::Q(k) = reach;
-    Vu0::Q(a) = Vu0::MulAddX(here, Vu0::NormalizeOr(Vu0::Q(gap), Vu0::Q(D_00248D30)), reach);
+    Vu0::Q(a) = Vu0::MulAddX(here, Vu0::NormalizeOr(Vu0::Q(gap), Vu0::Q(g_zeroVector)), reach);
     BuildAxisAngleMatrix(&g_unitXVector, &axis, g_linkPoseTiltA);
     MulRotation(rotA, arc, axis);
     BuildAxisAngleMatrix(&g_unitXVector, rotB, g_linkPoseTiltB);
@@ -745,7 +745,7 @@ void UpdatePlayerLinkPose(Player* self)
     Mat02 b;
     LinkPoseView* v = (LinkPoseView*)self;
     ComputePlayerLinkPose(self, &pos, &a, &b);
-    *(Quad128*)&v->offset = ApproachPointWithRamp(*(Quad128*)&v->offset, *(const Quad128*)&D_00248D30, g_gameClock[2], (RampProfile*)g_linkPoseOffsetRamp, 0);
+    *(Quad128*)&v->offset = ApproachPointWithRamp(*(Quad128*)&v->offset, *(const Quad128*)&g_zeroVector, g_gameClock[2], (RampProfile*)g_linkPoseOffsetRamp, 0);
     ApproachRotationWithRamp(&v->rotA, (Mat02*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotA, 0, g_gameClock[2]);
     ApproachRotationWithRamp(&v->rotB, (Mat02*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotB, 0, g_gameClock[2]);
     Vu0::Q(((LinkPoseTarget*)self->f251C)->pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(v->offset));

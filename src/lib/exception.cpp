@@ -13,7 +13,7 @@
 #include "exception.h"
 #include "typeinfo.h"
 
-extern void (*D_00278048)();
+extern void (*g_terminateHandler)();
 extern "C" u8* GetActiveExceptionSlot();
 // The argument GetActiveExceptionRecord passes through to the slot lookup, which ignores it.
 struct ExceptionLookupArg;
@@ -22,14 +22,14 @@ typedef void (*TerminateHandler)(void) __attribute__((noreturn));
 typedef void (*UnexpectedHandler)(void) __attribute__((noreturn));
 
 // The unexpected handler, at first func_001FE908 (defined below, after its first use).
-extern s32 D_00278640;
+extern s32 g_unexpectedHandler;
 
 void InvokeTerminateHandler(void) __attribute__((noreturn));
 
 // Calls the terminate hook D_00278048 and never returns.
 void InvokeTerminateHandler(void)
 {
-	((TerminateHandler)D_00278048)();
+	((TerminateHandler)g_terminateHandler)();
 }
 
 void DefaultUnexpectedHandler(void) __attribute__((noreturn));
@@ -43,16 +43,16 @@ void DefaultUnexpectedHandler(void)
 // Stores a new terminate hook in D_00278048 and returns the old one.
 TerminateHandler ReplaceTerminateHandler(TerminateHandler handler)
 {
-	TerminateHandler old = (TerminateHandler)D_00278048;
-	D_00278048 = (void (*)())handler;
+	TerminateHandler old = (TerminateHandler)g_terminateHandler;
+	g_terminateHandler = (void (*)())handler;
 	return old;
 }
 
 // Stores a new unexpected handler in D_00278640 and returns the old one.
 s32 ReplaceUnexpectedHandler(s32 value)
 {
-    s32 previous = D_00278640;
-    D_00278640 = value;
+    s32 previous = g_unexpectedHandler;
+    g_unexpectedHandler = value;
     return previous;
 }
 
@@ -61,7 +61,7 @@ void InvokeUnexpectedHandler(void) __attribute__((noreturn));
 // Calls the unexpected handler D_00278640 and never returns; CheckExceptionSpecification calls it.
 void InvokeUnexpectedHandler(void)
 {
-	((UnexpectedHandler)D_00278640)();
+	((UnexpectedHandler)g_unexpectedHandler)();
 }
 
 // Returns the thrown object's address: the active exception record's pointer plus 8.
@@ -290,4 +290,4 @@ const char* exception::what() const
     return typeid(*this).name();
 }
 
-s32 D_00278640 = (s32)DefaultUnexpectedHandler;
+s32 g_unexpectedHandler = (s32)DefaultUnexpectedHandler;

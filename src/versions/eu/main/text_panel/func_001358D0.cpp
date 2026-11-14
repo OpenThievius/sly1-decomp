@@ -31,7 +31,7 @@ void CollectPanelEntriesOfClass(PanelMarkers_1358D0_eu* self, s32 kind, void* a2
     HeapSortRecords(entries, n, 0x20, kind == 0x2E ? CompareEntriesFlaggedLast : CompareEntriesByAttachedKey);
     s32 mayStart = 1;
     FillMemory(self->blockA, 0, 0x10);
-    if (!(D_00261274 < g_gameClock[1] - *(f32*)&self->countA)) {
+    if (!(g_panelStartCooldown < g_gameClock[1] - *(f32*)&self->countA)) {
         mayStart = 0;
     }
     for (i = 0; i < n;) {

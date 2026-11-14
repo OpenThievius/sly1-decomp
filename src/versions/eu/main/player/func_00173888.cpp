@@ -17,7 +17,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
         ReleaseAnimationDrivenAttachments(self);
     }
     PadRecord blank;
-    if (D_00261D38 > 0 || self->walkerActivation != 0 || self->firstActivation != 0 || self->secondActivation != 0) {
+    if (g_controlBlockingElementCount > 0 || self->walkerActivation != 0 || self->firstActivation != 0 || self->secondActivation != 0) {
         switch (self->state) {
         case 12:
             if (self->pendingCaption == 0) {
@@ -198,7 +198,7 @@ held:
                     self->f2734 = g_gameTime[0];
                 }
             }
-            if (self->f2738 != 0 && g_gameTime[0] - self->f2734 < D_00263910[0]) {
+            if (self->f2738 != 0 && g_gameTime[0] - self->f2734 < g_playerCallbackWindow[0]) {
                 RunPlayerCallback(self);
                 state = self->state;
                 sub = self->subState;
@@ -456,7 +456,7 @@ held:
         break;
     case 4:
     case 10: {
-        self->headingVelocity = D_00248D30;
+        self->headingVelocity = g_zeroVector;
         PlayerNoticePlayer* src = (PlayerNoticePlayer*)self->stateAnimPlayer;
         if (src != 0) {
             Track83* track = src->anim->movedTrack;

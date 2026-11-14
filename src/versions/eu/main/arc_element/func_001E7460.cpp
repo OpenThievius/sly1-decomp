@@ -11,14 +11,14 @@ void ApplyArcTarget(Obj_1E7460_eu* self)
         return;
     }
     if (cur != 0) {
-        if (!(D_00270458 == 4 && cur == self->f588)) {
+        if (!(g_displayMode == 4 && cur == self->f588)) {
             cur->desc->m03(cur);
         }
     }
     self->f584 = self->f580;
     if (self->f584 != 0) {
         self->f584->desc->m02(self->f584);
-        if (D_00270458 != 4) {
+        if (g_displayMode != 4) {
             SetObjectTreeRecordsValue(self->f584, self);
         }
         self->f584->flags |= 0x100000000UL;

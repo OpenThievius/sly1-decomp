@@ -86,7 +86,7 @@ void UpdateArc(Obj_1E77C0_eu* self)
             }
             break;
         }
-        if (D_00270458 != 4)
+        if (g_displayMode != 4)
         {
             self->fC5C = ApproachValueWithRamp((RampProfile*)&self->fC64, 0, self->fC5C, self->fC60, g_gameClock[5]);
             if (AreFloatsNearlyEqual(self->fC5C, self->fC60, 1e-4f) != 0)

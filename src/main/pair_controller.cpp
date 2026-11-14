@@ -1263,8 +1263,8 @@ void SpawnPairedObject(PairController* self)
         f32 spin = RandomFloatInRange(0.0f, 6.2831855f);
         BuildAxisAngleMatrix(&g_unitZVector, &turn, spin);
         o->desc02()->m1E(o, &turn);
-        o->desc02()->m20(o, (Vec02*)&D_00248D30);
-        o->desc02()->m21(o, (Vec02*)&D_00248D30);
+        o->desc02()->m20(o, (Vec02*)&g_zeroVector);
+        o->desc02()->m21(o, (Vec02*)&g_zeroVector);
         SetColliderAnchors(o, 2, (Vec02*)&g_unitZVector, 3, 0);
         SetHitTargetState((HitTarget*)o, 0);
         RemoveFromList((List01*)self->list374, o);
@@ -1408,9 +1408,9 @@ void AttachPairedPartner(void* a0, void* a1)
     PairedObject* s = (PairedObject*)a1;
     ((Collider*)s->partner)->desc->m15((Collider*)s->partner, (BaseObject*)a1);
     s = (PairedObject*)a1;
-    ((Collider*)s->partner)->desc02()->m20((Collider*)s->partner, (Vec02*)&D_00248D30);
+    ((Collider*)s->partner)->desc02()->m20((Collider*)s->partner, (Vec02*)&g_zeroVector);
     s = (PairedObject*)a1;
-    ((Collider*)s->partner)->desc02()->m21((Collider*)s->partner, (Vec02*)&D_00248D30);
+    ((Collider*)s->partner)->desc02()->m21((Collider*)s->partner, (Vec02*)&g_zeroVector);
     SetColliderAnchors((Collider*)((PairedObject*)a1)->partner, 3, 0, 3, 0);
     StartSoundEffect(0x151, (PlayingSound**)0, 0, (Vec02*)0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
@@ -1423,8 +1423,8 @@ void DetachPairedPartner(PairController* unused, PairedObject* h)
 
     (void)unused;
     o->desc->m15(o, 0);
-    o->desc02()->m20(o, (Vec02*)&D_00248D30);
-    o->desc02()->m21(o, (Vec02*)&D_00248D30);
+    o->desc02()->m20(o, (Vec02*)&g_zeroVector);
+    o->desc02()->m21(o, (Vec02*)&g_zeroVector);
     SetColliderAnchors(o, 2, (Vec02*)&g_unitZVector, 3, 0);
 }
 
@@ -1727,8 +1727,8 @@ void UpdatePairedObject(PairedObject* self, f32 dt)
     case 8:
     case 9:
     case 10:
-        self->desc02()->m20(self, (Vec02*)&D_00248D30);
-        self->desc02()->m21(self, (Vec02*)&D_00248D30);
+        self->desc02()->m20(self, (Vec02*)&g_zeroVector);
+        self->desc02()->m21(self, (Vec02*)&g_zeroVector);
         break;
     }
 }
@@ -1783,7 +1783,7 @@ void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 backwards)
     }
     f32 turn = WrapAngle(bearing - heading);
     if (0.05235988f < __builtin_fabsf(turn)) {
-        self->desc02()->m20(self, (Vec02*)&D_00248D30);
+        self->desc02()->m20(self, (Vec02*)&g_zeroVector);
     } else {
         f32 speed = MinF(Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(delta))) / g_gameClock[2], self->maxSpeed);
         if (backwards) {

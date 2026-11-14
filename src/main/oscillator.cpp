@@ -375,7 +375,7 @@ void RefreshOscillatorFrames(Oscillator* self)
         u128 dir;
         if (part->mode == -1) {
             InitIdentityMatrix((Mat4*)&m);
-            dir = Vu0::Q(D_00248D30);
+            dir = Vu0::Q(g_zeroVector);
         } else {
             m = *(Mat4R*)part->m40;
             range.lo = MinB(part->endWeight, part->startWeight);
@@ -394,7 +394,7 @@ void RefreshOscillatorFrames(Oscillator* self)
                 dir = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar((part->endDistance + part->startDistance) * 0.5f));
                 break;
             default:
-                dir = Vu0::Q(D_00248D30);
+                dir = Vu0::Q(g_zeroVector);
                 break;
             }
             Mat4R inv;
@@ -529,7 +529,7 @@ static inline Vu0::Vec WeightOf(u128 w)
 void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB)
 {
     Vu0::Vec pos = Vu0::Vec::Of(*in);
-    Vu0::Vec other = Vu0::Vec::Of(D_00248D30);
+    Vu0::Vec other = Vu0::Vec::Of(g_zeroVector);
     Vu0::Vec base = pos;
     for (s32 i = 0; i < self->entryCount; i++) {
         OscillatorSweepEntry* e = (OscillatorSweepEntry*)self->entries + i;
@@ -571,7 +571,7 @@ void ComputeOscillatorMaxDisplacement(Oscillator* self, Vec02* out)
 {
     Vec02 sum;
     Vec02 span;
-    sum = D_00248D30;
+    sum = g_zeroVector;
     for (s32 i = 0; i < self->entryCount; i++) {
         OscillatorSweepEntry* e = (OscillatorSweepEntry*)self->entries + i;
         switch (e->kind) {
@@ -1057,7 +1057,7 @@ void PlaceAtArrivalPoint(TransformSet* self)
     who->vt->getDir(who, &rot);
     PlaceColliderClearOfContacts((Collider*)who, &pos, (Vec02*)&g_unitZVector);
     who->vt->setVel(who, &self->arrivalVelocity);
-    who->vt->setSpin(who, (void*)&D_00248D30);
+    who->vt->setSpin(who, (void*)&g_zeroVector);
     ActivateSwitchedCollider(who);
     for (s32 i = 0; i < self->count; i++) {
         CreateAnimationPlayerWithoutPresetTargets((Animation*)self->objects[i], 0, 0, 0, 0.0f, 1.0f);
@@ -1684,8 +1684,8 @@ void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
     if (ctx->cnt != 0) {
         ComputeTargetArc(self, (TargetArcSource*)f.a, 0.0f, 0, (Vec02*)f.b, 0);
         self->desc02()->m1D(self, (Vec02*)f.b);
-        self->desc02()->m20(self, (Vec02*)&D_00248D30);
-        self->desc02()->m21(self, (Vec02*)&D_00248D30);
+        self->desc02()->m20(self, (Vec02*)&g_zeroVector);
+        self->desc02()->m21(self, (Vec02*)&g_zeroVector);
         BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)f.c, self->heading);
         self->desc02()->m1E(self, (Mat02*)f.c);
         SetPlayerState(self, 2, 2);

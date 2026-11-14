@@ -376,7 +376,7 @@ struct __attribute__((aligned(4))) FadeColor { u8 c[4]; };
 struct FadeEffectRequest { void* fn; f32 f; s32 mode; u8 pad[0x54]; FadeColor col; u8 pad2[0x1C]; };
 extern s32 D_00275BC4;
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 extern f32 g_gameTime;
 void RemoveFromList(List01* list, void* item);
 void DrawScreenFill(u8* a0);
@@ -590,7 +590,7 @@ extern s32 g_codeChecksumFailed;
 extern void* g_frameDoneSemaphore;
 extern volatile s32 g_renderThreadWaiting;
 extern void* g_drawingFrame;
-extern s32 D_002626CC;
+extern s32 g_fieldOffsetMode;
 
 extern "C" s32 AwaitSemaphore(void* a);
 
@@ -628,7 +628,7 @@ extern void* g_frameDoneSemaphore;
 extern u32 g_renderFrameIndex;
 extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
-extern s32 D_002626CC;
+extern s32 g_fieldOffsetMode;
 
 extern "C" s32 AwaitSemaphore(void* p);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
@@ -702,8 +702,8 @@ void InitSpawnRecord(void* mem)
 {
     SpawnRecordParts* self = (SpawnRecordParts*)mem;
     static SpawnVectors vectors = { {
-        { { 0, 0, 0, 0 } }, *(Quad16*)&D_00248D30, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } },
-        *(Quad16*)&g_unitXVector, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } }, *(Quad16*)&D_00248D30
+        { { 0, 0, 0, 0 } }, *(Quad16*)&g_zeroVector, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } },
+        *(Quad16*)&g_unitXVector, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } }, *(Quad16*)&g_zeroVector
     } };
     static Blk05 block = {
         { 750.0f, 750.0f, 1.0f }, { 0.0f, 0.0f, -1500.0f }, { -1.0f, 0.0f, 0.0f }, *(Quad16*)&g_unitZVector, 0.0f, 0.0f, 0.0f, 200,
@@ -2719,7 +2719,7 @@ struct ValueRange;
 f32 ClampToRange(ValueRange* span, f32 x);
 void ComputeChainedWorldFrame(void* a, void* frame, void* out);
 extern f32 g_spawnScaleRatioRange[2];
-extern const Vec02 D_00248D30;
+extern const Vec02 g_zeroVector;
 
 // The sound a spawner member plays (HoldingMember::fA0): the sound, two radii, a volume and a pitch.
 struct SpawnSoundParams {
@@ -2819,7 +2819,7 @@ void HandleSpawnMessage(void* self, void* body)
             v = **(Vec02**)(rec.p20 + 0x18);
             break;
         case 3:
-            v = D_00248D30;
+            v = g_zeroVector;
             break;
         case 4:
             v = rec.v40;
@@ -3127,7 +3127,7 @@ void DrawScreenFill(u8* a0)
 void UpdateColorFade(ColorFade* self)
 {
     if (D_00275BC4 != 3) return;
-    s32 g = D_00270458;
+    s32 g = g_displayMode;
     if (g == 1) return;
     if (g == 2) return;
     FadeColor out; Rgba4 a, b;

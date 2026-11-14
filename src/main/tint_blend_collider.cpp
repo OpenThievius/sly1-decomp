@@ -56,36 +56,36 @@ struct ColliderLink { s32 flags, id, offset; };
 struct ColliderLinkTable { ColliderLink e[9]; s32 end; };
 
 
-Quad16 D_00275730 = { 0x42C80000, 0, 0, 0 };
-Quad16 D_00275740 = { { 0x3F800000, 0, 0, 0 } };
+Quad16 g_redirectObjectDefaultQuad = { 0x42C80000, 0, 0, 0 };
+Quad16 g_tintBlendHeadingWeightCurve = { { 0x3F800000, 0, 0, 0 } };
 ColliderLinkTable g_tintBlendColliderLinks = { {
     { 0x0, 0x34D, 0x6DC }, { 0x0, 0x350, 0x758 }, { 0x4, 0x60, 0x748 },
     { 0x4, 0x50, 0x750 }, { 0x4, 0x34E, 0x744 }, { 0x2, 0x161, 0x588 },
     { 0x2, 0x162, 0x58C }, { 0x2, 0x163, 0x590 }, { 0x4, 0x160, 0x584 }
     }, 0 };
-f32 D_002757C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
-f32 D_002757D0[1] = { 6.0f };
-f32 D_002757D4 = 3.0f;
+f32 g_tintSpringCurve[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
+f32 g_tintPositionSpringScale[1] = { 6.0f };
+f32 g_tintRotationSpringScale = 3.0f;
 Vec02 g_reachCurve = { 0.0f, 0.0f, 800.0f, 0.0f };
 f32 g_reachRange[4] = { 0.0f, 800.0f, 0.0f, 0.0f };
 f32 g_tintLeanCurve[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 f32 g_leanTiltFactor[4] = { 0.150000006f, 0.0f, 0.0f, 0.0f };
 f32 D_00275820[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-f32 D_00275830[4] = { -0.200000003f, 0.0f, 0.0f, 0.0f };
-f32 D_00275840[4] = { 0.0f, 0.00124999997f, 0.0f, 0.0f };
-f32 D_00275850[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
-f32 D_00275860 = 15.0f;
-f32 D_00275864 = 10.0f;
-Vec02 D_00275870 = { 1.0f, 0.0f, -0.75f, 0.0f };
-f32 D_00275880[4] = { 0.699999988f, 0.300000012f, 0.0f, 0.0f };
-f32 D_00275890 = 0.5f;
-f32 D_00275894 = 700.0f;
-f32 D_00275898 = 650.0f;
-f32 D_0027589C = 650.0f;
-f32 D_002758A0 = 300.0f;
-f32 D_002758A4 = 400.0f;
-f32 D_002758A8 = -100.0f;
-f32 D_002758AC = 5.0f;
+f32 g_tintBodyLeanFactor[4] = { -0.200000003f, 0.0f, 0.0f, 0.0f };
+f32 g_tintSpeedInfluenceCurve[4] = { 0.0f, 0.00124999997f, 0.0f, 0.0f };
+f32 g_tintStickInfluenceCurve[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 g_tintSpeedInfluenceGain = 15.0f;
+f32 g_tintStickInfluenceGain = 10.0f;
+Vec02 g_tintBlendTimeCurve = { 1.0f, 0.0f, -0.75f, 0.0f };
+f32 g_tintBlendPulseCurve[4] = { 0.699999988f, 0.300000012f, 0.0f, 0.0f };
+f32 g_tintEffectImpulseScale = 0.5f;
+f32 g_tintLaunchSpeed = 700.0f;
+f32 g_tintLaunchLift = 650.0f;
+f32 g_tintPushSpeedWithSpare = 650.0f;
+f32 g_tintPushSpeed = 300.0f;
+f32 g_tintBodyPushSpeed = 400.0f;
+f32 g_tintBodyPushLift = -100.0f;
+f32 g_tintBodySpinSpeed = 5.0f;
 f32 D_002758B0[4] = { 1.5f, 0.0f, 0.0f, 0.0f };
 f32 D_002758C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 
@@ -96,7 +96,7 @@ f32 D_002758C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 void InitRedirectObject(RedirectObject* self)
 {
     InitPlacedObject(self);
-    self->q320 = D_00275730;
+    self->q320 = g_redirectObjectDefaultQuad;
 }
 
 
@@ -364,7 +364,7 @@ void InitTintBlendCollider(TintBlendCollider* self)
     BuildAxisAngleMatrix(&g_unitZVector, &self->headingMatrix, f);
     self->state = -1;
     self->tintStartTime = -10.0f;
-    (*(Quad16*)&self->headingWeightCurve) = D_00275740;
+    (*(Quad16*)&self->headingWeightCurve) = g_tintBlendHeadingWeightCurve;
 }
 
 // EXACT: literal 1 stores (no `one` local), `||` condition, D_00262E10 compared as a pointer
@@ -458,7 +458,7 @@ void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
     }
     {
         f32 d = g_gameClock[1] - self->tintStartTime;
-        f32 x = D_002757C0[0] + d * (D_002757C0[1] + d * D_002757C0[2]);
+        f32 x = g_tintSpringCurve[0] + d * (g_tintSpringCurve[1] + d * g_tintSpringCurve[2]);
         f32 c0 = ((f32*)&g_unitRange)[0];
         f32 c1 = ((f32*)&g_unitRange)[1];
         if (x < c0) {
@@ -469,8 +469,8 @@ void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
             f20 = x;
         }
     }
-    SetScaledPositionSpring((PlacedObject*)self->f748, f20 * D_002757D0[0]);
-    SetScaledRotationSpring((PlacedObject*)self->f748, f20 * D_002757D4);
+    SetScaledPositionSpring((PlacedObject*)self->f748, f20 * g_tintPositionSpringScale[0]);
+    SetScaledRotationSpring((PlacedObject*)self->f748, f20 * g_tintRotationSpringScale);
     if (self->tinted != 0 && self->state != 2) {
         f32 e = g_gameClock[1] - self->tintFadeTime;
         if (2.0f < e) {
@@ -596,7 +596,7 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     // stores, and its sums are scheduled among the rows' loads (docs/toolchain/sched1.md,
     // "Argument moves held back").
     f32 lean2 = g_unitRange.Limit(Quadratic(D_00275820, pad->stickMagnitude));
-    BuildAxisAngleMatrix(&axis, &m, D_00275830[0] * lean);
+    BuildAxisAngleMatrix(&axis, &m, g_tintBodyLeanFactor[0] * lean);
     PlacedObject* frame = ((TintPart*)self->f748)->frame;
     rot = MultiplyByTransposedMatrix3x3(frame->m110, RotatedRows(m, frame->m110));
     ((TintBody*)self->f74C)->m40 = rot;
@@ -604,11 +604,11 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     f32 speed = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150)));
     f32 k;
     if (0.0f < speed) {
-        k = D_00275860 * g_unitRange.Clamp(Quadratic(D_00275840, speed)) / speed;
+        k = g_tintSpeedInfluenceGain * g_unitRange.Clamp(Quadratic(g_tintSpeedInfluenceCurve, speed)) / speed;
     } else {
         k = 0.0f;
     }
-    f32 w = D_00275864 * g_unitRange.Clamp(Quadratic(D_00275850, pad->stickMagnitude));
+    f32 w = g_tintStickInfluenceGain * g_unitRange.Clamp(Quadratic(g_tintStickInfluenceCurve, pad->stickMagnitude));
     ComputePolarOffset((Vec3*)&axis, stick, 1.0f, 0.0f);
     Vec02 vel;
     Vu0::Q(vel) = Vu0::MulXSum(Vu0::Q(self->v150), Vu0::Scalar(k), Vu0::Q(axis), Vu0::Scalar(w));
@@ -630,7 +630,7 @@ void SetTintBlendColliderTracked(TintBlendCollider* self, void* p)
 }
 
 extern f32 g_gameClock[];
-extern Rgba4 D_002623E0;
+extern Rgba4 g_defaultModelColor;
 
 struct UnitClamp {
     static f32 Of(f32 v, f32 lo, f32 hi)
@@ -659,18 +659,18 @@ void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
                 t = 0.0f;
             }
             f32 r = Cosine((g_gameClock[1] - self->tintStartTime) * 10.0f);
-            f32 a = D_00275870.x + t * (D_00275870.y + t * D_00275870.z);
+            f32 a = g_tintBlendTimeCurve.x + t * (g_tintBlendTimeCurve.y + t * g_tintBlendTimeCurve.z);
             a = UnitClamp::Of(a, ((f32*)&g_unitRange)[0], ((f32*)&g_unitRange)[1]);
-            f32 b = D_00275880[0] + r * (D_00275880[1] + r * D_00275880[2]);
+            f32 b = g_tintBlendPulseCurve[0] + r * (g_tintBlendPulseCurve[1] + r * g_tintBlendPulseCurve[2]);
             b = UnitClamp::Of(b, ((f32*)&g_unitRange)[0], ((f32*)&g_unitRange)[1]);
             f32 k = a * b;
             f32 inv = 1.0f - k;
-            out.r = (s32)(inv * D_002623E0.r + k * col.r);
-            out.g = (s32)(inv * D_002623E0.g + k * col.g);
-            out.b = (s32)(inv * D_002623E0.b + k * col.b);
-            out.a = D_002623E0.a;
+            out.r = (s32)(inv * g_defaultModelColor.r + k * col.r);
+            out.g = (s32)(inv * g_defaultModelColor.g + k * col.g);
+            out.b = (s32)(inv * g_defaultModelColor.b + k * col.b);
+            out.a = g_defaultModelColor.a;
         } else {
-            out = D_002623E0;
+            out = g_defaultModelColor;
         }
         SetObjectTreeRecordValue(self, *(u32*)&out);
         ApplyPlacedObjectTransform(self, (Camera*)a1, (ScaledTransform*)a2);
@@ -685,7 +685,7 @@ void ApplyTintBlendColliderPendingImpulse(TintBlendCollider* self, s32 moved)
 {
     Vec02 local;
     Vec02 k;
-    u128 s = Vu0::FromFloatAt(D_00275890);
+    u128 s = Vu0::FromFloatAt(g_tintEffectImpulseScale);
     PlacedObject* effect = (PlacedObject*)self->f748;
     Vu0::Q(local) = Vu0::RotateTransposed(((PlacedObject*)effect->parent)->m110, Vu0::Q(self->v490));
     u128 v = Vu0::Q(effect->v150);
@@ -703,8 +703,8 @@ s32 IsTintBlendColliderRequestBlocked(TintBlendCollider* self, s32 mode)
     return 0;
 }
 
-extern f32 D_00275894;
-extern f32 D_00275898;
+extern f32 g_tintLaunchSpeed;
+extern f32 g_tintLaunchLift;
 
 // After a tint request, sends the other collider (a player) off along this collider's horizontal
 // velocity with a fixed speed and vertical speed, faces it back along that direction and puts it in
@@ -716,8 +716,8 @@ void ContinueTintBlendColliderRequest(TintBlendCollider* self, TintBlendCollider
     u128& q = Vu0::Q(d);
     Vec02 k;
     u128 n = Vu0::NormalizeOr(q, Vu0::Q(g_unitXVector));
-    Vu0::Q(k) = Vu0::FromFloatAt(D_00275894);
-    f32 z = D_00275898;
+    Vu0::Q(k) = Vu0::FromFloatAt(g_tintLaunchSpeed);
+    f32 z = g_tintLaunchLift;
     q = Vu0::MulX(n, Vu0::Q(k));
     d.z = z;
     other->desc02()->m20(other, &d);
@@ -757,17 +757,17 @@ s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
             Vu0::Set(dir, Vu0::DivX(Vu0::Q(dir), len));
         }
         if (HasSpareCount()) {
-            Vu0::Set(v, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(D_0027589C)));
+            Vu0::Set(v, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(g_tintPushSpeedWithSpare)));
         } else {
-            Vu0::Set(v, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(D_002758A0)));
+            Vu0::Set(v, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(g_tintPushSpeed)));
         }
         self->desc02()->m20(self, &v);
-        Vu0::Set(v, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(D_002758A4)));
-        v.z = D_002758A8;
+        Vu0::Set(v, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(g_tintBodyPushSpeed)));
+        v.z = g_tintBodyPushLift;
         TransformDirectionBetweenFrames(0, (PlacedObject*)(((PlacedObject*)self->f748)->parent), &v, &v);
         ((PlacedObject*)self->f748)->desc02()->m20((PlacedObject*)self->f748, &v);
         Vu0::Set(dir, Vu0::FromFloats(-dir.y, dir.x, 0.0f));
-        Vu0::Set(w, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(D_002758AC)));
+        Vu0::Set(w, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(g_tintBodySpinSpeed)));
         TransformDirectionBetweenFrames(0, (PlacedObject*)(((PlacedObject*)self->f748)->parent), &w, &w);
         ((PlacedObject*)self->f748)->desc02()->m21((PlacedObject*)self->f748, &w);
 }
@@ -915,7 +915,7 @@ void SetTintBlendColliderState(TintBlendCollider* self, s32 mode)
         case 0:
         case 2:
         case 3:
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             BuildAxisAngleMatrix(&g_unitZVector, &self->headingMatrix, self->heading);
 
             self->f580 = 0;

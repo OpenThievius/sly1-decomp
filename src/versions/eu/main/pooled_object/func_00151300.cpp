@@ -11,12 +11,12 @@ s32 TestStepWaitConditions(StepSequence* self)
         if (e != 0 && e->type == 2) {
             if (flags == 2) return 0;
         }
-        if (((Hld_151300_eu*)&D_002708E0)->f580 == self->f2F0 && ((Hld_151300_eu*)&D_002708E0)->f578 == 1) flags &= 0xFFFFFFFD;
+        if (((Hld_151300_eu*)&g_leftArcElement)->f580 == self->f2F0 && ((Hld_151300_eu*)&g_leftArcElement)->f578 == 1) flags &= 0xFFFFFFFD;
     }
     if (flags & 4) {
         SequenceStep* e = self->step2E4 < self->count2DC - 1 ? &((SequenceStep*)self->steps2E0)[self->step2E4 + 1] : 0;
         if (e != 0 && e->type == 1 && flags == 4) return 0;
-        if (((Hld_151300_eu*)&D_00271558)->f580 == self->f2F4 && ((Hld_151300_eu*)&D_00271558)->f578 == 1) flags &= 0xFFFFFFFB;
+        if (((Hld_151300_eu*)&g_rightArcElement)->f580 == self->f2F4 && ((Hld_151300_eu*)&g_rightArcElement)->f578 == 1) flags &= 0xFFFFFFFB;
     }
     if (flags & 1) {
         if (CheckStreamVoicePending() == 0) flags &= 0xFFFFFFFE;

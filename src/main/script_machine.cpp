@@ -2311,7 +2311,7 @@ ScriptValue* GetScriptDistance(ScriptValue* ret, s32 count, ScriptValue* args, S
     ScriptValue obj;
     InitScriptValue(&obj);
     if (args[1].tag == 0) {
-        SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(D_00248D30)))));
+        SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(g_zeroVector)))));
     } else {
         SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(*(Vec02*)args[1].node->v)))));
     }
@@ -2328,7 +2328,7 @@ ScriptValue* GetScriptDistanceSquared(ScriptValue* ret, s32 count, ScriptValue* 
     ScriptValue obj;
     InitScriptValue(&obj);
     if (args[1].tag == 0) {
-        u128 d = Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(D_00248D30));
+        u128 d = Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(g_zeroVector));
         SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Dot(d, d)));
     } else {
         u128 d = Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(*(Vec02*)args[1].node->v));
@@ -2350,7 +2350,7 @@ ScriptValue* NormalizeScriptVector(ScriptValue* ret, s32 count, ScriptValue* arg
     u128 a = Vu0::Q(*(Vec02*)args[0].v);
     Vu0::Q(*out) = a;
     if (args[1].tag == 0) {
-        Vec02* fb = (Vec02*)&D_00248D30;
+        Vec02* fb = (Vec02*)&g_zeroVector;
         u128 len = Vu0::Length(a);
         if (Vu0::ToFloatMoved(len) < 0.0001f) {
             *out = *fb;

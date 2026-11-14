@@ -25,7 +25,7 @@ void ResetWorldSubsystems(s32 a0)
         g_stepScale = 1.0f;
         ((PackedWord*)(c + 0x584))->v = 0;
         ((PackedWord*)(e + 0x590))->v = 0;
-        D_00261D38 = 0;
+        g_controlBlockingElementCount = 0;
         *(s32*)(c + 0x588) = 0;
         *(s32*)(e + 0x59C) = 0;
     }

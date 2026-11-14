@@ -183,7 +183,7 @@ extern s32 g_codeChecksumFailed;
 extern void* g_frameDoneSemaphore;
 extern volatile s32 g_renderThreadWaiting;
 extern void* g_drawingFrame;
-extern s32 D_002626CC;
+extern s32 g_fieldOffsetMode;
 
 extern "C" s32 AwaitSemaphore(void* a);
 void SendRenderFrameToDma(RenderFrame* self, s32 flag);
@@ -207,7 +207,7 @@ extern void* g_frameDoneSemaphore;
 extern u32 g_renderFrameIndex;
 extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
-extern s32 D_002626CC;
+extern s32 g_fieldOffsetMode;
 
 void VerifyCodeChecksum(void);
 extern "C" s32 AwaitSemaphore(void* p);
@@ -490,7 +490,7 @@ void RunRenderThread(void)
         WaitDmaChannel((DmaChannel*)g_vif1Channel, 0, 0);
         PostSemaphore(g_frameDoneSemaphore);
         FlipDisplayFrame();
-        D_002626CC = 1;
+        g_fieldOffsetMode = 1;
     }
 }
 
@@ -564,7 +564,7 @@ void DrainRenderFrames(s32 flag)
             BlitFrameToDisplay();
             FlipDisplayFrame();
         } while (--n >= 0);
-        D_002626CC = 3;
+        g_fieldOffsetMode = 3;
     }
     RenderFrame* p = g_renderFrames;
     RenderFrame* end = p + 2;
@@ -579,9 +579,9 @@ void DrainRenderFrames(s32 flag)
 // The two display buffers' register records (display.cpp): FRAME at +0 and DISPFB-style
 // words chosen by the frame counter's parity.
 extern u8 g_fieldOffsetPacket0[];
-extern u8 D_00262500[];
+extern u8 g_drawEnvBlockEven[];
 extern u8 g_fieldOffsetPacket1[];
-extern u8 D_002625F0[];
+extern u8 g_drawEnvBlockOdd[];
 extern s32 g_displayFrameCounter;
 extern s32 g_displayFieldParity;
 
@@ -602,7 +602,7 @@ void BlitFrameToDisplay(void)
     UsePacketBufferMemory(&w, 100, buf);
     BeginDmaTag(&w);
     BeginGifTag(&w, 0, 1, 0xE);
-    u64 frame = *(u64*)((g_displayFrameCounter & 1) ? D_002625F0 : D_00262500);
+    u64 frame = *(u64*)((g_displayFrameCounter & 1) ? g_drawEnvBlockOdd : g_drawEnvBlockEven);
     AddGifRegisterWrite(&w, 0x3F, (u64)0);
     AddGifRegisterWrite(&w, 0x4E, FrameBits(frame) | ((u64)1 << 32));
     u64 disp = *(u64*)((g_displayFrameCounter & 1) ? g_fieldOffsetPacket0 : g_fieldOffsetPacket1);

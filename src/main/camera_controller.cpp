@@ -96,7 +96,7 @@ extern u8 g_identityMatrix[];
 extern u8 g_identityMatrix[];
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-extern T217D_Vt D_00218330;
+extern T217D_Vt g_buttonHintElementMethods;
 
 
 extern f32 g_gameTime[];
@@ -108,21 +108,21 @@ extern f32 g_gameTime[];
 
 
 f32 D_00261BF0 = 0.0f;
-f32 D_00261BF4 = 0.300000012f;
-f32 D_00261BF8 = 7e+01f;
-f32 D_00261BFC = -1.0f;
+f32 g_cameraPlacementEase = 0.300000012f;
+f32 g_cameraTargetHeight = 7e+01f;
+f32 g_cameraPitchMin = -1.0f;
 // The upper bound of the tilt, a float of its own: func_00149760 reads it as a scalar (the alias
 // rule, docs/TOOLCHAIN.md). The 16-aligned offsets after it pad it to 0x261C10.
-f32 D_00261C00 = 1.0f;
-Vec02 D_00261C10 = { -150.0f, 0.0f, 0.0f, 0.0f };
-Vec02 D_00261C20 = { -25.0f, 0.0f, 0.0f, 0.0f };
-f32 D_00261C30[4] = { 2.0f, 0.0f, -1.0f, 0.0f };
-f32 D_00261C40[4] = { 0.200000003f, 0.0f, 0.5f, 1.0f };
-f32 D_00261C50[4] = { 0.25f, 0.0f, 0.75f, 2.25f };
-f32 D_00261C60[4] = { 10.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00261C70[4] = { 1.0f, 0.400000006f, 1.5f, 0.0f };
-f32 D_00261C80[3] = { 5.0f, 0.0f, 0.5f };
-f32 D_00261C8C = 24.0f;
+f32 g_cameraPitchMax = 1.0f;
+Vec02 g_cameraEyeOffset = { -150.0f, 0.0f, 0.0f, 0.0f };
+Vec02 g_cameraEyeOffsetSubState22 = { -25.0f, 0.0f, 0.0f, 0.0f };
+f32 g_cameraStickSpeedCurve[4] = { 2.0f, 0.0f, -1.0f, 0.0f };
+f32 g_cameraZoomRampFar[4] = { 0.200000003f, 0.0f, 0.5f, 1.0f };
+f32 g_cameraZoomRampNear[4] = { 0.25f, 0.0f, 0.75f, 2.25f };
+f32 g_cameraZoomSpeedDecayRamp[4] = { 10.0f, 0.0f, 0.100000001f, 0.0f };
+f32 g_cameraZoomFractionRamp[4] = { 1.0f, 0.400000006f, 1.5f, 0.0f };
+f32 g_cameraTurnSpeedDecayRamp[3] = { 5.0f, 0.0f, 0.5f };
+f32 g_cameraAimPushSpeed = 24.0f;
 
 void SetCameraControllerOwner(CameraController* self, Camera* owner)
 {
@@ -156,7 +156,7 @@ Quad16 GetCameraControllerTargetPoint(TargetCameraController* self)
     } else {
         if (GetActiveSwitchedCollider() != 0) {
             r = *(Quad16*)&((PlacedObject*)GetActiveSwitchedCollider())->v140;
-            *(f32*)&r.w[2] = *(f32*)&r.w[2] + D_00261BF8;
+            *(f32*)&r.w[2] = *(f32*)&r.w[2] + g_cameraTargetHeight;
         } else {
             r = *(Quad16*)(*(Camera**)g_camera)->position;
         }
@@ -172,9 +172,9 @@ Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self)
     Mat02 m;
     Vec02* offset;
     if (g_player != 0 && g_player->subState == 0x22) {
-        offset = &D_00261C20;
+        offset = &g_cameraEyeOffsetSubState22;
     } else {
-        offset = &D_00261C10;
+        offset = &g_cameraEyeOffset;
     }
     BuildYawPitchMatrix(*(f32*)&self->value, self->pitch, &m);
     Quad16 target = GetCameraControllerTargetPoint(self);
@@ -276,17 +276,17 @@ static inline f32 ClampFloat(f32 v, f32 lo, f32 hi)
 extern Player* g_player;
 extern u8 g_camera[];
 extern f32 g_gameTime[];
-extern f32 D_00261BF4;
-extern f32 D_00261BFC;
-extern f32 D_00261C00;
-extern Vec02 D_00261C20;
-extern f32 D_00261C30[4];
-extern f32 D_00261C40[4];
-extern f32 D_00261C50[4];
-extern f32 D_00261C60[4];
-extern f32 D_00261C70[4];
-extern f32 D_00261C80[3];
-extern f32 D_00261C8C;
+extern f32 g_cameraPlacementEase;
+extern f32 g_cameraPitchMin;
+extern f32 g_cameraPitchMax;
+extern Vec02 g_cameraEyeOffsetSubState22;
+extern f32 g_cameraStickSpeedCurve[4];
+extern f32 g_cameraZoomRampFar[4];
+extern f32 g_cameraZoomRampNear[4];
+extern f32 g_cameraZoomSpeedDecayRamp[4];
+extern f32 g_cameraZoomFractionRamp[4];
+extern f32 g_cameraTurnSpeedDecayRamp[3];
+extern f32 g_cameraAimPushSpeed;
 Quad16 GetCameraControllerTargetPoint(TargetCameraController* self);
 Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self);
 s32 PeekStackValue(TargetCameraController* s);
@@ -352,7 +352,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
     Quad16 target = GetCameraControllerTargetPoint(self);
     Quad16 eye;
     Camera* cam = self->owner;
-    f32 ease = D_00261BF4;
+    f32 ease = g_cameraPlacementEase;
     s32 mode;
     s32 flag;
     f32 blend;
@@ -366,7 +366,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
     switch (mode) {
     case 0: {
         f32 t = self->zoomFraction;
-        f32 speed = (D_00261C30[0] + t * (D_00261C30[1] + t * D_00261C30[2])) * pad->secondStickY * __builtin_fabsf(pad->secondStickY);
+        f32 speed = (g_cameraStickSpeedCurve[0] + t * (g_cameraStickSpeedCurve[1] + t * g_cameraStickSpeedCurve[2])) * pad->secondStickY * __builtin_fabsf(pad->secondStickY);
         self->zoomSpeed = speed;
         self->zoomFraction = ClampFloat(t + speed * dt, 0.0f, 1.0f);
         break;
@@ -419,23 +419,23 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
                 f32 gap = __builtin_fabsf(zoom - self->zoomFraction);
                 f32 w[2] = { 1.0f, 4.0f };
                 f32 s = (1.0f - gap) * w[0] + gap * w[1];
-                scaled = *(RampProfile*)D_00261C40;
+                scaled = *(RampProfile*)g_cameraZoomRampFar;
                 scaled.maxAccel *= s;
                 scaled.maxSpeed *= s;
                 scaled.endSpeed *= s;
                 profile = &scaled;
             } else {
-                profile = D_00261C50;
+                profile = g_cameraZoomRampNear;
             }
             self->zoomFraction = ApproachValueClampingVelocity(self->zoomFraction, self->zoomSpeed, zoom, dt, profile, &self->zoomSpeed);
         } else {
-            self->zoomSpeed = ApproachValueWithRamp(self->zoomSpeed, 0.0f, dt, (RampProfile*)D_00261C60, 0);
+            self->zoomSpeed = ApproachValueWithRamp(self->zoomSpeed, 0.0f, dt, (RampProfile*)g_cameraZoomSpeedDecayRamp, 0);
             self->zoomFraction = ClampFloat(self->zoomFraction + self->zoomSpeed * dt, 0.0f, 1.0f);
         }
         break;
     }
     case 3: {
-        f32 v = ClampFloat(ApproachValueWithRamp(self->zoomFraction, D_002704F8, dt, (RampProfile*)D_00261C70, 0), 0.0f, 1.0f);
+        f32 v = ClampFloat(ApproachValueWithRamp(self->zoomFraction, D_002704F8, dt, (RampProfile*)g_cameraZoomFractionRamp, 0), 0.0f, 1.0f);
         f32 prev = self->zoomFraction;
         self->zoomFraction = v;
         self->zoomSpeed = (v - prev) / dt;
@@ -492,12 +492,12 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         if (pitch * self->pitchSpeed <= zero) {
             self->pitchSpeed = zero;
         }
-        self->yawSpeed = ApproachValueWithRamp(self->yawSpeed, zero, dt, (RampProfile*)D_00261C80, 0);
-        self->pitchSpeed = ApproachValueWithRamp(self->pitchSpeed, zero, dt, (RampProfile*)D_00261C80, 0);
+        self->yawSpeed = ApproachValueWithRamp(self->yawSpeed, zero, dt, (RampProfile*)g_cameraTurnSpeedDecayRamp, 0);
+        self->pitchSpeed = ApproachValueWithRamp(self->pitchSpeed, zero, dt, (RampProfile*)g_cameraTurnSpeedDecayRamp, 0);
         self->yawSpeed = ClampToMagnitude(self->yawSpeed + yaw * dt, limit * 0.9f);
         self->pitchSpeed = ClampToMagnitude(self->pitchSpeed + pitch * dt, limit * 0.8f);
         self->g08 = WrapAngle(self->g08 + self->yawSpeed * dt);
-        self->pitch = ClampFloat(self->pitch + self->pitchSpeed * dt, D_00261BFC, D_00261C00);
+        self->pitch = ClampFloat(self->pitch + self->pitchSpeed * dt, g_cameraPitchMin, g_cameraPitchMax);
         eye = GetTargetCameraControllerEyePoint(self);
         f32 since = (g_gameTime[0] - cam->controllerSwitchTime) * 2.0f;
         blend = ClampFloat(since, 0.0f, 1.0f);
@@ -541,7 +541,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
                 push.y = -pad->stickY;
             }
             push.z = 0.0f;
-            Vu0::Q(moved) = Vu0::MulAddX(Vu0::Vec::Of(screen), Vu0::Vec::Of(push), Vu0::Vec::Scalar(D_00261C8C * dt)).q;
+            Vu0::Q(moved) = Vu0::MulAddX(Vu0::Vec::Of(screen), Vu0::Vec::Of(push), Vu0::Vec::Scalar(g_cameraAimPushSpeed * dt)).q;
             UnprojectCameraPoint(*(Camera**)g_camera, (f32*)&moved, &world);
             Vu0::Q(dir) = Vu0::Sub(Vu0::Vec::Of(world), Vu0::Vec::Of(pt)).q;
         }
@@ -566,7 +566,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             Vec02 n;
             Vu0::Q(n) = Normalized(Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)obj)->v140), Vu0::Vec::Of(target))).q;
             self->g08 = ArctangentOfRatio(n.y, n.x);
-            Vu0::Q(eye) = Vu0::Add(Vu0::Vec::Of(target), Vu0::MulX(Vu0::Vec::Of(n), Vu0::Vec::Scalar(-Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(D_00261C20)))))).q;
+            Vu0::Q(eye) = Vu0::Add(Vu0::Vec::Of(target), Vu0::MulX(Vu0::Vec::Of(n), Vu0::Vec::Scalar(-Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(g_cameraEyeOffsetSubState22)))))).q;
         } else {
             eye = GetTargetCameraControllerEyePoint(self);
         }
@@ -578,10 +578,10 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
     }
     case 4: {
         T217D_3F0* s;
-        if (D_002708E0.fade == 1) {
-            s = &D_002708E0;
+        if (g_leftArcElement.fade == 1) {
+            s = &g_leftArcElement;
         } else {
-            s = (D_00271558.fade == 1) ? &D_00271558 : 0;
+            s = (g_rightArcElement.fade == 1) ? &g_rightArcElement : 0;
         }
         u8* obj = (u8*)D_002704F4;
         if (obj == 0 && s != 0) {

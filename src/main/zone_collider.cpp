@@ -304,7 +304,7 @@ struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 extern u8 g_scatterController[];
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 
 // The sound a released zone plays (the block at 0x6B4, func_0013DAF0).
 struct ZoneSound {
@@ -374,13 +374,13 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
             }
             if (node->desc->flags & 1) {
                 if ((u32)(e->kind - 2) < 2) {
-                    node->desc02()->m20(node, (Vec02*)D_00248D30);
-                    node->desc02()->m21(node, (Vec02*)D_00248D30);
+                    node->desc02()->m20(node, (Vec02*)g_zeroVector);
+                    node->desc02()->m21(node, (Vec02*)g_zeroVector);
                 } else if (IsObjectOfKind(node, 0x2E) || IsObjectOfKind(node, 0x55)) {
                     Mat02 m;
                     RotateMatrixUpright(&node->rot, 0, &m);
                     node->desc02()->m1E(node, &m);
-                    node->desc02()->m21(node, (Vec02*)D_00248D30);
+                    node->desc02()->m21(node, (Vec02*)g_zeroVector);
                     if (IsObjectOfKind(node, 0x2E)) {
                         SetColliderAnchors(node, 0, 0, 3, 0);
                     } else if (IsObjectOfKind(node, 0x59)) {
@@ -782,7 +782,7 @@ s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 
                     span->face54 = top->face;
                     Quad16* src = (Quad16*)top->face;
                     if (src == 0) {
-                        src = (Quad16*)D_00248D30;
+                        src = (Quad16*)g_zeroVector;
                     }
                     span->q[3] = *src;
                     span->time[1] = top->t;
@@ -1610,7 +1610,7 @@ s32 FindLargestEntryIndex(TriggerZone* s, f32* out)
     return idx;
 }
 
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 
 
 // The trigger zone's per-step motion: the collider's, then, in state 0 or 1, steers the zone toward
@@ -1626,7 +1626,7 @@ void StepTriggerZone(TriggerZone* self, f32 t)
             if (self->zone.mode != 4) {
                 p += self->chosenIndex << 4;
             }
-            SteerColliderTowardPosition(self, (Vec02*)p, (f32*)self->p20C, (Vec02*)D_00248D30, (f32*)self->p210, t);
+            SteerColliderTowardPosition(self, (Vec02*)p, (f32*)self->p20C, (Vec02*)g_zeroVector, (f32*)self->p210, t);
         }
         break;
     case 1:
@@ -1635,7 +1635,7 @@ void StepTriggerZone(TriggerZone* self, f32 t)
             if (self->zone.mode != 4) {
                 p += self->chosenIndex * 0x30;
             }
-            SteerColliderTowardRotation(self, (Mat02*)p, (f32*)self->p214, (Vec02*)D_00248D30, (f32*)self->p218, t);
+            SteerColliderTowardRotation(self, (Mat02*)p, (f32*)self->p214, (Vec02*)g_zeroVector, (f32*)self->p218, t);
         }
         break;
     }

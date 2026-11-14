@@ -663,7 +663,7 @@ void BuildUniformScaleAboutPoint(void* point, void* out, f32 s)
     BuildScaleAboutFrame((Vec02*)point, 0, (f32*)&scale, (Mat4A*)out);
 }
 
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 
 // A matrix of zeros.
 static inline void ClearMatrix(Mat4A* m)
@@ -681,7 +681,7 @@ void BuildScaleAboutFrame(Vec02* pos, Mat02* rot, f32* scale, Mat4A* out)
     Mat4A step;
 
     if (pos == 0)
-        pos = (Vec02*)D_00248D30;
+        pos = (Vec02*)g_zeroVector;
     if (rot == 0)
         rot = (Mat02*)&g_identityMatrix;
     BuildMatrixFromRotationAndTranslation(pos, rot, &frame);

@@ -157,7 +157,7 @@ float g_standInAgeCurve[4] = {0.0f, 4.0f, 0.0f, 0.0f};
 float g_pathLookAhead = 850.0f;
 s32 D_002751D4 = 60;
 float g_pathFollowerRampTime = 1.25f;
-float D_002751DC = 0.75f;
+float g_lapCountCooldown = 0.75f;
 float g_leanCurve[4] = {1.35000002f, 0.0f, -0.349999994f, 0.0f};
 float g_leanRange[4] = {1.0f, 1.35000002f, 0.0f, 0.0f};
 float g_gripScaleCurve[4] = {1.5f, 0.0f, -0.5f, 0.0f};
@@ -221,7 +221,7 @@ struct RingSource {
 
 typedef void (*RingDrawFn)(void* request);
 extern "C" f32 Cosine(f32 x);
-extern Rgba4 D_002623E0[];
+extern Rgba4 g_defaultModelColor[];
 
 struct RingClamp {
     static f32 Of(f32 x, f32 lo, f32 hi)
@@ -279,12 +279,12 @@ void QueuePlayerMarkerRingDraw(Player* self, RingSource* a, void* b)
             f32 y = RingClamp::Of(q, g_unitRange.lo, g_unitRange.hi);
             f32 w = x * y;
             f32 u = 1.0f - w;
-            c.r = (u8)(u * D_002623E0[0].r + w * from[0]);
-            c.g = (u8)(u * D_002623E0[0].g + w * from[1]);
-            c.b = (u8)(u * D_002623E0[0].b + w * from[2]);
-            c.a = D_002623E0[0].a;
+            c.r = (u8)(u * g_defaultModelColor[0].r + w * from[0]);
+            c.g = (u8)(u * g_defaultModelColor[0].g + w * from[1]);
+            c.b = (u8)(u * g_defaultModelColor[0].b + w * from[2]);
+            c.a = g_defaultModelColor[0].a;
         } else {
-            c = D_002623E0[0];
+            c = g_defaultModelColor[0];
         }
         SetObjectTreeRecordValue(self, *(u32*)&c);
     }
@@ -450,7 +450,7 @@ s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out)
         ComputeOscillatorDisplacement((Oscillator*)(((void**)col->f278)[3]), 50.0f, &self->v140, 0, &moved, 0, 0);
         Vu0::Q(shift) = Vu0::Sub(Vu0::Q(moved), Vu0::Q(self->v140));
     } else {
-        shift = D_00248D30;
+        shift = g_zeroVector;
     }
     u128 base = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(shift));
     Vu0::Q(end) = base;
@@ -575,14 +575,14 @@ void StepStandIn(StandIn* self, f32 t)
     if (self->running != 0) {
         Vu0::Q(spin) = Vu0::MulX(Vu0::Q(self->rot.r[2]), Vu0::ScalarAt(g_standInSpinRate));
     } else {
-        spin = D_00248D30;
+        spin = g_zeroVector;
         q50 = *(Vec02*)&g_zeroQuad;
     }
     SteerColliderTowardRotation(self, &upright, (f32*)&q50, &spin, (f32*)&q60, t);
     if (self->running != 0) {
         Vu0::Q(push) = Vu0::MulX(Vu0::Q(self->rot.r[0]), Vu0::ScalarAt(g_standInPushSpeed));
     } else {
-        push = D_00248D30;
+        push = g_zeroVector;
     }
     StoreScaledQuadword(&q60, age, (u8*)g_standInPositionTurn);
     SteerColliderTowardPosition(self, 0, 0, &push, (f32*)&q60, t);
@@ -935,7 +935,7 @@ void StepPathFollower(PathFollower* self, f32 dt)
         CopyQuadword((u128*)&u, p);
         Vec02 turn;
         StoreQuadword((u128*)&turn, ScaleQuadword(qv, u));
-        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, (f32*)&turn, dt);
+        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&g_zeroVector, (f32*)&turn, dt);
     }
     f32 one = 1.0f;
     f32 drive = sum / (self->mass * g_driveForceFull);

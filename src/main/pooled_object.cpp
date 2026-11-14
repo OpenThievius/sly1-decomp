@@ -335,7 +335,7 @@ void SkipDisplayListWriterSlot();
 void ClearPacketBuffer(PacketWriter* p);
 
 
-extern s32 D_00261D38;
+extern s32 g_controlBlockingElementCount;
 extern f32 g_gameTime[];
 
 void ReleasePadSelectFlag(World* self);
@@ -647,8 +647,8 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
                 }
             }
             ((ObjPtrFn)((void**)self->desc)[0x64 / 4])(self, c);
-            ((ObjPtrFn)((void**)self->desc)[0x90 / 4])(self, (void*)&D_00248D30);
-            ((ObjPtrFn)((void**)self->desc)[0x94 / 4])(self, (void*)&D_00248D30);
+            ((ObjPtrFn)((void**)self->desc)[0x90 / 4])(self, (void*)&g_zeroVector);
+            ((ObjPtrFn)((void**)self->desc)[0x94 / 4])(self, (void*)&g_zeroVector);
             SetColliderAnchors(self, 3, 0, 3, 0);
             SetPooledObjectState(self, 4);
             if (self->watchedAnimation != 0) {
@@ -716,7 +716,7 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
     ComputeObjectFrameAtTime(self->holder, 0, &at, 0, 0, 0, t);
     at.z = at.z + self->holdHeight;
     u128 k = Vu0::ScalarAt(self->holdSpeed);
-    Vu0::Set(dir, Vu0::MulX(Vu0::NormalizeOr(Vu0::Sub(Vec::Of(at), Vec::Of(self->v140)), Vec::Of(D_00248D30)).q, k));
+    Vu0::Set(dir, Vu0::MulX(Vu0::NormalizeOr(Vu0::Sub(Vec::Of(at), Vec::Of(self->v140)), Vec::Of(g_zeroVector)).q, k));
     ((ObjPtrFn)((void**)self->desc)[0x90 / 4])(self, &dir);
     BuildBasisFromX(&dir, &basis);
     ((ObjPtrFn)((void**)self->desc)[0x88 / 4])(self, &basis);
@@ -946,7 +946,7 @@ void UpdatePooledHolderAim(PooledHolder* self, s32* state)
     if (self->targetObject == 0) {
         return;
     }
-    AssignAimTarget((T2195_790*)self->p734->aimAttachment, self->targetObject, (Vec02*)&D_00248D30);
+    AssignAimTarget((T2195_790*)self->p734->aimAttachment, self->targetObject, (Vec02*)&g_zeroVector);
     if (self->acquireDelay < g_gameTime[0] - self->acquireTime) {
         if (AcquirePooledObject(self)) {
             *state = 0x2BB;
@@ -979,8 +979,8 @@ s32 AcquirePooledObject(PooledHolder* self) {
     SetColliderAnchors(s0, 3, 0, 3, 0);
     s0->desc03()->m1D(s0, &self->savedPose[0]);
     s0->desc03()->m1E(s0, (Mat02*)&self->savedPose[1]);
-    s0->desc03()->m20(s0, (Vec02*)&D_00248D30);
-    s0->desc03()->m21(s0, (Vec02*)&D_00248D30);
+    s0->desc03()->m20(s0, (Vec02*)&g_zeroVector);
+    s0->desc03()->m21(s0, (Vec02*)&g_zeroVector);
     SetPooledObjectState(s0, 1);
     self->heldObject = s0;
     self->acquireTime = g_gameTime[0];
@@ -1235,7 +1235,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         break;
     case 1:
         if (self->mode2D0 != cur) {
-            D_00261D38 = D_00261D38 - 1;
+            g_controlBlockingElementCount = g_controlBlockingElementCount - 1;
         }
         break;
     case 3:
@@ -1271,7 +1271,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         break;
     case 1:
         if (self->mode2D0 != next) {
-            D_00261D38 = D_00261D38 + 1;
+            g_controlBlockingElementCount = g_controlBlockingElementCount + 1;
         }
         self->state2D4 = next;
         break;
@@ -1301,10 +1301,10 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         self->state2D4 = next;
         break;
     case 4:
-        SetArcTarget(&D_002708E0, 0);
-        SetArcSpecialObject(&D_002708E0, 0);
-        SetArcTarget(&D_00271558, 0);
-        SetArcSpecialObject(&D_00271558, 0);
+        SetArcTarget(&g_leftArcElement, 0);
+        SetArcSpecialObject(&g_leftArcElement, 0);
+        SetArcTarget(&g_rightArcElement, 0);
+        SetArcSpecialObject(&g_rightArcElement, 0);
         self->state2D4 = next;
         break;
     default:
@@ -1461,16 +1461,16 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
         }
         switch (msg->type) {
         case 1:
-            SetArcTarget(&D_002708E0, s2);
-            SetArcSpecialObject(&D_002708E0, s4);
+            SetArcTarget(&g_leftArcElement, s2);
+            SetArcSpecialObject(&g_leftArcElement, s4);
             self->p2F0 = s2;
             if (s2) {
                 self->waitFlags |= 2;
             }
             break;
         case 2:
-            SetArcTarget(&D_00271558, s2);
-            SetArcSpecialObject(&D_00271558, s4);
+            SetArcTarget(&g_rightArcElement, s2);
+            SetArcSpecialObject(&g_rightArcElement, s4);
             self->p2F4 = s2;
             if (s2) {
                 self->waitFlags |= 4;
@@ -1483,12 +1483,12 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
     case 3:
         if (self->p2F0 && MatchesObjectId((BaseObject*)self->p2F0, msg->f18)) {
             s2 = (CaptionSpeaker*)self->p2F0;
-            SetArcFade(&D_002708E0, 1);
-            SetArcFade(&D_00271558, 0);
+            SetArcFade(&g_leftArcElement, 1);
+            SetArcFade(&g_rightArcElement, 0);
         } else if (self->p2F4 && MatchesObjectId((BaseObject*)self->p2F4, msg->f18)) {
             s2 = (CaptionSpeaker*)self->p2F4;
-            SetArcFade(&D_00271558, 1);
-            SetArcFade(&D_002708E0, 0);
+            SetArcFade(&g_rightArcElement, 1);
+            SetArcFade(&g_leftArcElement, 0);
         } else {
             s2 = 0;
         }
@@ -1594,12 +1594,12 @@ s32 TestStepWaitConditions(StepSequence* self)
         if (e != 0 && e->type == 2) {
             if (flags == 2) return 0;
         }
-        if (D_002708E0.target == self->p2F0 && D_002708E0.phase == 1) flags &= 0xFFFFFFFD;
+        if (g_leftArcElement.target == self->p2F0 && g_leftArcElement.phase == 1) flags &= 0xFFFFFFFD;
     }
     if (flags & 4) {
         SequenceStep* e = self->step2E4 < self->count2DC - 1 ? &((SequenceStep*)self->steps2E0)[self->step2E4 + 1] : 0;
         if (e != 0 && e->type == 1 && flags == 4) return 0;
-        if (D_00271558.target == self->p2F4 && D_00271558.phase == 1) flags &= 0xFFFFFFFB;
+        if (g_rightArcElement.target == self->p2F4 && g_rightArcElement.phase == 1) flags &= 0xFFFFFFFB;
     }
     if (flags & 1) {
         if (CheckStreamVoicePending() == 0) flags &= 0xFFFFFFFE;
@@ -2521,7 +2521,7 @@ ObjectLink g_takerLinks[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x
 u16 g_stepWaitButtonMasks[16] = {0x40,0x40,0x80,0x20,0x10,4,1,8,2,0,0,0,0,0,0,0};
 u8 g_stepWaitButtonGlyphs[16] = {0x58,0x58,0x53,0x4F,0x54,0x4C,0x6C,0x52,0x72,0x28,0x29,0x28,0x28,0x58,0,0};
 // size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
-s32 D_00261D38 = 0;
+s32 g_controlBlockingElementCount = 0;
 ThresholdRange g_thresholdRanges[4] = {
     { 0.8f, 2, 5 }, { 0.4f, 6, 10 }, { 0.2f, 15, 25 }, { 0.0f, 50, 100 }
 };

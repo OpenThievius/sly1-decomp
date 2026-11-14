@@ -354,7 +354,7 @@ extern const SoundEntry g_soundEntries[771] = {
     { 6, 77 }, { 6, 78 }, { 6, 79 },
 };
 extern const s32 g_soundEntryForcedAvailable[772] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-extern ClassHead D_002505B8;  // in .data, below
+extern ClassHead g_emptyClass;  // in .data, below
 extern const void* const g_classDescriptorTable[149] = {
     &g_classRoot,
     &g_objectClass,
@@ -504,7 +504,7 @@ extern const void* const g_classDescriptorTable[149] = {
     &D_00220C40,
     &g_animationPlayerMethods,
     &g_stateWalkerMethods,
-    &D_002505B8
+    &g_emptyClass
 };
 extern const u32 g_crc32Table[256] = {
     0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
@@ -652,15 +652,15 @@ extern void* const g_screenElements[38] = {
     (void*)&g_selectionCaption,
     (void*)&g_gridSelector,
     (void*)&g_pauseMenuElement,
-    (void*)&D_002708E0,
-    (void*)&D_00271558,
+    (void*)&g_leftArcElement,
+    (void*)&g_rightArcElement,
     (void*)&g_firstTallyCaption,
     (void*)&g_secondTallyCaption,
     (void*)&g_titleElement,
     (void*)&g_promptElement,
     (void*)&g_stackedCaptionGroup,
-    (void*)&D_002739F0,
-    (void*)&D_00273C50,
+    (void*)&g_bossBeatGlyphElement,
+    (void*)&g_beatPressGlyphElement,
     (void*)&g_cyclingGlyphElement,
     (void*)&g_completionPercentCaption,
     0,
@@ -703,14 +703,14 @@ extern const LevelEntry g_levelEntries[33] = {
 extern const Vec02 g_unitXVector = { 1.0f, 0.0f, 0.0f, 0.0f };
 extern const Vec02 g_unitYVector = { 0.0f, 1.0f, 0.0f, 0.0f };
 extern const Vec02 g_unitZVector = { 0.0f, 0.0f, 1.0f, 0.0f };
-extern const Vec02 D_00248D30 = { 0.0f, 0.0f, 0.0f, 0.0f };
-extern const f32 D_00248D40[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
+extern const Vec02 g_zeroVector = { 0.0f, 0.0f, 0.0f, 0.0f };
+extern const f32 g_unitScale[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
 extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e+38f, 0.0f };
 // Read only by func_001B8540, which is original assembly (16 bytes, then 16 no code reads).
 extern const u32 D_00248D60[8] = { 0xFF7FFFFF, 0xFF7FFFFF, 0xFF7FFFFF, 0, 0x53DE6B03, 0xF1409707, 0x45DE6074, 0xD41837D9 };
 // The file's .data.
 u8 D_00250580[56] = { 0 };
 // The descriptor of class 0x94, the last of D_00247448: two zero words.
-ClassHead D_002505B8 = { 0, 0 };
+ClassHead g_emptyClass = { 0, 0 };
 // The method table warp_menu.cpp's objects take (state_reset_object.h), zero in the image.
 void* g_stateResetGroupMethods[6] = { 0 };

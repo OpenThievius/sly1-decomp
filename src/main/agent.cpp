@@ -74,15 +74,15 @@ PaddedQuadratic g_agentPitchHeightCoefficients = { { 0.0f, 0.00499999989f, 0.0f 
 float g_agentPitchHeightLimits[2] = {0.0f, 1.0f};
 float g_agentPitchScale[2] = {1.0f, 0.0f};
 PaddedQuadratic g_agentTargetRangeCoefficients = { { 0.0f, 0.00499999989f, 0.0f } };
-float D_00274CF0 = 0.349999994f;
-f32 D_00274CF4 = 0.85f;
-f32 D_00274CF8[1] = { 0 };
+float g_agentLeadTime = 0.349999994f;
+f32 g_agentDisabledContactFriction = 0.85f;
+f32 g_agentDisabledContactBounce[1] = { 0 };
 float g_agentHitVelocityBoost = 0.25f;
 float g_agentHitMinUpSpeed = 700.0f;
 float g_agentHitMaxSpeed = 1200.0f;
-f32 D_00274D08[2] = { 0.0f, 4.0f };
+f32 g_agentState6DeadlineRange[2] = { 0.0f, 4.0f };
 f32 D_00274D10[2] = { 0.0f, 1.5f };
-f32 D_00274D18[2] = { 0.0f, 0.3f };
+f32 g_agentState8DeadlineRange[2] = { 0.0f, 0.3f };
 float g_itemKeeperMemberSpacing[2] = {700.0f, 0.0f};
 float g_itemKeeperPlaceAngleJitter[2] = {-0.200000003f, 0.200000003f};
 PaddedQuadratic g_itemKeeperPlaceRadiusScale = { { 0.800000012f, 1.20000005f, 0.0f } };
@@ -414,7 +414,7 @@ void StepAgent(Agent* self, f32 dt)
         f32 k = LimitToUnitRange(g_agentSteerBlendCoefficients.c[0] + x * (g_agentSteerBlendCoefficients.c[1] + x * g_agentSteerBlendCoefficients.c[2]));
         StoreScaledQuadword(&q, k, (u8*)&g_agentSteerRatesA);
         StoreScaledQuadword(&q2, k, (u8*)&g_agentSteerRatesB);
-        SteerColliderTowardRotation(self, &self->headingMatrix, (f32*)&q, (Vec02*)&D_00248D30, (f32*)&q2, dt);
+        SteerColliderTowardRotation(self, &self->headingMatrix, (f32*)&q, (Vec02*)&g_zeroVector, (f32*)&q2, dt);
         AddColliderForce(self, &self->gravity);
     } else {
         StepTurningCollider(self, dt);
@@ -491,7 +491,7 @@ void FaceAgentFromAnimationMotion(Agent* self)
 
 void ClearRootTries(PlacedObject* self);
 extern f32 g_contactSideSigns[];
-extern const Vec02 D_00248D30;
+extern const Vec02 g_zeroVector;
 
 struct AgentBody {
     u8 pad00[0x80];
@@ -571,10 +571,10 @@ void UpdateAgent(Agent* self, f32 dt)
             Vu0::Q(self->headingVelocity) = Vu0::MulX(Vu0::Q(self->headingVelocity), neg);
             Vu0::Q(push) = neg;
         } else {
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
         }
     } else {
-        self->headingVelocity = D_00248D30;
+        self->headingVelocity = g_zeroVector;
     }
     self->desc08()->m5E(self, 0);
     ((void (*)(Agent*))self->desc08()->m5A)(self);
@@ -1613,7 +1613,7 @@ void SteerAgentAlongPath(Agent* self)
         Vu0::Q(w) = s;
         Vu0::Q(self->headingVelocity) = r;
     } else {
-        self->headingVelocity = D_00248D30;
+        self->headingVelocity = g_zeroVector;
     }
 }
 
@@ -2156,7 +2156,7 @@ void PickAgentSecondaryTarget(Agent* self)
     vel = self->v150;
     vel.z = 0.0f;
     Vu0::Vec k;
-    k.q = Vu0::FromFloatAt(D_00274CF0);
+    k.q = Vu0::FromFloatAt(g_agentLeadTime);
     *(Vu0::Vec*)&lead = k;
     Vu0::Q(here) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(vel), Vu0::Q(lead));
     for (s32 i = 0; i < n; i++) {
@@ -2192,8 +2192,8 @@ void SetAgentPrimaryTarget(Agent* self, s32 value)
 void ComputeAgentContactValue(Agent* self, Contact03* out)
 {
     if (self->contactsDisabled != 0) {
-        f32 a = D_00274CF4;
-        f32 b = D_00274CF8[0];
+        f32 a = g_agentDisabledContactFriction;
+        f32 b = g_agentDisabledContactBounce[0];
         out->friction = a;
         out->bounce = b;
     } else {
@@ -2353,7 +2353,7 @@ void DispatchAgentContactHits(Agent* self)
                     case 6:
                         if (self->usesPitch != 0) {
                             msg.fn = (void (*)(void))LaunchObjectWithAgentVelocity;
-                            self->launchVelocity = D_00248D30;
+                            self->launchVelocity = g_zeroVector;
                             break;
                         }
                     case 0:
@@ -2847,7 +2847,7 @@ void SetItemKeeperState(ItemKeeper* self, s32 ns)
                 Agent* it = *p;
                 f32 t = g_gameClock[1];
                 i++;
-                f32 r = RandomFloatInRange(D_00274D18[0], D_00274D18[1]);
+                f32 r = RandomFloatInRange(g_agentState8DeadlineRange[0], g_agentState8DeadlineRange[1]);
                 it->state8Deadline = g_gameClock[1] + r;
                 p++;
             } while (i < self->owned.count);
@@ -2860,7 +2860,7 @@ void SetItemKeeperState(ItemKeeper* self, s32 ns)
             do {
                 f32 t = g_gameClock[1];
                 j++;
-                f32 r = RandomFloatInRange(D_00274D08[0], D_00274D08[1]);
+                f32 r = RandomFloatInRange(g_agentState6DeadlineRange[0], g_agentState6DeadlineRange[1]);
                 (*p)->state6Deadline = g_gameClock[1] + r;
                 p++;
             } while (j < self->owned.count);

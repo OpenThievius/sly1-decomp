@@ -43,17 +43,17 @@ struct __attribute__((aligned(16))) PaddedQuadratic { f32 c[3]; };
 // The file's .data, in retail's order.
 s32 g_hitCountColliderLinks[36] = { 4, 1317, 1632, 4, 1320, 1580, 2, 354, 1420, 2, 355, 1424, 6, 352, 1412, 0, 1319, 1636, 0, 1321, 1560, 0, 1322, 1564, 0, 1323, 1568, 0, 1324, 1572, 0, 1325, 1652, 0, 1326, 1656 };
 char D_00274A40[4] = "\r";
-f32 D_00274A44 = 150.0f;
+f32 g_hitCountHitRadius = 150.0f;
 PaddedQuadratic D_00274A50 = { { 0.2f, 0.0f, 0.0f } };
 f32 g_hitCountRotationRamp[3] = { 40.0f, 0.0f, 0.3f };
 PaddedQuadratic D_00274A70 = { { 1.0f, 0.0f, -0.75f } };
 PaddedQuadratic D_00274A80 = { { 0.7f, 0.3f, 0.0f } };
-f32 D_00274A90[2] = { 1200.0f, 1.0f };
-f32 D_00274A98 = 0.25f;
-f32 D_00274A9C = 3000.0f;
+f32 g_hitCountStickSpeedScale[2] = { 1200.0f, 1.0f };
+f32 g_hitCountMinSpeedLimit = 0.25f;
+f32 g_hitCountAccelLimit = 3000.0f;
 f32 D_00274AA0 = 0.1f;
 f32 g_hitCountTurnRamp[3] = { 20.0f, 0.0f, 0.3f };
-f32 D_00274AB4 = 1000.0f;
+f32 g_hitCountPushSpeed = 1000.0f;
 f32 g_hitCountItemSpeedRange[2] = { 0.0f, 300.0f };
 PaddedQuadratic g_hitCountItemSpinRange = { { -1.0f, 1.0f, 0.0f } };
 
@@ -163,7 +163,7 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
         g_stepScale = 1.0f;
         u = 0.0f;
     }
-    f32 w = u * D_00274A44 + (1.0f - u) * self->baseRadius;
+    f32 w = u * g_hitCountHitRadius + (1.0f - u) * self->baseRadius;
     self->radius3D0 = w;
     self->radius3CC = w;
     if (self->acceptedMark) {
@@ -240,14 +240,14 @@ void ControlHitCountCollider(HitCountCollider* self, PadRecord* ev, f32 dt)
         }
     }
     if (self->state != 1) {
-        self->speedLimit = D_00274A98;
-        self->f650 = D_00248D30;
+        self->speedLimit = g_hitCountMinSpeedLimit;
+        self->f650 = g_zeroVector;
     } else {
         if (0.0f < ev->stickMagnitude) {
             ComputeCameraRelativeStickHeading(g_camera, ev, 0, &self->heading);
         }
-        f32 k = D_00274A90[0];
-        f32 m = D_00274A98;
+        f32 k = g_hitCountStickSpeedScale[0];
+        f32 m = g_hitCountMinSpeedLimit;
         m = m >? ev->stickMagnitude;
         self->speedLimit = m;
         ComputePolarOffset((Vec3*)&self->f650, self->heading, k * ev->stickMagnitude, 0.0f);
@@ -281,7 +281,7 @@ void StepHitCountCollider(HitCountCollider* self, f32 dt)
     BuildYawPitchMatrix(self->heading, 0.0f, &rot);
     TurnColliderTowardRotation(self, dt, &rot, g_hitCountTurnRamp);
     Vu0::Q(accel) = Vu0::Sub(Vu0::Q(self->f650), Vu0::Q(self->v150));
-    ClampVectorLength(&accel, &accel, D_00274A9C * self->speedLimit * dt);
+    ClampVectorLength(&accel, &accel, g_hitCountAccelLimit * self->speedLimit * dt);
     Vu0::Q(t) = Vu0::FromFloat(dt);
     Vu0::Q(accel) = Vu0::DivX(Vu0::Q(accel), Vu0::Q(t));
     AddColliderForce(self, &accel);
@@ -312,7 +312,7 @@ void ResolveHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 en
     AnimationPlayer* p = self->hitPlayer;
     if (p != 0) {
         u128 vel = Vu0::Q(c->end[end].v30);
-        u128 k = Vu0::Scalar((D_00274A44 - self->baseRadius) / p->anim->length);
+        u128 k = Vu0::Scalar((g_hitCountHitRadius - self->baseRadius) / p->anim->length);
         u128 d = Vu0::Sub(Vu0::Q(c->end[end].point), Vu0::Q(self->v140));
         Vu0::Q(c->end[end].v30) = Vu0::MulAddX(vel, Vu0::DivX(d, Vu0::Length(d)), k);
     }
@@ -380,7 +380,7 @@ void PushRequesterAwayFromSender(void* c, void* receiver)
     Vec02 v;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(to->v140), Vu0::Q(from->v140));
     d.z = 0.0f;
-    u128 s = Vu0::ScalarAt(D_00274AB4);
+    u128 s = Vu0::ScalarAt(g_hitCountPushSpeed);
     Vu0::Set(v, Vu0::MulX(Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_unitXVector)), s));
     to->desc02()->m20(to, &v);
 }
@@ -427,7 +427,7 @@ void SetHitCountColliderState(HitCountCollider* self, s32 state)
         f32 b = WrapAngle(a + 3.14159274f);
         self->heading = b;
         self->aimHeading = b;
-        q = D_00248D30;
+        q = g_zeroVector;
         f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
         ApproachAngleWithRamp(r, self->heading, 0.0f, g_hitCountTurnRamp, &q.z);
         self->desc02()->m21(self, (Vec02*)&q);
@@ -477,7 +477,7 @@ void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj)
     if (!IsObjectAttached(obj)) {
         Vec02 p;
         Vec02 best;
-        best = D_00248D30;
+        best = g_zeroVector;
         f32 bestDist = 0.0f;
         for (s32 j = 0; j < self->placePointCount; j++) {
             ConvertPositionToWorld(self->placePoints[j], &p);

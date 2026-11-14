@@ -20,12 +20,12 @@
 
 // The file's .data, in retail's order. D_00274F0C holds two floats (0.3, 10) under one label, which
 // GCC would align to 8 as one object: it stays included, and ControlPlayerOnPath reads its first.
-float D_00274F00 = 35.0f;
-float D_00274F04 = 100.0f;
+float g_pathFinishMargin = 35.0f;
+float g_pathStartMargin = 100.0f;
 float g_steepSlopeThreshold = 0.5f;
 INCLUDE_DATA(D_00274F0C);
-float D_00274F14 = 50.0f;
-float D_00274F18 = 1.0f;
+float g_pathProbeDistance = 50.0f;
+float g_pathSpeedEaseRate = 1.0f;
 float g_pathTurnThreshold = 0.400000006f;
 float g_pathPlaceStep[2] = {10.0f, 0.0f};
 float g_pathVelocityRamp[4] = {1500.0f, 0.0f, 0.5f, 0.0f};
@@ -150,9 +150,9 @@ void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length)
         }
         Vec02 behind;
         if (h->desc->m2 != 0) {
-            h->desc->m2(h, &ahead, at + D_00274F14, 0);
+            h->desc->m2(h, &ahead, at + g_pathProbeDistance, 0);
             if (h->desc->m2 != 0) {
-                h->desc->m2(h, &behind, at - D_00274F14, 0);
+                h->desc->m2(h, &behind, at - g_pathProbeDistance, 0);
             }
         }
         Vu0::Vec d = NormalizeOrElse(Vu0::Sub(Vu0::Vec::Of(ahead), Vu0::Vec::Of(behind)), Vu0::Vec::Of(g_unitZVector));
@@ -224,7 +224,7 @@ void StepPlayerOnPath(Player* self)
         PathWatch* w = (PathWatch*)self->stateAnimPlayer;
         f32 dt = g_gameClock.dt;
         f32 t = w->target->f34 - w->f14;
-        BlendRotationsWithSpin(dt >? t, dt, 1.0f, &self->rot, &self->v160, &placed, &D_00248D30, &goal, 0, 0);
+        BlendRotationsWithSpin(dt >? t, dt, 1.0f, &self->rot, &self->v160, &placed, &g_zeroVector, &goal, 0, 0);
     } else {
         goal = placed;
     }
@@ -234,7 +234,7 @@ void StepPlayerOnPath(Player* self)
     Vu0::Q(self->v160) = Vu0::MulX(Vu0::Q(axis), Vu0::Q(k));
 }
 
-extern f32 D_00274F0C;
+extern f32 g_pathFlipDirectionLimit;
 
 // The pad's stick (+0x40, +0x44) as ControlPlayerOnPath reads it.
 struct PathPad { u8 pad00[0x40]; f32 x; f32 y; };
@@ -297,17 +297,17 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     s32 rev;
     f32 k;
 
-    Vu0::Q(self->pathPoseOffset) = ApproachPointWithRamp(Vu0::Q(self->pathPoseOffset), Vu0::Q(D_00248D30), (RampProfile*)g_pathVelocityRamp, 0,
+    Vu0::Q(self->pathPoseOffset) = ApproachPointWithRamp(Vu0::Q(self->pathPoseOffset), Vu0::Q(g_zeroVector), (RampProfile*)g_pathVelocityRamp, 0,
                                                 g_gameClock.dt);
     if (self->subState == 0x17 || self->subState == 0x1B) {
         Vu0::Set(self->headingVelocity, Vu0::Zero());
         return;
     }
     if (holder->desc->m2) {
-        holder->desc->m2(holder, &a, self->pathPos + D_00274F14, 0);
+        holder->desc->m2(holder, &a, self->pathPos + g_pathProbeDistance, 0);
     }
     if (holder->desc->m2) {
-        holder->desc->m2(holder, &b, self->pathPos - D_00274F14, 0);
+        holder->desc->m2(holder, &b, self->pathPos - g_pathProbeDistance, 0);
     }
     TransformPointBetweenFrames(path->frame, 0, &a, &a);
     TransformPointBetweenFrames(path->frame, 0, &b, &b);
@@ -324,11 +324,11 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
                 return;
             }
         }
-        if (g_pathTurnThreshold < self->pathSpeedEased && self->pathFlipped != 0 && -D_00274F0C < dir.z) {
+        if (g_pathTurnThreshold < self->pathSpeedEased && self->pathFlipped != 0 && -g_pathFlipDirectionLimit < dir.z) {
             SetPlayerState(self, 7, 0x1B);
             return;
         }
-        if (self->pathSpeedEased < -g_pathTurnThreshold && self->pathFlipped == 0 && dir.z < D_00274F0C) {
+        if (self->pathSpeedEased < -g_pathTurnThreshold && self->pathFlipped == 0 && dir.z < g_pathFlipDirectionLimit) {
             SetPlayerState(self, 7, 0x1B);
             return;
         }
@@ -345,14 +345,14 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
         if (guide->desc->m10) {
             guide->desc->m10(guide, &c, 0, 0, 0, 0, &t);
         }
-        t = ClampBetween(t, D_00274F14, guide->desc->m8(guide) - D_00274F14);
+        t = ClampBetween(t, g_pathProbeDistance, guide->desc->m8(guide) - g_pathProbeDistance);
         if (guide->desc->m2) {
-            guide->desc->m2(guide, &c, t + D_00274F14, 0);
+            guide->desc->m2(guide, &c, t + g_pathProbeDistance, 0);
         }
         TransformPointBetweenFrames((PlacedObject*)frame, 0, &c, &d);
         ProjectPointToCamera(g_camera, &c, (f32*)&pa);
         if (guide->desc->m2) {
-            guide->desc->m2(guide, &c, t - D_00274F14, 0);
+            guide->desc->m2(guide, &c, t - g_pathProbeDistance, 0);
         }
         TransformPointBetweenFrames((PlacedObject*)frame, 0, &c, &d);
         ProjectPointToCamera(g_camera, &c, (f32*)&pb);
@@ -372,7 +372,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     default: {
         Vec02 stick;
         Vu0::Set(stick, Vu0::FromFloats(pad->x, pad->y, 0.0f));
-        f32 mag = NormalizeVector(stick, D_00248D30);
+        f32 mag = NormalizeVector(stick, g_zeroVector);
         amount = Vu0::ToFloat(Vu0::Dot(Vu0::Q(dir), Vu0::Q(stick)));
         switch (self->pathStickSide) {
         case 0:
@@ -430,7 +430,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
         vel = -vel;
     }
     PathRamp ramp;
-    k = D_00274F18 * g_gameClock.dt;
+    k = g_pathSpeedEaseRate * g_gameClock.dt;
     ramp.rate = __builtin_fabsf(self->blend103C[1].speed);
     ramp.f04 = 0.0f;
     ramp.f08 = 0.2f;
@@ -439,11 +439,11 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
         f32 start;
         f32 end;
         if (rev != 0) {
-            start = holder->first[0] + D_00274F00;
-            end = holder->first[holder->count - 1] - D_00274F04;
+            start = holder->first[0] + g_pathFinishMargin;
+            end = holder->first[holder->count - 1] - g_pathStartMargin;
         } else {
-            start = holder->first[0] + D_00274F04;
-            end = holder->first[holder->count - 1] - D_00274F00;
+            start = holder->first[0] + g_pathStartMargin;
+            end = holder->first[holder->count - 1] - g_pathFinishMargin;
         }
         ApproachValueWithRamp(self->pathPos, start, g_gameClock.dt, (RampProfile*)&ramp, &lo);
         ApproachValueWithRamp(self->pathPos, end, g_gameClock.dt, (RampProfile*)&ramp, &hi);

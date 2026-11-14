@@ -49,13 +49,13 @@ PlayerTableEntry g_playerObjectTable[8] = {
     { 0x35, 30.0f, 0 }, { 0x36, 30.0f, 0 }, { 0x37, 30.0f, 0 }, { 0x3A, 30.0f, 0 },
     { 0x50, 60.0f, 0 }, { 0x58, 30.0f, 0 }, { 0x170, 30.0f, 0 }, { 0, 0.0f, 0 }
 };
-float D_00275020[4] = {0.0f, 10.0f, 0.00999999978f, 0.0f};
-f32 D_00275030[4] = { 3.5f, 0.0f, 0.5f, 0.0f };
-f32 D_00275040[4] = { 0.0f, 0.0f, -1000.0f, 0.0f };
-f32 D_00275050[4] = { -0.5f, -0.0025f, 0.0f, 0.0f };
-f32 D_00275060[2] = { 0.0f, 0.7f };
+float g_requestSteerProfile[4] = {0.0f, 10.0f, 0.00999999978f, 0.0f};
+f32 g_requestTurnAwayRamp[4] = { 3.5f, 0.0f, 0.5f, 0.0f };
+f32 g_requestDropVelocity[4] = { 0.0f, 0.0f, -1000.0f, 0.0f };
+f32 g_requestLandingVolumeCurve[4] = { -0.5f, -0.0025f, 0.0f, 0.0f };
+f32 g_requestLandingVolumeRange[2] = { 0.0f, 0.7f };
 f32 D_00275068[1] = { 0 };
-float D_0027506C = 0.25f;
+float g_hullAngleStep = 0.25f;
 float g_ringSevenPoints[14] = {0.0f, 1.0f, 0.781831503f, 0.623489797f, 0.974927902f, -0.222520933f, 0.433883727f, -0.90096885f, -0.433883727f, -0.90096885f, -0.974927902f, -0.222520933f, -0.781831503f, 0.623489797f};
 float g_ringSeventeenPoints[34] = {1.0f, 0.0f, 0.932472229f, 0.361241668f, 0.739008904f, 0.673695624f, 0.445738345f, 0.895163298f, 0.0922683626f, 0.995734155f, -0.273662984f, 0.961825669f, -0.602634609f, 0.798017204f, -0.850217164f, 0.526432157f, -0.982973099f, 0.183749512f, -0.982973099f, -0.183749512f, -0.850217164f, -0.526432157f, -0.602634609f, -0.798017204f, -0.273662984f, -0.961825669f, 0.0922683626f, -0.995734155f, 0.445738345f, -0.895163298f, 0.739008904f, -0.673695624f, 0.932472229f, -0.361241668f};
 
@@ -578,7 +578,7 @@ void StepPlayerRequestState(Player* self)
         Vu0::Q(k) = Vu0::FromFloat(-1.0f);
         Vu0::Q(force) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(k));
         AddColliderForce(self, &force);
-        SteerColliderTowardPosition(self, 0, 0, (Vec02*)&D_00248D30, D_00275020, g_gameClock.dt);
+        SteerColliderTowardPosition(self, 0, 0, (Vec02*)&g_zeroVector, g_requestSteerProfile, g_gameClock.dt);
         break;
     }
     case 0x29:
@@ -589,12 +589,12 @@ void StepPlayerRequestState(Player* self)
         Vu0::Q(force) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(k));
         AddColliderForce(self, &force);
         f32 zero = 0.0f;
-        aim = D_00248D30;
+        aim = g_zeroVector;
         if (self->headingVelocity.z != zero)
             aim.z = self->v150.z;
-        SteerColliderTowardPosition(self, 0, 0, &aim, D_00275020, g_gameClock.dt);
+        SteerColliderTowardPosition(self, 0, 0, &aim, g_requestSteerProfile, g_gameClock.dt);
         if (self->headingVelocity.z != zero) {
-            force = D_00248D30;
+            force = g_zeroVector;
             force.z = (-self->headingVelocity.z - aim.z) / g_gameClock.dt;
             AddColliderForce(self, &force);
         }
@@ -621,7 +621,7 @@ void UpdatePlayerRequestSubState(Player* self) {
     switch (self->subState) {
     case 0x2B: {
         f32 t = ArctangentOfRatio(self->v150.y, self->v150.x);
-        self->heading = ApproachAngleWithRamp(self->heading, t + 3.1415927f, g_gameClock.dt, D_00275030, 0);
+        self->heading = ApproachAngleWithRamp(self->heading, t + 3.1415927f, g_gameClock.dt, g_requestTurnAwayRamp, 0);
         if (0.25f < g_gameClock.time - self->subStateStartTime && self->groundContact != 0) {
 
             RunPlayerCallback(self);
@@ -767,13 +767,13 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
     case 2: {
         s32 id;
         if (self->state == 0xD) {
-            (*(Quad16*)&self->savedVelocity) = (*(Quad16*)&self->savedSpin) = *(const Quad16*)&D_00248D30;
+            (*(Quad16*)&self->savedVelocity) = (*(Quad16*)&self->savedSpin) = *(const Quad16*)&g_zeroVector;
         } else {
             (*(Quad16*)&self->savedVelocity) = (*(Quad16*)&self->v150);
             (*(Quad16*)&self->savedSpin) = (*(Quad16*)&self->v160);
         }
-        self->desc02()->m20(self, (Vec02*)&D_00248D30);
-        self->desc02()->m21(self, (Vec02*)&D_00248D30);
+        self->desc02()->m20(self, (Vec02*)&g_zeroVector);
+        self->desc02()->m21(self, (Vec02*)&g_zeroVector);
         switch (msg->kind) {
         case 1:
             id = 0x25;
@@ -795,7 +795,7 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
         }
         break;
     case 4:
-        self->desc02()->m20(self, (Vec02*)D_00275040);
+        self->desc02()->m20(self, (Vec02*)g_requestDropVelocity);
         if (HasSpareCount() != 0) {
             SetPlayerState(self, 4, 0x28);
             SetPlayerCallback(self, FinishPlayerRequest);
@@ -853,9 +853,9 @@ void ContinuePlayerRequestKind0(Player* self)
     }
     if (self->state == 4) {
         f32 t = self->v150.z;
-        f32 x = D_00275050[0] + t * (D_00275050[1] + t * D_00275050[2]);
-        f32 lo = D_00275060[0];
-        f32 hi = D_00275060[1];
+        f32 x = g_requestLandingVolumeCurve[0] + t * (g_requestLandingVolumeCurve[1] + t * g_requestLandingVolumeCurve[2]);
+        f32 lo = g_requestLandingVolumeRange[0];
+        f32 hi = g_requestLandingVolumeRange[1];
         if (x < lo) {
             x = lo;
         } else if (hi < x) {
@@ -1120,7 +1120,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
             prev = to;
             f32 a = prevAngle;
             prevAngle = entries[i].angle;
-            s32 steps = (s32)(__builtin_fabsf(WrapAngle(a - prevAngle)) / D_0027506C);
+            s32 steps = (s32)(__builtin_fabsf(WrapAngle(a - prevAngle)) / g_hullAngleStep);
             if (steps > 0) {
                 for (i = 0; i < steps;) {
                     i++;
@@ -1140,7 +1140,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
     VertexBatch batch;
     InitVertexBatch(&batch);
     BeginDmaTag(&g_vifPacketWriter);
-    SetVertexBatchTransform(&batch, (u8*)&D_00248D30, (u8*)&g_identityMatrix);
+    SetVertexBatchTransform(&batch, (u8*)&g_zeroVector, (u8*)&g_identityMatrix);
     Vec02 rows[3];
     s32 r;
     for (r = 0; r < 3; r++) {

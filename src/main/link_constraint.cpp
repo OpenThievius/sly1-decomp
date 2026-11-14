@@ -76,7 +76,7 @@ void BuildAxisAngleMatrix(f32 angle, const Vec02* v, Mat02* out);
 // The definition takes the angle last; the EE passes it in its own register, and retail's
 // caller evaluates it first, as this order does.
 Mat02 MultiplyByTransposedMatrix3x3(const Mat02& a, const Mat02& b);
-extern Vec02 D_00248D30;
+extern Vec02 g_zeroVector;
 extern Mat02 g_identityMatrix;
 extern Vec02 g_unitXVector;
 
@@ -181,7 +181,7 @@ void ApplyLinkConstraint(PlacedObject* self)
         if (reach < d) {
             *(Vec*)&diff = Vu0::MulX(Vec::Of(diff), Vec::Scalar(reach / d));
             *(Vec*)&to = Vu0::Add(Vec::Of(((PlacedObject*)rec->f80)->v140), Vec::Of(diff));
-            SetPlacedObjectVelocity(self, &D_00248D30);
+            SetPlacedObjectVelocity(self, &g_zeroVector);
             TransformPointBetweenFrames(0, (PlacedObject*)self->parent, &to, &to);
             self->desc02()->m1D(self, &to);
         }
@@ -198,7 +198,7 @@ void ApplyLinkConstraint(PlacedObject* self)
         a->desc->m12(a);
     }
     Vec02 target = *(Vec02*)&rec->q60[0];
-    Vec02 vel = D_00248D30;
+    Vec02 vel = g_zeroVector;
     TransformStateToAncestorFrame(self, top, &target, 0, &vel, 0);
     Vec02 pos[4];
     Mat02 rot[4];
@@ -286,8 +286,8 @@ void ApplyLinkConstraint(PlacedObject* self)
         *(Vec*)&b->v160 = Vu0::RotateTransposed(rot[2], Vec::Of(spin));
         *(Vec*)&a->v160 = Vu0::RotateTransposed(rot[3], Vec::Of(rel));
     } else {
-        b->v160 = D_00248D30;
-        a->v160 = D_00248D30;
+        b->v160 = g_zeroVector;
+        a->v160 = g_zeroVector;
     }
     b->linkRecord->p64 = 0;
     a->linkRecord->p64 = 0;

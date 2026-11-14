@@ -48,7 +48,7 @@ extern ObjectLink g_pathSpeedColliderLinks[];
 extern ObjectLink g_world2BossLoadLinks[];
 extern ObjectLink g_world2BossStartLinks[];
 extern ObjectLink g_contactListObjectLinks[];
-extern ObjectLink D_00269B60[];
+extern ObjectLink g_pointGraphLinks[];
 extern ObjectLink g_gaugeColliderLoadLinks[];
 extern ObjectLink g_gaugeColliderStartLinks[];
 extern ObjectLink g_gaugeCountedObjectLinks[];

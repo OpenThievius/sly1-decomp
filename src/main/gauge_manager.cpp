@@ -93,8 +93,8 @@ void CountDownGaugeContacts(GaugeManager* self, ContactAgent* agent);
 
 s32 HandleAgentObjectEvent(NumberedAgent* self, void* event);
 extern u8 g_camera[];
-extern u8 D_00248D30[];
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
+extern u8 g_zeroVector[];
 
 void ApplyGaugeRatioToEffect(GaugeManager* self);
 extern f32 g_gameClock[];
@@ -120,10 +120,10 @@ struct ColliderQuerySlots { ColliderQueryFn* vtbl; };
 
 void ComputeGaugeOutputs(GaugeManager* self);
 extern f32 g_gameTime[];
-extern u8 D_00248D30[];
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
+extern u8 g_zeroVector[];
 
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 
 typedef void (*TimerDoneFn)(void* self);
 void FinishGaugeOnTimeout(T217D_510* timer, s32 mode);
@@ -720,8 +720,8 @@ void RunGaugeTimedEvent(GaugeManager* self)
         GetObjectWorldRotation((BaseObject*)slot->anchor, (Mat02*)rotp);
         agent->desc02()->m1D(agent, posp);
         agent->desc02()->m1E(agent, (Mat02*)rotp);
-        agent->desc02()->m20(agent, (Vec02*)D_00248D30);
-        agent->desc02()->m21(agent, (Vec02*)D_00248D30);
+        agent->desc02()->m20(agent, (Vec02*)g_zeroVector);
+        agent->desc02()->m21(agent, (Vec02*)g_zeroVector);
         if (made == 0) {
             anchor = pos;
         }
@@ -765,8 +765,8 @@ void ActivateRandomGaugeSlot(GaugeManager* self)
     GetObjectWorldRotation((BaseObject*)s->anchor, (Mat02*)v1);
     c->desc02()->m1D(c, (Vec02*)v0);
     c->desc02()->m1E(c, (Mat02*)v1);
-    c->desc02()->m20(c, (Vec02*)D_00248D30);
-    c->desc02()->m21(c, (Vec02*)D_00248D30);
+    c->desc02()->m20(c, (Vec02*)g_zeroVector);
+    c->desc02()->m21(c, (Vec02*)g_zeroVector);
     CreateAnimationPlayerWithoutPresetTargets((Animation*)s->animation, (BaseObject*)s->obj, 0, (AnimationPlayer**)&s->key, 0.0f, 1.0f);
     AddAnimationPlayerRecordCallback((AnimationPlayer*)s->key, (PlacedObject**)self);
     self->slotAgents = self->slotAgents + 1;

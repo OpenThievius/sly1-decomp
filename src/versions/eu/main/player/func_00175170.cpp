@@ -126,10 +126,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 4:
             PS(s32, 0x23DC) = -1;
             if (PS(void*, 0x2490) != 0) {
-                AT(Vec02, PS(void*, 0x2490), 0x300) = D_00248D30;
+                AT(Vec02, PS(void*, 0x2490), 0x300) = g_zeroVector;
             }
             if (PS(void*, 0x2494) != 0) {
-                AT(Vec02, PS(void*, 0x2494), 0x300) = D_00248D30;
+                AT(Vec02, PS(void*, 0x2494), 0x300) = g_zeroVector;
             }
             self->f580 = 1;
             ResetTrailRing((TrailRing*)self->trail);
@@ -380,9 +380,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 break;
             default: {
                 if (s->desc->m2 != 0) {
-                    s->desc->m2(s, self->pathPos + D_00274F14, &a, 0);
+                    s->desc->m2(s, self->pathPos + g_pathProbeDistance, &a, 0);
                     if (s->desc->m2 != 0) {
-                        s->desc->m2(s, self->pathPos - D_00274F14, &b, 0);
+                        s->desc->m2(s, self->pathPos - g_pathProbeDistance, &b, 0);
                     }
                 }
                 TransformPointBetweenFrames((PlacedObject*)(AT(void*, self->aimCurve, 0x18)), 0, &a, &a);
@@ -397,9 +397,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->pathPos = len;
             if (s->looped == 0) {
                 if (self->pathFlipped != 0) {
-                    self->pathPos = Clamp_175170(len, s->lengths[0] + D_00274F00, s->lengths[s->count - 1] - D_00274F04);
+                    self->pathPos = Clamp_175170(len, s->lengths[0] + g_pathFinishMargin, s->lengths[s->count - 1] - g_pathStartMargin);
                 } else {
-                    self->pathPos = Clamp_175170(len, s->lengths[0] + D_00274F04, s->lengths[s->count - 1] - D_00274F00);
+                    self->pathPos = Clamp_175170(len, s->lengths[0] + g_pathStartMargin, s->lengths[s->count - 1] - g_pathFinishMargin);
                 }
             }
             if (s->desc->m2 != 0) {
@@ -426,7 +426,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vu0::Q(pos) = Vu0::Sub(Vu0::Q(pos), Vu0::Rotate(m, Vu0::Q(self->ledgeHandOffset)));
             anim = PS(void*, 0x1038);
             Vu0::Q(self->ledgeSlack) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(pos));
-            self->pathPoseOffset = D_00248D30;
+            self->pathPoseOffset = g_zeroVector;
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             break;
         }
@@ -481,9 +481,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 break;
             }
             case 7:
-                self->desc02()->m20(self, (Vec02*)&D_00248D30);
+                self->desc02()->m20(self, (Vec02*)&g_zeroVector);
                 loud = 1;
-                self->desc02()->m21(self, (Vec02*)&D_00248D30);
+                self->desc02()->m21(self, (Vec02*)&g_zeroVector);
                 Vu0::Q(self->headingVelocity) = Vu0::Zero();
                 ActivateSwitchedCollider(self->targetSwitch);
                 break;
@@ -550,11 +550,11 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if (self->stateNodes[13] != 0) {
                 SetTurningColliderFollowedMesh(self, 0, 0);
             }
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             SetPlayerAimMode(self, -1);
             break;
         case 16:
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             break;
         case 14: {
             BaseObject* o = (BaseObject*)self->contactOwner;
@@ -568,12 +568,12 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             o = (BaseObject*)self->contactOwner;
             o->desc->m03(o);
             anim = PS(void*, 0x274C);
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             break;
         }
         case 15:
             anim = PS(void*, 0x2754);
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             break;
         }
         ReleaseFarPlayerLinks(self);
@@ -598,7 +598,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             ((Attachment*)self->selfPoseSource)->mode0 = -1;
             self->desc02()->m2B(self);
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             break;
         case 9:
             if (self->leapTarget != 0) {
@@ -610,7 +610,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             ((Attachment*)self->selfPoseSource)->mode0 = -1;
             self->desc02()->m2B(self);
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             break;
         case 10:
             if (state != 6 || self->targetMode != 5) {
@@ -677,7 +677,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         }
         case 39:
         case 47:
-            AT(Vec02, PS(void*, 0x2490), 0x300) = D_00248D30;
+            AT(Vec02, PS(void*, 0x2490), 0x300) = g_zeroVector;
             break;
         case 28:
             if (self->forcedOnOffObject != 0) {
@@ -706,7 +706,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->stickReleaseTime = now;
             self->stickFullTime = now;
             self->jumpStartTime = now;
-            self->jumpSpeed = D_00262E14 * Fpu::Sqrt(self->gravityScale);
+            self->jumpSpeed = g_jumpSpeedBase * Fpu::Sqrt(self->gravityScale);
             self->groundContact = 0;
             StartSoundEffect(0x4F, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             ComputePlayerJumpVelocity(self, &v);
@@ -715,11 +715,11 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 anim = PS(void*, 0x1028);
                 break;
             case 4:
-                self->jumpSpeed *= D_00262E1C;
+                self->jumpSpeed *= g_jumpKind4SpeedScale;
                 anim = PS(void*, 0x1028);
                 break;
             case 3:
-                self->jumpSpeed *= D_00262E18;
+                self->jumpSpeed *= g_jumpKind3SpeedScale;
                 anim = PS(void*, 0x1028);
                 break;
             case 0:
@@ -831,7 +831,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->f2498 = 1;
             self->steerKeepsDirection = 1;
             self->jumpStickPhase = 2;
-            self->jumpSpeed = D_00262E14 * Fpu::Sqrt(self->gravityScale);
+            self->jumpSpeed = g_jumpSpeedBase * Fpu::Sqrt(self->gravityScale);
             self->v2290 = self->v150;
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             self->groundContact = 0;
@@ -950,7 +950,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                         }
                     }
                     if ((OnOffObject*)self->forcedOnOffObject == self->ownOnOffObject) {
-                        const Vec02* z = &D_00248D30;
+                        const Vec02* z = &g_zeroVector;
                         OnOffObject* p = (OnOffObject*)self->forcedOnOffObject;
                         p->desc02()->m1D(p, (Vec02*)z);
                         p = (OnOffObject*)self->forcedOnOffObject;
@@ -1128,7 +1128,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         case 40:
         case 49:
-            self->desc02()->m21(self, (Vec02*)&D_00248D30);
+            self->desc02()->m21(self, (Vec02*)&g_zeroVector);
             self->heading = self->stickHeading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
             anim = self->subStateAnims[sub];
             break;
@@ -1172,7 +1172,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             self->desc02()->m20(self, &v);
             v.z = 0.0f;
-            Vu0::Vec len = NormalizeInPlace_175170(v, D_00248D30);
+            Vu0::Vec len = NormalizeInPlace_175170(v, g_zeroVector);
             f32 k = Vu0::ToFloatMoved(len) / self->radius3CC;
             Vec02 spin;
             Vu0::Q(spin) = Vu0::FromFloats(-k * v.y, k * v.x, 0.0f);

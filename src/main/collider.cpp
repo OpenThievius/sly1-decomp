@@ -161,8 +161,8 @@ s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
 f32 g_colliderPositionGains[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
 f32 g_colliderRotationGains[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
 AnchorPreset g_anchorPresets[8] = {
-    { &D_00248D30, 0 },
-    { &D_00248D30, 3 },
+    { &g_zeroVector, 0 },
+    { &g_zeroVector, 3 },
     { &g_unitXVector, 2 },
     { &g_unitYVector, 2 },
     { &g_unitZVector, 2 },
@@ -1365,7 +1365,7 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
         }
         Vu0::Q(target2) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(rest));
         SteerColliderTowardPosition(self, 0, 0, &target2, gains, dt);
-        Vu0::Q(spin) = Vu0::Sub(Vu0::Q(D_00248D30), Vu0::Q(self->v160));
+        Vu0::Q(spin) = Vu0::Sub(Vu0::Q(g_zeroVector), Vu0::Q(self->v160));
         SplitVectorAlongAxis(&spin, &normal, &spinAlong, &spinRest);
         for (s32 i = 0; i < 3; i++) {
             gains[i] = g_colliderRotationGains[i] * depth * drag;
@@ -2198,7 +2198,7 @@ void AddParentVelocityToChildRows(void* unusedA, void* unusedB, s32 n, Collider*
                 && __builtin_fabsf(Vu0::ToFloatY(Vu0::Vec::Of(o->offset))) < 0.0001f
                 && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Vec::Of(o->offset))) < 0.0001f;
             if (!still) {
-                const u128& fb = Vu0::Q(D_00248D30);
+                const u128& fb = Vu0::Q(g_zeroVector);
                 Vu0::Q(loc) = Vu0::RotateTransposed(o->m110, Vu0::Vec::Of(vel)).q;
                 Vu0::Q(axis) = Vu0::Cross(Vu0::Vec::Of(o->offset), Vu0::Vec::Of(loc)).q;
                 Vu0::Vec l = Vu0::Length(Vu0::Vec::Of(axis));

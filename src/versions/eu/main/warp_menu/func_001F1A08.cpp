@@ -60,7 +60,7 @@ void HandleWarpMenuInput(Obj_1F1A08_eu* self, PadRecord* t)
     if (s3 != 0) {
         self->f590 = 1.0f;
     } else {
-        self->f590 = D_00275FC0;
+        self->f590 = g_scaleTargetSmall;
     }
-    self->f58C = ApproachValueWithRamp((RampProfile*)D_00276278, 0, self->f58C, self->f590, g_gameClock.step);
+    self->f58C = ApproachValueWithRamp((RampProfile*)g_warpLevelRampKind2, 0, self->f58C, self->f590, g_gameClock.step);
 }

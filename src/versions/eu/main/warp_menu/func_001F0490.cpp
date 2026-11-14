@@ -20,7 +20,7 @@ s32 IsWarpEntryAvailable(WarpPage* self, s32 kind, s32* outA, s32* outB)
                 s32 m = mode * 0x44C;
                 if (*(s32*)((u8*)g_saveData + m + 0x88) & 1) {
                     s32 q = g_saveData->levels[mode].f448;
-                    flag = (q & D_00275FC8[mode]) != 0;
+                    flag = (q & g_warpSlotKindMasks[mode]) != 0;
                 }
             }
         } else {

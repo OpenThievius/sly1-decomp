@@ -110,7 +110,7 @@ EffectSpawnParams g_switchedEffectParams = { 0x18, -1, 0, 0, 1.0f, 2.0f, 0, 0, 1
 // in .bss, the global with the uninitialised ones at the end of .data.
 static Blk05 g_defaultSwitchedColliderData = {
     { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { { 0, 0, 0, 0 } }, 0.0f, 0.0f, 0.0f, 0,
-    { 0.0f, 0.0f, 0.0f }, *(Quad16*)&D_00248D30, { 0.0f, 0.0f, 0.0f }
+    { 0.0f, 0.0f, 0.0f }, *(Quad16*)&g_zeroVector, { 0.0f, 0.0f, 0.0f }
 };
 Blk05 g_switchedEffectBlock = {
     { 1000.0f, 1200.0f, 1.0f }, { 0.0f, 0.0f, -1750.0f }, { -0.5f, 0.0f, 0.0f }, *(Quad16*)&g_unitZVector, 0.0f, 0.0f, 0.0f, 1,
@@ -483,8 +483,8 @@ void FinishSwitchedCollider(SwitchedCollider* self)
         RotateMatrixUpright(&((PlacedObject*)self->f584)->m110, 0, &tmp);
         s1->desc02()->m1D(s1, &((PlacedObject*)self->f584)->v140);
         s1->desc02()->m1E(s1, &tmp);
-        s1->desc02()->m20(s1, (Vec02*)&D_00248D30);
-        s1->desc02()->m21(s1, (Vec02*)&D_00248D30);
+        s1->desc02()->m20(s1, (Vec02*)&g_zeroVector);
+        s1->desc02()->m21(s1, (Vec02*)&g_zeroVector);
         void* r = (void*)FindFirstObjectById(self->world, 1, 0x18C, s1);
         if (r != 0) {
             CreateAnimationPlayerWithoutPresetTargets((Animation*)r, s1, 0, 0, 0.0f, 1.0f);

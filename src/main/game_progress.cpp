@@ -87,7 +87,7 @@ void* MoveMemory(void* dst, void* src, s32 bytes);
 
 void MergeObjectGroupMembers(World* self, FoundList* group);
 
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
@@ -222,22 +222,22 @@ struct PlaneTreeNode;
 struct PlaneTreeOutput;
 
 extern u8 g_flushBatchProgram[];
-extern u8 D_000018F8[];
+extern u8 g_stripMeshMode1Program[];
 
 void WriteVifMscal(void* s, s32 n);
 
-extern u8 D_00000FA0[];
-extern u8 D_00000FD8[];
+extern u8 g_morphTargetMode0Program[];
+extern u8 g_morphTargetMode1Program[];
 
 void WriteVifMscal(void* s, s32 n);
 
-extern u8 D_00000FA0[];
-extern u8 D_00000FD8[];
+extern u8 g_morphTargetMode0Program[];
+extern u8 g_morphTargetMode1Program[];
 
 void WriteVifMscal(void* obj, void* data);
 
 extern u8 g_flushBatchProgram[];
-extern u8 D_000018F8[];
+extern u8 g_stripMeshMode1Program[];
 
 void WriteVifMscal(void* obj, void* text);
 
@@ -299,12 +299,12 @@ struct ElementStack;
 void SetElementStackState(ElementStack* self, s32 state);
 
 extern u8 g_flushBatchProgram[];
-extern u8 D_000018F8[];
+extern u8 g_stripMeshMode1Program[];
 
 void WriteVifMscal(void* s, s32 n);
 
-extern u8 D_00000FA0[];
-extern u8 D_00000FD8[];
+extern u8 g_morphTargetMode0Program[];
+extern u8 g_morphTargetMode1Program[];
 
 void WriteVifMscal(void* s, s32 n);
 
@@ -355,9 +355,9 @@ s32 g_previousLevelIndex = -1;
 char g_missingEntryName[8] = "<none>";
 u8 D_002623D8[4] = { 0 };
 s32 g_timerRateExponent = 0;
-extern u8 D_00001298[];
-extern u8 D_00001368[];
-extern u8 D_00000ED8[];
+extern u8 g_morphTargetBlendProgram[];
+extern u8 g_morphTargetTailProgram[];
+extern u8 g_morphTargetEndProgram[];
 
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -492,13 +492,13 @@ void CopyMemory(void* dst, void* src, u32 size);
 
 extern u8 g_unlitBatchFinishProgram[];
 extern u8 g_unlitBatchProgram[];
-extern u8 D_000036D0[];
-extern u8 D_00001A80[];
-extern u8 D_000027C0[];
-extern u8 D_00002008[];
-extern u8 D_000023B8[];
-extern u8 D_00003A80[];
-extern u8 D_00003A90[];
+extern u8 g_unlitKind4BatchFinishProgram[];
+extern u8 g_unlitKind4BatchProgram[];
+extern u8 g_nodeLinkProgram[];
+extern u8 g_skinWeightProgram[];
+extern u8 g_positionDeltaProgram[];
+extern u8 g_extraStreamFirstProgram[];
+extern u8 g_unlitExtraStreamSecondProgram[];
 
 void BeginDmaTag(PacketWriter* pkt);
 void CloseDmaTag(PacketWriter* pkt);
@@ -535,7 +535,7 @@ struct TargetFrames { Quad16 a; u8 pad0[0x30]; Quad16 b; u8 pad1[0x30]; QuadMatr
 
 
 extern u8 g_litBatchFinishProgram[];
-extern u8 D_000000F0[];
+extern u8 g_litBatchSecondFinishProgram[];
 
 
 void* InitPacketWriter(PacketWriter* self);
@@ -561,14 +561,14 @@ QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
 extern u8 g_litBatchProgram[];
 extern u8 g_litBatchThirdProgram[];
-extern u8 D_00002008[];
-extern u8 D_00002088[];
-extern u8 D_000023B8[];
-extern u8 D_000023D8[];
-extern u8 D_000023F0[];
-extern u8 D_000027C0[];
-extern u8 D_00003A80[];
-extern u8 D_00003AA0[];
+extern u8 g_skinWeightProgram[];
+extern u8 g_litSkinWeightProgram[];
+extern u8 g_positionDeltaProgram[];
+extern u8 g_normalDeltaProgram[];
+extern u8 g_normalDeltaFinishProgram[];
+extern u8 g_nodeLinkProgram[];
+extern u8 g_extraStreamFirstProgram[];
+extern u8 g_litExtraStreamSecondProgram[];
 
 void BeginDmaTag(PacketWriter* self);
 void CloseDmaTag(PacketWriter* self);
@@ -917,8 +917,8 @@ void SetPlacedObjectFrozen(PlacedObject* self, s32 flag)
         if (self->soundRecord != 0) {
             StopSoundRecord((PlayingSound*)self->soundRecord->sound, 0);
         }
-        self->desc02()->m20(self, (Vec02*)D_00248D30);
-        self->desc02()->m21(self, (Vec02*)D_00248D30);
+        self->desc02()->m20(self, (Vec02*)g_zeroVector);
+        self->desc02()->m21(self, (Vec02*)g_zeroVector);
         self->flags |= (u64)1 << 38;
     } else {
         self->flags &= ~((u64)1 << 38);

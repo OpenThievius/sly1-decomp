@@ -22,8 +22,8 @@ void UpdatePanelStick(Self_136040_eu* self, PadRecord* p)
         f32 lo = -1.0f;
         f32 hi = 1.0f;
         f32 sum = p->stickX + p->secondStickX;
-        StickLimits t0 = D_00249D00;
-        StickLimits t1 = D_00249D10;
+        StickLimits t0 = g_panelStickActiveRamp;
+        StickLimits t1 = g_panelStickIdleRamp;
         f32 u = (sum < lo) ? lo : ((hi < sum) ? hi : sum);
         f32 v = p->stickY;
         f32 lo2 = -1.0f;

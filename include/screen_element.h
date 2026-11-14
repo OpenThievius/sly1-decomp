@@ -429,16 +429,16 @@ extern T217D_1330 g_gridSelector;   // D_00221330
 extern T217D_6D0 g_pauseMenuElement;    // D_002186D0
 extern T217D_440 g_typedTextCaptionBox;    // D_0021A440
 extern T217D_BF0 g_spinningSpriteElement;    // D_00220BF0
-extern T217D_3F0 D_002708E0;    // D_0021A3F0
-extern T217D_3F0 D_00271558;    // D_0021A3F0
+extern T217D_3F0 g_leftArcElement;    // D_0021A3F0
+extern T217D_3F0 g_rightArcElement;    // D_0021A3F0
 extern T217D_560 g_letterboxElement;    // D_00218560
 extern T217D_E30 g_firstTallyCaption;    // D_00218240
 extern T217D_E30 g_secondTallyCaption;    // D_00218290
 extern T217D_470 g_titleElement;    // D_00218470
 extern T217D_4C0 g_promptElement;    // D_002184C0
 extern T217D_720 g_stackedCaptionGroup;    // D_00218720
-extern T217D_5B0 D_002739F0;    // D_002185B0
-extern T217D_5B0 D_00273C50;    // D_002185B0
+extern T217D_5B0 g_bossBeatGlyphElement;    // D_002185B0
+extern T217D_5B0 g_beatPressGlyphElement;    // D_002185B0
 extern T217D_600 g_cyclingGlyphElement;    // D_00218600
 extern T217D_E30 g_completionPercentCaption;    // D_002181F0
 

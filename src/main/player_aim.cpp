@@ -68,7 +68,7 @@ void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec02* pos, Vec02* vec)
     Vec02 d;
     PlacedObject* owner = self->owner;
     *pos = owner->v190;
-    *vec = D_00248D30;
+    *vec = g_zeroVector;
     Attachment* c = self;
     s32 n = ((ChildPoseSource*)c)->count;
     if (n > 0) {
@@ -119,7 +119,7 @@ void CombineChildPoseRotations(ChildPoseSource* self, Mat02* outRot, Vec02* outV
     Vec02 tmpVec;
     PlacedObject* owner = self->owner;
     *outRot = owner->m1A0;
-    *outVec = D_00248D30;
+    *outVec = g_zeroVector;
     owner->desc02()->m29(owner, outRot, 0);
     saved = *outRot;
     Attachment* c = self;

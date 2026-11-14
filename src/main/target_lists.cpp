@@ -365,7 +365,7 @@ void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t)
     if (out) {
         u128 base = Vu0::Q(pos);
         u128 k = Vu0::Scalar(radius);
-        Vu0::Q(*out) = Vu0::MulAddX(base, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(tangent), Vu0::Q(g_unitZVector)), Vu0::Q(D_00248D30)), k);
+        Vu0::Q(*out) = Vu0::MulAddX(base, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(tangent), Vu0::Q(g_unitZVector)), Vu0::Q(g_zeroVector)), k);
     }
     if (angleOut) {
         *angleOut = ArctangentOfRatio(-tangent.x, tangent.y);
@@ -570,7 +570,7 @@ void StepListedCollisionPart(ListedCollisionPart* self, f32 t)
         return;
     }
     RotateMatrixUpright(&self->rot, 0, (Mat02*)&buf);
-    SteerColliderTowardRotation(self, (Mat02*)&buf, (f32*)self->p214, (Vec02*)&D_00248D30, (f32*)self->p218, t);
+    SteerColliderTowardRotation(self, (Mat02*)&buf, (f32*)self->p214, (Vec02*)&g_zeroVector, (f32*)self->p218, t);
 }
 
 // Changes the state of a pooled object that the player can pick up: leaving state 1 (held) lets go
@@ -591,8 +591,8 @@ void SetPooledObjectPlayerHold(PooledObject* self, s32 v)
     }
     if (v == 1) {
         self->desc->m15(self, (BaseObject*)g_player);
-        self->desc02()->m20(self, (Vec02*)&D_00248D30);
-        self->desc02()->m21(self, (Vec02*)&D_00248D30);
+        self->desc02()->m20(self, (Vec02*)&g_zeroVector);
+        self->desc02()->m21(self, (Vec02*)&g_zeroVector);
         SetColliderAnchors(self, 3, 0, 3, 0);
         RotateMatrixUpright(&g_player->m110, 0, (Mat02*)f.a);
         RotateMatrixUpright(&self->m110, (Mat02*)f.c, (Mat02*)f.b);

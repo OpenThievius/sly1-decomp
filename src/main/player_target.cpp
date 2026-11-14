@@ -50,26 +50,26 @@ struct TargetPoint;
 struct __attribute__((aligned(16))) OnOffDefaultsBlock { f32 f[36]; };
 
 // The file's .data, in retail's order.
-float D_00274E00 = 150.0f;
+float g_targetSearchLimit = 150.0f;
 float g_targetPathEdgeInset = 50.0f;
-float D_00274E08 = 250.0f;
+float g_targetReach = 250.0f;
 float g_farTargetDistance = 1000.0f;
 float g_targetCostWeight = 1.25f;
 float D_00274E14 = 2.0f;
-float D_00274E18 = 250.0f;
+float g_specialTargetDistance = 250.0f;
 float D_00274E1C = 0.200000003f;
 float g_targetMaxCost = 2500.0f;
-float D_00274E24 = -250.0f;
-f32 D_00274E28 = 0;
+float g_placementTargetBias = -250.0f;
+f32 g_pathTargetBias = 0;
 f32 D_00274E2C = 0;
-float D_00274E30 = 1250.0f;
-float D_00274E34 = 500.0f;
+float g_nearestPathTargetBias = 1250.0f;
+float g_curveTargetBias = 500.0f;
 float D_00274E38 = 500.0f;
-f32 D_00274E3C = 1e+03f;
+f32 g_repeatTargetPenalty = 1e+03f;
 float D_00274E40 = 100.0f;
-float D_00274E44 = 100.0f;
+float g_curveSearchStep = 100.0f;
 float D_00274E48 = 0.300000012f;
-float D_00274E4C = 25.0f;
+float g_driveSpeedThreshold = 25.0f;
 float D_00274E50 = 1.5f;
 float D_00274E54 = 0.25f;
 float D_00274E58 = 0.5f;
@@ -147,7 +147,7 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
     f32 curveT;
     f32 vectorT;
     s32 kind = -1;
-    f32 best = target != 0 ? -3.40282347e+38f : D_00274E00;
+    f32 best = target != 0 ? -3.40282347e+38f : g_targetSearchLimit;
     Class75_1CDFB8* obj;
     TargetCurve_1CDFB8* curve;
     Part_1CDFB8* part;
@@ -194,7 +194,7 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
     for (Class75_1CDFB8* o = (Class75_1CDFB8*)g_class75List.head; o != 0; o = o->next) {
         if (o != self->lastAimObject && (o->flags88 & 1) && (target == 0 || o == target) && IsObjectOfKind(o, 0x76) != 0) {
             GetObjectWorldPosition(o, &a);
-            f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(self->pos)))) - D_00274E08;
+            f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(self->pos)))) - g_targetReach;
             if (d < (best <? 0.0f) || o == target) {
                 best = best <? d;
                 obj = o;
@@ -209,7 +209,7 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
             s->vtbl[10](s, &a, 0, &b, 0, 0, &vectorT);
         }
         TransformPointBetweenFrames((PlacedObject*)v->parent, 0, &b, &b);
-        f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(b), Vu0::Q(self->pos)))) - D_00274E08;
+        f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(b), Vu0::Q(self->pos)))) - g_targetReach;
         if (d < (best <? 0.0f) || v == target) {
             d = best <? d;
             vectorU = vectorT;
@@ -224,7 +224,7 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
     if (c != 0 && n >= w->count2300 && CompletesWorldBits(c->worldBits) == 0) {
         GetObjectWorldPosition((BaseObject*)self->world->f1CE4->f618, &a);
         dist = Vu0::Distance(a, self->pos);
-        if (dist < D_00274E18 || self->world->f1CE4 == target) {
+        if (dist < g_specialTargetDistance || self->world->f1CE4 == target) {
             kind = 5;
             c17 = self->world->f1CE4;
         }
@@ -452,7 +452,7 @@ f32 ScoreTargetCurveAt(TargetCostContext* self, f32 t)
 
 // Left in this order: retail's call here evaluates the time before the pointers.
 void TransformPointAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
-extern const Vec02 D_00248D30;
+extern const Vec02 g_zeroVector;
 
 // v made unit length, or fallback when shorter than 0.0001; returns its length.
 static inline f32 NormalizeVector(Vec02& v, const Vec02& fallback)
@@ -481,7 +481,7 @@ void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec02* point, f32* ou
     p = *point;
     TransformPointAtTime((PlacedObject*)obj, 0, t, &p, 0, 0, 0);
     Vu0::Set(d, Vu0::Sub(Vu0::Q(p), Vu0::Q(pos0)));
-    f32 r = D_00274E08;
+    f32 r = g_targetReach;
     f32 dist2 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
     if (dist2 < r * r) {
         if (out1 != 0) {
@@ -509,8 +509,8 @@ void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec02* point, f32* ou
         return;
     }
     d.z = 0.0f;
-    f32 l = NormalizeVector(d, D_00248D30);
-    f32 gap = l - Fpu::Sqrt(D_00274E08 * D_00274E08 - az * az);
+    f32 l = NormalizeVector(d, g_zeroVector);
+    f32 gap = l - Fpu::Sqrt(g_targetReach * g_targetReach - az * az);
     Vu0::Set(acc, Vu0::MulX(Vu0::Q(d), Vu0::Scalar((gap + gap) / (t * t))));
     Vu0::Set(vel, Vu0::MulAddX2(Vu0::Q(self->v150), Vu0::Q(self->gravity), Vu0::Scalar(t), Vu0::Q(acc), Vu0::Scalar(t)));
     if (out1 != 0) {
@@ -643,7 +643,7 @@ f32 AddRepeatTargetPenalty(Player* self, void* target, f32 a, f32 b)
 {
     f32 r = a + b;
     if (target == self->penalizedTarget) {
-        r = r + D_00274E3C;
+        r = r + g_repeatTargetPenalty;
     }
     return r;
 }
@@ -816,7 +816,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (cost >= g_targetMaxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E24);
+            cost = AddRepeatTargetPenalty((Player*)self, o, cost, g_placementTargetBias);
             if (bestCost <= cost) {
                 continue;
             }
@@ -857,7 +857,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (cost >= g_targetMaxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, path, cost, D_00274E28);
+            cost = AddRepeatTargetPenalty((Player*)self, path, cost, g_pathTargetBias);
             if (bestCost <= cost) {
                 continue;
             }
@@ -958,7 +958,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (cost >= g_targetMaxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E30);
+            cost = AddRepeatTargetPenalty((Player*)self, o, cost, g_nearestPathTargetBias);
             if (bestCost <= cost) {
                 continue;
             }
@@ -1047,14 +1047,14 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         ctx.v = self->v150;
         ctx.target = o;
         f32 start = tCurve;
-        FindLocalMinimum((MinimumFn)ScoreTargetCurveAt, c, start, D_00274E44, 30.0f, o->shape->desc->m8(o->shape) - 30.0f,
+        FindLocalMinimum((MinimumFn)ScoreTargetCurveAt, c, start, g_curveSearchStep, 30.0f, o->shape->desc->m8(o->shape) - 30.0f,
                          &tCurveBest, &cost);
         cost = cost * weight;
         if (o != keep) {
             if (cost >= maxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E34);
+            cost = AddRepeatTargetPenalty((Player*)self, o, cost, g_curveTargetBias);
             if (bestCost <= cost) {
                 continue;
             }
@@ -1275,7 +1275,7 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         u128 drive = Vu0::MulX(local, n.q);
         *(Vu0::Vec*)&k = n;
         *(Vu0::Vec*)&self->headingVelocity = *(Vu0::Vec*)&drive;
-        if (D_00274E4C < Vu0::ToFloat(Vu0::Length(drive))) {
+        if (g_driveSpeedThreshold < Vu0::ToFloat(Vu0::Length(drive))) {
             sub = 0x11;
             if (self->targetMode == 0) {
                 if (45.0f < Vu0::ToFloat(Vu0::Length(vel))) {
@@ -1288,9 +1288,9 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
             }
         } else {
             sub = 0x10;
-            if (v < -D_00274E4C && (((TargetFrameRecord*)self->targetCurve)->sides & 1)) {
+            if (v < -g_driveSpeedThreshold && (((TargetFrameRecord*)self->targetCurve)->sides & 1)) {
                 sub = self->targetMode == 0 ? 0x13 : 0x12;
-            } else if (D_00274E4C < v && (((TargetFrameRecord*)self->targetCurve)->sides & 2)) {
+            } else if (g_driveSpeedThreshold < v && (((TargetFrameRecord*)self->targetCurve)->sides & 2)) {
                 sub = self->targetMode == 0 ? 0x12 : 0x13;
             }
             if (self->targetMode == 0) {
@@ -1460,7 +1460,7 @@ void CollectPlayerTargetSpans(TargetPlayerView* self, TargetProbe* t, u8* out)
     ColliderSpan span;
     if (t->active == 0) {
         // the object's class is not known
-        *(Vec02*)(out + 0x20) = D_00248D30;
+        *(Vec02*)(out + 0x20) = g_zeroVector;
         return;
     }
     TargetFrameRecord* rec = self->record;
@@ -1488,7 +1488,7 @@ void CollectPlayerTargetSpans(TargetPlayerView* self, TargetProbe* t, u8* out)
 }
 
 
-extern f32 D_00274B64;
+extern f32 g_phaseTimeOffset;
 struct BlendSlot;
 
 // The per-frame update of the player's state 6 by sub-state: 0x11 and 0x14 update the animation
@@ -1521,7 +1521,7 @@ void UpdatePlayerTargetPhase(Player* self)
         }
         UpdateEightEntryBlendWeights(self, (BlendSlot*)slots, n);
         PhasePlayer* ph = (PhasePlayer*)self->stateAnimPlayer;
-        f32 t = WrapModulo((ph->time + D_00274B64 * ph->speed) / ph->clip->length, 1.0f);
+        f32 t = WrapModulo((ph->time + g_phaseTimeOffset * ph->speed) / ph->clip->length, 1.0f);
         if (self->forcedOnOffObject == (s32)self->ownOnOffObject) {
             s32 m = self->onOffPhase;
             if (m < 3) {
@@ -1547,7 +1547,7 @@ void UpdatePlayerTargetPhase(Player* self)
             break;
         }
         PhasePlayer* ph = (PhasePlayer*)self->stateAnimPlayer;
-        f32 t = WrapModulo((ph->time + D_00274B64 * ph->speed) / ph->clip->length, 1.0f);
+        f32 t = WrapModulo((ph->time + g_phaseTimeOffset * ph->speed) / ph->clip->length, 1.0f);
         PlayPhaseCrossingSound(self, (f32*)self->phaseSoundStates, t);
         break;
     }

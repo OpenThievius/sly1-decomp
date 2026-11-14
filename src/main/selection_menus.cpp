@@ -71,7 +71,7 @@ extern ChoiceSound g_choiceSounds[6];
 extern ChoiceSound g_defaultChoiceSound;
 extern f32 g_gameClock[];
 extern f32 g_choiceSoundGap;
-extern s32 D_0026FCF4;
+extern s32 g_streamVoiceActive;
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 struct BoxStyle {
@@ -411,7 +411,7 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
         }
         if (slot) {
             OpenKeyRecord((KeyRecord*)slot);
-            D_0026FCF4 = HasStreamVoice();
+            g_streamVoiceActive = HasStreamVoice();
         }
     }
     void* h = self->walkers[0].walker;

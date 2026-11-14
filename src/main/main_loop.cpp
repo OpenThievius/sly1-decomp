@@ -382,7 +382,7 @@ void AssignAimTarget(T2195_790* self, void* obj, Vec02* src)
     if (obj == 0 || obj == (void*)GetActiveSwitchedCollider()) {
         self->hasTarget = 0;
         self->target = 0;
-        self->point = D_00248D30;
+        self->point = g_zeroVector;
     } else {
         self->target = obj;
         self->hasTarget = 1;
@@ -452,7 +452,7 @@ void GetAimRotation(T2195_790* self, f32 dt, Mat02* rot, Vec02* vec)
     Mat02 m;
     f32 angles[2];
     PlacedObject* owner = self->owner;
-    *vec = D_00248D30;
+    *vec = g_zeroVector;
     if (self->hold != 0) {
         *rot = owner->rot;
         return;

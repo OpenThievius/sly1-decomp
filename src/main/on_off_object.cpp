@@ -79,7 +79,7 @@ void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 
 
-extern f32 D_00275980[16];
+extern f32 g_onOffObjectBlockDefaults[16];
 
 
 
@@ -114,9 +114,9 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 
 
-extern f32 D_00275980[];
-extern f32 D_00275A10[4];
-extern f32 D_00275A20[2];
+extern f32 g_onOffObjectBlockDefaults[];
+extern f32 g_onOffObjectQuad450Default[4];
+extern f32 g_onOffObjectPackDefault[2];
 
 
 
@@ -214,27 +214,27 @@ World* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 void CloseBufferedStream(BufferedStream* q);
 void EndLoadProgress(LoadProgress* p);
 struct Counter;
-f32 D_00275970 = 0.5f;
+f32 g_onOffCameraMoveCooldown = 0.5f;
 f32 g_onOffCameraRetryDelay = 2.0f;
 s32 D_00275978 = 0;
-f32 D_00275980[16] = { -450.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 1.0f, 0, 0, 125.0f, 1.0f, 0, 0 };
-f32 D_002759C0[20] = { -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, 0, -0.1f,
+f32 g_onOffObjectBlockDefaults[16] = { -450.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 1.0f, 0, 0, 125.0f, 1.0f, 0, 0 };
+f32 g_onOffCameraOrbitLimits[20] = { -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, 0, -0.1f,
                         1.0f, 1.0f, 1.0f, 0, 1.0f, 1.0f, 1.0f, 0, 1.0f, 1.0f, 0, 0 };
-f32 D_00275A10[4] = { 0, 0.5f, 0, 0 };
-f32 D_00275A20[2] = { 0, 3.4028235e38f };
+f32 g_onOffObjectQuad450Default[4] = { 0, 0.5f, 0, 0 };
+f32 g_onOffObjectPackDefault[2] = { 0, 3.4028235e38f };
 f32 g_onOffCameraTurnLimit = 2.5f;
 f32 g_onOffCameraAimGain = 2.5f;
 f32 g_onOffCameraStepRate[4] = { 15.0f, 0.0f, 0.0f, 0.0f };
 f32 g_onOffCameraTurnTiltCoefficients[4] = { 1.0f, -2.0f, -2.0f, 0.0f };
 f32 g_onOffCameraTurnTiltLimits[2] = { 1.0f, 2.0f };
-f32 D_00275A58[6] = { 0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f };
+f32 g_onOffCameraAngleProfileScales[6] = { 0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f };
 f32 g_onOffCameraTurnBlendCoefficients[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 RampProfile g_onOffCameraFadeRamp = { 4.0f, 0.0f, 0.25f, 0.0f };
 RampProfile g_onOffCameraAngleRamp = { 2.5f, 0.0f, 0.35f, 15.0f };
 Vec02 g_onOffCameraProbeOffsets[5] = { { 0, 0, 0, 0 }, { 0, -50.0f, 0, 0 }, { 0, 50.0f, 0, 0 }, { 0, 0, 75.0f, 0 }, { 0, 0, -50.0f, 0 } };
 
 // Gives the block at 0x2F0 of the object, or the default block when there is no object.
-void* GetOnOffObjectBlock(OnOffObject* self) { return self ? (void*)&self->block2F0 : (void*)D_00275980; }
+void* GetOnOffObjectBlock(OnOffObject* self) { return self ? (void*)&self->block2F0 : (void*)g_onOffObjectBlockDefaults; }
 
 struct CameraPlacement { Vec02 q[5]; };
 // The orbit's polynomial block: three rows of four floats, cleared before the blend fills them.
@@ -261,7 +261,7 @@ void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffO
         s32 saved = object->f380;
         object->f380 = 0;
         PlaceOnOffCameraFrame(object, out, &x, &dir);
-        PlaceOnOffCameraOrbit(object->angle3A0, 0.0f, object, (f32*)&x, poly.f, D_002759C0, 1, out);
+        PlaceOnOffCameraOrbit(object->angle3A0, 0.0f, object, (f32*)&x, poly.f, g_onOffCameraOrbitLimits, 1, out);
         object->f380 = saved;
     }
 }
@@ -271,16 +271,16 @@ void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffO
 void InitOnOffObject(OnOffObject* self)
 {
     InitPlacedObject(self);
-    self->block2F0 = *(Block63*)D_00275980;
+    self->block2F0 = *(Block63*)g_onOffObjectBlockDefaults;
     self->limitRampTime = 2.0f;
     self->limitSpeed = 1.0f;
     self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
     self->holdRampTime = 2.0f;
     self->holdSpeed = 1.0f;
     self->f430 = -1;
-    self->quad450 = *(Quad63*)D_00275A10;
+    self->quad450 = *(Quad63*)g_onOffObjectQuad450Default;
     {
-        u8* src = (u8*)D_00275A20;
+        u8* src = (u8*)g_onOffObjectPackDefault;
         self->pack460 = *(Pack63*)src;
     }
     self->forcedState = -1;
@@ -691,7 +691,7 @@ extern f32 g_onOffCameraAimGain;
 extern f32 g_onOffCameraStepRate[4];
 extern f32 g_onOffCameraTurnTiltCoefficients[4];
 extern f32 g_onOffCameraTurnTiltLimits[2];
-extern f32 D_00275A58[6];
+extern f32 g_onOffCameraAngleProfileScales[6];
 extern f32 g_onOffCameraTurnBlendCoefficients[4];
 extern RampProfile g_onOffCameraFadeRamp;
 extern RampProfile g_onOffCameraAngleRamp;
@@ -753,7 +753,7 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
     if (object != 0 && (flags & 3)) {
         PlaceOnOffCameraFrame(object, &blended, &frame, &dir);
         if (object->f380 != 0) {
-            ConvertOffsetToCylindrical(&frame, (Vec02*)&D_00248D30, &frame.x, &frame.y, &frame.z);
+            ConvertOffsetToCylindrical(&frame, (Vec02*)&g_zeroVector, &frame.x, &frame.y, &frame.z);
             if (view->active24 == 0) {
                 frame.x += ClampToMagnitude(WrapAngle(view->frameAngle - frame.x), *(f32*)&object->f390);
             }
@@ -804,7 +804,7 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         Vec02 d;
         Vu0::Q(d) = Vu0::Sub(Vu0::Q((object->f444)->v140), Vu0::Q(eye->q[1]));
         d.z = 0.0f;
-        const u128& zero = Vu0::Q(D_00248D30);
+        const u128& zero = Vu0::Q(g_zeroVector);
         Vu0::Vec v = Vu0::Vec::Of(d);
         Vu0::Vec l = Vu0::Length(v);
         if (Vu0::ToFloat(l) < 0.0001f) {
@@ -981,9 +981,9 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
             }
         }
         RampProfile prof;
-        prof.maxSpeed = D_00275A58[0] * speed;
-        prof.endSpeed = D_00275A58[1] * speed;
-        prof.rampTime = D_00275A58[2];
+        prof.maxSpeed = g_onOffCameraAngleProfileScales[0] * speed;
+        prof.endSpeed = g_onOffCameraAngleProfileScales[1] * speed;
+        prof.rampTime = g_onOffCameraAngleProfileScales[2];
         f32 a = ApproachAngleWithRamp(angle, WrapAngle(angle + WrapAngle(goal - angle)), dt, &prof, 0);
         f32 da = __builtin_fabsf(WrapAngle(goal - a));
         if (__builtin_fabsf(WrapAngle(goal - next)) < da) {
@@ -1106,7 +1106,7 @@ done:
 
 
 extern s32 g_padSelectFlags;
-extern f32 D_00275970;
+extern f32 g_onOffCameraMoveCooldown;
 extern f32 g_onOffCameraRetryDelay;
 extern f32 g_gameClock[];
 extern f32 g_gameTime;
@@ -1139,7 +1139,7 @@ void FindFreeOnOffCameraScreenSpan(CameraController* self, Vec02* center)
     if (D_00275978 != 0) {
         return;
     }
-    if (g_gameClock[1] - ((OnOffCameraController*)self)->lastMoveTime < D_00275970) {
+    if (g_gameClock[1] - ((OnOffCameraController*)self)->lastMoveTime < g_onOffCameraMoveCooldown) {
         return;
     }
     lo = hi = *(Vec02*)cam->position;

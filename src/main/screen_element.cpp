@@ -203,7 +203,7 @@ extern Node_001AE178* D_00269988;
 
 // NEAR: the store of func_0015C1C0 result is before the float load and call; retail puts it in the delay slot of the func_001AA788 call
 
-extern f32 D_002744AC;
+extern f32 g_cyclingGlyphElementScale;
 // The letter func_001AEA08 picks: PAL reads the table's bytes unsigned (docs/VERSIONS.md).
 #ifdef VERSION_EU
 typedef u8 Letter_1AEA08;
@@ -212,10 +212,10 @@ typedef s8 Letter_1AEA08;
 #endif
 Letter_1AEA08 GetCyclingGlyph(void);
 
-extern f32 D_0027446C;
+extern f32 g_promptFontScaleX;
 // The vertical scale of the clone func_001ADF28 makes of its font (D_0027446C is the
 // horizontal one); the label runs on over a word nothing reads.
-extern f32 D_00274470[2];
+extern f32 g_promptFontScaleY[2];
 extern TextStyle g_promptStyle;
 
 s32 MatchesObjectId(s32 value, s32 item);
@@ -2067,8 +2067,8 @@ void DrawTitleElement(T217D_470* self)
     }
 }
 
-f32 D_0027446C = 0.7f;
-f32 D_00274470[2] = { 0.6f, 0.0f };
+f32 g_promptFontScaleX = 0.7f;
+f32 g_promptFontScaleY[2] = { 0.6f, 0.0f };
 const char* g_promptTexts[3] = { "Press START button for New Game", "Press START button to Resume Game", "Press SELECT button for Menu" };
 const char* g_noControllerText = "No Controller";
 TextStyle g_promptStyle = {0};
@@ -2083,7 +2083,7 @@ void InitPromptElement(T217D_4C0* self)
     SetupScreenElementText(self);
     vt = self->font->vt;
     // the class's this-adjustment from its vtable, not a field
-    self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), D_0027446C, D_00274470[0]);
+    self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), g_promptFontScaleX, g_promptFontScaleY[0]);
     if (GetFontById(2)) {
         self->frame = (Font**)&g_promptStyle;
         *self->frame = GetFontById(2);
@@ -2165,7 +2165,7 @@ void UpdatePromptElement(T217D_4C0* self)
     UpdateScreenElementSlide(self);
 }
 
-extern f32 D_00272B6C;
+extern f32 g_elementBlendLimit;
 
 // Draws the prompt element: its frame and text, positioned between hidden and shown by the blend,
 // with the colour's alpha pulsing as a sine of the elapsed time.
@@ -2179,7 +2179,7 @@ void DrawPromptElement(T217D_4C0* self)
     f32 s = Sine(g_elapsedTime * 3.0f);
     tmp = self->colorWord;
     ((u8*)&tmp)[3] = (u8)(s32)((s * 0.5f + 0.5f) * 255.0f);
-    f32 t = D_00272B6C <? self->blend;
+    f32 t = g_elementBlendLimit <? self->blend;
     f32 u = 1.0f - t;
     f32 w = self->w;
     f32 h = self->h;
@@ -2215,7 +2215,7 @@ void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* color
     CloseGifTag(&g_gsPacketWriter, 0);
 }
 
-f32 D_002744A4 = 0.1f;
+f32 g_letterPopDuration = 0.1f;
 f32 g_letterGlyphScale = 1.3f;
 
 // Sets up a glyph element in font 2 with the letter 'L' or 'K' (by which of the two elements it
@@ -2224,9 +2224,9 @@ void InitLetterGlyphElement(T217D_5B0* self)
 {
     SetupScreenElementText(self);
     self->font = GetFontById(2);
-    if (self == &D_00273C50) {
+    if (self == &g_beatPressGlyphElement) {
         FormatToString(self->text, "%c", 0x4C);
-    } else if (self == &D_002739F0) {
+    } else if (self == &g_bossBeatGlyphElement) {
         FormatToString(self->text, "%c", 0x4B);
     }
     PushFontScale(self->font, g_letterGlyphScale, g_letterGlyphScale);
@@ -2256,10 +2256,10 @@ void DrawLetterGlyphElement(ScreenElement* self)
     f32 size = 1.0f;
     curve.start = g_letterGlyphScale;
     curve.none = 0;
-    curve.k = (1.0f - g_letterGlyphScale) / (D_002744A4 * D_002744A4);
+    curve.k = (1.0f - g_letterGlyphScale) / (g_letterPopDuration * g_letterPopDuration);
     f32 peak = Fpu::Sqrt(g_letterGlyphScale / curve.k);
     f32 age = g_elapsedTime - self->since;
-    if (!(peak + D_002744A4 < age)) {
+    if (!(peak + g_letterPopDuration < age)) {
         f32 t = age - peak;
         size = (curve.floor >? curve.start + t * (t * curve.k));
     }
@@ -2282,7 +2282,7 @@ void DrawLetterGlyphElement(ScreenElement* self)
     }
 }
 
-f32 D_002744AC = 0.7f;
+f32 g_cyclingGlyphElementScale = 0.7f;
 
 // Sets up a glyph element in font 1 with 0.25 s slide times, no hold, and the current cycling
 // glyph as its text.
@@ -2297,7 +2297,7 @@ void InitCyclingGlyphElement(T217D_600* self)
     SetScreenElementSlideOutTime(self, k);
     SetScreenElementHoldTime(self, 0.0f);
     Font* r = GetFontById(1);
-    f32 g = D_002744AC;
+    f32 g = g_cyclingGlyphElementScale;
     self->font = r;
     SetScreenElementScale(self, g);
     v = GetCyclingGlyph();

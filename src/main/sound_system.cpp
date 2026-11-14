@@ -214,7 +214,7 @@ s32 g_streamVoiceLocked = 0;
 s32 g_soundEmitterUpdateDisabled = 0;
 s32 g_nextSoundRecordId = 0;
 f32 g_lastSilentSoundTime = -2.0f;
-s32 D_00274754 = 3;
+s32 g_soundLevelStepCountdown = 3;
 f32 g_defaultVolumeChannelFactors[11][4] = { 1.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 s32 g_iopChannel2Values[6] = { 0, 2, 3, 4, 9, 1 };
 U64P g_defaultSoundRepeat = { 0x40C0000040800000ULL };
@@ -1165,8 +1165,8 @@ void UpdateSoundEmitters(void)
             SetVolumeChannelFactor(7, 1, 1.0f);
             D_002748EC = 0;
         } else {
-            D_00274754 = D_00274754 - 1;
-            if (D_00274754 < 0) {
+            g_soundLevelStepCountdown = g_soundLevelStepCountdown - 1;
+            if (g_soundLevelStepCountdown < 0) {
                 s32 a = g_previousSoundLevel;
                 s32 v = (g_currentSoundLevel < a) ? a - 1 : a + 1;
                 D_002748EC = (u32)v >> 31;
@@ -1185,7 +1185,7 @@ void UpdateSoundEmitters(void)
                     f32 m = y * 0.6666667f;
                     SetVolumeChannelFactor(7, 1, (1.0f - y) + m);
                 }
-                D_00274754 = D_00274754 + 3;
+                g_soundLevelStepCountdown = g_soundLevelStepCountdown + 3;
             }
         }
         if (up ? !(g_previousSoundLevel < g_currentSoundLevel) : !(g_previousSoundLevel > g_currentSoundLevel)) {

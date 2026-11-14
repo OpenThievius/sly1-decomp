@@ -18,7 +18,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         break;
     case 1:
         if (self->mode2D0 != cur) {
-            D_00261D38 = D_00261D38 - 1;
+            g_controlBlockingElementCount = g_controlBlockingElementCount - 1;
         }
         break;
     case 3:
@@ -54,7 +54,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         break;
     case 1:
         if (self->mode2D0 != next) {
-            D_00261D38 = D_00261D38 + 1;
+            g_controlBlockingElementCount = g_controlBlockingElementCount + 1;
         }
         self->state2D4 = next;
         break;
@@ -84,10 +84,10 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         self->state2D4 = next;
         break;
     case 4:
-        SetArcTarget(&D_002708E0, 0);
-        SetArcSpecialObject(&D_002708E0, 0);
-        SetArcTarget(&D_00271558, 0);
-        SetArcSpecialObject(&D_00271558, 0);
+        SetArcTarget(&g_leftArcElement, 0);
+        SetArcSpecialObject(&g_leftArcElement, 0);
+        SetArcTarget(&g_rightArcElement, 0);
+        SetArcSpecialObject(&g_rightArcElement, 0);
         self->state2D4 = next;
         break;
     default:

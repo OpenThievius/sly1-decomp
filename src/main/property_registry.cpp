@@ -18,10 +18,10 @@ extern PropertyDescriptor g_objectPropertyDescriptors[1179];
 
 // The property lists, by class: (id, descriptor of D_002505D8, filled at startup).
 #define PROP(id, n) { id, &g_objectPropertyDescriptors[n] }
-extern const PropertyEntry D_002215A0[2] = {
+extern const PropertyEntry g_classRootProperties[2] = {
     PROP(0x1, 0), PROP(0x2, 1),
 };
-extern const PropertyEntry D_002215B0[21] = {
+extern const PropertyEntry g_objectProperties[21] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -29,7 +29,7 @@ extern const PropertyEntry D_002215B0[21] = {
     PROP(0x1C, 16), PROP(0x1D, 17), PROP(0x1E, 18), PROP(0x1F, 19),
     PROP(0x20, 20),
 };
-extern const PropertyEntry D_00221658[127] = {
+extern const PropertyEntry g_placedObjectProperties[127] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -63,7 +63,7 @@ extern const PropertyEntry D_00221658[127] = {
     PROP(0xD2, 120), PROP(0xD3, 121), PROP(0xD4, 122), PROP(0xD9, 123),
     PROP(0xDA, 124), PROP(0xDC, 125), PROP(0xDE, 126),
 };
-extern const PropertyEntry D_00221A50[149] = {
+extern const PropertyEntry g_colliderProperties[149] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -143,7 +143,7 @@ extern const PropertyEntry D_00221EF8[149] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148),
 };
-extern const PropertyEntry D_002223A0[153] = {
+extern const PropertyEntry g_switchedColliderProperties[153] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -184,7 +184,7 @@ extern const PropertyEntry D_002223A0[153] = {
     PROP(0xFF, 148), PROP(0x1B7, 281), PROP(0x1B8, 282), PROP(0x1B9, 283),
     PROP(0x1BA, 284),
 };
-extern const PropertyEntry D_00222868[156] = {
+extern const PropertyEntry g_turningColliderProperties[156] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -225,7 +225,7 @@ extern const PropertyEntry D_00222868[156] = {
     PROP(0xFF, 148), PROP(0x1B7, 281), PROP(0x1B8, 282), PROP(0x1B9, 283),
     PROP(0x1BA, 284), PROP(0x2F7, 709), PROP(0x2F8, 710), PROP(0x2F9, 711),
 };
-extern const PropertyEntry D_00222D48[170] = {
+extern const PropertyEntry g_playerProperties[170] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -270,7 +270,7 @@ extern const PropertyEntry D_00222D48[170] = {
     PROP(0x314, 740), PROP(0x315, 741), PROP(0x316, 742), PROP(0x317, 743),
     PROP(0x318, 744), PROP(0x319, 745),
 };
-extern const PropertyEntry D_00223298[198] = {
+extern const PropertyEntry g_agentProperties[198] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -322,7 +322,7 @@ extern const PropertyEntry D_00223298[198] = {
     PROP(0x2E5, 691), PROP(0x2E6, 692), PROP(0x2E7, 693), PROP(0x2F7, 709),
     PROP(0x2F8, 710), PROP(0x2F9, 711),
 };
-extern const PropertyEntry D_002238C8[211] = {
+extern const PropertyEntry g_companionAgentProperties[211] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -377,7 +377,7 @@ extern const PropertyEntry D_002238C8[211] = {
     PROP(0x2F3, 705), PROP(0x2F4, 706), PROP(0x2F5, 707), PROP(0x2F6, 708),
     PROP(0x2F7, 709), PROP(0x2F8, 710), PROP(0x2F9, 711),
 };
-extern const PropertyEntry D_00223F60[208] = {
+extern const PropertyEntry g_coneAgentProperties[208] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -431,7 +431,7 @@ extern const PropertyEntry D_00223F60[208] = {
     PROP(0x372, 841), PROP(0x373, 842), PROP(0x374, 843), PROP(0x375, 844),
     PROP(0x376, 845), PROP(0x377, 846), PROP(0x378, 847), PROP(0x379, 848),
 };
-extern const PropertyEntry D_002245E0[208] = {
+extern const PropertyEntry g_world1BossProperties[208] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -485,7 +485,7 @@ extern const PropertyEntry D_002245E0[208] = {
     PROP(0x372, 841), PROP(0x373, 842), PROP(0x374, 843), PROP(0x375, 844),
     PROP(0x376, 845), PROP(0x377, 846), PROP(0x378, 847), PROP(0x379, 848),
 };
-extern const PropertyEntry D_00224C60[203] = {
+extern const PropertyEntry g_world2BossProperties[203] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -538,7 +538,7 @@ extern const PropertyEntry D_00224C60[203] = {
     PROP(0x2F7, 709), PROP(0x2F8, 710), PROP(0x2F9, 711), PROP(0x421, 1024),
     PROP(0x422, 1025), PROP(0x423, 1026), PROP(0x424, 1027),
 };
-extern const PropertyEntry D_002252B8[201] = {
+extern const PropertyEntry g_world4BossProperties[201] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -591,7 +591,7 @@ extern const PropertyEntry D_002252B8[201] = {
     PROP(0x2F7, 709), PROP(0x2F8, 710), PROP(0x2F9, 711), PROP(0x48D, 1168),
     PROP(0x48E, 1169),
 };
-extern const PropertyEntry D_00225900[201] = {
+extern const PropertyEntry g_seekingAgentProperties[201] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -644,7 +644,7 @@ extern const PropertyEntry D_00225900[201] = {
     PROP(0x2F8, 710), PROP(0x2F9, 711), PROP(0x463, 1105), PROP(0x464, 1106),
     PROP(0x465, 1107),
 };
-extern const PropertyEntry D_00225F48[198] = {
+extern const PropertyEntry g_gaugeColliderAgentProperties[198] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -696,7 +696,7 @@ extern const PropertyEntry D_00225F48[198] = {
     PROP(0x2E5, 691), PROP(0x2E6, 692), PROP(0x2E7, 693), PROP(0x2F7, 709),
     PROP(0x2F8, 710), PROP(0x2F9, 711),
 };
-extern const PropertyEntry D_00226578[198] = {
+extern const PropertyEntry g_worldListedAgentProperties[198] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -748,7 +748,7 @@ extern const PropertyEntry D_00226578[198] = {
     PROP(0x2E5, 691), PROP(0x2E6, 692), PROP(0x2E7, 693), PROP(0x2F7, 709),
     PROP(0x2F8, 710), PROP(0x2F9, 711),
 };
-extern const PropertyEntry D_00226BA8[199] = {
+extern const PropertyEntry g_numberedAgentProperties[199] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -800,7 +800,7 @@ extern const PropertyEntry D_00226BA8[199] = {
     PROP(0x2E5, 691), PROP(0x2E6, 692), PROP(0x2E7, 693), PROP(0x2F7, 709),
     PROP(0x2F8, 710), PROP(0x2F9, 711), PROP(0x44B, 1079),
 };
-extern const PropertyEntry D_002271E0[198] = {
+extern const PropertyEntry g_contactAgentProperties[198] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -852,7 +852,7 @@ extern const PropertyEntry D_002271E0[198] = {
     PROP(0x2E5, 691), PROP(0x2E6, 692), PROP(0x2E7, 693), PROP(0x2F7, 709),
     PROP(0x2F8, 710), PROP(0x2F9, 711),
 };
-extern const PropertyEntry D_00227810[207] = {
+extern const PropertyEntry g_world3BossProperties[207] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -906,7 +906,7 @@ extern const PropertyEntry D_00227810[207] = {
     PROP(0x481, 1151), PROP(0x482, 1152), PROP(0x483, 1153), PROP(0x484, 1155),
     PROP(0x485, 1156), PROP(0x486, 1157), PROP(0x487, 1158),
 };
-extern const PropertyEntry D_00227E88[158] = {
+extern const PropertyEntry g_tintBlendColliderProperties[158] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -948,7 +948,7 @@ extern const PropertyEntry D_00227E88[158] = {
     PROP(0x1BA, 284), PROP(0x2F7, 709), PROP(0x2F8, 710), PROP(0x2F9, 711),
     PROP(0x425, 1028), PROP(0x426, 1029),
 };
-extern const PropertyEntry D_00228378[154] = {
+extern const PropertyEntry g_walkerColliderProperties[154] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -989,7 +989,7 @@ extern const PropertyEntry D_00228378[154] = {
     PROP(0xFF, 148), PROP(0x1B7, 281), PROP(0x1B8, 282), PROP(0x1B9, 283),
     PROP(0x1BA, 284), PROP(0x352, 804),
 };
-extern const PropertyEntry D_00228848[160] = {
+extern const PropertyEntry g_playerLinkedColliderProperties[160] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1073,7 +1073,7 @@ extern const PropertyEntry D_00228D48[158] = {
     PROP(0x1BA, 284), PROP(0x42E, 1046), PROP(0x42F, 1047), PROP(0x430, 1048),
     PROP(0x431, 1049), PROP(0x432, 1050),
 };
-extern const PropertyEntry D_00229238[156] = {
+extern const PropertyEntry g_gaugeColliderProperties[156] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1114,7 +1114,7 @@ extern const PropertyEntry D_00229238[156] = {
     PROP(0xFF, 148), PROP(0x1B7, 281), PROP(0x1B8, 282), PROP(0x1B9, 283),
     PROP(0x1BA, 284), PROP(0x421, 1053), PROP(0x433, 1051), PROP(0x434, 1052),
 };
-extern const PropertyEntry D_00229718[176] = {
+extern const PropertyEntry g_pathFollowerProperties[176] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1160,7 +1160,7 @@ extern const PropertyEntry D_00229718[176] = {
     PROP(0x459, 1095), PROP(0x45A, 1096), PROP(0x45B, 1097), PROP(0x45C, 1098),
     PROP(0x45D, 1099), PROP(0x45E, 1100), PROP(0x45F, 1101), PROP(0x460, 1102),
 };
-extern const PropertyEntry D_00229C98[177] = {
+extern const PropertyEntry g_modeWalkerObjectProperties[177] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1207,7 +1207,7 @@ extern const PropertyEntry D_00229C98[177] = {
     PROP(0x45D, 1099), PROP(0x45E, 1100), PROP(0x45F, 1101), PROP(0x460, 1102),
     PROP(0x46A, 1114),
 };
-extern const PropertyEntry D_0022A220[156] = {
+extern const PropertyEntry g_world5ModeColliderProperties[156] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1248,7 +1248,7 @@ extern const PropertyEntry D_0022A220[156] = {
     PROP(0xFF, 148), PROP(0x1B7, 281), PROP(0x1B8, 282), PROP(0x1B9, 283),
     PROP(0x1BA, 284), PROP(0x2A4, 1147), PROP(0x47E, 1145), PROP(0x47F, 1146),
 };
-extern const PropertyEntry D_0022A700[155] = {
+extern const PropertyEntry g_world3BeatPressColliderProperties[155] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1289,7 +1289,7 @@ extern const PropertyEntry D_0022A700[155] = {
     PROP(0xFF, 148), PROP(0x1B7, 281), PROP(0x1B8, 282), PROP(0x1B9, 283),
     PROP(0x1BA, 284), PROP(0x484, 1159), PROP(0x488, 1160),
 };
-extern const PropertyEntry D_0022ABD8[159] = {
+extern const PropertyEntry g_hitCountColliderProperties[159] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1331,7 +1331,7 @@ extern const PropertyEntry D_0022ABD8[159] = {
     PROP(0x1BA, 284), PROP(0x256, 1170), PROP(0x48F, 1171), PROP(0x490, 1172),
     PROP(0x491, 1173), PROP(0x492, 1174), PROP(0x493, 1175),
 };
-extern const PropertyEntry D_0022B0D0[149] = {
+extern const PropertyEntry g_effectOwnerProperties[149] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1371,7 +1371,7 @@ extern const PropertyEntry D_0022B0D0[149] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148),
 };
-extern const PropertyEntry D_0022B578[160] = {
+extern const PropertyEntry g_attachedSetProperties[160] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1413,7 +1413,7 @@ extern const PropertyEntry D_0022B578[160] = {
     PROP(0x177, 204), PROP(0x178, 205), PROP(0x179, 206), PROP(0x17A, 207),
     PROP(0x17B, 208), PROP(0x17C, 209), PROP(0x17D, 210), PROP(0x17E, 211),
 };
-extern const PropertyEntry D_0022BA78[179] = {
+extern const PropertyEntry g_maskedColliderProperties[179] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1460,7 +1460,7 @@ extern const PropertyEntry D_0022BA78[179] = {
     PROP(0x196, 235), PROP(0x197, 236), PROP(0x198, 237), PROP(0x199, 238),
     PROP(0x19A, 239), PROP(0x19B, 240), PROP(0x19C, 241),
 };
-extern const PropertyEntry D_0022C010[179] = {
+extern const PropertyEntry g_playerFlaggedColliderProperties[179] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1554,7 +1554,7 @@ extern const PropertyEntry D_0022C5A8[180] = {
     PROP(0x196, 235), PROP(0x197, 236), PROP(0x198, 237), PROP(0x199, 238),
     PROP(0x19A, 239), PROP(0x19B, 240), PROP(0x19C, 241), PROP(0x1C4, 298),
 };
-extern const PropertyEntry D_0022CB48[186] = {
+extern const PropertyEntry g_pooledHolderProperties[186] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1651,7 +1651,7 @@ extern const PropertyEntry D_0022D118[184] = {
     PROP(0x19A, 239), PROP(0x19B, 240), PROP(0x19C, 241), PROP(0x36C, 1110),
     PROP(0x44E, 1109), PROP(0x467, 1111), PROP(0x468, 1112), PROP(0x469, 1113),
 };
-extern const PropertyEntry D_0022D6D8[183] = {
+extern const PropertyEntry g_massScalingColliderProperties[183] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1699,7 +1699,7 @@ extern const PropertyEntry D_0022D6D8[183] = {
     PROP(0x19A, 239), PROP(0x19B, 240), PROP(0x19C, 241), PROP(0x19D, 242),
     PROP(0x19E, 243), PROP(0x19F, 244), PROP(0x1A0, 245),
 };
-extern const PropertyEntry D_0022DC90[184] = {
+extern const PropertyEntry g_latchedSwitchColliderProperties[184] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1747,7 +1747,7 @@ extern const PropertyEntry D_0022DC90[184] = {
     PROP(0x19A, 239), PROP(0x19B, 240), PROP(0x19C, 241), PROP(0x19D, 242),
     PROP(0x19E, 243), PROP(0x19F, 244), PROP(0x1A0, 245), PROP(0x1A1, 246),
 };
-extern const PropertyEntry D_0022E250[153] = {
+extern const PropertyEntry g_timedStateProperties[153] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1788,7 +1788,7 @@ extern const PropertyEntry D_0022E250[153] = {
     PROP(0xFF, 148), PROP(0x191, 250), PROP(0x1A2, 247), PROP(0x1A3, 248),
     PROP(0x1A4, 249),
 };
-extern const PropertyEntry D_0022E718[165] = {
+extern const PropertyEntry g_triggerZoneProperties[165] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1832,7 +1832,7 @@ extern const PropertyEntry D_0022E718[165] = {
     PROP(0x1AF, 261), PROP(0x1B0, 262), PROP(0x1B1, 263), PROP(0x1B2, 265),
     PROP(0x1B3, 266),
 };
-extern const PropertyEntry D_0022EC40[163] = {
+extern const PropertyEntry g_zoneColliderProperties[163] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1875,7 +1875,7 @@ extern const PropertyEntry D_0022EC40[163] = {
     PROP(0x1AF, 272), PROP(0x1B1, 273), PROP(0x1B2, 279), PROP(0x1B3, 280),
     PROP(0x1B4, 274), PROP(0x1B5, 277), PROP(0x1B6, 278),
 };
-extern const PropertyEntry D_0022F158[167] = {
+extern const PropertyEntry g_followableObjectProperties[167] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1959,7 +1959,7 @@ extern const PropertyEntry D_0022F690[149] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148),
 };
-extern const PropertyEntry D_0022FB38[152] = {
+extern const PropertyEntry g_objectSetProperties[152] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -1999,7 +1999,7 @@ extern const PropertyEntry D_0022FB38[152] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148), PROP(0x1A5, 287), PROP(0x1BC, 286), PROP(0x1BD, 288),
 };
-extern const PropertyEntry D_0022FFF8[152] = {
+extern const PropertyEntry g_flaggedObjectSetProperties[152] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2039,7 +2039,7 @@ extern const PropertyEntry D_0022FFF8[152] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148), PROP(0x1A5, 287), PROP(0x1BC, 286), PROP(0x1BD, 288),
 };
-extern const PropertyEntry D_002304B8[155] = {
+extern const PropertyEntry g_numberedItemProperties[155] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2080,7 +2080,7 @@ extern const PropertyEntry D_002304B8[155] = {
     PROP(0xFF, 148), PROP(0x18F, 622), PROP(0x1A5, 287), PROP(0x1BC, 286),
     PROP(0x1BD, 288), PROP(0x2AE, 623), PROP(0x2AF, 624),
 };
-extern const PropertyEntry D_00230990[158] = {
+extern const PropertyEntry g_stateTriggerProperties[158] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2122,7 +2122,7 @@ extern const PropertyEntry D_00230990[158] = {
     PROP(0x1BE, 289), PROP(0x1BF, 290), PROP(0x1C0, 291), PROP(0x1C1, 293),
     PROP(0x1C2, 294), PROP(0x1C3, 295),
 };
-extern const PropertyEntry D_00230E80[163] = {
+extern const PropertyEntry g_timedObjectProperties[163] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2165,7 +2165,7 @@ extern const PropertyEntry D_00230E80[163] = {
     PROP(0x1CB, 305), PROP(0x1CC, 306), PROP(0x1CD, 308), PROP(0x1CE, 309),
     PROP(0x1CF, 310), PROP(0x1D0, 311), PROP(0x1D1, 312),
 };
-extern const PropertyEntry D_00231398[167] = {
+extern const PropertyEntry g_timedGroupProperties[167] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2209,7 +2209,7 @@ extern const PropertyEntry D_00231398[167] = {
     PROP(0x1CE, 309), PROP(0x1CF, 310), PROP(0x1D0, 311), PROP(0x1D1, 312),
     PROP(0x1D2, 313), PROP(0x1D3, 314), PROP(0x1D4, 315),
 };
-extern const PropertyEntry D_002318D0[167] = {
+extern const PropertyEntry g_sequencedObjectProperties[167] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2253,7 +2253,7 @@ extern const PropertyEntry D_002318D0[167] = {
     PROP(0x1CF, 310), PROP(0x1D0, 311), PROP(0x1D1, 312), PROP(0x1D5, 317),
     PROP(0x1D6, 318), PROP(0x1D7, 319), PROP(0x1D8, 320),
 };
-extern const PropertyEntry D_00231E08[179] = {
+extern const PropertyEntry g_blinkObjectProperties[179] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2381,7 +2381,7 @@ extern const PropertyEntry D_00232868[149] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148),
 };
-extern const PropertyEntry D_00232D10[156] = {
+extern const PropertyEntry g_contactTrackerProperties[156] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2543,7 +2543,7 @@ extern const PropertyEntry g_scaledOffsetObjectProperties[150] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148), PROP(0x2B2, 625),
 };
-extern const PropertyEntry D_00234040[152] = {
+extern const PropertyEntry g_listedCollisionPartProperties[152] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2583,7 +2583,7 @@ extern const PropertyEntry D_00234040[152] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148), PROP(0x1EE, 642), PROP(0x2B6, 640), PROP(0x2BC, 641),
 };
-extern const PropertyEntry D_00234500[169] = {
+extern const PropertyEntry g_childGroupObjectProperties[169] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2628,7 +2628,7 @@ extern const PropertyEntry D_00234500[169] = {
     PROP(0x307, 727), PROP(0x308, 728), PROP(0x309, 729), PROP(0x30A, 730),
     PROP(0x30B, 731),
 };
-extern const PropertyEntry D_00234A48[175] = {
+extern const PropertyEntry g_contactListObjectProperties[175] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2674,7 +2674,7 @@ extern const PropertyEntry D_00234A48[175] = {
     PROP(0x30A, 730), PROP(0x30B, 731), PROP(0x364, 823), PROP(0x365, 825),
     PROP(0x366, 826), PROP(0x367, 827), PROP(0x368, 828),
 };
-extern const PropertyEntry D_00234FC0[178] = {
+extern const PropertyEntry g_contactListObjectWithoutGravityProperties[178] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2721,7 +2721,7 @@ extern const PropertyEntry D_00234FC0[178] = {
     PROP(0x365, 825), PROP(0x366, 826), PROP(0x367, 827), PROP(0x368, 828),
     PROP(0x369, 830), PROP(0x36A, 831),
 };
-extern const PropertyEntry D_00235550[179] = {
+extern const PropertyEntry g_timedContactListObjectProperties[179] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -2768,7 +2768,7 @@ extern const PropertyEntry D_00235550[179] = {
     PROP(0x366, 826), PROP(0x367, 827), PROP(0x368, 828), PROP(0x36B, 832),
     PROP(0x36C, 833), PROP(0x36D, 834), PROP(0x36E, 835),
 };
-extern const PropertyEntry D_00235AE8[169] = {
+extern const PropertyEntry g_standInProperties[169] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3060,7 +3060,7 @@ extern const PropertyEntry g_objectCreatorProperties[149] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148),
 };
-extern const PropertyEntry D_00237D30[155] = {
+extern const PropertyEntry g_pooledObjectProperties[155] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3101,7 +3101,7 @@ extern const PropertyEntry D_00237D30[155] = {
     PROP(0xFF, 148), PROP(0x1A2, 814), PROP(0x358, 810), PROP(0x359, 811),
     PROP(0x35A, 812), PROP(0x35B, 813), PROP(0x35C, 815),
 };
-extern const PropertyEntry D_00238208[156] = {
+extern const PropertyEntry g_targetFollowerProperties[156] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3142,7 +3142,7 @@ extern const PropertyEntry D_00238208[156] = {
     PROP(0xFF, 148), PROP(0x39B, 887), PROP(0x39C, 888), PROP(0x39D, 889),
     PROP(0x39E, 890), PROP(0x39F, 891), PROP(0x3A0, 892), PROP(0x3A1, 893),
 };
-extern const PropertyEntry D_002386E8[149] = {
+extern const PropertyEntry g_gaugeCountedObjectProperties[149] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3182,7 +3182,7 @@ extern const PropertyEntry D_002386E8[149] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148),
 };
-extern const PropertyEntry D_00238B90[152] = {
+extern const PropertyEntry g_boxColliderProperties[152] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3222,7 +3222,7 @@ extern const PropertyEntry D_00238B90[152] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148), PROP(0x435, 1054), PROP(0x436, 1055), PROP(0x437, 1056),
 };
-extern const PropertyEntry D_00239050[154] = {
+extern const PropertyEntry g_world5BossProperties[154] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3303,7 +3303,7 @@ extern const PropertyEntry g_countdownColliderProperties[151] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148), PROP(0x256, 1149), PROP(0x2CE, 1148),
 };
-extern const PropertyEntry D_002399D8[152] = {
+extern const PropertyEntry g_countedColliderProperties[152] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3343,7 +3343,7 @@ extern const PropertyEntry D_002399D8[152] = {
     PROP(0xF7, 144), PROP(0xF8, 145), PROP(0xFC, 146), PROP(0xFE, 147),
     PROP(0xFF, 148), PROP(0x175, 1178), PROP(0x18E, 1176), PROP(0x494, 1177),
 };
-extern const PropertyEntry D_00239E98[127] = {
+extern const PropertyEntry g_worldListedObjectProperties[127] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3377,7 +3377,7 @@ extern const PropertyEntry D_00239E98[127] = {
     PROP(0xD2, 120), PROP(0xD3, 121), PROP(0xD4, 122), PROP(0xD9, 123),
     PROP(0xDA, 124), PROP(0xDC, 125), PROP(0xDE, 126),
 };
-extern const PropertyEntry D_0023A290[133] = {
+extern const PropertyEntry g_lookupObjectProperties[133] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3447,7 +3447,7 @@ extern const PropertyEntry D_0023A6B8[127] = {
     PROP(0xD2, 120), PROP(0xD3, 121), PROP(0xD4, 122), PROP(0xD9, 123),
     PROP(0xDA, 124), PROP(0xDC, 125), PROP(0xDE, 126),
 };
-extern const PropertyEntry D_0023AAB0[200] = {
+extern const PropertyEntry g_effectSpawnerProperties[200] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3499,7 +3499,7 @@ extern const PropertyEntry D_0023AAB0[200] = {
     PROP(0x235, 413), PROP(0x236, 414), PROP(0x237, 415), PROP(0x238, 416),
     PROP(0x239, 417), PROP(0x23A, 418), PROP(0x23B, 419), PROP(0x23C, 420),
 };
-extern const PropertyEntry D_0023B0F0[149] = {
+extern const PropertyEntry g_coneVolumeProperties[149] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3573,7 +3573,7 @@ extern const PropertyEntry D_0023B598[127] = {
     PROP(0xD2, 120), PROP(0xD3, 121), PROP(0xD4, 122), PROP(0xD9, 123),
     PROP(0xDA, 124), PROP(0xDC, 125), PROP(0xDE, 126),
 };
-extern const PropertyEntry D_0023B990[127] = {
+extern const PropertyEntry g_objectGroupProperties[127] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3607,7 +3607,7 @@ extern const PropertyEntry D_0023B990[127] = {
     PROP(0xD2, 120), PROP(0xD3, 121), PROP(0xD4, 122), PROP(0xD9, 123),
     PROP(0xDA, 124), PROP(0xDC, 125), PROP(0xDE, 126),
 };
-extern const PropertyEntry D_0023BD88[128] = {
+extern const PropertyEntry g_cameraPositionedObjectProperties[128] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3677,7 +3677,7 @@ extern const PropertyEntry g_stateNotifierProperties[133] = {
     PROP(0x3F6, 980), PROP(0x3F7, 981), PROP(0x3F8, 982), PROP(0x3F9, 983),
     PROP(0x3FA, 984),
 };
-extern const PropertyEntry D_0023C5B0[133] = {
+extern const PropertyEntry g_soundNotifierProperties[133] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3713,7 +3713,7 @@ extern const PropertyEntry D_0023C5B0[133] = {
     PROP(0x3F6, 980), PROP(0x3F7, 981), PROP(0x3F8, 982), PROP(0x3F9, 983),
     PROP(0x3FA, 984),
 };
-extern const PropertyEntry D_0023C9D8[134] = {
+extern const PropertyEntry g_countdownNotifierProperties[134] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3749,7 +3749,7 @@ extern const PropertyEntry D_0023C9D8[134] = {
     PROP(0x3F6, 980), PROP(0x3F7, 981), PROP(0x3F8, 982), PROP(0x3F9, 983),
     PROP(0x3FA, 984), PROP(0x3FB, 986),
 };
-extern const PropertyEntry D_0023CE08[134] = {
+extern const PropertyEntry g_timeRangeNotifierProperties[134] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3785,7 +3785,7 @@ extern const PropertyEntry D_0023CE08[134] = {
     PROP(0x3F6, 980), PROP(0x3F7, 981), PROP(0x3F8, 982), PROP(0x3F9, 983),
     PROP(0x3FA, 984), PROP(0x3FB, 985),
 };
-extern const PropertyEntry D_0023D238[133] = {
+extern const PropertyEntry g_saveNotifierProperties[133] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3821,7 +3821,7 @@ extern const PropertyEntry D_0023D238[133] = {
     PROP(0x3F6, 980), PROP(0x3F7, 981), PROP(0x3F8, 982), PROP(0x3F9, 983),
     PROP(0x3FA, 984),
 };
-extern const PropertyEntry D_0023D660[134] = {
+extern const PropertyEntry g_deadlineNotifierProperties[134] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3857,7 +3857,7 @@ extern const PropertyEntry D_0023D660[134] = {
     PROP(0x3F6, 980), PROP(0x3F7, 981), PROP(0x3F8, 982), PROP(0x3F9, 983),
     PROP(0x3FA, 984), PROP(0x3FC, 987),
 };
-extern const PropertyEntry D_0023DA90[133] = {
+extern const PropertyEntry g_armedStateNotifierProperties[133] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3893,7 +3893,7 @@ extern const PropertyEntry D_0023DA90[133] = {
     PROP(0x3F6, 980), PROP(0x3F7, 981), PROP(0x3F8, 982), PROP(0x3F9, 983),
     PROP(0x3FA, 984),
 };
-extern const PropertyEntry D_0023DEB8[127] = {
+extern const PropertyEntry g_stateWalkerObjectProperties[127] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -3927,7 +3927,7 @@ extern const PropertyEntry D_0023DEB8[127] = {
     PROP(0xD2, 120), PROP(0xD3, 121), PROP(0xD4, 122), PROP(0xD9, 123),
     PROP(0xDA, 124), PROP(0xDC, 125), PROP(0xDE, 126),
 };
-extern const PropertyEntry D_0023E2B0[130] = {
+extern const PropertyEntry g_stateWalkerGroupProperties[130] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4040,7 +4040,7 @@ extern const PropertyEntry g_pairControllerProperties[160] = {
     PROP(0x34A, 796), PROP(0x34B, 797), PROP(0x34C, 798), PROP(0x34D, 799),
     PROP(0x34E, 800), PROP(0x34F, 801), PROP(0x350, 802), PROP(0x351, 803),
 };
-extern const PropertyEntry D_0023EFF8[128] = {
+extern const PropertyEntry g_scalingVolumeProperties[128] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4074,7 +4074,7 @@ extern const PropertyEntry D_0023EFF8[128] = {
     PROP(0xD2, 120), PROP(0xD3, 121), PROP(0xD4, 122), PROP(0xD9, 123),
     PROP(0xDA, 124), PROP(0xDC, 125), PROP(0xDE, 126), PROP(0xFE, 1104),
 };
-extern const PropertyEntry D_0023F3F8[127] = {
+extern const PropertyEntry g_textureRenderObjectProperties[127] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4108,7 +4108,7 @@ extern const PropertyEntry D_0023F3F8[127] = {
     PROP(0xD2, 120), PROP(0xD3, 121), PROP(0xD4, 122), PROP(0xD9, 123),
     PROP(0xDA, 124), PROP(0xDC, 125), PROP(0xDE, 126),
 };
-extern const PropertyEntry D_0023F7F0[130] = {
+extern const PropertyEntry g_stateResetObjectProperties[130] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4143,7 +4143,7 @@ extern const PropertyEntry D_0023F7F0[130] = {
     PROP(0xDA, 124), PROP(0xDC, 125), PROP(0xDE, 126), PROP(0x10A, 840),
     PROP(0x13B, 838), PROP(0x371, 839),
 };
-extern const PropertyEntry D_0023FC00[163] = {
+extern const PropertyEntry g_onOffObjectProperties[163] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4222,7 +4222,7 @@ extern const PropertyEntry g_entryTableObjectProperties[136] = {
     PROP(0x3A6, 898), PROP(0x3A7, 900), PROP(0x3A8, 901), PROP(0x3A9, 902),
     PROP(0x3AA, 903), PROP(0x3AB, 904), PROP(0x3AC, 905), PROP(0x3AD, 906),
 };
-extern const PropertyEntry D_00240558[140] = {
+extern const PropertyEntry g_stepSequenceProperties[140] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4296,7 +4296,7 @@ extern const PropertyEntry g_idLinkedObjectProperties[139] = {
     PROP(0x401, 993), PROP(0x402, 994), PROP(0x403, 995), PROP(0x404, 996),
     PROP(0x408, 997), PROP(0x40A, 998), PROP(0x40B, 999),
 };
-extern const PropertyEntry D_00240E10[127] = {
+extern const PropertyEntry g_warpPageProperties[127] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4330,7 +4330,7 @@ extern const PropertyEntry D_00240E10[127] = {
     PROP(0xD2, 120), PROP(0xD3, 121), PROP(0xD4, 122), PROP(0xD9, 123),
     PROP(0xDA, 124), PROP(0xDC, 125), PROP(0xDE, 126),
 };
-extern const PropertyEntry D_00241208[149] = {
+extern const PropertyEntry g_gaugeManagerProperties[149] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4472,7 +4472,7 @@ extern const PropertyEntry g_codeChecksumProperties[127] = {
     PROP(0xD2, 120), PROP(0xD3, 121), PROP(0xD4, 122), PROP(0xD9, 123),
     PROP(0xDA, 124), PROP(0xDC, 125), PROP(0xDE, 126),
 };
-extern const PropertyEntry D_00242298[81] = {
+extern const PropertyEntry g_worldProperties[81] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4495,7 +4495,7 @@ extern const PropertyEntry D_00242298[81] = {
     PROP(0x298, 579), PROP(0x299, 580), PROP(0x29A, 581), PROP(0x29B, 582),
     PROP(0x29C, 583),
 };
-extern const PropertyEntry D_00242520[39] = {
+extern const PropertyEntry g_cameraProperties[39] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4507,7 +4507,7 @@ extern const PropertyEntry D_00242520[39] = {
     PROP(0x29F, 595), PROP(0x2A0, 596), PROP(0x2A1, 597), PROP(0x2A2, 598),
     PROP(0x2A3, 599), PROP(0x2A4, 600), PROP(0x2A5, 601),
 };
-extern const PropertyEntry D_00242658[21] = {
+extern const PropertyEntry g_pathCurveObjectProperties[21] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4515,7 +4515,7 @@ extern const PropertyEntry D_00242658[21] = {
     PROP(0x1C, 16), PROP(0x1D, 17), PROP(0x1E, 18), PROP(0x1F, 19),
     PROP(0x20, 20),
 };
-extern const PropertyEntry D_00242700[28] = {
+extern const PropertyEntry g_targetCurveProperties[28] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4524,7 +4524,7 @@ extern const PropertyEntry D_00242700[28] = {
     PROP(0x20, 20), PROP(0xFF, 639), PROP(0x1EE, 638), PROP(0x2B7, 633),
     PROP(0x2B8, 634), PROP(0x2B9, 635), PROP(0x2BA, 637), PROP(0x2BB, 636),
 };
-extern const PropertyEntry D_002427E0[30] = {
+extern const PropertyEntry g_targetVectorProperties[30] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4543,7 +4543,7 @@ extern const PropertyEntry D_002428D0[28] = {
     PROP(0x20, 20), PROP(0xFF, 1036), PROP(0x1EE, 1035), PROP(0x2C0, 1037),
     PROP(0x2C1, 1038), PROP(0x2F9, 1034), PROP(0x427, 1032), PROP(0x428, 1033),
 };
-extern const PropertyEntry D_002429B0[21] = {
+extern const PropertyEntry g_listedKeepObjectProperties[21] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4551,7 +4551,7 @@ extern const PropertyEntry D_002429B0[21] = {
     PROP(0x1C, 16), PROP(0x1D, 17), PROP(0x1E, 18), PROP(0x1F, 19),
     PROP(0x20, 20),
 };
-extern const PropertyEntry D_00242A58[25] = {
+extern const PropertyEntry g_transformObjectProperties[25] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4560,7 +4560,7 @@ extern const PropertyEntry D_00242A58[25] = {
     PROP(0x20, 20), PROP(0x3A, 149), PROP(0x3C, 151), PROP(0x3D, 150),
     PROP(0x3F, 152),
 };
-extern const PropertyEntry D_00242B20[35] = {
+extern const PropertyEntry g_arrivalPointProperties[35] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4591,7 +4591,7 @@ extern const PropertyEntry D_00242D18[35] = {
     PROP(0xFF, 342), PROP(0x1E9, 337), PROP(0x1EA, 338), PROP(0x1EB, 339),
     PROP(0x1EC, 340), PROP(0x1ED, 341), PROP(0x1EE, 343),
 };
-extern const PropertyEntry D_00242E30[25] = {
+extern const PropertyEntry g_memberObjectProperties[25] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4600,7 +4600,7 @@ extern const PropertyEntry D_00242E30[25] = {
     PROP(0x20, 20), PROP(0x3A, 149), PROP(0x3C, 151), PROP(0x3D, 150),
     PROP(0x3F, 152),
 };
-extern const PropertyEntry D_00242EF8[27] = {
+extern const PropertyEntry g_groupMembersProperties[27] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4609,7 +4609,7 @@ extern const PropertyEntry D_00242EF8[27] = {
     PROP(0x20, 20), PROP(0x3A, 149), PROP(0x3C, 151), PROP(0x3D, 150),
     PROP(0x3F, 152), PROP(0x160, 489), PROP(0x23F, 490),
 };
-extern const PropertyEntry D_00242FD0[44] = {
+extern const PropertyEntry g_recordMemberProperties[44] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4622,7 +4622,7 @@ extern const PropertyEntry D_00242FD0[44] = {
     PROP(0x20E, 432), PROP(0x20F, 433), PROP(0x210, 434), PROP(0x216, 435),
     PROP(0x217, 436), PROP(0x218, 437), PROP(0x21A, 438), PROP(0x234, 439),
 };
-extern const PropertyEntry D_00243130[93] = {
+extern const PropertyEntry g_holdingMemberProperties[93] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4666,7 +4666,7 @@ extern const PropertyEntry D_002434E8[26] = {
     PROP(0x20, 20), PROP(0x3A, 149), PROP(0x3C, 151), PROP(0x3D, 150),
     PROP(0x3F, 152), PROP(0xFE, 1103),
 };
-extern const PropertyEntry D_002435B8[34] = {
+extern const PropertyEntry g_objectSubGroupProperties[34] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4685,7 +4685,7 @@ extern const PropertyEntry g_pointObjectProperties[23] = {
     PROP(0x1C, 16), PROP(0x1D, 17), PROP(0x1E, 18), PROP(0x1F, 19),
     PROP(0x20, 20), PROP(0x3A, 176), PROP(0x3C, 177),
 };
-extern const PropertyEntry D_00243780[30] = {
+extern const PropertyEntry g_targetPointProperties[30] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4704,7 +4704,7 @@ extern const PropertyEntry D_00243870[25] = {
     PROP(0x20, 20), PROP(0x3A, 176), PROP(0x3C, 177), PROP(0x36F, 836),
     PROP(0x370, 837),
 };
-extern const PropertyEntry D_00243938[25] = {
+extern const PropertyEntry g_listedPointObjectProperties[25] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4713,7 +4713,7 @@ extern const PropertyEntry D_00243938[25] = {
     PROP(0x20, 20), PROP(0x3A, 176), PROP(0x3C, 177), PROP(0xFF, 1031),
     PROP(0x1EE, 1030),
 };
-extern const PropertyEntry D_00243A00[23] = {
+extern const PropertyEntry g_textPointObjectProperties[23] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4721,7 +4721,7 @@ extern const PropertyEntry D_00243A00[23] = {
     PROP(0x1C, 16), PROP(0x1D, 17), PROP(0x1E, 18), PROP(0x1F, 19),
     PROP(0x20, 20), PROP(0x3A, 176), PROP(0x3C, 177),
 };
-extern const PropertyEntry D_00243AB8[33] = {
+extern const PropertyEntry g_animationProperties[33] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4732,7 +4732,7 @@ extern const PropertyEntry D_00243AB8[33] = {
     PROP(0x129, 184), PROP(0x12A, 185), PROP(0x12B, 186), PROP(0x12C, 187),
     PROP(0x12D, 188),
 };
-extern const PropertyEntry D_00243BC0[33] = {
+extern const PropertyEntry g_skipAnimationPlayerProperties[33] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4751,7 +4751,7 @@ extern const PropertyEntry D_00243CC8[21] = {
     PROP(0x1C, 16), PROP(0x1D, 17), PROP(0x1E, 18), PROP(0x1F, 19),
     PROP(0x20, 20),
 };
-extern const PropertyEntry D_00243D70[21] = {
+extern const PropertyEntry g_valueListObjectProperties[21] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4767,7 +4767,7 @@ extern const PropertyEntry D_00243E18[22] = {
     PROP(0x1C, 16), PROP(0x1D, 17), PROP(0x1E, 18), PROP(0x1F, 19),
     PROP(0x20, 20), PROP(0x1BB, 285),
 };
-extern const PropertyEntry D_00243EC8[23] = {
+extern const PropertyEntry g_stateGraphProperties[23] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4791,7 +4791,7 @@ extern const PropertyEntry g_pointGraphObjectProperties[22] = {
     PROP(0x1C, 16), PROP(0x1D, 17), PROP(0x1E, 18), PROP(0x1F, 19),
     PROP(0x20, 20), PROP(0x466, 1108),
 };
-extern const PropertyEntry D_002440E8[27] = {
+extern const PropertyEntry g_aimBlendGridProperties[27] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4800,7 +4800,7 @@ extern const PropertyEntry D_002440E8[27] = {
     PROP(0x20, 20), PROP(0xAB, 749), PROP(0x31A, 746), PROP(0x31B, 747),
     PROP(0x31C, 748), PROP(0x31D, 750), PROP(0x320, 751),
 };
-extern const PropertyEntry D_002441C0[62] = {
+extern const PropertyEntry g_objectPoolProperties[62] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4818,7 +4818,7 @@ extern const PropertyEntry D_002441C0[62] = {
     PROP(0x3CF, 942), PROP(0x3D0, 943), PROP(0x3D1, 944), PROP(0x3D2, 945),
     PROP(0x3D3, 946), PROP(0x3D4, 947),
 };
-extern const PropertyEntry D_002443B0[41] = {
+extern const PropertyEntry g_oscillatorProperties[41] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4839,7 +4839,7 @@ extern const PropertyEntry g_coloredTriangleSetProperties[21] = {
     PROP(0x1C, 16), PROP(0x1D, 17), PROP(0x1E, 18), PROP(0x1F, 19),
     PROP(0x20, 20),
 };
-extern const PropertyEntry D_002445A0[38] = {
+extern const PropertyEntry g_entryQueueProperties[38] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4851,7 +4851,7 @@ extern const PropertyEntry D_002445A0[38] = {
     PROP(0x46F, 1125), PROP(0x470, 1126), PROP(0x471, 1127), PROP(0x472, 1128),
     PROP(0x473, 1129), PROP(0x474, 1131),
 };
-extern const PropertyEntry D_002446D0[27] = {
+extern const PropertyEntry g_world3TimelineProperties[27] = {
     PROP(0x1, 0), PROP(0x2, 1), PROP(0xA, 2), PROP(0xB, 3),
     PROP(0xC, 4), PROP(0xD, 5), PROP(0xE, 6), PROP(0xF, 7),
     PROP(0x10, 8), PROP(0x11, 9), PROP(0x12, 10), PROP(0x15, 11),
@@ -4882,43 +4882,43 @@ extern const PropertyEntry g_stateWalkerProperties[11] = {
     PROP(0x259, 517), PROP(0x25A, 518), PROP(0x25B, 523),
 };
 extern const PropertyRegistry g_classPropertyLists = { {
-    { 2, D_002215A0 }, { 21, D_002215B0 }, { 127, D_00221658 }, { 149, D_00221A50 },
-    { 149, D_00221EF8 }, { 153, D_002223A0 }, { 156, D_00222868 }, { 170, D_00222D48 },
-    { 198, D_00223298 }, { 211, D_002238C8 }, { 208, D_00223F60 }, { 208, D_002245E0 },
-    { 203, D_00224C60 }, { 201, D_002252B8 }, { 201, D_00225900 }, { 198, D_00225F48 },
-    { 198, D_00226578 }, { 199, D_00226BA8 }, { 198, D_002271E0 }, { 207, D_00227810 },
-    { 158, D_00227E88 }, { 154, D_00228378 }, { 160, D_00228848 }, { 158, D_00228D48 },
-    { 156, D_00229238 }, { 176, D_00229718 }, { 177, D_00229C98 }, { 156, D_0022A220 },
-    { 155, D_0022A700 }, { 159, D_0022ABD8 }, { 149, D_0022B0D0 }, { 160, D_0022B578 },
-    { 179, D_0022BA78 }, { 179, D_0022C010 }, { 180, D_0022C5A8 }, { 186, D_0022CB48 },
-    { 184, D_0022D118 }, { 183, D_0022D6D8 }, { 184, D_0022DC90 }, { 153, D_0022E250 },
-    { 165, D_0022E718 }, { 163, D_0022EC40 }, { 167, D_0022F158 }, { 149, D_0022F690 },
-    { 152, D_0022FB38 }, { 152, D_0022FFF8 }, { 155, D_002304B8 }, { 158, D_00230990 },
-    { 163, D_00230E80 }, { 167, D_00231398 }, { 167, D_002318D0 }, { 179, D_00231E08 },
-    { 153, g_idFilterObjectProperties }, { 149, D_00232868 }, { 156, D_00232D10 }, { 156, D_002331F0 },
-    { 152, g_flaggedObjectProperties }, { 150, g_scaledOffsetObjectProperties }, { 152, D_00234040 }, { 169, D_00234500 },
-    { 175, D_00234A48 }, { 178, D_00234FC0 }, { 179, D_00235550 }, { 169, D_00235AE8 },
+    { 2, g_classRootProperties }, { 21, g_objectProperties }, { 127, g_placedObjectProperties }, { 149, g_colliderProperties },
+    { 149, D_00221EF8 }, { 153, g_switchedColliderProperties }, { 156, g_turningColliderProperties }, { 170, g_playerProperties },
+    { 198, g_agentProperties }, { 211, g_companionAgentProperties }, { 208, g_coneAgentProperties }, { 208, g_world1BossProperties },
+    { 203, g_world2BossProperties }, { 201, g_world4BossProperties }, { 201, g_seekingAgentProperties }, { 198, g_gaugeColliderAgentProperties },
+    { 198, g_worldListedAgentProperties }, { 199, g_numberedAgentProperties }, { 198, g_contactAgentProperties }, { 207, g_world3BossProperties },
+    { 158, g_tintBlendColliderProperties }, { 154, g_walkerColliderProperties }, { 160, g_playerLinkedColliderProperties }, { 158, D_00228D48 },
+    { 156, g_gaugeColliderProperties }, { 176, g_pathFollowerProperties }, { 177, g_modeWalkerObjectProperties }, { 156, g_world5ModeColliderProperties },
+    { 155, g_world3BeatPressColliderProperties }, { 159, g_hitCountColliderProperties }, { 149, g_effectOwnerProperties }, { 160, g_attachedSetProperties },
+    { 179, g_maskedColliderProperties }, { 179, g_playerFlaggedColliderProperties }, { 180, D_0022C5A8 }, { 186, g_pooledHolderProperties },
+    { 184, D_0022D118 }, { 183, g_massScalingColliderProperties }, { 184, g_latchedSwitchColliderProperties }, { 153, g_timedStateProperties },
+    { 165, g_triggerZoneProperties }, { 163, g_zoneColliderProperties }, { 167, g_followableObjectProperties }, { 149, D_0022F690 },
+    { 152, g_objectSetProperties }, { 152, g_flaggedObjectSetProperties }, { 155, g_numberedItemProperties }, { 158, g_stateTriggerProperties },
+    { 163, g_timedObjectProperties }, { 167, g_timedGroupProperties }, { 167, g_sequencedObjectProperties }, { 179, g_blinkObjectProperties },
+    { 153, g_idFilterObjectProperties }, { 149, D_00232868 }, { 156, g_contactTrackerProperties }, { 156, D_002331F0 },
+    { 152, g_flaggedObjectProperties }, { 150, g_scaledOffsetObjectProperties }, { 152, g_listedCollisionPartProperties }, { 169, g_childGroupObjectProperties },
+    { 175, g_contactListObjectProperties }, { 178, g_contactListObjectWithoutGravityProperties }, { 179, g_timedContactListObjectProperties }, { 169, g_standInProperties },
     { 167, g_objectCyclerProperties }, { 160, g_objectGathererProperties }, { 150, g_pairedObjectProperties }, { 153, g_hitTargetProperties },
-    { 149, g_soundStateObjectProperties }, { 149, g_objectCreatorProperties }, { 155, D_00237D30 }, { 156, D_00238208 },
-    { 149, D_002386E8 }, { 152, D_00238B90 }, { 154, D_00239050 }, { 151, g_countdownColliderProperties },
-    { 152, D_002399D8 }, { 127, D_00239E98 }, { 133, D_0023A290 }, { 127, D_0023A6B8 },
-    { 200, D_0023AAB0 }, { 149, D_0023B0F0 }, { 127, D_0023B598 }, { 127, D_0023B990 },
-    { 128, D_0023BD88 }, { 133, g_stateNotifierProperties }, { 133, D_0023C5B0 }, { 134, D_0023C9D8 },
-    { 134, D_0023CE08 }, { 133, D_0023D238 }, { 134, D_0023D660 }, { 133, D_0023DA90 },
-    { 127, D_0023DEB8 }, { 130, D_0023E2B0 }, { 135, g_redirectObjectProperties }, { 160, g_pairControllerProperties },
-    { 128, D_0023EFF8 }, { 127, D_0023F3F8 }, { 130, D_0023F7F0 }, { 163, D_0023FC00 },
-    { 136, g_entryTableObjectProperties }, { 140, D_00240558 }, { 139, g_idLinkedObjectProperties }, { 127, D_00240E10 },
-    { 149, D_00241208 }, { 127, g_currentPlacedObjectProperties }, { 127, g_partHolderObjectProperties }, { 127, g_codeChecksumProperties },
-    { 81, D_00242298 }, { 39, D_00242520 }, { 21, D_00242658 }, { 28, D_00242700 },
-    { 30, D_002427E0 }, { 28, D_002428D0 }, { 21, D_002429B0 }, { 25, D_00242A58 },
-    { 35, D_00242B20 }, { 28, D_00242C38 }, { 35, D_00242D18 }, { 25, D_00242E30 },
-    { 27, D_00242EF8 }, { 44, D_00242FD0 }, { 93, D_00243130 }, { 26, D_00243418 },
-    { 26, D_002434E8 }, { 34, D_002435B8 }, { 23, g_pointObjectProperties }, { 30, D_00243780 },
-    { 25, D_00243870 }, { 25, D_00243938 }, { 23, D_00243A00 }, { 33, D_00243AB8 },
-    { 33, D_00243BC0 }, { 21, D_00243CC8 }, { 21, D_00243D70 }, { 22, D_00243E18 },
-    { 23, D_00243EC8 }, { 23, g_itemKeeperProperties }, { 22, g_pointGraphObjectProperties }, { 27, D_002440E8 },
-    { 62, D_002441C0 }, { 41, D_002443B0 }, { 21, g_coloredTriangleSetProperties }, { 38, D_002445A0 },
-    { 27, D_002446D0 }, { 29, D_002447A8 }, { 13, g_animationPlayerProperties }, { 11, g_stateWalkerProperties },
+    { 149, g_soundStateObjectProperties }, { 149, g_objectCreatorProperties }, { 155, g_pooledObjectProperties }, { 156, g_targetFollowerProperties },
+    { 149, g_gaugeCountedObjectProperties }, { 152, g_boxColliderProperties }, { 154, g_world5BossProperties }, { 151, g_countdownColliderProperties },
+    { 152, g_countedColliderProperties }, { 127, g_worldListedObjectProperties }, { 133, g_lookupObjectProperties }, { 127, D_0023A6B8 },
+    { 200, g_effectSpawnerProperties }, { 149, g_coneVolumeProperties }, { 127, D_0023B598 }, { 127, g_objectGroupProperties },
+    { 128, g_cameraPositionedObjectProperties }, { 133, g_stateNotifierProperties }, { 133, g_soundNotifierProperties }, { 134, g_countdownNotifierProperties },
+    { 134, g_timeRangeNotifierProperties }, { 133, g_saveNotifierProperties }, { 134, g_deadlineNotifierProperties }, { 133, g_armedStateNotifierProperties },
+    { 127, g_stateWalkerObjectProperties }, { 130, g_stateWalkerGroupProperties }, { 135, g_redirectObjectProperties }, { 160, g_pairControllerProperties },
+    { 128, g_scalingVolumeProperties }, { 127, g_textureRenderObjectProperties }, { 130, g_stateResetObjectProperties }, { 163, g_onOffObjectProperties },
+    { 136, g_entryTableObjectProperties }, { 140, g_stepSequenceProperties }, { 139, g_idLinkedObjectProperties }, { 127, g_warpPageProperties },
+    { 149, g_gaugeManagerProperties }, { 127, g_currentPlacedObjectProperties }, { 127, g_partHolderObjectProperties }, { 127, g_codeChecksumProperties },
+    { 81, g_worldProperties }, { 39, g_cameraProperties }, { 21, g_pathCurveObjectProperties }, { 28, g_targetCurveProperties },
+    { 30, g_targetVectorProperties }, { 28, D_002428D0 }, { 21, g_listedKeepObjectProperties }, { 25, g_transformObjectProperties },
+    { 35, g_arrivalPointProperties }, { 28, D_00242C38 }, { 35, D_00242D18 }, { 25, g_memberObjectProperties },
+    { 27, g_groupMembersProperties }, { 44, g_recordMemberProperties }, { 93, g_holdingMemberProperties }, { 26, D_00243418 },
+    { 26, D_002434E8 }, { 34, g_objectSubGroupProperties }, { 23, g_pointObjectProperties }, { 30, g_targetPointProperties },
+    { 25, D_00243870 }, { 25, g_listedPointObjectProperties }, { 23, g_textPointObjectProperties }, { 33, g_animationProperties },
+    { 33, g_skipAnimationPlayerProperties }, { 21, D_00243CC8 }, { 21, g_valueListObjectProperties }, { 22, D_00243E18 },
+    { 23, g_stateGraphProperties }, { 23, g_itemKeeperProperties }, { 22, g_pointGraphObjectProperties }, { 27, g_aimBlendGridProperties },
+    { 62, g_objectPoolProperties }, { 41, g_oscillatorProperties }, { 21, g_coloredTriangleSetProperties }, { 38, g_entryQueueProperties },
+    { 27, g_world3TimelineProperties }, { 29, D_002447A8 }, { 13, g_animationPlayerProperties }, { 11, g_stateWalkerProperties },
 }, { 0, g_classPropertyLists.lists, 0x2000 },
     { 0x2000, 0x1, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x5, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x2000, 0x6, 0x6, 0x2000, 0x1000, 0x1000, 0x2000, 0x6, 0x2000, 0x2000, 0x2000, 0x2000, 0x1000, 0x2000, 0x5, 0x2000, 0x2000, 0x2000, 0x2000, 0x6, 0x2000, 0x2000, 0x2000, 0x6, 0x2000, 0x2000, 0x2000 } };
 #undef PROP

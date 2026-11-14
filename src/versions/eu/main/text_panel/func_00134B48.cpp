@@ -88,7 +88,7 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
         } else {
             objs[shown++] = obj;
             ProjectPointToCamera((Camera*)g_camera, &pos, (f32*)&screen);
-            Vu0::Vec e = Vu0::Sub(Vu0::Vec::Of(screen), Vu0::Vec::Of(D_00261190));
+            Vu0::Vec e = Vu0::Sub(Vu0::Vec::Of(screen), Vu0::Vec::Of(g_panelFocusPoint));
             f32 c = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(e, e)));
             if (c < best) {
                 nearest = obj;

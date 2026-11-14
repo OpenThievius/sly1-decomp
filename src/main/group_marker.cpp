@@ -54,7 +54,7 @@ extern u8 g_groupMicroprogramEnd[];
 void UploadProjectionConstants(void);
 void UploadCameraOncePerFrame(void);
 void AddDmaRefTagIfChanged(void* self, void* a, void* b);
-extern WarpPage* D_0026FA68;   // the warp page on view (warp_menu sets its mode and cursor)
+extern WarpPage* g_currentWarpPage;   // the warp page on view (warp_menu sets its mode and cursor)
 extern s32 g_maskImageUploads[];
 extern Camera* g_camera;
 void SnapCameraZoom(void* self, f32 x);
@@ -69,8 +69,8 @@ void WriteCameraMatricesPacket(Camera* self);
 void AddDmaRefTagIfChanged(void*, void*, void*);
 void UploadGroupConstants(void);
 extern u32 g_cameraUploadedThisFrame;
-extern u8 D_00215C60[];
-extern u8 D_00217348[];
+extern u8 g_alternateMicroprogram[];
+extern u8 g_alternateMicroprogramEnd[];
 
 // D_0026AC10 points at the next free 128-byte entry of D_005E4700 (1024 of them).
 void QueueDeferredRequest(DeferredRequest* src)
@@ -304,7 +304,7 @@ void PrepareAlternateBlockGroup(void)
     UploadProjectionConstants();
     UploadCameraOncePerFrame();
     UploadGroupConstants();
-    AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00215C60, D_00217348);
+    AddDmaRefTagIfChanged(&g_vifPacketWriter, g_alternateMicroprogram, g_alternateMicroprogramEnd);
 }
 
 // Prepares the last draw group: sends the group's microprogram and projection constants, the mask
@@ -317,8 +317,8 @@ void PrepareUnzoomedGroup(void)
     UploadProjectionConstants();
     UploadCameraOncePerFrame();
 
-    if (D_0026FA68 != 0) {
-        s32 v = g_maskImageUploads[D_0026FA68->slot];
+    if (g_currentWarpPage != 0) {
+        s32 v = g_maskImageUploads[g_currentWarpPage->slot];
         if (v != 0) {
             *(u64*)self->cur = ((u64)v << 32) | 0x50000000;
             self->cur = self->cur + 0x10;

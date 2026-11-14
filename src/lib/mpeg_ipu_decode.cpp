@@ -551,7 +551,7 @@ void ReadMotionVector(MpegDecoder* self, MpegMotionVector* n, s32* out, s32 p3, 
     }
 }
 
-u32 D_0027B040[10] = { 0x1, 0x1, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x1 };
+u32 g_ipuCommandWindowInvalid[10] = { 0x1, 0x1, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x1 };
 
 // Writes a command to the IPU's command register 0x10002000 and records what its kind leaves in the
 // bit window (D_0027B040).
@@ -560,7 +560,7 @@ void SendIpuCommand(MpegDecoder* obj, u32 value)
     u32 index = value >> 28;
     volatile u32* setting = (volatile u32*)0x10002000;
     *setting = value;
-    obj->windowInvalid = D_0027B040[index];
+    obj->windowInvalid = g_ipuCommandWindowInvalid[index];
 }
 
 
@@ -599,7 +599,7 @@ s64 WaitIpuCommandResult(MpegDecoder* p) {
     return v;
 }
 
-extern u32 D_0027B040[];
+extern u32 g_ipuCommandWindowInvalid[];
 
 
 // Waits for the IPU, then sends it a variable-length decode command of a table and reads the
@@ -622,7 +622,7 @@ s16 DecodeIpuVariableLength(MpegDecoder* self, s32 mode)
     }
     cmd = (mode << 26) | 0x30000000;
     *(volatile u32*)0x10002000 = cmd;
-    self->windowInvalid = D_0027B040[cmd >> 28];
+    self->windowInvalid = g_ipuCommandWindowInvalid[cmd >> 28];
     st = *(volatile s64*)0x10002000;
     if (st < 0) {
         do {
@@ -648,7 +648,7 @@ s16 DecodeIpuVariableLength(MpegDecoder* self, s32 mode)
 
 s64 WaitIpuCommandResult(MpegDecoder* obj);
 
-extern u32 D_0027B040[];
+extern u32 g_ipuCommandWindowInvalid[];
 
 // Returns the next n bits of the IPU's bit stream without consuming them.
 s32 PeekIpuBits(MpegDecoder* obj, s32 a1)
@@ -662,14 +662,14 @@ s32 PeekIpuBits(MpegDecoder* obj, s32 a1)
             }
         }
         *(volatile u32*)0x10002000 = 0x40000000;
-        obj->windowInvalid = D_0027B040[4];
+        obj->windowInvalid = g_ipuCommandWindowInvalid[4];
         obj->window = WaitIpuCommandResult(obj);
         obj->windowBits = 0x20;
     }
     return (u32)obj->window >> (32 - a1);
 }
 
-extern u32 D_0027B040[];
+extern u32 g_ipuCommandWindowInvalid[];
 extern s64 WaitIpuCommandResult(MpegDecoder* c, u32* v);
 
 // Sends the IPU a command that consumes n bits and refreshes the bit window.
@@ -687,7 +687,7 @@ void SkipIpuBits(MpegDecoder* s0, u32 s1)
     }
     v = s1 | 0x40000000u;
     *(volatile u32*)0x10002000 = v;
-    p = &D_0027B040[v >> 28];
+    p = &g_ipuCommandWindowInvalid[v >> 28];
     s0->windowInvalid = *p;
     s0->window = WaitIpuCommandResult(s0, p);
     s0->windowBits = 0x20;
@@ -696,13 +696,13 @@ void SkipIpuBits(MpegDecoder* s0, u32 s1)
 
 s64 WaitIpuCommandResult(MpegDecoder* obj);
 
-extern u32 D_0027B040[];
+extern u32 g_ipuCommandWindowInvalid[];
 
 struct IpuCommand {
     static void Send(MpegDecoder* obj, u32 cmd)
     {
         *(volatile u32*)0x10002000 = cmd;
-        obj->windowInvalid = D_0027B040[cmd >> 28];
+        obj->windowInvalid = g_ipuCommandWindowInvalid[cmd >> 28];
         obj->window = WaitIpuCommandResult(obj);
     }
 };

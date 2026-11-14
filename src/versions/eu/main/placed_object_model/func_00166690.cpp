@@ -320,7 +320,7 @@ slow:
             q.hi = 1;
             q.lo = Rgbaq_166690(a, skin->r, skin->g, skin->b);
         } else {
-            q.lo = Rgbaq_166690(Alpha_166690((s32)(D_002623E0.a * self->alpha)), D_002623E0.r, D_002623E0.g, D_002623E0.b);
+            q.lo = Rgbaq_166690(Alpha_166690((s32)(g_defaultModelColor.a * self->alpha)), g_defaultModelColor.r, g_defaultModelColor.g, g_defaultModelColor.b);
             q.hi = 1;
         }
         D_00262474 = 0x23C - D_00262474;

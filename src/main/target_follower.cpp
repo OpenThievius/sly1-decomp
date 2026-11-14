@@ -451,8 +451,8 @@ typedef void (*VFn_16D788)(TargetFollower* self, const void* arg);
 void PlaceTargetFollowerOnFollowed(TargetFollower* self) {
     Vec3 v;
     SetColliderAnchors(self, 3, 0, 3, 0);
-    ((VFn_16D788*)self->desc)[36](self, &D_00248D30);
-    ((VFn_16D788*)self->desc)[37](self, &D_00248D30);
+    ((VFn_16D788*)self->desc)[36](self, &g_zeroVector);
+    ((VFn_16D788*)self->desc)[37](self, &g_zeroVector);
     ConvertPositionToWorld((BaseObject*)self->followedObject->anchor, (Vec02*)&v);
     v.z = v.z + self->heightOffset;
     ((VFn_16D788*)self->desc)[33](self, &v);

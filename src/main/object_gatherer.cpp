@@ -153,7 +153,7 @@ f32 g_numberedItemSpinRange[2] = { 0.8f, 1.2f };
 f32 g_numberedItemJitterRange[2] = { 0.9f, 1.1f };
 f32 g_numberedItemReachRadius = 300.0f;
 T219C_Params g_numberedItemEffectParams = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, (void (*)(void*))SetNumberedItemFlag };
-s32 D_0026A9E0[28] = { 2, 4, 8, 16, 65536, 32, 64, 128, 256, 512, 131072, 1024, 2048, 8192, 4096, 16384, 32768, 0, 0, 0, 0, 0, 0, 268435456, 536870912, 1073741824, (-2147483647 - 1), 1 };
+s32 g_levelBitTable[28] = { 2, 4, 8, 16, 65536, 32, 64, 128, 256, 512, 131072, 1024, 2048, 8192, 4096, 16384, 32768, 0, 0, 0, 0, 0, 0, 268435456, 536870912, 1073741824, (-2147483647 - 1), 1 };
 // The links func_0019A1E0 resolves for a C17, and two words after them that retail's label
 // holds as zeros (the label runs to the next table, D_0026AB90; nothing reads them).
 struct C17LinkTable { ObjectLink e[26]; s32 end[2]; };
@@ -275,7 +275,7 @@ void UpdateObjectSet(ObjectSet* self, f32 dt)
     d.z = 0.0f;
     u128 base = Vu0::Q(r->target->v150);
     u128 out = Vu0::ScalarAt(g_objectSetPushSpeed);
-    Vu0::Q(d) = Vu0::MulAddX2(base, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(D_00248D30)), out, Vu0::Q(g_unitZVector), Vu0::ScalarAt(g_objectSetLiftSpeed));
+    Vu0::Q(d) = Vu0::MulAddX2(base, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_zeroVector)), out, Vu0::Q(g_unitZVector), Vu0::ScalarAt(g_objectSetLiftSpeed));
     self->desc02()->m20(self, &d);
     ((SlotFn*)self->desc)[77](self);
 }
@@ -590,7 +590,7 @@ void UpdateNumberedItem(NumberedItem* self, f32 dt)
     ComputeObjectMotionInFrame(self, 0, &self->v140, &second, 0, 0, 0);
     u128 rel = Vu0::Sub(Vu0::Q(second), Vu0::Q(first));
     u128 away = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(data->collider->v140));
-    u128 dir = Vu0::NormalizeOrMoved(away, Vu0::Q(D_00248D30));
+    u128 dir = Vu0::NormalizeOrMoved(away, Vu0::Q(g_zeroVector));
     if (Vu0::ToFloat(Vu0::Dot(rel, dir)) > -50.0f) {
         ((SlotFn*)self->desc)[77](self);
     }
@@ -951,14 +951,14 @@ void StartC17Collider(C17* o)
         return;
     o->levelBitIndex = 0;
 lookup:
-    if (D_0026A9E0[0] != (s32)o->levelBit) {
+    if (g_levelBitTable[0] != (s32)o->levelBit) {
         do {
             o->levelBitIndex++;
             if (o->levelBitIndex >= 0x1C) {
                 o->levelBitIndex = -1;
                 return;
             }
-        } while (D_0026A9E0[o->levelBitIndex] != (s32)o->levelBit);
+        } while (g_levelBitTable[o->levelBitIndex] != (s32)o->levelBit);
     }
     if (o->levelBitIndex >= 0x1C)
         o->levelBitIndex = -1;
@@ -1433,7 +1433,7 @@ void StepObjectGatherer(ObjectGatherer* self, f32 dt)
         TurnColliderTowardRotation(self, dt, &basis, g_gathererTurnRamp);
         break;
     default:
-        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, (f32*)self->p214, dt);
+        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&g_zeroVector, (f32*)self->p214, dt);
         break;
     }
 }
@@ -1553,8 +1553,8 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
                 }
                 g_activeListFrames = frame.prev;
             } else {
-                self->desc02()->m20(self, (Vec02*)&D_00248D30);
-                self->desc02()->m21(self, (Vec02*)&D_00248D30);
+                self->desc02()->m20(self, (Vec02*)&g_zeroVector);
+                self->desc02()->m21(self, (Vec02*)&g_zeroVector);
             }
             break;
         }
@@ -1737,8 +1737,8 @@ void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
         SetColliderPartListed((ObjectGatherer *)node, a1 == 0);
         node = it.Next();
     }
-    self->desc02()->m20(self, (Vec02 *)&D_00248D30);
-    self->desc02()->m21(self, (Vec02 *)&D_00248D30);
+    self->desc02()->m20(self, (Vec02 *)&g_zeroVector);
+    self->desc02()->m21(self, (Vec02 *)&g_zeroVector);
 }
 
 // Switches the gatherer to a new mode (nothing if unchanged): leaving 4 un-suspends it; mode 0 is

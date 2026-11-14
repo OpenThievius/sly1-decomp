@@ -237,9 +237,9 @@ void DrawTrailRibbon(TrailOwner* self)
     *(u32*)&c = 0xFFFFFFFF;
     BeginDmaTag(&g_vifPacketWriter);
     b.f98 = 0;
-    SetVertexBatchTransform(&b, ((u8*)&D_00248D30), (u8*)&g_identityMatrix);
+    SetVertexBatchTransform(&b, ((u8*)&g_zeroVector), (u8*)&g_identityMatrix);
     SetVertexBatchMode(&b, r->batchMode);
-    SelectVertexBatchLights(&b, ((u8*)&D_00248D30), r->target->boundRadius);
+    SelectVertexBatchLights(&b, ((u8*)&g_zeroVector), r->target->boundRadius);
     idx = r->oldest;
     if (idx != r->next) {
         do {

@@ -140,7 +140,7 @@ extern "C" s32 AwaitSemaphore(s32 a);
 
 extern u8 g_movieCrcTable[];
 
-extern s32 D_002626CC;
+extern s32 g_fieldOffsetMode;
 
 void ResetMpegDecoder(S_20B0C0* d);
 
@@ -213,7 +213,7 @@ extern u8 g_moviePictureBuffer[];
 extern u8 g_movieVideoRingBuffer[];
 extern u8 g_movieUploadPacket[];
 extern u8 g_movieDrawPacket[];
-extern u8 D_00148D68[];
+extern u8 g_moviePlayerChecksumEnd[];
 
 s32 CreateMpegDecoder(void* self, void* a, s32 b);
 Handler_20A220 SetStreamCallback(Ctx_20A220* self, s32 idx, s32 key, Handler_20A220 handler, void* arg);
@@ -338,7 +338,7 @@ void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
             if (self->positionAttachment != 0) {
                 self->positionAttachment->vt->getPos(self->positionAttachment, 0.0f, &f.q00, &f.q10);
             } else {
-                f.q00 = D_00248D30;
+                f.q00 = g_zeroVector;
             }
             if (self->orientationAttachment != 0) {
                 self->orientationAttachment->vt->getRot(self->orientationAttachment, 0.0f, &f.tbl30, &f.q20);
@@ -401,7 +401,7 @@ void AddColliderForce(void* a, void* b);
 void InitContactListObjectWithoutGravity(ContactListObject* self)
 {
     InitContactListObject(self);
-    self->gravity = D_00248D30;
+    self->gravity = g_zeroVector;
 }
 
 // Launches the object as the base does, then sets its target velocity to the unit X direction
@@ -449,7 +449,7 @@ void LaunchTimedContactListObject(ContactListGlider* self, PlacedObject* target,
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-0.5f));
         ClampVectorLength(&d, &d, self->rate6F4 * 0.75f);
         Vu0::Q(e) = Vu0::MulAddX(Vu0::Q(d), Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos)), Vu0::Scalar(1.5f));
-        FindSegmentSphereSpan((Vec02*)&D_00248D30, &d, &e, self->rate6F4, 1, &hit);
+        FindSegmentSphereSpan((Vec02*)&g_zeroVector, &d, &e, self->rate6F4, 1, &hit);
         f32 x = hit.time[1];
         f32 m = 0.25f;
         m = m >? x;
@@ -511,7 +511,7 @@ void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
         self->pos = outPos;
         self->v150 = outVel;
     } else {
-        accel = D_00248D30;
+        accel = g_zeroVector;
         Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Scalar(dt));
     }
     if (self->ready != 0) {
@@ -1064,9 +1064,9 @@ void InitMoviePlayback(MoviePlayer* self, void* v)
     }
     self->uploadPacket = g_movieUploadPacket;
     self->drawPacket = g_movieDrawPacket;
-    D_002626CC = 0;
+    g_fieldOffsetMode = 0;
     g_moviePlayer.cur = (u8*)0x100010;
-    g_moviePlayer.remain = (s32)D_00148D68;
+    g_moviePlayer.remain = (s32)g_moviePlayerChecksumEnd;
     g_moviePlayer.crc = 0xFFFFFFFF;
     u8* tb = g_movieCrcTable;
     i = 0;
@@ -1160,7 +1160,7 @@ void FinishMovie(MoviePlayer* self)
         do {
         } while (self->threadStep != 0);
     }
-    D_002626CC = 3;
+    g_fieldOffsetMode = 3;
     SendResidentImages();
     if (self->movieIndex >= 16) {
         mask = 0;

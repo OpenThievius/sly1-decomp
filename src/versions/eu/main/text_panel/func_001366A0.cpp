@@ -146,11 +146,11 @@ void DrawTextPanel(Obj_eu_1367B8* self)
     Layout_eu_1367B8 box;
     PanelLayout_eu_1367B8::Set(&box, offX + 180.0f, offY + 362.610168f, width, height, grey, 0);
     f32 fade = 1.0f;
-    if (((Sparkle_eu_1367B8*)&D_002708E0)->target != 0) {
-        fade = ((Sparkle_eu_1367B8*)&D_002708E0)->blend <? fade;
+    if (((Sparkle_eu_1367B8*)&g_leftArcElement)->target != 0) {
+        fade = ((Sparkle_eu_1367B8*)&g_leftArcElement)->blend <? fade;
     }
-    if (((Sparkle_eu_1367B8*)&D_00271558)->target != 0) {
-        fade = ((Sparkle_eu_1367B8*)&D_00271558)->blend <? fade;
+    if (((Sparkle_eu_1367B8*)&g_rightArcElement)->target != 0) {
+        fade = ((Sparkle_eu_1367B8*)&g_rightArcElement)->blend <? fade;
     }
     if (fade < 1.0f) {
         u8 a = ByteLerp::Of(0, color.a, fade);

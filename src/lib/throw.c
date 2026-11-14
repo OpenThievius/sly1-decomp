@@ -65,7 +65,7 @@ EhContext* GetStaticExceptionContext(void);
 void InstallExceptionContextGetter(void);
 
 /* The terminate hook, and the function that returns the exception context. */
-void (*D_00278048)(void) = AbortOnTerminate;
+void (*g_terminateHandler)(void) = AbortOnTerminate;
 EhContext* (*g_exceptionContextGetter)(void) = (EhContext* (*)(void))InstallExceptionContextGetter;
 
 /* The default terminate hook D_00278048: calls AbortProgram. */
@@ -78,7 +78,7 @@ void AbortOnTerminate(void)
  * HandleAbstractCall call it). */
 void RunTerminateHook(void)
 {
-    (*D_00278048)();
+    (*g_terminateHandler)();
 }
 
 /* Compares a type's name with a given one through CompareStrings (CompareStrings): returns its

@@ -23,7 +23,7 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
     switch (mode) {
     case 2: {
         Vu0::Q(((T217D_BF0Rates*)&g_spinningSpriteElement)->aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
-        ((T217D_BF0Rates*)&g_spinningSpriteElement)->rates = D_00248D30;
+        ((T217D_BF0Rates*)&g_spinningSpriteElement)->rates = g_zeroVector;
         g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 2);
         anim = self->weightBlend;
         break;

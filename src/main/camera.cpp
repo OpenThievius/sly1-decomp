@@ -394,7 +394,7 @@ struct Record_00143208 {
 };
 
 extern Player* g_player;
-extern const Vec02 D_00248D30;
+extern const Vec02 g_zeroVector;
 void SpringCameraVector(Camera* self, Vec02* pos, Vec02* vel, Vec02* target, f32 k, f32 damp, f32 dt);
 void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3);
 
@@ -411,7 +411,7 @@ void UpdateCameraTargetTracking(Spring_00143208* self, void* target, f32 dt, Rec
         switch (g_player->f268C) {
         case 0:
             SpringCameraVector((Camera*)self, &self->v250, &self->v260, &offset, 5.0f, -3.5f, dt);
-            SpringCameraVector((Camera*)self, &self->v270, &self->v280, (Vec02*)&D_00248D30, 5.0f, -3.5f, dt);
+            SpringCameraVector((Camera*)self, &self->v270, &self->v280, (Vec02*)&g_zeroVector, 5.0f, -3.5f, dt);
             break;
         case 1:
             SpringCameraVector((Camera*)self, &self->v250, &self->v260, &offset, 1.0f, -10.0f, dt);
@@ -423,7 +423,7 @@ void UpdateCameraTargetTracking(Spring_00143208* self, void* target, f32 dt, Rec
         }
     } else {
         SpringCameraVector((Camera*)self, &self->v250, &self->v260, &offset, 5.0f, -3.5f, dt);
-        SpringCameraVector((Camera*)self, &self->v270, &self->v280, (Vec02*)&D_00248D30, 5.0f, -3.5f, dt);
+        SpringCameraVector((Camera*)self, &self->v270, &self->v280, (Vec02*)&g_zeroVector, 5.0f, -3.5f, dt);
     }
     Vu0::Q(rec->v40) = Vu0::Add(Vu0::Q(rec->v10), Vu0::Q(self->v250));
 }
@@ -970,7 +970,7 @@ void BuildFrustumSideNormals(Mat02* m, Vec02* out, f32 x, f32 y)
     Vu0::Q(out[3]) = Vu0::Cross(Vu0::Q(m->r[1]), Unit(Vu0::MulAddX(Vu0::Q(m->r[0]), Vu0::Q(m->r[2]), Vu0::Scalar(ny))));
 }
 
-extern const f32 D_00248D40[4];
+extern const f32 g_unitScale[4];
 extern "C" f32 Sine(f32 x);
 void BuildRotationFromVector(Vec02* v, Mat02* mat);
 
@@ -1000,7 +1000,7 @@ void UpdateCameraMatrices(Camera* self)
         Vec02 corner;
         Vec02 tilt;
         Mat4 proj;
-        Vu0::Q(corner) = Vu0::MulAddX(Vu0::Q(*(Vec02*)D_00248D40), Vu0::Q(*(Vec02*)g_cameraSwingCornerShift), Vu0::Scalar(swing));
+        Vu0::Q(corner) = Vu0::MulAddX(Vu0::Q(*(Vec02*)g_unitScale), Vu0::Q(*(Vec02*)g_cameraSwingCornerShift), Vu0::Scalar(swing));
         Vu0::Q(tilt) = Vu0::MulX(Vu0::Q(*(Vec02*)g_cameraSwingTiltShift), Vu0::Scalar(swing));
         BuildProjectionMatrix(&proj, corner.x * 640.0f / (self->projectionScaleX * 4096.0f), corner.y * 224.0f / (self->projectionScaleY * 4096.0f), tilt.x, tilt.y, self->nearDistance, self->farDistance);
         BuildViewProjectionMatrix((f32*)&pos, (f32*)&rotation, &proj, (Quad16*)&self->viewProjection);
@@ -1416,7 +1416,7 @@ void RequestPlainCameraSnap(void* p)
     RequestCameraSnap((Camera*)p, 0);
 }
 
-extern const Vec02 D_00248D30;
+extern const Vec02 g_zeroVector;
 
 // The view ray through the screen point (x, y): from the camera 100 units along the direction
 // (1, -x f1F0, y f1F4) in its frame, the point of it nearest p; v230 is that point less p.
@@ -1426,7 +1426,7 @@ void SetCameraAimOffsetFromScreenPoint(Camera* self, Vec02* p, f32 x, f32 y)
     Vec02 far;
     f32 t;
     f32 dist;
-    self->v240 = D_00248D30;
+    self->v240 = g_zeroVector;
     dir.x = 1.0f;
     dir.y = -x * self->projectionScaleX;
     dir.z = y * self->projectionScaleY;
@@ -1449,7 +1449,7 @@ void AimCameraAtPointWithSpring(Camera* self, Vec02* a1, Vec02* a2, f32 turnYaw,
     f32 dist;
 
     *(Vec02*)self->position = *a2;
-    SpringCameraVector(self, &self->v230, &self->v240, (Vec02*)&D_00248D30, g_cameraAimSpringStiffness, g_cameraAimSpringDamping, g_gameClock.dt);
+    SpringCameraVector(self, &self->v230, &self->v240, (Vec02*)&g_zeroVector, g_cameraAimSpringStiffness, g_cameraAimSpringDamping, g_gameClock.dt);
     Vu0::Q(tmp) = Vu0::Add(Vu0::Q(*a1), Vu0::Q(self->v230));
     ConvertOffsetToSpherical(&tmp, a2, &yaw, &pitch, &dist);
     yaw = yaw + Arctangent(turnYaw * self->projectionScaleX);
@@ -1569,7 +1569,7 @@ void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWei
         *p++ = fn(ctx, a4, origin, &hits[i]);
     }
     SolveActiveSetSystem(total, (u8*)dots, rhs, weights);
-    sum = D_00248D30;
+    sum = g_zeroVector;
     p = weights;
     for (i = 0; i < total; i++) {
         Vu0::Q(sum) = Vu0::MulAddX(Vu0::Q(sum), Vu0::Q(hits[i].normal), Vu0::Scalar(*p++));

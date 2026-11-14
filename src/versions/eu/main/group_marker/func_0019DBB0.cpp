@@ -7,8 +7,8 @@ void PrepareUnzoomedGroup(void)
     UploadProjectionConstants();
     UploadCameraOncePerFrame();
 
-    if (D_0026FA68 != 0) {
-        s32 v = g_maskImageUploads[D_0026FA68->slot];
+    if (g_currentWarpPage != 0) {
+        s32 v = g_maskImageUploads[g_currentWarpPage->slot];
         if (v != 0) {
             *(u64*)self->cur = ((u64)v << 32) | 0x50000000;
             self->cur = self->cur + 0x10;

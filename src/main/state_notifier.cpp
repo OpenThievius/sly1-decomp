@@ -50,7 +50,7 @@ struct ScaledTransform;
 
 extern u8 g_flagTable[];
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 extern f32 g_frameDt;
 struct BufferedStream;
 struct Collider;
@@ -114,7 +114,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void CompleteCountdownNotifier(CountdownNotifier* self);
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 extern f32 g_frameDt;
 
 extern void* g_countdownNotifierParams[28];
@@ -131,7 +131,7 @@ extern u8 g_camera[];
 extern u8 g_identityMatrix[];
 
 extern u8 g_identityMatrix[];
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 extern f32 g_scatterStagger;
 void PushBackMemoryMark(void);
 StateNotifier** AllocateBackMemory(s32 size);
@@ -148,7 +148,7 @@ struct __attribute__((aligned(16))) Quad_148038 {
 struct Ctx_148038;
 extern f32 g_spareNotifierScreenPoint[4];
 extern u8 g_identityMatrix[];
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 extern Quad_148038 g_spareNotifierVelocity;
 s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out);
 void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
@@ -334,7 +334,7 @@ void StartStateNotifier(StateNotifier* self)
 
 extern f32 g_gameTime;
 extern u8 g_camera[];
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 extern f32 g_notifierDragRate;
 extern f32 g_notifierAimZScale;
 extern f32 g_notifierArriveTime;
@@ -464,7 +464,7 @@ void MoveStateNotifier(StateNotifier* self, f32 dt, s32 quiet)
         }
         ComputePolarOffset((Vec3*)&w, self->motionPos.x, self->motionPos.y, self->motionPos.z);
         *(Vu0::Vec*)&self->pos = Vu0::Add(Vu0::Vec::Of(lead->placementObject->v140), Vu0::Vec::Of(w));
-        self->v150 = *(Vec02*)&D_00248D30;
+        self->v150 = *(Vec02*)&g_zeroVector;
         Vu0::Q(w) = Vu0::Sub(Vu0::Q(lead->placementObject->v140), Vu0::Q(self->pos));
         w.z *= g_notifierAimZScale;
         BuildBasisFromX(&w, &m);
@@ -590,7 +590,7 @@ struct NotifierMeshHit {
     u8 pad24[0x30 - 0x24];
 };
 
-extern const f32 D_00248D40[4];
+extern const f32 g_unitScale[4];
 extern u8 g_unitXVector[];
 struct FaceRef;
 struct Mesh03;
@@ -609,8 +609,8 @@ void BounceStateNotifierOffSurfaces(StateNotifier* self)
     f32 best = 0.0f;
     Vec02 lo;
     Vec02 hi;
-    Vu0::Q(lo) = Vu0::MulAddX(Vec::Of(self->v140), Vec::Of(D_00248D40), Vec::Scalar(-self->collisionRadius)).q;
-    Vu0::Q(hi) = Vu0::MulAddX(Vec::Of(self->v140), Vec::Of(D_00248D40), Vec::Scalar(self->collisionRadius)).q;
+    Vu0::Q(lo) = Vu0::MulAddX(Vec::Of(self->v140), Vec::Of(g_unitScale), Vec::Scalar(-self->collisionRadius)).q;
+    Vu0::Q(hi) = Vu0::MulAddX(Vec::Of(self->v140), Vec::Of(g_unitScale), Vec::Scalar(self->collisionRadius)).q;
     Vec02 dir;
     Vec02 bestN;
     NotifierMeshHit hits[8];
@@ -704,7 +704,7 @@ void TriggerStateNotifierNearPlayer(StateNotifier* self)
                     ComputeObjectMotionInFrame(d->trackedObject, 0, &d->trackedObject->v140, &p0, 0, 0, 0);
                     ComputeObjectMotionInFrame(self, 0, pos, &p1, 0, 0, 0);
                     u128 dd = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(d->trackedObject->v140));
-                    u128 fb = *(const u128*)&D_00248D30;
+                    u128 fb = *(const u128*)&g_zeroVector;
                     u128 rel = Vu0::Sub(Vu0::Q(p1), Vu0::Q(p0));
                     u128 dir = Vu0::NormalizeOrMoved(dd, fb);
                     if (-50.0f < Vu0::ToFloat(Vu0::Dot(rel, dir))) {
@@ -896,7 +896,7 @@ void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
             k += x * (c[1] + x * c[2]);
             Vu0::Q(scale) = Vu0::Splat(k);
             }
-        BuildScaledTransformMatrix((f32*)D_00248D30, (f32 (*)[4])g_identityMatrix, (f32*)&scale, (f32 (*)[4])&s);
+        BuildScaledTransformMatrix((f32*)g_zeroVector, (f32 (*)[4])g_identityMatrix, (f32*)&scale, (f32 (*)[4])&s);
         BuildPlacedObjectTransform(self, (Quad16*)m, (ScaledTransform*)&t);
         *(Mat4A*)&t = MultiplyMatrices(&t, &s);
         m = &t;
@@ -942,7 +942,7 @@ void SetStateNotifierState(StateNotifier* self, s32 state)
         switch (state) {
         case 0: {
             s32 saved = self->f2DC;
-            self->motionAccel = *(Vec02*)D_00248D30;
+            self->motionAccel = *(Vec02*)g_zeroVector;
             event = 0x261;
             if (saved != -1) {
                 event = saved;
@@ -951,7 +951,7 @@ void SetStateNotifierState(StateNotifier* self, s32 state)
         }
         case 7:
             event = 0x262;
-            self->motionAccel = *(Vec02*)D_00248D30;
+            self->motionAccel = *(Vec02*)g_zeroVector;
             break;
         case 3:
             event = 0x260;
@@ -969,7 +969,7 @@ void SetStateNotifierState(StateNotifier* self, s32 state)
             Mat02 m40;
             ConvertOffsetToCylindrical(&self->v140, &((NotifierLead*)active)->placementObject->v140, &self->motionPos.x, &self->motionPos.y, &self->motionPos.z);
             self->motionVel = *(Vec02*)g_notifierStartVelocity;
-            self->motionAccel = *(Vec02*)D_00248D30;
+            self->motionAccel = *(Vec02*)g_zeroVector;
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(((NotifierLead*)active)->placementObject->v140), Vu0::Q(self->v140));
             dir.z = dir.z * g_notifierAimZScale;
             BuildBasisFromX(&dir, &m10);
@@ -982,11 +982,11 @@ void SetStateNotifierState(StateNotifier* self, s32 state)
         }
         case 5:
             Vu0::Q(self->motionPos) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(((NotifierLead*)active)->placementObject->v140));
-            self->motionVel = self->motionAccel = *(Vec02*)D_00248D30;
+            self->motionVel = self->motionAccel = *(Vec02*)g_zeroVector;
             break;
         case 6:
             event = 0x263;
-            self->motionAccel = *(Vec02*)D_00248D30;
+            self->motionAccel = *(Vec02*)g_zeroVector;
             break;
         default:
             break;
@@ -1077,7 +1077,7 @@ void UpdateTimeRangeNotifier(TimeRangeNotifier* self, f32 dt)
     UpdateStateNotifier(self, dt);
     if (self->state != 0) return;
     if (self->f338 == 0) return;
-    if (D_00270458 != 2) {
+    if (g_displayMode != 2) {
         self->timeLeft = self->timeLeft - g_frameDt;
     }
     if (self->timeLeft <= 0.0f) {
@@ -1108,8 +1108,8 @@ void PlaceSpareSoundNotifier(World* self)
         UnprojectCameraPoint(*(Camera**)g_camera, g_spareNotifierScreenPoint, (Vec02*)buf);
         obj->desc02()->m1D(obj, (Vec02*)buf);
         obj->desc02()->m1E(obj, (Mat02*)g_identityMatrix);
-        obj->desc02()->m20(obj, (Vec02*)D_00248D30);
-        obj->desc02()->m21(obj, (Vec02*)D_00248D30);
+        obj->desc02()->m20(obj, (Vec02*)g_zeroVector);
+        obj->desc02()->m21(obj, (Vec02*)g_zeroVector);
         obj->desc02()->m2F(obj, 4);
         *(Quad_148038*)&obj->motionVel = g_spareNotifierVelocity;
         QueryValueListMask((ValueListObject*)self->valueListObject, obj->boundRadius, (Bits128*)&obj->v140, &obj->visibilityMask);
@@ -1450,8 +1450,8 @@ s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec02* a2, s32 n, StateNotif
             o->desc->m15(o, 0);
             o->desc02()->m1D(o, a2);
             o->desc02()->m1E(o, (Mat02*)g_identityMatrix);
-            o->desc02()->m20(o, (Vec02*)D_00248D30);
-            o->desc02()->m21(o, (Vec02*)D_00248D30);
+            o->desc02()->m20(o, (Vec02*)g_zeroVector);
+            o->desc02()->m21(o, (Vec02*)g_zeroVector);
             o->f2E0 = (f32)i * g_scatterStagger;
             o->landed = 0;
             i++;
@@ -1535,7 +1535,7 @@ void CountDownNotifierTimer(CountdownNotifier* self, f32 dt)
     UpdateStateNotifier(self, dt);
     if (self->state != 0) return;
     if (self->f338 == 0) return;
-    if (D_00270458 != 2) {
+    if (g_displayMode != 2) {
         self->timeLeft = self->timeLeft - g_frameDt;
     }
     if (self->timeLeft <= 0.0f) {

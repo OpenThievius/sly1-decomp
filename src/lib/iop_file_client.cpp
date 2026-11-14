@@ -102,7 +102,7 @@ s32 g_fileHandleTableSemaphore = -1;
 s32 g_fileReplySemaphore = -1;
 
 static u8* g_fileReplyBufferAddress;
-static u32* D_00627844;
+static u32* g_fileControlOutput;
 static FileRequest g_fileRequestBuffer __attribute__((aligned(64)));
 static u8 g_fileCallResult[0x40] __attribute__((aligned(64)));
 static u8 g_fileReplyBuffer[0x440] __attribute__((aligned(64)));
@@ -539,7 +539,7 @@ s32 ControlFile(s32 a0, s32 mode, u32* out)
     s32 ret = 1;
     FileHandleEntry* ent = (FileHandleEntry*)FindFileHandle(a0);
     (void)LockFileRequests(5);
-    D_00627844 = out;
+    g_fileControlOutput = out;
     if (g_fileClientOpen == 0) {
         (void)OpenFileClient();
     }
@@ -557,9 +557,9 @@ s32 ControlFile(s32 a0, s32 mode, u32* out)
             i++;
         }
         if (i == 32) {
-            *D_00627844 = 0;
+            *g_fileControlOutput = 0;
         } else {
-            *D_00627844 = 1;
+            *g_fileControlOutput = 1;
         }
         (void)PostSemaphore(g_fileReplySemaphore);
         UnlockFileRequests();

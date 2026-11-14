@@ -20,7 +20,7 @@ void UpdateCameraMatrices(Camera* self)
         Vec02 corner;
         Vec02 tilt;
         Mat4 proj;
-        Vu0::Q(corner) = Vu0::MulAddX(Vu0::Q(*(Vec02*)D_00248D40), Vu0::Q(*(Vec02*)g_cameraSwingCornerShift), Vu0::Scalar(swing));
+        Vu0::Q(corner) = Vu0::MulAddX(Vu0::Q(*(Vec02*)g_unitScale), Vu0::Q(*(Vec02*)g_cameraSwingCornerShift), Vu0::Scalar(swing));
         Vu0::Q(tilt) = Vu0::MulX(Vu0::Q(*(Vec02*)g_cameraSwingTiltShift), Vu0::Scalar(swing));
         BuildProjectionMatrix(&proj, corner.x * 640.0f / (self->projectionScaleX * 4096.0f), corner.y * 256.0f / (self->projectionScaleY * 4096.0f), tilt.x, tilt.y, self->nearDistance, self->farDistance);
         BuildViewProjectionMatrix((f32*)&pos, (f32*)&rotation, &proj, (Quad16*)((u8*)self + 0x100));

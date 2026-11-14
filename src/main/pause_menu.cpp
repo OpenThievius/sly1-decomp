@@ -113,7 +113,7 @@ extern "C" s32 ConvertFloatToU32(f32 value);
 
 extern u8 g_elementStack[];
 extern u8 g_objectFadeIn[];
-extern CardSlot D_002542D8[];
+extern CardSlot g_cardSlots[];
 
 void CancelPauseMenuPage(T217D_6D0* self);
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
@@ -528,7 +528,7 @@ s32 FindObject42CStateWalker(void)
     return v;
 }
 
-extern s32 D_0026FA68;
+extern s32 g_currentWarpPage;
 extern s32 D_0026EC58;
 extern s32 D_00269984;
 void *CopyString(void* dst, const char* src);
@@ -552,7 +552,7 @@ void BuildPauseMenuPage(T217D_6D0* self)
             s32 show = 1;
             switch (item) {
             case 4:
-                if (D_0026FA68 == 0) {
+                if (g_currentWarpPage == 0) {
                     show = 0;
                 }
                 break;
@@ -993,7 +993,7 @@ void UpdatePauseMenu(T217D_6D0* self)
     if (pad->flags & 0x80) {
         ClearPadPressedBits(&g_padRecord, 0x80);
         if (self->page == 11 || self->page == 16) {
-            CardSlot* e = &D_002542D8[row->items[self->cursor]];
+            CardSlot* e = &g_cardSlots[row->items[self->cursor]];
             if (e->f0C != 0.0f) {
                 g_cardSlotInAction = e;
                 SetPauseMenuLayerPage(self, 1, 0x12);
@@ -1045,7 +1045,7 @@ void UpdatePauseMenu(T217D_6D0* self)
         } else {
             s32 id = row->items[self->cursor];
             if ((u32)(id - 10) < 3) {
-                CardSlot* e = &D_002542D8[id];
+                CardSlot* e = &g_cardSlots[id];
                 if (self->page == 16) {
                     if (e->f0C != 0.0f) {
                         g_buttonHintElement.vt->m08(&g_buttonHintElement, "&2S&. : Erase Game");
@@ -1637,7 +1637,7 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
         SetPauseMenuLayerPage(self, 0, 0x17);
         return;
     case 16: {
-        CardSlot* e = &D_002542D8[sel];
+        CardSlot* e = &g_cardSlots[sel];
         if (e->f0C == 0.0f) {
             SetPauseMenuLayerPage(self, 0, -1);
             g_memoryCard.f4F44 = e;
@@ -1650,7 +1650,7 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
     }
     case 17:
         SetPauseMenuLayerPage(self, 0, -1);
-        g_memoryCard.f4F44 = &D_002542D8[sel];
+        g_memoryCard.f4F44 = &g_cardSlots[sel];
         ApplyMemoryCardImage(&g_memoryCard);
         ResumeAtSavedLevel();
         return;
@@ -1658,7 +1658,7 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
         CardSlot* e;
         u32 p;
         p = sel * sizeof(CardSlot);
-        p += (u32)D_002542D8;
+        p += (u32)g_cardSlots;
         e = (CardSlot*)p;
         g_memoryCard.f4F4C = e;
         if (e->f0C == 0.0f) {

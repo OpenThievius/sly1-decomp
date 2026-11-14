@@ -841,7 +841,7 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
         Vec02 cur;
         Vec02* end = (Vec02*)o->mesh.verts + o->mesh.vertCount;
         Vec02 best;
-        Vu0::Q(best) = Vu0::Q(D_00248D30);
+        Vu0::Q(best) = Vu0::Q(g_zeroVector);
         f32 bestD = 3.4028235e+38f;
         for (Vec02* q = (Vec02*)o->mesh.verts; q < end; q++) {
             Vu0::Q(cur) = Vu0::Q(*q);
@@ -881,7 +881,7 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     Vu0::Set(t2, tang2.q);
     f32 along;
     f32 off;
-    MeasurePointToSegment((Vec02*)&D_00248D30, &t1, &t2, &along, &off);
+    MeasurePointToSegment((Vec02*)&g_zeroVector, &t1, &t2, &along, &off);
     *(Vu0::Vec*)&self->qA0 = Vu0::Add(Vu0::Vec::Of(self->qA0), Vu0::MulXSum(d1, Vu0::Vec::Scalar((1.0f - along) * j1), dir, Vu0::Vec::Scalar(along * j2)));
     *(Vu0::Vec*)&self->spin = Vu0::MulAddX(Vu0::Vec::Of(self->spin), Vu0::MulXSum(c1, Vu0::Vec::Scalar((1.0f - along) * j1), c2, Vu0::Vec::Scalar(along * j2)), Vu0::Vec::Scalar(2.5f / (radius * radius)));
     if (((Vec02*)&self->qA0)->z < g_effectFloorZ) {

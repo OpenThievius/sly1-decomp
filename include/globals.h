@@ -41,7 +41,7 @@ extern const Mat02 g_identityMatrix;  // the identity (rows 1 0 0 0, 0 1 0 0, 0 
 extern const Vec02 g_unitXVector;  // 1 0 0 0
 extern const Vec02 g_unitYVector;  // 0 1 0 0
 extern const Vec02 g_unitZVector;  // 0 0 1 0
-extern const Vec02 D_00248D30;  // 0 0 0 0
+extern const Vec02 g_zeroVector;  // 0 0 0 0
 
 // The two packet streams (PacketWriter, packet_writer.h): 20 views of D_002622A8 in 6 files, 6 of D_00262280 in
 // 4. Their objects are 0x24 and 0x28 bytes (the VIF writer ends with the count at 0x20, the GS

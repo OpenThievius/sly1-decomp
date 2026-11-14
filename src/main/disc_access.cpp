@@ -198,7 +198,7 @@ void StepDiscSectorCheck(void)
 }
 
 // The path pieces func_00140B60 formats with, after func_001407A8's ";1" in .rodata.
-extern const u16 D_00249E20[4] = { 0x5C, 0, 0, 0 };
+extern const u16 g_discPathRootPrefix[4] = { 0x5C, 0, 0, 0 };
 extern const char g_discPathFormat[8] = "%s\\%s";
 extern const char g_discDevicePrefix[8] = "cdrom0:";
 extern const char g_emptyPathPrefix[4] = "";
@@ -208,7 +208,7 @@ extern const char g_emptyPathPrefix[4] = "";
 void FormatDiscPath(void* self, const char* name, s32 flag)
 {
     char buf[256];
-    *(u16*)buf = D_00249E20[0];
+    *(u16*)buf = g_discPathRootPrefix[0];
     AppendString((s8*)buf, name);
     s32 n = NormalizeDiscPath((s8*)buf);
     char* p = buf;

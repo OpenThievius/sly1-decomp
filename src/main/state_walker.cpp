@@ -61,7 +61,7 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(u32 bytes);
 void* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* table);
-extern f32 D_002746A0[8];
+extern f32 g_defaultLookPoint[8];
 void* AllocateBackMemory(s32 size);
 
 // A Shift-JIS code and the character it stands for (MapCharToCode).
@@ -89,7 +89,7 @@ SjisCharEntry g_sjisCharRanges[4] = {
 };
 f32 g_companionProbePointsA[16] = { 0.0f, 0.0f, -80.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f, -70.0f, 40.0f, 0.0f, 0.0f, 70.0f, 40.0f, 0.0f };
 f32 g_companionProbePointsB[16] = { 0.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, 70.0f, 0.0f, 0.0f, -30.0f, 30.0f, 0.0f, 0.0f, 30.0f, 30.0f, 0.0f };
-f32 D_002746A0[8] = { 1000.0f, 0.0f, 0.0f, 0.0f, 2.0f, -2.0f, 0.0f, 0.0f };
+f32 g_defaultLookPoint[8] = { 1000.0f, 0.0f, 0.0f, 0.0f, 2.0f, -2.0f, 0.0f, 0.0f };
 
 void CopyVec3(Vec3* dst, Vec3* src)
 {
@@ -1174,10 +1174,10 @@ void AimCompanionAgentPose(CompanionAgent *self) {
     case 1:
         if ((void *)self->lookTarget != 0) {
             t->target = (void *)self->lookTarget;
-            t->point = *(Vec02 *)&D_00248D30;
+            t->point = *(Vec02 *)&g_zeroVector;
         } else {
             t->target = self;
-            t->point = *(Vec02 *)D_002746A0;
+            t->point = *(Vec02 *)g_defaultLookPoint;
         }
         f = 1.3f;
         if (r == 0) {
@@ -1187,25 +1187,25 @@ void AimCompanionAgentPose(CompanionAgent *self) {
     case 2:
         if ((void *)self->lookTarget != 0) {
             t->target = (void *)self->lookTarget;
-            t->point = *(Vec02 *)&D_00248D30;
+            t->point = *(Vec02 *)&g_zeroVector;
         } else if (IsAgentFacingBlocked(self) != 0) {
             t->target = self;
-            t->point = *(Vec02 *)D_002746A0;
+            t->point = *(Vec02 *)g_defaultLookPoint;
         } else {
             res = (s32)self->desc08()->m62(self);
             if (res != 0) {
                 t->target = (void *)res;
-                t->point = *(Vec02 *)&D_00248D30;
+                t->point = *(Vec02 *)&g_zeroVector;
             } else {
                 t->target = self;
-                t->point = *(Vec02 *)D_002746A0;
+                t->point = *(Vec02 *)g_defaultLookPoint;
             }
         }
         f = 1.3f;
         break;
     case 3:
         t->target = self;
-        t->point = *(Vec02 *)D_002746A0;
+        t->point = *(Vec02 *)g_defaultLookPoint;
         f = 0.1f;
         break;
     }

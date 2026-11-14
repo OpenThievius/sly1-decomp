@@ -99,9 +99,9 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
         }
         case 0x13C:
             if (self->subState == 8) {
-                self->spinTargetRate = (f32)D_002637D4;
+                self->spinTargetRate = (f32)g_spinTargetRateSubState8;
             } else {
-                self->spinTargetRate = (f32)D_002637D0;
+                self->spinTargetRate = (f32)g_spinTargetRateDefault;
             }
             break;
         case 0x13D:

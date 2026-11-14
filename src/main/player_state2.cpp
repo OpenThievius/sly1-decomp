@@ -64,10 +64,10 @@ f32 D_00263E70 = 0.0700000003f;
 f32 D_00263E74 = 0.300000012f;
 f32 D_00263E78 = -750.0f;
 f32 D_00263E7C = 5.0f;
-f32 D_00263E80 = 700.0f;
-f32 D_00263E84 = 245.0f;
-f32 D_00263E88 = 900.0f;
-f32 D_00263E8C = 800.0f;
+f32 g_jumpKind1SpeedBase = 700.0f;
+f32 g_jumpApexHeight = 245.0f;
+f32 g_jumpKind3SpeedBase = 900.0f;
+f32 g_jumpKind4SpeedBase = 800.0f;
 f32 D_00263E90[4] = { 0.0f, 5.0f, 0.0f, 0.0f };
 f32 D_00263EA0[4] = { 0.0f, 10.0f, 0.0f, 0.0f };
 f32 D_00263EB0[4] = { 0.400000006f, 0.0f, 0.0f, 0.0f };
@@ -142,7 +142,7 @@ void StepPlayerState2(Player* self)
             AddColliderForce(self, &a);
         }
         if (((AnimationPlayer*)self->stateAnimPlayer)->time < t0) {
-            b = D_00248D30;
+            b = g_zeroVector;
         } else {
             Vu0::Q(b) = Vu0::FromFloats(0.0f, 0.0f, self->v150.z);
         }
@@ -342,7 +342,7 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
             Vu0::Q(dv) = Vu0::Sub(Vu0::Q(p->v150), Vu0::Q(q->v150));
             Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(rel), Vu0::Q(dv), Vu0::Scalar(MinF(0.25f, t)));
             rel.z = end.z = 0.0f;
-            MeasurePointToSegment((Vec02*)&D_00248D30, &rel, &end, &a, &b);
+            MeasurePointToSegment((Vec02*)&g_zeroVector, &rel, &end, &a, &b);
             if ((100.0f < b || a == 0.0f) && (25.0f < b || 0.0f < p->v150.z)) {
                 continue;
             }
@@ -375,7 +375,7 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
             Vu0::Q(dv) = Vu0::Sub(Vu0::Q(p->v150), Vu0::Q(vel));
             Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(rel), Vu0::Q(dv), Vu0::Scalar(MinF(0.25f, t)));
             rel.z = end.z = 0.0f;
-            MeasurePointToSegment((Vec02*)&D_00248D30, &rel, &end, &a, &b);
+            MeasurePointToSegment((Vec02*)&g_zeroVector, &rel, &end, &a, &b);
             if ((b > q->radius || a == 0.0f) && (q->radius * 0.25f < b || 0.0f < p->v150.z)) {
                 continue;
             }
@@ -535,7 +535,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
     switch (kind) {
     case 1: {
         Mesh03* mesh = &part->meshCopy;
-        u128 acc = Vu0::Q(D_00248D30);
+        u128 acc = Vu0::Q(g_zeroVector);
         s32 found = 0;
         s32 n = CollectEntriesForKey((KeyedPointSet*)mesh, (KeyedPointSet*)&part->tree, (Vec02*)arg - (Vec02*)mesh->verts, 0x40, (KeyedEdge**)buf);
         for (s32 i = 0; i < n; i++) {
@@ -560,7 +560,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
         if (g->f8 < 0.7f) {
             return 0;
         }
-        u128 sum = Vu0::Q(D_00248D30);
+        u128 sum = Vu0::Q(g_zeroVector);
         s32 found = 0;
         Vec02* verts;
         for (EdgeNode* e = g->list14; e != 0; e = e->next8) {
@@ -1102,7 +1102,7 @@ void UpdatePlayerState2(Player* p)
             break;
         }
         b = ((LeapTarget_17F018*)p->leapTarget)->pos;
-        c = D_00248D30;
+        c = g_zeroVector;
         TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->leapTarget)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
         ((Leap_17F018*)p->selfPoseSource)->aim = b;
         ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
@@ -1119,7 +1119,7 @@ void UpdatePlayerState2(Player* p)
             break;
         }
         b = ((LeapTarget_17F018*)p->targetNode)->pos;
-        c = D_00248D30;
+        c = g_zeroVector;
         TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->targetNode)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
         ((Leap_17F018*)p->selfPoseSource)->aim = b;
         ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
@@ -1154,7 +1154,7 @@ void UpdatePlayerState2(Player* p)
         }
         PlaceOnTargetPoint((TargetPoint*)p->targetPoint, &b, 0, p->targetPointPlace);
         TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTarget_17F018*)p->targetPoint)->frame), &b, &b);
-        c = D_00248D30;
+        c = g_zeroVector;
         TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->targetPoint)->frame), 0, &b, 0, &c, 0, ((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]);
         ((Leap_17F018*)p->selfPoseSource)->aim = b;
         ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
@@ -1172,7 +1172,7 @@ void UpdatePlayerState2(Player* p)
         }
         PlaceOnTargetCurve((TargetCurve*)p->targetCurve, &b, 0, p->targetCurvePos);
         TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTarget_17F018*)p->targetCurve)->frame), &b, &b);
-        c = D_00248D30;
+        c = g_zeroVector;
         TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->targetCurve)->frame), 0, &b, 0, &c, 0, ((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]);
         ((Leap_17F018*)p->selfPoseSource)->aim = b;
         ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
@@ -1245,17 +1245,17 @@ void ComputePlayerJumpVelocity(Player* self, Vec02* out)
     f32 z;
     switch (self->jumpKind) {
     case 1:
-        z = D_00263E80 * Fpu::Sqrt(self->gravityScale);
+        z = g_jumpKind1SpeedBase * Fpu::Sqrt(self->gravityScale);
         break;
     case 4:
-        z = D_00263E8C * Fpu::Sqrt(self->gravityScale);
+        z = g_jumpKind4SpeedBase * Fpu::Sqrt(self->gravityScale);
         break;
     case 3:
-        z = D_00263E88 * Fpu::Sqrt(self->gravityScale);
+        z = g_jumpKind3SpeedBase * Fpu::Sqrt(self->gravityScale);
         break;
     case 0:
     case 2:
-        z = Fpu::Sqrt(MaxF(0.0f, ((self->v140.z - (self->groundContactPoint.z + D_00263E84)) + (self->v140.z - (self->groundContactPoint.z + D_00263E84))) * self->gravity.z));
+        z = Fpu::Sqrt(MaxF(0.0f, ((self->v140.z - (self->groundContactPoint.z + g_jumpApexHeight)) + (self->v140.z - (self->groundContactPoint.z + g_jumpApexHeight))) * self->gravity.z));
         break;
     }
     *out = self->v150;

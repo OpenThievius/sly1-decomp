@@ -56,8 +56,8 @@ struct TransformSet;
 f32 D_00263E34 = -200.0f;
 f32 g_queueGoalReachDistance = 25.0f;
 f32 g_queuePathReachTolerance = 15.0f;
-f32 D_00263E40 = 0.200000003f;
-f32 D_00263E44 = 0.5f;
+f32 g_entrySubState2Delay = 0.200000003f;
+f32 g_entrySubState3Delay = 0.5f;
 
 void* AllocateFrontMemory(int size);
 
@@ -163,7 +163,7 @@ void SetEntryQueueTargetNode(EntryQueue* self, BaseObject* target)
         p->targeting = 1;
         GetNodeAnchorAndHeading(self, target, &p->aim, 0);
         p->aim.z += 125.0f;
-        p->mark = D_00248D30;
+        p->mark = g_zeroVector;
         self->aimTarget = target;
     }
 }
@@ -249,8 +249,8 @@ void StartNextQueueEntry(EntryQueue* self)
         p->heading = heading;
         BuildAxisAngleMatrix(&g_unitZVector, &rot, heading);
         p->desc02()->m1E(p, &rot);
-        p->desc02()->m20(p, (Vec02*)&D_00248D30);
-        p->desc02()->m21(p, (Vec02*)&D_00248D30);
+        p->desc02()->m20(p, (Vec02*)&g_zeroVector);
+        p->desc02()->m21(p, (Vec02*)&g_zeroVector);
         SetPlayerState(p, 2, 2);
         p->groundContact = 0;
         self->pendingEntry = 0;
@@ -511,7 +511,7 @@ void AdvanceEntryQueue(EntryQueue* self)
 struct TargetCand;
 struct Chooser;
 extern f32 g_gameTime;
-extern f32 D_00274F14;
+extern f32 g_pathProbeDistance;
 
 struct TrackShape_17C718;
 struct TrackShapeDesc_17C718 {
@@ -561,7 +561,7 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
             return;
         case 5:
             if (p->state == 2 && o != 0) {
-                if ((p->subState == 2 && D_00263E40 < g_gameTime - p->subStateStartTime) || (p->subState == 3 && D_00263E44 < g_gameTime - p->subStateStartTime)) {
+                if ((p->subState == 2 && g_entrySubState2Delay < g_gameTime - p->subStateStartTime) || (p->subState == 3 && g_entrySubState3Delay < g_gameTime - p->subStateStartTime)) {
                     if (IsObjectOfKind(o, 0x81) || IsObjectOfKind(o, 0x71) || IsObjectOfKind(o, 0x6F) || IsObjectOfKind(o, 0x7F) || IsObjectOfKind(o, 0x70) || IsObjectOfKind(o, 0x76)) {
                         SetPlayerState(p, 2, ChoosePlayerTargetByCost((Chooser*)p, (TargetCand*)o));
                     }
@@ -621,10 +621,10 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
         case 7: {
             TrackShape_17C718* s = ((TrackRecord_17C718*)p->aimCurve)->shape;
             if (s->desc->m2 != 0) {
-                s->desc->m2(s, p->pathPos + D_00274F14, &a, 0);
+                s->desc->m2(s, p->pathPos + g_pathProbeDistance, &a, 0);
                 s = ((TrackRecord_17C718*)p->aimCurve)->shape;
                 if (s->desc->m2 != 0) {
-                    s->desc->m2(s, p->pathPos - D_00274F14, &b, 0);
+                    s->desc->m2(s, p->pathPos - g_pathProbeDistance, &b, 0);
                 }
             }
             TransformPointBetweenFrames((PlacedObject*)(((TrackRecord_17C718*)p->aimCurve)->frame), 0, &a, &a);

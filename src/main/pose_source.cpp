@@ -220,7 +220,7 @@ extern const PositionCurveVt g_positionCurveKind0Methods;
 extern const PositionCurveVt g_positionCurveKind1Methods;
 extern const PositionCurveVt g_positionCurveKind2Methods;
 
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 
 extern u8 g_identityMatrix[];
 
@@ -1254,7 +1254,7 @@ void EvaluateBlendedPositionCurve(PositionCurveKind2* o, PlacedObject* cam, s32 
                 u128 w = Vu0::FromFloat(wt);
                 u128 acc = Vu0::Q(*out0);
                 Vu0::Q(k) = w;
-                Vu0::Q(*out0) = Vu0::MulAddX(acc, Vu0::Q(cam ? cam->v190 : *(Vec02*)D_00248D30), w);
+                Vu0::Q(*out0) = Vu0::MulAddX(acc, Vu0::Q(cam ? cam->v190 : *(Vec02*)g_zeroVector), w);
             }
         } else {
             f32 a, b;
@@ -1344,7 +1344,7 @@ void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 
         if (!tg) {
             if (!out0)
                 continue;
-            Vu0::Set(x0, Vu0::Q(cam ? cam->v1D0 : *(Vec02*)D_00248D30));
+            Vu0::Set(x0, Vu0::Q(cam ? cam->v1D0 : *(Vec02*)g_zeroVector));
         } else {
             f32 a, b;
             if (!seq) {
@@ -1706,7 +1706,7 @@ void ReleasePoseSource(Attachment* self, s32 flags)
             ConstrainColliderVector(m, (u8*)&((Collider*)m)->v440, (u8*)&m->v150, local, 0);
             m->desc02()->m20(m, (Vec02*)local);
         } else {
-            SetPlacedObjectVelocity(m, (Vec02*)D_00248D30);
+            SetPlacedObjectVelocity(m, (Vec02*)g_zeroVector);
         }
     }
     if (self == b && m->orientationAttachment == 0 && (flags & 2) != 0) {
@@ -1714,7 +1714,7 @@ void ReleasePoseSource(Attachment* self, s32 flags)
             ConstrainColliderVector(m, (u8*)&((Collider*)m)->v460, (u8*)&m->v160, local, 0);
             m->desc02()->m21(m, (Vec02*)local);
         } else {
-            SetPlacedObjectSpin(m, (Vec02*)D_00248D30);
+            SetPlacedObjectSpin(m, (Vec02*)g_zeroVector);
         }
     }
     PushFreeSlot(&m->world->pool1B20, self);
@@ -1725,7 +1725,7 @@ void ReleasePoseSource(Attachment* self, s32 flags)
 void GetOwnerPosition(Attachment* self, Vec02* out1, Vec02* out2)
 {
     *out1 = self->owner->v190;
-    *out2 = *(Vec02*)D_00248D30;
+    *out2 = *(Vec02*)g_zeroVector;
     if (self->owner->desc02()->m28 != 0) {
         ((PositionOutToldFn)self->owner->desc02()->m28)(self->owner, out1);
     }
@@ -1735,7 +1735,7 @@ void GetOwnerPosition(Attachment* self, Vec02* out1, Vec02* out2)
 void GetOwnerRotation(Attachment* self, Mat02* out1, Vec02* out2)
 {
     *out1 = self->owner->m1A0;
-    *out2 = *(Vec02*)D_00248D30;
+    *out2 = *(Vec02*)g_zeroVector;
     ((FrameOutToldFn)self->owner->desc02()->m29)(self->owner, out1, out2);
 }
 
@@ -1821,7 +1821,7 @@ void ApplyPoseSource(Attachment* self, s32 flag)
 // limited by 1 over the frame time).
 void ComputePositionSpringAcceleration(PlacedObject* self, f32 dt, Vec02* a, Vec02* b, Vec02* out)
 {
-    Vec02 force = *(Vec02*)D_00248D30;
+    Vec02 force = *(Vec02*)g_zeroVector;
     Vec02 d;
     f32* k = (f32*)self->p20C;
     f32* k2;
@@ -1969,7 +1969,7 @@ void ApplyPoseSourcePosition(T2195_7C0* self)
 // p218, limited by 1 over the frame time).
 void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat02* rot, Vec02* spin, Vec02* out)
 {
-    Vec02 force = *(Vec02*)D_00248D30;
+    Vec02 force = *(Vec02*)g_zeroVector;
     if (self->p214 != 0) {
         Mat02 m;
         Vec02 axis;
@@ -2124,7 +2124,7 @@ void ApplyPoseSourceRotation(Attachment* self)
             }
             if (still) {
                 owner->rot = A;
-                owner->v160 = *(Vec02*)D_00248D30;
+                owner->v160 = *(Vec02*)g_zeroVector;
             } else {
                 Vec02 w;
                 Mat02 m;
@@ -2300,13 +2300,13 @@ void InitLinkedPoseSource(T2195_5B0* self, PlacedObject* src)
     self->pos = &src->v190;
     self->rot = &src->m1A0;
     self->count = &src->valueCount;
-    self->vec = (Vec02*)D_00248D30;
-    self->vec2 = (Vec02*)D_00248D30;
+    self->vec = (Vec02*)g_zeroVector;
+    self->vec2 = (Vec02*)g_zeroVector;
     self->values = src->f274;
     Rec2195_224* o = (Rec2195_224*)src->linkRecord;
     if (o != 0) {
         if (o->flags & 0x20) {
-            self->p30 = (f32*)D_00248D30;
+            self->p30 = (f32*)g_zeroVector;
             self->p2C = &o->f8C;
         }
     }
@@ -2486,7 +2486,7 @@ void GetAimPoseRotation(T2195_600* self, Mat02* out, Vec02* vec)
         Vu0::Q(dir) = Vu0::MulAddX(Vu0::Q(dir), Vu0::DivX(Vu0::Sub(Vu0::Q(vel), Vu0::Q(owner->v150)), Vu0::ScalarAt(self->f20)), w1);
     }
     BuildBasisFromXAndZHint(&owner->v150, &dir, out);
-    *vec = *(Vec02*)D_00248D30;
+    *vec = *(Vec02*)g_zeroVector;
 }
 
 // Removes the track's pose source from its player's list, clears the player's driven pointer if it

@@ -26,7 +26,7 @@ void SetArcMode(Obj_1E76E0_eu* self, s32 value)
     SetScreenElementMode(self, value);
     if (old == value) return;
     if (old != 0) goto done;
-    if (D_00270458 == 4) {
+    if (g_displayMode == 4) {
         self->f528->i4 = 0;
         SetScreenElementSize(self, 640.0f, 360.0f);
     } else {
@@ -35,7 +35,7 @@ void SetArcMode(Obj_1E76E0_eu* self, s32 value)
     }
 done:
     if (value != 2) return;
-    if (D_00270458 == 4) return;
+    if (g_displayMode == 4) return;
     self->f578 = -1;
     SetArcPhase(self, 3);
 }

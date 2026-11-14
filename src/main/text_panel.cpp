@@ -239,8 +239,8 @@ struct StickLimits { u64 a __attribute__((packed)); u32 b; };
 typedef u64 Quad_136040 __attribute__((mode(TI)));
 struct __attribute__((aligned(16))) Vec_136040 { f32 x, y, z, w; };
 
-extern const StickLimits D_00249D00;
-extern const StickLimits D_00249D10;
+extern const StickLimits g_panelStickActiveRamp;
+extern const StickLimits g_panelStickIdleRamp;
 
 struct RampProfile;
 Quad_136040 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel);
@@ -339,7 +339,7 @@ PanelStyle g_panelFrameStyle(2.0f);
 PanelStyle g_objectLabelStyle(32, 16);
 f32 g_nearestLabelScale = 1.0f;
 f32 g_otherLabelScale = 0.5f;
-f32 D_00261190[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
+f32 g_panelFocusPoint[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
 f32 g_labelAlphaCoefficients[4] = { 1.5f, -1.5f, 0.0f, 0.0f };
 f32 g_labelAlphaRamp[3] = { 5.0f, 0.0f, 0.100000001f };
 f32 g_otherLabelAlphaFactor = 0.5f;
@@ -363,7 +363,7 @@ f32 g_panelBlockCornersY[4][4] = {
 };
 f32 g_panelBlockPulseRate[2] = { 8.0f, 0.0f };
 f32 g_panelBlockFadeRamp[3] = { 8.0f, 0.0f, 0.150000006f };
-f32 D_00261274 = 0.25f;
+f32 g_panelStartCooldown = 0.25f;
 CurveSpan g_panelEdgeCurveA;
 CurveSpan g_panelEdgeCurveB;
 CurveSpan g_panelEdgeCurveC;
@@ -1126,7 +1126,7 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
         } else {
             objs[shown++] = obj;
             ProjectPointToCamera((Camera*)g_camera, &pos, (f32*)&screen);
-            Vu0::Vec e = Vu0::Sub(Vu0::Vec::Of(screen), Vu0::Vec::Of(D_00261190));
+            Vu0::Vec e = Vu0::Sub(Vu0::Vec::Of(screen), Vu0::Vec::Of(g_panelFocusPoint));
             f32 c = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(e, e)));
             if (c < best) {
                 nearest = obj;
@@ -1376,7 +1376,7 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
     HeapSortRecords(entries, n, 0x20, kind == 0x2E ? CompareEntriesFlaggedLast : CompareEntriesByAttachedKey);
     s32 mayStart = 1;
     FillMemory(self->blockA, 0, 0x10);
-    if (!(D_00261274 < g_gameClock[1] - *(f32*)&self->countA)) {
+    if (!(g_panelStartCooldown < g_gameClock[1] - *(f32*)&self->countA)) {
         mayStart = 0;
     }
     for (i = 0; i < n;) {
@@ -1524,8 +1524,8 @@ void UpdatePanelStick(T217D_440* self, PadRecord* p)
         f32 lo = -1.0f;
         f32 hi = 1.0f;
         f32 sum = p->stickX + p->secondStickX;
-        StickLimits t0 = D_00249D00;
-        StickLimits t1 = D_00249D10;
+        StickLimits t0 = g_panelStickActiveRamp;
+        StickLimits t1 = g_panelStickIdleRamp;
         f32 u = (sum < lo) ? lo : ((hi < sum) ? hi : sum);
         f32 v = p->stickY;
         f32 lo2 = -1.0f;
@@ -1556,8 +1556,8 @@ void UpdatePanelStick(T217D_440* self, PadRecord* p)
     }
     RefreshPanelEntries(self, p);
 }
-extern const StickLimits D_00249D00 = { 0x4248000042A00000ULL, 0x3F000000 };
-extern const StickLimits D_00249D10 = { 0x43480000437A0000ULL, 0x3DCCCCCD };
+extern const StickLimits g_panelStickActiveRamp = { 0x4248000042A00000ULL, 0x3F000000 };
+extern const StickLimits g_panelStickIdleRamp = { 0x43480000437A0000ULL, 0x3DCCCCCD };
 
 // Opens or closes the text panel (nothing when it is already so): pauses or resumes the stream
 // voice of its child sequence, sets the palette to 0 and, on opening, runs method 0x16 with 2,
@@ -1804,11 +1804,11 @@ void DrawTextPanel(T217D_440* self)
     Layout_137228 box;
     PanelLayout::Set(&box, offX + 180.0f, offY + 386.800018f, width, height, grey);
     f32 fade = 1.0f;
-    if (D_002708E0.target != 0) {
-        fade = D_002708E0.blend <? fade;
+    if (g_leftArcElement.target != 0) {
+        fade = g_leftArcElement.blend <? fade;
     }
-    if (D_00271558.target != 0) {
-        fade = D_00271558.blend <? fade;
+    if (g_rightArcElement.target != 0) {
+        fade = g_rightArcElement.blend <? fade;
     }
     if (fade < 1.0f) {
         u8 a = ByteLerp::Of(0, color.a, fade);

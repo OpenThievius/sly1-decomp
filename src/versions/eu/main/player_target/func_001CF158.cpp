@@ -53,7 +53,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (cost >= g_targetMaxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E24);
+            cost = AddRepeatTargetPenalty((Player*)self, o, cost, g_placementTargetBias);
             if (bestCost <= cost) {
                 continue;
             }
@@ -94,7 +94,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (cost >= g_targetMaxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, path, cost, D_00274E28);
+            cost = AddRepeatTargetPenalty((Player*)self, path, cost, g_pathTargetBias);
             if (bestCost <= cost) {
                 continue;
             }
@@ -195,7 +195,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (cost >= g_targetMaxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E30);
+            cost = AddRepeatTargetPenalty((Player*)self, o, cost, g_nearestPathTargetBias);
             if (bestCost <= cost) {
                 continue;
             }
@@ -284,14 +284,14 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         ctx.v = self->v150;
         ctx.target = o;
         f32 start = tCurve;
-        FindLocalMinimum((MinimumFn)ScoreTargetCurveAt, c, start, D_00274E44, 30.0f, o->shape->desc->m8(o->shape) - 30.0f,
+        FindLocalMinimum((MinimumFn)ScoreTargetCurveAt, c, start, g_curveSearchStep, 30.0f, o->shape->desc->m8(o->shape) - 30.0f,
                          &tCurveBest, &cost);
         cost = cost * weight;
         if (o != keep) {
             if (cost >= maxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E34);
+            cost = AddRepeatTargetPenalty((Player*)self, o, cost, g_curveTargetBias);
             if (bestCost <= cost) {
                 continue;
             }

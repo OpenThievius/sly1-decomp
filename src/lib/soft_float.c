@@ -25,7 +25,7 @@ typedef struct Unpacked {
 #define IS_INF(p) (((p)->kind ^ 4) == 0)
 
 /* The NaN that an invalid operation returns. */
-static Unpacked D_0062A770;
+static Unpacked g_invalidOperationNan;
 
 /* Tiny values read as zero. */
 #define FLUSH_TINY 1
@@ -142,7 +142,7 @@ Unpacked* AddUnpackedDoubles(Unpacked* a, Unpacked* b, Unpacked* tmp)
     if (IS_NAN(a)) return a;
     if (IS_NAN(b)) return b;
     if (IS_INF(a)) {
-        if (IS_INF(b) && a->sign != b->sign) return &D_0062A770;
+        if (IS_INF(b) && a->sign != b->sign) return &g_invalidOperationNan;
         return a;
     }
     if (IS_INF(b)) return b;
@@ -258,14 +258,14 @@ static inline Unpacked* Multiply(Unpacked* a, Unpacked* b, Unpacked* tmp)
     }
     if (IS_INF(a)) {
         if (IS_ZERO(b)) {
-            return (Unpacked*)&D_0062A770;
+            return (Unpacked*)&g_invalidOperationNan;
         }
         a->sign = a->sign != b->sign;
         return a;
     }
     if (IS_INF(b)) {
         if (IS_ZERO(a)) {
-            return (Unpacked*)&D_0062A770;
+            return (Unpacked*)&g_invalidOperationNan;
         }
         b->sign = a->sign != b->sign;
         return b;
@@ -367,7 +367,7 @@ static inline Unpacked* Divide(Unpacked* a, Unpacked* b)
     a->sign ^= b->sign;
     if (IS_INF(a) || IS_ZERO(a)) {
         if (a->kind == b->kind) {
-            return &D_0062A770;
+            return &g_invalidOperationNan;
         }
         return a;
     }

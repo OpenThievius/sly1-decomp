@@ -36,7 +36,7 @@
 #include "state_walker.h"
 #include "asm_func.h"
 
-extern u32 D_00275718;
+extern u32 g_bufferedBlockData;
 // A GIF register word, built from a zeroed doubleword.
 struct GifWord {
     u64 bits;
@@ -51,7 +51,7 @@ extern s32 g_imageSlotsA;
 extern s32 g_activeImageMask;
 extern f32 g_gameTime;
 u32* AllocateFrontMemory(s32 bytes);
-extern s32 D_002626CC;
+extern s32 g_fieldOffsetMode;
 // EXACT (us)
 
 extern s32 g_animRecordCount;
@@ -184,7 +184,7 @@ void SendTextureRegisters(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx
 void ReadImageRecordB(void* a0, PaletteRecord* a1)
 {
     ReadBufferedStreamBytes((BufferedStream*)a0, 12, a1);
-    a1->data = D_00275718 + a1->data;
+    a1->data = g_bufferedBlockData + a1->data;
     a1->blockCount = (u32)((a1->f4 << 2) + 15) >> 4;
 }
 
@@ -218,7 +218,7 @@ void LoadImageRecordsB(void* self)
 void ReadImageRecordA(void* self, ImageRecord* obj)
 {
     ReadBufferedStreamBytes((BufferedStream*)self, 0x14, obj);
-    s32 base = D_00275718;
+    s32 base = g_bufferedBlockData;
     u32 bytes = obj->bytes;
     s32 off = obj->data;
     obj->blockCount = (bytes + 0xF) >> 4;
@@ -433,7 +433,7 @@ void SwitchActiveImageMask(s32 self)
         BuildAnimRecordGifPackets(self);
         FlushMeshQueue();
         UpdateMatchingListedObjects(self);
-        D_002626CC = 2;
+        g_fieldOffsetMode = 2;
         g_activeImageMask = self;
     }
 }

@@ -117,9 +117,9 @@ void SetAgentGoalPoint(Agent* self, Vec02* p);
 s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans);
 
 
-f32 D_00269B50[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
-ObjectLink D_00269B60[2] = { { 0x20, 0x167, 0x59C }, { 0x20, 0x168, 0x5A0 } };
-f32 D_00269B78[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
+f32 g_pointFadeRamp[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
+ObjectLink g_pointGraphLinks[2] = { { 0x20, 0x167, 0x59C }, { 0x20, 0x168, 0x5A0 } };
+f32 g_turnAngleSearchOrder[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
 s32 g_screenOwner = 0;
 List_269BA8 g_targetVectors = { 0 };
 
@@ -237,7 +237,7 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
             }
             if (target != st->fade) {
                 ModelPartState* home = (ModelPartState*)((u8*)self->partStates + (j + i) * 0x28);
-                f32 a = ApproachValueWithRamp((RampProfile*)D_00269B50, 0, st->fade, target, g_gameClock[2]);
+                f32 a = ApproachValueWithRamp((RampProfile*)g_pointFadeRamp, 0, st->fade, target, g_gameClock[2]);
                 st->fade = a;
                 home->fade = a;
             }
@@ -304,7 +304,7 @@ void InitSeekingAgent(SeekingAgent* self)
 void StartSeekingAgent(SeekingAgent* self)
 {
     StartAgent(self);
-    ResolveObjectLinks(self, 2, D_00269B60);
+    ResolveObjectLinks(self, 2, g_pointGraphLinks);
     self->f5F0 = (void*)ResolveAgentClip(self, 0xEF);
     self->removeClip = ResolveAgentClip(self, 0x16C);
     self->hurtClip = ResolveAgentClip(self, 0x16D);
@@ -1271,7 +1271,7 @@ void FitStepToPointGraph(PointGraphObject* self, f32 scale, Vec02* pos, Vec02* s
         Mat02 scaled;
         Vec02 weight;
         Mat02 rows;
-        BuildAxisAngleMatrix(&g_unitZVector, &turn, D_00269B78[i]);
+        BuildAxisAngleMatrix(&g_unitZVector, &turn, g_turnAngleSearchOrder[i]);
         Vu0::Vec k;
         k.q = Vu0::ScalarMovedReg(scale);
         *(Vu0::Vec*)&rows.r[0] = Vu0::MulX(Vu0::Vec::Of(turn.r[0]), k);

@@ -181,7 +181,7 @@ extern u8 g_elementStack[];
 struct ColoredTriangleSet;
 extern ColoredTriangleSet* g_coloredTriangleSet;
 extern f32 g_stepScale;
-extern s32 D_00261D38;
+extern s32 g_controlBlockingElementCount;
 
 void StopAllSoundsAndWait(void);
 void ResetElementStack(ElementStack* self);
@@ -337,7 +337,7 @@ ClipPlane g_clipVolumePlanes[6] = {
 };
 World* g_currentWorld = 0;
 u32 g_scriptStreamExtras = 0;
-u8* D_00275718 = 0;
+u8* g_bufferedBlockData = 0;
 s32 g_bufferedBlockLoad = 0;
 s32 g_bufferedBlockSize = 0;
 s32 g_bufferedBlockKey = 0;
@@ -416,7 +416,7 @@ void UpdatePathFollower(PathFollower* self, f32 t)
 }
 
 extern s32 g_movieChecksumFailed;
-extern float D_002751DC;
+extern float g_lapCountCooldown;
 extern s32 D_002751D4;
 
 // The pad's control of a path follower: its heading from the stick, its pace in mode 2 and the
@@ -439,7 +439,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
             ClearPadPressedBits(pad, 0x80);
             switch (self->kind) {
             case 0:
-                if (self->lapsLeft > 0 && D_002751DC < g_gameTime - self->lapTime) {
+                if (self->lapsLeft > 0 && g_lapCountCooldown < g_gameTime - self->lapTime) {
                     CountDownPathFollowerLap(self);
                     StartSoundEffect(0x5A, 0, 0, 0, 0.0f, 0.0f, 2.0f, -0.25f, 0.0f, 0, 0);
                 } else {
@@ -1105,7 +1105,7 @@ void ResetWorldSubsystems(World* a0)
         g_stepScale = 1.0f;
         ((PackedWord*)(c + 0x274))->v = 0;
         ((PackedWord*)(e + 0x280))->v = 0;
-        D_00261D38 = 0;
+        g_controlBlockingElementCount = 0;
         *(s32*)(c + 0x278) = 0;
         *(s32*)(e + 0x28C) = 0;
     }
@@ -1137,7 +1137,7 @@ void ReadBufferedBlockHeader(s32 a0, BufferedStream* self)
     u8* r = (u8*)AllocateFrontMemory(s3);
     g_bufferedBlockKey = s0;
     g_bufferedBlockSize = s3;
-    D_00275718 = r;
+    g_bufferedBlockData = r;
     g_bufferedBlockLoad = s2;
 }
 
@@ -1148,7 +1148,7 @@ void ReadBufferedBlockBody(BufferedStream* self)
     if (g_bufferedBlockLoad != 0) {
         g_bufferedBlockStart = self->bytesToRead;
         AlignBufferedStreamPosition(self, 0x10);
-        ReadBufferedStreamBytes(self, g_bufferedBlockSize, D_00275718);
+        ReadBufferedStreamBytes(self, g_bufferedBlockSize, g_bufferedBlockData);
     }
 }
 

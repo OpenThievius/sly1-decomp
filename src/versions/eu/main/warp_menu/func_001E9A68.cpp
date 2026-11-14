@@ -2,7 +2,7 @@
 // PAL: the two gate fields of each global are at 0x560 and 0x56C (US 0x250, 0x25C).
 struct Gate_1E9A68_eu { u8 pad0[0x560]; s32 f560; u8 pad1[8]; s32 f56C; };
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 
 s32 IsArcDrawAllowed(void)
 {
@@ -12,7 +12,7 @@ s32 IsArcDrawAllowed(void)
     if (((Gate_1E9A68_eu*)&g_pauseMenuElement)->f560 != 0) goto fail;
     if (((Gate_1E9A68_eu*)&g_mapScreenList)->f56C != 0) goto fail;
     if (((Gate_1E9A68_eu*)&g_mapScreenList)->f560 != 0) goto fail;
-    m = D_00270458;
+    m = g_displayMode;
     if (m == 4) goto fail;
     if (m != 1) goto ok;
 fail:

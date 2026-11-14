@@ -212,12 +212,12 @@ single:
     return;
 path2:
     ComputeWorld5ModeColliderAnchors(self, &a, &b);
-    b = D_00248D30;
+    b = g_zeroVector;
     TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, &a, 0, &b, 0);
     goto tail;
 path3:
     a = *(Vec02*)&self->pos;
-    b = D_00248D30;
+    b = g_zeroVector;
 tail:
     SteerColliderTowardPosition(self, &a, D_00263C20, &b, D_00263C30, f);
     TurnColliderTowardRotation(self, f, &self->m620, D_00263C40);
@@ -541,7 +541,7 @@ void HandleWorld5ModeColliderActivation(World5ModeCollider* self, void* active)
         self->pulseActive = 0;
     }
 }
-extern Rgba4 D_002623E0;
+extern Rgba4 g_defaultModelColor;
 
 extern "C" f32 Cosine(f32 x);
 
@@ -588,12 +588,12 @@ void ApplyWorld5ModeColliderTint(World5ModeCollider* self, void* s, void* out)
             b = hi;
         }
         k = c1 * b;
-        res.r = (s32)((1.0f - k) * D_002623E0.r + k * col[0]);
-        res.g = (s32)((1.0f - k) * D_002623E0.g + k * col[1]);
-        res.b = (s32)((1.0f - k) * D_002623E0.b + k * col[2]);
-        res.a = D_002623E0.a;
+        res.r = (s32)((1.0f - k) * g_defaultModelColor.r + k * col[0]);
+        res.g = (s32)((1.0f - k) * g_defaultModelColor.g + k * col[1]);
+        res.b = (s32)((1.0f - k) * g_defaultModelColor.b + k * col[2]);
+        res.a = g_defaultModelColor.a;
     } else {
-        res = D_002623E0;
+        res = g_defaultModelColor;
     }
     SetObjectTreeRecordValue(self, *(u32*)&res);
     ApplyPlacedObjectTransform(self, (Camera*)s, (ScaledTransform*)out);
@@ -710,7 +710,7 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
     switch (mode) {
     case 2: {
         Vu0::Q(g_spinningSpriteElement.aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
-        *(Vec02*)&g_spinningSpriteElement.rateX = D_00248D30;
+        *(Vec02*)&g_spinningSpriteElement.rateX = g_zeroVector;
         g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 2);
         anim = self->weightBlend;
         break;
@@ -859,7 +859,7 @@ void UpdateWorld5Boss(World5Boss* self, f32 dt)
     }
 }
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 extern s32 D_00270B54;
 extern s32 D_002717CC;
 
@@ -872,7 +872,7 @@ void ShowWorld5BossBar(World5Boss* self)
     if (mode < 2) {
         if (mode >= 0) {
             if (AreMenusAndFadeClear() != 0) {
-                if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
+                if (g_displayMode != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
             }
         }
     }
@@ -1015,7 +1015,7 @@ void UpdateWorld5Countdown(World5Countdown* self, f32 dt)
     }
 }
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 extern s32 D_00270B54;
 extern s32 D_002717CC;
 
@@ -1024,7 +1024,7 @@ void UpdateWorld5CountdownVisibility(World5Countdown* self)
 {
     s32 busy = 0;
     if (self->mode == 1 && AreMenusAndFadeClear() != 0) {
-        if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
+        if (g_displayMode != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
     }
     if (busy) g_gaugeBarElement.vt->m14(&g_gaugeBarElement);
     else g_gaugeBarElement.vt->m15(&g_gaugeBarElement);

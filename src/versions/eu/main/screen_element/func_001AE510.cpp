@@ -15,10 +15,10 @@ void InitLetterGlyphElement(Obj_1AE510* base)
     Key_eu_1AE510 key;
     SetupScreenElementText(base);
     self->f4 = GetFontById(2);
-    if ((u8*)self == (u8*)&D_00273C50) {
+    if ((u8*)self == (u8*)&g_beatPressGlyphElement) {
         key.pad = 0;
         key.id = 0x4C;
-    } else if ((u8*)self == (u8*)&D_002739F0) {
+    } else if ((u8*)self == (u8*)&g_bossBeatGlyphElement) {
         key.pad = 0;
         key.id = 0x4B;
     }

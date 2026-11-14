@@ -33,18 +33,18 @@ struct Vec02;
 // The file's .data, in retail's order.
 f32 g_contactSideSigns[2] = { 1.0f, -1.0f };
 ObjectLink g_turningColliderLinks[6] = { {6, 0x36, 0x61C}, {6, 0x35, 0x618}, {6, 0x37, 0x628}, {6, 0x3A, 0x62C}, {6, 0x38, 0x620}, {6, 0x3B, 0x624} };
-f32 D_00274B20 = 0.5f;
-Vec02 D_00274B30 = { 1.0f, -1.0f, 0.0f, 0.0f };
-s32 D_00274B40[3] = { 0x453B8000, 0, 0x40000000 };
-s32 D_00274B50[3] = { 0x453B8000, 0, 0x3E800000 };
+f32 g_turningColliderPushFactor = 0.5f;
+Vec02 g_turningColliderHeadingWeightCurve = { 1.0f, -1.0f, 0.0f, 0.0f };
+s32 g_turningColliderRestRamp[3] = { 0x453B8000, 0, 0x40000000 };
+s32 g_turningColliderSinkRamp[3] = { 0x453B8000, 0, 0x3E800000 };
 f32 g_previousStickLevel = 0;
 f32 g_phaseSoundMinInterval[1] = { 0.1f };
-f32 D_00274B64 = -0.033f;
-f32 D_00274B68[3] = { 300.0f, 0.0f, 0.25f };
-f32 D_00274B74 = 1.5f;
+f32 g_phaseTimeOffset = -0.033f;
+f32 g_turningColliderHookRamp[3] = { 300.0f, 0.0f, 0.25f };
+f32 g_turningColliderContactFriction = 1.5f;
 f32 D_00274B78 = 2.0f;
 f32 D_00274B7C = 0.0333333351f;
-f32 D_00274B80[3] = { 25.0f, 0.0f, 0.25f };
+f32 g_turningColliderTurnRampDefaults[3] = { 25.0f, 0.0f, 0.25f };
 
 // Three words copied whole from .data to a place only 4-aligned: the first two as one
 // unaligned doubleword.
@@ -58,11 +58,11 @@ void InitTurningCollider(TurningCollider* self)
 {
     InitSwitchedCollider(self);
     self->gravityScale = 1.0f;
-    self->pushFactor = D_00274B20;
+    self->pushFactor = g_turningColliderPushFactor;
     ScaleTurningColliderRamp(self, 1.0f);
-    self->headingWeightCurve = D_00274B30;
-    *(ThreeWords*)self->restRamp = *(ThreeWords*)D_00274B40;
-    *(ThreeWords*)self->sinkRamp = *(ThreeWords*)D_00274B50;
+    self->headingWeightCurve = g_turningColliderHeadingWeightCurve;
+    *(ThreeWords*)self->restRamp = *(ThreeWords*)g_turningColliderRestRamp;
+    *(ThreeWords*)self->sinkRamp = *(ThreeWords*)g_turningColliderSinkRamp;
 }
 
 
@@ -282,7 +282,7 @@ void TrackFollowedMeshVertexVelocities(TurningCollider* self)
             Vec02 world;
             Vu0::Q(world) = Vu0::Add(Vu0::Q(other->pos), Vu0::Rotate(other->rot, Vu0::Q(*src)));
             for (s32 k = 0; k < 3; k++) {
-                f32 t = ApproachValueWithRamp((&cur->x)[k], (&world.x)[k], g_gameClock.dt, (RampProfile*)D_00274B68, 0);
+                f32 t = ApproachValueWithRamp((&cur->x)[k], (&world.x)[k], g_gameClock.dt, (RampProfile*)g_turningColliderHookRamp, 0);
                 (&dst->x)[k] = (t - (&cur->x)[k]) / g_gameClock.dt;
             }
             src++;
@@ -324,7 +324,7 @@ void SetTurningColliderFollowedMesh(TurningCollider* self, Collider* other, s32 
             }
             changed = 1;
             Vu0::Q(out[i]) = p.q;
-            vel[i] = D_00248D30;
+            vel[i] = g_zeroVector;
         next:;
         }
     }
@@ -492,7 +492,7 @@ typedef s32 (*ContactTestFn)(void* self);
 void ComputeTurningColliderContactValue(TurningCollider* self, Contact03* out)
 {
     if (((ContactTestFn*)self->desc)[0x168 / 4](self)) {
-        f32 d = D_00274B74;
+        f32 d = g_turningColliderContactFriction;
         out->bounce = 0;
         out->friction = d;
     } else {
@@ -804,7 +804,7 @@ void GetTurningColliderPose(TurningCollider* self, void* matrix, Vec02* out, f32
 // last by 1/sqrt(s)).
 void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
 {
-    *(ThreeWords*)&self->turnGain = *(ThreeWords*)D_00274B80;
+    *(ThreeWords*)&self->turnGain = *(ThreeWords*)g_turningColliderTurnRampDefaults;
     self->turnGain *= s;
     self->f6E4 *= s;
     self->f6E8 *= 1.0f / Fpu::Sqrt(s);

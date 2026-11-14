@@ -402,7 +402,7 @@ void StepCountedCollider(CountedCollider* self, f32 t)
     StepCollider(self, t);
     if (self->parent == 0) {
         RotateMatrixUpright(&self->rot, 0, (Mat02*)buf);
-        SteerColliderTowardRotation(self, (Mat02*)buf, (f32*)self->p214, (Vec02*)&D_00248D30, (f32*)self->p218, t);
+        SteerColliderTowardRotation(self, (Mat02*)buf, (f32*)self->p214, (Vec02*)&g_zeroVector, (f32*)self->p218, t);
     }
 }
 
