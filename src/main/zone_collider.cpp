@@ -2056,7 +2056,7 @@ void AddZoneColliderId(ZoneCollider* self, s32 value)
 
 void SetTriggerZoneEntry(TriggerZone* self, s32 a, s32 b, s32 c, s32 d)
 {
-    SetZoneEntry((Zone28*)((u8*)self + 0x554), a, b, c, d);
+    SetZoneEntry(&self->zone, a, b, c, d);
 }
 
-void SetZoneColliderEntry(ZoneCollider* self, s32 a, s32 b, s32 c, s32 d) { SetZoneEntry((Zone28*)((u8*)self + 0x5C0), a, b, c, d); }
+void SetZoneColliderEntry(ZoneCollider* self, s32 a, s32 b, s32 c, s32 d) { SetZoneEntry(&self->zone, a, b, c, d); }

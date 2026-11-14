@@ -265,16 +265,17 @@ struct OrbitPoly {
 
 void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object)
 {
-    f32 t = *(f32*)((u8*)block + 0x60);
+    Block63* b = (Block63*)block;
+    f32 t = b->f60;
     Vu0::Q(*out) = Vu0::MulXSum(Vu0::Q(eye->q[1]), Vu0::Scalar(1.0f - t), Vu0::Q(eye->q[4]), Vu0::Scalar(t));
     if (object != 0) {
         Vec02 x;
         OrbitPoly poly;
         Vec02 dir;
         poly.Clear();
-        poly.f[1] = *(f32*)((u8*)block + 0x70);
-        poly.f[5] = *(f32*)((u8*)block + 0x74);
-        poly.f[9] = *(f32*)((u8*)block + 0x78);
+        poly.f[1] = b->f70;
+        poly.f[5] = b->f74;
+        poly.f[9] = b->f78;
         s32 saved = object->f380;
         object->f380 = 0;
         PlaceOnOffCameraFrame(object, out, &x, &dir);
@@ -316,7 +317,7 @@ void LoadOnOffObject(OnOffObject* self, void* a1)
     if (vt->m12 != 0) {
         vt->m12(self);
     }
-    ReadMeshTables(a1, (u8*)self + 0x2D4, (u8*)self + 0x2D8, (u8*)self + 0x2DC, (u8*)self + 0x2E0);
+    ReadMeshTables(a1, &self->f2D4, self->f2D8, &self->f2DC, &self->faceTree);
     s32 idx = ReadBufferedS8((BufferedStream*)a1);
     if (idx != -1) {
         Arr63* o = (Arr63*)CreatePathCurve(idx);
@@ -328,8 +329,8 @@ void LoadOnOffObject(OnOffObject* self, void* a1)
         Arr63* p = self->obj;
         self->lastCurveValue = p->data[p->count - 1];
     } else {
-        ReadBufferedRotation3((BufferedStream*)a1, (u8*)self + 0x3B0);
-        ReadBufferedVector3((BufferedStream*)a1, (u8*)self + 0x3E0);
+        ReadBufferedRotation3((BufferedStream*)a1, &self->rot3B0);
+        ReadBufferedVector3((BufferedStream*)a1, &self->v3E0);
         *(s32*)&self->lastCurveValue = 0;
     }
     self->i414 = (self->obj != 0) ? 7 : 5;
@@ -351,7 +352,7 @@ void SetOnOffObjectState(void* selfv, s32 state)
             goto tail;
         }
         Camera* base = g_camera;
-        PushCameraController(base, self->f388 + 2, (CameraController*)((u8*)base + 0x520), self->switchedCollider, self);
+        PushCameraController(base, self->f388 + 2, &base->ctl520, self->switchedCollider, self);
         TriggerScriptEvent(self, 2, 0, 0);
     } else {
         Camera* base = g_camera;
@@ -419,7 +420,7 @@ void SetOnOffObjectFrozen(OnOffObject* self, s32 p)
     }
 }
 
-void SetOnOffObjectBlockValue(OnOffObject* self, f32 value) { *(f32*)(self->block2F0.d + 0x74) = value; *(f32*)(self->block2F0.d + 0x78) = 1.0f; *(f32*)(self->block2F0.d + 0x70) = value; }
+void SetOnOffObjectBlockValue(OnOffObject* self, f32 value) { self->block2F0.f74 = value; self->block2F0.f78 = 1.0f; self->block2F0.f70 = value; }
 
 typedef void (*OnOffShapeFn)(f32 angle, Arr63* obj, Vec02* out, Vec02* dir);
 void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
@@ -448,7 +449,7 @@ void PlaceOnOffCameraFrame(OnOffObject* self, Vec02* eye, Vec02* out, Vec02* dir
         Vu0::Q(*out) = Vu0::RotateTransposed(m, Vu0::Sub(Vu0::Q(a), Vu0::Q(b)));
     } else {
         *dir = g_unitXVector;
-        Vu0::Q(*out) = Vu0::RotateTransposed(*(Mat02*)((u8*)self + 0x3B0), Vu0::Sub(Vu0::Q(a), Vu0::Q(*(Vec02*)((u8*)self + 0x3E0))));
+        Vu0::Q(*out) = Vu0::RotateTransposed(*(Mat02*)(&self->rot3B0), Vu0::Sub(Vu0::Q(a), Vu0::Q(*(Vec02*)(&self->v3E0))));
     }
 }
 
@@ -514,8 +515,8 @@ void PlaceOnOffCameraOrbit(f32 angle, f32 offset, OnOffObject* self, f32* x, f32
         Vu0::Q(r) = Vu0::Rotate(m, Vu0::Q(v));
     } else {
         v.x += offset;
-        t = *(Vec02*)((u8*)self + 0x3E0);
-        Vu0::Q(r) = Vu0::Rotate(*(Mat02*)((u8*)self + 0x3B0), Vu0::Q(v));
+        t = *(Vec02*)(&self->v3E0);
+        Vu0::Q(r) = Vu0::Rotate(*(Mat02*)(&self->rot3B0), Vu0::Q(v));
     }
     Vu0::Q(t) = Vu0::Add(Vu0::Q(t), Vu0::Q(r));
     TransformPointBetweenFrames(self, 0, &t, out);
@@ -590,7 +591,7 @@ void ActivateOnOffCameraController(OnOffCameraController* self, OnOffObject* obj
     Camera* cam = self->owner;
     self->active24 = 1;
     self->ptr = object;
-    void* target = *(void**)((u8*)cam + 0x3DC);
+    void* target = cam->stack[0].target;
     void* block = GetOnOffObjectBlock(object);
     GetCameraTargetPlacement(cam, target, (TargetRecord_00143418*)&place, 0.0f);
     BlendOnOffCameraPoint(block, &place, &blended, 0);
@@ -606,10 +607,10 @@ void ActivateOnOffCameraController(OnOffCameraController* self, OnOffObject* obj
         }
         BlendOnOffCameraPoint(block, &place, &blended, object);
     }
-    Vu0::Q(sum) = Vu0::Add(Vu0::Q(blended), Vu0::Q(*(Vec02*)((u8*)g_camera + 0x270)));
-    ConvertOffsetToCylindrical((const Vec02*)((u8*)cam + 0x40), &sum, &view->angle, &view->distance, &view->height);
+    Vu0::Q(sum) = Vu0::Add(Vu0::Q(blended), Vu0::Q(g_camera->v270));
+    ConvertOffsetToCylindrical((const Vec02*)cam->position, &sum, &view->angle, &view->distance, &view->height);
     f32 reach = Fpu::Sqrt(view->distance * view->distance + view->height * view->height);
-    f32 scale = (reach - *(f32*)((u8*)cam + 0x1E4)) / reach;
+    f32 scale = (reach - cam->nearDistance) / reach;
     f32 lateral = view->distance * scale;
     f32 radial = view->height * scale;
     view->height = radial;
@@ -631,7 +632,7 @@ void ActivateOnOffCameraController(OnOffCameraController* self, OnOffObject* obj
             g_camera->zoomGoal = fov;
         }
     }
-    SetCameraAimOffsetFromScreenPoint(cam, &sum, *(f32*)((u8*)block + 0x58), *(f32*)((u8*)block + 0x5C));
+    SetCameraAimOffsetFromScreenPoint(cam, &sum, ((Block63*)block)->f58, ((Block63*)block)->f5C);
 }
 
 void DeactivateOnOffCameraController(OnOffCameraController* self)
@@ -747,9 +748,9 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
     if (target == g_player && target->f268C == 2) {
         Vec02 goal;
         Vu0::Q(goal) = Vu0::Sub(Vu0::Q(target->v2690), Vu0::Q(blended));
-        SpringCameraVector(g_camera, (Vec02*)((u8*)g_camera + 0x270), (Vec02*)((u8*)g_camera + 0x280), &goal, 8.0f, -6.0f, dt);
+        SpringCameraVector(g_camera, &g_camera->v270, &g_camera->v280, &goal, 8.0f, -6.0f, dt);
     }
-    Vu0::Q(sum) = Vu0::Add(Vu0::Q(blended), Vu0::Q(*(Vec02*)((u8*)g_camera + 0x270)));
+    Vu0::Q(sum) = Vu0::Add(Vu0::Q(blended), Vu0::Q(g_camera->v270));
     view->turnScale = ApproachValueWithRamp(view->turnScale, (*(s32*)&eye->q[0] & 1) ? 0.0f : block->turnRate, dt, &g_onOffCameraFadeRamp, 0);
     view->f40 = eye->q[3].z >? view->f40;
     Vec02 frame;
@@ -769,12 +770,12 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         }
         if (flags & 1) {
             PlaceOnOffCameraOrbit(object->angle3A0, *(f32*)&object->block2F0, object, &frame.x,
-                                  (f32*)((u8*)object + 0x300), (f32*)((u8*)object + 0x330), 1, &orbit1);
+                                  object->block2F0.f10, object->block2F0.f40, 1, &orbit1);
             ConvertOffsetToCylindrical(&orbit1, &sum, &angle1, &dist1, &height1);
         }
         if (object->i414 & 2) {
             PlaceOnOffCameraOrbit(object->angle3A0, *(f32*)&object->block2F0, object, &frame.x,
-                                  (f32*)((u8*)object + 0x300), (f32*)((u8*)object + 0x330), 2, &orbit2);
+                                  object->block2F0.f10, object->block2F0.f40, 2, &orbit2);
             ConvertOffsetToCylindrical(&orbit2, &sum, &angle2, &dist2, &height2);
         }
     }
@@ -808,9 +809,9 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         view->mode = 4;
     }
     Vec02 offset;
-    if (object != 0 && *(PlacedObject**)((u8*)object + 0x444) != 0) {
+    if (object != 0 && object->f444 != 0) {
         Vec02 d;
-        Vu0::Q(d) = Vu0::Sub(Vu0::Q((*(PlacedObject**)((u8*)object + 0x444))->v140), Vu0::Q(eye->q[1]));
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q((object->f444)->v140), Vu0::Q(eye->q[1]));
         d.z = 0.0f;
         const u128& zero = Vu0::Q(D_00248D30);
         Vu0::Vec v = Vu0::Vec::Of(d);
@@ -1086,7 +1087,7 @@ done:
     ComputePolarOffset((Vec3*)&polar, placeAngle, placeDist, placeHeight);
     Vec02 pos;
     Vu0::Set(pos, Vu0::Add(Vu0::Q(sum), Vu0::Q(polar)));
-    if (object == 0 || *(s32*)((u8*)object + 0x440) == 0) {
+    if (object == 0 || object->f440 == 0) {
         if (cam->snapping != 0) {
             if (cam->hasSnapValue == 0) {
                 FindFreeOnOffCameraAngle(self, &sum, &pos, &pos);
@@ -1140,16 +1141,16 @@ void FindFreeOnOffCameraScreenSpan(CameraController* self, Vec02* center)
     Camera* cam = (Camera*)self->owner;
     Collider* target = (Collider*)cam->stack[0].target;
     if (g_padSelectFlags & 2) {
-        *(f32*)((u8*)self + 0x60) = g_gameTime;
+        ((OnOffCameraController*)self)->lastMoveTime = g_gameTime;
         return;
     }
-    if (self->ptr != 0 && *(s32*)((u8*)self->ptr + 0x440) != 0) {
+    if (self->ptr != 0 && ((OnOffObject*)self->ptr)->f440 != 0) {
         return;
     }
     if (D_00275978 != 0) {
         return;
     }
-    if (g_gameClock[1] - *(f32*)((u8*)self + 0x60) < D_00275970) {
+    if (g_gameClock[1] - ((OnOffCameraController*)self)->lastMoveTime < D_00275970) {
         return;
     }
     lo = hi = *(Vec02*)cam->position;
@@ -1170,12 +1171,12 @@ void FindFreeOnOffCameraScreenSpan(CameraController* self, Vec02* center)
         tmp.z = cam->nearDistance;
         UnprojectCameraPoint(cam, (f32*)&tmp, &tmp);
         if (FindFirstFreeSpan(count, list, &pts[i], &tmp, 0.0f, 0, &spanEnd) != 0 && 1.0f <= spanEnd) {
-            *(f32*)((u8*)self + 0x60) = g_gameClock[1];
+            ((OnOffCameraController*)self)->lastMoveTime = g_gameClock[1];
             break;
         }
     }
     PopBackMemoryMark();
-    if (g_onOffCameraRetryDelay < g_gameClock[1] - *(f32*)((u8*)self + 0x60)) {
+    if (g_onOffCameraRetryDelay < g_gameClock[1] - ((OnOffCameraController*)self)->lastMoveTime) {
         QueueCameraSnap(cam);
     }
 }
@@ -1214,7 +1215,7 @@ void FindFreeOnOffCameraAngle(CameraController* self, Vec02* p, Vec02* q, Vec02*
         Vec02 dir;
         Vec02 cand;
         Vec02 mixed;
-        *(s32*)((u8*)self + 0x20) = 4;
+        ((OnOffCameraController*)self)->f20 = 4;
         ConvertOffsetToCylindrical(q, p, &m0, &m1, &m2);
         f32 bestScore = 3.40282347e+38f;
         f32 angle = 0.0f;

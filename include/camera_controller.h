@@ -101,9 +101,12 @@ struct FrameCameraController : CameraController {
 
 // D_002173F8's, 0x70 bytes (up to the end of class 0x6D): +0x08 is a pointer (CameraController::ptr).
 struct OnOffCameraController : CameraController {
-    u8 pad0C[0x24 - 0x0C];  // 0x0C
+    u8 pad0C[0x20 - 0x0C];  // 0x0C
+    s32 f20;                // 0x20: set to 4 when no free span is found
     s32 active24;           // 0x24: func_001E2E68 sets it to 1
-    u8 pad28[0x70 - 0x28];  // 0x28
+    u8 pad28[0x60 - 0x28];  // 0x28
+    f32 lastMoveTime;       // 0x60: the game time the camera last moved or was held
+    u8 pad64[0x70 - 0x64];  // 0x64
 };
 
 // One entry of the camera's stack (Camera::stack), sorted by key.

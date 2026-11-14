@@ -944,8 +944,8 @@ void PlaceObjectAtRandomNode(GaugeCollider* self)
     RemoveFromList(&self->freeNodes, nd);
     AppendToList(&self->usedNodes, nd);
     o->desc->m02(o);
-    o->desc02()->m1D(o, (Vec02*)((u8*)nd + 0x140));
-    o->desc02()->m1E(o, (Mat02*)((u8*)nd + 0x110));
+    o->desc02()->m1D(o, &nd->v140);
+    o->desc02()->m1E(o, &nd->m110);
     o->desc02()->m20(o, (Vec02*)&D_00248D30);
     o->desc02()->m21(o, (Vec02*)&D_00248D30);
     ChangeAgentState(o, 0x10, 0);

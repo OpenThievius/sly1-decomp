@@ -379,7 +379,7 @@ void BeginRenderFrame(void)
     ReleaseFrameNodes(g_buildFrame);
     {
         RenderFrame* slot = g_buildFrame;
-        s32 v = *(s32*)((u8*)g_camera + 0x21C);
+        s32 v = g_camera->f21C;
         slot->flags = 0;
         slot->imageMask = v;
         slot->hasMaskedImages = 0;
@@ -524,7 +524,7 @@ void ReleaseFrameNodes(RenderFrame* self)
         BeginListWalk::Of(&it, &self->detachedRecords);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
             if (n->pooledSlot != 0) {
-                PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1B4C), n->pooledSlot);
+                PushFreeSlot(&g_currentWorld->pool1B4C, n->pooledSlot);
             }
             RemoveFromList(&self->detachedRecords, n);
             PushFreeSlot(&g_currentWorld->pool1B40, n);

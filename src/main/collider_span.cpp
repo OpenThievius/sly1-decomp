@@ -73,7 +73,7 @@ s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderS
         return CollectTreeNodeSpans((TreeNode03*)self->tree.nodes, (Vec02*)a1, (Vec02*)a2, 0, a3, (ColliderSpan*)a4);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return CollectBoundsSpans((Vec02*)((u8*)self + 0x140), a1, a2, self->radius3CC, a3, a4);
+        return CollectBoundsSpans(&self->v140, a1, a2, self->radius3CC, a3, a4);
     }
     return 0;
 }
@@ -84,7 +84,7 @@ s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32
         return CollectTreeNodeSpans((TreeNode03*)a1, (Vec02*)a2, (Vec02*)a3, 0, a4, (ColliderSpan*)a5);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return CollectBoundsSpans((Vec02*)((u8*)self + 0x140), (Vec02*)a2, (Vec02*)a3, self->radius3CC, a4, a5);
+        return CollectBoundsSpans(&self->v140, (Vec02*)a2, (Vec02*)a3, self->radius3CC, a4, a5);
     }
     return 0;
 }

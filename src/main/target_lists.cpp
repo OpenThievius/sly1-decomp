@@ -602,7 +602,7 @@ void StepListedCollisionPart(ListedCollisionPart* self, f32 t)
     if (self->skipSteering != 0) {
         return;
     }
-    RotateMatrixUpright((Mat02*)((u8*)self + 0xD0), 0, (Mat02*)&buf);
+    RotateMatrixUpright(&self->rot, 0, (Mat02*)&buf);
     SteerColliderTowardRotation(self, (Mat02*)&buf, (f32*)self->p214, (Vec02*)&D_00248D30, (f32*)self->p218, t);
 }
 
@@ -623,8 +623,8 @@ void SetPooledObjectPlayerHold(PooledObject* self, s32 v)
         self->desc02()->m20(self, (Vec02*)&D_00248D30);
         self->desc02()->m21(self, (Vec02*)&D_00248D30);
         SetColliderAnchors(self, 3, 0, 3, 0);
-        RotateMatrixUpright((Mat02*)((u8*)g_player + 0x110), 0, (Mat02*)f.a);
-        RotateMatrixUpright((Mat02*)((u8*)self + 0x110), (Mat02*)f.c, (Mat02*)f.b);
+        RotateMatrixUpright(&g_player->m110, 0, (Mat02*)f.a);
+        RotateMatrixUpright(&self->m110, (Mat02*)f.c, (Mat02*)f.b);
         MatrixToAxisAngle((Mat02*)f.c, (f32*)f.e, (Vec02*)f.d);
         MultiplyMatrices3x3((Mat02*)f.a, (Mat02*)f.b, (Mat02*)self->linkRecord);
         TriggerScriptEvent(self, 2, 0, 0);

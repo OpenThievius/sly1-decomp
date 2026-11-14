@@ -467,12 +467,12 @@ void ReparentPathCurveObject(PathCurveObject* self, BaseObject* other)
     Mat4A b;
     PathCurve* h;
     if (self->parent) {
-        BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)self->parent + 0x140), (const Mat02*)((u8*)self->parent + 0x110), &a);
+        BuildMatrixFromRotationAndTranslation(&((PlacedObject*)self->parent)->v140, &((PlacedObject*)self->parent)->m110, &a);
     } else {
         a = *(Mat4A*)g_identityMatrix4;
     }
     if (other) {
-        BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)other + 0x140), (const Mat02*)((u8*)other + 0x110), &b);
+        BuildMatrixFromRotationAndTranslation(&((PlacedObject*)other)->v140, &((PlacedObject*)other)->m110, &b);
     } else {
         b = *(Mat4A*)g_identityMatrix4;
     }

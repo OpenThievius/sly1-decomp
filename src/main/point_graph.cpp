@@ -430,7 +430,7 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
             for (i = 0, slot = self->objects; i < self->objectCount; slot++, i++) {
                 void* n = *slot;
                 if (IsObjectAttached((BaseObject*)n) != 0) {
-                    SetAgentGoalPoint(self, (Vec02*)((u8*)n + 0x140));
+                    SetAgentGoalPoint(self, &((PlacedObject*)n)->v140);
                     break;
                 }
             }
@@ -510,7 +510,7 @@ void UpdateSeekingAgentState(SeekingAgent* self)
         if (*(void**)((u8*)self->statePlayer + 8) != self->f5F0) {
             break;
         }
-        Vu0::Q(tmp) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)g_camera + 0x40)), Vu0::Q(self->v140));
+        Vu0::Q(tmp) = Vu0::Sub(Vu0::Q(*(Vec02*)g_camera->position), Vu0::Q(self->v140));
         a = ArctangentOfRatio(tmp.y, tmp.x);
         SetAgentFacingAngles(self, a, 0.0f);
         break;
@@ -519,7 +519,7 @@ void UpdateSeekingAgentState(SeekingAgent* self)
         if (self->requestInPool == 0) {
             break;
         }
-        Vu0::Q(tmp) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)((u8*)self->partner + 0x140)));
+        Vu0::Q(tmp) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(((PlacedObject*)self->partner)->v140));
         a = ArctangentOfRatio(tmp.y, tmp.x);
         if (self->state == 0x10) {
             a = WrapAngle(a + 4.0f);

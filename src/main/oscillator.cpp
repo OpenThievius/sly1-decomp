@@ -398,7 +398,7 @@ void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
 
 void RefreshOscillatorFrames(Oscillator* self)
 {
-    for (OscPart* part = *(OscPart**)((u8*)self + 0x8E0); part != 0; part = part->next) {
+    for (OscPart* part = (OscPart*)self->partList; part != 0; part = part->next) {
         PlacedObject* obj = part->obj;
         OscMesh* mesh = part->mesh;
         Mat4R m;
@@ -526,7 +526,7 @@ void RefreshOscillatorFrames(Oscillator* self)
             }
         }
     }
-    *(s32*)((u8*)self + 0x8E4) = 0;
+    self->framesDirty = 0;
 }
 
 struct OscillatorSweepEntry {
@@ -1039,7 +1039,7 @@ void PlaceAtArrivalPoint(TransformSet* self)
     for (s32 i = 0; i < self->count; i++) {
         CreateAnimationPlayerWithoutPresetTargets((Animation*)self->objects[i], 0, 0, 0, 0.0f, 1.0f);
     }
-    SetGatheredWalkerTargets(self->world, *(s32*)((u8*)self + 0xB4), (ZoneTargetEntry*)((u8*)self + 0xB8), self, 1);
+    SetGatheredWalkerTargets(self->world, self->keyedCount, (ZoneTargetEntry*)self->keyed, self, 1);
     for (s32 i = 0; i < self->idCount; i++) {
         ArrivalWatcher* w = (ArrivalWatcher*)FindFirstObjectById(self->world, 0x104, self->ids[i], self);
         if (w != 0) {
@@ -1049,13 +1049,13 @@ void PlaceAtArrivalPoint(TransformSet* self)
     s32 n = GatherObjectsById(self->world, 0x205, 0x7D, 0, 0x40, found);
     n = MinOf::Of(n, 0x40);
     for (n = n - 1; n >= 0; n--) {
-        if (*(s32*)((u8*)found[n] + 0x2E4) != 2) {
+        if (((ObjectSubGroup*)found[n])->state != 2) {
             SetObjectSubGroupState((ObjectSubGroup*)found[n], 0);
         }
     }
     if (who->flags538 & (0x8000ULL << 30)) {
-        if (*(s32*)((u8*)self + 0x98) != 0) {
-            angle = WrapAngle(ArctangentOfRatio(rot.r[0].y, rot.r[0].x) + *(f32*)((u8*)self + 0x9C));
+        if (self->hasHeading != 0) {
+            angle = WrapAngle(ArctangentOfRatio(rot.r[0].y, rot.r[0].x) + self->headingOffset);
             RequestCameraSnap(g_camera, &angle);
         } else {
             RequestCameraSnap(g_camera, 0);
@@ -1064,7 +1064,7 @@ void PlaceAtArrivalPoint(TransformSet* self)
     TriggerScriptEvent(self, 2, 0, 0);
 }
 
-s32 SetTransformObjectKeyedValue(TransformObject* self, s32 flag, s32 k1, s32 k2, s32 val) { return UpsertKeyedEntry((ZoneTargetEntry*)((u8*)self + 0xB8), 4, (s32*)((u8*)self + 0xB4), flag, k1, k2, val); }
+s32 SetTransformObjectKeyedValue(TransformObject* self, s32 flag, s32 k1, s32 k2, s32 val) { return UpsertKeyedEntry((ZoneTargetEntry*)((TransformSet*)self)->keyed, 4, &((TransformSet*)self)->keyedCount, flag, k1, k2, val); }
 
 void StoreValueAndMarkSet(TimedValue* self, f32 value) { self->value = value; self->state = 1; }
 
@@ -1144,8 +1144,8 @@ larg:
 
 void LoadObjectSubGroup(ObjectSubGroup* self, void* s3)
 {
-    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)((u8*)self + 0x2FC));
-    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)((u8*)self + 0x308));
+    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)&self->levelEntry);
+    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)&self->f308);
     ReadBufferedRotation3((BufferedStream*)s3, &self->rot);
     ReadBufferedVector3((BufferedStream*)s3, &self->pos);
     void (*f)(BaseObject* self) = self->desc->m12;
@@ -1235,7 +1235,7 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
         return;
     }
     if (key == 0 || IsObjectOfKind(key, 0x16) == 0) {
-        RemoveCameraControllers(g_camera, 2, 0, (CameraController*)((u8*)g_camera + 0x460), 0, 0);
+        RemoveCameraControllers(g_camera, 2, 0, &g_camera->ctl460, 0, 0);
     }
     SetObjectSubGroupState(self, 5);
     for (i = 0; i < self->count; i++) {
@@ -1400,9 +1400,9 @@ void StartLookupObject(LookupObject* self)
     }
 }
 
-void PushObjectCameraController(void* self) { if (!*(s32*)((u8*)self + 0x310)) { PushCameraController(g_camera, 7, (CameraController*)((u8*)g_camera + 0x510), 0, self); *(s32*)((u8*)self + 0x310) = 1; } }
+void PushObjectCameraController(void* self) { if (!*(s32*)((u8*)self + 0x310)) { PushCameraController(g_camera, 7, &g_camera->ctl510, 0, self); *(s32*)((u8*)self + 0x310) = 1; } }
 
-void RemoveObjectCameraController(void* self) { if (*(s32*)((u8*)self + 0x310)) { RemoveCameraControllers(g_camera, 0xB, 7, (CameraController*)((u8*)g_camera + 0x510), 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
+void RemoveObjectCameraController(void* self) { if (*(s32*)((u8*)self + 0x310)) { RemoveCameraControllers(g_camera, 0xB, 7, &g_camera->ctl510, 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
 
 void InitTrackedNodes(Rec36* a, ContactTracker* b);
 
@@ -1441,8 +1441,8 @@ void CollectTouchingObjects(ContactTracker* self, f32 dt) {
         p = (ObjectGatherer*)s->obj;
         tmp.self = self;
         tmp.obj = p;
-        tmp.q20 = *(Vec02*)((u8*)p + 0x140);
-        tmp.q30 = *(Vec02*)((u8*)p + 0x150);
+        tmp.q20 = p->v140;
+        tmp.q30 = p->v150;
         FindNodeForQuery((NodeQuery*)&tmp, 0, 0);
     }
 }
@@ -1453,7 +1453,7 @@ void ApplyContactTrackerTransform(ContactTracker* self, Camera* cam, ScaledTrans
 
 int RequestContactTrackerLaunch(ContactTracker* self, void* source, TrackedNodeOffer* offer) { OfferTrackedNodeLaunch(&self->rec, source, offer); return 1; }
 
-void* GetContactTrackerRecord(void* self) { return (u8*)self + 0x550; }
+void* GetContactTrackerRecord(void* self) { return &((ContactTracker*)self)->rec; }
 
 void ClearTrackedNodes(ContactTracker* self) { self->rec.found = 0; }
 

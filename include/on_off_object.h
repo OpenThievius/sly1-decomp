@@ -13,7 +13,17 @@
 
 // The 0x90 bytes at 0x2F0, copied from the table at D_00275980 at construction.
 struct __attribute__((aligned(16))) Block63 {
-    u8 d[0x90];
+    u8 d0[0x10];
+    f32 f10[12];            // 0x10: the orbit's polynomial rows
+    f32 f40[6];             // 0x40: the orbit's range
+    f32 f58;
+    f32 f5C;
+    f32 f60;
+    u8 d64[0xC];
+    f32 f70;
+    f32 f74;
+    f32 f78;
+    u8 d7C[0x90 - 0x7C];
 };
 
 struct __attribute__((aligned(16))) Quad63 {
@@ -53,7 +63,9 @@ struct OnOffObject : PlacedObject {
         s32 f3A0;           // 0x3A0
         f32 angle3A0;       // 0x3A0: the angle round the object the camera is at (func_001E30E8)
     };
-    u8 pad3A4[0x3F0 - 0x3A4];
+    u8 pad3A4[0x3B0 - 0x3A4];
+    Mat02 rot3B0;           // 0x3B0: the fixed camera frame a stream without a list gives
+    Vec02 v3E0;             // 0x3E0: and its origin
     f32 lastCurveValue;     // 0x3F0: the list's last value, or 0
     u8 pad3F4[0x400 - 0x3F4];
     Vec02 v400;             // 0x400: the point the angle is measured from
@@ -66,7 +78,10 @@ struct OnOffObject : PlacedObject {
     f32 limitRampTime;      // 0x428: ramp of the limit branch
     f32 limitSpeed;         // 0x42C: the speed the limit branch asks for
     s32 f430;               // 0x430: -1 at construction
-    u8 pad434[0x450 - 0x434];
+    u8 pad434[0x440 - 0x434];
+    s32 f440;               // 0x440
+    PlacedObject* f444;     // 0x444
+    u8 pad448[0x450 - 0x448];
     Quad63 quad450;         // 0x450
     Pack63 pack460;         // 0x460
     u8 pad468[0x470 - 0x468];
