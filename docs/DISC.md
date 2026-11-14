@@ -271,9 +271,10 @@ and value index as in an object list); a transition without one is taken at once
 An animation's three event lists (0x12BC38) run when it starts, as its time passes
 each event (the second list, the only one with times) and when it ends. A list is an s8
 count; an event an s8 kind (0x00–0x3B), its time in the timed list, and a payload of 0
-to 32 bytes chosen by the kind. Kind 0x00 plays a sound effect at an object, 0x2C a
+to 36 bytes chosen by the kind. Kind 0x00 plays a sound effect at an object, 0x2C a
 streamed sound and 0x33 a video, both named by a disc record; the others start, stop
-and adjust animations, objects and the world.
+and adjust animations, objects and the world. [OBJECTS.md](OBJECTS.md) lists every kind's
+payload and what it does, and every object class.
 
 Class 0x65 (mostly created inline by 0x53) ends with a list of steps (0x150570): an s8
 count of steps, each an s8 kind (0–7) and its payload; kind 0 plays a streamed sound and
@@ -371,5 +372,7 @@ sound banks, 70 voices and 2,625 event and step sounds (525 per language). What 
    one, and the sound banks are measured (2026-11-14); the rest are marked never read, not
    shown, or by their shape. The roles of the sound banks' other fields, and how the driver
    plays a tone and a sequence, would need the driver's code and stay open.
-2. **What the data is in the game.** The event kinds and object classes, which so far
-   have only a shape; PAL's language-specific music and its voice index 5.
+2. **What the data is in the game.** The event kinds and object classes are in
+   [OBJECTS.md](OBJECTS.md) (2026-11-14), each from the code that loads and runs it; left are
+   the roles the code does not show (described there by their mechanics), and PAL's
+   language-specific music and its voice index 5.
