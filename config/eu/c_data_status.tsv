@@ -213,7 +213,7 @@ D_002758E0	0027F090	96	match
 D_00275940	0027F0B8	40	match	
 D_00275970	0027F0E0	436	match	
 D_00275B28	0027F298	56	match	
-D_00275B60	0027F2D0	2772	differs	first difference at +0x463; 10 text, 5 pointer, 353 other words differ
+D_00275B60	0027F2D0	2736	differs	first difference at +0x463; 10 text, 5 pointer, 353 other words differ
 D_00276680	0027FDE0	752	match	
 D_00276970	002800D0	16	match	
 D_00276980	002800E0	1960	match	
