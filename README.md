@@ -8,9 +8,9 @@
 [![Code](https://bytematch.dev/OpenThievius/sly1-decomp.svg?mode=shield&label=Code&measure=matched_code_percent)](https://bytematch.dev/OpenThievius/sly1-decomp)
 [![Functions](https://bytematch.dev/OpenThievius/sly1-decomp.svg?mode=shield&label=Functions&measure=matched_functions)](https://bytematch.dev/OpenThievius/sly1-decomp)
 
-A work-in-progress **matching decompilation** of *Sly Cooper and the Thievius Raccoonus* (Sucker Punch Productions, 2002) for the PlayStation 2 (`SCUS_971.98`, NTSC-U v1.00), part of **[OpenThievius](https://github.com/OpenThievius/OpenThievius)**.
+A complete **matching decompilation** of *Sly Cooper and the Thievius Raccoonus* (Sucker Punch Productions, 2002) for the PlayStation 2 (`SCUS_971.98`, NTSC-U v1.00), part of **[OpenThievius](https://github.com/OpenThievius/OpenThievius)**.
 
-The goal is C++ source that, built with the original compiler, gives back a byte-identical copy of the retail executable. The matched code is then cleaned up into readable code with real types and names, and the matching build stays on as the regression test.
+Its C++ source, built with the original compiler, gives back a byte-identical copy of the retail executable: every function of both versions is matched. The code has readable names and types throughout, and the matching build stays on as the regression test for the cleanup that continues and for the native port.
 
 > [!NOTE]
 > This repository contains **no game assets, retail executables or disassembly**. To build anything you need your own copy of the game. Please read [`LEGAL.md`](LEGAL.md) before contributing.
@@ -32,7 +32,7 @@ A US function counts when the build links its C and still prints `MATCH`; a PAL 
 
 NTSC-U is the primary version. PAL (*Sly Raccoon*) shares its C and builds byte for byte from its own assembly; [`docs/VERSIONS.md`](docs/VERSIONS.md) compares the two. The May 2002 E3 prototype is recognised by the tools and nothing is taken from it ([`docs/PROTOTYPE.md`](docs/PROTOTYPE.md)).
 
-Every function links at its retail address. Functions not yet decompiled are built from disassembly, so the full executable always links and equals retail. The game is C++ built with SN Systems' GCC 2.95.3 ([`docs/TOOLCHAIN.md`](docs/TOOLCHAIN.md)), and its data lives on the disc outside the file system, with no code of its own ([`docs/DISC.md`](docs/DISC.md)).
+Every function links at its retail address, from C or, for the 311 functions that were hand-written assembly or are the linker's leftovers, from their original assembly. US data is 99.97% C; PAL's data is partly still built from its disassembly ([`docs/ROADMAP.md`](docs/ROADMAP.md)). The game is C++ built with SN Systems' GCC 2.95.3 ([`docs/TOOLCHAIN.md`](docs/TOOLCHAIN.md)), and its data lives on the disc outside the file system, with no code of its own ([`docs/DISC.md`](docs/DISC.md)).
 
 ---
 
@@ -90,7 +90,7 @@ For more detail:
 
 ## Contributing
 
-Contributions are warmly welcome, whether you want to match functions, research the game's data formats or improve the tools and documentation.
+Contributions are warmly welcome, whether you want to make the code more readable, research the game's data formats, work toward the native port or improve the tools and documentation.
 
 - Read [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`AGENTS.md`](AGENTS.md) first: they hold the rules, above all that everything is derived from the retail executable and nothing proprietary enters the repository.
 - Reserve what you work on in the pinned **[Contributor coordination](https://github.com/OpenThievius/sly1-decomp/issues/1)** issue.
