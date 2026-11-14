@@ -40,33 +40,33 @@ void* ResolveAgentClip(Agent* self, s32 arg);
 struct __attribute__((aligned(16))) PaddedQuadratic { f32 c[3]; };
 
 // The file's .data, in retail's order; its assembly reads the quadratics.
-s32 D_00274C20[4] = { 2, 0x195, 0x87C, 0 };
-s32 D_00274C30[8] = { 2, 0x194, 0x750, 6, 0x50, 0x734, 0, 0 };
-PaddedQuadratic D_00274C50 = { { 1.0f, -1.0f, 0.0f } };
-PaddedQuadratic D_00274C60 = { { 0.0f, 0.0f, 1.0f } };
-PaddedQuadratic D_00274C70 = { { 0.0f, 15.0f, 1.5f } };
-PaddedQuadratic D_00274C80 = { { 0.0f, 2.5f, 0.25f } };
-float D_00274C90 = 40.0f;
-float D_00274C94 = 50.0f;
-float D_00274C98[2] = {0.5f, 0.0f};
-PaddedQuadratic D_00274CA0 = { { 1.0f, -0.00100000005f, 0.0f } };
-PaddedQuadratic D_00274CB0 = { { 0.25f, 1.0f, 0.0f } };
-PaddedQuadratic D_00274CC0 = { { 0.0f, 0.00499999989f, 0.0f } };
-float D_00274CD0[2] = {0.0f, 1.0f};
-float D_00274CD8[2] = {1.0f, 0.0f};
-PaddedQuadratic D_00274CE0 = { { 0.0f, 0.00499999989f, 0.0f } };
+s32 g_agentLoadLinks[4] = { 2, 0x195, 0x87C, 0 };
+s32 g_agentStartLinks[8] = { 2, 0x194, 0x750, 6, 0x50, 0x734, 0, 0 };
+PaddedQuadratic g_agentTurnBlendCoefficients = { { 1.0f, -1.0f, 0.0f } };
+PaddedQuadratic g_agentSteerBlendCoefficients = { { 0.0f, 0.0f, 1.0f } };
+PaddedQuadratic g_agentSteerRatesA = { { 0.0f, 15.0f, 1.5f } };
+PaddedQuadratic g_agentSteerRatesB = { { 0.0f, 2.5f, 0.25f } };
+float g_agentGoalFarDistance = 40.0f;
+float g_agentFacingFarDistance = 50.0f;
+float g_agentPathRetryDelay[2] = {0.5f, 0.0f};
+PaddedQuadratic g_agentPitchDistanceCoefficients = { { 1.0f, -0.00100000005f, 0.0f } };
+PaddedQuadratic g_agentPitchDistanceLimits = { { 0.25f, 1.0f, 0.0f } };
+PaddedQuadratic g_agentPitchHeightCoefficients = { { 0.0f, 0.00499999989f, 0.0f } };
+float g_agentPitchHeightLimits[2] = {0.0f, 1.0f};
+float g_agentPitchScale[2] = {1.0f, 0.0f};
+PaddedQuadratic g_agentTargetRangeCoefficients = { { 0.0f, 0.00499999989f, 0.0f } };
 float D_00274CF0 = 0.349999994f;
 f32 D_00274CF4 = 0.85f;
 f32 D_00274CF8[1] = { 0 };
-float D_00274CFC = 0.25f;
-float D_00274D00 = 700.0f;
-float D_00274D04 = 1200.0f;
+float g_agentHitVelocityBoost = 0.25f;
+float g_agentHitMinUpSpeed = 700.0f;
+float g_agentHitMaxSpeed = 1200.0f;
 f32 D_00274D08[2] = { 0.0f, 4.0f };
 f32 D_00274D10[2] = { 0.0f, 1.5f };
 f32 D_00274D18[2] = { 0.0f, 0.3f };
-float D_00274D20[2] = {700.0f, 0.0f};
-float D_00274D28[2] = {-0.200000003f, 0.200000003f};
-PaddedQuadratic D_00274D30 = { { 0.800000012f, 1.20000005f, 0.0f } };
+float g_itemKeeperMemberSpacing[2] = {700.0f, 0.0f};
+float g_itemKeeperPlaceAngleJitter[2] = {-0.200000003f, 0.200000003f};
+PaddedQuadratic g_itemKeeperPlaceRadiusScale = { { 0.800000012f, 1.20000005f, 0.0f } };
 
 extern u8 g_flagTable[];
 void InitTurningCollider(TurningCollider* self);
@@ -132,7 +132,7 @@ void ResolveAgentSecondaryClips(Agent* self);
 void LoadAgent(Agent* self, void* a1)
 {
     LoadCollider(self, (BufferedStream*)a1);
-    ResolveObjectLinks(self, 1, (ObjectLink*)D_00274C20);
+    ResolveObjectLinks(self, 1, (ObjectLink*)g_agentLoadLinks);
     ResolveAgentClips(self);
     ResolveAgentSecondaryClips(self);
 }
@@ -192,7 +192,7 @@ extern u8 g_flagTable[];
 void StartAgent(Agent* self)
 {
     StartTurningCollider(self);
-    ResolveObjectLinks(self, 2, (ObjectLink*)D_00274C30);
+    ResolveObjectLinks(self, 2, (ObjectLink*)g_agentStartLinks);
     if (self->roster == 0) {
         void* t = CreateItemKeeper(self->world);
         self->roster = t;
@@ -362,7 +362,7 @@ void StepAgent(Agent* self, f32 dt)
         Mat02 m2;
         Mat02 m;
         f32 a = __builtin_fabsf(Arccosine(Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->rot.r[0]), Vu0::Q(self->headingMatrix.r[0])))));
-        f32 k = LimitToUnitRange(D_00274C50.c[0] + a * (D_00274C50.c[1] + a * D_00274C50.c[2]));
+        f32 k = LimitToUnitRange(g_agentTurnBlendCoefficients.c[0] + a * (g_agentTurnBlendCoefficients.c[1] + a * g_agentTurnBlendCoefficients.c[2]));
         if (self->state == 12) {
             f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->snappedGoal), Vu0::Q(self->v140))));
             f32* q = &F(f32, 0xB30);
@@ -396,9 +396,9 @@ void StepAgent(Agent* self, f32 dt)
         } else {
             x = 1.0f;
         }
-        f32 k = LimitToUnitRange(D_00274C60.c[0] + x * (D_00274C60.c[1] + x * D_00274C60.c[2]));
-        StoreScaledQuadword(&q, k, (u8*)&D_00274C70);
-        StoreScaledQuadword(&q2, k, (u8*)&D_00274C80);
+        f32 k = LimitToUnitRange(g_agentSteerBlendCoefficients.c[0] + x * (g_agentSteerBlendCoefficients.c[1] + x * g_agentSteerBlendCoefficients.c[2]));
+        StoreScaledQuadword(&q, k, (u8*)&g_agentSteerRatesA);
+        StoreScaledQuadword(&q2, k, (u8*)&g_agentSteerRatesB);
         SteerColliderTowardRotation(self, &self->headingMatrix, (f32*)&q, (Vec02*)&D_00248D30, (f32*)&q2, dt);
         AddColliderForce(self, &self->gravity);
     } else {
@@ -474,7 +474,7 @@ void* FindColliderFloorContact(void* self, s32 key, s32* out);
 void DispatchAgentContactHits(Agent* self);
 void ClearRootTries(PlacedObject* self);
 void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
-extern f32 D_00274AD0[];
+extern f32 g_contactSideSigns[];
 extern const Vec02 D_00248D30;
 s32 IsObjectAttached(BaseObject* self);
 void QueueItemKeeperUpdate(ItemKeeper* a0);
@@ -570,7 +570,7 @@ void UpdateAgent(Agent* self, f32 dt)
         AgentBody* floor = (AgentBody*)FindColliderFloorContact(self, 0, &kind);
         if (floor != 0) {
             Vec02 scale;
-            u128 k = Vu0::FromFloatAt(D_00274AD0[kind]);
+            u128 k = Vu0::FromFloatAt(g_contactSideSigns[kind]);
             Vu0::Q(push) = Vu0::MulX(Vu0::Q(floor->v80), k);
             Vu0::Q(scale) = k;
         } else {
@@ -834,7 +834,7 @@ void SetAgentGoalPoint(Agent* self, Vec02* p)
     }
     if (self->pathValid != 0) {
         u128 d = Vu0::Sub(Vu0::Q(self->snappedGoal), Vu0::Q(t));
-        s32 far = D_00274C90 < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+        s32 far = g_agentGoalFarDistance < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
         if (far) {
             self->pathValid = 0;
         }
@@ -887,7 +887,7 @@ static inline f32 ClockTime(const f32* clock) { return clock[1]; }
 void BuildAgentPath(Agent* self)
 {
     if (F(s32, 0xA60) != 0) {
-        if (!(D_00274C98[0] < ClockTime(g_gameClock) - F(f32, 0xA64))) return;
+        if (!(g_agentPathRetryDelay[0] < ClockTime(g_gameClock) - F(f32, 0xA64))) return;
     }
     if (F(s32, 0xB90) != 0) {
         F(s32, 0x92C) = 2;
@@ -971,7 +971,7 @@ void FaceAgentAlongPath(Agent* self)
         if (!(self->pathIndex < self->pathCount)) break;
         s32 i = self->pathIndex;
         u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (i << 4))));
-        s32 far = D_00274C94 < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+        s32 far = g_agentFacingFarDistance < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
         if (far) break;
         self->pathIndex = i + 1;
     }
@@ -1000,12 +1000,12 @@ void FaceAgentAlongPath(Agent* self)
             dz += F(f32, 0xB20);
             break;
         }
-        f32 g1 = D_00274CA0.c[0] + dist * (D_00274CA0.c[1] + dist * D_00274CA0.c[2]);
-        g1 = ClampTo(g1, D_00274CB0.c);
+        f32 g1 = g_agentPitchDistanceCoefficients.c[0] + dist * (g_agentPitchDistanceCoefficients.c[1] + dist * g_agentPitchDistanceCoefficients.c[2]);
+        g1 = ClampTo(g1, g_agentPitchDistanceLimits.c);
         f32 adz = __builtin_fabsf(dz);
-        f32 g2 = D_00274CC0.c[0] + adz * (D_00274CC0.c[1] + adz * D_00274CC0.c[2]);
-        g2 = ClampTo(g2, D_00274CD0);
-        pitch = g1 * g2 * D_00274CD8[0];
+        f32 g2 = g_agentPitchHeightCoefficients.c[0] + adz * (g_agentPitchHeightCoefficients.c[1] + adz * g_agentPitchHeightCoefficients.c[2]);
+        g2 = ClampTo(g2, g_agentPitchHeightLimits);
+        pitch = g1 * g2 * g_agentPitchScale[0];
         if (dz < 0.0f) pitch = -pitch;
     }
     SetAgentFacingAngles(self, yaw, pitch);
@@ -1869,7 +1869,7 @@ s32 IsAgentTargetInRange(Agent* self)
         return 0;
     }
     f32 bearing = __builtin_fabsf(ComputeAgentTargetBearing(self));
-    f32 g = D_00274CE0.c[0] + dist * (D_00274CE0.c[1] + dist * D_00274CE0.c[2]);
+    f32 g = g_agentTargetRangeCoefficients.c[0] + dist * (g_agentTargetRangeCoefficients.c[1] + dist * g_agentTargetRangeCoefficients.c[2]);
     g = Limit(g, g_unitRange[0], g_unitRange[1]);
     if (self->targetAngleLimit < g * bearing) {
         return 0;
@@ -2296,9 +2296,9 @@ void DispatchAgentContactHits(Agent* self)
                         }
                     case 0:
                         ComputeObjectMotionInFrame(c->end[j].part, 0, &c->end[1 - j].point, &vel, 0, 0, 0);
-                        Vu0::Q(vel) = Vu0::MulX(Vu0::Vec::Of(vel), Vu0::Vec::Scalar(D_00274CFC + 1.0f)).q;
-                        ClampVectorLength(&vel, &vel, D_00274D04);
-                        vel.z = D_00274D00 >? vel.z;
+                        Vu0::Q(vel) = Vu0::MulX(Vu0::Vec::Of(vel), Vu0::Vec::Scalar(g_agentHitVelocityBoost + 1.0f)).q;
+                        ClampVectorLength(&vel, &vel, g_agentHitMaxSpeed);
+                        vel.z = g_agentHitMinUpSpeed >? vel.z;
                         msg.fn = (void (*)(void))LaunchObjectWithAgentVelocity;
                         self->launchVelocity = vel;
                         break;
@@ -2864,7 +2864,7 @@ void AssignItemKeeperMemberPlaces(ItemKeeper* self)
     PopBackMemoryMark();
     if (i != self->owned.count) {
         f32 cnt = (f32)self->owned.count;
-        f32 radius = cnt * D_00274D20[0] * 0.15915494f;
+        f32 radius = cnt * g_itemKeeperMemberSpacing[0] * 0.15915494f;
         f32 step = 6.2831855f / cnt;
         PlacedObject* target = (PlacedObject*)GetItemKeeperTarget(self);
         f32 ang0;
@@ -2875,9 +2875,9 @@ void AssignItemKeeperMemberPlaces(ItemKeeper* self)
         }
         for (; i < self->owned.count; i++) {
             Agent* m = self->owned.found[i];
-            f32 r = RandomFloatInRange(D_00274D28[0], D_00274D28[1]);
+            f32 r = RandomFloatInRange(g_itemKeeperPlaceAngleJitter[0], g_itemKeeperPlaceAngleJitter[1]);
             f32 ang = WrapAngle(ang0 + r * step);
-            f32 r2 = RandomFloatInRange(D_00274D30.c[0], D_00274D30.c[1]);
+            f32 r2 = RandomFloatInRange(g_itemKeeperPlaceRadiusScale.c[0], g_itemKeeperPlaceRadiusScale.c[1]);
             ComputePolarOffset((Vec3*)&offset, ang, r2 * radius, 0.0f);
             u128 q = Vu0::Add(Vu0::Q(self->targetPos), Vu0::Q(offset));
             m->placeHeading = ang;

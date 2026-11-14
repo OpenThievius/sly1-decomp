@@ -40,7 +40,7 @@ void InitPoseSource(Attachment* self, PlacedObject* value);
 
 
 extern s32 g_vif0Channel;
-extern u8 D_00211E10[];
+extern u8 g_vu0ProgramChain[];
 extern "C" void SyncDataCache(s32 unused);
 struct DmaChannel;
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
@@ -49,7 +49,7 @@ extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 
 extern u8 g_vif1Channel[];
-extern u8 D_00212110[];
+extern u8 g_vu1ProgramChain[];
 
 extern "C" void SyncDataCache(s32 a);
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
@@ -576,7 +576,7 @@ void SendVif0StartupPacket(void)
     s32* p = (s32*)g_vif0Channel;
     *p |= 0x40;
     SyncDataCache(0);
-    StartDmaChain((DmaChannel*)g_vif0Channel, D_00211E10);
+    StartDmaChain((DmaChannel*)g_vif0Channel, g_vu0ProgramChain);
     WaitDmaChannel((DmaChannel*)g_vif0Channel, 0, 0);
     s32* q = (s32*)g_vif0Channel;
     *q &= ~0x40;
@@ -587,7 +587,7 @@ void SendVif1StartupPacket()
     DmaChannelFlags* p = *(DmaChannelFlags**)g_vif1Channel;
     p->flags |= 0x40;
     SyncDataCache(0);
-    StartDmaChain((DmaChannel*)(*(void**)g_vif1Channel), D_00212110);
+    StartDmaChain((DmaChannel*)(*(void**)g_vif1Channel), g_vu1ProgramChain);
     WaitDmaChannel((DmaChannel*)(*(void**)g_vif1Channel), 0, 0);
     (*(DmaChannelFlags**)g_vif1Channel)->flags &= ~0x40;
 }

@@ -20,7 +20,7 @@ struct Vec02;
 void InvalidateRangeRecordPacket(RangeRecord* o);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern s32 g_meshQueueCount;
-extern u8 D_0027DC20[];
+extern u8 g_meshQueueEntries[];
 void LinkRangeRecord(RangeRecord* self, s32 code);
 s32 HasRangeRecordRanges(RangeRecord* self);
 void StoreRangeRecordNear(RangeRecord* self, f32 v);
@@ -34,12 +34,12 @@ void ReadPropertyRecords(void* self, void* obj);
 void BuildRangeRecordPacket(void* o);
 s32 RangeRecordReachesSphere(RangeRecord* node, void* a1, f32 f);
 extern "C" f32 Tangent(f32 x);
-extern u8 D_00248400[];
+extern u8 g_identityMatrix4[];
 void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 void ReparentObject(BaseObject* self, BaseObject* parent);
 
 // The file's .data, in retail's order.
-f32 D_002744F0 = 50.0f;
+f32 g_rangeRecordClipMargin = 50.0f;
 
 ASM_FUNC(func_001B1AC8);
 
@@ -55,7 +55,7 @@ void PrepareRangeRecord(RangeRecord* self)
     if ((self->link->maskC & 0x10000000) == 0) {
         s32 idx = g_meshQueueCount;
         if (idx < 0x4000) {
-            u8* p = D_0027DC20 + idx * 16;
+            u8* p = g_meshQueueEntries + idx * 16;
             self->f2D0 = p;
             g_meshQueueCount = idx + 1;
             FillMemory(p, 0, 16);
@@ -320,8 +320,8 @@ void InitIdentityMatrix(Mat4* self);
 void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out);
 void CopyMemory(void* dst, void* src, u32 size);
-extern u8 D_000003B0[];
-extern f32 D_002744F0;
+extern u8 g_rangeRecordProgram[];
+extern f32 g_rangeRecordClipMargin;
 
 void BuildRangeRecordPacket(RangeRecord* self)
 {
@@ -353,7 +353,7 @@ void BuildRangeRecordPacket(RangeRecord* self)
             *(s32*)(dst + 4) = ents->addr;
             *(s32*)(dst + 0xC) = 0;
             SubmitMeshQueueEntry((FrameTarget*)dst);
-            WriteVifMscal(&pw, D_000003B0);
+            WriteVifMscal(&pw, g_rangeRecordProgram);
             WriteVifFlushE(&pw);
             DetachPacketBuffer(&pw, (u32*)&self->packetValid, 0);
             axis = self->v20;
@@ -369,7 +369,7 @@ void BuildRangeRecordPacket(RangeRecord* self)
                 proj.m[3][1] = half;
                 p->nearZ = -3.40282347e+38f;
                 p->farZ = 3.40282347e+38f;
-                p->clipZ = self->innerDistance - D_002744F0;
+                p->clipZ = self->innerDistance - g_rangeRecordClipMargin;
             } else {
                 f32 k = (self->farRange * self->innerDistance - self->nearRange * self->outerDistance) / (self->farRange - self->nearRange);
                 f32 lo = self->innerDistance - k;
@@ -383,7 +383,7 @@ void BuildRangeRecordPacket(RangeRecord* self)
                     p->nearZ = hi;
                     p->farZ = lo;
                 }
-                p->clipZ = p->nearZ - D_002744F0;
+                p->clipZ = p->nearZ - g_rangeRecordClipMargin;
             }
             BuildViewProjectionMatrix((f32*)&pos, (f32*)&basis, &proj, (Quad16*)((u8*)self + 0x70));
             CopyMemory(p, (u8*)self + 0x70, 0x40);
@@ -469,12 +469,12 @@ void ReparentPathCurveObject(PathCurveObject* self, BaseObject* other)
     if (self->parent) {
         BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)self->parent + 0x140), (const Mat02*)((u8*)self->parent + 0x110), &a);
     } else {
-        a = *(Mat4A*)D_00248400;
+        a = *(Mat4A*)g_identityMatrix4;
     }
     if (other) {
         BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)other + 0x140), (const Mat02*)((u8*)other + 0x110), &b);
     } else {
-        b = *(Mat4A*)D_00248400;
+        b = *(Mat4A*)g_identityMatrix4;
     }
     h = self->curve;
     if (h->vt->m04) {

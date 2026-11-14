@@ -26,21 +26,21 @@ struct ObjectLink;
 struct __attribute__((aligned(16))) PaddedQuadratic { f32 c[3]; };
 
 // The file's .data, in retail's order.
-s32 D_002749B0[36] = { 4, 1317, 1632, 4, 1320, 1580, 2, 354, 1420, 2, 355, 1424, 6, 352, 1412, 0, 1319, 1636, 0, 1321, 1560, 0, 1322, 1564, 0, 1323, 1568, 0, 1324, 1572, 0, 1325, 1652, 0, 1326, 1656 };
+s32 g_hitCountColliderLinks[36] = { 4, 1317, 1632, 4, 1320, 1580, 2, 354, 1420, 2, 355, 1424, 6, 352, 1412, 0, 1319, 1636, 0, 1321, 1560, 0, 1322, 1564, 0, 1323, 1568, 0, 1324, 1572, 0, 1325, 1652, 0, 1326, 1656 };
 char D_00274A40[4] = "\r";
 f32 D_00274A44 = 150.0f;
 PaddedQuadratic D_00274A50 = { { 0.2f, 0.0f, 0.0f } };
-f32 D_00274A60[3] = { 40.0f, 0.0f, 0.3f };
+f32 g_hitCountRotationRamp[3] = { 40.0f, 0.0f, 0.3f };
 PaddedQuadratic D_00274A70 = { { 1.0f, 0.0f, -0.75f } };
 PaddedQuadratic D_00274A80 = { { 0.7f, 0.3f, 0.0f } };
 f32 D_00274A90[2] = { 1200.0f, 1.0f };
 f32 D_00274A98 = 0.25f;
 f32 D_00274A9C = 3000.0f;
 f32 D_00274AA0 = 0.1f;
-f32 D_00274AA8[3] = { 20.0f, 0.0f, 0.3f };
+f32 g_hitCountTurnRamp[3] = { 20.0f, 0.0f, 0.3f };
 f32 D_00274AB4 = 1000.0f;
-f32 D_00274AB8[2] = { 0.0f, 300.0f };
-PaddedQuadratic D_00274AC0 = { { -1.0f, 1.0f, 0.0f } };
+f32 g_hitCountItemSpeedRange[2] = { 0.0f, 300.0f };
+PaddedQuadratic g_hitCountItemSpinRange = { { -1.0f, 1.0f, 0.0f } };
 
 void InitSwitchedCollider(SwitchedCollider* self);
 
@@ -69,15 +69,15 @@ void StartHitCountCollider(HitCountCollider* self)
 {
     StartPlacedObject(self);
     self->baseRadius = self->radius3CC;
-    ResolveObjectLinks(self, 0xC, (ObjectLink*)D_002749B0);
+    ResolveObjectLinks(self, 0xC, (ObjectLink*)g_hitCountColliderLinks);
     self->walker = CreateStateWalker((StateGraph*)self->walkerGraph, self, -1, 0);
     self->heading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     PlacedObject* v = self->aimObject;
     self->aimHeading = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
     *(UnalignedFloatPair*)&self->f630 = *(UnalignedFloatPair*)((u8*)self->f62C + 0x2DC);
-    u8* g1 = (u8*)&D_0026DD48;
+    u8* g1 = (u8*)&g_hitCountCaptionA;
     ((UnalignedPointer*)(g1 + 0x264))->p = (u8*)self + 0x690;
-    u8* g2 = (u8*)&D_0026DFC8;
+    u8* g2 = (u8*)&g_hitCountCaptionB;
     ((UnalignedPointer*)(g2 + 0x264))->p = (u8*)self + 0x694;
     *(void**)(g1 + 0x268) = D_00274A40;
     *(f32*)(g2 + 0x26C) = 4.0f;
@@ -161,7 +161,7 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
     }
     f32 ang = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)buf, self->aimHeading - ang);
-    ApproachRotationWithRamp(&self->aimObject->rot, (Mat02*)buf, (RampProfile*)D_00274A60, (Mat02*)buf2, 0, t);
+    ApproachRotationWithRamp(&self->aimObject->rot, (Mat02*)buf, (RampProfile*)g_hitCountRotationRamp, (Mat02*)buf2, 0, t);
     self->aimObject->desc02()->m1E(self->aimObject, (Mat02*)buf2);
     ca[0] = 0x8010FF00;
     cb[0] = 0x800000FF;
@@ -199,11 +199,11 @@ bool AreMenusAndFadeClear();
 void ShowHitCountColliderCounters()
 {
     if (AreMenusAndFadeClear()) {
-        D_0026DD48.vt->m14(&D_0026DD48);
-        D_0026DFC8.vt->m14(&D_0026DFC8);
+        g_hitCountCaptionA.vt->m14(&g_hitCountCaptionA);
+        g_hitCountCaptionB.vt->m14(&g_hitCountCaptionB);
     } else {
-        D_0026DD48.vt->m15(&D_0026DD48);
-        D_0026DFC8.vt->m15(&D_0026DFC8);
+        g_hitCountCaptionA.vt->m15(&g_hitCountCaptionA);
+        g_hitCountCaptionB.vt->m15(&g_hitCountCaptionB);
     }
 }
 
@@ -271,7 +271,7 @@ void StepHitCountCollider(HitCountCollider* self, f32 dt)
     Vec02 t;
     StepCollider(self, dt);
     BuildYawPitchMatrix(self->heading, 0.0f, &rot);
-    TurnColliderTowardRotation(self, dt, &rot, D_00274AA8);
+    TurnColliderTowardRotation(self, dt, &rot, g_hitCountTurnRamp);
     Vu0::Q(accel) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x650)), Vu0::Q(self->v150));
     ClampVectorLength(&accel, &accel, D_00274A9C * F(self, 0x66C) * dt);
     Vu0::Q(t) = Vu0::FromFloat(dt);
@@ -412,7 +412,7 @@ void SetHitCountColliderState(PlacedObject* self, s32 state)
         F(self, 0x648) = b;
         q = D_00248D30;
         f32 r = ArctangentOfRatio(F(self, 0xD4), F(self, 0xD0));
-        ApproachAngleWithRamp(r, F(self, 0x644), 0.0f, D_00274AA8, (f32*)((u8*)&q + 8));
+        ApproachAngleWithRamp(r, F(self, 0x644), 0.0f, g_hitCountTurnRamp, (f32*)((u8*)&q + 8));
         self->desc02()->m21(self, (Vec02*)&q);
         W(self, 0x694) = 0;
         D_0026E228[0] = -1;
@@ -483,9 +483,9 @@ void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj)
         if (IsObjectOfKind(obj, 0x21)) {
             Vec02 vel;
             Vec02 spin;
-            ComputePolarOffset((Vec3*)&vel, RandomFloatInRange(-3.1415927f, 3.1415927f), RandomFloatInRange(D_00274AB8[0], D_00274AB8[1]), 0.0f);
+            ComputePolarOffset((Vec3*)&vel, RandomFloatInRange(-3.1415927f, 3.1415927f), RandomFloatInRange(g_hitCountItemSpeedRange[0], g_hitCountItemSpeedRange[1]), 0.0f);
             obj->desc02()->m20(obj, &vel);
-            Vu0::Set(spin, Vu0::FromFloats(0.0f, 0.0f, RandomFloatInRange(D_00274AC0.c[0], D_00274AC0.c[1])));
+            Vu0::Set(spin, Vu0::FromFloats(0.0f, 0.0f, RandomFloatInRange(g_hitCountItemSpinRange.c[0], g_hitCountItemSpinRange.c[1])));
             obj->desc02()->m21(obj, &spin);
         }
     }

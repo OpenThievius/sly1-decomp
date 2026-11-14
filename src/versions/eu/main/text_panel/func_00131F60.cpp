@@ -64,8 +64,8 @@ void DrawTextPanelControlLabels(Obj_eu_131F60* self, PacketWriter* gs)
     BeginGifTag(gs, 0x84, 5, 0x44441);
     for (s32 i = 0; i < 8; i++) {
         f32 zoom = g_camera->f478;
-        const PanelColor* const lit = &D_002610D8;
-        const PanelColor* const dim = &D_002610E0;
+        const PanelColor* const lit = &g_arcTickColorFrom;
+        const PanelColor* const dim = &g_arcTickColorTo;
         f32 step = 1.0f / 15.0f;
         f32 top = 348.610168f;
         f32 half = 0.5f;
@@ -124,13 +124,13 @@ void DrawTextPanelControlLabels(Obj_eu_131F60* self, PacketWriter* gs)
     PushFontScale(text, 0.6f, 0.6f);
     Layout_eu_131F60& move = L;
     move.f18 = 2;
-    L.x = (f32)(320 - D_00261090[0]);
+    L.x = (f32)(320 - g_hintLabelOffset[0]);
     L.y = row;
     TextReader_eu_131F60 moveText;
     InitTextReaderFromTextTable(&moveText, 0x4F, text, 0);
     DrawWrappedAlignedText(&moveText, &L, 0, gs);
     L.f18 = 0;
-    L.x = (f32)(D_00261090[0] + 320);
+    L.x = (f32)(g_hintLabelOffset[0] + 320);
     L.y = row;
     TextReader_eu_131F60 zoomText;
     InitTextReaderFromTextTable(&zoomText, 0x50, text, 0);

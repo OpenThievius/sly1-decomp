@@ -66,13 +66,13 @@ s32 TestStepWaitConditions(StepSequence* self)
         }
             break;
         default:
-            r = (in->flags & D_00261D08[k]) != 0;
+            r = (in->flags & g_stepWaitButtonMasks[k]) != 0;
             break;
         }
         if (r != 0) {
             flags = 0;
         } else {
-            ((Sc_151300_eu*)&g_typedTextCaptionBox)->f584 = D_00261D28[k];
+            ((Sc_151300_eu*)&g_typedTextCaptionBox)->f584 = g_stepWaitButtonGlyphs[k];
         }
     }
     self->waitFlags = flags;

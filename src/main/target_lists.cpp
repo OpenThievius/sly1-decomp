@@ -73,7 +73,7 @@ extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 
 struct DmaChainBlock { u8 bytes[0x20]; };
 
-extern u8 D_002BE1A0[];
+extern u8 g_screenClearPacketC[];
 void* InitPacketBuffer(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void AddDmaRefTag(DmaChainBlock* a, s32 n, void* table);
@@ -98,7 +98,7 @@ void AddDmaEndTag(PacketWriter* f);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void SendGsPacketAndWait(s32 channel, void* b);
 
-extern FrameTarget D_0027DC20[];
+extern FrameTarget g_meshQueueEntries[];
 
 void RegisterObject(BaseObject* self);
 void AppendToList(List01* self, void* item);
@@ -157,9 +157,9 @@ void SubmitMeshQueueEntry(FrameTarget* self);
 void* AllocateZeroedFrontMemory(u32 n);
 
 
-extern u8 D_002BDC20[];
-extern u8 D_002BE1A0[];
-extern u8 D_002BDEE0[];
+extern u8 g_screenClearPacketA[];
+extern u8 g_screenClearPacketC[];
+extern u8 g_screenClearPacketB[];
 
 struct GsDBuff;
 extern "C" void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag);

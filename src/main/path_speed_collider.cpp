@@ -67,10 +67,10 @@ f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 
 // The file's .data, 0x264230 to 0x264260, in retail's order.
-ObjectLink D_00264230[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };
+ObjectLink g_pathSpeedColliderLinks[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };
 f32 D_00264248 = 2.5f;
 f32 D_0026424C = 300.0f;
-f32 D_00264250[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
+f32 g_pathSpeedColliderRotationRamp[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
 
 void InitC24Object(C24* self)
 {
@@ -86,7 +86,7 @@ void InitC24Object(C24* self)
 void StartC24Object(C24* self)
 {
     StartMaskedCollider(self);
-    ResolveObjectLinks(self, 2, D_00264230);
+    ResolveObjectLinks(self, 2, g_pathSpeedColliderLinks);
     self->walker = (StateWalker*)CreateStateWalker((StateGraph*)self->stateGraph, self, 0x36E, 0);
     Alloc24* n = (Alloc24*)CreateWeightCurve(0);
     self->curveTable = n;
@@ -199,7 +199,7 @@ void MoveC24Object(C24* self, s32 a1, f32 dt)
         BuildBasisFromXAndZHint(&vel, &t, &basis);
         self->pos = pos;
         self->v150 = vel;
-        ApproachRotationWithRamp(dt, &self->rot, &basis, (RampProfile*)D_00264250, &self->rot, &self->v160);
+        ApproachRotationWithRamp(dt, &self->rot, &basis, (RampProfile*)g_pathSpeedColliderRotationRamp, &self->rot, &self->v160);
     }
     ScopedListFrame frame(&self->children);
     void* head = *(void**)((u8*)self + 0x34);

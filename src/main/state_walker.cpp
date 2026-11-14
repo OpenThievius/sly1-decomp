@@ -87,7 +87,7 @@ void StartNextStateWalkerEdge(StateWalker* self);
 extern const ClassHead g_stateWalkerMethods;
 void* PopZeroedFreeSlot(Pool6C* pool);
 void AppendToList(List01* self, void* item);
-extern u8 D_0021A790[];
+extern u8 g_aimSwitchPoseSourceMethods[];
 s32 MatchesObjectId(BaseObject* a, s32 b);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
@@ -111,11 +111,11 @@ void CallStateWalkerListeners(StateWalker* self, s32 a, void* b);
 struct SjisCharEntry { u16 code; u16 id; };
 
 // The file's .data, in retail's order.
-s32 D_00274548[4] = { 0, 1, 2, 0 };
-s32 D_00274558[4] = { 2, 0, 1, 0 };
-s32 D_00274568[4] = { 0, 2, 1, 0 };
-s32 D_00274578[4] = { 1, 0, 2, 0 };
-SjisCharEntry D_00274588[34] = {
+s32 g_stripOrderEven[4] = { 0, 1, 2, 0 };
+s32 g_stripNextEven[4] = { 2, 0, 1, 0 };
+s32 g_stripOrderOdd[4] = { 0, 2, 1, 0 };
+s32 g_stripNextOdd[4] = { 1, 0, 2, 0 };
+SjisCharEntry g_sjisCharTable[34] = {
     { 0x8140, 0x0020 }, { 0x8149, 0x0021 }, { 0x8168, 0x0022 }, { 0x8194, 0x0023 },
     { 0x8190, 0x0024 }, { 0x8193, 0x0025 }, { 0x8195, 0x0026 }, { 0x8166, 0x0027 },
     { 0x8169, 0x0028 }, { 0x816A, 0x0029 }, { 0x8196, 0x002A }, { 0x817B, 0x002B },
@@ -126,11 +126,11 @@ SjisCharEntry D_00274588[34] = {
     { 0x8165, 0x0060 }, { 0x816F, 0x007B }, { 0x8162, 0x007C }, { 0x8170, 0x007D },
     { 0x8150, 0x007E }, { 0x0000, 0x0000 }
 };
-SjisCharEntry D_00274610[4] = {
+SjisCharEntry g_sjisCharRanges[4] = {
     { 0x824F, 0x0030 }, { 0x8260, 0x0041 }, { 0x8281, 0x0061 }, { 0x0000, 0x0000 }
 };
-f32 D_00274620[16] = { 0.0f, 0.0f, -80.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f, -70.0f, 40.0f, 0.0f, 0.0f, 70.0f, 40.0f, 0.0f };
-f32 D_00274660[16] = { 0.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, 70.0f, 0.0f, 0.0f, -30.0f, 30.0f, 0.0f, 0.0f, 30.0f, 30.0f, 0.0f };
+f32 g_companionProbePointsA[16] = { 0.0f, 0.0f, -80.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f, -70.0f, 40.0f, 0.0f, 0.0f, 70.0f, 40.0f, 0.0f };
+f32 g_companionProbePointsB[16] = { 0.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, 70.0f, 0.0f, 0.0f, -30.0f, 30.0f, 0.0f, 0.0f, 30.0f, 30.0f, 0.0f };
 f32 D_002746A0[8] = { 1000.0f, 0.0f, 0.0f, 0.0f, 2.0f, -2.0f, 0.0f, 0.0f };
 
 void CopyVec3(Vec3* dst, Vec3* src)
@@ -203,11 +203,11 @@ void UpdateTriangleAnimatorCursor(TriangleAnimator* self, PlacedObject* obj, voi
         s32* order;
         s32* next;
         if (i & 1) {
-            order = D_00274568;
-            next = D_00274578;
+            order = g_stripOrderOdd;
+            next = g_stripNextOdd;
         } else {
-            order = D_00274548;
-            next = D_00274558;
+            order = g_stripOrderEven;
+            next = g_stripNextEven;
         }
         DropFirst(tri);
         DropFirst(uv);
@@ -301,10 +301,10 @@ u16 MapCharToCode(u8 ch)
     }
     u16 code;
     if (base != 0) {
-        SjisCharEntry* e = &D_00274588[ch - (base + 0x1F)];
+        SjisCharEntry* e = &g_sjisCharTable[ch - (base + 0x1F)];
         code = e->code;
     } else {
-        code = D_00274610[idx].code + ch - D_00274610[idx].id;
+        code = g_sjisCharRanges[idx].code + ch - g_sjisCharRanges[idx].id;
     }
     return code;
 }
@@ -971,7 +971,7 @@ void ResolveCompanionAgentObjects(CompanionAgent* self)
     self->companion = (void*)best;
     PopBackMemoryMark();
     if (self->companion != 0) {
-        self->poseSource = CreatePoseSource(self->world, (PlacedObject*)self->companion, (const T2195_Vt*)D_0021A790);
+        self->poseSource = CreatePoseSource(self->world, (PlacedObject*)self->companion, (const T2195_Vt*)g_aimSwitchPoseSourceMethods);
         ((T2195_790*)self->poseSource)->mode1 = 2;
         ((T2195_790*)self->poseSource)->hasTarget = 1;
         ((T2195_790*)self->poseSource)->f84 = ((T2195_790*)self->poseSource)->f80 = 0;
@@ -1105,12 +1105,12 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
         s32 n;
         switch (v) {
         case 2:
-            table = D_00274620;
+            table = g_companionProbePointsA;
             n = 4;
             break;
         case 0:
         case 1:
-            table = D_00274660;
+            table = g_companionProbePointsB;
             n = 4;
             break;
         }

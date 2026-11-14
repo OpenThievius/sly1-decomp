@@ -49,16 +49,16 @@ void ChangePauseMenuPage(Self_193EE8_eu* self, s32 a, s32 b)
         self->f288 = HasStreamVoice();
         break;
     case 24: {
-        D_eu_0026BB30 = D_eu_0026BB38 = (f32)(u32)((DisplayRegRead*)&D_00262490)->a.x;
-        D_eu_0026BB34 = D_eu_0026BB3C = (f32)((u32)(((DisplayRegRead*)&D_00262490)->q18 >> 12) & 0x7FF);
+        D_eu_0026BB30 = D_eu_0026BB38 = (f32)(u32)((DisplayRegRead*)&g_displayRegisters)->a.x;
+        D_eu_0026BB34 = D_eu_0026BB3C = (f32)((u32)(((DisplayRegRead*)&g_displayRegisters)->q18 >> 12) & 0x7FF);
         break;
     }
     case -1:
-        D_0026C6C8.vt->m15(&D_0026C6C8);
-        D_0026C948.vt->m15(&D_0026C948);
+        g_reserveCountCaption.vt->m15(&g_reserveCountCaption);
+        g_collectedItemCaption.vt->m15(&g_collectedItemCaption);
         D_0026CBC8.vt->m15(&D_0026CBC8);
         D_0026CE48.vt->m15(&D_0026CE48);
-        D_00274118.vt->m15(&D_00274118);
+        g_completionPercentCaption.vt->m15(&g_completionPercentCaption);
         break;
     }
 }

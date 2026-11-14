@@ -163,8 +163,8 @@ struct FontHeader {
 struct BufferedStream;
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 void* AllocateFrontMemory(s32 n);
-extern s32 D_00262258;
-extern s32 D_0026225C;
+extern s32 g_glyphUOffset;
+extern s32 g_glyphVOffset;
 
 FontGlyph* FindFontGlyph(Font* self, s8 key);
 s32 AddFontImagesToFrame(Font* self, void* obj);
@@ -597,10 +597,10 @@ void DrawFontGlyphTurned(Font* self, s8 key, u32 color, PacketWriter* s, f32 x, 
         f32 px = x + h;
         f32 py = y + w;
         if (0.0f <= px && x <= 640.0f && 0.0f <= py && y <= 492.80002f) {
-            s32 u0 = (e->u << 4) + D_00262258;
-            s32 v0 = ((s4 - e->v) << 4) + D_0026225C;
-            s32 u1 = ((e->u + e->w) << 4) + D_00262258;
-            s32 v1 = ((s4 - (e->v + self->height)) << 4) + D_0026225C;
+            s32 u0 = (e->u << 4) + g_glyphUOffset;
+            s32 v0 = ((s4 - e->v) << 4) + g_glyphVOffset;
+            s32 u1 = ((e->u + e->w) << 4) + g_glyphUOffset;
+            s32 v1 = ((s4 - (e->v + self->height)) << 4) + g_glyphVOffset;
             s32 ok = AddFontImagesToFrame(self, s);
             BeginGifTag(s, 6, 1, 0xE);
             if (ok != 0) {
@@ -1118,8 +1118,8 @@ LINKER_REMNANT(func_0015E678);
 
 // The file's .data, 0x262250 to 0x262280, in retail's order.
 s8 g_fontEscapeKeys[8] = "02134";
-s32 D_00262258 = -8;
-s32 D_0026225C = -8;
+s32 g_glyphUOffset = -8;
+s32 g_glyphVOffset = -8;
 // size: s32 (lw/sw), 4-byte label
 s32 g_fontCount = 0;
 // size: pointer to array allocated by new Ent[D_00262260] (lw/sw), 4-byte label

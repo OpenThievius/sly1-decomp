@@ -317,7 +317,7 @@ struct Table_20A7F0
 };
 
 // The length of each optional field the header's flags announce.
-extern const Table_20A7F0 D_00250028 = { { 0x00, 0x10, 0x08, 0x18, 0x08, 0x18, 0x10, 0x20, 0x18, 0x28, 0x20, 0x30, 0x20, 0x30, 0x28, 0x38 } };
+extern const Table_20A7F0 g_packetOptionalFieldLengths = { { 0x00, 0x10, 0x08, 0x18, 0x08, 0x18, 0x10, 0x20, 0x18, 0x28, 0x20, 0x30, 0x20, 0x30, 0x28, 0x38 } };
 
 u32 ReadBits(Bits_20A7F0* bs, s32 n);
 s64 ReadBit(Bits_20A7F0* bs);
@@ -338,7 +338,7 @@ s32 ParsePacketHeader(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
     s32 rest;
 
     hdr->at = bs->pos;
-    tbl = D_00250028;
+    tbl = g_packetOptionalFieldLengths;
     ReadBits(bs, 0x18);
     hdr->id = (u64)ReadBits(bs, 8) << 32;
     hdr->len = ReadBits(bs, 16);

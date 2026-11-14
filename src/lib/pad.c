@@ -94,13 +94,13 @@ typedef struct PadInfoRequest {
     s32 result;
 } PadInfoRequest;
 
-char D_0027AE70[16] = "PsIIlibpad  2410";
-s32 D_0027AE80 = 0;
-s32 D_0027AE84 = 1;
+char g_padLibraryVersion[16] = "PsIIlibpad  2410";
+s32 g_padLibraryInitialised = 0;
+s32 g_padDiagnosticsEnabled = 1;
 
 static RemoteCallClient g_padClients[2] __attribute__((aligned(64)));
 static PadSlot g_padSlots[2][4];
-static u32 D_0062ABC0[2][4][8] __attribute__((aligned(64)));
+static u32 g_padDmaBuffers[2][4][8] __attribute__((aligned(64)));
 static u8 g_padRequest[0x80] __attribute__((aligned(64)));
 
 s32 PrintFormatted(const char* fmt, ...);
@@ -130,7 +130,7 @@ s32 SendPadDma(s32 port, s32 slot)
     u32 count;
 
     if (g_padSlots[port][slot].dmaId != 0 && GetIopDmaStatus(g_padSlots[port][slot].dmaId) >= 0) {
-        if (D_0027AE84 != 0)
+        if (g_padDiagnosticsEnabled != 0)
             PrintFormatted("libpad: sceSifSetDma faild\n");
         return 0;
     }
@@ -144,7 +144,7 @@ s32 SendPadDma(s32 port, s32 slot)
     transfers[0].attr = 0;
     id = StartIopDma(transfers, 1);
     if (id == 0) {
-        if (D_0027AE84 != 0)
+        if (g_padDiagnosticsEnabled != 0)
             PrintFormatted("libpad: sceSifSetDma faild\n");
         return 0;
     }
@@ -153,7 +153,7 @@ s32 SendPadDma(s32 port, s32 slot)
 }
 
 /* The message of a function the linker stripped. */
-const char D_0024F758[] = "libpad: tPadDma Structure Invalid\n";
+const char g_padDmaInvalidMessage[] = "libpad: tPadDma Structure Invalid\n";
 
 s32 InitPadLibrary(s32 mode)
 {
@@ -161,7 +161,7 @@ s32 InitPadLibrary(s32 mode)
     s32 version;
     s32 major;
 
-    D_0027AE80 = 1;
+    g_padLibraryInitialised = 1;
     while (BindRemoteService(&g_padClients[0], 0x80000100, 0), g_padClients[0].server == 0) {
         for (i = 0x10000; i != -1; i--) {
         }
@@ -176,7 +176,7 @@ s32 InitPadLibrary(s32 mode)
     version = GetPadModuleVersion();
     major = version >> 8;
     if (major != 4) {
-        if (D_0027AE84 != 0) {
+        if (g_padDiagnosticsEnabled != 0) {
             PrintFormatted("libpad: Module version mismatch ");
             PrintFormatted("[libpad.a = %d.%d, padman.irx = %d.%d]\n", 4, 0, major, version & 0xFF);
         }
@@ -212,12 +212,12 @@ s32 OpenPadPort(s32 port, s32 slot, u8* buffer)
     s32 i;
 
     if ((u32)buffer & 0x3F) {
-        if (D_0027AE84 != 0)
+        if (g_padDiagnosticsEnabled != 0)
             PrintFormatted("libpad: buffer addr is not 64 byte align. %08x\n", buffer);
         return 0;
     }
     if (g_padSlots[port][slot].open == 1) {
-        if (D_0027AE84 != 0)
+        if (g_padDiagnosticsEnabled != 0)
             PrintFormatted("libpad: pad port is already open [%d][%d]\n", port, slot);
         return 0;
     }
@@ -238,7 +238,7 @@ s32 OpenPadPort(s32 port, s32 slot, u8* buffer)
     request->arg10 = buffer;
     if (CallRemoteService(g_padClients, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
         return 0;
-    dma = D_0062ABC0[port][slot];
+    dma = g_padDmaBuffers[port][slot];
     g_padSlots[port][slot].open = 1;
     g_padSlots[port][slot].iopBuffer = request->arg14;
     g_padSlots[port][slot].buffer = buffer;
@@ -514,6 +514,6 @@ LINKER_REMNANT(func_00204F48);
 
 /* The names of a slot's states and of a command's results, which no function left in retail
  * reads. */
-const char* D_0027AE88[8] = { "DISCONNECT", "", "FINDCTP1", "", "", "EXECCMD", "STABLE", "ERROR" };
-const char* D_0027AEA8[3] = { "COMPLETE", "FAILED", "BUSY" };
+const char* g_padSlotStateNames[8] = { "DISCONNECT", "", "FINDCTP1", "", "", "EXECCMD", "STABLE", "ERROR" };
+const char* g_padResultNames[3] = { "COMPLETE", "FAILED", "BUSY" };
 s32 D_0027AEB4 = 0;

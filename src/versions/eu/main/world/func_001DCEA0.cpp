@@ -14,7 +14,7 @@ void LoadWorld(World* self, BufferedStream* s)
     s32 i;
     ResetScatterController((ScatterController*)g_scatterController);
     InitScriptValuePools();
-    D_00275714 = ReadBufferedU8(s);
+    g_scriptStreamExtras = ReadBufferedU8(s);
     self->soundBank = ReadBufferedS16(s);
     SkipBufferedBlocks(s);
     LoadTextTable(s);
@@ -51,7 +51,7 @@ void LoadWorld(World* self, BufferedStream* s)
     }
     self->fillAlpha = 0x80;
     color = self->color1D64;
-    FillScreenColor(D_002BDC20, &color, 0);
+    FillScreenColor(g_screenClearPacketA, &color, 0);
     self->f1D68 *= 0.003921569f;
     self->f1D6C *= 0.003921569f;
     SpawnListedObjectCopies(self);

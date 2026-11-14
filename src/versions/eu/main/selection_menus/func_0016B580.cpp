@@ -39,7 +39,7 @@ void HandleSelectionCaptionInput(Obj_16B580_eu* self, PadRecord* arg)
     if (D_00272420 != 0) {
         return;
     }
-    if (D_0027051C != 0) {
+    if (g_activeStepSequence != 0) {
         return;
     }
     self = self->p260;
@@ -56,11 +56,11 @@ void HandleSelectionCaptionInput(Obj_16B580_eu* self, PadRecord* arg)
     if (self->f2D4 == 1 && (p->currentEntry == p->index || delay <= g_gameTime[0] - self->f2D8)) {
         s32 idx = self->f2D0;
         if (idx == 0) {
-            Obj_16B580_eu* g = (Obj_16B580_eu*)&D_0026FD00;
+            Obj_16B580_eu* g = (Obj_16B580_eu*)&g_gridSelector;
             if (g->f250 != 0) {
                 return;
             }
-            PushStackElement((ElementStack*)g_elementStack, &D_0026FD00);
+            PushStackElement((ElementStack*)g_elementStack, &g_gridSelector);
             return;
         }
         Obj_16B580_eu* g = (Obj_16B580_eu*)&g_mapScreenList;

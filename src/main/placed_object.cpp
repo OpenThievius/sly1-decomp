@@ -220,7 +220,7 @@ extern const ScaleCurveVt g_scaleCurveKind0Methods;
 extern const ScaleCurveVt g_scaleCurveKind1Methods;
 void* AllocateZeroedFrontMemory(s32 n);
 
-extern u8 D_00219560[];
+extern u8 g_ownerPoseSourceMethods[];
 
 
 // The dispatch tables func_00121160 gives each kind of curve: three functions, or one and a
@@ -440,20 +440,20 @@ void ConvertVectorsBetweenObjectFrames(BaseObject* a, BaseObject* b, void* c, vo
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
-extern const Fn_Table D_002197C0[10];
+extern const Fn_Table g_trackPoseSourceMethods[10];
 Attachment* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* table);
 
 void SetOrientationSourceMode(PlacedObject* self, s32 value);
 
 void EnsureAimAttachment(void* self);
 
-extern u8 D_00275C40[];
+extern u8 g_zeroQuad[];
 
 extern u8 g_unitRange[];
 
 void StoreRangeRecordFar(RangeRecord* o, f32 v);
 
-extern RangeRecord D_0027B520;
+extern RangeRecord g_sharedRangeRecord;
 void InitRangeRecord(void* p);
 
 void* AllocateFrontMemory(s32 n);
@@ -622,13 +622,13 @@ void SetSpinSpring(PlacedObject* self, Quad16* src);
 
 void InsertAttachment(PlacedObject* self, Attachment* src);
 
-extern u8 D_0021A790[];
+extern u8 g_aimSwitchPoseSourceMethods[];
 
-extern const Fn_Table D_002195D8[];
+extern const Fn_Table g_identityPoseSourceMethods[];
 
 void AssignAimTarget(T2195_790* self, void* obj, Vec02* src);
 
-extern const Fn_Table D_00219600[];
+extern const Fn_Table g_aimPoseSourceBases[];
 
 
 
@@ -676,7 +676,7 @@ struct KeyedValues { s32 key; f32* values; };
 struct SetMode3 {
     static s32 Of(Attachment* a, s32 v) { s32 o = a->mode3; a->mode3 = v; return o != v; }
 };
-extern const Fn_Table D_002195B0[];
+extern const Fn_Table g_linkedPoseSourceMethods[];
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 void CopyPoseSource();
@@ -707,9 +707,9 @@ void GetIdentityMatrix();
 f32 GetOwnerIndexedValue();
 void InitAimPoseSource();
 void GetAimPoseRotation();
-extern const Fn_Table D_002195B0[10];
-extern const Fn_Table D_002195D8[10];
-extern const Fn_Table D_00219600[26];
+extern const Fn_Table g_linkedPoseSourceMethods[10];
+extern const Fn_Table g_identityPoseSourceMethods[10];
+extern const Fn_Table g_aimPoseSourceBases[26];
 
 // The script list a property getter fills (object_properties defines it; AppendPropertyToScriptList).
 struct ScriptListBuilder;
@@ -3217,7 +3217,7 @@ s32 TestChildrenAccepted(PlacedObject* self, ScriptListBuilder* context)
 
 Attachment* CreateTrackAttachment(BaseObject* item)
 {
-    return CreatePoseSource(item->world, (PlacedObject*)item, (const T2195_Vt*)D_002197C0);
+    return CreatePoseSource(item->world, (PlacedObject*)item, (const T2195_Vt*)g_trackPoseSourceMethods);
 }
 
 void LoadFollowRecord(PlacedObject* self, void* a1);
@@ -3481,8 +3481,8 @@ void SetRangeRecordCode(void* self, s32 value)
 RangeRecord* GetRangeRecord(PlacedObject* self)
 {
     if (self->rangeRecord != 0) return self->rangeRecord;
-    InitRangeRecord(&D_0027B520);
-    return &D_0027B520;
+    InitRangeRecord(&g_sharedRangeRecord);
+    return &g_sharedRangeRecord;
 }
 
 void GetRangeRecordPresent(PlacedObject* self, s32* out)
@@ -3579,7 +3579,7 @@ void SetRotationDegrees(PlacedObject* self, f32* src)
 void EnsureBaseAttachment(PlacedObject* self)
 {
     if (self->baseAttachment == 0) {
-        Attachment* v = CreatePoseSource(self->world, self, (const T2195_Vt*)D_00219560);
+        Attachment* v = CreatePoseSource(self->world, self, (const T2195_Vt*)g_ownerPoseSourceMethods);
         self->baseAttachment = v;
         InsertAttachment(self, v);
     }
@@ -3588,7 +3588,7 @@ void EnsureBaseAttachment(PlacedObject* self)
 void EnsureAimAttachment(PlacedObject* self)
 {
     if (self->aimAttachment == 0) {
-        T2195_790* v = (T2195_790*)CreatePoseSource(self->world, self, (const T2195_Vt*)D_0021A790);
+        T2195_790* v = (T2195_790*)CreatePoseSource(self->world, self, (const T2195_Vt*)g_aimSwitchPoseSourceMethods);
         self->aimAttachment = v;
         InsertAttachment(self, v);
     }
@@ -3606,7 +3606,7 @@ void ChooseActiveAttachments(PlacedObject* self)
         if (s2 == 0) if (n->mode1 != -1) s2 = n;
         if (s3 == 0) if (n->mode2 != -1) s3 = n;
         if (n->mode3 == -1) continue;
-        if (n->vt == (const T2195_Vt*)D_002197C0) {
+        if (n->vt == (const T2195_Vt*)g_trackPoseSourceMethods) {
             Track83* e = &((T2195_7C0*)n)->player->anim->tracks[((T2195_7C0*)n)->index];
             for (i = 0; i < e->morphCount; i++) {
                 if (e->morph[i] != 0) {
@@ -3712,11 +3712,11 @@ void* FindTrackPlayer(PlacedObject* node)
 {
     while (node != 0) {
         Attachment* a = node->positionAttachment;
-        if (a != 0 && a->vt == (const T2195_Vt*)D_002197C0) {
+        if (a != 0 && a->vt == (const T2195_Vt*)g_trackPoseSourceMethods) {
             return ((T2195_7C0*)a)->player;
         }
         a = node->orientationAttachment;
-        if (a != 0 && a->vt == (const T2195_Vt*)D_002197C0) {
+        if (a != 0 && a->vt == (const T2195_Vt*)g_trackPoseSourceMethods) {
             return ((T2195_7C0*)a)->player;
         }
         node = (PlacedObject*)node->parent;
@@ -3729,7 +3729,7 @@ void AddMatrixAttachment(PlacedObject* self, s32 key, Attachment** out)
     Attachment* n;
 
     if (self != 0) {
-        n = CreatePoseSource(self->world, self, (const T2195_Vt*)(((u8*)D_002195D8)));
+        n = CreatePoseSource(self->world, self, (const T2195_Vt*)(((u8*)g_identityPoseSourceMethods)));
         n->key = key;
         InsertAttachment(self, n);
         *out = n;
@@ -3957,7 +3957,7 @@ void SetAimYawCurve(PlacedObject* self, Vec02* src)
 
 void GetAimYawCurve(PlacedObject* self, Quad16* out)
 {
-    Quad16* src = self->aimAttachment != 0 ? (Quad16*)((u8*)self->aimAttachment + 0x50) : (Quad16*)D_00275C40;
+    Quad16* src = self->aimAttachment != 0 ? (Quad16*)((u8*)self->aimAttachment + 0x50) : (Quad16*)g_zeroQuad;
     *out = *src;
 }
 
@@ -3981,7 +3981,7 @@ void SetAimPitchCurve(PlacedObject* self, Vec02* src)
 
 void GetAimPitchCurve(PlacedObject* self, Quad16* out)
 {
-    Quad16* src = self->aimAttachment != 0 ? (Quad16*)((u8*)self->aimAttachment + 0x70) : (Quad16*)D_00275C40;
+    Quad16* src = self->aimAttachment != 0 ? (Quad16*)((u8*)self->aimAttachment + 0x70) : (Quad16*)g_zeroQuad;
     *out = *src;
 }
 
@@ -4063,7 +4063,7 @@ void SetAimHold(PlacedObject* self)
 void SetValueAttachment(PlacedObject* self, s32 a1, f32 x, f32 y)
 {
     if (self->ownValueAttachment == 0) {
-        T2195_600* r = (T2195_600*)CreatePoseSource(self->world, self, (const T2195_Vt*)(((u8*)D_00219600)));
+        T2195_600* r = (T2195_600*)CreatePoseSource(self->world, self, (const T2195_Vt*)(((u8*)g_aimPoseSourceBases)));
         self->ownValueAttachment = r;
         InsertAttachment(self, r);
     }
@@ -4419,7 +4419,7 @@ void SelectValueEntryByKey(PlacedObject* self, s32 key)
         }
         if (i < self->keyedValueCount) {
             if (self->keyedValueAttachment == 0) {
-                self->keyedValueAttachment = (T2195_5B0*)CreatePoseSource(self->world, self, (const T2195_Vt*)(((u8*)D_002195B0)));
+                self->keyedValueAttachment = (T2195_5B0*)CreatePoseSource(self->world, self, (const T2195_Vt*)(((u8*)g_linkedPoseSourceMethods)));
                 InsertAttachment(self, self->keyedValueAttachment);
             }
             callVt = SetMode3::Of(self->keyedValueAttachment, 3);

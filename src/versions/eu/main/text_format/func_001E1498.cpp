@@ -61,7 +61,7 @@ s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
         }
         s32 d = (s32)Power(10.0f, 2.0f);
         for (s32 k = 2; k >= 0; k--) {
-            *out++ = D_00275940[e / d];
+            *out++ = g_hexDigits[e / d];
             e = (e % d) * 10;
         }
     }

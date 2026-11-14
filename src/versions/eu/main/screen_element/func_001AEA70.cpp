@@ -11,35 +11,35 @@ void ConstructScreenTextStyles(s32 initialize, s32 priority)
         }
         for (i = 3; i != -1; i--) {
         }
-        FillMemory(&D_002743D0, 0, 0x1C);
-        D_002743D0.f04 = 0x2D;
-        D_002743D0.f08 = 2.0f;
-        D_002743D0.f0C = 1.0f;
-        D_002743D0.f14 = D_002743D0.f10 = 0.3f;
-        D_002743D0.color = 0xFF7D4B00;
-        FillMemory(&D_002743F0, 0, 0x1C);
-        D_002743F0.f04 = 0x2D;
-        D_002743F0.f08 = 2.0f;
-        D_002743F0.f0C = -4.0f;
-        D_002743F0.f14 = D_002743F0.f10 = 0.3f;
-        D_002743F0.color = 0xFF7D4B00;
-        FillMemory(&D_00274410, 0, 0x1C);
-        D_00274410.f04 = 0x3D;
-        D_00274410.f08 = 2.0f;
-        D_00274410.f0C = -4.0f;
-        D_00274410.f14 = D_00274410.f10 = 0.3f;
-        D_00274410.color = 0xFF7D4B00;
-        FillMemory(&D_00274450, 0, 0x1C);
-        D_00274450.f04 = 0x2D;
-        D_00274450.f08 = 2.0f;
-        D_00274450.f0C = -4.0f;
-        D_00274450.f14 = D_00274450.f10 = 0.3f;
-        D_00274450.color = 0xFF7D4B00;
-        FillMemory(&D_00274488, 0, 0x1C);
-        D_00274488.f04 = 0x2D;
-        D_00274488.f08 = 2.0f;
-        D_00274488.f0C = -4.0f;
-        D_00274488.f14 = D_00274488.f10 = 0.3f;
-        D_00274488.color = 0xFF7D4B00;
+        FillMemory(&g_framedElementStyle, 0, 0x1C);
+        g_framedElementStyle.f04 = 0x2D;
+        g_framedElementStyle.f08 = 2.0f;
+        g_framedElementStyle.f0C = 1.0f;
+        g_framedElementStyle.f14 = g_framedElementStyle.f10 = 0.3f;
+        g_framedElementStyle.color = 0xFF7D4B00;
+        FillMemory(&g_pointerCaptionStyle, 0, 0x1C);
+        g_pointerCaptionStyle.f04 = 0x2D;
+        g_pointerCaptionStyle.f08 = 2.0f;
+        g_pointerCaptionStyle.f0C = -4.0f;
+        g_pointerCaptionStyle.f14 = g_pointerCaptionStyle.f10 = 0.3f;
+        g_pointerCaptionStyle.color = 0xFF7D4B00;
+        FillMemory(&g_copiedCaptionStyle, 0, 0x1C);
+        g_copiedCaptionStyle.f04 = 0x3D;
+        g_copiedCaptionStyle.f08 = 2.0f;
+        g_copiedCaptionStyle.f0C = -4.0f;
+        g_copiedCaptionStyle.f14 = g_copiedCaptionStyle.f10 = 0.3f;
+        g_copiedCaptionStyle.color = 0xFF7D4B00;
+        FillMemory(&g_titleStyle, 0, 0x1C);
+        g_titleStyle.f04 = 0x2D;
+        g_titleStyle.f08 = 2.0f;
+        g_titleStyle.f0C = -4.0f;
+        g_titleStyle.f14 = g_titleStyle.f10 = 0.3f;
+        g_titleStyle.color = 0xFF7D4B00;
+        FillMemory(&g_promptStyle, 0, 0x1C);
+        g_promptStyle.f04 = 0x2D;
+        g_promptStyle.f08 = 2.0f;
+        g_promptStyle.f0C = -4.0f;
+        g_promptStyle.f14 = g_promptStyle.f10 = 0.3f;
+        g_promptStyle.color = 0xFF7D4B00;
     }
 }

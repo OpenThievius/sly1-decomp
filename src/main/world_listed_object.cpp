@@ -173,7 +173,7 @@ void AppendToList(List01* self, void* item);
 void DetachOwnedRecord(OwnedRecord* o)
 {
     RemoveFromList((List01*)(&((WorldListedObject*)o->owner)->members), o);
-    AppendToList(&D_002622F0, o);
+    AppendToList(&g_deferredReleaseListB, o);
 }
 
 WorldListedObject* ResetFirstListedObject(World* self)
@@ -250,7 +250,7 @@ void ReleaseWorldListedObject(WorldListedObject* self)
         node = nx;
     }
     RemoveFromList(&obj->world->list1CB4, self);
-    AppendToList(&D_002622E0, self);
+    AppendToList(&g_deferredReleaseListA, self);
 
     UnregisterPlacedObject(self);
     *(s32*)&g_activeListFrames = fr.prev;
@@ -496,15 +496,15 @@ struct SprTransfer {
     s32 state;              // 0x4C: 2 while its blocks are worked on
 };
 
-extern s32 D_00274990;
-extern SprTransfer D_002748F0[2];
+extern s32 g_sprTransferIndex;
+extern SprTransfer g_sprTransfers[2];
 extern void* g_toSprChannel;
 
 // Block n of the current scratchpad transfer.
 struct SprBlock {
     static u32 Of(s32 n)
     {
-        return D_002748F0[D_00274990].addrs[n];
+        return g_sprTransfers[g_sprTransferIndex].addrs[n];
     }
 };
 
@@ -557,8 +557,8 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
     while (node != 0) {
         void* ch = g_toSprChannel;
         WaitDmaChannel((DmaChannel*)ch, 0, 0);
-        D_00274990 = 1 - D_00274990;
-        SprTransfer* t = &D_002748F0[D_00274990];
+        g_sprTransferIndex = 1 - g_sprTransferIndex;
+        SprTransfer* t = &g_sprTransfers[g_sprTransferIndex];
         t->state = 2;
         OwnedRecord* next = *(OwnedRecord**)fr.link;
         fr.link = (s32)next + fr.offset;
@@ -755,10 +755,10 @@ void WriteVifUnpack(PacketWriter* w, s32 tag, s32 size, void* src, s32 addr, s32
 void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
 void WriteVifMscal(PacketWriter* w, void* addr);
 void WriteVifFlush(PacketWriter* w);
-extern const f32 D_00248400[28];
-extern u8 D_00000000[];
-extern u8 D_00000398[];
-extern u8 D_00000880[];
+extern const f32 g_identityMatrix4[28];
+extern u8 g_listedParticleProgram0[];
+extern u8 g_listedParticleProgram1[];
+extern u8 g_listedParticleProgram2[];
 
 // A walk of a list on g_activeListFrames, popped when it ends.
 struct ViewListWalk {
@@ -835,7 +835,7 @@ void WriteListedObjectParticlePacket(void* self)
     } else {
         frames = &one;
         count = 1;
-        *(Mat4x4Copy*)one.m = *(const Mat4x4Copy*)D_00248400;
+        *(Mat4x4Copy*)one.m = *(const Mat4x4Copy*)g_identityMatrix4;
         one.fade = req->radius;
     }
     s32 sent = 0;
@@ -888,13 +888,13 @@ void WriteListedObjectParticlePacket(void* self)
             WriteVifStcycl(&g_vifPacketWriter, 1, 1);
             switch (obj->particleMode) {
             case 0:
-                WriteVifMscal(&g_vifPacketWriter, D_00000000);
+                WriteVifMscal(&g_vifPacketWriter, g_listedParticleProgram0);
                 break;
             case 1:
-                WriteVifMscal(&g_vifPacketWriter, D_00000398);
+                WriteVifMscal(&g_vifPacketWriter, g_listedParticleProgram1);
                 break;
             case 2:
-                WriteVifMscal(&g_vifPacketWriter, D_00000880);
+                WriteVifMscal(&g_vifPacketWriter, g_listedParticleProgram2);
                 break;
             }
             WriteVifFlush(&g_vifPacketWriter);

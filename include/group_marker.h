@@ -27,7 +27,7 @@ typedef char check_GroupMarker[sizeof(GroupMarker) == 0x80 ? 1 : -1];
 // (GCC writes such globals in the order they are first declared): the next free deferred
 // request (D_005E4700), a GIF tag, the markers.
 extern u8 g_nextDeferredRequest[16];
-extern s32 D_0026AC20[4];
+extern s32 g_projectionExtraConstants[4];
 extern GroupMarker g_groupMarkers[18];
 
 #endif

@@ -14,11 +14,11 @@ void DrawTextPanelBorders(Self_133B58_eu* self, PacketWriter* gs)
     f32 step = 1.0f / 24.0f;
     f32 t;
     t = 0.5f - Cosine(self->phase) * 0.5f;
-    c0 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
+    c0 = BorderColorMix::Mix(g_arcTickColorTo, g_arcTickColorFrom, t);
     t = 0.5f - Cosine(self->phase + 1.5707964f) * 0.5f;
-    c1 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
+    c1 = BorderColorMix::Mix(g_arcTickColorTo, g_arcTickColorFrom, t);
     t = 0.5f - Cosine(self->phase + 3.1415927f) * 0.5f;
-    c2 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
+    c2 = BorderColorMix::Mix(g_arcTickColorTo, g_arcTickColorFrom, t);
     s32 i;
     f32 x;
 
@@ -31,7 +31,7 @@ void DrawTextPanelBorders(Self_133B58_eu* self, PacketWriter* gs)
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 v = EvalCurveSpan(&D_00261280, i);
+        f32 v = EvalCurveSpan(&g_panelEdgeCurveA, i);
         f32 sx = x * 640.0f;
         f32 v2 = v + 4.0f;
         AddGifRgbaEntry(gs, *(u32*)&c2);
@@ -53,7 +53,7 @@ void DrawTextPanelBorders(Self_133B58_eu* self, PacketWriter* gs)
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 v = EvalCurveSpan(&D_002612B0, i);
+        f32 v = EvalCurveSpan(&g_panelEdgeCurveB, i);
         f32 sx = x * 640.0f;
         f32 v2 = v - 4.0f;
         AddGifRgbaEntry(gs, *(u32*)&c2);
@@ -75,7 +75,7 @@ void DrawTextPanelBorders(Self_133B58_eu* self, PacketWriter* gs)
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 r = EvalCurveSpan(&D_00261280, i);
+        f32 r = EvalCurveSpan(&g_panelEdgeCurveA, i);
         f32 sx = x * 640.0f;
         f32 v = r + 4.0f;
         f32 v2 = v + 4.0f;
@@ -98,7 +98,7 @@ void DrawTextPanelBorders(Self_133B58_eu* self, PacketWriter* gs)
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 r = EvalCurveSpan(&D_002612B0, i);
+        f32 r = EvalCurveSpan(&g_panelEdgeCurveB, i);
         f32 sx = x * 640.0f;
         f32 v = r - 4.0f;
         f32 v2 = v - 4.0f;

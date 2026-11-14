@@ -64,22 +64,22 @@ f32 D_00263C10[4] = { 0.0f, -300.0f, 0.0f, 0.0f };
 f32 D_00263C20[4] = { 0.0f, 20.0f, 0.0f, 0.0f };
 f32 D_00263C30[4] = { 0.0f, 10.0f, 0.0f, 0.0f };
 f32 D_00263C40[3] = { 25.0f, 0.0f, 0.5f };
-f32 D_00263C4C = 0.699999988f;
-f32 D_00263C50[2] = { 0.150000006f, 0.0f };
-f32 D_00263C58[4] = { 1.5f, 0.0f, 0.75f, 0.0f };
-f32 D_00263C68[4] = { 20.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00263C78[2] = { -1.0f, 1.0f };
-f32 D_00263C80[4] = { 10.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00263C90[4] = { -1.0f, 1.0f, 0.0f, 0.0f };
-f32 D_00263CA0[4] = { 0.0f, -750.0f, 0.0f, 0.0f };
-f32 D_00263CB0[4] = { 0.0f, -450.0f, 0.0f, 0.0f };
-f32 D_00263CC0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
-f32 D_00263CD0[4] = { 0.0f, 0.5f, 0.0f, 0.0f };
-f32 D_00263CE0[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
-f32 D_00263CF0[4] = { 0.0f, 0.00100000005f, 0.0f, 0.0f };
-f32 D_00263D00[2] = { 0.0f, 0.300000012f };
-f32 D_00263D08[4] = { 30.0f, 0.0f, 0.5f, 0.0f };
-f32 D_00263D18[6] = { 30.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f };
+f32 g_world5AimSmoothing = 0.699999988f;
+f32 g_world5ButtonWindow[2] = { 0.150000006f, 0.0f };
+f32 g_world5AimBoundsRamp[4] = { 1.5f, 0.0f, 0.75f, 0.0f };
+f32 g_world5AimSpeedRamp[4] = { 20.0f, 0.0f, 0.100000001f, 0.0f };
+f32 g_world5AimMargin[2] = { -1.0f, 1.0f };
+f32 g_world5SteerRamp[4] = { 10.0f, 0.0f, 0.100000001f, 0.0f };
+f32 g_world5SteerLimits[4] = { -1.0f, 1.0f, 0.0f, 0.0f };
+f32 g_world5AimMapY[4] = { 0.0f, -750.0f, 0.0f, 0.0f };
+f32 g_world5AimMapZ[4] = { 0.0f, -450.0f, 0.0f, 0.0f };
+f32 g_world5SteerProgressCoefficients[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 g_world5PitchCoefficients[4] = { 0.0f, 0.5f, 0.0f, 0.0f };
+f32 g_world5YawCoefficients[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
+f32 g_world5TiltCoefficients[4] = { 0.0f, 0.00100000005f, 0.0f, 0.0f };
+f32 g_world5TiltLimits[2] = { 0.0f, 0.300000012f };
+f32 g_world5PartRotationRamp[4] = { 30.0f, 0.0f, 0.5f, 0.0f };
+f32 g_world5AimRotationRamp[6] = { 30.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f };
 
 extern f32 g_gameClock[];
 f32 D_00263D30[4] = { 1.0f, 0.0f, -0.75f, 0.0f };
@@ -105,7 +105,7 @@ f32 D_00263DF8 = 1250.0f;
 f32 D_00263DFC = 750.0f;
 f32 D_00263E00 = 750.0f;
 
-extern s32 D_00263E2C;
+extern s32 g_world5CountdownRequest;
 extern s32 g_timeoutFired;
 f32 g_timeoutLimit = 3.0f;
 
@@ -115,9 +115,9 @@ ObjectLink g_countdownTable[3] = {
     { 0, 0x47A, 0x564 }
 };
 // size: s32, word load/store only
-s32 D_00263E2C = 0;
+s32 g_world5CountdownRequest = 0;
 
-extern s32 D_00263E2C;
+extern s32 g_world5CountdownRequest;
 s32 g_timeoutFired = 0;
 
 void InitSwitchedCollider(SwitchedCollider* self);
@@ -160,7 +160,7 @@ void StartWorld5ModeCollider(World5ModeCollider* self)
     self->restWeight = 1.0f;
     SetBlendItemWeights((BlendAnimationView*)self->weightBlend, 0xC, 5, &self->restWeight);
     SetWorld5ModeColliderMode(self, 2);
-    T217D_BF0* base = &D_00270650;
+    T217D_BF0* base = &g_spinningSpriteElement;
     ((T217D_Float*)&base->alphaScale)->v = 0.0f;
     base->icon = FindAnimRecord(0x36A);
 }
@@ -218,7 +218,7 @@ void MoveWorld5ModeCollider(World5ModeCollider* self, f32 t, void* arg)
     if (fn != 0) fn(self);
 }
 
-extern T217D_BF0 D_00270650;
+extern T217D_BF0 g_spinningSpriteElement;
 extern f32 g_gameTime;
 extern s32 g_padSelectFlags;
 void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt);
@@ -274,16 +274,16 @@ void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
         }
     }
     if (self == GetActiveSwitchedCollider() && (g_padSelectFlags & 2) == 0) {
-        D_00270650.vt->m16(&D_00270650, 2);
+        g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 2);
     } else {
-        D_00270650.vt->m16(&D_00270650, 0);
+        g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 0);
     }
     ComputeObjectMotionInFrame((PlacedObject*)self->f668, 0, (Vec02*)((u8*)self + 0x100), &a, 0, 0, 0);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v150), Vu0::Q(a));
     TransformDirectionBetweenFrames(0, (PlacedObject*)self->f668, &d, &d);
     wx = d.y * -0.0016666667f;
     wy = d.z * -0.0033333334f;
-    f32 k = D_00263C4C;
+    f32 k = g_world5AimSmoothing;
     f32 m = 1.0f - k;
     wx = k * wx + m * self->poseRateX;
     wy = k * wy + m * self->poseRateY;
@@ -382,7 +382,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
                 ClearPadPressedBits(pad, 0x40);
                 self->buttonPressTime = g_gameTime;
             }
-            if (self->f6E0 != 0 && g_gameTime - self->buttonPressTime < D_00263C50[0]) {
+            if (self->f6E0 != 0 && g_gameTime - self->buttonPressTime < g_world5ButtonWindow[0]) {
                 self->desc05()->m50(self);
             }
         }
@@ -405,12 +405,12 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         Vec02 at;
         Vec02 pos;
         TransformPointBetweenFrames(0, (PlacedObject*)self->f660, &self->f664->v140, &at);
-        f32 u = (at.y - D_00263CA0[0]) / D_00263CA0[1];
-        f32 v = (at.z - D_00263CB0[0]) / D_00263CB0[1];
-        ApproachValueWithRamp(self->aimX, u + D_00263C78[1], 0.0f, (RampProfile*)D_00263C58, &hiX);
-        ApproachValueWithRamp(self->aimX, u + D_00263C78[0], 0.0f, (RampProfile*)D_00263C58, &loX);
-        ApproachValueWithRamp(self->aimY, v + D_00263C78[1], 0.0f, (RampProfile*)D_00263C58, &hiY);
-        ApproachValueWithRamp(self->aimY, v + D_00263C78[0], 0.0f, (RampProfile*)D_00263C58, &loY);
+        f32 u = (at.y - g_world5AimMapY[0]) / g_world5AimMapY[1];
+        f32 v = (at.z - g_world5AimMapZ[0]) / g_world5AimMapZ[1];
+        ApproachValueWithRamp(self->aimX, u + g_world5AimMargin[1], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &hiX);
+        ApproachValueWithRamp(self->aimX, u + g_world5AimMargin[0], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &loX);
+        ApproachValueWithRamp(self->aimY, v + g_world5AimMargin[1], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &hiY);
+        ApproachValueWithRamp(self->aimY, v + g_world5AimMargin[0], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &loY);
         f32 stickY = pad->stickY;
         if (g_saveData->optionFlags & 0x800) {
             stickY = -stickY;
@@ -424,34 +424,34 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
             tx = (loX + hiX) * 0.5f;
             ty = (loY + hiY) * 0.5f;
         }
-        self->aimRateX = ApproachValueWithRamp(self->aimRateX, tx, dt, (RampProfile*)D_00263C68, 0);
-        self->aimRateY = ApproachValueWithRamp(self->aimRateY, ty, dt, (RampProfile*)D_00263C68, 0);
-        self->aimX = ClampBetween(self->aimX + dt * self->aimRateX, u + D_00263C78[0], u + D_00263C78[1]);
-        f32 w = ClampBetween(self->aimY + dt * self->aimRateY, v + D_00263C78[0], v + D_00263C78[1]);
+        self->aimRateX = ApproachValueWithRamp(self->aimRateX, tx, dt, (RampProfile*)g_world5AimSpeedRamp, 0);
+        self->aimRateY = ApproachValueWithRamp(self->aimRateY, ty, dt, (RampProfile*)g_world5AimSpeedRamp, 0);
+        self->aimX = ClampBetween(self->aimX + dt * self->aimRateX, u + g_world5AimMargin[0], u + g_world5AimMargin[1]);
+        f32 w = ClampBetween(self->aimY + dt * self->aimRateY, v + g_world5AimMargin[0], v + g_world5AimMargin[1]);
         self->aimY = w;
         f32 h = self->aimX;
-        Vu0::Q(pos) = Vu0::FromFloats(at.x, D_00263CA0[0] + h * (D_00263CA0[1] + h * D_00263CA0[2]),
-                                      D_00263CB0[0] + w * (D_00263CB0[1] + w * D_00263CB0[2]));
+        Vu0::Q(pos) = Vu0::FromFloats(at.x, g_world5AimMapY[0] + h * (g_world5AimMapY[1] + h * g_world5AimMapY[2]),
+                                      g_world5AimMapZ[0] + w * (g_world5AimMapZ[1] + w * g_world5AimMapZ[2]));
         TransformPointBetweenFrames((PlacedObject*)self->f660, 0, &pos, &pos);
         TransformPointBetweenFrames(0, (PlacedObject*)self->f660, &pos, (Vec02*)((u8*)self->f650 + 0xF0));
-        ProjectPointToCamera(g_camera, &pos, D_00270650.aim);
+        ProjectPointToCamera(g_camera, &pos, g_spinningSpriteElement.aim);
         for (i = 0; i < 2; i++) {
             Vec02 dir;
             *(Vu0::Vec*)&dir = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->f674[i]->v140));
             BuildBasisFromXAndZHint(&dir, &g_unitZVector, &mats[i]);
             TransformRotationBetweenFrames(0, (PlacedObject*)self->f674[i]->parent, &mats[i], &mats[i]);
         }
-        ApproachValueWithRamp(self->poseX, D_00263C90[1], 0.0f, (RampProfile*)D_00263C58, &hiX);
-        ApproachValueWithRamp(self->poseX, D_00263C90[0], 0.0f, (RampProfile*)D_00263C58, &loX);
-        ApproachValueWithRamp(self->poseY, D_00263C90[1], 0.0f, (RampProfile*)D_00263C58, &hiY);
-        ApproachValueWithRamp(self->poseY, D_00263C90[0], 0.0f, (RampProfile*)D_00263C58, &loY);
-        RampProfile3 prof = *(RampProfile3*)D_00263C80;
+        ApproachValueWithRamp(self->poseX, g_world5SteerLimits[1], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &hiX);
+        ApproachValueWithRamp(self->poseX, g_world5SteerLimits[0], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &loX);
+        ApproachValueWithRamp(self->poseY, g_world5SteerLimits[1], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &hiY);
+        ApproachValueWithRamp(self->poseY, g_world5SteerLimits[0], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &loY);
+        RampProfile3 prof = *(RampProfile3*)g_world5SteerRamp;
         if (self->mode == 2) {
             tx = loX + (pad->stickX + 1.0f) * ((hiX - loX) * 0.5f);
             ty = loY + (stickY + 1.0f) * ((hiY - loY) * 0.5f);
         } else {
             f32 k = (g_gameTime - self->modeStartTime) / ((World5ModeColliderSource*)self->modeAnimPlayer)->lengthRecord->length;
-            f32 s = D_00263CC0[0] + k * (D_00263CC0[1] + k * D_00263CC0[2]);
+            f32 s = g_world5SteerProgressCoefficients[0] + k * (g_world5SteerProgressCoefficients[1] + k * g_world5SteerProgressCoefficients[2]);
             tx = (loX + hiX) * 0.5f;
             ty = hiY;
             s = ClampBetween(s, g_unitRange.lo, g_unitRange.hi);
@@ -460,8 +460,8 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         }
         self->poseRateX = ApproachValueWithRamp(self->poseRateX, tx, dt, (RampProfile*)&prof, 0);
         self->poseRateY = ApproachValueWithRamp(self->poseRateY, ty, dt, (RampProfile*)&prof, 0);
-        self->poseX = ClampBetween(self->poseX + dt * self->poseRateX, D_00263C90[0], D_00263C90[1]);
-        self->poseY = ClampBetween(self->poseY + dt * self->poseRateY, D_00263C90[0], D_00263C90[1]);
+        self->poseX = ClampBetween(self->poseX + dt * self->poseRateX, g_world5SteerLimits[0], g_world5SteerLimits[1]);
+        self->poseY = ClampBetween(self->poseY + dt * self->poseRateY, g_world5SteerLimits[0], g_world5SteerLimits[1]);
 
         Mat02 pitch;
         Mat02 yaw;
@@ -475,13 +475,13 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         if (rel.x < 0.0f) {
             sx = -sx;
         }
-        BuildAxisAngleMatrix(&g_unitXVector, &pitch, D_00263CD0[0] + sx * (D_00263CD0[1] + sx * D_00263CD0[2]));
+        BuildAxisAngleMatrix(&g_unitXVector, &pitch, g_world5PitchCoefficients[0] + sx * (g_world5PitchCoefficients[1] + sx * g_world5PitchCoefficients[2]));
         f32 sy = pad->stickY;
-        BuildAxisAngleMatrix(&g_unitYVector, &yaw, D_00263CE0[0] + sy * (D_00263CE0[1] + sy * D_00263CE0[2]));
+        BuildAxisAngleMatrix(&g_unitYVector, &yaw, g_world5YawCoefficients[0] + sy * (g_world5YawCoefficients[1] + sy * g_world5YawCoefficients[2]));
         *(Vu0::Vec*)&to = Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)self->f660)->v140), Vu0::Vec::Of(self->v140));
         BuildBasisFromXAndZHint(&to, &g_unitZVector, &face);
         f32 speed = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(self->v150), Vu0::Q(self->v150))));
-        f32 angle = ClampBetween(D_00263CF0[0] + speed * (D_00263CF0[1] + speed * D_00263CF0[2]), D_00263D00[0], D_00263D00[1]);
+        f32 angle = ClampBetween(g_world5TiltCoefficients[0] + speed * (g_world5TiltCoefficients[1] + speed * g_world5TiltCoefficients[2]), g_world5TiltLimits[0], g_world5TiltLimits[1]);
         Vu0::Vec n;
         n.q = Vu0::FromFloats(-self->v150.y, self->v150.x, 0.0f);
         *(Vu0::Vec*)&axis = n;
@@ -509,12 +509,12 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     }
     Mat02 rot;
     for (i = 0; i < 2; i++) {
-        ApproachRotationWithRamp(&self->f674[i]->rot, &mats[i], (RampProfile*)D_00263D08, dt, &rot, 0);
+        ApproachRotationWithRamp(&self->f674[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
         self->f674[i]->desc02()->m1E(self->f674[i], &rot);
     }
     if (self->f67C->orientationAttachment == 0) {
         MulRotationRowsIndexed(&aim, aim, self->f67C->m1A0);
-        ApproachRotationWithRamp(&self->f67C->rot, &aim, (RampProfile*)D_00263D18, dt, &rot, 0);
+        ApproachRotationWithRamp(&self->f67C->rot, &aim, (RampProfile*)g_world5AimRotationRamp, dt, &rot, 0);
         self->f67C->desc02()->m1E(self->f67C, &rot);
     }
     HandleStepSequenceSkipButtons(self, pad);
@@ -535,9 +535,9 @@ void HandleWorld5ModeColliderActivation(World5ModeCollider* self, void* active)
 {
     HandleSwitchedColliderActivation(self, active);
     if (active) {
-        Vu0::Q(D_00270650.aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
+        Vu0::Q(g_spinningSpriteElement.aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
     } else {
-        D_00270650.vt->m16(&D_00270650, 0);
+        g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 0);
         self->pulseActive = 0;
     }
 }
@@ -703,9 +703,9 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
     void* anim = 0;
     switch (mode) {
     case 2: {
-        Vu0::Q(D_00270650.aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
-        *(Vec02*)&D_00270650.rateX = D_00248D30;
-        D_00270650.vt->m16(&D_00270650, 2);
+        Vu0::Q(g_spinningSpriteElement.aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
+        *(Vec02*)&g_spinningSpriteElement.rateX = D_00248D30;
+        g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 2);
         anim = self->weightBlend;
         break;
     }
@@ -964,7 +964,7 @@ void InitWorld5Countdown(World5Countdown* self)
 {
     InitCollider(self);
     self->countdown = 0x10;
-    D_00263E2C = -1;
+    g_world5CountdownRequest = -1;
     g_timeoutFired = 0;
 }
 
@@ -995,8 +995,8 @@ void UpdateWorld5Countdown(World5Countdown* self, f32 dt)
             self->record = 0;
         }
     }
-    if (D_00263E2C != -1) {
-        SetWorld5CountdownState(self, D_00263E2C);
+    if (g_world5CountdownRequest != -1) {
+        SetWorld5CountdownState(self, g_world5CountdownRequest);
     }
     if (self->mode == 2) {
         if (g_timeoutLimit < g_gameTime - self->startTime) {
@@ -1025,7 +1025,7 @@ void UpdateWorld5CountdownVisibility(World5Countdown* self)
 
 // NEAR: 0x558 clamp uses movz with the operand order ours does not reproduce; msg->fC mask load goes to the other register
 
-extern s32 D_00263E2C;
+extern s32 g_world5CountdownRequest;
 
 void DecrementGaugeCount(T217D_2E0* self);
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
@@ -1041,7 +1041,7 @@ s32 HandleWorld5CountdownObjectEvent(World5Countdown* self, ObjectEvent* msg)
         self->countdown = pos ? n : 0;
         DecrementGaugeCount(&g_gaugeBarElement);
         if (self->countdown == 0) {
-            D_00263E2C = 2;
+            g_world5CountdownRequest = 2;
             p = 0;
         } else {
             s32 flags = msg->extraFlags;
@@ -1077,7 +1077,7 @@ void SetWorld5CountdownState(World5Countdown* self, s32 state)
     if (state == self->mode) {
         return;
     }
-    D_00263E2C = -1;
+    g_world5CountdownRequest = -1;
     switch (state) {
     case 1:
         {

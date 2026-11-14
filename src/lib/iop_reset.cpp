@@ -48,11 +48,11 @@ struct Syscall_1F9E50 {
 
 s32* FindKernelWord(s32 value);
 
-Syscall_1F9E50 D_002771D8 = { 0x83, FindKernelWord, 0 };
-s32 D_002771E4;
-s32 D_002771E8;
+Syscall_1F9E50 g_kernelWordSearchCall = { 0x83, FindKernelWord, 0 };
+s32 g_librarySemaphore0;
+s32 g_librarySemaphore1;
 
-static Cmd_1F9AD8 D_00628E40 __attribute__((aligned(64)));
+static Cmd_1F9AD8 g_iopResetPacket __attribute__((aligned(64)));
 
 void StopIopDma(char* text, void* q);
 s32 ReadIopRegister(u32 a0);
@@ -79,24 +79,24 @@ s32 SendIopReset(char* text, void* q)
 
     StopIopDma(text, q);
     w = ReadIopRegister(0x80000000);
-    D_00628E40.q = q;
+    g_iopResetPacket.q = q;
     len = 0;
     if (text[0] != 0) {
         do {
-            D_00628E40.text[len] = (u8)text[len];
+            g_iopResetPacket.text[len] = (u8)text[len];
             len++;
         } while (text[len] != 0);
     }
-    D_00628E40.w[1] = 0;
-    D_00628E40.len = len;
-    D_00628E40.w8 = (s32)0x80000003;
-    D_00628E40.hdr = D_00628E40.hdr & 0xFFFFFFFF000000FFULL;
-    *(u8*)&D_00628E40 = 0x68;
-    span.a = &D_00628E40;
+    g_iopResetPacket.w[1] = 0;
+    g_iopResetPacket.len = len;
+    g_iopResetPacket.w8 = (s32)0x80000003;
+    g_iopResetPacket.hdr = g_iopResetPacket.hdr & 0xFFFFFFFF000000FFULL;
+    *(u8*)&g_iopResetPacket = 0x68;
+    span.a = &g_iopResetPacket;
     span.b = w;
     span.c = 0x68;
     span.d = 0x44;
-    WriteBackDataCacheRange(&D_00628E40, 0x68);
+    WriteBackDataCacheRange(&g_iopResetPacket, 0x68);
     WriteIopRegister(4, 0x40000);
     if (StartIopDma(&span, 1) != 0) {
         WriteIopRegister(4, 0x10000);
@@ -147,10 +147,10 @@ s32 ResetIop(char* arg)
 }
 
 // The messages of the IOP's terminal, which no code reads.
-extern const char D_0024EBC0[] = "TTY: packet size larger than expect\n";
-extern const char D_0024EBE8[] = "TTY: receive error";
-extern const char D_0024EC00[] = "TTY: send err %d\n";
-extern const char D_0024EC18[] = "TTY: err ti->wlen=%08x\n";
+extern const char g_ttyPacketSizeText[] = "TTY: packet size larger than expect\n";
+extern const char g_ttyReceiveErrorText[] = "TTY: receive error";
+extern const char g_ttySendErrorText[] = "TTY: send err %d\n";
+extern const char g_ttyWordLengthErrorText[] = "TTY: err ti->wlen=%08x\n";
 
 ASM_FUNC(func_001F9D60);
 
@@ -163,8 +163,8 @@ void CreateLibrarySemaphores(void)
     f.w[2] = 1;
     f.w[9] = 1;
     f.w[10] = 1;
-    D_002771E4 = NewSemaphore(&f);
-    D_002771E8 = NewSemaphore((SemaphoreParamsPair*)&f.w[8]);
+    g_librarySemaphore0 = NewSemaphore(&f);
+    g_librarySemaphore1 = NewSemaphore((SemaphoreParamsPair*)&f.w[8]);
 }
 
 s32* FindKernelWord(s32 value)
@@ -179,7 +179,7 @@ ASM_FUNC(func_001F9E40);
 
 s32 InstallKernelWordSearch(void)
 {
-    SetSystemCallHandlerForWordSearch(D_002771D8.num, D_002771D8.handler);
+    SetSystemCallHandlerForWordSearch(g_kernelWordSearchCall.num, g_kernelWordSearchCall.handler);
     s32 r = RunKernelWordSearchSyscall(FindKernelWord);
     return r - 0x20C;
 }

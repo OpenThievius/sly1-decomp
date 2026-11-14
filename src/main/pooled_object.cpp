@@ -91,7 +91,7 @@ void StartPlacedObject(PlacedObject* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 
-extern GaugeManager* D_0027C00C;
+extern GaugeManager* g_gaugeManager;
 
 void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
 void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
@@ -382,7 +382,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void SetListLinkOffset(List01* self, s32 offset);
 
 
-extern s32 D_00275F84;
+extern s32 g_resumeSoundSetupDone;
 s32 IsStreamVoiceLocked(void);
 void SetStepSequenceState(StepSequence* self, s32 mode);
 
@@ -444,7 +444,7 @@ void ShowCountedScreenElement(World* self);
 void HideCountedScreenElement(World* self);
 void PopStackElement(ElementStack* g);
 
-extern s32 D_00275F84;
+extern s32 g_resumeSoundSetupDone;
 extern s32 D_00270B30;
 extern s32 D_002717A8;
 extern u8 g_elementStack[];
@@ -463,8 +463,8 @@ void RunStepSequence(StepSequence* self);
 
 
 extern s32 g_padRouting;
-extern u16 D_00261D08[16];
-extern u8 D_00261D28[16];
+extern u16 g_stepWaitButtonMasks[16];
+extern u8 g_stepWaitButtonGlyphs[16];
 
 s32 CheckStreamVoicePending(void);
 s32 HasStreamVoice(void);
@@ -556,9 +556,9 @@ void WriteVifFlush(PacketWriter* p);
 
 
 
-extern ScatterTable D_00261D70[2];
-extern ScatterTable D_00261E30;
-extern ScatterTable D_00261E90;
+extern ScatterTable g_scatterTablesPlain[2];
+extern ScatterTable g_scatterTableFlagged;
+extern ScatterTable g_scatterTableEarlyGame;
 s32 RandomIntInRange(s32 a, s32 b);
 
 void InitPlacedObject(PlacedObject* self);
@@ -665,8 +665,8 @@ void SetPooledObjectState(PooledObject* self, s32 state)
     }
 }
 
-extern f32 D_00261CD4;
-extern f32 D_00261CD8;
+extern f32 g_launchHorizontalSpeed;
+extern f32 g_launchLiftSpeed;
 void SetPlayerState(Player* self, s32 state, s32 sub);
 
 // The owner-message callback of a pooled object's launch: gives the other object, through its
@@ -685,7 +685,7 @@ void LaunchObjectFromPooledObject(PlacedObject* self, PlacedObject* other)
     Vec02 r;
     *(Vu0::Vec*)p = Vu0::NormalizeOr(Vu0::Vec::Of(d), Vu0::Vec::Of(g_unitXVector));
     const Desc02* desc = other->desc02();
-    Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(D_00261CD4), Vu0::Q(g_unitZVector), Vu0::ScalarAtValue(D_00261CD8));
+    Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(g_launchHorizontalSpeed), Vu0::Q(g_unitZVector), Vu0::ScalarAtValue(g_launchLiftSpeed));
     desc->m20(other, &r);
     if (IsObjectOfKind(other, 7) != 0) {
         SetPlayerState((Player*)other, 4, 0x2B);
@@ -1287,8 +1287,8 @@ void SetStepSequenceState(StepSequence* self, s32 next)
     }
     switch (cur) {
     case 5:
-        if (D_0026F5A0.owner == self) {
-            D_0026F5A0.owner = 0;
+        if (g_hintGlyphElement.owner == self) {
+            g_hintGlyphElement.owner = 0;
         }
         break;
     case 1:
@@ -1321,10 +1321,10 @@ void SetStepSequenceState(StepSequence* self, s32 next)
     }
     switch (next) {
     case 5:
-        if (D_0026F5A0.owner != 0) {
-            SetStepSequenceState(D_0026F5A0.owner, 0);
+        if (g_hintGlyphElement.owner != 0) {
+            SetStepSequenceState(g_hintGlyphElement.owner, 0);
         }
-        D_0026F5A0.owner = self;
+        g_hintGlyphElement.owner = self;
         self->state2D4 = next;
         break;
     case 1:
@@ -1379,7 +1379,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
     Ent65* s2;
 
     UpdatePlacedObject(self, dt);
-    if (!(g_timerCaption.state < 2 && g_timerCaption.pressed == 0 && IsStreamVoiceLocked() == 0 && D_00275F84 != 1)) {
+    if (!(g_timerCaption.state < 2 && g_timerCaption.pressed == 0 && IsStreamVoiceLocked() == 0 && g_resumeSoundSetupDone != 1)) {
         s32 st = self->state2D4;
         switch (st) {
         case 1:
@@ -1403,7 +1403,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
     switch (s1) {
     case 0:
         if (self->startPending != 0) {
-            if (D_00275F84 == 0 && q[1] != 0) {
+            if (g_resumeSoundSetupDone == 0 && q[1] != 0) {
                 self->startPending = 0;
                 ChooseStepSequenceState(self);
                 s1 = self->state2D4;
@@ -1424,7 +1424,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
         goto timer;
     case 1:
         if (q[1] != 0) {
-            StepSequence* o = D_0027051C;
+            StepSequence* o = g_activeStepSequence;
             if (o == 0) {
                 ShowStepSequenceText(self, s2);
                 s1 = self->state2D4;
@@ -1440,7 +1440,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
         break;
     case 3:
         if (self->mode2D0 != 2) {
-            if (!(self->step2E4 < self->count2DC) || D_00275F84 == 1) {
+            if (!(self->step2E4 < self->count2DC) || g_resumeSoundSetupDone == 1) {
                 PopStackElement((ElementStack*)g_elementStack);
                 s1 = self->state2D4;
             }
@@ -1681,13 +1681,13 @@ s32 TestStepWaitConditions(StepSequence* self)
         }
             break;
         default:
-            r = (in->flags & D_00261D08[k]) != 0;
+            r = (in->flags & g_stepWaitButtonMasks[k]) != 0;
             break;
         }
         if (r != 0) {
             flags = 0;
         } else {
-            g_typedTextCaptionBox.buttonGlyph = D_00261D28[k];
+            g_typedTextCaptionBox.buttonGlyph = g_stepWaitButtonGlyphs[k];
         }
     }
     self->waitFlags = flags;
@@ -1763,9 +1763,9 @@ void ChooseStepSequenceState(StepSequence* self)
         return;
     if (IsStreamVoiceLocked() != 0)
         return;
-    if (D_00275F84 == 1)
+    if (g_resumeSoundSetupDone == 1)
         return;
-    if (self == D_0027051C)
+    if (self == g_activeStepSequence)
         return;
     s32 mode = 1;
     if (*(s32*)self->target304 != 0) {
@@ -1820,9 +1820,9 @@ void ResetScatterController(ScatterController* self)
     self->countLo = 1;
     self->countHi = 3;
     GameProgress* g = g_saveData;
-    if (g->levelIndex == 0 || g->levelIndex == 5 || g->entryIndex == 1) self->table = &D_00261E90;
-    else if (!(g_currentEntry->flags & 2)) self->table = D_00261D70;
-    else self->table = &D_00261E30;
+    if (g->levelIndex == 0 || g->levelIndex == 5 || g->entryIndex == 1) self->table = &g_scatterTableEarlyGame;
+    else if (!(g_currentEntry->flags & 2)) self->table = g_scatterTablesPlain;
+    else self->table = &g_scatterTableFlagged;
     SetScatterLevel(self, g_currentEntry->dt);
     s32 a = ((ScatterTable*)self->table)->countLoStart;
     s32 b = ((ScatterTable*)self->table)->countLoEnd;
@@ -2153,13 +2153,13 @@ void InitDmaChannels()
 	g_toSprChannel = GetDmaChannel(9);
 }
 
-extern const VtableEntry D_0024A0E0[4] = {{0, 0}, {0, SkipDisplayListWriterSlot}, {0, 0}, {0, 0}};
+extern const VtableEntry g_packetWriterVtable[4] = {{0, 0}, {0, SkipDisplayListWriterSlot}, {0, 0}, {0, 0}};
 
 PacketWriter* InitPacketBuffer(PacketWriter* self)
 {
     self->f10 = 0;
     self->f14 = 0;
-    self->vt = (const PacketWriterVt*)D_0024A0E0;
+    self->vt = (const PacketWriterVt*)g_packetWriterVtable;
     ClearPacketBuffer(self);
     return self;
 }
@@ -2465,22 +2465,22 @@ void QueuePlacedObjectDraw(TextureRenderObject* self, s32 unused, void* a2)
 // The file's .data, 0x261CC8 to 0x261F28, in retail's order: the globals its functions read
 // (D_00261EF0 and the DMA channel words are read by many files, which keep them extern).
 ObjectLink g_pooledObjectLinks[1] = { { 2, 0x2BC, 0x574 } };
-f32 D_00261CD4 = 500.0f;
-f32 D_00261CD8 = 800.0f;
+f32 g_launchHorizontalSpeed = 500.0f;
+f32 g_launchLiftSpeed = 800.0f;
 ObjectLink g_takerLinks[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x2B6, 0x73C } };
-u16 D_00261D08[16] = {0x40,0x40,0x80,0x20,0x10,4,1,8,2,0,0,0,0,0,0,0};
-u8 D_00261D28[16] = {0x58,0x58,0x53,0x4F,0x54,0x4C,0x6C,0x52,0x72,0x28,0x29,0x28,0x28,0x58,0,0};
+u16 g_stepWaitButtonMasks[16] = {0x40,0x40,0x80,0x20,0x10,4,1,8,2,0,0,0,0,0,0,0};
+u8 g_stepWaitButtonGlyphs[16] = {0x58,0x58,0x53,0x4F,0x54,0x4C,0x6C,0x52,0x72,0x28,0x29,0x28,0x28,0x58,0,0};
 // size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
 s32 D_00261D38 = 0;
 ThresholdRange g_thresholdRanges[4] = {
     { 0.8f, 2, 5 }, { 0.4f, 6, 10 }, { 0.2f, 15, 25 }, { 0.0f, 50, 100 }
 };
-ScatterTable D_00261D70[2] = {
+ScatterTable g_scatterTablesPlain[2] = {
     { 0, 1.0f, 0.0f, 0.6f, 0.1f, -0.8f, 0.0f, 4, 6, 0, 2, 0.399f, 1, 0.799f, 2, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 },
     { 0, 0.5f, 0.0f, 0.2f, 0.1f, -0.4f, -0.4f, 4, 6, 0, 2, 0.399f, 0, 0.799f, 0, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 },
 };
-ScatterTable D_00261E30 = { 0, 0.0f, 0.0f, 0.2f, 0.0f, 0.0f, 0.0f, 4, 6, 0, 2, 0.399f, 0, 0.799f, 0, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 };
-ScatterTable D_00261E90 = { 0, 1.0f, 0.0f, 0.0f, 0.1f, -0.8f, 0.0f, 4, 6, 0, 2, 0.399f, 1, 0.799f, 2, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 };
+ScatterTable g_scatterTableFlagged = { 0, 0.0f, 0.0f, 0.2f, 0.0f, 0.0f, 0.0f, 4, 6, 0, 2, 0.399f, 0, 0.799f, 0, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 };
+ScatterTable g_scatterTableEarlyGame = { 0, 1.0f, 0.0f, 0.0f, 0.1f, -0.8f, 0.0f, 4, 6, 0, 2, 0.399f, 1, 0.799f, 2, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 };
 // size: func_00151A68 clears 0x24 bytes of it
 ScatterController g_scatterController = {};
 // size: semaphore id from func_002027A0 (lw/sw), 4-byte label

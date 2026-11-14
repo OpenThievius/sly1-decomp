@@ -27,7 +27,7 @@ ASM_FUNC(func_001FA8D8);
 
 ASM_FUNC(func_001FA8E8);
 
-u32 D_002779C0[220] = {
+u32 g_thirdKernelPatchCode[220] = {
     0x3C028007, 0x0000282D, 0x24435300, 0x00000000, 0x8C620000, 0x14820003, 0x24A50001, 0x03E00008,
     0x8C620004, 0x2CA20005, 0x1440FFF9, 0x24630008, 0x03E00008, 0x0000102D, 0x00051602, 0x304300F0,
     0x24020030, 0x10620014, 0x2C620031, 0x10400009, 0x24020010, 0x1062000E, 0x2C620011, 0x1040000A,
@@ -59,18 +59,18 @@ u32 D_002779C0[220] = {
 };
 
 struct Blk_1FA8F8;
-u32 D_00277D30[16] = { 0x5A, 0x1FA8A0, 0x5B, 0x80075000, 0x54, 0x1FAC40, 0x55, 0, 0x56, 0, 0x57, 0, 0x58, 0, 0x59, 0 };
+u32 g_thirdKernelPatchHandlers[16] = { 0x5A, 0x1FA8A0, 0x5B, 0x80075000, 0x54, 0x1FAC40, 0x55, 0, 0x56, 0, 0x57, 0, 0x58, 0, 0x59, 0 };
 u32 RunSyscall5BThirdPatch(Blk_1FA8F8* a);
 void SetSystemCallHandlerThirdPatch(Blk_1FA8F8* a, u32 b);
 void CopyKernelWordsSyscallThirdPatch(Blk_1FA8F8* a, void* b, s32 c);
 extern "C" void SyncDataCache(s32 a);
 
 void InstallThirdKernelPatch() {
-    u32* s0 = D_00277D30;
+    u32* s0 = g_thirdKernelPatchHandlers;
     u32* s1;
     u32 k = 3;
     SetSystemCallHandlerThirdPatch((Blk_1FA8F8*)s0[0], s0[1]);
-    CopyKernelWordsSyscallThirdPatch((Blk_1FA8F8*)0x80075000, D_002779C0, 0x328);
+    CopyKernelWordsSyscallThirdPatch((Blk_1FA8F8*)0x80075000, g_thirdKernelPatchCode, 0x328);
     SyncDataCache(0);
     SyncDataCache(2);
     SetSystemCallHandlerThirdPatch((Blk_1FA8F8*)s0[2], s0[3]);

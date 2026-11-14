@@ -35,7 +35,7 @@ void GatherAxisCurveTimes(WeightCurve** axis, s32* outCount, f32** outTimes);
 
 void FillObjectPropertyTable(void);
 
-extern u8 D_002505D8[];
+extern u8 g_objectPropertyDescriptors[];
 
 void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r);
 
@@ -138,7 +138,7 @@ void DestroyBufferedStream(BufferedStream* self, s32 flags);
 
 // EXACT: reuse parameter a1 directly instead of a local copy
 
-extern u8 D_00247448[];
+extern u8 g_classDescriptorTable[];
 
 void* AllocateZeroedFrontMemory(s32 n);
 
@@ -270,7 +270,7 @@ extern const ScaleCurveVt g_scaleCurveKind0Methods;
 extern const ScaleCurveVt g_scaleCurveKind1Methods;
 void* AllocateZeroedFrontMemory(s32 n);
 
-extern u8 D_00219560[];
+extern u8 g_ownerPoseSourceMethods[];
 
 typedef void (*PositionOutToldFn)(PlacedObject* self, Vec02* out);
 
@@ -304,7 +304,7 @@ void InitObjectBuiltinTable(void)
 BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4)
 {
     s32 off = index << 2;
-    Desc01* owner = *(Desc01**)((u8*)D_00247448 + off);
+    Desc01* owner = *(Desc01**)((u8*)g_classDescriptorTable + off);
     BaseObject* r = (BaseObject*)AllocateZeroedFrontMemory(owner->size);
     r->desc = owner;
     r->id = a3;
@@ -551,7 +551,7 @@ void ReadPropertyRecords(void* self, void* obj)
 {
     s32 r;
     while ((r = ReadBufferedS16((BufferedStream*)obj)) >= 0) {
-        ApplyPropertyRecord(self, (PropertyDescriptor*)(D_002505D8 + (r << 5)), (BufferedStream*)obj);
+        ApplyPropertyRecord(self, (PropertyDescriptor*)(g_objectPropertyDescriptors + (r << 5)), (BufferedStream*)obj);
     }
 }
 
@@ -1593,7 +1593,7 @@ Attachment* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* t
 
 Attachment* ClonePoseSource(Attachment* self, World* a, PlacedObject* b)
 {
-    Attachment* node = CreatePoseSource(a, b, (const T2195_Vt*)D_00219560);
+    Attachment* node = CreatePoseSource(a, b, (const T2195_Vt*)g_ownerPoseSourceMethods);
     node->vt->copy(node, self);
     return node;
 }

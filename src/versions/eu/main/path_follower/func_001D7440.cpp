@@ -17,7 +17,7 @@ void StartPathFollower(PathFollower* self)
     s32 id1;
     s32 id2;
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 0x14, D_002752A0);
+    ResolveObjectLinks(self, 0x14, g_pathFollowerLinks);
     self->targetHeading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     if (self->walkerGraph != 0) {
         StateWalker* v = CreateStateWalker((StateGraph*)self->walkerGraph, self, -1, 0);
@@ -64,10 +64,10 @@ void StartPathFollower(PathFollower* self)
         for (s32 i = 0; i < n; i++) {
             buf[i]->desc->m17(buf[i], self);
         }
-        ((BlkP_eu_1D7440*)&D_00272430)->v = 0;
-        ((BlkP_eu_1D7440*)&D_002726B0)->v = 0;
-        ((Blk_eu_1D7440*)&D_00272430)->p574 = &((Blk_eu_1D7440*)&D_00272430)->f58C;
-        ((Blk_eu_1D7440*)&D_002726B0)->p574 = &((Blk_eu_1D7440*)&D_002726B0)->f58C;
+        ((BlkP_eu_1D7440*)&g_firstTallyCaption)->v = 0;
+        ((BlkP_eu_1D7440*)&g_secondTallyCaption)->v = 0;
+        ((Blk_eu_1D7440*)&g_firstTallyCaption)->p574 = &((Blk_eu_1D7440*)&g_firstTallyCaption)->f58C;
+        ((Blk_eu_1D7440*)&g_secondTallyCaption)->p574 = &((Blk_eu_1D7440*)&g_secondTallyCaption)->f58C;
     }
     for (s32 k = 0; k < 4; k++) {
         Slot19* s = &self->wheels[k];

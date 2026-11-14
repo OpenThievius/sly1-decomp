@@ -24,7 +24,7 @@ typedef struct GsParam {
 /* The words the path reset writes to VIF1's FIFO, each 16 bytes. */
 u32 D_00279300[4] __attribute__((aligned(16))) = { 0x01000404, 0x20000000, 0, 0x05000000 };
 u32 D_00279310[4] __attribute__((aligned(16))) = { 0x06000000, 0x03000000, 0x02000000, 0x04000000 };
-char D_00279320[16] = "PsIIlibgraph2400";
+char g_graphLibraryVersion[16] = "PsIIlibgraph2400";
 GsParam g_gsParams = { 1, 2, 1, 3, 0, 0 };
 
 /* The display environment: what the reset writes to the GS's privileged registers. */

@@ -50,7 +50,7 @@ f32 D_00263E90[4] = { 0.0f, 5.0f, 0.0f, 0.0f };
 f32 D_00263EA0[4] = { 0.0f, 10.0f, 0.0f, 0.0f };
 f32 D_00263EB0[4] = { 0.400000006f, 0.0f, 0.0f, 0.0f };
 // The 22 segment ends func_0017DE88 transforms; func_00188700 loads each whole (lqc2).
-Vec02 D_00263EC0[22] = {
+Vec02 g_probeSegmentEndpoints[22] = {
     { 50.0f, 0.0f, 75.0f, 0.0f },
     { 50.0f, 0.0f, -150.0f, 0.0f },
     { 50.0f, 0.0f, 75.0f, 0.0f },
@@ -77,7 +77,7 @@ Vec02 D_00263EC0[22] = {
 f32 D_00264020 = 60.0f;
 f32 D_00264024 = 70.0f;
 f32 D_00264028 = 300.0f;
-f32 D_0026402C = 500.0f;
+f32 g_kind58SearchRadius = 500.0f;
 f32 D_00264030 = 1000.0f;
 f32 D_00264034 = 3000.0f;
 f32 D_00264038[2] = { -150.0f, 150.0f };
@@ -464,8 +464,8 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
     BuildPerpendicularPair(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
     BuildMatrixFromRotationAndTranslation((const Vec02*)ctx, (const Mat02*)&q, (Mat4A*)(buf + 0x30));
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
-        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &D_00263EC0[i], 1.0f, (Vec02*)(buf + 0x70));
-        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &D_00263EC0[i + 1], 1.0f, (Vec02*)(buf + 0x80));
+        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &g_probeSegmentEndpoints[i], 1.0f, (Vec02*)(buf + 0x70));
+        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &g_probeSegmentEndpoints[i + 1], 1.0f, (Vec02*)(buf + 0x80));
         ContactRow03* n = self->contacts->head;
         while (n) {
             Collider* a = n->other;
@@ -569,7 +569,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
 }
 
 extern f32 g_gameTime;
-extern f32 D_00274AD0[];
+extern f32 g_contactSideSigns[];
 void NotifyContactEnds(World* world, s32 n, Contact03** list);
 s32 FindPlaneTreeNodeForPoint(Vec02* p, void* tree);
 Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
@@ -622,7 +622,7 @@ Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
             if ((self->f4B8 & 2) == 0 || (c->end[1 - side].body->f4B8 & 2) == 0) {
                 NotifyContactEnds(self->world, 1, &c);
             }
-            if (0.0f < D_00274AD0[side] * *(f32*)((u8*)c + 0xB8)) {
+            if (0.0f < g_contactSideSigns[side] * *(f32*)((u8*)c + 0xB8)) {
                 continue;
             }
             Vu0::Q(p) = Vu0::MulAddX2(Vu0::Vec::Of(c->end[1 - side].point), Vu0::Vec::Of(tmp), Vu0::Vec::Scalar(-D_00264020),
@@ -748,7 +748,7 @@ void CollectPlayerHoldQueries(Player* self)
                 goto next;
             }
             if (IsObjectOfKind(p, 0x58)) {
-                range = D_0026402C;
+                range = g_kind58SearchRadius;
             }
         }
         GetObjectWorldPosition(n, &pos);

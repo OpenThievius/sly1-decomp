@@ -10,7 +10,7 @@ void StartMemoryCardSave(MemoryCard* self)
             SetPauseMenuLayerPage(&g_pauseMenuElement, 1, 0x14);
         } else {
             StartBackgroundJob(&g_backgroundJob, (void*)SaveGameToMemoryCardSlot, self);
-            u8* obj = (u8*)&D_00273EB0;
+            u8* obj = (u8*)&g_cyclingGlyphElement;
             ((T217D_Word*)(obj + 0x570))->v = 0;
             ((ScreenElement*)obj)->vt->m14((ScreenElement*)obj);
         }

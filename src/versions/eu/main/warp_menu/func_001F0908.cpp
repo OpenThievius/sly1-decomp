@@ -17,20 +17,20 @@ struct Eng_eu_1F0908 {
 
 void AnnouncePendingWarpEntry(WarpPage* self)
 {
-    if (D_00276250 == -1) return;
-    SetScreenElementHoldTime(&D_002721D0, ((g_saveData->levelIndex << 8) | g_saveData->entryIndex) == 4 ? 0.5f : 2.0f);
-    D_002721D0.vt->m16(&D_002721D0, 2);
-    Eng_eu_1F0908* e = ((Eng_eu_1F0908*)&D_0026F138);
+    if (g_pendingWarpEntry == -1) return;
+    SetScreenElementHoldTime(&g_letterboxElement, ((g_saveData->levelIndex << 8) | g_saveData->entryIndex) == 4 ? 0.5f : 2.0f);
+    g_letterboxElement.vt->m16(&g_letterboxElement, 2);
+    Eng_eu_1F0908* e = ((Eng_eu_1F0908*)&g_copiedTextCaption);
     e->i570 = 0;
     e->vt->set((Eng_1F0908*)e, 0);
     SetElementTextFromEntry((Eng_1F0908*)e, g_saveData->levelIndex, g_saveData->entryIndex);
     e->i974 = 1;
     SetScreenElementHoldTime((Eng_1F0908*)e, 0.0f);
     e->vt->set((Eng_1F0908*)e, 2);
-    Animation* sl = self->entries[D_00276250].animation;
+    Animation* sl = self->entries[g_pendingWarpEntry].animation;
     if (sl != 0) {
         f32 f = 0.0f;
-        if (D_00276654 == 0) f = sl->length;
+        if (g_pendingWarpEntryAtEnd == 0) f = sl->length;
         ReplaceAnimationPlayer(sl, self, 0, (AnimationPlayer**)&self->entryPlayer, f, 0.0f);
     }
     if (self->closeAnimation != 0) {
@@ -42,5 +42,5 @@ void AnnouncePendingWarpEntry(WarpPage* self)
             }
         }
     }
-    D_00276250 = -1;
+    g_pendingWarpEntry = -1;
 }

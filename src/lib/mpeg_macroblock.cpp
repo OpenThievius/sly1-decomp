@@ -33,8 +33,8 @@ void BlendLumaBlockHalfHorizontal();
 void BlendChromaBlockHalfHorizontal();
 void BlendLumaBlockHalfBoth();
 void BlendChromaBlockHalfBoth();
-void (*D_0027B000[8])() = { FetchLumaBlock, FetchLumaBlockHalfVertical, FetchLumaBlockHalfHorizontal, FetchLumaBlockHalfBoth, BlendLumaBlock, BlendLumaBlockHalfVertical, BlendLumaBlockHalfHorizontal, BlendLumaBlockHalfBoth };
-void (*D_0027B020[8])() = { FetchChromaBlock, FetchChromaBlockHalfVertical, FetchChromaBlockHalfHorizontal, FetchChromaBlockHalfBoth, BlendChromaBlock, BlendChromaBlockHalfVertical, BlendChromaBlockHalfHorizontal, BlendChromaBlockHalfBoth };
+void (*g_lumaBlockFunctions[8])() = { FetchLumaBlock, FetchLumaBlockHalfVertical, FetchLumaBlockHalfHorizontal, FetchLumaBlockHalfBoth, BlendLumaBlock, BlendLumaBlockHalfVertical, BlendLumaBlockHalfHorizontal, BlendLumaBlockHalfBoth };
+void (*g_chromaBlockFunctions[8])() = { FetchChromaBlock, FetchChromaBlockHalfVertical, FetchChromaBlockHalfHorizontal, FetchChromaBlockHalfBoth, BlendChromaBlock, BlendChromaBlockHalfVertical, BlendChromaBlockHalfHorizontal, BlendChromaBlockHalfBoth };
 
 struct Chan_20C1A0 {
     s32 f00;
@@ -363,11 +363,11 @@ void PredictMacroblock(Dec_20CAF8* self, Frame_20CAF8* src, s32 srcField, s32 ds
     chroma->src0 = cbase + ((yo << 3) + 0x100);
     chroma->src1 = cbase + ((yo << 3) + 0x400);
     chroma->stride = 8 << half;
-    self->preds[self->current].luma[n] = D_0027B000[lumaSel];
+    self->preds[self->current].luma[n] = g_lumaBlockFunctions[lumaSel];
     chromaSel = (average << 2) | (fx << 1) | fy;
     self->preds[self->current].src0[n] = (u8*)(src->data + lumaBlock * 0x180);
     self->preds[self->current].src1[n] = (u8*)(src->data + (lumaBlock + src->width) * 0x180);
-    self->preds[self->current].chroma[n] = D_0027B020[chromaSel];
+    self->preds[self->current].chroma[n] = g_chromaBlockFunctions[chromaSel];
     self->preds[self->current].count++;
 }
 

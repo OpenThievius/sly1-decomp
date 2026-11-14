@@ -21,10 +21,10 @@ struct Quad16;
 // The file's .data, in retail's order: two boxes (the corners 0 and the size -1e8 or 1e8) and
 // the records that point at them, which func_0013E430 reads, then the disc code's sector check
 // state (disc_access.cpp uses it; its own .data must start 8-aligned).
-f32 D_00261390[8] = { 0.0f, 0.0f, 0.0f, 0.0f, -100000000.0f, 0.0f, 0.0f, 0.0f };
-f32 D_002613B0[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 100000000.0f, 0.0f, 0.0f, 0.0f };
-f32* D_002613D0[4] = { D_00261390, 0, 0, 0 };
-f32* D_002613E0[3] = { D_002613B0, 0, 0 };
+f32 g_planeTreeBelowBounds[8] = { 0.0f, 0.0f, 0.0f, 0.0f, -100000000.0f, 0.0f, 0.0f, 0.0f };
+f32 g_planeTreeAboveBounds[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 100000000.0f, 0.0f, 0.0f, 0.0f };
+f32* g_planeTreeEmptyBelow[4] = { g_planeTreeBelowBounds, 0, 0, 0 };
+f32* g_planeTreeEmptyAbove[3] = { g_planeTreeAboveBounds, 0, 0 };
 s32 g_discSectorCheckState = 0;
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
@@ -883,7 +883,7 @@ s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput*
             out->cur->below = 0;
             break;
         case 1:
-            out->cur->below = (PlaneTreeNode*)D_002613D0;
+            out->cur->below = (PlaneTreeNode*)g_planeTreeEmptyBelow;
             break;
         case 2:
             out->cur->below = loNode;
@@ -891,7 +891,7 @@ s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput*
         }
         switch (hi) {
         case 0:
-            out->cur->above = (PlaneTreeNode*)D_002613E0;
+            out->cur->above = (PlaneTreeNode*)g_planeTreeEmptyAbove;
             break;
         case 1:
             out->cur->above = 0;

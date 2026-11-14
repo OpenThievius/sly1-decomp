@@ -46,7 +46,7 @@ s32 IsSecondKernelPatchNeeded(void)
     return ((b.value >> 13) & 7) == 0;
 }
 
-u32 D_002771F0[490] = {
+u32 g_secondInstallerCode[490] = {
     0x27BDFFE0, 0x24050026, 0xFFB00000, 0x0080802D, 0xFFBF0010, 0x3C048007, 0x0C01D07A, 0x24844700,
     0x3C028007, 0x3C05FFFF, 0x3C0603FF, 0x3C070C00, 0x24434780, 0x0000202D, 0x34A5C402, 0x34C6FFFF,
     0x8C620000, 0x56020007, 0x24840001, 0x16050009, 0x8C620004, 0x00021082, 0x00461024, 0x10000005,
@@ -112,7 +112,7 @@ u32 D_002771F0[490] = {
 };
 
 struct Slot_1F9FB8 { s32 key; s32 value; };
-Slot_1F9FB8 D_00277998[3] = { { 0x5A, (s32)CopyKernelWordsSecondPatch }, { 0x5B, 0x80074000 }, { (s32)0xFFFFC402, 0 } };
+Slot_1F9FB8 g_secondKernelPatchHandlers[3] = { { 0x5A, (s32)CopyKernelWordsSecondPatch }, { 0x5B, 0x80074000 }, { (s32)0xFFFFC402, 0 } };
 s32 IsSecondKernelPatchNeeded(void);
 void SetSystemCallHandlerSecondPatch(s32 a, s32 b);
 void CopyKernelWordsSyscallSecondPatch(s32 a, void* b, s32 c);
@@ -124,12 +124,12 @@ void InstallSecondKernelPatch(void)
     Slot_1F9FB8* q;
     u32 i;
     if (IsSecondKernelPatchNeeded() != 0) {
-        SetSystemCallHandlerSecondPatch(D_00277998[0].key, D_00277998[0].value);
-        CopyKernelWordsSyscallSecondPatch(0x80074000, D_002771F0, 0x7A8);
+        SetSystemCallHandlerSecondPatch(g_secondKernelPatchHandlers[0].key, g_secondKernelPatchHandlers[0].value);
+        CopyKernelWordsSyscallSecondPatch(0x80074000, g_secondInstallerCode, 0x7A8);
         SyncDataCache(0);
         SyncDataCache(2);
-        SetSystemCallHandlerSecondPatch(D_00277998[1].key, D_00277998[1].value);
-        q = &D_00277998[2];
+        SetSystemCallHandlerSecondPatch(g_secondKernelPatchHandlers[1].key, g_secondKernelPatchHandlers[1].value);
+        q = &g_secondKernelPatchHandlers[2];
         i = 2;
         do {
             s32 v;

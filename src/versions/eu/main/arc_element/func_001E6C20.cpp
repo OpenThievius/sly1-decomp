@@ -27,8 +27,8 @@ void WriteArcTickVertices(Self_eu_1E6C20* self, PacketWriter* buf)
     }
     BeginGifTag(buf, 0, 1, 1);
     {
-        Rgba4 a = D_002610D8;
-        Rgba4 b = D_002610E0;
+        Rgba4 a = g_arcTickColorFrom;
+        Rgba4 b = g_arcTickColorTo;
         Rgba4 r;
         r.r = ColorLerp::Of(a.r, b.r, t);
         r.g = ColorLerp::Of(a.g, b.g, t);

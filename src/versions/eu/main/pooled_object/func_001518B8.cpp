@@ -9,9 +9,9 @@ void ChooseStepSequenceState(StepSequence* self)
         return;
     if (IsStreamVoiceLocked() != 0)
         return;
-    if (D_00275F84 == 1)
+    if (g_resumeSoundSetupDone == 1)
         return;
-    if (self == D_0027051C)
+    if (self == g_activeStepSequence)
         return;
     s32 mode = 1;
     if (*(s32*)self->target304 != 0) {

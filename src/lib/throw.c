@@ -59,7 +59,7 @@ void InstallExceptionContextGetter(void);
 
 /* The terminate hook, and the function that returns the exception context. */
 void (*D_00278048)(void) = AbortOnTerminate;
-EhContext* (*D_0027804C)(void) = (EhContext* (*)(void))InstallExceptionContextGetter;
+EhContext* (*g_exceptionContextGetter)(void) = (EhContext* (*)(void))InstallExceptionContextGetter;
 
 void AbortOnTerminate(void)
 {
@@ -105,18 +105,18 @@ ExceptionBlock* AllocateZeroedNodeOrTerminate(void)
 
 s32 GetExceptionContext(void)
 {
-    return (s32)(*D_0027804C)();
+    return (s32)(*g_exceptionContextGetter)();
 }
 
 u8* GetActiveExceptionSlot(void)
 {
-    return (u8*)(*D_0027804C)() + 8;
+    return (u8*)(*g_exceptionContextGetter)() + 8;
 }
 
 void InstallExceptionContextGetter(void)
 {
     void (*f)(void) = (void (*)(void))GetStaticExceptionContext;
-    D_0027804C = (EhContext* (*)(void))f;
+    g_exceptionContextGetter = (EhContext* (*)(void))f;
     f();
 }
 
@@ -126,23 +126,23 @@ typedef struct Once_1FDA60 {
     u8 pad8[8];
 } Once_1FDA60;
 
-static Once_1FDA60 D_0062A798;
-static s32 D_0062A7A8;
-static void* D_0062A7B0[2];
+static Once_1FDA60 g_staticExceptionContext;
+static s32 g_staticExceptionContextReady;
+static void* g_staticHandlerChain[2];
 
 EhContext* GetStaticExceptionContext(void)
 {
-    if (D_0062A7A8 == 0) {
-        D_0062A7A8 = 1;
-        (void)FillMemory(&D_0062A798, 0, 0x10);
-        D_0062A798.b = D_0062A7B0;
+    if (g_staticExceptionContextReady == 0) {
+        g_staticExceptionContextReady = 1;
+        (void)FillMemory(&g_staticExceptionContext, 0, 0x10);
+        g_staticExceptionContext.b = g_staticHandlerChain;
     }
-    return (EhContext*)&D_0062A798;
+    return (EhContext*)&g_staticExceptionContext;
 }
 
 u8* GetHandlerChainSlot(void)
 {
-    return (u8*)(*D_0027804C)() + 4;
+    return (u8*)(*g_exceptionContextGetter)() + 4;
 }
 
 /* The runtime's exception context: the handler chain at +4, the active exception at +8. */
@@ -157,7 +157,7 @@ void ThrowToTopHandler(void) __attribute__((noreturn));
 /* Throws: runs the cleanups registered in the top handler, then jumps to that handler. */
 void ThrowToTopHandler(void)
 {
-    Ctx_1FDAF0* ctx = (Ctx_1FDAF0*)(*D_0027804C)();
+    Ctx_1FDAF0* ctx = (Ctx_1FDAF0*)(*g_exceptionContextGetter)();
     void*** chain = &ctx->chain;
     void*** cleanups = (void***)&(*chain)[1];
     void* buf;
@@ -193,7 +193,7 @@ void ThrowToTopHandler(void)
 /* Pops the top handler after running its cleanups, then throws again. */
 void PopHandlerAndThrow(void)
 {
-    Ctx_1FDAF0* ctx = (Ctx_1FDAF0*)(*D_0027804C)();
+    Ctx_1FDAF0* ctx = (Ctx_1FDAF0*)(*g_exceptionContextGetter)();
     void*** chain = &ctx->chain;
     void*** cleanups = (void***)&(*chain)[1];
 
@@ -503,7 +503,7 @@ void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_,
 /* Rethrow: unwind from the caller to the handler of the exception being handled. */
 void RethrowActiveException(void)
 {
-    EhContext* ctx = (*D_0027804C)();
+    EhContext* ctx = (*g_exceptionContextGetter)();
     UnwindFrame mine, copy;
     UnwindFrame* cur = &mine;
     UnwindFrame* cp = &copy;
@@ -528,7 +528,7 @@ here:
 /* Throw: the same, after recording the index the thrower passes. */
 void ThrowException(void* index)
 {
-    EhContext* ctx = (*D_0027804C)();
+    EhContext* ctx = (*g_exceptionContextGetter)();
     UnwindFrame mine, copy;
     UnwindFrame* cur = &mine;
     UnwindFrame* cp = &copy;

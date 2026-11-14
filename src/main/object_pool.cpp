@@ -202,7 +202,7 @@ extern const Fn_Table D_00217E80[];
 extern const Fn_Table D_00217ED0[];
 extern const Fn_Table D_00217F20[];
 extern const Fn_Table D_00217F70[];
-extern const Fn_Table D_00217FC0[];
+extern const Fn_Table g_gaugeAmountCaptionMethods[];
 extern const Fn_Table D_00218010[];
 extern const Fn_Table D_00218060[];
 extern const Fn_Table D_002180B0[];
@@ -212,26 +212,26 @@ extern const Fn_Table D_002181A0[];
 extern const Fn_Table D_002181F0[];
 extern const Fn_Table D_00218240[];
 extern const Fn_Table D_00218290[];
-extern const Fn_Table D_002182E0[];
+extern const Fn_Table g_gaugeBarElementMethods[];
 extern const Fn_Table D_00218330[];
-extern const Fn_Table D_00218380[];
-extern const Fn_Table D_002183D0[];
-extern const Fn_Table D_00218420[];
-extern const Fn_Table D_00218470[];
-extern const Fn_Table D_002184C0[];
-extern const Fn_Table D_00218510[];
-extern const Fn_Table D_00218560[];
-extern const Fn_Table D_002185B0[];
-extern const Fn_Table D_00218600[];
-extern const Fn_Table D_002186D0[];
-extern const Fn_Table D_00218720[];
-extern const Fn_Table D_0021A3F0[];
-extern const Fn_Table D_0021A440[];
-extern const Fn_Table D_00220BF0[];
-extern const Fn_Table D_002210F0[];
-extern const Fn_Table D_002212E0[];
-extern const Fn_Table D_00221330[];
-extern const Fn_Table D_00221380[];
+extern const Fn_Table g_pointerTextCaptionMethods[];
+extern const Fn_Table g_copiedTextCaptionMethods[];
+extern const Fn_Table g_hintGlyphElementMethods[];
+extern const Fn_Table g_titleElementMethods[];
+extern const Fn_Table g_promptElementMethods[];
+extern const Fn_Table g_timerElementMethods[];
+extern const Fn_Table g_letterboxElementMethods[];
+extern const Fn_Table g_letterGlyphElementMethods[];
+extern const Fn_Table g_cyclingGlyphElementMethods[];
+extern const Fn_Table g_pauseMenuElementMethods[];
+extern const Fn_Table g_stackedCaptionGroupMethods[];
+extern const Fn_Table g_arcElementMethods[];
+extern const Fn_Table g_typedTextCaptionBoxMethods[];
+extern const Fn_Table g_spinningSpriteElementMethods[];
+extern const Fn_Table g_mapScreenListMethods[];
+extern const Fn_Table g_selectionCaptionMethods[];
+extern const Fn_Table g_gridSelectorMethods[];
+extern const Fn_Table g_timerCaptionMethods[];
 extern u8 g_screenFade[];
 
 void ResetScreenFade(ScreenFade* o);
@@ -494,43 +494,43 @@ ElementPlaceTable g_elementPlaces = {
 
 // The 37 screen objects, in address order (D_002486B0 lists them in another order). They have
 // no initialiser: func_001A9C68 installs their tables at run time.
-T217D_E30 D_0026C6C8;
-T217D_E30 D_0026C948;
+T217D_E30 g_reserveCountCaption;
+T217D_E30 g_collectedItemCaption;
 T217D_E30 D_0026CBC8;
 T217D_E30 D_0026CE48;
-T217D_E30 D_0026D0C8;
+T217D_E30 g_pairControllerCountCaption;
 T217D_E30 g_gaugeAmountCaption;
-T217D_E30 D_0026D5C8;
+T217D_E30 g_pathFollowerFirstCountCaption;
 T217D_E30 D_0026D848;
-T217D_E30 D_0026DAC8;
-T217D_E30 D_0026DD48;
-T217D_E30 D_0026DFC8;
+T217D_E30 g_pathFollowerSecondCountCaption;
+T217D_E30 g_hitCountCaptionA;
+T217D_E30 g_hitCountCaptionB;
 T217D_2E0 g_gaugeBarElement;
-T217D_E30 D_0026E4E0;
+T217D_E30 g_gaugeColliderCaption;
 T217D_510 g_timerElement;
 T217D_1380 g_timerCaption;
 T217D_330 g_buttonHintElement;
-T217D_380 D_0026EED0;
-T217D_3D0 D_0026F138;
-T217D_420 D_0026F5A0;
+T217D_380 g_pointerTextCaption;
+T217D_3D0 g_copiedTextCaption;
+T217D_420 g_hintGlyphElement;
 T217D_0F0 g_mapScreenList;
-T217D_12E0 D_0026FA90;
-T217D_1330 D_0026FD00;
+T217D_12E0 g_selectionCaption;
+T217D_1330 g_gridSelector;
 T217D_6D0 g_pauseMenuElement;
 T217D_440 g_typedTextCaptionBox;
-T217D_BF0 D_00270650;
+T217D_BF0 g_spinningSpriteElement;
 T217D_3F0 D_002708E0;
 T217D_3F0 D_00271558;
-T217D_560 D_002721D0;
-T217D_E30 D_00272430;
-T217D_E30 D_002726B0;
-T217D_470 D_00272930;
-T217D_4C0 D_00272B98;
+T217D_560 g_letterboxElement;
+T217D_E30 g_firstTallyCaption;
+T217D_E30 g_secondTallyCaption;
+T217D_470 g_titleElement;
+T217D_4C0 g_promptElement;
 T217D_720 g_stackedCaptionGroup;
 T217D_5B0 D_002739F0;
 T217D_5B0 D_00273C50;
-T217D_600 D_00273EB0;
-T217D_E30 D_00274118;
+T217D_600 g_cyclingGlyphElement;
+T217D_E30 g_completionPercentCaption;
 
 
 
@@ -1417,43 +1417,43 @@ void SetWorld4BossValues(World4Boss* self, Animation* a, Animation* b, Animation
 
 void InstallScreenElements()
 {
-    D_0026C6C8.vt = (const T217D_Vt*)D_00217E30;
-    D_0026C948.vt = (const T217D_Vt*)D_00217E80;
+    g_reserveCountCaption.vt = (const T217D_Vt*)D_00217E30;
+    g_collectedItemCaption.vt = (const T217D_Vt*)D_00217E80;
     D_0026CBC8.vt = (const T217D_Vt*)D_00217ED0;
     D_0026CE48.vt = (const T217D_Vt*)D_00217F20;
-    D_0026D0C8.vt = (const T217D_Vt*)D_00217F70;
-    g_gaugeAmountCaption.vt = (const T217D_Vt*)D_00217FC0;
-    D_0026D5C8.vt = (const T217D_Vt*)D_002180B0;
+    g_pairControllerCountCaption.vt = (const T217D_Vt*)D_00217F70;
+    g_gaugeAmountCaption.vt = (const T217D_Vt*)g_gaugeAmountCaptionMethods;
+    g_pathFollowerFirstCountCaption.vt = (const T217D_Vt*)D_002180B0;
     D_0026D848.vt = (const T217D_Vt*)D_00218010;
-    D_0026DAC8.vt = (const T217D_Vt*)D_00218060;
-    D_0026DD48.vt = (const T217D_Vt*)D_00218100;
-    D_0026DFC8.vt = (const T217D_Vt*)D_00218150;
-    g_gaugeBarElement.vt = (const T217D_Vt*)D_002182E0;
-    D_0026E4E0.vt = (const T217D_Vt*)D_002181A0;
-    g_timerElement.vt = (const T217D_Vt*)D_00218510;
-    g_timerCaption.vt = (const T217D_Vt*)D_00221380;
+    g_pathFollowerSecondCountCaption.vt = (const T217D_Vt*)D_00218060;
+    g_hitCountCaptionA.vt = (const T217D_Vt*)D_00218100;
+    g_hitCountCaptionB.vt = (const T217D_Vt*)D_00218150;
+    g_gaugeBarElement.vt = (const T217D_Vt*)g_gaugeBarElementMethods;
+    g_gaugeColliderCaption.vt = (const T217D_Vt*)D_002181A0;
+    g_timerElement.vt = (const T217D_Vt*)g_timerElementMethods;
+    g_timerCaption.vt = (const T217D_Vt*)g_timerCaptionMethods;
     g_buttonHintElement.vt = (const T217D_Vt*)D_00218330;
-    D_0026EED0.vt = (const T217D_Vt*)D_00218380;
-    D_0026F138.vt = (const T217D_Vt*)D_002183D0;
-    D_0026F5A0.vt = (const T217D_Vt*)D_00218420;
-    g_mapScreenList.vt = (const T217D_Vt*)D_002210F0;
-    D_0026FA90.vt = (const T217D_Vt*)D_002212E0;
-    D_0026FD00.vt = (const T217D_Vt*)D_00221330;
-    g_pauseMenuElement.vt = (const T217D_Vt*)D_002186D0;
-    g_typedTextCaptionBox.vt = (const T217D_Vt*)D_0021A440;
-    D_00270650.vt = (const T217D_Vt*)D_00220BF0;
-    D_002708E0.vt = (const T217D_Vt*)D_0021A3F0;
-    D_00271558.vt = (const T217D_Vt*)D_0021A3F0;
-    D_00272430.vt = (const T217D_Vt*)D_00218240;
-    D_002726B0.vt = (const T217D_Vt*)D_00218290;
-    D_00272930.vt = (const T217D_Vt*)D_00218470;
-    D_00272B98.vt = (const T217D_Vt*)D_002184C0;
-    D_002721D0.vt = (const T217D_Vt*)D_00218560;
-    g_stackedCaptionGroup.vt = (const T217D_Vt*)D_00218720;
-    D_002739F0.vt = (const T217D_Vt*)D_002185B0;
-    D_00273C50.vt = (const T217D_Vt*)D_002185B0;
-    D_00273EB0.vt = (const T217D_Vt*)D_00218600;
-    D_00274118.vt = (const T217D_Vt*)D_002181F0;
+    g_pointerTextCaption.vt = (const T217D_Vt*)g_pointerTextCaptionMethods;
+    g_copiedTextCaption.vt = (const T217D_Vt*)g_copiedTextCaptionMethods;
+    g_hintGlyphElement.vt = (const T217D_Vt*)g_hintGlyphElementMethods;
+    g_mapScreenList.vt = (const T217D_Vt*)g_mapScreenListMethods;
+    g_selectionCaption.vt = (const T217D_Vt*)g_selectionCaptionMethods;
+    g_gridSelector.vt = (const T217D_Vt*)g_gridSelectorMethods;
+    g_pauseMenuElement.vt = (const T217D_Vt*)g_pauseMenuElementMethods;
+    g_typedTextCaptionBox.vt = (const T217D_Vt*)g_typedTextCaptionBoxMethods;
+    g_spinningSpriteElement.vt = (const T217D_Vt*)g_spinningSpriteElementMethods;
+    D_002708E0.vt = (const T217D_Vt*)g_arcElementMethods;
+    D_00271558.vt = (const T217D_Vt*)g_arcElementMethods;
+    g_firstTallyCaption.vt = (const T217D_Vt*)D_00218240;
+    g_secondTallyCaption.vt = (const T217D_Vt*)D_00218290;
+    g_titleElement.vt = (const T217D_Vt*)g_titleElementMethods;
+    g_promptElement.vt = (const T217D_Vt*)g_promptElementMethods;
+    g_letterboxElement.vt = (const T217D_Vt*)g_letterboxElementMethods;
+    g_stackedCaptionGroup.vt = (const T217D_Vt*)g_stackedCaptionGroupMethods;
+    D_002739F0.vt = (const T217D_Vt*)g_letterGlyphElementMethods;
+    D_00273C50.vt = (const T217D_Vt*)g_letterGlyphElementMethods;
+    g_cyclingGlyphElement.vt = (const T217D_Vt*)g_cyclingGlyphElementMethods;
+    g_completionPercentCaption.vt = (const T217D_Vt*)D_002181F0;
     for (s32 i = 0x24; i >= 0; i--) {
         ((ScreenElement**)g_screenElements)[i]->vt->m00(((ScreenElement**)g_screenElements)[i], i);
     }
@@ -1541,7 +1541,7 @@ void DrawScreenElements(void)
         }
     }
     DrawScreenFade((ScreenFade*)g_screenFade);
-    DrawCyclingGlyphElement((T217D_600*)&D_00273EB0);
+    DrawCyclingGlyphElement((T217D_600*)&g_cyclingGlyphElement);
 }
 
 void InitScreenElement(ScreenElement* self, s32 index)

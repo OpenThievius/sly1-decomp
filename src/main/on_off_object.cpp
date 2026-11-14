@@ -196,7 +196,7 @@ struct OwnedStream : BufferedStream {
     void SetOwner(void* o) { owner = o; }
 };
 
-extern u8 D_002C3B00[];
+extern u8 g_packetBufferMemory[];
 extern u8 g_scatterController[];
 extern u8 D_002623D8[];
 
@@ -234,23 +234,23 @@ void SetGameClockScale(f32 x);
 void ResetVolumeChannelFactors(void);
 void ClearScreenOwner(s32 owner);
 f32 D_00275970 = 0.5f;
-f32 D_00275974 = 2.0f;
+f32 g_onOffCameraRetryDelay = 2.0f;
 s32 D_00275978 = 0;
 f32 D_00275980[16] = { -450.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 1.0f, 0, 0, 125.0f, 1.0f, 0, 0 };
 f32 D_002759C0[20] = { -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, -3.4028235e38f, 3.4028235e38f, 0, -0.1f,
                         1.0f, 1.0f, 1.0f, 0, 1.0f, 1.0f, 1.0f, 0, 1.0f, 1.0f, 0, 0 };
 f32 D_00275A10[4] = { 0, 0.5f, 0, 0 };
 f32 D_00275A20[2] = { 0, 3.4028235e38f };
-f32 D_00275A28 = 2.5f;
-f32 D_00275A2C = 2.5f;
-f32 D_00275A30[4] = { 15.0f, 0.0f, 0.0f, 0.0f };
-f32 D_00275A40[4] = { 1.0f, -2.0f, -2.0f, 0.0f };
-f32 D_00275A50[2] = { 1.0f, 2.0f };
+f32 g_onOffCameraTurnLimit = 2.5f;
+f32 g_onOffCameraAimGain = 2.5f;
+f32 g_onOffCameraStepRate[4] = { 15.0f, 0.0f, 0.0f, 0.0f };
+f32 g_onOffCameraTurnTiltCoefficients[4] = { 1.0f, -2.0f, -2.0f, 0.0f };
+f32 g_onOffCameraTurnTiltLimits[2] = { 1.0f, 2.0f };
 f32 D_00275A58[6] = { 0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f };
-f32 D_00275A70[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-RampProfile D_00275A80 = { 4.0f, 0.0f, 0.25f, 0.0f };
-RampProfile D_00275A90 = { 2.5f, 0.0f, 0.35f, 15.0f };
-Vec02 D_00275AA0[5] = { { 0, 0, 0, 0 }, { 0, -50.0f, 0, 0 }, { 0, 50.0f, 0, 0 }, { 0, 0, 75.0f, 0 }, { 0, 0, -50.0f, 0 } };
+f32 g_onOffCameraTurnBlendCoefficients[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+RampProfile g_onOffCameraFadeRamp = { 4.0f, 0.0f, 0.25f, 0.0f };
+RampProfile g_onOffCameraAngleRamp = { 2.5f, 0.0f, 0.35f, 15.0f };
+Vec02 g_onOffCameraProbeOffsets[5] = { { 0, 0, 0, 0 }, { 0, -50.0f, 0, 0 }, { 0, 50.0f, 0, 0 }, { 0, 0, 75.0f, 0 }, { 0, 0, -50.0f, 0 } };
 
 void* GetOnOffObjectBlock(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
 
@@ -682,18 +682,18 @@ void ComputeOnOffCameraHeading(OnOffCameraController* self, CameraPlacement* eye
 }
 
 extern s32 D_0026FA64;
-extern f32 D_00261920;
-extern f32 D_00261924;
+extern f32 g_cameraAimSpringStiffness;
+extern f32 g_cameraAimSpringDamping;
 extern s32 D_00275978;
-extern f32 D_00275A28;
-extern f32 D_00275A2C;
-extern f32 D_00275A30[4];
-extern f32 D_00275A40[4];
-extern f32 D_00275A50[2];
+extern f32 g_onOffCameraTurnLimit;
+extern f32 g_onOffCameraAimGain;
+extern f32 g_onOffCameraStepRate[4];
+extern f32 g_onOffCameraTurnTiltCoefficients[4];
+extern f32 g_onOffCameraTurnTiltLimits[2];
 extern f32 D_00275A58[6];
-extern f32 D_00275A70[4];
-extern RampProfile D_00275A80;
-extern RampProfile D_00275A90;
+extern f32 g_onOffCameraTurnBlendCoefficients[4];
+extern RampProfile g_onOffCameraFadeRamp;
+extern RampProfile g_onOffCameraAngleRamp;
 extern ValueRange g_unitRange;
 f32 WrapAngle(f32 a);
 f32 ClampToMagnitude(f32 a, f32 b);
@@ -750,7 +750,7 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         SpringCameraVector(g_camera, (Vec02*)((u8*)g_camera + 0x270), (Vec02*)((u8*)g_camera + 0x280), &goal, 8.0f, -6.0f, dt);
     }
     Vu0::Q(sum) = Vu0::Add(Vu0::Q(blended), Vu0::Q(*(Vec02*)((u8*)g_camera + 0x270)));
-    view->turnScale = ApproachValueWithRamp(view->turnScale, (*(s32*)&eye->q[0] & 1) ? 0.0f : block->turnRate, dt, &D_00275A80, 0);
+    view->turnScale = ApproachValueWithRamp(view->turnScale, (*(s32*)&eye->q[0] & 1) ? 0.0f : block->turnRate, dt, &g_onOffCameraFadeRamp, 0);
     view->f40 = eye->q[3].z >? view->f40;
     Vec02 frame;
     Vec02 dir;
@@ -848,17 +848,17 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
                 view->turningToGoal = 0;
             }
             if (view->turningToGoal != 0) {
-                angle = ApproachAngleClampingVelocity(view->angle, view->angleVelocity, view->goalAngle, step, &D_00275A90, &view->angleVelocity);
+                angle = ApproachAngleClampingVelocity(view->angle, view->angleVelocity, view->goalAngle, step, &g_onOffCameraAngleRamp, &view->angleVelocity);
                 if (angle == view->goalAngle) {
                     view->turningToGoal = 0;
                 }
             } else {
                 f32 x = pad->secondStickX;
-                f32 lim = D_00275A30[0] * step;
+                f32 lim = g_onOffCameraStepRate[0] * step;
                 f32 v = view->angleVelocity;
                 f32 lo = v - lim;
                 f32 hi = v + lim;
-                f32 want = x * __builtin_fabsf(x) * D_00275A2C;
+                f32 want = x * __builtin_fabsf(x) * g_onOffCameraAimGain;
                 f32 nv = (want < lo) ? lo : ((hi < want) ? hi : want);
                 view->angleVelocity = nv;
                 angle = WrapAngle(view->angle + nv * step);
@@ -900,11 +900,11 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
             axis = toCam;
             break;
         }
-        f32 turn = ClampToMagnitude(Vu0::ToFloat(Vu0::Dot(Vu0::Q(offset), Vu0::Q(axis))) / dist, D_00275A28) * view->turnScale;
+        f32 turn = ClampToMagnitude(Vu0::ToFloat(Vu0::Dot(Vu0::Q(offset), Vu0::Q(axis))) / dist, g_onOffCameraTurnLimit) * view->turnScale;
         f32 y = stick.y;
-        turn *= ((ValueRange*)D_00275A50)->Clamp(D_00275A40[0] + y * (D_00275A40[1] + y * D_00275A40[2]));
+        turn *= ((ValueRange*)g_onOffCameraTurnTiltLimits)->Clamp(g_onOffCameraTurnTiltCoefficients[0] + y * (g_onOffCameraTurnTiltCoefficients[1] + y * g_onOffCameraTurnTiltCoefficients[2]));
         f32 t = g_gameClock[1] - view->lastTurnTime;
-        turn *= g_unitRange.Limit(D_00275A70[0] + t * (D_00275A70[1] + t * D_00275A70[2]));
+        turn *= g_unitRange.Limit(g_onOffCameraTurnBlendCoefficients[0] + t * (g_onOffCameraTurnBlendCoefficients[1] + t * g_onOffCameraTurnBlendCoefficients[2]));
         f32 next = WrapAngle(angle + turn * dt);
         if (!(flags & 3)) {
             angle = next;
@@ -1075,9 +1075,9 @@ done:
         break;
     }
     if (cam->snapping == 0) {
-        view->distanceVelocity = (block->springDamping * D_00261924 * dt + 1.0f) * view->distanceVelocity + (placeDist - view->distance) * block->springStiffness * D_00261920 * dt;
+        view->distanceVelocity = (block->springDamping * g_cameraAimSpringDamping * dt + 1.0f) * view->distanceVelocity + (placeDist - view->distance) * block->springStiffness * g_cameraAimSpringStiffness * dt;
         placeDist = view->distance + view->distanceVelocity * dt;
-        view->heightVelocity = (block->springDamping * D_00261924 * dt + 1.0f) * view->heightVelocity + (placeHeight - view->height) * block->springStiffness * D_00261920 * dt;
+        view->heightVelocity = (block->springDamping * g_cameraAimSpringDamping * dt + 1.0f) * view->heightVelocity + (placeHeight - view->height) * block->springStiffness * g_cameraAimSpringStiffness * dt;
         placeHeight = view->height + view->heightVelocity * dt;
     } else {
         view->distanceVelocity = view->heightVelocity = 0.0f;
@@ -1115,7 +1115,7 @@ done:
 
 extern s32 g_padSelectFlags;
 extern f32 D_00275970;
-extern f32 D_00275974;
+extern f32 g_onOffCameraRetryDelay;
 extern f32 g_gameClock[];
 extern f32 g_gameTime;
 void PushBackMemoryMark(void);
@@ -1158,7 +1158,7 @@ void FindFreeOnOffCameraScreenSpan(CameraController* self, Vec02* center)
     *(Vu0::Vec*)&basis.r[1] = side;
     *(Vu0::Vec*)&basis.r[0] = Vu0::Cross(Vu0::Vec::Of(basis.r[2]), side);
     for (i = 0; (u32)i < 5; i++) {
-        Vu0::Vec p = Vu0::Add(Vu0::Vec::Of(target->v140), Vu0::Rotate(basis, Vu0::Vec::Of(D_00275AA0[i])));
+        Vu0::Vec p = Vu0::Add(Vu0::Vec::Of(target->v140), Vu0::Rotate(basis, Vu0::Vec::Of(g_onOffCameraProbeOffsets[i])));
         *(Vu0::Vec*)&lo = Vu0::Min(Vu0::Vec::Of(lo), p);
         *(Vu0::Vec*)&hi = Vu0::Max(Vu0::Vec::Of(lo), p);
         *(Vu0::Vec*)&pts[i] = p;
@@ -1175,7 +1175,7 @@ void FindFreeOnOffCameraScreenSpan(CameraController* self, Vec02* center)
         }
     }
     PopBackMemoryMark();
-    if (D_00275974 < g_gameClock[1] - *(f32*)((u8*)self + 0x60)) {
+    if (g_onOffCameraRetryDelay < g_gameClock[1] - *(f32*)((u8*)self + 0x60)) {
         QueueCameraSnap(cam);
     }
 }
@@ -1347,7 +1347,7 @@ void RunPendingWorldLoad(WorldLoadRequest* self)
             w80.v = 0x3F3F;
             w90.v = 0x3F;
             InitLoadProgress(&o30, &w60, &w70, &w80, &w90);
-            InitBufferedStream(&sub, 0x340C00, D_002C3B00, 6);
+            InitBufferedStream(&sub, 0x340C00, g_packetBufferMemory, 6);
             sub.SetOwner(&o30);
             if (sub.owner != 0) BeginLoadProgress((LoadProgress*)sub.owner);
             if (OpenBufferedSectorStreamRange(&sub, &key) == 0) {
@@ -1380,10 +1380,10 @@ void RunPendingWorldLoad(WorldLoadRequest* self)
     FindOrActivateSwitchedCollider(g_currentWorld, self->f8, self->fC);
     NotifyScatterControllerLoaded(g_scatterController);
     ResetCounter((Counter*)D_002623D8);
-    RestoreSelectionCaptionCamera(&D_0026FA90);
+    RestoreSelectionCaptionCamera(&g_selectionCaption);
     UpdateWorldContacts(g_currentWorld, 0);
     UpdateCamera(g_camera, 0, g_frameStep);
-    if (self->flags & 0x10) D_0026C6C8.vt->m14(&D_0026C6C8);
+    if (self->flags & 0x10) g_reserveCountCaption.vt->m14(&g_reserveCountCaption);
     SetGameClockScale(1.0f);
 end:
     ResetVolumeChannelFactors();

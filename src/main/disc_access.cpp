@@ -18,9 +18,9 @@ s32 g_discReadErrors[6] = { 0, 0, 0, 0, 0, 0 };
 
 // In another stretch of .rodata (global_tables.cpp defines them): the read mode, the checked sector
 // and its CRC-32.
-extern const u32 D_00247AA0;
-extern const u32 D_00247AA4;
-extern const u32 D_00247AA8[2];
+extern const u32 g_discCheckReadMode;
+extern const u32 g_discCheckSector;
+extern const u32 g_discCheckExpectedCrc[2];
 extern u8 D_002701B8[];
 extern u8 g_discCheckSectorBuffer[];
 extern u32 g_crc32Table[];
@@ -161,7 +161,7 @@ void StepDiscSectorCheck(void)
         s1 = *(s32*)D_002701B8;
         if (s1 == 2) {
             if (RefreshDiscStatus() != 0) {
-                if (StartDiscRead((s32)D_00247AA4, 1, g_discCheckSectorBuffer, (ReadMode*)&D_00247AA0) == 1) {
+                if (StartDiscRead((s32)g_discCheckSector, 1, g_discCheckSectorBuffer, (ReadMode*)&g_discCheckReadMode) == 1) {
                     g_discSectorCheckState = s1;
                 }
             }
@@ -178,7 +178,7 @@ void StepDiscSectorCheck(void)
                 p++;
                 n--;
             } while (n != -1);
-            if ((s32)crc != (s32)D_00247AA8[0]) {
+            if ((s32)crc != (s32)g_discCheckExpectedCrc[0]) {
                 g_discSectorCheckState = 1;
             } else {
                 SetPauseMenuLayerPage((T217D_6D0*)g_pauseMenuElement, 2, -1);
@@ -191,9 +191,9 @@ void StepDiscSectorCheck(void)
 
 // The path pieces func_00140B60 formats with, after func_001407A8's ";1" in .rodata.
 extern const u16 D_00249E20[4] = { 0x5C, 0, 0, 0 };
-extern const char D_00249E28[8] = "%s\\%s";
-extern const char D_00249E30[8] = "cdrom0:";
-extern const char D_00249E38[4] = "";
+extern const char g_discPathFormat[8] = "%s\\%s";
+extern const char g_discDevicePrefix[8] = "cdrom0:";
+extern const char g_emptyPathPrefix[4] = "";
 
 void FormatDiscPath(void* self, const char* name, s32 flag)
 {
@@ -205,15 +205,15 @@ void FormatDiscPath(void* self, const char* name, s32 flag)
     for (s32 i = 1; i < n; i++) {
         p[GetStringLength((const char*)p)] = 0x5C;
     }
-    FormatToString((char*)self, D_00249E28,
-                  flag ? (void*)D_00249E30 : (void*)D_00249E38, buf);
+    FormatToString((char*)self, g_discPathFormat,
+                  flag ? (void*)g_discDevicePrefix : (void*)g_emptyPathPrefix, buf);
 }
 
 void StartDiscReadUntilAccepted(s32 sector, s32 count, void* buffer)
 {
     s32 result;
     do {
-        result = StartDiscRead(sector, count, buffer, (ReadMode*)&D_00247AA0);
+        result = StartDiscRead(sector, count, buffer, (ReadMode*)&g_discCheckReadMode);
         g_lastDiscReadResult = result;
         if (result != 1) { SyncDiscRead(0); g_discReadErrors[0] = GetDiscReadError(); }
     } while (result != 1);
@@ -223,7 +223,7 @@ void StartLowLevelDiscReadUntilAccepted(s32 sector, s32 count, void* buffer)
 {
     s32 result;
     do {
-        result = ReadDiscSectors(sector, count, buffer, (ReadMode*)&D_00247AA0);
+        result = ReadDiscSectors(sector, count, buffer, (ReadMode*)&g_discCheckReadMode);
         g_lastDiscReadResult = result;
         if (result != 1) { SyncDiscNCommand(0); g_discReadErrors[0] = GetDiscError(); }
     } while (result != 1);

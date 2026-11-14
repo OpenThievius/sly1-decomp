@@ -222,7 +222,7 @@ struct PlaneTreeNode;
 struct PlaneTreeOutput;
 s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out);
 
-extern u8 D_000018C0[];
+extern u8 g_flushBatchProgram[];
 extern u8 D_000018F8[];
 
 void WriteVifMscal(void* s, s32 n);
@@ -237,7 +237,7 @@ extern u8 D_00000FD8[];
 
 void WriteVifMscal(void* obj, void* data);
 
-extern u8 D_000018C0[];
+extern u8 g_flushBatchProgram[];
 extern u8 D_000018F8[];
 
 void WriteVifMscal(void* obj, void* text);
@@ -293,8 +293,8 @@ struct PlayerListWalk {
 
 struct ElementStackState { u8 pad0[0x30]; s32 f30; };
 extern ElementStackState g_elementStack;
-extern SessionKey D_00247AB0;
-extern s32 D_00275F84;
+extern SessionKey g_sessionFadeKey;
+extern s32 g_resumeSoundSetupDone;
 
 void ClearTwoWords(void* p);
 void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
@@ -304,7 +304,7 @@ struct ElementStack;
 void StopAnimationPlayer(AnimationPlayer* self);
 void SetElementStackState(ElementStack* self, s32 state);
 
-extern u8 D_000018C0[];
+extern u8 g_flushBatchProgram[];
 extern u8 D_000018F8[];
 
 void WriteVifMscal(void* s, s32 n);
@@ -334,7 +334,7 @@ void RaiseScatterLevels(ScatterController* self, f32 amount);
 
 
 
-extern u8 D_00247AD0[];
+extern u8 g_objectFadeIn[];
 
 void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
 void QueueMovieWithSuccessor(s32 slot, u32 n);
@@ -370,13 +370,13 @@ struct ColorWord
 
 // The file's .data, in retail's order. It begins with the game progress pointers
 // (game_progress.h), which this file's functions read and render_frame.cpp's do not.
-GameProgress* g_saveData = &D_0027C220;
+GameProgress* g_saveData = &g_saveDataBlock;
 G27C230* g_currentLevelRecord = D_0027C230;
 G27C230* g_currentEntry = D_0027C230;
 s32 g_previousLevelIndex = -1;
-char D_002623D0[8] = "<none>";
+char g_missingEntryName[8] = "<none>";
 u8 D_002623D8[4] = { 0 };
-s32 D_002623DC = 0;
+s32 g_timerRateExponent = 0;
 extern u8 D_00001298[];
 extern u8 D_00001368[];
 extern u8 D_00000ED8[];
@@ -418,7 +418,7 @@ struct PercentClamp {
 struct FlushedVertexBatch { u8 pad0[0xF8]; u8* mode; u8 pad1[0x28]; s32 vertexCount; };
 
 extern PacketWriter g_vifPacketWriter;
-extern u8 D_000018C0[];
+extern u8 g_flushBatchProgram[];
 
 void FlipVifBaseOffset(void);
 s32 WriteVifUnpackHeader(PacketWriter* s, s32 a, s32 b, s32 c);
@@ -465,8 +465,8 @@ struct UnlitUnpackHeader { u16 arrayOffset; u16 frameDataOffset; u8 pad[4]; u16 
 struct CopiedGifTags { u32 w[8]; };
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-extern u8 D_00001A50[];
-extern u8 D_000002F8[];
+extern u8 g_unlitBatchProgram[];
+extern u8 g_unlitBatchFinishProgram[];
 void CopyMemory(void* dst, void* src, u32 size);
 
 // A run of bytes, for the fill and copy calls.
@@ -508,10 +508,10 @@ struct LitVertexBatch
     LitVertex verts[1];
 };
 
-extern u8 D_00000288[];
-extern u8 D_00001210[];
-extern u8 D_00001AB0[];
-extern u8 D_00000010[];
+extern u8 g_litBatchProgram[];
+extern u8 g_litBatchSecondProgram[];
+extern u8 g_litBatchThirdProgram[];
+extern u8 g_litBatchFinishProgram[];
 
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -588,8 +588,8 @@ struct StripHeader {
     s32 count;
 };
 
-extern u8 D_000002F8[];
-extern u8 D_00001A50[];
+extern u8 g_unlitBatchFinishProgram[];
+extern u8 g_unlitBatchProgram[];
 extern u8 D_000036D0[];
 extern u8 D_00001A80[];
 extern u8 D_000027C0[];
@@ -659,7 +659,7 @@ struct AnimatorOwner {
 s32 ClaimAnimatorStep(void* p);
 void EvaluateOscillator(Oscillator* self);
 
-extern u8 D_00000010[];
+extern u8 g_litBatchFinishProgram[];
 extern u8 D_000000F0[];
 
 struct PartPacketContext { u8 pad0[0x28]; s32 f28; };
@@ -710,8 +710,8 @@ struct QuadLanes {
     f32 w[4];
 };
 
-extern u8 D_00000288[];
-extern u8 D_00001AB0[];
+extern u8 g_litBatchProgram[];
+extern u8 g_litBatchThirdProgram[];
 extern u8 D_00002008[];
 extern u8 D_00002088[];
 extern u8 D_000023B8[];
@@ -840,52 +840,52 @@ void FlipVifBaseOffset(void);
 
 // The 46 names of the keyed entries (keyed_entry.h; D_00247AF0, which this file's functions
 // walk), which begin the file's .rodata, before its functions' own literals.
-extern const char D_0024A2D0[8] = "Splash";
-extern const char D_0024A2D8[16] = "Paris, France";
-extern const char D_0024A2E8[16] = "The Hideout";
-extern const char D_0024A2F8[24] = "A Stealthy Approach";
-extern const char D_0024A310[24] = "Prowling the Grounds";
-extern const char D_0024A328[24] = "High Class Heist";
-extern const char D_0024A340[24] = "Into the Machine";
-extern const char D_0024A358[24] = "A Cunning Disguise";
-extern const char D_0024A370[24] = "The Fire Down Below";
-extern const char D_0024A388[24] = "Treasure in the Depths";
-extern const char D_0024A3A0[24] = "The Gunboat Graveyard";
-extern const char D_0024A3B8[24] = "The Eye of the Storm";
-extern const char D_0024A3D0[16] = "A Rocky Start";
-extern const char D_0024A3E0[16] = "Muggshot's Turf";
-extern const char D_0024A3F0[16] = "Boneyard Casino";
-extern const char D_0024A400[24] = "Murray's Big Gamble";
-extern const char D_0024A418[24] = "At the Dog Track";
-extern const char D_0024A430[16] = "Two to Tango";
-extern const char D_0024A440[24] = "Straight to the Top";
-extern const char D_0024A458[24] = "Back Alley Heist";
-extern const char D_0024A470[16] = "Last Call";
-extern const char D_0024A480[24] = "The Dread Swamp Path";
-extern const char D_0024A498[24] = "The Swamp's Dark Center";
-extern const char D_0024A4B0[24] = "The Lair of the Beast";
-extern const char D_0024A4C8[24] = "A Grave Undertaking";
-extern const char D_0024A4E0[16] = "Piranha Lake";
-extern const char D_0024A4F0[24] = "Descent into Danger";
-extern const char D_0024A508[24] = "A Ghastly Voyage";
-extern const char D_0024A520[24] = "Down Home Cooking";
-extern const char D_0024A538[16] = "A Deadly Dance";
-extern const char D_0024A548[24] = "A Perilous Ascent";
-extern const char D_0024A560[24] = "Inside the Stronghold";
-extern const char D_0024A578[24] = "Flaming Temple of Flame";
-extern const char D_0024A590[16] = "The Unseen Foe";
-extern const char D_0024A5A0[24] = "The King of the Hill";
-extern const char D_0024A5B8[24] = "Rapid Fire Assault";
-extern const char D_0024A5D0[24] = "Duel by the Dragon";
-extern const char D_0024A5E8[24] = "A Desperate Race";
-extern const char D_0024A600[16] = "Flame Fu!";
-extern const char D_0024A610[24] = "A Hazardous Path";
-extern const char D_0024A628[16] = "Burning Rubber";
-extern const char D_0024A638[16] = "A Daring Rescue";
-extern const char D_0024A648[24] = "Bentley Comes Through";
-extern const char D_0024A660[24] = "A Temporary Truce";
-extern const char D_0024A678[16] = "Sinking Peril";
-extern const char D_0024A688[24] = "A Strange Reunion";
+extern const char g_entryNameSplash[8] = "Splash";
+extern const char g_entryNameParisFrance[16] = "Paris, France";
+extern const char g_entryNameTheHideout[16] = "The Hideout";
+extern const char g_entryNameAStealthyApproach[24] = "A Stealthy Approach";
+extern const char g_entryNameProwlingTheGrounds[24] = "Prowling the Grounds";
+extern const char g_entryNameHighClassHeist[24] = "High Class Heist";
+extern const char g_entryNameIntoTheMachine[24] = "Into the Machine";
+extern const char g_entryNameACunningDisguise[24] = "A Cunning Disguise";
+extern const char g_entryNameTheFireDownBelow[24] = "The Fire Down Below";
+extern const char g_entryNameTreasureInTheDepths[24] = "Treasure in the Depths";
+extern const char g_entryNameTheGunboatGraveyard[24] = "The Gunboat Graveyard";
+extern const char g_entryNameTheEyeOfTheStorm[24] = "The Eye of the Storm";
+extern const char g_entryNameARockyStart[16] = "A Rocky Start";
+extern const char g_entryNameMuggshotsTurf[16] = "Muggshot's Turf";
+extern const char g_entryNameBoneyardCasino[16] = "Boneyard Casino";
+extern const char g_entryNameMurraysBigGamble[24] = "Murray's Big Gamble";
+extern const char g_entryNameAtTheDogTrack[24] = "At the Dog Track";
+extern const char g_entryNameTwoToTango[16] = "Two to Tango";
+extern const char g_entryNameStraightToTheTop[24] = "Straight to the Top";
+extern const char g_entryNameBackAlleyHeist[24] = "Back Alley Heist";
+extern const char g_entryNameLastCall[16] = "Last Call";
+extern const char g_entryNameTheDreadSwampPath[24] = "The Dread Swamp Path";
+extern const char g_entryNameTheSwampsDarkCenter[24] = "The Swamp's Dark Center";
+extern const char g_entryNameTheLairOfTheBeast[24] = "The Lair of the Beast";
+extern const char g_entryNameAGraveUndertaking[24] = "A Grave Undertaking";
+extern const char g_entryNamePiranhaLake[16] = "Piranha Lake";
+extern const char g_entryNameDescentIntoDanger[24] = "Descent into Danger";
+extern const char g_entryNameAGhastlyVoyage[24] = "A Ghastly Voyage";
+extern const char g_entryNameDownHomeCooking[24] = "Down Home Cooking";
+extern const char g_entryNameADeadlyDance[16] = "A Deadly Dance";
+extern const char g_entryNameAPerilousAscent[24] = "A Perilous Ascent";
+extern const char g_entryNameInsideTheStronghold[24] = "Inside the Stronghold";
+extern const char g_entryNameFlamingTempleOfFlame[24] = "Flaming Temple of Flame";
+extern const char g_entryNameTheUnseenFoe[16] = "The Unseen Foe";
+extern const char g_entryNameTheKingOfTheHill[24] = "The King of the Hill";
+extern const char g_entryNameRapidFireAssault[24] = "Rapid Fire Assault";
+extern const char g_entryNameDuelByTheDragon[24] = "Duel by the Dragon";
+extern const char g_entryNameADesperateRace[24] = "A Desperate Race";
+extern const char g_entryNameFlameFu[16] = "Flame Fu!";
+extern const char g_entryNameAHazardousPath[24] = "A Hazardous Path";
+extern const char g_entryNameBurningRubber[16] = "Burning Rubber";
+extern const char g_entryNameADaringRescue[16] = "A Daring Rescue";
+extern const char g_entryNameBentleyComesThrough[24] = "Bentley Comes Through";
+extern const char g_entryNameATemporaryTruce[24] = "A Temporary Truce";
+extern const char g_entryNameSinkingPeril[16] = "Sinking Peril";
+extern const char g_entryNameAStrangeReunion[24] = "A Strange Reunion";
 
 void QueueObjectForRegroup(World* owner, PlacedObject* obj)
 {
@@ -1225,7 +1225,7 @@ void* GetEntryName(s32 id)
     void* p = FindEntryById(id);
     if (p == 0)
     {
-        return D_002623D0;
+        return g_missingEntryName;
     }
     return *(void**)((u8*)p + 0x24);
 }
@@ -1365,7 +1365,7 @@ void FadeOutAndQueueMovie(s32 kind)
     s32 s0 = -1;
 
     if (kind != 4) { if (kind < 5) { if (kind == 2) { s0 = 0xD; } } } else { s0 = 0xE; }
-    StartObjectFade((IdentityKey*)D_00247AD0, -1, 1);
+    StartObjectFade((IdentityKey*)g_objectFadeIn, -1, 1);
     if (s0 != -1) {
         QueueMovieWithSuccessor(s0, 0xF);
     }
@@ -1466,20 +1466,20 @@ void ResetReserveCounts(void)
 void ResetGameSessionAndFade(void)
 {
     ResetGameSession();
-    StartObjectFade(&D_00247AB0, -1, 0);
+    StartObjectFade(&g_sessionFadeKey, -1, 0);
 }
 
 void ResumeAtSavedLevel(void)
 {
     SessionKey* k = (SessionKey*)LookupEntryById((g_saveData->levelIndex << 8) | g_saveData->entryIndex);
     if (k == 0) {
-        k = &D_00247AB0;
+        k = &g_sessionFadeKey;
     }
     ClearTwoWords(D_002623D8);
     if (g_elementStack.f30 != 1 || g_saveData->totalTime != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
     } else if (g_elementStack.f30 == 1) {
-        if (D_00275F84 == 0) {
+        if (g_resumeSoundSetupDone == 0) {
             SilenceVolumeChannel3(g_saveData->optionFlags & 0x80);
             ApplySoundOptionFlag(g_saveData->optionFlags & 0x40);
             Animation* r = (Animation*)FindFirstObjectById(g_currentWorld, 0x105, 0x494, 0);
@@ -2039,7 +2039,7 @@ void BuildUnlitVertexPacket(VertexBatch* batch)
         out1 += 3;
         out2++;
     }
-    WriteVifMscal(&g_vifPacketWriter, D_00001A50);
+    WriteVifMscal(&g_vifPacketWriter, g_unlitBatchProgram);
     WriteVifStcycl(&g_vifPacketWriter, 1, 3);
     ReserveVifUnpack(&g_vifPacketWriter, 0xE, self->vertexCount, hd->arrayOffset + 1, 0, &out3);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
@@ -2065,7 +2065,7 @@ void BuildUnlitVertexPacket(VertexBatch* batch)
         hd->frameOffsets[k] = base;
         base += pair->n;
     }
-    WriteVifMscalf(&g_vifPacketWriter, D_000002F8);
+    WriteVifMscalf(&g_vifPacketWriter, g_unlitBatchFinishProgram);
 }
 
 void BuildLitVertexPacket(VertexBatch* batch)
@@ -2109,7 +2109,7 @@ void BuildLitVertexPacket(VertexBatch* batch)
     ReserveVifUnpack(&g_vifPacketWriter, 0xC, (self->n + 3) & ~3, hdr->arrayOffset, 0, (u8**)&p8);
     ReserveVifUnpack(&g_vifPacketWriter, 0xE, self->n, hdr->arrayOffset + 1, 0, &pC);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
-    WriteVifMscal(&g_vifPacketWriter, D_00000288);
+    WriteVifMscal(&g_vifPacketWriter, g_litBatchProgram);
     for (i = 0; i < self->n; i += 4)
     {
         for (j = 0; j < 4; j++)
@@ -2139,12 +2139,12 @@ void BuildLitVertexPacket(VertexBatch* batch)
     for (s32 t = 0; t < self->texCount; t++)
         AddDmaRefTag(&g_vifPacketWriter, self->tex[t]->n, self->tex[t]->data);
     BeginDmaTag(&g_vifPacketWriter);
-    WriteVifMscal(&g_vifPacketWriter, D_00001210);
+    WriteVifMscal(&g_vifPacketWriter, g_litBatchSecondProgram);
     WriteVifFlushE(&g_vifPacketWriter);
     WriteVifStcycl(&g_vifPacketWriter, 1, 4);
     ReserveVifUnpack(&g_vifPacketWriter, 8, self->n, hdr->arrayOffset, 0, (u8**)&p10);
     WriteVifStcycl(&g_vifPacketWriter, 1, 1);
-    WriteVifMscal(&g_vifPacketWriter, D_00001AB0);
+    WriteVifMscal(&g_vifPacketWriter, g_litBatchThirdProgram);
     for (i = 0; i < self->n; i++)
     {
         v = &self->verts[i];
@@ -2167,7 +2167,7 @@ void BuildLitVertexPacket(VertexBatch* batch)
         k++;
         off += e->n;
     }
-    WriteVifMscalf(&g_vifPacketWriter, D_00000010);
+    WriteVifMscalf(&g_vifPacketWriter, g_litBatchFinishProgram);
 }
 
 void FlushVertexBatch(VertexBatch* batch)
@@ -2186,7 +2186,7 @@ void FlushVertexBatch(VertexBatch* batch)
         s32 size = WriteVifUnpackHeader(s, 12, 11, 0);
         WordCopy::Words((s32*)s->cur, (s32*)self, size >> 2);
         s->cur += size;
-        WriteVifMscal(&g_vifPacketWriter, D_000018C0);
+        WriteVifMscal(&g_vifPacketWriter, g_flushBatchProgram);
         switch (*self->mode) {
         case 1:
         case 6:

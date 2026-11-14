@@ -34,7 +34,7 @@ void BuildPauseMenuPage(Self_1936A0_eu* self)
     case 0:
         row->count = 0;
         for (u32 i = 0; i < 8; i++) {
-            s32 item = D_00269CD8[i];
+            s32 item = g_pauseMenuCandidates[i];
             s32 show = 1;
             switch (item) {
             case 4:
@@ -90,7 +90,7 @@ void BuildPauseMenuPage(Self_1936A0_eu* self)
     case 0x17:
         row->count = 0;
         for (u32 i = 0; i < 9; i++) {
-            s32 item = D_00269D18[i];
+            s32 item = g_optionsMenuCandidates[i];
             s32 show = 1;
             switch (item) {
             case 6:

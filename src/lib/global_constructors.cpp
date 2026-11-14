@@ -10,14 +10,14 @@
 #include "common.h"
 #include "asm_func.h"
 
-static u8 D_0062A540[0x200];
+static u8 g_constructorSavedRegisters[0x200];
 static u64 D_0062A740;
 static u64 D_0062A748;
 static u64 D_0062A750;
 static u64 D_0062A758;
 static u64 D_0062A760;
 static s32 D_0062A768;
-static s32 D_0062A76C;
+static s32 g_constructorsRun;
 
 ASM_FUNC(func_001FAC00);
 
@@ -25,8 +25,8 @@ extern "C" void func_001FAD68(void);
 
 void RunConstructorsOnce(void)
 {
-    if (D_0062A76C == 0) {
-        D_0062A76C = 1;
+    if (g_constructorsRun == 0) {
+        g_constructorsRun = 1;
         func_001FAD68();
     }
 }

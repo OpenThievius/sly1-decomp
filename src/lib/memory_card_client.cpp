@@ -16,7 +16,7 @@
 #include "remote_call_client.h"
 
 // The library's identification string, 16 characters without a terminator.
-char D_0027AEB8[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'm', 'c', ' ', ' ', ' ', '2', '4', '3', '0' };
+char g_cardLibraryIdentification[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'm', 'c', ' ', ' ', ' ', '2', '4', '3', '0' };
 
 // The request in flight (0 when none) and the semaphore that serialises the requests.
 s32 g_cardRequestInFlight = 0;
@@ -25,19 +25,19 @@ s32 g_cardSemaphore = -1;
 // The remote call's client record, bound to the server.
 static u8 g_cardClient[0x28] __attribute__((aligned(64)));
 // Where func_00209C60 stores the results of the request func_00209CB8 sent.
-static u32* D_0062AD68;
-static u32* D_0062AD6C;
-static u32* D_0062AD70;
+static u32* g_cardInfoOutputA;
+static u32* g_cardInfoOutputB;
+static u32* g_cardInfoOutputC;
 // A 64-byte aligned buffer no code reads: the data of a function the linker stripped.
 static u8 D_0062AD80[0x40] __attribute__((aligned(64)));
 // The request sent to the server.
-static u8 D_0062ADC0[0x30] __attribute__((aligned(64)));
+static u8 g_cardRequestBuffer[0x30] __attribute__((aligned(64)));
 // A request that carries a name: five words, then the name (func_002095B0 addresses the name).
-static u8 D_0062ADF0[0x414];
+static u8 g_cardPathRequestBuffer[0x414];
 // The transfer buffer the completion handlers read.
-static u8 D_0062B240[0x10C0] __attribute__((aligned(64)));
+static u8 g_cardReplyDirectoryBuffer[0x10C0] __attribute__((aligned(64)));
 // The server's reply.
-static u8 D_0062C300[0x40] __attribute__((aligned(64)));
+static u8 g_cardReplyBuffer[0x40] __attribute__((aligned(64)));
 
 struct Req_2093F0 {
     s32 f00;
@@ -91,27 +91,27 @@ s32 InitMemoryCardClient(void)
         for (s32 i = 0x100000; i != 0; i--) {
         }
     }
-    s32 r = CallRemoteService((RemoteCallClient*)g_cardClient, 0xFE, 0, D_0062ADC0, 0x30, (Info_2093F0*)D_0062C300, 0xC, 0, 0);
+    s32 r = CallRemoteService((RemoteCallClient*)g_cardClient, 0xFE, 0, g_cardRequestBuffer, 0x30, (Info_2093F0*)g_cardReplyBuffer, 0xC, 0, 0);
     PostSemaphore(g_cardSemaphore);
     if (r < 0) {
         ((Sema_2093F0*)g_cardClient)->f24 = 0;
         return r - 100;
     }
-    if (((Info_2093F0*)D_0062C300)->f4 < 0x20A) {
+    if (((Info_2093F0*)g_cardReplyBuffer)->f4 < 0x20A) {
         PrintFormatted("libmc: too old release of mcserv.irx\n");
         ((Sema_2093F0*)g_cardClient)->f24 = 0;
         return -0x78;
     }
-    if (((Info_2093F0*)D_0062C300)->f8 < 0x20E) {
+    if (((Info_2093F0*)g_cardReplyBuffer)->f8 < 0x20E) {
         PrintFormatted("libmc: too old release of mcman.irx\n");
         ((Sema_2093F0*)g_cardClient)->f24 = 0;
         return -0x79;
     }
-    return ((Info_2093F0*)D_0062C300)->f0;
+    return ((Info_2093F0*)g_cardReplyBuffer)->f0;
 }
 
 // The message of a function the linker stripped.
-extern const char D_00250008[] = "sceMcUdCheckNewCard RPC faild\n";
+extern const char g_cardNewCardFailureMessage[] = "sceMcUdCheckNewCard RPC faild\n";
 
 LINKER_REMNANT(func_002095A8);
 
@@ -135,14 +135,14 @@ s32 OpenCardFile(s32 a0, s32 a1, const char* a2, s32 a3)
         PostSemaphore(g_cardSemaphore);
         return -210;
     }
-    u8* name = D_0062ADF0 + 0x14;
+    u8* name = g_cardPathRequestBuffer + 0x14;
     CopyStringBounded((Name_2095B0*)name, a2, 0x3FF);
     ((s32*)name)[-5] = a0;
     Rec_2095B0* r = (Rec_2095B0*)(name - 0x14);
     r->f08 = a3;
     r->f04 = a1;
     r->name[0x3FF] = 0;
-    s32 result = CallRemoteService((RemoteCallClient*)pool, 2, 1, r, 0x414, D_0062C300, 4, 0, 0);
+    s32 result = CallRemoteService((RemoteCallClient*)pool, 2, 1, r, 0x414, g_cardReplyBuffer, 4, 0, 0);
     if (result == 0) {
         g_cardRequestInFlight = 2;
     } else {
@@ -177,8 +177,8 @@ s32 CloseCardFile(s32 value)
         (void)PostSemaphore(g_cardSemaphore);
         return -100;
     }
-    (*(Slot_209720*)&D_0062ADC0).v = value;
-    r = CallRemoteService((RemoteCallClient*)elt, 3, 1, ((Slot_209720*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    (*(Slot_209720*)&g_cardRequestBuffer).v = value;
+    r = CallRemoteService((RemoteCallClient*)elt, 3, 1, ((Slot_209720*)&g_cardRequestBuffer), 0x30, g_cardReplyBuffer, 4, 0, 0);
     if (r == 0) {
         g_cardRequestInFlight = 3;
     } else {
@@ -235,15 +235,15 @@ s32 ReadCardFile(s32 fd, void* buf, s32 size)
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
-    tab = D_0062B240;
-    slot = (CardFileRequest*)D_0062ADC0;
+    tab = g_cardReplyDirectoryBuffer;
+    slot = (CardFileRequest*)g_cardRequestBuffer;
     slot->fd = fd;
     slot->tab = tab;
     slot->buf = buf;
     slot->size = size;
     WriteBackDataCacheRange(buf, size);
     WriteBackDataCacheRange(tab, 0xC0);
-    r = CallRemoteService(ctl, 5, 1, slot, 0x30, D_0062C300, 4, (RemoteCallEndFn)CopyCardDirectoryReply, tab);
+    r = CallRemoteService(ctl, 5, 1, slot, 0x30, g_cardReplyBuffer, 4, (RemoteCallEndFn)CopyCardDirectoryReply, tab);
     if (r == 0) {
         g_cardRequestInFlight = 5;
     } else {
@@ -267,26 +267,26 @@ s32 WriteCardFile(s32 self, const void* src, s32 n)
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
-    (*(Ctx_209990*)&D_0062ADC0).f00 = self;
+    (*(Ctx_209990*)&g_cardRequestBuffer).f00 = self;
     if (n < 17) {
-        (*(Ctx_209990*)&D_0062ADC0).f14 = n;
-        (*(Ctx_209990*)&D_0062ADC0).f0C = 0;
-        (*(Ctx_209990*)&D_0062ADC0).f18 = 0;
+        (*(Ctx_209990*)&g_cardRequestBuffer).f14 = n;
+        (*(Ctx_209990*)&g_cardRequestBuffer).f0C = 0;
+        (*(Ctx_209990*)&g_cardRequestBuffer).f18 = 0;
     } else {
         u32 lo = (u32)src - 16;
         s32 off = (((u32)src - 1) & ~0xF) - lo;
-        (*(Ctx_209990*)&D_0062ADC0).f0C = n - off;
-        (*(Ctx_209990*)&D_0062ADC0).f14 = off;
-        (*(Ctx_209990*)&D_0062ADC0).f18 = (u32)src + off; // the address the IOP reads the rest from
+        (*(Ctx_209990*)&g_cardRequestBuffer).f0C = n - off;
+        (*(Ctx_209990*)&g_cardRequestBuffer).f14 = off;
+        (*(Ctx_209990*)&g_cardRequestBuffer).f18 = (u32)src + off; // the address the IOP reads the rest from
     }
     {
         u32 i;
-        for (i = 0; i < (*(Ctx_209990*)&D_0062ADC0).f14; i++) {
-            (*(Ctx_209990*)&D_0062ADC0).buf[i] = ((const u8*)src)[i];
+        for (i = 0; i < (*(Ctx_209990*)&g_cardRequestBuffer).f14; i++) {
+            (*(Ctx_209990*)&g_cardRequestBuffer).buf[i] = ((const u8*)src)[i];
         }
     }
     SyncDataCache(0);
-    r = CallRemoteService((RemoteCallClient*)&g_cardClient, 6, 1, ((Ctx_209990*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    r = CallRemoteService((RemoteCallClient*)&g_cardClient, 6, 1, ((Ctx_209990*)&g_cardRequestBuffer), 0x30, g_cardReplyBuffer, 4, 0, 0);
     if (r == 0) {
         g_cardRequestInFlight = 6;
     } else {
@@ -337,7 +337,7 @@ s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2)
     if (ok != 0) {
         g_cardRequestInFlight = 0;
         if (a2 != 0) {
-            *a2 = (*(s32*)&D_0062C300);
+            *a2 = (*(s32*)&g_cardReplyBuffer);
         }
         (void)PostSemaphore(g_cardSemaphore);
     }
@@ -347,9 +347,9 @@ s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2)
 void CopyCardInfoReply(u32 base)
 {
     volatile u32* regs = (volatile u32*)(base | 0x20000000);
-    if (D_0062AD68) *D_0062AD68 = regs[0];
-    if (D_0062AD6C) *D_0062AD6C = regs[1];
-    if (D_0062AD70) *D_0062AD70 = regs[0x24];
+    if (g_cardInfoOutputA) *g_cardInfoOutputA = regs[0];
+    if (g_cardInfoOutputB) *g_cardInfoOutputB = regs[1];
+    if (g_cardInfoOutputC) *g_cardInfoOutputC = regs[0x24];
 }
 
 struct Rec_209CB8 { s32 f00; s32 f04; s32 f08; s32 f0C; s32 f10; s32 f14; s32 f18; s32 f1C; };
@@ -368,29 +368,29 @@ s32 GetCardInfo(s32 a0, s32 a1, s32* a2, s32* a3, s32* a4)
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
-    (*(Rec_209CB8*)&D_0062ADC0).f04 = a0;
-    (*(Rec_209CB8*)&D_0062ADC0).f08 = a1;
-    (*(Rec_209CB8*)&D_0062ADC0).f1C = (s32)D_0062B240;
+    (*(Rec_209CB8*)&g_cardRequestBuffer).f04 = a0;
+    (*(Rec_209CB8*)&g_cardRequestBuffer).f08 = a1;
+    (*(Rec_209CB8*)&g_cardRequestBuffer).f1C = (s32)g_cardReplyDirectoryBuffer;
     if (a2) {
-        (*(Rec_209CB8*)&D_0062ADC0).f14 = 1;
+        (*(Rec_209CB8*)&g_cardRequestBuffer).f14 = 1;
     } else {
-        (*(Rec_209CB8*)&D_0062ADC0).f14 = 0;
+        (*(Rec_209CB8*)&g_cardRequestBuffer).f14 = 0;
     }
     if (a3) {
-        (*(Rec_209CB8*)&D_0062ADC0).f10 = 1;
+        (*(Rec_209CB8*)&g_cardRequestBuffer).f10 = 1;
     } else {
-        (*(Rec_209CB8*)&D_0062ADC0).f10 = 0;
+        (*(Rec_209CB8*)&g_cardRequestBuffer).f10 = 0;
     }
     if (a4) {
-        (*(Rec_209CB8*)&D_0062ADC0).f0C = 1;
+        (*(Rec_209CB8*)&g_cardRequestBuffer).f0C = 1;
     } else {
-        (*(Rec_209CB8*)&D_0062ADC0).f0C = 0;
+        (*(Rec_209CB8*)&g_cardRequestBuffer).f0C = 0;
     }
-    D_0062AD68 = (u32*)a2;
-    D_0062AD6C = (u32*)a3;
-    D_0062AD70 = (u32*)a4;
-    WriteBackDataCacheRange(D_0062B240, 0xC0);
-    s32 result = CallRemoteService((RemoteCallClient*)&g_cardClient, 1, 1, ((Rec_209CB8*)&D_0062ADC0), 0x30, D_0062C300, 4, (RemoteCallEndFn)CopyCardInfoReply, D_0062B240);
+    g_cardInfoOutputA = (u32*)a2;
+    g_cardInfoOutputB = (u32*)a3;
+    g_cardInfoOutputC = (u32*)a4;
+    WriteBackDataCacheRange(g_cardReplyDirectoryBuffer, 0xC0);
+    s32 result = CallRemoteService((RemoteCallClient*)&g_cardClient, 1, 1, ((Rec_209CB8*)&g_cardRequestBuffer), 0x30, g_cardReplyBuffer, 4, (RemoteCallEndFn)CopyCardInfoReply, g_cardReplyDirectoryBuffer);
     if (result == 0) {
         g_cardRequestInFlight = 1;
     } else {
@@ -422,7 +422,7 @@ s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, void* a5
         PostSemaphore(g_cardSemaphore);
         return -210;
     }
-    Rec_9E48* rec = (Rec_9E48*)D_0062ADF0;
+    Rec_9E48* rec = (Rec_9E48*)g_cardPathRequestBuffer;
     rec->f0 = a0;
     rec->f4 = a1;
     rec->f8 = a3;
@@ -433,7 +433,7 @@ s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, void* a5
     if (a4 >= 0) {
         WriteBackDataCacheRange(a5, a4 << 6);
     }
-    s32 r = CallRemoteService((RemoteCallClient*)mgr, 0xD, 1, rec, 0x414, D_0062C300, 4, 0, 0);
+    s32 r = CallRemoteService((RemoteCallClient*)mgr, 0xD, 1, rec, 0x414, g_cardReplyBuffer, 4, 0, 0);
     if (r == 0) {
         g_cardRequestInFlight = 0xD;
     } else {
@@ -460,9 +460,9 @@ s32 RequestCardFormat(s32 a, s32 b)
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
-    (*(Req_209FA8*)&D_0062ADC0).b = b;
-    (*(Req_209FA8*)&D_0062ADC0).a = a;
-    res = CallRemoteService((RemoteCallClient*)&g_cardClient, 0x10, 1, ((Req_209FA8*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    (*(Req_209FA8*)&g_cardRequestBuffer).b = b;
+    (*(Req_209FA8*)&g_cardRequestBuffer).a = a;
+    res = CallRemoteService((RemoteCallClient*)&g_cardClient, 0x10, 1, ((Req_209FA8*)&g_cardRequestBuffer), 0x30, g_cardReplyBuffer, 4, 0, 0);
     if (res == 0) {
         (*(u32*)&g_cardRequestInFlight) = 0x10;
     } else {
@@ -501,12 +501,12 @@ s32 RequestCardSpaceForPath(s32 a0, s32 a1, const char* a2)
         PostSemaphore(g_cardSemaphore);
         return -210;
     }
-    buf = ((CardPathRequest*)&D_0062ADF0);
+    buf = ((CardPathRequest*)&g_cardPathRequestBuffer);
     buf->f0 = a0;
     buf->f4 = a1;
     CopyStringBounded(buf->text14, a2, 0x3FF);
     buf->text14[0x3FF] = 0;
-    res = CallRemoteService(reg, 0x12, 1, buf, 0x414, ((u32*)&D_0062C300), 4, 0, 0);
+    res = CallRemoteService(reg, 0x12, 1, buf, 0x414, ((u32*)&g_cardReplyBuffer), 4, 0, 0);
     if (res == 0) {
         g_cardRequestInFlight = 0x12;
     } else {

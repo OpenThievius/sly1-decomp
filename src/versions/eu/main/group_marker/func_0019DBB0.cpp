@@ -3,7 +3,7 @@
 void PrepareUnzoomedGroup(void)
 {
     PacketWriter* self = &g_vifPacketWriter;
-    AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
+    AddDmaRefTagIfChanged(self, g_groupMicroprogram, g_groupMicroprogramEnd);
     UploadProjectionConstants();
     UploadCameraOncePerFrame();
 

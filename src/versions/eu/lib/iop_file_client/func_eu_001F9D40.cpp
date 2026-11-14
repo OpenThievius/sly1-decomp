@@ -20,7 +20,7 @@ s32 IsFileServiceVersionUnknown(void);
 
 s32 OpenFile(const char* name, u32 flags, ...)
 {
-    Open_1F9D40* g = (Open_1F9D40*)D_00627880;
+    Open_1F9D40* g = (Open_1F9D40*)g_fileRequestBuffer;
     Handle_1F84D8* p;
     s32 mode;
     s32 h;
@@ -53,7 +53,7 @@ s32 OpenFile(const char* name, u32 flags, ...)
     if (i == 0x400) {
         g->name[0x3FF] = 0;
     }
-    index = ((s32)p - (s32)D_00628940) >> 4;
+    index = ((s32)p - (s32)g_fileHandleTable) >> 4;
     g->flags = flags & 0x6FFFFFFF;
     g->mode = mode;
     g->index = index;
@@ -64,12 +64,12 @@ s32 OpenFile(const char* name, u32 flags, ...)
     g->result = (s32)&out;
     g->sema = h;
     g->result_size = 4;
-    if (CallRemoteService((RemoteCallClient*)g_fileClient, 0, 0, D_00627880, 0x418, D_006284C0, 4, 0, 0) < 0) {
+    if (CallRemoteService((RemoteCallClient*)g_fileClient, 0, 0, g_fileRequestBuffer, 0x418, g_fileCallResult, 4, 0, 0) < 0) {
         FreeSemaphore(h);
         UnlockFileRequests();
         return -0xB;
     }
-    reply = (s32*)((s32)D_006284C0 | 0x20000000);
+    reply = (s32*)((s32)g_fileCallResult | 0x20000000);
     result = *reply;
     UnlockFileRequests();
     if (result == 0) {
@@ -79,15 +79,15 @@ s32 OpenFile(const char* name, u32 flags, ...)
     AwaitSemaphore(h);
     FreeSemaphore(h);
     if (out < 0) {
-        AwaitSemaphore(D_002771C0);
+        AwaitSemaphore(g_fileHandleTableSemaphore);
         p->used = 0;
-        PostSemaphore(D_002771C0);
+        PostSemaphore(g_fileHandleTableSemaphore);
         return out;
     }
     result = index;
-    AwaitSemaphore(D_002771C0);
+    AwaitSemaphore(g_fileHandleTableSemaphore);
     p->id = out;
     p->used |= flags;
-    PostSemaphore(D_002771C0);
+    PostSemaphore(g_fileHandleTableSemaphore);
     return result;
 }

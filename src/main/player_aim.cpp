@@ -28,7 +28,7 @@ void GetObjectWorldPosition(BaseObject* self, Vec02* out);
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
 f32 WrapAngle(f32 a);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-extern const T2195_Vt D_00219560;
+extern const T2195_Vt g_ownerPoseSourceMethods;
 
 // The pose source that adds up the offsets of the attachments after it (D_0021A9A8): the number
 // of them to take.
@@ -40,15 +40,15 @@ struct ChildPoseSource : Attachment {
 struct Rec_274BA0 { s32 a[12]; f32 b; };
 
 // The file's .data, in retail's order.
-f32 D_00274B90 = 0.06666667f;
-f32 D_00274B94 = 0.16666667f;
-f32 D_00274B98 = 0.116666675f;
-Rec_274BA0 D_00274BA0 = { { (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, 6, 7, 4, 5, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF }, 0.15f };
-float D_00274BD4 = -250.0f;
-f32 D_00274BD8 = -1.0f;
-f32 D_00274BE0[4] = { 175.0f, 0.0f, 0.0f, 0.0f };
-f32 D_00274BF0[4] = { 250.0f, 0.0f, 125.0f, 0.0f };
-f32 D_00274C00[4] = { 125.0f, 0.0f, 0.0f, 0.0f };
+f32 g_aimStartDelay = 0.06666667f;
+f32 g_aimDurationLong = 0.16666667f;
+f32 g_aimDurationShort = 0.116666675f;
+Rec_274BA0 g_aimModeChain = { { (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, 6, 7, 4, 5, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF }, 0.15f };
+float g_aimHitDistanceBias = -250.0f;
+f32 g_aimBlendOverride = -1.0f;
+f32 g_aimBlendSearchOffset[4] = { 175.0f, 0.0f, 0.0f, 0.0f };
+f32 g_aimTurnSearchOffset8[4] = { 250.0f, 0.0f, 125.0f, 0.0f };
+f32 g_aimTurnSearchOffset4[4] = { 125.0f, 0.0f, 0.0f, 0.0f };
 s32 D_00274C10 = 0;
 s32 D_00274C14 = 0;
 
@@ -67,7 +67,7 @@ void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec02* pos, Vec02* vec)
         c = c->link.next;
         while (c != 0) {
             if ((u8)(c->mode0 + 1) >= 2) {
-                if (c->vt != &D_00219560) {
+                if (c->vt != &g_ownerPoseSourceMethods) {
                     c->vt->getPos(c, t, &a, &b);
                     Vu0::Q(d) = Vu0::Sub(Vu0::Q(a), Vu0::Q(owner->v190));
                     Vu0::Q(*pos) = Vu0::Add(Vu0::Q(*pos), Vu0::Q(d));
@@ -117,7 +117,7 @@ void CombineChildPoseRotations(ChildPoseSource* self, Mat02* outRot, Vec02* outV
         c = c->link.next;
         while (c != 0) {
             if ((u8)(c->mode1 + 1) >= 2) {
-                if (c->vt != &D_00219560) {
+                if (c->vt != &g_ownerPoseSourceMethods) {
                     c->vt->getRot(c, t, &tmpRot, &tmpVec);
                     MultiplyMatrices3x3(&saved, &tmpRot, &m);
                     *outRot = RotateRowsBy(m, *outRot);
@@ -174,9 +174,9 @@ s32 FindStateEntryIndex(StateGraph* self, s32 key);
 struct TwoBlendWeights;
 void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx);
 void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
-extern f32 D_00274B90;
-extern f32 D_00274B94;
-extern f32 D_00274B98;
+extern f32 g_aimStartDelay;
+extern f32 g_aimDurationLong;
+extern f32 g_aimDurationShort;
 extern s32 D_00274C10;
 extern s32 D_00274C14;
 
@@ -188,7 +188,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     }
     s32 chained = 0;
     if (state != -1 && old != -1) {
-        chained = state == D_00274BA0.a[old];
+        chained = state == g_aimModeChain.a[old];
     }
     AimSlotObject* hold = (AimSlotObject*)self->f25D8[0];
     if (hold != 0 && chained == 0) {
@@ -299,42 +299,42 @@ void SetPlayerAimMode(Player* self, s32 state)
         self->foundNodeCount = 0;
         SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->aimBlend4, self->aimAnim4);
         sound = 11;
-        delay = D_00274B90;
+        delay = g_aimStartDelay;
         anim = self->aimAnim4;
-        self->aimEndTime = g_gameClock.time + D_00274B94;
+        self->aimEndTime = g_gameClock.time + g_aimDurationLong;
         break;
     case 5:
     aim5:
         self->foundNodeCount = 0;
         SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->aimBlend5, self->aimAnim5);
         sound = 11;
-        delay = D_00274B90;
+        delay = g_aimStartDelay;
         anim = self->aimAnim5;
-        self->aimEndTime = g_gameClock.time + D_00274B98;
+        self->aimEndTime = g_gameClock.time + g_aimDurationShort;
         break;
     case 6:
     aim6:
         self->foundNodeCount = 0;
         SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->aimBlend6, (void*)self->aimAnim6);
         sound = 11;
-        delay = D_00274B90;
+        delay = g_aimStartDelay;
         anim = (void*)self->aimAnim6;
         if (FindStateEntryIndex((StateGraph*)self->stateGraph, 0x14F) >= 0) {
             TeleportStateWalker((StateWalker*)self->stateWalker, 0x14F);
         }
-        self->aimEndTime = g_gameClock.time + D_00274B94;
+        self->aimEndTime = g_gameClock.time + g_aimDurationLong;
         break;
     case 7:
     aim7:
         self->foundNodeCount = 0;
         SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->aimBlend7, (void*)self->aimAnim7);
         sound = 11;
-        delay = D_00274B90;
+        delay = g_aimStartDelay;
         anim = (void*)self->aimAnim7;
         if (FindStateEntryIndex((StateGraph*)self->stateGraph, 0x14F) >= 0) {
             TeleportStateWalker((StateWalker*)self->stateWalker, 0x14F);
         }
-        self->aimEndTime = g_gameClock.time + D_00274B98;
+        self->aimEndTime = g_gameClock.time + g_aimDurationShort;
         break;
     case 8:
         anim = self->aimAnim8;
@@ -534,7 +534,7 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
         MeasurePointToSegment(&world, &delta, &hitPoint, &hit[0], &hit[1]);
         if (n->parent != 0) {
             if (((PlacedObject*)n->parent)->root->desc->flags & 8) {
-                hit[1] = hit[1] + D_00274BD4;
+                hit[1] = hit[1] + g_aimHitDistanceBias;
             }
         }
         if (hit[1] < bestDist) {
@@ -574,7 +574,7 @@ void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
     if (s->state == 0) {
         k = 3.1500001f;
     }
-    FindNearestClass75Ahead(s, 2, D_00274BE0, &fr.found, fr.dir, 0.150000006f, k);
+    FindNearestClass75Ahead(s, 2, g_aimBlendSearchOffset, &fr.found, fr.dir, 0.150000006f, k);
     f32 t;
     if (fr.found != 0) {
         f32 v = (fr.dir[2] - -50.0f) * 0.0090909088f;
@@ -590,8 +590,8 @@ void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
     } else {
         t = 1.0f;
     }
-    if (D_00274BD8 >= 0.0f) {
-        t = D_00274BD8;
+    if (g_aimBlendOverride >= 0.0f) {
+        t = g_aimBlendOverride;
     }
     out->a = 1.0f - t;
     out->b = t;
@@ -608,7 +608,7 @@ void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
 void TurnPlayerToClass75AheadMask8(Player* self)
 {
     NearestAhead t;
-    FindNearestClass75Ahead(self, 8, D_00274BF0, &t.found, t.dir, 0.25f, 1.0f);
+    FindNearestClass75Ahead(self, 8, g_aimTurnSearchOffset8, &t.found, t.dir, 0.25f, 1.0f);
     self->boundObject = 0;
     self->aimTarget = t.found;
     self->aimCurve = 0;
@@ -621,7 +621,7 @@ void TurnPlayerToClass75AheadMask8(Player* self)
 void TurnPlayerToClass75AheadMask4(Player* self)
 {
     NearestAhead t;
-    FindNearestClass75Ahead(self, 4, D_00274C00, &t.found, t.dir, 0.25f, 3.15f);
+    FindNearestClass75Ahead(self, 4, g_aimTurnSearchOffset4, &t.found, t.dir, 0.25f, 3.15f);
     self->boundObject = 0;
     self->aimTarget = t.found;
     self->aimCurve = 0;

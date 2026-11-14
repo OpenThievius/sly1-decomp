@@ -33,7 +33,7 @@ void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec)
             if (code < 0x3F6) {
                 StopTimer(&g_timerElement);
                 g_gaugeAmountCaption.vt->m15(&g_gaugeAmountCaption);
-                D_0026E4E0.vt->m15(&D_0026E4E0);
+                g_gaugeColliderCaption.vt->m15(&g_gaugeColliderCaption);
                 g_timerElement.vt->m15(&g_timerElement);
                 SetWorldActiveFollower(self->world, 0);
             }

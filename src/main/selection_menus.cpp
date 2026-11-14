@@ -54,16 +54,16 @@ struct ChoiceLevelEntry {
 };
 // The state-walker keys of each choice (D_00262860): the one walked to, the one targeted.
 struct ChoiceKeys { s32 walkerKey; s32 targetKey; };
-extern ChoiceKeys D_00262860[6];
+extern ChoiceKeys g_choiceKeys[6];
 // A sound request of a choice (D_00262890 by choice, D_00262950), 0x20 bytes.
 struct ChoiceSound { u32 w[8]; };
-extern ChoiceSound D_00262890[6];
-extern ChoiceSound D_00262950;
+extern ChoiceSound g_choiceSounds[6];
+extern ChoiceSound g_defaultChoiceSound;
 extern f32 g_gameClock[];
-extern f32 D_00262970;
+extern f32 g_choiceSoundGap;
 extern s32 D_0026FCF4;
 struct BoxStyle;
-extern BoxStyle D_00262988;
+extern BoxStyle g_selectionCaptionFrame;
 extern s32 D_00272420;
 struct CaptionLayout;
 struct CaptionLayout {
@@ -95,7 +95,7 @@ struct CaptionDrawer {
         }
     }
 };
-extern BoxStyle D_002629A8;
+extern BoxStyle g_gridSelectorFrame;
 
 void StartPlacedObject(PlacedObject* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
@@ -207,10 +207,10 @@ void SetupCurrentObjectChoices(CurrentPlacedObject* self)
             else if (t->levels[5].f448 & 1) self->walkerChoice = 0;
             else self->walkerChoice = idx;
         }
-        if (self->walkers[2].walker) TeleportStateWalker(self->walkers[2].walker, D_00262860[self->walkerChoice].walkerKey);
-        if (self->walkers[3].walker) TeleportStateWalker(self->walkers[3].walker, D_00262860[self->walkerChoice].walkerKey);
+        if (self->walkers[2].walker) TeleportStateWalker(self->walkers[2].walker, g_choiceKeys[self->walkerChoice].walkerKey);
+        if (self->walkers[3].walker) TeleportStateWalker(self->walkers[3].walker, g_choiceKeys[self->walkerChoice].walkerKey);
     }
-    PushStackElement((ElementStack*)g_elementStack, &D_0026FA90);
+    PushStackElement((ElementStack*)g_elementStack, &g_selectionCaption);
 }
 
 void StartPlacedObject(PlacedObject* self);
@@ -236,30 +236,30 @@ void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
     StateWalker* p = self->walkers[0].walker;
 
     if (p->currentEntry != p->index) {
-        D_0026F138.vt->m08(&D_0026F138, "");
+        g_copiedTextCaption.vt->m08(&g_copiedTextCaption, "");
     } else if (self->choice == 0) {
-        D_0026F138.vt->m08(&D_0026F138, "Bentley");
+        g_copiedTextCaption.vt->m08(&g_copiedTextCaption, "Bentley");
     } else {
         s32 flags = g_saveData->levels[self->choice].f448;
         if (flags & 1) {
-            SetElementTextFromIndexedCounts(&D_0026F138, self->choice);
+            SetElementTextFromIndexedCounts(&g_copiedTextCaption, self->choice);
         } else if (self->choice == self->walkerChoice) {
-            D_0026F138.vt->m08(&D_0026F138, "Murray");
+            g_copiedTextCaption.vt->m08(&g_copiedTextCaption, "Murray");
         } else {
             s1 = 1;
-            D_0026F138.vt->m08(&D_0026F138, "");
+            g_copiedTextCaption.vt->m08(&g_copiedTextCaption, "");
         }
     }
 
-    SetScreenElementHoldTime(&D_0026F138, 0.0f);
-    D_0026F138.announce = 0;
-    D_0026F138.vt->m14(&D_0026F138);
+    SetScreenElementHoldTime(&g_copiedTextCaption, 0.0f);
+    g_copiedTextCaption.announce = 0;
+    g_copiedTextCaption.vt->m14(&g_copiedTextCaption);
 
     if (s1 != 0) {
-        D_0026FA90.vt->m08(&D_0026FA90, "Press &2X&. to Start Mission!");
-        D_0026FA90.vt->m14(&D_0026FA90);
+        g_selectionCaption.vt->m08(&g_selectionCaption, "Press &2X&. to Start Mission!");
+        g_selectionCaption.vt->m14(&g_selectionCaption);
     } else {
-        D_0026FA90.vt->m15(&D_0026FA90);
+        g_selectionCaption.vt->m15(&g_selectionCaption);
     }
 }
 
@@ -337,7 +337,7 @@ void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
             void* h = self->walkers[3].walker;
             callB = 0;
             if (h != 0) {
-                { SetStateWalkerTarget((StateWalker*)h, D_00262860[idx].targetKey); }
+                { SetStateWalkerTarget((StateWalker*)h, g_choiceKeys[idx].targetKey); }
             }
         }
         }
@@ -363,13 +363,13 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
             s32 fl = g_saveData->optionFlags;
             if (!(fl & 2)) {
                 g_saveData->optionFlags = fl | 2;
-                slot = (ChoiceSound*)&D_00262950;
+                slot = (ChoiceSound*)&g_defaultChoiceSound;
             }
         } else {
             f32 t = g_gameClock[1];
-            if (D_00262970 <= t - D_0026FA90.lastAt) {
-                D_0026FA90.lastAt = t;
-                slot = (ChoiceSound*)((u8*)D_00262890 + (a << 5));
+            if (g_choiceSoundGap <= t - g_selectionCaption.lastAt) {
+                g_selectionCaption.lastAt = t;
+                slot = (ChoiceSound*)((u8*)g_choiceSounds + (a << 5));
             }
         }
         if (slot) {
@@ -381,11 +381,11 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
     if (h) {
         if (self->choice == -1) {
             if (a != 0) {
-                TeleportStateWalker((StateWalker*)h, D_00262860[a].targetKey);
-                SetStateWalkerTarget(self->walkers[0].walker, D_00262860[a].walkerKey);
+                TeleportStateWalker((StateWalker*)h, g_choiceKeys[a].targetKey);
+                SetStateWalkerTarget(self->walkers[0].walker, g_choiceKeys[a].walkerKey);
             }
         } else {
-            SetStateWalkerTarget((StateWalker*)h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
+            SetStateWalkerTarget((StateWalker*)h, *(s32*)((u8*)g_choiceKeys + (a * 8 + b * 4)));
         }
     }
     self->choice = a;
@@ -399,14 +399,14 @@ void InitSelectionCaption(T217D_12E0* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
-        self->frame = (Font**)&D_00262988;
+        self->frame = (Font**)&g_selectionCaptionFrame;
         *self->frame = GetFontById(2);
     }
     SetScreenElementHoldTime(self, 0.0f);
     self->node = 0;
     *(u32*)self->rgba.c = 0xDF7F7F7F;
     self->sound = 0;
-    self->lastAt = -D_00262970;
+    self->lastAt = -g_choiceSoundGap;
 }
 
 void PushObjectCameraController(void* p);
@@ -454,7 +454,7 @@ void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
     if (D_00272420 != 0) {
         return;
     }
-    if (D_0027051C != 0) {
+    if (g_activeStepSequence != 0) {
         return;
     }
     CurrentPlacedObject* o = (CurrentPlacedObject*)self->node;
@@ -471,10 +471,10 @@ void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
     if (o->keyIndex == 1 && (p->currentEntry == p->index || delay <= g_gameTime[0] - o->choiceTime)) {
         s32 idx = o->choice;
         if (idx == 0) {
-            if (D_0026FD00.mode != 0) {
+            if (g_gridSelector.mode != 0) {
                 return;
             }
-            PushStackElement((ElementStack*)g_elementStack, &D_0026FD00);
+            PushStackElement((ElementStack*)g_elementStack, &g_gridSelector);
             return;
         }
         if (g_mapScreenList.mode != 0) {
@@ -522,7 +522,7 @@ void SetSelectionCaptionOpen(T217D_12E0* self, s32 v)
         }
         ClearPadSelectFlags(1);
         self->vt->m15(self);
-        D_0026F138.vt->m15(&D_0026F138);
+        g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
     }
     self->open = v;
 }
@@ -581,7 +581,7 @@ void InitGridSelector(T217D_1330* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
-        self->frame = (Font**)&D_002629A8;
+        self->frame = (Font**)&g_gridSelectorFrame;
         *self->frame = GetFontById(2);
     }
     Font* a1 = self->font;
@@ -773,7 +773,7 @@ void DrawGridSelector(T217D_1330* self)
     }
     PopFontScale(f);
     s32 y = (s32)(((self->y + (f32)self->font->height * self->font->sy + -1.0f) * 0.45454547f + 1936.0f) * 16.0f);
-    T217D_Word slot = *(T217D_Word*)((u8*)&D_002629A8 + 0x18);
+    T217D_Word slot = *(T217D_Word*)((u8*)&g_gridSelectorFrame + 0x18);
     DrawLineSegment((s32)((self->x + 1728.0f) * 16.0f), y, 0, (s32)((self->x + self->w + 1728.0f) * 16.0f), y, 0,
                     &slot, 0);
 }
@@ -817,11 +817,11 @@ ChoiceEntry g_currentPlacedObjectLinks[18] = {
     { 1, 0x513, 0x31C }, { 1, 0x514, 0x320 }, { 7, 0x33B, 0x33C }, { 7, 0x33C, 0x340 },
     { 7, 0x33D, 0x344 }, { 7, 0x33E, 0x348 }
 };
-ChoiceKeys D_00262860[6] = {
+ChoiceKeys g_choiceKeys[6] = {
     { 0x4FF, 0x505 }, { 0x500, 0x506 }, { 0x501, 0x507 }, { 0x502, 0x508 }, { 0x503, 0x509 },
     { 0x504, 0x50A }
 };
-ChoiceSound D_00262890[6] = {
+ChoiceSound g_choiceSounds[6] = {
     { { 0, 0, 0, 0, 0, 0, 0, 0 } },
     { { 0x635DE216, 0x4EC49A4B, 0xE334472E, 0xCEF69512, 0x21FD26D6, 0x635CED13, 0xE33445A7, 0x4EC400FB } },
     { { 0x3FB4CB9D, 0xE4C59CDC, 0xB54DAA16, 0x74DAA291, 0x4E0ADF39, 0x3FB04A25, 0xB54DA89D, 0xE4C5FF1C } },
@@ -829,17 +829,17 @@ ChoiceSound D_00262890[6] = {
     { { 0xA46F3D2E, 0x368721CE, 0xF314B84E, 0x702E7249, 0x5011BB12, 0xA47BDDCC, 0xF314BAC4, 0x3687A2FE } },
     { { 0x4BEF3327, 0x61E51B24, 0x2E2955B0, 0xFEF61D5D, 0x4AC1B015, 0x4BE71C67, 0x2E29573C, 0x61E5EF04 } }
 };
-ChoiceSound D_00262950 = { { 0xAD5AA16C, 0xC4D11624, 0x183E0989, 0x9870DBBF, 0xC74A50B2, 0xAD59F526, 0x183E0BF2, 0xC4D06934 } };
+ChoiceSound g_defaultChoiceSound = { { 0xAD5AA16C, 0xC4D11624, 0x183E0989, 0x9870DBBF, 0xC74A50B2, 0xAD59F526, 0x183E0BF2, 0xC4D06934 } };
 // Six words of floats; the code reads only the first (func_0016B300, func_0016B4A0).
-f32 D_00262970 = 20.0f;
+f32 g_choiceSoundGap = 20.0f;
 f32 D_00262974 = 0.5f;
 f32 D_00262978 = 2.0f;
 f32 D_0026297C = 0.0f;
 f32 D_00262980 = 0.1f;
 f32 D_00262984 = 0.0f;
-BoxStyle D_00262988(2.0f, 1.0f);
+BoxStyle g_selectionCaptionFrame(2.0f, 1.0f);
 f32 D_002629A4 = 0.5f;
-BoxStyle D_002629A8(2.0f, 1.0f);  // D_002629C0, which func_0016BEA0 reads, is its colour f18
+BoxStyle g_gridSelectorFrame(2.0f, 1.0f);  // D_002629C0, which func_0016BEA0 reads, is its colour f18
 
 // The static initialiser above (func_0016C360) is followed in retail by 12 bytes the linker left
 // of a setter this file wrote out, then the file's _GLOBAL_$I$ (func_0016C450).

@@ -60,7 +60,7 @@ typedef void (*ActivationHook)(void* self, s32 mode, void* other);
 extern u8 g_elementStack[];
 void PushStackElement(ElementStack* self, ScreenElement* node);
 extern s32 g_padRouting;
-extern u8* D_0026F800;
+extern u8* g_playerStepSequence;
 // A record whose 16-bit flags sit at 0xAA.
 
 
@@ -115,18 +115,18 @@ struct ClampInt {
 };
 
 void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other);
-f32 D_00269BC0[3] = { 1000.0f, 10.0f, 1.0f };
+f32 g_followZRamp[3] = { 1000.0f, 10.0f, 1.0f };
 s32 g_activeSwitchedCollider = -1;
-EffectSpawnParams D_00269BD0 = { 0x18, -1, 0, 0, 1.0f, 2.0f, 0, 0, 1.0f, 2.0f, 0, 0, 0, 1, 0, 0 };
+EffectSpawnParams g_switchedEffectParams = { 0x18, -1, 0, 0, 1.0f, 2.0f, 0, 0, 1.0f, 2.0f, 0, 0, 0, 1, 0, 0 };
 // Built by the file's static initialiser (func_001930B8, which the compiler makes from these two
 // brace initialisers): a vector member copied from a global makes an initialiser run at run
 // time, into a temporary that is then copied whole. Both stay where retail has them: the static
 // in .bss, the global with the uninitialised ones at the end of .data.
-static Blk05 D_00604700 = {
+static Blk05 g_defaultSwitchedColliderData = {
     { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { { 0, 0, 0, 0 } }, 0.0f, 0.0f, 0.0f, 0,
     { 0.0f, 0.0f, 0.0f }, *(Quad16*)&D_00248D30, { 0.0f, 0.0f, 0.0f }
 };
-Blk05 D_00269C10 = {
+Blk05 g_switchedEffectBlock = {
     { 1000.0f, 1200.0f, 1.0f }, { 0.0f, 0.0f, -1750.0f }, { -0.5f, 0.0f, 0.0f }, *(Quad16*)&g_unitZVector, 0.0f, 0.0f, 0.0f, 1,
     { 0.5f, 2.0f, 0.0f }, { { 0, 0, 0, 0 } }, { 1.0f, -1.0f, 0.0f }
 };
@@ -193,7 +193,7 @@ void CaptureSwitchedColliderPose(SwitchedCollider* self, u8* out, f32 a)
     }
     Camera* base = g_camera;
     if (base->snapping == 0) {
-        *(f32*)(out + 0x18) = ApproachValueWithRamp(self->focusPoint.z, self->v140.z, a, (RampProfile*)D_00269BC0, 0);
+        *(f32*)(out + 0x18) = ApproachValueWithRamp(self->focusPoint.z, self->v140.z, a, (RampProfile*)g_followZRamp, 0);
     }
     *(Quad16*)((u8*)self + 0x560) = *(Quad16*)(out + 0x10);
 }
@@ -376,7 +376,7 @@ void* GetActiveSwitchedColliderData()
 {
     void* r = GetActiveSwitchedCollider();
     if (r) return (u8*)r + 0x580;
-    return &D_00604700;
+    return &g_defaultSwitchedColliderData;
 }
 
 void GetSwitchedColliderInteractFlags(s32, s32, InteractFlags* out)
@@ -397,12 +397,12 @@ void HandleStepSequenceSkipButtons(void* self, PadRecord* rec)
     if (IsTopCameraController(&g_camera->ctl454) != 0)
         return;
     PadRecord* a1 = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
-    StepSequence* ctx = D_0027051C;
+    StepSequence* ctx = g_activeStepSequence;
     if (ctx != 0 && ctx->state2D4 == 3 && ctx->f32C == 0 && (a1->flags & 0xC) != 0
         && *(s32*)ctx->target304 != 0) {
         SkipRemainingSteps(ctx);
-    } else if ((rec->flags & 0xC) != 0 && D_0026F800 != 0) {
-        SetStepSequenceState((StepSequence*)D_0026F800, 1);
+    } else if ((rec->flags & 0xC) != 0 && g_playerStepSequence != 0) {
+        SetStepSequenceState((StepSequence*)g_playerStepSequence, 1);
     }
     ClearPadPressedBits(rec, 0xC);
 }
@@ -459,9 +459,9 @@ void FinishSwitchedCollider(SwitchedCollider* self)
     } else {
         s32 v = (s32)self->f588[1];
         if (v != 0) {
-            u8* g = (u8*)&D_00269BD0;
+            u8* g = (u8*)&g_switchedEffectParams;
             *(s32*)(g + 0x28) = v;
-            SpawnEffectsAt((Quad16*)(((u8*)self->f584) + 0x140), (Quad16*)&g_unitZVector, 1, (SpawnTail*)g, (SpawnBlock*)&D_00269C10, 0, 0);
+            SpawnEffectsAt((Quad16*)(((u8*)self->f584) + 0x140), (Quad16*)&g_unitZVector, 1, (SpawnTail*)g, (SpawnBlock*)&g_switchedEffectBlock, 0, 0);
         }
     }
 }

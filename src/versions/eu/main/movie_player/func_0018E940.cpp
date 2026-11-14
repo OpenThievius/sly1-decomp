@@ -27,5 +27,5 @@ s32 StartMovieStream(MovieStream* self_)
     self->f00 = 1;
     self->f04 = -1;
     InitRingBuffer((RingBuffer*)self->sub30, 0x28, (u8*)self->f08);
-    InitRingBuffer((RingBuffer*)self->sub50, 0x20000, D_002CBB40);
+    InitRingBuffer((RingBuffer*)self->sub50, 0x20000, g_movieDataRingBuffer);
 }

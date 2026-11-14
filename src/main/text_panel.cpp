@@ -329,56 +329,56 @@ struct PanelStyle {
     }
 };
 
-s32 D_00261090[4] = { 75, 0, 0, 0 };
-f32 D_002610A0[4] = { 80.0f, -288.0f, 288.0f, 0.0f };
-f32 D_002610B0[4] = { 280.800018f, 376.0f, -376.0f, 0.0f };
-f32 D_002610C0[4] = { -8.0f, -40.0f, 40.0f, 0.0f };
-PanelColor D_002610D0(0x00, 0x00, 0x00, 0x80);
-PanelColor D_002610D8(0x00, 0x52, 0x7E, 0x80);
-PanelColor D_002610E0(0x19, 0x1E, 0x6E, 0x80);
-PanelColor D_002610E8(0x7E, 0x28, 0x0A, 0x80);
-PanelColor D_002610F0(0x50, 0x28, 0x28, 0x80);
-PanelColor D_002610F8(0xF0, 0xF0, 0x00, 0x80);
-PanelColor D_00261100(0x28, 0x28, 0x00, 0x80);
-PanelColor D_00261108(0xFF, 0xFF, 0xFF, 0x80);
-PanelColor D_00261110(0xE6, 0xE6, 0xE6, 0x80);
+s32 g_hintLabelOffset[4] = { 75, 0, 0, 0 };
+f32 g_panelEdgeCurvePointsA[4] = { 80.0f, -288.0f, 288.0f, 0.0f };
+f32 g_panelEdgeCurvePointsB[4] = { 280.800018f, 376.0f, -376.0f, 0.0f };
+f32 g_panelEdgeCurvePointsC[4] = { -8.0f, -40.0f, 40.0f, 0.0f };
+PanelColor g_panelBackdropColor(0x00, 0x00, 0x00, 0x80);
+PanelColor g_arcTickColorFrom(0x00, 0x52, 0x7E, 0x80);
+PanelColor g_arcTickColorTo(0x19, 0x1E, 0x6E, 0x80);
+PanelColor g_panelPalette2ColorB(0x7E, 0x28, 0x0A, 0x80);
+PanelColor g_panelPalette2ColorA(0x50, 0x28, 0x28, 0x80);
+PanelColor g_panelPalette1ColorB(0xF0, 0xF0, 0x00, 0x80);
+PanelColor g_panelPalette1ColorA(0x28, 0x28, 0x00, 0x80);
+PanelColor g_panelPalette0ActiveColorB(0xFF, 0xFF, 0xFF, 0x80);
+PanelColor g_panelPalette0ActiveColorA(0xE6, 0xE6, 0xE6, 0x80);
 PanelColor D_00261118(0x2F, 0x72, 0x3E, 0x80);
-s32 D_00261120[2] = { -268435456, -268435456 };
+s32 g_panelBankReleaseMasks[2] = { -268435456, -268435456 };
 // The eight compass points, read by func_00131198 and func_001316E8.
-const char* D_00261128[8] = { "N", "NW", "W", "SW", "S", "SE", "E", "NE" };
-PanelStyle D_00261148(2.0f);
-PanelStyle D_00261168(32, 16);
-f32 D_00261184 = 1.0f;
-f32 D_00261188 = 0.5f;
+const char* g_compassDirectionNames[8] = { "N", "NW", "W", "SW", "S", "SE", "E", "NE" };
+PanelStyle g_panelFrameStyle(2.0f);
+PanelStyle g_objectLabelStyle(32, 16);
+f32 g_nearestLabelScale = 1.0f;
+f32 g_otherLabelScale = 0.5f;
 f32 D_00261190[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
-f32 D_002611A0[4] = { 1.5f, -1.5f, 0.0f, 0.0f };
-f32 D_002611B0[3] = { 5.0f, 0.0f, 0.100000001f };
-f32 D_002611BC = 0.5f;
-f32 D_002611C0[3] = { 5.0f, 0.0f, 0.100000001f };
-f32 D_002611CC = 250.0f;
-f32 D_002611D0 = 40.0f;
-f32 D_002611D4 = -20.0f;
-f32 D_002611D8 = -15.0f;
-f32 D_002611DC = 1.0f;
-f32 D_002611E0[4][4] = {
+f32 g_labelAlphaCoefficients[4] = { 1.5f, -1.5f, 0.0f, 0.0f };
+f32 g_labelAlphaRamp[3] = { 5.0f, 0.0f, 0.100000001f };
+f32 g_otherLabelAlphaFactor = 0.5f;
+f32 g_labelScaleRamp[3] = { 5.0f, 0.0f, 0.100000001f };
+f32 g_labelBaseWidth = 250.0f;
+f32 g_labelOffsetX = 40.0f;
+f32 g_labelOffsetY = -20.0f;
+f32 g_labelPointerOffsetX = -15.0f;
+f32 g_labelPointerOffsetY = 1.0f;
+f32 g_panelBlockCornersX[4][4] = {
     { -5.0f, -15.0f, -35.0f, -15.0f },
     { 5.0f, 15.0f, 35.0f, 15.0f },
     { 0.0f, 10.0f, 0.0f, -10.0f },
     { 0.0f, -10.0f, 0.0f, 10.0f },
 };
-f32 D_00261220[4][4] = {
+f32 g_panelBlockCornersY[4][4] = {
     { 0.0f, -11.0f, 0.0f, 11.0f },
     { 0.0f, 11.0f, 0.0f, -11.0f },
     { -4.4f, -15.4f, -35.2f, -15.4f },
     { 4.4f, 15.4f, 35.2f, 15.4f },
 };
-f32 D_00261260[2] = { 8.0f, 0.0f };
-f32 D_00261268[3] = { 8.0f, 0.0f, 0.150000006f };
+f32 g_panelBlockPulseRate[2] = { 8.0f, 0.0f };
+f32 g_panelBlockFadeRamp[3] = { 8.0f, 0.0f, 0.150000006f };
 f32 D_00261274 = 0.25f;
-CurveSpan D_00261280;
-CurveSpan D_002612B0;
-CurveSpan D_002612E0;
-f32 D_00261310;
+CurveSpan g_panelEdgeCurveA;
+CurveSpan g_panelEdgeCurveB;
+CurveSpan g_panelEdgeCurveC;
+f32 g_compassLabelWidth;
 
 void InitCurveSpan(CurveSpan* d, const SpanHead* src, f32 x, f32 y, s32 n);
 f32 EvalCurveSpan(const CurveSpan* s, s32 x);
@@ -494,12 +494,12 @@ void SetupTextPanel(T217D_440* self)
     small->testWord = 0x3F001;
     self->font = self->font->Clone(0.75f, sy);
     if (IsFontLoaded(2) != 0) {
-        self->frame = (Font**)&D_00261148;
+        self->frame = (Font**)&g_panelFrameStyle;
         *self->frame = GetFontById(2);
     }
-    D_00261310 = MeasureFontString(self->smallFont, D_00261128[0]);
+    g_compassLabelWidth = MeasureFontString(self->smallFont, g_compassDirectionNames[0]);
     for (u32 i = 1; i < 8; i++) {
-        D_00261310 = MeasureFontString(self->smallFont, D_00261128[i]) >? D_00261310;
+        g_compassLabelWidth = MeasureFontString(self->smallFont, g_compassDirectionNames[i]) >? g_compassLabelWidth;
     }
     self->state = -1;
     self->child = 0;
@@ -512,20 +512,20 @@ void SetupTextPanel(T217D_440* self)
     BeginGifTag(&gs, 0, 3, 0x1EE);
     AddGifRegisterWrite(&gs, 0x47, 0x70000);
     AddGifRegisterWrite(&gs, 0x42, 0x44);
-    PanelColor c = D_002610D0;
+    PanelColor c = g_panelBackdropColor;
     c.a = 0x60;
     AddGifRgbaEntry(&gs, *(u32*)&c);
     BeginGifTag(&gs, 0x44, 1, 4);
-    InitCurveSpan(&D_00261280, (const SpanHead*)D_002610A0, 0.171875f, 40.0f, 0x18);
-    InitCurveSpan(&D_002612B0, (const SpanHead*)D_002610B0, 0.171875f, -60.0f, 0x18);
-    InitCurveSpan(&D_002612E0, (const SpanHead*)D_002610C0, 0.2857143f, 8.0f, 0x18);
+    InitCurveSpan(&g_panelEdgeCurveA, (const SpanHead*)g_panelEdgeCurvePointsA, 0.171875f, 40.0f, 0x18);
+    InitCurveSpan(&g_panelEdgeCurveB, (const SpanHead*)g_panelEdgeCurvePointsB, 0.171875f, -60.0f, 0x18);
+    InitCurveSpan(&g_panelEdgeCurveC, (const SpanHead*)g_panelEdgeCurvePointsC, 0.2857143f, 8.0f, 0x18);
     s32 i;
     f32 t;
     AddGifXyzfNoDrawEntry(&gs, 0x6C00, 0x7900, 0x0FFFFFF0, 0);
     AddGifXyzfNoDrawEntry(&gs, 0x6C00, 0x7B45, 0x0FFFFFF0, 0);
     for (t = step, i = 1; i < 24; i++) {
         f32 u = t * 640.0f;
-        f32 y = EvalCurveSpan(&D_00261280, i);
+        f32 y = EvalCurveSpan(&g_panelEdgeCurveA, i);
         t += step;
         s32 x = (s32)((u + 1728.0f) * 16.0f);
         AddGifXyzfEntry(&gs, x, 0x7900, 0x0FFFFFF0, 0);
@@ -538,7 +538,7 @@ void SetupTextPanel(T217D_440* self)
     t = 1.0f / 24.0f;
     for (i = 1; i < 24; i++) {
         f32 u = t * 640.0f;
-        f32 y = EvalCurveSpan(&D_002612B0, i);
+        f32 y = EvalCurveSpan(&g_panelEdgeCurveB, i);
         t += step;
         s32 x = (s32)((u + 1728.0f) * 16.0f);
         AddGifXyzfEntry(&gs, x, 0x8700, 0x0FFFFFF0, 0);
@@ -586,7 +586,7 @@ void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
     BeginGifTag(gs, 0, 3, 0x1EE);
     AddGifRegisterWrite(gs, 0x47, 0x3F001);
     AddGifRegisterWrite(gs, 0x42, 0x44);
-    AddGifRgbaEntry(gs, *(u32*)&D_002610E0);
+    AddGifRgbaEntry(gs, *(u32*)&g_arcTickColorTo);
     BeginGifTag(gs, 0x84, 1, 4);
 
     for (i = 0; i < 11; i++) {
@@ -605,16 +605,16 @@ void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
     f32 half = 0.5f;
     f32 row = 6.0f;
     f32 a = WrapModulo(g_camera->heading + 0.39269909f, 6.2831855f);
-    f32 w = D_00261310 + 4.0f;
+    f32 w = g_compassLabelWidth + 4.0f;
     s32 cur = (s32)(a / 0.78539819f);
     s32 prev = (cur + 7) & 7;
     s32 next = (cur + 1) & 7;
     f32 frac = WrapModulo(a, 0.78539819f) / 0.78539819f;
     Font* font;
-    f32 wCur = MeasureFontString(PanelFont::Of(self), D_00261128[cur]);
+    f32 wCur = MeasureFontString(PanelFont::Of(self), g_compassDirectionNames[cur]);
     f32 off = frac * w;
-    f32 wPrev = MeasureFontString(PanelFont::Of(self), D_00261128[prev]);
-    f32 wNext = MeasureFontString(PanelFont::Of(self), D_00261128[next]);
+    f32 wPrev = MeasureFontString(PanelFont::Of(self), g_compassDirectionNames[prev]);
+    f32 wNext = MeasureFontString(PanelFont::Of(self), g_compassDirectionNames[next]);
     f32 hPrev = (w - wPrev) * half;
     f32 hCur = (w - wCur) * half;
     f32 hNext = (w - wNext) * half;
@@ -634,32 +634,32 @@ void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
 
     font = PanelFont::Of(self);
     L.h = (f32)font->height * font->sy;
-    L.w = D_00261310;
-    *(PanelColor*)&L.color = PanelColor(D_002610D8);
+    L.w = g_compassLabelWidth;
+    *(PanelColor*)&L.color = PanelColor(g_arcTickColorFrom);
     L.x = xPrev;
     L.y = row;
-    DrawFontString(PanelFont::Of(self), D_00261128[prev], (StringLayout*)&L, 0, gs);
+    DrawFontString(PanelFont::Of(self), g_compassDirectionNames[prev], (StringLayout*)&L, 0, gs);
     L.x = xNext;
     L.y = row;
-    DrawFontString(PanelFont::Of(self), D_00261128[next], (StringLayout*)&L, 0, gs);
+    DrawFontString(PanelFont::Of(self), g_compassDirectionNames[next], (StringLayout*)&L, 0, gs);
 
     {
         SpanHead q = { 0.0f, 4.0f, -4.0f };
         f32 t = q.c0 + frac * (q.c1 + frac * q.c2);
-        *(PanelColor*)&L.color = BorderColorMix::Mix(D_002610D8, PanelColor(0x32, 0x84, 0xB0, 0x80), t);
+        *(PanelColor*)&L.color = BorderColorMix::Mix(g_arcTickColorFrom, PanelColor(0x32, 0x84, 0xB0, 0x80), t);
     }
     L.x = xCur;
     L.y = row;
-    DrawFontString(PanelFont::Of(self), D_00261128[cur], (StringLayout*)&L, 0, gs);
+    DrawFontString(PanelFont::Of(self), g_compassDirectionNames[cur], (StringLayout*)&L, 0, gs);
 
     BeginGifTag(gs, 0, 1, 0xE);
     AddGifRegisterWrite(gs, 0x40, 0xDF0000027F0000);
 }
 
 
-extern const char D_00249CE0[8] = "%c";
-extern const char D_00249CE8[8] = "Move";
-extern const char D_00249CF0[8] = "Zoom";
+extern const char g_characterFormat[8] = "%c";
+extern const char g_moveLabel[8] = "Move";
+extern const char g_zoomLabel[8] = "Zoom";
 s32 FormatToString(char* dst, const char* fmt, ...);
 
 struct ScreenLayout {
@@ -705,8 +705,8 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     BeginGifTag(gs, 0x84, 5, 0x44441);
     for (s32 i = 0; i < 8; i++) {
         f32 zoom = g_camera->f478;
-        const PanelColor* const lit = &D_002610D8;
-        const PanelColor* const dim = &D_002610E0;
+        const PanelColor* const lit = &g_arcTickColorFrom;
+        const PanelColor* const dim = &g_arcTickColorTo;
         f32 step = 1.0f / 15.0f;
         f32 top = 372.800018f;
         f32 half = 0.5f;
@@ -736,7 +736,7 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     PadRecord* pad = (g_padRouting & 2) ? &g_padRecord : &g_blankPadRecord;
     Font* glyphs = GetFontById(1);
     Font* text = GetFontById(0);
-    FormatToString(buf, D_00249CE0, 0x28);
+    FormatToString(buf, g_characterFormat, 0x28);
     Layout_137228* lay = &L;
     lay->f14 = 1;
     lay->f18 = 1;
@@ -751,7 +751,7 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     L.y = row;
     DrawFontString(glyphs, buf, (StringLayout*)&L, 0, gs);
     PopFontScale(glyphs);
-    FormatToString(buf, D_00249CE0, 0x29);
+    FormatToString(buf, g_characterFormat, 0x29);
     s = 0.4f;
     if (self->open != 0 && pad->secondStickMagnitude != 0.0f) {
         s = 0.5f;
@@ -765,13 +765,13 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     PushFontScale(text, 0.6f, 0.6f);
     Layout_137228& move = L;
     move.f14 = 2;
-    L.x = (f32)(320 - D_00261090[0]);
+    L.x = (f32)(320 - g_hintLabelOffset[0]);
     L.y = row;
-    DrawFontString(text, D_00249CE8, (StringLayout*)&L, 0, gs);
+    DrawFontString(text, g_moveLabel, (StringLayout*)&L, 0, gs);
     L.f14 = 0;
-    L.x = (f32)(D_00261090[0] + 320);
+    L.x = (f32)(g_hintLabelOffset[0] + 320);
     L.y = row;
-    DrawFontString(text, D_00249CF0, (StringLayout*)&L, 0, gs);
+    DrawFontString(text, g_zoomLabel, (StringLayout*)&L, 0, gs);
     PopFontScale(text);
 }
 
@@ -806,35 +806,35 @@ void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
     switch (self->palette) {
     case 0:
         if (self->state == 5) {
-            PanelColor t = D_00261110;
+            PanelColor t = g_panelPalette0ActiveColorA;
             t.a = alpha;
             c0 = t;
-            t = D_00261108;
+            t = g_panelPalette0ActiveColorB;
             t.a = alpha;
             c1 = t;
         } else {
-            PanelColor t = (*(PanelColor*)&D_002610E0);
+            PanelColor t = (*(PanelColor*)&g_arcTickColorTo);
             t.a = alpha;
             c0 = t;
-            t = (*(PanelColor*)&D_002610D8);
+            t = (*(PanelColor*)&g_arcTickColorFrom);
             t.a = alpha;
             c1 = t;
         }
         break;
     case 1: {
-        PanelColor t = D_00261100;
+        PanelColor t = g_panelPalette1ColorA;
         t.a = alpha;
         c0 = t;
-        t = D_002610F8;
+        t = g_panelPalette1ColorB;
         t.a = alpha;
         c1 = t;
         break;
     }
     case 2: {
-        PanelColor t = D_002610F0;
+        PanelColor t = g_panelPalette2ColorA;
         t.a = alpha;
         c0 = t;
-        t = D_002610E8;
+        t = g_panelPalette2ColorB;
         t.a = alpha;
         c1 = t;
         break;
@@ -869,7 +869,7 @@ void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
             f32 y;
             f32 y2;
             u += step;
-            y = posY + scale * EvalCurveSpan(&D_002612E0, i);
+            y = posY + scale * EvalCurveSpan(&g_panelEdgeCurveC, i);
             y2 = y + scale * 5.0f;
             AddGifRgbaEntry(gs, *(u32*)&colB);
             AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(x), CenterFrameMath::ScreenY(y), 0, 0);
@@ -891,7 +891,7 @@ void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
             f32 y;
             f32 y2;
             u += step;
-            y = posY - scale * EvalCurveSpan(&D_002612E0, i);
+            y = posY - scale * EvalCurveSpan(&g_panelEdgeCurveC, i);
             y2 = y - scale * 5.0f;
             AddGifRgbaEntry(gs, *(u32*)&colB);
             AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(x), CenterFrameMath::ScreenY(y), 0, 0);
@@ -957,11 +957,11 @@ void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
     f32 step = 1.0f / 24.0f;
     f32 t;
     t = 0.5f - Cosine(self->spin) * 0.5f;
-    c0 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
+    c0 = BorderColorMix::Mix(g_arcTickColorTo, g_arcTickColorFrom, t);
     t = 0.5f - Cosine(self->spin + 1.5707964f) * 0.5f;
-    c1 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
+    c1 = BorderColorMix::Mix(g_arcTickColorTo, g_arcTickColorFrom, t);
     t = 0.5f - Cosine(self->spin + 3.1415927f) * 0.5f;
-    c2 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
+    c2 = BorderColorMix::Mix(g_arcTickColorTo, g_arcTickColorFrom, t);
     s32 i;
     f32 x;
 
@@ -974,7 +974,7 @@ void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 v = EvalCurveSpan(&D_00261280, i);
+        f32 v = EvalCurveSpan(&g_panelEdgeCurveA, i);
         f32 sx = x * 640.0f;
         f32 v2 = v + 4.0f;
         AddGifRgbaEntry(gs, *(u32*)&c2);
@@ -996,7 +996,7 @@ void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 v = EvalCurveSpan(&D_002612B0, i);
+        f32 v = EvalCurveSpan(&g_panelEdgeCurveB, i);
         f32 sx = x * 640.0f;
         f32 v2 = v - 4.0f;
         AddGifRgbaEntry(gs, *(u32*)&c2);
@@ -1018,7 +1018,7 @@ void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 r = EvalCurveSpan(&D_00261280, i);
+        f32 r = EvalCurveSpan(&g_panelEdgeCurveA, i);
         f32 sx = x * 640.0f;
         f32 v = r + 4.0f;
         f32 v2 = v + 4.0f;
@@ -1041,7 +1041,7 @@ void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 r = EvalCurveSpan(&D_002612B0, i);
+        f32 r = EvalCurveSpan(&g_panelEdgeCurveB, i);
         f32 sx = x * 640.0f;
         f32 v = r - 4.0f;
         f32 v2 = v - 4.0f;
@@ -1145,7 +1145,7 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
             }
         }
         *t = 0;
-        const f32* k = D_002611A0;
+        const f32* k = g_labelAlphaCoefficients;
         const ValueRange* lim = &g_unitRange;
         ProjectPointToCamera((Camera*)g_camera, &pos, (f32*)&screen);
         Vu0::Vec e = Vu0::Vec::Of(screen);
@@ -1153,20 +1153,20 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
         f32 scale = k[0] + len * (k[1] + len * k[2]);
         f32 alpha = lim->Limit(scale);
         if (obj != nearest) {
-            alpha *= D_002611BC;
+            alpha *= g_otherLabelAlphaFactor;
         }
-        obj->f54 = ApproachValueWithRamp(obj->f54, alpha, g_gameClock[5], (RampProfile*)D_002611B0, 0);
-        obj->f58 = ApproachValueWithRamp(obj->f58, obj == nearest ? D_00261184 : D_00261188, g_gameClock[5], (RampProfile*)D_002611C0, 0);
+        obj->f54 = ApproachValueWithRamp(obj->f54, alpha, g_gameClock[5], (RampProfile*)g_labelAlphaRamp, 0);
+        obj->f58 = ApproachValueWithRamp(obj->f58, obj == nearest ? g_nearestLabelScale : g_otherLabelScale, g_gameClock[5], (RampProfile*)g_labelScaleRamp, 0);
         PushFontScale(self->font, obj->f58, obj->f58);
         ScreenLayout::Reset(&layout);
-        f32 h = MeasureFontStringHeight(self->font, (u8*)buf, D_002611CC * obj->f58);
-        f32 x = screen.x * 320.0f + 320.0f + D_002611D0 * obj->f58;
-        f32 y = screen.y * -246.400009f + 246.400009f + D_002611D4 * obj->f58 - h;
+        f32 h = MeasureFontStringHeight(self->font, (u8*)buf, g_labelBaseWidth * obj->f58);
+        f32 x = screen.x * 320.0f + 320.0f + g_labelOffsetX * obj->f58;
+        f32 y = screen.y * -246.400009f + 246.400009f + g_labelOffsetY * obj->f58 - h;
         layout.x = x;
         layout.y = y;
-        layout.w = D_002611CC * obj->f58;
+        layout.w = g_labelBaseWidth * obj->f58;
         layout.h = h;
-        PanelStyle style(D_00261168);
+        PanelStyle style(g_objectLabelStyle);
         Font* font = GetFontById(2);
         style.font = (s32)font;
         ((u8*)&style.color)[3] = (s32)(alpha * (f32)((u8*)&style.color)[3]);
@@ -1177,7 +1177,7 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
         DrawFontString(self->font, buf, (StringLayout*)&layout, 0, q);
         BeginGifTag(q, 0xC1, 3, 0x441);
         AddGifRgbaEntry(q, ((u32*)self->frame)[6]);
-        AddGifXyzfEntry(q, CenterFrameMath::ScreenX(x + D_002611D8 * obj->f58), CenterFrameMath::ScreenY(y + h + D_002611DC * obj->f58), 0, 0);
+        AddGifXyzfEntry(q, CenterFrameMath::ScreenX(x + g_labelPointerOffsetX * obj->f58), CenterFrameMath::ScreenY(y + h + g_labelPointerOffsetY * obj->f58), 0, 0);
         y = screen.y * -246.400009f + 246.400009f;
         x = screen.x * 320.0f + 320.0f;
         AddGifXyzfEntry(q, CenterFrameMath::ScreenX(x), CenterFrameMath::ScreenY(y), 0, 0);
@@ -1204,10 +1204,10 @@ void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q)
             *(u32*)c0 = 0xFF408080;
             *(u32*)c1 = 0xFF406060;
             *(u32*)c2 = 0xFF404040;
-            f32 t = Cosine(g_gameClock[1] * D_00261260[0]) * 0.5f + 0.5f;
+            f32 t = Cosine(g_gameClock[1] * g_panelBlockPulseRate[0]) * 0.5f + 0.5f;
             for (u32 i = 0; i < 4; i++)
             {
-                f32 r = ApproachValueWithRamp(self->blockB[i], self->blockA[i] ? 1.0f : 0.0f, g_gameClock[2], (RampProfile*)&D_00261260[2], 0);
+                f32 r = ApproachValueWithRamp(self->blockB[i], self->blockA[i] ? 1.0f : 0.0f, g_gameClock[2], (RampProfile*)&g_panelBlockPulseRate[2], 0);
                 self->blockB[i] = r;
                 for (s32 j = 0; j < 4; j++)
                 {
@@ -1218,8 +1218,8 @@ void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q)
                 AddGifRgbaEntry(q, *(u32*)out);
                 for (s32 k = 0; k < 4; k++)
                 {
-                    s32 xi = (s32)(((D_002611E0[i][k] + 320.0f) + 1728.0f) * 16.0f);
-                    s32 yi = (s32)(((D_00261220[i][k] + 415.8000183f) * 0.45454547f + 1936.0f) * 16.0f);
+                    s32 xi = (s32)(((g_panelBlockCornersX[i][k] + 320.0f) + 1728.0f) * 16.0f);
+                    s32 yi = (s32)(((g_panelBlockCornersY[i][k] + 415.8000183f) * 0.45454547f + 1936.0f) * 16.0f);
                     AddGifXyzfEntry(q, xi, yi, 0, 0);
                 }
             }
@@ -1277,8 +1277,8 @@ void SetTextPanelState(T217D_440* self, s32 mode)
             self->state = mode;
             break;
         case 4:
-            ((Tail_1356C0*)&D_0026F138)->v = 0;
-            D_0026F138.vt->m15(&D_0026F138);
+            ((Tail_1356C0*)&g_copiedTextCaption)->v = 0;
+            g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
             self->state = mode;
             break;
         default:
@@ -1539,7 +1539,7 @@ void SetTextPanelOpen(T217D_440* self, s32 on)
         self->vt->m16(self, 2);
         GetCurrentLevelBit((u32*)&in);
         if (MaskWorldBitsBySave() & in.v) {
-            if (MaskWorldBitsBySave() & D_00261120[self->savedBank]) ReleasePanelEntries(self, self->savedBank, 1);
+            if (MaskWorldBitsBySave() & g_panelBankReleaseMasks[self->savedBank]) ReleasePanelEntries(self, self->savedBank, 1);
         }
         if (MaskWorldBitsBySave() & 0x800) {
             n = GatherObjectsById(g_currentWorld, 0x205, 0x82, 0, 0x100, arr);

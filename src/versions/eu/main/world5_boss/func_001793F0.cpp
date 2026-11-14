@@ -12,7 +12,7 @@ void StartWorld5ModeCollider(World5ModeCollider* self)
     self->restWeight = 1.0f;
     SetBlendItemWeights((BlendAnimationView*)self->weightBlend, 0xC, 5, &self->restWeight);
     SetWorld5ModeColliderMode(self, 2);
-    u8* base = (u8*)&D_00270650;
+    u8* base = (u8*)&g_spinningSpriteElement;
     ((T217D_Float*)(base + 0x598))->v = 0.0f;
     *(s32*)(base + 0x594) = FindAnimRecord(0x36A);
 }

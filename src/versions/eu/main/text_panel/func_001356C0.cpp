@@ -23,8 +23,8 @@ void SetTextPanelState(Obj_1356C0_eu* self, s32 mode)
             self->state = mode;
             break;
         case 4:
-            ((Tail_1356C0_eu*)&D_0026F138)->v = 0;
-            D_0026F138.vt->m15(&D_0026F138);
+            ((Tail_1356C0_eu*)&g_copiedTextCaption)->v = 0;
+            g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
             self->state = mode;
             break;
         default:

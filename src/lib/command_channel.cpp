@@ -54,18 +54,18 @@ struct Header_1FA4F8 { s32 w0; s32 w4; s32 w8; };
 struct Transfer_1FA4F8 { s32 w0; s32 w4; s32 w8; s32 wC; };
 
 struct Pair_2779B0 { s32 a; void* b; };
-extern u8 D_0064C700[];
+extern u8 g_imageEndMarker[];
 
-static Pair_2779B0 D_002779B0 = { 0, D_0064C700 };
-static s32 D_002779B8[2] = { 0, 0 };
+static Pair_2779B0 g_imageEndRecord = { 0, g_imageEndMarker };
+static s32 g_commandChannelReady[2] = { 0, 0 };
 
-static u8 D_006292C0[0x80];
-static u8 D_00629340[0x40];
-static Request_1FA068 D_00629380;
-static s32 D_00629394;
-static Channel_1FA068 D_00629398;
-static Slot_1FA068 D_006293C0[32];
-static s32 D_006294C0[32];
+static u8 g_commandReceiveBuffer[0x80];
+static u8 g_commandReceiveBuffer2[0x40];
+static Request_1FA068 g_commandRequest;
+static s32 g_commandDmaHandlerId;
+static Channel_1FA068 g_commandChannel;
+static Slot_1FA068 g_commandSystemSlots[32];
+static s32 g_commandChannelWords[32];
 
 s32 SetUpTlbForMemory(void);
 void ExitProgramSyscall(s32 status);
@@ -100,7 +100,7 @@ extern "C" void TerminateProgram(s32 status)
 
 void ClearImageEndRecordWord(void)
 {
-    D_002779B0.a = 0;
+    g_imageEndRecord.a = 0;
 }
 
 LINKER_REMNANT(func_001FA0B0);
@@ -142,7 +142,7 @@ s32 StoreIopChannelAddress(Packet_1FA068* packet, Channel_1FA068* channel)
 
 s32 GetChannelWord(s32 index)
 {
-    return D_006294C0[index];
+    return g_commandChannelWords[index];
 }
 
 LINKER_REMNANT(func_001FA1D8);
@@ -153,30 +153,30 @@ void InitCommandChannel(void)
 {
     s32 i;
     DisableInterrupts();
-    if (D_002779B8[0] != 0) {
+    if (g_commandChannelReady[0] != 0) {
         EnableInterrupts();
         return;
     }
-    D_002779B8[0] = 1;
-    D_00629398.buffer = (u32)D_006292C0 | 0x20000000;
-    D_00629398.buffer2 = (u32)D_00629340 | 0x20000000;
-    D_00629398.system_count = 0x20;
-    D_00629398.iop = 0;
-    D_00629398.system = D_006293C0;
-    D_00629398.user = 0;
-    D_00629398.user_count = 0;
-    D_00629398.words = D_006294C0;
+    g_commandChannelReady[0] = 1;
+    g_commandChannel.buffer = (u32)g_commandReceiveBuffer | 0x20000000;
+    g_commandChannel.buffer2 = (u32)g_commandReceiveBuffer2 | 0x20000000;
+    g_commandChannel.system_count = 0x20;
+    g_commandChannel.iop = 0;
+    g_commandChannel.system = g_commandSystemSlots;
+    g_commandChannel.user = 0;
+    g_commandChannel.user_count = 0;
+    g_commandChannel.words = g_commandChannelWords;
     for (i = 0; i < 32; i++) {
-        D_006293C0[i].handler = 0;
-        D_006293C0[i].arg = 0;
+        g_commandSystemSlots[i].handler = 0;
+        g_commandSystemSlots[i].arg = 0;
     }
     for (i = 0; i < 32; i++) {
-        D_006294C0[i] = 0;
+        g_commandChannelWords[i] = 0;
     }
-    D_006293C0[0].handler = (Handler_1FA068)StoreIopChannelAddress;
-    D_006293C0[1].handler = StoreChannelWord;
-    D_006293C0[0].arg = &D_00629398;
-    D_006293C0[1].arg = &D_00629398;
+    g_commandSystemSlots[0].handler = (Handler_1FA068)StoreIopChannelAddress;
+    g_commandSystemSlots[1].handler = StoreChannelWord;
+    g_commandSystemSlots[0].arg = &g_commandChannel;
+    g_commandSystemSlots[1].arg = &g_commandChannel;
     EnableInterrupts();
     SyncDataCache(0);
     if ((*(volatile u32*)0x1000E010 & 0x20) != 0) {
@@ -185,38 +185,38 @@ void InitCommandChannel(void)
     if ((*(volatile u32*)0x1000C000 & 0x100) == 0) {
         ArmIopDmaChain();
     }
-    D_00629394 = AddDmaHandler(5, (void*)HandleCommandInterrupt, 0);
+    g_commandDmaHandlerId = AddDmaHandler(5, (void*)HandleCommandInterrupt, 0);
     EnableDmaInterrupt(5);
-    D_00629398.iop = ReadIopRegister(0x80000000);
-    if (D_00629398.iop != 0) {
-        D_00629380.buffer = D_006292C0;
-        SendCommand(0x80000000, &D_00629380, 0x14, 0, 0, 0);
+    g_commandChannel.iop = ReadIopRegister(0x80000000);
+    if (g_commandChannel.iop != 0) {
+        g_commandRequest.buffer = g_commandReceiveBuffer;
+        SendCommand(0x80000000, &g_commandRequest, 0x14, 0, 0, 0);
         return;
     }
     while ((ReadIopRegister(4) & 0x20000) == 0) {
     }
-    D_00629398.iop = ReadIopRegister(2);
-    WriteIopRegister(0x80000000, D_00629398.iop);
-    WriteIopRegister(0x80000001, (u32)&D_00629398);
-    D_00629380.buffer = D_006292C0;
-    D_00629380.opt = 0;
-    SendCommand(0x80000002, &D_00629380, 0x14, 0, 0, 0);
+    g_commandChannel.iop = ReadIopRegister(2);
+    WriteIopRegister(0x80000000, g_commandChannel.iop);
+    WriteIopRegister(0x80000001, (u32)&g_commandChannel);
+    g_commandRequest.buffer = g_commandReceiveBuffer;
+    g_commandRequest.opt = 0;
+    SendCommand(0x80000002, &g_commandRequest, 0x14, 0, 0, 0);
 }
 
 void ShutDownCommandChannel(void)
 {
     (void)DisableDmaInterrupt(5);
-    (void)RemoveDmaHandler(5, D_00629394);
-    D_002779B8[0] = 0;
+    (void)RemoveDmaHandler(5, g_commandDmaHandlerId);
+    g_commandChannelReady[0] = 0;
 }
 
 extern "C" void SetCommandHandler(s32 cmd, Handler_1FA068 handler, void* arg)
 {
     s32 off = cmd << 3;
     if (cmd < 0) {
-        cmd = (s32)D_00629398.system;
+        cmd = (s32)g_commandChannel.system;
     } else {
-        cmd = (s32)D_00629398.user;
+        cmd = (s32)g_commandChannel.user;
     }
     off += cmd;
     Slot_1FA068* slot = (Slot_1FA068*)off;
@@ -228,9 +228,9 @@ extern "C" void ClearCommandHandler(s32 cmd)
 {
     s32 off = cmd << 3;
     if (cmd < 0) {
-        cmd = (s32)D_00629398.system;
+        cmd = (s32)g_commandChannel.system;
     } else {
-        cmd = (s32)D_00629398.user;
+        cmd = (s32)g_commandChannel.user;
     }
     off += cmd;
     ((Slot_1FA068*)off)->handler = 0;
@@ -263,7 +263,7 @@ s32 SendCommandPacket(u32 cmd, s32 flags, Header_1FA4F8* obj, s32 size, void* da
         obj->w0 = ((u8*)obj)[0];
     }
     recs[n].w0 = (s32)obj;
-    recs[n].w4 = D_00629398.iop;
+    recs[n].w4 = g_commandChannel.iop;
     recs[n].w8 = size;
     obj->w8 = cmd;
     ((u8*)obj)[0] = (u8)size;
@@ -320,7 +320,7 @@ s32 HandleCommandInterrupt(s32 cause)
     s32 i;
 
     EnableInterrupts();
-    ch = &D_00629398;
+    ch = &g_commandChannel;
     buffer = (volatile u8*)ch->buffer;
     n = buffer[0];
     if (n == 0) {

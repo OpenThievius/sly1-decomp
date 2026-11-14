@@ -20,12 +20,12 @@ s32 RequestCardSpaceForPath(s32 a0, s32 a1, const char* a2)
         PostSemaphore(g_cardSemaphore);
         return -210;
     }
-    buf = ((CardPathRequest*)&D_0062ADF0);
+    buf = ((CardPathRequest*)&g_cardPathRequestBuffer);
     buf->f0 = a0;
     buf->f4 = a1;
     CopyStringBounded(buf->text14, a2, 0x3FF);
     buf->text14[0x3FF] = 0;
-    res = CallRemoteService(reg, 0x12, 1, buf, 0x414, ((u32*)&D_0062C300), 4, 0, 0);
+    res = CallRemoteService(reg, 0x12, 1, buf, 0x414, ((u32*)&g_cardReplyBuffer), 4, 0, 0);
     if (res == 0) {
         g_cardRequestInFlight = 0x12;
     } else {

@@ -54,7 +54,7 @@ void AddDmaEndTag(PacketWriter* f);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void SendGsPacketAndWait(s32 channel, void* b);
 
-extern FrameTarget D_0027DC20[];
+extern FrameTarget g_meshQueueEntries[];
 
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
@@ -359,7 +359,7 @@ local_path:
     goto store;
 pool_path:
     n = g_meshQueueCount;
-    e = &D_0027DC20[n];
+    e = &g_meshQueueEntries[n];
     n++;
     g_meshQueueCount = n;
 store:
@@ -395,7 +395,7 @@ void QueueNodeLink(s32 a0, s32 a1, AnimCursor* a2)
     if (count >= 0x4000) {
         e = &local;
     } else {
-        e = &D_0027DC20[count];
+        e = &g_meshQueueEntries[count];
         g_meshQueueCount = count + 1;
     }
     e->count = a1;
@@ -417,7 +417,7 @@ void RemapMeshQueueValues(s32 idx, u32 lo, u32 take, u32 give)
     u32 end = take + lo;
 
     if (idx < g_meshQueueCount) {
-        FrameTarget* e = &D_0027DC20[idx];
+        FrameTarget* e = &g_meshQueueEntries[idx];
         s32 n = g_meshQueueCount - idx;
 
         do {
@@ -435,7 +435,7 @@ void FlushMeshQueue(void)
     s32 i;
 
     for (i = 0; i < g_meshQueueCount; i++) {
-        SubmitMeshQueueEntry(&D_0027DC20[i]);
+        SubmitMeshQueueEntry(&g_meshQueueEntries[i]);
     }
 }
 

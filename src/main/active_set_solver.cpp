@@ -87,7 +87,7 @@ struct Frame_166690;
 void DrawModelPart(Frame_166690* self);
 
 // The file's .data: the view matrix DrawPlacedObjectParts multiplies the object's transform by.
-Mat4A D_00261F30 = { { { 2.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 2.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f }, { -1.0f, -1.0f, 0.0f, 1.0f } } };
+Mat4A g_unitSquareToClipMatrix = { { { 2.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 2.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f }, { -1.0f, -1.0f, 0.0f, 1.0f } } };
 
 void DrawPlacedObjectParts(DeferredRequest* self)
 {
@@ -103,7 +103,7 @@ void DrawPlacedObjectParts(DeferredRequest* self)
     f.object = s1;
     f.record = s1->sub22C;
     i = 0;
-    MultiplyMatrices(f.qC0, &D_00261F30, (u8*)s1->drawRange + 0x70);
+    MultiplyMatrices(f.qC0, &g_unitSquareToClipMatrix, (u8*)s1->drawRange + 0x70);
     f.q80[0] = f.qC0[0];
     f.q80[1] = f.qC0[1];
     f.q80[2] = f.qC0[2];

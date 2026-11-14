@@ -38,7 +38,7 @@ struct ColliderLinkTable { ColliderLink e[9]; s32 end; };
 
 Quad16 D_00275730 = { 0x42C80000, 0, 0, 0 };
 Quad16 D_00275740 = { { 0x3F800000, 0, 0, 0 } };
-ColliderLinkTable D_00275750 = { {
+ColliderLinkTable g_tintBlendColliderLinks = { {
     { 0x0, 0x34D, 0x6DC }, { 0x0, 0x350, 0x758 }, { 0x4, 0x60, 0x748 },
     { 0x4, 0x50, 0x750 }, { 0x4, 0x34E, 0x744 }, { 0x2, 0x161, 0x588 },
     { 0x2, 0x162, 0x58C }, { 0x2, 0x163, 0x590 }, { 0x4, 0x160, 0x584 }
@@ -46,10 +46,10 @@ ColliderLinkTable D_00275750 = { {
 f32 D_002757C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 f32 D_002757D0[1] = { 6.0f };
 f32 D_002757D4 = 3.0f;
-Vec02 D_002757E0 = { 0.0f, 0.0f, 800.0f, 0.0f };
-f32 D_002757F0[4] = { 0.0f, 800.0f, 0.0f, 0.0f };
-f32 D_00275800[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-f32 D_00275810[4] = { 0.150000006f, 0.0f, 0.0f, 0.0f };
+Vec02 g_reachCurve = { 0.0f, 0.0f, 800.0f, 0.0f };
+f32 g_reachRange[4] = { 0.0f, 800.0f, 0.0f, 0.0f };
+f32 g_tintLeanCurve[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 g_leanTiltFactor[4] = { 0.150000006f, 0.0f, 0.0f, 0.0f };
 f32 D_00275820[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 f32 D_00275830[4] = { -0.200000003f, 0.0f, 0.0f, 0.0f };
 f32 D_00275840[4] = { 0.0f, 0.00124999997f, 0.0f, 0.0f };
@@ -367,7 +367,7 @@ void StartTintBlendCollider(TintBlendCollider* self)
     s32 flag;
 
     StartTurningCollider(self);
-    ResolveObjectLinks(self, 9, (ObjectLink*)&D_00275750);
+    ResolveObjectLinks(self, 9, (ObjectLink*)&g_tintBlendColliderLinks);
     ((LinkTargetFn)s->desc03()->m34)(self, s->followedMesh, 1);
     AddMatrixAttachment((PlacedObject*)s->f748, 5, (Attachment**)&s->f74C);
     ((u8*)s->f74C)[0x10] = 1;
@@ -570,12 +570,12 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
         SetStateWalkerTarget((StateWalker*)self->walker, 0x352);
     }
     ComputeCameraRelativeStickHeading(g_camera, pad, 0, &stick);
-    f32 reach = ((ValueRange*)D_002757F0)->Clamp(Quadratic(&D_002757E0.x, pad->stickMagnitude));
+    f32 reach = ((ValueRange*)g_reachRange)->Clamp(Quadratic(&g_reachCurve.x, pad->stickMagnitude));
     ComputePolarOffset((Vec3*)&offset, stick + 3.14159274f, reach, 0.0f);
     ComputePolarOffset((Vec3*)&axis, stick, 1.0f, 0.0f);
     Vu0::Q(axis) = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(axis));
-    f32 lean = g_unitRange.Limit(Quadratic(D_00275800, pad->stickMagnitude));
-    BuildAxisAngleMatrix(&axis, &tilt, D_00275810[0] * lean);
+    f32 lean = g_unitRange.Limit(Quadratic(g_tintLeanCurve, pad->stickMagnitude));
+    BuildAxisAngleMatrix(&axis, &tilt, g_leanTiltFactor[0] * lean);
     BuildAxisAngleMatrix(&g_unitZVector, &turn, self->heading);
     // Row 0 is stored after rows 1 and 2: the six stores of this block tie in sched1 and go in
     // the order they are written (docs/toolchain/sched1.md, "Argument moves held back").

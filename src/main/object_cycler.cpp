@@ -65,15 +65,15 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 f32 RandomFloatInRange(f32 a, f32 b);
 f32 RandomFloatInRange(f32 a, f32 b);
-extern PackedFloatPair D_00262180;
-extern PackedFloatPair D_00262188;
-extern PackedFloatPair D_00262190;
-extern PackedFloatPair D_00262198;
-extern PackedFloatPair D_002621A0;
-extern PackedFloatPair D_002621A8;
-extern PackedFloatPair D_002621B0;
-extern PackedFloatPair D_002621B8;
-extern PackedFloatPair D_002621C0;
+extern PackedFloatPair g_cyclerTargetRadiusRange;
+extern PackedFloatPair g_cyclerTargetHeightRange;
+extern PackedFloatPair g_cyclerTangentRadiusRange;
+extern PackedFloatPair g_cyclerTangentHeightRange;
+extern PackedFloatPair g_cyclerCheckDelayRange;
+extern PackedFloatPair g_cyclerHoldExtraRange;
+extern PackedFloatPair g_cyclerAdvanceDelayRange;
+extern PackedFloatPair g_cyclerWrapDelayRange;
+extern PackedFloatPair g_cyclerMessageIntervalRange;
 
 void InitCollider(Collider* self);
 void AppendToList(List01* self, void* item);
@@ -174,8 +174,8 @@ void RemoveFromList(List01* list, void* item);
 
 struct CyclerDrawParams { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
 extern f32 g_gameTime;
-extern f32 D_00262230[4];
-extern f32 D_00262240[4];
+extern f32 g_cyclerShrinkCurve[4];
+extern f32 g_cyclerGrowCurve[4];
 extern f32 g_unitRange[];
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 
@@ -219,16 +219,16 @@ void InitObjectCycler(ObjectCycler* self)
 {
     InitCollider(self);
     self->state = -1;
-    self->p610.pk = D_00262180;
-    self->p618.pk = D_00262188;
-    self->p620.pk = D_00262190;
-    self->p628.pk = D_00262198;
+    self->p610.pk = g_cyclerTargetRadiusRange;
+    self->p618.pk = g_cyclerTargetHeightRange;
+    self->p620.pk = g_cyclerTangentRadiusRange;
+    self->p628.pk = g_cyclerTangentHeightRange;
     self->swapKind = -1;
-    self->checkDelay.pk = D_002621A0;
-    self->p650.pk = D_002621A8;
-    self->p658.pk = D_002621B0;
-    self->p660.pk = D_002621B8;
-    self->p670.pk = D_002621C0;
+    self->checkDelay.pk = g_cyclerCheckDelayRange;
+    self->p650.pk = g_cyclerHoldExtraRange;
+    self->p658.pk = g_cyclerAdvanceDelayRange;
+    self->p660.pk = g_cyclerWrapDelayRange;
+    self->p670.pk = g_cyclerMessageIntervalRange;
     self->indexStep = 1;
     self->f690 = -1;
     AppendToList(&self->world->list1C48, self);
@@ -307,9 +307,9 @@ void StartObjectCycler(ObjectCycler* self)
     self->searchRadius = self->radius3CC + self->radius3CC;
 }
 
-extern f32 D_002621F8[6];
-extern f32 D_00262210[4];
-extern f32 D_00262220[4];
+extern f32 g_cyclerRotationRamp[6];
+extern f32 g_cyclerFallPositionSteer[4];
+extern f32 g_cyclerFallRotationSteer[4];
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
@@ -345,14 +345,14 @@ void StepObjectCycler(ObjectCycler* self, f32 dt)
         AddColliderForce(self, &accel);
         Vu0::Q(accel) = Vu0::Sub(Vu0::Q(accel), Vu0::Q(self->gravity));
         BuildBasisFromXAndZHint(&vel, &accel, &basis);
-        ApproachRotationWithRamp(&self->rot, &basis, (RampProfile*)D_002621F8, 0, &k, dt);
+        ApproachRotationWithRamp(&self->rot, &basis, (RampProfile*)g_cyclerRotationRamp, 0, &k, dt);
         self->desc02()->m21(self, &k);
         break;
     }
     case 1:
         AddColliderForce(self, &self->gravity);
-        SteerColliderTowardPosition(self, 0, 0, (Vec02*)&D_00248D30, D_00262210, dt);
-        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, D_00262220, dt);
+        SteerColliderTowardPosition(self, 0, 0, (Vec02*)&D_00248D30, g_cyclerFallPositionSteer, dt);
+        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, g_cyclerFallRotationSteer, dt);
         break;
     case 6:
         StepCollider(self, dt);
@@ -477,7 +477,7 @@ void DrawObjectCycler(ObjectCycler* self, void* a1, void* a2)
         f32 num = g_gameTime - base;
         f32 den = self->stateEnd - base;
         f32 t = num / den;
-        f32 v = D_00262230[0] + t * (D_00262230[1] + t * D_00262230[2]);
+        f32 v = g_cyclerShrinkCurve[0] + t * (g_cyclerShrinkCurve[1] + t * g_cyclerShrinkCurve[2]);
         f32 lo = g_unitRange[0];
         f32 hi = g_unitRange[1];
         if (v < lo) v = lo;
@@ -491,7 +491,7 @@ void DrawObjectCycler(ObjectCycler* self, void* a1, void* a2)
         f32 num = g_gameTime - base;
         f32 den = self->stateEnd - base;
         f32 t = num / den;
-        f32 v = D_00262240[0] + t * (D_00262240[1] + t * D_00262240[2]);
+        f32 v = g_cyclerGrowCurve[0] + t * (g_cyclerGrowCurve[1] + t * g_cyclerGrowCurve[2]);
         f32 lo = g_unitRange[0];
         f32 hi = g_unitRange[1];
         if (v < lo) v = lo;
@@ -783,19 +783,19 @@ s32 IsObjectCyclerUnsupported(ObjectCycler* self)
 }
 
 // The file's .data, 0x262180 to 0x262250, in retail's order.
-PackedFloatPair D_00262180 = { 0x4348000043480000ULL };
-PackedFloatPair D_00262188 = { 0x42C8000042C80000ULL };
-PackedFloatPair D_00262190 = { 0x4448000043FA0000ULL };
-PackedFloatPair D_00262198 = { 0x43960000C3960000ULL };
-PackedFloatPair D_002621A0 = { 0x4270000041700000ULL };
-PackedFloatPair D_002621A8 = { 0x42F0000041F00000ULL };
-PackedFloatPair D_002621B0 = { 0x3E4CCCCD3D4CCCCDULL };
-PackedFloatPair D_002621B8 = { 0x3F4CCCCD3DCCCCCDULL };
-PackedFloatPair D_002621C0 = { 0x4170000040A00000ULL };
+PackedFloatPair g_cyclerTargetRadiusRange = { 0x4348000043480000ULL };
+PackedFloatPair g_cyclerTargetHeightRange = { 0x42C8000042C80000ULL };
+PackedFloatPair g_cyclerTangentRadiusRange = { 0x4448000043FA0000ULL };
+PackedFloatPair g_cyclerTangentHeightRange = { 0x43960000C3960000ULL };
+PackedFloatPair g_cyclerCheckDelayRange = { 0x4270000041700000ULL };
+PackedFloatPair g_cyclerHoldExtraRange = { 0x42F0000041F00000ULL };
+PackedFloatPair g_cyclerAdvanceDelayRange = { 0x3E4CCCCD3D4CCCCDULL };
+PackedFloatPair g_cyclerWrapDelayRange = { 0x3F4CCCCD3DCCCCCDULL };
+PackedFloatPair g_cyclerMessageIntervalRange = { 0x4170000040A00000ULL };
 s32 g_objectCyclerLoadLinks[6] = { 0, 0x256, 0x5D0, 2, 0x259, 0x678 };
 s32 g_objectCyclerStartLinks[6] = { 4, 0x258, 0x5D8, 2, 0x25A, 0x67C };
-f32 D_002621F8[6] = { 7.0f, 1.0f, 0.25f, 0.0f, 0.0f, 0.0f };
-f32 D_00262210[4] = { 0.0f, 0.25f, 0.000250000012f, 0.0f };
-f32 D_00262220[4] = { 0.0f, 0.25f, 0.0250000004f, 0.0f };
-f32 D_00262230[4] = { 1.0f, 1.5f, -2.5f, 0.0f };
-f32 D_00262240[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
+f32 g_cyclerRotationRamp[6] = { 7.0f, 1.0f, 0.25f, 0.0f, 0.0f, 0.0f };
+f32 g_cyclerFallPositionSteer[4] = { 0.0f, 0.25f, 0.000250000012f, 0.0f };
+f32 g_cyclerFallRotationSteer[4] = { 0.0f, 0.25f, 0.0250000004f, 0.0f };
+f32 g_cyclerShrinkCurve[4] = { 1.0f, 1.5f, -2.5f, 0.0f };
+f32 g_cyclerGrowCurve[4] = { 0.0f, 2.0f, 0.0f, 0.0f };

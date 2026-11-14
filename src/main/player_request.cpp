@@ -24,8 +24,8 @@
 // Types other files define, named by the parameters of their functions declared here.
 struct TargetArcSource;
 
-s32 D_00274FA0[2] = {286, 287};
-s32 D_00274FA8[2] = {288, 289};
+s32 g_playerBlendDeltaIdsA[2] = {286, 287};
+s32 g_playerBlendDeltaIdsB[2] = {288, 289};
 s32 D_00274FB0[2] = {2, 2};
 s32 D_00274FB8[2] = {48, 64};
 
@@ -41,8 +41,8 @@ f32 D_00275050[4] = { -0.5f, -0.0025f, 0.0f, 0.0f };
 f32 D_00275060[2] = { 0.0f, 0.7f };
 f32 D_00275068[1] = { 0 };
 float D_0027506C = 0.25f;
-float D_00275070[14] = {0.0f, 1.0f, 0.781831503f, 0.623489797f, 0.974927902f, -0.222520933f, 0.433883727f, -0.90096885f, -0.433883727f, -0.90096885f, -0.974927902f, -0.222520933f, -0.781831503f, 0.623489797f};
-float D_002750A8[34] = {1.0f, 0.0f, 0.932472229f, 0.361241668f, 0.739008904f, 0.673695624f, 0.445738345f, 0.895163298f, 0.0922683626f, 0.995734155f, -0.273662984f, 0.961825669f, -0.602634609f, 0.798017204f, -0.850217164f, 0.526432157f, -0.982973099f, 0.183749512f, -0.982973099f, -0.183749512f, -0.850217164f, -0.526432157f, -0.602634609f, -0.798017204f, -0.273662984f, -0.961825669f, 0.0922683626f, -0.995734155f, 0.445738345f, -0.895163298f, 0.739008904f, -0.673695624f, 0.932472229f, -0.361241668f};
+float g_ringSevenPoints[14] = {0.0f, 1.0f, 0.781831503f, 0.623489797f, 0.974927902f, -0.222520933f, 0.433883727f, -0.90096885f, -0.433883727f, -0.90096885f, -0.974927902f, -0.222520933f, -0.781831503f, 0.623489797f};
+float g_ringSeventeenPoints[34] = {1.0f, 0.0f, 0.932472229f, 0.361241668f, 0.739008904f, 0.673695624f, 0.445738345f, 0.895163298f, 0.0922683626f, 0.995734155f, -0.273662984f, 0.961825669f, -0.602634609f, 0.798017204f, -0.850217164f, 0.526432157f, -0.982973099f, 0.183749512f, -0.982973099f, -0.183749512f, -0.850217164f, -0.526432157f, -0.602634609f, -0.798017204f, -0.273662984f, -0.961825669f, 0.0922683626f, -0.995734155f, 0.445738345f, -0.895163298f, 0.739008904f, -0.673695624f, 0.932472229f, -0.361241668f};
 
 // The eight blend slots func_001D4148 fills (0x20 bytes each), the weight of slot 6 first.
 struct BlendSlotObject;
@@ -96,8 +96,8 @@ void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAni
         return;
     }
     items[0].weight = 1.0f;
-    ComputeWrappedDeltas(0x50, 6, (u8*)items, 0x30, 2, D_00274FA0);
-    ComputeWrappedDeltas(0x50, 6, (u8*)items, 0x40, 2, D_00274FA8);
+    ComputeWrappedDeltas(0x50, 6, (u8*)items, 0x30, 2, g_playerBlendDeltaIdsA);
+    ComputeWrappedDeltas(0x50, 6, (u8*)items, 0x40, 2, g_playerBlendDeltaIdsB);
     for (i = 0; i < 6; i++) {
         PlayerBlendItem* it = &items[i];
         BlendSlotObject* o = it->object;
@@ -1168,7 +1168,7 @@ void DrawPlayerMarkerRing1(DeferredRequest* request)
     };
     params.textures[0] = 0;
     params.textures[1] = FindAnimRecord(0x15C);
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)D_00275070, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
+    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
 }
 
 void DrawPlayerMarkerRing2(DeferredRequest* request)
@@ -1185,7 +1185,7 @@ void DrawPlayerMarkerRing2(DeferredRequest* request)
     AnimRecord* texture = FindAnimRecord(0x15D);
     params.textures[1] = texture;
     params.textures[0] = texture;
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)D_00275070, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
+    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
 }
 
 void DrawPlayerMarkerRing3(DeferredRequest* request)
@@ -1204,5 +1204,5 @@ void DrawPlayerMarkerRing3(DeferredRequest* request)
     params.textures[1] = FindAnimRecord(0x15C);
     anchor.scale = 60.0f;
     anchor.obj = (PlacedObject*)player;
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 0x11, (Point2*)D_002750A8, 1, &anchor, &params, request);
+    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 0x11, (Point2*)g_ringSeventeenPoints, 1, &anchor, &params, request);
 }

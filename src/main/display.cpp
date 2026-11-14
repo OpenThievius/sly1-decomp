@@ -36,7 +36,7 @@ extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 
 struct DmaChainBlock { u8 bytes[0x20]; };
 
-extern u8 D_002BE1A0[];
+extern u8 g_screenClearPacketC[];
 void* InitPacketBuffer(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void AddDmaRefTag(DmaChainBlock* a, s32 n, void* table);
@@ -58,9 +58,9 @@ void BeginGifTag(void* p, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 
 
-extern u8 D_002BDC20[];
-extern u8 D_002BE1A0[];
-extern u8 D_002BDEE0[];
+extern u8 g_screenClearPacketA[];
+extern u8 g_screenClearPacketC[];
+extern u8 g_screenClearPacketB[];
 
 struct GsDBuff;
 extern "C" void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag);
@@ -85,26 +85,26 @@ extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 // after the 4-byte D_00262484) and its two pairs of packets, the frame counter and modes. Then
 // its .bss (0x2BE460 to 0x2BE478), the statics the display code shares with func_001682C0 and
 // func_00168698.
-s32 D_00262480 = 0xF;
-s32 D_00262484 = 0;
-u8 D_00262490[0x50] __attribute__((aligned(16))) = { 0 };
-u8 D_002624E0[16] = { 0 };
-u8 D_002624F0[16] = { 0 };
+s32 g_displayFieldReload = 0xF;
+s32 g_displayFieldCountdown = 0;
+u8 g_displayRegisters[0x50] __attribute__((aligned(16))) = { 0 };
+u8 g_drawEnvPacket0[16] = { 0 };
+u8 g_fieldOffsetPacket0[16] = { 0 };
 u8 D_00262500[208] = { 0 };
-u8 D_002625D0[16] = { 0 };
-u8 D_002625E0[16] = { 0 };
+u8 g_drawEnvPacket1[16] = { 0 };
+u8 g_fieldOffsetPacket1[16] = { 0 };
 u8 D_002625F0[208] = { 0 };
 s32 g_displayFrameCounter = 0;
-s32 D_002626C4 = 0;
-s32 D_002626C8 = 0;
+s32 g_drawFieldParity = 0;
+s32 g_displayFieldParity = 0;
 s32 D_002626CC = 0;
 
-static s32 D_002BE460;
-static s32 D_002BE464;
-static s32 D_002BE468;
-static s32 D_002BE46C;
-static s32 D_002BE470;
-static s32 D_002BE474;
+static s32 g_vblankSemaphore;
+static s32 g_gsFinishSemaphore;
+static s32 g_gsFinishWaiting;
+static s32 g_vblankWaiting;
+static s32 g_displayFlipBusy;
+static s32 g_displayFlipPending;
 
 void ApplyFieldDisplayOffset(void);
 s32 WaitGsPaths(s32 a0, s32 a1);
@@ -144,12 +144,12 @@ void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void ApplyFieldDisplayOffset(void)
 {
     s32 i = g_displayFrameCounter & 1;
-    s32 field = D_002626C8;
-    GsPmode pm = ((DisplayRegs*)&D_00262490)[i].pmode;
+    s32 field = g_displayFieldParity;
+    GsPmode pm = ((DisplayRegs*)&g_displayRegisters)[i].pmode;
 
     if (field != (s32)((((GsPrivRegs*)0x12000000)->csr >> 13) & 1)) {
-        GsDisplay d = ((DisplayRegs*)&D_00262490)[i].display;
-        GsDispFb fb = ((DisplayRegs*)&D_00262490)[i].dispfb;
+        GsDisplay d = ((DisplayRegs*)&g_displayRegisters)[i].display;
+        GsDispFb fb = ((DisplayRegs*)&g_displayRegisters)[i].dispfb;
         d.dh = d.dh - 1;
         if (field != 0) {
             d.dy = d.dy + 1;
@@ -170,27 +170,27 @@ extern "C" void WriteDisplayRegisters(void* self);
 // mode puts the field offset or the next frame's display registers; then ends the handler.
 s32 HandleVblankStart(s32 cause)
 {
-    if (D_002BE46C != 0) {
-        D_002BE46C = 0;
-        PostSemaphoreFromInterrupt(D_002BE460);
+    if (g_vblankWaiting != 0) {
+        g_vblankWaiting = 0;
+        PostSemaphoreFromInterrupt(g_vblankSemaphore);
     }
     switch (D_002626CC) {
     case 1:
-        if (D_002BE470 == 0) {
-            D_00262484 = D_00262480;
+        if (g_displayFlipBusy == 0) {
+            g_displayFieldCountdown = g_displayFieldReload;
             ApplyFieldDisplayOffset();
         }
         break;
     case 2:
-        if (D_002BE470 == 0) {
+        if (g_displayFlipBusy == 0) {
             ApplyFieldDisplayOffset();
         }
         break;
     case 3: {
         s32 n = g_displayFrameCounter + 1;
-        D_002BE474 = 1;
+        g_displayFlipPending = 1;
         g_displayFrameCounter = n;
-        WriteDisplayRegisters(D_00262490 + (n & 1) * 0x28);
+        WriteDisplayRegisters(g_displayRegisters + (n & 1) * 0x28);
         break;
     }
     }
@@ -199,36 +199,36 @@ s32 HandleVblankStart(s32 cause)
 }
 
 void SignalDisplaySync(void) {
-    D_002BE46C = 1;
-    AwaitSemaphore(D_002BE460);
+    g_vblankWaiting = 1;
+    AwaitSemaphore(g_vblankSemaphore);
 }
 
 void FlipDisplayFrame(void)
 {
-    D_002BE470 = 1;
+    g_displayFlipBusy = 1;
     SignalDisplaySync();
-    s32 a0 = D_002626C4;
-    s32 a1 = D_00262484;
-    D_002626C8 = a0;
-    D_002BE470 = 0;
+    s32 a0 = g_drawFieldParity;
+    s32 a1 = g_displayFieldCountdown;
+    g_displayFieldParity = a0;
+    g_displayFlipBusy = 0;
     if (a1 > 0) {
-        D_002626C4 = 0;
-        D_00262484 = a1 - 1;
+        g_drawFieldParity = 0;
+        g_displayFieldCountdown = a1 - 1;
     } else {
         u32 flag = (*(u32*)0x12001000 >> 13) & 1;
-        D_002626C4 = (flag == 0);
+        g_drawFieldParity = (flag == 0);
     }
     u8* ptr;
     if (g_displayFrameCounter & 1) {
-        ptr = D_002624F0;
+        ptr = g_fieldOffsetPacket0;
     } else {
-        ptr = D_002625E0;
+        ptr = g_fieldOffsetPacket1;
     }
-    s16 half = *(s16*)&D_002626C4;
+    s16 half = *(s16*)&g_drawFieldParity;
     SetFieldDrawOffset((GsOffset*)ptr, 0x800, 0x800, half);
     SyncDataCache(0);
     g_displayFrameCounter = g_displayFrameCounter + 1;
-    SwapDoubleBuffer(D_00262490, g_displayFrameCounter);
+    SwapDoubleBuffer(g_displayRegisters, g_displayFrameCounter);
     if ((u32)(D_002626CC - 1) < 2) {
         ApplyFieldDisplayOffset();
     }
@@ -240,25 +240,25 @@ void ApplyPendingDisplayFlip(void)
     if (D_002626CC == 3) {
         D_002626CC = 2;
     }
-    if (D_002BE474 != 0) {
+    if (g_displayFlipPending != 0) {
         u32 flag = (*(u32*)0x12001000 >> 13) & 1;
         s32 cnt = g_displayFrameCounter;
-        D_002BE474 = 0;
-        D_002626C4 = (flag == 0);
+        g_displayFlipPending = 0;
+        g_drawFieldParity = (flag == 0);
         u8* ptr;
         if (cnt & 1) {
-            ptr = D_002625E0;
+            ptr = g_fieldOffsetPacket1;
         } else {
-            ptr = D_002624F0;
+            ptr = g_fieldOffsetPacket0;
         }
-        s16 half = *(s16*)&D_002626C4;
+        s16 half = *(s16*)&g_drawFieldParity;
         SetFieldDrawOffset((GsOffset*)ptr, 0x800, 0x800, half);
         SyncDataCache(0);
         u8* ptr2;
         if (g_displayFrameCounter & 1) {
-            ptr2 = D_002625D0;
+            ptr2 = g_drawEnvPacket1;
         } else {
-            ptr2 = D_002624E0;
+            ptr2 = g_drawEnvPacket0;
         }
         SendDrawEnvironment(ptr2);
     }
@@ -266,28 +266,28 @@ void ApplyPendingDisplayFlip(void)
 
 void ResetDisplayBuffers(void)
 {
-    D_002BE470 = 1;
+    g_displayFlipBusy = 1;
     SendDisplayResetPacket();
     SignalDisplaySync();
-    D_002BE470 = 0;
+    g_displayFlipBusy = 0;
     ResetGs(0, 1, 2, 1);
     u32 flag = (*(u32*)0x12001000 >> 13) & 1;
     s32 cnt = g_displayFrameCounter;
     D_002626CC = 0;
-    D_00262484 = 0;
-    D_002626C8 = flag;
-    D_002626C4 = (flag == 0);
+    g_displayFieldCountdown = 0;
+    g_displayFieldParity = flag;
+    g_drawFieldParity = (flag == 0);
     u8* ptr;
     if (cnt & 1) {
-        ptr = D_002624F0;
+        ptr = g_fieldOffsetPacket0;
     } else {
-        ptr = D_002625E0;
+        ptr = g_fieldOffsetPacket1;
     }
-    s16 half = *(s16*)&D_002626C4;
+    s16 half = *(s16*)&g_drawFieldParity;
     SetFieldDrawOffset((GsOffset*)ptr, 0x800, 0x800, half);
     SyncDataCache(0);
     g_displayFrameCounter = g_displayFrameCounter + 1;
-    SwapDoubleBuffer(D_00262490, g_displayFrameCounter);
+    SwapDoubleBuffer(g_displayRegisters, g_displayFrameCounter);
 }
 
 extern "C" void PostSemaphoreFromInterrupt(s32 sema);
@@ -296,9 +296,9 @@ extern "C" void PostSemaphoreFromInterrupt(s32 sema);
 // clears the wait and posts its semaphore; then ends the handler.
 s32 HandleGsFinish(s32 cause)
 {
-    if (D_002BE468 != 0 && (*(volatile u64*)0x12001000 & 2)) {
-        D_002BE468 = 0;
-        PostSemaphoreFromInterrupt(D_002BE464);
+    if (g_gsFinishWaiting != 0 && (*(volatile u64*)0x12001000 & 2)) {
+        g_gsFinishWaiting = 0;
+        PostSemaphoreFromInterrupt(g_gsFinishSemaphore);
     }
     SyncAndEnableInterrupts();
     return -1;
@@ -306,13 +306,13 @@ s32 HandleGsFinish(s32 cause)
 
 void SendGsPacketAndWait(s32 channel, void* b)
 {
-    D_002BE468 = 1;
+    g_gsFinishWaiting = 1;
     *(volatile u64*)0x12001000 |= 2;
     s32 r = GetGsInterruptMask();
     SwapGsInterruptMask(r & -0x201);
     SyncDataCache(0);
     StartDmaChain((DmaChannel*)channel, b);
-    AwaitSemaphore(D_002BE464);
+    AwaitSemaphore(g_gsFinishSemaphore);
 }
 
 void FillScreenColor(u8* buffer, Rgba4* color, s32 flag)
@@ -339,7 +339,7 @@ void InitDisplay(void)
     Rgba4 t;
 
     ResetGs(0, 1, 2, 1);
-    u8* s0 = D_00262490;
+    u8* s0 = g_displayRegisters;
     SetUpDoubleBuffer((GsDBuff*)s0, 0, 0x280, 0xE0, 3, 0x30, 0);
     u8* p = s0;
     s32 end = (s32)s0 + 0x50;
@@ -354,13 +354,13 @@ void InitDisplay(void)
     k.b = 0;
     k.a = 0x80;
     t = k;
-    FillScreenColor(D_002BDC20, &t, 0);
+    FillScreenColor(g_screenClearPacketA, &t, 0);
     t = k;
-    FillScreenColor(D_002BE1A0, &t, 0);
+    FillScreenColor(g_screenClearPacketC, &t, 0);
     t = k;
-    FillScreenColor(D_002BDEE0, &t, 1);
-    D_002BE460 = CreateLockSemaphore(0, 1);
-    D_002BE464 = CreateLockSemaphore(0, 1);
+    FillScreenColor(g_screenClearPacketB, &t, 1);
+    g_vblankSemaphore = CreateLockSemaphore(0, 1);
+    g_gsFinishSemaphore = CreateLockSemaphore(0, 1);
     AddInterruptHandler(2, (void (*)(void))HandleVblankStart, 0);
     EnableInterruptCause(2);
     AddInterruptHandler(0, (void (*)(void))HandleGsFinish, 0);
@@ -376,9 +376,9 @@ void SendPacketToBothBuffers(void* chain)
     do {
         void* p;
         if (((i + g_displayFrameCounter) & 1) != 0) {
-            p = D_002624E0;
+            p = g_drawEnvPacket0;
         } else {
-            p = D_002625D0;
+            p = g_drawEnvPacket1;
         }
         SendDrawEnvironment(p);
         i++;
@@ -394,7 +394,7 @@ void SendDisplayResetPacket(void)
 
     InitPacketBuffer((PacketWriter*)&a);
     UsePacketBufferMemory((PacketWriter*)&a, 2, &b);
-    AddDmaRefTag(&a, 0x2C, D_002BE1A0);
+    AddDmaRefTag(&a, 0x2C, g_screenClearPacketC);
     AddDmaEndTag((PacketWriter*)&a);
     DetachPacketBuffer((PacketWriter*)&a, 0, 0);
     SendPacketToBothBuffers(&b);

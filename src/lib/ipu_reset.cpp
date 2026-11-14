@@ -11,13 +11,13 @@
 #include "common.h"
 
 // The library's identification string, 16 characters without a terminator.
-char D_0027B0B0[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'i', 'p', 'u', ' ', ' ', '2', '4', '0', '0' };
+char g_ipuLibraryVersion[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'i', 'p', 'u', ' ', ' ', '2', '4', '0', '0' };
 
 typedef u64 Quad_211BA8 __attribute__((mode(TI)));
 struct Quad_27B0C0 { u64 lo; u64 hi; } __attribute__((aligned(16)));
 
 // The default quantiser matrices: intra, then one row of the non-intra (all 16), sent four times.
-volatile Quad_27B0C0 D_0027B0C0[5] = {
+volatile Quad_27B0C0 g_ipuQuantiserMatrices[5] = {
     { 0x1616131013101008ULL, 0x1B1A181A16161616ULL },
     { 0x1B1B1A1A1A1A1B1BULL, 0x1D2222221D1D1D1BULL },
     { 0x20201D1D1B1B1D1DULL, 0x2223232526252222ULL },
@@ -25,7 +25,7 @@ volatile Quad_27B0C0 D_0027B0C0[5] = {
     { 0x1010101010101010ULL, 0x1010101010101010ULL },
 };
 // The colour table the reset loads.
-Quad_27B0C0 D_0027B110[2] = {
+Quad_27B0C0 g_ipuColourTable[2] = {
     { 0x03E0084204210000ULL, 0x1CE718C614A51084ULL },
     { 0x7C00294A2529001FULL, 0x39CE7FFF35AD318CULL },
 };
@@ -51,22 +51,22 @@ void ResetIpu(void)
     *(volatile u32*)0x10002000 = 0;
     while (*(volatile s32*)0x10002010 < 0) {
     }
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[0];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[1];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[2];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[3];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
-    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&g_ipuQuantiserMatrices[0];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&g_ipuQuantiserMatrices[1];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&g_ipuQuantiserMatrices[2];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&g_ipuQuantiserMatrices[3];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&g_ipuQuantiserMatrices[4];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&g_ipuQuantiserMatrices[4];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&g_ipuQuantiserMatrices[4];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&g_ipuQuantiserMatrices[4];
     *(volatile u32*)0x10002000 = 0x50000000;
     while (*(volatile s32*)0x10002010 < 0) {
     }
     *(volatile u32*)0x10002000 = 0x58000000;
     while (*(volatile s32*)0x10002010 < 0) {
     }
-    *(volatile Quad_211BA8*)0x10007010 = *(Quad_211BA8*)&D_0027B110[0];
-    *(volatile Quad_211BA8*)0x10007010 = *(Quad_211BA8*)&D_0027B110[1];
+    *(volatile Quad_211BA8*)0x10007010 = *(Quad_211BA8*)&g_ipuColourTable[0];
+    *(volatile Quad_211BA8*)0x10007010 = *(Quad_211BA8*)&g_ipuColourTable[1];
     *(volatile u32*)0x10002000 = 0x60000000;
     while (*(volatile s32*)0x10002010 < 0) {
     }

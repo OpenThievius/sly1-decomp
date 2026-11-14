@@ -38,10 +38,10 @@ struct DisplayRegRead {
     };
 };
 
-extern f32 D_0026A700;
-extern f32 D_0026A704;
-extern f32 D_0026A708;
-extern f32 D_0026A70C;
+extern f32 g_screenAdjustX;
+extern f32 g_screenAdjustY;
+extern f32 g_screenAdjustSavedX;
+extern f32 g_screenAdjustSavedY;
 
 void StopStreamVoice(void);
 
@@ -88,7 +88,7 @@ void SetPauseMenuPage(void* self, s32 v);
 void PopStackElement(ElementStack* g);
 void PushStackElement(ElementStack* self, ScreenElement* node);
 
-extern u8 D_00247AB0[];
+extern u8 g_sessionFadeKey[];
 
 void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
 
@@ -106,16 +106,16 @@ struct DisplayRegs {
     u8 pad20[0x20];
     DisplayReg64 f40;
 };
-extern DisplayRegs D_00262490;
+extern DisplayRegs g_displayRegisters;
 extern s32 D_00275BF0;
-extern f32 D_0026A708;
-extern f32 D_0026A70C;
+extern f32 g_screenAdjustSavedX;
+extern f32 g_screenAdjustSavedY;
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
 extern "C" s32 ConvertFloatToU32(f32 value);
 
 
 extern u8 g_elementStack[];
-extern u8 D_00247AD0[];
+extern u8 g_objectFadeIn[];
 extern CardSlot D_002542D8[];
 
 void CancelPauseMenuPage(T217D_6D0* self);
@@ -160,14 +160,14 @@ struct GlyphMark {
 };
 
 extern f32 g_elapsedTime;
-extern CardSlot* D_0026998C;
+extern CardSlot* g_cardSlotInAction;
 extern s32 D_00264A4C;
-extern f32 D_0026A22C;
+extern f32 g_screenAdjustRateX;
 // The speeds the screen-position page moves the screen at (x is D_0026A22C).
 struct ScreenAdjustRate { f32 verticalRate; f32 f4; };
-extern ScreenAdjustRate D_0026A230;
-extern f32 D_0026A700;
-extern f32 D_0026A704;
+extern ScreenAdjustRate g_screenAdjustRateY;
+extern f32 g_screenAdjustX;
+extern f32 g_screenAdjustY;
 
 s32 ComputeCompletionPercent(GameProgress* progress);
 s32 CheckStreamVoicePending(void);
@@ -207,7 +207,7 @@ enum PadSelectBits {
 };
 
 extern u8 g_elementStack[];
-extern u8* D_0027051C;
+extern u8* g_activeStepSequence;
 
 void PauseStagedBankVoice(void);
 void ResumeStagedBankVoice(void);
@@ -316,57 +316,57 @@ struct ChoiceLabels { s32 count; char** labels; };
 
 extern s32 g_pauseMenuItems[];
 extern s32 g_optionsMenuItems[];
-extern char D_0026A480[];
-extern char D_0026A4C0[];
-extern char D_0026A500[];
-extern char D_0026A540[];
-extern char D_0026A580[];
-extern char D_0026A5C0[];
-extern char D_0026A600[];
-extern char D_0026A640[];
-extern char D_0026A680[];
-extern char D_0026A6C0[];
+extern char g_saveSlotLabel0[];
+extern char g_saveSlotLabel1[];
+extern char g_saveSlotLabel2[];
+extern char g_quitChoiceLabel[];
+extern char g_vibrationChoiceLabel[];
+extern char g_musicChoiceLabel[];
+extern char g_speakerChoiceLabel[];
+extern char g_lookControlChoiceLabel[];
+extern char g_turretControlChoiceLabel[];
+extern char g_jetPackControlChoiceLabel[];
 
-s32 D_00269CD8[8] = { 3, 18, 19, 20, 4, 5, 21, 9 };
+s32 g_pauseMenuCandidates[8] = { 3, 18, 19, 20, 4, 5, 21, 9 };
 s32 g_yesNoItems[2] = { 0, 1 };
-s32 D_00269D00[2] = { 2, 0 };
-s32 D_00269D08[4] = { 10, 11, 12, 17 };
-s32 D_00269D18[10] = { 6, 7, 8, 15, 16, 13, 14, 23, 17, 0 };
-s32 D_00269D40[4] = { 24, 25, 26, 17 };
+s32 g_messagePageItems[2] = { 2, 0 };
+s32 g_cardSlotItems[4] = { 10, 11, 12, 17 };
+s32 g_optionsMenuCandidates[10] = { 6, 7, 8, 15, 16, 13, 14, 23, 17, 0 };
+s32 g_controlsMenuItems[4] = { 24, 25, 26, 17 };
 MenuPage g_pauseMenuPages[33] = {
     { "Paused", 1.0f, 1.0f, 1, 8, g_pauseMenuItems },
     { "Game Over. Try again?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
     { "Really Quit?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
-    { "There is no Memory Card (PS2) inserted in\nMemory Card Slot 1\n\nSly Cooper requires 49 KB of free space\n\nPlease insert a Memory Card (PS2) containing sufficient space or you will not be able to save your progress\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
+    { "There is no Memory Card (PS2) inserted in\nMemory Card Slot 1\n\nSly Cooper requires 49 KB of free space\n\nPlease insert a Memory Card (PS2) containing sufficient space or you will not be able to save your progress\n", 0.7f, 1.0f, 1, 1, g_messagePageItems },
     { "The Memory Card (PS2) in Memory Card Slot 1 is unformatted\n\nIf you do not format it then you will not be able to save your progress\n\nDo you want to format?", 0.7f, 1.0f, 0, 2, g_yesNoItems },
     { "\nFormatting the Memory Card (PS2) in Memory Card Slot 1\n\nPlease do not turn off your system or remove the Memory Card (PS2)\n", 0.7f, 1.0f, 1, 0, 0 },
-    { "An error occurred while formatting the Memory Card (PS2) in Memory Card Slot 1\n\nYou will not be able to save your progress\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
+    { "An error occurred while formatting the Memory Card (PS2) in Memory Card Slot 1\n\nYou will not be able to save your progress\n", 0.7f, 1.0f, 1, 1, g_messagePageItems },
     { "No Sly Cooper Save File on the Memory Card (PS2) inserted in Memory Card Slot 1\n\nSly Cooper requires 49 KB of free space\n\nIf you do not create a Sly Cooper Save File then you will not be able to save your progress\n\nDo you want to create a Sly Cooper Save File?", 0.7f, 1.0f, 0, 2, g_yesNoItems },
     { "\nCreating the Sly Cooper Save File on the Memory Card (PS2) in Memory Card Slot 1\n\nPlease do not turn off your system or remove the Memory Card (PS2)\n", 0.7f, 1.0f, 1, 0, 0 },
-    { "An error occurred while creating the Sly Cooper Save File on the Memory Card (PS2) in Memory Card Slot 1\n\nYour progress is not being saved\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
-    { "The Memory Card (PS2) inserted in Memory Card Slot 1 does not have enough free space to create a Sly Cooper Save File\n\nSly Cooper requires 49 KB of free space\n\nPlease insert a Memory Card (PS2) containing sufficient space or you will not be able to save your progress\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
-    { "Save Game", 1.0f, 0.7f, 1, 4, D_00269D08 },
+    { "An error occurred while creating the Sly Cooper Save File on the Memory Card (PS2) in Memory Card Slot 1\n\nYour progress is not being saved\n", 0.7f, 1.0f, 1, 1, g_messagePageItems },
+    { "The Memory Card (PS2) inserted in Memory Card Slot 1 does not have enough free space to create a Sly Cooper Save File\n\nSly Cooper requires 49 KB of free space\n\nPlease insert a Memory Card (PS2) containing sufficient space or you will not be able to save your progress\n", 0.7f, 1.0f, 1, 1, g_messagePageItems },
+    { "Save Game", 1.0f, 0.7f, 1, 4, g_cardSlotItems },
     { "\nSaving...\n\nPlease do not turn off your system or remove the Memory Card (PS2)\n", 0.7f, 1.0f, 1, 0, 0 },
-    { "Game Saved", 1.0f, 1.0f, 1, 1, D_00269D00 },
+    { "Game Saved", 1.0f, 1.0f, 1, 1, g_messagePageItems },
     { "Do you want to overwrite this game?", 0.7f, 1.0f, 0, 2, g_yesNoItems },
-    { "An error occurred while writing to the Sly Cooper Save File on the Memory Card (PS2) in Memory Card Slot 1\n\nYour progress is not being saved\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
-    { "New Game", 1.0f, 0.7f, 1, 4, D_00269D08 },
-    { "Load Game", 1.0f, 0.7f, 1, 4, D_00269D08 },
+    { "An error occurred while writing to the Sly Cooper Save File on the Memory Card (PS2) in Memory Card Slot 1\n\nYour progress is not being saved\n", 0.7f, 1.0f, 1, 1, g_messagePageItems },
+    { "New Game", 1.0f, 0.7f, 1, 4, g_cardSlotItems },
+    { "Load Game", 1.0f, 0.7f, 1, 4, g_cardSlotItems },
     { "Do you want to erase this game?", 0.7f, 1.0f, 0, 2, g_yesNoItems },
     { "\nErasing...\n\nPlease do not turn off your system or remove the Memory Card (PS2)\n", 0.7f, 1.0f, 1, 0, 0 },
-    { "When the following icon appears,\nyour progress is being saved\n\n^15&2a&.^.\n\nWhile this icon is on screen, please\ndo not turn off your system or remove\nthe Memory Card (PS2)\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
-    { "The Memory Card (PS2) in Memory Card Slot 1 was removed\n\nAuto-save has been disabled\n\nUse the save game option to manually save your game and re-enable auto-save\n", 0.7f, 1.0f, 1, 1, D_00269D00 },
+    { "When the following icon appears,\nyour progress is being saved\n\n^15&2a&.^.\n\nWhile this icon is on screen, please\ndo not turn off your system or remove\nthe Memory Card (PS2)\n", 0.7f, 1.0f, 1, 1, g_messagePageItems },
+    { "The Memory Card (PS2) in Memory Card Slot 1 was removed\n\nAuto-save has been disabled\n\nUse the save game option to manually save your game and re-enable auto-save\n", 0.7f, 1.0f, 1, 1, g_messagePageItems },
     { "The disc was removed\n\nPlease insert the Sly Cooper disc to continue playing", 0.8f, 1.0f, 1, 0, 0 },
     { "Options", 1.0f, 1.0f, 1, 9, g_optionsMenuItems },
     { "&2T&. : Cancel\n&2+&. : Move\n&2X&. : Accept", 0.8f, 1.0f, 1, 0, 0 },
     { "Try again?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
     { "Try again?", 1.0f, 1.0f, 0, 2, g_yesNoItems },
-    { "CONGRATULATIONS!\n\nYou have beaten the\nMaster Thief Sprint!\n\nReturn to this level at any time\nto hear the Bonus Commentary!", 0.8f, 1.0f, 0, 1, D_00269D00 },
+    { "CONGRATULATIONS!\n\nYou have beaten the\nMaster Thief Sprint!\n\nReturn to this level at any time\nto hear the Bonus Commentary!", 0.8f, 1.0f, 0, 1, g_messagePageItems },
     { "TIME EXPIRED\n\nWould you like to retry\nthe Master Thief Sprint?\n\n", 0.8f, 1.0f, 0, 2, g_yesNoItems },
     { "CONGRATULATIONS!\n\nYou beat your best\nMaster Thief Sprint time!\n\nTry Again?", 0.8f, 1.0f, 0, 2, g_yesNoItems },
     { "You didn't beat your best\nMaster Thief Sprint time\n\nTry again?", 0.8f, 1.0f, 0, 2, g_yesNoItems },
-    { "Controls", 1.0f, 0.8f, 1, 4, D_00269D40 },
-    { "\nPlease insert a Memory Card (PS2) in Memory Card Slot 1 that contains a Sly Cooper Save File\n", 1.0f, 1.0f, 1, 1, D_00269D00 },
+    { "Controls", 1.0f, 0.8f, 1, 4, g_controlsMenuItems },
+    { "\nPlease insert a Memory Card (PS2) in Memory Card Slot 1 that contains a Sly Cooper Save File\n", 1.0f, 1.0f, 1, 1, g_messagePageItems },
 };
 char* g_menuChoiceLabels[28] = {
     "Yes",
@@ -378,14 +378,14 @@ char* g_menuChoiceLabels[28] = {
     "New Game...",
     "Load Game...",
     "Save Game...",
-    D_0026A540,
-    D_0026A480,
-    D_0026A4C0,
-    D_0026A500,
-    D_0026A580,
+    g_quitChoiceLabel,
+    g_saveSlotLabel0,
+    g_saveSlotLabel1,
+    g_saveSlotLabel2,
+    g_vibrationChoiceLabel,
     "Center Screen...",
-    D_0026A5C0,
-    D_0026A600,
+    g_musicChoiceLabel,
+    g_speakerChoiceLabel,
     "Back",
     "Restart Race",
     "Restart Sprint",
@@ -393,22 +393,22 @@ char* g_menuChoiceLabels[28] = {
     "Exit Level",
     "Exit to Hideout",
     "Controls...",
-    D_0026A640,
-    D_0026A680,
-    D_0026A6C0,
+    g_lookControlChoiceLabel,
+    g_turretControlChoiceLabel,
+    g_jetPackControlChoiceLabel,
     0,
 };
-char* D_0026A0D8 = "New Game";
-char* D_0026A0DC = "Empty";
-char* D_0026A0E0[2] = { "Quit Game", "Save and Quit" };
-char* D_0026A0E8[2] = { "Vibrations: On", "Vibrations: Off" };
-char* D_0026A0F0[2] = { "Music: On", "Music: Off" };
-char* D_0026A0F8[2] = { "Speakers: Stereo", "Speakers: Mono" };
-char* D_0026A100[2] = { "Binoc-u-com: &2(&. Up = Look Down", "Binoc-u-com: &2(&. Up = Look Up" };
-char* D_0026A108[2] = { "Turrets: &2(&. Up = Aim Down", "Turrets: &2(&. Up = Aim Up" };
-char* D_0026A110[2] = { "Jet Pack: &2(&. Up = Fly Down", "Jet Pack: &2(&. Up = Fly Up" };
-u32 D_0026A118[8] = { 0x2815A489, 0x4A3840F1, 0xDB146408, 0x9260417F, 0x4CCB23D6, 0x281349F9, 0xDB146685, 0x4A39BF71 };
-ChoiceLabels D_0026A138[27] = {
+char* g_newGameSlotText = "New Game";
+char* g_emptySlotText = "Empty";
+char* g_quitChoiceTexts[2] = { "Quit Game", "Save and Quit" };
+char* g_vibrationChoiceTexts[2] = { "Vibrations: On", "Vibrations: Off" };
+char* g_musicChoiceTexts[2] = { "Music: On", "Music: Off" };
+char* g_speakerChoiceTexts[2] = { "Speakers: Stereo", "Speakers: Mono" };
+char* g_lookControlChoiceTexts[2] = { "Binoc-u-com: &2(&. Up = Look Down", "Binoc-u-com: &2(&. Up = Look Up" };
+char* g_turretControlChoiceTexts[2] = { "Turrets: &2(&. Up = Aim Down", "Turrets: &2(&. Up = Aim Up" };
+char* g_jetPackControlChoiceTexts[2] = { "Jet Pack: &2(&. Up = Fly Down", "Jet Pack: &2(&. Up = Fly Up" };
+u32 g_pauseStreamKey[8] = { 0x2815A489, 0x4A3840F1, 0xDB146408, 0x9260417F, 0x4CCB23D6, 0x281349F9, 0xDB146685, 0x4A39BF71 };
+ChoiceLabels g_choiceTextSets[27] = {
     { 0, 0 },
     { 0, 0 },
     { 0, 0 },
@@ -418,44 +418,44 @@ ChoiceLabels D_0026A138[27] = {
     { 0, 0 },
     { 0, 0 },
     { 0, 0 },
-    { 2, D_0026A0E0 },
+    { 2, g_quitChoiceTexts },
     { 0, 0 },
     { 0, 0 },
     { 0, 0 },
-    { 2, D_0026A0E8 },
+    { 2, g_vibrationChoiceTexts },
     { 0, 0 },
-    { 2, D_0026A0F0 },
-    { 2, D_0026A0F8 },
-    { 0, 0 },
-    { 0, 0 },
+    { 2, g_musicChoiceTexts },
+    { 2, g_speakerChoiceTexts },
     { 0, 0 },
     { 0, 0 },
     { 0, 0 },
     { 0, 0 },
     { 0, 0 },
-    { 2, D_0026A100 },
-    { 2, D_0026A108 },
-    { 2, D_0026A110 },
+    { 0, 0 },
+    { 0, 0 },
+    { 2, g_lookControlChoiceTexts },
+    { 2, g_turretControlChoiceTexts },
+    { 2, g_jetPackControlChoiceTexts },
 };
-MenuBoxStyle D_0026A210(15);
-f32 D_0026A22C = 5.0f;
-ScreenAdjustRate D_0026A230 = { 2.0f, 0.0f };
+MenuBoxStyle g_pauseMenuBoxStyle(15);
+f32 g_screenAdjustRateX = 5.0f;
+ScreenAdjustRate g_screenAdjustRateY = { 2.0f, 0.0f };
 s32 g_pauseMenuItems[8] = { 0 };
 s32 g_optionsMenuItems[138] = { 0 };
-char D_0026A480[64] = { 0 };
-char D_0026A4C0[64] = { 0 };
-char D_0026A500[64] = { 0 };
-char D_0026A540[64] = { 0 };
-char D_0026A580[64] = { 0 };
-char D_0026A5C0[64] = { 0 };
-char D_0026A600[64] = { 0 };
-char D_0026A640[64] = { 0 };
-char D_0026A680[64] = { 0 };
-char D_0026A6C0[64] = { 0 };
-f32 D_0026A700 = 0;
-f32 D_0026A704 = 0;
-f32 D_0026A708 = 0;
-f32 D_0026A70C = 0;
+char g_saveSlotLabel0[64] = { 0 };
+char g_saveSlotLabel1[64] = { 0 };
+char g_saveSlotLabel2[64] = { 0 };
+char g_quitChoiceLabel[64] = { 0 };
+char g_vibrationChoiceLabel[64] = { 0 };
+char g_musicChoiceLabel[64] = { 0 };
+char g_speakerChoiceLabel[64] = { 0 };
+char g_lookControlChoiceLabel[64] = { 0 };
+char g_turretControlChoiceLabel[64] = { 0 };
+char g_jetPackControlChoiceLabel[64] = { 0 };
+f32 g_screenAdjustX = 0;
+f32 g_screenAdjustY = 0;
+f32 g_screenAdjustSavedX = 0;
+f32 g_screenAdjustSavedY = 0;
 
 LoadProgress* InitLoadProgress(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
 void BeginLoadProgress(LoadProgress* p);
@@ -597,7 +597,7 @@ void BuildPauseMenuPage(T217D_6D0* self)
     case 0:
         row->count = 0;
         for (u32 i = 0; i < 8; i++) {
-            s32 item = D_00269CD8[i];
+            s32 item = g_pauseMenuCandidates[i];
             s32 show = 1;
             switch (item) {
             case 4:
@@ -653,7 +653,7 @@ void BuildPauseMenuPage(T217D_6D0* self)
     case 0x17:
         row->count = 0;
         for (u32 i = 0; i < 9; i++) {
-            s32 item = D_00269D18[i];
+            s32 item = g_optionsMenuCandidates[i];
             s32 show = 1;
             switch (item) {
             case 6:
@@ -673,7 +673,7 @@ void BuildPauseMenuPage(T217D_6D0* self)
     }
     for (s32 i = 0; i < 27; i++) {
         char* dst = g_menuChoiceLabels[i];
-        ChoiceLabels* cl = &D_0026A138[i];
+        ChoiceLabels* cl = &g_choiceTextSets[i];
         switch (i) {
         case 9:
             if (D_00269984 != 0) {
@@ -727,11 +727,11 @@ void BuildPauseMenuPage(T217D_6D0* self)
             } else {
                 if (page < 0x12) {
                     if (page >= 0x10) {
-                        FormatToString(dst, D_0026A0D8);
+                        FormatToString(dst, g_newGameSlotText);
                         break;
                     }
                 }
-                FormatToString(dst, D_0026A0DC);
+                FormatToString(dst, g_emptySlotText);
             }
             break;
         }
@@ -755,7 +755,7 @@ void BuildPauseMenuPage(T217D_6D0* self)
         break;
     case 20:
         if (HasStreamVoice() == 0) {
-            OpenKeyRecord((KeyRecord*)D_0026A118);
+            OpenKeyRecord((KeyRecord*)g_pauseStreamKey);
             self->sound = HasStreamVoice();
         }
         break;
@@ -790,7 +790,7 @@ void BuildPauseMenuPage(T217D_6D0* self)
         height += (f32)self->font->height * self->font->sy;
     }
     for (s32 i = 0; i < row->count && row->items[i] != -1; i++) {
-        ChoiceLabels* cl = &D_0026A138[row->items[i]];
+        ChoiceLabels* cl = &g_choiceTextSets[row->items[i]];
         f32 w = 0.0f;
         if (cl->count != 0) {
             for (s32 j = 0; j < cl->count; j++) {
@@ -819,7 +819,7 @@ void InitPauseMenu(T217D_6D0* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
-        self->frame = (Font**)&D_0026A210;
+        self->frame = (Font**)&g_pauseMenuBoxStyle;
         *self->frame = GetFontById(2);
     }
     self->page = -1;
@@ -860,16 +860,16 @@ void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b)
         break;
     }
     case 24: {
-        D_0026A700 = D_0026A708 = (f32)(u32)((DisplayRegRead*)&D_00262490)->a.x;
-        D_0026A704 = D_0026A70C = (f32)((u32)(((DisplayRegRead*)&D_00262490)->q18 >> 12) & 0x7FF);
+        g_screenAdjustX = g_screenAdjustSavedX = (f32)(u32)((DisplayRegRead*)&g_displayRegisters)->a.x;
+        g_screenAdjustY = g_screenAdjustSavedY = (f32)((u32)(((DisplayRegRead*)&g_displayRegisters)->q18 >> 12) & 0x7FF);
         break;
     }
     case -1:
-        D_0026C6C8.vt->m15(&D_0026C6C8);
-        D_0026C948.vt->m15(&D_0026C948);
+        g_reserveCountCaption.vt->m15(&g_reserveCountCaption);
+        g_collectedItemCaption.vt->m15(&g_collectedItemCaption);
         D_0026CBC8.vt->m15(&D_0026CBC8);
         D_0026CE48.vt->m15(&D_0026CE48);
-        D_00274118.vt->m15(&D_00274118);
+        g_completionPercentCaption.vt->m15(&g_completionPercentCaption);
         break;
     }
 }
@@ -881,7 +881,7 @@ void SetPauseMenuOpen(T217D_6D0* self, s32 mode) {
         if (key == 0x308) {
             PauseStagedBankVoice();
             SetElementStackState((ElementStack*)g_elementStack, 5);
-        } else if (D_0027051C != 0) {
+        } else if (g_activeStepSequence != 0) {
             SetElementStackState((ElementStack*)g_elementStack, 5);
         } else {
             u8* base = g_elementStack;
@@ -900,7 +900,7 @@ void SetPauseMenuOpen(T217D_6D0* self, s32 mode) {
         if (key == 0x308) {
             ResumeStagedBankVoice();
             SetElementStackState((ElementStack*)g_elementStack, 3);
-        } else if (D_0027051C != 0) {
+        } else if (g_activeStepSequence != 0) {
             SetElementStackState((ElementStack*)g_elementStack, 3);
         } else if (self->page != 0) {
             SetElementStackState((ElementStack*)g_elementStack, 3);
@@ -951,7 +951,7 @@ void StartPauseMenuExitFade(void)
 {
     FadeRequest args;
     args.kind = 1;
-    args.text = D_00247AB0;
+    args.text = g_sessionFadeKey;
     args.f08 = -1;
     args.f0C = -1;
     args.flags = 4;
@@ -981,13 +981,13 @@ void UpdatePauseMenu(T217D_6D0* self)
         break;
     }
     if (on) {
-        D_0026C6C8.vt->m14(&D_0026C6C8);
-        D_0026C948.vt->m14(&D_0026C948);
+        g_reserveCountCaption.vt->m14(&g_reserveCountCaption);
+        g_collectedItemCaption.vt->m14(&g_collectedItemCaption);
         D_0026CBC8.vt->m14(&D_0026CBC8);
         D_0026CE48.vt->m14(&D_0026CE48);
     } else {
-        D_0026C6C8.vt->m15(&D_0026C6C8);
-        D_0026C948.vt->m15(&D_0026C948);
+        g_reserveCountCaption.vt->m15(&g_reserveCountCaption);
+        g_collectedItemCaption.vt->m15(&g_collectedItemCaption);
         D_0026CBC8.vt->m15(&D_0026CBC8);
         D_0026CE48.vt->m15(&D_0026CE48);
     }
@@ -995,12 +995,12 @@ void UpdatePauseMenu(T217D_6D0* self)
     case 0:
     case 11:
     case 17:
-        D_00274118.own = ComputeCompletionPercent(g_saveData);
-        D_00274118.target = &D_00274118.own;
-        D_00274118.vt->m14(&D_00274118);
+        g_completionPercentCaption.own = ComputeCompletionPercent(g_saveData);
+        g_completionPercentCaption.target = &g_completionPercentCaption.own;
+        g_completionPercentCaption.vt->m14(&g_completionPercentCaption);
         break;
     default:
-        D_00274118.vt->m15(&D_00274118);
+        g_completionPercentCaption.vt->m15(&g_completionPercentCaption);
         break;
     }
     if (self->sound != 0) {
@@ -1044,7 +1044,7 @@ void UpdatePauseMenu(T217D_6D0* self)
         if (self->page == 11 || self->page == 16) {
             CardSlot* e = &D_002542D8[row->items[self->cursor]];
             if (e->f0C != 0.0f) {
-                D_0026998C = e;
+                g_cardSlotInAction = e;
                 SetPauseMenuLayerPage(self, 1, 0x12);
             }
         }
@@ -1065,12 +1065,12 @@ void UpdatePauseMenu(T217D_6D0* self)
         if (dx == 0.0f && dy == 0.0f) {
             return;
         }
-        D_0026A700 = ClampFloat::Of(D_0026A700 + dx * D_0026A22C, 424.0f, 848.0f);
-        v = ClampFloat::Of(D_0026A704 + dy * D_0026A230.verticalRate, 10.0f, 90.0f);
-        D_0026A704 = v;
+        g_screenAdjustX = ClampFloat::Of(g_screenAdjustX + dx * g_screenAdjustRateX, 424.0f, 848.0f);
+        v = ClampFloat::Of(g_screenAdjustY + dy * g_screenAdjustRateY.verticalRate, 10.0f, 90.0f);
+        g_screenAdjustY = v;
         {
-            DisplayRegs* gs = &D_00262490;
-            s32 h = ConvertFloatToU32(D_0026A700);
+            DisplayRegs* gs = &g_displayRegisters;
+            s32 h = ConvertFloatToU32(g_screenAdjustX);
             DisplayReg64 ra = gs->f40;
             DisplayReg32 rb = gs->f18;
             ra.lo = h;
@@ -1186,7 +1186,7 @@ void UpdatePauseMenu(T217D_6D0* self)
     case 19: {
         BackgroundJob* p = &g_backgroundJob;
         if (IsBackgroundJobRunning(p) == 0) {
-            D_0026998C = 0;
+            g_cardSlotInAction = 0;
             if (p->result == 0) {
                 SetPauseMenuLayerPage(self, 1, -1);
             } else {
@@ -1440,7 +1440,7 @@ void DrawPauseMenu(T217D_6D0* self)
     }
     PopFontScale(self->font);
     if (menu->title != 0 && menu->count != 0) {
-        Rgba4 c = D_0026A210.color;
+        Rgba4 c = g_pauseMenuBoxStyle.color;
         c.a = alpha;
         s32 y = (s32)((base * 0.45454547f + 1936.0f) * 16.0f);
         DrawLineSegment((s32)((cx + 1728.0f) * 16.0f), y, 0, (s32)((cx + w + 1728.0f) * 16.0f), y, 0, (u8*)&c, 0);
@@ -1504,7 +1504,7 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
             return;
         case 22:
             SetPauseMenuLayerPage(self, 0, -1);
-            StartObjectFade((IdentityKey*)D_00247AD0, -1, 2);
+            StartObjectFade((IdentityKey*)g_objectFadeIn, -1, 2);
             return;
         case 9:
             SetPauseMenuLayerPage(self, 0, 2);
@@ -1749,7 +1749,7 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
             break;
         case -1:
             SetPauseMenuLayerPage(self, 1, -1);
-            D_00273EB0.vt->m14(&D_00273EB0);
+            g_cyclingGlyphElement.vt->m14(&g_cyclingGlyphElement);
             break;
         }
         StartBackgroundJob(&g_backgroundJob, (void*)SaveGameToMemoryCardSlot, &g_memoryCard);
@@ -1772,15 +1772,15 @@ void CancelPauseMenuPage(T217D_6D0* self)
         SetPauseMenuLayerPage(self, 0, 0);
         break;
     case 24: {
-        DisplayRegs* g = &D_00262490;
-        s32 v = ConvertFloatToU32(D_0026A708);
+        DisplayRegs* g = &g_displayRegisters;
+        s32 v = ConvertFloatToU32(g_screenAdjustSavedX);
         DisplayReg64 a = g->f40;
         DisplayReg32 b = g->f18;
         a.lo = v;
         b.lo = v;
         g->f40 = a;
         g->f18 = b;
-        s32 w = ConvertFloatToU32(D_0026A70C);
+        s32 w = ConvertFloatToU32(g_screenAdjustSavedY);
         a.mid = w;
         b.mid = w;
         g->f40 = a;

@@ -156,8 +156,8 @@ void* DefineScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, Script
 
 void* EvalScriptBody(ScriptValue* ret, R11B008Node* list, ScriptScope* scope);
 
-extern const s32 D_00244EC0[];
-extern s32 D_00244DFC[];
+extern const s32 g_scriptEventOffsets[];
+extern s32 g_scriptEventPairs[];
 
 s32 SuppressScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
@@ -626,7 +626,7 @@ void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out)
     MarkPoolLiveEnds((MarkStacks*)g_markStacks);
     if (SuppressScriptEvent(self, idx, flag, out) == 0) {
         if (flag != 0) {
-            BuildScriptListFromPairs(&tmp, flag, (s32*)D_00244DFC + D_00244EC0[idx], (s32*)out);
+            BuildScriptListFromPairs(&tmp, flag, (s32*)g_scriptEventPairs + g_scriptEventOffsets[idx], (s32*)out);
             AssignScriptValue(&r, &tmp);
             DestroyScriptValue(&tmp, 2);
             a4 = (s32)r.p;
@@ -850,9 +850,9 @@ void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 void BuildFrustumSideNormals(Mat02* m, Vec02* out, f32 x, f32 y);
 void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out);
-extern u8 D_00000BF0[];
-extern u8 D_00000D30[];
-extern u8 D_00000EF0[];
+extern u8 g_coneProgramMode0[];
+extern u8 g_coneProgramMode1[];
+extern u8 g_coneProgramMode23[];
 
 void RefreshConeVolumeShape(ConeVolume* self)
 {
@@ -885,7 +885,7 @@ void RefreshConeVolumeShape(ConeVolume* self)
         Vec02 d;
         TransformDirectionBetweenFrames(self, 0, (Vec02*)&self->q320, &d);
         CopyWordsToWriter(&w, 8, 1, (u32*)&d, 0x19);
-        WriteVifMscal(&w, D_00000BF0);
+        WriteVifMscal(&w, g_coneProgramMode0);
         break;
     }
     case 1: {
@@ -893,7 +893,7 @@ void RefreshConeVolumeShape(ConeVolume* self)
         FitReciprocalThroughPoints(&r[0], &r[1], self->rangeMin, 1.0f, self->rangeMax, 0.0f);
         CopyWordsToWriter(&w, 4, 1, (u32*)r, 0x19);
         CopyWordsToWriter(&w, 8, 1, (u32*)&self->v140, 0x1A);
-        WriteVifMscal(&w, D_00000D30);
+        WriteVifMscal(&w, g_coneProgramMode1);
         break;
     }
     case 2:
@@ -939,7 +939,7 @@ void RefreshConeVolumeShape(ConeVolume* self)
         CopyWordsToWriter(&w, 0xC, 2, (u32*)ramp, 0x19);
         CopyWordsToWriter(&w, 8, 1, (u32*)&d, 0x1B);
         CopyWordsToWriter(&w, 0xC, 4, (u32*)view, 0x1C);
-        WriteVifMscal(&w, D_00000EF0);
+        WriteVifMscal(&w, g_coneProgramMode23);
         break;
     }
     }

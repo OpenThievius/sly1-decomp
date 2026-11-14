@@ -249,9 +249,9 @@ void MarkSoundRecordIfIdMatches(s32 reply, s64 key);
 void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c);
 void StopSoundRecord(PlayingSound* self, s32 n);
 s32 SetIopSoundOptionFlag(s32 flag);
-extern U64P D_00274820;
-extern U64P D_00274828;
-extern s32 D_006053E0[];
+extern U64P g_defaultSoundRepeat;
+extern U64P g_defaultSoundRange;
+extern s32 g_cachedVoiceParams[];
 s32 GetVoiceParam(s32 a, s32 b);
 void UnregisterObject(BaseObject* self);
 void RemoveFromList(List01* list, void* item);
@@ -262,14 +262,14 @@ void RegisterObject(BaseObject* self);
 void AppendToList(List01* self, void* item);
 void CopyObjectData(BaseObject* self, BaseObject* src);
 void SetIopVolumeChannel(s32 a, s32 b);
-extern s32 D_00274808[6];
+extern s32 g_iopChannel2Values[6];
 void SetIopChannelValue(s32 a, s32 b);
 void SetIopChannelValuePair(s32 a, s32 b, s32 c);
 struct Point2 { f32 x; f32 y; };
 extern f32 g_volumeChannelFactors[11][4];
 void SetIopVolumeChannel(s32 slot, s32 value);
 void ApplyVolumeChannelFactors(s32 column);
-extern u8 D_002748E8[4];
+extern u8 g_worldSoundHandle[4];
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void StopAllIopSounds(void);
@@ -281,7 +281,7 @@ void ClearCachedVoiceParams(void);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern f32 g_defaultVolumeChannelFactors[11][4];
-extern s32 D_00274808[];
+extern s32 g_iopChannel2Values[];
 void SetIopChannelValue(s32 channel, s32 value);
 void SetIopChannelValuePair(s32 channel, s32 value, s32 value2);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -290,9 +290,9 @@ s32 StepBiasedRandomWalk(void);
 // from -12 to 12, copied to the stack.
 struct RandomWalkSteps { s32 v[42]; };
 struct RandomWalkRows { s32 v[25]; };
-extern const RandomWalkSteps D_0024D2A8;
-extern const RandomWalkRows D_0024D350;
-extern s32 D_00274830;
+extern const RandomWalkSteps g_randomWalkSteps;
+extern const RandomWalkRows g_randomWalkRows;
+extern s32 g_randomWalkPosition;
 void SetVoiceParam(s32 a0, s32 a1, s32 a2);
 void InitObject(BaseObject* self);
 void StopSoundRecord(PlayingSound* self, s32 n);
@@ -325,17 +325,17 @@ s32 g_previousSoundLevel = 0;
 s32 g_stagedBankHandle = 0;
 s32 g_loadedSoundBank = -1;
 s32 g_streamVoiceLocked = 0;
-s32 D_00274748 = 0;
+s32 g_soundEmitterUpdateDisabled = 0;
 s32 g_nextSoundRecordId = 0;
-f32 D_00274750 = -2.0f;
+f32 g_lastSilentSoundTime = -2.0f;
 s32 D_00274754 = 3;
 f32 g_defaultVolumeChannelFactors[11][4] = { 1.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-s32 D_00274808[6] = { 0, 2, 3, 4, 9, 1 };
-U64P D_00274820 = { 0x40C0000040800000ULL };
-U64P D_00274828 = { 0x45FA0000453B8000ULL };
-s32 D_00274830 = 0;
+s32 g_iopChannel2Values[6] = { 0, 2, 3, 4, 9, 1 };
+U64P g_defaultSoundRepeat = { 0x40C0000040800000ULL };
+U64P g_defaultSoundRange = { 0x45FA0000453B8000ULL };
+s32 g_randomWalkPosition = 0;
 f32 g_volumeChannelFactors[11][4] = { 0 };
-u8 D_002748E8[4] = { 0 };
+u8 g_worldSoundHandle[4] = { 0 };
 s32 D_002748EC = 0;
 void CopyMemory(void* dst, void* src, u32 size);
 
@@ -829,7 +829,7 @@ void InitSoundSystem(void)
 
 LINKER_REMNANT(func_001BF1E8);
 
-s32 IsSoundEmitterUpdateDisabled(void) { return D_00274748; }
+s32 IsSoundEmitterUpdateDisabled(void) { return g_soundEmitterUpdateDisabled; }
 
 void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c)
 {
@@ -1247,8 +1247,8 @@ void UpdateSoundEmitters(void)
                 } else {
                     ScheduleAmbientSoundRecord(e);
                     if (e->silent != 0) {
-                        if (s1[1] - D_00274750 < 1.0f) goto next;
-                        D_00274750 = s1[1];
+                        if (s1[1] - g_lastSilentSoundTime < 1.0f) goto next;
+                        g_lastSilentSoundTime = s1[1];
                     }
                 }
             }
@@ -1370,7 +1370,7 @@ void StopWorldSoundRecords(s32 item)
 void PushIopChannel2Setting(World* self, s32 a, s32 b)
 {
     if ((u32)self->channel2Count < 4) {
-        SetIopChannelValue(2, D_00274808[a]);
+        SetIopChannelValue(2, g_iopChannel2Values[a]);
         SetIopChannelValuePair(2, b, b);
         self->channel2[self->channel2Count].index = a;
         self->channel2[self->channel2Count].value = b;
@@ -1383,14 +1383,14 @@ void PopIopChannel2Setting(World* self)
     s32 n = self->channel2Count;
     if (n >= 2) {
         self->channel2Count = n - 1;
-        SetIopChannelValue(2, D_00274808[self->channel2[n - 2].index]);
+        SetIopChannelValue(2, g_iopChannel2Values[self->channel2[n - 2].index]);
         SetIopChannelValuePair(2, self->channel2[self->channel2Count - 1].value, self->channel2[self->channel2Count - 1].value);
     }
 }
 
 void SetIopChannel2Setting(World* self, s32 index, s32 value)
 {
-    SetIopChannelValue(2, D_00274808[index]);
+    SetIopChannelValue(2, g_iopChannel2Values[index]);
     SetIopChannelValuePair(2, value, value);
     self->channel2[0].index = index;
     self->channel2[0].value = value;
@@ -1402,8 +1402,8 @@ void AddWorldSoundEntry(World* self, s32 key)
     if (self->soundCount < 16) {
         WorldSoundEntry* e = &self->soundEntries[self->soundCount];
         e->sound = key;
-        e->repeat = D_00274820;
-        e->range = D_00274828;
+        e->repeat = g_defaultSoundRepeat;
+        e->range = g_defaultSoundRange;
         self->soundCount++;
     }
 }
@@ -1430,26 +1430,26 @@ void StartWorldSoundEntries(World* self)
 {
     for (s32 i = 0; i < self->soundCount; i++) {
         WorldSoundEntry* e = &self->soundEntries[i];
-        StartSoundEffect(e->sound, (PlayingSound**)D_002748E8, 0, 0, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f, (f32*)&e->repeat, &e->range);
+        StartSoundEffect(e->sound, (PlayingSound**)g_worldSoundHandle, 0, 0, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f, (f32*)&e->repeat, &e->range);
     }
 }
 
 void SetCachedVoiceParam(s32 idx, s32 val)
 {
-    if (val != D_006053E0[idx]) {
-        D_006053E0[idx] = val;
+    if (val != g_cachedVoiceParams[idx]) {
+        g_cachedVoiceParams[idx] = val;
         SetVoiceParam(g_stagedBankVoice, idx, val);
     }
 }
 
 s32 GetCachedVoiceParam(s32 index)
 {
-    return D_006053E0[index];
+    return g_cachedVoiceParams[index];
 }
 
 void RefreshCachedVoiceParam(s32 i, s32 unused1)
 {
-    D_006053E0[i] = GetVoiceParam(g_stagedBankVoice, i);
+    g_cachedVoiceParams[i] = GetVoiceParam(g_stagedBankVoice, i);
 }
 
 void ClearCachedVoiceParams(void)
@@ -1459,15 +1459,15 @@ void ClearCachedVoiceParams(void)
     }
 }
 
-extern const RandomWalkSteps D_0024D2A8 = { { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, 1, -5, -5, -5, -5, 1, 1, -5, -5, -5, 1, 1, 1, -5, -5, 1, 1, 1, 1, -5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
-extern const RandomWalkRows D_0024D350 = { { 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0 } };
+extern const RandomWalkSteps g_randomWalkSteps = { { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, 1, -5, -5, -5, -5, 1, 1, -5, -5, -5, 1, 1, 1, -5, -5, 1, 1, 1, 1, -5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+extern const RandomWalkRows g_randomWalkRows = { { 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0 } };
 
 s32 StepBiasedRandomWalk() {
-    RandomWalkSteps a = D_0024D2A8;
-    RandomWalkRows b = D_0024D350;
+    RandomWalkSteps a = g_randomWalkSteps;
+    RandomWalkRows b = g_randomWalkRows;
     s32 r = RandomIntInRange(0, 5);
-    D_00274830 += *(s32*)((u8*)&a + (b.v[D_00274830 + 12] * 24 + r * 4));
-    return D_00274830;
+    g_randomWalkPosition += *(s32*)((u8*)&a + (b.v[g_randomWalkPosition + 12] * 24 + r * 4));
+    return g_randomWalkPosition;
 }
 
 void PlaySoundWithWanderingPitch(void)

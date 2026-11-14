@@ -38,8 +38,8 @@ struct TransformSet;
 // functions read; its .bss the spare entry D_002BE478.
 
 f32 D_00263E34 = -200.0f;
-f32 D_00263E38 = 25.0f;
-f32 D_00263E3C = 15.0f;
+f32 g_queueGoalReachDistance = 25.0f;
+f32 g_queuePathReachTolerance = 15.0f;
 f32 D_00263E40 = 0.200000003f;
 f32 D_00263E44 = 0.5f;
 
@@ -436,11 +436,11 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
         Vec02 pos;
         GetNodeAnchorAndHeading(self, (BaseObject*)obj, &pos, 0);
         Vu0::Vec gap = Vu0::Sub(Vu0::Vec::Of(pl->v140), Vu0::Vec::Of(pos));
-        done = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(gap, gap))) < D_00263E38;
+        done = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(gap, gap))) < g_queueGoalReachDistance;
         break;
     }
     case 7:
-        done = __builtin_fabsf(pl->pathPos - self->f64) < D_00263E3C;
+        done = __builtin_fabsf(pl->pathPos - self->f64) < g_queuePathReachTolerance;
         break;
     case 9: {
         void* p = self->animationPlayer;
@@ -726,13 +726,13 @@ void UnbindEntryQueue(EntryQueue* self)
 }
 
 // The entry AddQueueEntry hands out once the queue's 0x80 entries are used (0x14 bytes).
-static u8 D_002BE478[0x14];
+static u8 g_queueOverflowEntry[0x14];
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void* AddQueueEntry(EntryQueue* pool, s32 a, s32 b, s32 c)
 {
     if (pool->entryCount >= 0x80) {
-        return D_002BE478;
+        return g_queueOverflowEntry;
     }
     s32 n = pool->entryCount;
     u8* e = (u8*)pool->buffer + n * 0x14;

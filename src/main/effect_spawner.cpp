@@ -255,15 +255,15 @@ void SetCrossfadeMode(CrossfadeAnimator* self, s32 mode);
 
 s32 IsObjectAttached(BaseObject* self);
 void RemoveObjectNodeFromWorld(WorldObjectNode* self);
-extern PackedFloatPair D_00262180;
-extern PackedFloatPair D_00262188;
-extern PackedFloatPair D_00262190;
-extern PackedFloatPair D_00262198;
-extern PackedFloatPair D_002621A0;
-extern PackedFloatPair D_002621A8;
-extern PackedFloatPair D_002621B0;
-extern PackedFloatPair D_002621B8;
-extern PackedFloatPair D_002621C0;
+extern PackedFloatPair g_cyclerTargetRadiusRange;
+extern PackedFloatPair g_cyclerTargetHeightRange;
+extern PackedFloatPair g_cyclerTangentRadiusRange;
+extern PackedFloatPair g_cyclerTangentHeightRange;
+extern PackedFloatPair g_cyclerCheckDelayRange;
+extern PackedFloatPair g_cyclerHoldExtraRange;
+extern PackedFloatPair g_cyclerAdvanceDelayRange;
+extern PackedFloatPair g_cyclerWrapDelayRange;
+extern PackedFloatPair g_cyclerMessageIntervalRange;
 
 void InitCollider(Collider* self);
 void AppendToList(List01* self, void* item);
@@ -444,7 +444,7 @@ void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
 struct ClassKindNode { ClassKindNode* next; s32 value; };
 
-extern u8 D_00247448[];
+extern u8 g_classDescriptorTable[];
 
 s32 IsObjectAttached(BaseObject* self);
 
@@ -505,8 +505,8 @@ void RemoveFromList(List01* list, void* item);
 
 struct CyclerDrawParams { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
 extern f32 g_gameTime;
-extern f32 D_00262230[4];
-extern f32 D_00262240[4];
+extern f32 g_cyclerShrinkCurve[4];
+extern f32 g_cyclerGrowCurve[4];
 extern f32 g_unitRange[];
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 
@@ -537,8 +537,8 @@ s32 ReadTextChar(TextReader* self);
 // The packet memory a GIF writer fills: quadwords.
 typedef u64 UQuadword128 __attribute__((mode(TI)));
 
-extern u8 D_00212160[];
-extern u8 D_00215C50[];
+extern u8 g_groupMicroprogram[];
+extern u8 g_groupMicroprogramEnd[];
 
 void* InitGifPacket(void* p);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
@@ -601,7 +601,7 @@ void PopBackMemoryMark(void);
 void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 void AddDmaRefTag(void* list, u32 count, s32 value);
-extern s32 D_0026230C;
+extern s32 g_lastDmaRefStart;
 
 void BeginGifTag(void* obj, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(void* obj, s32 a, s32 b);
@@ -614,8 +614,8 @@ void CloseDrawBuffer(void* obj, void* a, u8** b);
 void ClearList(List01* p);
 extern "C" s32 PostSemaphore(void* a);
 
-extern List01 D_002622E0;
-extern List01 D_002622F0;
+extern List01 g_deferredReleaseListA;
+extern List01 g_deferredReleaseListB;
 extern List01 g_deferredReleaseListC;
 extern s32 g_buildFrameData;
 extern void* g_frameReadySemaphore;
@@ -681,8 +681,8 @@ f32 MeasureTextWidth(TextReader* self);
 
 
 
-extern u32 D_002C3B00[];
-extern u8 D_00148D74[];
+extern u32 g_packetBufferMemory[];
+extern u8 g_codeChecksumSize[];
 extern s32 g_codeChecksumFailed;
 
 extern void* g_frameDoneSemaphore;
@@ -713,8 +713,8 @@ struct FontHeader {
 
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 void* AllocateFrontMemory(s32 n);
-extern s32 D_00262258;
-extern s32 D_0026225C;
+extern s32 g_glyphUOffset;
+extern s32 g_glyphVOffset;
 
 FontGlyph* FindFontGlyph(Font* self, s8 key);
 s32 AddFontImagesToFrame(Font* self, void* obj);
@@ -727,7 +727,7 @@ void AddGifXyzfRegListEntry(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
 
 // NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
 
-extern u8 D_003C3B00[], D_005C3B00[];
+extern u8 g_vifPacketMemory[], g_renderFrameDataMemory[];
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
 extern s32 g_mainAndRenderThreads[];
@@ -745,7 +745,7 @@ struct GroundCandidate { u8 pad0[0x50]; s32 f50; u8 pad1[0x278]; u32 f2CC; u8 pa
 
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
-extern u32 D_00262314;
+extern u32 g_renderFrameIndex;
 extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
 extern s32 D_002626CC;
@@ -854,7 +854,7 @@ struct SpawnRecordParts {
     u8 pad1F0[0x200 - 0x1F0];
 };
 typedef char check_SpawnRecordParts[sizeof(SpawnRecordParts) == 0x200 ? 1 : -1];
-extern SpawnTable D_00261F80;
+extern SpawnTable g_spawnRecordDefaults;
 
 // The vectors and the block are built once each, as function-local statics with brace
 // initialisers: a vector copied from a global makes each run at run time, through a temporary
@@ -874,7 +874,7 @@ void InitSpawnRecord(void* mem)
     self->f0 = 1;
     self->vectors = vectors;
     self->block = block;
-    self->table = D_00261F80;
+    self->table = g_spawnRecordDefaults;
 }
 
 void InitEffectSpawner(EffectSpawner* self)
@@ -1537,7 +1537,7 @@ struct __attribute__((aligned(16))) SplashTail {
     s32 f38;                // 0x38
     s32 f3C;                // 0x3C
 };
-extern s32 D_00262050[74];
+extern s32 g_surfaceContactSounds[74];
 s32 RandomIntInRange(s32 a, s32 b);
 void SpawnEffectsAt(Quad16* self, Quad16* a1, s32 a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
 
@@ -1572,7 +1572,7 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
             if (rec != 0) {
                 AT(f32, rec, 0x14) = vol;
             } else {
-                StartSoundEffect(D_00262050[RandomIntInRange(0, 3)], (PlayingSound**)(snd + 0x574), (BaseObject*)snd, 0, 10.0f, 1.0f, vol,
+                StartSoundEffect(g_surfaceContactSounds[RandomIntInRange(0, 3)], (PlayingSound**)(snd + 0x574), (BaseObject*)snd, 0, 10.0f, 1.0f, vol,
                                  0.0f, 0.0f, 0, 0);
             }
         }
@@ -2383,20 +2383,20 @@ struct SpinRecord_158480 {
     s32 mode;           // 0x40
     void* frame;        // 0x44
 };
-extern const Mat4A D_00248400;
+extern const Mat4A g_identityMatrix4;
 void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 s32 ScaleMatrix(Mat4A* out, Mat4A* in, u128 scale);
 void AddMatrices(f32* a, f32* b, f32* out);
 
 void TurnMatrixBySpin(SpinRecord_158480* spin, f32 dt, f32* out)
 {
-    Mat4A place = D_00248400;
+    Mat4A place = g_identityMatrix4;
     Mat4A turn;
     place.m[2][2] = place.m[1][1] = place.m[0][0] = spin->scale;
     place.m[3][0] = spin->tx;
     place.m[3][1] = spin->ty;
     place.m[3][2] = spin->tz;
-    turn = D_00248400;
+    turn = g_identityMatrix4;
     if (spin->rate != 0.0f) {
         Quad16 axis;
         if (spin->mode == 1 && spin->frame != 0) {
@@ -2752,7 +2752,7 @@ struct ValueRange;
 f32 ClampToRange(ValueRange* span, f32 x);
 void ComputeChainedWorldFrame(void* a, void* frame, void* out);
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-extern f32 D_00262178[2];
+extern f32 g_spawnScaleRatioRange[2];
 extern const Vec02 D_00248D30;
 
 void HandleSpawnMessage(void* self, void* body)
@@ -2797,7 +2797,7 @@ void HandleSpawnMessage(void* self, void* body)
             else count = (s32)((f32)count / s);
             s32 least = (s32)AT(f32, self, 0xA8) / 2;
             count = least < count ? count : least;
-            f32 r = ClampToRange((ValueRange*)D_00262178, s);
+            f32 r = ClampToRange((ValueRange*)g_spawnScaleRatioRange, s);
             rec.fA0 = rec.fA0 * r;
             rec.fA4 = rec.fA4 * r;
             f32 lowest = 0.5f;
@@ -3351,7 +3351,7 @@ BaseObject* FindFirstObjectByIdMode1(World* self,s32 kind,void* arg)
 
 s32 IsClassOfKind(s32 index, s32 value)
 {
-    ClassKindNode* p = ((ClassKindNode**)D_00247448)[index];
+    ClassKindNode* p = ((ClassKindNode**)g_classDescriptorTable)[index];
     while (p != 0) {
         if (p->value != value) {
             p = p->next;
@@ -3519,15 +3519,15 @@ s32 IsPointInsideObjectFaces(ScalingVolume* self, void* point)
     return IsPointInsideFaceTree((TreeNode03*)self->out2DC, (FacePoint*)&local);
 }
 
-extern f32 D_002621F8[6];
-extern f32 D_00262210[4];
-extern f32 D_00262220[4];
+extern f32 g_cyclerRotationRamp[6];
+extern f32 g_cyclerFallPositionSteer[4];
+extern f32 g_cyclerFallRotationSteer[4];
 
 // The file's .data, 0x261F70 to 0x262180, in retail's order. The two packet streams
 // (globals.h), whose labels are shorter than PacketWriter, are included from the disassembly.
 // The spawn record's table, copied whole by InitSpawnRecord (func_001549C8), whose two statics'
 // guards (D_00261F70, D_00261F74) the compiler writes out with the function, ahead of it.
-SpawnTable D_00261F80 = { {
+SpawnTable g_spawnRecordDefaults = { {
     { { 0, 0, 0, 0 } },
     { { 0, 45, 0, 0 } },
     { { 0x41C80000, 0, 0, 0 } },
@@ -3542,5 +3542,5 @@ SpawnTable D_00261F80 = { {
     { { 0x3F800000, 0x3F800000, 0, 0 } },
     { { 0, 0, 0, 0 } },
 } };
-s32 D_00262050[74] = { 82, 83, 84, 85, 0, 46, 0, 0, 0x41F00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0x41A00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0 };
-f32 D_00262178[2] = { 0.5f, 2.0f };
+s32 g_surfaceContactSounds[74] = { 82, 83, 84, 85, 0, 46, 0, 0, 0x41F00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0x41A00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0 };
+f32 g_spawnScaleRatioRange[2] = { 0.5f, 2.0f };

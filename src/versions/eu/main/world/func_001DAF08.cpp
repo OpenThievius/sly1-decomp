@@ -6,10 +6,10 @@ void HandlePathFollowerNotification(PathFollower* self, s32 code, CountedNotice*
 {
     HandleSwitchedColliderNotification(self, code, rec);
     if (code == 0xE && rec->kind == 0x426) {
-        Counter_1DAF08_eu* a = (Counter_1DAF08_eu*)&D_00272430;
+        Counter_1DAF08_eu* a = (Counter_1DAF08_eu*)&g_firstTallyCaption;
         s32 lim = D_002751D4;
         if (a->count < lim) {
-            Counter_1DAF08_eu* b = (Counter_1DAF08_eu*)&D_002726B0;
+            Counter_1DAF08_eu* b = (Counter_1DAF08_eu*)&g_secondTallyCaption;
             if (b->count < lim) {
                 if (rec->link->owner == self) {
                     a->count = a->count + 1;

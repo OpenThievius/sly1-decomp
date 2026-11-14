@@ -237,7 +237,7 @@ void StartModeWalkerObject(ModeWalker* self)
     TransformPointBetweenFrames(0, (PlacedObject*)self->fBC0, (Vec02*)((u8*)self->fBCC + 0x140), (Vec02*)((u8*)self + 0xBE0));
     SetModeWalkerMode(self, 1);
     self->paceChangeTime = 3.4028234663852886e+38f;
-    T217D_BF0* base = &D_00270650;
+    T217D_BF0* base = &g_spinningSpriteElement;
     ((T217D_Float*)&base->alphaScale)->v = 0.0f;
     base->icon = FindAnimRecord(0x36A);
 }
@@ -253,7 +253,7 @@ struct PadStick {
     u16 pressed;            // 0xAA: func_00181078 tests and clears 0x40
 };
 
-extern T217D_BF0 D_00270650;
+extern T217D_BF0 g_spinningSpriteElement;
 extern u8 g_blankPadRecord[];
 extern u8 D_002708C0[];
 void ControlPathFollower(PathFollower* self, PadStick* pad, f32 dt);
@@ -316,7 +316,7 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
             if (self->walkerMode == 2) {
                 pad = (PadStick*)g_blankPadRecord;
             }
-            SteerWalkerAimAtNearestTarget(&D_00270650, pad);
+            SteerWalkerAimAtNearestTarget(&g_spinningSpriteElement, pad);
             Vu0::Q(m.r[2]) = Vu0::Q(self->m110.r[2]);
             u128 n = Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(m.r[2]), Vu0::Q(((Vec02*)((u8*)g_camera + 0x80))[0])), *(u128*)&self->m110.r[1]);
             Vu0::Q(m.r[1]) = n;
@@ -431,11 +431,11 @@ void HandleModeWalkerActivation(ModeWalker* self, void* active)
 {
     HandlePathFollowerActivation(self, active);
     if (active) {
-        T217D_BF0* e = &D_00270650;
+        T217D_BF0* e = &g_spinningSpriteElement;
         e->vt->m16(e, 2);
         Vu0::Q(e->aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
     } else {
-        D_00270650.vt->m16(&D_00270650, 0);
+        g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 0);
         self->pulseActive = 0;
     }
 }

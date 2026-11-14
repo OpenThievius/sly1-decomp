@@ -85,9 +85,9 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                 GetStateWalkerCurrentKey((StateWalker*)dev, &code);
             }
             if (code == 0x42F) {
-                if (((Counter_1D9D78_eu*)&D_00272430)->count >= D_002751D4) {
+                if (((Counter_1D9D78_eu*)&g_firstTallyCaption)->count >= D_002751D4) {
                     SetStateWalkerTarget((StateWalker*)dev, 0x432);
-                } else if (((Counter_1D9D78_eu*)&D_002726B0)->count >= D_002751D4) {
+                } else if (((Counter_1D9D78_eu*)&g_secondTallyCaption)->count >= D_002751D4) {
                     SetStateWalkerTarget((StateWalker*)dev, 0x431);
                     RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f);
                 }

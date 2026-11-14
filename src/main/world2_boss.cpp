@@ -32,10 +32,10 @@ struct GaugeTarget {
     BaseObject* value;      // 0x08: FindFirstObjectById's result
 };
 
-ObjectLink D_00264910[2] = { { 0, 0x82, 0xC24 }, { 0, 0x83, 0xC74 } };
-ObjectLink D_00264928[3] = { { 1, 0x437, 0xE0C }, { 0, 0x440, 0xE18 }, { 0, 0x441, 0xE1C } };
-s32 D_00264950[4] = { 0x446, 0x447, 0x448, 0 };
-GaugeTarget D_00264960[6] = {
+ObjectLink g_world2BossLoadLinks[2] = { { 0, 0x82, 0xC24 }, { 0, 0x83, 0xC74 } };
+ObjectLink g_world2BossStartLinks[3] = { { 1, 0x437, 0xE0C }, { 0, 0x440, 0xE18 }, { 0, 0x441, 0xE1C } };
+s32 g_world2BossClipIds[4] = { 0x446, 0x447, 0x448, 0 };
+GaugeTarget g_world2BossGaugeTargets[6] = {
     { 0x35, 50.0f, 0 }, { 0x36, 50.0f, 0 }, { 0x38, 80.0f, 0 },
     { 0x3B, 80.0f, 0 }, { 0x60, 70.0f, 0 }, { 0x50, 220.0f, 0 }
 };
@@ -87,7 +87,7 @@ void InitWorld2Boss(World2Boss* self)
 void LoadWorld2Boss(World2Boss* self, void* reader)
 {
     LoadAgent(self, reader);
-    ResolveObjectLinks(self, 2, D_00264910);
+    ResolveObjectLinks(self, 2, g_world2BossLoadLinks);
 }
 
 void StartWorld2Boss(World2Boss* self)
@@ -97,21 +97,21 @@ void StartWorld2Boss(World2Boss* self)
 
     StartAgent(self);
     SetWorldActiveFollower(self->world, self);
-    ResolveObjectLinks(self, 3, D_00264928);
+    ResolveObjectLinks(self, 3, g_world2BossStartLinks);
     CreateSixEntryBlend(self, (PlayerBlendItem*)((u8*)self + 0xC20), (BlendAnimationView**)((u8*)self + 0xE00));
     self->stateClips[12].obj = (void*)self->blendView;
     self->walker = CreateStateWalker((StateGraph*)self->walkerGraph, 0, 0x438, 0);
     for (n = 0; n < 3; n++)
-        self->phaseClips[n] = ResolveAgentClip(self, D_00264950[n]);
+        self->phaseClips[n] = ResolveAgentClip(self, g_world2BossClipIds[n]);
     self->keyedCount = 6;
-    self->keyedObjects = (GaugeTarget*)CopyToFrontMemory(0x48, D_00264960);
+    self->keyedObjects = (GaugeTarget*)CopyToFrontMemory(0x48, g_world2BossGaugeTargets);
     for (i = 0; i < self->keyedCount; i++) {
         GaugeTarget* e = ((GaugeTarget*)self->keyedObjects) + i;
         e->value = FindFirstObjectById(self->world, 1, e->key, self);
     }
 }
 
-extern f32 D_00275070[14];
+extern f32 g_ringSevenPoints[14];
 AnimRecord* FindAnimRecord(s32 key);
 
 // DrawPlayerMarkerRing2's counterpart (player_request.cpp): the same block, built once as a
@@ -131,17 +131,17 @@ void DrawWorld2BossMarkerRing(DeferredRequest* request)
     AnimRecord* texture = FindAnimRecord(0x15D);
     params.textures[1] = texture;
     params.textures[0] = texture;
-    DrawAngleSortedRing((Vec02*)((u8*)agent + 0x140), 7, (Point2*)D_00275070, agent->keyedCount, (RingAnchor*)agent->keyedObjects, &params, request);
+    DrawAngleSortedRing((Vec02*)((u8*)agent + 0x140), 7, (Point2*)g_ringSevenPoints, agent->keyedCount, (RingAnchor*)agent->keyedObjects, &params, request);
 }
 
 // The static's guard (D_002649A8) is written out with the function above, so the data below
 // follows it.
-s32 D_002649B0[5] = { 4, 5, 60, 41, 76 };
+s32 g_world2BossBlockerKinds[5] = { 4, 5, 60, 41, 76 };
 f32 D_002649C4 = 1.5e+02f;
 f32 D_002649C8 = 0.25f;
 f32 D_002649D0[2] = { 0.0f, 0.25f };
-s32 D_002649D8[4] = { 16, 16, 11, 0 };
-s32 D_002649E8[6] = { 1083, 1085, 1087, 0, 0, 0 };
+s32 g_world2BossPhaseStates[4] = { 16, 16, 11, 0 };
+s32 g_world2BossPhaseValues[6] = { 1083, 1085, 1087, 0, 0, 0 };
 f32 D_00264A00[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
 f32 D_00264A10[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
 f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
@@ -214,7 +214,7 @@ struct BlockerQuery { u8 pad[0x50]; BaseObject* sub; };
 
 s32 IsWorld2BossBlocker(void* self, BlockerQuery* rec)
 {
-    s32* e = D_002649B0;
+    s32* e = g_world2BossBlockerKinds;
     u32 i;
     for (i = 0; i < 5; e++, i++) {
         if (IsObjectOfKind(rec->sub, *e) != 0) {
@@ -365,9 +365,9 @@ void AdvanceWorld2BossPhase(World2Boss* self)
 {
     DecrementGaugeCount((T217D_2E0*)&g_gaugeBarElement);
     s32 idx = self->phase;
-    ChangeAgentState(self, D_002649D8[idx], (void*)self->phaseClips[idx]);
+    ChangeAgentState(self, g_world2BossPhaseStates[idx], (void*)self->phaseClips[idx]);
     s32 n = self->phase;
-    self->pendingWalkerTarget = D_002649E8[n];
+    self->pendingWalkerTarget = g_world2BossPhaseValues[n];
     self->phase = n + 1;
 }
 

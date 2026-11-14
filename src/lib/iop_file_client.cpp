@@ -61,20 +61,20 @@ struct Callback_1F84D8 {
 volatile s32 g_semaphoreSlots[32] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 s32 g_fileClientOpen = 0;
-s32 D_002771BC = -1;
-s32 D_002771C0 = -1;
-s32 D_002771C4 = -1;
+s32 g_fileRequestSemaphore = -1;
+s32 g_fileHandleTableSemaphore = -1;
+s32 g_fileReplySemaphore = -1;
 
-static u8* D_00627840;
+static u8* g_fileReplyBufferAddress;
 static u32* D_00627844;
-static u8 D_00627880[0xC40] __attribute__((aligned(64)));
-static u8 D_006284C0[0x40] __attribute__((aligned(64)));
-static u8 D_00628500[0x440] __attribute__((aligned(64)));
-static u8 D_00628940[0x200] __attribute__((aligned(64)));
+static u8 g_fileRequestBuffer[0xC40] __attribute__((aligned(64)));
+static u8 g_fileCallResult[0x40] __attribute__((aligned(64)));
+static u8 g_fileReplyBuffer[0x440] __attribute__((aligned(64)));
+static u8 g_fileHandleTable[0x200] __attribute__((aligned(64)));
 static u8 g_fileClient[0x28] __attribute__((aligned(64)));
-static s32 D_00628B68;
-static u8 D_00628B80[0x40] __attribute__((aligned(64)));
-static Callback_1F84D8 D_00628BC0 __attribute__((aligned(64)));
+static s32 g_fileClientResult;
+static u8 g_fileReplyHandlerArgument[0x40] __attribute__((aligned(64)));
+static Callback_1F84D8 g_fileCommandCallback __attribute__((aligned(64)));
 
 extern "C" s32 NewSemaphore(SemaphoreParams* params);
 extern "C" s32 FreeSemaphore(s32 sema);
@@ -100,13 +100,13 @@ void RunFileClientCallback(void* packet, FileCommandCall* call);
 
 void CreateFileTableLock(void)
 {
-    if (D_002771C0 == -1) {
+    if (g_fileHandleTableSemaphore == -1) {
         SemaphoreParams b;
         b.initCount = 1;
         b.option = 0;
         b.maxCount = 1;
-        D_002771C0 = NewSemaphore(&b);
-        D_002771C4 = NewSemaphore(&b);
+        g_fileHandleTableSemaphore = NewSemaphore(&b);
+        g_fileReplySemaphore = NewSemaphore(&b);
     }
 }
 
@@ -114,14 +114,14 @@ s32 FindFileHandle(s32 a0)
 {
     s32 s = a0;
     CreateFileTableLock();
-    AwaitSemaphore(D_002771C0);
+    AwaitSemaphore(g_fileHandleTableSemaphore);
     if ((u32)a0 >= 0x20u) {
-        PostSemaphore(D_002771C0);
+        PostSemaphore(g_fileHandleTableSemaphore);
         return 0;
     }
     s32 t = s << 4;
-    t += (s32)D_00628940;
-    PostSemaphore(D_002771C0);
+    t += (s32)g_fileHandleTable;
+    PostSemaphore(g_fileHandleTableSemaphore);
     return t;
 }
 
@@ -156,16 +156,16 @@ void HandleFileReply(void) {
     u32 psize;
     s32 i;
 
-    Word_1F85A8::Read(&sema, D_00628500);
-    Word_1F85A8::Read(&type, D_00628500 + 4);
-    Word_1F85A8::Read(&dst, D_00628500 + 8);
-    Word_1F85A8::Read(&size, D_00628500 + 12);
+    Word_1F85A8::Read(&sema, g_fileReplyBuffer);
+    Word_1F85A8::Read(&type, g_fileReplyBuffer + 4);
+    Word_1F85A8::Read(&dst, g_fileReplyBuffer + 8);
+    Word_1F85A8::Read(&size, g_fileReplyBuffer + 12);
     if (sema >= 0) {
-        CopyBytes(dst, UNCACHED_1F84D8(D_00628500 + 16), size);
+        CopyBytes(dst, UNCACHED_1F84D8(g_fileReplyBuffer + 16), size);
     }
     switch (type) {
     case 2: {
-        struct Bytes_1F85A8 *b = (struct Bytes_1F85A8 *)UNCACHED_1F84D8(D_00628500 + 20);
+        struct Bytes_1F85A8 *b = (struct Bytes_1F85A8 *)UNCACHED_1F84D8(g_fileReplyBuffer + 20);
         if (b->count0 > 0) {
             u8 *d = b->dst0;
             for (i = 0; i < b->count0; i++) {
@@ -181,22 +181,22 @@ void HandleFileReply(void) {
         break;
     }
     case 11:
-        Word_1F85A8::Read(&pdst, D_00628500 + 20);
-        *(struct Block144_1F85A8 *)pdst = *(struct Block144_1F85A8 *)UNCACHED_1F84D8(D_00628500 + 24);
+        Word_1F85A8::Read(&pdst, g_fileReplyBuffer + 20);
+        *(struct Block144_1F85A8 *)pdst = *(struct Block144_1F85A8 *)UNCACHED_1F84D8(g_fileReplyBuffer + 24);
         break;
     case 12:
-        Word_1F85A8::Read(&pdst, D_00628500 + 20);
-        *(struct Block40_1F85A8 *)pdst = *(struct Block40_1F85A8 *)UNCACHED_1F84D8(D_00628500 + 24);
+        Word_1F85A8::Read(&pdst, g_fileReplyBuffer + 20);
+        *(struct Block40_1F85A8 *)pdst = *(struct Block40_1F85A8 *)UNCACHED_1F84D8(g_fileReplyBuffer + 24);
         break;
     case 23:
     case 25:
     case 26:
-        Word_1F85A8::Read(&pdst, D_00628500 + 20);
-        Word_1F85A8::Read(&psize, D_00628500 + 24);
+        Word_1F85A8::Read(&pdst, g_fileReplyBuffer + 20);
+        Word_1F85A8::Read(&psize, g_fileReplyBuffer + 24);
         if (psize > 0x400) {
             psize = 0x400;
         }
-        CopyBytes(pdst, UNCACHED_1F84D8(D_00628500 + 28), psize);
+        CopyBytes(pdst, UNCACHED_1F84D8(g_fileReplyBuffer + 28), psize);
         break;
     }
     if (sema < 0) {
@@ -216,23 +216,23 @@ void HandleFileReply(void) {
 
 void CreateFileRequestLock(void)
 {
-    if (D_002771BC == -1) {
+    if (g_fileRequestSemaphore == -1) {
         SemaphoreParams d;
         d.initCount = 1;
         d.maxCount = 1;
         d.option = 0;
-        D_002771BC = NewSemaphore(&d);
+        g_fileRequestSemaphore = NewSemaphore(&d);
     }
 }
 
 s32 LockFileRequests(s32 unused)
 {
     CreateFileRequestLock();
-    AwaitSemaphore(D_002771BC);
+    AwaitSemaphore(g_fileRequestSemaphore);
     return 0;
 }
 
-void UnlockFileRequests() { PostSemaphore(D_002771BC); }
+void UnlockFileRequests() { PostSemaphore(g_fileRequestSemaphore); }
 
 // The handler of command 0x80000013: runs the call it is given, if any, and ends the handler.
 void RunFileClientCallback(void* packet, FileCommandCall* call)
@@ -247,12 +247,12 @@ s32 OpenFileClient(void)
 {
     s32 i;
     RemoteCallClient* q;
-    Callback_1F84D8* g = &D_00628BC0;
+    Callback_1F84D8* g = &g_fileCommandCallback;
     InitRemoteCalls(0);
-    D_00628BC0.func = 0;
+    g_fileCommandCallback.func = 0;
     g->arg = 0;
     DisableInterrupts();
-    SetCommandHandler(0x80000011, (CommandHandler)&HandleFileReply, D_00628B80);
+    SetCommandHandler(0x80000011, (CommandHandler)&HandleFileReply, g_fileReplyHandlerArgument);
     SetCommandHandler(0x80000013, (CommandHandler)&RunFileClientCallback, (void*)g);
     (s32)EnableInterrupts();
     for (;;) {
@@ -262,12 +262,12 @@ s32 OpenFileClient(void)
         for (i = 0x100000; i != -1; ) i--;
     }
     CreateFileTableLock();
-    AwaitSemaphore(D_002771C0);
-    for (u8* p = D_00628940; p < D_00628940 + 0x200; p += 0x10) *(s32*)(p + 4) = 0;
-    PostSemaphore(D_002771C0);
-    D_00627840 = D_00628500;
-    if (CallRemoteService((RemoteCallClient*)g_fileClient, 0xFF, 0, &D_00627840, 4, D_006284C0, 4, 0, 0) < 0) return 0xFFFEFFFF;
-    *(Word_1F85A8*)&D_00628B68 = *(Word_1F85A8*)UNCACHED_1F84D8(D_006284C0);
+    AwaitSemaphore(g_fileHandleTableSemaphore);
+    for (u8* p = g_fileHandleTable; p < g_fileHandleTable + 0x200; p += 0x10) *(s32*)(p + 4) = 0;
+    PostSemaphore(g_fileHandleTableSemaphore);
+    g_fileReplyBufferAddress = g_fileReplyBuffer;
+    if (CallRemoteService((RemoteCallClient*)g_fileClient, 0xFF, 0, &g_fileReplyBufferAddress, 4, g_fileCallResult, 4, 0, 0) < 0) return 0xFFFEFFFF;
+    *(Word_1F85A8*)&g_fileClientResult = *(Word_1F85A8*)UNCACHED_1F84D8(g_fileCallResult);
     g_fileClientOpen = 1;
     return 0;
 }
@@ -277,7 +277,7 @@ LINKER_REMNANT(func_001F8BF0);
 s32 ForgetFileClient(void)
 {
     g_fileClientOpen = 0;
-    FillMemory(&D_00628B68, 0, 4);
+    FillMemory(&g_fileClientResult, 0, 4);
     return 0;
 }
 
@@ -288,7 +288,7 @@ struct Min_1F8C38 { static s32 Of(s32 a, s32 b) { return a < b ? a : b; } };
 
 s32 CloseFile(s32 a0)
 {
-    Close_1F84D8* g = (Close_1F84D8*)D_00627880;
+    Close_1F84D8* g = (Close_1F84D8*)g_fileRequestBuffer;
     Handle_1F84D8* p;
     s32 h;
     s32 out;
@@ -306,7 +306,7 @@ s32 CloseFile(s32 a0)
         return -9;
     }
     g->id = p->id;
-    g->index = ((s32)p - (s32)D_00628940) >> 4;
+    g->index = ((s32)p - (s32)g_fileHandleTable) >> 4;
     ctor.maxCount = 1;
     ctor.initCount = 0;
     ctor.option = 0;
@@ -314,7 +314,7 @@ s32 CloseFile(s32 a0)
     g->sema = h;
     g->result = (s32)&out;
     g->result_size = 4;
-    q = D_006284C0;
+    q = g_fileCallResult;
     v = CallRemoteService((RemoteCallClient*)g_fileClient, 1, 0, g, 0x14, q, 4, 0, 0);
     if (v >= 0) {
         p->used = 0;
@@ -348,7 +348,7 @@ struct Read_1F8DB8 {
 
 s32 ReadFile(s32 fd, void* buf, s32 size)
 {
-    Read_1F8DB8* g = (Read_1F8DB8*)D_00627880;
+    Read_1F8DB8* g = (Read_1F8DB8*)g_fileRequestBuffer;
     Handle_1F84D8* p;
     s32 mode;
     s32 h;
@@ -368,7 +368,7 @@ s32 ReadFile(s32 fd, void* buf, s32 size)
     }
     mode = p->used;
     g->id = p->id;
-    g->index = ((s32)p - (s32)D_00628940) >> 4;
+    g->index = ((s32)p - (s32)g_fileHandleTable) >> 4;
     g->buf = buf;
     g->size = size;
     ctor.maxCount = 1;
@@ -379,7 +379,7 @@ s32 ReadFile(s32 fd, void* buf, s32 size)
     g->result = (s32)&out;
     g->result_size = 4;
     if (mode & 0x8000) {
-        AwaitSemaphore(D_002771C4);
+        AwaitSemaphore(g_fileReplySemaphore);
         for (i = 0; i < 32; i++) {
             if (g_semaphoreSlots[i] == -1) {
                 g_semaphoreSlots[i] = g->sema;
@@ -387,19 +387,19 @@ s32 ReadFile(s32 fd, void* buf, s32 size)
                 break;
             }
         }
-        PostSemaphore(D_002771C4);
+        PostSemaphore(g_fileReplySemaphore);
     }
     if (!(mode & 0x20000000)) {
         WriteBackDataCacheRange(buf, size);
     }
-    WriteBackDataCacheRange(D_00628500, 0xA4);
+    WriteBackDataCacheRange(g_fileReplyBuffer, 0xA4);
     WriteBackDataCacheRange(g, 0x20);
-    if (CallRemoteService((RemoteCallClient*)g_fileClient, 2, 0, D_00627880, 0x20, D_006284C0, 4, 0, 0) < 0) {
+    if (CallRemoteService((RemoteCallClient*)g_fileClient, 2, 0, g_fileRequestBuffer, 0x20, g_fileCallResult, 4, 0, 0) < 0) {
         FreeSemaphore(h);
         UnlockFileRequests();
         return -0xB;
     }
-    v = *(s32*)((u32)D_006284C0 | 0x20000000);
+    v = *(s32*)((u32)g_fileCallResult | 0x20000000);
     UnlockFileRequests();
     if (v == 0) {
         FreeSemaphore(h);
@@ -429,7 +429,7 @@ struct Write_1F9028 {
 
 s32 WriteFile(s32 fd, void* buf, s32 size)
 {
-    Write_1F9028* g = (Write_1F9028*)D_00627880;
+    Write_1F9028* g = (Write_1F9028*)g_fileRequestBuffer;
     Handle_1F84D8* p;
     s32 mode;
     s32 h;
@@ -450,7 +450,7 @@ s32 WriteFile(s32 fd, void* buf, s32 size)
     }
     mode = p->used;
     g->id = p->id;
-    g->index = ((s32)p - (s32)D_00628940) >> 4;
+    g->index = ((s32)p - (s32)g_fileHandleTable) >> 4;
     g->size = size;
     g->buf = buf;
     ctor.maxCount = 1;
@@ -461,7 +461,7 @@ s32 WriteFile(s32 fd, void* buf, s32 size)
     g->result = (s32)&out;
     g->result_size = 4;
     if (mode & 0x8000) {
-        AwaitSemaphore(D_002771C4);
+        AwaitSemaphore(g_fileReplySemaphore);
         for (i = 0; i < 32; i++) {
             if (g_semaphoreSlots[i] == -1) {
                 g_semaphoreSlots[i] = g->sema;
@@ -469,7 +469,7 @@ s32 WriteFile(s32 fd, void* buf, s32 size)
                 break;
             }
         }
-        PostSemaphore(D_002771C4);
+        PostSemaphore(g_fileReplySemaphore);
     }
     if (((u32)buf & 0xF) == 0)
         head = 0;
@@ -483,12 +483,12 @@ s32 WriteFile(s32 fd, void* buf, s32 size)
     g->head = head;
     for (s32 j = 0; j < head; j++)
         g->bytes[j] = ((u8*)buf)[j];
-    if (CallRemoteService((RemoteCallClient*)g_fileClient, 3, 0, D_00627880, 0x30, D_006284C0, 4, 0, 0) < 0) {
+    if (CallRemoteService((RemoteCallClient*)g_fileClient, 3, 0, g_fileRequestBuffer, 0x30, g_fileCallResult, 4, 0, 0) < 0) {
         FreeSemaphore(h);
         UnlockFileRequests();
         return -0xB;
     }
-    v = *(s32*)((u32)D_006284C0 | 0x20000000);
+    v = *(s32*)((u32)g_fileCallResult | 0x20000000);
     UnlockFileRequests();
     if (v == 0) {
         FreeSemaphore(h);
@@ -505,7 +505,7 @@ s32 WriteFile(s32 fd, void* buf, s32 size)
 
 s32 ControlFile(s32 a0, s32 mode, u32* out)
 {
-    Ioctl_1F92E8* g = (Ioctl_1F92E8*)D_00627880;
+    Ioctl_1F92E8* g = (Ioctl_1F92E8*)g_fileRequestBuffer;
     s32 ret = 1;
     Handle_1F84D8* ent = (Handle_1F84D8*)FindFileHandle(a0);
     (void)LockFileRequests(5);
@@ -521,7 +521,7 @@ s32 ControlFile(s32 a0, s32 mode, u32* out)
     g->f418 = 0;
     switch (mode) {
     case 1: {
-        (void)AwaitSemaphore(D_002771C4);
+        (void)AwaitSemaphore(g_fileReplySemaphore);
         s32 i = 0;
         while (i < 32 && g_semaphoreSlots[i] == -1) {
             i++;
@@ -531,16 +531,16 @@ s32 ControlFile(s32 a0, s32 mode, u32* out)
         } else {
             *D_00627844 = 1;
         }
-        (void)PostSemaphore(D_002771C4);
+        (void)PostSemaphore(g_fileReplySemaphore);
         UnlockFileRequests();
         return 0;
     }
     case 2:
-        *out = *(u32*)((u32)(D_00628500 + 0x10) | 0x20000000);
+        *out = *(u32*)((u32)(g_fileReplyBuffer + 0x10) | 0x20000000);
         UnlockFileRequests();
         return 0;
     case 3:
-        *(u64*)out = *(u64*)((u32)(D_00628500 + 0x10) | 0x20000000);
+        *(u64*)out = *(u64*)((u32)(g_fileReplyBuffer + 0x10) | 0x20000000);
         UnlockFileRequests();
         return 0;
     default:
@@ -563,13 +563,13 @@ s32 ControlFile(s32 a0, s32 mode, u32* out)
     g->sema = h;
     g->result = (s32)&sp30;
     g->result_size = 4;
-    WriteBackDataCacheRange(D_00627880, 0x420);
-    if (CallRemoteService((RemoteCallClient*)g_fileClient, 5, 0, D_00627880, 0x420, D_006284C0, 4, 0, 0) < 0) {
+    WriteBackDataCacheRange(g_fileRequestBuffer, 0x420);
+    if (CallRemoteService((RemoteCallClient*)g_fileClient, 5, 0, g_fileRequestBuffer, 0x420, g_fileCallResult, 4, 0, 0) < 0) {
         FreeSemaphore(h);
         UnlockFileRequests();
         return -0xB;
     }
-    u32 res = *(u32*)((u32)D_006284C0 | 0x20000000);
+    u32 res = *(u32*)((u32)g_fileCallResult | 0x20000000);
     UnlockFileRequests();
     if (res == 0) {
         FreeSemaphore(h);

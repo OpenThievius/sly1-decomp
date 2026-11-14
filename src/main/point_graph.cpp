@@ -209,14 +209,14 @@ struct SprTransfer {
     s32 state;              // 0x4C: 2 while its parts are drawn
 };
 
-extern s32 D_00274990;
-extern SprTransfer D_002748F0[2];
+extern s32 g_sprTransferIndex;
+extern SprTransfer g_sprTransfers[2];
 
 // Block n of the current scratchpad transfer.
 struct SprBlock {
     static u32 Of(s32 n)
     {
-        return D_002748F0[D_00274990].addrs[n];
+        return g_sprTransfers[g_sprTransferIndex].addrs[n];
     }
 };
 
@@ -233,7 +233,7 @@ void QueueDeferredRequest(DeferredRequest* src);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern void* g_toSprChannel;
 extern f32 g_gameClock[];
-extern const Mat4A D_00248400;
+extern const Mat4A g_identityMatrix4;
 
 void QueueModelPartDraws(PlacedObject* self, Camera* cam)
 {
@@ -254,8 +254,8 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
     while (i < self->drawPartCount) {
         WaitDmaChannel((DmaChannel*)g_toSprChannel, 0, 0);
         s32 next = i + n;
-        D_00274990 = 1 - D_00274990;
-        D_002748F0[D_00274990].state = 2;
+        g_sprTransferIndex = 1 - g_sprTransferIndex;
+        g_sprTransfers[g_sprTransferIndex].state = 2;
         s32 rest = self->drawPartCount - next;
         s32 m = 0x34;
         if (rest <= 0x33) {
@@ -341,7 +341,7 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
             }
             QueueDeferredRequest((DeferredRequest*)&rec);
             if (part->matrix != 0 || part->cameraFacing != 0) {
-                rec.m = D_00248400;
+                rec.m = g_identityMatrix4;
             }
         }
         i = next;

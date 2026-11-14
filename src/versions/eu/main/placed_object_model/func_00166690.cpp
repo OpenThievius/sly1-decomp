@@ -166,7 +166,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscal(&g_vifPacketWriter, D_00001210);
+                Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0x10000000);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -176,7 +176,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, e->qwc2, e->addr2);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscal(&g_vifPacketWriter, D_00000010);
+                Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchFinishProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0x10000000);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -189,7 +189,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscal(&g_vifPacketWriter, D_00001210);
+                Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0x10000000);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -199,7 +199,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, e->qwc2, e->addr2);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscalf(&g_vifPacketWriter, D_00000010);
+                Vif_166690::Mscalf(&g_vifPacketWriter, g_litBatchFinishProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -211,7 +211,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscal(&g_vifPacketWriter, D_00001210);
+                Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0x90000000);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -230,7 +230,7 @@ slow:
                         Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
                     }
                     Vif_166690::Cnt1(&g_vifPacketWriter);
-                    Vif_166690::Mscal(&g_vifPacketWriter, D_00001210);
+                    Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
                     Vif_166690::Word(&g_vifPacketWriter, 0);
                     Vif_166690::Word(&g_vifPacketWriter, 0);
                     Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -241,7 +241,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, e->qwc2, e->addr2);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscalf(&g_vifPacketWriter, D_00000010);
+                Vif_166690::Mscalf(&g_vifPacketWriter, g_litBatchFinishProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);

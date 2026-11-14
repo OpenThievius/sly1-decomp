@@ -50,7 +50,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
     if (self->state != 4) {
     if (self->entryQueue != 0 && IsEntryQueueRunning(self->entryQueue)) {
         EntryQueue* q = self->entryQueue;
-        if ((g_padRecord.flags & 0x800) && D_00275F84 == 0) {
+        if ((g_padRecord.flags & 0x800) && g_resumeSoundSetupDone == 0) {
             s32 start = q->entryIndex;
             if (start >= 0) {
                 for (s32 i = start; i < q->entryCount; i++) {
@@ -177,8 +177,8 @@ held:
                     skipStep = 1;
                 }
             } else if (((CaptionBox_eu*)&g_typedTextCaptionBox)->child == 0) {
-                if ((pad->flags & 4) && D_0026F800 != 0 && (self->f2BD4 == 0 || D_0026F800->mode2D0 == 1)) {
-                    SetStepSequenceState(D_0026F800, 1);
+                if ((pad->flags & 4) && g_playerStepSequence != 0 && (self->f2BD4 == 0 || g_playerStepSequence->mode2D0 == 1)) {
+                    SetStepSequenceState(g_playerStepSequence, 1);
                 } else if (self->f2BD4 == 0) {
                     self->pendingCaption = 0;
                     skipStep = 1;
@@ -231,7 +231,7 @@ held:
                     break;
                 }
                 if (pad->flags & 0x20) {
-                    StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E24, 0.0f, 0.0f, 0, 0);
+                    StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, g_soundEffect7EVolume, 0.0f, 0.0f, 0, 0);
                 }
             }
             if (skipStep) {
@@ -269,7 +269,7 @@ held:
                     break;
                 }
                 if (pad->flags & 0x20) {
-                    StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E24, 0.0f, 0.0f, 0, 0);
+                    StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, g_soundEffect7EVolume, 0.0f, 0.0f, 0, 0);
                 }
             }
             if (skipStep) {
@@ -301,7 +301,7 @@ held:
                     break;
                 }
                 if (pad->flags & 0x20) {
-                    StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E24, 0.0f, 0.0f, 0, 0);
+                    StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, g_soundEffect7EVolume, 0.0f, 0.0f, 0, 0);
                 }
             }
             if (skipStep) {
@@ -423,7 +423,7 @@ held:
             }
             break;
         case 13:
-            if (!(pad->buttons & 0x10) && g_gameTime[0] - self->stateStartTime > D_00262E3C) {
+            if (!(pad->buttons & 0x10) && g_gameTime[0] - self->stateStartTime > g_state13ExitDelay) {
                 sub = 0x38;
                 break;
             }

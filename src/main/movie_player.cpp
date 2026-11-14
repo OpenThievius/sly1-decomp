@@ -31,7 +31,7 @@ struct Vec02;
 struct ScaledTransform;
 
 ObjectLink g_contactListObjectLinks[1] = { { 2, 0x317, 0x6B0 } };
-f32 D_002699BC = 0.5f;
+f32 g_movieFrameLookahead = 0.5f;
 const char* g_movieTitles[16] = {
     "The Secret Police File",
     "The Tokyo Police File",
@@ -86,7 +86,7 @@ void ResetRingBuffer(RingBuffer* ring);
 void UnregisterCollider(Collider* self);
 void StopAnimationPlayer(AnimationPlayer* self);
 
-extern u8 D_002CBB40[];
+extern u8 g_movieDataRingBuffer[];
 
 void SuspendIopVoices(u32 a0);
 void ResumeIopVoices(u32 a0);
@@ -154,7 +154,7 @@ void SendGsPacketAndWait(s32 channel, void* b);
 void ApplyPendingDisplayFlip(void);
 void FlipDisplayFrame(void);
 
-extern u8 D_005A2E60[];
+extern u8 g_movieCrcTable[];
 
 extern s32 D_002626CC;
 
@@ -196,7 +196,7 @@ struct KeyIdOfMovie {
     }
 };
 
-extern u8 D_002C3B00[];
+extern u8 g_packetBufferMemory[];
 extern u8 g_screenFade[];
 extern s32 g_discSectorCheckState;
 
@@ -219,7 +219,7 @@ void ClearScreenOwner(s32 owner);
 void DestroyStreamReader(StreamReader* self, s32 flags);
 
 extern u8 g_movieDecodeThreadStack[];
-extern u8 D_002832F0[];
+extern u8 g_globalPointer[];
 extern s32 g_movieDecodeThread;
 
 s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
@@ -246,11 +246,11 @@ s32 DecodeMpegPicture(MpegHandle* obj, void* picture, s32 a2);
 extern "C" void PostSemaphore(s32 a);
 
 
-extern u8 D_002D7B40[];
-extern u8 D_0045AAC0[];
-extern u8 D_0042AAC0[];
-extern u8 D_00586AC0[];
-extern u8 D_005A2D40[];
+extern u8 g_movieDecoderWork[];
+extern u8 g_moviePictureBuffer[];
+extern u8 g_movieVideoRingBuffer[];
+extern u8 g_movieUploadPacket[];
+extern u8 g_movieDrawPacket[];
 extern u8 D_00148D68[];
 
 void InitMpegLibrary(void);
@@ -477,7 +477,7 @@ void LaunchTimedContactListObject(ContactListGlider* self, PlacedObject* target,
     if (0.0f < speed) {
         self->time6FC = g_gameTime + speed;
     } else {
-        ComputeObjectFrameAtTime(self->anchorObject, 0, &pos, &rot, 0, 0, D_002699BC);
+        ComputeObjectFrameAtTime(self->anchorObject, 0, &pos, &rot, 0, 0, g_movieFrameLookahead);
         Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(self->anchorOffset)), Vu0::Q(pos));
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-0.5f));
         ClampVectorLength(&d, &d, self->rate6F4 * 0.75f);
@@ -523,7 +523,7 @@ void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
         Vec02 vel;
         Mat02 rot;
         f32 remain = self->time6FC - now + dt;
-        ComputeObjectFrameAtTime(self->anchorObject, 0, &pos, &rot, 0, 0, D_002699BC <? remain);
+        ComputeObjectFrameAtTime(self->anchorObject, 0, &pos, &rot, 0, 0, g_movieFrameLookahead <? remain);
         Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(self->anchorOffset)), Vu0::Q(pos));
         s32 still = 0;
         if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->v700))) < 0.0001f
@@ -669,7 +669,7 @@ void CreateMovieDecodeThread(void)
     (void)FillMemory(&l, 0, sizeof(l));
     l.entry = RunMovieDecodeThread;
     l.stack = g_movieDecodeThreadStack;
-    l.gp = D_002832F0;
+    l.gp = g_globalPointer;
     l.stackSize = 0x1000;
     l.priority = 2;
     v = MakeThread(&l);
@@ -788,7 +788,7 @@ s32 StartMovieStream(MovieStream* self)
     } else {
         self->state = 1;
         InitRingBuffer(&self->headerRing, 0x28, self->header);
-        InitRingBuffer(&self->dataRing, 0xC000, D_002CBB40);
+        InitRingBuffer(&self->dataRing, 0xC000, g_movieDataRingBuffer);
         InitIopRingSink(&self->sink, 0x6000, r);
     }
 }
@@ -999,14 +999,14 @@ void PlayMovie(MoviePlayer* self, IdentityKey* key)
     KeyId pr;
     SetScreenOwner(4);
     self->movieIndex = FindKeyIndex(key);
-    InitStreamReader(&loc, D_002C3B00);
+    InitStreamReader(&loc, g_packetBufferMemory);
     if (KeyIdOfMovie::Of(&pr, key) && OpenSectorStreamRange(&loc, &pr)) {
         InitMoviePlayback(self, &loc);
         while (!GetMpegDecoderStatus((Device_20B0B0*)&self->decoder)) {
             AdvanceGameClockElapsed((GameClock*)g_gameClock);
             UpdatePadConnection(&g_padRecord);
             s32 flag = 0;
-            if (SameMovieKey::Of(key, &D_00248490)) flag = g_keyedMovieWatched != 0;
+            if (SameMovieKey::Of(key, &g_watchedMovieKey)) flag = g_keyedMovieWatched != 0;
             u32 m;
             if (self->movieIndex >= 16) m = 0;
             else m = 1u << self->movieIndex;
@@ -1022,7 +1022,7 @@ void PlayMovie(MoviePlayer* self, IdentityKey* key)
             if (g_discSectorCheckState != 3) break;
             StepMovieFrame(self);
         }
-        if (SameMovieKey::Of(key, &D_00248490)) g_keyedMovieWatched = 1;
+        if (SameMovieKey::Of(key, &g_watchedMovieKey)) g_keyedMovieWatched = 1;
         FinishMovie(self);
         CloseStreamReader(&loc);
     } else {
@@ -1037,9 +1037,9 @@ void InitMoviePlayback(MoviePlayer* self, void* v)
     s32 i;
 
     self->reader = (StreamReaderWindow*)v;
-    self->decoderWork = D_002D7B40;
-    self->picture = D_0045AAC0;
-    InitRingBuffer(&self->videoRing, 0x30000, (u8*)((s32)D_0042AAC0 | 0x20000000));
+    self->decoderWork = g_movieDecoderWork;
+    self->picture = g_moviePictureBuffer;
+    InitRingBuffer(&self->videoRing, 0x30000, (u8*)((s32)g_movieVideoRingBuffer | 0x20000000));
     StartMovieStream(&self->stream);
     InitMpegLibrary();
     CreateMpegDecoder(&self->decoder, self->decoderWork, 0x152F68);
@@ -1050,13 +1050,13 @@ void InitMoviePlayback(MoviePlayer* self, void* v)
     SetMpegCallback(&self->decoder, 0, (void*)AcceptMovieDecoderEvent, self);
     while (FeedMovieDecoder(self, 1) != 0) {
     }
-    self->uploadPacket = D_00586AC0;
-    self->drawPacket = D_005A2D40;
+    self->uploadPacket = g_movieUploadPacket;
+    self->drawPacket = g_movieDrawPacket;
     D_002626CC = 0;
     g_moviePlayer.cur = (u8*)0x100010;
     g_moviePlayer.remain = (s32)D_00148D68;
     g_moviePlayer.crc = 0xFFFFFFFF;
-    u8* tb = D_005A2E60;
+    u8* tb = g_movieCrcTable;
     i = 0;
     s32 j;
     do {
@@ -1076,7 +1076,7 @@ void AdvanceCodeChecksum(MoviePlayer* self)
 {
     if (self->remain > 0) {
         s32 n = self->remain - 4;
-        u32* tab = (u32*)D_005A2E60;
+        u32* tab = (u32*)g_movieCrcTable;
         u8* p = self->cur;
         u8* nxt = p + 4;
         u32 c0 = self->crc;

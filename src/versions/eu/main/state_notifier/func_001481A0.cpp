@@ -39,7 +39,7 @@ void CountPickupTowardHundred(void* self)
             ((Sys_1481A0_eu*)&D_0026CE48)->p278 = 0;
             ((Sys_1481A0_eu*)&D_0026CE48)->fn274 = AddReserveUnit;
             {
-                VObj_1481A0* obj = (VObj_1481A0*)&D_0026C6C8;
+                VObj_1481A0* obj = (VObj_1481A0*)&g_reserveCountCaption;
                 obj->vtbl[14](obj);
             }
         } else {

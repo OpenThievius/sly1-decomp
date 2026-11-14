@@ -146,7 +146,7 @@ struct MinOf {
     static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
 };
 
-extern s32 (*D_00276608[6])[4];
+extern s32 (*g_warpCursorTables[6])[4];
 
 
 
@@ -215,7 +215,7 @@ void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 void CopyMemory(void* dst, void* src, u32 size);
 
-extern u8 D_00247AD0[];
+extern u8 g_objectFadeIn[];
 
 // The word at 0x78 of the current level's record (G27C230): bit 0 picks the level's own fade.
 struct LevelRecordWord78 {
@@ -1117,7 +1117,7 @@ void BeginLevelExit(s32 flag, s32 n)
         goto l4470;
     }
 lm1:
-    StartObjectFade((IdentityKey*)D_00247AD0, -1, n);
+    StartObjectFade((IdentityKey*)g_objectFadeIn, -1, n);
     return;
 l4470:
     k = LookupEntryById((ctx->levelIndex << 8) | 1);
@@ -1198,7 +1198,7 @@ void SetObjectSubGroupState(ObjectSubGroup* self, s32 state)
 {
     if (state != self->state) {
         if (self->state == 4 && state != 5)
-            D_0026F138.vt->m15(&D_0026F138);
+            g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
         if (state == 5) {
             self->flags = (self->flags & ~0x30000000000ULL) | 0x10000000000ULL;
             AcquirePadSelectFlag(self->world);
@@ -1285,7 +1285,7 @@ void StartObjectSubGroupFade(ObjectSubGroup* self)
 extern s32 D_0026FA64;
 extern s32 D_002701C4;
 extern s32 D_0026F388;
-extern T217D_3D0 D_0026F138;
+extern T217D_3D0 g_copiedTextCaption;
 extern T217D_440 g_typedTextCaptionBox;
 void UpdatePlacedObject(PlacedObject* self, f32 dt);
 void SetScreenElementHoldTime(void* e, f32 t);
@@ -1318,12 +1318,12 @@ void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
         if (D_0026FA64 == 0) {
             if (D_002701C4 != 0 || g_typedTextCaptionBox.state == 1 || g_typedTextCaptionBox.state == 2
                 || (g_typedTextCaptionBox.state == 3 && g_typedTextCaptionBox.text[0] != 0)) {
-                D_0026F138.vt->m15(&D_0026F138);
+                g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
             } else {
-                SetScreenElementHoldTime(&D_0026F138, 0.0f);
-                SetElementTextFromPackedEntry(&D_0026F138, GetEntryIdByKey(self->levelEntry));
-                D_0026F138.announce = 0;
-                D_0026F138.vt->m14(&D_0026F138);
+                SetScreenElementHoldTime(&g_copiedTextCaption, 0.0f);
+                SetElementTextFromPackedEntry(&g_copiedTextCaption, GetEntryIdByKey(self->levelEntry));
+                g_copiedTextCaption.announce = 0;
+                g_copiedTextCaption.vt->m14(&g_copiedTextCaption);
             }
         }
     case 0:

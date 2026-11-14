@@ -47,11 +47,11 @@ DmaChannel* g_dmaChannels[10] = {
     (DmaChannel*)0x1000D000, (DmaChannel*)0x1000D400,
 };
 /* On 16 bytes, as retail has it after the table's 8 bytes of padding. */
-char D_00279370[16] __attribute__((aligned(16))) = "PsIIlibdma  2400";
+char g_dmaLibraryVersion[16] __attribute__((aligned(16))) = "PsIIlibdma  2400";
 s32 g_dmaChannelsToReset[10] = { 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 };
-u8 D_002793A8[16] = { 0, 0, 0, 3, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0 };
-u8 D_002793B8[16] = { 0, 1, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-u8 D_002793C8[16] = { 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+u8 g_dmaReleaseBits[16] = { 0, 0, 0, 3, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0 };
+u8 g_dmaMfifoBits[16] = { 0, 1, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+u8 g_dmaStallBits[16] = { 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 DmaSettings g_dmaSettings = { 0 };
 u32 D_002793F0[4] = { 0 };
 
@@ -118,9 +118,9 @@ s32 SetDmaSettings(DmaSettings* c)
     if (c->mfifo >= 10) return -2;
     if (c->stall >= 10) return -3;
     if (c->stall_drain >= 7) return -4;
-    r = (r & ~0x30u) | (D_002793A8[c->release] << 4);
-    r = (r & ~0xC0u) | (D_002793B8[c->mfifo] << 6);
-    r = (r & ~0xCu) | (D_002793C8[c->stall] << 2);
+    r = (r & ~0x30u) | (g_dmaReleaseBits[c->release] << 4);
+    r = (r & ~0xC0u) | (g_dmaMfifoBits[c->mfifo] << 6);
+    r = (r & ~0xCu) | (g_dmaStallBits[c->stall] << 2);
     if (c->stall_drain) {
         r |= 2;
         r = (r & ~0x300u) | ((c->stall_drain - 1) << 8);

@@ -235,11 +235,11 @@ struct BlendedGaugeParams {
 extern f32 g_gameClock[];
 
 // The file's statics (.bss from 0x27C00C).
-static GaugeManager* D_0027C00C;  // the gauge manager, set by its set-up (func_0014C018)
+static GaugeManager* g_gaugeManager;  // the gauge manager, set by its set-up (func_0014C018)
 
-s32 D_00261C90 = 4;
-f32 D_00261C94 = 900.0f;
-f32 D_00261C98 = 1200.0f;
+s32 g_agentGoalPeriod = 4;
+f32 g_agentNearRadius = 900.0f;
+f32 g_agentFarRadius = 1200.0f;
 ObjectLink g_gaugeManagerLinks[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
 
 void SetSinCosPair(f32 value, SinCosPair* self);
@@ -257,7 +257,7 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
     switch (self->state) {
     case 12:
     case 13:
-        if (g_frameCount % D_00261C90 == self->number % D_00261C90) {
+        if (g_frameCount % g_agentGoalPeriod == self->number % g_agentGoalPeriod) {
             f32 step = 0.3926991f;
             f32 best = 3.40282347e+38f;
             f32 angle = self->heading;
@@ -389,12 +389,12 @@ s32 IsNumberedAgentFree(NumberedAgent* self)
     u128 gap2 = gap;
     f32 dist = Vu0::ToFloat(Vu0::Length(gap));
     if (self->targetNear != 0) {
-        if (D_00261C98 < dist) {
+        if (g_agentFarRadius < dist) {
             self->targetNear = 0;
         }
         return self->targetNear;
     }
-    if (dist < D_00261C94) {
+    if (dist < g_agentNearRadius) {
         u128 facing = Vu0::NormalizeOr(Vu0::Q(target->v150), Vu0::Q(g_unitXVector));
         u128 facing2 = facing;
         u128 toward = Vu0::NormalizeOr(gap2, Vu0::Q(g_unitXVector));
@@ -425,12 +425,12 @@ void EnterNumberedAgentState(NumberedAgent* self, s32 evt, Animation* arg)
     EnterAgentState(self, evt, arg);
     switch (self->state) {
     case 0xB:
-        AddToGaugeAmount(D_0027C00C, self);
+        AddToGaugeAmount(g_gaugeManager, self);
         if (((GaugeSlot*)self->slot) != 0) { ((GaugeSlot*)self->slot)->taken = 0; self->slot = 0; }
         break;
     case 0xC:
         if (((GaugeSlot*)self->slot) != 0) { ((GaugeSlot*)self->slot)->taken = 0; self->slot = 0; }
-        SetAnimationPlayerSpeed(self->statePlayer, D_0027C00C->speed448);
+        SetAnimationPlayerSpeed(self->statePlayer, g_gaugeManager->speed448);
         break;
     }
 }
@@ -480,7 +480,7 @@ void EnterContactAgentState(ContactAgent* self, s32 evt, Animation* arg)
     EnterAgentState(self, evt, arg);
     switch (self->state) {
     case 0xB:
-        CountDownGaugeContacts(D_0027C00C, self);
+        CountDownGaugeContacts(g_gaugeManager, self);
         if (((GaugeSlot*)self->slot) != 0) {
             ((GaugeSlot*)self->slot)->taken = 0;
             self->slot = 0;
@@ -516,7 +516,7 @@ void InitGaugeManager(GaugeManager* self)
     self->nextContactTime = 3.4028235e+38f;
     self->maxContactAgents = 2;
     self->contactsStarted = 0;
-    D_0027C00C = self;
+    g_gaugeManager = self;
 }
 
 void BlendParamSets(GaugeManager* self)
@@ -603,11 +603,11 @@ void FinishGaugeOnTimeout(T217D_510* timer, s32 mode)
 {
     if (mode == 1) {
         s32 t[2];
-        GetStateWalkerTargetKey((StateWalker*)D_0027C00C->device, &t[0]);
-        GetStateWalkerCurrentKey((StateWalker*)D_0027C00C->device, &t[1]);
+        GetStateWalkerTargetKey((StateWalker*)g_gaugeManager->device, &t[0]);
+        GetStateWalkerCurrentKey((StateWalker*)g_gaugeManager->device, &t[1]);
         if (t[0] != 0x3FE && t[1] != 0x3FE) {
-            SetStateWalkerTarget((StateWalker*)D_0027C00C->device, 0x3FF);
-            ApplyGaugeRatioToEffect(D_0027C00C);
+            SetStateWalkerTarget((StateWalker*)g_gaugeManager->device, 0x3FF);
+            ApplyGaugeRatioToEffect(g_gaugeManager);
         }
     }
 }

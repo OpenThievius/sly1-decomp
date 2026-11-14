@@ -351,34 +351,34 @@ u32 GetEntryFlags(s32 id);
 
 struct ClipPlane { f32 x, y, z, w; };
 
-f32 D_00275600[4] = { 2000.0f, 0.0f, 2000.0f, 0.0f };
-f32 D_00275610 = 0.5f;
-f32 D_00275614 = 0.00200000009f;
+f32 g_pushVelocity[4] = { 2000.0f, 0.0f, 2000.0f, 0.0f };
+f32 g_pushVelocityShare = 0.5f;
+f32 g_pushSpinScale = 0.00200000009f;
 f32 D_00275618 = 800.0f;
-f32 D_00275620[4] = { 2000.0f, 0.0f, 0.150000006f, 0.0f };
+f32 g_wheelAttachRamp[4] = { 2000.0f, 0.0f, 0.150000006f, 0.0f };
 s32 g_coneVolumeMask[4] = { 1, 0, 0, 0 };
-f32 D_00275640[4] = { 0.0f, 255.0f, 255.0f, 0.0f };
-f32 D_00275650 = 0;
-f32 D_00275654 = 255.0f;
-f32 D_00275658 = 240.0f;
-f32 D_0027565C = 0;
-f32 D_00275660 = 180.0f;
-Vec02 D_00275670 = { -0.2f, 0.3f, -1.0f, 0.0f };
-f32 D_00275680[4] = { 100.0f, -150.0f, 500.0f, 0.0f };
-f32 D_00275690[2] = { 500.0f, 2500.0f };
-f32 D_00275698[2] = { 500.0f, 2500.0f };
-f32 D_002756A0[4] = { 500.0f, 2500.0f, 0.0f, 0.0f };
-ClipPlane D_002756B0[6] = {
+f32 g_coneVolumeColor[4] = { 0.0f, 255.0f, 255.0f, 0.0f };
+f32 g_coneVolumeFirstAngle = 0;
+f32 g_coneVolumeSecondLevel = 255.0f;
+f32 g_coneVolumeSecondAngle = 240.0f;
+f32 g_coneVolumeThirdLevel = 0;
+f32 g_coneVolumeThirdAngle = 180.0f;
+Vec02 g_coneVolumeDirection = { -0.2f, 0.3f, -1.0f, 0.0f };
+f32 g_coneVolumePosition[4] = { 100.0f, -150.0f, 500.0f, 0.0f };
+f32 g_coneVolumeMode1Range[2] = { 500.0f, 2500.0f };
+f32 g_coneVolumeMode2Range[2] = { 500.0f, 2500.0f };
+f32 g_coneVolumeMode3Range[4] = { 500.0f, 2500.0f, 0.0f, 0.0f };
+ClipPlane g_clipVolumePlanes[6] = {
     { 1.0f, 0.0f, 0.0f, 1.0f }, { -1.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f },
     { 0.0f, -1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, -1.0f, 1.0f }
 };
 World* g_currentWorld = 0;
-u32 D_00275714 = 0;
+u32 g_scriptStreamExtras = 0;
 u8* D_00275718 = 0;
-s32 D_0027571C = 0;
-s32 D_00275720 = 0;
-s32 D_00275724 = 0;
-s32 D_00275728 = 0;
+s32 g_bufferedBlockLoad = 0;
+s32 g_bufferedBlockSize = 0;
+s32 g_bufferedBlockKey = 0;
+s32 g_bufferedBlockStart = 0;
 
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
@@ -403,9 +403,9 @@ void ProcessPathFollowerContacts(PathFollower* self)
         if (i < self->pushedCount) {
             continue;
         }
-        TransformDirectionBetweenFrames(self, 0, (Vec02*)D_00275600, &pos);
-        Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(pos), Vu0::Q(self->v150), Vu0::ScalarAtCall(D_00275610));
-        Vu0::Set(spin, Vu0::MulX(Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(pos)), Vu0::ScalarAtCall(D_00275614)));
+        TransformDirectionBetweenFrames(self, 0, (Vec02*)g_pushVelocity, &pos);
+        Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(pos), Vu0::Q(self->v150), Vu0::ScalarAtCall(g_pushVelocityShare));
+        Vu0::Set(spin, Vu0::MulX(Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(pos)), Vu0::ScalarAtCall(g_pushSpinScale)));
         other->desc02()->m20(other, &pos);
         other->desc02()->m21(other, &spin);
         if ((u32)self->pushedCount < 8) {
@@ -540,9 +540,9 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                 GetStateWalkerCurrentKey((StateWalker*)dev, &code);
             }
             if (code == 0x42F) {
-                if (D_00272430.own >= D_002751D4) {
+                if (g_firstTallyCaption.own >= D_002751D4) {
                     SetStateWalkerTarget((StateWalker*)dev, 0x432);
-                } else if (D_002726B0.own >= D_002751D4) {
+                } else if (g_secondTallyCaption.own >= D_002751D4) {
                     SetStateWalkerTarget((StateWalker*)dev, 0x431);
                     RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f);
                 }
@@ -583,19 +583,19 @@ void UpdatePathFollowerScreenElements(PathFollower* self)
     }
     if (a != 0) {
         D_0026D848.vt->m14(&D_0026D848);
-        D_0026D5C8.vt->m14(&D_0026D5C8);
-        D_0026DAC8.vt->m14(&D_0026DAC8);
+        g_pathFollowerFirstCountCaption.vt->m14(&g_pathFollowerFirstCountCaption);
+        g_pathFollowerSecondCountCaption.vt->m14(&g_pathFollowerSecondCountCaption);
     } else {
         D_0026D848.vt->m15(&D_0026D848);
-        D_0026D5C8.vt->m15(&D_0026D5C8);
-        D_0026DAC8.vt->m15(&D_0026DAC8);
+        g_pathFollowerFirstCountCaption.vt->m15(&g_pathFollowerFirstCountCaption);
+        g_pathFollowerSecondCountCaption.vt->m15(&g_pathFollowerSecondCountCaption);
     }
     if (b != 0) {
-        D_00272430.vt->m14(&D_00272430);
-        D_002726B0.vt->m14(&D_002726B0);
+        g_firstTallyCaption.vt->m14(&g_firstTallyCaption);
+        g_secondTallyCaption.vt->m14(&g_secondTallyCaption);
     } else {
-        D_00272430.vt->m15(&D_00272430);
-        D_002726B0.vt->m15(&D_002726B0);
+        g_firstTallyCaption.vt->m15(&g_firstTallyCaption);
+        g_secondTallyCaption.vt->m15(&g_secondTallyCaption);
     }
 }
 
@@ -717,7 +717,7 @@ void UpdatePathFollowerAttachmentFrames(PathFollower* self, ParentFrame* frame)
             TransformPointBetweenFrames(0, self, &s->contactPoint, &s->placedPos);
             s->placedPos.z = s->placedPos.z + (((s32)i < 2) ? self->frontWheelRadius : self->rearWheelRadius);
         } else {
-            *(Quad_1DA7E0*)&s->placedPos = ApproachPointWithRamp(*(Quad_1DA7E0*)&s->placedPos, *(Quad_1DA7E0*)&s->obj->v190, g_gameClock[2], (RampProfile*)D_00275620, 0);
+            *(Quad_1DA7E0*)&s->placedPos = ApproachPointWithRamp(*(Quad_1DA7E0*)&s->placedPos, *(Quad_1DA7E0*)&s->obj->v190, g_gameClock[2], (RampProfile*)g_wheelAttachRamp, 0);
         }
         if ((s32)i < 2) {
             BuildAxisAngleMatrix(&g_unitZVector, &tilt, self->steerAngle);
@@ -842,9 +842,9 @@ void HandlePathFollowerActivation(PathFollower* self, void* v)
 {
     HandleSwitchedColliderActivation(self, v);
     if (v != 0) {
-        T217D_E30* a = &D_0026D5C8;
+        T217D_E30* a = &g_pathFollowerFirstCountCaption;
         *(void**)(D_0026DAAC) = (u8*)self + 0x858;
-        T217D_E30* b = &D_0026DAC8;
+        T217D_E30* b = &g_pathFollowerSecondCountCaption;
         a->target = (s32*)((u8*)self + 0xB00);
         a->limit = (s32*)((u8*)self + 0xB04);
         b->target = (s32*)((u8*)self + 0xB08);
@@ -861,10 +861,10 @@ void HandlePathFollowerNotification(PathFollower* self, s32 code, CountedNotice*
 {
     HandleSwitchedColliderNotification(self, code, rec);
     if (code == 0xE && rec->kind == 0x426) {
-        T217D_E30* a = &D_00272430;
+        T217D_E30* a = &g_firstTallyCaption;
         s32 lim = D_002751D4;
         if (a->own < lim) {
-            T217D_E30* b = &D_002726B0;
+            T217D_E30* b = &g_secondTallyCaption;
             if (b->own < lim) {
                 if (rec->link->owner == self) {
                     a->own = a->own + 1;
@@ -1119,33 +1119,33 @@ void ReadBufferedBlockHeader(s32 a0, BufferedStream* self)
     s32 s0;
     if (self->mode == 1) {
         if (s2 == 0) {
-            ReduceBufferedStreamBytesLeft(self, D_00275728);
-            self->bytesToRead -= D_00275728;
+            ReduceBufferedStreamBytesLeft(self, g_bufferedBlockStart);
+            self->bytesToRead -= g_bufferedBlockStart;
         }
         s3 = ReadBufferedS32(self);
         s0 = ReadBufferedS32(self);
     } else {
         s3 = ReadBufferedS32(self);
         s0 = ReadBufferedS32(self);
-        if (s0 != D_00275724) s2 = 1;
+        if (s0 != g_bufferedBlockKey) s2 = 1;
         if (s2 == 0) {
-            s32 v = self->bytesToRead - D_00275728;
+            s32 v = self->bytesToRead - g_bufferedBlockStart;
             self->bytesToRead = (s2 < v) ? v : 0;
         }
     }
     u8* r = (u8*)AllocateFrontMemory(s3);
-    D_00275724 = s0;
-    D_00275720 = s3;
+    g_bufferedBlockKey = s0;
+    g_bufferedBlockSize = s3;
     D_00275718 = r;
-    D_0027571C = s2;
+    g_bufferedBlockLoad = s2;
 }
 
 void ReadBufferedBlockBody(BufferedStream* self)
 {
-    if (D_0027571C != 0) {
-        D_00275728 = self->bytesToRead;
+    if (g_bufferedBlockLoad != 0) {
+        g_bufferedBlockStart = self->bytesToRead;
         AlignBufferedStreamPosition(self, 0x10);
-        ReadBufferedStreamBytes(self, D_00275720, D_00275718);
+        ReadBufferedStreamBytes(self, g_bufferedBlockSize, D_00275718);
     }
 }
 
@@ -1616,58 +1616,58 @@ void CreateConeVolumes(World* self)
 
     if (g_coneVolumeMask[0] & 1) {
         p = CreateTypedRecord(0x51, self, 0, 0x201, -1);
-        SetConeVolumeColor(p, (Quad16*)D_00275640);
-        SetConeVolumeFirstAngle(p, D_00275650);
-        SetConeVolumeSecondLevel(p, D_00275654);
-        SetConeVolumeSecondAngle(p, D_00275658);
-        SetConeVolumeThirdLevel(p, D_0027565C);
-        SetConeVolumeThirdAngle(p, D_00275660);
-        SetConeVolumeDirection(p, (Quad16*)&D_00275670);
+        SetConeVolumeColor(p, (Quad16*)g_coneVolumeColor);
+        SetConeVolumeFirstAngle(p, g_coneVolumeFirstAngle);
+        SetConeVolumeSecondLevel(p, g_coneVolumeSecondLevel);
+        SetConeVolumeSecondAngle(p, g_coneVolumeSecondAngle);
+        SetConeVolumeThirdLevel(p, g_coneVolumeThirdLevel);
+        SetConeVolumeThirdAngle(p, g_coneVolumeThirdAngle);
+        SetConeVolumeDirection(p, (Quad16*)&g_coneVolumeDirection);
     }
     if (g_coneVolumeMask[0] & 2) {
         p = CreateTypedRecord(0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 1);
-        SetConeVolumeColor(p, (Quad16*)D_00275640);
-        SetConeVolumeFirstAngle(p, D_00275650);
-        SetConeVolumeSecondLevel(p, D_00275654);
-        SetConeVolumeSecondAngle(p, D_00275658);
-        SetConeVolumeThirdLevel(p, D_0027565C);
-        SetConeVolumeThirdAngle(p, D_00275660);
-        SetConeVolumeRange(p, (U64P*)D_00275690);
-        p->desc02()->m1D(p, (Vec02*)D_00275680);
+        SetConeVolumeColor(p, (Quad16*)g_coneVolumeColor);
+        SetConeVolumeFirstAngle(p, g_coneVolumeFirstAngle);
+        SetConeVolumeSecondLevel(p, g_coneVolumeSecondLevel);
+        SetConeVolumeSecondAngle(p, g_coneVolumeSecondAngle);
+        SetConeVolumeThirdLevel(p, g_coneVolumeThirdLevel);
+        SetConeVolumeThirdAngle(p, g_coneVolumeThirdAngle);
+        SetConeVolumeRange(p, (U64P*)g_coneVolumeMode1Range);
+        p->desc02()->m1D(p, (Vec02*)g_coneVolumePosition);
     }
     if (g_coneVolumeMask[0] & 4) {
         p = CreateTypedRecord(0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 2);
-        SetConeVolumeColor(p, (Quad16*)D_00275640);
-        SetConeVolumeFirstAngle(p, D_00275650);
-        SetConeVolumeSecondLevel(p, D_00275654);
-        SetConeVolumeSecondAngle(p, D_00275658);
-        SetConeVolumeThirdLevel(p, D_0027565C);
-        SetConeVolumeThirdAngle(p, D_00275660);
-        SetConeVolumeDirection(p, (Quad16*)&D_00275670);
-        SetConeVolumeRange(p, (U64P*)D_00275698);
-        p->desc02()->m1D(p, (Vec02*)D_00275680);
+        SetConeVolumeColor(p, (Quad16*)g_coneVolumeColor);
+        SetConeVolumeFirstAngle(p, g_coneVolumeFirstAngle);
+        SetConeVolumeSecondLevel(p, g_coneVolumeSecondLevel);
+        SetConeVolumeSecondAngle(p, g_coneVolumeSecondAngle);
+        SetConeVolumeThirdLevel(p, g_coneVolumeThirdLevel);
+        SetConeVolumeThirdAngle(p, g_coneVolumeThirdAngle);
+        SetConeVolumeDirection(p, (Quad16*)&g_coneVolumeDirection);
+        SetConeVolumeRange(p, (U64P*)g_coneVolumeMode2Range);
+        p->desc02()->m1D(p, (Vec02*)g_coneVolumePosition);
     }
     if (g_coneVolumeMask[0] & 8) {
         p = CreateTypedRecord(0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 3);
-        SetConeVolumeColor(p, (Quad16*)D_00275640);
-        SetConeVolumeFirstAngle(p, D_00275650);
-        SetConeVolumeSecondLevel(p, D_00275654);
-        SetConeVolumeSecondAngle(p, D_00275658);
-        SetConeVolumeThirdLevel(p, D_0027565C);
-        SetConeVolumeThirdAngle(p, D_00275660);
-        SetConeVolumeDirection(p, (Quad16*)&D_00275670);
-        SetConeVolumeRange(p, (U64P*)D_002756A0);
-        p->desc02()->m1D(p, (Vec02*)D_00275680);
+        SetConeVolumeColor(p, (Quad16*)g_coneVolumeColor);
+        SetConeVolumeFirstAngle(p, g_coneVolumeFirstAngle);
+        SetConeVolumeSecondLevel(p, g_coneVolumeSecondLevel);
+        SetConeVolumeSecondAngle(p, g_coneVolumeSecondAngle);
+        SetConeVolumeThirdLevel(p, g_coneVolumeThirdLevel);
+        SetConeVolumeThirdAngle(p, g_coneVolumeThirdAngle);
+        SetConeVolumeDirection(p, (Quad16*)&g_coneVolumeDirection);
+        SetConeVolumeRange(p, (U64P*)g_coneVolumeMode3Range);
+        p->desc02()->m1D(p, (Vec02*)g_coneVolumePosition);
     }
 }
 
 void SkipBufferedBlocks(BufferedStream* self)
 {
     s32 n = ReadBufferedU32(self);
-    if (D_00275714) {
+    if (g_scriptStreamExtras) {
         s32 i = 1;
         if (i < n) {
             i = n - 1;
@@ -1723,7 +1723,7 @@ void RequestStagedBank(KeyRecord* self);
 void SendResidentImages(void);
 s32 IsListEmpty(List01* list);
 void CreateConeVolumes(World* self);
-extern u8 D_002BDC20[];
+extern u8 g_screenClearPacketA[];
 void FillScreenColor(u8* buffer, Rgba4* color, s32 flag);
 void SpawnListedObjectCopies(World* self);
 void RunQueuedCalls(World* self);
@@ -1742,7 +1742,7 @@ void LoadWorld(World* self, BufferedStream* s)
     s32 i;
     ResetScatterController((ScatterController*)g_scatterController);
     InitScriptValuePools();
-    D_00275714 = ReadBufferedU8(s);
+    g_scriptStreamExtras = ReadBufferedU8(s);
     self->soundBank = ReadBufferedS16(s);
     SkipBufferedBlocks(s);
     g_camera = (Camera*)CreateTypedRecord(0x6D, self, 0, 4, -1);
@@ -1775,7 +1775,7 @@ void LoadWorld(World* self, BufferedStream* s)
     }
     self->fillAlpha = 0x80;
     color = self->color1D64;
-    FillScreenColor(D_002BDC20, &color, 0);
+    FillScreenColor(g_screenClearPacketA, &color, 0);
     self->f1D68 *= 0.003921569f;
     self->f1D6C *= 0.003921569f;
     SpawnListedObjectCopies(self);
@@ -1817,7 +1817,7 @@ s32 ClipSegmentToPlanes(ClipPoint* pts)
 {
     u32 i;
     for (i = 0; i < 6; i++) {
-        const ClipPlane* pl = &D_002756B0[i];
+        const ClipPlane* pl = &g_clipVolumePlanes[i];
         f32 d[2];
         s32 k;
         for (k = 0; k < 2; k++) {
@@ -2101,7 +2101,7 @@ void SetWorldValueTarget(World* self, f32 value) { self->valueTarget = value; }
 
 void PopActiveSequenceElement(World* world)
 {
-    StepSequence* ctx = D_0027051C;
+    StepSequence* ctx = g_activeStepSequence;
     if (ctx != 0 && ctx->state2D4 != 4) {
         u32 t = (u32)(ctx->mode2D0 - 1);
         if (t < 2) PopStackElement((ElementStack*)g_elementStack);
@@ -2119,15 +2119,15 @@ void ShowPauseMenuPageWith(void* unused, s32 a1, s32 a2)
 void ShowCountedScreenElement(World* self)
 {
     if (++self->elementHolds == 1) {
-        SetScreenElementHoldTime(&D_002721D0, 0.0f);
-        D_002721D0.vt->m14(&D_002721D0);
+        SetScreenElementHoldTime(&g_letterboxElement, 0.0f);
+        g_letterboxElement.vt->m14(&g_letterboxElement);
     }
 }
 
 void HideCountedScreenElement(World* self)
 {
     if (--self->elementHolds == 0) {
-        D_002721D0.vt->m15(&D_002721D0);
+        g_letterboxElement.vt->m15(&g_letterboxElement);
     }
 }
 

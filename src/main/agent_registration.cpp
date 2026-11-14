@@ -51,7 +51,7 @@ void AppendToList(List01* self, void* item);
 
 
 // The file's statics (.bss from 0x27C008).
-static s32 D_0027C008;  // a running count, reset by func_0014B608
+static s32 g_numberedAgentCounter;  // a running count, reset by func_0014B608
 
 void RegisterWorldListedAgent(WorldListedAgent* self)
 {
@@ -63,9 +63,9 @@ void UnregisterWorldListedAgent(WorldListedAgent* self) { UnregisterAgent(self);
 
 void CopyWorldListedAgent(WorldListedAgent* self, void* other) { Pack10 save=self->listLink; CopyAgent(self,other); self->listLink=save; }
 
-void InitNumberedAgent(NumberedAgent* self) { InitAgent(self); self->fC24=1; D_0027C008=0; }
+void InitNumberedAgent(NumberedAgent* self) { InitAgent(self); self->fC24=1; g_numberedAgentCounter=0; }
 
-void StartNumberedAgent(NumberedAgent* self) { StartAgent(self); self->number=D_0027C008++; }
+void StartNumberedAgent(NumberedAgent* self) { StartAgent(self); self->number=g_numberedAgentCounter++; }
 
 void SetSinCosPair(f32 value, SinCosPair* self)
 {

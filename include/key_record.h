@@ -24,8 +24,8 @@ struct KeyRecord {
 
 typedef char check_KeyRecord[sizeof(KeyRecord) == 0x20 ? 1 : -1];
 
-extern KeyRecord D_00262890[6];
-extern KeyRecord D_00262950;
-extern KeyRecord D_0026A118;
+extern KeyRecord g_choiceSounds[6];
+extern KeyRecord g_defaultChoiceSound;
+extern KeyRecord g_pauseStreamKey;
 
 #endif

@@ -33,7 +33,7 @@ extern Camera* g_camera;
 extern Player* g_player;
 
 // An object of class 0x65 (c65.h) or none: func_001516C0 and func_00192A70 read its fields.
-extern StepSequence* D_0027051C;
+extern StepSequence* g_activeStepSequence;
 
 // The axes and the identity, in .rodata (global_tables.cpp defines them): read as
 // whole vectors (lq) and as a matrix (three lq).
@@ -59,8 +59,8 @@ extern PaletteRecord* g_imageRecordsB;
 // List heads (List01, c01.h), defined in render_frame.cpp (D_002626E8, D_002626F8 and D_00262708
 // in target_lists.cpp, D_00264088 in player_state2.cpp): each label is 0xC bytes (D_00262300's and D_00264088's run to the next
 // label with a word or a pad after them).
-extern List01 D_002622E0;
-extern List01 D_002622F0;
+extern List01 g_deferredReleaseListA;
+extern List01 g_deferredReleaseListB;
 extern List01 g_deferredReleaseListC;
 extern List01 g_targetCurveList;
 extern List01 g_targetPointList;

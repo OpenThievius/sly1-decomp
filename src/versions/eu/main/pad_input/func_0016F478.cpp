@@ -17,7 +17,7 @@ void ShowPasswordMessage(void)
                     *p ^= 0x23;
                     p++;
                 }
-                FormatToString(text, (const char*)D_0024A848, buf);
+                FormatToString(text, (const char*)g_passwordMessageFormat, buf);
                 SetScreenElementByteText(&g_buttonHintElement, text);
                 SetScreenElementHoldTime(&g_buttonHintElement, 10.0f);
                 g_buttonHintElement.vt->m14(&g_buttonHintElement);

@@ -13,7 +13,7 @@ void BlitFrameToDisplay(void)
     u64 frame = *(u64*)((g_displayFrameCounter & 1) ? D_002625F0 : D_00262500);
     AddGifRegisterWrite(&w, 0x3F, (u64)0);
     AddGifRegisterWrite(&w, 0x4E, FrameBits(frame) | ((u64)1 << 32));
-    u64 disp = *(u64*)((g_displayFrameCounter & 1) ? D_002624F0 : D_002625E0);
+    u64 disp = *(u64*)((g_displayFrameCounter & 1) ? g_fieldOffsetPacket0 : g_fieldOffsetPacket1);
     AddGifRegisterWrite(&w, 6, ((disp & 0x1FF) << 5) | (((disp >> 16) & 0x3F) << 14) | (((disp >> 24) & 0x3F) << 20) | 0x2A8000000ULL);
     AddGifRegisterWrite(&w, 0x14, (u64)0x61);
     AddGifRegisterWrite(&w, 8, (u64)5);
@@ -22,7 +22,7 @@ void BlitFrameToDisplay(void)
     AddGifRegisterWrite(&w, 1, 0x3F80000080808080ULL);
     AddGifRegisterWrite(&w, 0x40, 0xFE0001027F0000ULL);
     BeginGifTag(&w, 0x156, 2, 0x43);
-    s32 v = (D_002626C8 & 1) ? 0 : 8;
+    s32 v = (g_displayFieldParity & 1) ? 0 : 8;
     for (s32 x = 0; x < 0x280; x += 0x20) {
         AddGifUvEntry(&w, x << 4, v);
         AddGifXyzfEntry(&w, (x + 0x6C0) << 4, 0x7800, 0, 0);

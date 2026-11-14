@@ -36,14 +36,14 @@ void SetupTextPanel(Panel_131198_eu* self)
     small->testWord = 0x3F001;
     self->font = self->font->Clone(0.75f, sy);
     if (IsFontLoaded(2) != 0) {
-        self->frame = (Font**)&D_00261148;
+        self->frame = (Font**)&g_panelFrameStyle;
         *self->frame = GetFontById(2);
     }
-    D_00261310 = 0.0f;
+    g_compassLabelWidth = 0.0f;
     for (u32 i = 0; i < 8; i++) {
         TextReader_131198_eu reader;
-        InitTextReaderFromTextTable(&reader, ((s32*)D_00261128)[i], self->smallFont, 0);
-        D_00261310 = SumTextWidth(&reader) >? D_00261310;
+        InitTextReaderFromTextTable(&reader, ((s32*)g_compassDirectionNames)[i], self->smallFont, 0);
+        g_compassLabelWidth = SumTextWidth(&reader) >? g_compassLabelWidth;
     }
     self->state = -1;
     self->child = 0;
@@ -56,20 +56,20 @@ void SetupTextPanel(Panel_131198_eu* self)
     BeginGifTag(&gs, 0, 3, 0x1EE);
     AddGifRegisterWrite(&gs, 0x47, 0x70000);
     AddGifRegisterWrite(&gs, 0x42, 0x44);
-    PanelColor c = D_002610D0;
+    PanelColor c = g_panelBackdropColor;
     c.a = 0x60;
     AddGifRgbaEntry(&gs, *(u32*)&c);
     BeginGifTag(&gs, 0x44, 1, 4);
-    InitCurveSpan(&D_00261280, (const SpanHead*)D_002610A0, 0.171875f, 40.0f, 0x18);
-    InitCurveSpan(&D_002612B0, (const SpanHead*)D_002610B0, 0.171875f, -60.0f, 0x18);
-    InitCurveSpan(&D_002612E0, (const SpanHead*)D_002610C0, 0.2857143f, 8.0f, 0x18);
+    InitCurveSpan(&g_panelEdgeCurveA, (const SpanHead*)g_panelEdgeCurvePointsA, 0.171875f, 40.0f, 0x18);
+    InitCurveSpan(&g_panelEdgeCurveB, (const SpanHead*)g_panelEdgeCurvePointsB, 0.171875f, -60.0f, 0x18);
+    InitCurveSpan(&g_panelEdgeCurveC, (const SpanHead*)g_panelEdgeCurvePointsC, 0.2857143f, 8.0f, 0x18);
     s32 i;
     f32 t;
     AddGifXyzfNoDrawEntry(&gs, 0x6C00, 0x7800, 0x0FFFFFF0, 0);
     AddGifXyzfNoDrawEntry(&gs, 0x6C00, 0x7ABB, 0x0FFFFFF0, 0);
     for (t = step, i = 1; i < 24; i++) {
         f32 u = t * 640.0f;
-        f32 y = EvalCurveSpan(&D_00261280, i);
+        f32 y = EvalCurveSpan(&g_panelEdgeCurveA, i);
         t += step;
         s32 x = (s32)((u + 1728.0f) * 16.0f);
         AddGifXyzfEntry(&gs, x, 0x7800, 0x0FFFFFF0, 0);
@@ -82,7 +82,7 @@ void SetupTextPanel(Panel_131198_eu* self)
     t = 1.0f / 24.0f;
     for (i = 1; i < 24; i++) {
         f32 u = t * 640.0f;
-        f32 y = EvalCurveSpan(&D_002612B0, i);
+        f32 y = EvalCurveSpan(&g_panelEdgeCurveB, i);
         t += step;
         s32 x = (s32)((u + 1728.0f) * 16.0f);
         AddGifXyzfEntry(&gs, x, 0x8800, 0x0FFFFFF0, 0);

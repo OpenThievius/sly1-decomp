@@ -28,10 +28,10 @@ void DrawTextPanelBlocks(Obj_eu_135228* self, PacketWriter* q)
             *(u32*)c0 = 0xFF408080;
             *(u32*)c1 = 0xFF406060;
             *(u32*)c2 = 0xFF404040;
-            f32 t = Cosine(g_gameClock[1] * D_00261260[0]) * 0.5f + 0.5f;
+            f32 t = Cosine(g_gameClock[1] * g_panelBlockPulseRate[0]) * 0.5f + 0.5f;
             for (u32 i = 0; i < 4; i++)
             {
-                f32 r = ApproachValueWithRamp(self->f5CC[i], self->f5BC[i] ? 1.0f : 0.0f, g_gameClock[2], (RampProfile*)&D_00261260[2], 0);
+                f32 r = ApproachValueWithRamp(self->f5CC[i], self->f5BC[i] ? 1.0f : 0.0f, g_gameClock[2], (RampProfile*)&g_panelBlockPulseRate[2], 0);
                 self->f5CC[i] = r;
                 for (s32 j = 0; j < 4; j++)
                 {
@@ -42,8 +42,8 @@ void DrawTextPanelBlocks(Obj_eu_135228* self, PacketWriter* q)
                 AddGifRgbaEntry(q, *(u32*)out);
                 for (s32 k = 0; k < 4; k++)
                 {
-                    s32 xi = (s32)(((D_002611E0[i][k] + 320.0f) + 1728.0f) * 16.0f);
-                    s32 yi = (s32)(((D_00261220[i][k] + 391.6101685f) * 0.5462963f + 1920.0f) * 16.0f);
+                    s32 xi = (s32)(((g_panelBlockCornersX[i][k] + 320.0f) + 1728.0f) * 16.0f);
+                    s32 yi = (s32)(((g_panelBlockCornersY[i][k] + 391.6101685f) * 0.5462963f + 1920.0f) * 16.0f);
                     AddGifXyzfEntry(q, xi, yi, 0, 0);
                 }
             }

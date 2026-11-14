@@ -133,7 +133,7 @@ void SetListLinkOffset(List01* p, s32 value);
 
 
 
-extern u8 D_0021A790[];
+extern u8 g_aimSwitchPoseSourceMethods[];
 
 struct StateGraph;
 void StartPlacedObject(PlacedObject* self);
@@ -309,7 +309,7 @@ Vec02 D_0026A850 = { 0.0f, 3.0f, 0.0f, 0.0f };
 Vec02 D_0026A860 = { 0.0f, 0.75f, 0.0f, 0.0f };
 Vec02 D_0026A870 = { 5000.0f, 0.0f, 0.0f, 0.0f };
 Vec02 D_0026A880 = { 3.0f, -2.0f, -1.0f, 0.0f };
-Vec02 D_0026A890 = { 500.0f, 0.0f, 0.0f, 0.0f };
+Vec02 g_agentGoalMinDistance = { 500.0f, 0.0f, 0.0f, 0.0f };
 Vec02 D_0026A8A0 = { 1.8f, -0.00024999998f, 0.0f, 0.0f };
 Vec02 D_0026A8B0 = { 1.1f, 1.6f, 0.0f, 0.0f };
 Vec02 D_0026A8C0 = { 1.4f, -0.005f, 0.0f, 0.0f };
@@ -541,7 +541,7 @@ void StartGaugeCollider(GaugeCollider* self)
     self->heading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     self->carryWalker = (StateWalker*)CreateStateWalker((StateGraph*)self->carryGraph, self, -1, 1);
 
-    self->poseSource = CreatePoseSource(self->world, (PlacedObject*)self->poseObject, (const T2195_Vt*)D_0021A790);
+    self->poseSource = CreatePoseSource(self->world, (PlacedObject*)self->poseObject, (const T2195_Vt*)g_aimSwitchPoseSourceMethods);
     ((Attachment*)self->poseSource)->mode1 = 2;
     InsertAttachment((PlacedObject*)self->poseObject, (Attachment*)self->poseSource);
     ((T2195_790*)self->poseSource)->hasTarget = 1;
@@ -911,12 +911,12 @@ void UpdateGaugeColliderVisibility(GaugeCollider* self)
     if (v == 0x3F3) p = AreMenusAndFadeClear();
     if (p != 0) {
         g_gaugeAmountCaption.vt->m14(&g_gaugeAmountCaption);
-        D_0026E4E0.vt->m14(&D_0026E4E0);
+        g_gaugeColliderCaption.vt->m14(&g_gaugeColliderCaption);
         g_timerElement.vt->m14(&g_timerElement);
         return;
     }
     g_gaugeAmountCaption.vt->m15(&g_gaugeAmountCaption);
-    D_0026E4E0.vt->m15(&D_0026E4E0);
+    g_gaugeColliderCaption.vt->m15(&g_gaugeColliderCaption);
     g_timerElement.vt->m15(&g_timerElement);
 }
 
@@ -1084,7 +1084,7 @@ void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec)
             if (code < 0x3F6) {
                 StopTimer(&g_timerElement);
                 g_gaugeAmountCaption.vt->m15(&g_gaugeAmountCaption);
-                D_0026E4E0.vt->m15(&D_0026E4E0);
+                g_gaugeColliderCaption.vt->m15(&g_gaugeColliderCaption);
                 g_timerElement.vt->m15(&g_timerElement);
                 SetWorldActiveFollower(self->world, 0);
             }
@@ -1189,7 +1189,7 @@ void UpdateGaugeColliderAgentGoal(GaugeColliderAgent* self, s32 pick)
         do {
             PickRandomPointOnPointGraph(self->pathGraph, &d);
             u128 e = Vu0::Sub(Vu0::Q(d), Vu0::Q(self->v140));
-            far = D_0026A890.x < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(e, e)));
+            far = g_agentGoalMinDistance.x < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(e, e)));
         } while (far == 0);
         SetAgentGoalPoint(self, &d);
         break;

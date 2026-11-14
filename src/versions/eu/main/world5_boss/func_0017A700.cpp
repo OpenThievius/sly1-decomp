@@ -11,9 +11,9 @@ void HandleWorld5ModeColliderActivation(World5ModeCollider* self, void* active)
 {
     HandleSwitchedColliderActivation(self, active);
     if (active) {
-        Vu0::Q(((T217D_BF0Aim*)&D_00270650)->aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
+        Vu0::Q(((T217D_BF0Aim*)&g_spinningSpriteElement)->aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
     } else {
-        D_00270650.vt->m16(&D_00270650, 0);
+        g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 0);
         self->pulseActive = 0;
     }
 }

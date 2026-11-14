@@ -33,10 +33,10 @@ void DrawLetterGlyphElement(Element_eu_1AE5E0* self)
     f32 w;
     f32 h;
     f32 size = 1.0f;
-    curve.start = D_002744A8;
+    curve.start = g_letterGlyphScale;
     curve.none = 0;
-    curve.k = (1.0f - D_002744A8) / (D_002744A4 * D_002744A4);
-    f32 peak = Fpu::Sqrt(D_002744A8 / curve.k);
+    curve.k = (1.0f - g_letterGlyphScale) / (D_002744A4 * D_002744A4);
+    f32 peak = Fpu::Sqrt(g_letterGlyphScale / curve.k);
     f32 age = g_elapsedTime - self->since;
     if (!(peak + D_002744A4 < age)) {
         f32 t = age - peak;

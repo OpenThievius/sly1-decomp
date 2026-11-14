@@ -69,7 +69,7 @@ struct GameProgress {
 typedef char check_G27C230[sizeof(G27C230) == 0x44C ? 1 : -1];
 typedef char check_GameProgress[sizeof(GameProgress) == 0x1A00 ? 1 : -1];
 
-extern GameProgress D_0027C220;      // .bss: the head (label D_0027C220, 0x10) and D_0027C230 (0x19F0)
+extern GameProgress g_saveDataBlock;      // .bss: the head (label D_0027C220, 0x10) and D_0027C230 (0x19F0)
 extern G27C230 D_0027C230[];    // .bss: D_0027C220.levels, the label the two record pointers name
 extern GameProgress* g_saveData;     // game_progress.cpp: = D_0027C220
 extern G27C230* g_currentLevelRecord;     // game_progress.cpp: = D_0027C230

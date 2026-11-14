@@ -17,7 +17,7 @@ void SetPauseMenuOpen(Obj_1940E8_eu* self, s32 mode) {
         if (key == 0x308) {
             PauseStagedBankVoice();
             SetElementStackState((Obj_1940E8_eu*)g_elementStack, 5);
-        } else if (D_0027051C != 0) {
+        } else if (g_activeStepSequence != 0) {
             SetElementStackState((Obj_1940E8_eu*)g_elementStack, 5);
         } else {
             u8* base = g_elementStack;
@@ -36,7 +36,7 @@ void SetPauseMenuOpen(Obj_1940E8_eu* self, s32 mode) {
         if (key == 0x308) {
             ResumeStagedBankVoice();
             SetElementStackState((Obj_1940E8_eu*)g_elementStack, 3);
-        } else if (D_0027051C != 0) {
+        } else if (g_activeStepSequence != 0) {
             SetElementStackState((Obj_1940E8_eu*)g_elementStack, 3);
         } else if (self->f570 != 0) {
             SetElementStackState((Obj_1940E8_eu*)g_elementStack, 3);

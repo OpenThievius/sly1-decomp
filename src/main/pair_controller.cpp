@@ -120,7 +120,7 @@ void LoadCollider(Collider* self, BufferedStream* in);
 
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-extern Quad219C D_00275C50;
+extern Quad219C g_unitXQuad;
 
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
@@ -159,7 +159,7 @@ struct HeadingFrame {
     RampParams ramp;    // 0x30
 };
 
-extern const f32 D_0024C9C0[4];
+extern const f32 g_walkerControlRamp[4];
 
 extern f32 g_frameDt;
 
@@ -196,7 +196,7 @@ s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 void SetHitTargetState(HitTarget* self, s32 value);
 
-extern f32 D_0026B850[4];
+extern f32 g_hitTargetTurnRamp[4];
 
 void StepCollider(Collider* self, f32 dt);
 
@@ -254,7 +254,7 @@ s32 PairWithNearestFreeObject(void* self, void* child);
 
 void InitCollider(Collider* self);
 
-extern f32 D_0026B7D8[4];
+extern f32 g_walkerTurnRamp[4];
 
 
 void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
@@ -472,9 +472,9 @@ struct ClampedQuadratic {
     }
 };
 
-ObjectLink D_0026B778[2] = { { 0x2, 0x28E, 0x640 }, { 0x2, 0x292, 0x650 } };
+ObjectLink g_walkerColliderLoadLinks[2] = { { 0x2, 0x28E, 0x640 }, { 0x2, 0x292, 0x650 } };
 
-ObjectLink D_0026B790[6] = {
+ObjectLink g_walkerColliderStartLinks[6] = {
     { 0x4, 0x291, 0x64C },
     { 0x4, 0x299, 0x664 },
     { 0x4, 0x297, 0x65C },
@@ -483,7 +483,7 @@ ObjectLink D_0026B790[6] = {
     { 0x2, 0x29B, 0x67C },
 };
 
-f32 D_0026B7D8[4] = { 20.0f, 0.0f, 0.30000001192092896f, 0.0f };
+f32 g_walkerTurnRamp[4] = { 20.0f, 0.0f, 0.30000001192092896f, 0.0f };
 
 ObjectLink g_pairedObjectLinks[6] = {
     { 0x2, 0x29C, 0x58C },
@@ -498,7 +498,7 @@ ObjectLink g_hitTargetLoadLinks[1] = { { 0x2, 0x2A3, 0x560 } };
 
 ObjectLink g_hitTargetStartLinks[1] = { { 0x6, 0x2AE, 0x578 } };
 
-f32 D_0026B850[4] = { 2.0f, 0.0f, 0.699999988079071f, 0.0f };
+f32 g_hitTargetTurnRamp[4] = { 2.0f, 0.0f, 0.699999988079071f, 0.0f };
 
 s32 g_hitTargetStateIds[10] = { 0x2A4, 0x2A5, 0x2A6, 0x2A7, 0x2A8, 0x2A9, 0x2AA, 0x2AB, 0x2AC, 0x2AD };
 
@@ -549,14 +549,14 @@ void InitWalkerCollider(WalkerCollider* self)
 void LoadWalkerCollider(WalkerCollider* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
-    ResolveObjectLinks(self, 2, D_0026B778);
+    ResolveObjectLinks(self, 2, g_walkerColliderLoadLinks);
 }
 
 void StartWalkerCollider(WalkerCollider* self)
 {
     StartPlacedObject(self);
     if (self->f678 != 0) {
-        ResolveObjectLinks(self, 6, D_0026B790);
+        ResolveObjectLinks(self, 6, g_walkerColliderStartLinks);
         SetColliderAnchors(self, 0, 0, 3, 0);
         if (self->stateGraph != 0) {
             self->stateWalker = CreateStateWalker((StateGraph*)self->stateGraph, self, -1, 0);
@@ -572,7 +572,7 @@ void StartWalkerCollider(WalkerCollider* self)
     }
 }
 
-extern const f32 D_0024C9C0[4] = { 30.0f, 0.0f, 0.2f, 0.0f };
+extern const f32 g_walkerControlRamp[4] = { 30.0f, 0.0f, 0.2f, 0.0f };
 
 void ControlWalkerCollider(WalkerCollider* self, PadRecord* src, f32 dt)
 {
@@ -584,7 +584,7 @@ void ControlWalkerCollider(WalkerCollider* self, PadRecord* src, f32 dt)
     }
     ReadWalkerColliderInput(self, src);
     ComputePolarOffset((Vec3*)&self->moveOffset, self->heading, self->stickLength * self->speedScale, 0.0f);
-    f.ramp = *(RampParams*)D_0024C9C0;
+    f.ramp = *(RampParams*)g_walkerControlRamp;
     f32 r = ArctangentOfRatio(((PlacedObject*)self->f64C)->m110.r[0].y, ((PlacedObject*)self->f64C)->m110.r[0].x);
     r = ApproachAngleWithRamp(r, self->aimHeading, g_frameDt, &f.ramp, 0);
     BuildYawPitchMatrix(r, 0.0f, (Mat02*)&f.rot);
@@ -831,7 +831,7 @@ void StepWalkerCollider(WalkerCollider* self, f32 dt)
     f32 buf[12];
     StepCollider(self, dt);
     BuildYawPitchMatrix(self->heading, 0.0f, (Mat02*)buf);
-    TurnColliderTowardRotation(self, g_frameDt, (Mat02*)buf, D_0026B7D8);
+    TurnColliderTowardRotation(self, g_frameDt, (Mat02*)buf, g_walkerTurnRamp);
 }
 
 s32 HasAnimationDrivenAttachment(SwitchedCollider *self);
@@ -938,7 +938,7 @@ void InitPairController(PairController* self)
     tmp = g_pairControllerPoseTable;
     CopyMemory(self->poseA, &tmp, 0xC0);
     CopyMemory(self->poseB, &tmp, 0xC0);
-    self->q3D0 = *(AlignedQuad*)&D_00275C50;
+    self->q3D0 = *(AlignedQuad*)&g_unitXQuad;
     f32 k2300 = 2300.0f;
     f32 k1500 = 1500.0f;
     f32 k146 = 1.46f;
@@ -1133,9 +1133,9 @@ void ShowPairControllerElement(PairController* self)
         p = AreMenusAndFadeClear();
     }
     if (p != 0) {
-        D_0026D0C8.vt->m14(&D_0026D0C8);
+        g_pairControllerCountCaption.vt->m14(&g_pairControllerCountCaption);
     } else {
-        D_0026D0C8.vt->m15(&D_0026D0C8);
+        g_pairControllerCountCaption.vt->m15(&g_pairControllerCountCaption);
     }
 }
 
@@ -1206,8 +1206,8 @@ void SetPairControllerState(PairController* self, s32 state)
         break;
     }
     case 2: {
-        D_0026D0C8.target = &self->finishedCount;
-        D_0026D0C8.limit = &self->limit3B8;
+        g_pairControllerCountCaption.target = &self->finishedCount;
+        g_pairControllerCountCaption.limit = &self->limit3B8;
         SetWorldActiveFollower(self->world, self);
         break;
     }
@@ -2086,7 +2086,7 @@ void StepHitTarget(HitTarget* self, f32 dt)
     if (self->parent == 0) {
         u8 buf[0x30];
         RotateMatrixUpright(&self->m110, 0, (Mat02*)buf);
-        TurnColliderTowardRotation(self, g_frameDt, (Mat02*)buf, D_0026B850);
+        TurnColliderTowardRotation(self, g_frameDt, (Mat02*)buf, g_hitTargetTurnRamp);
     }
 }
 

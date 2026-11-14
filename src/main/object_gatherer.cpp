@@ -237,16 +237,16 @@ void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
 // The file's .data, in retail's order. D_0026A910 and D_0026A914 are read by the VU0 function
 // func_00198BD8, D_0026A968 by func_00199698, D_0026ABB0 and D_0026ABC0 by func_0019B298 and
 // func_0019B378.
-f32 D_0026A910 = 100.0f;
-f32 D_0026A914 = 0.0f;
-ObjectLink D_0026A918[1] = { { 0x0, 0x22B, 0x2D0 } };
-ObjectLink D_0026A928[1] = { { 0x0, 0x22D, 0x2D8 } };
-ObjectLink D_0026A938[1] = { { 0x0, 0x22C, 0x2D4 } };
+f32 g_objectSetPushSpeed = 100.0f;
+f32 g_objectSetLiftSpeed = 0.0f;
+ObjectLink g_stateWalkerObjectLoadLinks[1] = { { 0x0, 0x22B, 0x2D0 } };
+ObjectLink g_stateWalkerObjectStartLinks[1] = { { 0x0, 0x22D, 0x2D8 } };
+ObjectLink g_stateWalkerGroupLoadLinks[1] = { { 0x0, 0x22C, 0x2D4 } };
 ObjectLink g_numberedItemLinks[1] = { { 0x0, 0x339, 0x5BC } };
-f32 D_0026A958[2] = { 0.8f, 1.2f };
-f32 D_0026A960[2] = { 0.9f, 1.1f };
-f32 D_0026A968 = 300.0f;
-T219C_Params D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, (void (*)(void*))SetNumberedItemFlag };
+f32 g_numberedItemSpinRange[2] = { 0.8f, 1.2f };
+f32 g_numberedItemJitterRange[2] = { 0.9f, 1.1f };
+f32 g_numberedItemReachRadius = 300.0f;
+T219C_Params g_numberedItemEffectParams = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, (void (*)(void*))SetNumberedItemFlag };
 s32 D_0026A9E0[28] = { 2, 4, 8, 16, 65536, 32, 64, 128, 256, 512, 131072, 1024, 2048, 8192, 4096, 16384, 32768, 0, 0, 0, 0, 0, 0, 268435456, 536870912, 1073741824, (-2147483647 - 1), 1 };
 // The links func_0019A1E0 resolves for a C17, and two words after them that retail's label
 // holds as zeros (the label runs to the next table, D_0026AB90; nothing reads them).
@@ -255,8 +255,8 @@ C17LinkTable D_0026AA50 = { {
     { 0, 0x376, 0x610 }, { 0, 0x37C, 0x618 }, { 4, 0x377, 0x61C }, { 4, 0x378, 0x628 }, { 4, 0x379, 0x634 }, { 6, 0x3A2, 0x768 }, { 6, 0x3A4, 0x76C }, { 6, 0x3A5, 0x770 }, { 6, 0x3A6, 0x774 }, { 6, 0x3A7, 0x77C }, { 6, 0x3A8, 0x780 }, { 6, 0x3A9, 0x784 }, { 6, 0x3AB, 0x788 }, { 6, 0x3AC, 0x78C }, { 6, 0x3AD, 0x790 }, { 6, 0x3AE, 0x794 }, { 6, 0x3AF, 0x798 }, { 6, 0x3B0, 0x79C }, { 6, 0x3B1, 0x7A0 }, { 6, 0x3B2, 0x7A4 }, { 6, 0x3B3, 0x7A8 }, { 6, 0x3B4, 0x7C4 }, { 6, 0x3B5, 0x7C8 }, { 6, 0x3B6, 0x7CC }, { 6, 0x3B7, 0x7D0 }, { 6, 0x3D8, 0x7D4 } }, { 0, 0 } };
 ObjectLink g_objectGathererLoadLinks[1] = { { 0x0, 0x268, 0x5EC } };
 ObjectLink g_objectGathererStartLinks[1] = { { 0x4, 0x267, 0x5FC } };
-f32 D_0026ABB0[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
-f32 D_0026ABC0[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
+f32 g_gathererTurnRamp[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
+f32 g_gathererApproachCurve[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
 s32 D_0026ABD0[2] = { 0x130, 0x132 };
 s32 D_0026ABD8[2] = { 2, 0 };
 s32 D_0026ABE0[4] = { 0x10, 0, 0, 0 };
@@ -364,8 +364,8 @@ void UpdateObjectSet(ObjectSet* self, f32 dt)
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(r->target->v140));
     d.z = 0.0f;
     u128 base = Vu0::Q(r->target->v150);
-    u128 out = Vu0::ScalarAt(D_0026A910);
-    Vu0::Q(d) = Vu0::MulAddX2(base, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(D_00248D30)), out, Vu0::Q(g_unitZVector), Vu0::ScalarAt(D_0026A914));
+    u128 out = Vu0::ScalarAt(g_objectSetPushSpeed);
+    Vu0::Q(d) = Vu0::MulAddX2(base, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(D_00248D30)), out, Vu0::Q(g_unitZVector), Vu0::ScalarAt(g_objectSetLiftSpeed));
     self->desc02()->m20(self, &d);
     ((SlotFn*)self->desc)[77](self);
 }
@@ -478,19 +478,19 @@ void CollectFlaggedObjectSet(FlaggedObjectSet* self)
 void LoadStateWalkerObject(StateWalkerObject* self, BufferedStream* stream)
 {
     LoadPlacedObject(self, stream);
-    ResolveObjectLinks(self, 1, D_0026A918);
+    ResolveObjectLinks(self, 1, g_stateWalkerObjectLoadLinks);
 }
 
 void StartStateWalkerObject(StateWalkerObject* self)
 {
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 1, D_0026A928);
+    ResolveObjectLinks(self, 1, g_stateWalkerObjectStartLinks);
 }
 
 void LoadStateWalkerGroup(StateWalkerGroup* self, BufferedStream* stream)
 {
     LoadPlacedObject(self, stream);
-    ResolveObjectLinks(self, 1, D_0026A938);
+    ResolveObjectLinks(self, 1, g_stateWalkerGroupLoadLinks);
 }
 
 void StartStateWalkerGroup(StateWalkerGroup* self)
@@ -582,13 +582,13 @@ void StartNumberedItem(NumberedItem* self)
 
     StartObjectSet(self);
     self->spinAngle = RandomFloatInRange(-3.14159274f, 3.14159274f);
-    self->spinSpeed = RandomFloatInRange(D_0026A958[0], D_0026A958[1]);
+    self->spinSpeed = RandomFloatInRange(g_numberedItemSpinRange[0], g_numberedItemSpinRange[1]);
     if (RandomIntInRange(0, 1) != 0) {
         self->spinSpeed = -self->spinSpeed;
     }
     neg = -1;
     one = 1;
-    r = RandomFloatInRange(D_0026A960[0], D_0026A960[1]);
+    r = RandomFloatInRange(g_numberedItemJitterRange[0], g_numberedItemJitterRange[1]);
     self->halfCycle = self->halfCycle * r;
     self->cycleTime = RandomFloatInRange(0.0f, self->halfCycle + self->halfCycle);
 
@@ -645,7 +645,7 @@ void UpdateNumberedItem(NumberedItem* self, f32 dt)
         return;
     }
     u128 gap = Vu0::Sub(*(const u128*)&target->v140, Vu0::Q(self->v140));
-    if (D_0026A968 * D_0026A968 < Vu0::ToFloatMoved(Vu0::Dot(gap, gap))) {
+    if (g_numberedItemReachRadius * g_numberedItemReachRadius < Vu0::ToFloatMoved(Vu0::Dot(gap, gap))) {
         return;
     }
     ComputeObjectMotionInFrame(target, 0, &target->v140, &first, 0, 0, 0);
@@ -703,7 +703,7 @@ L980:
 void CollectNumberedItem(NumberedItem* self)
 {
     Quad16 loc;
-    T217D_E30* g = &D_0026C948;
+    T217D_E30* g = &g_collectedItemCaption;
     g->vt->m14(g);
     Effect* n = CreateEffect(0x10, 0);
     if (n != 0) {
@@ -712,7 +712,7 @@ void CollectNumberedItem(NumberedItem* self)
             StartSoundEffect(0x21, 0, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
         }
         n->p134 = self;
-        n->params = &D_0026A970;
+        n->params = &g_numberedItemEffectParams;
         TransformPointBetweenFrames(self, 0, (Vec02*)(self->f5BC + 0x100), (Vec02*)&loc);
         n->vt->m00(n, &loc, 1.0f, 0);
         n->i20 = *(s32*)&self->f5BC;
@@ -869,7 +869,7 @@ void FlagAllNumberedItems(void)
             p--;
         } while (i >= 0);
     }
-    D_0026C948.vt->m14(&D_0026C948);
+    g_collectedItemCaption.vt->m14(&g_collectedItemCaption);
 }
 
 void SetSavedWorldBits(u32 value)
@@ -1074,7 +1074,7 @@ void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
         return;
     }
     if (cur == 0x38E && target == cur) {
-        if (self->queueCount == 0 && D_0027051C == 0) {
+        if (self->queueCount == 0 && g_activeStepSequence == 0) {
             SetStateWalkerTarget(self->stateWalker, 0x38F);
             switch (self->levelBit) {
             case 2:
@@ -1200,7 +1200,7 @@ void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
             return;
         }
     }
-    if (self->queueCount > 0 && D_0027051C == 0) {
+    if (self->queueCount > 0 && g_activeStepSequence == 0) {
         ChooseStepSequenceState((StepSequence*)self->queue[0]);
         self->queueCount--;
         CopyMemory(&self->queue[0], &self->queue[1], self->queueCount * 4);
@@ -1219,7 +1219,7 @@ void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
             s32 k;
             s32 a;
             s32 b;
-            D_0026C948.vt->m14(&D_0026C948);
+            g_collectedItemCaption.vt->m14(&g_collectedItemCaption);
             a = g_currentEntry->count64;
             b = g_currentWorld->count2300;
             k = -1;
@@ -1432,14 +1432,14 @@ void StepObjectGatherer(ObjectGatherer* self, f32 dt)
         Vu0::Q(delta) = Vu0::Sub(Vu0::Q(self->v640), Vu0::Q(self->v140));
         delta.z = 0.0f;
         BuildBasisFromX(&delta, &basis);
-        TurnColliderTowardRotation(self, dt, &basis, D_0026ABB0);
+        TurnColliderTowardRotation(self, dt, &basis, g_gathererTurnRamp);
         break;
     case 2:
         TransformPointBetweenFrames((PlacedObject*)(*(void**)((u8*)self->candidate + 0x18)), 0, (Vec02*)((u8*)self->candidate + 0x40), &target);
         Vu0::Q(delta) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
         delta.z = 0.0f;
         BuildBasisFromX(&delta, &basis);
-        TurnColliderTowardRotation(self, dt, &basis, D_0026ABB0);
+        TurnColliderTowardRotation(self, dt, &basis, g_gathererTurnRamp);
         break;
     default:
         SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, (f32*)self->p214, dt);
@@ -1603,7 +1603,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
             u128 d = Vu0::Sub(Vu0::Q(at), Vu0::Q(self->v140));
             f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d, d)));
             if (dist < 500.0f) {
-                speed = self->state2Speed <? (D_0026ABC0[0] + dist * (D_0026ABC0[1] + dist * D_0026ABC0[2]));
+                speed = self->state2Speed <? (g_gathererApproachCurve[0] + dist * (g_gathererApproachCurve[1] + dist * g_gathererApproachCurve[2]));
             }
             Vu0::Q(self->v630) = d;
         }

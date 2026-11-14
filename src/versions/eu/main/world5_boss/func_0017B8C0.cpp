@@ -7,7 +7,7 @@ void SetWorld5CountdownState(World5Countdown* self, s32 state)
     if (state == self->mode) {
         return;
     }
-    D_00263E2C = -1;
+    g_world5CountdownRequest = -1;
     switch (state) {
     case 1:
         {

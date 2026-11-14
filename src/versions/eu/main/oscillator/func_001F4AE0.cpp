@@ -25,12 +25,12 @@ void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
         if (D_0026FA64 == 0) {
             if (D_002701C4 != 0 || ((Cap_eu_1F4AE0*)&g_typedTextCaptionBox)->f570 == 1 || ((Cap_eu_1F4AE0*)&g_typedTextCaptionBox)->f570 == 2
                 || (((Cap_eu_1F4AE0*)&g_typedTextCaptionBox)->f570 == 3 && ((Cap_eu_1F4AE0*)&g_typedTextCaptionBox)->t8 != 0)) {
-                D_0026F138.vt->m15(&D_0026F138);
+                g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
             } else {
-                SetScreenElementHoldTime(&D_0026F138, 0.0f);
-                SetElementTextFromPackedEntry(&D_0026F138, GetEntryIdByKey(self->levelEntry));
-                ((Ann_eu_1F4AE0*)&D_0026F138)->announce = 0;
-                D_0026F138.vt->m14(&D_0026F138);
+                SetScreenElementHoldTime(&g_copiedTextCaption, 0.0f);
+                SetElementTextFromPackedEntry(&g_copiedTextCaption, GetEntryIdByKey(self->levelEntry));
+                ((Ann_eu_1F4AE0*)&g_copiedTextCaption)->announce = 0;
+                g_copiedTextCaption.vt->m14(&g_copiedTextCaption);
             }
         }
     case 0:

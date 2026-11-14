@@ -8,10 +8,10 @@
 // D_0062C540. Written for this project from retail's code.
 #include "common.h"
 
-extern u8 D_0027B198[];
+extern u8 g_frameInfoList[];
 
 // The runtime's record of the registered frame information.
-static u8 D_0062C540[0x18];
+static u8 g_programFrameTable[0x18];
 
 struct FrameTable;
 extern "C" void RegisterFrameInfo(void* begin, FrameTable* ob);
@@ -19,10 +19,10 @@ extern "C" void* DeregisterFrameInfo(void* value);
 
 void RegisterProgramFrameInfo(void)
 {
-    RegisterFrameInfo(D_0027B198, (FrameTable*)D_0062C540);
+    RegisterFrameInfo(g_frameInfoList, (FrameTable*)g_programFrameTable);
 }
 
 void ReleaseProgramFrameInfo(void)
 {
-    DeregisterFrameInfo(D_0027B198);
+    DeregisterFrameInfo(g_frameInfoList);
 }

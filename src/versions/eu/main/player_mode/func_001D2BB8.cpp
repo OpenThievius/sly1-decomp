@@ -73,9 +73,9 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         } else if (pad->buttons & 0x10) {
             self->speedUpAmount = 1.0f;
         } else {
-            self->speedUpAmount = ApproachValueWithRamp((RampProfile*)D_00274F78, 0, self->speedUpAmount, 0.0f, g_frameStep);
+            self->speedUpAmount = ApproachValueWithRamp((RampProfile*)g_stepScaleRamp, 0, self->speedUpAmount, 0.0f, g_frameStep);
         }
-        g_stepScale = self->speedUpAmount * D_00274F84 + (1.0f - self->speedUpAmount);
+        g_stepScale = self->speedUpAmount * g_stepScaleFast + (1.0f - self->speedUpAmount);
         break;
     case 2:
         if (g_padSelectFlags & 3) {
@@ -97,7 +97,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
             self->slowDownHeld = 0;
         }
         if (self->slowDownHeld != 0) {
-            g_stepScale = D_00274F88[0];
+            g_stepScale = g_stepScaleSlow[0];
         } else {
             g_stepScale = 1.0f;
         }

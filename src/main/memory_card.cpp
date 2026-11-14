@@ -22,10 +22,10 @@ MemoryCard g_memoryCard = {};
 BackgroundJob g_backgroundJob = {0};
 
 extern f32 g_elapsedTime[];
-extern u8 D_00275960[];
+extern u8 g_backgroundJobThread[];
 extern const u32 g_memoryCardIconKey[8];
-extern u8 D_002BE540[];
-extern u8 D_002BE9C0[];
+extern u8 g_cardDirectoryBuffer[];
+extern u8 g_cardDirectoryPath[];
 
 s32 InitMemoryCardClient(void);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -115,7 +115,7 @@ void RunBackgroundJob()
     BackgroundJob* o = &g_backgroundJob;
     s32 r = o->job(o->arg);
     o->result = r;
-    *(s32*)D_00275960 = -1;
+    *(s32*)g_backgroundJobThread = -1;
     o->thread = -1;
     o->arg = 0;
     o->job = 0;
@@ -123,8 +123,8 @@ void RunBackgroundJob()
     EndOwnThread();
 }
 
-extern u8 D_002BEA10[];
-extern u8 D_002832F0[];
+extern u8 g_backgroundJobStack[];
+extern u8 g_globalPointer[];
 s32 MakeThread(ThreadParams* param);
 void RunThread(s32 thread, void* arg);
 
@@ -137,12 +137,12 @@ void StartBackgroundJob(BackgroundJob* job, void* fn, void* arg)
     job->result = 0x20;
     FillMemory(&param, 0, 0x30);
     param.entry = RunBackgroundJob;
-    param.stack = D_002BEA10;
+    param.stack = g_backgroundJobStack;
     param.stackSize = 0x4000;
-    param.gp = D_002832F0;
+    param.gp = g_globalPointer;
     param.priority = 3;
     job->thread = MakeThread(&param);
-    *(s32*)D_00275960 = job->thread;
+    *(s32*)g_backgroundJobThread = job->thread;
     RunThread(job->thread, job);
 }
 
@@ -576,19 +576,19 @@ s32 GetKeyedDataSize(KeyRecord* self)
 }
 
 // The save files' names, in the order retail's .rodata holds them.
-extern const char D_0024B340[8] = "/";
-extern const char D_0024B348[24] = "/BASCUS-97198YAOTWTD!";
-extern const char D_0024B360[48] = "/BASCUS-97198YAOTWTD!/BASCUS-97198YAOTWTD!";
-extern const char D_0024B390[16] = "Sly Cooper";
-extern const char D_0024B3A0[16] = "/%s/%s%d";
-extern const char D_0024B3B0[24] = "BASCUS-97198YAOTWTD!";
-extern const char D_0024B3C8[8] = "save";
+extern const char g_cardRootPath[8] = "/";
+extern const char g_saveDirectoryPath[24] = "/BASCUS-97198YAOTWTD!";
+extern const char g_saveFilePath[48] = "/BASCUS-97198YAOTWTD!/BASCUS-97198YAOTWTD!";
+extern const char g_saveTitle[16] = "Sly Cooper";
+extern const char g_saveSlotPathFormat[16] = "/%s/%s%d";
+extern const char g_saveDirectoryName[24] = "BASCUS-97198YAOTWTD!";
+extern const char g_saveSlotBaseName[8] = "save";
 
 s32 CreateMemoryCardSaveFiles(MemoryCard* self)
 {
     char name[0x50];
     s32 info[4];
-    s32 r = FinishMemoryCardCall(RequestCardSpaceForPath(self->port, self->slot, D_0024B340), 0x12, info);
+    s32 r = FinishMemoryCardCall(RequestCardSpaceForPath(self->port, self->slot, g_cardRootPath), 0x12, info);
     if (r != 0) return r;
     s32 need = info[0] == 0 ? 2 : 1;
     s32 sz = GetKeyedDataSize((KeyRecord*)g_memoryCardIconKey);
@@ -596,18 +596,18 @@ s32 CreateMemoryCardSaveFiles(MemoryCard* self)
     need += (sz + 1023) / 1024;
     need += 0x15;
     if (self->freeBlocks < need) return 1;
-    const char* dir = D_0024B348;
+    const char* dir = g_saveDirectoryPath;
     r = CreateMemoryCardDirectory(self, (void*)dir);
     if (r == 0) {
-        const char* title = D_0024B390;
-        r = CreateMemoryCardFile(self, (void*)D_0024B360, (void*)title, 10);
+        const char* title = g_saveTitle;
+        r = CreateMemoryCardFile(self, (void*)g_saveFilePath, (void*)title, 10);
         if (r == 0) {
             r = WriteMemoryCardSaveHeader(self, (void*)dir, (void*)title);
             if (r == 0) {
                 r = WriteMemoryCardIcon(self, dir);
                 if (r == 0) {
                     for (s32 i = 0; i < 3; i++) {
-                        FormatToString(name, D_0024B3A0, D_0024B3B0, D_0024B3C8, i + 1);
+                        FormatToString(name, g_saveSlotPathFormat, g_saveDirectoryName, g_saveSlotBaseName, i + 1);
                         r = WriteMemoryCardSlot(self, name, (u8*)self + 0x30 + i * 0x1A5C, (u8*)self + 0x1A30 + i * 0x1A5C);
                         if (r != 0) return r;
                     }
@@ -632,7 +632,7 @@ s32 LoadMemoryCardSaveSlots(void* p) {
         s32 local50;
     s32 local54;
 
-    r = FinishMemoryCardCall(ReadCardDirectory(self->port, self->slot, D_0024B348, 0, -1, 0), 0xD, &local50);
+    r = FinishMemoryCardCall(ReadCardDirectory(self->port, self->slot, g_saveDirectoryPath, 0, -1, 0), 0xD, &local50);
     if (local50 <= 0) {
         GetMemoryCardFreeBytes(self, &local54);
         if (local54 <= 0xC3FF) {
@@ -643,7 +643,7 @@ s32 LoadMemoryCardSaveSlots(void* p) {
     n = 0;
     if (r == 0) {
         for (; r == 0 && n < 3; n++) {
-            FormatToString((char*)&buf, D_0024B3A0, D_0024B3B0, D_0024B3C8, n + 1);
+            FormatToString((char*)&buf, g_saveSlotPathFormat, g_saveDirectoryName, g_saveSlotBaseName, n + 1);
             (void)ReadMemoryCardSlotFile(self, &buf, &self->slots[n].data, self->slots[n].info);
         }
         if (r == 0 && self->targetState < 5) {
@@ -678,7 +678,7 @@ s32 SaveGameToMemoryCardSlot(MemoryCard* self)
     n = n - (s32)self;
     n = n * 0x26FFD927;
     n = (n >> 2) + 1;
-    FormatToString((char*)&buf, D_0024B3A0, D_0024B3B0, D_0024B3C8, n);
+    FormatToString((char*)&buf, g_saveSlotPathFormat, g_saveDirectoryName, g_saveSlotBaseName, n);
     return WriteMemoryCardSlotFile(self, &buf, self->p4F44);
 }
 
@@ -697,7 +697,7 @@ s32 WriteSelectedMemoryCardSlot(MemoryCard* self)
     n = n - (s32)self;
     n = n * 0x26FFD927;
     n = (n >> 2) + 1;
-    FormatToString((char*)&buf, D_0024B3A0, D_0024B3B0, D_0024B3C8, n);
+    FormatToString((char*)&buf, g_saveSlotPathFormat, g_saveDirectoryName, g_saveSlotBaseName, n);
     g = self->i4F4C;
     return WriteMemoryCardSlot(self, &buf, (void*)g, (void*)(g + 0x1A00));
 }
@@ -711,7 +711,7 @@ void StartMemoryCardSave(MemoryCard* self)
             SetPauseMenuLayerPage(&g_pauseMenuElement, 1, 0x14);
         } else {
             StartBackgroundJob(&g_backgroundJob, (void*)SaveGameToMemoryCardSlot, self);
-            T217D_600* obj = &D_00273EB0;
+            T217D_600* obj = &g_cyclingGlyphElement;
             ((T217D_Word*)&obj->flag)->v = 0;
             obj->vt->m14(obj);
         }
@@ -734,13 +734,13 @@ s32 ListMemoryCardDirectory(void* ctx, u8* b, s32 c, u8* d, s32* e)
         if ((u32)GetStringLength((const char*)b) >= 0x41) {
             return 0xD;
         }
-        CopyString(D_002BE9C0, (const char*)b);
+        CopyString(g_cardDirectoryPath, (const char*)b);
         flag = 0;
     } else {
         flag = 1;
-        b = D_002BE9C0;
+        b = g_cardDirectoryPath;
     }
-    buf = D_002BE540;
+    buf = g_cardDirectoryBuffer;
     FillMemory(buf, 0, 0x480);
     r = FinishMemoryCardCall(ReadCardDirectory(a->port, a->slot, (const char*)b, flag, c, buf), 0xD, e);
     if (r != 0) {
@@ -838,18 +838,18 @@ struct IconSysHeader {
 
 
 // The header and icon files' names.
-extern const IconSysMagic D_0024B3D0 = { 0x44325350, 0 };
-extern const char D_0024B3D8[8] = "sly.ico";
-extern const char D_0024B3E0[8] = "%s/%s";
-extern const char D_0024B3E8[24] = "icon.sys";
+extern const IconSysMagic g_iconSysMagic = { 0x44325350, 0 };
+extern const char g_iconFileName[8] = "sly.ico";
+extern const char g_pathJoinFormat[8] = "%s/%s";
+extern const char g_iconSysFileName[24] = "icon.sys";
 
 s32 WriteMemoryCardSaveHeader(void* owner, void* a1, void* a2)
 {
     IconSysHeader c;
     CardFileName buf;
     (void)FillMemory(&c, 0, 0x3C4);
-    c.magic = ((IconSysMagic*)&D_0024B3D0)->w0;
-    c.f004 = ((IconSysMagic*)&D_0024B3D0)->b4;
+    c.magic = ((IconSysMagic*)&g_iconSysMagic)->w0;
+    c.f004 = ((IconSysMagic*)&g_iconSysMagic)->b4;
     c.titleBreakOffset = 0x20;
     c.backgroundAlpha = 0x60;
     c.backgroundColor0Red = 0;
@@ -886,16 +886,16 @@ s32 WriteMemoryCardSaveHeader(void* owner, void* a1, void* a2)
     c.f0B4 = 0.5f;
     c.f0B8 = 0.5f;
     ConvertStringToCharCodes((u8*)a2, (u16*)((u8*)&c + 0xC0));
-    c.listIconName = (*(IconFileName*)&D_0024B3D8);
-    c.copyIconName = (*(IconFileName*)&D_0024B3D8);
-    c.deleteIconName = (*(IconFileName*)&D_0024B3D8);
-    FormatToString(buf.s, D_0024B3E0, a1, D_0024B3E8);
+    c.listIconName = (*(IconFileName*)&g_iconFileName);
+    c.copyIconName = (*(IconFileName*)&g_iconFileName);
+    c.deleteIconName = (*(IconFileName*)&g_iconFileName);
+    FormatToString(buf.s, g_pathJoinFormat, a1, g_iconSysFileName);
     return CreateMemoryCardFile(owner, &buf, &c, 0x3C4);
 }
 
 s32 WriteMemoryCardIcon(void* self, const char* dir)
 {
-    return WriteMemoryCardKeyedFile(self, dir, (void*)g_memoryCardIconKey, D_0024B3D8);
+    return WriteMemoryCardKeyedFile(self, dir, (void*)g_memoryCardIconKey, g_iconFileName);
 }
 
 struct KeyIdFromRecord : KeyId {
@@ -929,7 +929,7 @@ s32 WriteMemoryCardKeyedFile(void* self, const char* dir, void* k, const char* n
     PushBackMemoryMark();
     code = -1;
     (void)InitBufferedStream(&obj, 0x8040, AllocateBackMemory(0x8040), 0);
-    FormatToString(text, D_0024B3E0, dir, name);
+    FormatToString(text, g_pathJoinFormat, dir, name);
     status = OpenMemoryCardFile(self, text, 0x202, &code);
     if (status == 0) {
         if (!pair.Set(key) || !OpenBufferedSectorStreamRange(&obj, &pair)) {

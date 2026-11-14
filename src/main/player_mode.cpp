@@ -25,9 +25,9 @@ struct ObjectLink;
 s32 g_modeMasks[8] = { 0x12, 0x404, 0x1008, 0x40, 0x80, 0x200, 0x8000, 0 };
 const char* g_modeLabels[7] = { "&2T&.: Dive", "&2T&.: Roll", "&2T&.: Slow", "&2T&.: Mine", "&2T&.: Fast", "&2T&.: Decoy", "&2T&.: Stun" };
 s32 g_currentMode = -1;
-float D_00274F78[3] = {2.0f, 0.0f, 0.100000001f};
-float D_00274F84 = 1.5f;
-float D_00274F88[2] = {0.25f, 0.0f};
+float g_stepScaleRamp[3] = {2.0f, 0.0f, 0.100000001f};
+float g_stepScaleFast = 1.5f;
+float g_stepScaleSlow[2] = {0.25f, 0.0f};
 s32 g_countedColliderLinkIds[4] = { 0x22, 0x152, 0x558, 0 };
 
 struct ContactObject;
@@ -220,9 +220,9 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         } else if (pad->buttons & 0x10) {
             self->speedUpAmount = 1.0f;
         } else {
-            self->speedUpAmount = ApproachValueWithRamp((RampProfile*)D_00274F78, 0, self->speedUpAmount, 0.0f, g_frameStep);
+            self->speedUpAmount = ApproachValueWithRamp((RampProfile*)g_stepScaleRamp, 0, self->speedUpAmount, 0.0f, g_frameStep);
         }
-        g_stepScale = self->speedUpAmount * D_00274F84 + (1.0f - self->speedUpAmount);
+        g_stepScale = self->speedUpAmount * g_stepScaleFast + (1.0f - self->speedUpAmount);
         break;
     case 2:
         if (g_padSelectFlags & 3) {
@@ -244,7 +244,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
             self->slowDownHeld = 0;
         }
         if (self->slowDownHeld != 0) {
-            g_stepScale = D_00274F88[0];
+            g_stepScale = g_stepScaleSlow[0];
         } else {
             g_stepScale = 1.0f;
         }

@@ -5,7 +5,7 @@ void StartPauseMenuExitFade(void)
 {
     FadeRequest args;
     args.kind = 1;
-    args.text = D_00247AB0 + D_eu_00263710 * 32;
+    args.text = g_sessionFadeKey + D_eu_00263710 * 32;
     args.f08 = -1;
     args.f0C = -1;
     args.flags = 4;

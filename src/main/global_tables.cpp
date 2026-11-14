@@ -19,231 +19,231 @@ struct SoundEntry { s32 bank; s32 index; };
 
 void UpdateColliderBounds();
 
-extern const ClassHead D_00217410;
-extern const ClassDescriptor<28> D_00217418;
-extern const ClassDescriptor<48> D_00217498;
-extern const ClassDescriptor<86> D_00217568;
-extern const ClassDescriptor<28> D_00217740;
+extern const ClassHead g_classRoot;
+extern const ClassDescriptor<28> g_objectClass;
+extern const ClassDescriptor<48> g_placedObjectClass;
+extern const ClassDescriptor<86> g_colliderClass;
+extern const ClassDescriptor<28> g_pathCurveObjectClass;
 extern const ClassDescriptor<28> g_pointObjectClass;
-extern const ClassDescriptor<28> D_00217840;
-extern const ClassDescriptor<28> D_002178C0;
-extern const ClassDescriptor<28> D_00217940;
-extern const ClassDescriptor<48> D_002179C0;
-extern const ClassDescriptor<48> D_00217A90;
-extern const ClassDescriptor<48> D_00217B60;
-extern const ClassDescriptor<124> D_00217C30;
+extern const ClassDescriptor<28> g_textPointObjectClass;
+extern const ClassDescriptor<28> g_transformObjectClass;
+extern const ClassDescriptor<28> g_arrivalPointClass;
+extern const ClassDescriptor<48> g_objectSubGroupClass;
+extern const ClassDescriptor<48> g_lookupObjectClass;
+extern const ClassDescriptor<48> g_coneVolumeClass;
+extern const ClassDescriptor<124> g_switchedColliderClass;
 extern const ClassDescriptor<28> g_coloredTriangleSetClass;
-extern const ClassDescriptor<72> D_00218770;
-extern const ClassDescriptor<48> D_002188A0;
-extern const ClassDescriptor<74> D_00218970;
-extern const ClassDescriptor<72> D_00218AA8;
-extern const ClassDescriptor<74> D_00218BD8;
-extern const ClassDescriptor<74> D_00218D10;
-extern const ClassDescriptor<74> D_00218E48;
-extern const ClassDescriptor<72> D_00218F80;
-extern const ClassDescriptor<72> D_002190B0;
+extern const ClassDescriptor<72> g_attachedSetClass;
+extern const ClassDescriptor<48> g_onOffObjectClass;
+extern const ClassDescriptor<74> g_maskedColliderClass;
+extern const ClassDescriptor<72> g_timedStateClass;
+extern const ClassDescriptor<74> g_playerFlaggedColliderClass;
+extern const ClassDescriptor<74> g_massScalingColliderClass;
+extern const ClassDescriptor<74> g_latchedSwitchColliderClass;
+extern const ClassDescriptor<72> g_zoneColliderClass;
+extern const ClassDescriptor<72> g_triggerZoneClass;
 extern const ClassDescriptor<28> D_002191E0;
 extern const ClassDescriptor<48> D_00219260;
 extern const ClassDescriptor<72> D_00219330;
-extern const ClassDescriptor<28> D_00219460;
+extern const ClassDescriptor<28> g_valueListObjectClass;
 extern const ClassDescriptor<28> D_002194E0;
-extern const ClassDescriptor<28> D_00219738;
+extern const ClassDescriptor<28> g_animationClass;
 extern const ClassHead g_animationPlayerMethods;
-extern const ClassDescriptor<28> D_002197E8;
-extern const ClassDescriptor<28> D_00219868;
+extern const ClassDescriptor<28> g_skipAnimationPlayerClass;
+extern const ClassDescriptor<28> g_stateGraphClass;
 extern const ClassHead g_stateWalkerMethods;
 extern const ClassDescriptor<72> D_002198F0;
 extern const ClassDescriptor<48> D_00219A20;
-extern const ClassDescriptor<72> D_00219AF0;
-extern const ClassDescriptor<48> D_00219F80;
-extern const ClassDescriptor<48> D_0021A050;
-extern const ClassDescriptor<28> D_0021A120;
-extern const ClassDescriptor<28> D_0021A1A0;
-extern const ClassDescriptor<28> D_0021A220;
-extern const ClassDescriptor<28> D_0021A2A0;
-extern const ClassDescriptor<48> D_0021A320;
-extern const ClassDescriptor<48> D_0021A490;
-extern const ClassDescriptor<28> D_0021A560;
-extern const ClassDescriptor<28> D_0021A5E0;
-extern const ClassDescriptor<72> D_0021A660;
-extern const ClassDescriptor<28> D_0021A7B8;
-extern const ClassDescriptor<88> D_0021A838;
+extern const ClassDescriptor<72> g_effectOwnerClass;
+extern const ClassDescriptor<48> g_worldListedObjectClass;
+extern const ClassDescriptor<48> g_effectSpawnerClass;
+extern const ClassDescriptor<28> g_memberObjectClass;
+extern const ClassDescriptor<28> g_groupMembersClass;
+extern const ClassDescriptor<28> g_recordMemberClass;
+extern const ClassDescriptor<28> g_holdingMemberClass;
+extern const ClassDescriptor<48> g_objectGroupClass;
+extern const ClassDescriptor<48> g_stepSequenceClass;
+extern const ClassDescriptor<28> g_targetCurveClass;
+extern const ClassDescriptor<28> g_targetPointClass;
+extern const ClassDescriptor<72> g_listedCollisionPartClass;
+extern const ClassDescriptor<28> g_aimBlendGridClass;
+extern const ClassDescriptor<88> g_turningColliderClass;
 extern const ClassDescriptor<74> D_0021A9D0;
-extern const ClassDescriptor<72> D_0021AB08;
-extern const ClassDescriptor<78> D_0021AC38;
-extern const ClassDescriptor<78> D_0021AD80;
-extern const ClassDescriptor<78> D_0021AEC8;
-extern const ClassDescriptor<78> D_0021B010;
+extern const ClassDescriptor<72> g_stateTriggerClass;
+extern const ClassDescriptor<78> g_timedObjectClass;
+extern const ClassDescriptor<78> g_timedGroupClass;
+extern const ClassDescriptor<78> g_sequencedObjectClass;
+extern const ClassDescriptor<78> g_blinkObjectClass;
 extern const ClassDescriptor<28> D_0021B158;
 extern const ClassDescriptor<28> D_0021B1D8;
-extern const ClassDescriptor<28> D_0021B258;
+extern const ClassDescriptor<28> g_targetVectorClass;
 extern const ClassDescriptor<72> g_idFilterObjectClass;
 extern const ClassDescriptor<48> g_redirectObjectClass;
-extern const ClassDescriptor<72> D_0021B4D8;
-extern const ClassDescriptor<28> D_0021B608;
-extern const ClassDescriptor<88> D_0021B688;
+extern const ClassDescriptor<72> g_childGroupObjectClass;
+extern const ClassDescriptor<28> g_entryQueueClass;
+extern const ClassDescriptor<88> g_playerClass;
 extern const ClassDescriptor<28> D_0021B7F8;
-extern const ClassDescriptor<72> D_0021B878;
-extern const ClassDescriptor<72> D_0021B9A8;
+extern const ClassDescriptor<72> g_standInClass;
+extern const ClassDescriptor<72> g_countedColliderClass;
 extern const ClassDescriptor<28> g_itemKeeperClass;
-extern const ClassDescriptor<100> D_0021BB58;
-extern const ClassDescriptor<100> D_0021BCF8;
-extern const ClassDescriptor<100> D_0021BE98;
-extern const ClassDescriptor<72> D_0021C038;
+extern const ClassDescriptor<100> g_agentClass;
+extern const ClassDescriptor<100> g_coneAgentClass;
+extern const ClassDescriptor<100> g_companionAgentClass;
+extern const ClassDescriptor<72> g_contactTrackerClass;
 extern const ClassDescriptor<72> D_0021C168;
 extern const ClassDescriptor<28> D_0021C298;
 extern const ClassDescriptor<72> g_flaggedObjectClass;
 extern const ClassDescriptor<28> g_pointGraphObjectClass;
-extern const ClassDescriptor<48> D_0021C4C8;
+extern const ClassDescriptor<48> g_cameraPositionedObjectClass;
 extern const ClassDescriptor<72> g_objectCyclerClass;
 extern const ClassDescriptor<48> g_stateNotifierClass;
-extern const ClassDescriptor<48> D_0021C798;
-extern const ClassDescriptor<48> D_0021C868;
-extern const ClassDescriptor<48> D_0021C938;
-extern const ClassDescriptor<48> D_0021CA08;
-extern const ClassDescriptor<48> D_0021CAD8;
-extern const ClassDescriptor<48> D_0021CBA8;
-extern const ClassDescriptor<76> D_0021CC78;
-extern const ClassDescriptor<76> D_0021CDB8;
-extern const ClassDescriptor<76> D_0021CEF8;
-extern const ClassDescriptor<48> D_0021D038;
-extern const ClassDescriptor<48> D_0021D108;
+extern const ClassDescriptor<48> g_timeRangeNotifierClass;
+extern const ClassDescriptor<48> g_soundNotifierClass;
+extern const ClassDescriptor<48> g_saveNotifierClass;
+extern const ClassDescriptor<48> g_deadlineNotifierClass;
+extern const ClassDescriptor<48> g_countdownNotifierClass;
+extern const ClassDescriptor<48> g_armedStateNotifierClass;
+extern const ClassDescriptor<76> g_objectSetClass;
+extern const ClassDescriptor<76> g_flaggedObjectSetClass;
+extern const ClassDescriptor<76> g_numberedItemClass;
+extern const ClassDescriptor<48> g_stateWalkerObjectClass;
+extern const ClassDescriptor<48> g_stateWalkerGroupClass;
 extern const ClassDescriptor<84> D_0021D1D8;
 extern const ClassDescriptor<28> D_0021D338;
 extern const ClassDescriptor<72> g_objectGathererClass;
 extern const ClassDescriptor<48> g_pairControllerClass;
-extern const ClassDescriptor<84> D_0021D5B8;
+extern const ClassDescriptor<84> g_walkerColliderClass;
 extern const ClassDescriptor<72> g_pairedObjectClass;
 extern const ClassDescriptor<72> g_hitTargetClass;
 extern const ClassDescriptor<72> g_soundStateObjectClass;
 extern const ClassDescriptor<72> g_objectCreatorClass;
-extern const ClassDescriptor<72> D_0021DBD8;
-extern const ClassDescriptor<74> D_0021DD08;
-extern const ClassDescriptor<48> D_0021DE40;
-extern const ClassDescriptor<74> D_0021DF10;
-extern const ClassDescriptor<74> D_0021E048;
-extern const ClassDescriptor<74> D_0021E180;
-extern const ClassDescriptor<36> D_0021E2B8;
+extern const ClassDescriptor<72> g_pooledObjectClass;
+extern const ClassDescriptor<74> g_pooledHolderClass;
+extern const ClassDescriptor<48> g_scalingVolumeClass;
+extern const ClassDescriptor<74> g_contactListObjectClass;
+extern const ClassDescriptor<74> g_contactListObjectWithoutGravityClass;
+extern const ClassDescriptor<74> g_timedContactListObjectClass;
+extern const ClassDescriptor<36> g_objectPoolClass;
 extern const ClassDescriptor<72> g_scaledOffsetObjectClass;
-extern const ClassDescriptor<48> D_0021E588;
-extern const ClassDescriptor<48> D_0021E658;
-extern const ClassDescriptor<100> D_0021E728;
-extern const ClassDescriptor<100> D_0021E8C8;
-extern const ClassDescriptor<100> D_0021EA68;
-extern const ClassDescriptor<84> D_0021EC08;
-extern const ClassDescriptor<100> D_0021ED68;
-extern const ClassDescriptor<28> D_0021EF08;
+extern const ClassDescriptor<48> g_textureRenderObjectClass;
+extern const ClassDescriptor<48> g_stateResetObjectClass;
+extern const ClassDescriptor<100> g_world1BossClass;
+extern const ClassDescriptor<100> g_world2BossClass;
+extern const ClassDescriptor<100> g_world4BossClass;
+extern const ClassDescriptor<84> g_world3BeatPressColliderClass;
+extern const ClassDescriptor<100> g_world3BossClass;
+extern const ClassDescriptor<28> g_world3TimelineClass;
 extern const ClassDescriptor<48> g_entryTableObjectClass;
-extern const ClassDescriptor<72> D_0021F058;
-extern const ClassDescriptor<72> D_0021F188;
-extern const ClassDescriptor<28> D_0021F2B8;
+extern const ClassDescriptor<72> g_followableObjectClass;
+extern const ClassDescriptor<72> g_targetFollowerClass;
+extern const ClassDescriptor<28> g_listedPointObjectClass;
 extern const ClassDescriptor<28> D_0021F338;
-extern const ClassDescriptor<28> D_0021F3B8;
-extern const ClassDescriptor<28> D_0021F438;
-extern const ClassDescriptor<88> D_0021F4B8;
-extern const ClassDescriptor<84> D_0021F628;
-extern const ClassDescriptor<100> D_0021F788;
-extern const ClassDescriptor<84> D_0021F928;
-extern const ClassDescriptor<100> D_0021FA88;
-extern const ClassDescriptor<72> D_0021FC28;
-extern const ClassDescriptor<72> D_0021FD58;
-extern const ClassDescriptor<100> D_0021FE88;
-extern const ClassDescriptor<100> D_00220028;
-extern const ClassDescriptor<100> D_002201C8;
-extern const ClassDescriptor<48> D_00220368;
-extern const ClassDescriptor<84> D_00220438;
-extern const ClassDescriptor<84> D_00220598;
-extern const ClassDescriptor<72> D_002206F8;
+extern const ClassDescriptor<28> g_listedKeepObjectClass;
+extern const ClassDescriptor<28> g_oscillatorClass;
+extern const ClassDescriptor<88> g_tintBlendColliderClass;
+extern const ClassDescriptor<84> g_playerLinkedColliderClass;
+extern const ClassDescriptor<100> g_seekingAgentClass;
+extern const ClassDescriptor<84> g_gaugeColliderClass;
+extern const ClassDescriptor<100> g_gaugeColliderAgentClass;
+extern const ClassDescriptor<72> g_gaugeCountedObjectClass;
+extern const ClassDescriptor<72> g_boxColliderClass;
+extern const ClassDescriptor<100> g_worldListedAgentClass;
+extern const ClassDescriptor<100> g_numberedAgentClass;
+extern const ClassDescriptor<100> g_contactAgentClass;
+extern const ClassDescriptor<48> g_gaugeManagerClass;
+extern const ClassDescriptor<84> g_pathFollowerClass;
+extern const ClassDescriptor<84> g_world5ModeColliderClass;
+extern const ClassDescriptor<72> g_world5BossClass;
 extern const ClassDescriptor<72> g_countdownColliderClass;
 extern const ClassDescriptor<74> D_00220958;
-extern const ClassDescriptor<84> D_00220A90;
+extern const ClassDescriptor<84> g_modeWalkerObjectClass;
 extern const ClassDescriptor<28> D_00220C40;
-extern const ClassDescriptor<84> D_00220CC0;
+extern const ClassDescriptor<84> g_hitCountColliderClass;
 extern const ClassDescriptor<72> D_00220E20;
 extern const ClassDescriptor<48> g_idLinkedObjectClass;
-extern const ClassDescriptor<48> D_00221020;
+extern const ClassDescriptor<48> g_warpPageClass;
 extern const ClassDescriptor<48> g_partHolderObjectClass;
 extern const ClassDescriptor<48> g_currentPlacedObjectClass;
 extern const ClassDescriptor<48> g_codeChecksumClass;
-extern const ClassDescriptor<28> D_002214A0;
-extern const ClassDescriptor<28> D_00221520;
-extern const char D_0024A2D0[8];
-extern const char D_0024A2D8[16];
-extern const char D_0024A2E8[16];
-extern const char D_0024A2F8[24];
-extern const char D_0024A310[24];
-extern const char D_0024A328[24];
-extern const char D_0024A340[24];
-extern const char D_0024A358[24];
-extern const char D_0024A370[24];
-extern const char D_0024A388[24];
-extern const char D_0024A3A0[24];
-extern const char D_0024A3B8[24];
-extern const char D_0024A3D0[16];
-extern const char D_0024A3E0[16];
-extern const char D_0024A3F0[16];
-extern const char D_0024A400[24];
-extern const char D_0024A418[24];
-extern const char D_0024A430[16];
-extern const char D_0024A440[24];
-extern const char D_0024A458[24];
-extern const char D_0024A470[16];
-extern const char D_0024A480[24];
-extern const char D_0024A498[24];
-extern const char D_0024A4B0[24];
-extern const char D_0024A4C8[24];
-extern const char D_0024A4E0[16];
-extern const char D_0024A4F0[24];
-extern const char D_0024A508[24];
-extern const char D_0024A520[24];
-extern const char D_0024A538[16];
-extern const char D_0024A548[24];
-extern const char D_0024A560[24];
-extern const char D_0024A578[24];
-extern const char D_0024A590[16];
-extern const char D_0024A5A0[24];
-extern const char D_0024A5B8[24];
-extern const char D_0024A5D0[24];
-extern const char D_0024A5E8[24];
-extern const char D_0024A600[16];
-extern const char D_0024A610[24];
-extern const char D_0024A628[16];
-extern const char D_0024A638[16];
-extern const char D_0024A648[24];
-extern const char D_0024A660[24];
-extern const char D_0024A678[16];
-extern const char D_0024A688[24];
-extern const char D_0024DCB0[];
-extern const char D_0024DCC8[];
-extern const char D_0024DCE8[];
-extern const char D_0024DD38[];
-extern const char D_0024DD60[];
-extern const char D_0024DD80[];
-extern const char D_0024DDA0[];
-extern const char D_0024DDC8[];
-extern const char D_0024DDF0[];
-extern const char D_0024DE10[];
-extern const char D_0024DE38[];
-extern const char D_0024DE50[];
-extern const char D_0024DE70[];
-extern const char D_0024DE98[];
-extern const char D_0024DEC0[];
-extern const char D_0024DEF0[];
-extern const char D_0024DF10[];
-extern const char D_0024DF50[];
-extern const char D_0024DF78[];
-extern const char D_0024DFA0[];
-extern const char D_0024DFB8[];
-extern const char D_0024DFD8[];
-extern const char D_0024DFF0[];
-extern const char D_0024E018[];
-extern const char D_0024E038[];
-extern const char D_0024E060[];
-extern const char D_0024E088[];
-extern const char D_0024E0A8[];
-extern const char D_0024E0C8[];
-extern const char D_0024E0F8[];
-extern const char D_0024E118[];
+extern const ClassDescriptor<28> g_worldClass;
+extern const ClassDescriptor<28> g_cameraClass;
+extern const char g_entryNameSplash[8];
+extern const char g_entryNameParisFrance[16];
+extern const char g_entryNameTheHideout[16];
+extern const char g_entryNameAStealthyApproach[24];
+extern const char g_entryNameProwlingTheGrounds[24];
+extern const char g_entryNameHighClassHeist[24];
+extern const char g_entryNameIntoTheMachine[24];
+extern const char g_entryNameACunningDisguise[24];
+extern const char g_entryNameTheFireDownBelow[24];
+extern const char g_entryNameTreasureInTheDepths[24];
+extern const char g_entryNameTheGunboatGraveyard[24];
+extern const char g_entryNameTheEyeOfTheStorm[24];
+extern const char g_entryNameARockyStart[16];
+extern const char g_entryNameMuggshotsTurf[16];
+extern const char g_entryNameBoneyardCasino[16];
+extern const char g_entryNameMurraysBigGamble[24];
+extern const char g_entryNameAtTheDogTrack[24];
+extern const char g_entryNameTwoToTango[16];
+extern const char g_entryNameStraightToTheTop[24];
+extern const char g_entryNameBackAlleyHeist[24];
+extern const char g_entryNameLastCall[16];
+extern const char g_entryNameTheDreadSwampPath[24];
+extern const char g_entryNameTheSwampsDarkCenter[24];
+extern const char g_entryNameTheLairOfTheBeast[24];
+extern const char g_entryNameAGraveUndertaking[24];
+extern const char g_entryNamePiranhaLake[16];
+extern const char g_entryNameDescentIntoDanger[24];
+extern const char g_entryNameAGhastlyVoyage[24];
+extern const char g_entryNameDownHomeCooking[24];
+extern const char g_entryNameADeadlyDance[16];
+extern const char g_entryNameAPerilousAscent[24];
+extern const char g_entryNameInsideTheStronghold[24];
+extern const char g_entryNameFlamingTempleOfFlame[24];
+extern const char g_entryNameTheUnseenFoe[16];
+extern const char g_entryNameTheKingOfTheHill[24];
+extern const char g_entryNameRapidFireAssault[24];
+extern const char g_entryNameDuelByTheDragon[24];
+extern const char g_entryNameADesperateRace[24];
+extern const char g_entryNameFlameFu[16];
+extern const char g_entryNameAHazardousPath[24];
+extern const char g_entryNameBurningRubber[16];
+extern const char g_entryNameADaringRescue[16];
+extern const char g_entryNameBentleyComesThrough[24];
+extern const char g_entryNameATemporaryTruce[24];
+extern const char g_entryNameSinkingPeril[16];
+extern const char g_entryNameAStrangeReunion[24];
+extern const char g_levelCredits0100[];
+extern const char g_levelCredits0102[];
+extern const char g_levelCredits0103[];
+extern const char g_levelCredits0104[];
+extern const char g_levelCredits0105[];
+extern const char g_levelCredits0106[];
+extern const char g_levelCredits0107[];
+extern const char g_levelCredits0200[];
+extern const char g_levelCredits0202[];
+extern const char g_levelCredits0204[];
+extern const char g_levelCredits0205[];
+extern const char g_levelCredits0207[];
+extern const char g_levelCredits0300[];
+extern const char g_levelCredits0302[];
+extern const char g_levelCredits0303[];
+extern const char g_levelCredits0304[];
+extern const char g_levelCredits0305[];
+extern const char g_levelCredits0306[];
+extern const char g_levelCredits0307[];
+extern const char g_levelCredits0400[];
+extern const char g_levelCredits0402[];
+extern const char g_levelCredits0403[];
+extern const char g_levelCredits0404[];
+extern const char g_levelCredits0405[];
+extern const char g_levelCredits0406[];
+extern const char g_levelCredits0407[];
+extern const char g_levelCredits0502[];
+extern const char g_levelCredits0503[];
+extern const char g_levelCredits0504[];
+extern const char g_levelCredits0505[];
+extern const char g_levelCredits0506[];
 
 extern const KeyRecord g_soundBankKeys[7] = {
     { 0x586CE175, 0xA5D810DD, 0x6CE4D53F, 0xECC6A60C, 0xF9C79CAC, 0x586738D6, 0x6CE4D502, 0xA5D3AA4D },
@@ -355,152 +355,152 @@ extern const SoundEntry g_soundEntries[771] = {
 };
 extern const s32 g_soundEntryForcedAvailable[772] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 extern ClassHead D_002505B8;  // in .data, below
-extern const void* const D_00247448[149] = {
-    &D_00217410,
-    &D_00217418,
-    &D_00217498,
-    &D_00217568,
+extern const void* const g_classDescriptorTable[149] = {
+    &g_classRoot,
+    &g_objectClass,
+    &g_placedObjectClass,
+    &g_colliderClass,
     &D_00220E20,
-    &D_00217C30,
-    &D_0021A838,
-    &D_0021B688,
-    &D_0021BB58,
-    &D_0021BE98,
-    &D_0021BCF8,
-    &D_0021E728,
-    &D_0021E8C8,
-    &D_0021EA68,
-    &D_0021F788,
-    &D_0021FA88,
-    &D_0021FE88,
-    &D_00220028,
-    &D_002201C8,
-    &D_0021ED68,
-    &D_0021F4B8,
-    &D_0021D5B8,
-    &D_0021F628,
+    &g_switchedColliderClass,
+    &g_turningColliderClass,
+    &g_playerClass,
+    &g_agentClass,
+    &g_companionAgentClass,
+    &g_coneAgentClass,
+    &g_world1BossClass,
+    &g_world2BossClass,
+    &g_world4BossClass,
+    &g_seekingAgentClass,
+    &g_gaugeColliderAgentClass,
+    &g_worldListedAgentClass,
+    &g_numberedAgentClass,
+    &g_contactAgentClass,
+    &g_world3BossClass,
+    &g_tintBlendColliderClass,
+    &g_walkerColliderClass,
+    &g_playerLinkedColliderClass,
     &D_0021D1D8,
-    &D_0021F928,
-    &D_00220438,
-    &D_00220A90,
-    &D_00220598,
-    &D_0021EC08,
-    &D_00220CC0,
-    &D_00219AF0,
-    &D_00218770,
-    &D_00218970,
-    &D_00218BD8,
+    &g_gaugeColliderClass,
+    &g_pathFollowerClass,
+    &g_modeWalkerObjectClass,
+    &g_world5ModeColliderClass,
+    &g_world3BeatPressColliderClass,
+    &g_hitCountColliderClass,
+    &g_effectOwnerClass,
+    &g_attachedSetClass,
+    &g_maskedColliderClass,
+    &g_playerFlaggedColliderClass,
     &D_0021A9D0,
-    &D_0021DD08,
+    &g_pooledHolderClass,
     &D_00220958,
-    &D_00218D10,
-    &D_00218E48,
-    &D_00218AA8,
-    &D_002190B0,
-    &D_00218F80,
-    &D_0021F058,
+    &g_massScalingColliderClass,
+    &g_latchedSwitchColliderClass,
+    &g_timedStateClass,
+    &g_triggerZoneClass,
+    &g_zoneColliderClass,
+    &g_followableObjectClass,
     &D_00219330,
-    &D_0021CC78,
-    &D_0021CDB8,
-    &D_0021CEF8,
-    &D_0021AB08,
-    &D_0021AC38,
-    &D_0021AD80,
-    &D_0021AEC8,
-    &D_0021B010,
+    &g_objectSetClass,
+    &g_flaggedObjectSetClass,
+    &g_numberedItemClass,
+    &g_stateTriggerClass,
+    &g_timedObjectClass,
+    &g_timedGroupClass,
+    &g_sequencedObjectClass,
+    &g_blinkObjectClass,
     &g_idFilterObjectClass,
     &D_002198F0,
-    &D_0021C038,
+    &g_contactTrackerClass,
     &D_0021C168,
     &g_flaggedObjectClass,
     &g_scaledOffsetObjectClass,
-    &D_0021A660,
-    &D_0021B4D8,
-    &D_0021DF10,
-    &D_0021E048,
-    &D_0021E180,
-    &D_0021B878,
+    &g_listedCollisionPartClass,
+    &g_childGroupObjectClass,
+    &g_contactListObjectClass,
+    &g_contactListObjectWithoutGravityClass,
+    &g_timedContactListObjectClass,
+    &g_standInClass,
     &g_objectCyclerClass,
     &g_objectGathererClass,
     &g_pairedObjectClass,
     &g_hitTargetClass,
     &g_soundStateObjectClass,
     &g_objectCreatorClass,
-    &D_0021DBD8,
-    &D_0021F188,
-    &D_0021FC28,
-    &D_0021FD58,
-    &D_002206F8,
+    &g_pooledObjectClass,
+    &g_targetFollowerClass,
+    &g_gaugeCountedObjectClass,
+    &g_boxColliderClass,
+    &g_world5BossClass,
     &g_countdownColliderClass,
-    &D_0021B9A8,
-    &D_00219F80,
-    &D_00217A90,
+    &g_countedColliderClass,
+    &g_worldListedObjectClass,
+    &g_lookupObjectClass,
     &D_00219260,
-    &D_0021A050,
-    &D_00217B60,
+    &g_effectSpawnerClass,
+    &g_coneVolumeClass,
     &D_00219A20,
-    &D_0021A320,
-    &D_0021C4C8,
+    &g_objectGroupClass,
+    &g_cameraPositionedObjectClass,
     &g_stateNotifierClass,
-    &D_0021C868,
-    &D_0021CAD8,
-    &D_0021C798,
-    &D_0021C938,
-    &D_0021CA08,
-    &D_0021CBA8,
-    &D_0021D038,
-    &D_0021D108,
+    &g_soundNotifierClass,
+    &g_countdownNotifierClass,
+    &g_timeRangeNotifierClass,
+    &g_saveNotifierClass,
+    &g_deadlineNotifierClass,
+    &g_armedStateNotifierClass,
+    &g_stateWalkerObjectClass,
+    &g_stateWalkerGroupClass,
     &g_redirectObjectClass,
     &g_pairControllerClass,
-    &D_0021DE40,
-    &D_0021E588,
-    &D_0021E658,
-    &D_002188A0,
+    &g_scalingVolumeClass,
+    &g_textureRenderObjectClass,
+    &g_stateResetObjectClass,
+    &g_onOffObjectClass,
     &g_entryTableObjectClass,
-    &D_0021A490,
+    &g_stepSequenceClass,
     &g_idLinkedObjectClass,
-    &D_00221020,
-    &D_00220368,
+    &g_warpPageClass,
+    &g_gaugeManagerClass,
     &g_currentPlacedObjectClass,
     &g_partHolderObjectClass,
     &g_codeChecksumClass,
-    &D_002214A0,
-    &D_00221520,
-    &D_00217740,
-    &D_0021A560,
-    &D_0021B258,
+    &g_worldClass,
+    &g_cameraClass,
+    &g_pathCurveObjectClass,
+    &g_targetCurveClass,
+    &g_targetVectorClass,
     &D_0021F338,
-    &D_0021F3B8,
-    &D_002178C0,
-    &D_00217940,
+    &g_listedKeepObjectClass,
+    &g_transformObjectClass,
+    &g_arrivalPointClass,
     &D_0021B158,
     &D_0021B1D8,
-    &D_0021A120,
-    &D_0021A1A0,
-    &D_0021A220,
-    &D_0021A2A0,
+    &g_memberObjectClass,
+    &g_groupMembersClass,
+    &g_recordMemberClass,
+    &g_holdingMemberClass,
     &D_0021C298,
     &D_0021D338,
-    &D_002179C0,
+    &g_objectSubGroupClass,
     &g_pointObjectClass,
-    &D_0021A5E0,
+    &g_targetPointClass,
     &D_0021B7F8,
-    &D_0021F2B8,
-    &D_00217840,
-    &D_00219738,
-    &D_002197E8,
+    &g_listedPointObjectClass,
+    &g_textPointObjectClass,
+    &g_animationClass,
+    &g_skipAnimationPlayerClass,
     &D_002194E0,
-    &D_00219460,
+    &g_valueListObjectClass,
     &D_002191E0,
-    &D_00219868,
+    &g_stateGraphClass,
     &g_itemKeeperClass,
     &g_pointGraphObjectClass,
-    &D_0021A7B8,
-    &D_0021E2B8,
-    &D_0021F438,
+    &g_aimBlendGridClass,
+    &g_objectPoolClass,
+    &g_oscillatorClass,
     &g_coloredTriangleSetClass,
-    &D_0021B608,
-    &D_0021EF08,
+    &g_entryQueueClass,
+    &g_world3TimelineClass,
     &D_00220C40,
     &g_animationPlayerMethods,
     &g_stateWalkerMethods,
@@ -540,58 +540,58 @@ extern const u32 g_crc32Table[256] = {
     0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693, 0x54DE5729, 0x23D967BF,
     0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
 };
-extern const u32 D_00247AA0 = 0x17F;
-extern const u32 D_00247AA4 = 0x14E0EF;
-extern const u32 D_00247AA8[2] = { 0x2E774159, 0 };
-extern const u32 D_00247AB0[8] = { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 };
-extern const u32 D_00247AD0[8] = { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 };
+extern const u32 g_discCheckReadMode = 0x17F;
+extern const u32 g_discCheckSector = 0x14E0EF;
+extern const u32 g_discCheckExpectedCrc[2] = { 0x2E774159, 0 };
+extern const u32 g_sessionFadeKey[8] = { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 };
+extern const u32 g_objectFadeIn[8] = { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 };
 extern const KeyedEntry g_keyedEntries[46] = {
-    { { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 }, 0x00000002, D_0024A2D0, 0x00000000 },
-    { { 0x70692A0C, 0x7C1ADFDF, 0x8DDAB8A2, 0xFEC7AC06, 0xCF2C336D, 0x7065AED2, 0x8DDAB8A8, 0x7C53A53E }, 0x00000003, D_0024A2D8, 0x00000000 },
-    { { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 }, 0x00000004, D_0024A2E8, 0x00000000 },
-    { { 0x21AE2EFD, 0x8032D4F4, 0x57308A08, 0xFCC368AF, 0x5AE57D3A, 0x21A31573, 0x57308A2D, 0x8078262F }, 0x00000100, D_0024A2F8, 0x0000000E },
-    { { 0x3A18A984, 0x43DF3FC4, 0x462872FD, 0x368F2E0E, 0xC389BEF7, 0x3A1358E8, 0x462872DB, 0x439A73E7 }, 0x00000101, D_0024A310, 0x00000000 },
-    { { 0x8AFD3960, 0xAC2F4521, 0xF66CA215, 0x7550F254, 0x1C0429D2, 0x8AF1EF1F, 0xF66CA234, 0xAC131937 }, 0x00000102, D_0024A328, 0x0000000E },
-    { { 0xFA00A4D4, 0x2B9592C6, 0x19333451, 0xF3021496, 0xED95088F, 0xFA0CDD98, 0x19333475, 0x2BC71397 }, 0x00000103, D_0024A340, 0x0000000E },
-    { { 0x55782648, 0x7C38E297, 0x6512C668, 0xB5AF751C, 0x49FAB8FB, 0x55741958, 0x6512C648, 0x7C0F6898 }, 0x00000104, D_0024A358, 0x0000000E },
-    { { 0x5ED07C40, 0x4ACAA4FF, 0x4CF76E84, 0xDF64A3A2, 0xA0F55FC3, 0x5EDC7797, 0x4CF76E9B, 0x4AF304E9 }, 0x00000105, D_0024A370, 0x0000000E },
-    { { 0x59A2D291, 0x6F41BEA4, 0xCEEE7857, 0xBF734963, 0x588DB2A7, 0x59AF9F96, 0xCEEE7870, 0x6F4D10EA }, 0x00000106, D_0024A388, 0x00000002 },
-    { { 0x0AF17BCA, 0x357EBDDD, 0x65AEC442, 0x209BF707, 0x2AA7CBEF, 0x0AFDDFA6, 0x65AEC46A, 0x354038F4 }, 0x00000107, D_0024A3A0, 0x0000000E },
-    { { 0xBD799A28, 0xBB675614, 0xA2CFD3E5, 0x18D9F2E5, 0x1C494DB2, 0xBD75AA4A, 0xA2CFD3C7, 0xBB4013AF }, 0x00000108, D_0024A3B8, 0x00000000 },
-    { { 0x9443A65C, 0x6A8C5C73, 0xF461374C, 0xB7E0CF07, 0x32B103EF, 0x94481DBB, 0xF4613740, 0x6ADA3CC7 }, 0x00000200, D_0024A3D0, 0x0000000E },
-    { { 0xB2C1322F, 0x027AF1AE, 0x73D1F95C, 0x7EDA6F1F, 0x65366029, 0xB2CDECDB, 0x73D1F953, 0x022CC41B }, 0x00000201, D_0024A3E0, 0x00000000 },
-    { { 0xF6AA3766, 0x6EE44033, 0xC8CEDC91, 0xF54C0C2A, 0x413C17A4, 0xF6A6DD11, 0xC8CEDC9F, 0x6EA20BE1 }, 0x00000202, D_0024A3F0, 0x0000000E },
-    { { 0x96B81254, 0x87BFCA5D, 0x16A6D62F, 0x976F1995, 0xFE4CA8EC, 0x96B4DC09, 0x16A6D63D, 0x87866960 }, 0x00000203, D_0024A400, 0x00000002 },
-    { { 0xE3D43512, 0x27982FB7, 0x516A4462, 0x7C1565F7, 0x1DEDAD16, 0xE3D8C137, 0x516A4471, 0x27A5D3A9 }, 0x00000204, D_0024A418, 0x00000002 },
-    { { 0x3F452A5A, 0xE7DFCB19, 0x3D2FF024, 0x0A466EB9, 0xADD4FA33, 0x3F487850, 0x3D2FF034, 0xE79BCC30 }, 0x00000205, D_0024A430, 0x0000000E },
-    { { 0x27EEDC0C, 0x42D1114A, 0x2AFB9928, 0xAACE171D, 0xE50F8A06, 0x27E220C6, 0x2AFB9939, 0x4290349A }, 0x00000206, D_0024A440, 0x0000000E },
-    { { 0xB3590529, 0x2936FC1F, 0xE38710D4, 0xC8802051, 0xF19B17C4, 0xB35516D2, 0xE38710C0, 0x290A1469 }, 0x00000207, D_0024A458, 0x0000000E },
-    { { 0x21CADA41, 0x635F5DD8, 0x1756DB03, 0x3DE92F94, 0x3CC24DD3, 0x21C12619, 0x1756DB0E, 0x636B749E }, 0x00000208, D_0024A470, 0x00000000 },
-    { { 0x4792B776, 0xDB3479C6, 0xD5D60AD4, 0x49270025, 0x0648E89D, 0x479ED350, 0xD5D60AFD, 0xDB7E83B6 }, 0x00000300, D_0024A480, 0x0000000E },
-    { { 0x70F7F5BA, 0xF3A4A6F8, 0x2B0CE758, 0x1B2E85EF, 0x941D6918, 0x70FAF97B, 0x2B0CE775, 0xF3F82427 }, 0x00000301, D_0024A498, 0x00000000 },
-    { { 0x4288AE87, 0xF946ECEE, 0x2EC30CB4, 0x9FDEF57C, 0xF31E36E5, 0x42840398, 0x2EC30C85, 0xF90AC054 }, 0x00000302, D_0024A4B0, 0x0000000E },
-    { { 0x18553E3D, 0x147C896A, 0x2A4B495D, 0x98E7B7BC, 0xAD4148A7, 0x1859FC84, 0x2A4B4971, 0x1429F912 }, 0x00000303, D_0024A4C8, 0x0000000E },
-    { { 0x14ADD7B5, 0x26637BFA, 0xF61DDB5C, 0xC6091F6E, 0x0E0C8BE4, 0x14A09263, 0xF61DDB73, 0x264A610B }, 0x00000304, D_0024A4E0, 0x00000002 },
-    { { 0xD5FA54DB, 0x352BF531, 0xF504CCE4, 0xA52CA674, 0x56FC4BC8, 0xD5F64852, 0xF504CCD4, 0x35621799 }, 0x00000305, D_0024A4F0, 0x0000000E },
-    { { 0xFC736514, 0x7BDCD02C, 0x07BCD396, 0x04D7BB91, 0xABA60A6C, 0xFC7F3E08, 0x07BCD3B8, 0x7B9C0BDE }, 0x00000306, D_0024A508, 0x00000002 },
-    { { 0x552F9A6D, 0x851FEF4D, 0x7ED446BB, 0xD56439EA, 0xEE405DE8, 0x5523D7FF, 0x7ED44690, 0x8506AECD }, 0x00000307, D_0024A520, 0x00000002 },
-    { { 0x631E0C66, 0x786F0552, 0x5CD8547B, 0x790F7F64, 0xE5763F4F, 0x6315D77D, 0x5CD85451, 0x782D1F0A }, 0x00000308, D_0024A538, 0x00000000 },
-    { { 0xDDE3089F, 0xF6445E0B, 0x839A18B5, 0x12B38073, 0x24AD5171, 0xDDEE11AF, 0x839A18A3, 0xF613C5C4 }, 0x00000400, D_0024A548, 0x0000000E },
-    { { 0x09FCA124, 0x2FDB235A, 0x4E7C6634, 0x244D8BD6, 0xA817793B, 0x09F0CF50, 0x4E7C662D, 0x2F94FF1B }, 0x00000401, D_0024A560, 0x00000000 },
-    { { 0x073DAB55, 0x33416024, 0x8CC5FB13, 0x38B05273, 0x2EBC58F1, 0x07364F1B, 0x8CC5FB08, 0x33176720 }, 0x00000402, D_0024A578, 0x0000000E },
-    { { 0x69193071, 0x64C2907F, 0x9D7744B7, 0x0D7B899C, 0xBCDFE0BF, 0x691561D2, 0x9D7744A0, 0x6486EFC7 }, 0x00000403, D_0024A590, 0x0000000E },
-    { { 0x31C24155, 0x2A93133E, 0xF733F040, 0x1C2232DE, 0xB2A034DB, 0x31CF6446, 0xF733F05C, 0x2AD267C8 }, 0x00000404, D_0024A5A0, 0x00000002 },
-    { { 0x55F238FD, 0xA436D1AD, 0xF5C88A4C, 0x1862E8EB, 0xD61AFAD8, 0x55FE1E59, 0xF5C88A52, 0xA471F3B7 }, 0x00000405, D_0024A5B8, 0x00000002 },
-    { { 0x2390CCDD, 0xE7ABA666, 0x0A8E45C4, 0x6643FE22, 0x97D2FB1E, 0x239B04E5, 0x0A8E45DE, 0xE7F898A4 }, 0x00000406, D_0024A5D0, 0x0000000E },
-    { { 0x0F84BC15, 0x5C2652BF, 0xBD31382E, 0x11FED1F7, 0xB4E14DA6, 0x0F880B96, 0xBD313833, 0x5C16E898 }, 0x00000407, D_0024A5E8, 0x00000002 },
-    { { 0xE4806B75, 0x1DE290C8, 0xDFCAEBC4, 0x4A1C6170, 0x71E1A8DE, 0xE48C2D92, 0xDFCAEBDC, 0x1DC193FE }, 0x00000408, D_0024A600, 0x00000000 },
-    { { 0xD5B67B6A, 0x4854289A, 0xE1FCA832, 0x4F3C70E6, 0x2C782027, 0xD5BA4D2A, 0xE1FCA83A, 0x48678D7B }, 0x00000500, D_0024A610, 0x00000000 },
-    { { 0xCB5C1CD2, 0x7DA13F74, 0xD29AD321, 0x41CC84D6, 0x212F6EC3, 0xCB50A252, 0xD29AD326, 0x7DBB77CD }, 0x00000502, D_0024A628, 0x00000000 },
-    { { 0x36E5CD84, 0x066ED834, 0x3DA04171, 0x7BE81ABD, 0x86A774CA, 0x36EE1EF8, 0x3DA04177, 0x06477F5B }, 0x00000503, D_0024A638, 0x00000000 },
-    { { 0x981B0998, 0x35E939CD, 0xE0016E8A, 0x7210407C, 0x923436E4, 0x9816461F, 0xE0016E88, 0x35E27074 }, 0x00000504, D_0024A648, 0x00000000 },
-    { { 0x48C10A2C, 0xED11F262, 0xBF175611, 0x9D181905, 0x86D2E9A9, 0x48CC0FF3, 0xBF175614, 0xED3E4BF8 }, 0x00000505, D_0024A660, 0x00000000 },
-    { { 0x9EAE1C3C, 0xC2FEDE9B, 0x2AFD4D95, 0x573AF42F, 0xA18F6572, 0x9EA328CC, 0x2AFD4D91, 0xC2D3B7FC }, 0x00000506, D_0024A678, 0x00000000 },
-    { { 0xAC0C665D, 0x524AA938, 0x33CB5B57, 0xE1FFC9B9, 0x35BE9ACD, 0xAC006598, 0x33CB5B54, 0x527D9E86 }, 0x00000508, D_0024A688, 0x00000000 },
+    { { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 }, 0x00000002, g_entryNameSplash, 0x00000000 },
+    { { 0x70692A0C, 0x7C1ADFDF, 0x8DDAB8A2, 0xFEC7AC06, 0xCF2C336D, 0x7065AED2, 0x8DDAB8A8, 0x7C53A53E }, 0x00000003, g_entryNameParisFrance, 0x00000000 },
+    { { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 }, 0x00000004, g_entryNameTheHideout, 0x00000000 },
+    { { 0x21AE2EFD, 0x8032D4F4, 0x57308A08, 0xFCC368AF, 0x5AE57D3A, 0x21A31573, 0x57308A2D, 0x8078262F }, 0x00000100, g_entryNameAStealthyApproach, 0x0000000E },
+    { { 0x3A18A984, 0x43DF3FC4, 0x462872FD, 0x368F2E0E, 0xC389BEF7, 0x3A1358E8, 0x462872DB, 0x439A73E7 }, 0x00000101, g_entryNameProwlingTheGrounds, 0x00000000 },
+    { { 0x8AFD3960, 0xAC2F4521, 0xF66CA215, 0x7550F254, 0x1C0429D2, 0x8AF1EF1F, 0xF66CA234, 0xAC131937 }, 0x00000102, g_entryNameHighClassHeist, 0x0000000E },
+    { { 0xFA00A4D4, 0x2B9592C6, 0x19333451, 0xF3021496, 0xED95088F, 0xFA0CDD98, 0x19333475, 0x2BC71397 }, 0x00000103, g_entryNameIntoTheMachine, 0x0000000E },
+    { { 0x55782648, 0x7C38E297, 0x6512C668, 0xB5AF751C, 0x49FAB8FB, 0x55741958, 0x6512C648, 0x7C0F6898 }, 0x00000104, g_entryNameACunningDisguise, 0x0000000E },
+    { { 0x5ED07C40, 0x4ACAA4FF, 0x4CF76E84, 0xDF64A3A2, 0xA0F55FC3, 0x5EDC7797, 0x4CF76E9B, 0x4AF304E9 }, 0x00000105, g_entryNameTheFireDownBelow, 0x0000000E },
+    { { 0x59A2D291, 0x6F41BEA4, 0xCEEE7857, 0xBF734963, 0x588DB2A7, 0x59AF9F96, 0xCEEE7870, 0x6F4D10EA }, 0x00000106, g_entryNameTreasureInTheDepths, 0x00000002 },
+    { { 0x0AF17BCA, 0x357EBDDD, 0x65AEC442, 0x209BF707, 0x2AA7CBEF, 0x0AFDDFA6, 0x65AEC46A, 0x354038F4 }, 0x00000107, g_entryNameTheGunboatGraveyard, 0x0000000E },
+    { { 0xBD799A28, 0xBB675614, 0xA2CFD3E5, 0x18D9F2E5, 0x1C494DB2, 0xBD75AA4A, 0xA2CFD3C7, 0xBB4013AF }, 0x00000108, g_entryNameTheEyeOfTheStorm, 0x00000000 },
+    { { 0x9443A65C, 0x6A8C5C73, 0xF461374C, 0xB7E0CF07, 0x32B103EF, 0x94481DBB, 0xF4613740, 0x6ADA3CC7 }, 0x00000200, g_entryNameARockyStart, 0x0000000E },
+    { { 0xB2C1322F, 0x027AF1AE, 0x73D1F95C, 0x7EDA6F1F, 0x65366029, 0xB2CDECDB, 0x73D1F953, 0x022CC41B }, 0x00000201, g_entryNameMuggshotsTurf, 0x00000000 },
+    { { 0xF6AA3766, 0x6EE44033, 0xC8CEDC91, 0xF54C0C2A, 0x413C17A4, 0xF6A6DD11, 0xC8CEDC9F, 0x6EA20BE1 }, 0x00000202, g_entryNameBoneyardCasino, 0x0000000E },
+    { { 0x96B81254, 0x87BFCA5D, 0x16A6D62F, 0x976F1995, 0xFE4CA8EC, 0x96B4DC09, 0x16A6D63D, 0x87866960 }, 0x00000203, g_entryNameMurraysBigGamble, 0x00000002 },
+    { { 0xE3D43512, 0x27982FB7, 0x516A4462, 0x7C1565F7, 0x1DEDAD16, 0xE3D8C137, 0x516A4471, 0x27A5D3A9 }, 0x00000204, g_entryNameAtTheDogTrack, 0x00000002 },
+    { { 0x3F452A5A, 0xE7DFCB19, 0x3D2FF024, 0x0A466EB9, 0xADD4FA33, 0x3F487850, 0x3D2FF034, 0xE79BCC30 }, 0x00000205, g_entryNameTwoToTango, 0x0000000E },
+    { { 0x27EEDC0C, 0x42D1114A, 0x2AFB9928, 0xAACE171D, 0xE50F8A06, 0x27E220C6, 0x2AFB9939, 0x4290349A }, 0x00000206, g_entryNameStraightToTheTop, 0x0000000E },
+    { { 0xB3590529, 0x2936FC1F, 0xE38710D4, 0xC8802051, 0xF19B17C4, 0xB35516D2, 0xE38710C0, 0x290A1469 }, 0x00000207, g_entryNameBackAlleyHeist, 0x0000000E },
+    { { 0x21CADA41, 0x635F5DD8, 0x1756DB03, 0x3DE92F94, 0x3CC24DD3, 0x21C12619, 0x1756DB0E, 0x636B749E }, 0x00000208, g_entryNameLastCall, 0x00000000 },
+    { { 0x4792B776, 0xDB3479C6, 0xD5D60AD4, 0x49270025, 0x0648E89D, 0x479ED350, 0xD5D60AFD, 0xDB7E83B6 }, 0x00000300, g_entryNameTheDreadSwampPath, 0x0000000E },
+    { { 0x70F7F5BA, 0xF3A4A6F8, 0x2B0CE758, 0x1B2E85EF, 0x941D6918, 0x70FAF97B, 0x2B0CE775, 0xF3F82427 }, 0x00000301, g_entryNameTheSwampsDarkCenter, 0x00000000 },
+    { { 0x4288AE87, 0xF946ECEE, 0x2EC30CB4, 0x9FDEF57C, 0xF31E36E5, 0x42840398, 0x2EC30C85, 0xF90AC054 }, 0x00000302, g_entryNameTheLairOfTheBeast, 0x0000000E },
+    { { 0x18553E3D, 0x147C896A, 0x2A4B495D, 0x98E7B7BC, 0xAD4148A7, 0x1859FC84, 0x2A4B4971, 0x1429F912 }, 0x00000303, g_entryNameAGraveUndertaking, 0x0000000E },
+    { { 0x14ADD7B5, 0x26637BFA, 0xF61DDB5C, 0xC6091F6E, 0x0E0C8BE4, 0x14A09263, 0xF61DDB73, 0x264A610B }, 0x00000304, g_entryNamePiranhaLake, 0x00000002 },
+    { { 0xD5FA54DB, 0x352BF531, 0xF504CCE4, 0xA52CA674, 0x56FC4BC8, 0xD5F64852, 0xF504CCD4, 0x35621799 }, 0x00000305, g_entryNameDescentIntoDanger, 0x0000000E },
+    { { 0xFC736514, 0x7BDCD02C, 0x07BCD396, 0x04D7BB91, 0xABA60A6C, 0xFC7F3E08, 0x07BCD3B8, 0x7B9C0BDE }, 0x00000306, g_entryNameAGhastlyVoyage, 0x00000002 },
+    { { 0x552F9A6D, 0x851FEF4D, 0x7ED446BB, 0xD56439EA, 0xEE405DE8, 0x5523D7FF, 0x7ED44690, 0x8506AECD }, 0x00000307, g_entryNameDownHomeCooking, 0x00000002 },
+    { { 0x631E0C66, 0x786F0552, 0x5CD8547B, 0x790F7F64, 0xE5763F4F, 0x6315D77D, 0x5CD85451, 0x782D1F0A }, 0x00000308, g_entryNameADeadlyDance, 0x00000000 },
+    { { 0xDDE3089F, 0xF6445E0B, 0x839A18B5, 0x12B38073, 0x24AD5171, 0xDDEE11AF, 0x839A18A3, 0xF613C5C4 }, 0x00000400, g_entryNameAPerilousAscent, 0x0000000E },
+    { { 0x09FCA124, 0x2FDB235A, 0x4E7C6634, 0x244D8BD6, 0xA817793B, 0x09F0CF50, 0x4E7C662D, 0x2F94FF1B }, 0x00000401, g_entryNameInsideTheStronghold, 0x00000000 },
+    { { 0x073DAB55, 0x33416024, 0x8CC5FB13, 0x38B05273, 0x2EBC58F1, 0x07364F1B, 0x8CC5FB08, 0x33176720 }, 0x00000402, g_entryNameFlamingTempleOfFlame, 0x0000000E },
+    { { 0x69193071, 0x64C2907F, 0x9D7744B7, 0x0D7B899C, 0xBCDFE0BF, 0x691561D2, 0x9D7744A0, 0x6486EFC7 }, 0x00000403, g_entryNameTheUnseenFoe, 0x0000000E },
+    { { 0x31C24155, 0x2A93133E, 0xF733F040, 0x1C2232DE, 0xB2A034DB, 0x31CF6446, 0xF733F05C, 0x2AD267C8 }, 0x00000404, g_entryNameTheKingOfTheHill, 0x00000002 },
+    { { 0x55F238FD, 0xA436D1AD, 0xF5C88A4C, 0x1862E8EB, 0xD61AFAD8, 0x55FE1E59, 0xF5C88A52, 0xA471F3B7 }, 0x00000405, g_entryNameRapidFireAssault, 0x00000002 },
+    { { 0x2390CCDD, 0xE7ABA666, 0x0A8E45C4, 0x6643FE22, 0x97D2FB1E, 0x239B04E5, 0x0A8E45DE, 0xE7F898A4 }, 0x00000406, g_entryNameDuelByTheDragon, 0x0000000E },
+    { { 0x0F84BC15, 0x5C2652BF, 0xBD31382E, 0x11FED1F7, 0xB4E14DA6, 0x0F880B96, 0xBD313833, 0x5C16E898 }, 0x00000407, g_entryNameADesperateRace, 0x00000002 },
+    { { 0xE4806B75, 0x1DE290C8, 0xDFCAEBC4, 0x4A1C6170, 0x71E1A8DE, 0xE48C2D92, 0xDFCAEBDC, 0x1DC193FE }, 0x00000408, g_entryNameFlameFu, 0x00000000 },
+    { { 0xD5B67B6A, 0x4854289A, 0xE1FCA832, 0x4F3C70E6, 0x2C782027, 0xD5BA4D2A, 0xE1FCA83A, 0x48678D7B }, 0x00000500, g_entryNameAHazardousPath, 0x00000000 },
+    { { 0xCB5C1CD2, 0x7DA13F74, 0xD29AD321, 0x41CC84D6, 0x212F6EC3, 0xCB50A252, 0xD29AD326, 0x7DBB77CD }, 0x00000502, g_entryNameBurningRubber, 0x00000000 },
+    { { 0x36E5CD84, 0x066ED834, 0x3DA04171, 0x7BE81ABD, 0x86A774CA, 0x36EE1EF8, 0x3DA04177, 0x06477F5B }, 0x00000503, g_entryNameADaringRescue, 0x00000000 },
+    { { 0x981B0998, 0x35E939CD, 0xE0016E8A, 0x7210407C, 0x923436E4, 0x9816461F, 0xE0016E88, 0x35E27074 }, 0x00000504, g_entryNameBentleyComesThrough, 0x00000000 },
+    { { 0x48C10A2C, 0xED11F262, 0xBF175611, 0x9D181905, 0x86D2E9A9, 0x48CC0FF3, 0xBF175614, 0xED3E4BF8 }, 0x00000505, g_entryNameATemporaryTruce, 0x00000000 },
+    { { 0x9EAE1C3C, 0xC2FEDE9B, 0x2AFD4D95, 0x573AF42F, 0xA18F6572, 0x9EA328CC, 0x2AFD4D91, 0xC2D3B7FC }, 0x00000506, g_entryNameSinkingPeril, 0x00000000 },
+    { { 0xAC0C665D, 0x524AA938, 0x33CB5B57, 0xE1FFC9B9, 0x35BE9ACD, 0xAC006598, 0x33CB5B54, 0x527D9E86 }, 0x00000508, g_entryNameAStrangeReunion, 0x00000000 },
 };
 extern const KeyRecord g_streamVoiceKeys[7] = {
     {0x239C1F4B, 0x4F1B6BCE, 0x332880C9, 0xDC1FC810, 0xB3EF7189, 0x239FB500, 0x332882F6, 0x4F1B486E},
@@ -602,11 +602,11 @@ extern const KeyRecord g_streamVoiceKeys[7] = {
     {0xD4312CB4, 0xC376AE2A, 0x8D50D2C3, 0xC7A8D28C, 0x39A7CE66, 0xD422EB19, 0x8D50D087, 0xC3769B7A},
     {0x3909A2A2, 0xDA5D87C2, 0xC3446569, 0x59D126B9, 0x6943323B, 0x390995E6, 0xC344672C, 0xDA5DAE02}
 };
-extern const char D_002483B8[24] = "@KFWHJGL";
+extern const char g_scrambledPassword[24] = "@KFWHJGL";
 extern const Mat02 g_identityMatrix = { { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } } };
-extern const f32 D_00248400[28] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+extern const f32 g_identityMatrix4[28] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 extern const KeyRecord g_memoryCardIconKey = { 0x80CFADA9, 0x930F4F53, 0x7F1AF6BE, 0x5EAA1EBC, 0xDDC30E98, 0x80DB63DE, 0x7F1AF5F2, 0x930F1BCB };
-extern const IdentityKey D_00248490 = { { { 0xEF312076, 0x53B6BFB5, 0x4846D1FF, 0x0EAD57EE, 0x9E3389D7, 0xEF3E4A62, 0x4846D2BB, 0x531DFFB1 } } };
+extern const IdentityKey g_watchedMovieKey = { { { 0xEF312076, 0x53B6BFB5, 0x4846D1FF, 0x0EAD57EE, 0x9E3389D7, 0xEF3E4A62, 0x4846D2BB, 0x531DFFB1 } } };
 extern const IdentityKey g_movieKeys[16] = {
     { { { 0xF5248332, 0x853A4F27, 0x46B9CAE3, 0x13D7C04C, 0x74F101E3, 0xF524CCCD, 0x46B9C9A3, 0x80694F23 } } },
     { { { 0xCE3D9360, 0x2F5524C3, 0xAD69A291, 0xE6559C19, 0x9871938B, 0xCE3E40C9, 0xAD69A1D0, 0x2A3164C7 } } },
@@ -626,79 +626,79 @@ extern const IdentityKey g_movieKeys[16] = {
     { { { 0x1B7736BC, 0x08EA9779, 0x9ABAE153, 0x01F1543B, 0x48D846BE, 0x1B72254A, 0x9ABAE26B, 0x0D7F577D } } },
 };
 extern void* const g_screenElements[38] = {
-    (void*)&D_002721D0,
+    (void*)&g_letterboxElement,
     (void*)&g_typedTextCaptionBox,
-    (void*)&D_00270650,
-    (void*)&D_0026C6C8,
-    (void*)&D_0026C948,
+    (void*)&g_spinningSpriteElement,
+    (void*)&g_reserveCountCaption,
+    (void*)&g_collectedItemCaption,
     (void*)&D_0026CBC8,
     (void*)&D_0026CE48,
-    (void*)&D_0026D0C8,
+    (void*)&g_pairControllerCountCaption,
     (void*)&g_gaugeAmountCaption,
-    (void*)&D_0026D5C8,
+    (void*)&g_pathFollowerFirstCountCaption,
     (void*)&D_0026D848,
-    (void*)&D_0026DAC8,
-    (void*)&D_0026DD48,
-    (void*)&D_0026DFC8,
+    (void*)&g_pathFollowerSecondCountCaption,
+    (void*)&g_hitCountCaptionA,
+    (void*)&g_hitCountCaptionB,
     (void*)&g_gaugeBarElement,
-    (void*)&D_0026E4E0,
+    (void*)&g_gaugeColliderCaption,
     (void*)&g_timerElement,
     (void*)&g_timerCaption,
     (void*)&g_buttonHintElement,
-    (void*)&D_0026EED0,
-    (void*)&D_0026F138,
-    (void*)&D_0026F5A0,
+    (void*)&g_pointerTextCaption,
+    (void*)&g_copiedTextCaption,
+    (void*)&g_hintGlyphElement,
     (void*)&g_mapScreenList,
-    (void*)&D_0026FA90,
-    (void*)&D_0026FD00,
+    (void*)&g_selectionCaption,
+    (void*)&g_gridSelector,
     (void*)&g_pauseMenuElement,
     (void*)&D_002708E0,
     (void*)&D_00271558,
-    (void*)&D_00272430,
-    (void*)&D_002726B0,
-    (void*)&D_00272930,
-    (void*)&D_00272B98,
+    (void*)&g_firstTallyCaption,
+    (void*)&g_secondTallyCaption,
+    (void*)&g_titleElement,
+    (void*)&g_promptElement,
     (void*)&g_stackedCaptionGroup,
     (void*)&D_002739F0,
     (void*)&D_00273C50,
-    (void*)&D_00273EB0,
-    (void*)&D_00274118,
+    (void*)&g_cyclingGlyphElement,
+    (void*)&g_completionPercentCaption,
     0,
 };
 extern const LevelEntry g_levelEntries[33] = {
-    { 0x00000100, 77.0f, { 0xB4D572D8, 0xF825BBFB, 0xD81D7156, 0x397F5178, 0x728793AF, 0xB4DDCF33, 0xD81D73EC, 0xF8032CCB }, D_0024DCB0 },
-    { 0x00000102, 60.0f, { 0x2D97B868, 0x3B2491E4, 0x149B5E84, 0xED6063AB, 0xEC614227, 0x2D9472EA, 0x149B5C3C, 0x3B063804 }, D_0024DCC8 },
-    { 0x00000103, 139.0f, { 0x7EA0F65C, 0xD2337F06, 0xBE2AFC49, 0x12C36311, 0x7C279683, 0x7EA42098, 0xBE2AFEF0, 0xD22162E6 }, D_0024DCE8 },
-    { 0x00000104, 90.0f, { 0x43450000, 0x1BA9F623, 0xD50CE115, 0x2C1200AF, 0xCEA641C8, 0x4356A7CF, 0xD50CE3A2, 0x1B896FC3 }, D_0024DD38 },
-    { 0x00000105, 92.0f, { 0x99CE9B7C, 0x71906A24, 0xF0C28B06, 0xEB485F8B, 0x53B61FF1, 0x99DD5CC8, 0xF0C289B0, 0x71B1D014 }, D_0024DD60 },
-    { 0x00000106, 0.0f, { 0x2699F11C, 0x49A028DA, 0x4F211F07, 0x48124182, 0x178D0C5F, 0x269A54DB, 0x4F211DBC, 0x4984311A }, D_0024DD80 },
-    { 0x00000107, 70.0f, { 0x58F37394, 0x1350631B, 0x01CBDC91, 0x44F71ECF, 0xDF5726B9, 0x58F33959, 0x01CBDE2D, 0x1372669B }, D_0024DDA0 },
-    { 0x00000200, 90.0f, { 0xD0F1FFA7, 0xC60FB906, 0xF6CBF1E8, 0xDBDFC7A2, 0x60C39D81, 0xD0F25069, 0xF6CBF340, 0xC62CF876 }, D_0024DDC8 },
-    { 0x00000202, 135.0f, { 0x8D75C2BA, 0x1C60DBC3, 0x87B409B3, 0xE1C1EC55, 0x1628B119, 0x8D73AF2A, 0x87B40B1A, 0x1C4054D3 }, D_0024DDF0 },
-    { 0x00000203, 80.0f, { 0xEFF2D448, 0xCD3CF9B6, 0x643C8676, 0xEE4BB37E, 0x5221084A, 0xEFFBDEE7, 0x643C84DA, 0xCD29D486 }, D_0024DD80 },
-    { 0x00000204, 0.0f, { 0x085CFED8, 0x500DEAB1, 0x2D8244CE, 0x20D7E0BD, 0x7B9BF59A, 0x084F301B, 0x2D824663, 0x50119521 }, D_0024DE10 },
-    { 0x00000205, 118.0f, { 0x34B8FDC0, 0xBA921EE9, 0xBC440B92, 0xF084CB5F, 0x9B5D7162, 0x34B8BB9E, 0xBC440938, 0xBAB16B39 }, D_0024DE38 },
-    { 0x00000206, 77.0f, { 0x1C7E6EEE, 0x3905F736, 0x84C0AC66, 0xF3ECEA0D, 0xF49EA1A6, 0x1C7E59A4, 0x84C0AECD, 0x39225AD6 }, D_0024DCC8 },
-    { 0x00000207, 83.0f, { 0x22F88C24, 0x981BED54, 0xBE8B1621, 0xC6B35547, 0x244B7E13, 0x22FEE53D, 0xBE8B148F, 0x98385A04 }, D_0024DE50 },
-    { 0x00000300, 95.0f, { 0x255C8D9D, 0xC67DD187, 0xB30FF9E1, 0xC0220E2F, 0x42968B68, 0x25585E92, 0xB30FFB5C, 0xC6607257 }, D_0024DE70 },
-    { 0x00000302, 122.0f, { 0x95E88262, 0x256551E6, 0x4ADF2CC3, 0x3DB989E3, 0xB6A6B35A, 0x95EB4CBA, 0x4ADF2E00, 0x2543D296 }, D_0024DE98 },
-    { 0x00000303, 138.0f, { 0x11AF8222, 0x4154CCCF, 0x0079AF5D, 0xE4F21BF0, 0x4D1A9134, 0x11BB038E, 0x0079ADE2, 0x414910EF }, D_0024DEC0 },
-    { 0x00000304, 0.0f, { 0x4E5C5D94, 0x9A873808, 0x96FFEFBF, 0x8BD43856, 0x4D5F0EF3, 0x4E53B0C4, 0x96FFED7E, 0x9A95DB18 }, D_0024DEF0 },
-    { 0x00000305, 128.0f, { 0xF98CB02D, 0xA283FC15, 0x25BB5DC0, 0xE157D974, 0x79983E9E, 0xF989BEEC, 0x25BB5F02, 0xA29D9135 }, D_0024DF10 },
-    { 0x00000306, 0.0f, { 0xCD08BB18, 0xE7BF9B3F, 0xC95EE322, 0xE910E326, 0x9644F239, 0xCD09B122, 0xC95EE1E2, 0xE799CE4F }, D_0024DF50 },
-    { 0x00000307, 0.0f, { 0x675AB398, 0xCDC3F75B, 0x04221B83, 0x8816DEE1, 0xC808ED2E, 0x675C5565, 0x0422193D, 0xCDD7A0DB }, D_0024DF78 },
-    { 0x00000400, 129.0f, { 0x690D68D5, 0x91BE10E9, 0x53BEE0CB, 0x2DD4C53B, 0x34B03761, 0x691EC614, 0x53BEE264, 0x91A1B799 }, D_0024DFA0 },
-    { 0x00000402, 135.0f, { 0xCDE8339C, 0xA52C25B6, 0x7A1C3B47, 0x60EAC381, 0x5CCA62D2, 0xCDE6A0FA, 0x7A1C39F5, 0xA50AE286 }, D_0024DFB8 },
-    { 0x00000403, 145.0f, { 0x2E641117, 0x48B11069, 0x55A7DCBF, 0xBEE1993E, 0x68804E34, 0x2E651ED2, 0x55A7DE0F, 0x4894DAA9 }, D_0024DFD8 },
-    { 0x00000404, 165.0f, { 0x67AF3B57, 0xF492F4FB, 0x4582A324, 0x58A7E5D7, 0x19037D39, 0x67BCF0BB, 0x4582A197, 0xF48440DB }, D_0024DFF0 },
-    { 0x00000405, 0.0f, { 0x39FDBB59, 0x61874FF5, 0x431AA733, 0x1BF9BD2A, 0xD8FC45CE, 0x39E904E7, 0x431AA586, 0x619A0B55 }, D_0024E018 },
-    { 0x00000406, 162.0f, { 0x130F1A4B, 0xF165A43C, 0x1085A760, 0x7EF09D87, 0xEEDC6182, 0x130BC343, 0x1085A5D1, 0xF17A745C }, D_0024E038 },
-    { 0x00000407, 0.0f, { 0xAEE1B3B0, 0x23F21A5C, 0x2C5069FC, 0x69DA4B36, 0x2EFC59A8, 0xAEE1800D, 0x2C506B48, 0x23E4C85C }, D_0024E060 },
-    { 0x00000502, 0.0f, { 0xE03513A1, 0xDF69E228, 0xBCC1BC75, 0x66B59F20, 0x5603C88D, 0xE0251B60, 0xBCC1BED2, 0xDF776558 }, D_0024E088 },
-    { 0x00000503, 0.0f, { 0x10003460, 0x2357C8AB, 0x82DF6820, 0x9EA4EEF0, 0x67FFDE84, 0x101449AA, 0x82DF6A86, 0x2348C7EB }, D_0024E0A8 },
-    { 0x00000504, 0.0f, { 0xC0351F76, 0xAEA9D7A0, 0xA96A1A69, 0x5A238437, 0x525CDAB3, 0xC03D3461, 0xA96A18CA, 0xAE889780 }, D_0024E0C8 },
-    { 0x00000505, 0.0f, { 0x166B5E9F, 0xD83C11E9, 0x64ED4809, 0x9F137E03, 0x544B9C1C, 0x167F901D, 0x64ED4AAC, 0xD82147F9 }, D_0024E0F8 },
-    { 0x00000506, 0.0f, { 0x9CD62C23, 0x9AB39D3E, 0xEA6D2E63, 0xFEC5BF26, 0xC170A675, 0x9CD0481B, 0xEA6D2CC7, 0x9A96D39E }, D_0024E118 },
+    { 0x00000100, 77.0f, { 0xB4D572D8, 0xF825BBFB, 0xD81D7156, 0x397F5178, 0x728793AF, 0xB4DDCF33, 0xD81D73EC, 0xF8032CCB }, g_levelCredits0100 },
+    { 0x00000102, 60.0f, { 0x2D97B868, 0x3B2491E4, 0x149B5E84, 0xED6063AB, 0xEC614227, 0x2D9472EA, 0x149B5C3C, 0x3B063804 }, g_levelCredits0102 },
+    { 0x00000103, 139.0f, { 0x7EA0F65C, 0xD2337F06, 0xBE2AFC49, 0x12C36311, 0x7C279683, 0x7EA42098, 0xBE2AFEF0, 0xD22162E6 }, g_levelCredits0103 },
+    { 0x00000104, 90.0f, { 0x43450000, 0x1BA9F623, 0xD50CE115, 0x2C1200AF, 0xCEA641C8, 0x4356A7CF, 0xD50CE3A2, 0x1B896FC3 }, g_levelCredits0104 },
+    { 0x00000105, 92.0f, { 0x99CE9B7C, 0x71906A24, 0xF0C28B06, 0xEB485F8B, 0x53B61FF1, 0x99DD5CC8, 0xF0C289B0, 0x71B1D014 }, g_levelCredits0105 },
+    { 0x00000106, 0.0f, { 0x2699F11C, 0x49A028DA, 0x4F211F07, 0x48124182, 0x178D0C5F, 0x269A54DB, 0x4F211DBC, 0x4984311A }, g_levelCredits0106 },
+    { 0x00000107, 70.0f, { 0x58F37394, 0x1350631B, 0x01CBDC91, 0x44F71ECF, 0xDF5726B9, 0x58F33959, 0x01CBDE2D, 0x1372669B }, g_levelCredits0107 },
+    { 0x00000200, 90.0f, { 0xD0F1FFA7, 0xC60FB906, 0xF6CBF1E8, 0xDBDFC7A2, 0x60C39D81, 0xD0F25069, 0xF6CBF340, 0xC62CF876 }, g_levelCredits0200 },
+    { 0x00000202, 135.0f, { 0x8D75C2BA, 0x1C60DBC3, 0x87B409B3, 0xE1C1EC55, 0x1628B119, 0x8D73AF2A, 0x87B40B1A, 0x1C4054D3 }, g_levelCredits0202 },
+    { 0x00000203, 80.0f, { 0xEFF2D448, 0xCD3CF9B6, 0x643C8676, 0xEE4BB37E, 0x5221084A, 0xEFFBDEE7, 0x643C84DA, 0xCD29D486 }, g_levelCredits0106 },
+    { 0x00000204, 0.0f, { 0x085CFED8, 0x500DEAB1, 0x2D8244CE, 0x20D7E0BD, 0x7B9BF59A, 0x084F301B, 0x2D824663, 0x50119521 }, g_levelCredits0204 },
+    { 0x00000205, 118.0f, { 0x34B8FDC0, 0xBA921EE9, 0xBC440B92, 0xF084CB5F, 0x9B5D7162, 0x34B8BB9E, 0xBC440938, 0xBAB16B39 }, g_levelCredits0205 },
+    { 0x00000206, 77.0f, { 0x1C7E6EEE, 0x3905F736, 0x84C0AC66, 0xF3ECEA0D, 0xF49EA1A6, 0x1C7E59A4, 0x84C0AECD, 0x39225AD6 }, g_levelCredits0102 },
+    { 0x00000207, 83.0f, { 0x22F88C24, 0x981BED54, 0xBE8B1621, 0xC6B35547, 0x244B7E13, 0x22FEE53D, 0xBE8B148F, 0x98385A04 }, g_levelCredits0207 },
+    { 0x00000300, 95.0f, { 0x255C8D9D, 0xC67DD187, 0xB30FF9E1, 0xC0220E2F, 0x42968B68, 0x25585E92, 0xB30FFB5C, 0xC6607257 }, g_levelCredits0300 },
+    { 0x00000302, 122.0f, { 0x95E88262, 0x256551E6, 0x4ADF2CC3, 0x3DB989E3, 0xB6A6B35A, 0x95EB4CBA, 0x4ADF2E00, 0x2543D296 }, g_levelCredits0302 },
+    { 0x00000303, 138.0f, { 0x11AF8222, 0x4154CCCF, 0x0079AF5D, 0xE4F21BF0, 0x4D1A9134, 0x11BB038E, 0x0079ADE2, 0x414910EF }, g_levelCredits0303 },
+    { 0x00000304, 0.0f, { 0x4E5C5D94, 0x9A873808, 0x96FFEFBF, 0x8BD43856, 0x4D5F0EF3, 0x4E53B0C4, 0x96FFED7E, 0x9A95DB18 }, g_levelCredits0304 },
+    { 0x00000305, 128.0f, { 0xF98CB02D, 0xA283FC15, 0x25BB5DC0, 0xE157D974, 0x79983E9E, 0xF989BEEC, 0x25BB5F02, 0xA29D9135 }, g_levelCredits0305 },
+    { 0x00000306, 0.0f, { 0xCD08BB18, 0xE7BF9B3F, 0xC95EE322, 0xE910E326, 0x9644F239, 0xCD09B122, 0xC95EE1E2, 0xE799CE4F }, g_levelCredits0306 },
+    { 0x00000307, 0.0f, { 0x675AB398, 0xCDC3F75B, 0x04221B83, 0x8816DEE1, 0xC808ED2E, 0x675C5565, 0x0422193D, 0xCDD7A0DB }, g_levelCredits0307 },
+    { 0x00000400, 129.0f, { 0x690D68D5, 0x91BE10E9, 0x53BEE0CB, 0x2DD4C53B, 0x34B03761, 0x691EC614, 0x53BEE264, 0x91A1B799 }, g_levelCredits0400 },
+    { 0x00000402, 135.0f, { 0xCDE8339C, 0xA52C25B6, 0x7A1C3B47, 0x60EAC381, 0x5CCA62D2, 0xCDE6A0FA, 0x7A1C39F5, 0xA50AE286 }, g_levelCredits0402 },
+    { 0x00000403, 145.0f, { 0x2E641117, 0x48B11069, 0x55A7DCBF, 0xBEE1993E, 0x68804E34, 0x2E651ED2, 0x55A7DE0F, 0x4894DAA9 }, g_levelCredits0403 },
+    { 0x00000404, 165.0f, { 0x67AF3B57, 0xF492F4FB, 0x4582A324, 0x58A7E5D7, 0x19037D39, 0x67BCF0BB, 0x4582A197, 0xF48440DB }, g_levelCredits0404 },
+    { 0x00000405, 0.0f, { 0x39FDBB59, 0x61874FF5, 0x431AA733, 0x1BF9BD2A, 0xD8FC45CE, 0x39E904E7, 0x431AA586, 0x619A0B55 }, g_levelCredits0405 },
+    { 0x00000406, 162.0f, { 0x130F1A4B, 0xF165A43C, 0x1085A760, 0x7EF09D87, 0xEEDC6182, 0x130BC343, 0x1085A5D1, 0xF17A745C }, g_levelCredits0406 },
+    { 0x00000407, 0.0f, { 0xAEE1B3B0, 0x23F21A5C, 0x2C5069FC, 0x69DA4B36, 0x2EFC59A8, 0xAEE1800D, 0x2C506B48, 0x23E4C85C }, g_levelCredits0407 },
+    { 0x00000502, 0.0f, { 0xE03513A1, 0xDF69E228, 0xBCC1BC75, 0x66B59F20, 0x5603C88D, 0xE0251B60, 0xBCC1BED2, 0xDF776558 }, g_levelCredits0502 },
+    { 0x00000503, 0.0f, { 0x10003460, 0x2357C8AB, 0x82DF6820, 0x9EA4EEF0, 0x67FFDE84, 0x101449AA, 0x82DF6A86, 0x2348C7EB }, g_levelCredits0503 },
+    { 0x00000504, 0.0f, { 0xC0351F76, 0xAEA9D7A0, 0xA96A1A69, 0x5A238437, 0x525CDAB3, 0xC03D3461, 0xA96A18CA, 0xAE889780 }, g_levelCredits0504 },
+    { 0x00000505, 0.0f, { 0x166B5E9F, 0xD83C11E9, 0x64ED4809, 0x9F137E03, 0x544B9C1C, 0x167F901D, 0x64ED4AAC, 0xD82147F9 }, g_levelCredits0505 },
+    { 0x00000506, 0.0f, { 0x9CD62C23, 0x9AB39D3E, 0xEA6D2E63, 0xFEC5BF26, 0xC170A675, 0x9CD0481B, 0xEA6D2CC7, 0x9A96D39E }, g_levelCredits0506 },
 };
 extern const Vec02 g_unitXVector = { 1.0f, 0.0f, 0.0f, 0.0f };
 extern const Vec02 g_unitYVector = { 0.0f, 1.0f, 0.0f, 0.0f };
@@ -713,4 +713,4 @@ u8 D_00250580[56] = { 0 };
 // The descriptor of class 0x94, the last of D_00247448: two zero words.
 ClassHead D_002505B8 = { 0, 0 };
 // The method table warp_menu.cpp's objects take (state_reset_object.h), zero in the image.
-void* D_002505C0[6] = { 0 };
+void* g_stateResetGroupMethods[6] = { 0 };

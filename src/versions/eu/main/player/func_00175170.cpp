@@ -387,7 +387,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 TransformPointBetweenFrames((PlacedObject*)(AT(void*, self->aimCurve, 0x18)), 0, &b, &b);
                 Vec02 d;
                 *(u128*)&d = NormalizeOrElse_175170(Vu0::Sub(Vu0::Vec::Of(a), Vu0::Vec::Of(b)), Vu0::Vec::Of(g_unitZVector)).q;
-                self->pathFlipped = d.z < -D_00274F08;
+                self->pathFlipped = d.z < -g_steepSlopeThreshold;
                 break;
             }
             }
@@ -492,9 +492,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                     loud = 1;
                 }
                 if (HasNoActiveObject89(self)) {
-                    StartSoundEffect(0x94, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E20, 0.0f, 0.0f, 0, 0);
+                    StartSoundEffect(0x94, 0, 0, &self->v140, 3000.0f, 300.0f, g_soundEffect94Volume, 0.0f, 0.0f, 0, 0);
                 } else {
-                    StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E24, 0.0f, 0.0f, 0, 0);
+                    StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, g_soundEffect7EVolume, 0.0f, 0.0f, 0, 0);
                 }
                 break;
             }
@@ -502,7 +502,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             case 1:
                 loud = 1;
                 if (self->state != 2 || (self->subState != 12 && self->subState != 13)) {
-                    StartSoundEffect(0x94, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E20, 0.0f, 0.0f, 0, 0);
+                    StartSoundEffect(0x94, 0, 0, &self->v140, 3000.0f, 300.0f, g_soundEffect94Volume, 0.0f, 0.0f, 0, 0);
                 }
                 break;
             }
@@ -814,7 +814,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             self->f2498 = 0;
             if (sub == 12 || sub == 13) {
-                StartSoundEffect(0x94, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E20, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x94, 0, 0, &self->v140, 3000.0f, 300.0f, g_soundEffect94Volume, 0.0f, 0.0f, 0, 0);
             }
             break;
         case 5: {

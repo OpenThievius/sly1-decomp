@@ -103,7 +103,7 @@ void DrawGridSelector(Obj_16BEA0_eu* self)
     }
     PopFontScale(f);
     s32 y = (s32)(((self->y + (f32)self->font->height * self->font->sy + -1.0f) * 0.5462963f + 1920.0f) * 16.0f);
-    Pk4_16BEA0 slot = *(Pk4_16BEA0*)((u8*)&D_002629A8 + 0x18);
+    Pk4_16BEA0 slot = *(Pk4_16BEA0*)((u8*)&g_gridSelectorFrame + 0x18);
     DrawLineSegment((s32)((self->x + 1728.0f) * 16.0f), y, 0, (s32)((self->x + self->w + 1728.0f) * 16.0f), y, 0,
                     (T217D_Word*)&slot, 0);
 }

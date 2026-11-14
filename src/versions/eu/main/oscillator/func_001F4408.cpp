@@ -19,7 +19,7 @@ void BeginLevelExit(s32 flag, s32 n)
         goto l4470;
     }
 lm1:
-    StartObjectFade((IdentityKey*)(D_00247AD0 + 0x80 + D_eu_00263710 * 32), -1, n);
+    StartObjectFade((IdentityKey*)(g_objectFadeIn + 0x80 + D_eu_00263710 * 32), -1, n);
     return;
 l4470:
     k = LookupEntryById((ctx->levelIndex << 8) | 1);

@@ -118,7 +118,7 @@ s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
 void SendObjectNotification(BaseObject* self, s32 kind, void* arg);
 // An anchor preset (func_001BB028): a direction and a mode.
 struct AnchorPreset { const Vec02* quad; s32 value; };
-extern AnchorPreset D_002746E0[8];
+extern AnchorPreset g_anchorPresets[8];
 void* AllocateBackMemory(s32 n);
 s32 GetContactRowHead(Collider* self, Collider* other);
 // Matched by indexing the end as (u32)e + (i << 6).
@@ -285,9 +285,9 @@ s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
 
 // The file's .data, in retail's order.
-f32 D_002746C0[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
-f32 D_002746D0[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
-AnchorPreset D_002746E0[8] = {
+f32 g_colliderPositionGains[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
+f32 g_colliderRotationGains[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
+AnchorPreset g_anchorPresets[8] = {
     { &D_00248D30, 0 },
     { &D_00248D30, 3 },
     { &g_unitXVector, 2 },
@@ -1407,24 +1407,24 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
             scale = depth * 0.5f + 0.5f;
         }
         for (s32 i = 0; i < 3; i++) {
-            gains[i] = D_002746C0[i] * scale * drag;
+            gains[i] = g_colliderPositionGains[i] * scale * drag;
         }
         Vu0::Q(target) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(along));
         SteerColliderTowardPosition(self, 0, 0, &target, gains, dt);
         for (s32 i = 0; i < 3; i++) {
-            gains[i] = D_002746C0[i] * depth * drag;
+            gains[i] = g_colliderPositionGains[i] * depth * drag;
         }
         Vu0::Q(target2) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(rest));
         SteerColliderTowardPosition(self, 0, 0, &target2, gains, dt);
         Vu0::Q(spin) = Vu0::Sub(Vu0::Q(D_00248D30), Vu0::Q(self->v160));
         SplitVectorAlongAxis(&spin, &normal, &spinAlong, &spinRest);
         for (s32 i = 0; i < 3; i++) {
-            gains[i] = D_002746D0[i] * depth * drag;
+            gains[i] = g_colliderRotationGains[i] * depth * drag;
         }
         Vu0::Q(target3) = Vu0::Add(Vu0::Q(self->v160), Vu0::Q(spinAlong));
         SteerColliderTowardRotation(self, 0, 0, &target3, gains, dt);
         for (s32 i = 0; i < 3; i++) {
-            gains[i] = D_002746D0[i] * drag;
+            gains[i] = g_colliderRotationGains[i] * drag;
         }
         Vu0::Q(target4) = Vu0::Add(Vu0::Q(self->v160), Vu0::Q(spinRest));
         SteerColliderTowardRotation(self, 0, 0, &target4, gains, dt);
@@ -1544,8 +1544,8 @@ void ResetColliderAnchors(void* self)
 
 void GetAnchorPreset(s32 index, s32* out, Vec02* dst)
 {
-    *out = D_002746E0[index].value;
-    *dst = *D_002746E0[index].quad;
+    *out = g_anchorPresets[index].value;
+    *dst = *g_anchorPresets[index].quad;
 }
 
 void SetColliderTurnAnchorPreset(Collider* self, s32 index)

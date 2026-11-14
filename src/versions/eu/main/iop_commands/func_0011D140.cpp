@@ -12,14 +12,14 @@ s32 LoadSoundBankAtLocation(s32 a0, s32 a1)
     g_soundBankLoadError = 0;
     if (g_soundBankLoadBusy.busy != 0) {
         if (D_eu_0025D6B8 == 0) {
-            PrintFormatted(D_00249570);
+            PrintFormatted(g_bankLoadInProgressMessage);
         }
         return 0;
     }
     v = SyncDiscRead(1);
     if (v == 1) {
         if (D_eu_0025D6B8 == 0) {
-            PrintFormatted(D_002495A0);
+            PrintFormatted(g_bankLoadCdBusyMessage);
         }
         return 0;
     }
@@ -30,7 +30,7 @@ s32 LoadSoundBankAtLocation(s32 a0, s32 a1)
     g_iopChannel2Args[0] = a0;
     while (IsRemoteCallPending(&g_iopBankLoadRpc)) {
         if (D_eu_0025D6B8 == 0) {
-            PrintFormatted(D_002494E8);
+            PrintFormatted(g_rpcCollisionMessage);
         }
         PollIopCommands();
         SyncDataCache(0);
@@ -39,7 +39,7 @@ s32 LoadSoundBankAtLocation(s32 a0, s32 a1)
     v1 = g_iopChannel2Result.result;
     if (w < 0) {
         if (D_eu_0025D6B8 == 0) {
-            PrintFormatted(D_002495C0);
+            PrintFormatted(g_bankLoadFailureMessages);
         }
         g_soundBankLoadError = 0x106;
         return 0;

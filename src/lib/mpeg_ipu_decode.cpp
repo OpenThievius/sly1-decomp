@@ -970,13 +970,13 @@ void RejectSequenceScalableExtension(MpegDecoder* self);
 void RejectUnknownExtension(MpegDecoder* self);
 void RejectSpatialScalableExtension(MpegDecoder* self);
 void RejectTemporalScalableExtension(MpegDecoder* self);
-extern const Fn_Table D_00250430[12] = { (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadSequenceExtension, (Fn_Table)ReadSequenceDisplayExtension, (Fn_Table)ReadQuantiserMatrixExtension, (Fn_Table)ReadCopyrightExtension, (Fn_Table)RejectSequenceScalableExtension, (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadPictureDisplayExtension, (Fn_Table)ReadPictureCodingExtension, (Fn_Table)RejectSpatialScalableExtension, (Fn_Table)RejectTemporalScalableExtension, 0 };
+extern const Fn_Table g_mpegExtensionHandlers[12] = { (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadSequenceExtension, (Fn_Table)ReadSequenceDisplayExtension, (Fn_Table)ReadQuantiserMatrixExtension, (Fn_Table)ReadCopyrightExtension, (Fn_Table)RejectSequenceScalableExtension, (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadPictureDisplayExtension, (Fn_Table)ReadPictureCodingExtension, (Fn_Table)RejectSpatialScalableExtension, (Fn_Table)RejectTemporalScalableExtension, 0 };
 
 void ReadExtensionsAndUserData(MpegDecoder* self)
 {
     s32 kA = 0x1B2;
     union ExtensionHandlerTable t;
-    t.t = *(struct ExtensionHandlerCopy*)((u8*)D_00250430);
+    t.t = *(struct ExtensionHandlerCopy*)((u8*)g_mpegExtensionHandlers);
     s32 kB = 0x1B5;
     s32 r;
 
@@ -1616,7 +1616,7 @@ void OutputFieldPicturePair(Ctx_210A80* c, Src_210A80* a, Src_210A80* b, s32 cou
 }
 
 // The DMA chain func_00210C38 builds, which only it reads.
-static u8 D_0062C340[0x200];
+static u8 g_blockChainTags[0x200];
 
 extern "C" s32 DisableInterrupts(void);
 extern "C" s32 EnableInterrupts(void);
@@ -1644,7 +1644,7 @@ struct Dec_210C38 {
 // and the channel's control word, with interrupts disabled.
 void StartBlockChainToScratchpad(Dec_210C38* self)
 {
-    u64* tag = (u64*)(((u32)D_0062C340 & 0x0FFFFFFF) | 0x20000000);
+    u64* tag = (u64*)(((u32)g_blockChainTags & 0x0FFFFFFF) | 0x20000000);
     s32 n = self->pics[self->current].count;
     for (s32 i = 0; i < n; i++) {
         u64 first = (u64)(self->pics[self->current].a[i] & 0x0FFFFFFF) << 32;
@@ -1657,7 +1657,7 @@ void StartBlockChainToScratchpad(Dec_210C38* self)
     DisableInterrupts();
     Sync();
     *(volatile u32*)0x1000D480 = self->pics[self->current].f00;
-    *(volatile u32*)0x1000D430 = (u32)D_0062C340;
+    *(volatile u32*)0x1000D430 = (u32)g_blockChainTags;
     *(volatile u32*)0x1000D420 = 0;
     *(volatile u32*)0x1000D400 = 0x105;
     EnableInterrupts();
@@ -1822,7 +1822,7 @@ s32 ContinueColourConversionInput(s32 unused, PendingInput* p)
     return 0;
 }
 
-extern u8 D_00278000[], D_00278050[], D_00278644[], D_002789DC[], D_00278A7C[], D_00278E88[];
+extern u8 g_frameInfoObject0[], g_frameInfoObject1[], g_frameInfoObject2[], g_frameInfoObject3[], g_frameInfoObject4[], g_frameInfoObject5[];
 
 struct Queue_211348;
 struct Self_211348 {

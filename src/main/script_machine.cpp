@@ -3479,7 +3479,7 @@ ScriptValue* EvalScriptDefine(ScriptValue* ret, R11B008Node* expr, ScriptScope* 
 
 // The message func_00118F48 prints, kept as retail's bytes: retail places it on 16 bytes, 8 past
 // where GCC puts the literal (the 8 zero bytes before it are not explained yet).
-extern const char D_00249200[];
+extern const char g_assertFailedMessage[];
 INCLUDE_RODATA(D_00249200);
 
 ScriptValue* EvalScriptAssert(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
@@ -3496,7 +3496,7 @@ ScriptValue* EvalScriptAssert(ScriptValue* ret, R11B008Node* expr, ScriptScope* 
     if (q.i == 0) {
         R11B008Node* v = c->node;
         R11B008Node* w = v->next;
-        PrintFormatted(D_00249200);
+        PrintFormatted(g_assertFailedMessage);
         IgnoreScriptArgument(&t, 1, w, scope);
         DestroyScriptValue(&t, 2);
     }

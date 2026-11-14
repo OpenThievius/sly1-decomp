@@ -18,12 +18,12 @@ void InitSelectionCaption(Obj_16B4A0_eu* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
-        self->f520 = (s32*)&D_00262988;
+        self->f520 = (s32*)&g_selectionCaptionFrame;
         *self->f520 = (s32)GetFontById(2);
     }
     SetScreenElementHoldTime(self, 0.0f);
     self->f570 = 0;
     *(u32*)self->f518 = 0xDF7F7F7F;
     self->f574 = 0;
-    self->f578 = -D_00262970;
+    self->f578 = -g_choiceSoundGap;
 }

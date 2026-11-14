@@ -28,7 +28,7 @@
 #define LX (CC_LOWER | CC_HEX)
 #define L CC_LOWER
 
-const u8 D_0024E878[257] = {
+const u8 g_charClassTable[257] = {
     0,
     C, C, C, C, C, C, C, C, C, S, S, S, S, S, C, C,
     C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,

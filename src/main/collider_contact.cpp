@@ -294,14 +294,14 @@ void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
 }
 
 extern s32 g_vif0Channel;
-extern u8 D_00211E10[];
+extern u8 g_vu0ProgramChain[];
 extern "C" void SyncDataCache(s32 unused);
 struct DmaChannel;
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 extern u8 g_vif1Channel[];
-extern u8 D_00212110[];
+extern u8 g_vu1ProgramChain[];
 
 extern "C" void SyncDataCache(s32 a);
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);

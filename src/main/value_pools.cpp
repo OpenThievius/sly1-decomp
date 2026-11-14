@@ -212,12 +212,12 @@ void* AcquireVectorAPayload(void)
     return p;
 }
 
-extern u8* D_0062C55C;
+extern u8* g_vectorAPayloadBase;
 extern u8* g_payloadRefCounts[];
 
 s32 AddRefVectorAPayload(void* payload)
 {
-    u8* p = g_payloadRefCounts[0] + ((u32)((u8*)payload - D_0062C55C) >> 4);
+    u8* p = g_payloadRefCounts[0] + ((u32)((u8*)payload - g_vectorAPayloadBase) >> 4);
     s32 v = *p;
     v++;
     *p = v;
@@ -256,11 +256,11 @@ void* AcquireMatrixPayload(void)
     return s0;
 }
 
-extern u8* D_0062C56C;
+extern u8* g_matrixPayloadBase;
 
 s32 AddRefMatrixPayload(void* payload)
 {
-    u8* p = g_payloadRefCounts[1] + ((u32)((u8*)payload - D_0062C56C) >> 6);
+    u8* p = g_payloadRefCounts[1] + ((u32)((u8*)payload - g_matrixPayloadBase) >> 6);
     s32 v = *p;
     v++;
     *p = v;
@@ -297,11 +297,11 @@ void* AcquireVectorBPayload(void)
     return s0;
 }
 
-extern u8* D_0062C57C;
+extern u8* g_vectorBPayloadBase;
 
 s32 AddRefVectorBPayload(void* payload)
 {
-    u8* p = g_payloadRefCounts[2] + ((u32)((u8*)payload - D_0062C57C) >> 4);
+    u8* p = g_payloadRefCounts[2] + ((u32)((u8*)payload - g_vectorBPayloadBase) >> 4);
     s32 v = *p;
     v++;
     *p = v;
@@ -335,11 +335,11 @@ void* AcquirePairPayload(void)
     return s0;
 }
 
-extern u8* D_0062C58C;
+extern u8* g_pairPayloadBase;
 
 s32 AddRefPairPayload(void* payload)
 {
-    u8* p = g_payloadRefCounts[3] + ((u32)((u8*)payload - D_0062C58C) >> 3);
+    u8* p = g_payloadRefCounts[3] + ((u32)((u8*)payload - g_pairPayloadBase) >> 3);
     s32 v = *p;
     v++;
     *p = v;
@@ -378,13 +378,13 @@ TriplePayloadSlot* AcquireTriplePayload(void)
     return p;
 }
 
-extern u8* D_0062C59C;
+extern u8* g_triplePayloadBase;
 extern u8* g_triplePayloadRefCounts;
 
 s32 AddRefTriplePayload(void* payload)
 {
     u32 n = 12;
-    u8* p = g_triplePayloadRefCounts + (u32)((u8*)payload - D_0062C59C) / n;
+    u8* p = g_triplePayloadRefCounts + (u32)((u8*)payload - g_triplePayloadBase) / n;
     s32 v = *p + 1;
     *p = v;
     return v;
@@ -410,9 +410,9 @@ void ReleaseTriplePayload(void* payload)
     PushFreeSlot((Pool6C*)t, payload);
 }
 
-extern u8* D_0027B304;
-extern u8* D_0027B308;
-extern u8* D_0027B30C;
+extern u8* g_matrixPayloadRefCounts;
+extern u8* g_vectorBPayloadRefCounts;
+extern u8* g_pairPayloadRefCounts;
 void InitSlotPool(Pool6C* s, s32 size, s32 count);
 
 struct PayloadPoolInit {
@@ -426,9 +426,9 @@ struct PayloadPoolInit {
 void InitPayloadPools(void)
 {
     PayloadPoolInit::Load(((u8*)&g_vectorAPayloadPool), 0x10, &g_vectorAPayloadCapacity, &g_payloadRefCounts[0]);
-    PayloadPoolInit::Load(g_matrixPayloadPool, 0x40, &g_matrixPayloadCapacity, &D_0027B304);
-    PayloadPoolInit::Load(g_vectorBPayloadPool, 0x10, &g_vectorBPayloadCapacity, &D_0027B308);
-    PayloadPoolInit::Load(g_pairPayloadPool, 0x08, &g_pairPayloadCapacity, &D_0027B30C);
+    PayloadPoolInit::Load(g_matrixPayloadPool, 0x40, &g_matrixPayloadCapacity, &g_matrixPayloadRefCounts);
+    PayloadPoolInit::Load(g_vectorBPayloadPool, 0x10, &g_vectorBPayloadCapacity, &g_vectorBPayloadRefCounts);
+    PayloadPoolInit::Load(g_pairPayloadPool, 0x08, &g_pairPayloadCapacity, &g_pairPayloadRefCounts);
     PayloadPoolInit::Load(((u8*)&g_triplePayloadPool), 0x0C, g_triplePayloadCapacity, &g_triplePayloadRefCounts);
 }
 

@@ -28,18 +28,18 @@ struct NodeQuery;
 
 // The file's .data, in retail's order: class 0x3B's set-up values, then the constants of its
 // assembly functions.
-Quad3B D_00261320 = { 0x42480000, 0x459C4000, 0, 0 };
-Quad3B D_00261330 = { 0x43FA0000, 0x3FE66666, 0, 0 };
-Quad3B D_00261340 = { 0x3F000000, 0x3E4CCCCD, 0, 0 };
-Pair3B D_00261350 = { 0x44160000, 0x44AF0000 };
-Pair3B D_00261358 = { 0x41A00000, 0x42480000 };
-f32 D_00261360 = 600.0f;
-f32 D_00261364 = 800.0f;
+Quad3B g_childGroupMassRange = { 0x42480000, 0x459C4000, 0, 0 };
+Quad3B g_childGroupScatterCurve = { 0x43FA0000, 0x3FE66666, 0, 0 };
+Quad3B g_childGroupSpreadCurve = { 0x3F000000, 0x3E4CCCCD, 0, 0 };
+Pair3B g_childGroupScatterRange = { 0x44160000, 0x44AF0000 };
+Pair3B g_childGroupSpreadRange = { 0x41A00000, 0x42480000 };
+f32 g_childGroupKnockbackSpeed = 600.0f;
+f32 g_childGroupKnockbackLift = 800.0f;
 // The two polynomials the knockback evaluates (TimePolynomial), aligned to 16 as the object's own
 // polynomials at 0x5D0 and 0x5F0 are (Quad3B): retail has the 8 bytes of zeros that alignment
 // leaves after the knockback's upward weight, D_00261364.
-f32 D_00261370[4] __attribute__((aligned(16))) = { 1.0f, -1.0f, 0.0f, 0.0f };
-f32 D_00261380[4] __attribute__((aligned(16))) = { 2.0f, -1.5f, 0.0f, 0.0f };
+f32 g_childGroupApproachCurve[4] __attribute__((aligned(16))) = { 1.0f, -1.0f, 0.0f, 0.0f };
+f32 g_childGroupDistanceCurve[4] __attribute__((aligned(16))) = { 2.0f, -1.5f, 0.0f, 0.0f };
 
 void InitCollider(Collider* self);
 
@@ -50,13 +50,13 @@ void InitChildGroupObject(ChildGroupObject* self)
     self->blastRadius = 200.0f;
     self->playerBlastRadius = 200.0f;
     self->contactMode = 0;
-    self->massRange = *(Pair3B*)&D_00261320;
+    self->massRange = *(Pair3B*)&g_childGroupMassRange;
     self->pushStrength = 800.0f;
     self->maxMass = 5000.0f;
-    self->speedCurve = *(Quad3B*)&D_00261330;
-    self->speedRange = *(Pair3B*)&D_00261350;
-    self->spinCurve = *(Quad3B*)&D_00261340;
-    self->spinRange = *(Pair3B*)&D_00261358;
+    self->speedCurve = *(Quad3B*)&g_childGroupScatterCurve;
+    self->speedRange = *(Pair3B*)&g_childGroupScatterRange;
+    self->spinCurve = *(Quad3B*)&g_childGroupSpreadCurve;
+    self->spinRange = *(Pair3B*)&g_childGroupSpreadRange;
     self->announceBlast = 1;
     self->f678 = 1;
     self->ownerMessageMode = 0;
@@ -378,7 +378,7 @@ void StartChildGroupDelay(ChildGroupObject* self, f32 delta)
     self->blastTime = g_gameTime + delta;
 }
 
-extern f32 D_00261364;
+extern f32 g_childGroupKnockbackLift;
 struct VectorConstraint;
 void SetPlayerState(Player* self, s32 state, s32 sub);
 void ConstrainVectorByParentAnchor(Collider* self, VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
@@ -404,7 +404,7 @@ void ApplyChildGroupKnockback(ChildGroupObject* self, Collider* other)
     d.z = 0.0f;
     Vec02* p = &d;
     *(Vu0::Vec*)p = Vu0::NormalizeOr(Vu0::Vec::Of(d), Vu0::Vec::Of(g_unitXVector));
-    Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(D_00261360), Vu0::Q(g_unitZVector), Vu0::ScalarAtValue(D_00261364));
+    Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(g_childGroupKnockbackSpeed), Vu0::Q(g_unitZVector), Vu0::ScalarAtValue(g_childGroupKnockbackLift));
     ConstrainVectorByParentAnchor(other, (VectorConstraint*)&other->v440, &r, &r, 0);
     other->desc02()->m20(other, &r);
     if (IsObjectOfKind(other, 7) != 0) {
@@ -417,8 +417,8 @@ void StartChildGroupDelay(ChildGroupObject* self, f32 delta);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 s32 IsObjectAttached(BaseObject* self);
 Collider* GetActiveSwitchedCollider();
-extern f32 D_00261370[4];
-extern f32 D_00261380[4];
+extern f32 g_childGroupApproachCurve[4];
+extern f32 g_childGroupDistanceCurve[4];
 
 void PushBackMemoryMark();
 void PopBackMemoryMark();
@@ -527,9 +527,9 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             dir.z += 200.0f;
             Vu0::Q(dir) = Vu0::NormalizeOr(Vu0::Q(dir), Vu0::Q(g_unitZVector));
             f32 m = 1.0f / Fpu::Sqrt(ClampToRange((ValueRange*)&self->massRange, c->mass) / *(f32*)&self->massRange.a);
-            f32 sv = g_unitRange.Limit(((TimePolynomial*)D_00261370)->Eval(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(c->v150), Vu0::Q(dir))) / self->pushStrength));
+            f32 sv = g_unitRange.Limit(((TimePolynomial*)g_childGroupApproachCurve)->Eval(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(c->v150), Vu0::Q(dir))) / self->pushStrength));
             f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(off))) - (c->radius3CC + self->radius3D0);
-            f32 sd = g_unitRange.Limit(((TimePolynomial*)D_00261380)->Eval((d >? 0.0f) / self->blastRadius));
+            f32 sd = g_unitRange.Limit(((TimePolynomial*)g_childGroupDistanceCurve)->Eval((d >? 0.0f) / self->blastRadius));
             f32 k = self->pushStrength * m * sv * sd;
             Vu0::Q(imp) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(k));
             ConstrainColliderVector(c, &c->v440, &imp, &imp, 0);

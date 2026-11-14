@@ -58,30 +58,30 @@ struct QuadraticCurve {
     f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
 };
 
-extern float D_002751D8;
-extern float D_00275240[4];
+extern float g_pathFollowerRampTime;
+extern float g_pathFollowerFadeCurve[4];
 
-f32 D_00275500[2] = { 0.400000006f, 0.800000012f };
-f32 D_00275508[2] = { 0.0500000007f, 0.300000012f };
-f32 D_00275510[2] = { 0.100000001f, 0.400000006f };
-f32 D_00275518[3] = { 10.0f, 0.0f, 0.100000001f };
-f32 D_00275524 = 4000.0f;
-Vec02 D_00275530 = { -0.5f, 0.699999988f, 0.0f, 0.0f };
-f32 D_00275540[4] = { 1.0f, -0.5f, 0.0f, 0.0f };
-f32 D_00275550[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-f32 D_00275560[4] = { -0.5f, 2.0f, 0.0f, 0.0f };
-f32 D_00275570[4] = { 0.5f, 4.0f, 0.0f, 0.0f };
-f32 D_00275580[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
-f32 D_00275590[4] = { 1.0f, -0.600000024f, 0.0f, 0.0f };
-f32 D_002755A0[2] = { 0.25f, 1.0f };
-f32 D_002755A8 = 1.10000002f;
-f32 D_002755AC = 1000.0f;
-f32 D_002755B0[4] = { 0.5f, 0.25f, 0.0f, 0.0f };
-f32 D_002755C0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
-f32 D_002755D0[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-f32 D_002755E0[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-f32 D_002755F0[2] = { 0.0f, 1.0f };
-f32 D_002755F8 = 0.75f;
+f32 g_wheelParticleTurnRange[2] = { 0.400000006f, 0.800000012f };
+f32 g_wheelParticleTurnRangeWorld3[2] = { 0.0500000007f, 0.300000012f };
+f32 g_wheelParticleTiltRange[2] = { 0.100000001f, 0.400000006f };
+f32 g_followerSpeedRamp[3] = { 10.0f, 0.0f, 0.100000001f };
+f32 g_followerSoundSpeedScale = 4000.0f;
+Vec02 g_followerEngineAPitchCoefficients = { -0.5f, 0.699999988f, 0.0f, 0.0f };
+f32 g_followerEngineAVolumeCoefficients[4] = { 1.0f, -0.5f, 0.0f, 0.0f };
+f32 g_followerEngineAVolumeLimits[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 g_followerEngineBPitchCoefficients[4] = { -0.5f, 2.0f, 0.0f, 0.0f };
+f32 g_followerEngineBVolumeCoefficients[4] = { 0.5f, 4.0f, 0.0f, 0.0f };
+f32 g_followerEngineBVolumeLimits[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
+f32 g_followerSoundMixCoefficients[4] = { 1.0f, -0.600000024f, 0.0f, 0.0f };
+f32 g_followerSoundMixLimits[2] = { 0.25f, 1.0f };
+f32 g_followerSoundBoost = 1.10000002f;
+f32 g_followerSlideSpeedScale = 1000.0f;
+f32 g_followerSlidePitchCoefficients[4] = { 0.5f, 0.25f, 0.0f, 0.0f };
+f32 g_followerSlideVolumeCoefficients[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 g_followerSlideVolumeLimits[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 g_followerSlideGainCoefficients[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 g_followerSlideGainLimits[2] = { 0.0f, 1.0f };
+f32 g_followerSlideSidewaysFactor = 0.75f;
 
 // The record a wheel's emitter (PathEmitter's slot at 0x7C) takes: flags, the spawn data and
 // how many to spawn.
@@ -111,8 +111,8 @@ void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02
 void EmitPathFollowerWheelParticles(PathFollower* self)
 {
     if (self->lapObject != 0) {
-        f32 t = (g_gameTime - self->lapTime) / D_002751D8;
-        *(f32*)((u8*)self->lapObject + 0x334) = g_unitRange.Clamp(((QuadraticCurve*)D_00275240)->Eval(t));
+        f32 t = (g_gameTime - self->lapTime) / g_pathFollowerRampTime;
+        *(f32*)((u8*)self->lapObject + 0x334) = g_unitRange.Clamp(((QuadraticCurve*)g_pathFollowerFadeCurve)->Eval(t));
         BaseObject* o = self->lapObject;
         if (*(f32*)((u8*)o + 0x334) == 0.0f) {
             ((void (*)(BaseObject*))o->desc->m03)(o);
@@ -129,13 +129,13 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
                 Vec02 dir;
                 Mat02 m;
                 Mat02 n;
-                f32* range = (g_currentWorld->soundBank == 3) ? D_00275508 : D_00275500;
+                f32* range = (g_currentWorld->soundBank == 3) ? g_wheelParticleTurnRangeWorld3 : g_wheelParticleTurnRange;
                 // The angle is a statement of its own: &m is formed at the call, after it.
                 f32 a = RandomFloatInRange(range[0], range[1]);
                 BuildAxisAngleMatrix(&g_unitYVector, &m, a);
                 // The tilt's range through a pointer, as the turn's: loop.c then moves its
                 // address out of the loop with the %hi of its first word.
-                f32* tilt = D_00275510;
+                f32* tilt = g_wheelParticleTiltRange;
                 f32 b = RandomFloatInRange(tilt[0], tilt[1]);
                 switch ((s32)i) {
                 case 0:
@@ -323,7 +323,7 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
     if (*(PlayingSound**)self->engineSoundA == 0) {
         return;
     }
-    f32 t = self->targetSpeed / D_00275524;
+    f32 t = self->targetSpeed / g_followerSoundSpeedScale;
     f32 lo = 0.0f;
     f32 hi = 1.0f;
     if (t < lo) {
@@ -331,8 +331,8 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
     } else if (hi < t) {
         t = hi;
     }
-    self->soundSpeed = ApproachValueWithRamp((RampProfile*)D_00275518, 0, self->soundSpeed, t, dt);
-    f32 fwd = Vu0::ToFloat(Vu0::Dot(Vec::Of(self->v150), Vec::Of(self->m110.r[0]))) / D_00275524;
+    self->soundSpeed = ApproachValueWithRamp((RampProfile*)g_followerSpeedRamp, 0, self->soundSpeed, t, dt);
+    f32 fwd = Vu0::ToFloat(Vu0::Dot(Vec::Of(self->v150), Vec::Of(self->m110.r[0]))) / g_followerSoundSpeedScale;
     f32 lo1 = 0.0f;
     f32 hi1 = 1.0f;
     f32 share;
@@ -343,20 +343,20 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
     } else {
         share = fwd;
     }
-    f32 mix = ((ValueRange*)D_002755A0)->Limit(((QuadraticCurve*)D_00275590)->Eval(self->drive));
-    mix = (1.0f - mix) * share + mix * D_002755A8 * self->soundSpeed;
-    SetSoundRecordPitch(*(PlayingSound**)self->engineSoundA, ((QuadraticCurve*)&D_00275530)->Eval(mix) + self->engineAPitchOffset);
+    f32 mix = ((ValueRange*)g_followerSoundMixLimits)->Limit(((QuadraticCurve*)g_followerSoundMixCoefficients)->Eval(self->drive));
+    mix = (1.0f - mix) * share + mix * g_followerSoundBoost * self->soundSpeed;
+    SetSoundRecordPitch(*(PlayingSound**)self->engineSoundA, ((QuadraticCurve*)&g_followerEngineAPitchCoefficients)->Eval(mix) + self->engineAPitchOffset);
     SetSoundRecordVolume(*(PlayingSound**)self->engineSoundA,
-                         ((ValueRange*)D_00275550)->Clamp(((QuadraticCurve*)D_00275540)->Eval(mix)));
-    SetSoundRecordPitch(*(PlayingSound**)self->engineSoundB, ((QuadraticCurve*)D_00275560)->Eval(mix) + self->engineBPitchOffset);
+                         ((ValueRange*)g_followerEngineAVolumeLimits)->Clamp(((QuadraticCurve*)g_followerEngineAVolumeCoefficients)->Eval(mix)));
+    SetSoundRecordPitch(*(PlayingSound**)self->engineSoundB, ((QuadraticCurve*)g_followerEngineBPitchCoefficients)->Eval(mix) + self->engineBPitchOffset);
     SetSoundRecordVolume(*(PlayingSound**)self->engineSoundB,
-                         ((ValueRange*)D_00275580)->Clamp(((QuadraticCurve*)D_00275570)->Eval(mix)));
+                         ((ValueRange*)g_followerEngineBVolumeLimits)->Clamp(((QuadraticCurve*)g_followerEngineBVolumeCoefficients)->Eval(mix)));
     Vec02 local;
     Vec02 drift;
     TransformDirectionBetweenFrames(0, self, &self->v150, &local);
     Vu0::Q(drift) = Vu0::MulAddX(Vec::Of(local), Vec::Of(g_unitXVector), Vec::Scalar(-self->targetSpeed)).q;
-    drift.x = drift.x * D_002755F8;
-    f32 d = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(drift), Vu0::Q(drift)))) / D_002755AC;
+    drift.x = drift.x * g_followerSlideSidewaysFactor;
+    f32 d = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(drift), Vu0::Q(drift)))) / g_followerSlideSpeedScale;
     f32 lo2 = 0.0f;
     f32 hi2 = 1.0f;
     f32 slide;
@@ -367,8 +367,8 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
     } else {
         slide = d;
     }
-    slide = slide * ((ValueRange*)D_002755F0)->Clamp(((QuadraticCurve*)D_002755E0)->Eval(self->drive));
-    SetSoundRecordPitch(*(PlayingSound**)self->slideSound, ((QuadraticCurve*)D_002755B0)->Eval(slide) + self->slidePitchOffset);
+    slide = slide * ((ValueRange*)g_followerSlideGainLimits)->Clamp(((QuadraticCurve*)g_followerSlideGainCoefficients)->Eval(self->drive));
+    SetSoundRecordPitch(*(PlayingSound**)self->slideSound, ((QuadraticCurve*)g_followerSlidePitchCoefficients)->Eval(slide) + self->slidePitchOffset);
     SetSoundRecordVolume(*(PlayingSound**)self->slideSound,
-                         ((ValueRange*)D_002755D0)->Clamp(((QuadraticCurve*)D_002755C0)->Eval(slide)));
+                         ((ValueRange*)g_followerSlideVolumeLimits)->Clamp(((QuadraticCurve*)g_followerSlideVolumeCoefficients)->Eval(slide)));
 }

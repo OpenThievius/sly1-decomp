@@ -41,7 +41,7 @@ void UpdateBestTimeState(Obj_1E00B0_eu* self)
             SetBestTimeState((T217D_1380*)self, 3);
             return;
         }
-        SetTimerRate(o, -Power(2.0f, (f32)D_002623DC));
+        SetTimerRate(o, -Power(2.0f, (f32)g_timerRateExponent));
         r = AreMenusAndFadeClear();
         if (r) o->vt->m38(o); else o->vt->m3C(o);
         if (g_currentEntry->flags & 8) {

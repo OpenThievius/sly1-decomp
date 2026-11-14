@@ -71,7 +71,7 @@ void PushBackMemoryMark(void);
 u8* AllocateBackMemory(s32 size);
 void PopBackMemoryMark(void);
 
-extern u8 D_000018C0[];
+extern u8 g_flushBatchProgram[];
 extern u8 D_000018F8[];
 
 void WriteVifMscal(void* s, s32 n);
@@ -86,12 +86,12 @@ extern u8 D_00000FD8[];
 
 void WriteVifMscal(void* obj, void* data);
 
-extern u8 D_000018C0[];
+extern u8 g_flushBatchProgram[];
 extern u8 D_000018F8[];
 
 void WriteVifMscal(void* obj, void* text);
 
-extern u8 D_000018C0[];
+extern u8 g_flushBatchProgram[];
 extern u8 D_000018F8[];
 
 void WriteVifMscal(void* s, s32 n);
@@ -146,7 +146,7 @@ struct QuadClear
 };
 
 extern PacketWriter g_vifPacketWriter;
-extern u8 D_000018C0[];
+extern u8 g_flushBatchProgram[];
 
 void FlipVifBaseOffset(void);
 
@@ -164,17 +164,17 @@ void CopyMemory(void* dst, void* src, u32 size);
 struct CopiedGifTags { u32 w[8]; };
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-extern u8 D_00001A50[];
-extern u8 D_000002F8[];
+extern u8 g_unlitBatchProgram[];
+extern u8 g_unlitBatchFinishProgram[];
 void CopyMemory(void* dst, void* src, u32 size);
 
 // A run of bytes, for the fill and copy calls.
 struct ByteSpan { u8 b[1]; };
 
-extern u8 D_00000288[];
-extern u8 D_00001210[];
-extern u8 D_00001AB0[];
-extern u8 D_00000010[];
+extern u8 g_litBatchProgram[];
+extern u8 g_litBatchSecondProgram[];
+extern u8 g_litBatchThirdProgram[];
+extern u8 g_litBatchFinishProgram[];
 
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -251,8 +251,8 @@ struct StripHeader {
     s32 count;
 };
 
-extern u8 D_000002F8[];
-extern u8 D_00001A50[];
+extern u8 g_unlitBatchFinishProgram[];
+extern u8 g_unlitBatchProgram[];
 extern u8 D_000036D0[];
 extern u8 D_00001A80[];
 extern u8 D_000027C0[];
@@ -322,7 +322,7 @@ struct AnimatorOwner {
 s32 ClaimAnimatorStep(CursorAnimator* a0);
 void EvaluateOscillator(Oscillator* self);
 
-extern u8 D_00000010[];
+extern u8 g_litBatchFinishProgram[];
 extern u8 D_000000F0[];
 
 struct PartPacketContext { u8 pad0[0x28]; s32 skinned; };
@@ -373,8 +373,8 @@ struct QuadLanes {
     f32 w[4];
 };
 
-extern u8 D_00000288[];
-extern u8 D_00001AB0[];
+extern u8 g_litBatchProgram[];
+extern u8 g_litBatchThirdProgram[];
 extern u8 D_00002008[];
 extern u8 D_00002088[];
 extern u8 D_000023B8[];
@@ -626,12 +626,12 @@ extern u8* g_animRecords;
 // The file's .data, in retail's order, from 0x2623E0.
 ColorWord D_002623E0(0x80101010);
 s32 D_002623E4 = 1;
-s32 D_002623E8[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
-s32 D_00262400[6] = { -1, 0, 4, 8, 12, 0 };
-s32 D_00262418[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
-s32 D_00262430[6] = { -1, 0, 4, 8, 12, 0 };
-s32 D_00262448[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
-s32 D_00262460[5] = { -1, 0, 4, 8, 12 };
+s32 g_morphStmasks[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
+s32 g_morphUnpackAddresses[6] = { -1, 0, 4, 8, 12, 0 };
+s32 g_stripStmasks[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
+s32 g_stripUnpackAddresses[6] = { -1, 0, 4, 8, 12, 0 };
+s32 g_litStripStmasks[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
+s32 g_litStripUnpackAddresses[5] = { -1, 0, 4, 8, 12 };
 s32 D_00262474 = 0x28;
 
 void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
@@ -936,7 +936,7 @@ void WriteStripMeshMscal(s32 mode, void* obj)
 {
     switch (mode) {
     case 0:
-        WriteVifMscal(obj, D_000018C0);
+        WriteVifMscal(obj, g_flushBatchProgram);
         break;
     case 1:
         WriteVifMscal(obj, D_000018F8);
@@ -1003,8 +1003,8 @@ void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* h
         QuadClear::Clear(buf);
         off += n;
         WriteVifStrow(pkt, buf);
-        WriteVifStmask(pkt, D_002623E8[hdr->count]);
-        CopyWordsToWriter(pkt, D_00262400[hdr->count], n, (u32*)data, hdr->p[5]);
+        WriteVifStmask(pkt, g_morphStmasks[hdr->count]);
+        CopyWordsToWriter(pkt, g_morphUnpackAddresses[hdr->count], n, (u32*)data, hdr->p[5]);
         WriteVifStmask(pkt, 0);
     }
     s32 end = off + extra;
@@ -1078,8 +1078,8 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     case 7:
     case 8:
     case 10:
-        head = D_000002F8;
-        tail = D_00001A50;
+        head = g_unlitBatchFinishProgram;
+        tail = g_unlitBatchProgram;
         tinted = 1;
         hasUv = 1;
         break;
@@ -1090,8 +1090,8 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
         tinted = hasUv;
         break;
     case 9:
-        head = D_000002F8;
-        tail = D_00001A50;
+        head = g_unlitBatchFinishProgram;
+        tail = g_unlitBatchProgram;
         hasUv = 0;
         tinted = 1;
         break;
@@ -1158,8 +1158,8 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
         off += n;
         FillMemory(buf, 0, 0x10);
         WriteVifStrow(pkt, buf);
-        WriteVifStmask(pkt, D_00262418[hdr->count]);
-        ReserveVifUnpack(pkt, D_00262430[hdr->count], n, hdr->p->off[3], 0, (u8**)&wOut);
+        WriteVifStmask(pkt, g_stripStmasks[hdr->count]);
+        ReserveVifUnpack(pkt, g_stripUnpackAddresses[hdr->count], n, hdr->p->off[3], 0, (u8**)&wOut);
         WriteVifStmask(pkt, 0);
         for (i = 0; i < n; i++) {
             r = &recs[i];
@@ -1318,8 +1318,8 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
         off += n;
         FillMemory(buf, 0, 0x10);
         WriteVifStrow((PacketWriter*)&pkt[0], buf);
-        WriteVifStmask((PacketWriter*)&pkt[0], D_00262448[hdr->count]);
-        ReserveVifUnpack((PacketWriter*)&pkt[0], D_00262460[hdr->count], n, hdr->p->off[3], 0, (u8**)&wOut);
+        WriteVifStmask((PacketWriter*)&pkt[0], g_litStripStmasks[hdr->count]);
+        ReserveVifUnpack((PacketWriter*)&pkt[0], g_litStripUnpackAddresses[hdr->count], n, hdr->p->off[3], 0, (u8**)&wOut);
         WriteVifStmask((PacketWriter*)&pkt[0], 0);
         for (i = 0; i < n; i++) {
             r = &recs[i];
@@ -1378,7 +1378,7 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
         }
         WriteVifMscal(&pkt[1], D_000023F0);
     }
-    WriteVifMscal(&pkt[1], D_00000288);
+    WriteVifMscal(&pkt[1], g_litBatchProgram);
     for (i = 0; i < n; i++) {
         s32 j;
         r = &recs[i];
@@ -1464,7 +1464,7 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
         hdr->p->off[3] = off;
         off += n;
     }
-    WriteVifMscal(&pkt[2], D_00001AB0);
+    WriteVifMscal(&pkt[2], g_litBatchThirdProgram);
     s32 slot = 0;
     for (s32 i = 0; i < mesh->nstrips; i++) {
         FrameSource* s = &mesh->strips[i];
@@ -1492,7 +1492,7 @@ void BuildPartVifPackets(PartPacketContext* a, PartPacketSource* b, PartPackets*
     WriteVifStcycl((PacketWriter*)buf, 1, 4);
     ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->unpack->lo + 1, 0, (u8**)&c->firstUnpackCursor);
     WriteVifStcycl((PacketWriter*)buf, 1, 1);
-    WriteVifMscal(buf, D_00000010);
+    WriteVifMscal(buf, g_litBatchFinishProgram);
     DetachPacketBuffer((PacketWriter*)buf, (u32*)&c->firstQwc, (u8**)&c->firstBuffer);
     AllocateQuadwordBuffer((PacketWriter*)buf, (u32)((s0 + 4) / 2), 0x1A);
     WriteVifStcycl((PacketWriter*)buf, 1, 4);
@@ -1630,7 +1630,7 @@ struct PartRecord {
     u8 pad00[0x04];
     u8* packets;            // 0x04: 0x30 bytes an entry
 };
-extern FrameTarget D_0027DC20[];
+extern FrameTarget g_meshQueueEntries[];
 s32 GetAnimatorSize(s32 type);
 
 // Moves a pointer that points into the block at `from` (`size` bytes) to the same place in the
@@ -1687,11 +1687,11 @@ void CopyAttachmentPart(AttachmentCopy* owner, void* partp, void* recp)
                     u8* end = old + size;
                     e->buffers[j] = CopyToFrontMemory(size, old);
                     for (s32 k = 0; k < first; k++) {
-                        FrameTarget* t = &D_0027DC20[k];
+                        FrameTarget* t = &g_meshQueueEntries[k];
                         if (!((u8*)t->dstAddr < old) && (u8*)t->dstAddr < end) {
                             s32 again = 0;
                             for (s32 m = first; m < g_meshQueueCount; m++) {
-                                FrameTarget* q = &D_0027DC20[m];
+                                FrameTarget* q = &g_meshQueueEntries[m];
                                 if (q->dstAddr == t->dstAddr) {
                                     again = 1;
                                     break;
@@ -2273,7 +2273,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscal(&g_vifPacketWriter, D_00001210);
+                Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0x10000000);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -2283,7 +2283,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, e->qwc2, e->addr2);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscal(&g_vifPacketWriter, D_00000010);
+                Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchFinishProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0x10000000);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -2296,7 +2296,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscal(&g_vifPacketWriter, D_00001210);
+                Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0x10000000);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -2306,7 +2306,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, e->qwc2, e->addr2);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscalf(&g_vifPacketWriter, D_00000010);
+                Vif_166690::Mscalf(&g_vifPacketWriter, g_litBatchFinishProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -2318,7 +2318,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscal(&g_vifPacketWriter, D_00001210);
+                Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0x90000000);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -2337,7 +2337,7 @@ slow:
                         Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
                     }
                     Vif_166690::Cnt1(&g_vifPacketWriter);
-                    Vif_166690::Mscal(&g_vifPacketWriter, D_00001210);
+                    Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
                     Vif_166690::Word(&g_vifPacketWriter, 0);
                     Vif_166690::Word(&g_vifPacketWriter, 0);
                     Vif_166690::Word(&g_vifPacketWriter, 0);
@@ -2348,7 +2348,7 @@ slow:
                     Vif_166690::Refs(&g_vifPacketWriter, e->qwc2, e->addr2);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
-                Vif_166690::Mscalf(&g_vifPacketWriter, D_00000010);
+                Vif_166690::Mscalf(&g_vifPacketWriter, g_litBatchFinishProgram);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);

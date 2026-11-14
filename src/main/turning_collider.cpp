@@ -19,14 +19,14 @@ struct Vec02;
 
 
 // The file's .data, in retail's order.
-f32 D_00274AD0[2] = { 1.0f, -1.0f };
+f32 g_contactSideSigns[2] = { 1.0f, -1.0f };
 ObjectLink g_turningColliderLinks[6] = { {6, 0x36, 0x61C}, {6, 0x35, 0x618}, {6, 0x37, 0x628}, {6, 0x3A, 0x62C}, {6, 0x38, 0x620}, {6, 0x3B, 0x624} };
 f32 D_00274B20 = 0.5f;
 Vec02 D_00274B30 = { 1.0f, -1.0f, 0.0f, 0.0f };
 s32 D_00274B40[3] = { 0x453B8000, 0, 0x40000000 };
 s32 D_00274B50[3] = { 0x453B8000, 0, 0x3E800000 };
-f32 D_00274B5C = 0;
-f32 D_00274B60[1] = { 0.1f };
+f32 g_previousStickLevel = 0;
+f32 g_phaseSoundMinInterval[1] = { 0.1f };
 f32 D_00274B64 = -0.033f;
 f32 D_00274B68[3] = { 300.0f, 0.0f, 0.25f };
 f32 D_00274B74 = 1.5f;
@@ -199,19 +199,19 @@ void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32
 
 void ReadTurningColliderStickHeading(TurningCollider* self, PadRecord* pad)
 {
-    D_00274B5C = (D_00274B5C - 0.25f >? 0.0f);
-    if (D_00274B5C < pad->stickMagnitude) {
+    g_previousStickLevel = (g_previousStickLevel - 0.25f >? 0.0f);
+    if (g_previousStickLevel < pad->stickMagnitude) {
         ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->stickHeading);
     } else {
         self->stickHeading = self->heading;
     }
     f32 level = pad->stickMagnitude;
     self->stickLevel = level;
-    D_00274B5C = level;
+    g_previousStickLevel = level;
 }
 
 extern f32 g_gameTime[];
-extern s32 D_00605548;
+extern s32 g_lastPhaseSoundId;
 f32 WrapModulo(f32 x, f32 y);
 s32 RandomIntInRange(s32 a, s32 b);
 struct PlayingSound;
@@ -223,7 +223,7 @@ void PlayPhaseCrossingSound(Player* self, f32* p, f32 f) {
     f32 old = self->stepPhase;
     f32 ang;
     self->stepPhase = f;
-    if (g_gameTime[0] - self->f6C8 < D_00274B60[0]) return;
+    if (g_gameTime[0] - self->f6C8 < g_phaseSoundMinInterval[0]) return;
     if (WrapModulo(f - p[0], 1.0f) < 0.5f && 0.5f < WrapModulo(old - p[0], 1.0f)) {
         ang = p[2];
     } else if (WrapModulo(self->stepPhase - p[1], 1.0f) < 0.5f && 0.5f < WrapModulo(old - p[1], 1.0f)) {
@@ -232,11 +232,11 @@ void PlayPhaseCrossingSound(Player* self, f32* p, f32 f) {
         return;
     }
     s32 idx = RandomIntInRange(0x47, 0x4A);
-    if (idx == D_00605548) {
+    if (idx == g_lastPhaseSoundId) {
         s32 x = idx - 0x46;
         idx = x % 4 + 0x47;
     }
-    D_00605548 = idx;
+    g_lastPhaseSoundId = idx;
     StartSoundEffect(idx, 0, 0, (Vec02*)&self->v140, 1000.0f, 200.0f, ang, 0.0f, 0.0f, 0, 0);
     PlaySoundWithWanderingPitch();
 }
@@ -434,7 +434,7 @@ s32 IsTurningColliderGroundContact(TurningCollider* self, Contact03* a, s32 idx)
     if (self->followedMesh == 0) {
         return 0;
     }
-    if (a->normal.z * D_00274AD0[idx] < 0.7f) {
+    if (a->normal.z * g_contactSideSigns[idx] < 0.7f) {
         return 0;
     }
     s32 kind = a->kind;
@@ -568,7 +568,7 @@ void ResolveTurningColliderGroundContact(TurningCollider* self, Contact03* c, s3
         push = 0.0f;
         goto apply;
     }
-    w = Vu0::ToFloat(Vu0::Dot(Vu0::Q(c->normal), Vu0::Q(self->m110.r[2]))) * D_00274AD0[e];
+    w = Vu0::ToFloat(Vu0::Dot(Vu0::Q(c->normal), Vu0::Q(self->m110.r[2]))) * g_contactSideSigns[e];
     if (c->depth < -2.0f) {
         f32 f90 = c->depth;
         u128 v = Vu0::Q(c->end[e].point);
@@ -638,7 +638,7 @@ void CollectTurningColliderContacts(TurningCollider* self)
                     bestHeight = h;
                     self->groundContactTime = g_gameClock.time;
                     self->groundContactPoint = c->end[1 - j].point;
-                    Vu0::Q(self->groundContactNormal) = Vu0::MulX(Vu0::Q(c->normal), Vu0::ScalarAt(D_00274AD0[j]));
+                    Vu0::Q(self->groundContactNormal) = Vu0::MulX(Vu0::Q(c->normal), Vu0::ScalarAt(g_contactSideSigns[j]));
                     self->groundContactPart = c->end[1 - j].part;
                     best = c;
                 }
@@ -675,7 +675,7 @@ void CollectTurningColliderContacts(TurningCollider* self)
                     }
                 }
                 if (kind == 3 || (j == 1 && (kind == 1 || kind == 4 || kind == 5 || kind == 6))) {
-                    f32 sign = D_00274AD0[j];
+                    f32 sign = g_contactSideSigns[j];
                     if (0.0f < sign * c->normal.z) {
                         Vec02 n;
                         Vec02 d;

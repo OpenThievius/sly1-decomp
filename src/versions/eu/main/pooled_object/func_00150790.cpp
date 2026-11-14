@@ -12,8 +12,8 @@ void SetStepSequenceState(StepSequence* self, s32 next)
     }
     switch (cur) {
     case 5:
-        if (((Glob_150790_eu*)&D_0026F5A0)->f260 == self) {
-            ((Glob_150790_eu*)&D_0026F5A0)->f260 = 0;
+        if (((Glob_150790_eu*)&g_hintGlyphElement)->f260 == self) {
+            ((Glob_150790_eu*)&g_hintGlyphElement)->f260 = 0;
         }
         break;
     case 1:
@@ -46,10 +46,10 @@ void SetStepSequenceState(StepSequence* self, s32 next)
     }
     switch (next) {
     case 5:
-        if (((Glob_150790_eu*)&D_0026F5A0)->f260 != 0) {
-            SetStepSequenceState(((Glob_150790_eu*)&D_0026F5A0)->f260, 0);
+        if (((Glob_150790_eu*)&g_hintGlyphElement)->f260 != 0) {
+            SetStepSequenceState(((Glob_150790_eu*)&g_hintGlyphElement)->f260, 0);
         }
-        ((Glob_150790_eu*)&D_0026F5A0)->f260 = self;
+        ((Glob_150790_eu*)&g_hintGlyphElement)->f260 = self;
         self->state2D4 = next;
         break;
     case 1:

@@ -63,7 +63,7 @@ struct OwnedAgent {
     PlayerLinkedCollider* owner;
 };
 
-extern s32 D_00275B28[10];
+extern s32 g_playerLinkedColliderLinks[10];
 
 void StartPlacedObject(PlacedObject* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
@@ -78,7 +78,7 @@ void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
     void* r;
 
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 3, (ObjectLink*)D_00275B28);
+    ResolveObjectLinks(self, 3, (ObjectLink*)g_playerLinkedColliderLinks);
     self->stateWalker = (StateWalker*)CreateStateWalker((StateGraph*)self->stateGraph, self, -1, 1);
     r = FindFirstObjectByIdMode4((World*)g_currentWorld, 7, self);
     if (r != 0) {
@@ -502,13 +502,13 @@ void InitArcPoints(T217D_3F0* self, s32 kind)
 }
 
 extern u8* g_currentWorld;
-extern u8 D_00275640[];
-extern f32 D_00275B58[2];
-extern f32 D_00275650;
-extern f32 D_00275654;
-extern f32 D_00275658;
-extern f32 D_0027565C;
-extern f32 D_00275660;
+extern u8 g_coneVolumeColor[];
+extern f32 g_arcSpriteRange[2];
+extern f32 g_coneVolumeFirstAngle;
+extern f32 g_coneVolumeSecondLevel;
+extern f32 g_coneVolumeSecondAngle;
+extern f32 g_coneVolumeThirdLevel;
+extern f32 g_coneVolumeThirdAngle;
 
 typedef void (*ConeSpriteFn)(void* self);
 struct ConeSprite { ConeSpriteFn* vtbl; };
@@ -532,13 +532,13 @@ void CreateArcSprite(T217D_3F0* self)
     SetupScreenElementText(self);
     self->sprite = CreateTypedRecord(0x51, g_currentWorld, 0, 0x201, -1);
     SetConeVolumeMode((ConeVolume*)self->sprite, 1);
-    SetConeVolumeColor((ConeVolume*)self->sprite, (Quad16*)D_00275640);
-    SetConeVolumeFirstAngle((ConeVolume*)self->sprite, D_00275650);
-    SetConeVolumeSecondLevel((ConeVolume*)self->sprite, D_00275654);
-    SetConeVolumeSecondAngle((ConeVolume*)self->sprite, D_00275658);
-    SetConeVolumeThirdLevel((ConeVolume*)self->sprite, D_0027565C);
-    SetConeVolumeThirdAngle((ConeVolume*)self->sprite, D_00275660);
-    SetConeVolumeRange((ConeVolume*)self->sprite, (U64P*)D_00275B58);
+    SetConeVolumeColor((ConeVolume*)self->sprite, (Quad16*)g_coneVolumeColor);
+    SetConeVolumeFirstAngle((ConeVolume*)self->sprite, g_coneVolumeFirstAngle);
+    SetConeVolumeSecondLevel((ConeVolume*)self->sprite, g_coneVolumeSecondLevel);
+    SetConeVolumeSecondAngle((ConeVolume*)self->sprite, g_coneVolumeSecondAngle);
+    SetConeVolumeThirdLevel((ConeVolume*)self->sprite, g_coneVolumeThirdLevel);
+    SetConeVolumeThirdAngle((ConeVolume*)self->sprite, g_coneVolumeThirdAngle);
+    SetConeVolumeRange((ConeVolume*)self->sprite, (U64P*)g_arcSpriteRange);
     SetConeVolumeValue((ConeVolume*)self->sprite, 1);
     ((ConeSprite*)self->sprite)->vtbl[7](self->sprite);
 }
@@ -588,7 +588,7 @@ void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
     }
 }
 
-extern u8 D_00275B50[8];
+extern u8 g_arcGreyColor[8];
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
 
@@ -627,7 +627,7 @@ void WriteArcPointVertices(T217D_3F0* self, PacketWriter* buf)
         Rgba4 c;
         {
             Rgba4 a = *(Rgba4*)&p->colorB;
-            Rgba4 b = *(Rgba4*)D_00275B50;
+            Rgba4 b = *(Rgba4*)g_arcGreyColor;
             f32 t = p->level;
             Rgba4 m;
             m.r = ColorLerp::Of(a.r, b.r, t);
@@ -669,8 +669,8 @@ void WriteArcPointVertices(T217D_3F0* self, PacketWriter* buf)
 
 
 extern f32 g_elapsedTime;
-extern Rgba4 D_002610D8;
-extern Rgba4 D_002610E0;
+extern Rgba4 g_arcTickColorFrom;
+extern Rgba4 g_arcTickColorTo;
 
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
@@ -700,8 +700,8 @@ void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf)
     }
     BeginGifTag(buf, 0, 1, 1);
     {
-        Rgba4 a = D_002610D8;
-        Rgba4 b = D_002610E0;
+        Rgba4 a = g_arcTickColorFrom;
+        Rgba4 b = g_arcTickColorTo;
         Rgba4 r;
         r.r = ColorLerp::Of(a.r, b.r, t);
         r.g = ColorLerp::Of(a.g, b.g, t);
@@ -1333,8 +1333,8 @@ void ResetArc(T217D_3F0* self)
     self->phase = 3;
 }
 
-extern u8 D_00275B50[8];
-void ConstructGreyColor(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { D_00275B50[0] = 0x80; D_00275B50[1] = 0x80; D_00275B50[2] = 0x80; D_00275B50[3] = 0x80; } }
+extern u8 g_arcGreyColor[8];
+void ConstructGreyColor(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { g_arcGreyColor[0] = 0x80; g_arcGreyColor[1] = 0x80; g_arcGreyColor[2] = 0x80; g_arcGreyColor[3] = 0x80; } }
 
 void ConstructGreyColor(s32 enabled, u32 value);
 
@@ -1343,6 +1343,6 @@ void ConstructGreyColorAtStartup(void)
     ConstructGreyColor(1, 0xFFFF);
 }
 
-s32 D_00275B28[10] = { 0x00000000, 0x00000356, 0x00000618, 0x00000000, 0x00000357, 0x00000610, 0x00000002, 0x0000035C, 0x0000061C, 0x00000000 };
-u8 D_00275B50[8] = { 0 };
-f32 D_00275B58[2] = { 500.0f, 2500.0f };
+s32 g_playerLinkedColliderLinks[10] = { 0x00000000, 0x00000356, 0x00000618, 0x00000000, 0x00000357, 0x00000610, 0x00000002, 0x0000035C, 0x0000061C, 0x00000000 };
+u8 g_arcGreyColor[8] = { 0 };
+f32 g_arcSpriteRange[2] = { 500.0f, 2500.0f };

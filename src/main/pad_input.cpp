@@ -21,7 +21,7 @@ struct PadPatternPlayer;
 // 0x262E10, in retail's order: the stick-response floats func_0016E738 reads, the button masks,
 // the code sequences with their slots, the flags, the two records, the list head and the timer.
 
-extern const char D_0024A848[24] = "The password is: %s";
+extern const char g_passwordMessageFormat[24] = "The password is: %s";
 f32 D_00262A30[8] = { 1.0f, 0.0f, 0.0f, 1.0f, 0.699999988f, 0.699999988f, 0.699999988f, -0.699999988f };
 
 u16 g_padButtonMasks[12] = { 0x2000, 0x8000, 0x1000, 0x4000, 0x0010, 0x0020, 0x0040, 0x0080, 0x0004, 0x0008, 0x0001, 0x0002 };
@@ -37,18 +37,18 @@ void MarkAllLevelRecordsComplete(void);
 ButtonCodeSlot g_worldLoadButtonCode = { { (const u16*)g_worldLoadButtonSequence, 0xB, (ButtonCodeFn)RequestWorldLoadByMode, 0x0 } };
 u32 g_clearFlagsButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800 };
 ButtonCodeSlot g_clearFlagsButtonCode = { { (const u16*)g_clearFlagsButtonSequence, 0xB, (ButtonCodeFn)ClearButtonCodeFlags, 0x0 } };
-u32 D_00262AD8[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x8000 };
-ButtonCodeSlot D_00262AF0 = { { (const u16*)D_00262AD8, 0xB, (ButtonCodeFn)SetButtonCodeFlags, 0x4004 } };
-u32 D_00262B10[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x2000 };
-ButtonCodeSlot D_00262B28 = { { (const u16*)D_00262B10, 0xB, (ButtonCodeFn)SetButtonCodeFlags, 0x8 } };
+u32 g_setFlags4004ButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x8000 };
+ButtonCodeSlot g_setFlags4004ButtonCode = { { (const u16*)g_setFlags4004ButtonSequence, 0xB, (ButtonCodeFn)SetButtonCodeFlags, 0x4004 } };
+u32 g_setFlag8ButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x2000 };
+ButtonCodeSlot g_setFlag8ButtonCode = { { (const u16*)g_setFlag8ButtonSequence, 0xB, (ButtonCodeFn)SetButtonCodeFlags, 0x8 } };
 u32 g_setFlagsButtonSequenceC[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x20 };
 ButtonCodeSlot g_setFlagsButtonCodeC = { { (const u16*)g_setFlagsButtonSequenceC, 0xB, (ButtonCodeFn)SetButtonCodeFlags, 0x2 } };
 u32 g_flagNumberedItemsButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x1000 };
 ButtonCodeSlot g_flagNumberedItemsButtonCode = { { (const u16*)g_flagNumberedItemsButtonSequence, 0xB, (ButtonCodeFn)FlagAllNumberedItems, 0x0 } };
-u32 D_00262BB8[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x4000 };
-ButtonCodeSlot D_00262BD0 = { { (const u16*)D_00262BB8, 0xB, (ButtonCodeFn)SetSavedWorldBits, 0xF000FFFF } };
-u32 D_00262BF0[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x10 };
-ButtonCodeSlot D_00262C08 = { { (const u16*)D_00262BF0, 0xB, (ButtonCodeFn)MarkAllLevelRecordsComplete, 0x0 } };
+u32 g_setWorldBitsButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x4000 };
+ButtonCodeSlot g_setWorldBitsButtonCode = { { (const u16*)g_setWorldBitsButtonSequence, 0xB, (ButtonCodeFn)SetSavedWorldBits, 0xF000FFFF } };
+u32 g_completeRecordsButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x10 };
+ButtonCodeSlot g_completeRecordsButtonCode = { { (const u16*)g_completeRecordsButtonSequence, 0xB, (ButtonCodeFn)MarkAllLevelRecordsComplete, 0x0 } };
 u32 g_passwordMessageButtonSequence[8] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800080, 0x80, 0x0 };
 ButtonCode g_passwordMessageButtonCode = { (const u16*)g_passwordMessageButtonSequence, 0xD, (ButtonCodeFn)ShowPasswordMessage, 0x0 };
 // size: s32 flags, word accesses only
@@ -65,7 +65,7 @@ ButtonCode* g_buttonCodes = 0;
 
 extern f32 g_elapsedTime[];
 struct ButtonCodeTimer { f32 time; f32 pad[3]; };
-ButtonCodeTimer D_00262E00 = { 0.0f, { 0.0f, 0.0f, 0.0f } };
+ButtonCodeTimer g_buttonCodeTimer = { 0.0f, { 0.0f, 0.0f, 0.0f } };
 
 void UpdatePadRouting(void);
 extern "C" s32 InitPadLibrary(s32 mode);
@@ -723,7 +723,7 @@ void AdvanceButtonCodes(PadRecord* self, s32 value)
     if (id == previous || previous == 0) return;
     ButtonCodeAdvance::Of(head);
     GameClock* clock = &g_gameClock;
-    D_00262E00.time = clock->elapsed + 1.0f;
+    g_buttonCodeTimer.time = clock->elapsed + 1.0f;
 }
 
 void ResetButtonCodes(void);
@@ -733,10 +733,10 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 
 void RunCompletedButtonCode(void)
 {
-    if (D_00262E00.time == 0.0f) {
+    if (g_buttonCodeTimer.time == 0.0f) {
         return;
     }
-    if (!(D_00262E00.time <= g_elapsedTime[0])) {
+    if (!(g_buttonCodeTimer.time <= g_elapsedTime[0])) {
         return;
     }
     ButtonCode* best = 0;
@@ -763,7 +763,7 @@ void RunCompletedButtonCode(void)
         best->fn(best->arg);
     }
     ResetButtonCodes();
-    D_00262E00.time = 0.0f;
+    g_buttonCodeTimer.time = 0.0f;
 }
 
 extern s32 g_buttonCodeFlags;
@@ -791,7 +791,7 @@ void SetButtonCodeFlags(s32 flags)
 
 LINKER_REMNANT(func_0016F470);
 
-extern const char D_002483B8[24];
+extern const char g_scrambledPassword[24];
 
 s32 ComputeCompletionMask(void);
 void* CopyString(void* dst, const char* src);
@@ -806,12 +806,12 @@ void ShowPasswordMessage(void)
         if ((ComputeCompletionMask() & 6) == 6) {
             if (g_saveData->pickupCount == 99 && g_saveData->reserveCount == 0) {
                 char* p = buf;
-                CopyString(p, (const char*)D_002483B8);
+                CopyString(p, (const char*)g_scrambledPassword);
                 while (*p != 0) {
                     *p ^= 0x23;
                     p++;
                 }
-                FormatToString(text, (const char*)D_0024A848, buf);
+                FormatToString(text, (const char*)g_passwordMessageFormat, buf);
                 g_buttonHintElement.vt->m08(&g_buttonHintElement, text);
                 SetScreenElementHoldTime(&g_buttonHintElement, 10.0f);
                 g_buttonHintElement.vt->m14(&g_buttonHintElement);
@@ -826,11 +826,11 @@ void RegisterButtonCodes(void)
 {
     AddButtonCode(&g_worldLoadButtonCode.rec);
     AddButtonCode(&g_clearFlagsButtonCode.rec);
-    AddButtonCode(&D_00262AF0.rec);
-    AddButtonCode(&D_00262B28.rec);
+    AddButtonCode(&g_setFlags4004ButtonCode.rec);
+    AddButtonCode(&g_setFlag8ButtonCode.rec);
     AddButtonCode(&g_setFlagsButtonCodeC.rec);
     AddButtonCode(&g_flagNumberedItemsButtonCode.rec);
-    AddButtonCode(&D_00262BD0.rec);
-    AddButtonCode(&D_00262C08.rec);
+    AddButtonCode(&g_setWorldBitsButtonCode.rec);
+    AddButtonCode(&g_completeRecordsButtonCode.rec);
     AddButtonCode(&g_passwordMessageButtonCode);
 }

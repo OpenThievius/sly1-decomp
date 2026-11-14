@@ -7,7 +7,7 @@ void InitDisplay(void)
     Rgba4 t;
 
     ResetGs(0, 1, 3, 1);
-    u8* s0 = D_00262490;
+    u8* s0 = g_displayRegisters;
     SetUpDoubleBuffer((GsDBuff*)s0, 0, 0x280, 0x100, 3, 0x30, 0);
     u8* p = s0;
     s32 end = (s32)s0 + 0x50;
@@ -22,13 +22,13 @@ void InitDisplay(void)
     k.b = 0;
     k.a = 0x80;
     t = k;
-    FillScreenColor(D_002BDC20, &t, 0);
+    FillScreenColor(g_screenClearPacketA, &t, 0);
     t = k;
-    FillScreenColor(D_002BE1A0, &t, 0);
+    FillScreenColor(g_screenClearPacketC, &t, 0);
     t = k;
-    FillScreenColor(D_002BDEE0, &t, 1);
-    D_002BE460 = CreateLockSemaphore(0, 1);
-    D_002BE464 = CreateLockSemaphore(0, 1);
+    FillScreenColor(g_screenClearPacketB, &t, 1);
+    g_vblankSemaphore = CreateLockSemaphore(0, 1);
+    g_gsFinishSemaphore = CreateLockSemaphore(0, 1);
     AddInterruptHandler(2, (void (*)(void))HandleVblankStart, 0);
     EnableInterruptCause(2);
     AddInterruptHandler(0, (void (*)(void))HandleGsFinish, 0);

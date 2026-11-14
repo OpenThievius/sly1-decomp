@@ -13,13 +13,13 @@
 // GCC would align to 8 as one object: it stays included, and ControlPlayerOnPath reads its first.
 float D_00274F00 = 35.0f;
 float D_00274F04 = 100.0f;
-float D_00274F08 = 0.5f;
+float g_steepSlopeThreshold = 0.5f;
 INCLUDE_DATA(D_00274F0C);
 float D_00274F14 = 50.0f;
 float D_00274F18 = 1.0f;
-float D_00274F1C = 0.400000006f;
-float D_00274F20[2] = {10.0f, 0.0f};
-float D_00274F28[4] = {1500.0f, 0.0f, 0.5f, 0.0f};
+float g_pathTurnThreshold = 0.400000006f;
+float g_pathPlaceStep[2] = {10.0f, 0.0f};
+float g_pathVelocityRamp[4] = {1500.0f, 0.0f, 0.5f, 0.0f};
 
 struct TwoEntryBlendEntry {
     u8 pad0[4];
@@ -126,9 +126,9 @@ void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length)
     for (;; i++) {
         f32 step;
         if (i & 1) {
-            step = (f32)(i + 1) * D_00274F20[0];
+            step = (f32)(i + 1) * g_pathPlaceStep[0];
         } else {
-            step = (f32)i * -D_00274F20[0];
+            step = (f32)i * -g_pathPlaceStep[0];
         }
         f32 at = length + step;
         if (h->closed == 0) {
@@ -291,7 +291,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     s32 rev;
     f32 k;
 
-    Vu0::Q(self->pathPoseOffset) = ApproachPointWithRamp(Vu0::Q(self->pathPoseOffset), Vu0::Q(D_00248D30), (RampProfile*)D_00274F28, 0,
+    Vu0::Q(self->pathPoseOffset) = ApproachPointWithRamp(Vu0::Q(self->pathPoseOffset), Vu0::Q(D_00248D30), (RampProfile*)g_pathVelocityRamp, 0,
                                                 g_gameClock.dt);
     if (self->subState == 0x17 || self->subState == 0x1B) {
         Vu0::Set(self->headingVelocity, Vu0::Zero());
@@ -307,7 +307,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     TransformPointBetweenFrames(path->frame, 0, &b, &b);
     Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Sub(Vu0::Q(a), Vu0::Q(b)), Vu0::Q(g_unitZVector)));
     if (self->padSelectMode == -1) {
-        if (D_00274F08 < __builtin_fabsf(dir.z)) {
+        if (g_steepSlopeThreshold < __builtin_fabsf(dir.z)) {
             if (0.0f < dir.z) {
                 if (self->pathFlipped != 0) {
                     SetPlayerState(self, 7, 0x1B);
@@ -318,11 +318,11 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
                 return;
             }
         }
-        if (D_00274F1C < self->pathSpeedEased && self->pathFlipped != 0 && -D_00274F0C < dir.z) {
+        if (g_pathTurnThreshold < self->pathSpeedEased && self->pathFlipped != 0 && -D_00274F0C < dir.z) {
             SetPlayerState(self, 7, 0x1B);
             return;
         }
-        if (self->pathSpeedEased < -D_00274F1C && self->pathFlipped == 0 && dir.z < D_00274F0C) {
+        if (self->pathSpeedEased < -g_pathTurnThreshold && self->pathFlipped == 0 && dir.z < D_00274F0C) {
             SetPlayerState(self, 7, 0x1B);
             return;
         }

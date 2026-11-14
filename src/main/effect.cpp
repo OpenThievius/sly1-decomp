@@ -392,7 +392,7 @@ void UpdateEffect(Effect* self, f32 dt);
 
 s32 IsObjectAttached(BaseObject* self);
 
-extern Quad219C D_00275C50;
+extern Quad219C g_unitXQuad;
 
 void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra);
 
@@ -406,7 +406,7 @@ struct AngledPoint { u8 pad00[0x20]; f32 angle; };
 
 
 
-extern s32 D_0026B6C0[4];
+extern s32 g_effectImpactIgnoredKinds[4];
 
 void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Vec02* normal, Effect** out);
 
@@ -431,14 +431,14 @@ s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 
 
-extern f32 D_0026B5B0[4];
+extern f32 g_followUpEffectAlphaCurve[4];
 
-extern f32 D_0026B5C0[4];
+extern f32 g_followUpEffectAcceleration[4];
 
 
-extern f32 D_0026B710[4];
+extern f32 g_facingEffectAlphaCurve[4];
 
-extern f32 D_0026B720[4];
+extern f32 g_facingEffectSizeCurve[4];
 
 void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
@@ -458,29 +458,29 @@ Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 
 void* StoreQuadword(u128* out, u128 v);
 
-extern f32 D_0026B570[4];
+extern f32 g_trailSegmentAlphaCurve[4];
 
-extern f32 D_0026B580[4];
+extern f32 g_trailSegmentSizeCurve[4];
 
-extern f32 D_0026B5D0[4];
+extern f32 g_wideTrailAlphaCurve[4];
 
-extern f32 D_0026B5E0[4];
+extern f32 g_wideTrailSizeCurve[4];
 
 void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra);
 
-extern Vec02 D_0026B560;
+extern Vec02 g_scaledEffectSizeCurve;
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
-extern f32 D_0026B6A0[4];
+extern f32 g_phaseFadeInAlphaCurve[4];
 
-extern f32 D_0026B6B0[4];
+extern f32 g_phaseFadeOutAlphaCurve[4];
 
 void* StoreQuadword(u128* out, u128 v);
 
-extern f32 D_0026B590[4];
+extern f32 g_spawningEffectSizeCurve[4];
 
-extern f32 D_0026B5A0[4];
+extern f32 g_spawningEffectAlphaCurve[4];
 
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
@@ -536,90 +536,90 @@ struct ClampedQuadratic {
 
 f32 D_0026B530[4] = { 1.0f, 1.666667f, -2.666667f, 0.0f };
 
-f32 D_0026B540 = 0.5f;
+f32 g_attachedHitDuration = 0.5f;
 
-f32 D_0026B544 = 0.5f;
+f32 g_attachedHitBlend = 0.5f;
 
-f32 D_0026B548 = 1.5f;
+f32 g_attachedHitBriefScale = 1.5f;
 
-f32 D_0026B54C = 200.0f;
+f32 g_effectFloorZ = 200.0f;
 
 // The life left to an effect that falls below the floor (HandleEffectContact reads it as a float).
-f32 D_0026B550 = 0.25f;
+f32 g_effectFloorLife = 0.25f;
 
 // A size curve, read as one quadword (InitScaledEffect): 16-aligned, which leaves retail's 12
 // bytes of zeros after the float before it.
-Vec02 D_0026B560 = { 0.5f, 2.0f, -2.0f, 0.0f };
+Vec02 g_scaledEffectSizeCurve = { 0.5f, 2.0f, -2.0f, 0.0f };
 
-f32 D_0026B570[4] = { 0.5f, -0.5f, 0.0f, 0.0f };
+f32 g_trailSegmentAlphaCurve[4] = { 0.5f, -0.5f, 0.0f, 0.0f };
 
-f32 D_0026B580[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
+f32 g_trailSegmentSizeCurve[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
 
-f32 D_0026B590[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 g_spawningEffectSizeCurve[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
 
-f32 D_0026B5A0[4] = { 4.0f, -4.0f, 0.0f, 0.0f };
+f32 g_spawningEffectAlphaCurve[4] = { 4.0f, -4.0f, 0.0f, 0.0f };
 
-f32 D_0026B5B0[4] = { 0.699999988079071f, 0.0f, -0.699999988079071f, 0.0f };
+f32 g_followUpEffectAlphaCurve[4] = { 0.699999988079071f, 0.0f, -0.699999988079071f, 0.0f };
 
-f32 D_0026B5C0[4] = { 0.0f, 0.0f, 50.0f, 0.0f };
+f32 g_followUpEffectAcceleration[4] = { 0.0f, 0.0f, 50.0f, 0.0f };
 
-f32 D_0026B5D0[4] = { 0.75f, -0.75f, -0.0f, 0.0f };
+f32 g_wideTrailAlphaCurve[4] = { 0.75f, -0.75f, -0.0f, 0.0f };
 
-f32 D_0026B5E0[4] = { 1.0f, 2.0f, -3.0f, 0.0f };
+f32 g_wideTrailSizeCurve[4] = { 1.0f, 2.0f, -3.0f, 0.0f };
 
-f32 D_0026B5F0[4] = { 0.5f, 0.0f, 0.0f, 0.0f };
+f32 g_cameraSpaceEffectLife[4] = { 0.5f, 0.0f, 0.0f, 0.0f };
 
-f32 D_0026B600[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
+f32 g_phaseFadeInSpeedCurve[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
 
-f32 D_0026B610[4] = { 1.0f, -0.7f, 0.0f, 0.0f };
+f32 g_phaseSpeedCurve[4] = { 1.0f, -0.7f, 0.0f, 0.0f };
 
-f32 D_0026B620[4] = { 135.0f, 0.0f, -85.0f, 0.0f };
+f32 g_phaseFadeInSizeCurve[4] = { 135.0f, 0.0f, -85.0f, 0.0f };
 
-f32 D_0026B630[4] = { 50.0f, 170.0f, -85.0f, 0.0f };
+f32 g_phaseSizeCurve[4] = { 50.0f, 170.0f, -85.0f, 0.0f };
 
-f32 D_0026B640[4] = { 1.0f, 0.0005f, 0.0f, 0.0f };
+f32 g_phaseScaleDistanceCurve[4] = { 1.0f, 0.0005f, 0.0f, 0.0f };
 
-f32 D_0026B650[4] = { 1.0f, 10.0f, 0.0f, 0.0f };
+f32 g_phaseScaleDistanceRange[4] = { 1.0f, 10.0f, 0.0f, 0.0f };
 
-f32 D_0026B660[4] = { 1.65f, -0.0002f, 0.0f, 0.0f };
+f32 g_phaseAlphaDistanceCurve[4] = { 1.65f, -0.0002f, 0.0f, 0.0f };
 
-f32 D_0026B670[4] = { 0.65f, 1.0f, 0.0f, 0.0f };
+f32 g_phaseAlphaDistanceRange[4] = { 0.65f, 1.0f, 0.0f, 0.0f };
 
-f32 D_0026B680[4] = { 0.0f, 6.0f, 0.0f, 0.0f };
+f32 g_phaseDashCountCurve[4] = { 0.0f, 6.0f, 0.0f, 0.0f };
 
-f32 D_0026B690[4] = { 5.0f, 16.0f, 0.0f, 0.0f };
+f32 g_phaseDashCountRange[4] = { 5.0f, 16.0f, 0.0f, 0.0f };
 
-f32 D_0026B6A0[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 g_phaseFadeInAlphaCurve[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 
-f32 D_0026B6B0[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
+f32 g_phaseFadeOutAlphaCurve[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
 
-s32 D_0026B6C0[4] = { 0x40, 5, 0x42, 0x43 };
+s32 g_effectImpactIgnoredKinds[4] = { 0x40, 5, 0x42, 0x43 };
 
-f32 D_0026B6D0[4] = { 0.0f, -0.01f, 0.0f, 0.0f };
+f32 g_tumbleSpinCurve[4] = { 0.0f, -0.01f, 0.0f, 0.0f };
 
-f32 D_0026B6E0[2] = { -10.0f, 10.0f };
+f32 g_tumbleSpinRange[2] = { -10.0f, 10.0f };
 
-f32 D_0026B6E8 = -1.0f;
+f32 g_tumbleAlongDrag = -1.0f;
 
-f32 D_0026B6EC = 200.0f;
+f32 g_tumbleTargetSpeed = 200.0f;
 
-f32 D_0026B6F0[4] = { 0.75f, 1.25f, 0.0f, 0.0f };
+f32 g_spinLifeScaleRange[4] = { 0.75f, 1.25f, 0.0f, 0.0f };
 
-f32 D_0026B700[4] = { 0.0f, 0.001f, 0.0f, 0.0f };
+f32 g_spinSpeedCurve[4] = { 0.0f, 0.001f, 0.0f, 0.0f };
 
-f32 D_0026B710[4] = { 0.0f, 4.0f, -4.0f, 0.0f };
+f32 g_facingEffectAlphaCurve[4] = { 0.0f, 4.0f, -4.0f, 0.0f };
 
-f32 D_0026B720[4] = { 0.25f, 3.0f, -3.0f, 0.0f };
+f32 g_facingEffectSizeCurve[4] = { 0.25f, 3.0f, -3.0f, 0.0f };
 
-f32 D_0026B730[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 g_facingEffectRollCurve[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 
-f32 D_0026B740[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
+f32 g_facingEffectNearCurve[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
 
-f32 D_0026B750[4] = { 1.0f, 5.0f, 0.0f, 0.0f };
+f32 g_facingEffectNearRange[4] = { 1.0f, 5.0f, 0.0f, 0.0f };
 
-f32 D_0026B760[4] = { 0.5f, 0.0f, 0.5f, 0.0f };
+f32 g_facingEffectFadeCurve[4] = { 0.5f, 0.0f, 0.5f, 0.0f };
 
-f32 D_0026B770[2] = { 0.5f, 1.0f };
+f32 g_facingEffectFadeRange[2] = { 0.5f, 1.0f };
 
 EffectOwner* AcquireEffectOwner(World* self, s32 flag)
 {
@@ -955,12 +955,12 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     if (other->desc->flags & 0x80) {
         Vec02 target;
         GetAttachedSetPointMotion((AttachedSet*)other, at, (Quad16*)&target, 0);
-        Vu0::Vec vel = Vu0::MulAddX(Vu0::Vec::Of(self->qA0), Vu0::Sub(Vu0::Vec::Of(target), Vu0::Vec::Of(self->qA0)), Vu0::Vec::ScalarAt(D_0026B544));
-        f32 time = D_0026B540;
+        Vu0::Vec vel = Vu0::MulAddX(Vu0::Vec::Of(self->qA0), Vu0::Sub(Vu0::Vec::Of(target), Vu0::Vec::Of(self->qA0)), Vu0::Vec::ScalarAt(g_attachedHitBlend));
+        f32 time = g_attachedHitDuration;
         Vu0::Q(self->qA0) = vel.q;
         Vu0::Q(self->qC0) = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(target), vel), Vu0::Vec::Scalar(time)).q;
         ShortenEffectLife(self, time);
-        SpawnBriefEffectAt(at, (BriefEffectSource*)other, radius * D_0026B548);
+        SpawnBriefEffectAt(at, (BriefEffectSource*)other, radius * g_attachedHitBriefScale);
         return 1;
     }
     Collider* o = (Collider*)self->p20;
@@ -1015,9 +1015,9 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     MeasurePointToSegment((Vec02*)&D_00248D30, &t1, &t2, &along, &off);
     *(Vu0::Vec*)&self->qA0 = Vu0::Add(Vu0::Vec::Of(self->qA0), Vu0::MulXSum(d1, Vu0::Vec::Scalar((1.0f - along) * j1), dir, Vu0::Vec::Scalar(along * j2)));
     *(Vu0::Vec*)&self->spin = Vu0::MulAddX(Vu0::Vec::Of(self->spin), Vu0::MulXSum(c1, Vu0::Vec::Scalar((1.0f - along) * j1), c2, Vu0::Vec::Scalar(along * j2)), Vu0::Vec::Scalar(2.5f / (radius * radius)));
-    if (((Vec02*)&self->qA0)->z < D_0026B54C) {
-        ((Vec02*)&self->qA0)->z = D_0026B54C;
-        ShortenEffectLife(self, D_0026B550);
+    if (((Vec02*)&self->qA0)->z < g_effectFloorZ) {
+        ((Vec02*)&self->qA0)->z = g_effectFloorZ;
+        ShortenEffectLife(self, g_effectFloorLife);
     }
     f32 depth = MaxF(0.0f, Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Vec::Of(*at), Vu0::Vec::Of(self->pos)), nv))) + 1.0f;
     Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Vec::Of(self->pos), nv, Vu0::Vec::Scalar(depth)).q;
@@ -1343,7 +1343,7 @@ void InitStreakEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->life = 0.25f;
     s32 v = (s32)g_currentWorld->slot1CE8[4];
     self->i20 = v;
-    self->q40 = D_00275C50;
+    self->q40 = g_unitXQuad;
     self->f120 = 0.05f;
 }
 
@@ -1372,7 +1372,7 @@ void InitScaledEffect(Effect* self, void* pos, f32 f, s32 flags)
     InitEffect(self, pos, f, flags);
     self->life = 0.5f;
     s32 v = (s32)g_currentWorld->slot1CE8[5];
-    u8* p = (u8*)&D_0026B560;
+    u8* p = (u8*)&g_scaledEffectSizeCurve;
     self->i20 = v;
     Quadword128 t;
     StoreFloatAsQuadword((u128*)&t, f);
@@ -1387,11 +1387,11 @@ void InitTrailSegment(Effect* self, void* pos, f32 f, s32 flags)
 {
     InitEffect(self, pos, f, flags);
     Quad219C* sub = &self->q30;
-    u8* p = (u8*)D_0026B580;
+    u8* p = (u8*)g_trailSegmentSizeCurve;
     s32 v = (s32)g_currentWorld->slot1CE8[7];
     self->fB0 = -15.0f;
     self->i20 = v;
-    self->q40 = *(Quad219C*)D_0026B570;
+    self->q40 = *(Quad219C*)g_trailSegmentAlphaCurve;
     self->life = 0.35f;
     Quadword128 t;
     StoreFloatAsQuadword((u128*)&t, f);
@@ -1607,7 +1607,7 @@ void InitSpawningEffect(Effect* self, void* pos, f32 f, s32 flags)
 {
     InitEffect(self, pos, f, flags);
     Quad219C* sub = &self->q30;
-    u8* p = (u8*)D_0026B590;
+    u8* p = (u8*)g_spawningEffectSizeCurve;
     s32 v = (s32)g_currentWorld->slot1CE8[8];
     self->life = 0.25f;
     self->i20 = v;
@@ -1617,7 +1617,7 @@ void InitSpawningEffect(Effect* self, void* pos, f32 f, s32 flags)
     Quadword128 u;
     CopyQuadword((u128*)&u, p);
     (void)StoreQuadword((u128*)sub, ScaleQuadword(tv, u));
-    u8* q = (u8*)D_0026B5A0;
+    u8* q = (u8*)g_spawningEffectAlphaCurve;
     self->q40 = *(Quad219C*)q;
 }
 
@@ -1641,9 +1641,9 @@ void InitFollowUpEffect(Effect* self, void* pos, f32 scale, s32 flags)
     World* sys = g_currentWorld;
     self->i20 = (s32)sys->slot1CE8[9];
     self->life = 3.0f;
-    self->q40 = *(Quad219C*)D_0026B5B0;
+    self->q40 = *(Quad219C*)g_followUpEffectAlphaCurve;
     self->m30[1] = self->m30[0] * 0.25f;
-    self->qC0 = *(Quad219C*)D_0026B5C0;
+    self->qC0 = *(Quad219C*)g_followUpEffectAcceleration;
     self->fB0 = -1.0f;
 }
 
@@ -1651,11 +1651,11 @@ void InitWideTrailSegment(Effect* self, void* pos, f32 f, s32 flags)
 {
     InitTrailSegment(self, pos, f, flags);
     Quad219C* sub = &self->q30;
-    u8* p = (u8*)D_0026B5E0;
+    u8* p = (u8*)g_wideTrailSizeCurve;
     s32 v = (s32)g_currentWorld->slot1CE8[10];
     self->fB0 = -15.0f;
     self->i20 = v;
-    self->q40 = *(Quad219C*)D_0026B5D0;
+    self->q40 = *(Quad219C*)g_wideTrailAlphaCurve;
     Quadword128 t;
     StoreFloatAsQuadword((u128*)&t, f);
     Quadword128 tv = t;
@@ -1685,9 +1685,9 @@ void InitCameraSpaceEffect(Effect* self, void* pos, f32 scale, s32 flags)
     f32 x = RandomFloatInRange(p->rows[8], p->rows[12]);
     f32 y = RandomFloatInRange(p->rows[9], p->rows[13]);
     f32 z = RandomFloatInRange(p->rows[10], p->rows[14]);
-    self->life = D_0026B5F0[0];
+    self->life = g_cameraSpaceEffectLife[0];
     Vu0::Q(self->qA0) = Vu0::FromFloats(x, y, z);
-    self->q40 = D_00275C50;
+    self->q40 = g_unitXQuad;
     self->q30 = *(const Quad219C*)&p->rows[20];
 }
 
@@ -1750,7 +1750,7 @@ void RunEffectEndCallback(Effect* self)
 void InitEmitterEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
-    self->q40 = D_00275C50;
+    self->q40 = g_unitXQuad;
     self->life = 2.0f;
 }
 
@@ -1860,9 +1860,9 @@ void AdvanceEffectPhases(Effect* c, f32 dt)
     f32 t = (g_gameTime - c->start) / c->life;
     f32 k;
     switch (c->i120) {
-    case 0: k = D_0026B600[0] + t * (D_0026B600[1] + t * D_0026B600[2]); break;
-    case 1: k = D_0026B610[0]; break;
-    case 2: k = D_0026B610[0] + t * (D_0026B610[1] + t * D_0026B610[2]); break;
+    case 0: k = g_phaseFadeInSpeedCurve[0] + t * (g_phaseFadeInSpeedCurve[1] + t * g_phaseFadeInSpeedCurve[2]); break;
+    case 1: k = g_phaseSpeedCurve[0]; break;
+    case 2: k = g_phaseSpeedCurve[0] + t * (g_phaseSpeedCurve[1] + t * g_phaseSpeedCurve[2]); break;
     }
     f32 p = c->f124 + k * dt;
     c->f124 = p;
@@ -1914,13 +1914,13 @@ void DrawPhasedEffect(Effect* self, Camera* cam)
     f32 size;
     switch (self->i120) {
     case 0:
-        size = D_0026B620[0] + t * (D_0026B620[1] + t * D_0026B620[2]);
+        size = g_phaseFadeInSizeCurve[0] + t * (g_phaseFadeInSizeCurve[1] + t * g_phaseFadeInSizeCurve[2]);
         break;
     case 1:
-        size = D_0026B630[0];
+        size = g_phaseSizeCurve[0];
         break;
     case 2:
-        size = D_0026B630[0] + t * (D_0026B630[1] + t * D_0026B630[2]);
+        size = g_phaseSizeCurve[0] + t * (g_phaseSizeCurve[1] + t * g_phaseSizeCurve[2]);
         break;
     }
     f32 total = 0.0f;
@@ -1942,10 +1942,10 @@ void DrawPhasedEffect(Effect* self, Camera* cam)
         f32 b;
         f32 c;
         ClampedQuadratic::Get(a, (const QuadraticCoeffs*)&self->q40, t);
-        ClampedQuadratic::Clamp(b, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B660, w), (const ValueRange*)D_0026B670);
+        ClampedQuadratic::Clamp(b, ClampedQuadratic::Eval((const QuadraticCoeffs*)g_phaseAlphaDistanceCurve, w), (const ValueRange*)g_phaseAlphaDistanceRange);
         draw.alpha = a * b >? draw.alpha;
         f32 s = ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, t);
-        ClampedQuadratic::Clamp(c, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B640, w), (const ValueRange*)D_0026B650);
+        ClampedQuadratic::Clamp(c, ClampedQuadratic::Eval((const QuadraticCoeffs*)g_phaseScaleDistanceCurve, w), (const ValueRange*)g_phaseScaleDistanceRange);
         f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(v), Vu0::Q(v))));
         scaleMin = s * c <? scaleMin;
         p->length = len;
@@ -1958,14 +1958,14 @@ void DrawPhasedEffect(Effect* self, Camera* cam)
         if (dh <= 0.0f) {
             dh += 6.28318548f;
         }
-        f32 turn = dh * D_0026B630[0] / p[1].at.z;
+        f32 turn = dh * g_phaseSizeCurve[0] / p[1].at.z;
         p->turn = turn;
         total += turn;
     }
     pts[n] = pts[0];
     if (self->i128 < 0) {
         f32 c;
-        ClampedQuadratic::Clamp(c, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B680, total), (const ValueRange*)D_0026B690);
+        ClampedQuadratic::Clamp(c, ClampedQuadratic::Eval((const QuadraticCoeffs*)g_phaseDashCountCurve, total), (const ValueRange*)g_phaseDashCountRange);
         self->i128 = (s32)c;
         cur = n;
     } else {
@@ -2051,15 +2051,15 @@ void SetEffectPhase(Effect* self, s32 mode)
     }
     switch (mode) {
     case 0:
-        self->q40 = *(Quad219C*)D_0026B6A0;
+        self->q40 = *(Quad219C*)g_phaseFadeInAlphaCurve;
         self->life = 0.25f;
         break;
     case 1:
-        self->q40 = *(Quad219C*)((u8*)&D_00275C50);
+        self->q40 = *(Quad219C*)((u8*)&g_unitXQuad);
         self->life = 3.4028235e+38f;
         break;
     case 2:
-        self->q40 = *(Quad219C*)D_0026B6B0;
+        self->q40 = *(Quad219C*)g_phaseFadeOutAlphaCurve;
         self->life = 0.5f;
         break;
     }
@@ -2256,7 +2256,7 @@ s32 HandleEffectImpact(Effect* self, PlacedObject* other, void* a2, void* a3)
 {
     u32 i;
     for (i = 0; i < 4; i++) {
-        if (IsObjectOfKind(other->root, D_0026B6C0[i]) != 0) {
+        if (IsObjectOfKind(other->root, g_effectImpactIgnoredKinds[i]) != 0) {
             return 0;
         }
     }
@@ -2365,7 +2365,7 @@ static inline f32 NormalizeInPlace(Vec02* v, const Vec02& fallback)
 void MoveTumblingEffect(Effect* self, f32 dt)
 {
     f32 t = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->qA0), Vu0::Q(self->rotation[0])));
-    f32 w = EvalClampedQuadratic(D_0026B6D0, D_0026B6E0, t);
+    f32 w = EvalClampedQuadratic(g_tumbleSpinCurve, g_tumbleSpinRange, t);
     Mat02 turn;
     TurnEffectAboutRow(self, *(Mat02*)self->rotation, &turn, w * dt);
     f32 drag = self->fB0;
@@ -2375,7 +2375,7 @@ void MoveTumblingEffect(Effect* self, f32 dt)
     SplitVectorAlongAxis((Vec02*)&self->qA0, self->rotation, &along, &across);
     t = NormalizeInPlace(&along, g_unitXVector);
     Vu0::Q(self->qA0) =
-        Vu0::MulXSum(Vu0::Vec::Of(along), Vu0::Vec::Scalar(D_0026B6EC + (D_0026B6E8 * dt + 1.0f) * (t - D_0026B6EC)),
+        Vu0::MulXSum(Vu0::Vec::Of(along), Vu0::Vec::Scalar(g_tumbleTargetSpeed + (g_tumbleAlongDrag * dt + 1.0f) * (t - g_tumbleTargetSpeed)),
                      Vu0::Vec::Of(across), Vu0::Vec::Scalar(drag * dt + 1.0f)).q;
     MoveEffect(self, dt);
     self->fB0 = drag;
@@ -2532,13 +2532,13 @@ remove:
 
 void RandomizeEffectSpin(Effect* self, Rec50* src)
 {
-    self->life *= RandomFloatInRange(D_0026B6F0[0], D_0026B6F0[1]);
+    self->life *= RandomFloatInRange(g_spinLifeScaleRange[0], g_spinLifeScaleRange[1]);
     f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->qA0)));
     f32 t;
     self->f120 = *(f32*)((u8*)src + 0x1F0);
     self->f124 = *(f32*)((u8*)src + 0x1F4);
     self->f128 = *(f32*)((u8*)src + 0x1F8);
-    ClampedQuadratic::Get(t, (const QuadraticCoeffs*)D_0026B700, len);
+    ClampedQuadratic::Get(t, (const QuadraticCoeffs*)g_spinSpeedCurve, len);
     f32 s = t * 10.0f;
     f32* p = (f32*)((u8*)self + 0x100);
     for (s32 i = 2; i >= 0; i--) {
@@ -2571,8 +2571,8 @@ void InitFacingEffect(Effect* self, void* pos, f32 scale, s32 flags)
     u8* sys = (u8*)g_currentWorld;
     self->life = half;
     self->i20 = *(s32*)(sys + 0x1D30);
-    self->q40 = *(Quad219C*)D_0026B710;
-    self->q30 = *(Quad219C*)D_0026B720;
+    self->q40 = *(Quad219C*)g_facingEffectAlphaCurve;
+    self->q30 = *(Quad219C*)g_facingEffectSizeCurve;
 }
 
 // Draws a facing effect: an object turned to the camera, scaled and faded by the distance and
@@ -2602,15 +2602,15 @@ void DrawFacingEffect(Effect* self, Camera* cam)
         f32 k = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(dir))) * 0.001f;
         f32 s = ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, t);
         f32 near;
-        ClampedQuadratic::Clamp(near, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B740, k), (const ValueRange*)D_0026B750);
+        ClampedQuadratic::Clamp(near, ClampedQuadratic::Eval((const QuadraticCoeffs*)g_facingEffectNearCurve, k), (const ValueRange*)g_facingEffectNearRange);
         Vu0::Q(scale) = Vu0::Splat(s * near);
         f32 a;
         ClampedQuadratic::Get(a, (const QuadraticCoeffs*)&self->q40, t);
         f32 fade;
-        ClampedQuadratic::Clamp(fade, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B760, k), (const ValueRange*)D_0026B770);
+        ClampedQuadratic::Clamp(fade, ClampedQuadratic::Eval((const QuadraticCoeffs*)g_facingEffectFadeCurve, k), (const ValueRange*)g_facingEffectFadeRange);
         draw.alpha = a * fade;
         draw.scale = 1.0f;
-        BuildAxisAngleMatrix(&g_unitXVector, &axis, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B730, t));
+        BuildAxisAngleMatrix(&g_unitXVector, &axis, ClampedQuadratic::Eval((const QuadraticCoeffs*)g_facingEffectRollCurve, t));
         MulRotationRowsX(&rot, basis, axis);
         BuildScaledTransformMatrix(&pos.x, (f32(*)[4])&rot, &scale.x, draw.m);
         ((PlacedObject*)self->p20)->desc02()->m26((PlacedObject*)self->p20, cam, &draw);
@@ -2620,7 +2620,7 @@ void DrawFacingEffect(Effect* self, Camera* cam)
 void InitDelayedEffect(Effect* self, void* pos, f32 x, s32 flags)
 {
     InitEffect(self, pos, x, flags);
-    self->q40 = *(Quad219C*)&D_00275C50;
+    self->q40 = *(Quad219C*)&g_unitXQuad;
     self->m30[0] = x;
     self->m30[1] = 1.0f - x;
     *(s32*)&self->m30[2] = 0;
