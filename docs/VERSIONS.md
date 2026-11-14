@@ -82,6 +82,13 @@ the next one's alignment.
 
 ### PAL's own data
 
+The class descriptors (`D_00217380`, one row for the whole of src/main/class_descriptors.cpp) match
+through two tables of their own, `src/versions/eu/main/class_descriptors/`: `D_00218330`, whose slot 8
+holds PAL's `SetScreenElementWideText` (func_eu_001AB2B0; US's `SetCaptionTextAndSize` is absent from
+PAL, as is `SetScreenElementText`, which the pairing already sends to the same function), and
+`D_002184C0`, whose slot 16 holds the generic `SetScreenElementMode` where US has
+`SetElementModeRebuildingText`.
+
 A global PAL holds differently (another value, a string id where US has a pointer, a table with
 other rows) gets a definition of its own, the same way a function does:
 
@@ -123,7 +130,7 @@ What stays `differs`, and why, from the last full check:
 | Cause | Rows | Globals |
 |---|---:|---|
 | Literals and jump tables of functions PAL has no C for: strings translated, reordered or turned into ids, floats, cases elsewhere. PAL's message text is longer, so its strings straddle the US arrays' places (`D_002495C0`, `D_002497D8`, `D_00249838`): those are left to the disassembly, since filling a US label with whatever PAL bytes sit at its place would describe nothing | 9 | `D_00249428`, `D_00249CA0`, `D_0024A2D0`, `D_0024A7A0`, `D_0024B280`, `D_0024B660`, `D_0024CBD0`, `D_0024DB20`, `D_0024E600` |
-| One word that no global holds, or that needs another row's section: the pad word after `g_buildFrame` (PAL has 1 in it), the pointer to the literal `"ab"`, a method table slot that holds another method, a function with no PAL pairing | 4 | `D_00261F70`, `D_002743A0` (every global of it is defined, but the literal `"ab"` moves with the rodata of `D_0024CBD0`), `D_0024B438`, `D_00217380` |
+| One word that no global holds, or that needs another row's section: the pad word after `g_buildFrame` (PAL has 1 in it), the pointer to the literal `"ab"`, a method table slot that holds another method | 3 | `D_00261F70`, `D_002743A0` (every global of it is defined, but the literal `"ab"` moves with the rodata of `D_0024CBD0`), `D_0024B438` |
 | Objects a constructor fills in (`BoxStyle D_00262988`, `D_002629A8`): PAL's bytes there are static data, and a C++ object with a constructor has no initial value to write; a table PAL grew and moved (`D_0026A138`, the pause menu's rows and the pointers into them) | 2 | `D_00262718`, `D_00269CD8` |
 | Grown tables inside labels the file includes from the disassembly (`INCLUDE_DATA`), which are not C | 2 | `D_00275940`, `D_00275B60` |
 | Tables PAL grew or laid out differently, whose extra words run into the next US globals: the clip planes (`D_002756B0`, two more planes, then `D_00275718`, `D_0027571C`, `D_00275728`) and a block of `game_progress`'s tables (`D_002623E4` to `D_00262474`). A definition needs PAL's own layout (its own label sizes), not US's labels filled with the bytes at their places, so they stay | 2 | `D_00275140`, `D_002623C0` |
