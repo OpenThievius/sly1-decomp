@@ -7,7 +7,6 @@
 #include "common.h"
 
 struct ArmedStateNotifier;
-struct Camera;
 struct Collider;
 struct Contact03;
 struct ContactObject;
@@ -38,7 +37,7 @@ void TriggerStateNotifierNearPlayer(StateNotifier* self);
 s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* b);
 void UpdateStateNotifier(StateNotifier* self, f32 dt);
 void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m);
-void SetStateNotifierState(Camera* self, s32 state);
+void SetStateNotifierState(StateNotifier* self, s32 state);
 void InitTimeRangeNotifier(TimeRangeNotifier* self);
 void CompleteTimeRangeNotifier(TimeRangeNotifier* self);
 void HandleTimeRangeNotifierNotification(TimeRangeNotifier* self, s32 kind, void* target);

@@ -741,7 +741,7 @@ void RecomputeSoundLevel(SoundLevelEntry* entry)
     SoundLevelEntry* x;
     f.list = P;
     f.link = P;
-    f.offset = *(s32*)(P + 8);
+    f.offset = ((List01*)P)->offset;
     f.prev = g_activeListFrames;
     g_activeListFrames = &f;
     if (IsListEmpty((List01*)P) != 0) {
@@ -878,9 +878,9 @@ void* GetSoundListenerPosition(void)
     SwitchedCollider* p = (SwitchedCollider*)GetActiveSwitchedCollider();
     u8* r;
     if (p != 0 && p->desc05()->m4A(p) != 0) {
-        r = (u8*)p + 0x140;
+        r = (u8*)&p->v140;
     } else {
-        r = (u8*)g_camera + 0x40;
+        r = (u8*)g_camera->position;
     }
     return r;
 }
@@ -1203,7 +1203,7 @@ void UpdateSoundEmitters(void)
     ListFrame* saved = g_activeListFrames;
     f.list = P;
     f.link = P;
-    f.offset = *(s32*)(P + 8);
+    f.offset = ((List01*)P)->offset;
     f.prev = saved;
     g_activeListFrames = &f;
     if (g_streamVoice != 0 && IsVoiceBusy(g_streamVoice) == 0) {
@@ -1296,7 +1296,7 @@ void UpdateSoundEmitters(void)
             if (e->positional == 0) goto next;
             {
                 s1 = (u8*)&e->position;
-                if (e->object != 0) s1 = (u8*)e->object + 0x140;
+                if (e->object != 0) s1 = (u8*)&((PlacedObject*)e->object)->v140;
                 r = v5(v4, s1);
                 if (e->farRange < r) {
                     if (0.0f <= e->interval.value) goto next;
@@ -1484,8 +1484,7 @@ void SetLastWorldSoundEntryFromPoint(World* self, Point2* p)
 void SetLastWorldSoundEntryValues(World* self, U64P* item)
 {
     if (!self->soundCount) return;
-    // &soundEntries[soundCount - 1], written from 0x1D70 as retail computes it
-    WorldSoundEntry* e = (WorldSoundEntry*)((u8*)self + 0x1D70 + self->soundCount * 20);
+    WorldSoundEntry* e = &self->soundEntries[self->soundCount - 1];
     e->repeat = *item;
 }
 

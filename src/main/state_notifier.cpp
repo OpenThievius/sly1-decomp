@@ -79,7 +79,9 @@ struct NotifyFrame {
 struct ListenerMessage {
     s32 state;              // 0x00
     void* sender;           // 0x04
-    u8 pad08[0x50 - 0x08];
+    u8 pad08[0x40 - 0x08];
+    s32 units;              // 0x40: the whole units counted so far (state 7)
+    u8 pad44[0x50 - 0x44];
 };
 
 extern u8 g_flagTable[];
@@ -317,7 +319,7 @@ void StartStateNotifier(StateNotifier* self)
 {
     StartPlacedObject(self);
     void* r = FindFirstObjectByIdGathered(self->world, 1, 0x75, self);
-    self->f2EC = r;
+    self->f2EC = (BaseObject*)r;
     if (r != 0) {
         ((void (*)(void*))((void**)*(void***)r)[7])(r);
     }
@@ -779,7 +781,7 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
         self->countAccum = self->countAccum + dt * self->countRate;
         if (1.0f <= self->countAccum) {
             ListenerMessage msg;
-            *(s32*)(msg.pad08 + 0x38) = (s32)self->countAccum;
+            msg.units = (s32)self->countAccum;
             msg.state = 0x81;
             msg.sender = self;
             self->countListener->vtbl[31](self->countListener, &msg);
@@ -807,7 +809,7 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
         if (!(1.0f < g_gameClock[1] - self->stateSince)) {
             break;
         }
-        ((BaseObject*)self->f2EC)->desc->m02((BaseObject*)self->f2EC);
+        self->f2EC->desc->m02(self->f2EC);
     case 6:
         TriggerStateNotifierNearPlayer(self);
         break;
@@ -905,7 +907,6 @@ void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
 }
 
 
-#define CAMERA_AT(T, p, off) (*(T*)((u8*)(p) + (off)))
 extern f32 g_gameTime;
 extern u8 g_unitXVector[];
 void* GetActiveSwitchedColliderData(void);
@@ -916,23 +917,23 @@ void AdvanceStateWalkerTime(Node_1B6CF0* self, f32 t);
 // 4 and 5, sets the vectors of the new state, tells the object at 0x2EC (add to or remove from
 // its parent's list) and starts or stops the state walker of the state's event (0x260 to 0x263,
 // or the one saved at 0x2DC in state 0).
-void SetStateNotifierState(Camera* self, s32 state)
+void SetStateNotifierState(StateNotifier* self, s32 state)
 {
     s32 event = -1;
-    if (CAMERA_AT(s32, self, 0x2D0) == state) {
+    if (self->state == state) {
         return;
     }
     void* active = GetActiveSwitchedColliderData();
     if (state != 0 && state != 6) {
         self->desc->m15(self, 0);
     }
-    switch (CAMERA_AT(s32, self, 0x2D0)) {
+    switch (self->state) {
     case -1:
     case 2:
     case 4:
     case 5:
-        self->f2F0 = self->f100;
-        self->f300 = self->f150;
+        self->motionPos = self->pos;
+        self->motionVel = self->v150;
         break;
     default:
         break;
@@ -940,8 +941,8 @@ void SetStateNotifierState(Camera* self, s32 state)
     if ((u32)state < 8) {
         switch (state) {
         case 0: {
-            s32 saved = CAMERA_AT(s32, self, 0x2DC);
-            self->f310 = *(Vec02*)D_00248D30;
+            s32 saved = self->f2DC;
+            self->motionAccel = *(Vec02*)D_00248D30;
             event = 0x261;
             if (saved != -1) {
                 event = saved;
@@ -950,15 +951,15 @@ void SetStateNotifierState(Camera* self, s32 state)
         }
         case 7:
             event = 0x262;
-            self->f310 = *(Vec02*)D_00248D30;
+            self->motionAccel = *(Vec02*)D_00248D30;
             break;
         case 3:
             event = 0x260;
-            self->f310 = *(Vec02*)g_notifierFallAcceleration;
+            self->motionAccel = *(Vec02*)g_notifierFallAcceleration;
             break;
         case 2:
             if (self->f334 == 0) {
-                self->f338 = 1;
+                self->f338 = (void*)1;
             }
             self->desc->m03(self);
             break;
@@ -966,26 +967,26 @@ void SetStateNotifierState(Camera* self, s32 state)
             Vec02 dir;
             Mat02 m10;
             Mat02 m40;
-            ConvertOffsetToCylindrical(&self->f140, (Vec02*)((u8*)CAMERA_AT(u8*, active, 4) + 0x140), &self->f2F0.x, &self->f2F0.y, &self->f2F0.z);
-            self->f300 = *(Vec02*)g_notifierStartVelocity;
-            self->f310 = *(Vec02*)D_00248D30;
-            Vu0::Q(dir) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)CAMERA_AT(u8*, active, 4) + 0x140)), Vu0::Q(self->f140));
+            ConvertOffsetToCylindrical(&self->v140, &((NotifierLead*)active)->placementObject->v140, &self->motionPos.x, &self->motionPos.y, &self->motionPos.z);
+            self->motionVel = *(Vec02*)g_notifierStartVelocity;
+            self->motionAccel = *(Vec02*)D_00248D30;
+            Vu0::Q(dir) = Vu0::Sub(Vu0::Q(((NotifierLead*)active)->placementObject->v140), Vu0::Q(self->v140));
             dir.z = dir.z * g_notifierAimZScale;
             BuildBasisFromX(&dir, &m10);
             BuildAxisAngleMatrix((const Vec02*)g_unitXVector, (Mat02*)&m40, -2.5f);
             MulRotationRowsX(&m10, m10, m40);
             MultiplyMatrices3x3(&m10, &self->m110, &m40);
-            MatrixToAxisAngle(&m40, (f32*)((u8*)self + 0x35C), (Vec02*)((u8*)self + 0x360));
-            self->f370 = 0;
+            MatrixToAxisAngle(&m40, &self->spinAngle, &self->spinAxis);
+            self->settled = 0;
             break;
         }
         case 5:
-            Vu0::Q(self->f2F0) = Vu0::Sub(Vu0::Q(self->f140), Vu0::Q(*(Vec02*)((u8*)CAMERA_AT(u8*, active, 4) + 0x140)));
-            self->f300 = self->f310 = *(Vec02*)D_00248D30;
+            Vu0::Q(self->motionPos) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(((NotifierLead*)active)->placementObject->v140));
+            self->motionVel = self->motionAccel = *(Vec02*)D_00248D30;
             break;
         case 6:
             event = 0x263;
-            self->f310 = *(Vec02*)D_00248D30;
+            self->motionAccel = *(Vec02*)D_00248D30;
             break;
         default:
             break;
@@ -1004,24 +1005,25 @@ void SetStateNotifierState(Camera* self, s32 state)
             obj->desc->m03(obj);
         }
     }
-    CAMERA_AT(s32, self, 0x2D0) = state;
-    CAMERA_AT(f32, self, 0x2D4) = g_gameTime;
+    // a field access here changes retail's code
+    *(s32*)((u8*)self + 0x2D0) = state;
+    *(f32*)((u8*)self + 0x2D4) = g_gameTime;
     if (event != -1) {
-        void* h = self->f2E8;
+        void* h = self->host;
         if (h == 0) {
-            void* made = CreateStateWalker((StateGraph*)(self->f2E4), self, event, 0);
-            self->f2E8 = made;
-            if (0.0f < CAMERA_AT(f32, self, 0x2E0)) {
-                AdvanceStateWalkerTime((Node_1B6CF0*)made, CAMERA_AT(f32, self, 0x2E0));
+            void* made = CreateStateWalker((StateGraph*)(self->stateGraph), self, event, 0);
+            self->host = made;
+            if (0.0f < self->f2E0) {
+                AdvanceStateWalkerTime((Node_1B6CF0*)made, self->f2E0);
             }
         } else {
             SetStateWalkerTarget((StateWalker*)h, event);
         }
     } else {
-        void* h = self->f2E8;
+        void* h = self->host;
         if (h != 0) {
             DestroyStateWalker((StateWalker*)h);
-            self->f2E8 = 0;
+            self->host = 0;
         }
     }
 }
@@ -1109,7 +1111,7 @@ void PlaceSpareSoundNotifier(World* self)
         obj->desc02()->m20(obj, (Vec02*)D_00248D30);
         obj->desc02()->m21(obj, (Vec02*)D_00248D30);
         obj->desc02()->m2F(obj, 4);
-        *(Quad_148038*)((u8*)obj + 0x300) = g_spareNotifierVelocity;
+        *(Quad_148038*)&obj->motionVel = g_spareNotifierVelocity;
         QueryValueListMask((ValueListObject*)self->valueListObject, obj->boundRadius, (Bits128*)&obj->v140, &obj->visibilityMask);
     }
 }
@@ -1194,7 +1196,7 @@ void SetEffectNotifierState(TimeRangeNotifier* self, s32 mode)
                 mode = 2;
             break;
         }
-        SetStateNotifierState((Camera*)self, mode);
+        SetStateNotifierState(self, mode);
     }
 }
 
@@ -1227,7 +1229,7 @@ void SetSoundNotifierState(SoundNotifier* self, s32 mode)
         mode = 4;
         TriggerScriptEvent(self, 2, 0, 0);
     }
-    SetStateNotifierState((Camera*)self, mode);
+    SetStateNotifierState(self, mode);
 }
 
 // Initialises the state notifier with its radii, speeds and retention factors; starts in mode 2
@@ -1276,7 +1278,7 @@ void SetSaveNotifierState(SaveNotifier* self, s32 mode)
         ResetScatterLevels((ScatterController*)g_scatterController);
         StartMemoryCardSave((MemoryCard*)g_memoryCard);
     }
-    SetStateNotifierState((Camera*)self, mode);
+    SetStateNotifierState(self, mode);
 }
 
 // Initialises the state notifier with its radii, speeds and retention factors; starts in mode 2
@@ -1353,7 +1355,7 @@ void SetDeadlineNotifierState(DeadlineNotifier* self, s32 mode)
         }
         mode = 2;
     }
-    SetStateNotifierState((Camera*)self, mode);
+    SetStateNotifierState(self, mode);
 }
 
 // Comparison for a sort into descending order: 1 when the first is smaller, else -1.
@@ -1392,7 +1394,7 @@ s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out)
     if (viewer != 0) {
         src = &viewer->v140;
     } else {
-        src = (Vec02*)(*(u8**)g_camera + 0x40);
+        src = (Vec02*)(*(Camera**)g_camera)->position;
     }
     origin = *src;
     n = 0;
@@ -1602,7 +1604,7 @@ one_case:
     }
 
 call_tail:
-    SetStateNotifierState((Camera*)self, mode);
+    SetStateNotifierState(self, mode);
 }
 
 // Initialises the state notifier, then clears its armed flag.
@@ -1640,6 +1642,7 @@ void UpdateArmedNotifier(ArmedStateNotifier* self, f32 dt)
             continue;
         }
         if ((void*)o == (void*)GetActiveSwitchedCollider()) {
+            // the object's class is not known
             s32 c = *(s32*)((u8*)o + 0x858) + 1;
             s32 v = 99;
             if (c < 99) v = c;

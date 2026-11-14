@@ -15,6 +15,8 @@
 // the vertex batch before it (0x1619C0 to 0x162890) could belong to either file or to a third.
 // The name is ours, after its role.
 #include "common.h"
+#include "cone_volume.h"
+#include "attachment.h"
 #include "id_lookup_object.h"
 #include "placed_object.h"
 #include "world.h"
@@ -323,7 +325,7 @@ struct FrameLinkConstraint { u8 pad0[0x60]; QuadMatrix m60; u8 pad[4]; s32 a4; u
 struct FramedObject { FramedObjectVt* vt; u8 pad0[0x10C]; u8 sub110[0x30]; u8 sub140[0x40]; u8 pad180[0xA4]; FrameLinkConstraint* link; };
 struct FramedAttachment { FramedObject* obj; u8 pad[0xC]; Quad16 q10[4]; QuadMatrix m50;  };
 struct FramedAttachmentList { s32 count; FramedAttachment* items; };
-struct ParentFrame { u8 pad[0x30]; };
+struct ParentFrame { Mat02 rot; Vec02 pos; };
 
 QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
@@ -841,6 +843,7 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
                         }
                     }
                 }
+                // address arithmetic over a variable index
                 strip->unpack = (StripUnpack*)((u8*)strip->unpack + (strip->addr[0] - starts[0]));
                 BuildPartVifPackets((PartPacketContext*)part, (PartPacketSource*)strip, (PartPackets*)pp);
                 PopBackMemoryMark();
@@ -891,6 +894,7 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
                 u32 start;
                 DetachPacketBufferCopy((PacketWriter*)&pw, &m->qwc, &start, (s32*)&m->addr, 0x13);
                 RemapMeshQueueValues(queued, m->qwc * 16, start, m->addr);
+                // address arithmetic over a variable index
                 m->p = (u16*)((u8*)m->p + (m->addr - start));
                 PopBackMemoryMark();
             }
@@ -960,8 +964,10 @@ void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* h
     AddGifXyzfEntry(&f, 0, 0, 0, 0);
     CloseGifTag(&f, 1);
     CopyWordsToWriter(pkt, 0xC, 2, (u32*)f.begin, 0x1B);
+    // packet record, not an object
     CopyWordsToWriter(pkt, 0xC, 2, (u32*)(f.begin + 0x40), 0x1F);
     CopyWordsToWriter(pkt, 0xC, 2, (u32*)f.begin, 0x23);
+    // packet record, not an object
     CopyWordsToWriter(pkt, 0xC, 2, (u32*)(f.begin + 0x40), 0x27);
 
     hdr->p[0] = off;
@@ -1546,6 +1552,7 @@ void CopyAttachmentBlock(AttachmentCopy* self, PlacedObject* owner, void* src)
     self->p14 = CopyToFrontMemory(self->count * 0x28, self->p14);
     AttachmentPart* old = self->recs;
     for (; i < self->count; i++) {
+        // address arithmetic over a variable index
         AttachmentPart* r = (AttachmentPart*)((u8*)self->recs + i * 0x70);
         if ((r->a && (r->a->flags & 4)) || r->b) {
             self->recs = (AttachmentPart*)CopyToFrontMemory(self->count * 0x70, self->recs);
@@ -1578,6 +1585,7 @@ void CopyAttachmentBlock(AttachmentCopy* self, PlacedObject* owner, void* src)
         s32 b = 0, a = 0;
         do {
             i++;
+            // address arithmetic over a variable index
             CopyAttachmentPart(self, (u8*)self->recs + a, (u8*)self->p14 + b);
             a += 0x70;
             b += 0x28;
@@ -1625,6 +1633,7 @@ s32 GetAnimatorSize(s32 type);
 static inline void MovePointerInto(void** p, u8* from, s32 size, u8* to)
 {
     if (p != 0 && !((u8*)*p < from) && (u8*)*p < from + size) {
+        // address arithmetic over a variable index
         *p = (u8*)*p + (to - from);
     }
 }
@@ -1688,7 +1697,7 @@ void CopyAttachmentPart(AttachmentCopy* owner, void* partp, void* recp)
                                 FrameSource* strip = 0;
                                 for (s32 n = 0; n < e->mesh->nstrips; n++) {
                                     FrameSource* s = &e->mesh->strips[n];
-                                    u32 limit = (u32)s->base + ((*(s32*)((u8*)e->mesh + 0x20) * s->stride) << 4);
+                                    u32 limit = (u32)s->base + ((e->mesh->frameCount * s->stride) << 4);
                                     if (!((u32)t->value < (u32)s->base) && (u32)t->value < limit) {
                                         strip = s;
                                         break;
@@ -1740,8 +1749,8 @@ void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f)
 // (0x10) set and a linked object, ApplyLinkConstraint is run on that object.
 void UpdateLinkConstraint(PlacedObject* self)
 {
-    u8* p=(u8*)self->linkRecord;
-    if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) ApplyLinkConstraint((PlacedObject*)((PlacedObject*)(*(void**)(p+0x60))));
+    Rec2195_224* p = self->linkRecord;
+    if (p && (p->flags & 16) && p->p64) ApplyLinkConstraint((PlacedObject*)p->p60);
 }
 
 // Updates the frames of the object's attachments: from the inverse of the object's own and its
@@ -1758,11 +1767,12 @@ void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par)
     if (l->count > 0) {
         InvertRigidTransform(&self->v140, &self->m110, (Quad16*)&a);
         if (par != 0) {
-            InvertRigidTransform((u8*)par + 0x30, par, (Quad16*)&b);
+            InvertRigidTransform(&par->pos, &par->rot, (Quad16*)&b);
         } else {
             b = a;
         }
         for (i = 0; i < l->count; i++) {
+            // address arithmetic over a variable index
             FramedAttachment* el = (FramedAttachment*)((u8*)l->items + (i << 4) * 9);
             if (el->obj != 0) {
                 el->obj->vt->f(el->obj);
@@ -1836,6 +1846,7 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
             Cmd_1662A8* c;
             Row_1662A8* r;
             s32 prev;
+            // address arithmetic over a variable index
             c = (Cmd_1662A8*)((u8*)cfg->strips + co);
             r = (Row_1662A8*)((u8*)out->packets + ro);
             sz = total - sz;
@@ -2277,8 +2288,8 @@ slow:
                 Vif_166690::Refs(&g_vifPacketWriter, c->f0C, c->f10);
                 Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n304; k++) {
-                    u8* l = (u8*)lights[k];
-                    Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                    ConeVolume* l = (ConeVolume*)lights[k];
+                    Vif_166690::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
                 Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -2300,8 +2311,8 @@ slow:
             case 4:
                 Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n304; k++) {
-                    u8* l = (u8*)lights[k];
-                    Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                    ConeVolume* l = (ConeVolume*)lights[k];
+                    Vif_166690::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
                 Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -2322,8 +2333,8 @@ slow:
             case 3: {
                 Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n300; k++) {
-                    u8* l = (u8*)lights[k];
-                    Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                    ConeVolume* l = (ConeVolume*)lights[k];
+                    Vif_166690::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
                 Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -2341,8 +2352,8 @@ slow:
                 if (k < n304) {
                     Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                     for (k = 0; k < n304; k++) {
-                        u8* l = (u8*)lights[k];
-                        Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                        ConeVolume* l = (ConeVolume*)lights[k];
+                        Vif_166690::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
                     }
                     Vif_166690::Cnt1(&g_vifPacketWriter);
                     Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);

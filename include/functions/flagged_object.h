@@ -9,6 +9,7 @@
 struct BufferedStream;
 struct FlagTable;
 struct FlaggedObject;
+struct MeshObject;
 struct ObjectEvent;
 struct ObjectGatherer;
 
@@ -20,7 +21,7 @@ s32 TakeFlagTableIndex(FlagTable* c);
 s32 TestFlagTableBit(FlagTable* table, s32 index);
 void SetFlagTableBit(FlagTable* self, s32 bit);
 void ClearFlagTableBit(FlagTable* self, s32 bit);
-void ReadObjectTransformAndTables(void* a0, void* a1);
+void ReadObjectTransformAndTables(MeshObject* self, BufferedStream* stream);
 s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value);
 void InitFlaggedObject(FlaggedObject* self);
 void CollectChildLists(FlaggedObject* self, BufferedStream* stream);

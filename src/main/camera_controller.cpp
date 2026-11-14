@@ -155,10 +155,10 @@ Quad16 GetCameraControllerTargetPoint(TargetCameraController* self)
         ConvertPositionToWorld((BaseObject*)self->anchorObject, (Vec02*)&r);
     } else {
         if (GetActiveSwitchedCollider() != 0) {
-            r = *(Quad16*)((u8*)GetActiveSwitchedCollider() + 0x140);
+            r = *(Quad16*)&((PlacedObject*)GetActiveSwitchedCollider())->v140;
             *(f32*)&r.w[2] = *(f32*)&r.w[2] + D_00261BF8;
         } else {
-            r = *(Quad16*)(*(u8**)g_camera + 0x40);
+            r = *(Quad16*)(*(Camera**)g_camera)->position;
         }
     }
     return r;
@@ -246,7 +246,7 @@ void ActivateTargetCameraController(TargetCameraController* self)
 {
     Quad4 tmp;
     Camera* eng = (Camera*)self->owner;
-    VectorToAngles((Vec3*)eng->g80, (f32*)((u8*)self + 8), &self->pitch);
+    VectorToAngles((Vec3*)eng->g80, &self->g08, &self->pitch);
     f32 d = self->f20;
     self->pitch = D_00261BF0;
     self->f0C = 0;
@@ -382,14 +382,14 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             Vec02 mid;
             Vec02 d;
             Vec02 e;
-            f32 size = (0.0f < self->sizeOverride) ? self->sizeOverride : *(f32*)(obj + 0x2A8);
-            f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of((*(Camera**)g_camera)->position), Vu0::Vec::Of(*(Vec02*)(obj + 0x140)))));
+            f32 size = (0.0f < self->sizeOverride) ? self->sizeOverride : ((PlacedObject*)obj)->boundRadius;
+            f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of((*(Camera**)g_camera)->position), Vu0::Vec::Of(((PlacedObject*)obj)->v140))));
             f32 fov = 2.0f * Arctangent(size / (self->f54 * dist));
             fov = self->zoomMin >? fov;
             ComputeObjectFrameAtTime((PlacedObject*)obj, 0, &pos, 0, 0, 0, 0.1f);
-            Vu0::Q(span) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(*(Vec02*)(obj + 0x140))).q;
+            Vu0::Q(span) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(((PlacedObject*)obj)->v140)).q;
             Camera* gc = *(Camera**)g_camera;
-            Vu0::Q(mid) = Vu0::Add(Vu0::Vec::Of(*(Vec02*)(obj + 0x140)), Vu0::MulX(Vu0::Vec::Of(span), Vu0::Vec::Scalar(0.5f))).q;
+            Vu0::Q(mid) = Vu0::Add(Vu0::Vec::Of(((PlacedObject*)obj)->v140), Vu0::MulX(Vu0::Vec::Of(span), Vu0::Vec::Scalar(0.5f))).q;
             f32 reach = size + Vu0::ToFloatMoved(Vu0::Length(Vu0::Vec::Of(span))) * 0.5f;
             Vu0::Q(d) = Vu0::Sub(Vu0::Vec::Of(mid), Vu0::Vec::Of(gc->position)).q;
             Vu0::Q(d) = Vu0::RotateTransposed(*(Mat02*)gc->rotation, Vu0::Vec::Of(d)).q;
@@ -516,11 +516,11 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         ease = 0.0f;
         Quad16 pt;
         pt = GetCameraControllerTargetPoint(self);
-        u8* coll = (u8*)GetActiveSwitchedCollider();
+        PlayerLinkedCollider* coll = (PlayerLinkedCollider*)GetActiveSwitchedCollider();
         Mat02 basis;
         Vec02 dir;
-        if (*(s32*)(coll + 0x634) != 0) {
-            Vu0::Q(dir) = Vu0::Sub(Vu0::Vec::Of(*(Vec02*)(self->keptObject + 0x140)), Vu0::Vec::Of(pt)).q;
+        if (coll->f634 != 0) {
+            Vu0::Q(dir) = Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)self->keptObject)->v140), Vu0::Vec::Of(pt)).q;
         } else {
             Vec02 screen;
             Vec02 moved;
@@ -553,10 +553,10 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         far = 20.0f;
         rise = -7.0f;
         blend = 0.0f;
-        f32 dy = ClampToRange((ValueRange*)(coll + 0x658), WrapAngle(yaw - *(f32*)(coll + 0x648)));
-        f32 dp = ClampToRange((ValueRange*)(coll + 0x650), WrapAngle(pitch - *(f32*)(coll + 0x64C)));
-        self->g08 = WrapAngle(*(f32*)(coll + 0x648) + dy);
-        self->pitch = WrapAngle(*(f32*)(coll + 0x64C) + dp);
+        f32 dy = ClampToRange((ValueRange*)&coll->f658, WrapAngle(yaw - coll->f648));
+        f32 dp = ClampToRange((ValueRange*)&coll->f650, WrapAngle(pitch - coll->f64C));
+        self->g08 = WrapAngle(coll->f648 + dy);
+        self->pitch = WrapAngle(coll->f64C + dp);
         eye = GetTargetCameraControllerEyePoint(self);
         break;
     }
@@ -564,7 +564,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         u8* obj = (u8*)D_002704F4;
         if (obj != 0) {
             Vec02 n;
-            Vu0::Q(n) = Normalized(Vu0::Sub(Vu0::Vec::Of(*(Vec02*)(obj + 0x140)), Vu0::Vec::Of(target))).q;
+            Vu0::Q(n) = Normalized(Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)obj)->v140), Vu0::Vec::Of(target))).q;
             self->g08 = ArctangentOfRatio(n.y, n.x);
             Vu0::Q(eye) = Vu0::Add(Vu0::Vec::Of(target), Vu0::MulX(Vu0::Vec::Of(n), Vu0::Vec::Scalar(-Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(D_00261C20)))))).q;
         } else {
@@ -590,7 +590,8 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         if (s == 0 || s->target == 0 || obj == 0) {
             return;
         }
-        Quad16 pos = *(Quad16*)(obj + 0x140);
+        Quad16 pos = *(Quad16*)&((PlacedObject*)obj)->v140;
+        // the object's class is not known
         f32 sy = *(f32*)((u8*)s->target + 0x324) * 2.0f - 1.0f;
         f32 sx = *(f32*)((u8*)s->target + 0x320) * 2.0f - 1.0f;
         f32 reach = *(f32*)((u8*)s->target + 0x2D8) * 0.22222222f;
@@ -599,10 +600,11 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             ConvertPositionToWorld((BaseObject*)self->anchorObject, (Vec02*)&target);
             Vu0::Q(dir) = Normalized(Vu0::Sub(Vu0::Vec::Of(target), Vu0::Vec::Of(pos))).q;
         } else {
-            Vu0::Vec fwd = Vu0::Vec::Of(*(Vec02*)(obj + 0x110));
+            Vu0::Vec fwd = Vu0::Vec::Of(((PlacedObject*)obj)->m110.r[0]);
             Vu0::Vec k = Vu0::Vec::Scalar(sx);
-            Vu0::Q(dir) = Normalized(Vu0::MulAddX(fwd, Vu0::Vec::Of(*(Vec02*)(obj + 0x120)), k)).q;
+            Vu0::Q(dir) = Normalized(Vu0::MulAddX(fwd, Vu0::Vec::Of(((PlacedObject*)obj)->m110.r[1]), k)).q;
         }
+        // the object's class is not known
         u8* tg = (u8*)s->target;
         Vu0::Q(target) = Vu0::Add(Vu0::Add(Vu0::Vec::Of(pos), Vu0::MulX(Vu0::Vec::Of(dir), ScalarHere(reach * 2.0f))), Vu0::Vec::Of(*(Vec02*)(tg + 0x310))).q;
         f32 heading;
@@ -620,6 +622,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         Mat02 mx;
         BuildAxisAngleMatrix(&g_unitZVector, &mz, a);
         BuildAxisAngleMatrix(&g_unitYVector, &my, -b);
+        // the object's class is not known
         BuildAxisAngleMatrix(&g_unitXVector, &mx, *(f32*)((u8*)s->target + 0x328));
         Mat02 rot;
         Mat02 m;
@@ -667,7 +670,7 @@ void InitFrameCameraController(FrameCameraController* self, Camera* a1)
 void ActivateFrameCameraController(FrameCameraController* self)
 {
     Camera* parent = self->owner;
-    SetCameraLookAnchor(parent, (Quad16*)((u8*)parent->stack[0].target + 0x370));
+    SetCameraLookAnchor(parent, (Quad16*)&((Collider*)parent->stack[0].target)->v370);
 }
 
 void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, const Vec02* focus, s32 e, f32 gain, f32 damp,
@@ -687,6 +690,7 @@ void UpdateFrameCameraController(FrameCameraController* self, f32 dt)
     Vec02 target;
     MulRotationCopied(&basis, frame->m110, *(Mat02*)&self->frame20);
     Vu0::Q(eye) = Vu0::MulAddX(Vu0::Vec::Of(frame->v140), Vu0::Vec::Of(basis.r[0]), Vu0::Vec::Scalar(10.0f)).q;
+    // a vector view over four fields of different roles
     Vu0::Q(rv) = Vu0::Rotate(frame->m110, Vu0::Q(*(Vec02*)((u8*)self + 0x10)));
     Vu0::Q(target) = Vu0::Add(Vu0::Q(frame->v140), Vu0::Q(rv));
     Vu0::Q(eye) = Vu0::Add(Vu0::Q(eye), Vu0::Q(rv));
@@ -709,6 +713,19 @@ void ActivateValueCameraController(ValueCameraController* obj, s32 value) { obj-
 void DeactivateValueCameraController(ValueCameraController* obj) { obj->value = 0; }
 
 
+// The placed object a value camera controller takes the camera's place from (its class is not
+// named): a point to look at or an object to look at, a point in its own frame the camera
+// stands at, and two vectors that give the look direction when it has neither.
+struct CameraRigObject : PlacedObject {
+    u8 pad2D0[0x2D4 - 0x2D0];
+    void* lookPoint;        // 0x2D4: an object whose position the camera looks at
+    PlacedObject* lookObject; // 0x2D8: an object the camera looks at (tried first)
+    u8 pad2DC[0x2E0 - 0x2DC];
+    Vec02 anchor;           // 0x2E0: the camera's place in this object's frame
+    Vec02 forwardHint;      // 0x2F0
+    Vec02 upHint;           // 0x300
+};
+
 // Sets the camera's position and orientation from a placed object that carries them: the position
 // comes from a point in the object's frame, and the basis looks at the object's target (an object,
 // or a converted position) or, with neither, is built from two stored vectors and rotated by the
@@ -721,19 +738,19 @@ void UpdateValueCameraController(ValueCameraController* ctl)
     Vec02 v50;
     Mat02 t1;
     Mat02 t2;
-    u8* o = (u8*)ctl->ptr;
+    CameraRigObject* o = (CameraRigObject*)ctl->ptr;
     Camera* cam = ctl->owner;
-    TransformPointBetweenFrames((PlacedObject*)o, 0, (Vec02*)(o + 0x2E0), &pos);
-    if (*(u8**)(o + 0x2D8) != 0) {
-        Vu0::Q(v40) = Vu0::Sub(Vu0::Q(((PlacedObject*)*(u8**)(o + 0x2D8))->v140), Vu0::Q(pos));
+    TransformPointBetweenFrames(o, 0, &o->anchor, &pos);
+    if (o->lookObject != 0) {
+        Vu0::Q(v40) = Vu0::Sub(Vu0::Q(o->lookObject->v140), Vu0::Q(pos));
         BuildBasisFromX(&v40, &basis);
-    } else if (*(u8**)(o + 0x2D4) != 0) {
-        ConvertPositionToWorld((BaseObject*)(*(u8**)(o + 0x2D4)), &v40);
+    } else if (o->lookPoint != 0) {
+        ConvertPositionToWorld((BaseObject*)o->lookPoint, &v40);
         Vu0::Q(v50) = Vu0::Sub(Vu0::Q(v40), Vu0::Q(pos));
         BuildBasisFromX(&v50, &basis);
     } else {
-        BuildBasisFromXAndZHint((const Vec02*)(o + 0x2F0), (const Vec02*)(o + 0x300), &basis);
-        const Mat02& m = *(Mat02*)(o + 0x110);
+        BuildBasisFromXAndZHint(&o->forwardHint, &o->upHint, &basis);
+        const Mat02& m = o->m110;
         u128 r0 = Vu0::RotateUntied(m, Vu0::Q(basis.r[0]));
         u128 r1 = Vu0::RotateUntied(m, Vu0::Q(basis.r[1]));
         u128 r2 = Vu0::RotateUntied(m, Vu0::Q(basis.r[2]));
@@ -747,5 +764,5 @@ void UpdateValueCameraController(ValueCameraController* ctl)
         Vu0::Q(basis.r[1]) = r1;
         Vu0::Q(basis.r[2]) = r2;
     }
-    SetCameraPlacement(cam, (Quad16*)(o + 0x140), (Quad16*)&basis);
+    SetCameraPlacement(cam, (Quad16*)&o->v140, (Quad16*)&basis);
 }

@@ -64,6 +64,13 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // What DrawPlacedObjectParts hands the part drawer (DrawModelPart) for each part: the object's
 // transform, the object, its record at +0x22C, the part, and the view matrix.
+// The range record of a placed object (TextureRenderObject::drawRange): the clip-space matrix
+// of its draw range at 0x70.
+struct DrawRangeRecord {
+    u8 pad00[0x70];
+    u8 m70[0x40];
+};
+
 struct PartDrawFrame {
     void* fn;
     u8 pad0[4];
@@ -104,7 +111,7 @@ void DrawPlacedObjectParts(DeferredRequest* self)
     f.object = s1;
     f.record = s1->sub22C;
     i = 0;
-    MultiplyMatrices(f.qC0, &g_unitSquareToClipMatrix, (u8*)s1->drawRange + 0x70);
+    MultiplyMatrices(f.qC0, &g_unitSquareToClipMatrix, &((DrawRangeRecord*)s1->drawRange)->m70);
     f.q80[0] = f.qC0[0];
     f.q80[1] = f.qC0[1];
     f.q80[2] = f.qC0[2];
@@ -117,6 +124,7 @@ void DrawPlacedObjectParts(DeferredRequest* self)
         s32 off = 0;
         do {
             i++;
+            // address arithmetic over a variable index
             f.part = (u8*)s1->drawParts + off;
             DrawModelPart((Frame_166690*)&f);
             off += 0x70;
@@ -181,7 +189,7 @@ void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item)
         ActiveSetItem* e = (ActiveSetItem*)(self->items + i * 0x60);
         f32* row = e->row;
         if (row != 0) {
-            Vu0::Vec d = Vu0::Dot(Vu0::Vec::Of(item->axis), Vu0::Vec::Of(e->axes[*(s32*)((u8*)item->owner + 0xCC)]));
+            Vu0::Vec d = Vu0::Dot(Vu0::Vec::Of(item->axis), Vu0::Vec::Of(e->axes[((Contact03*)item->owner)->axesIndex]));
             Vu0::StoreX(((u32*)row)[self->count], d.q);
         }
     }
@@ -222,9 +230,11 @@ void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a
                 Vu0::Q(out[j]) = Vu0::Zero();
             } else if (body == contact->end[0].body) {
                 Collider* part = e[j].part;
+                // address arithmetic over a variable index
                 ComputeColliderPointVelocity(part, &e[j].point, (f32*)((u8*)n->rows[0] + (part->index << 5)), &out[j]);
             } else if (body == contact->end[1].body) {
                 Collider* part = e[j].part;
+                // address arithmetic over a variable index
                 ComputeColliderPointVelocity(part, &e[j].point, (f32*)((u8*)n->rows[1] + (part->index << 5)), &out[j]);
             } else {
                 Vu0::Q(out[j]) = Vu0::Zero();
@@ -236,7 +246,7 @@ void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a
     n->row = row;
     for (s32 i = 0; i < self->count; i++) {
         ActiveSetItem* it = (ActiveSetItem*)(self->items + i * 0x60);
-        *(u32*)row++ = Vu0::ToBits(Vu0::Dot(Vu0::Vec::Of(it->axis), Vu0::Vec::Of(((Vec02*)n->axes)[*(s32*)((u8*)it->owner + 0xCC)])).q);
+        *(u32*)row++ = Vu0::ToBits(Vu0::Dot(Vu0::Vec::Of(it->axis), Vu0::Vec::Of(((Vec02*)n->axes)[((Contact03*)it->owner)->axesIndex])).q);
     }
 }
 
@@ -387,7 +397,7 @@ void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s
     fr.cursor = e;
     fr.list = e;
     s32 old = (s32)g_activeListFrames;
-    s32 link = *(s32*)(e + 8);
+    s32 link = ((List01*)e)->offset;
     g_activeListFrames = (ListFrame*)&fr;
     fr.prev = old;
     s32 h = *(s32*)e;
@@ -497,7 +507,7 @@ void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, Contact03** 
         for (s32 j = 0; j < 2; j++) {
             Collider* h = FindHandlerForSlot(end[j].part, 0x108);
             if (h != 0) {
-                HandlerFn fn = *(HandlerFn*)(*(u8**)h + 0x108);
+                HandlerFn fn = (HandlerFn)h->desc03()->m3E;
                 if (fn != 0) {
                     fn(h, a1 | 0x10, it, j, dt);
                 }

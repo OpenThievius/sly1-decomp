@@ -79,6 +79,7 @@ void LoadTargetFollowerRecords(TargetFollower* self, BufferedStream* stream)
         if (i >= self->list550->count) {
             return;
         }
+        // address arithmetic over a variable index
         Entry47* e = (Entry47*)((u8*)self->list550->items + off);
         if (GetStateEntryKey((StateGraph*)self->list550, e->a) == k1 && GetStateEntryKey((StateGraph*)self->list550, e->b) == k2) {
             break;
@@ -87,6 +88,7 @@ void LoadTargetFollowerRecords(TargetFollower* self, BufferedStream* stream)
         i++;
     }
     if (i < self->list550->count) {
+        // address arithmetic over a variable index
         Entry47* p = (Entry47*)((u8*)(i * 0x14) + (s32)self->list550->items);
         self->leadTime = p->ref->f34;
     }
@@ -345,8 +347,9 @@ struct ChaseObject;
 struct FollowObject {
     u8 pad00[0x48];
     ChaseObject* f48;       // 0x48
-    u8 pad4C[0xB0 - 0x4C];
-    Vec02 vB0;              // 0xB0
+    u8 pad4C[0x60 - 0x4C];
+    FollowPoseA poseA;      // 0x60: the record the placement is read from; its v50 is the velocity at 0xB0
+    FollowPoseB poseB;      // 0xE0
 };
 
 struct ChaseObject {
@@ -385,8 +388,8 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
     GetObjectWorldPosition((BaseObject*)self->lookTarget, &a);
     FollowObject* obj = (FollowObject*)self->launchPool;
     ChaseObject* t = obj->f48;
-    FollowPoseA* sa = (FollowPoseA*)((u8*)obj + 0x60);
-    FollowPoseB* sb = (FollowPoseB*)((u8*)obj + 0xE0);
+    FollowPoseA* sa = &obj->poseA;
+    FollowPoseB* sb = &obj->poseB;
     if (t == 0) {
         return;
     }
@@ -418,7 +421,7 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
         }
         Vu0::Q(sa->v50) = Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(t->f690));
     } else if (IsObjectOfKind((BaseObject*)t, 0x3E) != 0) {
-        Vu0::Q(obj->vB0) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::ScalarAt(tune->launchSpeed));
+        Vu0::Q(obj->poseA.v50) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::ScalarAt(tune->launchSpeed));
         Vu0::Q(t->v700) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-tune->f334));
         t->f6F0 = tune->flightTime;
     } else {
@@ -431,7 +434,7 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
         f32 l2 = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(dir), Vu0::Q(dir))));
         f32 u = l1 / l2 / tune->flightTime;
         Vu0::Q(t->gravity) = Vu0::MulX(Vu0::Q(self->world->gravity), Vu0::Scalar(u * u));
-        Vu0::Q(obj->vB0) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(u));
+        Vu0::Q(obj->poseA.v50) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(u));
     }
     sa->life = tune->flightTime * D_00262A28[0];
     sb->v10 = a;
@@ -498,6 +501,7 @@ void StartRandomStreamVoice(TargetFollower* self)
         return;
     }
     r = RandomIntInRange(0, 6);
+    // address arithmetic over a variable index
     OpenKeyRecord((KeyRecord*)((u8*)g_streamVoiceKeys + (r << 5)));
     self->voicePending = 1;
 }
@@ -720,6 +724,7 @@ void* ChooseEntryTableObject(EntryTableObject* self)
             }
             s32 r = RandomIntInRange(0, self->entryCount - 1);
             void** base = (void**)self->entries;
+            // address arithmetic over a variable index
             return *(void**)((u8*)base + r * 4);
         }
         f32 best = 3.40282347e+38f;

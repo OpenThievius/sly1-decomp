@@ -9,6 +9,7 @@
 // helpers, the tempo agent with its beat presses and timelines, the VIF writer, the attached set
 // and the screen fade.
 #include "common.h"
+#include "scaled_transform.h"
 #include "switched_collider.h"
 #include "list_iter.h"
 #include "fpu.h"
@@ -652,7 +653,7 @@ void EnterWorld1BossState(World1Boss* self, s32 a, Animation* b)
             SetStateWalkerTarget((StateWalker*)self->stateWalker, self->stageKey);
             void* near = ((TargetObjectFn*)self->desc)[102](self);
             if (near != 0) {
-                key = FindNearestAgentKey(self, (u8*)near + 0x140);
+                key = FindNearestAgentKey(self, (u8*)&((PlacedObject*)near)->v140);
             } else {
                 key = 0;
             }
@@ -797,7 +798,7 @@ void SteerWorld1BossAlongPath(World1Boss* a0)
 void RestartWorld1BossClip(World1Boss* self)
 {
     if (self->stageKey == 0x2DA && self->state == 0xC && FindColliderFloorContact(self, 0, 0) != 0) {
-        PlacedObject* s = FindNearestAgentKey(self, (u8*)self + 0x140);
+        PlacedObject* s = FindNearestAgentKey(self, (u8*)&self->v140);
         if (s != self->nearestKeyRoot) {
             s32 n = self->visitsLeft - 1;
             if (!(0 < n)) n = 0;
@@ -1083,7 +1084,7 @@ void ResetElementStack(ElementStack* self)
     u8* base = (u8*)&g_padRecord;
     self->count = one;
     self->items[0] = 0;
-    SetPadPatternState((PadPatternPlayer*)(*(void**)(base + 0xBC)), 3);
+    SetPadPatternState((PadPatternPlayer*)((PadRecord*)base)->patternPlayer, 3);
     ResetScreenElements();
 }
 
@@ -1998,10 +1999,10 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
         Mat3U mat;
         GetObjectWorldPosition((BaseObject*)self->frameAnchor, (Vec02*)&pos);
         GetObjectWorldRotation((BaseObject*)self->frameAnchor, (Mat02*)&mat);
-        ((PlayerSlotFn*)g_player->desc)[0x84 / 4](g_player, &pos);
-        ((PlayerSlotFn*)g_player->desc)[0x88 / 4](g_player, &mat);
-        ((World3BeatPressSlotFn*)self->desc)[0x84 / 4](self, &pos);
-        ((World3BeatPressSlotFn*)self->desc)[0x88 / 4](self, &mat);
+        g_player->desc02()->m1D(g_player, (Vec02*)&pos);
+        g_player->desc02()->m1E(g_player, (Mat02*)&mat);
+        self->desc02()->m1D(self, (Vec02*)&pos);
+        self->desc02()->m1E(self, (Mat02*)&mat);
     }
     if (self->judging != 0) {
         u32 f = in->flags;
@@ -2050,22 +2051,22 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
                 return;
             }
             StartSoundEffect(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
-            if (HasSpareCount() == 0 && ((World3BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
+            if (HasSpareCount() == 0 && self->desc05()->m4B(self, 0) == 0) {
                 OwnerMessage msg;
                 World3Boss* o;
                 ActivateSwitchedCollider(g_player);
                 InitOwnerMessage(&msg, 0, self);
                 msg.fn = (void (*)(void))ContinueWorld3BeatPressColliderRequest;
-                ((s32 (*)(Player*, OwnerMessage*))((PlayerSlotFn*)g_player->desc)[0x140 / 4])(g_player, &msg);
+                g_player->desc05()->m4C(g_player, &msg);
                 o = (World3Boss*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
                 EndHeldWorld3Timeline(o);
                 o->clip10Deadline = g_gameTime[0];
                 SetCachedVoiceParam(2, 1);
                 goto next;
             }
-            if (((World3BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
+            if (self->desc05()->m4B(self, 0) == 0) {
                 World3Timeline* l;
-                ((void (*)(World3BeatPressCollider*))((World3BeatPressSlotFn*)self->desc)[0x150 / 4])(self);
+                self->desc05()->m50(self);
                 Player* gl = g_player;
                 self->runEnded = 1;
                 gl->pulseActive = 1;
@@ -2118,7 +2119,7 @@ void AppendWorld3BeatPressEntry(World3BeatPressCollider* list, const U64P* src)
 {
     s32 n = list->entryCount;
     list->entryCount = n + 1;
-    U64P* dst = (U64P*)((u8*)list + (n * 8 + 0x634));
+    U64P* dst = (U64P*)&list->entries[n];
     *dst = *src;
 }
 
@@ -2224,6 +2225,7 @@ void StartWorld3Boss(World3Boss* self)
     if (self->keyedCount > 0) {
         s32 off = 0;
         do {
+            // address arithmetic over a variable index
             TempoObjectRef* e = (TempoObjectRef*)((u8*)self->keyedObjects + off);
             e->obj = FindFirstObjectById(self->world, 1, e->id, self);
             i++;
@@ -2485,12 +2487,12 @@ char D_00276670[12] = "0824.2206";
 // cleared and applies that, otherwise it applies the one given.
 void ApplyWorld3BossTransform(World3Boss* self, void* s, void* c)
 {
-    u8 tmp[0x50];
+    ScaledTransform tmp;
     void* out = c;
     if (self->state == 16) {
-        BuildPlacedObjectTransform(self, (Quad16*)c, (ScaledTransform*)tmp);
-        *(s32*)(tmp + 0x44) = 0;
-        out = tmp;
+        BuildPlacedObjectTransform(self, (Quad16*)c, &tmp);
+        *(s32*)&tmp.scaleB = 0;
+        out = &tmp;
     }
     ApplyPlacedObjectTransform(self, (Camera*)s, (ScaledTransform*)out);
 }
@@ -2700,13 +2702,14 @@ void HandleWorld3BossNotification(World3Boss* self, s32 kind, TempoNoticeRec* re
             ChooseObjectPoolItem((ObjectPool*)line);
             TempoLineSub* sub = &line->sub;
             f32 half = self->beatLength * 0.5f;
-            f32 t = self->spanSeconds + self->pressScheduledTime - g_gameTime[0] + ((f32*)self->beatPressCollider)[0x684 / 4] * half;
+            f32 t = self->spanSeconds + self->pressScheduledTime - g_gameTime[0] + ((World3BeatPressCollider*)self->beatPressCollider)->timingWindow * half;
             u8* r = line->rec;
             FramePoint_001EBD10* fp = (FramePoint_001EBD10*)((World3BeatPressCollider*)self->beatPressCollider)->lineAnchors[self->direction];
             GetPlacementRecordTransform((FrameSource*)sub, &a, b.r, 0);
             ComputeObjectFrameAtTime((PlacedObject*)fp->object, 0, &p, &rot, 0, 0, t);
             Vu0::Q(line->vF0) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(fp->point)));
             f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(line->vF0)))) / t;
+            // the object's class is not known
             *(f32*)(r + 0x690) = d;
             *(f32*)(r + 0x6F0) = d;
             sub->life = t * 1.25f;
@@ -3074,6 +3077,7 @@ void RunWorld3TimelineEntry(World3Timeline* self, Entry90* msg)
 Entry90* AppendWorld3TimelineEntry(World3Timeline* self, s32 a, s32 b, f32 c)
 {
     if (self->entryCount >= 0xC0) return (Entry90*)D_00625760;
+    // address arithmetic over a variable index
     Entry90* e = (Entry90*)((u8*)self->buffer + self->entryCount * 16);
     self->entryCount = self->entryCount + 1;
     (void)FillMemory(e, 0, 16);
@@ -3329,7 +3333,7 @@ s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, 
     f32 s = Sine(angle);
     u8* g;
     if (rec != 0) {
-        g = rec + 0x350;
+        g = (u8*)&((Collider*)rec)->gravity;
     } else {
         g = (u8*)&g_currentWorld->gravity;
     }
@@ -3343,7 +3347,7 @@ s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, 
     }
     f32 theta = a + (1.5707964f - a) * s;
     f32 e = h - dist * Tangent(theta);
-    f32 q = *(f32*)(g + 8) / (e + e);
+    f32 q = ((Vec02*)g)->z / (e + e);
     if (q <= 0.0f) {
         return 0;
     }
@@ -3364,11 +3368,11 @@ s32 ComputeLaunchVelocityToPoint(f32 speed, Vec02* from, Vec02* to, Vec02* out, 
     Vec02 d;
     u8* g;
     if (rec != 0) {
-        g = rec + 0x350;
+        g = (u8*)&((Collider*)rec)->gravity;
     } else {
         g = (u8*)&g_currentWorld->gravity;
     }
-    f32 grav = *(f32*)(g + 8);
+    f32 grav = ((Vec02*)g)->z;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*to), Vu0::Q(*from));
     if (__builtin_fabsf(grav) < 1.0f) {
         u128 k = Vu0::Scalar(speed);
@@ -3823,7 +3827,7 @@ void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16
     Quad16 c;
     Vec02 d;
     TransformDirectionBetweenFrames(0, self, (Vec02*)in, &a);
-    b = *(Quad16*)((u8*)self + 0x570);
+    b = *(Quad16*)&self->f570;
     a.z = 0.0f;
     c = *(Quad16*)&D_00248D30;
     TransformStateToAncestorFrame(self, 0, &a, 0, (Vec02*)&b, (Vec02*)&c);
@@ -4087,9 +4091,9 @@ f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02*
             from.z = o->groundContactPoint.z >? from.z;
         }
     } else {
-        from.z = from.z + (*(f32*)((u8*)o + 0x428) - o->v140.z);
+        from.z = from.z + (((Collider*)o)->boundsMin.z - o->v140.z);
     }
-    to.z = to.z + (*(f32*)((u8*)o + 0x438) - o->v140.z);
+    to.z = to.z + (((Collider*)o)->boundsMax.z - o->v140.z);
     s32 n = CollectTreeNodeSpans(self->tree.nodes, &from, &to, 0, 0x10, spans);
     if (n == 0) {
         if (hitOut != 0) {
@@ -4101,8 +4105,8 @@ f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02*
         *nOut = *(Vec02*)&spans[0].q[1];
     }
     if (hitOut != 0) {
-        if (*(Vec02**)((u8*)&spans[0] + 0x54) != 0) {
-            *hitOut = **(Vec02**)((u8*)&spans[0] + 0x54);
+        if (spans[0].face54 != 0) {
+            *hitOut = *(Vec02*)spans[0].face54;
         } else {
             *hitOut = g_unitZVector;
         }
@@ -4595,6 +4599,7 @@ s32 IsWarpEntryAvailable(WarpPage* self, s32 kind, s32* outA, s32* outB)
         if (kind == 9) {
             if (allowed != 0) {
                 s32 m = mode * 0x44C;
+                // address arithmetic over a variable index
                 if (*(s32*)((u8*)g_saveData + m + 0x88) & 1) {
                     s32 q = g_saveData->levels[mode].f448;
                     flag = (q & D_00275FC8[mode]) != 0;
@@ -4667,7 +4672,7 @@ void StartWarpPage(WarpPage* o) {
     o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
     if (g_saveData->levelIndex) {
         u8* t = (u8*)&g_mapScreenList;
-        ((PtrP*)(t + 0x260))->v = o;
+        ((PtrP*)&((T217D_0F0*)t)->current)->v = o;
     }
     switch (o->id) {
     case 0x1C7: o->slot = 1; break;
@@ -4870,13 +4875,14 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
 // page ignores the zoom, applies it, then restores the camera's zoom and zoom goal.
 void ApplyWarpPageTransform(WarpPage* obj, u8* s, void* c)
 {
+    // a stack buffer used as two record types
     u8 tmp[0x50];
     Camera* p = g_camera;
     f32 keep1 = p->zoom;
     f32 keep2 = p->zoomGoal;
     SnapCameraZoom(p, 1.0f);
     BuildPlacedObjectTransform(obj, (Quad16*)c, (ScaledTransform*)tmp);
-    BuildMatrixFromRotationAndTranslation((const Vec02*)(s + 0x40), (const Mat02*)(s + 0x80), (Mat4A*)tmp);
+    BuildMatrixFromRotationAndTranslation((const Vec02*)((Camera*)s)->position, (const Mat02*)&((Camera*)s)->rot80, (Mat4A*)tmp);
     ApplyPlacedObjectTransform(obj, (Camera*)s, (ScaledTransform*)tmp);
     SnapCameraZoom(g_camera, keep1);
     g_camera->zoomGoal = keep2;
@@ -4961,7 +4967,7 @@ void SetWarpPageMode(WarpPage* self, u32 next)
                 s->availableLevel = 0;
             }
         }
-        *(f32*)((u8*)self + 0x4DC) = *(f32*)((u8*)self + 0x33C);
+        self->entries[9].cursorLevel = self->entries[1].cursorLevel;
         for (s32 j = 0; j <= 10; j++) {
             WarpEntry* s = &self->entries[j];
             PlacedObject* a = (PlacedObject*)s->availableObject;
@@ -4993,6 +4999,7 @@ void SetWarpPageMode(WarpPage* self, u32 next)
             } else {
                 off = GetCurrentWarpEntry() * 52;
             }
+            // address arithmetic over a variable index
             a = *(Animation**)((u8*)self + off + 0x2F8);
             if (a) {
                 f32 fa = 0;
@@ -5179,6 +5186,7 @@ void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
 // Makes idx the selected warp page entry: stores the entry's placement relative to the page (or the
 // identity) at +0x550, zeroes its float and sets the previous selection's float to 1.0.
 void SetWarpPageSelectedEntry(WarpPage* self, s32 idx) {
+    // a field access here changes retail's code (it works on selected, entries[].f14 and dimTarget, targetPoint)
     u8* base = (u8*)self;
     if (*(s32*)(base + 0x534) == idx) {
         return;

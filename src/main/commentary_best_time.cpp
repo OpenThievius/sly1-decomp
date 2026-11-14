@@ -137,6 +137,7 @@ void InitCommentaryPromptElement(T217D_1380* self)
         *self->frame = GetFontById(2);
     }
     SetScreenElementScale(self, 0.6f);
+    // a field access here changes retail's code
     *(s32*)((u8*)self + 0x208) = (s32)0xDF7F7F7Fu;
     if (CheckEntryThreeBitRequirement(g_currentWorld, (g_saveData->levelIndex << 8) | g_saveData->entryIndex)) {
         SetBestTimeState(self, 1);
@@ -337,6 +338,7 @@ struct FrameFont {
     {
         if (*h != 0) {
             const FontVt* vt = (*h)->vt;
+            // the class's this-adjustment from its vtable, not a field
             vt->drawBox((Font*)((u8*)*h + vt->adj9), h, out, tbl);
         }
     }
@@ -379,12 +381,12 @@ void DrawFramedText(T217D_1380* self)
         out.FlagA(0);
         out.FlagB(0);
 
-        u8* h = (u8*)self->frame;
+        BestTimeTextStyle* h = (BestTimeTextStyle*)self->frame;
         if (h != 0) {
-            slot = *(T217D_Word*)(h + 0x18);
-            h[0x1B] = (u8)((f32)h[0x1B] * self->blend);
+            slot = *(T217D_Word*)&h->color;
+            ((u8*)&h->color)[3] = (u8)((f32)((u8*)&h->color)[3] * self->blend);
             FrameFont::Draw(self->frame, &out, &g_gsPacketWriter);
-            *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
+            *(T217D_Word*)&((BestTimeTextStyle*)self->frame)->color = slot;
         }
         InitTextReader((TextReader*)loc, &self->text[0], self->font);
         DrawAlignedText((TextReader*)loc, (Layout_137228*)&out, 0, &g_gsPacketWriter);

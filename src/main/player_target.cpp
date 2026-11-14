@@ -389,10 +389,12 @@ void PlaceOnTargetObject(Player* self, PathTarget* node, Vec02* outA, Vec02* out
     }
     TransformPointBetweenFrames((PlacedObject*)node->frame, 0, &a, &c);
     TransformDirectionBetweenFrames((PlacedObject*)node->frame, 0, &b, &d);
+    // a field inside the blend items' byte array (the item record type is not known)
     ComputePolarOffset((Vec3*)&e, self->stickHeading, Vu0::ToFloat(Vu0::Length(Vu0::Q(*(Vec02*)((u8*)self + 0xE90)))) * self->stickLevel, 0.0f);
     f32 along = Vu0::ToFloat(Vu0::Dot(Vu0::Q(e), Vu0::Q(d)));
     PathShape* s2 = node->shape;
     f32 value = ((ShapeScalarFn)s2->vtbl[5])(s2, t);
+    // a field inside the blend items' byte array (the item record type is not known)
     f.y = -*(f32*)((u8*)self + 0xE40);
     f.x = -*(f32*)((u8*)self + 0xE90);
     f.z = D_00274E1C;
@@ -406,7 +408,7 @@ void PlaceOnTargetObject(Player* self, PathTarget* node, Vec02* outA, Vec02* out
 
 // What a target cost search passes to its scorer: the player, the target, and the record at
 // +0x10 the scorer hands on.
-struct TargetCostContext { Player* p0; BaseObject* p4; u8 pad1[0x10 - 8]; };
+struct TargetCostContext { Player* p0; BaseObject* p4; u8 pad1[0x10 - 8]; Vec02 point; };
 struct ObjectPlacementScore { u8 vecA[0x10]; u8 vecB[0x10]; f32 result; };
 
 void PlaceOnTargetObject(Player* self, PathTarget* node, Vec02* outA, Vec02* outB, f32 t);
@@ -418,7 +420,7 @@ f32 ScoreTargetObjectAt(TargetCostContext* self, f32 t)
 {
     ObjectPlacementScore f;
     PlaceOnTargetObject(self->p0, (PathTarget*)self->p4, (Vec02*)f.vecA, (Vec02*)f.vecB, t);
-    ScorePlayerTargetPlacement(self->p0, (Vec02*)((u8*)self + 0x10), self->p4->parent, (Vec02*)f.vecA, (Vec02*)f.vecB, 0, &f.result, 0, 0);
+    ScorePlayerTargetPlacement(self->p0, &self->point, self->p4->parent, (Vec02*)f.vecA, (Vec02*)f.vecB, 0, &f.result, 0, 0);
     return f.result;
 }
 
@@ -433,7 +435,7 @@ f32 ScoreTargetPointAt(TargetCostContext* self, f32 t)
 {
     PointPlacementScore f;
     PlaceOnTargetPoint((TargetPoint*)self->p4, (Vec02*)f.vecA, 0, t);
-    ScorePlayerTargetPlacement(self->p0, (Vec02*)((u8*)self + 0x10), self->p4->parent, (Vec02*)f.vecA, 0, 0, &f.result, 0, 0);
+    ScorePlayerTargetPlacement(self->p0, &self->point, self->p4->parent, (Vec02*)f.vecA, 0, 0, &f.result, 0, 0);
     return f.result;
 }
 
@@ -444,7 +446,7 @@ f32 ScoreTargetCurveAt(TargetCostContext* self, f32 t)
 {
     PointPlacementScore f;
     PlaceOnTargetCurve((TargetCurve*)self->p4, (Vec02*)f.vecA, 0, t);
-    ScorePlayerTargetPlacement(self->p0, (Vec02*)((u8*)self + 0x10), self->p4->parent, (Vec02*)f.vecA, 0, 0, &f.result, 0, 0);
+    ScorePlayerTargetPlacement(self->p0, &self->point, self->p4->parent, (Vec02*)f.vecA, 0, 0, &f.result, 0, 0);
     return f.result;
 }
 
@@ -1225,9 +1227,11 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         }
         f32 speed;
         if (self->targetMode == 0) {
+            // a field inside the blend slots' byte array (the slot record type is not known)
             speed = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*(Vec02*)((u8*)self + 0xAB0)))) *
                     ((PhasePlayer*)self->stateAnimPlayer)->speed;
         } else {
+            // a field inside the blend slots' byte array (the slot record type is not known)
             speed = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*(Vec02*)((u8*)self + 0xB80)))) *
                     ((PhasePlayer*)self->stateAnimPlayer)->speed;
         }
@@ -1402,6 +1406,7 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         if (rec->active != 0) {
             along = 0.0f;
         } else {
+            // a field inside the blend items' byte array (the item record type is not known)
             i.y = -*(f32*)((u8*)self + 0xE40);
             i.x = -*(f32*)((u8*)self + 0xE90);
             i.z = D_00274E5C;
@@ -1454,6 +1459,7 @@ void CollectPlayerTargetSpans(TargetPlayerView* self, TargetProbe* t, u8* out)
     Vec02 local;
     ColliderSpan span;
     if (t->active == 0) {
+        // the object's class is not known
         *(Vec02*)(out + 0x20) = D_00248D30;
         return;
     }
@@ -1476,6 +1482,7 @@ void CollectPlayerTargetSpans(TargetPlayerView* self, TargetProbe* t, u8* out)
     }
     TransformPointBetweenFrames((PlacedObject*)frame, (PlacedObject*)self, &pos, &local);
     if (CollectBoundsSpans(&t->end, &t->point, &local, t->radius, 1, &span) > 0) {
+        // the object's class is not known
         Vu0::Q(*(Vec02*)(out + 0x20)) = Vu0::Sub(Vu0::Q(span.q[1]), Vu0::Q(t->point));
     }
 }
@@ -1519,6 +1526,7 @@ void UpdatePlayerTargetPhase(Player* self)
             s32 m = self->onOffPhase;
             if (m < 3) {
                 if (m > 0) {
+                    // a field inside the blend slots' byte array (the slot record type is not known)
                     if (m == 1) *(f32*)&self->f26A0 >?= *(f32*)((u8*)self + 0xA40); else *(f32*)&self->f26A0 >?= *(f32*)self->eightSlotsB;
                 }
             }

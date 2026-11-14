@@ -23,7 +23,8 @@ struct AttachedGroup {
 struct AttachedSet : Collider {
     Attach03* links;        // 0x550: the objects attached to it (linked at Attach03::nextOwn)
     AttachedGroup group;    // 0x554
-    u8 pad564[0x580 - 0x564];
+    u8 pad564[0x570 - 0x564];
+    Vec02 f570;             // 0x570: the velocity GetAttachedSetPointMotion starts from
     s32 tellsLanding;       // 0x580: nonzero, a body landing on it is told of the point (func_001EEF90)
     s32 f584;               // 0x584: 1 at set-up
     s32 f588;               // 0x588: 1 at set-up

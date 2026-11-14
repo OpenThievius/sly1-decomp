@@ -877,7 +877,7 @@ void StartStateTrigger(StateTrigger* self)
     sptr e = (sptr)&self->children;
     fr.link = e;
     fr.list = e;
-    s32 link = *(s32*)(e + 8);
+    s32 link = ((List01*)e)->offset;
     sptr old = (sptr)g_activeListFrames;
     fr.prev = old;
     fr.offset = link;
@@ -1468,7 +1468,7 @@ void StartPlacedObject(PlacedObject* self)
     sptr e = (sptr)&self->children;
     fr.list = e;
     fr.link = e;
-    fr.offset = *(s32*)(e + 8);
+    fr.offset = ((List01*)e)->offset;
     fr.prev = old;
     g_activeListFrames = (ListFrame*)&fr;
     StartObject(self);
@@ -1582,6 +1582,7 @@ void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item)
         void* node = FindFirstObjectById(host, kind, it->id, self);
         if (node) {
             if (!(it->flags & 8)) {
+                // address arithmetic over a variable index
                 *(void**)((u8*)self + it->offset) = node;
             }
             if (!(it->flags & 4)) {
@@ -1615,7 +1616,7 @@ void UpdateObjectTree(void* self, f32 f)
     fr.list = e;
     fr.link = e;
     sptr old = *(sptr*)&g_activeListFrames;
-    s32 link = *(s32*)(e + 8);
+    s32 link = ((List01*)e)->offset;
     fr.prev = old;
     fr.offset = link;
     *(sptr*)&g_activeListFrames = (sptr)&fr;
@@ -1662,6 +1663,7 @@ void UpdatePlacedObject(PlacedObject* self, f32 f)
 void ClearObjectRecordValues(PlacedObject* records)
 {
     for (s32 i = 0; i < records->drawPartCount; i++) {
+        // address arithmetic over a variable index
         PartState* record = (PartState*)((u8*)records->partStates + i * 0x28);
         record->value = -1;
     }
@@ -2390,8 +2392,8 @@ void SetObjectTreeRecordValue(PlacedObject* object, u32 value)
 {
     ListFrame frame;
     PlacedObject* child = (PlacedObject*)object->children.head;
-    *(u32*)(object->sub22C + 0x3C) = value;
-    *(u32*)(object->sub22C + 0x38) |= 2;
+    object->recordValue = value;
+    object->recordFlags |= 2;
     while (child != 0) {
         if ((child->desc->flags & 1) != 0)
             SetObjectTreeRecordValue(child, value);
@@ -2402,8 +2404,8 @@ void SetObjectTreeRecordValue(PlacedObject* object, u32 value)
 // Stores value in the object's record at 0x22C (offset 0x3C) and sets bit 2 of that record's flags.
 void SetObjectRecordValue(PlacedObject* state, u32 value)
 {
-	*(u32*)(state->sub22C + 0x3C) = value;
-	*(u32*)(state->sub22C + 0x38) |= 2;
+    state->recordValue = value;
+    state->recordFlags |= 2;
 }
 
 extern "C" f32 Sine(f32 x);
@@ -2432,6 +2434,7 @@ void SetObjectTreeRecordsValue(PlacedObject* object, void* value)
 {
     ListFrame frame;
     for (s32 i = 0; i < object->drawPartCount; i++) {
+        // address arithmetic over a variable index
         DrawPart* record = (DrawPart*)((u8*)object->drawParts + i * 0x70);
         record->type = 2;
         record->object = value;
@@ -2586,7 +2589,7 @@ void CopyPlacedObject(PlacedObject* self, PlacedObject* src)
     if (src->rangeRecord) {
         u8* p = (u8*)TakePoolSlot(&self->world->pool1BF4);
         CopyMemory(p, src->rangeRecord, 0x2E0);
-        ClearListLinks((ListLink*)(p + 0xB8));
+        ClearListLinks((ListLink*)&((RangeRecord*)p)->next);
         self->rangeRecord = (RangeRecord*)p;
         AppendToList(&self->world->list1C00, p);
     }
@@ -3280,10 +3283,10 @@ void LoadFollowRecord(PlacedObject* self, void* a1)
         self->linkRecord = p;
         p->flags = flags;
 
-        u8* q = (u8*)p + 0x30;
-        *(Mat02*)p = g_identityMatrix;
+        u8* q = (u8*)&p->m[1];
+        p->m[0] = g_identityMatrix;
         *(Mat02*)q = g_identityMatrix;
-        if (flags & 1) ReadBufferedRotation3((BufferedStream*)a1, (u8*)p);
+        if (flags & 1) ReadBufferedRotation3((BufferedStream*)a1, (u8*)&p->m[0]);
         if (flags & 2) ReadBufferedRotation3((BufferedStream*)a1, q);
         if (flags & 0xC) {
             s32 r = ReadBufferedS16((BufferedStream*)a1);
@@ -3296,8 +3299,8 @@ void LoadFollowRecord(PlacedObject* self, void* a1)
         }
         if (flags & 0x20) {
             p->p84 = (BaseObject*)ReadBufferedS16((BufferedStream*)a1);
-            ReadBufferedVector3((BufferedStream*)a1, (u8*)p + 0x60);
-            ReadBufferedVector3((BufferedStream*)a1, (u8*)p + 0x70);
+            ReadBufferedVector3((BufferedStream*)a1, &p->q60[0]);
+            ReadBufferedVector3((BufferedStream*)a1, &p->q60[1]);
             f32 f = WrapAngle(ReadBufferedFloat((BufferedStream*)a1));
             p->linkFlags = 0;
             p->f8C = f;
@@ -3353,11 +3356,11 @@ void ApplyObjectFrameOffsetToPose(PlacedObject* self, Mat02* m, Vec02* v)
         }
         if (p->flags & 2) {
             if (m != 0) {
-                MulRotationRowsX(&t, *(Mat02*)(p->pad00 + 0x30), *m);
+                MulRotationRowsX(&t, p->m[1], *m);
                 *m = t;
             }
             if (v != 0) {
-                Vu0::Q(t.r[0]) = Vu0::Rotate(*(Mat02*)(p->pad00 + 0x30), Vu0::Q(*v));
+                Vu0::Q(t.r[0]) = Vu0::Rotate(p->m[1], Vu0::Q(*v));
                 *v = t.r[0];
             }
         }
@@ -3380,7 +3383,7 @@ void RemoveObjectFrameOffsetFromPose(PlacedObject* self, Mat02* m)
             *m = t;
         }
         if (p->flags & 2) {
-            t = MultiplyByTransposedMatrix3x3(p->pad00 + 0x30, m);
+            t = MultiplyByTransposedMatrix3x3((u8*)&p->m[1], m);
             *m = t;
         }
     }
@@ -5224,6 +5227,7 @@ s32 HasAnimationEventKind19(Animation* a0)
     s32 n = a0->timedCount;
     if (n > 0) {
         s32 i = 0;
+        // a field access here changes retail's code
         u8* p = (u8*)a0->timedList + 4;
         do {
             i++;
@@ -5465,6 +5469,7 @@ void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount
     u8* p;
     if (self->timedCount > 0) {
         i = self->timedCount;
+        // a field access here changes retail's code
         p = (u8*)self->timedList + 4;
         do {
             if (*(s32*)p == 0x29) n++;
@@ -6096,7 +6101,7 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
     case 55:
     {
         u8* sys = g_elementStack;
-        ((U32P*)(sys + 0x30))->v = 0;
+        ((U32P*)&((ElementStack*)sys)->resumeState)->v = 0;
         SetElementStackState((ElementStack*)sys, 0);
     }
         break;
@@ -6199,6 +6204,7 @@ void StopAnimationPlayer(AnimationPlayer* self)
     Animation* sub = self->anim;
     u8* base = (u8*)sub->world;
     for (i = 0; i < sub->endCount; i++) {
+        // address arithmetic over a variable index
         AnimEvent* it = (AnimEvent*)((u8*)sub->endList + i * 16);
         tmp.a = 0;
         RunAnimationEvent(self, it, (s32*)&tmp);
@@ -6211,16 +6217,16 @@ void StopAnimationPlayer(AnimationPlayer* self)
     RemoveQueuedCalls((World*)base, 2, 0, self, -1, 0);
     RemoveFromList((List01*)sub->props6C, self);
     if (sub->listedInWorld != 0) {
-        RemoveFromList((List01*)(base + 0x1B70), self);
+        RemoveFromList((List01*)&((World*)base)->f1B70, self);
     } else {
-        RemoveFromList((List01*)(base + 0x1B64), self);
+        RemoveFromList((List01*)&((World*)base)->animationPlayers, self);
     }
-    AppendToList((List01*)(base + 0x1B7C), self);
-    sptr s0 = (sptr)self + 0xC;
-    sptr e = (sptr)self + 0x44;
+    AppendToList((List01*)&((World*)base)->list1B7C, self);
+    sptr s0 = (sptr)&self->object;
+    sptr e = (sptr)&self->list44;
     fr.link = e;
     fr.list = e;
-    s32 link = *(s32*)(e + 8);
+    s32 link = ((List01*)e)->offset;
     fr.prev = (sptr)g_activeListFrames;
     g_activeListFrames = (ListFrame*)&fr;
     fr.offset = link;

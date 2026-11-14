@@ -28,6 +28,15 @@ struct TransformObject : BaseObject {
     Mat3_73 rot;            // 0x50
 };
 
+// 0x7B (0x90 bytes): a placed transform with a mesh of points and links read from the level
+// stream (func_00141108, ReadMeshTables).
+struct MeshObject : TransformObject {
+    s32 pointCount;         // 0x80
+    void* points;           // 0x84
+    s32 linkCount;          // 0x88
+    void* links;            // 0x8C
+};
+
 // 0x74 (0x100 bytes): a set of objects of its own. Loading (slot 10, func_001F3D80) makes each
 // object from the stream and has it load itself, then reads a list of ids; copying (slot 9,
 // func_001F3EE0) copies the objects; starting (slot 16, func_001F3F80) gives each its parent

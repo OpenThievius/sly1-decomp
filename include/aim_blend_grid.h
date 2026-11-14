@@ -29,7 +29,17 @@ struct GridRecord { s32 id; u8 pos[96]; };
 // (func_001C8C08), and a record whose flag at 0x18 func_00139B38 sets.
 struct PoseSource;
 typedef void (*PoseSourceFn)(PoseSource* m, void* body, f32 x, f32 y, s32 z, void* out, s32 w);
-struct PoseSource { PoseSourceFn* vtbl; };
+// The sequence a mover holds at 0x10 (func_0018AE38): FindCyclicRangeIndex's pairs.
+struct CyclicRanges {
+    u8 pad00[0x04];
+    s32 count;              // 0x04
+    void* pairs;            // 0x08
+};
+struct PoseSource {
+    PoseSourceFn* vtbl;
+    u8 pad04[0x10 - 0x04];
+    CyclicRanges* ranges;   // 0x10: of a clip's mover (func_0018AE38)
+};
 struct FlaggedSource { u8 pad[0x18]; s32 flag; };
 struct BlendSourceEntry {
     s32 key;                // 0x00: the object id func_0012CCE8 matches

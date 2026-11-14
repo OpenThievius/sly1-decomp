@@ -19,7 +19,18 @@ struct HitStamp {
     f32 time;               // 0x04
 };
 
+// One place the player has stood (player.cpp RecordPlayerTargetMemo): the object it was bound to, how far
+// along it, the time, and the position.
+struct TargetMemo {
+    void* key;
+    f32 along;
+    f32 f8;
+    u8 padC[4];
+    Vec02 pos;
+};
+
 struct Player;
+struct Attachment;      // attachment.h
 struct ObjectMessage;    // object_message.h
 struct World3BeatPressCollider;
 struct Agent;
@@ -452,9 +463,13 @@ struct Player : TurningCollider {
     void* f23D4;            // 0x23D4
     void* f23D8;            // 0x23D8: the other of the pair
     s32 f23DC;               // 0x23DC
-    f32 f23E0;              // 0x23E0
-    f32 f23E4;              // 0x23E4
-    u8 pad23E8[0x23F0 - 0x23E8];
+    union {
+        Vec02 v23E0;        // 0x23E0
+        struct {
+            f32 f23E0;      // 0x23E0
+            f32 f23E4;      // 0x23E4
+        };
+    };
     f32 f23F0;              // 0x23F0
     f32 f23F4;              // 0x23F4
     u8 pad23F8[0x2400 - 0x23F8];
@@ -485,7 +500,7 @@ struct Player : TurningCollider {
     s32 ledgeKind;          // 0x24F0: handed to func_0017E088 with f24F4 (UpdatePlayer)
     s32 ledgeKey;           // 0x24F4: the key of the ledge contact
     PlacedObject* rigObject; // 0x24F8: the object of link id 0x60 (D_00262E40); func_00175078 calls its slot 43
-    u8* f24FC;               // 0x24FC
+    Attachment* f24FC;               // 0x24FC
     void* f2500;            // 0x2500: five parts whose byte at +0x10 func_00175078 sets to 9 or -1
     void* f2504;            // 0x2504
     void* f2508;            // 0x2508
@@ -493,8 +508,8 @@ struct Player : TurningCollider {
     void* footPartB;        // 0x2510: the same with f1290
     void* selfPoseSource;   // 0x2514: the player's own pose source
     void* rigPoseSource;    // 0x2518: the pose source on rigObject
-    u8* f251C;       // 0x251C
-    u8* f2520;               // 0x2520
+    Attachment* f251C;       // 0x251C
+    Attachment* f2520;               // 0x2520
     u8 pad2524[0x2530 - 0x2524];
     Vec02 poseOffset;       // 0x2530: an offset of the pose eased to zero (func_00172EE0)
     u8 aimBlend4[0x18];     // 0x2540: the blend set up for aim state 4 (func_001C6D00), with its animation
@@ -565,8 +580,10 @@ struct Player : TurningCollider {
     void* f2764;             // 0x2764
     s32 f2768;              // 0x2768
     u8 pad276C[0x2770 - 0x276C];
-    u8 f2770[0x20];         // 0x2770
-    u8 pad2790[0x2B70 - 0x2790];
+    union {
+        u8 f2770[0x400];    // 0x2770
+        TargetMemo targetMemo[32]; // 0x2770: the places it has stood (RecordPlayerTargetMemo)
+    };
     union {
         Vec02 contactQuads[2]; // 0x2B70: the two quads func_00178598 copies from what func_001782C0 takes
         struct {
@@ -944,7 +961,7 @@ struct PlayerLinkedCollider : SwitchedCollider {
     s32 f628;               // 0x628
     u8 pad62C[0x630 - 0x62C];
     s32 f630;               // 0x630
-    u8 pad634[0x638 - 0x634];
+    s32 f634;               // 0x634: nonzero, the camera looks from the kept object (func_0014A7B8)
     s32 linkedCount;        // 0x638: how many linked objects there are
     void* linkedObjects;    // 0x63C: the objects the ids resolve to
     void* linkedIds;        // 0x640: the ids of the linked objects
