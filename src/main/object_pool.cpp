@@ -9,6 +9,7 @@
 // the object pool.
 #include "common.h"
 #include "attachment.h"
+#include "list_walk.h"
 
 #include "switched_collider.h"
 #include "list_iter.h"
@@ -143,7 +144,7 @@ ObjectPoolEntry* FindObjectPoolEntry(ObjectPool* table, s32 key);
 
 // Where func_001A94C0 takes a position and a matrix from: an object's world frame (f0 or f4), a
 // placed object's m110 and v140 (f8), or its own copy of both.
-struct FrameSource {
+struct PlacementRecord {
     void* positionObject;
     void* frameObject;
     PlacedObject* placedObject;
@@ -313,25 +314,7 @@ struct PoolCandidate { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
 s32 IsObjectAttached(BaseObject* self);
 
 // The list walk (list_iter.h): push a frame, step through the elements, pop it.
-struct ListWalkBegin {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-};
 
-struct ListWalkNext {
-    static u8* Of(ListFrame* it)
-    {
-        u8* obj = *(u8**)it->link;
-        it->link = obj + it->offset;
-        return obj;
-    }
-};
 
 struct ListWalkEnd {
     static void Of(ListFrame* it)
@@ -899,7 +882,7 @@ struct PoolView_1A8C90 {
 };
 
 struct FrameFollower;
-void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* a3);
+void GetPlacementRecordTransform(PlacementRecord* self, Vec02* a1, Vec02* a2, void* a3);
 void ComputeFrameFollowerPoint(FrameFollower* self, Vec02* target, Vec02* out, void* to);
 void GetPlacementRecordAngle(u8* self, f32* out, void* x);
 void GetPlacementRecordPitch(u8* self, f32* out, void* x);
@@ -942,7 +925,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
         }
         obj = self->chosen;
     }
-    GetPlacementRecordTransform((FrameSource*)&pool->f60, &pos, rot.r, self->frame);
+    GetPlacementRecordTransform((PlacementRecord*)&pool->f60, &pos, rot.r, self->frame);
     ComputeFrameFollowerPoint((FrameFollower*)&pool->fE0, &pos, &to, self->frame);
     Vu0::Q(dir) = Vu0::Sub(Vu0::Q(to), Vu0::Q(pos));
     u128 len = NormalizeVectorOr(dir, g_unitXVector);
@@ -1107,7 +1090,7 @@ void ClearObjectPoolHeadingRecord(u8* self)
 // Gives the release point of a placement record in a1 (position) and a2 (rotation): from its
 // position object, its frame object, its placed object, or its own position and rotation;
 // converted into the frame a3 when given.
-void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* a3)
+void GetPlacementRecordTransform(PlacementRecord* self, Vec02* a1, Vec02* a2, void* a3)
 {
     if (self->positionObject != 0) {
         ConvertPositionToWorld((BaseObject*)self->positionObject, a1);

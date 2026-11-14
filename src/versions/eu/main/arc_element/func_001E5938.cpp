@@ -67,7 +67,7 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         Vec02 c0;
         Mat02 rot;
         Vec02 d;
-        GetPlacementRecordTransform((FrameSource*)place, &c0, rot.r, 0);
+        GetPlacementRecordTransform((PlacementRecord*)place, &c0, rot.r, 0);
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(c0));
         *(f32*)(ang + 8) = ArctangentOfRatio(d.y, d.x);
         *(f32*)(ang + 4) = ArctangentOfRatio(d.z, Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d)))));

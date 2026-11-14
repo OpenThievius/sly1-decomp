@@ -10,6 +10,7 @@
 #include "common.h"
 #include "id_lookup_object.h"
 #include "placed_object.h"
+#include "model_build.h"
 #include "world.h"
 #include "animation.h"
 #include "sound_record.h"
@@ -28,6 +29,8 @@
 #include "word_copy.h"
 #include "camera.h"
 #include "object_finder.h"
+#include "element_stack_state.h"
+#include "mesh_face03.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
 #include "functions/collider.h"
@@ -294,7 +297,6 @@ struct PlayerListWalk {
     }
 };
 
-struct ElementStackState { u8 pad0[0x30]; s32 f30; };
 extern ElementStackState g_elementStack;
 extern SessionKey g_sessionFadeKey;
 extern s32 g_resumeSoundSetupDone;
@@ -398,7 +400,7 @@ struct QuadClear
     }
 };
 
-struct PercentClamp {
+struct PercentClampS32 {
     static s32 Of(s32 v, s32 lo, s32 hi)
     {
         if (v < lo) return lo;
@@ -532,38 +534,10 @@ struct WeightIndices {
     u16* pos;
     u16* nrm;
 };
-struct MeshBuildState {
-    u8 pad00[0x40];
-    s32 f40;
-};
-struct StripMeshInfo {
-    u8 pad00[0x10];
-    s32 f10;
-    s32 f14;
-    s32 f18;
-};
 struct CursorHook;
 typedef AnimCursor* (*CursorHookFn)(CursorHook* self, StripMesh* mesh);
 struct CursorHook {
     CursorHookFn* vt;
-};
-struct StripMeshOwner {
-    u8 pad00[0x18];
-    s32 f18;
-    u8 pad1C[0x28 - 0x1C];
-    s32 f28;
-    u8 pad2C[0x38 - 0x2C];
-    CursorHook* f38;
-    u8 pad3C[0x40 - 0x3C];
-    f32 f40;
-    u8 pad44[0x54 - 0x44];
-    StripMeshInfo* f54;
-};
-struct StripExtra {
-    s32 f0;
-    s32 a4[4];
-    s32 a14[4];
-    s32 a24[4];
 };
 struct StripUnpack {
     u16 off[4];
@@ -611,9 +585,6 @@ void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
 
 typedef void (*AttachmentHandlerFn)(void* self);
 struct AttachmentHandler { AttachmentHandlerFn* vtbl; };
-struct AttachmentEntry { u8 pad0[0x38]; AttachmentHandler* f38; u8 pad1[0x70 - 0x3C]; };
-struct AttachmentNode { u8 pad0[4]; void* f4; s32 f8; u8 pad1[0x80 - 0xC]; AttachmentNode* next80; };
-struct AttachmentBlock { u8 pad0[0xC]; s32 count0C; AttachmentEntry* f10; u8* f14; u8 pad1[0x4C - 0x18]; AttachmentNode* f4C; };
 
 
 // Four quadwords: a matrix as the attachment code copies it.
@@ -624,16 +595,7 @@ struct AttachmentTargets { s32 count; AttachmentTarget* elems; s32* keys; };
 struct TargetFrames { Quad16 a; u8 pad0[0x30]; Quad16 b; u8 pad1[0x30]; QuadMatrix m; };
 
 
-struct AnimatorStep;
-typedef void (*AnimatorStepFn)(void* self, f32 f);
 
-struct AnimatorStep {
-    AnimatorStepFn* vtbl;
-    u8 pad4[0x8];
-    void* f0C;
-    u8 pad10[0x70];
-    AnimatorStep* next80;
-};
 
 struct AnimatorOwner {
     u8 pad0[0x4C];
@@ -645,10 +607,7 @@ struct AnimatorOwner {
 extern u8 g_litBatchFinishProgram[];
 extern u8 D_000000F0[];
 
-struct PartPacketContext { u8 pad0[0x28]; s32 f28; };
 struct PartRange { u16 lo; u16 hi; };
-struct PartPacketSource { u8 pad0[0x18]; u8* f18; PartRange* f1C; };
-struct PartPackets { void* f0; void* f4; void* f8; void* fC; void* f10; void* f14; };
 
 void* InitPacketWriter(PacketWriter* self);
 void AllocateQuadwordBuffer(PacketWriter* buffer, u32 count, u32 kind);
@@ -657,7 +616,6 @@ void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8*
 void WriteVifMscal(void* s, void* n);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-struct AttachmentLink { s32 tag; AttachmentLink* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; AttachmentLink* next; u8 pad84[0xC]; };
 struct AttachmentPartInfo { u8 pad[0x10]; u32 flags; };
 struct AttachmentPart { u8 pad[0x38]; AttachmentPartInfo* a; u8 pad3C[0x18]; void* b; };
 struct AttachmentCopy { s32 n0; void* p4; u8 pad8[4]; s32 count; AttachmentPart* recs; void* p14; u8 pad18[0x28]; s32 n40; void* p44; u8 pad48[4]; AttachmentLink* head; s32 f50; };
@@ -675,7 +633,6 @@ struct FrameLinkConstraint { u8 pad0[0x60]; QuadMatrix m60; u8 pad[4]; s32 a4; u
 struct FramedObject { FramedObjectVt* vt; u8 pad0[0x10C]; u8 sub110[0x30]; u8 sub140[0x40]; u8 pad180[0xA4]; FrameLinkConstraint* link; };
 struct FramedAttachment { FramedObject* obj; u8 pad[0xC]; Quad16 q10[4]; QuadMatrix m50;  };
 struct FramedAttachmentList { s32 count; FramedAttachment* items; };
-struct ParentFrame { u8 pad[0x30]; };
 
 QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
@@ -1509,9 +1466,9 @@ void ResumeAtSavedLevel(void)
         k = &g_sessionFadeKey;
     }
     ClearTwoWords(D_002623D8);
-    if (g_elementStack.f30 != 1 || g_saveData->totalTime != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
+    if (g_elementStack.resumeState != 1 || g_saveData->totalTime != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
-    } else if (g_elementStack.f30 == 1) {
+    } else if (g_elementStack.resumeState == 1) {
         if (g_resumeSoundSetupDone == 0) {
             SilenceVolumeChannel3(g_saveData->optionFlags & 0x80);
             ApplySoundOptionFlag(g_saveData->optionFlags & 0x40);
@@ -1528,7 +1485,7 @@ void ResumeAtSavedLevel(void)
                     } while (node != 0);
                 }
             }
-            g_elementStack.f30 = -1;
+            g_elementStack.resumeState = -1;
             SetElementStackState((ElementStack*)&g_elementStack, 3);
         }
     }
@@ -1570,7 +1527,7 @@ s32 ComputeCompletionPercent(GameProgress* progress)
     }
     if (done == 0) return 0;
     if (done == total) return 100;
-    return PercentClamp::Of(done * 100 / total, 1, 99);
+    return PercentClampS32::Of(done * 100 / total, 1, 99);
 }
 
 void SetSpareCount(s32 value)
@@ -1691,12 +1648,6 @@ void ClearRecordBody(ClearedRecord* self)
 
 // A face of a collision mesh (Mesh03::faces, 0x20 bytes): its normal, the plane's offset (as bits)
 // and the index of one of its vertices.
-struct MeshFace03 {
-    Vec02 normal;           // 0x00
-    u32 offsetBits;         // 0x10
-    u8 pad14[0x1E - 0x14];
-    u16 vert;               // 0x1E
-};
 
 // Copies a mesh (vertices, faces, face points and words) into front memory, sharing its edge list,
 // and when a matrix is given transforms the copied vertices (and the face data) by it.
@@ -1719,7 +1670,7 @@ void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
             MeshFace03* face = &((MeshFace03*)dst->faces)[i];
             TransformByMatrixWithW((const Quad16*)matrix, &face->normal, 0.0f, &face->normal);
             Vec02* vert = (Vec02*)((face->vert << 4) + (uptr)dst->verts);
-            face->offsetBits = Vu0::ToBits(Vu0::Dot(Vu0::Q(face->normal), Vu0::Q(*vert)));
+            face->offset = Vu0::ToBits(Vu0::Dot(Vu0::Q(face->normal), Vu0::Q(*vert)));
             Vec02* p = &((Vec02*)dst->points)[i];
             TransformByMatrixWithW((const Quad16*)matrix, p, 1.0f, p);
         }

@@ -85,7 +85,7 @@ void AddDmaRefTag(DmaChainBlock* a, s32 n, void* table);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-struct TexturePacket : PacketWriter { s32 value; };
+struct TexturePacketValue : PacketWriter { s32 value; };
 
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;

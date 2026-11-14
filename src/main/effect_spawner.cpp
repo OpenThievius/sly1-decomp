@@ -39,6 +39,8 @@
 #include "scope_marker.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "list_walk.h"
+#include "playing_sound.h"
 #include "functions/active_set_solver.h"
 #include "functions/anim_record.h"
 #include "functions/collider.h"
@@ -270,7 +272,7 @@ struct MemberTargetObject;
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
 // list at +0x1BDC, linked at +0x64): the receiver, the 0x50-byte message, the time it is due.
 struct DelayedMessageBody { Quad16 q[5]; };
-struct DelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 due; u8 link[8]; /* 0x64: the link in World::list1BDC */ };
+struct QueuedDelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 due; u8 link[8]; /* 0x64: the link in World::list1BDC */ };
 
 extern f32 g_gameClock[];
 
@@ -344,14 +346,6 @@ void AppendToList(List01* self, void* item);
 
 void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15, void* owner);
 
-struct CyclerEventMessage {
-    u8 pad0[0x8];
-    f32 f8;
-    s32 fC;
-    u8 pad1[0x20 - 0x10];
-    Quad16 f20;
-    Quad16 f30;
-};
 struct __attribute__((aligned(16))) GroupForwardMessage {
     s32 f0;
     u8 pad0[0x10 - 0x4];
@@ -379,7 +373,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 // The colour UpdateColorFade blends, word-aligned, and its request: DeferredRequest's layout
 // with that colour at +0x60 (DeferredRequest's Rgba4 would copy it unaligned).
 struct __attribute__((aligned(4))) FadeColor { u8 c[4]; };
-struct FadeRequest { void* fn; f32 f; s32 mode; u8 pad[0x54]; FadeColor col; u8 pad2[0x1C]; };
+struct FadeEffectRequest { void* fn; f32 f; s32 mode; u8 pad[0x54]; FadeColor col; u8 pad2[0x1C]; };
 extern s32 D_00275BC4;
 
 extern s32 D_00270458;
@@ -437,16 +431,6 @@ void RemoveFromList(List01* list, void* item);
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
 // (list_iter.h) and each step reads the next item through the link.
-struct BeginListWalk {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-};
 
 template <class T> struct NextInList {
     static T* Of(ListFrame* it)
@@ -527,11 +511,6 @@ void* InitGifPacket(void* p);
 void* InitPacketWriter(PacketWriter* self);
 
 
-struct GroundProbe {
-    Vec02 q;
-    s32 a;
-    s32 b;
-};
 
 extern f32 g_gameClock[];
 
@@ -615,17 +594,6 @@ extern s32 D_002626CC;
 
 extern "C" s32 AwaitSemaphore(void* a);
 
-struct FontHeader {
-    u16 u0;
-    u16 u2;
-    u8 b4;
-    u8 b5;
-    u8 b6;
-    u8 b7;
-    f32 f8;
-    u16 uC;
-    u16 padE;
-};
 
 
 
@@ -654,8 +622,6 @@ void RunThread(void* a, s32 b);
 void func_0015E678(void);
 
 
-struct GroundFilterContext { u8 pad[0x50]; s32 f50; };
-struct GroundCandidate { u8 pad0[0x50]; s32 f50; u8 pad1[0x278]; u32 f2CC; u8 pad2[0x268]; u64 f538; };
 
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
@@ -668,12 +634,6 @@ extern "C" s32 AwaitSemaphore(void* p);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 
-struct FrameNode {
-    u8 pad0[0x14];
-    u8* f14;
-    u8 pad18[0x1088 - 0x18];
-    void* f1088;
-};
 
 
 s32 IsListEmpty(List01* l);
@@ -1483,10 +1443,6 @@ s32 RandomIntInRange(s32 a, s32 b);
 void SpawnEffectsAt(Quad16* self, Quad16* a1, s32 a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
 
 // A playing sound, as far as the surface-contact effects reach into it.
-struct PlayingSound {
-    u8 pad00[0x14];
-    f32 volume;             // 0x14: the volume it is played at
-};
 
 // Both callers (gauge_collider.cpp and collider.cpp) declare it with these parameters and are
 // retail's code with them; a float takes its register wherever it is declared.
@@ -1518,7 +1474,7 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
             f32 vol = k * 0.9f + 0.1f;
             PlayingSound* rec = (PlayingSound*)snd->playingSound;
             if (rec != 0) {
-                rec->volume = vol;
+                rec->baseVolume = vol;
             } else {
                 StartSoundEffect(g_surfaceContactSounds[RandomIntInRange(0, 3)], (PlayingSound**)&snd->playingSound, (BaseObject*)snd, 0, 10.0f, 1.0f, vol,
                                  0.0f, 0.0f, 0, 0);
@@ -2688,12 +2644,12 @@ void ReleaseHeldObject(HoldingMember* self, s32 kind, BaseObject* other)
 // DispatchDelayedMessages later handles the queued ones.
 void SendMessageAfterDelay(HoldingMember* self, void* message)
 {
-    DelayedMessage* r;
+    QueuedDelayedMessage* r;
     f32* k;
     s32 done = 0;
 
     if (0.0f < self->delay) {
-        r = (DelayedMessage*)PopFreeSlot(&self->world->pool1BD0);
+        r = (QueuedDelayedMessage*)PopFreeSlot(&self->world->pool1BD0);
         if (r != 0) {
             r->owner = self;
             r->body = *(DelayedMessageBody*)message;
@@ -2940,8 +2896,8 @@ void DispatchDelayedMessages(World* self)
 {
     ListFrame it;
     BeginListWalk::Of(&it, &self->list1BDC);
-    DelayedMessage* node;
-    while ((node = NextInList<DelayedMessage>::Of(&it)) != 0) {
+    QueuedDelayedMessage* node;
+    while ((node = NextInList<QueuedDelayedMessage>::Of(&it)) != 0) {
         if (!(g_gameClock[1] < node->due)) {
             HandleSpawnMessage(node->owner, &node->body);
             RemoveFromList(&self->list1BDC, node);
@@ -3218,7 +3174,7 @@ void UpdateColorFade(ColorFade* self)
     f32 r = t / d;
     for (s32 i = 0; i < 4; i++)
         out.c[i] = (s32)((1.0f - r) * ((u8*)&a)[i] + r * ((u8*)&b)[i]);
-    FadeRequest q;
+    FadeEffectRequest q;
     q.f = -1.0f;
 
     q.fn = (void*)(void (*)(ColorFade*))DrawScreenFill;

@@ -33,6 +33,7 @@
 #include "value_range.h"
 #include "common.h"
 #include "object_finder.h"
+#include "list_walk.h"
 #include "functions/buffered_stream.h"
 #include "functions/camera.h"
 #include "functions/collider.h"
@@ -252,16 +253,6 @@ struct NextListed {
     }
 };
 
-struct BeginListWalk {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-};
 
 void AddTrackedNode(Rec36* self, BaseObject* n);
 

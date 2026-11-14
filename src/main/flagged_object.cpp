@@ -11,6 +11,7 @@
 #include "flag_table.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "list_walk.h"
 #include "functions/base_object.h"
 #include "functions/buffered_stream.h"
 #include "functions/collider.h"
@@ -191,21 +192,6 @@ void InitFlaggedObject(FlaggedObject* self)
     SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
-struct ScopedListFrame {
-    void* list;
-    void* cursor;
-    s32 next_off;
-    ScopedListFrame* prev;
-    ScopedListFrame(List01* l)
-    {
-        list = l;
-        cursor = l;
-        next_off = l->offset;
-        prev = (ScopedListFrame*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)this;
-    }
-    ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
-};
 
 
 // Loads the flagged object (as a collider), resolves its links, and sorts its children into two
@@ -272,24 +258,6 @@ void ResolveListIds(FlaggedObject* self)
     }
 }
 
-struct ListWalkNext {
-    static u8* Of(ListFrame* it)
-    {
-        u8* obj = *(u8**)it->link;
-        it->link = obj + it->offset;
-        return obj;
-    }
-};
-struct ListWalkBegin {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
 
 struct StateGraph;
 

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "list_walk.h"
+#include "scaled_transform.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
 #include "functions/collider.h"
@@ -236,16 +238,6 @@ void LoadTimedGroup(TimedGroup* self, BufferedStream* stream)
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
 // (list_iter.h) and each step reads the next item through the link.
-struct BeginListWalk {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-};
 
 template <class T> struct NextInList {
     static T* Of(ListFrame* it)
@@ -503,12 +495,6 @@ Vec02* AllocateBackMemory(s32 size);
 // through its points (in this object's frame), cut off at the length ComputeTimedGroupRamp gives;
 // records the drawn length in fallScale for the states that use it. The beam object comes from one
 // of two fields by state, or the world's default.
-// The transform DrawCollider is given (placed_object.cpp's ScaledTransform): four quads, then the
-// fade the beam is drawn with.
-struct ScaledTransform {
-    Quad16 q[4];
-    f32 outerFade;
-};
 
 void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
 {

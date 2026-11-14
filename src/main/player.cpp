@@ -57,6 +57,8 @@
 #include "point_object.h"
 #include "texture_render_object.h"
 #include "object_finder.h"
+#include "collider_pose.h"
+#include "mesh_hit_sample.h"
 #include "functions/base_object.h"
 #include "functions/blend_animation.h"
 #include "functions/camera.h"
@@ -1746,8 +1748,8 @@ void BlendPlayerPose(Player* self, void* a, void* b)
     if (self->f2724 < 1.0f || spin < 1.0f) {
         BuildPlacedObjectTransform(self, (Quad16*)b, &out);
         b = &out;
-        out.scaleB = self->f2728;
-        out.scaleA = out.scaleA * self->f2724;
+        out.innerFade = self->f2728;
+        out.outerFade = out.outerFade * self->f2724;
     }
     self->boundRadius = 500.0f;
     if (self->spinAngle != 0.0f || self->spinRate != 0.0f) {
@@ -2150,16 +2152,6 @@ void FillPlayerPushRecord(Player* self, PushRecord* out);
 typedef void (*PoseAtFn)(PoseHolder47* self, Vec02* pos, Vec02* dir, f32 t);
 
 // The pose a collider's slot captures each frame (CaptureSwitchedColliderPose fills pos).
-struct ColliderPose {
-    s32 flags;              // 0x00: bit 0 set in the player's grounded states
-    u8 pad04[0x10 - 0x04];
-    Vec02 pos;              // 0x10: where the camera looks
-    Vec02 dir;              // 0x20: the path's direction times the speed along it
-    u8 pad30[0x34 - 0x30];
-    f32 weight;             // 0x34: a weight, scaled down by the spin or cleared
-    f32 stampTime;          // 0x38: the time it was last stamped
-    s32 f3C;                // 0x3C
-};
 
 // Fills the pose the camera reads each frame, after the switched collider's. Unless the focus is
 // held, the focus is the point along the path in state 7, or the player's position with a clamped,
@@ -2180,13 +2172,13 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
                 fn(h, &pos, &dir, self->pathPos);
             }
             TransformPointBetweenFrames((PlacedObject*)(((PoseTarget*)self->aimCurve)->frame), 0, &pos, &pos);
-            Vu0::Q(pose->pos) = Vu0::Q(pos);
+            Vu0::Q(pose->position) = Vu0::Q(pos);
             TransformDirectionBetweenFrames((PlacedObject*)(((PoseTarget*)self->aimCurve)->frame), 0, &dir, &dir);
             u128 d = Vu0::Q(dir);
             d = Vu0::NormalizeOr(d, Vu0::Q(D_00248D30));
             Vu0::Q(pose->dir) = Vu0::MulX(d, Vu0::ScalarAt(self->pathSpeed));
             Vu0::Q(dir) = d;
-            self->cameraHeight = pose->pos.z - 125.0f;
+            self->cameraHeight = pose->position.z - 125.0f;
         } else {
             if (self->state == 3) {
                 Vec02 pos;
@@ -2211,10 +2203,10 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
             self->cameraHeight = r;
             f32 z = r + 125.0f;
             if (g_camera->snapping != 0) {
-                pose->pos.z = z;
+                pose->position.z = z;
             } else {
                 f32 v = ApproachValueWithRamp((RampProfile*)g_heightApproachRamp, 0, last.z, z, g_gameClock[2]);
-                pose->pos.z = v;
+                pose->position.z = v;
                 f32 zlo = self->pos.z + D_002638BC;
                 f32 zhi = self->pos.z + D_002638B8;
                 f32 w;
@@ -2225,7 +2217,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
                 } else {
                     w = v;
                 }
-                pose->pos.z = w;
+                pose->position.z = w;
             }
         }
         if (self->state == 6 && self->targetMode == 0) {
@@ -2233,7 +2225,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
         }
         u128 d = ApproachPointWithRamp(Vu0::Q(self->poseOffset), Vu0::Q(D_00248D30), dt, (RampProfile*)g_pivotApproachRamp, 0);
         Vu0::Q(self->poseOffset) = d;
-        Vu0::Q(pose->pos) = Vu0::Add(Vu0::Q(pose->pos), d);
+        Vu0::Q(pose->position) = Vu0::Add(Vu0::Q(pose->position), d);
     }
     switch (self->state) {
     case 2:
@@ -2317,7 +2309,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
         pose->weight = 0.0f;
         break;
     }
-    self->focusPoint = pose->pos;
+    self->focusPoint = pose->position;
 }
 
 #undef POSE
@@ -4722,10 +4714,6 @@ s32 CompareKeysAscending(FloatKeyedItem* a, FloatKeyedItem* b)
 }
 
 extern List01 g_class75List;
-// A hit CollectMeshHits gives (0x30 bytes).
-struct MeshHit {
-    u8 pad00[0x30];
-};
 typedef s32 (*SortCompareFn)(void* a, void* b);
 void HeapSortRecords(void* records, s32 n, s32 size, SortCompareFn cmp);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -4743,7 +4731,7 @@ void UpdatePlayerGrabs(Player* self)
     ListFrame frame;
     Vec02 pos;
     Vec02 motion;
-    MeshHit hit;
+    MeshHitSample hit;
     NodeQuery* rec;
     Collider* target;
     s32 mask;

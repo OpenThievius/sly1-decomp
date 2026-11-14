@@ -12,6 +12,7 @@
 #include "game_clock.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "state_notifier.h"
 #include "functions/base_object.h"
 #include "functions/collider_contact.h"
 #include "functions/effect_spawner.h"
@@ -49,13 +50,6 @@ struct ContactEvent {
     s32 flags;
 };
 
-struct ContactObject {
-    s32* vtbl;
-    u8 pad0[0x18 - 4];
-    ContactObject* parent;
-    u8 pad1[0x50 - 0x1C];
-    s32 root;
-};
 
 
 void* HandleObjectEvent(Collider* a, void* event);
@@ -437,9 +431,9 @@ void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1)
     return r;
 }
 
-struct FrameSource;
-struct FrameSourceDesc { u8 pad00[0x1C]; void (*getFrame)(FrameSource* self, Mat02* out); };
-struct FrameSource { FrameSourceDesc* desc; };
+struct FrameDescHolder;
+struct FrameSourceDesc { u8 pad00[0x1C]; void (*getFrame)(FrameDescHolder* self, Mat02* out); };
+struct FrameDescHolder { FrameSourceDesc* desc; };
 typedef u64 Qword128 __attribute__((mode(TI)));
 void ComputeColliderWorldFrame(Collider* self);
 void TransformMeshToWorld(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
@@ -454,7 +448,7 @@ void ComputeCountedColliderWorldFrame(CountedCollider* self)
         Mat02 copyA;
         Mat02 copyB;
         ComputePlacedObjectWorldFrame(self);
-        FrameSource* src = (FrameSource*)self->matrixAttachment;
+        FrameDescHolder* src = (FrameDescHolder*)self->matrixAttachment;
         src->desc->getFrame(src, &frame);
         u128 r0 = Vu0::RotateUntied(self->m110, Vu0::Q(frame.r[0]));
         u128 r1 = Vu0::RotateUntied(self->m110, Vu0::Q(frame.r[1]));

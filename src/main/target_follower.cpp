@@ -375,7 +375,7 @@ struct FollowTune {
     f32 f334;               // 0x334
 };
 
-struct FrameSource;
+struct PlacementRecord;
 
 // Launches the item of the follower's pool at the object it looks at: takes the item's current
 // chase target and pose, and when that target is of class 0x3D (or otherwise) computes a launch
@@ -393,7 +393,7 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
     if (t == 0) {
         return;
     }
-    GetPlacementRecordTransform((FrameSource*)sa, &b, c.r, 0);
+    GetPlacementRecordTransform((PlacementRecord*)sa, &b, c.r, 0);
     FollowTune* tune = (FollowTune*)self->followedObject->tuneObject;
     if (IsObjectOfKind((BaseObject*)t, 0x3D) != 0) {
         Vec02 dir;

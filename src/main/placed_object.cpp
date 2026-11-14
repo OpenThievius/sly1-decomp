@@ -46,6 +46,9 @@
 #include "shapes.h"
 #include "anim_curve.h"
 #include "object_finder.h"
+#include "list_walk.h"
+#include "model_part.h"
+#include "scaled_transform.h"
 #include "functions/agent.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
@@ -92,6 +95,7 @@ struct ModelRecord;
 struct MoviePlayer;
 struct PlayingSound;
 struct Quad_001B4580;
+struct PackedRampProfile;
 struct RampProfile;
 struct RefCounted;
 struct ScriptListBuilder;
@@ -315,38 +319,13 @@ void CopyMemory(void* dst, void* src, u32 size);
 // NEAR: the branches and the 0x40-byte copy loop match; retail loads both quads of a pair before
 // storing them (and computes the loop end in $v0), ours interleaves load and store.
 
-struct ScaledTransform {
-    Quad16 q[4];
-    f32 outerFade;
-    f32 innerFade;
-    f32 f48;
-    f32 f4c;
-};
 
 extern u8 D_00248D40[];
 
 
 
 
-struct ListWalkNext {
-    static BaseObject* Of(ListFrame* it)
-    {
-        BaseObject* obj = *(BaseObject**)it->link;
-        it->link = (u8*)obj + it->offset;
-        return obj;
-    }
-};
 
-struct ListWalkBegin {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
 
 
 
@@ -418,7 +397,7 @@ void InitRangeRecord(void* p);
 void* AllocateFrontMemory(s32 n);
 
 
-void SetRotationRamp(PlacedObject* self, RampProfile* src);
+void SetRotationRamp(PlacedObject* self, PackedRampProfile* src);
 
 void SetGroupActivityMode(PlacedObject* self, u32 value);
 
@@ -470,14 +449,14 @@ void SetVelocitySpring(PlacedObject* self, Quad16* src);
 
 // A ramp profile (+0x21C, +0x220) as the setters copy it: four floats at an address they do not
 // trust to be aligned.
-struct __attribute__((packed)) RampProfile { f32 x, y, z, w; };
+struct __attribute__((packed)) PackedRampProfile { f32 x, y, z, w; };
 
-void SetPositionRamp(PlacedObject* self, RampProfile* src);
+void SetPositionRamp(PlacedObject* self, PackedRampProfile* src);
 
 void* AllocateFrontMemory(s32 size);
 
 
-extern void SetRotationRamp(PlacedObject* self, RampProfile* src);
+extern void SetRotationRamp(PlacedObject* self, PackedRampProfile* src);
 
 void* AllocateFrontMemory(u32 size);
 
@@ -1211,7 +1190,7 @@ void AttachPlacedObject(PlacedObject* self)
     ListWalkBegin::Of(&it, &self->children);
     self->desc->m06(self);
     BaseObject* obj;
-    while ((obj = ListWalkNext::Of(&it)) != 0) {
+    while ((obj = ListWalkNextBase::Of(&it)) != 0) {
         obj->desc->m04(obj);
     }
     self->desc->m0E(self, 1, self);
@@ -1274,7 +1253,7 @@ void DetachPlacedObject(PlacedObject* self)
     ListWalkBegin::Of(&it, &self->children);
     self->desc->m07(self);
     BaseObject* obj;
-    while ((obj = ListWalkNext::Of(&it)) != 0) {
+    while ((obj = ListWalkNextBase::Of(&it)) != 0) {
         obj->desc->m05(obj);
     }
     self->desc->m0E(self, 2, self);
@@ -1821,7 +1800,7 @@ void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
     ListFrame it;
     ListWalkBegin::Of(&it, &self->children);
     BaseObject* obj;
-    while ((obj = ListWalkNext::Of(&it)) != 0) {
+    while ((obj = ListWalkNextBase::Of(&it)) != 0) {
         if ((obj->desc->flags & 1) != 0) {
             ((void (*)(BaseObject*, f32, s32))obj->desc->m1B)(obj, dt, moved);
         }
@@ -2143,48 +2122,6 @@ void DrawPlacedObject(PlacedObject* self, void* b, void* m)
 }
 
 // A part of a placed object's model (drawParts, 0x70 bytes each): what func_00126270 reads of it.
-struct FadeCubic {
-    f32 c[4];
-    f32 Eval(f32 t) const { return c[0] + t * (c[1] + t * (c[2] + t * c[3])); }
-};
-struct ModelPartFade {
-    Vec02 axis;             // 0x00: the part's facing, turned by the object's transform
-    FadeCubic cubic;        // 0x10: its weight by how squarely the camera sees it
-};
-struct ModelPartHook;
-struct ModelPartHookVt {
-    u8 pad00[0x10];
-    void (*m04)(ModelPartHook* self, PlacedObject* obj, void* req); // 0x10
-};
-struct ModelPartHook {
-    const ModelPartHookVt* vt;
-};
-struct ModelPart {
-    Vec02 pos;              // 0x00: the part's point in the object
-    f32 radius;             // 0x10
-    s32 kind;               // 0x14
-    u8 pad18[0x1C - 0x18];
-    f32 nearFade;           // 0x1C
-    f32 farFade;            // 0x20
-    f32 dist;               // 0x24: FLT_MAX for the distance to the camera
-    u8 pad28[0x30 - 0x28];
-    ModelPartFade* fade;    // 0x30
-    void* cameraFacing;     // 0x34: a camera-facing matrix source
-    ModelPartHook* hook;    // 0x38
-    u8 pad3C[0x60 - 0x3C];
-    s32 f60;                // 0x60
-    u8 pad64[0x68 - 0x64];
-    void* matrix;           // 0x68: a matrix the transform is multiplied by
-    u8 pad6C[0x70 - 0x6C];
-};
-// A part's state (partStates, 0x28 bytes each).
-struct ModelPartState {
-    u32 mask;               // 0x00: the camera's f21C bits it is drawn under
-    u8 pad04[0x10 - 0x04];
-    f32 fade;               // 0x10: eased to 1, or 0.5 until `until`
-    f32 until;              // 0x14
-    u8 pad18[0x28 - 0x18];
-};
 // The 0x80-byte request func_00126270 queues for each part it draws (DrawModelPart).
 struct __attribute__((aligned(16))) ModelPartRequest {
     void* fn;               // 0x00
@@ -2535,10 +2472,10 @@ void ClonePlacedObject(PlacedObject* self, PlacedObject* owner)
     ListFrame it;
     ListWalkBegin::Of(&it, &owner->children);
     self->desc->m09(self, owner);
-    BaseObject* obj = ListWalkNext::Of(&it);
+    BaseObject* obj = ListWalkNextBase::Of(&it);
     while (obj != 0) {
         (void)CreateObjectCopy(obj, self->world, self);
-        obj = ListWalkNext::Of(&it);
+        obj = ListWalkNextBase::Of(&it);
     }
     if ((self->desc->flags & 2) && self->parent == 0) {
         UpdateAnchorModeFlags((Collider*)self);
@@ -3912,25 +3849,25 @@ void SetScaledPositionRamp(PlacedObject* self, f32 scale)
     tmp.y = D_00260EB0[1] * scale;
     tmp.z = D_00260EB0[2];
     tmp.w = D_00260EB0[3] * scale;
-    SetPositionRamp(self, (RampProfile*)&tmp);
+    SetPositionRamp(self, (PackedRampProfile*)&tmp);
 }
 
 // Recomputes the position ramp's fourth value as scale * (x - y) / z of the ramp and stores it.
 void SetPositionRampAccelScale(PlacedObject* self, f32 scale)
 {
-    RampProfile tmp = *(RampProfile*)self->p21C;
+    PackedRampProfile tmp = *(PackedRampProfile*)self->p21C;
     tmp.w = scale * (tmp.x - tmp.y) / tmp.z;
     SetPositionRamp(self, &tmp);
 }
 
 // Stores the ramp profile used for the object's position; the object gets its own 16-byte copy the
 // first time (it points to a shared default until then).
-void SetPositionRamp(PlacedObject* self, RampProfile* src)
+void SetPositionRamp(PlacedObject* self, PackedRampProfile* src)
 {
     if (self->p21C == (u8*)D_00260EB0) {
         self->p21C = (u8*)AllocateFrontMemory(16);
     }
-    *(RampProfile*)self->p21C = *src;
+    *(PackedRampProfile*)self->p21C = *src;
 }
 
 // Sets the rotation ramp to the default one (D_00260EC0) with its first, second and fourth values
@@ -3943,26 +3880,26 @@ void SetScaledRotationRamp(void* self, f32 s)
     v[1] = m[1] * s;
     v[2] = m[2];
     v[3] = m[3] * s;
-    SetRotationRamp((PlacedObject*)self, (RampProfile*)v);
+    SetRotationRamp((PlacedObject*)self, (PackedRampProfile*)v);
 }
 
 // Recomputes the rotation ramp's fourth value as scale * (x - y) / z of the ramp and stores it.
 void SetRotationRampAccelScale(PlacedObject* self, f32 scale)
 {
-    RampProfile tmp;
-    tmp = *(RampProfile*)self->p220;
+    PackedRampProfile tmp;
+    tmp = *(PackedRampProfile*)self->p220;
     tmp.w = scale * (tmp.x - tmp.y) / tmp.z;
     SetRotationRamp(self, &tmp);
 }
 
 // Stores the ramp profile used for the object's rotation; own 16-byte copy on first use, as
 // SetPositionRamp.
-void SetRotationRamp(PlacedObject* self, RampProfile* src)
+void SetRotationRamp(PlacedObject* self, PackedRampProfile* src)
 {
     if (self->p220 == (u8*)D_00260EC0) {
         self->p220 = (u8*)AllocateFrontMemory(0x10);
     }
-    *(RampProfile*)self->p220 = *src;
+    *(PackedRampProfile*)self->p220 = *src;
 }
 
 // Stores the default position mode (byte at 0x2C9).

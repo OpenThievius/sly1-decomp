@@ -15,6 +15,7 @@
 #include "transform_object.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "list_walk.h"
 #include "functions/base_object.h"
 #include "functions/camera.h"
 #include "functions/collider.h"
@@ -1029,25 +1030,7 @@ void InitZoneRecord(Zone28* s)
 
 
 
-struct ListWalkNext {
-    static BaseObject* Of(ListFrame* it)
-    {
-        BaseObject* obj = *(BaseObject**)it->link;
-        it->link = (u8*)obj + it->offset;
-        return obj;
-    }
-};
 
-struct ListWalkBegin {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = (g_activeListFrames);
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
 
 // Takes the children of a collider that are of flag 0x40 into the zone record's first queue (and
 // records the collider as its owner), skipping the ones already seen in either of its queues.
@@ -1057,7 +1040,7 @@ void CollectZoneChildren(Zone28* self, Collider* a1)
     ListWalkBegin::Of(&it, &a1->children);
     self->owner = a1;
     BaseObject* node;
-    while ((node = ListWalkNext::Of(&it)) != 0) {
+    while ((node = ListWalkNextBase::Of(&it)) != 0) {
         if (node->desc->flags & 0x40) {
             if (IsObjectInIdList(&self->pairs[1].seen, node) == 0) {
                 if (IsObjectInIdList(&self->pairs[0].seen, node) == 0) {
@@ -1392,21 +1375,21 @@ void AddTriggerZoneRotation(TriggerZone* self, BaseObject* a1, Mat02* e)
 }
 
 
-struct ScopedListFrame {
+struct ZoneListFrame {
     void* list;
     void* cursor;
     s32 next_off;
-    ScopedListFrame* prev;
-    ScopedListFrame(List01* l)
+    ZoneListFrame* prev;
+    ZoneListFrame(List01* l)
     {
         list = l;
         cursor = l;
-        ScopedListFrame* p = (ScopedListFrame*)g_activeListFrames;
+        ZoneListFrame* p = (ZoneListFrame*)g_activeListFrames;
         next_off = l->offset;
         g_activeListFrames = (ListFrame*)this;
         prev = p;
     }
-    ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
+    ~ZoneListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
 void StartPlacedObject(PlacedObject* self);
@@ -1430,7 +1413,7 @@ static inline Vec02* RowOf(Mat02* m, s32 i)
 // node. It then constrains the points (state 0) or works out the plane vectors (state 1).
 void StartTriggerZone(TriggerZone* self)
 {
-    ScopedListFrame frame(&self->children);
+    ZoneListFrame frame(&self->children);
     Vec02 v;
     StartPlacedObject(self);
     StartZoneRecord(&self->zone);

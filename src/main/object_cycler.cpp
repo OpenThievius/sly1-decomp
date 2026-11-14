@@ -168,12 +168,6 @@ struct GroundFilterContext { u8 pad[0x50]; s32 root; };
 struct GroundCandidate { u8 pad0[0x50]; s32 root; u8 pad1[0x278]; u32 flagsHigh; u8 pad2[0x268]; u64 flags; };
 
 
-struct FrameNode {
-    u8 pad0[0x14];
-    u8* f14;
-    u8 pad18[0x1088 - 0x18];
-    void* f1088;
-};
 typedef unsigned long u64;
 extern const Vec02 D_00248D30;
 

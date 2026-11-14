@@ -48,6 +48,7 @@
 #include "ramp_profile.h"
 #include "node_query.h"
 #include "object_finder.h"
+#include "list_walk.h"
 #include "functions/base_object.h"
 #include "functions/camera.h"
 #include "functions/collider.h"
@@ -114,30 +115,6 @@ extern Camera* g_camera;
 
 
 // A list walk whose frame pushes itself when it is made and pops itself when it goes out of scope.
-struct ListWalk : ListFrame {
-    ListWalk(List01* l)
-    {
-        list = l;
-        link = (u8*)l;
-        offset = l->offset;
-        prev = g_activeListFrames;
-        g_activeListFrames = this;
-    }
-    ~ListWalk() { g_activeListFrames = prev; }
-    // The list's first element, from the list's head.
-    void* First()
-    {
-        void* n = *(void**)list;
-        link = (u8*)n + offset;
-        return n;
-    }
-    void* Next()
-    {
-        void* n = *(void**)link;
-        link = (u8*)n + offset;
-        return n;
-    }
-};
 
 
 
@@ -278,16 +255,6 @@ struct NextEffect {
 };
 
 // A list walk's start: the frame takes the list and is pushed.
-struct BeginListWalk {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-};
 
 struct NextListItem {
     static u8* Of(ListFrame* it)

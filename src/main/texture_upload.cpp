@@ -36,7 +36,7 @@ struct PaletteRecord;
 
 struct DmaChainBlock { u8 bytes[0x20]; };
 
-struct TexturePacket : PacketWriter { u8* packet; };
+struct TexturePacketBuffer : PacketWriter { u8* packet; };
 
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
@@ -249,7 +249,7 @@ s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c)
 // mask.
 void SendMaskedImagesToGif(s32 self, BumpAllocator* arg)
 {
-    TexturePacket f;
+    TexturePacketBuffer f;
 
     if (self == 0) {
         return;

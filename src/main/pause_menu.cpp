@@ -15,6 +15,7 @@
 #include "background_job.h"
 #include "screen_fade.h"
 #include "object_finder.h"
+#include "clamp_helper.h"
 #include "functions/display.h"
 #include "functions/iop_commands.h"
 #include "functions/memory_card.h"
@@ -96,13 +97,13 @@ extern u8 g_unitZVector[];
 // the mixed types are what give retail's copy of the masked value.
 struct DisplayReg64 { u64 lo : 12; u64 mid : 11; u64 rest : 41; };
 struct DisplayReg32 { u32 lo : 12; u32 mid : 11; u32 rest : 9; u32 hi; } __attribute__((aligned(8)));
-struct DisplayRegs {
+struct DisplayPositionRegs {
     u8 pad0[0x18];
     DisplayReg32 f18;
     u8 pad20[0x20];
     DisplayReg64 f40;
 };
-extern DisplayRegs g_displayRegisters;
+extern DisplayPositionRegs g_displayRegisters;
 extern s32 D_00275BF0;
 extern f32 g_screenAdjustSavedX;
 extern f32 g_screenAdjustSavedY;
@@ -157,18 +158,6 @@ GlyphMark* FindSubstring(char* s, char* t);
 s32 GetCyclingGlyph(void);
 extern "C" s32 ConvertFloatToU32(f32 value);
 
-struct ClampFloat {
-    static f32 Of(f32 x, f32 lo, f32 hi)
-    {
-        if (x < lo) {
-            return lo;
-        }
-        if (hi < x) {
-            return hi;
-        }
-        return x;
-    }
-};
 
 enum PadSelectBits {
     PAD_SELECT_NONE = 0
@@ -1027,11 +1016,11 @@ void UpdatePauseMenu(T217D_6D0* self)
         if (dx == 0.0f && dy == 0.0f) {
             return;
         }
-        g_screenAdjustX = ClampFloat::Of(g_screenAdjustX + dx * g_screenAdjustRateX, 424.0f, 848.0f);
-        v = ClampFloat::Of(g_screenAdjustY + dy * g_screenAdjustRateY.verticalRate, 10.0f, 90.0f);
+        g_screenAdjustX = ClampHelper::Of(g_screenAdjustX + dx * g_screenAdjustRateX, 424.0f, 848.0f);
+        v = ClampHelper::Of(g_screenAdjustY + dy * g_screenAdjustRateY.verticalRate, 10.0f, 90.0f);
         g_screenAdjustY = v;
         {
-            DisplayRegs* gs = &g_displayRegisters;
+            DisplayPositionRegs* gs = &g_displayRegisters;
             s32 h = ConvertFloatToU32(g_screenAdjustX);
             DisplayReg64 ra = gs->f40;
             DisplayReg32 rb = gs->f18;
@@ -1734,7 +1723,7 @@ void CancelPauseMenuPage(T217D_6D0* self)
         SetPauseMenuLayerPage(self, 0, 0);
         break;
     case 24: {
-        DisplayRegs* g = &g_displayRegisters;
+        DisplayPositionRegs* g = &g_displayRegisters;
         s32 v = ConvertFloatToU32(g_screenAdjustSavedX);
         DisplayReg64 a = g->f40;
         DisplayReg32 b = g->f18;

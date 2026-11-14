@@ -29,6 +29,7 @@
 #include "transform_object.h"
 #include "ramp_profile.h"
 #include "path_curve.h"
+#include "list_walk.h"
 #include "functions/base_object.h"
 #include "functions/effect_spawner.h"
 #include "functions/matrix.h"
@@ -151,21 +152,6 @@ void ApproachRotationWithRamp(f32 limit, Mat02* from, Mat02* to, RampProfile* ra
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 
-struct ScopedListFrame {
-    void* list;
-    void* cursor;
-    s32 next_off;
-    ScopedListFrame* prev;
-    ScopedListFrame(List01* l)
-    {
-        list = l;
-        cursor = l;
-        next_off = l->offset;
-        prev = (ScopedListFrame*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)this;
-    }
-    ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
-};
 
 // Moves the path-speed object to the point and velocity its curve table gives for the current
 // level, turns it toward the velocity (with the acceleration relative to gravity as its up hint)

@@ -34,6 +34,8 @@
 #include "asm_func.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "list_walk.h"
+#include "element_stack_state.h"
 #include "functions/base_object.h"
 #include "functions/blend_animation.h"
 #include "functions/buffered_stream.h"
@@ -76,7 +78,6 @@ struct ActiveColliderData {
 // One of the nine 0x78-byte records at the start of a level's record (G27C230): its flags.
 struct LevelTaskRecord { s32 flags; u8 rest[0x74]; };
 // The element stack (g_elementStack), as game_progress.cpp and selection_menus.cpp view it.
-struct ElementStackState { u8 pad0[0x30]; s32 resumeState; };
 extern ElementStackState g_elementStack;
 struct StateWalker;
 struct StateGraph;
@@ -1439,16 +1440,6 @@ void StepObjectGatherer(ObjectGatherer* self, f32 dt)
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
 // (list_iter.h) and each step reads the next item through the link.
-struct BeginListWalk {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-};
 
 template <class T> struct NextInList {
     static T* Of(ListFrame* it)

@@ -34,6 +34,7 @@
 #include "layout_137228.h"
 #include "scope_marker.h"
 #include "vu0.h"
+#include "list_walk.h"
 #include "functions/anim_record.h"
 #include "functions/display.h"
 #include "functions/game_progress.h"
@@ -109,16 +110,6 @@ void RemoveFromList(List01* list, void* item);
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
 // (list_iter.h) and each step reads the next item through the link.
-struct BeginListWalk {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-};
 
 template <class T> struct NextInList {
     static T* Of(ListFrame* it)

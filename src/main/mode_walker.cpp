@@ -28,6 +28,8 @@
 #include "attachment.h"
 #include "ramp_profile.h"
 #include "path_curve.h"
+#include "clamp_helper.h"
+#include "collider_pose.h"
 #include "functions/base_object.h"
 #include "functions/camera.h"
 #include "functions/collider.h"
@@ -126,21 +128,6 @@ s32 FindAnimRecord(s32 key);
 
 
 
-struct ClampHelper
-{
-    static f32 Of(f32 x, f32 lo, f32 hi)
-    {
-        if (x < lo)
-        {
-            return lo;
-        }
-        if (hi < x)
-        {
-            return hi;
-        }
-        return x;
-    }
-};
 
 extern Rgba4 D_002623E0[];
 
@@ -449,10 +436,6 @@ void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
 
 // Captures the path follower's pose into outv and stores the owner's position vector (v140) of
 // the object at fBC0 after it, as the pose's position (offset 0x10).
-struct ColliderPose {
-    u8 pad00[0x10];
-    Vec02 position;         // 0x10: v140
-};
 
 void CaptureModeWalkerTarget(ModeWalker* self, void* outv)
 {

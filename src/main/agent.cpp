@@ -2618,7 +2618,7 @@ struct ItemTimeoutGroup {
     void* keeper;           // 0x2C
 };
 // What GatherAnimationEventObjects hands back for one agent: the objects and their count.
-struct GatheredObjects {
+struct GatheredStateResetObjects {
     s32 count;
     StateResetObject** items;
 };
@@ -2630,14 +2630,14 @@ void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount
 // objects with the same id (id2E0) of later members into the same group.
 void GroupAnimationEventObjects(ItemKeeper* self)
 {
-    GatheredObjects* arr;
+    GatheredStateResetObjects* arr;
     s32 i;
     s32 j;
     s32 k;
     s32 m;
 
     PushBackMemoryMark();
-    arr = (GatheredObjects*)AllocateZeroedBackMemory(self->owned.count * 8);
+    arr = (GatheredStateResetObjects*)AllocateZeroedBackMemory(self->owned.count * 8);
     for (i = 0; i < self->owned.count; i++) {
         Agent* agent = self->owned.found[i];
         if (agent->mainClip != 0) {
@@ -2645,7 +2645,7 @@ void GroupAnimationEventObjects(ItemKeeper* self)
         }
     }
     for (i = 0; i < self->owned.count; i++) {
-        GatheredObjects* e = &arr[i];
+        GatheredStateResetObjects* e = &arr[i];
         for (j = 0; j < e->count; j++) {
             StateResetObject* node = e->items[j];
             if (node->group == 0) {
@@ -2654,7 +2654,7 @@ void GroupAnimationEventObjects(ItemKeeper* self)
                 AppendToSmallList((StateResetGroup*)node->group, node);
                 if (node->id2E0 != -1) {
                     for (k = i + 1; k < self->owned.count; k++) {
-                        GatheredObjects* e2 = &arr[k];
+                        GatheredStateResetObjects* e2 = &arr[k];
                         for (m = 0; m < e2->count; m++) {
                             StateResetObject* item = e2->items[m];
                             if (item->id2E0 == node->id2E0) {

@@ -138,11 +138,11 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
         if (dx == 0.0f && dy == 0.0f) {
             return;
         }
-        D_eu_0026BB30 = ClampFloat::Of(D_eu_0026BB30 + dx * g_screenAdjustRateX, 438.0f, 874.0f);
-        v = ClampFloat::Of(D_eu_0026BB34 + dy * g_screenAdjustRateY.verticalRate, 15.0f, 129.0f);
+        D_eu_0026BB30 = ClampHelper::Of(D_eu_0026BB30 + dx * g_screenAdjustRateX, 438.0f, 874.0f);
+        v = ClampHelper::Of(D_eu_0026BB34 + dy * g_screenAdjustRateY.verticalRate, 15.0f, 129.0f);
         D_eu_0026BB34 = v;
         {
-            DisplayRegs* gs = &g_displayRegisters;
+            DisplayPositionRegs* gs = &g_displayRegisters;
             s32 h = ConvertFloatToU32(D_eu_0026BB30);
             DisplayReg64 ra = gs->f40;
             DisplayReg32 rb = gs->f18;

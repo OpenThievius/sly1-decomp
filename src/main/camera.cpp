@@ -15,6 +15,7 @@
 #include "game_clock.h"
 #include "mul_rotation.h"
 #include "value_range.h"
+#include "mesh_hit_sample.h"
 #include "functions/active_set_solver.h"
 #include "functions/base_object.h"
 #include "functions/camera_controller.h"
@@ -1523,13 +1524,8 @@ void FindNearestFreePointAround(s32 count, Collider** objs, Vec02* origin, Vec02
     *out = best;
 }
 
-struct MeshHit {
-    u8 pad0[0x10];
-    Vec02 point;
-    u8 pad20[0x10];
-};
 
-typedef f32 (*MeshHitWeigh)(void* ctx, void* a, void* b, MeshHit* hit);
+typedef f32 (*MeshHitWeigh)(void* ctx, void* a, void* b, MeshHitSample* hit);
 struct FaceRef;
 struct Mesh03;
 struct MeshHitEntry;
@@ -1541,7 +1537,7 @@ void* AllocateBackMemory(s32 size);
 // nothing is hit.
 void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWeigh fn, f32 r, f32 limit, void* a4, Vec02* origin, Vec02* out)
 {
-    MeshHit hits[64];
+    MeshHitSample hits[64];
     Vec02 sum;
     s32 total = 0;
     s32 i;
@@ -1564,7 +1560,7 @@ void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWei
     p = dots;
     for (i = 0; i < total; i++) {
         for (j = 0; j < total; j++) {
-            Vu0::StoreX(*p, Vu0::Dot(Vu0::Q(hits[i].point), Vu0::Q(hits[j].point)));
+            Vu0::StoreX(*p, Vu0::Dot(Vu0::Q(hits[i].normal), Vu0::Q(hits[j].normal)));
             p++;
         }
     }
@@ -1576,7 +1572,7 @@ void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWei
     sum = D_00248D30;
     p = weights;
     for (i = 0; i < total; i++) {
-        Vu0::Q(sum) = Vu0::MulAddX(Vu0::Q(sum), Vu0::Q(hits[i].point), Vu0::Scalar(*p++));
+        Vu0::Q(sum) = Vu0::MulAddX(Vu0::Q(sum), Vu0::Q(hits[i].normal), Vu0::Scalar(*p++));
     }
     ClampVectorLength(&sum, &sum, limit);
     PopBackMemoryMark();

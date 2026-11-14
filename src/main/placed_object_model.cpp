@@ -19,6 +19,7 @@
 #include "attachment.h"
 #include "id_lookup_object.h"
 #include "placed_object.h"
+#include "model_build.h"
 #include "world.h"
 #include "animation.h"
 #include "sound_record.h"
@@ -194,38 +195,10 @@ struct WeightIndices {
     u16* pos;
     u16* nrm;
 };
-struct MeshBuildState {
-    u8 pad00[0x40];
-    s32 nweights;
-};
-struct StripMeshInfo {
-    u8 pad00[0x10];
-    s32 extraCount;
-    s32 f14;
-    s32 f18;
-};
 struct CursorHook;
 typedef AnimCursor* (*CursorHookFn)(CursorHook* self, StripMesh* mesh);
 struct CursorHook {
     CursorHookFn* vt;
-};
-struct StripMeshOwner {
-    u8 pad00[0x18];
-    s32 lit;
-    u8 pad1C[0x28 - 0x1C];
-    s32 skinned;
-    u8 pad2C[0x38 - 0x2C];
-    CursorHook* animator;
-    u8 pad3C[0x40 - 0x3C];
-    f32 fogBias;
-    u8 pad44[0x54 - 0x44];
-    StripMeshInfo* link;
-};
-struct StripExtra {
-    s32 positions;
-    s32 a4[4];
-    s32 a14[4];
-    s32 a24[4];
 };
 struct StripUnpack {
     u16 off[4];
@@ -264,9 +237,6 @@ void WriteStripMeshMscal(s32 mode, void* obj);
 
 typedef void (*AttachmentHandlerFn)(void* self);
 struct AttachmentHandler { AttachmentHandlerFn* vtbl; };
-struct AttachmentEntry { u8 pad0[0x38]; AttachmentHandler* handler; u8 pad1[0x70 - 0x3C]; };
-struct AttachmentNode { u8 pad0[4]; void* attachment; s32 targetId; u8 pad1[0x80 - 0xC]; AttachmentNode* next80; };
-struct AttachmentBlock { u8 pad0[0xC]; s32 count0C; AttachmentEntry* entries; u8* chainData; u8 pad1[0x4C - 0x18]; AttachmentNode* nodes; };
 
 void BuildAttachmentDmaChain(void* self, void* entry, void* sub, void* ctx);
 
@@ -278,16 +248,7 @@ struct AttachmentTargets { s32 count; AttachmentTarget* elems; s32* keys; };
 
 QuadMatrix MultiplyMatrices(const QuadMatrix& a, const QuadMatrix& b);
 
-struct AnimatorStep;
-typedef void (*AnimatorStepFn)(void* self, f32 f);
 
-struct AnimatorStep {
-    AnimatorStepFn* vtbl;
-    u8 pad4[0x8];
-    void* oscillator;
-    u8 pad10[0x70];
-    AnimatorStep* next80;
-};
 
 struct AnimatorOwner {
     u8 pad0[0x4C];
@@ -300,14 +261,10 @@ s32 ClaimAnimatorStep(CursorAnimator* a0);
 extern u8 g_litBatchFinishProgram[];
 extern u8 D_000000F0[];
 
-struct PartPacketContext { u8 pad0[0x28]; s32 skinned; };
 struct PartRange { u16 lo; u16 hi; };
-struct PartPacketSource { u8 pad0[0x18]; u8* mesh; PartRange* unpack; };
-struct PartPackets { void* firstQwc; void* firstBuffer; void* firstUnpackCursor; void* secondQwc; void* secondBuffer; void* secondUnpackCursor; };
 
 void WriteVifMscal(void* s, void* n);
 
-struct AttachmentLink { PlacedObject* owner; AttachmentLink* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; AttachmentLink* next; u8 pad84[0xC]; };
 struct AttachmentPartInfo { u8 pad[0x10]; u32 flags; };
 struct AttachmentPart { u8 pad[0x38]; AttachmentPartInfo* a; u8 pad3C[0x18]; void* b; };
 struct AttachmentCopy { s32 n0; void* p4; u8 pad8[4]; s32 count; AttachmentPart* recs; void* p14; u8 pad18[0x28]; s32 n40; void* p44; u8 pad48[4]; AttachmentLink* head; s32 f50; };
@@ -325,7 +282,6 @@ struct FrameLinkConstraint { u8 pad0[0x60]; QuadMatrix m60; u8 pad[4]; s32 a4; u
 struct FramedObject { FramedObjectVt* vt; u8 pad0[0x10C]; u8 sub110[0x30]; u8 sub140[0x40]; u8 pad180[0xA4]; FrameLinkConstraint* link; };
 struct FramedAttachment { FramedObject* obj; u8 pad[0xC]; Quad16 q10[4]; QuadMatrix m50;  };
 struct FramedAttachmentList { s32 count; FramedAttachment* items; };
-struct ParentFrame { Mat02 rot; Vec02 pos; };
 
 QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 

@@ -46,6 +46,9 @@
 #include "active_set_solver.h"
 #include "sound_level.h"
 #include "object_finder.h"
+#include "list_walk.h"
+#include "playing_sound.h"
+#include "point2.h"
 #include "functions/base_object.h"
 #include "functions/camera_controller.h"
 #include "functions/heap.h"
@@ -78,50 +81,6 @@ s32 EnsureSoundBankLoaded(s32 a);
 void ResetVolumeChannelFactors(void);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void AppendToList(List01* self, void* item);
-// A sound playing in the world: a 0x90-byte record of the pool at World 0x1BA0, kept on
-// World::list1BAC. func_001BF6B8 takes one, func_001BF920 fills it, func_001BFAF8 starts its
-// voice, func_001C0070 updates each one every frame and func_001BF728 gives it back.
-struct PlayingSound {
-    s32 entry;              // 0x00: its row of g_soundEntries, -2 for the stream voice
-    s32 serial;             // 0x04: g_nextSoundRecordId when filled, checked by MarkSoundRecordIfIdMatches
-    s32 bank;               // 0x08: the bank handle its voice starts from (StartSoundRecordVoice)
-    PlayingSound** owner;   // 0x0C: the caller's pointer to it, cleared when it ends
-    f32 startTime;          // 0x10: g_gameTime when its voice started
-    f32 baseVolume;         // 0x14: the volume before distance; SetSoundRecordVolume rescales by it
-    s32 voice;              // 0x18: the IOP voice handle, 0 while silent
-    u8 pad1C[4];
-    Quad16 position;        // 0x20: where it plays when it follows no object
-    BaseObject* object;     // 0x30: the object it follows (its position at 0x140)
-    f32 farRange;           // 0x34: beyond it the sound is silenced or ended (UpdateSoundEmitters)
-    f32 nearRange;          // 0x38
-    s32 keepWhenFar;        // 0x3C: silenced instead of ended out of range
-    s32 silent;             // 0x40: no voice is playing
-    s32 positional;         // 0x44: volume and pan follow the listener
-    s32 finished;           // 0x48: its voice has ended (MarkSoundRecordIfIdMatches sets it)
-    u8 pollTick;            // 0x4C: frames to the next end-of-voice query, modulo 4
-    f32 volume;             // 0x50
-    f32 pan;                // 0x54
-    f32 pitch;              // 0x58: in octaves, 1524 units each (SetSoundRecordPitch)
-    f32 dopplerScale;       // 0x5C: how strongly the object's motion shifts the sound's pitch
-    s32 pitchOffset;        // 0x60: added to the pitch (SetSoundRecordPitch)
-    U64P link;              // 0x64: kept when InitSoundRecord clears the record
-    s32 pitchBaseValid;     // 0x6C
-    s32 pitchBase;          // 0x70: the entry's pitch from GetSoundPitchBase, cached
-    f32 nextTime;           // 0x74: when an ambient repeat plays next
-    union { U64P bytes; f32 value; } interval;  // 0x78: the ambient repeat interval, < 0 for none
-    union { U64P bytes; f32 value; } f80;       // 0x80
-    u8 pad88[8];
-    s32 Clamp(s32 v, s32 lo, s32 hi)
-    {
-        if (v < lo) {
-            return lo;
-        }
-        if (hi < v) {
-            return hi;
-        }
-        return v;
-    }
-};
 void RemoveFromList(List01* list, void* item);
 void FreeSoundRecord(PlayingSound* self);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -183,23 +142,6 @@ void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, 
 void ScheduleAmbientSoundRecord(PlayingSound* self);
 void StartSoundRecordVoice(PlayingSound* self, s32 id);
 // The list walk of list_iter.h over a List01: push the frame, take each element, pop the frame.
-struct ListWalk {
-    static void Begin(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-    static u8* Next(ListFrame* it)
-    {
-        u8* obj = *(u8**)it->link;
-        it->link = obj + it->offset;
-        return obj;
-    }
-    static void End(ListFrame* it) { g_activeListFrames = it->prev; }
-};
 void ComputeSoundAttenuation(void* self, f32* out, s32* flag, f32 a, f32 b, f32 c);
 // The list walk of World::list1BAC, element by element.
 struct PlayingSoundFrame : ListFrame {
@@ -218,7 +160,6 @@ void RemoveFromList(List01* list, void* item);
 void SetCachedVoiceParam(s32 index, s32 value);
 void AppendToList(List01* self, void* item);
 extern s32 g_iopChannel2Values[6];
-struct Point2 { f32 x; f32 y; };
 extern f32 g_volumeChannelFactors[11][4];
 void ApplyVolumeChannelFactors(s32 column);
 extern u8 g_worldSoundHandle[4];
@@ -697,9 +638,9 @@ void RemoveSoundLevelEntry(void* self)
 void ClearSoundLevels(void)
 {
     ListFrame it;
-    ListWalk::Begin(&it, &g_currentWorld->list1BC4);
+    ListWalkSteps::Begin(&it, &g_currentWorld->list1BC4);
     SoundLevelEntry* node;
-    for (node = (SoundLevelEntry*)ListWalk::Next(&it); node != 0; node = (SoundLevelEntry*)ListWalk::Next(&it)) {
+    for (node = (SoundLevelEntry*)ListWalkSteps::Next(&it); node != 0; node = (SoundLevelEntry*)ListWalkSteps::Next(&it)) {
         RemoveSoundLevelEntry(node);
     }
     SendIopSoundLevel(0x14);
@@ -1412,11 +1353,11 @@ void StopWorldSoundRecords(s32 item)
     if (g_currentWorld) {
         ListFrame it;
         u8* obj;
-        ListWalk::Begin(&it, &g_currentWorld->list1BAC);
-        for (obj = ListWalk::Next(&it); obj; obj = ListWalk::Next(&it)) {
+        ListWalkSteps::Begin(&it, &g_currentWorld->list1BAC);
+        for (obj = ListWalkSteps::Next(&it); obj; obj = ListWalkSteps::Next(&it)) {
             StopSoundRecord((PlayingSound*)obj, item);
         }
-        ListWalk::End(&it);
+        ListWalkSteps::End(&it);
     }
     PollIopCommands();
 }

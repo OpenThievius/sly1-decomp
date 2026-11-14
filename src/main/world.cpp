@@ -41,6 +41,7 @@
 #include "fpu.h"
 #include "scope_marker.h"
 #include "object_finder.h"
+#include "walker_holder.h"
 #include "functions/agent.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
@@ -134,7 +135,6 @@ void SetPathFollowerMode(PathFollower* self, s32 mode);
 s32 ReduceBufferedStreamBytesLeft(BufferedStream* self, s32 n);
 s32 ReadBufferedS32(BufferedStream* self);
 
-struct WalkerHolder { u8 pad[0x48]; void* walker; };
 
 s32 AreMenusAndFadeClear(void);
 

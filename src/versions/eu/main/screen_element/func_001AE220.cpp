@@ -52,7 +52,7 @@ void DrawPromptElement(Prompt_eu_1AEF48* self)
     out.FlagB(2);
     SetTextLayoutVerticalPlacement(&out, 0);
     if (self->frame != 0) {
-        StyleDrawer::Draw(self->frame, &out, D_eu_00263590);
+        StyleDrawerBuilder::Draw(self->frame, &out, D_eu_00263590);
     }
     PushFontScale(self->font, self->scale, self->scale);
     InitWideTextReader(loc, &self->text[0], self->font, 0);

@@ -40,6 +40,7 @@
 #include "fpu.h"
 #include "scope_marker.h"
 #include "object_finder.h"
+#include "walker_holder.h"
 #include "functions/base_object.h"
 #include "functions/child_group_object.h"
 #include "functions/collider.h"
@@ -95,7 +96,6 @@ f32 GetWrappedDifference(f32 x, f32 lim, f32 base);
 
 
 
-struct WalkerHolder { u8 pad[0x48]; void* f48; };
 
 
 extern f32 g_gameClock[];

@@ -28,6 +28,7 @@
 #include "game_progress.h"
 #include "value_range.h"
 #include "object_finder.h"
+#include "walker_holder.h"
 #include "functions/flagged_object.h"
 #include "functions/matrix.h"
 #include "functions/placed_object.h"
@@ -43,7 +44,6 @@ extern f32 g_gameTime;
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-struct WalkerHolder { u8 pad[0x48]; void* f48; };
 
 struct RampProfile;
 
@@ -272,7 +272,7 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
                     s32 n = self->lap + 1;
                     self->lap = n;
                     if (self->lapCount < n) {
-                        void* w = ((WalkerHolder*)FindFirstObjectById(self->world, 4, 0x42C, self))->f48;
+                        void* w = ((WalkerHolder*)FindFirstObjectById(self->world, 4, 0x42C, self))->walker;
                         s32 key;
                         GetStateWalkerTargetKey((StateWalker*)w, &key);
                         if (key == -1) {

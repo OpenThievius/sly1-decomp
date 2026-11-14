@@ -98,18 +98,18 @@ void CopyChildGroupObject(ChildGroupObject* self, ChildGroupObject* other)
     if (other->slot) self->slot = (void*)CopyToFrontMemory(0x24, other->slot);
 }
 
-struct ScopedListFrame;
-struct ScopedListFrame {
-    void* base; void* cur; s32 off; ScopedListFrame* prev;
-    ScopedListFrame(List01* l) {
+struct ChildListFrame;
+struct ChildListFrame {
+    void* base; void* cur; s32 off; ChildListFrame* prev;
+    ChildListFrame(List01* l) {
         cur = l;
         base = l;
-        ScopedListFrame* p = (ScopedListFrame*)g_activeListFrames;
+        ChildListFrame* p = (ChildListFrame*)g_activeListFrames;
         off = l->offset;
         g_activeListFrames = (ListFrame*)this;
         prev = p;
     }
-    ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
+    ~ChildListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
 void* AllocateFrontMemory(s32 size);
@@ -119,7 +119,7 @@ void* AllocateFrontMemory(s32 size);
 void StartChildGroupObject(ChildGroupObject* self)
 {
     StartPlacedObject(self);
-    ScopedListFrame f(&self->children);
+    ChildListFrame f(&self->children);
     void* n;
     void* t = *(void**)f.base;
     f.cur = (u8*)t + f.off;

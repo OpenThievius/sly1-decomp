@@ -32,5 +32,5 @@ s32 ComputeCompletionPercent(GameProgress* progress)
     }
     if (done == 0) return 0;
     if (done == total) return 100;
-    return PercentClamp::Of(done * 100 / total, 1, 99);
+    return PercentClampS32::Of(done * 100 / total, 1, 99);
 }

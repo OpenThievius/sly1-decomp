@@ -23,6 +23,7 @@
 #include "vu0.h"
 #include "packet_writer.h"
 #include "asm_func.h"
+#include "clamp_helper.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
 #include "functions/camera.h"
@@ -158,16 +159,6 @@ struct Quad_001B4580;
 
 extern "C" f32 Tangent(f32 x);
 
-struct ClampHelper {
-    static f32 Of(f32 v, f32 lo, f32 hi)
-    {
-        if (v < lo)
-            return lo;
-        if (hi < v)
-            return hi;
-        return v;
-    }
-};
 
 extern "C" f32 Cosine(f32 x);
 

@@ -24,10 +24,16 @@ struct StateListener {
 
 struct StateNotifier;
 
-// An object a message names whose flags (+0xC) func_001473E0 tests.
+// An object a message names whose flags (+0xC) func_001473E0 tests; the player's modes read its
+// class table, its parent and its root.
 struct ContactObject {
-    u8 pad0[0xC];
-    s32 fC;
+    s32* vtbl;              // 0x00
+    u8 pad4[0xC - 4];
+    s32 fC;                 // 0x0C
+    u8 pad10[0x18 - 0x10];
+    ContactObject* parent;  // 0x18
+    u8 pad1C[0x50 - 0x1C];
+    s32 root;               // 0x50
 };
 
 // 0x55: a state, a few movement numbers set by each subclass's constructor.

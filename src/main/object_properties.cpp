@@ -37,6 +37,7 @@
 #include "attached_set.h"
 #include "active_set_solver.h"
 #include "sound_level.h"
+#include "spr_transfer.h"
 #include "functions/matrix.h"
 #include "functions/placed_object.h"
 struct HomogeneousMatrix;
@@ -80,14 +81,6 @@ extern DmaTag g_sprChainTagsB[8];
 // One of the two scratchpad transfer buffers (D_002748F0; D_00274990 picks the current one):
 // func_001C2430 sends up to 8 blocks into the scratchpad by a DMA chain, func_001C25B0 sends
 // them back to memory.
-struct SprTransfer {
-    DmaTag* tags;           // 0x00: the chain's tags
-    s32 base;               // 0x04: the scratchpad address of the first block's tag
-    u32 addrs[8];           // 0x08: each block's address, after its 16-byte tag
-    s32 sizes[8];           // 0x28: each block's size, rounded up to 16
-    s32 count;              // 0x48: the number of blocks
-    s32 state;              // 0x4C: 1 sent in, 3 sending back (StartFromSprChain), 0 done
-};
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 

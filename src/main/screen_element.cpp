@@ -304,7 +304,7 @@ struct LayoutBuilder : Layout_137228 {
     void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
     void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
 };
-struct StyleDrawer {
+struct StyleDrawerBuilder {
     static void Draw(Font** h, LayoutBuilder* out, void* tbl)
     {
         if (*h != 0) {
@@ -350,7 +350,7 @@ struct FontCalls {
     static void End(Font* f, Vec4U* clip, PacketWriter* d) { f->vt->end((Font*)((u8*)f + f->vt->adj7), clip, d); }
 };
 
-struct ClampFloat {
+struct ClampFloatSelect {
     static f32 Of(f32 x, f32 lo, f32 hi)
     {
         return x < lo ? lo : (hi < x ? hi : x);
@@ -1486,7 +1486,7 @@ void DrawElementWithFadedFrame(T217D_330* self)
         if (h != 0) {
             slot = *(T217D_Word*)&h->color;
             ((u8*)&h->color)[3] = (u8)((f32)((u8*)&h->color)[3] * self->blend);
-            StyleDrawer::Draw(self->frame, &out, &g_gsPacketWriter);
+            StyleDrawerBuilder::Draw(self->frame, &out, &g_gsPacketWriter);
             *(T217D_Word*)&((TextStyle*)self->frame)->color = slot;
         }
         PushFontScale(self->font, self->scale, self->scale);
@@ -1608,7 +1608,7 @@ void DrawSlidingGlyphElement(T217D_380* self)
     }
     x = self->shownX;
     y = self->hiddenX;
-    c = ClampFloat::Of(self->blend / (1.0f / (f32)n), 0.0f, 1.0f);
+    c = ClampFloatSelect::Of(self->blend / (1.0f / (f32)n), 0.0f, 1.0f);
     rest = 1.0f - c;
     if (self->frame != 0) {
         s32 grey = 0xFF808080;
@@ -1629,7 +1629,7 @@ void DrawSlidingGlyphElement(T217D_380* self)
     for (i = 0; i < n; i++) {
         s32 ch = self->text[i];
         f32 d;
-        c = ClampFloat::Of(self->blend / ((f32)(i + 1) / (f32)n), 0.0f, 1.0f);
+        c = ClampFloatSelect::Of(self->blend / ((f32)(i + 1) / (f32)n), 0.0f, 1.0f);
         rest = 1.0f - c;
         FontCalls::Glyph(self->font, ch, self->color, &g_gsPacketWriter, c * x + rest * y, self->shownY);
         d = FontCalls::Advance(self->font, ch);
@@ -2191,7 +2191,7 @@ void DrawPromptElement(T217D_4C0* self)
     out.FlagA(2);
     out.FlagB(0);
     if (self->frame != 0) {
-        StyleDrawer::Draw(self->frame, &out, &g_gsPacketWriter);
+        StyleDrawerBuilder::Draw(self->frame, &out, &g_gsPacketWriter);
     }
     PushFontScale(self->font, self->scale, self->scale);
     InitTextReader((TextReader*)loc, &self->text[0], self->font);

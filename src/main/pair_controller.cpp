@@ -47,6 +47,7 @@
 #include "ramp_profile.h"
 #include "node_query.h"
 #include "object_finder.h"
+#include "list_walk.h"
 #include "functions/base_object.h"
 #include "functions/camera.h"
 #include "functions/collider.h"
@@ -86,30 +87,6 @@ extern f32 g_gameTime;
 extern Camera* g_camera;
 
 // A list walk whose frame pushes itself when it is made and pops itself when it goes out of scope.
-struct ListWalk : ListFrame {
-    ListWalk(List01* l)
-    {
-        list = l;
-        link = (u8*)l;
-        offset = l->offset;
-        prev = g_activeListFrames;
-        g_activeListFrames = this;
-    }
-    ~ListWalk() { g_activeListFrames = prev; }
-    // The list's first element, from the list's head.
-    void* First()
-    {
-        void* n = *(void**)list;
-        link = (u8*)n + offset;
-        return n;
-    }
-    void* Next()
-    {
-        void* n = *(void**)link;
-        link = (u8*)n + offset;
-        return n;
-    }
-};
 
 // The loop walks an intrusive list with an iterator that registers itself on a global stack
 // (D_0027B314) for its lifetime and unregisters in its destructor.

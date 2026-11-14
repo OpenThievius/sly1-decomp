@@ -22,6 +22,7 @@
 #include "vu0.h"
 #include "game_clock.h"
 #include "object_finder.h"
+#include "point2.h"
 #include "functions/agent.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
@@ -39,7 +40,6 @@
 
 extern f32 g_gameTime;
 // Two floats (CopyVec2).
-struct Point2 { f32 x; f32 y; };
 struct SoundLevelEntry;
 // A free slot of a world pool (Pool6C): its first word links the next.
 struct FreeSlot { FreeSlot* next; };

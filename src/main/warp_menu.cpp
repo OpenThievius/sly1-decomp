@@ -45,6 +45,7 @@
 #include "vu0.h"
 #include "object_finder.h"
 #include "layout_137228.h"
+#include "plane_node.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
 #include "functions/camera.h"
@@ -2491,7 +2492,7 @@ void ApplyWorld3BossTransform(World3Boss* self, void* s, void* c)
     void* out = c;
     if (self->state == 16) {
         BuildPlacedObjectTransform(self, (Quad16*)c, &tmp);
-        *(s32*)&tmp.scaleB = 0;
+        *(s32*)&tmp.innerFade = 0;
         out = &tmp;
     }
     ApplyPlacedObjectTransform(self, (Camera*)s, (ScaledTransform*)out);
@@ -2677,7 +2678,7 @@ struct TempoLine {
     Vec02 vF0;              // 0xF0
 };
 
-struct FrameSource;
+struct PlacementRecord;
 struct AgentNotification;
 struct Agent;
 void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
@@ -2705,7 +2706,7 @@ void HandleWorld3BossNotification(World3Boss* self, s32 kind, TempoNoticeRec* re
             f32 t = self->spanSeconds + self->pressScheduledTime - g_gameTime[0] + ((World3BeatPressCollider*)self->beatPressCollider)->timingWindow * half;
             u8* r = line->rec;
             FramePoint_001EBD10* fp = (FramePoint_001EBD10*)((World3BeatPressCollider*)self->beatPressCollider)->lineAnchors[self->direction];
-            GetPlacementRecordTransform((FrameSource*)sub, &a, b.r, 0);
+            GetPlacementRecordTransform((PlacementRecord*)sub, &a, b.r, 0);
             ComputeObjectFrameAtTime((PlacedObject*)fp->object, 0, &p, &rot, 0, 0, t);
             Vu0::Q(line->vF0) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(fp->point)));
             f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(line->vF0)))) / t;
@@ -3722,12 +3723,6 @@ s32 ExpandMaskThroughTable(ValueListObject* self, s32 bits)
 
 // One plane of the value tree (QueryValueTreeMask): a child is a node's address, or a leaf mask
 // with bit 31 set.
-struct PlaneNode {
-    Vec02 normal;           // 0x00
-    f32 dist;               // 0x10
-    sptr front;             // 0x14: the child on the plane's near side
-    sptr back;              // 0x18
-};
 
 // The mask of the leaves within radius of point under node: the walk follows the near side,
 // descends into the far side too where the sphere straddles the plane, and ORs each leaf's mask
@@ -3741,19 +3736,19 @@ s32 QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radi
         sptr next;
         do {
             PlaneNode* n = (PlaneNode*)node;
-            f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(point), Vu0::Q(n->normal))) - n->dist;
+            f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(point), Vu0::Q(n->normal))) - n->offset;
             if (d < near) {
-                next = n->front;
+                next = n->below;
             } else if (radius < d) {
-                next = n->back;
+                next = n->above;
             } else {
-                next = n->back;
+                next = n->above;
                 if ((u32)next & 0x80000000) {
                     *out |= ExpandMaskThroughTable(self, next);
                 } else {
                     QueryValueTreeMask(self, next, point, radius, out);
                 }
-                next = n->front;
+                next = n->below;
             }
             node = next;
         } while (!((u32)next & 0x80000000));

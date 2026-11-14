@@ -266,7 +266,7 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 u8* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 void PopBackMemoryMark(void);
-struct FrameSource;
+struct PlacementRecord;
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 // Chooses which collider the player-linked object points at: when its pool has a choice, takes the
@@ -337,7 +337,7 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         Vec02 c0;
         Mat02 rot;
         Vec02 d;
-        GetPlacementRecordTransform((FrameSource*)place, &c0, rot.r, 0);
+        GetPlacementRecordTransform((PlacementRecord*)place, &c0, rot.r, 0);
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(c0));
         // a field access here changes retail's code (the record pointer is kept in a register)
         *(f32*)(ang + 8) = ArctangentOfRatio(d.y, d.x);

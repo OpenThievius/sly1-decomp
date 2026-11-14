@@ -26,6 +26,7 @@
 #include "shapes.h"
 #include "object_finder.h"
 #include "layout_137228.h"
+#include "element_stack_state.h"
 #include "functions/iop_commands.h"
 #include "functions/memory_card.h"
 #include "functions/oscillator.h"
@@ -52,7 +53,6 @@ struct ChoiceEntry { s32 a; s32 b; s32 c; };
 struct ChoiceTable { ChoiceEntry e[9]; s32 end; };
 extern ChoiceTable g_partHolderLinks;
 // The element stack (D_00275BC0) as func_0016AED8 sets its state word.
-struct ElementStackState { u8 pad0[0x30]; s32 f30; };
 extern ChoiceEntry g_currentPlacedObjectLinks[18];
 // The entry LookupEntryById gives for a choice's level: StartObjectFade fades it when its
 // two words differ.
@@ -255,7 +255,7 @@ void BecomeCurrentObject(CurrentPlacedObject* self)
     StartPlacedObject(self);
     self->flags = (self->flags & ~(3ULL << 40)) | (1ULL << 40);
     g_currentPlacedObject = (s32)self;
-    ((ElementStackState*)g_elementStack)->f30 = 2;
+    ((ElementStackState*)g_elementStack)->resumeState = 2;
     SetElementStackState((ElementStack*)g_elementStack, 2);
     ResolveObjectLinks(self, 0x12, (ObjectLink*)g_currentPlacedObjectLinks);
     self->choice = -1;
