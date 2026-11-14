@@ -247,10 +247,7 @@ extern "C" double ConvertFloatToDouble(f32 x);
 extern "C" double MultiplyDoubles(double a, double b);
 extern "C" double AddDoubles(double a, double b);
 
-union DoubleBits {
-    double d;
-    u64 u;
-};
+#include "double_bits.h"
 
 
 

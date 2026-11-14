@@ -454,10 +454,7 @@ void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
     }
 }
 
-struct QuadraticCurve {
-    f32 c[3];
-    f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
-};
+#include "quadratic_curve.h"
 
 extern ValueRange g_unitRange;
 void UpdateAgentState(Agent* self);

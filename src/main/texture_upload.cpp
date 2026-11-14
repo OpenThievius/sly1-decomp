@@ -29,12 +29,12 @@
 #include "functions/texture_upload.h"
 struct FrameTarget;
 struct ImageRecord;
-struct PacketWriter;
+#include "texture_upload_packet.h"
 struct PaletteRecord;
 
 
 
-struct DmaChainBlock { u8 bytes[0x20]; };
+#include "dma_chain_block.h"
 
 struct TexturePacket : PacketWriter { u8* packet; };
 
@@ -56,20 +56,7 @@ void AddGifImageTag(PacketWriter* self, s32 count);
 // The GS register TEX0 an image or palette record keeps (ImageRecord at 0x18, PaletteRecord
 // at 0x10), as func_00168E78 and func_00168FB0 fill it: the base, width and format, the size
 // as powers of two, then the palette's base, format and load mode.
-struct GsTex0 {
-    u64 tbp : 14;
-    u64 tbw : 6;
-    u64 psm : 6;
-    u64 tw : 4;
-    u64 th : 4;
-    u64 tcc : 1;
-    u64 tfx : 2;
-    u64 cbp : 14;
-    u64 cpsm : 4;
-    u64 csm : 1;
-    u64 csa : 5;
-    u64 cld : 3;
-};
+
 
 
 void BeginImageTransfer(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
@@ -83,7 +70,7 @@ BumpAllocator g_bumpAllocator = { 0 };
 extern s32 g_gifChannel;
 
 
-struct TextureUploadPacket : PacketWriter { u8 span[0x10]; s32 out; };
+
 
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
@@ -98,14 +85,10 @@ extern s32 g_imageRecordCountB;
 
 // The start of what a queue entry copies: two GIF tags whose words func_001694A0 marks (bit
 // 15) when the entry has a flag.
-struct QueuedGifTags {
-    s32 f0;
-    u8 pad0[0xC];
-    s32 f10;
-};
 
 
-struct TransferBase { s32 v; };
+
+
 
 void BeginImageTransfer(TransferBase dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
 

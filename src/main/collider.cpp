@@ -215,12 +215,12 @@ struct PooledContact;
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 // A script list being built (func_001C1530 hands one to a getter; func_001C1A28 appends a value
 // of `type` to it).
-struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
+#include "script_list.h"
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 s32 ReadBufferedU32(BufferedStream* self);
 void* AllocateFrontMemory(u32 size);
 // A type and a list of script values: func_001C1AD8 tells whether a value is among them.
-struct ScriptValueFilter { u32 type; R11B008Node* list; };
+
 s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
 
 

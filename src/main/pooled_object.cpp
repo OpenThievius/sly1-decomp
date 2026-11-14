@@ -330,7 +330,7 @@ f32 ClampToRange(ValueRange* span, f32 x);
 void SetScatterLevel(void*, f32);
 
 // An entry of a GCC 2.95 vtable as this file defines D_0024A0E0 (packet_writer.h).
-struct VtableEntry { s32 delta; void (*fn)(); };
+#include "vtable_entry.h"
 void SkipDisplayListWriterSlot();
 void ClearPacketBuffer(PacketWriter* p);
 

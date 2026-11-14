@@ -15,7 +15,7 @@
 
 // The sounds' table: each sound's bank and its index in the bank, by id (func_001BE4A8 reads it;
 // func_001C0070 reads it from its second word, D_00245024).
-struct SoundEntry { s32 bank; s32 index; };
+#include "sound_entry.h"
 
 void UpdateColliderBounds();
 

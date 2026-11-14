@@ -52,10 +52,7 @@ extern u8 g_scatterController[];
 struct ScatterController;
 
 // A quadratic by its three coefficients (func_001D8E40, func_001D9678).
-struct QuadraticCurve {
-    f32 c[3];
-    f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
-};
+#include "quadratic_curve.h"
 
 extern float g_pathFollowerRampTime;
 extern float g_pathFollowerFadeCurve[4];

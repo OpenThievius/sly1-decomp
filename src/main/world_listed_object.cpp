@@ -63,56 +63,20 @@ struct ContactRowNode;
 struct ContactRowList;
 struct ContactRowSource;
 
-struct ContactBody;
-struct ContactPart;
+#include "contact_parts.h"
 
-struct ContactPartVt
-{
-    u8 pad0[0x10C];
-    void (*f10C)(ContactPart* c);
-    void (*f110)(ContactPart* c);
-};
 
-struct ContactPart
-{
-    ContactPartVt* vt;
-    u8 pad[0x2E4 - 4];
-    ContactPart* next;
-};
 
-struct ContactSlot
-{
-    Contact03* f0;
-};
 
-struct ContactNode
-{
-    Contact03* f0;
-    ContactNode* f4;
-    ContactSlot* f8;
-    ContactBody* fC;
-};
 
-struct ContactNodeList
-{
-    ContactNode* head;
-};
 
-struct ContactBody
-{
-    u8 pad0[0x2C8];
-    u64 bits2C8;
-    u8 pad1[0x2D8 - 0x2D0];
-    ContactPart* children;
-    u8 pad2[0x414 - 0x2DC];
-    ContactBody* next;
-    u8 pad3[0x480 - 0x418];
-    ContactNodeList* list;
-    u8 pad4[0x4B8 - 0x484];
-    s32 kind;
-    u8 pad5[0x538 - 0x4BC];
-    u64 bits538;
-};
+
+
+
+
+
+
+
 
 void* InitGifPacket(PacketWriter* f);
 void AllocatePacketBuffer(PacketWriter* f, s32 n);
@@ -505,26 +469,14 @@ s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec02* pos, Vec02* e
 }
 
 // One of the two scratchpad transfer buffers (object_properties.cpp): the blocks StartToSprChain sent.
-struct SprTransfer {
-    void* tags;             // 0x00
-    s32 base;               // 0x04
-    u32 addrs[8];           // 0x08: each block's scratchpad address
-    s32 sizes[8];           // 0x28
-    s32 count;              // 0x48
-    s32 state;              // 0x4C: 2 while its blocks are worked on
-};
+#include "spr_block.h"
 
-extern s32 g_sprTransferIndex;
-extern SprTransfer g_sprTransfers[2];
+
+
 extern void* g_toSprChannel;
 
 // Block n of the current scratchpad transfer.
-struct SprBlock {
-    static u32 Of(s32 n)
-    {
-        return g_sprTransfers[g_sprTransferIndex].addrs[n];
-    }
-};
+
 
 struct SpinRecord_158480;
 struct DmaChannel;

@@ -39,7 +39,7 @@
 
 extern f32 g_gameTime;
 // Two floats (CopyVec2).
-struct Point2 { f32 x; f32 y; };
+#include "point2.h"
 struct SoundLevelEntry;
 // A free slot of a world pool (Pool6C): its first word links the next.
 struct FreeSlot { FreeSlot* next; };

@@ -20,6 +20,7 @@
 
 #include "common.h"
 #include "shapes.h"
+#include "point2.h"
 
 struct AnimRecord;
 struct PlacedObject;
@@ -59,7 +60,6 @@ typedef char check_RingRow[sizeof(RingRow) == 0x20 ? 1 : -1];
 typedef char check_RingParams[sizeof(RingParams) == 0x80 ? 1 : -1];
 
 // A point of the ring's outline around an anchor, before the anchor's scale.
-struct Point2 { f32 x; f32 y; };
 
 // func_001D5678 (player_request.cpp). Its callers pass the request they draw for, which it
 // does not read.

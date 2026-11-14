@@ -65,7 +65,7 @@ void AppendToList(List01* self, void* item);
 void RemoveFromList(List01* list, void* item);
 void RemoveFromList(List01* list, void* item);
 void AppendToList(List01* self, void* item);
-struct RandomRangeLow { s32 v; };
+#include "random_range_low.h"
 extern s32 g_streamVoiceLocked;
 void StopStreamVoice(void);
 extern s32 g_stagedBankVoice;
@@ -163,7 +163,7 @@ void* AllocateSoundLevelEntry(void);
 extern f32 g_gameClock[];
 // A row of g_soundEntries (global_tables.cpp defines it): the bank a sound is in, -1 for none, and
 // its index in that bank.
-struct SoundEntry { s32 bank; s32 index; };
+#include "sound_entry.h"
 extern SoundEntry g_soundEntries[];
 extern u8 g_soundBankLoaded[];
 extern u8 g_soundEntryAvailable[];
@@ -218,7 +218,7 @@ void RemoveFromList(List01* list, void* item);
 void SetCachedVoiceParam(s32 index, s32 value);
 void AppendToList(List01* self, void* item);
 extern s32 g_iopChannel2Values[6];
-struct Point2 { f32 x; f32 y; };
+#include "point2.h"
 extern f32 g_volumeChannelFactors[11][4];
 void ApplyVolumeChannelFactors(s32 column);
 extern u8 g_worldSoundHandle[4];

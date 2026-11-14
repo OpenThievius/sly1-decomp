@@ -146,9 +146,7 @@ f32 HashToUnitFloat(s32 i);
 
 
 
-struct MinOf {
-    static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
-};
+#include "min_of.h"
 
 extern s32 (*g_warpCursorTables[6])[4];
 

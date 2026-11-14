@@ -269,7 +269,7 @@ struct MemberTargetObject;
 
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
 // list at +0x1BDC, linked at +0x64): the receiver, the 0x50-byte message, the time it is due.
-struct DelayedMessageBody { Quad16 q[5]; };
+#include "delayed_message_body.h"
 struct DelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 due; u8 link[8]; /* 0x64: the link in World::list1BDC */ };
 
 extern f32 g_gameClock[];
@@ -463,7 +463,7 @@ void FindOrBuildMemberGroup(void** out, void* self);
 s32 IsInList(List01* self, void* item);
 void RemoveFromList(List01* list, void* item);
 
-struct CyclerDrawParams { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
+#include "cycler_draw_params.h"
 extern f32 g_gameTime;
 extern f32 g_cyclerShrinkCurve[4];
 extern f32 g_cyclerGrowCurve[4];
@@ -477,7 +477,7 @@ void CollectObjectByMode(PlacedObject* obj, s32 kind, s32 all, s32 zero, PlacedO
 
 
 // An entry of a GCC 2.95 vtable as this file defines D_0024A220 (the font table).
-struct VtableEntry { s32 delta; void (*fn)(); };
+#include "vtable_entry.h"
 struct FloatPair2 { f32 x; f32 y; };
 extern const VtableEntry g_fontMethods[22];
 void* AllocateObjectMemory(u32);
@@ -584,7 +584,7 @@ extern s32 g_fonts[];
 // NEAR: the first load of self->p54 goes to $v0 (retail $v1), so two
 // pointer loads differ in register choice; everything else matches.
 
-struct FontUploadFrame { PacketWriter a; u8 buf[0x100]; };
+#include "font_frame.h"
 PacketWriter* InitGifPacket(PacketWriter* p);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
@@ -693,32 +693,14 @@ typedef unsigned int u32;
 typedef signed long s64;
 typedef unsigned long u64;
 typedef float f32;
-struct StringLayout
-{
-  f32 x;
-  f32 y;
-  f32 width;
-  f32 height;
-  s32 color;
-  s32 horizontalAlign;
-  s32 verticalAlign;
-};
+
 
 
 
 // Inline text codes: ~RRGGBB / ~. colour, &<id> / &. font, ^<d><d> / ^. scale.
 
-struct FrameGlyph {
-    Font* font;
-    s8 key;
-    u8 p5[3];
-    f32 paddingX;
-    f32 paddingY;
-    f32 scaleX;
-    f32 scaleY;
-    u32 color;
-};
-struct FrameRect { f32 x, y, w, h; };
+
+
 
 void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s);
