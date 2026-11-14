@@ -408,7 +408,7 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
         f32 l1 = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d1, d1)));
         f32 l2 = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(dir), Vu0::Q(dir))));
         f32 u = l1 / l2 / tune->flightTime;
-        Vu0::Q(t->gravity) = Vu0::MulX(Vu0::Q(*(Vec02*)((u8*)self->world + 0x1EE0)), Vu0::Scalar(u * u));
+        Vu0::Q(t->gravity) = Vu0::MulX(Vu0::Q(self->world->gravity), Vu0::Scalar(u * u));
         Vu0::Q(obj->vB0) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(u));
     }
     sa->life = tune->flightTime * D_00262A28[0];

@@ -65,7 +65,10 @@ struct Camera : BaseObject {
     f32 snapValue;          // 0x22C: the value a snap with a source carries
     Vec02 v230;             // 0x230: from p to the screen point's place on the view ray (func_00145610)
     Vec02 v240;             // 0x240: D_00248D30 at func_00145610
-    u8 pad250[0x2B0 - 0x250];
+    u8 pad250[0x270 - 0x250];
+    Vec02 v270;             // 0x270: the offset the on-off controllers spring (func_001E3380)
+    Vec02 v280;             // 0x280: its goal
+    u8 pad290[0x2B0 - 0x290];
     f32 f2B0;               // 0x2B0
     f32 f2B4;               // 0x2B4
     f32 f2B8;               // 0x2B8

@@ -713,7 +713,7 @@ void RefreshConeVolume(ConeVolume* self)
 
 void RemoveConeVolumeFromWorldList(ConeVolume* self)
 {
-    RemoveFromList((List01*)((u8*)self->world + 0x1BE8), self);
+    RemoveFromList(&self->world->list1BE8, self);
     NoteConeVolumeLightingChange(self);
 }
 
@@ -721,7 +721,7 @@ void AddConeVolumeToWorldList(ConeVolume* self)
 {
     void (*fn)(BaseObject*);
 
-    AppendToList((List01*)((u8*)self->world + 0x1BE8), self);
+    AppendToList(&self->world->list1BE8, self);
     fn = self->desc->m12;
     if (fn != 0) fn(self);
 }

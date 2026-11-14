@@ -2189,15 +2189,15 @@ void AddDmaReturnTag(PacketWriter* self)
 
 void AppendPacketQuadwords(PacketWriter* self, s32 n, void* src)
 {
-    CopyQuadwords(*(void**)((u8*)self + 0xC), src, n);
-    *(u8**)((u8*)self + 0xC) += n * 16;
+    CopyQuadwords(self->cur, src, n);
+    self->cur += n * 16;
 }
 
 void AddDmaEndTag(PacketWriter* self)
 {
     CloseDmaTag(self);
-    u8* cursor = *(u8**)((u8*)self + 0xC);
-    *(u8**)((u8*)self + 0xC) = cursor + 0x10;
+    u8* cursor = self->cur;
+    self->cur = cursor + 0x10;
     *(u64*)cursor = 0x70000000;
     *(u64*)(cursor + 8) = 0;
 }

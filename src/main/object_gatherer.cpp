@@ -724,7 +724,7 @@ void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
     }
     self->spinAngle = self->spinAngle + self->spinSpeed * g_gameClock[2];
     BuildAxisAngleMatrix(&g_unitZVector, &axis, self->spinAngle);
-    MulRotation(&turned, *(const Mat02*)((u8*)self + 0x110), axis);
+    MulRotation(&turned, *&self->m110, axis);
     if (self->parent != 0) {
         RotateMatrixUpright(&turned, 0, &turned);
     }
@@ -2106,7 +2106,7 @@ void TrackAimTargetPoint(Player* self, AimBlendGrid* dst, PathCurveObject* src, 
     Quad16 q3;
     GridCell* w40;
     s32 w44;
-    TransformPointBetweenFrames(0, (PlacedObject*)src->parent, (Vec02*)((u8*)self + 0x140), (Vec02*)&q0);
+    TransformPointBetweenFrames(0, (PlacedObject*)src->parent, &self->v140, (Vec02*)&q0);
     PathCurve* o = src->curve;
     if (o->vt->m12 != 0) {
         o->vt->m12(o, *k, &q0, 0, (f32*)&q1, 0, 0, k);

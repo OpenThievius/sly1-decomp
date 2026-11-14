@@ -935,7 +935,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
     if (self->mover != 0) {
         Vec02 vel;
         Vec02 spin;
-        ComputeObjectMotionInFrame((PlacedObject*)self->mover, 0, (Vec02*)((u8*)self->mover + 0x140), &vel, &spin, 0, 0);
+        ComputeObjectMotionInFrame((PlacedObject*)self->mover, 0, &((PlacedObject*)self->mover)->v140, &vel, &spin, 0, 0);
         obj->desc->m90(obj, &vel);
         obj->desc->m94(obj, &spin);
     } else {
@@ -1206,7 +1206,7 @@ void UpdateWorld4BossGoal(World4Boss* self, s32 flag)
     if (self->state == 0x10) {
         void* r = ((VFn_1A9960*)self->desc)[102](self);
         if (r != 0)
-            SetAgentGoalPoint(self, (Vec02*)((u8*)r + 0x140));
+            SetAgentGoalPoint(self, &((PlacedObject*)r)->v140);
     }
 }
 

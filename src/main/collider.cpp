@@ -1952,7 +1952,7 @@ void CopyColliderMeshesInFrame(Collider* self, Collider* src, s32 extra)
 {
     Vec02 m[4];
     Mesh03 tmp;
-    BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)src + 0x100), (const Mat02*)((u8*)src + 0xD0), (Mat4A*)m);
+    BuildMatrixFromRotationAndTranslation(&src->pos, &src->rot, (Mat4A*)m);
     f32 maxDist = 0.0f;
     for (s32 i = 0; i < src->mesh.vertCount; i++) {
         f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(((Vec02*)src->mesh.verts)[i]), Vu0::Q(((Vec02*)src->mesh.verts)[i])));
@@ -1964,7 +1964,7 @@ void CopyColliderMeshesInFrame(Collider* self, Collider* src, s32 extra)
     tmp = src->mesh;
     tmp.vertCount = tmp.vertCount + extra;
     CopyMeshTransformed(&tmp, (s32)m, &self->mesh);
-    BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)self + 0x140), (const Mat02*)((u8*)self + 0x110), (Mat4A*)m);
+    BuildMatrixFromRotationAndTranslation(&self->v140, &self->m110, (Mat4A*)m);
     CopyMeshTransformed(&self->mesh, (s32)m, &self->meshCopy);
     self->f4B8 = 0;
     CloneTreeNodes(&src->meshCopy, &src->tree, &self->meshCopy, &self->tree);

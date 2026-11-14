@@ -27,7 +27,7 @@ struct Oscillator : BaseObject {
     u8 pad6D4[0x6E0 - 0x6D4];
     OscillatorFrame framesA[4]; // 0x6E0: the rows EvaluateOscillator writes (an entry's frame, rows from its row)
     OscillatorFrame framesB[4]; // 0x7E0: their xy for the second set
-    u8 pad8E0[0x8E4 - 0x8E0];
+    void* partList;         // 0x8E0: the parts the oscillator moves (OscPart)
     s32 framesDirty;        // 0x8E4: set when an entry changed (RefreshOscillatorFrames)
     u8 pad8E8[0x8F0 - 0x8E8];
 };

@@ -92,7 +92,7 @@ struct World : BaseObject {
     EffectOwner* freeEffectOwners;  // 0x1B38: the unused effect owners, linked through saved564
     EffectOwner* sharedEffectOwner; // 0x1B3C: the owner handed to every flag 0 request
     Pool6C pool1B40;        // 0x1B40: 0x10C0-byte records (func_00139C70)
-    u8 pad1B4C[0x1B58 - 0x1B4C];
+    Pool6C pool1B4C;        // 0x1B4C: the pooled slots a render node holds (PushFreeSlot in render_frame)
     Pool6C pool1B58;        // 0x1B58: the 0xEC-byte AnimationPlayer records (func_0012D3F8)
     void* animationPlayers; // 0x1B64: the list of animation players
     s32 f1B68;              // 0x1B68
@@ -103,7 +103,7 @@ struct World : BaseObject {
     ActorList6C list1B7C;   // 0x1B7C
     Pool6C pool1B88;        // 0x1B88: the 0x40-byte StateWalker handles (func_001B6290)
     List01 list1B94;        // 0x1B94: the handles in use (func_001B6290 adds each)
-    u8 pad1BA0[0x1BAC - 0x1BA0];
+    Pool6C pool1BA0;        // 0x1BA0: the free sound records (func_001C0808)
     List01 list1BAC;        // 0x1BAC: the sound records (func_001C0808 walks them)
     Pool6C pool1BB8;        // 0x1BB8: the sound level entries (func_001BEDF8 gives one back)
     List01 list1BC4;        // 0x1BC4: the sound level entries in use (func_001BEE48 walks them)

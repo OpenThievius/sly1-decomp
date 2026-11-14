@@ -642,14 +642,14 @@ void* AllocateSoundLevelEntry(void)
     void* p = PopFreeSlot(&g_currentWorld->pool1BB8);
     if (p != 0) {
         FillMemory((u8*)p, 0, 12);
-        AppendToList((List01*)((u8*)g_currentWorld + 0x1BC4), p);
+        AppendToList(&g_currentWorld->list1BC4, p);
     }
     return p;
 }
 
 void RemoveSoundLevelEntry(void* self)
 {
-    RemoveFromList((List01*)((u8*)g_currentWorld + 0x1BC4), self);
+    RemoveFromList(&g_currentWorld->list1BC4, self);
     PushFreeSlot(&g_currentWorld->pool1BB8, self);
 }
 
@@ -671,7 +671,7 @@ void ClearSoundLevels(void)
 
 SoundLevelEntry* PushSoundLevel(s32 x)
 {
-    s32 flag = IsListEmpty((List01*)((u8*)g_currentWorld + 0x1BC4));
+    s32 flag = IsListEmpty(&g_currentWorld->list1BC4);
     SoundLevelEntry* p = (SoundLevelEntry*)AllocateSoundLevelEntry();
     s32 hi = 0x6B;
     s32 v = -20;
@@ -785,9 +785,9 @@ void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f3
             Vec02 d;
             f32 range = b - c;
             f32 away = b - r;
-            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*(Vec02*)pos), Vu0::Q(*(Vec02*)((u8*)cam + 0x40)));
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*(Vec02*)pos), Vu0::Q(*(Vec02*)cam->position));
             Vu0::Q(d) = Vu0::DivX(Vu0::Q(d), Vu0::Length(Vu0::Q(d)));
-            f32 across = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)((u8*)cam + 0x90))));
+            f32 across = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)cam->f90)));
             f32 ratio = away / range;
             *pan = -across * 0.7f * (1.0f - ratio);
             *volume = a * ratio;
@@ -856,8 +856,8 @@ void ComputeSoundRecordDoppler(PlayingSound* self)
 ListenerDistanceFn ChooseSoundListenerFunction(void)
 {
     s32 n;
-    if (IsTopCameraController((CameraController*)((u8*)g_camera + 0x460)) == 0) return MeasureListenerDistance;
-    n = PeekStackValue((TargetCameraController*)((u8*)g_camera + 0x460));
+    if (IsTopCameraController(&g_camera->ctl460) == 0) return MeasureListenerDistance;
+    n = PeekStackValue(&g_camera->ctl460);
     if (n >= 3) return MeasureListenerDistance;
     if (n <= 0) return MeasureListenerDistance;
     return MeasureCameraWeightedDistance;
@@ -882,10 +882,10 @@ void ComputeSoundAttenuation(void* self, f32* out, s32* flag, f32 a, f32 b, f32 
 
 void* AllocateSoundRecord(void)
 {
-    void* s = PopFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1BA0));
+    void* s = PopFreeSlot(&g_currentWorld->pool1BA0);
     if (s) {
         FillMemory(s, 0, 0x90);
-        AppendToList((List01*)((u8*)g_currentWorld + 0x1BAC), s);
+        AppendToList(&g_currentWorld->list1BAC, s);
     }
     return s;
 }
@@ -903,8 +903,8 @@ void FreeSoundRecord(PlayingSound* self)
         *self->owner = 0;
     }
     self->serial = -1;
-    RemoveFromList((List01*)((u8*)g_currentWorld + 0x1BAC), self);
-    PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1BA0), self);
+    RemoveFromList(&g_currentWorld->list1BAC, self);
+    PushFreeSlot(&g_currentWorld->pool1BA0, self);
 }
 
 void StopSoundRecord(PlayingSound* self, s32 n)
@@ -960,7 +960,7 @@ void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, 
     U64P keep = self->link;
     FillMemory(self, 0, 0x90);
     self->link = keep;
-    if (object) position = (Quad16*)((u8*)object + 0x140);
+    if (object) position = (Quad16*)&((PlacedObject*)object)->v140;
     self->owner = owner;
     if (owner) *owner = self;
     self->pitch = pitch;

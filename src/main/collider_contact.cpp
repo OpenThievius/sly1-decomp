@@ -1067,7 +1067,7 @@ s32 AddSweptPartMeshContact(void* a0, void* a1, s32 a2, void* a3, void* a4, void
     MeshHit recs[2];
     Vec4U v1;
     Vec4U v2;
-    s32 count = CollectTreeNodeSpans((TreeNode03*)a4, (Vec02*)((u8*)a0 + 0x370), (Vec02*)((u8*)a0 + 0x140), 0, 2, (ColliderSpan*)recs);
+    s32 count = CollectTreeNodeSpans((TreeNode03*)a4, (Vec02*)((u8*)a0 + 0x370), &((PlacedObject*)a0)->v140, 0, 2, (ColliderSpan*)recs);
     s32 idx = 0;
     if (count > 0) {
         idx = (recs[0].p50 == 0);
@@ -1135,7 +1135,7 @@ struct SphereHitFrame { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
 s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
 {
     SphereHitFrame loc;
-    if (IntersectSegmentWithSphere((Vec02*)((u8*)a1 + 0x140), (Vec02*)((u8*)a0 + 0x370), (Vec02*)((u8*)a0 + 0x140), 0, (Vec02*)&loc, (Vec02*)loc.b, &loc.fa, *(f32*)((u8*)a1 + 0x3CC)) == 0) {
+    if (IntersectSegmentWithSphere(&((PlacedObject*)a1)->v140, (Vec02*)((u8*)a0 + 0x370), &((PlacedObject*)a0)->v140, 0, (Vec02*)&loc, (Vec02*)loc.b, &loc.fa, *(f32*)((u8*)a1 + 0x3CC)) == 0) {
         return 0;
     }
     FindPartSupportPoint(a0, loc.b, loc.a, &loc.fb, loc.fa);

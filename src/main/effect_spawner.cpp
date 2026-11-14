@@ -1749,7 +1749,7 @@ void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Ve
         break;
     case 4:
         if (shape->anchor != 0) {
-            Vu0::Set(*axis, Vu0::RotateTransposed(*(Mat02*)((u8*)shape->anchor + 0x110),
+            Vu0::Set(*axis, Vu0::RotateTransposed(((PlacedObject*)shape->anchor)->m110,
                                                   Vu0::Rotate(*(Mat02*)((u8*)g_camera + 0x80), Vu0::Vec::Of(shape->dir))).q);
         } else {
             Vu0::Set(*axis, Vu0::Rotate(*(Mat02*)((u8*)g_camera + 0x80), Vu0::Vec::Of(shape->dir)).q);

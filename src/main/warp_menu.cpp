@@ -800,7 +800,7 @@ void UpdateWorld1BossGoal(World1Boss* self, s32 flag)
     switch (self->state) {
     case 4:
         if (self->disabled != 0) {
-            SetAgentGoalPoint(self, (Vec02*)((u8*)self + 0x190));
+            SetAgentGoalPoint(self, &self->v190);
         } else {
             GetObjectWorldPosition((BaseObject*)self->fC60, (Vec02*)&loc);
             SetAgentGoalPoint(self, (Vec02*)&loc);
@@ -808,7 +808,7 @@ void UpdateWorld1BossGoal(World1Boss* self, s32 flag)
         break;
     case 8: {
         void* r = ((TargetObjectFn*)self->desc)[102](self);
-        if (r != 0) SetAgentGoalPoint(self, (Vec02*)((u8*)r + 0x140));
+        if (r != 0) SetAgentGoalPoint(self, &((PlacedObject*)r)->v140);
         break;
     }
     default:
@@ -1839,7 +1839,7 @@ void HandleWorld3BeatPressColliderActivation(World3BeatPressCollider* self, void
         self->tempoAgent = r;
     } else {
         SetStateWalkerTarget((StateWalker*)self->walker, 0x4CA);
-        *(f32*)((u8*)g_player + 0x26D0) = 2.0f;
+        g_player->pulseFadeDuration = 2.0f;
     }
 }
 
@@ -1933,10 +1933,10 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
                 self->runEnded = 1;
                 gl->pulseActive = 1;
                 f32 v = g_gameTime[0];
-                *(f32*)((u8*)gl + 0x26CC) = v;
+                gl->pulseFadeStart = v;
                 gl->pulseStartTime = v;
                 l = ((World3Boss*)self->tempoAgent)->heldTimeline;
-                *(f32*)((u8*)gl + 0x26D0) = 2.0f;
+                gl->pulseFadeDuration = 2.0f;
                 if (l != 0) {
                     s32 j = l->index;
                     while (j < l->entryCount) {
@@ -1947,7 +1947,7 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
                     if (j < l->entryCount) {
                         Entry90* it = &((Entry90*)l->buffer)[j];
                         World3Boss* gg = ((World3Boss*)self->tempoAgent);
-                        *(f32*)((u8*)g_player + 0x26D0) = ((f32)it->step * 4.0f + it->substep - ((f32)gg->bar * 4.0f + gg->barPosition)) * gg->beatLength;
+                        g_player->pulseFadeDuration = ((f32)it->step * 4.0f + it->substep - ((f32)gg->bar * 4.0f + gg->barPosition)) * gg->beatLength;
                     }
                 }
             }
@@ -2031,14 +2031,14 @@ void GetWorld3BeatPressColliderRotationAt(World3BeatPressCollider* self, f32 t, 
 void InitWorld3Boss(World3Boss* self)
 {
     InitAgent(self);
-    *(s32*)((u8*)self + 0xC5C) = 0x3C;
+    self->tempo = 0x3C;
     self->newBeatLength = 1.0f;
     self->spanSeconds = 8.0f;
     self->bar = 0;
     self->beatInBar = -1;
     self->beat = -1;
     self->spanBeats = 8;
-    *(s32*)((u8*)self + 0xC6C) = (s32)AllocateFrontMemory(0x400);
+    self->players = (TempoPlayerEntry*)AllocateFrontMemory(0x400);
     self->world->f2358 = 1;
     StopStagedBankVoice();
     D_00275DB8 = 2;
@@ -2365,7 +2365,7 @@ void LeaveWorld3BossState(World3Boss* self, s32 arg)
             return;
         }
         self->beatGate = 0;
-        GetStateWalkerCurrentKey((StateWalker*)(*(void**)((u8*)self + 0xC54)), &out);
+        GetStateWalkerCurrentKey((StateWalker*)(self->walker), &out);
         switch (out) {
         case 0x4EE:
             sel = 0x4EF;
@@ -2377,7 +2377,7 @@ void LeaveWorld3BossState(World3Boss* self, s32 arg)
             sel = 0x4F5;
             break;
         }
-        SetStateWalkerTarget((StateWalker*)(*(void**)((u8*)self + 0xC54)), sel);
+        SetStateWalkerTarget((StateWalker*)(self->walker), sel);
     } else {
         self->beatGate = 0;
     }
@@ -2675,7 +2675,7 @@ void UpdateWorld3BossGoal(World3Boss* self, s32 flag)
             GetObjectWorldPosition((BaseObject*)q, (Vec02*)loc);
             SetAgentGoalPoint(self, (Vec02*)loc);
         } else {
-            SetAgentGoalPoint(self, (Vec02*)((u8*)self + 0x140));
+            SetAgentGoalPoint(self, &self->v140);
         }
     }
     return;
@@ -4056,7 +4056,7 @@ void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count)
 
     if (dst->mode == 0) {
         if (g_activeStepSequence != 0) {
-            if (*(s32*)((u8*)g_activeStepSequence + 0x2D0) != 2) {
+            if (g_activeStepSequence->mode2D0 != 2) {
                 PopActiveSequenceElement(g_currentWorld);
             }
         }

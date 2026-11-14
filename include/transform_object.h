@@ -31,12 +31,16 @@ struct TransformObject : BaseObject {
 // func_001F3EE0) copies the objects; starting (slot 16, func_001F3F80) gives each its parent
 // and starts it.
 struct TransformSet : TransformObject {
-    u8 pad80[0xA0 - 0x80];
+    u8 pad80[0x98 - 0x80];
+    s32 hasHeading;         // 0x98: set when the arrival turns the camera
+    f32 headingOffset;      // 0x9C: added to the arrival's heading
     s32 count;              // 0xA0
     BaseObject** objects;   // 0xA4
     s32 idCount;            // 0xA8
     s32* ids;               // 0xAC
-    u8 padB0[0x100 - 0xB0];
+    u8 padB0[0xB4 - 0xB0];
+    s32 keyedCount;         // 0xB4: the entries in keyed
+    u8 keyed[0x100 - 0xB8]; // 0xB8: four keyed entries (ZoneTargetEntry)
 };
 
 struct MemberGroup;

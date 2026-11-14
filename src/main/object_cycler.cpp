@@ -294,7 +294,7 @@ void StepObjectCycler(ObjectCycler* self, f32 dt)
         Vec02 k;
         Mat02 basis;
         f32 t = self->stateEnd + dt - g_gameClock[1];
-        EvaluateHermiteVectorSegment(t, dt, 1.0f, &self->pos, &self->v150, &self->v5F0, (const Vec02*)((u8*)self + 0x600), &pos, &vel, 0);
+        EvaluateHermiteVectorSegment(t, dt, 1.0f, &self->pos, &self->v150, &self->v5F0, &self->v600, &pos, &vel, 0);
         Vu0::Q(accel) = Vu0::Sub(Vu0::Q(vel), Vu0::Q(self->v150));
         *(u128*)&k = Vu0::FromFloat(1.0f / dt);
         Vu0::Q(accel) = Vu0::MulX(Vu0::Q(accel), *(u128*)&k);
@@ -516,7 +516,7 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
         self->nextMessageTime = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
         break;
     }
-    (*(PlacedObject**)((u8*)self + 0x5D8))->visibilityMask = 14;
+    self->obj5D8->visibilityMask = 14;
     self->stateEnd = g_gameClock[1];
     switch (state) {
     case 0:
@@ -560,7 +560,7 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
     }
     case 1:
         StartSoundEffect(0x3A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->f690, *(s32*)((u8*)self + 0x694));
+        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->f690, self->f694);
         self->stateEnd += 2.0f;
         break;
     case 2:

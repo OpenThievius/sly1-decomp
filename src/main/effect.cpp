@@ -1062,17 +1062,17 @@ void DrawEffect(Effect* self, void* a1)
 void AddEffectListener(void* obj, void* arg)
 {
     const Desc01* desc = ((BaseObject*)arg)->desc;
-    AddCallbackNode(g_currentWorld, (Callback01**)((u8*)obj + 0x118), (void*)desc->m0D, arg);
+    AddCallbackNode(g_currentWorld, (Callback01**)&((Effect*)obj)->hooks, (void*)desc->m0D, arg);
 }
 
 void AddEffectCallback(void* obj, void* a1, void* a2)
 {
-    AddCallbackNode(g_currentWorld, (Callback01**)((u8*)obj + 0x118), a1, a2);
+    AddCallbackNode(g_currentWorld, (Callback01**)&((Effect*)obj)->hooks, a1, a2);
 }
 
 void RemoveEffectCallback(void* obj, void* a1, void* a2)
 {
-    RemoveCallbackNode(g_currentWorld, (Callback01**)((u8*)obj + 0x118), a1, a2);
+    RemoveCallbackNode(g_currentWorld, (Callback01**)&((Effect*)obj)->hooks, a1, a2);
 }
 
 void InitFallingEffect(Effect* self, void* pos, f32 scale, s32 flags)
@@ -2412,7 +2412,7 @@ void RandomizeEffectSpin(Effect* self, Rec50* src)
     self->f128 = *(f32*)((u8*)src + 0x1F8);
     ClampedQuadratic::Get(t, (const QuadraticCoeffs*)g_spinSpeedCurve, len);
     f32 s = t * 10.0f;
-    f32* p = (f32*)((u8*)self + 0x100);
+    f32* p = (f32*)&self->spin;
     for (s32 i = 2; i >= 0; i--) {
         *p++ = RandomFloatInRange(-s, s);
     }
