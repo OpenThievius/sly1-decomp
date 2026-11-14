@@ -196,6 +196,8 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
     }
 }
 
+// Counts one lap off: stamps the lap time with the game time, decreases the laps left and calls
+// slot 2 of the lap object if there is one.
 void CountDownPathFollowerLap(PathFollower* self)
 {
     self->lapTime = g_gameTime;

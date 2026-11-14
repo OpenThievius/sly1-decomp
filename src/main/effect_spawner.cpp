@@ -779,6 +779,8 @@ void InitSpawnRecord(void* mem)
     self->table = g_spawnRecordDefaults;
 }
 
+// Initialises the placed object and puts every id and counter at its unset value (-1), with both
+// delays at 10 and the list link offset at 0x320.
 void InitEffectSpawner(EffectSpawner* self)
 {
     InitPlacedObject(self);
@@ -853,6 +855,7 @@ void ReadSpawnMesh(void* p, void* other)
     }
 }
 
+// Reads a source byte and count words from the stream, keeping the first 32 at most.
 void ReadCappedWordList(CappedWordList* self, s32 count, void* unused, void* src)
 {
     s32 limit = 31;
@@ -895,12 +898,14 @@ void LoadEffectSpawner(EffectSpawner* self, BufferedStream* count)
     }
 }
 
+// Copies the placed object and counts one more user on the shared spawn record.
 void CopyEffectSpawner(EffectSpawner* self, EffectSpawner* src)
 {
     CopyPlacedObject(self, src);
     self->rec->uses++;
 }
 
+// Calls slot 15 with the record's target, which looks like making the spawner a child of it.
 void ReparentEffectSpawnerToSource(EffectSpawner* self)
 {
     self->desc->m15(self, (BaseObject*)self->rec->target);
@@ -1030,6 +1035,7 @@ void StartEffectSpawner(EffectSpawner* self)
     }
 }
 
+// For notification kind 2 about one of the two held objects, tells it (slot 24) and forgets it.
 void ReleaseEffectSpawnerHeld(EffectSpawner* self, s32 mode, BaseObject* p)
 {
     if (mode == 2) {
@@ -1043,6 +1049,8 @@ void ReleaseEffectSpawnerHeld(EffectSpawner* self, s32 mode, BaseObject* p)
     }
 }
 
+// Gives a spawn record this owner may change: the record itself when only one owner uses it, else a
+// copy (with its own copy of the 0x28-byte entries for kind 3) with the use counts adjusted.
 Rec50* CloneSharedSpawnRecord(Rec50* self)
 {
     Rec50* n;
@@ -1056,6 +1064,8 @@ Rec50* CloneSharedSpawnRecord(Rec50* self)
     return n;
 }
 
+// Gives the spawner's spawn record; with mode 1 it first makes it the spawner's own copy and marks
+// the spawner changed.
 Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode)
 {
     if (mode == 1) {
@@ -1065,6 +1075,7 @@ Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode)
     return self->rec;
 }
 
+// Marks the spawner changed when value is 1, and gives it back.
 EffectSpawner* MarkEffectSpawnerChanged(EffectSpawner* self, s32 value)
 {
     if (value == 1) {
@@ -1073,6 +1084,7 @@ EffectSpawner* MarkEffectSpawnerChanged(EffectSpawner* self, s32 value)
     return self;
 }
 
+// Adds a range entry to the spawner's own (copied if shared) spawn record.
 void AddSpawnRangeEntry(EffectSpawner* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w)
 {
     u8* p=(u8*)GetOwnSpawnRecord(self,1);
@@ -1293,6 +1305,8 @@ timer:
     WrapSpawnerParticlesIntoBox(self);
 }
 
+// Unless it has the flag itself, looks up the parents for the first with bits 0x0C000000 equal to
+// 0x08000000 and takes its visibility mask.
 void InheritFlaggedAncestorValue(EffectSpawner* self)
 {
     if ((self->flags & 0x0C000000) == 0x08000000) {
@@ -1310,21 +1324,25 @@ void InheritFlaggedAncestorValue(EffectSpawner* self)
     }
 }
 
+// Keeps the spawner active until f from now (game time).
 void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f)
 {
     self->activeUntil = g_gameTime + f;
 }
 
+// Sets activeUntil to the largest float, so the spawner stays active for good.
 void SetEffectSpawnerActiveForever(EffectSpawner* self)
 {
     self->activeUntil = 3.4028234663852886e+38f;
 }
 
+// Ends the active period by setting activeUntil to -1.
 void SetEffectSpawnerInactive(EffectSpawner* self)
 {
     self->activeUntil = -1.0f;
 }
 
+// True while the game time is before activeUntil, or in mode 0 or 1 when the counter is 0.
 s32 IsEffectSpawnerActive(EffectSpawner* self)
 {
     if (g_gameTime < self->activeUntil) {
@@ -1340,6 +1358,7 @@ s32 IsEffectSpawnerActive(EffectSpawner* self)
     return 0;
 }
 
+// Turns the spawner off for a non-zero argument and on forever for zero.
 void SetEffectSpawnerDisabled(EffectSpawner* self, s32 a1)
 {
     if (a1 != 0) {
@@ -1349,16 +1368,21 @@ void SetEffectSpawnerDisabled(EffectSpawner* self, s32 a1)
     }
 }
 
+// Stores whether the spawner is inactive in *out.
 void GetEffectSpawnerInactive(EffectSpawner* self, s32* out)
 {
     *out = IsEffectSpawnerActive(self) == 0;
 }
 
+// Stores whether the spawner is active in *out.
 void GetEffectSpawnerActive(void* self,s32* out)
 {
     *out=IsEffectSpawnerActive((EffectSpawner*)self);
 }
 
+// Re-arms the spawner: clears its counter, passes the record's look source to the listed object and
+// the margin to the effect owner if they exist, and draws a new random delay between delayMin and
+// delayMax (in seconds, scaled by 60 for record kind 3).
 void RandomizeEffectSpawnerDelay(u8* self)
 {
     *(s32*)(self+0x34C)=0;
@@ -1370,6 +1394,8 @@ void RandomizeEffectSpawnerDelay(u8* self)
     *(f32*)(self+0x328)=value;
 }
 
+// Sets how many more spawns are allowed. In mode -1 that is the counter; in mode 0, 0 means active
+// forever and -1 inactive. Marks the spawner changed.
 void SetEffectSpawnerLimit(EffectSpawner* self, s32 a1)
 {
     if (self->mode == -1) {
@@ -1386,12 +1412,15 @@ void SetEffectSpawnerLimit(EffectSpawner* self, s32 a1)
     self->changed = 1;
 }
 
+// Sets the spawner's continuous flag and marks it changed.
 void SetEffectSpawnerContinuous(EffectSpawner* a0, s32 a1)
 {
     a0->continuous = a1;
     a0->changed = 1;
 }
 
+// Stores the effect kind in the record and resets its three kind parameters: kind 24 gets 25, 0.8,
+// 0.8 and kind 27 gets -1 and 10.0; others get zeros.
 void SetSpawnRecordKind(u8* self,s32 kind)
 {
     *(s32*)(self+0x1B0)=kind;
@@ -1408,12 +1437,14 @@ void SetSpawnRecordKind(u8* self,s32 kind)
     }
 }
 
+// Sets the effect kind on the spawner's own spawn record.
 void SetEffectSpawnerKind(void* a0, s32 a1)
 {
     void* r = GetOwnSpawnRecord((EffectSpawner*)a0, 1);
     SetSpawnRecordKind((u8*)r, a1);
 }
 
+// Sets the effect kind on the member's own spawn record.
 void SetOwnedSpawnRecordKind(void* a0, s32 a1)
 {
     void* r = GetOwnedSpawnRecord(a0, 1);
@@ -1527,6 +1558,7 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
     }
 }
 
+// Sends a point event (kind 12, the point and a value) to the world's listener in slot 9 if any.
 void SendPointEventToWorldListener(Quad16* a0, f32 f)
 {
     BaseObject* obj = g_currentWorld->slot1CE8[9];
@@ -1785,6 +1817,8 @@ struct AnchoredSpawn {
 };
 
 
+// Brings a spawn position and direction into the anchor's frame. Unless mode 3 the direction is
+// turned too, and unless mode 2 the anchor's own motion at that point is added to it.
 void ConvertSpawnToAnchorSpace(AnchoredSpawn* self, Vec02* pos, Vec02* dir)
 {
     Vec02 motion;
@@ -1803,6 +1837,8 @@ void ConvertSpawnToAnchorSpace(AnchoredSpawn* self, Vec02* pos, Vec02* dir)
     }
 }
 
+// Sets up an evenly spaced ring of angles over the span lo..hi: at most k slots, the rate (2 pi per
+// slot), the step between rings, the first phase half a step in, and a random starting angle.
 void InitSpawnRing(s32 n, SpawnSpan* span, s32 k, SpawnRing* out) { if (n > 0) { out->count = n < k ? n : k; } else { out->count = k; } s32 steps = k - 1; steps += out->count; steps = steps / out->count; f32 w = WrapAngle(span->hi - span->lo); f32 rate = 6.2831855f / (f32)out->count; f32 step = w / (f32)steps; out->rate = rate; out->step = step; out->phase = span->lo + step * 0.5f; out->out10 = RandomFloatInRange(0.0f, 6.2831855f); }
 
 void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale);
@@ -2209,6 +2245,8 @@ void BroadcastPointEvent(void* self, void* obj, f32 x)
     }
 }
 
+// Creates effect type 4 at the given place and starts it with the given strength. It lives 0.75 and
+// follows the source's oscillator if it has one.
 void SpawnBriefEffectAt(void* a0, BriefEffectSource* a1, f32 f)
 {
     Effect* o = (Effect*)CreateEffect(4, 0);
@@ -2349,6 +2387,7 @@ void TurnMatrixBySpin(SpinRecord_158480* spin, f32 dt, f32* out)
     AddMatrices((f32*)&turn, (f32*)&term, out);
 }
 
+// Starts the object, then calls its slot 3.
 void StartMemberObject(MemberObject* self)
 {
     StartObject(self);
@@ -2357,6 +2396,7 @@ void StartMemberObject(MemberObject* self)
 
 ASM_FUNC(func_00158630);
 
+// Sends a zeroed 0x50-byte message through slot 27.
 void SendEmptyMessage(MemberObject* a0)
 {
     EmptyMessage b;
@@ -2364,6 +2404,7 @@ void SendEmptyMessage(MemberObject* a0)
     a0->desc->m1B(a0, &b);
 }
 
+// Sends a message carrying two ids, two vectors and two floats through slot 27.
 void SendTwoVectorMessage(MemberObject* a0, s32 a1, s32 a2, Quad16* a3, Quad16* a4, f32 x, f32 y)
 {
     TwoVectorMessage m;
@@ -2431,6 +2472,8 @@ void LoadGroupMembers(MemberGroup* self, void* src)
     }
 }
 
+// Copies the group's data, then replaces each member with a copy made on the group's world and
+// parent, starts it and points it at this group.
 void CopyGroupMembers(MemberGroup* self, MemberGroup* src)
 {
     CopyObjectData(self, src);
@@ -2442,6 +2485,7 @@ void CopyGroupMembers(MemberGroup* self, MemberGroup* src)
     }
 }
 
+// Calls slot 15 of each member that has one.
 void ResolveGroupMembers(MemberGroup* self)
 {
     for (s32 i = 0; i < self->count; i++) {
@@ -2453,6 +2497,7 @@ void ResolveGroupMembers(MemberGroup* self)
     }
 }
 
+// Sends the message to every member of the group through its slot-27 method.
 void BroadcastMessageToMembers(MemberGroup* self, void* message)
 {
     for (s32 i = 0; i < self->count; i++) {
@@ -2461,6 +2506,7 @@ void BroadcastMessageToMembers(MemberGroup* self, void* message)
     }
 }
 
+// Initialises the transform object and puts both target ids at -1.
 void InitRecordMember(RecordMember* self)
 {
     InitTransformObject(self);
@@ -2496,12 +2542,16 @@ void LoadRecordMember(RecordMember* self, void* stream)
     }
 }
 
+// Copies the object's data and counts one more user on the shared spawn record.
 void CopyRecordMember(RecordMember* self, RecordMember* src)
 {
     CopyObjectData(self, src);
     self->rec->uses += 1;
 }
 
+// Looks up the objects the member's ids 0x94 and 0x98 name and stores them in its owned spawn
+// record (the second also supplies the value), then resolves the record's own targets. Skipped when
+// both ids are unset and the record has nothing of its own to resolve.
 void ResolveRecordMemberTargets(RecordMember* self)
 {
     Rec79* r;
@@ -2539,12 +2589,14 @@ void SendRecordMemberMessage(void)
 {
 }
 
+// Adds a range entry to the member's own (copied if shared) spawn record.
 void AddRecordMemberRangeEntry(RecordMember* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w)
 {
     u8* p = (u8*)GetOwnedSpawnRecord(self, 1);
     AddRangeEntry((RangeEmitter*)(p+16),a,b,x,y,z,w,self);
 }
 
+// Gives the member's spawn record; with own 1 it first makes it the member's own copy.
 Rec79* GetOwnedSpawnRecord(RecordMember* self, s32 own)
 {
     if (own == 1) {
@@ -2553,6 +2605,7 @@ Rec79* GetOwnedSpawnRecord(RecordMember* self, s32 own)
     return self->rec;
 }
 
+// Initialises the record member and puts its three held ids at -1.
 void InitHoldingMember(HoldingMember* self)
 {
     InitRecordMember(self);
@@ -2561,6 +2614,8 @@ void InitHoldingMember(HoldingMember* self)
     self->idB4 = -1;
 }
 
+// Resolves the record member's targets, then the up to three objects it holds (ids 0xAC, 0xB0 and
+// 0xB4, the last only if it is of kind 3) into the spawn record's found array.
 void ResolveHoldingMemberTargets(HoldingMember* self)
 {
     Rec79* s;
@@ -2585,6 +2640,7 @@ void ResolveHoldingMemberTargets(HoldingMember* self)
     }
 }
 
+// For notification kind 2 about one of the two held objects, tells it (slot 24) and forgets it.
 void ReleaseHeldObject(HoldingMember* self, s32 kind, BaseObject* other)
 {
     if (kind == 2) {
@@ -2624,6 +2680,7 @@ void SendMessageAfterDelay(HoldingMember* self, void* message)
     }
 }
 
+// Gives the member's sound record, creating it on first use.
 s32 GetOrCreateSoundParams(void* self)
 {
     HoldingMember* o = (HoldingMember*)self;
@@ -2856,6 +2913,7 @@ void DispatchDelayedMessages(World* self)
 
 LINKER_REMNANT(func_00159668);
 
+// Loads the base animator, then the second record key, scale, low and high limits and the limit.
 void LoadCrossfadeAnimator(CrossfadeAnimator* self, AnimatorParams* src)
 {
     LoadAnimatorBase(self, src);
@@ -2867,6 +2925,8 @@ void LoadCrossfadeAnimator(CrossfadeAnimator* self, AnimatorParams* src)
     self->limit = src->f10;
 }
 
+// Binds the first record, then looks up the second by its key (claiming it if the first one's owner
+// is this animator), sets the frame count to the larger of the two and starts in mode 0.
 void BindCrossfadeAnimator(CrossfadeAnimator* self)
 {
     BindAnimatorRecord(self);
@@ -2990,6 +3050,8 @@ call:
     SetCursorFrame(&s->cursor2, (s32)s->pos);
 }
 
+// Sets the crossfade ratio; at 1 or more the animator goes to mode 2, otherwise back to mode 0.
+// Both cursors are put on the current frame.
 void SetCrossfadeRatio(CrossfadeAnimator* a0, f32 f12)
 {
     a0->ratio = f12;
@@ -3003,6 +3065,8 @@ void SetCrossfadeRatio(CrossfadeAnimator* a0, f32 f12)
     SetCursorFrame(&a0->cursor2, (s32)a0->pos);
 }
 
+// Finds the cursor for a record in the base animator, else the second cursor if the key matches the
+// second record's.
 AnimCursor* FindCrossfadeCursor(CrossfadeAnimator* self, const AnimRecord* key)
 {
     AnimCursor* p = FindAnimatorCursor(self, key);
@@ -3039,6 +3103,8 @@ void StepObjectLevelRamp(WorldObjectNode* self, f32 dt)
     }
 }
 
+// Takes a node from the world's pool and appends it, with the object as owner, to the world's list
+// for objects that run on the frame step clock or the one for those that do not.
 WorldObjectNode* AddObjectNodeToWorld(PlacedObject* self)
 {
     WorldObjectNode* node = (WorldObjectNode*)PopZeroedFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1C18));
@@ -3051,6 +3117,8 @@ WorldObjectNode* AddObjectNodeToWorld(PlacedObject* self)
     return node;
 }
 
+// Unlinks the node from the world's list it is on, clears the owner's ramp node and returns the
+// node to the pool.
 void RemoveObjectNodeFromWorld(WorldObjectNode* node)
 {
     if (node->owner->frameStepClock != 0) {
@@ -3062,6 +3130,8 @@ void RemoveObjectNodeFromWorld(WorldObjectNode* node)
     PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1C18), node);
 }
 
+// Draws a full-screen colour fill: builds the packet from the colour at 0x60 and sends it to the
+// VIF as a direct packet.
 void DrawScreenFill(u8* a0)
 {
     ScreenFillPacket f;
@@ -3121,6 +3191,8 @@ void UpdateColorFade(ColorFade* self)
     QueueDeferredRequest((DeferredRequest*)&q);
 }
 
+// Starts the fade if it is not running: stamps the game time and appends it to the world's list of
+// fades.
 void StartColorFade(ColorFade* a0)
 {
     if (a0->running == 0) {
@@ -3130,6 +3202,7 @@ void StartColorFade(ColorFade* a0)
     }
 }
 
+// Gives the slot of n in a hash table of 512 twelve-byte entries that starts 0x84 bytes into base.
 u8* GetHashedSlot(u8* base, s32 n)
 {
     return base + (((n * 0x95675) & 0x1FF) * 12 + 0x84);
@@ -3297,6 +3370,7 @@ s32 GatherObjectsByMode(World* host, s32 flags, s32 id, void* rootp, s32 max, vo
     return count;
 }
 
+// Gathers the first object that matches kind and arg with the given flags and 0x200; null if none.
 BaseObject* FindFirstObjectById(World* self,s32 flags,s32 kind,void* arg)
 {
     BaseObject* out=0;
@@ -3304,6 +3378,7 @@ BaseObject* FindFirstObjectById(World* self,s32 flags,s32 kind,void* arg)
     return out;
 }
 
+// Gathers the first object that matches kind and arg with mode 0x204; null if none.
 BaseObject* FindFirstObjectByIdMode4(World* self,s32 kind,void* arg)
 {
     BaseObject* out=0;
@@ -3311,6 +3386,7 @@ BaseObject* FindFirstObjectByIdMode4(World* self,s32 kind,void* arg)
     return out;
 }
 
+// Gathers the first object that matches kind and arg with mode 0x201; null if none.
 BaseObject* FindFirstObjectByIdMode1(World* self,s32 kind,void* arg)
 {
     BaseObject* out=0;
@@ -3318,6 +3394,8 @@ BaseObject* FindFirstObjectByIdMode1(World* self,s32 kind,void* arg)
     return out;
 }
 
+// True when the class with this index in the class descriptor table has value in its chain of
+// ancestors.
 s32 IsClassOfKind(s32 index, s32 value)
 {
     ClassKindNode* p = ((ClassKindNode**)g_classDescriptorTable)[index];
@@ -3419,6 +3497,7 @@ s32 GatherObjectsById(World* world, u32 flags, s32 id, void* scope, s32 max, voi
     return c;
 }
 
+// The same as FindFirstObjectById, through the id-based gather.
 PlacedObject* FindFirstObjectByIdGathered(World* self,s32 flags,s32 kind,void* arg)
 {
     PlacedObject* out=0;
@@ -3426,6 +3505,7 @@ PlacedObject* FindFirstObjectByIdGathered(World* self,s32 flags,s32 kind,void* a
     return out;
 }
 
+// Gives the first object in the parent chain of list that is also in the parent chain of other.
 BaseObject* FindCommonAncestor(BaseObject* list, BaseObject* other)
 {
     for (BaseObject* p = list; p != 0; p = p->parent) {
@@ -3440,6 +3520,7 @@ BaseObject* FindCommonAncestor(BaseObject* list, BaseObject* other)
 
 LINKER_REMNANT(func_0015A8B0);
 
+// Initialises the placed object with current and target scale 1 and a ramp profile of 1, 0.2, 0.1.
 void InitScalingVolume(ScalingVolume* self)
 {
     InitPlacedObject(self);
@@ -3451,18 +3532,21 @@ void InitScalingVolume(ScalingVolume* self)
     v[2] = 0.1f;
 }
 
+// Loads the placed object, then its mesh tables.
 void LoadScalingVolume(ScalingVolume* self,void* other)
 {
     LoadPlacedObject(self,other);
     ReadMeshTables(other,&self->out2D0,&self->out2D4,&self->out2D8,&self->out2DC);
 }
 
+// Updates the placed object and eases the scale toward its target with the ramp profile.
 void UpdateScalingVolume(ScalingVolume* self, f32 dt)
 {
     UpdatePlacedObject(self, dt);
     self->f2EC = ApproachValueWithRamp((RampProfile*)self->v, 0, self->f2EC, self->f2F0, g_frameDt);
 }
 
+// Draws the placed object with its transform scaled uniformly by its current scale (at 0x2EC).
 void DrawScalingVolume(ScalingVolume* self, void* arg1, void* arg2)
 {
     ScaledDrawFrame f;
@@ -3480,6 +3564,8 @@ struct TreeNode03;
 struct FacePoint;
 s32 IsPointInsideFaceTree(TreeNode03* self, FacePoint* value);
 
+// Tests a world point against the volume's face tree: the point is moved into the volume's frame
+// and divided by its scale; false if the scale is almost zero.
 s32 IsPointInsideObjectFaces(ScalingVolume* self, void* point)
 {
     Vec02 local;

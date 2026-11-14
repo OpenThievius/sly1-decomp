@@ -165,6 +165,7 @@ Fn_Table g_startupInitializers[29] = { (Fn_Table)InitPlacedObjectModule, (Fn_Tab
 s32 D_00264834;
 s32 D_00264838;
 
+// Comparison for sorting objects: by dynamic flag, then f308, then bit 38 of the flags, then kind.
 s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b)
 {
     SortKeyedObject* x = *a;
@@ -359,6 +360,8 @@ s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 sk
     return strongest;
 }
 
+// Initialises the pose source with an aim range of 800, four constant vectors and the near and far
+// keys at 1 and -1.
 void InitAim(T2195_790* self, PlacedObject* owner)
 {
     InitPoseSource(self, owner);
@@ -372,6 +375,8 @@ void InitAim(T2195_790* self, PlacedObject* owner)
     self->farKey = -1;
 }
 
+// Sets the aim target and the point on it; no object, or the active switched collider itself, means
+// no target and the zero point.
 void AssignAimTarget(T2195_790* self, void* obj, Vec02* src)
 {
     if (obj == 0 || obj == (void*)GetActiveSwitchedCollider()) {
@@ -385,6 +390,7 @@ void AssignAimTarget(T2195_790* self, void* obj, Vec02* src)
     }
 }
 
+// Gives the aim target, or the active switched collider when none was assigned.
 void* ResolveAimTarget(T2195_790* a0) {
     if (a0->hasTarget == 0) {
         return GetActiveSwitchedCollider();
@@ -548,6 +554,8 @@ void LoadIopModules()
     }
 }
 
+// Sends the VU0 program chain on the VIF0 DMA channel (with the 0x40 flag set while it runs) and
+// waits for it to finish.
 void SendVif0StartupPacket(void)
 {
     s32* p = (s32*)g_vif0Channel;
@@ -559,6 +567,8 @@ void SendVif0StartupPacket(void)
     *q &= ~0x40;
 }
 
+// Sends the VU1 program chain on the VIF1 DMA channel (with the 0x40 flag set while it runs) and
+// waits for it to finish.
 void SendVif1StartupPacket()
 {
     DmaChannelFlags* p = *(DmaChannelFlags**)g_vif1Channel;

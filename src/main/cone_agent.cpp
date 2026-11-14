@@ -43,6 +43,8 @@ struct StateResetGroup;
 void* IsObjectOfKind(BaseObject* list, s32 key);
 
 
+// Initialises the agent with its sight cone: ranges 1000 and 1500, angles 45 and 180 degrees, a
+// leash of 2000 by 300, target range up to 300 and a limit of 60 degrees, and both zone ids unset.
 void InitConeAgent(ConeAgent* self)
 {
     InitAgent(self);

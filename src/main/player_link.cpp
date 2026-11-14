@@ -61,6 +61,8 @@ struct BlendAnimationView;
 
 struct ThreeBlendRecord { s32 f0; u8 pad0[0xC - 0x4]; s32 fC; u8 pad1[0x18 - 0x10]; f32 f18; };
 
+// Builds a combined blend animation of three entries from the record (the last weight starting at
+// 1) and gives it in *a2 if requested.
 void CreateThreeEntryBlend(void* a0, ThreeBlendRecord* a1, void** a2)
 {
     void* tmp;
@@ -366,6 +368,7 @@ struct LinkTargetHolder { s32 pad0; void* target; };
 void AddColliderForce(void* target, void* slot);
 void AddColliderTorque(void* target, void* slot);
 
+// Passes the player's force and torque (at 0x22D0 and 0x22E0) on to its link target collider.
 void SyncPlayerTarget(Player* self)
 {
     AddColliderForce(((LinkTargetHolder*)self->linkSystem)->target, (u8*)self + 0x22D0);
@@ -634,6 +637,8 @@ struct HeadingVector {
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Gives the heading, as an angle in the x/y plane, of the linked owner's direction in the world
+// frame.
 void GetLinkedObjectHeading(Player* self, f32* heading)
 {
     HeadingVector v;
@@ -745,6 +750,8 @@ void UpdatePlayerLinkPose(Player* self)
 }
 
 
+// Gives the pose at time t: from the placed object's rotation in state 3, else from the turning
+// collider.
 void GetPlayerPose(Player* self, f32 t, void* out, void* extra)
 {
     if (self->state == 3) {

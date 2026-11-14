@@ -249,6 +249,7 @@ void* AllocateZeroedFrontMemory(s32 n);
 
 typedef void (*FrameOutToldFn)(PlacedObject* self, Mat02* out1, Vec02* out2);
 
+// Fills the object property table with the built-in entries.
 void InitObjectBuiltinTable(void)
 {
     FillObjectPropertyTable();
@@ -508,6 +509,7 @@ void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r)
     }
 }
 
+// Reads property records from the stream and applies each to self until a negative index ends it.
 void ReadPropertyRecords(void* self, void* obj)
 {
     s32 r;
@@ -516,6 +518,7 @@ void ReadPropertyRecords(void* self, void* obj)
     }
 }
 
+// Maps a key code 12 to 42 onto the slot 0 to 30, and anything else to -1.
 s32 MapKeyToSlotIndex(s32 value)
 {
     s32 r = value - 12;
@@ -546,6 +549,8 @@ void ReadSlotObjects(World* self, void* a1, void* a2)
     }
 }
 
+// Applies the default value of each property of the object's class that is flagged 0x800, by
+// parsing the property's stored value as a buffered memory stream.
 void ApplyObjectClassDefaults(BaseObject* self)
 {
     BufferedStream buf;
@@ -568,6 +573,10 @@ void ApplyObjectClassDefaults(BaseObject* self)
     }
 }
 
+// Binary-searches the key array (records of stride bytes, time first) for the segment holding key.
+// Gives the segment start in *outPtr, the time into it in *outDiff and its length in *outDelta
+// (either may be null). With flags bit 0 set, a key exactly on a boundary uses the previous
+// segment.
 void FindCurveSegment(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr)
 {
     s32 hi = n;
@@ -622,10 +631,12 @@ void FindCurveSegment(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outD
     *outPtr = p;
 }
 
+// Does nothing: the empty position curve's evaluation.
 void EvaluateNoPositionCurve(void)
 {
 }
 
+// The empty position curve has no keys: stores 0 as the count.
 void GetNoPositionCurveTimes(PositionCurve* unused, s32* a, s32* b)
 {
     *a = 0;
@@ -634,14 +645,17 @@ void GetNoPositionCurveTimes(PositionCurve* unused, s32* a, s32* b)
     }
 }
 
+// Does nothing: the empty rotation curve's evaluation.
 void EvaluateNoRotationCurve(void)
 {
 }
 
+// Does nothing: the empty rotation curve's raw getter.
 void GetNoRotationCurve(void)
 {
 }
 
+// The empty rotation curve has no keys: stores 0 as the count.
 void GetNoRotationCurveTimes(RotationCurve* self, s32* first, s32* second)
 {
     *first = 0;
@@ -650,10 +664,12 @@ void GetNoRotationCurveTimes(RotationCurve* self, s32* first, s32* second)
     }
 }
 
+// Does nothing: the empty scale curve's evaluation.
 void EvaluateNoScaleCurve()
 {
 }
 
+// The empty scale curve has no keys: stores 0 as the count.
 void GetNoScaleCurveTimes(ScaleCurve* a0, s32* a1, s32* a2)
 {
     *a1 = 0;
@@ -662,10 +678,12 @@ void GetNoScaleCurveTimes(ScaleCurve* a0, s32* a1, s32* a2)
     }
 }
 
+// Does nothing: the empty weight curve's evaluation.
 void EvaluateNoWeightCurve()
 {
 }
 
+// The empty weight curve has no keys: stores 0 as the count.
 void GetNoWeightCurveTimes(WeightCurve* unused, s32* a, s32* b)
 {
     *a = 0;
@@ -690,6 +708,8 @@ void ReadTangentWeightCurve(TangentWeightCurve* self, Stream83* src)
     }
 }
 
+// Evaluates a weight curve of Hermite keys at key: a segment whose first key has kind 5 holds its
+// value, any other is a Hermite segment between the two keys. Value to *outF, slope to *outI.
 void EvaluateTangentWeightCurve(TangentWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
@@ -708,6 +728,7 @@ void EvaluateTangentWeightCurve(TangentWeightCurve* self, s32 unused, s32 flags,
     EvaluateHermiteSegment(delta, diff, scale, ((TangentWeightKey*)p)->value, ((TangentWeightKey*)p)->f, ((TangentWeightKey*)p + 1)->value, ((TangentWeightKey*)p + 1)->d, outF, outI, 0);
 }
 
+// Gives the key count, and with outValues non-null a back-memory array of the keys' times.
 void GetTangentWeightCurveTimes(TangentWeightCurve* src, s32* outCount, f32** outValues)
 {
     *outCount = src->count;
@@ -743,6 +764,9 @@ void ReadControlPointWeightCurve(ControlPointWeightCurve* self, Stream83* src)
     }
 }
 
+// Evaluates a weight curve of Bezier keys at key: a segment whose first key has kind 5 holds its
+// value, any other is solved as a Bezier segment between the two keys. Value to *outF, slope to
+// *outI.
 void EvaluateControlPointWeightCurve(ControlPointWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
@@ -761,6 +785,7 @@ void EvaluateControlPointWeightCurve(ControlPointWeightCurve* self, s32 unused, 
     SolveBezierSegment(delta, diff, scale, ((ControlPointWeightKey*)p)->value, ((ControlPointWeightKey*)p)->g, ((ControlPointWeightKey*)p)->h, ((ControlPointWeightKey*)p + 1)->value, ((ControlPointWeightKey*)p + 1)->d, ((ControlPointWeightKey*)p + 1)->e, outF, outI, 0);
 }
 
+// Gives the key count, and with outArr non-null a back-memory array of the keys' times.
 void GetControlPointWeightCurveTimes(ControlPointWeightCurve* self, s32* outCount, f32** outArr)
 {
     s32 n = self->count;
@@ -805,6 +830,8 @@ void EvaluateLinearWeightCurve(LinearWeightCurve* self, s32 unused, s32 flags, f
     }
 }
 
+// Reads a count and that many (time, value) keys from the stream; times are stored in 1/60 s ticks
+// and converted to seconds.
 void ReadLinearWeightCurve(LinearWeightCurve* self, Stream83* src)
 {
     self->count = ReadBufferedU16((BufferedStream*)src);
@@ -816,6 +843,7 @@ void ReadLinearWeightCurve(LinearWeightCurve* self, Stream83* src)
     }
 }
 
+// Gives the key count, and with out non-null a back-memory array of the keys' times.
 void GetLinearWeightCurveTimes(LinearWeightCurve* self, s32* count, f32** out)
 {
     s32 n = self->count;
@@ -843,6 +871,8 @@ void EvaluateAxisCurves(WeightCurve** axis, PlacedObject* other, s32 flags, Vec0
     }
 }
 
+// Reads a vector and a 3-bit mask, then for each set bit one weight curve (kind byte, then the
+// curve's own read) into out[0..2], one per axis.
 void ReadAxisCurves(WeightCurve** out, Vec02* dst, Stream83* src)
 {
     s32 mask = ReadBufferedU8((BufferedStream*)src);
@@ -904,6 +934,8 @@ void GatherAxisCurveTimes(WeightCurve** objs, s32* outCount, f32** outArr)
     if (outArr) *outArr = arr;
 }
 
+// Evaluates a curve of 0x40-byte vector keys at key: finds the segment and runs the Hermite vector
+// evaluation between its two keys, giving values and slopes.
 void EvaluateVectorKeyCurve(s32 count, VectorKey* keys, s32 flags, f32* values, f32* slopes, f32 key, f32 scale)
 {
     CurveSegment s;
@@ -940,6 +972,7 @@ void ReadVectorKeys(s32* outCount, VectorKey** outItems, Stream83* src)
     *outItems = items;
 }
 
+// Gives the key count, and with outArr non-null a back-memory array of the keys' times.
 void GetVectorKeyTimes(s32 count, VectorKey* src, s32* outCount, f32** outArr)
 {
     *outCount = count;
@@ -957,6 +990,8 @@ void GetVectorKeyTimes(s32 count, VectorKey* src, s32* outCount, f32** outArr)
     }
 }
 
+// Evaluates the three per-axis curves, then tells the owner through its slot-28 method if it has
+// one.
 void EvaluateAxisPositionCurve(AxisPositionCurve* self, PlacedObject* other, s32 c, f32* e, f32* f, f32 p12, f32 p13)
 {
     EvaluateAxisCurves(self->axis, other, c, &self->base, e, f, p12, p13);
@@ -988,11 +1023,13 @@ void ReadAxisPositionCurve(AxisPositionCurve* self, Stream83* arg)
     PopBackMemoryMark();
 }
 
+// Gives the key times of the three per-axis position curves.
 void GetAxisPositionCurveTimes(AxisPositionCurve* self, s32* outCount, f32** outTimes)
 {
     GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
+// Evaluates the key curve, then tells the owner through its slot-28 method if it has one.
 void EvaluateVectorKeyPositionCurve(VectorKeyPositionCurve* self, PlacedObject* other, s32 a2, f32* a3, f32* a4, f32 p12, f32 p13)
 {
     EvaluateVectorKeyCurve(self->count, self->keys, a2, a3, a4, p12, p13);
@@ -1000,6 +1037,8 @@ void EvaluateVectorKeyPositionCurve(VectorKeyPositionCurve* self, PlacedObject* 
         ((VectorCurveToldFn)other->desc02()->m28)(other, a3, a4);
 }
 
+// Reads the position keys from the stream and sets closed when the last key is within 1 unit of the
+// first (a single key counts as closed).
 void ReadVectorKeyPositionCurve(VectorKeyPositionCurve* self, Stream83* arg)
 {
     ReadVectorKeys(&self->count, &self->keys, arg);
@@ -1011,11 +1050,14 @@ void ReadVectorKeyPositionCurve(VectorKeyPositionCurve* self, Stream83* arg)
     }
 }
 
+// Gives the position curve's key count and times.
 void GetVectorKeyPositionCurveTimes(VectorKeyPositionCurve* self, s32* outCount, f32** outArr)
 {
     GetVectorKeyTimes(self->count, self->keys, outCount, outArr);
 }
 
+// Evaluates the three per-axis curves into Euler angles, builds the rotation matrix (and the
+// rotation's derivative) from them, then tells the owner through its slot-29 method.
 void EvaluateAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 c, void* p3, void* p4, f32 key, f32 scale)
 {
     AngleSample tmp;
@@ -1028,6 +1070,8 @@ void EvaluateAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32
         ((AxisRotationToldFn)other->desc02()->m29)(other, p3, p4);
 }
 
+// Evaluates the three per-axis curves at key (the method shares its body with the axis position
+// evaluation, without the angles and notification).
 void* GetAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 flags, f32* values, f32* slopes, f32 key, f32 scale)
 {
     EvaluateAxisCurves(self->axis, other, flags, &self->base, values, slopes, key, scale);
@@ -1057,11 +1101,14 @@ void ReadAxisRotationCurve(AxisRotationCurve* self, Stream83* arg)
     PopBackMemoryMark();
 }
 
+// Gives the key times of the three per-axis rotation curves.
 void GetAxisRotationCurveKeyTimes(AxisRotationCurve* self, s32* outCount, f32** outTimes)
 {
     GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
+// Evaluates the keyed curve into Euler angles, builds the rotation matrix (and the derivative) from
+// them, then tells the parent through its slot-29 method.
 void EvaluateKeyedRotationCurve(KeyedRotationCurve* self, PlacedObject* parent, s32 mode,
                    void* output, void* state, f32 key, f32 scale)
 {
@@ -1080,11 +1127,14 @@ void EvaluateKeyedRotationCurve(KeyedRotationCurve* self, PlacedObject* parent, 
     }
 }
 
+// Evaluates the keyed rotation curve's raw vector keys at key, giving values and slopes.
 void GetKeyedRotationCurve(KeyedRotationCurve* self, PlacedObject* other, s32 flags, f32* values, f32* slopes, f32 key, f32 scale)
 {
 	EvaluateVectorKeyCurve(self->count, self->keys, flags, values, slopes, key, scale);
 }
 
+// Reads the rotation keys from the stream and sets closed when the curve loops: the rotation from
+// the first key to the last is under 0.01 in angle (a single key counts as closed).
 void ReadKeyedRotationCurve(KeyedRotationCurve* self, Stream83* arg)
 {
     KeyedCurveClosure loc;
@@ -1104,11 +1154,13 @@ void ReadKeyedRotationCurve(KeyedRotationCurve* self, Stream83* arg)
     self->closed = result;
 }
 
+// Gives the key count and times of the keyed rotation curve.
 void GetKeyedRotationCurveKeyTimes(KeyedRotationCurve* self, s32* outCount, f32** outTimes)
 {
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
 
+// Evaluates the three per-axis curves into a diagonal scale matrix (the rest zeroed).
 void EvaluateAxisScaleCurve(AxisScaleCurve* self, PlacedObject* second, s32 third,
                    Mat3U* output, f32 factor)
 {
@@ -1123,16 +1175,19 @@ void EvaluateAxisScaleCurve(AxisScaleCurve* self, PlacedObject* second, s32 thir
     }
 }
 
+// Reads the three per-axis scale curves from the stream.
 void ReadAxisScaleCurve(AxisScaleCurve* self, Stream83* p)
 {
     ReadAxisCurves(self->axis, &self->base, p);
 }
 
+// Gives the key times of the three per-axis scale curves.
 void GetAxisScaleCurveKeyTimes(AxisScaleCurve* self, s32* outCount, f32** outTimes)
 {
 	GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
+// Evaluates the keyed curve into a diagonal scale matrix (the rest zeroed).
 void EvaluateKeyedScaleCurve(KeyedScaleCurve* self, PlacedObject* unused, s32 mode,
                    Mat3U* output, f32 factor)
 {
@@ -1147,11 +1202,13 @@ void EvaluateKeyedScaleCurve(KeyedScaleCurve* self, PlacedObject* unused, s32 mo
     }
 }
 
+// Reads the scale keys from the stream.
 void ReadKeyedScaleCurve(KeyedScaleCurve* self, Stream83* stream)
 {
 	ReadVectorKeys(&self->count, &self->keys, stream);
 }
 
+// Gives the key count and times of the keyed scale curve.
 void GetKeyedScaleCurveKeyTimes(KeyedScaleCurve* self, s32* outCount, f32** outTimes)
 {
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
@@ -1476,6 +1533,7 @@ void EvaluateValueBlendCurve(ValueBlendWeightCurve* o, PlacedObject* cam, s32 c,
         *out1 = sum1;
 }
 
+// Allocates a position curve of the given kind (0 to 2) and sets its method table; null otherwise.
 PositionCurve* CreatePositionCurve(s32 kind)
 {
     PositionCurve* p;
@@ -1502,6 +1560,7 @@ PositionCurve* CreatePositionCurve(s32 kind)
     return p;
 }
 
+// Allocates a rotation curve of the given kind (0 to 2) and sets its method table; null otherwise.
 RotationCurve* CreateRotationCurve(s32 kind) {
     RotationCurve* p;
     switch (kind) {
@@ -1527,6 +1586,7 @@ RotationCurve* CreateRotationCurve(s32 kind) {
     return p;
 }
 
+// Allocates a scale curve of the given kind (0 or 1) and sets its method table; null otherwise.
 ScaleCurve* CreateScaleCurve(s32 kind)
 {
     ScaleCurve* p;
@@ -1549,6 +1609,8 @@ ScaleCurve* CreateScaleCurve(s32 kind)
     return p;
 }
 
+// Allocates a weight curve of the given kind (0 to 4) and sets its method table; null for any other
+// kind. The kinds differ in size, so each has its own key layout.
 WeightCurve* CreateWeightCurve(u32 kind)
 {
     WeightCurve* o;
@@ -1581,6 +1643,8 @@ WeightCurve* CreateWeightCurve(u32 kind)
     return o;
 }
 
+// Takes a zeroed slot from the world's pose source pool, sets its method table and initialises it
+// for the owner.
 Attachment* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* table)
 {
 	Attachment* node = (Attachment*)PopZeroedFreeSlot(&root->pool1B20);
@@ -1589,6 +1653,7 @@ Attachment* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* t
 	return node;
 }
 
+// Creates an owner-type pose source on the given world and owner and copies this one into it.
 Attachment* ClonePoseSource(Attachment* self, World* a, PlacedObject* b)
 {
     Attachment* node = CreatePoseSource(a, b, (const T2195_Vt*)g_ownerPoseSourceMethods);
@@ -1596,6 +1661,7 @@ Attachment* ClonePoseSource(Attachment* self, World* a, PlacedObject* b)
     return node;
 }
 
+// Copies a pose source's whole record over this one, keeping this one's list links and owner.
 void CopyPoseSource(Attachment* self, Attachment* src)
 {
     Link2195 tmp = self->link;
@@ -1605,6 +1671,7 @@ void CopyPoseSource(Attachment* self, Attachment* src)
     self->owner = saved;
 }
 
+// Sets the owner and puts all four mode bytes at -1 (unset).
 void InitPoseSource(Attachment* self, PlacedObject* value)
 {
 	s8 m = -1;
@@ -1646,6 +1713,8 @@ void ReleasePoseSource(Attachment* self, s32 flags)
     PushFreeSlot(&m->world->pool1B20, self);
 }
 
+// Gives the owner's position and a zero vector, then tells the owner through its slot-28 method if
+// it has one.
 void GetOwnerPosition(Attachment* self, Vec02* out1, Vec02* out2)
 {
     *out1 = self->owner->v190;
@@ -1655,6 +1724,7 @@ void GetOwnerPosition(Attachment* self, Vec02* out1, Vec02* out2)
     }
 }
 
+// Gives the owner's orientation and a zero vector, then tells the owner through its slot-29 method.
 void GetOwnerRotation(Attachment* self, Mat02* out1, Vec02* out2)
 {
     *out1 = self->owner->m1A0;
@@ -1662,6 +1732,7 @@ void GetOwnerRotation(Attachment* self, Mat02* out1, Vec02* out2)
     ((FrameOutToldFn)self->owner->desc02()->m29)(self->owner, out1, out2);
 }
 
+// Gives the owner's link record value and a slope of 0.
 void GetOwnerValue(Attachment* self, f32* value, f32* slope)
 {
 	Rec2195_224* rec = (Rec2195_224*)self->owner->linkRecord;
@@ -1669,6 +1740,7 @@ void GetOwnerValue(Attachment* self, f32* value, f32* slope)
 	*slope = 0.0f;
 }
 
+// Copies the 3-row identity matrix into out.
 void GetIdentityMatrix(Attachment* unused, Mat02* out)
 {
     Mat02* src = (Mat02*)g_identityMatrix;
@@ -1677,11 +1749,14 @@ void GetIdentityMatrix(Attachment* unused, Mat02* out)
     out->r[2] = src->r[2];
 }
 
+// Gives entry index of the owner's animation value array.
 f32 GetOwnerIndexedValue(Attachment* self, s32 index)
 {
 	return (*(f32**)((u8*)self->owner + 0x274))[index];
 }
 
+// Picks the source's two modes from the owner: its own 0x2C9 and 0x2CA bytes unless they are -1,
+// else 2 for a non-collider (or collider mode 3) and 3 otherwise.
 void ChoosePoseSourceModes(Attachment* obj)
 {
     PlacedObject* node = obj->owner;
@@ -2070,6 +2145,8 @@ void ApplyPoseSourceRotation(Attachment* self)
     }
 }
 
+// Reads the indexed value val from the pose source and writes it into the owner's value array: mode
+// 2 stores it directly, mode 3 eases the stored value toward it with the value ramp profile.
 void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
 {
     f32 ret = self->vt->getIndexed(self, val);
@@ -2086,6 +2163,8 @@ void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
     }
 }
 
+// Gives the object's position and velocity t seconds ahead: its own if t is 0, the position
+// attachment's if it has one, else the plain linear extrapolation pos + velocity * t.
 void GetPlacedObjectPositionAt(PlacedObject* self, f32 t, Vec02* pos, Vec02* vec)
 {
     Vec02 k;
@@ -2127,6 +2206,7 @@ void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat02* rot, Vec02* vec
     }
 }
 
+// Turns a mode0 or mode1 of 7 into 3.
 void SettlePoseSourceModes(Attachment* self)
 {
     if (self->mode0 == 7) {
@@ -2137,6 +2217,8 @@ void SettlePoseSourceModes(Attachment* self)
     }
 }
 
+// Sets the pose source up as a copy of the owner's current position, orientation and animation
+// values, with an identity matrix beside it.
 void InitSnapshotPoseSource(T2195_588* self, PlacedObject* src)
 {
     InitPoseSource(self, src);
@@ -2158,6 +2240,7 @@ void InitSnapshotPoseSource(T2195_588* self, PlacedObject* src)
     self->valuesC4 = *(f32**)((u8*)src + 0x274);
 }
 
+// Gives the snapshot position and vector, then tells the owner through its slot-28 method if set.
 void GetSnapshotPosition(T2195_588* src, Vec02* d0, Vec02* d1)
 {
     *d0 = src->pos;
@@ -2169,6 +2252,7 @@ void GetSnapshotPosition(T2195_588* src, Vec02* d0, Vec02* d1)
     }
 }
 
+// Gives the snapshot orientation and vector, then tells the owner through its slot-29 method.
 void GetSnapshotRotation(T2195_588* src, Mat02* d0, Vec02* d1)
 {
     d0->r[0] = src->rot.r[0];
@@ -2180,12 +2264,14 @@ void GetSnapshotRotation(T2195_588* src, Mat02* d0, Vec02* d1)
     fn(obj, d0, d1);
 }
 
+// Gives the two values saved in the snapshot.
 void GetSnapshotValue(T2195_588* self, f32* first, f32* second)
 {
 	*first = self->f80;
 	*second = self->f84;
 }
 
+// Copies the snapshot's second matrix (the identity set at init) into output.
 void GetSnapshotMatrix(T2195_588* self, Mat02* output)
 {
 	output->r[0] = self->m90.r[0];
@@ -2193,11 +2279,14 @@ void GetSnapshotMatrix(T2195_588* self, Mat02* output)
 	output->r[2] = self->m90.r[2];
 }
 
+// Gives entry i of the snapshot's value array.
 f32 GetSnapshotIndexedValue(T2195_588* self, s32 i)
 {
     return self->valuesC4[i];
 }
 
+// Sets the pose source up to point at the owner's own position, orientation and animation values
+// (and its link record's value when flagged 0x20) instead of copying them.
 void InitLinkedPoseSource(T2195_5B0* self, PlacedObject* src)
 {
     InitPoseSource(self, src);
@@ -2217,6 +2306,7 @@ void InitLinkedPoseSource(T2195_5B0* self, PlacedObject* src)
     self->ident = (Mat02*)g_identityMatrix;
 }
 
+// Gives the linked position and vector, then calls the owner's slot-28 method if it has one.
 void GetLinkedPosition(T2195_5B0* self, Vec02* first, Vec02* second)
 {
 	*first = *self->pos;
@@ -2226,6 +2316,7 @@ void GetLinkedPosition(T2195_5B0* self, Vec02* first, Vec02* second)
 		callback(self->owner);
 }
 
+// Gives the linked orientation and vector, then tells the owner through its slot-29 method.
 void GetLinkedRotation(T2195_5B0* self, Mat02* d1, Vec02* d2)
 {
     Mat02* s = self->rot;
@@ -2237,12 +2328,14 @@ void GetLinkedRotation(T2195_5B0* self, Mat02* d1, Vec02* d2)
 
 }
 
+// Gives the two linked values, read through the pointers at 0x2C and 0x30.
 void GetLinkedValue(T2195_5B0* self, f32* a, f32* b)
 {
     *a = *self->p2C;
     *b = *self->p30;
 }
 
+// Copies the linked identity matrix into dst.
 void GetLinkedMatrix(T2195_5B0* self, Mat02* dst)
 {
     Mat02* s = self->ident;
@@ -2251,11 +2344,13 @@ void GetLinkedMatrix(T2195_5B0* self, Mat02* dst)
     dst->r[2] = s->r[2];
 }
 
+// Gives entry i of the linked value array.
 f32 GetLinkedIndexedValue(T2195_5B0* self, s32 i)
 {
     return self->values[i];
 }
 
+// Sets the pose source up with two identity matrices.
 void InitIdentityPoseSource(T2195_5D8* self, PlacedObject* owner)
 {
     InitPoseSource(self, owner);
@@ -2270,6 +2365,8 @@ void InitIdentityPoseSource(T2195_5D8* self, PlacedObject* owner)
     d2[2] = src[2];
 }
 
+// Gives the position at time t from the next pose source in the chain whose mode0 is not 0 or -1
+// (the owner's position if there is none), then adds this source's own offset vectors.
 void GetIdentityPosePosition(T2195_588* self, f32 t, Vec02* pos, Vec02* vec)
 {
     Attachment* p = self;
@@ -2307,6 +2404,8 @@ void GetIdentityPoseRotation(T2195_588* self, f32 t, Mat02* rot, Vec02* vec)
     Vu0::Q(*vec) = Vu0::Add(Vu0::RotateMembers(self->rot, Vu0::Q(*vec)), Vu0::Q(self->v70));
 }
 
+// Gives the value from the next pose source in the chain whose mode1 is not 0 or -1 (the owner's
+// own value if there is none).
 void GetNextPoseSourceValue(Attachment* self, f32* a1, f32* a2)
 {
     Attachment* p = self;
@@ -2342,11 +2441,13 @@ void GetIdentityPoseMatrix(T2195_588* self, Mat02* out)
     MulRotationRowsOnce(out, self->m90, m);
 }
 
+// The identity pose has no values: always 0.
 f32 GetIdentityPoseIndexedValue(void)
 {
     return 0.0f;
 }
 
+// Initialises the pose source with two constants, 1.0 and 0.25, in its aim fields.
 void InitAimPoseSource(T2195_600* self, PlacedObject* a1)
 {
     InitPoseSource(self, a1);
@@ -2381,6 +2482,8 @@ void GetAimPoseRotation(T2195_600* self, Mat02* out, Vec02* vec)
     *vec = *(Vec02*)D_00248D30;
 }
 
+// Removes the track's pose source from its player's list, clears the player's driven pointer if it
+// was this one, and releases it.
 void ReleaseTrackPoseSource(T2195_7C0* self, s32 a1)
 {
     AnimationPlayer* o = self->player;
@@ -2391,6 +2494,7 @@ void ReleaseTrackPoseSource(T2195_7C0* self, s32 a1)
     ReleasePoseSource(self, a1);
 }
 
+// Copies a pose source over this track source, keeping its player and its pair at 0x20.
 void CopyTrackPoseSource(T2195_7C0* self, Attachment* a1)
 {
     AnimationPlayer* saved = self->player;
@@ -2461,6 +2565,8 @@ void GetTrackRotation(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
     GetOwnerRotation(self, a1, a2);
 }
 
+// Gives the value of the animation track's weight curve at the player's time, or the owner's own
+// value when the track has no weight curve.
 void GetTrackValue(T2195_7C0* self, f32* a1, f32* a2)
 {
     f32* saved = a1;
@@ -2475,6 +2581,8 @@ void GetTrackValue(T2195_7C0* self, f32* a1, f32* a2)
     }
 }
 
+// Gives the scale matrix of the animation track's scale curve at the player's time, or the identity
+// when the track has none.
 void GetTrackScaleMatrix(T2195_7C0* self, Mat02* a1)
 {
     Mat02* saved = a1;
@@ -2489,6 +2597,7 @@ void GetTrackScaleMatrix(T2195_7C0* self, Mat02* a1)
     }
 }
 
+// Gives the track's indexed curve at index, evaluated at the player's time.
 f32 GetTrackIndexedValue(T2195_7C0* self, s32 index)
 {
     AnimationPlayer* track = self->player;

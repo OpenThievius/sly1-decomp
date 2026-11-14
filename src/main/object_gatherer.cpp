@@ -170,12 +170,15 @@ s32 D_0026ABD8[2] = { 2, 0 };
 s32 D_0026ABE0[4] = { 0x10, 0, 0, 0 };
 
 
+// Initialises the collider and sets f554 to 1.
 void InitObjectSet(ObjectSet* self)
 {
     InitCollider(self);
     self->f554 = 1;
 }
 
+// Loads the collider and the member group, then walks the children: each child whose class flags
+// include 0x40 is added to the set's found list and resolved and started.
 void LoadObjectSet(ObjectSet* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -197,6 +200,7 @@ void LoadObjectSet(ObjectSet* self, BufferedStream* stream)
     *(s32*)&g_activeListFrames = fr.prev;
 }
 
+// After loading, looks up each stored key and adds the objects found to the found list.
 void PostLoadObjectSet(ObjectSet* self)
 {
     s32 i;
@@ -210,6 +214,8 @@ void PostLoadObjectSet(ObjectSet* self)
     }
 }
 
+// Starts the placed object, then each found object: sets f558 if it has an animation event of kind
+// 19, and resolves and starts it. Calls slot 3 when slot 76 says it is not ready.
 void StartObjectSet(ObjectSet* self)
 {
     s32 i;
@@ -276,6 +282,8 @@ void UpdateObjectSet(ObjectSet* self, f32 dt)
     ((SlotFn*)self->desc)[77](self);
 }
 
+// Collecting the set: calls slot 7, seeks an animation player on each found object, calls slot 78
+// and triggers script event 2.
 void CollectObjectSet(ObjectSet* self)
 {
     SlotFn fn = ((SlotFn*)self->desc)[7];
@@ -289,6 +297,7 @@ void CollectObjectSet(ObjectSet* self)
     (void)TriggerScriptEvent(self, 2, 0, 0);
 }
 
+// Sends message kind 1, naming this set, to its member group's object, if there is one.
 void NotifyObjectSetTarget(ObjectSet* self)
 {
     BaseObject* t = (BaseObject*)self->f584;
@@ -300,6 +309,7 @@ void NotifyObjectSetTarget(ObjectSet* self)
     }
 }
 
+// 0 when the set is not attached, else 1 when f554 is set and 2 when not.
 s32 GetObjectSetActivationState(ObjectSet* self)
 {
     if (IsObjectAttached(self)) {
@@ -308,11 +318,14 @@ s32 GetObjectSetActivationState(ObjectSet* self)
     return 0;
 }
 
+// Appends a key to the set's list of keys.
 void AddObjectSetKey(ObjectSet* queue, s32 item)
 {
     queue->keys560[queue->n55C++] = item;
 }
 
+// Passes the notification on. For kind 5 it marks the found entry the message names, and when the
+// message is the player's state animation player it tells the player (slot 24) and sets done598.
 void HandleObjectSetNotification(ObjectSet* self, s32 msg, ObjectMessage* m)
 {
     (void)HandlePlacedObjectNotification(self, msg, m);
@@ -332,6 +345,7 @@ void HandleObjectSetNotification(ObjectSet* self, s32 msg, ObjectMessage* m)
     }
 }
 
+// Allows contact with objects of kind 8 or 0x3B only.
 s32 TestObjectSetMayContact(ObjectSet* unused, void* obj)
 {
     if (IsObjectOfKind((BaseObject*)obj, 8) != 0 || IsObjectOfKind((BaseObject*)obj, 0x3B) != 0) {
@@ -340,6 +354,8 @@ s32 TestObjectSetMayContact(ObjectSet* unused, void* obj)
     return 0;
 }
 
+// Sets f59C when the active switched collider's collider is a descendant of one end of the contact
+// pair (the one that is not idx).
 void LatchObjectSetContact(ObjectSet* self, Contact03* elems, s32 idx)
 {
     ActiveColliderData* r = (ActiveColliderData*)GetActiveSwitchedColliderData();
@@ -353,12 +369,14 @@ void LatchObjectSetContact(ObjectSet* self, Contact03* elems, s32 idx)
     }
 }
 
+// Initialises the object set and takes a free index in the flag table.
 void InitFlaggedObjectSet(FlaggedObjectSet* self)
 {
     InitObjectSet(self);
     self->flagIndex = TakeFlagTableIndex((FlagTable*)g_flagTable);
 }
 
+// Copies the collider but keeps this set's own flag index.
 void CopyFlaggedObjectSet(FlaggedObjectSet* obj, FlaggedObjectSet* src)
 {
     s32 value = obj->flagIndex;
@@ -366,6 +384,8 @@ void CopyFlaggedObjectSet(FlaggedObjectSet* obj, FlaggedObjectSet* src)
     obj->flagIndex = value;
 }
 
+// Gives the object set's activation state, but 0 where the state is 1 and its flag table bit is
+// set.
 s32 GetFlaggedObjectSetActivationState(FlaggedObjectSet* self)
 {
     s32 r = GetObjectSetActivationState(self);
@@ -375,24 +395,28 @@ s32 GetFlaggedObjectSetActivationState(FlaggedObjectSet* self)
     return r;
 }
 
+// Sets the set's bit in the flag table and collects it.
 void CollectFlaggedObjectSet(FlaggedObjectSet* self)
 {
     SetFlagTableBit((FlagTable*)g_flagTable, self->flagIndex);
     CollectObjectSet(self);
 }
 
+// Loads the placed object and resolves its load links.
 void LoadStateWalkerObject(StateWalkerObject* self, BufferedStream* stream)
 {
     LoadPlacedObject(self, stream);
     ResolveObjectLinks(self, 1, g_stateWalkerObjectLoadLinks);
 }
 
+// Starts the placed object and resolves its start links.
 void StartStateWalkerObject(StateWalkerObject* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, g_stateWalkerObjectStartLinks);
 }
 
+// Loads the placed object and resolves its load links.
 void LoadStateWalkerGroup(StateWalkerGroup* self, BufferedStream* stream)
 {
     LoadPlacedObject(self, stream);
@@ -428,11 +452,13 @@ void StartStateWalkerGroup(StateWalkerGroup* self)
     SetStateWalkerTarget((StateWalker*)self->walker, s4);
 }
 
+// Sets the group's mask to the single bit number bit + 1.
 void SetStateWalkerGroupMaskBit(StateWalkerGroup* flags, u32 bit)
 {
     flags->flagMask = 1 << (bit + 1);
 }
 
+// Appends an id to the group (at most 8).
 void AddStateWalkerGroupId(StateWalkerGroup* queue, void* item)
 {
     u32 count = queue->idCount;
@@ -450,12 +476,15 @@ void QueueWalkerActivationOnPlayer(StateWalkerGroup* group) {
     }
 }
 
+// Initialises the object set and takes the world's next item number.
 void InitNumberedItem(NumberedItem* obj)
 {
     InitObjectSet(obj);
     obj->itemNumber = obj->world->count2300++;
 }
 
+// Loads the object set and resolves its links, then collects the keyframe objects numbered 0x318 up
+// to 0x337 (stopping at the first missing one), starting each.
 void LoadNumberedItem(NumberedItem* self, BufferedStream* stream)
 {
     LoadObjectSet(self, stream);
@@ -475,6 +504,7 @@ void LoadNumberedItem(NumberedItem* self, BufferedStream* stream)
     }
 }
 
+// Copies the collider but keeps this item's own number.
 void CopyNumberedItem(NumberedItem* obj, NumberedItem* src)
 {
     s32 value = obj->itemNumber;
@@ -666,6 +696,7 @@ void FlagNumberedItem(NumberedItem* self)
     TriggerScriptEvent(self, 2, 0, 0);
 }
 
+// Stores whether the item's bit (its number) is set in the current entry's bit array at 0x68.
 void GetNumberedItemFlag(NumberedItem* self, s32* out)
 {
     s32 n = self->itemNumber;
@@ -682,6 +713,8 @@ void ApplyNumberedItemPendingImpulse(NumberedItem* self, s32 moved)
     ApplyColliderPendingImpulse(self, moved);
 }
 
+// When the event has flag 8 calls slot 25 and resets the collider anchors; handles the event, and
+// with flag 0x10 calls slot 77 (collect).
 s32 HandleNumberedItemObjectEvent(NumberedItem* self, ObjectEvent* a1)
 {
     if (a1->eventFlags & 0x8) {
@@ -764,6 +797,8 @@ void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
     ApplyPlacedObjectTransform(self, (Camera*)a1, (ScaledTransform*)&base);
 }
 
+// Flags every numbered item in the world (up to 256, found through id 0x2E): each is flagged and a
+// parent of kind 0x20 gets its slot 3 called; then the collected-item caption's slot 20 is called.
 void FlagAllNumberedItems(void)
 {
     void* arr[0x100];
@@ -785,11 +820,14 @@ void FlagAllNumberedItems(void)
     g_collectedItemCaption.vt->m14(&g_collectedItemCaption);
 }
 
+// Stores the saved world bits.
 void SetSavedWorldBits(u32 value)
 {
     g_saveData->u19F0 = value;
 }
 
+// True when adding bits to the saved world bits (mask 0xF000FFFF) would set them all, and they are
+// not all set already and completion mask bit 1 is clear.
 s32 CompletesWorldBits(s32 bits)
 {
     s64 mask = 0xF000;
@@ -810,6 +848,8 @@ s32 CompletesWorldBits(s32 bits)
     return r;
 }
 
+// Sets bit 1 in every task record of the level (the current level for -1) and the five low bits of
+// its total at 0x448.
 void MarkLevelRecordComplete(s32 index)
 {
     if (index == -1) index = g_saveData->levelIndex;
@@ -823,12 +863,14 @@ void MarkLevelRecordComplete(s32 index)
     *(s32*)(base + 0x448) |= 0x1F;
 }
 
+// Marks levels 0 to 5 complete; asks for a world load when the resume state is 2.
 void MarkAllLevelRecordsComplete()
 {
     for (s32 i = 0; i < 6; i++) MarkLevelRecordComplete(i);
     if (g_elementStack.resumeState == 2) RequestWorldLoadByMode(0);
 }
 
+// Initialises the switched collider with its trigger and extra ids unset (-1).
 void InitC17Collider(C17* self)
 {
     InitSwitchedCollider(self);
@@ -836,6 +878,7 @@ void InitC17Collider(C17* self)
     self->extraId = -1;
 }
 
+// Finds the marker object (id 0x37A), resolves and starts it, and creates a state walker on it.
 void StartC17Marker(C17Marker* self, s32 x)
 {
     self->object = FindFirstObjectById(g_currentWorld, 0x101, 0x37A, (void*)self->owner);
@@ -1174,6 +1217,7 @@ void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
     }
 }
 
+// Appends a key to record index of the entry list (at most 4 per record, 0x2C bytes each).
 void AddEntryRecordKey(C17* list, u32 index, s32 key)
 {
     Ent17* record = (Ent17*)((u8*)list + 0x658 + index * 0x2C);
@@ -1253,6 +1297,7 @@ void RecordC17ColliderCompletion(C17* self)
     }
 }
 
+// Initialises the object, with no target and the largest float in f4C.
 void InitC71Object(C71* self)
 {
     InitObject(self);
@@ -1260,18 +1305,21 @@ void InitC71Object(C71* self)
     self->f4C = 3.4028235e+38f;
 }
 
+// Registers the object and appends it to the world list at 0x1C90.
 void RegisterC71Object(C71* obj)
 {
     RegisterObject(obj);
     AppendToList(&obj->world->list1C90, obj);
 }
 
+// Unregisters the object and removes it from the world list at 0x1C90.
 void UnregisterC71Object(C71* obj)
 {
     UnregisterObject(obj);
     RemoveFromList(&obj->world->list1C90, obj);
 }
 
+// Starts the object and looks up its target by id, if it has one.
 void StartC71Object(C71* obj)
 {
     StartObject(obj);
@@ -1279,6 +1327,7 @@ void StartC71Object(C71* obj)
         obj->target = FindFirstObjectById(obj->world, 4, obj->targetId, obj);
 }
 
+// Copies the object's data but keeps this object's own bits at keep.
 void CopyC71Object(C71* self, C71* src)
 {
     PathCurveKeptBits tmp;
@@ -1288,6 +1337,8 @@ void CopyC71Object(C71* self, C71* src)
     self->keep = tmp;
 }
 
+// Initialises the collider with idle times 0.5 to 1.0, the next sound time drawn at random around
+// three seconds ahead, and f664 unset.
 void InitObjectGatherer(ObjectGatherer* self)
 {
     InitCollider(self);
@@ -1319,6 +1370,7 @@ void LoadObjectGatherer(ObjectGatherer* self, BufferedStream* stream)
     }
 }
 
+// Resolves its links and starts the placed object, then enters state 1 and remembers its position.
 void StartObjectGatherer(ObjectGatherer* self)
 {
     ResolveObjectLinks(self, 1, g_objectGathererStartLinks);
@@ -1328,18 +1380,21 @@ void StartObjectGatherer(ObjectGatherer* self)
     self->v650 = self->v140;
 }
 
+// Registers the collider and appends it to the world list at 0x1C60.
 void AddObjectGatherer(ObjectGatherer* obj)
 {
     RegisterCollider(obj);
     AppendToList(&obj->world->list1C60, obj);
 }
 
+// Unregisters the collider and removes it from the world list at 0x1C60.
 void RemoveObjectGatherer(ObjectGatherer* obj)
 {
     UnregisterCollider(obj);
     RemoveFromList(&obj->world->list1C60, obj);
 }
 
+// Copies the collider but keeps this gatherer's own 64-bit value at 0x600.
 void CopyObjectGatherer(ObjectGatherer* self, ObjectGatherer* src)
 {
     PackedS64 tmp;
@@ -1611,6 +1666,8 @@ void ApplyObjectGathererLodObject(ObjectGatherer* self, void* a1, void* a2)
     }
 }
 
+// The first time (state not yet 3), sets state 3 and sends kind 6, with two vectors of the event,
+// to its group; always returns 1.
 s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
 {
     SlotMessage loc;
@@ -1745,18 +1802,21 @@ void SetObjectGathererState(ObjectGatherer* self, s32 mode)
     self->modeStartTime = g_gameClock[1];
 }
 
+// Registers the object and appends it to the world list at 0x1C6C.
 void RegisterC7CObject(BaseObject* obj)
 {
     RegisterObject(obj);
     AppendToList(&obj->world->list1C6C, obj);
 }
 
+// Unregisters the object and removes it from the world list at 0x1C6C.
 void UnregisterC7CObject(BaseObject* obj)
 {
     UnregisterObject(obj);
     RemoveFromList(&obj->world->list1C6C, obj);
 }
 
+// Initialises the object with both ids at 0x34 and 0x38 unset (-1).
 void InitAimBlendGrid(AimBlendGrid* obj)
 {
     InitObject(obj);
@@ -1982,6 +2042,8 @@ void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 x, f32 y, f32 z)
     out[23] = z2 * y * x;
 }
 
+// Turns a grid cell index back into three coordinates: the index is split by (n+1)*(3n+1) and by
+// 3n+1, and each part divided by the resolution n (the first one after subtracting n).
 void DecodeAimBlendGridIndex(AimBlendGrid* self, s32 p, f32* out0, f32* out1, f32* out2)
 {
     s32 n = self->resolution;
@@ -1994,6 +2056,7 @@ void DecodeAimBlendGridIndex(AimBlendGrid* self, s32 p, f32* out0, f32* out1, f3
     *out2 = (f32)s / (f32)self->resolution;
 }
 
+// Stores the blend vector.
 void SetAimBlendGridVector(AimBlendGrid* value, f32 x, f32 y, f32 z)
 {
     value->blendX = x;
@@ -2001,6 +2064,7 @@ void SetAimBlendGridVector(AimBlendGrid* value, f32 x, f32 y, f32 z)
     value->blendZ = z;
 }
 
+// Stores the blend vector and marks that the second vector is set.
 void SetAimBlendGridVectorFlagged(AimBlendGrid* self, f32 x, f32 y, f32 z)
 {
     self->hasSecondVector = 1;
@@ -2018,6 +2082,8 @@ struct FramePoint_0019CE50 {
 };
 
 
+// Gives where a point fixed to an object's frame is at time t: the object's position and rotation
+// at t applied to the point.
 void PlaceFramePointAtTime(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
 {
     Vec02 pos;
@@ -2144,6 +2210,8 @@ void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void*
     }
 }
 
+// Given a target, takes the remaining aim time (at least the clock minimum), finds the target's
+// point in the frame, the nearest accepted point on the grid, and blends the corner records there.
 void TrackAimTargetObject(Player* self, AimBlendGrid* x, void* y)
 {
     Quad16 q0;
