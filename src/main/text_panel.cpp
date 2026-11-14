@@ -558,7 +558,7 @@ void SetupTextPanel(T217D_440* self)
 
 
 struct PanelFont {
-    static Font* Of(T217D_440* self) { return *(Font**)((u8*)self + 0x310); }
+    static Font* Of(T217D_440* self) { return self->smallFont; }
 };
 
 f32 MeasureFontString(Font* font, const char* text);

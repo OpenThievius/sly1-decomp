@@ -520,7 +520,7 @@ void ClampColliderContactLimit(Collider* self, s32 flags, ContactLimit03* limit)
 // Builds the heading matrix: a rotation about Z by the heading.
 void BuildTurningColliderHeadingMatrix(TurningCollider* self)
 {
-    BuildAxisAngleMatrix(&g_unitZVector, (Mat02*)((u8*)self + 0x660), self->heading);
+    BuildAxisAngleMatrix(&g_unitZVector, &self->headingMatrix, self->heading);
 }
 
 
@@ -786,7 +786,7 @@ void TurnColliderTowardHeading(TurningCollider* self)
 {
     Vec02 q = self->v160;
     f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    ApproachAngleWithRamp(r, self->heading, 0.0f, (u8*)self + 0x6E0, &q.z);
+    ApproachAngleWithRamp(r, self->heading, 0.0f, &self->turnGain, &q.z);
     self->desc02()->m21(self, &q);
 }
 
@@ -796,7 +796,7 @@ void GetTurningColliderPose(TurningCollider* self, void* matrix, Vec02* out, f32
 {
     f32 turn;
     f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    f32 angle = ApproachAngleWithRamp(r, self->heading, limit, (u8*)self + 0x6E0, &turn);
+    f32 angle = ApproachAngleWithRamp(r, self->heading, limit, &self->turnGain, &turn);
     BuildAxisAngleMatrix(&g_unitZVector, (Mat02*)matrix, angle);
     Vec02 k;
     Vu0::Q(k) = Vu0::FromFloatAt(turn);

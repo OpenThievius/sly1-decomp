@@ -78,7 +78,8 @@ struct ObjectPool : BaseObject {
     f32 f124;               // 0x124
     u8 pad128[0x144 - 0x128];
     f32 f144;               // 0x144
-    u8 pad148[0x160 - 0x148];
+    u8 pad148[0x150 - 0x148];
+    u8 f150[0x10];          // 0x150: the record InitObjectPool clears with the 8 bytes after it
     void* f160;             // 0x160
     void* f164;             // 0x164
     s32 idsResolved;        // 0x168: set once the ids are looked up

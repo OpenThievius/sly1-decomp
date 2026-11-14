@@ -1855,16 +1855,16 @@ void NotifyScatterControllerLoaded(void* self)
 // 0..1.
 void RaiseScatterLevels(ScatterController* self, f32 amount)
 {
-    f32 x = g_currentEntry->dt + amount * *(f32*)((u8*)self->table + 0x10);
+    f32 x = g_currentEntry->dt + amount * ((ScatterTable*)self->table)->levelScale;
     SetScatterLevel(self, x);
     s32 index = g_saveData->reserveCount;
     f32 y;
     if (index < 0) {
-        y = *(f32*)((u8*)self->table + 0x40);
+        y = ((ScatterTable*)self->table)->f40;
     } else {
-        y = *(f32*)((u8*)self->table + 0x3C);
-        if (index <= *(s32*)((u8*)self->table + 0x4C)) {
-            y += *(f32*)((u8*)self->table + 0x50);
+        y = ((ScatterTable*)self->table)->f3C;
+        if (index <= ((ScatterTable*)self->table)->f4C) {
+            y += ((ScatterTable*)self->table)->f50;
         }
     }
     f32 result = ((f32 (*)(void*, f32))ClampToRange)(&g_unitRange, g_currentEntry->f10 + amount * y);

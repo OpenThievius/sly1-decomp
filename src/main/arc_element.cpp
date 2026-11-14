@@ -126,7 +126,7 @@ void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
         }
     }
     self->linkedCount = n;
-    VectorToAngles((Vec3*)((u8*)self + 0x110), (f32*)((u8*)self + 0x648), (f32*)((u8*)self + 0x64C));
+    VectorToAngles((Vec3*)&self->m110, &self->f648, &self->f64C);
 }
 
 
@@ -182,7 +182,7 @@ void ControlPlayerLinkedCollider(PlayerLinkedCollider* self, void* obj, f32 t)
     u8* o;
 
     ChoosePlayerLinkedColliderTarget(self);
-    if (*(u16*)((u8*)obj + 0xAA) & 0xC0) {
+    if (((PadRecord*)obj)->flags & 0xC0) {
         ClearPadPressedBits((PadRecord*)obj, 0xC0);
         AdvancePlayerLinkedColliderWalker(self);
     }
@@ -279,9 +279,9 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
 {
     if (HasObjectPoolChoice(self->pool) != 0) {
         ObjectPool* pool = self->pool;
-        u8* place = (u8*)pool + 0x60;
-        u8* e0 = (u8*)pool + 0xE0;
-        u8* ang = (u8*)pool + 0x150;
+        u8* place = (u8*)&pool->f60;
+        u8* e0 = (u8*)&pool->fE0;
+        u8* ang = (u8*)&pool->f150;
         f32 cx;
         f32 cy;
         Vec02 a;

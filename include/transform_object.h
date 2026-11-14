@@ -11,6 +11,7 @@
 #define TRANSFORM_OBJECT_H
 
 #include "base_object.h"
+#include "placed_object.h"
 #include "path_curve.h"
 struct MemberGroup;
 
@@ -31,7 +32,8 @@ struct TransformObject : BaseObject {
 // func_001F3EE0) copies the objects; starting (slot 16, func_001F3F80) gives each its parent
 // and starts it.
 struct TransformSet : TransformObject {
-    u8 pad80[0x98 - 0x80];
+    Vec02 arrivalVelocity;  // 0x80: the velocity the arriving object is given
+    u8 pad90[0x98 - 0x90];
     s32 hasHeading;         // 0x98: set when the arrival turns the camera
     f32 headingOffset;      // 0x9C: added to the arrival's heading
     s32 count;              // 0xA0

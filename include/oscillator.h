@@ -22,7 +22,8 @@ struct Oscillator : BaseObject {
     s32 entryCount;         // 0x38: the entries
     s32 nextId;             // 0x3C: the next entry id (an X entry takes it, a YZ entry uses one up)
     s32 pendingId;          // 0x40: the id the next X entry takes as its pair (-1 for none)
-    u8 pad44[0x6D0 - 0x44];
+    u8 pad44[0x50 - 0x44];
+    u8 entries[8 * 0xD0];   // 0x50: the entries, 0xD0 bytes each (viewed as the entry kind each function works on)
     s32 currentEntry;       // 0x6D0: the index of the current entry (-1 for none)
     u8 pad6D4[0x6E0 - 0x6D4];
     OscillatorFrame framesA[4]; // 0x6E0: the rows EvaluateOscillator writes (an entry's frame, rows from its row)

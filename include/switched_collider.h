@@ -417,7 +417,9 @@ struct Player : TurningCollider {
     s32 linkReversed;       // 0x22A8: set when the link's heading is turned round (func_001CD0C8)
     void* linkSystem;       // 0x22AC: the link system the player is hanging on
     Vec02 linkAcceleration; // 0x22B0: the link's acceleration (func_001CC818, or SolvePlayerLinkSystem)
-    u8 pad22C0[0x22F0 - 0x22C0];
+    u8 pad22C0[0x22D0 - 0x22C0];
+    Vec02 linkForce;        // 0x22D0: handed to the link target's collider (SyncPlayerTarget)
+    Vec02 linkTorque;       // 0x22E0: the torque handed with it
     Vec02 f22F0;             // 0x22F0
     Mat02 f2300;             // 0x2300
     Mat02 f2330;             // 0x2330
@@ -786,7 +788,7 @@ struct World4Boss : Agent {
     Animation* fC14;        // 0xC14: the animations the script gives (SetWorld4BossValues)
     Animation* fC18;        // 0xC18
     Animation* fC1C;        // 0xC1C
-    u8 padC20[0xC24 - 0xC20];
+    AnimationPlayer* hitPlayer; // 0xC20: the animation player of the hit it plays
     s32 fC24;               // 0xC24
     u8 padC28[0xC30 - 0xC28];
 };
@@ -939,7 +941,8 @@ struct PlayerLinkedCollider : SwitchedCollider {
     void* linkedObjects;    // 0x63C: the objects the ids resolve to
     void* linkedIds;        // 0x640: the ids of the linked objects
     s32 f644;               // 0x644
-    u8 pad648[0x650 - 0x648];
+    f32 f648;               // 0x648: the angles VectorToAngles takes from the matrix at 0x110
+    f32 f64C;               // 0x64C
     f32 f650;               // 0x650
     f32 f654;               // 0x654
     f32 f658;               // 0x658
@@ -1202,8 +1205,8 @@ struct World3BeatPressCollider : SwitchedCollider {
 struct HitCountCollider : SwitchedCollider {
     s32 state;              // 0x610
     f32 stateTime;          // 0x614
-    u8 pad618[0x628 - 0x618];
-    void* f628; // 0x628
+    Animation* stateAnims[4]; // 0x618: the animation of states 0 to 3 (state 4 plays the last)
+    AnimationPlayer* animPlayer; // 0x628: the player of the state's animation
     void* f62C;             // 0x62C
     f32 f630;               // 0x630
     f32 f634;               // 0x634
@@ -1217,7 +1220,7 @@ struct HitCountCollider : SwitchedCollider {
     PlacedObject* aimObject; // 0x660: an object it turns with itself (func_001C34C8 sets its matrix)
     void* walkerGraph;      // 0x664
     void* walker;           // 0x668
-    u8 pad66C[0x670 - 0x66C];
+    f32 speedLimit;         // 0x66C: the stick's strength, at least 0.25; bounds the acceleration
     f32 f670;               // 0x670
     u8 pad674[0x678 - 0x674];
     void* hitClip;          // 0x678

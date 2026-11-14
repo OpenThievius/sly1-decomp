@@ -130,11 +130,11 @@ void SolvePlayerLinkSystem(PlacedObject* a, PlacedObject* b, Vec02* point, const
             Vu0::Vec c = Vu0::Vec::Of(o->v140);
             Vu0::Vec arm = Vu0::Sub(p, c);
             Vu0::Set(cross, Vu0::Cross(arm, Vu0::Vec::Of(axis)).q);
-            Vu0::Vec mass = Vu0::Vec::ScalarAtValue(*(f32*)((u8*)o + 0x368));
+            Vu0::Vec mass = Vu0::Vec::ScalarAtValue(((Collider*)o)->mass);
             Vu0::Set(scaled, Vu0::DivX(Vu0::Vec::Of(axis), mass).q);
-            ConstrainVectorByParentAnchor((Collider*)o, (VectorConstraint*)((u8*)o + 0x440), &scaled, &rows[i][j].a, 0);
+            ConstrainVectorByParentAnchor((Collider*)o, (VectorConstraint*)&((Collider*)o)->v440, &scaled, &rows[i][j].a, 0);
             ApplyColliderInverseInertia(o, &cross, &torque);
-            ConstrainVectorByParentAnchor((Collider*)o, (VectorConstraint*)((u8*)o + 0x460), &torque, &rows[i][j].b, 0);
+            ConstrainVectorByParentAnchor((Collider*)o, (VectorConstraint*)&((Collider*)o)->v460, &torque, &rows[i][j].b, 0);
             ComputeColliderPointVelocity(o, point, &rows[i][j], &vel[i]);
         }
         Vu0::Vec v0 = Vu0::Vec::Of(vel[0]);
@@ -355,7 +355,7 @@ void TurnPlayerTowardLinkedObject(Player* self)
     Mat02 a;
     Mat02 b;
     Mat02 r;
-    AddColliderForce(self, (u8*)self + 0x22B0);
+    AddColliderForce(self, &self->linkAcceleration);
     GetObjectWorldPosition((BaseObject*)self->boundObject, &pos);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
     BuildShortestArcRotation(&g_unitZVector, &d, &a);
@@ -371,8 +371,8 @@ void AddColliderTorque(void* target, void* slot);
 // Passes the player's force and torque (at 0x22D0 and 0x22E0) on to its link target collider.
 void SyncPlayerTarget(Player* self)
 {
-    AddColliderForce(((LinkTargetHolder*)self->linkSystem)->target, (u8*)self + 0x22D0);
-    AddColliderTorque(((LinkTargetHolder*)self->linkSystem)->target, (u8*)self + 0x22E0);
+    AddColliderForce(((LinkTargetHolder*)self->linkSystem)->target, &self->linkForce);
+    AddColliderTorque(((LinkTargetHolder*)self->linkSystem)->target, &self->linkTorque);
 }
 
 f32 WrapAngle(f32 a);
@@ -642,8 +642,8 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void GetLinkedObjectHeading(Player* self, f32* heading)
 {
     HeadingVector v;
-    void* owner = *(void**)((u8*)self + 0x2204);
-    TransformDirectionBetweenFrames((PlacedObject*)(*(void**)((u8*)owner + 0x18)), 0, (Vec02*)((u8*)owner + 0x50), (Vec02*)&v);
+    BaseObject* owner = self->boundObject;
+    TransformDirectionBetweenFrames((PlacedObject*)owner->parent, 0, (Vec02*)((u8*)owner + 0x50), (Vec02*)&v);
     *heading = ArctangentOfRatio(v.y, v.x);
 }
 
@@ -686,7 +686,7 @@ void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB)
     MulRotation(rotA, arc, axis);
     BuildAxisAngleMatrix(&g_unitXVector, rotB, g_linkPoseTiltB);
     u128 turned = Vu0::Rotate(*rotB, Vu0::Q(((PlacedObject*)self->f23D4)->pos));
-    u128 sum = Vu0::Add(Vu0::Q((*(PlacedObject**)((u8*)self + 0x23D0))->pos), turned);
+    u128 sum = Vu0::Add(Vu0::Q(((PlacedObject*)self->f23D0)->pos), turned);
     u128 moved = Vu0::Rotate(*rotA, sum);
     PlacedObject* base = (PlacedObject*)self->f61C;
     u128 total = Vu0::Add(Vu0::Q(base->pos), moved);
@@ -742,11 +742,11 @@ void UpdatePlayerLinkPose(Player* self)
     *(Quad128*)&v->offset = ApproachPointWithRamp(*(Quad128*)&v->offset, *(const Quad128*)&D_00248D30, g_gameClock[2], (RampProfile*)g_linkPoseOffsetRamp, 0);
     ApproachRotationWithRamp(&v->rotA, (Mat02*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotA, 0, g_gameClock[2]);
     ApproachRotationWithRamp(&v->rotB, (Mat02*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotB, 0, g_gameClock[2]);
-    Vu0::Q((*(LinkPoseTarget**)((u8*)self + 0x251C))->pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(v->offset));
-    MulRotationInto(*(LinkPoseTarget**)((u8*)self + 0x251C), v->rotA, a);
-    MulRotationInto(*(LinkPoseTarget**)((u8*)self + 0x2520), v->rotB, b);
-    ApplyPoseSource((Attachment*)(*(void**)((u8*)self + 0x251C)), 1);
-    ApplyPoseSource((Attachment*)(*(void**)((u8*)self + 0x2520)), 1);
+    Vu0::Q(((LinkPoseTarget*)self->f251C)->pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(v->offset));
+    MulRotationInto((LinkPoseTarget*)self->f251C, v->rotA, a);
+    MulRotationInto((LinkPoseTarget*)self->f2520, v->rotB, b);
+    ApplyPoseSource((Attachment*)self->f251C, 1);
+    ApplyPoseSource((Attachment*)self->f2520, 1);
 }
 
 

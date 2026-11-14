@@ -471,7 +471,7 @@ void RefreshOscillatorFrames(Oscillator* self)
             }
             u128 pivot = Vu0::Add(Vu0::Q(obj->v140), Vu0::RotateUntied(obj->m110, dir));
             for (s32 j = 0; j < self->entryCount; j++) {
-                OscEntry* ent = &((OscEntry*)((u8*)self + 0x50))[j];
+                OscEntry* ent = &((OscEntry*)self->entries)[j];
                 OscOut* out = data->outs[ent->out];
                 w = weights;
                 for (v = verts; v < end; v++, out++, w++) {
@@ -542,7 +542,7 @@ void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02*
     Vu0::Vec other = Vu0::Vec::Of(D_00248D30);
     Vu0::Vec base = pos;
     for (s32 i = 0; i < self->entryCount; i++) {
-        OscillatorSweepEntry* e = (OscillatorSweepEntry*)((u8*)self + 0x50) + i;
+        OscillatorSweepEntry* e = (OscillatorSweepEntry*)self->entries + i;
         if (e->kind != 0) {
             continue;
         }
@@ -583,7 +583,7 @@ void ComputeOscillatorMaxDisplacement(Oscillator* self, Vec02* out)
     Vec02 span;
     sum = D_00248D30;
     for (s32 i = 0; i < self->entryCount; i++) {
-        OscillatorSweepEntry* e = (OscillatorSweepEntry*)((u8*)self + 0x50) + i;
+        OscillatorSweepEntry* e = (OscillatorSweepEntry*)self->entries + i;
         switch (e->kind) {
         case 0: {
             f32* d = &span.x;
@@ -690,7 +690,7 @@ void EvaluateOscillator(Oscillator* self)
         RefreshOscillatorFrames(self);
     }
     for (s32 i = 0; i < self->entryCount; i++) {
-        OscillatorEntry* e = (OscillatorEntry*)((u8*)self + 0x50) + i;
+        OscillatorEntry* e = (OscillatorEntry*)self->entries + i;
         OscillatorFrame* fa = &self->framesA[e->frame];
         OscillatorFrame* fb = &self->framesB[e->frame];
         switch (e->kind) {
@@ -779,7 +779,7 @@ void AddOscillatorYZEntry(Oscillator* self)
 {
     s32 n6 = self->currentEntry;
     s32 idx = self->entryCount;
-    OscillatorPlaneEntry* e = (OscillatorPlaneEntry*)((u8*)self + 0x50 + 0xD0 * idx);
+    OscillatorPlaneEntry* e = (OscillatorPlaneEntry*)(self->entries + 0xD0 * idx);
     n6 = n6 + 1;
     idx = idx + 1;
     self->entryCount = idx;
@@ -909,13 +909,13 @@ void ConvertPointIntoObjectFrame(TransformObject* self, Vec02* p, Vec02* out)
 // The object's position (at +0x40) converted from its parent's frame to world coordinates.
 void GetObjectWorldPosition(BaseObject* self, Vec02* out)
 {
-    TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)((u8*)self + 0x40), out);
+    TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)&((TransformObject*)self)->pos, out);
 }
 
 // The object's rotation (at +0x50) converted from its parent's frame to world coordinates.
 void GetObjectWorldRotation(BaseObject* self, Mat02* out)
 {
-    TransformRotationBetweenFrames((PlacedObject*)self->parent, 0, (Mat02*)((u8*)self + 0x50), out);
+    TransformRotationBetweenFrames((PlacedObject*)self->parent, 0, (Mat02*)&((TransformObject*)self)->rot, out);
 }
 
 // Looks up the arrival point for an id: first the object of class 0x101 with that id under the
@@ -1056,7 +1056,7 @@ void PlaceAtArrivalPoint(TransformSet* self)
     }
     who->vt->getDir(who, &rot);
     PlaceColliderClearOfContacts((Collider*)who, &pos, (Vec02*)&g_unitZVector);
-    who->vt->setVel(who, (u8*)self + 0x80);
+    who->vt->setVel(who, &self->arrivalVelocity);
     who->vt->setSpin(who, (void*)&D_00248D30);
     ActivateSwitchedCollider(who);
     for (s32 i = 0; i < self->count; i++) {

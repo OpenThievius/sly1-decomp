@@ -10,6 +10,7 @@
 // collider's functions begin. Its name is ours, after its largest family, the point graph and its
 // searches.
 #include "common.h"
+#include "transform_object.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "box_collider.h"
@@ -1450,7 +1451,7 @@ void LoadPointObject(PointObject* self, void* other)
 // Gives back the object's position (at 0x40) converted from its parent's frame to world space.
 void ConvertPositionToWorld(BaseObject* self, Vec02* out)
 {
-    TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)((u8*)self + 0x40), out);
+    TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)&((TransformObject*)self)->pos, out);
 }
 
 // Converts the point's position from its old parent's frame into value's and then reparents it.

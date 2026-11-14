@@ -135,7 +135,8 @@ struct __attribute__((packed)) Pair2195 { s32 lo; s32 hi; };
 
 // D_00219588: a copy of the owner's position, matrix and values, taken when it is set up.
 struct T2195_588 : Attachment {
-    u8 pad18[0x20 - 0x18]; // 0x18
+    f32 time18;             // 0x18: the time of the snapshot (the player compares it with the game clock)
+    u8 pad1C[0x20 - 0x1C]; // 0x1C
     Vec02 pos;              // 0x20: PlacedObject::v190
     Vec02 vec;              // 0x30
     Mat02 rot;              // 0x40: PlacedObject::m1A0

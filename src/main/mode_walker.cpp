@@ -215,7 +215,7 @@ void StartModeWalkerObject(ModeWalker* self)
     ((u8*)self->fBD0)[0x10] = 9;
     ((u8*)self->fBD0)[0x11] = 9;
     ((PlacedObject*)self->fBCC)->desc02()->m2B((PlacedObject*)self->fBCC);
-    TransformPointBetweenFrames(0, (PlacedObject*)self->fBC0, (Vec02*)((u8*)self->fBCC + 0x140), &self->vBE0);
+    TransformPointBetweenFrames(0, (PlacedObject*)self->fBC0, &((PlacedObject*)self->fBCC)->v140, &self->vBE0);
     SetModeWalkerMode(self, 1);
     self->paceChangeTime = 3.4028234663852886e+38f;
     T217D_BF0* base = &g_spinningSpriteElement;
@@ -287,7 +287,7 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
             }
             SteerWalkerAimAtNearestTarget(&g_spinningSpriteElement, pad);
             Vu0::Q(m.r[2]) = Vu0::Q(self->m110.r[2]);
-            u128 n = Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(m.r[2]), Vu0::Q(((Vec02*)((u8*)g_camera + 0x80))[0])), *(u128*)&self->m110.r[1]);
+            u128 n = Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(m.r[2]), Vu0::Q(*(Vec02*)g_camera->rotation)), *(u128*)&self->m110.r[1]);
             Vu0::Q(m.r[1]) = n;
             Vu0::Q(m.r[0]) = Vu0::Cross(n, Vu0::Q(m.r[2]));
             TransformRotationBetweenFrames(0, (PlacedObject*)(((PlacedObject*)self->fBC4)->parent), &m, &m);
@@ -561,7 +561,7 @@ void HandleModeWalkerNotification(ModeWalker* self, s32 code, MessageBody* rec)
 // Extracts the contacts by part mode into the contact list at offset 0xC04.
 void ExtractModeWalkerContacts(ModeWalker* self)
 {
-    ExtractContactsByPartMode(self, (Contact03**)((u8*)self + 0xC04));
+    ExtractContactsByPartMode(self, (Contact03**)&self->contactChainHead);
 }
 
 // Changes the walker's mode (0 to 4): leaving mode 2 or 3 records the time of the change for the
@@ -631,7 +631,7 @@ void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad)
         if (p.z < 100.0f) {
             continue;
         }
-        f32 r = o->scale / (p.z * *(f32*)((u8*)g_camera + 0x1F0));
+        f32 r = o->scale / (p.z * g_camera->projectionScaleX);
         u128 d = Vu0::Sub(Vu0::Q(p), Vu0::Q(self->aim));
         f32 eps = 0.0001f;
         f32 score = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d, d))) - r;

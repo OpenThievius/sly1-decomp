@@ -3331,7 +3331,7 @@ s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, 
     if (rec != 0) {
         g = rec + 0x350;
     } else {
-        g = (u8*)g_currentWorld + 0x1EE0;
+        g = (u8*)&g_currentWorld->gravity;
     }
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*to), Vu0::Q(*from));
     h = d.z;
@@ -3366,7 +3366,7 @@ s32 ComputeLaunchVelocityToPoint(f32 speed, Vec02* from, Vec02* to, Vec02* out, 
     if (rec != 0) {
         g = rec + 0x350;
     } else {
-        g = (u8*)g_currentWorld + 0x1EE0;
+        g = (u8*)&g_currentWorld->gravity;
     }
     f32 grav = *(f32*)(g + 8);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*to), Vu0::Q(*from));
@@ -5163,7 +5163,7 @@ void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
         o = (BaseObject*)self->entries[idx].f14;
     }
     if (o != 0) {
-        TransformPointBetweenFrames((PlacedObject*)o->parent, self, (Vec02*)((u8*)o + 0x40), &v);
+        TransformPointBetweenFrames((PlacedObject*)o->parent, self, (Vec02*)&((TransformObject*)o)->pos, &v);
         Camera* g = g_camera;
         Vu0::Q(v) = Vu0::Rotate(g->rotation, Vu0::Q(v));
         Vu0::Q(v) = Vu0::Add(Vu0::Q(g->position), Vu0::Q(v));
@@ -5185,7 +5185,7 @@ void SetWarpPageSelectedEntry(WarpPage* self, s32 idx) {
     }
     BaseObject* r = *(BaseObject**)(base + idx * 0x34 + 0x30C);
     if (r != 0) {
-        TransformPointBetweenFrames((PlacedObject*)r->parent, self, (Vec02*)((u8*)r + 0x40), (Vec02*)((base + 0x550)));
+        TransformPointBetweenFrames((PlacedObject*)r->parent, self, (Vec02*)&((TransformObject*)r)->pos, (Vec02*)((base + 0x550)));
     } else {
         *(Quad16*)(base + 0x550) = *(Quad16*)&D_00248D30;
     }

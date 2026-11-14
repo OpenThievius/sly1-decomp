@@ -1238,12 +1238,12 @@ void ComputePathFollowerHeadingTarget(PathFollower* self)
         }
         f32 turn = ComputeAngleBetweenVectors(&tangent, &ahead, 0);
         self->targetSpeed = self->pace * self->maxSpeed;
-        u8* limit = *(u8**)((u8*)self + 0xAFC);
+        PathEmitters* limit = self->activeZone;
         if (limit != 0) {
-            self->targetSpeed = *(f32*)(limit + 0x1C) <? self->targetSpeed;
+            self->targetSpeed = limit->maxSpeed <? self->targetSpeed;
         }
         if (0.0f < turn) {
-            f32 v = Fpu::Sqrt(g_cornerSpeedFactor[0] * (g_turnProbeLength / turn) * self->grip * -*(f32*)((u8*)self + 0x358));
+            f32 v = Fpu::Sqrt(g_cornerSpeedFactor[0] * (g_turnProbeLength / turn) * self->grip * -self->gravity.z);
             if (v < self->targetSpeed) {
                 self->targetSpeed = v;
             }

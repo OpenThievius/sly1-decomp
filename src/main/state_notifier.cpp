@@ -711,8 +711,8 @@ void TriggerStateNotifierNearPlayer(StateNotifier* self)
                     }
                 }
                 PlacedObject* o = d->trackedObject;
-                if ((o->desc->flags & 2) != 0 && *(void**)((u8*)o + 0x3F8) != 0) {
-                    if (CollectMeshHits(pos, self->triggerRadius, *(s32*)((u8*)o + 0x3F0), (FaceRef*)(*(void**)((u8*)o + 0x3F8)), 0, (Mesh03*)((u8*)o + 0x3A4), 1, (MeshHitEntry*)hit) != 0) {
+                if ((o->desc->flags & 2) != 0 && ((Collider*)o)->tree.nodes != 0) {
+                    if (CollectMeshHits(pos, self->triggerRadius, ((Collider*)o)->tree.count, (FaceRef*)(((Collider*)o)->tree.nodes), 0, &((Collider*)o)->meshCopy, 1, (MeshHitEntry*)hit) != 0) {
                         self->desc02()->m2F(self, 1);
                     }
                 }
@@ -966,7 +966,7 @@ void SetStateNotifierState(Camera* self, s32 state)
             Vec02 dir;
             Mat02 m10;
             Mat02 m40;
-            ConvertOffsetToCylindrical((Vec02*)((u8*)self + 0x140), (Vec02*)((u8*)CAMERA_AT(u8*, active, 4) + 0x140), (f32*)((u8*)self + 0x2F0), (f32*)((u8*)self + 0x2F4), (f32*)((u8*)self + 0x2F8));
+            ConvertOffsetToCylindrical(&self->f140, (Vec02*)((u8*)CAMERA_AT(u8*, active, 4) + 0x140), &self->f2F0.x, &self->f2F0.y, &self->f2F0.z);
             self->f300 = *(Vec02*)g_notifierStartVelocity;
             self->f310 = *(Vec02*)D_00248D30;
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)CAMERA_AT(u8*, active, 4) + 0x140)), Vu0::Q(self->f140));
@@ -974,7 +974,7 @@ void SetStateNotifierState(Camera* self, s32 state)
             BuildBasisFromX(&dir, &m10);
             BuildAxisAngleMatrix((const Vec02*)g_unitXVector, (Mat02*)&m40, -2.5f);
             MulRotationRowsX(&m10, m10, m40);
-            MultiplyMatrices3x3(&m10, (Mat02*)((u8*)self + 0x110), &m40);
+            MultiplyMatrices3x3(&m10, &self->m110, &m40);
             MatrixToAxisAngle(&m40, (f32*)((u8*)self + 0x35C), (Vec02*)((u8*)self + 0x360));
             self->f370 = 0;
             break;
@@ -1110,7 +1110,7 @@ void PlaceSpareSoundNotifier(World* self)
         obj->desc02()->m21(obj, (Vec02*)D_00248D30);
         obj->desc02()->m2F(obj, 4);
         *(Quad_148038*)((u8*)obj + 0x300) = g_spareNotifierVelocity;
-        QueryValueListMask((ValueListObject*)self->valueListObject, obj->boundRadius, (Bits128*)((u8*)obj + 0x140), &obj->visibilityMask);
+        QueryValueListMask((ValueListObject*)self->valueListObject, obj->boundRadius, (Bits128*)&obj->v140, &obj->visibilityMask);
     }
 }
 
@@ -1458,7 +1458,7 @@ s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec02* a2, s32 n, StateNotif
             b = RandomFloatInRange(g_scatterLiftRange[0], g_scatterLiftRange[1]);
             ComputePolarOffset((Vec3*)q, ang, a, b);
             ang += step;
-            QueryValueListMask((ValueListObject*)self->valueListObject, o->boundRadius, (Bits128*)((u8*)o + 0x140), &o->visibilityMask);
+            QueryValueListMask((ValueListObject*)self->valueListObject, o->boundRadius, (Bits128*)&o->v140, &o->visibilityMask);
         }
     }
     PopBackMemoryMark();
@@ -1636,7 +1636,7 @@ void UpdateArmedNotifier(ArmedStateNotifier* self, f32 dt)
         if (250000.0f < Vu0::ToFloat(Vu0::Dot(d, d))) {
             continue;
         }
-        if (CollectMeshHits(&probe, 100.0f, *(s32*)((u8*)o + 0x3F4), (FaceRef*)(*(void**)((u8*)o + 0x3F8)), 0, (Mesh03*)((u8*)o + 0x3A4), 1, (MeshHitEntry*)hit) <= 0) {
+        if (CollectMeshHits(&probe, 100.0f, ((Collider*)o)->tree.count2, (FaceRef*)(((Collider*)o)->tree.nodes), 0, &((Collider*)o)->meshCopy, 1, (MeshHitEntry*)hit) <= 0) {
             continue;
         }
         if ((void*)o == (void*)GetActiveSwitchedCollider()) {

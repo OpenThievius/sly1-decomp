@@ -33,7 +33,7 @@ struct Camera : BaseObject {
     f32 fD4;                // 0xD4: and this
     u8 padD8[0x100 - 0xD8];
     Vec02 f100; // 0x100
-    u8 pad110[0x140 - 0x110];
+    Mat02 m110;             // 0x110
     Vec02 f140; // 0x140
     Vec02 f150; // 0x150
     u8 pad160[0x1C0 - 0x160];

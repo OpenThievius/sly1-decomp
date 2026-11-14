@@ -737,7 +737,7 @@ SoundLevelEntry* PushSoundLevel(s32 x)
 void RecomputeSoundLevel(SoundLevelEntry* entry)
 {
     ListFrame f;
-    u8* P = (u8*)g_currentWorld + 0x1BC4;
+    u8* P = (u8*)&g_currentWorld->list1BC4;
     SoundLevelEntry* x;
     f.list = P;
     f.link = P;
@@ -1199,7 +1199,7 @@ void UpdateSoundEmitters(void)
     if (IsSoundEmitterUpdateDisabled() != 0) return;
     void* v4 = GetSoundListenerPosition();
     ListenerDistanceFn v5 = ChooseSoundListenerFunction();
-    u8* P = (u8*)g_currentWorld + 0x1BAC;
+    u8* P = (u8*)&g_currentWorld->list1BAC;
     ListFrame* saved = g_activeListFrames;
     f.list = P;
     f.link = P;

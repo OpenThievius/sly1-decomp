@@ -39,6 +39,7 @@
 #include "anim_curve.h"
 #include "fpu.h"
 #include "attachment.h"
+#include "state_walker.h"
 #include "aim_blend_grid.h"
 #include "on_off_object.h"
 #include "mul_rotation.h"
@@ -491,7 +492,7 @@ void StartPlayer(Player* self)
     AddMatrixAttachment((PlacedObject*)self->f610, 7, (Attachment**)&self->footPartA);
     AddMatrixAttachment((PlacedObject*)self->f614, 7, (Attachment**)&self->footPartB);
     self->rigPoseSource = CreatePoseSource(self->world, self->rigObject, (const T2195_Vt*)g_snapshotPoseSourceMethods);
-    *(s32*)((u8*)self->rigPoseSource + 0x14) = 1;
+    ((T2195_588*)self->rigPoseSource)->key = 1;
     InsertAttachment(self->rigObject, (Attachment*)self->rigPoseSource);
     self->trailOwner = self->f23D0;
     self->trailAnimRecord = FindAnimRecord(0x15A);
@@ -1071,7 +1072,7 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
         PlayerNoticePlayer* src = (PlayerNoticePlayer*)msg->source;
         if (src != (void*)self->stateAnimPlayer && src != self->aimAnimPlayer) {
             void* other = self->stateWalker;
-            if (other == 0 || src != *(void**)((u8*)other + 0x24)) {
+            if (other == 0 || src != (void*)((StateWalker*)other)->player) {
                 break;
             }
         }
@@ -1498,15 +1499,15 @@ void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d
     if (pl->state == 0) {
         if (pl->aimMode < 10) {
             if (pl->aimMode < 6) {
-                node = *(ProbeNode**)((u8*)pl->stateWalker + 0x24);
+                node = (ProbeNode*)((StateWalker*)pl->stateWalker)->player;
             } else {
-                node = *(ProbeNode**)((u8*)pl + 0x2244);
+                node = (ProbeNode*)pl->aimAnimPlayer;
             }
         } else {
-            node = *(ProbeNode**)((u8*)pl->stateWalker + 0x24);
+            node = (ProbeNode*)((StateWalker*)pl->stateWalker)->player;
         }
     } else if (pl->stateWalker != 0) {
-        node = *(ProbeNode**)((u8*)pl->stateWalker + 0x24);
+        node = (ProbeNode*)((StateWalker*)pl->stateWalker)->player;
     } else {
         node = (ProbeNode*)pl->stateAnimPlayer;
     }
@@ -2415,8 +2416,8 @@ void FillPlayerPushRecord(Player* self, PushRecord* out)
         force = 0.0f;
     }
     OnOffObject* target = self->ownOnOffObject;
-    f32* slot = (f32*)((u8*)target + 0x300);
-    *(f32*)((u8*)self->ownOnOffObject + 0x300) = ApproachValueWithRamp((RampProfile*)g_forceApproachRamp, 0, *slot, force, g_frameDt[0]);
+    f32* slot = &target->block2F0.f10[0];
+    self->ownOnOffObject->block2F0.f10[0] = ApproachValueWithRamp((RampProfile*)g_forceApproachRamp, 0, *slot, force, g_frameDt[0]);
 }
 
 
@@ -3612,7 +3613,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         }
         case 12:
-            RemoveCameraControllers(g_camera, 0xF, 6, (CameraController*)((u8*)g_camera + 0x460), self, 0);
+            RemoveCameraControllers(g_camera, 0xF, 6, (CameraController*)&g_camera->ctl460, self, 0);
             if (D_00270454 != 0) {
                 PopStackElement((ElementStack*)g_elementStack);
             }
@@ -4452,13 +4453,13 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if ((void*)self->f25CC != 0) {
                 anim = (void*)self->f25CC;
             }
-            PushCameraController(g_camera, 6, (CameraController*)((u8*)g_camera + 0x460), self, 0);
+            PushCameraController(g_camera, 6, (CameraController*)&g_camera->ctl460, self, 0);
             break;
         case 34: {
             f32 dim = 0.6f;
             SetVolumeChannelFactor(5, 0, dim);
             SetVolumeChannelFactor(5, 1, dim);
-            StartCameraSounds((CameraSoundOwner*)((u8*)g_camera + 0x460));
+            StartCameraSounds((CameraSoundOwner*)&g_camera->ctl460);
             RequestCameraSnap(g_camera, 0);
             g_typedTextCaptionBox.child = self->pendingCaption;
             self->pendingCaption = 0;
@@ -4469,7 +4470,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if ((void*)self->f25D0 != 0) {
                 anim = (void*)self->f25D0;
             }
-            RemoveCameraControllers(g_camera, 0xF, 6, (CameraController*)((u8*)g_camera + 0x460), self, 0);
+            RemoveCameraControllers(g_camera, 0xF, 6, (CameraController*)&g_camera->ctl460, self, 0);
             RequestCameraSnap(g_camera, 0);
             break;
         case 39:
