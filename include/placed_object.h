@@ -14,38 +14,38 @@
 struct PlacedObject;
 struct Attachment;   // an attachment (t2195.h): a record of the world's pool at World::pool1B20
 struct Rec2195_224;     // the 0xC0-byte record at +0x224 (t2195.h)
-struct T2195_790;       // the aim attachment at +0x200 (attachment.h)
-struct T2195_600;       // the own-value attachment at +0x204 (attachment.h)
-struct T2195_5B0;       // the value-pointer attachment at +0x2C0 (attachment.h)
+struct AimAttachment;       // the aim attachment at +0x200 (attachment.h)
+struct TiltValueAttachment;       // the own-value attachment at +0x204 (attachment.h)
+struct OwnerPointerAttachment;       // the value-pointer attachment at +0x2C0 (attachment.h)
 struct RangeRecord;         // the 0x2E0-byte record at +0x284 (s1291d0.h)
 struct SoundRecord;         // the 0x24-byte record at +0x2AC (s1be4d8.h)
 struct Animation;           // class 0x83 (animation.h)
 
 // A 16-byte vector (a position, a velocity, a matrix row), 16-aligned as the code moves it.
-struct __attribute__((aligned(16))) Vec02 {
+struct __attribute__((aligned(16))) Vec4 {
     f32 x, y, z, w;
 };
 
 // Three rows: the placement matrix of the common block (+0xD0) and the two like it.
-struct Mat02 {
-    Vec02 r[3];
+struct Mat3 {
+    Vec4 r[3];
 };
 
 // A link (next, previous) kept as one unaligned doubleword by slot 9 (func_00127048).
-struct __attribute__((packed)) Link02 {
+struct __attribute__((packed)) ObjectListLink {
     u32 next;
     u32 prev;
 };
 
 // An entry of the list at +0x2C4: an object id slot 16 (func_00124A48) resolves and starts.
-struct Key02 {
+struct StartKeyNode {
     s32 key;        // 0x00
-    Key02* next;    // 0x04
+    StartKeyNode* next;    // 0x04
 };
 
 // An element of the list at +0x280 (func_00146298, func_0012AA50, func_001B11A0): its kind,
 // then the values those readers take of kinds 1 and 6.
-struct Elem02 {
+struct PlacedObjectElement {
     u8 pad00[0x08];
     s32 kind;               // 0x08: func_0012AA50 takes kind 6, func_0012AAE8 kind 5, func_001B11A0 kind 1
     u8 pad0C[0x14 - 0x0C];
@@ -81,29 +81,29 @@ struct __attribute__((aligned(16))) ColorRecord {
         struct {
             s32 preset;     // 0x00: the preset's index, -1 when none (func_0012B0B0)
             u8 pad04[0x10 - 0x04];
-            Vec02 c10;      // 0x10: a colour (func_0012B140)
-            Vec02 c20;      // 0x20: a second one (func_0012B1A0)
+            Vec4 c10;      // 0x10: a colour (func_0012B140)
+            Vec4 c20;      // 0x20: a second one (func_0012B1A0)
             f32 factor;     // 0x30: 2.0 in the presets (func_0012B200)
         };
     };
 };
 
 // Class 0x02's descriptor: the root's slots, then twenty more (slot n at 0x10 + 4n).
-struct Desc02 : Desc01 {
+struct PlacedObjectDescriptor : BaseObjectDescriptor {
     void (*m1C)(PlacedObject* self);                         // 0x80: func_00125438
-    void (*m1D)(PlacedObject* self, Vec02* pos);             // 0x84: set the position (func_001273F0)
-    void (*m1E)(PlacedObject* self, Mat02* rot);             // 0x88: set the matrix (func_00127478)
+    void (*m1D)(PlacedObject* self, Vec4* pos);             // 0x84: set the position (func_001273F0)
+    void (*m1E)(PlacedObject* self, Mat3* rot);             // 0x88: set the matrix (func_00127478)
     void (*m1F)(PlacedObject* self, PlacedObject* other);             // 0x8C: take other's frame (func_001276C0)
-    void (*m20)(PlacedObject* self, Vec02* v);               // 0x90: func_001274F8
-    void (*m21)(PlacedObject* self, Vec02* v);               // 0x94: func_00127590
+    void (*m20)(PlacedObject* self, Vec4* v);               // 0x90: func_001274F8
+    void (*m21)(PlacedObject* self, Vec4* v);               // 0x94: func_00127590
     void* m22;                                      // 0x98: func_00122550
     void* m23;                                      // 0x9C: func_001225D0
     void (*m24)(PlacedObject* self, void* a, void* b);       // 0xA0: func_00125C90
     void (*m25)(PlacedObject* self, void* a, void* m);       // 0xA4: func_001261C0
     void (*m26)(PlacedObject* self, void* a, void* m);       // 0xA8: func_00126270
     void (*m27)(PlacedObject* self, void* frame);            // 0xAC: func_001660E8
-    void (*m28)(PlacedObject* self, Vec02* pos, Vec02* vec); // 0xB0: told the position an attachment gave (func_001227B0)
-    void (*m29)(PlacedObject* self, Mat02* rot, Vec02* v);   // 0xB4: told the orientation (func_00122968, func_00129648; func_00128E88)
+    void (*m28)(PlacedObject* self, Vec4* pos, Vec4* vec); // 0xB0: told the position an attachment gave (func_001227B0)
+    void (*m29)(PlacedObject* self, Mat3* rot, Vec4* v);   // 0xB4: told the orientation (func_00122968, func_00129648; func_00128E88)
     void (*m2A)(PlacedObject* self, void* out);              // 0xB8: func_00128FD0
     void (*m2B)(PlacedObject* self);                         // 0xBC: func_00129780
     void (*m2C)(PlacedObject* self);                         // 0xC0: func_001660A0
@@ -115,13 +115,13 @@ struct Desc02 : Desc01 {
 struct FoundList;
 
 struct PlacedObject : BaseObject {
-    List01 children;        // 0x34: the child objects, linked at BaseObject::next (offset 0x1C)
-    Link02 link40;          // 0x40
-    Link02 link48;          // 0x48
+    ObjectList children;        // 0x34: the child objects, linked at BaseObject::next (offset 0x1C)
+    ObjectListLink link40;          // 0x40
+    ObjectListLink link48;          // 0x48
     PlacedObject* root;              // 0x50: the topmost object above it (itself at the top)
     PlacedObject* linkListOwner; // 0x54: the owner of its link list (func_0015F6C0); given back with func_0015F710 by slot 7
-    Link02 link58;          // 0x58: the link in list60
-    List01 list60;          // 0x60: offset 0x58
+    ObjectListLink link58;          // 0x58: the link in list60
+    ObjectList list60;          // 0x60: offset 0x58
     s32 count6C;            // 0x6C
     FoundList* items70[4];  // 0x70: count6C of the groups it is in (func_0015F8B0)
     f32 fadeDistanceFar;    // 0x80: FLT_MAX at set-up
@@ -132,29 +132,29 @@ struct PlacedObject : BaseObject {
     s32 save94;             // 0x94: Collider::mode470 kept by func_001BD790
     s32 f98[1];             // 0x98
     u8 pad9C[0xA0 - 0x9C];
-    Vec02 vA0;              // 0xA0: v150 kept by slot 20
-    Vec02 vB0;              // 0xB0: v160 kept by slot 20
+    Vec4 vA0;              // 0xA0: v150 kept by slot 20
+    Vec4 vB0;              // 0xB0: v160 kept by slot 20
     u64 savedC0;            // 0xC0: bits 0, 1: Collider::flags538 bits 54, 55 kept by func_001BD790
     u8 padC8[0xD0 - 0xC8];
-    Mat02 rot;              // 0xD0: the placement matrix (the common block)
-    Vec02 pos;              // 0x100: the position (the common block; slot 29)
-    Mat02 m110;             // 0x110
-    Vec02 v140;             // 0x140
-    Vec02 v150;             // 0x150: slot 32
-    Vec02 v160;             // 0x160: slot 33
-    Vec02 v170;             // 0x170: added to the spin through the frames (func_001278A8)
-    Vec02 v180;             // 0x180: crossed with the arm to the pivot (func_001C5148)
-    Vec02 v190;             // 0x190
-    Mat02 m1A0;             // 0x1A0
-    Vec02 v1D0;             // 0x1D0
-    List01 list1E0;         // 0x1E0: the attachments (Attachment records), linked at Attachment::link (offset 8)
+    Mat3 rot;              // 0xD0: the placement matrix (the common block)
+    Vec4 pos;              // 0x100: the position (the common block; slot 29)
+    Mat3 m110;             // 0x110
+    Vec4 v140;             // 0x140
+    Vec4 v150;             // 0x150: slot 32
+    Vec4 v160;             // 0x160: slot 33
+    Vec4 v170;             // 0x170: added to the spin through the frames (func_001278A8)
+    Vec4 v180;             // 0x180: crossed with the arm to the pivot (func_001C5148)
+    Vec4 v190;             // 0x190
+    Mat3 m1A0;             // 0x1A0
+    Vec4 v1D0;             // 0x1D0
+    ObjectList list1E0;         // 0x1E0: the attachments (Attachment records), linked at Attachment::link (offset 8)
     Attachment* positionAttachment; // 0x1EC: the attachment that gives the position (slot 4)
     Attachment* orientationAttachment; // 0x1F0: the one that gives the orientation (slot 5)
     void* matrixAttachment; // 0x1F4
     void** indexedAttachments; // 0x1F8: f26C entries
     Attachment* baseAttachment; // 0x1FC: the base attachment (func_001296E0, table D_00219560)
-    T2195_790* aimAttachment; // 0x200: the aim attachment (func_00129730)
-    T2195_600* ownValueAttachment; // 0x204: the own-value attachment (func_0012A8D8)
+    AimAttachment* aimAttachment; // 0x200: the aim attachment (func_00129730)
+    TiltValueAttachment* ownValueAttachment; // 0x204: the own-value attachment (func_0012A8D8)
     u8 pad208[0x20C - 0x208];
     u8* p20C;               // 0x20C: D_00260E70 until slot 9 copies it
     u8* p210;               // 0x210: D_00260E80
@@ -163,7 +163,7 @@ struct PlacedObject : BaseObject {
     u8* p21C;               // 0x21C: D_00260EB0
     u8* p220;               // 0x220: D_00260EC0
     Rec2195_224* linkRecord; // 0x224: a 0xC0-byte record (t2195.h)
-    s32 tries;              // 0x228: as Actor6C::tries; func_0013DC38 tests it, func_00129DF8 clears the root's
+    s32 tries;              // 0x228: as UpdatedObject::tries; func_0013DC38 tests it, func_00129DF8 clears the root's
     union {
         u8 sub22C[0x26C - 0x22C];   // 0x22C: a record func_00165728/165828/165920/165FE0 work on
         struct {
@@ -181,7 +181,7 @@ struct PlacedObject : BaseObject {
     f32* defaultValues; // 0x274: the values f270 returns to
     s32 oscillatorBlock;    // 0x278: func_001EECE0 calls slot 50 while it is set
     s32 elemCount;          // 0x27C
-    Elem02** elems;         // 0x280: elemCount of them
+    PlacedObjectElement** elems;         // 0x280: elemCount of them
     RangeRecord* rangeRecord;   // 0x284: a 0x2E0-byte record in the world's list at 0x1C00
     ColorRecord* colorRecord; // 0x288: a 0x40-byte record
     f32 xyScale;            // 0x28C
@@ -202,8 +202,8 @@ struct PlacedObject : BaseObject {
     u8 pad2B5[0x2B8 - 0x2B5];
     s32 keyedValueCount;    // 0x2B8
     void* keyedValues;      // 0x2BC
-    T2195_5B0* keyedValueAttachment; // 0x2C0: the attachment func_0012B2F8 points at the values of a key of f2BC
-    Key02* keys;            // 0x2C4: slot 16 resolves each and empties the list
+    OwnerPointerAttachment* keyedValueAttachment; // 0x2C0: the attachment func_0012B2F8 points at the values of a key of f2BC
+    StartKeyNode* keys;            // 0x2C4: slot 16 resolves each and empties the list
     union {
         u64 flags;          // 0x2C8
         struct {
@@ -232,11 +232,11 @@ struct PlacedObject : BaseObject {
         };
     };
 
-    const Desc02* desc02() const { return (const Desc02*)desc; }
+    const PlacedObjectDescriptor* desc02() const { return (const PlacedObjectDescriptor*)desc; }
 };
 
 typedef char check_PlacedObject[sizeof(PlacedObject) == 0x2D0 ? 1 : -1];
 typedef char check_ColorRecord[sizeof(ColorRecord) == 0x40 ? 1 : -1];
-typedef char check_Desc02[sizeof(Desc02) == 0xD0 ? 1 : -1];
+typedef char check_Desc02[sizeof(PlacedObjectDescriptor) == 0xD0 ? 1 : -1];
 
 #endif

@@ -64,29 +64,29 @@ extern "C" f32 Sine(f32 x);
 extern f32 g_gameTime[];
 void ReleaseSoundLevel(SoundLevelEntry* self);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void AppendToList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
+void AppendToList(ObjectList* self, void* item);
+void RemoveFromList(ObjectList* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
+void AppendToList(ObjectList* self, void* item);
 #include "random_range_low.h"
 extern s32 g_streamVoiceLocked;
 void StopStreamVoice(void);
 extern s32 g_stagedBankVoice;
 void RequestStagedBank(KeyRecord* self);
 extern "C" void SyncDataCache(s32 a);
-void RemoveFromList(List01* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 extern u8 g_soundBankHandles[];
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 s32 EnsureSoundBankLoaded(s32 a);
 void ResetVolumeChannelFactors(void);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void AppendToList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
+void AppendToList(ObjectList* self, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 void FreeSoundRecord(PlayingSound* self);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void ApplySoundRecordVolumePan(PlayingSound* self);
 void SetVolumeChannelFactor(s32 a, s32 b, f32 x);
-void AppendToList(List01* self, void* item);
+void AppendToList(ObjectList* self, void* item);
 extern s32 D_002748EC;
 extern s32 g_currentSoundLevel;
 extern s32 g_previousSoundLevel;
@@ -102,7 +102,7 @@ extern s32 g_streamVoice;
 // How far the listener is from a position (func_001BF2E0 or func_001BF398, as func_001BF578 chooses).
 typedef f32 (*ListenerDistanceFn)(void* listener, void* position);
 f32 MeasureListenerDistance(void* listener, void* position);
-f32 MeasureCameraWeightedDistance(Vec02* a, Vec02* b);
+f32 MeasureCameraWeightedDistance(Vec4* a, Vec4* b);
 extern s32 g_streamVoicePending;
 s32 HasStreamVoice(void);
 void ClearStreamVoicePending(s32 reply, s64 arg);
@@ -110,14 +110,14 @@ typedef void (*IopCallbackFn)(s32 reply, s64 arg);
 void RequestStreamCallback(s32 a0, IopCallbackFn a1, u64 a2);
 f32 ComputeSoundListenerFactor(void* self);
 void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c);
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void ClearSoundRecordHandle(PlayingSound** slot);
 void StopStagedBankVoice(void);
 void UnloadStagedBank(void);
 void StoreStagedBankHandle(s32 h, s64 arg);
 void StartSoundBankLoad(s32 a0, s32 a1, IopCallbackFn a2, s64 a3);
-s32 IsListEmpty(List01* p);
+s32 IsListEmpty(ObjectList* p);
 void* AllocateSoundLevelEntry(void);
 extern f32 g_gameClock[];
 // A row of g_soundEntries (global_tables.cpp defines it): the bank a sound is in, -1 for none, and
@@ -141,7 +141,7 @@ s32 IsSoundEntryAvailable(s32 id);
 void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, BaseObject* object, Quad16* position, f32 farRange, f32 nearRange, f32 baseVolume, f32 pitch, f32 f16, U64P* interval, U64P* p80);
 void ScheduleAmbientSoundRecord(PlayingSound* self);
 void StartSoundRecordVoice(PlayingSound* self, s32 id);
-// The list walk of list_iter.h over a List01: push the frame, take each element, pop the frame.
+// The list walk of list_iter.h over a ObjectList: push the frame, take each element, pop the frame.
 void ComputeSoundAttenuation(void* self, f32* out, s32* flag, f32 a, f32 b, f32 c);
 // The list walk of World::list1BAC, element by element.
 struct PlayingSoundFrame : ListFrame {
@@ -156,14 +156,14 @@ void StopSoundRecord(PlayingSound* self, s32 n);
 extern U64P g_defaultSoundRepeat;
 extern U64P g_defaultSoundRange;
 extern s32 g_cachedVoiceParams[];
-void RemoveFromList(List01* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 void SetCachedVoiceParam(s32 index, s32 value);
-void AppendToList(List01* self, void* item);
+void AppendToList(ObjectList* self, void* item);
 extern s32 g_iopChannel2Values[6];
 extern f32 g_volumeChannelFactors[11][4];
 void ApplyVolumeChannelFactors(s32 column);
 extern u8 g_worldSoundHandle[4];
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void StopWorldSoundRecords(s32 item);
 void ClearSoundLevels(void);
@@ -682,10 +682,10 @@ void RecomputeSoundLevel(SoundLevelEntry* entry)
     SoundLevelEntry* x;
     f.list = P;
     f.link = P;
-    f.offset = ((List01*)P)->offset;
+    f.offset = ((ObjectList*)P)->offset;
     f.prev = g_activeListFrames;
     g_activeListFrames = &f;
-    if (IsListEmpty((List01*)P) != 0) {
+    if (IsListEmpty((ObjectList*)P) != 0) {
         g_currentSoundLevel = 0;
     } else {
         g_currentSoundLevel = -20;
@@ -776,12 +776,12 @@ void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f3
         }
         if (c < r) {
             Camera* cam = g_camera;
-            Vec02 d;
+            Vec4 d;
             f32 range = b - c;
             f32 away = b - r;
-            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*(Vec02*)pos), Vu0::Q(*(Vec02*)cam->position));
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*(Vec4*)pos), Vu0::Q(*(Vec4*)cam->position));
             Vu0::Q(d) = Vu0::DivX(Vu0::Q(d), Vu0::Length(Vu0::Q(d)));
-            f32 across = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)cam->rotationRow1)));
+            f32 across = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec4*)cam->rotationRow1)));
             f32 ratio = away / range;
             *pan = -across * 0.7f * (1.0f - ratio);
             *volume = a * ratio;
@@ -795,11 +795,11 @@ void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f3
 // The distance from a to b as heard through the camera: the part along the camera's axis is
 // scaled down by 1 / ((1 - z) + z * 10), z being the camera controller's zoom fraction, so a
 // zoomed-in view hears things along the view axis as nearer.
-f32 MeasureCameraWeightedDistance(Vec02* a, Vec02* b)
+f32 MeasureCameraWeightedDistance(Vec4* a, Vec4* b)
 {
-    Vec02 d;
-    Vec02 r;
-    Vec02 k;
+    Vec4 d;
+    Vec4 r;
+    Vec4 k;
     Camera* cam = g_camera;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     f32 w = cam->ctl460.zoomFraction;
@@ -839,10 +839,10 @@ void ComputeSoundRecordDoppler(PlayingSound* self)
     }
     PlacedObject* listener = (PlacedObject*)GetActiveSwitchedCollider();
     if (listener != 0) {
-        Vec02 rel;
-        Vec02 away;
-        Vec02 sourceVel;
-        Vec02 listenerVel;
+        Vec4 rel;
+        Vec4 away;
+        Vec4 sourceVel;
+        Vec4 listenerVel;
         ComputeObjectMotionInFrame(source, 0, &source->v140, &sourceVel, 0, 0, 0);
         ComputeObjectMotionInFrame(listener, 0, &listener->v140, &listenerVel, 0, 0, 0);
         Vu0::Q(rel) = Vu0::Sub(Vu0::Q(sourceVel), Vu0::Q(listenerVel));
@@ -1052,7 +1052,7 @@ void ScheduleAmbientSoundRecord(PlayingSound* self)
         f32 r = RandomFloatInRange(self->f80.value, (&self->f80.value)[1]);
         u128 off = Vu0::FromFloats(Cosine(angle) * r, Sine(angle) * r, 0.0f);
         Vu0::Q(self->position) = off;
-        Vu0::Q(self->position) = Vu0::Add(off, Vu0::Q(*(Vec02*)GetSoundListenerPosition()));
+        Vu0::Q(self->position) = Vu0::Add(off, Vu0::Q(*(Vec4*)GetSoundListenerPosition()));
     }
 }
 
@@ -1060,7 +1060,7 @@ void ScheduleAmbientSoundRecord(PlayingSound* self)
 // it makes a playing-sound record (far range fa, near range fb, base volume fc, pitch fd, Doppler
 // scale fe, a repeat interval p4 and range p5 for an ambient sound), with *out set to it;
 // otherwise it is a one-shot voice at volume fc and pitch fd.
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5) {
     PlayingSound* s1;
     s32 s0;
@@ -1144,7 +1144,7 @@ void UpdateSoundEmitters(void)
     ListFrame* saved = g_activeListFrames;
     f.list = P;
     f.link = P;
-    f.offset = ((List01*)P)->offset;
+    f.offset = ((ObjectList*)P)->offset;
     f.prev = saved;
     g_activeListFrames = &f;
     if (g_streamVoice != 0 && IsVoiceBusy(g_streamVoice) == 0) {

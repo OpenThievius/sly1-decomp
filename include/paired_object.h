@@ -19,7 +19,7 @@ struct PairedObject : Collider {
     f32 maxSpeed;  // 0x564: the fastest it steers (func_001A6788)
     f32 maxTurn;  // 0x568: the fastest it turns, in radians a second (func_001A6788)
     u8 pad56C[0x570 - 0x56C];
-    Vec02 offset570;  // 0x570: the offset state 2 steers to (func_001A65C8); its y (0x574) is scaled by the controller's
+    Vec4 offset570;  // 0x570: the offset state 2 steers to (func_001A65C8); its y (0x574) is scaled by the controller's
     f32 nextOffsetTime; // 0x580: the clock time after which state 2 moves the offset on (func_001A65C8)
     f32 offsetWaitMin; // 0x584: 1.0 at set-up
     f32 offsetWaitMax; // 0x588: 2.5 at set-up

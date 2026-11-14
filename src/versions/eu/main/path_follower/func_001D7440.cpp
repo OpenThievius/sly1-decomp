@@ -70,7 +70,7 @@ void StartPathFollower(PathFollower* self)
         ((Blk_eu_1D7440*)&g_secondTallyCaption)->p574 = &((Blk_eu_1D7440*)&g_secondTallyCaption)->f58C;
     }
     for (s32 k = 0; k < 4; k++) {
-        Slot19* s = &self->wheels[k];
+        FollowerObjectSlot* s = &self->wheels[k];
         s->placedPos = s->obj->pos;
     }
     ResetPathFollower(self);

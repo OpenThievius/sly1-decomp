@@ -5,12 +5,12 @@
 // initialiser; every other file refers to them by name.
 #pragma interface
 
-struct __attribute__((packed)) Rgba_137248 { u32 value; };
+struct __attribute__((packed)) LayoutRgba { u32 value; };
 
-struct Layout_137228 {
+struct TextBoxLayout {
     f32 x, y;
     f32 w, h;
-    Rgba_137248 color;
+    LayoutRgba color;
     s32 f14;
     s32 f18;
 

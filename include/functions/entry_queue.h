@@ -12,10 +12,10 @@ struct OnOffObject;
 struct PadRecord;
 struct Player;
 struct QueueEntry;
-struct Vec02;
+struct Vec4;
 
 void InitEntryQueue(EntryQueue* self);
-void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* outf);
+void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec4* out, f32* outf);
 void SetEntryQueueTargetNode(EntryQueue* self, BaseObject* target);
 void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next);
 void StartNextQueueEntry(EntryQueue* self);

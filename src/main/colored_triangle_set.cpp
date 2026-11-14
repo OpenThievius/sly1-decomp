@@ -68,7 +68,7 @@ Quad128 TransformVector4(void* m, Quad128 v);
 void DrawTriangleGroups(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d);
 
 // Copies the object's data but keeps its own bits (the keep field).
-void CopyPointObject(C80* self, C80* src)
+void CopyPointObject(TargetFindingPoint* self, TargetFindingPoint* src)
 {
     KeptBits tmp = self->keep;
     CopyObjectData(self, src);
@@ -76,7 +76,7 @@ void CopyPointObject(C80* self, C80* src)
 }
 
 // Starts the object and finds its target object by id (lookup mode 0x104) unless it has none.
-void StartPointObject(C80* self)
+void StartPointObject(TargetFindingPoint* self)
 {
     StartObject(self);
     if (self->targetId != -1) {
@@ -215,7 +215,7 @@ void DrawColoredTriangles(ColoredTriangleSet* self, f32 t)
     BuildUniformScaleAboutPoint(0, mat, (1.0f - t) * (1280.0f / self->width) + t * (4.0f / self->width));
     o = GetActiveSwitchedCollider();
     if (o != 0 && (o = o->desc05()->m53(o)) != 0 && o->desc05()->m4D(o) == 2) {
-        Vec02 v;
+        Vec4 v;
         f32 x, y;
         ProjectPointToCamera(g_camera, &o->v140, (f32*)&v);
         x = ClampHelper::Of(v.x * 320.0f + 320.0f, 10.0f, 630.0f);

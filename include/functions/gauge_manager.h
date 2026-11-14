@@ -11,7 +11,7 @@ struct ContactAgent;
 struct GaugeManager;
 struct ListedAgentView;
 struct NumberedAgent;
-struct T217D_510;
+struct TimerElement;
 
 void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag);
 s32 IsNumberedAgentFree(NumberedAgent* self);
@@ -25,7 +25,7 @@ void InitGaugeManager(GaugeManager* self);
 void BlendParamSets(GaugeManager* self);
 void ComputeGaugeOutputs(GaugeManager* o);
 void ApplyGaugeRatioToEffect(GaugeManager* self);
-void FinishGaugeOnTimeout(T217D_510* timer, s32 mode);
+void FinishGaugeOnTimeout(TimerElement* timer, s32 mode);
 void UpdateGaugeManager(GaugeManager* self, f32 dt);
 void ShowGaugeManagerDisplays(GaugeManager* self);
 void* GetGaugeParams(GaugeManager* self);

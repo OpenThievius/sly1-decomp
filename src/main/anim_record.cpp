@@ -84,7 +84,7 @@ struct PartFacingSource { u8 pad0[0x34]; s32 i34; };
 struct DrawnPart {
     void* vt; u8 pad0[0xC]; FacingXY vec; u8 pad1[0x60]; PartFacingSource* p78;
 };
-struct Frame_166690;
+struct PartDrawRequest;
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern "C" f32 FloatRemainder(f32 x, f32 y);
 void* AllocateZeroedFrontMemory(s32 size);

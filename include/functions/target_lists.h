@@ -13,7 +13,7 @@ struct PlacedObject;
 struct PooledObject;
 struct TargetCurve;
 struct TargetPoint;
-struct Vec02;
+struct Vec4;
 
 void SetObjectListLinkOffsets();
 void ClearObjectLists();
@@ -22,15 +22,15 @@ void RegisterTargetCurve(TargetCurve* self);
 void UnregisterTargetCurve(TargetCurve* self);
 void PostLoadTargetCurve(TargetCurve* self);
 void CopyTargetCurve(TargetCurve* self, TargetCurve* src);
-void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t);
+void PlaceOnTargetCurve(TargetCurve* self, Vec4* out, f32* angleOut, f32 t);
 void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, void* a3);
 void InitTargetPoint(TargetPoint* self);
 void RegisterTargetPoint(TargetPoint* self);
 void UnregisterTargetPoint(TargetPoint* self);
 void PostLoadTargetPoint(TargetPoint* self);
 void CopyTargetPoint(TargetPoint* self, TargetPoint* src);
-void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t);
-void PlaceTargetPointNearCollider(TargetPoint* self, Vec02* out, f32* angleOut);
+void PlaceOnTargetPoint(TargetPoint* self, Vec4* out, f32* angleOut, f32 t);
+void PlaceTargetPointNearCollider(TargetPoint* self, Vec4* out, f32* angleOut);
 void InitListedCollisionPart(ListedCollisionPart* self);
 void LoadListedCollisionPart(ListedCollisionPart* self, BufferedStream* stream);
 void AddToPartList(ListedCollisionPart* self);
@@ -41,6 +41,6 @@ void StepListedCollisionPart(ListedCollisionPart* self, f32 t);
 void SetPooledObjectPlayerHold(PooledObject* self, s32 v);
 s32 CountHeldPooledChildren(PlacedObject* self);
 void* FindEarliestPooledChild(PlacedObject* self);
-void FindRingPointTowardCollider(PlacedObject* self, Vec02* out, f32* angleOut);
+void FindRingPointTowardCollider(PlacedObject* self, Vec4* out, f32* angleOut);
 
 #endif

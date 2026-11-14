@@ -21,5 +21,5 @@ void DrawScreenElements(void)
         }
     }
     DrawScreenFade((ScreenFade*)D_eu_0027F700);
-    DrawCyclingGlyphElement((T217D_600*)D_eu_0027CFE8);
+    DrawCyclingGlyphElement((CyclingGlyphElement*)D_eu_0027CFE8);
 }

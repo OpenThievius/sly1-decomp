@@ -112,7 +112,7 @@ void InitAlphaStatePackets(void)
 }
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void AppendToList(List01* self, void* item);
+void AppendToList(ObjectList* self, void* item);
 
 // Takes a cleared 0x10C0-byte record from the world's pool for the object (plus a 0x580-byte extra
 // record when its mode is 2) and links it into the object's member list; 0 when a pool is empty.
@@ -136,19 +136,19 @@ OwnedRecord* AcquireOwnedRecord(WorldListedObject* o)
             return 0;
         }
     }
-    AppendToList((List01*)&o->members, s);
+    AppendToList((ObjectList*)&o->members, s);
     return s;
 }
 
 
 
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
+void RemoveFromList(ObjectList* list, void* item);
+void AppendToList(ObjectList* self, void* item);
 
 // Takes a record out of its owner's member list and puts it on the deferred release list.
 void DetachOwnedRecord(OwnedRecord* o)
 {
-    RemoveFromList((List01*)(&((WorldListedObject*)o->owner)->members), o);
+    RemoveFromList((ObjectList*)(&((WorldListedObject*)o->owner)->members), o);
     AppendToList(&g_deferredReleaseListB, o);
 }
 
@@ -170,8 +170,8 @@ WorldListedObject* ResetFirstListedObject(World* self)
 
 
 
-void AppendToList(List01* self, void* item);
-void SetListLinkOffset(List01* self, s32 offset);
+void AppendToList(ObjectList* self, void* item);
+void SetListLinkOffset(ObjectList* self, s32 offset);
 
 // Slot 0 of the world-listed object: adds itself to the world's list, sets up its member list and
 // flags and a far fade distance of 1e10.
@@ -179,7 +179,7 @@ void InitWorldListedObject(WorldListedObject* self)
 {
     AppendToList(&self->world->list1CC0, self);
     InitPlacedObject(self);
-    SetListLinkOffset((List01*)&self->members, 0x1090);
+    SetListLinkOffset((ObjectList*)&self->members, 0x1090);
     u64 b = self->flags;
     b &= 0xFFFFFFFFCFFFFFFFull;
     b |= 0x20000000ull;
@@ -189,8 +189,8 @@ void InitWorldListedObject(WorldListedObject* self)
     self->flags = b;
 }
 
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
+void RemoveFromList(ObjectList* list, void* item);
+void AppendToList(ObjectList* self, void* item);
 
 // Slot 6 of the world-listed object: moves itself from the world's list at +0x1CC0 to the one at
 // +0x1CB4 (the one ReleaseWorldListedObject takes it out of) and registers the placed object.
@@ -201,8 +201,8 @@ void LeaveWorldLists(WorldListedObject* self)
     RegisterPlacedObject(self);
 }
 
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
+void RemoveFromList(ObjectList* list, void* item);
+void AppendToList(ObjectList* self, void* item);
 
 // Slot 7 of the world-listed object: detaches every record it owns, moves itself from the world's
 // active list to the deferred release list and unregisters it.
@@ -331,7 +331,7 @@ struct LookSourceTail {
 // +0x2D0), as far as it reads it.
 struct LookSource {
     u8 pad00[0xB0];
-    Vec02 vB0;              // 0xB0: a drift; the source is still when it and fC0, fC4 are 0
+    Vec4 vB0;              // 0xB0: a drift; the source is still when it and fC0, fC4 are 0
     f32 fC0;                // 0xC0
     f32 fC4;                // 0xC4
     u8 padC8[0xF4 - 0xC8];
@@ -418,7 +418,7 @@ void UpdateWorldListedObject(WorldListedObject* self, f32 dt)
         self->desc->m03(self);
 }
 
-s32 IsListEmpty(List01* p);
+s32 IsListEmpty(ObjectList* p);
 
 // Slot 23 of the world-listed object: copies as a listener of src and, when src is an effect
 // spawner (kind 0x50), takes it as its source with its fade distance.
@@ -429,7 +429,7 @@ void CopyWorldListedObject(WorldListedObject* self, BaseObject* src)
         EffectSpawner* from = (EffectSpawner*)src;
         self->source = from;
         self->fadeDistanceFar = from->fadeDistanceFar;
-        if (IsListEmpty((List01*)from->list314) == 0) {
+        if (IsListEmpty((ObjectList*)from->list314) == 0) {
             self->flags &= 0xFFFFFFFFF3FFFFFFULL;
             self->flags &= 0xFFFFFFFFCFFFFFFFULL;
         }
@@ -441,7 +441,7 @@ extern f32 g_gameTime;
 // Runs the microprogram at 0x10 over count particles (Vu0::ParticleFilter): a particle whose
 // extra.w has passed is dropped, the others are packed down in all three arrays with the
 // microprogram's results, and the two bounds come back updated. Returns how many were dropped.
-s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec02* pos, Vec02* extra, Vec02* items, s32 count, s32 mode,
+s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec4* pos, Vec4* extra, Vec4* items, s32 count, s32 mode,
                               void* boundA, void* boundB)
 {
     s32 j = -1;
@@ -478,7 +478,7 @@ extern void* g_toSprChannel;
 // Block n of the current scratchpad transfer.
 
 
-struct SpinRecord_158480;
+struct EffectSpinRecord;
 struct DmaChannel;
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
@@ -505,7 +505,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
 {
     Quadratic16 lo = {{3.4028235e+38f}, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
     Quadratic16 hi = {{-3.4028235e+38f}, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
-    Vec02 mat[4];
+    Vec4 mat[4];
     WordListFrame fr;
     sptr e = (sptr)&self->members.head;
     fr.list = e;
@@ -515,11 +515,11 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
     fr.prev = old;
     fr.offset = link;
     *(sptr*)&g_activeListFrames = (sptr)&fr;
-    TurnMatrixBySpin((SpinRecord_158480*)self->block330, dt, (f32*)mat);
+    TurnMatrixBySpin((EffectSpinRecord*)self->block330, dt, (f32*)mat);
     sptr head = *(sptr*)fr.link;
     fr.link = head + fr.offset;
     OwnedRecord* node = (OwnedRecord*)head;
-    Vec02* p = node->points[node->bank];
+    Vec4* p = node->points[node->bank];
     StartToSprChain(node->count * 16, p, node->count * 16, p + 0x2C, node->count * 16, p + 0x58, 0, 0);
     while (node != 0) {
         void* ch = g_toSprChannel;
@@ -536,7 +536,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
         u128 w = Vu0::ScalarInGpr(dt);
         s32 mode;
         GetParticleMode(self, &mode);
-        s32 used = FilterParticleVerticesVu0((const f32*)mat, w, (Vec02*)SprBlock::Of(0), (Vec02*)SprBlock::Of(1), (Vec02*)SprBlock::Of(2),
+        s32 used = FilterParticleVerticesVu0((const f32*)mat, w, (Vec4*)SprBlock::Of(0), (Vec4*)SprBlock::Of(1), (Vec4*)SprBlock::Of(2),
                                              node->count, mode, &lo, &hi);
         s32 nb = (node->bank + 1) & 1;
         p = node->points[nb];
@@ -553,10 +553,10 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
     if (self->particleCount <= 0) {
         self->desc->m03(self);
     } else {
-        Vec02 center;
+        Vec4 center;
         Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(lo), Vu0::Scalar(0.5f), Vu0::Q(hi), Vu0::Scalar(0.5f));
         self->desc02()->m1D(self, &center);
-        self->f2A4 = self->boundRadius = Vu0::Distance(center, *(Vec02*)&hi);
+        self->f2A4 = self->boundRadius = Vu0::Distance(center, *(Vec4*)&hi);
     }
     *(sptr*)&g_activeListFrames = fr.prev;
 }
@@ -564,7 +564,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
 extern f32 g_gameClock[];
 
 // One entry of a record's extra block: the two vectors a mode-2 point's segment ends on.
-struct VecPair { Vec02 a; Vec02 b; };
+struct VecPair { Vec4 a; Vec4 b; };
 
 // Class 0x4D's move slot. Mode 0 steps the particles (StepListedObjectParticles). Otherwise
 // each member record's live points are copied from the bank in use to the other, closing the
@@ -602,16 +602,16 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
     fr.link = head + fr.offset;
     OwnedRecord* node = (OwnedRecord*)head;
     while (node != 0) {
-        Vec02* cur = node->points[node->bank];
+        Vec4* cur = node->points[node->bank];
         s32 out = 0;
         s32 removed = 0;
         s32 nb = (node->bank + 1) & 1;
-        Vec02* nxt = node->points[nb];
+        Vec4* nxt = node->points[nb];
         for (s32 j = 0; j < node->count; j++) {
-            Vec02* pos = &cur[j];
-            Vec02* vel = &cur[0x2C + j];
-            Vec02* npos = &nxt[out];
-            Vec02* nvel = &nxt[0x2C + out];
+            Vec4* pos = &cur[j];
+            Vec4* vel = &cur[0x2C + j];
+            Vec4* npos = &nxt[out];
+            Vec4* nvel = &nxt[0x2C + out];
             f32 end = vel->w;
             if (end <= g_gameClock[1]) {
                 removed++;
@@ -635,8 +635,8 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
             }
             npos->w = pos->w;
             nvel->w = vel->w;
-            Vec02* rec = &cur[0x58 + j];
-            Vec02* nrec = &nxt[0x58 + out];
+            Vec4* rec = &cur[0x58 + j];
+            Vec4* nrec = &nxt[0x58 + out];
             *nrec = *rec;
             if (self->particleMode == 2) {
                 nrec->w = WrapAngle(rec->w + rec->z * dt);
@@ -659,22 +659,22 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
     if (self->particleCount <= 0) {
         self->desc->m03(self);
     } else {
-        Vec02 center;
+        Vec4 center;
         Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(lo), Vu0::Scalar(0.5f), Vu0::Q(hi), Vu0::Scalar(0.5f));
         self->desc02()->m1D(self, &center);
-        self->f2A4 = self->boundRadius = Vu0::Distance(center, *(Vec02*)&hi);
+        self->f2A4 = self->boundRadius = Vu0::Distance(center, *(Vec4*)&hi);
     }
     *(sptr*)&g_activeListFrames = fr.prev;
 }
 
 struct DeferredRadiusRequest { void (*fn)(void* self); s32 zero; s32 count; u8 pad0[0x50 - 0x0C]; f32 radius; u8 pad1[0x60 - 0x54]; void* owner; u8 pad2[0x80 - 0x64]; };
-struct Src_13AD08 { u8 pad[0x40]; f32 scale; };
+struct ScaledBlockSource { u8 pad[0x40]; f32 scale; };
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // Slot 37 of the world-listed object: queues a deferred draw request (the particle packet writer,
 // radius from the source or 1.0) for it.
-void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, Src_13AD08* src)
+void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, ScaledBlockSource* src)
 {
     DeferredRadiusRequest blk;
     FillMemory(&blk, 0, (u32)0x80);
@@ -693,7 +693,7 @@ void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, Src_13AD
 extern f32 g_gameClock[];
 extern s32 g_alphaStatePacket1;
 extern s32 g_alphaStatePacket2;
-s32 IsListEmpty(List01* p);
+s32 IsListEmpty(ObjectList* p);
 void PopBackMemoryMark(void);
 
 // An object of a spawner's list as func_0013AD80 draws it: the record whose 0x7C gives the frame.
@@ -707,7 +707,7 @@ struct ViewedFrame { f32 m[4][4]; f32 fade; u8 pad44[0x50 - 0x44]; };
 
 void PushBackMemoryMark();
 void* AllocateBackMemory(s32 size);
-s32 CountListItems(List01* list);
+s32 CountListItems(ObjectList* list);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
 void BeginDmaTag(PacketWriter* w);
 void CloseDmaTag(PacketWriter* w);
@@ -728,7 +728,7 @@ struct ViewListWalk {
     {
         list = l;
         link = (u8*)l;
-        offset = ((List01*)l)->offset;
+        offset = ((ObjectList*)l)->offset;
         prev = (ViewListWalk*)g_activeListFrames;
         g_activeListFrames = (ListFrame*)this;
     }
@@ -753,16 +753,16 @@ void WriteListedObjectParticlePacket(void* self)
     s32 count;
     PushBackMemoryMark();
     WorldListedObject* obj = (WorldListedObject*)req->owner;
-    if (obj->source != 0 && IsListEmpty((List01*)(((EffectSpawner*)obj->source)->list314)) == 0) {
+    if (obj->source != 0 && IsListEmpty((ObjectList*)(((EffectSpawner*)obj->source)->list314)) == 0) {
         count = 0;
         ViewListWalk walk(((EffectSpawner*)obj->source)->list314);
-        frames = (ViewedFrame*)AllocateBackMemory(CountListItems((List01*)(((EffectSpawner*)obj->source)->list314)) * sizeof(ViewedFrame));
+        frames = (ViewedFrame*)AllocateBackMemory(CountListItems((ObjectList*)(((EffectSpawner*)obj->source)->list314)) * sizeof(ViewedFrame));
         ViewedFrame* cur = frames;
         ViewedPart* e;
         while ((e = (ViewedPart*)walk.Next()) != 0) {
             if ((e->visibilityMask & g_camera->areaMask) == g_camera->areaMask && IsObjectAttached(e)) {
-                Vec02 pos;
-                Mat02 rot;
+                Vec4 pos;
+                Mat3 rot;
                 if (e->rec->frame != 0) {
                     pos = e->rec->frame->v140;
                     rot = e->rec->frame->m110;
@@ -834,7 +834,7 @@ void WriteListedObjectParticlePacket(void* self)
         CopyWordsToWriter(&g_vifPacketWriter, 9, 1, (u32*)hdr, 0);
         for (s32 i = 0; i < count; i++) {
             ViewedFrame* f = &frames[i];
-            Vec02 fade;
+            Vec4 fade;
             CopyWordsToWriter(&g_vifPacketWriter, 0xC, 4, (u32*)f, 7);
             fade.x = f->fade;
             CopyWordsToWriter(&g_vifPacketWriter, 0xC, 1, (u32*)&fade, 0xB);

@@ -175,7 +175,7 @@ void StartWorld5ModeCollider(World5ModeCollider* self)
     self->restWeight = 1.0f;
     SetBlendItemWeights((BlendAnimationView*)self->weightBlend, 0xC, 5, &self->restWeight);
     SetWorld5ModeColliderMode(self, 2);
-    T217D_BF0* base = &g_spinningSpriteElement;
+    AimReticle* base = &g_spinningSpriteElement;
     ((T217D_Float*)&base->alphaScale)->v = 0.0f;
     base->icon = FindAnimRecord(0x36A);
 }
@@ -188,15 +188,15 @@ extern f32 D_00263C20[];
 extern f32 D_00263C30[];
 extern f32 D_00263C40[];
 
-void ComputeWorld5ModeColliderAnchors(World5ModeCollider* self, Vec02* a, Vec02* b);
+void ComputeWorld5ModeColliderAnchors(World5ModeCollider* self, Vec4* a, Vec4* b);
 
 // Per-frame forces of the world 5 mode collider: in modes 0 and 1 the ordinary collider step; in
 // modes 2 and 3 it steers toward the anchor point (taken to the frame of its parent object), in
 // mode 4 toward its own current position, and always turns toward its target rotation.
 void StepWorld5ModeCollider(World5ModeCollider* self, f32 f)
 {
-    Vec02 a;
-    Vec02 b;
+    Vec4 a;
+    Vec4 b;
     s32 mode = self->mode;
     if (mode < 2) {
         goto single;
@@ -216,7 +216,7 @@ path2:
     TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, &a, 0, &b, 0);
     goto tail;
 path3:
-    a = *(Vec02*)&self->pos;
+    a = *(Vec4*)&self->pos;
     b = g_zeroVector;
 tail:
     SteerColliderTowardPosition(self, &a, D_00263C20, &b, D_00263C30, f);
@@ -232,7 +232,7 @@ void MoveWorld5ModeCollider(World5ModeCollider* self, f32 t, void* arg)
     if (fn != 0) fn(self);
 }
 
-extern T217D_BF0 g_spinningSpriteElement;
+extern AimReticle g_spinningSpriteElement;
 extern f32 g_gameTime;
 extern s32 g_padSelectFlags;
 struct OwnerMessage;
@@ -254,9 +254,9 @@ static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
 // its five-way blend animation.
 void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
 {
-    Vec02 a;
-    Vec02 d;
-    Vec02 tmp;
+    Vec4 a;
+    Vec4 d;
+    Vec4 tmp;
     f32 wx;
     f32 wy;
     UpdateSwitchedCollider(self, dt);
@@ -333,23 +333,23 @@ struct RampProfile3 {
 };
 
 struct RampProfile;
-struct Vec02;
-struct Mat02;
+struct Vec4;
+struct Mat3;
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, f32 limit, Mat02* outRot, Vec02* outSpin);
+void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, f32 limit, Mat3* outRot, Vec4* outSpin);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 
 // The product a b of two rotations into out: a's rows loaded once, b's rows each rotated by
 // them, each result row stored to its vector local and then to out's row.
-static inline void RotationProductInto(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void RotationProductInto(Mat3* out, const Mat3& a, const Mat3& b)
 {
     Vu0::Vec a0 = Vu0::Vec::Of(a.r[0]);
     Vu0::Vec a1 = Vu0::Vec::Of(a.r[1]);
     Vu0::Vec a2 = Vu0::Vec::Of(a.r[2]);
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     Vu0::Q(out->r[0]) = Vu0::Q(x) = Vu0::RotateRows(a0.q, a1.q, a2.q, Vu0::Q(b.r[0]));
     Vu0::Q(out->r[1]) = Vu0::Q(y) = Vu0::RotateRows(a0.q, a1.q, a2.q, Vu0::Q(b.r[1]));
     Vu0::Q(out->r[2]) = Vu0::Q(z) = Vu0::RotateRows(a0.q, a1.q, a2.q, Vu0::Q(b.r[2]));
@@ -362,9 +362,9 @@ static inline void RotationProductInto(Mat02* out, const Mat02& a, const Mat02& 
 // spill slots: the last `to` stored through Vu0::Q keeps it in retail's range.
 void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
 {
-    Mat02 mats[2];
+    Mat3 mats[2];
     s32 i;
-    Mat02 aim;
+    Mat3 aim;
     s32 key;
     f32 hiX;
     f32 loX;
@@ -400,8 +400,8 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     case 2:
     case 3:
     case 4: {
-        Vec02 at;
-        Vec02 pos;
+        Vec4 at;
+        Vec4 pos;
         TransformPointBetweenFrames(0, (PlacedObject*)self->aimFrame, &self->aimTargetObject->v140, &at);
         f32 u = (at.y - g_world5AimMapY[0]) / g_world5AimMapY[1];
         f32 v = (at.z - g_world5AimMapZ[0]) / g_world5AimMapZ[1];
@@ -434,7 +434,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         TransformPointBetweenFrames(0, (PlacedObject*)self->aimFrame, &pos, &((PlacedObject*)self->f650)->rot.r[2]);
         ProjectPointToCamera(g_camera, &pos, g_spinningSpriteElement.aim);
         for (i = 0; i < 2; i++) {
-            Vec02 dir;
+            Vec4 dir;
             *(Vu0::Vec*)&dir = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->turnedParts[i]->v140));
             BuildBasisFromXAndZHint(&dir, &g_unitZVector, &mats[i]);
             TransformRotationBetweenFrames(0, (PlacedObject*)self->turnedParts[i]->parent, &mats[i], &mats[i]);
@@ -461,13 +461,13 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         self->poseX = ClampBetween(self->poseX + dt * self->poseRateX, g_world5SteerLimits[0], g_world5SteerLimits[1]);
         self->poseY = ClampBetween(self->poseY + dt * self->poseRateY, g_world5SteerLimits[0], g_world5SteerLimits[1]);
 
-        Mat02 pitch;
-        Mat02 yaw;
-        Mat02 face;
-        Vec02 to;
-        Vec02 rel;
-        Mat02 tilt;
-        Vec02 axis;
+        Mat3 pitch;
+        Mat3 yaw;
+        Mat3 face;
+        Vec4 to;
+        Vec4 rel;
+        Mat3 tilt;
+        Vec4 axis;
         TransformPointBetweenFrames(0, (PlacedObject*)self->f668, &((PlacedObject*)self->aimFrame)->v140, &rel);
         f32 sx = pad->stickX;
         if (rel.x < 0.0f) {
@@ -485,9 +485,9 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         *(Vu0::Vec*)&axis = n;
         *(Vu0::Vec*)&axis = Vu0::NormalizeOr(Vu0::Vec::Of(axis), Vu0::Vec::Of(g_unitXVector));
         BuildAxisAngleMatrix(&axis, &tilt, angle);
-        Mat02 m3;
-        Mat02 m2;
-        Mat02 m1;
+        Mat3 m3;
+        Mat3 m2;
+        Mat3 m1;
         RotationProductInto(&m1, tilt, face);
         RotationProductInto(&m2, m1, yaw);
         RotationProductInto(&m3, m2, pitch);
@@ -505,7 +505,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         aim = g_identityMatrix;
         break;
     }
-    Mat02 rot;
+    Mat3 rot;
     for (i = 0; i < 2; i++) {
         ApproachRotationWithRamp(&self->turnedParts[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
         self->turnedParts[i]->desc02()->m1E(self->turnedParts[i], &rot);
@@ -647,8 +647,8 @@ s32 AcceptWorld5ModeColliderRequest(World5ModeCollider* self, s32* arg)
         self->poseRateX = 0.0f;
         self->poseRateY = 3.0f;
         ComputeWorld5ModeColliderAnchors(self, bufA, bufB);
-        TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, (Vec02*)bufA, 0, (Vec02*)bufB, 0);
-        self->desc02()->m20(self, (Vec02*)bufB);
+        TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, (Vec4*)bufA, 0, (Vec4*)bufB, 0);
+        self->desc02()->m20(self, (Vec4*)bufB);
     }
     if (HasSpareCount() != 0) {
         SetWorld5ModeColliderMode(self, 3);
@@ -710,7 +710,7 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
     switch (mode) {
     case 2: {
         Vu0::Q(g_spinningSpriteElement.aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
-        *(Vec02*)&g_spinningSpriteElement.rateX = g_zeroVector;
+        *(Vec4*)&g_spinningSpriteElement.rateX = g_zeroVector;
         g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 2);
         anim = self->weightBlend;
         break;
@@ -742,9 +742,9 @@ void PlaceWorld5ModeColliderAtAnchor(World5ModeCollider* self)
     u8 bufA[16];
     u8 bufB[16];
     ComputeWorld5ModeColliderAnchors(self, bufA, bufB);
-    TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, (Vec02*)bufA, 0, (Vec02*)bufB, 0);
-    self->desc02()->m1D(self, (Vec02*)bufA);
-    self->desc02()->m20(self, (Vec02*)bufB);
+    TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, (Vec4*)bufA, 0, (Vec4*)bufB, 0);
+    self->desc02()->m1D(self, (Vec4*)bufA);
+    self->desc02()->m20(self, (Vec4*)bufB);
 }
 
 
@@ -790,12 +790,12 @@ static inline f32 MinF(f32 a, f32 b) { return a <? b; }
 // stores before the scaling stay until flow2, so the remainder's product takes k's register.
 void UpdateWorld5Boss(World5Boss* self, f32 dt)
 {
-    Vec02 v0;
-    Vec02 local;
-    Vec02 vel;
-    Vec02 local2;
-    Vec02 pos;
-    Mat02 rot;
+    Vec4 v0;
+    Vec4 local;
+    Vec4 vel;
+    Vec4 local2;
+    Vec4 pos;
+    Mat3 rot;
 
     UpdateCollider(self, dt);
     if (self->mode >= 0) {
@@ -835,7 +835,7 @@ void UpdateWorld5Boss(World5Boss* self, f32 dt)
     PlacedObject* p = (PlacedObject*)GetActiveSwitchedCollider();
     if (p != 0) {
         TransformPointBetweenFrames(0, self, &p->v140, &v0);
-        f32 t = ComputeAngleBetweenVectors((Vec02*)&g_unitXVector, &v0, &local);
+        f32 t = ComputeAngleBetweenVectors((Vec4*)&g_unitXVector, &v0, &local);
         t = MinF(1.0f, t);
         f32 y = -t * local.y;
         f32 z = t * local.z;
@@ -919,14 +919,14 @@ void SetWorld5BossMode(World5Boss* self, s32 mode)
     }
     if (mode >= 0) {
         if (mode < 2) {
-            T217D_2E0* sys = &g_gaugeBarElement;
+            GaugeBar* sys = &g_gaugeBarElement;
             sys->fillTarget = 1.0f;
             sys->segmentsLeft = sys->segmentCount;
             sys->cellsLeft = sys->cellsPerSegment;
             sys->fill = 0.0f;
             SetWorldActiveFollower(self->world, self);
         } else if (mode < 4) {
-            T217D_2E0* sys = &g_gaugeBarElement;
+            GaugeBar* sys = &g_gaugeBarElement;
             sys->vt->m15(sys);
             SetWorldActiveFollower(self->world, 0);
         }
@@ -1089,7 +1089,7 @@ void SetWorld5CountdownState(World5Countdown* self, s32 state)
     switch (state) {
     case 1:
         {
-            T217D_2E0* bar = &g_gaugeBarElement;
+            GaugeBar* bar = &g_gaugeBarElement;
             bar->segmentsLeft = bar->segmentCount = 4;
             bar->cellsLeft = bar->cellsPerSegment = 4;
             bar->cellCount = 0x10;

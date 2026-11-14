@@ -12,11 +12,11 @@ struct Out_eu_1AE138;
 void SetTextLayoutVerticalPlacement(Out_eu_1AE138* out, s32 v);
 struct Out_eu_1AE138 {
     u8 d[0x20];
-    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
-    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
-    void Color(s32* c) { ((Layout_137228*)this)->Color(c); }
-    void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
-    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
+    void Pos(f32 x, f32 y) { ((TextBoxLayout*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((TextBoxLayout*)this)->Size(x, y); }
+    void Color(s32* c) { ((TextBoxLayout*)this)->Color(c); }
+    void FlagA(s32 f) { ((TextBoxLayout*)this)->SetF14(f); }
+    void FlagB(s32 f) { ((TextBoxLayout*)this)->SetF18(f); }
     void Fin(s32 v) { SetTextLayoutVerticalPlacement(this, v); }
 };
 struct Globals_eu_1AE138 { u8 pad0[0x560]; s32 f560; u8 pad1[0xC]; s32 f570; };

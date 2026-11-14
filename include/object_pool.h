@@ -16,7 +16,7 @@
 struct Quad16;
 
 // 0x3C: a record shared with the object this one was copied from (func_001A84C8).
-struct Sub8C {
+struct LentRecord {
     s32 f0;                 // 0x0
     s32 lentOut;            // 0x04: nonzero while the record is lent out
     s32 f8;                 // 0x08
@@ -49,7 +49,7 @@ typedef char check_ObjectPoolEntry[sizeof(ObjectPoolEntry) == 0x14 ? 1 : -1];
 struct ObjectPool : BaseObject {
     s32 count;              // 0x34: the entries of items (func_001A84C8)
     ObjectPoolEntry* items; // 0x38
-    Sub8C* sub;             // 0x3C
+    LentRecord* sub;             // 0x3C
     s32 f40;                // 0x40
     s32 lastItemIndex;      // 0x44: the index of the entry the last choice came from
     s32 chosenItem;         // 0x48: the item chosen (func_001A8AF8); func_001A8C50 tests it, func_001A93C8 clears it

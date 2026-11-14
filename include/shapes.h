@@ -7,7 +7,7 @@
 // 4-aligned one with four lw/sw, a packed one with lwl/lwr (ldl/ldr for a doubleword), and it
 // gives a 16-aligned local a 16-aligned stack slot. So a view takes the shape whose alignment
 // it has, never another one of the same size. The 16-aligned four floats and the three-row
-// matrix are Vec02 and Mat02 (c02.h); this header does not repeat them.
+// matrix are Vec4 and Mat3 (c02.h); this header does not repeat them.
 #ifndef SHAPES_H
 #define SHAPES_H
 
@@ -78,7 +78,7 @@ struct Vec3 {
     f32 z;                  // 0x08
 };
 
-// Four floats at 4-byte alignment (the 26 views that are not Vec02: lwc1/swc1 one by one).
+// Four floats at 4-byte alignment (the 26 views that are not Vec4: lwc1/swc1 one by one).
 struct Vec4U {
     f32 x;                  // 0x00
     f32 y;                  // 0x04
@@ -87,7 +87,7 @@ struct Vec4U {
 };
 
 // Three rows of four floats at 4-byte alignment (Buf_16A580, Buf_16D0C0, Mat_1EB748,
-// Loc_13F940): the shape of Mat02 where the code does not align it.
+// Loc_13F940): the shape of Mat3 where the code does not align it.
 struct Mat3U {
     f32 m[3][4];            // 0x00
 };
@@ -98,7 +98,7 @@ struct Mat4 {
     f32 m[4][4];            // 0x00
 };
 
-// Four rows moved as quadwords: the layout of four Vec02 (the 16-aligned 4-row blocks,
+// Four rows moved as quadwords: the layout of four Vec4 (the 16-aligned 4-row blocks,
 // Blk4_18DB20, Tail_157EF8, Dst_188B08).
 struct __attribute__((aligned(16))) Mat4A {
     f32 m[4][4];            // 0x00

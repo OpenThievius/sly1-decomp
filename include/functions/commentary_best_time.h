@@ -6,13 +6,13 @@
 
 #include "common.h"
 
-struct T217D_1380;
+struct SprintCaption;
 
 void* FindLevelEntry(s32 key);
-void InitCommentaryPromptElement(T217D_1380* self);
-void UpdateBestTimeState(T217D_1380* self);
-void SetBestTimeState(T217D_1380* self, s32 n);
-void DrawFramedText(T217D_1380* self);
+void InitCommentaryPromptElement(SprintCaption* self);
+void UpdateBestTimeState(SprintCaption* self);
+void SetBestTimeState(SprintCaption* self, s32 n);
+void DrawFramedText(SprintCaption* self);
 void FinishBestTimeRun(void* self);
 
 #endif

@@ -93,7 +93,7 @@ R11B008Key* NewKeyedValue(void);
 void CopyKeyedValueChain(R11B008Key* src, R11B008Key* dst, s32 first);
 
 // The pools (value.cpp) and the collector's calls on them (value_pools.cpp).
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
+void BuildBasisFromXAndZHint(const Vec4* x, const Vec4* hint, Mat3* out);
 extern EntryPool g_valueNodePool;
 extern EntryPool g_scopePool;
 extern EntryPool g_keyedValuePool;
@@ -114,9 +114,9 @@ void CopyTransposedMatrix(Quad16* src, Quad16* dst);
 void* InvertMatrix4x4(void* a0, void* a1);
 void TransformMatrixByObject(u8* self, void* arg, Quad16* out);
 void MatrixToEulerAngles(Mat4* self, Vec3* out);
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
+void MatrixToAxisAngle(Mat3* m, f32* angle, Vec4* axis);
+void RotateMatrixUpright(Mat3* self, Mat3* scratch, Mat3* out);
+void BuildMatrixFromRotationAndTranslation(const Vec4* pos, const Mat3* rot, Mat4A* out);
 void ResetMatrixHomogeneous(HomogeneousMatrix* self);
 ScriptValue* UpdateObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
 ScriptValue* SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
@@ -125,7 +125,7 @@ ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx);
 ScriptScope* GetScriptEntryScope(s32 index, World* self);
@@ -142,7 +142,7 @@ extern s32 D_00259DE8;
 s32 IsPoolEntryUnmarked(void* payload);
 void MarkPoolEntryUsed(void* payload);
 
-s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
+s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 // This file's functions. The built-ins (ScriptBuiltinFn) and their helpers:
 ScriptValue* IgnoreScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
@@ -516,10 +516,10 @@ ScriptValue* AddScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, Scr
         break;
     }
     case 0x16: {
-        Vec02* v = (Vec02*)AcquireVectorAPayload();
-        *v = *(Vec02*)args[0].v;
+        Vec4* v = (Vec4*)AcquireVectorAPayload();
+        *v = *(Vec4*)args[0].v;
         for (; n != 0; n = n->next) {
-            Vu0::Q(*v) = Vu0::Add(Vu0::Q(*v), Vu0::Q(*(Vec02*)n->v));
+            Vu0::Q(*v) = Vu0::Add(Vu0::Q(*v), Vu0::Q(*(Vec4*)n->v));
         }
         SetScriptValueVectorA(&t, (f32*)v);
         break;
@@ -596,10 +596,10 @@ ScriptValue* SubtractScriptValues(ScriptValue* ret, s32 count, ScriptValue* args
         break;
     }
     case 0x16: {
-        Vec02* v = (Vec02*)AcquireVectorAPayload();
-        *v = *(Vec02*)args[0].v;
+        Vec4* v = (Vec4*)AcquireVectorAPayload();
+        *v = *(Vec4*)args[0].v;
         for (; n != 0; n = n->next) {
-            Vu0::Q(*v) = Vu0::Sub(Vu0::Q(*v), Vu0::Q(*(Vec02*)n->v));
+            Vu0::Q(*v) = Vu0::Sub(Vu0::Q(*v), Vu0::Q(*(Vec4*)n->v));
         }
         SetScriptValueVectorA(&t, (f32*)v);
         break;
@@ -668,7 +668,7 @@ static inline ScriptMatrixPayload ScaledMatrix(const ScriptMatrixPayload* m, u12
     return r;
 }
 u128* StoreFloatAsQuadword(u128* out, f32 f);
-void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
+void TransformByMatrixWithW(const Quad16* m, const Vec4* v, f32 w, Vec4* out);
 ScriptMatrixPayload MultiplyMatrices(const ScriptMatrixPayload* a, const void* b);
 void FreeMatrixPayload(void* p);
 
@@ -795,7 +795,7 @@ ScriptValue* MultiplyScriptValues(ScriptValue* ret, s32 count, ScriptValue* args
             case 0x16:
                 va = (ScriptVectorRow*)AcquireVectorAPayload();
                 tag = 0x16;
-                TransformByMatrixWithW((const Quad16*)m, (const Vec02*)x->v, 1.0f, (Vec02*)va);
+                TransformByMatrixWithW((const Quad16*)m, (const Vec4*)x->v, 1.0f, (Vec4*)va);
                 break;
             case 0x17: {
                 ScriptMatrixPayload c;
@@ -1950,7 +1950,7 @@ ScriptValue* MakeScriptVector(ScriptValue* ret, s32 count, ScriptValue* args, Sc
 }
 
 // A row of the 0x40-byte block of tag 0x17 (func_0011C618), 16-aligned: copied with lq/sq.
-struct __attribute__((aligned(16))) Row_115510 {
+struct __attribute__((aligned(16))) MatrixRow {
     f32 f[4];               // 0x00
 };
 
@@ -1961,14 +1961,14 @@ ScriptValue* MakeScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, Sc
 {
     ScriptValue t, u;
     InitScriptValue(&t);
-    Row_115510* a = (Row_115510*)AcquireMatrixPayload();
+    MatrixRow* a = (MatrixRow*)AcquireMatrixPayload();
     R11B008Node* n = args->node;
     switch (count) {
     case 3:
     case 4: {
         ResetMatrixHomogeneous((HomogeneousMatrix*)a);
         for (s32 i = 0; i < count; i++) {
-            a[i] = *(Row_115510*)n->v;
+            a[i] = *(MatrixRow*)n->v;
             n = n->next;
         }
         break;
@@ -2273,7 +2273,7 @@ ScriptValue* GetScriptDotProduct(ScriptValue* ret, s32 count, ScriptValue* args,
 {
     ScriptValue obj;
     InitScriptValue(&obj);
-    SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Dot(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(*(Vec02*)args[1].v))));
+    SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Dot(Vu0::Q(*(Vec4*)args[0].v), Vu0::Q(*(Vec4*)args[1].v))));
     CopyConstructScriptValue(ret, &obj);
     DestroyScriptValue(&obj, 2);
     return ret;
@@ -2311,9 +2311,9 @@ ScriptValue* GetScriptDistance(ScriptValue* ret, s32 count, ScriptValue* args, S
     ScriptValue obj;
     InitScriptValue(&obj);
     if (args[1].tag == 0) {
-        SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(g_zeroVector)))));
+        SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*(Vec4*)args[0].v), Vu0::Q(g_zeroVector)))));
     } else {
-        SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(*(Vec02*)args[1].node->v)))));
+        SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*(Vec4*)args[0].v), Vu0::Q(*(Vec4*)args[1].node->v)))));
     }
     CopyConstructScriptValue(ret, &obj);
     DestroyScriptValue(&obj, 2);
@@ -2328,10 +2328,10 @@ ScriptValue* GetScriptDistanceSquared(ScriptValue* ret, s32 count, ScriptValue* 
     ScriptValue obj;
     InitScriptValue(&obj);
     if (args[1].tag == 0) {
-        u128 d = Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(g_zeroVector));
+        u128 d = Vu0::Sub(Vu0::Q(*(Vec4*)args[0].v), Vu0::Q(g_zeroVector));
         SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Dot(d, d)));
     } else {
-        u128 d = Vu0::Sub(Vu0::Q(*(Vec02*)args[0].v), Vu0::Q(*(Vec02*)args[1].node->v));
+        u128 d = Vu0::Sub(Vu0::Q(*(Vec4*)args[0].v), Vu0::Q(*(Vec4*)args[1].node->v));
         SetScriptValueFloat(&obj, Vu0::ToFloat(Vu0::Dot(d, d)));
     }
     CopyConstructScriptValue(ret, &obj);
@@ -2346,11 +2346,11 @@ ScriptValue* NormalizeScriptVector(ScriptValue* ret, s32 count, ScriptValue* arg
 {
     ScriptValue obj;
     InitScriptValue(&obj);
-    Vec02* out = (Vec02*)AcquireVectorAPayload();
-    u128 a = Vu0::Q(*(Vec02*)args[0].v);
+    Vec4* out = (Vec4*)AcquireVectorAPayload();
+    u128 a = Vu0::Q(*(Vec4*)args[0].v);
     Vu0::Q(*out) = a;
     if (args[1].tag == 0) {
-        Vec02* fb = (Vec02*)&g_zeroVector;
+        Vec4* fb = (Vec4*)&g_zeroVector;
         u128 len = Vu0::Length(a);
         if (Vu0::ToFloatMoved(len) < 0.0001f) {
             *out = *fb;
@@ -2358,7 +2358,7 @@ ScriptValue* NormalizeScriptVector(ScriptValue* ret, s32 count, ScriptValue* arg
             Vu0::Q(*out) = Vu0::DivX(a, len);
         }
     } else {
-        Vec02* fb = (Vec02*)args[1].node->v;
+        Vec4* fb = (Vec4*)args[1].node->v;
         u128 len = Vu0::Length(a);
         if (Vu0::ToFloatMoved(len) < 0.0001f) {
             *out = *fb;
@@ -2378,9 +2378,9 @@ ScriptValue* ProjectScriptVector(ScriptValue* ret, s32 count, ScriptValue* args,
     ScriptValue obj;
     InitScriptValue(&obj);
     f32* p = AcquireVectorAPayload();
-    u128 a = Vu0::Q(*(Vec02*)args[0].v);
-    u128 b = Vu0::Q(*(Vec02*)args[1].v);
-    Vu0::Q(*(Vec02*)p) = Vu0::MulX(b, Vu0::Dot(a, b));
+    u128 a = Vu0::Q(*(Vec4*)args[0].v);
+    u128 b = Vu0::Q(*(Vec4*)args[1].v);
+    Vu0::Q(*(Vec4*)p) = Vu0::MulX(b, Vu0::Dot(a, b));
     SetScriptValueVectorA(&obj, p);
     CopyConstructScriptValue(ret, &obj);
     DestroyScriptValue(&obj, 2);
@@ -2394,9 +2394,9 @@ ScriptValue* RemoveScriptVectorComponent(ScriptValue* ret, s32 count, ScriptValu
     ScriptValue obj;
     InitScriptValue(&obj);
     f32* p = AcquireVectorAPayload();
-    u128 a = Vu0::Q(*(Vec02*)args[0].v);
-    u128 b = Vu0::Q(*(Vec02*)args[1].v);
-    Vu0::Q(*(Vec02*)p) = Vu0::Sub(a, Vu0::MulX(b, Vu0::Dot(a, b)));
+    u128 a = Vu0::Q(*(Vec4*)args[0].v);
+    u128 b = Vu0::Q(*(Vec4*)args[1].v);
+    Vu0::Q(*(Vec4*)p) = Vu0::Sub(a, Vu0::MulX(b, Vu0::Dot(a, b)));
     SetScriptValueVectorA(&obj, p);
     CopyConstructScriptValue(ret, &obj);
     DestroyScriptValue(&obj, 2);
@@ -2422,7 +2422,7 @@ ScriptValue* GetScriptBallisticVelocity(ScriptValue* ret, s32 count, ScriptValue
     void* s1 = args[0].p;
     void* fc = args[1].p;
     ConvertScriptValueToFloat(&v, &args[2]);
-    ComputeBallisticLaunchVelocity((Vec02*)s1, (Vec02*)fc, (Vec02*)p, (u8*)s3, v.f);
+    ComputeBallisticLaunchVelocity((Vec4*)s1, (Vec4*)fc, (Vec4*)p, (u8*)s3, v.f);
     DestroyScriptValue(&v, 2);
     SetScriptValueVectorA(&q, p);
     CopyConstructScriptValue(ret, &q);
@@ -2441,7 +2441,7 @@ ScriptValue* GetScriptAngleAndAxis(ScriptValue* ret, s32 count, ScriptValue* arg
     a->next = b;
     f32* c = AcquireVectorAPayload();
     SetScriptValueVectorA(b, c);
-    f32 d = ComputeAngleBetweenVectors((Vec02*)args[0].p, (Vec02*)args[1].p, (Vec02*)c);
+    f32 d = ComputeAngleBetweenVectors((Vec4*)args[0].p, (Vec4*)args[1].p, (Vec4*)c);
     SetScriptValueFloat(a, d);
     SetScriptValueChain(&t, a);
     CopyConstructScriptValue(ret, &t);
@@ -2490,11 +2490,11 @@ ScriptValue* TransformScriptMatrixByObject(ScriptValue* ret, s32 count, ScriptVa
 
 typedef f32 (*MathFn_259938)(f32 x);
 f32* AcquireMatrixPayload(void);
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
+void MatrixToAxisAngle(Mat3* m, f32* angle, Vec4* axis);
 void ResetMatrixHomogeneous(HomogeneousMatrix* self);
 
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
+void MultiplyMatrices3x3(Mat3* a, Mat3* b, Mat3* out);
+void BuildAxisAngleMatrix(const Vec4* v, Mat3* out, f32 angle);
 
 // The script's rotation-blend built-in: takes the rotation between the matrices args[0] and args[1]
 // as an axis and an angle, scales the angle by the weight args[2] and applies that partial rotation
@@ -2502,22 +2502,22 @@ void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 ScriptValue* InterpolateScriptRotation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue obj;
-    Mat02 delta;
-    Vec02 axis;
-    Mat02 a;
-    Mat02 b;
+    Mat3 delta;
+    Vec4 axis;
+    Mat3 a;
+    Mat3 b;
     f32 angle;
     InitScriptValue(&obj);
     f32* m = AcquireMatrixPayload();
-    MultiplyMatrices3x3((Mat02*)args[0].p, (Mat02*)args[1].p, &delta);
-    MatrixToAxisAngle(&delta, &angle, (Vec02*)&axis);
+    MultiplyMatrices3x3((Mat3*)args[0].p, (Mat3*)args[1].p, &delta);
+    MatrixToAxisAngle(&delta, &angle, (Vec4*)&axis);
     BuildAxisAngleMatrix(&axis, &delta, angle * args[2].f);
-    const Mat02* src = (const Mat02*)args[0].p;
+    const Mat3* src = (const Mat3*)args[0].p;
     u128 v0 = Vu0::Q(src->r[0]);
     Vu0::Q(b.r[0]) = Vu0::Q(a.r[0]) = Vu0::RotateUntied(delta, v0);
     Vu0::Q(b.r[1]) = Vu0::Q(a.r[1]) = Vu0::RotateUntied(delta, Vu0::Q(src->r[1]));
     Vu0::Q(b.r[2]) = Vu0::Q(a.r[2]) = Vu0::RotateUntied(delta, Vu0::Q(src->r[2]));
-    *(Mat02*)m = a;
+    *(Mat3*)m = a;
     ResetMatrixHomogeneous((HomogeneousMatrix*)m);
     SetScriptValueMatrix(&obj, m);
     CopyConstructScriptValue(ret, &obj);
@@ -2578,7 +2578,7 @@ ScriptValue* GetScriptMatrixAxisAngle(ScriptValue* ret, s32 count, ScriptValue* 
     f32* c = AcquireVectorAPayload();
     SetScriptValueVectorA(b, c);
     a->next = b;
-    MatrixToAxisAngle((Mat02*)args[0].p, &vec.x, (Vec02*)c);
+    MatrixToAxisAngle((Mat3*)args[0].p, &vec.x, (Vec4*)c);
     SetScriptValueFloat(a, vec.x);
     SetScriptValueChain(&t, a);
     CopyConstructScriptValue(ret, &t);
@@ -2592,16 +2592,16 @@ ScriptValue* MakeScriptDirectionMatrix(ScriptValue* ret, s32 count, ScriptValue*
 {
     ScriptValue obj;
     u128 dir;
-    const Vec02* up;
+    const Vec4* up;
     InitScriptValue(&obj);
     if (args[2].tag == 0) {
         up = &g_unitZVector;
     } else {
-        up = (const Vec02*)args[2].node->v;
+        up = (const Vec4*)args[2].node->v;
     }
-    dir = Vu0::Sub(Vu0::Q(*(Vec02*)args[1].v), Vu0::Q(*(Vec02*)args[0].v));
+    dir = Vu0::Sub(Vu0::Q(*(Vec4*)args[1].v), Vu0::Q(*(Vec4*)args[0].v));
     f32* m = AcquireMatrixPayload();
-    BuildBasisFromXAndZHint((const Vec02*)&dir, (const Vec02*)up, (Mat02*)m);
+    BuildBasisFromXAndZHint((const Vec4*)&dir, (const Vec4*)up, (Mat3*)m);
     ResetMatrixHomogeneous((HomogeneousMatrix*)m);
     SetScriptValueMatrix(&obj, m);
     CopyConstructScriptValue(ret, &obj);
@@ -2622,8 +2622,8 @@ ScriptValue* MakeScriptUprightObjectMatrix(ScriptValue* ret, s32 count, ScriptVa
     UprightBasis v;
     InitScriptValue(&t);
     f32* a = AcquireMatrixPayload();
-    RotateMatrixUpright((Mat02*)args[0].p, 0, (Mat02*)&v);
-    BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)args[0].p + 0x30), (const Mat02*)&v, (Mat4A*)a);
+    RotateMatrixUpright((Mat3*)args[0].p, 0, (Mat3*)&v);
+    BuildMatrixFromRotationAndTranslation((const Vec4*)((u8*)args[0].p + 0x30), (const Mat3*)&v, (Mat4A*)a);
     SetScriptValueMatrix(&t, a);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -3212,8 +3212,8 @@ ScriptValue* GatherScriptObjectsById(ScriptValue* ret, s32 count, ScriptValue* a
 ScriptValue* FindScriptObjectsInBox(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
-    Vec02 lo;
-    Vec02 hi;
+    Vec4 lo;
+    Vec4 hi;
     ScriptValue t;
     s32 n;
     u8* list;
@@ -3243,7 +3243,7 @@ ScriptValue* FindScriptObjectsInSphere(ScriptValue* ret, s32 count, ScriptValue*
     InitScriptValue(&q);
     if (args[1].tag == 0x14) scale = (f32)args[1].i; else scale = args[1].f;
     PushBackMemoryMark();
-    GatherCollidersInSphere(g_currentWorld, 0, scale, (Vec02*)args[0].v, 0, 0, &n, (Collider***)&list);
+    GatherCollidersInSphere(g_currentWorld, 0, scale, (Vec4*)args[0].v, 0, 0, &n, (Collider***)&list);
     MakeScriptRefList(&t, n, list);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3280,7 +3280,7 @@ RetValue SearchScriptObjectHits(s32 id, s32 count, ScriptValue* args, ScriptScop
             if (e == 0)
                 continue;
             slot = e;
-            if (FindNearestSpanObject(0, (Vec02*)pa->p, (Vec02*)pb->p, 1, (Collider**)&slot, &hit) == 0)
+            if (FindNearestSpanObject(0, (Vec4*)pa->p, (Vec4*)pb->p, 1, (Collider**)&slot, &hit) == 0)
                 continue;
             if (id == kind) {
                 n1 = NewScriptValueNode();
@@ -3356,7 +3356,7 @@ ScriptValue* TransformScriptPointBetweenFrames(ScriptValue* ret, s32 count, Scri
     ScriptValue t;
     InitScriptValue(&t);
     f32* p = AcquireVectorAPayload();
-    TransformPointBetweenFrames((PlacedObject*)args[0].p, (PlacedObject*)args[1].p, (Vec02*)args[2].p, (Vec02*)p);
+    TransformPointBetweenFrames((PlacedObject*)args[0].p, (PlacedObject*)args[1].p, (Vec4*)args[2].p, (Vec4*)p);
     SetScriptValueVectorA(&t, p);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -3370,7 +3370,7 @@ ScriptValue* TransformScriptDirectionBetweenFrames(ScriptValue* ret, s32 count, 
     ScriptValue t;
     InitScriptValue(&t);
     f32* p = AcquireVectorAPayload();
-    TransformDirectionBetweenFrames((PlacedObject*)args[0].p, (PlacedObject*)args[1].p, (Vec02*)args[2].p, (Vec02*)p);
+    TransformDirectionBetweenFrames((PlacedObject*)args[0].p, (PlacedObject*)args[1].p, (Vec4*)args[2].p, (Vec4*)p);
     SetScriptValueVectorA(&t, p);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -3385,7 +3385,7 @@ ScriptValue* TransformScriptRotationBetweenFrames(ScriptValue* ret, s32 count, S
     f32* obj;
     InitScriptValue(&q);
     obj = AcquireMatrixPayload();
-    TransformRotationBetweenFrames((PlacedObject*)args[0].p, (PlacedObject*)args[1].p, (Mat02*)args[2].v, (Mat02*)obj);
+    TransformRotationBetweenFrames((PlacedObject*)args[0].p, (PlacedObject*)args[1].p, (Mat3*)args[2].v, (Mat3*)obj);
     ResetMatrixHomogeneous((HomogeneousMatrix*)obj);
     SetScriptValueMatrix(&q, obj);
     CopyConstructScriptValue(ret, &q);
@@ -3398,14 +3398,14 @@ ScriptValue* TransformScriptRotationBetweenFrames(ScriptValue* ret, s32 count, S
 ScriptValue* GetScriptPointAheadOfCamera(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue obj;
-    Vec02 t;
-    Vec02 k;
+    Vec4 t;
+    Vec4 k;
     InitScriptValue(&obj);
     f32* p = AcquireVectorAPayload();
     Camera* c = g_camera;
     Vu0::Q(k) = Vu0::FromFloatAt(c->nearDistance);
     Vu0::Q(t) = Vu0::MulX(Vu0::Q(c->rotation), Vu0::Q(k));
-    Vu0::Q(*(Vec02*)p) = Vu0::Add(Vu0::Q(c->position), Vu0::Q(t));
+    Vu0::Q(*(Vec4*)p) = Vu0::Add(Vu0::Q(c->position), Vu0::Q(t));
     SetScriptValueVectorA(&obj, p);
     CopyConstructScriptValue(ret, &obj);
     DestroyScriptValue(&obj, 2);
@@ -3526,8 +3526,8 @@ ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* arg
     if (mask & 8) {
         q8 = (u8*)AllocateBackMemory(n * sizeof(ScriptSampleQuad));
     }
-    SampleAnimationFrameChain((BlendAnimationView*)anim, a, b, (PlacedObject*)from, (PlacedObject*)to, n, (Vec02*)positions, (Mat02*)rotations,
-                  (Vec02*)q4, (Vec02*)q8);
+    SampleAnimationFrameChain((BlendAnimationView*)anim, a, b, (PlacedObject*)from, (PlacedObject*)to, n, (Vec4*)positions, (Mat3*)rotations,
+                  (Vec4*)q4, (Vec4*)q8);
     R11B008Node* head = 0;
     R11B008Node* tail = 0;
     for (s32 bit = 1; bit < 9; bit <<= 1) {

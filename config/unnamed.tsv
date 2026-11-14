@@ -405,11 +405,11 @@ include/aim_blend_grid.h:AimBlendGrid.fE0	no reader	float read last from the str
 include/aim_blend_grid.h:BlendAnimationView.f78	role not shown	copied from another view only)
 include/aim_blend_grid.h:BlendAnimationView.f7C	role not shown	one of two pose scales, with f98)
 include/aim_blend_grid.h:BlendAnimationView.f98	role not shown	as f7C)
+include/attachment.h:AimAttachment.f80	no reader	union alias of p80)
+include/attachment.h:AimAttachment.f84	no reader	union alias of p80)
 include/attachment.h:AnimationPlayer.f54	role not shown	an 8-byte array handed to RegisterObjectGroup/UnregisterObjectGroup)
-include/attachment.h:T2195_588.f80	role not shown	copy of the link value, set at init only)
-include/attachment.h:T2195_588.f84	no reader	
-include/attachment.h:T2195_790.f80	no reader	union alias of p80)
-include/attachment.h:T2195_790.f84	no reader	union alias of p80)
+include/attachment.h:OwnerSnapshotAttachment.f80	role not shown	copy of the link value, set at init only)
+include/attachment.h:OwnerSnapshotAttachment.f84	no reader	
 include/base_object.h:BaseObject.f0C	role not shown	a flag word tested nonzero on the other object by TestOtherFlagged)
 include/buffered_stream.h:BufferedStream.f38	no reader	cleared at open)
 include/buffered_stream.h:BufferedStream.f44	no reader	cleared at open)
@@ -441,8 +441,8 @@ include/collider.h:Collider.fD4	no reader	a 12-byte tail copied with the rest of
 include/collider_pose.h:ColliderPose.f3C	no reader	only written to 1 in player.cpp)
 include/colored_triangle_set.h:ColoredTriangleSet.f4C	value only	1.0 set at init, no reader)
 include/colored_triangle_set.h:ColoredTriangleSet.f5C	value only	1.0 set at init, no reader)
-include/contact_tracker.h:Rec36.f04	no reader	0 at set-up)
-include/contact_tracker.h:Rec36.f08	no reader	150.0 at set-up)
+include/contact_tracker.h:ContactTrackerRecord.f04	no reader	0 at set-up)
+include/contact_tracker.h:ContactTrackerRecord.f08	no reader	150.0 at set-up)
 include/cursor_animator.h:AnimatorParams.f10	role not shown	a block word each animator type reads differently in its Load function)
 include/cursor_animator.h:AnimatorParams.f14	role not shown	a block word each animator type reads differently in its Load function)
 include/cursor_animator.h:AnimatorParams.f18	role not shown	a block word each animator type reads differently in its Load function)
@@ -454,12 +454,12 @@ include/effect.h:Effect.f124	role not shown	union, kind-specific)
 include/effect.h:Effect.f128	role not shown	union, kind-specific)
 include/effect.h:Effect.f130	role not shown	union of params, points and an angle; kind-specific)
 include/effect.h:Effect.fB0	role not shown	union of float and int, kind-specific)
-include/effect_spawner.h:Rec50.f130	role not shown	a mode; == 2 needs a pooled slot and a setup pair; aliased by words130)
-include/effect_spawner.h:Rec50.f188	role not shown	tested against -1 at post-load; aliased by words130)
-include/effect_spawner.h:Rec50.f1F0	role not shown	kind-dependent parameter, union of float, int and object id)
-include/effect_spawner.h:Rec50.f1F0f	role not shown	kind-dependent parameter)
-include/effect_spawner.h:Rec50.f1F4	role not shown	kind-dependent parameter)
-include/effect_spawner.h:Rec50.f1F8	role not shown	kind 24's third parameter, copied to an effect's f128)
+include/effect_spawner.h:EffectSpawnerRecord.f130	role not shown	a mode; == 2 needs a pooled slot and a setup pair; aliased by words130)
+include/effect_spawner.h:EffectSpawnerRecord.f188	role not shown	tested against -1 at post-load; aliased by words130)
+include/effect_spawner.h:EffectSpawnerRecord.f1F0	role not shown	kind-dependent parameter, union of float, int and object id)
+include/effect_spawner.h:EffectSpawnerRecord.f1F0f	role not shown	kind-dependent parameter)
+include/effect_spawner.h:EffectSpawnerRecord.f1F4	role not shown	kind-dependent parameter)
+include/effect_spawner.h:EffectSpawnerRecord.f1F8	role not shown	kind 24's third parameter, copied to an effect's f128)
 include/flag_table.h:FlagTable.f000	no reader	no use found)
 include/font.h:Font.f00	no reader	no use found)
 include/game_progress.h:G27C230.f08	role not shown	read through extern views in other files)
@@ -482,19 +482,19 @@ include/id_linked_object.h:IdLinkedObject.f2DC	role not shown	a pair with f2E0 s
 include/id_linked_object.h:IdLinkedObject.f2E0	role not shown	pair with f2DC)
 include/id_linked_object.h:IdLinkedObject.f320	no reader	0.3 at set-up)
 include/id_linked_object.h:IdLinkedObject.f324	no reader	0.5 at set-up)
-include/layout_137228.h:Layout_137228.f14	role not shown	set through SetF14 only)
-include/layout_137228.h:Layout_137228.f18	role not shown	set through SetF18 only)
+include/layout_137228.h:TextBoxLayout.f14	role not shown	set through SetF14 only)
+include/layout_137228.h:TextBoxLayout.f18	role not shown	set through SetF18 only)
 include/listed_collision_part.h:ListedCollisionPart.f568	no reader	300.0 at set-up only; never read by this struct
 include/load_progress.h:LoadProgress.f14	no reader	union alias of barColor)
 include/load_progress.h:LoadProgress.f18	no reader	union alias of color0)
 include/load_progress.h:LoadProgress.f1C	no reader	union alias of color1)
 include/load_progress.h:LoadProgress.f20	no reader	union alias of color2)
-include/masked_collider.h:C24.f6CC	role not shown	start of an embedded ramp profile with f6D0, f6D4)
-include/masked_collider.h:C24.f6D0	role not shown	ramp profile word)
-include/masked_collider.h:C24.f6D4	role not shown	ramp profile word)
-include/masked_collider.h:C24.f6D8	role not shown	3000.0 scale: lens = sqrt(f6D8 / len))
-include/masked_collider.h:Held23.f4C	role not shown	set to 1 and 0 on the aim attachment)
+include/masked_collider.h:HeldAimAttachment.f4C	role not shown	set to 1 and 0 on the aim attachment)
 include/masked_collider.h:MaskedCollider.f620	role not shown	copied into a message field f30)
+include/masked_collider.h:PathSpeedCollider.f6CC	role not shown	start of an embedded ramp profile with f6D0, f6D4)
+include/masked_collider.h:PathSpeedCollider.f6D0	role not shown	ramp profile word)
+include/masked_collider.h:PathSpeedCollider.f6D4	role not shown	ramp profile word)
+include/masked_collider.h:PathSpeedCollider.f6D8	role not shown	3000.0 scale: lens = sqrt(f6D8 / len))
 include/masked_collider.h:PooledHolder.f7B0	role not shown	set by a kind 7 item, picks the 0x2B8 state; meaning unclear)
 include/memory_card.h:CardSlot.f0C	role not shown	a float of the save image; nonzero tells a used slot, no name from the code)
 include/memory_card.h:MemoryCard.f00	no reader	
@@ -560,11 +560,11 @@ include/placed_model_parts.h:BatchVertexWords.f20	role not shown	a packet word)
 include/placed_model_parts.h:StripHeader.f14	role not shown	a byte read from the stream, scaled into a packet word)
 include/placed_model_parts.h:StripUnpack.f10	role not shown	a packet header constant, 3 or 4)
 include/placed_model_parts.h:StripUnpack.f12	role not shown	packet word computed from the strip header byte)
-include/placed_object.h:Elem02.f14	role not shown	
 include/placed_object.h:PlacedObject.f29C	role not shown	integer view of the union with eventTimer)
 include/placed_object.h:PlacedObject.f2A4	role not shown	a radius set with boundRadius; zone_collider takes the max with radius3CC)
 include/placed_object.h:PlacedObject.f8C	role not shown	read as a face tree by TestPointAgainstObjectShape; no writer found)
 include/placed_object.h:PlacedObject.f98	role not shown	
+include/placed_object.h:PlacedObjectElement.f14	role not shown	
 include/point_object.h:ListedPointObject.f58	no reader	largest float at set-up)
 include/point_object.h:TargetPoint.f68	no reader	1 at set-up)
 include/point_object.h:TargetPoint.f70	no reader	largest float at set-up)
@@ -590,8 +590,8 @@ include/scatter_controller.h:ScatterTable.f40	no reader	never accessed by name i
 include/scatter_controller.h:ScatterTable.f4C	no reader	never accessed by name in pooled_object.cpp)
 include/scatter_controller.h:ScatterTable.f50	no reader	never accessed by name in pooled_object.cpp)
 include/scatter_controller.h:ScatterTable.f5C	no reader	never accessed by name in pooled_object.cpp)
-include/screen_element.h:T217D_1380.f270	no reader	only cleared)
-include/screen_element.h:T217D_6D0.f280	role not shown	read two ways: a state walker held as an s32, and a page value
+include/screen_element.h:PauseMenu.f280	role not shown	read two ways: a state walker held as an s32, and a page value
+include/screen_element.h:SprintCaption.f270	no reader	only cleared)
 include/screen_fade.h:FadeRequest.f08	role not shown	copied through to WorldLoadRequest.f8; meaning of the word is not seen
 include/screen_fade.h:FadeRequest.f0C	role not shown	copied through to WorldLoadRequest.fC; meaning not seen
 include/screen_fade.h:ScreenFade.f00	no reader	only asm-named callers; no C reads it
@@ -611,14 +611,13 @@ include/switched_collider.h:Agent.fB5C	no reader	never accessed by name in src/ 
 include/switched_collider.h:Agent.fB80	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:Agent.fBD0	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:Agent.fC08	role not shown	read in a few places, none shows what it holds
-include/switched_collider.h:Blk05.f40	role not shown	read in a few places, none shows what it holds
-include/switched_collider.h:Blk05.f44	role not shown	read in a few places, none shows what it holds
-include/switched_collider.h:Blk05.f48	role not shown	read in a few places, none shows what it holds
-include/switched_collider.h:Blk05.f4C	role not shown	read in a few places, none shows what it holds
-include/switched_collider.h:C17.f654	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:CompanionAgent.fCC8	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:CompanionAgent.fCCC	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:CompanionAgent.fCD0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:EffectSpawnData.f40	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:EffectSpawnData.f44	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:EffectSpawnData.f48	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:EffectSpawnData.f4C	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:GaugeCollider.f678	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:ModeWalker.fBC0	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:ModeWalker.fBC4	role not shown	read in a few places, none shows what it holds
@@ -709,6 +708,7 @@ include/switched_collider.h:PlayerLinkedCollider.f650	role not shown	read in a f
 include/switched_collider.h:PlayerLinkedCollider.f654	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:PlayerLinkedCollider.f658	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:PlayerLinkedCollider.f65C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:ProgressCollider.f654	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:SwitchedCollider.f580	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:SwitchedCollider.f584	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:SwitchedCollider.f588	role not shown	read in a few places, none shows what it holds
@@ -743,8 +743,8 @@ include/switched_collider.h:World5ModeCollider.f650	role not shown	read in a few
 include/switched_collider.h:World5ModeCollider.f668	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:World5ModeCollider.f680	role not shown	read in a few places, none shows what it holds
 include/switched_collider.h:World5ModeCollider.f6E8	role not shown	read in a few places, none shows what it holds
-include/target_follower.h:List47.f38	no reader	
-include/target_follower.h:Sub47.f44	role not shown	set from the tune object's +0x318 before ChooseObjectPoolItem)
+include/target_follower.h:FollowerStateGraph.f38	no reader	
+include/target_follower.h:FollowerStepRecord.f44	role not shown	set from the tune object's +0x318 before ChooseObjectPoolItem)
 include/target_follower.h:TargetFollower.f57C	no reader	loaded by id only)
 include/target_follower.h:TargetFollower.f580	no reader	loaded by id only)
 include/target_follower.h:TargetFollower.f584	no reader	loaded by id only)
@@ -756,7 +756,7 @@ include/texture_upload_packet.h:QueuedGifTags.f10	role not shown	a word of the q
 include/thread_params.h:ThreadParams.f00	no reader	first word of the thread record, not read)
 include/timed_object.h:TimedGroup.f5D0	role not shown	tested == 1 together with the player's state before a span search)
 include/timed_object.h:TrackPlayer.f18	value only	a value given back as the record is cleared)
-include/timed_state_object.h:Child27.f694	role not shown	tested by func_0013DD08)
+include/timed_state_object.h:TimedStateFilterObject.f694	role not shown	tested by func_0013DD08)
 include/vertex_batch.h:VertexBatch.f0AC	no reader	1.0 at set-up)
 include/vertex_batch.h:VertexBatch.f94	no reader	1 at set-up, 4 once lights are selected)
 include/vertex_batch.h:VertexBatch.f98	no reader	set to 1 in one place)
@@ -849,14 +849,14 @@ src/main/gauge_collider.cpp:GaugeCarrierRecord.f18C	role not shown	assigned from
 src/main/gauge_collider.cpp:GaugeHeld.f55C	role not shown	copied into a carrier record field, never used otherwise)
 src/main/gauge_collider.cpp:NodeQueryFrame.f00	no reader	slots of a local query frame)
 src/main/gauge_collider.cpp:NodeQueryFrame.f08	no reader	slots of a local query frame)
-src/main/link_constraint.cpp:C76.f88	no reader	set to 1 at set-up)
-src/main/link_constraint.cpp:C76.fA8	no reader	set to 8 at set-up)
-src/main/link_constraint.cpp:C76.fAC	no reader	set to 9 at set-up)
-src/main/link_constraint.cpp:C76.fB4	no reader	largest float at set-up)
+src/main/link_constraint.cpp:LeapTarget.f88	no reader	set to 1 at set-up)
+src/main/link_constraint.cpp:LeapTarget.fA8	no reader	set to 8 at set-up)
+src/main/link_constraint.cpp:LeapTarget.fAC	no reader	set to 9 at set-up)
+src/main/link_constraint.cpp:LeapTarget.fB4	no reader	largest float at set-up)
 src/main/main_loop.cpp:LightObject.f334	role not shown	only sent as the w word of a directional light)
 src/main/memory_card.cpp:IconSysHeader.f004	role not shown	copy of the magic's trailing byte)
-src/main/object_pool.cpp:Released_1A8C90.f6E4	role not shown	a Player view in a local struct: set from the parent's root before a release; same field as TurningCollider.f6E4, role not shown
-src/main/object_pool.cpp:Released_1A8C90.fC3C	role not shown	a Player view in a local struct: set to 1 for kind 0xA objects, same field as Player.fC3C, role not shown
+src/main/object_pool.cpp:ReleasedObject.f6E4	role not shown	a Player view in a local struct: set from the parent's root before a release; same field as TurningCollider.f6E4, role not shown
+src/main/object_pool.cpp:ReleasedObject.fC3C	role not shown	a Player view in a local struct: set to 1 for kind 0xA objects, same field as Player.fC3C, role not shown
 src/main/on_off_object.cpp:OnOffView.f40	role not shown	max of eye z over frames; no consumer seen)
 src/main/on_off_object.cpp:OnOffView.f60	no reader	
 src/main/oscillator.cpp:TrackerHit.f80	role not shown	tested after the span call; looks like part of the collision span result
@@ -870,7 +870,7 @@ src/main/pause_menu.cpp:MenuBoxStyle.f4	value only	0x2D set by the constructor, 
 src/main/pause_menu.cpp:MenuBoxStyle.f8	role not shown	the size argument as float, read by the font's drawBox)
 src/main/pause_menu.cpp:MenuBoxStyle.fC	no reader	
 src/main/player.cpp:ChildSumPoseSource.f1C	no reader	2 at set-up)
-src/main/player.cpp:ContactBody_174808.f4E0	role not shown	a small kind tested 0, 1 or 4 while walking parents)
+src/main/player.cpp:ContactedObject.f4E0	role not shown	a small kind tested 0, 1 or 4 while walking parents)
 src/main/player.cpp:WalkerHost.f2D8	role not shown	a target object for effects)
 src/main/player_request.cpp:PlayerBlendCurve.f10	no reader	only written)
 src/main/player_request.cpp:SixBlendEntry.f10	role not shown	a reference value subtracted from the heading velocity)
@@ -880,19 +880,19 @@ src/main/player_request.cpp:SixBlendEntry.f54	role not shown	flag: nonzero compu
 src/main/player_request.cpp:SixBlendEntry.f60	role not shown	second reference value subtracted from the heading velocity)
 src/main/player_request.cpp:SixBlendEntry.f84	role not shown	second weight)
 src/main/player_request.cpp:SixBlendEntry.fA4	role not shown	flag: nonzero takes the span times path)
-src/main/player_target.cpp:C17_1CDFB8.f618	role not shown	an object whose world position is taken; partial view)
 src/main/player_target.cpp:Chooser.f2200	no reader	mirrors aimObject in this file)
 src/main/player_target.cpp:Chooser.f23C4	role not shown	a place along a path shape approached with ramps; unclear)
 src/main/player_target.cpp:Chooser.f358	role not shown	multiplied by an arc time to step z; a vertical rate of unclear kind)
 src/main/player_target.cpp:Chooser.f6D4	role not shown	a point passed to obstruction costs and frame transforms)
-src/main/player_target.cpp:Chooser_1CDFB8.f2200	no reader	mirrors aimObject in this file)
-src/main/player_target.cpp:Chooser_1CDFB8.f23CC	no reader	written with the class 0x17 object only)
+src/main/player_target.cpp:PlayerTargetState.f2200	no reader	mirrors aimObject in this file)
+src/main/player_target.cpp:PlayerTargetState.f23CC	no reader	written with the class 0x17 object only)
+src/main/player_target.cpp:ProgressColliderView.f618	role not shown	an object whose world position is taken; partial view)
 src/main/player_target.cpp:TargetCand.f4C	role not shown	height threshold of a candidate kind, compared with the player's height over it)
 src/main/player_target.cpp:TargetCand.f58	role not shown	height threshold, shared view of several real structs)
 src/main/player_target.cpp:TargetCand.f5C	role not shown	height threshold or turn scale, shared view of several structs)
 src/main/player_target.cpp:TargetCand.f70	role not shown	height threshold, shared view)
 src/main/player_target.cpp:TargetCand.fB4	role not shown	height threshold, shared view)
-src/main/player_target.cpp:World_1CDFB8.f1CE4	role not shown	class 0x17 object; same field as World::f1CE4)
+src/main/player_target.cpp:TargetWorldView.f1CE4	role not shown	class 0x17 object; same field as World::f1CE4)
 src/main/pooled_object.cpp:f20	role not shown	not a field (a local variable)
 src/main/screen_element.cpp:TextStyle.f04	role not shown	a style byte set to 0x2D or 0x3D; font draw reads it by cast)
 src/main/screen_element.cpp:TextStyle.f08	role not shown	2.0 in every style, read by the font draw only)
@@ -906,12 +906,12 @@ src/main/selection_menus.cpp:BoxStyle.f4	value only	set to the constant 0x2D by 
 src/main/selection_menus.cpp:ChoiceLevelEntry.f0	no reader	never used
 src/main/selection_menus.cpp:ChoiceLevelEntry.f1C	role not shown	compared with f4
 src/main/selection_menus.cpp:ChoiceLevelEntry.f4	role not shown	compared with f1C by StartObjectFade, meaning not seen
+src/main/state_notifier.cpp:CaptionBoxView.f26C	role not shown	a single float set to 250.0 through a view of a global)
 src/main/state_notifier.cpp:NotifierLead.f00	no reader	no use found)
-src/main/state_notifier.cpp:PSys_1481A0.f26C	role not shown	a single float set to 250.0 through a view of a global)
 src/main/target_follower.cpp:ChaseObject.f6F0	role not shown	end speed for class 0x3D, flight time for class 0x3E)
 src/main/target_follower.cpp:FollowTune.f334	role not shown	negated into a vector along Z of a class 0x3E item; velocity or acceleration unclear)
 src/main/target_lists.cpp:TargetedObject.f398	role not shown	one word of a partial view)
-src/main/timed_object.cpp:Record200.f44	role not shown	set to 4 or 0 as a sequence changes state; a record of the aim attachment, meaning not seen
+src/main/timed_object.cpp:TimedAimRecord.f44	role not shown	set to 4 or 0 as a sequence changes state; a record of the aim attachment, meaning not seen
 src/main/tint_blend_collider.cpp:f20	role not shown	not a field (a local variable)
 src/main/warp_menu.cpp:WarpLabelLayout.f14	role not shown	always set to 0 by SetF14 callers
 src/main/warp_menu.cpp:WarpLabelLayout.f18	role not shown	always set to 0 by SetF18 callers
@@ -923,3 +923,14 @@ src/main/world_listed_object.cpp:LookSource.fC4	role not shown	as fC0)
 src/main/world_listed_object.cpp:LookSourceTail.f184	role not shown	copied to the listed object's field only)
 src/main/world_listed_object.cpp:LookSourceTail.f190	role not shown	copied to particleMode, already named at its destination)
 src/main/world_listed_object.cpp:LookSourceTail.f194	role not shown	copied to a field of another class)
+type C35	role not shown	role not shown (only a draw method forwarding to Collider)
+type C52	role not shown	role not shown (only a draw method forwarding to PlacedObject)
+type C71	role not shown	role not shown (one of six landing-target kinds; OBJECTS.md gives no more)
+type Class75Link	role not shown	list link of class 0x75, whose role is not shown (OBJECTS.md: a count and a scale only)
+type Class75Object	role not shown	role not shown (OBJECTS.md: transform object with a count and a scale)
+type Crc32	kept: the number is a size or standard	standard (CRC-32 step)
+type Mat4A	kept: the number is a size or standard	shape and alignment (4x4 matrix, 16-byte aligned)
+type Quad16	kept: the number is a size or standard	keep: 16 is the size in bytes (four words moved as one quadword)
+type Quadratic16	kept: the number is a size or standard	keep: 16 is the size in bytes (four 16-aligned floats, a quadratic's coefficients)
+type Unaligned16	kept: the number is a size or standard	keep: 16 is the size in bits of the unaligned halfword access (src/lib/unwind.c)
+type Unaligned32	kept: the number is a size or standard	keep: 32 is the width in bits of the unaligned word access (src/lib/unwind.c)

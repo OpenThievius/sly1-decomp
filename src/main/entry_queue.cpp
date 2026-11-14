@@ -74,12 +74,12 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 // Gives the world position and heading of a node object of a queue entry: for kinds 0x7E, 0x73,
 // 0x6E (a point on a path curve nearest the player) and 2 from the object, otherwise (or with no
 // object) the player's own position 75 units down and its heading. Either output may be 0.
-void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* outf)
+void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec4* out, f32* outf)
 {
-    Vec02 v;
-    Vec02 a;
-    Vec02 b;
-    Vec02 c;
+    Vec4 v;
+    Vec4 a;
+    Vec4 b;
+    Vec4 c;
     Player* s1 = (Player*)self->player;
     f32 r;
 
@@ -95,7 +95,7 @@ void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* o
     else if (IsObjectOfKind(n, 0x73))
     {
         GetObjectWorldPosition(n, &v);
-        GetObjectWorldRotation(n, (Mat02*)&a);
+        GetObjectWorldRotation(n, (Mat3*)&a);
         r = ArctangentOfRatio(a.y, a.x);
     }
     else if (IsObjectOfKind(n, 0x6E))
@@ -103,8 +103,8 @@ void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* o
         TransformPointBetweenFrames(0, (PlacedObject*)n->parent, &s1->pos, &a);
         {
             PathCurve* curve = ((PathCurveObject*)n)->curve;
-            void (*fn)(void*, Vec02*, s32, Vec02*, Vec02*, s32, s32) =
-                (void (*)(void*, Vec02*, s32, Vec02*, Vec02*, s32, s32))curve->vt->m10;
+            void (*fn)(void*, Vec4*, s32, Vec4*, Vec4*, s32, s32) =
+                (void (*)(void*, Vec4*, s32, Vec4*, Vec4*, s32, s32))curve->vt->m10;
             if (fn)
             {
                 fn(curve, &a, 0, &a, &b, 0, 0);
@@ -139,13 +139,13 @@ void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* o
 // The part of the player func_0017BB78 aims: a position, a time, the aim and the mark it leaves.
 struct Aim_0017BB78 {
     u8 pad0[0x100];
-    Vec02 pos;              // 0x100
+    Vec4 pos;              // 0x100
     u8 pad110[0x554 - 0x110];
     s32 targeting;          // 0x554
     u8 pad558[0x560 - 0x558];
-    Vec02 aim;              // 0x560
+    Vec4 aim;              // 0x560
     u8 pad570[0x2530 - 0x570];
-    Vec02 mark;             // 0x2530
+    Vec4 mark;             // 0x2530
 };
 
 // Ends any current aim at a node (the player keeps its heading as the mark) and, when target is
@@ -200,7 +200,7 @@ void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next)
 struct QueueTargetDriver;
 struct QueueTargetDriverVt {
     u8 pad00[0x28];
-    void (*m0A)(QueueTargetDriver* self, Vec02* p, s32 a, s32 b, s32 c, void* d, void* e);    // 0x28
+    void (*m0A)(QueueTargetDriver* self, Vec4* p, s32 a, s32 b, s32 c, void* d, void* e);    // 0x28
 };
 struct QueueTargetDriver {
     const QueueTargetDriverVt* vt;
@@ -212,7 +212,7 @@ struct QueueTargetHolder {
     QueueTargetDriver* driver;  // 0x34
 };
 
-struct Chooser_1CDFB8;
+struct PlayerTargetState;
 extern f32 g_gameTime;
 
 // Moves an entry queue (a scripted sequence that drives the player) to its next entry and starts
@@ -234,8 +234,8 @@ void StartNextQueueEntry(EntryQueue* self)
         self->lastFoundObject = obj;
         break;
     case 1: {
-        Vec02 pos;
-        Mat02 rot;
+        Vec4 pos;
+        Mat3 rot;
         f32 heading;
         if (obj != 0 && IsObjectOfKind(obj, 0x74)) {
             PlaceAtArrivalPoint((TransformSet*)obj);
@@ -249,8 +249,8 @@ void StartNextQueueEntry(EntryQueue* self)
         p->heading = heading;
         BuildAxisAngleMatrix(&g_unitZVector, &rot, heading);
         p->desc02()->m1E(p, &rot);
-        p->desc02()->m20(p, (Vec02*)&g_zeroVector);
-        p->desc02()->m21(p, (Vec02*)&g_zeroVector);
+        p->desc02()->m20(p, (Vec4*)&g_zeroVector);
+        p->desc02()->m21(p, (Vec4*)&g_zeroVector);
         SetPlayerState(p, 2, 2);
         p->groundContact = 0;
         self->pendingEntry = 0;
@@ -263,13 +263,13 @@ void StartNextQueueEntry(EntryQueue* self)
         }
         if (IsObjectOfKind(obj, 0x7F) || IsObjectOfKind(obj, 0x6F) || IsObjectOfKind(obj, 0x3A)
             || IsObjectOfKind(obj, 0x70) || IsObjectOfKind(obj, 0x76)) {
-            s32 t = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)p, obj, &p->targetMode);
+            s32 t = ChooseNearbyPlayerTarget((PlayerTargetState*)p, obj, &p->targetMode);
             if (t != -1) {
                 SetPlayerState(p, 6, t);
             }
         }
         if (p->state == 6 && p->targetMode == 4) {
-            Vec02 pos;
+            Vec4 pos;
             GetNodeAnchorAndHeading(self, obj, &pos, 0);
             TransformPointBetweenFrames(0, (PlacedObject*)(((QueueTargetHolder*)p->targetTrack)->frame), &pos, &pos);
             QueueTargetDriver* d = ((QueueTargetHolder*)p->targetTrack)->driver;
@@ -281,7 +281,7 @@ void StartNextQueueEntry(EntryQueue* self)
         goto done;
     }
     case 7: {
-        Vec02 pos;
+        Vec4 pos;
         self->pendingEntry = e;
         GetNodeAnchorAndHeading(self, obj, &pos, 0);
         TransformPointBetweenFrames(0, (PlacedObject*)(((QueueTargetHolder*)p->aimCurve)->frame), &pos, &pos);
@@ -299,10 +299,10 @@ void StartNextQueueEntry(EntryQueue* self)
         }
         goto done;
     case 5: {
-        Vec02 start;
-        Vec02 vel;
-        Vec02 goal;
-        Vec02 drift;
+        Vec4 start;
+        Vec4 vel;
+        Vec4 goal;
+        Vec4 drift;
         f32 rise;
         self->pendingEntry = e;
         s32 sub = e->value != 0 ? 0 : 2;
@@ -357,11 +357,11 @@ void StartNextQueueEntry(EntryQueue* self)
         if (SolveArrivalTimeAtHeight(p, &start, &vel, &goal, &drift, &left)) {
             SetPlayerState(p, 2, sub);
             Vu0::Q(goal) = Vu0::MulAddX(Vu0::Q(goal), Vu0::Q(drift), Vu0::Scalar(left));
-            Vec02 v;
+            Vec4 v;
             Vu0::Set(v, Vu0::DivX(Vu0::Sub(Vu0::Q(goal), Vu0::Q(p->pos)), Vu0::Scalar(left + rise)));
             v.z = p->v150.z;
             p->desc02()->m20(p, &v);
-            Vec02 d;
+            Vec4 d;
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(goal), Vu0::Q(p->pos));
             f32 h = ArctangentOfRatio(d.y, d.x);
             p->heading = h;
@@ -443,7 +443,7 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
             done = 1;
             break;
         }
-        Vec02 pos;
+        Vec4 pos;
         GetNodeAnchorAndHeading(self, (BaseObject*)obj, &pos, 0);
         Vu0::Vec gap = Vu0::Sub(Vu0::Vec::Of(pl->v140), Vu0::Vec::Of(pos));
         done = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(gap, gap))) < g_queueGoalReachDistance;
@@ -513,17 +513,17 @@ struct Chooser;
 extern f32 g_gameTime;
 extern f32 g_pathProbeDistance;
 
-struct TrackShape_17C718;
-struct TrackShapeDesc_17C718 {
+struct EntryTrackShape;
+struct EntryTrackShapeClass {
     void* m0;
-    void (*m1)(TrackShape_17C718* self, f32 t, Vec02* pos, Vec02* dir);   // 0x04
-    void (*m2)(TrackShape_17C718* self, f32 t, Vec02* pos, s32 a);        // 0x08
+    void (*m1)(EntryTrackShape* self, f32 t, Vec4* pos, Vec4* dir);   // 0x04
+    void (*m2)(EntryTrackShape* self, f32 t, Vec4* pos, s32 a);        // 0x08
     u8 pad0C[0x1C - 0x0C];
-    f32 (*m7)(TrackShape_17C718* self);                                   // 0x1C: the length
-    f32 (*m8)(TrackShape_17C718* self);                                   // 0x20: the length
+    f32 (*m7)(EntryTrackShape* self);                                   // 0x1C: the length
+    f32 (*m8)(EntryTrackShape* self);                                   // 0x20: the length
 };
-struct TrackShape_17C718 { TrackShapeDesc_17C718* desc; u8 pad04[4]; s32 looped; };
-struct TrackRecord_17C718 { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; TrackShape_17C718* shape; };
+struct EntryTrackShape { EntryTrackShapeClass* desc; u8 pad04[4]; s32 looped; };
+struct EntryTrackOwner { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; EntryTrackShape* shape; };
 
 // Per-frame, fakes the pad input the player reads while an entry runs: sets the stick heading
 // toward the node (or along the path curve in the direction of the target position) and its level
@@ -531,11 +531,11 @@ struct TrackRecord_17C718 { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; 
 // triggers a target jump once the player has been in its sub state long enough.
 void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
 {
-    Vec02 a;
-    Vec02 b;
-    Vec02 c;
-    Vec02 d;
-    Vec02 dir;
+    Vec4 a;
+    Vec4 b;
+    Vec4 c;
+    Vec4 d;
+    Vec4 dir;
     f32 heading;
     QueueEntry* e = (QueueEntry*)self->pendingEntry;
     Player* p = (Player*)self->player;
@@ -575,8 +575,8 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
         case 6:
             if (o != 0) {
                 if (p->state == 6 && p->targetMode == 4) {
-                    TrackRecord_17C718* r = (TrackRecord_17C718*)p->targetTrack;
-                    TrackShape_17C718* s = r->shape;
+                    EntryTrackOwner* r = (EntryTrackOwner*)p->targetTrack;
+                    EntryTrackShape* s = r->shape;
                     void* frame = r->frame;
                     if (s->desc->m1 != 0) {
                         s->desc->m1(s, p->trackPos, &a, &b);
@@ -587,7 +587,7 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
                     Vu0::Set(d, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_unitXVector)));
                     s32 flip = 0;
                     p->stickHeading = ArctangentOfRatio(d.y, d.x);
-                    s = ((TrackRecord_17C718*)p->targetTrack)->shape;
+                    s = ((EntryTrackOwner*)p->targetTrack)->shape;
                     if (s->looped != 0) {
                         f32 fwd;
                         f32 back;
@@ -619,16 +619,16 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
             }
             return;
         case 7: {
-            TrackShape_17C718* s = ((TrackRecord_17C718*)p->aimCurve)->shape;
+            EntryTrackShape* s = ((EntryTrackOwner*)p->aimCurve)->shape;
             if (s->desc->m2 != 0) {
                 s->desc->m2(s, p->pathPos + g_pathProbeDistance, &a, 0);
-                s = ((TrackRecord_17C718*)p->aimCurve)->shape;
+                s = ((EntryTrackOwner*)p->aimCurve)->shape;
                 if (s->desc->m2 != 0) {
                     s->desc->m2(s, p->pathPos - g_pathProbeDistance, &b, 0);
                 }
             }
-            TransformPointBetweenFrames((PlacedObject*)(((TrackRecord_17C718*)p->aimCurve)->frame), 0, &a, &a);
-            TransformPointBetweenFrames((PlacedObject*)(((TrackRecord_17C718*)p->aimCurve)->frame), 0, &b, &b);
+            TransformPointBetweenFrames((PlacedObject*)(((EntryTrackOwner*)p->aimCurve)->frame), 0, &a, &a);
+            TransformPointBetweenFrames((PlacedObject*)(((EntryTrackOwner*)p->aimCurve)->frame), 0, &b, &b);
             ProjectPointToCamera(g_camera, &a, (f32*)&c);
             ProjectPointToCamera(g_camera, &b, (f32*)&d);
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(c), Vu0::Q(d));
@@ -638,7 +638,7 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
             p->stickHeading = ArctangentOfRatio(dir.y, dir.x);
             pad->stickX = dir.x;
             pad->stickY = dir.y;
-            s = ((TrackRecord_17C718*)p->aimCurve)->shape;
+            s = ((EntryTrackOwner*)p->aimCurve)->shape;
             if (s->looped != 0) {
                 f32 fwd;
                 f32 back;

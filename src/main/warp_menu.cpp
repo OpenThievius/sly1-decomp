@@ -79,11 +79,11 @@ struct WorldObjectNode;
 
 struct BaseObject;
 struct ContactTracker;
-struct Mat02;
+struct Mat3;
 struct ObjectSubGroup;
-struct Rec36;
+struct ContactTrackerRecord;
 
-struct Mat02;
+struct Mat3;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -111,9 +111,9 @@ PlacedObject* FindNearestAgentKey(void* a, void* b);
 void* FindObjectHandle(PlacedObject* self, s32 key);
 void RestartAgentClip(Agent* self);
 typedef void* (*TargetObjectFn)(void* self);
-void SetAgentGoalPoint(Agent* self, Vec02* p);
+void SetAgentGoalPoint(Agent* self, Vec4* p);
 void UpdateAgentGoal(Agent* self, s32 flag);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
+void GetObjectWorldPosition(BaseObject* self, Vec4* out);
 void FaceAgentTowardGoalPoint(Agent* self);
 void UpdateAgentState(Agent* self);
 extern u8 g_flagTable[];
@@ -152,16 +152,16 @@ extern void* FindActiveObjectSubGroup(void);
 extern void StartObjectSubGroupFinish(ObjectSubGroup* self);
 extern void ResetGameProgress(GameProgress* self);
 extern void ResumeAtSavedLevel(void);
-extern void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
+extern void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value);
 extern void PushStackElement(ElementStack* o, ScreenElement* g);
 extern void ApplyStackTimeScale(ElementStack* o, f32 v);
 extern void SetElementStackState(ElementStack* o, s32 mode);
 typedef s32 (*World3BeatPressSlotFn)(World3BeatPressCollider* self, void* arg);
 typedef void (*PlayerSlotFn)(Player* g, void* arg);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-void GetObjectWorldRotation(BaseObject* self, Mat02* out);
+void GetObjectWorldPosition(BaseObject* self, Vec4* out);
+void GetObjectWorldRotation(BaseObject* self, Mat3* out);
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 s32 HasSpareCount(void);
 void ActivateSwitchedCollider(void* value);
@@ -191,7 +191,7 @@ struct ListedObjectVt {
 };
 struct ListedObject { ListedObjectVt* vtbl; };
 struct BeginNodeWalk {
-    static void Of(ListFrame* it, List01* list)
+    static void Of(ListFrame* it, ObjectList* list)
     {
         it->list = list;
         it->link = (u8*)list;
@@ -216,7 +216,7 @@ void UpdateObjectTree(void* self, f32 f);
 void UpdateAnimationPlayer(AnimationPlayer* self, f32 dt);
 void RunQueuedCalls(World* self);
 struct BeginByteWalk {
-    static void Of(ListFrame* it, List01* list)
+    static void Of(ListFrame* it, ObjectList* list)
     {
         it->list = list;
         it->link = (u8*)list;
@@ -245,9 +245,9 @@ void UpdateWorldObjectLists(World* self);
 void UpdateObjectTree(void* self, f32 f);
 void UpdateAnimationPlayer(AnimationPlayer* self, f32 dt);
 struct NextActor {
-    static Actor6C* Of(ListFrame* it)
+    static UpdatedObject* Of(ListFrame* it)
     {
-        Actor6C* obj = *(Actor6C**)it->link;
+        UpdatedObject* obj = *(UpdatedObject**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
@@ -265,28 +265,28 @@ struct BeginActorWalk {
 void UpdateWorldStepLists(World* self, f32 t);
 void UpdateWorldDeltaLists(World* self, f32 t);
 void UpdateUnflaggedParts(World* self);
-s32 IsObjectTreeAtRest(Actor6C* n);
+s32 IsObjectTreeAtRest(UpdatedObject* n);
 void ClearRootTries(PlacedObject* self);
 void RunDueDelayedScriptCalls(World* self, f32 t);
 void NotifyWorldActiveFollower(World* self);
 void ReleaseWorldListEntry(void* a0);
 void StepWorldValueTowardTarget(World* self, f32 t);
-void RunWorld3TimelineEntry(World3Timeline* self, Entry90* msg);
-Entry90* AppendWorld3TimelineEntry(World3Timeline* self, s32 a, s32 b, f32 c);
+void RunWorld3TimelineEntry(World3Timeline* self, TimelineEntry* msg);
+TimelineEntry* AppendWorld3TimelineEntry(World3Timeline* self, s32 a, s32 b, f32 c);
 // What ComputeSinCos writes for func_001ED650.
 struct SinCos { f32 sine; f32 cosine; };
 void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
 void RegisterSwitchedCollider(SwitchedCollider* self);
 void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1);
-s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, f32 angle);
+s32 ComputeBallisticLaunchVelocity(Vec4* from, Vec4* to, Vec4* out, u8* rec, f32 angle);
 s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c);
-void ReleaseAttachRecords(World* self, Attach03* node);
+void ReleaseAttachRecords(World* self, ColliderAttachment* node);
 void SetScreenFadeMode(void* o, s32 mode);
 void UnregisterObjectGroup(World* self, FoundList* s);
 void RegisterObjectGroup(World* self, FoundList* group);
-struct Rec36;
+struct ContactTrackerRecord;
 struct TrackedNodeOffer;
-void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out);
+void OfferTrackedNodeLaunch(ContactTrackerRecord* self, void* a1, TrackedNodeOffer* out);
 void InitPlacedObject(PlacedObject* self);
 void SetStateAndNotify(void* self, s32 b);
 struct ZoneTargetEntry;
@@ -300,7 +300,7 @@ s32 QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radi
 typedef void (*AttachNotifyFn)(void* self, void* arg);
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
-void SetAgentGoalPoint(Agent* self, Vec02* p);
+void SetAgentGoalPoint(Agent* self, Vec4* p);
 void UpdateAgentGoal(Agent* self, s32 flag);
 void PadPacketToQuadSlot(void* s, s32 target);
 s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c);
@@ -315,7 +315,7 @@ s32 ReadBufferedU32(BufferedStream* self);
 struct DetachMsg { AttachedSet* self; Collider* obj; };
 void RebuildAttachedSet(AttachedSet* self);
 void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void InitTrackedNodes(Rec36* a, ContactTracker* b);
+void InitTrackedNodes(ContactTrackerRecord* a, ContactTracker* b);
 extern s32 g_worldLoadRequest;
 s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, s32 mode);
 void SetScreenFadeMode(ScreenFade* self, s32 state);
@@ -343,7 +343,7 @@ struct ChildWalkFrame {
     ~ChildWalkFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 void StartPlacedObject(PlacedObject* self);
-void FillTrackedNodes(Rec36* self);
+void FillTrackedNodes(ContactTrackerRecord* self);
 // The message (kind 0x16) func_001EF900 sends with a state change: the old and new states.
 struct StateChangeMsg {
     void* self;
@@ -351,8 +351,8 @@ struct StateChangeMsg {
     s32 cur;
 };
 struct ZoneTargetEntry;
-void ScheduleWorld3BossBeatPress(World3Boss* self, Entry90* e);
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void ScheduleWorld3BossBeatPress(World3Boss* self, TimelineEntry* e);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 extern u8 D_00625760[];
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -367,7 +367,7 @@ void RaiseScatterLevelForObject(ScatterController* obj, FlaggedObject* node);
 extern u8 g_scatterController[];
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void CopyMemory(void* dst, void* src, u32 size);
-void RunWorld3TimelineEntry(World3Timeline* self, Entry90* e);
+void RunWorld3TimelineEntry(World3Timeline* self, TimelineEntry* e);
 void* MoveMemory(void* dst, void* src, s32 size);
 // An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
 // Moves n bytes of the item list down over a removed item.
@@ -397,8 +397,8 @@ struct FadeRequestBlock {
     QuadP pair;
     s32 mid;
 };
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
 void SetWarpPageSelectedEntry(void* self, s32 value);
 extern s32 g_pendingWarpEntryAtEnd;
 void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
@@ -411,7 +411,7 @@ s32 GetCurrentWarpEntry(void);
 void PopStackElement(ElementStack* q);
 IdentityKey* LookupEntryById(s32 k);
 void StartObjectFade(IdentityKey* v, s32 m, s32 n);
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 s32 IsWarpEntryAvailable(WarpPage* self, s32 kind, s32* outA, s32* outB);
@@ -470,7 +470,7 @@ void AnnouncePendingWarpEntry(WarpPage* o);
 void SetWarpPageSelectedEntry(WarpPage* o, s32 n);
 void EnsureObjectWorldNode(PlacedObject* o);
 void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void PostLoadPlacedObject(PlacedObject* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
@@ -483,7 +483,7 @@ struct NextPageNode {
     }
 };
 struct BeginPageWalk {
-    static void Of(ListFrame* it, List01* list)
+    static void Of(ListFrame* it, ObjectList* list)
     {
         it->list = list;
         it->link = (u8*)list;
@@ -495,7 +495,7 @@ struct BeginPageWalk {
 extern s32 (*g_warpCursorTables[6])[4];
 // The sounds MoveWarpCursor plays: the cursor moved, or it could not.
 enum WarpCursorSound { WARP_SOUND_MOVE = 0x79, WARP_SOUND_REFUSE = 0x7B };
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 // A point of the fan func_001F1E38 draws: its colour and, at 0x10, its position.
 struct FanPoint { s32 k; s32 pad[3]; f32 x; f32 y; };
@@ -821,8 +821,8 @@ void UpdateWorld1BossGoal(World1Boss* self, s32 flag)
         if (self->disabled != 0) {
             SetAgentGoalPoint(self, &self->v190);
         } else {
-            GetObjectWorldPosition((BaseObject*)self->goalObject, (Vec02*)&loc);
-            SetAgentGoalPoint(self, (Vec02*)&loc);
+            GetObjectWorldPosition((BaseObject*)self->goalObject, (Vec4*)&loc);
+            SetAgentGoalPoint(self, (Vec4*)&loc);
         }
         break;
     case 8: {
@@ -966,7 +966,7 @@ void UpdateElementStack(ElementStack* obj)
                 s1 = obj->state;
                 ClearPadPressedBits(s2, 0x800);
             } else if ((v = s2->flags) & 0x100) {
-                T217D_0F0* g2 = &g_mapScreenList;
+                WarpPageList* g2 = &g_mapScreenList;
                 WarpPage* x = g2->current;
                 if (x == 0) break;
                 if (x->mode) break;
@@ -1261,7 +1261,7 @@ void UpdateWorldDeltaLists(World* self, f32 dt)
     StepMemoryChecksum();
     SwitchedCollider* h = GetActiveSwitchedCollider();
     if (h != 0) {
-        const Desc05* vt = h->desc05();
+        const SwitchedColliderDescriptor* vt = h->desc05();
         if (vt->m49 != 0) {
             PadRecord* a;
             if ((*(s32*)&g_padRouting) & 2)
@@ -1274,7 +1274,7 @@ void UpdateWorldDeltaLists(World* self, f32 dt)
     UpdateWorldObjectLists(self);
     {
         ListFrame it;
-        BeginByteWalk::Of(&it, (List01*)&self->list60);
+        BeginByteWalk::Of(&it, (ObjectList*)&self->list60);
         for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
             UpdateObjectTree(n, dt);
         }
@@ -1282,7 +1282,7 @@ void UpdateWorldDeltaLists(World* self, f32 dt)
     }
     {
         ListFrame it;
-        BeginByteWalk::Of(&it, (List01*)&self->animationPlayers);
+        BeginByteWalk::Of(&it, (ObjectList*)&self->animationPlayers);
         for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
             UpdateAnimationPlayer((AnimationPlayer*)n, dt);
         }
@@ -1290,7 +1290,7 @@ void UpdateWorldDeltaLists(World* self, f32 dt)
     }
     {
         ListFrame it;
-        BeginByteWalk::Of(&it, (List01*)&self->worldClockNodes);
+        BeginByteWalk::Of(&it, (ObjectList*)&self->worldClockNodes);
         for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
             StepObjectLevelRamp((WorldObjectNode*)n, dt);
         }
@@ -1314,7 +1314,7 @@ void UpdateUnflaggedParts(World* self)
                 do {
                     u64 bit = (u64)1 << 53;
                     if ((s0->flags538 & bit) == 0) {
-                        ((Desc03*)s0->desc)->m44(s0);
+                        ((ColliderDescriptor*)s0->desc)->m44(s0);
                     }
                     s0->flags538 &= ~bit;
                     s0 = (Collider*)s0->link2E4.next;
@@ -1335,10 +1335,10 @@ void UpdateWorldStepLists(World* self, f32 dt)
     BeginNodeWalk::Of(&it, &self->list78);
     for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) UpdateObjectTree(obj, dt);
     EndNodeWalk::Of(&it);
-    BeginNodeWalk::Of(&it, (List01*)&self->listedAnimationPlayers);
+    BeginNodeWalk::Of(&it, (ObjectList*)&self->listedAnimationPlayers);
     for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) UpdateAnimationPlayer((AnimationPlayer*)obj, dt);
     EndNodeWalk::Of(&it);
-    BeginNodeWalk::Of(&it, (List01*)&self->stepClockNodes);
+    BeginNodeWalk::Of(&it, (ObjectList*)&self->stepClockNodes);
     for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) StepObjectLevelRamp((WorldObjectNode*)obj, dt);
     EndNodeWalk::Of(&it);
     BeginNodeWalk::Of(&it, &self->list78);
@@ -1376,7 +1376,7 @@ void UpdateWorld(World* self, f32 unused1)
         UpdateWorldContacts(self, 0);
         ProcessColliderGroups(self, 1, clock->dt);
         BeginActorWalk::Of(&it, &self->list6C);
-        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
+        for (UpdatedObject* obj; (obj = NextActor::Of(&it)) != 0;) {
             if (obj->vtable->update != 0) {
                 obj->vtable->update(obj, clock->dt);
             }
@@ -1385,7 +1385,7 @@ void UpdateWorld(World* self, f32 unused1)
         UpdateWorldContacts(self, 1);
         ProcessColliderGroups(self, 6, g_gameClock.dt);
         BeginActorWalk::Of(&it, &self->list60);
-        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
+        for (UpdatedObject* obj; (obj = NextActor::Of(&it)) != 0;) {
             if (obj->tries < 2) {
                 if (IsObjectTreeAtRest(obj) != 0) {
                     obj->tries++;
@@ -1396,7 +1396,7 @@ void UpdateWorld(World* self, f32 unused1)
         }
         g_activeListFrames = it.prev;
         BeginActorWalk::Of(&it, &self->list6C);
-        for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
+        for (UpdatedObject* obj; (obj = NextActor::Of(&it)) != 0;) {
             obj->vtable->post(obj);
             if (obj->flags & 0x8000000000000000ULL) {
                 UpdateTouchingParts((Collider*)obj);
@@ -1409,7 +1409,7 @@ void UpdateWorld(World* self, f32 unused1)
     }
     NotifyWorldActiveFollower(self);
     BeginActorWalk::Of(&it, &self->list1B7C);
-    for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
+    for (UpdatedObject* obj; (obj = NextActor::Of(&it)) != 0;) {
         ReleaseWorldListEntry(obj);
     }
     g_activeListFrames = it.prev;
@@ -1545,7 +1545,7 @@ f32 ApproachAngleClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self
 // the difference into a pseudo of its own, so retail's difference lives in the frame across the
 // call and its copy in vf3 is caller-saved, and the limit comes before the ramp in the prototype
 // as the other callers have it: retail moves it to $f14 first.
-u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel)
+u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec4* vel)
 {
     f32 step;
     Vu0::Vec f;
@@ -1573,15 +1573,15 @@ u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec
 // is taken as an axis and angle, ApproachValueWithRamp gives how far it turns this step, and the
 // new rotation (or the target itself when it arrives) goes to outRot and the angular velocity along
 // the axis to outSpin; either may be null.
-void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit)
+void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin, f32 limit)
 {
-    Mat02 rel;
-    Mat02 built;
-    Vec02 axis;
+    Mat3 rel;
+    Mat3 built;
+    Vec4 axis;
     f32 angle;
     f32 step;
     MultiplyMatrices3x3(from, to, &rel);
-    MatrixToAxisAngle(&rel, &angle, (Vec02*)&axis);
+    MatrixToAxisAngle(&rel, &angle, (Vec4*)&axis);
     f32 a = angle;
     f32 travel = ApproachValueWithRamp(0.0f, a, limit, ramp, &step);
     if (outRot != 0) {
@@ -1838,7 +1838,7 @@ s32 CompareFloats(f32* a, f32* b)
 }
 
 // Does nothing; its one caller passes it the address of a 16-byte local of its frame.
-void IgnoreStackLocal(Vec02* unused0)
+void IgnoreStackLocal(Vec4* unused0)
 {
 }
 
@@ -1978,7 +1978,7 @@ void HandleWorld3BeatPressColliderActivation(World3BeatPressCollider* self, void
 // the direction to it plus pi) and sets the player to state 4 with 0x2B.
 void ContinueWorld3BeatPressColliderRequest(PlacedObject* from, Player* self)
 {
-    Vec02 dir;
+    Vec4 dir;
     Vu0::Q(dir) = Vu0::MulXSum(Vu0::Q(from->m110.r[0]), Vu0::Scalar(-g_beatPressRequestSideSpeed), Vu0::Q(from->m110.r[2]), Vu0::ScalarAt(g_beatPressRequestUpSpeed));
     self->desc02()->m20(self, &dir);
     self->heading = WrapAngle(ArctangentOfRatio(dir.y, dir.x) + 3.1415927f);
@@ -1995,12 +1995,12 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
     if (self->frameAnchor != 0 && g_player != 0) {
         Vec4U pos;
         Mat3U mat;
-        GetObjectWorldPosition((BaseObject*)self->frameAnchor, (Vec02*)&pos);
-        GetObjectWorldRotation((BaseObject*)self->frameAnchor, (Mat02*)&mat);
-        g_player->desc02()->m1D(g_player, (Vec02*)&pos);
-        g_player->desc02()->m1E(g_player, (Mat02*)&mat);
-        self->desc02()->m1D(self, (Vec02*)&pos);
-        self->desc02()->m1E(self, (Mat02*)&mat);
+        GetObjectWorldPosition((BaseObject*)self->frameAnchor, (Vec4*)&pos);
+        GetObjectWorldRotation((BaseObject*)self->frameAnchor, (Mat3*)&mat);
+        g_player->desc02()->m1D(g_player, (Vec4*)&pos);
+        g_player->desc02()->m1E(g_player, (Mat3*)&mat);
+        self->desc02()->m1D(self, (Vec4*)&pos);
+        self->desc02()->m1E(self, (Mat3*)&mat);
     }
     if (self->judging != 0) {
         u32 f = in->flags;
@@ -2019,7 +2019,7 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
             }
             ok = 0;
             if (self->nextEntry < self->entryCount) {
-                Ent1C* e = &self->entries[self->nextEntry];
+                BeatPressEntry* e = &self->entries[self->nextEntry];
                 if (e->dir == dir) {
                     World3Boss* g = ((World3Boss*)self->tempoAgent);
                     at = (f32)g->bar * 4.0f + g->barPosition;
@@ -2037,7 +2037,7 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
         }
     }
     if (self->nextEntry < self->entryCount) {
-        Ent1C* e = &self->entries[self->nextEntry];
+        BeatPressEntry* e = &self->entries[self->nextEntry];
         World3Boss* g = ((World3Boss*)self->tempoAgent);
         f32 at = (f32)g->bar * 4.0f + g->barPosition;
         f32 win = self->timingWindow;
@@ -2076,12 +2076,12 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
                 if (l != 0) {
                     s32 j = l->index;
                     while (j < l->entryCount) {
-                        Entry90* p = &((Entry90*)l->buffer)[j];
+                        TimelineEntry* p = &((TimelineEntry*)l->buffer)[j];
                         if (p->kind == 3) break;
                         j++;
                     }
                     if (j < l->entryCount) {
-                        Entry90* it = &((Entry90*)l->buffer)[j];
+                        TimelineEntry* it = &((TimelineEntry*)l->buffer)[j];
                         World3Boss* gg = ((World3Boss*)self->tempoAgent);
                         g_player->pulseFadeDuration = ((f32)it->step * 4.0f + it->substep - ((f32)gg->bar * 4.0f + gg->barPosition)) * gg->beatLength;
                     }
@@ -2133,25 +2133,25 @@ struct FramePoint_001EBD10 {
     u8 pad0[0x18];
     void* object;           // 0x18
     u8 pad1C[0x40 - 0x1C];
-    Vec02 point;            // 0x40
-    Mat02 m50;              // 0x50
+    Vec4 point;            // 0x40
+    Mat3 m50;              // 0x50
 };
 
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin, f32 t);
 
 // Position and velocity of the collider at time t: the plain placed-object answer, or, when it is
 // anchored to a point on another object, that point's position and velocity in the other object's
 // frame at t.
-void GetWorld3BeatPressColliderPositionAt(World3BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
+void GetWorld3BeatPressColliderPositionAt(World3BeatPressCollider* self, f32 t, Vec4* pos, Vec4* vel)
 {
     if (self->frameAnchor == 0) {
         GetPlacedObjectPositionAt(self, t, pos, vel);
         return;
     }
-    Vec02 p;
-    Mat02 rot;
-    Vec02 v;
-    Vec02 w;
+    Vec4 p;
+    Mat3 rot;
+    Vec4 v;
+    Vec4 w;
     ComputeObjectFrameAtTime((PlacedObject*)(((FramePoint_001EBD10*)self->frameAnchor)->object), 0, &p, &rot, &v, &w, t);
     Vu0::Q(*pos) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(((FramePoint_001EBD10*)self->frameAnchor)->point)));
     Vu0::Q(*vel) = Vu0::Add(Vu0::Q(v), Vu0::Cross(Vu0::Q(w), Vu0::Q(((FramePoint_001EBD10*)self->frameAnchor)->point)));
@@ -2161,14 +2161,14 @@ void GetWorld3BeatPressColliderPositionAt(World3BeatPressCollider* self, f32 t, 
 // Gives the press collider's rotation and spin at t seconds from now: those of a placed object when
 // it has no frame anchor, otherwise the anchor object's frame at that time composed with the
 // anchor's own rotation, and the object's spin.
-void GetWorld3BeatPressColliderRotationAt(World3BeatPressCollider* self, f32 t, Mat02* rot, Vec02* spin)
+void GetWorld3BeatPressColliderRotationAt(World3BeatPressCollider* self, f32 t, Mat3* rot, Vec4* spin)
 {
     if (self->frameAnchor == 0) {
         GetPlacedObjectRotationAt(self, t, rot, spin);
         return;
     }
-    Mat02 m;
-    Vec02 w;
+    Mat3 m;
+    Vec4 w;
     ComputeObjectFrameAtTime((PlacedObject*)(((FramePoint_001EBD10*)self->frameAnchor)->object), 0, 0, &m, 0, &w, t);
     FramePoint_001EBD10* f = (FramePoint_001EBD10*)self->frameAnchor;
     MulRotationRowsIndexed(rot, m, f->m50);
@@ -2321,7 +2321,7 @@ void DrawWorld3BossRing(DeferredRequest* request)
         f32 level = agent->rampNode->level;
         StoreScaledQuadword(&params.rows[1].shape, level * level, &params.rows[1].shape);
         StoreScaledQuadword(&params.rows[2].shape, agent->rampNode->level, &params.rows[2].shape);
-        DrawAngleSortedRing((Vec02*)&agent->v140, 7, (Point2*)g_ringSevenPoints, agent->keyedCount, (RingAnchor*)agent->keyedObjects, &params, request);
+        DrawAngleSortedRing((Vec4*)&agent->v140, 7, (Point2*)g_ringSevenPoints, agent->keyedCount, (RingAnchor*)agent->keyedObjects, &params, request);
     }
 }
 
@@ -2551,8 +2551,8 @@ void LeaveWorld3BossState(World3Boss* self, s32 arg)
 // snaps the bar's fill to its target.
 void DecrementWorld3BossGauge(World3Boss* self)
 {
-    T217D_2E0* g = &g_gaugeBarElement;
-    DecrementGaugeCount((T217D_2E0*)&g_gaugeBarElement);
+    GaugeBar* g = &g_gaugeBarElement;
+    DecrementGaugeCount((GaugeBar*)&g_gaugeBarElement);
     self->hitsLeft = 2;
     g->fill = g->fillTarget;
 }
@@ -2634,10 +2634,10 @@ void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
 // next statement sets again (the same choice, by index): flow deletes the two loads as dead,
 // but the branch keeps its two empty arms through reload and sched2, and jump2, which deletes
 // it, leaves the constant (docs/toolchain/alias-classes.md, "A merged arm keeps its place").
-void ScheduleWorld3BossBeatPress(World3Boss* self, Entry90* e)
+void ScheduleWorld3BossBeatPress(World3Boss* self, TimelineEntry* e)
 {
     s32 dir = e->value;
-    Ent1C entry;
+    BeatPressEntry entry;
     s32 clip;
     if (dir == 1) {
         clip = self->clips[1];
@@ -2672,7 +2672,7 @@ struct TempoLine {
     u8 pad4C[0x60 - 0x4C];
     TempoLineSub sub;       // 0x60
     u8 padDC[0xF0 - 0xDC];
-    Vec02 vF0;              // 0xF0
+    Vec4 vF0;              // 0xF0
 };
 
 struct PlacementRecord;
@@ -2686,10 +2686,10 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
 // its walker maps its key (0x4EC to 0x4F8) to a voice number for the cached voice parameter.
 void HandleWorld3BossNotification(World3Boss* self, s32 kind, TempoNoticeRec* rec)
 {
-    Vec02 a;
-    Mat02 b;
-    Mat02 rot;
-    Vec02 p;
+    Vec4 a;
+    Mat3 b;
+    Mat3 rot;
+    Vec4 p;
     s32 key;
     s32 voice;
 
@@ -2857,8 +2857,8 @@ void UpdateWorld3BossGoal(World3Boss* self, s32 flag)
     {
         void* q = self->faceObject;
         if (q != 0) {
-            GetObjectWorldPosition((BaseObject*)q, (Vec02*)loc);
-            SetAgentGoalPoint(self, (Vec02*)loc);
+            GetObjectWorldPosition((BaseObject*)q, (Vec4*)loc);
+            SetAgentGoalPoint(self, (Vec4*)loc);
         } else {
             SetAgentGoalPoint(self, &self->v140);
         }
@@ -2877,7 +2877,7 @@ void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 // Otherwise it runs the generic agent state update.
 void UpdateWorld3BossState(World3Boss* self)
 {
-    Vec02 diff;
+    Vec4 diff;
     Mat3U rot;
     s32 code;
     SwitchedCollider* p;
@@ -2899,7 +2899,7 @@ void UpdateWorld3BossState(World3Boss* self)
         if (self->state >= 15) goto other;
         if (self->state < 13) goto other;
         if (self->faceObject == 0) goto other;
-        GetObjectWorldRotation((BaseObject*)self->faceObject, (Mat02*)&rot);
+        GetObjectWorldRotation((BaseObject*)self->faceObject, (Mat3*)&rot);
         y = rot.m[0][1];
         x = rot.m[0][0];
         goto angle;
@@ -3012,10 +3012,10 @@ void EndWorld3Timeline(World3Timeline* self)
     s32 n;
     TriggerScriptEvent(self, 0x1C, 0, 0);
     n = 5;
-    RunWorld3TimelineEntry(self, (Entry90*)&n);
+    RunWorld3TimelineEntry(self, (TimelineEntry*)&n);
     if (((World3Boss*)self->found)->beatPressCollider) {
         n = 3;
-        RunWorld3TimelineEntry(self, (Entry90*)&n);
+        RunWorld3TimelineEntry(self, (TimelineEntry*)&n);
     }
 }
 
@@ -3023,7 +3023,7 @@ void EndWorld3Timeline(World3Timeline* self)
 // same bar, its position within it) has reached the entry's step plus the offset.
 void RunWorld3TimelineEntries(World3Timeline* self)
 {
-    Entry90* e;
+    TimelineEntry* e;
     s32 v;
     while (self->index < self->entryCount && (e = self->Cur(), v = e->step + self->timeOffset, !(((World3Boss*)self->found)->bar < v))) {
         if (v == ((World3Boss*)self->found)->bar && ((World3Boss*)self->found)->barPosition < e->substep) return;
@@ -3036,7 +3036,7 @@ void RunWorld3TimelineEntries(World3Timeline* self)
 // script event 0x1B with the entry's value, 2 and 3 start and end the judging of the press collider
 // (with its caption and a sound for 2), 4 and 5 turn the boss's flag on and off (with a caption and
 // a lower-pitched sound for 4).
-void RunWorld3TimelineEntry(World3Timeline* self, Entry90* msg)
+void RunWorld3TimelineEntry(World3Timeline* self, TimelineEntry* msg)
 {
     switch (msg->kind) {
     case 0:
@@ -3072,11 +3072,11 @@ void RunWorld3TimelineEntry(World3Timeline* self, Entry90* msg)
 
 // Adds a 16-byte entry (kind, step, substep) to the timeline buffer and returns it; at the limit of
 // 0xC0 entries it returns a dummy entry.
-Entry90* AppendWorld3TimelineEntry(World3Timeline* self, s32 a, s32 b, f32 c)
+TimelineEntry* AppendWorld3TimelineEntry(World3Timeline* self, s32 a, s32 b, f32 c)
 {
-    if (self->entryCount >= 0xC0) return (Entry90*)D_00625760;
+    if (self->entryCount >= 0xC0) return (TimelineEntry*)D_00625760;
     // address arithmetic over a variable index
-    Entry90* e = (Entry90*)((u8*)self->buffer + self->entryCount * 16);
+    TimelineEntry* e = (TimelineEntry*)((u8*)self->buffer + self->entryCount * 16);
     self->entryCount = self->entryCount + 1;
     (void)FillMemory(e, 0, 16);
     e->kind = a;
@@ -3151,9 +3151,9 @@ ASM_FUNC(func_001ED780);
 
 // Writes a unit vector perpendicular to v: crosses v with a copy whose two smaller-magnitude
 // components are swapped (one negated), then normalises the result.
-void ComputeUnitPerpendicular(Vec02* v, Vec02* out)
+void ComputeUnitPerpendicular(Vec4* v, Vec4* out)
 {
-    Vec02 w;
+    Vec4 w;
     f32 x = v->x;
     f32 y = v->y;
     f32 ax = __builtin_fabsf(x);
@@ -3185,13 +3185,13 @@ void ComputeUnitPerpendicular(Vec02* v, Vec02* out)
 
 LINKER_REMNANT(func_001ED900);
 
-void ComputeUnitPerpendicular(Vec02* v, Vec02* out);
+void ComputeUnitPerpendicular(Vec4* v, Vec4* out);
 extern "C" f32 Arccosine(f32 x);
 
 // Gives the angle between a and b in radians (0 and the x axis in axis if either is almost zero),
 // and the unit axis of the turn from a to b in axis (a perpendicular if they are parallel); axis
 // may be null.
-f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis)
+f32 ComputeAngleBetweenVectors(Vec4* a, Vec4* b, Vec4* axis)
 {
     u128 va = Vu0::Length(Vu0::Q(*a));
     u128 vb = Vu0::Length(Vu0::Q(*b));
@@ -3218,7 +3218,7 @@ f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis)
 // the closest point on each line (both 0 where they are almost parallel), to dist the signed
 // distance between the lines along their common normal, and to normal that unit normal (the z axis
 // if it has no length), oriented to point from the first line toward the second.
-void FindSegmentClosestParams(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out2, f32* dist, Vec02* normal)
+void FindSegmentClosestParams(Vec4* a, Vec4* b, Vec4* c, Vec4* d, f32* out2, f32* dist, Vec4* normal)
 {
     u128 v = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     u128 w = Vu0::Sub(Vu0::Q(*d), Vu0::Q(*c));
@@ -3247,7 +3247,7 @@ void FindSegmentClosestParams(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out2,
     Vu0::Q(*normal) = n.q;
 }
 
-void FindSegmentClosestParams(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out2, f32* dist, Vec02* normal);
+void FindSegmentClosestParams(Vec4* a, Vec4* b, Vec4* c, Vec4* d, f32* out2, f32* dist, Vec4* normal);
 
 // v clamped to [0, 1].
 static inline f32 ClampUnit(f32 v)
@@ -3268,9 +3268,9 @@ static inline f32 ClampUnit(f32 v)
 // The closest points of the segments p0-p1 and q0-q1, their fractions clamped to the segments:
 // the direction from the first to the second into dir (the x axis when they meet) and the
 // distance into dist.
-void FindClosestPointsOnSegments(const Vec02* p0, const Vec02* p1, const Vec02* q0, const Vec02* q1, f32* st, f32* dist, Vec02* dir)
+void FindClosestPointsOnSegments(const Vec4* p0, const Vec4* p1, const Vec4* q0, const Vec4* q1, f32* st, f32* dist, Vec4* dir)
 {
-    FindSegmentClosestParams((Vec02*)p0, (Vec02*)p1, (Vec02*)q0, (Vec02*)q1, st, dist, dir);
+    FindSegmentClosestParams((Vec4*)p0, (Vec4*)p1, (Vec4*)q0, (Vec4*)q1, st, dist, dir);
     st[0] = ClampUnit(st[0]);
     st[1] = ClampUnit(st[1]);
     Vu0::Vec w0 = Vu0::Vec::Scalar(st[0] - 1.0f);
@@ -3283,7 +3283,7 @@ void FindClosestPointsOnSegments(const Vec02* p0, const Vec02* p1, const Vec02* 
     Vu0::Vec a3 = Vu0::Vec::Of(*q1);
     u128 d = Vu0::MulXSum4(a0, w0, a1, w1, a2, w2, a3, w3).q;
     Vu0::Q(*dir) = d;
-    const Vec02* fallback = &g_unitXVector;
+    const Vec4* fallback = &g_unitXVector;
     u128 len = Vu0::Length(d);
     if (Vu0::ToFloatMoved(len) < 0.0001f) {
         *dir = *fallback;
@@ -3324,9 +3324,9 @@ extern "C" f32 Tangent(f32 x);
 // The launch velocity from from to to under the gravity at 0x358 of rec (the world's when null),
 // its angle above the straight line by angle's sine of the way to vertical. The speed's product
 // is a variable of its own: retail moves the square root into q's register before it.
-s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, f32 angle)
+s32 ComputeBallisticLaunchVelocity(Vec4* from, Vec4* to, Vec4* out, u8* rec, f32 angle)
 {
-    Vec02 d;
+    Vec4 d;
     f32 h;
     f32 s = Sine(angle);
     u8* g;
@@ -3345,7 +3345,7 @@ s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, 
     }
     f32 theta = a + (1.5707964f - a) * s;
     f32 e = h - dist * Tangent(theta);
-    f32 q = ((Vec02*)g)->z / (e + e);
+    f32 q = ((Vec4*)g)->z / (e + e);
     if (q <= 0.0f) {
         return 0;
     }
@@ -3361,16 +3361,16 @@ s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, 
 // The launch velocity that throws an object from `from` to `to` at the given speed under the
 // gravity of rec (the world's when null), into out: straight at the target when there is almost
 // no gravity; else 0 when the speed cannot reach it.
-s32 ComputeLaunchVelocityToPoint(f32 speed, Vec02* from, Vec02* to, Vec02* out, u8* rec)
+s32 ComputeLaunchVelocityToPoint(f32 speed, Vec4* from, Vec4* to, Vec4* out, u8* rec)
 {
-    Vec02 d;
+    Vec4 d;
     u8* g;
     if (rec != 0) {
         g = (u8*)&((Collider*)rec)->gravity;
     } else {
         g = (u8*)&g_currentWorld->gravity;
     }
-    f32 grav = ((Vec02*)g)->z;
+    f32 grav = ((Vec4*)g)->z;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*to), Vu0::Q(*from));
     if (__builtin_fabsf(grav) < 1.0f) {
         u128 k = Vu0::Scalar(speed);
@@ -3391,7 +3391,7 @@ s32 ComputeLaunchVelocityToPoint(f32 speed, Vec02* from, Vec02* to, Vec02* out, 
     f32 b = gu + sp2;
     f32 dd = dist * dist;
     {
-        Vec02 flat;
+        Vec4 flat;
         Vu0::Q(flat) = Vu0::Q(d);
         Vu0::Q(d) = Vu0::DivX(Vu0::Q(flat), lv);
     }
@@ -3424,18 +3424,18 @@ s32 ComputeLaunchVelocityToPoint(f32 speed, Vec02* from, Vec02* to, Vec02* out, 
     return 1;
 }
 
-void ForwardBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, f32 angle)
+void ForwardBallisticLaunchVelocity(Vec4* from, Vec4* to, Vec4* out, u8* rec, f32 angle)
 {
     ComputeBallisticLaunchVelocity(from, to, out, rec, angle);
 }
 
 // Writes v to out, scaled down to length max when it is longer.
-void ClampVectorLength(Vec02* v, Vec02* out, f32 max)
+void ClampVectorLength(Vec4* v, Vec4* out, f32 max)
 {
     u128 q = Vu0::Q(*v);
     f32 len = Vu0::ToFloat(Vu0::Length(q));
     if (max < len) {
-        Vec02 s;
+        Vec4 s;
         Vu0::Q(s) = Vu0::FromFloat(max / len);
         Vu0::Q(*out) = Vu0::MulX(q, Vu0::Q(s));
     } else if (v != out) {
@@ -3804,9 +3804,9 @@ void StartAttachedSet(AttachedSet* self)
 }
 
 struct Oscillator;
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
-void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
+void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin);
+void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec4* in, Vec4* deltas, Vec4* outA, Vec4* outDeltas, Vec4* outB);
 
 // Gives the position (outA) and velocity (outB) that a point in (given in world space) of the
 // attached set has, by taking it into the set's frame and moving it with the set's state up the
@@ -3814,18 +3814,18 @@ void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02*
 // at the point).
 void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16* outB)
 {
-    Vec02 a;
+    Vec4 a;
     Quad16 b;
     Quad16 c;
-    Vec02 d;
-    TransformDirectionBetweenFrames(0, self, (Vec02*)in, &a);
+    Vec4 d;
+    TransformDirectionBetweenFrames(0, self, (Vec4*)in, &a);
     b = *(Quad16*)&self->baseVelocity;
     a.z = 0.0f;
     c = *(Quad16*)&g_zeroVector;
-    TransformStateToAncestorFrame(self, 0, &a, 0, (Vec02*)&b, (Vec02*)&c);
+    TransformStateToAncestorFrame(self, 0, &a, 0, (Vec4*)&b, (Vec4*)&c);
     if (self->oscillatorBlock != 0) {
-        ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->oscillatorBlock + 0xC)), 50.0f, (Vec02*)in, 0, 0, 0, &d);
-        Vu0::Q(*(Vec02*)&b) = Vu0::Add(Vu0::Q(*(Vec02*)&b), Vu0::Q(d));
+        ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->oscillatorBlock + 0xC)), 50.0f, (Vec4*)in, 0, 0, 0, &d);
+        Vu0::Q(*(Vec4*)&b) = Vu0::Add(Vu0::Q(*(Vec4*)&b), Vu0::Q(d));
     }
     if (outA != 0) {
         *outA = b;
@@ -3839,14 +3839,14 @@ void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16
 // its target's flags (59 for the old records, 60 for the new) to remove or add the attachment on
 // the target, drops the records without bit 60 from the list (freeing them in a chain) and clears
 // both bits.
-void ReconcileColliderAttachments(void* owner, Attach03** head)
+void ReconcileColliderAttachments(void* owner, ColliderAttachment** head)
 {
-    Attach03** link = head;
-    Attach03* node = *head;
-    Attach03* removed = 0;
+    ColliderAttachment** link = head;
+    ColliderAttachment* node = *head;
+    ColliderAttachment* removed = 0;
     while (node != 0) {
         Collider* o = node->target;
-        Attach03* next = node->nextOwn;
+        ColliderAttachment* next = node->nextOwn;
         if (((o->flags538 >> 59) & 1) != ((o->flags538 >> 60) & 1)) {
             if (o->flags538 & (1ULL << 59)) {
                 RemoveColliderAttachment(o, node);
@@ -3870,9 +3870,9 @@ void ReconcileColliderAttachments(void* owner, Attach03** head)
     ReleaseAttachRecords((World*)owner, removed);
 }
 
-Attach03* TakeAttachRecord(World* self);
-f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+ColliderAttachment* TakeAttachRecord(World* self);
+f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec4* nOut, Vec4* hitOut);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // Per-frame update of an attached set (a collider others ride on): after the base update it clears
@@ -3887,7 +3887,7 @@ void UpdateAttachedSet(AttachedSet* self, f32 dt)
         return;
     }
     World* world = self->world;
-    Attach03* link;
+    ColliderAttachment* link;
     Collider* c;
     for (link = self->links; link != 0; link = link->nextOwn) {
         link->target->flags538 |= 1ULL << 59;
@@ -3921,12 +3921,12 @@ void UpdateAttachedSet(AttachedSet* self, f32 dt)
         if (!(c->v150.z < -100.0f)) {
             continue;
         }
-        Vec02 from;
-        Vec02 to;
+        Vec4 from;
+        Vec4 to;
         ColliderSpan spans[16];
-        Vec02 off;
+        Vec4 off;
         if (self->oscillatorBlock != 0) {
-            Vec02 d;
+            Vec4 d;
             ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->oscillatorBlock + 0xC)), 50.0f, &c->v140, 0, &d, 0, 0);
             Vu0::Q(off) = Vu0::Sub(Vu0::Vec::Of(d), Vu0::Vec::Of(c->v140)).q;
         } else {
@@ -3978,7 +3978,7 @@ void UpdateAttachedSet(AttachedSet* self, f32 dt)
 
 // Slot 0xDC of the attached set: passes the step on to its link's target (that object's slot 46,
 // with this set).
-void ForwardAttachedSetLinkStep(AttachedSet* self, Attach03* link)
+void ForwardAttachedSetLinkStep(AttachedSet* self, ColliderAttachment* link)
 {
     Collider* target = link->target;
     ((AttachNotifyFn)target->desc03()->m46)(target, self);
@@ -3993,7 +3993,7 @@ void HandleAttachedSetNotification(AttachedSet* self, s32 kind, void* msg)
     s32 flag = 0;
     if (kind == 2) {
         if (msg == (void*)self) {
-            Attach03* n = self->links;
+            ColliderAttachment* n = self->links;
             if (n != 0) {
                 do {
                     RemoveColliderAttachment(n->target, n);
@@ -4004,8 +4004,8 @@ void HandleAttachedSetNotification(AttachedSet* self, s32 kind, void* msg)
             ReleaseAttachRecords(self->world, self->links);
             self->links = 0;
         } else {
-            Attach03** link = &self->links;
-            Attach03* n = *link;
+            ColliderAttachment** link = &self->links;
+            ColliderAttachment* n = *link;
             if (n != 0) {
                 if (n->target == (Collider*)msg) {
                     *link = n->nextOwn;
@@ -4050,7 +4050,7 @@ void RebuildAttachedSet(AttachedSet* self)
         UnregisterObjectGroup(self->world, (FoundList*)s);
         s->items[0] = self;
         s->count = 1;
-        Attach03* node = self->links;
+        ColliderAttachment* node = self->links;
         if (node) {
             do {
                 s->items[s->count++] = node->target;
@@ -4066,10 +4066,10 @@ void RebuildAttachedSet(AttachedSet* self)
 // feet 75 below, else its lower bound) to its upper bound is tested against the set's tree
 // (displaced by its oscillator). Gives the first span's length as a fraction of the segment (0 for
 // none); nOut gets its normal, hitOut the surface normal or the z axis.
-f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut)
+f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec4* nOut, Vec4* hitOut)
 {
-    Vec02 from;
-    Vec02 to;
+    Vec4 from;
+    Vec4 to;
     ColliderSpan spans[16];
     if (self->oscillatorBlock != 0) {
         ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->oscillatorBlock + 0xC)), 50.0f, &o->v140, 0, &from, 0, 0);
@@ -4094,11 +4094,11 @@ f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02*
         return 0.0f;
     }
     if (nOut != 0) {
-        *nOut = *(Vec02*)&spans[0].q[1];
+        *nOut = *(Vec4*)&spans[0].q[1];
     }
     if (hitOut != 0) {
         if (spans[0].face54 != 0) {
-            *hitOut = *(Vec02*)spans[0].face54;
+            *hitOut = *(Vec4*)spans[0].face54;
         } else {
             *hitOut = g_unitZVector;
         }
@@ -4112,7 +4112,7 @@ struct SwingRecord {
 };
 
 void UpdateColliderBounds(Collider* self);
-void ComputeOscillatorMaxDisplacement(Oscillator* osc, Vec02* out);
+void ComputeOscillatorMaxDisplacement(Oscillator* osc, Vec4* out);
 
 // Grows the box and both radii by the oscillator's largest swing.
 void UpdateAttachedSetBounds(AttachedSet* self)
@@ -4120,7 +4120,7 @@ void UpdateAttachedSetBounds(AttachedSet* self)
     UpdateColliderBounds(self);
     SwingRecord* r = (SwingRecord*)self->oscillatorBlock;
     if (r != 0 && r->osc != 0) {
-        Vec02 d;
+        Vec4 d;
         ComputeOscillatorMaxDisplacement(r->osc, &d);
         u128 v = Vu0::Q(d);
         f32 len = Vu0::ToFloatMoved(Vu0::SelfLength(v));
@@ -4664,7 +4664,7 @@ void StartWarpPage(WarpPage* o) {
     o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
     if (g_saveData->levelIndex) {
         u8* t = (u8*)&g_mapScreenList;
-        ((PtrP*)&((T217D_0F0*)t)->current)->v = o;
+        ((PtrP*)&((WarpPageList*)t)->current)->v = o;
     }
     switch (o->id) {
     case 0x1C7: o->slot = 1; break;
@@ -4713,7 +4713,7 @@ void SelectWarpPageEntry(WarpPage* self, s32 value)
     if (value == 10) {
         SetElementTextFromEntry(&g_copiedTextCaption, 0, 4);
     } else {
-        T217D_3D0* base = &g_copiedTextCaption;
+        CopiedTextCaption* base = &g_copiedTextCaption;
         s32 t = value < 9;
         s32 idx = t ? value : -1;
         SetElementTextFromEntry(base, self->slot, idx);
@@ -4737,7 +4737,7 @@ void AnnouncePendingWarpEntry(WarpPage* self)
     if (g_pendingWarpEntry == -1) return;
     SetScreenElementHoldTime(&g_letterboxElement, ((g_saveData->levelIndex << 8) | g_saveData->entryIndex) == 4 ? 0.5f : 2.0f);
     g_letterboxElement.vt->m16(&g_letterboxElement, 2);
-    T217D_3D0* e = &g_copiedTextCaption;
+    CopiedTextCaption* e = &g_copiedTextCaption;
     e->pending = 0;
     e->vt->m16(e, 0);
     SetElementTextFromEntry(e, g_saveData->levelIndex, g_saveData->entryIndex);
@@ -4874,7 +4874,7 @@ void ApplyWarpPageTransform(WarpPage* obj, u8* s, void* c)
     f32 keep2 = p->zoomGoal;
     SnapCameraZoom(p, 1.0f);
     BuildPlacedObjectTransform(obj, (Quad16*)c, (ScaledTransform*)tmp);
-    BuildMatrixFromRotationAndTranslation((const Vec02*)((Camera*)s)->position, (const Mat02*)&((Camera*)s)->rot80, (Mat4A*)tmp);
+    BuildMatrixFromRotationAndTranslation((const Vec4*)((Camera*)s)->position, (const Mat3*)&((Camera*)s)->rot80, (Mat4A*)tmp);
     ApplyPlacedObjectTransform(obj, (Camera*)s, (ScaledTransform*)tmp);
     SnapCameraZoom(g_camera, keep1);
     g_camera->zoomGoal = keep2;
@@ -5147,14 +5147,14 @@ void MoveWarpCursor(WarpPage* self, s32 idx)
     }
 }
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
 
 // Gives in out the screen position (in 640x492.8 pixel units) of one of an entry's two anchor
 // objects (picked by flag): its point is taken into the camera's view and projected; the screen
 // centre if the entry has no such object.
 void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
 {
-    Vec02 v;
+    Vec4 v;
     BaseObject* o;
     if (flag != 0) {
         o = (BaseObject*)self->entries[idx].secondAnchor;
@@ -5162,7 +5162,7 @@ void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
         o = (BaseObject*)self->entries[idx].firstAnchor;
     }
     if (o != 0) {
-        TransformPointBetweenFrames((PlacedObject*)o->parent, self, (Vec02*)&((TransformObject*)o)->pos, &v);
+        TransformPointBetweenFrames((PlacedObject*)o->parent, self, (Vec4*)&((TransformObject*)o)->pos, &v);
         Camera* g = g_camera;
         Vu0::Q(v) = Vu0::Rotate(g->rotation, Vu0::Q(v));
         Vu0::Q(v) = Vu0::Add(Vu0::Q(g->position), Vu0::Q(v));
@@ -5185,7 +5185,7 @@ void SetWarpPageSelectedEntry(WarpPage* self, s32 idx) {
     }
     BaseObject* r = *(BaseObject**)(base + idx * 0x34 + 0x30C);
     if (r != 0) {
-        TransformPointBetweenFrames((PlacedObject*)r->parent, self, (Vec02*)&((TransformObject*)r)->pos, (Vec02*)((base + 0x550)));
+        TransformPointBetweenFrames((PlacedObject*)r->parent, self, (Vec4*)&((TransformObject*)r)->pos, (Vec4*)((base + 0x550)));
     } else {
         *(Quad16*)(base + 0x550) = *(Quad16*)&g_zeroVector;
     }
@@ -5200,7 +5200,7 @@ void SetWarpPageSelectedEntry(WarpPage* self, s32 idx) {
 }
 
 extern const char g_warpMenuHint[40] = "&2T&. : Back\n&2(&. : Move\n&2X&. : Warp";
-void InitWarpMenu(T217D_0F0* self) {
+void InitWarpMenu(WarpPageList* self) {
     SetupScreenElementText(self);
     if (IsFontLoaded(2) != 0) {
         self->frame = (Font**)&g_warpTextStyle;
@@ -5214,7 +5214,7 @@ void InitWarpMenu(T217D_0F0* self) {
     FillMemory(self->nodes, 0, 0x18);
 }
 
-void HandleWarpMenuInput(T217D_0F0* self, PadRecord* t)
+void HandleWarpMenuInput(WarpPageList* self, PadRecord* t)
 {
     s32 loc[2];
     s32 s3;
@@ -5269,7 +5269,7 @@ void HandleWarpMenuInput(T217D_0F0* self, PadRecord* t)
     self->scale = ApproachValueWithRamp((RampProfile*)g_warpLevelRampKind2, 0, self->scale, self->scaleTarget, g_gameClock.step);
 }
 
-void SetWarpMenuOpen(T217D_0F0* self, s32 a1)
+void SetWarpMenuOpen(WarpPageList* self, s32 a1)
 {
     if ((a1 != 0) != (self->open == 0)) return;
     if (a1 != 0) {
@@ -5367,7 +5367,7 @@ struct WarpColor {
     }
 };
 
-// The text layout DrawFontString reads (Layout_137228's fields), filled through its setters.
+// The text layout DrawFontString reads (TextBoxLayout's fields), filled through its setters.
 struct WarpLabelLayout;
 #ifdef VERSION_EU
 void SetTextLayoutVerticalPlacement(WarpLabelLayout* self, s32 f);  // only PAL has this setter
@@ -5378,18 +5378,18 @@ struct WarpLabelLayout {
     s32 color;
     s32 f14;
     void* f18;
-    void Pos(f32 x_, f32 y_) { ((Layout_137228*)this)->Pos(x_, y_); }
-    void Size(f32 x_, f32 y_) { ((Layout_137228*)this)->Size(x_, y_); }
-    void Color(s32* c) { ((Layout_137228*)this)->Color(c); }
-    void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
-    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
+    void Pos(f32 x_, f32 y_) { ((TextBoxLayout*)this)->Pos(x_, y_); }
+    void Size(f32 x_, f32 y_) { ((TextBoxLayout*)this)->Size(x_, y_); }
+    void Color(s32* c) { ((TextBoxLayout*)this)->Color(c); }
+    void FlagA(s32 f) { ((TextBoxLayout*)this)->SetF14(f); }
+    void FlagB(s32 f) { ((TextBoxLayout*)this)->SetF18(f); }
 #ifdef VERSION_EU
     void FlagC(s32 f) { SetTextLayoutVerticalPlacement(this, f); }
 #endif
 };
 
 
-void DrawWarpMenu(T217D_0F0* self)
+void DrawWarpMenu(WarpPageList* self)
 {
     if (self->current == 0) {
         return;
@@ -5400,7 +5400,7 @@ void DrawWarpMenu(T217D_0F0* self)
     f32 keep2 = cam->zoomGoal;
     SnapCameraZoom(cam, one);
     if (g_coloredTriangleSet != 0) {
-        Vec02 v;
+        Vec4 v;
         f32 out[2];
         WarpColor inner;
         WarpColor outer;

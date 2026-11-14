@@ -18,7 +18,7 @@ struct Stream83;  // the level stream an animation is read from (func_00137D10 a
 // select (position 0x1, rotation 0x2, scale 0x4, weight 0x8), and the morph channels (0x10).
 // The curves are kind t2196 (anim_curve.h); slot 1 (slot 2 of the rotation curves) reads each from
 // the stream.
-struct Track83 {
+struct AnimationTrack {
     s32 target;             // 0x00
     PositionCurve* pos;         // 0x04
     RotationCurve* rot;         // 0x08
@@ -29,7 +29,7 @@ struct Track83 {
 };
 
 // A value that moves with a speed and an acceleration (func_0012C160 steps it by the frame time).
-struct Kin83 {
+struct MotionState {
     f32 pos;                // 0x00
     f32 vel;                // 0x04
     f32 acc;                // 0x08
@@ -67,7 +67,7 @@ struct AnimEvent {
 struct Animation : BaseObject {
     f32 length;             // 0x34: seconds (the stream's 1/60 s count times 1/60)
     s32 trackCount;         // 0x38
-    Track83* tracks;        // 0x3C
+    AnimationTrack* tracks;        // 0x3C
     s32 id;                 // 0x40
     s32 endMode;            // 0x44
     s32 enabled;            // 0x48: func_0012C160 queues its callback while set
@@ -82,26 +82,26 @@ struct Animation : BaseObject {
     u8 props6C[0x78 - 0x6C]; // 0x6C: the property list (func_00152438 sets its element size 0x3C)
     s32 key;                // 0x78: the key a player's track attachments are given (CreateAnimationPlayer)
     f32 speedScale;         // 0x7C: handed to the player as its speed scale
-    Kin83 kin;              // 0x80
+    MotionState kin;              // 0x80
     u8 pad8C[0x90 - 0x8C];
     f32 lo;                 // 0x90
     f32 hi;                 // 0x94
     f32 out;                // 0x98
-    Track83* movedTrack;    // 0x9C: the track func_0012D2A8 moved to the end (func_0012D398 tests it)
+    AnimationTrack* movedTrack;    // 0x9C: the track func_0012D2A8 moved to the end (func_0012D398 tests it)
     s32 targetCount;        // 0xA0
     s32* targets;           // 0xA4
     u8 padA8[0xB0 - 0xA8];
 };
 
 // 0x84: no field of its own is read.
-struct C84 : Animation {
+struct RuntimeAnimation : Animation {
     u8 padB0[0xD0 - 0xB0];
 };
 
 typedef char check_AnimEvent[sizeof(AnimEvent) == 0x10 ? 1 : -1];
 typedef char check_Animation[sizeof(Animation) == 0xB0 ? 1 : -1];
-typedef char check_C84[sizeof(C84) == 0xD0 ? 1 : -1];
-typedef char check_Track83[sizeof(Track83) == 0x1C ? 1 : -1];
+typedef char check_C84[sizeof(RuntimeAnimation) == 0xD0 ? 1 : -1];
+typedef char check_Track83[sizeof(AnimationTrack) == 0x1C ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitAnimation(Animation* self);                      // 0x83 slot 0

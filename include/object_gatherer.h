@@ -43,9 +43,9 @@ struct ObjectGatherer : Collider {
     f32 upwardPush;         // 0x620: the weight of the upward push
     f32 neighborRadius;     // 0x624: how near another gatherer is sent to state 2
     u8 pad628[0x630 - 0x628];
-    Vec02 v630;             // 0x630: the direction it heads in
-    Vec02 v640;             // 0x640: the point mode 1 picks
-    Vec02 v650;             // 0x650: v140, copied by slot 16
+    Vec4 v630;             // 0x630: the direction it heads in
+    Vec4 v640;             // 0x640: the point mode 1 picks
+    Vec4 v650;             // 0x650: v140, copied by slot 16
     void* candidate;        // 0x660: the candidate object chosen in mode 2
     s32 scatterCount;       // 0x664: -1 at set-up
     s32 scatterHoldsCounts; // 0x668

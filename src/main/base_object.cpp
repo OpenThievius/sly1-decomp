@@ -32,7 +32,7 @@
 #include "functions/placed_object.h"
 #include "functions/pooled_object.h"
 #include "functions/value_pools.h"
-struct Mat02;
+struct Mat3;
 
 
 void SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value); // stays void: retail returns a ScriptValue by value through the hidden pointer, a call with no value register, which a pointer return changes in func_00183A90 and func_00183C38
@@ -64,7 +64,7 @@ s32 IsInsideRange(ValueRange* span, f32 x);
 
 
 
-struct __attribute__((packed)) Pack_183B20 { u64 v; };
+struct __attribute__((packed)) PairValuePayload { u64 v; };
 
 
 
@@ -180,7 +180,7 @@ void StartObject(BaseObject* self)
 // it is already there, and calls the class's method 4 on it when it is attached.
 void AddObjectToParentList(BaseObject* self)
 {
-    List01* sub;
+    ObjectList* sub;
     if (self->parent == 0) {
         sub = &self->world->list48;
     } else {
@@ -212,7 +212,7 @@ void RegisterObject(BaseObject* self)
 // it is attached it also calls the class's method 5 on it.
 void RemoveObjectFromParentList(BaseObject* self)
 {
-    List01* sub;
+    ObjectList* sub;
     if (self->parent == 0) {
         sub = &self->world->list48;
     } else {
@@ -239,7 +239,7 @@ void AddObjectKeyToOwner(BaseObject* self)
         target = (PlacedObject*)self->parent;
     }
     if (target != 0) {
-        Key02* n = (Key02*)AllocateFrontMemory(8);
+        StartKeyNode* n = (StartKeyNode*)AllocateFrontMemory(8);
         n->key = self->id;
         n->next = target->keys;
         target->keys = n;
@@ -320,7 +320,7 @@ s32 IsObjectAttached(BaseObject* self)
             sub = node->world;
             sub = (u8*)sub + 0x48;
         }
-        if (IsInList((List01*)sub, node) == 0) {
+        if (IsInList((ObjectList*)sub, node) == 0) {
             return 0;
         }
         node = next;
@@ -362,13 +362,13 @@ void CopyObjectData(BaseObject* self, BaseObject* src)
         self->keyedList = p;
         AddMarkRootList((MarkStacks*)g_markStacks, p);
     }
-    const Desc01* d = src->desc;
+    const BaseObjectDescriptor* d = src->desc;
     World* s0 = self->world;
     CopyMemory((u8*)self + sizeof(BaseObject), (u8*)src + sizeof(BaseObject), d->size - sizeof(BaseObject));
     u8* t = GetHashedSlot((u8*)s0, self->id);
-    RemoveFromList((List01*)t, self);
+    RemoveFromList((ObjectList*)t, self);
     t = GetHashedSlot((u8*)s0, src->id);
-    AppendToList((List01*)t, self);
+    AppendToList((ObjectList*)t, self);
     self->id = src->id;
     if (src->scriptScope != 0) {
         u8* s1 = g_markStacks;
@@ -382,9 +382,9 @@ void CopyObjectData(BaseObject* self, BaseObject* src)
 }
 
 // Adds a callback (function and context) at the head of the list, taking its node from the world.
-void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx)
+void AddCallbackNode(World* world, ObjectCallback** head, void* fn, void* ctx)
 {
-    Callback01* n = (Callback01*)TakeCallRecord(world);
+    ObjectCallback* n = (ObjectCallback*)TakeCallRecord(world);
     n->fn = (void (*)(void*, s32, void*))fn;
     n->ctx = ctx;
     n->next = *head;
@@ -392,9 +392,9 @@ void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx)
 }
 
 // Removes the first callback of the list with this function and context, if any.
-void RemoveCallbackNode(World* mgr, Callback01** link, void* fn, void* ctx)
+void RemoveCallbackNode(World* mgr, ObjectCallback** link, void* fn, void* ctx)
 {
-    Callback01* node;
+    ObjectCallback* node;
     goto test;
 advance:
     link = &(*link)->next;
@@ -443,7 +443,7 @@ void SendObjectNotification(BaseObject* self, s32 kind, void* arg)
     if (self->desc->m0D != 0) {
         self->desc->m0D(self, kind, arg);
     }
-    Callback01* n = self->callbacks;
+    ObjectCallback* n = self->callbacks;
     while (n) { void* c = n->ctx; void (*f)(void*, s32, void*) = n->fn; n = n->next; f(c, kind, arg); }
 }
 
@@ -456,7 +456,7 @@ void LoadObjectProperties(BaseObject* self, void* stream)
 // Whether id is the object's id or its alias id; -1 never matches.
 s32 MatchesObjectId(BaseObject* self, s32 id)
 {
-    Alias01* link;
+    ObjectAlias* link;
 
     if (id == -1) {
         return 0;
@@ -480,7 +480,7 @@ missing:
 // The id of the object's alias, or -1 if it has none.
 s32 GetAliasId(BaseObject* self)
 {
-    Alias01* link = self->alias;
+    ObjectAlias* link = self->alias;
     if (link != 0) {
         return link->id;
     }
@@ -701,7 +701,7 @@ void SetExtraObjectPropertyPair(BaseObject* a0, s32 a1, void* a2)
     void* p;
     InitScriptValue(&a);
     p = AcquirePairPayload();
-    *(Pack_183B20*)p = *(Pack_183B20*)a2;
+    *(PairValuePayload*)p = *(PairValuePayload*)a2;
     SetScriptValuePair(&a, (f32*)p);
     SetExtraObjectProperty(&b, a0, a1, &a);
     DestroyScriptValue(&b, 2);
@@ -891,7 +891,7 @@ void RefreshConeVolumeShape(ConeVolume* self)
         self->shape = 0;
     }
     UsePacketBufferMemory(&w, 0x20, self->packet);
-    Vec02 c;
+    Vec4 c;
     if (0.0001f < self->hsv.z) {
         ConvertHsv255ToRgb255((Quad_001B4580*)&self->hsv, (f32*)&c);
         Vu0::Q(c) = Vu0::MulX(Vu0::Q(c), Vu0::Scalar(1.0f / self->hsv.z));
@@ -906,8 +906,8 @@ void RefreshConeVolumeShape(ConeVolume* self)
     CopyWordsToWriter(&w, 0xC, 2, (u32*)fit, 0x17);
     switch (self->mode) {
     case 0: {
-        Vec02 d;
-        TransformDirectionBetweenFrames(self, 0, (Vec02*)&self->q320, &d);
+        Vec4 d;
+        TransformDirectionBetweenFrames(self, 0, (Vec4*)&self->q320, &d);
         CopyWordsToWriter(&w, 8, 1, (u32*)&d, 0x19);
         WriteVifMscal(&w, g_coneProgramMode0);
         break;
@@ -922,15 +922,15 @@ void RefreshConeVolumeShape(ConeVolume* self)
     }
     case 2:
     case 3: {
-        Vec02 d;
-        Vec02 up;
-        TransformDirectionBetweenFrames(self, 0, (Vec02*)&self->q320, &d);
+        Vec4 d;
+        Vec4 up;
+        TransformDirectionBetweenFrames(self, 0, (Vec4*)&self->q320, &d);
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(d), Vu0::Scalar(-1.0f));
-        TransformDirectionBetweenFrames(self, 0, (Vec02*)&self->q340, &up);
+        TransformDirectionBetweenFrames(self, 0, (Vec4*)&self->q340, &up);
         BuildBasisFromXAndZHint(&d, &up, &self->basis);
         BuildFrustumSideNormals(&self->basis, self->planes, self->tangentX, self->tangentY);
-        Vec02& far = self->planes[4];
-        Vec02& near = self->planes[5];
+        Vec4& far = self->planes[4];
+        Vec4& near = self->planes[5];
         for (s32 i = 0; i < 4; i++) {
             self->planes[i].w = -Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(self->v140), Vu0::Vec::Of(self->planes[i])));
         }
@@ -1035,7 +1035,7 @@ void SetConeVolumeDirection(ConeVolume* self, Quad16* dir)
     u128 v = Vu0::Q(*dir);
     f32 len = Vu0::ToFloat(Vu0::Length(v));
     if (0.0001f < len) {
-        Vec02 k;
+        Vec4 k;
         Vu0::Q(k) = Vu0::FromFloat(-1.0f / len);
         Vu0::Q(self->q320) = Vu0::MulX(v, Vu0::Q(k));
     } else {
@@ -1125,10 +1125,10 @@ void UpdateConeVolumeBounds(ConeVolume* self)
         break;
     case 2:
     case 3: {
-        Vec02 apex;
-        Vec02 rim;
-        Vec02 v;
-        Vec02 center;
+        Vec4 apex;
+        Vec4 rim;
+        Vec4 v;
+        Vec4 center;
         Vu0::Q(apex) = Vu0::FromFloats(0.0f, 0.0f, self->rangeMax * 0.5f);
         f32 t = Tangent(self->outerAngle * 0.00872664712f);
         Vu0::Q(rim) = Vu0::FromFloats(t * self->rangeMax, 0.0f, self->rangeMax);

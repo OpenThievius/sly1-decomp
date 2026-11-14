@@ -7,7 +7,7 @@
 #include "common.h"
 
 struct BaseObject;
-struct Contact03;
+struct BodyContact;
 struct HitCountCollider;
 struct OwnerMessage;
 struct PadRecord;
@@ -19,8 +19,8 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t);
 void ShowHitCountColliderCounters();
 void ControlHitCountCollider(HitCountCollider* self, PadRecord* ev, f32 dt);
 void StepHitCountCollider(HitCountCollider* self, f32 dt);
-void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end);
-void ResolveHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end);
+void NoteHitCountColliderContact(HitCountCollider* self, BodyContact* c, s32 end);
+void ResolveHitCountColliderContact(HitCountCollider* self, BodyContact* c, s32 end);
 s32 IsHitCountColliderRequestBlocked(HitCountCollider* self);
 s32 AcceptHitCountColliderRequest(HitCountCollider* self, OwnerMessage* arg);
 s32 HasHitCountColliderAcceptedRequest(HitCountCollider* self);

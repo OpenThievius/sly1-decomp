@@ -236,7 +236,7 @@ explains it; search the section's title or the function. Walls that stay open ar
 - **The weight slot is a cast's copy.** `Vu0::Scalar`, `ScalarAt`, `FromFloats` and `ScalarInGpr` end in
   `return Q((s128)r)`: g++ 2.95 copies the register into a scalar-flagged temporary that member loads never wait
   for (func_001D87C8, func_001C75B0, func_0017ABE8, func_001A00A0, func_0015BC78 "The weight slot is a cast's
-  copy"). Where a near miss stores its own `Vec02 k` or `Slot`, pass `Vu0::Scalar(...)` directly.
+  copy"). Where a near miss stores its own `Vec4 k` or `Slot`, pass `Vu0::Scalar(...)` directly.
 - **Call through the descriptor member** (`self->desc02()->m20(...)`), not a cast array of function pointers,
   so both sides of the alias test carry a flag (func_001EB698). `RotateMembers` and `Vec::ScalarAtValue` read
   rows and members as members (func_001980B0, func_001C75B0, func_001719E8).

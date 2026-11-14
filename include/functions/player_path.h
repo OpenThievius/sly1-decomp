@@ -6,13 +6,13 @@
 
 #include "common.h"
 
-struct Mat02;
+struct Mat3;
 struct PathObject;
 struct PathPad;
 struct Player;
 
 void CreatePlayerTwoEntryBlend(Player* self);
-void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length);
+void PlaceOnPathAt(Player* self, PathObject* path, Mat3* out, f32 length);
 void StepPlayerOnPath(Player* self);
 void ControlPlayerOnPath(Player* self, PathPad* pad);
 void PinPlayerToPath(Player* self);

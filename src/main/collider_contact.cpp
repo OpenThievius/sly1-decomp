@@ -96,13 +96,13 @@ struct PooledEnd {
     Collider* part;         // 0x04
     s32 surface;            // 0x08
     u8 pad0C[4];
-    Vec02 v10;              // 0x10
-    Vec02 v20;              // 0x20
-    Vec02 v30;              // 0x30
+    Vec4 v10;              // 0x10
+    Vec4 v20;              // 0x20
+    Vec4 v30;              // 0x30
 };
 struct PooledContact {
     PooledEnd end[2];       // 0x00
-    Vec02 v80;              // 0x80
+    Vec4 v80;              // 0x80
     f32 depth;              // 0x90: how far the two ends are pressed into each other
     f32 friction;           // 0x94: the surface pair's friction
     f32 bounce;             // 0x98: the surface pair's bounce
@@ -113,7 +113,7 @@ struct PooledContact {
     PooledContact* next;    // 0xD0
 };
 
-struct Pool6C;
+struct FreeListPool;
 
 // Makes one contact from the pool for two parts (the second may be none): stores the penetration
 // depth, point, normal and kind, the body and the point in each part's frame at both ends, the
@@ -122,13 +122,13 @@ struct Pool6C;
 PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7)
 {
     s32 surfaces[2];
-    Vec02 k;
+    Vec4 k;
     PooledContact* c;
     s32 e;
     Collider* part;
     c = (PooledContact*)PopZeroedFreeSlot(&((BaseObject*)a0)->world->pool1AFC);
     c->depth = f;
-    c->v80 = *(Vec02*)a3;
+    c->v80 = *(Vec4*)a3;
     PooledEnd* end = c->end;
     for (e = 0; e < 2; e++) {
         part = (e != 0) ? (Collider*)a1 : (Collider*)a0;
@@ -141,9 +141,9 @@ PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3
         }
         end++;
     }
-    c->end[0].v10 = *(Vec02*)a2;
+    c->end[0].v10 = *(Vec4*)a2;
     Vu0::Q(k) = Vu0::FromFloat(-f);
-    *(Vu0::Vec*)&c->end[1].v10 = Vu0::MulAddX(Vu0::Vec::Of(*(Vec02*)a2), Vu0::Vec::Of(*(Vec02*)a3), Vu0::Vec::Of(k));
+    *(Vu0::Vec*)&c->end[1].v10 = Vu0::MulAddX(Vu0::Vec::Of(*(Vec4*)a2), Vu0::Vec::Of(*(Vec4*)a3), Vu0::Vec::Of(k));
     c->kind = a4;
     for (e = 0; e < 2; e++) {
         PooledEnd* pe = &c->end[e];
@@ -172,7 +172,7 @@ PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3
             }
         }
     }
-    NotifyContactEnds(((BaseObject*)a0)->world, 1, (Contact03**)&c);
+    NotifyContactEnds(((BaseObject*)a0)->world, 1, (BodyContact**)&c);
     c->next = *(PooledContact**)a7;
     *(PooledContact**)a7 = c;
     return c;
@@ -182,10 +182,10 @@ PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3
 // (TransformPointBetweenFrames), except for the kinds whose end lies on the part's sphere, where
 // the point is the part's centre moved by its radius against the contact's normal (kinds 4 to 6
 // at end 0, kinds 7 and 9 at end 1).
-void RefreshContactEndPoints(World* world, s32 n, Contact03** list)
+void RefreshContactEndPoints(World* world, s32 n, BodyContact** list)
 {
     for (s32 i = 0; i < n; i++) {
-        Contact03* c = list[i];
+        BodyContact* c = list[i];
         for (s32 e = 0; e < 2; e++) {
             ContactEnd03* end = &c->end[e];
             Collider* part = end->part;
@@ -219,21 +219,21 @@ void RefreshContactEndPoints(World* world, s32 n, Contact03** list)
 // For each contact of the list, works out the motion of each end's point and calls the part's
 // slot 59 for it, then each end's contact handler (slot 61, the one found by FindHandlerForSlot)
 // and stores the relative velocity of the ends (v B0).
-void NotifyContactEnds(World* world, s32 n, Contact03** list)
+void NotifyContactEnds(World* world, s32 n, BodyContact** list)
 {
     for (s32 i = 0; i < n; i++) {
-        Contact03* c = list[i];
+        BodyContact* c = list[i];
         s32 e;
         for (e = 0; e < 2; e++) {
             if (c->end[e].part != 0) {
                 ComputeObjectMotionInFrame(c->end[e].part, 0, &c->end[e].point, &c->end[e].v30, 0, 0, 0);
-                ((void (*)(Collider*, Contact03*, s32))c->end[e].part->desc03()->m3B)(c->end[e].part, c, e);
+                ((void (*)(Collider*, BodyContact*, s32))c->end[e].part->desc03()->m3B)(c->end[e].part, c, e);
             }
         }
         for (e = 0; e < 2; e++) {
             Collider* obj = FindHandlerForSlot(c->end[e].part, 0x104);
             if (obj != 0) {
-                void (*fn)(Collider*, Contact03*, s32) = (void (*)(Collider*, Contact03*, s32))obj->desc03()->m3D;
+                void (*fn)(Collider*, BodyContact*, s32) = (void (*)(Collider*, BodyContact*, s32))obj->desc03()->m3D;
                 if (fn != 0) {
                     fn(obj, c, e);
                 }
@@ -245,12 +245,12 @@ void NotifyContactEnds(World* world, s32 n, Contact03** list)
 
 
 // Returns each contact of a chain to the world's contact pool.
-void FreePooledContactChain(World* world, Contact03* head)
+void FreePooledContactChain(World* world, BodyContact* head)
 {
     if (head != 0) {
-        Contact03* cur = head;
+        BodyContact* cur = head;
         do {
-            Contact03* next = cur->next;
+            BodyContact* next = cur->next;
             PushFreeSlot(&world->pool1AFC, cur);
             cur = next;
         } while (cur != 0);
@@ -259,10 +259,10 @@ void FreePooledContactChain(World* world, Contact03* head)
 
 // Gives the parameter t of the point's projection on the infinite line through a and b (0 when
 // the line is degenerate) and its distance to the line in *dist.
-void MeasurePointToLine(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
+void MeasurePointToLine(Vec4* p, Vec4* a, Vec4* b, f32* t, f32* dist)
 {
-    Vec02 e;
-    Vec02 w;
+    Vec4 e;
+    Vec4 w;
     Vu0::Q(e) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     Vu0::Q(w) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a));
     f32 len2 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(e), Vu0::Q(e)));
@@ -281,10 +281,10 @@ void MeasurePointToLine(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
 
 // Like MeasurePointToLine but for the segment from a to b: t is clamped to 0 to 1 and the
 // distance is to the nearest point of the segment.
-void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
+void MeasurePointToSegment(Vec4* p, Vec4* a, Vec4* b, f32* t, f32* dist)
 {
-    Vec02 e;
-    Vec02 d;
+    Vec4 e;
+    Vec4 d;
     Vu0::Q(e) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     f32 r = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(e), Vu0::Q(e)));
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*a));
@@ -323,9 +323,9 @@ extern "C" void SyncDataCache(s32 a);
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
-// An edge of a collision mesh (Mesh03::edges): its two vertex indices first.
+// An edge of a collision mesh (CollisionMesh::edges): its two vertex indices first.
 
-// A face of a collision mesh (Mesh03::faces, 0x20 bytes): its plane, then flags (8 marks a face
+// A face of a collision mesh (CollisionMesh::faces, 0x20 bytes): its plane, then flags (8 marks a face
 // func_00186BA8 has tried).
 
 // A 0x70-byte hit func_0013DFD8 fills (CollectEdgeContacts, func_00187C28) and GroupEdgesByKey
@@ -347,7 +347,7 @@ s32 CollectEdgeContacts(Collider* other, Collider* self, u8* ctx, s32 cap, MeshH
 
     while (i >= 0) {
         MeshEdge* e = &table[i];
-        total += CollectTreeNodeSpans((TreeNode03*)ctx, (Vec02*)(base + e->x * 16), (Vec02*)(base + e->y * 16), 0, cap - total, (ColliderSpan*)&out[total]);
+        total += CollectTreeNodeSpans((TreeNode03*)ctx, (Vec4*)(base + e->x * 16), (Vec4*)(base + e->y * 16), 0, cap - total, (ColliderSpan*)&out[total]);
         if (filled < total) {
             for (; filled < total; filled++)
                 out[filled].edge = e;
@@ -380,7 +380,7 @@ s32 CollectMeshEdgeHitsFromFaces(Collider* self, Collider* other, s32 n, FaceRef
         f = list[i].face;
         s32 k = f - faces;
         f32 reach = self->radius3CC + ((f32*)other->meshCopy.words)[k];
-        u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(((Vec02*)other->meshCopy.points)[k]));
+        u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(((Vec4*)other->meshCopy.points)[k]));
         if (!(reach * reach <= Vu0::ToFloatMoved(Vu0::Dot(d, d)))) {
             f->flags |= 1;
         }
@@ -397,7 +397,7 @@ s32 CollectMeshEdgeHitsFromFaces(Collider* self, Collider* other, s32 n, FaceRef
                 if (!(far->flags & 1)) {
                     continue;
                 }
-                total += CollectTreeNodeSpans((TreeNode03*)self->tree.nodes, (Vec02*)(verts + e->x * 16), (Vec02*)(verts + e->y * 16), 0, cap - total, (ColliderSpan*)&out[total]);
+                total += CollectTreeNodeSpans((TreeNode03*)self->tree.nodes, (Vec4*)(verts + e->x * 16), (Vec4*)(verts + e->y * 16), 0, cap - total, (ColliderSpan*)&out[total]);
                 if (filled < total) {
                     for (; filled < total; filled++) {
                         out[filled].edge = e;
@@ -440,7 +440,7 @@ void GroupEdgesByKey(s32 count, MeshHit* base, s32* outCount, s32* keys, MeshHit
             continue;
         }
         if (!e->i54) {
-            Vec02 t;
+            Vec4 t;
             t = e->r0;
             e->r0 = e->r1;
             e->r1 = t;
@@ -584,9 +584,9 @@ void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3
     Collider* objs[2];
     MeshHit* path[32];
     f32 params[2];
-    Vec02 normal;
-    Vec02 pts[2];
-    Vec02* seg[4];
+    Vec4 normal;
+    Vec4 pts[2];
+    Vec4* seg[4];
     f32 depth;
     s32 i;
     s32 j;
@@ -606,8 +606,8 @@ void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3
         for (j = 0; j < groupCounts[i]; j++) {
             MeshHit* g = groups[i][j];
             s32 key = keys[i][j];
-            Vec02* verts = (Vec02*)objs[0]->meshCopy.verts;
-            Vec02* kp = &verts[key];
+            Vec4* verts = (Vec4*)objs[0]->meshCopy.verts;
+            Vec4* kp = &verts[key];
             f32 best = -3.40282347e+38f;
             MeshFace* bestFace = 0;
             f32 bestDot;
@@ -641,7 +641,7 @@ void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3
                 c->face54->flags &= ~8;
             }
             CreatePooledContact(bestDot - bestFace->dist, objs[0], objs[1], kp, bestFace, 1,
-                                &((Vec02*)objs[0]->meshCopy.verts)[key], bestFace, list);
+                                &((Vec4*)objs[0]->meshCopy.verts)[key], bestFace, list);
             for (h = g; h != 0; h = h->next) {
                 if (h->face54 == bestFace) {
                     continue;
@@ -670,8 +670,8 @@ void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3
         if (n > 0) {
             for (s32 k = 0; k < n; k++) {
                 MeshHit* h = path[k];
-                Vec02* va = (Vec02*)self->meshCopy.verts;
-                Vec02* vb = (Vec02*)other->meshCopy.verts;
+                Vec4* va = (Vec4*)self->meshCopy.verts;
+                Vec4* vb = (Vec4*)other->meshCopy.verts;
                 seg[0] = &va[e->edge->v[0]];
                 seg[1] = &va[e->edge->v[1]];
                 seg[2] = &vb[h->edge->v[0]];
@@ -714,7 +714,7 @@ void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3
             } else {
                 face = e->face54;
             }
-            Vec02* p = &((Vec02*)self->meshCopy.verts)[edge->v[end]];
+            Vec4* p = &((Vec4*)self->meshCopy.verts)[edge->v[end]];
             PooledContact* c;
             for (c = *list; c != 0; c = c->next) {
                 if (c->kind == 1 && c->vertex == p && c->face == face) {
@@ -734,8 +734,8 @@ void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3
 // A 0x30-byte hit CollectMeshHits gives: the contact point, the normal, the depth, a kind (6 a
 // face, 5 an edge, 4 a vertex) and the part hit.
 struct MeshHitEntry {
-    Vec02 point;            // 0x00
-    Vec02 normal;           // 0x10
+    Vec4 point;            // 0x00
+    Vec4 normal;           // 0x10
     f32 depth;              // 0x20
     s32 kind;               // 0x24
     void* part;             // 0x28
@@ -746,8 +746,8 @@ struct MeshHitEntry {
 struct VertexHit {
     s32 index;              // 0x00
     u8 pad4[0xC];
-    Vec02 point;            // 0x10
-    Vec02 normal;           // 0x20
+    Vec4 point;            // 0x10
+    Vec4 normal;           // 0x20
     f32 depth;              // 0x30
     u8 pad34[0xC];
 };
@@ -759,7 +759,7 @@ struct PlaneTreeNode;
 struct PlaneTreeOutput;
 
 // The squared distance between two points.
-static inline f32 DistanceSquared(const Vec02& a, const Vec02& b)
+static inline f32 DistanceSquared(const Vec4& a, const Vec4& b)
 {
     Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(a), Vu0::Vec::Of(b));
     return Vu0::ToFloat(Vu0::Dot(d, d));
@@ -771,7 +771,7 @@ static inline f32 DistanceSquared(const Vec02& a, const Vec02& b)
 // the edge hits of the marked faces not hit whole (0x20), keeping the vertex hits found on the
 // way, and last the vertex hits no edge hit ends at. The list comes from func_0013E430 when no
 // cursor is given. The marks are cleared on the way out.
-s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out)
+s32 CollectMeshHits(Vec4* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, CollisionMesh* mesh, s32 cap, MeshHitEntry* out)
 {
     VertexHit verts[64];
     s32 n;
@@ -803,14 +803,14 @@ s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef
         s32 k = face - (MeshFace*)mesh->faces;
         f32* w = (f32*)mesh->words;
         f32 r = radius + w[k];
-        f32 dsq = DistanceSquared(*center, ((Vec02*)mesh->points)[k]);
+        f32 dsq = DistanceSquared(*center, ((Vec4*)mesh->points)[k]);
         if (r * r <= dsq) {
             continue;
         }
         f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(*center), Vu0::Vec::Of(face->normal))) - face->dist;
         Vu0::Vec s = Vu0::Vec::Scalar(-d);
         Vu0::Vec p = Vu0::MulAddX(Vu0::Vec::Of(*center), Vu0::Vec::Of(face->normal), s);
-        f32 e = Vu0::ToFloat(Vu0::Length(Vu0::Sub(p, Vu0::Vec::Of(((Vec02*)mesh->points)[k])))) - w[k];
+        f32 e = Vu0::ToFloat(Vu0::Length(Vu0::Sub(p, Vu0::Vec::Of(((Vec4*)mesh->points)[k])))) - w[k];
         e = e >? 0.0f;
         if (radius * radius < e * e + d * d) {
             continue;
@@ -826,10 +826,10 @@ s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef
             continue;
         }
         face->flags |= 0x40;
-        Vec02 top;
-        Vec02 bottom;
+        Vec4 top;
+        Vec4 bottom;
         MeshHit spans[16];
-        Vec02 pt;
+        Vec4 pt;
         Vu0::Set(top, Vu0::MulAddX(Vu0::Q(*center), Vu0::Q(face->normal), Vu0::Scalar(radius)));
         Vu0::Set(bottom, Vu0::MulAddX(Vu0::Q(*center), Vu0::Q(face->normal), Vu0::Scalar(-radius)));
         s32 m = CollectTreeNodeSpans((TreeNode03*)cursor, &top, &bottom, 0, 0x10, (ColliderSpan*)spans);
@@ -865,7 +865,7 @@ s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef
     }
     firstEdge = n;
     for (i = count; --i >= 0;) {
-        Vec02* vtx = (Vec02*)mesh->verts;
+        Vec4* vtx = (Vec4*)mesh->verts;
         MeshFace* faces = (MeshFace*)mesh->faces;
         face = list[i].face;
         if (!(face->flags & 0x10)) {
@@ -883,12 +883,12 @@ s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef
             if (of->flags & 0x80) {
                 continue;
             }
-            Vec02* a = &vtx[ed->v[0]];
-            Vec02* b = &vtx[ed->v[1]];
-            Vec02 dir;
-            Vec02 rel;
-            Vec02 nrm;
-            Vec02 p;
+            Vec4* a = &vtx[ed->v[0]];
+            Vec4* b = &vtx[ed->v[1]];
+            Vec4 dir;
+            Vec4 rel;
+            Vec4 nrm;
+            Vec4 p;
             s32 vi;
             Vu0::Set(dir, Vu0::Sub(Vu0::Vec::Of(*b), Vu0::Vec::Of(*a)).q);
             f32 lsq = Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(dir), Vu0::Vec::Of(dir)));
@@ -963,7 +963,7 @@ s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef
             o->normal = v->normal;
             o->depth = v->depth;
             o->kind = 4;
-            o->part = &((Vec02*)mesh->verts)[vi];
+            o->part = &((Vec4*)mesh->verts)[vi];
             if (n >= cap) {
                 goto clear;
             }
@@ -983,7 +983,7 @@ done:
 
 // Collects the mesh hits of a2 near a1 (up to 64) and creates a pooled contact for each, deepest
 // last.
-void AddMeshContacts(Collider* a0, f32 radius, Vec02* a1, Collider* a2, s32 a3, FaceRef* a4, FaceRef* a5, PooledContact** a6)
+void AddMeshContacts(Collider* a0, f32 radius, Vec4* a1, Collider* a2, s32 a3, FaceRef* a4, FaceRef* a5, PooledContact** a6)
 {
     MeshHitEntry ents[64];
     s32 n = CollectMeshHits(a1, radius, a3, a4, a5, &a2->meshCopy, 0x40, ents);
@@ -998,7 +998,7 @@ void AddMeshContacts(Collider* a0, f32 radius, Vec02* a1, Collider* a2, s32 a3, 
 // sum of the radii.
 void AddSphereSphereContact(Collider* self, Collider* other, void* a2)
 {
-    Vec02 d;
+    Vec4 d;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(other->v140));
     f32 rs = self->radius3CC;
     f32 dist2 = Vu0::ToFloatNow(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
@@ -1010,15 +1010,15 @@ void AddSphereSphereContact(Collider* self, Collider* other, void* a2)
         return;
     }
     f32 dist = Fpu::Sqrt(dist2);
-    Vec02 point;
-    Vec02 n;
+    Vec4 point;
+    Vec4 n;
     {
-        Vec02 k;
+        Vec4 k;
         Vu0::Q(k) = Vu0::FromFloat(1.0f / dist);
         Vu0::Q(n) = Vu0::MulX(Vu0::Q(d), Vu0::Q(k));
     }
     {
-        Vec02 k;
+        Vec4 k;
         Vu0::Q(k) = Vu0::FromFloat(-rs);
         Vu0::Q(point) = Vu0::MulAddX(Vu0::Q(self->v140), Vu0::Q(n), Vu0::Q(k));
     }
@@ -1031,11 +1031,11 @@ void AddSphereSphereContact(Collider* self, Collider* other, void* a2)
 void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f)
 {
     Collider* part = (Collider*)a0;
-    Vec02* dir = (Vec02*)a1;
-    Vec02* out = (Vec02*)a2;
+    Vec4* dir = (Vec4*)a1;
+    Vec4* out = (Vec4*)a2;
     f32 best = Vu0::ToFloat(Vu0::Dot(Vu0::Q(part->v140), Vu0::Q(*dir)));
     if (part->meshCopy.vertCount > 0) {
-        Vec02* verts = (Vec02*)part->meshCopy.verts;
+        Vec4* verts = (Vec4*)part->meshCopy.verts;
         Vu0::Q(*out) = Vu0::Q(part->v140);
         s32 i = part->meshCopy.vertCount; i--; for (; i >= 0; i--) {
             u128 p = Vu0::Q(verts[i]);
@@ -1047,7 +1047,7 @@ void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f)
         }
     } else {
         f32 r = part->radius3CC;
-        Vec02 k;
+        Vec4 k;
         best -= r;
         Vu0::Q(k) = Vu0::FromFloat(-r);
         Vu0::Q(*out) = Vu0::MulAddX(Vu0::Q(part->v140), Vu0::Q(*dir), Vu0::Q(k));
@@ -1086,13 +1086,13 @@ s32 AddSweptPartMeshContact(void* a0, void* a1, s32 a2, void* a3, void* a4, void
 // stored as locals before the products are taken, and the squared length of e before the cross
 // term: local-alloc then ranks d's register ahead of the products' (docs/TOOLCHAIN.md,
 // "Local allocation's ranking"). Its outputs are optional.
-s32 IntersectSegmentWithSphere(Vec02* a, Vec02* b, Vec02* c, f32* tOut, Vec02* hitOut, Vec02* nOut, f32* dOut, f32 r)
+s32 IntersectSegmentWithSphere(Vec4* a, Vec4* b, Vec4* c, f32* tOut, Vec4* hitOut, Vec4* nOut, f32* dOut, f32 r)
 {
-    Vec02 e;
-    Vec02 d;
-    Vec02 p;
-    Vec02 w;
-    Vec02 n;
+    Vec4 e;
+    Vec4 d;
+    Vec4 p;
+    Vec4 w;
+    Vec4 n;
     u128 dv = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     u128 ev = Vu0::Sub(Vu0::Q(*c), Vu0::Q(*b));
     Vu0::Q(e) = ev;
@@ -1137,7 +1137,7 @@ struct SphereHitFrame { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
 s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
 {
     SphereHitFrame loc;
-    if (IntersectSegmentWithSphere(&((PlacedObject*)a1)->v140, &((Collider*)a0)->v370, &((PlacedObject*)a0)->v140, 0, (Vec02*)&loc, (Vec02*)loc.b, &loc.fa, ((Collider*)a1)->radius3CC) == 0) {
+    if (IntersectSegmentWithSphere(&((PlacedObject*)a1)->v140, &((Collider*)a0)->v370, &((PlacedObject*)a0)->v140, 0, (Vec4*)&loc, (Vec4*)loc.b, &loc.fa, ((Collider*)a1)->radius3CC) == 0) {
         return 0;
     }
     FindPartSupportPoint(a0, loc.b, loc.a, &loc.fb, loc.fa);

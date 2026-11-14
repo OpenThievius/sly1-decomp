@@ -25,12 +25,12 @@
 #include "functions/state_walker.h"
 #include "functions/switched_collider.h"
 #include "functions/world.h"
-struct Vec02;
+struct Vec4;
 
 struct MemberObject;
 
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -89,9 +89,9 @@ void StartHitCountCollider(HitCountCollider* self)
     PlacedObject* v = self->aimObject;
     self->aimHeading = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
     *(UnalignedFloatPair*)&self->drivenBaseX = *(UnalignedFloatPair*)&((IdLinkedObject*)self->drivenObject)->f2DC;
-    T217D_E30* g1 = &g_hitCountCaptionA;
+    CounterCaption* g1 = &g_hitCountCaptionA;
     ((UnalignedPointer*)&g1->target)->p = (u8*)&self->collectedCount;
-    T217D_E30* g2 = &g_hitCountCaptionB;
+    CounterCaption* g2 = &g_hitCountCaptionB;
     ((UnalignedPointer*)&g2->target)->p = (u8*)&self->hitsLeft;
     *(void**)&g1->limit = D_00274A40;
     g2->rate = 4.0f;
@@ -107,12 +107,12 @@ extern f32 g_stepScale;
 extern f32 g_gameClock[];
 extern s32 D_0026E228[8];
 
-struct Vec02;
+struct Vec4;
 struct RampProfile;
-struct Mat02;
+struct Mat3;
 void SendHitCountColliderRequest(HitCountCollider* self, BaseObject* value);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit);
+void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin, f32 limit);
 extern "C" f32 Cosine(f32 x);
 
 // Per-frame update of the hit-count collider: updates it as a switched collider, handles a
@@ -170,9 +170,9 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
         if (g_gameTime[0] - self->markStartTime > 2.0f) self->acceptedMark = 0;
     }
     f32 ang = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)buf, self->aimHeading - ang);
-    ApproachRotationWithRamp(&self->aimObject->rot, (Mat02*)buf, (RampProfile*)g_hitCountRotationRamp, (Mat02*)buf2, 0, t);
-    self->aimObject->desc02()->m1E(self->aimObject, (Mat02*)buf2);
+    BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, (Mat3*)buf, self->aimHeading - ang);
+    ApproachRotationWithRamp(&self->aimObject->rot, (Mat3*)buf, (RampProfile*)g_hitCountRotationRamp, (Mat3*)buf2, 0, t);
+    self->aimObject->desc02()->m1E(self->aimObject, (Mat3*)buf2);
     ca[0] = 0x8010FF00;
     cb[0] = 0x800000FF;
     if (self->acceptedMark) {
@@ -266,7 +266,7 @@ void ControlHitCountCollider(HitCountCollider* self, PadRecord* ev, f32 dt)
 }
 
 
-void ClampVectorLength(Vec02* v, Vec02* out, f32 max);
+void ClampVectorLength(Vec4* v, Vec4* out, f32 max);
 void AddColliderForce(void* a, void* b);
 
 // Per-frame step: steps the collider, turns it toward its heading (yaw only) with the turn ramp,
@@ -274,9 +274,9 @@ void AddColliderForce(void* a, void* b);
 // maximum acceleration, divided by dt.
 void StepHitCountCollider(HitCountCollider* self, f32 dt)
 {
-    Mat02 rot;
-    Vec02 accel;
-    Vec02 t;
+    Mat3 rot;
+    Vec4 accel;
+    Vec4 t;
     StepCollider(self, dt);
     BuildYawPitchMatrix(self->heading, 0.0f, &rot);
     TurnColliderTowardRotation(self, dt, &rot, g_hitCountTurnRamp);
@@ -291,7 +291,7 @@ void StepHitCountCollider(HitCountCollider* self, f32 dt)
 // Contact method: notes what touched the collider (the other end of the contact): a kind-0x21 body
 // sets hitPending while hits are left, else is kept as touchedObject unless hitPlayer is set; a
 // body with id 0x52F is kept as collectedObject.
-void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
+void NoteHitCountColliderContact(HitCountCollider* self, BodyContact* c, s32 end)
 {
     ContactEnd03* e = &c->end[1 - end];
     if (IsObjectOfKind(e->body, 0x21)) {
@@ -307,7 +307,7 @@ void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
 
 // The velocity is read first, and each of the three references to the end takes its address
 // again through Q (docs/toolchain/reloads-and-stores.md, "Three adds of one address").
-void ResolveHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
+void ResolveHitCountColliderContact(HitCountCollider* self, BodyContact* c, s32 end)
 {
     AnimationPlayer* p = self->hitPlayer;
     if (p != 0) {
@@ -376,8 +376,8 @@ void PushRequesterAwayFromSender(void* c, void* receiver)
 {
     PlacedObject* from = (PlacedObject*)c;
     PlacedObject* to = (PlacedObject*)receiver;
-    Vec02 d;
-    Vec02 v;
+    Vec4 d;
+    Vec4 v;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(to->v140), Vu0::Q(from->v140));
     d.z = 0.0f;
     u128 s = Vu0::ScalarAt(g_hitCountPushSpeed);
@@ -405,7 +405,7 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 f32 WrapAngle(f32 a);
 struct ScatterController;
 f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out);
-void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
+void SetPauseMenuLayerPage(PauseMenu* a, s32 b, s32 c);
 
 // Changes the collider's state (the value at +0x610). Leaving state 2 records the time and sets a
 // mark; entering state 2 or 3 stores the opposite of the heading as the facing angle, and each new
@@ -422,7 +422,7 @@ void SetHitCountColliderState(HitCountCollider* self, s32 state)
     }
     *(s32*)&self->stickGain = 0;
     if (state < 4) if (state >= 2) {
-        Vec02 q;
+        Vec4 q;
         f32 a = ArctangentOfRatio(self->v150.y, self->v150.x);
         f32 b = WrapAngle(a + 3.14159274f);
         self->heading = b;
@@ -430,7 +430,7 @@ void SetHitCountColliderState(HitCountCollider* self, s32 state)
         q = g_zeroVector;
         f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
         ApproachAngleWithRamp(r, self->heading, 0.0f, g_hitCountTurnRamp, &q.z);
-        self->desc02()->m21(self, (Vec02*)&q);
+        self->desc02()->m21(self, (Vec4*)&q);
         self->hitsLeft = 0;
         D_0026E228[0] = -1;
         if (state == 3) RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f);
@@ -475,8 +475,8 @@ void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj)
     }
     s32 n = i + 1;
     if (!IsObjectAttached(obj)) {
-        Vec02 p;
-        Vec02 best;
+        Vec4 p;
+        Vec4 best;
         best = g_zeroVector;
         f32 bestDist = 0.0f;
         for (s32 j = 0; j < self->placePointCount; j++) {
@@ -498,8 +498,8 @@ void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj)
         best.z = obj->pos.z;
         obj->desc02()->m1D(obj, &best);
         if (IsObjectOfKind(obj, 0x21)) {
-            Vec02 vel;
-            Vec02 spin;
+            Vec4 vel;
+            Vec4 spin;
             ComputePolarOffset((Vec3*)&vel, RandomFloatInRange(-3.1415927f, 3.1415927f), RandomFloatInRange(g_hitCountItemSpeedRange[0], g_hitCountItemSpeedRange[1]), 0.0f);
             obj->desc02()->m20(obj, &vel);
             Vu0::Set(spin, Vu0::FromFloats(0.0f, 0.0f, RandomFloatInRange(g_hitCountItemSpinRange.c[0], g_hitCountItemSpinRange.c[1])));

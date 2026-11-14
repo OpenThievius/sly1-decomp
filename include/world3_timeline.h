@@ -8,7 +8,7 @@
 #include "base_object.h"
 
 // A 16-byte entry of the buffer at 0x38 (func_001ED4C8 adds one).
-struct Entry90 {
+struct TimelineEntry {
     s32 kind;               // 0x00
     s32 step;               // 0x04: a time, against the found object's +0xC70 (func_001ED278)
     f32 substep;            // 0x08
@@ -19,12 +19,12 @@ struct Entry90 {
 // the level (+0x14) and keeps the result.
 struct World3Timeline : BaseObject {
     s32 entryCount;         // 0x34
-    void* buffer;           // 0x38: f34 Entry90 records (0xC00 bytes, func_001ED168)
+    void* buffer;           // 0x38: f34 TimelineEntry records (0xC00 bytes, func_001ED168)
     s32 index;              // 0x3C: the entry func_001ED278 is at
     PlacedObject* found;    // 0x40
     s32 timeOffset;         // 0x44: added to an entry's f4 (func_001ED278)
 
-    Entry90* Cur() { return &((Entry90*)buffer)[index]; }
+    TimelineEntry* Cur() { return &((TimelineEntry*)buffer)[index]; }
 };
 
 typedef char check_World3Timeline[sizeof(World3Timeline) == 0x48 ? 1 : -1];

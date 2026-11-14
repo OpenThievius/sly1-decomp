@@ -29,7 +29,7 @@ struct __attribute__((aligned(16))) GaugeParams {
     s32 rest[0x17];
 };
 
-struct Timer68 {
+struct GaugeTimerState {
     s32 state;
     f32 scale;
     s32 count;
@@ -88,7 +88,7 @@ struct GaugeManager : PlacedObject {
     s32 contactsStarted;    // 0x464: 0 at setup
     u8 pad468[0x470 - 0x468];
     union {
-        Timer68 timer;      // 0x470
+        GaugeTimerState timer;      // 0x470
         f32 poly[3];        // 0x470: coefficients (func_0014C138)
     };
     u8 pad47C[0x480 - 0x47C];

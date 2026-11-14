@@ -16,13 +16,13 @@ struct StepSequence;
 struct AnimationPlayer;  // an animation's player (t2195.h)
 
 // The entry func_001925F0 returns; its slot at 0x154 gives the state of the controls.
-struct Ent65;
+struct StepSequenceHost;
 struct VtEnt65 {
     u8 pad[0x154];
     void (*f154)(void* o, StepSequence* self, s32* q);
-    void (*f158)(Ent65* o, void* value);    // 0x158: shows a step's text (func_00151860)
+    void (*f158)(StepSequenceHost* o, void* value);    // 0x158: shows a step's text (func_00151860)
 };
-struct Ent65 { VtEnt65* vt; };
+struct StepSequenceHost { VtEnt65* vt; };
 
 // A step (0x28 bytes): func_00150570 reads `type` and then, by type, the words after it
 // (0 and 7: an optional block at +4; 1, 2: two shorts; 3: two floats, two bytes, a string at

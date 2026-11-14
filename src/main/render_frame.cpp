@@ -84,27 +84,27 @@ typedef char check_VifWriterState[sizeof(VifWriterState) == 0x24 ? 1 : -1];
 extern GsWriterState g_gsPacketWriter;
 extern VifWriterState g_vifPacketWriter;
 
-void SetListLinkOffset(List01* self, s32 offset);
-s32 IsListEmpty(List01* p);
-void AppendToList(List01* self, void* item);
+void SetListLinkOffset(ObjectList* self, s32 offset);
+s32 IsListEmpty(ObjectList* p);
+void AppendToList(ObjectList* self, void* item);
 
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
 // list at +0x1BDC, linked at +0x64): the receiver, the 0x50-byte message, the time it is due.
 #include "delayed_message_body.h"
-void AppendToList(List01* self, void* item);
-void AppendToList(List01* self, void* item);
+void AppendToList(ObjectList* self, void* item);
+void AppendToList(ObjectList* self, void* item);
 
 
 
-void RemoveFromList(List01* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 void BeginDmaTag(PacketWriter* self);
 void CloseDmaTag(PacketWriter* self);
 
 
-void AppendToList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
-void RemoveFromList(List01* list, void* item);
-void RemoveFromList(List01* list, void* item);
+void AppendToList(ObjectList* self, void* item);
+void RemoveFromList(ObjectList* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
@@ -118,7 +118,7 @@ template <class T> struct NextInList {
         return obj;
     }
 };
-void RemoveFromList(List01* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 
 // The packet memory a GIF writer fills: quadwords.
 typedef u64 UQuadword128 __attribute__((mode(TI)));
@@ -155,12 +155,12 @@ void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 void WriteGsFinishPacket(void* self, void* p, u8** n);
 void CloseDrawBuffer(void* obj, void* a, u8** b);
-void ClearList(List01* p);
+void ClearList(ObjectList* p);
 extern "C" s32 PostSemaphore(void* a);
 
-extern List01 g_deferredReleaseListA;
-extern List01 g_deferredReleaseListB;
-extern List01 g_deferredReleaseListC;
+extern ObjectList g_deferredReleaseListA;
+extern ObjectList g_deferredReleaseListB;
+extern ObjectList g_deferredReleaseListC;
 extern s32 g_buildFrameData;
 extern void* g_frameReadySemaphore;
 
@@ -196,7 +196,7 @@ extern u8 g_vifPacketMemory[], g_renderFrameDataMemory[];
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
 extern s32 g_mainAndRenderThreads[];
-void SetListLinkOffset(List01* self, s32 value);
+void SetListLinkOffset(ObjectList* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
 void* CreateLockSemaphore(s32 initCount, s32 maxCount);
 void RunThread(s32 thread, void* arg);
@@ -224,10 +224,10 @@ struct FrameNode {
 };
 
 
-s32 IsListEmpty(List01* l);
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
-void ClearList(List01* l);
+s32 IsListEmpty(ObjectList* l);
+void RemoveFromList(ObjectList* list, void* item);
+void AppendToList(ObjectList* self, void* item);
+void ClearList(ObjectList* l);
 typedef signed long s64;
 typedef unsigned long u64;
 extern void* g_drawingFrame;
@@ -245,25 +245,25 @@ void BeginDmaTag(PacketWriter* self);
 
 // A frame's colour record, as func_0015E6A8 reads it: 64-byte entries whose quadwords at +0x10
 // and +0x20 hold colours as four words, a run of colour quadwords, and where the packed colours go.
-struct ColorEntry_15E6A8 {
+struct FrameColorEntry {
     u8 pad00[0x10];
     Quad16 c10;             // 0x10
     Quad16 c20;             // 0x20
     u8 pad30[0x40 - 0x30];
 };
 
-struct ColorOut_15E6A8 {
+struct FrameColorOutput {
     u8 pad00[0x08];
     u32* out08;             // 0x08: the packed c10 of each entry
     u8 pad0C[0x14 - 0x0C];
     u32* out14;             // 0x14: the packed c20, then two words on, the packed run
 };
 
-struct ColorRecord_15E6A8 {
-    ColorEntry_15E6A8* begin;   // 0x00
-    ColorEntry_15E6A8* end;     // 0x04
+struct FrameColorRecord {
+    FrameColorEntry* begin;   // 0x00
+    FrameColorEntry* end;     // 0x04
     Quad16* run;                // 0x08: one quadword for each entry
-    ColorOut_15E6A8* out;       // 0x0C
+    FrameColorOutput* out;       // 0x0C
 };
 
 // A colour as four words, packed into one: each word a byte, the first lowest.
@@ -276,11 +276,11 @@ static inline u32 PackColor(Quad16 c)
 // on to the next record, then lets the VIF1 go on (FBRST's STC) and ends the handler.
 s32 PackFrameColors(s32 cause)
 {
-    ColorRecord_15E6A8* r = (ColorRecord_15E6A8*)g_drawFrameData;
-    ColorEntry_15E6A8* begin = r->begin;
-    ColorEntry_15E6A8* end = r->end;
-    ColorOut_15E6A8* o = r->out;
-    ColorEntry_15E6A8* e;
+    FrameColorRecord* r = (FrameColorRecord*)g_drawFrameData;
+    FrameColorEntry* begin = r->begin;
+    FrameColorEntry* end = r->end;
+    FrameColorOutput* o = r->out;
+    FrameColorEntry* e;
     u32* out = o->out08;
     for (e = begin; e < end; e++) {
         *out++ = PackColor(e->c10);
@@ -291,7 +291,7 @@ s32 PackFrameColors(s32 cause)
     }
     s32 n = end - begin;
     out += 2;
-    Quad16* run = ((ColorRecord_15E6A8*)g_drawFrameData)->run;
+    Quad16* run = ((FrameColorRecord*)g_drawFrameData)->run;
     Quad16* qend = run + n;
     for (Quad16* q = run; q < qend; q++) {
         *out++ = PackColor(*q);
@@ -659,11 +659,11 @@ s32 g_drawFrameData = 0;
 // size: pointer (lw/sw), 4 bytes before an 8-aligned next label
 RenderFrame* g_buildFrame = 0;
 // size: 12-byte record copied into Slot r20 by func_0015EC68, 4 bytes pad before 16-aligned next label
-List01 g_deferredReleaseListA = {};
+ObjectList g_deferredReleaseListA = {};
 // size: 12-byte record copied into Slot r2C by func_0015EC68, 4 bytes pad before 16-aligned next label
-List01 g_deferredReleaseListB = {};
+ObjectList g_deferredReleaseListB = {};
 // size: 12-byte record copied into Slot r38 by func_0015EC68
-List01 g_deferredReleaseListC = {};
+ObjectList g_deferredReleaseListC = {};
 s32 g_lastDmaRefStart = 0;
 // size: s32 (sw), 4-byte label
 s32 g_codeChecksumFailed = 0;

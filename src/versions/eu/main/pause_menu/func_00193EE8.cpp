@@ -36,7 +36,7 @@ void ChangePauseMenuPage(Self_193EE8_eu* self, s32 a, s32 b)
     case 11:
     case 16:
     case 17: {
-        T217D_330* o = &g_buttonHintElement;
+        ButtonHintElement* o = &g_buttonHintElement;
         SetScreenElementHoldTime(o, 0.0f);
         SetScreenElementScale(o, 0.6f);
         break;

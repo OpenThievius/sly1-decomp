@@ -403,7 +403,7 @@ by loop.c), the marker pointer is set in the entry jump's delay slot, after them
   loop phony and moves nothing (-1 and 100 stay in the loop, &t takes a saved register).
 - **A record by index.** A walking `m++` pointer is set where its statement is, before loop.c's
   moved constants; retail's comes after them, which is where loop.c puts a reduced giv's
-  initialisation. `C17Marker* m = &markers[i];` at the top of the body (4 insns more, still 29
+  initialisation. `ProgressMarker* m = &markers[i];` at the top of the body (4 insns more, still 29
   in the window) gives that, where `markers[i].walker` at each call (twice the multiply) breaks
   the window.
 - **The key.** `s32 key = target; if (key == -1) key = cur;` makes key's pseudo the target
@@ -590,7 +590,7 @@ by one), 2026-11-10:
 ### A vector copied before a call with global float arguments (func_00145718, unsolved)
 
 `self->pos = *a2;` then a call whose float arguments are three `.data` globals: copied as a
-Vec02 assignment the store is MEM_IN_STRUCT_P, the scalar globals' loads pass it
+Vec4 assignment the store is MEM_IN_STRUCT_P, the scalar globals' loads pass it
 (fixed_scalar_and_varying_struct_p), and local-alloc gives the copy a2 and a %hi t0 (four bytes
 short: a0 keeps self, no `move a0,s0`). Copied as `Vu0::Q(self->pos) = Vu0::Q(*a2)` the store has
 no class, every float load waits for it, and the registers are retail's (copy in v0, %hi in a0,
@@ -599,9 +599,9 @@ Neither form gives both; a Vec member store (`((Vu0::Vec*)&p)->q`) behaves as th
 
 Solved (2026-11-10, EXACT): the three globals are not alike. `g_frameDt` is the game clock's
 `dt` member, and read as `g_gameClock.dt` (include/game_clock.h) its load is MEM_IN_STRUCT_P
-with a fixed address, so it conflicts with the Vec02 assignment's in-struct store at a varying
+with a fixed address, so it conflicts with the Vec4 assignment's in-struct store at a varying
 address, while `D_00261924` and `D_00261920` stay scalars that pass it. With the store keeping
-the class (`*(Vec02*)self->f40 = *a2;`), only the scalar loads may cross it, and retail's
+the class (`*(Vec4*)self->f40 = *a2;`), only the scalar loads may cross it, and retail's
 order and registers follow: sched2 lifts `$f13` above the `sq`, `$f14` waits behind it. A
 float read through a struct global and one read as a plain scalar differ exactly here; check
 whether a global is a member of a known struct before blaming the store's alias class.
@@ -631,7 +631,7 @@ From the `.flow`, `.sched` and `.lreg` dumps and alias.c, flow.c and function.c 
   VOIDmode ADDRESS, so `(plus (reg ref) 16)` through an inline reference parameter (self+0x80)
   waits for a frame store, while `(plus (reg self) 128)` (a pointer parameter) passes it. In
   func_00144540 that keeps the product's rows behind corner's store, where retail loads them
-  first; a `Mat02*` local and Vec-member reads did not change it. Unsolved.
+  first; a `Mat3*` local and Vec-member reads did not change it. Unsolved.
 
 ### An address taken after a clamp's join reaches a later arm: a fifth saved register (func_001DEBE8)
 
@@ -792,7 +792,7 @@ source's shape, not in a pass's tie:
   a `switch` with cases 0 and 1 and no default. An `if (f == 0) ... else if (f == 1)` chain gives
   `bnezl` into the second test instead, one block shorter.
 - **A value set in both arms, then read.** `if (c) g = a; else g = 0; t = g + v;` with `g` a
-  stack Vec02: retail stores `g` once at the join (cross-jumping merged the arms' stores after
+  stack Vec4: retail stores `g` once at the join (cross-jumping merged the arms' stores after
   reload) and reloads it for the add. A `u128 push` set in the arms and stored once (`Q(g) =
   push`) lets CSE forward the register and drops the reload: assign the memory in each arm.
 
@@ -975,7 +975,7 @@ StartNextQueueEntry (2026-11-10):
 
 - **What differed.** Kind 5 builds a goal (`goal += drift * rise`, a MulAddX whose weight slot
   is 64(sp)), skips a lift for kind 0x76 (`if (IsObjectOfKind(obj, 0x76)) goal.z += D;`), calls
-  SolveArrivalTimeAtHeight and, in its body, passes a block-scope `Vec02 v` (the freed slot,
+  SolveArrivalTimeAtHeight and, in its body, passes a block-scope `Vec4 v` (the freed slot,
   64(sp) again) to slot 32. Retail forms `addiu a1,sp,64` at the call; ours kept the address in
   a saved register from the first weight on, one saved register more (s8), 0x10 more frame and
   every register after it shifted (17.9%).
@@ -1027,10 +1027,10 @@ func_001D36F0 (2026-11-10, src/main/player_request.cpp):
   above, where an inline's parameter keeps the copy from forming.
 - **Also in this function.** Vu0::ScalarAt returned `Q((s128)r)`, a reference, which left the
   weight slot's address in a pseudo, as Vu0::Scalar's did (func_0017BCD0 above): the division's
-  slot (32(sp)) is reused by the block-scope `Vec02 a20` declared after it, and CSE then read
+  slot (32(sp)) is reused by the block-scope `Vec4 a20` declared after it, and CSE then read
   `&a20` through that pseudo, which loop.c hoisted into a saved register (s6) for the whole loop.
   ScalarAt now ends `return *(u128*)&(s128)r;`, the same slot and store; every matched function
-  builds the same (full US and PAL builds MATCH). The two Vec02 results read last (a20, a30)
+  builds the same (full US and PAL builds MATCH). The two Vec4 results read last (a20, a30)
   are declared in the body before their calls, where the slot order shows them (the division's
   slot shared with a20, the 0.5's slot after a30, `&blend` last); the second loop has its own
   counter (`for (s32 j = 0; ...)`), as retail's caller-saved a2 shows.
@@ -1180,7 +1180,7 @@ Read from function.c (assign_stack_temp_for_type, combine_temp_slots), integrate
 frame); four changes matched it:
 
 - **A block local takes its slot where it is declared.** g++ expands a declaration at its
-  statement (expand_decl, `assign_temp (type, 1, 1, 1)`), so `Vec02 pos;` at the top of a case's
+  statement (expand_decl, `assign_temp (type, 1, 1, 1)`), so `Vec4 pos;` at the top of a case's
   block holds its 16 bytes before the block's weight temporaries are made, and they go to the
   next slot (0xD0). Declared just before its assignment, after the weights' statements, pos
   takes the freed slot the weights used (0xC0), as retail's does; the outline's 0x80-byte request

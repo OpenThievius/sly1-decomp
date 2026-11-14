@@ -12,7 +12,7 @@
 #include "path_curve.h"
 
 // The 0x90 bytes at 0x2F0, copied from the table at D_00275980 at construction.
-struct __attribute__((aligned(16))) Block63 {
+struct __attribute__((aligned(16))) OnOffCameraBlock {
     u8 d0[0x10];
     f32 f10[12];            // 0x10: the orbit's polynomial rows
     f32 f40[6];             // 0x40: the orbit's range
@@ -26,18 +26,18 @@ struct __attribute__((aligned(16))) Block63 {
     u8 d7C[0x90 - 0x7C];
 };
 
-struct __attribute__((aligned(16))) Quad63 {
+struct __attribute__((aligned(16))) OnOffQuad {
     u8 d[0x10];
 };
 
-struct __attribute__((packed)) Pack63 {
+struct __attribute__((packed)) OnOffPackedPair {
     u64 v;
 };
 
 // A list of floats the loader finds by index (func_0014D9A8): its count and its values. It is
 // the key-frame curve PathCurve (include/path_curve.h): count is PathCurve::count and data is
 // PathCurve::lengths; func_001E2648 (on_off_object.cpp) can read it as a PathCurve through `curve`.
-struct Arr63 { u8 pad0[0xC]; s32 count; u8 pad1[4]; f32* data; };
+struct OnOffCurve { u8 pad0[0xC]; s32 count; u8 pad1[4]; f32* data; };
 
 struct OnOffObject : PlacedObject {
     void* switchedCollider; // 0x2D0: the switched collider the object last saw active
@@ -46,11 +46,11 @@ struct OnOffObject : PlacedObject {
     s32 f2DC;               // 0x2DC
     void* faceTree;         // 0x2E0: the face tree the active collider is tested against
     union {
-        Arr63* obj;         // 0x2E4: the list the stream names, or 0
+        OnOffCurve* obj;         // 0x2E4: the list the stream names, or 0
         PathCurve* curve;       // 0x2E4: the same, as the key-frame curve it is
     };
     u8 f2E8[0x2F0 - 0x2E8]; // 0x2E8
-    Block63 block2F0;       // 0x2F0
+    OnOffCameraBlock block2F0;       // 0x2F0
     s32 usesCylindricalFrame; // 0x380: nonzero: the camera frame is tracked as an angle
     s32 f384;               // 0x384
     s32 controllerKindBase; // 0x388: camera controller kind, plus 2
@@ -64,11 +64,11 @@ struct OnOffObject : PlacedObject {
         f32 angle3A0;       // 0x3A0: the angle round the object the camera is at (func_001E30E8)
     };
     u8 pad3A4[0x3B0 - 0x3A4];
-    Mat02 rot3B0;           // 0x3B0: the fixed camera frame a stream without a list gives
-    Vec02 v3E0;             // 0x3E0: and its origin
+    Mat3 rot3B0;           // 0x3B0: the fixed camera frame a stream without a list gives
+    Vec4 v3E0;             // 0x3E0: and its origin
     f32 lastCurveValue;     // 0x3F0: the list's last value, or 0
     u8 pad3F4[0x400 - 0x3F4];
-    Vec02 v400;             // 0x400: the point the angle is measured from
+    Vec4 v400;             // 0x400: the point the angle is measured from
     f32 orbitRadius;        // 0x410: scales the angle
     s32 i414;               // 0x414: 7 with a list, 5 without
     s32 holdEnabled;        // 0x418: passed on as the hold branch flag
@@ -82,8 +82,8 @@ struct OnOffObject : PlacedObject {
     s32 skipsGeometryPush;  // 0x440: nonzero: the camera is not pushed out of geometry
     PlacedObject* lookAtObject; // 0x444: an object the camera keeps its view toward
     u8 pad448[0x450 - 0x448];
-    Quad63 quad450;         // 0x450
-    Pack63 pack460;         // 0x460
+    OnOffQuad quad450;         // 0x450
+    OnOffPackedPair pack460;         // 0x460
     u8 pad468[0x470 - 0x468];
 };
 

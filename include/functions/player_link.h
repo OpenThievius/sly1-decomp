@@ -10,23 +10,23 @@ struct BaseObject;
 struct Collider;
 struct LinkRow;
 struct LinkVector;
-struct Mat02;
+struct Mat3;
 struct PlacedObject;
 struct Player;
 struct ThreeBlendRecord;
-struct Vec02;
+struct Vec4;
 
 void CreateThreeEntryBlend(void* a0, ThreeBlendRecord* a1, void** a2);
-void SolvePlayerLinkSystem(PlacedObject* a, PlacedObject* b, Vec02* point, const LinkVector* target, LinkRow* out);
+void SolvePlayerLinkSystem(PlacedObject* a, PlacedObject* b, Vec4* point, const LinkVector* target, LinkRow* out);
 void PlacePlayerOnLinkedObject(Player* self);
 void TurnPlayerTowardLinkedObject(Player* self);
 void SyncPlayerTarget(Player* self);
 void ControlPlayerOnLinkedObject(Player* self, void* pad);
 void ReleaseFarPlayerLinks(Player* self);
 void SetFlaggedLinkContactMask(Collider* self, BaseObject* node, s32 flag);
-void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec02* origin, Vec02* axis, Vec02* offset);
+void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec4* origin, Vec4* axis, Vec4* offset);
 void GetLinkedObjectHeading(Player* self, f32* heading);
-void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB);
+void ComputePlayerLinkPose(Player* self, Vec4* pos, Mat3* rotA, Mat3* rotB);
 void UpdatePlayerLinkPose(Player* self);
 void GetPlayerPose(Player* self, f32 t, void* out, void* extra);
 

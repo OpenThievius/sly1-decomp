@@ -98,7 +98,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
                 break;
             default:
                 if (self->f2498 != 0) {
-                    Vec02 off;
+                    Vec4 off;
                     Vu0::Q(off) = Vu0::MulXSum3(Vu0::Q(g_unitZVector), Vu0::Scalar(-self->probeDepth),
                                                 Vu0::Q(self->v150), Vu0::Scalar(0.1f),
                                                 Vu0::Q(self->gravity), Vu0::Scalar(0.5f * 0.1f * 0.1f));
@@ -111,7 +111,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
             goto held;
         case 5:
         default: {
-            Vec02 off;
+            Vec4 off;
             *(u128*)&off = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-self->probeDepth - 60.0f));
             if (g_gameTime[0] - self->groundContactTime < 0.1f || HasFloorAtPlayerOffset(self, &off)) {
                 jump = 1;
@@ -140,7 +140,7 @@ held:
     case 15:
     case 16:
         if (g_gameTime[0] - self->groundContactTime > 0.1f) {
-            Vec02 off;
+            Vec4 off;
             if (self->state == 6 && self->targetMode == 3) {
                 Vu0::Q(off) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-self->probeDepth - 200.0f));
             } else {
@@ -224,7 +224,7 @@ held:
                 break;
             }
             if (aim) {
-                target = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)self, 0, &self->targetMode);
+                target = ChooseNearbyPlayerTarget((PlayerTargetState*)self, 0, &self->targetMode);
                 if (target != -1) {
                     state = 6;
                     sub = target;
@@ -262,7 +262,7 @@ held:
                 break;
             }
             if (aim) {
-                target = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)self, 0, &self->targetMode);
+                target = ChooseNearbyPlayerTarget((PlayerTargetState*)self, 0, &self->targetMode);
                 if (target != -1) {
                     state = 6;
                     sub = target;
@@ -294,7 +294,7 @@ held:
                 break;
             }
             if (aim) {
-                target = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)self, 0, &self->targetMode);
+                target = ChooseNearbyPlayerTarget((PlayerTargetState*)self, 0, &self->targetMode);
                 if (target != -1) {
                     state = 6;
                     sub = target;
@@ -449,7 +449,7 @@ held:
     HandlePlayerAimButton(self, pad);
     switch (self->state) {
     case 5:
-        SetPlayerVelocityFromHeading(self, (const Vec02*)((u8*)self + 0x910), self->eightWayBlend, self->stickHeading, self->stickLevel);
+        SetPlayerVelocityFromHeading(self, (const Vec4*)((u8*)self + 0x910), self->eightWayBlend, self->stickHeading, self->stickLevel);
         break;
     case 1:
         SetPlayerBlendWeights(self->stickHeading, self->stickLevel, self, (TurnBlendRecords*)((u8*)self + 0x720), self->sixWayBlend);
@@ -459,11 +459,11 @@ held:
         self->headingVelocity = g_zeroVector;
         PlayerNoticePlayer* src = (PlayerNoticePlayer*)self->stateAnimPlayer;
         if (src != 0) {
-            Track83* track = src->anim->movedTrack;
+            AnimationTrack* track = src->anim->movedTrack;
             if (track != 0) {
                 PositionCurve* c = track->pos;
                 if (c != 0) {
-                    Vec02 v;
+                    Vec4 v;
                     c->vt->eval(c, self, src->time, src->speed, 0, 0, &v);
                     Vu0::Q(self->headingVelocity) = Vu0::MulX(Vu0::Q(v), Vu0::Scalar(-1.0f));
                 }

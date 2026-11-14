@@ -6,7 +6,7 @@
 //
 // Each class's fields follow its parent's and end at the size its descriptor gives; the pads keep
 // every field at its retail offset. Class 0x55 sits under 0x02 (include/c02.h), whose fields and
-// descriptor (Desc02: slot 47, 0xCC, sets the state) its methods use. Names may change at the
+// descriptor (PlacedObjectDescriptor: slot 47, 0xCC, sets the state) its methods use. Names may change at the
 // naming step.
 #ifndef STATE_NOTIFIER_H
 #define STATE_NOTIFIER_H
@@ -46,9 +46,9 @@ struct StateNotifier : PlacedObject {
     void* stateGraph;       // 0x2E4: the graph of the walker kept at host (SetStateNotifierState)
     void* host;             // 0x2E8: the object whose message ends it (func_00147EF8)
     BaseObject* joinedObject; // 0x2EC: told to join or leave its parent's list by the state (SetStateNotifierState)
-    Vec02 motionPos;        // 0x2F0: pushed clear of what it overlaps (func_00146DB0)
-    Vec02 motionVel;        // 0x300: its motion, split along the push (func_00146DB0)
-    Vec02 motionAccel;      // 0x310: the push (func_001478F0 sets it, func_00146518 adds it to the motion)
+    Vec4 motionPos;        // 0x2F0: pushed clear of what it overlaps (func_00146DB0)
+    Vec4 motionVel;        // 0x300: its motion, split along the push (func_00146DB0)
+    Vec4 motionAccel;      // 0x310: the push (func_001478F0 sets it, func_00146518 adds it to the motion)
     union {
         f32 splashChance;   // 0x320
         s32 i320;
@@ -71,7 +71,7 @@ struct StateNotifier : PlacedObject {
     f32 bounceRetention;    // 0x354
     f32 slideRetention;     // 0x358
     f32 spinAngle;          // 0x35C: an angle about v360, eased to 0 in state 4 (func_00146518)
-    Vec02 spinAxis;         // 0x360: its axis (func_001478F0)
+    Vec4 spinAxis;         // 0x360: its axis (func_001478F0)
     s32 settled;            // 0x370: set once state 4 has come to rest (func_00146518)
     union {
         u8 tail374[8];      // 0x374: copied unaligned by func_00146418

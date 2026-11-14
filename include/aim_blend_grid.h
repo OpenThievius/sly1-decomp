@@ -14,7 +14,7 @@
 #include "base_object.h"
 
 #include "shapes.h"   // Quad16
-#include "collider.h"  // Mesh03
+#include "collider.h"  // CollisionMesh
 
 struct SlotObject;
 typedef void (*SlotObjectFn)(SlotObject* n);
@@ -72,10 +72,10 @@ struct BlendAnimationView {
 // positions, rotations, velocities and spins, each output optional (placed_object.cpp). The
 // floats come after self: SampleScriptAnimation's argument moves need that order.
 struct PlacedObject;
-struct Vec02;
-struct Mat02;
-void SampleAnimationFrameChain(BlendAnimationView* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
-                   Vec02* vel, Vec02* spin);
+struct Vec4;
+struct Mat3;
+void SampleAnimationFrameChain(BlendAnimationView* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec4* pos, Mat3* rot,
+                   Vec4* vel, Vec4* spin);
 
 struct GridBlendSlot {
     u8 pad0[4];
@@ -105,7 +105,7 @@ struct AimBlendGrid : BaseObject {
     f32 secondBlendY;       // 0x88
     f32 secondBlendZ;       // 0x8C
     Quad16 originPoint;     // 0x90
-    Mesh03 mesh;            // 0xA0: the grid's points (vertCount, verts at 0xA8) and faces (0xB0), as read by func_00137FB0
+    CollisionMesh mesh;            // 0xA0: the grid's points (vertCount, verts at 0xA8) and faces (0xB0), as read by func_00137FB0
     GridRecord* pointRecords;    // 0xC4: fA4 records of 100 bytes
     s32 cellCount;          // 0xC8
     u8* cells;              // 0xCC: fC8 records of 16 bytes

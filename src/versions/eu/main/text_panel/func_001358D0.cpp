@@ -17,7 +17,7 @@ void CollectPanelEntriesOfClass(PanelMarkers_1358D0_eu* self, s32 kind, void* a2
 {
     PanelEntry entries[0x80];
     void* objs[0x80];
-    Vec02 d;
+    Vec4 d;
     s32 want;
     s32 i = 0;
     s32 n = GatherObjectsById(g_currentWorld, 0x105, kind, 0, 0x80, objs);

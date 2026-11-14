@@ -80,7 +80,7 @@ void SetCameraFarDistance(Camera* self, f32 value);
 
 
 
-void PlaceCameraLookingAt(Camera* self, const Vec02* target, const Vec02* focus);
+void PlaceCameraLookingAt(Camera* self, const Vec4* target, const Vec4* focus);
 void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, void* arg);
 
 
@@ -255,7 +255,7 @@ Mat4A MultiplyMatrices(Quad16* m, Quad16* in);
 
 
 
-void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, const Vec02* focus, s32 e, f32 gain, f32 damp,
+void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec4* target, const Vec4* focus, s32 e, f32 gain, f32 damp,
                    f32 unused, f32 yawOffset, f32 pitchOffset, f32 dt);
 
 
@@ -264,7 +264,7 @@ void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, co
 
 void ApplyLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32 x, f32 y, f32 z);
 void ComputeLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32* x, f32* y, f32* z);
-void BuildBasisFromX(Vec02* x, Mat02* out);
+void BuildBasisFromX(Vec4* x, Mat3* out);
 
 
 
@@ -306,7 +306,7 @@ void UpdateCameraLocation(Camera* self);
 void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out);
 void WriteCameraMatricesPacket(Camera* self);
 void SetCameraPlacement(Camera* self, Quad16* a, Quad16* b);
-void PlaceCameraLookingAt(Camera* self, const Vec02* target, const Vec02* focus);
+void PlaceCameraLookingAt(Camera* self, const Vec4* target, const Vec4* focus);
 void SetCameraLookAnchor(Camera* self, Quad16* arg);
 void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
 void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, void* k2, void* k3);
@@ -342,8 +342,8 @@ f32 g_freePointRingSamples[9] = { 1.0f, 5.0f, 10.0f, 12.0f, 15.0f, 12.0f, 10.0f,
 f32 g_cameraProbeRadius = 250.0f;
 f32 g_cameraProbeLimitMargin[2] = { 1500.0f, 0.0f };
 RampProfile g_cameraClearanceRamp = { 2500.0f, 0.0f, 0.25f, 0.0f };
-Vec02 g_cameraProbeBoxMin = { -250.0f, -250.0f, -250.0f, 0.0f };
-Vec02 g_cameraProbeBoxMax = { 250.0f, 250.0f, 250.0f, 0.0f };
+Vec4 g_cameraProbeBoxMin = { -250.0f, -250.0f, -250.0f, 0.0f };
+Vec4 g_cameraProbeBoxMax = { 250.0f, 250.0f, 250.0f, 0.0f };
 Camera* g_camera = 0;
 
 // Empty: the camera module needs no set-up of its own.
@@ -361,15 +361,15 @@ void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3
 // One step of a damped spring pulling pos toward target: the velocity gains (target - pos) * k
 // + vel * damp over dt, and pos moves by the velocity over dt. With f224 set, pos is placed at
 // target at rest.
-void SpringCameraVector(Camera* self, Vec02* pos, Vec02* vel, Vec02* target, f32 k, f32 damp, f32 dt)
+void SpringCameraVector(Camera* self, Vec4* pos, Vec4* vel, Vec4* target, f32 k, f32 damp, f32 dt)
 {
     if (self->snapping != 0) {
         *pos = *target;
         Vu0::Q(*vel) = Vu0::Zero();
         return;
     }
-    Vec02 d;
-    Vec02 acc;
+    Vec4 d;
+    Vec4 acc;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*target), Vu0::Q(*pos));
     Vu0::Q(acc) = Vu0::MulXSum(Vu0::Q(d), Vu0::Scalar(k), Vu0::Q(*vel), Vu0::Scalar(damp));
     Vu0::Q(*vel) = Vu0::MulAddX(Vu0::Q(*vel), Vu0::Q(acc), Vu0::Scalar(dt));
@@ -380,22 +380,22 @@ void SpringCameraVector(Camera* self, Vec02* pos, Vec02* vel, Vec02* target, f32
 // (+0x250/+0x260 and +0x270/+0x280) and the record func_00143148 reads.
 struct Spring_00143208 {
     u8 pad0[0x250];
-    Vec02 v250;             // 0x250
-    Vec02 v260;             // 0x260
-    Vec02 v270;             // 0x270
-    Vec02 v280;             // 0x280
+    Vec4 v250;             // 0x250
+    Vec4 v260;             // 0x260
+    Vec4 v270;             // 0x270
+    Vec4 v280;             // 0x280
 };
 
 struct Record_00143208 {
     u8 pad0[0x10];
-    Vec02 v10;              // 0x10
+    Vec4 v10;              // 0x10
     u8 pad20[0x40 - 0x20];
-    Vec02 v40;              // 0x40
+    Vec4 v40;              // 0x40
 };
 
 extern Player* g_player;
-extern const Vec02 g_zeroVector;
-void SpringCameraVector(Camera* self, Vec02* pos, Vec02* vel, Vec02* target, f32 k, f32 damp, f32 dt);
+extern const Vec4 g_zeroVector;
+void SpringCameraVector(Camera* self, Vec4* pos, Vec4* vel, Vec4* target, f32 k, f32 damp, f32 dt);
 void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3);
 
 // Moves the camera's tracking offset (v250, with velocity v260) and look offset (v270 and v280)
@@ -404,14 +404,14 @@ void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3
 // the offset, into the record.
 void UpdateCameraTargetTracking(Spring_00143208* self, void* target, f32 dt, Record_00143208* rec)
 {
-    Vec02 offset;
+    Vec4 offset;
 
     ComputeOffsetBehindTarget(self, target, (Target_00143148*)rec, &offset);
     if (target == g_player) {
         switch (g_player->cameraSpringMode) {
         case 0:
             SpringCameraVector((Camera*)self, &self->v250, &self->v260, &offset, 5.0f, -3.5f, dt);
-            SpringCameraVector((Camera*)self, &self->v270, &self->v280, (Vec02*)&g_zeroVector, 5.0f, -3.5f, dt);
+            SpringCameraVector((Camera*)self, &self->v270, &self->v280, (Vec4*)&g_zeroVector, 5.0f, -3.5f, dt);
             break;
         case 1:
             SpringCameraVector((Camera*)self, &self->v250, &self->v260, &offset, 1.0f, -10.0f, dt);
@@ -423,7 +423,7 @@ void UpdateCameraTargetTracking(Spring_00143208* self, void* target, f32 dt, Rec
         }
     } else {
         SpringCameraVector((Camera*)self, &self->v250, &self->v260, &offset, 5.0f, -3.5f, dt);
-        SpringCameraVector((Camera*)self, &self->v270, &self->v280, (Vec02*)&g_zeroVector, 5.0f, -3.5f, dt);
+        SpringCameraVector((Camera*)self, &self->v270, &self->v280, (Vec4*)&g_zeroVector, 5.0f, -3.5f, dt);
     }
     Vu0::Q(rec->v40) = Vu0::Add(Vu0::Q(rec->v10), Vu0::Q(self->v250));
 }
@@ -451,9 +451,9 @@ void ResetCameraTargetTracking(Tracking_001433E0* self, void* a1, Target_0014314
 // The 0x50-byte record of the target in action (Camera +0x2F0): the target's slot 73 fills it.
 struct TargetRecord_00143418 {
     u8 pad0[0x10];
-    Vec02 v10;              // 0x10
+    Vec4 v10;              // 0x10
     u8 pad20[0x40 - 0x20];
-    Vec02 v40;              // 0x40
+    Vec4 v40;              // 0x40
 };
 
 // Slot 73 (0x124) of the target's method table: CaptureColliderPose and its overrides take the
@@ -465,7 +465,7 @@ typedef void (*VFn_143418)(void* self, TargetRecord_00143418* out, f32 dt);
 // is still in $f12 at the call.
 void GetCameraTargetPlacement(Camera* self, void* o, TargetRecord_00143418* out, f32 dt)
 {
-    Vec02 offset;
+    Vec4 offset;
     if (o == self->currentTarget) {
         *out = *(TargetRecord_00143418*)&self->f2F0;
     } else {
@@ -669,7 +669,7 @@ void SetCameraDistanceScale(Camera* self, f32 value)
 void ResetCamera(Camera* self, s32 flag)
 {
     if (flag != 0) {
-        PlaceCameraLookingAt(self, (const Vec02*)g_cameraResetPosition, (const Vec02*)g_cameraResetTarget);
+        PlaceCameraLookingAt(self, (const Vec4*)g_cameraResetPosition, (const Vec4*)g_cameraResetTarget);
     }
     self->stackCount = 0;
     SetCameraControllerValue(&self->ctl454, 0);
@@ -745,13 +745,13 @@ void PopBackMemoryMark(void);
 // sets the fade-until time of the span's part group.
 void FadeCameraObstructingParts(Camera* self)
 {
-    Vec02 lo;
-    Vec02 hi;
+    Vec4 lo;
+    Vec4 hi;
     ColliderSpan spans[0x20];
     s32 n;
     Collider** list;
     PushBackMemoryMark();
-    lo = hi = *(Vec02*)self->position;
+    lo = hi = *(Vec4*)self->position;
     for (s32 i = 0; i < self->objectCount; i++) {
         PlacedObject* obj = (PlacedObject*)self->objects[i];
         if (obj->flags & (1ULL << 37)) {
@@ -767,14 +767,14 @@ void FadeCameraObstructingParts(Camera* self)
             if (!(obj->flags & (1ULL << 37))) {
                 continue;
             }
-            s32 m = CollectTreeNodeSpans(c->tree.nodes, (Vec02*)self->position, &obj->v140, c->nodeGroups, 0x20, spans);
+            s32 m = CollectTreeNodeSpans(c->tree.nodes, (Vec4*)self->position, &obj->v140, c->nodeGroups, 0x20, spans);
             ColliderSpan* end = &spans[m];
             for (ColliderSpan* sp = spans; sp < end; sp++) {
                 if (sp->group < 0) {
                     continue;
                 }
                 for (s32 q = sp->group; q < c->groupCount; q++) {
-                    Pair03* e = &c->groups[q];
+                    CollisionRefPair* e = &c->groups[q];
                     if (e->a >= 0 && q != sp->group) {
                         break;
                     }
@@ -847,19 +847,19 @@ ASM_FUNC(func_00144008);
 // The camera's frame as func_00144128 reads it: rows at 0x80, a position at 0x40, two scales.
 struct Frame_00144128 {
     u8 pad0[0x40];
-    Vec02 pos;              // 0x40
+    Vec4 pos;              // 0x40
     u8 pad50[0x80 - 0x50];
-    Mat02 rot;              // 0x80
+    Mat3 rot;              // 0x80
     u8 padB0[0x1F0 - 0xB0];
     f32 scaleY;             // 0x1F0
     f32 scaleZ;             // 0x1F4
 };
 
 // The inverse of ProjectPointToCamera: from a[0], a[1] and depth a[2] makes the world point.
-void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out)
+void UnprojectCameraPoint(Camera* camera, f32* a, Vec4* out)
 {
     Frame_00144128* self = (Frame_00144128*)camera;
-    Vec02 v;
+    Vec4 v;
     v.x = a[2];
     v.y = -a[0];
     v.z = a[1];
@@ -875,10 +875,10 @@ void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out)
 // Projects a world point into the camera's frame: out[2] is the depth along the camera's x axis,
 // out[0] and out[1] the sideways and up offsets scaled by the camera's y and z scale and, for a
 // point in front of the camera (depth above 1e-4), divided by the depth.
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out)
+void ProjectPointToCamera(Camera* camera, Vec4* in, f32* out)
 {
     Frame_00144128* self = (Frame_00144128*)camera;
-    Vec02 v;
+    Vec4 v;
     Vu0::Q(v) = Vu0::RotateTransposed(self->rot, Vu0::Sub(Vu0::Q(*in), Vu0::Q(self->pos)));
     out[2] = v.x;
     out[1] = v.z;
@@ -960,7 +960,7 @@ static inline u128 Unit(u128 v)
 // rows being the view axes) and the half-extents x and y (as tangents): two for the sides of the
 // horizontal range and two for the vertical one, each the cross product of a view axis with the
 // unit edge direction.
-void BuildFrustumSideNormals(Mat02* m, Vec02* out, f32 x, f32 y)
+void BuildFrustumSideNormals(Mat3* m, Vec4* out, f32 x, f32 y)
 {
     f32 nx = -x;
     f32 ny = -y;
@@ -972,7 +972,7 @@ void BuildFrustumSideNormals(Mat02* m, Vec02* out, f32 x, f32 y)
 
 extern const f32 g_unitScale[4];
 extern "C" f32 Sine(f32 x);
-void BuildRotationFromVector(Vec02* v, Mat02* mat);
+void BuildRotationFromVector(Vec4* v, Mat3* mat);
 
 // For D_002618C8 seconds after self->f218 the view swings by a sine of the time since then,
 // scaled by a curve of that time. The weight is written at each use: each
@@ -982,9 +982,9 @@ void BuildRotationFromVector(Vec02* v, Mat02* mat);
 // comes after the product, so the product's rows are read before corner's store.
 void UpdateCameraMatrices(Camera* self)
 {
-    Vec02 pos;
-    Vec02 dir;
-    Mat02 rotation;
+    Vec4 pos;
+    Vec4 dir;
+    Mat3 rotation;
     f32 f6 = g_gameTime - self->swingStartTime;
     if (g_cameraSwingDuration < f6) {
         BuildViewProjectionMatrix((f32*)self->position, (f32*)self->rotation, &self->projection, (Quad16*)&self->viewProjection);
@@ -992,21 +992,21 @@ void UpdateCameraMatrices(Camera* self)
         f32 t = f6 / g_cameraSwingDuration;
         f32 amount = g_unitRange.Limit(g_cameraSwingFalloffCurve[0] + t * (g_cameraSwingFalloffCurve[1] + t * g_cameraSwingFalloffCurve[2]));
         f32 swing = Sine(f6 * g_cameraSwingRate) * amount;
-        u128 turn = Vu0::Rotate(*(Mat02*)self->rotation, Vu0::Q(*(Vec02*)g_cameraSwingOffset));
-        Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(*(Vec02*)self->position), turn, Vu0::Scalar(swing));
-        Vu0::Q(dir) = Vu0::MulX(Vu0::Q(*(Vec02*)g_cameraSwingTurn), Vu0::Scalar(swing));
-        BuildRotationFromVector(&dir, (Mat02*)&rotation);
-        MulRotationRowsX(&rotation, *(Mat02*)self->rotation, rotation);
-        Vec02 corner;
-        Vec02 tilt;
+        u128 turn = Vu0::Rotate(*(Mat3*)self->rotation, Vu0::Q(*(Vec4*)g_cameraSwingOffset));
+        Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(*(Vec4*)self->position), turn, Vu0::Scalar(swing));
+        Vu0::Q(dir) = Vu0::MulX(Vu0::Q(*(Vec4*)g_cameraSwingTurn), Vu0::Scalar(swing));
+        BuildRotationFromVector(&dir, (Mat3*)&rotation);
+        MulRotationRowsX(&rotation, *(Mat3*)self->rotation, rotation);
+        Vec4 corner;
+        Vec4 tilt;
         Mat4 proj;
-        Vu0::Q(corner) = Vu0::MulAddX(Vu0::Q(*(Vec02*)g_unitScale), Vu0::Q(*(Vec02*)g_cameraSwingCornerShift), Vu0::Scalar(swing));
-        Vu0::Q(tilt) = Vu0::MulX(Vu0::Q(*(Vec02*)g_cameraSwingTiltShift), Vu0::Scalar(swing));
+        Vu0::Q(corner) = Vu0::MulAddX(Vu0::Q(*(Vec4*)g_unitScale), Vu0::Q(*(Vec4*)g_cameraSwingCornerShift), Vu0::Scalar(swing));
+        Vu0::Q(tilt) = Vu0::MulX(Vu0::Q(*(Vec4*)g_cameraSwingTiltShift), Vu0::Scalar(swing));
         BuildProjectionMatrix(&proj, corner.x * 640.0f / (self->projectionScaleX * 4096.0f), corner.y * 224.0f / (self->projectionScaleY * 4096.0f), tilt.x, tilt.y, self->nearDistance, self->farDistance);
         BuildViewProjectionMatrix((f32*)&pos, (f32*)&rotation, &proj, (Quad16*)&self->viewProjection);
     }
     InvertMatrix4x4((u8*)&self->viewProjection, (u8*)&self->inverseViewProjection);
-    BuildFrustumSideNormals((Mat02*)self->rotation, self->frustum, self->projectionScaleX, self->projectionScaleY);
+    BuildFrustumSideNormals((Mat3*)self->rotation, self->frustum, self->projectionScaleX, self->projectionScaleY);
     {
         f32* e = (f32*)&self->frustum[3];
         f32* d = self->planes[0];
@@ -1057,7 +1057,7 @@ void SetCameraPlacement(Camera* self, Quad16* a, Quad16* b)
 }
 
 // Places the camera at target looking at focus, through the orbit camera placement.
-void PlaceCameraLookingAt(Camera* self, const Vec02* target, const Vec02* focus)
+void PlaceCameraLookingAt(Camera* self, const Vec4* target, const Vec4* focus)
 {
     UpdateOrbitCameraPlacement(self, 0, target, focus, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
@@ -1067,9 +1067,9 @@ void PlaceCameraLookingAt(Camera* self, const Vec02* target, const Vec02* focus)
 // 100). All three are 0 when a and b are almost the same point.
 void ComputeLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* in, f32* x, f32* y, f32* z)
 {
-    Mat02 m;
-    Vec02 d;
-    Vec02 v;
+    Mat3 m;
+    Vec4 d;
+    Vec4 v;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     BuildBasisFromX(&d, &m);
     f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
@@ -1091,9 +1091,9 @@ void ComputeLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* in, f32* x, f32* 
 // rotated into world space into *out. The inverse of ComputeLookFrameCoordinates.
 void ApplyLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32 x, f32 y, f32 z)
 {
-    Mat02 m;
-    Vec02 d;
-    Vec02 v;
+    Mat3 m;
+    Vec4 d;
+    Vec4 v;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     BuildBasisFromX(&d, &m);
     f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(d)));
@@ -1111,20 +1111,20 @@ void SetCameraLookAnchor(Camera* self, Quad16* arg)
     *(Quad16*)self->lookFocus = *arg;
 }
 
-void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist);
+void ConvertOffsetToSpherical(const Vec4* a, const Vec4* b, f32* heading, f32* pitch, f32* dist);
 void VectorToAngles(Vec3* v, f32* a1, f32* a2);
-void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
+void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat3* out);
 
 // Places the camera on an orbit around focus, looking at target, from the spherical coordinates of
 // the offset plus yaw and pitch offsets scaled by the zoom. Unless snapping, the five current
 // values move toward their goals as damped springs (gain, damp, dt), going the short way round,
 // then the position, rotation rows and matrices are written and focus is kept.
-void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, const Vec02* focus, s32 e, f32 gain, f32 damp,
+void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec4* target, const Vec4* focus, s32 e, f32 gain, f32 damp,
                    f32 unused, f32 yawOffset, f32 pitchOffset, f32 dt)
 {
-    Vec02 dir;
-    Vec02 pos;
-    Mat02 m;
+    Vec4 dir;
+    Vec4 pos;
+    Mat3 m;
     f32 heading;
     f32 pitch;
     f32 dist;
@@ -1144,7 +1144,7 @@ void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, co
     ConvertOffsetToSpherical(target, focus, &heading, &pitch, &dist);
     f32 yaw = heading + 3.14159274f + yawOffset * self->zoom * self->aspectScale * 0.5f;
     f32 tilt = -pitch - pitchOffset * self->zoom * 0.5f;
-    ConvertOffsetToSpherical((Vec02*)self->position, (Vec02*)self->lookFocus, &curHeading, &curPitch, &curDist);
+    ConvertOffsetToSpherical((Vec4*)self->position, (Vec4*)self->lookFocus, &curHeading, &curPitch, &curDist);
     VectorToAngles((Vec3*)self->rotation, &curYaw, &curTilt);
     if ((flags & 1) == 0) {
         y = yaw;
@@ -1213,12 +1213,12 @@ void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, co
     ComputeDirectionFromAngles((Vec3*)&dir, h, p, r);
     Vu0::Q(pos) = Vu0::Add(Vu0::Q(*focus), Vu0::Q(dir));
     BuildYawPitchMatrix(y, t, &m);
-    *(Vec02*)self->position = pos;
-    *(Vec02*)self->rotation = m.r[0];
-    *(Vec02*)self->rotationRow1 = m.r[1];
-    *(Vec02*)self->rotationRow2 = m.r[2];
+    *(Vec4*)self->position = pos;
+    *(Vec4*)self->rotation = m.r[0];
+    *(Vec4*)self->rotationRow1 = m.r[1];
+    *(Vec4*)self->rotationRow2 = m.r[2];
     UpdateCameraMatrices(self);
-    *(Vec02*)self->lookFocus = *focus;
+    *(Vec4*)self->lookFocus = *focus;
 }
 
 // Gives in *out the world heading the stick points to when the camera's view is taken into account:
@@ -1351,9 +1351,9 @@ ASM_FUNC(func_001453B0);
 
 // Gives the offset a (minus b, when b is given) as an angle about the z axis (wrapped), the
 // horizontal distance and the height; any of the three outputs may be 0 to skip it.
-void ConvertOffsetToCylindrical(const Vec02* a, const Vec02* b, f32* angle, f32* dist, f32* height)
+void ConvertOffsetToCylindrical(const Vec4* a, const Vec4* b, f32* angle, f32* dist, f32* height)
 {
-    Vec02 d;
+    Vec4 d;
     if (b != 0) {
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(*b));
     } else {
@@ -1373,9 +1373,9 @@ void ConvertOffsetToCylindrical(const Vec02* a, const Vec02* b, f32* angle, f32*
 
 // Turns the offset a - b (or a alone if b is null) into spherical coordinates: heading (the angle
 // in the xy plane), pitch (the elevation) and distance; each output may be null.
-void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist)
+void ConvertOffsetToSpherical(const Vec4* a, const Vec4* b, f32* heading, f32* pitch, f32* dist)
 {
-    Vec02 d;
+    Vec4 d;
     if (b != 0) {
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(*b));
     } else {
@@ -1416,14 +1416,14 @@ void RequestPlainCameraSnap(void* p)
     RequestCameraSnap((Camera*)p, 0);
 }
 
-extern const Vec02 g_zeroVector;
+extern const Vec4 g_zeroVector;
 
 // The view ray through the screen point (x, y): from the camera 100 units along the direction
 // (1, -x f1F0, y f1F4) in its frame, the point of it nearest p; v230 is that point less p.
-void SetCameraAimOffsetFromScreenPoint(Camera* self, Vec02* p, f32 x, f32 y)
+void SetCameraAimOffsetFromScreenPoint(Camera* self, Vec4* p, f32 x, f32 y)
 {
-    Vec02 dir;
-    Vec02 far;
+    Vec4 dir;
+    Vec4 far;
     f32 t;
     f32 dist;
     self->v240 = g_zeroVector;
@@ -1431,7 +1431,7 @@ void SetCameraAimOffsetFromScreenPoint(Camera* self, Vec02* p, f32 x, f32 y)
     dir.y = -x * self->projectionScaleX;
     dir.z = y * self->projectionScaleY;
     Vu0::Q(far) = Vu0::MulAddX(Vu0::Q(self->position), Vu0::Rotate(self->rotation, Vu0::Q(dir)), Vu0::Scalar(100.0f));
-    MeasurePointToLine(p, (Vec02*)self->position, &far, &t, &dist);
+    MeasurePointToLine(p, (Vec4*)self->position, &far, &t, &dist);
     Vu0::Q(far) = Vu0::MulXSum(Vu0::Q(self->position), Vu0::Scalar(1.0f - t), Vu0::Q(far), Vu0::Scalar(t));
     Vu0::Q(self->v230) = Vu0::Sub(Vu0::Q(far), Vu0::Q(*p));
 }
@@ -1441,20 +1441,20 @@ extern "C" f32 Arctangent(f32 x);
 // The orbit step: the camera moves to the focus a2, the spring at v230/v240 eases toward rest,
 // and the heading and pitch of a1 plus the spring's offset, seen from a2, turn by the
 // arctangents of the screen turn scaled by f1F0 and f1F4; the frame is rebuilt from them.
-void AimCameraAtPointWithSpring(Camera* self, Vec02* a1, Vec02* a2, f32 turnYaw, f32 turnPitch)
+void AimCameraAtPointWithSpring(Camera* self, Vec4* a1, Vec4* a2, f32 turnYaw, f32 turnPitch)
 {
-    Vec02 tmp;
+    Vec4 tmp;
     f32 yaw;
     f32 pitch;
     f32 dist;
 
-    *(Vec02*)self->position = *a2;
-    SpringCameraVector(self, &self->v230, &self->v240, (Vec02*)&g_zeroVector, g_cameraAimSpringStiffness, g_cameraAimSpringDamping, g_gameClock.dt);
+    *(Vec4*)self->position = *a2;
+    SpringCameraVector(self, &self->v230, &self->v240, (Vec4*)&g_zeroVector, g_cameraAimSpringStiffness, g_cameraAimSpringDamping, g_gameClock.dt);
     Vu0::Q(tmp) = Vu0::Add(Vu0::Q(*a1), Vu0::Q(self->v230));
     ConvertOffsetToSpherical(&tmp, a2, &yaw, &pitch, &dist);
     yaw = yaw + Arctangent(turnYaw * self->projectionScaleX);
     pitch = pitch - Arctangent(turnPitch * self->projectionScaleY);
-    BuildYawPitchMatrix(yaw, pitch, (Mat02*)self->rotation);
+    BuildYawPitchMatrix(yaw, pitch, (Mat3*)self->rotation);
     UpdateCameraMatrices(self);
 }
 // Finds along the segment a2 to a3 the first stretch of at least thresh (as a fraction of the
@@ -1471,7 +1471,7 @@ s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh
     f32 f2;
     f32 f1;
     for (i = 0; i < count; i++) {
-        total += CollectTreeNodeSpans(objs[i]->tree2.nodes, (Vec02*)a2, (Vec02*)a3, 0, 0x40 - total, &recs[total]);
+        total += CollectTreeNodeSpans(objs[i]->tree2.nodes, (Vec4*)a2, (Vec4*)a3, 0, 0x40 - total, &recs[total]);
     }
     total = MergeOverlappingSpans(total, recs);
     j = 0;
@@ -1494,11 +1494,11 @@ s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh
 // directions on nine latitude rings (counts in g_freePointRingSamples), tests the line from origin
 // to each with FindFirstFreeSpan and keeps the one with the smallest free fraction (plus a step);
 // origin if none.
-void FindNearestFreePointAround(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r)
+void FindNearestFreePointAround(s32 count, Collider** objs, Vec4* origin, Vec4* out, f32 r)
 {
-    Vec02 dir;
-    Vec02 cand;
-    Vec02 best;
+    Vec4 dir;
+    Vec4 cand;
+    Vec4 best;
     f32 lo;
     f32 hi;
     f32 step = 5.0f / r;
@@ -1527,7 +1527,7 @@ void FindNearestFreePointAround(s32 count, Collider** objs, Vec02* origin, Vec02
 
 typedef f32 (*MeshHitWeigh)(void* ctx, void* a, void* b, MeshHitSample* hit);
 struct FaceRef;
-struct Mesh03;
+struct CollisionMesh;
 struct MeshHitEntry;
 void* AllocateBackMemory(s32 size);
 
@@ -1535,10 +1535,10 @@ void* AllocateBackMemory(s32 size);
 // a4: up to 64 hit points are gathered, the weights that fn asks for are solved with the active-set
 // solver, and their weighted sum (limited to limit in length) is added to origin; origin itself if
 // nothing is hit.
-void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWeigh fn, f32 r, f32 limit, void* a4, Vec02* origin, Vec02* out)
+void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWeigh fn, f32 r, f32 limit, void* a4, Vec4* origin, Vec4* out)
 {
     MeshHitSample hits[64];
-    Vec02 sum;
+    Vec4 sum;
     s32 total = 0;
     s32 i;
     s32 j;
@@ -1546,7 +1546,7 @@ void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWei
     for (s32 k = 0; k < count; k++) {
         Collider* c = objs[k];
         if (c->tree2.nodes != 0) {
-            total += CollectMeshHits((Vec02*)a4, r, c->tree2.count2, (FaceRef*)c->tree2.nodes, 0, &c->mesh2Copy, 0x40 - total, (MeshHitEntry*)&hits[total]);
+            total += CollectMeshHits((Vec4*)a4, r, c->tree2.count2, (FaceRef*)c->tree2.nodes, 0, &c->mesh2Copy, 0x40 - total, (MeshHitEntry*)&hits[total]);
         }
     }
     if (total == 0) {
@@ -1606,12 +1606,12 @@ f32 ComputeCameraHitClearance(Camera* self, void* unused, Quad16* v, Heading_001
 
 // The camera's sweep probe: the step's direction from origin to dest, the colliders in a box
 // of 250 around the origin, and the weighed hit, scaled by the step, from the origin into out.
-void PushCameraOutOfGeometry(Camera* self, Quad16* origin, Quad16* dest, Vec02* out)
+void PushCameraOutOfGeometry(Camera* self, Quad16* origin, Quad16* dest, Vec4* out)
 {
-    Vec02 dir;
-    Vec02 hit;
-    Vec02 lo;
-    Vec02 hi;
+    Vec4 dir;
+    Vec4 hit;
+    Vec4 lo;
+    Vec4 hi;
     s32 n;
     Collider** list;
     GameClock* clock = &g_gameClock;
@@ -1654,9 +1654,9 @@ s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x
 
 // True when the sphere (centre p, given radius) is inside all of the camera's side planes and its
 // distance fade (ComputeCameraDistanceFade) is non-zero.
-s32 IsSphereInCameraView(Camera* self, Vec02* p, f32 radius, f32 x)
+s32 IsSphereInCameraView(Camera* self, Vec4* p, f32 radius, f32 x)
 {
-    Vec02 r;
+    Vec4 r;
     f32 fade;
     s32 in = 0;
     u128 d = Vu0::Sub(Vu0::Q(*p), Vu0::Q(self->position));

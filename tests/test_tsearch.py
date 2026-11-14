@@ -364,11 +364,11 @@ class Rewrites(unittest.TestCase):
         self.assertFalse(any(l.startswith("chain@") for l in results(src, only={"chained-assignment"})))
 
     def test_struct_store(self):
-        src = ("#include \"vu0.h\"\nstruct S { Vec02 q; };\n"
+        src = ("#include \"vu0.h\"\nstruct S { Vec4 q; };\n"
                "void func_00100000(S* p, Vu0::Vec v) { Vu0::Q(p->q) = Vu0::Add(v, v).q; }\n")
         rs = results(src, only={"struct-store"})
         self.assertTrue(has(rs, "struct-store", "void func_00100000(S* p, Vu0::Vec v) { *(Vu0::Vec*)&p->q = Vu0::Add(v, v); }"))
-        src = ("#include \"vu0.h\"\nstruct S { Vec02 q; };\n"
+        src = ("#include \"vu0.h\"\nstruct S { Vec4 q; };\n"
                "void func_00100000(S* p, Vu0::Vec v) { *(Vu0::Vec*)&p->q = Vu0::Add(v, v); }\n")
         rs = results(src, only={"struct-store"})
         self.assertTrue(has(rs, "q-store", "void func_00100000(S* p, Vu0::Vec v) { Vu0::Q(p->q) = Vu0::Add(v, v).q; }"))

@@ -6,12 +6,12 @@
 
 #include "common.h"
 
-struct C80;
 struct ColoredTriangleSet;
 struct Stream8E;
+struct TargetFindingPoint;
 
-void CopyPointObject(C80* self, C80* src);
-void StartPointObject(C80* self);
+void CopyPointObject(TargetFindingPoint* self, TargetFindingPoint* src);
+void StartPointObject(TargetFindingPoint* self);
 void InitColoredTriangles(ColoredTriangleSet* self);
 void LoadColoredTriangles(ColoredTriangleSet* self, Stream8E* rd);
 void DrawTriangleGroups(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d);

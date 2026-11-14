@@ -28,8 +28,8 @@ struct TextReader_eu_134CE0 { u8 bytes[0xC0]; };
 
 void InitWideTextReader(TextReader_eu_134CE0* out, u8* text, Font* font, s32 zero);
 void BreakTextIntoLines(TextReader_eu_134CE0* reader, TextLines_eu_134CE0* lines, f32 w);
-void DrawWrappedAlignedText(TextReader_eu_134CE0* reader, Layout_137228* layout, s32 zero, PacketWriter* gs);
-void SetTextLayoutVerticalPlacement(Layout_137228* layout, s32 value);
+void DrawWrappedAlignedText(TextReader_eu_134CE0* reader, TextBoxLayout* layout, s32 zero, PacketWriter* gs);
+void SetTextLayoutVerticalPlacement(TextBoxLayout* layout, s32 value);
 
 struct Gfx_eu_134CE0 {
     static s32 ScreenX(f32 x)
@@ -49,7 +49,7 @@ struct ScreenLayout_eu_134CE0 {
         return q.w;
     }
 
-    static void Reset(Layout_137228* l)
+    static void Reset(TextBoxLayout* l)
     {
         Quad4 col;
         l->Pos(0.0f, 0.0f);
@@ -65,8 +65,8 @@ struct ScreenLayout_eu_134CE0 {
 void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
 {
     TextPointObject* objs[32];
-    Vec02 pos;
-    Vec02 screen;
+    Vec4 pos;
+    Vec4 screen;
     s32 i;
     s32 shown = 0;
     TextPointObject* nearest = 0;
@@ -99,7 +99,7 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
     for (i = 0; i < shown; i++) {
         TextPointObject* obj = objs[i];
         ConvertPositionToWorld(obj, &pos);
-        Layout_137228 layout;
+        TextBoxLayout layout;
         PanelStyle style;
         TextReader_eu_134CE0 reader;
         const f32* k = g_labelAlphaCoefficients;

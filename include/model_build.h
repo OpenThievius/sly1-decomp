@@ -60,6 +60,6 @@ struct PartPacketSource { u8 pad0[0x18]; u8* mesh; PartRange* unpack; };
 struct PartPackets { void* firstQwc; void* firstBuffer; void* firstUnpackCursor; void* secondQwc; void* secondBuffer; void* secondUnpackCursor; };
 
 struct AttachmentLink { PlacedObject* owner; AttachmentLink* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; AttachmentLink* next; u8 pad84[0xC]; };
-struct ParentFrame { Mat02 rot; Vec02 pos; };
+struct ParentFrame { Mat3 rot; Vec4 pos; };
 
 #endif

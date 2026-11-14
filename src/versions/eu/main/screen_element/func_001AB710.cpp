@@ -9,7 +9,7 @@ void DrawWrappedAlignedText(void* buf, void* out, s32 zero, void* d);
 
 void DrawTimerElement(Actor_001AB710_eu* self)
 {
-    Layout_137228 L;
+    TextBoxLayout L;
     Quad4 tag;
     T217D_Word warn;
     u8 buf[0xC0];
@@ -17,12 +17,12 @@ void DrawTimerElement(Actor_001AB710_eu* self)
         f32 f544 = self->f544;
         f32 f548 = self->f548;
         s32 s0v = self->f518;
-        ((Layout_137228*)&L)->Pos(self->f52C, self->f530);
-        ((Layout_137228*)&L)->Size(f544, f548);
+        ((TextBoxLayout*)&L)->Pos(self->f52C, self->f530);
+        ((TextBoxLayout*)&L)->Size(f544, f548);
         tag.w[0] = s0v;
-        ((Layout_137228*)&L)->Color(&tag.w[0]);
-        ((Layout_137228*)&L)->SetF14(0);
-        ((Layout_137228*)&L)->SetF18(0);
+        ((TextBoxLayout*)&L)->Color(&tag.w[0]);
+        ((TextBoxLayout*)&L)->SetF14(0);
+        ((TextBoxLayout*)&L)->SetF18(0);
         SetTextLayoutVerticalPlacement(&L, 0);
         void* obj = self->f520;
         if (obj != 0) {

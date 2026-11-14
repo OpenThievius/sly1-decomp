@@ -11,7 +11,7 @@
 
 // Pushes a walk's frame (the statements in this order).
 struct BeginListWalk {
-    static void Of(ListFrame* it, List01* list)
+    static void Of(ListFrame* it, ObjectList* list)
     {
         it->list = list;
         it->link = (u8*)list;
@@ -22,7 +22,7 @@ struct BeginListWalk {
 };
 
 struct ListWalkBegin {
-    static void Of(ListFrame* it, List01* list)
+    static void Of(ListFrame* it, ObjectList* list)
     {
         it->list = list;
         it->link = (u8*)list;
@@ -54,7 +54,7 @@ struct ListWalkNextBase {
 
 // A walk as an object: the frame, pushed by the constructor and popped by the destructor.
 struct ListWalk : ListFrame {
-    ListWalk(List01* l)
+    ListWalk(ObjectList* l)
     {
         list = l;
         link = (u8*)l;
@@ -80,7 +80,7 @@ struct ListWalk : ListFrame {
 
 // A walk as a set of steps on a frame: begin, next element, end.
 struct ListWalkSteps {
-    static void Begin(ListFrame* it, List01* list)
+    static void Begin(ListFrame* it, ObjectList* list)
     {
         it->list = list;
         it->link = (u8*)list;
@@ -104,7 +104,7 @@ struct ScopedListFrame {
     void* cursor;
     s32 next_off;
     ScopedListFrame* prev;
-    ScopedListFrame(List01* l)
+    ScopedListFrame(ObjectList* l)
     {
         list = l;
         cursor = l;

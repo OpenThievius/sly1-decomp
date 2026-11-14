@@ -24,15 +24,15 @@
 #include "functions/matrix.h"
 #include "functions/path_curve.h"
 #include "functions/warp_menu.h"
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 
 
 struct CurvePoint { u8 pad0[16]; };
 
-void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, s32 count,
+void SampleCurvePoints(f32 dur, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, s32 count,
                        CurvePoint* out, f32 start, f32 end);
 
 
@@ -148,9 +148,9 @@ void EvaluateHermiteSegment(f32* p0, f32* p1, f32* p2, f32 dur, f32 t, f32 e, f3
 // The cubic Hermite segment from p0 (tangent m0) to p1 (tangent m1) over dur, at time t: the
 // point into pos, the velocity (scaled by k) into vel and the acceleration (by k squared)
 // into acc, each when given.
-void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc)
+void EvaluateHermiteVectorSegment(f32 dur, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, f32 t, f32 k, Vec4* pos, Vec4* vel, Vec4* acc)
 {
-    Vec02 d;
+    Vec4 d;
     f32 u = t / dur;
     f32 w = 1.0f - u;
     if (pos != 0) {
@@ -179,7 +179,7 @@ void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, con
 
 
 // v made unit length where it is, or fallback when shorter than 0.0001: its length.
-static inline f32 NormalizeAxis(Vec02& v, const Vec02& fallback)
+static inline f32 NormalizeAxis(Vec4& v, const Vec4& fallback)
 {
     u128 len = Vu0::Length(Vu0::Q(v));
     if (Vu0::ToFloatMoved(len) < 0.0001f) {
@@ -194,16 +194,16 @@ static inline f32 NormalizeAxis(Vec02& v, const Vec02& fallback)
 // wb at the ends (a cubic Hermite blend of orientation). Writes the interpolated rotation to out
 // and its angular velocity (scaled by e) to outW; either may be null. Used for the player's path
 // moves and the pose source's link blends.
-void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Mat02* b, const Vec02* wb, Mat02* out, Vec02* outW,
+void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat3* a, const Vec4* wa, Mat3* b, const Vec4* wb, Mat3* out, Vec4* outW,
                             s32 unused6)
 {
     f32 u = t / dur;
     f32 v = 1.0f - u;
     if (out != 0) {
-        Vec02 axis;
-        Mat02 m1;
-        Mat02 m2;
-        Mat02 rot;
+        Vec4 axis;
+        Mat3 m1;
+        Mat3 m2;
+        Mat3 rot;
         f32 uu = u * u;
         f32 uv = u * v;
         f32 uuu = uu * u;
@@ -225,8 +225,8 @@ void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Ma
         MulRotationRowsX(out, rot, m1);
     }
     if (outW != 0) {
-        Mat02 d;
-        Vec02 axis;
+        Mat3 d;
+        Vec4 axis;
         f32 angle;
         MultiplyMatrices3x3(a, b, &d);
         MatrixToAxisAngle(&d, &angle, &axis);
@@ -242,21 +242,21 @@ void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Ma
 // Samples a Hermite vector segment (points p0 and p1 with tangents m0 and m1, length dur) at count
 // evenly spaced times from start to end inclusive, writing the positions to out. Used to build the
 // 20-point polyline of a path curve segment.
-void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, s32 count,
+void SampleCurvePoints(f32 dur, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, s32 count,
                        CurvePoint* out, f32 start, f32 end)
 {
     f32 step = (end - start) / (f32)(count - 1);
     f32 cur = start;
     s32 i;
     for (i = 0; i < count; i++) {
-        EvaluateHermiteVectorSegment(dur, p0, m0, p1, m1, cur, 1.0f, (Vec02*)(out + i), 0, 0);
+        EvaluateHermiteVectorSegment(dur, p0, m0, p1, m1, cur, 1.0f, (Vec4*)(out + i), 0, 0);
         cur += step;
     }
 }
 
 // The length of one Hermite segment (points p0 and p1 with tangents m0 and m1) from its start to
 // time end, by summing the lengths of 20 sampled chords.
-f32 MeasureCurveSegmentLength(const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 dur, f32 end)
+f32 MeasureCurveSegmentLength(const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, f32 dur, f32 end)
 {
     CurvePoint buf[20];
     SampleCurvePoints(dur, p0, m0, p1, m1, 20, buf, 0.0f, end);

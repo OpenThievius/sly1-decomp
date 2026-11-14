@@ -12,7 +12,7 @@ struct Collider;
 struct ContactPair;
 struct ObjectEvent;
 struct ObjectMessage;
-struct Vec02;
+struct Vec4;
 
 void InitChildGroupObject(ChildGroupObject* self);
 void LoadChildGroupObject(ChildGroupObject* self, BufferedStream* stream);
@@ -24,7 +24,7 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self);
 void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5);
 void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s32 which);
 s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev);
-void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* z);
+void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec4* pos, Vec4* z);
 void StartChildGroupDelay(ChildGroupObject* self, f32 delta);
 void ApplyChildGroupKnockback(ChildGroupObject* self, Collider* other);
 void ApplyChildGroupRepulsion(ChildGroupObject* self);

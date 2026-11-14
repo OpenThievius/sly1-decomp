@@ -20,8 +20,8 @@ struct IdLinkedObject : PlacedObject {
     f32 f2DC;               // 0x2DC: 0.5 at set-up
     f32 f2E0;               // 0x2E0: 0.5 at set-up
     u8 pad2E4[0x2F0 - 0x2E4];
-    Vec02 v2F0;             // 0x2F0: (0, 0, 50) at set-up
-    Vec02 v300;             // 0x300: (100, 80, 50) at set-up
+    Vec4 v2F0;             // 0x2F0: (0, 0, 50) at set-up
+    Vec4 v300;             // 0x300: (100, 80, 50) at set-up
     u8 pad310[0x320 - 0x310];
     f32 f320;               // 0x320: 0.3 at set-up
     f32 f324;               // 0x324: 0.5 at set-up

@@ -177,7 +177,7 @@ typedef unsigned long u64;
 
 void RewindTextReader(TextReader* self);
 s32 ReadTextChar(TextReader* self);
-void SetTextDefaultColor(TextReader* self, Rgba_137248* p);
+void SetTextDefaultColor(TextReader* self, LayoutRgba* p);
 
 // Inline text codes: ~RRGGBB / ~. colour, &<id> / &. font, ^<d><d> / ^. scale.
 s32 FindFontByKeyChar(s32 id);
@@ -827,7 +827,7 @@ void RewindTextReader(TextReader* self)
 
 // Sets the reader's default colour, which colour codes in the text go back to, and the current
 // colour.
-void SetTextDefaultColor(TextReader* self, Rgba_137248* color)
+void SetTextDefaultColor(TextReader* self, LayoutRgba* color)
 {
     // a field access here changes retail's code (the packed word stores)
     u8* dst = (u8*)self;
@@ -1081,10 +1081,10 @@ void MeasureText(TextReader* self, f32 f, f32* out1, f32* out2)
 // Draws the text of a reader in a layout: it first measures each line's width, then positions the
 // lines from the layout's alignment (left, centred or right horizontally, top, middle or bottom
 // vertically) and draws each character with its font and colour.
-void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s)
+void DrawAlignedText(TextReader* self, TextBoxLayout* p, Vec4U* clip, PacketWriter* s)
 {
     f32 f[64];
-    Rgba_137248 u;
+    LayoutRgba u;
     s32 first = 1;
     s32 n = 0;
     f32 top;

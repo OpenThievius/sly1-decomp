@@ -39,7 +39,7 @@ extern "C" s32 AwaitSemaphore(void* a);
 extern "C" void PostSemaphore(void* a);
 s32 EndOwnThread();
 void SetThreadPriority(s32 thread, s32 b);
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 a, s32 b);
+void SetPauseMenuLayerPage(PauseMenu* self, s32 a, s32 b);
 s32 InitBufferedStream(BufferedStream* o, s32 a, u8* b, s32 c);
 s32 OpenBufferedSectorStreamRange(BufferedStream* o, KeyId* p);
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
@@ -760,7 +760,7 @@ void StartMemoryCardSave(MemoryCard* self)
             SetPauseMenuLayerPage(&g_pauseMenuElement, 1, 0x14);
         } else {
             StartBackgroundJob(&g_backgroundJob, (void*)SaveGameToMemoryCardSlot, self);
-            T217D_600* obj = &g_cyclingGlyphElement;
+            CyclingGlyphElement* obj = &g_cyclingGlyphElement;
             ((T217D_Word*)&obj->flag)->v = 0;
             obj->vt->m14(obj);
         }

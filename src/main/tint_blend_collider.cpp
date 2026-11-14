@@ -42,8 +42,8 @@
 #include "functions/world.h"
 #include "functions/world_contacts.h"
 #include "attachment.h"
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -66,7 +66,7 @@ ColliderLinkTable g_tintBlendColliderLinks = { {
 f32 g_tintSpringCurve[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 f32 g_tintPositionSpringScale[1] = { 6.0f };
 f32 g_tintRotationSpringScale = 3.0f;
-Vec02 g_reachCurve = { 0.0f, 0.0f, 800.0f, 0.0f };
+Vec4 g_reachCurve = { 0.0f, 0.0f, 800.0f, 0.0f };
 f32 g_reachRange[4] = { 0.0f, 800.0f, 0.0f, 0.0f };
 f32 g_tintLeanCurve[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 f32 g_leanTiltFactor[4] = { 0.150000006f, 0.0f, 0.0f, 0.0f };
@@ -76,7 +76,7 @@ f32 g_tintSpeedInfluenceCurve[4] = { 0.0f, 0.00124999997f, 0.0f, 0.0f };
 f32 g_tintStickInfluenceCurve[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
 f32 g_tintSpeedInfluenceGain = 15.0f;
 f32 g_tintStickInfluenceGain = 10.0f;
-Vec02 g_tintBlendTimeCurve = { 1.0f, 0.0f, -0.75f, 0.0f };
+Vec4 g_tintBlendTimeCurve = { 1.0f, 0.0f, -0.75f, 0.0f };
 f32 g_tintBlendPulseCurve[4] = { 0.699999988f, 0.300000012f, 0.0f, 0.0f };
 f32 g_tintEffectImpulseScale = 0.5f;
 f32 g_tintLaunchSpeed = 700.0f;
@@ -147,7 +147,7 @@ void StartRedirectObject(RedirectObject* self)
             if (c != 0) {
                 step->below = p->pos;
             } else {
-                step->below = *(Vec02*)&self->q320;
+                step->below = *(Vec4*)&self->q320;
             }
             step++;
         } while (c != 0);
@@ -158,9 +158,9 @@ void StartRedirectObject(RedirectObject* self)
 
 extern s32 g_frameCount;
 extern f32 g_gameClock[];
-f32 SplitVectorAlongAxis(Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
-void OrthonormalizeMatrix(Mat02* m);
-Mat02 MultiplyByTransposedMatrix3x3(const Mat02& a, const Mat02& b);
+f32 SplitVectorAlongAxis(Vec4* v, const Vec4* axis, Vec4* along, Vec4* rest);
+void OrthonormalizeMatrix(Mat3* m);
+Mat3 MultiplyByTransposedMatrix3x3(const Mat3& a, const Mat3& b);
 
 // The clock's step, read through the clock's address.
 static inline const f32& ClockStep(const f32* clock) { return clock[2]; }
@@ -169,16 +169,16 @@ static inline const f32& ClockStep(const f32* clock) { return clock[2]; }
 // pointer (mul_rotation.h's Indexed forms: retail's `lqc2 0x30(v0); addiu v0, v0, 0x30; lqc2
 // 0x10(v0)`); rows 0 and 1 store the result before the row local, row 2 after, as retail's P3 and
 // else-branch products do (P1 and P2 order theirs either way).
-static inline Mat02 MulRotationValue(const Mat02& a, const Mat02& b) return r
+static inline Mat3 MulRotationValue(const Mat3& a, const Mat3& b) return r
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
     const u128* q = (const u128*)&b;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     Vu0::Q(x) = *(u128*)&r.r[0] = Vu0::RotateRows(a0, a1, a2, q[0]);
     Vu0::Q(y) = *(u128*)&r.r[1] = Vu0::RotateRows(a0, a1, a2, q[1]);
     *(u128*)&r.r[2] = Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, q[2]);
@@ -187,15 +187,15 @@ static inline Mat02 MulRotationValue(const Mat02& a, const Mat02& b) return r
 // The same with b's rows read through Vu0::Q, which CSE folds into frame offsets: the R * M
 // product, whose b is the frame's M (through a pointer the rows are read via the hoisted &M and the
 // stores fall between them).
-static inline Mat02 MulRotationValue2(const Mat02& a, const Mat02& b) return r
+static inline Mat3 MulRotationValue2(const Mat3& a, const Mat3& b) return r
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     *(u128*)&r.r[0] = Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
     *(u128*)&r.r[1] = Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
     *(u128*)&r.r[2] = Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
@@ -224,11 +224,11 @@ void SimulateRedirectChain(RedirectObject* self)
     s32 i;
     RedirectStep* step;
     RedirectStep* prev;
-    Vec02 a;
-    Vec02 d;
-    Vec02 axis;
-    Vec02 b;
-    Vec02 c;
+    Vec4 a;
+    Vec4 d;
+    Vec4 axis;
+    Vec4 b;
+    Vec4 c;
     if (self->targetIsSelf != 0) {
         for (i = 0; i < self->chainCount - 1; i++) {
             step = &self->steps[i];
@@ -270,7 +270,7 @@ void SimulateRedirectChain(RedirectObject* self)
             *(Vec*)&b = Vu0::Sub(Vec::Of(step->vel), Vec::Of(prev->vel));
             f32 angle = ComputeAngleBetweenVectors(&a, &d, &axis);
             if (self->maxBend < angle) {
-                Mat02 r;
+                Mat3 r;
                 BuildAxisAngleMatrix(&axis, &r, angle - self->maxBend);
                 *(Vec*)&a = Vu0::Rotate(r, Vec::Of(a));
                 *(Vec*)&step->pos = Vu0::Add(Vec::Of(prev->pos), Vec::Of(a));
@@ -294,17 +294,17 @@ void SimulateRedirectChain(RedirectObject* self)
             *(Vec*)&axis = diff;
             *(Vec*)&axis = Vu0::NormalizeOr(diff, Vec::Of(g_unitXVector));
             *(Vec*)&step->pos = Vu0::MulAddX(Vec::Of(prev->pos), Vec::Of(axis), Vec::ScalarAt(step->length));
-            Vec02 along;
-            Vec02 rest;
+            Vec4 along;
+            Vec4 rest;
             SplitVectorAlongAxis(&prev->vel, &axis, &along, 0);
             SplitVectorAlongAxis(&step->vel, &axis, 0, &rest);
             *(Vec*)&step->vel = Vu0::Add(Vec::Of(along), Vec::Of(rest));
         }
     }
-    Vec02 v;
-    Mat02 R;
-    Mat02 M;
-    Mat02 m;
+    Vec4 v;
+    Mat3 R;
+    Mat3 M;
+    Mat3 m;
     if (self->f310 != 0) {
         if (self->parent != 0) {
             m = ((PlacedObject*)self->parent)->m110;
@@ -420,7 +420,7 @@ void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
 {
     OwnerMessage loc;
     f32 f20;
-    Contact03* s1;
+    BodyContact* s1;
     Collider* s0;
     s32 v;
     s32 idx;
@@ -429,7 +429,7 @@ void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
     if (HasAnimationDrivenAttachment(self) != 0) {
         ResetTintBlendColliderOrientation(self);
     }
-    Contact03* head = ((Contact03*)self->heldContacts);
+    BodyContact* head = ((BodyContact*)self->heldContacts);
     if (head != 0) {
         s1 = head;
         do {
@@ -453,7 +453,7 @@ void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
             }
             s1 = s1->next;
         } while (s1 != 0);
-        FreePooledContactChain(self->world, ((Contact03*)self->heldContacts));
+        FreePooledContactChain(self->world, ((BodyContact*)self->heldContacts));
         self->heldContacts = 0;
     }
     {
@@ -505,7 +505,7 @@ extern s32 g_movieChecksumFailed;
 // The collider's effect (its frame) and a body's velocity and rotation, as this function reads
 // them.
 struct TintPart { u8 pad00[0x18]; PlacedObject* frame; };
-struct TintBody { u8 pad00[0x20]; Vec02 v20; u8 pad30[0x40 - 0x30]; Mat02 m40; };
+struct TintBody { u8 pad00[0x20]; Vec4 v20; u8 pad30[0x40 - 0x30]; Mat3 m40; };
 typedef void (*TintSelfFn)(void* self);
 
 // A tuning curve at z: poly[0] + poly[1] z + poly[2] z^2.
@@ -515,10 +515,10 @@ static inline f32 Quadratic(const f32* poly, f32 z)
 }
 
 // The rows of m, each turned by r, returned by value (g++'s named return value).
-static inline Mat02 RotatedRows(const Mat02& r, const Mat02& m) return out
+static inline Mat3 RotatedRows(const Mat3& r, const Mat3& m) return out
 {
     const u128* q = (const u128*)&m;
-    Mat02 t;
+    Mat3 t;
     Vu0::Q(t.r[0]) = Vu0::RotateUntied(r, q[0]);
     out.r[0] = t.r[0];
     Vu0::Q(t.r[1]) = Vu0::RotateUntied(r, q[1]);
@@ -533,12 +533,12 @@ static inline Mat02 RotatedRows(const Mat02& r, const Mat02& m) return out
 // and blends the body's velocity towards the stick.
 void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
 {
-    Vec02 offset;
-    Vec02 axis;
-    Mat02 tilt;
-    Mat02 turn;
-    Mat02 m;
-    Mat02 rot;
+    Vec4 offset;
+    Vec4 axis;
+    Mat3 tilt;
+    Mat3 turn;
+    Mat3 m;
+    Mat3 rot;
     s32 cur;
     s32 tgt;
     f32 stick;
@@ -610,7 +610,7 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     }
     f32 w = g_tintStickInfluenceGain * g_unitRange.Clamp(Quadratic(g_tintStickInfluenceCurve, pad->stickMagnitude));
     ComputePolarOffset((Vec3*)&axis, stick, 1.0f, 0.0f);
-    Vec02 vel;
+    Vec4 vel;
     Vu0::Q(vel) = Vu0::MulXSum(Vu0::Q(self->v150), Vu0::Scalar(k), Vu0::Q(axis), Vu0::Scalar(w));
     Vu0::Q(((TintBody*)self->primaryPartAttachment)->v20) = Vu0::RotateTransposedMembers(((TintPart*)self->primaryPart)->frame->m110, Vu0::Q(vel));
     if (self->f73C != 0 && g_player != 0 && (pad->flags & 0x40)) {
@@ -683,8 +683,8 @@ void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
 // own step, with the flag passed through.
 void ApplyTintBlendColliderPendingImpulse(TintBlendCollider* self, s32 moved)
 {
-    Vec02 local;
-    Vec02 k;
+    Vec4 local;
+    Vec4 k;
     u128 s = Vu0::FromFloatAt(g_tintEffectImpulseScale);
     PlacedObject* effect = (PlacedObject*)self->primaryPart;
     Vu0::Q(local) = Vu0::RotateTransposed(((PlacedObject*)effect->parent)->m110, Vu0::Q(self->v490));
@@ -711,10 +711,10 @@ extern f32 g_tintLaunchLift;
 // state 4 sub-state 0x2B.
 void ContinueTintBlendColliderRequest(TintBlendCollider* self, TintBlendCollider* other)
 {
-    Vec02 d = self->v150;
+    Vec4 d = self->v150;
     d.z = 0.0f;
     u128& q = Vu0::Q(d);
-    Vec02 k;
+    Vec4 k;
     u128 n = Vu0::NormalizeOr(q, Vu0::Q(g_unitXVector));
     Vu0::Q(k) = Vu0::FromFloatAt(g_tintLaunchSpeed);
     f32 z = g_tintLaunchLift;
@@ -744,10 +744,10 @@ s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
     if (req->mode == 0 && req->reply != 0) {
         req->reply(req->c, self);
         {
-        Vec02 dir;
-        Vec02 v;
-        Vec02 w;
-        const Vec02* fb = &g_unitXVector;
+        Vec4 dir;
+        Vec4 v;
+        Vec4 w;
+        const Vec4* fb = &g_unitXVector;
         dir = self->v150;
         dir.z = 0.0f;
         u128 len = Vu0::Length(Vu0::Q(dir));
@@ -797,7 +797,7 @@ s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
 // collider's contacts.
 void CollectTintBlendColliderContacts(TintBlendCollider* self)
 {
-    ExtractContactsByPartMode(self, (Contact03**)&self->heldContacts);
+    ExtractContactsByPartMode(self, (BodyContact**)&self->heldContacts);
     CollectTurningColliderContacts(self);
 }
 

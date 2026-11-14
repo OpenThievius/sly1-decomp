@@ -42,7 +42,7 @@ struct MeshObject : TransformObject {
 // func_001F3EE0) copies the objects; starting (slot 16, func_001F3F80) gives each its parent
 // and starts it.
 struct TransformSet : TransformObject {
-    Vec02 arrivalVelocity;  // 0x80: the velocity the arriving object is given
+    Vec4 arrivalVelocity;  // 0x80: the velocity the arriving object is given
     u8 pad90[0x98 - 0x90];
     s32 hasHeading;         // 0x98: set when the arrival turns the camera
     f32 headingOffset;      // 0x9C: added to the arrival's heading
@@ -81,7 +81,7 @@ struct CappedWordList {
 
 // The 0x200-byte record a 0x79 shares with its copies (func_00158C28 counts them;
 // func_00158DD8 makes the object's own before a change).
-struct Rec79 {
+struct TransformRecord {
     s32 uses;               // 0x00
     u8 pad04[0x10 - 0x04];
     s32 kind;               // 0x10: 3, 4 seen
@@ -109,7 +109,7 @@ struct Rec79 {
 
 // 0x79: a member with a shared record and two object ids (-1 for none).
 struct RecordMember : MemberObject {
-    Rec79* rec;             // 0x90
+    TransformRecord* rec;             // 0x90
     s32 id94;               // 0x94
     s32 id98;               // 0x98
     u8 pad9C[0xA0 - 0x9C];
@@ -154,7 +154,7 @@ typedef char check_MemberGroup[sizeof(MemberGroup) == 0xC0 ? 1 : -1];
 typedef char check_RecordMember[sizeof(RecordMember) == 0xA0 ? 1 : -1];
 typedef char check_HoldingMember[sizeof(HoldingMember) == 0xD0 ? 1 : -1];
 typedef char check_Class75Object[sizeof(Class75Object) == 0xA0 ? 1 : -1];
-typedef char check_Rec79[sizeof(Rec79) == 0x200 ? 1 : -1];
+typedef char check_Rec79[sizeof(TransformRecord) == 0x200 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitTransformObject(TransformObject* self);                       // 0x73 slot 0
@@ -176,6 +176,6 @@ void InitHoldingMember(HoldingMember* self);                       // 0x7A slot 
 void ReleaseHeldObject(HoldingMember* self, s32 kind, BaseObject* other); // 0x7A slot 13
 void ResolveHoldingMemberTargets(HoldingMember* self);                       // 0x7A slot 15
 void SendMessageAfterDelay(HoldingMember* self, void* message);        // 0x7A slot 27
-Rec79* GetOwnedSpawnRecord(RecordMember* self, s32 own);            // the record, made the object's own first
+TransformRecord* GetOwnedSpawnRecord(RecordMember* self, s32 own);            // the record, made the object's own first
 
 #endif

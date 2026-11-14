@@ -157,12 +157,12 @@ extern s32 (*g_warpCursorTables[6])[4];
 struct KeyedEntry;
 struct TrackedNodeOffer;
 struct ScaledTransform;
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
-struct Rec36;
-void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out);
+struct ContactTrackerRecord;
+void OfferTrackedNodeLaunch(ContactTrackerRecord* self, void* a1, TrackedNodeOffer* out);
 struct TimedValue { u8 pad[0x98]; s32 state; f32 value; };
 
 
@@ -170,7 +170,7 @@ struct TimedValue { u8 pad[0x98]; s32 state; f32 value; };
 
 
 struct ZoneTargetEntry;
-void FillTrackedNodes(Rec36* self);
+void FillTrackedNodes(ContactTrackerRecord* self);
 
 
 
@@ -194,7 +194,7 @@ s32 GetLevelEntryWord(s32 a0);
 
 
 // The offer func_001F57E0 fills: the tracker's word, the tracker, and the launch to call.
-struct TrackedNodeOffer { s32 f0; s32 f4; Rec36* tracker; void* launch; };
+struct TrackedNodeOffer { s32 f0; s32 f4; ContactTrackerRecord* tracker; void* launch; };
 
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
@@ -231,8 +231,8 @@ struct TargetLaunchFrame {
 
 
 void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHit* out, f32* outf);
-void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Vec02* pos, Vec02* acc);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
+void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec4* vel, Vec4* pos, Vec4* acc);
+void BuildAxisAngleMatrix(const Vec4* v, Mat3* out, f32 angle);
 void SetPlayerState(Player* self, s32 a, s32 b);
 void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f);
 
@@ -252,7 +252,7 @@ struct NextListed {
 };
 
 
-void AddTrackedNode(Rec36* self, BaseObject* n);
+void AddTrackedNode(ContactTrackerRecord* self, BaseObject* n);
 
 
 s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
@@ -263,17 +263,17 @@ struct GathererQuery {
     ContactTracker* self;
     ObjectGatherer* obj;
     u8 pad[0x18];
-    Vec02 q20;
-    Vec02 q30;
+    Vec4 q20;
+    Vec4 q30;
 };
 
 struct AddGathererContact {
-    static void Of(ContactTracker* self, ObjectGatherer* p, Vec02* a, Vec02* b)
+    static void Of(ContactTracker* self, ObjectGatherer* p, Vec4* a, Vec4* b)
     {
         s32 c = self->count;
         if ((u32)c < 10) {
             if (p->state != 3) {
-                Slot36* s = &self->slots[c];
+                HeldContact* s = &self->slots[c];
                 self->count = c + 1;
                 s->obj = (Collider*)p;
                 s->point = *a;
@@ -335,7 +335,7 @@ struct OscPart {
     f32 startDistance;      // 0x2C: the distance at which the vertex weight is startWeight
     f32 startWeight;        // 0x30: the weight at startDistance
     u8 pad34[0x40 - 0x34];
-    Vec02 m40[4];           // 0x40
+    Vec4 m40[4];           // 0x40
     u8 pad80[0x84 - 0x80];
     OscPart* next;          // 0x84
 };
@@ -344,12 +344,12 @@ struct OscVertexRange { u16 start; u16 end; u8 pad04[0x10 - 0x04]; u16 stride; }
 // The vertex data and, for each oscillator entry's output, a pointer to the four floats a vertex.
 // A vertex's output: four floats, the entries' cosine and sine weights at their index.
 struct OscOut { f32 f[4]; };
-struct OscVertexData { Vec02* verts; u8 pad04[0x24 - 0x04]; OscOut* outs[1]; };
+struct OscVertexData { Vec4* verts; u8 pad04[0x24 - 0x04]; OscOut* outs[1]; };
 struct OscBlock { u8 pad00[0x1C]; OscVertexRange* range; OscVertexData* data; u8 pad24[0x50 - 0x24]; };
 struct OscMesh { u8 pad00[0x58]; s32 blockCount; OscBlock* blocks; u8 pad60[0x68 - 0x60]; void* matrix; };
 // An oscillator entry as func_001F2840 reads it (0xD0 bytes from +0x50).
-struct OscEntry { s32 mode; s32 out; u8 pad08[0x10 - 0x08]; Vec02 axis; u8 pad20[0x60 - 0x20]; s32 index; f32 rate; u8 pad68[0xD0 - 0x68]; };
-struct Mat4R { Vec02 r[4]; };
+struct OscEntry { s32 mode; s32 out; u8 pad08[0x10 - 0x08]; Vec4 axis; u8 pad20[0x60 - 0x20]; s32 index; f32 rate; u8 pad68[0xD0 - 0x68]; };
+struct Mat4R { Vec4 r[4]; };
 
 static inline f32 MinA(f32 a, f32 b) { return a <? b; }
 static inline f32 MinB(f32 a, f32 b) { return b <? a; }
@@ -358,7 +358,7 @@ static inline f32 MaxB(f32 a, f32 b) { return b >? a; }
 void InitIdentityMatrix(Mat4* self);
 void* InvertMatrix4x4(void* a0, void* a1);
 Mat4R MultiplyMatrices(const Mat4R& a, const Mat4R& b);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
+void BuildMatrixFromRotationAndTranslation(const Vec4* pos, const Mat3* rot, Mat4A* out);
 
 // Rebuilds the oscillator's per-vertex tables after its parts or entries changed (framesDirty):
 // each vertex of a part's mesh blocks gets a weight (1, or a ramp of its distance along the
@@ -408,15 +408,15 @@ void RefreshOscillatorFrames(Oscillator* self)
             OscBlock* block = &mesh->blocks[i];
             OscVertexData* data = block->data;
             OscVertexRange* r = block->range;
-            Vec02 verts[0x100];
+            Vec4 verts[0x100];
             f32 weights[0x100];
             s32 n = (r->end - r->start) / r->stride;
-            Vec02* end = verts + n;
-            CopyMemory(verts, data->verts, n * sizeof(Vec02));
-            Vec02* v;
+            Vec4* end = verts + n;
+            CopyMemory(verts, data->verts, n * sizeof(Vec4));
+            Vec4* v;
             f32* w = weights;
             for (v = verts; v < end; v++, w++) {
-                Vec02 p;
+                Vec4 p;
                 f32 weight;
                 f32 d;
                 Vu0::Q(p) = Vu0::Transform(m, Vu0::Q(*v), 1.0f);
@@ -480,7 +480,7 @@ void RefreshOscillatorFrames(Oscillator* self)
                         break;
                     }
                     case 1: {
-                        Vec02 d;
+                        Vec4 d;
                         Vu0::Vec qv, pv; qv.q = q; pv.q = pivot;
                         Vu0::Q(d) = Vu0::Sub(qv, pv).q;
                         out->f[0] = *w * d.x;
@@ -500,10 +500,10 @@ void RefreshOscillatorFrames(Oscillator* self)
 struct OscillatorSweepEntry {
     s32 kind;               // 0x00: 0 for an axis entry
     u8 pad04[0x10 - 0x04];
-    Vec02 v10;              // 0x10: the axis
-    Vec02 v20;              // 0x20
+    Vec4 v10;              // 0x10: the axis
+    Vec4 v20;              // 0x20
     u8 pad30[0x40 - 0x30];
-    Vec02 v40;              // 0x40
+    Vec4 v40;              // 0x40
     u8 pad50[0x64 - 0x50];
     f32 scale;              // 0x64
     f32 frequency;          // 0x68: how fast the phase advances with the game clock
@@ -526,7 +526,7 @@ static inline Vu0::Vec WeightOf(u128 w)
 // gets the moved point, outB the matching second vector (the derivative), and outDeltas the
 // displaced copies of three offset vectors relative to it. Entries whose period is shorter than
 // time are skipped.
-void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB)
+void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec4* in, Vec4* deltas, Vec4* outA, Vec4* outDeltas, Vec4* outB)
 {
     Vu0::Vec pos = Vu0::Vec::Of(*in);
     Vu0::Vec other = Vu0::Vec::Of(g_zeroVector);
@@ -558,7 +558,7 @@ void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02*
     }
     if (deltas != 0 && outDeltas != 0) {
         for (s32 k = 0; k < 3; k++) {
-            Vec02 t;
+            Vec4 t;
             Vu0::Set(t, Vu0::Add(Vu0::Q(*in), Vu0::Q(deltas[k])));
             ComputeOscillatorDisplacement(self, time, &t, 0, &t, 0, 0);
             Vu0::Q(outDeltas[k]) = Vu0::Sub(Vu0::Q(t), pos.q);
@@ -567,10 +567,10 @@ void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02*
 }
 
 // The kind-0 (sine) entries' amplitudes, per axis: a noise blend (kind 1) adds no fixed bound.
-void ComputeOscillatorMaxDisplacement(Oscillator* self, Vec02* out)
+void ComputeOscillatorMaxDisplacement(Oscillator* self, Vec4* out)
 {
-    Vec02 sum;
-    Vec02 span;
+    Vec4 sum;
+    Vec4 span;
     sum = g_zeroVector;
     for (s32 i = 0; i < self->entryCount; i++) {
         OscillatorSweepEntry* e = (OscillatorSweepEntry*)self->entries + i;
@@ -652,11 +652,11 @@ struct OscillatorEntry {
     s32 kind;               // 0x00: 0 a sine, 1 a noise blend
     s32 frame;              // 0x04: the frames it writes (Oscillator's framesA and framesB)
     u8 pad08[0x10 - 0x08];
-    Vec02 v10;              // 0x10: kind 1: the axis turned by the first matrix
-    Vec02 v20;              // 0x20: kind 1: the first matrix's axis
-    Vec02 v30;              // 0x30: kind 1: a NoiseBlend (the second angle)
-    Vec02 v40;              // 0x40
-    Vec02 v50;              // 0x50
+    Vec4 v10;              // 0x10: kind 1: the axis turned by the first matrix
+    Vec4 v20;              // 0x20: kind 1: the first matrix's axis
+    Vec4 v30;              // 0x30: kind 1: a NoiseBlend (the second angle)
+    Vec4 v40;              // 0x40
+    Vec4 v50;              // 0x50
     s32 row;                // 0x60: kind 0: the first of the two rows it writes
     f32 scale;              // 0x64
     f32 frequency;          // 0x68: how fast the phase advances with the game clock
@@ -689,8 +689,8 @@ void EvaluateOscillator(Oscillator* self)
             f32 sn, cs;
             ComputeSinCos(&sn, &cs, phase * 6.2831855f);
             u128 c = Vu0::FromFloatAt(cs);
-            Vec02 a;
-            Vec02 b;
+            Vec4 a;
+            Vec4 b;
             s32 row = e->row;
             Vu0::Set(a, Vu0::MulXSum(Vu0::Vec::Of(e->v20), WeightOf(c), Vu0::Vec::Of(e->v40), Vu0::Vec::Scalar(sn)).q);
             fa->r[row].x = a.x;
@@ -712,9 +712,9 @@ void EvaluateOscillator(Oscillator* self)
         }
         case 1: {
             f32 angle = EvaluateNoiseBlend((NoiseBlend*)&e->v30);
-            Mat02 m;
-            Mat02 turn;
-            Vec02 axis;
+            Mat3 m;
+            Mat3 turn;
+            Vec4 axis;
             f32 tilt = EvaluateNoiseBlend((NoiseBlend*)e->blend80);
             BuildAxisAngleMatrix(&e->v20, &turn, tilt);
             Vu0::Set(axis, Vu0::Rotate(turn, Vu0::Vec::Of(e->v10)).q);
@@ -883,8 +883,8 @@ void ReadTransformObject(TransformObject* self, void* stream)
 // parent's frame to the new one's so it stays where it is.
 void ReparentObjectKeepingTransform(TransformObject* self, BaseObject* other)
 {
-    TransformPointBetweenFrames((PlacedObject*)self->parent, (PlacedObject*)other, (Vec02*)&self->pos, (Vec02*)&self->pos);
-    TransformRotationBetweenFrames((PlacedObject*)self->parent, (PlacedObject*)other, (Mat02*)&self->rot, (Mat02*)&self->rot);
+    TransformPointBetweenFrames((PlacedObject*)self->parent, (PlacedObject*)other, (Vec4*)&self->pos, (Vec4*)&self->pos);
+    TransformRotationBetweenFrames((PlacedObject*)self->parent, (PlacedObject*)other, (Mat3*)&self->rot, (Mat3*)&self->rot);
     ReparentObject(self, other);
 }
 
@@ -892,30 +892,30 @@ void ReparentObjectKeepingTransform(TransformObject* self, BaseObject* other)
 // place).
 void TransformObjectIntoFrame(TransformObject* self, BaseObject* other)
 {
-    TransformPointBetweenFrames((PlacedObject*)other, 0, (Vec02*)&self->pos, (Vec02*)&self->pos);
-    TransformRotationBetweenFrames((PlacedObject*)other, 0, (Mat02*)&self->rot, (Mat02*)&self->rot);
+    TransformPointBetweenFrames((PlacedObject*)other, 0, (Vec4*)&self->pos, (Vec4*)&self->pos);
+    TransformRotationBetweenFrames((PlacedObject*)other, 0, (Mat3*)&self->rot, (Mat3*)&self->rot);
 }
 
 // The world point p in the object's own frame: into its parent's frame, less the position,
 // through the transpose of the rotation.
-void ConvertPointIntoObjectFrame(TransformObject* self, Vec02* p, Vec02* out)
+void ConvertPointIntoObjectFrame(TransformObject* self, Vec4* p, Vec4* out)
 {
-    Vec02 t;
+    Vec4 t;
     TransformPointBetweenFrames(0, (PlacedObject*)self->parent, p, &t);
     Vu0::Q(t) = Vu0::Sub(Vu0::Q(t), Vu0::Q(self->pos));
     Vu0::Q(*out) = Vu0::RotateTransposed(self->rot, Vu0::Q(t));
 }
 
 // The object's position (at +0x40) converted from its parent's frame to world coordinates.
-void GetObjectWorldPosition(BaseObject* self, Vec02* out)
+void GetObjectWorldPosition(BaseObject* self, Vec4* out)
 {
-    TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)&((TransformObject*)self)->pos, out);
+    TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec4*)&((TransformObject*)self)->pos, out);
 }
 
 // The object's rotation (at +0x50) converted from its parent's frame to world coordinates.
-void GetObjectWorldRotation(BaseObject* self, Mat02* out)
+void GetObjectWorldRotation(BaseObject* self, Mat3* out)
 {
-    TransformRotationBetweenFrames((PlacedObject*)self->parent, 0, (Mat02*)&((TransformObject*)self)->rot, out);
+    TransformRotationBetweenFrames((PlacedObject*)self->parent, 0, (Mat3*)&((TransformObject*)self)->rot, out);
 }
 
 // Looks up the arrival point for an id: first the object of class 0x101 with that id under the
@@ -1038,10 +1038,10 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 // 2.
 void PlaceAtArrivalPoint(TransformSet* self)
 {
-    Vec02 pos;
-    Mat02 rot;
-    Vec02 look;
-    Vec02 k;
+    Vec4 pos;
+    Mat3 rot;
+    Vec4 look;
+    Vec4 k;
     ArrivalWatcher* found[0x40];
     f32 angle;
     ArrivingObject* who = (ArrivingObject*)GetCurrentSwitchedCollider();
@@ -1055,7 +1055,7 @@ void PlaceAtArrivalPoint(TransformSet* self)
         return;
     }
     who->vt->getDir(who, &rot);
-    PlaceColliderClearOfContacts((Collider*)who, &pos, (Vec02*)&g_unitZVector);
+    PlaceColliderClearOfContacts((Collider*)who, &pos, (Vec4*)&g_unitZVector);
     who->vt->setVel(who, &self->arrivalVelocity);
     who->vt->setSpin(who, (void*)&g_zeroVector);
     ActivateSwitchedCollider(who);
@@ -1213,7 +1213,7 @@ void StartObjectSubGroup(ObjectSubGroup* self)
     StartPlacedObject(self);
     for (s32 i = 0; i < self->count; i++) {
         BaseObject* e = self->items[i];
-        const Desc01* vt = e->desc;
+        const BaseObjectDescriptor* vt = e->desc;
         if (vt->m0F != 0) {
             vt->m0F(e);
         }
@@ -1331,8 +1331,8 @@ void StartObjectSubGroupFade(ObjectSubGroup* self)
 extern s32 D_0026FA64;
 extern s32 D_002701C4;
 extern s32 D_0026F388;
-extern T217D_3D0 g_copiedTextCaption;
-extern T217D_440 g_typedTextCaptionBox;
+extern CopiedTextCaption g_copiedTextCaption;
+extern CaptionBox g_typedTextCaptionBox;
 s32 GetEntryIdByKey(KeyedEntry* key);
 struct TreeNode03;
 struct FacePoint;
@@ -1345,8 +1345,8 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self);
 // outside.
 void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
 {
-    Vec02 local;
-    Vec02 radius;
+    Vec4 local;
+    Vec4 radius;
     UpdatePlacedObject(self, dt);
     switch (self->state) {
     case 5: {
@@ -1458,7 +1458,7 @@ void PushObjectCameraController(void* self) { if (!*(s32*)((u8*)self + 0x310)) {
 // the object's class is not known
 void RemoveObjectCameraController(void* self) { if (*(s32*)((u8*)self + 0x310)) { RemoveCameraControllers(g_camera, 0xB, 7, &g_camera->ctl510, 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
 
-void InitTrackedNodes(Rec36* a, ContactTracker* b);
+void InitTrackedNodes(ContactTrackerRecord* a, ContactTracker* b);
 
 // Initialiser of the contact tracker: a collider whose tracked-node record points back to it,
 // with part mode 1 and a set of flag bits.
@@ -1483,7 +1483,7 @@ void CollectTouchingObjects(ContactTracker* self, f32 dt) {
     self->count = 0;
     Collider* owner = self->root03();
     for (ContactRow03* g = owner->contacts->head; g; g = g->next) {
-        for (Contact03* it = g->head; it; it = it->next) {
+        for (BodyContact* it = g->head; it; it = it->next) {
             s32 side = (owner != it->end[0].body);
             Collider* near = it->end[side].part;
             if (IsObjectDescendantOf(near, self)) {
@@ -1497,7 +1497,7 @@ void CollectTouchingObjects(ContactTracker* self, f32 dt) {
     }
     FillMemory(&tmp, 0, 0x40);
     for (s32 i = 0; i < self->count; i++) {
-        Slot36* s = &self->slots[i];
+        HeldContact* s = &self->slots[i];
         p = (ObjectGatherer*)s->obj;
         tmp.self = self;
         tmp.obj = p;
@@ -1523,7 +1523,7 @@ void ClearTrackedNodes(ContactTracker* self) { self->rec.found = 0; }
 
 // Initialiser of class 0x37: the contact tracker's, one more flag bit and collider anchors
 // (3, 0, 3, 0).
-void InitC37(C37* o) {
+void InitC37(OverlapTracker* o) {
     InitContactTracker(o);
     o->flags538 |= ((u64)0x8000 << 28);
     SetColliderAnchors(o, 3, 0, 3, 0);
@@ -1540,19 +1540,19 @@ struct TrackerHit {
 typedef s32 (*TargetHitFn)(Collider* self, s32 kind);
 typedef void (*TargetNotifyFn)(Collider* self, TrackerHit* hit);
 struct FaceRef;
-struct Mesh03;
+struct CollisionMesh;
 struct MeshHitEntry;
 struct PooledContact;
 struct OwnerMessage;
-void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out);
+void OfferTrackedNodeLaunch(ContactTrackerRecord* self, void* a1, TrackedNodeOffer* out);
 struct TreeNode03;
-s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
+s32 FindPlaneTreeNodeForPoint(Vec4* pos, TreeNode03* nodes);
 
 // Per-frame update of a collider that reacts to the active switched collider overlapping it (part
 // mode 1 or 4): checks that the bounding spheres overlap, then tests the other's mesh or point
 // against its own tree and builds the contacts (sphere-sphere, mesh, or mesh pair). Returns early
 // when nothing touches.
-void UpdateC37(C37* self, f32 dt)
+void UpdateC37(OverlapTracker* self, f32 dt)
 {
     TrackerHit hit;
     PooledContact* result;
@@ -1570,7 +1570,7 @@ void UpdateC37(C37* self, f32 dt)
     s32 far = 1;
     f32 r = self->radius3CC;
     f32 sum = r + target->radius3CC;
-    Vec02* pos = &target->v140;
+    Vec4* pos = &target->v140;
     u128 mine = Vu0::Q(self->v140);
     u128 gap = Vu0::Sub(mine, Vu0::Q(target->v140));
     if (!(sum * sum < Vu0::ToFloatMoved(Vu0::Dot(gap, gap)))) {
@@ -1584,7 +1584,7 @@ void UpdateC37(C37* self, f32 dt)
         if (0.0f < target->v150.z) {
             return;
         }
-        if (FindPlaneTreeNodeForPoint((Vec02*)pos, self->tree.nodes) == 0) {
+        if (FindPlaneTreeNodeForPoint((Vec4*)pos, self->tree.nodes) == 0) {
             return;
         }
         if ((target->flags538 & ((u64)0x8000 << 25)) != 0) {
@@ -1596,7 +1596,7 @@ void UpdateC37(C37* self, f32 dt)
                 // address arithmetic over a variable index
                 s16* edge = (s16*)((u8*)target->meshCopy.edges + i * 16);
                 Quad16* verts = (Quad16*)target->meshCopy.verts;
-                if (CollectTreeNodeSpans(self->tree.nodes, (Vec02*)&verts[edge[0]], (Vec02*)&verts[edge[1]], 0, 1, (ColliderSpan*)hit.span) == 0) {
+                if (CollectTreeNodeSpans(self->tree.nodes, (Vec4*)&verts[edge[0]], (Vec4*)&verts[edge[1]], 0, 1, (ColliderSpan*)hit.span) == 0) {
                     return;
                 }
                 if (hit.f80 != 0) {
@@ -1616,7 +1616,7 @@ void UpdateC37(C37* self, f32 dt)
                 inside = 0;
             }
         } else {
-            inside = FindPlaneTreeNodeForPoint((Vec02*)pos, self->tree.nodes);
+            inside = FindPlaneTreeNodeForPoint((Vec4*)pos, self->tree.nodes);
         }
         if (inside == 0) {
             if ((target->flags538 & ((u64)0x8000 << 25)) != 0) {
@@ -1641,15 +1641,15 @@ void UpdateC37(C37* self, f32 dt)
     InitOwnerMessage((OwnerMessage*)&hit, self->rec.f04, self);
     OfferTrackedNodeLaunch(&self->rec, (void*)result, (TrackedNodeOffer*)&hit);
     ((SwitchedCollider*)target)->desc05()->m4C((SwitchedCollider*)target, &hit);
-    FreePooledContactChain((World*)self->world, (Contact03*)result);
+    FreePooledContactChain((World*)self->world, (BodyContact*)result);
 }
 
 // Initialises the tracked-node record: its owner, f04 = 0 and f08 = 150.
-void InitTrackedNodes(Rec36* a, ContactTracker* b) { a->owner = b; a->f04 = 0; a->f08 = 150.0f; }
+void InitTrackedNodes(ContactTrackerRecord* a, ContactTracker* b) { a->owner = b; a->f04 = 0; a->f08 = 150.0f; }
 
 // Fills the tracker's node list: the owner's children of class 0x7E or 0x6E, then the objects
 // found by each stored key (AddTrackedNode filters those). Called when the tracker starts.
-void FillTrackedNodes(Rec36* self)
+void FillTrackedNodes(ContactTrackerRecord* self)
 {
     ListFrame it;
     BaseObject* n;
@@ -1682,12 +1682,12 @@ void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
     TargetLaunchFrame f;
     ChooseBestTargetCandidate(self, ctx->s94, &ctx->bestTarget, (TargetHit*)f.a, &f.distance);
     if (ctx->cnt != 0) {
-        ComputeTargetArc(self, (TargetArcSource*)f.a, 0.0f, 0, (Vec02*)f.b, 0);
-        self->desc02()->m1D(self, (Vec02*)f.b);
-        self->desc02()->m20(self, (Vec02*)&g_zeroVector);
-        self->desc02()->m21(self, (Vec02*)&g_zeroVector);
-        BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)f.c, self->heading);
-        self->desc02()->m1E(self, (Mat02*)f.c);
+        ComputeTargetArc(self, (TargetArcSource*)f.a, 0.0f, 0, (Vec4*)f.b, 0);
+        self->desc02()->m1D(self, (Vec4*)f.b);
+        self->desc02()->m20(self, (Vec4*)&g_zeroVector);
+        self->desc02()->m21(self, (Vec4*)&g_zeroVector);
+        BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, (Mat3*)f.c, self->heading);
+        self->desc02()->m1E(self, (Mat3*)f.c);
         SetPlayerState(self, 2, 2);
     } else {
         LaunchPlayerAtTarget(self, (TargetHit*)f.a, f.distance);
@@ -1696,7 +1696,7 @@ void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
 
 // Fills out with the tracker record, its f04 value and the launch routine
 // (LaunchPlayerAtTrackedNode), and sends the owner script event 2.
-void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out)
+void OfferTrackedNodeLaunch(ContactTrackerRecord* self, void* a1, TrackedNodeOffer* out)
 {
     GetActiveSwitchedCollider();
     s32 v = self->f04;
@@ -1707,11 +1707,11 @@ void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out)
 }
 
 // Adds the key entry to the tracker's list of up to 32 keys (resolved by FillTrackedNodes).
-void AddTrackedKey(Rec36* self, s32 entry) { u32 n = self->count; if (n < 32) { self->keys[n] = entry; self->count = n + 1; } }
+void AddTrackedKey(ContactTrackerRecord* self, s32 entry) { u32 n = self->count; if (n < 32) { self->keys[n] = entry; self->count = n + 1; } }
 
 // Adds e to the tracker's list of up to 32 nodes when it is one of the six accepted classes
 // (0x7E, 0x6E, 0x76, 0x70, 0x71, 0x81).
-void AddTrackedNode(Rec36* self, BaseObject* e) {
+void AddTrackedNode(ContactTrackerRecord* self, BaseObject* e) {
     if (self->found < 0x20) {
         if (IsObjectOfKind(e, 0x7E) || IsObjectOfKind(e, 0x6E) || IsObjectOfKind(e, 0x76) ||
             IsObjectOfKind(e, 0x70) || IsObjectOfKind(e, 0x71) || IsObjectOfKind(e, 0x81)) {
@@ -1721,7 +1721,7 @@ void AddTrackedNode(Rec36* self, BaseObject* e) {
 }
 
 // Removes the node value from the tracker's list (shifting the rest down), if it is there.
-void RemoveTrackedNode(Rec36* self, s32 value)
+void RemoveTrackedNode(ContactTrackerRecord* self, s32 value)
 {
     s32 i;
     for (i = 0; i < (s32)self->found; i++) {

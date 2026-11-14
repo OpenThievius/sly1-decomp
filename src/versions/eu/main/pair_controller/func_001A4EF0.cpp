@@ -68,7 +68,7 @@ void SetPairControllerState(PairController* self, s32 state)
         RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f);
         break;
     case 4:
-        SetPauseMenuLayerPage((T217D_6D0*)&g_pauseMenuElement, 0, 0x1A);
+        SetPauseMenuLayerPage((PauseMenu*)&g_pauseMenuElement, 0, 0x1A);
         break;
     case 6:
         SetWalkerColliderState((WalkerCollider*)(P(self, 0x354)), 3);

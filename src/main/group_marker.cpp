@@ -155,7 +155,7 @@ void RunWorldFrameLists(World* self, void* arg)
     f1.link = (u8*)e;
     f1.list = (void*)e;
     s32 old = (s32)g_activeListFrames;
-    s32 link = ((List01*)e)->offset;
+    s32 link = ((ObjectList*)e)->offset;
     *(s32*)g_nextDeferredRequest = (s32)g_deferredRequests;
     g_activeListFrames = &f1;
     f1.prev = (ListFrame*)old;

@@ -13,7 +13,7 @@
 
 struct CountedCollider : Collider {
     s32 touchesLeft;        // 0x550: TakeCountedColliderTouch counts it down
-    Contact03* contacts;    // 0x554: a chain of pooled contacts (FreePooledContactChain)
+    BodyContact* contacts;    // 0x554: a chain of pooled contacts (FreePooledContactChain)
     void* target;           // 0x558: the object TakeCountedColliderTouch sends the empty message to
     u8 pad55C[0x560 - 0x55C];
 };

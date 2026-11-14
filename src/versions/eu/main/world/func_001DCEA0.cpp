@@ -62,7 +62,7 @@ void LoadWorld(World* self, BufferedStream* s)
         }
     }
     RunQueuedCalls(self);
-    List01* list = &self->list48;
+    ObjectList* list = &self->list48;
     frame.list = list;
     frame.offset = list->offset;
     frame.prev = g_activeListFrames;

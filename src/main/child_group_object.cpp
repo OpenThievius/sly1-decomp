@@ -33,10 +33,10 @@ struct BufferedStream;
 struct Quad16;
 
 struct BaseObject;
-struct Vec02;
+struct Vec4;
 
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -44,15 +44,15 @@ struct NodeQuery;
 
 // The file's .data, in retail's order: class 0x3B's set-up values, then the constants of its
 // assembly functions.
-Quad3B g_childGroupMassRange = { 0x42480000, 0x459C4000, 0, 0 };
-Quad3B g_childGroupScatterCurve = { 0x43FA0000, 0x3FE66666, 0, 0 };
-Quad3B g_childGroupSpreadCurve = { 0x3F000000, 0x3E4CCCCD, 0, 0 };
-Pair3B g_childGroupScatterRange = { 0x44160000, 0x44AF0000 };
-Pair3B g_childGroupSpreadRange = { 0x41A00000, 0x42480000 };
+ChildGroupQuad g_childGroupMassRange = { 0x42480000, 0x459C4000, 0, 0 };
+ChildGroupQuad g_childGroupScatterCurve = { 0x43FA0000, 0x3FE66666, 0, 0 };
+ChildGroupQuad g_childGroupSpreadCurve = { 0x3F000000, 0x3E4CCCCD, 0, 0 };
+ChildValueRange g_childGroupScatterRange = { 0x44160000, 0x44AF0000 };
+ChildValueRange g_childGroupSpreadRange = { 0x41A00000, 0x42480000 };
 f32 g_childGroupKnockbackSpeed = 600.0f;
 f32 g_childGroupKnockbackLift = 800.0f;
 // The two polynomials the knockback evaluates (TimePolynomial), aligned to 16 as the object's own
-// polynomials at 0x5D0 and 0x5F0 are (Quad3B): retail has the 8 bytes of zeros that alignment
+// polynomials at 0x5D0 and 0x5F0 are (ChildGroupQuad): retail has the 8 bytes of zeros that alignment
 // leaves after the knockback's upward weight, D_00261364.
 f32 g_childGroupApproachCurve[4] __attribute__((aligned(16))) = { 1.0f, -1.0f, 0.0f, 0.0f };
 f32 g_childGroupDistanceCurve[4] __attribute__((aligned(16))) = { 2.0f, -1.5f, 0.0f, 0.0f };
@@ -68,13 +68,13 @@ void InitChildGroupObject(ChildGroupObject* self)
     self->blastRadius = 200.0f;
     self->playerBlastRadius = 200.0f;
     self->contactMode = 0;
-    self->massRange = *(Pair3B*)&g_childGroupMassRange;
+    self->massRange = *(ChildValueRange*)&g_childGroupMassRange;
     self->pushStrength = 800.0f;
     self->maxMass = 5000.0f;
-    self->speedCurve = *(Quad3B*)&g_childGroupScatterCurve;
-    self->speedRange = *(Pair3B*)&g_childGroupScatterRange;
-    self->spinCurve = *(Quad3B*)&g_childGroupSpreadCurve;
-    self->spinRange = *(Pair3B*)&g_childGroupSpreadRange;
+    self->speedCurve = *(ChildGroupQuad*)&g_childGroupScatterCurve;
+    self->speedRange = *(ChildValueRange*)&g_childGroupScatterRange;
+    self->spinCurve = *(ChildGroupQuad*)&g_childGroupSpreadCurve;
+    self->spinRange = *(ChildValueRange*)&g_childGroupSpreadRange;
     self->announceBlast = 1;
     self->selectable = 1;
     self->ownerMessageMode = 0;
@@ -101,7 +101,7 @@ void CopyChildGroupObject(ChildGroupObject* self, ChildGroupObject* other)
 struct ChildListFrame;
 struct ChildListFrame {
     void* base; void* cur; s32 off; ChildListFrame* prev;
-    ChildListFrame(List01* l) {
+    ChildListFrame(ObjectList* l) {
         cur = l;
         base = l;
         ChildListFrame* p = (ChildListFrame*)g_activeListFrames;
@@ -139,7 +139,7 @@ void StartChildGroupObject(ChildGroupObject* self)
         } while (n != 0);
     }
     if (self->active != 0) {
-        self->entries = (Entry3B*)AllocateFrontMemory(0xC0);
+        self->entries = (ChildHitRecord*)AllocateFrontMemory(0xC0);
     }
 }
 
@@ -176,7 +176,7 @@ void UpdateChildGroupObject(ChildGroupObject* self, f32 dt)
     }
 }
 
-extern List01 g_class75List;
+extern ObjectList g_class75List;
 
 // Rebuilds the group's list of up to 4 contacting attached objects: it first clears the contact
 // flags set for the old ones, then looks through the class 75 list for objects whose bounds touch
@@ -184,7 +184,7 @@ extern List01 g_class75List;
 void RefreshChildGroupObjectContacts(ChildGroupObject* self)
 {
     ListFrame frame;
-    Vec02 tmp;
+    Vec4 tmp;
     ColliderSpan span;
 
     for (s32 i = 0; i < self->entryCount; i++) {
@@ -216,7 +216,7 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self)
             continue;
         }
         SetContactPairFlags(self->world, self->contacts, ((Collider*)a->root)->contacts, 0x40, 0);
-        Entry3B* e = &self->entries[self->entryCount++];
+        ChildHitRecord* e = &self->entries[self->entryCount++];
         e->key = (s32)a;
         u128 point = Vu0::Q(span.q[0]);
         Vu0::Q(e->v[0]) = point;
@@ -242,7 +242,7 @@ void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s3
             if (self->entries[i].key == key) break;
         }
         if (i < self->entryCount) {
-            Entry3B* e = &self->entries[i];
+            ChildHitRecord* e = &self->entries[i];
             CreatePooledContact(self, key, e, &e->data, 9, 0, 0, arg5, e->value);
         }
     }
@@ -258,7 +258,7 @@ struct ContactSide {
 
 struct ContactPair {
     ContactSide side[2];    // 0x00
-    Vec02 v80;              // 0x80
+    Vec4 v80;              // 0x80
 };
 
 Collider* GetActiveSwitchedCollider(void);
@@ -268,10 +268,10 @@ Collider* GetActiveSwitchedCollider(void);
 // the contact to record the hit.
 void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s32 which)
 {
-    Vec02 pos;
+    Vec4 pos;
     ColliderSpan span;
-    Vec02 dir;
-    Vec02 k;
+    Vec4 dir;
+    Vec4 k;
 
     if (self->flag60C != 0) {
         return;
@@ -294,7 +294,7 @@ void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s3
     }
     case 0:
         if (FindNearestSpanObject(0, &self->v370, &self->v140, 1, &side->obj, &span) != 0) {
-            pos = *(Vec02*)&span.q[0];
+            pos = *(Vec4*)&span.q[0];
         }
         break;
     default:
@@ -320,7 +320,7 @@ s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev)
 {
     s32 handled = HandleObjectEvent(self, ev);
     if (handled != 0 && (ev->eventFlags & 0x10) != 0) {
-        Vec02 dir;
+        Vec4 dir;
         Vu0::Q(dir) = Vu0::NormalizeOr(Vu0::Q(ev->v30), Vu0::Q(g_unitZVector));
         RecordChildGroupPose(self, 0, 0, &dir);
         StartChildGroupDelay(self, 0.0f);
@@ -332,13 +332,13 @@ s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev)
 // The product of the turn a and the object's matrix b into the pose at +0x620: b's rows read by
 // index, each result stored to its vector local and to the matrix local, the last in the other
 // order, then the matrix written through the object.
-static inline void MulPoseRows(ChildGroupObject* o, const Mat02& a, const Mat02& b)
+static inline void MulPoseRows(ChildGroupObject* o, const Mat3& a, const Mat3& b)
 {
     const u128* q = (const u128*)&b;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    Mat02 m;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
+    Mat3 m;
     Vu0::Q(m.r[0]) = Vu0::Q(x) = Vu0::RotateUntied(a, q[0]);
     Vu0::Q(m.r[1]) = Vu0::Q(y) = Vu0::RotateUntied(a, q[1]);
     Vu0::Q(z) = Vu0::Q(m.r[2]) = Vu0::RotateUntied(a, q[2]);
@@ -348,9 +348,9 @@ static inline void MulPoseRows(ChildGroupObject* o, const Mat02& a, const Mat02&
 // Records the group's pose at the moment it is hit (once: it does nothing when already recorded):
 // the object that hit it, the hit position (or its own), its velocity and spin, and the hit
 // direction z, which is stored as the group's frame.
-void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* z)
+void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec4* pos, Vec4* z)
 {
-    Mat02 a;
+    Mat3 a;
 
     if ((self->flag60C) != 0) {
         return;
@@ -366,7 +366,7 @@ void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec
     (self->v660) = self->v160;
     switch ((self->mode608)) {
     case 0: {
-        BuildShortestArcRotation(&self->m110.r[2], z ? z : (Vec02*)&g_unitZVector, &a);
+        BuildShortestArcRotation(&self->m110.r[2], z ? z : (Vec4*)&g_unitZVector, &a);
         MulPoseRows(self, a, self->m110);
         Rec2195_224* rec = self->linkRecord;
         void* frame;
@@ -383,7 +383,7 @@ void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec
         break;
     }
     case 1:
-        BuildBasisFromXAndZHint(&self->v650, (const Vec02*)&g_unitZVector, &self->m620);
+        BuildBasisFromXAndZHint(&self->v650, (const Vec4*)&g_unitZVector, &self->m620);
         break;
     case 2:
         (self->m620) = self->rot;
@@ -413,15 +413,15 @@ struct VectorConstraint;
 // the slot (docs/toolchain/sched1.md, "A store in each arm leaves the join block to sched2").
 void ApplyChildGroupKnockback(ChildGroupObject* self, Collider* other)
 {
-    Vec02 d;
-    Vec02 r;
+    Vec4 d;
+    Vec4 r;
     if (IsObjectOfKind(self, 0x3D) != 0) {
         d = ((ContactListGlider*)self)->v700;
     } else {
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(other->v140), Vu0::Q(self->v140));
     }
     d.z = 0.0f;
-    Vec02* p = &d;
+    Vec4* p = &d;
     *(Vu0::Vec*)p = Vu0::NormalizeOr(Vu0::Vec::Of(d), Vu0::Vec::Of(g_unitXVector));
     Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(g_childGroupKnockbackSpeed), Vu0::Q(g_unitZVector), Vu0::ScalarAtValue(g_childGroupKnockbackLift));
     ConstrainVectorByParentAnchor(other, (VectorConstraint*)&other->v440, &r, &r, 0);
@@ -439,23 +439,23 @@ void PushBackMemoryMark();
 void PopBackMemoryMark();
 void* AllocateBackMemory(s32 size);
 struct FaceRef;
-struct Mesh03;
+struct CollisionMesh;
 struct MeshHitEntry;
 void CopyMemory(void* dst, void* src, u32 size);
-s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out);
+s32 CollectMeshHits(Vec4* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, CollisionMesh* mesh, s32 cap, MeshHitEntry* out);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 struct TimedStateObject;
-extern const Vec02 g_unitZVector;
+extern const Vec4 g_unitZVector;
 extern ValueRange g_unitRange;
 
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
 
 
 // The query func_0013BF68 sends for each object it hits (0x40 bytes, FillMemory'd).
-struct BlastQuery { ChildGroupObject* from; Collider* to; u8 pad08[0x10 - 0x08]; s32 kind; u8 pad14[0x20 - 0x14]; Vec02 pos; Vec02 vel; };
+struct BlastQuery { ChildGroupObject* from; Collider* to; u8 pad08[0x10 - 0x08]; s32 kind; u8 pad14[0x20 - 0x14]; Vec4 pos; Vec4 vel; };
 // The message a ChildGroupObject's member gets (kind 9): the object, then two floats at 0x30.
 struct BlastMessage { s32 kind; ChildGroupObject* from; u8 pad08[0x30 - 0x08]; f32 f30; f32 f34; };
 // The sound slot at +0x680.
@@ -469,10 +469,10 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
     Collider* player;
     s32 count;
     Collider** list;
-    Vec02* pos;
-    Mat02* rot;
-    Vec02* vel;
-    Vec02* spin;
+    Vec4* pos;
+    Mat3* rot;
+    Vec4* vel;
+    Vec4* spin;
     RecordChildGroupPose(self, 0, 0, 0);
     player = (Collider*)GetActiveSwitchedCollider();
     PushBackMemoryMark();
@@ -517,16 +517,16 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             OwnerMessage msg;
             InitOwnerMessage(&msg, self->ownerMessageMode, self);
             msg.fn = (void (*)())ApplyChildGroupKnockback;
-            ((const Desc05*)c->desc)->m4C((SwitchedCollider*)c, &msg);
+            ((const SwitchedColliderDescriptor*)c->desc)->m4C((SwitchedCollider*)c, &msg);
             continue;
         }
         if (c->mass < self->maxMass && c->parent == 0) {
-            Vec02 dir;
-            Vec02 imp;
-            Vec02 nv;
-            Vec02 sp;
-            Vec02 ns;
-            Vec02 off;
+            Vec4 dir;
+            Vec4 imp;
+            Vec4 nv;
+            Vec4 sp;
+            Vec4 ns;
+            Vec4 off;
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(c->v140), Vu0::Q(self->v610));
             Vu0::Q(off) = Vu0::Q(dir);
             dir.z += 200.0f;
@@ -539,7 +539,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             Vu0::Q(imp) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(k));
             ConstrainColliderVector(c, &c->v440, &imp, &imp, 0);
             Vu0::Q(nv) = Vu0::Add(Vu0::Q(c->v150), Vu0::Q(imp));
-            ((const Desc02*)c->desc)->m20(c, &nv);
+            ((const PlacedObjectDescriptor*)c->desc)->m20(c, &nv);
             if (0.0001f < k) {
                 f32 r = k * 0.01f;
                 f32 nr = -r;
@@ -549,7 +549,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
                 Vu0::Q(sp) = Vu0::FromFloats(x, y, z);
                 ConstrainColliderVector(c, &c->v460, &sp, &sp, 0);
                 Vu0::Q(ns) = Vu0::Add(Vu0::Q(c->v160), Vu0::Q(sp));
-                ((const Desc02*)c->desc)->m21(c, &ns);
+                ((const PlacedObjectDescriptor*)c->desc)->m21(c, &ns);
             }
         }
         BlastQuery q;
@@ -562,7 +562,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
         FindNodeForQuery((NodeQuery*)&q, 0, 0);
     }
     PopBackMemoryMark();
-    Vec02 at;
+    Vec4 at;
     {
         PlacedObject* frame;
         if (self->linkRecord != 0 && ((u32)self->linkRecord->flags & 4) != 0)
@@ -570,13 +570,13 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
         else
             frame = (PlacedObject*)self->parent;
         TransformPointBetweenFrames(0, frame, pos, &at);
-        ((const Desc02*)self->desc)->m1D(self, &at);
+        ((const PlacedObjectDescriptor*)self->desc)->m1D(self, &at);
     }
-    ((const Desc02*)self->desc)->m1E(self, rot);
-    ((const Desc02*)self->desc)->m20(self, vel);
-    ((const Desc02*)self->desc)->m21(self, spin);
+    ((const PlacedObjectDescriptor*)self->desc)->m1E(self, rot);
+    ((const PlacedObjectDescriptor*)self->desc)->m20(self, vel);
+    ((const PlacedObjectDescriptor*)self->desc)->m21(self, spin);
     if (self->announceBlast != 0) {
-        Vec02* at;
+        Vec4* at;
         if (self->member5BC != 0) {
             BlastMessage msg;
             msg.kind = 9;
@@ -605,24 +605,24 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             f32 x, y, z;
             f32 na = -sa;
             f32 nb = -sb;
-            Vec02 v;
-            Vec02 w;
-            Vec02 rv;
+            Vec4 v;
+            Vec4 w;
+            Vec4 rv;
             o->desc->m02(o);
             o->desc->m15(o, 0);
             SetTimedState((TimedStateObject*)o, 1);
-            ((const Desc02*)o->desc)->m1D(o, &self->v140);
+            ((const PlacedObjectDescriptor*)o->desc)->m1D(o, &self->v140);
             x = RandomFloatInRange(0.0f, sa * 2.5f);
             y = RandomFloatInRange(na, sa);
             z = RandomFloatInRange(na, sa);
             Vu0::Q(v) = Vu0::FromFloats(x, y, z);
             Vu0::Q(rv) = Vu0::Rotate(self->m110, Vu0::Q(v));
-            ((const Desc02*)o->desc)->m20(o, &rv);
+            ((const PlacedObjectDescriptor*)o->desc)->m20(o, &rv);
             f32 sx = RandomFloatInRange(nb, sb);
             f32 sy = RandomFloatInRange(nb, sb);
             f32 sz = RandomFloatInRange(nb, sb);
             Vu0::Q(w) = Vu0::FromFloats(sx, sy, sz);
-            ((const Desc02*)o->desc)->m21(o, &w);
+            ((const PlacedObjectDescriptor*)o->desc)->m21(o, &w);
         }
     }
     self->desc->m03(self);

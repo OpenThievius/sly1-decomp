@@ -12,8 +12,8 @@ How the frame's locals get their offsets (function.c, stmt.c, integrate.c of GCC
   inline's frame slot, alias set 0, is reused by the next call's), so the alias set never
   blocks reuse. The frame grows upward from 0 in allocation order (MIPS does not define
   FRAME_GROWS_DOWNWARD).
-- **Vec02 is BLKmode, Vu0::Vec is TImode.** Vec02's `aligned(16)` comes after layout chose
-  BLKmode for four floats at 4-byte alignment; Vu0::Vec has a u128 member. A Vec02 declared
+- **Vec4 is BLKmode, Vu0::Vec is TImode.** Vec4's `aligned(16)` comes after layout chose
+  BLKmode for four floats at 4-byte alignment; Vu0::Vec has a u128 member. A Vec4 declared
   after a block can therefore take part of an earlier BLKmode slot (an inline's frame); a
   Vu0::Vec whose address is taken never can, and gets a new 16-byte slot at the frame's end.
 - **An inline call's frame is one BLKmode temporary of DECL_FRAME_SIZE.** rest_of_compilation
@@ -30,8 +30,8 @@ How the frame's locals get their offsets (function.c, stmt.c, integrate.c of GCC
 
 func_00125138 (ComputePlacedObjectWorldFrame): retail's locals are 112 bytes, the product's
 x, y, z at 0, 0x10, 0x20 and its matrix at 0x30..0x60, then 16 bytes nothing touches; the
-direction (a Vec02 at 0) and Scalar's slot (0x10) of the later block reuse the product's slot.
-The other rotation products' frames are 96 bytes. A Vec02 declared after the matrix in this
+direction (a Vec4 at 0) and Scalar's slot (0x10) of the later block reuse the product's slot.
+The other rotation products' frames are 96 bytes. A Vec4 declared after the matrix in this
 product's inline (its fourth row, never set) gives a 112-byte saved frame and the function
 matches. The 0x60 slot is the inline's own, not the caller's.
 
@@ -50,12 +50,12 @@ From calls.c and integrate.c of GCC 2.95.3 and the frames of func_001DEBE8 (2026
   frame (its local `t` and its named return value `out`, one BLKmode temporary of its saved
   size) is taken while the argument is expanded, after it. Retail's frame shows exactly that:
   the result at 0xE0, the inline's rows at 0x110 and 0x140, the call passed 0x110.
-- **Declared locals come in the other order.** `Mat02 p, q; RotateRowsBy(&q, ...); p = q;
-  Mat02 r = Multiply(..., p);` puts p and q (declared at the top) before the call's slot, so
+- **Declared locals come in the other order.** `Mat3 p, q; RotateRowsBy(&q, ...); p = q;
+  Mat3 r = Multiply(..., p);` puts p and q (declared at the top) before the call's slot, so
   the result lands after them (0x140) and the out-parameter product at 0xE0: same size, wrong
   offsets. Spot it: a call's return slot below an argument's rows means the argument was an
   expression (an inline returning by value), not a local.
-- The call's slot is freed at the end of the statement, so a later Vec02 (the velocity at
+- The call's slot is freed at the end of the statement, so a later Vec4 (the velocity at
   0xE0) and its Scalar slots (0xF0) reuse it.
 
 ### A local's size is the frame (func_00203FD0)
@@ -118,7 +118,7 @@ Still open there: retail moves d, a spilled u128 that PlaneSigns read through a 
 vf6, to the first call with `qmfc2 a1,$vf6`; ours reloads it (`lq a1`). The argument move
 `(set a1 d)` takes movti's memory alternative, whose source class is NO_REGS, so find_reloads
 makes no optional reload and inheritance never sees vf6: retail must have had a second pseudo
-in vf6 for the asm and the first call. d as Vu0::Vec, as a Vec02, through Vu0::Q, and an inline
+in vf6 for the asm and the first call. d as Vu0::Vec, as a Vec4, through Vu0::Q, and an inline
 helper taking d for PlaneSigns and the call do not give it.
 
 Read further from reload1.c, reload.c and the `-dF -dG -dt -dl -dg` dumps (2026-11-10, w15):
@@ -137,7 +137,7 @@ Read further from reload1.c, reload.c and the `-dF -dG -dt -dl -dg` dumps (2026-
   time lands at 0x1C0, after fade (0x1B0), retail's offsets; but cse2 then forwards the
   stored value to the asm and the call (vsub straight into vf6, `qmfc2 a1,$vf6`, no reload),
   where retail reloads the slot. cse1 does not forward through `(mem (addressof))`; cse2 does
-  once the variable is in the frame or a register again. A Vec02 d (expand-time slot 0x60)
+  once the variable is in the frame or a register again. A Vec4 d (expand-time slot 0x60)
   is forwarded by cse1; a Vu0::Vec d keeps its movti copies through gcse and cse2 folds them;
   a `const u128&` to d, local or an inline helper's parameter, is purged to the same pseudo.
 - **What retail implies.** A pseudo in vf6 that the asm reads and the first call's move copies
@@ -182,13 +182,13 @@ Read again with the brace initialiser's CLOBBER (2026-11-12, w40-fa):
 
 - **A CLOBBER between the store and the cull keeps the load.** cse's invalidate treats a
   `(clobber (mem:BLK frame))` as a store of unknown size, so it drops every frame MEM's
-  equivalence. With d a Vec02 in the frame and the radius a union holding a Vec02, built in
+  equivalence. With d a Vec4 in the frame and the radius a union holding a Vec4, built in
   place after d is stored (`RadiusU r = { rq };`), cse1 does not forward the difference: the
   asm reads one load (vf6), the first call's argument is that register (`qmfc2 a1,$vf6`) and
   the second call's the memory (`lq a1`), which are retail's three lines. The same source
   without the union forwards (`vsub` into vf6). This is the first plain form that gives the
   shared load.
-- **What it does not give.** A Vec02 d is allocated when declared (0x50; retail 0x1C0, after
+- **What it does not give.** A Vec4 d is allocated when declared (0x50; retail 0x1C0, after
   fade) and the stored difference is a local pseudo that takes vf1 from the dying input, where
   retail's vf3 is an output reload's register. A u128 d is a pseudo, which a CLOBBER does not
   touch. A u128 d forced to the frame at purge time (a probe reading one of its words) lands
@@ -270,7 +270,7 @@ and the `-dr -ds -dG -dl -dg` dumps:
   substitutes the unchanged pointer parameter at each use ("Integration: an inline function's
   parameters and results"). The glyph's layout, whose two words are then set to 1 through the
   pointer retail keeps in v0 (`addiu v0,sp,80; sw v1,24(v0)`), takes the helper's result:
-  `Layout_137228* l = PanelLayout::Set(&at, ...)`.
+  `TextBoxLayout* l = PanelLayout::Set(&at, ...)`.
 - **A constant colour defeats the substitution.** The glyph's call passed `0xFF808080` as a
   literal; the colour store `col.w[0] = color` cannot take that immediate, so try_constants's
   group fails for the insn and the inline frame's base pseudo stays its address; CSE then makes
@@ -303,7 +303,7 @@ and the `-dr -ds -dG -dl -dg` dumps:
 - **Constants the near miss had wrong.** The glyph's x in state 4 is 532.0 (`lui at,0x4405`), not
   533, and the cursor's string (D_00249D58) is `"&.~ffffff|"` with six f's: read both from the
   bytes (the `.word`s of a string are little-endian). The glyph's byte is a `char` (`lb` for the
-  test), T217D_440::f2F8 in include/screen_element.h.
+  test), CaptionBox::f2F8 in include/screen_element.h.
 
 ### Reading a frame's slots back to the declarations (func_0019B378)
 
@@ -379,7 +379,7 @@ integrate.c (the inline frame's `assign_stack_temp (BLKmode, size, 1)`), with th
   Scalar weight at 32 (16 untouched bytes between); the push block stores two differences at 0
   and 16 and the ramp profiles at 32 and 48; the tail stores both weights at 64; the two
   out-parameters are at 80 and 84 (purge_addressof, after every expand-time slot). Every one of
-  these is BLKmode (Vec02 and an inline's frame are BLKmode, the profile union too), so a
+  these is BLKmode (Vec4 and an inline's frame are BLKmode, the profile union too), so a
   later BLKmode request of 16 bytes takes any free slot: the tail's weight at 64 means 0..64 is
   still in use at the tail, and the profile at 32 reusing the ground push's freed weight slot
   means it was allocated after that block ended.
@@ -482,7 +482,7 @@ combine statistics" line says why:
   `sq v0,272(sp)` (the zero vector copied through a GPR), `lqc2 vf2` then `lqc2 vf3` from
   272(sp) in the two loops, and in the normalisation `lqc2 vf4,272(sp)` for the length and
   `lqc2 vf2,272(sp)` again in the divide's arm (bc1f's delay slot).
-- **Why.** As a Vec02 local read and written through Q, the sum is memory that CSE reads once at
+- **Why.** As a Vec4 local read and written through Q, the sum is memory that CSE reads once at
   the normalisation (one register for both uses). As a `u128` variable it is a pseudo living
   across every call of both loops, which no VU register survives: global-alloc leaves it
   unallocated, reload gives it a slot after the locals and loads it at each use into the spill
@@ -499,12 +499,12 @@ row rotated, stored to a vector and then to a matrix. Retail's frame has the mat
 and the three row vectors at 0x160, 0x170, 0x180, and the rotated vectors of the blocks before
 it (0x130, 0x140, 0x150; the spin's at 0x130 again) in the matrix's bytes. With MulRotation
 the frame is 0x30 bigger: the inline's frame is one 96-byte BLKmode temporary, and the freed
-Vec02 slots of the earlier blocks combine to only 48 bytes, so it takes a new slot at 0x160
+Vec4 slots of the earlier blocks combine to only 48 bytes, so it takes a new slot at 0x160
 (no slot is extended, assign_stack_temp_for_type only reuses, splits or allocates). Retail's
 offsets are the caller's own locals, each a temporary of its own in declaration order: the
 matrix (48 bytes) fits the combined freed slots exactly, and the three vectors, declared after
 it, are new slots above. Writing the product out in a block of the loop body
-(`{ Mat02 r; Vec02 x, y, z; ... N = r; }`) matches. Spot it: an inline's locals split across
+(`{ Mat3 r; Vec4 x, y, z; ... N = r; }`) matches. Spot it: an inline's locals split across
 reused and new slots means they were not an inline's.
 
 Two more differences of the same function, before the frame: the parameter `o` reused for
@@ -518,7 +518,7 @@ only with the floats after self; the other three callers match with either.
 
 ### Two untouched 16-byte slots: which GCC objects can leave one (func_0017D5D8, near miss)
 
-func_0017D5D8 (the player's steer and leap search) matches with two Vec02 locals nothing
+func_0017D5D8 (the player's steer and leap search) matches with two Vec4 locals nothing
 touches, which the maintainer held. Read from function.c, stmt.c, cp/decl.c and cp/semantics.c
 of GCC 2.95.3 (2026-11-10), with the frame dumped (`-dr`; virtual-stack-vars is sp+16 here):
 
@@ -528,14 +528,14 @@ of GCC 2.95.3 (2026-11-10), with the frame dumped (`-dr`; virtual-stack-vars is 
   pop_temp_slots frees every slot of the level, kept or not. An inline's frame
   (`assign_stack_temp (BLKmode, size, 1)`, its by-value parameters and its locals), Scalar's
   copy and a call's return slot are therefore free again at the statement's end, and the next
-  declaration of the same mode and size takes them: `u128 w = Scalar(...); Vec02 end;` puts end
+  declaration of the same mode and size takes them: `u128 w = Scalar(...); Vec4 end;` puts end
   in w's slot (measured, a 0x160 frame). If and for conditions get their own binding level and
   are freed at its end. preserve_temp_slots (expand_assignment, calls.c) only moves a slot to the
   outer of the two statement levels.
 - **What outlives a statement.** A declared local (expand_decl, keep 1 at its block's level),
   and a memory variable declared in a for-init, which cp_finish_decl preserves into the
   enclosing block (is_for_scope). A slot of another machine mode (a TImode temporary) is never
-  taken by a BLKmode Vec02 either, but it is written where it is created.
+  taken by a BLKmode Vec4 either, but it is written where it is created.
 - **So an untouched slot is a declared object.** Every slot that is created and then never
   stored to or read, while later locals are placed above it, is a local declared at that point
   that the surviving code never writes. In func_0017D5D8, retail's 0x50 is created after

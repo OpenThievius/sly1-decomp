@@ -84,7 +84,7 @@ fallback straight into the result (`lqc2 $vf2`), with `bc1tl` and the store in i
   register, not the length's.
 - **The last normalisation's slots.** Its result and the position copy at 0x80 and 0x90 of the
   frame, above every case's locals, are u128 values crossing the jitter's call that reload
-  spills (the slots go at the frame's end), not Vec02 locals (which reuse the cases' freed
+  spills (the slots go at the frame's end), not Vec4 locals (which reuse the cases' freed
   slots at 0x0 and 0x10).
 
 ### A clamp's constant in a register: `slt v1,v1(98),v0; movz` (func_00149190)

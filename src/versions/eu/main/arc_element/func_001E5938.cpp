@@ -12,10 +12,10 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         u8* ang = (u8*)pool + 0x150;
         f32 cx;
         f32 cy;
-        Vec02 a;
-        Vec02 b;
-        Vec02 lo;
-        Vec02 hi;
+        Vec4 a;
+        Vec4 b;
+        Vec4 lo;
+        Vec4 hi;
         Collider** list;
         s32 n;
 
@@ -24,14 +24,14 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         Vu0::Set(b, Vu0::FromFloats(cx * 0.003125f - 1.0f, 1.0f - cy * 0.00426794f, 80000.0f));
         UnprojectCameraPoint(g_camera, (f32*)&a, &lo);
         UnprojectCameraPoint(g_camera, (f32*)&b, &hi);
-        Vec02 pos;
+        Vec4 pos;
         SpanHit hit;
         PushBackMemoryMark();
         GatherCollidersInBox(self->world, 0, &lo, &hi, IsPlayerLinkedColliderCandidate, self, &n, &list);
         u8* found = FindNearestSpanObject(0, &lo, &hi, n, (Collider**)list, (ColliderSpan*)&hit);
         if (found != 0 && *(s32*)(found + 8) != 1) {
             *(u8**)e0 = found;
-            TransformPointBetweenFrames(0, (PlacedObject*)found, (Vec02*)&hit, (Vec02*)&pool->fF0);
+            TransformPointBetweenFrames(0, (PlacedObject*)found, (Vec4*)&hit, (Vec4*)&pool->fF0);
             pos = hit.point;
             if (IsObjectOfKind((BaseObject*)(*(void**)(found + 0x50)), 0xE) != 0 || IsObjectOfKind((BaseObject*)(*(void**)(found + 0x50)), 7) != 0) {
                 ((Cap_eu_1E5938*)&g_typedTextCaptionBox)->palette = 2;
@@ -59,14 +59,14 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
             }
         } else {
             *(u8**)e0 = 0;
-            *(Vec02*)(e0 + 0x10) = hi;
+            *(Vec4*)(e0 + 0x10) = hi;
             ((Cap_eu_1E5938*)&g_typedTextCaptionBox)->palette = 0;
             pos = hi;
         }
         PopBackMemoryMark();
-        Vec02 c0;
-        Mat02 rot;
-        Vec02 d;
+        Vec4 c0;
+        Mat3 rot;
+        Vec4 d;
         GetPlacementRecordTransform((PlacementRecord*)place, &c0, rot.r, 0);
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(c0));
         *(f32*)(ang + 8) = ArctangentOfRatio(d.y, d.x);

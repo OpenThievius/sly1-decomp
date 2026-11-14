@@ -27,7 +27,7 @@
 struct R11B008Node;
 struct R11AFC8;
 struct BufferedStream;
-struct Vec02;
+struct Vec4;
 
 // Tags: the setters, func_0011B0F8 (the comparison), func_0011B258 (the deep copy),
 // func_0011B418 / func_0011B4A8 (the payload's release and reference), func_0011BA28 (the reader).
@@ -57,7 +57,7 @@ struct ScriptValue {
     // element past the first of an array, its `this` is a sum the inliner copies into a fresh
     // pseudo with no pointer flag, so a read through it is reloaded after a store
     // (docs/TOOLCHAIN.md, "An inline method's this").
-    Vec02* Vector() const { return (Vec02*)v; }
+    Vec4* Vector() const { return (Vec4*)v; }
 };
 
 typedef char check_ScriptValue[sizeof(ScriptValue) == 8 ? 1 : -1];

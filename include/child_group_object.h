@@ -11,23 +11,23 @@
 struct ContactPair;
 struct BufferedStream;
 
-struct __attribute__((aligned(16))) Quad3B {
+struct __attribute__((aligned(16))) ChildGroupQuad {
     s32 a, b, c, d;
 };
 
-struct Pair3B {
+struct ChildValueRange {
     s32 a, b;
 };
 
 // A 0x30-byte entry of the table at +0x68C (func_0013B9D8 finds the one with the key).
-struct Entry3B {
+struct ChildHitRecord {
     union {
         struct {
             u8 pad00[0x10];
             void* data;             // 0x10
             u8 pad14[0x0C];
         };
-        Vec02 v[2];         // 0x00: the point of the hit and the direction (0x10), as vectors
+        Vec4 v[2];         // 0x00: the point of the hit and the direction (0x10), as vectors
     };
     f32 value;              // 0x20
     s32 key;                // 0x24
@@ -42,24 +42,24 @@ struct ChildGroupObject : Collider {
     f32 playerBlastRadius;  // 0x560: 200.0
     s32 contactBlast;       // 0x564: set, the blast reaches the parts in contact with it (CollectContactingParts); clear, the colliders in its radius
     f32 pushStrength;       // 0x568: 800.0
-    Pair3B massRange;       // 0x56C: 50.0, 5000.0
+    ChildValueRange massRange;       // 0x56C: 50.0, 5000.0
     f32 maxMass;            // 0x574: 5000.0
     s32 count;              // 0x578: the objects of arr (at most 16)
     s32 arr[16];            // 0x57C: children of kind 0x27 that slot 16 found
     void* member5BC;        // 0x5BC: func_00159478 finds it (slot 10)
     f32 blastStrength;      // 0x5C0: sent with the blast message to member5BC
     u8 pad5C4[0x5D0 - 0x5C4];
-    Quad3B speedCurve;      // 0x5D0
-    Pair3B speedRange;      // 0x5E0
+    ChildGroupQuad speedCurve;      // 0x5D0
+    ChildValueRange speedRange;      // 0x5E0
     u8 pad5E8[0x5F0 - 0x5E8];
-    Quad3B spinCurve;       // 0x5F0
-    Pair3B spinRange;       // 0x600
+    ChildGroupQuad spinCurve;       // 0x5F0
+    ChildValueRange spinRange;       // 0x600
     s32 mode608;            // 0x608: 0, 1 or 2: how RecordChildGroupPose (func_0013BC80) takes the pose
     s32 flag60C;            // 0x60C: set by it (func_0013BA70 and func_0013BC80 do nothing while it is set)
-    Vec02 v610;             // 0x610: the position it was given, or the object's own
-    Mat02 m620;             // 0x620: the orientation it records
-    Vec02 v650;             // 0x650: the object's v150
-    Vec02 v660;             // 0x660: the object's v160
+    Vec4 v610;             // 0x610: the position it was given, or the object's own
+    Mat3 m620;             // 0x620: the orientation it records
+    Vec4 v650;             // 0x650: the object's v150
+    Vec4 v660;             // 0x660: the object's v160
     Collider* obj670;       // 0x670: the object it was given
     s32 announceBlast;      // 0x674: 1 at set-up
     s32 selectable;         // 0x678: 1 at set-up
@@ -67,7 +67,7 @@ struct ChildGroupObject : Collider {
     void* slot;             // 0x680: a copy of the other's (func_0018D568, 0x24 bytes; slot 9)
     void* active;           // 0x684
     s32 entryCount;         // 0x688
-    Entry3B* entries;       // 0x68C: entryCount of them (0xC0 bytes allocated when active)
+    ChildHitRecord* entries;       // 0x68C: entryCount of them (0xC0 bytes allocated when active)
 };
 
 // The movie player's object (movie_player.cpp): the lists of objects it asks about (slot 56),
@@ -76,7 +76,7 @@ struct ContactListObject : ChildGroupObject {
     u8 pad690[4];
     PlacedObject* anchorObject; // 0x694
     u8 pad698[0x6A0 - 0x698];
-    Vec02 anchorOffset;     // 0x6A0
+    Vec4 anchorOffset;     // 0x6A0
     Animation* animation;   // 0x6B0: the animation slot 0x130 starts into f6B4
     void* animationPlayer;  // 0x6B4: given back by slot 7 (func_0012E760)
     s32 ready;              // 0x6B8: 1 at set-up (slot 0); slot 27 tests it
@@ -94,7 +94,7 @@ struct ContactListGlider : ContactListObject {
     f32 rate6F4;            // 0x6F4: how fast it turns to that velocity (func_0018DE70)
     f32 f6F8;               // 0x6F8
     f32 time6FC;
-    Vec02 v700;             // 0x700: the velocity it keeps
+    Vec4 v700;             // 0x700: the velocity it keeps
 };
 
 // 0x3F, the player's stand-in: SwapInPlayerStandIn puts it in the place of an attached object.

@@ -10,7 +10,6 @@ struct AnimatorOwner;
 struct AttachmentBlock;
 struct AttachmentCopy;
 struct AttachmentTargets;
-struct Frame_166690;
 struct MeshBuildState;
 struct MeshUv;
 struct ModelRecord;
@@ -18,6 +17,7 @@ struct MorphTargetHeader;
 struct PacketSlot;
 struct PacketWriter;
 struct ParentFrame;
+struct PartDrawRequest;
 struct PartPacketContext;
 struct PartPacketSource;
 struct PartPackets;
@@ -45,6 +45,6 @@ void UpdateLinkConstraint(PlacedObject* self);
 void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par);
 void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ctx);
 void FlipVifBaseOffset(void);
-void DrawModelPart(Frame_166690* self);
+void DrawModelPart(PartDrawRequest* self);
 
 #endif

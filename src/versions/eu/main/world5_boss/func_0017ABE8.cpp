@@ -5,8 +5,8 @@
 // D_00270650 as PAL lays it out, for the aim's speeds and the aim.
 struct T217D_BF0Rates {
     u8 pad000[0x570];
-    Vec02 rates;                // 0x570
-    Vec02 aim;                  // 0x580
+    Vec4 rates;                // 0x570
+    Vec4 aim;                  // 0x580
 };
 
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)

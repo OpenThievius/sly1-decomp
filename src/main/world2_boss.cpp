@@ -154,9 +154,9 @@ f32 D_00264A38 = 20.0f;
 // The record an agent's draw method is given: the point and the weights it measures against.
 struct AgentDrawArgs {
     u8 pad00[0x40];
-    Vec02 point;            // 0x40
+    Vec4 point;            // 0x40
     u8 pad50[0x80 - 0x50];
-    Vec02 weights;          // 0x80
+    Vec4 weights;          // 0x80
 };
 
 void DrawAgent(Agent* self, void* unused1, void* unused2);
@@ -259,7 +259,7 @@ s32 IsWorld2BossLineBlocked(World2Boss* self, void* a1, void* a2)
     s32 x;
     s32 y;
     PushBackMemoryMark();
-    GatherCollidersInBox(self->world, 0, (Vec02*)a1, (Vec02*)a2, (s32 (*)(void*, Collider*))IsWorld2BossBlocker, self, &x, (Collider***)&y);
+    GatherCollidersInBox(self->world, 0, (Vec4*)a1, (Vec4*)a2, (s32 (*)(void*, Collider*))IsWorld2BossBlocker, self, &x, (Collider***)&y);
     s32 r = FindNearestHitObject(0, a1, a2, x, y, buf, g_bossNearestHitRange);
     PopBackMemoryMark();
     return r != 0;
@@ -314,7 +314,7 @@ s32 HasWorld2BossClearLine(World2Boss* self)
 one:
     return 1;
 second:
-    ComputeObjectFrameAtTime((PlacedObject*)sub, 0, (Vec02*)loc.buf, 0, 0, 0, D_002649C8);
+    ComputeObjectFrameAtTime((PlacedObject*)sub, 0, (Vec4*)loc.buf, 0, 0, 0, D_002649C8);
     if (IsWorld2BossLineBlocked(self, &self->v140, loc.buf) == 0) {
         goto one;
     }
@@ -385,7 +385,7 @@ s32 ChooseWorld2BossState(World2Boss* self)
 // 16), and the phase counter incremented.
 void AdvanceWorld2BossPhase(World2Boss* self)
 {
-    DecrementGaugeCount((T217D_2E0*)&g_gaugeBarElement);
+    DecrementGaugeCount((GaugeBar*)&g_gaugeBarElement);
     s32 idx = self->phase;
     ChangeAgentState(self, g_world2BossPhaseStates[idx], (void*)self->phaseClips[idx]);
     s32 n = self->phase;
@@ -420,7 +420,7 @@ void ShowWorld2BossBar(World2Boss* self)
         g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
-void SetAgentGoalPoint(Agent* self, Vec02* p);
+void SetAgentGoalPoint(Agent* self, Vec4* p);
 void UpdateAgentGoal(Agent* self, s32 flag);
 
 // Sets the boss's goal point each update. In state 4 it chases the object it holds (fE14) when it
@@ -431,7 +431,7 @@ void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
     switch (self->state) {
     case 4:
         if (self->heldObject != 0) {
-            Vec02 pos;
+            Vec4 pos;
             GetObjectWorldPosition((BaseObject*)self->heldObject, &pos);
             SetAgentGoalPoint(self, &pos);
         } else {
@@ -462,7 +462,7 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 struct TurnBlendRecords;
 struct BlendTimeScale;
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 s32 IsAgentFacingBlocked(Agent* self);
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
@@ -527,8 +527,8 @@ void UpdateWorld2BossState(World2Boss* self)
         if (IsAgentFacingBlocked(self)) {
             return;
         }
-        Vec02 to;
-        Vec02 curve = { 0.0f, 0.00016666666f, 0.0f, 0.0f };
+        Vec4 to;
+        Vec4 curve = { 0.0f, 0.00016666666f, 0.0f, 0.0f };
         f32 level;
         GetWorld2BossLevelFactor(self, &level);
         f32 rest = 1.0f - level;

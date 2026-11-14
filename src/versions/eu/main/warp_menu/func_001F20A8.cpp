@@ -26,7 +26,7 @@ void DrawWarpMenu(WarpMenu_eu* self)
     f32 keep2 = cam->zoomGoal;
     SnapCameraZoom(cam, one);
     if (g_coloredTriangleSet != 0) {
-        Vec02 v;
+        Vec4 v;
         f32 out[2];
         WarpColor inner;
         WarpColor outer;

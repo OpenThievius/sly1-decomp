@@ -7,11 +7,11 @@
 #include "common.h"
 #include "property_descriptor.h"
 
-struct PropTable_244DF0 { s32 f0; const PropertyList* lists; s32 f8; };
+struct PropertyListTable { s32 f0; const PropertyList* lists; s32 f8; };
 // The lists by class id, the record that names them, then the lists of values (each ending in
 // 0x2000) that base_object.cpp reads from D_00244DFC by D_00244EC0's offsets: a word-aligned array
 // right after the record, so a part of the same object (an array of its own would be 8-aligned).
-struct PropertyRegistry { PropertyList lists[148]; PropTable_244DF0 table; s32 valueLists[49]; };
+struct PropertyRegistry { PropertyList lists[148]; PropertyListTable table; s32 valueLists[49]; };
 
 
 extern PropertyDescriptor g_objectPropertyDescriptors[1179];

@@ -39,7 +39,7 @@
 #include "functions/texture_upload.h"
 struct BufferedStream;
 struct BaseObject;
-struct Vec02;
+struct Vec4;
 
 struct BaseObject;
 
@@ -48,8 +48,8 @@ struct ImageRecord;
 #include "gs_display.h"
 struct PaletteRecord;
 
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 #include "texture_upload_packet.h"
 
@@ -64,7 +64,7 @@ struct StateResetGroup;
 void AppendToSmallList(StateResetGroup* self, StateResetObject* value);
 
 
-void RemoveFromList(List01* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 
 
 
@@ -101,8 +101,8 @@ void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 extern FrameTarget g_meshQueueEntries[];
 
-void AppendToList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
+void AppendToList(ObjectList* self, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 
 
 struct TargetedObject {
@@ -129,9 +129,9 @@ void AddGifImageTag(void* p, s32 x);
 
 
 
-void SetListLinkOffset(List01* self, s32 offset);
+void SetListLinkOffset(ObjectList* self, s32 offset);
 
-void ClearList(List01* p);
+void ClearList(ObjectList* p);
 
 
 
@@ -176,12 +176,12 @@ void AddDmaRefTag(void* self, s32 lo, s32 hi);
 void* IsObjectOfKind(BaseObject* list, s32 key);
 
 struct ChildListWalk {
-    List01* iter;
+    ObjectList* iter;
     void* cursor;
     s32 link;
     void* prev;
 
-    ChildListWalk(List01* i)
+    ChildListWalk(ObjectList* i)
     {
         cursor = i;
         iter = i;
@@ -215,8 +215,8 @@ struct CurveProbe {
     f32 x;
 };
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
 
 struct HoldMatrices {
     u8 a[0x30];
@@ -269,9 +269,9 @@ void CloseDmaTag(PacketWriter* f);
 void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
 
 // The file's .data, in retail's order (0x2626E8 to 0x262714): the three object lists.
-List01 g_targetCurveList = { 0 };
-List01 g_targetPointList = { 0 };
-List01 g_partList = { 0 };
+ObjectList g_targetCurveList = { 0 };
+ObjectList g_targetPointList = { 0 };
+ObjectList g_partList = { 0 };
 
 // Sets the link offset of the three lists (target curves 0x38, target points 0x50, parts
 // 0x558).
@@ -340,10 +340,10 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 // Gives the place on a target curve at length t where the player is held: the curve's point (in the
 // world) offset sideways, 20 units to one side for mode 0 and 70 for mode 1, and the heading angle
 // to face along the curve (turned half a turn for mode 1).
-void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t)
+void PlaceOnTargetCurve(TargetCurve* self, Vec4* out, f32* angleOut, f32 t)
 {
-    Vec02 pos;
-    Vec02 tangent;
+    Vec4 pos;
+    Vec4 tangent;
     PathCurve* o = self->curve;
     if (o->vt->m02 != 0) {
         ((void (*)(PathCurve*, f32, void*, void*))o->vt->m02)(o, t, &pos, &tangent);
@@ -384,8 +384,8 @@ void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, vo
     PlacedObject* node = (PlacedObject*)GetActiveSwitchedCollider();
     PathCurve* o = self->curve;
     f.c = 1;
-    TransformPointBetweenFrames(0, (PlacedObject*)self->parent, &node->v140, (Vec02*)&f.a);
-    TransformDirectionBetweenFrames(0, (PlacedObject*)self->parent, (Vec02*)&g_unitZVector, (Vec02*)&f.b);
+    TransformPointBetweenFrames(0, (PlacedObject*)self->parent, &node->v140, (Vec4*)&f.a);
+    TransformDirectionBetweenFrames(0, (PlacedObject*)self->parent, (Vec4*)&g_unitZVector, (Vec4*)&f.b);
     if (o->vt->m10 != 0) {
         o->vt->m10(o, &f.a, &f.b, 0, 0, 0, &f.x);
     }
@@ -400,7 +400,7 @@ void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, vo
         }
         f.x = r;
     }
-    PlaceOnTargetCurve(self, (Vec02*)a2, (f32*)a3, f.x);
+    PlaceOnTargetCurve(self, (Vec4*)a2, (f32*)a3, f.x);
     *out = f.x;
 }
 
@@ -455,9 +455,9 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 // Gives the place on a target point's ring at distance t along it (an angle of t over the ring's
 // radius): the point's position plus the offset at that angle, the radius grown by 20 for mode 0
 // and 70 for mode 1, and the angle to face (turned half a turn for mode 1).
-void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t)
+void PlaceOnTargetPoint(TargetPoint* self, Vec4* out, f32* angleOut, f32 t)
 {
-    Vec02 offset;
+    Vec4 offset;
     f32 angle = t / self->radius5C;
     if (out) {
         f32 radius = self->radius5C;
@@ -482,10 +482,10 @@ void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t)
 
 // Places a point on the target point's circle (radius at +0x5C), at the angle from the target
 // point toward the active switched collider.
-void PlaceTargetPointNearCollider(TargetPoint* self, Vec02* out, f32* angleOut)
+void PlaceTargetPointNearCollider(TargetPoint* self, Vec4* out, f32* angleOut)
 {
-    Vec02 here;
-    Vec02 d;
+    Vec4 here;
+    Vec4 d;
     PlacedObject* active = (PlacedObject*)GetActiveSwitchedCollider();
     ConvertPositionToWorld(self, &here);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(active->v140), Vu0::Q(here));
@@ -544,7 +544,7 @@ void RemoveFromPartList(ListedCollisionPart* self)
 // Copy of a listed collision part that keeps its own list link, so it stays on its own list.
 void CopyKeepingListLink(ListedCollisionPart* self, ListedCollisionPart* src)
 {
-    Link02 tmp = self->listLink;
+    ObjectListLink tmp = self->listLink;
     CopyCollider(self, src);
     self->listLink = tmp;
 }
@@ -569,8 +569,8 @@ void StepListedCollisionPart(ListedCollisionPart* self, f32 t)
     if (self->skipSteering != 0) {
         return;
     }
-    RotateMatrixUpright(&self->rot, 0, (Mat02*)&buf);
-    SteerColliderTowardRotation(self, (Mat02*)&buf, (f32*)self->p214, (Vec02*)&g_zeroVector, (f32*)self->p218, t);
+    RotateMatrixUpright(&self->rot, 0, (Mat3*)&buf);
+    SteerColliderTowardRotation(self, (Mat3*)&buf, (f32*)self->p214, (Vec4*)&g_zeroVector, (f32*)self->p218, t);
 }
 
 // Changes the state of a pooled object that the player can pick up: leaving state 1 (held) lets go
@@ -591,13 +591,13 @@ void SetPooledObjectPlayerHold(PooledObject* self, s32 v)
     }
     if (v == 1) {
         self->desc->m15(self, (BaseObject*)g_player);
-        self->desc02()->m20(self, (Vec02*)&g_zeroVector);
-        self->desc02()->m21(self, (Vec02*)&g_zeroVector);
+        self->desc02()->m20(self, (Vec4*)&g_zeroVector);
+        self->desc02()->m21(self, (Vec4*)&g_zeroVector);
         SetColliderAnchors(self, 3, 0, 3, 0);
-        RotateMatrixUpright(&g_player->m110, 0, (Mat02*)f.a);
-        RotateMatrixUpright(&self->m110, (Mat02*)f.c, (Mat02*)f.b);
-        MatrixToAxisAngle((Mat02*)f.c, (f32*)f.e, (Vec02*)f.d);
-        MultiplyMatrices3x3((Mat02*)f.a, (Mat02*)f.b, (Mat02*)self->linkRecord);
+        RotateMatrixUpright(&g_player->m110, 0, (Mat3*)f.a);
+        RotateMatrixUpright(&self->m110, (Mat3*)f.c, (Mat3*)f.b);
+        MatrixToAxisAngle((Mat3*)f.c, (f32*)f.e, (Vec4*)f.d);
+        MultiplyMatrices3x3((Mat3*)f.a, (Mat3*)f.b, (Mat3*)self->linkRecord);
         TriggerScriptEvent(self, 2, 0, 0);
     }
     self->state = v;
@@ -651,9 +651,9 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 // Gives the point on a ring around an object (the radius at +0x560 plus 70) in the direction of the
 // active switched collider, in the horizontal plane, and the heading angle of that direction turned
 // half a turn.
-void FindRingPointTowardCollider(PlacedObject* self, Vec02* out, f32* angleOut)
+void FindRingPointTowardCollider(PlacedObject* self, Vec4* out, f32* angleOut)
 {
-    Vec02 d;
+    Vec4 d;
     PlacedObject* active = (PlacedObject*)GetActiveSwitchedCollider();
     u128 p = Vu0::Q(self->v140);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(active->v140), p);

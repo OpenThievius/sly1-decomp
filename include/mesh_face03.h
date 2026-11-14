@@ -17,7 +17,7 @@ struct MeshEdge03 {
 };
 
 struct MeshFace03 {
-    Vec02 normal;
+    Vec4 normal;
     u32 offset;
     MeshEdge03* first;
     MeshEdge03* edges;

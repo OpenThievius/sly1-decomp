@@ -35,7 +35,7 @@
 #include "functions/pooled_object.h"
 #include "functions/warp_menu.h"
 struct BaseObject;
-struct Mat02;
+struct Mat3;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -67,13 +67,13 @@ struct Vec4U;
 void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 void PopFontScale(Font* font);
 void* InitTextReader(TextReader* self, char* text, Font* font);
-void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
+void DrawAlignedText(TextReader* self, TextBoxLayout* p, Vec4U* clip, PacketWriter* s);
 
 
 extern f32 g_gameTime;
 extern f32 g_frameDt;
 
-void StepTimer(T217D_510* self, f32 value);
+void StepTimer(TimerElement* self, f32 value);
 
 extern s32 g_defaultFont;
 
@@ -108,7 +108,7 @@ s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...);
 extern s32 D_002751D4;
 
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 void DrawScreenElementText();
@@ -159,7 +159,7 @@ extern "C" s32 GetStringLength(const char* s);
 void* CopyString(void* dst, const char* src);
 void MeasureText(TextReader*, f32, f32*, f32*);
 
-void FormatCounterCaption(T217D_E30* self);
+void FormatCounterCaption(CounterCaption* self);
 f32 SumTextWidth(TextReader* loc);
 
 
@@ -176,7 +176,7 @@ extern "C" s32 GetStringLength(const char* s);
 void* CopyString(void* dst, const char* src);
 void MeasureText(TextReader* self, f32 f, f32* out1, f32* out2);
 
-void RebuildPromptText(T217D_4C0* self);
+void RebuildPromptText(PromptElement* self);
 
 
 extern TextStyle g_framedElementStyle;
@@ -297,12 +297,12 @@ void CloseGifTag(PacketWriter* p, s32 a);
 extern u8 D_00275B00[];
 
 // A layout with its setters as calls (SetTextLayoutPosition and the others).
-struct LayoutBuilder : Layout_137228 {
-    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
-    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
-    void Color(s32* c) { ((Layout_137228*)this)->Color(c); }
-    void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
-    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
+struct LayoutBuilder : TextBoxLayout {
+    void Pos(f32 x, f32 y) { ((TextBoxLayout*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((TextBoxLayout*)this)->Size(x, y); }
+    void Color(s32* c) { ((TextBoxLayout*)this)->Color(c); }
+    void FlagA(s32 f) { ((TextBoxLayout*)this)->SetF14(f); }
+    void FlagB(s32 f) { ((TextBoxLayout*)this)->SetF18(f); }
 };
 struct StyleDrawerBuilder {
     static void Draw(Font** h, LayoutBuilder* out, void* tbl)
@@ -331,12 +331,12 @@ void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* f, u64 a, u64 b);
 void AddGifRgbaEntry(PacketWriter* f, u32 v);
 void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
-struct LayoutByValue : Layout_137228 {
-    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
-    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
-    void Color(s32 c) { ((Layout_137228*)this)->Color(&c); }
-    void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
-    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
+struct LayoutByValue : TextBoxLayout {
+    void Pos(f32 x, f32 y) { ((TextBoxLayout*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((TextBoxLayout*)this)->Size(x, y); }
+    void Color(s32 c) { ((TextBoxLayout*)this)->Color(&c); }
+    void FlagA(s32 f) { ((TextBoxLayout*)this)->SetF14(f); }
+    void FlagB(s32 f) { ((TextBoxLayout*)this)->SetF18(f); }
 };
 
 struct FontCalls {
@@ -357,8 +357,8 @@ struct ClampFloatSelect {
     }
 };
 
-struct VEnt_1AC0E8 { s16 delta; s16 index; void (*fn)(void* self, f32 x, f32 y, s32 a, s32 b, void* c); };
-struct Text_1AC0E8 { u8 pad[0x4C]; VEnt_1AC0E8* vtbl; };
+struct FontMethodEntry { s16 delta; s16 index; void (*fn)(void* self, f32 x, f32 y, s32 a, s32 b, void* c); };
+struct ElementFontView { u8 pad[0x4C]; FontMethodEntry* vtbl; };
 extern RampProfile g_gaugeFillRamp;
 
 extern "C" f32 Sine(f32 x);
@@ -536,12 +536,12 @@ void DrawScreenElementText(ScreenElement* self)
         f32 p = self->w;
         f32 q = self->h;
         s32 held = self->color;
-        ((Layout_137228*)out)->Pos(self->x, self->y);
-        ((Layout_137228*)out)->Size(p, q);
+        ((TextBoxLayout*)out)->Pos(self->x, self->y);
+        ((TextBoxLayout*)out)->Size(p, q);
         tmp = held;
-        ((Layout_137228*)out)->Color(&tmp);
-        ((Layout_137228*)out)->SetF14(0);
-        ((Layout_137228*)out)->SetF18(0);
+        ((TextBoxLayout*)out)->Color(&tmp);
+        ((TextBoxLayout*)out)->SetF14(0);
+        ((TextBoxLayout*)out)->SetF18(0);
 
         handle = self->frame;
         if (handle != 0) {
@@ -809,7 +809,7 @@ void SetScreenElementClock(ScreenElement* self, f32* p)
 // Sets up a counter caption (font 2, rate 6000) and points its value at the counter its index
 // names: reserve count (3), current entry's count (4, limit in the world), level record field
 // (5), pickup count (6), or its own shown value for the other indices.
-void InitCounterCaption(T217D_E30* self)
+void InitCounterCaption(CounterCaption* self)
 {
     SetupScreenElementText(self);
     self->font = GetFontById(2);
@@ -840,7 +840,7 @@ void InitCounterCaption(T217D_E30* self)
 // Per-frame update of a counter caption: slides it, makes the shown value approach the target by
 // rate per second (at once for a negative value), calls the done callback once when it arrives,
 // rebuilds the text and sets the element's size to the text's.
-void UpdateCounterCaption(T217D_E30* self)
+void UpdateCounterCaption(CounterCaption* self)
 {
     TextReader loc;
     f32 frac;
@@ -887,7 +887,7 @@ void UpdateCounterCaption(T217D_E30* self)
 }
 
 // Draws the counter caption's text, faded by the pause menu's fade when that is up.
-void DrawCounterCaption(T217D_E30* self)
+void DrawCounterCaption(CounterCaption* self)
 {
     u8 out[0x20];
     T217D_Word packed;
@@ -897,7 +897,7 @@ void DrawCounterCaption(T217D_E30* self)
     f32 scale;
     f32 px;
     f32 py;
-    T217D_6D0* g;
+    PauseMenu* g;
 
     if (self->text[0] == 0) {
         return;
@@ -912,22 +912,22 @@ void DrawCounterCaption(T217D_E30* self)
     held = packed.v;
     px = self->w;
     py = self->h;
-    ((Layout_137228*)out)->Pos(self->x, self->y);
-    ((Layout_137228*)out)->Size(px, py);
+    ((TextBoxLayout*)out)->Pos(self->x, self->y);
+    ((TextBoxLayout*)out)->Size(px, py);
     tmp[0] = held;
-    ((Layout_137228*)out)->Color(&tmp[0]);
-    ((Layout_137228*)out)->SetF14(0);
-    ((Layout_137228*)out)->SetF18(0);
+    ((TextBoxLayout*)out)->Color(&tmp[0]);
+    ((TextBoxLayout*)out)->SetF14(0);
+    ((TextBoxLayout*)out)->SetF18(0);
     PushFontScale(self->font, self->scale, self->scale);
     InitTextReader((TextReader*)buf, &self->text[0], self->font);
-    DrawAlignedText((TextReader*)buf, (Layout_137228*)out, 0, &g_gsPacketWriter);
+    DrawAlignedText((TextReader*)buf, (TextBoxLayout*)out, 0, &g_gsPacketWriter);
     PopFontScale(self->font);
 }
 
 // Builds the text of a counter caption from its kind (index) and the shown value: the value with
 // its limit and a one-letter glyph suffix or prefix, a row of icons for kind 13, a percent for
 // 36, and empty text where the kind does not apply; then substitutes glyph escapes.
-void FormatCounterCaption(T217D_E30* self)
+void FormatCounterCaption(CounterCaption* self)
 {
     switch (self->index) {
     case 3:
@@ -1006,7 +1006,7 @@ f32 GetCaptionHoldTime(void)
 
 // Sets up a timer element in font 2 with no seconds or tenths shown yet, no warning time and
 // the stopped state.
-void InitTimerElement(T217D_510* self)
+void InitTimerElement(TimerElement* self)
 {
     SetupScreenElementText(self);
     self->font = GetFontById(2);
@@ -1019,7 +1019,7 @@ void InitTimerElement(T217D_510* self)
 // Per-frame update of a timer element: updates the slide; while the timer is stopped (state 0)
 // in mode 1 or 2 it hides itself after a second or when f290 is set, otherwise it steps the
 // timer by the frame time.
-void UpdateTimerElement(T217D_510* self)
+void UpdateTimerElement(TimerElement* self)
 {
     UpdateScreenElementSlide(self);
     if (self->mode == 0) {
@@ -1039,21 +1039,21 @@ void UpdateTimerElement(T217D_510* self)
 
 // Draws the timer: a frame box, the first character (a fixed glyph), then the time text after it,
 // in the warning colour once the timer has warned.
-void DrawTimerElement(T217D_510* self)
+void DrawTimerElement(TimerElement* self)
 {
-    Layout_137228 L;
+    TextBoxLayout L;
     Quad4 tag;
     T217D_Word warn;
     if (self->text[0] != 0) {
         f32 f234 = self->w;
         f32 f238 = self->h;
         s32 s0v = self->color;
-        ((Layout_137228*)&L)->Pos(self->x, self->y);
-        ((Layout_137228*)&L)->Size(f234, f238);
+        ((TextBoxLayout*)&L)->Pos(self->x, self->y);
+        ((TextBoxLayout*)&L)->Size(f234, f238);
         tag.w[0] = s0v;
-        ((Layout_137228*)&L)->Color(&tag.w[0]);
-        ((Layout_137228*)&L)->SetF14(0);
-        ((Layout_137228*)&L)->SetF18(0);
+        ((TextBoxLayout*)&L)->Color(&tag.w[0]);
+        ((TextBoxLayout*)&L)->SetF14(0);
+        ((TextBoxLayout*)&L)->SetF18(0);
         void* obj = self->frame;
         if (obj != 0) {
             Font* sub = *(Font**)obj;
@@ -1084,7 +1084,7 @@ void DrawTimerElement(T217D_510* self)
 
 // Starts the timer at x with no limit, warnings or callbacks, a falling rate of -1 per second
 // and grey colour, and shows it.
-void StartTimer(T217D_510* self, f32 x)
+void StartTimer(TimerElement* self, f32 x)
 {
     self->onWarn = 0;
     self->warned = 0;
@@ -1102,26 +1102,26 @@ void StartTimer(T217D_510* self, f32 x)
     self->vt->m14(self);
 }
 
-void SetTimerRate(T217D_510* self, f32 value)
+void SetTimerRate(TimerElement* self, f32 value)
 {
     self->rate = value;
 }
 
 // Sets the time at which the timer ends and the function to call then.
-void SetTimerLimit(T217D_510* self, f32 limit, T217D_510_Fn onEnd)
+void SetTimerLimit(TimerElement* self, f32 limit, T217D_510_Fn onEnd)
 {
     self->limit = limit;
     self->onEnd = onEnd;
 }
 
 // Puts the timer in state 2, counting.
-void StartTimerCounting(T217D_510* self)
+void StartTimerCounting(TimerElement* self)
 {
     SetTimerState(self, 2);
 }
 
 // Stops the timer element (state 0) and sets its f290 flag.
-void StopTimer(T217D_510* self)
+void StopTimer(TimerElement* self)
 {
     self->hideWhenStopped = 1;
     SetTimerState(self, 0);
@@ -1131,7 +1131,7 @@ void StopTimer(T217D_510* self)
 // countdown has its own pair of sounds at the tenths 9 and 4), advances the time by dt * rate,
 // raises the warning once at warnAt, ends at the limit (sound, state 0, onEnd) and rebuilds its
 // text when a displayed digit changes.
-void StepTimer(T217D_510* self, f32 dt)
+void StepTimer(TimerElement* self, f32 dt)
 {
     f32 t = __builtin_fabsf(self->time);
     s32 sec = (s32)t;
@@ -1236,7 +1236,7 @@ void StepTimer(T217D_510* self, f32 dt)
 }
 
 // Changes the timer's state (0 stopped, 1 shown, 2 counting) and stamps the time of the change.
-void SetTimerState(T217D_510* self, s32 state)
+void SetTimerState(TimerElement* self, s32 state)
 {
     if (self->state != state) {
         self->state = state;
@@ -1265,7 +1265,7 @@ f32 g_gaugeBarWidth = 26.0f;
 f32 g_gaugeBarHeight = 340.0f;
 
 // Starts the gauge's count from its mode's segments and returns the number of cells.
-static inline s32 StartGaugeCount(T217D_2E0* g)
+static inline s32 StartGaugeCount(GaugeBar* g)
 {
     s32 cells = g->segmentCount * g->cellsPerSegment;
     g->segmentsLeft = g->segmentCount;
@@ -1276,7 +1276,7 @@ static inline s32 StartGaugeCount(T217D_2E0* g)
 // Sets up the gauge element: font, scale, bar size and position from the gauge constants, and the
 // number of segments and cells per segment according to the current level index (the fill starts
 // full for levels 2 and 3); the letter position is derived from the font's size.
-void InitGauge(T217D_2E0* self)
+void InitGauge(GaugeBar* self)
 {
     s32 n = 4;
     SetupScreenElementText(self);
@@ -1330,7 +1330,7 @@ void InitGauge(T217D_2E0* self)
 
 // Takes one cell off the gauge (moving to the next segment when a segment is used up),
 // recomputes its fill target as a fraction of all cells and notes the time of the change.
-void DecrementGaugeCount(T217D_2E0* self)
+void DecrementGaugeCount(GaugeBar* self)
 {
     s32 n = self->cellsLeft - 1;
     self->cellsLeft = n;
@@ -1359,9 +1359,9 @@ RampProfile g_gaugeFillRamp = { 0.5f, 0.25f, 0.2f, 0.0f };
 // Draws the vertical gauge element: a dark background bar, a fill bar in proportion to the fill
 // value (which eases toward its target), whose colour flashes from red toward grey for about half
 // a second after a change, and the gauge's letter, which shakes for 0.75 s after a change.
-void DrawGauge(T217D_2E0* self)
+void DrawGauge(GaugeBar* self)
 {
-    Layout_137228 out;
+    TextBoxLayout out;
     f32 t = 0.0f;
     s32 flag = 0;
     if (self->changedAt != t) {
@@ -1375,15 +1375,15 @@ void DrawGauge(T217D_2E0* self)
     f32 h = self->fill * y;
     y -= h;
     f32 w = self->barW;
-    ((Layout_137228*)&out)->Pos(self->x + self->barX, self->y + self->barY);
-    ((Layout_137228*)&out)->Size(w, y);
+    ((TextBoxLayout*)&out)->Pos(self->x + self->barX, self->y + self->barY);
+    ((TextBoxLayout*)&out)->Size(w, y);
     {
         Quad4 tmp;
         tmp.w[0] = grey;
-        ((Layout_137228*)&out)->Color(tmp.w);
+        ((TextBoxLayout*)&out)->Color(tmp.w);
     }
-    ((Layout_137228*)&out)->SetF14(0);
-    ((Layout_137228*)&out)->SetF18(0);
+    ((TextBoxLayout*)&out)->SetF14(0);
+    ((TextBoxLayout*)&out)->SetF18(0);
     {
     Rgba4 col;
     col.r = 0x20; col.g = 0x20; col.b = 0x20; col.a = 0xC0;
@@ -1401,8 +1401,8 @@ void DrawGauge(T217D_2E0* self)
     WriteColoredSpritePacket(out.x, out.y, out.x + out.w, out.y + out.h, col.r, col.g, col.b, col.a, &g_gsPacketWriter);
     }
     PushFontScale(self->font, self->scale, self->scale);
-    Text_1AC0E8* text = (Text_1AC0E8*)self->font;
-    VEnt_1AC0E8* ve = &text->vtbl[8];
+    ElementFontView* text = (ElementFontView*)self->font;
+    FontMethodEntry* ve = &text->vtbl[8];
     // the class's this-adjustment from its vtable, not a field
     ve->fn((u8*)self->font + ve->delta, self->x, self->y, 0x7A, out.color.value, &g_gsPacketWriter);
     f32 dx = 0.0f;
@@ -1425,7 +1425,7 @@ void DrawGauge(T217D_2E0* self)
 TextStyle g_framedElementStyle = {0};
 
 // Sets up a framed element with a 1.25 scaled copy of its font and the frame font.
-void InitFramedElement(T217D_330* self)
+void InitFramedElement(ButtonHintElement* self)
 {
     const FontVt* vt;
 
@@ -1441,7 +1441,7 @@ void InitFramedElement(T217D_330* self)
 
 // Copies the text (or clears it) and sizes the element to the text measured at the element's
 // scale; an empty text has height 0.
-void SetCaptionTextAndSize(T217D_330* self, const char* p)
+void SetCaptionTextAndSize(ButtonHintElement* self, const char* p)
 {
     MeasuredText loc;
 
@@ -1462,7 +1462,7 @@ void SetCaptionTextAndSize(T217D_330* self, const char* p)
 
 // Draws the element's frame and text, both faded by multiplying their alpha by the element's
 // blend.
-void DrawElementWithFadedFrame(T217D_330* self)
+void DrawElementWithFadedFrame(ButtonHintElement* self)
 {
     T217D_Word tmp;
     LayoutBuilder out;
@@ -1499,7 +1499,7 @@ void DrawElementWithFadedFrame(T217D_330* self)
 TextStyle g_pointerCaptionStyle = {0};
 
 // Sets up a caption with a 0.9 scaled copy of its font, a grey colour and the frame font.
-void InitPointerTextCaption(T217D_380* self)
+void InitPointerTextCaption(PointerTextCaption* self)
 {
     const FontVt* vt;
 
@@ -1516,7 +1516,7 @@ void InitPointerTextCaption(T217D_380* self)
 
 // Like SetElementTextCopiedAfterSlideOut but remembers only the pointer of the new text: sets
 // it at once when hidden, and in modes 1 to 3 with a different text slides out first (m16, 3).
-void SetElementTextAfterSlideOut(T217D_380* self, const char* v)
+void SetElementTextAfterSlideOut(PointerTextCaption* self, const char* v)
 {
     s32 k = self->mode;
     if (k == 0) {
@@ -1540,7 +1540,7 @@ done:
 
 // Sets the element's mode; a pending text is applied first when the mode is 0, which makes the
 // mode 1 instead.
-void SetElementModeApplyingPendingText(T217D_380* self, s32 v)
+void SetElementModeApplyingPendingText(PointerTextCaption* self, s32 v)
 {
     if (self->pending != 0 && v == 0) {
         const char* x = self->pendingText;
@@ -1552,7 +1552,7 @@ void SetElementModeApplyingPendingText(T217D_380* self, s32 v)
 }
 
 // Whether the two elements are together or this one has a text waiting.
-s32 AreElementsTogetherOrPending(T217D_380* self, ScreenElement* other)
+s32 AreElementsTogetherOrPending(PointerTextCaption* self, ScreenElement* other)
 {
     s32 r = 0;
     if (AreScreenElementsTogether(self, other) != 0 || self->pending != 0) {
@@ -1562,7 +1562,7 @@ s32 AreElementsTogetherOrPending(T217D_380* self, ScreenElement* other)
 }
 
 // Shows the element, except that in mode 3 with a text waiting it does nothing.
-void ShowElementUnlessTextPending(T217D_380* self)
+void ShowElementUnlessTextPending(PointerTextCaption* self)
 {
     if (self->mode != 3 || self->pending == 0) {
         ShowScreenElement(self);
@@ -1570,7 +1570,7 @@ void ShowElementUnlessTextPending(T217D_380* self)
 }
 
 // Hides the element, except that in mode 3 with a text waiting it only drops the waiting text.
-void HideElementOrDropPendingText(T217D_380* self)
+void HideElementOrDropPendingText(PointerTextCaption* self)
 {
     if (self->mode == 3 && self->pending != 0) {
         self->pending = 0;
@@ -1582,7 +1582,7 @@ void HideElementOrDropPendingText(T217D_380* self)
 // Draws a text element whose characters slide in one by one, each blended from its hidden x to
 // its shown x as the element's blend rises (the first character first), with the frame box
 // stretching along. In mode 2 it is drawn as plain text.
-void DrawSlidingGlyphElement(T217D_380* self)
+void DrawSlidingGlyphElement(PointerTextCaption* self)
 {
     LayoutByValue out;
     s32 n;
@@ -1643,7 +1643,7 @@ TextStyle g_copiedCaptionStyle = {0};
 
 // Sets up a caption with a copy of font 0, scale 0.8, a slide-out time of 0.5 and the frame
 // font.
-void InitCopiedTextCaption(T217D_3D0* self)
+void InitCopiedTextCaption(CopiedTextCaption* self)
 {
     Font* o;
     const FontVt* vt;
@@ -1664,7 +1664,7 @@ void InitCopiedTextCaption(T217D_3D0* self)
 // Sets the element's text at once when it is hidden (mode 0); in modes 1 to 3 and when the text
 // differs it copies the new text aside and slides the element out (m16, 3), so the text is
 // applied after the slide-out.
-void SetElementTextCopiedAfterSlideOut(T217D_3D0* self, const char* v)
+void SetElementTextCopiedAfterSlideOut(CopiedTextCaption* self, const char* v)
 {
     s32 k = self->mode;
     if (k == 0) {
@@ -1788,7 +1788,7 @@ void SetElementTextFromIndexedCounts(ScreenElement* self, s32 idx)
 
 // Sets the element's mode; a pending copied text is applied first when the mode is 0, which
 // makes the mode 1 instead.
-void SetElementModeApplyingCopiedText(T217D_3D0* self, s32 flag)
+void SetElementModeApplyingCopiedText(CopiedTextCaption* self, s32 flag)
 {
     if (self->pending != 0 && flag == 0) {
         self->pending = 0;
@@ -1802,14 +1802,14 @@ void SetElementModeApplyingCopiedText(T217D_3D0* self, s32 flag)
 }
 
 // Shows the element, except that in mode 3 with a copied text waiting it does nothing.
-void ShowElementUnlessCopiedTextPending(T217D_3D0* self)
+void ShowElementUnlessCopiedTextPending(CopiedTextCaption* self)
 {
     if (self->mode == 3 && self->pending != 0) return;
     ShowScreenElement(self);
 }
 
 // Hides the element, except that in mode 3 with a copied text waiting it only drops that text.
-void HideElementOrDropCopiedText(T217D_3D0* self)
+void HideElementOrDropCopiedText(CopiedTextCaption* self)
 {
     if (self->mode == 3 && self->pending != 0) {
         self->pending = 0;
@@ -1821,7 +1821,7 @@ void HideElementOrDropCopiedText(T217D_3D0* self)
 // Draws a message element: its text, faded by the element's blend, with a translucent black bar
 // behind it at the bottom of the screen when it is not an announcement; hidden while the typed-
 // text caption box is on screen.
-void DrawMessageElement(T217D_3D0* self)
+void DrawMessageElement(CopiedTextCaption* self)
 {
     T217D_Word packed;
     LayoutBuilder out;
@@ -1832,7 +1832,7 @@ void DrawMessageElement(T217D_3D0* self)
     f32 px;
     f32 py;
     s32 held;
-    T217D_440* g;
+    CaptionBox* g;
 
     if (self->text[0] == 0) {
         return;
@@ -1860,7 +1860,7 @@ void DrawMessageElement(T217D_3D0* self)
     out.FlagA(0);
     out.FlagB(0);
     if (self->announce == 0) {
-        T217D_0F0* g2 = &g_mapScreenList;
+        WarpPageList* g2 = &g_mapScreenList;
         PacketWriter* s = &g_gsPacketWriter;
         f32 sc = scale;
         f32 y;
@@ -1886,7 +1886,7 @@ void DrawMessageElement(T217D_3D0* self)
 }
 
 // Sets up the hint glyph with a copy of font 2 and the text "B", initially off.
-void InitHintGlyphElement(T217D_420* self)
+void InitHintGlyphElement(HintGlyphElement* self)
 {
     Font* o;
     const FontVt* vt;
@@ -1902,7 +1902,7 @@ void InitHintGlyphElement(T217D_420* self)
 
 // Per-frame update of the hint glyph: shown while its flag is set, the player is not in state 6
 // and the element stack is in state 3 with fewer than 2 entries, hidden otherwise.
-void UpdateHintGlyphElement(T217D_420* self)
+void UpdateHintGlyphElement(HintGlyphElement* self)
 {
     Player* g;
     ElementStack* m;
@@ -1922,9 +1922,9 @@ tail:
 
 // Draws the element's text plus the glyph "L" of font 1 on top, with its size pulsing with the
 // elapsed time.
-void DrawHintGlyphElement(T217D_420* self)
+void DrawHintGlyphElement(HintGlyphElement* self)
 {
-    Layout_137228 buf;
+    TextBoxLayout buf;
     Quad4 tmp;
     s32 mask = (s32)0xFF808080;
     DrawScreenElementText(self);
@@ -1935,18 +1935,18 @@ void DrawHintGlyphElement(T217D_420* self)
     PushFontScale(h, s2, s2);
     f32 w = MeasureFontString(h, (const char*)((void*)"L"));
     f32 ht = (f32)h->height * h->sy;
-    ((Layout_137228*)&buf)->Pos(self->x + 2.0f + self->w * half - w * half, self->y + 14.0f + self->h * half - ht * half);
-    ((Layout_137228*)&buf)->Size(w, ht);
+    ((TextBoxLayout*)&buf)->Pos(self->x + 2.0f + self->w * half - w * half, self->y + 14.0f + self->h * half - ht * half);
+    ((TextBoxLayout*)&buf)->Size(w, ht);
     tmp.w[0] = mask;
-    ((Layout_137228*)&buf)->Color(&tmp.w[0]);
-    ((Layout_137228*)&buf)->SetF14(0);
-    ((Layout_137228*)&buf)->SetF18(0);
+    ((TextBoxLayout*)&buf)->Color(&tmp.w[0]);
+    ((TextBoxLayout*)&buf)->SetF14(0);
+    ((TextBoxLayout*)&buf)->SetF18(0);
     DrawFontString(h, "L", (StringLayout*)&buf, 0, &g_gsPacketWriter);
     PopFontScale(h);
 }
 
 // Sets up the letterbox element with a slide-out time of 0.5 s.
-void InitLetterboxElement(T217D_560* self)
+void InitLetterboxElement(LetterboxElement* self)
 {
     SetupScreenElementText(self);
     self->outTime = 0.5f;
@@ -1956,9 +1956,9 @@ void InitLetterboxElement(T217D_560* self)
 // while the fade is in mode 1 it ignores a change to 3 or 0; in mode 3 it shows or hides the
 // element depending on a flag and, to show it, posts the caption of the current level entry.
 // Closes the caption and the cycling glyph element when going to 0.
-void SetElementModeFollowingFade(T217D_560* self, s32 newval)
+void SetElementModeFollowingFade(LetterboxElement* self, s32 newval)
 {
-    T217D_3D0* g;
+    CopiedTextCaption* g;
     GameProgress* gg;
 
     if (self->mode != newval) {
@@ -1986,11 +1986,11 @@ void SetElementModeFollowingFade(T217D_560* self, s32 newval)
             }
         }
         if (self->mode != newval && newval == 0) {
-            T217D_3D0* a = &g_copiedTextCaption;
+            CopiedTextCaption* a = &g_copiedTextCaption;
             if (a->announce != 0) {
                 a->vt->m16(a, 0);
             }
-            T217D_600* b = &g_cyclingGlyphElement;
+            CyclingGlyphElement* b = &g_cyclingGlyphElement;
             if (b->flag != 0) {
                 b->vt->m16(b, 0);
             }
@@ -2001,7 +2001,7 @@ void SetElementModeFollowingFade(T217D_560* self, s32 newval)
 
 // Draws the black bar at the bottom of the screen, 66.4 high at full blend (the screen is 492.8
 // high), as one sprite on the GS.
-void DrawLetterboxElement(T217D_560* self)
+void DrawLetterboxElement(LetterboxElement* self)
 {
     f32 x = self->blend * 66.40001f;
     f32 y = 492.80002f - x;
@@ -2022,7 +2022,7 @@ TextStyle g_titleStyle = {0};
 // Sets up the title element with a scaled copy of its font and the frame font; with the
 // animation record 0x493 present it is sized 366.75 by 165.75, otherwise it shows the game's
 // title as text.
-void InitTitleElement(T217D_470* self)
+void InitTitleElement(TitleElement* self)
 {
     SetupScreenElementText(self);
     Font* in = self->font;
@@ -2043,7 +2043,7 @@ and the Thievius Raccoonus");
 
 // Draws a title element: as a textured sprite of its icon, with the size of the element, when it
 // has one; otherwise as plain text.
-void DrawTitleElement(T217D_470* self)
+void DrawTitleElement(TitleElement* self)
 {
     if (self->icon != 0) {
         TextureTable* sub = ((AnimRecord*)self->icon)->elems;
@@ -2076,7 +2076,7 @@ TextStyle g_promptStyle = {0};
 // Sets up the prompt element with a scaled copy of its font and the frame font, reads its two
 // display flags (one from a global equal to 3, one from a nonzero field of another object) and
 // builds its text.
-void InitPromptElement(T217D_4C0* self)
+void InitPromptElement(PromptElement* self)
 {
     const FontVt* vt;
 
@@ -2101,7 +2101,7 @@ void InitPromptElement(T217D_4C0* self)
 
 // Rebuilds the prompt text: two lines from the prompt texts when a controller is present (grey),
 // or the no-controller text (red); then sizes the element to the text.
-void RebuildPromptText(T217D_4C0 *self)
+void RebuildPromptText(PromptElement *self)
 {
     ColoredText loc;
     f32 y;
@@ -2136,7 +2136,7 @@ void RebuildPromptText(T217D_4C0 *self)
 
 // Sets the element's mode; a pending change rebuilds the prompt text first when the mode is 0,
 // which makes the mode 1 instead.
-void SetElementModeRebuildingText(T217D_4C0* self, s32 force)
+void SetElementModeRebuildingText(PromptElement* self, s32 force)
 {
     if (self->pending != 0 && force == 0) {
         self->pending = 0;
@@ -2148,7 +2148,7 @@ void SetElementModeRebuildingText(T217D_4C0* self, s32 force)
 
 // Per-frame update of the prompt: when its two display flags have changed it rebuilds its text,
 // then updates the slide.
-void UpdatePromptElement(T217D_4C0* self)
+void UpdatePromptElement(PromptElement* self)
 {
     if (D_00275BF0 == 1) {
         s32 b = 0;
@@ -2169,7 +2169,7 @@ extern f32 g_elementBlendLimit;
 
 // Draws the prompt element: its frame and text, positioned between hidden and shown by the blend,
 // with the colour's alpha pulsing as a sine of the elapsed time.
-void DrawPromptElement(T217D_4C0* self)
+void DrawPromptElement(PromptElement* self)
 {
     LayoutBuilder out;
     T217D_Word tmp;
@@ -2220,7 +2220,7 @@ f32 g_letterGlyphScale = 1.3f;
 
 // Sets up a glyph element in font 2 with the letter 'L' or 'K' (by which of the two elements it
 // is) and measures its width and height at the glyph scale.
-void InitLetterGlyphElement(T217D_5B0* self)
+void InitLetterGlyphElement(BeatGlyphElement* self)
 {
     SetupScreenElementText(self);
     self->font = GetFontById(2);
@@ -2286,7 +2286,7 @@ f32 g_cyclingGlyphElementScale = 0.7f;
 
 // Sets up a glyph element in font 1 with 0.25 s slide times, no hold, and the current cycling
 // glyph as its text.
-void InitCyclingGlyphElement(T217D_600* self)
+void InitCyclingGlyphElement(CyclingGlyphElement* self)
 {
     f32 k = 0.25f;
     char fl[2];
@@ -2308,7 +2308,7 @@ void InitCyclingGlyphElement(T217D_600* self)
 }
 
 // Sets the element's mode; a mode of 0 also clears the element's flag.
-void SetElementModeClearingFlag(T217D_600* self, s32 flag)
+void SetElementModeClearingFlag(CyclingGlyphElement* self, s32 flag)
 {
     if (flag == 0) {
         self->flag = 0;
@@ -2319,7 +2319,7 @@ void SetElementModeClearingFlag(T217D_600* self, s32 flag)
 // Draws the line of the completion percent with a changing glyph in front, using the current time
 // to slide it in and out (it is kept shown for 2 seconds in mode 2, then closed after one second
 // once the background job has ended).
-void DrawCyclingGlyphElement(T217D_600* self)
+void DrawCyclingGlyphElement(CyclingGlyphElement* self)
 {
     u8 out[0x20];
     s32 tmp[4];
@@ -2358,19 +2358,19 @@ void DrawCyclingGlyphElement(T217D_600* self)
     held = self->color;
     px = self->w;
     py = self->h;
-    ((Layout_137228*)out)->Pos(self->x, self->y + adj);
-    ((Layout_137228*)out)->Size(px, py);
+    ((TextBoxLayout*)out)->Pos(self->x, self->y + adj);
+    ((TextBoxLayout*)out)->Size(px, py);
     tmp[0] = held;
-    ((Layout_137228*)out)->Color(tmp);
-    ((Layout_137228*)out)->SetF14(0);
-    ((Layout_137228*)out)->SetF18(0);
+    ((TextBoxLayout*)out)->Color(tmp);
+    ((TextBoxLayout*)out)->SetF14(0);
+    ((TextBoxLayout*)out)->SetF18(0);
     fmt = "%c&1^07~b2a83d%d%%&.";
     sp = str;
     c = GetCyclingGlyph();
     FormatToString(sp, fmt, c, ComputeCompletionPercent(g_saveData));
     PushFontScale(self->font, self->scale, self->scale);
     InitTextReader((TextReader*)buf, sp, self->font);
-    DrawAlignedText((TextReader*)buf, (Layout_137228*)out, 0, &g_gsPacketWriter);
+    DrawAlignedText((TextReader*)buf, (TextBoxLayout*)out, 0, &g_gsPacketWriter);
     PopFontScale(self->font);
 }
 

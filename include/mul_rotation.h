@@ -16,12 +16,12 @@
 // The product a b of two rotations into out: b's rows each rotated by a, a's rows read where
 // they are (Vu0::RotateUntied), each result row stored to its vector local and then to the
 // matrix local (placed_object.cpp's frame functions).
-static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotation(Mat3* out, const Mat3& a, const Mat3& b)
 {
-    Mat02 r;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Mat3 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     Vu0::Q(x) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
     r.r[0] = x;
     Vu0::Q(y) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
@@ -33,16 +33,16 @@ static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
 
 // The same with a's rows loaded once as values (Vu0::RotateRows), and the last row's two
 // stores as one chained assignment (func_00128150, func_00128E88's first product).
-static inline void MulRotationRows(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotationRows(Mat3* out, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    Mat02 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
+    Mat3 r;
     Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
     r.r[0] = x;
     Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
@@ -52,16 +52,16 @@ static inline void MulRotationRows(Mat02* out, const Mat02& a, const Mat02& b)
 }
 
 // The same with each row's two stores in the other order (func_00128E88's second product).
-static inline void MulRotationRowsX(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotationRowsX(Mat3* out, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    Mat02 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
+    Mat3 r;
     Vu0::Q(x) = Vu0::Q(r.r[0]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
     Vu0::Q(y) = Vu0::Q(r.r[1]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
     Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
@@ -74,17 +74,17 @@ static inline void MulRotationRowsX(Mat02* out, const Mat02& a, const Mat02& b)
 // (`lqc2 0xD0(s0); addiu v0, s0, 0xD0; lqc2 0x10(v0)`), each after the stores of the row before.
 // Q's reference parameter is a pseudo of its own, whose address CSE folds into the object's
 // offset; an address written in the load stays as it is (func_001225D0, GetPlacedObjectRotationAt).
-static inline void MulRotationRowsIndexed(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotationRowsIndexed(Mat3* out, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
     const u128* q = (const u128*)&b;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    Mat02 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
+    Mat3 r;
     Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
     r.r[0] = x;
     Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
@@ -94,17 +94,17 @@ static inline void MulRotationRowsIndexed(Mat02* out, const Mat02& a, const Mat0
 }
 
 // MulRotationRowsX with b's rows read so.
-static inline void MulRotationRowsXIndexed(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotationRowsXIndexed(Mat3* out, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
     const u128* q = (const u128*)&b;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    Mat02 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
+    Mat3 r;
     Vu0::Q(x) = Vu0::Q(r.r[0]) = Vu0::RotateRows(a0, a1, a2, q[0]);
     Vu0::Q(y) = Vu0::Q(r.r[1]) = Vu0::RotateRows(a0, a1, a2, q[1]);
     Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]);
@@ -112,19 +112,19 @@ static inline void MulRotationRowsXIndexed(Mat02* out, const Mat02& a, const Mat
 }
 
 // MulRotationRowsIndexed into an object's own matrix, written through the object (o->rot = r):
-// the result rows are stored at the object's offset, where a Mat02* to the matrix stores them
+// the result rows are stored at the object's offset, where a Mat3* to the matrix stores them
 // through a register of its own (func_00125440, MovePlacedObject; func_001B8148).
-template <class O> static inline void MulRotationIntoRot(O* o, const Mat02& a, const Mat02& b)
+template <class O> static inline void MulRotationIntoRot(O* o, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
     const u128* q = (const u128*)&b;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
-    Mat02 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
+    Mat3 r;
     Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
     r.r[0] = x;
     Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
@@ -136,17 +136,17 @@ template <class O> static inline void MulRotationIntoRot(O* o, const Mat02& a, c
 // MulRotationIntoRot with the matrix local declared first, as MulRotationIntoRotMatFirst, and
 // each row's two stores as one chained assignment (MulRotationRowsX): ApplyPoseSourceRotation's
 // spring and ramp products.
-template <class O> static inline void MulRotationIntoRotX(O* o, const Mat02& a, const Mat02& b)
+template <class O> static inline void MulRotationIntoRotX(O* o, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
     const u128* q = (const u128*)&b;
-    Mat02 r;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Mat3 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     Vu0::Q(x) = Vu0::Q(r.r[0]) = Vu0::RotateRows(a0, a1, a2, q[0]);
     Vu0::Q(y) = Vu0::Q(r.r[1]) = Vu0::RotateRows(a0, a1, a2, q[1]);
     Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]);
@@ -156,15 +156,15 @@ template <class O> static inline void MulRotationIntoRotX(O* o, const Mat02& a, 
 // The product with a's rows as values, written straight into out's rows (no matrix local), each
 // result row stored to its vector local and to out's row: the first product of func_001A0DF0
 // (DrawCameraSpaceEffect), whose frame has no third matrix for it.
-static inline void MulRotationRowsInto(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotationRowsInto(Mat3* out, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     Vu0::Q(x) = Vu0::Q(out->r[0]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
     Vu0::Q(y) = Vu0::Q(out->r[1]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[1]));
     Vu0::Q(z) = Vu0::Q(out->r[2]) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
@@ -172,16 +172,16 @@ static inline void MulRotationRowsInto(Mat02* out, const Mat02& a, const Mat02& 
 
 // MulRotationRowsInto with b's rows read by index (MulRotationRowsIndexed) and each row stored
 // to its vector local before out's row (func_001A0DF0's second product).
-static inline void MulRotationRowsIntoIndexed(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotationRowsIntoIndexed(Mat3* out, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
     const u128* q = (const u128*)&b;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     Vu0::Q(out->r[0]) = Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
     Vu0::Q(out->r[1]) = Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
     Vu0::Q(out->r[2]) = Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, q[2]);
@@ -190,17 +190,17 @@ static inline void MulRotationRowsIntoIndexed(Mat02* out, const Mat02& a, const 
 // MulRotationIntoRot with the matrix local declared before the row locals, so its rows sit
 // below them in the frame, and every row stored to its local and then to the matrix
 // (ApplyPoseSourceRotation's eased product: retail copies the rows from the lower block).
-template <class O> static inline void MulRotationIntoRotMatFirst(O* o, const Mat02& a, const Mat02& b)
+template <class O> static inline void MulRotationIntoRotMatFirst(O* o, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0];
     u128 a1 = p[1];
     u128 a2 = p[2];
     const u128* q = (const u128*)&b;
-    Mat02 r;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Mat3 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     Vu0::Q(x) = Vu0::RotateRows(a0, a1, a2, q[0]);
     r.r[0] = x;
     Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
@@ -217,7 +217,7 @@ template <class O> static inline void MulRotationIntoRotMatFirst(O* o, const Mat
 // Loads of structure members through a pointer never wait for such stores
 // (fixed_scalar_and_varying_struct_p), so they sink below later code as retail's do
 // (docs/TOOLCHAIN.md, "Three row copies made by one call").
-static inline void SetRows(Mat02& m, const s128& x, const s128& y, const s128& z)
+static inline void SetRows(Mat3& m, const s128& x, const s128& y, const s128& z)
 {
     Vu0::Q(m.r[0]) = x;
     Vu0::Q(m.r[1]) = y;
@@ -226,9 +226,9 @@ static inline void SetRows(Mat02& m, const s128& x, const s128& y, const s128& z
 
 // The product a b with a's rows loaded once as values and the three result rows put in the
 // matrix local by SetRows, then copied to out (GetIdentityPoseRotation, func_00122B30).
-static inline void MulRotationSetRows(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotationSetRows(Mat3* out, const Mat3& a, const Mat3& b)
 {
-    Mat02 r;
+    Mat3 r;
     const u128* p = (const u128*)&a;
     u128 a0 = p[0], a1 = p[1], a2 = p[2];
     u128 x = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[0]));
@@ -240,7 +240,7 @@ static inline void MulRotationSetRows(Mat02* out, const Mat02& a, const Mat02& b
 
 // A matrix's three rows set from quadwords that are already in memory, bound where they are:
 // the arguments are u128 lvalues, so no copy is made for the call.
-static inline void SetRowsFrom(Mat02& m, const u128& x, const u128& y, const u128& z)
+static inline void SetRowsFrom(Mat3& m, const u128& x, const u128& y, const u128& z)
 {
     Vu0::Q(m.r[0]) = x;
     Vu0::Q(m.r[1]) = y;
@@ -256,7 +256,7 @@ static inline void SetRowsFrom(Mat02& m, const u128& x, const u128& y, const u12
 // members never wait for the slots' stores (fixed_scalar_and_varying_struct_p), only for r's
 // (func_00172078, OrientPlayerSpinPart's second product; docs/TOOLCHAIN.md, "A rotation
 // product's last two stores").
-static inline void MulRotationCopiedVia(Mat02* out, Mat02& r, const Mat02& a, const Mat02& b)
+static inline void MulRotationCopiedVia(Mat3* out, Mat3& r, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0], a1 = p[1], a2 = p[2];
@@ -269,9 +269,9 @@ static inline void MulRotationCopiedVia(Mat02* out, Mat02& r, const Mat02& a, co
 
 // MulRotationCopiedVia with the matrix local its own (UpdateFrameCameraController,
 // func_0014A8F8; func_001721B0's spin part).
-static inline void MulRotationCopied(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotationCopied(Mat3* out, const Mat3& a, const Mat3& b)
 {
-    Mat02 r;
+    Mat3 r;
     const u128* p = (const u128*)&a;
     u128 a0 = p[0], a1 = p[1], a2 = p[2];
     const Vu0::Vec* q = (const Vu0::Vec*)&b;
@@ -283,7 +283,7 @@ static inline void MulRotationCopied(Mat02* out, const Mat02& a, const Mat02& b)
 
 // The product a b with the three rows computed first and then set into out by SetRowsFrom
 // through their casts' copies, three slots of the one call (func_00172078's first product).
-static inline void MulRotationThenCopy(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotationThenCopy(Mat3* out, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0], a1 = p[1], a2 = p[2];
@@ -298,7 +298,7 @@ static inline void MulRotationThenCopy(Mat02* out, const Mat02& a, const Mat02& 
 // order, and out is set from r's rows (UpdateTargetCameraController's second product, the
 // camera's matrix set through a local: retail stores r's row 0 between the first and second
 // slots).
-static inline void MulRotationThenCopyVia(Mat02* out, Mat02& r, const Mat02& a, const Mat02& b)
+static inline void MulRotationThenCopyVia(Mat3* out, Mat3& r, const Mat3& a, const Mat3& b)
 {
     const u128* p = (const u128*)&a;
     u128 a0 = p[0], a1 = p[1], a2 = p[2];

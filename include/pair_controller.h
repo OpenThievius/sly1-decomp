@@ -61,7 +61,7 @@ struct PairController : PlacedObject {
     s32 idCount;  // 0x2E0
     s32 ids[1];  // 0x2E4
     u8 pad2E8[0x330 - 0x2E8];
-    Vec02 spawnCentre; // 0x330: the centre new objects start around
+    Vec4 spawnCentre; // 0x330: the centre new objects start around
     union {
         s32 mode340;  // 0x340
         f32 minRadius340;  // 0x340: the shortest distance a new object starts at (added to the radius at 0x3D0)

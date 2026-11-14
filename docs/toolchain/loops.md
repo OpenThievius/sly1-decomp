@@ -168,12 +168,12 @@ s5/s4) mean those two never were pseudos:
   to Q by reference, which copies its address into a pseudo; CSE then uses that pseudo for the later
   `&s` argument, and PRE hoists it. Stored as `*(Vu0::Vec*)&s.r[i] = ...` the address stays a
   constant in the memory reference.
-- **Not a struct assignment.** `rot = s` of two Mat02 is moved by pieces (lq/sq), of two Mat3U by
-  ldl/sdl pieces, and an inline returning a Mat02 by value copies it by pieces too: none calls
+- **Not a struct assignment.** `rot = s` of two Mat3 is moved by pieces (lq/sq), of two Mat3U by
+  ldl/sdl pieces, and an inline returning a Mat3 by value copies it by pieces too: none calls
   CopyBytes (memcpy), so retail's call was written.
 
 - **The scale as a spilled Vec value (2026-11-10, w16-191AC8).** Held as a `Vu0::Vec` value
-  instead of a Vec02 in memory, the scale has 10 refs and crosses 3 calls: CALLER_SAVE_PROFITABLE
+  instead of a Vec4 in memory, the scale has 10 refs and crosses 3 calls: CALLER_SAVE_PROFITABLE
   (4 * calls < refs) fails, global-alloc leaves it unallocated and reload gives it the spill slot
   after the locals (304). Every load in the loop then is retail's: row 0's in vf2, rows 1 and 2
   sharing vf4 (inheritance), and `k2 = k` as a memory-to-memory move through v0
@@ -393,7 +393,7 @@ the loop that loop.c did not move out. A `while (1)` with `{ store; break; }` lo
 ### An int parameter used as a pointer: no base for the alias test (func_0019C9C8)
 
 func_0019C9C8 took its cell as `s32 b` (the caller's word from func_0019D0E0) and read
-`((s32*)b)[i]` after storing three Vec02 locals. With an int parameter the cell's address has no
+`((s32*)b)[i]` after storing three Vec4 locals. With an int parameter the cell's address has no
 REGNO_POINTER_FLAG (the rule in "Alias classes": a pointer parameter's base never conflicts with
 frame stores; seen in the output, not traced in alias.c), so the read may alias the frame stores:
 sched1 kept the load after the normal's stores, and the body's order, the VU0 registers
@@ -778,7 +778,7 @@ others. Ours computes &cur[j] once into a pseudo that several statements share (
 DEST_REG giv with several uses: it ties at 116 with another and absorbs every memory giv, so the
 loop has one reduced register fewer, the bivs (removed, j, out) take the saved register left over
 instead of retail's caller-saved a7/t0/t1 (saved around both calls with sq/lq), and the function
-is 12 bytes short. The array form (Vec02 indexing or a bank struct of three arrays) does not
+is 12 bytes short. The array form (Vec4 indexing or a bank struct of three arrays) does not
 change it.
 
 #### Which giv absorbs the memory references (func_0013A940, matched 2026-11-13, w46-a)
@@ -814,10 +814,10 @@ was not a tie to break: the two 116s were *twins*.
 - **The source.** Named element pointers, each a plain `base + (16j + 16K)` that leaves no
   shared `base + 16j` behind:
 
-      Vec02* pos = &cur[j];           Vec02* npos = &nxt[out];
-      Vec02* vel = &cur[0x2C + j];    Vec02* nvel = &nxt[0x2C + out];
+      Vec4* pos = &cur[j];           Vec4* npos = &nxt[out];
+      Vec4* vel = &cur[0x2C + j];    Vec4* nvel = &nxt[0x2C + out];
       ... the test, the switch ...
-      Vec02* rec = &cur[0x58 + j];    Vec02* nrec = &nxt[0x58 + out];
+      Vec4* rec = &cur[0x58 + j];    Vec4* nrec = &nxt[0x58 + out];
       *nrec = *rec; ...
 
   Every access is then a pointer plus a constant; each pointer is one DEST_REG giv with
@@ -876,7 +876,7 @@ fourth candidate, B0's address (227, also 5 refs, born first), loses and is rema
   needs it between the slip statement (B0, C0) and the push (D0), where no statement takes
   spin's address. D0's `%hi` cannot move to pass 2 instead (it would need a lifetime of 3 in
   both passes; its `lo_sum` and c[0] load give 9).
-- **Ruled out.** `Vec02* out = &spin;` or `Vec02& out = spin;` after the slip statement, with
+- **Ruled out.** `Vec4* out = &spin;` or `Vec4& out = spin;` after the slip statement, with
   the calls taking `out` (697 lines): the user variable's copy has lifetime 0 in loop.c ("not
   desirable"), the loop reads PRE's 966 directly and B0's address takes s8.
 - **The only other ranking that works (wave 22, 2026-11-11).** With the copy born last, retail's
@@ -923,7 +923,7 @@ when D0's and E0's `lo_sum` are left by the first pass and moved by the second
   count the block notes between its set and its uses. Two notes are the difference between an
   inline's parameter and an expression written in place.
 - **A second route, probed and not needed.** A dead early copy of PRE's reg also reorders the
-  list: with `Vec02* out = &spin;` after the slip statement and the calls still taking `&spin`,
+  list: with `Vec4* out = &spin;` after the slip statement and the calls still taking `&spin`,
   the pointer's `247 = 966` is a movable of lifetime 0 that the calls' `382 = 966` matches
   (combine_movables: same source), so the pair moves at the pointer's place (`Insn 551: regno
   247 (life 12), savings 2 moved`, `Insn 1056: regno 382 done matches 551`) and global-alloc
@@ -1347,7 +1347,7 @@ other 32 do not change.
     and 0x2751DC (60 and 0.75, read only by func_001D9D78 and func_001DAF08 after the cut, in a
     block of four words whose other two, 850 and 1.25, are read by functions before it), and
     the cleanest place, 0x275518, is on 8 only while the unit after it begins with a 16-aligned
-    Vec02 at 0x275530 in our source (the type is ours: retail only shows the address). A cut
+    Vec4 at 0x275530 in our source (the type is ours: retail only shows the address). A cut
     before func_001D8E40 adds D_00275240 to the globals read across it. The .rodata (0x24DC90
     to 0x24DCA8) splits cleanly: the "%s" and the float are the first unit's, the pairs at
     0x24DC98 (func_001DCD28) the last's, and func_001D9488's unit has none.
@@ -1410,7 +1410,7 @@ built whole and the full builds print `MATCH` on US and PAL.
   give no edge: func_001D9488 calls func_001D9338 before it, and it, func_001D8E40 and
   func_001D9678 are called only by UpdatePathFollower (func_001D9C98, class 0x19's method at
   +0x54) after it, func_001D92F0 only by ControlPathFollower (+0x134). The edges are the data's.
-  The middle unit holds the 16-aligned Vec02 at 0x275530 (retail has eight zero bytes before it,
+  The middle unit holds the 16-aligned Vec4 at 0x275530 (retail has eight zero bytes before it,
   after D_00275524: an object on 16, or a new file's `.data`), so its `.data` starts on 16;
   0x275518, the place with the fewest crossings, would need D_00275524 to be a 12-byte object
   that no reader shows. Of the places on 16, 0x275500 (the middle unit from func_001D8E40, whose

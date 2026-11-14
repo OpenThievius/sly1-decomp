@@ -49,14 +49,14 @@ void CreatePlayerTwoEntryBlend(Player* self)
     TwoEntryBlendEntry* e = (TwoEntryBlendEntry*)self->f103C;
     s32 i = 1;
     do {
-        SampleAnimationFrameChain((BlendAnimationView*)e->p4, 0.0f, 1.0f, (PlacedObject*)self->linkPartB, (PlacedObject*)self, 1, 0, 0, (Vec02*)out, 0);
+        SampleAnimationFrameChain((BlendAnimationView*)e->p4, 0.0f, 1.0f, (PlacedObject*)self->linkPartB, (PlacedObject*)self, 1, 0, 0, (Vec4*)out, 0);
         e->fC = out[2];
         e++;
         i--;
     } while (i >= 0);
     BuildCombinedBlendAnimation(self, 0x10, 2, self->f103C, 0, 0, 0, (BlendAnimation**)&self->pathBlendItem);
-    SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f618, (PlacedObject*)self, 1, (Vec02*)&self->v23E0, 0, 0, 0);
-    SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->linkPartB, (PlacedObject*)self, 1, (Vec02*)&self->f23F0, 0, 0, 0);
+    SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f618, (PlacedObject*)self, 1, (Vec4*)&self->v23E0, 0, 0, 0);
+    SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->linkPartB, (PlacedObject*)self, 1, (Vec4*)&self->f23F0, 0, 0, 0);
     f32 avg = (self->f23E0 + self->f23F0) * 0.5f;
     self->f23F4 = 0.0f;
     self->f23E4 = 0.0f;
@@ -69,12 +69,12 @@ void CreatePlayerTwoEntryBlend(Player* self)
 struct PathHolder;
 struct PathHolderDesc {
     u8 pad00[4];
-    void (*m1)(PathHolder* self, Vec02* pos, f32 t, Vec02* tangent);  // 0x04
-    void (*m2)(PathHolder* self, Vec02* pos, f32 t, Vec02* dir);      // 0x08
+    void (*m1)(PathHolder* self, Vec4* pos, f32 t, Vec4* tangent);  // 0x04
+    void (*m2)(PathHolder* self, Vec4* pos, f32 t, Vec4* dir);      // 0x08
     u8 pad0C[0x20 - 0x0C];
     f32 (*m8)(PathHolder* self);                                      // 0x20: the length
     u8 pad24[0x28 - 0x24];
-    void (*m10)(PathHolder* self, Vec02* in, s32 a, s32 b, s32 c, s32 d, f32* out);
+    void (*m10)(PathHolder* self, Vec4* in, s32 a, s32 b, s32 c, s32 d, f32* out);
 };
 struct PathHolder {
     PathHolderDesc* desc;
@@ -85,13 +85,13 @@ struct PathHolder {
     f32* first;             // 0x14: the smallest length it takes (func_001D1630)
 };
 struct PathObject {
-    const Desc01* desc;
+    const BaseObjectDescriptor* desc;
     u8 pad04[0x14];
     PlacedObject* frame;    // 0x18
     u8 pad1C[0x34 - 0x1C];
     PathHolder* holder;     // 0x34
     u8 pad38[0x40 - 0x38];
-    Vec02 v40;              // 0x40
+    Vec4 v40;              // 0x40
     u8 pad50[0x68 - 0x50];
     PathObject* guide;      // 0x68: a path the camera follows instead (ControlPlayerOnPath)
 };
@@ -117,12 +117,12 @@ static inline Vu0::Vec NormalizeOrElse(Vu0::Vec v, Vu0::Vec fallback)
 // out on both sides until the direction there turns less than 0.9 away from it, the shortest-arc
 // rotation of the path's offset, and the frame built from the first direction and that offset,
 // turned about when 0x221C is set.
-void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length)
+void PlaceOnPathAt(Player* self, PathObject* path, Mat3* out, f32 length)
 {
-    Vec02 start;
-    Vec02 first;
-    Vec02 dir;
-    Vec02 ahead;
+    Vec4 start;
+    Vec4 first;
+    Vec4 dir;
+    Vec4 ahead;
     PathHolder* h = path->holder;
     f32 total = h->desc->m8(h);
     if (h->desc->m1 != 0) {
@@ -148,7 +148,7 @@ void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length)
         } else {
             at = WrapModulo(at, total);
         }
-        Vec02 behind;
+        Vec4 behind;
         if (h->desc->m2 != 0) {
             h->desc->m2(h, &ahead, at + g_pathProbeDistance, 0);
             if (h->desc->m2 != 0) {
@@ -164,12 +164,12 @@ void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length)
             break;
         }
     }
-    Mat02 arc;
+    Mat3 arc;
     BuildShortestArcRotation(&start, &dir, &arc);
     Vu0::Q(ahead) = Vu0::Rotate(arc, Vu0::Q(path->v40));
     TransformDirectionBetweenFrames(path->frame, 0, &first, &first);
     TransformDirectionBetweenFrames(path->frame, 0, &ahead, &ahead);
-    Mat02 m;
+    Mat3 m;
     u128 z = Vu0::NormalizeOr(Vu0::Q(first), Vu0::Q(g_unitZVector));
     Vu0::Q(m.r[2]) = z;
     u128 c = Vu0::Cross(z, Vu0::Q(ahead));
@@ -186,7 +186,7 @@ void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length)
     if (self->pathFlipped != 0) {
         // The -1 vector is stored to a local of its own after the two products (retail's sqc2
         // to the frame before the rows' stores, scheduled after both vmulx).
-        Vec02 flip;
+        Vec4 flip;
         Vu0::Vec k;
         k.q = Vu0::FromFloat(-1.0f);
         Vu0::Vec a2 = Vu0::MulX(Vu0::Vec::Of(m.r[2]), k);
@@ -205,7 +205,7 @@ void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length)
 struct PathWatch { u8 pad00[8]; struct PathWatchTarget* target; u8 pad0C[8]; f32 f14; };
 struct PathWatchTarget { u8 pad00[0x34]; f32 f34; };
 
-void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Mat02* b, const Vec02* wb, Mat02* out, Vec02* outW,
+void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat3* a, const Vec4* wa, Mat3* b, const Vec4* wb, Mat3* out, Vec4* outW,
                             s32 unused6);
 
 // Moves the player one step along the path: places the goal pose on the path at the current
@@ -213,12 +213,12 @@ void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Ma
 // the sub-states 0x17 and 0x1B, otherwise it takes the placed pose directly).
 void StepPlayerOnPath(Player* self)
 {
-    Mat02 placed;
-    Mat02 goal;
-    Mat02 delta;
-    Vec02 axis;
-    Vec02 k;
-    Vec02 angle;
+    Mat3 placed;
+    Mat3 goal;
+    Mat3 delta;
+    Vec4 axis;
+    Vec4 k;
+    Vec4 angle;
     PlaceOnPathAt(self, (PathObject*)self->aimCurve, &placed, self->pathPos);
     if (self->subState == 0x17 || self->subState == 0x1B) {
         PathWatch* w = (PathWatch*)self->stateAnimPlayer;
@@ -242,11 +242,11 @@ struct PathPad { u8 pad00[0x40]; f32 x; f32 y; };
 // The easing ApproachValueWithRamp takes: a rate, then two more values.
 struct PathRamp { f32 rate; f32 f04; f32 f08; f32 f0C; };
 
-struct Vec02;
+struct Vec4;
 struct RampProfile;
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-u128 ApproachPointWithRamp(u128 from, u128 to, RampProfile* ramp, Vec02* vel, f32 limit);
+u128 ApproachPointWithRamp(u128 from, u128 to, RampProfile* ramp, Vec4* vel, f32 limit);
 struct RampProfile;
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
@@ -264,7 +264,7 @@ static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
 }
 
 // v made unit length, or fallback when shorter than 0.0001; returns its length.
-static inline f32 NormalizeVector(Vec02& v, const Vec02& fallback)
+static inline f32 NormalizeVector(Vec4& v, const Vec4& fallback)
 {
     u128 len = Vu0::Length(Vu0::Q(v));
     if (Vu0::ToFloat(len) < 0.0001f) {
@@ -283,11 +283,11 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
 {
     PathObject* path = (PathObject*)self->aimCurve;
     PathHolder* holder = path->holder;
-    Vec02 a;
-    Vec02 b;
-    Vec02 pa;
-    Vec02 pb;
-    Vec02 dir;
+    Vec4 a;
+    Vec4 b;
+    Vec4 pa;
+    Vec4 pb;
+    Vec4 dir;
     f32 t;
     f32 lo;
     f32 hi;
@@ -337,8 +337,8 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
         ProjectPointToCamera(g_camera, &a, (f32*)&pa);
         ProjectPointToCamera(g_camera, &b, (f32*)&pb);
     } else {
-        Vec02 c;
-        Vec02 d;
+        Vec4 c;
+        Vec4 d;
         void* frame = path->guide->frame;
         PathHolder* guide = path->guide->holder;
         TransformPointBetweenFrames(0, (PlacedObject*)frame, &self->v140, &c);
@@ -370,7 +370,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
         amount = 1.0f;
         break;
     default: {
-        Vec02 stick;
+        Vec4 stick;
         Vu0::Set(stick, Vu0::FromFloats(pad->x, pad->y, 0.0f));
         f32 mag = NormalizeVector(stick, g_zeroVector);
         amount = Vu0::ToFloat(Vu0::Dot(Vu0::Q(dir), Vu0::Q(stick)));
@@ -468,7 +468,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     SetPlayerState(self, 7, state);
 }
 
-void BuildPerpendicularPair(Vec02* dir, Vec02* a, const Vec02* b, const Vec02* c);
+void BuildPerpendicularPair(Vec4* dir, Vec4* a, const Vec4* b, const Vec4* c);
 s32 CreatePooledContact(void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7, f32 f);
 
 // The player held on its path: the contact row for the path's frame's root (or the player's own
@@ -479,13 +479,13 @@ s32 CreatePooledContact(void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, 
 // moves in insn order, which sched1's tie-break needs (docs/TOOLCHAIN.md, "local-alloc").
 void PinPlayerToPath(Player* self)
 {
-    Vec02 pos;
-    Vec02 dir;
-    Vec02 local;
-    Vec02 delta;
-    Vec02 perp[2];
+    Vec4 pos;
+    Vec4 dir;
+    Vec4 local;
+    Vec4 delta;
+    Vec4 perp[2];
     PathObject* path = (PathObject*)self->aimCurve;
-    Contact03** link;
+    BodyContact** link;
     ContactRow03* row;
     if (path->frame != 0 && (path->frame->desc->flags & 2) != 0) {
         ContactRow03* r = self->contacts->head;
@@ -511,7 +511,7 @@ void PinPlayerToPath(Player* self)
     CreatePooledContact(self, path->frame, &local, &perp[0], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[0]))));
     CreatePooledContact(self, path->frame, &local, &perp[1], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[1]))));
     CreatePooledContact(self, path->frame, &local, &dir, 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(dir))));
-    *link = (Contact03*)row->head;
+    *link = (BodyContact*)row->head;
 }
 
 
@@ -539,10 +539,10 @@ void SetPlayerPadSelectMode(Player* a0, s32 a1)
 // it.
 void SetPlayerPath(Player* self, PathObject* path)
 {
-    Vec02 pos;
-    Mat02 rot;
-    Vec02 local;
-    Vec02 world;
+    Vec4 pos;
+    Mat3 rot;
+    Vec4 local;
+    Vec4 world;
     if ((PathObject*)self->aimCurve != path) {
         if (self->state == 7) {
             TriggerScriptEvent((BaseObject*)self->aimCurve, 3, 0, 0);

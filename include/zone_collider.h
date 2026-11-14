@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Class 0x29 (descriptor D_00218F80, 0x7A0 bytes) and its child 0x2A (D_0021F058, 0x7C0 bytes): a
 // collision trigger like class 0x28 that watches a short list of objects it looks up by id. It
-// embeds the same 0x1CC-byte zone record as class 0x28 (Zone28, include/c28.h), at +0x5C0 instead
+// embeds the same 0x1CC-byte zone record as class 0x28 (TriggerZoneRecord, include/c28.h), at +0x5C0 instead
 // of +0x554. Written for this project from what retail's code does (config/us/classes.tsv).
 #ifndef ZONE_COLLIDER_H
 #define ZONE_COLLIDER_H
@@ -18,7 +18,7 @@ struct ZoneCollider : Collider {
     s32 countInside;        // 0x598: the objects inside at the last update (func_00140258 keeps them)
     void* inside[8];        // 0x59C: func_00140550 hands each to a script list
     s32 testsActiveCollider; // 0x5BC: set to 1 when there are no ids
-    Zone28 zone;            // 0x5C0: its helpers take the record's address (func_0013E918, 0013E950, 0013EA38, 0013EB68)
+    TriggerZoneRecord zone;            // 0x5C0: its helpers take the record's address (func_0013E918, 0013E950, 0013EA38, 0013EB68)
     s32 timedModeNext;      // 0x78C: func_00140258's next mode when a timed mode 2 runs out (1 if set, else 0)
     s32 reportInside;       // 0x790: tested by slot 10 (then zone.f13C = 1)
     u8 pad794[0x7A0 - 0x794];
@@ -31,7 +31,7 @@ struct FollowableObject : ZoneCollider {
     void* anchor;           // 0x7A4: the object of that id, or the first of kind 0x7E (slot 15)
     s32 id7A8;              // 0x7A8: -1 at set-up
     void* tuneObject;       // 0x7AC: the object of id7A8 (class 0x47 reads a field of it at +0x318)
-    Link02 link7B0;         // 0x7B0: the link in class 0x47's list
+    ObjectListLink link7B0;         // 0x7B0: the link in class 0x47's list
     u8 pad7B8[0x7C0 - 0x7B8];
 };
 

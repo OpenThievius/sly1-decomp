@@ -65,10 +65,10 @@ struct BlendSlot {
     f32 weight;             // 0x00
     BlendSlotObject* object; // 0x04
     u8 pad08[0x10 - 0x08];
-    Vec02 v10;              // 0x10: where the object's mover puts it
+    Vec4 v10;              // 0x10: where the object's mover puts it
 };
 
-typedef void (*SlotMoveFn)(PoseSource* m, void* body, f32 x, f32 y, s32 z, Vec02* out, Vec02* out2);
+typedef void (*SlotMoveFn)(PoseSource* m, void* body, f32 x, f32 y, s32 z, Vec4* out, Vec4* out2);
 struct SlotMover { SlotMoveFn* vtbl; };
 struct SlotMoverHolder { u8 pad00[4]; SlotMover* mover; };
 struct BlendSlotObject {
@@ -86,8 +86,8 @@ struct PlayerBlendItem {
     f32 weight;             // 0x00
     BlendSlotObject* object; // 0x04
     u8 pad08[0x10 - 0x08];
-    Vec02 v10;              // 0x10
-    Vec02 v20;              // 0x20
+    Vec4 v10;              // 0x10
+    Vec4 v20;              // 0x20
     f32 timeAtFirstKey;     // 0x30
     u8 pad34[0x40 - 0x34];
     f32 timeAtSecondKey;    // 0x40
@@ -102,8 +102,8 @@ struct PlayerBlendCurve { u8 pad00[0x10]; void* f10; };
 // fields of its entries and sets the item weights. Gives the blend in *out.
 void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAnimationView** out)
 {
-    Vec02 a0;
-    Vec02 a10;
+    Vec4 a0;
+    Vec4 a10;
     BlendAnimationView* blend;
     s32 i;
 
@@ -124,10 +124,10 @@ void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAni
             m = o->holder->mover;
             (*m->vtbl)((PoseSource*)m, self, o->duration, one, 0, &a10, 0);
             *(Vu0::Vec*)&it->v10 = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(a0), Vu0::Vec::Of(a10)), Vu0::Vec::ScalarAt(o->duration));
-            Vec02 a20;
+            Vec4 a20;
             m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)it->object, (BaseObject*)self->linkPartA)->mover;
             (*m->vtbl)((PoseSource*)m, self->linkPartA, it->timeAtFirstKey, one, 0, &a20, 0);
-            Vec02 a30;
+            Vec4 a30;
             m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)it->object, (BaseObject*)self->linkPartB)->mover;
             (*m->vtbl)((PoseSource*)m, self->linkPartB, it->timeAtSecondKey, one, 0, &a30, 0);
             Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
@@ -165,13 +165,13 @@ void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAni
     }
 }
 
-struct WeightedRow { f32 w; u8 pad0[0xC]; Vec02 v; u8 pad1[0x14]; f32 d; u8 pad2[0x18]; };
+struct WeightedRow { f32 w; u8 pad0[0xC]; Vec4 v; u8 pad1[0x14]; f32 d; u8 pad2[0x18]; };
 
 // Sums n weighted rows into *out: each row's vector times its weight times its d divided by
 // scale[1].
-void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out)
+void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec4* out)
 {
-    Vec02 k;
+    Vec4 k;
     Vu0::Q(*out) = Vu0::Zero();
     if (n > 0) {
         do {
@@ -183,14 +183,14 @@ void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out)
     }
 }
 ASM_FUNC(func_001D3A38);
-s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
+s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 // Casts the segment from one point to another against the colliders in its bounding box; gives 1
 // and the fraction of the way to the nearest hit in *ratio (1.0 when it hits nothing).
-s32 FindObjectAlongSegment(PlacedObject* self, Vec02* from, Vec02* to, f32* ratio)
+s32 FindObjectAlongSegment(PlacedObject* self, Vec4* from, Vec4* to, f32* ratio)
 {
-    Vec02 a;
-    Vec02 b;
+    Vec4 a;
+    Vec4 b;
     ColliderSpan hit;
     s32 count;
     Collider** list;
@@ -280,10 +280,10 @@ void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView*
     f32 t;
     f32 lo;
     f32 hi;
-    Vec02 va;
-    Vec02 vb;
-    Vec02 vd;
-    Vec02 vc;
+    Vec4 va;
+    Vec4 vb;
+    Vec4 vd;
+    Vec4 vc;
     if (en->f54 == 0) {
         t = 0.0f;
     } else {
@@ -385,7 +385,7 @@ void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecor
     a1->weight3 = 0;
     a1->weight5 = 0;
     SetBlendItemWeights(a2, 0x50, 6, a1);
-    SumBlendEntryVectors(6, (WeightedRow*)a1, (f32*)a2->pC0->p8, (Vec02*)&a0->f640);
+    SumBlendEntryVectors(6, (WeightedRow*)a1, (f32*)a2->pC0->p8, (Vec4*)&a0->f640);
 }
 
 // Builds the combined animation blend of the eight entries: for each it works out the entry's
@@ -393,10 +393,10 @@ void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecor
 // sets the weights, with slot 6 starting at 1.0. Gives the blend in *gr.
 void CreateEightEntryBlend(TurningCollider* self, BlendSlot* slots, BlendAnimationView** gr)
 {
-    Vec02 here;
-    Vec02 there;
-    Vec02 delta;
-    Vec02 k;
+    Vec4 here;
+    Vec4 there;
+    Vec4 delta;
+    Vec4 k;
     s32 i;
     slots[6].weight = 1.0f;
     for (i = 0; i < 8; i++) {
@@ -473,7 +473,7 @@ static inline void SetSlotWeights(Player* self, BlendSlot* slots, s32 o, f32 sca
 // the slots' vectors scaled by the animation's rate.
 void UpdateEightEntryBlendWeights(Player* self, BlendSlot* slots, BlendAnimationView* gr)
 {
-    Vec02 acc;
+    Vec4 acc;
     f32 scale = ((AnimationPlayer*)self->stateAnimPlayer)->speed;
     s32 i;
     if (self->eightWayHalf == -1) {
@@ -508,9 +508,9 @@ static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
 
 // The velocity of a heading and speed, from six axes of the basis: forward (y) by the
 // heading's length ahead, and right or left by its side (x), the set picked by the walk mode.
-void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, BlendAnimationView* blend, f32 heading, f32 speed)
+void SetPlayerVelocityFromHeading(Player* self, const Vec4* basis, BlendAnimationView* blend, f32 heading, f32 speed)
 {
-    Vec02 h;
+    Vec4 h;
     ComputePolarOffset((Vec3*)&h, heading - self->heading, speed, 0.0f);
     f32 m;
     if (10.0f < h.y) {
@@ -563,28 +563,28 @@ void ResolvePlayerTableObjects(Player* self)
 }
 
 
-void AddColliderForce(Collider* self, Vec02* force);
+void AddColliderForce(Collider* self, Vec4* force);
 
 // Per-frame forces of the request sub states: in 0x25, 0x26, 0x29 and 0x30 it cancels gravity and
 // steers the position toward rest (holding the height in 0x29 and 0x30 from the heading
 // velocity); always turns toward the heading matrix.
 void StepPlayerRequestState(Player* self)
 {
-    Vec02 force;
+    Vec4 force;
     switch (self->subState) {
     case 0x25:
     case 0x26: {
-        Vec02 k;
+        Vec4 k;
         Vu0::Q(k) = Vu0::FromFloat(-1.0f);
         Vu0::Q(force) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(k));
         AddColliderForce(self, &force);
-        SteerColliderTowardPosition(self, 0, 0, (Vec02*)&g_zeroVector, g_requestSteerProfile, g_gameClock.dt);
+        SteerColliderTowardPosition(self, 0, 0, (Vec4*)&g_zeroVector, g_requestSteerProfile, g_gameClock.dt);
         break;
     }
     case 0x29:
     case 0x30: {
-        Vec02 aim;
-        Vec02 k;
+        Vec4 aim;
+        Vec4 k;
         Vu0::Q(k) = Vu0::FromFloat(-1.0f);
         Vu0::Q(force) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(k));
         AddColliderForce(self, &force);
@@ -629,9 +629,9 @@ void UpdatePlayerRequestSubState(Player* self) {
         break;
     }
     case 0x2C: {
-        if (((T2195_588*)self->selfPoseSource)->time18 < g_gameClock.time) {
+        if (((OwnerSnapshotAttachment*)self->selfPoseSource)->time18 < g_gameClock.time) {
             RunPlayerCallback(self);
-        } else if (self->touchedObject != 0 && ((T2195_588*)self->selfPoseSource)->time18 < g_gameClock.time + 0.25f &&
+        } else if (self->touchedObject != 0 && ((OwnerSnapshotAttachment*)self->selfPoseSource)->time18 < g_gameClock.time + 0.25f &&
                    (IsObjectOfKind((BaseObject*)self->touchedObject, 0x76) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x70) ||
                     IsObjectOfKind((BaseObject*)self->touchedObject, 0x71) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x81) ||
                     IsObjectOfKind((BaseObject*)self->touchedObject, 0x6F) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x7F))) {
@@ -644,7 +644,7 @@ void UpdatePlayerRequestSubState(Player* self) {
                 SetPlayerState(self, 2, r);
             }
         } else {
-            ComputeTargetArc(self, (TargetArcSource*)&self->touchedObject, ((T2195_588*)self->selfPoseSource)->time18 - g_gameClock.time, 0, &((T2195_588*)self->selfPoseSource)->pos, 0);
+            ComputeTargetArc(self, (TargetArcSource*)&self->touchedObject, ((OwnerSnapshotAttachment*)self->selfPoseSource)->time18 - g_gameClock.time, 0, &((OwnerSnapshotAttachment*)self->selfPoseSource)->pos, 0);
         }
         break;
     }
@@ -687,7 +687,7 @@ struct PlayerRequestMessage { Player* self; s32 v; };
 s32 MaskWorldBitsBySave(void);
 s32 HasSpareCount(void);
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 extern u32 g_buttonCodeFlags;
 extern f32 g_gameTime[];
@@ -696,13 +696,13 @@ extern f32 g_gameTime[];
 // check (slot 75) says no, or drops what it carries (state 6 mode 2); otherwise remembers the
 // message and by its kind enters sub state 0x25 to 0x31 of state 4 with a callback to continue.
 // Gives back whether it accepted (f2730) and sends event 0x17 when it did.
-s32 AcceptPlayerRequest(Player* self, Ev07* msg)
+s32 AcceptPlayerRequest(Player* self, PlayerMessageRecord* msg)
 {
     if (self->desc05()->m4B(self, msg->kind) != 0) {
         return 0;
     }
     if (self->state == 6 && self->targetMode == 2) {
-        Ev07* tmp = msg;
+        PlayerMessageRecord* tmp = msg;
         TriggerScriptEvent((BaseObject*)self->heldObject, 0x13, 1, &tmp);
         SetPlayerState(self, 2, 5);
         return 0;
@@ -772,8 +772,8 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
             (*(Quad16*)&self->savedVelocity) = (*(Quad16*)&self->v150);
             (*(Quad16*)&self->savedSpin) = (*(Quad16*)&self->v160);
         }
-        self->desc02()->m20(self, (Vec02*)&g_zeroVector);
-        self->desc02()->m21(self, (Vec02*)&g_zeroVector);
+        self->desc02()->m20(self, (Vec4*)&g_zeroVector);
+        self->desc02()->m21(self, (Vec4*)&g_zeroVector);
         switch (msg->kind) {
         case 1:
             id = 0x25;
@@ -795,7 +795,7 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
         }
         break;
     case 4:
-        self->desc02()->m20(self, (Vec02*)g_requestDropVelocity);
+        self->desc02()->m20(self, (Vec4*)g_requestDropVelocity);
         if (HasSpareCount() != 0) {
             SetPlayerState(self, 4, 0x28);
             SetPlayerCallback(self, FinishPlayerRequest);
@@ -822,7 +822,7 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
 }
 
 s32 HasSpareCount(void);
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // The callback after a kind 0 request has run: when the player touched a target of one of six
@@ -866,7 +866,7 @@ void ContinuePlayerRequestKind0(Player* self)
     }
 }
 
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // Plays sound 0xA6, puts the player into state 4 sub-state 0x2A and sets ContinuePlayerSubState2A
@@ -981,7 +981,7 @@ void EndPlayerRequestState(void* self)
 struct AnimRecord;
 // A point of the ring in camera space and its angle about the centre.
 struct __attribute__((aligned(16))) RingEntry {
-    Vec02 pos;              // 0x00
+    Vec4 pos;              // 0x00
     f32 angle;              // 0x10
     u8 pad14[0x20 - 0x14];
 };
@@ -1014,11 +1014,11 @@ void DestroyVertexBatch(VertexBatch* b, s32 f);
 // `base` is declared apart from its value: two more insns before GCSE, whose table then has
 // retail's 323 buckets and numbers the four hoisted addresses in retail's spill-slot order
 // (docs/toolchain/gcse.md, "One reaching register for every occurrence").
-void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingAnchor* anchors, RingParams* params, DeferredRequest* request)
+void DrawAngleSortedRing(Vec4* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingAnchor* anchors, RingParams* params, DeferredRequest* request)
 {
     RingEntry entries[256];
-    Vec02 pt;
-    Vec02 center;
+    Vec4 pt;
+    Vec4 center;
     f32 lowest = 3.4028235e+38f;
     RingEntry* low = 0;
     s32 n = 0;
@@ -1035,9 +1035,9 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
             u8* cam = (u8*)g_camera;
             base = Vu0::Vec::Of(anchor->obj->v140);
             Vu0::Vec sx = Vu0::Vec::Scalar(off->x * s);
-            Vu0::Vec ax = Vu0::Vec::Of(*(Vec02*)(cam + 0x90));
+            Vu0::Vec ax = Vu0::Vec::Of(*(Vec4*)(cam + 0x90));
             Vu0::Vec sy = Vu0::Vec::Scalar(off->y * s);
-            Vu0::Vec ay = Vu0::Vec::Of(*(Vec02*)(cam + 0xA0));
+            Vu0::Vec ay = Vu0::Vec::Of(*(Vec4*)(cam + 0xA0));
             *(Vu0::Vec*)&pt = Vu0::MulAddX2(base, ax, sx, ay, sy);
             e = &entries[n];
             ProjectPointToCamera(g_camera, &pt, (f32*)e);
@@ -1055,7 +1055,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
         entries[0] = t;
     }
     for (s32 j = 1; j < n; j++) {
-        Vec02 d;
+        Vec4 d;
         e = &entries[j];
         *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(e->pos), Vu0::Vec::Of(entries[0].pos));
         e->angle = ArctangentOfRatio(d.y, d.x);
@@ -1078,8 +1078,8 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
     }
     n = top - entries;
     entries[n] = entries[0];
-    Vec02 lo;
-    Vec02 hi;
+    Vec4 lo;
+    Vec4 hi;
     lo = hi = center;
     for (i = n - 1; i >= 0; i--) {
         e = &entries[i];
@@ -1101,7 +1101,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
         }
     }
     for (i = n - 1; i >= 0; i--) {
-        Vec02 d;
+        Vec4 d;
         e = &entries[i];
         *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(e->pos), Vu0::Vec::Of(center));
         e->angle = WrapAngle(ArctangentOfRatio(d.y, d.x));
@@ -1125,7 +1125,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
                 for (i = 0; i < steps;) {
                     i++;
                     f32 t = (f32)i / (f32)(steps + 1);
-                    Vec02 d;
+                    Vec4 d;
                     e = &entries[n++];
                     *(Vu0::Vec*)&e->pos = Vu0::MulXSum(to, Vu0::Vec::Scalar(1.0f - t), from, Vu0::Vec::Scalar(t));
                     *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(e->pos), Vu0::Vec::Of(center));
@@ -1141,10 +1141,10 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
     InitVertexBatch(&batch);
     BeginDmaTag(&g_vifPacketWriter);
     SetVertexBatchTransform(&batch, (u8*)&g_zeroVector, (u8*)&g_identityMatrix);
-    Vec02 rows[3];
+    Vec4 rows[3];
     s32 r;
     for (r = 0; r < 3; r++) {
-        rows[r] = *(Vec02*)&params->rows[r].shape;
+        rows[r] = *(Vec4*)&params->rows[r].shape;
         rows[r].x = rows[r].x / center.z;
         rows[r].z = rows[r].z * center.z;
     }
@@ -1157,7 +1157,7 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
         SetVertexBatchMode(&batch, (u8*)tex);
         f32 u0 = WrapModulo(g_gameClock.time * params->rate, 1.0f);
         for (i = 0; i <= n;) {
-            Vec02 d;
+            Vec4 d;
             f32 uv[2];
             next = i + 1;
             e = &entries[i];

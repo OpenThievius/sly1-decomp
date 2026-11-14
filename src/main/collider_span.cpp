@@ -19,7 +19,7 @@ struct SpanSet;
 // Finds which of the colliders in list the segment a1 to a2 meets first and gives it, with the span
 // in *out when out is given; null when none. With flags bit 0 a segment that starts inside an
 // object counts its second span (where it leaves).
-Collider* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out)
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out)
 {
     f32 bestKey = 3.4028235e+38f;
     Collider* best = 0;
@@ -56,7 +56,7 @@ s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4,
         do {
             Collider* e = *p;
             if ((e->flags538 & mask) == 0) {
-                s32 r = CollectColliderSpans(e, (Vec02*)a0, (Vec02*)a1, a4 - result, a5 + result);
+                s32 r = CollectColliderSpans(e, (Vec4*)a0, (Vec4*)a1, a4 - result, a5 + result);
                 if (r != 0) {
                     if (result != 0) {
                         r = MergeOverlappingSpans(result + r, a5);
@@ -74,10 +74,10 @@ s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4,
 // Collects the spans along the segment a1 to a2 through the collider's own tree (up to a3 into
 // a4), or through its bounding shape when it has no tree and flag 0x8000<<25 is set; gives back
 // the count, 0 if neither.
-s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderSpan* a4)
+s32 CollectColliderSpans(Collider* self, Vec4* a1, Vec4* a2, s32 a3, ColliderSpan* a4)
 {
     if (self->tree.nodes != 0) {
-        return CollectTreeNodeSpans((TreeNode03*)self->tree.nodes, (Vec02*)a1, (Vec02*)a2, 0, a3, (ColliderSpan*)a4);
+        return CollectTreeNodeSpans((TreeNode03*)self->tree.nodes, (Vec4*)a1, (Vec4*)a2, 0, a3, (ColliderSpan*)a4);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
         return CollectBoundsSpans(&self->v140, a1, a2, self->radius3CC, a3, a4);
@@ -91,10 +91,10 @@ s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderS
 s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, ColliderSpan* a5)
 {
     if (a1 != 0) {
-        return CollectTreeNodeSpans((TreeNode03*)a1, (Vec02*)a2, (Vec02*)a3, 0, a4, (ColliderSpan*)a5);
+        return CollectTreeNodeSpans((TreeNode03*)a1, (Vec4*)a2, (Vec4*)a3, 0, a4, (ColliderSpan*)a5);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return CollectBoundsSpans(&self->v140, (Vec02*)a2, (Vec02*)a3, self->radius3CC, a4, a5);
+        return CollectBoundsSpans(&self->v140, (Vec4*)a2, (Vec4*)a3, self->radius3CC, a4, a5);
     }
     return 0;
 }
@@ -105,7 +105,7 @@ s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32
 s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, s32 p3, ColliderSpan* p4)
 {
     if (self->tree.nodes != 0) {
-        return TestTreeSegmentHit((SpanQuery*)&self->tree, (SpanSet*)&self->meshCopy, (Vec02*)p1, (Vec02*)p2, p3, p4, x);
+        return TestTreeSegmentHit((SpanQuery*)&self->tree, (SpanSet*)&self->meshCopy, (Vec4*)p1, (Vec4*)p2, p3, p4, x);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
         return TestBoundsSegmentHit((u8*)&self->v140, p1, p2, p3, p4, self->radius3CC, x);
@@ -116,13 +116,13 @@ s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, s32 p3, Co
 // The spans where the segment a-b is inside the sphere of the given radius around p (the roots
 // of a quadratic in the position along the segment): the points, their directions from p and
 // the times, into out.
-s32 FindSegmentSphereSpan(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out)
+s32 FindSegmentSphereSpan(Vec4* p, Vec4* a, Vec4* b, f32 radius, s32 count, ColliderSpan* out)
 {
     if (count <= 0) {
         return 0;
     }
-    Vec02 ab;
-    Vec02 pa;
+    Vec4 ab;
+    Vec4 pa;
     f32 roots[2];
     Vu0::Q(ab) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     Vu0::Q(pa) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(*p));
@@ -159,13 +159,13 @@ static inline f32 MinF(f32 a, f32 b) { return b <? a; }
 // Intersects the segment a to b with the sphere of the given radius at p: solves the quadratic for
 // the two times the line meets the sphere, clips them to the segment (0 to 1) and gives one span
 // (kind 1) with the entry and exit points and the outward normals, or 0 for a miss.
-s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out)
+s32 CollectBoundsSpans(Vec4* p, Vec4* a, Vec4* b, f32 radius, s32 count, ColliderSpan* out)
 {
     if (count <= 0) {
         return 0;
     }
-    Vec02 ab;
-    Vec02 pa;
+    Vec4 ab;
+    Vec4 pa;
     f32 roots[2];
     Vu0::Q(ab) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
     Vu0::Q(pa) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(*p));
@@ -208,22 +208,22 @@ s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, Coll
 // (at most fb long), hits them (CollectBoundsSpans).
 s32 TestBoundsSegmentHit(void* p, void* a, void* b, s32 d, ColliderSpan* e, f32 fa, f32 fb)
 {
-    Vec02 nearest;
-    Vec02 off;
-    Vec02 a2;
-    Vec02 b2;
+    Vec4 nearest;
+    Vec4 off;
+    Vec4 a2;
+    Vec4 b2;
     f32 t;
     f32 dist;
-    MeasurePointToSegment((Vec02*)p, (Vec02*)a, (Vec02*)b, &t, &dist);
-    Vu0::Q(nearest) = Vu0::MulXSum(Vu0::Q(*(Vec02*)a), Vu0::Scalar(1.0f - t), Vu0::Q(*(Vec02*)b), Vu0::Scalar(t));
-    Vu0::Q(off) = Vu0::Sub(Vu0::Q(*(Vec02*)p), Vu0::Q(nearest));
+    MeasurePointToSegment((Vec4*)p, (Vec4*)a, (Vec4*)b, &t, &dist);
+    Vu0::Q(nearest) = Vu0::MulXSum(Vu0::Q(*(Vec4*)a), Vu0::Scalar(1.0f - t), Vu0::Q(*(Vec4*)b), Vu0::Scalar(t));
+    Vu0::Q(off) = Vu0::Sub(Vu0::Q(*(Vec4*)p), Vu0::Q(nearest));
     ClampVectorLength(&off, &off, fb);
-    Vu0::Q(a2) = Vu0::Add(Vu0::Q(*(Vec02*)a), Vu0::Q(off));
-    Vu0::Q(b2) = Vu0::Add(Vu0::Q(*(Vec02*)b), Vu0::Q(off));
-    return CollectBoundsSpans((Vec02*)p, &a2, &b2, fa, d, e);
+    Vu0::Q(a2) = Vu0::Add(Vu0::Q(*(Vec4*)a), Vu0::Q(off));
+    Vu0::Q(b2) = Vu0::Add(Vu0::Q(*(Vec4*)b), Vu0::Q(off));
+    return CollectBoundsSpans((Vec4*)p, &a2, &b2, fa, d, e);
 }
 
-f32 SplitVectorAlongAxis(const Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
+f32 SplitVectorAlongAxis(const Vec4* v, const Vec4* axis, Vec4* along, Vec4* rest);
 
 static inline u128 NormalizeOfCopy(u128 v, u128 vc, u128 fallback)
 {
@@ -238,15 +238,15 @@ static inline u128 NormalizeOfCopy(u128 v, u128 vc, u128 fallback)
 // closest approach of the two lines, the span of the segment inside the capsule (time along a-b,
 // parameter along c-d) clipped to both segments, and the entry and exit points with their surface
 // normals. Gives 1 and writes one span into out (kind 2), or 0 for a miss.
-s32 IntersectSegmentWithCapsule(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 radius, s32 count, ColliderSpan* out)
+s32 IntersectSegmentWithCapsule(Vec4* a, Vec4* b, Vec4* c, Vec4* d, f32 radius, s32 count, ColliderSpan* out)
 {
-    Vec02 cd;
-    Vec02 ab;
-    Vec02 ca;
-    Vec02 n;
-    Vec02 x;
-    Vec02 m;
-    Vec02 dir;
+    Vec4 cd;
+    Vec4 ab;
+    Vec4 ca;
+    Vec4 n;
+    Vec4 x;
+    Vec4 m;
+    Vec4 dir;
     f32 s;
     f32 u;
     if (count == 0)
@@ -342,10 +342,10 @@ s32 IntersectSegmentWithCapsule(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 radi
         if (out->param[0] == 0.0f) {
             Vu0::Q(out->q[i + 2]) = Vu0::MulX(Vu0::Vec::Of(dir), Vu0::Vec::Scalar(-1.0f)).q;
         } else if (out->param[0] == 1.0f) {
-            *(Vec02*)&out->q[i + 2] = dir;
+            *(Vec4*)&out->q[i + 2] = dir;
         } else {
             Vu0::Q(ca) = Vu0::Sub(Vu0::Vec::Of(out->q[i]), Vu0::Vec::Of(*a)).q;
-            SplitVectorAlongAxis(&ca, &dir, 0, (Vec02*)&out->q[i + 2]);
+            SplitVectorAlongAxis(&ca, &dir, 0, (Vec4*)&out->q[i + 2]);
             Vu0::Q(out->q[i + 2]) = Vu0::NormalizeOr(Vu0::Vec::Of(out->q[i + 2]), Vu0::Vec::Of(g_unitZVector)).q;
         }
     }
@@ -478,9 +478,9 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 // segment wholly inside the tree it is one span; otherwise the tree's spans plus those of the edge
 // capsules (IntersectSegmentWithCapsule) of the tree's marked nodes, merged
 // (MergeOverlappingSpans). Gives how many were written, at most max.
-s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, ColliderSpan* out, f32 radius)
+s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec4* p, Vec4* q, s32 max, ColliderSpan* out, f32 radius)
 {
-    Vec02 mid;
+    Vec4 mid;
     SpanRecord* end;
     SpanRecord* recs;
     s32 total;
@@ -505,8 +505,8 @@ s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 m
     case 0:
         FillMemory(out, 0, 0x70);
         total = 1;
-        *(Vec02*)&out->q[0] = *p;
-        *(Vec02*)&out->q[1] = *q;
+        *(Vec4*)&out->q[0] = *p;
+        *(Vec4*)&out->q[1] = *q;
         out->time[1] = 1.0f;
         break;
     case 2:
@@ -524,7 +524,7 @@ s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 m
                     SpanOther* other = &set->others[l->other];
                     if ((other->flags & 0x100) != 0) {
                         ColliderSpan* seg = out + total;
-                        s32 got = IntersectSegmentWithCapsule(p, q, (Vec02*)(set->verts + l->vertA * 16), (Vec02*)(set->verts + l->vertB * 16), radius, max - total, seg);
+                        s32 got = IntersectSegmentWithCapsule(p, q, (Vec4*)(set->verts + l->vertA * 16), (Vec4*)(set->verts + l->vertB * 16), radius, max - total, seg);
                         if (got > 0) {
                             ColliderSpan* sp = seg;
                             ColliderSpan* segEnd = sp + got;

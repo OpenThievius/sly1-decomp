@@ -76,9 +76,9 @@ void EndGifPacket(PacketWriter* f);
 
 extern World* g_currentWorld;
 
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
+void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value);
 
-void BuildPauseMenuPage(T217D_6D0* self);
+void BuildPauseMenuPage(PauseMenu* self);
 void SetPauseMenuPage(void* self, s32 v);
 
 extern u8 g_elementStack[];
@@ -107,7 +107,7 @@ extern DisplayPositionRegs g_displayRegisters;
 extern s32 D_00275BF0;
 extern f32 g_screenAdjustSavedX;
 extern f32 g_screenAdjustSavedY;
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
+void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value);
 extern "C" s32 ConvertFloatToU32(f32 value);
 
 
@@ -115,11 +115,11 @@ extern u8 g_elementStack[];
 extern u8 g_objectFadeIn[];
 extern CardSlot g_cardSlots[];
 
-void CancelPauseMenuPage(T217D_6D0* self);
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
-void ExitLevelFromPauseMenu(T217D_6D0* a0, s32 a1, s32 a2);
+void CancelPauseMenuPage(PauseMenu* self);
+void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value);
+void ExitLevelFromPauseMenu(PauseMenu* a0, s32 a1, s32 a2);
 void ResumeAtSavedLevel(void);
-void BuildPauseMenuPage(T217D_6D0* self);
+void BuildPauseMenuPage(PauseMenu* self);
 struct PathFollower;
 struct StateWalker;
 s32 ComputeCompletionMask(void);
@@ -127,8 +127,8 @@ void FadeOutAndQueueMovie(s32 n);
 void StartPauseMenuExitFade(void);
 struct PlayingSound;
 struct BaseObject;
-struct Vec02;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+struct Vec4;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // The glyph mark FindSubstring finds in a page title: the glyph is its third byte.
@@ -148,11 +148,11 @@ extern f32 g_screenAdjustX;
 extern f32 g_screenAdjustY;
 
 s32 ComputeCompletionPercent(GameProgress* progress);
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
-void ActivatePauseMenuSelection(T217D_6D0* self);
-void CancelPauseMenuPage(T217D_6D0* self);
+void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value);
+void ActivatePauseMenuSelection(PauseMenu* self);
+void CancelPauseMenuPage(PauseMenu* self);
 void StartPauseMenuExitFade(void);
 GlyphMark* FindSubstring(char* s, char* t);
 s32 GetCyclingGlyph(void);
@@ -166,7 +166,7 @@ enum PadSelectBits {
 extern u8 g_elementStack[];
 extern u8* g_activeStepSequence;
 
-void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b);
+void ChangePauseMenuPage(PauseMenu* self, s32 a, s32 b);
 
 // func_0015DB28 builds a text buffer and returns it (a constructor's `this`).
 
@@ -209,24 +209,24 @@ extern "C" f32 Sine(f32 x);
 struct RampProfile;
 void PushFontScale(Font* font, f32 a, f32 b);
 TextReader* InitTextReader(TextReader* self, char* text, Font* font);
-void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
+void DrawAlignedText(TextReader* self, TextBoxLayout* p, Vec4U* clip, PacketWriter* s);
 f32 MeasureTextHeight(TextReader* buf, f32 w);
 void PopFontScale(Font* font);
 f32 SumTextWidth(TextReader* buf);
 char* GetMenuChoiceLabel(s32 index);
 
-struct SetupLayout { static void Do(Layout_137228* out, f32 x, f32 y, f32 w, f32 h, s32 color, s32 flag)
+struct SetupLayout { static void Do(TextBoxLayout* out, f32 x, f32 y, f32 w, f32 h, s32 color, s32 flag)
 {
-    ((Layout_137228*)out)->Pos(x, y);
-    ((Layout_137228*)out)->Size(w, h);
+    ((TextBoxLayout*)out)->Pos(x, y);
+    ((TextBoxLayout*)out)->Size(w, h);
     Quad4 tmp;
     tmp.w[0] = color;
-    ((Layout_137228*)out)->Color(tmp.w);
-    ((Layout_137228*)out)->SetF14(flag);
-    ((Layout_137228*)out)->SetF18(0);
+    ((TextBoxLayout*)out)->Color(tmp.w);
+    ((TextBoxLayout*)out)->SetF14(flag);
+    ((TextBoxLayout*)out)->SetF18(0);
 } };
 
-struct DrawBoxWithFont { static void Do(MenuBoxStyle* o, Layout_137228* out, void* d)
+struct DrawBoxWithFont { static void Do(MenuBoxStyle* o, TextBoxLayout* out, void* d)
 {
     Font* hk = o->font;
     if (hk != 0) {
@@ -414,20 +414,20 @@ void EndLoadProgress(LoadProgress* p);
 void DrawLoadProgressBar(LoadProgress* o);
 void FormatGameSummary(GameProgress* self, char* dst);
 s32 FindObject42CStateWalker(void);
-void InitPauseMenu(T217D_6D0* self);
-void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b);
-void SetPauseMenuOpen(T217D_6D0* self, s32 mode);
-void ExitLevelFromPauseMenu(T217D_6D0* a0, s32 a1, s32 a2);
+void InitPauseMenu(PauseMenu* self);
+void ChangePauseMenuPage(PauseMenu* self, s32 a, s32 b);
+void SetPauseMenuOpen(PauseMenu* self, s32 mode);
+void ExitLevelFromPauseMenu(PauseMenu* a0, s32 a1, s32 a2);
 void StartPauseMenuExitFade(void);
-void UpdatePauseMenu(T217D_6D0* self);
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
-void SetPauseMenuMode(T217D_6D0* self, s32 v);
-void ShowPauseMenu(T217D_6D0* self);
-void HidePauseMenu(T217D_6D0* self);
-void DrawPauseMenu(T217D_6D0* self);
-void SetPauseMenuPage(T217D_6D0* self, s32 v);
-void ActivatePauseMenuSelection(T217D_6D0* self);
-void CancelPauseMenuPage(T217D_6D0* self);
+void UpdatePauseMenu(PauseMenu* self);
+void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value);
+void SetPauseMenuMode(PauseMenu* self, s32 v);
+void ShowPauseMenu(PauseMenu* self);
+void HidePauseMenu(PauseMenu* self);
+void DrawPauseMenu(PauseMenu* self);
+void SetPauseMenuPage(PauseMenu* self, s32 v);
+void ActivatePauseMenuSelection(PauseMenu* self);
+void CancelPauseMenuPage(PauseMenu* self);
 
 LoadProgress* InitLoadProgress(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4)
 {
@@ -540,7 +540,7 @@ void MeasureText(TextReader* buf, f32 w, f32* outW, f32* outH);
 
 // Builds the page on view: the items of the main and options pages as the game's state allows,
 // the labels that depend on the state, the row first highlighted, and the box's size.
-void BuildPauseMenuPage(T217D_6D0* self)
+void BuildPauseMenuPage(PauseMenu* self)
 {
     s32 page = self->page;
     MenuPage* row = &g_pauseMenuPages[page];
@@ -766,7 +766,7 @@ void BuildPauseMenuPage(T217D_6D0* self)
     SetScreenElementSize(self, width + 10.0f, height);
 }
 
-void InitPauseMenu(T217D_6D0* self)
+void InitPauseMenu(PauseMenu* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
@@ -781,7 +781,7 @@ void InitPauseMenu(T217D_6D0* self)
     self->fade = 1.0f;
 }
 
-void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b)
+void ChangePauseMenuPage(PauseMenu* self, s32 a, s32 b)
 {
     if (a == b) {
         return;
@@ -805,7 +805,7 @@ void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b)
     case 11:
     case 16:
     case 17: {
-        T217D_330* o = &g_buttonHintElement;
+        ButtonHintElement* o = &g_buttonHintElement;
         SetScreenElementHoldTime(o, 0.0f);
         SetScreenElementScale(o, 0.6f);
         break;
@@ -825,7 +825,7 @@ void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b)
     }
 }
 
-void SetPauseMenuOpen(T217D_6D0* self, s32 mode) {
+void SetPauseMenuOpen(PauseMenu* self, s32 mode) {
     if (self->open == mode) return;
     if (mode != 0) {
         s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
@@ -865,7 +865,7 @@ void SetPauseMenuOpen(T217D_6D0* self, s32 mode) {
     self->open = mode;
 }
 
-void ExitLevelFromPauseMenu(T217D_6D0* a0, s32 a1, s32 a2)
+void ExitLevelFromPauseMenu(PauseMenu* a0, s32 a1, s32 a2)
 {
     SetPauseMenuLayerPage(a0, 0, -1);
     GameProgress* g = g_saveData;
@@ -909,7 +909,7 @@ void StartPauseMenuExitFade(void)
     StartScreenFade(&g_screenFade, &args, 0);
 }
 
-void UpdatePauseMenu(T217D_6D0* self)
+void UpdatePauseMenu(PauseMenu* self)
 {
     GameProgress* g = g_saveData;
     MenuPage* row = &g_pauseMenuPages[self->page];
@@ -1150,7 +1150,7 @@ void UpdatePauseMenu(T217D_6D0* self)
     }
 }
 
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value)
+void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value)
 {
     s32 s1;
     s32 s2;
@@ -1199,7 +1199,7 @@ void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value)
     }
 }
 
-void SetPauseMenuMode(T217D_6D0* self, s32 v)
+void SetPauseMenuMode(PauseMenu* self, s32 v)
 {
     s32 flag = v;
 
@@ -1222,13 +1222,13 @@ void SetPauseMenuMode(T217D_6D0* self, s32 v)
     SetScreenElementMode(self, flag);
 }
 
-void ShowPauseMenu(T217D_6D0* self)
+void ShowPauseMenu(PauseMenu* self)
 {
     if (self->mode == 3 && self->queued != 0) return;
     ShowScreenElement(self);
 }
 
-void HidePauseMenu(T217D_6D0* self)
+void HidePauseMenu(PauseMenu* self)
 {
     if (self->mode == 3 && self->queued != 0) {
         self->queued = 0;
@@ -1238,7 +1238,7 @@ void HidePauseMenu(T217D_6D0* self)
     HideScreenElement(self);
 }
 
-void DrawPauseMenu(T217D_6D0* self)
+void DrawPauseMenu(PauseMenu* self)
 {
     f32 cx;
     f32 cy;
@@ -1276,17 +1276,17 @@ void DrawPauseMenu(T217D_6D0* self)
     self->fade = ApproachValueWithRamp((RampProfile*)g_fadeRampProfile, 0, self->fade, fade, g_gameClock[5]);
     alpha = (u8)(s32)(self->fade * 255.0f);
     if (((MenuBoxStyle*)self->frame) != 0) {
-        Layout_137228 out;
+        TextBoxLayout out;
         s32 backColor = 0xFF808080;
-        ((Layout_137228*)&out)->Pos(cx, cy);
-        ((Layout_137228*)&out)->Size(w, h);
+        ((TextBoxLayout*)&out)->Pos(cx, cy);
+        ((TextBoxLayout*)&out)->Size(w, h);
         {
             Quad4 tmp;
             tmp.w[0] = backColor;
-            ((Layout_137228*)&out)->Color(tmp.w);
+            ((TextBoxLayout*)&out)->Color(tmp.w);
         }
-        ((Layout_137228*)&out)->SetF14(0);
-        ((Layout_137228*)&out)->SetF18(0);
+        ((TextBoxLayout*)&out)->SetF14(0);
+        ((TextBoxLayout*)&out)->SetF18(0);
         Rgba4 saved = ((MenuBoxStyle*)self->frame)->color;
         {
             Rgba4 t = saved;
@@ -1309,7 +1309,7 @@ void DrawPauseMenu(T217D_6D0* self)
     }
     if (menu->title != 0) {
         TextReader buf;
-        Layout_137228 out;
+        TextBoxLayout out;
         Rgba4 c;
         f32 sc = menu->titleScale * self->blend;
         PushFontScale(self->font, sc, sc);
@@ -1379,7 +1379,7 @@ void DrawPauseMenu(T217D_6D0* self)
         InitTextReader(&buf, (char*)str, self->font);
         f32 width2 = SumTextWidth(&buf);
         th = (f32)self->font->height * self->font->sy;
-        Layout_137228 out;
+        TextBoxLayout out;
         SetupLayout::Do(&out, x + (width - width2) * 0.5f, cy + (lineH - th) * 0.5f, w, th, *(s32*)&col, 0);
         DrawAlignedText(&buf, &out, 0, (PacketWriter*)g_gsPacketWriter);
         PopFontScale(self->font);
@@ -1398,7 +1398,7 @@ void DrawPauseMenu(T217D_6D0* self)
     }
 }
 
-void SetPauseMenuPage(T217D_6D0* self, s32 v)
+void SetPauseMenuPage(PauseMenu* self, s32 v)
 {
     if (self->page != v) {
         self->page = v;
@@ -1406,7 +1406,7 @@ void SetPauseMenuPage(T217D_6D0* self, s32 v)
     }
 }
 
-void ActivatePauseMenuSelection(T217D_6D0* self)
+void ActivatePauseMenuSelection(PauseMenu* self)
 {
     s32 sel = g_pauseMenuPages[self->page].items ? g_pauseMenuPages[self->page].items[self->cursor] : -1;
     if (sel == 0x11) {
@@ -1420,7 +1420,7 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
             SetPauseMenuLayerPage(self, 0, -1);
             return;
         case 4: {
-            T217D_0F0* s = &g_mapScreenList;
+            WarpPageList* s = &g_mapScreenList;
             if (s->current != 0) {
                 SetPauseMenuLayerPage(self, 0, -1);
                 PushStackElement((ElementStack*)g_elementStack, s);
@@ -1709,7 +1709,7 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
     }
 }
 
-void CancelPauseMenuPage(T217D_6D0* self)
+void CancelPauseMenuPage(PauseMenu* self)
 {
     switch (self->page) {
     case 0:

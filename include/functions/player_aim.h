@@ -7,14 +7,14 @@
 #include "common.h"
 
 struct ChildPoseSource;
-struct Mat02;
+struct Mat3;
 struct PadRecord;
 struct Player;
 struct TwoBlendWeights;
-struct Vec02;
+struct Vec4;
 
-void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec02* pos, Vec02* vec);
-void CombineChildPoseRotations(ChildPoseSource* self, Mat02* outRot, Vec02* outVec, f32 t);
+void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec4* pos, Vec4* vec);
+void CombineChildPoseRotations(ChildPoseSource* self, Mat3* outRot, Vec4* outVec, f32 t);
 void SetPlayerAimMode(Player* self, s32 state);
 void UpdatePlayerAimTarget(Player* s);
 void HandlePlayerAimButton(Player* self, PadRecord* other);

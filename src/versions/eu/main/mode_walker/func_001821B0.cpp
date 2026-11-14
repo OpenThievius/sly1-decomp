@@ -11,8 +11,8 @@ struct SpinningSprite_eu {
 void DrawSpinningSpriteElement(SpinningSprite_eu* self)
 {
     Rgba4 col;
-    Mat02 m;
-    Vec02 p;
+    Mat3 m;
+    Vec4 p;
     if (self->icon == 0) {
         return;
     }

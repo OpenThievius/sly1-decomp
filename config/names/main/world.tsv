@@ -32,8 +32,8 @@ func_001DBAC0	SetCachedVoiceParamBuiltin	the script built-in func_00104220 calls
 func_001DBAE0	GetCachedVoiceParamBuiltin	returns GetCachedVoiceParam of the index, for the script built-ins
 func_001DBB00	RefreshCachedVoiceParamBuiltin	calls RefreshCachedVoiceParam with its two arguments, for the script built-ins
 func_001DBB20	IsWorldBodyLimitReached	returns 1 when the object's class has flag bit 2, the world already counts 0xF7 or more bodies (+0x38) and the value is 0; func_0013D278 asks it
-func_001DBB50	TakeAttachRecord	takes a 0x10-byte entry from the world's pool at +0x1B08 and clears 16 bytes; its callers store it as an Attach03 link
-func_001DBB90	ReleaseAttachRecords	walks an Attach03 chain by nextOwn and pushes each node back on the world's pool at +0x1B08
+func_001DBB50	TakeAttachRecord	takes a 0x10-byte entry from the world's pool at +0x1B08 and clears 16 bytes; its callers store it as an ColliderAttachment link
+func_001DBB90	ReleaseAttachRecords	walks an ColliderAttachment chain by nextOwn and pushes each node back on the world's pool at +0x1B08
 func_001DBBD8	TakeCallRecord	takes a 0x14-byte entry from the world's pool at +0x1B14 (PopZeroedFreeSlot) and clears 0x14 bytes
 func_001DBC18	ReleaseCallRecords	walks the chain linked through the next word at +0x10 and pushes each 0x14-byte record back on the world's pool at +0x1B14 (PushFreeSlot)
 func_001DBC60	AppendQueuedCallOnce	walks the list at +0x1EC8 and returns if a record with the same four words exists, otherwise calls AppendQueuedCall
@@ -42,13 +42,13 @@ func_001DBD40	RemoveQueuedCalls	unlinks every record of the list at +0x1EC8 whos
 func_001DBE48	RunQueuedCalls	slot of the world: pops each record of the list at +0x1EC8, calls its function with the next three words, and releases it with ReleaseCallRecords
 func_001DBEC8	RunDueDelayedScriptCalls	UpdateWorld calls it with the time step: takes it off the delay of each (delay, expression) entry of the world's script variable +0x1EF8 (the list func_00117668 appends to), evaluates the expressions that fall due and drops their entries from the list
 func_001DC0C8	AllocateTouchNode	takes a record from the pool at world + 0x1C0C (func_001B5EC0) and clears its 8 bytes
-func_001DC108	FreeTouchNodes	walks a Touch03 chain by next and gives each node back to the pool at owner + 0x1C0C with func_001B5F28
+func_001DC108	FreeTouchNodes	walks a TouchedObjectLink chain by next and gives each node back to the pool at owner + 0x1C0C with func_001B5F28
 func_001DC150	PushCloneBatch	makes n - 1 copies of src with func_00183058 into a new buffer and pushes the (count, buffer) pair on the stack at 0x1F00 indexed by 0x1EFC
 func_001DC208	PopSpawnedClone	decrements the count of the stack entry at index in the array at 0x1F00 and returns the value it then points to
 func_001DC238	GatherCollidersInBox	allocates an array of the world's body count (+0x34) in back memory and fills it with the bodies of the world's list (+0x6C) and their parts whose bounds (+0x420 to +0x434) overlap the box of two points, skipping the given object, flagged bodies (+0x538 bits) and those the optional filter refuses; writes the array and its count; eighteen functions call it, among them ScoreTargetCandidate, BuildAgentPath and AddTargetObstructionCost
 func_001DC4D0	GatherCollidersInSphere	original assembly: as GatherCollidersInBox but keeps the bodies whose bounding sphere (centre +0x140, radius +0x3D0) comes within the given radius of a point, testing each pair with the bodies' slot at +0xF0 and the optional filter; IsObjectCyclerUnsupported, ChooseTimedGroupState and UpdateRangeRecord call it
 func_001DC710	UnlinkContactTable	removes node from the doubly linked list whose head is *head, fixing prev/next and the head
-func_001DC740	InitContactTables	allocates 0x1000 bytes, makes them 0x100 16-byte Contacts03 records chained through next/prev, sets tables and freeTables to the block
+func_001DC740	InitContactTables	allocates 0x1000 bytes, makes them 0x100 16-byte BodyContactTable records chained through next/prev, sets tables and freeTables to the block
 func_001DC7B0	PushContactTable	pushes node on the front of the doubly linked list *head (next, prev)
 func_001DC7D0	TakeContactTable	unlinks the first of freeTables, pushes it onto usedTables and sets its owner
 func_001DC828	ReleaseContactTable	gives back every contact row of the table to pool1AF0, clears its byte pair entries in buf1ADC, unlinks it from usedTables and pushes it onto freeTables

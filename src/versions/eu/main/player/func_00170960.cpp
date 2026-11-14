@@ -80,8 +80,8 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
         }
         switch (msg->code) {
         case 0x138: {
-            Vec02 v;
-            Track83* track = src->anim->movedTrack;
+            Vec4 v;
+            AnimationTrack* track = src->anim->movedTrack;
             if (track == 0) {
                 break;
             }
@@ -90,7 +90,7 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
             Vu0::Q(v) = Vu0::Rotate(self->headingMatrix, Vu0::Q(v));
             self->desc02()->m20(self, &v);
             if (src == (void*)self->stateAnimPlayer) {
-                Vec02 w;
+                Vec4 w;
                 u128 s = Vu0::FromFloat(-1.0f);
                 Vu0::Q(self->headingVelocity) = Vu0::MulX(Vu0::Q(v), s);
                 Vu0::Q(w) = s;

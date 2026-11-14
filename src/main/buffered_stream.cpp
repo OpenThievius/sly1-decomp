@@ -402,8 +402,8 @@ extern f32 g_gameTime;
 
 struct BaseObject;
 struct PlayingSound;
-struct Vec02;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+struct Vec4;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 extern u8 func_00135E20[];
@@ -661,7 +661,7 @@ void* AllocateZeroedFrontMemory(s32 size);
 
 // Reads a collision mesh from the stream: the radius, the vertices (16 bytes each), then the faces
 // (32 bytes each) with their points and words, and the edge data.
-void ReadMeshFromStream(BufferedStream* in, Mesh03* mesh)
+void ReadMeshFromStream(BufferedStream* in, CollisionMesh* mesh)
 {
     s32 i = 0;
     mesh->radius = ReadBufferedFloat(in);
@@ -690,15 +690,15 @@ void ReadMeshFromStream(BufferedStream* in, Mesh03* mesh)
         idx[0] = ReadBufferedU16(in);
         idx[1] = ReadBufferedU16(in);
         idx[2] = ReadBufferedU16(in);
-        Vec02 e1;
-        Vec02 e2;
-        Vu0::Q(e1) = Vu0::Sub(Vu0::Q(((Vec02*)mesh->verts)[idx[1]]), Vu0::Q(((Vec02*)mesh->verts)[idx[0]]));
-        Vu0::Q(e2) = Vu0::Sub(Vu0::Q(((Vec02*)mesh->verts)[idx[2]]), Vu0::Q(((Vec02*)mesh->verts)[idx[0]]));
+        Vec4 e1;
+        Vec4 e2;
+        Vu0::Q(e1) = Vu0::Sub(Vu0::Q(((Vec4*)mesh->verts)[idx[1]]), Vu0::Q(((Vec4*)mesh->verts)[idx[0]]));
+        Vu0::Q(e2) = Vu0::Sub(Vu0::Q(((Vec4*)mesh->verts)[idx[2]]), Vu0::Q(((Vec4*)mesh->verts)[idx[0]]));
         u128 nrm = Vu0::Cross(Vu0::Q(e1), Vu0::Q(e2));
         u128 unit = Vu0::DivX(nrm, Vu0::Length(nrm));
         Vu0::Q(f->normal) = unit;
         f->vert = idx[0];
-        Vu0::StoreX(f->offset, Vu0::Dot(unit, Vu0::Q(((Vec02*)mesh->verts)[f->vert])));
+        Vu0::StoreX(f->offset, Vu0::Dot(unit, Vu0::Q(((Vec4*)mesh->verts)[f->vert])));
         ((f32*)mesh->words)[face] = ReadBufferedFloat(in);
         ReadBufferedVector3(in, (u8*)mesh->points + (face << 4));
         s32 cnt = ReadBufferedU8(in);
@@ -730,7 +730,7 @@ void* AllocateZeroedFrontMemory(s32 size);
 // Reads a face tree (a binary tree over a mesh's faces) from the stream: the counts, then for each
 // node the face, the two child indexes (0xFFFF for none) and the rest of its record, linked to the
 // nodes and faces by pointer.
-void ReadFaceTree(BufferedStream* self, Mesh03* in, Tree03* out)
+void ReadFaceTree(BufferedStream* self, CollisionMesh* in, MeshTree* out)
 {
     s32 x = ReadBufferedU16(self);
     out->count = x;

@@ -13,7 +13,7 @@
 // and some labels sit inside an object): no sizeof check is made for the variants.
 // Three tables of the later segment end in the same three digits as one of the first
 // (D_002212E0 and D_002182E0, D_00221330 and D_00218330, D_00221380 and D_00218380): their
-// variants take four digits (T217D_12E0, T217D_1330, T217D_1380).
+// variants take four digits (ObjectScreenCaption, ChoiceGridCaption, SprintCaption).
 #ifndef SCREEN_ELEMENT_H
 #define SCREEN_ELEMENT_H
 
@@ -121,7 +121,7 @@ struct ScreenElement {
 
 // The sixteen plain captions (D_00217E30 ... D_00218290, one table shape): a text that follows
 // a counter in the game's state, f214 telling which one (func_001AB2B8), and counts to it.
-struct T217D_E30 : ScreenElement {
+struct CounterCaption : ScreenElement {
     s32 shown;                  // 0x260: the value on the display, -1 before the first update
     s32* target;                // 0x264: the counter it follows
     s32* limit;                 // 0x268: a second counter (the "of" in "3/5")
@@ -132,11 +132,11 @@ struct T217D_E30 : ScreenElement {
     s32 own;                    // 0x27C: D_00274118 only: a count of its own that `target` points at (func_001943E8)
 };
 
-struct T217D_510;
-typedef void (*T217D_510_Fn)(T217D_510* self, s32 arg);
+struct TimerElement;
+typedef void (*T217D_510_Fn)(TimerElement* self, s32 arg);
 
 // The timer (D_00218510): counts up or down and shows minutes and seconds.
-struct T217D_510 : ScreenElement {
+struct TimerElement : ScreenElement {
     s32 state;                  // 0x260: 0 off, 1 waiting, 2 counting (func_001ABE20)
     f32 stateSince;             // 0x264: the clock when the state began
     f32 time;                   // 0x268: seconds on the timer
@@ -152,10 +152,10 @@ struct T217D_510 : ScreenElement {
     s32 hideWhenStopped;        // 0x290: set by func_001AB600 and func_001AB958, 0 by func_001AB890
 };
 
-void SetTimerState(T217D_510* self, s32 state);
+void SetTimerState(TimerElement* self, s32 state);
 
 // The gauge (D_002182E0): a filled bar that follows a value and flashes a letter.
-struct T217D_2E0 : ScreenElement {
+struct GaugeBar : ScreenElement {
     s32 segmentCount;       // 0x260: copied into f26C when a gauge mode starts (func_0017B410)
     s32 cellsPerSegment;    // 0x264: copied into f270 then
     s32 cellCount;          // 0x268: the cells of the whole bar
@@ -176,25 +176,25 @@ struct T217D_2E0 : ScreenElement {
 };
 
 // D_00218330: the base without any field of its own.
-struct T217D_330 : ScreenElement {
+struct ButtonHintElement : ScreenElement {
 };
 
 // A caption that can be told a new text while it is on screen (D_00218380): the new one waits
 // in f264 until the element has slid out.
-struct T217D_380 : ScreenElement {
+struct PointerTextCaption : ScreenElement {
     s32 pending;                // 0x260: a new text waits
     const char* pendingText;    // 0x264
 };
 
 // The same with the text copied (D_002183D0).
-struct T217D_3D0 : ScreenElement {
+struct CopiedTextCaption : ScreenElement {
     s32 pending;                // 0x260
     char pendingText[0x200];    // 0x264
     s32 announce;               // 0x464: 1 while the announcement is shown in the middle
 };
 
 // D_00218420.
-struct T217D_420 : ScreenElement {
+struct HintGlyphElement : ScreenElement {
     union {
         s32 flag;               // 0x260: nonzero, the element shows (func_001AD718)
         StepSequence* owner;    // 0x260: the step sequence in state 5 that shows it (func_00150790)
@@ -202,26 +202,26 @@ struct T217D_420 : ScreenElement {
 };
 
 // D_00218470: an element with an icon table.
-struct T217D_470 : ScreenElement {
+struct TitleElement : ScreenElement {
     void* icon;                 // 0x260: the icon's record (func_001B4688), or 0
 };
 
 // D_002184C0.
-struct T217D_4C0 : ScreenElement {
+struct PromptElement : ScreenElement {
     s32 flagA;                  // 0x260
     s32 flagB;                  // 0x264
     s32 pending;                // 0x268
 };
 
 // D_00218560 and D_002185B0 have no field of their own.
-struct T217D_560 : ScreenElement {
+struct LetterboxElement : ScreenElement {
 };
 
-struct T217D_5B0 : ScreenElement {
+struct BeatGlyphElement : ScreenElement {
 };
 
 // D_00218600.
-struct T217D_600 : ScreenElement {
+struct CyclingGlyphElement : ScreenElement {
     s32 flag;                   // 0x260
 };
 
@@ -244,7 +244,7 @@ struct T217D_3F0_Pt {
 typedef char check_T217D_3F0_Pt[sizeof(T217D_3F0_Pt) == 0x2C ? 1 : -1];   // func_001E5E70 steps 0x2C bytes
 
 // The sparkle round a held item (D_0021A3F0, two objects: D_002708E0 and D_00271558).
-struct T217D_3F0 : ScreenElement {
+struct HeldItemSparkle : ScreenElement {
     s32 fade;                   // 0x260: 0 fading in, 1 fading out (func_001E6C20, func_001E7440)
     f32 fadeSince;              // 0x264: the clock when `fade` was set
     s32 phase;                  // 0x268: 0 growing, 1 full, 2 shrinking, 3 gone (func_001E7518, func_001E77C0)
@@ -281,7 +281,7 @@ struct T217D_440_Slot {
 
 // The caption box of the dialogue and tutorial screens (D_0021A440, D_002701F8): it types its text
 // out, keeps a state of its own (0 off ... 5), and follows a game object (`child`).
-struct T217D_440 : ScreenElement {
+struct CaptionBox : ScreenElement {
     s32 state;                  // 0x260: 0 off, 1 .. 4 the kinds of box, 5 (func_001356C0 sets it, func_00136408 tests 4)
     f32 stateSince;             // 0x264: the clock when `state` was set
     f32 textSince;              // 0x268: the clock when the text was set (func_00136408; the typing starts here)
@@ -320,7 +320,7 @@ struct T217D_440 : ScreenElement {
 
 // The pause menu (D_002186D0, D_0026FF68): three layers each ask for a screen, the lowest answer
 // shown (func_00194D30); it slides in and out like the other elements.
-struct T217D_6D0 : ScreenElement {
+struct PauseMenu : ScreenElement {
     s32 page;                   // 0x260: the screen on view, -1 for none (func_00193E58 starts it at -1)
     s32 cursor;                 // 0x264: the highlighted row of that screen
     s32 want[3];                // 0x268: the screen each of the three layers asks for, -1 for none
@@ -333,7 +333,7 @@ struct T217D_6D0 : ScreenElement {
 };
 
 // The map screen's list (D_002210F0, D_0026F808): it holds the objects of kind 0x67 by slot.
-struct T217D_0F0 : ScreenElement {
+struct WarpPageList : ScreenElement {
     WarpPage* current;          // 0x260: the object it shows
     WarpPage* nodes[6];         // 0x264: the warp pages, by their slot (StartWarpPage enters them)
     f32 scale;                  // 0x27C: eased toward `scaleTarget` (func_001F1A08)
@@ -341,19 +341,19 @@ struct T217D_0F0 : ScreenElement {
 };
 
 // D_002212E0 (D_0026FA90): a caption that opens an object's screen.
-struct T217D_12E0 : ScreenElement {
+struct ObjectScreenCaption : ScreenElement {
     void* node;                 // 0x260: the object it shows (its mode at +0x2D0)
     s32 sound;                  // 0x264: the sound handle func_001BE980 gave, 0 for none
     f32 lastAt;                 // 0x268: the clock of the last time it spoke; -D_00262970 at the start, so the first test passes
 };
 
 // D_00221330 (D_0026FD00).
-struct T217D_1330 : ScreenElement {
+struct ChoiceGridCaption : ScreenElement {
     s32 cursor;                 // 0x260: the chosen one of 16 (4 by 4, func_0016BBA8); func_0016BDD0 starts it at the highest bit set in the game state's word at +0x19F4
 };
 
 // D_00221380 (D_0026E9F8): the caption of the timed sprint.
-struct T217D_1380 : ScreenElement {
+struct SprintCaption : ScreenElement {
     s32 state;                  // 0x260: 0 off, 1, 2 the sprint on, 3 (func_001E02C8)
     f32 stateSince;             // 0x264: the clock when `state` was set
     s32 active;                 // 0x268: state != 0
@@ -362,7 +362,7 @@ struct T217D_1380 : ScreenElement {
 };
 
 // D_00220BF0 (D_00270650).
-struct T217D_BF0 : ScreenElement {
+struct AimReticle : ScreenElement {
     f32 rateX;                  // 0x260: the aim's speeds, eased to the stick (func_00181ED0)
     f32 rateY;                  // 0x264
     u8 pad268[0x270 - 0x268];
@@ -373,9 +373,9 @@ struct T217D_BF0 : ScreenElement {
 };
 
 // D_00218720 (D_00272E08): four sub-elements of the same kind (D_00218330) stacked, drawn together.
-struct T217D_720 : ScreenElement {
+struct StackedCaptionGroup : ScreenElement {
     s32 count;                  // 0x260: how many of `items` are in use (func_0014ADE0)
-    T217D_330 items[4];         // 0x264: 0x260 bytes each (func_0014ABD0)
+    ButtonHintElement items[4];         // 0x264: 0x260 bytes each (func_0014ABD0)
 };
 
 // The base's functions (src/main/object_pool.cpp and screen_element.cpp).
@@ -404,47 +404,47 @@ void SetScreenElementClock(ScreenElement* self, f32* clock);
 // The 37 objects, in .data in address order (GCC writes uninitialised globals in the order
 // they are first declared; D_002486B0 lists them in its own order). Each is of the variant of
 // its table (D_0026EC70 and the four sub-elements of D_00272E08 have the base's table D_00218330).
-extern T217D_E30 g_reserveCountCaption;    // D_00217E30
-extern T217D_E30 g_collectedItemCaption;    // D_00217E80
-extern T217D_E30 D_0026CBC8;    // D_00217ED0
-extern T217D_E30 D_0026CE48;    // D_00217F20
-extern T217D_E30 g_pairControllerCountCaption;    // D_00217F70
-extern T217D_E30 g_gaugeAmountCaption;    // D_00217FC0
-extern T217D_E30 g_pathFollowerFirstCountCaption;    // D_002180B0
-extern T217D_E30 D_0026D848;    // D_00218010
-extern T217D_E30 g_pathFollowerSecondCountCaption;    // D_00218060
-extern T217D_E30 g_hitCountCaptionA;    // D_00218100
-extern T217D_E30 g_hitCountCaptionB;    // D_00218150
-extern T217D_2E0 g_gaugeBarElement;    // D_002182E0
-extern T217D_E30 g_gaugeColliderCaption;    // D_002181A0
-extern T217D_510 g_timerElement;    // D_00218510
-extern T217D_1380 g_timerCaption;   // D_00221380
-extern T217D_330 g_buttonHintElement;    // D_00218330
-extern T217D_380 g_pointerTextCaption;    // D_00218380
-extern T217D_3D0 g_copiedTextCaption;    // D_002183D0
-extern T217D_420 g_hintGlyphElement;    // D_00218420
-extern T217D_0F0 g_mapScreenList;    // D_002210F0
-extern T217D_12E0 g_selectionCaption;   // D_002212E0
-extern T217D_1330 g_gridSelector;   // D_00221330
-extern T217D_6D0 g_pauseMenuElement;    // D_002186D0
-extern T217D_440 g_typedTextCaptionBox;    // D_0021A440
-extern T217D_BF0 g_spinningSpriteElement;    // D_00220BF0
-extern T217D_3F0 g_leftArcElement;    // D_0021A3F0
-extern T217D_3F0 g_rightArcElement;    // D_0021A3F0
-extern T217D_560 g_letterboxElement;    // D_00218560
-extern T217D_E30 g_firstTallyCaption;    // D_00218240
-extern T217D_E30 g_secondTallyCaption;    // D_00218290
-extern T217D_470 g_titleElement;    // D_00218470
-extern T217D_4C0 g_promptElement;    // D_002184C0
-extern T217D_720 g_stackedCaptionGroup;    // D_00218720
-extern T217D_5B0 g_bossBeatGlyphElement;    // D_002185B0
-extern T217D_5B0 g_beatPressGlyphElement;    // D_002185B0
-extern T217D_600 g_cyclingGlyphElement;    // D_00218600
-extern T217D_E30 g_completionPercentCaption;    // D_002181F0
+extern CounterCaption g_reserveCountCaption;    // D_00217E30
+extern CounterCaption g_collectedItemCaption;    // D_00217E80
+extern CounterCaption D_0026CBC8;    // D_00217ED0
+extern CounterCaption D_0026CE48;    // D_00217F20
+extern CounterCaption g_pairControllerCountCaption;    // D_00217F70
+extern CounterCaption g_gaugeAmountCaption;    // D_00217FC0
+extern CounterCaption g_pathFollowerFirstCountCaption;    // D_002180B0
+extern CounterCaption D_0026D848;    // D_00218010
+extern CounterCaption g_pathFollowerSecondCountCaption;    // D_00218060
+extern CounterCaption g_hitCountCaptionA;    // D_00218100
+extern CounterCaption g_hitCountCaptionB;    // D_00218150
+extern GaugeBar g_gaugeBarElement;    // D_002182E0
+extern CounterCaption g_gaugeColliderCaption;    // D_002181A0
+extern TimerElement g_timerElement;    // D_00218510
+extern SprintCaption g_timerCaption;   // D_00221380
+extern ButtonHintElement g_buttonHintElement;    // D_00218330
+extern PointerTextCaption g_pointerTextCaption;    // D_00218380
+extern CopiedTextCaption g_copiedTextCaption;    // D_002183D0
+extern HintGlyphElement g_hintGlyphElement;    // D_00218420
+extern WarpPageList g_mapScreenList;    // D_002210F0
+extern ObjectScreenCaption g_selectionCaption;   // D_002212E0
+extern ChoiceGridCaption g_gridSelector;   // D_00221330
+extern PauseMenu g_pauseMenuElement;    // D_002186D0
+extern CaptionBox g_typedTextCaptionBox;    // D_0021A440
+extern AimReticle g_spinningSpriteElement;    // D_00220BF0
+extern HeldItemSparkle g_leftArcElement;    // D_0021A3F0
+extern HeldItemSparkle g_rightArcElement;    // D_0021A3F0
+extern LetterboxElement g_letterboxElement;    // D_00218560
+extern CounterCaption g_firstTallyCaption;    // D_00218240
+extern CounterCaption g_secondTallyCaption;    // D_00218290
+extern TitleElement g_titleElement;    // D_00218470
+extern PromptElement g_promptElement;    // D_002184C0
+extern StackedCaptionGroup g_stackedCaptionGroup;    // D_00218720
+extern BeatGlyphElement g_bossBeatGlyphElement;    // D_002185B0
+extern BeatGlyphElement g_beatPressGlyphElement;    // D_002185B0
+extern CyclingGlyphElement g_cyclingGlyphElement;    // D_00218600
+extern CounterCaption g_completionPercentCaption;    // D_002181F0
 
 // The base is the stride of D_00218720's four sub-elements (func_0014ABD0 steps 0x260 bytes).
 typedef char check_ScreenElement[sizeof(ScreenElement) == 0x260 ? 1 : -1];
-typedef char check_T217D_330[sizeof(T217D_330) == 0x260 ? 1 : -1];
+typedef char check_T217D_330[sizeof(ButtonHintElement) == 0x260 ? 1 : -1];
 
 // The stack of screen elements the menus push and pop (g_elementStack, D_00275BC0): its state
 // (SetElementStackState), and the elements, whose top gets the pad each frame

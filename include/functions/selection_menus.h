@@ -6,11 +6,11 @@
 
 #include "common.h"
 
+struct ChoiceGridCaption;
 struct CurrentPlacedObject;
+struct ObjectScreenCaption;
 struct PadRecord;
 struct PartHolderObject;
-struct T217D_12E0;
-struct T217D_1330;
 
 void CallFlaggedParts(PartHolderObject* self);
 void SetupCurrentObjectChoices(CurrentPlacedObject* self);
@@ -19,16 +19,16 @@ void ShowCurrentObjectCaptions(CurrentPlacedObject* self);
 void MoveCurrentObjectChoice(CurrentPlacedObject* self, PadRecord* a1);
 void ConfirmCurrentObjectChoice(CurrentPlacedObject* self);
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
-void InitSelectionCaption(T217D_12E0* self);
-void RestoreSelectionCaptionCamera(T217D_12E0* self);
-void UpdateSelectionCaption(T217D_12E0* self);
-void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg);
-void SetSelectionCaptionOpen(T217D_12E0* self, s32 v);
-void DrawSelectionCaption(T217D_12E0* self);
-void InitGridSelector(T217D_1330* self);
+void InitSelectionCaption(ObjectScreenCaption* self);
+void RestoreSelectionCaptionCamera(ObjectScreenCaption* self);
+void UpdateSelectionCaption(ObjectScreenCaption* self);
+void HandleSelectionCaptionInput(ObjectScreenCaption* self, PadRecord* arg);
+void SetSelectionCaptionOpen(ObjectScreenCaption* self, s32 v);
+void DrawSelectionCaption(ObjectScreenCaption* self);
+void InitGridSelector(ChoiceGridCaption* self);
 u32 TestGridEntryBit(u32 bit);
-void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o);
-void SetGridSelectorOpen(T217D_1330* self, s32 flag);
-void DrawGridSelector(T217D_1330* self);
+void HandleGridSelectorInput(ChoiceGridCaption* ctx, PadRecord* o);
+void SetGridSelectorOpen(ChoiceGridCaption* self, s32 flag);
+void DrawGridSelector(ChoiceGridCaption* self);
 
 #endif

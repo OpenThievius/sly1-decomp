@@ -21,15 +21,15 @@ struct AttachedGroup {
 };
 
 struct AttachedSet : Collider {
-    Attach03* links;        // 0x550: the objects attached to it (linked at Attach03::nextOwn)
+    ColliderAttachment* links;        // 0x550: the objects attached to it (linked at ColliderAttachment::nextOwn)
     AttachedGroup group;    // 0x554
     u8 pad564[0x570 - 0x564];
-    Vec02 baseVelocity;     // 0x570: the velocity GetAttachedSetPointMotion starts from
+    Vec4 baseVelocity;     // 0x570: the velocity GetAttachedSetPointMotion starts from
     s32 tellsLanding;       // 0x580: nonzero, a body landing on it is told of the point (func_001EEF90)
     s32 splashSoundEnabled; // 0x584: 1 at set-up
     s32 splashBurstEnabled; // 0x588: 1 at set-up
     u8 pad58C[0x590 - 0x58C];
-    Rec36 trackedNodes;     // 0x590: tracked nodes, as a contact tracker keeps (InitAttachedSet)
+    ContactTrackerRecord trackedNodes;     // 0x590: tracked nodes, as a contact tracker keeps (InitAttachedSet)
 };
 
 typedef char check_AttachedSet[sizeof(AttachedSet) == 0x6B0 ? 1 : -1];

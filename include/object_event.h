@@ -16,8 +16,8 @@ struct ObjectEvent {
     s32 eventFlags;         // 0x0C: func_001BC320, func_0017B7A8, func_00199C78 (bits tested, 0x20 cleared once handled)
     s32 extraFlags;         // 0x10: func_001417F0, func_0017B7A8 (flags)
     u8 pad14[0x20 - 0x14];
-    Vec02 pos;              // 0x20: where it happened: classes 0x42 and 0x43 play their hit sound there (func_001A6DE0, func_001A72B0)
-    Vec02 v30;              // 0x30: passed on, raised, in their kind-6 message
+    Vec4 pos;              // 0x20: where it happened: classes 0x42 and 0x43 play their hit sound there (func_001A6DE0, func_001A72B0)
+    Vec4 v30;              // 0x30: passed on, raised, in their kind-6 message
 };
 
 #endif

@@ -35,7 +35,7 @@ struct GroupCell {
 };
 
 // Two words func_00196810 keeps across the copy of the common fields.
-struct Pair53 {
+struct ObjectGroupKeptWords {
     u32 first;
     u32 second;
 };
@@ -44,7 +44,7 @@ struct Pair53 {
 // (func_00196810) makes new cells that point at the copy's objects).
 struct ObjectGroup : PlacedObject {
     GroupList cells;           // 0x2D0
-    Pair53 kept;            // 0x2DC: restored after the common copy
+    ObjectGroupKeptWords kept;            // 0x2DC: restored after the common copy
     u8 pad2E4[0x2F0 - 0x2E4];
 };
 

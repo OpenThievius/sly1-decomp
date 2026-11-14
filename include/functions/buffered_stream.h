@@ -7,12 +7,12 @@
 #include "common.h"
 
 struct BufferedStream;
+struct CollisionMesh;
 struct FileStreamState;
 struct KeyId;
 struct LinkedItem;
-struct Mesh03;
+struct MeshTree;
 struct SectorStreamState;
-struct Tree03;
 
 BufferedStream* InitBufferedStream(BufferedStream* self, s32 a1, u8* a2, s32 a3);
 void DestroyBufferedStream(BufferedStream* self, s32 flags);
@@ -38,8 +38,8 @@ void ReadBufferedVector3(BufferedStream* src, void* dst);
 void ReadBufferedVector4(BufferedStream* self, void* out);
 void ReadBufferedRotation3(BufferedStream* self, void* out);
 void ReadBufferedMatrix4(BufferedStream* self, void* out);
-void ReadMeshFromStream(BufferedStream* in, Mesh03* mesh);
-void ReadFaceTree(BufferedStream* self, Mesh03* in, Tree03* out);
+void ReadMeshFromStream(BufferedStream* in, CollisionMesh* mesh);
+void ReadFaceTree(BufferedStream* self, CollisionMesh* in, MeshTree* out);
 void ReadLinkedItemArray(BufferedStream* src, s32* count, LinkedItem** out);
 void ReadBufferedString(BufferedStream* self, u8** out);
 void SkipBufferedBlock(BufferedStream* self);

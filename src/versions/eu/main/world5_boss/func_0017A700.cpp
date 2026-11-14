@@ -4,7 +4,7 @@
 // D_00270650 as PAL lays it out, for the aim.
 struct T217D_BF0Aim {
     u8 pad000[0x580];
-    Vec02 aim;                  // 0x580
+    Vec4 aim;                  // 0x580
 };
 
 void HandleWorld5ModeColliderActivation(World5ModeCollider* self, void* active)

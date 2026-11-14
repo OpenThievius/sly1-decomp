@@ -22,7 +22,7 @@ class DemangleTest(unittest.TestCase):
 
     def test_classes_pointers_references(self):
         self.assertEqual(demangle("func_0018A388__FP10World2Boss"), ["World2Boss*"])
-        self.assertEqual(demangle("func_00100000__FRC5Vec02PP6Player"), ["const Vec02&", "Player**"])
+        self.assertEqual(demangle("func_00100000__FRC4Vec4PP6Player"), ["const Vec4&", "Player**"])
         self.assertEqual(demangle("func_00100000__FG14RandomRangeLowi"), ["RandomRangeLow", "int"])
         self.assertEqual(demangle("func_00100000__FPQ23Vu03Vec"), ["Vu0::Vec*"])
 
@@ -35,8 +35,8 @@ class DemangleTest(unittest.TestCase):
         self.assertEqual(demangle("func_00104DE0__FP11ScriptValueP12NumberedItemiT0"),
                          ["ScriptValue*", "NumberedItem*", "int", "ScriptValue*"])
         self.assertEqual(demangle("func_00113B60__FP11ScriptValueN20"), ["ScriptValue*"] * 3)
-        self.assertEqual(demangle("func_001782C0__FP6PlayerP15TargetArcSourcefP5Vec02N23"),
-                         ["Player*", "TargetArcSource*", "float", "Vec02*", "Vec02*", "Vec02*"])
+        self.assertEqual(demangle("func_001782C0__FP6PlayerP15TargetArcSourcefP4Vec4N23"),
+                         ["Player*", "TargetArcSource*", "float", "Vec4*", "Vec4*", "Vec4*"])
         # an index over 9 is written with a closing '_'
         self.assertEqual(demangle("func_00100000__FiiiiiiiiiifPT10_")[-1], "float*")
 

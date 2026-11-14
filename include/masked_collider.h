@@ -12,7 +12,7 @@
 struct StateWalker;     // a handle func_001B6290 makes (s1b6290.h)
 
 // The object at the 0x200 field of what PooledHolder keeps at 0x734: a flag at 0x1C and one at 0x4C.
-struct Held23 {
+struct HeldAimAttachment {
     void** vtbl;            // 0x00
     u8 pad04[0x1C - 4];
     s32 aimAtTarget;        // 0x1C
@@ -27,21 +27,21 @@ struct PooledObject;
 
 // An entry of the queue at 0x554 (func_0013D868 and its siblings append {kind, value}; the
 // callback func_0013CE80 fills `node` with the object it found for `key`).
-struct Slot20 {
+struct MaskedQueueEntry {
     s32 kind;               // 0x00: 0 to 4
     s32 key;                // 0x04
     s32 node;               // 0x08
 };
 
 // Class 0x20's descriptor: 0x03's slots, then two more (slot n at 0x10 + 4n).
-struct Desc20 : Desc03 {
+struct MaskedColliderDescriptor : ColliderDescriptor {
     void (*m48)(MaskedCollider* self);                         // 0x130: slot 72 (func_0013D278)
     void* m49;                                      // 0x134: slot 73
 };
 
 struct MaskedCollider : Collider {
     s32 count550;           // 0x550: entries of slots
-    Slot20 slots[16];       // 0x554: func_0013D868, 0013D8B0, 0013D900, 0013D950 append (kind 0, 1, 2, 3)
+    MaskedQueueEntry slots[16];       // 0x554: func_0013D868, 0013D8B0, 0013D900, 0013D950 append (kind 0, 1, 2, 3)
     s32 receiverKey;        // 0x614: a key for func_0015A418, -1 at set-up
     BaseObject* receiver;   // 0x618: the object it found (slot 10, func_00159478 when f614 is -1)
     s32 radiusKind;         // 0x61C: which radius slot 72 sends (0 radius3CC or f2A4, 1 radius3D0 or f2A8)
@@ -69,16 +69,16 @@ struct MaskedCollider : Collider {
     u8 pad694[0x698 - 0x694];
     s32 scatterCount;       // 0x698: -1 in class 0x21
     u8 pad69C[0x6A0 - 0x69C];
-    Vec02 point6A0;         // 0x6A0: where slot 72 scatters, in its own frame
+    Vec4 point6A0;         // 0x6A0: where slot 72 scatters, in its own frame
     s32 scatter6B0;         // 0x6B0: what it scatters (func_00152010)
     void* soundParams;      // 0x6B4: a block of 0x24 bytes (slot 9 copies it; func_0013DAF0 makes it)
     u8 pad6B8[0x6C0 - 0x6B8];
 
-    const Desc20* desc20() const { return (const Desc20*)desc; }
+    const MaskedColliderDescriptor* desc20() const { return (const MaskedColliderDescriptor*)desc; }
 };
 
 typedef char check_MaskedCollider[sizeof(MaskedCollider) == 0x6C0 ? 1 : -1];
-typedef char check_Desc20[sizeof(Desc20) == 0x138 ? 1 : -1];
+typedef char check_Desc20[sizeof(MaskedColliderDescriptor) == 0x138 ? 1 : -1];
 
 struct PlayerFlaggedCollider : MaskedCollider {
 };
@@ -103,7 +103,7 @@ struct PooledHolder : PlayerFlaggedCollider {
     s32 throwTarget;        // 0x6DC
     PooledObject* targetObject;      // 0x6E0
     u8 pad6E4[0x6F0 - 0x6E4];
-    Vec02 savedPose[4];     // 0x6F0
+    Vec4 savedPose[4];     // 0x6F0
     BaseObject* savedParent;       // 0x730
     PlacedObject* p734;              // 0x734
     PlacedObject* p738;              // 0x738
@@ -121,13 +121,13 @@ struct PooledHolder : PlayerFlaggedCollider {
 
 typedef char check_PooledHolder[sizeof(PooledHolder) == 0x7C0 ? 1 : -1];
 
-struct Alloc24 {
+struct PathSpeedCurveTable {
     u8 pad0[8];
     s32 field8;             // 0x08
     void* field_c;          // 0x0C
 };
 
-struct C24 : PlayerFlaggedCollider {
+struct PathSpeedCollider : PlayerFlaggedCollider {
     void* path;             // 0x6C0: the path object it follows (func_00182748)
     void* stateGraph;       // 0x6C4: loaded (D_00264230)
     StateWalker* walker;        // 0x6C8: a handle func_001B6290 makes for x6C4
@@ -138,11 +138,11 @@ struct C24 : PlayerFlaggedCollider {
     f32 levelLimit;         // 0x6DC
     f32 levelRate;          // 0x6E0
     f32 level;              // 0x6E4: the level between 0 and f6DC, raised by f6E0 each second (func_00182548)
-    Alloc24* curveTable;    // 0x6E8
+    PathSpeedCurveTable* curveTable;    // 0x6E8
     void* x6EC;             // 0x6EC: loaded (D_00264230)
 };
 
-typedef char check_C24[sizeof(C24) == 0x6F0 ? 1 : -1];
+typedef char check_C24[sizeof(PathSpeedCollider) == 0x6F0 ? 1 : -1];
 
 struct MassScalingCollider : MaskedCollider {
     f32 scale;              // 0x6C0

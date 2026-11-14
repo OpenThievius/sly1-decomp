@@ -21,11 +21,11 @@ struct ContactPart
 };
 struct ContactSlot
 {
-    Contact03* f0;
+    BodyContact* f0;
 };
 struct ContactNode
 {
-    Contact03* f0;
+    BodyContact* f0;
     ContactNode* f4;
     ContactSlot* f8;
     ContactBody* fC;

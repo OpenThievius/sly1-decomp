@@ -8,8 +8,8 @@
 
 struct ActiveSetItem;
 struct ActiveSetSolver;
+struct BodyContact;
 struct Collider;
-struct Contact03;
 struct DeferredRequest;
 
 void DrawPlacedObjectParts(DeferredRequest* self);
@@ -19,7 +19,7 @@ void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item);
 void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6);
 void PivotActiveSet(ActiveSetSolver* self, ActiveSetItem* x);
 void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6);
-void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, Contact03** contacts, s32 a4, s32 a5, f32 dt);
+void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, BodyContact** contacts, s32 a4, s32 a5, f32 dt);
 void ApplySolvedImpulsesToParts(ActiveSetSolver* self, s32 n, s32* counts, Collider*** lists, f32 maxLin, f32 maxAng);
 void SolveActiveSetSystem(s32 count, u8* data, f32* values, f32* out);
 

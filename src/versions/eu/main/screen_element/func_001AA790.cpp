@@ -20,12 +20,12 @@ void DrawScreenElementText(Actor_eu_001AB558* self)
         f32 f544 = self->f544;
         f32 f548 = self->f548;
         s32 s0v = self->f518;
-        ((Layout_137228*)&L)->Pos(self->f52C, self->f530);
-        ((Layout_137228*)&L)->Size(f544, f548);
+        ((TextBoxLayout*)&L)->Pos(self->f52C, self->f530);
+        ((TextBoxLayout*)&L)->Size(f544, f548);
         L.tag = s0v;
-        ((Layout_137228*)&L)->Color(&L.tag);
-        ((Layout_137228*)&L)->SetF14((s32)rt);
-        ((Layout_137228*)&L)->SetF18(0);
+        ((TextBoxLayout*)&L)->Color(&L.tag);
+        ((TextBoxLayout*)&L)->SetF14((s32)rt);
+        ((TextBoxLayout*)&L)->SetF18(0);
         SetTextLayoutVerticalPlacement(&L, 0);
         void* obj = self->f520;
         if (obj != 0) {

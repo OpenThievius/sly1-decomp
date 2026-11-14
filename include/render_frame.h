@@ -26,9 +26,9 @@ struct RenderFrame {
     u8 pad14[0x18 - 0x14];
     u32 flags;              // 0x18: func_0015E9F0
     s32 hasMaskedImages;    // 0x1C: func_0015ED50
-    List01 releasedObjects; // 0x20: func_0015E810, func_0015EFE8
-    List01 detachedRecords; // 0x2C
-    List01 deferredReleases; // 0x38
+    ObjectList releasedObjects; // 0x20: func_0015E810, func_0015EFE8
+    ObjectList detachedRecords; // 0x2C
+    ObjectList deferredReleases; // 0x38
     s32 imageMask;          // 0x44: func_0015E9F0, func_0015ED50
 };
 

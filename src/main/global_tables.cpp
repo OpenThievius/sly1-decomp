@@ -603,7 +603,7 @@ extern const KeyRecord g_streamVoiceKeys[7] = {
     {0x3909A2A2, 0xDA5D87C2, 0xC3446569, 0x59D126B9, 0x6943323B, 0x390995E6, 0xC344672C, 0xDA5DAE02}
 };
 extern const char g_scrambledPassword[24] = "@KFWHJGL";
-extern const Mat02 g_identityMatrix = { { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } } };
+extern const Mat3 g_identityMatrix = { { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } } };
 extern const f32 g_identityMatrix4[28] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 extern const KeyRecord g_memoryCardIconKey = { 0x80CFADA9, 0x930F4F53, 0x7F1AF6BE, 0x5EAA1EBC, 0xDDC30E98, 0x80DB63DE, 0x7F1AF5F2, 0x930F1BCB };
 extern const IdentityKey g_watchedMovieKey = { { { 0xEF312076, 0x53B6BFB5, 0x4846D1FF, 0x0EAD57EE, 0x9E3389D7, 0xEF3E4A62, 0x4846D2BB, 0x531DFFB1 } } };
@@ -700,10 +700,10 @@ extern const LevelEntry g_levelEntries[33] = {
     { 0x00000505, 0.0f, { 0x166B5E9F, 0xD83C11E9, 0x64ED4809, 0x9F137E03, 0x544B9C1C, 0x167F901D, 0x64ED4AAC, 0xD82147F9 }, g_levelCredits0505 },
     { 0x00000506, 0.0f, { 0x9CD62C23, 0x9AB39D3E, 0xEA6D2E63, 0xFEC5BF26, 0xC170A675, 0x9CD0481B, 0xEA6D2CC7, 0x9A96D39E }, g_levelCredits0506 },
 };
-extern const Vec02 g_unitXVector = { 1.0f, 0.0f, 0.0f, 0.0f };
-extern const Vec02 g_unitYVector = { 0.0f, 1.0f, 0.0f, 0.0f };
-extern const Vec02 g_unitZVector = { 0.0f, 0.0f, 1.0f, 0.0f };
-extern const Vec02 g_zeroVector = { 0.0f, 0.0f, 0.0f, 0.0f };
+extern const Vec4 g_unitXVector = { 1.0f, 0.0f, 0.0f, 0.0f };
+extern const Vec4 g_unitYVector = { 0.0f, 1.0f, 0.0f, 0.0f };
+extern const Vec4 g_unitZVector = { 0.0f, 0.0f, 1.0f, 0.0f };
+extern const Vec4 g_zeroVector = { 0.0f, 0.0f, 0.0f, 0.0f };
 extern const f32 g_unitScale[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
 extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e+38f, 0.0f };
 // Read only by func_001B8540, which is original assembly (16 bytes, then 16 no code reads).

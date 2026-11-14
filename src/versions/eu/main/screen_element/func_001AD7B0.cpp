@@ -29,12 +29,12 @@ void DrawHintGlyphElement(Obj_eu_1AE500* self)
     PushFontScale((Font*)font, s, s);
     w = MeasureFontString((Font*)font, D_eu_0024E350);
     h = (f32)font->units * font->scale;
-    ((Layout_137228*)out)->Pos(((self->f52C + 2.0f) + self->f544 * half) - w * half, ((self->f530 + 14.0f) + self->f548 * half) - h * half);
-    ((Layout_137228*)out)->Size(w, h);
+    ((TextBoxLayout*)out)->Pos(((self->f52C + 2.0f) + self->f544 * half) - w * half, ((self->f530 + 14.0f) + self->f548 * half) - h * half);
+    ((TextBoxLayout*)out)->Size(w, h);
     tmp[0] = color;
-    ((Layout_137228*)out)->Color(tmp);
-    ((Layout_137228*)out)->SetF14(0);
-    ((Layout_137228*)out)->SetF18(0);
+    ((TextBoxLayout*)out)->Color(tmp);
+    ((TextBoxLayout*)out)->SetF14(0);
+    ((TextBoxLayout*)out)->SetF18(0);
     SetTextLayoutVerticalPlacement(out, 0);
     DrawFontString((Font*)font, D_eu_0024E350, (StringLayout*)out, 0, (PacketWriter*)D_eu_00263590);
     PopFontScale((Font*)font);

@@ -7,34 +7,34 @@
 #include "common.h"
 
 struct BaseObject;
-struct C37;
 struct Camera;
 struct ContactTracker;
+struct ContactTrackerRecord;
 struct HoldingMember;
 struct LookupObject;
-struct Mat02;
+struct Mat3;
 struct NodeAttachment;
 struct NodeOwner;
 struct NoiseBlend;
 struct ObjectSubGroup;
 struct Oscillator;
+struct OverlapTracker;
 struct Player;
-struct Rec36;
 struct ScaledTransform;
 struct TimedValue;
 struct TrackedNodeOffer;
 struct TrackedTargetChoice;
 struct TransformObject;
 struct TransformSet;
-struct Vec02;
+struct Vec4;
 struct VectorList4;
 struct World;
 
 void InitOscillator(Oscillator* self);
 void AttachNodeToOwner(NodeOwner* self, void* unused, NodeAttachment* ctx);
 void RefreshOscillatorFrames(Oscillator* self);
-void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB);
-void ComputeOscillatorMaxDisplacement(Oscillator* self, Vec02* out);
+void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec4* in, Vec4* deltas, Vec4* outA, Vec4* outDeltas, Vec4* outB);
+void ComputeOscillatorMaxDisplacement(Oscillator* self, Vec4* out);
 f32 HashToUnitFloat(s32 a0);
 f32 SampleSmoothNoise(f32 x, f32 y, f32 z);
 f32 ApplyBiasCurve(f32 value, f32 denominator);
@@ -54,9 +54,9 @@ void InitTransformObject(TransformObject* self);
 void ReadTransformObject(TransformObject* self, void* stream);
 void ReparentObjectKeepingTransform(TransformObject* self, BaseObject* other);
 void TransformObjectIntoFrame(TransformObject* self, BaseObject* other);
-void ConvertPointIntoObjectFrame(TransformObject* self, Vec02* p, Vec02* out);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-void GetObjectWorldRotation(BaseObject* self, Mat02* out);
+void ConvertPointIntoObjectFrame(TransformObject* self, Vec4* p, Vec4* out);
+void GetObjectWorldPosition(BaseObject* self, Vec4* out);
+void GetObjectWorldRotation(BaseObject* self, Mat3* out);
 HoldingMember* FindArrivalPoint(s32 id, s32 parent);
 void LoadArrivalPoint(TransformSet* self, void* other);
 void CopyArrivalPoint(TransformSet* self, TransformSet* other);
@@ -85,14 +85,14 @@ void ApplyContactTrackerTransform(ContactTracker* self, Camera* cam, ScaledTrans
 int RequestContactTrackerLaunch(ContactTracker* self, void* source, TrackedNodeOffer* offer);
 void* GetContactTrackerRecord(void* self);
 void ClearTrackedNodes(ContactTracker* self);
-void InitC37(C37* o);
-void UpdateC37(C37* self, f32 dt);
-void InitTrackedNodes(Rec36* a, ContactTracker* b);
-void FillTrackedNodes(Rec36* self);
+void InitC37(OverlapTracker* o);
+void UpdateC37(OverlapTracker* self, f32 dt);
+void InitTrackedNodes(ContactTrackerRecord* a, ContactTracker* b);
+void FillTrackedNodes(ContactTrackerRecord* self);
 void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self);
-void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out);
-void AddTrackedKey(Rec36* self, s32 entry);
-void AddTrackedNode(Rec36* self, BaseObject* e);
-void RemoveTrackedNode(Rec36* self, s32 value);
+void OfferTrackedNodeLaunch(ContactTrackerRecord* self, void* a1, TrackedNodeOffer* out);
+void AddTrackedKey(ContactTrackerRecord* self, s32 entry);
+void AddTrackedNode(ContactTrackerRecord* self, BaseObject* e);
+void RemoveTrackedNode(ContactTrackerRecord* self, s32 value);
 
 #endif

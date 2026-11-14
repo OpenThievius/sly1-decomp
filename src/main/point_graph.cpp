@@ -50,9 +50,9 @@
 #include "functions/world.h"
 struct ColliderSpan;
 struct PlaneNode;
-struct Vec02;
+struct Vec4;
 struct BaseObject;
-struct Mat02;
+struct Mat3;
 struct Mat4A;
 struct DeferredRequest;
 struct ItemKeeper;
@@ -84,9 +84,9 @@ struct SourceNotice { s32 f_0; u8 pad4[4]; s32 f_8; };
 struct AgentNotification;
 extern void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
 // The point graph FindPointGraphPath and SnapPointToPointGraph take, at 0x34 of its owner.
-s32 FindPointGraphPath(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out);
-s32 FindPointGraphTriangleWithin(PlaneNode* node, Vec02* p);
-void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out);
+s32 FindPointGraphPath(PointGraph* graph, Vec4* start, Vec4* goal, s32 maxOut, Vec4* out);
+s32 FindPointGraphTriangleWithin(PlaneNode* node, Vec4* p);
+void SnapPointToPointGraph(PointGraph* self, Vec4* p, Vec4* out);
 extern "C" void* CopyBytes(void* dst, void* src, s32 n);
 extern "C" void SyncDataCache(s32 a);
 // func_001EA4B8 takes its float arguments first: the caller then sets $f14 before $a0.
@@ -112,16 +112,16 @@ void CopyMemory(void* dst, void* src, u32 size);
 void PopBackMemoryMark(void);
 s32 IsPointPathShortcutBlocked(void* self, s32 a, s32 b);
 void UpdateAgentGoal(Agent* self, s32 flag);
-void SetAgentGoalPoint(Agent* self, Vec02* p);
+void SetAgentGoalPoint(Agent* self, Vec4* p);
 // Up to d spans between two points of the graph (0xE0 bytes for d = 2: two ColliderSpans).
-s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans);
+s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec4* a, Vec4* b, s32 max, ColliderSpan* spans);
 
 
 f32 g_pointFadeRamp[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 ObjectLink g_pointGraphLinks[2] = { { 0x20, 0x167, 0x59C }, { 0x20, 0x168, 0x5A0 } };
 f32 g_turnAngleSearchOrder[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
 s32 g_screenOwner = 0;
-List_269BA8 g_targetVectors = { 0 };
+TargetVectorList g_targetVectors = { 0 };
 
 // Initialises the collider, sets flag bit 43 of its flags and its anchors (3, 0, 3, 0).
 void InitContactlessCollider(ContactlessCollider* self)
@@ -147,7 +147,7 @@ struct __attribute__((aligned(16))) PartRequest {
     f32 fade;               // 0x50
     f32 fade2;              // 0x54
     u8 pad58[8];
-    Vec02 at;               // 0x60
+    Vec4 at;               // 0x60
     PlacedObject* owner;    // 0x70
     void* state;            // 0x74: the owner's record at +0x22C
     ModelPart* part;        // 0x78
@@ -163,7 +163,7 @@ struct __attribute__((aligned(16))) PartRequest {
 // Block n of the current scratchpad transfer.
 
 
-struct Frame_166690;
+struct PartDrawRequest;
 struct DmaChannel;
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
@@ -391,8 +391,8 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
     case 4:
         if (self->mainClip == 0) {
             if (self->walkTarget != 0) {
-                GetObjectWorldPosition((BaseObject*)self->walkTarget, (Vec02*)tmp);
-                SetAgentGoalPoint(self, (Vec02*)tmp);
+                GetObjectWorldPosition((BaseObject*)self->walkTarget, (Vec4*)tmp);
+                SetAgentGoalPoint(self, (Vec4*)tmp);
             } else {
                 SetAgentGoalPoint(self, &self->v140);
             }
@@ -403,8 +403,8 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
     case 12:
     case 13:
         if (self->stateTarget != 0) {
-            GetObjectWorldPosition((BaseObject*)self->stateTarget, (Vec02*)tmp);
-            SetAgentGoalPoint(self, (Vec02*)tmp);
+            GetObjectWorldPosition((BaseObject*)self->stateTarget, (Vec4*)tmp);
+            SetAgentGoalPoint(self, (Vec4*)tmp);
         }
         break;
     default:
@@ -423,9 +423,9 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 // their own checks and moves.
 void UpdateSeekingAgentState(SeekingAgent* self)
 {
-    Vec02 tmp;
-    Vec02 second;
-    Vec02 third;
+    Vec4 tmp;
+    Vec4 second;
+    Vec4 third;
     f32 a;
 
     switch (self->state) {
@@ -438,7 +438,7 @@ void UpdateSeekingAgentState(SeekingAgent* self)
             break;
         }
         if (self->walkTarget != 0) {
-            GetObjectWorldRotation((BaseObject*)self->walkTarget, (Mat02*)&tmp);
+            GetObjectWorldRotation((BaseObject*)self->walkTarget, (Mat3*)&tmp);
             a = ArctangentOfRatio(tmp.y, tmp.x);
             SetAgentFacingAngles(self, a, 0.0f);
         } else {
@@ -455,7 +455,7 @@ void UpdateSeekingAgentState(SeekingAgent* self)
         if (self->stateTarget == 0) {
             break;
         }
-        GetObjectWorldRotation((BaseObject*)self->stateTarget, (Mat02*)&tmp);
+        GetObjectWorldRotation((BaseObject*)self->stateTarget, (Mat3*)&tmp);
         a = ArctangentOfRatio(tmp.y, tmp.x);
         SetAgentFacingAngles(self, a, 0.0f);
         break;
@@ -463,7 +463,7 @@ void UpdateSeekingAgentState(SeekingAgent* self)
         if (*(void**)((u8*)self->statePlayer + 8) != self->f5F0) {
             break;
         }
-        Vu0::Q(tmp) = Vu0::Sub(Vu0::Q(*(Vec02*)g_camera->position), Vu0::Q(self->v140));
+        Vu0::Q(tmp) = Vu0::Sub(Vu0::Q(*(Vec4*)g_camera->position), Vu0::Q(self->v140));
         a = ArctangentOfRatio(tmp.y, tmp.x);
         SetAgentFacingAngles(self, a, 0.0f);
         break;
@@ -656,7 +656,7 @@ s32 GetNeighbourTriangle(s32 value)
 // Walks a plane tree from node with point p: on the side p lies (more than 1e-4 above the node's
 // plane or not), a tagged child gives its triangle (GetNeighbourTriangle) and an untagged one is
 // descended into; 0 when the walk ends without a triangle.
-s32 FindPointGraphTriangle(PlaneNode* node, Vec02* p)
+s32 FindPointGraphTriangle(PlaneNode* node, Vec4* p)
 {
     while (node != 0) {
         f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(*p), Vu0::Q(node->normal))) - node->offset;
@@ -680,7 +680,7 @@ s32 FindPointGraphTriangle(PlaneNode* node, Vec02* p)
 // Finds the graph triangle that contains point p by walking the plane tree from node: each plane
 // sends the walk above or below (both when the point is within 1.0 of the plane) and a neighbouring
 // triangle is returned as soon as one is found; 0 when none.
-s32 FindPointGraphTriangleWithin(PlaneNode* node, Vec02* p)
+s32 FindPointGraphTriangleWithin(PlaneNode* node, Vec4* p)
 {
     while (node != 0) {
         f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(*p), Vu0::Q(node->normal))) - node->offset;
@@ -733,7 +733,7 @@ struct SegmentWalkEntry {
 
 // The point at t along the segment from a to b.
 struct SegmentPoint {
-    static u128 At(const Vec02& a, const Vec02& b, f32 t)
+    static u128 At(const Vec4& a, const Vec4& b, f32 t)
     {
         return Vu0::MulXSum(Vu0::Q(a), Vu0::Scalar(1.0f - t), Vu0::Q(b), Vu0::Scalar(t));
     }
@@ -742,7 +742,7 @@ struct SegmentPoint {
 // Walks a plane tree along the segment a to b and collects, up to max, the spans (entry and exit)
 // of the segment inside the tree's solid leaves into spans; returns how many. A 32-entry stack
 // holds the far sides still to visit.
-s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans)
+s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec4* a, Vec4* b, s32 max, ColliderSpan* spans)
 {
     SegmentWalkEntry cur;
     SegmentWalkEntry stack[32];
@@ -842,7 +842,7 @@ s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max,
 s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
 {
     ColliderSpan out[2];
-    switch (CollectSegmentSpansInPlaneTree((PlaneNode*)a, (Vec02*)b, (Vec02*)c, 2, out)) {
+    switch (CollectSegmentSpansInPlaneTree((PlaneNode*)a, (Vec4*)b, (Vec4*)c, 2, out)) {
     case 0:
         return 1;
     case 1:
@@ -907,7 +907,7 @@ void SearchPointGraph(PointGraph* graph, GraphPoint* from, GraphPoint* goal, s32
     start.cost = 0.0f;
     start.parent = 0;
     start.depth = 1;
-    u128 d = Vu0::Sub(Vu0::Q(*(Vec02*)from), Vu0::Q(*(Vec02*)goal));
+    u128 d = Vu0::Sub(Vu0::Q(*(Vec4*)from), Vu0::Q(*(Vec4*)goal));
     start.score = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
     if (from != goal) {
         do {
@@ -921,7 +921,7 @@ void SearchPointGraph(PointGraph* graph, GraphPoint* from, GraphPoint* goal, s32
                 node->point = other;
                 f32 cost = cur->cost + link->length;
                 node->cost = cost;
-                u128 e = Vu0::Sub(Vu0::Q(*(Vec02*)here), Vu0::Q(*(Vec02*)goal));
+                u128 e = Vu0::Sub(Vu0::Q(*(Vec4*)here), Vu0::Q(*(Vec4*)goal));
                 node->parent = cur;
                 node->score = cost + Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(e, e)));
                 node->depth = cur->depth + 1;
@@ -1014,7 +1014,7 @@ struct PathLink {
 };
 
 struct PathNode {
-    Vec02 pos;
+    Vec4 pos;
     s32 count;
     PathLink** links;
     u8 pad18[8];
@@ -1030,10 +1030,10 @@ static inline s32 MinOfCounts(s32 a, s32 b)
 // it); a shared triangle is the straight path. Otherwise the start becomes a temporary point
 // linked to its triangle's corners, the goal one its triangle's corners link to (their counts
 // raised for the search and lowered after), and the search's path is simplified.
-s32 FindPointGraphPath(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out)
+s32 FindPointGraphPath(PointGraph* graph, Vec4* start, Vec4* goal, s32 maxOut, Vec4* out)
 {
-    Vec02 a;
-    Vec02 b;
+    Vec4 a;
+    Vec4 b;
     PathNode* faces = (PathNode*)graph->faces;
     PathNode** tri0 = (PathNode**)FindPointGraphTriangle((PlaneNode*)faces, start);
     if (tri0 != 0) {
@@ -1107,7 +1107,7 @@ s32 FindPointGraphPath(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut,
 // taken at p's height); otherwise p itself. The weighted sum's operands are formed weight, end,
 // weight, end, the order retail's stores and loads keep (docs/TOOLCHAIN.md, "A weighted sum's
 // operands in insn order").
-void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out)
+void SnapPointToPointGraph(PointGraph* self, Vec4* p, Vec4* out)
 {
     if (FindPointGraphTriangleWithin((PlaneNode*)self->faces, p) != 0) {
         *out = *p;
@@ -1118,8 +1118,8 @@ void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out)
     GraphPoint** nearest = 0;
     for (s32 i = 0; i < self->nA; i++) {
         GraphPoint** link = (GraphPoint**)(self->links + i * 12);
-        Vec02 a = *(Vec02*)link[0];
-        Vec02 b = *(Vec02*)link[1];
+        Vec4 a = *(Vec4*)link[0];
+        Vec4 b = *(Vec4*)link[1];
         f32 t;
         f32 d;
         a.z = p->z;
@@ -1131,8 +1131,8 @@ void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out)
             best = d;
         }
     }
-    Vec02* b = (Vec02*)nearest[1];
-    Vec02* a = (Vec02*)nearest[0];
+    Vec4* b = (Vec4*)nearest[1];
+    Vec4* a = (Vec4*)nearest[0];
     Vu0::Vec s = Vu0::Vec::Scalar(1.0f - bestT);
     Vu0::Vec pa = Vu0::Vec::Of(*a);
     Vu0::Vec t = Vu0::Vec::Scalar(bestT);
@@ -1229,25 +1229,25 @@ ASM_FUNC(func_001919F8);
 
 // Finds a path through the owner's point graph from start to goal, writing up to maxOut points to
 // out.
-s32 FindOwnerGraphPath(PointGraphObject* self, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out)
+s32 FindOwnerGraphPath(PointGraphObject* self, Vec4* start, Vec4* goal, s32 maxOut, Vec4* out)
 {
     return FindPointGraphPath(&self->graph, start, goal, maxOut, out);
 }
 
 // Snaps the point to the owner's point graph.
-void SnapPointToOwnerGraph(PointGraphObject* self, Vec02* p, Vec02* out)
+void SnapPointToOwnerGraph(PointGraphObject* self, Vec4* p, Vec4* out)
 {
     SnapPointToPointGraph(&self->graph, p, out);
 }
 
 // Collects the spans of the segment from-to that lie in the owner graph's plane tree (up to max).
-s32 TestOwnerGraphSpan(PointGraphObject* self, Vec02* from, Vec02* to, s32 max, ColliderSpan* out)
+s32 TestOwnerGraphSpan(PointGraphObject* self, Vec4* from, Vec4* to, s32 max, ColliderSpan* out)
 {
     return CollectSegmentSpansInPlaneTree((PlaneNode*)self->graph.faces, from, to, max, out);
 }
 
 // A matrix copied whole: the call's arguments are its parameters, substituted as constants.
-static inline void CopyMatrix(Mat02* d, const Mat02* s) { CopyBytes(d, (void*)s, 0x30); }
+static inline void CopyMatrix(Mat3* d, const Mat3* s) { CopyBytes(d, (void*)s, 0x30); }
 
 // A step fitted to the graph: the step turned about Z by each of eleven angles in turn (none,
 // then half a radian more to either side each time) and scaled, the span from the position to
@@ -1260,17 +1260,17 @@ static inline void CopyMatrix(Mat02* d, const Mat02* s) { CopyBytes(d, (void*)s,
 // end of the loop's first block, where cse2 makes it a copy of the first: the load before the
 // branch on the test's result (docs/toolchain/loops.md, "An asm kept in its loop"). Retail
 // stores a copy of the scale beside the scaled matrix (0xF0), which nothing reads.
-void FitStepToPointGraph(PointGraphObject* self, f32 scale, Vec02* pos, Vec02* step)
+void FitStepToPointGraph(PointGraphObject* self, f32 scale, Vec4* pos, Vec4* step)
 {
-    Mat02 turn;
-    Vec02 end;
-    Vec02 reached;
+    Mat3 turn;
+    Vec4 end;
+    Vec4 reached;
     ColliderSpan span;
     f32 best = -1.0f;
     for (u32 i = 0; i < 11; i++) {
-        Mat02 scaled;
-        Vec02 weight;
-        Mat02 rows;
+        Mat3 scaled;
+        Vec4 weight;
+        Mat3 rows;
         BuildAxisAngleMatrix(&g_unitZVector, &turn, g_turnAngleSearchOrder[i]);
         Vu0::Vec k;
         k.q = Vu0::ScalarMovedReg(scale);
@@ -1291,10 +1291,10 @@ void FitStepToPointGraph(PointGraphObject* self, f32 scale, Vec02* pos, Vec02* s
 }
 
 // A random point on the graph's triangles: one picked by its area, then a point inside it.
-void PickRandomPointOnPointGraph(PointGraphObject* self, Vec02* out)
+void PickRandomPointOnPointGraph(PointGraphObject* self, Vec4* out)
 {
-    Vec02 e1;
-    Vec02 e2;
+    Vec4 e1;
+    Vec4 e2;
     GraphTri* t;
     f32 total = 0.0f;
     s32 i;
@@ -1410,16 +1410,16 @@ void LoadPointObject(PointObject* self, void* other)
 }
 
 // Gives back the object's position (at 0x40) converted from its parent's frame to world space.
-void ConvertPositionToWorld(BaseObject* self, Vec02* out)
+void ConvertPositionToWorld(BaseObject* self, Vec4* out)
 {
-    TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)&((TransformObject*)self)->pos, out);
+    TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec4*)&((TransformObject*)self)->pos, out);
 }
 
 // Converts the point's position from its old parent's frame into value's and then reparents it.
 void ReparentPointObject(PointObject* self, BaseObject* value)
 {
     void* sub = &self->pos;
-    TransformPointBetweenFrames((PlacedObject*)self->parent, (PlacedObject*)value, (Vec02*)sub, (Vec02*)sub);
+    TransformPointBetweenFrames((PlacedObject*)self->parent, (PlacedObject*)value, (Vec4*)sub, (Vec4*)sub);
     ReparentObject(self, value);
 }
 
@@ -1427,7 +1427,7 @@ void ReparentPointObject(PointObject* self, BaseObject* value)
 s32 ConvertPointObjectPosition(PointObject* self, void* other)
 {
     void* p = &self->pos;
-    TransformPointBetweenFrames((PlacedObject*)other, 0, (Vec02*)p, (Vec02*)p);
+    TransformPointBetweenFrames((PlacedObject*)other, 0, (Vec4*)p, (Vec4*)p);
 }
 
 // Loads the point and then reads its text string from the stream.

@@ -51,13 +51,13 @@
 #include "functions/world.h"
 struct ColliderSpan;
 struct PlaneNode;
-struct Vec02;
+struct Vec4;
 
 struct PlacedObject;
 
 struct BaseObject;
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 
@@ -126,7 +126,7 @@ extern u8 g_zeroVector[];
 extern u8 g_zeroVector[];
 
 typedef void (*TimerDoneFn)(void* self);
-void FinishGaugeOnTimeout(T217D_510* timer, s32 mode);
+void FinishGaugeOnTimeout(TimerElement* timer, s32 mode);
 
 // The coefficients of a quadratic in the gauge fraction (GaugeCurve::Eval).
 struct Quadratic {
@@ -208,13 +208,13 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
             f32 best = 3.40282347e+38f;
             f32 angle = self->heading;
             f32 frac;
-            Vec02 bestPos;
-            Vec02 probe;
+            Vec4 bestPos;
+            Vec4 probe;
             SinCosPair dir;
             for (s32 i = 0; i < 16; i++) {
                 SetSinCosPair(angle, &dir);
                 f32 score = 0.0f;
-                Vu0::Set(probe, Vu0::MulAddX(Vec::Of(self->v140), Vec::Of(*(Vec02*)&dir), Vec::Scalar(3000.0f)).q);
+                Vu0::Set(probe, Vu0::MulAddX(Vec::Of(self->v140), Vec::Of(*(Vec4*)&dir), Vec::Scalar(3000.0f)).q);
                 if (self->pathGraph != 0) {
                     ColliderSpan hits[8];
                     ScopeMarker scope;
@@ -250,13 +250,13 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                 }
                 NumberedAgent* tgt = ((TargetOfFn)((void**)self->desc)[0x198 / 4])(self);
                 if (tgt != 0) {
-                    Vec02 other;
+                    Vec4 other;
                     Vec from = Vec::Of(tgt->v140);
                     Vec weight = Vec::Scalar(3.0f);
                     Vec vel = Vec::Of(tgt->v150);
                     Vu0::Q(other) = Vu0::MulAddX(from, vel, weight).q;
-                    Vec02 onA;
-                    Vec02 onB;
+                    Vec4 onA;
+                    Vec4 onB;
                     f32 d;
                     FindClosestPointsOnSegments(&self->v140, &probe, &tgt->v140, &other, (f32*)&onA, &d, &onB);
                     f32 q = d / ((tgt->radius3D0 + self->radius3D0) * 5.0f);
@@ -274,13 +274,13 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                     if (o == self) {
                         continue;
                     }
-                    Vec02 other;
+                    Vec4 other;
                     Vec from = Vec::Of(o->v140);
                     Vec weight = Vec::Scalar(3.0f);
                     Vec vel = Vec::Of(o->v150);
                     Vu0::Q(other) = Vu0::MulAddX(from, vel, weight).q;
-                    Vec02 onA;
-                    Vec02 onB;
+                    Vec4 onA;
+                    Vec4 onB;
                     f32 d;
                     FindClosestPointsOnSegments(&self->v140, &probe, &o->v140, &other, (f32*)&onA, &d, &onB);
                     f32 q = d / ((o->radius3D0 + self->radius3D0) + (o->radius3D0 + self->radius3D0));
@@ -314,7 +314,7 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
     }
 }
 
-extern const Vec02 g_unitXVector;
+extern const Vec4 g_unitXVector;
 
 // Tells whether an agent is free to take part: not while pad select is held or in states 4, 0xB
 // or 0x10, and only when its target is near (within the near radius and in front of the target's
@@ -576,7 +576,7 @@ void ApplyGaugeRatioToEffect(GaugeManager* self)
 
 // Timer callback: when the timer ends (mode 1) and the manager's state walker is not heading to or
 // in state 0x3FE, sends it to state 0x3FF and applies the gauge ratio to the effect.
-void FinishGaugeOnTimeout(T217D_510* timer, s32 mode)
+void FinishGaugeOnTimeout(TimerElement* timer, s32 mode)
 {
     if (mode == 1) {
         s32 t[2];
@@ -651,13 +651,13 @@ void AppendGaugeSlot(GaugeManager* self, s32 value)
 // pointers are set where they are used, so loop.c hoists them after the wait pointer's address.
 void RunGaugeTimedEvent(GaugeManager* self)
 {
-    Vec02 anchor;
-    Vec02 pos;
+    Vec4 anchor;
+    Vec4 pos;
     f32 screen[2];
-    Vec02 rot[3];
-    Vec02* posp;
+    Vec4 rot[3];
+    Vec4* posp;
     s32 made = 0;
-    Vec02* rotp;
+    Vec4* rotp;
     f32* wait = &self->waitMin;
     s32 pass;
     s32 best;
@@ -686,7 +686,7 @@ void RunGaugeTimedEvent(GaugeManager* self)
                 if (cand->taken != 0 || cand->key != 0) {
                     continue;
                 }
-                GetObjectWorldPosition((BaseObject*)cand->anchor, (Vec02*)&pos);
+                GetObjectWorldPosition((BaseObject*)cand->anchor, (Vec4*)&pos);
                 if (pass == 0) {
                     ProjectPointToCamera(*(Camera**)g_camera, &((PlacedObject*)cand->obj)->v140, screen);
                     if (screen[0] < -1.0f || 1.0f < screen[0] || screen[1] < -1.0f || 1.0f < screen[1]) {
@@ -716,12 +716,12 @@ void RunGaugeTimedEvent(GaugeManager* self)
         LaunchChosenPoolObject(h, 0);
         posp = &pos;
         rotp = &rot[0];
-        GetObjectWorldPosition((BaseObject*)slot->anchor, (Vec02*)posp);
-        GetObjectWorldRotation((BaseObject*)slot->anchor, (Mat02*)rotp);
+        GetObjectWorldPosition((BaseObject*)slot->anchor, (Vec4*)posp);
+        GetObjectWorldRotation((BaseObject*)slot->anchor, (Mat3*)rotp);
         agent->desc02()->m1D(agent, posp);
-        agent->desc02()->m1E(agent, (Mat02*)rotp);
-        agent->desc02()->m20(agent, (Vec02*)g_zeroVector);
-        agent->desc02()->m21(agent, (Vec02*)g_zeroVector);
+        agent->desc02()->m1E(agent, (Mat3*)rotp);
+        agent->desc02()->m20(agent, (Vec4*)g_zeroVector);
+        agent->desc02()->m21(agent, (Vec4*)g_zeroVector);
         if (made == 0) {
             anchor = pos;
         }
@@ -761,12 +761,12 @@ void ActivateRandomGaugeSlot(GaugeManager* self)
     NumberedAgent* c = (NumberedAgent*)h->chosenItem;
     GaugeSlot* s = list[idx];
     (void)LaunchChosenPoolObject(h, 0);
-    GetObjectWorldPosition((BaseObject*)s->anchor, (Vec02*)v0);
-    GetObjectWorldRotation((BaseObject*)s->anchor, (Mat02*)v1);
-    c->desc02()->m1D(c, (Vec02*)v0);
-    c->desc02()->m1E(c, (Mat02*)v1);
-    c->desc02()->m20(c, (Vec02*)g_zeroVector);
-    c->desc02()->m21(c, (Vec02*)g_zeroVector);
+    GetObjectWorldPosition((BaseObject*)s->anchor, (Vec4*)v0);
+    GetObjectWorldRotation((BaseObject*)s->anchor, (Mat3*)v1);
+    c->desc02()->m1D(c, (Vec4*)v0);
+    c->desc02()->m1E(c, (Mat3*)v1);
+    c->desc02()->m20(c, (Vec4*)g_zeroVector);
+    c->desc02()->m21(c, (Vec4*)g_zeroVector);
     CreateAnimationPlayerWithoutPresetTargets((Animation*)s->animation, (BaseObject*)s->obj, 0, (AnimationPlayer**)&s->key, 0.0f, 1.0f);
     AddAnimationPlayerRecordCallback((AnimationPlayer*)s->key, (PlacedObject**)self);
     self->slotAgents = self->slotAgents + 1;

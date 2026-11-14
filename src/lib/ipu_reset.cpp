@@ -14,10 +14,10 @@
 char g_ipuLibraryVersion[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'i', 'p', 'u', ' ', ' ', '2', '4', '0', '0' };
 
 typedef u64 Quad_211BA8 __attribute__((mode(TI)));
-struct Quad_27B0C0 { u64 lo; u64 hi; } __attribute__((aligned(16)));
+struct IpuQuadword { u64 lo; u64 hi; } __attribute__((aligned(16)));
 
 // The default quantiser matrices: intra, then one row of the non-intra (all 16), sent four times.
-volatile Quad_27B0C0 g_ipuQuantiserMatrices[5] = {
+volatile IpuQuadword g_ipuQuantiserMatrices[5] = {
     { 0x1616131013101008ULL, 0x1B1A181A16161616ULL },
     { 0x1B1B1A1A1A1A1B1BULL, 0x1D2222221D1D1D1BULL },
     { 0x20201D1D1B1B1D1DULL, 0x2223232526252222ULL },
@@ -25,7 +25,7 @@ volatile Quad_27B0C0 g_ipuQuantiserMatrices[5] = {
     { 0x1010101010101010ULL, 0x1010101010101010ULL },
 };
 // The colour table the reset loads.
-Quad_27B0C0 g_ipuColourTable[2] = {
+IpuQuadword g_ipuColourTable[2] = {
     { 0x03E0084204210000ULL, 0x1CE718C614A51084ULL },
     { 0x7C00294A2529001FULL, 0x39CE7FFF35AD318CULL },
 };

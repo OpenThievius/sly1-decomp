@@ -761,7 +761,7 @@ void AdvanceButtonCodes(PadRecord* self, s32 value)
 
 void ResetButtonCodes(void);
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // Once the button-code timer has expired, drops the codes marked for removal and, among the codes

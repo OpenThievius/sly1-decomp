@@ -37,11 +37,11 @@ extern StepSequence* g_activeStepSequence;
 
 // The axes and the identity, in .rodata (global_tables.cpp defines them): read as
 // whole vectors (lq) and as a matrix (three lq).
-extern const Mat02 g_identityMatrix;  // the identity (rows 1 0 0 0, 0 1 0 0, 0 0 1 0)
-extern const Vec02 g_unitXVector;  // 1 0 0 0
-extern const Vec02 g_unitYVector;  // 0 1 0 0
-extern const Vec02 g_unitZVector;  // 0 0 1 0
-extern const Vec02 g_zeroVector;  // 0 0 0 0
+extern const Mat3 g_identityMatrix;  // the identity (rows 1 0 0 0, 0 1 0 0, 0 0 1 0)
+extern const Vec4 g_unitXVector;  // 1 0 0 0
+extern const Vec4 g_unitYVector;  // 0 1 0 0
+extern const Vec4 g_unitZVector;  // 0 0 1 0
+extern const Vec4 g_zeroVector;  // 0 0 0 0
 
 // The two packet streams (PacketWriter, packet_writer.h): 20 views of D_002622A8 in 6 files, 6 of D_00262280 in
 // 4. Their objects are 0x24 and 0x28 bytes (the VIF writer ends with the count at 0x20, the GS
@@ -56,22 +56,22 @@ extern PacketWriter g_gsPacketWriter;
 extern ImageRecord* g_imageRecordsA;
 extern PaletteRecord* g_imageRecordsB;
 
-// List heads (List01, c01.h), defined in render_frame.cpp (D_002626E8, D_002626F8 and D_00262708
+// List heads (ObjectList, c01.h), defined in render_frame.cpp (D_002626E8, D_002626F8 and D_00262708
 // in target_lists.cpp, D_00264088 in player_state2.cpp): each label is 0xC bytes (D_00262300's and D_00264088's run to the next
 // label with a word or a pad after them).
-extern List01 g_deferredReleaseListA;
-extern List01 g_deferredReleaseListB;
-extern List01 g_deferredReleaseListC;
-extern List01 g_targetCurveList;
-extern List01 g_targetPointList;
-extern List01 g_partList;       // its head is the first object of class 0x46 (Node_150298, Iter_16A820)
-extern List01 g_pointObjects;
+extern ObjectList g_deferredReleaseListA;
+extern ObjectList g_deferredReleaseListB;
+extern ObjectList g_deferredReleaseListC;
+extern ObjectList g_targetCurveList;
+extern ObjectList g_targetPointList;
+extern ObjectList g_partList;       // its head is the first object of class 0x46 (Node_150298, Iter_16A820)
+extern ObjectList g_pointObjects;
 // A list head (func_00152438(D_00269BA8, 0x38) sets it up, point_graph.cpp defines it): 0xC
 // bytes like every other; its label runs to D_00269BC0 because switched_collider.cpp's .data
 // starts there, after the linker's padding.
-struct List_269BA8 {
-    List01 list;            // 0x00
+struct TargetVectorList {
+    ObjectList list;            // 0x00
 };
-extern List_269BA8 g_targetVectors;
+extern TargetVectorList g_targetVectors;
 
 #endif

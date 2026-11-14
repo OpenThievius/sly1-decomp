@@ -6,7 +6,7 @@
 #include "functions/text_format.h"
 
 // Types other files define, named by the parameters of their functions declared here.
-struct T217D_6D0;
+struct PauseMenu;
 
 // The sector check's state, the word before this file's .data: GCC aligns the read errors
 // (24 bytes) to 8, so a .data that started at 0x2613EC would put them at 0x261400.
@@ -37,7 +37,7 @@ extern "C" s32 SyncDiscNCommand(s32 mode);
 extern "C" s32 GetDiscError();
 s32 RefreshDiscStatus(void);
 s32 TestDiscReadDone(s32 value);
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
+void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value);
 
 // Restarts the disc sector check from its first state (waiting for a disc change).
 void ResetDiscSectorCheck(void)
@@ -159,7 +159,7 @@ void StepDiscSectorCheck(void)
         if (CheckDiscChanged(2, tmp) != 0) {
             if (tmp[0] != 0) {
                 if (RefreshDiscStatus() == 0) {
-                    SetPauseMenuLayerPage((T217D_6D0*)g_pauseMenuElement, 2, 0x16);
+                    SetPauseMenuLayerPage((PauseMenu*)g_pauseMenuElement, 2, 0x16);
                     g_discSectorCheckState = 1;
                 }
             }
@@ -189,7 +189,7 @@ void StepDiscSectorCheck(void)
             if ((s32)crc != (s32)g_discCheckExpectedCrc[0]) {
                 g_discSectorCheckState = 1;
             } else {
-                SetPauseMenuLayerPage((T217D_6D0*)g_pauseMenuElement, 2, -1);
+                SetPauseMenuLayerPage((PauseMenu*)g_pauseMenuElement, 2, -1);
                 g_discSectorCheckState = 3;
             }
         }

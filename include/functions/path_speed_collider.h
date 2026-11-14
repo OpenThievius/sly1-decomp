@@ -6,13 +6,13 @@
 
 #include "common.h"
 
-struct C24;
 struct PathCurveObject;
+struct PathSpeedCollider;
 
-void InitC24Object(C24* self);
-void StartC24Object(C24* self);
-void UpdateC24Object(C24* self, f32 dt);
-void MoveC24Object(C24* self, s32 a1, f32 dt);
-void BuildPathSpeedProfile(C24* self, PathCurveObject* path, f32 speed);
+void InitC24Object(PathSpeedCollider* self);
+void StartC24Object(PathSpeedCollider* self);
+void UpdateC24Object(PathSpeedCollider* self, f32 dt);
+void MoveC24Object(PathSpeedCollider* self, s32 a1, f32 dt);
+void BuildPathSpeedProfile(PathSpeedCollider* self, PathCurveObject* path, f32 speed);
 
 #endif

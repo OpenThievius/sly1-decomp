@@ -65,7 +65,7 @@ struct PlacedObject;
 
 struct BaseObject;
 
-struct Mat02;
+struct Mat3;
 
 
 extern f32 g_gameClock[];
@@ -85,7 +85,7 @@ void FlushOutputBuffer(OutputBuffer* self);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 struct StateGraph;
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -179,7 +179,7 @@ ObjectLink g_pathFollowerLinks[20] = {
 };
 float g_uprightSteerDelay = 1.0f;
 f32 g_uprightRampTime = 2.0f;
-Vec02 g_uprightPull = { 0.0f, 30.0f, 3.0f, 0.0f };
+Vec4 g_uprightPull = { 0.0f, 30.0f, 3.0f, 0.0f };
 float g_wheelSlipCurve[4] = {0.0f, 0.00999999978f, 0.0f, 0.0f};
 float g_wheelSlipRange[2] = {0.0f, 45.0f};
 float g_suspensionDampingGain = 15.0f;
@@ -214,9 +214,9 @@ f32 g_steerAngleGain = 0.5f;
 
 struct RingSource {
     u8 pad00[0x40];
-    Vec02 v40;              // 0x40
+    Vec4 v40;              // 0x40
     u8 pad50[0x30];
-    Vec02 v80;              // 0x80
+    Vec4 v80;              // 0x80
 };
 
 typedef void (*RingDrawFn)(void* request);
@@ -318,9 +318,9 @@ void FinishPlayerRequest(Player* self)
         self->lastMessage.fn = 0;
         ((void (*)(s32, Player*))fn)(self->lastMessage.data, self);
     } else {
-        Vec02 v = self->v150;
+        Vec4 v = self->v150;
         v.z = g_requestFinishMinSpeedZ >? v.z;
-        const Desc02* d = self->desc02();
+        const PlacedObjectDescriptor* d = self->desc02();
         d->m20(self, &v);
         SetPlayerState(self, 2, 6);
     }
@@ -331,7 +331,7 @@ void FinishPlayerRequest(Player* self)
 struct HitMessage {
     s32 kind;               // 0x00
     u8 pad04[0x20 - 0x04];
-    Vec02 v20;              // 0x20
+    Vec4 v20;              // 0x20
     f32 f30;                // 0x30
     u8 pad34[0x38 - 0x34];
     Collider* source;       // 0x38
@@ -340,8 +340,8 @@ struct HitMessage {
 
 struct Oscillator;
 struct TreeNode03;
-s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
-s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out);
+s32 FindPlaneTreeNodeForPoint(Vec4* pos, TreeNode03* nodes);
+s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec4* out);
 typedef s32 (*MessageHandlerFn)(Collider* self, s32 a, OwnerMessage* msg);
 typedef void (*HitFn)(Collider* self, HitMessage* msg);
 
@@ -354,8 +354,8 @@ void NotifyPlayerGroundObject(Player* self)
     u32 i;
     // the object's class is not known (a subclass of Collider)
     if (self->containingCollider != 0 && *(s32*)((u8*)self->containingCollider + 0x58C) != 0) {
-        Vec02 p;
-        Vec02 moved;
+        Vec4 p;
+        Vec4 moved;
         p = self->v140;
         p.z = p.z + g_groundProbeLift;
         if (self->subState == 0x27 || self->subState == 0x2F) {
@@ -367,7 +367,7 @@ void NotifyPlayerGroundObject(Player* self)
             u128 s1 = Vu0::Scalar(-1.0f);
             Vu0::Q(p) = Vu0::MulXSum(Vu0::Q(p), s2, Vu0::Q(moved), s1);
         }
-        i = FindPlaneTreeNodeForPoint((Vec02*)&p, self->containingCollider->tree.nodes) != 0;
+        i = FindPlaneTreeNodeForPoint((Vec4*)&p, self->containingCollider->tree.nodes) != 0;
     } else {
         i = 0;
     }
@@ -378,7 +378,7 @@ void NotifyPlayerGroundObject(Player* self)
             self->desc05()->m4C(self, (void*)&msg);
         }
     }
-    Vec02 out;
+    Vec4 out;
     if (i == 0 || ProbeColliderBelowPoint(self, self->containingCollider, &out) == 0) {
         return;
     }
@@ -403,12 +403,12 @@ void NotifyPlayerGroundObject(Player* self)
         }
         for (s32 j = 0; j < count; j++) {
             Collider* o = list[j];
-            Vec02 lo;
-            Vec02 hi;
+            Vec4 lo;
+            Vec4 hi;
             s32 hit = 0;
             GetObjectWorldPosition(o, &lo);
             // the object's class is not known
-            hi = *(Vec02*)((u8*)o + 0x40);
+            hi = *(Vec4*)((u8*)o + 0x40);
             TransformPointAtTime((PlacedObject*)((BaseObject*)obj)->parent, 0, &hi, 0, 0, 0, g_gameClock[2]);
             if (out.z <= lo.z) {
                 if (hi.z <= out.z) {
@@ -439,12 +439,12 @@ void NotifyPlayerGroundObject(Player* self)
 
 // Casts a short vertical segment at the player's position (shifted back through the collider's
 // oscillator motion) against the collider's plane tree; gives 1 and the hit point when it hits.
-s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out)
+s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec4* out)
 {
-    Vec02 moved;
-    Vec02 shift;
-    Vec02 start;
-    Vec02 end;
+    Vec4 moved;
+    Vec4 shift;
+    Vec4 start;
+    Vec4 end;
     ColliderSpan hit;
     if (col->oscillatorBlock != 0) {
         ComputeOscillatorDisplacement((Oscillator*)(((void**)col->oscillatorBlock)[3]), 50.0f, &self->v140, 0, &moved, 0, 0);
@@ -481,12 +481,12 @@ void ApplyPlayerAttachedSetContact(Player* self, Collider* other, f32 t)
         return;
     case 0x27:
     case 0x2F: {
-        Vec02 point;
-        Vec02 local;
-        Vec02 q2;
-        Vec02 q3;
-        Vec02 force;
-        Vec02 k;
+        Vec4 point;
+        Vec4 local;
+        Vec4 q2;
+        Vec4 q3;
+        Vec4 force;
+        Vec4 k;
         f32 next;
         if (ProbeColliderBelowPoint(self, other, &point) == 0) {
             return;
@@ -547,7 +547,7 @@ Quadword ScaleQuadword(Quadword a, Quadword b);
 extern Quad16 g_zeroQuad;
 
 // k times the vector at p, into dst (the quadword helpers' product).
-static inline void StoreScaledQuadword(Vec02* dst, f32 k, u8* p)
+static inline void StoreScaledQuadword(Vec4* dst, f32 k, u8* p)
 {
     Quadword t;
     StoreFloatAsQuadword((u128*)&t, k);
@@ -561,11 +561,11 @@ static inline void StoreScaledQuadword(Vec02* dst, f32 k, u8* p)
 // upright, and while running adds a spin, a forward push and gains that grow with its age.
 void StepStandIn(StandIn* self, f32 t)
 {
-    Mat02 upright;
-    Vec02 push;
-    Vec02 spin;
-    Vec02 q50;
-    Vec02 q60;
+    Mat3 upright;
+    Vec4 push;
+    Vec4 spin;
+    Vec4 q50;
+    Vec4 q60;
     StepCollider(self, t);
     f32 since = g_gameClock[1] - self->startTime;
     f32 age = g_unitRange.Limit(g_standInAgeCurve[0] + since * (g_standInAgeCurve[1] + since * g_standInAgeCurve[2]));
@@ -576,7 +576,7 @@ void StepStandIn(StandIn* self, f32 t)
         Vu0::Q(spin) = Vu0::MulX(Vu0::Q(self->rot.r[2]), Vu0::ScalarAt(g_standInSpinRate));
     } else {
         spin = g_zeroVector;
-        q50 = *(Vec02*)&g_zeroQuad;
+        q50 = *(Vec4*)&g_zeroQuad;
     }
     SteerColliderTowardRotation(self, &upright, (f32*)&q50, &spin, (f32*)&q60, t);
     if (self->running != 0) {
@@ -786,15 +786,15 @@ void StartPathFollower(PathFollower* self)
         for (s32 i = 0; i < n; i++) {
             buf[i]->desc->m17(buf[i], self);
         }
-        T217D_E30* boxA = &g_firstTallyCaption;
-        T217D_E30* boxB = &g_secondTallyCaption;
+        CounterCaption* boxA = &g_firstTallyCaption;
+        CounterCaption* boxB = &g_secondTallyCaption;
         ((U32P*)&boxA->own)->v = 0;
         ((U32P*)&boxB->own)->v = 0;
         boxA->target = &boxA->own;
         boxB->target = &boxB->own;
     }
     for (s32 k = 0; k < 4; k++) {
-        Slot19* s = &self->wheels[k];
+        FollowerObjectSlot* s = &self->wheels[k];
         s->placedPos = s->obj->pos;
     }
     ResetPathFollower(self);
@@ -810,7 +810,7 @@ extern float g_maxAccelCurve[];
 extern float g_maxAccelRange[];
 extern float g_uprightSteerDelay;
 extern f32 g_uprightRampTime;
-extern Vec02 g_uprightPull;
+extern Vec4 g_uprightPull;
 extern float g_wheelSlipCurve[];
 extern float g_wheelSlipRange[];
 extern float g_suspensionDampingGain;
@@ -836,15 +836,15 @@ void AddColliderForce(void* a, void* b);
 void* StoreFloatAsQuadword(u128* out, f32 f);
 void* CopyQuadword(u128* out, void* src);
 void* StoreQuadword(u128* out, u128 v);
-void ApplyColliderInverseInertia(Collider* self, Vec02* in, Vec02* out);
-void AddColliderTorque(Collider* self, Vec02* torque);
+void ApplyColliderInverseInertia(Collider* self, Vec4* in, Vec4* out);
+void AddColliderTorque(Collider* self, Vec4* torque);
 Quadword ScaleQuadword(Quadword a, Quadword b);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 
 // v made unit length into out; returns its length.
-static inline f32 NormalizeInto(Vec02& out, Vec02 v)
+static inline f32 NormalizeInto(Vec4& out, Vec4 v)
 {
     u128 len = Vu0::Length(Vu0::Q(v));
     Vu0::Q(out) = Vu0::DivX(Vu0::Q(v), len);
@@ -859,29 +859,29 @@ void StepPathFollower(PathFollower* self, f32 dt)
 {
     StepCollider(self, dt);
     if (g_gameClock[1] - self->uprightTime > g_uprightSteerDelay && g_gameClock[1] - self->pushedTime > g_uprightRampTime) {
-        Mat02 upright;
+        Mat3 upright;
         RotateMatrixUpright(&self->rot, 0, &upright);
         SteerColliderTowardRotation(self, &upright, (f32*)&g_uprightPull, 0, 0, dt);
     }
     f32 sum = 0.0f;
     u32 i;
-    Slot19* s;
+    FollowerObjectSlot* s;
     for (i = 0; i < 4; i++) {
         s = &self->wheels[i];
         if (s->contactStamp != self->contactStamp) {
             continue;
         }
-        Vec02 a;
-        Vec02 b;
-        Vec02 dir;
-        Vec02 motion;
-        Vec02 force;
-        Vec02 torque;
-        Vec02 accel;
-        Vec02 spin;
+        Vec4 a;
+        Vec4 b;
+        Vec4 dir;
+        Vec4 motion;
+        Vec4 force;
+        Vec4 torque;
+        Vec4 accel;
+        Vec4 spin;
         s32 front = (s32)i < 2;
         // the object's class is not known
-        a = *(Vec02*)((u8*)s->obj8 + 0x40);
+        a = *(Vec4*)((u8*)s->obj8 + 0x40);
         a.z -= front ? self->frontWheelRadius : self->rearWheelRadius;
         TransformPointBetweenFrames(self, 0, &a, &a);
         b = s->obj->v190;
@@ -933,9 +933,9 @@ void StepPathFollower(PathFollower* self, f32 dt)
         Quadword qv = q;
         Quadword u;
         CopyQuadword((u128*)&u, p);
-        Vec02 turn;
+        Vec4 turn;
         StoreQuadword((u128*)&turn, ScaleQuadword(qv, u));
-        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&g_zeroVector, (f32*)&turn, dt);
+        SteerColliderTowardRotation(self, 0, 0, (Vec4*)&g_zeroVector, (f32*)&turn, dt);
     }
     f32 one = 1.0f;
     f32 drive = sum / (self->mass * g_driveForceFull);
@@ -953,9 +953,9 @@ void StepPathFollower(PathFollower* self, f32 dt)
         w *= self->pace * self->pace;
     }
     limit *= w;
-    Vec02 vel;
+    Vec4 vel;
     Vu0::Q(vel) = Vu0::MulAddX(Vu0::Vec::Of(self->v150), Vu0::Vec::Of(self->v170), Vu0::Vec::ScalarInGpr(dt)).q;
-    Vec02 local;
+    Vec4 local;
     Vu0::Q(local) = Vu0::RotateTransposed(self->rot, Vu0::Q(vel));
     f32 span = self->wheels[0].obj->v190.x - self->wheels[2].obj->v190.x;
     f32 rate = self->targetSpeed / self->maxSpeed;
@@ -970,25 +970,25 @@ void StepPathFollower(PathFollower* self, f32 dt)
     r *= g_unitRange.Clamp(((QuadraticCurve*)g_steerSpeedCurve)->Eval(local.x / self->maxSpeed));
     f32 yaw = (local.x <? g_steerSpeedCap) * self->steerAngle;
     f32 r2 = r * self->steerAngle;
-    Vec02 spinL;
+    Vec4 spinL;
     Vu0::Q(spinL) = Vu0::RotateTransposed(self->rot, Vu0::Q(self->v160));
     f32 inertia = self->mass * __builtin_fabsf(self->wheels[0].obj->v190.x) / self->inertia.r[2].z;
-    Vec02 c;
+    Vec4 c;
     c.x = c.y = 0.0f;
     f32 tq = ClampToMagnitude((yaw / span + r2 * g_steerRateGain - spinL.z) / dt, inertia * limit);
     c.z = tq;
     inertia = tq / inertia;
-    Vec02 torque2;
+    Vec4 torque2;
     Vu0::Q(torque2) = Vu0::Rotate(self->rot, Vu0::Q(c));
     limit -= __builtin_fabsf(inertia);
     AddColliderTorque(self, &torque2);
     f32 lean = ((ValueRange*)g_leanRange)->Clamp(((QuadraticCurve*)g_leanCurve)->Eval(lap)) * self->pace;
     f32 tilt = (g_leanRange[1] <? lean) / self->pace;
-    Vec02 heading;
+    Vec4 heading;
     ComputePolarOffset((Vec3*)&heading, self->targetHeading, 1.0f, 0.0f);
     f32 h = ((ValueRange*)g_headingAlignRange)->Limit(((QuadraticCurve*)g_headingAlignCurve)->Eval(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(heading), Vu0::Q(self->rot.r[0])))));
-    Vec02 want;
-    Mat02 roll;
+    Vec4 want;
+    Mat3 roll;
     BuildAxisAngleMatrix(&g_unitZVector, &roll, (spinL.z + c.z * (dt * 0.5f)) * dt);
     f32 speed;
     if (1.0f < tilt) {
@@ -999,9 +999,9 @@ void StepPathFollower(PathFollower* self, f32 dt)
     Vu0::Q(want) = Vu0::FromFloats(speed, 0.0f, 0.0f);
     Vu0::Q(want) = Vu0::RotateUntied(roll, Vu0::Q(want));
     f32 maxAccel = ((ValueRange*)g_maxAccelRange)->Limit(((QuadraticCurve*)g_maxAccelCurve)->Eval(lap));
-    Vec02 delta;
-    Vec02 world;
-    Vec02 clamped;
+    Vec4 delta;
+    Vec4 world;
+    Vec4 clamped;
     Vu0::Q(delta) = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(want), Vu0::Vec::Of(local)), Vu0::Vec::ScalarInGpr(dt)).q;
     delta.z = 0.0f;
     ClampVectorLength(&delta, &clamped, limit >? maxAccel);
@@ -1024,7 +1024,7 @@ void StepPathFollower(PathFollower* self, f32 dt)
             s->firstEmitterOwed += p * g_gameClock[2];
         }
     }
-    Vec02 tq3;
+    Vec4 tq3;
     Vu0::Q(tq3) = Vu0::Cross(Vu0::MulX(Vu0::Q(self->rot.r[2]), Vu0::ScalarAt(g_forceLeverDrop)), Vu0::MulX(Vu0::Q(world), Vu0::ScalarAt(self->mass)));
     ApplyColliderInverseInertia(self, &tq3, &torque2);
     AddColliderTorque(self, &torque2);
@@ -1135,12 +1135,12 @@ void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
 {
     PathFollower* list[16];
     ValueRange spans[16];
-    Vec02 pos;
-    Vec02 tangent;
-    Vec02 dir;
-    Vec02 lo;
-    Vec02 hi;
-    Vec02 out;
+    Vec4 pos;
+    Vec4 tangent;
+    Vec4 dir;
+    Vec4 lo;
+    Vec4 hi;
+    Vec4 out;
     s32 n = GatherObjectsById(self->world, 5, 0x19, 0, 0x10, list);
     s32 count = 0;
     s32 k = 0;
@@ -1176,7 +1176,7 @@ void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
     c->vt->m06(c, self->pathDistance + g_pathLookAhead);
     c = self->path->curve;
     if (c->vt->m02) {
-        ((void (*)(PathCurve*, f32, Vec02*, Vec02*))c->vt->m02)(c, self->pathDistance + g_pathLookAhead, &pos, &tangent);
+        ((void (*)(PathCurve*, f32, Vec4*, Vec4*))c->vt->m02)(c, self->pathDistance + g_pathLookAhead, &pos, &tangent);
     }
     u128 side = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(tangent));
     Vu0::Q(dir) = Vu0::DivX(side, Vu0::Length(side));
@@ -1214,11 +1214,11 @@ void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
 // lower speed).
 void ComputePathFollowerHeadingTarget(PathFollower* self)
 {
-    Vec02 pos;
-    Vec02 tangent;
-    Vec02 side;
-    Vec02 w;
-    Vec02 ahead;
+    Vec4 pos;
+    Vec4 tangent;
+    Vec4 side;
+    Vec4 w;
+    Vec4 ahead;
     if (self->path != 0) {
         PathCurve* o = self->path->curve;
         if (o->vt->m02 != 0) {
@@ -1262,7 +1262,7 @@ void SteerPathFollower(PathFollower* self)
     f32 c = ClampToMagnitude(g_steerAngleGain * b, g_steerAngleLimit);
     self->steerAngle = ApproachAngleWithRamp((u8*)g_steerAngleRamp, 0, self->steerAngle, c, g_frameDt);
     for (u32 i = 0; i < 4; i++) {
-        Slot19* s = &self->wheels[i];
+        FollowerObjectSlot* s = &self->wheels[i];
         if ((s32)i < 2) {
             s->turnRate = self->targetSpeed / self->frontWheelRadius;
         } else {

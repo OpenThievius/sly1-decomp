@@ -12,11 +12,11 @@ struct T217D_BF0Eu {
     void* target;               // 0x590
 };
 
-void SteerWalkerAimAtNearestTarget(T217D_BF0* element, PadStick* pad)
+void SteerWalkerAimAtNearestTarget(AimReticle* element, PadStick* pad)
 {
     T217D_BF0Eu* self = (T217D_BF0Eu*)element;
-    Vec02 p;
-    Vec02 best;
+    Vec4 p;
+    Vec4 best;
     f32 bestScore = 3.40282347e+38f;
     Vu0::Q(best) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
     Class75Object* chosen = 0;

@@ -9,7 +9,7 @@
 #include "placed_object.h"
 
 struct PlaneNode {
-    Vec02 normal;           // 0x00
+    Vec4 normal;           // 0x00
     f32 offset;             // 0x10
     sptr below;             // 0x14: the child on the plane's near side
     sptr above;             // 0x18
