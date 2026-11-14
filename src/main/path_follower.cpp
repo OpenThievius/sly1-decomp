@@ -112,10 +112,7 @@ void SteerPathFollower(PathFollower* self);
 
 
 // A quadratic by its three coefficients (func_001D8578).
-struct QuadraticCurve {
-    f32 c[3];
-    f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
-};
+#include "quadratic_curve.h"
 
 
 

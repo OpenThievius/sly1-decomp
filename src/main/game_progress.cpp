@@ -154,19 +154,11 @@ void ResetGameSession(void);
 
 void* AllocateFrontMemory(s32 size);
 
-struct RefItem { u8 pad[0x38]; void* ref; u8 rest[0x70 - 0x3C]; };
+#include "placed_model_parts.h"
 
-struct RefOwner
-{
-    u8 pad0[0xC];
-    s32 count;
-    RefItem* items;
-    u8 pad1[0x50 - 0x14];
-    s32 capacity;
-    void** refs;
-};
 
-extern "C" void* FillMemory(void* p, s32 value, s32 size);
+
+
 
 struct Counter
 {
@@ -349,21 +341,10 @@ void ApplyCompletionFlags(s32 mode);
 
 // EXACT: self->block store ahead of self->f20 store.
 
-struct MorphTargetHeader
-{
-    u16* p;
-    s32 count;
-};
+
 // Built at startup: the compiler's initialiser and constructor for this file are func_00167D20
 // and func_00167D48 (config/us/generated.tsv).
-struct ColorWord
-{
-    union {
-        struct { u8 r, g, b, a; };
-        u32 rgba;
-    };
-    ColorWord(u32 v) { rgba = v; }
-};
+
 
 // The file's .data, in retail's order. It begins with the game progress pointers
 // (game_progress.h), which this file's functions read and render_frame.cpp's do not.
@@ -392,13 +373,7 @@ void WriteVifStmask(PacketWriter* s, s32 value);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifFlushE(PacketWriter* s);
 
-struct QuadClear
-{
-    static void Clear(u32* q)
-    {
-        FillMemory(q, 0, 0x10);
-    }
-};
+
 
 struct PercentClampS32 {
     static s32 Of(s32 v, s32 lo, s32 hi)
@@ -421,15 +396,7 @@ void ResetVertexBatch(VertexBatch* batch);
 void BuildUnlitVertexPacket(VertexBatch* batch);
 void BuildLitVertexPacket(VertexBatch* batch);
 
-struct __attribute__((packed)) BatchVertexWords {
-    u64 q0;
-    u64 q8;
-    u64 q10;
-    u64 q18;
-    s32 f20;
-    s32 value;
-    BatchVertexWords() {}
-};
+
 
 struct AppendVertexBatch {
     u8 pad0[0xF8];
@@ -457,7 +424,7 @@ struct UnlitVertexBatch {
     UnlitVertex e[1];
 };
 struct UnlitUnpackHeader { u16 arrayOffset; u16 frameDataOffset; u8 pad[4]; u16 frameOffsets[4]; u16 arrayCount; u8 pad3[6]; };
-struct CopiedGifTags { u32 w[8]; };
+
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern u8 g_unlitBatchProgram[];
@@ -465,7 +432,7 @@ extern u8 g_unlitBatchFinishProgram[];
 void CopyMemory(void* dst, void* src, u32 size);
 
 // A run of bytes, for the fill and copy calls.
-struct ByteSpan { u8 b[1]; };
+
 struct LitUnpackHeader { u16 arrayOffset; u16 f2; u8 pad4[4]; u16 frameOffsets[3]; u16 fE; u16 arrayCount; u8 pad12[6]; };
 struct LitVertex
 {
@@ -518,42 +485,10 @@ void AddDmaRefTag(PacketWriter* s, s32 n, void* data);
 void BeginDmaTag(PacketWriter* s);
 void CopyMemory(void* dst, void* src, u32 size);
 
-struct MeshUv {
-    f32 u;
-    f32 v;
-};
+
 // A vertex's indices into the position, normal and uv arrays, and its flags.
-struct VertexRefs {
-    u8 pos;
-    u8 nrm;
-    u8 uv;
-    u8 flags;
-};
+
 // A weight's two index lists: the positions it moves, then the normals.
-struct WeightIndices {
-    u16* pos;
-    u16* nrm;
-};
-struct CursorHook;
-typedef AnimCursor* (*CursorHookFn)(CursorHook* self, StripMesh* mesh);
-struct CursorHook {
-    CursorHookFn* vt;
-};
-struct StripUnpack {
-    u16 off[4];
-    u16 strip[4];
-    u16 f10;
-    u16 f12;
-    u16 pad14[2];
-};
-struct StripHeader {
-    u8 pad00[0x14];
-    u32 f14;
-    u8 pad18[0x1C - 0x18];
-    StripUnpack* p;
-    StripExtra* extra;
-    s32 count;
-};
 
 extern u8 g_unlitBatchFinishProgram[];
 extern u8 g_unlitBatchProgram[];
@@ -583,31 +518,25 @@ void* AllocateZeroedFrontMemory(s32 bytes);
 void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
 
 
-typedef void (*AttachmentHandlerFn)(void* self);
-struct AttachmentHandler { AttachmentHandlerFn* vtbl; };
 
 
 // Four quadwords: a matrix as the attachment code copies it.
-struct QuadMatrix { Quad16 q[4]; };
-struct TargetObject { u8 pad0[0x110]; u8 sub110[0x30]; u8 sub140[0x40]; };
-struct AttachmentTarget { TargetObject* p0; u8 pad0[0xC]; QuadMatrix m; u8 tail[0x90 - 0x50]; };
-struct AttachmentTargets { s32 count; AttachmentTarget* elems; s32* keys; };
+
+
+
+
 struct TargetFrames { Quad16 a; u8 pad0[0x30]; Quad16 b; u8 pad1[0x30]; QuadMatrix m; };
 
 
 
 
-struct AnimatorOwner {
-    u8 pad0[0x4C];
-    AnimatorStep* head4C;
-};
+
 
 
 
 extern u8 g_litBatchFinishProgram[];
 extern u8 D_000000F0[];
 
-struct PartRange { u16 lo; u16 hi; };
 
 void* InitPacketWriter(PacketWriter* self);
 void AllocateQuadwordBuffer(PacketWriter* buffer, u32 count, u32 kind);
@@ -616,9 +545,6 @@ void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8*
 void WriteVifMscal(void* s, void* n);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-struct AttachmentPartInfo { u8 pad[0x10]; u32 flags; };
-struct AttachmentPart { u8 pad[0x38]; AttachmentPartInfo* a; u8 pad3C[0x18]; void* b; };
-struct AttachmentCopy { s32 n0; void* p4; u8 pad8[4]; s32 count; AttachmentPart* recs; void* p14; u8 pad18[0x28]; s32 n40; void* p44; u8 pad48[4]; AttachmentLink* head; s32 f50; };
 
 void CopyMemory(void* dst, void* src, u32 size);
 void* AllocateZeroedFrontMemory(s32 n);
@@ -626,26 +552,12 @@ void* CopyToFrontMemory(s32 size, void* src);
 void CollectNonNullRefs(AttachmentCopy* o);
 
 // Index written (i << 4) * 9: a plain &items[i] gives a mult that loop.c does not strength-reduce (no s4 offset giv).
-struct FramedObject;
-typedef void (*FramedObjectFn)(FramedObject* self);
-struct FramedObjectVt { u8 pad[0xC0]; FramedObjectFn f; };
-struct FrameLinkConstraint { u8 pad0[0x60]; QuadMatrix m60; u8 pad[4]; s32 a4; u8 pad2[8]; u32 flags; };
-struct FramedObject { FramedObjectVt* vt; u8 pad0[0x10C]; u8 sub110[0x30]; u8 sub140[0x40]; u8 pad180[0xA4]; FrameLinkConstraint* link; };
-struct FramedAttachment { FramedObject* obj; u8 pad[0xC]; Quad16 q10[4]; QuadMatrix m50;  };
-struct FramedAttachmentList { s32 count; FramedAttachment* items; };
 
 QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
 // The lit strip builder's packets: 0x24-byte slots, written two apart.
-struct PacketSlot {
-    u8 pad[0x24];
-};
-struct QuadLanes {
-    f32 x[4];
-    f32 y[4];
-    f32 z[4];
-    f32 w[4];
-};
+
+
 
 extern u8 g_litBatchProgram[];
 extern u8 g_litBatchThirdProgram[];

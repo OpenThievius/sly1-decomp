@@ -155,17 +155,13 @@ struct __attribute__((aligned(16))) PartRequest {
 };
 
 // One of the two scratchpad transfer buffers (object_properties.cpp): the blocks StartToSprChain sent.
+#include "spr_block.h"
 
-extern s32 g_sprTransferIndex;
-extern SprTransfer g_sprTransfers[2];
+
+
 
 // Block n of the current scratchpad transfer.
-struct SprBlock {
-    static u32 Of(s32 n)
-    {
-        return g_sprTransfers[g_sprTransferIndex].addrs[n];
-    }
-};
+
 
 struct Frame_166690;
 struct DmaChannel;

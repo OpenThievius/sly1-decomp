@@ -159,10 +159,7 @@ struct ScatterController;
 void RaiseScatterLevels(ScatterController* self, f32 amount);
 
 // A quadratic by its three coefficients (func_001DB290).
-struct QuadraticCurve {
-    f32 c[3];
-    f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
-};
+#include "quadratic_curve.h"
 
 
 extern s32 g_buttonCodeFlags;

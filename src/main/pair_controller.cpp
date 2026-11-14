@@ -357,32 +357,8 @@ void AttachPairedPartner(void* a0, void* a1);
 
 
 
-// The coefficients of a quadratic in t (a + bt + ct^2), as the pose holds them.
-typedef BlendQuad QuadraticCoeffs;
-
 // A quadratic evaluated at t and clamped to a range (func_001A5760).
-struct ClampedQuadratic {
-    static f32 Eval(const QuadraticCoeffs* p, f32 t)
-    {
-        return p->a + t * (p->b + t * p->c);
-    }
-    static void Clamp(f32& c, f32 v, const ValueRange* r)
-    {
-        f32 lo = r->lo;
-        f32 hi = r->hi;
-        if (v < lo) {
-            c = lo;
-        } else if (hi < v) {
-            c = hi;
-        } else {
-            c = v;
-        }
-    }
-    static void Get(f32& c, const QuadraticCoeffs* p, f32 t)
-    {
-        Clamp(c, Eval(p, t), &g_unitRange);
-    }
-};
+#include "clamped_quadratic.h"
 
 ObjectLink g_walkerColliderLoadLinks[2] = { { 0x2, 0x28E, 0x640 }, { 0x2, 0x292, 0x650 } };
 

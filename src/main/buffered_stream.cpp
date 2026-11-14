@@ -207,9 +207,7 @@ struct SectorStreamState {
     s32 writeIdx;   // 0x58
 };
 
-struct MinOf {
-    static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
-};
+#include "min_of.h"
 
 extern "C" s32 GetDiscReadPosition();
 extern "C" s32 SyncDiscNCommand(s32 mode);

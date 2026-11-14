@@ -180,10 +180,7 @@ void InitSwitchedCollider(SwitchedCollider* self);
 f32 RandomFloatInRange(f32 lo, f32 hi);
 extern "C" f32 Logarithm(f32 x);
 s32 IsPadSelectFlagHeld(World* p);
-union DoubleBits {
-    double d;
-    u64 u;
-};
+#include "double_bits.h"
 extern "C" double AddDoubles(double a, double b);
 // An object of the world's lists at 0x78, 0x1B70 and 0x1C30 as func_001E9EE8 walks them: the
 // slot at 0x7C of the first list's objects is called with the frame time.

@@ -107,7 +107,7 @@ extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 extern "C" void StartDmaChainToMemory(DmaChannel* ch);
 // A script list being built (func_001C1530 hands one to a getter; func_001C1A28 appends a value
 // of `type` to it).
-struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
+#include "script_list.h"
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 // Declared void with an address-sized integer: retail's func_001C1A28 schedules its call as one
 // whose result is unused (the definition, below, returns out and takes the address as void*).
@@ -126,10 +126,10 @@ void* DefineScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, Script
 extern u32 g_scriptStreamExtras;
 // NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
 
-struct R11B008Node;
+
 void EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope); // stays void: retail returns a value, but declared so func_001C13E8 differs in registers
 // A type and a list of script values: func_001C1AD8 tells whether a value is among them.
-struct ScriptValueFilter { u32 type; R11B008Node* list; };
+
 // The payloads of script values of kind 10 and 11 (two and three words), copied word by word.
 struct ScriptPair { s32 w[2]; };
 struct ScriptTriple { s32 w[3]; };

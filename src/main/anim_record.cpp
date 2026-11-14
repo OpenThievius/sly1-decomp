@@ -100,7 +100,7 @@ extern u8 g_crossfadeAnimatorMethods[];
 extern const Fn_Table g_scrollAnimatorMethods[];
 extern const Fn_Table g_circleAnimatorMethods[];
 extern const Fn_Table g_triangleAnimatorMethods[];
-struct RandomRangeLow { s32 v; };
+#include "random_range_low.h"
 s32 RandomIntInRange(RandomRangeLow lo, s32 hi);
 
 // The file's .data, in retail's order.

@@ -86,7 +86,7 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev);
 
 
 // What SetSinCosPair fills: the two results of ComputeSinCos and a word it clears.
-struct SinCosPair { f32 a; f32 b; s32 value; };
+#include "sin_cos_pair.h"
 
 
 void CountDownGaugeContacts(GaugeManager* self, ContactAgent* agent);
