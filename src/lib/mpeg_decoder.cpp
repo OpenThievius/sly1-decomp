@@ -89,13 +89,13 @@ s32 CreateMpegDecoder(MpegHandle* out, s32 mem, u32 size)
     in->outputHeight = 0;
     in->outputMacroblocks = 0;
     in->fE8 = 0;
-    in->fF8 = 0;
+    in->overridePhase = 0;
     in->callbacks[0].fn = 0;
     in->callbacks[1].fn = 0;
     in->callbacks[4].fn = 0;
     in->callbacks[5].fn = 0;
     in->callbacks[6].fn = 0;
-    in->fF0 = -1;
+    in->overridePts = -1;
     in->callbacks[2].fn = (MpegCallbackFn)SaveMpegDmaState;
     in->callbacks[3].fn = (MpegCallbackFn)RestoreMpegDmaState;
     u32 table = AllocateFromMpegRing(in, &in->ring, 0x600, 8);
@@ -105,8 +105,8 @@ s32 CreateMpegDecoder(MpegHandle* out, s32 mem, u32 size)
     in->frameBuffer[2] = 0;
     in->f70 = 0;
     in->f78 = 0;
-    in->f80 = -1;
-    in->f88 = 0;
+    in->lastPts = -1;
+    in->lastFieldUnits = 0;
     in->f90 = 0;
     in->firstPictureNumber = 0;
     in->pictureLimit[0] = -1;
@@ -175,7 +175,7 @@ void ResetMpegDecoder(MpegHandle* d) {
     s->phase = 0;
     d->pictureIndex = 0;
     s->firstPictureNumber = 0;
-    s->f80 = -1;
+    s->lastPts = -1;
     ResetMpegDmaAndIpu(s);
     s->pictureNumber = 0;
     ResetMpegPictureMode(s);

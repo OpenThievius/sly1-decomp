@@ -1131,8 +1131,8 @@ void OutputPictureIfDecoded(MpegDecoder* self, s32 count, s32 flag)
             OutputFieldPicturePair(self, x, y, n);
         }
     }
-    if (self->fF8 == 1) {
-        self->fF8 = 2;
+    if (self->overridePhase == 1) {
+        self->overridePhase = 2;
     }
 }
 
@@ -1323,11 +1323,11 @@ void FillPictureOutputInfo(MpegDecoder* self, MpegPicture* node, s64* out1, s64*
         if (v >= 0) {
             *out1 = v;
         } else {
-            s7 = self->f80;
+            s7 = self->lastPts;
             if (s7 < 0) {
                 *out1 = v;
             } else {
-                t88 = self->f88;
+                t88 = self->lastFieldUnits;
                 s0 = (s32)t88;
                 s2 = s0 & 1;
                 v = MultiplySigned64(s2, self->f78 & 1);
@@ -1343,11 +1343,11 @@ void FillPictureOutputInfo(MpegDecoder* self, MpegPicture* node, s64* out1, s64*
     } else {
         *out1 = node->pts;
     }
-    if (self->fF8 == 2) {
-        if (self->fF0 >= 0) {
-            *out1 = self->fF0;
-            self->fF8 = 0;
-            self->fF0 = -1;
+    if (self->overridePhase == 2) {
+        if (self->overridePts >= 0) {
+            *out1 = self->overridePts;
+            self->overridePhase = 0;
+            self->overridePts = -1;
         }
     }
     *out3 = node->dts;
@@ -1371,8 +1371,8 @@ void OutputFramePicture(MpegDecoder* c, MpegPicture* s, s32 count)
     FillPictureOutputInfo(c, s, &c->handle->info[0].pts, &c->handle->info[0].dts, &c->handle->info[0].flags);
     MpegHandle* p = c->handle;
     u32 idx = (u32)(p->info[0].flags >> 5) & 0xF;
-    c->f80 = (s32)p->info[0].pts;
-    c->f88 = D_0027B068[idx];
+    c->lastPts = (s32)p->info[0].pts;
+    c->lastFieldUnits = D_0027B068[idx];
     c->outputDisplayWidth = s->displayWidth;
     c->outputDisplayHeight = s->displayHeight;
     c->outputCentreHorizontal[0] = s->centreHorizontal[0];
@@ -1409,11 +1409,11 @@ void OutputFieldPicturePair(MpegDecoder* c, MpegPicture* a, MpegPicture* b, s32 
         s4 = a;
     }
     (void)FillPictureOutputInfo(c, s3, &c->handle->info[0].pts, &c->handle->info[0].dts, &c->handle->info[0].flags);
-    c->f80 = (s32)c->handle->info[0].pts;
-    c->f88 = 1;
+    c->lastPts = (s32)c->handle->info[0].pts;
+    c->lastFieldUnits = 1;
     (void)FillPictureOutputInfo(c, s4, &c->handle->info[1].pts, &c->handle->info[1].dts, &c->handle->info[1].flags);
-    c->f80 = (s32)c->handle->info[1].pts;
-    c->f88 = 1;
+    c->lastPts = (s32)c->handle->info[1].pts;
+    c->lastFieldUnits = 1;
     MpegHandle* p = c->handle;
     u64 v0 = p->info[0].flags | (s64)s6;
     s32 a2 = s3->displayWidth;

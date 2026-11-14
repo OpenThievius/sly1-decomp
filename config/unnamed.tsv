@@ -504,14 +504,20 @@ include/memory_card.h:MemoryCard.f4F48	role not shown	union member used as a poi
 include/memory_card.h:MemoryCard.f4F4C	role not shown	union member; a slot pointer copied to f4F44 by pause_menu)
 include/model_build.h:StripMeshInfo.f14	no reader	no C use found
 include/model_build.h:StripMeshInfo.f18	no reader	no C use found
+include/mpeg_decoder.h:MpegDecoder.f144	no reader	
 include/mpeg_decoder.h:MpegDecoder.f144	role not shown	a byte read from the stream, set to 5)
 include/mpeg_decoder.h:MpegDecoder.f70	role not shown	read as a timestamp-synthesis switch, only ever 0)
+include/mpeg_decoder.h:MpegDecoder.f70	value only	only ever cleared; the extrapolation it guards never runs)
 include/mpeg_decoder.h:MpegDecoder.f78	role not shown	used in timestamp arithmetic in FillPictureOutputInfo)
+include/mpeg_decoder.h:MpegDecoder.f78	value only	only ever cleared)
 include/mpeg_decoder.h:MpegDecoder.f80	role not shown	a timestamp base, -1 at init)
 include/mpeg_decoder.h:MpegDecoder.f814	no reader	cleared only)
+include/mpeg_decoder.h:MpegDecoder.f814	no reader	only cleared)
 include/mpeg_decoder.h:MpegDecoder.f88	role not shown	timestamp arithmetic)
+include/mpeg_decoder.h:MpegDecoder.f90	role not shown	counter FillPictureOutputInfo increments)
 include/mpeg_decoder.h:MpegDecoder.f90	role not shown	timestamp arithmetic counter)
 include/mpeg_decoder.h:MpegDecoder.fE8	role not shown	cleared flag read with brokenLink in SelectPictureBuffer)
+include/mpeg_decoder.h:MpegDecoder.fE8	value only	only ever cleared)
 include/mpeg_decoder.h:MpegDecoder.fF0	role not shown	1 at init, never set to a value)
 include/mpeg_decoder.h:MpegDecoder.fF8	role not shown	0 at init; compared with 1 and 2)
 include/mpeg_decoder.h:MpegMacroblock.f134	no reader	
@@ -570,8 +576,11 @@ include/pooled_object.h:PooledObject.f584	role not shown	union with holdHeight, 
 include/property_descriptor.h:PropertyDescriptor.f10	role not shown	kept in a property reference by the getter code, never interpreted)
 include/redirect_object.h:RedirectObject.f310	role not shown	selects the first step index and a pinned first link of the chain; meaning unclear)
 include/remote_call_client.h:RemoteCallClient.f10	no reader	cleared by BindRemoteService)
+include/remote_call_client.h:RemoteCallClient.f10	no reader	only cleared)
 include/remote_call_client.h:RemoteCallClient.f14	role not shown	a word of the bind's reply)
+include/remote_call_client.h:RemoteCallClient.f18	no reader	word of the bind reply, never read)
 include/remote_call_client.h:RemoteCallClient.f18	role not shown	a word of the bind's reply)
+include/remote_call_client.h:RemoteCallClient.fC	no reader	
 include/scaled_transform.h:ScaledTransform.f48	no reader	never accessed by name
 include/scaled_transform.h:ScaledTransform.f4c	no reader	never accessed by name
 include/scatter_controller.h:ScatterTable.f00	no reader	never accessed by name in pooled_object.cpp)
@@ -767,6 +776,66 @@ include/world5_countdown.h:World5Countdown.f560	no reader	no use through this st
 include/world5_countdown.h:World5Countdown.f564	no reader	no use through this struct)
 include/world_listed_object.h:WorldListedObject.f300	no reader	zeroed with q300 and uploaded whole)
 include/world_listed_object.h:WorldListedObject.f61C	role not shown	copied from the source's +0x194 and uploaded as a VU1 word)
+src/lib/command_channel.cpp:CommandChannel.f20	no reader	
+src/lib/command_channel.cpp:CommandChannel.f24	no reader	
+src/lib/exception.cpp:ThrownException.f06	value only	always 1, never read)
+src/lib/graph.c:GsDBuff.f38	no reader	written with half the page count, never read)
+src/lib/graph.c:GsDBuff.f60	no reader	written with half the page count, never read)
+src/lib/iop_file_client.cpp:FileControlRequest.f414	no reader	only cleared)
+src/lib/iop_file_client.cpp:FileControlRequest.f418	no reader	only cleared)
+src/lib/iop_file_client.cpp:FileReadRequest.f18	no reader	
+src/lib/memory_card_client.cpp:CardInfoRequest.f00	no reader	
+src/lib/memory_card_client.cpp:CardInfoRequest.f18	no reader	
+src/lib/pad.c:PadFrame.f67	no reader	only cleared)
+src/lib/pad.c:PadSlot.f14	no reader	only cleared)
+src/lib/pad.c:PadSlot.f18	no reader	only cleared)
+src/lib/remote_call.cpp:IopCallPacket.f24	role not shown	two roles (the call data address and count in AnswerIopCall, lookup result words in AnswerServiceLookup)
+src/lib/remote_call.cpp:IopCallPacket.f28	role not shown	two roles (the call data address and count in AnswerIopCall, lookup result words in AnswerServiceLookup)
+src/lib/remote_call.cpp:IopCallPacket.f2C	role not shown	lookup result word the client never reads)
+src/lib/remote_call.cpp:IopCallPacket.f30	no reader	
+src/lib/remote_call.cpp:IopCallPacket.f34	no reader	
+src/lib/remote_call.cpp:IopCallPacket.f38	no reader	
+src/lib/remote_call.cpp:IopCallPacket.f3C	no reader	
+src/lib/remote_call.cpp:RemoteCallPacket.f38	no reader	
+src/lib/remote_call.cpp:RemoteCallPacket.f3C	no reader	
+src/lib/remote_call.cpp:RemoteCallState.f10	no reader	only cleared)
+src/lib/remote_call.cpp:RemoteCallState.f2C	no reader	
+src/lib/remote_call.cpp:RemoteCallState.f30	no reader	
+src/lib/remote_call.cpp:RemoteCallState.f34	no reader	
+src/lib/remote_call.cpp:RemoteCallState.f38	no reader	
+src/lib/remote_call.cpp:RemoteCallState.f3C	no reader	
+src/lib/remote_call.cpp:RemoteCallState.fC	no reader	only cleared)
+src/lib/remote_call.cpp:ServerRequestEntry.f04	role not shown	copied from the request packet, never read here)
+src/lib/remote_call.cpp:ServerRequestEntry.f08	role not shown	copied from the request packet, never read here)
+src/lib/remote_call.cpp:ServerRequestEntry.f14	role not shown	copied from the request packet, never read here)
+src/lib/remote_call.cpp:ServerRequestEntry.f18	role not shown	copied from the request packet, never read here)
+src/lib/remote_call.cpp:ServerRequestEntry.f1C	role not shown	copied from the request packet, never read here)
+src/lib/remote_call.cpp:ServerRequestEntry.f20	role not shown	copied from the request packet, never read here)
+src/lib/remote_call.cpp:ServerRequestEntry.f24	role not shown	copied from the request packet, never read here)
+src/lib/remote_call.cpp:ServerRequestEntry.f34	role not shown	copied from the request packet, never read here)
+src/lib/remote_call.cpp:ServerRequestEntry.f38	role not shown	copied from the request packet, never read here)
+src/lib/remote_call.cpp:ServerRequestPacket.f00	role not shown	copied or never read)
+src/lib/remote_call.cpp:ServerRequestPacket.f04	role not shown	copied or never read)
+src/lib/remote_call.cpp:ServerRequestPacket.f08	role not shown	copied or never read)
+src/lib/remote_call.cpp:ServerRequestPacket.f0C	role not shown	copied or never read)
+src/lib/remote_call.cpp:ServerRequestPacket.f10	role not shown	copied or never read)
+src/lib/remote_call.cpp:ServerRequestPacket.f14	role not shown	copied or never read)
+src/lib/remote_call.cpp:ServerRequestPacket.f18	role not shown	copied or never read)
+src/lib/remote_call.cpp:ServerRequestPacket.f1C	role not shown	copied or never read)
+src/lib/remote_call.cpp:ServerRequestPacket.f20	role not shown	copied or never read)
+src/lib/remote_call.cpp:ServerRequestPacket.f30	role not shown	copied or never read)
+src/lib/remote_call.cpp:ServiceGroup.f0	no reader	
+src/lib/remote_call.cpp:ServiceGroup.f10	no reader	
+src/lib/remote_call.cpp:ServiceGroup.f4	no reader	
+src/lib/remote_call.cpp:ServiceGroup.fC	no reader	
+src/lib/remote_call.cpp:ServiceRecord.f10	no reader	
+src/lib/remote_call.cpp:ServiceRecord.f14	no reader	
+src/lib/remote_call.cpp:ServiceRecord.f18	no reader	
+src/lib/remote_call.cpp:ServiceRecord.f4	no reader	
+src/lib/remote_call.cpp:ServiceRecord.fC	no reader	
+src/lib/throw.c:ExceptionBlock.f10	no reader	block zeroed, field never used)
+src/lib/throw.c:ExceptionBlock.f14	no reader	block zeroed, field never used)
+src/lib/tlb.cpp:TlbSetup.f1C	no reader	
 src/main/arc_element.cpp:ArcQueueRequest.f04	no reader	
 src/main/arc_element.cpp:pool.f60	role not shown	address of a place block passed on)
 src/main/buffered_stream.cpp:LinkedItem.f10	role not shown	a float read from the stream)

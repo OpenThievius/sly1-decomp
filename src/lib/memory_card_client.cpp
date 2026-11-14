@@ -85,7 +85,7 @@ static CardRequest g_cardRequestBuffer __attribute__((aligned(64)));
 struct CardNameRequest {
     s32 port;         // 0x00
     s32 slot;         // 0x04
-    s32 f08;          // 0x08
+    s32 openFlags;    // 0x08: the open flags (0 for a directory read)
     s32 entryCount;   // 0x0C: the entries a directory read asks for
     s32 entries;      // 0x10: the address the IOP writes the entries to
     char name[0x400]; // 0x14
@@ -185,7 +185,7 @@ s32 OpenCardFile(s32 a0, s32 a1, const char* a2, s32 a3)
     CopyStringBounded(name, a2, 0x3FF);
     ((s32*)name)[-5] = a0;
     CardNameRequest* r = (CardNameRequest*)(name - 0x14);
-    r->f08 = a3;
+    r->openFlags = a3;
     r->slot = a1;
     r->name[0x3FF] = 0;
     s32 result = CallRemoteService(pool, 2, 1, r, 0x414, &g_cardReplyBuffer, 4, 0, 0);
@@ -462,7 +462,7 @@ s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, void* a5
     CardNameRequest* rec = &g_cardPathRequestBuffer;
     rec->port = a0;
     rec->slot = a1;
-    rec->f08 = a3;
+    rec->openFlags = a3;
     rec->entryCount = a4;
     rec->entries = (s32)a5;
     CopyStringBounded(rec->name, name, 0x3FF);
