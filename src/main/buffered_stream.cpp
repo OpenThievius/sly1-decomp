@@ -39,9 +39,9 @@ struct LoadProgress;
 
 f32 WrapModulo(f32 x, f32 y);
 
-BufferedStream* InitBufferedStream(BufferedStream* self, s32 a1, s32 a2, s32 a3)
+BufferedStream* InitBufferedStream(BufferedStream* self, s32 a1, u8* a2, s32 a3)
 {
-    s32 align = (a2 + 0x3F) & -0x40;
+    sptr align = ((sptr)a2 + 0x3F) & -0x40;
     self->mode = -1;
     self->flags = a3;
     self->nextPtr = 0;
@@ -52,7 +52,7 @@ BufferedStream* InitBufferedStream(BufferedStream* self, s32 a1, s32 a2, s32 a3)
     self->unpackFlags = 0;
     self->unpackCarry = 0;
     self->end = align;
-    self->start = a1 - (align - a2);
+    self->start = a1 - (align - (sptr)a2);
     return self;
 }
 
@@ -419,7 +419,7 @@ void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out)
             } else {
                 RefillBufferedStream(self);
                 s32 nc = self->nextCount;
-                s32 np = self->nextPtr;
+                sptr np = self->nextPtr;
                 self->remaining = nc;
                 self->ptr = np;
                 self->nextPtr = np + nc;
@@ -449,10 +449,10 @@ void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out)
 
 void AlignBufferedStreamPosition(BufferedStream* self, s32 n)
 {
-    s32 head = self->ptr;
-    s32 t = head - 1;
+    sptr head = self->ptr;
+    sptr t = head - 1;
     t = t + n;
-    s32 aligned = t & -n;
+    sptr aligned = t & -n;
     s32 delta = aligned - head;
     self->ptr = aligned;
     self->remaining -= delta;

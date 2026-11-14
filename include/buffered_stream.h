@@ -16,18 +16,18 @@
 struct BufferedStream {
     s32 flags;              // 0x00: the fourth argument (func_00137290, func_00137A60)
     s32 mode;               // 0x04: -1 at set-up (func_00137398, func_001373D0)
-    s32 end;                // 0x08: the buffer's end, aligned to 64
+    sptr end;               // 0x08: the buffer's end, aligned to 64
     s32 start;              // 0x0C: the base, moved back by the alignment
     s32 totalSize;          // 0x10: func_001373D0
     s32 bytesToRead;        // 0x14: func_001373D0
     union {
         u8* cur;            // 0x18: the readers (func_00137B90 .. func_00137DF8), func_001378A0
-        s32 ptr;            // 0x18: func_00137290, func_00137398, func_00137A60
+        sptr ptr;           // 0x18: func_00137290, func_00137398, func_00137A60
     };
     s32 remaining;          // 0x1C: the readers; func_00137A60 (count)
     union {
         u8* next;           // 0x20: func_001378A0
-        s32 nextPtr;        // 0x20: func_00137290, func_00137A60
+        sptr nextPtr;       // 0x20: func_00137290, func_00137A60
     };
     s32 nextCount;          // 0x24: func_00137290, func_001378A0, func_00137A60
     s32 unpackFlags;        // 0x28: func_00137290, func_001378A0

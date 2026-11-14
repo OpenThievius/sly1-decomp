@@ -25,7 +25,7 @@ struct __attribute__((aligned(16))) TextureRegWrite {
 // The list at +0x624: first element, a pad, and the offset of the link inside an element
 // (func_00139EC8 walks it).
 struct OffsetList {
-    s32 head;               // 0x00
+    sptr head;              // 0x00
     u8 pad04[4];
     s32 link;               // 0x08
 };

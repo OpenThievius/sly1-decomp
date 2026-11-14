@@ -49,9 +49,27 @@ of plain C++; their bodies are one `__asm__` statement of VU0 instructions each.
 
 ## Data and types a port meets
 
-- **32-bit pointers** are held in `u32` fields and 32-bit integers where the game's structures
-  store addresses (the PS2's pointers are 32 bits); the structures keep retail's layouts, so a
-  port on 64-bit pointers changes the field types and every size and offset that follows.
+- **32-bit pointers.** The PS2's pointers are 32 bits, and the structures keep retail's layouts,
+  so their `sizeof` checks (`check_X` typedefs) assume 4-byte pointers. Where the code keeps an
+  address in an integer, because a pointer type would change retail's code, the integer is
+  `sptr` or `uptr` (include/common.h): retail's `s32` and `u32` here, `intptr_t` and `uintptr_t`
+  in a port on 64-bit pointers, which changes only those two lines. They hold the property
+  descriptors' getters and setters (include/property_descriptor.h), the list walks' frames
+  (`WordListFrame`, include/list_iter.h), the stream readers' buffer addresses
+  (include/stream_reader.h, include/buffered_stream.h), the spawners' arrays (`SpawnSetup`), the
+  value tree's children (`PlaneNode`, src/main/warp_menu.cpp), and the address arithmetic that
+  aligns a buffer or indexes an array of pointers (`i * sizeof(void*) + (uptr)arr`). A pointer
+  stored at an address the code does not trust to be aligned is `PtrP` (include/shapes.h).
+  What still carries an address in 32 bits:
+  - **script values.** The script machine's integer (`ScriptValue::i`, tag 0x14) holds object
+    and sound-level handles (PushSoundLevelBuiltin, ReadPropertyValue's property references):
+    a port makes the value's word pointer-sized or hands scripts a handle table;
+  - **the hardware's words**: DMA tags and channel addresses (`g_vif0Channel` and the other
+    channels in src/main/pooled_object.cpp, `dma.c`), the uncached `0x20000000` segment, the
+    IOP request words and the VU microcode addresses, all of which a port replaces with its own
+    graphics, sound and file layers;
+  - the free-function declarations PR #148 left (its description lists them), which a normal
+    linker reports.
 - **128-bit values** are `u128` (`unsigned int` with `mode(TI)`, include/vu0.h): four 32-bit
   lanes in one register, with the 16-byte alignment `lqc2`, `sqc2`, `lq` and `sq` need. The
   structures that hold vectors are 16-aligned; a port keeps the alignment if it uses SIMD loads.

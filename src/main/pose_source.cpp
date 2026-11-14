@@ -128,7 +128,7 @@ struct PropertyListSlot { void* node; s32 pad; };
 
 extern u8 g_classPropertyLists[];
 
-void* InitBufferedStream(BufferedStream* self, s32 a, s32 b, s32 c);
+void* InitBufferedStream(BufferedStream* self, s32 a, u8* b, s32 c);
 
 void OpenBufferedMemoryStream(BufferedStream* self, s32 a1, u8* a2);
 

@@ -19,10 +19,10 @@ extern ListFrame* g_activeListFrames;
 
 // The same frame as some walks keep it: four words, each pointer handled as an int.
 struct WordListFrame {
-    s32 list;
-    s32 link;
+    sptr list;
+    sptr link;
     s32 offset;
-    s32 prev;
+    sptr prev;
 };
 
 #endif

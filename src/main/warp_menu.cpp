@@ -314,7 +314,7 @@ void EndWorld3Timeline(void* p);
 // evaluates its float arguments there, and only their place in the list decides that.
 void ComputeSinCos(f32 angle, f32* sinOut, f32* cosOut);
 typedef u64 Bits128 __attribute__((mode(TI)));
-s32 QueryValueTreeMask(ValueListObject* self, s32 node, Bits128 point, f32 radius, s32* out);
+s32 QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radius, s32* out);
 typedef void (*AttachNotifyFn)(void* self, void* arg);
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
@@ -3521,20 +3521,20 @@ s32 ExpandMaskThroughTable(ValueListObject* self, s32 bits)
 struct PlaneNode {
     Vec02 normal;           // 0x00
     f32 dist;               // 0x10
-    s32 front;              // 0x14: the child on the plane's near side
-    s32 back;               // 0x18
+    sptr front;             // 0x14: the child on the plane's near side
+    sptr back;              // 0x18
 };
 
 // The mask of the leaves within radius of point under node: the walk follows the near side,
 // descends into the far side too where the sphere straddles the plane, and ORs each leaf's mask
 // (ExpandMaskThroughTable) into *out.
-s32 QueryValueTreeMask(ValueListObject* self, s32 node, Bits128 point, f32 radius, s32* out)
+s32 QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radius, s32* out)
 {
     if (node < 0) {
         *out = ExpandMaskThroughTable(self, node);
     } else {
         f32 near = -radius;
-        s32 next;
+        sptr next;
         do {
             PlaneNode* n = (PlaneNode*)node;
             f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(point), Vu0::Q(n->normal))) - n->dist;
@@ -3562,7 +3562,7 @@ void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* ou
     if (self != 0 && self->data38 != 0) {
         Bits128 q = *vec;
         *out = 0;
-        QueryValueTreeMask(self, (s32)self->data38, q, radius, out);
+        QueryValueTreeMask(self, (sptr)self->data38, q, radius, out);
     } else {
         *out = 0x0FFFFFFF;
     }
@@ -4388,7 +4388,7 @@ void StartWarpPage(WarpPage* o) {
     o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
     if (g_saveData->levelIndex) {
         u8* t = (u8*)&g_mapScreenList;
-        ((U32P*)(t + 0x260))->v = (u32)o;
+        ((PtrP*)(t + 0x260))->v = o;
     }
     switch (o->id) {
     case 0x1C7: o->slot = 1; break;

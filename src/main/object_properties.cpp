@@ -47,7 +47,7 @@ struct ScriptValueFilter;
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void* AllocateFrontMemory(s32 size);
 s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
-s32 AppendPropertyToScriptList(ScriptListBuilder* self, s32 value);
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, sptr value);
 s32 ReadBufferedU32(BufferedStream* in);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -115,9 +115,9 @@ extern "C" void StartDmaChainToMemory(DmaChannel* ch);
 // of `type` to it).
 struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-// Declared void with an integer: retail's func_001C1A28 schedules its call as one whose result
-// is unused (the definition, below, returns out and takes the address as void*).
-void ReadPropertyValue(ScriptValue* out, s32 base, PropertyDescriptor* d);
+// Declared void with an address-sized integer: retail's func_001C1A28 schedules its call as one
+// whose result is unused (the definition, below, returns out and takes the address as void*).
+void ReadPropertyValue(ScriptValue* out, sptr base, PropertyDescriptor* d);
 extern PropertyList g_classPropertyLists[];
 // (if/else with the small path first moved $s0/$s1)
 ScriptValue *ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d);
@@ -155,10 +155,10 @@ ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx);
 PropertyDescriptor* FindPropertyDescriptor(BaseObject* self, s32 key);
 ScriptValue* BuildScriptListFromCallback(ScriptValue* self, void* ctx, s32 v, PropertyGetter cb);
 ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d);
-s32 AppendPropertyToScriptList(ScriptListBuilder* self, s32 value);
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, sptr value);
 s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
 ScriptValue* StoreScriptArguments(ScriptValue* out, s32 n, ScriptValue* args, const u32* kinds, void** dsts);
-ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, s32* vals);
+ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, sptr* vals);
 ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n);
 ScriptValue* UpdateObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
 ScriptValue* AddObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
@@ -300,8 +300,8 @@ ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor*
     PropertyGetter fn;
     InitScriptValue(&q);
     if (d->flags & 1) {
-        s32* r = (s32*)TakeZeroedPoolEntry();
-        r[0] = (s32)base;
+        sptr* r = (sptr*)TakeZeroedPoolEntry();
+        r[0] = (sptr)base;
         r[1] = d->f10;
         r[2] = d->argCount;
         SetScriptValueIntC(&q, (s32)r);
@@ -440,7 +440,7 @@ ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor*
     return out;
 }
 
-s32 AppendPropertyToScriptList(ScriptListBuilder* self, s32 value)
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, sptr value)
 {
     PropertyDescriptor d;
     ScriptValue t;
@@ -571,7 +571,7 @@ ScriptValue* StoreScriptArguments(ScriptValue* out, s32 n, ScriptValue* args, co
     return out;
 }
 
-ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, s32* vals)
+ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, sptr* vals)
 {
     ScriptValue q;
     ScriptListBuilder list;

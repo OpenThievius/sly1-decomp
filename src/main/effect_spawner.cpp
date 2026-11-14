@@ -80,19 +80,19 @@ struct PointEventMessage {
 extern f32 g_gameTime;
 
 struct SpawnSetup {
-    s32 out[4];
+    sptr out[4];
     s32 flag;
     s32 pad[3];
-    s32 pair[2];
+    sptr pair[2];
     u8 tail[0x18];
 };
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GenerateSpawnArrays(s32 n, void* b, s32* out);
-void SpawnRecordEffects(void* b, void* c, s32 n, s32 o0, s32 o1, s32 o2, s32 o3);
-void GenerateSpawnSetupPair(s32 n, void* b, s32* out, s32* pair);
-void EmitParticleChunk(void* b, void* c, s32 n, s32 o0, s32 o1, s32 o2, s32 o3, s32 p0, s32 p1);
+void GenerateSpawnArrays(s32 n, void* b, sptr* out);
+void SpawnRecordEffects(void* b, void* c, s32 n, sptr o0, sptr o1, sptr o2, sptr o3);
+void GenerateSpawnSetupPair(s32 n, void* b, sptr* out, sptr* pair);
+void EmitParticleChunk(void* b, void* c, s32 n, sptr o0, sptr o1, sptr o2, sptr o3, sptr p0, sptr p1);
 
 struct StreamWord {
     s32 value;
@@ -2128,15 +2128,15 @@ struct SpawnFrame {
 
 // Makes the count points of a spawn record, their directions and times, in the four arrays out
 // holds (positions, directions, starts, ends), moved to the followed object's frame.
-void GenerateSpawnArrays(s32 n, void* b, s32* out)
+void GenerateSpawnArrays(s32 n, void* b, sptr* out)
 {
     u8* rec = (u8*)b;
     SpawnRing ring;
     Vec02 axis;
-    out[0] = (s32)AllocateBackMemory(n * 16);
-    out[1] = (s32)AllocateBackMemory(n * 16);
-    out[2] = (s32)AllocateBackMemory(n * 4);
-    out[3] = (s32)AllocateBackMemory(n * 4);
+    out[0] = (sptr)AllocateBackMemory(n * 16);
+    out[1] = (sptr)AllocateBackMemory(n * 16);
+    out[2] = (sptr)AllocateBackMemory(n * 4);
+    out[3] = (sptr)AllocateBackMemory(n * 4);
     InitSpawnRing(*(s32*)(rec + 0xEC), (SpawnSpan*)(rec + 0xE4), n, &ring);
     for (s32 i = 0; i < n; i++) {
         ChooseSpawnPosition((SpawnShape*)(rec + 0x10), i, n, (Vec02*)out[0] + i, &axis);

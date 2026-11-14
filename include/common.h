@@ -14,6 +14,13 @@ typedef signed long s64;
 typedef unsigned long u64;
 typedef float f32;
 
+// An integer that holds an address: a field or value that carries a pointer in some uses and a
+// number in others, or an address the code does arithmetic on. The PS2's pointers are 32 bits,
+// so these are retail's 32-bit integers; a port to 64-bit pointers changes only these two lines
+// (docs/PORTING.md).
+typedef s32 sptr;
+typedef u32 uptr;
+
 // Readable names for address-named symbols (docs/NAMING.md).
 #include "names.h"
 
