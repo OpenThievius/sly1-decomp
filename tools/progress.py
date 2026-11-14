@@ -34,8 +34,8 @@ tools/data_check.py). PAL links no C, so none of it is complete data. Data that 
 assembly counts as matched too, as original-assembly functions do: the sections no compiler made
 (config/<version>/original_data.tsv, by hand; the .vutext section of VU microprograms).
 So does the US build's alignment padding between the data it credits: zeros the assembler or
-the linker put before a C section or global up to its alignment (config/us/padding.tsv, from
-tools/padding.py, which says the rule).
+the linker put before a C section or global up to its alignment (config/us/padding.tsv, and
+config/eu/padding.tsv between the data PAL matches, from tools/padding.py, which says the rule).
 Each unit is in one category, game, lib or data, and every category has its
 own measures.
 """
@@ -173,11 +173,10 @@ def original_data(key):
 
 def padding(key):
     """[(address, size)] of the alignment padding between credited data: config/us/padding.tsv
-    (tools/padding.py) in the primary version; none in PAL, which links no C."""
-    if key != versions.primary():
-        return []
+    (tools/padding.py) in the primary version, config/eu/padding.tsv in PAL (between the globals
+    it credits at their PAL addresses)."""
     import padding as pad
-    return pad.read_table()
+    return pad.read_table(pad.table_path(key))
 
 
 def measures(funcs, done, linked, data=0, near=None, data_done=0):

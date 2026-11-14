@@ -35,6 +35,10 @@ import versions  # noqa: E402
 
 ROOT = versions.ROOT
 TABLE = ROOT / "config" / "us" / "padding.tsv"
+
+
+def table_path(key="us"):
+    return ROOT / "config" / key / "padding.tsv"
 HEADER = "address\tsize\talign\tbefore"
 
 
@@ -75,41 +79,60 @@ def section_alignment(source, section, name):
     return sec["align"]
 
 
-def credited(key="us"):
-    """[(start, end, align, name)] of the objects config/us/c_data.tsv and original_data.tsv
-    credit. A whole file's section that includes labels from the disassembly is split around
+def pieces_of(row, listings):
+    """[(start, end, align or None, label)] of one global of config/us/c_data.tsv at its US
+    address. A whole file's section that includes labels from the disassembly is split around
     them (c_data.tsv gives its size without them)."""
     import asm_func
+    name, addr, size, section, source = row
+    addr, size = int(addr, 16), int(size)
+    align = section_alignment(source, section, name)
+    label = "%s %s" % (source, section)
+    if section not in (".rodata", ".data"):
+        return [(addr, addr + size, align, label)]
+    text = (ROOT / source).read_text()
+    included = asm_func.included_rodata(text) if section == ".rodata" else asm_func.included_data(text)
+    if not included:
+        return [(addr, addr + size, align, label)]
+    listing = "%s.%s.s" % (section[1:], section[1:])
+    if listing not in listings:
+        listings[listing] = (ROOT / "asm" / "us" / "data" / listing).read_text()
+    pieces = sorted((int(l[-8:], 16), asm_func.label_size(listings[listing], l)) for l in included)
+    end = addr + size + sum(s for _a, s in pieces)
+    out = []
+    at = addr
+    for a, s in pieces:
+        if a > at:
+            out.append((at, a, align if at == addr else None, label))
+        at = a + s
+    if end > at:
+        out.append((at, end, None, label))
+    return out
+
+
+def credited(key="us"):
+    """[(start, end, align, name)] of the objects the version credits: the globals of
+    config/us/c_data.tsv and original_data.tsv. In PAL only the globals that
+    config/eu/c_data_status.tsv found equal to PAL's bytes, at their PAL address (a file's
+    section, with its included labels, keeps its layout there)."""
     import progress
+    status = {}
+    if key != "us":
+        import data_check
+        status = data_check.read_status()
     listings = {}
     out = []
-    for line in (ROOT / "config" / key / "c_data.tsv").read_text().splitlines()[1:]:
+    for line in (ROOT / "config" / "us" / "c_data.tsv").read_text().splitlines()[1:]:
         if not line:
             continue
-        name, addr, size, section, source = line.split("\t")
-        addr, size = int(addr, 16), int(size)
-        align = section_alignment(source, section, name)
-        label = "%s %s" % (source, section)
-        if section not in (".rodata", ".data"):
-            out.append((addr, addr + size, align, label))
-            continue
-        text = (ROOT / source).read_text()
-        included = asm_func.included_rodata(text) if section == ".rodata" else asm_func.included_data(text)
-        if not included:
-            out.append((addr, addr + size, align, label))
-            continue
-        listing = "%s.%s.s" % (section[1:], section[1:])
-        if listing not in listings:
-            listings[listing] = (ROOT / "asm" / key / "data" / listing).read_text()
-        pieces = sorted((int(l[-8:], 16), asm_func.label_size(listings[listing], l)) for l in included)
-        end = addr + size + sum(s for _a, s in pieces)
-        at = addr
-        for a, s in pieces:
-            if a > at:
-                out.append((at, a, align if at == addr else None, label))
-            at = a + s
-        if end > at:
-            out.append((at, end, None, label))
+        row = line.split("\t")
+        shift = 0
+        if key != "us":
+            st = status.get(row[0])
+            if st is None or st[2] != "match" or st[0] == "-":
+                continue
+            shift = int(st[0], 16) - int(row[1], 16)
+        out += [(a + shift, e + shift, al, lb) for a, e, al, lb in pieces_of(row, listings)]
     out += [(a, a + s, None, "original data") for a, s in progress.original_data(key)]
     return sorted(out)
 
@@ -127,7 +150,7 @@ def render(rows):
 
 
 def read_table(path=TABLE):
-    """[(address, size)] of config/us/padding.tsv."""
+    """[(address, size)] of a padding table (config/us/padding.tsv by default)."""
     if not path.exists():
         return []
     rows = [l.split("\t") for l in path.read_text().splitlines()[1:] if l]
@@ -136,28 +159,34 @@ def read_table(path=TABLE):
 
 def write(key="us"):
     text = render(compute(key))
-    if not TABLE.exists() or TABLE.read_text() != text:
-        TABLE.write_text(text)
+    path = table_path(key)
+    if not path.exists() or path.read_text() != text:
+        path.write_text(text)
     return text
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("--check", action="store_true", help="fail when config/us/padding.tsv is out of date")
+    parser.add_argument("--check", action="store_true", help="fail when a padding table is out of date")
+    parser.add_argument("--version", choices=("us", "eu"), help="one version (default: both)")
     args = parser.parse_args(argv)
-    text = render(compute())
-    rows = text.count("\n") - 1
-    size = sum(int(l.split("\t")[1]) for l in text.splitlines()[1:])
-    if args.check:
-        if not TABLE.exists() or TABLE.read_text() != text:
-            print("stale: %s (run python3 tools/padding.py)" % TABLE.relative_to(ROOT))
-            return 1
-        print("ok: %s, %d runs of padding, %d bytes" % (TABLE.relative_to(ROOT), rows, size))
-        return 0
-    if not TABLE.exists() or TABLE.read_text() != text:
-        TABLE.write_text(text)
-    print("wrote %s: %d runs of padding, %d bytes" % (TABLE.relative_to(ROOT), rows, size))
-    return 0
+    status = 0
+    for key in ([args.version] if args.version else ["us", "eu"]):
+        path = table_path(key)
+        text = render(compute(key))
+        rows = text.count("\n") - 1
+        size = sum(int(l.split("\t")[1]) for l in text.splitlines()[1:])
+        if args.check:
+            if not path.exists() or path.read_text() != text:
+                print("stale: %s (run python3 tools/padding.py)" % path.relative_to(ROOT))
+                status = 1
+                continue
+            print("ok: %s, %d runs of padding, %d bytes" % (path.relative_to(ROOT), rows, size))
+            continue
+        if not path.exists() or path.read_text() != text:
+            path.write_text(text)
+        print("wrote %s: %d runs of padding, %d bytes" % (path.relative_to(ROOT), rows, size))
+    return status
 
 
 if __name__ == "__main__":

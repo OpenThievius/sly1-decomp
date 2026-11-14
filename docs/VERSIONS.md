@@ -76,6 +76,10 @@ row's note says where the bytes first differ and what the words that differ are 
 other data). The report counts the `match` rows' bytes as PAL's matched data (never as complete
 data: PAL links no C), on 2026-11-11 330,370 of 464,563 (71.11%; 288,919, 62.19%, before PAL's own data), which with the original assembly the reports count (the `.vutext` microprograms) is 352,210 bytes, 75.82% of PAL's data (66.89% before).
 
+PAL's alignment padding follows the US rule (tools/padding.py, `config/eu/padding.tsv`, written
+by `tools/data_check.py`): the zeros between the globals that match, at their PAL addresses, up to
+the next one's alignment.
+
 ### PAL's own data
 
 A global PAL holds differently (another value, a string id where US has a pointer, a table with
