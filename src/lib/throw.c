@@ -81,7 +81,7 @@ void RunTerminateHook(void)
     (*D_00278048)();
 }
 
-/* Compares a type's name with a given one through CompareStrings (func_001F6738): returns its
+/* Compares a type's name with a given one through CompareStrings (CompareStrings): returns its
  * third argument when they are equal, 0 otherwise; it sits in the exception runtime's unwind
  * table with no direct caller. */
 s32 SelectArgumentIfTypeNamesEqual(void* self, s32 v, s32 fallback)
@@ -119,7 +119,7 @@ ExceptionBlock* AllocateZeroedNodeOrTerminate(void)
     return p;
 }
 
-/* Returns the exception context by calling the getter in D_0027804C. */
+/* Returns the exception context by calling the getter in g_exceptionContextGetter. */
 s32 GetExceptionContext(void)
 {
     return (s32)(*g_exceptionContextGetter)();
@@ -132,7 +132,8 @@ u8* GetActiveExceptionSlot(void)
     return (u8*)(*g_exceptionContextGetter)() + 8;
 }
 
-/* First call of D_0027804C: replaces it with GetStaticExceptionContext and calls that. */
+/* First call of g_exceptionContextGetter: replaces it with GetStaticExceptionContext and calls
+   that. */
 void InstallExceptionContextGetter(void)
 {
     void (*f)(void) = (void (*)(void))GetStaticExceptionContext;

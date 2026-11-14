@@ -497,7 +497,7 @@ s32 SendPadMaskRequest(s32 port, s32 slot, s32 data)
     return result;
 }
 
-/* Tells whether an open slot's button mask (func_00204B80) is 0x3FFFF (UpdatePadConnection calls
+/* Tells whether an open slot's button mask (GetPadButtonMask) is 0x3FFFF (UpdatePadConnection calls
  * it). */
 s32 HasFullPadMask(s32 port, s32 slot)
 {

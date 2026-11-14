@@ -283,9 +283,9 @@ void RunFileClientCallback(void* packet, FileCommandCall* call)
     SyncAndEnableInterrupts();
 }
 
-// Once, installs HandleFileReply and func_001F89F8 for the commands 0x80000011 and 0x80000013,
-// binds the client to the IOP's file service, clears the handle table and hands the reply buffer
-// over.
+// Once, installs HandleFileReply and RunFileClientCallback for the commands 0x80000011 and
+// 0x80000013, binds the client to the IOP's file service, clears the handle table and hands the
+// reply buffer over.
 s32 OpenFileClient(void)
 {
     s32 i;

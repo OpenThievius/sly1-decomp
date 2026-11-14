@@ -168,7 +168,8 @@ ASM_FUNC(func_001F9D60);
 
 ASM_FUNC(func_001F9DA8);
 
-// Creates the two semaphores D_002771E4 and D_002771E8 (InitKernelLibrary calls it first).
+// Creates the two semaphores g_librarySemaphore0 and g_librarySemaphore1 (InitKernelLibrary calls
+// it first).
 void CreateLibrarySemaphores(void)
 {
     SemaphoreParamsPair f;
@@ -191,7 +192,7 @@ s32* FindKernelWord(s32 value)
 
 ASM_FUNC(func_001F9E40);
 
-// Installs FindKernelWord as the system call D_002771D8 names (0x83).
+// Installs FindKernelWord as the system call g_kernelWordSearchCall names (0x83).
 s32 InstallKernelWordSearch(void)
 {
     SetSystemCallHandlerForWordSearch(g_kernelWordSearchCall.num, g_kernelWordSearchCall.handler);

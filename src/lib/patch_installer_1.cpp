@@ -119,9 +119,9 @@ void CopyKernelWordsSyscallFirstPatch(u32 a, void* b, s32 c);
 extern "C" void SyncDataCache(s32 a);
 s32 RunSyscall5BFirstPatch(s32 key);
 
-// Unless bit 8 of the hardware word at 0x10001810 is set, copies D_00276980 to 0x80076000 and
-// D_002770C0 to 0x82000, syncs the caches and sets the system calls D_002770E8 lists
-// (InitKernelLibrary calls it).
+// Unless bit 8 of the hardware word at 0x10001810 is set, copies g_firstKernelPatchCode to
+// 0x80076000 and g_secondKernelPatchCode to 0x82000, syncs the caches and sets the system calls
+// g_kernelPatchHandlers lists (InitKernelLibrary calls it).
 void InstallFirstKernelPatch(void)
 {
     if ((*(volatile u32*)0x10001810 & 0x100) != 0) {

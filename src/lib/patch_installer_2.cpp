@@ -124,8 +124,8 @@ void CopyKernelWordsSyscallSecondPatch(s32 a, void* b, s32 c);
 extern "C" void SyncDataCache(s32 a);
 s32 RunSyscall5BSecondPatch(s32 key);
 
-// When IsSecondKernelPatchNeeded passes, copies D_002771F0 to 0x80074000 and sets the system calls
-// D_00277998 lists (InitKernelLibrary calls it).
+// When IsSecondKernelPatchNeeded passes, copies g_secondInstallerCode to 0x80074000 and sets the
+// system calls g_secondKernelPatchHandlers lists (InitKernelLibrary calls it).
 void InstallSecondKernelPatch(void)
 {
     SyscallPatchSlot* q;

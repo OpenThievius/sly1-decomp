@@ -5,7 +5,7 @@
 void func_001FD930(void);
 
 /* HandleAbstractCall: what a method table's unimplemented (abstract) slot holds; it only calls
- * func_001FD930 of the exception runtime, the terminate hook, and takes no arguments. */
+ * RunTerminateHook of the exception runtime, the terminate hook, and takes no arguments. */
 void func_001FBDF8(void)
 {
     func_001FD930();

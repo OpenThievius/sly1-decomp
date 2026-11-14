@@ -1,15 +1,14 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-// The rest of the MPEG library's decoder, from 0x20DEE8 to 0x2115C0, built whole
-// (config/us/files.tsv): the IPU's control (func_0020DEE8), the slice and macroblock layer that
-// drives the IPU's decoding (func_0020DF10 to func_0020EF70), the IPU's commands and its bit
-// reading (func_0020F0C0 to func_0020F5B8), the picture header and its extensions, dispatched
-// through the table D_00250430 (func_0020F708 to func_00210090), the pictures' output and
-// their buffers (func_00210160 to func_00210A80), and the colour conversion by DMA and its
-// interrupt handlers (func_00210C38 to func_00211348). Its start is exact: the hand-written
-// prediction object ends at 0x20DEE8, and this file's .rodata starts at 0x250300 and its .data
-// at 0x27B040, after src/lib/mpeg_macroblock.cpp's. Its end is chosen: the bit reader of
-// src/lib/mpeg_bit_reader.cpp follows, which nothing here calls. Its .rodata is its messages and the
-// extension table, its .data the IPU commands' table D_0027B040 and the table D_0027B068 (which
+// SPDX-License-Identifier: AGPL-3.0-or-later The rest of the MPEG library's decoder, from 0x20DEE8
+// to 0x2115C0, built whole (config/us/files.tsv): the IPU's control (func_0020DEE8), the slice and
+// macroblock layer that drives the IPU's decoding (func_0020DF10 to func_0020EF70), the IPU's
+// commands and its bit reading (func_0020F0C0 to func_0020F5B8), the picture header and its
+// extensions, dispatched through the table D_00250430 (func_0020F708 to func_00210090), the
+// pictures' output and their buffers (func_00210160 to func_00210A80), and the colour conversion by
+// DMA and its interrupt handlers (func_00210C38 to func_00211348). Its start is exact: the
+// hand-written prediction object ends at 0x20DEE8, and this file's .rodata starts at 0x250300 and
+// its .data at 0x27B040, after src/lib/mpeg_macroblock.cpp's. Its end is chosen: the bit reader of
+// src/lib/mpeg_bit_reader.cpp follows, which nothing here calls. Its .rodata is its messages and
+// the extension table, its .data the IPU commands' table D_0027B040 and the table D_0027B068 (which
 // ends at 0x27B0A8, before the padding to the IPU library's .data), its .bss func_00210C38's
 // buffer. One file between those edges, with no evidence of a boundary inside it; it could be
 // several. Written for this project from retail's code.
@@ -869,7 +868,7 @@ void RejectTemporalScalableExtension(MpegDecoder* self);
 extern const Fn_Table g_mpegExtensionHandlers[12] = { (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadSequenceExtension, (Fn_Table)ReadSequenceDisplayExtension, (Fn_Table)ReadQuantiserMatrixExtension, (Fn_Table)ReadCopyrightExtension, (Fn_Table)RejectSequenceScalableExtension, (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadPictureDisplayExtension, (Fn_Table)ReadPictureCodingExtension, (Fn_Table)RejectSpatialScalableExtension, (Fn_Table)RejectTemporalScalableExtension, 0 };
 
 // Reads the extensions and user data after a header, dispatching each extension through the table
-// D_00250430.
+// g_mpegExtensionHandlers.
 void ReadExtensionsAndUserData(MpegDecoder* self)
 {
     s32 kA = 0x1B2;

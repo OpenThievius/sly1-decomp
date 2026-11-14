@@ -584,7 +584,7 @@ u32 ConvertDoubleToU32(u64 value)
 }
 
 /* Packs a double from a kind, sign, exponent and fraction passed as loose arguments (fptodp,
- * func_001FD868, calls it). */
+ * ConvertFloatToDouble, calls it). */
 u64 PackDoubleFromParts(s32 a0, s32 a1, s32 a2, u64 a3)
 {
     Unpacked args;

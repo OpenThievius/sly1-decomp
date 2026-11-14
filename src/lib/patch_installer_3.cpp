@@ -67,8 +67,8 @@ void SetSystemCallHandlerThirdPatch(Blk_1FA8F8* a, u32 b);
 void CopyKernelWordsSyscallThirdPatch(Blk_1FA8F8* a, void* b, s32 c);
 extern "C" void SyncDataCache(s32 a);
 
-// Copies D_002779C0 to 0x80075000 and sets the system calls that D_00277D30 lists;
-// InitKernelLibrary calls it.
+// Copies g_thirdKernelPatchCode to 0x80075000 and sets the system calls that
+// g_thirdKernelPatchHandlers lists; InitKernelLibrary calls it.
 void InstallThirdKernelPatch() {
     u32* s0 = g_thirdKernelPatchHandlers;
     u32* s1;

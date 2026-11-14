@@ -72,7 +72,7 @@ extern "C" s32 GetCurrentThreadId(void);
 void SetThreadPriority(s32 h, s32 v);
 
 // Once (g_requestThreadId), creates g_requestSemaphore and the thread RunRequestThread on the stack
-// D_00625770, sets its priority and starts it (InitKernelLibrary calls it).
+// g_requestThreadStack, sets its priority and starts it (InitKernelLibrary calls it).
 s32 StartRequestThread(void)
 {
     StartFrame f;
