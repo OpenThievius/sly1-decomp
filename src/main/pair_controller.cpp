@@ -381,7 +381,7 @@ void AttachPairedPartner(void* a0, void* a1);
 
 
 // The coefficients of a quadratic in t (a + bt + ct^2), as the pose holds them.
-struct QuadraticCoeffs { f32 a, b, c; };
+typedef BlendQuad QuadraticCoeffs;
 
 // A quadratic evaluated at t and clamped to a range (func_001A5760).
 struct ClampedQuadratic {
@@ -769,11 +769,11 @@ void HandleWalkerColliderNotification(WalkerCollider* self, s32 code, MessageBod
     }
     return;
 kind295:
-    StartSoundEffect(0x152, 0, 0, (Vec02*)(((u8*)self + 0x140)), 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
+    StartSoundEffect(0x152, 0, 0, &self->v140, 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
     SetEffectSpawnerInactive((EffectSpawner*)self->f65C);
     return;
 kind296:
-    StartSoundEffect(0x152, 0, 0, (Vec02*)(((u8*)self + 0x140)), 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
+    StartSoundEffect(0x152, 0, 0, &self->v140, 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
     SetEffectSpawnerInactive((EffectSpawner*)self->f660);
     return;
 code5:
@@ -1158,23 +1158,19 @@ s32 ChoosePairControllerState(PairController* self)
     return s;
 }
 
-#define F(o, off) (*(f32*)((u8*)(o) + (off)))
-#define W(o, off) (*(s32*)((u8*)(o) + (off)))
-#define P(o, off) (*(void**)((u8*)(o) + (off)))
-#define O(o, off) (*(PairController**)((u8*)(o) + (off)))
 // Switches the controller's state: 1 shows a caption from object 0x33B (some entry variants); 2
 // points the count caption at the finished and limit counts and becomes the world's active
 // follower; 5 shows 0x33D, sets the active objects to state 8 and resets scatter levels; 3 shows
 // 0x33E, sets unpaired ones to 7; 4 opens pause page 0x1A; 6 sets the watched object to state 3.
 void SetPairControllerState(PairController* self, s32 state)
 {
-    PairController* o;
+    PairedObject* o;
     void* v;
     ListFrame frame;
     if (self->state == state) return;
     self->state = state;
     self->stateStartTime = g_gameClock[1];
-    W(self, 0x658) = 0;
+    self->link = 0;
     switch (state) {
     case 0:
         break;
@@ -1182,13 +1178,13 @@ void SetPairControllerState(PairController* self, s32 state)
         if (self->id64C < 3) {
             if (self->id64C >= 0) {
                 if (g_currentEntry->f14) {
-                    W(self, 0x658) = 0;
+                    self->link = 0;
                 } else {
-                    P(self, 0x658) = FindFirstObjectById(self->world, 0x105, 0x33B, 0);
+                    self->link = (LinkedObject*)FindFirstObjectById(self->world, 0x105, 0x33B, 0);
                 }
             }
         }
-        void* w = P(self, 0x658);
+        void* w = self->link;
         if (w) {
             T217D_440* box = &g_typedTextCaptionBox;
             ((PtrP*)&box->child)->v = w;
@@ -1204,24 +1200,24 @@ void SetPairControllerState(PairController* self, s32 state)
     }
     case 5:
         v = FindFirstObjectById(self->world, 0x105, 0x33D, 0);
-        P(self, 0x658) = v;
+        self->link = (LinkedObject*)v;
         if (v) {
             g_typedTextCaptionBox.child = (void*)v;
             PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
         }
-        for (o = O(self, 0x384); o; o = O(o, 0x5B0)) SetPairedState((PairedObject*)o, 8);
+        for (o = self->head384; o; o = o->nextActive) SetPairedState(o, 8);
         ResetScatterLevels((ScatterController*)g_scatterController);
         break;
     case 3:
         v = FindFirstObjectById(self->world, 0x105, 0x33E, 0);
-        P(self, 0x658) = v;
+        self->link = (LinkedObject*)v;
         if (v) {
             g_typedTextCaptionBox.child = (void*)v;
             PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
         }
-        for (o = O(self, 0x384); o; o = O(o, 0x5B0)) {
-            BaseObject* l = (BaseObject*)P(o, 0x55C);
-            if (l == 0 || l->parent != o) SetPairedState((PairedObject*)o, 7);
+        for (o = self->head384; o; o = o->nextActive) {
+            BaseObject* l = (BaseObject*)o->partner;
+            if (l == 0 || l->parent != o) SetPairedState(o, 7);
         }
         RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f);
         break;
@@ -1234,10 +1230,6 @@ void SetPairControllerState(PairController* self, s32 state)
         break;
     }
 }
-#undef F
-#undef W
-#undef P
-#undef O
 
 extern const Vec02 g_unitZVector;
 
@@ -1276,7 +1268,7 @@ void SpawnPairedObject(PairController* self)
     o = *(PairedObject**)self->list374;
     for (i = 0; i < 8; i++) {
         f32 angle = RandomFloatInRange(0.0f, 6.2831855f);
-        f32 radius = RandomFloatInRange(*(f32*)((u8*)self + 0x340) + o->radius3D0, self->tune344);
+        f32 radius = RandomFloatInRange(self->minRadius340 + o->radius3D0, self->tune344);
         other = (PairedObject*)GetActiveSwitchedCollider();
         ComputePolarOffset((Vec3*)&pos, angle, radius, 0.0f);
         pos.y = pos.y * self->tune34C;
@@ -1284,7 +1276,7 @@ void SpawnPairedObject(PairController* self)
         if (other != 0 && IsNearSpot(pos, other, o)) {
             continue;
         }
-        for (n = *(PairedObject**)self->list384; n != 0; n = *(PairedObject**)((u8*)n + 0x5B0)) {
+        for (n = self->head384; n != 0; n = n->nextActive) {
             if (IsNearSpotOf(pos, n, o)) {
                 break;
             }
@@ -1292,7 +1284,7 @@ void SpawnPairedObject(PairController* self)
         if (n != 0) {
             continue;
         }
-        for (m = *(PairedObject**)self->list35C; m != 0; m = *(PairedObject**)((u8*)m + 0x5A0)) {
+        for (m = self->head35C; m != 0; m = m->nextFree) {
             if (m->parent == 0 && IsNearSpot(pos, m, o)) {
                 break;
             }
@@ -1300,7 +1292,7 @@ void SpawnPairedObject(PairController* self)
         if (m != 0) {
             continue;
         }
-        for (m = *(PairedObject**)self->list368; m != 0; m = *(PairedObject**)((u8*)m + 0x5A0)) {
+        for (m = self->head368; m != 0; m = m->nextFree) {
             if (m != o && IsNearSpot(pos, m, o)) {
                 break;
             }
@@ -1355,13 +1347,13 @@ void StartPairedObjects(PairController* self)
             AppendToList((List01*)self->list3AC, node);
             RemoveFromList((List01*)self->list390, owner);
             AppendToList((List01*)self->list384, owner);
-            owner->attachment = node;
+            owner->attachment = (SoundStateObject*)node;
             (self->count39C)++;
             owner->desc->m02(owner);
             owner->desc02()->m1D(owner, (Vec02*)(node + 0x140));
             owner->desc02()->m1E(owner, (Mat02*)(node + 0x110));
             SetPairedState(owner, 1);
-            SetSoundStateObjectState((SoundStateObject*)(owner->attachment), 1);
+            SetSoundStateObjectState(owner->attachment, 1);
             owner->maxSpeed = self->f644;
             owner->maxTurn = self->f648;
             f32* fp = &self->attachDelayMin;
@@ -1372,9 +1364,6 @@ void StartPairedObjects(PairController* self)
     }
 }
 
-#define F(o) (*(f32*)((u8*)self + (o)))
-#define I(o) (*(s32*)((u8*)self + (o)))
-#define P(o) ((const QuadraticCoeffs*)((u8*)self + (o)))
 // Recomputes the controller's current tuning values from pairs of start and end values (blended by
 // a clamped quadratic of dt each): the two delay ranges, two further ranges, two single values and
 // the two limits of active objects. When a limit rises while the old limit was reached, the next
@@ -1382,42 +1371,39 @@ void StartPairedObjects(PairController* self)
 void UpdatePairControllerTuning(PairController* self, f32 dt)
 {
     f32 t0;
-    ClampedQuadratic::Get(t0, P(0x5B0), dt);
-    F(0x62C) = (1.0f - t0) * F(0x5A0) + t0 * F(0x5A8);
-    F(0x630) = (1.0f - t0) * F(0x5A4) + t0 * F(0x5AC);
+    ClampedQuadratic::Get(t0, &self->blend.startDelay.q, dt);
+    self->startDelayMin = (1.0f - t0) * self->blend.startDelay.value[0] + t0 * self->blend.startDelay.value[2];
+    self->startDelayMax = (1.0f - t0) * self->blend.startDelay.value[1] + t0 * self->blend.startDelay.value[3];
 
     f32 t1;
-    ClampedQuadratic::Get(t1, P(0x5D0), dt);
-    F(0x638) = (1.0f - t1) * F(0x5C0) + t1 * F(0x5C8);
-    F(0x63C) = (1.0f - t1) * F(0x5C4) + t1 * F(0x5CC);
+    ClampedQuadratic::Get(t1, &self->blend.attachDelay.q, dt);
+    self->attachDelayMin = (1.0f - t1) * self->blend.attachDelay.value[0] + t1 * self->blend.attachDelay.value[2];
+    self->attachDelayMax = (1.0f - t1) * self->blend.attachDelay.value[1] + t1 * self->blend.attachDelay.value[3];
 
     f32 t2;
-    ClampedQuadratic::Get(t2, P(0x5F0), dt);
-    F(0x644) = (1.0f - t2) * F(0x5E0) + t2 * F(0x5E4);
+    ClampedQuadratic::Get(t2, &self->blend.speed.q, dt);
+    self->f644 = (1.0f - t2) * self->blend.speed.value[0] + t2 * self->blend.speed.value[1];
 
     f32 t3;
-    ClampedQuadratic::Get(t3, P(0x610), dt);
-    F(0x648) = (1.0f - t3) * F(0x600) + t3 * F(0x604);
+    ClampedQuadratic::Get(t3, &self->blend.turn.q, dt);
+    self->f648 = (1.0f - t3) * self->blend.turn.value[0] + t3 * self->blend.turn.value[1];
 
     f32 t4;
-    ClampedQuadratic::Get(t4, P(0x570), dt);
-    s32 n = (s32)((1.0f - t4) * F(0x560) + t4 * F(0x564));
-    if (I(0x624) < n && I(0x380) == I(0x624)) {
-        F(0x634) = g_gameClock[1] + RandomFloatInRange(F(0x62C), F(0x630));
+    ClampedQuadratic::Get(t4, &self->blend.limit.q, dt);
+    s32 n = (s32)((1.0f - t4) * self->blend.limit.value[0] + t4 * self->blend.limit.value[1]);
+    if (self->limit624 < n && self->count380 == self->limit624) {
+        self->nextStartTime = g_gameClock[1] + RandomFloatInRange(self->startDelayMin, self->startDelayMax);
     }
-    I(0x624) = n;
+    self->limit624 = n;
 
     f32 t5;
-    ClampedQuadratic::Get(t5, P(0x590), dt);
-    n = (s32)((1.0f - t5) * F(0x580) + t5 * F(0x584));
-    if (I(0x628) < n && I(0x39C) == I(0x628)) {
-        F(0x640) = g_gameClock[1] + RandomFloatInRange(F(0x638), F(0x63C));
+    ClampedQuadratic::Get(t5, &self->blend.attachLimit.q, dt);
+    n = (s32)((1.0f - t5) * self->blend.attachLimit.value[0] + t5 * self->blend.attachLimit.value[1]);
+    if (self->attachLimit < n && self->count39C == self->attachLimit) {
+        self->nextAttachTime = g_gameClock[1] + RandomFloatInRange(self->attachDelayMin, self->attachDelayMax);
     }
-    I(0x628) = n;
+    self->attachLimit = n;
 }
-#undef F
-#undef I
-#undef P
 
 // Takes a finished hit target out of play: counts it as finished (and updates the controller's
 // tuning to the finished fraction), returns it to the free list, re-pairs its partner with the
@@ -1458,7 +1444,7 @@ void ReleasePairedAttachment(u8* self, PairedObject* obj)
 {
     RemoveFromList((List01*)(self + 0x3AC), obj->attachment);
     AppendToList((List01*)(self + 0x3A0), obj->attachment);
-    SetSoundStateObjectState((SoundStateObject*)obj->attachment, 0);
+    SetSoundStateObjectState(obj->attachment, 0);
     obj->attachment = 0;
 }
 
@@ -1493,7 +1479,7 @@ void DetachPairedPartner(PairController* unused, PairedObject* h)
 // state 5 to 6.
 void ActivatePairedAttachment(void* unused, PairedObject* obj)
 {
-    SetSoundStateObjectState((SoundStateObject*)obj->attachment, 1);
+    SetSoundStateObjectState(obj->attachment, 1);
 }
 
 // Ends a pairing: counts the transition, returns the partner to its free list (list374), the object
@@ -1518,7 +1504,7 @@ void FinishPairedObjectTransition(PairController* self, PairedObject* obj)
         q->desc->m03(q);
     }
     obj->desc->m03(obj);
-    SetSoundStateObjectState((SoundStateObject*)obj->attachment, 0);
+    SetSoundStateObjectState(obj->attachment, 0);
     obj->attachment = 0;
     ((PairedObject*)obj->partner)->partner = 0;
     obj->partner = 0;
@@ -1546,7 +1532,7 @@ void RemovePairedObject(PairController* self, PairedObject* obj)
     if (obj->attachment != 0) {
         RemoveFromList((List01*)self->list3AC, obj->attachment);
         AppendToList((List01*)self->list3A0, obj->attachment);
-        SetSoundStateObjectState((SoundStateObject*)obj->attachment, 0);
+        SetSoundStateObjectState(obj->attachment, 0);
     }
     PairedObject* child = (PairedObject*)obj->partner;
     if (child != 0) {
@@ -1581,7 +1567,7 @@ s32 PairWithNearestFreeObject(void* self, void* child)
     }
     f32 best = 3.4028234663852886e+38f;
     PairedObject* found;
-    for (PairedObject* p = *(PairedObject**)c->list368; p != 0; p = *(PairedObject**)((u8*)p + 0x5A0)) {
+    for (PairedObject* p = c->head368; p != 0; p = p->nextFree) {
         u128 d = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(o->v140));
         f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
         if (dist < best) {
@@ -1637,7 +1623,7 @@ s32 PairWithNearestWaitingObject(void* self, void* child)
     PairedObject* o = (PairedObject*)child;
     f32 best = 3.4028234663852886e+38f;
     PairedObject* found = 0;
-    for (PairedObject* p = *(PairedObject**)c->list384; p != 0; p = *(PairedObject**)((u8*)p + 0x5B0)) {
+    for (PairedObject* p = c->head384; p != 0; p = p->nextActive) {
         if (p->partner == 0 && p->state == 2) {
             u128 d = Vu0::Sub(Vu0::Q(o->v140), Vu0::Q(p->v140));
             f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
@@ -1668,8 +1654,8 @@ s32 AssignNearestListedObjectToPair(PairController* self, PairedObject* obj)
         return 0;
     }
     f32 best = 3.4028234663852886e+38f;
-    PlacedObject* found = 0;
-    for (PlacedObject* p = *(PlacedObject**)self->list3A0; p != 0; p = *(PlacedObject**)((u8*)p + 0x568)) {
+    SoundStateObject* found = 0;
+    for (SoundStateObject* p = self->head3A0; p != 0; p = p->listNext) {
         u128 d = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(obj->v140));
         f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
         if (dist < best) {
@@ -1689,8 +1675,8 @@ void RandomizePairedObjectOffset(PairController* self, PairedObject* b)
 {
     f32 r0 = RandomFloatInRange(0.0f, 6.2831855f);
     f32 r1 = RandomFloatInRange(0.0f, self->tune348);
-    ComputePolarOffset((Vec3*)((u8*)b + 0x570), r0, r1, 0.0f);
-    b->f574 = b->f574 * self->tune34C;
+    ComputePolarOffset((Vec3*)&b->offset570, r0, r1, 0.0f);
+    b->offset570.y = b->offset570.y * self->tune34C;
 }
 
 // Address of the controller's current pose record (0xC0 bytes each, from +0x3E0).
@@ -1761,26 +1747,26 @@ void UpdatePairedObject(PairedObject* self, f32 dt)
     }
     switch (s) {
     case 1:
-        ConvertPositionToWorld((BaseObject*)(*(void**)((u8*)self->attachment + 0x564)), &v);
+        ConvertPositionToWorld((BaseObject*)self->attachment->child7E, &v);
         SteerPairedObjectWithinArea(self, &v, 0);
         break;
     case 2: {
-        if (self->nextOffsetTime < g_gameClock[1] || GroundDistance(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)((u8*)self + 0x570))) < 50.0f) {
+        if (self->nextOffsetTime < g_gameClock[1] || GroundDistance(Vu0::Q(self->v140), Vu0::Q(self->offset570)) < 50.0f) {
             RandomizePairedObjectOffset((PairController*)self->controller, self);
             self->nextOffsetTime = g_gameClock[1] + RandomFloatInRange(self->offsetWaitMin, self->offsetWaitMax);
         }
-        SteerPairedObjectWithinArea(self, (Vec02*)((u8*)self + 0x570), 0);
+        SteerPairedObjectWithinArea(self, &self->offset570, 0);
         break;
     }
     case 3:
         SteerPairedObjectWithinArea(self, &((PlacedObject*)self->partner)->v140, 0);
         break;
     case 5:
-        ConvertPositionToWorld((BaseObject*)(*(void**)((u8*)self->attachment + 0x564)), &v);
+        ConvertPositionToWorld((BaseObject*)self->attachment->child7E, &v);
         SteerPairedObjectWithinArea(self, &v, 1);
         break;
     case 6:
-        SteerPairedObjectWithinArea(self, &((PlacedObject*)self->attachment)->v140, 1);
+        SteerPairedObjectWithinArea(self, &self->attachment->v140, 1);
         break;
     case 0:
     case 4:
@@ -1881,7 +1867,7 @@ s32 ChoosePairedObjectState(PairedObject* self)
             s = 4;
             break;
         }
-        ConvertPositionToWorld((BaseObject*)(*(void**)((u8*)self->attachment + 0x564)), &v);
+        ConvertPositionToWorld((BaseObject*)self->attachment->child7E, &v);
         if (GroundDistance(Vu0::Q(v), Vu0::Q(self->v140)) < 10.0f) {
             s = 2;
             if (PairWithNearestFreeObject(self->controller, self) != 0) {
@@ -1900,8 +1886,8 @@ s32 ChoosePairedObjectState(PairedObject* self)
         break;
     }
     case 4: {
-        u8* p = (u8*)self->activeHandle;
-        if (p != 0 && *(f32*)(p + 0x14) < *(f32*)((u8*)self->attachAnimation + 0x34)) {
+        AnimationPlayer* p = (AnimationPlayer*)self->activeHandle;
+        if (p != 0 && p->time < ((Animation*)self->attachAnimation)->length) {
             s = 4;
             break;
         }
@@ -1913,13 +1899,13 @@ s32 ChoosePairedObjectState(PairedObject* self)
         break;
     }
     case 5:
-        ConvertPositionToWorld((BaseObject*)(*(void**)((u8*)self->attachment + 0x564)), &v);
+        ConvertPositionToWorld((BaseObject*)self->attachment->child7E, &v);
         if (GroundDistance(Vu0::Q(self->v140), Vu0::Q(v)) < 10.0f) {
             s = 6;
         }
         break;
     case 6:
-        if (GroundDistance(Vu0::Q(self->v140), Vu0::Q(((PlacedObject*)self->attachment)->v140)) < 10.0f) {
+        if (GroundDistance(Vu0::Q(self->v140), Vu0::Q(self->attachment->v140)) < 10.0f) {
             s = 0;
         }
         break;
@@ -2093,7 +2079,7 @@ void StartHitTarget(HitTarget* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, g_hitTargetStartLinks);
     if (self->scaledObject != 0) {
-        *(Bytes8*)&self->spawnerIntervalMin = *(Bytes8*)((u8*)self->scaledObject + 0x2DC);
+        self->spawnerInterval = self->scaledObject->delay;
     }
     if (self->soundId != 0) {
         self->soundHandle = (void*)CreateStateWalker((StateGraph*)self->soundId, self, -1, 0);
@@ -2113,11 +2099,10 @@ void UpdateHitTarget(HitTarget* self, f32 dt)
     while ((n = ChooseHitTargetState(self)) != self->state) {
         SetHitTargetState(self, n);
     }
-    void* sub = self->scaledObject;
-    if (sub != 0) {
+    if (self->scaledObject != 0) {
         f32 t = -self->v150.z;
         if (9.99999975e-05f < t) {
-            SetEffectSpawnerInactive((EffectSpawner*)sub);
+            SetEffectSpawnerInactive(self->scaledObject);
             TimePolynomial* v = &self->scalePoly;
             f32 p = v->x + t * (v->y + t * v->z);
             f32 lo = g_unitRange.lo;
@@ -2132,11 +2117,11 @@ void UpdateHitTarget(HitTarget* self, f32 dt)
             }
             f32 a = self->spawnerIntervalMin * x;
             f32 b = self->spawnerIntervalMax * x;
-            u8* o = (u8*)self->scaledObject;
-            *(f32*)(o + 0x2DC) = a;
-            *(f32*)(o + 0x2E0) = b;
+            EffectSpawner* o = self->scaledObject;
+            o->delayMin = a;
+            o->delayMax = b;
         } else {
-            SetEffectSpawnerActiveForever((EffectSpawner*)sub);
+            SetEffectSpawnerActiveForever(self->scaledObject);
         }
     }
 }
@@ -2382,8 +2367,8 @@ void UpdateObjectCreator(ObjectCreator* self, f32 dt)
         SetObjectCreatorState(self, v);
     }
     if (v == 2) {
-        PlacedObject* anchor = (PlacedObject*)self->createsObject;
-        SetDirectionOr(dir, Vu0::Sub(Vu0::Q(((PlacedObject*)*(void**)((u8*)anchor + 0x354))->v140), Vu0::Q(((PlacedObject*)self->created)->v140)), g_unitXVector);
+        PairController* anchor = (PairController*)self->createsObject;
+        SetDirectionOr(dir, Vu0::Sub(Vu0::Q(((PlacedObject*)anchor->watchedObject)->v140), Vu0::Q(((PlacedObject*)self->created)->v140)), g_unitXVector);
         f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(((PlacedObject*)self->created)->v150)));
         ramp.Set(3000.0f, 0.0f, 0.2f);
         f32 speed = ApproachValueWithRamp(&ramp, 0, len, 3000.0f, g_frameDt);

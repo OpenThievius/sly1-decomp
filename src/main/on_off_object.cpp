@@ -379,7 +379,7 @@ void UpdateOnOffObjectState(OnOffObject* self, s32 unused1, s32 unused2) {
     }
     s32 st;
     if (self->forcedState == -1) {
-        TransformPointBetweenFrames(0, self, (Vec02*)((u8*)p + 0x140), (Vec02*)&loc);
+        TransformPointBetweenFrames(0, self, &((PlacedObject*)p)->v140, (Vec02*)&loc);
         s32 r = IsPointInsideFaceTree((TreeNode03*)self->faceTree, &loc);
         st = (0u < (u32)r);
     } else {

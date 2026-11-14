@@ -274,7 +274,7 @@ BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a
     r->world = (World*)a1;
     r->scriptScope = GetScriptEntryScope(a4, (World*)a1);
     AppendToList((List01*)(GetHashedSlot((u8*)r->world, r->id)), r);
-    u8* base = (u8*)r->world + 0x1884;
+    u8* base = (u8*)r->world->f1884;
     void** slot = (void**)(base + off);
     r->nextById = (BaseObject*)*slot;
     *slot = r;
@@ -1507,7 +1507,7 @@ void EvaluateValueBlendCurve(ValueBlendWeightCurve* o, PlacedObject* cam, s32 c,
         WeightCurve* tg = o->targets[i];
         if (!tg) {
             if (cam)
-                sum0 += e->weight * (*(f32**)((u8*)cam + 0x274))[o->index];
+                sum0 += e->weight * cam->f274[o->index];
         } else {
             f32 a, b;
             if (!seq) {
@@ -1696,7 +1696,7 @@ void ReleasePoseSource(Attachment* self, s32 flags)
     m->desc02()->m2B(m);
     if (self == a && m->positionAttachment == 0 && (flags & 1) != 0) {
         if ((m->desc->flags & 2) != 0) {
-            ConstrainColliderVector(m, (u8*)m + 0x440, (u8*)m + 0x150, local, 0);
+            ConstrainColliderVector(m, (u8*)&((Collider*)m)->v440, (u8*)&m->v150, local, 0);
             m->desc02()->m20(m, (Vec02*)local);
         } else {
             SetPlacedObjectVelocity(m, (Vec02*)D_00248D30);
@@ -1704,7 +1704,7 @@ void ReleasePoseSource(Attachment* self, s32 flags)
     }
     if (self == b && m->orientationAttachment == 0 && (flags & 2) != 0) {
         if ((m->desc->flags & 2) != 0) {
-            ConstrainColliderVector(m, (u8*)m + 0x460, (u8*)m + 0x160, local, 0);
+            ConstrainColliderVector(m, (u8*)&((Collider*)m)->v460, (u8*)&m->v160, local, 0);
             m->desc02()->m21(m, (Vec02*)local);
         } else {
             SetPlacedObjectSpin(m, (Vec02*)D_00248D30);
@@ -1752,7 +1752,7 @@ void GetIdentityMatrix(Attachment* unused, Mat02* out)
 // Gives entry index of the owner's animation value array.
 f32 GetOwnerIndexedValue(Attachment* self, s32 index)
 {
-	return (*(f32**)((u8*)self->owner + 0x274))[index];
+	return self->owner->f274[index];
 }
 
 // Picks the source's two modes from the owner: its own 0x2C9 and 0x2CA bytes unless they are -1,
@@ -2237,7 +2237,7 @@ void InitSnapshotPoseSource(T2195_588* self, PlacedObject* src)
     self->m90.r[1] = table[1];
     self->m90.r[2] = table[2];
     self->countC0 = src->valueCount;
-    self->valuesC4 = *(f32**)((u8*)src + 0x274);
+    self->valuesC4 = src->f274;
 }
 
 // Gives the snapshot position and vector, then tells the owner through its slot-28 method if set.
@@ -2295,7 +2295,7 @@ void InitLinkedPoseSource(T2195_5B0* self, PlacedObject* src)
     self->count = &src->valueCount;
     self->vec = (Vec02*)D_00248D30;
     self->vec2 = (Vec02*)D_00248D30;
-    self->values = *(f32**)((u8*)src + 0x274);
+    self->values = src->f274;
     Rec2195_224* o = (Rec2195_224*)src->linkRecord;
     if (o != 0) {
         if (o->flags & 0x20) {

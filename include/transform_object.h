@@ -13,6 +13,7 @@
 #include "base_object.h"
 #include "placed_object.h"
 #include "path_curve.h"
+#include "shapes.h"
 struct MemberGroup;
 
 
@@ -61,6 +62,14 @@ struct MemberGroup : MemberObject {
     u8 padB4[0xC0 - 0xB4];
 };
 
+// The list of ids a spawn record holds at 0x130, read from the stream with a capacity (func_00154EE0).
+struct CappedWordList {
+    u8 pad0[0x4C];
+    s32 cap;  // 0x4C
+    U32P* items;  // 0x50
+    void* source;  // 0x54
+};
+
 // The 0x200-byte record a 0x79 shares with its copies (func_00158C28 counts them;
 // func_00158DD8 makes the object's own before a change).
 struct Rec79 {
@@ -76,8 +85,14 @@ struct Rec79 {
     void* target;           // 0x7C
     u8 pad80[0x120 - 0x80];
     void* link120;          // 0x120
-    u8 pad124[0x188 - 0x124];
-    s32 link188;            // 0x188
+    u8 pad124[0x130 - 0x124];
+    union {
+        struct {
+            u8 pad130[0x188 - 0x130];
+            s32 link188;            // 0x188
+        };
+        CappedWordList words130;    // 0x130
+    };
     u8 pad18C[0x1D8 - 0x18C];
     void* found[3];         // 0x1D8: objects named by a 0x7A's ids
     u8 pad1E4[0x200 - 0x1E4];

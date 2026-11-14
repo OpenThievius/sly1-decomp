@@ -466,7 +466,7 @@ void GetCameraTargetPlacement(Camera* self, void* o, TargetRecord_00143418* out,
 {
     Vec02 offset;
     if (o == self->currentTarget) {
-        *out = *(TargetRecord_00143418*)((u8*)self + 0x2F0);
+        *out = *(TargetRecord_00143418*)&self->f2F0;
     } else {
         ((VFn_143418)(*(void***)o)[0x124 / 4])(o, out, dt);
         ComputeOffsetBehindTarget(self, o, (Target_00143148*)out, &offset);
@@ -499,19 +499,18 @@ extern "C" f32 Tangent(f32 x);
 // matrices.
 void UpdateCameraProjection(Camera* self)
 {
-    u8* s = (u8*)self;
     f32 one = 1.0f;
     f32 t = Tangent(self->zoom * 0.5f);
     f32 inv = one / self->zoom;
-    f32 w = *(f32*)(s + 0x1E0);
-    *(f32*)(s + 0x1F4) = t;
-    *(f32*)(s + 0x1F0) = t * w;
+    f32 w = self->aspectScale;
+    self->projectionScaleY = t;
+    self->projectionScaleX = t * w;
     f32 d = w * w + one;
-    *(f32*)(s + 0xB0) = (one >? self->distanceScale * inv);
+    self->fB0 = (one >? self->distanceScale * inv);
     f32 q = t * Fpu::Sqrt(d);
-    *(f32*)(s + 0x1EC) = q * self->nearDistance + one;
-    BuildProjectionMatrix((Mat4*)(s + 0xC0), 640.0f / (t * w * 4096.0f), 224.0f / (t * 4096.0f), 0.0f, 0.0f, self->nearDistance, self->farDistance);
-    ComputeCameraFogTerms(self, (f32*)(s + 0x208), one);
+    self->f1EC = q * self->nearDistance + one;
+    BuildProjectionMatrix(&self->projection, 640.0f / (t * w * 4096.0f), 224.0f / (t * 4096.0f), 0.0f, 0.0f, self->nearDistance, self->farDistance);
+    ComputeCameraFogTerms(self, self->fogTerms, one);
     UpdateCameraMatrices(self);
 }
 
@@ -521,30 +520,28 @@ void UpdateCameraProjection(Camera* self)
 // with their method tables and owner; ends with ResetCamera.
 void InitCamera(Camera* self)
 {
-    u8* s = (u8*)self;
-
     InitObject(self);
     f32 one = 1.0f;
-    *(f32*)(s + 0x1C0) = one;
-    *(f32*)(s + 0x1C4) = one;
-    *(f32*)(s + 0x1C8) = one;
-    *(struct ParamBlock16*)(s + 0x1D0) = *(struct ParamBlock16*)g_cameraDefaultRamp;
+    self->distanceScale = one;
+    self->zoom = one;
+    self->zoomGoal = one;
+    *(struct ParamBlock16*)&self->zoomProfile = *(struct ParamBlock16*)g_cameraDefaultRamp;
     f32 k = 1.29870129f;
     f32 x = g_cameraDefaultFogNear;
     f32 y = g_cameraDefaultFogFar;
     f32 z = g_cameraDefaultFogStrength;
     f32 h = 100.0f;
     f32 t = 20000.0f;
-    *(f32*)(s + 0x1E0) = k;
-    *(f32*)(s + 0x1E4) = h;
-    *(f32*)(s + 0x1E8) = t;
-    *(f32*)(s + 0x1F8) = x;
-    *(f32*)(s + 0x1FC) = y;
-    *(f32*)(s + 0x200) = z;
-    *(struct FogColorWord*)(s + 0x204) = *(struct FogColorWord*)&g_cameraDefaultFogColor;
-    *(struct FrameRow*)(s + 0x80) = *(struct FrameRow*)g_identityMatrix;
-    *(struct FrameRow*)(s + 0x90) = *(struct FrameRow*)(g_identityMatrix + 0x10);
-    *(struct FrameRow*)(s + 0xA0) = *(struct FrameRow*)(g_identityMatrix + 0x20);
+    self->aspectScale = k;
+    self->nearDistance = h;
+    self->farDistance = t;
+    self->fogNear = x;
+    self->fogFar = y;
+    self->fogStrength = z;
+    *(struct FogColorWord*)&self->fogColor = *(struct FogColorWord*)&g_cameraDefaultFogColor;
+    *(struct FrameRow*)&self->rot80.r[0] = *(struct FrameRow*)g_identityMatrix;
+    *(struct FrameRow*)&self->rot80.r[1] = *(struct FrameRow*)(g_identityMatrix + 0x10);
+    *(struct FrameRow*)&self->rot80.r[2] = *(struct FrameRow*)(g_identityMatrix + 0x20);
     UpdateCameraProjection(self);
     self->ctl454.vt = (const CameraControllerVt*)g_cameraControllerMethods;
     SetCameraControllerOwner(&self->ctl454, self);
@@ -654,7 +651,7 @@ void SetCameraFogStrength(void* ptr, f32 value)
 // Sets the camera's fog colour and updates the projection.
 void SetCameraFogColor(void* self, void* value)
 {
-    *(Value_00143A08*)((u8*)self + 0x204) = *(Value_00143A08*)value;
+    *(Value_00143A08*)&((Camera*)self)->fogColor = *(Value_00143A08*)value;
     UpdateCameraProjection((Camera*)self);
 }
 
@@ -989,7 +986,7 @@ void UpdateCameraMatrices(Camera* self)
     Mat02 rotation;
     f32 f6 = g_gameTime - self->swingStartTime;
     if (g_cameraSwingDuration < f6) {
-        BuildViewProjectionMatrix((f32*)self->position, (f32*)self->rotation, (void*)((u8*)self + 0xC0), (Quad16*)((u8*)self + 0x100));
+        BuildViewProjectionMatrix((f32*)self->position, (f32*)self->rotation, &self->projection, (Quad16*)&self->viewProjection);
     } else {
         f32 t = f6 / g_cameraSwingDuration;
         f32 amount = g_unitRange.Limit(g_cameraSwingFalloffCurve[0] + t * (g_cameraSwingFalloffCurve[1] + t * g_cameraSwingFalloffCurve[2]));
@@ -1005,16 +1002,16 @@ void UpdateCameraMatrices(Camera* self)
         Vu0::Q(corner) = Vu0::MulAddX(Vu0::Q(*(Vec02*)D_00248D40), Vu0::Q(*(Vec02*)g_cameraSwingCornerShift), Vu0::Scalar(swing));
         Vu0::Q(tilt) = Vu0::MulX(Vu0::Q(*(Vec02*)g_cameraSwingTiltShift), Vu0::Scalar(swing));
         BuildProjectionMatrix(&proj, corner.x * 640.0f / (self->projectionScaleX * 4096.0f), corner.y * 224.0f / (self->projectionScaleY * 4096.0f), tilt.x, tilt.y, self->nearDistance, self->farDistance);
-        BuildViewProjectionMatrix((f32*)&pos, (f32*)&rotation, &proj, (Quad16*)((u8*)self + 0x100));
+        BuildViewProjectionMatrix((f32*)&pos, (f32*)&rotation, &proj, (Quad16*)&self->viewProjection);
     }
-    InvertMatrix4x4((u8*)self + 0x100, (u8*)self + 0x140);
-    BuildFrustumSideNormals((Mat02*)self->rotation, (Vec02*)((u8*)self + 0x180), self->projectionScaleX, self->projectionScaleY);
+    InvertMatrix4x4((u8*)&self->viewProjection, (u8*)&self->inverseViewProjection);
+    BuildFrustumSideNormals((Mat02*)self->rotation, self->frustum, self->projectionScaleX, self->projectionScaleY);
     {
-        f32* e = (f32*)((u8*)self + 0x1B0);
+        f32* e = (f32*)&self->frustum[3];
         f32* d = self->planes[0];
-        f32* c = (f32*)((u8*)self + 0x1A0);
-        f32* b = (f32*)((u8*)self + 0x190);
-        f32* a = (f32*)((u8*)self + 0x180);
+        f32* c = (f32*)&self->frustum[2];
+        f32* b = (f32*)&self->frustum[1];
+        f32* a = (f32*)&self->frustum[0];
         s32 n = 2;
         do {
             d[0] = *a++;
@@ -1032,8 +1029,8 @@ void WriteCameraMatricesPacket(Camera* self)
 {
     BeginDmaTag((PacketWriter*)g_vifPacketWriter);
     WriteVifBaseOffset((PacketWriter*)g_vifPacketWriter, 0, 0);
-    CopyWordsToWriter((PacketWriter*)g_vifPacketWriter, 0xC, 4, (u32*)((u8*)self + 0x100), 4);
-    CopyWordsToWriter((PacketWriter*)g_vifPacketWriter, 0xC, 4, (u32*)((u8*)self + 0x140), 8);
+    CopyWordsToWriter((PacketWriter*)g_vifPacketWriter, 0xC, 4, (u32*)&self->viewProjection, 4);
+    CopyWordsToWriter((PacketWriter*)g_vifPacketWriter, 0xC, 4, (u32*)&self->inverseViewProjection, 8);
     CloseDmaTag((PacketWriter*)g_vifPacketWriter);
 }
 

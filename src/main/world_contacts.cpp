@@ -176,8 +176,8 @@ void AddColliderToSweepAxes(World* self, void* arg)
     World* t = self;
     s32 stride = 24;
     s32 one = 1;
-    u8* a3 = (u8*)arg + 0x430;
-    u8* a2 = (u8*)arg + 0x420;
+    u8* a3 = (u8*)&((Collider*)arg)->boundsMax;
+    u8* a2 = (u8*)&((Collider*)arg)->boundsMin;
     s32 off = 0;
     s32 n = 2;
     do {

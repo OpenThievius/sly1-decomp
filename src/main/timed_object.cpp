@@ -288,7 +288,7 @@ void PostLoadTimedGroup(TimedGroup* self)
                     TimedGroupChild* g = (TimedGroupChild*)((u8*)self + n * 0x50 + 0x5E0);
                     g->child = node;
                     g->riseScale = curve->lengths[curve->count - 1];
-                    s32* widest = (s32*)((u8*)self + 0xAE0);
+                    s32* widest = &self->fAE0;
                     s32 w = *widest;
                     if (!(curve->count < w)) {
                         w = curve->count;
@@ -313,7 +313,7 @@ void PostLoadTimedGroup(TimedGroup* self)
         }
     }
     if ((self->flags & 0x3000000) != 0x2000000) {
-        QueryValueListMask((ValueListObject*)(*(void**)((u8*)self->world + 0x1EC4)), self->boundRadius, (Bits128*)&self->v140, &self->visibilityMask);
+        QueryValueListMask((ValueListObject*)self->world->valueListObject, self->boundRadius, (Bits128*)&self->v140, &self->visibilityMask);
     }
     PlacedObject* o = self;
     if (o->parent != 0) {
@@ -325,7 +325,7 @@ void PostLoadTimedGroup(TimedGroup* self)
             }
             up->boundRadius = reach;
             if ((up->flags & 0x3000000) != 0x2000000) {
-                QueryValueListMask((ValueListObject*)(*(void**)((u8*)up->world + 0x1EC4)), reach, (Bits128*)&up->v140, &up->visibilityMask);
+                QueryValueListMask((ValueListObject*)up->world->valueListObject, reach, (Bits128*)&up->v140, &up->visibilityMask);
             }
             o = (PlacedObject*)o->parent;
         } while (o->parent != 0);
@@ -525,7 +525,7 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
     while (i < self->groupCount) {
         TimedGroupChild* g = &self->groups[i];
         f32 acc = 0.0f;
-        DrawPoints* src = *(DrawPoints**)((u8*)g->child + 0x34);
+        DrawPoints* src = (DrawPoints*)((GroupCurveObject*)g->child)->curve;
         s32 n = src->count;
         f32 total = ComputeTimedGroupRamp(self, g);
         if (g->fC != 0) {
@@ -620,9 +620,9 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
         s32 next = i + 1;
         s32 active = 0;
         f32 total = ComputeTimedGroupRamp(self, g);
-        DrawPoints* src = *(DrawPoints**)((u8*)g->child + 0x34);
+        DrawPoints* src = (DrawPoints*)((GroupCurveObject*)g->child)->curve;
         s32 n = src->count;
-        *(Collider**)((u8*)g + 0xC) = 0;
+        g->hit = 0;
         for (k = 0; k < n; k++) {
             TransformPointBetweenFrames(self, 0, &src->points[k], &pts[k]);
         }
@@ -658,9 +658,9 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
             if (hit != 0) {
                 s32 near = acc + Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of(p0), Vu0::Vec::Of(span.q[0])))) < total;
                 if (near) {
-                    Vu0::Q(*(Quad16*)((u8*)g + 0x10)) = Vu0::Q(span.q[0]);
+                    Vu0::Q(g->f10) = Vu0::Q(span.q[0]);
                     g->f20 = k;
-                    *(Collider**)((u8*)g + 0xC) = hit;
+                    g->hit = hit;
                     if (*state < 8) {
                         active = *state >= 4;
                     }
@@ -698,7 +698,7 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
             Collider* h;
             u64 m = 0x8000;
             m <<= 41;
-            if (active && (h = *(Collider**)((u8*)g + 0xC)) != 0 && ((h->flags538 & m) != 0 || e->value == 0)) {
+            if (active && (h = g->hit) != 0 && ((h->flags538 & m) != 0 || e->value == 0)) {
                 Quad16* rec = (Quad16*)GetOwnSpawnRecord((EffectSpawner*)e->obj, 1);
                 rec[6] = span.q[2];
                 TransformPointBetweenFrames(0, self, (Vec02*)&span.q[0], &p0);

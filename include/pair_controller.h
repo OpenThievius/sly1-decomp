@@ -12,6 +12,9 @@
 
 #include "placed_object.h"
 
+struct PairedObject;
+struct SoundStateObject;
+
 struct ObjectCreator;  // the object at 0x358 (object_creator.h; func_001A4C48 reads its state at 0x550)
 struct LinkedObject;  // the object at 0x658 (func_001A4C48 reads a state at 0x2D4)
 
@@ -22,6 +25,30 @@ struct BlendMotion {
     f32 pos;  // 0x00
     f32 vel;  // 0x04
     f32 acc;  // 0x08
+};
+
+// The coefficients of a quadratic in t (a + bt + ct^2).
+struct BlendQuad {
+    f32 a, b, c;
+};
+
+// One tuning value or pair of values that moves from a start to an end along a quadratic of the
+// frame time (UpdatePairControllerTuning): value[0..1] are the starts and value[2..3] the ends of
+// up to two values.
+struct BlendedPair {
+    f32 value[4];  // 0x00
+    BlendQuad q;  // 0x10
+    f32 pad1C;  // 0x1C
+};
+
+// The six blends at 0x560, in the order the controller's tuning values come from them.
+struct TuningBlends {
+    BlendedPair limit;  // 0x560: the most paired objects out at once
+    BlendedPair attachLimit;  // 0x580
+    BlendedPair startDelay;  // 0x5A0: the two ends of the wait before the next start
+    BlendedPair attachDelay;  // 0x5C0
+    BlendedPair speed;  // 0x5E0: f644
+    BlendedPair turn;  // 0x600: f648
 };
 
 // 0x5F: func_001A4718 sets it up (the lists, the ids, the tuning values and two copies of the
@@ -35,21 +62,36 @@ struct PairController : PlacedObject {
     s32 ids[1];  // 0x2E4
     u8 pad2E8[0x330 - 0x2E8];
     Vec02 f330; // 0x330
-    s32 mode340;  // 0x340
+    union {
+        s32 mode340;  // 0x340
+        f32 minRadius340;  // 0x340: the shortest distance a new object starts at (added to the radius at 0x3D0)
+    };
     f32 tune344;  // 0x344
     f32 tune348;  // 0x348
     f32 tune34C;  // 0x34C
     f32 tune350;  // 0x350
     void* watchedObject; // 0x354
     ObjectCreator* target;  // 0x358
-    u8 list35C[0x368 - 0x35C];  // lists (func_00152438 sets their element size)
-    u8 list368[0x374 - 0x368];
+    union {
+        PairedObject* head35C;
+        u8 list35C[0x368 - 0x35C];  // lists (func_00152438 sets their element size)
+    };
+    union {
+        PairedObject* head368;
+        u8 list368[0x374 - 0x368];
+    };
     u8 list374[0x380 - 0x374];
     s32 count380;  // 0x380: paired objects out; at limit624 a removal schedules the next start (f62C to f630 later, at f634)
-    u8 list384[0x390 - 0x384];
+    union {
+        PairedObject* head384;
+        u8 list384[0x390 - 0x384];
+    };
     u8 list390[0x39C - 0x390];
     s32 count39C;  // 0x39C: attachments out; at f628 a removal schedules the next (f638 to f63C later, at f640)
-    u8 list3A0[0x3AC - 0x3A0];
+    union {
+        SoundStateObject* head3A0;
+        u8 list3A0[0x3AC - 0x3A0];
+    };
     u8 list3AC[0x3B8 - 0x3AC];
     s32 limit3B8;  // 0x3B8: 0x28 after setup
     s32 count3BC;  // 0x3BC
@@ -62,7 +104,10 @@ struct PairController : PlacedObject {
     };
     f32 poseA[48];  // 0x3E0
     f32 poseB[48];  // 0x4A0
-    f32 poseOut[48];  // 0x560
+    union {
+        f32 poseOut[48];  // 0x560
+        TuningBlends blend;  // 0x560: the same bytes, read as the tuning blends
+    };
     s32 poseIndex;  // 0x620
     s32 limit624;  // 0x624: the most paired objects out at once
     s32 attachLimit; // 0x628

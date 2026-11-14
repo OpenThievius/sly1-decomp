@@ -491,19 +491,31 @@ void UpdateMemoryCard(MemoryCard* self)
 
 // Compares two directory entries by their time stamps: the u16 at 0x54, then the bytes at 0x52,
 // 0x53, 0x56, 0x57 and 0x58 in turn; the first difference is the result.
+struct CardEntryTimes {
+    u8 pad00[0x52];
+    u8 b52;   // 0x52
+    u8 b53;   // 0x53
+    u16 w54;  // 0x54
+    u8 b56;   // 0x56
+    u8 b57;   // 0x57
+    u8 b58;   // 0x58
+};
+
 s32 CompareMemoryCardEntryTimes(void* lhs, void* rhs)
 {
-	s32 difference = *(u16*)((char*)lhs + 0x54) - *(u16*)((char*)rhs + 0x54);
+	CardEntryTimes* l = (CardEntryTimes*)lhs;
+	CardEntryTimes* r = (CardEntryTimes*)rhs;
+	s32 difference = l->w54 - r->w54;
 	if (difference) return difference;
-	difference = *(u8*)((char*)lhs + 0x52) - *(u8*)((char*)rhs + 0x52);
+	difference = l->b52 - r->b52;
 	if (difference) return difference;
-	difference = *(u8*)((char*)lhs + 0x53) - *(u8*)((char*)rhs + 0x53);
+	difference = l->b53 - r->b53;
 	if (difference) return difference;
-	difference = *(u8*)((char*)lhs + 0x56) - *(u8*)((char*)rhs + 0x56);
+	difference = l->b56 - r->b56;
 	if (difference) return difference;
-	difference = *(u8*)((char*)lhs + 0x57) - *(u8*)((char*)rhs + 0x57);
+	difference = l->b57 - r->b57;
 	if (difference) return difference;
-	return *(u8*)((char*)lhs + 0x58) - *(u8*)((char*)rhs + 0x58);
+	return l->b58 - r->b58;
 }
 
 // Changes the memory card object's state (0 to 5): states 0 and 1 start a card poll job, 3 starts
@@ -529,18 +541,18 @@ c420:
     goto store;
 loop: {
     CardSlot* e;
-    CardSlot* p = (CardSlot*)((u8*)self + 0x1A30);
-    e = (CardSlot*)(self->f4F48 = (u8*)self + 0x30);
+    CardSlot* p = (CardSlot*)self->slots[0].info;
+    e = (CardSlot*)(self->f4F48 = &self->slots[0]);
     n = 2;
     do {
         if (e->f0C != 0.0f) {
-            s32 r = CompareMemoryCardEntryTimes((u8*)self->f4F48 + 0x1A00, p);
+            s32 r = CompareMemoryCardEntryTimes(((CardSlot*)self->f4F48)->info, p);
             if (r < 0) self->f4F48 = e;
         } else {
             ResetGameProgress((GameProgress*)e);
         }
-        p = (CardSlot*)((u8*)p + 0x1A5C);
-        e = (CardSlot*)((u8*)e + 0x1A5C);
+        p++;
+        e++;
     } while (--n >= 0);
 }
 
@@ -632,7 +644,7 @@ s32 CreateMemoryCardSaveFiles(MemoryCard* self)
                 if (r == 0) {
                     for (s32 i = 0; i < 3; i++) {
                         FormatToString(name, g_saveSlotPathFormat, g_saveDirectoryName, g_saveSlotBaseName, i + 1);
-                        r = WriteMemoryCardSlot(self, name, (u8*)self + 0x30 + i * 0x1A5C, (u8*)self + 0x1A30 + i * 0x1A5C);
+                        r = WriteMemoryCardSlot(self, name, &self->slots[i], self->slots[i].info);
                         if (r != 0) return r;
                     }
                     if (self->targetState < 5) self->targetState = 5;

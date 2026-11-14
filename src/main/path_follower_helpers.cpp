@@ -256,12 +256,12 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
 {
     for (s32 i = 0; i < self->markerCount; i++) {
         PathMarker* e = &self->markers[i];
-        s32 r = TestPointAgainstObjectShape((ObjectGatherer*)e->item, (u8*)self + 0x100);
-        if (r == *(s32*)((u8*)e + 8)) {
+        s32 r = TestPointAgainstObjectShape((ObjectGatherer*)e->item, &self->pos);
+        if (r == e->inside) {
             continue;
         }
         s32 kind = e->kind;
-        *(s32*)((u8*)e + 8) = r;
+        e->inside = r;
         switch (kind) {
         case 0:
             if (r != 0 && e->next == self->currentMarker) {

@@ -65,7 +65,8 @@ struct MaskedCollider : Collider {
     s32 quiet;              // 0x684: set, slot 72 only marks it done
     s32 id688;              // 0x688: func_00140FF8 at set-up; slot 9 keeps it
     s32 f68C;               // 0x68C: 1 at set-up
-    u8 pad690[0x698 - 0x690];
+    s32 hitCount;           // 0x690: the hits that reached the script (slot 48 counts it up against f68C)
+    u8 pad694[0x698 - 0x694];
     s32 f698;               // 0x698: -1 in class 0x21
     u8 pad69C[0x6A0 - 0x69C];
     Vec02 point6A0;         // 0x6A0: where slot 72 scatters, in its own frame
