@@ -85,6 +85,10 @@ BlendCurveView* CreatePositionCurve(s32 kind);
 BlendCurveView* CreateRotationCurve(s32 kind);
 BlendCurveView* CreateWeightCurve(u32 kind);
 
+// Builds one blend animation (a record of class 0x84) from count items a stride apart, each holding
+// a source animation: it makes the key table (nkeys sequences of keyA and keyB entries) and, for
+// each track key of any source, a combined position, rotation and weight curve whose slot i is item
+// i's curve, copying the first source's other fields. *out is null when no item has a source.
 void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out)
 {
     s32 i;
@@ -211,6 +215,9 @@ void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items
 }
 
 
+// For each blend item that has a clip, reads the times of the markers in vals (count2 of them) into
+// the item's key pairs at off and sets each pair's length to the time to the next marker, wrapping
+// round the end of the clip (adding its length) for the last one.
 void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* vals)
 {
     s32 i;
@@ -251,6 +258,10 @@ void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, 
     }
 }
 
+// Works out the timing of a blend from its items' weights. Without key pairs, *out gets the sum of
+// each weighted item's clip length. With nKeys pairs each key's length is the weighted sum of the
+// items' lengths, and the starts are chained from a phase that is the weighted average of the
+// clips' own phases (wrapped about a half turn); *out gets the total.
 void ComputeBlendedDuration(s32 stride, s32 count, void* items, s32 offset, s32 nKeys, BlendTimeScale* pairs, void* out)
 {
     BlendTimeScale* keys = pairs;
@@ -345,6 +356,9 @@ LINKER_REMNANT(func_001399F0);
 
 void CopyMemory(void* dst, void* src, u32 size);
 
+// Sets the weights of a blend animation's items (a2 items a1 bytes apart at a3): copies them into
+// the blend, recomputes its duration for each key sequence (ComputeBlendedDuration) and rescales
+// the playing animation players' times so they stay at the same phase of the new duration.
 void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3)
 {
     AnimationPlayer* node = (AnimationPlayer*)self->f6C;

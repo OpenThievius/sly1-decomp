@@ -59,6 +59,10 @@ struct ContactRowList;
 struct ContactRowSource;
 
 
+// Sets and clears flag bits (set, clr) of a pair of objects in the world's pair table (kept
+// symmetric for both orders). When the pair becomes active (all four low bits set, or bit 0x40) it
+// is linked in both objects' contact rows; when it stops being active the rows are unlinked, the
+// pair's contacts freed, the objects' root tries cleared and the row slots returned.
 void SetContactPairFlags(World* w, Contacts03* a, Contacts03* b, u8 set, u8 clr) {
     ContactPairLink* n1;
     ContactPairLink* n2;
@@ -361,6 +365,10 @@ struct ContactBody
 
 struct ColliderPair;
 
+// The world's contact pass for a frame: sorts the objects (sweep axes) and, for each linked pair
+// not yet visited, frees the old contacts and builds new ones (BuildObjectPairContacts), clearing
+// the objects' root tries when a pair gains or loses them; other pairs only get their contacts'
+// ends notified. Then the touched objects' per-part methods 0x110 and 0x10C run.
 void UpdateWorldContacts(World* w, s32 arg)
 {
     ContactBody* pair[2];

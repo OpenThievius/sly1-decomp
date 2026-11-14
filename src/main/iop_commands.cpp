@@ -87,6 +87,10 @@ s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
         } \
     }
 
+// Sets up the channels to the IOP: the two command buffers with their reply and callback tables,
+// the remote services for commands (0x123456) and sound bank loads (0x123457), each bound by
+// retrying until the server answers, and the shared packet, whose address is then sent to the IOP
+// with command 0.
 void InitIopCommandChannels(void)
 {
     s32 n;
@@ -128,6 +132,10 @@ void FlushIopCommandBuffer(void);
 s32 SyncDiscRead(s32 flag);
 extern "C" void SyncDataCache(s32 a0);
 
+// Services the IOP traffic and gives 1 while anything is still outstanding: runs the callbacks of
+// the replies that have arrived (the single reply's or each of the last buffer's), finishes a sound
+// bank load when its result is in, flushes the command buffer that is waiting, and finishes a disc
+// read that has completed with its callback.
 s32 PollIopCommands(void)
 {
     s32 i;
@@ -226,6 +234,9 @@ LINKER_REMNANT(func_0011D138);
 
 s32 PollIopCommands(void);
 
+// Loads a sound bank into the IOP from the disc location (two words) and waits for it to finish:
+// gives the bank's handle, or 0 when another load or a disc read is under way or the call fails
+// (error 0x106 is then recorded).
 s32 LoadSoundBankAtLocation(s32 a0, s32 a1)
 {
     s32 v;
@@ -272,6 +283,9 @@ s32 LoadSoundBankAtLocation(s32 a0, s32 a1)
 struct WordPairArgs { s32 a; s32 b; };
 extern "C" void SyncDataCache(s32 a);
 
+// Starts loading a sound bank into the IOP from the disc location (two words) without waiting:
+// records the callback and its argument for PollIopCommands to call with the result, and gives up
+// with a message when a load or a disc read is already going on.
 void StartSoundBankLoad(s32 a0, s32 a1, IopCallbackFn a2, s64 a3)
 {
     g_soundBankLoadError = 0;
@@ -516,6 +530,8 @@ LINKER_REMNANT(func_0011D958);
 
 void ArmIopReplyBuffer(s32* ptr, s32 count);
 
+// Sends one command (id with size bytes of data) to the IOP and waits for the reply, polling the
+// other traffic meanwhile, then flushes a waiting command buffer. Gives the reply's result.
 s32 SendIopCommandAndWait(s32 id, s32 size, void* data)
 {
     s32 i;
@@ -547,6 +563,10 @@ s32 SendIopCommandAndWait(s32 id, s32 size, void* data)
 void ArmIopReplyBuffer(s32* ptr, s32 count);
 void CommitQueuedIopCommand(void);
 
+// Queues a command for the IOP (the sound processor): with nothing in flight and no data or
+// callback it is sent at once as a remote call; otherwise the command and its data go into the
+// current command buffer (waiting while it is full) with the callback and its argument in the
+// buffer's callback table, and the buffer is committed.
 void QueueIopCommand(s32 cmd, s32 len, void* data, IopCallbackFn arg, u64 val)
 {
     s32 flag = 0;
@@ -615,6 +635,8 @@ void CommitQueuedIopCommand()
 
 void ArmIopReplyBuffer(s32* ptr, s32 count);
 
+// Sends the current IOP command buffer (as far as it is filled) as one remote call (service 0x4D),
+// expecting its replies in the reply table, then switches to the other buffer and empties it.
 void FlushIopCommandBuffer(void)
 {
     ArmIopReplyBuffer(g_iopReplyTables[g_iopBufferIndex], *g_iopCommandBuffers[g_iopBufferIndex]);

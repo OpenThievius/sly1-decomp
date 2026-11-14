@@ -136,6 +136,10 @@ struct Chooser_1CDFB8 {
 };
 extern List01 g_class75List;
 
+// Chooses the closest thing for the player to take hold of: the nearest of the target curves,
+// points, parts, aim objects and target vectors (and the world's special object when the level bits
+// allow), or target if given. It sets the matching target fields and aim mode and gives the state
+// to enter (0x15 or 0x10) with the sub-state in *out; -1 when nothing is near.
 s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
 {
     Vec02 a;
@@ -285,6 +289,10 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
 void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
 
 static inline f32 MinF(f32 a, f32 b) { return b <? a; }
+// Scores landing on a moving target: when the player can reach the point's height, it builds a
+// Hermite arc from the player to the point and the cost is the arc's horizontal length (at most
+// 1000000); when it cannot, the time is the fall time and the cost 1010000 less the height reached.
+// Also gives the end point and velocity.
 void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec02* start, Vec02* extra, f32* outTime, f32* outCost, Vec02* outPoint, Vec02* outVel)
 {
     Vec02 vel;
@@ -362,6 +370,9 @@ static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
     return v;
 }
 
+// Works out where the player is put on a path object at place t: the point (in outA, in the world)
+// and the offset along the path's direction in outB, which follows the stick (its heading and
+// length) projected on the direction and is clamped by two ramps that start at the path's two ends.
 void PlaceOnTargetObject(Player* self, PathTarget* node, Vec02* outA, Vec02* outB, f32 t)
 {
     Vec02 a;
@@ -449,6 +460,10 @@ static inline f32 NormalizeVector(Vec02& v, const Vec02& fallback)
     return Vu0::ToFloatMoved(len);
 }
 
+// Scores a leap of time t to a point on an object (where it will be at t) against the player's
+// place under gravity: within the reach D_00274E08 the cost is the miss distance less the reach,
+// too far above or below it is the height plus 1010000, otherwise it follows the sideways
+// acceleration that closes the gap. It also gives the leap's end point and velocity.
 void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec02* point, f32* out1, Vec02* out2, Vec02* out3, f32 t)
 {
     Vec02 pos0;
@@ -562,6 +577,10 @@ void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const 
 s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 
 
+// Tests whether a leap arc is blocked: walks the Hermite arc in 0.1 s steps over the colliders in
+// its box and stops at the first span hit more than 100 units from the arc's start (a hit within 50
+// of the end point pe also counts). Gives 1 when the walk stopped before the end of the arc
+// (blocked), 0 when it is clear.
 s32 AddTargetObstructionCost(f32 limit, BaseObject* self, void* a1, void* a2, void* pa, void* pb, Vec02* pc, void* pd, Vec02* pe)
 {
     Vec02 lo;
@@ -732,6 +751,10 @@ static inline f32 Distance(const Vec02& a, const Vec02& b)
     return Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(b))));
 }
 
+// Chooses the player's next target by cost: scores candidates of six kinds (objects, paths, aim
+// objects, target vectors, points, curves) with a local-minimum search, drops those over the cost
+// limit or blocked, and keeps the cheapest (or keep). It sets the target fields, fills the aim
+// record and gives the sub-state to enter (0xA to 0xF), or the current one with a sound if none.
 s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
 {
     Vec02 cur0;
@@ -1412,6 +1435,10 @@ struct TargetProbe { u8 pad0[4]; s32 active; f32 radius; u8 pad0C[4]; Vec02 poin
 s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
 
 
+// For a foot probe, finds where the foot meets the track the player rides: takes the track point at
+// the probe's offset (flipped, wrapped or clamped to the track's limit), looks for a collider span
+// between the probe point and it, and stores the span's far end relative to the probe at +0x20 of
+// out (zero for an inactive probe).
 void CollectPlayerTargetSpans(TargetPlayerView* self, TargetProbe* t, u8* out)
 {
     Vec02 pos;
@@ -1448,6 +1475,10 @@ void CollectPlayerTargetSpans(TargetPlayerView* self, TargetProbe* t, u8* out)
 extern f32 D_00274B64;
 struct BlendSlot;
 
+// The per-frame update of the player's state 6 by sub-state: 0x11 and 0x14 update the animation
+// blend weights for the target mode (eight- or six-entry blend) and play the phase-crossing sounds
+// for the animation's phase, with the push limit kept in 0x11; 0x10 on a track measures both foot
+// probes and collects the spans they touch.
 void UpdatePlayerTargetPhase(Player* self)
 {
     switch (self->subState) {
@@ -1528,6 +1559,10 @@ struct ContactPlayerView {
 };
 
 
+// Keeps the player pinned to what it is bound to, by adding object contacts at its probe point: for
+// a node target (mode 5) at the object's position and, for a track (mode 4), at the point of the
+// track nearest the player, with the track's direction; when the player moves off the end of an
+// open track it puts the contact at the end instead (the direction reversed at the far end).
 void PinPlayerToTarget(Player* self)
 {
     Vec02 pos;
@@ -1641,6 +1676,10 @@ f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 // evaluates its float arguments there, and only their place in the list decides that.
 void AddColliderForce(Player* self, void* v);
 
+// The step of state 6: on an active track the player is held to the track's speed limit: the
+// track's direction against gravity and the player's velocity along it give a force that keeps the
+// speed along the track within a ramp of the limit and the track's scale. Then the default
+// steering.
 void StepPlayerAlongTarget(Player* self)
 {
     Vec02 dir;

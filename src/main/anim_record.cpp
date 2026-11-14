@@ -131,6 +131,9 @@ u64 GetTextureRegisterBits(TextureTable* t, s32 i, s32 j)
     return r;
 }
 
+// Adds to a GIF packet the three texture register writes (the TEX0 and TEX1 pair and the CLAMP one,
+// each for context 1 or 2 by the record's kind) of a texture table's frame p1 and layer p2, with
+// the clamp bits from the table's two flags.
 void SendTextureRegisters(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx)
 {
     GifWord a;
@@ -181,6 +184,9 @@ void ReadImageRecordB(void* a0, PaletteRecord* a1)
     a1->blockCount = (u32)((a1->f4 << 2) + 15) >> 4;
 }
 
+// Reads the table of B image records (0x18 bytes each, the palettes) from a stream and works out
+// the number of slots it needs: the records flagged 0x10000000 count as already placed, and the
+// slot count is raised to the number of the others if that is larger.
 void LoadImageRecordsB(void* self)
 {
     s32 i;
@@ -214,6 +220,9 @@ void ReadImageRecordA(void* self, ImageRecord* obj)
 
 }
 
+// Reads the table of A image records (0x20 bytes each) from a stream and works out the number of
+// slots needed in the same way as LoadImageRecordsB, counting the records flagged 0x10000000
+// against the rest.
 void LoadImageRecordsA(void* self)
 {
     s32 i;
@@ -236,6 +245,8 @@ void LoadImageRecordsA(void* self)
     }
 }
 
+// Reads the font count and each font record from a stream (each gets the mask bit of its index) and
+// sets the default font to font id 0.
 void LoadFonts(BufferedStream* self)
 {
     g_fontCount = ReadBufferedU16(self);
@@ -247,6 +258,9 @@ void LoadFonts(BufferedStream* self)
     g_defaultFont = GetFontById(0);
 }
 
+// Reads a texture table from a stream: its 6-byte header, then its entries (u16 indexes into the A
+// image records) and its cells (u16 indexes into the B image records, 0xFFFF for none) as arrays of
+// pointers.
 void ReadTextureTable(void* self, TextureTable* o)
 {
     ReadBufferedStreamBytes((BufferedStream*)self, 6, o);
@@ -270,6 +284,10 @@ void ReadTextureTable(void* self, TextureTable* o)
     }
 }
 
+// Loads the screen's image resources from a stream: the two image record tables, the animated image
+// records (each with its animator, texture tables and zeroed packet buffers sized by kind) and the
+// fonts, and binds the cursor animators. It then places, packs and uploads the images of the masks
+// 0x10000000, the fonts and six more masks, and builds the masked-images packet (0x20000000).
 void LoadScreenResources(BufferedStream* self)
 {
     s32 i;
@@ -410,6 +428,10 @@ void SwitchActiveImageMask(s32 self)
     }
 }
 
+// Builds the GS packets of every animated image record whose mask holds all the bits of mask: for
+// each frame of the record, by its kind (0 to 10), the TEST and ALPHA register writes from the
+// record's flags, the fog colour and the texture registers (SendTextureRegisters); kinds 0 and 4
+// build several packets per frame. Does nothing for a mask of 0.
 void BuildAnimRecordGifPackets(s32 mask)
 {
     PacketWriter buf;
@@ -660,6 +682,9 @@ static inline f32 ClampTo(f32 v, f32 lo, f32 hi)
     return v;
 }
 
+// Converts a colour from hue (degrees, 0 to 360, negative for none), saturation and value (0 to 1)
+// in hsv to red, green and blue (0 to 1) in rgb. With no saturation the result is the grey of the
+// value.
 void ConvertHsvToRgb(Quad_001B4580* hsv, Quad_001B4580* rgb)
 {
     f32 h;
@@ -933,6 +958,9 @@ void BindFrameRunAnimator(FrameRunAnimator* p)
     }
 }
 
+// The per-frame step of an animator that plays its record's frames through in a loop: waits for its
+// random wait to pass, advances the position by the rate, and at the end of the frames picks a new
+// random duration and wait, wraps the position and sets the cursor frame.
 void StepFrameRunAnimator(FrameRunAnimator* p, f32 dt)
 {
     if (p->cursor.record == 0) {
@@ -985,6 +1013,10 @@ void BindFramePingPongAnimator(FramePingPongAnimator* p)
     }
 }
 
+// The per-frame step of an animator that plays its record's frames forward and back: waits for its
+// random wait to pass, advances the position by the rate and turns around at the last frame; back
+// at 0 it picks a new random duration (setting the rate) and wait, and sets the cursor frame to the
+// position.
 void StepFramePingPongAnimator(FramePingPongAnimator* p, f32 dt)
 {
     AnimRecord* d = p->cursor.record;

@@ -169,6 +169,10 @@ SprTransfer g_sprTransfers[2] = { MakeSprTransfer(0), MakeSprTransfer(1) };
 s32 g_sprTransferIndex = 0;
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// Reads a world's script entry table from a stream: the count and the expression chain of each
+// entry (skipping the extra blocks when the stream carries them), then makes the world's script
+// scope (a collector root), defines its variable scopeVariableId as the empty list and evaluates
+// each entry in turn.
 void LoadScriptEntryTable(World* self, BufferedStream* arg) {
     ScriptValue q0;
     ScriptValue q1;
@@ -228,6 +232,8 @@ void* GetScriptEntryScope(s32 index, World* self)
     }
 }
 
+// Runs script entry index of a world once: when the entry has an expression and no scope yet, makes
+// it a scope and evaluates the expression in it. Gives back the empty result (tag 0x22) either way.
 ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx)
 {
     s32 off = index << 3;
@@ -289,6 +295,10 @@ ScriptValue* BuildScriptListFromCallback(ScriptValue* self, void* ctx, s32 v, Pr
     return self;
 }
 
+// Reads an object's property into a script value: by the descriptor's flags it is a callable
+// reference to the property's function (flag 1), a field read directly at an offset, or the result
+// of a getter method or function, converted by the property's type (int, float, bool, vector,
+// matrix, four-float vector, pair, triple, pointer, or a list from a callback).
 ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d)
 {
     ScriptValue q;
@@ -460,6 +470,9 @@ s32 AppendPropertyToScriptList(ScriptListBuilder* self, sptr value)
     return 1;
 }
 
+// Whether the value at val, read as the filter's property type (float, bool, int-like or pointer),
+// equals any element of the script list in the filter; no list, or a type that cannot be compared
+// (vectors, matrices and the like), gives 0.
 s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val) {
     ScriptValue q;
     R11B008Node* l;
@@ -497,6 +510,10 @@ s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val) {
     return 0;
 }
 
+// Stores n script values into the memory at the pointers dsts, each by its kind from kinds: an int
+// or a float is converted from the other number type if need be, a matrix, vector, pair or triple
+// is copied from its payload, and bool and pointer kinds store the value's word. Gives back the
+// empty result.
 ScriptValue* StoreScriptArguments(ScriptValue* out, s32 n, ScriptValue* args, const u32* kinds, void** dsts)
 {
     ScriptValue q;
@@ -591,6 +608,10 @@ ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, sptr*
     return self;
 }
 
+// Writes a script value into an object's property by the descriptor: stored directly into the field
+// at an offset (StoreScriptArguments) or passed to the setter method or function, converted to the
+// property's type (ints and floats are converted from the other number type; the other types pass
+// the value's payload). Gives back the empty result (tag 0x22).
 ScriptValue* WritePropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d, ScriptValue* val)
 {
     ScriptValue q;
@@ -740,6 +761,10 @@ ScriptValue* StoreScriptArgumentsVa(ScriptValue* ret, s32 count, ScriptValue* ar
     return ret;
 }
 
+// Starts a DMA chain from main memory into the scratchpad for the (size, address) pairs given as
+// arguments (a zero size ends them): lays the buffers out one after another from the transfer's
+// base, 16-byte aligned, each with a tag, waits for an earlier copy out of the scratchpad to finish
+// and starts the channel.
 void StartToSprChain(s32 size, ...)
 {
     char* ap;
@@ -776,6 +801,10 @@ void StartToSprChain(s32 size, ...)
     StartDmaChain((DmaChannel*)c, (void*)((u32)e->tags & 0x0FFFFFFF));
 }
 
+// Starts a DMA chain from the scratchpad back to main memory for the buffers given as the arguments
+// (zero ends them): fills the tags of the transfer last prepared (StartToSprChain) with the
+// destination addresses, the last one ending the chain, and starts the channel; the other transfer
+// buffer is then marked free if it was being copied.
 void StartFromSprChain(void* first, ...) {
     s32 buf[8];
     SprTransfer* r = &g_sprTransfers[g_sprTransferIndex];

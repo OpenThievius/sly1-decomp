@@ -134,6 +134,10 @@ struct ListFrameWithFlag { s32 list; s32 cursor; s32 link; s32 prev; s32 out; };
 struct NumberedItem;
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
+// Registers the children of a masked collider in its slot table: skips the kinds that are not its
+// business (0x75, 0x7A, 0x53), for a busy collider only the numbered items whose flag is clear,
+// enters each child under the first slot with its id (or a new slot of kind 4) and calls the
+// child's method 3.
 void AttachMaskedColliderChildren(MaskedCollider* self)
 {
     ListFrameWithFlag fr;
@@ -221,6 +225,10 @@ struct ContactEvent_0013D0B0 {
 
 extern u8 g_padRecord[];
 
+// The masked collider's reaction to an event on another object: ignored while it holds something or
+// if the object is not one of its kinds or accepted (IsObjectAccepted). On an impact (flag 8) it
+// applies an impulse, and on a hit (flag 0x10) it shakes the pad when the player did it, raises
+// script event 0x14 and calls its method 0x48 once the count reaches its limit.
 s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
 {
     Vec02 push;
@@ -522,6 +530,9 @@ void* GetMaskedColliderSoundParams(MaskedCollider* self)
 
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
+// Whether a masked collider accepts an object by its mask: no mask accepts everything; bit 0
+// accepts the active switched collider, bit 4 any object of flag 0x20, and bit 2 an object whose id
+// or kind is in the collider's id list or kind list.
 s32 IsObjectAccepted(MaskedCollider* self, BaseObject* msg)
 {
 
@@ -821,6 +832,10 @@ struct PlaneTreeOutput {
     PlaneTreeNode* cur;     // 0x00: the next node to write
 };
 
+// Classifies a point against a tree of planes within eps: gives 0 (outside), 1 (inside) or 2 (near
+// a plane, in which case the part of the tree that the point's neighbourhood reaches is copied into
+// out). It follows one side while the point is more than eps from the plane, and both sides when it
+// is within eps.
 s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out)
 {
     f32 d;
@@ -895,6 +910,9 @@ ASM_FUNC(func_0013E658);
 
 void* AllocateFrontMemory(s32 size);
 
+// Copies a collision tree for a copy of its mesh: the counts, and a new node array (from front
+// memory) in which every face and node pointer is moved by the offset between the old mesh and the
+// new one.
 void CloneTreeNodes(Mesh03* self, Tree03* src, Mesh03* base, Tree03* dst)
 {
     dst->count = src->count;
@@ -984,6 +1002,8 @@ struct ListWalkBegin {
     }
 };
 
+// Takes the children of a collider that are of flag 0x40 into the zone record's first queue (and
+// records the collider as its owner), skipping the ones already seen in either of its queues.
 void CollectZoneChildren(Zone28* self, Collider* a1)
 {
     ListFrame it;
@@ -1117,6 +1137,9 @@ s32 UpsertKeyedEntry(ZoneTargetEntry* tab, s32 cap, s32* count, s32 flag, s32 k1
 
 void* FindObjectHandle(PlacedObject* self, s32 key);
 
+// For each of n entries, gathers the object with the entry's id, finds the walker handle with the
+// entry's key on it and sets that walker's target to the entry's on-state (flag set) or off-state
+// (flag clear), unless it is -1. Stops at the first entry whose object cannot be found.
 void SetGatheredWalkerTargets(void* self, s32 n, ZoneTargetEntry* ent, void* arg, s32 flag)
 {
     s32 count = 0;
@@ -1153,6 +1176,9 @@ void* FindOrCreateSeekedAnimationPlayer(void* self, BaseObject* key, s32 a2, s32
 // An object queued in a zone (func_0013ED90): the id of the object it goes to and a flag.
 struct ZoneQueuedObject { u8 pad[0x40]; s32 key40; s32 flag44; };
 
+// Runs a zone record's queued objects for a mode: seeks the animation players of each (forward or
+// backward by the sign of the seek time and the reversed flag), sets the gathered walker targets
+// and, when the record has a step sequence, resets it (mode 1) or has it choose its state (mode 0).
 void RunZoneRecordEntries(Zone28* self, s32 mode, s32 p, s32 q)
 {
     s32 n = self->pairs[mode].queued.count;
@@ -1209,6 +1235,9 @@ extern u8 g_flagTable[];
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
+// Activates a zone record: raises script event 2 (0x16 when q is set) on its owner, plays its sound
+// unless silent, runs its queued entries, leaves the active mode unless it stays active, sets its
+// saved flag if persistent and sends its owner notification 0xC.
 void ActivateZoneRecord(Zone28* self, s32 p, s32 q)
 {
     if (q != 0) {
@@ -1330,6 +1359,10 @@ static inline Vec02* RowOf(Mat02* m, s32 i)
     return &m->r[i];
 }
 
+// The trigger zone's start method: starts the placed object and its zone record, sets mode 0 and
+// takes its child markers: in state 0 each quad marker (kind 0x7E) becomes a stored point, in state
+// 1 each rotation marker (0x73) a stored rotation, and the kind 0x76 child is kept as the marker
+// node. It then constrains the points (state 0) or works out the plane vectors (state 1).
 void StartTriggerZone(TriggerZone* self)
 {
     ScopedListFrame frame(&self->children);
@@ -1442,6 +1475,9 @@ void SetTriggerZoneMode(TriggerZone* state, s32 mode) {
 
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
+// Whether an object may set a trigger zone off: if the zone lists ids to accept, the object must
+// match one, otherwise it must match none of the ids to refuse; the same then for the lists of
+// kinds. With no lists every object passes.
 s32 PassesTriggerFilters(TriggerZone* self, void* arg)
 {
     if (self->countIdsIn > 0) {
@@ -1524,6 +1560,9 @@ s32 FindLargestEntryIndex(TriggerZone* s, f32* out)
 extern u8 D_00248D30[];
 
 
+// The trigger zone's per-step motion: the collider's, then, in state 0 or 1, steers the zone toward
+// the stored point (state 0) or rotation (state 1) of its chosen index, or the first one while in
+// mode 4.
 void StepTriggerZone(TriggerZone* self, f32 t)
 {
     StepCollider(self, t);
@@ -1551,6 +1590,10 @@ void StepTriggerZone(TriggerZone* self, f32 t)
 
 struct PooledContact;
 
+// Frees the trigger zone's pooled contacts and makes new ones for the zone's walls: two planes,
+// from the stored points (state 0) or the rotation planes, each tested against the zone's own
+// position; a wall the position is past (by more than 0.0001) gets one contact of kind 10 with no
+// bounce.
 void ReleaseTriggerZoneContacts(TriggerZone* self)
 {
     Vec02 v[2];
@@ -1609,6 +1652,10 @@ extern f32 g_gameTime;
 s32 FindNearestStoredPoint(TriggerZone* self, f32* out);
 void ClearRootTries(PlacedObject* self);
 
+// The trigger zone's per-frame update: after the collider's, sets the zone mode by its state. Mode
+// 2 times out to mode 4, and mode 4 settles to mode 0 or 1. In modes 0 and 1, states 2 to 4 test
+// the player's marker or a contact that passes the filters, and the others test how near the
+// nearest stored point or largest entry is (under 2 units or 0.1), and set the chosen index.
 void UpdateTriggerZone(TriggerZone* self, f32 dt)
 {
     UpdateCollider(self, dt);
@@ -1781,6 +1828,10 @@ struct ZoneTarget {
 s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
 void CopyMemory(void* dst, void* src, u32 size);
 
+// The zone collider's per-frame update: after the collider's, a timed mode (2) ends when its
+// duration is over. Otherwise it tests whether any of its objects (or the active switched collider)
+// is inside its radius or plane tree, sets mode 1 if so and 0 if not, and, with reportInside, keeps
+// the list of those inside and sends script event 0xC when it changes.
 void UpdateZoneCollider(ZoneCollider* self, f32 dt)
 {
     ZoneTarget* found[8];
