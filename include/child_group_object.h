@@ -40,14 +40,15 @@ struct ChildGroupObject : Collider {
     f32 settleSpeed;        // 0x558: a speed: slower than it, or once the clock passes f554, slot 17 settles it (func_0013BF68)
     f32 blastRadius;        // 0x55C: 200.0
     f32 playerBlastRadius;  // 0x560: 200.0
-    u8 pad564[0x568 - 0x564];
+    s32 contactBlast;       // 0x564: set, the blast reaches the parts in contact with it (CollectContactingParts); clear, the colliders in its radius
     f32 pushStrength;       // 0x568: 800.0
     Pair3B massRange;       // 0x56C: 50.0, 5000.0
     f32 maxMass;            // 0x574: 5000.0
     s32 count;              // 0x578: the objects of arr (at most 16)
     s32 arr[16];            // 0x57C: children of kind 0x27 that slot 16 found
     void* member5BC;        // 0x5BC: func_00159478 finds it (slot 10)
-    u8 pad5C0[0x5D0 - 0x5C0];
+    f32 blastStrength;      // 0x5C0: sent with the blast message to member5BC
+    u8 pad5C4[0x5D0 - 0x5C4];
     Quad3B speedCurve;      // 0x5D0
     Pair3B speedRange;      // 0x5E0
     u8 pad5E8[0x5F0 - 0x5E8];
@@ -87,6 +88,15 @@ struct ContactListObject : ChildGroupObject {
     u8 pad6E8[0x6F0 - 0x6E8];
 };
 
+// Class 0x3D, a contact-list object without gravity that keeps a velocity of its own.
+struct ContactListGlider : ContactListObject {
+    f32 speed6F0;           // 0x6F0: the speed of the velocity it keeps (func_0018DDD8)
+    f32 rate6F4;            // 0x6F4: how fast it turns to that velocity (func_0018DE70)
+    f32 f6F8;               // 0x6F8
+    f32 time6FC;
+    Vec02 v700;             // 0x700: the velocity it keeps
+};
+
 // 0x3F, the player's stand-in: SwapInPlayerStandIn puts it in the place of an attached object.
 struct StandIn : ChildGroupObject {
     f32 startTime;          // 0x690: the clock when SwapInPlayerStandIn started it
@@ -96,6 +106,7 @@ struct StandIn : ChildGroupObject {
 
 typedef char check_ChildGroupObject[sizeof(ChildGroupObject) == 0x690 ? 1 : -1];
 typedef char check_ContactListObject[sizeof(ContactListObject) == 0x6F0 ? 1 : -1];
+typedef char check_ContactListGlider[sizeof(ContactListGlider) == 0x710 ? 1 : -1];
 typedef char check_StandIn[sizeof(StandIn) == 0x6A0 ? 1 : -1];
 
 void InitChildGroupObject(ChildGroupObject* self);                          // slot 0

@@ -75,7 +75,7 @@ struct World : BaseObject {
     ActorList6C list60;     // 0x60: the objects func_00129D70 tries to start
     ActorList6C list6C;     // 0x6C: the objects updated every frame
     List01 list78;          // 0x78: the placed objects without a parent that have +0x294 set
-    u8 pad84[0x1884 - 0x84];
+    List01 hashLists[0x200]; // 0x84: the 0x200 hash lists (link offset 0xC, InitWorldHashLists)
     void* f1884[0x95];      // 0x1884: the objects by id, chained at BaseObject::nextById (func_0015A4F0)
     void* buf1AD8;          // 0x1AD8: 0x4800 bytes
     void* buf1ADC;          // 0x1ADC: 0x10000 bytes, a byte for each pair of contact tables (func_001DC828)
@@ -94,12 +94,22 @@ struct World : BaseObject {
     Pool6C pool1B40;        // 0x1B40: 0x10C0-byte records (func_00139C70)
     Pool6C pool1B4C;        // 0x1B4C: the pooled slots a render node holds (PushFreeSlot in render_frame)
     Pool6C pool1B58;        // 0x1B58: the 0xEC-byte AnimationPlayer records (func_0012D3F8)
-    void* animationPlayers; // 0x1B64: the list of animation players
-    s32 f1B68;              // 0x1B68
-    s32 f1B6C;              // 0x1B6C
-    void* f1B70;            // 0x1B70
-    s32 f1B74;              // 0x1B74
-    s32 f1B78;              // 0x1B78
+    union {
+        List01 list1B64;    // 0x1B64: the animation players (link offset 0x34)
+        struct {
+            void* animationPlayers; // 0x1B64: the list of animation players
+            s32 f1B68;      // 0x1B68
+            s32 f1B6C;      // 0x1B6C
+        };
+    };
+    union {
+        List01 list1B70;    // 0x1B70: the second list of animation players (link offset 0x34)
+        struct {
+            void* f1B70;    // 0x1B70
+            s32 f1B74;      // 0x1B74
+            s32 f1B78;      // 0x1B78
+        };
+    };
     ActorList6C list1B7C;   // 0x1B7C
     Pool6C pool1B88;        // 0x1B88: the 0x40-byte StateWalker handles (func_001B6290)
     List01 list1B94;        // 0x1B94: the handles in use (func_001B6290 adds each)

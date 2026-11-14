@@ -285,6 +285,7 @@ void PostLoadTimedGroup(TimedGroup* self)
                 if (curve->kind == 0) {
                     s32 n = self->groupCount;
                     self->groupCount = n + 1;
+                    // a field access here changes retail's code: groups[n] is addressed from self with the index scaled
                     TimedGroupChild* g = (TimedGroupChild*)((u8*)self + n * 0x50 + 0x5E0);
                     g->child = node;
                     g->riseScale = curve->lengths[curve->count - 1];
@@ -502,6 +503,13 @@ Vec02* AllocateBackMemory(s32 size);
 // through its points (in this object's frame), cut off at the length ComputeTimedGroupRamp gives;
 // records the drawn length in fallScale for the states that use it. The beam object comes from one
 // of two fields by state, or the world's default.
+// The transform DrawCollider is given (placed_object.cpp's ScaledTransform): four quads, then the
+// fade the beam is drawn with.
+struct ScaledTransform {
+    Quad16 q[4];
+    f32 outerFade;
+};
+
 void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
 {
     DrawCollider(self, a1, a2);
@@ -552,7 +560,7 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
                 u128 p1 = Vu0::Q(buf[k + 1]);
                 Vu0::Q(buf[k + 1]) = Vu0::MulXSum(p0, ws, p1, wt);
             }
-            DrawBeamBetweenPoints((PlacedObject*)fp, (PlacedObject*)a1, &buf[k], &buf[k + 1], 1.0f, a2 != 0 ? *(f32*)((u8*)a2 + 0x40) : 1.0f);
+            DrawBeamBetweenPoints((PlacedObject*)fp, (PlacedObject*)a1, &buf[k], &buf[k + 1], 1.0f, a2 != 0 ? ((ScaledTransform*)a2)->outerFade : 1.0f);
             acc += len;
             if (total < acc) break;
         }
@@ -1572,5 +1580,6 @@ void SetBlinkObjectFrame(BlinkObject* self)
         }
         frame += first;
     }
+    // the cursor at 0x10 of the element overlaps Elem02::f14 (no field of Elem02 covers it)
     SetCursorFrame((AnimCursor*)((u8*)self->blinkElem + 0x10), frame);
 }

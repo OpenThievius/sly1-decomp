@@ -25,6 +25,7 @@
 #include "state_walker.h"
 #include "asm_func.h"
 #include "transform_object.h"
+#include "attachment.h"
 #include "ramp_profile.h"
 #include "path_curve.h"
 #include "functions/base_object.h"
@@ -211,11 +212,11 @@ void StartModeWalkerObject(ModeWalker* self)
     StartPathFollower(self);
     ResolveObjectLinks(self, 0xA, g_modeWalkerLinks);
     self->stateWalker = (StateWalker*)CreateStateWalker((StateGraph*)self->stateGraph, self, -1, 0);
-    AddMatrixAttachment((PlacedObject*)self->fBCC, 5, (Attachment**)&self->fBD0);
-    ((u8*)self->fBD0)[0x10] = 9;
-    ((u8*)self->fBD0)[0x11] = 9;
-    ((PlacedObject*)self->fBCC)->desc02()->m2B((PlacedObject*)self->fBCC);
-    TransformPointBetweenFrames(0, (PlacedObject*)self->fBC0, &((PlacedObject*)self->fBCC)->v140, &self->vBE0);
+    AddMatrixAttachment(self->fBCC, 5, (Attachment**)&self->fBD0);
+    self->fBD0->mode0 = 9;
+    self->fBD0->mode1 = 9;
+    self->fBCC->desc02()->m2B(self->fBCC);
+    TransformPointBetweenFrames(0, self->fBC0, &self->fBCC->v140, &self->vBE0);
     SetModeWalkerMode(self, 1);
     self->paceChangeTime = 3.4028234663852886e+38f;
     T217D_BF0* base = &g_spinningSpriteElement;
@@ -290,24 +291,24 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
             u128 n = Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(m.r[2]), Vu0::Q(*(Vec02*)g_camera->rotation)), *(u128*)&self->m110.r[1]);
             Vu0::Q(m.r[1]) = n;
             Vu0::Q(m.r[0]) = Vu0::Cross(n, Vu0::Q(m.r[2]));
-            TransformRotationBetweenFrames(0, (PlacedObject*)(((PlacedObject*)self->fBC4)->parent), &m, &m);
-            ApproachRotationWithRamp((Mat02*)((u8*)self->fBC4 + 0xD0), &m, (RampProfile*)D_00264130, &m, 0, dt);
+            TransformRotationBetweenFrames(0, (PlacedObject*)(self->fBC4->parent), &m, &m);
+            ApproachRotationWithRamp(&self->fBC4->rot, &m, (RampProfile*)D_00264130, &m, 0, dt);
             (*(FrameFn**)self->fBC4)[34](self->fBC4, &m);
             UnprojectCameraPoint(g_camera, (f32*)D_002708C0, &pos);
-            Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(((PlacedObject*)self->fBC0)->v140));
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->fBC0->v140));
             BuildBasisFromXAndZHint(&d, (const Vec02*)&g_unitZVector, &m);
-            TransformRotationBetweenFrames(0, (PlacedObject*)(((PlacedObject*)self->fBC0)->parent), &m, &m);
+            TransformRotationBetweenFrames(0, (PlacedObject*)(self->fBC0->parent), &m, &m);
             (*(FrameFn**)self->fBC0)[34](self->fBC0, &m);
             u128 v = Vu0::Q(self->vBE0);
             u128 rot = Vu0::RotateUntied(m, v);
             Vu0::Q(d) = Vu0::MulX(Vu0::Sub(rot, v), Vu0::ScalarAt(D_0026413C));
             Mat02 m2;
             Vec02 k;
-            TransformDirectionBetweenFrames((PlacedObject*)((PlacedObject*)self->fBC0)->parent, (PlacedObject*)((PlacedObject*)self->fBCC)->parent, &d, (Vec02*)((u8*)self->fBD0 + 0x20));
-            MultiplyMatrices3x3((Mat02*)((u8*)self->fBC0 + 0x1A0), &m, &m2);
-            TransformRotationBetweenFrames((PlacedObject*)((PlacedObject*)self->fBC0)->parent, (PlacedObject*)((PlacedObject*)self->fBCC)->parent, &m2, &m2);
+            TransformDirectionBetweenFrames((PlacedObject*)self->fBC0->parent, (PlacedObject*)self->fBCC->parent, &d, &self->fBD0->pos);
+            MultiplyMatrices3x3(&self->fBC0->m1A0, &m, &m2);
+            TransformRotationBetweenFrames((PlacedObject*)self->fBC0->parent, (PlacedObject*)self->fBCC->parent, &m2, &m2);
             MatrixToAxisAngle(&m2, &angle, &k);
-            BuildAxisAngleMatrix(&k, (Mat02*)((u8*)self->fBD0 + 0x40), D_0026413C * angle);
+            BuildAxisAngleMatrix(&k, &self->fBD0->rot, D_0026413C * angle);
             ClearRootTries(self);
         }
     }
@@ -348,8 +349,8 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
     if (v < lo) x = lo;
     else if (hi < v) x = hi;
     else x = v;
-    SetScaledPositionSpring((PlacedObject*)self->fBCC, x * D_00264150);
-    SetScaledRotationSpring((PlacedObject*)self->fBCC, x * D_00264154);
+    SetScaledPositionSpring(self->fBCC, x * D_00264150);
+    SetScaledRotationSpring(self->fBCC, x * D_00264154);
     if (self->pulseActive != 0 && self->walkerMode != 2 && g_gameClock[1] - self->pulseFadeStart > 2.0f) self->pulseActive = 0;
 }
 
@@ -447,12 +448,17 @@ void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
 }
 
 // Captures the path follower's pose into outv and stores the owner's position vector (v140) of
-// the object at fBC0 after it, at offset 0x10.
+// the object at fBC0 after it, as the pose's position (offset 0x10).
+struct ColliderPose {
+    u8 pad00[0x10];
+    Vec02 position;         // 0x10: v140
+};
+
 void CaptureModeWalkerTarget(ModeWalker* self, void* outv)
 {
-    Vec02* out = (Vec02*)((u8*)outv + 0x10);
+    Vec02* out = &((ColliderPose*)outv)->position;
     CapturePathFollowerPose((PathFollower*)self, (ColliderPose*)outv);
-    *out = ((PlacedObject*)self->fBC0)->v140;
+    *out = self->fBC0->v140;
 }
 
 // Gives 1 (blocked) unless the walker is in mode 1 with no pulse running and the pad select flag
@@ -690,6 +696,7 @@ void DrawSpinningSpriteElement(T217D_BF0* self)
     if (self->alphaScale == 0.0f) {
         return;
     }
+    // packet data: skips the GIF tag quadword, not an object field
     AppendPacketQuadwords(&g_gsPacketWriter, ((SpriteIcon*)self->icon)->packets->count - 1, ((SpriteIcon*)self->icon)->packets->data + 0x10);
     BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
     AddGifRegisterWrite(&g_gsPacketWriter, 0x47, 0x30000);

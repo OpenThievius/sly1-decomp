@@ -835,6 +835,7 @@ void RewindTextReader(TextReader* self)
     s32 t;
     self->cur = (char*)self->text;
     self->font = self->defaultFont;
+    // a field access here changes retail's code (the packed word copies)
     t = ((U32P*)((u8*)self + 0xA4))->v;
     ((U32P*)((u8*)self + 0xA0))->v = t;
     t = ((U32P*)((u8*)self + 0xA0))->v;
@@ -846,6 +847,7 @@ void RewindTextReader(TextReader* self)
 // colour.
 void SetTextDefaultColor(TextReader* self, Rgba_137248* color)
 {
+    // a field access here changes retail's code (the packed word stores)
     u8* dst = (u8*)self;
     s32 v = ((U32P*)color)->v;
     ((U32P*)(dst + 0xA4))->v = v;

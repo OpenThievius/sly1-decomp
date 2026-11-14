@@ -483,6 +483,7 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
     Quad16& q = *(Quad16*)buf;
     q = *src;
     s32 hits = 0;
+    // stack scratch: a frame and the segment spans, not an object
     BuildPerpendicularPair(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
     BuildMatrixFromRotationAndTranslation((const Vec02*)ctx, (const Mat02*)&q, (Mat4A*)(buf + 0x30));
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
@@ -495,6 +496,7 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
                 Collider* c = (Collider*)a->parts.head;
                 while (c) {
                     if (!(c->flags538 & 0x80000000000ULL)) {
+                        // stack scratch: the span buffer, not an object
                         if (CollectColliderSpans(c, (Vec02*)(buf + 0x70), (Vec02*)(buf + 0x80), 1, (ColliderSpan*)(buf + 0x90)) > 0) {
                             if (i < 4) return 0;
                             if (*(f32*)(buf + 0xD0) == 0.0f) return 0;
@@ -565,6 +567,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
         for (EdgeNode* e = g->list14; e != 0; e = e->next8) {
             if (ComputeLedgeEdgeOffset(self, part, e, (Vec02*)buf) != 0) {
                 verts = (Vec02*)part->meshCopy.verts;
+                // stack scratch: the span buffer, not an object
                 if (CollectTreeNodeSpans(self->tree.nodes, verts + e->vertA, verts + e->vertB, 0, 2, (ColliderSpan*)(buf + 0x10)) > 0) {
                     found = 1;
                     sum = Vu0::Add(sum, Vu0::Q(*(Vec02*)buf));
@@ -574,6 +577,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
         for (EdgeNode* e = g->list18; e != 0; e = e->nextC) {
             if (ComputeLedgeEdgeOffset(self, part, e, (Vec02*)buf) != 0) {
                 verts = (Vec02*)part->meshCopy.verts;
+                // stack scratch: the span buffer, not an object
                 if (CollectTreeNodeSpans(self->tree.nodes, verts + e->vertA, verts + e->vertB, 0, 2, (ColliderSpan*)(buf + 0x10)) > 0) {
                     found = 1;
                     sum = Vu0::Add(sum, Vu0::Q(*(Vec02*)buf));
@@ -649,7 +653,7 @@ Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
             if ((self->f4B8 & 2) == 0 || (c->end[1 - side].body->f4B8 & 2) == 0) {
                 NotifyContactEnds(self->world, 1, &c);
             }
-            if (0.0f < g_contactSideSigns[side] * *(f32*)((u8*)c + 0xB8)) {
+            if (0.0f < g_contactSideSigns[side] * c->relativeVelocity.z) {
                 continue;
             }
             Vu0::Q(p) = Vu0::MulAddX2(Vu0::Vec::Of(c->end[1 - side].point), Vu0::Vec::Of(tmp), Vu0::Vec::Scalar(-D_00264020),
@@ -1252,7 +1256,7 @@ void ComputePlayerJumpVelocity(Player* self, Vec02* out)
         break;
     case 0:
     case 2:
-        z = Fpu::Sqrt(MaxF(0.0f, ((self->v140.z - (*(f32*)((u8*)self + 0x6A8) + D_00263E84)) + (self->v140.z - (*(f32*)((u8*)self + 0x6A8) + D_00263E84))) * self->gravity.z));
+        z = Fpu::Sqrt(MaxF(0.0f, ((self->v140.z - (self->groundContactPoint.z + D_00263E84)) + (self->v140.z - (self->groundContactPoint.z + D_00263E84))) * self->gravity.z));
         break;
     }
     *out = self->v150;

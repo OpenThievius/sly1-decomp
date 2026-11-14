@@ -167,8 +167,8 @@ void SolvePlayerLinkSystem(PlacedObject* a, PlacedObject* b, Vec02* point, const
         Vu0::Vec t2 = Vu0::Vec::ScalarAtValue(sol[2]);
         Vu0::Vec b2 = Vu0::Vec::Of(rows[i][2].b);
         Vu0::Q(out[i].b) = Vu0::MulXSum3(b0, t0, b1, t1, b2, t2).q;
-        TransformDirectionBetweenFrames(0, (PlacedObject*)(*(void**)((u8*)objs[i] + 0x18)), &out[i].a, &out[i].a);
-        TransformDirectionBetweenFrames(0, (PlacedObject*)(*(void**)((u8*)objs[i] + 0x18)), &out[i].b, &out[i].b);
+        TransformDirectionBetweenFrames(0, (PlacedObject*)objs[i]->parent, &out[i].a, &out[i].a);
+        TransformDirectionBetweenFrames(0, (PlacedObject*)objs[i]->parent, &out[i].b, &out[i].b);
     }
 }
 
@@ -526,7 +526,13 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
 }
 
 
-struct LinkedFrame { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; BaseObject* item; };
+// The object a link was made to: its parent is the frame it is in, then the item to ask and
+// a point of its own.
+struct LinkedFrame : BaseObject {
+    BaseObject* item;       // 0x34
+    u8 pad38[0x40 - 0x38];
+    Vec02 point;            // 0x40
+};
 typedef void (*LinkItemFn)(BaseObject* self, Vec02* a, f32 t, s32 b, Vec02* c, s32 d, s32 e, void* f);
 
 // Lets go of a linked object that has got too far: the first beyond 50 units, the second, after
@@ -535,23 +541,22 @@ void ReleaseFarPlayerLinks(Player* self)
 {
     Vec02 pos;
     Vec02 q;
-    u8* p = (u8*)self;
-    LinkedFrame* a = *(LinkedFrame**)(p + 0x2210);
+    LinkedFrame* a = (LinkedFrame*)self->previousBoundObject;
     if (a != 0) {
-        TransformPointBetweenFrames((PlacedObject*)a->frame, 0, (Vec02*)((u8*)a + 0x40), &pos);
-        if (Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*(Vec02*)(*(u8**)(p + 0x23D4) + 0x140)), Vu0::Q(pos)))) > 50.0f) {
-            *(s32*)(p + 0x2210) = 0;
+        TransformPointBetweenFrames((PlacedObject*)a->parent, 0, &a->point, &pos);
+        if (Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(((PlacedObject*)self->f23D4)->v140), Vu0::Q(pos)))) > 50.0f) {
+            self->previousBoundObject = 0;
             self->f4B8 = 0;
         }
     } else {
-        if (*(LinkedFrame**)(p + 0x2214) != 0) {
-            TransformPointBetweenFrames(0, (PlacedObject*)((*(LinkedFrame**)(p + 0x2214))->frame), (Vec02*)(*(u8**)(p + 0x23D4) + 0x140), &pos);
-            LinkItemFn fn = (LinkItemFn)((void**)(*(LinkedFrame**)(p + 0x2214))->item->desc)[12];
+        if (self->previousAimCurve != 0) {
+            TransformPointBetweenFrames(0, (PlacedObject*)(*(LinkedFrame**)&self->previousAimCurve)->parent, &((PlacedObject*)self->f23D4)->v140, &pos);
+            LinkItemFn fn = (LinkItemFn)((void**)(*(LinkedFrame**)&self->previousAimCurve)->item->desc)[12];
             if (fn != 0) {
-                fn((*(LinkedFrame**)(p + 0x2214))->item, &pos, *(f32*)(p + 0x2218), 0, &q, 0, 0, p + 0x2218);
+                fn((*(LinkedFrame**)&self->previousAimCurve)->item, &pos, self->f2218, 0, &q, 0, 0, &self->f2218);
             }
             if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(q), Vu0::Q(q))) > 2500.0f) {
-                *(s32*)(p + 0x2214) = 0;
+                *(s32*)&self->previousAimCurve = 0;
             }
         }
     }
@@ -625,7 +630,7 @@ void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec02* o
         CreatePooledContact(d.y, self, n, offset, &m.r[1], each != 0 ? 11 : 10, 0, 0, head);
     }
     if (third != 0 || ((flags & 0x20) != 0 && d.z < 0.0001f)) {
-        CreatePooledContact(d.z, self, n, offset, &m.r[2], third != 0 ? 11 : 10, third != 0 ? 0 : *(void**)((u8*)self + 0x6D4), 0, head);
+        CreatePooledContact(d.z, self, n, offset, &m.r[2], third != 0 ? 11 : 10, third != 0 ? 0 : *(void**)&self->probeVertex, 0, head);
     }
     *last = *head;
 }
@@ -643,6 +648,7 @@ void GetLinkedObjectHeading(Player* self, f32* heading)
 {
     HeadingVector v;
     BaseObject* owner = self->boundObject;
+    // the bound object's class is not known: a vector at 0x50
     TransformDirectionBetweenFrames((PlacedObject*)owner->parent, 0, (Vec02*)((u8*)owner + 0x50), (Vec02*)&v);
     *heading = ArctangentOfRatio(v.y, v.x);
 }

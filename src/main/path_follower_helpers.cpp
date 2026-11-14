@@ -108,8 +108,10 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
 {
     if (self->lapObject != 0) {
         f32 t = (g_gameTime - self->lapTime) / g_pathFollowerRampTime;
+        // the lap object (class 0x22) is read at 0x334, inside Collider::invInertia: its role there is not known
         *(f32*)((u8*)self->lapObject + 0x334) = g_unitRange.Clamp(((QuadraticCurve*)g_pathFollowerFadeCurve)->Eval(t));
         BaseObject* o = self->lapObject;
+        // the same word of the lap object (role not known)
         if (*(f32*)((u8*)o + 0x334) == 0.0f) {
             ((void (*)(BaseObject*))o->desc->m03)(o);
         }
@@ -301,9 +303,9 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
             break;
         case 1:
             if (r != 0) {
-                *(PathMarker**)((u8*)self + 0xAFC) = e;
+                self->activeZone = (PathEmitters*)e;
             } else {
-                *(PathMarker**)((u8*)self + 0xAFC) = 0;
+                self->activeZone = 0;
             }
             break;
         }

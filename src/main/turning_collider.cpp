@@ -131,7 +131,7 @@ void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, 
     out->active = 0;
     Rec2195_224* rec = obj->linkRecord;
     if (rec != 0 && (rec->flags & 0x20) != 0) {
-        TransformPointBetweenFrames(obj, 0, (Vec02*)((u8*)rec + 0x60), &pos);
+        TransformPointBetweenFrames(obj, 0, (Vec02*)&rec->q60[0], &pos);
         Vu0::Q(dir) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(((PlacedObject*)obj->linkRecord->f80)->v140));
         u128 len = Vu0::Length(Vu0::Q(dir));
         const Vec02* fallback = &g_unitXVector;

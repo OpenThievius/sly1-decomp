@@ -27,6 +27,8 @@ struct OnOffObject;     // an object of class 0x63 (c63.h)
 struct PathCurveObject;   // path_curve_object.h
 struct AimBlendGrid;      // aim_blend_grid.h
 struct StateTrigger;      // state_trigger.h
+struct PlacedObject;
+struct T2195_588;         // attachment.h
 struct StateWalker; // a handle func_001B6290 makes (s1b6290.h)
 struct AnimationPlayer;  // an animation's player (t2195.h)
 struct EntryQueue;       // class 0x8F (entry_queue.h)
@@ -205,7 +207,7 @@ struct SwitchedCollider : Collider {
     s32 holdFocus;          // 0x554: slot 69 keeps v560 while it is set
     u8 pad558[0x560 - 0x558];
     Vec02 focusPoint;       // 0x560: v140 kept by slot 72; slot 69 reads its z
-    u8 pad570[0x574 - 0x570];
+    f32 surfaceEffectTime;  // 0x570: the clock when SpawnSurfaceContactEffects last made an effect for it
     void* playingSound;     // 0x574: given to func_001BF788 by slot 13 (kind 0xB)
     union {
         Blk05 blk580;       // 0x580: copied whole by class 0x17 (func_0019A520)
@@ -955,11 +957,16 @@ struct PlayerLinkedCollider : SwitchedCollider {
     f32 f65C;               // 0x65C
 };
 
+// One of class 0x17's three markers at 0x61C (StartC17Marker): its owner, the object found for it
+// and that object's state walker.
+struct C17Marker { s32 owner; BaseObject* object; StateWalker* walker; };
+
 struct C17 : SwitchedCollider {
     s32 stateGraph;         // 0x610: the graph of the walker
     StateWalker* stateWalker;   // 0x614: a handle (func_001B6290)
     u8 pad618[0x61C - 0x618];
-    u8 markers[0x28];       // 0x61C: three 12-byte records func_0019A178 sets up (slot 16)
+    C17Marker markers[3];   // 0x61C: three 12-byte records func_0019A178 sets up (slot 16)
+    s32 markerCode;         // 0x640: the code whose decimal digits the markers' states are compared with
     s32 extraId;            // 0x644: the link id of the extra object
     void* extraObject;      // 0x648: the extra object
     s32 triggerId;          // 0x64C: the link id of the trigger object
@@ -1125,11 +1132,11 @@ struct ModeWalker : PathFollower {
     f32 walkerModeTime;     // 0xBB4: the clock when the mode was set
     void* stateGraph;       // 0xBB8: the graph of the walker
     StateWalker* stateWalker;   // 0xBBC: a handle (func_001B6290)
-    void* fBC0;             // 0xBC0
-    void* fBC4;             // 0xBC4: turned to the camera's side (func_00181078)
+    PlacedObject* fBC0;     // 0xBC0
+    PlacedObject* fBC4;             // 0xBC4: turned to the camera's side (func_00181078)
     void* fBC8;             // 0xBC8
-    void* fBCC;             // 0xBCC
-    void* fBD0;             // 0xBD0
+    PlacedObject* fBCC;     // 0xBCC
+    T2195_588* fBD0;        // 0xBD0: the matrix attachment func_00129D00 adds to fBCC
     u8 padBD4[0xBE0 - 0xBD4];
     Vec02 vBE0;             // 0xBE0
     s32 pulseActive;        // 0xBF0: set while the marker pulses

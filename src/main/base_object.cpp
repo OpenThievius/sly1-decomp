@@ -325,6 +325,7 @@ s32 IsObjectAttached(BaseObject* self)
         if (next != 0) {
             sub = &((PlacedObject*)next)->children;
         } else {
+            // a field access here changes retail's code (the list at World::list48)
             sub = node->world;
             sub = (u8*)sub + 0x48;
         }
@@ -1174,5 +1175,5 @@ void SetConeVolumeColorRgb(ConeVolume* self, void* a1)
 // Writes the cone volume's colour, stored as HSV, into out as RGB (0..255).
 void GetConeVolumeColorRgb(u8* self, f32* out)
 {
-    ConvertHsv255ToRgb255((Quad_001B4580*)(self + 736), out);
+    ConvertHsv255ToRgb255((Quad_001B4580*)&((ConeVolume*)self)->hsv, out);
 }

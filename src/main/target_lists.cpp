@@ -405,10 +405,10 @@ void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t)
 void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, void* a3)
 {
     CurveProbe f;
-    u8* node = (u8*)GetActiveSwitchedCollider();
+    PlacedObject* node = (PlacedObject*)GetActiveSwitchedCollider();
     PathCurve* o = self->curve;
     f.c = 1;
-    TransformPointBetweenFrames(0, (PlacedObject*)self->parent, (Vec02*)(node + 0x140), (Vec02*)&f.a);
+    TransformPointBetweenFrames(0, (PlacedObject*)self->parent, &node->v140, (Vec02*)&f.a);
     TransformDirectionBetweenFrames(0, (PlacedObject*)self->parent, (Vec02*)&g_unitZVector, (Vec02*)&f.b);
     if (o->vt->m10 != 0) {
         o->vt->m10(o, &f.a, &f.b, 0, 0, 0, &f.x);
@@ -683,6 +683,7 @@ void FindRingPointTowardCollider(PlacedObject* self, Vec02* out, f32* angleOut)
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(active->v140), p);
     d.z = 0.0f;
     if (out) {
+        // the held object's class is not known: its ring radius is at 0x560
         u128 k = Vu0::Scalar(*(f32*)((u8*)self + 0x560) + 70.0f);
         Vu0::Q(*out) = Vu0::MulAddX(p, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_unitXVector)), k);
     }

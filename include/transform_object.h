@@ -109,12 +109,13 @@ struct RecordMember : MemberObject {
 // 0x7A: three more ids, a delay for messages, and two objects it holds.
 struct HoldingMember : RecordMember {
     s32 fA0;                // 0xA0
-    u8 padA4[0xAC - 0xA4];
+    f32 countMin;           // 0xA4: the range the particle count of a spawn message is drawn from
+    f32 countMax;           // 0xA8
     s32 idAC;               // 0xAC
     s32 idB0;               // 0xB0
     s32 idB4;               // 0xB4
     f32 delay;              // 0xB8
-    u8 padBC[0xC0 - 0xBC];
+    s32 chained;            // 0xBC: set, a spawn message chains the two objects it holds to the effects
     BaseObject* heldC0;            // 0xC0
     BaseObject* heldC4;            // 0xC4
     u8 padC8[0xD0 - 0xC8];

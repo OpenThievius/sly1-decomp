@@ -12,7 +12,16 @@
 #include "placed_object.h"
 #include "path_curve.h"
 #include "transform_object.h"
+#include "shapes.h"   // Quad16
 struct BufferedStream;
+
+// Two floats a random value is taken between (func_001EAAE0), copied as one unaligned doubleword.
+struct Range50 {
+    f32 lo;
+    f32 hi;
+};
+
+struct RecordMember;   // transform_object.h
 
 // The record the object points to (func_00154F98 makes it, func_00155778 makes it the object's
 // own before a change, func_001550E8 fills it from the ids).
@@ -33,20 +42,30 @@ struct __attribute__((aligned(16))) Rec50 {
         Vec02 point20;      // 0x20: a point (PlaceEffectAtSource)
         f32 box20[8];       // 0x20: kind 1's box: two corners (WrapSpawnerParticlesIntoBox)
     };
-    u8 pad40[0x7C - 0x40];
+    u8 pad40[0x78 - 0x40];
+    void* frame;            // 0x78: a frame the record's points are placed in (GenerateSpawnSetupPair)
     void* target;           // 0x7C
-    u8 pad80[0x120 - 0x80];
+    s32 f80;                // 0x80: how the second end of a setup pair takes its velocity (1, 2 or 3)
+    u8 pad84[0x110 - 0x84];
+    Quad16 q110;            // 0x110: copied to the start of each effect it makes (SpawnRecordEffects)
     s32 f120;               // 0x120
     u8 pad124[0x130 - 0x124];
     union {
         struct {
             s32 f130;               // 0x130
-            u8 pad134[0x188 - 0x134];
+            u8 pad134[0x178 - 0x134];
+            s32 f178;               // 0x178: set, each particle gets a random second frame
+            u8 pad17C[0x188 - 0x17C];
             s32 f188;               // 0x188
         };
         CappedWordList words130;    // 0x130: the ids the record reads from the stream
     };
-    u8 pad18C[0x1B0 - 0x18C];
+    RecordMember* member;   // 0x18C: the member object the record belongs to (its rec at 0x90 is this record)
+    u8 pad190[0x198 - 0x190];
+    s32 f198;               // 0x198: clear, a particle's second frame turns toward the camera (EmitParticleChunk)
+    Range50 range19C;       // 0x19C: the range of a particle's second frame
+    s32 f1A4;               // 0x1A4: set, each particle gets a random turn
+    u8 pad1A8[0x1B0 - 0x1A8];
     s32 f1B0;               // 0x1B0: -1 or a value; set, starting the spawner sets f120 (func_00155270)
     u8 pad1B4[0x1C0 - 0x1B4];
     f32 poly1C0[3];         // 0x1C0: a quadratic (AimEffectAtNearestObject)
@@ -67,11 +86,7 @@ struct __attribute__((aligned(16))) Rec50 {
     u8 pad1FC[0x200 - 0x1FC];
 };
 
-// Two floats a random value is taken between (func_001EAAE0), copied as one unaligned doubleword.
-struct Range50 {
-    f32 lo;
-    f32 hi;
-};
+typedef char check_Rec50[sizeof(Rec50) == 0x200 ? 1 : -1];
 
 struct EffectSpawner : PlacedObject {
     Rec50* rec;             // 0x2D0

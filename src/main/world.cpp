@@ -164,7 +164,6 @@ struct QuadraticCurve {
     f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
 };
 
-struct WorldRecord { u8 b; };
 
 extern s32 g_buttonCodeFlags;
 
@@ -174,7 +173,6 @@ void InitContactTables(World* self);
 void SetListLinkOffset(List01* self, s32 offset);
 void SetWorldGravityZ(World* self, f32 x);
 
-#define SUB(off) ((WorldRecord*)((u8*)self + (off)))
 
 typedef s32 VoiceParamIndex;
 
@@ -596,6 +594,7 @@ void CollidePathFollowerWithObject(PathFollower* self, Collider* other, s32 a2, 
             Vec02 q;
             Vec02 k;
             ColliderSpan hit;
+            // the class of the slot's object (obj8) is not known: a point at 0x40
             p = *(Vec02*)((u8*)slot->obj8 + 0x40);
             p.z = p.z - (first ? self->frontWheelRadius : self->rearWheelRadius);
             TransformPointBetweenFrames(self, 0, &p, &p);
@@ -884,10 +883,11 @@ void SetPathFollowerSecondPath(u8* self, PathCurveObject* obj)
     s32 loc[4];
     PathCurve* inner;
 
-    *(PathCurveObject**)(self + 0x848) = obj;
+    PathFollower* f = (PathFollower*)self;
+    f->sidePath = obj;
     inner = obj->curve;
     if (inner->vt->m10 != 0) {
-        inner->vt->m10(inner, self + 0x100, 0, loc, 0, (f32*)(self + 0x84C), 0);
+        inner->vt->m10(inner, &f->pos, 0, loc, 0, &f->sidePathTime, 0);
     }
 }
 
@@ -936,6 +936,7 @@ void AddPathFollowerActiveEntry(PathFollower* self, void* a, f32 x, f32 y, s32 b
 void SetPathFollowerMode(PathFollower* self, s32 mode)
 {
     if (mode != self->mode) {
+        // a field access here changes retail's code (0xB34 is PathFollower::mode, stored as a bare word)
         *(s32*)((u8*)self + 0xB34) = mode;
         self->modeTime = g_gameTime;
         if (mode == 2 && self != GetActiveSwitchedCollider()) {
@@ -996,7 +997,7 @@ void InitWorldHashLists(u8* self)
 {
     u32 i;
     for (i = 0; i < 0x200; i++) {
-        SetListLinkOffset((List01*)(self + 0x84 + i * 0xC), 0xC);
+        SetListLinkOffset(&((World*)self)->hashLists[i], 0xC);
     }
 }
 
@@ -1016,48 +1017,48 @@ void InitWorldPools(World* self)
     InitSlotPool(&self->pool1B14, 0x14, 0x400);
     InitSlotPool(&self->pool1B2C, 0x140, 0x180);
     InitAlignedSlotPool(&self->pool1B40, 0x10C0, 0x80);
-    InitSlotPool((Pool6C*)(SUB(0x1B4C)), 0x580, 0x20);
+    InitSlotPool(&self->pool1B4C, 0x580, 0x20);
     InitSlotPool(&self->pool1B58, 0xEC, 0x100);
     InitSlotPool(&self->pool1B20, 0xD0, 0x400);
-    InitSlotPool((Pool6C*)(SUB(0x1BA0)), 0x90, 0x80);
+    InitSlotPool(&self->pool1BA0, 0x90, 0x80);
     InitSlotPool(&self->pool1BB8, 0xC, 0x20);
     InitSlotPool(&self->pool1B88, 0x40, 0x100);
     InitSlotPool(&self->pool1BF4, 0x2E0, 0x20);
     InitSlotPool(&self->pool1BD0, 0x70, 0x20);
-    InitSlotPool((Pool6C*)(SUB(0x1C0C)), 0x8, 0x80);
-    InitSlotPool((Pool6C*)(SUB(0x1C18)), 0x14, 0x100);
+    InitSlotPool(&self->pool1C0C, 0x8, 0x80);
+    InitSlotPool(&self->pool1C18, 0x14, 0x100);
     self->regroupObjects = (PlacedObject**)AllocateFrontMemory(0x1000);
-    SetListLinkOffset((List01*)(SUB(0x48)), 0x1C);
-    SetListLinkOffset((List01*)(SUB(0x54)), 0x48);
-    SetListLinkOffset((List01*)(SUB(0x78)), 0x48);
-    SetListLinkOffset((List01*)(SUB(0x60)), 0x40);
-    SetListLinkOffset((List01*)(SUB(0x6C)), 0x414);
-    SetListLinkOffset((List01*)(SUB(0x3C)), 0x2D0);
-    SetListLinkOffset((List01*)(SUB(0x1B64)), 0x34);
-    SetListLinkOffset((List01*)(SUB(0x1B70)), 0x34);
-    SetListLinkOffset((List01*)(SUB(0x1B7C)), 0x34);
-    SetListLinkOffset((List01*)(SUB(0x1B94)), 0x10);
-    SetListLinkOffset((List01*)(SUB(0x1BAC)), 0x64);
-    SetListLinkOffset((List01*)(SUB(0x1BC4)), 0x4);
-    SetListLinkOffset((List01*)(SUB(0x1BE8)), 0x410);
-    SetListLinkOffset((List01*)(SUB(0x1C00)), 0xB8);
-    SetListLinkOffset((List01*)(SUB(0x1BDC)), 0x64);
-    SetListLinkOffset((List01*)(SUB(0x1C3C)), 0x2DC);
-    SetListLinkOffset((List01*)(SUB(0x1C48)), 0x5DC);
-    SetListLinkOffset((List01*)(SUB(0x1C54)), 0x374);
-    SetListLinkOffset((List01*)(SUB(0x1C60)), 0x600);
-    SetListLinkOffset((List01*)(SUB(0x1C6C)), 0x90);
-    SetListLinkOffset((List01*)(SUB(0x1C78)), 0x56C);
-    SetListLinkOffset((List01*)(SUB(0x1C84)), 0x50);
-    SetListLinkOffset((List01*)(SUB(0x1C90)), 0x38);
-    SetListLinkOffset((List01*)(SUB(0x1C9C)), 0x38);
-    SetListLinkOffset((List01*)(SUB(0x1CA8)), 0xAF0);
-    SetListLinkOffset((List01*)(SUB(0x1CB4)), 0x630);
-    SetListLinkOffset((List01*)(SUB(0x1CC0)), 0x630);
-    SetListLinkOffset((List01*)(SUB(0x1C24)), 0xC);
-    SetListLinkOffset((List01*)(SUB(0x1C30)), 0xC);
-    SetListLinkOffset((List01*)(SUB(0x1CCC)), 0xC10);
-    SetListLinkOffset((List01*)(SUB(0x1CD8)), 0x34);
+    SetListLinkOffset(&self->list48, 0x1C);
+    SetListLinkOffset(&self->list54, 0x48);
+    SetListLinkOffset(&self->list78, 0x48);
+    SetListLinkOffset((List01*)&self->list60, 0x40);
+    SetListLinkOffset((List01*)&self->list6C, 0x414);
+    SetListLinkOffset(&self->bodies, 0x2D0);
+    SetListLinkOffset(&self->list1B64, 0x34);
+    SetListLinkOffset(&self->list1B70, 0x34);
+    SetListLinkOffset((List01*)&self->list1B7C, 0x34);
+    SetListLinkOffset(&self->list1B94, 0x10);
+    SetListLinkOffset(&self->list1BAC, 0x64);
+    SetListLinkOffset(&self->list1BC4, 0x4);
+    SetListLinkOffset(&self->list1BE8, 0x410);
+    SetListLinkOffset(&self->list1C00, 0xB8);
+    SetListLinkOffset(&self->list1BDC, 0x64);
+    SetListLinkOffset(&self->list1C3C, 0x2DC);
+    SetListLinkOffset(&self->list1C48, 0x5DC);
+    SetListLinkOffset(&self->list1C54, 0x374);
+    SetListLinkOffset(&self->list1C60, 0x600);
+    SetListLinkOffset(&self->list1C6C, 0x90);
+    SetListLinkOffset(&self->list1C78, 0x56C);
+    SetListLinkOffset(&self->list1C84, 0x50);
+    SetListLinkOffset(&self->list1C90, 0x38);
+    SetListLinkOffset(&self->list1C9C, 0x38);
+    SetListLinkOffset(&self->list1CA8, 0xAF0);
+    SetListLinkOffset(&self->list1CB4, 0x630);
+    SetListLinkOffset(&self->list1CC0, 0x630);
+    SetListLinkOffset(&self->list1C24, 0xC);
+    SetListLinkOffset(&self->list1C30, 0xC);
+    SetListLinkOffset(&self->list1CCC, 0xC10);
+    SetListLinkOffset(&self->list1CD8, 0x34);
     x = -1500.0f;
     if (g_buttonCodeFlags & 4) {
         x = -900.0f;
@@ -1098,6 +1099,8 @@ void ResetWorldSubsystems(World* a0)
         ShutDownScriptValuePools();
         ResetElementStack((ElementStack*)g_elementStack);
         ResetFrontMemory();
+        // a field access here changes retail's code: the elements' callback words (onDone, onWarn)
+        // are stored packed, and the elements are reached through byte pointers
         u8* c = (u8*)&D_0026CE48;
         u8* e = (u8*)&g_timerElement;
         g_camera = 0;
@@ -1926,6 +1929,7 @@ void DrawProjectedLine(ClipPoint* a, ClipPoint* b, PackedColor* c, u8* obj, s32 
     p = base;
     n = 1;
     do {
+        // the object's class is not known: its 4x4 matrix starts at 0x100
         *(UQuadword*)p = TransformVector4(obj + 0x100, *(UQuadword*)(p - 2));
         n--;
         p++;
@@ -2202,6 +2206,7 @@ void PopActiveSequenceElement(World* world)
 void ShowPauseMenuPageWith(void* unused, s32 a1, s32 a2)
 {
     s32 saved = a1;
+    // a field access here changes retail's code (the pause menu element's word 0x280, f280, stored packed)
     u8* p = (u8*)&g_pauseMenuElement;
     ((PackedPageWord*)(p + 0x280))->v = a2;
     SetPauseMenuLayerPage(&g_pauseMenuElement, 0, saved);

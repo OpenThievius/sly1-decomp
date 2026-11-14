@@ -37,7 +37,7 @@ void HandleGaugeColliderActivation(GaugeCollider* a, void* b);
 void ControlGaugeCollider(GaugeCollider* self, PadRecord* pad, f32 dt);
 void UpdateGaugeColliderVisibility(GaugeCollider* self);
 void PlaceObjectAtRandomNode(GaugeCollider* self);
-void ReleaseObjectNode(u8* self, GaugeColliderAgent* ctx);
+void ReleaseObjectNode(GaugeCollider* self, GaugeColliderAgent* ctx);
 void ComputeGaugeColliderContactValue(GaugeCollider* ctx, Contact03* out);
 void ApplyGaugeColliderAttachedSetContact(GaugeCollider* self, AttachedSet* set, f32 dt);
 void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec);

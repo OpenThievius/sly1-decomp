@@ -78,10 +78,7 @@ struct LevelTaskRecord { s32 flags; u8 rest[0x74]; };
 // The element stack (g_elementStack), as game_progress.cpp and selection_menus.cpp view it.
 struct ElementStackState { u8 pad0[0x30]; s32 resumeState; };
 extern ElementStackState g_elementStack;
-// One of C17's three markers at 0x61C (StartC17Marker): its owner, the object found for it and
-// that object's state walker.
 struct StateWalker;
-struct C17Marker { s32 owner; BaseObject* object; StateWalker* walker; };
 struct StateGraph;
 void CopyMemory(void* dst, void* src, u32 size);
 extern u8 g_flagTable[];
@@ -659,7 +656,7 @@ void CollectNumberedItem(NumberedItem* self)
         }
         n->p134 = self;
         n->params = &g_numberedItemEffectParams;
-        TransformPointBetweenFrames(self, 0, (Vec02*)(self->f5BC + 0x100), (Vec02*)&loc);
+        TransformPointBetweenFrames(self, 0, &((PlacedObject*)self->f5BC)->pos, (Vec02*)&loc);
         n->vt->m00(n, &loc, 1.0f, 0);
         n->i20 = *(s32*)&self->f5BC;
     } else {
@@ -853,14 +850,14 @@ s32 CompletesWorldBits(s32 bits)
 void MarkLevelRecordComplete(s32 index)
 {
     if (index == -1) index = g_saveData->levelIndex;
-    u8* base = (u8*)g_saveData + (index * 0x44C + 0x10);
-    LevelTaskRecord* p = (LevelTaskRecord*)base;
-    LevelTaskRecord* end = (LevelTaskRecord*)(base + 0x438);
+    G27C230* level = &g_saveData->levels[index];
+    LevelTaskRecord* p = (LevelTaskRecord*)level;
+    LevelTaskRecord* end = (LevelTaskRecord*)&level->f438;
     do {
         p->flags |= 1;
         p++;
     } while ((s32)p < (s32)end);
-    *(s32*)(base + 0x448) |= 0x1F;
+    level->f448 |= 0x1F;
 }
 
 // Marks levels 0 to 5 complete; asks for a world load when the resume state is 2.
@@ -896,7 +893,7 @@ void StartC17Collider(C17* o)
     StartPlacedObject(o);
     ResolveObjectLinks(o, 0x1A, D_0026AA50.e);
     for (i = 0; i < 3; i++)
-        StartC17Marker((C17Marker*)(o->markers + i * 12), 0x390);
+        StartC17Marker(&o->markers[i], 0x390);
     StateWalker* h = CreateStateWalker((StateGraph*)o->stateGraph, o, 0x384, 1);
     o->levelBitIndex = -1;
     o->stateWalker = h;
@@ -1147,9 +1144,9 @@ void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
             break;
         }
         s32 i = 0;
-        s32 code = *(s32*)(self->markers + 0x24);
+        s32 code = self->markerCode;
         for (; i < 3; i++, code *= 10) {
-            C17Marker* m = &((C17Marker*)self->markers)[i];
+            C17Marker* m = &self->markers[i];
             s32 t;
             s32 c;
             GetStateWalkerTargetKey(m->walker, &t);
@@ -1208,7 +1205,7 @@ void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
                 }
             }
             if (k != -1) {
-                Ent17* e = (Ent17*)((u8*)self + (k * 0x2C + 0x658));
+                Ent17* e = &self->sequenceGroups[k];
                 *(s32*)((StepSequence*)e->list[e->pick])->target304 = 0;
                 ChooseStepSequenceState((StepSequence*)e->list[e->pick]);
                 e->pick = (e->pick + 1) % e->n;
@@ -1738,8 +1735,8 @@ void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
         Quad4 buf;
         AppendToList(&self->world->list1C60, self);
         ((BaseObject *)self->f5FC)->desc->m02((BaseObject *)self->f5FC);
-        TransformPointBetweenFrames(*(PlacedObject **)((u8 *)self->candidate + 0x18), 0,
-                      (Vec02 *)((u8 *)self->candidate + 0x40), (Vec02 *)&buf);
+        TransformPointBetweenFrames((PlacedObject*)((GatherCandidate*)self->candidate)->frame, 0,
+                      &((GatherCandidate*)self->candidate)->pos, (Vec02*)&buf);
         PlaceColliderClearOfContacts((Collider*)self, (Vec02*)&buf, (Vec02*)&g_unitZVector);
     }
     SetColliderPartListed(self, a1 == 0);
@@ -1767,7 +1764,7 @@ void SetObjectGathererState(ObjectGatherer* self, s32 mode)
         SetObjectGathererSuspended(self, 0);
         self->candidate = 0;
     }
-    *(s32*)((u8*)self->f5FC + 0x88) = 14;
+    ((PlacedObject*)self->f5FC)->visibilityMask = 14;
     self->modeEndTime = g_gameClock[1];
     switch (mode) {
     case 0:
@@ -1833,7 +1830,7 @@ void LoadAimBlendGrid(AimBlendGrid* o, LoadStream* in)
 {
     {
         s32 i = 0x17;
-        s32* p = (s32*)((u8*)o + 0xF0);
+        s32* p = &o->slots[0].id;
         do {
             i--;
             *p = ReadBufferedS16((BufferedStream*)in);
@@ -1842,9 +1839,9 @@ void LoadAimBlendGrid(AimBlendGrid* o, LoadStream* in)
     }
     s32 i = 0;
     o->resolution = ReadBufferedS16((BufferedStream*)in);
-    ReadMeshFromStream((BufferedStream*)in, (Mesh03*)o->fA0);
-    o->pointRecords = (GridRecord*)AllocateZeroedFrontMemory(o->pointCount * 100);
-    for (i = 0; i < o->pointCount; i++) {
+    ReadMeshFromStream((BufferedStream*)in, &o->mesh);
+    o->pointRecords = (GridRecord*)AllocateZeroedFrontMemory(o->mesh.vertCount * 100);
+    for (i = 0; i < o->mesh.vertCount; i++) {
         f32 x;
         f32 y;
         f32 z;
@@ -1873,7 +1870,7 @@ void LoadAimBlendGrid(AimBlendGrid* o, LoadStream* in)
         s32 a = ReadBufferedS16((BufferedStream*)in);
         s32 b = ReadBufferedS16((BufferedStream*)in);
         s32 c = ReadBufferedS16((BufferedStream*)in);
-        t->a = o->faces + (a << 5);
+        t->a = (u8*)o->mesh.faces + (a << 5);
         if (b > 0) {
             b--;
             t->b = (u8*)&o->nodes[b];
@@ -1957,7 +1954,7 @@ void BlendCellCornerRecords(AimBlendGrid* self, GridCell* cell, Quad16* point)
         for (j = 0; j < 3; j++) {
             tri[j] = cell->corner[(i + j + 1) % 4];
         }
-        Vec02* points = *(Vec02**)((u8*)self + 0xA8);
+        Vec02* points = (Vec02*)self->mesh.verts;
         Vu0::Q(side1) = Vu0::Sub(Vu0::Q(points[tri[1]]), Vu0::Q(points[tri[0]]));
         Vu0::Q(side2) = Vu0::Sub(Vu0::Q(points[tri[2]]), Vu0::Q(points[tri[0]]));
         Vu0::Q(normal) = Vu0::Cross(Vu0::Q(side1), Vu0::Q(side2));
@@ -2186,7 +2183,7 @@ void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void*
     f32 hi = 1.0f;
     for (s32 i = 9; i >= 0; i--) {
         f32 t = (lo + hi) * 0.5f;
-        Vu0::Q(point) = Vu0::MulXSum(Vu0::Q(*(Vec02*)(self + 0x90)), Vu0::Scalar(1.0f - t), Vu0::Q(*from), Vu0::Scalar(t));
+        Vu0::Q(point) = Vu0::MulXSum(Vu0::Q(*(Vec02*)&((AimBlendGrid*)self)->originPoint), Vu0::Scalar(1.0f - t), Vu0::Q(*from), Vu0::Scalar(t));
         s32 r = (s32)FindPlaneTreeLeafAtPoint((AimBlendGrid*)self, 0, &point);
         if (r != 0) {
             found = r;
@@ -2197,7 +2194,7 @@ void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void*
         }
     }
     if (found == 0) {
-        best = *(Vec02*)(self + 0x70);
+        best = *(Vec02*)&((AimBlendGrid*)self)->blendPoint;
         found = (s32)FindPlaneTreeLeafAtPoint((AimBlendGrid*)self, 0, &best);
     }
     if (out != 0) {

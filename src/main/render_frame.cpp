@@ -228,7 +228,7 @@ extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 struct FrameNode {
     u8 pad0[0x14];
-    u8* owner;
+    World* owner;
     u8 pad18[0x1088 - 0x18];
     void* pooledSlot;
 };
@@ -330,6 +330,7 @@ void InitRenderFrames(void)
     SetListLinkOffset(&g_deferredReleaseListA, 0x630);
     SetListLinkOffset(&g_deferredReleaseListB, 0x1090);
     SetListLinkOffset(&g_deferredReleaseListC, 0xB8);
+    // code address: the handler starts 0x30 bytes into func_0015E678
     AddInterruptHandler(5, (void (*)(void))((u8*)func_0015E678 + 0x30), 0);
     EnableInterruptCause(5);
     g_frameReadySemaphore = CreateLockSemaphore(0, 2);
@@ -425,6 +426,7 @@ void CloseDrawBuffer(void* obj, void* a, u8** b)
 // the render thread.
 void SubmitRenderFrame(void)
 {
+    // the frame's word at 0x8 has no field of RenderFrame (it lies in pad08)
     WriteGsFinishPacket((PacketWriter*)&g_vifPacketWriter, (u8*)g_buildFrame + 8, 0);
     CloseDrawBuffer((PacketWriter*)&g_gsPacketWriter, g_buildFrame, 0);
     g_buildFrame->releasedObjects = g_deferredReleaseListA;
@@ -525,7 +527,7 @@ void ReleaseFrameNodes(RenderFrame* self)
         BeginListWalk::Of(&it, &self->releasedObjects);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
             RemoveFromList(&self->releasedObjects, n);
-            AppendToList((List01*)(n->owner + 0x1CC0), n);
+            AppendToList(&n->owner->list1CC0, n);
         }
         ClearList(&self->releasedObjects);
         g_activeListFrames = it.prev;
@@ -574,11 +576,11 @@ void DrainRenderFrames(s32 flag)
         } while (--n >= 0);
         D_002626CC = 3;
     }
-    u8* p = (u8*)g_renderFrames;
-    u8* end = p + 0x90;
+    RenderFrame* p = g_renderFrames;
+    RenderFrame* end = p + 2;
     do {
-        ReleaseFrameNodes((RenderFrame*)p);
-        p += 0x48;
+        ReleaseFrameNodes(p);
+        p++;
     } while (p < end);
     ClearScreenOwner(3);
     g_drawingFrame = 0;

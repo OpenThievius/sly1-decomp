@@ -10,6 +10,7 @@
 // the next file's .data. One file between two edges otherwise; it could be several. Its name is
 // ours, after its first and largest family, the pooled objects and their holder; the step
 // sequence is nearly as large, and none of its families names the whole.
+#include "listed_collision_part.h"
 #include "common.h"
 #include "gauge_manager.h"
 #include "asm_func.h"
@@ -639,7 +640,7 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
             if (g_player != 0 && g_player->heldObject == c) {
                 StartPadRecordPattern(&g_padRecord, 4, 0.25f);
             }
-            if (!(CountHeldPooledChildren(c) < *(s32*)((u8*)c + 0x564))) {
+            if (!(CountHeldPooledChildren(c) < ((ListedCollisionPart*)c)->heldLimit)) {
                 PooledObject* e = FindEarliestPooledChild((PooledObject*)c);
                 if (e != 0) {
                     SetPooledObjectState(e, 5);
@@ -1015,7 +1016,7 @@ void ThrowHeldPooledObject(PooledHolder* self)
         source = self->targetObject;
     } else {
         source = (PlacedObject*)self->throwTarget;
-        speed = *(f32*)((u8*)self + 0x6D4);
+        speed = self->defaultThrowSpeed;
     }
     obj = (PooledObject*)self->heldObject;
     self->targetObject = 0;
@@ -2302,12 +2303,14 @@ void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi)
     u8* p = self->cur;
     self->cur = p + 16;
     *(u64*)p = (u64)lo | 0x40000000 | ((u64)hi << 32);
+    // DMA tag record in the packet buffer, not an object
     *(u64*)(p + 8) = 0;
     if (flag != 0) {
         u8* q = self->cur;
         self->f08 = (s32*)q;
         self->cur = q + 16;
         *(u64*)q = 0x10000000;
+        // DMA tag record in the packet buffer, not an object
         *(u64*)((u8*)self->f08 + 8) = 0;
     }
 }
@@ -2324,12 +2327,14 @@ void AddDmaCallTag(PacketWriter* self, s32 hi)
     u8* p = self->cur;
     self->cur = p + 16;
     *(u64*)p = ((u64)hi << 32) | 0x50000000;
+    // DMA tag record in the packet buffer, not an object
     *(u64*)(p + 8) = 0;
     if (flag != 0) {
         u8* q = self->cur;
         self->f08 = (s32*)q;
         self->cur = q + 16;
         *(u64*)q = 0x10000000;
+        // DMA tag record in the packet buffer, not an object
         *(u64*)((u8*)self->f08 + 8) = 0;
     }
 }
@@ -2339,6 +2344,7 @@ void AddDmaReturnTag(PacketWriter* self)
 {
     CloseDmaTag(self);
     u64* p = (u64*)self->cur;
+    // packet buffer: the cursor steps over the 16-byte tag, not an object field
     self->cur = (u8*)p + 0x10;
     p[0] = 0x60000000ull;
     p[1] = 0;
@@ -2358,6 +2364,7 @@ void AddDmaEndTag(PacketWriter* self)
     u8* cursor = self->cur;
     self->cur = cursor + 0x10;
     *(u64*)cursor = 0x70000000;
+    // DMA tag record in the packet buffer, not an object
     *(u64*)(cursor + 8) = 0;
 }
 
