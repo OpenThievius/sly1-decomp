@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Class 0x4A (descriptor D_002206F8, 0x620 bytes), a gauge mode object: an object with collision
-// that switches between modes (SetGaugeModeObjectMode sets the mode, takes or gives up the
+// that switches between modes (SetWorld5BossMode sets the mode, takes or gives up the
 // world's gauge object and starts the handle it keeps for modes 0 and 1), shows or hides the
-// gauge bar by its mode (ShowGaugeModeObjectBar) and hands out three handles it makes when it
-// starts (StartGaugeModeObject). Written for this project from what retail's code does
-// (config/us/classes.tsv; src/main/mode_collider.cpp).
+// gauge bar by its mode (ShowWorld5BossBar) and hands out three handles it makes when it
+// starts (StartWorld5Boss). Written for this project from what retail's code does
+// (config/us/classes.tsv; src/main/world5_boss.cpp).
 //
 // Its fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.
-#ifndef GAUGE_MODE_OBJECT_H
-#define GAUGE_MODE_OBJECT_H
+#ifndef WORLD5_BOSS_H
+#define WORLD5_BOSS_H
 
 #include "collider.h"
 
@@ -19,13 +19,13 @@ struct BlendWeight3 {
     u8 pad04[8];
 };
 
-struct GaugeModeObject : Collider {
-    s32 mode;               // 0x550: -1 at set-up; SetGaugeModeObjectMode sets it
+struct World5Boss : Collider {
+    s32 mode;               // 0x550: -1 at set-up; SetWorld5BossMode sets it
     f32 modeTime;           // 0x554: the clock when the mode was set
     u8 modePlayer[4];       // 0x558: the mode's player (ReplaceAnimationPlayer)
     union {
         struct {
-            u8 grpA[0x24];  // 0x55C: the first group of func_00139038 (StartGaugeModeObject)
+            u8 grpA[0x24];  // 0x55C: the first group of func_00139038 (StartWorld5Boss)
             f32 fA;         // 0x580: 1.0
             u8 pad584[0x58C - 0x584];
         };
@@ -47,13 +47,13 @@ struct GaugeModeObject : Collider {
         };
         BlendWeight3 wC[5]; // 0x5C4: its five weights
     };
-    void* loopHandle;       // 0x600: the handle PlayGaugeModeObjectLoop starts
+    void* loopHandle;       // 0x600: the handle PlayWorld5BossLoop starts
     u8 loopPlayer[4];       // 0x604: its player (ReplaceAnimationPlayer)
-    s32 f608;               // 0x608: compared with a message's id by HandleGaugeModeObjectEvent
-    void* target;           // 0x60C: the object SetGaugeModeObjectTarget finds
-    u8 targetPlayer[0x620 - 0x610]; // 0x610: its player (PlayGaugeModeObjectTarget)
+    s32 f608;               // 0x608: compared with a message's id by HandleWorld5BossEvent
+    void* target;           // 0x60C: the object SetWorld5BossTarget finds
+    u8 targetPlayer[0x620 - 0x610]; // 0x610: its player (PlayWorld5BossTarget)
 };
 
-typedef char check_GaugeModeObject[sizeof(GaugeModeObject) == 0x620 ? 1 : -1];
+typedef char check_World5Boss[sizeof(World5Boss) == 0x620 ? 1 : -1];
 
 #endif

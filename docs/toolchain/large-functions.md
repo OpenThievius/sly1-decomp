@@ -555,6 +555,6 @@ cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
   the whole group at 0x40 is ruled out (79 lines).
 - **Where the guard puts the data.** The compiler writes a static's guard out with its function,
   so a file's globals that retail has after the guard are defined after the function
-  (gauge_agent.cpp's D_002649B0 on, warp_menu.cpp's D_00275DB8 on, declared `extern` above for
+  (world2_boss.cpp's D_002649B0 on, warp_menu.cpp's D_00275DB8 on, declared `extern` above for
   the functions that use them earlier), and the record's address is the file's `.bss` entry in
   config/us/files.tsv.

@@ -71,19 +71,19 @@ void SetStateWalkerTarget(s32, s32);
 s32 LaunchChosenPoolObject(void* obj, s32 v);
 void HandleAgentNotification(void* self, s32 code, void* req);
 
-void InitGaugeAgent(GaugeAgent* self)
+void InitWorld2Boss(World2Boss* self)
 {
 	InitAgent(self);
 	*(s32*)((char*)self + 0xE3C) = -1;
 }
 
-void LoadGaugeAgent(GaugeAgent* self, void* reader)
+void LoadWorld2Boss(World2Boss* self, void* reader)
 {
     LoadAgent(self, reader);
     ResolveObjectLinks(self, 2, D_00264910);
 }
 
-void StartGaugeAgent(GaugeAgent* self)
+void StartWorld2Boss(World2Boss* self)
 {
     s32 n;
     s32 i;
@@ -108,11 +108,11 @@ extern f32 D_00275070[14];
 AnimRecord* FindAnimRecord(s32 key);
 
 // DrawPlayerMarkerRing2's counterpart (player_request.cpp): the same block, built once as a
-// function-local static with a brace initialiser (include/ring_params.h). DrawGaugeAgent queues
+// function-local static with a brace initialiser (include/ring_params.h). DrawWorld2Boss queues
 // it as a deferred request's callback, with the agent as the request's argument.
-void DrawGaugeAgentMarkerRing(DeferredRequest* request)
+void DrawWorld2BossMarkerRing(DeferredRequest* request)
 {
-    GaugeAgent* agent = (GaugeAgent*)request->arg;
+    World2Boss* agent = (World2Boss*)request->arg;
     static RingParams params = {
         1, 5.0f, 0.5f,
         {
@@ -153,7 +153,7 @@ void DrawAgent(Agent* self, AgentDrawArgs* args);
 void QueueDeferredRequest(DeferredRequest* request);
 void* FillMemory(void* p, s32 value, s32 size);
 
-void DrawGaugeAgent(GaugeAgent* self, AgentDrawArgs* args)
+void DrawWorld2Boss(World2Boss* self, AgentDrawArgs* args)
 {
     DrawAgent(self, args);
     if (self->fE2C) {
@@ -162,7 +162,7 @@ void DrawGaugeAgent(GaugeAgent* self, AgentDrawArgs* args)
         request.group = 0xD;
         request.f04 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(args->point)), Vu0::Q(args->weights)));
         request.arg = self;
-        request.callback = (void*)DrawGaugeAgentMarkerRing;
+        request.callback = (void*)DrawWorld2BossMarkerRing;
         QueueDeferredRequest(&request);
     }
 }
@@ -202,10 +202,10 @@ s32 FindNearestHitObject(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f
 }
 
 typedef s32 (*VFn_18A830)(BaseObject* self, void* arg);
-// What func_001DC238 hands its filter (IsGaugeAgentBlocker): the object hit at 0x50.
+// What func_001DC238 hands its filter (IsWorld2BossBlocker): the object hit at 0x50.
 struct BlockerQuery { u8 pad[0x50]; BaseObject* sub; };
 
-s32 IsGaugeAgentBlocker(void* self, BlockerQuery* rec)
+s32 IsWorld2BossBlocker(void* self, BlockerQuery* rec)
 {
     s32* e = D_002649B0;
     u32 i;
@@ -235,13 +235,13 @@ typedef s32 (*Cb_18A910)(void* self, BlockerQuery* ctx);
 
 void GatherCollidersInBox(void* a0, s32 a1, void* a2, void* a3, Cb_18A910 a4, void* a5, s32* a6, s32* a7);
 
-s32 IsGaugeAgentLineBlocked(GaugeAgent* self, void* a1, void* a2)
+s32 IsWorld2BossLineBlocked(World2Boss* self, void* a1, void* a2)
 {
     u8 buf[0x70];
     s32 x;
     s32 y;
     PushBackMemoryMark(self, a1, a2);
-    GatherCollidersInBox(self->world, 0, a1, a2, IsGaugeAgentBlocker, self, &x, &y);
+    GatherCollidersInBox(self->world, 0, a1, a2, IsWorld2BossBlocker, self, &x, &y);
     s32 r = FindNearestHitObject(0, a1, a2, x, y, buf, D_002649C4);
     PopBackMemoryMark();
     return r != 0;
@@ -256,7 +256,7 @@ struct LineCheckFrame {
     s32 code;
 };
 
-s32 HasGaugeAgentClearLine(GaugeAgent* self)
+s32 HasWorld2BossClearLine(World2Boss* self)
 {
     u8* obj = (u8*)self;
     LineCheckFrame loc;
@@ -289,14 +289,14 @@ s32 HasGaugeAgentClearLine(GaugeAgent* self)
             return 0;
         }
     }
-    if (IsGaugeAgentLineBlocked((GaugeAgent*)obj, obj + 0x140, (u8*)sub + 0x140) != 0) {
+    if (IsWorld2BossLineBlocked((World2Boss*)obj, obj + 0x140, (u8*)sub + 0x140) != 0) {
         goto second;
     }
 one:
     return 1;
 second:
     ComputeObjectFrameAtTime(sub, 0, loc.buf, 0, 0, 0, D_002649C8);
-    if (IsGaugeAgentLineBlocked((GaugeAgent*)obj, obj + 0x140, loc.buf) == 0) {
+    if (IsWorld2BossLineBlocked((World2Boss*)obj, obj + 0x140, loc.buf) == 0) {
         goto one;
     }
     return 0;
@@ -304,7 +304,7 @@ second:
 
 typedef s32 (*VFnI_0018AAE0)(void* self);
 
-s32 IsGaugeAgentFree(GaugeAgent* self)
+s32 IsWorld2BossFree(World2Boss* self)
 {
     s32 out;
     if (IsPadSelectFlagHeld(self->world) != 0) goto zero;
@@ -325,7 +325,7 @@ one:
     return 1;
 }
 
-void EnterGaugeAgentState(GaugeAgent* self)
+void EnterWorld2BossState(World2Boss* self)
 {
     EnterAgentState(self);
     s32 st = self->f724;
@@ -341,7 +341,7 @@ void EnterGaugeAgentState(GaugeAgent* self)
     }
 }
 
-s32 ChooseGaugeAgentState(GaugeAgent* self)
+s32 ChooseWorld2BossState(World2Boss* self)
 {
     if (self->f724 == 4) {
         s32 kind;
@@ -354,7 +354,7 @@ s32 ChooseGaugeAgentState(GaugeAgent* self)
     return ChooseAgentState(self);
 }
 
-void AdvanceGaugeAgentPhase(GaugeAgent* self)
+void AdvanceWorld2BossPhase(World2Boss* self)
 {
     DecrementGaugeCount((u8*)&g_gaugeBarElement);
     s32 idx = self->fE28;
@@ -364,12 +364,12 @@ void AdvanceGaugeAgentPhase(GaugeAgent* self)
     self->fE28 = n + 1;
 }
 
-void UpdateGaugeAgent(void)
+void UpdateWorld2Boss(void)
 {
     UpdateAgent();
 }
 
-void ShowGaugeAgentBar(GaugeAgent* self)
+void ShowWorld2BossBar(World2Boss* self)
 {
     s32 kind;
     GetStateWalkerCurrentKey(self->fE10, &kind);
@@ -393,7 +393,7 @@ void SetAgentGoalPoint(void* self, void* p);
 s32 GetObjectWorldPosition(void* obj, Vec02* out);
 void UpdateAgentGoal(void* self, s32 flag);
 
-void UpdateGaugeAgentGoal(GaugeAgent* self, s32 flag)
+void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
 {
     switch (self->f724) {
     case 4:
@@ -435,7 +435,7 @@ struct CyclicRanges {
 
 extern ValueRange g_unitRange;
 void UpdateAgentState(void* self);
-void GetGaugeAgentLevelFactor(GaugeAgent* a0, f32* a1);
+void GetWorld2BossLevelFactor(World2Boss* a0, f32* a1);
 f32 ArctangentOfRatio(f32 y, f32 x);
 f32 WrapAngle(f32 a);
 void SetPlayerBlendWeights(f32 angle, f32 weight, void* self, void* blend, s32 table);
@@ -445,9 +445,9 @@ void RecordCameraTimestamp(Camera* c);
 void StartSoundEffect(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 s32 IsAgentFacingBlocked(void* self);
 void SetAgentFacingAngles(void* self, f32 yaw, f32 pitch);
-typedef Agent* (*GaugeTargetFn)(GaugeAgent* self);
+typedef Agent* (*GaugeTargetFn)(World2Boss* self);
 
-void UpdateGaugeAgentState(GaugeAgent* self)
+void UpdateWorld2BossState(World2Boss* self)
 {
     typedef Vu0::Vec Vec;
     UpdateAgentState(self);
@@ -467,7 +467,7 @@ void UpdateGaugeAgentState(GaugeAgent* self)
             f32 near = g_unitRange.Limit(((QuadraticCurve*)D_00264A00)->Eval(dist));
             f32 far = g_unitRange.Limit(((QuadraticCurve*)D_00264A10)->Eval(dist));
             f32 level;
-            GetGaugeAgentLevelFactor(self, &level);
+            GetWorld2BossLevelFactor(self, &level);
             weight = level * far + (1.0f - level) * near;
         } else {
             weight = 1.0f;
@@ -505,7 +505,7 @@ void UpdateGaugeAgentState(GaugeAgent* self)
         Vec02 to;
         Vec02 curve = { 0.0f, 0.00016666666f, 0.0f, 0.0f };
         f32 level;
-        GetGaugeAgentLevelFactor(self, &level);
+        GetWorld2BossLevelFactor(self, &level);
         f32 rest = 1.0f - level;
         f32 limit = (1.0f - rest) * D_002649D0[0] + rest * D_002649D0[1];
         Agent* tgt = ((GaugeTargetFn)((void**)self->desc)[0x198 / 4])(self);
@@ -522,7 +522,7 @@ void UpdateGaugeAgentState(GaugeAgent* self)
     }
 }
 
-void LeaveGaugeAgentState(GaugeAgent* self)
+void LeaveWorld2BossState(World2Boss* self)
 {
     LeaveAgentState(self);
     if (self->f724 == 16) {
@@ -533,7 +533,7 @@ void LeaveGaugeAgentState(GaugeAgent* self)
     }
 }
 
-void HandleGaugeAgentNotification(GaugeAgent* self, s32 a1, MessageBody* key)
+void HandleWorld2BossNotification(World2Boss* self, s32 a1, MessageBody* key)
 {
     if (a1 == 0x13 && key->sourceId == (s32)self->f7E0) {
         switch (key->code) {
@@ -573,7 +573,7 @@ void HandleGaugeAgentNotification(GaugeAgent* self, s32 a1, MessageBody* key)
 }
 
 // Hoisting 1.0f into a local `one` matched the constant scheduling.
-void GetGaugeAgentLevelFactor(GaugeAgent* a0, f32* a1)
+void GetWorld2BossLevelFactor(World2Boss* a0, f32* a1)
 {
     s32 kind;
     GetStateWalkerCurrentKey(a0->fE10, &kind);

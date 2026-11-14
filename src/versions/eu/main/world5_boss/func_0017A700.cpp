@@ -7,7 +7,7 @@ struct T217D_BF0Aim {
     Vec02 aim;                  // 0x580
 };
 
-void HandleModeColliderActivation(ModeCollider* self, s32 active)
+void HandleWorld5ModeColliderActivation(World5ModeCollider* self, s32 active)
 {
     HandleSwitchedColliderActivation(self, active);
     if (active) {

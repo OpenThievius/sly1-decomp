@@ -6,8 +6,8 @@
 #include "globals.h"
 #include "switched_collider.h"
 #include "node_query.h"
-#include "gauge_mode_object.h"
-#include "countdown_collider.h"
+#include "world5_boss.h"
+#include "world5_countdown.h"
 #include "entry_queue.h"
 #include "object_link.h"
 #include "message_body.h"
@@ -4924,7 +4924,7 @@ void SetFollowObjects(void* a, s32 b, s32 c);
 void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
 void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
 void SetBlendItemWeights(void* obj, s32 a1, s32 a2, void* a3);
-void SetModeColliderMode(void* self, s32 a1);
+void SetWorld5ModeColliderMode(void* self, s32 a1);
 s32 FindAnimRecord(s32 key);
 
 
@@ -5003,9 +5003,9 @@ walker:
 
 
 s32 HasSpareCount(void);
-void ComputeModeColliderAnchors(void* self, void* a, void* b);
+void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
 void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
-void SetModeColliderMode(void* self, s32 a1);
+void SetWorld5ModeColliderMode(void* self, s32 a1);
 
 
 
@@ -5015,7 +5015,7 @@ extern s32 D_00263E2C;
 
 void DecrementGaugeCount(void* p);
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
-void ReplaceAnimationPlayer(void* a, CountdownCollider* b, s32 c, void* d, f32 e, f32 f);
+void ReplaceAnimationPlayer(void* a, World5Countdown* b, s32 c, void* d, f32 e, f32 f);
 s32 HandleObjectEvent(void* self, ObjectEvent* msg);
 
 
@@ -5061,7 +5061,7 @@ void StartPlacedObject(void* self);
 void ResolveObjectLinks(void* self, int n, void* table);
 
 
-void ComputeModeColliderAnchors(void* self, void* a, void* b);
+void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
 void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
 
 
@@ -5069,13 +5069,13 @@ void StartPlacedObject(void* self);
 void ResolveObjectLinks(void* self, s32 a1, void* a2);
 void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
 void SetBlendItemWeights(void* obj, s32 a1, s32 a2, void* a3);
-void SetGaugeModeObjectMode(GaugeModeObject* self, s32 a1);
-s32 PlayGaugeModeObjectLoop(GaugeModeObject* self, s32 a1);
+void SetWorld5BossMode(World5Boss* self, s32 a1);
+s32 PlayWorld5BossLoop(World5Boss* self, s32 a1);
 
 
 
 void DecrementGaugeCount(void* p);
-void PlayGaugeModeObjectTarget(GaugeModeObject* self);
+void PlayWorld5BossTarget(World5Boss* self);
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
 
 
@@ -5186,7 +5186,7 @@ void MoveCollider(void* self, void* b);
 
 
 void FinishSwitchedCollider(void* self);
-void SetModeColliderMode(void* self, s32 a1);
+void SetWorld5ModeColliderMode(void* self, s32 a1);
 
 
 void HandleSwitchedColliderNotification(void* self, s32 kind, MessageBody* rec);
@@ -5386,7 +5386,7 @@ extern s32 g_timeoutFired;
 
 void UpdateCollider(void* self);
 void StopAnimationPlayer(void* p);
-void SetCountdownState(void* self, s32 state);
+void SetWorld5CountdownState(void* self, s32 state);
 void FadeOutAndQueueMovie(s32 n);
 
 
@@ -5406,8 +5406,8 @@ extern f32 g_gameClock[];
 extern Rgba4 D_002623E0;
 
 f32 Cosine(f32 x);
-void SetObjectTreeRecordValue(ModeCollider* o, u32 value);
-void ApplyPlacedObjectTransform(ModeCollider* o, void* s, void* out);
+void SetObjectTreeRecordValue(World5ModeCollider* o, u32 value);
+void ApplyPlacedObjectTransform(World5ModeCollider* o, void* s, void* out);
 
 
 // NEAR: last call (func_001B9D10) loads a2 before $f12 is moved; retail moves $f12 first. Otherwise every instruction matches.
@@ -5416,10 +5416,10 @@ extern f32 D_00263C20[];
 extern f32 D_00263C30[];
 extern f32 D_00263C40[];
 
-void StepCollider(ModeCollider* self, f32 t);
-void ComputeModeColliderAnchors(ModeCollider* self, Vec02* a, Vec02* b);
-void SteerColliderTowardPosition(ModeCollider* self, void* buf, f32 f, void* d1, void* d2, void* d3);
-void TurnColliderTowardRotation(ModeCollider* self, f32 scale, void* out, void* data);
+void StepCollider(World5ModeCollider* self, f32 t);
+void ComputeWorld5ModeColliderAnchors(World5ModeCollider* self, Vec02* a, Vec02* b);
+void SteerColliderTowardPosition(World5ModeCollider* self, void* buf, f32 f, void* d1, void* d2, void* d3);
+void TurnColliderTowardRotation(World5ModeCollider* self, f32 scale, void* out, void* data);
 
 
 // A 0x20-byte candidate: an object, its distance along its curve (class 0x6E) and the point

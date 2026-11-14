@@ -23,7 +23,7 @@ source and `-dS -fsched-verbose-6` dumps (2026-11-08, func_00179A68):
   clamp written in place, `v = lo` / `v = hi`) keeps its static priority.
 - **Diagnosing it.** The dump's `Ready list (t = N):` lines list the sorted ready insns, best
   last; a priority that is not the table's `prio` is adjust_priority's.
-- **ControlModeCollider (func_00179A68).** `f700 = Clamp(f700 + dt * f708, b[0], b[1])`
+- **ControlWorld5ModeCollider (func_00179A68).** `f700 = Clamp(f700 + dt * f708, b[0], b[1])`
   written in place left the add at priority 7 while the load of `b[1]`, born once, went from 2
   to 8 when the store before it was scheduled. Both were ready in cycle 6; the load went first
   and was live across the product in $f0, so it got $f3 where retail has $f0. Written as a clamp
@@ -1589,7 +1589,7 @@ local-alloc's VU quantities) (2026-11-09):
 
 ### A store after the call makes the jump every insn's dependent (func_0017B8C0)
 
-Found from the `-dS -dR -fsched-verbose-6` dumps (2026-11-09). SetCountdownState's state-1
+Found from the `-dS -dR -fsched-verbose-6` dumps (2026-11-09). SetWorld5CountdownState's state-1
 block sets eight fields of g_gaugeBarElement, then calls SetWorldActiveFollower. Two separate
 things decided its order:
 

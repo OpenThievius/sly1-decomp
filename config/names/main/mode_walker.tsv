@@ -4,13 +4,13 @@ func_00180EE8	UnregisterListedKeepObject	slot 7 of class 0x72: UnregisterObject,
 func_00180F20	CopyListedKeepObject	slot 9 of class 0x72: saves the kept 8 bytes, runs the base copy func_001830D8 and restores them
 func_00180F68	InitModeWalkerObject	slot 0 of class 0x1A: base init func_001D73A8, then sets the time stamp at 0xBF4 to -10
 func_00180F98	StartModeWalkerObject	slot 16 of class 0x1A: resolves its links, creates the walker (CreateStateWalker) and sets mode 1
-func_00181078	ControlModeWalker	slot 0x134 of class 0x1A, the control slot ControlPlayer and ControlModeCollider fill: reads the pad (ClearPadPressedBits), moves its state walkers (SetStateWalkerTarget, TeleportStateWalker) and steers the walker's frame and the camera (func_00181ED0, BuildAxisAngleMatrix)
+func_00181078	ControlModeWalker	slot 0x134 of class 0x1A, the control slot ControlPlayer and ControlWorld5ModeCollider fill: reads the pad (ClearPadPressedBits), moves its state walkers (SetStateWalkerTarget, TeleportStateWalker) and steers the walker's frame and the camera (func_00181ED0, BuildAxisAngleMatrix)
 func_00181448	UpdateModeWalkerObject	slot 17 of class 0x1A: after the base update walks the contact list at 0xC04, frees it with FreePooledContactChain and fits a clamped ramp from the clock into two calls on the object at 0xBCC
 func_00181658	RecomputeModeWalker	original assembly: slot 0x58 of class 0x1A
 func_00181780	HandleModeWalkerActivation	slot 0x130 of class 0x1A, the slot HandleSwitchedColliderActivation fills for 0x05: runs HandlePathFollowerActivation, then updates D_00270650 through its slots by the activation
 func_00181818	ApplyModeWalkerTint	slot 36 of class 0x1A: blends the base colour with a fixed one by two clamped ramps while the flag at 0xBF0 is set, passes it to func_00126A48 and runs func_00125C90
 func_00181A58	CaptureModeWalkerTarget	slot 0x124 of class 0x1A: runs func_001DAE48 and copies the position (+0x140) of its object at +0xBC0 to the output's +0x10
-func_00181A98	IsModeWalkerRequestBlocked	slot 0x13C of class 0x1A (as IsModeColliderRequestBlocked for 0x1B): 1 unless its mode +0xBB0 is 1, its accepted flag +0xBF0 is clear and func_001DDA80 does not hold for the world
+func_00181A98	IsModeWalkerRequestBlocked	slot 0x13C of class 0x1A (as IsWorld5ModeColliderRequestBlocked for 0x1B): 1 unless its mode +0xBB0 is 1, its accepted flag +0xBF0 is clear and func_001DDA80 does not hold for the world
 func_00181AE0	HasModeWalkerAcceptedRequest	slot 0x144 of class 0x1A: whether +0xBF0 is set
 func_00181AF0	FinishModeWalker	slot 0x150 of class 0x1A: runs func_00192C58, then SetModeWalkerMode with 1
 func_00181B20	LaunchPlayerFromModeWalker	the callback AcceptModeWalkerRequest gives the player: places it from D_00264180 through D_00264190 (func_001BC260), turns it to face the other way and sets state 4/0x2B (SetPlayerState)

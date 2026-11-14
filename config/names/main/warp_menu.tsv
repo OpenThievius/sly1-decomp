@@ -1,15 +1,15 @@
 symbol	name	evidence
-func_001E88D0	InitKeyedConeAgent	slot 0 of class 0x0B: runs InitConeAgent, sets the mode +0xC58 to 0x2D8 and its ranges (30000.0, 3e7, 3e6, 3e6) and a full turn (2 pi) at +0xC2C
-func_001E8948	StartKeyedConeAgent	slot 16 of class 0x0B: resolves its links (D_00275B60), makes itself the world's active follower (SetWorldActiveFollower), creates its state walker, takes four flag-table indices into +0xC80 and starts the cone agent
+func_001E88D0	InitWorld1Boss	slot 0 of class 0x0B: runs InitConeAgent, sets the mode +0xC58 to 0x2D8 and its ranges (30000.0, 3e7, 3e6, 3e6) and a full turn (2 pi) at +0xC2C
+func_001E8948	StartWorld1Boss	slot 16 of class 0x0B: resolves its links (D_00275B60), makes itself the world's active follower (SetWorldActiveFollower), creates its state walker, takes four flag-table indices into +0xC80 and starts the cone agent
 func_001E89F0	FindNearestAgentKey	returns the one of the six key objects at +0xC64 of a class 0x0B agent whose position (+0x140) is nearest a point in x and y
-func_001E8A50	EnterKeyedConeAgentState	slot 92 of class 0x0B, its override of EnterAgentState
-func_001E8D58	ChooseKeyedConeAgentState	slot 89 of class 0x0B: with its count at +0xC5C used up clears the deadline +0xBFC to FLT_MAX; keeps state 10 while +0x7E0 is set (else 8), otherwise asks ChooseAgentState
-func_001E8DB0	IsKeyedConeAgentFree	slot 0x16C of class 0x0B, the slot of IsConeAgentFree and IsGaugeAgentFree: 0 while +0xC40 is set, else whether the count at +0xC5C is nonzero
-func_001E8DD0	IsKeyedConeAgentTargetInRange	slot 93 of class 0x0B: true only in mode 0x2DB with the count at +0xC5C neither 0 nor 5
-func_001E8E08	SteerKeyedConeAgentAlongPath	slot 97 of class 0x0B: outside mode 0x2DA lowers the count at +0xC5C by one (not below 0), then runs SteerAgentAlongPath
-func_001E8E48	RestartKeyedConeAgentClip	slot 96 of class 0x0B: in mode 0x2DA and state 12, when the nearest key (FindNearestAgentKey) has changed, lowers the count at +0xC5C and points that key's state walker at 0x2E0; then runs RestartAgentClip
-func_001E8EF8	UpdateKeyedConeAgentGoal	slot 94 of class 0x0B: in state 4 heads for +0x190 or the object at +0xC60, in state 8 for the object its slot 98 returns, else runs UpdateAgentGoal
-func_001E8FA8	UpdateKeyedConeAgentState	slot 90 of class 0x0B: in state 8 runs func_001C8BC0, else UpdateAgentState
+func_001E8A50	EnterWorld1BossState	slot 92 of class 0x0B, its override of EnterAgentState. Boss of world 1: one of the five calls of MarkLevelDone, with world 1, and the class's only object in retail's levels is in level 0x108, the last of world 1
+func_001E8D58	ChooseWorld1BossState	slot 89 of class 0x0B: with its count at +0xC5C used up clears the deadline +0xBFC to FLT_MAX; keeps state 10 while +0x7E0 is set (else 8), otherwise asks ChooseAgentState
+func_001E8DB0	IsWorld1BossFree	slot 0x16C of class 0x0B, the slot of IsConeAgentFree and IsWorld2BossFree: 0 while +0xC40 is set, else whether the count at +0xC5C is nonzero
+func_001E8DD0	IsWorld1BossTargetInRange	slot 93 of class 0x0B: true only in mode 0x2DB with the count at +0xC5C neither 0 nor 5
+func_001E8E08	SteerWorld1BossAlongPath	slot 97 of class 0x0B: outside mode 0x2DA lowers the count at +0xC5C by one (not below 0), then runs SteerAgentAlongPath
+func_001E8E48	RestartWorld1BossClip	slot 96 of class 0x0B: in mode 0x2DA and state 12, when the nearest key (FindNearestAgentKey) has changed, lowers the count at +0xC5C and points that key's state walker at 0x2E0; then runs RestartAgentClip
+func_001E8EF8	UpdateWorld1BossGoal	slot 94 of class 0x0B: in state 4 heads for +0x190 or the object at +0xC60, in state 8 for the object its slot 98 returns, else runs UpdateAgentGoal
+func_001E8FA8	UpdateWorld1BossState	slot 90 of class 0x0B: in state 8 runs func_001C8BC0, else UpdateAgentState
 func_001E8FE8	ShowElementWhenMenusClear	calls slot 14 (show) of the element D_0026E248 when AreMenusAndFadeClear is true and slot 15 (hide) otherwise
 func_001E9038	TestAgentMayContactExceptKeys	slot 60 of class 0x0B: returns 0 when the probe's key (+0x50) is one of the six keys at +0xC64, else TestAgentMayContact
 func_001E9088	InitGlobalElementStack	runs InitElementStack on the global D_00275BC0, the stack object the pause and map code push to and pop from
@@ -40,7 +40,7 @@ func_001EA620	ApproachValueClampingVelocity	runs ApproachValueWithRamp, then whe
 func_001EA728	ApproachAngleWithRamp	wraps the angle difference with WrapAngle, runs ApproachValueWithRamp on it and wraps the sum with the start angle
 func_001EA798	ApproachAngleClampingVelocity	wraps the angle difference, runs ApproachValueClampingVelocity on it and wraps the sum with the start angle
 func_001EA818	ApproachPointWithRamp	original assembly: moves a point toward a target along the line between them by ApproachValueWithRamp of the distance, writing the new point and, when asked, the velocity; UpdatePlayer, UpdatePanelStick and the player's path and target controls call it
-func_001EA918	ApproachRotationWithRamp	original assembly: turns a rotation toward a target rotation: the axis and angle between them (MultiplyMatrices3x3, MatrixToAxisAngle), ApproachValueWithRamp on the angle and the rotation about the axis (BuildAxisAngleMatrix); ControlModeCollider, ControlModeWalker and UpdatePlayerLinkPose call it
+func_001EA918	ApproachRotationWithRamp	original assembly: turns a rotation toward a target rotation: the axis and angle between them (MultiplyMatrices3x3, MatrixToAxisAngle), ApproachValueWithRamp on the angle and the rotation about the axis (BuildAxisAngleMatrix); ControlWorld5ModeCollider, ControlModeWalker and UpdatePlayerLinkPose call it
 func_001EAA70	RandomIntInRange	returns a + (random value mod b - a + 1) for a != b, using func_001F6708
 func_001EAAE0	RandomFloatInRange	returns a when a == b, else a + (b - a) times a random 31-bit integer from func_001F6708 scaled by 2^-31
 func_001EAB48	RandomGaussian	draws points in the unit circle by RandomFloatInRange, applies the polar transform with log and square root, scales by deviation, adds mean and clamps to mean +- limit when limit is nonzero
@@ -58,57 +58,57 @@ func_001EB0F8	ClampToRange	returns lo when x is below it, hi when above it, else
 func_001EB128	CompareFloats	compares the floats two pointers refer to and returns 1, -1 or 0 (a comparison function with qsort's shape)
 func_001EB160	IgnoreStackLocal	an empty function; func_00127B20 calls it with the address of a 16-byte local of its frame
 func_001EB168	FindLocalMinimum	from a start value clamped to the range samples the function (by $f12 with its context) one step below and above, walks toward the lower side and narrows the step until the bracket closes, writing the lowest argument and value; ChoosePlayerTargetByCost passes it the ScoreTarget*At functions
-func_001EB460	InitBeatPressCollider	slot 0 of class 0x1C: runs InitSwitchedCollider and sets the timing window +0x684 between the two values D_00275C70 by the polynomial D_00275C80 of g_currentEntry's dt, clamped to g_unitRange
-func_001EB518	LoadBeatPressCollider	slot 10 of class 0x1C: runs LoadCollider and resolves its link (D_00275C90)
+func_001EB460	InitWorld3BeatPressCollider	slot 0 of class 0x1C: runs InitSwitchedCollider and sets the timing window +0x684 between the two values D_00275C70 by the polynomial D_00275C80 of g_currentEntry's dt, clamped to g_unitRange
+func_001EB518	LoadWorld3BeatPressCollider	slot 10 of class 0x1C: runs LoadCollider and resolves its link (D_00275C90)
 func_001EB550	CopyPlayerAttachBlock	copies the block at +0x580 and the word at +0x604 of the player g_player into the class 0x1C object (its slot 16 calls it)
-func_001EB598	StartBeatPressCollider	slot 16 of class 0x1C: starts the placed object, resolves its links (D_00275CA0), creates its state walker at 0x4CA and queues CopyPlayerAttachBlock for itself
-func_001EB608	HandleBeatPressColliderActivation	slot 72 of class 0x1C: runs HandleSwitchedColliderActivation; on activation points its walker at 0x4CB and links itself and the class 0x13 tempo agent at +0x68C, on deactivation points it back at 0x4CA
-func_001EB698	ContinueBeatPressColliderRequest	original assembly: the callback JudgeBeatPressInput installs: turns the player toward the collider (ArctangentOfRatio, WrapAngle, TurnColliderTowardHeading) and changes its state (SetPlayerState), as ContinueTintBlendColliderRequest does for class 0x14
-func_001EB748	JudgeBeatPressInput	slot 73 of class 0x1C: holds the player at its anchor, matches a pressed direction (pad bits 0x10..0x80) against the current entry of +0x634 within half the window +0x684 of the tempo agent's beat, plays the hit or miss sounds, and on a missed beat ends the run or the player's hold; then moves to the next entry
-func_001EBC88	IsBeatPressColliderRequestBlocked	slot 75 of class 0x1C: blocked while g_buttonCodeFlags bit 0 is set or the pad select flag is held (IsPadSelectFlagHeld), else while +0x688 is set
-func_001EBCD8	AppendBeatPressEntry	appends an eight-byte (time, direction) entry to the array at +0x634 of a class 0x1C beat-press collider, counted at its +0x630 word, the entries JudgeBeatPressInput works through (func_001EC7A8 calls it)
-func_001EBD08	AcceptBeatPressColliderRequest	slot 0x140 of class 0x1C, the slot AcceptPlayerRequest and AcceptAgentRequest fill: returns 0 and takes no request
-func_001EBD10	GetBeatPressColliderPositionAt	slot 34 of class 0x1C, its override of GetPlacedObjectPositionAt
-func_001EBDD0	GetBeatPressColliderRotationAt	slot 35 of class 0x1C, its override of GetPlacedObjectRotationAt
-func_001EBEB0	InitTempoAgent	slot 0 of class 0x13: runs InitAgent, sets the tempo +0xC5C to 60 beats a minute and the beat length +0xC8C to 1.0, the span +0xC60 to 8 beats (8.0 at +0xC64), allocates its 0x400-byte entry array and stops the staged bank voice
-func_001EBF40	LoadTempoAgent	slot 10 of class 0x13
-func_001EBFB0	StartTempoAgent	slot 16 of class 0x13: starts the agent, makes itself the world's active follower, resolves its links (D_00275D08), creates its state walker and copies its nine-entry object table from D_00275D48, finding each entry's object by id
-func_001EC098	UnregisterTempoAgent	slot 7 of class 0x13: runs UnregisterSwitchedCollider
-func_001EC0B8	RegisterTempoAgent	slot 6 of class 0x13: runs RegisterSwitchedCollider
-func_001EC0D8	IsTempoAgentTargetInRange	slot 93 of class 0x13: decides by the state its walker is in (func_001B6598): the 0x4ED group while +0xC20 is set, the 0x4EE group by the phase +0xC94 (0 moves it to 1)
-func_001EC188	IsTempoAgentFree	slot 0x16C of class 0x13, the slot of IsConeAgentFree and IsGaugeAgentFree: always 1
-func_001EC190	DrawTempoAgentRing	the deferred draw DrawTempoAgent queues: fills its parameter block once, finds an anim record (FindAnimRecord), scales its colours (ScaleQuadword) and draws the agent's ring of entries with DrawAngleSortedRing
-func_001EC380	ApplyTempoAgentTransform	slot 0xA0 of class 0x13, the slot BlendPlayerPose and ApplyModeColliderTint fill: in state 16 (+0x724) builds its own transform (BuildPlacedObjectTransform) with +0x44 cleared and passes it to the base func_00125C90 instead of the given one
-func_001EC3D8	DrawTempoAgent	slot 37 of class 0x13, its override of DrawAgent
-func_001EC478	LeaveTempoAgentState	slot 91 of class 0x13: runs LeaveAgentState and, leaving state 16, resets the phase +0xC94 and moves its walker from 0x4EE, 0x4F1 or 0x4F4 to the next state
-func_001EC528	DecrementTempoAgentGauge	the script built-in func_00108B48 calls it: lowers the gauge bar's count (DecrementGaugeCount), sets +0xA68 to 2 and snaps the bar's fill to its target
-func_001EC570	EnterTempoAgentState	slot 92 of class 0x13: lowers the gauge bar on states 16 and 11 (11 also marks level 3 done and saves), runs EnterAgentState, then sets the clip rates from the beat length +0xC88 and adds its entry for states 2 and 13 (AddTempoAgentEntry)
-func_001EC7A8	ScheduleTempoAgentBeatPress	RunTimelineEntry's kind 0: stores the entry's direction (+0xC) at +0xC40, its object (+0xC10 by direction) at +0xC20 and the time at +0xC44, and appends a (direction, time) entry, the beat four times the entry's bar plus its beat after +0xC60, to the beat-press collider at +0xC3C (AppendBeatPressEntry)
-func_001EC828	HandleTempoAgentNotification	slot 13 of class 0x13
-func_001ECB18	SyncTempoAgentEntries	queued each frame by UpdateTempoAgent: sets each entry's object rate (+0x18) so that it reaches its next division of the beat count +0xC74 by the next beat time +0xC84
-func_001ECBC8	UpdateTempoAgent	slot 17 of class 0x13: runs UpdateAgent, restarts the beat clock when D_00275DB8 is 2, and on each beat time +0xC84 advances the beat +0xC74, the beat in the bar +0xC78 (four to a bar, +0xC70 counts bars) and the next beat time by the beat length; then runs its timeline and queues SyncTempoAgentEntries
-func_001ECDF8	ShowTempoAgentGauge	slot 46 of class 0x13: shows the gauge bar g_gaugeBarElement (slot 14) while its walker is in state 0x4EE, 0x4F1, 0x4F4 or 0x4F7 and AreMenusAndFadeClear holds, else hides it (slot 15)
-func_001ECE98	UpdateTempoAgentGoal	slot 94 of class 0x13: in states 12 and 13 heads for the object at +0xC48 (else its own position), otherwise runs UpdateAgentGoal
-func_001ECF10	UpdateTempoAgentState	slot 90 of class 0x13, its override of UpdateAgentState
-func_001ED018	SetTempoAgentPendingTimeline	stores the timeline at +0xC34 that UpdateTempoAgent starts when the beat clock restarts (the script built-in func_00108878 calls it)
-func_001ED020	EndHeldTimeline	ends the timeline held at +0xC38 with EndTimeline and clears the field; the script built-in func_00108928 and func_001EB748 call it
-func_001ED050	SetTempoAgentTempo	stores the tempo in beats a minute at +0xC5C of a class 0x13 tempo agent and 60 over it, the beat length in seconds UpdateTempoAgent counts beats by, at +0xC8C (the script built-in func_00109488 calls it)
-func_001ED070	SetTempoAgentSpanBeats	stores a number of beats at +0xC60 of a class 0x13 tempo agent and that many beat lengths (+0xC88) in seconds at +0xC64 (the script built-in func_00109488 calls it)
-func_001ED090	AddTempoAgentEntry	appends an (object, word) entry to the array at +0xC6C of a class 0x13 tempo agent, counted at +0xC68, and hands the object to func_0012F810; slot 92 of the class (func_001EC570) and the script built-in func_001089C8 call it
-func_001ED0D8	RemoveTempoAgentEntry	removes the entry with the key from the array at +0xC6C (count +0xC68) that AddTempoAgentEntry fills, shifting the rest down (the script built-in func_00108A98 and HandleTempoAgentNotification call it)
-func_001ED168	InitTimeline	slot 4 of class 0x90: runs func_00182C18 and allocates the 0xC00-byte buffer of 0xC0 sixteen-byte entries
-func_001ED198	FindTimelineTarget	slot 20 of class 0x90: finds the class 0x13 object in the world with func_0015A838 and keeps it in +0x40
-func_001ED1D8	RestartTimeline	clears the word at +0x3C, copies +0x70 of the object at +0x40 into +0x44 and raises script event 0x1A; func_001ECBC8 calls it
-func_001ED210	EndTimeline	raises script event 0x1C on the timeline, runs its entry kind 5 with RunTimelineEntry and, when its found target's +0x3C is set, kind 3
-func_001ED278	RunTimelineEntries	while the entry at the current index is due (its time plus +0x44 is not after the target's beat counter at +0xC70, and not equal with an earlier fraction), runs it with RunTimelineEntry and advances the index
-func_001ED318	RunTimelineEntry	switches on the entry's kind: kind 0 calls func_001EC7A8 on the target, 1 sends message 0x1B, 2 and 3 set and clear a flag in the object at +0xC3C and set the element D_00273C50's state, 4 and 5 do the same for +0xC4C and D_002739F0
-func_001ED4C8	AppendTimelineEntry	stores a kind, a value and a float in the next 16-byte entry of the buffer (limit 0xC0, returning a dummy record when full) and returns it; func_001ED558 .. func_001ED618 call it with kinds 0 .. 5
-func_001ED558	AppendTimelineKind0Entry	appends a timeline entry of kind 0 with AppendTimelineEntry and stores the value at its +0xC (the script built-in func_00108BE8 calls it)
-func_001ED588	AppendTimelineKind1Entry	appends a timeline entry of kind 1 with AppendTimelineEntry and stores the value at its +0xC
-func_001ED5B8	AppendTimelineKind2Entry	appends a timeline entry of kind 2 with AppendTimelineEntry
-func_001ED5D8	AppendTimelineKind3Entry	appends a timeline entry of kind 3 with AppendTimelineEntry
-func_001ED5F8	AppendTimelineKind4Entry	appends a timeline entry of kind 4 with AppendTimelineEntry
-func_001ED618	AppendTimelineKind5Entry	appends a timeline entry of kind 5 with AppendTimelineEntry
+func_001EB598	StartWorld3BeatPressCollider	slot 16 of class 0x1C: starts the placed object, resolves its links (D_00275CA0), creates its state walker at 0x4CA and queues CopyPlayerAttachBlock for itself
+func_001EB608	HandleWorld3BeatPressColliderActivation	slot 72 of class 0x1C: runs HandleSwitchedColliderActivation; on activation points its walker at 0x4CB and links itself and the class 0x13 tempo agent at +0x68C, on deactivation points it back at 0x4CA
+func_001EB698	ContinueWorld3BeatPressColliderRequest	original assembly: the callback JudgeWorld3BeatPressInput installs: turns the player toward the collider (ArctangentOfRatio, WrapAngle, TurnColliderTowardHeading) and changes its state (SetPlayerState), as ContinueTintBlendColliderRequest does for class 0x14
+func_001EB748	JudgeWorld3BeatPressInput	slot 73 of class 0x1C: holds the player at its anchor, matches a pressed direction (pad bits 0x10..0x80) against the current entry of +0x634 within half the window +0x684 of the tempo agent's beat, plays the hit or miss sounds, and on a missed beat ends the run or the player's hold; then moves to the next entry
+func_001EBC88	IsWorld3BeatPressColliderRequestBlocked	slot 75 of class 0x1C: blocked while g_buttonCodeFlags bit 0 is set or the pad select flag is held (IsPadSelectFlagHeld), else while +0x688 is set
+func_001EBCD8	AppendWorld3BeatPressEntry	appends an eight-byte (time, direction) entry to the array at +0x634 of a class 0x1C beat-press collider, counted at its +0x630 word, the entries JudgeWorld3BeatPressInput works through (func_001EC7A8 calls it)
+func_001EBD08	AcceptWorld3BeatPressColliderRequest	slot 0x140 of class 0x1C, the slot AcceptPlayerRequest and AcceptAgentRequest fill: returns 0 and takes no request
+func_001EBD10	GetWorld3BeatPressColliderPositionAt	slot 34 of class 0x1C, its override of GetPlacedObjectPositionAt
+func_001EBDD0	GetWorld3BeatPressColliderRotationAt	slot 35 of class 0x1C, its override of GetPlacedObjectRotationAt
+func_001EBEB0	InitWorld3Boss	slot 0 of class 0x13: runs InitAgent, sets the tempo +0xC5C to 60 beats a minute and the beat length +0xC8C to 1.0, the span +0xC60 to 8 beats (8.0 at +0xC64), allocates its 0x400-byte entry array and stops the staged bank voice
+func_001EBF40	LoadWorld3Boss	slot 10 of class 0x13
+func_001EBFB0	StartWorld3Boss	slot 16 of class 0x13: starts the agent, makes itself the world's active follower, resolves its links (D_00275D08), creates its state walker and copies its nine-entry object table from D_00275D48, finding each entry's object by id
+func_001EC098	UnregisterWorld3Boss	slot 7 of class 0x13: runs UnregisterSwitchedCollider
+func_001EC0B8	RegisterWorld3Boss	slot 6 of class 0x13: runs RegisterSwitchedCollider
+func_001EC0D8	IsWorld3BossTargetInRange	slot 93 of class 0x13: decides by the state its walker is in (func_001B6598): the 0x4ED group while +0xC20 is set, the 0x4EE group by the phase +0xC94 (0 moves it to 1)
+func_001EC188	IsWorld3BossFree	slot 0x16C of class 0x13, the slot of IsConeAgentFree and IsWorld2BossFree: always 1
+func_001EC190	DrawWorld3BossRing	the deferred draw DrawWorld3Boss queues: fills its parameter block once, finds an anim record (FindAnimRecord), scales its colours (ScaleQuadword) and draws the agent's ring of entries with DrawAngleSortedRing
+func_001EC380	ApplyWorld3BossTransform	slot 0xA0 of class 0x13, the slot BlendPlayerPose and ApplyWorld5ModeColliderTint fill: in state 16 (+0x724) builds its own transform (BuildPlacedObjectTransform) with +0x44 cleared and passes it to the base func_00125C90 instead of the given one
+func_001EC3D8	DrawWorld3Boss	slot 37 of class 0x13, its override of DrawAgent
+func_001EC478	LeaveWorld3BossState	slot 91 of class 0x13: runs LeaveAgentState and, leaving state 16, resets the phase +0xC94 and moves its walker from 0x4EE, 0x4F1 or 0x4F4 to the next state
+func_001EC528	DecrementWorld3BossGauge	the script built-in func_00108B48 calls it: lowers the gauge bar's count (DecrementGaugeCount), sets +0xA68 to 2 and snaps the bar's fill to its target
+func_001EC570	EnterWorld3BossState	slot 92 of class 0x13: lowers the gauge bar on states 16 and 11 (11 also marks level 3 done and saves), runs EnterAgentState, then sets the clip rates from the beat length +0xC88 and adds its entry for states 2 and 13 (AddWorld3BossEntry). Boss of world 3: one of the five calls of MarkLevelDone, with world 3, and the class's only object in retail's levels is in level 0x308, the last of world 3
+func_001EC7A8	ScheduleWorld3BossBeatPress	RunWorld3TimelineEntry's kind 0: stores the entry's direction (+0xC) at +0xC40, its object (+0xC10 by direction) at +0xC20 and the time at +0xC44, and appends a (direction, time) entry, the beat four times the entry's bar plus its beat after +0xC60, to the beat-press collider at +0xC3C (AppendWorld3BeatPressEntry)
+func_001EC828	HandleWorld3BossNotification	slot 13 of class 0x13
+func_001ECB18	SyncWorld3BossEntries	queued each frame by UpdateWorld3Boss: sets each entry's object rate (+0x18) so that it reaches its next division of the beat count +0xC74 by the next beat time +0xC84
+func_001ECBC8	UpdateWorld3Boss	slot 17 of class 0x13: runs UpdateAgent, restarts the beat clock when D_00275DB8 is 2, and on each beat time +0xC84 advances the beat +0xC74, the beat in the bar +0xC78 (four to a bar, +0xC70 counts bars) and the next beat time by the beat length; then runs its timeline and queues SyncWorld3BossEntries
+func_001ECDF8	ShowWorld3BossGauge	slot 46 of class 0x13: shows the gauge bar g_gaugeBarElement (slot 14) while its walker is in state 0x4EE, 0x4F1, 0x4F4 or 0x4F7 and AreMenusAndFadeClear holds, else hides it (slot 15)
+func_001ECE98	UpdateWorld3BossGoal	slot 94 of class 0x13: in states 12 and 13 heads for the object at +0xC48 (else its own position), otherwise runs UpdateAgentGoal
+func_001ECF10	UpdateWorld3BossState	slot 90 of class 0x13, its override of UpdateAgentState
+func_001ED018	SetWorld3BossPendingTimeline	stores the timeline at +0xC34 that UpdateWorld3Boss starts when the beat clock restarts (the script built-in func_00108878 calls it)
+func_001ED020	EndHeldWorld3Timeline	ends the timeline held at +0xC38 with EndWorld3Timeline and clears the field; the script built-in func_00108928 and func_001EB748 call it
+func_001ED050	SetWorld3BossTempo	stores the tempo in beats a minute at +0xC5C of a class 0x13 tempo agent and 60 over it, the beat length in seconds UpdateWorld3Boss counts beats by, at +0xC8C (the script built-in func_00109488 calls it)
+func_001ED070	SetWorld3BossSpanBeats	stores a number of beats at +0xC60 of a class 0x13 tempo agent and that many beat lengths (+0xC88) in seconds at +0xC64 (the script built-in func_00109488 calls it)
+func_001ED090	AddWorld3BossEntry	appends an (object, word) entry to the array at +0xC6C of a class 0x13 tempo agent, counted at +0xC68, and hands the object to func_0012F810; slot 92 of the class (func_001EC570) and the script built-in func_001089C8 call it
+func_001ED0D8	RemoveWorld3BossEntry	removes the entry with the key from the array at +0xC6C (count +0xC68) that AddWorld3BossEntry fills, shifting the rest down (the script built-in func_00108A98 and HandleWorld3BossNotification call it)
+func_001ED168	InitWorld3Timeline	slot 4 of class 0x90: runs func_00182C18 and allocates the 0xC00-byte buffer of 0xC0 sixteen-byte entries
+func_001ED198	FindWorld3TimelineTarget	slot 20 of class 0x90: finds the class 0x13 object in the world with func_0015A838 and keeps it in +0x40
+func_001ED1D8	RestartWorld3Timeline	clears the word at +0x3C, copies +0x70 of the object at +0x40 into +0x44 and raises script event 0x1A; func_001ECBC8 calls it
+func_001ED210	EndWorld3Timeline	raises script event 0x1C on the timeline, runs its entry kind 5 with RunWorld3TimelineEntry and, when its found target's +0x3C is set, kind 3
+func_001ED278	RunWorld3TimelineEntries	while the entry at the current index is due (its time plus +0x44 is not after the target's beat counter at +0xC70, and not equal with an earlier fraction), runs it with RunWorld3TimelineEntry and advances the index
+func_001ED318	RunWorld3TimelineEntry	switches on the entry's kind: kind 0 calls func_001EC7A8 on the target, 1 sends message 0x1B, 2 and 3 set and clear a flag in the object at +0xC3C and set the element D_00273C50's state, 4 and 5 do the same for +0xC4C and D_002739F0
+func_001ED4C8	AppendWorld3TimelineEntry	stores a kind, a value and a float in the next 16-byte entry of the buffer (limit 0xC0, returning a dummy record when full) and returns it; func_001ED558 .. func_001ED618 call it with kinds 0 .. 5
+func_001ED558	AppendWorld3TimelineKind0Entry	appends a timeline entry of kind 0 with AppendWorld3TimelineEntry and stores the value at its +0xC (the script built-in func_00108BE8 calls it)
+func_001ED588	AppendWorld3TimelineKind1Entry	appends a timeline entry of kind 1 with AppendWorld3TimelineEntry and stores the value at its +0xC
+func_001ED5B8	AppendWorld3TimelineKind2Entry	appends a timeline entry of kind 2 with AppendWorld3TimelineEntry
+func_001ED5D8	AppendWorld3TimelineKind3Entry	appends a timeline entry of kind 3 with AppendWorld3TimelineEntry
+func_001ED5F8	AppendWorld3TimelineKind4Entry	appends a timeline entry of kind 4 with AppendWorld3TimelineEntry
+func_001ED618	AppendWorld3TimelineKind5Entry	appends a timeline entry of kind 5 with AppendWorld3TimelineEntry
 func_001ED650	ComputePolarOffset	takes sin and cos of its angle (ComputeSinCos) and writes cos*scale, sin*scale and z to the output vector
 func_001ED6B0	ComputeDirectionFromAngles	takes the sine and cosine of two angles and writes (cos b cos a, cos b sin a, sin b) times a scale
 func_001ED738	SplitVectorAlongAxis	returns the dot product of a vector with an axis and writes, when asked, its part along the axis and the rest

@@ -1675,7 +1675,7 @@
      "address": "29320",
      "metadata": {
       "virtual_address": "1078096",
-      "demangled_name": "AdvanceScriptGaugeAgentPhase"
+      "demangled_name": "AdvanceScriptWorld2BossPhase"
      }
     },
     {
@@ -1935,7 +1935,7 @@
      "address": "34240",
      "metadata": {
       "virtual_address": "1083016",
-      "demangled_name": "PlayScriptGaugeModeObjectTarget"
+      "demangled_name": "PlayScriptWorld5BossTarget"
      }
     },
     {
@@ -1945,7 +1945,7 @@
      "address": "34400",
      "metadata": {
       "virtual_address": "1083176",
-      "demangled_name": "SetScriptGaugeModeObjectTarget"
+      "demangled_name": "SetScriptWorld5BossTarget"
      }
     },
     {
@@ -1955,7 +1955,7 @@
      "address": "34576",
      "metadata": {
       "virtual_address": "1083352",
-      "demangled_name": "PlaceScriptModeColliderAtAnchor"
+      "demangled_name": "PlaceScriptWorld5ModeColliderAtAnchor"
      }
     },
     {
@@ -1965,7 +1965,7 @@
      "address": "34736",
      "metadata": {
       "virtual_address": "1083512",
-      "demangled_name": "SetScriptTempoAgentPendingTimeline"
+      "demangled_name": "SetScriptWorld3BossPendingTimeline"
      }
     },
     {
@@ -1975,7 +1975,7 @@
      "address": "34912",
      "metadata": {
       "virtual_address": "1083688",
-      "demangled_name": "EndScriptHeldTimeline"
+      "demangled_name": "EndScriptHeldWorld3Timeline"
      }
     },
     {
@@ -1995,7 +1995,7 @@
      "address": "35280",
      "metadata": {
       "virtual_address": "1084056",
-      "demangled_name": "RemoveScriptTempoAgentEntry"
+      "demangled_name": "RemoveScriptWorld3BossEntry"
      }
     },
     {
@@ -2005,7 +2005,7 @@
      "address": "35456",
      "metadata": {
       "virtual_address": "1084232",
-      "demangled_name": "DecrementScriptTempoAgentGauge"
+      "demangled_name": "DecrementScriptWorld3BossGauge"
      }
     },
     {
@@ -2015,7 +2015,7 @@
      "address": "35616",
      "metadata": {
       "virtual_address": "1084392",
-      "demangled_name": "AppendScriptTimelineKind0Entry"
+      "demangled_name": "AppendScriptWorld3TimelineKind0Entry"
      }
     },
     {
@@ -2025,7 +2025,7 @@
      "address": "35840",
      "metadata": {
       "virtual_address": "1084616",
-      "demangled_name": "AppendScriptTimelineKind1Entry"
+      "demangled_name": "AppendScriptWorld3TimelineKind1Entry"
      }
     },
     {
@@ -2035,7 +2035,7 @@
      "address": "36064",
      "metadata": {
       "virtual_address": "1084840",
-      "demangled_name": "AppendScriptTimelineKind2Entry"
+      "demangled_name": "AppendScriptWorld3TimelineKind2Entry"
      }
     },
     {
@@ -2045,7 +2045,7 @@
      "address": "36264",
      "metadata": {
       "virtual_address": "1085040",
-      "demangled_name": "AppendScriptTimelineKind3Entry"
+      "demangled_name": "AppendScriptWorld3TimelineKind3Entry"
      }
     },
     {
@@ -2055,7 +2055,7 @@
      "address": "36464",
      "metadata": {
       "virtual_address": "1085240",
-      "demangled_name": "AppendScriptTimelineKind4Entry"
+      "demangled_name": "AppendScriptWorld3TimelineKind4Entry"
      }
     },
     {
@@ -2065,7 +2065,7 @@
      "address": "36664",
      "metadata": {
       "virtual_address": "1085440",
-      "demangled_name": "AppendScriptTimelineKind5Entry"
+      "demangled_name": "AppendScriptWorld3TimelineKind5Entry"
      }
     },
     {
@@ -2075,7 +2075,7 @@
      "address": "36864",
      "metadata": {
       "virtual_address": "1085640",
-      "demangled_name": "SetScriptGaugeBarAgentValues"
+      "demangled_name": "SetScriptWorld4BossValues"
      }
     },
     {
@@ -21929,7 +21929,7 @@
    }
   },
   {
-   "name": "game/mode_collider",
+   "name": "game/world5_boss",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "9636",
@@ -21956,7 +21956,7 @@
      "address": "0",
      "metadata": {
       "virtual_address": "1546784",
-      "demangled_name": "InitModeCollider"
+      "demangled_name": "InitWorld5ModeCollider"
      }
     },
     {
@@ -21966,7 +21966,7 @@
      "address": "48",
      "metadata": {
       "virtual_address": "1546832",
-      "demangled_name": "StartModeCollider"
+      "demangled_name": "StartWorld5ModeCollider"
      }
     },
     {
@@ -21976,7 +21976,7 @@
      "address": "288",
      "metadata": {
       "virtual_address": "1547072",
-      "demangled_name": "ComputeModeColliderAnchors"
+      "demangled_name": "ComputeWorld5ModeColliderAnchors"
      }
     },
     {
@@ -21986,7 +21986,7 @@
      "address": "464",
      "metadata": {
       "virtual_address": "1547248",
-      "demangled_name": "StepModeCollider"
+      "demangled_name": "StepWorld5ModeCollider"
      }
     },
     {
@@ -21996,7 +21996,7 @@
      "address": "720",
      "metadata": {
       "virtual_address": "1547504",
-      "demangled_name": "MoveModeCollider"
+      "demangled_name": "MoveWorld5ModeCollider"
      }
     },
     {
@@ -22006,7 +22006,7 @@
      "address": "784",
      "metadata": {
       "virtual_address": "1547568",
-      "demangled_name": "UpdateModeCollider"
+      "demangled_name": "UpdateWorld5ModeCollider"
      }
     },
     {
@@ -22016,7 +22016,7 @@
      "address": "1704",
      "metadata": {
       "virtual_address": "1548488",
-      "demangled_name": "ControlModeCollider"
+      "demangled_name": "ControlWorld5ModeCollider"
      }
     },
     {
@@ -22026,7 +22026,7 @@
      "address": "4880",
      "metadata": {
       "virtual_address": "1551664",
-      "demangled_name": "FinishModeCollider"
+      "demangled_name": "FinishWorld5ModeCollider"
      }
     },
     {
@@ -22036,7 +22036,7 @@
      "address": "4928",
      "metadata": {
       "virtual_address": "1551712",
-      "demangled_name": "HandleModeColliderActivation"
+      "demangled_name": "HandleWorld5ModeColliderActivation"
      }
     },
     {
@@ -22046,7 +22046,7 @@
      "address": "5064",
      "metadata": {
       "virtual_address": "1551848",
-      "demangled_name": "ApplyModeColliderTint"
+      "demangled_name": "ApplyWorld5ModeColliderTint"
      }
     },
     {
@@ -22056,7 +22056,7 @@
      "address": "5664",
      "metadata": {
       "virtual_address": "1552448",
-      "demangled_name": "IsModeColliderRequestBlocked"
+      "demangled_name": "IsWorld5ModeColliderRequestBlocked"
      }
     },
     {
@@ -22066,7 +22066,7 @@
      "address": "5760",
      "metadata": {
       "virtual_address": "1552544",
-      "demangled_name": "AcceptModeColliderRequest"
+      "demangled_name": "AcceptWorld5ModeColliderRequest"
      }
     },
     {
@@ -22076,7 +22076,7 @@
      "address": "6040",
      "metadata": {
       "virtual_address": "1552824",
-      "demangled_name": "HandleModeColliderNotification"
+      "demangled_name": "HandleWorld5ModeColliderNotification"
      }
     },
     {
@@ -22086,7 +22086,7 @@
      "address": "6168",
      "metadata": {
       "virtual_address": "1552952",
-      "demangled_name": "HasModeColliderAcceptedRequest"
+      "demangled_name": "HasWorld5ModeColliderAcceptedRequest"
      }
     },
     {
@@ -22096,7 +22096,7 @@
      "address": "6184",
      "metadata": {
       "virtual_address": "1552968",
-      "demangled_name": "SetModeColliderMode"
+      "demangled_name": "SetWorld5ModeColliderMode"
      }
     },
     {
@@ -22106,7 +22106,7 @@
      "address": "6544",
      "metadata": {
       "virtual_address": "1553328",
-      "demangled_name": "PlaceModeColliderAtAnchor"
+      "demangled_name": "PlaceWorld5ModeColliderAtAnchor"
      }
     },
     {
@@ -22116,7 +22116,7 @@
      "address": "6672",
      "metadata": {
       "virtual_address": "1553456",
-      "demangled_name": "InitGaugeModeObject"
+      "demangled_name": "InitWorld5Boss"
      }
     },
     {
@@ -22126,7 +22126,7 @@
      "address": "6720",
      "metadata": {
       "virtual_address": "1553504",
-      "demangled_name": "StartGaugeModeObject"
+      "demangled_name": "StartWorld5Boss"
      }
     },
     {
@@ -22136,7 +22136,7 @@
      "address": "7032",
      "metadata": {
       "virtual_address": "1553816",
-      "demangled_name": "UpdateGaugeModeObject"
+      "demangled_name": "UpdateWorld5Boss"
      }
     },
     {
@@ -22146,7 +22146,7 @@
      "address": "8008",
      "metadata": {
       "virtual_address": "1554792",
-      "demangled_name": "ShowGaugeModeObjectBar"
+      "demangled_name": "ShowWorld5BossBar"
      }
     },
     {
@@ -22156,7 +22156,7 @@
      "address": "8168",
      "metadata": {
       "virtual_address": "1554952",
-      "demangled_name": "HandleGaugeModeObjectEvent"
+      "demangled_name": "HandleWorld5BossEvent"
      }
     },
     {
@@ -22166,7 +22166,7 @@
      "address": "8272",
      "metadata": {
       "virtual_address": "1555056",
-      "demangled_name": "SetGaugeModeObjectMode"
+      "demangled_name": "SetWorld5BossMode"
      }
     },
     {
@@ -22176,7 +22176,7 @@
      "address": "8528",
      "metadata": {
       "virtual_address": "1555312",
-      "demangled_name": "PlayGaugeModeObjectLoop"
+      "demangled_name": "PlayWorld5BossLoop"
      }
     },
     {
@@ -22186,7 +22186,7 @@
      "address": "8592",
      "metadata": {
       "virtual_address": "1555376",
-      "demangled_name": "SetGaugeModeObjectTarget"
+      "demangled_name": "SetWorld5BossTarget"
      }
     },
     {
@@ -22196,7 +22196,7 @@
      "address": "8664",
      "metadata": {
       "virtual_address": "1555448",
-      "demangled_name": "PlayGaugeModeObjectTarget"
+      "demangled_name": "PlayWorld5BossTarget"
      }
     },
     {
@@ -22206,7 +22206,7 @@
      "address": "8720",
      "metadata": {
       "virtual_address": "1555504",
-      "demangled_name": "InitCountdown"
+      "demangled_name": "InitWorld5Countdown"
      }
     },
     {
@@ -22216,7 +22216,7 @@
      "address": "8784",
      "metadata": {
       "virtual_address": "1555568",
-      "demangled_name": "StartCountdown"
+      "demangled_name": "StartWorld5Countdown"
      }
     },
     {
@@ -22226,7 +22226,7 @@
      "address": "8840",
      "metadata": {
       "virtual_address": "1555624",
-      "demangled_name": "UpdateCountdown"
+      "demangled_name": "UpdateWorld5Countdown"
      }
     },
     {
@@ -22236,7 +22236,7 @@
      "address": "9040",
      "metadata": {
       "virtual_address": "1555824",
-      "demangled_name": "UpdateCountdownVisibility"
+      "demangled_name": "UpdateWorld5CountdownVisibility"
      }
     },
     {
@@ -22246,7 +22246,7 @@
      "address": "9192",
      "metadata": {
       "virtual_address": "1555976",
-      "demangled_name": "HandleCountdownObjectEvent"
+      "demangled_name": "HandleWorld5CountdownObjectEvent"
      }
     },
     {
@@ -22256,7 +22256,7 @@
      "address": "9472",
      "metadata": {
       "virtual_address": "1556256",
-      "demangled_name": "SetCountdownState"
+      "demangled_name": "SetWorld5CountdownState"
      }
     }
    ],
@@ -22265,7 +22265,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/mode_collider.cpp"
+    "source_path": "src/main/world5_boss.cpp"
    }
   },
   {
@@ -24803,7 +24803,7 @@
    }
   },
   {
-   "name": "game/gauge_agent",
+   "name": "game/world2_boss",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "4552",
@@ -24830,7 +24830,7 @@
      "address": "0",
      "metadata": {
       "virtual_address": "1616368",
-      "demangled_name": "InitGaugeAgent"
+      "demangled_name": "InitWorld2Boss"
      }
     },
     {
@@ -24840,7 +24840,7 @@
      "address": "48",
      "metadata": {
       "virtual_address": "1616416",
-      "demangled_name": "LoadGaugeAgent"
+      "demangled_name": "LoadWorld2Boss"
      }
     },
     {
@@ -24850,7 +24850,7 @@
      "address": "104",
      "metadata": {
       "virtual_address": "1616472",
-      "demangled_name": "StartGaugeAgent"
+      "demangled_name": "StartWorld2Boss"
      }
     },
     {
@@ -24860,7 +24860,7 @@
      "address": "392",
      "metadata": {
       "virtual_address": "1616760",
-      "demangled_name": "DrawGaugeAgentMarkerRing"
+      "demangled_name": "DrawWorld2BossMarkerRing"
      }
     },
     {
@@ -24870,7 +24870,7 @@
      "address": "672",
      "metadata": {
       "virtual_address": "1617040",
-      "demangled_name": "DrawGaugeAgent"
+      "demangled_name": "DrawWorld2Boss"
      }
     },
     {
@@ -24890,7 +24890,7 @@
      "address": "1192",
      "metadata": {
       "virtual_address": "1617560",
-      "demangled_name": "IsGaugeAgentBlocker"
+      "demangled_name": "IsWorld2BossBlocker"
      }
     },
     {
@@ -24900,7 +24900,7 @@
      "address": "1416",
      "metadata": {
       "virtual_address": "1617784",
-      "demangled_name": "IsGaugeAgentLineBlocked"
+      "demangled_name": "IsWorld2BossLineBlocked"
      }
     },
     {
@@ -24910,7 +24910,7 @@
      "address": "1568",
      "metadata": {
       "virtual_address": "1617936",
-      "demangled_name": "HasGaugeAgentClearLine"
+      "demangled_name": "HasWorld2BossClearLine"
      }
     },
     {
@@ -24920,7 +24920,7 @@
      "address": "1880",
      "metadata": {
       "virtual_address": "1618248",
-      "demangled_name": "IsGaugeAgentFree"
+      "demangled_name": "IsWorld2BossFree"
      }
     },
     {
@@ -24930,7 +24930,7 @@
      "address": "2048",
      "metadata": {
       "virtual_address": "1618416",
-      "demangled_name": "EnterGaugeAgentState"
+      "demangled_name": "EnterWorld2BossState"
      }
     },
     {
@@ -24940,7 +24940,7 @@
      "address": "2152",
      "metadata": {
       "virtual_address": "1618520",
-      "demangled_name": "ChooseGaugeAgentState"
+      "demangled_name": "ChooseWorld2BossState"
      }
     },
     {
@@ -24950,7 +24950,7 @@
      "address": "2256",
      "metadata": {
       "virtual_address": "1618624",
-      "demangled_name": "AdvanceGaugeAgentPhase"
+      "demangled_name": "AdvanceWorld2BossPhase"
      }
     },
     {
@@ -24960,7 +24960,7 @@
      "address": "2376",
      "metadata": {
       "virtual_address": "1618744",
-      "demangled_name": "UpdateGaugeAgent"
+      "demangled_name": "UpdateWorld2Boss"
      }
     },
     {
@@ -24970,7 +24970,7 @@
      "address": "2408",
      "metadata": {
       "virtual_address": "1618776",
-      "demangled_name": "ShowGaugeAgentBar"
+      "demangled_name": "ShowWorld2BossBar"
      }
     },
     {
@@ -24980,7 +24980,7 @@
      "address": "2560",
      "metadata": {
       "virtual_address": "1618928",
-      "demangled_name": "UpdateGaugeAgentGoal"
+      "demangled_name": "UpdateWorld2BossGoal"
      }
     },
     {
@@ -24990,7 +24990,7 @@
      "address": "2736",
      "metadata": {
       "virtual_address": "1619104",
-      "demangled_name": "UpdateGaugeAgentState"
+      "demangled_name": "UpdateWorld2BossState"
      }
     },
     {
@@ -25000,7 +25000,7 @@
      "address": "3936",
      "metadata": {
       "virtual_address": "1620304",
-      "demangled_name": "LeaveGaugeAgentState"
+      "demangled_name": "LeaveWorld2BossState"
      }
     },
     {
@@ -25010,7 +25010,7 @@
      "address": "4024",
      "metadata": {
       "virtual_address": "1620392",
-      "demangled_name": "HandleGaugeAgentNotification"
+      "demangled_name": "HandleWorld2BossNotification"
      }
     },
     {
@@ -25020,7 +25020,7 @@
      "address": "4312",
      "metadata": {
       "virtual_address": "1620680",
-      "demangled_name": "GetGaugeAgentLevelFactor"
+      "demangled_name": "GetWorld2BossLevelFactor"
      }
     }
    ],
@@ -25029,7 +25029,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/gauge_agent.cpp"
+    "source_path": "src/main/world2_boss.cpp"
    }
   },
   {
@@ -31126,7 +31126,7 @@
      "address": "6416",
      "metadata": {
       "virtual_address": "1746496",
-      "demangled_name": "StartGaugeBarAgent"
+      "demangled_name": "StartWorld4Boss"
      }
     },
     {
@@ -31136,7 +31136,7 @@
      "address": "6464",
      "metadata": {
       "virtual_address": "1746544",
-      "demangled_name": "IsGaugeBarAgentFree"
+      "demangled_name": "IsWorld4BossFree"
      }
     },
     {
@@ -31146,7 +31146,7 @@
      "address": "6520",
      "metadata": {
       "virtual_address": "1746600",
-      "demangled_name": "UpdateGaugeBarAgentGoal"
+      "demangled_name": "UpdateWorld4BossGoal"
      }
     },
     {
@@ -31156,7 +31156,7 @@
      "address": "6608",
      "metadata": {
       "virtual_address": "1746688",
-      "demangled_name": "UpdateGaugeBarAgentState"
+      "demangled_name": "UpdateWorld4BossState"
      }
     },
     {
@@ -31166,7 +31166,7 @@
      "address": "6672",
      "metadata": {
       "virtual_address": "1746752",
-      "demangled_name": "EnterGaugeBarAgentState"
+      "demangled_name": "EnterWorld4BossState"
      }
     },
     {
@@ -31176,7 +31176,7 @@
      "address": "6744",
      "metadata": {
       "virtual_address": "1746824",
-      "demangled_name": "UpdateGaugeBarAgent"
+      "demangled_name": "UpdateWorld4Boss"
      }
     },
     {
@@ -31186,7 +31186,7 @@
      "address": "6832",
      "metadata": {
       "virtual_address": "1746912",
-      "demangled_name": "UpdateGaugeBarAgentVisibility"
+      "demangled_name": "UpdateWorld4BossVisibility"
      }
     },
     {
@@ -31196,7 +31196,7 @@
      "address": "6912",
      "metadata": {
       "virtual_address": "1746992",
-      "demangled_name": "HandleGaugeBarAgentObjectEvent"
+      "demangled_name": "HandleWorld4BossObjectEvent"
      }
     },
     {
@@ -31206,7 +31206,7 @@
      "address": "7280",
      "metadata": {
       "virtual_address": "1747360",
-      "demangled_name": "SetGaugeBarAgentValues"
+      "demangled_name": "SetWorld4BossValues"
      }
     },
     {
@@ -41983,7 +41983,7 @@
      "address": "0",
      "metadata": {
       "virtual_address": "2005240",
-      "demangled_name": "InitKeyedConeAgent"
+      "demangled_name": "InitWorld1Boss"
      }
     },
     {
@@ -41993,7 +41993,7 @@
      "address": "120",
      "metadata": {
       "virtual_address": "2005360",
-      "demangled_name": "StartKeyedConeAgent"
+      "demangled_name": "StartWorld1Boss"
      }
     },
     {
@@ -42013,7 +42013,7 @@
      "address": "384",
      "metadata": {
       "virtual_address": "2005624",
-      "demangled_name": "EnterKeyedConeAgentState"
+      "demangled_name": "EnterWorld1BossState"
      }
     },
     {
@@ -42023,7 +42023,7 @@
      "address": "1160",
      "metadata": {
       "virtual_address": "2006400",
-      "demangled_name": "ChooseKeyedConeAgentState"
+      "demangled_name": "ChooseWorld1BossState"
      }
     },
     {
@@ -42033,7 +42033,7 @@
      "address": "1248",
      "metadata": {
       "virtual_address": "2006488",
-      "demangled_name": "IsKeyedConeAgentFree"
+      "demangled_name": "IsWorld1BossFree"
      }
     },
     {
@@ -42043,7 +42043,7 @@
      "address": "1280",
      "metadata": {
       "virtual_address": "2006520",
-      "demangled_name": "IsKeyedConeAgentTargetInRange"
+      "demangled_name": "IsWorld1BossTargetInRange"
      }
     },
     {
@@ -42053,7 +42053,7 @@
      "address": "1336",
      "metadata": {
       "virtual_address": "2006576",
-      "demangled_name": "SteerKeyedConeAgentAlongPath"
+      "demangled_name": "SteerWorld1BossAlongPath"
      }
     },
     {
@@ -42063,7 +42063,7 @@
      "address": "1400",
      "metadata": {
       "virtual_address": "2006640",
-      "demangled_name": "RestartKeyedConeAgentClip"
+      "demangled_name": "RestartWorld1BossClip"
      }
     },
     {
@@ -42073,7 +42073,7 @@
      "address": "1576",
      "metadata": {
       "virtual_address": "2006816",
-      "demangled_name": "UpdateKeyedConeAgentGoal"
+      "demangled_name": "UpdateWorld1BossGoal"
      }
     },
     {
@@ -42083,7 +42083,7 @@
      "address": "1752",
      "metadata": {
       "virtual_address": "2006992",
-      "demangled_name": "UpdateKeyedConeAgentState"
+      "demangled_name": "UpdateWorld1BossState"
      }
     },
     {
@@ -42591,7 +42591,7 @@
      "address": "11232",
      "metadata": {
       "virtual_address": "2016472",
-      "demangled_name": "InitBeatPressCollider"
+      "demangled_name": "InitWorld3BeatPressCollider"
      }
     },
     {
@@ -42601,7 +42601,7 @@
      "address": "11416",
      "metadata": {
       "virtual_address": "2016656",
-      "demangled_name": "LoadBeatPressCollider"
+      "demangled_name": "LoadWorld3BeatPressCollider"
      }
     },
     {
@@ -42621,7 +42621,7 @@
      "address": "11544",
      "metadata": {
       "virtual_address": "2016784",
-      "demangled_name": "StartBeatPressCollider"
+      "demangled_name": "StartWorld3BeatPressCollider"
      }
     },
     {
@@ -42631,7 +42631,7 @@
      "address": "11656",
      "metadata": {
       "virtual_address": "2016896",
-      "demangled_name": "HandleBeatPressColliderActivation"
+      "demangled_name": "HandleWorld3BeatPressColliderActivation"
      }
     },
     {
@@ -42641,7 +42641,7 @@
      "address": "11800",
      "metadata": {
       "virtual_address": "2017040",
-      "demangled_name": "ContinueBeatPressColliderRequest"
+      "demangled_name": "ContinueWorld3BeatPressColliderRequest"
      }
     },
     {
@@ -42651,7 +42651,7 @@
      "address": "11976",
      "metadata": {
       "virtual_address": "2017216",
-      "demangled_name": "JudgeBeatPressInput"
+      "demangled_name": "JudgeWorld3BeatPressInput"
      }
     },
     {
@@ -42661,7 +42661,7 @@
      "address": "13320",
      "metadata": {
       "virtual_address": "2018560",
-      "demangled_name": "IsBeatPressColliderRequestBlocked"
+      "demangled_name": "IsWorld3BeatPressColliderRequestBlocked"
      }
     },
     {
@@ -42671,7 +42671,7 @@
      "address": "13400",
      "metadata": {
       "virtual_address": "2018640",
-      "demangled_name": "AppendBeatPressEntry"
+      "demangled_name": "AppendWorld3BeatPressEntry"
      }
     },
     {
@@ -42681,7 +42681,7 @@
      "address": "13448",
      "metadata": {
       "virtual_address": "2018688",
-      "demangled_name": "AcceptBeatPressColliderRequest"
+      "demangled_name": "AcceptWorld3BeatPressColliderRequest"
      }
     },
     {
@@ -42691,7 +42691,7 @@
      "address": "13456",
      "metadata": {
       "virtual_address": "2018696",
-      "demangled_name": "GetBeatPressColliderPositionAt"
+      "demangled_name": "GetWorld3BeatPressColliderPositionAt"
      }
     },
     {
@@ -42701,7 +42701,7 @@
      "address": "13648",
      "metadata": {
       "virtual_address": "2018888",
-      "demangled_name": "GetBeatPressColliderRotationAt"
+      "demangled_name": "GetWorld3BeatPressColliderRotationAt"
      }
     },
     {
@@ -42711,7 +42711,7 @@
      "address": "13872",
      "metadata": {
       "virtual_address": "2019112",
-      "demangled_name": "InitTempoAgent"
+      "demangled_name": "InitWorld3Boss"
      }
     },
     {
@@ -42721,7 +42721,7 @@
      "address": "14016",
      "metadata": {
       "virtual_address": "2019256",
-      "demangled_name": "LoadTempoAgent"
+      "demangled_name": "LoadWorld3Boss"
      }
     },
     {
@@ -42731,7 +42731,7 @@
      "address": "14128",
      "metadata": {
       "virtual_address": "2019368",
-      "demangled_name": "StartTempoAgent"
+      "demangled_name": "StartWorld3Boss"
      }
     },
     {
@@ -42741,7 +42741,7 @@
      "address": "14360",
      "metadata": {
       "virtual_address": "2019600",
-      "demangled_name": "UnregisterTempoAgent"
+      "demangled_name": "UnregisterWorld3Boss"
      }
     },
     {
@@ -42751,7 +42751,7 @@
      "address": "14392",
      "metadata": {
       "virtual_address": "2019632",
-      "demangled_name": "RegisterTempoAgent"
+      "demangled_name": "RegisterWorld3Boss"
      }
     },
     {
@@ -42761,7 +42761,7 @@
      "address": "14424",
      "metadata": {
       "virtual_address": "2019664",
-      "demangled_name": "IsTempoAgentTargetInRange"
+      "demangled_name": "IsWorld3BossTargetInRange"
      }
     },
     {
@@ -42771,7 +42771,7 @@
      "address": "14600",
      "metadata": {
       "virtual_address": "2019840",
-      "demangled_name": "IsTempoAgentFree"
+      "demangled_name": "IsWorld3BossFree"
      }
     },
     {
@@ -42781,7 +42781,7 @@
      "address": "14608",
      "metadata": {
       "virtual_address": "2019848",
-      "demangled_name": "DrawTempoAgentRing"
+      "demangled_name": "DrawWorld3BossRing"
      }
     },
     {
@@ -42791,7 +42791,7 @@
      "address": "15104",
      "metadata": {
       "virtual_address": "2020344",
-      "demangled_name": "ApplyTempoAgentTransform"
+      "demangled_name": "ApplyWorld3BossTransform"
      }
     },
     {
@@ -42801,7 +42801,7 @@
      "address": "15192",
      "metadata": {
       "virtual_address": "2020432",
-      "demangled_name": "DrawTempoAgent"
+      "demangled_name": "DrawWorld3Boss"
      }
     },
     {
@@ -42811,7 +42811,7 @@
      "address": "15352",
      "metadata": {
       "virtual_address": "2020592",
-      "demangled_name": "LeaveTempoAgentState"
+      "demangled_name": "LeaveWorld3BossState"
      }
     },
     {
@@ -42821,7 +42821,7 @@
      "address": "15528",
      "metadata": {
       "virtual_address": "2020768",
-      "demangled_name": "DecrementTempoAgentGauge"
+      "demangled_name": "DecrementWorld3BossGauge"
      }
     },
     {
@@ -42831,7 +42831,7 @@
      "address": "15600",
      "metadata": {
       "virtual_address": "2020840",
-      "demangled_name": "EnterTempoAgentState"
+      "demangled_name": "EnterWorld3BossState"
      }
     },
     {
@@ -42841,7 +42841,7 @@
      "address": "16168",
      "metadata": {
       "virtual_address": "2021408",
-      "demangled_name": "ScheduleTempoAgentBeatPress"
+      "demangled_name": "ScheduleWorld3BossBeatPress"
      }
     },
     {
@@ -42851,7 +42851,7 @@
      "address": "16296",
      "metadata": {
       "virtual_address": "2021536",
-      "demangled_name": "HandleTempoAgentNotification"
+      "demangled_name": "HandleWorld3BossNotification"
      }
     },
     {
@@ -42861,7 +42861,7 @@
      "address": "17048",
      "metadata": {
       "virtual_address": "2022288",
-      "demangled_name": "SyncTempoAgentEntries"
+      "demangled_name": "SyncWorld3BossEntries"
      }
     },
     {
@@ -42871,7 +42871,7 @@
      "address": "17224",
      "metadata": {
       "virtual_address": "2022464",
-      "demangled_name": "UpdateTempoAgent"
+      "demangled_name": "UpdateWorld3Boss"
      }
     },
     {
@@ -42881,7 +42881,7 @@
      "address": "17784",
      "metadata": {
       "virtual_address": "2023024",
-      "demangled_name": "ShowTempoAgentGauge"
+      "demangled_name": "ShowWorld3BossGauge"
      }
     },
     {
@@ -42891,7 +42891,7 @@
      "address": "17944",
      "metadata": {
       "virtual_address": "2023184",
-      "demangled_name": "UpdateTempoAgentGoal"
+      "demangled_name": "UpdateWorld3BossGoal"
      }
     },
     {
@@ -42901,7 +42901,7 @@
      "address": "18064",
      "metadata": {
       "virtual_address": "2023304",
-      "demangled_name": "UpdateTempoAgentState"
+      "demangled_name": "UpdateWorld3BossState"
      }
     },
     {
@@ -42911,7 +42911,7 @@
      "address": "18328",
      "metadata": {
       "virtual_address": "2023568",
-      "demangled_name": "SetTempoAgentPendingTimeline"
+      "demangled_name": "SetWorld3BossPendingTimeline"
      }
     },
     {
@@ -42921,7 +42921,7 @@
      "address": "18336",
      "metadata": {
       "virtual_address": "2023576",
-      "demangled_name": "EndHeldTimeline"
+      "demangled_name": "EndHeldWorld3Timeline"
      }
     },
     {
@@ -42931,7 +42931,7 @@
      "address": "18384",
      "metadata": {
       "virtual_address": "2023624",
-      "demangled_name": "SetTempoAgentTempo"
+      "demangled_name": "SetWorld3BossTempo"
      }
     },
     {
@@ -42941,7 +42941,7 @@
      "address": "18416",
      "metadata": {
       "virtual_address": "2023656",
-      "demangled_name": "SetTempoAgentSpanBeats"
+      "demangled_name": "SetWorld3BossSpanBeats"
      }
     },
     {
@@ -42951,7 +42951,7 @@
      "address": "18448",
      "metadata": {
       "virtual_address": "2023688",
-      "demangled_name": "AddTempoAgentEntry"
+      "demangled_name": "AddWorld3BossEntry"
      }
     },
     {
@@ -42961,7 +42961,7 @@
      "address": "18520",
      "metadata": {
       "virtual_address": "2023760",
-      "demangled_name": "RemoveTempoAgentEntry"
+      "demangled_name": "RemoveWorld3BossEntry"
      }
     },
     {
@@ -42971,7 +42971,7 @@
      "address": "18664",
      "metadata": {
       "virtual_address": "2023904",
-      "demangled_name": "InitTimeline"
+      "demangled_name": "InitWorld3Timeline"
      }
     },
     {
@@ -42981,7 +42981,7 @@
      "address": "18712",
      "metadata": {
       "virtual_address": "2023952",
-      "demangled_name": "FindTimelineTarget"
+      "demangled_name": "FindWorld3TimelineTarget"
      }
     },
     {
@@ -42991,7 +42991,7 @@
      "address": "18776",
      "metadata": {
       "virtual_address": "2024016",
-      "demangled_name": "RestartTimeline"
+      "demangled_name": "RestartWorld3Timeline"
      }
     },
     {
@@ -43001,7 +43001,7 @@
      "address": "18832",
      "metadata": {
       "virtual_address": "2024072",
-      "demangled_name": "EndTimeline"
+      "demangled_name": "EndWorld3Timeline"
      }
     },
     {
@@ -43011,7 +43011,7 @@
      "address": "18936",
      "metadata": {
       "virtual_address": "2024176",
-      "demangled_name": "RunTimelineEntries"
+      "demangled_name": "RunWorld3TimelineEntries"
      }
     },
     {
@@ -43021,7 +43021,7 @@
      "address": "19096",
      "metadata": {
       "virtual_address": "2024336",
-      "demangled_name": "RunTimelineEntry"
+      "demangled_name": "RunWorld3TimelineEntry"
      }
     },
     {
@@ -43031,7 +43031,7 @@
      "address": "19528",
      "metadata": {
       "virtual_address": "2024768",
-      "demangled_name": "AppendTimelineEntry"
+      "demangled_name": "AppendWorld3TimelineEntry"
      }
     },
     {
@@ -43041,7 +43041,7 @@
      "address": "19672",
      "metadata": {
       "virtual_address": "2024912",
-      "demangled_name": "AppendTimelineKind0Entry"
+      "demangled_name": "AppendWorld3TimelineKind0Entry"
      }
     },
     {
@@ -43051,7 +43051,7 @@
      "address": "19720",
      "metadata": {
       "virtual_address": "2024960",
-      "demangled_name": "AppendTimelineKind1Entry"
+      "demangled_name": "AppendWorld3TimelineKind1Entry"
      }
     },
     {
@@ -43061,7 +43061,7 @@
      "address": "19768",
      "metadata": {
       "virtual_address": "2025008",
-      "demangled_name": "AppendTimelineKind2Entry"
+      "demangled_name": "AppendWorld3TimelineKind2Entry"
      }
     },
     {
@@ -43071,7 +43071,7 @@
      "address": "19800",
      "metadata": {
       "virtual_address": "2025040",
-      "demangled_name": "AppendTimelineKind3Entry"
+      "demangled_name": "AppendWorld3TimelineKind3Entry"
      }
     },
     {
@@ -43081,7 +43081,7 @@
      "address": "19832",
      "metadata": {
       "virtual_address": "2025072",
-      "demangled_name": "AppendTimelineKind4Entry"
+      "demangled_name": "AppendWorld3TimelineKind4Entry"
      }
     },
     {
@@ -43091,7 +43091,7 @@
      "address": "19864",
      "metadata": {
       "virtual_address": "2025104",
-      "demangled_name": "AppendTimelineKind5Entry"
+      "demangled_name": "AppendWorld3TimelineKind5Entry"
      }
     },
     {
