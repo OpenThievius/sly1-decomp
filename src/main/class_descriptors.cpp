@@ -95,7 +95,7 @@ struct ArmedStateNotifier;
 struct Attach03;
 struct AttachedSet;
 struct BlinkObject;
-struct BoxCollider;
+struct ContactlessCollider;
 struct BufferedStream;
 struct C17;
 struct C24;
@@ -2511,8 +2511,8 @@ extern const ClassDescriptor<72> g_gaugeCountedObjectClass = { &g_colliderClass,
     0, 0, 0, (Fn_Table)NotifyContactHandlers,
     (Fn_Table)SaveColliderPreviousPosition, (Fn_Table)CaptureColliderPose, (Fn_Table)ApplyColliderAttachedSetContact, (Fn_Table)RequestColliderLaunch,
 } };
-extern const ClassDescriptor<72> g_boxColliderClass = { &g_colliderClass, 0x49, 0x3, 0x570, {
-    (Fn_Table)InitBoxCollider, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+extern const ClassDescriptor<72> g_contactlessColliderClass = { &g_colliderClass, 0x49, 0x3, 0x570, {
+    (Fn_Table)InitContactlessCollider, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterCollider, (Fn_Table)UnregisterCollider,
     (Fn_Table)ClonePlacedObject, (Fn_Table)CopyCollider, (Fn_Table)LoadCollider, 0,
     0, (Fn_Table)HandlePlacedObjectNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadPlacedObject,

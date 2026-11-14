@@ -12,7 +12,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
-#include "box_collider.h"
+#include "contactless_collider.h"
 #include "object_link.h"
 #include "path_curve_object.h"
 #include "point_object.h"

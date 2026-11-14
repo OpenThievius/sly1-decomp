@@ -1,7 +1,7 @@
 symbol	name	evidence
 func_001419E8	FindNearestSpanObject	asks each listed object for up to two spans (func_00141C28) and returns the object whose first usable span has the smallest key at +0x40 (skipping a zero key unless flag bit 1), copying that record to out
 func_00141B48	CollectSpansFromList	for each object of the list whose flags538 lack the bits 0xC000<<28, gets its spans with func_00141C28 into the output at a 0x70 stride and merges them with MergeOverlappingSpans
-func_00141C28	CollectColliderSpans	if the object has BSP tree nodes it queries them with func_0013DFD8, else when flags538 has 0x8000<<28 it queries the box at +0x140 with func_00141F48; returns the number of 0x70-byte records written
+func_00141C28	CollectColliderSpans	if the object has BSP tree nodes it queries them with func_0013DFD8, else when flags538 has 0x8000<<25 (bit 40) it queries the bounds at +0x140 with func_00141F48; returns the number of 0x70-byte records written
 func_00141C90	CollectColliderSpansInTree	the same two-way query as func_00141C28 but takes the tree nodes as an argument instead of reading them from the object
 func_00141D00	TestColliderSegmentHit	the segment test FindNearestHitObject runs on each candidate: the tree at 0x3A4/0x3F0 with TestTreeSegmentHit when the collider has nodes, else the bounds at 0x140 with the radius at 0x3CC (TestBoundsSegmentHit) when flags538 has 0x8000<<25
 func_00141D88	FindSegmentSphereSpan	solves the quadratic for the segment a to b against the sphere at p with the radius, and stores the two crossing times, points and outward unit directions in the span (flag 1); returns 0 when the discriminant is below 1e-4

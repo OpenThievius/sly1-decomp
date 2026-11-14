@@ -1,5 +1,5 @@
 symbol	name	evidence
-func_0018F988	InitBoxCollider	slot 0 of class 0x49: InitCollider, then sets bit 0x8000<<28 of flags538 (the bit CollectColliderSpans reads to test the box at +0x140 instead of a tree) and its anchors with SetColliderAnchors(3, 0, 3, 0)
+func_0018F988	InitContactlessCollider	slot 0 of class 0x49: InitCollider, then sets bit 0x8000<<28 of flags538 (the contacts-dropped flag SetColliderContactsDropped sets, which span collection skips) and its anchors with SetColliderAnchors(3, 0, 3, 0)
 func_0018F9D8	QueueModelPartDraws	slot 0xA8 of class 0x04: streams the object's draw parts and part states through the scratchpad in batches of 0x34, culls each part against the camera planes (PlaneSigns, ComputeCameraDistanceFade), eases its alpha, and queues the visible ones with DrawModelPart as the callback
 func_0018FEF8	InitSeekingAgent	slot 0 of class 0x0E: runs InitAgent, then clears the words at 0xBD0 and 0xBD4
 func_0018FF28	StartSeekingAgent	slot 16 of class 0x0E: runs StartAgent, resolves its two object links (D_00269B60) and looks up the clips 0xEF, 0x16C, 0x16D, 0x16A and 0x16B with ResolveAgentClip
