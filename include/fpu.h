@@ -11,6 +11,10 @@
 #include "common.h"
 
 struct Fpu {
+    // Computes: sqrt(x) in single precision. The EE's FPU is not IEEE: sqrt.s of a negative input
+    // sets the invalid flag and returns the square root of its absolute value (never NaN), and
+    // there is no infinity or NaN anywhere (overflow gives the largest finite float, denormals
+    // are zero, rounding is toward zero). A port that must behave the same uses sqrt(fabs(x)).
     static f32 Sqrt(f32 x)
     {
         f32 r;

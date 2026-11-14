@@ -83,6 +83,7 @@ For more detail:
 - [`docs/TOOLCHAIN.md`](docs/TOOLCHAIN.md): the compiler, assembler and flags, and how each was measured.
 - [`docs/AGENT_WORKFLOW.md`](docs/AGENT_WORKFLOW.md): the step-by-step matching guide, for people and AI agents.
 - [`docs/ROADMAP.md`](docs/ROADMAP.md): what is done and what comes next.
+- [`docs/PORTING.md`](docs/PORTING.md): where the PS2-specific parts are, for whoever ports the game.
 - [`AGENTS.md`](AGENTS.md): the repository layout and every tool's command.
 
 ---
