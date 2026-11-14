@@ -50,6 +50,10 @@ static const f32 g_halfPiTail3 = 6.1232342629e-17f;
 f32 AbsoluteValue(f32 x);
 s32 ReduceLargeByHalfPi(f32* digits, f32* parts, s32 exponent, s32 digitCount, s32 precision, const s32* twoOverPi);
 
+/* Range reduction for the trigonometric functions: writes x minus n times pi/2 to parts[0] (head)
+ * and parts[1] (tail) and returns n (the quadrant, modulo 4 for the caller). Small arguments use
+ * a few fixed multiples of pi/2, medium ones a multiply by 2/pi, large ones ReduceLargeByHalfPi
+ * on the argument's digits. */
 s32 ReduceByHalfPi(f32 x, f32* parts)
 {
     s32 bits, magnitude, remBits, quadrant, i, xExp, exponent, digitCount;

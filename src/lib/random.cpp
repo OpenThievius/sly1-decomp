@@ -9,11 +9,14 @@
 struct LibraryState { u8 pad[0x58]; u32 randomSeed; };
 extern LibraryState* g_libraryState;
 
+// Sets the pseudo-random generator's seed, the word at +0x58 of the library state record.
 void SeedRandom(u32 value)
 {
     g_libraryState->randomSeed = value;
 }
 
+// The next pseudo-random number: a linear congruential step (seed * 0x41C64E6D + 0x3039), stored
+// back as the seed, giving the low 31 bits (0 to 0x7FFFFFFF).
 u32 NextRandom(void)
 {
     u32 state = g_libraryState->randomSeed * 0x41C64E6Du + 0x3039u;

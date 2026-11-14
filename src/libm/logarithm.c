@@ -7,6 +7,9 @@
 
 f32 LogarithmKernel(f32 x);
 
+/* Checked natural logarithm: runs LogarithmKernel, and for x <= 0 reports an error "logf" through
+ * the error hook (kind 2, a range error with result -infinity, for 0; kind 1, a domain error, for
+ * a negative) and sets the error number (0x22 or 0x21) unless the error mode is -1. */
 f32 Logarithm(f32 x)
 {
     MathError e;

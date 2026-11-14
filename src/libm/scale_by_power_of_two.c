@@ -11,6 +11,9 @@ static const f32 g_tenToMinus30 = 1.0e-30f;
 
 f32 CopySign(f32 x, f32 y);
 
+/* x times 2^n for a float (scalbn), by adding n to the exponent bits; handles denormal input,
+ * overflow to +-1e30 * 1e30 (infinity) and underflow through a final scaling for denormal
+ * results. */
 f32 ScaleByPowerOfTwo(f32 x, s32 n)
 {
     s32 rawBits, bits, exponent;

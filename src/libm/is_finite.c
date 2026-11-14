@@ -4,6 +4,7 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
+/* 1 if the float is neither infinity nor NaN, else 0 (an exponent test on the bits). */
 s32 IsFinite(f32 x)
 {
     s32 bits;

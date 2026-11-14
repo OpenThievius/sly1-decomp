@@ -17,6 +17,8 @@ s32 QueryMemorySize(void);
 s32 SetUpTlbSyscall(void);
 s32 SetUpTlbEntries(void);
 
+// Sets the TLB up through func_001FAA00 when QueryMemorySize reports 0x2000000, and calls the
+// system call stub func_001F6D30 otherwise.
 s32 SetUpTlbForMemory(void)
 {
     if (QueryMemorySize() == 0x2000000) {

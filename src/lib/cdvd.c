@@ -105,6 +105,9 @@ void WakeDiscWaiter(s32 id, u16 time, s32 sema)
     SyncAndEnableInterrupts();
 }
 
+/* Sleeps the calling thread for ticks (1/60 s ticks as ScheduleAlarm counts them): makes a one-
+ * count semaphore, arms an alarm whose handler (WakeDiscWaiter) posts it, waits on it and frees
+ * it. The disc waits poll with it, 60 ticks at a time. */
 void WaitDiscTicks(u16 ticks)
 {
     SemaphoreParams param;
@@ -144,6 +147,10 @@ void EndDiscCommand(s32* code)
 
 LINKER_REMNANT(func_00202E40);
 
+/* The read's end callback, run from the remote call's completion: the IOP cannot DMA the
+ * unaligned head and tail of a read, so it leaves up to two pieces of 0x40 bytes in uncached
+ * memory; this copies each (count, destination, bytes) to where it belongs and then ends the
+ * command. */
 void CopyDiscReadTail(ReadTail* tail)
 {
     ReadTail* q = (ReadTail*)((u32)tail | 0x20000000);
@@ -181,6 +188,9 @@ void CreateDiscSemaphores(void)
     }
 }
 
+/* Closes the library down: when a callback is pending, marks the result -1 and wakes its waiter,
+ * then frees the three semaphores and, with interrupts off, removes the handler of command
+ * 0x80000012. */
 void DeleteDiscSemaphores(void)
 {
     if (D_00279414) {
@@ -200,6 +210,8 @@ void DeleteDiscSemaphores(void)
 
 LINKER_REMNANT(func_00203008);
 
+/* The handler of IOP command 0x80000012, run in the interrupt: calls the game's disc callback
+ * with its stored argument, unless there is none or the library is installing it. */
 void RunDiscCallback(void)
 {
     if (g_discCallback && !g_discCallbackSuppressed) {
@@ -207,6 +219,8 @@ void RunDiscCallback(void)
     }
 }
 
+/* Installs RunDiscCallback as the handler of command 0x80000012 (with interrupts off and the
+ * callback suppressed meanwhile); always returns 1. */
 s32 InstallDiscCallbackHandler(void)
 {
     g_discCallbackSuppressed = 1;
@@ -269,6 +283,9 @@ s32 BeginDiscNCommand(s32 command)
     return 1;
 }
 
+/* First client command 0xE (no arguments, a 4-byte reply read uncached): the drive state word, 0
+ * when the client is busy or the call fails. ReadDiscSectors refuses to start a read when it is
+ * 6. */
 s32 GetDiscDriveState(void)
 {
     u32 recv;
@@ -286,6 +303,9 @@ s32 GetDiscDriveState(void)
     return recv;
 }
 
+/* Waits for the first client's command to end (mode 0: polls every 60 ticks) or, in mode 1,
+ * returns 1 while one is still running and 0 when it is not. Prints "N cmd wait" when messages
+ * are enabled. */
 s32 SyncDiscNCommand(s32 mode)
 {
     if (mode == 0) {
@@ -303,6 +323,8 @@ s32 SyncDiscNCommand(s32 mode)
     return 0;
 }
 
+/* The same for the second client's commands (mode 0 waits, polling every 60 ticks; mode 1 returns
+ * whether one is pending). Prints "S cmd wait" when messages are enabled. */
 s32 SyncDiscSCommand(s32 mode)
 {
     if (mode == 0) {
@@ -495,6 +517,8 @@ s32 WaitDiscReady(s32 mode)
     return v;
 }
 
+/* Second client command 0x22 with one word (the value, 4 bytes, written back from the cache
+ * first): returns the 4-byte reply read uncached, or 0 if busy or the call fails. */
 u32 SendDiscSCommand22(u32 value)
 {
     u32* send = g_discSendBuffer;
@@ -518,6 +542,9 @@ u32 SendDiscSCommand22(u32 value)
     return recv;
 }
 
+/* While a read is the running command (the result word is 1), the word the IOP keeps in
+ * g_discReadResult, read uncached; 0 otherwise. The buffered streams poll it to see how far a
+ * read has got. */
 s32 GetDiscReadPosition(void)
 {
     if (g_discCommandResult == 1)
@@ -602,6 +629,8 @@ s32 ReadDiscSectors(s32 lsn, s32 sectors, void* buffer, ReadMode* mode)
     return 1;
 }
 
+/* Second client command 3 (no arguments, a 4-byte reply): the drive's status word, or 0 when the
+ * client is busy or the call fails. */
 s32 GetDiscStatus(void)
 {
     u32 base;
@@ -619,6 +648,8 @@ s32 GetDiscStatus(void)
     return v;
 }
 
+/* Second client command 4 (a 4-byte reply): the drive's last error word, or -1 when the client is
+ * busy or the call fails. */
 s32 GetDiscError(void)
 {
     u32 base;
@@ -636,6 +667,9 @@ s32 GetDiscError(void)
     return v;
 }
 
+/* Second client command 0x16 (a 4-byte reply): stops the read in progress; the library's result
+ * word is 8 during the call and 0 after. Returns the reply, or 0 when the client is busy or the
+ * call fails. */
 s32 StopDiscRead(void)
 {
     s32 r;
@@ -655,6 +689,9 @@ s32 StopDiscRead(void)
     return r;
 }
 
+/* Second client command 5 with one word (the value) and an 8-byte reply: returns the first reply
+ * word and stores the second in *out when out is not 0; -1 when the client is busy or the call
+ * fails. */
 s32 CheckDiscChanged(s32 value, s32* out)
 {
     s32 base;

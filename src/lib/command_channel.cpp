@@ -89,6 +89,8 @@ extern "C" s32 StartIopDma(DmaTransfer* transfers, s32 n);
 s32 HandleCommandInterrupt(s32 cause);
 extern "C" void WriteBackDataCacheRange(void* data, s32 size);
 
+// Runs the kernel's TLB set-up (SetUpTlbForMemory); TerminateProgram and the exit path call it
+// before leaving.
 void SetUpTlb(void)
 {
     SetUpTlbForMemory();
@@ -102,6 +104,9 @@ extern "C" void TerminateProgram(s32 status)
     ExitProgramSyscall(status);
 }
 
+// Clears the first word of a two-word record whose second word points at the end of the program
+// image; nothing reads that word, and IsIopResetDone calls this when the IOP has come back from a
+// reset.
 void ClearImageEndRecordWord(void)
 {
     g_imageEndRecord.a = 0;
@@ -124,6 +129,8 @@ extern "C" s32 SignalProcess(s32 mode, s32 status)
 
 LINKER_REMNANT(func_001FA108);
 
+// Hands a NUL-terminated line to the kernel's debug service (request 0x10, the pointer passed by
+// address); BufferOutputChar calls it when a line is complete.
 void PrintToDebugConsole(const u8* text)
 {
     const u8* local = text;
@@ -132,11 +139,15 @@ void PrintToDebugConsole(const u8* text)
 
 LINKER_REMNANT(func_001FA168);
 
+// Command handler for system command 1: stores the packet's value into the channel's table of 32
+// words at the packet's index; the IOP uses these to pass numbers to the EE.
 void StoreChannelWord(CommandPacket* packet, CommandChannel* channel)
 {
     channel->words[packet->index] = packet->value;
 }
 
+// Command handler for system command 0: stores the IOP's address of its channel (the packet's index
+// word) in the channel record, where SendCommandPacket takes its DMA destination from.
 s32 StoreIopChannelAddress(CommandPacket* packet, CommandChannel* channel)
 {
     s32 value = packet->index;
@@ -144,6 +155,8 @@ s32 StoreIopChannelAddress(CommandPacket* packet, CommandChannel* channel)
     return value;
 }
 
+// The command channel's word at an index (0 to 31), as the IOP last stored it with command 1;
+// InitRemoteCalls reads one.
 s32 GetChannelWord(s32 index)
 {
     return g_commandChannelWords[index];
@@ -153,6 +166,12 @@ LINKER_REMNANT(func_001FA1D8);
 
 s32 SendCommand(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 count);
 
+// Sets up the command channel to the IOP, once (a flag guards it, tested with interrupts off):
+// clears the handler table and the 32 words, installs handlers for system commands 0 and 1, clears
+// the DMA channel's interrupt state, arms the receive chain, installs HandleCommandInterrupt on DMA
+// cause 5, and then either reuses the IOP's address when it is already known (sending command
+// 0x80000000) or waits for the IOP to publish it, writes both addresses back through the IOP
+// registers and sends command 0x80000002 with the receive buffer's address.
 void InitCommandChannel(void)
 {
     s32 i;
@@ -207,6 +226,8 @@ void InitCommandChannel(void)
     SendCommand(0x80000002, &g_commandRequest, 0x14, 0, 0, 0);
 }
 
+// Disables DMA interrupt cause 5, removes the channel's handler for it and clears the ready flag so
+// InitCommandChannel can run again.
 void ShutDownCommandChannel(void)
 {
     (void)DisableDmaInterrupt(5);
@@ -214,6 +235,8 @@ void ShutDownCommandChannel(void)
     g_commandChannelReady[0] = 0;
 }
 
+// Stores a handler and its argument for a command number: a number with the top bit set
+// (0x8000000N) picks slot N of the system table, any other the user table.
 extern "C" void SetCommandHandler(s32 cmd, CommandHandler handler, void* arg)
 {
     s32 off = cmd << 3;
@@ -228,6 +251,8 @@ extern "C" void SetCommandHandler(s32 cmd, CommandHandler handler, void* arg)
     slot->arg = arg;
 }
 
+// Clears a command's handler (top bit set: system table, else user table); the slot's argument is
+// left as it was.
 extern "C" void ClearCommandHandler(s32 cmd)
 {
     s32 off = cmd << 3;
@@ -240,6 +265,11 @@ extern "C" void ClearCommandHandler(s32 cmd)
     ((HandlerSlot*)off)->handler = 0;
 }
 
+// Sends a command packet (16 to 0x70 bytes, else returns 0) to the IOP by DMA: stamps the command
+// number and size into the packet header, optionally adds a second transfer of count bytes of data
+// to the IOP address addr (written back from the cache first when flags has bit 2), and starts both
+// transfers in one chain, from an interrupt handler when flags has bit 0. Returns what the DMA
+// start returns.
 s32 SendCommandPacket(u32 cmd, s32 flags, PacketHeader* obj, s32 size, void* data, s32 addr, s32 count)
 {
     DmaTransfer recs[2];
@@ -282,11 +312,15 @@ s32 SendCommandPacket(u32 cmd, s32 flags, PacketHeader* obj, s32 size, void* dat
     return result;
 }
 
+// Sends a command packet from normal code, without data being flagged for write-back
+// (SendCommandPacket with flags 0). BindRemoteService and CallRemoteService send through it.
 s32 SendCommand(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 count)
 {
     return SendCommandPacket(cmd, 0, (PacketHeader*)packet, size, data, addr, count);
 }
 
+// Sends a command packet from an interrupt handler (SendCommandPacket with flags 1); AnswerIopCall
+// and AnswerServiceLookup send their replies through it.
 s32 SendCommandFromInterrupt(u32 cmd, void* packet, s32 size, void* data, s32 addr, s32 count)
 {
     return SendCommandPacket(cmd, 1, (PacketHeader*)packet, size, data, addr, count);

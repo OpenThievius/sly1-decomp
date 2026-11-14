@@ -22,6 +22,7 @@ typedef struct Packed {
 
 u64 PackDoubleFromParts(s32 a0, s32 a1, s32 a2, u64 a3);
 
+/* Packs a float taken apart (kind, sign, exponent, fraction) back into its 32 bits. */
 f32 PackFloat(Packed* p)
 {
     union {
@@ -80,6 +81,7 @@ f32 PackFloat(Packed* p)
     return bits.f;
 }
 
+/* Takes a float's 32 bits apart into kind, sign, unbiased exponent and fraction. */
 void UnpackFloat(u32* src, Packed* out)
 {
     u32 bits = *src;
@@ -113,6 +115,7 @@ void UnpackFloat(u32* src, Packed* out)
 
 LINKER_REMNANT(func_001FD770);
 
+/* Converts a float to an unsigned 32-bit integer (CancelPauseMenuPage calls it). */
 u32 ConvertFloatToU32(f32 value)
 {
     f32 in = value;
@@ -143,6 +146,8 @@ u32 ConvertFloatToU32(f32 value)
     return p.mant >> (0x1E - p.exp);
 }
 
+/* Packs a float from a kind, sign, exponent and fraction passed as loose arguments (the double to
+ * float conversion calls it). */
 f32 PackFloatFromParts(s32 a0, s32 a1, s32 a2, s32 a3)
 {
     Packed args;
@@ -154,6 +159,8 @@ f32 PackFloatFromParts(s32 a0, s32 a1, s32 a2, s32 a3)
     return PackFloat(&args);
 }
 
+/* Unpacks a float and packs its parts as a double with PackDoubleFromParts, the fraction shifted
+ * up 30 bits. */
 u64 ConvertFloatToDouble(f32 x)
 {
     Packed v;

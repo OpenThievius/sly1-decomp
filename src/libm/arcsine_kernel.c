@@ -23,6 +23,8 @@ static const f32 g_denT4 = 7.7038154006e-02f;
 f32 AbsoluteValue(f32 x);
 f32 SquareRootKernel(f32 x);
 
+/* Unchecked arcsine in radians, -pi/2 to pi/2: a rational polynomial for |x| < 0.5, else a
+ * square-root identity; returns x for tiny x, +-pi/2 for |x| = 1 and NaN for |x| > 1. */
 f32 ArcsineKernel(f32 x)
 {
     s32 bits, magnitude, rootBits;

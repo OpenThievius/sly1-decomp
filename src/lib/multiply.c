@@ -18,6 +18,8 @@ typedef union {
     } h;
 } Halves;
 
+/* 64-bit product (the compiler's __muldi3): the full 64-bit product of the two low words plus the
+ * two cross products added into the high word. */
 s64 func_001FE890(s64 u, s64 v)
 {
     Halves uu, vv, w;

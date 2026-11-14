@@ -8,6 +8,9 @@
 s32 ReduceByHalfPi(f32 x, f32* parts);
 f32 TangentKernel(f32 x, f32 y, s32 sign);
 
+/* Tangent of a float in radians: reduces by multiples of pi/2 (ReduceByHalfPi) and calls
+ * TangentKernel with a sign that flips (cotangent form) on odd quadrants; NaN for infinities and
+ * NaNs. */
 f32 Tangent(f32 x)
 {
     f32 parts[2];

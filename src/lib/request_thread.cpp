@@ -31,6 +31,9 @@ void PrintToOutputHook(const char* fmt, ...);
 
 extern const char g_requestThreadErrorText[40] = "## internel error in libkernl.a!\n";
 
+// The request thread's loop: waits on g_requestSemaphore, takes the next entry of the ring and runs
+// WakeThread, RotateReadyThreads or PauseThread on its argument, or prints the internal-error
+// message.
 void RunRequestThread(RequestRing* q)
 {
     for (;;) {
@@ -68,6 +71,8 @@ void RunThread(s32 h, RequestRing* q);
 extern "C" s32 GetCurrentThreadId(void);
 void SetThreadPriority(s32 h, s32 v);
 
+// Once (g_requestThreadId), creates g_requestSemaphore and the thread RunRequestThread on the stack
+// D_00625770, sets its priority and starts it (InitKernelLibrary calls it).
 s32 StartRequestThread(void)
 {
     StartFrame f;

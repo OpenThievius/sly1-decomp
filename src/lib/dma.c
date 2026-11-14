@@ -58,6 +58,8 @@ u32 D_002793F0[4] = { 0 };
 s32 PrintFormatted(const char* fmt, ...);
 s32 SetDmaSettings(DmaSettings* c);
 
+/* Sets n bytes at p to 0 (a byte loop, not memset); ResetDmaController clears its settings record
+ * with it. */
 void ClearBytes(u8* p, s32 n)
 {
     s32 i = n - 1;
@@ -70,6 +72,8 @@ void ClearBytes(u8* p, s32 n)
     }
 }
 
+/* The register block of DMA channel index (0 to 9, from the table g_dmaChannels, the blocks at
+ * 0x10008000 to 0x1000D400), or 0 for a larger index. */
 DmaChannel* GetDmaChannel(u32 index)
 {
     if (index < 10)
@@ -77,6 +81,10 @@ DmaChannel* GetDmaChannel(u32 index)
     return 0;
 }
 
+/* Resets the DMA controller: zeroes the registers of each channel marked in g_dmaChannelsToReset
+ * (channels 0 to 4, 8 and 9), clears the controller's pending interrupt bits at 0x1000E010, sets
+ * its settings to zero with SetDmaSettings and, when mode is 1, enables it (bit 0 of 0x1000E000).
+ * Returns whether it was enabled before. InitDmaChannels calls it. */
 s32 ResetDmaController(s32 mode)
 {
     DmaSettings settings;
@@ -107,6 +115,10 @@ s32 ResetDmaController(s32 mode)
     return flag;
 }
 
+/* Writes the controller's settings (the control word at 0x1000E000 with the release, memory-FIFO,
+ * stall-source and stall-drain fields mapped through the g_dma*Bits tables, then the registers at
+ * 0x1000E020 to 0x1000E050) and keeps a copy in g_dmaSettings. Returns 0, or -1 to -4 for the
+ * first field out of range (nothing is written). */
 s32 SetDmaSettings(DmaSettings* c)
 {
     u32 r = *(volatile u32*)0x1000E000;
@@ -140,6 +152,10 @@ s32 SetDmaSettings(DmaSettings* c)
     return 0;
 }
 
+/* Waits for the channel to be idle (its STR bit clear, with a timeout of 0x1000000 polls after
+ * which it prints "libdma: sync timeout" and forces the bit clear), sets its tag address (unless
+ * it reads 0xFFFFFFFF), clears the quadword count and starts it in source-chain mode with STR
+ * set. SubmitPacketBuffer calls it. */
 void StartDmaChain(DmaChannel* ch, void* tadr)
 {
     s32 timeout = 0x1000000;
@@ -168,6 +184,8 @@ void StartDmaChain(DmaChannel* ch, void* tadr)
 
 LINKER_REMNANT(func_00202B58);
 
+/* Waits for the channel as StartDmaChain does, then starts it in chain mode towards memory (the
+ * direction bit cleared, mode bits 0x4) with no tag address set; StartFromSprChain calls it. */
 void StartDmaChainToMemory(DmaChannel* ch)
 {
     s32 timeout = 0x1000000;
@@ -193,6 +211,9 @@ void StartDmaChainToMemory(DmaChannel* ch)
 
 LINKER_REMNANT(func_00202C30);
 
+/* Waits for the channel's transfer to end (mode 0, with timeout polls, 0x1000000 when 0, after
+ * which it prints "libdma: sync timeout" and forces the STR bit clear; returns 0), or in mode 1
+ * just returns whether it is still running (1) or not (0). RunRenderThread calls it. */
 s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout)
 {
     s32 cur;

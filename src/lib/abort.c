@@ -7,6 +7,8 @@
 s32 RaiseSignal(s32 sig);
 void ExitProgram(s32 status);
 
+/* Raises signal 6 and then exits with status 1, in an endless loop; the runtime's default terminate
+ * hook (AbortOnTerminate) calls it. */
 void AbortProgram(void)
 {
     for (;;) {

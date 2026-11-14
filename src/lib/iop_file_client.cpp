@@ -129,6 +129,8 @@ extern "C" void SetCommandHandler(s32 cmd, CommandHandler handler, void* arg);
 extern "C" void WriteBackDataCacheRange(void* data, s32 size);
 void RunFileClientCallback(void* packet, FileCommandCall* call);
 
+// Creates the two semaphores that guard the file client's handle table and its replies
+// (OpenFileClient and FindFileHandle call it).
 void CreateFileTableLock(void)
 {
     if (g_fileHandleTableSemaphore == -1) {
@@ -141,6 +143,7 @@ void CreateFileTableLock(void)
     }
 }
 
+// Returns the entry of the file client's table of 32 open handles for a handle, or 0.
 s32 FindFileHandle(s32 a0)
 {
     s32 s = a0;
@@ -178,6 +181,10 @@ struct ReplyBlock40 {
     u8 b[0x40];
 };
 
+// The handler of the IOP file service's replies (command 0x80000013): copies the reply out of the
+// reply buffer's uncached address into the waiting request's result and frees that waiter's slot
+// in g_semaphoreSlots, which wakes the thread blocked in CloseFile, ReadFile, WriteFile or
+// ControlFile.
 void HandleFileReply(void) {
     s32 sema;
     s32 type;
@@ -245,6 +252,7 @@ void HandleFileReply(void) {
     }
 }
 
+// Creates the semaphore that keeps one file request at a time (LockFileRequests calls it first).
 void CreateFileRequestLock(void)
 {
     if (g_fileRequestSemaphore == -1) {
@@ -256,6 +264,7 @@ void CreateFileRequestLock(void)
     }
 }
 
+// Waits on the file client's request semaphore, creating it first when needed.
 s32 LockFileRequests(s32 unused)
 {
     CreateFileRequestLock();
@@ -274,6 +283,9 @@ void RunFileClientCallback(void* packet, FileCommandCall* call)
     SyncAndEnableInterrupts();
 }
 
+// Once, installs HandleFileReply and func_001F89F8 for the commands 0x80000011 and 0x80000013,
+// binds the client to the IOP's file service, clears the handle table and hands the reply buffer
+// over.
 s32 OpenFileClient(void)
 {
     s32 i;
@@ -305,6 +317,8 @@ s32 OpenFileClient(void)
 
 LINKER_REMNANT(func_001F8BF0);
 
+// Clears the file client's opened flag and its binding (LoadIopModules calls it before it resets
+// the IOP).
 s32 ForgetFileClient(void)
 {
     g_fileClientOpen = 0;
@@ -317,6 +331,8 @@ LINKER_REMNANT(func_001F8C30);
 struct FileRequestGate { static s32 Ready(s32 n) { LockFileRequests(n); return ((s32*)&g_fileClientOpen)[0]; } };
 struct MinOf { static s32 Of(s32 a, s32 b) { return a < b ? a : b; } };
 
+// Sends the close request for a handle and waits for its reply (CloseStreamReader and
+// CloseBufferedStream call it).
 s32 CloseFile(s32 a0)
 {
     FileCloseRequest* g = &g_fileRequestBuffer.close;
@@ -366,6 +382,8 @@ s32 CloseFile(s32 a0)
 }
 
 
+// Sends a read request for a handle into a buffer and waits for its reply (StartChunkRead and
+// RefillBufferedStreamFromFile call it).
 s32 ReadFile(s32 fd, void* buf, s32 size)
 {
     FileReadRequest* g = &g_fileRequestBuffer.read;
@@ -435,6 +453,8 @@ s32 ReadFile(s32 fd, void* buf, s32 size)
 }
 
 
+// Sends a write request of a buffer to a handle and waits for its reply (FlushOutputBuffer calls
+// it).
 s32 WriteFile(s32 fd, void* buf, s32 size)
 {
     FileWriteRequest* g = &g_fileRequestBuffer.write;
@@ -511,6 +531,8 @@ s32 WriteFile(s32 fd, void* buf, s32 size)
     return out;
 }
 
+// Sends request 5 with a mode and a block of data for a handle, answering modes 1 to 3 from the
+// client's own state (PollChunkRead asks whether a read finished with it).
 s32 ControlFile(s32 a0, s32 mode, u32* out)
 {
     FileControlRequest* g = &g_fileRequestBuffer.control;

@@ -10,6 +10,8 @@
 
 ASM_FUNC(func_001FA890);
 
+// Copies bytes / 4 words from src to dst and returns 0; the third patch installer installs it as
+// system call 0x5A and copies its code through it.
 s32 CopyKernelWordsThirdPatch(s32* dst, s32* src, u32 bytes)
 {
     s32* d = dst;
@@ -65,6 +67,8 @@ void SetSystemCallHandlerThirdPatch(Blk_1FA8F8* a, u32 b);
 void CopyKernelWordsSyscallThirdPatch(Blk_1FA8F8* a, void* b, s32 c);
 extern "C" void SyncDataCache(s32 a);
 
+// Copies D_002779C0 to 0x80075000 and sets the system calls that D_00277D30 lists;
+// InitKernelLibrary calls it.
 void InstallThirdKernelPatch() {
     u32* s0 = g_thirdKernelPatchHandlers;
     u32* s1;

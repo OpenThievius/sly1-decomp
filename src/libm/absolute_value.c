@@ -5,6 +5,7 @@
 #include "common.h"
 #include "float_bits.h"
 
+/* The absolute value of a float: clears the sign bit. */
 f32 AbsoluteValue(f32 x)
 {
     s32 bits;

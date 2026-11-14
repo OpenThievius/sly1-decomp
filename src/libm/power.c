@@ -7,6 +7,11 @@
 
 f32 PowerKernel(f32 x, f32 y);
 
+/* Checked x to the power y: runs PowerKernel and reports through the error hook ("powf") the 0 to
+ * the power 0 case (result 1), a zero base with a negative power (-infinity, kind 1), a finite
+ * overflow to infinity (kind 3, sign from x and an odd y), a finite underflow to 0 (kind 4) and a
+ * negative base with a non-integer power (NaN); sets the error number (0x21 or 0x22) as the
+ * others do. */
 f32 Power(f32 x, f32 y)
 {
     f32 value = PowerKernel(x, y);

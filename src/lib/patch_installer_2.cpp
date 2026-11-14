@@ -14,6 +14,8 @@ ASM_FUNC(func_001F9EE8);
 
 ASM_FUNC(func_001F9EF8);
 
+// Copies bytes / 4 words from src to dst and returns 0; the second patch installer installs it as
+// system call 0x5A and copies its code through it.
 s32 CopyKernelWordsSecondPatch(s32* dst, s32* src, u32 bytes)
 {
     s32* d = dst;
@@ -34,6 +36,9 @@ struct ConfigWord { u32 value; };
 void ReadSystemConfig(ConfigWord* w);
 void WriteSystemConfig(ConfigWord* w);
 
+// Writes the system configuration word back with bits 13 to 15 set to 1 (WriteSystemConfig), reads
+// it again (ReadSystemConfig), restores the original and returns whether the field came back 0
+// (InstallSecondKernelPatch's test).
 s32 IsSecondKernelPatchNeeded(void)
 {
     ConfigWord a;
@@ -119,6 +124,8 @@ void CopyKernelWordsSyscallSecondPatch(s32 a, void* b, s32 c);
 extern "C" void SyncDataCache(s32 a);
 s32 RunSyscall5BSecondPatch(s32 key);
 
+// When IsSecondKernelPatchNeeded passes, copies D_002771F0 to 0x80074000 and sets the system calls
+// D_00277998 lists (InitKernelLibrary calls it).
 void InstallSecondKernelPatch(void)
 {
     SyscallPatchSlot* q;

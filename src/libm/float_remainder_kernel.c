@@ -7,6 +7,9 @@
 static const f32 g_one = 1.0f;
 static const f32 g_signedZeros[] = { 0.0f, -0.0f };
 
+/* Unchecked remainder of x / y with the sign of x, computed exactly on the mantissas by shift and
+ * subtract; NaN for y = 0, infinite x or NaN, x itself when |x| < |y|, a signed zero for an exact
+ * multiple. */
 f32 FloatRemainderKernel(f32 x, f32 y)
 {
     s32 xBits, yBits, sign, xExp, yExp, diff, probe;

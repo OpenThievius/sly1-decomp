@@ -7,6 +7,9 @@
 
 f32 SquareRootKernel(f32 x);
 
+/* Checked square root: runs SquareRootKernel, and for x < 0 reports a domain error "sqrtf"
+ * through the error hook (result 0 in mode 0, else NaN) and sets the error number (0x21) unless
+ * the error mode is -1. */
 f32 SquareRoot(f32 x)
 {
     MathError e;

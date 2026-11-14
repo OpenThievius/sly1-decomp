@@ -68,16 +68,22 @@ void InstallExceptionContextGetter(void);
 void (*D_00278048)(void) = AbortOnTerminate;
 EhContext* (*g_exceptionContextGetter)(void) = (EhContext* (*)(void))InstallExceptionContextGetter;
 
+/* The default terminate hook D_00278048: calls AbortProgram. */
 void AbortOnTerminate(void)
 {
     AbortProgram();
 }
 
+/* Calls the function the terminate hook D_00278048 holds (the exception runtime and
+ * HandleAbstractCall call it). */
 void RunTerminateHook(void)
 {
     (*D_00278048)();
 }
 
+/* Compares a type's name with a given one through CompareStrings (func_001F6738): returns its
+ * third argument when they are equal, 0 otherwise; it sits in the exception runtime's unwind
+ * table with no direct caller. */
 s32 SelectArgumentIfTypeNamesEqual(void* self, s32 v, s32 fallback)
 {
     s32 result = fallback;
@@ -99,6 +105,9 @@ typedef struct ExceptionBlock {
     s32 f14;
 } ExceptionBlock;
 
+/* Allocates a 0x18-byte node under the runtime lock, calls RunTerminateHook when that fails,
+ * zeroes it and points its field at +4 to its own +0x10; it sits in the exception runtime's
+ * unwind table with no direct caller. */
 ExceptionBlock* AllocateZeroedNodeOrTerminate(void)
 {
     ExceptionBlock* p = (ExceptionBlock*)EnterRuntimeLock(0x18);
@@ -110,16 +119,20 @@ ExceptionBlock* AllocateZeroedNodeOrTerminate(void)
     return p;
 }
 
+/* Returns the exception context by calling the getter in D_0027804C. */
 s32 GetExceptionContext(void)
 {
     return (s32)(*g_exceptionContextGetter)();
 }
 
+/* Returns the address of the active exception pointer, at +8 of the exception context; the
+ * exception entry points read it. */
 u8* GetActiveExceptionSlot(void)
 {
     return (u8*)(*g_exceptionContextGetter)() + 8;
 }
 
+/* First call of D_0027804C: replaces it with GetStaticExceptionContext and calls that. */
 void InstallExceptionContextGetter(void)
 {
     void (*f)(void) = (void (*)(void))GetStaticExceptionContext;
@@ -132,6 +145,8 @@ static EhContext g_staticExceptionContext;
 static s32 g_staticExceptionContextReady;
 static void* g_staticHandlerChain[2];
 
+/* Returns the single static exception context, zeroing it and giving it a handler buffer on first
+ * use; the runtime has one thread. */
 EhContext* GetStaticExceptionContext(void)
 {
     if (g_staticExceptionContextReady == 0) {
@@ -142,6 +157,7 @@ EhContext* GetStaticExceptionContext(void)
     return (EhContext*)&g_staticExceptionContext;
 }
 
+/* Returns the address of the handler chain head, at +4 of the exception context. */
 u8* GetHandlerChainSlot(void)
 {
     return (u8*)(*g_exceptionContextGetter)() + 4;
@@ -218,6 +234,8 @@ void PopHandlerAndThrow(void)
 
 /* The active exception, asked whether it matches a runtime type through its matcher. */
 
+/* Asks the active exception's type information to match a given type through its matcher and
+ * returns whether it did. */
 s32 ActiveExceptionMatches(void* type)
 {
     ActiveException* info = *(ActiveException**)GetActiveExceptionSlot();
@@ -228,11 +246,14 @@ s32 ActiveExceptionMatches(void* type)
     return match(info, type, 0) != 0;
 }
 
+/* Reads the halfword at +6 of an exception record; PushThrownException stores 1 there. */
 s16 GetExceptionRecordSubkind(void* object)
 {
     return *(s16*)((u8*)object + 6);
 }
 
+/* Reads the halfword at +4 of an exception record; PushThrownException stores 4 there and the
+ * matcher tests for it. */
 s16 GetExceptionRecordKind(void* object)
 {
     return *(s16*)((u8*)object + 4);
@@ -244,6 +265,8 @@ typedef struct UnwindRange {
     s32 value;
 } UnwindRange;
 
+/* Looks a code address up in a table of (low, high, value) ranges ended by 0xFFFFFFFF and returns
+ * the value of the narrowest range holding it, else 0; FindHandlerAndRestoreRegisters calls it. */
 s32 FindInnermostRangeValue(u32 key, UnwindRange* t)
 {
     s32 best, i;
@@ -280,6 +303,8 @@ typedef struct PendingHandlerRecord {
     s32 count;
 } PendingHandlerRecord;
 
+/* Walks a table of code spans with handler callbacks, asks each matching span's callback whether
+ * it takes the exception, and returns the span's value, flagging cleanup-only matches. */
 s32 FindHandlerInSpanTable(s32 a0, void* a1, ActiveException* a2, s32 a3, s32* a4)
 {
     s32 result = 0;
@@ -326,6 +351,8 @@ s32 FindHandlerInSpanTable(s32 a0, void* a1, ActiveException* a2, s32 a3, s32* a
     return result;
 }
 
+/* Follows a register's redirections in an unwind state until it reaches a saved register, and
+ * returns its storage; aborts when it was not saved. */
 u8* ResolveSavedRegisterSlot(u32 idx, UnwindFrame* self, UnwindFrame* other)
 {
     while (self->how[idx] == 2) {
@@ -337,6 +364,8 @@ u8* ResolveSavedRegisterSlot(u32 idx, UnwindFrame* self, UnwindFrame* other)
     AbortProgram();
 }
 
+/* Copies one saved register (4, 8 or 16 bytes by its number) from one unwind state's storage to
+ * another's. */
 s32 CopySavedRegister(s32 a0, u32 a1, u32 a2)
 {
     u8* r1 = ResolveSavedRegisterSlot(a0, (UnwindFrame*)a1, 0);
@@ -355,6 +384,8 @@ s32 CopySavedRegister(s32 a0, u32 a1, u32 a2)
 
 typedef struct CodeAddress CodeAddress;
 
+/* Finds the unwind state of a code address, then works out the frame's own address from the
+ * caller's state and the frame's offset; the handler search calls it for each frame. */
 UnwindFrame* UnwindOneFrame(CodeAddress* a0, UnwindFrame* a1, UnwindFrame* a2)
 {
     UnwindFrame* s0 = FindFrameUnwindState(a0, a2);
@@ -375,17 +406,23 @@ UnwindFrame* UnwindOneFrame(CodeAddress* a0, UnwindFrame* a1, UnwindFrame* a2)
 
 void NoteCleanupOnlyHandler(void) {}
 
+/* The return address of an unwind frame: the 8-byte saved value of its return register, followed
+ * through the unwind state's redirections (ResolveSavedRegisterSlot), narrowed to an address. */
 static inline CodeAddress* FrameReturnAddress(UnwindFrame* f, UnwindFrame* g)
 {
     s64 w = *(s64*)ResolveSavedRegisterSlot(f->returnReg, (UnwindFrame*)f, (UnwindFrame*)g);
     return (CodeAddress*)(s32)w;
 }
 
+/* Always 0: the placeholder of a register-window test the runtime has no use for on this CPU. */
 static inline s32 RegisterInWindow(s32 i, UnwindFrame* f)
 {
     return 0;
 }
 
+/* Walks frames outwards from a code address until a handler takes the exception, then unwinds the
+ * saved registers up to that frame; terminates when there is none; the throw and rethrow entries
+ * call it. */
 void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** pout_)
 {
     EhContext* obj = eh;

@@ -155,6 +155,8 @@ s32 SendPadDma(s32 port, s32 slot)
 /* The message of a function the linker stripped. */
 const char g_padDmaInvalidMessage[] = "libpad: tPadDma Structure Invalid\n";
 
+/* Binds the two pad clients to the services 0x80000100 and 0x80000101, retrying until bound, and
+ * initialises the module (InitPadSystem calls it). */
 s32 InitPadLibrary(s32 mode)
 {
     s32 i;
@@ -185,6 +187,8 @@ s32 InitPadLibrary(s32 mode)
     return ResetPadModule(mode);
 }
 
+/* Closes every slot of both ports, then sends the pad module command 0x10 and returns its result
+ * (InitPadLibrary's last step). */
 s32 ResetPadModule(s32 mode)
 {
     s32 i;
@@ -204,6 +208,8 @@ s32 ResetPadModule(s32 mode)
     return ((PadRequest*)g_padRequest)->result;
 }
 
+/* Opens a port's slot on a 64-byte aligned buffer of two frames, printing its
+ * messages on a bad buffer or a slot already open (InitPadRecord calls it). */
 s32 OpenPadPort(s32 port, s32 slot, u8* buffer)
 {
     PadRequest* request;
@@ -248,6 +254,7 @@ s32 OpenPadPort(s32 port, s32 slot, u8* buffer)
     return request->result;
 }
 
+/* Refreshes a slot's two frames from memory and returns the one with the higher count. */
 PadFrame* GetNewerPadFrame(s32 port, s32 slot)
 {
     PadFrame* frames = (PadFrame*)g_padSlots[port][slot].buffer;
@@ -258,6 +265,7 @@ PadFrame* GetNewerPadFrame(s32 port, s32 slot)
     return &frames[newer];
 }
 
+/* Copies the newer frame of an open slot into data and returns its size (PollPadInput calls it). */
 s32 ReadPadFrame(s32 port, s32 slot, u8* data)
 {
     PadFrame* frame;
@@ -269,6 +277,8 @@ s32 ReadPadFrame(s32 port, s32 slot, u8* data)
     return frame->size;
 }
 
+/* Returns the state of an open slot's newer frame (5 for a stable slot with a request running),
+ * or 0x63 when closed (UpdatePadConnection polls it). */
 s32 GetPadSlotState(s32 port, s32 slot)
 {
     PadFrame* frame;
@@ -285,6 +295,7 @@ s32 GetPadSlotState(s32 port, s32 slot)
 
 LINKER_REMNANT(func_00204608);
 
+/* Sets the request mode of an open slot's newer frame (2 while a request runs). */
 s32 SetPadRequestMode(s32 port, s32 slot, s32 mode)
 {
     if (g_padSlots[port][slot].open == 0)
@@ -293,6 +304,7 @@ s32 SetPadRequestMode(s32 port, s32 slot, s32 mode)
     return 1;
 }
 
+/* Returns the request mode of an open slot's newer frame (UpdatePadConnection reads it). */
 u32 GetPadRequestMode(s32 port, s32 slot)
 {
     if (g_padSlots[port][slot].open == 0)
@@ -301,6 +313,10 @@ u32 GetPadRequestMode(s32 port, s32 slot)
 }
 
 LINKER_REMNANT(func_002046C8);
+/* For an open slot whose reply is valid (+0x72 is 1, +0x64 at least 2), returns the count at
+ * +0x6A when the index is -1 and 0 when the index is at or past it, else byte kind-1 (kind 1 to
+ * 4) of the four-byte entry at index of the table at +0x30; the pad connection code (case 2)
+ * compares them with its mode and counts. */
 s32 GetPadReplyTableByte(s32 port, s32 slot, s32 index, s32 kind)
 {
     PadFrame* frame;
@@ -331,6 +347,10 @@ s32 GetPadReplyTableByte(s32 port, s32 slot, s32 index, s32 kind)
     return 0;
 }
 LINKER_REMNANT(func_002047F0);
+/* For an open slot whose reply is valid (+0x72 is 1) and not in mode 2, returns by kind 1 to 4
+ * the high nibble of the byte at +0x65 (0 for 0xF3), the list entry at position +0x69, that
+ * position, or the entry at an index of the list at +0x50 (index -1 gives the count at +0x68);
+ * the pad connection code reads kinds 1 and 2 to choose its next mode. */
 s32 GetPadReplyListValue(s32 port, s32 slot, s32 kind, s32 index)
 {
     PadFrame* frame;
@@ -367,6 +387,8 @@ s32 GetPadReplyListValue(s32 port, s32 slot, s32 kind, s32 index)
     return 0;
 }
 
+/* Sends the pad module command 6 with two words for a slot and marks the request running on
+ * success (UpdatePadConnection calls it). */
 s32 SendPadTwoWordRequest(s32 port, s32 slot, s32 a2, s32 a3)
 {
     PadModeRequest* request = (PadModeRequest*)g_padRequest;
@@ -387,6 +409,8 @@ s32 SendPadTwoWordRequest(s32 port, s32 slot, s32 a2, s32 a3)
     return result;
 }
 
+/* Stores the bytes for a slot's actuators and sends them (UpdatePadPattern and
+ * StopPadPatternOutput call it). */
 s32 SetPadActuatorBytes(s32 port, s32 slot, u8* src)
 {
     u32* dma;
@@ -409,6 +433,8 @@ s32 SetPadActuatorBytes(s32 port, s32 slot, u8* src)
 }
 
 
+/* Sends the pad module command 8 with six bytes for a slot and marks the request running on
+ * success (UpdatePadConnection calls it). */
 s32 SendPadSixByteRequest(s32 port, s32 slot, u8* src)
 {
     PadActRequest* request = (PadActRequest*)g_padRequest;
@@ -429,6 +455,8 @@ s32 SendPadSixByteRequest(s32 port, s32 slot, u8* src)
     return request->result;
 }
 
+/* For an open slot with a valid reply of at least two, returns the four bytes of the newer frame
+ * at +0x79 as one 32-bit mask (HasFullPadMask compares it with 0x3FFFF). */
 s32 GetPadButtonMask(s32 port, s32 slot)
 {
     PadFrame* frame;
@@ -446,6 +474,8 @@ s32 GetPadButtonMask(s32 port, s32 slot)
 }
 
 
+/* Sends the pad module command 10 with a mask for a slot and marks the request running on
+ * success. */
 s32 SendPadMaskRequest(s32 port, s32 slot, s32 data)
 {
     PadInfoRequest* request = (PadInfoRequest*)g_padRequest;
@@ -467,6 +497,8 @@ s32 SendPadMaskRequest(s32 port, s32 slot, s32 data)
     return result;
 }
 
+/* Tells whether an open slot's button mask (func_00204B80) is 0x3FFFF (UpdatePadConnection calls
+ * it). */
 s32 HasFullPadMask(s32 port, s32 slot)
 {
     if (g_padSlots[port][slot].open == 0)
@@ -474,6 +506,7 @@ s32 HasFullPadMask(s32 port, s32 slot)
     return GetPadButtonMask(port, slot) == 0x3FFFF;
 }
 
+/* Sends SendPadMaskRequest with the mask 0xFFF for an open slot (UpdatePadConnection calls it). */
 s32 SendFullPadMask(s32 port, s32 slot)
 {
     if (g_padSlots[port][slot].open == 0)
@@ -483,6 +516,8 @@ s32 SendFullPadMask(s32 port, s32 slot)
 
 LINKER_REMNANT(func_00204DA0);
 
+/* Sends the pad module command 0x12 and returns its result, the version whose major part
+ * InitPadLibrary compares with 4. */
 s32 GetPadModuleVersion(void)
 {
     PadRequest* request = (PadRequest*)g_padRequest;

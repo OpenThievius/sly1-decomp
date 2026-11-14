@@ -36,6 +36,9 @@ void ReportMpegErrorFormat(MpegDecoder* d, const char* msg, s32 code);
 void ComputeMotionVectors(MpegDecoder* self, s32 x, s32 y, s32 flags, s32 type, MpegMotionVector* vec, s32* sel, s32* base);
 void StartBlockChainToScratchpad(MpegDecoder* self);
 
+// For macroblock n, checks its motion type (reporting "Invalid modion type -- ignored" outside 1
+// to 3), computes its motion vectors and prediction and waits for the IPU's output DMA channel
+// before marking the buffer.
 s32 PrepareMacroblockPrediction(MpegDecoder* d, s32 n, s32 mode, s32 flags, s32 code, MpegMotionVector* vec, s32* sel,
                                 s32* base)
 {
@@ -86,6 +89,8 @@ void ComputeDualPrimeVectors(MpegDecoder* self, s32* out, s32* in, s32 x, s32 y)
 void ReportMpegErrorFormat(MpegDecoder* self, const char* fmt, s32 value);
 
 
+// Works out a macroblock's motion vectors from its position and flags and fetches its prediction
+// through PredictMacroblock; PrepareMacroblockPrediction calls it.
 void ComputeMotionVectors(MpegDecoder* self, s32 x, s32 y, s32 flags, s32 type, MpegMotionVector* vec,
                    s32* sel, s32* base)
 {
@@ -177,6 +182,8 @@ void ComputeMotionVectors(MpegDecoder* self, s32 x, s32 y, s32 flags, s32 type, 
     }
 }
 
+// Runs the hand-written prediction routines of mpeg_motion_compensation.cpp through the two tables
+// D_0027B000 and D_0027B020, selected by the kind of motion and whole or half pixel.
 void PredictMacroblock(MpegDecoder* self, MpegPicture* src, s32 srcField, s32 dstField, s32 dstY, s32 height,
                        s32 x, s32 y, s32 dx, s32 dy, s32 half, s32 average)
 {
@@ -288,6 +295,8 @@ void ReportMpegError(MpegDecoder* self, const char* value);
 void ClampMacroblock(s32 destination, u32 buffer);
 void AddAndClampMacroblock(s32 destination, u32 scratch, u32 output);
 
+// Adds the prediction to the decoded residual through the hand-written routines func_0020DE28 and
+// func_0020DE88 (DecodeAllMacroblocks calls it).
 void AddMacroblockResiduals(MpegDecoder* d, s32 n)
 {
     s32 i;

@@ -16,6 +16,9 @@ static const f32 g_logS12 = 1.5313838422e-01f;
 static const f32 g_logS14 = 1.4798198640e-01f;
 static const f32 g_zero = 0.0f;
 
+/* Unchecked natural logarithm: splits x into exponent and mantissa near 1, uses a series in f /
+ * (2 + f) and adds the exponent times ln 2 (head and tail parts); -infinity for 0, NaN for a
+ * negative, x + x for infinity and NaN. */
 f32 LogarithmKernel(f32 x)
 {
     s32 bits, flag, flagHigh;

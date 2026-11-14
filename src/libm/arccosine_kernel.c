@@ -21,6 +21,9 @@ static const f32 g_denT4 = 7.7038154006e-02f;
 
 f32 SquareRootKernel(f32 x);
 
+/* Unchecked arccosine in radians, 0 to pi: three ranges (|x| < 0.5, x <= -0.5, x >= 0.5) each
+ * with a rational polynomial and the square root kernel; returns 0 for x = 1, pi for x = -1 and
+ * NaN for |x| > 1. */
 f32 ArccosineKernel(f32 x)
 {
     f32 t, num, den, ratio, root, head, tail;
