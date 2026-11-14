@@ -1772,10 +1772,25 @@ void ResumeElementStackState(void* stack);
 void PlayStagedBank(void* self);
 void StartWorldSoundEntries(World* self);
 
-// Loads a level's world from the stream: resets the scatter controller and script pools, creates
-// the camera and the pools of 10 and 0x28 helper objects, then reads the script table, properties,
-// credits text, screen resources and the placed objects. After that it starts the sound bank, makes
-// the cone volumes if none were loaded, starts every object and the world's sound entries.
+// Loads a level's world from its stream and brings it to a running state. In order:
+//  1. resets the scatter controller and the script value pools; reads the script stream extras
+//     byte and the world's sound bank id, skips a block;
+//  2. creates the camera (type 0x6D) and the pools of 10 (type 0x1E) and 0x28 (type 0x4D) helper
+//     records, calling each one's method 3 (probably its initialiser);
+//  3. reads the script entry table, the property records, the optional commentary record, the
+//     credits text, the optional staged bank, the screen resources and the placed objects;
+//  4. loads the sound bank if the id is >= 0, silences volume channel 2 when the world has it off,
+//     requests the staged bank and sends the resident images;
+//  5. creates the cone volumes if none were read, sets the fill alpha to 0x80, fills the screen
+//     clear packet with the world's colour and scales two floats by 1/255 (0.003921569);
+//  6. spawns the listed object copies, then runs the queued calls, calls method 0x0F of every
+//     object in the main list (list48) that has one, runs the queued calls again, calls method
+//     0x10 of every object of that list (walked under a ListFrame so the list may change), and
+//     runs the queued calls a third time;
+//  7. updates the scatter level limits, resumes the element stack, and when no map screen is
+//     current on a level other than 0 reserves 0x80000 bytes of zeroed front memory;
+//  8. places the camera, updates the world's contacts, plays the staged bank and starts the
+//     world's sound entries.
 void LoadWorld(World* self, BufferedStream* s)
 {
     Rgba4 color;
