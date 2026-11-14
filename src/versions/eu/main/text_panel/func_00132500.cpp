@@ -43,9 +43,9 @@ void DrawTextPanelCenterFrame(Obj_eu_132500* self, PacketWriter* gs)
 
     pad = (g_padRouting & 2) ? &g_padRecord : &g_blankPadRecord;
     k = 3.0f;
-    if (0.0f < pad->f78) {
+    if (0.0f < pad->secondStickY) {
         k = 6.0f;
-    } else if (pad->f78 < 0.0f) {
+    } else if (pad->secondStickY < 0.0f) {
         k = -6.0f;
     }
     self->f598 = WrapAngle(self->f598 + g_frameDt * k);
@@ -54,35 +54,35 @@ void DrawTextPanelCenterFrame(Obj_eu_132500* self, PacketWriter* gs)
     switch (self->f5AC) {
     case 0:
         if (self->f570 == 5) {
-            PanelColor t = D_00261110;
+            PanelColor t = g_panelPalette0ActiveColorA;
             t.a = alpha;
             c0 = t;
-            t = D_00261108;
+            t = g_panelPalette0ActiveColorB;
             t.a = alpha;
             c1 = t;
         } else {
-            PanelColor t = (*(PanelColor*)&D_002610E0);
+            PanelColor t = (*(PanelColor*)&g_arcTickColorTo);
             t.a = alpha;
             c0 = t;
-            t = (*(PanelColor*)&D_002610D8);
+            t = (*(PanelColor*)&g_arcTickColorFrom);
             t.a = alpha;
             c1 = t;
         }
         break;
     case 1: {
-        PanelColor t = D_00261100;
+        PanelColor t = g_panelPalette1ColorA;
         t.a = alpha;
         c0 = t;
-        t = D_002610F8;
+        t = g_panelPalette1ColorB;
         t.a = alpha;
         c1 = t;
         break;
     }
     case 2: {
-        PanelColor t = D_002610F0;
+        PanelColor t = g_panelPalette2ColorA;
         t.a = alpha;
         c0 = t;
-        t = D_002610E8;
+        t = g_panelPalette2ColorB;
         t.a = alpha;
         c1 = t;
         break;
@@ -117,7 +117,7 @@ void DrawTextPanelCenterFrame(Obj_eu_132500* self, PacketWriter* gs)
             f32 y;
             f32 y2;
             u += step;
-            y = posY + scale * EvalCurveSpan(&D_002612E0, i);
+            y = posY + scale * EvalCurveSpan(&g_panelEdgeCurveC, i);
             y2 = y + scale * 5.0f;
             AddGifRgbaEntry(gs, *(u32*)&colB);
             AddGifXyzfEntry(gs, Gfx_eu_132500::ScreenX(x), Gfx_eu_132500::ScreenY(y), 0, 0);
@@ -139,7 +139,7 @@ void DrawTextPanelCenterFrame(Obj_eu_132500* self, PacketWriter* gs)
             f32 y;
             f32 y2;
             u += step;
-            y = posY - scale * EvalCurveSpan(&D_002612E0, i);
+            y = posY - scale * EvalCurveSpan(&g_panelEdgeCurveC, i);
             y2 = y - scale * 5.0f;
             AddGifRgbaEntry(gs, *(u32*)&colB);
             AddGifXyzfEntry(gs, Gfx_eu_132500::ScreenX(x), Gfx_eu_132500::ScreenY(y), 0, 0);

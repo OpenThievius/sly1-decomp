@@ -82,7 +82,7 @@ void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
     BeginGifTag(gs, 0, 3, 0x1EE);
     AddGifRegisterWrite(gs, 0x47, 0x3F001);
     AddGifRegisterWrite(gs, 0x42, 0x44);
-    AddGifRgbaEntry(gs, *(u32*)&D_002610E0);
+    AddGifRgbaEntry(gs, *(u32*)&g_arcTickColorTo);
     BeginGifTag(gs, 0x84, 1, 4);
 
     for (i = 0; i < 11; i++) {
@@ -101,14 +101,14 @@ void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
     f32 half = 0.5f;
     f32 row = 6.0f;
     f32 a = WrapModulo(g_camera->heading + 0.39269909f, 6.2831855f);
-    f32 w = D_00261310 + 4.0f;
+    f32 w = g_compassLabelWidth + 4.0f;
     s32 cur = (s32)(a / 0.78539819f);
     s32 prev = (cur + 7) & 7;
     s32 next = (cur + 1) & 7;
     f32 frac = WrapModulo(a, 0.78539819f) / 0.78539819f;
-    InitTextReaderFromTextTable(&sCur, ((s32*)D_00261128)[cur], self->font, 0);
-    InitTextReaderFromTextTable(&sPrev, ((s32*)D_00261128)[prev], self->font, 0);
-    InitTextReaderFromTextTable(&sNext, ((s32*)D_00261128)[next], self->font, 0);
+    InitTextReaderFromTextTable(&sCur, ((s32*)g_compassDirectionNames)[cur], self->font, 0);
+    InitTextReaderFromTextTable(&sPrev, ((s32*)g_compassDirectionNames)[prev], self->font, 0);
+    InitTextReaderFromTextTable(&sNext, ((s32*)g_compassDirectionNames)[next], self->font, 0);
     f32 wCur = SumTextWidth(&sCur);
     f32 off = frac * w;
     f32 wPrev = SumTextWidth(&sPrev);
@@ -123,8 +123,8 @@ void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
     ScreenLayout_eu_1316E8::Reset(&L, grey);
 
     L.h = (f32)self->font->height * self->font->sy;
-    L.w = D_00261310;
-    *(PanelColor*)&L.color = PanelColor(D_002610D8);
+    L.w = g_compassLabelWidth;
+    *(PanelColor*)&L.color = PanelColor(g_arcTickColorFrom);
     L.x = xPrev;
     L.y = row;
     DrawWrappedAlignedText(&sPrev, &L, 0, gs);
@@ -135,7 +135,7 @@ void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
     {
         SpanHead q = { 0.0f, 4.0f, -4.0f };
         f32 t = q.c0 + frac * (q.c1 + frac * q.c2);
-        *(PanelColor*)&L.color = BorderColorMix::Mix(D_002610D8, PanelColor(0x32, 0x84, 0xB0, 0x80), t);
+        *(PanelColor*)&L.color = BorderColorMix::Mix(g_arcTickColorFrom, PanelColor(0x32, 0x84, 0xB0, 0x80), t);
     }
     L.x = xCur;
     L.y = row;

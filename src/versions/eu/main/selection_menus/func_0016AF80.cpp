@@ -17,36 +17,36 @@ void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
     s32 s1 = 0;
     StateWalker* p = self->walkers[0].walker;
 
-    if (p->f28 != p->index) {
-        SetScreenElementByteText((&D_0026F138), D_eu_0024CC20);
+    if (p->currentEntry != p->index) {
+        SetScreenElementByteText((&g_copiedTextCaption), D_eu_0024CC20);
     } else if (self->choice == 0) {
-        void** vt = *(void***)(&D_0026F138);
-        ((VFnS_16AF80)vt[8])((&D_0026F138), GetTextTableEntry(0x16));
+        void** vt = *(void***)(&g_copiedTextCaption);
+        ((VFnS_16AF80)vt[8])((&g_copiedTextCaption), GetTextTableEntry(0x16));
     } else {
         s32 flags = g_saveData->levels[self->choice].f448;
         if (flags & 1) {
-            SetElementWideTextFromIndexedCounts((&D_0026F138));
+            SetElementWideTextFromIndexedCounts((&g_copiedTextCaption));
         } else if (self->choice == self->walkerChoice) {
-            void** vt = *(void***)(&D_0026F138);
-            ((VFnS_16AF80)vt[8])((&D_0026F138), GetTextTableEntry(0x18));
+            void** vt = *(void***)(&g_copiedTextCaption);
+            ((VFnS_16AF80)vt[8])((&g_copiedTextCaption), GetTextTableEntry(0x18));
         } else {
             s1 = 1;
-            SetScreenElementByteText((&D_0026F138), D_eu_0024CC20);
+            SetScreenElementByteText((&g_copiedTextCaption), D_eu_0024CC20);
         }
     }
 
-    SetScreenElementHoldTime((&D_0026F138), 0.0f);
-    ((Obj_16AF80_eu*)(&D_0026F138))->f974 = 0;
+    SetScreenElementHoldTime((&g_copiedTextCaption), 0.0f);
+    ((Obj_16AF80_eu*)(&g_copiedTextCaption))->f974 = 0;
     {
-        void** vt = *(void***)(&D_0026F138);
-        ((VFnV_16AF80)vt[14])((&D_0026F138));
+        void** vt = *(void***)(&g_copiedTextCaption);
+        ((VFnV_16AF80)vt[14])((&g_copiedTextCaption));
     }
 
     if (s1 != 0) {
-        ((VFnS_16AF80)(*(void***)(&D_0026FA90))[8])((&D_0026FA90), GetTextTableEntry(0x17));
-        ((VFnV_16AF80)(*(void***)(&D_0026FA90))[14])((&D_0026FA90));
+        ((VFnS_16AF80)(*(void***)(&g_selectionCaption))[8])((&g_selectionCaption), GetTextTableEntry(0x17));
+        ((VFnV_16AF80)(*(void***)(&g_selectionCaption))[14])((&g_selectionCaption));
     } else {
-        void** vt = *(void***)(&D_0026FA90);
-        ((VFnV_16AF80)vt[15])((&D_0026FA90));
+        void** vt = *(void***)(&g_selectionCaption);
+        ((VFnV_16AF80)vt[15])((&g_selectionCaption));
     }
 }

@@ -256,56 +256,56 @@ void ClearTrackedNodes(ContactTracker* self);
 ScriptValue* StoreScriptArgumentsVa(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...);
 
 // The file's .rodata: the argument signatures its functions copy, in retail's order.
-extern const s32 D_00248D80[2] = { 0x2000, 0x2000 };
-extern const s32 D_00248D88[2] = { 0x14, 0 };
-extern const s32 D_00248D90[2] = { 0x14, 5 };
-extern const s32 D_00248D98[2] = { 0x14, 1 };
-extern const s32 D_00248DA0[2] = { 0x14, 9 };
-extern const s32 D_00248DA8[2] = { 0x14, 10 };
-extern const s32 D_00248DB0[2] = { 0x14, 6 };
-extern const s32 D_00248DB8[2] = { 0x14, 2 };
-extern const s32 D_00248DC0[4] = { 1, 1, 0x1000, 0 };
-extern const s32 D_00248DD0[2] = { 1, 1 };
-extern const s32 D_00248DD8[6] = { 14, 1, 1, 1, 10, 0 };
-extern const s32 D_00248DF0[4] = { 0, 6, 6, 6 };
-extern const s32 D_00248E00[4] = { 0x2000, 1, 1, 0x1000 };
-extern const s32 D_00248E10[6] = { 0x2000, 0x1000, 1, 1, 0x1000, 0 };
-extern const s32 D_00248E28[4] = { 0x1000, 1, 1, 0 };
-extern const Kinds2 D_00248E38 = { { 6, 0x1000 } };
-extern const s32 D_00248E40[6] = { 6, 6, 1, 1, 1, 1 };
-extern const s32 D_00248E58[6] = { 0x1000, 0x2000, 2, 2, 1, 1 };
-extern const s32 D_00248E70[4] = { 0x2000, 6, 0x1000, 0 };
-extern const s32 D_00248E80[4] = { 5, 5, 2, 0 };
-extern const s32 D_00248E90[2] = { 0x1000, 5 };
-extern const s32 D_00248E98[4] = { 15, 6, 5, 0 };
-extern const Kinds2 D_00248EA8 = { { 0xF, 6 } };
-extern const Kinds2 D_00248EB0 = { { 0x1000, 0x2000 } };
-extern const s32 D_00248EB8[2] = { 5, 5 };
-extern const s32 D_00248EC0[2] = { 5, 0 };
-extern const s32 D_00248EC8[4] = { 0x2000, 1, 1, 0 };
-extern const s32 D_00248ED8[4] = { 2, 1, 1, 0 };
-extern const s32 D_00248EE8[2] = { 0x1000, 6 };
-extern const s32 D_00248EF0[4] = { 6, 6, 6, 6 };
-extern const s32 D_00248F00[4] = { 1, 1, 1, 0 };
-extern const s32 D_00248F10[4] = { 6, 5, 0, 0 };
-extern const s32 D_00248F20[2] = { 6, 5 };
-extern const s32 D_00248F28[4] = { 1, 1, 1, 1 };
-extern const s32 D_00248F38[6] = { 0x2000, 1, 1, 0x2000, 0x2000, 0 };
-extern const s32 D_00248F50[2] = { 0x2000, 1 };
-extern const s32 D_00248F58[2] = { 6, 1 };
-extern const s32 D_00248F60[4] = { 6, 0x1000, 0x1000, 0 };
-extern const s32 D_00248F70[4] = { 6, 1, 0, 0 };
-extern const s32 D_00248F80[4] = { 6, 0x1000, 0, 0 };
-extern const s32 D_00248F90[2] = { 6, 0 };
-extern const s32 D_00248F98[2] = { 0x2000, 5 };
-extern const s32 D_00248FA0[4] = { 5, 1, 0x1000, 0 };
-extern const s32 D_00248FB0[4] = { 5, 1, 6, 0 };
-extern const s32 D_00248FC0[2] = { 5, 1 };
-extern const s32 D_00248FC8[4] = { 0x2000, 0x2000, 0x2000, 0 };
-extern const s32 D_00248FD8[2] = { 0x2000, 0 };
+extern const s32 g_createScriptObjectCopyArgKinds[2] = { 0x2000, 0x2000 };
+extern const s32 g_setScriptExtraObjectPropertyBoolArgKinds[2] = { 0x14, 0 };
+extern const s32 g_setScriptExtraObjectPropertyIntArgKinds[2] = { 0x14, 5 };
+extern const s32 g_setScriptExtraObjectPropertyFloatArgKinds[2] = { 0x14, 1 };
+extern const s32 g_setScriptExtraObjectPropertyVectorBArgKinds[2] = { 0x14, 9 };
+extern const s32 g_setScriptExtraObjectPropertyPairArgKinds[2] = { 0x14, 10 };
+extern const s32 g_setScriptExtraObjectPropertyWordArgKinds[2] = { 0x14, 6 };
+extern const s32 g_setScriptExtraObjectPropertyVectorAArgKinds[2] = { 0x14, 2 };
+extern const s32 g_setScriptValueAttachmentArgKinds[4] = { 1, 1, 0x1000, 0 };
+extern const s32 g_setScriptElementsScrollScaleArgKinds[2] = { 1, 1 };
+extern const s32 g_startScriptSoundWithParamsArgKinds[6] = { 14, 1, 1, 1, 10, 0 };
+extern const s32 g_setScriptTransformObjectKeyedValueArgKinds[4] = { 0, 6, 6, 6 };
+extern const s32 g_createScriptAnimationPlayerArgKinds[4] = { 0x2000, 1, 1, 0x1000 };
+extern const s32 g_findOrCreateScriptSeekedAnimationPlayerArgKinds[6] = { 0x2000, 0x1000, 1, 1, 0x1000, 0 };
+extern const s32 g_seekScriptAnimationPlayerArgKinds[4] = { 0x1000, 1, 1, 0 };
+extern const Kinds2 g_releaseScriptPlayerAttachmentArgKinds = { { 6, 0x1000 } };
+extern const s32 g_addScriptSpawnRangeEntryArgKinds[6] = { 6, 6, 1, 1, 1, 1 };
+extern const s32 g_sendScriptTwoVectorMessageC7AArgKinds[6] = { 0x1000, 0x2000, 2, 2, 1, 1 };
+extern const s32 g_createScriptStateWalkerArgKinds[4] = { 0x2000, 6, 0x1000, 0 };
+extern const s32 g_scatterScriptRandomObjectsArgKinds[4] = { 5, 5, 2, 0 };
+extern const s32 g_setScriptIopChannel2SettingArgKinds[2] = { 0x1000, 5 };
+extern const s32 g_setScriptEntrySlotValueArgKinds[4] = { 15, 6, 5, 0 };
+extern const Kinds2 g_getScriptEntrySlotValueArgKinds = { { 0xF, 6 } };
+extern const Kinds2 g_showScriptPauseMenuPageWithArgKinds = { { 0x1000, 0x2000 } };
+extern const s32 g_setScriptCachedVoiceParamArgKinds[2] = { 5, 5 };
+extern const s32 g_refreshScriptCachedVoiceParamArgKinds[2] = { 5, 0 };
+extern const s32 g_setScriptCameraControllerSettingsArgKinds[4] = { 0x2000, 1, 1, 0 };
+extern const s32 g_testScriptSphereInCameraViewArgKinds[4] = { 2, 1, 1, 0 };
+extern const s32 g_setScriptAgentStateClipIdArgKinds[2] = { 0x1000, 6 };
+extern const s32 g_addScriptAgentClipGroupArgKinds[4] = { 6, 6, 6, 6 };
+extern const s32 g_setScriptAimBlendGridVectorArgKinds[4] = { 1, 1, 1, 0 };
+extern const s32 g_addScriptObjectPoolEntryArgKinds[4] = { 6, 5, 0, 0 };
+extern const s32 g_setScriptObjectPoolEntryCountArgKinds[2] = { 6, 5 };
+extern const s32 g_addScriptOscillatorEntryVectorAArgKinds[4] = { 1, 1, 1, 1 };
+extern const s32 g_addScriptPathFollowerActiveEntryArgKinds[6] = { 0x2000, 1, 1, 0x2000, 0x2000, 0 };
+extern const s32 g_startScriptC24ObjectPathArgKinds[2] = { 0x2000, 1 };
+extern const s32 g_addScriptQueueEntryKind4ArgKinds[2] = { 6, 1 };
+extern const s32 g_addScriptQueueEntryKind5ArgKinds[4] = { 6, 0x1000, 0x1000, 0 };
+extern const s32 g_addScriptQueueEntryKind6ArgKinds[4] = { 6, 1, 0, 0 };
+extern const s32 g_addScriptQueueEntryKind8ArgKinds[4] = { 6, 0x1000, 0, 0 };
+extern const s32 g_addScriptQueueEntryKind9ArgKinds[2] = { 6, 0 };
+extern const s32 g_addScriptC13EntryArgKinds[2] = { 0x2000, 5 };
+extern const s32 g_appendScriptWorld3TimelineKind0EntryArgKinds[4] = { 5, 1, 0x1000, 0 };
+extern const s32 g_appendScriptWorld3TimelineKind1EntryArgKinds[4] = { 5, 1, 6, 0 };
+extern const s32 g_appendScriptWorld3TimelineKind2EntryArgKinds[2] = { 5, 1 };
+extern const s32 g_setScriptWorld4BossValuesArgKinds[4] = { 0x2000, 0x2000, 0x2000, 0 };
+extern const s32 g_takeScriptCountedColliderTouchArgKinds[2] = { 0x2000, 0 };
 
 // The file's .data: the property descriptors, filled at startup by func_00109488.
-PropertyDescriptor D_002505D8[1179];
+PropertyDescriptor g_objectPropertyDescriptors[1179];
 
 ScriptValue* TestScriptObjectOfKind(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptObjectKeyToOwner(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
@@ -579,7 +579,7 @@ ScriptValue* CreateScriptObjectCopy(ScriptValue* ret, BaseObject* obj, s32 unuse
     World* o1;
     BaseObject* o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248D80;
+    kinds = *(Kinds2*)&g_createScriptObjectCopyArgKinds;
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -651,7 +651,7 @@ ScriptValue* SetScriptExtraObjectPropertyBool(ScriptValue* ret, BaseObject* obj,
     s32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248D88;
+    kinds = *(Kinds2*)&g_setScriptExtraObjectPropertyBoolArgKinds;
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -670,7 +670,7 @@ ScriptValue* SetScriptExtraObjectPropertyInt(ScriptValue* ret, BaseObject* obj, 
     s32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248D90;
+    kinds = *(Kinds2*)&g_setScriptExtraObjectPropertyIntArgKinds;
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -689,7 +689,7 @@ ScriptValue* SetScriptExtraObjectPropertyFloat(ScriptValue* ret, BaseObject* obj
     s32 a;
     f32 b;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248D98;
+    kinds = *(Kinds2*)&g_setScriptExtraObjectPropertyFloatArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &a, &b);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -708,7 +708,7 @@ ScriptValue* SetScriptExtraObjectPropertyVectorB(ScriptValue* ret, BaseObject* o
     ScriptValue t;
     s32 out;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248DA0;
+    kinds = *(Kinds2*)&g_setScriptExtraObjectPropertyVectorBArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &out, &vec);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -727,7 +727,7 @@ ScriptValue* SetScriptExtraObjectPropertyPair(ScriptValue* ret, BaseObject* obj,
     ScriptValue t;
     s32 out;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248DA8;
+    kinds = *(Kinds2*)&g_setScriptExtraObjectPropertyPairArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &out, &vec);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -746,7 +746,7 @@ ScriptValue* SetScriptExtraObjectPropertyWord(ScriptValue* ret, BaseObject* obj,
     s32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248DB0;
+    kinds = *(Kinds2*)&g_setScriptExtraObjectPropertyWordArgKinds;
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -765,7 +765,7 @@ ScriptValue* SetScriptExtraObjectPropertyVectorA(ScriptValue* ret, BaseObject* o
     ScriptValue t;
     s32 out;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248DB8;
+    kinds = *(Kinds2*)&g_setScriptExtraObjectPropertyVectorAArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &out, &vec);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -838,7 +838,7 @@ ScriptValue* SetScriptValueAttachment(ScriptValue* ret, PlacedObject* obj, s32 u
     o0p = &o0;
     o1p = &o1;
     o2p = &o2;
-    kinds = *(Kinds3*)&D_00248DC0;
+    kinds = *(Kinds3*)&g_setScriptValueAttachmentArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, np, o0p, o1p, o2p);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -857,7 +857,7 @@ ScriptValue* SetScriptElementsScrollScale(ScriptValue* ret, PlacedObject* obj, s
     f32 x;
     f32 y;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248DD0;
+    kinds = *(Kinds2*)&g_setScriptElementsScrollScaleArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &x, &y);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -895,7 +895,7 @@ ScriptValue* StartScriptSoundWithParams(ScriptValue* ret, PlacedObject* obj, s32
     s32 i0;
     f32 f0, f1, f2;
     InitScriptValue(&q);
-    kinds = *(Kinds5*)&D_00248DD8;
+    kinds = *(Kinds5*)&g_startScriptSoundWithParamsArgKinds;
     StoreScriptArgumentsVa(&t, 5, args, &kinds, &i0, &f0, &f1, &f2, &vec);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1035,7 +1035,7 @@ ScriptValue* SetScriptFollowObjects(ScriptValue* ret, PlacedObject* obj, s32 unu
     BaseObject* o1;
     BaseObject* o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248D80;
+    kinds = *(Kinds2*)&g_createScriptObjectCopyArgKinds;
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1094,7 +1094,7 @@ ScriptValue* SetScriptTransformObjectKeyedValue(ScriptValue* ret, TransformObjec
     s32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds4*)D_00248DF0;
+    kinds = *(Kinds4*)g_setScriptTransformObjectKeyedValueArgKinds;
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1146,7 +1146,7 @@ ScriptValue* CreateScriptAnimationPlayer(ScriptValue* ret, Animation* obj, s32 u
     f32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds4*)&D_00248E00;
+    kinds = *(Kinds4*)&g_createScriptAnimationPlayerArgKinds;
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1168,7 +1168,7 @@ ScriptValue* FindOrCreateScriptSeekedAnimationPlayer(ScriptValue* ret, Animation
     f32 o4;
     s32 o5;
     InitScriptValue(&q);
-    kinds = *(Kinds5*)&D_00248E10;
+    kinds = *(Kinds5*)&g_findOrCreateScriptSeekedAnimationPlayerArgKinds;
     (void)StoreScriptArgumentsVa(&t, 5, args, &kinds, &o1, &o2, &o3, &o4, &o5);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1205,7 +1205,7 @@ ScriptValue* SeekScriptAnimationPlayer(ScriptValue* ret, AnimationPlayer* obj, s
     f32 o1;
     f32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)&D_00248E28;
+    kinds = *(Kinds3*)&g_seekScriptAnimationPlayerArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1257,7 +1257,7 @@ ScriptValue* ReleaseScriptPlayerAttachment(ScriptValue* ret, void* obj, s32 unus
     s32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = D_00248E38;
+    kinds = g_releaseScriptPlayerAttachmentArgKinds;
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1308,7 +1308,7 @@ ScriptValue* SetScriptTriggerZoneEntry(ScriptValue* ret, TriggerZone* obj, s32 u
     s32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds4*)D_00248DF0;
+    kinds = *(Kinds4*)g_setScriptTransformObjectKeyedValueArgKinds;
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1329,7 +1329,7 @@ ScriptValue* SetScriptZoneColliderEntry(ScriptValue* ret, ZoneCollider* obj, s32
     s32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds4*)D_00248DF0;
+    kinds = *(Kinds4*)g_setScriptTransformObjectKeyedValueArgKinds;
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1401,7 +1401,7 @@ ScriptValue* AddScriptStateTriggerTableEntry(ScriptValue* ret, StateTrigger* obj
     s32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds4*)D_00248DF0;
+    kinds = *(Kinds4*)g_setScriptTransformObjectKeyedValueArgKinds;
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1543,7 +1543,7 @@ ScriptValue* AddScriptSpawnRangeEntry(ScriptValue* ret, EffectSpawner* obj, s32 
     s32 i0, i1;
     f32 f0, f1, f2, f3;
     InitScriptValue(&q);
-    kinds = *(Kinds6*)&D_00248E40;
+    kinds = *(Kinds6*)&g_addScriptSpawnRangeEntryArgKinds;
     (void)StoreScriptArgumentsVa(&t, 6, args, &kinds, &i0, &i1, &f0, &f1, &f2, &f3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1562,7 +1562,7 @@ ScriptValue* AddScriptRecordMemberRangeEntry(ScriptValue* ret, RecordMember* obj
     s32 i0, i1;
     f32 f0, f1, f2, f3;
     InitScriptValue(&q);
-    kinds = *(Kinds6*)&D_00248E40;
+    kinds = *(Kinds6*)&g_addScriptSpawnRangeEntryArgKinds;
     (void)StoreScriptArgumentsVa(&t, 6, args, &kinds, &i0, &i1, &f0, &f1, &f2, &f3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1603,7 +1603,7 @@ ScriptValue* SendScriptTwoVectorMessageC7A(ScriptValue* ret, HoldingMember* obj,
     InitScriptValue(&q);
     s32* pi0 = &i0;
     s32* pi1 = &i1;
-    kinds = *(Kinds6*)&D_00248E58;
+    kinds = *(Kinds6*)&g_sendScriptTwoVectorMessageC7AArgKinds;
     (void)StoreScriptArgumentsVa(&t, 6, args, &kinds, pi0, pi1, &vec0, &vec1, &f0, &f1);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1642,7 +1642,7 @@ ScriptValue* SendScriptTwoVectorMessageC78(ScriptValue* ret, MemberGroup* obj, s
     f32 f1;
 
     InitScriptValue(&q);
-    kinds = *(Kinds6*)&D_00248E58;
+    kinds = *(Kinds6*)&g_sendScriptTwoVectorMessageC7AArgKinds;
     (void)StoreScriptArgumentsVa(&t, 6, args, &kinds, &i0, &i1, &vec0, &vec1, &f0, &f1);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1662,7 +1662,7 @@ ScriptValue* CreateScriptStateWalker(ScriptValue* ret, StateGraph* obj, s32 unus
     s32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)&D_00248E70;
+    kinds = *(Kinds3*)&g_createScriptStateWalkerArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1697,7 +1697,7 @@ ScriptValue* ScatterScriptRandomObjects(ScriptValue* ret, World* obj, s32 unused
     s32 a;
     s32 b;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)&D_00248E80;
+    kinds = *(Kinds3*)&g_scatterScriptRandomObjectsArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &a, &b, &vec);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1716,7 +1716,7 @@ ScriptValue* SetScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unuse
     s32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248E90;
+    kinds = *(Kinds2*)&g_setScriptIopChannel2SettingArgKinds;
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1735,7 +1735,7 @@ ScriptValue* PushScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unus
     s32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248E90;
+    kinds = *(Kinds2*)&g_setScriptIopChannel2SettingArgKinds;
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1889,7 +1889,7 @@ ScriptValue* SetScriptEntrySlotValue(ScriptValue* ret, World* obj, s32 unused, S
     s32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)&D_00248E98;
+    kinds = *(Kinds3*)&g_setScriptEntrySlotValueArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1908,7 +1908,7 @@ ScriptValue* GetScriptEntrySlotValue(ScriptValue* ret, World* obj, s32 unused, S
     s32 out1;
     s32 out2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248EA8;
+    kinds = *(Kinds2*)&g_getScriptEntrySlotValueArgKinds;
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &out1, &out2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -1990,7 +1990,7 @@ ScriptValue* ShowScriptPauseMenuPageWith(ScriptValue* ret, World* obj, s32 unuse
     s32 out1;
     s32 out2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248EB0;
+    kinds = *(Kinds2*)&g_showScriptPauseMenuPageWithArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &out1, &out2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2075,7 +2075,7 @@ ScriptValue* SetScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused,
     s32 out1;
     s32 out2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248EB8;
+    kinds = *(Kinds2*)g_setScriptCachedVoiceParamArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &out1, &out2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2118,7 +2118,7 @@ ScriptValue* RefreshScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unu
     pp = &kinds;
     o1 = &out1;
     o2 = &out2;
-    kinds = *(Kinds2*)D_00248EC0;
+    kinds = *(Kinds2*)g_refreshScriptCachedVoiceParamArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, pp, o1, o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2251,7 +2251,7 @@ ScriptValue* SetScriptCameraControllerSettings(ScriptValue* ret, Camera* obj, s3
     f32 o1;
     f32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)D_00248EC8;
+    kinds = *(Kinds3*)g_setScriptCameraControllerSettingsArgKinds;
     StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2301,7 +2301,7 @@ ScriptValue* TestScriptSphereInCameraView(ScriptValue* ret, Camera* obj, s32 unu
     f32 fx;
     f32 fy;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)D_00248ED8;
+    kinds = *(Kinds3*)g_testScriptSphereInCameraViewArgKinds;
     StoreScriptArgumentsVa(&t, 3, args, &kinds, &vec, &fx, &fy);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2379,7 +2379,7 @@ ScriptValue* SetScriptAgentStateClipId(ScriptValue* ret, Agent* obj, s32 unused,
     s32 out1;
     s32 out2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248EE8;
+    kinds = *(Kinds2*)g_setScriptAgentStateClipIdArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &out1, &out2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2398,7 +2398,7 @@ ScriptValue* SetScriptAgentStateClip(ScriptValue* ret, Agent* obj, s32 unused, S
     s32 out1;
     s32 out2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248EE8;
+    kinds = *(Kinds2*)g_setScriptAgentStateClipIdArgKinds;
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &out1, &out2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2436,7 +2436,7 @@ ScriptValue* AddScriptAgentClipGroup(ScriptValue* ret, Agent* obj, s32 unused, S
     s32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds4*)D_00248EF0;
+    kinds = *(Kinds4*)g_addScriptAgentClipGroupArgKinds;
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2455,7 +2455,7 @@ ScriptValue* AddScriptAgentMeshKey(ScriptValue* ret, Agent* obj, s32 unused, Scr
     s32 out1;
     s32 out2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)&D_00248E38;
+    kinds = *(Kinds2*)&g_releaseScriptPlayerAttachmentArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &out1, &out2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2474,7 +2474,7 @@ ScriptValue* AddScriptAgentExtraClip(ScriptValue* ret, Agent* obj, s32 unused, S
     s32 out1;
     s32 out2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248EE8;
+    kinds = *(Kinds2*)g_setScriptAgentStateClipIdArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &out1, &out2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2493,7 +2493,7 @@ ScriptValue* ForceScriptAgentState(ScriptValue* ret, Agent* obj, s32 unused, Scr
     s32 o1;
     void* o2;
     InitScriptValue(&q);
-    kinds = D_00248EB0;
+    kinds = g_showScriptPauseMenuPageWithArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2518,7 +2518,7 @@ ScriptValue* SetScriptAgentSecondaryClipId(ScriptValue* ret, Agent* obj, s32 unu
     kp = &kinds;
     o1p = &o1;
     o2p = &o2;
-    kinds = *(Kinds2*)D_00248EE8;
+    kinds = *(Kinds2*)g_setScriptAgentStateClipIdArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, kp, o1p, o2p);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2570,7 +2570,7 @@ ScriptValue* SetScriptCompanionAgentLookId(ScriptValue* ret, CompanionAgent* obj
     s32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248EE8;
+    kinds = *(Kinds2*)g_setScriptAgentStateClipIdArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2631,7 +2631,7 @@ ScriptValue* PlaceScriptPlayerOnGround(ScriptValue* ret, Player* obj, s32 unused
     vecp = &vec;
     fxp = &fx;
     fyp = &fy;
-    kinds = *(Kinds3*)D_00248ED8;
+    kinds = *(Kinds3*)g_testScriptSphereInCameraViewArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, kp, vecp, fxp, fyp);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2807,7 +2807,7 @@ ScriptValue* SetScriptAimBlendGridVector(ScriptValue* ret, AimBlendGrid* obj, s3
     f32 o1;
     f32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)D_00248F00;
+    kinds = *(Kinds3*)g_setScriptAimBlendGridVectorArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2827,7 +2827,7 @@ ScriptValue* SetScriptAimBlendGridVectorFlagged(ScriptValue* ret, AimBlendGrid* 
     f32 o1;
     f32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)D_00248F00;
+    kinds = *(Kinds3*)g_setScriptAimBlendGridVectorArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2917,7 +2917,7 @@ ScriptValue* AddScriptStateResetEntry(ScriptValue* ret, StateResetObject* obj, s
     s32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds4*)D_00248DF0;
+    kinds = *(Kinds4*)g_setScriptTransformObjectKeyedValueArgKinds;
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2969,7 +2969,7 @@ ScriptValue* AddScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unu
     s32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds4*)D_00248F10;
+    kinds = *(Kinds4*)g_addScriptObjectPoolEntryArgKinds;
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &o0, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3024,7 +3024,7 @@ ScriptValue* SetScriptObjectPoolEntryCount(ScriptValue* ret, ObjectPool* obj, s3
     s32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248F20;
+    kinds = *(Kinds2*)g_setScriptObjectPoolEntryCountArgKinds;
     StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3151,7 +3151,7 @@ ScriptValue* AddScriptSequenceExtraTarget(ScriptValue* ret, StepSequence* obj, s
     s32 o1;
     u32 o2;
     InitScriptValue(&q);
-    kinds = D_00248EA8;
+    kinds = g_getScriptEntrySlotValueArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3247,7 +3247,7 @@ ScriptValue* AddScriptOscillatorEntryVectorA(ScriptValue* ret, Oscillator* obj, 
     f32 z;
     f32 w;
     InitScriptValue(&q);
-    kinds = *(Kinds4*)D_00248F28;
+    kinds = *(Kinds4*)g_addScriptOscillatorEntryVectorAArgKinds;
     (void)StoreScriptArgumentsVa(&t, 4, args, &kinds, &x, &y, &z, &w);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3268,7 +3268,7 @@ ScriptValue* AddScriptOscillatorEntryVectorB(ScriptValue* ret, Oscillator* obj, 
     f32 z;
     f32 w;
     InitScriptValue(&q);
-    kinds = *(Kinds4*)D_00248F28;
+    kinds = *(Kinds4*)g_addScriptOscillatorEntryVectorAArgKinds;
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &x, &y, &z, &w);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3302,7 +3302,7 @@ ScriptValue* AddScriptEntryRecordKey(ScriptValue* ret, C17* obj, s32 unused, Scr
     s32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248EE8;
+    kinds = *(Kinds2*)g_setScriptAgentStateClipIdArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3342,7 +3342,7 @@ ScriptValue* AddScriptPathFollowerActiveEntry(ScriptValue* ret, PathFollower* ob
     s32 o4;
     s32 o5;
     InitScriptValue(&q);
-    kinds = *(Kinds5*)D_00248F38;
+    kinds = *(Kinds5*)g_addScriptPathFollowerActiveEntryArgKinds;
     (void)StoreScriptArgumentsVa(&t, 5, args, &kinds, &o1, &o2, &o3, &o4, &o5);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3427,7 +3427,7 @@ ScriptValue* StartScriptC24ObjectPath(ScriptValue* ret, C24* obj, s32 unused, Sc
     PathCurveObject* a;
     f32 b;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248F50;
+    kinds = *(Kinds2*)g_startScriptC24ObjectPathArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &a, &b);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3582,7 +3582,7 @@ ScriptValue* AddScriptQueueEntryKind4(ScriptValue* ret, EntryQueue* obj, s32 unu
     s32 a;
     f32 b;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248F58;
+    kinds = *(Kinds2*)g_addScriptQueueEntryKind4ArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &a, &b);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3603,7 +3603,7 @@ ScriptValue* AddScriptQueueEntryKind5(ScriptValue* ret, EntryQueue* obj, s32 unu
     s32 o3;
     s32 o4;
     InitScriptValue(&q);
-    kinds = *(Kinds4*)D_00248F60;
+    kinds = *(Kinds4*)g_addScriptQueueEntryKind5ArgKinds;
     (void)StoreScriptArgumentsVa(&t, 4, args, &kinds, &o1, &o2, &o3, &o4);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3623,7 +3623,7 @@ ScriptValue* AddScriptQueueEntryKind6(ScriptValue* ret, EntryQueue* obj, s32 unu
     f32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)D_00248F70;
+    kinds = *(Kinds3*)g_addScriptQueueEntryKind6ArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3643,7 +3643,7 @@ ScriptValue* AddScriptQueueEntryKind7(ScriptValue* ret, EntryQueue* obj, s32 unu
     f32 o2;
     s32 o3;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)D_00248F70;
+    kinds = *(Kinds3*)g_addScriptQueueEntryKind6ArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o1, &o2, &o3);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3663,7 +3663,7 @@ ScriptValue* AddScriptQueueEntryKind8(ScriptValue* ret, EntryQueue* obj, s32 unu
     s32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)D_00248F80;
+    kinds = *(Kinds3*)g_addScriptQueueEntryKind8ArgKinds;
     StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3682,7 +3682,7 @@ ScriptValue* AddScriptQueueEntryKind9(ScriptValue* ret, EntryQueue* obj, s32 unu
     s32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248F90;
+    kinds = *(Kinds2*)g_addScriptQueueEntryKind9ArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3830,7 +3830,7 @@ ScriptValue* AddScriptC13Entry(ScriptValue* ret, World3Boss* obj, s32 unused, Sc
     AnimationPlayer* o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248F98;
+    kinds = *(Kinds2*)g_addScriptC13EntryArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3883,7 +3883,7 @@ ScriptValue* AppendScriptWorld3TimelineKind0Entry(ScriptValue* ret, World3Timeli
     f32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)D_00248FA0;
+    kinds = *(Kinds3*)g_appendScriptWorld3TimelineKind0EntryArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3903,7 +3903,7 @@ ScriptValue* AppendScriptWorld3TimelineKind1Entry(ScriptValue* ret, World3Timeli
     f32 o1;
     s32 o2;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)D_00248FB0;
+    kinds = *(Kinds3*)g_appendScriptWorld3TimelineKind1EntryArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3922,7 +3922,7 @@ ScriptValue* AppendScriptWorld3TimelineKind2Entry(ScriptValue* ret, World3Timeli
     s32 n;
     f32 out;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248FC0;
+    kinds = *(Kinds2*)g_appendScriptWorld3TimelineKind2EntryArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &n, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3941,7 +3941,7 @@ ScriptValue* AppendScriptWorld3TimelineKind3Entry(ScriptValue* ret, World3Timeli
     s32 n;
     f32 out;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248FC0;
+    kinds = *(Kinds2*)g_appendScriptWorld3TimelineKind2EntryArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &n, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3960,7 +3960,7 @@ ScriptValue* AppendScriptWorld3TimelineKind4Entry(ScriptValue* ret, World3Timeli
     s32 n;
     f32 out;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248FC0;
+    kinds = *(Kinds2*)g_appendScriptWorld3TimelineKind2EntryArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &n, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3979,7 +3979,7 @@ ScriptValue* AppendScriptWorld3TimelineKind5Entry(ScriptValue* ret, World3Timeli
     s32 n;
     f32 out;
     InitScriptValue(&q);
-    kinds = *(Kinds2*)D_00248FC0;
+    kinds = *(Kinds2*)g_appendScriptWorld3TimelineKind2EntryArgKinds;
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &n, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3999,7 +3999,7 @@ ScriptValue* SetScriptWorld4BossValues(ScriptValue* ret, World4Boss* obj, s32 un
     Animation* o1;
     Animation* o2;
     InitScriptValue(&q);
-    kinds = *(Kinds3*)D_00248FC8;
+    kinds = *(Kinds3*)g_setScriptWorld4BossValuesArgKinds;
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -4072,7 +4072,7 @@ ScriptValue* TakeScriptCountedColliderTouch(ScriptValue* ret, CountedCollider* o
     void* o0;
     s32 o1;
     InitScriptValue(&q);
-    (void)StoreScriptArgumentsVa(&t, 2, args, (kinds = *(Kinds2*)D_00248FD8, &kinds), &o0, &o1);
+    (void)StoreScriptArgumentsVa(&t, 2, args, (kinds = *(Kinds2*)g_takeScriptCountedColliderTouchArgKinds, &kinds), &o0, &o1);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
     TakeCountedColliderTouch(obj, o0, o1);
@@ -4441,7 +4441,7 @@ void SetHitCountColliderState(PlacedObject* self, s32 state);
 
 void FillObjectPropertyTable()
 {
-    PropertyDescriptor* p = D_002505D8;
+    PropertyDescriptor* p = g_objectPropertyDescriptors;
 
     p->type = 7; p->flags = 0x4; p->getter = (s32)GetObjectClassId; p++;
     p->type = 0; p->flags = 0x1; p->getter = 0; p->f10 = (s32)TestScriptObjectOfKind; p->putter = 1; p++;

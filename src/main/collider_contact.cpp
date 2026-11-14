@@ -92,12 +92,12 @@ struct PooledEnd {
 struct PooledContact {
     PooledEnd end[2];       // 0x00
     Vec02 v80;              // 0x80
-    f32 f90;                // 0x90
-    f32 f94;                // 0x94
-    f32 f98;                // 0x98
+    f32 depth;              // 0x90: how far the two ends are pressed into each other
+    f32 friction;           // 0x94: the surface pair's friction
+    f32 bounce;             // 0x98: the surface pair's bounce
     s32 kind;               // 0x9C
-    void* fA0;              // 0xA0
-    void* fA4;              // 0xA4
+    void* vertex;           // 0xA0: the vertex the contact came from
+    void* face;             // 0xA4: the face the contact came from
     u8 padA8[0xD0 - 0xA8];
     PooledContact* next;    // 0xD0
 };
@@ -116,7 +116,7 @@ PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3
     s32 e;
     Collider* part;
     c = (PooledContact*)PopZeroedFreeSlot((Pool6C*)((u8*)((BaseObject*)a0)->world + 0x1AFC));
-    c->f90 = f;
+    c->depth = f;
     c->v80 = *(Vec02*)a3;
     PooledEnd* end = c->end;
     for (e = 0; e < 2; e++) {
@@ -148,10 +148,10 @@ PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3
             pe->surface = surface;
         }
     }
-    c->f94 = GetSurfacePairFriction((SurfacePair*)surfaces);
-    c->f98 = GetSurfacePairBounce((SurfacePair*)surfaces);
-    c->fA0 = a5;
-    c->fA4 = a6;
+    c->friction = GetSurfacePairFriction((SurfacePair*)surfaces);
+    c->bounce = GetSurfacePairBounce((SurfacePair*)surfaces);
+    c->vertex = a5;
+    c->face = a6;
     for (e = 0; e < 2; e++) {
         Collider* obj = FindHandlerForSlot(c->end[e].part, 0x100);
         if (obj != 0) {
@@ -187,18 +187,18 @@ void RefreshContactEndPoints(World* world, s32 n, Contact03** list)
                 case 5:
                 case 6: {
                     u128 centre = Vu0::Q(part->v140);
-                    Vu0::Q(end->v10) = Vu0::MulAddX(centre, Vu0::Q(c->v80), Vu0::Scalar(-part->radius3CC));
+                    Vu0::Q(end->point) = Vu0::MulAddX(centre, Vu0::Q(c->normal), Vu0::Scalar(-part->radius3CC));
                     break;
                 }
                 default:
-                    TransformPointBetweenFrames(end->part, 0, &end->v20, &end->v10);
+                    TransformPointBetweenFrames(end->part, 0, &end->localPoint, &end->point);
                     break;
                 }
             } else if (c->kind == 7 || c->kind == 9) {
                 u128 centre = Vu0::Q(part->v140);
-                Vu0::Q(end->v10) = Vu0::MulAddX(centre, Vu0::Q(c->v80), Vu0::Scalar(-part->radius3CC));
+                Vu0::Q(end->point) = Vu0::MulAddX(centre, Vu0::Q(c->normal), Vu0::Scalar(-part->radius3CC));
             } else {
-                TransformPointBetweenFrames(part, 0, &end->v20, &end->v10);
+                TransformPointBetweenFrames(part, 0, &end->localPoint, &end->point);
             }
         }
     }
@@ -214,7 +214,7 @@ void NotifyContactEnds(World* world, s32 n, Contact03** list)
         s32 e;
         for (e = 0; e < 2; e++) {
             if (c->end[e].part != 0) {
-                ComputeObjectMotionInFrame(c->end[e].part, 0, &c->end[e].v10, (Vec02*)((u8*)&c->end[e] + 0x30), 0, 0, 0);
+                ComputeObjectMotionInFrame(c->end[e].part, 0, &c->end[e].point, (Vec02*)((u8*)&c->end[e] + 0x30), 0, 0, 0);
                 ((void (*)(Collider*, Contact03*, s32))c->end[e].part->desc03()->m3B)(c->end[e].part, c, e);
             }
         }
@@ -294,14 +294,14 @@ void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
 }
 
 extern s32 g_vif0Channel;
-extern u8 D_00211E10[];
+extern u8 g_vu0ProgramChain[];
 extern "C" void SyncDataCache(s32 unused);
 struct DmaChannel;
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 extern u8 g_vif1Channel[];
-extern u8 D_00212110[];
+extern u8 g_vu1ProgramChain[];
 
 extern "C" void SyncDataCache(s32 a);
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
@@ -732,7 +732,7 @@ void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3
             Vec02* p = &((Vec02*)self->meshCopy.verts)[edge->v[end]];
             PooledContact* c;
             for (c = *list; c != 0; c = c->next) {
-                if (c->kind == 1 && c->fA0 == p && c->fA4 == face) {
+                if (c->kind == 1 && c->vertex == p && c->face == face) {
                     break;
                 }
             }

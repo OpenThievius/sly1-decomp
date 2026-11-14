@@ -54,7 +54,7 @@ void AddDmaEndTag(PacketWriter* f);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void SendGsPacketAndWait(s32 channel, void* b);
 
-extern FrameTarget D_0027DC20[];
+extern FrameTarget g_meshQueueEntries[];
 
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
@@ -189,7 +189,7 @@ void BeginImageTransfer(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, voi
 }
 
 void BuildPaletteTexRegister(PaletteRecord* self, u32 a1){
- GsTex0* bits = (GsTex0*)&self->f10;
+ GsTex0* bits = (GsTex0*)&self->texWordBits;
  bits->cbp = a1;
  bits->psm = (self->f4 <= 0x10) ? 0x14 : 0x13;
  bits->cpsm=0; bits->csm=0; bits->csa=0; bits->cld=1;}
@@ -200,12 +200,12 @@ void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx)
     s32 n = e->f4 - 1;
     TransferBase p;
     p.v = v;
-    BeginImageTransfer(p, 1, 0, step, ((n + step) & -step) / step, e->fC, ctx);
+    BeginImageTransfer(p, 1, 0, step, ((n + step) & -step) / step, e->blockCount, ctx);
 }
 
 void BuildImageTexRegister(ImageRecord* self, u32 a1)
 {
-    GsTex0* bits = (GsTex0*)&self->f18;
+    GsTex0* bits = (GsTex0*)&self->texWord;
     bits->tbp = a1;
     bits->tbw = self->f9;
     bits->psm = self->f8;
@@ -216,7 +216,7 @@ void BuildImageTexRegister(ImageRecord* self, u32 a1)
 
 void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx)
 {
-    BeginImageTransfer(dbp, d->f9, d->f8, d->f0, d->f2, d->f14, ctx);
+    BeginImageTransfer(dbp, d->f9, d->f8, d->f0, d->f2, d->blockCount, ctx);
 }
 
 s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c)
@@ -231,11 +231,11 @@ s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c)
     for (s32 i = 0; i < g_imageRecordCountB; i++) {
         PaletteRecord* e = &g_imageRecordsB[i];
         if ((e->f0 & mask) == mask) {
-            s32 v = AllocateBump((s32*)b, e->f6);
+            s32 v = AllocateBump((s32*)b, e->bumpSize);
             BuildPaletteTexRegister(e, v);
             if (c != 0) {
                 StartPaletteUpload(e, v, c);
-                AddDmaRefTag(c, e->fC, e->f8);
+                AddDmaRefTag(c, e->blockCount, e->data);
             }
         }
     }
@@ -249,11 +249,11 @@ s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c)
             if (e->f8 == 0 && (b->next & 0x1F) != 0) {
                 AllocateBump((s32*)b, 0x20 - (b->next & 0x1F));
             }
-            v = AllocateBump((s32*)b, e->f0A);
+            v = AllocateBump((s32*)b, e->bumpSize);
             BuildImageTexRegister(e, v);
             if (c != 0) {
                 StartImageUpload(e, v, c);
-                AddDmaRefTag(c, e->f14, e->f10);
+                AddDmaRefTag(c, e->blockCount, e->data);
             }
         }
     }
@@ -359,7 +359,7 @@ local_path:
     goto store;
 pool_path:
     n = g_meshQueueCount;
-    e = &D_0027DC20[n];
+    e = &g_meshQueueEntries[n];
     n++;
     g_meshQueueCount = n;
 store:
@@ -395,7 +395,7 @@ void QueueNodeLink(s32 a0, s32 a1, AnimCursor* a2)
     if (count >= 0x4000) {
         e = &local;
     } else {
-        e = &D_0027DC20[count];
+        e = &g_meshQueueEntries[count];
         g_meshQueueCount = count + 1;
     }
     e->count = a1;
@@ -417,7 +417,7 @@ void RemapMeshQueueValues(s32 idx, u32 lo, u32 take, u32 give)
     u32 end = take + lo;
 
     if (idx < g_meshQueueCount) {
-        FrameTarget* e = &D_0027DC20[idx];
+        FrameTarget* e = &g_meshQueueEntries[idx];
         s32 n = g_meshQueueCount - idx;
 
         do {
@@ -435,7 +435,7 @@ void FlushMeshQueue(void)
     s32 i;
 
     for (i = 0; i < g_meshQueueCount; i++) {
-        SubmitMeshQueueEntry(&D_0027DC20[i]);
+        SubmitMeshQueueEntry(&g_meshQueueEntries[i]);
     }
 }
 
@@ -463,13 +463,13 @@ s32 UploadImagesByMask(u32 mask)
         if ((e->f0 & mask) == mask) {
             RewindPacketBuffer(&fa);
             UsePacketBufferMemory(&fa, 0xA, buf);
-            s32 n = AllocateBump((s32*)&span, e->f6);
+            s32 n = AllocateBump((s32*)&span, e->bumpSize);
             BuildPaletteTexRegister(e, n);
             StartPaletteUpload(e, n, &fa);
             *(u64*)(fa.curS - 0x10) |= 0x8000;
             DetachPacketBuffer(&fa, (u32*)&o0, (u8**)&o1);
             WriteVifDirect(&fb, o0, o1, 0);
-            WriteVifDirectRef(&fb, e->fC, e->f8, 0);
+            WriteVifDirectRef(&fb, e->blockCount, e->data, 0);
             if (e->f0 & 0x40000000) {
                 e->f0 = 0x40000000;
             }
@@ -482,13 +482,13 @@ s32 UploadImagesByMask(u32 mask)
             if ((e->f4 & mask) == mask) {
                 RewindPacketBuffer(&fa);
                 UsePacketBufferMemory(&fa, 0xA, buf);
-                s32 n = AllocateBump((s32*)&span, e->f0A);
+                s32 n = AllocateBump((s32*)&span, e->bumpSize);
                 BuildImageTexRegister(e, n);
                 StartImageUpload(e, n, &fa);
                 *(u64*)(fa.curS - 0x10) |= 0x8000;
                 DetachPacketBuffer(&fa, (u32*)&o0, (u8**)&o1);
                 WriteVifDirect(&fb, o0, o1, 0);
-                WriteVifDirectRef(&fb, e->f14, e->f10, 0);
+                WriteVifDirectRef(&fb, e->blockCount, e->data, 0);
                 if (e->f4 & 0x40000000) {
                     e->f4 = 0x40000000;
                 }

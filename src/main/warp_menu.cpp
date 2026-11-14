@@ -351,7 +351,7 @@ s32 GetCachedVoiceParam(s32 a);
 void SyncWorld3BossEntries(World3Boss* self);
 void LeaveAgentState(Agent* self, s32 mode);
 void AppendPacketQuadwords(PacketWriter* self, s32 n, void* src);
-extern void* D_002505C0[6];
+extern void* g_stateResetGroupMethods[6];
 void* AllocateZeroedFrontMemory(s32 n);
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 struct ColoredTriangleSet;
@@ -362,7 +362,7 @@ void WriteColoredSpritePacket(s32 r, s32 g, s32 b, s32 a, PacketWriter* p, f32 x
 void DecrementGaugeCount(void* p);
 void DecrementGaugeCount(T217D_2E0* self);
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
-extern u8 D_0024A0E0[];
+extern u8 g_packetWriterVtable[];
 s32 InitPacketBuffer(PacketWriter* self);
 // The ListFrame of func_001EECE0's walk of its children, opened and closed by its lifetime.
 struct ChildWalkFrame {
@@ -438,7 +438,7 @@ void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void SetElementTextFromEntry(ScreenElement* self, s32 a1, s32 a2);
 void SetWarpPageSelectedEntry(void* self, s32 value);
-extern s32 D_00276654;
+extern s32 g_pendingWarpEntryAtEnd;
 void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
 void SetWarpPageMode(WarpPage* self, u32 next);
 void* AllocateFrontMemory(int size);
@@ -495,19 +495,19 @@ struct WarpTextStyle {
     u8 pad0[4];
     u8 kind;
     u8 pad5[3];
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    f32 f14;
-    s32 f18;
+    f32 paddingX;
+    f32 paddingY;
+    f32 scaleX;
+    f32 scaleY;
+    s32 color;
     WarpTextStyle(s32 a, s32 b)
     {
         FillMemory(this, 0, 0x1C);
         kind = 0x3D;
-        f8 = a;
-        fC = b;
-        f14 = f10 = 0.3f;
-        f18 = (s32)0xFF7D4B00;
+        paddingX = a;
+        paddingY = b;
+        scaleY = scaleX = 0.3f;
+        color = (s32)0xFF7D4B00;
     }
 };
 extern f32 D_00276650;
@@ -546,7 +546,7 @@ struct BeginPageWalk {
         g_activeListFrames = it;
     }
 };
-extern s32 (*D_00276608[6])[4];
+extern s32 (*g_warpCursorTables[6])[4];
 // The sounds MoveWarpCursor plays: the cursor moved, or it could not.
 enum WarpCursorSound { WARP_SOUND_MOVE = 0x79, WARP_SOUND_REFUSE = 0x7B };
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
@@ -572,7 +572,7 @@ void SetWarpPageMode(WarpPage* self, u32 next);
 void SetWarpCursor(WarpPage* self, s32 a1, s32 a2);
 void SetWarpPageSelectedEntry(WarpPage* self, s32 idx);
 
-ObjectLink D_00275B60[8] = {
+ObjectLink g_world1BossLinks[8] = {
     { 3, 0x2D5, 0xC50 }, { 3, 0x2E7, 0xC60 }, { 7, 0x2E1, 0xC64 }, { 7, 0x2E2, 0xC68 },
     { 7, 0x2E3, 0xC6C }, { 7, 0x2E4, 0xC70 }, { 7, 0x2E5, 0xC74 }, { 7, 0x2E6, 0xC78 }
 };
@@ -593,26 +593,26 @@ f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 f32 D_00275C28[3] = { 1.0f, 0.0f, 0.1f };
 s32 D_00275C34 = 0;
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
-Quad16 D_00275C40 = {0};
-f32 D_00275C50[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+Quad16 g_zeroQuad = {0};
+f32 g_unitXQuad[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
 ValueRange g_unitRange = { 0.0f, 1.0f };
 ValueRange D_00275C68 = { -1.0f, 1.0f };
 f32 D_00275C70[4] = { 0.5f, 0.8f, 0.0f, 0.0f };
 f32 D_00275C80[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-ObjectLink D_00275C90[1] = { { 0, 0x4C9, 0x610 } };
-ObjectLink D_00275CA0[4] = {
+ObjectLink g_world3BeatPressLoadLinks[1] = { { 0, 0x4C9, 0x610 } };
+ObjectLink g_world3BeatPressStartLinks[4] = {
     { 4, 0x4D0, 0x618 }, { 4, 0x4D1, 0x61C }, { 4, 0x4D2, 0x620 }, { 4, 0x4D3, 0x624 }
 };
 f32 D_00275CD0 = 700.0f;
 f32 D_00275CD4 = 650.0f;
-s32 D_00275CD8[4] = { 1228, 1230, 1229, 1231 };
-s32 D_00275CE8[4] = { 574, 576, 575, 577 };
-s32 D_00275CF8[4] = { 1247, 1248, 1249, 1250 };
-ObjectLink D_00275D08[5] = {
+s32 g_world3BeatPressWalkerTargets[4] = { 1228, 1230, 1229, 1231 };
+s32 g_world3BeatPressSoundIds[4] = { 574, 576, 575, 577 };
+s32 g_world3BossClipIds[4] = { 1247, 1248, 1249, 1250 };
+ObjectLink g_world3BossStartLinks[5] = {
     { 1, 0x4EB, 0xC50 }, { 0, 0x4E7, 0xC24 }, { 0, 0x4E8, 0xC28 }, { 0, 0x4E9, 0xC2C },
     { 0, 0x4EA, 0xC30 }
 };
-TempoObjectRef D_00275D48[9] = {
+TempoObjectRef g_world3BossObjectRefs[9] = {
     { 0x35, 50.0f, 0 }, { 0x36, 50.0f, 0 }, { 0x38, 80.0f, 0 }, { 0x3B, 80.0f, 0 },
     { 0x60, 70.0f, 0 }, { 0x50, 220.0f, 0 }, { 0x52, 80.0f, 0 }, { 0x53, 80.0f, 0 },
     { 0x54, 80.0f, 0 }
@@ -622,12 +622,12 @@ TempoObjectRef D_00275D48[9] = {
 // function. Declared here for the functions above that.
 extern s32 D_00275DB8;
 extern s32 D_00275DD0[16];
-extern s32 D_00275E10[92];
+extern s32 g_stateResetObjectLinks[92];
 extern ScreenFade g_screenFade;
 extern f32 D_00275FC0;
 extern s32 D_00275FC8[6];
-extern ObjectLink D_00275FE0[52];
-extern s32 D_00276250;
+extern ObjectLink g_warpPageLinks[52];
+extern s32 g_pendingWarpEntry;
 extern f32 D_00276258[4];
 extern f32 D_00276268[4];
 extern f32 D_00276278[4];
@@ -637,9 +637,9 @@ extern s32 D_00276348[11][4];
 extern s32 D_002763F8[11][4];
 extern s32 D_002764A8[11][4];
 extern s32 D_00276558[11][4];
-extern s32 (*D_00276608[6])[4];
+extern s32 (*g_warpCursorTables[6])[4];
 #ifndef VERSION_EU
-extern WarpTextStyle D_00276620;
+extern WarpTextStyle g_warpTextStyle;
 #endif
 #ifdef VERSION_EU
 extern f32 D_eu_0027FDAC;
@@ -648,7 +648,7 @@ extern f32 D_eu_0027FDB0;
 extern f32 D_00276648;
 extern f32 D_00276650;
 #endif
-extern s32 D_00276654;
+extern s32 g_pendingWarpEntryAtEnd;
 extern f32 D_0027663C[];
 extern char D_00276658[8];
 extern char D_00276660[16];
@@ -658,13 +658,13 @@ extern char D_00276670[12];
 void InitWorld1Boss(World1Boss* self)
 {
     InitConeAgent(self);
-    self->fC58 = 0x2D8;
-    self->fC14 = 30000.0f;
-    self->fC10 = 30000000.0f;
-    self->fC20 = 3000000.0f;
-    self->fC24 = 3000000.0f;
-    self->fC28 = 0;
-    self->fC2C = 6.2831855f;
+    self->stageKey = 0x2D8;
+    self->leashHeight = 30000.0f;
+    self->leashDistance = 30000000.0f;
+    self->nearRange = 3000000.0f;
+    self->farRange = 3000000.0f;
+    self->farAngle = 0;
+    self->nearAngle = 6.2831855f;
 }
 
 // The file's first read-only data, for func_001E89F0.
@@ -672,14 +672,14 @@ extern const f32 D_0024E600[4] = {3.40282347e+38f, 0.0f, 0.0f, 0.0f};
 
 void StartWorld1Boss(World1Boss* self)
 {
-    ResolveObjectLinks(self, 8, D_00275B60);
+    ResolveObjectLinks(self, 8, g_world1BossLinks);
     SetWorldActiveFollower(self->world, self);
-    if (self->fC50 != 0) {
-        self->fC54 = CreateStateWalker((StateGraph*)self->fC50, 0, 0x2D7, 0);
+    if (self->stateGraph != 0) {
+        self->stateWalker = CreateStateWalker((StateGraph*)self->stateGraph, 0, 0x2D7, 0);
     }
-    self->fC90 = 4;
+    self->stagesLeft = 4;
     for (u32 i = 0; i < 4; i++) {
-        self->fC80[i] = TakeFlagTableIndex((FlagTable*)g_flagTable);
+        self->stageFlagIndices[i] = TakeFlagTableIndex((FlagTable*)g_flagTable);
     }
     StartConeAgent(self);
 }
@@ -691,10 +691,10 @@ void EnterWorld1BossState(World1Boss* self, s32 a, Animation* b)
     PlacedObject* key;
     s32 slot;
 
-    switch (self->f724) {
+    switch (self->state) {
     case 1:
-        if (self->fC54 != 0) {
-            SetStateWalkerTarget((StateWalker*)self->fC54, self->fC58);
+        if (self->stateWalker != 0) {
+            SetStateWalkerTarget((StateWalker*)self->stateWalker, self->stageKey);
             void* near = ((TargetObjectFn*)self->desc)[102](self);
             if (near != 0) {
                 key = FindNearestAgentKey(self, (u8*)near + 0x140);
@@ -702,9 +702,9 @@ void EnterWorld1BossState(World1Boss* self, s32 a, Animation* b)
                 key = 0;
             }
             for (u32 i = 0; i < 6; i++) {
-                PlacedObject* root = self->fC64[i];
+                PlacedObject* root = self->keyRoots[i];
                 s32 pick;
-                switch (self->fC58) {
+                switch (self->stageKey) {
                 case 0x2D7:
                 case 0x2D8:
                 case 0x2DA:
@@ -726,62 +726,62 @@ void EnterWorld1BossState(World1Boss* self, s32 a, Animation* b)
                 }
             }
         }
-        if (self->fC58 != 0x2DA) {
+        if (self->stageKey != 0x2DA) {
             u128 d = Vu0::Sub(Vu0::Q(self->pos), Vu0::Q(self->v190));
             if (Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d))) < 300.0f) {
-                self->fC5C = 8;
+                self->visitsLeft = 8;
             } else {
-                self->fC5C = 5;
+                self->visitsLeft = 5;
             }
         } else {
-            self->fC5C = 5;
+            self->visitsLeft = 5;
         }
-        self->fC7C = 0;
+        self->nearestKeyRoot = 0;
         break;
     case 16:
-        switch (self->fC58) {
+        switch (self->stageKey) {
         case 0x2D8:
-            self->fC58 = 0x2D9;
+            self->stageKey = 0x2D9;
             slot = 0;
             break;
         case 0x2D9:
-            self->fC58 = 0x2DA;
+            self->stageKey = 0x2DA;
             slot = 1;
             break;
         case 0x2DA:
-            self->fC58 = 0x2DB;
+            self->stageKey = 0x2DB;
             slot = 2;
             break;
         case 0x2DB:
-            self->fC58 = 0x2DC;
+            self->stageKey = 0x2DC;
             slot = 3;
             break;
         }
-        if (TestFlagTableBit((FlagTable*)g_flagTable, self->fC80[slot]) == 0) {
+        if (TestFlagTableBit((FlagTable*)g_flagTable, self->stageFlagIndices[slot]) == 0) {
             RaiseScatterLevelForObject((ScatterController*)g_scatterController, 0);
         }
-        SetFlagTableBit((FlagTable*)g_flagTable, self->fC80[slot]);
-        self->fC90 = 3 - slot;
+        SetFlagTableBit((FlagTable*)g_flagTable, self->stageFlagIndices[slot]);
+        self->stagesLeft = 3 - slot;
         DecrementGaugeCount(&g_gaugeBarElement);
         break;
     case 11:
-        if (self->fC54 != 0) {
-            SetStateWalkerTarget((StateWalker*)self->fC54, 0x2DD);
+        if (self->stateWalker != 0) {
+            SetStateWalkerTarget((StateWalker*)self->stateWalker, 0x2DD);
         }
         for (u32 i = 0; i < 6; i++) {
-            void* h = FindObjectHandle(self->fC64[i], -1);
+            void* h = FindObjectHandle(self->keyRoots[i], -1);
             if (h != 0) {
                 SetStateWalkerTarget((StateWalker*)h, 0x2DE);
             }
         }
-        self->fC90 = 0;
+        self->stagesLeft = 0;
         DecrementGaugeCount(&g_gaugeBarElement);
         MarkLevelDone(1);
         StartMemoryCardSave(&g_memoryCard);
         break;
     case 10:
     case 14:
-        self->fC5C = 0;
+        self->visitsLeft = 0;
         break;
     }
     EnterAgentState(self, a, b);
@@ -790,12 +790,12 @@ void EnterWorld1BossState(World1Boss* self, s32 a, Animation* b)
 s32 ChooseWorld1BossState(World1Boss* self)
 {
     s32 a1;
-    if (self->fC5C <= 0) {
-        self->fBFC = 3.4028235e+38f;
+    if (self->visitsLeft <= 0) {
+        self->clip10Deadline = 3.4028235e+38f;
     }
-    a1 = self->f724;
+    a1 = self->state;
     if (a1 == 10) {
-        a1 = (self->f7E0 == 0) ? 8 : 10;
+        a1 = (self->statePlayer == 0) ? 8 : 10;
     } else {
         a1 = ChooseAgentState(self);
     }
@@ -804,15 +804,15 @@ s32 ChooseWorld1BossState(World1Boss* self)
 
 s32 IsWorld1BossFree(World1Boss* a0)
 {
-    if (a0->fC40 != 0) return 0;
-    return a0->fC5C != 0;
+    if (a0->disabled != 0) return 0;
+    return a0->visitsLeft != 0;
 }
 
 s32 IsWorld1BossTargetInRange(World1Boss* a0)
 {
-    if (a0->fC58 != 0x2DB) return 0;
+    if (a0->stageKey != 0x2DB) return 0;
     {
-        s32 v = a0->fC5C;
+        s32 v = a0->visitsLeft;
         if (v == 5 || v == 0) return 0;
         return 1;
     }
@@ -820,10 +820,10 @@ s32 IsWorld1BossTargetInRange(World1Boss* a0)
 
 void SteerWorld1BossAlongPath(World1Boss* a0)
 {
-    if (a0->fC58 != 0x2DA) {
-        s32 v = a0->fC5C - 1;
+    if (a0->stageKey != 0x2DA) {
+        s32 v = a0->visitsLeft - 1;
         if (!(0 < v)) v = 0;
-        a0->fC5C = v;
+        a0->visitsLeft = v;
     }
     SteerAgentAlongPath(a0);
 }
@@ -831,16 +831,16 @@ void SteerWorld1BossAlongPath(World1Boss* a0)
 
 void RestartWorld1BossClip(World1Boss* self)
 {
-    if (self->fC58 == 0x2DA && self->f724 == 0xC && FindColliderFloorContact(self, 0, 0) != 0) {
+    if (self->stageKey == 0x2DA && self->state == 0xC && FindColliderFloorContact(self, 0, 0) != 0) {
         PlacedObject* s = FindNearestAgentKey(self, (u8*)self + 0x140);
-        if (s != self->fC7C) {
-            s32 n = self->fC5C - 1;
+        if (s != self->nearestKeyRoot) {
+            s32 n = self->visitsLeft - 1;
             if (!(0 < n)) n = 0;
-            self->fC5C = n;
+            self->visitsLeft = n;
             if (n > 0) {
                 void* p = FindObjectHandle(s, -1);
                 if (p != 0) SetStateWalkerTarget((StateWalker*)p, 0x2E0);
-                self->fC7C = s;
+                self->nearestKeyRoot = s;
             }
         }
     }
@@ -850,9 +850,9 @@ void RestartWorld1BossClip(World1Boss* self)
 void UpdateWorld1BossGoal(World1Boss* self, s32 flag)
 {
     Vec4U loc;
-    switch (self->f724) {
+    switch (self->state) {
     case 4:
-        if (self->fC40 != 0) {
+        if (self->disabled != 0) {
             SetAgentGoalPoint(self, (Vec02*)((u8*)self + 0x190));
         } else {
             GetObjectWorldPosition((BaseObject*)self->fC60, (Vec02*)&loc);
@@ -872,7 +872,7 @@ void UpdateWorld1BossGoal(World1Boss* self, s32 flag)
 
 void UpdateWorld1BossState(World1Boss* self)
 {
-    if (self->f724 == 8) {
+    if (self->state == 8) {
         FaceAgentTowardGoalPoint(self);
     } else {
         UpdateAgentState(self);
@@ -894,7 +894,7 @@ s32 TestAgentMayContactExceptKeys(World1Boss* self, Collider* probe)
     u32 i = 0;
     s32 result;
     do {
-        if (key == self->fC64[i]) {
+        if (key == self->keyRoots[i]) {
             result = 0;
             goto done;
         }
@@ -981,7 +981,7 @@ void UpdateElementStack(ElementStack* obj)
         if (g_screenFade.mode) break;
         {
             u32 v = s2->flags;
-            if ((v & 0x800) || (s2->f14 == 1 && 5.0f <= g_gameClock.time)) {
+            if ((v & 0x800) || (s2->connectionMode == 1 && 5.0f <= g_gameClock.time)) {
                 SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0);
                 s1 = obj->state;
                 ClearPadPressedBits(s2, 0x800);
@@ -1104,8 +1104,8 @@ void SetElementStackState(ElementStack* self, s32 state)
     if (self->state != state) {
         if (self->state != 0) {
             if (self->state == 1) {
-                D_00272930.vt->m15(&D_00272930);
-                D_00272B98.vt->m15(&D_00272B98);
+                g_titleElement.vt->m15(&g_titleElement);
+                g_promptElement.vt->m15(&g_promptElement);
                 ReleasePadSelectFlag(g_currentWorld);
             }
         }
@@ -1119,8 +1119,8 @@ void SetElementStackState(ElementStack* self, s32 state)
         break;
     case 1:
         ApplyStackTimeScale(self, 1.0f);
-        D_00272930.vt->m14(&D_00272930);
-        D_00272B98.vt->m14(&D_00272B98);
+        g_titleElement.vt->m14(&g_titleElement);
+        g_promptElement.vt->m14(&g_promptElement);
         AcquirePadSelectFlag(g_currentWorld);
         InitPadPatternSetting();
         break;
@@ -1136,8 +1136,8 @@ void SetElementStackState(ElementStack* self, s32 state)
         ApplyStackTimeScale(self, 0.0f);
         break;
     case 8:
-        D_0026C6C8.vt->m15(&D_0026C6C8);
-        D_0026C948.vt->m15(&D_0026C948);
+        g_reserveCountCaption.vt->m15(&g_reserveCountCaption);
+        g_collectedItemCaption.vt->m15(&g_collectedItemCaption);
         D_0026CBC8.vt->m15(&D_0026CBC8);
         D_0026CE48.vt->m15(&D_0026CE48);
         break;
@@ -1271,7 +1271,7 @@ void UpdateWorldDeltaLists(World* self, f32 dt)
     }
     {
         ListFrame it;
-        BeginByteWalk::Of(&it, (List01*)&self->f1B64);
+        BeginByteWalk::Of(&it, (List01*)&self->animationPlayers);
         for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
             UpdateAnimationPlayer((AnimationPlayer*)n, dt);
         }
@@ -1334,12 +1334,12 @@ void UpdateWorldStepLists(World* self, f32 dt)
 void StepWorldValueTowardTarget(World* self, f32 x)
 {
     World* o = self;
-    f32 a = o->f234C;
-    f32 b = o->f2350;
+    f32 a = o->value;
+    f32 b = o->valueTarget;
     if (b < a) {
-        o->f234C = ApproachValueWithRamp((RampProfile*)D_00275C18, 0, a, b, x);
+        o->value = ApproachValueWithRamp((RampProfile*)D_00275C18, 0, a, b, x);
     } else if (a < b) {
-        o->f234C = ApproachValueWithRamp((RampProfile*)D_00275C28, 0, a, b, x);
+        o->value = ApproachValueWithRamp((RampProfile*)D_00275C28, 0, a, b, x);
     }
 }
 
@@ -1862,13 +1862,13 @@ void InitWorld3BeatPressCollider(World3BeatPressCollider* self)
     } else {
         c = x;
     }
-    self->f684 = (1.0f - c) * D_00275C70[0] + c * D_00275C70[1];
+    self->timingWindow = (1.0f - c) * D_00275C70[0] + c * D_00275C70[1];
 }
 
 void LoadWorld3BeatPressCollider(World3BeatPressCollider* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
-    ResolveObjectLinks(self, 1, D_00275C90);
+    ResolveObjectLinks(self, 1, g_world3BeatPressLoadLinks);
 }
 
 void CopyPlayerAttachBlock(World3BeatPressCollider* a0)
@@ -1880,8 +1880,8 @@ void CopyPlayerAttachBlock(World3BeatPressCollider* a0)
 void StartWorld3BeatPressCollider(World3BeatPressCollider* self)
 {
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 4, D_00275CA0);
-    self->f614 = CreateStateWalker((StateGraph*)self->f610, self, 0x4CA, 1);
+    ResolveObjectLinks(self, 4, g_world3BeatPressStartLinks);
+    self->walker = CreateStateWalker((StateGraph*)self->walkerGraph, self, 0x4CA, 1);
     AppendQueuedCall(self->world, (void*)CopyPlayerAttachBlock, self, 0, 0);
 }
 
@@ -1890,11 +1890,11 @@ void HandleWorld3BeatPressColliderActivation(World3BeatPressCollider* self, void
     HandleSwitchedColliderActivation(self, p);
     World3Boss* r = (World3Boss*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
     if (p != 0) {
-        SetStateWalkerTarget((StateWalker*)self->f614, 0x4CB);
-        r->fC3C = self;
-        self->f68C = r;
+        SetStateWalkerTarget((StateWalker*)self->walker, 0x4CB);
+        r->beatPressCollider = self;
+        self->tempoAgent = r;
     } else {
-        SetStateWalkerTarget((StateWalker*)self->f614, 0x4CA);
+        SetStateWalkerTarget((StateWalker*)self->walker, 0x4CA);
         *(f32*)((u8*)g_player + 0x26D0) = 2.0f;
     }
 }
@@ -1907,24 +1907,24 @@ void ContinueWorld3BeatPressColliderRequest(PlacedObject* from, Player* self)
     Vec02 dir;
     Vu0::Q(dir) = Vu0::MulXSum(Vu0::Q(from->m110.r[0]), Vu0::Scalar(-D_00275CD0), Vu0::Q(from->m110.r[2]), Vu0::ScalarAt(D_00275CD4));
     self->desc02()->m20(self, &dir);
-    self->f638 = WrapAngle(ArctangentOfRatio(dir.y, dir.x) + 3.1415927f);
+    self->heading = WrapAngle(ArctangentOfRatio(dir.y, dir.x) + 3.1415927f);
     TurnColliderTowardHeading(self);
     SetPlayerState(self, 4, 0x2B);
 }
 
 void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32 dt)
 {
-    if (self->f67C != 0 && g_player != 0) {
+    if (self->frameAnchor != 0 && g_player != 0) {
         Vec4U pos;
         Mat3U mat;
-        GetObjectWorldPosition((BaseObject*)self->f67C, (Vec02*)&pos);
-        GetObjectWorldRotation((BaseObject*)self->f67C, (Mat02*)&mat);
+        GetObjectWorldPosition((BaseObject*)self->frameAnchor, (Vec02*)&pos);
+        GetObjectWorldRotation((BaseObject*)self->frameAnchor, (Mat02*)&mat);
         ((PlayerSlotFn*)g_player->desc)[0x84 / 4](g_player, &pos);
         ((PlayerSlotFn*)g_player->desc)[0x88 / 4](g_player, &mat);
         ((World3BeatPressSlotFn*)self->desc)[0x84 / 4](self, &pos);
         ((World3BeatPressSlotFn*)self->desc)[0x88 / 4](self, &mat);
     }
-    if (self->f680 != 0) {
+    if (self->judging != 0) {
         u32 f = in->flags;
         if (f & 0xF0) {
             s32 dir;
@@ -1940,32 +1940,32 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
                 dir = 3;
             }
             ok = 0;
-            if (self->f62C < self->f630) {
-                Ent1C* e = &self->f634[self->f62C];
+            if (self->nextEntry < self->entryCount) {
+                Ent1C* e = &self->entries[self->nextEntry];
                 if (e->dir == dir) {
-                    World3Boss* g = ((World3Boss*)self->f68C);
-                    at = (f32)g->fC70 * 4.0f + g->fC7C;
-                    if (__builtin_fabsf(e->t - at) < self->f684 * 0.5f) {
+                    World3Boss* g = ((World3Boss*)self->tempoAgent);
+                    at = (f32)g->bar * 4.0f + g->barPosition;
+                    if (__builtin_fabsf(e->t - at) < self->timingWindow * 0.5f) {
                         ok = 1;
                     }
                 }
             }
             if (ok) {
-                self->f678 = dir;
-                self->f674 = at;
+                self->pressDirection = dir;
+                self->pressBeat = at;
             } else {
                 StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         }
     }
-    if (self->f62C < self->f630) {
-        Ent1C* e = &self->f634[self->f62C];
-        World3Boss* g = ((World3Boss*)self->f68C);
-        f32 at = (f32)g->fC70 * 4.0f + g->fC7C;
-        f32 win = self->f684;
-        if (self->f678 == e->dir && __builtin_fabsf(e->t - self->f674) < win * 0.5f) {
-            SetStateWalkerTarget((StateWalker*)self->f614, D_00275CD8[self->f678]);
-            StartSoundEffect(D_00275CE8[self->f678], 0, 0, 0, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f, 0, 0);
+    if (self->nextEntry < self->entryCount) {
+        Ent1C* e = &self->entries[self->nextEntry];
+        World3Boss* g = ((World3Boss*)self->tempoAgent);
+        f32 at = (f32)g->bar * 4.0f + g->barPosition;
+        f32 win = self->timingWindow;
+        if (self->pressDirection == e->dir && __builtin_fabsf(e->t - self->pressBeat) < win * 0.5f) {
+            SetStateWalkerTarget((StateWalker*)self->walker, g_world3BeatPressWalkerTargets[self->pressDirection]);
+            StartSoundEffect(g_world3BeatPressSoundIds[self->pressDirection], 0, 0, 0, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f, 0, 0);
         } else {
             if (!(at - e->t > win * 0.5f)) {
                 return;
@@ -1980,7 +1980,7 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
                 ((s32 (*)(Player*, OwnerMessage*))((PlayerSlotFn*)g_player->desc)[0x140 / 4])(g_player, &msg);
                 o = (World3Boss*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
                 EndHeldWorld3Timeline(o);
-                o->fBFC = g_gameTime[0];
+                o->clip10Deadline = g_gameTime[0];
                 SetCachedVoiceParam(2, 1);
                 goto next;
             }
@@ -1988,38 +1988,38 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
                 World3Timeline* l;
                 ((void (*)(World3BeatPressCollider*))((World3BeatPressSlotFn*)self->desc)[0x150 / 4])(self);
                 Player* gl = g_player;
-                self->f688 = 1;
-                gl->f26C4 = 1;
+                self->runEnded = 1;
+                gl->pulseActive = 1;
                 f32 v = g_gameTime[0];
                 *(f32*)((u8*)gl + 0x26CC) = v;
-                gl->f26C8 = v;
-                l = ((World3Boss*)self->f68C)->fC38;
+                gl->pulseStartTime = v;
+                l = ((World3Boss*)self->tempoAgent)->heldTimeline;
                 *(f32*)((u8*)gl + 0x26D0) = 2.0f;
                 if (l != 0) {
                     s32 j = l->index;
-                    while (j < l->f34) {
+                    while (j < l->entryCount) {
                         Entry90* p = &((Entry90*)l->buffer)[j];
-                        if (p->f0 == 3) break;
+                        if (p->kind == 3) break;
                         j++;
                     }
-                    if (j < l->f34) {
+                    if (j < l->entryCount) {
                         Entry90* it = &((Entry90*)l->buffer)[j];
-                        World3Boss* gg = ((World3Boss*)self->f68C);
-                        *(f32*)((u8*)g_player + 0x26D0) = ((f32)it->f4 * 4.0f + it->f8 - ((f32)gg->fC70 * 4.0f + gg->fC7C)) * gg->fC88;
+                        World3Boss* gg = ((World3Boss*)self->tempoAgent);
+                        *(f32*)((u8*)g_player + 0x26D0) = ((f32)it->step * 4.0f + it->substep - ((f32)gg->bar * 4.0f + gg->barPosition)) * gg->beatLength;
                     }
                 }
             }
         }
         if (e->dir == 3) {
             ActivateSwitchedCollider(g_player);
-            BindEntryQueueToObject(self->f628, g_player);
-            self->f628 = 0;
+            BindEntryQueueToObject(self->entryQueue, g_player);
+            self->entryQueue = 0;
         }
     next:
-        self->f62C++;
-        if (self->f62C == self->f630) {
-            self->f62C = 0;
-            self->f630 = 0;
+        self->nextEntry++;
+        if (self->nextEntry == self->entryCount) {
+            self->nextEntry = 0;
+            self->entryCount = 0;
         }
     }
 }
@@ -2027,14 +2027,14 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
 s32 IsWorld3BeatPressColliderRequestBlocked(World3BeatPressCollider* self)
 {
     if (g_buttonCodeFlags & 1) return 1;
-    if (IsPadSelectFlagHeld(self->world) == 0) return self->f688 != 0;
+    if (IsPadSelectFlagHeld(self->world) == 0) return self->runEnded != 0;
     return 1;
 }
 
 void AppendWorld3BeatPressEntry(World3BeatPressCollider* list, const U64P* src)
 {
-    s32 n = list->f630;
-    list->f630 = n + 1;
+    s32 n = list->entryCount;
+    list->entryCount = n + 1;
     U64P* dst = (U64P*)((u8*)list + (n * 8 + 0x634));
     *dst = *src;
 }
@@ -2059,7 +2059,7 @@ void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos,
 
 void GetWorld3BeatPressColliderPositionAt(World3BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
 {
-    if (self->f67C == 0) {
+    if (self->frameAnchor == 0) {
         GetPlacedObjectPositionAt(self, t, pos, vel);
         return;
     }
@@ -2067,23 +2067,23 @@ void GetWorld3BeatPressColliderPositionAt(World3BeatPressCollider* self, f32 t, 
     Mat02 rot;
     Vec02 v;
     Vec02 w;
-    ComputeObjectFrameAtTime((PlacedObject*)(((FramePoint_001EBD10*)self->f67C)->object), 0, &p, &rot, &v, &w, t);
-    Vu0::Q(*pos) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(((FramePoint_001EBD10*)self->f67C)->point)));
-    Vu0::Q(*vel) = Vu0::Add(Vu0::Q(v), Vu0::Cross(Vu0::Q(w), Vu0::Q(((FramePoint_001EBD10*)self->f67C)->point)));
+    ComputeObjectFrameAtTime((PlacedObject*)(((FramePoint_001EBD10*)self->frameAnchor)->object), 0, &p, &rot, &v, &w, t);
+    Vu0::Q(*pos) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(((FramePoint_001EBD10*)self->frameAnchor)->point)));
+    Vu0::Q(*vel) = Vu0::Add(Vu0::Q(v), Vu0::Cross(Vu0::Q(w), Vu0::Q(((FramePoint_001EBD10*)self->frameAnchor)->point)));
 }
 
 void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat02* rot, Vec02* vec);
 
 void GetWorld3BeatPressColliderRotationAt(World3BeatPressCollider* self, f32 t, Mat02* rot, Vec02* spin)
 {
-    if (self->f67C == 0) {
+    if (self->frameAnchor == 0) {
         GetPlacedObjectRotationAt(self, t, rot, spin);
         return;
     }
     Mat02 m;
     Vec02 w;
-    ComputeObjectFrameAtTime((PlacedObject*)(((FramePoint_001EBD10*)self->f67C)->object), 0, 0, &m, 0, &w, t);
-    FramePoint_001EBD10* f = (FramePoint_001EBD10*)self->f67C;
+    ComputeObjectFrameAtTime((PlacedObject*)(((FramePoint_001EBD10*)self->frameAnchor)->object), 0, 0, &m, 0, &w, t);
+    FramePoint_001EBD10* f = (FramePoint_001EBD10*)self->frameAnchor;
     MulRotationRowsIndexed(rot, m, f->m50);
     *spin = w;
 }
@@ -2092,12 +2092,12 @@ void InitWorld3Boss(World3Boss* self)
 {
     InitAgent(self);
     *(s32*)((u8*)self + 0xC5C) = 0x3C;
-    self->fC8C = 1.0f;
-    self->fC64 = 8.0f;
-    self->fC70 = 0;
-    self->fC78 = -1;
-    self->fC74 = -1;
-    self->fC60 = 8;
+    self->newBeatLength = 1.0f;
+    self->spanSeconds = 8.0f;
+    self->bar = 0;
+    self->beatInBar = -1;
+    self->beat = -1;
+    self->spanBeats = 8;
     *(s32*)((u8*)self + 0xC6C) = (s32)AllocateFrontMemory(0x400);
     self->world->f2358 = 1;
     StopStagedBankVoice();
@@ -2111,7 +2111,7 @@ void LoadWorld3Boss(World3Boss* self, void* reader)
 {
     LoadAgent(self, reader);
     for (s32 i = 0; i < 4; i++) {
-        self->fC10[i] = ResolveAgentClip(self, D_00275CF8[i]);
+        self->clips[i] = ResolveAgentClip(self, g_world3BossClipIds[i]);
     }
 }
 
@@ -2119,21 +2119,21 @@ void StartWorld3Boss(World3Boss* self)
 {
     StartAgent(self);
     SetWorldActiveFollower(self->world, self);
-    ResolveObjectLinks(self, 5, D_00275D08);
-    void* r = CreateStateWalker((StateGraph*)self->fC50, 0, -1, 0);
-    self->fC54 = r;
+    ResolveObjectLinks(self, 5, g_world3BossStartLinks);
+    void* r = CreateStateWalker((StateGraph*)self->walkerGraph, 0, -1, 0);
+    self->walker = r;
     AddStateWalkerListener((StateWalker*)r, (PlacedObject**)self);
-    self->fC98 = 9;
-    self->fC9C = CopyToFrontMemory(0x6C, D_00275D48);
+    self->keyedCount = 9;
+    self->keyedObjects = CopyToFrontMemory(0x6C, g_world3BossObjectRefs);
     s32 i = 0;
-    if (self->fC98 > 0) {
+    if (self->keyedCount > 0) {
         s32 off = 0;
         do {
-            TempoObjectRef* e = (TempoObjectRef*)((u8*)self->fC9C + off);
+            TempoObjectRef* e = (TempoObjectRef*)((u8*)self->keyedObjects + off);
             e->obj = FindFirstObjectById(self->world, 1, e->id, self);
             i++;
             off += 12;
-        } while (i < self->fC98);
+        } while (i < self->keyedCount);
     }
 }
 
@@ -2151,28 +2151,28 @@ void RegisterWorld3Boss(World3Boss* self)
 s32 IsWorld3BossTargetInRange(World3Boss* self)
 {
     s32 r[4];
-    GetStateWalkerCurrentKey((StateWalker*)self->fC54, r);
+    GetStateWalkerCurrentKey((StateWalker*)self->walker, r);
     switch (r[0]) {
     case 0x4ED:
     case 0x4F0:
     case 0x4F3:
     case 0x4F6:
-        if (self->fC20 == 0) goto zero;
+        if (self->pendingClip == 0) goto zero;
     yes:
         return 1;
     case 0x4EE:
     case 0x4F1:
     case 0x4F4:
     case 0x4F7:
-        if (self->fC94 == 1) goto zero;
-        if (self->fC94 < 2) {
-            if (self->fC94 == 0) goto set;
+        if (self->beatGate == 1) goto zero;
+        if (self->beatGate < 2) {
+            if (self->beatGate == 0) goto set;
             return 0;
         }
-        if (self->fC94 == 2) goto yes;
+        if (self->beatGate == 2) goto yes;
         return 0;
     set:
-        self->fC94 = 1;
+        self->beatGate = 1;
     }
 zero:
     return 0;
@@ -2189,7 +2189,7 @@ void* CopyQuadword(u128* out, void* src);
 Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 void* StoreQuadword(u128* out, u128 v);
 AnimRecord* FindAnimRecord(s32 key);
-extern f32 D_00275070[14];
+extern f32 g_ringSevenPoints[14];
 
 // k times the quadword at p, into dst (the quadword helpers' product).
 static inline void StoreScaledQuadword(void* dst, f32 k, void* p)
@@ -2217,14 +2217,14 @@ void DrawWorld3BossRing(DeferredRequest* request)
             { { 500.0f, 1.0f, 0.0f }, 1.0f, -100.0f, RingColor(0x80FFFFFF) },
         },
     };
-    if (agent->f298 != 0) {
+    if (agent->rampNode != 0) {
         RingParams params = defaults;
         params.textures[0] = 0;
         params.textures[1] = FindAnimRecord(0x15D);
-        f32 level = agent->f298->level;
+        f32 level = agent->rampNode->level;
         StoreScaledQuadword(&params.rows[1].shape, level * level, &params.rows[1].shape);
-        StoreScaledQuadword(&params.rows[2].shape, agent->f298->level, &params.rows[2].shape);
-        DrawAngleSortedRing((Vec02*)&agent->v140, 7, (Point2*)D_00275070, agent->fC98, (RingAnchor*)agent->fC9C, &params, request);
+        StoreScaledQuadword(&params.rows[2].shape, agent->rampNode->level, &params.rows[2].shape);
+        DrawAngleSortedRing((Vec02*)&agent->v140, 7, (Point2*)g_ringSevenPoints, agent->keyedCount, (RingAnchor*)agent->keyedObjects, &params, request);
     }
 }
 
@@ -2233,13 +2233,13 @@ void DrawWorld3BossRing(DeferredRequest* request)
 s32 D_00275DB8 = 0;
 INCLUDE_DATA(D_00275DBC);
 s32 D_00275DD0[16] = { 4, 2, 1, -1, 8, 4, 2, -1, 12, 6, 3, -1, 16, 8, 4, 2 };
-s32 D_00275E10[92] = { 2, 0x2EB, 0x2DC };
+s32 g_stateResetObjectLinks[92] = { 2, 0x2EB, 0x2DC };
 // word read whole / address only, 4 bytes to next label
 ScreenFade g_screenFade = { 0 };
 f32 D_00275FC0 = 0.5f;
 // Globals defined from C.
 s32 D_00275FC8[6] = { 0, 2, 4, 4, 4, 0 };
-ObjectLink D_00275FE0[52] = {
+ObjectLink g_warpPageLinks[52] = {
     { 0x2, 0x1CB, 0x2E4 },
     { 0x2, 0x1CC, 0x2E8 },
     { 0x2, 0x1CD, 0x2F8 },
@@ -2293,7 +2293,7 @@ ObjectLink D_00275FE0[52] = {
     { 0x2, 0x1F5, 0x4AC },
     { 0x2, 0x1F7, 0x514 },
 };
-s32 D_00276250 = -1;
+s32 g_pendingWarpEntry = -1;
 f32 D_00276258[4] = { 600.0f, 0.0f, 0.25f, 0.0f };
 f32 D_00276268[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
 f32 D_00276278[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
@@ -2363,11 +2363,11 @@ s32 D_00276558[11][4] = {
     { -1, -1, -1, -1 },
     { 0, -1, -1, 0 }
 };
-s32 (*D_00276608[6])[4] = { 0, (s32(*)[4])D_00276298, (s32(*)[4])D_00276348, (s32(*)[4])D_002763F8, (s32(*)[4])D_002764A8, (s32(*)[4])D_00276558 };
+s32 (*g_warpCursorTables[6])[4] = { 0, (s32(*)[4])D_00276298, (s32(*)[4])D_00276348, (s32(*)[4])D_002763F8, (s32(*)[4])D_002764A8, (s32(*)[4])D_00276558 };
 #ifndef VERSION_EU
 // PAL has no style here (its func_001F1960 draws without one): its static initialiser only
 // sets D_00276650.
-WarpTextStyle D_00276620(2, 1);
+WarpTextStyle g_warpTextStyle(2, 1);
 #endif
 INCLUDE_DATA(D_0027663C);
 #ifdef VERSION_EU
@@ -2378,7 +2378,7 @@ f32 D_eu_0027FDB0 = D_eu_0027FDAC * 0.75f;
 f32 D_00276648 = 24.0f;
 f32 D_00276650 = D_00276648 * 0.75f;
 #endif
-s32 D_00276654 = 0;
+s32 g_pendingWarpEntryAtEnd = 0;
 extern f32 D_0027663C[];
 char D_00276658[8] = "jojo";
 char D_00276660[16] = "08/24/02 22:06";
@@ -2388,7 +2388,7 @@ void ApplyWorld3BossTransform(World3Boss* self, void* s, void* c)
 {
     u8 tmp[0x50];
     void* out = c;
-    if (self->f724 == 16) {
+    if (self->state == 16) {
         BuildPlacedObjectTransform(self, (Quad16*)c, (ScaledTransform*)tmp);
         *(s32*)(tmp + 0x44) = 0;
         out = tmp;
@@ -2404,10 +2404,10 @@ void DrawWorld3BossRing(DeferredRequest* self);
 void DrawWorld3Boss(World3Boss* self, Camera* cam, void* arg2)
 {
     DrawAgent(self, cam, arg2);
-    if (self->f724 == 16) {
+    if (self->state == 16) {
         DeferredRequest r;
         FillMemory(&r, 0, 0x80);
-        f32 d = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->f40)), Vu0::Q(cam->f80)));
+        f32 d = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->position)), Vu0::Q(cam->rotation)));
         r.group = 0xD;
         r.f04 = d;
         r.arg = self;
@@ -2421,12 +2421,12 @@ void LeaveWorld3BossState(World3Boss* self, s32 arg)
     s32 out;
     s32 sel;
     LeaveAgentState(self, arg);
-    s32 st = self->f724;
+    s32 st = self->state;
     if (st != 0xE) {
         if (st != 0x10) {
             return;
         }
-        self->fC94 = 0;
+        self->beatGate = 0;
         GetStateWalkerCurrentKey((StateWalker*)(*(void**)((u8*)self + 0xC54)), &out);
         switch (out) {
         case 0x4EE:
@@ -2441,7 +2441,7 @@ void LeaveWorld3BossState(World3Boss* self, s32 arg)
         }
         SetStateWalkerTarget((StateWalker*)(*(void**)((u8*)self + 0xC54)), sel);
     } else {
-        self->fC94 = 0;
+        self->beatGate = 0;
     }
 }
 
@@ -2449,23 +2449,23 @@ void DecrementWorld3BossGauge(World3Boss* self)
 {
     T217D_2E0* g = &g_gaugeBarElement;
     DecrementGaugeCount((T217D_2E0*)&g_gaugeBarElement);
-    self->fA68 = 2;
+    self->hitsLeft = 2;
     g->fill = g->fillTarget;
 }
 
 void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
 {
     s32 r[3];
-    switch (self->f724) {
+    switch (self->state) {
     case 0xE:
-        GetStateWalkerCurrentKey((StateWalker*)self->fC54, &r[0]);
+        GetStateWalkerCurrentKey((StateWalker*)self->walker, &r[0]);
         switch (r[0]) {
         case 0x4ED:
         case 0x4F0:
         case 0x4F3:
         case 0x4F6:
-            b = self->fC20;
-            self->fC20 = 0;
+            b = self->pendingClip;
+            self->pendingClip = 0;
             break;
         }
         break;
@@ -2479,42 +2479,42 @@ void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
         break;
     }
     EnterAgentState(self, a, (Animation*)b);
-    switch (self->f724) {
+    switch (self->state) {
     case 14: {
-        GetStateWalkerCurrentKey((StateWalker*)self->fC54, &r[1]);
+        GetStateWalkerCurrentKey((StateWalker*)self->walker, &r[1]);
         f32 q;
         switch (r[1]) {
         case 0x4EE:
             q = 0.083333336f;
-            ((AnimationPlayer*)self->f7E0)->speed = ((AnimationPlayer*)self->f7E0)->anim->length / (self->fC88 + self->fC88);
+            ((AnimationPlayer*)self->statePlayer)->speed = ((AnimationPlayer*)self->statePlayer)->anim->length / (self->beatLength + self->beatLength);
             break;
         case 0x4F1:
         case 0x4F4:
         case 0x4F7:
             q = 0.083333336f;
-            ((AnimationPlayer*)self->f7E0)->speed = ((AnimationPlayer*)self->f7E0)->anim->length / (self->fC88 * 4.0f);
+            ((AnimationPlayer*)self->statePlayer)->speed = ((AnimationPlayer*)self->statePlayer)->anim->length / (self->beatLength * 4.0f);
             break;
         default:
             return;
         }
-        ((AnimationPlayer*)self->f7E0)->time = q;
+        ((AnimationPlayer*)self->statePlayer)->time = q;
         break;
     }
     case 2:
     case 13: {
         s32 n = 4;
-        GetStateWalkerCurrentKey((StateWalker*)self->fC54, &r[2]);
+        GetStateWalkerCurrentKey((StateWalker*)self->walker, &r[2]);
         if (r[2] < 0x4EF) {
             if (r[2] >= 0x4EC) n = 2;
         }
-        AddWorld3BossEntry(self, ((AnimationPlayer*)self->f7E0), n);
-        if (n == 2) ((AnimationPlayer*)self->f7E0)->time = ((AnimationPlayer*)self->f7E0)->anim->length * (self->fC7C / (f32)n);
-        else ((AnimationPlayer*)self->f7E0)->time = ((AnimationPlayer*)self->f7E0)->anim->length * (self->fC7C / (f32)n);
+        AddWorld3BossEntry(self, ((AnimationPlayer*)self->statePlayer), n);
+        if (n == 2) ((AnimationPlayer*)self->statePlayer)->time = ((AnimationPlayer*)self->statePlayer)->anim->length * (self->barPosition / (f32)n);
+        else ((AnimationPlayer*)self->statePlayer)->time = ((AnimationPlayer*)self->statePlayer)->anim->length * (self->barPosition / (f32)n);
         break;
     }
     case 11:
     case 16:
-        self->fC04 = 0;
+        self->contactsDisabled = 0;
         break;
     }
 }
@@ -2528,21 +2528,21 @@ void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
 // it, leaves the constant (docs/toolchain/alias-classes.md, "A merged arm keeps its place").
 void ScheduleWorld3BossBeatPress(World3Boss* self, Entry90* e)
 {
-    s32 dir = e->fC;
+    s32 dir = e->value;
     Ent1C entry;
     s32 clip;
     if (dir == 1) {
-        clip = self->fC10[1];
+        clip = self->clips[1];
     } else {
-        clip = self->fC10[0];
+        clip = self->clips[0];
     }
-    clip = self->fC10[dir];
-    self->fC40 = dir;
-    self->fC20 = clip;
-    self->fC44 = g_gameTime[0];
+    clip = self->clips[dir];
+    self->direction = dir;
+    self->pendingClip = clip;
+    self->pressScheduledTime = g_gameTime[0];
     entry.dir = dir;
-    entry.t = (f32)e->f4 * 4.0f + e->f8 + (f32)self->fC60;
-    AppendWorld3BeatPressEntry(self->fC3C, (const U64P*)&entry);
+    entry.t = (f32)e->step * 4.0f + e->substep + (f32)self->spanBeats;
+    AppendWorld3BeatPressEntry(self->beatPressCollider, (const U64P*)&entry);
 }
 
 void RemoveWorld3BossEntry(World3Boss* self, AnimationPlayer* key);
@@ -2555,7 +2555,7 @@ struct TempoNoticeRec {
 
 struct TempoLineSub {
     u8 pad00[0x78];
-    f32 f78;                // 0x78
+    f32 life;               // 0x78: how long the launched line object lives
 };
 
 struct TempoLine {
@@ -2588,39 +2588,39 @@ void HandleWorld3BossNotification(World3Boss* self, s32 kind, TempoNoticeRec* re
 
     switch (kind) {
     case 0x13:
-        if (rec->object == self->f7E0 && rec->id == 0x1A5) {
-            TempoLine* line = (TempoLine*)self->fC24[self->fC40];
+        if (rec->object == self->statePlayer && rec->id == 0x1A5) {
+            TempoLine* line = (TempoLine*)self->lines[self->direction];
             ChooseObjectPoolItem((ObjectPool*)line);
             TempoLineSub* sub = &line->sub;
-            f32 half = self->fC88 * 0.5f;
-            f32 t = self->fC64 + self->fC44 - g_gameTime[0] + ((f32*)self->fC3C)[0x684 / 4] * half;
+            f32 half = self->beatLength * 0.5f;
+            f32 t = self->spanSeconds + self->pressScheduledTime - g_gameTime[0] + ((f32*)self->beatPressCollider)[0x684 / 4] * half;
             u8* r = line->rec;
-            FramePoint_001EBD10* fp = (FramePoint_001EBD10*)((World3BeatPressCollider*)self->fC3C)->f618[self->fC40];
+            FramePoint_001EBD10* fp = (FramePoint_001EBD10*)((World3BeatPressCollider*)self->beatPressCollider)->lineAnchors[self->direction];
             GetPlacementRecordTransform((FrameSource*)sub, &a, b.r, 0);
             ComputeObjectFrameAtTime((PlacedObject*)fp->object, 0, &p, &rot, 0, 0, t);
             Vu0::Q(line->vF0) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(fp->point)));
             f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(line->vF0)))) / t;
             *(f32*)(r + 0x690) = d;
             *(f32*)(r + 0x6F0) = d;
-            sub->f78 = t * 1.25f;
+            sub->life = t * 1.25f;
             LaunchChosenPoolObject((ObjectPool*)line, 1);
             return;
         }
         break;
     case 6: {
         s32 i;
-        for (i = 0; i < self->fC68; i++) {
-            if ((void*)self->fC6C[i].player == (void*)rec) {
+        for (i = 0; i < self->playerCount; i++) {
+            if ((void*)self->players[i].player == (void*)rec) {
                 break;
             }
         }
-        if (i < self->fC68) {
+        if (i < self->playerCount) {
             RemoveWorld3BossEntry(self, (AnimationPlayer*)rec);
         }
         break;
     }
     case 0x14:
-        if ((void*)rec == self->fC54) {
+        if ((void*)rec == self->walker) {
             GetStateWalkerCurrentKey((StateWalker*)rec, &key);
             switch (key) {
             case 0x4EC: voice = 0; break;
@@ -2651,13 +2651,13 @@ done:
 
 void SyncWorld3BossEntries(World3Boss* self)
 {
-    f32 den = self->fC84 - (*(f32*)&g_gameTime);
-    for (s32 k = 0; k < self->fC68; k++) {
-        TempoPlayerEntry* e = &self->fC6C[k];
+    f32 den = self->nextBeatTime - (*(f32*)&g_gameTime);
+    for (s32 k = 0; k < self->playerCount; k++) {
+        TempoPlayerEntry* e = &self->players[k];
         AnimationPlayer* o = e->player;
         f32 len = o->anim->length;
         f32 start = o->time;
-        f32 t = len / (f32)e->beats * (f32)((self->fC74 + 1) % e->beats);
+        f32 t = len / (f32)e->beats * (f32)((self->beat + 1) % e->beats);
         if (t <= start)
             t += len;
         o->speed = (t - start) / den;
@@ -2672,45 +2672,45 @@ void UpdateWorld3Boss(World3Boss* self, f32 dt)
 
     UpdateAgent(self, dt);
     if (D_00275DB8 == 2) {
-        if (self->fC88 != self->fC8C) {
-            self->fC88 = self->fC8C;
-            self->fC64 = self->fC8C * (f32)self->fC60;
+        if (self->beatLength != self->newBeatLength) {
+            self->beatLength = self->newBeatLength;
+            self->spanSeconds = self->newBeatLength * (f32)self->spanBeats;
         }
-        sub = self->fC34;
-        self->fC84 = g_gameClock.time + self->fC88;
-        self->fC80 = g_gameClock.time;
-        self->fC70 = 0;
-        self->fC78 = 0;
-        self->fC74 = 0;
+        sub = self->pendingTimeline;
+        self->nextBeatTime = g_gameClock.time + self->beatLength;
+        self->lastBeatTime = g_gameClock.time;
+        self->bar = 0;
+        self->beatInBar = 0;
+        self->beat = 0;
         if (sub != 0) {
-            self->fC34 = 0;
-            self->fC38 = sub;
+            self->pendingTimeline = 0;
+            self->heldTimeline = sub;
             RestartWorld3Timeline(sub);
         }
         D_00275DB8 = 0;
     }
-    if (self->fC84 <= g_gameClock.time) {
-        s32 a = self->fC74 + 1;
-        s32 b = self->fC78 + 1;
-        self->fC80 = self->fC84;
-        self->fC74 = a;
-        self->fC78 = b;
+    if (self->nextBeatTime <= g_gameClock.time) {
+        s32 a = self->beat + 1;
+        s32 b = self->beatInBar + 1;
+        self->lastBeatTime = self->nextBeatTime;
+        self->beat = a;
+        self->beatInBar = b;
         if (b >= 4) {
-            self->fC78 = 0;
-            self->fC70 = self->fC70 + 1;
-            if (self->fC88 != self->fC8C) {
-                self->fC88 = self->fC8C;
-                self->fC64 = self->fC8C * (f32)self->fC60;
+            self->beatInBar = 0;
+            self->bar = self->bar + 1;
+            if (self->beatLength != self->newBeatLength) {
+                self->beatLength = self->newBeatLength;
+                self->spanSeconds = self->newBeatLength * (f32)self->spanBeats;
             }
         }
-        if (self->fC94 == 1) {
-            GetStateWalkerCurrentKey((StateWalker*)self->fC54, &code);
-            if (code == 0x4F1 || (code < 0x4F2 ? code == 0x4EE : (code == 0x4F4 || code == 0x4F7))) self->fC94 = 2;
+        if (self->beatGate == 1) {
+            GetStateWalkerCurrentKey((StateWalker*)self->walker, &code);
+            if (code == 0x4F1 || (code < 0x4F2 ? code == 0x4EE : (code == 0x4F4 || code == 0x4F7))) self->beatGate = 2;
         }
-        self->fC84 = self->fC84 + self->fC88;
+        self->nextBeatTime = self->nextBeatTime + self->beatLength;
     }
-    self->fC7C = (f32)self->fC78 + (g_gameClock.time - self->fC80) / self->fC88;
-    if (self->fC38 != 0) RunWorld3TimelineEntries(self->fC38);
+    self->barPosition = (f32)self->beatInBar + (g_gameClock.time - self->lastBeatTime) / self->beatLength;
+    if (self->heldTimeline != 0) RunWorld3TimelineEntries(self->heldTimeline);
     if (D_00275DB8 == 1) {
         RefreshCachedVoiceParam(1, 0);
         if (GetCachedVoiceParam(1) == D_00275DBC) D_00275DB8 = 2;
@@ -2721,7 +2721,7 @@ void UpdateWorld3Boss(World3Boss* self, f32 dt)
 void ShowWorld3BossGauge(World3Boss* self)
 {
     s32 code;
-    GetStateWalkerCurrentKey((StateWalker*)self->fC54, &code);
+    GetStateWalkerCurrentKey((StateWalker*)self->walker, &code);
     s32 obj = 0;
     if (code == 0x4F1 || (code < 0x4F2 ? code == 0x4EE : (code == 0x4F4 || code == 0x4F7))) {
         obj = AreMenusAndFadeClear();
@@ -2733,11 +2733,11 @@ void ShowWorld3BossGauge(World3Boss* self)
 void UpdateWorld3BossGoal(World3Boss* self, s32 flag)
 {
     s32 loc[4];
-    s32 v = self->f724;
+    s32 v = self->state;
     if (v >= 14) goto tail;
     if (v < 12) goto tail;
     {
-        void* q = self->fC48;
+        void* q = self->faceObject;
         if (q != 0) {
             GetObjectWorldPosition((BaseObject*)q, (Vec02*)loc);
             SetAgentGoalPoint(self, (Vec02*)loc);
@@ -2761,7 +2761,7 @@ void UpdateWorld3BossState(World3Boss* self)
     SwitchedCollider* p;
     f32 y;
     f32 x;
-    GetStateWalkerCurrentKey((StateWalker*)self->fC54, &code);
+    GetStateWalkerCurrentKey((StateWalker*)self->walker, &code);
     switch (code) {
     case 0x4ED:
     case 0x4F0:
@@ -2774,10 +2774,10 @@ void UpdateWorld3BossState(World3Boss* self)
     case 0x4EF:
     case 0x4F2:
     case 0x4F5:
-        if (self->f724 >= 15) goto other;
-        if (self->f724 < 13) goto other;
-        if (self->fC48 == 0) goto other;
-        GetObjectWorldRotation((BaseObject*)self->fC48, (Mat02*)&rot);
+        if (self->state >= 15) goto other;
+        if (self->state < 13) goto other;
+        if (self->faceObject == 0) goto other;
+        GetObjectWorldRotation((BaseObject*)self->faceObject, (Mat02*)&rot);
         y = rot.m[0][1];
         x = rot.m[0][0];
         goto angle;
@@ -2785,8 +2785,8 @@ void UpdateWorld3BossState(World3Boss* self)
     case 0x4F1:
     case 0x4F4:
     case 0x4F7:
-        if (self->f724 >= 15) goto other;
-        if (self->f724 < 13) goto other;
+        if (self->state >= 15) goto other;
+        if (self->state < 13) goto other;
         p = GetActiveSwitchedCollider();
         Vu0::Q(diff) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(p->v140));
     fromDiff:
@@ -2803,30 +2803,30 @@ void UpdateWorld3BossState(World3Boss* self)
 
 void SetWorld3BossPendingTimeline(World3Boss* self, World3Timeline* value)
 {
-    self->fC34 = value;
+    self->pendingTimeline = value;
 }
 
 void EndHeldWorld3Timeline(World3Boss* self)
 {
-    EndWorld3Timeline(self->fC38);
-    self->fC38 = 0;
+    EndWorld3Timeline(self->heldTimeline);
+    self->heldTimeline = 0;
 }
 
 void SetWorld3BossTempo(World3Boss* self, s32 v)
 {
-    self->fC5C = v;
-    self->fC8C = 60.0f / (f32)v;
+    self->tempo = v;
+    self->newBeatLength = 60.0f / (f32)v;
 }
 
 void SetWorld3BossSpanBeats(World3Boss* self, s32 v)
 {
-    self->fC60 = v;
-    self->fC64 = self->fC88 * (f32)v;
+    self->spanBeats = v;
+    self->spanSeconds = self->beatLength * (f32)v;
 }
 
 void AddWorld3BossEntry(World3Boss* self, AnimationPlayer* a, s32 b)
 {
-    TempoPlayerEntry* e = &self->fC6C[self->fC68++];
+    TempoPlayerEntry* e = &self->players[self->playerCount++];
     e->beats = b;
     e->player = a;
     AddAnimationPlayerRecordCallback(a, (PlacedObject**)self);
@@ -2835,18 +2835,18 @@ void AddWorld3BossEntry(World3Boss* self, AnimationPlayer* a, s32 b)
 void RemoveWorld3BossEntry(World3Boss* self, AnimationPlayer* key)
 {
     s32 i = 0;
-    if (self->fC68 > 0) {
-        TempoPlayerEntry* p = self->fC6C;
+    if (self->playerCount > 0) {
+        TempoPlayerEntry* p = self->players;
         while (p->player != key) {
             i++;
-            if (i >= self->fC68)
+            if (i >= self->playerCount)
                 return;
             p++;
         }
-        if (i < self->fC68) {
-            TempoPlayerEntry* e = self->fC6C + i;
-            CopyMemory(e, e + 1, (self->fC68 - i - 1) * 8);
-            self->fC68 = self->fC68 - 1;
+        if (i < self->playerCount) {
+            TempoPlayerEntry* e = self->players + i;
+            CopyMemory(e, e + 1, (self->playerCount - i - 1) * 8);
+            self->playerCount = self->playerCount - 1;
         }
     }
 }
@@ -2866,7 +2866,7 @@ void FindWorld3TimelineTarget(World3Timeline* self)
 void RestartWorld3Timeline(World3Timeline* self)
 {
     self->index = 0;
-    self->f44 = ((World3Boss*)self->found)->fC70;
+    self->timeOffset = ((World3Boss*)self->found)->bar;
     TriggerScriptEvent(self, 0x1A, 0, 0);
 }
 
@@ -2876,7 +2876,7 @@ void EndWorld3Timeline(World3Timeline* self)
     TriggerScriptEvent(self, 0x1C, 0, 0);
     n = 5;
     RunWorld3TimelineEntry(self, (Entry90*)&n);
-    if (((World3Boss*)self->found)->fC3C) {
+    if (((World3Boss*)self->found)->beatPressCollider) {
         n = 3;
         RunWorld3TimelineEntry(self, (Entry90*)&n);
     }
@@ -2886,8 +2886,8 @@ void RunWorld3TimelineEntries(World3Timeline* self)
 {
     Entry90* e;
     s32 v;
-    while (self->index < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(((World3Boss*)self->found)->fC70 < v))) {
-        if (v == ((World3Boss*)self->found)->fC70 && ((World3Boss*)self->found)->fC7C < e->f8) return;
+    while (self->index < self->entryCount && (e = self->Cur(), v = e->step + self->timeOffset, !(((World3Boss*)self->found)->bar < v))) {
+        if (v == ((World3Boss*)self->found)->bar && ((World3Boss*)self->found)->barPosition < e->substep) return;
         RunWorld3TimelineEntry(self, e);
         self->index++;
     }
@@ -2895,24 +2895,24 @@ void RunWorld3TimelineEntries(World3Timeline* self)
 
 void RunWorld3TimelineEntry(World3Timeline* self, Entry90* msg)
 {
-    switch (msg->f0) {
+    switch (msg->kind) {
     case 0:
         ScheduleWorld3BossBeatPress((World3Boss*)self->found, msg);
         break;
     case 1: {
-        s32* loc = &msg->fC;
+        s32* loc = &msg->value;
         TriggerScriptEvent(self, 0x1B, 1, &loc);
         break;
     }
     case 2:
-        ((World3Boss*)self->found)->fC3C->f680 = 1;
+        ((World3Boss*)self->found)->beatPressCollider->judging = 1;
         D_00273C50.vt->m16(&D_00273C50, 2);
         ResetPadStepRepeat(&g_padRecord);
         StartSoundEffect(0, 0, 0, 0, 80000.0f, 70000.0f, 1.5f, 0.5f, 0.0f, 0, 0);
         break;
     case 3:
-        ((World3Boss*)self->found)->fC3C->f680 = 0;
-        ((World3Boss*)self->found)->fC3C->f688 = 0;
+        ((World3Boss*)self->found)->beatPressCollider->judging = 0;
+        ((World3Boss*)self->found)->beatPressCollider->runEnded = 0;
         D_00273C50.vt->m16(&D_00273C50, 0);
         break;
     case 4:
@@ -2929,24 +2929,24 @@ void RunWorld3TimelineEntry(World3Timeline* self, Entry90* msg)
 
 Entry90* AppendWorld3TimelineEntry(World3Timeline* self, s32 a, s32 b, f32 c)
 {
-    if (self->f34 >= 0xC0) return (Entry90*)D_00625760;
-    Entry90* e = (Entry90*)((u8*)self->buffer + self->f34 * 16);
-    self->f34 = self->f34 + 1;
+    if (self->entryCount >= 0xC0) return (Entry90*)D_00625760;
+    Entry90* e = (Entry90*)((u8*)self->buffer + self->entryCount * 16);
+    self->entryCount = self->entryCount + 1;
     (void)FillMemory(e, 0, 16);
-    e->f0 = a;
-    e->f4 = b;
-    e->f8 = c;
+    e->kind = a;
+    e->step = b;
+    e->substep = c;
     return e;
 }
 
 void AppendWorld3TimelineKind0Entry(World3Timeline* self, s32 p, f32 time, s32 val)
 {
-    AppendWorld3TimelineEntry(self, 0, p, time)->fC = val;
+    AppendWorld3TimelineEntry(self, 0, p, time)->value = val;
 }
 
 void AppendWorld3TimelineKind1Entry(World3Timeline* self, s32 p, f32 time, s32 val)
 {
-    AppendWorld3TimelineEntry(self, 1, p, time)->fC = val;
+    AppendWorld3TimelineEntry(self, 1, p, time)->value = val;
 }
 
 void AppendWorld3TimelineKind2Entry(World3Timeline* self, s32 p, f32 time)
@@ -3278,9 +3278,9 @@ PacketWriter* InitPacketWriter(PacketWriter* self)
 {
     (void)InitPacketBuffer(self);
     self->f10 = 1;
-    self->vt = (const PacketWriterVt*)D_0024A0E0;
-    self->f1C = 0;
-    self->f20 = 0;
+    self->vt = (const PacketWriterVt*)g_packetWriterVtable;
+    self->openTag = 0;
+    self->registerCount = 0;
     return self;
 }
 
@@ -3383,7 +3383,7 @@ s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c)
     self->cur = (u8*)(p + 1);
     u32 tag = head | (u32)c;
     *p = tag;
-    if (self->f1C != 0) {
+    if (self->openTag != 0) {
         *p = tag | 0x10000000;
     }
     return D_00275DD0[a] * b;
@@ -3486,7 +3486,7 @@ void WriteVifDirectFromWriter(PacketWriter* a0, PacketWriter* a1) {
 void InitValueListObject(ValueListObject* self)
 {
     InitObject(self);
-    self->world->f1EC4 = self;
+    self->world->valueListObject = self;
 }
 
 void LoadValueList(ValueListObject* self, void* src)
@@ -3582,8 +3582,8 @@ void InitAttachedSet(AttachedSet* self)
     self->flags538 = bits;
     self->f584 = 1;
     self->f588 = 1;
-    self->f364 = 1.0f;
-    self->f360 = 1.0f;
+    self->dragFactor = 1.0f;
+    self->pushFactor = 1.0f;
     SetColliderAnchors(self, 3, 0, 3, 0);
     InitTrackedNodes(&self->trackedNodes, (ContactTracker*)self);
     self->trackedNodes.f04 = 3;
@@ -3683,7 +3683,7 @@ void UpdateAttachedSet(AttachedSet* self, f32 dt)
     }
     for (ContactRow03* r = ((Collider*)self->root)->contacts->head; r != 0; r = r->next) {
         c = r->other;
-        if (c->f360 < 0.0001f) {
+        if (c->pushFactor < 0.0001f) {
             continue;
         }
         if (c->flags538 & ((1ULL << 54) | (1ULL << 42))) {
@@ -3704,7 +3704,7 @@ void UpdateAttachedSet(AttachedSet* self, f32 dt)
         link->target = c;
         link->nextOwn = self->links;
         self->links = link;
-        if (self->f580 == 0) {
+        if (self->tellsLanding == 0) {
             continue;
         }
         if (!(c->v150.z < -100.0f)) {
@@ -3857,8 +3857,8 @@ f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02*
     }
     if (o == g_player) {
         from.z = from.z + -75.0f;
-        if (o->f690 != 0) {
-            from.z = o->v6A0.z >? from.z;
+        if (o->groundContact != 0) {
+            from.z = o->groundContactPoint.z >? from.z;
         }
     } else {
         from.z = from.z + (*(f32*)((u8*)o + 0x428) - o->v140.z);
@@ -3937,7 +3937,7 @@ void InitStateResetObject(StateResetObject* self)
 void StartStateResetObject(StateResetObject* self)
 {
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 1, (ObjectLink*)D_00275E10);
+    ResolveObjectLinks(self, 1, (ObjectLink*)g_stateResetObjectLinks);
     SetStateAndNotify(self, 0);
     self->desc->m03(self);
 }
@@ -3982,7 +3982,7 @@ void HandleStateResetNotification(StateResetObject* self, s32 kind, StateResetMs
 void* CreateRecord2505C0(void)
 {
     StateResetGroup* p = (StateResetGroup*)AllocateZeroedFrontMemory(48);
-    p->vtbl = D_002505C0;
+    p->vtbl = g_stateResetGroupMethods;
     return p;
 }
 
@@ -4003,7 +4003,7 @@ void RemoveFromSmallList(StateResetGroup* self, StateResetObject* value)
 void UpdateItemTimeouts(StateResetGroup* s)
 {
     s->scheduled = 0;
-    if (s->owner != 0 && s->owner->f180 != -1 && s->items[0]->id2E0 == s->owner->f180) {
+    if (s->owner != 0 && s->owner->selectedId != -1 && s->items[0]->id2E0 == s->owner->selectedId) {
         s32 i;
         for (i = 0; i < s->count; i++) {
             if (s->items[i]->id2D0 != 1) break;
@@ -4012,7 +4012,7 @@ void UpdateItemTimeouts(StateResetGroup* s)
             for (i = 0; i < s->count; i++) {
                 SetStateAndNotify(s->items[i], 2);
             }
-            s->owner->f180 = -1;
+            s->owner->selectedId = -1;
         }
         return;
     }
@@ -4126,8 +4126,8 @@ void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count)
     s32 mode;
 
     if (dst->mode == 0) {
-        if (D_0027051C != 0) {
-            if (*(s32*)((u8*)D_0027051C + 0x2D0) != 2) {
+        if (g_activeStepSequence != 0) {
+            if (*(s32*)((u8*)g_activeStepSequence + 0x2D0) != 2) {
                 PopActiveSequenceElement(g_currentWorld);
             }
         }
@@ -4264,7 +4264,7 @@ L038C:
             }
         }
         if (g_mapScreenList.current != 0) {
-            g_mapScreenList.current->f2E0 = 3;
+            g_mapScreenList.current->openKind = 3;
             SetWarpPageMode(g_mapScreenList.current, 4);
             self->mode = mode;
             goto L0404;
@@ -4299,7 +4299,7 @@ void StartObjectFade(IdentityKey* obj, s32 value, s32 count)
 s32 GetCurrentWarpEntry(void)
 {
     if (D_00275BF0 != 2) {
-        return g_saveData->f19DC;
+        return g_saveData->entryIndex;
     }
     return 10;
 }
@@ -4386,7 +4386,7 @@ s32 IsWarpEntryReachable(void* self, s32 code)
 void StartWarpPage(WarpPage* o) {
     StartPlacedObject(o);
     o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
-    if (g_saveData->f19D8) {
+    if (g_saveData->levelIndex) {
         u8* t = (u8*)&g_mapScreenList;
         ((U32P*)(t + 0x260))->v = (u32)o;
     }
@@ -4396,7 +4396,7 @@ void StartWarpPage(WarpPage* o) {
     case 0x1C9: o->slot = 3; break;
     case 0x1C6: o->slot = 4; break;
     case 0x1CA: o->slot = 5; break;
-    default: o->slot = g_saveData->f19D8; break;
+    default: o->slot = g_saveData->levelIndex; break;
     }
     g_mapScreenList.nodes[o->slot] = o;
 }
@@ -4409,7 +4409,7 @@ void PostLoadWarpPage(WarpPage* self)
     s32 i;
 
     PostLoadPlacedObject(self);
-    ResolveObjectLinks(self, 0x34, D_00275FE0);
+    ResolveObjectLinks(self, 0x34, g_warpPageLinks);
     BeginPageWalk::Of(&it, &self->children);
     while ((node = NextPageNode::Of(&it)) != 0) {
         ResolveAndStartObject(node);
@@ -4417,8 +4417,8 @@ void PostLoadWarpPage(WarpPage* self)
     el = self->entries;
     for (i = 0; i < 11; i++) {
         f32 zero = 0.0f;
-        el->f28 = zero;
-        el->f24 = zero;
+        el->dimTarget = zero;
+        el->dim = zero;
         el->phase = RandomFloatInRange(zero, 6.2831855f);
         el->speed = RandomFloatInRange(0.5f, 0.7f);
         el++;
@@ -4430,9 +4430,9 @@ void PostLoadWarpPage(WarpPage* self)
 void SelectWarpPageEntry(WarpPage* self, s32 value)
 {
     if (value == 10) {
-        SetElementTextFromEntry(&D_0026F138, 0, 4);
+        SetElementTextFromEntry(&g_copiedTextCaption, 0, 4);
     } else {
-        T217D_3D0* base = &D_0026F138;
+        T217D_3D0* base = &g_copiedTextCaption;
         s32 t = value < 9;
         s32 idx = t ? value : -1;
         SetElementTextFromEntry(base, self->slot, idx);
@@ -4442,38 +4442,38 @@ void SelectWarpPageEntry(WarpPage* self, s32 value)
 
 void SetPendingWarpEntry(s32 unused, s32 a, s32 b)
 {
-    D_00276250 = a;
-    D_00276654 = b;
+    g_pendingWarpEntry = a;
+    g_pendingWarpEntryAtEnd = b;
 }
 
 void AnnouncePendingWarpEntry(WarpPage* self)
 {
-    if (D_00276250 == -1) return;
-    SetScreenElementHoldTime(&D_002721D0, ((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 4 ? 0.5f : 2.0f);
-    D_002721D0.vt->m16(&D_002721D0, 2);
-    T217D_3D0* e = &D_0026F138;
+    if (g_pendingWarpEntry == -1) return;
+    SetScreenElementHoldTime(&g_letterboxElement, ((g_saveData->levelIndex << 8) | g_saveData->entryIndex) == 4 ? 0.5f : 2.0f);
+    g_letterboxElement.vt->m16(&g_letterboxElement, 2);
+    T217D_3D0* e = &g_copiedTextCaption;
     e->pending = 0;
     e->vt->m16(e, 0);
-    SetElementTextFromEntry(e, g_saveData->f19D8, g_saveData->f19DC);
+    SetElementTextFromEntry(e, g_saveData->levelIndex, g_saveData->entryIndex);
     e->announce = 1;
     SetScreenElementHoldTime(e, 0.0f);
     e->vt->m16(e, 2);
-    Animation* sl = self->entries[D_00276250].f00;
+    Animation* sl = self->entries[g_pendingWarpEntry].animation;
     if (sl != 0) {
         f32 f = 0.0f;
-        if (D_00276654 == 0) f = sl->length;
-        ReplaceAnimationPlayer(sl, self, 0, (AnimationPlayer**)&self->f2F0, f, 0.0f);
+        if (g_pendingWarpEntryAtEnd == 0) f = sl->length;
+        ReplaceAnimationPlayer(sl, self, 0, (AnimationPlayer**)&self->entryPlayer, f, 0.0f);
     }
-    if (self->f2E8 != 0) {
-        for (s32 i = 0; i < self->f2E8->startCount; i++) {
-            AnimEvent* en = &self->f2E8->startList[i];
+    if (self->closeAnimation != 0) {
+        for (s32 i = 0; i < self->closeAnimation->startCount; i++) {
+            AnimEvent* en = &self->closeAnimation->startList[i];
             if (en->kind == 10) {
                 BaseObject* n = FindFirstObjectById(self->world, 0x104, en->a8.i, self);
                 if (n != 0) n->desc->m02(n);
             }
         }
     }
-    D_00276250 = -1;
+    g_pendingWarpEntry = -1;
 }
 
 void UpdatePlacedObject(PlacedObject* self, f32 f);
@@ -4487,39 +4487,39 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
     UpdatePlacedObject(self, dt);
     switch (self->mode) {
     case 0:
-        if (self->f2EC != 0) {
-            StopAnimationPlayer(self->f2EC);
-            self->f2EC = 0;
+        if (self->closePlayer != 0) {
+            StopAnimationPlayer(self->closePlayer);
+            self->closePlayer = 0;
         }
-        if (self->f2F0 != 0) {
-            StopAnimationPlayer((AnimationPlayer*)self->f2F0);
-            self->f2F0 = 0;
+        if (self->entryPlayer != 0) {
+            StopAnimationPlayer((AnimationPlayer*)self->entryPlayer);
+            self->entryPlayer = 0;
         }
-        if (self->f2EC == 0 && self->f2F0 == 0) {
+        if (self->closePlayer == 0 && self->entryPlayer == 0) {
             self->desc->m03(self);
         }
         break;
     case 2:
-        if (self->f2D8 != self->cursor) {
+        if (self->lastCursor != self->cursor) {
             SelectWarpPageEntry(self, self->cursor);
-            if (IsWarpEntryAvailable(self, self->f2D8, 0, 0) != 0) {
-                self->entries[self->f2D8].f10 = 0.0f;
+            if (IsWarpEntryAvailable(self, self->lastCursor, 0, 0) != 0) {
+                self->entries[self->lastCursor].cursorLevel = 0.0f;
             }
             if (IsWarpEntryAvailable(self, self->cursor, 0, 0) != 0) {
-                self->entries[self->cursor].f10 = 1.0f;
+                self->entries[self->cursor].cursorLevel = 1.0f;
             }
-            self->entries[9].f10 = self->entries[1].f10;
-            self->f2D8 = self->cursor;
+            self->entries[9].cursorLevel = self->entries[1].cursorLevel;
+            self->lastCursor = self->cursor;
         }
-        *(u128*)&self->q540 = ApproachPointWithRamp(*(u128*)&self->q540, *(u128*)&self->q550, g_gameClock.step,
+        *(u128*)&self->smoothPoint = ApproachPointWithRamp(*(u128*)&self->smoothPoint, *(u128*)&self->targetPoint, g_gameClock.step,
                                                      (RampProfile*)D_00276258, 0);
         break;
     case 3:
-        if (self->f2D8 != self->cursor) {
+        if (self->lastCursor != self->cursor) {
             if (self->f560 == 0) {
                 SelectWarpPageEntry(self, self->cursor);
-                SetScreenElementHoldTime(&D_0026F138, 0.0f);
-                D_0026F138.vt->m14(&D_0026F138);
+                SetScreenElementHoldTime(&g_copiedTextCaption, 0.0f);
+                g_copiedTextCaption.vt->m14(&g_copiedTextCaption);
             }
             // Read as a 64-bit value: GCSE then does not take this read for the later
             // `target = self->cursor`, which retail loads again (docs/TOOLCHAIN.md, "GCSE").
@@ -4534,12 +4534,12 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
             } else {
                 target = GetCurrentWarpEntry();
             }
-            Animation* anim = self->entries[target].f00;
+            Animation* anim = self->entries[target].animation;
             if (D_00275BF0 != 2) {
-                self->entries[GetCurrentWarpEntry()].f10 = 0.0f;
-                self->entries[self->cursor].f10 = 1.0f;
-                self->entries[self->cursor].f08 = 1.0f;
-                self->entries[9].f10 = self->entries[1].f10;
+                self->entries[GetCurrentWarpEntry()].cursorLevel = 0.0f;
+                self->entries[self->cursor].cursorLevel = 1.0f;
+                self->entries[self->cursor].availableLevel = 1.0f;
+                self->entries[9].cursorLevel = self->entries[1].cursorLevel;
             }
             if (anim != 0) {
                 f32 start = 0.0f;
@@ -4550,28 +4550,28 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
                 if (back != 0) {
                     rate = -1.0f;
                 }
-                ReplaceAnimationPlayer(anim, self, 1, (AnimationPlayer**)&self->f2F0, start, rate);
+                ReplaceAnimationPlayer(anim, self, 1, (AnimationPlayer**)&self->entryPlayer, start, rate);
                 SetPendingWarpEntry((s32)self, target, back);
             }
             self->f560 = 0;
-            self->f2D8 = self->cursor;
+            self->lastCursor = self->cursor;
         }
         break;
     }
     if (self->mode != 0) {
         for (s32 i = 0; i < 11; i++) {
             WarpEntry* e = &self->entries[i];
-            e->f24 = ApproachValueWithRamp(e->f24, e->f28, g_gameClock.step, (RampProfile*)D_00276268, 0);
+            e->dim = ApproachValueWithRamp(e->dim, e->dimTarget, g_gameClock.step, (RampProfile*)D_00276268, 0);
             e->phase = WrapAngle(e->phase + e->speed * g_gameClock.step);
-            PlacedObject* a = (PlacedObject*)e->f04;
-            PlacedObject* b = (PlacedObject*)e->f0C;
+            PlacedObject* a = (PlacedObject*)e->availableObject;
+            PlacedObject* b = (PlacedObject*)e->cursorObject;
             if (a != 0) {
-                a->f298->level = ApproachValueWithRamp(a->f298->level, e->f08, dt,
-                                                       (RampProfile*)(self->f2E0 == 2 ? D_00276278 : D_00276288), 0);
+                a->rampNode->level = ApproachValueWithRamp(a->rampNode->level, e->availableLevel, dt,
+                                                       (RampProfile*)(self->openKind == 2 ? D_00276278 : D_00276288), 0);
             }
             if (b != 0) {
-                b->f298->level = ApproachValueWithRamp(b->f298->level, e->f10, dt,
-                                                       (RampProfile*)(self->f2E0 == 2 ? D_00276278 : D_00276288), 0);
+                b->rampNode->level = ApproachValueWithRamp(b->rampNode->level, e->cursorLevel, dt,
+                                                       (RampProfile*)(self->openKind == 2 ? D_00276278 : D_00276288), 0);
             }
         }
     }
@@ -4581,14 +4581,14 @@ void ApplyWarpPageTransform(WarpPage* obj, u8* s, void* c)
 {
     u8 tmp[0x50];
     Camera* p = g_camera;
-    f32 keep1 = p->f1C4;
-    f32 keep2 = p->f1C8;
+    f32 keep1 = p->zoom;
+    f32 keep2 = p->zoomGoal;
     SnapCameraZoom(p, 1.0f);
     BuildPlacedObjectTransform(obj, (Quad16*)c, (ScaledTransform*)tmp);
     BuildMatrixFromRotationAndTranslation((const Vec02*)(s + 0x40), (const Mat02*)(s + 0x80), (Mat4A*)tmp);
     ApplyPlacedObjectTransform(obj, (Camera*)s, (ScaledTransform*)tmp);
     SnapCameraZoom(g_camera, keep1);
-    g_camera->f1C8 = keep2;
+    g_camera->zoomGoal = keep2;
 }
 
 void HandleWarpPageNotification(WarpPage* self, s32 kind, void* msg)
@@ -4604,13 +4604,13 @@ L_ge4:
     if (v == 4) goto L_four;
     return;
 L_one:
-    SetWarpPageMode(self, self->f2E0);
+    SetWarpPageMode(self, self->openKind);
     return;
 L_three:
     SetScreenFadeMode(&g_screenFade, 2);
     return;
 L_four:
-    if ((AnimationPlayer*)msg != self->f2EC) return;
+    if ((AnimationPlayer*)msg != self->closePlayer) return;
     ScreenFade* g = &g_screenFade;
     if (g->mode == 3) {
         SetScreenFadeMode(g, 0);
@@ -4633,10 +4633,10 @@ void SetWarpPageMode(WarpPage* self, u32 next)
         break;
     case 2:
         if (self->f560 == 0) {
-            D_0026F138.vt->m15(&D_0026F138);
+            g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
         }
         for (s32 k = 0; k < 11; k++) {
-            self->entries[k].f28 = 0;
+            self->entries[k].dimTarget = 0;
         }
         break;
     case 0: {
@@ -4645,39 +4645,39 @@ void SetWarpPageMode(WarpPage* self, u32 next)
         for (s32 n = 0; n < 11; n++) {
             WarpEntry* s = &self->entries[n];
             if (IsWarpEntryAvailable(self, n, (s32*)0, (s32*)0)) {
-                s->f08 = one;
+                s->availableLevel = one;
                 s32 want;
-                if (self->f2E0 == 3) {
+                if (self->openKind == 3) {
                     want = GetCurrentWarpEntry();
                 } else {
                     want = self->cursor;
                 }
                 if (n == want) {
-                    s->f10 = one;
+                    s->cursorLevel = one;
                 } else {
-                    s->f10 = 0;
+                    s->cursorLevel = 0;
                 }
             } else {
-                s->f10 = 0;
-                s->f08 = 0;
+                s->cursorLevel = 0;
+                s->availableLevel = 0;
             }
         }
         *(f32*)((u8*)self + 0x4DC) = *(f32*)((u8*)self + 0x33C);
         for (s32 j = 0; j <= 10; j++) {
             WarpEntry* s = &self->entries[j];
-            PlacedObject* a = (PlacedObject*)s->f04;
-            PlacedObject* b = (PlacedObject*)s->f0C;
+            PlacedObject* a = (PlacedObject*)s->availableObject;
+            PlacedObject* b = (PlacedObject*)s->cursorObject;
             if (a) {
                 a->desc->m02(a);
                 EnsureObjectWorldNode(a);
-                a->f298->rate = 0;
-                a->f298->level = s->f08;
+                a->rampNode->rate = 0;
+                a->rampNode->level = s->availableLevel;
             }
             if (b) {
                 b->desc->m02(b);
                 EnsureObjectWorldNode(b);
-                b->f298->rate = 0;
-                b->f298->level = s->f10;
+                b->rampNode->rate = 0;
+                b->rampNode->level = s->cursorLevel;
             }
         }
         break;
@@ -4685,7 +4685,7 @@ void SetWarpPageMode(WarpPage* self, u32 next)
     }
     switch (next) {
     case 1: {
-        if (self->f2E0 == 3) {
+        if (self->openKind == 3) {
             s32 ne = self->cursor != 1;
             Animation* a;
             s32 off;
@@ -4700,19 +4700,19 @@ void SetWarpPageMode(WarpPage* self, u32 next)
                 if (ne) {
                     fa = a->length;
                 }
-                ReplaceAnimationPlayer(a, self, 0, (AnimationPlayer**)&self->f2F0, fa, 0.0f);
+                ReplaceAnimationPlayer(a, self, 0, (AnimationPlayer**)&self->entryPlayer, fa, 0.0f);
             }
         } else {
-            Animation* a = self->entries[1].f00;
+            Animation* a = self->entries[1].animation;
             if (a) {
-                ReplaceAnimationPlayer(a, self, 0, (AnimationPlayer**)&self->f2F0, 0.0f, 0.0f);
+                ReplaceAnimationPlayer(a, self, 0, (AnimationPlayer**)&self->entryPlayer, 0.0f, 0.0f);
             }
             f32 z = 0.0f;
             SetWarpPageSelectedEntry(self, self->cursor);
-            self->q540 = self->q550;
+            self->smoothPoint = self->targetPoint;
             SelectWarpPageEntry(self, self->cursor);
-            SetScreenElementHoldTime(&D_0026F138, z);
-            D_0026F138.vt->m14(&D_0026F138);
+            SetScreenElementHoldTime(&g_copiedTextCaption, z);
+            g_copiedTextCaption.vt->m14(&g_copiedTextCaption);
             StartSoundEffect(0x8A, (PlayingSound**)&self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
             for (i = 0; i < 11; i++) {
                 WarpEntry* s = &self->entries[i];
@@ -4723,11 +4723,11 @@ void SetWarpPageMode(WarpPage* self, u32 next)
                     v = 1;
                 }
                 s->f20 = v;
-                s->f24 = s->f28 = 0.0f;
+                s->dim = s->dimTarget = 0.0f;
             }
         }
-        self->f2D8 = self->cursor;
-        t = self->f2E4;
+        self->lastCursor = self->cursor;
+        t = self->openAnimation;
         if (t != 0) {
             goto L146C;
         }
@@ -4735,45 +4735,45 @@ void SetWarpPageMode(WarpPage* self, u32 next)
     }
     case 4: {
         if (self->f560 == 0) {
-            D_0026F138.vt->m15(&D_0026F138);
-            if (self->f2E0 == 2) {
+            g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
+            if (self->openKind == 2) {
                 StartSoundEffect(0x8B, (PlayingSound**)&self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         }
         AnnouncePendingWarpEntry(self);
-        t = self->f2E8;
+        t = self->closeAnimation;
         if (t == 0) {
             goto Lz;
         }
     L146C:
-        ReplaceAnimationPlayer(t, self, 0, &self->f2EC, 0.0f, 1.0f);
+        ReplaceAnimationPlayer(t, self, 0, &self->closePlayer, 0.0f, 1.0f);
         self->mode = next;
         goto L1550;
     }
     case 2:
         for (s32 m = 0; m < 11; m++) {
             if (m != self->selected) {
-                self->entries[m].f28 = 1.0f;
+                self->entries[m].dimTarget = 1.0f;
             }
         }
         self->mode = next;
         goto L1550;
     case 3:
-        self->f2D8 = -1;
+        self->lastCursor = -1;
         break;
     case 0:
         for (i = 0; i < 11; i++) {
-            PlacedObject* a = (PlacedObject*)self->entries[i].f04;
-            PlacedObject* b = (PlacedObject*)self->entries[i].f0C;
+            PlacedObject* a = (PlacedObject*)self->entries[i].availableObject;
+            PlacedObject* b = (PlacedObject*)self->entries[i].cursorObject;
             if (a) {
-                if (a->f298) {
-                    RemoveObjectNodeFromWorld(a->f298);
+                if (a->rampNode) {
+                    RemoveObjectNodeFromWorld(a->rampNode);
                 }
                 a->desc->m03(a);
             }
             if (b) {
-                if (b->f298) {
-                    RemoveObjectNodeFromWorld(b->f298);
+                if (b->rampNode) {
+                    RemoveObjectNodeFromWorld(b->rampNode);
                 }
                 b->desc->m03(b);
             }
@@ -4804,7 +4804,7 @@ void SetWarpCursor(WarpPage* self, s32 a1, s32 a2)
     return;
 L_store:
     self->cursor = a1;
-    self->f2E0 = a2;
+    self->openKind = a2;
     SetWarpPageMode(self, 1);
     return;
 L_two:
@@ -4826,7 +4826,7 @@ void BeginWarpPageClose(WarpPage* self)
 
 void MoveWarpCursor(WarpPage* self, s32 idx)
 {
-    s32 (*table)[4] = D_00276608[self->slot];
+    s32 (*table)[4] = g_warpCursorTables[self->slot];
     if (table == 0) {
         StartSoundEffect(WARP_SOUND_REFUSE, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
@@ -4858,8 +4858,8 @@ void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
     if (o != 0) {
         TransformPointBetweenFrames((PlacedObject*)o->parent, self, (Vec02*)((u8*)o + 0x40), &v);
         Camera* g = g_camera;
-        Vu0::Q(v) = Vu0::Rotate(g->f80, Vu0::Q(v));
-        Vu0::Q(v) = Vu0::Add(Vu0::Q(g->f40), Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Rotate(g->rotation, Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Add(Vu0::Q(g->position), Vu0::Q(v));
         ProjectPointToCamera(g, &v, out);
         out[0] = out[0] * 320.0f + 320.0f;
         out[1] = out[1] * -246.40001f + 246.40001f;
@@ -4894,7 +4894,7 @@ extern const char D_0024E808[40] = "&2T&. : Back\n&2(&. : Move\n&2X&. : Warp";
 void InitWarpMenu(T217D_0F0* self) {
     SetupScreenElementText(self);
     if (IsFontLoaded(2) != 0) {
-        self->frame = (Font**)&D_00276620;
+        self->frame = (Font**)&g_warpTextStyle;
         *self->frame = GetFontById(2);
     }
     SetScreenElementHoldTime(self, 0.0f);
@@ -4915,7 +4915,7 @@ void HandleWarpMenuInput(T217D_0F0* self, PadRecord* t)
     if (self->current == 0) return;
     if (self->current->mode != 2) return;
     if (self->current->f560 != 0) return;
-    if ((t->flags & 0x910) != 0 || t->f14 == 1) {
+    if ((t->flags & 0x910) != 0 || t->connectionMode == 1) {
         PopStackElement((ElementStack*)g_elementStack);
         ClearPadPressedBits(&g_padRecord, 0x910);
         return;
@@ -4925,8 +4925,8 @@ void HandleWarpMenuInput(T217D_0F0* self, PadRecord* t)
     s3 = IsWarpEntryAvailable(self->current, self->current->cursor, &loc[0], &loc[1]);
     s2 = GetPadHorizontalStep(t);
     v1 = GetPadVerticalStep(t);
-    t->f30 = g_gameClock.elapsed + t->f34;
-    t->f38 = g_gameClock.elapsed + t->f3C;
+    t->nextStepTimeX = g_gameClock.elapsed + t->stepDelayX;
+    t->nextStepTimeY = g_gameClock.elapsed + t->stepDelayY;
 
     if (v1 < 0) {
         MoveWarpCursor(self->current, 0);
@@ -4972,12 +4972,12 @@ void SetWarpMenuOpen(T217D_0F0* self, s32 a1)
         SetWarpCursor(self->current, r, 2);
         self->scaleTarget = 1.0f;
         self->scale = 1.0f;
-        Animation* an = self->current->f2E4;
+        Animation* an = self->current->openAnimation;
         if (an != 0) {
             SetScreenElementSlideInTime(self, an->length);
         }
         GameProgress* g = g_saveData;
-        if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
+        if (((g->levelIndex << 8) | g->entryIndex) == 0x308) {
             PauseStagedBankVoice();
         }
         self->vt->m14(self);
@@ -4988,14 +4988,14 @@ void SetWarpMenuOpen(T217D_0F0* self, s32 a1)
         self->vt->m15(self);
         if (self->current->f560 == 0) {
             BeginWarpPageClose(self->current);
-            Animation* an = self->current->f2E8;
+            Animation* an = self->current->closeAnimation;
             if (an != 0) {
                 SetScreenElementSlideOutTime(self, an->length);
             }
             ClearPadSelectFlags(1);
             SetElementStackState((ElementStack*)g_elementStack, 3);
             GameProgress* g = g_saveData;
-            if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
+            if (((g->levelIndex << 8) | g->entryIndex) == 0x308) {
                 ResumeStagedBankVoice();
             }
         }
@@ -5087,8 +5087,8 @@ void DrawWarpMenu(T217D_0F0* self)
     }
     f32 one = 1.0f;
     Camera* cam = g_camera;
-    f32 keep1 = cam->f1C4;
-    f32 keep2 = cam->f1C8;
+    f32 keep1 = cam->zoom;
+    f32 keep2 = cam->zoomGoal;
     SnapCameraZoom(cam, one);
     if (g_coloredTriangleSet != 0) {
         Vec02 v;
@@ -5096,10 +5096,10 @@ void DrawWarpMenu(T217D_0F0* self)
         WarpColor inner;
         WarpColor outer;
         f32 b2 = self->blend * self->blend;
-        Vu0::Q(v) = Vu0::Q(self->current->q540);
+        Vu0::Q(v) = Vu0::Q(self->current->smoothPoint);
         Camera* g = g_camera;
-        Vu0::Q(v) = Vu0::Rotate(g->f80, Vu0::Q(v));
-        Vu0::Q(v) = Vu0::Add(Vu0::Q(g->f40), Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Rotate(g->rotation, Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Add(Vu0::Q(g->position), Vu0::Q(v));
         ProjectPointToCamera(g, &v, out);
         out[0] = out[0] * 320.0f + 320.0f;
         out[1] = out[1] * -246.40001f + 246.40001f;
@@ -5132,7 +5132,7 @@ void DrawWarpMenu(T217D_0F0* self)
         }
         f32 pos[2];
         ProjectWarpEntryToScreen(self->current, i, 0, pos);
-        f32 size = e->f24 * self->blend;
+        f32 size = e->dim * self->blend;
         if (AreFloatsNearlyEqual(size, 1.0f, 0.0001f) && i < 9) {
             s32 slot = self->current->slot;
             if ((GetEntryFlags((slot << 8) | i) & 2)
@@ -5149,7 +5149,7 @@ void DrawWarpMenu(T217D_0F0* self)
         if (i < 9) {
             s32 slot = self->current->slot;
             if (GetEntryFlags((slot << 8) | i) & 2) {
-                f32 scale = e->f24;
+                f32 scale = e->dim;
                 s32 flags = *(s32*)((u8*)g_saveData + (slot * 0x44C + i * 0x78) + 0x10);
                 Font* font = GetFontById(3);
                 f32 k = D_0027663C[0] * scale;
@@ -5173,7 +5173,7 @@ void DrawWarpMenu(T217D_0F0* self)
         }
     }
     SnapCameraZoom(g_camera, keep1);
-    g_camera->f1C8 = keep2;
+    g_camera->zoomGoal = keep2;
 }
 
 // The style above (D_00276620) and D_00276650 are built by the static initialiser GCC writes

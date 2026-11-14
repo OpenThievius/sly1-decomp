@@ -111,7 +111,7 @@ struct PlayingSound {
     f32 volume;             // 0x50
     f32 pan;                // 0x54
     f32 pitch;              // 0x58: in octaves, 1524 units each (SetSoundRecordPitch)
-    f32 f5C;                // 0x5C
+    f32 dopplerScale;       // 0x5C: how strongly the object's motion shifts the sound's pitch
     s32 pitchOffset;        // 0x60: added to the pitch (SetSoundRecordPitch)
     U64P link;              // 0x64: kept when InitSoundRecord clears the record
     s32 pitchBaseValid;     // 0x6C
@@ -249,9 +249,9 @@ void MarkSoundRecordIfIdMatches(s32 reply, s64 key);
 void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c);
 void StopSoundRecord(PlayingSound* self, s32 n);
 s32 SetIopSoundOptionFlag(s32 flag);
-extern U64P D_00274820;
-extern U64P D_00274828;
-extern s32 D_006053E0[];
+extern U64P g_defaultSoundRepeat;
+extern U64P g_defaultSoundRange;
+extern s32 g_cachedVoiceParams[];
 s32 GetVoiceParam(s32 a, s32 b);
 void UnregisterObject(BaseObject* self);
 void RemoveFromList(List01* list, void* item);
@@ -262,14 +262,14 @@ void RegisterObject(BaseObject* self);
 void AppendToList(List01* self, void* item);
 void CopyObjectData(BaseObject* self, BaseObject* src);
 void SetIopVolumeChannel(s32 a, s32 b);
-extern s32 D_00274808[6];
+extern s32 g_iopChannel2Values[6];
 void SetIopChannelValue(s32 a, s32 b);
 void SetIopChannelValuePair(s32 a, s32 b, s32 c);
 struct Point2 { f32 x; f32 y; };
 extern f32 g_volumeChannelFactors[11][4];
 void SetIopVolumeChannel(s32 slot, s32 value);
 void ApplyVolumeChannelFactors(s32 column);
-extern u8 D_002748E8[4];
+extern u8 g_worldSoundHandle[4];
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void StopAllIopSounds(void);
@@ -281,7 +281,7 @@ void ClearCachedVoiceParams(void);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern f32 g_defaultVolumeChannelFactors[11][4];
-extern s32 D_00274808[];
+extern s32 g_iopChannel2Values[];
 void SetIopChannelValue(s32 channel, s32 value);
 void SetIopChannelValuePair(s32 channel, s32 value, s32 value2);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -290,9 +290,9 @@ s32 StepBiasedRandomWalk(void);
 // from -12 to 12, copied to the stack.
 struct RandomWalkSteps { s32 v[42]; };
 struct RandomWalkRows { s32 v[25]; };
-extern const RandomWalkSteps D_0024D2A8;
-extern const RandomWalkRows D_0024D350;
-extern s32 D_00274830;
+extern const RandomWalkSteps g_randomWalkSteps;
+extern const RandomWalkRows g_randomWalkRows;
+extern s32 g_randomWalkPosition;
 void SetVoiceParam(s32 a0, s32 a1, s32 a2);
 void InitObject(BaseObject* self);
 void StopSoundRecord(PlayingSound* self, s32 n);
@@ -325,17 +325,17 @@ s32 g_previousSoundLevel = 0;
 s32 g_stagedBankHandle = 0;
 s32 g_loadedSoundBank = -1;
 s32 g_streamVoiceLocked = 0;
-s32 D_00274748 = 0;
+s32 g_soundEmitterUpdateDisabled = 0;
 s32 g_nextSoundRecordId = 0;
-f32 D_00274750 = -2.0f;
+f32 g_lastSilentSoundTime = -2.0f;
 s32 D_00274754 = 3;
 f32 g_defaultVolumeChannelFactors[11][4] = { 1.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-s32 D_00274808[6] = { 0, 2, 3, 4, 9, 1 };
-U64P D_00274820 = { 0x40C0000040800000ULL };
-U64P D_00274828 = { 0x45FA0000453B8000ULL };
-s32 D_00274830 = 0;
+s32 g_iopChannel2Values[6] = { 0, 2, 3, 4, 9, 1 };
+U64P g_defaultSoundRepeat = { 0x40C0000040800000ULL };
+U64P g_defaultSoundRange = { 0x45FA0000453B8000ULL };
+s32 g_randomWalkPosition = 0;
 f32 g_volumeChannelFactors[11][4] = { 0 };
-u8 D_002748E8[4] = { 0 };
+u8 g_worldSoundHandle[4] = { 0 };
 s32 D_002748EC = 0;
 void CopyMemory(void* dst, void* src, u32 size);
 
@@ -420,14 +420,14 @@ s32 EnsureSoundEntryBankLoaded(s32 idx)
 void InitSoundParams(SoundRecord** self)
 {
     *self = (SoundRecord*)AllocateZeroedFrontMemory(0x24);
-    (*self)->f00 = -1;
-    (*self)->f04 = 3000.0f;
-    (*self)->f08 = 300.0f;
-    (*self)->f0C = 1.0f;
-    (*self)->f10 = 0;
-    (*self)->f1C = 0;
+    (*self)->soundId = -1;
+    (*self)->outerRange = 3000.0f;
+    (*self)->innerRange = 300.0f;
+    (*self)->baseVolume = 1.0f;
+    (*self)->pitch = 0;
+    (*self)->soundWord = 0;
     (*self)->f14 = -1.0f;
-    (*self)->f20 = 0;
+    (*self)->startParam = 0;
 }
 
 s32 IsSoundEntryAvailable(s32 idx)
@@ -829,7 +829,7 @@ void InitSoundSystem(void)
 
 LINKER_REMNANT(func_001BF1E8);
 
-s32 IsSoundEmitterUpdateDisabled(void) { return D_00274748; }
+s32 IsSoundEmitterUpdateDisabled(void) { return g_soundEmitterUpdateDisabled; }
 
 void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c)
 {
@@ -863,7 +863,7 @@ f32 MeasureCameraWeightedDistance(Vec02* a, Vec02* b)
     Vec02 k;
     Camera* cam = g_camera;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
-    f32 w = cam->ctl460.g18;
+    f32 w = cam->ctl460.zoomFraction;
     u128 side = Vu0::Sub(Vu0::Q(d), Vu0::MulX(Vu0::Q(cam->g80), Vu0::Dot(Vu0::Q(d), Vu0::Q(cam->g80))));
     Vu0::Q(k) = Vu0::FromFloat(1.0f / ((1.0f - w) + w * 10.0f));
     u128 along = Vu0::MulX(Vu0::Q(cam->g80), Vu0::Dot(Vu0::Q(d), Vu0::Q(cam->g80)));
@@ -890,7 +890,7 @@ s32 ConvertSpeedToPitchOffset(s32 speed);
 void ComputeSoundRecordDoppler(PlayingSound* self)
 {
     PlacedObject* source = (PlacedObject*)self->object;
-    if (source == 0 || self->f5C <= 0.0001f) {
+    if (source == 0 || self->dopplerScale <= 0.0001f) {
         self->pitchOffset = 0;
         return;
     }
@@ -903,7 +903,7 @@ void ComputeSoundRecordDoppler(PlayingSound* self)
         ComputeObjectMotionInFrame(source, 0, &source->v140, &sourceVel, 0, 0, 0);
         ComputeObjectMotionInFrame(listener, 0, &listener->v140, &listenerVel, 0, 0, 0);
         Vu0::Q(rel) = Vu0::Sub(Vu0::Q(sourceVel), Vu0::Q(listenerVel));
-        f32 scale = self->f5C * 3600.0f;
+        f32 scale = self->dopplerScale * 3600.0f;
         Vu0::Q(away) = Vu0::Sub(Vu0::Q(listener->v140), Vu0::Q(source->v140));
         u128 unit = Vu0::DivX(Vu0::Q(away), Vu0::Length(Vu0::Q(away)));
         self->pitchOffset = ConvertSpeedToPitchOffset((s32)(Vu0::ToFloat(Vu0::Dot(unit, Vu0::Q(rel))) * scale * 6.24999984e-06f));
@@ -989,7 +989,7 @@ void SetSoundRecordPitch(PlayingSound* p, f32 a)
         if (p->object == 0) {
             return;
         }
-        if (!(0.0001f < p->f5C)) {
+        if (!(0.0001f < p->dopplerScale)) {
             return;
         }
     }
@@ -1023,7 +1023,7 @@ void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, 
     self->owner = owner;
     if (owner) *owner = self;
     self->pitch = pitch;
-    self->f5C = f16;
+    self->dopplerScale = f16;
     s32 id = g_nextSoundRecordId;
     self->serial = id++;
     self->keepWhenFar = keepWhenFar;
@@ -1093,7 +1093,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
     if (id == -1) return;
     if (id != -2) {
         s32 a1 = g_soundEntries[id].bank;
-        if (a1 > 0 && a1 != g_currentWorld->f1D70) return;
+        if (a1 > 0 && a1 != g_currentWorld->soundBank) return;
         s0 = IsSoundEntryAvailable(id);
     } else {
         s0 = 0;
@@ -1247,8 +1247,8 @@ void UpdateSoundEmitters(void)
                 } else {
                     ScheduleAmbientSoundRecord(e);
                     if (e->silent != 0) {
-                        if (s1[1] - D_00274750 < 1.0f) goto next;
-                        D_00274750 = s1[1];
+                        if (s1[1] - g_lastSilentSoundTime < 1.0f) goto next;
+                        g_lastSilentSoundTime = s1[1];
                     }
                 }
             }
@@ -1327,8 +1327,8 @@ void ResetVolumeChannelFactors(void)
     for (s32 i = 0; i < 4; i++) {
         ApplyVolumeChannelFactors(i);
     }
-    SilenceVolumeChannel3(g_saveData->f19EC & 0x80);
-    ApplySoundOptionFlag(g_saveData->f19EC & 0x40);
+    SilenceVolumeChannel3(g_saveData->optionFlags & 0x80);
+    ApplySoundOptionFlag(g_saveData->optionFlags & 0x40);
 }
 
 void SilenceVolumeChannel3(s32 flag)
@@ -1370,7 +1370,7 @@ void StopWorldSoundRecords(s32 item)
 void PushIopChannel2Setting(World* self, s32 a, s32 b)
 {
     if ((u32)self->channel2Count < 4) {
-        SetIopChannelValue(2, D_00274808[a]);
+        SetIopChannelValue(2, g_iopChannel2Values[a]);
         SetIopChannelValuePair(2, b, b);
         self->channel2[self->channel2Count].index = a;
         self->channel2[self->channel2Count].value = b;
@@ -1383,14 +1383,14 @@ void PopIopChannel2Setting(World* self)
     s32 n = self->channel2Count;
     if (n >= 2) {
         self->channel2Count = n - 1;
-        SetIopChannelValue(2, D_00274808[self->channel2[n - 2].index]);
+        SetIopChannelValue(2, g_iopChannel2Values[self->channel2[n - 2].index]);
         SetIopChannelValuePair(2, self->channel2[self->channel2Count - 1].value, self->channel2[self->channel2Count - 1].value);
     }
 }
 
 void SetIopChannel2Setting(World* self, s32 index, s32 value)
 {
-    SetIopChannelValue(2, D_00274808[index]);
+    SetIopChannelValue(2, g_iopChannel2Values[index]);
     SetIopChannelValuePair(2, value, value);
     self->channel2[0].index = index;
     self->channel2[0].value = value;
@@ -1402,8 +1402,8 @@ void AddWorldSoundEntry(World* self, s32 key)
     if (self->soundCount < 16) {
         WorldSoundEntry* e = &self->soundEntries[self->soundCount];
         e->sound = key;
-        e->repeat = D_00274820;
-        e->range = D_00274828;
+        e->repeat = g_defaultSoundRepeat;
+        e->range = g_defaultSoundRange;
         self->soundCount++;
     }
 }
@@ -1430,26 +1430,26 @@ void StartWorldSoundEntries(World* self)
 {
     for (s32 i = 0; i < self->soundCount; i++) {
         WorldSoundEntry* e = &self->soundEntries[i];
-        StartSoundEffect(e->sound, (PlayingSound**)D_002748E8, 0, 0, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f, (f32*)&e->repeat, &e->range);
+        StartSoundEffect(e->sound, (PlayingSound**)g_worldSoundHandle, 0, 0, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f, (f32*)&e->repeat, &e->range);
     }
 }
 
 void SetCachedVoiceParam(s32 idx, s32 val)
 {
-    if (val != D_006053E0[idx]) {
-        D_006053E0[idx] = val;
+    if (val != g_cachedVoiceParams[idx]) {
+        g_cachedVoiceParams[idx] = val;
         SetVoiceParam(g_stagedBankVoice, idx, val);
     }
 }
 
 s32 GetCachedVoiceParam(s32 index)
 {
-    return D_006053E0[index];
+    return g_cachedVoiceParams[index];
 }
 
 void RefreshCachedVoiceParam(s32 i, s32 unused1)
 {
-    D_006053E0[i] = GetVoiceParam(g_stagedBankVoice, i);
+    g_cachedVoiceParams[i] = GetVoiceParam(g_stagedBankVoice, i);
 }
 
 void ClearCachedVoiceParams(void)
@@ -1459,15 +1459,15 @@ void ClearCachedVoiceParams(void)
     }
 }
 
-extern const RandomWalkSteps D_0024D2A8 = { { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, 1, -5, -5, -5, -5, 1, 1, -5, -5, -5, 1, 1, 1, -5, -5, 1, 1, 1, 1, -5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
-extern const RandomWalkRows D_0024D350 = { { 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0 } };
+extern const RandomWalkSteps g_randomWalkSteps = { { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, 1, -5, -5, -5, -5, 1, 1, -5, -5, -5, 1, 1, 1, -5, -5, 1, 1, 1, 1, -5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+extern const RandomWalkRows g_randomWalkRows = { { 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0 } };
 
 s32 StepBiasedRandomWalk() {
-    RandomWalkSteps a = D_0024D2A8;
-    RandomWalkRows b = D_0024D350;
+    RandomWalkSteps a = g_randomWalkSteps;
+    RandomWalkRows b = g_randomWalkRows;
     s32 r = RandomIntInRange(0, 5);
-    D_00274830 += *(s32*)((u8*)&a + (b.v[D_00274830 + 12] * 24 + r * 4));
-    return D_00274830;
+    g_randomWalkPosition += *(s32*)((u8*)&a + (b.v[g_randomWalkPosition + 12] * 24 + r * 4));
+    return g_randomWalkPosition;
 }
 
 void PlaySoundWithWanderingPitch(void)

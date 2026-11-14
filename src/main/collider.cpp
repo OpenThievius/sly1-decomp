@@ -118,7 +118,7 @@ s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
 void SendObjectNotification(BaseObject* self, s32 kind, void* arg);
 // An anchor preset (func_001BB028): a direction and a mode.
 struct AnchorPreset { const Vec02* quad; s32 value; };
-extern AnchorPreset D_002746E0[8];
+extern AnchorPreset g_anchorPresets[8];
 void* AllocateBackMemory(s32 n);
 s32 GetContactRowHead(Collider* self, Collider* other);
 // Matched by indexing the end as (u32)e + (i << 6).
@@ -190,7 +190,7 @@ struct PlayingSound {
     f32 volume;             // 0x50
     f32 pan;                // 0x54
     f32 pitch;              // 0x58: in octaves, 1524 units each (SetSoundRecordPitch)
-    f32 f5C;                // 0x5C
+    f32 dopplerScale;       // 0x5C
     s32 pitchOffset;        // 0x60: added to the pitch (SetSoundRecordPitch)
     U64P link;              // 0x64: kept when InitSoundRecord clears the record
     s32 pitchBaseValid;     // 0x6C
@@ -285,9 +285,9 @@ s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
 
 // The file's .data, in retail's order.
-f32 D_002746C0[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
-f32 D_002746D0[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
-AnchorPreset D_002746E0[8] = {
+f32 g_colliderPositionGains[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
+f32 g_colliderRotationGains[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
+AnchorPreset g_anchorPresets[8] = {
     { &D_00248D30, 0 },
     { &D_00248D30, 3 },
     { &g_unitXVector, 2 },
@@ -310,11 +310,11 @@ void InitCollider(Collider* self)
     if (self->parent != 0) {
         SetColliderAnchors(self, 3, 0, 3, 0);
     }
-    self->f4BC = -1;
+    self->solverIndex = -1;
     self->index = -1;
-    if (self->f2C != 0) {
-        s0 = LookupScriptVariable((ScriptScope*)self->f2C, 6, 1, &local);
-        s0 |= LookupScriptVariable((ScriptScope*)self->f2C, 7, 1, &local);
+    if (self->scriptScope != 0) {
+        s0 = LookupScriptVariable((ScriptScope*)self->scriptScope, 6, 1, &local);
+        s0 |= LookupScriptVariable((ScriptScope*)self->scriptScope, 7, 1, &local);
         if (s0 != 0) {
             self->flags538 |= (u64)0x8000 << 48;
         }
@@ -399,8 +399,8 @@ void ApplyColliderPendingMove(Collider* self, s32 quiet)
     }
     if (!still) {
         Vu0::Q(self->pos) = Vu0::Add(Vu0::Q(self->pos), Vu0::Q(self->v490));
-        if (self->f1EC != 0) {
-            SettlePoseSourceModes(self->f1EC);
+        if (self->positionAttachment != 0) {
+            SettlePoseSourceModes(self->positionAttachment);
         }
         Vu0::Q(self->v490) = Vu0::Zero();
         moved = 1;
@@ -415,8 +415,8 @@ void ApplyColliderPendingMove(Collider* self, s32 quiet)
         BuildRotationFromVector(&self->spin4A0, &rot);
         MulRotationRowsIndexed(&m, rot, self->rot);
         self->rot = m;
-        if (self->f1F0 != 0) {
-            SettlePoseSourceModes(self->f1F0);
+        if (self->orientationAttachment != 0) {
+            SettlePoseSourceModes(self->orientationAttachment);
         }
         Vu0::Q(self->spin4A0) = Vu0::Zero();
         moved = 1;
@@ -445,8 +445,8 @@ void ApplyColliderPendingImpulse(Collider* self, s32 moved)
     }
     if (!still) {
         Vu0::Q(self->v150) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(self->v490));
-        if (self->f1EC != 0) {
-            SettlePoseSourceModes(self->f1EC);
+        if (self->positionAttachment != 0) {
+            SettlePoseSourceModes(self->positionAttachment);
         }
         Vu0::Q(self->v490) = Vu0::Zero();
         moved = 1;
@@ -459,8 +459,8 @@ void ApplyColliderPendingImpulse(Collider* self, s32 moved)
     }
     if (!still) {
         Vu0::Q(self->v160) = Vu0::Add(Vu0::Q(self->v160), Vu0::Q(self->spin4A0));
-        if (self->f1F0 != 0) {
-            SettlePoseSourceModes(self->f1F0);
+        if (self->orientationAttachment != 0) {
+            SettlePoseSourceModes(self->orientationAttachment);
         }
         Vu0::Q(self->spin4A0) = Vu0::Zero();
         moved = 1;
@@ -490,8 +490,8 @@ void ApplyColliderPendingImpulseHalfStep(Collider* self, s32 flag)
     if (!still) {
         Vu0::Q(self->v150) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(self->v490));
         Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(self->v490), Vu0::Scalar(g_frameDt[0] * 0.5f));
-        if (self->f1EC != 0) {
-            SettlePoseSourceModes(self->f1EC);
+        if (self->positionAttachment != 0) {
+            SettlePoseSourceModes(self->positionAttachment);
         }
         Vu0::Q(self->v490) = Vu0::Zero();
         moved = 1;
@@ -509,8 +509,8 @@ void ApplyColliderPendingImpulseHalfStep(Collider* self, s32 flag)
         Vu0::Q(delta) = Vu0::MulX(Vu0::Q(self->spin4A0), Vu0::Scalar(g_frameDt[0] * 0.5f));
         BuildRotationFromVector(&delta, &turn);
         MulRotationIntoRot(self, turn, self->rot);
-        if (self->f1F0 != 0) {
-            SettlePoseSourceModes(self->f1F0);
+        if (self->orientationAttachment != 0) {
+            SettlePoseSourceModes(self->orientationAttachment);
         }
         Vu0::Q(self->spin4A0) = Vu0::Zero();
         moved = 1;
@@ -632,33 +632,33 @@ void AddContactVertexBlendVelocity(Collider* self, Contact03* c, s32 which)
         switch (c->kind) {
         case 1:
             kind = 1;
-            idx[0] = (Vec02*)c->fA0 - (Vec02*)self->meshCopy.verts;
+            idx[0] = (Vec02*)c->featureEnd0 - (Vec02*)self->meshCopy.verts;
             break;
         case 2:
         case 3:
             kind = 2;
-            idx[0] = ((s16*)c->fA0)[0];
-            idx[1] = ((s16*)c->fA0)[1];
+            idx[0] = ((s16*)c->featureEnd0)[0];
+            idx[1] = ((s16*)c->featureEnd0)[1];
             break;
         }
     } else {
         switch (c->kind) {
         case 4:
             kind = 1;
-            idx[0] = (Vec02*)c->fA4 - (Vec02*)self->meshCopy.verts;
+            idx[0] = (Vec02*)c->featureEnd1 - (Vec02*)self->meshCopy.verts;
             break;
         case 3:
         case 5:
             kind = 2;
-            idx[0] = ((s16*)c->fA4)[0];
-            idx[1] = ((s16*)c->fA4)[1];
+            idx[0] = ((s16*)c->featureEnd1)[0];
+            idx[1] = ((s16*)c->featureEnd1)[1];
             break;
         case 1:
         case 2:
         case 6:
         case 8:
             kind = 3;
-            CopyMemory(idx, ((VertexBlend03*)self->hook)->faceVerts[(c->fA4 - (s32)self->meshCopy.faces) >> 5], 12);
+            CopyMemory(idx, ((VertexBlend03*)self->hook)->faceVerts[(c->featureEnd1 - (s32)self->meshCopy.faces) >> 5], 12);
             break;
         }
     }
@@ -670,7 +670,7 @@ void AddContactVertexBlendVelocity(Collider* self, Contact03* c, s32 which)
         break;
     case 2: {
         Vec02* verts = (Vec02*)self->meshCopy.verts;
-        f32 t = ComputeSegmentParameter(&verts[idx[0]], &verts[idx[1]], &end->v10);
+        f32 t = ComputeSegmentParameter(&verts[idx[0]], &verts[idx[1]], &end->point);
         f32 lo = 0.0f;
         f32 hi = 1.0f;
         f32 r;
@@ -696,7 +696,7 @@ void AddContactVertexBlendVelocity(Collider* self, Contact03* c, s32 which)
             Vec v = Vec::Scalar(1.0f);
             Vec c = Vec::Of(verts[idx[(i + 2) % 3]]);
             Vu0::Q(sum) = Vu0::MulXSum3(a, s, b, u, c, v).q;
-            w[i] = ComputeSegmentParameter(&verts[idx[i]], &sum, &end->v10);
+            w[i] = ComputeSegmentParameter(&verts[idx[i]], &sum, &end->point);
         }
         f32 a = w[0];
         f32 lo = 0.0f;
@@ -941,7 +941,7 @@ void SetColliderPosition(Collider* self, Vec02* pos)
     if ((self->flags538 & ((u64)1 << 45)) != 0) {
         if (10.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->pos), Vu0::Q(*pos))))) {
             Camera* cam = g_camera;
-            cam->f2E0 = 0;
+            cam->currentTarget = 0;
             RequestCameraSnap(cam, 0);
         }
     }
@@ -986,7 +986,7 @@ void PlaceColliderClearOfContacts(Collider* self, Vec02* start, Vec02* step)
         UpdateWorldContacts(self->world, 0);
         for (ContactRow03* node = self->contacts->head; node != 0; node = node->next) {
             for (Contact03* c = node->head; c != 0; c = c->next) {
-                if (c->f90 < -2.0f) {
+                if (c->depth < -2.0f) {
                     goto moved;
                 }
             }
@@ -1380,11 +1380,11 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
     }
     f32 push;
     if ((self->flags538 & (0x8000ULL << 36)) == 0) {
-        push = self->f360 * other->f360;
+        push = self->pushFactor * other->pushFactor;
     } else {
         push = 0.0f;
     }
-    f32 drag = self->f364 * other->f364;
+    f32 drag = self->dragFactor * other->dragFactor;
     if (push != 0.0f) {
         Vu0::Q(force) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Scalar(-push * depth));
         ConstrainColliderVector(self, &self->v440, &force, &force, 0);
@@ -1407,24 +1407,24 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
             scale = depth * 0.5f + 0.5f;
         }
         for (s32 i = 0; i < 3; i++) {
-            gains[i] = D_002746C0[i] * scale * drag;
+            gains[i] = g_colliderPositionGains[i] * scale * drag;
         }
         Vu0::Q(target) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(along));
         SteerColliderTowardPosition(self, 0, 0, &target, gains, dt);
         for (s32 i = 0; i < 3; i++) {
-            gains[i] = D_002746C0[i] * depth * drag;
+            gains[i] = g_colliderPositionGains[i] * depth * drag;
         }
         Vu0::Q(target2) = Vu0::Add(Vu0::Q(self->v150), Vu0::Q(rest));
         SteerColliderTowardPosition(self, 0, 0, &target2, gains, dt);
         Vu0::Q(spin) = Vu0::Sub(Vu0::Q(D_00248D30), Vu0::Q(self->v160));
         SplitVectorAlongAxis(&spin, &normal, &spinAlong, &spinRest);
         for (s32 i = 0; i < 3; i++) {
-            gains[i] = D_002746D0[i] * depth * drag;
+            gains[i] = g_colliderRotationGains[i] * depth * drag;
         }
         Vu0::Q(target3) = Vu0::Add(Vu0::Q(self->v160), Vu0::Q(spinAlong));
         SteerColliderTowardRotation(self, 0, 0, &target3, gains, dt);
         for (s32 i = 0; i < 3; i++) {
-            gains[i] = D_002746D0[i] * drag;
+            gains[i] = g_colliderRotationGains[i] * drag;
         }
         Vu0::Q(target4) = Vu0::Add(Vu0::Q(self->v160), Vu0::Q(spinRest));
         SteerColliderTowardRotation(self, 0, 0, &target4, gains, dt);
@@ -1544,8 +1544,8 @@ void ResetColliderAnchors(void* self)
 
 void GetAnchorPreset(s32 index, s32* out, Vec02* dst)
 {
-    *out = D_002746E0[index].value;
-    *dst = *D_002746E0[index].quad;
+    *out = g_anchorPresets[index].value;
+    *dst = *g_anchorPresets[index].quad;
 }
 
 void SetColliderTurnAnchorPreset(Collider* self, s32 index)
@@ -1997,9 +1997,9 @@ void ApplyColliderImpulseEvent(void* a0, f32 value, void* a1, void* a2)
     contact = 0;
     CreatePooledContact(zero, self, 0, origin, &dir, 0xC, 0, 0, &contact);
     *(Vec02*)((u8*)&contact->end[1] + 0x30) = *target;
-    contact->f98 = zero;
-    contact->f94 = 1.0f;
-    *(f32*)&contact->fA0 = value;
+    contact->bounce = zero;
+    contact->friction = 1.0f;
+    *(f32*)&contact->featureEnd0 = value;
     NotifyContactEnds(self->world, 1, &contact);
     group[0] = (Collider*)self->root;
     SolveColliderGroupContacts(self->world, 1, group, 1, &contact, zero, 2);
@@ -2065,9 +2065,9 @@ void ExtractContactsByPartMode(Collider* self, Contact03** out)
                 while ((n = *pp) != 0) {
                     int k = (n->end[0].body != self);
                     Collider* e = n->end[1 - k].part;
-                    while (e && !e->f4E0) e = (Collider*)e->parent;
+                    while (e && !e->partMode) e = (Collider*)e->parent;
                     if (e) {
-                        switch (e->f4E0) {
+                        switch (e->partMode) {
                         case 1: {
                             Contact03* c = (Contact03*)TakePoolSlot(&self->world->pool1AFC);
                             *c = *n;
@@ -2156,10 +2156,10 @@ void ComputeColliderImpulseResponse(void* self, s32 a1, Contact03* c, s32 idx, C
     Vec02 k;
     ContactEnd03* e = &c->end[idx];
     if (idx == 0) {
-        dir = hit->v10;
+        dir = hit->point;
     } else {
         Vu0::Q(v) = Vu0::FromFloat(-1.0f);
-        Vu0::Q(dir) = Vu0::MulX(Vu0::Q(hit->v10), Vu0::Q(v));
+        Vu0::Q(dir) = Vu0::MulX(Vu0::Q(hit->point), Vu0::Q(v));
     }
     for (Collider* b = c->end[idx].part; b != 0; b = (Collider*)b->parent) {
         if (b->flags538 & (1ULL << 54)) {
@@ -2169,7 +2169,7 @@ void ComputeColliderImpulseResponse(void* self, s32 a1, Contact03* c, s32 idx, C
             continue;
         }
         ImpulseRow* row = &rows[b->index];
-        Vu0::Set(arm, Vu0::Cross(Vu0::Sub(Vu0::Q(e->v10), Vu0::Q(b->v140)), Vu0::Q(dir)));
+        Vu0::Set(arm, Vu0::Cross(Vu0::Sub(Vu0::Q(e->point), Vu0::Q(b->v140)), Vu0::Q(dir)));
         ConstrainVectorByParentAnchor(b, (VectorConstraint*)&b->v440, &dir, &v, &dir);
         Vu0::Q(k) = Vu0::FromFloat(1.0f / b->mass);
         Vu0::Q(row->linear) = Vu0::MulX(Vu0::Q(v), Vu0::Q(k));
@@ -2323,7 +2323,7 @@ void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 
     FillMemory(counts, 0, nParts * 4);
     for (s32 k = 0; k < nParts; k++) {
         Collider* part = parts[k];
-        part->f4BC = k;
+        part->solverIndex = k;
         lists[k] = AllocateBackMemory(0xC0);
         part->desc03()->m35(part, &counts[k], (Collider**)lists[k]);
     }
@@ -2415,7 +2415,7 @@ void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 
 done:
     for (i = 0; i < nParts; i++) {
         Collider* part = parts[i];
-        part->f4BC = -1;
+        part->solverIndex = -1;
         if (flags & 1) {
             part->desc03()->m31(part, 0);
         } else if (flags & 2) {

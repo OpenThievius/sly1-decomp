@@ -19,14 +19,14 @@ struct Vec02;
 
 
 // The file's .data, in retail's order.
-f32 D_00274AD0[2] = { 1.0f, -1.0f };
+f32 g_contactSideSigns[2] = { 1.0f, -1.0f };
 ObjectLink g_turningColliderLinks[6] = { {6, 0x36, 0x61C}, {6, 0x35, 0x618}, {6, 0x37, 0x628}, {6, 0x3A, 0x62C}, {6, 0x38, 0x620}, {6, 0x3B, 0x624} };
 f32 D_00274B20 = 0.5f;
 Vec02 D_00274B30 = { 1.0f, -1.0f, 0.0f, 0.0f };
 s32 D_00274B40[3] = { 0x453B8000, 0, 0x40000000 };
 s32 D_00274B50[3] = { 0x453B8000, 0, 0x3E800000 };
-f32 D_00274B5C = 0;
-f32 D_00274B60[1] = { 0.1f };
+f32 g_previousStickLevel = 0;
+f32 g_phaseSoundMinInterval[1] = { 0.1f };
 f32 D_00274B64 = -0.033f;
 f32 D_00274B68[3] = { 300.0f, 0.0f, 0.25f };
 f32 D_00274B74 = 1.5f;
@@ -45,12 +45,12 @@ void ScaleTurningColliderRamp(TurningCollider* self, f32 s);
 void InitTurningCollider(TurningCollider* self)
 {
     InitSwitchedCollider(self);
-    self->f700 = 1.0f;
-    self->f360 = D_00274B20;
+    self->gravityScale = 1.0f;
+    self->pushFactor = D_00274B20;
     ScaleTurningColliderRamp(self, 1.0f);
-    self->v6F0 = D_00274B30;
-    *(ThreeWords*)self->f710 = *(ThreeWords*)D_00274B40;
-    *(ThreeWords*)self->f704 = *(ThreeWords*)D_00274B50;
+    self->headingWeightCurve = D_00274B30;
+    *(ThreeWords*)self->restRamp = *(ThreeWords*)D_00274B40;
+    *(ThreeWords*)self->sinkRamp = *(ThreeWords*)D_00274B50;
 }
 
 void StartPlacedObject(PlacedObject* self);
@@ -72,7 +72,7 @@ void StartTurningCollider(TurningCollider* self)
     } else {
         self->f614 = self->f62C;
     }
-    Mat02* dst = &self->m660;
+    Mat02* dst = &self->headingMatrix;
     *dst = g_identityMatrix;
 }
 
@@ -80,31 +80,31 @@ void SetTurningColliderLinkFlag(TurningCollider* self, s32 a1)
 {
     PlacedObject* h = (PlacedObject*)self->f61C;
     if (h != 0) {
-        Rec2195_224* s = h->f224;
-        if (s != 0 && (s->fB0 & 0x20) != 0) {
-            if (a1 != 0) s->f98 |= 2;
-            else s->f98 &= ~2;
+        Rec2195_224* s = h->linkRecord;
+        if (s != 0 && (s->flags & 0x20) != 0) {
+            if (a1 != 0) s->linkFlags |= 2;
+            else s->linkFlags &= ~2;
         }
     }
     PlacedObject* v = (PlacedObject*)self->f618;
     if (v != 0) {
-        Rec2195_224* s = v->f224;
-        if (s != 0 && (s->fB0 & 0x20) != 0) {
-            if (a1 != 0) s->f98 |= 2;
-            else ((PlacedObject*)self->f61C)->f224->f98 &= ~2;
+        Rec2195_224* s = v->linkRecord;
+        if (s != 0 && (s->flags & 0x20) != 0) {
+            if (a1 != 0) s->linkFlags |= 2;
+            else ((PlacedObject*)self->f61C)->linkRecord->linkFlags &= ~2;
         }
     }
 }
 
 struct FollowProbe {
     u8 pad00[0x50];
-    s32 f50;
+    s32 active;
     u8 pad54[0x60 - 0x54];
     Vec02 v60;
     Vec02 v70;
-    f32 f80;
+    f32 length;
     u8 pad84[0xD0 - 0x84];
-    f32 fD0;
+    f32 nearestTime;
 };
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
@@ -112,11 +112,11 @@ void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, 
 {
     Vec02 pos;
     Vec02 dir;
-    out->f50 = 0;
-    Rec2195_224* rec = obj->f224;
-    if (rec != 0 && (rec->fB0 & 0x20) != 0) {
+    out->active = 0;
+    Rec2195_224* rec = obj->linkRecord;
+    if (rec != 0 && (rec->flags & 0x20) != 0) {
         TransformPointBetweenFrames(obj, 0, (Vec02*)((u8*)rec + 0x60), &pos);
-        Vu0::Q(dir) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(((PlacedObject*)obj->f224->f80)->v140));
+        Vu0::Q(dir) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(((PlacedObject*)obj->linkRecord->f80)->v140));
         u128 len = Vu0::Length(Vu0::Q(dir));
         const Vec02* fallback = &g_unitXVector;
         if (Vu0::ToFloat(len) < 0.0001f) {
@@ -125,16 +125,16 @@ void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, 
             Vu0::Q(dir) = Vu0::DivX(Vu0::Q(dir), len);
         }
         f32 dist = Vu0::ToFloatMoved(len) - 15.0f;
-        out->f80 = dist;
+        out->length = dist;
         if (dist < 0.0001f) {
             return;
         }
         u128 base = Vu0::MulAddX(Vu0::Q(self->v140), Vu0::Q(g_unitZVector), Vu0::Scalar(-radius));
         u128 tip = Vu0::MulAddX(base, Vu0::Q(dir), Vu0::Scalar(-dist));
         Vu0::Q(out->v70) = tip;
-        out->f50 = 1;
+        out->active = 1;
         Vu0::Q(out->v60) = base;
-        out->fD0 = 3.40282347e+38f;
+        out->nearestTime = 3.40282347e+38f;
     }
 }
 
@@ -145,8 +145,8 @@ void KeepNearestPartSpan(void* unused, void* a1, void* a2, Part07* self)
     ColliderSpan ents[2];
     s32 n;
     s32 idx;
-    if (self->f50 == 0) return;
-    n = CollectColliderSpansInTree((Collider*)a1, a2, &self->v70, &self->v60, 2, ents);
+    if (self->valid == 0) return;
+    n = CollectColliderSpansInTree((Collider*)a1, a2, &self->pointB, &self->pointA, 2, ents);
     idx = 0;
     if (n > 0) {
         if (ents[0].time[0] == 0.0f) idx = 1;
@@ -166,13 +166,13 @@ void PlacePartAtProbeSpan(void* unused0, PlacedObject* other, PlacedObject* self
     Vec02 dir;
     Vec02 pos;
     Vec02 vel;
-    if (rec->f50 != 0) {
-        rec->f50 = 0;
+    if (rec->valid != 0) {
+        rec->valid = 0;
         if (rec->span.time[0] != 3.40282347e+38f) {
-            u128 k = Vu0::FromFloatAt(rec->f80);
+            u128 k = Vu0::FromFloatAt(rec->distance);
             Vu0::Set(vel, k);
-            Vu0::Q(dir) = Vu0::DivX(Vu0::Sub(Vu0::Q(rec->v60), Vu0::Q(rec->v70)), k);
-            Vu0::Q(pos) = Vu0::Add(Vu0::Add(Vu0::Q(self->v140), Vu0::Sub(Vu0::Q(rec->span.q[0]), Vu0::Q(rec->v60))), Vu0::Q(dir));
+            Vu0::Q(dir) = Vu0::DivX(Vu0::Sub(Vu0::Q(rec->pointA), Vu0::Q(rec->pointB)), k);
+            Vu0::Q(pos) = Vu0::Add(Vu0::Add(Vu0::Q(self->v140), Vu0::Sub(Vu0::Q(rec->span.q[0]), Vu0::Q(rec->pointA))), Vu0::Q(dir));
             TransformPointBetweenFrames(0, (PlacedObject*)self->parent, &pos, &pos);
             self->desc02()->m1D(self, &pos);
             ComputeObjectMotionInFrame(self, 0, &other->v140, &vel, 0, 0, 0);
@@ -199,19 +199,19 @@ void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32
 
 void ReadTurningColliderStickHeading(TurningCollider* self, PadRecord* pad)
 {
-    D_00274B5C = (D_00274B5C - 0.25f >? 0.0f);
-    if (D_00274B5C < pad->f48) {
-        ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->f630);
+    g_previousStickLevel = (g_previousStickLevel - 0.25f >? 0.0f);
+    if (g_previousStickLevel < pad->stickMagnitude) {
+        ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->stickHeading);
     } else {
-        self->f630 = self->f638;
+        self->stickHeading = self->heading;
     }
-    f32 level = pad->f48;
-    self->f634 = level;
-    D_00274B5C = level;
+    f32 level = pad->stickMagnitude;
+    self->stickLevel = level;
+    g_previousStickLevel = level;
 }
 
 extern f32 g_gameTime[];
-extern s32 D_00605548;
+extern s32 g_lastPhaseSoundId;
 f32 WrapModulo(f32 x, f32 y);
 s32 RandomIntInRange(s32 a, s32 b);
 struct PlayingSound;
@@ -220,23 +220,23 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 void PlaySoundWithWanderingPitch();
 
 void PlayPhaseCrossingSound(Player* self, f32* p, f32 f) {
-    f32 old = self->f6C4;
+    f32 old = self->stepPhase;
     f32 ang;
-    self->f6C4 = f;
-    if (g_gameTime[0] - self->f6C8 < D_00274B60[0]) return;
+    self->stepPhase = f;
+    if (g_gameTime[0] - self->f6C8 < g_phaseSoundMinInterval[0]) return;
     if (WrapModulo(f - p[0], 1.0f) < 0.5f && 0.5f < WrapModulo(old - p[0], 1.0f)) {
         ang = p[2];
-    } else if (WrapModulo(self->f6C4 - p[1], 1.0f) < 0.5f && 0.5f < WrapModulo(old - p[1], 1.0f)) {
+    } else if (WrapModulo(self->stepPhase - p[1], 1.0f) < 0.5f && 0.5f < WrapModulo(old - p[1], 1.0f)) {
         ang = p[3];
     } else {
         return;
     }
     s32 idx = RandomIntInRange(0x47, 0x4A);
-    if (idx == D_00605548) {
+    if (idx == g_lastPhaseSoundId) {
         s32 x = idx - 0x46;
         idx = x % 4 + 0x47;
     }
-    D_00605548 = idx;
+    g_lastPhaseSoundId = idx;
     StartSoundEffect(idx, 0, 0, (Vec02*)&self->v140, 1000.0f, 200.0f, ang, 0.0f, 0.0f, 0, 0);
     PlaySoundWithWanderingPitch();
 }
@@ -252,7 +252,7 @@ f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 // increments PRE hoisted read them (docs/TOOLCHAIN.md).
 void TrackFollowedMeshVertexVelocities(TurningCollider* self)
 {
-    Collider* other = (Collider*)self->f6DC;
+    Collider* other = (Collider*)self->followedMesh;
     if (other != 0) {
         Vec02* src = (Vec02*)other->mesh.verts;
         Vec02* cur = (Vec02*)self->mesh.verts;
@@ -287,7 +287,7 @@ void AdvanceColliderMeshMotion(Collider* self, f32 dt);
 // `changed = 1` above the test of `other` (docs/TOOLCHAIN.md).
 void SetTurningColliderFollowedMesh(TurningCollider* self, Collider* other, s32 all)
 {
-    if (other == self->f6DC) {
+    if (other == self->followedMesh) {
         return;
     }
     s32 changed;
@@ -320,7 +320,7 @@ void SetTurningColliderFollowedMesh(TurningCollider* self, Collider* other, s32 
             AdvanceColliderMeshMotion(self, 0.0f);
         }
     }
-    self->f6DC = other;
+    self->followedMesh = other;
 }
 
 
@@ -354,8 +354,8 @@ void SetTurningColliderRotation(TurningCollider* self, Mat02* rot)
 {
     SetColliderRotation(self, rot);
     f32 r = ArctangentOfRatio(rot->r[0].y, rot->r[0].x);
-    self->f638 = r;
-    self->f630 = r;
+    self->heading = r;
+    self->stickHeading = r;
     self->desc06()->m54(self);
 }
 
@@ -376,16 +376,16 @@ void CopyTurningColliderMeshesInFrame(TurningCollider* self, Collider* other, s3
         Vec02* v = (Vec02*)self->mesh.verts + i;
         if (i == self->mesh.vertCount - 1) {
             Vu0::Vec low = Vu0::Vec::Of(((Vec02*)self->mesh.verts)[lowest]);
-            Vu0::Q(k) = Vu0::FromFloat(-self->f6CC);
+            Vu0::Q(k) = Vu0::FromFloat(-self->probeDepth);
             Vu0::Q(*v) = Vu0::MulAddX(low, Vu0::Vec::Of(g_unitZVector), Vu0::Vec::Of(k)).q;
-            self->f6D0 = i;
+            self->probeIndex = i;
             Vec02* dst = (Vec02*)self->meshCopy.verts + i;
-            self->f6D4 = (s32)dst;
+            self->probeVertex = (s32)dst;
             TransformByMatrixWithW((const Quad16*)&world, v, 1.0f, dst);
         } else if (v->z < lowZ) {
             lowZ = v->z;
             lowest = i;
-            self->f6D8 = ((Vec02*)self->meshCopy.verts + i);
+            self->lowestVertex = ((Vec02*)self->meshCopy.verts + i);
         }
     }
 }
@@ -406,15 +406,15 @@ void AddColliderForce(void* target, void* slot);
 
 void ApplyTurningColliderDrive(TurningCollider* self)
 {
-    TurnColliderTowardRotation(self, g_frameDt, &self->m660, &self->f6E0);
-    if (self->f6DC == 0) {
+    TurnColliderTowardRotation(self, g_frameDt, &self->headingMatrix, &self->turnGain);
+    if (self->followedMesh == 0) {
         return;
     }
     Vec02* pivot;
-    if (self->f690 != 0) {
-        pivot = &self->v6A0;
+    if (self->groundContact != 0) {
+        pivot = &self->groundContactPoint;
     } else {
-        pivot = (Vec02*)self->f6D4;
+        pivot = (Vec02*)self->probeVertex;
     }
     Vec02 arm;
     Vec02 v;
@@ -431,24 +431,24 @@ void ApplyTurningColliderDrive(TurningCollider* self)
 
 s32 IsTurningColliderGroundContact(TurningCollider* self, Contact03* a, s32 idx)
 {
-    if (self->f6DC == 0) {
+    if (self->followedMesh == 0) {
         return 0;
     }
-    if (a->v80.z * D_00274AD0[idx] < 0.7f) {
+    if (a->normal.z * g_contactSideSigns[idx] < 0.7f) {
         return 0;
     }
     s32 kind = a->kind;
     switch (kind) {
     case 1: {
         s32 r = 0;
-        if (idx == 0 && a->fA0 == self->f6D4) {
+        if (idx == 0 && a->featureEnd0 == self->probeVertex) {
             r = 1;
         }
         return r;
     }
     case 4: {
         s32 r = 0;
-        if (idx == 1 && a->fA4 == self->f6D4) {
+        if (idx == 1 && a->featureEnd1 == self->probeVertex) {
             r = 1;
         }
         return r;
@@ -456,7 +456,7 @@ s32 IsTurningColliderGroundContact(TurningCollider* self, Contact03* a, s32 idx)
     case 10: {
         s32 r = 0;
         if (idx == 0) {
-            r = a->fA0 == self->f6D4;
+            r = a->featureEnd0 == self->probeVertex;
         }
         return r;
     }
@@ -471,11 +471,11 @@ void ComputeTurningColliderContactValue(TurningCollider* self, Contact03* out)
 {
     if (((ContactTestFn*)self->desc)[0x168 / 4](self)) {
         f32 d = D_00274B74;
-        out->f98 = 0;
-        out->f94 = d;
+        out->bounce = 0;
+        out->friction = d;
     } else {
-        out->f94 = 0.0f;
-        out->f98 = 0;
+        out->friction = 0.0f;
+        out->bounce = 0;
     }
 }
 
@@ -494,7 +494,7 @@ void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 void BuildTurningColliderHeadingMatrix(TurningCollider* self)
 {
-    BuildAxisAngleMatrix(&g_unitZVector, (Mat02*)((u8*)self + 0x660), self->f638);
+    BuildAxisAngleMatrix(&g_unitZVector, (Mat02*)((u8*)self + 0x660), self->heading);
 }
 
 void ResolveTurningColliderGroundContact(TurningCollider* self, Contact03* c, s32 e);
@@ -515,10 +515,10 @@ void RecomputeTurningColliderFrame(TurningCollider* self)
 {
     RecomputeColliderFrame(self);
     f32 t = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    f32 ay = __builtin_fabsf(WrapAngle(self->f638 - t));
+    f32 ay = __builtin_fabsf(WrapAngle(self->heading - t));
     ValueRange* lim = &g_unitRange;
-    Vec02* p = &self->v6F0;
-    f32 v = self->v6F0.x + ay * (p->y + ay * p->z);
+    Vec02* p = &self->headingWeightCurve;
+    f32 v = self->headingWeightCurve.x + ay * (p->y + ay * p->z);
     f32 lo = lim->lo;
     f32 hi = lim->hi;
     if (v < lo) {
@@ -526,7 +526,7 @@ void RecomputeTurningColliderFrame(TurningCollider* self)
     } else if (hi < v) {
         v = hi;
     }
-    self->f63C = v;
+    self->headingWeight = v;
 }
 
 // A ramp's three words copied to the stack, read back as floats.
@@ -564,42 +564,42 @@ void ResolveTurningColliderGroundContact(TurningCollider* self, Contact03* c, s3
     f32 push;
     f32 w;
     f32 cur;
-    if (self->f6DC == 0 || self->f6CC == 0.0f) {
+    if (self->followedMesh == 0 || self->probeDepth == 0.0f) {
         push = 0.0f;
         goto apply;
     }
-    w = Vu0::ToFloat(Vu0::Dot(Vu0::Q(c->v80), Vu0::Q(self->m110.r[2]))) * D_00274AD0[e];
-    if (c->f90 < -2.0f) {
-        f32 f90 = c->f90;
-        u128 v = Vu0::Q(c->end[e].v10);
+    w = Vu0::ToFloat(Vu0::Dot(Vu0::Q(c->normal), Vu0::Q(self->m110.r[2]))) * g_contactSideSigns[e];
+    if (c->depth < -2.0f) {
+        f32 f90 = c->depth;
+        u128 v = Vu0::Q(c->end[e].point);
         f32 t = (f90 + 1.0f) / w;
-        f32 ground = ((Vec02*)self->mesh.verts)[self->f6D0].z + 10.0f;
+        f32 ground = ((Vec02*)self->mesh.verts)[self->probeIndex].z + 10.0f;
         f32 m = ground >? t;
-        Vu0::Q(c->end[e].v10) = Vu0::MulAddX(v, Vu0::Q(self->m110.r[2]), Vu0::Scalar(-m));
-        Vu0::Q(d0) = Vu0::Sub(Vu0::Q(c->end[0].v10), Vu0::Q(c->end[1].v10));
-        Vu0::StoreX(c->f90, Vu0::Dot(Vu0::Q(d0), Vu0::Q(c->v80)));
+        Vu0::Q(c->end[e].point) = Vu0::MulAddX(v, Vu0::Q(self->m110.r[2]), Vu0::Scalar(-m));
+        Vu0::Q(d0) = Vu0::Sub(Vu0::Q(c->end[0].point), Vu0::Q(c->end[1].point));
+        Vu0::StoreX(c->depth, Vu0::Dot(Vu0::Q(d0), Vu0::Q(c->normal)));
     }
     RampCopy A;
     RampCopy B;
     f32 out1;
     f32 out2;
-    Vu0::Q(d0) = Vu0::Sub(Vu0::Q(*(Vec02*)self->f6D4), Vu0::Q(c->end[e].v10));
+    Vu0::Q(d0) = Vu0::Sub(Vu0::Q(*(Vec02*)self->probeVertex), Vu0::Q(c->end[e].point));
     Vu0::Q(d1) = Vu0::Sub(Vu0::Q(c->end[0].v30), Vu0::Q(c->end[1].v30));
     cur = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d0), Vu0::Q(self->m110.r[2])));
-    push = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d1), Vu0::Q(c->v80))) / w;
-    A.w = *(ThreeWords*)self->f710;
-    B.w = *(ThreeWords*)self->f704;
-    A.f[0] = A.f[0] * self->f700;
-    B.f[0] = B.f[0] * self->f700;
+    push = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d1), Vu0::Q(c->normal))) / w;
+    A.w = *(ThreeWords*)self->restRamp;
+    B.w = *(ThreeWords*)self->sinkRamp;
+    A.f[0] = A.f[0] * self->gravityScale;
+    B.f[0] = B.f[0] * self->gravityScale;
     ApproachValueWithRamp(cur, 0.0f, g_gameClock.dt, (RampProfile*)&A, &out1);
-    ApproachValueWithRamp(cur, -self->f6CC, g_gameClock.dt, (RampProfile*)&B, &out2);
+    ApproachValueWithRamp(cur, -self->probeDepth, g_gameClock.dt, (RampProfile*)&B, &out2);
     if (push < out2) {
         push = out2;
     }
     push = push + ClampToMagnitude(out1 - push, g_gameClock.dt * (B.f[0] - B.f[1]) / B.f[2]);
 apply:
     ContactEnd03* end = &c->end[e];
-    Vu0::Q(end->v30) = Vu0::MulAddX2WeightFirst(Vu0::Vec::Of(end->v30).q, Vu0::Scalar(-push), Vu0::Vec::Of(self->m110.r[2]).q, Vu0::ScalarAt(self->f63C), RemoveAlong(Vu0::RotateMembers(self->m660, Vu0::Vec::Of(self->v640).q), Vu0::Vec::Of(c->v80).q));
+    Vu0::Q(end->v30) = Vu0::MulAddX2WeightFirst(Vu0::Vec::Of(end->v30).q, Vu0::Scalar(-push), Vu0::Vec::Of(self->m110.r[2]).q, Vu0::ScalarAt(self->headingWeight), RemoveAlong(Vu0::RotateMembers(self->headingMatrix, Vu0::Vec::Of(self->headingVelocity).q), Vu0::Vec::Of(c->normal).q));
 }
 
 struct PooledContact;
@@ -623,7 +623,7 @@ void CollectTurningColliderContacts(TurningCollider* self)
     Contact03* freed = 0;
     Contact03* best = 0;
     f32 bestHeight = 3.40282347e+38f;
-    self->f690 = 0;
+    self->groundContact = 0;
     ContactRow03* row = self->contacts->head;
     for (;;) {
         Contact03* c = row != 0 ? row->head : self->contacts4B4;
@@ -631,15 +631,15 @@ void CollectTurningColliderContacts(TurningCollider* self)
             s32 j = (self != c->end[0].body);
             if (((s32 (*)(TurningCollider*, Contact03*, s32))self->desc06()->m56)(self, c, j) != 0) {
                 Vec02 arm;
-                Vu0::Q(arm) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(c->end[1 - j].v10));
+                Vu0::Q(arm) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(c->end[1 - j].point));
                 f32 h = Vu0::ToFloat(Vu0::Dot(Vu0::Q(arm), Vu0::Q(self->m110.r[2])));
                 if (h < bestHeight) {
-                    self->f690 = 1;
+                    self->groundContact = 1;
                     bestHeight = h;
-                    self->f694 = g_gameClock.time;
-                    self->v6A0 = c->end[1 - j].v10;
-                    Vu0::Q(self->v6B0) = Vu0::MulX(Vu0::Q(c->v80), Vu0::ScalarAt(D_00274AD0[j]));
-                    self->f6C0 = c->end[1 - j].part;
+                    self->groundContactTime = g_gameClock.time;
+                    self->groundContactPoint = c->end[1 - j].point;
+                    Vu0::Q(self->groundContactNormal) = Vu0::MulX(Vu0::Q(c->normal), Vu0::ScalarAt(g_contactSideSigns[j]));
+                    self->groundContactPart = c->end[1 - j].part;
                     best = c;
                 }
             }
@@ -649,7 +649,7 @@ void CollectTurningColliderContacts(TurningCollider* self)
         }
         row = row->next;
     }
-    if (self->f6DC == 0) {
+    if (self->followedMesh == 0) {
         return;
     }
     row = self->contacts->head;
@@ -663,31 +663,31 @@ void CollectTurningColliderContacts(TurningCollider* self)
                 continue;
             }
             s32 kind = c->kind;
-            if ((kind == 1 && c->fA0 == (s32)self->f6D8) || (kind == 4 && c->fA4 == (s32)self->f6D8)) {
-                if (self->f690 != 0) {
+            if ((kind == 1 && c->featureEnd0 == (s32)self->lowestVertex) || (kind == 4 && c->featureEnd1 == (s32)self->lowestVertex)) {
+                if (self->groundContact != 0) {
                     goto drop;
                 }
             } else {
-                if ((kind == 1 && c->fA0 == self->f6D4) || (kind == 4 && c->fA4 == self->f6D4) ||
-                    (kind == 10 && c->fA0 == self->f6D4)) {
+                if ((kind == 1 && c->featureEnd0 == self->probeVertex) || (kind == 4 && c->featureEnd1 == self->probeVertex) ||
+                    (kind == 10 && c->featureEnd0 == self->probeVertex)) {
                     if (c != best) {
                         goto drop;
                     }
                 }
                 if (kind == 3 || (j == 1 && (kind == 1 || kind == 4 || kind == 5 || kind == 6))) {
-                    f32 sign = D_00274AD0[j];
-                    if (0.0f < sign * c->v80.z) {
+                    f32 sign = g_contactSideSigns[j];
+                    if (0.0f < sign * c->normal.z) {
                         Vec02 n;
                         Vec02 d;
                         Vec02 p;
                         Vu0::Vec sv = Vu0::Vec::Scalar(sign);
-                        *(Vu0::Vec*)&n = Vu0::MulX(Vu0::Vec::Of(c->v80), sv);
+                        *(Vu0::Vec*)&n = Vu0::MulX(Vu0::Vec::Of(c->normal), sv);
                         n.z = 0.0f;
                         Vu0::Q(n) = NormalizeOrElse(Vu0::Vec::Of(n), Vu0::Vec::Of(g_unitXVector)).q;
-                        *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(c->end[j].v10), Vu0::Vec::Of(c->end[1 - j].v10));
+                        *(Vu0::Vec*)&d = Vu0::Sub(Vu0::Vec::Of(c->end[j].point), Vu0::Vec::Of(c->end[1 - j].point));
                         Vu0::Vec dot = Vu0::Dot(Vu0::Vec::Of(d), Vu0::Vec::Of(n));
                         f32 depth = Vu0::ToFloat(dot);
-                        *(Vu0::Vec*)&p = Vu0::MulAddX(Vu0::Vec::Of(c->end[1 - j].v10), Vu0::Vec::Of(n),
+                        *(Vu0::Vec*)&p = Vu0::MulAddX(Vu0::Vec::Of(c->end[1 - j].point), Vu0::Vec::Of(n),
                                                  Vu0::Vec::Scalar(depth));
                         CreatePooledContact(depth, self, c->end[1 - j].part, &p, &n, 10, 0, 0, &c->next);
                     }
@@ -722,15 +722,15 @@ PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3
 
 void AddTurningColliderProbeContact(TurningCollider* self, Collider* obj, void* filter, void* out)
 {
-    if (self->f6DC != 0) {
+    if (self->followedMesh != 0) {
         ColliderSpan span;
-        if (CollectColliderSpansInTree(obj, filter, &self->v140, (void*)self->f6D4, 1, &span) > 0 && span.time[0] > 0.0f) {
+        if (CollectColliderSpansInTree(obj, filter, &self->v140, (void*)self->probeVertex, 1, &span) > 0 && span.time[0] > 0.0f) {
             Vec02 diff;
-            Vu0::Q(diff) = Vu0::Sub(Vu0::Q(*(Vec02*)self->f6D4), Vu0::Q(span.q[0]));
+            Vu0::Q(diff) = Vu0::Sub(Vu0::Q(*(Vec02*)self->probeVertex), Vu0::Q(span.q[0]));
             switch (span.f48) {
             case 0: {
                 f32 d0 = Vu0::ToFloat(Vu0::Dot(Vu0::Q(diff), Vu0::Q(span.q[2])));
-                CreatePooledContact(d0, self, obj, (void*)self->f6D4, &span.q[2], 1, (void*)self->f6D4, span.face50, out);
+                CreatePooledContact(d0, self, obj, (void*)self->probeVertex, &span.q[2], 1, (void*)self->probeVertex, span.face50, out);
                 break;
             }
             case 1: {
@@ -739,7 +739,7 @@ void AddTurningColliderProbeContact(TurningCollider* self, Collider* obj, void* 
                 Vu0::Q(span.q[2]) = Vu0::MulX(Vu0::Q(span.q[2]), Vu0::Q(k));
                 f32 d1 = Vu0::ToFloatViaBits(Vu0::Dot(Vu0::Q(diff), Vu0::Q(span.q[2])));
                 d1 = -d1;
-                CreatePooledContact(d1, obj, self, (void*)self->f6D4, &span.q[2], 4, 0, (void*)self->f6D4, out);
+                CreatePooledContact(d1, obj, self, (void*)self->probeVertex, &span.q[2], 4, 0, (void*)self->probeVertex, out);
                 break;
             }
             }
@@ -754,7 +754,7 @@ void TurnColliderTowardHeading(TurningCollider* self)
 {
     Vec02 q = self->v160;
     f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    ApproachAngleWithRamp(r, self->f638, 0.0f, (u8*)self + 0x6E0, &q.z);
+    ApproachAngleWithRamp(r, self->heading, 0.0f, (u8*)self + 0x6E0, &q.z);
     self->desc02()->m21(self, &q);
 }
 
@@ -762,7 +762,7 @@ void GetTurningColliderPose(TurningCollider* self, void* matrix, Vec02* out, f32
 {
     f32 turn;
     f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    f32 angle = ApproachAngleWithRamp(r, self->f638, limit, (u8*)self + 0x6E0, &turn);
+    f32 angle = ApproachAngleWithRamp(r, self->heading, limit, (u8*)self + 0x6E0, &turn);
     BuildAxisAngleMatrix(&g_unitZVector, (Mat02*)matrix, angle);
     Vec02 k;
     Vu0::Q(k) = Vu0::FromFloatAt(turn);
@@ -772,8 +772,8 @@ void GetTurningColliderPose(TurningCollider* self, void* matrix, Vec02* out, f32
 
 void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
 {
-    *(ThreeWords*)&self->f6E0 = *(ThreeWords*)D_00274B80;
-    self->f6E0 *= s;
+    *(ThreeWords*)&self->turnGain = *(ThreeWords*)D_00274B80;
+    self->turnGain *= s;
     self->f6E4 *= s;
     self->f6E8 *= 1.0f / Fpu::Sqrt(s);
 }
@@ -784,10 +784,10 @@ void SetTurningColliderGravityScale(TurningCollider* self, f32 s)
 {
     f32 n = 0.1f;
     n >?= s;
-    SetColliderMass(self, self->mass * self->f700 / n);
-    f32 ratio = n / self->f700;
+    SetColliderMass(self, self->mass * self->gravityScale / n);
+    f32 ratio = n / self->gravityScale;
     Vec02 k;
     Vu0::Q(k) = Vu0::FromFloat(ratio);
-    self->f700 = n;
+    self->gravityScale = n;
     Vu0::Q(self->gravity) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(k));
 }

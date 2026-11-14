@@ -50,7 +50,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         ScorePlayerTargetPlacement((Player*)self, &from, (BaseObject*)o->frame, &at, 0, &t, &cost, &cur0, &cur1);
         cur1.z = from.z + t * self->f358;
         if (o != keep) {
-            if (cost >= D_00274E20) {
+            if (cost >= g_targetMaxCost) {
                 continue;
             }
             cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E24);
@@ -86,12 +86,12 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         CostContext* c = &ctx;
         f32 start = tPath;
         f32 step = GetPathCurveSearchStep((PathCurve*)path->shape);
-        f32 lo = path->shape->desc->m6(path->shape, D_00274E04);
+        f32 lo = path->shape->desc->m6(path->shape, g_targetPathEdgeInset);
         FindLocalMinimum((MinimumFn)ScoreTargetObjectAt, c, start, step, lo,
-                         path->shape->desc->m6(path->shape, path->shape->desc->m8(path->shape) - D_00274E04),
+                         path->shape->desc->m6(path->shape, path->shape->desc->m8(path->shape) - g_targetPathEdgeInset),
                          &tPathBest, &cost);
         if (path != keep) {
-            if (cost >= D_00274E20) {
+            if (cost >= g_targetMaxCost) {
                 continue;
             }
             cost = AddRepeatTargetPenalty((Player*)self, path, cost, D_00274E28);
@@ -118,7 +118,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (keep != 0) {
                 continue;
             }
-            if (o == self->f2210) {
+            if (o == self->lastAimObject) {
                 continue;
             }
             if ((o->flags88 & 1) == 0) {
@@ -133,7 +133,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (o->fB4 < self->pos.z - at.z) {
                 continue;
             }
-            s32 far = D_00274E0C * D_00274E0C < DistanceSquared(at, self->v140);
+            s32 far = g_farTargetDistance * g_farTargetDistance < DistanceSquared(at, self->v140);
             if (far) {
                 continue;
             }
@@ -146,7 +146,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         FindLocalMinimum((MinimumFn)ScoreTargetPathAt, &args, 0.5f, 0.25f, 0.25f, 3.0f, &t, &cost);
         ScorePlayerLeapToPoint((Player*)self, (BaseObject*)args.frame, &args.c, 0, &cur0, &cur1, t);
         if (o != keep) {
-            if (cost >= D_00274E20) {
+            if (cost >= g_targetMaxCost) {
                 continue;
             }
             cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E2C);
@@ -180,7 +180,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (o->f5C < self->pos.z - at2.z) {
                 continue;
             }
-            s32 far = D_00274E0C < Distance(at2, self->v140);
+            s32 far = g_farTargetDistance < Distance(at2, self->v140);
             if (far) {
                 continue;
             }
@@ -192,7 +192,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         FindLocalMinimum((MinimumFn)ScoreTargetPathNearest, n, start, 100.0f, 50.0f, o->shape->desc->m8(o->shape) - 50.0f,
                          &tVectorBest, &cost);
         if (o != keep) {
-            if (cost >= D_00274E20) {
+            if (cost >= g_targetMaxCost) {
                 continue;
             }
             cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E30);
@@ -227,8 +227,8 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         Vec02 d;
         // The point and curve searches weigh their cost and test it against the limit, both
         // named here (bound by reference: their %hi parts are formed at the top of the body).
-        const f32& weight = D_00274E10;
-        const f32& maxCost = D_00274E20;
+        const f32& weight = g_targetCostWeight;
+        const f32& maxCost = g_targetMaxCost;
         ConvertPositionToWorld((BaseObject*)o, &at);
         if (o->f70 < self->pos.z - at.z) {
             continue;
@@ -269,8 +269,8 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
     for (o = (TargetCand*)g_targetCurveList.head; o != 0; o = o->next38) {
         Vec02 at2;
         CostContext ctx;
-        const f32& weight = D_00274E10;
-        const f32& maxCost = D_00274E20;
+        const f32& weight = g_targetCostWeight;
+        const f32& maxCost = g_targetMaxCost;
         TransformPointBetweenFrames(0, (PlacedObject*)o->frame, (Vec02*)self->f6D4, &at);
         if (o->shape->desc->m10) {
             o->shape->desc->m10(o->shape, &at, 0, &at2, 0, 0, &tCurve);
@@ -311,56 +311,56 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         bestCurveT = tCurveBest;
     }
     if (g_codeChecksumFailed != 0 && RandomIntInRange(0, 100) > 20) {
-        return self->f2228;
+        return self->subState;
     }
     s32 state;
     switch (kind) {
     case 3:
-        self->f23B8 = bestObject;
+        self->targetObject = bestObject;
         state = 0xA;
         break;
     case 4:
-        self->f23BC = bestPath;
-        self->f23C0 = bestPathT;
+        self->targetPath = bestPath;
+        self->targetPathPlace = bestPathT;
         self->f23C4 = bestPath->shape->desc->m5(bestPath->shape, bestPathT);
         state = 0xB;
         break;
     case 1:
-        self->f23A8 = bestPoint;
-        self->f23AC = bestPointT;
+        self->targetPoint = bestPoint;
+        self->targetPointPlace = bestPointT;
         state = 0xD;
         break;
     case 0:
-        self->f23A0 = bestCurve;
-        self->f23A4 = bestCurveT;
+        self->targetCurve = bestCurve;
+        self->targetCurvePlace = bestCurveT;
         state = 0xC;
         break;
     case 6:
-        self->f2208 = 0;
-        self->f2204 = bestClass75;
+        self->aimVector = 0;
+        self->aimObject = bestClass75;
         self->f2200 = bestClass75;
         SetPlayerAimMode((Player*)self, 0);
         UpdatePlayerAimTarget((Player*)self);
         state = 0xE;
         break;
     case 7:
-        self->f2208 = bestVector;
-        self->f220C = bestVectorT;
-        self->f2204 = 0;
+        self->aimVector = bestVector;
+        self->aimVectorPlace = bestVectorT;
+        self->aimObject = 0;
         self->f2200 = 0;
         SetPlayerAimMode((Player*)self, 0);
         UpdatePlayerAimTarget((Player*)self);
         state = 0xF;
         break;
     default:
-        StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E24, 0.0f, 0.0f, 0, 0);
-        state = self->f2228;
+        StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, g_soundEffect7EVolume, 0.0f, 0.0f, 0, 0);
+        state = self->subState;
         break;
     }
-    TargetRecord* r = self->f2514;
+    TargetRecord* r = self->aimRecord;
     r->time = g_gameClock.time + bestT;
-    self->f2514->a = best0;
-    self->f2514->a.z += 75.0f;
-    self->f2514->b = best1;
+    self->aimRecord->a = best0;
+    self->aimRecord->a.z += 75.0f;
+    self->aimRecord->b = best1;
     return state;
 }

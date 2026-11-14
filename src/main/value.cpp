@@ -61,7 +61,7 @@ s32 ReadBufferedS32(BufferedStream* r);
 f32 ReadBufferedFloat(BufferedStream* r);
 s32 ReadBufferedU32(BufferedStream* r);
 
-extern u32 D_00275714;
+extern u32 g_scriptStreamExtras;
 
 void* TakeZeroedPoolEntry(void)
 {
@@ -425,7 +425,7 @@ R11B008Node* ReadScriptValueChain(BufferedStream* rd)
     s32 flag = tag & 0x80;
     R11B008Node* n = NewScriptValueNode();
     n->tag = tag & 0x7F;
-    if (D_00275714) {
+    if (g_scriptStreamExtras) {
         ReadBufferedU16(rd);
         ReadBufferedU16(rd);
         ReadBufferedU16(rd);

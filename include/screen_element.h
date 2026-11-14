@@ -156,14 +156,14 @@ void SetTimerState(T217D_510* self, s32 state);
 
 // The gauge (D_002182E0): a filled bar that follows a value and flashes a letter.
 struct T217D_2E0 : ScreenElement {
-    s32 f260;               // 0x260: copied into f26C when a gauge mode starts (func_0017B410)
-    s32 f264;               // 0x264: copied into f270 then
-    s32 f268;               // 0x268
+    s32 segmentCount;       // 0x260: copied into f26C when a gauge mode starts (func_0017B410)
+    s32 cellsPerSegment;    // 0x264: copied into f270 then
+    s32 cellCount;          // 0x268: the cells of the whole bar
     union {
         u8 letter;          // 0x26C: the glyph to show, from 'r'
-        s32 f26C;           // 0x26C: counted down by func_001AC060
+        s32 segmentsLeft;   // 0x26C: counted down by func_001AC060
     };
-    s32 f270;               // 0x270
+    s32 cellsLeft;          // 0x270: the cells left of the current segment
     f32 fill;                   // 0x274: the filled part of the bar
     f32 fillTarget;             // 0x278
     f32 changedAt;              // 0x27C: the clock when the value last changed, 0 for never
@@ -290,15 +290,15 @@ struct T217D_440 : ScreenElement {
     u8 pad2B0[0x2F0 - 0x2B0];
     f32 charsPerSecond;         // 0x2F0: 15.0 (func_001310F0), the typing speed (func_00136530)
     u32 highlight;              // 0x2F4: 0x80FFFFFF (func_001310F0)
-    char f2F8;              // 0x2F8: the button glyph drawn beside the text (0 none)
+    char buttonGlyph;       // 0x2F8: the button glyph drawn beside the text (0 none)
     u8 pad2F9[0x2FC - 0x2F9];
-    BaseObject* f2FC;           // 0x2FC: the subject, set by func_001365A0
+    BaseObject* subject;        // 0x2FC: the subject, set by func_001365A0
     f32 value;                  // 0x300: 0 to 1 (func_001365A8: a percent / 100)
     f32 stickX;                 // 0x304: the smoothed pad direction (func_00136040)
     f32 stickY;                 // 0x308
     f32 spin;                   // 0x30C: moves by the pad's stick (func_00132500)
     Font* smallFont;            // 0x310: a copy of the font at 0.7 by 0.8 (SetupTextPanel)
-    f32 f314;                   // 0x314
+    f32 tickScroll;             // 0x314: the scroll of the tick marks
     void* bands;                // 0x318: the GS packet of the bands behind the panel (SetupTextPanel)
     s32 bandsSize;              // 0x31C
     s32 palette;                // 0x320: 0 .. 2, the colour pair func_00132500 picks
@@ -369,7 +369,7 @@ struct T217D_BF0 : ScreenElement {
     f32 aim[4];                 // 0x270: the aim, x and y in -1..1, and the zoom (func_00181ED0); the sprite's place as a fraction of the screen (func_001821B0)
     void* target;               // 0x280: the class 0x75 object the aim chose last (func_00181ED0)
     s32 icon;                   // 0x284: func_001B4688(0x36A) (func_00180F98)
-    f32 f288;                   // 0x288: 0.0 at the start, stored through T217D_Float (func_001793F0, func_00180F98)
+    f32 alphaScale;             // 0x288: 0.0 at the start, stored through T217D_Float (func_001793F0, func_00180F98)
 };
 
 // D_00218720 (D_00272E08): four sub-elements of the same kind (D_00218330) stacked, drawn together.
@@ -404,43 +404,43 @@ void SetScreenElementClock(ScreenElement* self, f32* clock);
 // The 37 objects, in .data in address order (GCC writes uninitialised globals in the order
 // they are first declared; D_002486B0 lists them in its own order). Each is of the variant of
 // its table (D_0026EC70 and the four sub-elements of D_00272E08 have the base's table D_00218330).
-extern T217D_E30 D_0026C6C8;    // D_00217E30
-extern T217D_E30 D_0026C948;    // D_00217E80
+extern T217D_E30 g_reserveCountCaption;    // D_00217E30
+extern T217D_E30 g_collectedItemCaption;    // D_00217E80
 extern T217D_E30 D_0026CBC8;    // D_00217ED0
 extern T217D_E30 D_0026CE48;    // D_00217F20
-extern T217D_E30 D_0026D0C8;    // D_00217F70
+extern T217D_E30 g_pairControllerCountCaption;    // D_00217F70
 extern T217D_E30 g_gaugeAmountCaption;    // D_00217FC0
-extern T217D_E30 D_0026D5C8;    // D_002180B0
+extern T217D_E30 g_pathFollowerFirstCountCaption;    // D_002180B0
 extern T217D_E30 D_0026D848;    // D_00218010
-extern T217D_E30 D_0026DAC8;    // D_00218060
-extern T217D_E30 D_0026DD48;    // D_00218100
-extern T217D_E30 D_0026DFC8;    // D_00218150
+extern T217D_E30 g_pathFollowerSecondCountCaption;    // D_00218060
+extern T217D_E30 g_hitCountCaptionA;    // D_00218100
+extern T217D_E30 g_hitCountCaptionB;    // D_00218150
 extern T217D_2E0 g_gaugeBarElement;    // D_002182E0
-extern T217D_E30 D_0026E4E0;    // D_002181A0
+extern T217D_E30 g_gaugeColliderCaption;    // D_002181A0
 extern T217D_510 g_timerElement;    // D_00218510
 extern T217D_1380 g_timerCaption;   // D_00221380
 extern T217D_330 g_buttonHintElement;    // D_00218330
-extern T217D_380 D_0026EED0;    // D_00218380
-extern T217D_3D0 D_0026F138;    // D_002183D0
-extern T217D_420 D_0026F5A0;    // D_00218420
+extern T217D_380 g_pointerTextCaption;    // D_00218380
+extern T217D_3D0 g_copiedTextCaption;    // D_002183D0
+extern T217D_420 g_hintGlyphElement;    // D_00218420
 extern T217D_0F0 g_mapScreenList;    // D_002210F0
-extern T217D_12E0 D_0026FA90;   // D_002212E0
-extern T217D_1330 D_0026FD00;   // D_00221330
+extern T217D_12E0 g_selectionCaption;   // D_002212E0
+extern T217D_1330 g_gridSelector;   // D_00221330
 extern T217D_6D0 g_pauseMenuElement;    // D_002186D0
 extern T217D_440 g_typedTextCaptionBox;    // D_0021A440
-extern T217D_BF0 D_00270650;    // D_00220BF0
+extern T217D_BF0 g_spinningSpriteElement;    // D_00220BF0
 extern T217D_3F0 D_002708E0;    // D_0021A3F0
 extern T217D_3F0 D_00271558;    // D_0021A3F0
-extern T217D_560 D_002721D0;    // D_00218560
-extern T217D_E30 D_00272430;    // D_00218240
-extern T217D_E30 D_002726B0;    // D_00218290
-extern T217D_470 D_00272930;    // D_00218470
-extern T217D_4C0 D_00272B98;    // D_002184C0
+extern T217D_560 g_letterboxElement;    // D_00218560
+extern T217D_E30 g_firstTallyCaption;    // D_00218240
+extern T217D_E30 g_secondTallyCaption;    // D_00218290
+extern T217D_470 g_titleElement;    // D_00218470
+extern T217D_4C0 g_promptElement;    // D_002184C0
 extern T217D_720 g_stackedCaptionGroup;    // D_00218720
 extern T217D_5B0 D_002739F0;    // D_002185B0
 extern T217D_5B0 D_00273C50;    // D_002185B0
-extern T217D_600 D_00273EB0;    // D_00218600
-extern T217D_E30 D_00274118;    // D_002181F0
+extern T217D_600 g_cyclingGlyphElement;    // D_00218600
+extern T217D_E30 g_completionPercentCaption;    // D_002181F0
 
 // The base is the stride of D_00218720's four sub-elements (func_0014ABD0 steps 0x260 bytes).
 typedef char check_ScreenElement[sizeof(ScreenElement) == 0x260 ? 1 : -1];

@@ -30,7 +30,7 @@ s32 CopyKernelWords(s32* dst, const s32* src, u32 bytes)
 
 ASM_FUNC(func_001F6F38);
 
-u32 D_00276980[464] = {
+u32 g_firstKernelPatchCode[464] = {
     0x3C028007, 0x0000282D, 0x24436710, 0x00000000, 0x8C620000, 0x14820003, 0x24A50001, 0x03E00008,
     0x8C620004, 0x2CA20006, 0x1440FFF9, 0x24630008, 0x03E00008, 0x0000102D, 0x00A4202A, 0x10800003,
     0x3C020001, 0x03E00008, 0x00A21025, 0x03E00008, 0x00A0102D, 0x00000000, 0x27BDFF80, 0xFFB30030,
@@ -91,17 +91,17 @@ u32 D_00276980[464] = {
     0x000000FD, 0x800762A0, 0x000000FF, 0x800762A0, 0x0000012C, 0x80076488, 0x00000008, 0x800766C0,
 };
 
-u32 D_002770C0[10] = {
+u32 g_secondKernelPatchCode[10] = {
     0x3C1D0008, 0x0060F809, 0x27BD1FC0, 0x2403FFF8, 0x0000000C, 0x00000000, 0x00000000, 0x00000000,
     0x00000000, 0x00000000,
 };
 
-struct Slot_1F6F48 {
+struct SyscallPatchSlot {
     s32 key;
     void* value;
 };
 
-Slot_1F6F48 D_002770E8[8] = {
+SyscallPatchSlot g_kernelPatchHandlers[8] = {
     { 0x5A, (void*)CopyKernelWords },
     { 0x5B, (void*)0x80076000 },
     { 0xFC, 0 },
@@ -122,13 +122,13 @@ void InstallFirstKernelPatch(void)
     if ((*(volatile u32*)0x10001810 & 0x100) != 0) {
         return;
     }
-    SetSystemCallHandlerFirstPatch(D_002770E8[0].key, (s32)D_002770E8[0].value);
-    CopyKernelWordsSyscallFirstPatch(0x80076000, D_00276980, 0x740);
-    CopyKernelWordsSyscallFirstPatch(0x82000, D_002770C0, 0x28);
+    SetSystemCallHandlerFirstPatch(g_kernelPatchHandlers[0].key, (s32)g_kernelPatchHandlers[0].value);
+    CopyKernelWordsSyscallFirstPatch(0x80076000, g_firstKernelPatchCode, 0x740);
+    CopyKernelWordsSyscallFirstPatch(0x82000, g_secondKernelPatchCode, 0x28);
     SyncDataCache(0);
     SyncDataCache(2);
-    SetSystemCallHandlerFirstPatch(D_002770E8[1].key, (s32)D_002770E8[1].value);
+    SetSystemCallHandlerFirstPatch(g_kernelPatchHandlers[1].key, (s32)g_kernelPatchHandlers[1].value);
     for (u32 i = 2; i < 8; i++) {
-        SetSystemCallHandlerFirstPatch(D_002770E8[i].key, RunSyscall5BFirstPatch(D_002770E8[i].key));
+        SetSystemCallHandlerFirstPatch(g_kernelPatchHandlers[i].key, RunSyscall5BFirstPatch(g_kernelPatchHandlers[i].key));
     }
 }

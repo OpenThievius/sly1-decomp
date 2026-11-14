@@ -75,12 +75,12 @@ s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
 // The active switched collider's data block (SwitchedCollider + 0x580): at 0x18 the collider.
 struct ActiveColliderData {
     u8 pad0[0x18];
-    void* f18;
+    void* collider;
 };
 // One of the nine 0x78-byte records at the start of a level's record (G27C230): its flags.
 struct LevelTaskRecord { s32 flags; u8 rest[0x74]; };
 // The element stack (g_elementStack), as game_progress.cpp and selection_menus.cpp view it.
-struct ElementStackState { u8 pad0[0x30]; s32 f30; };
+struct ElementStackState { u8 pad0[0x30]; s32 resumeState; };
 extern ElementStackState g_elementStack;
 void MarkLevelRecordComplete(s32 index);
 void RequestWorldLoadByMode(s32 mode);
@@ -237,16 +237,16 @@ void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
 // The file's .data, in retail's order. D_0026A910 and D_0026A914 are read by the VU0 function
 // func_00198BD8, D_0026A968 by func_00199698, D_0026ABB0 and D_0026ABC0 by func_0019B298 and
 // func_0019B378.
-f32 D_0026A910 = 100.0f;
-f32 D_0026A914 = 0.0f;
-ObjectLink D_0026A918[1] = { { 0x0, 0x22B, 0x2D0 } };
-ObjectLink D_0026A928[1] = { { 0x0, 0x22D, 0x2D8 } };
-ObjectLink D_0026A938[1] = { { 0x0, 0x22C, 0x2D4 } };
+f32 g_objectSetPushSpeed = 100.0f;
+f32 g_objectSetLiftSpeed = 0.0f;
+ObjectLink g_stateWalkerObjectLoadLinks[1] = { { 0x0, 0x22B, 0x2D0 } };
+ObjectLink g_stateWalkerObjectStartLinks[1] = { { 0x0, 0x22D, 0x2D8 } };
+ObjectLink g_stateWalkerGroupLoadLinks[1] = { { 0x0, 0x22C, 0x2D4 } };
 ObjectLink g_numberedItemLinks[1] = { { 0x0, 0x339, 0x5BC } };
-f32 D_0026A958[2] = { 0.8f, 1.2f };
-f32 D_0026A960[2] = { 0.9f, 1.1f };
-f32 D_0026A968 = 300.0f;
-T219C_Params D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, (void (*)(void*))SetNumberedItemFlag };
+f32 g_numberedItemSpinRange[2] = { 0.8f, 1.2f };
+f32 g_numberedItemJitterRange[2] = { 0.9f, 1.1f };
+f32 g_numberedItemReachRadius = 300.0f;
+T219C_Params g_numberedItemEffectParams = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, (void (*)(void*))SetNumberedItemFlag };
 s32 D_0026A9E0[28] = { 2, 4, 8, 16, 65536, 32, 64, 128, 256, 512, 131072, 1024, 2048, 8192, 4096, 16384, 32768, 0, 0, 0, 0, 0, 0, 268435456, 536870912, 1073741824, (-2147483647 - 1), 1 };
 // The links func_0019A1E0 resolves for a C17, and two words after them that retail's label
 // holds as zeros (the label runs to the next table, D_0026AB90; nothing reads them).
@@ -255,8 +255,8 @@ C17LinkTable D_0026AA50 = { {
     { 0, 0x376, 0x610 }, { 0, 0x37C, 0x618 }, { 4, 0x377, 0x61C }, { 4, 0x378, 0x628 }, { 4, 0x379, 0x634 }, { 6, 0x3A2, 0x768 }, { 6, 0x3A4, 0x76C }, { 6, 0x3A5, 0x770 }, { 6, 0x3A6, 0x774 }, { 6, 0x3A7, 0x77C }, { 6, 0x3A8, 0x780 }, { 6, 0x3A9, 0x784 }, { 6, 0x3AB, 0x788 }, { 6, 0x3AC, 0x78C }, { 6, 0x3AD, 0x790 }, { 6, 0x3AE, 0x794 }, { 6, 0x3AF, 0x798 }, { 6, 0x3B0, 0x79C }, { 6, 0x3B1, 0x7A0 }, { 6, 0x3B2, 0x7A4 }, { 6, 0x3B3, 0x7A8 }, { 6, 0x3B4, 0x7C4 }, { 6, 0x3B5, 0x7C8 }, { 6, 0x3B6, 0x7CC }, { 6, 0x3B7, 0x7D0 }, { 6, 0x3D8, 0x7D4 } }, { 0, 0 } };
 ObjectLink g_objectGathererLoadLinks[1] = { { 0x0, 0x268, 0x5EC } };
 ObjectLink g_objectGathererStartLinks[1] = { { 0x4, 0x267, 0x5FC } };
-f32 D_0026ABB0[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
-f32 D_0026ABC0[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
+f32 g_gathererTurnRamp[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
+f32 g_gathererApproachCurve[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
 s32 D_0026ABD0[2] = { 0x130, 0x132 };
 s32 D_0026ABD8[2] = { 2, 0 };
 s32 D_0026ABE0[4] = { 0x10, 0, 0, 0 };
@@ -353,7 +353,7 @@ void UpdateObjectSet(ObjectSet* self, f32 dt)
         return;
     }
     if (held == 0) {
-        f32 reach = r->reach + self->f550;
+        f32 reach = r->reach + self->reachBonus;
         u128 e = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(r->target->v140));
         s32 far = reach * reach <= Vu0::ToFloatMoved(Vu0::Dot(e, e));
         if (far) {
@@ -364,8 +364,8 @@ void UpdateObjectSet(ObjectSet* self, f32 dt)
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(r->target->v140));
     d.z = 0.0f;
     u128 base = Vu0::Q(r->target->v150);
-    u128 out = Vu0::ScalarAt(D_0026A910);
-    Vu0::Q(d) = Vu0::MulAddX2(base, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(D_00248D30)), out, Vu0::Q(g_unitZVector), Vu0::ScalarAt(D_0026A914));
+    u128 out = Vu0::ScalarAt(g_objectSetPushSpeed);
+    Vu0::Q(d) = Vu0::MulAddX2(base, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(D_00248D30)), out, Vu0::Q(g_unitZVector), Vu0::ScalarAt(g_objectSetLiftSpeed));
     self->desc02()->m20(self, &d);
     ((SlotFn*)self->desc)[77](self);
 }
@@ -418,7 +418,7 @@ void HandleObjectSetNotification(ObjectSet* self, s32 msg, ObjectMessage* m)
         }
         Player* g = g_player;
         if (g != 0) {
-            if (m == g->watched2230) {
+            if (m == g->stateAnimPlayer) {
                 g->desc->m18(g, self);
                 self->done598 = 1;
             }
@@ -437,11 +437,11 @@ s32 TestObjectSetMayContact(ObjectSet* unused, void* obj)
 void LatchObjectSetContact(ObjectSet* self, Contact03* elems, s32 idx)
 {
     ActiveColliderData* r = (ActiveColliderData*)GetActiveSwitchedColliderData();
-    if (r->f18 == 0) return;
+    if (r->collider == 0) return;
     {
         s32 one = 1;
         ContactEnd03* e = (ContactEnd03*)((u8*)elems + ((one - idx) << 6));
-        if (IsObjectDescendantOf(e->part, (BaseObject*)r->f18) != 0) {
+        if (IsObjectDescendantOf(e->part, (BaseObject*)r->collider) != 0) {
             self->f59C = one;
         }
     }
@@ -450,86 +450,86 @@ void LatchObjectSetContact(ObjectSet* self, Contact03* elems, s32 idx)
 void InitFlaggedObjectSet(FlaggedObjectSet* self)
 {
     InitObjectSet(self);
-    self->f5A0 = TakeFlagTableIndex((FlagTable*)g_flagTable);
+    self->flagIndex = TakeFlagTableIndex((FlagTable*)g_flagTable);
 }
 
 void CopyFlaggedObjectSet(FlaggedObjectSet* obj, FlaggedObjectSet* src)
 {
-    s32 value = obj->f5A0;
+    s32 value = obj->flagIndex;
     CopyCollider(obj, src);
-    obj->f5A0 = value;
+    obj->flagIndex = value;
 }
 
 s32 GetFlaggedObjectSetActivationState(FlaggedObjectSet* self)
 {
     s32 r = GetObjectSetActivationState(self);
     if (r == 1) {
-        r = TestFlagTableBit((FlagTable*)g_flagTable, self->f5A0) ? 0 : r;
+        r = TestFlagTableBit((FlagTable*)g_flagTable, self->flagIndex) ? 0 : r;
     }
     return r;
 }
 
 void CollectFlaggedObjectSet(FlaggedObjectSet* self)
 {
-    SetFlagTableBit((FlagTable*)g_flagTable, self->f5A0);
+    SetFlagTableBit((FlagTable*)g_flagTable, self->flagIndex);
     CollectObjectSet(self);
 }
 
 void LoadStateWalkerObject(StateWalkerObject* self, BufferedStream* stream)
 {
     LoadPlacedObject(self, stream);
-    ResolveObjectLinks(self, 1, D_0026A918);
+    ResolveObjectLinks(self, 1, g_stateWalkerObjectLoadLinks);
 }
 
 void StartStateWalkerObject(StateWalkerObject* self)
 {
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 1, D_0026A928);
+    ResolveObjectLinks(self, 1, g_stateWalkerObjectStartLinks);
 }
 
 void LoadStateWalkerGroup(StateWalkerGroup* self, BufferedStream* stream)
 {
     LoadPlacedObject(self, stream);
-    ResolveObjectLinks(self, 1, D_0026A938);
+    ResolveObjectLinks(self, 1, g_stateWalkerGroupLoadLinks);
 }
 
 void StartStateWalkerGroup(StateWalkerGroup* self)
 {
     StartPlacedObject(self);
-    self->count300 = GatherObjectsById(self->world, 1, 0x5C, self, 8, self->objs304);
+    self->objectCount = GatherObjectsById(self->world, 1, 0x5C, self, 8, self->objects);
     s32 i;
     StateWalkerObject* e;
-    for (i = 0; i < self->count2DC; i++) {
-        e = (StateWalkerObject*)FindFirstObjectById(self->world, 4, self->ids2E0[i], self);
+    for (i = 0; i < self->idCount; i++) {
+        e = (StateWalkerObject*)FindFirstObjectById(self->world, 4, self->ids[i], self);
         if (e != 0) {
-            u32 k = self->count300;
+            u32 k = self->objectCount;
             if (k < 8) {
-                self->objs304[k] = (void*)e;
-                self->count300 = k + 1;
+                self->objects[k] = (void*)e;
+                self->objectCount = k + 1;
             }
         }
     }
-    s32 s4 = (g_currentLevelRecord->f448 & self->mask2D0) ? 0x22F : 0x22E;
-    for (i = 0; i < self->count300; i++) {
-        e = (StateWalkerObject*)self->objs304[i];
+    s32 s4 = (g_currentLevelRecord->f448 & self->flagMask) ? 0x22F : 0x22E;
+    for (i = 0; i < self->objectCount; i++) {
+        e = (StateWalkerObject*)self->objects[i];
         e->f2D4 = CreateStateWalker((StateGraph*)e->f2D0, e, -1, 0);
         SetStateWalkerTarget((StateWalker*)e->f2D4, s4);
     }
-    self->f2D8 = CreateStateWalker((StateGraph*)self->f2D4, self, -1, 0);
-    SetStateWalkerTarget((StateWalker*)self->f2D8, s4);
+    self->walker = CreateStateWalker((StateGraph*)self->graph, self, -1, 0);
+    SetStateWalkerTarget((StateWalker*)self->walker, s4);
 }
 
 void SetStateWalkerGroupMaskBit(StateWalkerGroup* flags, u32 bit)
 {
-    flags->mask2D0 = 1 << (bit + 1);
+    flags->flagMask = 1 << (bit + 1);
 }
 
 void AddStateWalkerGroupId(StateWalkerGroup* queue, void* item)
 {
-    u32 count = queue->count2DC;
+    u32 count = queue->idCount;
     if (count < 8) {
-        queue->ids2E0[count] = (s32)item;
-        queue->count2DC = count + 1;
+        queue->ids[count] = (s32)item;
+        queue->idCount = count + 1;
     }
 }
 
@@ -545,7 +545,7 @@ void QueueWalkerActivationOnPlayer(StateWalkerGroup* group) {
 void InitNumberedItem(NumberedItem* obj)
 {
     InitObjectSet(obj);
-    obj->f5A0 = obj->world->count2300++;
+    obj->itemNumber = obj->world->count2300++;
 }
 
 void LoadNumberedItem(NumberedItem* self, BufferedStream* stream)
@@ -553,7 +553,7 @@ void LoadNumberedItem(NumberedItem* self, BufferedStream* stream)
     LoadObjectSet(self, stream);
     s32 i = 0x318;
     ResolveObjectLinks(self, 1, g_numberedItemLinks);
-    self->f5B0 = AllocateFrontMemory(0x80);
+    self->keyframes = AllocateFrontMemory(0x80);
     while (i < 0x338) {
         void* r = FindFirstObjectById(self->world, 1, i, self);
         if (r == 0) {
@@ -561,7 +561,7 @@ void LoadNumberedItem(NumberedItem* self, BufferedStream* stream)
         }
         s32 count = self->n5AC;
         i++;
-        ((void**)self->f5B0)[count] = r;
+        ((void**)self->keyframes)[count] = r;
         self->n5AC = count + 1;
         ResolveAndStartObject((BaseObject*)r);
     }
@@ -569,9 +569,9 @@ void LoadNumberedItem(NumberedItem* self, BufferedStream* stream)
 
 void CopyNumberedItem(NumberedItem* obj, NumberedItem* src)
 {
-    s32 value = obj->f5A0;
+    s32 value = obj->itemNumber;
     CopyCollider(obj, src);
-    obj->f5A0 = value;
+    obj->itemNumber = value;
 }
 
 void StartNumberedItem(NumberedItem* self)
@@ -581,19 +581,19 @@ void StartNumberedItem(NumberedItem* self)
     f32 r;
 
     StartObjectSet(self);
-    self->f5B8 = RandomFloatInRange(-3.14159274f, 3.14159274f);
-    self->f5B4 = RandomFloatInRange(D_0026A958[0], D_0026A958[1]);
+    self->spinAngle = RandomFloatInRange(-3.14159274f, 3.14159274f);
+    self->spinSpeed = RandomFloatInRange(g_numberedItemSpinRange[0], g_numberedItemSpinRange[1]);
     if (RandomIntInRange(0, 1) != 0) {
-        self->f5B4 = -self->f5B4;
+        self->spinSpeed = -self->spinSpeed;
     }
     neg = -1;
     one = 1;
-    r = RandomFloatInRange(D_0026A960[0], D_0026A960[1]);
-    self->f5A8 = self->f5A8 * r;
-    self->f5A4 = RandomFloatInRange(0.0f, self->f5A8 + self->f5A8);
+    r = RandomFloatInRange(g_numberedItemJitterRange[0], g_numberedItemJitterRange[1]);
+    self->halfCycle = self->halfCycle * r;
+    self->cycleTime = RandomFloatInRange(0.0f, self->halfCycle + self->halfCycle);
 
     {
-        s32 bit = self->f5A0;
+        s32 bit = self->itemNumber;
         s32 mask = one << (bit & 7);
         if (g_currentEntry->bits68[bit / 8] & mask) {
             self->desc->m03(self);
@@ -603,7 +603,7 @@ void StartNumberedItem(NumberedItem* self)
     if (D_00275C34 != 0) {
         if (RandomIntInRange(0, 100) < 20) {
             G27C230* d = g_currentEntry;
-            s32 bit = self->f5A0;
+            s32 bit = self->itemNumber;
             s32 mask = one << (bit & 7);
             if (d->bits68[bit / 8] & mask) {
                 d->bits68[bit / 8] = d->bits68[bit / 8] & ~mask;
@@ -617,7 +617,7 @@ void StartNumberedItem(NumberedItem* self)
 struct ActiveColliderTarget {
     s32 f0;
     u8 pad4[0x18 - 0x4];
-    PlacedObject* f18;
+    PlacedObject* collider;
 };
 s32 MaskWorldBitsBySave(void);
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
@@ -640,18 +640,18 @@ void UpdateNumberedItem(NumberedItem* self, f32 dt)
     if (data->f0 == 0) {
         return;
     }
-    PlacedObject* target = data->f18;
+    PlacedObject* target = data->collider;
     if (target == 0) {
         return;
     }
     u128 gap = Vu0::Sub(*(const u128*)&target->v140, Vu0::Q(self->v140));
-    if (D_0026A968 * D_0026A968 < Vu0::ToFloatMoved(Vu0::Dot(gap, gap))) {
+    if (g_numberedItemReachRadius * g_numberedItemReachRadius < Vu0::ToFloatMoved(Vu0::Dot(gap, gap))) {
         return;
     }
     ComputeObjectMotionInFrame(target, 0, &target->v140, &first, 0, 0, 0);
     ComputeObjectMotionInFrame(self, 0, &self->v140, &second, 0, 0, 0);
     u128 rel = Vu0::Sub(Vu0::Q(second), Vu0::Q(first));
-    u128 away = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(data->f18->v140));
+    u128 away = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(data->collider->v140));
     u128 dir = Vu0::NormalizeOrMoved(away, Vu0::Q(D_00248D30));
     if (Vu0::ToFloat(Vu0::Dot(rel, dir)) > -50.0f) {
         ((SlotFn*)self->desc)[77](self);
@@ -663,7 +663,7 @@ void SetNumberedItemFlag(NumberedItem* self)
     f32 zf;
     G27C230* ctx = g_currentEntry;
     zf = 0.0f;
-    s32 n = self->f5A0;
+    s32 n = self->itemNumber;
     u8* p = ctx->bits68;
     s32 byte = n / 8;
     p += byte;
@@ -676,12 +676,12 @@ void SetNumberedItemFlag(NumberedItem* self)
     s32 count = g_currentEntry->count64;
     s32 s0 = -1;
     s32 s1 = 0;
-    if (((g_saveData->f19EC ^ 1) & 1) != 0) {
+    if (((g_saveData->optionFlags ^ 1) & 1) != 0) {
         if (count > 0) {
             s0 = 0x348;
             s1 = 1;
         }
-    } else if ((g_saveData->f19EC & 4) == 0) {
+    } else if ((g_saveData->optionFlags & 4) == 0) {
         if (count < g_currentWorld->count2300) {
             goto L980;
         }
@@ -693,7 +693,7 @@ void SetNumberedItemFlag(NumberedItem* self)
     }
     StartSoundEffect(0x6A, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 L980:
-    g_saveData->f19EC = g_saveData->f19EC | s1;
+    g_saveData->optionFlags = g_saveData->optionFlags | s1;
     StepSequence* r = (StepSequence*)FindFirstObjectById(g_currentWorld, 1, s0, 0);
     if (r != 0) {
         ChooseStepSequenceState(r);
@@ -703,7 +703,7 @@ L980:
 void CollectNumberedItem(NumberedItem* self)
 {
     Quad16 loc;
-    T217D_E30* g = &D_0026C948;
+    T217D_E30* g = &g_collectedItemCaption;
     g->vt->m14(g);
     Effect* n = CreateEffect(0x10, 0);
     if (n != 0) {
@@ -712,7 +712,7 @@ void CollectNumberedItem(NumberedItem* self)
             StartSoundEffect(0x21, 0, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
         }
         n->p134 = self;
-        n->params = &D_0026A970;
+        n->params = &g_numberedItemEffectParams;
         TransformPointBetweenFrames(self, 0, (Vec02*)(self->f5BC + 0x100), (Vec02*)&loc);
         n->vt->m00(n, &loc, 1.0f, 0);
         n->i20 = *(s32*)&self->f5BC;
@@ -730,7 +730,7 @@ void InvokeNumberedItemCollect(NumberedItem* p)
 void FlagNumberedItem(NumberedItem* self)
 {
     self->desc->m03(self);
-    s32 n = self->f5A0;
+    s32 n = self->itemNumber;
     G27C230* m = g_currentEntry;
     s32 idx = n / 8;
     u8 cur = m->bits68[idx];
@@ -750,7 +750,7 @@ void FlagNumberedItem(NumberedItem* self)
 
 void GetNumberedItemFlag(NumberedItem* self, s32* out)
 {
-    s32 n = self->f5A0;
+    s32 n = self->itemNumber;
     s32 byte = n / 8;
     s32 bit = n & 7;
     u8 b = g_currentEntry->bits68[byte];
@@ -824,8 +824,8 @@ void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
     if (self->flags & ((u64)0x8000 << 17)) {
         return;
     }
-    self->f5B8 = self->f5B8 + self->f5B4 * g_gameClock[2];
-    BuildAxisAngleMatrix(&g_unitZVector, &axis, self->f5B8);
+    self->spinAngle = self->spinAngle + self->spinSpeed * g_gameClock[2];
+    BuildAxisAngleMatrix(&g_unitZVector, &axis, self->spinAngle);
     MulRotation(&turned, *(const Mat02*)((u8*)self + 0x110), axis);
     if (self->parent != 0) {
         RotateMatrixUpright(&turned, 0, &turned);
@@ -834,17 +834,17 @@ void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
     BuildMatrixFromRotationAndTranslation(&self->v140, &turned, (Mat4A*)&base);
     if (self->n5AC > 0) {
         SpinFrame4 key;
-        self->f5A4 = self->f5A4 + g_gameClock[2];
-        while (self->f5A8 + self->f5A8 <= self->f5A4) {
-            self->f5A4 = self->f5A4 - (self->f5A8 + self->f5A8);
+        self->cycleTime = self->cycleTime + g_gameClock[2];
+        while (self->halfCycle + self->halfCycle <= self->cycleTime) {
+            self->cycleTime = self->cycleTime - (self->halfCycle + self->halfCycle);
         }
-        s32 index = (s32)((f32)self->n5AC * self->f5A4 / self->f5A8);
+        s32 index = (s32)((f32)self->n5AC * self->cycleTime / self->halfCycle);
         if (index >= self->n5AC) {
             s32 twice = self->n5AC * 2;
             s32 m = index + 1;
             index = twice - m;
         }
-        SpinKeyframe* k = ((SpinKeyframe**)self->f5B0)[index];
+        SpinKeyframe* k = ((SpinKeyframe**)self->keyframes)[index];
         BuildMatrixFromRotationAndTranslation((const Vec02*)k->from, (const Mat02*)k->to, (Mat4A*)&key);
         base = MultiplyMatrices(base, key);
     }
@@ -869,7 +869,7 @@ void FlagAllNumberedItems(void)
             p--;
         } while (i >= 0);
     }
-    D_0026C948.vt->m14(&D_0026C948);
+    g_collectedItemCaption.vt->m14(&g_collectedItemCaption);
 }
 
 void SetSavedWorldBits(u32 value)
@@ -899,7 +899,7 @@ s32 CompletesWorldBits(s32 bits)
 
 void MarkLevelRecordComplete(s32 index)
 {
-    if (index == -1) index = g_saveData->f19D8;
+    if (index == -1) index = g_saveData->levelIndex;
     u8* base = (u8*)g_saveData + (index * 0x44C + 0x10);
     LevelTaskRecord* p = (LevelTaskRecord*)base;
     LevelTaskRecord* end = (LevelTaskRecord*)(base + 0x438);
@@ -913,14 +913,14 @@ void MarkLevelRecordComplete(s32 index)
 void MarkAllLevelRecordsComplete()
 {
     for (s32 i = 0; i < 6; i++) MarkLevelRecordComplete(i);
-    if (g_elementStack.f30 == 2) RequestWorldLoadByMode(0);
+    if (g_elementStack.resumeState == 2) RequestWorldLoadByMode(0);
 }
 
 void InitC17Collider(C17* self)
 {
     InitSwitchedCollider(self);
-    self->f64C = -1;
-    self->f644 = -1;
+    self->triggerId = -1;
+    self->extraId = -1;
 }
 
 void StartC17Marker(C17Marker* self, s32 x)
@@ -936,10 +936,10 @@ void StartC17Collider(C17* o)
     StartPlacedObject(o);
     ResolveObjectLinks(o, 0x1A, D_0026AA50.e);
     for (i = 0; i < 3; i++)
-        StartC17Marker((C17Marker*)(o->f61C + i * 12), 0x390);
-    StateWalker* h = CreateStateWalker((StateGraph*)o->f610, o, 0x384, 1);
-    o->f764 = -1;
-    o->f614 = h;
+        StartC17Marker((C17Marker*)(o->markers + i * 12), 0x390);
+    StateWalker* h = CreateStateWalker((StateGraph*)o->stateGraph, o, 0x384, 1);
+    o->levelBitIndex = -1;
+    o->stateWalker = h;
 
     if (g_currentEntry->bits & 4) {
         SetStateWalkerTarget(h, 0x38F);
@@ -947,7 +947,7 @@ void StartC17Collider(C17* o)
     }
     o->world->f1CE4 = o;
     for (s32 e = 0; e < 6; e++) {
-        Ent17* en = &o->f658[e];
+        Ent17* en = &o->sequenceGroups[e];
         for (s32 k = 0; k < en->count; k++) {
             BaseObject* r = FindFirstObjectByIdMode4(o->world, en->keys[k], o);
             if (r) {
@@ -957,15 +957,15 @@ void StartC17Collider(C17* o)
         if (en->n > 0)
             en->pick = RandomIntInRange(0, en->n - 1);
     }
-    o->f648 = (void*)FindFirstObjectByIdMode4(o->world, o->f644, o);
-    o->f650 = FindFirstObjectByIdMode4(o->world, o->f64C, o);
-    if (((BaseObject*)o->f650))
-        ((BaseObject*)o->f650)->desc->m17(((BaseObject*)o->f650), o);
-    if (((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 3) {
-        o->f760 = 1;
+    o->extraObject = (void*)FindFirstObjectByIdMode4(o->world, o->extraId, o);
+    o->triggerObject = FindFirstObjectByIdMode4(o->world, o->triggerId, o);
+    if (((BaseObject*)o->triggerObject))
+        ((BaseObject*)o->triggerObject)->desc->m17(((BaseObject*)o->triggerObject), o);
+    if (((g_saveData->levelIndex << 8) | g_saveData->entryIndex) == 3) {
+        o->levelBit = 1;
     } else {
-        GetCurrentLevelBit((u32*)&o->f760);
-        if (o->f760 & 0xF000FFFFl) {
+        GetCurrentLevelBit((u32*)&o->levelBit);
+        if (o->levelBit & 0xF000FFFFl) {
             s32 cnt = 0;
             LevelTaskRecord* p = (LevelTaskRecord*)g_currentLevelRecord;
             LevelTaskRecord* end = p + 9;
@@ -975,35 +975,35 @@ void StartC17Collider(C17* o)
                 p++;
             } while (p < end);
             if (cnt != 2)
-                o->f760 = 0;
-            if (o->f760 & 0xF000FFFFl) {
-                o->f764 = 0;
+                o->levelBit = 0;
+            if (o->levelBit & 0xF000FFFFl) {
+                o->levelBitIndex = 0;
                 goto lookup;
             }
         }
-        o->f760 = 2;
+        o->levelBit = 2;
         if (g_saveData->u19F0 & 2) {
             do {
-                o->f760 = o->f760 << 1;
-            } while ((o->f760 & 0xF000FFFFl) && (g_saveData->u19F0 & o->f760));
+                o->levelBit = o->levelBit << 1;
+            } while ((o->levelBit & 0xF000FFFFl) && (g_saveData->u19F0 & o->levelBit));
         }
-        o->f760 &= (s32)0xF000FFFF;
+        o->levelBit &= (s32)0xF000FFFF;
     }
-    if ((o->f760 & 0xF000FFFFl) == 0)
+    if ((o->levelBit & 0xF000FFFFl) == 0)
         return;
-    o->f764 = 0;
+    o->levelBitIndex = 0;
 lookup:
-    if (D_0026A9E0[0] != (s32)o->f760) {
+    if (D_0026A9E0[0] != (s32)o->levelBit) {
         do {
-            o->f764++;
-            if (o->f764 >= 0x1C) {
-                o->f764 = -1;
+            o->levelBitIndex++;
+            if (o->levelBitIndex >= 0x1C) {
+                o->levelBitIndex = -1;
                 return;
             }
-        } while (D_0026A9E0[o->f764] != (s32)o->f760);
+        } while (D_0026A9E0[o->levelBitIndex] != (s32)o->levelBit);
     }
-    if (o->f764 >= 0x1C)
-        o->f764 = -1;
+    if (o->levelBitIndex >= 0x1C)
+        o->levelBitIndex = -1;
 }
 
 void HandleC17ColliderActivation(C17* self, void* flag)
@@ -1013,16 +1013,16 @@ void HandleC17ColliderActivation(C17* self, void* flag)
     void* a;
     s32 n;
 
-    GetStateWalkerTargetKey(self->f614, &r);
+    GetStateWalkerTargetKey(self->stateWalker, &r);
     if (r == -1) {
-        GetStateWalkerCurrentKey(self->f614, &r);
+        GetStateWalkerCurrentKey(self->stateWalker, &r);
     }
     if (flag != 0) {
         if (r != 0x38F) {
-            SetStateWalkerTarget(self->f614, 0x385);
+            SetStateWalkerTarget(self->stateWalker, 0x385);
         }
         ResetPadStepRepeat(&g_padRecord);
-        flags = g_saveData->f19EC;
+        flags = g_saveData->optionFlags;
         if ((flags & 8) == 0) {
             a = FindFirstObjectByIdMode4(g_currentWorld, 0x39A, self);
         } else {
@@ -1032,16 +1032,16 @@ void HandleC17ColliderActivation(C17* self, void* flag)
             a = FindFirstObjectByIdMode4(g_currentWorld, 0x39B, self);
         }
         if (a != 0) {
-            n = self->f7D8;
-            self->f7DC[n] = a;
-            self->f7D8 = n + 1;
+            n = self->queueCount;
+            self->queue[n] = a;
+            self->queueCount = n + 1;
         }
 tail:
-        a = self->f648;
+        a = self->extraObject;
         if (a != 0) {
-            n = self->f7D8;
-            self->f7DC[n] = a;
-            self->f7D8 = n + 1;
+            n = self->queueCount;
+            self->queue[n] = a;
+            self->queueCount = n + 1;
         }
         if (g_player != 0) {
             self->blk580 = g_player->blk580;
@@ -1049,9 +1049,9 @@ tail:
         }
     } else {
         if (r != 0x38F) {
-            SetStateWalkerTarget(self->f614, 0x384);
+            SetStateWalkerTarget(self->stateWalker, 0x384);
         }
-        self->f7D8 = 0;
+        self->queueCount = 0;
         if ((ComputeCompletionMask() & 4) != 0) {
             FadeOutAndQueueMovie(4);
         }
@@ -1066,17 +1066,17 @@ void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
     s32 cur;
     s32 target;
 
-    GetStateWalkerCurrentKey(self->f614, &cur);
-    GetStateWalkerTargetKey(self->f614, &target);
+    GetStateWalkerCurrentKey(self->stateWalker, &cur);
+    GetStateWalkerTargetKey(self->stateWalker, &target);
     s32 key = target == -1 ? cur : target;
     if (cur == 0x38F) {
         ActivateSwitchedCollider(g_player);
         return;
     }
     if (cur == 0x38E && target == cur) {
-        if (self->f7D8 == 0 && D_0027051C == 0) {
-            SetStateWalkerTarget(self->f614, 0x38F);
-            switch (self->f760) {
+        if (self->queueCount == 0 && g_activeStepSequence == 0) {
+            SetStateWalkerTarget(self->stateWalker, 0x38F);
+            switch (self->levelBit) {
             case 2:
             case 0x10:
                 ShowModeLabel(0);
@@ -1131,34 +1131,34 @@ void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
             if (key < 0x385)
                 break;
             if (key < 0x388)
-                SetStateWalkerTarget(self->f614, 0x388);
+                SetStateWalkerTarget(self->stateWalker, 0x388);
             else if (key < 0x38B)
-                SetStateWalkerTarget(self->f614, 0x38B);
+                SetStateWalkerTarget(self->stateWalker, 0x38B);
             break;
         case 1:
             if (key < 0x388)
                 break;
             if (key < 0x38B)
-                SetStateWalkerTarget(self->f614, 0x385);
+                SetStateWalkerTarget(self->stateWalker, 0x385);
             else if (key < 0x38E)
-                SetStateWalkerTarget(self->f614, 0x388);
+                SetStateWalkerTarget(self->stateWalker, 0x388);
             break;
         case 2:
             switch (key) {
             case 0x385:
             case 0x386:
             case 0x387:
-                SetStateWalkerTarget(self->f614, 0x386);
+                SetStateWalkerTarget(self->stateWalker, 0x386);
                 break;
             case 0x388:
             case 0x389:
             case 0x38A:
-                SetStateWalkerTarget(self->f614, 0x389);
+                SetStateWalkerTarget(self->stateWalker, 0x389);
                 break;
             case 0x38B:
             case 0x38C:
             case 0x38D:
-                SetStateWalkerTarget(self->f614, 0x38C);
+                SetStateWalkerTarget(self->stateWalker, 0x38C);
                 break;
             }
             break;
@@ -1167,25 +1167,25 @@ void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
             case 0x385:
             case 0x386:
             case 0x387:
-                SetStateWalkerTarget(self->f614, 0x387);
+                SetStateWalkerTarget(self->stateWalker, 0x387);
                 break;
             case 0x388:
             case 0x389:
             case 0x38A:
-                SetStateWalkerTarget(self->f614, 0x38A);
+                SetStateWalkerTarget(self->stateWalker, 0x38A);
                 break;
             case 0x38B:
             case 0x38C:
             case 0x38D:
-                SetStateWalkerTarget(self->f614, 0x38D);
+                SetStateWalkerTarget(self->stateWalker, 0x38D);
                 break;
             }
             break;
         }
         s32 i = 0;
-        s32 code = *(s32*)(self->f61C + 0x24);
+        s32 code = *(s32*)(self->markers + 0x24);
         for (; i < 3; i++, code *= 10) {
-            C17Marker* m = &((C17Marker*)self->f61C)[i];
+            C17Marker* m = &((C17Marker*)self->markers)[i];
             s32 t;
             s32 c;
             GetStateWalkerTargetKey(m->walker, &t);
@@ -1200,26 +1200,26 @@ void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
             return;
         }
     }
-    if (self->f7D8 > 0 && D_0027051C == 0) {
-        ChooseStepSequenceState((StepSequence*)self->f7DC[0]);
-        self->f7D8--;
-        CopyMemory(&self->f7DC[0], &self->f7DC[1], self->f7D8 * 4);
+    if (self->queueCount > 0 && g_activeStepSequence == 0) {
+        ChooseStepSequenceState((StepSequence*)self->queue[0]);
+        self->queueCount--;
+        CopyMemory(&self->queue[0], &self->queue[1], self->queueCount * 4);
     }
 }
 
 void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
 {
     HandleSwitchedColliderNotification(self, msg, rec);
-    if (msg == 12 && rec[1] == (s32)self->f650) {
+    if (msg == 12 && rec[1] == (s32)self->triggerObject) {
         if (self->f654 != 0 && g_player != 0) {
-            g_player->f23CC = self;
-            g_player->f239C = 7;
+            g_player->targetSwitch = self;
+            g_player->targetMode = 7;
             SetPlayerState(g_player, 6, 16);
         } else {
             s32 k;
             s32 a;
             s32 b;
-            D_0026C948.vt->m14(&D_0026C948);
+            g_collectedItemCaption.vt->m14(&g_collectedItemCaption);
             a = g_currentEntry->count64;
             b = g_currentWorld->count2300;
             k = -1;
@@ -1268,33 +1268,33 @@ void RecordC17ColliderCompletion(C17* self)
     void* item;
     BaseObject* r;
 
-    SetStateWalkerTarget(self->f614, 0x38E);
-    if (self->f650 == 0) {
-        self->f7D8 = 0;
+    SetStateWalkerTarget(self->stateWalker, 0x38E);
+    if (self->triggerObject == 0) {
+        self->queueCount = 0;
     } else {
-        ((BaseObject*)self->f650)->desc->m18((BaseObject*)self->f650, self);
-        self->f650 = 0;
-        self->f7D8 = 0;
+        ((BaseObject*)self->triggerObject)->desc->m18((BaseObject*)self->triggerObject, self);
+        self->triggerObject = 0;
+        self->queueCount = 0;
     }
 
     if (D_00270454 != 0) {
         PopStackElement((ElementStack*)&g_elementStack);
     }
-    if ((self->f760 & (s64)0xF000FFFF) != 0) {
+    if ((self->levelBit & (s64)0xF000FFFF) != 0) {
         G27C230* ctx = g_currentLevelRecord;
         GameProgress* g = g_saveData;
         G27C230* ctl = g_currentEntry;
 
         ctx->f43C = ctx->f43C + 1;
-        g->f19F0 = g->f19F0 | self->f760;
+        g->f19F0 = g->f19F0 | self->levelBit;
         self->world->f1CE4 = 0;
         ctl->flags = ctl->flags | 4;
 
-        v = g->f19EC;
+        v = g->optionFlags;
         if ((v & 8) == 0) {
-            g->f19EC = v | 8;
+            g->optionFlags = v | 8;
         } else if ((v & 0x10) == 0) {
-            g->f19EC = v | 0x10;
+            g->optionFlags = v | 0x10;
         }
 
         if (ComputeCompletionMask() & 4) {
@@ -1302,7 +1302,7 @@ void RecordC17ColliderCompletion(C17* self)
         }
 
         sel = 0x37E;
-        if (self->f760 != 1) {
+        if (self->levelBit != 1) {
             sel = 0x37F;
             StartMemoryCardSave((MemoryCard*)g_memoryCard);
         }
@@ -1312,13 +1312,13 @@ void RecordC17ColliderCompletion(C17* self)
             r->desc->m02(r);
         }
 
-        idx = self->f764;
+        idx = self->levelBitIndex;
         if (idx >= 0) {
-            item = self->f768[idx];
+            item = self->levelBitObjects[idx];
             if (item != 0) {
-                n = self->f7D8;
-                self->f7DC[n] = item;
-                self->f7D8 = n + 1;
+                n = self->queueCount;
+                self->queue[n] = item;
+                self->queueCount = n + 1;
             }
         }
     }
@@ -1362,9 +1362,9 @@ void CopyC71Object(C71* self, C71* src)
 void InitObjectGatherer(ObjectGatherer* self)
 {
     InitCollider(self);
-    self->f60C = 1.0f;
-    self->f608 = 0.5f;
-    self->f55C = RandomGaussian(*(f32*)g_gameTime + 3.0f, 1.0f, 2.5f);
+    self->idleTimeMax = 1.0f;
+    self->idleTimeMin = 0.5f;
+    self->nextSoundTime = RandomGaussian(*(f32*)g_gameTime + 3.0f, 1.0f, 2.5f);
     self->f664 = -1;
 }
 
@@ -1432,14 +1432,14 @@ void StepObjectGatherer(ObjectGatherer* self, f32 dt)
         Vu0::Q(delta) = Vu0::Sub(Vu0::Q(self->v640), Vu0::Q(self->v140));
         delta.z = 0.0f;
         BuildBasisFromX(&delta, &basis);
-        TurnColliderTowardRotation(self, dt, &basis, D_0026ABB0);
+        TurnColliderTowardRotation(self, dt, &basis, g_gathererTurnRamp);
         break;
     case 2:
-        TransformPointBetweenFrames((PlacedObject*)(*(void**)((u8*)self->f660 + 0x18)), 0, (Vec02*)((u8*)self->f660 + 0x40), &target);
+        TransformPointBetweenFrames((PlacedObject*)(*(void**)((u8*)self->candidate + 0x18)), 0, (Vec02*)((u8*)self->candidate + 0x40), &target);
         Vu0::Q(delta) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
         delta.z = 0.0f;
         BuildBasisFromX(&delta, &basis);
-        TurnColliderTowardRotation(self, dt, &basis, D_0026ABB0);
+        TurnColliderTowardRotation(self, dt, &basis, g_gathererTurnRamp);
         break;
     default:
         SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, (f32*)self->p214, dt);
@@ -1494,9 +1494,9 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         Vu0::Q(target) = Vu0::MulAddX(pos, Vu0::Q(act->v150), Vu0::Scalar(0.5f));
     }
     if (state < 3) {
-        if (state >= 0 && self->f55C < g_gameClock[1]) {
+        if (state >= 0 && self->nextSoundTime < g_gameClock[1]) {
             StartSoundEffect(0x3B, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-            self->f55C = RandomGaussian(g_gameClock[1] + 3.0f, 1.0f, 2.5f);
+            self->nextSoundTime = RandomGaussian(g_gameClock[1] + 3.0f, 1.0f, 2.5f);
         }
     }
     if (act != 0 && (u32)state < 2 && Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140)), Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140)))) < 90000.0f) {
@@ -1505,7 +1505,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         ObjectGatherer* n;
         while ((n = NextInList<ObjectGatherer>::Of(&frame)) != 0) {
             if (self != n) {
-                s32 near = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(n->v140), Vu0::Q(self->v140)), Vu0::Sub(Vu0::Q(n->v140), Vu0::Q(self->v140)))) < self->f624 * self->f624;
+                s32 near = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(n->v140), Vu0::Q(self->v140)), Vu0::Sub(Vu0::Q(n->v140), Vu0::Q(self->v140)))) < self->neighborRadius * self->neighborRadius;
                 if (near) {
                     SetObjectGathererState(n, 2);
                 }
@@ -1518,22 +1518,22 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         s32 go;
         switch (state) {
         case 0:
-            if (self->f558 < g_gameTime[0]) {
+            if (self->modeEndTime < g_gameTime[0]) {
                 state = 1;
             }
             break;
         case 1: {
             go = 0;
-            if (self->ring == 0 && self->f554 + 0.5f < g_gameTime[0] && Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150))) < self->f614 * 0.1f) {
+            if (self->ring == 0 && self->modeStartTime + 0.5f < g_gameTime[0] && Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150))) < self->state1Speed * 0.1f) {
                 go = FindColliderFloorContact(self, 0, &side) != 0;
             }
             if (go) {
                 Vec02 push;
-                Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(self->m110.r[0]), Vu0::Scalar(self->f614 * 0.7f), Vu0::Q(g_unitZVector), Vu0::ScalarAt(self->f620));
+                Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(self->m110.r[0]), Vu0::Scalar(self->state1Speed * 0.7f), Vu0::Q(g_unitZVector), Vu0::ScalarAt(self->upwardPush));
                 self->desc02()->m20(self, &push);
                 break;
             }
-            if (self->f558 < g_gameTime[0]) {
+            if (self->modeEndTime < g_gameTime[0]) {
                 state = 0;
                 break;
             }
@@ -1544,20 +1544,20 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         }
         case 2: {
             go = 0;
-            if (self->ring == 0 && self->f554 + 0.7f < g_gameTime[0] && Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150))) < self->f618 * 0.3f) {
+            if (self->ring == 0 && self->modeStartTime + 0.7f < g_gameTime[0] && Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150))) < self->state2Speed * 0.3f) {
                 go = FindColliderFloorContact(self, 0, &side) != 0;
             }
             if (go) {
                 Vec02 push;
-                Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(self->m110.r[0]), Vu0::Scalar(self->f618 * 0.5f), Vu0::Q(g_unitZVector), Vu0::ScalarAt(self->f620));
+                Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(self->m110.r[0]), Vu0::Scalar(self->state2Speed * 0.5f), Vu0::Q(g_unitZVector), Vu0::ScalarAt(self->upwardPush));
                 self->desc02()->m20(self, &push);
                 break;
             }
-            if (self->f558 < g_gameTime[0]) {
+            if (self->modeEndTime < g_gameTime[0]) {
                 state = 1;
                 break;
             }
-            if (self->f660 != 0 && TestPointAgainstObjectShape((ObjectGatherer*)self->f660, &self->v140) != 0) {
+            if (self->candidate != 0 && TestPointAgainstObjectShape((ObjectGatherer*)self->candidate, &self->v140) != 0) {
                 state = 4;
             }
             break;
@@ -1565,7 +1565,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         case 3:
             break;
         case 4:
-            if (self->f558 < g_gameClock[1] && act != 0 && 360000.0f < Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(act->v140)), Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(act->v140))))) {
+            if (self->modeEndTime < g_gameClock[1] && act != 0 && 360000.0f < Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(act->v140)), Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(act->v140))))) {
                 ListFrame frame;
                 s32 any = 0;
                 BeginListWalk::Of(&frame, &self->world->list1C60);
@@ -1576,7 +1576,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
                     }
                 }
                 if (any != 0) {
-                    self->f558 = g_gameClock[1] + RandomFloatInRange(0.2f, 3.0f);
+                    self->modeEndTime = g_gameClock[1] + RandomFloatInRange(0.2f, 3.0f);
                 } else {
                     state = 1;
                 }
@@ -1595,15 +1595,15 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         f32 speed;
         if (state == 1) {
             Vu0::Q(self->v630) = Vu0::Sub(Vu0::Q(self->v640), Vu0::Q(self->v140));
-            speed = self->f614;
+            speed = self->state1Speed;
         } else {
-            speed = self->f618;
+            speed = self->state2Speed;
             Vec02 at;
-            TransformPointBetweenFrames((PlacedObject*)(((GatherCandidate*)self->f660)->frame), 0, &((GatherCandidate*)self->f660)->pos, &at);
+            TransformPointBetweenFrames((PlacedObject*)(((GatherCandidate*)self->candidate)->frame), 0, &((GatherCandidate*)self->candidate)->pos, &at);
             u128 d = Vu0::Sub(Vu0::Q(at), Vu0::Q(self->v140));
             f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d, d)));
             if (dist < 500.0f) {
-                speed = self->f618 <? (D_0026ABC0[0] + dist * (D_0026ABC0[1] + dist * D_0026ABC0[2]));
+                speed = self->state2Speed <? (g_gathererApproachCurve[0] + dist * (g_gathererApproachCurve[1] + dist * g_gathererApproachCurve[2]));
             }
             Vu0::Q(self->v630) = d;
         }
@@ -1617,14 +1617,14 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
         } else if (hi < c) {
             c = hi;
         }
-        self->f61C = c * speed;
+        self->currentSpeed = c * speed;
         ClearRootTries(self);
         return;
     }
     case 0:
     case 3:
     case 4:
-        self->f61C = 0.0f;
+        self->currentSpeed = 0.0f;
         return;
     }
 }
@@ -1736,7 +1736,7 @@ void ChooseObjectGathererCandidate(ObjectGatherer* self)
             }
         }
     }
-    self->f660 = best;
+    self->candidate = best;
     g_activeListFrames = frame.prev;
 }
 
@@ -1748,8 +1748,8 @@ void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
         Quad4 buf;
         AppendToList(&self->world->list1C60, self);
         ((BaseObject *)self->f5FC)->desc->m02((BaseObject *)self->f5FC);
-        TransformPointBetweenFrames(*(PlacedObject **)((u8 *)self->f660 + 0x18), 0,
-                      (Vec02 *)((u8 *)self->f660 + 0x40), (Vec02 *)&buf);
+        TransformPointBetweenFrames(*(PlacedObject **)((u8 *)self->candidate + 0x18), 0,
+                      (Vec02 *)((u8 *)self->candidate + 0x40), (Vec02 *)&buf);
         PlaceColliderClearOfContacts((Collider*)self, (Vec02*)&buf, (Vec02*)&g_unitZVector);
     }
     SetColliderPartListed(self, a1 == 0);
@@ -1771,28 +1771,28 @@ void SetObjectGathererState(ObjectGatherer* self, s32 mode)
     }
     if (self->state == 4) {
         SetObjectGathererSuspended(self, 0);
-        self->f660 = 0;
+        self->candidate = 0;
     }
     *(s32*)((u8*)self->f5FC + 0x88) = 14;
-    self->f558 = g_gameClock[1];
+    self->modeEndTime = g_gameClock[1];
     switch (mode) {
     case 0:
-        self->f558 = self->f558 + RandomFloatInRange(self->f608, self->f60C);
+        self->modeEndTime = self->modeEndTime + RandomFloatInRange(self->idleTimeMin, self->idleTimeMax);
         self->ring = 0;
         Vu0::Q(self->v650) = Vu0::Q(self->v140);
         break;
     case 1: {
         f32 angle = RandomFloatInRange(0.0f, 6.2831855f);
-        f32 radius = RandomFloatInRange(0.0f, self->f610);
+        f32 radius = RandomFloatInRange(0.0f, self->wanderRadius);
         ComputePolarOffset((Vec3*)&offset, angle, radius, 0.0f);
         Vu0::Q(self->v640) = Vu0::Add(Vu0::Q(self->v190), Vu0::Q(offset));
         self->ring = 0;
-        self->f558 = self->f558 + RandomFloatInRange(3.0f, 5.0f);
+        self->modeEndTime = self->modeEndTime + RandomFloatInRange(3.0f, 5.0f);
         break;
     }
     case 2:
         ChooseObjectGathererCandidate(self);
-        self->f558 = self->f558 + 10.0f;
+        self->modeEndTime = self->modeEndTime + 10.0f;
         self->ring = 0;
         break;
     case 3:
@@ -1802,11 +1802,11 @@ void SetObjectGathererState(ObjectGatherer* self, s32 mode)
         break;
     case 4:
         SetObjectGathererSuspended(self, 1);
-        self->f558 = self->f558 + RandomFloatInRange(3.0f, 15.0f);
+        self->modeEndTime = self->modeEndTime + RandomFloatInRange(3.0f, 15.0f);
         break;
     }
     self->state = mode;
-    self->f554 = g_gameClock[1];
+    self->modeStartTime = g_gameClock[1];
 }
 
 void RegisterC7CObject(BaseObject* obj)
@@ -1840,22 +1840,22 @@ void LoadAimBlendGrid(AimBlendGrid* o, LoadStream* in)
         } while (i >= 0);
     }
     s32 i = 0;
-    o->f48 = ReadBufferedS16((BufferedStream*)in);
+    o->resolution = ReadBufferedS16((BufferedStream*)in);
     ReadMeshFromStream((BufferedStream*)in, (Mesh03*)o->fA0);
-    o->fC4 = (GridRecord*)AllocateZeroedFrontMemory(o->fA4 * 100);
-    for (i = 0; i < o->fA4; i++) {
+    o->pointRecords = (GridRecord*)AllocateZeroedFrontMemory(o->pointCount * 100);
+    for (i = 0; i < o->pointCount; i++) {
         f32 x;
         f32 y;
         f32 z;
-        GridRecord* r = &o->fC4[i];
-        o->fC4[i].id = ReadBufferedS8((BufferedStream*)in);
+        GridRecord* r = &o->pointRecords[i];
+        o->pointRecords[i].id = ReadBufferedS8((BufferedStream*)in);
         DecodeAimBlendGridIndex(o, i, &x, &y, &z);
         ComputeGridBlendWeights(o, (f32*)r->pos, x, y, z);
     }
-    o->fC8 = ReadBufferedS16((BufferedStream*)in);
-    o->fCC = (u8*)AllocateZeroedFrontMemory(o->fC8 << 4);
-    for (s32 e = 0; e < o->fC8; e++) {
-        s32* r = (s32*)(o->fCC + (e << 4));
+    o->cellCount = ReadBufferedS16((BufferedStream*)in);
+    o->cells = (u8*)AllocateZeroedFrontMemory(o->cellCount << 4);
+    for (s32 e = 0; e < o->cellCount; e++) {
+        s32* r = (s32*)(o->cells + (e << 4));
         s32 j = 3;
         do {
             j--;
@@ -1863,29 +1863,29 @@ void LoadAimBlendGrid(AimBlendGrid* o, LoadStream* in)
             r++;
         } while (j >= 0);
     }
-    o->fD0 = o->fD4 = ReadBufferedS16((BufferedStream*)in);
-    o->fD8 = (AimPlaneNode*)AllocateZeroedFrontMemory(o->fD0 * 12);
-    o->fDC = (AimPlaneEdge*)AllocateZeroedFrontMemory(o->fD0 << 3);
-    for (s32 n = 0; n < o->fD0; n++) {
-        AimPlaneNode* t = &o->fD8[n];
-        AimPlaneEdge* e = &o->fDC[n];
+    o->nodeCount = o->fD4 = ReadBufferedS16((BufferedStream*)in);
+    o->nodes = (AimPlaneNode*)AllocateZeroedFrontMemory(o->nodeCount * 12);
+    o->leaves = (AimPlaneEdge*)AllocateZeroedFrontMemory(o->nodeCount << 3);
+    for (s32 n = 0; n < o->nodeCount; n++) {
+        AimPlaneNode* t = &o->nodes[n];
+        AimPlaneEdge* e = &o->leaves[n];
         s32 a = ReadBufferedS16((BufferedStream*)in);
         s32 b = ReadBufferedS16((BufferedStream*)in);
         s32 c = ReadBufferedS16((BufferedStream*)in);
-        t->a = o->fB0 + (a << 5);
+        t->a = o->faces + (a << 5);
         if (b > 0) {
             b--;
-            t->b = (u8*)&o->fD8[b];
+            t->b = (u8*)&o->nodes[b];
         } else if (b < 0) {
             b = ~b;
-            e->a = o->fCC + (b << 4);
+            e->a = o->cells + (b << 4);
         }
         if (c > 0) {
             c--;
-            t->c = (u8*)&o->fD8[c];
+            t->c = (u8*)&o->nodes[c];
         } else if (c < 0) {
             c = ~c;
-            e->b = o->fCC + (c << 4);
+            e->b = o->cells + (c << 4);
         }
     }
     o->fE0 = ReadBufferedFloat((BufferedStream*)in);
@@ -1897,40 +1897,40 @@ void StartAimBlendGrid(AimBlendGrid* self)
     GridBlendSlot* s;
     s32 i;
     StartObject(self);
-    self->f3C = FindFirstObjectByIdMode4(self->world, self->first34, self);
-    if (self->f3C == 0) return;
-    self->f40 = FindFirstObjectByIdMode1(self->world, self->second38, self->f3C);
-    if (self->f40 == 0) return;
+    self->rootObject = FindFirstObjectByIdMode4(self->world, self->first34, self);
+    if (self->rootObject == 0) return;
+    self->sampledObject = FindFirstObjectByIdMode1(self->world, self->second38, self->rootObject);
+    if (self->sampledObject == 0) return;
     for (i = 0; i < 24; i++) {
         s = &self->slots[i];
-        SlotObject* n = (SlotObject*)FindFirstObjectByIdMode1(self->world, s->fC, self->f3C);
-        s->n4 = n;
+        SlotObject* n = (SlotObject*)FindFirstObjectByIdMode1(self->world, s->id, self->rootObject);
+        s->object = n;
         if (n != 0) n->vtbl[7](n);
     }
     ComputeWrappedDeltas(0x20, 0x18, (u8*)self->slots, 0x10, 2, D_0026ABD0);
-    BuildCombinedBlendAnimation((Collider*)self->f3C, 0x20, 0x18, (u8*)self->slots, 1, D_0026ABE0, D_0026ABD8, (BlendAnimation**)&self->f3E4);
-    if (self->f3E4->f78 == 0) self->f3E4->f78 = 1;
-    void* nd = FindFirstObjectByIdMode1(self->world, 0x36, self->f3C);
-    if (nd != 0) SetBlendEntryRecordFlag(self->f3E4, nd);
+    BuildCombinedBlendAnimation((Collider*)self->rootObject, 0x20, 0x18, (u8*)self->slots, 1, D_0026ABE0, D_0026ABD8, (BlendAnimation**)&self->blendAnimation);
+    if (self->blendAnimation->f78 == 0) self->blendAnimation->f78 = 1;
+    void* nd = FindFirstObjectByIdMode1(self->world, 0x36, self->rootObject);
+    if (nd != 0) SetBlendEntryRecordFlag(self->blendAnimation, nd);
     f32 buf[24];
-    ComputeGridBlendWeights(self, buf, self->f54, self->f58, self->f5C);
+    ComputeGridBlendWeights(self, buf, self->blendX, self->blendY, self->blendZ);
     GridBlendSlot* d = self->slots;
     f32* src = buf;
     for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
-    SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
-    SampleAnimationFrameChain(self->f3E4, self->f3E4->pC0->p8->f8, 0.0f, (PlacedObject*)self->f40, (PlacedObject*)self->f3C, 1,
-                  (Vec02*)&self->q70, 0, 0, 0);
-    self->f60 = self->f3E4->pC0->p8->f8;
-    if (self->f80 != 0) {
-        ComputeGridBlendWeights(self, buf, self->f84, self->f88, self->f8C);
+    SetBlendItemWeights(self->blendAnimation, 0x20, 0x18, self->slots);
+    SampleAnimationFrameChain(self->blendAnimation, self->blendAnimation->pC0->p8->f8, 0.0f, (PlacedObject*)self->sampledObject, (PlacedObject*)self->rootObject, 1,
+                  (Vec02*)&self->blendPoint, 0, 0, 0);
+    self->sampleTime = self->blendAnimation->pC0->p8->f8;
+    if (self->hasSecondVector != 0) {
+        ComputeGridBlendWeights(self, buf, self->secondBlendX, self->secondBlendY, self->secondBlendZ);
         d = self->slots;
         src = buf;
         for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
-        SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
-        SampleAnimationFrameChain(self->f3E4, self->f3E4->pC0->p8->f8, 0.0f, (PlacedObject*)self->f40, (PlacedObject*)self->f3C, 1,
-                      (Vec02*)&self->q90, 0, 0, 0);
+        SetBlendItemWeights(self->blendAnimation, 0x20, 0x18, self->slots);
+        SampleAnimationFrameChain(self->blendAnimation, self->blendAnimation->pC0->p8->f8, 0.0f, (PlacedObject*)self->sampledObject, (PlacedObject*)self->rootObject, 1,
+                      (Vec02*)&self->originPoint, 0, 0, 0);
     } else {
-        self->q90 = self->q70;
+        self->originPoint = self->blendPoint;
     }
     self->f50 = 1;
 }
@@ -1968,13 +1968,13 @@ void BlendCellCornerRecords(AimBlendGrid* self, GridCell* cell, Quad16* point)
     }
     for (i = 0; i < 4; i++) {
         f32 w = weight[i];
-        f32* record = (f32*)self->fC4[cell->corner[i]].pos;
+        f32* record = (f32*)self->pointRecords[cell->corner[i]].pos;
         for (k = 0; k < 24; k++) {
             f32* out = (f32*)self->slots;
             out[k * 8] += record[k] * w;
         }
     }
-    SetBlendItemWeights(self->f3E4, 0x20, 0x18, self->slots);
+    SetBlendItemWeights(self->blendAnimation, 0x20, 0x18, self->slots);
 }
 
 void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 x, f32 y, f32 z)
@@ -2037,29 +2037,29 @@ void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 x, f32 y, f32 z)
 
 void DecodeAimBlendGridIndex(AimBlendGrid* self, s32 p, f32* out0, f32* out1, f32* out2)
 {
-    s32 n = self->f48;
+    s32 n = self->resolution;
     s32 q = p / ((n + 1) * (3 * n + 1));
     s32 r = p - q * (n + 1) * (3 * n + 1);
     s32 m = r / (3 * n + 1);
     s32 s = r - m * (3 * n + 1);
-    *out0 = (f32)(q - n) / (f32)self->f48;
-    *out1 = (f32)m / (f32)self->f48;
-    *out2 = (f32)s / (f32)self->f48;
+    *out0 = (f32)(q - n) / (f32)self->resolution;
+    *out1 = (f32)m / (f32)self->resolution;
+    *out2 = (f32)s / (f32)self->resolution;
 }
 
 void SetAimBlendGridVector(AimBlendGrid* value, f32 x, f32 y, f32 z)
 {
-    value->f54 = x;
-    value->f58 = y;
-    value->f5C = z;
+    value->blendX = x;
+    value->blendY = y;
+    value->blendZ = z;
 }
 
 void SetAimBlendGridVectorFlagged(AimBlendGrid* self, f32 x, f32 y, f32 z)
 {
-    self->f80 = 1;
-    self->f54 = x;
-    self->f58 = y;
-    self->f5C = z;
+    self->hasSecondVector = 1;
+    self->blendX = x;
+    self->blendY = y;
+    self->blendZ = z;
 }
 
 // What func_0019CE50 reads: an object to place at a time (+0x18) and a point in its frame (+0x40).
@@ -2106,25 +2106,25 @@ struct TreePlane {
 u8* FindPlaneTreeLeafAtPoint(AimBlendGrid* self, AimPlaneNode* node, Vec02* pt)
 {
     if (node == 0) {
-        node = self->fD8;
+        node = self->nodes;
     }
     for (;;) {
         TreePlane* plane = (TreePlane*)node->a;
         f32 d = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(*pt), Vu0::Q(plane->normal))) - plane->dist;
         if (d < -0.0001f) {
             if (node->b == 0) {
-                return self->fDC[node - self->fD8].a;
+                return self->leaves[node - self->nodes].a;
             }
             node = (AimPlaneNode*)node->b;
         } else if (d > 0.0001f) {
             if (node->c == 0) {
-                return self->fDC[node - self->fD8].b;
+                return self->leaves[node - self->nodes].b;
             }
             node = (AimPlaneNode*)node->c;
         } else {
             u8* r;
             if (node->c == 0) {
-                r = self->fDC[node - self->fD8].b;
+                r = self->leaves[node - self->nodes].b;
             } else {
                 r = FindPlaneTreeLeafAtPoint(self, (AimPlaneNode*)node->c, pt);
             }
@@ -2132,7 +2132,7 @@ u8* FindPlaneTreeLeafAtPoint(AimBlendGrid* self, AimPlaneNode* node, Vec02* pt)
                 return r;
             }
             if (node->b == 0) {
-                return self->fDC[node - self->fD8].a;
+                return self->leaves[node - self->nodes].a;
             }
             node = (AimPlaneNode*)node->b;
         }
@@ -2202,7 +2202,7 @@ void TrackAimTargetObject(Player* self, AimBlendGrid* x, void* y)
     GridCell* w20;
     s32 w24;
     if (y != 0) {
-        f32 d = self->f2424 - g_gameClock[1];
+        f32 d = self->aimEndTime - g_gameClock[1];
         if (d < g_gameClock[2]) {
             d = g_gameClock[2];
         }

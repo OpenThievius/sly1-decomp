@@ -17,37 +17,37 @@
 #include "memory_card.h"
 #include "layout_137228.h"
 
-extern const char D_0024DCB0[24] = "Nate Fox\nHokyo Lim";
-extern const char D_0024DCC8[32] = "Rob McDaniel\nSuzanne Kaufmann";
-extern const char D_0024DCE8[80] = "Rob McDaniel\nDev Madan\nAugie Pagan\nKarin Yamagiwa\nHokyo Lim\nSuzanne Kaufmann";
-extern const char D_0024DD38[40] = "Bruce Oberg\nRob McDaniel\nHokyo Lim";
-extern const char D_0024DD60[32] = "Rob McDaniel\nChris Heidorn";
-extern const char D_0024DD80[32] = "Brian Fleming\nChris Bentzel";
-extern const char D_0024DDA0[40] = "Brian Fleming\nDJ Stiner\nRob McDaniel";
-extern const char D_0024DDC8[40] = "Brian Fleming\nNate Fox\nTravis Kotzesbue";
-extern const char D_0024DDF0[32] = "Bruce Oberg\nNate Fox\nMatt Olsen";
-extern const char D_0024DE10[40] = "Chris Zimmerman\nMatt Olsen\nBruce Oberg";
-extern const char D_0024DE38[24] = "Nate Fox\nChris Bentzel";
-extern const char D_0024DE50[32] = "Rob McDaniel\nBrian Fleming";
-extern const char D_0024DE70[40] = "Nate Fox\nMatt Olsen\nAndrew Woods";
-extern const char D_0024DE98[40] = "Nate Fox\nBrian Fleming\nReid Johnson";
-extern const char D_0024DEC0[48] = "Suzanne Kaufmann\nKelle DeForrest\nRob McDaniel";
-extern const char D_0024DEF0[32] = "Chris Bentzel\nKelle DeForrest";
-extern const char D_0024DF10[64] = "Rob McDaniel\nSuzanne Kaufmann\nAndrew Woods\nKarin Yamagiwa";
-extern const char D_0024DF50[40] = "Nate Fox\nMatthew Morgaine\nChris Heidorn";
-extern const char D_0024DF78[40] = "Bruce Oberg\nGary Burd\nChris Bentzel";
-extern const char D_0024DFA0[24] = "Nate Fox\nMatt Olsen";
-extern const char D_0024DFB8[32] = "Rob McDaniel\nDarrell Plank";
-extern const char D_0024DFD8[24] = "Nate Fox\nAndrew Woods";
-extern const char D_0024DFF0[40] = "Chris Bentzel\nIan Stout\nKelle DeForrest";
-extern const char D_0024E018[32] = "Chris Bentzel\nRob McDaniel";
-extern const char D_0024E038[40] = "Rob McDaniel\nAugie Pagan\nAndrew Woods";
-extern const char D_0024E060[40] = "Matthew Morgaine\nChris Zimmerman";
-extern const char D_0024E088[32] = "Nate Fox\nChris Zimmerman";
-extern const char D_0024E0A8[32] = "Nate Fox\nMatthew Morgaine";
-extern const char D_0024E0C8[48] = "Matthew Morgaine\nMatt Olsen\nChris Bentzel";
-extern const char D_0024E0F8[32] = "Suzanne Kaufmann\nChris Bentzel";
-extern const char D_0024E118[40] = "Rob McDaniel\nDev Madan\nTravis Kotzesbue";
+extern const char g_levelCredits0100[24] = "Nate Fox\nHokyo Lim";
+extern const char g_levelCredits0102[32] = "Rob McDaniel\nSuzanne Kaufmann";
+extern const char g_levelCredits0103[80] = "Rob McDaniel\nDev Madan\nAugie Pagan\nKarin Yamagiwa\nHokyo Lim\nSuzanne Kaufmann";
+extern const char g_levelCredits0104[40] = "Bruce Oberg\nRob McDaniel\nHokyo Lim";
+extern const char g_levelCredits0105[32] = "Rob McDaniel\nChris Heidorn";
+extern const char g_levelCredits0106[32] = "Brian Fleming\nChris Bentzel";
+extern const char g_levelCredits0107[40] = "Brian Fleming\nDJ Stiner\nRob McDaniel";
+extern const char g_levelCredits0200[40] = "Brian Fleming\nNate Fox\nTravis Kotzesbue";
+extern const char g_levelCredits0202[32] = "Bruce Oberg\nNate Fox\nMatt Olsen";
+extern const char g_levelCredits0204[40] = "Chris Zimmerman\nMatt Olsen\nBruce Oberg";
+extern const char g_levelCredits0205[24] = "Nate Fox\nChris Bentzel";
+extern const char g_levelCredits0207[32] = "Rob McDaniel\nBrian Fleming";
+extern const char g_levelCredits0300[40] = "Nate Fox\nMatt Olsen\nAndrew Woods";
+extern const char g_levelCredits0302[40] = "Nate Fox\nBrian Fleming\nReid Johnson";
+extern const char g_levelCredits0303[48] = "Suzanne Kaufmann\nKelle DeForrest\nRob McDaniel";
+extern const char g_levelCredits0304[32] = "Chris Bentzel\nKelle DeForrest";
+extern const char g_levelCredits0305[64] = "Rob McDaniel\nSuzanne Kaufmann\nAndrew Woods\nKarin Yamagiwa";
+extern const char g_levelCredits0306[40] = "Nate Fox\nMatthew Morgaine\nChris Heidorn";
+extern const char g_levelCredits0307[40] = "Bruce Oberg\nGary Burd\nChris Bentzel";
+extern const char g_levelCredits0400[24] = "Nate Fox\nMatt Olsen";
+extern const char g_levelCredits0402[32] = "Rob McDaniel\nDarrell Plank";
+extern const char g_levelCredits0403[24] = "Nate Fox\nAndrew Woods";
+extern const char g_levelCredits0404[40] = "Chris Bentzel\nIan Stout\nKelle DeForrest";
+extern const char g_levelCredits0405[32] = "Chris Bentzel\nRob McDaniel";
+extern const char g_levelCredits0406[40] = "Rob McDaniel\nAugie Pagan\nAndrew Woods";
+extern const char g_levelCredits0407[40] = "Matthew Morgaine\nChris Zimmerman";
+extern const char g_levelCredits0502[32] = "Nate Fox\nChris Zimmerman";
+extern const char g_levelCredits0503[32] = "Nate Fox\nMatthew Morgaine";
+extern const char g_levelCredits0504[48] = "Matthew Morgaine\nMatt Olsen\nChris Bentzel";
+extern const char g_levelCredits0505[32] = "Suzanne Kaufmann\nChris Bentzel";
+extern const char g_levelCredits0506[40] = "Rob McDaniel\nDev Madan\nTravis Kotzesbue";
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
@@ -61,7 +61,7 @@ struct BestTimeTextStyle {
     f32 fC;
     f32 f10;
     f32 f14;
-    s32 f18;
+    s32 color;
     BestTimeTextStyle(s32 a, s32 b)
     {
         FillMemory(this, 0, 0x1C);
@@ -69,7 +69,7 @@ struct BestTimeTextStyle {
         f8 = a;
         fC = b;
         f14 = f10 = 0.3f;
-        f18 = (s32)0xFF7D4B00;
+        color = (s32)0xFF7D4B00;
     }
 };
 BestTimeTextStyle g_commentaryFrameStyle(2, 1);
@@ -91,7 +91,7 @@ void* FindLevelEntry(s32 key)
     return 0;
 }
 
-// The record a level entry keeps at +8 (World::f2310 points to it; func_001E00B0 streams it):
+// The record a level entry keeps at +8 (World::commentaryRecord points to it; func_001E00B0 streams it):
 // its two words at +4 and +0x1C differ while there is commentary to play.
 struct CommentaryRecord { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 differs() { if (this == 0) return 0; return a != b; } };
 
@@ -108,16 +108,16 @@ void InitCommentaryPromptElement(T217D_1380* self)
     const LevelEntry* e;
 
     SetupScreenElementText(self);
-    e = (const LevelEntry*)FindLevelEntry((g_saveData->f19D8 << 8) | g_saveData->f19DC);
+    e = (const LevelEntry*)FindLevelEntry((g_saveData->levelIndex << 8) | g_saveData->entryIndex);
     if (e) {
-        if (e->f04 != 0.0f) {
-            g_currentWorld->f230C = e->f04;
+        if (e->timerDuration != 0.0f) {
+            g_currentWorld->timerDuration = e->timerDuration;
         }
-        if (!(((CommentaryRecord*)g_currentWorld->f2310)->differs())) {
-            g_currentWorld->f2310 = (CommentaryRecord*)e->record;
+        if (!(((CommentaryRecord*)g_currentWorld->commentaryRecord)->differs())) {
+            g_currentWorld->commentaryRecord = (CommentaryRecord*)e->record;
         }
-        if (g_currentWorld->f2314 == 0 || !GetStringLength((const char*)g_currentWorld->f2314)) {
-            g_currentWorld->f2314 = (void*)e->credits;
+        if (g_currentWorld->creditsText == 0 || !GetStringLength((const char*)g_currentWorld->creditsText)) {
+            g_currentWorld->creditsText = (void*)e->credits;
         }
     }
     if (IsFontLoaded(2)) {
@@ -126,13 +126,13 @@ void InitCommentaryPromptElement(T217D_1380* self)
     }
     SetScreenElementScale(self, 0.6f);
     *(s32*)((u8*)self + 0x208) = (s32)0xDF7F7F7Fu;
-    if (CheckEntryThreeBitRequirement(g_currentWorld, (g_saveData->f19D8 << 8) | g_saveData->f19DC)) {
+    if (CheckEntryThreeBitRequirement(g_currentWorld, (g_saveData->levelIndex << 8) | g_saveData->entryIndex)) {
         SetBestTimeState(self, 1);
     } else {
         SetBestTimeState(self, 0);
     }
     if (g_currentEntry->bits & 8) {
-        if (((CommentaryRecord*)g_currentWorld->f2310)->differs()) {
+        if (((CommentaryRecord*)g_currentWorld->commentaryRecord)->differs()) {
             self->vt->m08(self, "Press &2L&. for Bonus Commentary");
             SetScreenElementHoldTime(self, 5.0f);
             self->vt->m14(self);
@@ -152,7 +152,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 extern f32 g_gameTime;
 extern s32 D_002701C4;
-extern s32 D_002623DC;
+extern s32 g_timerRateExponent;
 
 struct KeyRecord;
 void ClearPadPressedBits(PadRecord* self, u32 mask);
@@ -172,10 +172,10 @@ void UpdateBestTimeState(T217D_1380* self)
         if (self->pressed != 0) {
         if (g_padRecord.flags & 4) {
             ClearPadPressedBits(&g_padRecord, 4);
-            StartLockedStreamVoice((KeyRecord*)g_currentWorld->f2310);
-            if (g_currentWorld->f2314 != 0) {
+            StartLockedStreamVoice((KeyRecord*)g_currentWorld->commentaryRecord);
+            if (g_currentWorld->creditsText != 0) {
                 SetScreenElementHoldTime(self, 15.0f);
-                self->vt->m08(self, (const char*)g_currentWorld->f2314);
+                self->vt->m08(self, (const char*)g_currentWorld->creditsText);
             } else {
                 self->vt->m15(self);
             }
@@ -195,7 +195,7 @@ void UpdateBestTimeState(T217D_1380* self)
             SetBestTimeState(self, 3);
             return;
         }
-        SetTimerRate(o, -Power(2.0f, (f32)D_002623DC));
+        SetTimerRate(o, -Power(2.0f, (f32)g_timerRateExponent));
         r = AreMenusAndFadeClear();
         if (r) o->vt->m14(o); else o->vt->m15(o);
         if (g_currentEntry->flags & 8) {
@@ -208,7 +208,7 @@ void UpdateBestTimeState(T217D_1380* self)
     }
 }
 
-extern s32 D_002623DC;
+extern s32 g_timerRateExponent;
 
 void StopTimer(T217D_510* o);
 struct PlayingSound;
@@ -253,8 +253,8 @@ void SetBestTimeState(T217D_1380* self, s32 n)
         StartSoundEffect(0x6D, 0, 0, 0, 3000.0f, 300.0f, one, zero, zero, 0, 0);
         SetSpareCount(0);
         PopActiveSequenceElement(g_currentWorld);
-        StartTimer(&g_timerElement, g_currentWorld->f230C + 0.99f);
-        SetTimerRate(&g_timerElement, -Power(2.0f, (f32)D_002623DC));
+        StartTimer(&g_timerElement, g_currentWorld->timerDuration + 0.99f);
+        SetTimerRate(&g_timerElement, -Power(2.0f, (f32)g_timerRateExponent));
         SetTimerLimit(&g_timerElement, zero, 0);
         StartTimerCounting(&g_timerElement);
         G27C230* cam = g_currentEntry;

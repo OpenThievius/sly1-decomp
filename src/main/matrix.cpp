@@ -41,14 +41,14 @@ struct HomogeneousMatrix {
     Quad16 q30;
 };
 // The fourth row of a 4x4 matrix: 0 0 0 1.
-extern const Quad16 D_0024B260 = { { 0, 0, 0, 0x3F800000 } };
+extern const Quad16 g_unitWQuad = { { 0, 0, 0, 0x3F800000 } };
 
 void ResetMatrixHomogeneous(HomogeneousMatrix* self)
 {
     self->f0C = 0;
     self->f1C = 0;
     self->f2C = 0;
-    self->q30 = D_0024B260;
+    self->q30 = g_unitWQuad;
 }
 
 void* CopyRotationMatrix(Quad16* destination, const Quad16* source)

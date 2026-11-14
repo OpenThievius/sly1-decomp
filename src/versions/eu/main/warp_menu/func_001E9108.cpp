@@ -67,7 +67,7 @@ void UpdateElementStack(ElementStack* obj)
         if (g_screenFade.mode) break;
         {
             u32 v = s2->flags;
-            if ((v & 0x800) || (s2->f14 == 1 && 5.0f <= g_gameClock.time)) {
+            if ((v & 0x800) || (s2->connectionMode == 1 && 5.0f <= g_gameClock.time)) {
                 SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0);
                 s1 = obj->state;
                 ClearPadPressedBits(s2, 0x800);

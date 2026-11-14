@@ -12,7 +12,7 @@ void AdvanceCodeChecksum(MoviePlayer* self_)
     Obj_18F610_eu* self = (Obj_18F610_eu*)self_;
     if (self->remain > 0) {
         s32 n = self->remain - 4;
-        u32* tab = (u32*)D_005A2E60;
+        u32* tab = (u32*)g_movieCrcTable;
         u8* p = self->cur;
         u8* nxt = p + 4;
         u32 c0 = self->crc;

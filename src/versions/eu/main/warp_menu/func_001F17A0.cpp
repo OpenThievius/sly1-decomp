@@ -12,8 +12,8 @@ void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
     if (o != 0) {
         TransformPointBetweenFrames((PlacedObject*)o->parent, self, (Vec02*)((u8*)o + 0x40), &v);
         Camera* g = g_camera;
-        Vu0::Q(v) = Vu0::Rotate(g->f80, Vu0::Q(v));
-        Vu0::Q(v) = Vu0::Add(Vu0::Q(g->f40), Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Rotate(g->rotation, Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Add(Vu0::Q(g->position), Vu0::Q(v));
         ProjectPointToCamera(g, &v, out);
         out[0] = out[0] * 320.0f + 320.0f;
         out[1] = out[1] * -234.30508f + 234.30508f;

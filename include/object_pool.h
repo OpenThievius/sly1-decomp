@@ -18,14 +18,14 @@ struct Quad16;
 // 0x3C: a record shared with the object this one was copied from (func_001A84C8).
 struct Sub8C {
     s32 f0;                 // 0x0
-    s32 f4;                 // 0x04: nonzero while the record is lent out
+    s32 lentOut;            // 0x04: nonzero while the record is lent out
     s32 f8;                 // 0x08
     union {
         s32 fC;             // 0xC
         Quad16* qC;         // 0x0C: two quadwords per entry, allocated by func_001A8208
     };
     s32 f10;                // 0x10
-    void* f14;              // 0x14: the object it was lent to
+    void* lentTo;           // 0x14: the object it was lent to
 };
 
 // 0x110: three values func_001A7FE8 resets (0, 1.0f, 0).
@@ -51,8 +51,8 @@ struct ObjectPool : BaseObject {
     ObjectPoolEntry* items; // 0x38
     Sub8C* sub;             // 0x3C
     s32 f40;                // 0x40
-    s32 f44;                // 0x44
-    s32 f48;                // 0x48: the item chosen (func_001A8AF8); func_001A8C50 tests it, func_001A93C8 clears it
+    s32 lastItemIndex;      // 0x44: the index of the entry the last choice came from
+    s32 chosenItem;         // 0x48: the item chosen (func_001A8AF8); func_001A8C50 tests it, func_001A93C8 clears it
     s32 id4C;               // 0x4C: object ids, -1 for none (set by func_001A7FE8,
     s32 id50;               // 0x50  looked up by func_001A8590)
     s32 id54;               // 0x54
@@ -81,7 +81,7 @@ struct ObjectPool : BaseObject {
     u8 pad148[0x160 - 0x148];
     void* f160;             // 0x160
     void* f164;             // 0x164
-    s32 f168;               // 0x168: set once the ids are looked up
+    s32 idsResolved;        // 0x168: set once the ids are looked up
     u8 pad16C[0x170 - 0x16C];
 };
 

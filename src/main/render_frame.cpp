@@ -49,26 +49,26 @@ extern Camera* g_camera;
 struct GsWriterState {
     u8* end;                    // 0x00
     u8* begin;                  // 0x04
-    s32* f08;                   // 0x08
+    s32* packetHeader;          // 0x08
     u8* cur;                    // 0x0C
-    s32 f10;                    // 0x10
-    s32 f14;                    // 0x14
+    s32 padsOnClose;            // 0x10
+    s32 callsCloseHook;         // 0x14
     const PacketWriterVt* vt;   // 0x18
-    u32* f1C;                   // 0x1C
-    u32 f20;                    // 0x20
-    u32 f24;                    // 0x24: the GIF entry count
+    u32* openHeader;            // 0x1C
+    u32 elementCount;           // 0x20
+    u32 entryCount;             // 0x24: the GIF entry count
 };
 
 struct VifWriterState {
     u8* end;                    // 0x00
     u8* begin;                  // 0x04
-    s32* f08;                   // 0x08
+    s32* packetHeader;          // 0x08
     u8* cur;                    // 0x0C
-    s32 f10;                    // 0x10
-    s32 f14;                    // 0x14
+    s32 padsOnClose;            // 0x10
+    s32 callsCloseHook;         // 0x14
     const PacketWriterVt* vt;   // 0x18
-    u32* f1C;                   // 0x1C
-    u32 f20;                    // 0x20
+    u32* openHeader;            // 0x1C
+    u32 elementCount;           // 0x20
 };
 
 typedef char check_GsWriterState[sizeof(GsWriterState) == 0x28 ? 1 : -1];
@@ -130,8 +130,8 @@ void RemoveFromList(List01* list, void* item);
 // The packet memory a GIF writer fills: quadwords.
 typedef u64 UQuadword128 __attribute__((mode(TI)));
 
-extern u8 D_00212160[];
-extern u8 D_00215C50[];
+extern u8 g_groupMicroprogram[];
+extern u8 g_groupMicroprogramEnd[];
 
 PacketWriter* InitGifPacket(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
@@ -163,7 +163,7 @@ void ActivateRenderFrame(void* a, s32 b);
 void ConstructPacketWriters(s32 flag, s32 code);
 
 void AddDmaRefTag(void* list, u32 count, s32 value);
-extern s32 D_0026230C;
+extern s32 g_lastDmaRefStart;
 
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
@@ -176,8 +176,8 @@ void CloseDrawBuffer(void* obj, void* a, u8** b);
 void ClearList(List01* p);
 extern "C" s32 PostSemaphore(void* a);
 
-extern List01 D_002622E0;
-extern List01 D_002622F0;
+extern List01 g_deferredReleaseListA;
+extern List01 g_deferredReleaseListB;
 extern List01 g_deferredReleaseListC;
 extern s32 g_buildFrameData;
 extern void* g_frameReadySemaphore;
@@ -196,8 +196,8 @@ void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 
 
 
-extern u32 D_002C3B00[];
-extern u8 D_00148D74[];
+extern u32 g_packetBufferMemory[];
+extern u8 g_codeChecksumSize[];
 extern s32 g_codeChecksumFailed;
 
 extern void* g_frameDoneSemaphore;
@@ -216,7 +216,7 @@ void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 
 // NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
 
-extern u8 D_003C3B00[], D_005C3B00[];
+extern u8 g_vifPacketMemory[], g_renderFrameDataMemory[];
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
 extern s32 g_mainAndRenderThreads[];
@@ -229,7 +229,7 @@ void func_0015E678(void);
 
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
-extern u32 D_00262314;
+extern u32 g_renderFrameIndex;
 extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
 extern s32 D_002626CC;
@@ -246,9 +246,9 @@ void FlipDisplayFrame(void);
 
 struct FrameNode {
     u8 pad0[0x14];
-    u8* f14;
+    u8* owner;
     u8 pad18[0x1088 - 0x18];
-    void* f1088;
+    void* pooledSlot;
 };
 
 
@@ -335,21 +335,21 @@ void InitRenderFrames(void)
 {
     for (u32 i = 0; i < 2; i++) {
         RenderFrame* r = &g_renderFrames[i];
-        r->bufA = (u8*)D_002C3B00 + i * 0x80000;
-        r->bufB = D_003C3B00 + i * 0x100000;
-        r->f10 = D_005C3B00 + i * 0x10600;
-        SetListLinkOffset(&r->l20, 0x630);
-        SetListLinkOffset(&r->l2C, 0x1090);
-        SetListLinkOffset(&r->l38, 0xB8);
+        r->bufA = (u8*)g_packetBufferMemory + i * 0x80000;
+        r->bufB = g_vifPacketMemory + i * 0x100000;
+        r->frameData = g_renderFrameDataMemory + i * 0x10600;
+        SetListLinkOffset(&r->releasedObjects, 0x630);
+        SetListLinkOffset(&r->detachedRecords, 0x1090);
+        SetListLinkOffset(&r->deferredReleases, 0xB8);
     }
-    SetListLinkOffset(&D_002622E0, 0x630);
-    SetListLinkOffset(&D_002622F0, 0x1090);
+    SetListLinkOffset(&g_deferredReleaseListA, 0x630);
+    SetListLinkOffset(&g_deferredReleaseListB, 0x1090);
     SetListLinkOffset(&g_deferredReleaseListC, 0xB8);
     AddInterruptHandler(5, (void (*)(void))((u8*)func_0015E678 + 0x30), 0);
     EnableInterruptCause(5);
     g_frameReadySemaphore = CreateLockSemaphore(0, 2);
     g_frameDoneSemaphore = CreateLockSemaphore(2, 2);
-    u32* tab = (u32*)D_002C3B00;
+    u32* tab = (u32*)g_packetBufferMemory;
     s32 n = 0;
     do {
         u32 c = n;
@@ -381,20 +381,20 @@ void BeginRenderFrame(void)
         RenderFrame* slot = g_buildFrame;
         s32 v = *(s32*)((u8*)g_camera + 0x21C);
         slot->flags = 0;
-        slot->f44 = v;
-        slot->f1C = 0;
+        slot->imageMask = v;
+        slot->hasMaskedImages = 0;
         UsePacketBufferMemory((PacketWriter*)&g_gsPacketWriter, 0x8000, slot->bufA);
     }
     UsePacketBufferMemory((PacketWriter*)&g_vifPacketWriter, 0x10000, g_buildFrame->bufB);
-    g_buildFrameData = g_buildFrame->i10;
+    g_buildFrameData = g_buildFrame->frameDataWord;
     BeginDmaTag((PacketWriter*)&g_gsPacketWriter);
     BeginDmaTag((PacketWriter*)&g_vifPacketWriter);
 }
 
 void AddDmaRefTagIfChanged(void* list, s32 value, s32 end)
 {
-    if (D_0026230C != value) {
-        D_0026230C = value;
+    if (g_lastDmaRefStart != value) {
+        g_lastDmaRefStart = value;
         AddDmaRefTag(list, ((u32)(end - value) + 15) >> 4, value);
     }
 }
@@ -411,7 +411,7 @@ void WriteGsFinishPacket(void* self, void* p, u8** n)
     EndGifPacket((PacketWriter*)buf);
     WriteVifFlush((PacketWriter*)self);
     WriteVifDirectFromWriter((PacketWriter*)self, (PacketWriter*)buf);
-    AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
+    AddDmaRefTagIfChanged(self, g_groupMicroprogram, g_groupMicroprogramEnd);
     AddDmaEndTag((PacketWriter*)self);
     DetachPacketBuffer((PacketWriter*)self, (u32*)p, n);
 }
@@ -429,11 +429,11 @@ void SubmitRenderFrame(void)
 {
     WriteGsFinishPacket((PacketWriter*)&g_vifPacketWriter, (u8*)g_buildFrame + 8, 0);
     CloseDrawBuffer((PacketWriter*)&g_gsPacketWriter, g_buildFrame, 0);
-    g_buildFrame->l20 = D_002622E0;
-    ClearList(&D_002622E0);
-    g_buildFrame->l2C = D_002622F0;
-    ClearList(&D_002622F0);
-    g_buildFrame->l38 = g_deferredReleaseListC;
+    g_buildFrame->releasedObjects = g_deferredReleaseListA;
+    ClearList(&g_deferredReleaseListA);
+    g_buildFrame->detachedRecords = g_deferredReleaseListB;
+    ClearList(&g_deferredReleaseListB);
+    g_buildFrame->deferredReleases = g_deferredReleaseListC;
     ClearList(&g_deferredReleaseListC);
     g_buildFrameData = 0;
     g_buildFrame = 0;
@@ -442,9 +442,9 @@ void SubmitRenderFrame(void)
 
 void ActivateRenderFrame(RenderFrame* self)
 {
-    g_drawFrameData = self->i10;
-    SwitchActiveImageMask(self->f44);
-    if (self->f1C != 0 && g_maskedImagesPacket != 0) {
+    g_drawFrameData = self->frameDataWord;
+    SwitchActiveImageMask(self->imageMask);
+    if (self->hasMaskedImages != 0 && g_maskedImagesPacket != 0) {
         *(volatile s32*)0x10003010 = 4;
         StartDmaChain((DmaChannel*)g_gifChannel, (void*)g_maskedImagesPacket);
     }
@@ -452,8 +452,8 @@ void ActivateRenderFrame(RenderFrame* self)
 
 void VerifyCodeChecksum(void)
 {
-    const u8* table = (const u8*)D_002C3B00;
-    s32 n = (s32)D_00148D74;
+    const u8* table = (const u8*)g_packetBufferMemory;
+    s32 n = (s32)g_codeChecksumSize;
     u32 crc = 0xFFFFFFFF;
     u32* p = (u32*)0x00100000;
     if (n > 0) {
@@ -479,10 +479,10 @@ void RunRenderThread(void)
         g_renderThreadWaiting = 1;
         AwaitSemaphore(g_frameReadySemaphore);
         g_renderThreadWaiting = 0;
-        g_drawingFrame = &g_renderFrames[D_00262314];
-        D_00262314++;
-        if (D_00262314 >= 2) {
-            D_00262314 = 0;
+        g_drawingFrame = &g_renderFrames[g_renderFrameIndex];
+        g_renderFrameIndex++;
+        if (g_renderFrameIndex >= 2) {
+            g_renderFrameIndex = 0;
         }
         ActivateRenderFrame((RenderFrame*)g_drawingFrame);
         ApplyPendingDisplayFlip();
@@ -511,31 +511,31 @@ void ReleaseFrameNodes(RenderFrame* self)
 {
     ListFrame it;
     FrameNode* n;
-    if (IsListEmpty(&self->l20) == 0) {
-        BeginListWalk::Of(&it, &self->l20);
+    if (IsListEmpty(&self->releasedObjects) == 0) {
+        BeginListWalk::Of(&it, &self->releasedObjects);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
-            RemoveFromList(&self->l20, n);
-            AppendToList((List01*)(n->f14 + 0x1CC0), n);
+            RemoveFromList(&self->releasedObjects, n);
+            AppendToList((List01*)(n->owner + 0x1CC0), n);
         }
-        ClearList(&self->l20);
+        ClearList(&self->releasedObjects);
         g_activeListFrames = it.prev;
     }
-    if (IsListEmpty(&self->l2C) == 0) {
-        BeginListWalk::Of(&it, &self->l2C);
+    if (IsListEmpty(&self->detachedRecords) == 0) {
+        BeginListWalk::Of(&it, &self->detachedRecords);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
-            if (n->f1088 != 0) {
-                PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1B4C), n->f1088);
+            if (n->pooledSlot != 0) {
+                PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1B4C), n->pooledSlot);
             }
-            RemoveFromList(&self->l2C, n);
+            RemoveFromList(&self->detachedRecords, n);
             PushFreeSlot(&g_currentWorld->pool1B40, n);
         }
-        ClearList(&self->l2C);
+        ClearList(&self->detachedRecords);
         g_activeListFrames = it.prev;
     }
-    if (IsListEmpty(&self->l38) == 0) {
-        BeginListWalk::Of(&it, &self->l38);
+    if (IsListEmpty(&self->deferredReleases) == 0) {
+        BeginListWalk::Of(&it, &self->deferredReleases);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
-            RemoveFromList(&self->l38, n);
+            RemoveFromList(&self->deferredReleases, n);
             PushFreeSlot(&g_currentWorld->pool1BF4, n);
         }
         g_activeListFrames = it.prev;
@@ -573,12 +573,12 @@ void DrainRenderFrames(s32 flag)
 
 // The two display buffers' register records (display.cpp): FRAME at +0 and DISPFB-style
 // words chosen by the frame counter's parity.
-extern u8 D_002624F0[];
+extern u8 g_fieldOffsetPacket0[];
 extern u8 D_00262500[];
-extern u8 D_002625E0[];
+extern u8 g_fieldOffsetPacket1[];
 extern u8 D_002625F0[];
 extern s32 g_displayFrameCounter;
-extern s32 D_002626C8;
+extern s32 g_displayFieldParity;
 void AddGifUvEntry(PacketWriter* p, s32 u, s32 v);
 void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 
@@ -599,7 +599,7 @@ void BlitFrameToDisplay(void)
     u64 frame = *(u64*)((g_displayFrameCounter & 1) ? D_002625F0 : D_00262500);
     AddGifRegisterWrite(&w, 0x3F, (u64)0);
     AddGifRegisterWrite(&w, 0x4E, FrameBits(frame) | ((u64)1 << 32));
-    u64 disp = *(u64*)((g_displayFrameCounter & 1) ? D_002624F0 : D_002625E0);
+    u64 disp = *(u64*)((g_displayFrameCounter & 1) ? g_fieldOffsetPacket0 : g_fieldOffsetPacket1);
     AddGifRegisterWrite(&w, 6, ((disp & 0x1FF) << 5) | (((disp >> 16) & 0x3F) << 14) | (((disp >> 24) & 0x3F) << 20) | 0x2A8000000ULL);
     AddGifRegisterWrite(&w, 0x14, (u64)0x61);
     AddGifRegisterWrite(&w, 8, (u64)5);
@@ -608,7 +608,7 @@ void BlitFrameToDisplay(void)
     AddGifRegisterWrite(&w, 1, 0x3F80000080808080ULL);
     AddGifRegisterWrite(&w, 0x40, 0xDE0001027F0000ULL);
     BeginGifTag(&w, 0x156, 2, 0x43);
-    s32 v = (D_002626C8 & 1) ? 0 : 8;
+    s32 v = (g_displayFieldParity & 1) ? 0 : 8;
     for (s32 x = 0; x < 0x280; x += 0x20) {
         AddGifUvEntry(&w, x << 4, v);
         AddGifXyzfEntry(&w, (x + 0x6C0) << 4, 0x7900, 0, 0);
@@ -650,15 +650,15 @@ s32 g_drawFrameData = 0;
 // size: pointer (lw/sw), 4 bytes before an 8-aligned next label
 RenderFrame* g_buildFrame = 0;
 // size: 12-byte record copied into Slot r20 by func_0015EC68, 4 bytes pad before 16-aligned next label
-List01 D_002622E0 = {};
+List01 g_deferredReleaseListA = {};
 // size: 12-byte record copied into Slot r2C by func_0015EC68, 4 bytes pad before 16-aligned next label
-List01 D_002622F0 = {};
+List01 g_deferredReleaseListB = {};
 // size: 12-byte record copied into Slot r38 by func_0015EC68
 List01 g_deferredReleaseListC = {};
-s32 D_0026230C = 0;
+s32 g_lastDmaRefStart = 0;
 // size: s32 (sw), 4-byte label
 s32 g_codeChecksumFailed = 0;
-u32 D_00262314 = 0;
+u32 g_renderFrameIndex = 0;
 // size: s32 (lw/sw), 4-byte label
 s32 g_nextBuildFrameIndex = 0;
 void* g_drawingFrame = 0;

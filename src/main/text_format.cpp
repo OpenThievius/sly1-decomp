@@ -108,7 +108,7 @@ extern "C" void PostSemaphore(void* a);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-extern u8 D_00275940[0x18];
+extern u8 g_hexDigits[0x18];
 
 extern "C" u64 DivideUnsigned64(u64 num, u64 den);
 extern "C" s64 RemainderUnsigned64(u64 num, u64 den);
@@ -135,8 +135,8 @@ struct FormatSpec {
     s32 width;      // 0x18
     s32 prec;       // 0x1C
     s32 length;     // 0x20: 1 'h', 2 'l' or 'L'
-    s32 f24;        // 0x24: a vector's count (3, or 4 for an upper-case letter)
-    s32 f28;        // 0x28: a matrix's rows ('v' for one)
+    s32 vectorCount; // 0x24: a vector's count (3, or 4 for an upper-case letter)
+    s32 matrixRows; // 0x28: a matrix's rows ('v' for one)
     u8 conv;        // 0x2C: the conversion letter, in lower case
     s8 pad2D[3];
     s32 upper;      // 0x30: the letter was upper case
@@ -244,7 +244,7 @@ s32 ConvertDoubleToS32(RegDouble* self);
 
 
 
-extern u8 D_00275940[];
+extern u8 g_hexDigits[];
 
 
 
@@ -266,7 +266,7 @@ union DoubleBits {
 
 
 extern u8 g_renderThreadStack[];
-extern u8 D_002832F0[];
+extern u8 g_globalPointer[];
 // The ids of the main thread and of the render thread func_001E2398 starts.
 struct ThreadIds { s32 main; s32 render; };
 extern ThreadIds g_mainAndRenderThreads;
@@ -291,9 +291,9 @@ extern "C" double ConvertS32ToDouble(s32 a);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // The file's .data, in retail's order; the labels only its assembly reads are included.
-u8 D_00275940[0x18] = "0123456789abcdef";
+u8 g_hexDigits[0x18] = "0123456789abcdef";
 ThreadIds g_mainAndRenderThreads = { 0, 0 };
-u8 D_00275960[4] = { 0 };
+u8 g_backgroundJobThread[4] = { 0 };
 s32 g_movieDecodeThread = 0;
 
 s32 ParseSignedDecimal(s8* s, s32* out)
@@ -447,13 +447,13 @@ s32 ParseFormatSpec(s8* at, FormatSpec* spec, s32** va)
                     if (g_charClassFlags[(s8)(u8)*p] & 1) {
                         a = 4;
                     }
-                    spec->f24 = a;
+                    spec->vectorCount = a;
                     d = *p;
                     l = (g_charClassFlags[d] & 1) ? d + 0x20 : d;
                     if (l ^ 0x76) {
                         r = a;
                     }
-                    spec->f28 = r;
+                    spec->matrixRows = r;
                     adv = 1;
                     break;
                 }
@@ -586,7 +586,7 @@ s32 WriteIntegerDigits(u8* buf, s32 len, u64 value, u32 radixArg)
     do {
         s64 digit = RemainderUnsigned64(v, radix);
         end--;
-        *end = D_00275940[(s32)digit];
+        *end = g_hexDigits[(s32)digit];
         v = DivideUnsigned64(v, radix);
     } while (v != 0 && end >= buf);
     s32 count = stop - end;
@@ -730,7 +730,7 @@ s8 GetDecimalDigit(RegDouble* self0, s32 a, s32 b)
         p = MultiplyDoubles(p, (u64)0x4024000000000000ULL);
         idx = ConvertDoubleToS32(SubtractDoubles(self, p));
     }
-    return ((s8*)&D_00275940)[idx];
+    return ((s8*)&g_hexDigits)[idx];
 }
 
 
@@ -794,7 +794,7 @@ s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
         }
         s32 d = (s32)Power(10.0f, 2.0f);
         for (s32 k = 2; k >= 0; k--) {
-            *out++ = D_00275940[e / d];
+            *out++ = g_hexDigits[e / d];
             e = (e % d) * 10;
         }
     }
@@ -894,7 +894,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
         FormatIntegerArg(sp, c, v);
         return;
     case 'e': case 'f': case 'g':
-        if (sp->f24 != 0) {
+        if (sp->vectorCount != 0) {
             const char* s4 = "
 ";
             u8* a = *va;
@@ -905,17 +905,17 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
             const char* s5 = ", ";
             const char* s6 = " }";
             f32* fp = *(f32**)a;
-            if (sp->f28 >= 2) {
+            if (sp->matrixRows >= 2) {
                 AppendToOutputBuffer(c, (void*)s4, GetStringLength(s4));
             }
-            for (s32 i = 0; i < sp->f28; ) {
+            for (s32 i = 0; i < sp->matrixRows; ) {
                 s32 next;
                 if (i != 0) {
                     AppendToOutputBuffer(c, (void*)s8, GetStringLength(s8));
                 }
                 next = i + 1;
                 AppendToOutputBuffer(c, (void*)s7, GetStringLength(s7));
-                for (s32 j = 0; j < sp->f24; j++) {
+                for (s32 j = 0; j < sp->vectorCount; j++) {
                     if (j != 0) {
                         AppendToOutputBuffer(c, (void*)s5, GetStringLength(s5));
                     }
@@ -924,7 +924,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
                 AppendToOutputBuffer(c, (void*)s6, GetStringLength(s6));
                 i = next;
             }
-            if (sp->f28 >= 2) {
+            if (sp->matrixRows >= 2) {
                 AppendToOutputBuffer(c, (void*)s4, GetStringLength(s4));
             }
         } else {
@@ -1130,7 +1130,7 @@ void CreateRenderThread(void)
     l.stackSize = 0x20000;
     l.stack = g_renderThreadStack;
     l.priority = 2;
-    l.gp = D_002832F0;
+    l.gp = g_globalPointer;
     l.entry = RunRenderThread;
     g_mainAndRenderThreads.render = MakeThread(&l);
 }

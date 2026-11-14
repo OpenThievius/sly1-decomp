@@ -68,47 +68,47 @@ void SampleAnimationFrameChain(BlendAnimationView* self, f32 t, f32 scale, Place
 
 struct GridBlendSlot {
     u8 pad0[4];
-    SlotObject* n4;             // 0x04: the object named by the id
+    SlotObject* object;         // 0x04: the object named by the id
     u8 pad8[4];
-    s32 fC;                 // 0x0C: the id read from the stream
+    s32 id;                 // 0x0C: the id read from the stream
     u8 pad10[0x10];
 };
 
 struct AimBlendGrid : BaseObject {
     s32 first34;            // 0x34: -1 at construction
     s32 second38;           // 0x38: -1 at construction
-    void* f3C;              // 0x3C
-    void* f40;              // 0x40
+    void* rootObject;       // 0x3C
+    void* sampledObject;    // 0x40
     u8 pad44[0x48 - 0x44];
-    s32 f48;                // 0x48: grid size, read from the stream
+    s32 resolution;         // 0x48: grid size, read from the stream
     u8 pad4C[0x50 - 0x4C];
     s32 f50;                // 0x50
-    f32 f54;                // 0x54
-    f32 f58;                // 0x58
-    f32 f5C;                // 0x5C
-    f32 f60;                // 0x60
+    f32 blendX;             // 0x54
+    f32 blendY;             // 0x58
+    f32 blendZ;             // 0x5C
+    f32 sampleTime;         // 0x60
     u8 pad64[0x70 - 0x64];
-    Quad16 q70;             // 0x70
-    s32 f80;                // 0x80
-    f32 f84;                // 0x84
-    f32 f88;                // 0x88
-    f32 f8C;                // 0x8C
-    Quad16 q90;             // 0x90
+    Quad16 blendPoint;      // 0x70
+    s32 hasSecondVector;    // 0x80
+    f32 secondBlendX;       // 0x84
+    f32 secondBlendY;       // 0x88
+    f32 secondBlendZ;       // 0x8C
+    Quad16 originPoint;     // 0x90
     u8 fA0[4];              // 0xA0: read by func_00137FB0 (the field after it, fA4, is a count)
-    s32 fA4;                // 0xA4
+    s32 pointCount;         // 0xA4
     u8 padA8[8];
-    u8* fB0;                // 0xB0
+    u8* faces;              // 0xB0
     u8 padB4[0xC4 - 0xB4];
-    GridRecord* fC4;             // 0xC4: fA4 records of 100 bytes
-    s32 fC8;                // 0xC8
-    u8* fCC;                // 0xCC: fC8 records of 16 bytes
-    s32 fD0;                // 0xD0
+    GridRecord* pointRecords;    // 0xC4: fA4 records of 100 bytes
+    s32 cellCount;          // 0xC8
+    u8* cells;              // 0xCC: fC8 records of 16 bytes
+    s32 nodeCount;          // 0xD0
     s32 fD4;                // 0xD4
-    AimPlaneNode* fD8;             // 0xD8
-    AimPlaneEdge* fDC;            // 0xDC
+    AimPlaneNode* nodes;           // 0xD8
+    AimPlaneEdge* leaves;         // 0xDC
     f32 fE0;                // 0xE0
     GridBlendSlot slots[24];       // 0xE4
-    BlendAnimationView* f3E4;             // 0x3E4
+    BlendAnimationView* blendAnimation;   // 0x3E4
     u8 pad3E8[0x3F0 - 0x3E8];
 };
 

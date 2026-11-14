@@ -153,7 +153,7 @@ struct FontHeader {
     u8 b5;
     u8 b6;
     u8 b7;
-    f32 f8;
+    f32 scale;
     u16 uC;
     u16 padE;
 };
@@ -163,8 +163,8 @@ struct FontHeader {
 struct BufferedStream;
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 void* AllocateFrontMemory(s32 n);
-extern s32 D_00262258;
-extern s32 D_0026225C;
+extern s32 g_glyphUOffset;
+extern s32 g_glyphVOffset;
 
 FontGlyph* FindFontGlyph(Font* self, s8 key);
 s32 AddFontImagesToFrame(Font* self, void* obj);
@@ -185,13 +185,13 @@ typedef signed long s64;
 typedef unsigned long u64;
 struct StringLayout
 {
-  f32 f0;
-  f32 f4;
-  f32 f8;
-  f32 fC;
-  s32 f10;
-  s32 f14;
-  s32 f18;
+  f32 x;
+  f32 y;
+  f32 width;
+  f32 height;
+  s32 color;
+  s32 horizontalAlign;
+  s32 verticalAlign;
 };
 
 
@@ -206,13 +206,13 @@ void PopFontScale(Font* font);
 void PushFontScale(Font* font, f32 a, f32 b);
 
 struct FrameGlyph {
-    Font* f0;
+    Font* font;
     s8 key;
     u8 p5[3];
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    f32 f14;
+    f32 paddingX;
+    f32 paddingY;
+    f32 scaleX;
+    f32 scaleY;
     u32 color;
 };
 struct FrameRect { f32 x, y, w, h; };
@@ -279,9 +279,9 @@ void CopyFontMetrics(Font* src, Font* dst)
     dst->sy = src->sy;
     dst->depth = src->depth;
     CopyMemory(dst->stack, src->stack, src->depth << 3);
-    dst->f30 = src->f30;
-    dst->f38 = src->f38;
-    dst->f40 = src->f40;
+    dst->useTestWord = src->useTestWord;
+    dst->testWord = src->testWord;
+    dst->drawZ = src->drawZ;
 }
 
 void SetFontClipRect(Font* unused, Vec4U* v, PacketWriter* obj)
@@ -379,9 +379,9 @@ void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip,
   f32 x;
   f32 y;
   self->vt->begin((Font*) (((u8*) self) + self->vt->adj4), clip, s);
-  if (par->f18 == 0)
+  if (par->verticalAlign == 0)
   {
-    y = par->f4;
+    y = par->y;
   }
   else
   {
@@ -399,13 +399,13 @@ void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip,
       }
       while ((*q) != 0);
     }
-    if (par->f18 == 2)
+    if (par->verticalAlign == 2)
     {
-      y = (par->f4 + par->fC) - h;
+      y = (par->y + par->height) - h;
     }
     else
     {
-      y = par->f4 + ((par->fC - h) * 0.5f);
+      y = par->y + ((par->height - h) * 0.5f);
     }
   }
   for (p = str; (*p) != 0; p = next)
@@ -423,9 +423,9 @@ void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip,
     {
       if (pending != 0)
       {
-        if (par->f14 == 0)
+        if (par->horizontalAlign == 0)
         {
-          x = par->f0;
+          x = par->x;
         }
         else
         {
@@ -435,18 +435,18 @@ void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip,
           {
             x += self->vt->width((Font *) (((u8 *) self) + self->vt->adj3), *q);
           }
-          if (par->f14 == right)
+          if (par->horizontalAlign == right)
           {
-            x = (par->f0 + par->f8) - x;
+            x = (par->x + par->width) - x;
           }
           else
           {
-            x = par->f0 + ((par->f8 - x) * half);
+            x = par->x + ((par->width - x) * half);
           }
         }
         pending = 0;
       }
-      x += self->vt->draw(x, y, (Font*) (((u8*) self) + self->vt->adj6), *p, par->f10, s);
+      x += self->vt->draw(x, y, (Font*) (((u8*) self) + self->vt->adj6), *p, par->color, s);
     }
   }
 
@@ -481,11 +481,11 @@ void CopyFont(Font* self, Font* dst)
     dst->id = self->id;
     dst->imgA = self->imgA;
     dst->imgB = self->imgB;
-    dst->f60 = self->f60;
-    dst->f68 = self->f68;
-    dst->f6C = self->f6C;
-    dst->f70 = self->f70;
-    dst->f74 = self->f74;
+    dst->texWord = self->texWord;
+    dst->imageTagCount = self->imageTagCount;
+    dst->imageTagData = self->imageTagData;
+    dst->paletteTagCount = self->paletteTagCount;
+    dst->paletteTagData = self->paletteTagData;
     dst->glyphCount = self->glyphCount;
     dst->glyphs = self->glyphs;
     dst->mask = self->mask;
@@ -516,11 +516,11 @@ s32 AddFontImagesToFrame(Font* self, void* obj)
     s32 r = (g_buildFrame->flags & self->mask) == 0;
     if (r != 0) {
         CloseDmaTag((PacketWriter*)obj);
-        AddDmaRefTag(obj, self->f68, self->f6C);
-        AddDmaRefTag(obj, self->imgA->f14, self->imgA->f10);
+        AddDmaRefTag(obj, self->imageTagCount, self->imageTagData);
+        AddDmaRefTag(obj, self->imgA->blockCount, self->imgA->data);
         if (self->imgB != 0) {
-            AddDmaRefTag(obj, self->f70, self->f74);
-            AddDmaRefTag(obj, self->imgB->fC, self->imgB->f8);
+            AddDmaRefTag(obj, self->paletteTagCount, self->paletteTagData);
+            AddDmaRefTag(obj, self->imgB->blockCount, self->imgB->data);
         }
         BeginDmaTag((PacketWriter*)obj);
         g_buildFrame->flags |= self->mask;
@@ -537,12 +537,12 @@ void BeginFontDraw(Font* self, Vec4U* clip, void* obj)
         AddGifRegisterWrite((PacketWriter*)obj, 0x3F, 0);
     }
     s64 v = 0x31001;
-    if (self->f30 != 0) {
-        v = self->f38;
+    if (self->useTestWord != 0) {
+        v = self->testWord;
     }
     AddGifRegisterWrite((PacketWriter*)obj, 0x47, v);
     AddGifRegisterWrite((PacketWriter*)obj, 0x42, 0x44);
-    AddGifRegisterWrite((PacketWriter*)obj, 6, self->f60);
+    AddGifRegisterWrite((PacketWriter*)obj, 6, self->texWord);
     AddGifRegisterWrite((PacketWriter*)obj, 0x14, 0x60);
     AddGifRegisterWrite((PacketWriter*)obj, 8, 5);
     AddGifRegisterWrite((PacketWriter*)obj, 0, 0x1D6);
@@ -556,7 +556,7 @@ void BeginFontGlyphPacket(Font* self, void* obj)
     if (ok != 0) {
         AddGifRegisterWrite((PacketWriter*)obj, 0x3F, 0);
     }
-    AddGifRegisterWrite((PacketWriter*)obj, 6, self->f60);
+    AddGifRegisterWrite((PacketWriter*)obj, 6, self->texWord);
     AddGifRegisterWrite((PacketWriter*)obj, 0, 0x1D6);
     BeginGifRegListTag((PacketWriter*)obj, 5, 0x43431);
 }
@@ -565,7 +565,7 @@ f32 DrawFontGlyph(f32 x, f32 y, Font* self, s8 key, u32 color, PacketWriter* s)
 {
     FontGlyph* e = FindFontGlyph(self, key);
     if (e != 0) {
-        s32 shift = (s32)((self->f60u >> 30) & 0xF);
+        s32 shift = (s32)((self->texWordU >> 30) & 0xF);
         s32 s4 = 1 << shift;
         f32 h = (f32)self->height * self->sy;
         f32 w = (f32)e->w * self->sx;
@@ -576,10 +576,10 @@ f32 DrawFontGlyph(f32 x, f32 y, Font* self, s8 key, u32 color, PacketWriter* s)
             AddGifRegListFloat(s, tag, 0.0f);
             AddGifUvRegListEntry(s, e->u << 4, (s4 - e->v) << 4);
             AddGifXyzfRegListEntry(s, (s32)((x + 1728.0f) * 16.0f),
-                          (s32)((y * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
+                          (s32)((y * 0.45454547f + 1936.0f) * 16.0f), self->drawZ, 0);
             AddGifUvRegListEntry(s, (e->u + e->w) << 4, (s4 - (e->v + self->height)) << 4);
             AddGifXyzfRegListEntry(s, (s32)((px + 1728.0f) * 16.0f),
-                          (s32)((py * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
+                          (s32)((py * 0.45454547f + 1936.0f) * 16.0f), self->drawZ, 0);
         }
         return (f32)(e->w + 1) * self->sx;
     }
@@ -590,29 +590,29 @@ void DrawFontGlyphTurned(Font* self, s8 key, u32 color, PacketWriter* s, f32 x, 
 {
     FontGlyph* e = FindFontGlyph(self, key);
     if (e != 0) {
-        s32 shift = (s32)((self->f60u >> 30) & 0xF);
+        s32 shift = (s32)((self->texWordU >> 30) & 0xF);
         s32 s4 = 1 << shift;
         f32 h = (f32)self->height * self->sy;
         f32 w = (f32)e->w * self->sx;
         f32 px = x + h;
         f32 py = y + w;
         if (0.0f <= px && x <= 640.0f && 0.0f <= py && y <= 492.80002f) {
-            s32 u0 = (e->u << 4) + D_00262258;
-            s32 v0 = ((s4 - e->v) << 4) + D_0026225C;
-            s32 u1 = ((e->u + e->w) << 4) + D_00262258;
-            s32 v1 = ((s4 - (e->v + self->height)) << 4) + D_0026225C;
+            s32 u0 = (e->u << 4) + g_glyphUOffset;
+            s32 v0 = ((s4 - e->v) << 4) + g_glyphVOffset;
+            s32 u1 = ((e->u + e->w) << 4) + g_glyphUOffset;
+            s32 v1 = ((s4 - (e->v + self->height)) << 4) + g_glyphVOffset;
             s32 ok = AddFontImagesToFrame(self, s);
             BeginGifTag(s, 6, 1, 0xE);
             if (ok != 0) {
                 AddGifRegisterWrite(s, 0x3F, (u64)0);
             }
             u64 v = 0x31001;
-            if (self->f30 != 0) {
-                v = self->f38;
+            if (self->useTestWord != 0) {
+                v = self->testWord;
             }
             AddGifRegisterWrite(s, 0x47, (u64)v);
             AddGifRegisterWrite(s, 0x42, (u64)0x44);
-            AddGifRegisterWrite(s, 6, (u64)self->f60u);
+            AddGifRegisterWrite(s, 6, (u64)self->texWordU);
             AddGifRegisterWrite(s, 0x14, (u64)0x60);
             AddGifRegisterWrite(s, 8, (u64)5);
             AddGifRegisterWrite(s, 0, (u64)0x1D4);
@@ -622,15 +622,15 @@ void DrawFontGlyphTurned(Font* self, s8 key, u32 color, PacketWriter* s, f32 x, 
             AddGifUvRegListEntry(s, u0, v0);
             s32 sx = (s32)((x + 1728.0f) * 16.0f);
             s32 sy = (s32)((py * 0.45454547f + 1936.0f) * 16.0f);
-            AddGifXyzfRegListEntry(s, sx, sy, self->f40, 0);
+            AddGifXyzfRegListEntry(s, sx, sy, self->drawZ, 0);
             AddGifUvRegListEntry(s, u1, v0);
             s32 sy2 = (s32)((y * 0.45454547f + 1936.0f) * 16.0f);
-            AddGifXyzfRegListEntry(s, sx, sy2, self->f40, 0);
+            AddGifXyzfRegListEntry(s, sx, sy2, self->drawZ, 0);
             AddGifUvRegListEntry(s, u0, v1);
             s32 sx2 = (s32)((px + 1728.0f) * 16.0f);
-            AddGifXyzfRegListEntry(s, sx2, sy, self->f40, 0);
+            AddGifXyzfRegListEntry(s, sx2, sy, self->drawZ, 0);
             AddGifUvRegListEntry(s, u1, v1);
-            AddGifXyzfRegListEntry(s, sx2, sy2, self->f40, 0);
+            AddGifXyzfRegListEntry(s, sx2, sy2, self->drawZ, 0);
             self->vt->end((Font*)((u8*)self + self->vt->adj7), 0, &g_gsPacketWriter);
         }
     }
@@ -642,24 +642,24 @@ void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
     color = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
     AddGifRegListFloat(s, color, 0.0f);
     AddGifUvRegListEntry(s, (s32)(u0 * 16.0f), (s32)(v0 * 16.0f));
-    AddGifXyzfRegListEntry(s, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
+    AddGifXyzfRegListEntry(s, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 * 0.45454547f + 1936.0f) * 16.0f), self->drawZ, 0);
     AddGifUvRegListEntry(s, (s32)(u1 * 16.0f), (s32)(v1 * 16.0f));
-    AddGifXyzfRegListEntry(s, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
+    AddGifXyzfRegListEntry(s, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), self->drawZ, 0);
 }
 
 void DrawFontFrame(Font* self, FrameGlyph* item, FrameRect* r, PacketWriter* s)
 {
     FontGlyph* e = FindFontGlyph(self, item->key);
     if (e != 0) {
-        PushFontScale(item->f0, item->f10, item->f14);
+        PushFontScale(item->font, item->scaleX, item->scaleY);
         f32 top = r->y;
         f32 sx = self->sx;
         f32 left = r->x;
         s32 u2i = e->u + e->w;
-        f32 x2 = left + r->w + item->f8 * sx;
+        f32 x2 = left + r->w + item->paddingX * sx;
         f32 cw = (f32)e->w * sx;
-        f32 x1 = left - item->f8 * sx;
-        s32 sz = 1 << (s32)((self->f60u >> 30) & 0xF);
+        f32 x1 = left - item->paddingX * sx;
+        s32 sz = 1 << (s32)((self->texWordU >> 30) & 0xF);
         s32 height = self->height;
         f32 sy = self->sy;
         s32 v0i = sz - e->v;
@@ -668,10 +668,10 @@ void DrawFontFrame(Font* self, FrameGlyph* item, FrameRect* r, PacketWriter* s)
         f32 u1 = (f32)((e->u + u2i) / 2);
         f32 v1 = (f32)((v0i + v2i) / 2);
         f32 u0 = (f32)e->u;
-        f32 y1 = top - item->fC * sy;
+        f32 y1 = top - item->paddingY * sy;
         f32 v0 = (f32)v0i;
         f32 x3 = x2 + cw;
-        f32 y2 = top + r->h + item->fC * sy;
+        f32 y2 = top + r->h + item->paddingY * sy;
         f32 y0 = y1 - (f32)height * sy;
         f32 y3 = y2 + (f32)height * sy;
         self->vt->begin((Font*)((u8*)self + self->vt->adj4), 0, s);
@@ -686,7 +686,7 @@ void DrawFontFrame(Font* self, FrameGlyph* item, FrameRect* r, PacketWriter* s)
         DrawFontQuad(self, item->color, x0, y1, x1, y2, u0, v1, u1, v1, s);
         DrawFontQuad(self, item->color, x2, y1, x3, y2, u1, v1, u2, v1, s);
         DrawFontQuad(self, item->color, x1, y1, x2, y2, u1, v1, u1, v1, s);
-        PopFontScale(item->f0);
+        PopFontScale(item->font);
         self->vt->end((Font*)((u8*)self + self->vt->adj7), 0, s);
     }
 }
@@ -716,7 +716,7 @@ void LoadFont(Font* obj, BufferedStream* src)
     }
     obj->imgB = (PaletteRecord*)t;
     s32 n = l.uC;
-    s32 A = l.b4, B = l.b5, C = l.b6; f32 F = l.f8;
+    s32 A = l.b4, B = l.b5, C = l.b6; f32 F = l.scale;
     obj->f00 = A;
     obj->sx = F;
     obj->glyphCount = n;
@@ -734,21 +734,21 @@ void UploadFontImages(Font* self, void* arg)
 
     (void)InitGifPacket(&f.a);
     ImageRecord* q = self->imgA;
-    n = AllocateBump((s32*)arg, q->f0A);
+    n = AllocateBump((s32*)arg, q->bumpSize);
     BuildImageTexRegister(self->imgA, n);
-    self->f60u = self->imgA->f18;
+    self->texWordU = self->imgA->texWord;
     UsePacketBufferMemory(&f.a, 16, f.buf);
     StartImageUpload(self->imgA, n, &f.a);
-    DetachPacketBufferCopy(&f.a, &self->f68, 0, &self->f6C, 7);
+    DetachPacketBufferCopy(&f.a, &self->imageTagCount, 0, &self->imageTagData, 7);
     if (self->imgB != 0) {
-        n = AllocateBump((s32*)arg, self->imgB->f6);
+        n = AllocateBump((s32*)arg, self->imgB->bumpSize);
         BuildPaletteTexRegister(self->imgB, n);
-        u64 t = self->f60u;
-        t |= self->imgB->f10;
-        self->f60u = t;
+        u64 t = self->texWordU;
+        t |= self->imgB->texWordBits;
+        self->texWordU = t;
         UsePacketBufferMemory(&f.a, 16, f.buf);
         StartPaletteUpload(self->imgB, n, &f.a);
-        DetachPacketBufferCopy(&f.a, &self->f70, 0, &self->f74, 7);
+        DetachPacketBufferCopy(&f.a, &self->paletteTagCount, 0, &self->paletteTagData, 7);
     }
 }
 
@@ -1118,8 +1118,8 @@ LINKER_REMNANT(func_0015E678);
 
 // The file's .data, 0x262250 to 0x262280, in retail's order.
 s8 g_fontEscapeKeys[8] = "02134";
-s32 D_00262258 = -8;
-s32 D_0026225C = -8;
+s32 g_glyphUOffset = -8;
+s32 g_glyphVOffset = -8;
 // size: s32 (lw/sw), 4-byte label
 s32 g_fontCount = 0;
 // size: pointer to array allocated by new Ent[D_00262260] (lw/sw), 4-byte label

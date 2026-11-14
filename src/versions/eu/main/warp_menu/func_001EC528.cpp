@@ -6,6 +6,6 @@ void DecrementWorld3BossGauge(World3Boss* self)
 {
     Glob_1EC528_eu* g = (Glob_1EC528_eu*)&g_gaugeBarElement;
     DecrementGaugeCount((T217D_2E0*)&g_gaugeBarElement);
-    self->fA68 = 2;
+    self->hitsLeft = 2;
     g->f584 = g->f588;
 }

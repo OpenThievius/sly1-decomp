@@ -48,22 +48,22 @@ void InitArcPoints(Obj_1E5E70_eu* self, s32 kind)
     for (p = (ArcPointStep*)self->elems; i < 69; i++) {
         f32 t = (f32)i * step;
         f32 y = t + t - 1.0f;
-        p->f34 = y;
-        p->f2C = sign * Fpu::Sqrt(1.0f - y * y);
-        p->f3C = p->f40 = (i & 1) ? dim : 0x30808080;
-        p->f44 = p->f48 = 0.0f;
+        p->y = y;
+        p->x = sign * Fpu::Sqrt(1.0f - y * y);
+        p->colorA = p->colorB = (i & 1) ? dim : 0x30808080;
+        p->level = p->target = 0.0f;
         if (self->mode == special) {
-            p->f4C = RandomFloatInRange(0.6f, 0.8f);
-            p->f50 = RandomFloatInRange(0.4f, 0.6f);
-            p->f54 = RandomFloatInRange(0.05f, 0.2f);
+            p->rateA = RandomFloatInRange(0.6f, 0.8f);
+            p->rateB = RandomFloatInRange(0.4f, 0.6f);
+            p->rateC = RandomFloatInRange(0.05f, 0.2f);
         } else {
-            p->f4C = RandomFloatInRange(0.3f, 0.4f);
-            p->f50 = RandomFloatInRange(0.2f, 0.3f);
-            p->f54 = RandomFloatInRange(0.1f, 0.4f);
+            p->rateA = RandomFloatInRange(0.3f, 0.4f);
+            p->rateB = RandomFloatInRange(0.2f, 0.3f);
+            p->rateC = RandomFloatInRange(0.1f, 0.4f);
         }
         if (i != 0) {
-            p->fC = p->f34;
-            p->f4 = p->f2C;
+            p->previousNextY = p->y;
+            p->previousNextX = p->x;
         }
         p = (ArcPointStep*)((u8*)p + 0x2C);
     }

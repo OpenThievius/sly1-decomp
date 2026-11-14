@@ -34,7 +34,7 @@ void BuildPauseMenuPage(Self_1936A0_eu* self)
     case 0:
         row->count = 0;
         for (u32 i = 0; i < 8; i++) {
-            s32 item = D_00269CD8[i];
+            s32 item = g_pauseMenuCandidates[i];
             s32 show = 1;
             switch (item) {
             case 4:
@@ -46,7 +46,7 @@ void BuildPauseMenuPage(Self_1936A0_eu* self)
                 show = 1;
                 break;
             case 18: {
-                s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
+                s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
                 if (key != 0x204 && key != 0x407) {
                     show = 0;
                     break;
@@ -66,7 +66,7 @@ void BuildPauseMenuPage(Self_1936A0_eu* self)
                 show = D_0026EC58 == 2;
                 break;
             case 20: {
-                s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
+                s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
                 show = 0;
                 if (key == 0x304 || key == 0x307 || key == 0x502) {
                     show = 1;
@@ -74,10 +74,10 @@ void BuildPauseMenuPage(Self_1936A0_eu* self)
                 break;
             }
             case 21:
-                if (g_saveData->f19D8 == 0) {
+                if (g_saveData->levelIndex == 0) {
                     show = 0;
-                } else if (g_saveData->f19D8 == 5 || g_saveData->f19DC == 1 ||
-                           (g_saveData->f19DC == 0 && (*(s32*)(g_currentLevelRecord->bits74 + 4) & 1) == 0)) {
+                } else if (g_saveData->levelIndex == 5 || g_saveData->entryIndex == 1 ||
+                           (g_saveData->entryIndex == 0 && (*(s32*)(g_currentLevelRecord->bits74 + 4) & 1) == 0)) {
                     item = 0x16;
                 }
                 break;
@@ -90,7 +90,7 @@ void BuildPauseMenuPage(Self_1936A0_eu* self)
     case 0x17:
         row->count = 0;
         for (u32 i = 0; i < 9; i++) {
-            s32 item = D_00269D18[i];
+            s32 item = g_optionsMenuCandidates[i];
             s32 show = 1;
             switch (item) {
             case 6:

@@ -53,9 +53,9 @@ struct WorldListedObject : PlacedObject {
     s32 colorCount;         // 0x590: the colours in color: the source's (func_0013A128), or 1 taken from the record (func_00139F80)
     u8 color[32][4];        // 0x594: halved bytes: the source's colours last first, or the record's bytes 4..7
     s32 f614;               // 0x614: copied from the source's +0x184 (func_0013A128)
-    s32 f618;               // 0x618: from the source's +0x190
+    s32 particleMode;       // 0x618: from the source's +0x190
     f32 f61C;               // 0x61C: from the source's +0x194
-    s32 f620;               // 0x620: cleared by func_00139D68
+    s32 particleCount;      // 0x620: cleared by func_00139D68
     OffsetList members;               // 0x624
     WorldListedObject* next;          // 0x630: in World::list1CB4 (func_0013B430)
     u8 pad634[0x640 - 0x634];

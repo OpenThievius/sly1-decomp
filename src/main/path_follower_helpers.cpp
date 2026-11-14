@@ -58,30 +58,30 @@ struct QuadraticCurve {
     f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
 };
 
-extern float D_002751D8;
-extern float D_00275240[4];
+extern float g_pathFollowerRampTime;
+extern float g_pathFollowerFadeCurve[4];
 
-f32 D_00275500[2] = { 0.400000006f, 0.800000012f };
-f32 D_00275508[2] = { 0.0500000007f, 0.300000012f };
-f32 D_00275510[2] = { 0.100000001f, 0.400000006f };
-f32 D_00275518[3] = { 10.0f, 0.0f, 0.100000001f };
-f32 D_00275524 = 4000.0f;
-Vec02 D_00275530 = { -0.5f, 0.699999988f, 0.0f, 0.0f };
-f32 D_00275540[4] = { 1.0f, -0.5f, 0.0f, 0.0f };
-f32 D_00275550[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-f32 D_00275560[4] = { -0.5f, 2.0f, 0.0f, 0.0f };
-f32 D_00275570[4] = { 0.5f, 4.0f, 0.0f, 0.0f };
-f32 D_00275580[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
-f32 D_00275590[4] = { 1.0f, -0.600000024f, 0.0f, 0.0f };
-f32 D_002755A0[2] = { 0.25f, 1.0f };
-f32 D_002755A8 = 1.10000002f;
-f32 D_002755AC = 1000.0f;
-f32 D_002755B0[4] = { 0.5f, 0.25f, 0.0f, 0.0f };
-f32 D_002755C0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
-f32 D_002755D0[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-f32 D_002755E0[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-f32 D_002755F0[2] = { 0.0f, 1.0f };
-f32 D_002755F8 = 0.75f;
+f32 g_wheelParticleTurnRange[2] = { 0.400000006f, 0.800000012f };
+f32 g_wheelParticleTurnRangeWorld3[2] = { 0.0500000007f, 0.300000012f };
+f32 g_wheelParticleTiltRange[2] = { 0.100000001f, 0.400000006f };
+f32 g_followerSpeedRamp[3] = { 10.0f, 0.0f, 0.100000001f };
+f32 g_followerSoundSpeedScale = 4000.0f;
+Vec02 g_followerEngineAPitchCoefficients = { -0.5f, 0.699999988f, 0.0f, 0.0f };
+f32 g_followerEngineAVolumeCoefficients[4] = { 1.0f, -0.5f, 0.0f, 0.0f };
+f32 g_followerEngineAVolumeLimits[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 g_followerEngineBPitchCoefficients[4] = { -0.5f, 2.0f, 0.0f, 0.0f };
+f32 g_followerEngineBVolumeCoefficients[4] = { 0.5f, 4.0f, 0.0f, 0.0f };
+f32 g_followerEngineBVolumeLimits[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
+f32 g_followerSoundMixCoefficients[4] = { 1.0f, -0.600000024f, 0.0f, 0.0f };
+f32 g_followerSoundMixLimits[2] = { 0.25f, 1.0f };
+f32 g_followerSoundBoost = 1.10000002f;
+f32 g_followerSlideSpeedScale = 1000.0f;
+f32 g_followerSlidePitchCoefficients[4] = { 0.5f, 0.25f, 0.0f, 0.0f };
+f32 g_followerSlideVolumeCoefficients[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 g_followerSlideVolumeLimits[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 g_followerSlideGainCoefficients[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 g_followerSlideGainLimits[2] = { 0.0f, 1.0f };
+f32 g_followerSlideSidewaysFactor = 0.75f;
 
 // The record a wheel's emitter (PathEmitter's slot at 0x7C) takes: flags, the spawn data and
 // how many to spawn.
@@ -110,10 +110,10 @@ void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02
 // spawn counts (the first with a random turn and tilt, the second plain).
 void EmitPathFollowerWheelParticles(PathFollower* self)
 {
-    if (self->fB14 != 0) {
-        f32 t = (g_gameTime - self->f854) / D_002751D8;
-        *(f32*)((u8*)self->fB14 + 0x334) = g_unitRange.Clamp(((QuadraticCurve*)D_00275240)->Eval(t));
-        BaseObject* o = self->fB14;
+    if (self->lapObject != 0) {
+        f32 t = (g_gameTime - self->lapTime) / g_pathFollowerRampTime;
+        *(f32*)((u8*)self->lapObject + 0x334) = g_unitRange.Clamp(((QuadraticCurve*)g_pathFollowerFadeCurve)->Eval(t));
+        BaseObject* o = self->lapObject;
         if (*(f32*)((u8*)o + 0x334) == 0.0f) {
             ((void (*)(BaseObject*))o->desc->m03)(o);
         }
@@ -122,27 +122,27 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
     f32 zero = 0.0f;
     WheelSpawn spawn;
     for (u32 i = 0; i < 4; i++) {
-        Slot19* s = &self->f6B0[i];
-        if (one <= s->f58) {
-            if (500.0f < self->f698) {
+        Slot19* s = &self->wheels[i];
+        if (one <= s->firstEmitterOwed) {
+            if (500.0f < self->targetSpeed) {
                 Vec02 off;
                 Vec02 dir;
                 Mat02 m;
                 Mat02 n;
-                f32* range = (g_currentWorld->f1D70 == 3) ? D_00275508 : D_00275500;
+                f32* range = (g_currentWorld->soundBank == 3) ? g_wheelParticleTurnRangeWorld3 : g_wheelParticleTurnRange;
                 // The angle is a statement of its own: &m is formed at the call, after it.
                 f32 a = RandomFloatInRange(range[0], range[1]);
                 BuildAxisAngleMatrix(&g_unitYVector, &m, a);
                 // The tilt's range through a pointer, as the turn's: loop.c then moves its
                 // address out of the loop with the %hi of its first word.
-                f32* tilt = D_00275510;
+                f32* tilt = g_wheelParticleTiltRange;
                 f32 b = RandomFloatInRange(tilt[0], tilt[1]);
                 switch ((s32)i) {
                 case 0:
-                    b = b + self->f69C;
+                    b = b + self->steerAngle;
                     break;
                 case 1:
-                    b = self->f69C - b;
+                    b = self->steerAngle - b;
                     break;
                 case 2:
                     break;
@@ -153,25 +153,25 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
                 s32 front = (s32)i < 2;
                 BuildAxisAngleMatrix(&g_unitZVector, &n, b);
                 MulRotation(&m, n, m);
-                TransformPointBetweenFrames(0, self, &s->v20, &spawn.pos);
+                TransformPointBetweenFrames(0, self, &s->contactPoint, &spawn.pos);
                 // The offset stored in each arm: the join after them makes CSE read it back
                 // from memory, as retail does; cross-jumping merges the two tails.
                 if (front) {
-                    Vu0::Q(off) = Vu0::FromFloats(zero, zero, self->f610);
+                    Vu0::Q(off) = Vu0::FromFloats(zero, zero, self->frontWheelRadius);
                 } else {
-                    Vu0::Q(off) = Vu0::FromFloats(zero, zero, self->f614);
+                    Vu0::Q(off) = Vu0::FromFloats(zero, zero, self->rearWheelRadius);
                 }
                 Vu0::Q(spawn.pos) = Vu0::Sub(Vu0::Add(Vu0::Q(spawn.pos), Vu0::Q(off)),
                                              Vu0::Rotate(m, Vu0::Q(off)));
-                TransformDirectionBetweenFrames(0, self, &s->v30, &dir);
+                TransformDirectionBetweenFrames(0, self, &s->contactDirection, &dir);
                 BuildBasisFromX(&dir, &spawn.basis);
-                Vu0::Q(spawn.vel) = Vu0::FromFloats(-self->f698, zero, zero);
+                Vu0::Q(spawn.vel) = Vu0::FromFloats(-self->targetSpeed, zero, zero);
                 Vu0::Q(spawn.vel) = Vu0::RotateUntied(m, Vu0::Q(spawn.vel));
                 WheelEmit rec;
                 rec.flags = 0xC0;
-                rec.count = (s32)s->f58;
+                rec.count = (s32)s->firstEmitterOwed;
                 rec.spawn = &spawn;
-                PathEmitter* e = (self->fAFC != 0) ? self->fAFC->f20 : self->fB18;
+                PathEmitter* e = (self->activeZone != 0) ? self->activeZone->firstEmitter : self->firstEmitter;
                 if (e != 0) {
                     if (e->f18 == 0) {
                         TransformStateToAncestorFrame(self, 0, &spawn.pos, &spawn.basis, &spawn.vel, 0);
@@ -179,32 +179,32 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
                     ((EmitFn)e->vt[0x7C / 4])(e, &rec);
                 }
             }
-            s->f58 = s->f58 - (f32)(s32)s->f58;
+            s->firstEmitterOwed = s->firstEmitterOwed - (f32)(s32)s->firstEmitterOwed;
         }
-        if (one <= s->f5C) {
+        if (one <= s->secondEmitterOwed) {
             Vec02 dir;
             WheelEmit rec;
             FillMemory(&spawn, 0, 0x60);
-            TransformPointBetweenFrames(0, self, &s->v20, &spawn.pos);
-            TransformDirectionBetweenFrames(0, self, &s->v30, &dir);
+            TransformPointBetweenFrames(0, self, &s->contactPoint, &spawn.pos);
+            TransformDirectionBetweenFrames(0, self, &s->contactDirection, &dir);
             BuildBasisFromX(&dir, &spawn.basis);
             rec.flags = 0xC0;
-            rec.count = (s32)s->f5C;
+            rec.count = (s32)s->secondEmitterOwed;
             rec.spawn = &spawn;
-            PathEmitter* e = (self->fAFC != 0) ? self->fAFC->f24 : self->fB1C;
+            PathEmitter* e = (self->activeZone != 0) ? self->activeZone->secondEmitter : self->secondEmitter;
             if (e != 0) {
                 ((EmitFn)e->vt[0x7C / 4])(e, &rec);
             }
-            s->f5C = s->f5C - (f32)rec.count;
+            s->secondEmitterOwed = s->secondEmitterOwed - (f32)rec.count;
         }
     }
 }
 
 void CountDownPathFollowerLap(PathFollower* self)
 {
-    self->f854 = g_gameTime;
-    self->f858 = self->f858 - 1;
-    BaseObject* s = self->fB14;
+    self->lapTime = g_gameTime;
+    self->lapsLeft = self->lapsLeft - 1;
+    BaseObject* s = self->lapObject;
     if (s != 0) {
         s->desc->m02(s);
     }
@@ -214,14 +214,14 @@ void RecordPathFollowerProgress(PathFollower* self)
 {
     f32 lo = 0.0f;
     f32 hi = 1.0f;
-    s32 idx = self->fB00 - 1;
-    f32 f = (f32)(idx * 3 + self->fAF8->index) * 0.1f;
+    s32 idx = self->lap - 1;
+    f32 f = (f32)(idx * 3 + self->currentMarker->index) * 0.1f;
     if (f < lo) {
         f = lo;
     } else if (hi < f) {
         f = hi;
     }
-    s32 s0 = self->fB0C - self->fB08;
+    s32 s0 = self->placeCount - self->place;
     s32 t = 0;
     if (s0 >= 3) {
         s32 mk = 1 << (s0 & 7);
@@ -255,8 +255,8 @@ void ResetScatterLevels(ScatterController* object);
 // of 94 (docs/toolchain/loops.md, "A threshold of 94").
 void AdvancePathFollowerEntry(PathFollower* self, s32 v)
 {
-    for (s32 i = 0; i < self->f870; i++) {
-        PathMarker* e = &self->f874[i];
+    for (s32 i = 0; i < self->markerCount; i++) {
+        PathMarker* e = &self->markers[i];
         s32 r = TestPointAgainstObjectShape((ObjectGatherer*)e->item, (u8*)self + 0x100);
         if (r == *(s32*)((u8*)e + 8)) {
             continue;
@@ -265,12 +265,12 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
         *(s32*)((u8*)e + 8) = r;
         switch (kind) {
         case 0:
-            if (r != 0 && e->next == self->fAF8) {
-                self->fAF8 = e;
-                if (e == self->fAF4) {
-                    s32 n = self->fB00 + 1;
-                    self->fB00 = n;
-                    if (self->fB04 < n) {
+            if (r != 0 && e->next == self->currentMarker) {
+                self->currentMarker = e;
+                if (e == self->firstMarker) {
+                    s32 n = self->lap + 1;
+                    self->lap = n;
+                    if (self->lapCount < n) {
                         void* w = ((WalkerHolder*)FindFirstObjectById(self->world, 4, 0x42C, self))->f48;
                         s32 key;
                         GetStateWalkerTargetKey((StateWalker*)w, &key);
@@ -278,7 +278,7 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
                             GetStateWalkerCurrentKey((StateWalker*)w, &key);
                         }
                         if (self == GetActiveSwitchedCollider()) {
-                            self->fB00 = self->fB04;
+                            self->lap = self->lapCount;
                         }
                         switch (key) {
                         case 0x42F:
@@ -320,10 +320,10 @@ extern const Vec02 g_unitXVector;
 void UpdatePathFollowerSound(PathFollower* self, f32 dt)
 {
     typedef Vu0::Vec Vec;
-    if (*(PlayingSound**)self->fB84 == 0) {
+    if (*(PlayingSound**)self->engineSoundA == 0) {
         return;
     }
-    f32 t = self->f698 / D_00275524;
+    f32 t = self->targetSpeed / g_followerSoundSpeedScale;
     f32 lo = 0.0f;
     f32 hi = 1.0f;
     if (t < lo) {
@@ -331,8 +331,8 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
     } else if (hi < t) {
         t = hi;
     }
-    self->fBA0 = ApproachValueWithRamp((RampProfile*)D_00275518, 0, self->fBA0, t, dt);
-    f32 fwd = Vu0::ToFloat(Vu0::Dot(Vec::Of(self->v150), Vec::Of(self->m110.r[0]))) / D_00275524;
+    self->soundSpeed = ApproachValueWithRamp((RampProfile*)g_followerSpeedRamp, 0, self->soundSpeed, t, dt);
+    f32 fwd = Vu0::ToFloat(Vu0::Dot(Vec::Of(self->v150), Vec::Of(self->m110.r[0]))) / g_followerSoundSpeedScale;
     f32 lo1 = 0.0f;
     f32 hi1 = 1.0f;
     f32 share;
@@ -343,20 +343,20 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
     } else {
         share = fwd;
     }
-    f32 mix = ((ValueRange*)D_002755A0)->Limit(((QuadraticCurve*)D_00275590)->Eval(self->fB9C));
-    mix = (1.0f - mix) * share + mix * D_002755A8 * self->fBA0;
-    SetSoundRecordPitch(*(PlayingSound**)self->fB84, ((QuadraticCurve*)&D_00275530)->Eval(mix) + self->fB94);
-    SetSoundRecordVolume(*(PlayingSound**)self->fB84,
-                         ((ValueRange*)D_00275550)->Clamp(((QuadraticCurve*)D_00275540)->Eval(mix)));
-    SetSoundRecordPitch(*(PlayingSound**)self->fB80, ((QuadraticCurve*)D_00275560)->Eval(mix) + self->fB90);
-    SetSoundRecordVolume(*(PlayingSound**)self->fB80,
-                         ((ValueRange*)D_00275580)->Clamp(((QuadraticCurve*)D_00275570)->Eval(mix)));
+    f32 mix = ((ValueRange*)g_followerSoundMixLimits)->Limit(((QuadraticCurve*)g_followerSoundMixCoefficients)->Eval(self->drive));
+    mix = (1.0f - mix) * share + mix * g_followerSoundBoost * self->soundSpeed;
+    SetSoundRecordPitch(*(PlayingSound**)self->engineSoundA, ((QuadraticCurve*)&g_followerEngineAPitchCoefficients)->Eval(mix) + self->engineAPitchOffset);
+    SetSoundRecordVolume(*(PlayingSound**)self->engineSoundA,
+                         ((ValueRange*)g_followerEngineAVolumeLimits)->Clamp(((QuadraticCurve*)g_followerEngineAVolumeCoefficients)->Eval(mix)));
+    SetSoundRecordPitch(*(PlayingSound**)self->engineSoundB, ((QuadraticCurve*)g_followerEngineBPitchCoefficients)->Eval(mix) + self->engineBPitchOffset);
+    SetSoundRecordVolume(*(PlayingSound**)self->engineSoundB,
+                         ((ValueRange*)g_followerEngineBVolumeLimits)->Clamp(((QuadraticCurve*)g_followerEngineBVolumeCoefficients)->Eval(mix)));
     Vec02 local;
     Vec02 drift;
     TransformDirectionBetweenFrames(0, self, &self->v150, &local);
-    Vu0::Q(drift) = Vu0::MulAddX(Vec::Of(local), Vec::Of(g_unitXVector), Vec::Scalar(-self->f698)).q;
-    drift.x = drift.x * D_002755F8;
-    f32 d = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(drift), Vu0::Q(drift)))) / D_002755AC;
+    Vu0::Q(drift) = Vu0::MulAddX(Vec::Of(local), Vec::Of(g_unitXVector), Vec::Scalar(-self->targetSpeed)).q;
+    drift.x = drift.x * g_followerSlideSidewaysFactor;
+    f32 d = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(drift), Vu0::Q(drift)))) / g_followerSlideSpeedScale;
     f32 lo2 = 0.0f;
     f32 hi2 = 1.0f;
     f32 slide;
@@ -367,8 +367,8 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
     } else {
         slide = d;
     }
-    slide = slide * ((ValueRange*)D_002755F0)->Clamp(((QuadraticCurve*)D_002755E0)->Eval(self->fB9C));
-    SetSoundRecordPitch(*(PlayingSound**)self->fB7C, ((QuadraticCurve*)D_002755B0)->Eval(slide) + self->fB8C);
-    SetSoundRecordVolume(*(PlayingSound**)self->fB7C,
-                         ((ValueRange*)D_002755D0)->Clamp(((QuadraticCurve*)D_002755C0)->Eval(slide)));
+    slide = slide * ((ValueRange*)g_followerSlideGainLimits)->Clamp(((QuadraticCurve*)g_followerSlideGainCoefficients)->Eval(self->drive));
+    SetSoundRecordPitch(*(PlayingSound**)self->slideSound, ((QuadraticCurve*)g_followerSlidePitchCoefficients)->Eval(slide) + self->slidePitchOffset);
+    SetSoundRecordVolume(*(PlayingSound**)self->slideSound,
+                         ((ValueRange*)g_followerSlideVolumeLimits)->Clamp(((QuadraticCurve*)g_followerSlideVolumeCoefficients)->Eval(slide)));
 }

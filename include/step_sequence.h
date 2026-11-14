@@ -49,8 +49,8 @@ struct StepSequence : PlacedObject {
     s32 count2DC;           // 0x2DC: number of steps (written by func_00150570)
     void* steps2E0;         // 0x2E0: the steps (written by func_00150570)
     s32 step2E4;            // 0x2E4: the step being played
-    s32 f2E8;               // 0x2E8
-    s32 f2EC;               // 0x2EC
+    s32 waitFlags;          // 0x2E8: the conditions a step still waits for
+    s32 waitKey;            // 0x2EC: which button or condition the key wait is for
     union {
         s32 f2F0;           // 0x2F0: compared with D_002708E0's +0x270 (func_00151300)
         void* p2F0;         // 0x2F0: an object found by id (func_00150DC0)
@@ -61,14 +61,14 @@ struct StepSequence : PlacedObject {
     };
     AnimationPlayer* player2F8;  // 0x2F8: the player func_0012E760 ends (func_00150DC0 reads its animation);
                             // cleared when message 6 brings it back (func_001512A8)
-    f32 f2FC;               // 0x2FC
+    f32 waitDeadline;       // 0x2FC: the time the timer wait ends
     s32 second300;          // 0x300: -1 at load
     void* target304;        // 0x304: object found for id 30C, else the default at 0x308
     u8 fallback308[4];      // 0x308
     s32 first30C;           // 0x30C: -1 at load; then set from the id at +0x08
-    s32 f310;               // 0x310
-    void* f314[4];          // 0x314
-    s32 f324;               // 0x324
+    s32 extraTargetCount;   // 0x310: the entries of extraTargets
+    void* extraTargets[4];  // 0x314: up to four extra target slots
+    s32 startPending;       // 0x324: set when the sequence should start as soon as it can
     s32 f328;               // 0x328
     s32 f32C;               // 0x32C
     s32 f330;               // 0x330

@@ -8,21 +8,21 @@ void BeginLevelExit(s32 flag, s32 n)
     ObjectSubGroup* v;
     LevelFadeEntry* k;
     FadeRequest args;
-    if (ctx->f19D8 == 5) {
+    if (ctx->levelIndex == 5) {
         goto lm1;
     }
-    if (ctx->f19DC != 0) {
+    if (ctx->entryIndex != 0) {
         goto l4490;
     }
     o = (LevelRecordWord78*)g_currentLevelRecord;
-    if ((o->f78 & 1) != 0) {
+    if ((o->flags & 1) != 0) {
         goto l4470;
     }
 lm1:
-    StartObjectFade((IdentityKey*)(D_00247AD0 + 0x80 + D_eu_00263710 * 32), -1, n);
+    StartObjectFade((IdentityKey*)(g_objectFadeIn + 0x80 + D_eu_00263710 * 32), -1, n);
     return;
 l4470:
-    k = LookupEntryById((ctx->f19D8 << 8) | 1);
+    k = LookupEntryById((ctx->levelIndex << 8) | 1);
     StartObjectFade((IdentityKey*)k, 0x1BD, n);
     return;
 l4490:

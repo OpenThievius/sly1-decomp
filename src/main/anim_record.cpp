@@ -164,8 +164,8 @@ u64 GetTextureRegisterBits(TextureTable* t, s32 i, s32 j)
     s32 stride = 1;
     if (t->record->kind == 0) stride = 3;
     PaletteRecord* c = ((PaletteRecord**)t->cells)[i * stride + j];
-    u64 r = e->f18;
-    if (c != 0) r |= c->f10;
+    u64 r = e->texWord;
+    if (c != 0) r |= c->texWordBits;
     return r;
 }
 
@@ -215,8 +215,8 @@ void SendTextureRegisters(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx
 void ReadImageRecordB(void* a0, PaletteRecord* a1)
 {
     ReadBufferedStreamBytes((BufferedStream*)a0, 12, a1);
-    a1->f8 = D_00275718 + a1->f8;
-    a1->fC = (u32)((a1->f4 << 2) + 15) >> 4;
+    a1->data = D_00275718 + a1->data;
+    a1->blockCount = (u32)((a1->f4 << 2) + 15) >> 4;
 }
 
 void LoadImageRecordsB(void* self)
@@ -246,9 +246,9 @@ void ReadImageRecordA(void* self, ImageRecord* obj)
     ReadBufferedStreamBytes((BufferedStream*)self, 0x14, obj);
     s32 base = D_00275718;
     u32 bytes = obj->bytes;
-    s32 off = obj->f10;
-    obj->f14 = (bytes + 0xF) >> 4;
-    obj->f10 = base + off;
+    s32 off = obj->data;
+    obj->blockCount = (bytes + 0xF) >> 4;
+    obj->data = base + off;
 
 }
 

@@ -12,15 +12,15 @@ struct Obj_148F80_eu {
 
 void AddReserveUnitNow(void* self)
 {
-    Obj_148F80_eu* obj = (Obj_148F80_eu*)&D_0026C6C8;
+    Obj_148F80_eu* obj = (Obj_148F80_eu*)&g_reserveCountCaption;
     obj->vtbl[14](obj);
     GameProgress* g = g_saveData;
-    if (g->f19E0 < 0x63) {
-        g->f19E0 = g->f19E0 + 1;
+    if (g->reserveCount < 0x63) {
+        g->reserveCount = g->reserveCount + 1;
         obj->f26C = 250.0f;
         obj->f274 = 0;
         obj->f278 = 0;
     } else {
-        g->f19E0 = 0x63;
+        g->reserveCount = 0x63;
     }
 }

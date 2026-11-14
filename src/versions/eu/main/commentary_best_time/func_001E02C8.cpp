@@ -37,8 +37,8 @@ void SetBestTimeState(Obj_1E02C8_eu* self, s32 n)
         StartSoundEffect(0x6D, 0, 0, 0, 3000.0f, 300.0f, one, zero, zero, 0, 0);
         SetSpareCount(0);
         PopActiveSequenceElement(g_currentWorld);
-        StartTimer(&g_timerElement, g_currentWorld->f230C + 0.99f);
-        SetTimerRate(&g_timerElement, -Power(2.0f, (f32)D_002623DC));
+        StartTimer(&g_timerElement, g_currentWorld->timerDuration + 0.99f);
+        SetTimerRate(&g_timerElement, -Power(2.0f, (f32)g_timerRateExponent));
         SetTimerLimit(&g_timerElement, zero, 0);
         StartTimerCounting(&g_timerElement);
         G27C230* cam = g_currentEntry;

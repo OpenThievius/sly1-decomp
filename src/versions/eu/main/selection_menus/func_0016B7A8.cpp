@@ -20,7 +20,7 @@ void SetSelectionCaptionOpen(Obj_16B7A8_eu* self, s32 v)
         }
         ClearPadSelectFlags(1);
         self->vtbl[15](self);
-        D_0026F138.vt->m15(&D_0026F138);
+        g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
     }
     self->f56C = v;
 }

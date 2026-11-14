@@ -39,7 +39,7 @@ struct PairController : PlacedObject {
     f32 tune348;  // 0x348
     f32 tune34C;  // 0x34C
     f32 tune350;  // 0x350
-    void* f354;  // 0x354
+    void* watchedObject; // 0x354
     ObjectCreator* target;  // 0x358
     u8 list35C[0x368 - 0x35C];  // lists (func_00152438 sets their element size)
     u8 list368[0x374 - 0x368];
@@ -52,8 +52,8 @@ struct PairController : PlacedObject {
     u8 list3AC[0x3B8 - 0x3AC];
     s32 limit3B8;  // 0x3B8: 0x28 after setup
     s32 count3BC;  // 0x3BC
-    s32 f3C0;  // 0x3C0
-    s32 f3C4;  // 0x3C4
+    s32 transitionCount; // 0x3C0
+    s32 finishedCount; // 0x3C4
     u8 pad3C8[0x3D0 - 0x3C8];
     union {
         AlignedQuad q3D0;  // 0x3D0: set from D_00275C50
@@ -64,18 +64,18 @@ struct PairController : PlacedObject {
     f32 poseOut[48];  // 0x560
     s32 poseIndex;  // 0x620
     s32 limit624;  // 0x624: the most paired objects out at once
-    s32 f628;  // 0x628
-    f32 f62C;  // 0x62C: the shortest wait before the next start
-    f32 f630;  // 0x630: the longest
-    f32 f634;  // 0x634
-    f32 f638;  // 0x638
-    f32 f63C;  // 0x63C
-    f32 f640;  // 0x640
+    s32 attachLimit; // 0x628
+    f32 startDelayMin; // 0x62C: the shortest wait before the next start
+    f32 startDelayMax; // 0x630: the longest
+    f32 nextStartTime; // 0x634
+    f32 attachDelayMin; // 0x638
+    f32 attachDelayMax; // 0x63C
+    f32 nextAttachTime; // 0x640
     f32 f644;  // 0x644
     f32 f648;  // 0x648
     s32 id64C;  // 0x64C: -1 for none; the state func_001A4B30 compares
     s32 state;  // 0x650: -1 for none; the state machine's state
-    f32 f654;  // 0x654
+    f32 stateStartTime; // 0x654
     LinkedObject* link;  // 0x658
     u8 pad65C[0x660 - 0x65C];
 };

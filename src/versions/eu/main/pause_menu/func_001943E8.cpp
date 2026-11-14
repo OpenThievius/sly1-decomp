@@ -30,7 +30,7 @@ extern f32 D_eu_0026BB34;
 extern u8 D_eu_00263550[];
 extern u16 D_eu_00263558[];
 const char* GetTextTableEntry(s32 id);
-#define HUD_EU ((Hud_1943E8_eu*)&D_00274118)
+#define HUD_EU ((Hud_1943E8_eu*)&g_completionPercentCaption)
 void UpdatePauseMenu(Self_1943E8_eu* self)
 {
     GameProgress* g = g_saveData;
@@ -40,7 +40,7 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
     PadRecord* pad;
 
     on = 0;
-    switch ((g->f19D8 << 8) | g->f19DC) {
+    switch ((g->levelIndex << 8) | g->entryIndex) {
     case 0x106:
     case 0x204:
     case 0x304:
@@ -54,13 +54,13 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
         break;
     }
     if (on) {
-        D_0026C6C8.vt->m14(&D_0026C6C8);
-        D_0026C948.vt->m14(&D_0026C948);
+        g_reserveCountCaption.vt->m14(&g_reserveCountCaption);
+        g_collectedItemCaption.vt->m14(&g_collectedItemCaption);
         D_0026CBC8.vt->m14(&D_0026CBC8);
         D_0026CE48.vt->m14(&D_0026CE48);
     } else {
-        D_0026C6C8.vt->m15(&D_0026C6C8);
-        D_0026C948.vt->m15(&D_0026C948);
+        g_reserveCountCaption.vt->m15(&g_reserveCountCaption);
+        g_collectedItemCaption.vt->m15(&g_collectedItemCaption);
         D_0026CBC8.vt->m15(&D_0026CBC8);
         D_0026CE48.vt->m15(&D_0026CE48);
     }
@@ -70,10 +70,10 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
     case 17:
         HUD_EU->f58C = ComputeCompletionPercent(g_saveData);
         HUD_EU->f574 = &HUD_EU->f58C;
-        D_00274118.vt->m14(&D_00274118);
+        g_completionPercentCaption.vt->m14(&g_completionPercentCaption);
         break;
     default:
-        D_00274118.vt->m15(&D_00274118);
+        g_completionPercentCaption.vt->m15(&g_completionPercentCaption);
         break;
     }
     if (self->f598 != 0) {
@@ -117,7 +117,7 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
         if (self->f570 == 11 || self->f570 == 16) {
             CardSlot* e = &D_eu_00255538[row->items[self->f574]];
             if (e->f0C != 0.0f) {
-                D_0026998C = e;
+                g_cardSlotInAction = e;
                 SetPauseMenuLayerPage(self, 1, 0x12);
             }
         }
@@ -138,11 +138,11 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
         if (dx == 0.0f && dy == 0.0f) {
             return;
         }
-        D_eu_0026BB30 = ClampFloat::Of(D_eu_0026BB30 + dx * D_0026A22C, 438.0f, 874.0f);
-        v = ClampFloat::Of(D_eu_0026BB34 + dy * D_0026A230.f0, 15.0f, 129.0f);
+        D_eu_0026BB30 = ClampFloat::Of(D_eu_0026BB30 + dx * g_screenAdjustRateX, 438.0f, 874.0f);
+        v = ClampFloat::Of(D_eu_0026BB34 + dy * g_screenAdjustRateY.verticalRate, 15.0f, 129.0f);
         D_eu_0026BB34 = v;
         {
-            DisplayRegs* gs = &D_00262490;
+            DisplayRegs* gs = &g_displayRegisters;
             s32 h = ConvertFloatToU32(D_eu_0026BB30);
             DisplayReg64 ra = gs->f40;
             DisplayReg32 rb = gs->f18;
@@ -265,7 +265,7 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
     case 19: {
         BackgroundJob* p = &g_backgroundJob;
         if (IsBackgroundJobRunning(p) == 0) {
-            D_0026998C = 0;
+            g_cardSlotInAction = 0;
             if (p->result == 0) {
                 SetPauseMenuLayerPage(self, 1, -1);
             } else {

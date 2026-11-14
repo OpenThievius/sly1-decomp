@@ -30,5 +30,5 @@ void FinishMovie(MoviePlayer* self_)
     } else {
         mask = 1 << self->f00;
     }
-    g_saveData->f19F8 |= mask;
+    g_saveData->movieBits |= mask;
 }

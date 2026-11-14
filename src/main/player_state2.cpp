@@ -50,7 +50,7 @@ f32 D_00263E90[4] = { 0.0f, 5.0f, 0.0f, 0.0f };
 f32 D_00263EA0[4] = { 0.0f, 10.0f, 0.0f, 0.0f };
 f32 D_00263EB0[4] = { 0.400000006f, 0.0f, 0.0f, 0.0f };
 // The 22 segment ends func_0017DE88 transforms; func_00188700 loads each whole (lqc2).
-Vec02 D_00263EC0[22] = {
+Vec02 g_probeSegmentEndpoints[22] = {
     { 50.0f, 0.0f, 75.0f, 0.0f },
     { 50.0f, 0.0f, -150.0f, 0.0f },
     { 50.0f, 0.0f, 75.0f, 0.0f },
@@ -77,7 +77,7 @@ Vec02 D_00263EC0[22] = {
 f32 D_00264020 = 60.0f;
 f32 D_00264024 = 70.0f;
 f32 D_00264028 = 300.0f;
-f32 D_0026402C = 500.0f;
+f32 g_kind58SearchRadius = 500.0f;
 f32 D_00264030 = 1000.0f;
 f32 D_00264034 = 3000.0f;
 f32 D_00264038[2] = { -150.0f, 150.0f };
@@ -103,24 +103,24 @@ void StepPlayerState2(Player* self)
 {
     Vec02 a;
     Vec02 b;
-    TurnColliderTowardRotation(self, g_gameClock[2], &self->m660, &self->f6E0);
-    switch (self->f2228) {
+    TurnColliderTowardRotation(self, g_gameClock[2], &self->headingMatrix, &self->turnGain);
+    switch (self->subState) {
     case 6:
-        if (0.0001f < self->f634) {
-            ComputePolarOffset((Vec3*)&a, self->f630, self->f634 * self->f226C, 0.0f);
+        if (0.0001f < self->stickLevel) {
+            ComputePolarOffset((Vec3*)&a, self->stickHeading, self->stickLevel * self->jumpSpeed, 0.0f);
             Vu0::Q(b) = Vu0::Add(Vu0::Q(self->v2290), Vu0::Q(a));
             b.z = self->v150.z;
             SteerColliderTowardPosition(self, 0, 0, &b, D_00263E90, g_gameClock[2]);
         }
         break;
     case 8: {
-        f32 t0 = GetAnimationMarkerTime((Animation*)self->f25C8, 0x1BA);
-        f32 t1 = GetAnimationMarkerTime((Animation*)self->f25C8, 0x1BB);
-        if (*(f32*)((u8*)self->watched2230 + 0x14) < t1) {
+        f32 t0 = GetAnimationMarkerTime((Animation*)self->markerAnim, 0x1BA);
+        f32 t1 = GetAnimationMarkerTime((Animation*)self->markerAnim, 0x1BB);
+        if (*(f32*)((u8*)self->stateAnimPlayer + 0x14) < t1) {
             Vu0::Q(a) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Scalar(-1.0f));
             AddColliderForce(self, &a);
         }
-        if (*(f32*)((u8*)self->watched2230 + 0x14) < t0) {
+        if (*(f32*)((u8*)self->stateAnimPlayer + 0x14) < t0) {
             b = D_00248D30;
         } else {
             Vu0::Q(b) = Vu0::FromFloats(0.0f, 0.0f, self->v150.z);
@@ -160,7 +160,7 @@ void StepPlayerState2(Player* self)
         f32 s;
         f32 u;
         f32 x;
-        if (self->f2228 == 0) {
+        if (self->subState == 0) {
             if (b.x < len) {
                 s = D_00263E68;
             } else {
@@ -180,8 +180,8 @@ void StepPlayerState2(Player* self)
         c.z = 0.0f;
         c.y = u * b.y;
         c.x = s * (x - len);
-        if (self->f2228 != 6) {
-            f32 speed = self->f700;
+        if (self->subState != 6) {
+            f32 speed = self->gravityScale;
             if (self->v150.z < D_00263E78 * Fpu::Sqrt(speed)) {
                 c.z = (D_00263E78 * Fpu::Sqrt(speed) - self->v150.z) * D_00263E7C;
             }
@@ -225,11 +225,11 @@ struct LeapRecord_17D5D8 { u8 pad00[0x18]; f32 time; u8 pad1C[0x20 - 0x1C]; Vec0
 
 static inline void StartPlayerLeap(Player* p, f32 t, const Vec02& aim, const Vec02& land)
 {
-    ((LeapRecord_17D5D8*)p->f2514)->time = g_gameTime + t;
-    ((LeapRecord_17D5D8*)p->f2514)->aim = aim;
-    ((LeapRecord_17D5D8*)p->f2514)->aim.z += 75.0f;
-    ((LeapRecord_17D5D8*)p->f2514)->land = land;
-    ((LeapRecord_17D5D8*)p->f2514)->land.z = p->v150.z + t * p->gravity.z;
+    ((LeapRecord_17D5D8*)p->selfPoseSource)->time = g_gameTime + t;
+    ((LeapRecord_17D5D8*)p->selfPoseSource)->aim = aim;
+    ((LeapRecord_17D5D8*)p->selfPoseSource)->aim.z += 75.0f;
+    ((LeapRecord_17D5D8*)p->selfPoseSource)->land = land;
+    ((LeapRecord_17D5D8*)p->selfPoseSource)->land.z = p->v150.z + t * p->gravity.z;
 }
 
 // v made a unit vector, or the fallback when shorter than 1e-4; its length.
@@ -256,7 +256,7 @@ static inline f32 MinF(f32 a, f32 b) { return a <? b; }
 void ControlPlayerState2(Player* p, PadRecord* pad)
 {
     Vec02 aim;
-    switch (p->f2228) {
+    switch (p->subState) {
     case 4:
     case 6:
     case 9:
@@ -268,9 +268,9 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
     case 15:
         break;
     default:
-        ComputePolarOffset((Vec3*)&aim, p->f630, p->f634 * p->f226C, 0.0f);
-        Vu0::Q(p->v640) = Vu0::MulX(Vu0::RotateTransposed(p->m660, Vu0::Q(aim)), Vu0::Scalar(-1.0f));
-        if ((p->f2228 != 0 || p->f2270 == 3) && p->f2268 == 0) {
+        ComputePolarOffset((Vec3*)&aim, p->stickHeading, p->stickLevel * p->jumpSpeed, 0.0f);
+        Vu0::Q(p->headingVelocity) = Vu0::MulX(Vu0::RotateTransposed(p->headingMatrix, Vu0::Q(aim)), Vu0::Scalar(-1.0f));
+        if ((p->subState != 0 || p->jumpStickPhase == 3) && p->steerKeepsDirection == 0) {
             Vec02 dir;
             Vec02 side;
             dir = p->v150;
@@ -284,9 +284,9 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
         p->v2290 = aim;
         break;
     }
-    switch (p->f2228) {
+    switch (p->subState) {
     case 3:
-        if (!(D_00263EB0[0] < g_gameTime - p->f222C)) {
+        if (!(D_00263EB0[0] < g_gameTime - p->subStateStartTime)) {
             return;
         }
     case 1:
@@ -368,7 +368,7 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
             bestCost = cost;
         }
         if (best != 0) {
-            if (p->f2220 != 2 || p->f2228 != 5) {
+            if (p->state != 2 || p->subState != 5) {
                 void* held = p->heldObject;
                 if (held != best) {
                     InitContactPairFlags(p->world, (Collider*)best);
@@ -384,7 +384,7 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
         }
         if (bestPoint != 0) {
             StartPlayerLeap(p, bestT, bestAim, bestLand);
-            p->f23B4 = bestPoint;
+            p->leapTarget = bestPoint;
             SetPlayerState(p, 2, 9);
         }
         return;
@@ -464,8 +464,8 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
     BuildPerpendicularPair(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
     BuildMatrixFromRotationAndTranslation((const Vec02*)ctx, (const Mat02*)&q, (Mat4A*)(buf + 0x30));
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
-        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &D_00263EC0[i], 1.0f, (Vec02*)(buf + 0x70));
-        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &D_00263EC0[i + 1], 1.0f, (Vec02*)(buf + 0x80));
+        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &g_probeSegmentEndpoints[i], 1.0f, (Vec02*)(buf + 0x70));
+        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &g_probeSegmentEndpoints[i + 1], 1.0f, (Vec02*)(buf + 0x80));
         ContactRow03* n = self->contacts->head;
         while (n) {
             Collider* a = n->other;
@@ -569,7 +569,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
 }
 
 extern f32 g_gameTime;
-extern f32 D_00274AD0[];
+extern f32 g_contactSideSigns[];
 void NotifyContactEnds(World* world, s32 n, Contact03** list);
 s32 FindPlaneTreeNodeForPoint(Vec02* p, void* tree);
 Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
@@ -577,7 +577,7 @@ Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
     Vec02 tmp;
     Vec02 p;
     Contact03* c;
-    if (g_gameTime - self->f2224 < 0.15f) {
+    if (g_gameTime - self->stateStartTime < 0.15f) {
         return 0;
     }
     Contact03* best = 0;
@@ -598,39 +598,39 @@ Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
                 if (side == 0) {
                     continue;
                 }
-                extra = c->fA0;
+                extra = c->featureEnd0;
                 break;
             case 3:
                 if (side == 0) {
-                    extra = c->fA4;
+                    extra = c->featureEnd1;
                 } else {
-                    extra = c->fA0;
+                    extra = c->featureEnd0;
                 }
                 break;
             case 2:
                 if (side == 1) {
                     continue;
                 }
-                extra = c->fA4;
+                extra = c->featureEnd1;
                 break;
             default:
                 continue;
             }
-            if (ComputeLedgeOffsetForContact(self, other, &c->end[1 - side].v10, c->kind, (void*)extra, &tmp) == 0) {
+            if (ComputeLedgeOffsetForContact(self, other, &c->end[1 - side].point, c->kind, (void*)extra, &tmp) == 0) {
                 continue;
             }
             if ((self->f4B8 & 2) == 0 || (c->end[1 - side].body->f4B8 & 2) == 0) {
                 NotifyContactEnds(self->world, 1, &c);
             }
-            if (0.0f < D_00274AD0[side] * *(f32*)((u8*)c + 0xB8)) {
+            if (0.0f < g_contactSideSigns[side] * *(f32*)((u8*)c + 0xB8)) {
                 continue;
             }
-            Vu0::Q(p) = Vu0::MulAddX2(Vu0::Vec::Of(c->end[1 - side].v10), Vu0::Vec::Of(tmp), Vu0::Vec::Scalar(-D_00264020),
+            Vu0::Q(p) = Vu0::MulAddX2(Vu0::Vec::Of(c->end[1 - side].point), Vu0::Vec::Of(tmp), Vu0::Vec::Scalar(-D_00264020),
                                       Vu0::Vec::Of(g_unitZVector), Vu0::Vec::ScalarAtCall(D_00264024)).q;
             if (FindPlaneTreeNodeForPoint(&p, other->tree.nodes) != 0) {
                 continue;
             }
-            if (best == 0 || !(c->end[1 - side].v10.z < best->end[1 - side].v10.z)) {
+            if (best == 0 || !(c->end[1 - side].point.z < best->end[1 - side].point.z)) {
                 *outEnd = side;
                 *outPos = tmp;
                 best = c;
@@ -643,11 +643,11 @@ Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
 s32 ChoosePlayerNextState(Player* self)
 {
     s32 r;
-    if (0.0f < self->f634) {
-        if (self->f900 != 0) {
+    if (0.0f < self->stickLevel) {
+        if (self->sixWayBlend != 0) {
             r = 1;
         } else {
-            r = self->fA10 ? 5 : 0;
+            r = self->eightWayBlend ? 5 : 0;
         }
     } else r = 0;
     return r;
@@ -733,8 +733,8 @@ void CollectPlayerHoldQueries(Player* self)
     for (i = 0; i < count; i++) {
         list[i]->flags538 |= (u64)0x8000 << 47;
     }
-    band[0] = self->v6A0.z + D_00264038[0];
-    band[1] = self->v6A0.z + D_00264038[1];
+    band[0] = self->groundContactPoint.z + D_00264038[0];
+    band[1] = self->groundContactPoint.z + D_00264038[1];
     BeginListWalk::Of(&fr, &g_class75List);
     n = NextInList<Class75Object>::Of(&fr);
     while (n != 0) {
@@ -748,12 +748,12 @@ void CollectPlayerHoldQueries(Player* self)
                 goto next;
             }
             if (IsObjectOfKind(p, 0x58)) {
-                range = D_0026402C;
+                range = g_kind58SearchRadius;
             }
         }
         GetObjectWorldPosition(n, &pos);
-        far = range < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v6A0)),
-                                                         Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v6A0))))) - n->scale;
+        far = range < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->groundContactPoint)),
+                                                         Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->groundContactPoint))))) - n->scale;
         if (far) {
             goto next;
         }
@@ -764,7 +764,7 @@ void CollectPlayerHoldQueries(Player* self)
         q.p00 = self;
         q.hold = n;
         {
-            Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->v6A0));
+            Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->groundContactPoint));
             Vu0::Q(q.pos) = Vu0::Q(pos);
             Vu0::Set(q.dir, Vu0::MulX(NormalizedOr(d, Vu0::Vec::Of(g_unitXVector)), Vu0::Vec::ScalarAtCall(D_00264030)).q);
             q.weight = self->mass * D_00264034;
@@ -781,14 +781,14 @@ void CollectPlayerHoldQueries(Player* self)
             continue;
         }
         if (o->flags538 & ((u64)0x8000 << 25)) {
-            s32 out = D_00264028 < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(o->v140), Vu0::Q(self->v6A0))))
+            s32 out = D_00264028 < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(o->v140), Vu0::Q(self->groundContactPoint))))
                 || o->v140.z + o->radius3CC < band[0] || band[1] < o->v140.z - o->radius3CC;
             if (out) {
                 continue;
             }
         } else if (o->tree.nodes != 0) {
             MeshPointHit hits[32];
-            s32 hitCount = CollectMeshHits(&self->v6A0, D_00264028, o->tree.count2, (FaceRef*)o->tree.nodes, 0, &o->meshCopy, 32, (MeshHitEntry*)hits);
+            s32 hitCount = CollectMeshHits(&self->groundContactPoint, D_00264028, o->tree.count2, (FaceRef*)o->tree.nodes, 0, &o->meshCopy, 32, (MeshHitEntry*)hits);
             s32 j;
             for (j = 0; j < hitCount; j++) {
                 if (IsInsideRange((ValueRange*)band, hits[j].point.z)) {
@@ -808,7 +808,7 @@ void CollectPlayerHoldQueries(Player* self)
             q.pos = o->v140;
         }
         {
-            Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(o->v140), Vu0::Vec::Of(self->v6A0));
+            Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(o->v140), Vu0::Vec::Of(self->groundContactPoint));
             Vu0::Set(q.dir, Vu0::MulX(NormalizedOr(d, Vu0::Vec::Of(g_unitXVector)), Vu0::Vec::ScalarAtCall(D_00264030)).q);
             q.weight = self->mass;
             q.weight *= D_00264034;
@@ -839,14 +839,14 @@ s32 ShouldPlayerLaunchAtTarget(Player* self)
     Contact03* c;
     s32 n = 0;
     f32 now = g_gameTime;
-    if (now - self->f222C < 1.0f) {
+    if (now - self->subStateStartTime < 1.0f) {
         return 0;
     }
     if (now - *(f32*)((u8*)self + 0x2238) < 1.0f) {
         return 0;
     }
     *(f32*)((u8*)self + 0x2238) = now;
-    if (self->f690 != 0) {
+    if (self->groundContact != 0) {
         return 0;
     }
     Contacts03* ct = self->contacts;
@@ -868,13 +868,13 @@ s32 ShouldPlayerLaunchAtTarget(Player* self)
     f32* p = gram;
     for (row = self->contacts->head; row != 0; row = row->next) {
         for (c = row->head; c != 0; c = c->next) {
-            Vu0::Vec na = Vu0::Vec::Of(c->v80);
+            Vu0::Vec na = Vu0::Vec::Of(c->normal);
             if (c->end[0].body != (Collider*)self) {
                 na = Vu0::MulX(na, Vu0::Vec::Scalar(-1.0f));
             }
             for (ContactRow03* rb = self->contacts->head; rb != 0; rb = rb->next) {
                 for (Contact03* b = rb->head; b != 0; b = b->next) {
-                    Vu0::Vec nb = Vu0::Vec::Of(b->v80);
+                    Vu0::Vec nb = Vu0::Vec::Of(b->normal);
                     if (b->end[0].body != (Collider*)self) {
                         nb = Vu0::MulX(nb, Vu0::Vec::Scalar(-1.0f));
                     }
@@ -887,7 +887,7 @@ s32 ShouldPlayerLaunchAtTarget(Player* self)
     p = rhs;
     for (row = self->contacts->head; row != 0; row = row->next) {
         for (c = row->head; c != 0; c = c->next) {
-            Vu0::Vec na = Vu0::Vec::Of(c->v80);
+            Vu0::Vec na = Vu0::Vec::Of(c->normal);
             if (c->end[0].body != (Collider*)self) {
                 na = Vu0::MulX(na, Vu0::Vec::Scalar(-1.0f));
             }
@@ -900,7 +900,7 @@ s32 ShouldPlayerLaunchAtTarget(Player* self)
     p = sol;
     for (row = self->contacts->head; row != 0; row = row->next) {
         for (c = row->head; c != 0; c = c->next) {
-            Vu0::Vec na = Vu0::Vec::Of(c->v80);
+            Vu0::Vec na = Vu0::Vec::Of(c->normal);
             if (c->end[0].body != (Collider*)self) {
                 na = Vu0::MulX(na, Vu0::Vec::Scalar(-1.0f));
             }
@@ -946,7 +946,7 @@ struct Track_17F018;
 struct TrackDesc_17F018 { void* m0; void (*m1)(Track_17F018* self, f32 t, Vec02* out, s32 a); };
 struct Track_17F018 { TrackDesc_17F018* desc; };
 struct TrackOwner_17F018 { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; Track_17F018* track; };
-struct LeapTarget_17F018 { u8 pad00[0x18]; void* frame; u8 pad1C[0x40 - 0x1C]; union { Vec02 pos; s32 f40; }; u8 pad50[0x58 - 0x50]; s32 f58; };
+struct LeapTarget_17F018 { u8 pad00[0x18]; void* frame; u8 pad1C[0x40 - 0x1C]; union { Vec02 pos; s32 curveAttachKind; }; u8 pad50[0x58 - 0x50]; s32 pointAttachKind; };
 struct Anim_17F018 { u8 pad00[0x14]; f32 f14; f32 f18; };
 
 // The airborne player's step. Each leap state reads the game clock through a pointer of its own,
@@ -958,50 +958,50 @@ void UpdatePlayerState2(Player* p)
     Vec02 b;
     Vec02 c;
     s32 end;
-    if (p->f223C == -1) {
-        switch (p->f2228) {
+    if (p->aimMode == -1) {
+        switch (p->subState) {
         case 13:
-            ((void (*)(void*, s32, f32*, f32))PlaceOnTargetPoint)(p->f23A8, 0, &p->f638, p->f23AC);
+            ((void (*)(void*, s32, f32*, f32))PlaceOnTargetPoint)(p->targetPoint, 0, &p->heading, p->targetPointPlace);
             break;
         case 12:
-            ((void (*)(void*, s32, f32*, f32))PlaceOnTargetCurve)(p->f23A0, 0, &p->f638, p->f23A4);
+            ((void (*)(void*, s32, f32*, f32))PlaceOnTargetCurve)(p->targetCurve, 0, &p->heading, p->targetCurvePos);
             break;
         default:
             if (D_00263E54 < Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(p->v150), Vu0::Q(p->v150))))) {
-                p->f638 = ArctangentOfRatio(p->v150.y, p->v150.x);
+                p->heading = ArctangentOfRatio(p->v150.y, p->v150.x);
             }
             break;
         case 0:
-            p->f638 = p->f630;
+            p->heading = p->stickHeading;
             break;
         case 7:
         case 8:
             break;
         }
     } else if (AimPlayerAtTarget(p) == 0) {
-        p->f638 = p->f630;
+        p->heading = p->stickHeading;
     }
-    switch (p->f2270) {
+    switch (p->jumpStickPhase) {
     case 0:
-        if (p->f634 == 1.0f) {
-            p->f2270 = 1;
-            p->f2278 = g_gameTime;
-        } else if (D_00263E70 < g_gameTime - p->f2274) {
-            p->f2268 = 1;
+        if (p->stickLevel == 1.0f) {
+            p->jumpStickPhase = 1;
+            p->stickFullTime = g_gameTime;
+        } else if (D_00263E70 < g_gameTime - p->jumpStartTime) {
+            p->steerKeepsDirection = 1;
         }
         break;
     case 1:
-        if (p->f634 < 1.0f) {
-            p->f2270 = 2;
-            p->f227C = g_gameClock[1];
-            if (g_gameClock[1] - p->f2278 < D_00263E74) {
-                p->f2268 = 1;
+        if (p->stickLevel < 1.0f) {
+            p->jumpStickPhase = 2;
+            p->stickReleaseTime = g_gameClock[1];
+            if (g_gameClock[1] - p->stickFullTime < D_00263E74) {
+                p->steerKeepsDirection = 1;
             }
         }
         break;
     case 3:
-        if (0.0f < p->f634) {
-            p->f2268 = 1;
+        if (0.0f < p->stickLevel) {
+            p->steerKeepsDirection = 1;
         }
         break;
     }
@@ -1009,17 +1009,17 @@ void UpdatePlayerState2(Player* p)
     if (hit != 0) {
         ContactEnd03* e = &hit->end[1 - end];
         void* part = e->part;
-        p->f24A0 = part;
-        TransformPointBetweenFrames(0, (PlacedObject*)part, &e->v10, (Vec02*)p->f24B0);
-        p->f24F0 = hit->kind;
+        p->ledgeCollider = part;
+        TransformPointBetweenFrames(0, (PlacedObject*)part, &e->point, (Vec02*)p->ledgeLocalPoint);
+        p->ledgeKind = hit->kind;
         s32 key;
         if (end == 0) {
-            key = hit->fA4;
+            key = hit->featureEnd1;
         } else {
-            key = hit->fA0;
+            key = hit->featureEnd0;
         }
-        p->f24F4 = key;
-        p->v24C0 = at;
+        p->ledgeKey = key;
+        p->ledgeOffset = at;
         SetPlayerState(p, 8, -1);
         return;
     }
@@ -1027,179 +1027,179 @@ void UpdatePlayerState2(Player* p)
         LaunchPlayerAtTarget(p, 0, 0.0f);
         return;
     }
-    switch (p->f2228) {
+    switch (p->subState) {
     case 0:
         if (p->v150.z < 0.0f) {
             SetPlayerState(p, 2, 2);
-        } else if (D_00263E50 < g_gameTime - p->f222C) {
-            if (!(D_00262D18 & 0x40) && p->f2270 != 3) {
-                p->f2268 = 1;
+        } else if (D_00263E50 < g_gameTime - p->subStateStartTime) {
+            if (!(D_00262D18 & 0x40) && p->jumpStickPhase != 3) {
+                p->steerKeepsDirection = 1;
             }
             SetPlayerState(p, 2, 1);
         }
         break;
     case 1:
     case 5:
-        if (p->f690 != 0 && 0.15f < g_gameTime - p->f2224) {
+        if (p->groundContact != 0 && 0.15f < g_gameTime - p->stateStartTime) {
             SetPlayerState(p, ChoosePlayerNextState(p), -1);
         } else if (p->v150.z < 0.0f) {
             SetPlayerState(p, 2, 2);
         }
         break;
     case 6:
-        if (p->f690 != 0) {
+        if (p->groundContact != 0) {
             f32 k = 0.15f;
-            f32 t0 = p->f2224;
+            f32 t0 = p->stateStartTime;
             if (k < g_gameTime - t0) {
                 SetPlayerState(p, ChoosePlayerNextState(p), -1);
             }
         }
         break;
     case 2:
-        if (p->f690 != 0) {
+        if (p->groundContact != 0) {
             SetPlayerState(p, ChoosePlayerNextState(p), -1);
         }
         break;
     case 4: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->f2514;
+        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
         if (rec->time < clock[1]) {
-            p->f239C = 2;
+            p->targetMode = 2;
             SetPlayerState(p, 6, 0x10);
             break;
         }
         ComputeObjectFrameAtTime((PlacedObject*)p->heldObject, 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
-        ((Leap_17F018*)p->f2514)->aim = b;
-        ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
-        ((Leap_17F018*)p->f2514)->land = c;
-        ((Leap_17F018*)p->f2514)->land.z = p->v150.z + (((Leap_17F018*)p->f2514)->time - g_gameClock[1]) * p->gravity.z;
+        ((Leap_17F018*)p->selfPoseSource)->aim = b;
+        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
+        ((Leap_17F018*)p->selfPoseSource)->land = c;
+        ((Leap_17F018*)p->selfPoseSource)->land.z = p->v150.z + (((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
         break;
     }
     case 7:
-        if (p->f690 != 0 && D_00264040 < g_gameTime - p->f222C) {
+        if (p->groundContact != 0 && D_00264040 < g_gameTime - p->subStateStartTime) {
             SetPlayerState(p, ChoosePlayerNextState(p), -1);
         }
         break;
     case 8:
-        if (p->f690 != 0 && D_00264044 < g_gameTime - p->f222C) {
-            f32 t = GetAnimationMarkerTime((Animation*)p->f25C8, 0x1BB);
-            if (((Anim_17F018*)p->watched2230)->f14 < t) {
+        if (p->groundContact != 0 && D_00264044 < g_gameTime - p->subStateStartTime) {
+            f32 t = GetAnimationMarkerTime((Animation*)p->markerAnim, 0x1BB);
+            if (((Anim_17F018*)p->stateAnimPlayer)->f14 < t) {
                 CollectPlayerHoldQueries(p);
-                SeekAnimationPlayer((AnimationPlayer*)p->watched2230, 0, t, ((Anim_17F018*)p->watched2230)->f18);
+                SeekAnimationPlayer((AnimationPlayer*)p->stateAnimPlayer, 0, t, ((Anim_17F018*)p->stateAnimPlayer)->f18);
             }
         }
         break;
     case 9: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->f2514;
+        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
         if (rec->time < clock[1]) {
             SetPlayerState(p, 2, 2);
             break;
         }
-        b = ((LeapTarget_17F018*)p->f23B4)->pos;
+        b = ((LeapTarget_17F018*)p->leapTarget)->pos;
         c = D_00248D30;
-        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->f23B4)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
-        ((Leap_17F018*)p->f2514)->aim = b;
-        ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
-        ((Leap_17F018*)p->f2514)->land = c;
-        ((Leap_17F018*)p->f2514)->land.z = p->v150.z + (((Leap_17F018*)p->f2514)->time - g_gameClock[1]) * p->gravity.z;
+        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->leapTarget)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
+        ((Leap_17F018*)p->selfPoseSource)->aim = b;
+        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
+        ((Leap_17F018*)p->selfPoseSource)->land = c;
+        ((Leap_17F018*)p->selfPoseSource)->land.z = p->v150.z + (((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
         break;
     }
     case 10: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->f2514;
+        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
         if (rec->time < clock[1]) {
-            p->f239C = 5;
+            p->targetMode = 5;
             SetPlayerState(p, 6, 0x10);
             break;
         }
-        b = ((LeapTarget_17F018*)p->f23B8)->pos;
+        b = ((LeapTarget_17F018*)p->targetNode)->pos;
         c = D_00248D30;
-        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->f23B8)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
-        ((Leap_17F018*)p->f2514)->aim = b;
-        ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
-        ((Leap_17F018*)p->f2514)->land = c;
-        ((Leap_17F018*)p->f2514)->land.z = p->v150.z + (((Leap_17F018*)p->f2514)->time - g_gameClock[1]) * p->gravity.z;
+        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->targetNode)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
+        ((Leap_17F018*)p->selfPoseSource)->aim = b;
+        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
+        ((Leap_17F018*)p->selfPoseSource)->land = c;
+        ((Leap_17F018*)p->selfPoseSource)->land.z = p->v150.z + (((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
         break;
     }
     case 11: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->f2514;
+        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
         if (rec->time < clock[1]) {
-            p->f239C = 4;
+            p->targetMode = 4;
             SetPlayerState(p, 6, 0x10);
             break;
         }
-        Track_17F018* t = ((TrackOwner_17F018*)p->f23BC)->track;
+        Track_17F018* t = ((TrackOwner_17F018*)p->targetTrack)->track;
         if (t->desc->m1 != 0) {
-            t->desc->m1(t, p->f23C0, &b, 0);
+            t->desc->m1(t, p->trackPos, &b, 0);
         }
-        TransformPointAtTime((PlacedObject*)(((TrackOwner_17F018*)p->f23BC)->frame), 0, &b, 0, 0, 0, ((Leap_17F018*)p->f2514)->time - g_gameClock[1]);
-        ((Leap_17F018*)p->f2514)->aim = b;
-        ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
+        TransformPointAtTime((PlacedObject*)(((TrackOwner_17F018*)p->targetTrack)->frame), 0, &b, 0, 0, 0, ((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]);
+        ((Leap_17F018*)p->selfPoseSource)->aim = b;
+        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
         break;
     }
     case 13: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->f2514;
+        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
         if (rec->time < clock[1]) {
-            p->f239C = ((LeapTarget_17F018*)p->f23A8)->f58;
+            p->targetMode = ((LeapTarget_17F018*)p->targetPoint)->pointAttachKind;
             SetPlayerState(p, 6, 0x10);
             break;
         }
-        PlaceOnTargetPoint((TargetPoint*)p->f23A8, &b, 0, p->f23AC);
-        TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTarget_17F018*)p->f23A8)->frame), &b, &b);
+        PlaceOnTargetPoint((TargetPoint*)p->targetPoint, &b, 0, p->targetPointPlace);
+        TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTarget_17F018*)p->targetPoint)->frame), &b, &b);
         c = D_00248D30;
-        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->f23A8)->frame), 0, &b, 0, &c, 0, ((Leap_17F018*)p->f2514)->time - g_gameClock[1]);
-        ((Leap_17F018*)p->f2514)->aim = b;
-        ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
-        ((Leap_17F018*)p->f2514)->land = c;
-        ((Leap_17F018*)p->f2514)->land.z = p->v150.z + (((Leap_17F018*)p->f2514)->time - g_gameClock[1]) * p->gravity.z;
+        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->targetPoint)->frame), 0, &b, 0, &c, 0, ((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]);
+        ((Leap_17F018*)p->selfPoseSource)->aim = b;
+        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
+        ((Leap_17F018*)p->selfPoseSource)->land = c;
+        ((Leap_17F018*)p->selfPoseSource)->land.z = p->v150.z + (((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
         break;
     }
     case 12: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->f2514;
+        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
         if (rec->time < clock[1]) {
-            p->f239C = ((LeapTarget_17F018*)p->f23A0)->f40;
+            p->targetMode = ((LeapTarget_17F018*)p->targetCurve)->curveAttachKind;
             SetPlayerState(p, 6, 0x10);
             break;
         }
-        PlaceOnTargetCurve((TargetCurve*)p->f23A0, &b, 0, p->f23A4);
-        TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTarget_17F018*)p->f23A0)->frame), &b, &b);
+        PlaceOnTargetCurve((TargetCurve*)p->targetCurve, &b, 0, p->targetCurvePos);
+        TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTarget_17F018*)p->targetCurve)->frame), &b, &b);
         c = D_00248D30;
-        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->f23A0)->frame), 0, &b, 0, &c, 0, ((Leap_17F018*)p->f2514)->time - g_gameClock[1]);
-        ((Leap_17F018*)p->f2514)->aim = b;
-        ((Leap_17F018*)p->f2514)->aim.z += 75.0f;
-        ((Leap_17F018*)p->f2514)->land = c;
-        ((Leap_17F018*)p->f2514)->land.z = p->v150.z + (((Leap_17F018*)p->f2514)->time - g_gameClock[1]) * p->gravity.z;
+        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->targetCurve)->frame), 0, &b, 0, &c, 0, ((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]);
+        ((Leap_17F018*)p->selfPoseSource)->aim = b;
+        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
+        ((Leap_17F018*)p->selfPoseSource)->land = c;
+        ((Leap_17F018*)p->selfPoseSource)->land.z = p->v150.z + (((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
         break;
     }
     case 14: {
-        Leap_17F018* rec = (Leap_17F018*)p->f2514;
+        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
         if (rec->time < g_gameTime) {
             SetPlayerState(p, 3, 0x33);
         } else {
-            ScorePlayerLeapToPoint(p, (BaseObject*)(((TrackOwner_17F018*)p->f2204)->frame), (Vec02*)((u8*)p->f2204 + 0x40), 0, &rec->aim, &rec->land, rec->time - g_gameTime);
+            ScorePlayerLeapToPoint(p, (BaseObject*)(((TrackOwner_17F018*)p->boundObject)->frame), (Vec02*)((u8*)p->boundObject + 0x40), 0, &rec->aim, &rec->land, rec->time - g_gameTime);
         }
         break;
     }
     case 15:
-        if (((Leap_17F018*)p->f2514)->time < g_gameTime) {
+        if (((Leap_17F018*)p->selfPoseSource)->time < g_gameTime) {
             SetPlayerState(p, 7, 0x17);
         }
         break;
     case 3:
-        if (p->f690 != 0) {
+        if (p->groundContact != 0) {
             SetPlayerState(p, ChoosePlayerNextState(p), -1);
         }
         break;
     }
-    if (p->f2228 < 16) {
-        if (p->f2228 >= 9) {
-            f32 t = ((Leap_17F018*)p->f2514)->time - g_gameClock[1] + g_gameClock[2];
-            EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, &p->pos, &p->v150, &((Leap_17F018*)p->f2514)->aim, &((Leap_17F018*)p->f2514)->land, 0, 0, &b);
-            EvaluateHermiteVectorSegment(t, t, 1.0f, &p->pos, &p->v150, &((Leap_17F018*)p->f2514)->aim, &((Leap_17F018*)p->f2514)->land, 0, 0, &c);
+    if (p->subState < 16) {
+        if (p->subState >= 9) {
+            f32 t = ((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1] + g_gameClock[2];
+            EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, &p->pos, &p->v150, &((Leap_17F018*)p->selfPoseSource)->aim, &((Leap_17F018*)p->selfPoseSource)->land, 0, 0, &b);
+            EvaluateHermiteVectorSegment(t, t, 1.0f, &p->pos, &p->v150, &((Leap_17F018*)p->selfPoseSource)->aim, &((Leap_17F018*)p->selfPoseSource)->land, 0, 0, &c);
             if (D_00264048[0] < (Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(b))) + Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(c)))) * (t * 0.5f)) {
                 SetPlayerState(p, 2, 2);
             }
@@ -1237,15 +1237,15 @@ static inline f32 MaxF(f32 a, f32 b) { return a >? b; }
 void ComputePlayerJumpVelocity(Player* self, Vec02* out)
 {
     f32 z;
-    switch (self->f224C) {
+    switch (self->jumpKind) {
     case 1:
-        z = D_00263E80 * Fpu::Sqrt(self->f700);
+        z = D_00263E80 * Fpu::Sqrt(self->gravityScale);
         break;
     case 4:
-        z = D_00263E8C * Fpu::Sqrt(self->f700);
+        z = D_00263E8C * Fpu::Sqrt(self->gravityScale);
         break;
     case 3:
-        z = D_00263E88 * Fpu::Sqrt(self->f700);
+        z = D_00263E88 * Fpu::Sqrt(self->gravityScale);
         break;
     case 0:
     case 2:
@@ -1254,7 +1254,7 @@ void ComputePlayerJumpVelocity(Player* self, Vec02* out)
     }
     *out = self->v150;
     out->z = z;
-    if (self->f2220 == 3) {
+    if (self->state == 3) {
         out->z = z;
     } else {
         out->z = z;

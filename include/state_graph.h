@@ -27,8 +27,8 @@ struct StateEdge {
 };
 
 struct StateGraph : BaseObject {
-    s32 f34;                // 0x34: the entries at 0x38
-    StateEntry* f38;        // 0x38: the state table
+    s32 stateCount;         // 0x34: the entries at 0x38
+    StateEntry* states;     // 0x38: the state table
     s32 edgeCount;          // 0x3C
     StateEdge* edges;       // 0x40
     s32 armed;              // 0x44: nonzero once the graph has something to run

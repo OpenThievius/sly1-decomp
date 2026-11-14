@@ -48,8 +48,8 @@ struct TlbSetup {
     void* f1C;
 };
 
-extern TlbSetup D_00277FE0;
-extern const char D_0024EC30[], D_0024EC68[], D_0024EC80[], D_0024EC98[];
+extern TlbSetup g_tlbSetup;
+extern const char g_tlbReportFormat[], g_tlbOverflowMessage1[], g_tlbOverflowMessage2[], g_tlbOverflowMessage3[];
 void PrintToOutputHook(const char* fmt, ...);
 extern "C" void TerminateProgram(s32 status);
 void WriteTlbEntryForSetUp(s32 index, u32 mask, u32 hi, u32 lo0, u32 lo1);
@@ -64,37 +64,37 @@ s32 SetUpTlbEntries(void)
     TlbEntry* e;
     s32 n;
     s32 j;
-    PrintToOutputHook(D_0024EC30, D_00277FE0.kernelCount - 1, D_00277FE0.kernelCount,
-                      D_00277FE0.kernelCount + D_00277FE0.defaultCount - 1,
-                      D_00277FE0.kernelCount + D_00277FE0.defaultCount,
-                      D_00277FE0.kernelCount + D_00277FE0.defaultCount + D_00277FE0.extendedCount - 1);
+    PrintToOutputHook(g_tlbReportFormat, g_tlbSetup.kernelCount - 1, g_tlbSetup.kernelCount,
+                      g_tlbSetup.kernelCount + g_tlbSetup.defaultCount - 1,
+                      g_tlbSetup.kernelCount + g_tlbSetup.defaultCount,
+                      g_tlbSetup.kernelCount + g_tlbSetup.defaultCount + g_tlbSetup.extendedCount - 1);
     SetTlbWired(0);
     i = 0;
-    n = D_00277FE0.kernelCount;
+    n = g_tlbSetup.kernelCount;
     if (n > 0x30) {
-        PrintToOutputHook(D_0024EC68);
+        PrintToOutputHook(g_tlbOverflowMessage1);
         TerminateProgram(1);
     }
-    for (e = D_00277FE0.kernel; i < n; i++, e++) {
+    for (e = g_tlbSetup.kernel; i < n; i++, e++) {
         WriteTlbEntryForSetUp(i, e->mask, e->hi, e->lo0, e->lo1);
     }
-    n = i + D_00277FE0.defaultCount;
+    n = i + g_tlbSetup.defaultCount;
     if (n > 0x30) {
-        PrintToOutputHook(D_0024EC80);
+        PrintToOutputHook(g_tlbOverflowMessage2);
         TerminateProgram(1);
     }
-    for (e = D_00277FE0.defaults; i < n; i++, e++) {
+    for (e = g_tlbSetup.defaults; i < n; i++, e++) {
         WriteTlbEntryForSetUp(i, e->mask, e->hi, e->lo0, e->lo1);
     }
-    D_00277FE0.wiredCount = i;
+    g_tlbSetup.wiredCount = i;
     SetTlbWired(i);
-    if (D_00277FE0.extendedCount > 0) {
-        n = i + D_00277FE0.extendedCount;
+    if (g_tlbSetup.extendedCount > 0) {
+        n = i + g_tlbSetup.extendedCount;
         if (n > 0x30) {
-            PrintToOutputHook(D_0024EC98);
+            PrintToOutputHook(g_tlbOverflowMessage3);
             TerminateProgram(1);
         }
-        for (e = D_00277FE0.extended; i < n; i++, e++) {
+        for (e = g_tlbSetup.extended; i < n; i++, e++) {
             WriteTlbEntryForSetUp(i, e->mask, e->hi, e->lo0, e->lo1);
         }
     }
@@ -104,12 +104,12 @@ s32 SetUpTlbEntries(void)
     return i;
 }
 
-extern const char D_0024EC30[56] = "# TLB spad=0 kernel=1:%d default=%d:%d extended=%d:%d\n";
-extern const char D_0024EC68[24] = "# TLB over flow (1)";
-extern const char D_0024EC80[24] = "# TLB over flow (2)";
-extern const char D_0024EC98[24] = "# TLB over flow (3)";
+extern const char g_tlbReportFormat[56] = "# TLB spad=0 kernel=1:%d default=%d:%d extended=%d:%d\n";
+extern const char g_tlbOverflowMessage1[24] = "# TLB over flow (1)";
+extern const char g_tlbOverflowMessage2[24] = "# TLB over flow (2)";
+extern const char g_tlbOverflowMessage3[24] = "# TLB over flow (3)";
 
-TlbEntry D_00277D70[13] = {
+TlbEntry g_tlbKernelEntries[13] = {
     { 0x0, 0x70000000, 0x80000007, 0x7 },
     { 0x6000, 0xFFFF8000, 0x1E1F, 0x1F1F },
     { 0x0, 0x10000000, 0x400017, 0x400053 },
@@ -124,7 +124,7 @@ TlbEntry D_00277D70[13] = {
     { 0x1E000, 0x12000000, 0x480017, 0x480415 },
     { 0x1FFE000, 0x1E000000, 0x780017, 0x7C0017 }
 };
-TlbEntry D_00277E40[18] = {
+TlbEntry g_tlbDefaultEntries[18] = {
     { 0x7E000, 0x80000, 0x201F, 0x301F },
     { 0x7E000, 0x100000, 0x401F, 0x501F },
     { 0x7E000, 0x180000, 0x601F, 0x701F },
@@ -144,7 +144,7 @@ TlbEntry D_00277E40[18] = {
     { 0x7FE000, 0x21000000, 0x40017, 0x50017 },
     { 0x7FE000, 0x21800000, 0x60017, 0x70017 }
 };
-TlbEntry D_00277F60[8] = {
+TlbEntry g_tlbExtendedEntries[8] = {
     { 0x7E000, 0x30100000, 0x403F, 0x503F },
     { 0x7E000, 0x30180000, 0x603F, 0x703F },
     { 0x1FE000, 0x30200000, 0x803F, 0xC03F },
@@ -156,4 +156,4 @@ TlbEntry D_00277F60[8] = {
 };
 
 extern u8 D_0027B184[];
-TlbSetup D_00277FE0 = { 0xD, 0x12, 8, 0, D_00277D70, D_00277E40, D_00277F60, D_0027B184 };
+TlbSetup g_tlbSetup = { 0xD, 0x12, 8, 0, g_tlbKernelEntries, g_tlbDefaultEntries, g_tlbExtendedEntries, D_0027B184 };

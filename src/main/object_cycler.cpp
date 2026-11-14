@@ -65,15 +65,15 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 f32 RandomFloatInRange(f32 a, f32 b);
 f32 RandomFloatInRange(f32 a, f32 b);
-extern PackedFloatPair D_00262180;
-extern PackedFloatPair D_00262188;
-extern PackedFloatPair D_00262190;
-extern PackedFloatPair D_00262198;
-extern PackedFloatPair D_002621A0;
-extern PackedFloatPair D_002621A8;
-extern PackedFloatPair D_002621B0;
-extern PackedFloatPair D_002621B8;
-extern PackedFloatPair D_002621C0;
+extern PackedFloatPair g_cyclerTargetRadiusRange;
+extern PackedFloatPair g_cyclerTargetHeightRange;
+extern PackedFloatPair g_cyclerTangentRadiusRange;
+extern PackedFloatPair g_cyclerTangentHeightRange;
+extern PackedFloatPair g_cyclerCheckDelayRange;
+extern PackedFloatPair g_cyclerHoldExtraRange;
+extern PackedFloatPair g_cyclerAdvanceDelayRange;
+extern PackedFloatPair g_cyclerWrapDelayRange;
+extern PackedFloatPair g_cyclerMessageIntervalRange;
 
 void InitCollider(Collider* self);
 void AppendToList(List01* self, void* item);
@@ -109,11 +109,11 @@ void AppendToList(List01* self, void* item);
 
 struct CyclerEventMessage {
     u8 pad0[0x8];
-    f32 f8;
-    s32 fC;
+    f32 impulse;
+    s32 flags;
     u8 pad1[0x20 - 0x10];
-    Quad16 f20;
-    Quad16 f30;
+    Quad16 origin;
+    Quad16 target;
 };
 struct __attribute__((aligned(16))) GroupForwardMessage {
     s32 f0;
@@ -174,8 +174,8 @@ void RemoveFromList(List01* list, void* item);
 
 struct CyclerDrawParams { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
 extern f32 g_gameTime;
-extern f32 D_00262230[4];
-extern f32 D_00262240[4];
+extern f32 g_cyclerShrinkCurve[4];
+extern f32 g_cyclerGrowCurve[4];
 extern f32 g_unitRange[];
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 
@@ -197,8 +197,8 @@ s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider**
 void PopBackMemoryMark(void);
 void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
-struct GroundFilterContext { u8 pad[0x50]; s32 f50; };
-struct GroundCandidate { u8 pad0[0x50]; s32 f50; u8 pad1[0x278]; u32 f2CC; u8 pad2[0x268]; u64 f538; };
+struct GroundFilterContext { u8 pad[0x50]; s32 root; };
+struct GroundCandidate { u8 pad0[0x50]; s32 root; u8 pad1[0x278]; u32 flagsHigh; u8 pad2[0x268]; u64 flags; };
 
 
 struct FrameNode {
@@ -219,16 +219,16 @@ void InitObjectCycler(ObjectCycler* self)
 {
     InitCollider(self);
     self->state = -1;
-    self->p610.pk = D_00262180;
-    self->p618.pk = D_00262188;
-    self->p620.pk = D_00262190;
-    self->p628.pk = D_00262198;
+    self->p610.pk = g_cyclerTargetRadiusRange;
+    self->p618.pk = g_cyclerTargetHeightRange;
+    self->p620.pk = g_cyclerTangentRadiusRange;
+    self->p628.pk = g_cyclerTangentHeightRange;
     self->swapKind = -1;
-    self->checkDelay.pk = D_002621A0;
-    self->p650.pk = D_002621A8;
-    self->p658.pk = D_002621B0;
-    self->p660.pk = D_002621B8;
-    self->p670.pk = D_002621C0;
+    self->checkDelay.pk = g_cyclerCheckDelayRange;
+    self->p650.pk = g_cyclerHoldExtraRange;
+    self->p658.pk = g_cyclerAdvanceDelayRange;
+    self->p660.pk = g_cyclerWrapDelayRange;
+    self->p670.pk = g_cyclerMessageIntervalRange;
     self->indexStep = 1;
     self->f690 = -1;
     AppendToList(&self->world->list1C48, self);
@@ -300,16 +300,16 @@ void StartObjectCycler(ObjectCycler* self)
         f32 t = RandomFloatInRange(self->checkDelay.a, self->checkDelay.b);
         self->nextCheckTime = g_gameClock[1] + t;
         t = RandomFloatInRange(self->p670.a, self->p670.b);
-        self->f680 = g_gameClock[1] + t;
+        self->nextMessageTime = g_gameClock[1] + t;
     }
     SetObjectCyclerState(self, self->startState);
     StartPlacedObject(self);
-    self->f64C = self->radius3CC + self->radius3CC;
+    self->searchRadius = self->radius3CC + self->radius3CC;
 }
 
-extern f32 D_002621F8[6];
-extern f32 D_00262210[4];
-extern f32 D_00262220[4];
+extern f32 g_cyclerRotationRamp[6];
+extern f32 g_cyclerFallPositionSteer[4];
+extern f32 g_cyclerFallRotationSteer[4];
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
@@ -345,14 +345,14 @@ void StepObjectCycler(ObjectCycler* self, f32 dt)
         AddColliderForce(self, &accel);
         Vu0::Q(accel) = Vu0::Sub(Vu0::Q(accel), Vu0::Q(self->gravity));
         BuildBasisFromXAndZHint(&vel, &accel, &basis);
-        ApproachRotationWithRamp(&self->rot, &basis, (RampProfile*)D_002621F8, 0, &k, dt);
+        ApproachRotationWithRamp(&self->rot, &basis, (RampProfile*)g_cyclerRotationRamp, 0, &k, dt);
         self->desc02()->m21(self, &k);
         break;
     }
     case 1:
         AddColliderForce(self, &self->gravity);
-        SteerColliderTowardPosition(self, 0, 0, (Vec02*)&D_00248D30, D_00262210, dt);
-        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, D_00262220, dt);
+        SteerColliderTowardPosition(self, 0, 0, (Vec02*)&D_00248D30, g_cyclerFallPositionSteer, dt);
+        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, g_cyclerFallRotationSteer, dt);
         break;
     case 6:
         StepCollider(self, dt);
@@ -477,7 +477,7 @@ void DrawObjectCycler(ObjectCycler* self, void* a1, void* a2)
         f32 num = g_gameTime - base;
         f32 den = self->stateEnd - base;
         f32 t = num / den;
-        f32 v = D_00262230[0] + t * (D_00262230[1] + t * D_00262230[2]);
+        f32 v = g_cyclerShrinkCurve[0] + t * (g_cyclerShrinkCurve[1] + t * g_cyclerShrinkCurve[2]);
         f32 lo = g_unitRange[0];
         f32 hi = g_unitRange[1];
         if (v < lo) v = lo;
@@ -491,7 +491,7 @@ void DrawObjectCycler(ObjectCycler* self, void* a1, void* a2)
         f32 num = g_gameTime - base;
         f32 den = self->stateEnd - base;
         f32 t = num / den;
-        f32 v = D_00262240[0] + t * (D_00262240[1] + t * D_00262240[2]);
+        f32 v = g_cyclerGrowCurve[0] + t * (g_cyclerGrowCurve[1] + t * g_cyclerGrowCurve[2]);
         f32 lo = g_unitRange[0];
         f32 hi = g_unitRange[1];
         if (v < lo) v = lo;
@@ -520,14 +520,14 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
 {
     if (self->state != 1) {
         SetObjectCyclerState(self, 1);
-        if ((r->fC & 8) != 0) {
-            ApplyColliderImpulseEvent(self, r->f8, &r->f20, &r->f30);
+        if ((r->flags & 8) != 0) {
+            ApplyColliderImpulseEvent(self, r->impulse, &r->origin, &r->target);
         }
         if (self->group != 0) {
             GroupForwardMessage loc;
             loc.f0 = 6;
-            loc.f20 = r->f20;
-            loc.f10 = r->f30;
+            loc.f20 = r->origin;
+            loc.f10 = r->target;
             self->group->desc->m1B(self->group, &loc);
         }
     }
@@ -562,10 +562,10 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
     case 6:
         SetColliderAnchors(self, 0, 0, 0, 0);
         self->index = 0;
-        self->f680 = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
+        self->nextMessageTime = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
         break;
     }
-    (*(PlacedObject**)((u8*)self + 0x5D8))->f88 = 14;
+    (*(PlacedObject**)((u8*)self + 0x5D8))->visibilityMask = 14;
     self->stateEnd = g_gameClock[1];
     switch (state) {
     case 0:
@@ -626,7 +626,7 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
         SetColliderAnchors(self, 3, 0, 3, 0);
         self->index = 0;
         self->nextAdvanceTime = g_gameClock[1] + RandomFloatInRange(self->p658.a, self->p658.b);
-        self->f66C = g_gameClock[1];
+        self->lastLookTime = g_gameClock[1];
         self->stateEnd += RandomFloatInRange(self->p650.a, self->p650.b);
         break;
     }
@@ -642,7 +642,7 @@ void ConvertPositionToWorld(BaseObject* self, Vec02* out);
 void SendObjectCyclerMessage(ObjectCycler* self)
 {
     GroupForwardMessage loc;
-    if (self->receiver678 && self->f680 <= g_gameClock[1]) {
+    if (self->receiver678 && self->nextMessageTime <= g_gameClock[1]) {
         loc.f0 = 6;
         if (self->source67C)
             ConvertPositionToWorld(self->source67C, (Vec02*)&loc.f20);
@@ -651,7 +651,7 @@ void SendObjectCyclerMessage(ObjectCycler* self)
         Vu0::Q(loc.f10) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-1.0f));
         ((f32*)&loc.f10)[2] = 0.0f;
         self->receiver678->desc->m1B(self->receiver678, &loc);
-        self->f680 = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
+        self->nextMessageTime = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
     }
 }
 
@@ -717,7 +717,7 @@ s32 ChooseObjectCyclerNextState(ObjectCycler* self)
             break;
         }
     }
-    if (Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(self->v5F0)))) < self->f64C) {
+    if (Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(self->v5F0)))) < self->searchRadius) {
         next = 6;
     } else if (touching) {
         next = 0;
@@ -750,7 +750,7 @@ s32 IsActiveColliderNearObjectCycler(ObjectCycler* self)
     if (active != 0) {
         Vu0::Vec pos = Vu0::Vec::Of(active->v140);
         Vu0::Q(point) = Vu0::MulAddX(pos.q, Vu0::Q(active->v150), Vu0::Scalar(0.5f));
-        s32 inside = LengthSquared(Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140))) < self->f684 * self->f684;
+        s32 inside = LengthSquared(Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140))) < self->triggerDistance * self->triggerDistance;
         if (inside) {
             return 1;
         }
@@ -760,42 +760,42 @@ s32 IsActiveColliderNearObjectCycler(ObjectCycler* self)
 
 s32 IsCyclerGroundCandidate(GroundFilterContext* a0, GroundCandidate* a1)
 {
-    if ((a1->f538 & 0x80000000000ULL) || a1->f50 == a0->f50) return 0;
-    u64 v = a1->f2CC;
+    if ((a1->flags & 0x80000000000ULL) || a1->root == a0->root) return 0;
+    u64 v = a1->flagsHigh;
     return ((s32)v ^ 1) & 1;
 }
 
 s32 IsObjectCyclerUnsupported(ObjectCycler* self)
 {
     f32* tbl = g_gameClock;
-    if (tbl[1] - self->f66C < 0.05f) {
+    if (tbl[1] - self->lastLookTime < 0.05f) {
         return 0;
     }
     PushBackMemoryMark();
     GroundProbe fr;
-    GatherCollidersInSphere(self->world, 0, self->f64C, &self->v140, (s32 (*)(void*, Collider*))(s32 (*)(GroundFilterContext*, GroundCandidate*))IsCyclerGroundCandidate, self, &fr.a, &fr.b);
+    GatherCollidersInSphere(self->world, 0, self->searchRadius, &self->v140, (s32 (*)(void*, Collider*))(s32 (*)(GroundFilterContext*, GroundCandidate*))IsCyclerGroundCandidate, self, &fr.a, &fr.b);
     fr.q = self->v140;
-    fr.q.z = fr.q.z - self->f64C;
+    fr.q.z = fr.q.z - self->searchRadius;
     s32 r = FindNearestSpanObject(0, &self->v140, &fr.q, fr.a, fr.b, 0);
     PopBackMemoryMark();
-    self->f66C = tbl[1];
+    self->lastLookTime = tbl[1];
     return r == 0;
 }
 
 // The file's .data, 0x262180 to 0x262250, in retail's order.
-PackedFloatPair D_00262180 = { 0x4348000043480000ULL };
-PackedFloatPair D_00262188 = { 0x42C8000042C80000ULL };
-PackedFloatPair D_00262190 = { 0x4448000043FA0000ULL };
-PackedFloatPair D_00262198 = { 0x43960000C3960000ULL };
-PackedFloatPair D_002621A0 = { 0x4270000041700000ULL };
-PackedFloatPair D_002621A8 = { 0x42F0000041F00000ULL };
-PackedFloatPair D_002621B0 = { 0x3E4CCCCD3D4CCCCDULL };
-PackedFloatPair D_002621B8 = { 0x3F4CCCCD3DCCCCCDULL };
-PackedFloatPair D_002621C0 = { 0x4170000040A00000ULL };
+PackedFloatPair g_cyclerTargetRadiusRange = { 0x4348000043480000ULL };
+PackedFloatPair g_cyclerTargetHeightRange = { 0x42C8000042C80000ULL };
+PackedFloatPair g_cyclerTangentRadiusRange = { 0x4448000043FA0000ULL };
+PackedFloatPair g_cyclerTangentHeightRange = { 0x43960000C3960000ULL };
+PackedFloatPair g_cyclerCheckDelayRange = { 0x4270000041700000ULL };
+PackedFloatPair g_cyclerHoldExtraRange = { 0x42F0000041F00000ULL };
+PackedFloatPair g_cyclerAdvanceDelayRange = { 0x3E4CCCCD3D4CCCCDULL };
+PackedFloatPair g_cyclerWrapDelayRange = { 0x3F4CCCCD3DCCCCCDULL };
+PackedFloatPair g_cyclerMessageIntervalRange = { 0x4170000040A00000ULL };
 s32 g_objectCyclerLoadLinks[6] = { 0, 0x256, 0x5D0, 2, 0x259, 0x678 };
 s32 g_objectCyclerStartLinks[6] = { 4, 0x258, 0x5D8, 2, 0x25A, 0x67C };
-f32 D_002621F8[6] = { 7.0f, 1.0f, 0.25f, 0.0f, 0.0f, 0.0f };
-f32 D_00262210[4] = { 0.0f, 0.25f, 0.000250000012f, 0.0f };
-f32 D_00262220[4] = { 0.0f, 0.25f, 0.0250000004f, 0.0f };
-f32 D_00262230[4] = { 1.0f, 1.5f, -2.5f, 0.0f };
-f32 D_00262240[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
+f32 g_cyclerRotationRamp[6] = { 7.0f, 1.0f, 0.25f, 0.0f, 0.0f, 0.0f };
+f32 g_cyclerFallPositionSteer[4] = { 0.0f, 0.25f, 0.000250000012f, 0.0f };
+f32 g_cyclerFallRotationSteer[4] = { 0.0f, 0.25f, 0.0250000004f, 0.0f };
+f32 g_cyclerShrinkCurve[4] = { 1.0f, 1.5f, -2.5f, 0.0f };
+f32 g_cyclerGrowCurve[4] = { 0.0f, 2.0f, 0.0f, 0.0f };

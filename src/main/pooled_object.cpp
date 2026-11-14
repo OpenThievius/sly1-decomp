@@ -91,7 +91,7 @@ void StartPlacedObject(PlacedObject* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 
-extern GaugeManager* D_0027C00C;
+extern GaugeManager* g_gaugeManager;
 
 void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
 void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
@@ -382,7 +382,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void SetListLinkOffset(List01* self, s32 offset);
 
 
-extern s32 D_00275F84;
+extern s32 g_resumeSoundSetupDone;
 s32 IsStreamVoiceLocked(void);
 void SetStepSequenceState(StepSequence* self, s32 mode);
 
@@ -444,7 +444,7 @@ void ShowCountedScreenElement(World* self);
 void HideCountedScreenElement(World* self);
 void PopStackElement(ElementStack* g);
 
-extern s32 D_00275F84;
+extern s32 g_resumeSoundSetupDone;
 extern s32 D_00270B30;
 extern s32 D_002717A8;
 extern u8 g_elementStack[];
@@ -463,8 +463,8 @@ void RunStepSequence(StepSequence* self);
 
 
 extern s32 g_padRouting;
-extern u16 D_00261D08[16];
-extern u8 D_00261D28[16];
+extern u16 g_stepWaitButtonMasks[16];
+extern u8 g_stepWaitButtonGlyphs[16];
 
 s32 CheckStreamVoicePending(void);
 s32 HasStreamVoice(void);
@@ -480,7 +480,7 @@ void SolveFactoredSystem(s32 n, f32* a, f32* b, f32* c);
 // The object a caption is spoken by (kind 0x104, found by id by func_00150DC0): its colour
 // becomes the caption box's highlight, its state walker (+0x334) is sent key 0x34C.
 struct StateWalker;
-struct CaptionSpeaker { u8 pad0[0x2D0]; Rgba4 f2D0; u8 pad1[0x334 - 0x2D4]; StateWalker* f334; };
+struct CaptionSpeaker { u8 pad0[0x2D0]; Rgba4 color; u8 pad1[0x334 - 0x2D4]; StateWalker* walker; };
 // A word of a step sequence's message, read as an id or a time.
 struct KeyRecord;
 union MessageWord { s32 i; f32 f; KeyRecord* key; void* p; };
@@ -490,7 +490,7 @@ struct SequenceMessage {
     u32 type;
     MessageWord f4, f8;
     s32 fC, f10;
-    s8* f14;
+    s8* text;
     s32 f18, f1C, f20, f24;
 };
 
@@ -556,9 +556,9 @@ void WriteVifFlush(PacketWriter* p);
 
 
 
-extern ScatterTable D_00261D70[2];
-extern ScatterTable D_00261E30;
-extern ScatterTable D_00261E90;
+extern ScatterTable g_scatterTablesPlain[2];
+extern ScatterTable g_scatterTableFlagged;
+extern ScatterTable g_scatterTableEarlyGame;
 s32 RandomIntInRange(s32 a, s32 b);
 
 void InitPlacedObject(PlacedObject* self);
@@ -660,13 +660,13 @@ void SetPooledObjectState(PooledObject* self, s32 state)
         }
         self->stateTime = g_gameTime[0];
         if (state == 5) {
-            (void)FadeOutPlacedObject(self, self->f564);
+            (void)FadeOutPlacedObject(self, self->fadeOutTime);
         }
     }
 }
 
-extern f32 D_00261CD4;
-extern f32 D_00261CD8;
+extern f32 g_launchHorizontalSpeed;
+extern f32 g_launchLiftSpeed;
 void SetPlayerState(Player* self, s32 state, s32 sub);
 
 // The owner-message callback of a pooled object's launch: gives the other object, through its
@@ -685,7 +685,7 @@ void LaunchObjectFromPooledObject(PlacedObject* self, PlacedObject* other)
     Vec02 r;
     *(Vu0::Vec*)p = Vu0::NormalizeOr(Vu0::Vec::Of(d), Vu0::Vec::Of(g_unitXVector));
     const Desc02* desc = other->desc02();
-    Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(D_00261CD4), Vu0::Q(g_unitZVector), Vu0::ScalarAtValue(D_00261CD8));
+    Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(g_launchHorizontalSpeed), Vu0::Q(g_unitZVector), Vu0::ScalarAtValue(g_launchLiftSpeed));
     desc->m20(other, &r);
     if (IsObjectOfKind(other, 7) != 0) {
         SetPlayerState((Player*)other, 4, 0x2B);
@@ -731,7 +731,7 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
     Collider* c = (Collider*)FindContactingPart(self);
     if (c != 0) {
         s32 lands = 1;
-        if (c == (Collider*)g_player && (g_player->f2220 != 6 || g_player->f239C != 2)) {
+        if (c == (Collider*)g_player && (g_player->state != 6 || g_player->targetMode != 2)) {
             OwnerMessage m;
             InitOwnerMessage(&m, 0, self);
             m.fn = (void (*)())LaunchObjectFromPooledObject;
@@ -752,8 +752,8 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
             ((ObjPtrFn)((void**)self->desc)[0x94 / 4])(self, (void*)&D_00248D30);
             SetColliderAnchors(self, 3, 0, 3, 0);
             SetPooledObjectState(self, 4);
-            if (self->f574 != 0) {
-                CreateAnimationPlayerWithoutPresetTargets((Animation*)self->f574, self, 0, (AnimationPlayer**)&self->watched, 0.0f, 1.0f);
+            if (self->watchedAnimation != 0) {
+                CreateAnimationPlayerWithoutPresetTargets((Animation*)self->watchedAnimation, self, 0, (AnimationPlayer**)&self->watched, 0.0f, 1.0f);
                 if (self->watched != 0) {
                     SetPooledObjectState(self, 3);
                 }
@@ -791,14 +791,14 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
                 ev.pos = self->v140;
                 ((ObjPtrFn)((void**)*(void**)g)[0x7C / 4])(g, &ev);
             } else {
-                SendPointEventToWorldListener((Quad16*)&self->v140, self->f560);
+                SendPointEventToWorldListener((Quad16*)&self->v140, self->landEventValue);
             }
             ((ObjPtrFn)((void**)self->desc)[0x64 / 4])(self, 0);
             ((ObjFn)((void**)self->desc)[0x1C / 4])(self);
         }
         return;
     }
-    if (g_player != 0 && g_player->f2220 == 4) {
+    if (g_player != 0 && g_player->state == 4) {
         return;
     }
     Vec02 at;
@@ -826,7 +826,7 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
 void InitPooledHolder(PooledHolder* self)
 {
     InitPlayerFlaggedCollider(self);
-    self->f6C0 = -1;
+    self->templateId = -1;
 }
 
 void HandlePooledHolderNotification(PooledHolder* self, s32 kind, void* msg)
@@ -835,15 +835,15 @@ void HandlePooledHolderNotification(PooledHolder* self, s32 kind, void* msg)
 
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 0x14) {
-        if (msg == self->p740) {
+        if (msg == self->walker) {
             GetStateWalkerTargetKey((StateWalker*)msg, &result);
             if (result == 0x2B7) {
                 if (self->hold != 0) {
-                    DestroyStateWalker((StateWalker*)self->p740);
-                    self->p740 = 0;
+                    DestroyStateWalker((StateWalker*)self->walker);
+                    self->walker = 0;
                 } else {
-                    ((Held23*)self->p734->f200)->f4C = 1;
-                    ((Held23*)self->p734->f200)->f1C = 0;
+                    ((Held23*)self->p734->aimAttachment)->f4C = 1;
+                    ((Held23*)self->p734->aimAttachment)->aimAtTarget = 0;
                     self->p734->desc02()->m1D(self->p734, &self->p734->v190);
                     self->p734->desc02()->m1E(self->p734, &self->p734->m1A0);
                     self->p738->desc02()->m1E(self->p738, &self->p738->m1A0);
@@ -875,7 +875,7 @@ void PostLoadPooledHolder(PooledHolder* self)
 void SyncPooledHolderWithPlayer(PooledHolder* self)
 {
     if (g_player != 0) {
-        self->f6DC = (s32)g_player->f24F8;
+        self->throwTarget = (s32)g_player->rigObject;
     }
 }
 
@@ -883,13 +883,13 @@ void StartPooledHolder(PooledHolder* self)
 {
     StartMaskedCollider(self);
     ResolveObjectLinks(self, 3, g_takerLinks);
-    ((Held23*)self->p734->f200)->f4C = 1;
-    PlacedObject* s2 = (PlacedObject*)FindFirstObjectByIdMode1(self->world, self->f6C0, self);
-    *(Quad16*)&self->q6F0[0] = *(Quad16*)&s2->v190;
-    *(Quad16*)&self->q6F0[1] = *(Quad16*)&s2->m1A0.r[0];
-    *(Quad16*)&self->q6F0[2] = *(Quad16*)&s2->m1A0.r[1];
-    *(Quad16*)&self->q6F0[3] = *(Quad16*)&s2->m1A0.r[2];
-    self->f730 = s2->parent;
+    ((Held23*)self->p734->aimAttachment)->f4C = 1;
+    PlacedObject* s2 = (PlacedObject*)FindFirstObjectByIdMode1(self->world, self->templateId, self);
+    *(Quad16*)&self->savedPose[0] = *(Quad16*)&s2->v190;
+    *(Quad16*)&self->savedPose[1] = *(Quad16*)&s2->m1A0.r[0];
+    *(Quad16*)&self->savedPose[2] = *(Quad16*)&s2->m1A0.r[1];
+    *(Quad16*)&self->savedPose[3] = *(Quad16*)&s2->m1A0.r[2];
+    self->savedParent = s2->parent;
     s32 i = 1;
     if (i < self->cnt) {
         do {
@@ -905,26 +905,26 @@ void StartPooledHolder(PooledHolder* self)
     s2->desc->m15(s2, 0);
     s2->desc->m03(s2);
     AppendQueuedCall(self->world, (void*)(void (*)(void*))SyncPooledHolderWithPlayer, self, 0, 0);
-    self->p740 = CreateStateWalker((StateGraph*)self->p73C, self, 0x2B7, 1);
+    self->walker = CreateStateWalker((StateGraph*)self->stateGraph, self, 0x2B7, 1);
 }
 
 void UpdatePooledHolder(PooledHolder* self, f32 dt)
 {
     s32 st[2];
     UpdateMaskedCollider(self, dt);
-    if (self->hold == 0 && self->f6DC != 0 && self->p740 != 0) {
-        GetStateWalkerCurrentKey((StateWalker*)self->p740, &st[0]);
-        GetStateWalkerTargetKey((StateWalker*)self->p740, &st[1]);
+    if (self->hold == 0 && self->throwTarget != 0 && self->walker != 0) {
+        GetStateWalkerCurrentKey((StateWalker*)self->walker, &st[0]);
+        GetStateWalkerTargetKey((StateWalker*)self->walker, &st[1]);
         if (st[1] == -1) st[1] = st[0];
         if (st[0] == st[1]) {
             switch (st[0]) {
             case 0x2B7:
                 if (self->f7B0 != 0) st[1] = 0x2B8;
-                else if (self->f78C > 0) st[1] = 0x2B9;
+                else if (self->collectedCount > 0) st[1] = 0x2B9;
                 break;
             case 0x2B8:
                 if (self->f7B0 == 0) {
-                    if (self->f78C > 0) st[1] = 0x2B9;
+                    if (self->collectedCount > 0) st[1] = 0x2B9;
                     else st[1] = 0x2B7;
                 } else {
                     UpdatePooledHolderAim(self, &st[1]);
@@ -932,7 +932,7 @@ void UpdatePooledHolder(PooledHolder* self, f32 dt)
                 break;
             case 0x2B9:
                 if (self->f7B0 != 0) st[1] = 0x2B8;
-                else if (self->f78C <= 0) st[1] = 0x2B7;
+                else if (self->collectedCount <= 0) st[1] = 0x2B7;
                 else UpdatePooledHolderAim(self, &st[1]);
                 break;
             case 0x2BA:
@@ -963,20 +963,20 @@ void ReleasePooledHolder(PooledHolder* self)
 {
     s32 status;
 
-    if (self->p6C8 != 0) {
-        self->p6C8->desc->m15(self->p6C8, 0);
-        self->p6C8->desc->m03(self->p6C8);
+    if (self->heldObject != 0) {
+        self->heldObject->desc->m15(self->heldObject, 0);
+        self->heldObject->desc->m03(self->heldObject);
     }
-    if (self->p740 != 0) {
-        TeleportStateWalker((StateWalker*)self->p740, 0x2B7);
-        GetStateWalkerCurrentKey((StateWalker*)self->p740, &status);
+    if (self->walker != 0) {
+        TeleportStateWalker((StateWalker*)self->walker, 0x2B7);
+        GetStateWalkerCurrentKey((StateWalker*)self->walker, &status);
         if (status == 0x2B7) {
-            DestroyStateWalker((StateWalker*)self->p740);
-            self->p740 = 0;
+            DestroyStateWalker((StateWalker*)self->walker);
+            self->walker = 0;
         }
     }
     {
-        Held23* o = (Held23*)self->p734->f200;
+        Held23* o = (Held23*)self->p734->aimAttachment;
         ((Held23Slot2Fn)o->vtbl[2])(o, 7);
     }
     HandleMaskedColliderActivation(self);
@@ -986,47 +986,47 @@ void SetPooledHolderWalkerState(PooledHolder* self, s32 code)
 {
     s32 r;
 
-    GetStateWalkerTargetKey((StateWalker*)self->p740, &r);
+    GetStateWalkerTargetKey((StateWalker*)self->walker, &r);
     if (r == -1) {
-        GetStateWalkerCurrentKey((StateWalker*)self->p740, &r);
+        GetStateWalkerCurrentKey((StateWalker*)self->walker, &r);
     }
     if (code == r) {
         return;
     }
     if (r == 0x2B7) {
-        ((Held23*)self->p734->f200)->f4C = 0;
+        ((Held23*)self->p734->aimAttachment)->f4C = 0;
     }
     if (code < 0x2BA) {
         if (code >= 0x2B8) {
-            ((Held23*)self->p734->f200)->f1C = (code == 0x2B9);
+            ((Held23*)self->p734->aimAttachment)->aimAtTarget = (code == 0x2B9);
             if (!((u32)(r - 0x2BA) < 2)) {
-                self->f6D8 = 0;
+                self->acquireTime = 0;
             }
         }
     }
-    SetStateWalkerTarget((StateWalker*)self->p740, code);
+    SetStateWalkerTarget((StateWalker*)self->walker, code);
 }
 
 void UpdatePooledHolderAim(PooledHolder* self, s32* state)
 {
     if (*state == 0x2B8) {
-        ((Held23*)self->p734->f200)->f1C = 0;
-        if (self->f6D0 < g_gameTime[0] - self->f6D8) {
+        ((Held23*)self->p734->aimAttachment)->aimAtTarget = 0;
+        if (self->acquireDelay < g_gameTime[0] - self->acquireTime) {
             if (AcquirePooledObject(self)) {
                 *state = 0x2BA;
             }
         }
         return;
     }
-    if (self->p6E0 == 0 || IsObjectAttached(self->p6E0) == 0
-        || self->p6E0->state == 3 || self->p6E0->state == 4) {
-        self->p6E0 = FindFirstAttachedPooledObject(self);
+    if (self->targetObject == 0 || IsObjectAttached(self->targetObject) == 0
+        || self->targetObject->state == 3 || self->targetObject->state == 4) {
+        self->targetObject = FindFirstAttachedPooledObject(self);
     }
-    if (self->p6E0 == 0) {
+    if (self->targetObject == 0) {
         return;
     }
-    AssignAimTarget((T2195_790*)self->p734->f200, self->p6E0, (Vec02*)&D_00248D30);
-    if (self->f6D0 < g_gameTime[0] - self->f6D8) {
+    AssignAimTarget((T2195_790*)self->p734->aimAttachment, self->targetObject, (Vec02*)&D_00248D30);
+    if (self->acquireDelay < g_gameTime[0] - self->acquireTime) {
         if (AcquirePooledObject(self)) {
             *state = 0x2BB;
         }
@@ -1036,35 +1036,35 @@ void UpdatePooledHolderAim(PooledHolder* self, s32* state)
 s32 AcquirePooledObject(PooledHolder* self) {
     PooledObject* s0;
 
-    if (self->p6C8 != 0) {
+    if (self->heldObject != 0) {
         return 1;
     }
-    if (self->p6CC != 0) {
-        if (self->p6CC->state != 5) {
-            self->p6CC = 0;
+    if (self->reservedObject != 0) {
+        if (self->reservedObject->state != 5) {
+            self->reservedObject = 0;
         }
     }
-    if (IsListEmpty(&self->world->list1C78) != 0 || self->p6CC != 0) {
+    if (IsListEmpty(&self->world->list1C78) != 0 || self->reservedObject != 0) {
         SelectEarliestPooledObject(self);
         return 0;
     }
     s0 = (PooledObject*)self->world->list1C78.head;
     s0->taker = self;
     s0->desc->m02(s0);
-    s0->desc->m15(s0, self->f730);
+    s0->desc->m15(s0, self->savedParent);
     SetColliderAnchors(s0, 3, 0, 3, 0);
-    s0->desc03()->m1D(s0, &self->q6F0[0]);
-    s0->desc03()->m1E(s0, (Mat02*)&self->q6F0[1]);
+    s0->desc03()->m1D(s0, &self->savedPose[0]);
+    s0->desc03()->m1E(s0, (Mat02*)&self->savedPose[1]);
     s0->desc03()->m20(s0, (Vec02*)&D_00248D30);
     s0->desc03()->m21(s0, (Vec02*)&D_00248D30);
     SetPooledObjectState(s0, 1);
-    self->p6C8 = s0;
-    self->f6D8 = g_gameTime[0];
+    self->heldObject = s0;
+    self->acquireTime = g_gameTime[0];
     return 1;
 }
 
 #define OBJV ((PooledView*)obj)
-struct PooledView { u8 pad00[0x558]; f32 f558; f32 f55C; u8 pad560[0x580 - 0x560]; f32 f580; f32 f584; };
+struct PooledView { u8 pad00[0x558]; f32 throwSpeed; f32 throwEventRadius; u8 pad560[0x580 - 0x560]; f32 flightTime; f32 throwHeight; };
 void SetPooledObjectState(PooledObject* self, s32 state);
 void BuildBasisFromX(Vec02* x, Mat02* out);
 void SendPointEventToWorldListener(Quad16* a0, f32 f);
@@ -1083,25 +1083,25 @@ void ThrowHeldPooledObject(PooledHolder* self)
     void* args[1];
     PlacedObject* source;
     f32 speed;
-    if (self->p6E0 != 0 && ((Held23*)self->p734->f200)->f1C != 0) {
-        if (IsObjectAttached(self->p6E0) == 0 || self->p6E0->state == 3 || self->p6E0->state == 4) {
-            self->p6E0 = 0;
+    if (self->targetObject != 0 && ((Held23*)self->p734->aimAttachment)->aimAtTarget != 0) {
+        if (IsObjectAttached(self->targetObject) == 0 || self->targetObject->state == 3 || self->targetObject->state == 4) {
+            self->targetObject = 0;
             return;
         }
         speed = 15.0f;
-        source = self->p6E0;
+        source = self->targetObject;
     } else {
-        source = (PlacedObject*)self->f6DC;
+        source = (PlacedObject*)self->throwTarget;
         speed = *(f32*)((u8*)self + 0x6D4);
     }
-    obj = (PooledObject*)self->p6C8;
-    self->p6E0 = 0;
-    self->p6C8 = 0;
+    obj = (PooledObject*)self->heldObject;
+    self->targetObject = 0;
+    self->heldObject = 0;
     obj->desc->m15(obj, 0);
     SetColliderAnchors(obj, 0, 0, 0, 0);
-    if (obj->f1FC != 0) {
+    if (obj->baseAttachment != 0) {
         typedef void (*AttachedFn)(void* self, s32 arg);
-        void* att = obj->f1FC;
+        void* att = obj->baseAttachment;
         (*(AttachedFn**)att)[2](att, 7);
     }
     pos = source->v140;
@@ -1110,20 +1110,20 @@ void ThrowHeldPooledObject(PooledHolder* self)
     BuildBasisFromX(&d, &basis);
     obj->desc02()->m1E(obj, &basis);
     f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(d)));
-    OBJV->f580 = len / OBJV->f558;
+    OBJV->flightTime = len / OBJV->throwSpeed;
     TransformDirectionBetweenFrames(source->root, 0, &source->root->v150, &dir);
-    Vu0::Q(step) = Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(OBJV->f580));
+    Vu0::Q(step) = Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(OBJV->flightTime));
     Vu0::Q(pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(step));
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(obj->v140));
     f32 len2 = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(d)));
-    OBJV->f580 = len2 / OBJV->f558;
+    OBJV->flightTime = len2 / OBJV->throwSpeed;
     Vu0::Q(d) = Vu0::DivX(Vu0::Q(d), Vu0::Length(Vu0::Q(d)));
-    Vu0::Q(vel) = Vu0::MulX(Vu0::Q(d), Vu0::ScalarAt(OBJV->f558));
+    Vu0::Q(vel) = Vu0::MulX(Vu0::Q(d), Vu0::ScalarAt(OBJV->throwSpeed));
     obj->desc02()->m20(obj, &vel);
     SetPooledObjectState(obj, 2);
     obj->f57C = (s32)source;
-    OBJV->f584 = speed;
-    SendPointEventToWorldListener((Quad16*)&obj->v140, OBJV->f55C);
+    OBJV->throwHeight = speed;
+    SendPointEventToWorldListener((Quad16*)&obj->v140, OBJV->throwEventRadius);
     args[0] = &obj;
     TriggerScriptEvent(self, 0xD, 1, args);
 }
@@ -1131,7 +1131,7 @@ void ThrowHeldPooledObject(PooledHolder* self)
 void SelectEarliestPooledObject(PooledHolder* self)
 {
 	ListFrame frame;
-	if (self->p6CC != 0) return;
+	if (self->reservedObject != 0) return;
 	PooledObject* current = (PooledObject*)g_partList.head;
 	PooledObject* best = 0;
 	f32 minimum = 3.4028235e+38f;
@@ -1141,13 +1141,13 @@ void SelectEarliestPooledObject(PooledHolder* self)
 
 		if (candidate != 0 && candidate->stateTime < minimum) { best = candidate; minimum = candidate->stateTime; }
 	}
-	if (best != 0) { SetPooledObjectState(best, 5); self->p6CC = best; }
+	if (best != 0) { SetPooledObjectState(best, 5); self->reservedObject = best; }
 }
 
 PooledObject* FindFirstAttachedPooledObject(PooledHolder* state)
 {
-	for (s32 i = 0; i < state->f78C; ++i) {
-		PooledObject* item = (PooledObject*)state->f790[i];
+	for (s32 i = 0; i < state->collectedCount; ++i) {
+		PooledObject* item = (PooledObject*)state->collected[i];
 		if (IsObjectAttached(item) == 0) continue;
 		if (item->state == 3) continue;
 		if (item->state == 4) continue;
@@ -1167,7 +1167,7 @@ void AddPooledHolderItem(PooledHolder* self, s32 item)
 
 void ResetCollectedItems(PooledHolder* self)
 {
-    self->f78C = 0;
+    self->collectedCount = 0;
     self->f7B0 = 0;
 }
 
@@ -1188,10 +1188,10 @@ void RecordCollectedItem(PooledHolder* self, void* event)
         }
     }
     if (found) {
-        u32 count = self->f78C;
+        u32 count = self->collectedCount;
         if (count < 8) {
-            self->f790[count] = event;
-            self->f78C = count + 1;
+            self->collected[count] = event;
+            self->collectedCount = count + 1;
         }
     }
 }
@@ -1287,8 +1287,8 @@ void SetStepSequenceState(StepSequence* self, s32 next)
     }
     switch (cur) {
     case 5:
-        if (D_0026F5A0.owner == self) {
-            D_0026F5A0.owner = 0;
+        if (g_hintGlyphElement.owner == self) {
+            g_hintGlyphElement.owner = 0;
         }
         break;
     case 1:
@@ -1305,7 +1305,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
             ReleasePadSelectFlag(g_currentWorld);
         }
         (void)PopStackValue(&g_camera->ctl460);
-        if ((self->f2E8 & 0x10) != 0 && self->player2F8 != 0) {
+        if ((self->waitFlags & 0x10) != 0 && self->player2F8 != 0) {
             StopAnimationPlayer(self->player2F8);
         }
         if (self->mode2D0 == 2 && self->f330 != 0) {
@@ -1321,10 +1321,10 @@ void SetStepSequenceState(StepSequence* self, s32 next)
     }
     switch (next) {
     case 5:
-        if (D_0026F5A0.owner != 0) {
-            SetStepSequenceState(D_0026F5A0.owner, 0);
+        if (g_hintGlyphElement.owner != 0) {
+            SetStepSequenceState(g_hintGlyphElement.owner, 0);
         }
-        D_0026F5A0.owner = self;
+        g_hintGlyphElement.owner = self;
         self->state2D4 = next;
         break;
     case 1:
@@ -1335,7 +1335,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         break;
     case 3:
         self->step2E4 = -1;
-        self->f2E8 = 0;
+        self->waitFlags = 0;
         if (self->mode2D0 == 2) {
             PushStackValue(&g_camera->ctl460, 4);
             PushCameraController(g_camera, 6, &g_camera->ctl460, 0, 0);
@@ -1350,9 +1350,9 @@ void SetStepSequenceState(StepSequence* self, s32 next)
             PushStackValue(&g_camera->ctl460, 3);
             if (self->mode2D0 == 0) {
                 if (self->second300 != -1) {
-                    g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, self->second300, 0);
+                    g_camera->ctl460.anchorObject = FindFirstObjectByIdMode4(self->world, self->second300, 0);
                 } else {
-                    g_camera->ctl460.f5C = 0;
+                    g_camera->ctl460.anchorObject = 0;
                 }
             }
         }
@@ -1379,7 +1379,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
     Ent65* s2;
 
     UpdatePlacedObject(self, dt);
-    if (!(g_timerCaption.state < 2 && g_timerCaption.pressed == 0 && IsStreamVoiceLocked() == 0 && D_00275F84 != 1)) {
+    if (!(g_timerCaption.state < 2 && g_timerCaption.pressed == 0 && IsStreamVoiceLocked() == 0 && g_resumeSoundSetupDone != 1)) {
         s32 st = self->state2D4;
         switch (st) {
         case 1:
@@ -1402,9 +1402,9 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
     s1 = self->state2D4;
     switch (s1) {
     case 0:
-        if (self->f324 != 0) {
-            if (D_00275F84 == 0 && q[1] != 0) {
-                self->f324 = 0;
+        if (self->startPending != 0) {
+            if (g_resumeSoundSetupDone == 0 && q[1] != 0) {
+                self->startPending = 0;
                 ChooseStepSequenceState(self);
                 s1 = self->state2D4;
             }
@@ -1424,7 +1424,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
         goto timer;
     case 1:
         if (q[1] != 0) {
-            StepSequence* o = D_0027051C;
+            StepSequence* o = g_activeStepSequence;
             if (o == 0) {
                 ShowStepSequenceText(self, s2);
                 s1 = self->state2D4;
@@ -1440,7 +1440,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
         break;
     case 3:
         if (self->mode2D0 != 2) {
-            if (!(self->step2E4 < self->count2DC) || D_00275F84 == 1) {
+            if (!(self->step2E4 < self->count2DC) || g_resumeSoundSetupDone == 1) {
                 PopStackElement((ElementStack*)g_elementStack);
                 s1 = self->state2D4;
             }
@@ -1478,7 +1478,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
     switch (msg->type) {
     case 0:
         OpenKeyRecord(msg->f4.key);
-        self->f2E8 |= 1;
+        self->waitFlags |= 1;
         break;
     case 1:
     case 2:
@@ -1492,8 +1492,8 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
         } else {
             s4 = 0;
         }
-        if (s2 && s2->f334) {
-            SetStateWalkerTarget(s2->f334, 0x34C);
+        if (s2 && s2->walker) {
+            SetStateWalkerTarget(s2->walker, 0x34C);
         }
         switch (msg->type) {
         case 1:
@@ -1501,7 +1501,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             SetArcSpecialObject(&D_002708E0, s4);
             self->p2F0 = s2;
             if (s2) {
-                self->f2E8 |= 2;
+                self->waitFlags |= 2;
             }
             break;
         case 2:
@@ -1509,7 +1509,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             SetArcSpecialObject(&D_00271558, s4);
             self->p2F4 = s2;
             if (s2) {
-                self->f2E8 |= 4;
+                self->waitFlags |= 4;
             }
             break;
         default:
@@ -1532,7 +1532,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
         a0 = 0;
         if (a2 != -1) {
             a0 = FindFirstObjectById(self->world, 2, a2, self);
-            self->f2E8 |= 0x10;
+            self->waitFlags |= 0x10;
         } else {
             if (s2) {
                 a0 = FindFirstObjectById(self->world, 1, 0x54A, s2);
@@ -1542,11 +1542,11 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             CreateAnimationPlayerWithoutPresetTargets((Animation*)a0, (BaseObject*)s2, 1, &self->player2F8, 0.0f, 1.0f);
             AddAnimationPlayerRecordCallback(self->player2F8, (PlacedObject**)self);
         }
-        nm = msg->f14;
+        nm = msg->text;
         if (nm && *nm) {
             g_typedTextCaptionBox.vt->m08(&g_typedTextCaptionBox, (const char*)nm);
             if (s2) {
-                *(Rgba4*)&g_typedTextCaptionBox.highlight = s2->f2D0;
+                *(Rgba4*)&g_typedTextCaptionBox.highlight = s2->color;
             } else {
                 g_typedTextCaptionBox.highlight = 0x80808080;
             }
@@ -1561,37 +1561,37 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             }
             if (0.0f < f20) {
                 T217D_440* h2 = &g_typedTextCaptionBox;
-                h2->charsPerSecond = (f32)(GetStringLength((const char*)msg->f14) + 10) / f20;
+                h2->charsPerSecond = (f32)(GetStringLength((const char*)msg->text) + 10) / f20;
             } else {
                 T217D_440* h3 = &g_typedTextCaptionBox;
                 h3->charsPerSecond = 15.0f;
             }
-            self->f2E8 |= 0x20;
+            self->waitFlags |= 0x20;
         }
         if (msg->f4.f >= 0.0f) {
             SetTextPanelValuePercent(&g_typedTextCaptionBox, msg->f4.f + 1.0f);
-            self->f2E8 |= 0x40;
+            self->waitFlags |= 0x40;
         }
         if (msg->f8.f >= 0.0f) {
-            self->f2E8 |= 0x80;
-            self->f2FC = g_gameTime[0] + msg->f8.f;
+            self->waitFlags |= 0x80;
+            self->waitDeadline = g_gameTime[0] + msg->f8.f;
         }
         if (msg->f20 != -1) {
             BaseObject* r = FindFirstObjectById(self->world, 0x104, msg->f20, self->root ? self->root : self);
             SetTextPanelSubject(&g_typedTextCaptionBox, r);
         }
         if (msg->f24 != -1) {
-            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, msg->f24, 0);
+            g_camera->ctl460.anchorObject = FindFirstObjectByIdMode4(self->world, msg->f24, 0);
         } else if (self->second300 != -1) {
-            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, self->second300, 0);
+            g_camera->ctl460.anchorObject = FindFirstObjectByIdMode4(self->world, self->second300, 0);
         } else {
-            g_camera->ctl460.f5C = 0;
+            g_camera->ctl460.anchorObject = 0;
         }
         if (msg->fC) {
-            self->f2E8 |= 0x100;
-            self->f2EC = msg->f10;
+            self->waitFlags |= 0x100;
+            self->waitKey = msg->f10;
         }
-        self->f2E8 |= 8;
+        self->waitFlags |= 8;
         break;
     case 4: {
         void* tmp = &msg->f4;
@@ -1620,7 +1620,7 @@ void HandleStepSequenceNotification(StepSequence* state, s32 mode, void* value)
 
 s32 TestStepWaitConditions(StepSequence* self)
 {
-    s32 flags = self->f2E8;
+    s32 flags = self->waitFlags;
     if (flags & 2) {
         SequenceStep* e = self->step2E4 < self->count2DC - 1 ? &((SequenceStep*)self->steps2E0)[self->step2E4 + 1] : 0;
         if (e != 0 && e->type == 2) {
@@ -1646,32 +1646,32 @@ s32 TestStepWaitConditions(StepSequence* self)
         if (IsTextPanelTextTyped(&g_typedTextCaptionBox) != 0) flags &= 0xFFFFFFDF;
     }
     if (flags & 0x40) {
-        if (g_camera->ctl460.g18 == g_typedTextCaptionBox.value) flags &= 0xFFFFFFBF;
+        if (g_camera->ctl460.zoomFraction == g_typedTextCaptionBox.value) flags &= 0xFFFFFFBF;
     }
     if (flags & 0x80) {
-        if (self->f2FC <= g_gameTime[0]) flags &= 0xFFFFFF7F;
+        if (self->waitDeadline <= g_gameTime[0]) flags &= 0xFFFFFF7F;
     }
-    g_typedTextCaptionBox.f2F8 = 0;
+    g_typedTextCaptionBox.buttonGlyph = 0;
     if (flags == 0x100) {
         s32 r;
         PadRecord* in = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
-        s32 k = self->f2EC;
+        s32 k = self->waitKey;
         r = 0;
         switch (k) {
         case 9:
-            if (0.8f < in->f48) r = 1;
+            if (0.8f < in->stickMagnitude) r = 1;
             break;
         case 10:
-            if (0.8f < in->f7C) r = 1;
+            if (0.8f < in->secondStickMagnitude) r = 1;
             break;
         case 11:
-            if (0.8f < __builtin_fabsf(in->f40)) r = 1;
+            if (0.8f < __builtin_fabsf(in->stickX)) r = 1;
             break;
         case 12:
-            if (0.8f < __builtin_fabsf(in->f44)) r = 1;
+            if (0.8f < __builtin_fabsf(in->stickY)) r = 1;
             break;
         case 13:
-            if (g_player != 0 && g_player->f2220 == 2) r = g_player->f2228 == 3;
+            if (g_player != 0 && g_player->state == 2) r = g_player->subState == 3;
             break;
         case 14:
         {
@@ -1681,16 +1681,16 @@ s32 TestStepWaitConditions(StepSequence* self)
         }
             break;
         default:
-            r = (in->flags & D_00261D08[k]) != 0;
+            r = (in->flags & g_stepWaitButtonMasks[k]) != 0;
             break;
         }
         if (r != 0) {
             flags = 0;
         } else {
-            g_typedTextCaptionBox.f2F8 = D_00261D28[k];
+            g_typedTextCaptionBox.buttonGlyph = g_stepWaitButtonGlyphs[k];
         }
     }
-    self->f2E8 = flags;
+    self->waitFlags = flags;
     return flags != 0;
 }
 
@@ -1763,18 +1763,18 @@ void ChooseStepSequenceState(StepSequence* self)
         return;
     if (IsStreamVoiceLocked() != 0)
         return;
-    if (D_00275F84 == 1)
+    if (g_resumeSoundSetupDone == 1)
         return;
-    if (self == D_0027051C)
+    if (self == g_activeStepSequence)
         return;
     s32 mode = 1;
     if (*(s32*)self->target304 != 0) {
         mode = (self->mode2D0 == 2) ? self->state2D4 : 5;
     } else {
-        s32 n = self->f310;
+        s32 n = self->extraTargetCount;
         if (n > 0) {
             for (s32 i = 0; i < n; i++) {
-                if (*(s32*)self->f314[i] != 0) {
+                if (*(s32*)self->extraTargets[i] != 0) {
                     mode = 5;
                     break;
                 }
@@ -1793,14 +1793,14 @@ void ResetStepSequence(StepSequence* self)
 
 void AddSequenceExtraTarget(StepSequence* collection, s32 key, u32 kind)
 {
-	if ((u32)collection->f310 >= 4) return;
+	if ((u32)collection->extraTargetCount >= 4) return;
 	void* item = GetLevelEntryByKey(key);
 	if (!item) return;
 	void* value = GetIndexedTargetSlot(item, kind);
 	if (!value) return;
-	u32 count = collection->f310;
-	collection->f314[count] = value;
-	collection->f310 = count + 1;
+	u32 count = collection->extraTargetCount;
+	collection->extraTargets[count] = value;
+	collection->extraTargetCount = count + 1;
 }
 
 void* GetScatterController(void)
@@ -1820,9 +1820,9 @@ void ResetScatterController(ScatterController* self)
     self->countLo = 1;
     self->countHi = 3;
     GameProgress* g = g_saveData;
-    if (g->f19D8 == 0 || g->f19D8 == 5 || g->f19DC == 1) self->table = &D_00261E90;
-    else if (!(g_currentEntry->flags & 2)) self->table = D_00261D70;
-    else self->table = &D_00261E30;
+    if (g->levelIndex == 0 || g->levelIndex == 5 || g->entryIndex == 1) self->table = &g_scatterTableEarlyGame;
+    else if (!(g_currentEntry->flags & 2)) self->table = g_scatterTablesPlain;
+    else self->table = &g_scatterTableFlagged;
     SetScatterLevel(self, g_currentEntry->dt);
     s32 a = ((ScatterTable*)self->table)->countLoStart;
     s32 b = ((ScatterTable*)self->table)->countLoEnd;
@@ -1847,21 +1847,21 @@ void ResetScatterController(ScatterController* self)
         if (e->threshold <= g_currentEntry->f10) break;
     }
     self->bandCountdown = RandomIntInRange(e->low, e->high);
-    self->f20 = 0;
+    self->spareRaised = 0;
 }
 
 void UpdateScatterLevelLimits(ScatterController* self)
 {
     if (D_00275B00 & 8) {
                 if (((ScatterTable*)self->table)->bandStart1 <= g_currentEntry->dt && g_currentEntry->dt < ((ScatterTable*)self->table)->bandStart2) {
-            if (g_saveData->f19E4 < ((ScatterTable*)self->table)->spareCount1) {
+            if (g_saveData->spareCount < ((ScatterTable*)self->table)->spareCount1) {
                 SetSpareCount(((ScatterTable*)self->table)->spareCount1);
-                self->f20 = 1;
+                self->spareRaised = 1;
             }
         } else if (((ScatterTable*)self->table)->bandStart2 <= g_currentEntry->dt) {
-            if (g_saveData->f19E4 < ((ScatterTable*)self->table)->spareCount2) {
+            if (g_saveData->spareCount < ((ScatterTable*)self->table)->spareCount2) {
                 SetSpareCount(((ScatterTable*)self->table)->spareCount2);
-                self->f20 = 1;
+                self->spareRaised = 1;
             }
         }
     } else {
@@ -1879,7 +1879,7 @@ void RaiseScatterLevels(ScatterController* self, f32 amount)
 {
     f32 x = g_currentEntry->dt + amount * *(f32*)((u8*)self->table + 0x10);
     SetScatterLevel(self, x);
-    s32 index = g_saveData->f19E0;
+    s32 index = g_saveData->reserveCount;
     f32 y;
     if (index < 0) {
         y = *(f32*)((u8*)self->table + 0x40);
@@ -1941,7 +1941,7 @@ void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag)
             if (self->bandCountdown < 0) {
                 if (g_currentEntry->f10 != 0.0f) {
                     did = 1;
-                    g_currentEntry->f10 = ClampToRange(&g_unitRange, g_currentEntry->f10 + ((ScatterTable*)self->table)->f44);
+                    g_currentEntry->f10 = ClampToRange(&g_unitRange, g_currentEntry->f10 + ((ScatterTable*)self->table)->bandLevelStep);
                 }
                 s32 i = 0;
                 ThresholdRange* r = 0;
@@ -1980,7 +1980,7 @@ void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag)
         }
     }
     if (!flag) {
-        g_currentEntry->f10 = ClampToRange(&g_unitRange, g_currentEntry->f10 + ((ScatterTable*)self->table)->f48);
+        g_currentEntry->f10 = ClampToRange(&g_unitRange, g_currentEntry->f10 + ((ScatterTable*)self->table)->levelStep);
     }
 }
 
@@ -2153,13 +2153,13 @@ void InitDmaChannels()
 	g_toSprChannel = GetDmaChannel(9);
 }
 
-extern const VtableEntry D_0024A0E0[4] = {{0, 0}, {0, SkipDisplayListWriterSlot}, {0, 0}, {0, 0}};
+extern const VtableEntry g_packetWriterVtable[4] = {{0, 0}, {0, SkipDisplayListWriterSlot}, {0, 0}, {0, 0}};
 
 PacketWriter* InitPacketBuffer(PacketWriter* self)
 {
     self->f10 = 0;
     self->f14 = 0;
-    self->vt = (const PacketWriterVt*)D_0024A0E0;
+    self->vt = (const PacketWriterVt*)g_packetWriterVtable;
     ClearPacketBuffer(self);
     return self;
 }
@@ -2371,7 +2371,7 @@ void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a)
     s32 x1;
     s32 y1;
 
-    self->f2D0 = a;
+    self->drawRange = a;
     if (a == 0) {
         return;
     }
@@ -2404,7 +2404,7 @@ void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a)
     UsePacketBufferMemory(&pa, 1, &q);
     ReserveGifPackedData(&pa, 0x24D, 0, 3, 0x412, 0);
     CopyWordsToWriter(&pb, 0xC, 1, (u32*)&q, 0xC);
-    DetachPacketBufferCopy(&pb, &self->f2D4, 0, &self->f2D8, 0x13);
+    DetachPacketBufferCopy(&pb, &self->firstPacket, 0, &self->firstPacketSize, 0x13);
     PopBackMemoryMark();
     PushBackMemoryMark();
     ClearPacketBuffer(&pa);
@@ -2442,14 +2442,14 @@ void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a)
     EndGifPacket(&pa);
     WriteVifFlush(&pb);
     WriteVifDirectFromWriter(&pb, &pa);
-    DetachPacketBufferCopy(&pb, &self->f2DC, 0, &self->f2E0, 0x13);
+    DetachPacketBufferCopy(&pb, &self->secondPacket, 0, &self->secondPacketSize, 0x13);
     PopBackMemoryMark();
 }
 
 void QueuePlacedObjectDraw(TextureRenderObject* self, s32 unused, void* a2)
 {
     (void)unused;
-    if (self->f2D0 != 0) {
+    if (self->drawRange != 0) {
         self->desc02()->m27(self, a2);
         DeferredRequest f;
         (void)FillMemory(&f, 0, 0x80);
@@ -2465,22 +2465,22 @@ void QueuePlacedObjectDraw(TextureRenderObject* self, s32 unused, void* a2)
 // The file's .data, 0x261CC8 to 0x261F28, in retail's order: the globals its functions read
 // (D_00261EF0 and the DMA channel words are read by many files, which keep them extern).
 ObjectLink g_pooledObjectLinks[1] = { { 2, 0x2BC, 0x574 } };
-f32 D_00261CD4 = 500.0f;
-f32 D_00261CD8 = 800.0f;
+f32 g_launchHorizontalSpeed = 500.0f;
+f32 g_launchLiftSpeed = 800.0f;
 ObjectLink g_takerLinks[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x2B6, 0x73C } };
-u16 D_00261D08[16] = {0x40,0x40,0x80,0x20,0x10,4,1,8,2,0,0,0,0,0,0,0};
-u8 D_00261D28[16] = {0x58,0x58,0x53,0x4F,0x54,0x4C,0x6C,0x52,0x72,0x28,0x29,0x28,0x28,0x58,0,0};
+u16 g_stepWaitButtonMasks[16] = {0x40,0x40,0x80,0x20,0x10,4,1,8,2,0,0,0,0,0,0,0};
+u8 g_stepWaitButtonGlyphs[16] = {0x58,0x58,0x53,0x4F,0x54,0x4C,0x6C,0x52,0x72,0x28,0x29,0x28,0x28,0x58,0,0};
 // size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
 s32 D_00261D38 = 0;
 ThresholdRange g_thresholdRanges[4] = {
     { 0.8f, 2, 5 }, { 0.4f, 6, 10 }, { 0.2f, 15, 25 }, { 0.0f, 50, 100 }
 };
-ScatterTable D_00261D70[2] = {
+ScatterTable g_scatterTablesPlain[2] = {
     { 0, 1.0f, 0.0f, 0.6f, 0.1f, -0.8f, 0.0f, 4, 6, 0, 2, 0.399f, 1, 0.799f, 2, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 },
     { 0, 0.5f, 0.0f, 0.2f, 0.1f, -0.4f, -0.4f, 4, 6, 0, 2, 0.399f, 0, 0.799f, 0, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 },
 };
-ScatterTable D_00261E30 = { 0, 0.0f, 0.0f, 0.2f, 0.0f, 0.0f, 0.0f, 4, 6, 0, 2, 0.399f, 0, 0.799f, 0, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 };
-ScatterTable D_00261E90 = { 0, 1.0f, 0.0f, 0.0f, 0.1f, -0.8f, 0.0f, 4, 6, 0, 2, 0.399f, 1, 0.799f, 2, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 };
+ScatterTable g_scatterTableFlagged = { 0, 0.0f, 0.0f, 0.2f, 0.0f, 0.0f, 0.0f, 4, 6, 0, 2, 0.399f, 0, 0.799f, 0, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 };
+ScatterTable g_scatterTableEarlyGame = { 0, 1.0f, 0.0f, 0.0f, 0.1f, -0.8f, 0.0f, 4, 6, 0, 2, 0.399f, 1, 0.799f, 2, 0.075f, 0.25f, -0.2f, -0.003f, 2, 0.075f, 4, g_thresholdRanges, 0 };
 // size: func_00151A68 clears 0x24 bytes of it
 ScatterController g_scatterController = {};
 // size: semaphore id from func_002027A0 (lw/sw), 4-byte label

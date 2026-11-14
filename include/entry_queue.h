@@ -26,16 +26,16 @@ typedef char check_QueueEntry[sizeof(QueueEntry) == 0x14 ? 1 : -1];
 
 // 0x8F: func_0017B998 (slot 0) allocates a 0xA00-byte buffer and sets a flag.
 struct EntryQueue : BaseObject {
-    s32 f34;                // 0x34
+    s32 entryCount;         // 0x34: the entries in the queue's buffer
     void* buffer;           // 0x38
-    void* f3C;              // 0x3C: the player it drives (func_0017CE20 binds it)
-    s32 f40;                // 0x40
-    f32 f44;                // 0x44: a kind 4 entry is done once its value is below minus this
-    void* f48;              // 0x48: a queued entry (func_0017C660 hands it to func_0017C428)
-    BaseObject* f4C;        // 0x4C: the object the last entry found, where the next looks from
-    void* f50;              // 0x50
-    void* f54;              // 0x54: the object func_0017BB78 aims the player at
-    OnOffObject* f58;       // 0x58: the on-off object it forces on (ReplaceQueueOnOffObject)
+    void* player;           // 0x3C: the player it drives (func_0017CE20 binds it)
+    s32 entryIndex;         // 0x40: the index of the entry being run
+    f32 entryStartTime;     // 0x44: a kind 4 entry is done once its value is below minus this
+    void* pendingEntry;     // 0x48: a queued entry (func_0017C660 hands it to func_0017C428)
+    BaseObject* lastFoundObject; // 0x4C: the object the last entry found, where the next looks from
+    void* animationPlayer;  // 0x50: the animation player a queue entry started
+    void* aimTarget;        // 0x54: the object func_0017BB78 aims the player at
+    OnOffObject* forcedOnOffObject; // 0x58: the on-off object it forces on (ReplaceQueueOnOffObject)
     s32 f5C;                // 0x5C: f58 was not attached, so it was put in its parent's list
     f32 f60;                // 0x60: a kind 6 entry turns the player round when its place is behind this
     f32 f64;                // 0x64: a kind 7 entry waits for the player's f2410 to come within 15 of this

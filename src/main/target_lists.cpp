@@ -73,7 +73,7 @@ extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 
 struct DmaChainBlock { u8 bytes[0x20]; };
 
-extern u8 D_002BE1A0[];
+extern u8 g_screenClearPacketC[];
 void* InitPacketBuffer(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void AddDmaRefTag(DmaChainBlock* a, s32 n, void* table);
@@ -98,7 +98,7 @@ void AddDmaEndTag(PacketWriter* f);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void SendGsPacketAndWait(s32 channel, void* b);
 
-extern FrameTarget D_0027DC20[];
+extern FrameTarget g_meshQueueEntries[];
 
 void RegisterObject(BaseObject* self);
 void AppendToList(List01* self, void* item);
@@ -157,9 +157,9 @@ void SubmitMeshQueueEntry(FrameTarget* self);
 void* AllocateZeroedFrontMemory(u32 n);
 
 
-extern u8 D_002BDC20[];
-extern u8 D_002BE1A0[];
-extern u8 D_002BDEE0[];
+extern u8 g_screenClearPacketA[];
+extern u8 g_screenClearPacketC[];
+extern u8 g_screenClearPacketB[];
 
 struct GsDBuff;
 extern "C" void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag);
@@ -554,13 +554,13 @@ void LoadListedCollisionPart(ListedCollisionPart* self, BufferedStream* stream)
     Quad16* src;
 
     LoadCollider(self, stream);
-    if (self->f224 == 0) {
-        self->f224 = (Rec2195_224*)AllocateZeroedFrontMemory(0xC0);
+    if (self->linkRecord == 0) {
+        self->linkRecord = (Rec2195_224*)AllocateZeroedFrontMemory(0xC0);
 
     }
-    b = self->f224;
-    b->fB0 |= 1;
-    dst = (Quad16*)self->f224;
+    b = self->linkRecord;
+    b->flags |= 1;
+    dst = (Quad16*)self->linkRecord;
     src = (Quad16*)&g_identityMatrix;
     dst[0] = src[0];
     dst[1] = src[1];
@@ -599,7 +599,7 @@ void StepListedCollisionPart(ListedCollisionPart* self, f32 t)
     Mat3U buf;
 
     StepCollider(self, t);
-    if (self->f550 != 0) {
+    if (self->skipSteering != 0) {
         return;
     }
     RotateMatrixUpright((Mat02*)((u8*)self + 0xD0), 0, (Mat02*)&buf);
@@ -626,7 +626,7 @@ void SetPooledObjectPlayerHold(PooledObject* self, s32 v)
         RotateMatrixUpright((Mat02*)((u8*)g_player + 0x110), 0, (Mat02*)f.a);
         RotateMatrixUpright((Mat02*)((u8*)self + 0x110), (Mat02*)f.c, (Mat02*)f.b);
         MatrixToAxisAngle((Mat02*)f.c, (f32*)f.e, (Vec02*)f.d);
-        MultiplyMatrices3x3((Mat02*)f.a, (Mat02*)f.b, (Mat02*)self->f224);
+        MultiplyMatrices3x3((Mat02*)f.a, (Mat02*)f.b, (Mat02*)self->linkRecord);
         TriggerScriptEvent(self, 2, 0, 0);
     }
     self->state = v;

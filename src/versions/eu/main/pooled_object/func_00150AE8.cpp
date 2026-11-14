@@ -9,7 +9,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
     Ent65* s2;
 
     UpdatePlacedObject(self, dt);
-    if (!(((Gl_150AE8_eu*)&g_timerCaption)->f570 < 2 && ((Gl_150AE8_eu*)&g_timerCaption)->f57C == 0 && IsStreamVoiceLocked() == 0 && D_00275F84 != 1)) {
+    if (!(((Gl_150AE8_eu*)&g_timerCaption)->f570 < 2 && ((Gl_150AE8_eu*)&g_timerCaption)->f57C == 0 && IsStreamVoiceLocked() == 0 && g_resumeSoundSetupDone != 1)) {
         s32 st = self->state2D4;
         switch (st) {
         case 1:
@@ -32,9 +32,9 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
     s1 = self->state2D4;
     switch (s1) {
     case 0:
-        if (self->f324 != 0) {
-            if (D_00275F84 == 0 && q[1] != 0) {
-                self->f324 = 0;
+        if (self->startPending != 0) {
+            if (g_resumeSoundSetupDone == 0 && q[1] != 0) {
+                self->startPending = 0;
                 ChooseStepSequenceState(self);
                 s1 = self->state2D4;
             }
@@ -54,7 +54,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
         goto timer;
     case 1:
         if (q[1] != 0) {
-            StepSequence* o = (StepSequence*)D_0027051C;
+            StepSequence* o = (StepSequence*)g_activeStepSequence;
             if (o == 0) {
                 ShowStepSequenceText(self, s2);
                 s1 = self->state2D4;
@@ -70,7 +70,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
         break;
     case 3:
         if (self->mode2D0 != 2) {
-            if (!(self->step2E4 < self->count2DC) || D_00275F84 == 1) {
+            if (!(self->step2E4 < self->count2DC) || g_resumeSoundSetupDone == 1) {
                 PopStackElement((ElementStack*)g_elementStack);
                 s1 = self->state2D4;
             }

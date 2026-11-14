@@ -33,7 +33,7 @@ void WriteArcPointVertices(ArcPoints_1E6600_eu* self, PacketWriter* buf)
         Rgba4 c;
         {
             Rgba4 a = *(Rgba4*)&p->colorB;
-            Rgba4 b = *(Rgba4*)D_00275B50;
+            Rgba4 b = *(Rgba4*)g_arcGreyColor;
             f32 t = p->level;
             Rgba4 m;
             m.r = ColorLerp::Of(a.r, b.r, t);

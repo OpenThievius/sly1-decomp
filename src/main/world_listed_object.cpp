@@ -173,7 +173,7 @@ void AppendToList(List01* self, void* item);
 void DetachOwnedRecord(OwnedRecord* o)
 {
     RemoveFromList((List01*)(&((WorldListedObject*)o->owner)->members), o);
-    AppendToList(&D_002622F0, o);
+    AppendToList(&g_deferredReleaseListB, o);
 }
 
 WorldListedObject* ResetFirstListedObject(World* self)
@@ -182,9 +182,9 @@ WorldListedObject* ResetFirstListedObject(World* self)
     if (s0 != 0) {
         u64 b = ((s0->flags & 0xFFFFFFFFF3FFFFFFull) | 0x08000000ull) & 0xFFFFFFFFCFFFFFFFull | 0x20000000ull;
         s0->source = 0;
-        s0->f80 = 1e10f;
+        s0->fadeDistanceFar = 1e10f;
         s0->flags = b;
-        s0->f620 = 0;
+        s0->particleCount = 0;
         s0->desc->m02(s0);
     }
     return s0;
@@ -207,7 +207,7 @@ void InitWorldListedObject(WorldListedObject* self)
     b &= 0xFFFFFFFFCFFFFFFFull;
     b |= 0x20000000ull;
     b &= 0xFFFFFCFFFFFFFFFFull;
-    self->f80 = 1e10f;
+    self->fadeDistanceFar = 1e10f;
     b |= 0x10000000000ull;
     self->flags = b;
 }
@@ -250,7 +250,7 @@ void ReleaseWorldListedObject(WorldListedObject* self)
         node = nx;
     }
     RemoveFromList(&obj->world->list1CB4, self);
-    AppendToList(&D_002622E0, self);
+    AppendToList(&g_deferredReleaseListA, self);
 
     UnregisterPlacedObject(self);
     *(s32*)&g_activeListFrames = fr.prev;
@@ -336,8 +336,8 @@ struct LookSourceTail {
     Quad16 q150;        // 0x150
     Vec3 curve160;      // 0x160
     u8 pad4C[0x50 - 0x4C];
-    s32 f170;           // 0x170
-    f32 f174;           // 0x174
+    s32 rateOverDuration; // 0x170: non-zero: the rate is the register count over the source's duration
+    f32 rateSpan;       // 0x174: the time the register count is spread over
     u8 pad58[0x5C - 0x58];
     s32 colorCount;     // 0x17C
     u8* colors;         // 0x180: colorCount colours of four bytes
@@ -355,7 +355,7 @@ struct LookSource {
     f32 fC0;                // 0xC0
     f32 fC4;                // 0xC4
     u8 padC8[0xF4 - 0xC8];
-    f32 fF4;                // 0xF4: a time the curves and the rate are taken over
+    f32 duration;           // 0xF4: a time the curves and the rate are taken over
     u8 padF8[0x110 - 0xF8];
     Vec3 curve110;          // 0x110: quadratic coefficients (RemapQuadraticParameter)
     u8 pad11C[0x120 - 0x11C];
@@ -368,7 +368,7 @@ void FillLookDirectionBlock(void* out, LookSource* src);
 void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src)
 {
     LookSourceTail* t = &src->tail;
-    self->f618 = src->tail.f190;
+    self->particleMode = src->tail.f190;
     self->f61C = src->tail.f194;
     self->colorCount = src->tail.colorCount;
     for (s32 i = 0; i < self->colorCount; i++) {
@@ -382,17 +382,17 @@ void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src)
     FillMemory(&self->q300, 0, 0x10);
     s32 n = self->regCount;
     if (n >= 2) {
-        if (t->f174 != 0.0f) {
-            self->f304 = (f32)n / t->f174;
-        } else if (t->f170 != 0) {
-            self->f304 = (f32)n / src->fF4;
+        if (t->rateSpan != 0.0f) {
+            self->f304 = (f32)n / t->rateSpan;
+        } else if (t->rateOverDuration != 0) {
+            self->f304 = (f32)n / src->duration;
         } else {
             self->q300 = t->q150;
         }
     }
-    RemapQuadraticParameter(&src->curve110, 1.0f / src->fF4, 0.0f, (Vec3*)self->curve2F0);
-    RemapQuadraticParameter(&src->tail.curve140, 1.0f / src->fF4, 0.0f, (Vec3*)self->curve2E0);
-    RemapQuadraticParameter(&src->tail.curve160, 1.0f / src->fF4, 0.0f, (Vec3*)self->curve310);
+    RemapQuadraticParameter(&src->curve110, 1.0f / src->duration, 0.0f, (Vec3*)self->curve2F0);
+    RemapQuadraticParameter(&src->tail.curve140, 1.0f / src->duration, 0.0f, (Vec3*)self->curve2E0);
+    RemapQuadraticParameter(&src->tail.curve160, 1.0f / src->duration, 0.0f, (Vec3*)self->curve310);
     s32 st = src->tail.still;
     self->mode = st;
     s32 still = 0;
@@ -445,7 +445,7 @@ void CopyWorldListedObject(WorldListedObject* self, BaseObject* src)
     if (IsObjectOfKind(src, 0x50) != 0) {
         EffectSpawner* from = (EffectSpawner*)src;
         self->source = from;
-        self->f80 = from->f80;
+        self->fadeDistanceFar = from->fadeDistanceFar;
         if (IsListEmpty((List01*)from->list314) == 0) {
             self->flags &= 0xFFFFFFFFF3FFFFFFULL;
             self->flags &= 0xFFFFFFFFCFFFFFFFULL;
@@ -496,15 +496,15 @@ struct SprTransfer {
     s32 state;              // 0x4C: 2 while its blocks are worked on
 };
 
-extern s32 D_00274990;
-extern SprTransfer D_002748F0[2];
+extern s32 g_sprTransferIndex;
+extern SprTransfer g_sprTransfers[2];
 extern void* g_toSprChannel;
 
 // Block n of the current scratchpad transfer.
 struct SprBlock {
     static u32 Of(s32 n)
     {
-        return D_002748F0[D_00274990].addrs[n];
+        return g_sprTransfers[g_sprTransferIndex].addrs[n];
     }
 };
 
@@ -518,7 +518,7 @@ void StartFromSprChain(void* first, ...);
 // The object's filter mode (0x618), read into the caller's variable.
 static inline void GetParticleMode(const WorldListedObject* self, s32* mode)
 {
-    *mode = self->f618;
+    *mode = self->particleMode;
 }
 
 // Steps the object's particles: each owned record's three arrays go to the scratchpad (the
@@ -557,8 +557,8 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
     while (node != 0) {
         void* ch = g_toSprChannel;
         WaitDmaChannel((DmaChannel*)ch, 0, 0);
-        D_00274990 = 1 - D_00274990;
-        SprTransfer* t = &D_002748F0[D_00274990];
+        g_sprTransferIndex = 1 - g_sprTransferIndex;
+        SprTransfer* t = &g_sprTransfers[g_sprTransferIndex];
         t->state = 2;
         OwnedRecord* next = *(OwnedRecord**)fr.link;
         fr.link = (s32)next + fr.offset;
@@ -575,7 +575,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
         p = node->points[nb];
         StartFromSprChain(p, p + 0x2C, p + 0x58, 0);
         node->count -= used;
-        self->f620 -= used;
+        self->particleCount -= used;
         if (node->count <= 0) {
             DetachOwnedRecord(node);
         } else {
@@ -583,13 +583,13 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
         }
         node = next;
     }
-    if (self->f620 <= 0) {
+    if (self->particleCount <= 0) {
         self->desc->m03(self);
     } else {
         Vec02 center;
         Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(lo), Vu0::Scalar(0.5f), Vu0::Q(hi), Vu0::Scalar(0.5f));
         self->desc02()->m1D(self, &center);
-        self->f2A4 = self->f2A8 = Vu0::Distance(center, *(Vec02*)&hi);
+        self->f2A4 = self->boundRadius = Vu0::Distance(center, *(Vec02*)&hi);
     }
     *(s32*)&g_activeListFrames = fr.prev;
 }
@@ -673,7 +673,7 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
             Vec02* rec = &cur[0x58 + j];
             Vec02* nrec = &nxt[0x58 + out];
             *nrec = *rec;
-            if (self->f618 == 2) {
+            if (self->particleMode == 2) {
                 nrec->w = WrapAngle(rec->w + rec->z * dt);
             }
             Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(*npos));
@@ -681,7 +681,7 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
             out++;
         }
         node->count -= removed;
-        self->f620 -= removed;
+        self->particleCount -= removed;
         if (node->count <= 0) {
             DetachOwnedRecord(node);
         } else {
@@ -691,13 +691,13 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
         fr.link = next + fr.offset;
         node = (OwnedRecord*)next;
     }
-    if (self->f620 <= 0) {
+    if (self->particleCount <= 0) {
         self->desc->m03(self);
     } else {
         Vec02 center;
         Vu0::Q(center) = Vu0::MulXSum(Vu0::Q(lo), Vu0::Scalar(0.5f), Vu0::Q(hi), Vu0::Scalar(0.5f));
         self->desc02()->m1D(self, &center);
-        self->f2A4 = self->f2A8 = Vu0::Distance(center, *(Vec02*)&hi);
+        self->f2A4 = self->boundRadius = Vu0::Distance(center, *(Vec02*)&hi);
     }
     *(s32*)&g_activeListFrames = fr.prev;
 }
@@ -755,10 +755,10 @@ void WriteVifUnpack(PacketWriter* w, s32 tag, s32 size, void* src, s32 addr, s32
 void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
 void WriteVifMscal(PacketWriter* w, void* addr);
 void WriteVifFlush(PacketWriter* w);
-extern const f32 D_00248400[28];
-extern u8 D_00000000[];
-extern u8 D_00000398[];
-extern u8 D_00000880[];
+extern const f32 g_identityMatrix4[28];
+extern u8 g_listedParticleProgram0[];
+extern u8 g_listedParticleProgram1[];
+extern u8 g_listedParticleProgram2[];
 
 // A walk of a list on g_activeListFrames, popped when it ends.
 struct ViewListWalk {
@@ -802,7 +802,7 @@ void WriteListedObjectParticlePacket(void* self)
         ViewedFrame* cur = frames;
         ViewedPart* e;
         while ((e = (ViewedPart*)walk.Next()) != 0) {
-            if ((e->f88 & g_camera->f21C) == g_camera->f21C && IsObjectAttached(e)) {
+            if ((e->visibilityMask & g_camera->f21C) == g_camera->f21C && IsObjectAttached(e)) {
                 Vec02 pos;
                 Mat02 rot;
                 if (e->rec->frame != 0) {
@@ -815,12 +815,12 @@ void WriteListedObjectParticlePacket(void* self)
                     else
                         rot = g_identityMatrix;
                 }
-                f32 radius = obj->f2A8;
+                f32 radius = obj->boundRadius;
                 Camera* cam = g_camera;
-                u128 d = Vu0::Sub(Vu0::Add(Vu0::Rotate(rot, Vu0::Vec::Of(obj->pos)), Vu0::Vec::Of(pos)), Vu0::Vec::Of(cam->f40)).q;
+                u128 d = Vu0::Sub(Vu0::Add(Vu0::Rotate(rot, Vu0::Vec::Of(obj->pos)), Vu0::Vec::Of(pos)), Vu0::Vec::Of(cam->position)).q;
                 u128 ones = Vu0::Ones();
                 if ((Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, Vu0::Scalar(radius)) ^ 0xF0) == 0) {
-                    if (ComputeCameraDistanceFade(cam, d, &cur->fade, radius, e->f80) != 0) {
+                    if (ComputeCameraDistanceFade(cam, d, &cur->fade, radius, e->fadeDistanceFar) != 0) {
                         BuildMatrixFromRotationAndTranslation(&pos, &rot, (Mat4A*)cur);
                         cur++;
                         count++;
@@ -835,7 +835,7 @@ void WriteListedObjectParticlePacket(void* self)
     } else {
         frames = &one;
         count = 1;
-        *(Mat4x4Copy*)one.m = *(const Mat4x4Copy*)D_00248400;
+        *(Mat4x4Copy*)one.m = *(const Mat4x4Copy*)g_identityMatrix4;
         one.fade = req->radius;
     }
     s32 sent = 0;
@@ -881,20 +881,20 @@ void WriteListedObjectParticlePacket(void* self)
             fade.x = f->fade;
             CopyWordsToWriter(&g_vifPacketWriter, 0xC, 1, (u32*)&fade, 0xB);
             WriteVifStcycl(&g_vifPacketWriter, 1, 10);
-            if (obj->f618 == 1)
+            if (obj->particleMode == 1)
                 WriteVifUnpack(&g_vifPacketWriter, 0xC, mesh->count, bank + 0x2C0, hdr[0] + 1, 0);
             WriteVifUnpack(&g_vifPacketWriter, 0xC, mesh->count, bank + 0x580, hdr[0] + 2, 0);
             WriteVifUnpack(&g_vifPacketWriter, 0xC, mesh->count, bank, hdr[0] + 3, 0);
             WriteVifStcycl(&g_vifPacketWriter, 1, 1);
-            switch (obj->f618) {
+            switch (obj->particleMode) {
             case 0:
-                WriteVifMscal(&g_vifPacketWriter, D_00000000);
+                WriteVifMscal(&g_vifPacketWriter, g_listedParticleProgram0);
                 break;
             case 1:
-                WriteVifMscal(&g_vifPacketWriter, D_00000398);
+                WriteVifMscal(&g_vifPacketWriter, g_listedParticleProgram1);
                 break;
             case 2:
-                WriteVifMscal(&g_vifPacketWriter, D_00000880);
+                WriteVifMscal(&g_vifPacketWriter, g_listedParticleProgram2);
                 break;
             }
             WriteVifFlush(&g_vifPacketWriter);

@@ -18,10 +18,10 @@ void UpdateBestTimeState(Obj_1E00B0_eu* self)
         if (self->f57C != 0) {
         if (g_padRecord.flags & 4) {
             ClearPadPressedBits(&g_padRecord, 4);
-            StartLockedStreamVoice((KeyRecord*)g_currentWorld->f2310);
-            if (g_currentWorld->f2314 != 0) {
+            StartLockedStreamVoice((KeyRecord*)g_currentWorld->commentaryRecord);
+            if (g_currentWorld->creditsText != 0) {
                 SetScreenElementHoldTime(self, 15.0f);
-                SetScreenElementByteText(self, g_currentWorld->f2314);
+                SetScreenElementByteText(self, g_currentWorld->creditsText);
             } else {
                 self->vt->m3C(self);
             }
@@ -41,7 +41,7 @@ void UpdateBestTimeState(Obj_1E00B0_eu* self)
             SetBestTimeState((T217D_1380*)self, 3);
             return;
         }
-        SetTimerRate(o, -Power(2.0f, (f32)D_002623DC));
+        SetTimerRate(o, -Power(2.0f, (f32)g_timerRateExponent));
         r = AreMenusAndFadeClear();
         if (r) o->vt->m38(o); else o->vt->m3C(o);
         if (g_currentEntry->flags & 8) {

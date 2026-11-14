@@ -13,14 +13,14 @@
 // 0x25C340 to 0x260E60. Its assert strings name it "989snd.c".
 
 extern const char g_rpcBindErrorFormat[40] = "error: sceSifBindRpc in %s, at line %d\n";
-extern const char D_00249450[16] = "989snd.c";
-extern const char D_00249460[136] = "989snd.c: Sif says RPC isn't busy, but we still don't have returns from the IOP!\n\000\000\000\000\000\000\000snd_BankLoad: Load already in progress!\n";
-extern const char D_002494E8[136] = "989snd.c: RPC collision!\n\000\000\000\000\000\000\000989snd.c: RPC call has failed inside snd_BankLoad\n\000\000\000\000\000\000snd_BankLoad_CB: Load already in progress!\n";
-extern const char D_00249570[48] = "snd_BankLoadByLoc: Load already in progress!\n";
-extern const char D_002495A0[32] = "snd_BankLoadByLoc: CD BUSY!\n";
-extern const char D_002495C0[536] = "989snd.c: RPC call has failed inside snd_BankLoadByLoc\n\000snd_BankLoadFromEE: Load already in progress!\n\000\000snd_BankLoadFromEE: CD BUSY!\n\000\000\000989snd.c: RPC call has failed inside snd_BankLoadFromEE\n\000\000\000\000\000\000\000\000snd_BankLoadFromEE_CB: Load already in progress!\n\000\000\000\000\000\000\000snd_BankLoadFromEE_CB: CD BUSY!\n\000\000\000\000\000\000\000\000snd_BankLoadFromIOP: Load already in progress!\n\000snd_BankLoadFromIOP: CD BUSY!\n\000\000989snd.c: RPC call has failed inside snd_BankLoadFromIOP\n\000\000\000\000\000\000\000snd_BankLoadFromIOP_CB: Load already in progress!\n\000\000\000\000\000\000snd_BankLoadFromIOP_CB: CD BUSY!\n";
-extern const char D_002497D8[96] = "snd_SendIOPCommandNoWait: BUFFER %d FULL(%d)! Sound stalled waiting for IOP comands to finish!\n";
-extern const char D_00249838[56] = "snd_SendIOPCommandNoWait: continueing (%d).\n";
+extern const char g_sndSourceName[16] = "989snd.c";
+extern const char g_rpcNotBusyMessage[136] = "989snd.c: Sif says RPC isn't busy, but we still don't have returns from the IOP!\n\000\000\000\000\000\000\000snd_BankLoad: Load already in progress!\n";
+extern const char g_rpcCollisionMessage[136] = "989snd.c: RPC collision!\n\000\000\000\000\000\000\000989snd.c: RPC call has failed inside snd_BankLoad\n\000\000\000\000\000\000snd_BankLoad_CB: Load already in progress!\n";
+extern const char g_bankLoadInProgressMessage[48] = "snd_BankLoadByLoc: Load already in progress!\n";
+extern const char g_bankLoadCdBusyMessage[32] = "snd_BankLoadByLoc: CD BUSY!\n";
+extern const char g_bankLoadFailureMessages[536] = "989snd.c: RPC call has failed inside snd_BankLoadByLoc\n\000snd_BankLoadFromEE: Load already in progress!\n\000\000snd_BankLoadFromEE: CD BUSY!\n\000\000\000989snd.c: RPC call has failed inside snd_BankLoadFromEE\n\000\000\000\000\000\000\000\000snd_BankLoadFromEE_CB: Load already in progress!\n\000\000\000\000\000\000\000snd_BankLoadFromEE_CB: CD BUSY!\n\000\000\000\000\000\000\000\000snd_BankLoadFromIOP: Load already in progress!\n\000snd_BankLoadFromIOP: CD BUSY!\n\000\000989snd.c: RPC call has failed inside snd_BankLoadFromIOP\n\000\000\000\000\000\000\000snd_BankLoadFromIOP_CB: Load already in progress!\n\000\000\000\000\000\000snd_BankLoadFromIOP_CB: CD BUSY!\n";
+extern const char g_iopBufferFullMessage[96] = "snd_SendIOPCommandNoWait: BUFFER %d FULL(%d)! Sound stalled waiting for IOP comands to finish!\n";
+extern const char g_iopContinueMessage[56] = "snd_SendIOPCommandNoWait: continueing (%d).\n";
 
 // D_0025C360 and D_0025C378 are arrays of buffer pointers, one per IOP command buffer.
 extern s32 g_iopCommandBuffer0[1024];
@@ -82,7 +82,7 @@ s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
 #define ASSERT_0011CBB8(cond, line) \
     if (!(cond)) { \
-        PrintFormatted(g_rpcBindErrorFormat, D_00249450, line); \
+        PrintFormatted(g_rpcBindErrorFormat, g_sndSourceName, line); \
         for (;;) { \
         } \
     }
@@ -210,7 +210,7 @@ s32 IsIopReplyReady(void)
             return 1;
         }
     }
-    PrintFormatted(D_00249460);
+    PrintFormatted(g_rpcNotBusyMessage);
     return 0;
 }
 
@@ -235,12 +235,12 @@ s32 LoadSoundBankAtLocation(s32 a0, s32 a1)
 
     g_soundBankLoadError = 0;
     if (g_soundBankLoadBusy.busy != 0) {
-        PrintFormatted(D_00249570);
+        PrintFormatted(g_bankLoadInProgressMessage);
         return 0;
     }
     v = SyncDiscRead(1);
     if (v == 1) {
-        PrintFormatted(D_002495A0);
+        PrintFormatted(g_bankLoadCdBusyMessage);
         return 0;
     }
     s32* p = &g_iopChannel2Result.result;
@@ -249,14 +249,14 @@ s32 LoadSoundBankAtLocation(s32 a0, s32 a1)
     g_iopChannel2Args[1] = a1;
     g_iopChannel2Args[0] = a0;
     while (IsRemoteCallPending(&g_iopBankLoadRpc)) {
-        PrintFormatted(D_002494E8);
+        PrintFormatted(g_rpcCollisionMessage);
         PollIopCommands();
         SyncDataCache(0);
     }
     w = CallRemoteService(&g_iopBankLoadRpc, 3, 1, g_iopChannel2Args, 8, &g_iopChannel2Result.result, 4, 0, 0);
     v1 = g_iopChannel2Result.result;
     if (w < 0) {
-        PrintFormatted(D_002495C0);
+        PrintFormatted(g_bankLoadFailureMessages);
         g_soundBankLoadError = 0x106;
         return 0;
     }
@@ -276,11 +276,11 @@ void StartSoundBankLoad(s32 a0, s32 a1, IopCallbackFn a2, s64 a3)
 {
     g_soundBankLoadError = 0;
     if (g_soundBankLoadBusy.busy != 0) {
-        PrintFormatted(D_00249570);
+        PrintFormatted(g_bankLoadInProgressMessage);
         return;
     }
     if (SyncDiscRead(1) == 1) {
-        PrintFormatted(D_002495A0);
+        PrintFormatted(g_bankLoadCdBusyMessage);
         return;
     }
     (*(u32*)&g_iopChannel2Result.result) = 0xFFFFFFFF;
@@ -289,7 +289,7 @@ void StartSoundBankLoad(s32 a0, s32 a1, IopCallbackFn a2, s64 a3)
     g_soundBankLoadCallback.fn = a2;
     g_soundBankLoadCallback.arg = a3;
     while (IsRemoteCallPending(&g_iopBankLoadRpc)) {
-        PrintFormatted(D_002494E8);
+        PrintFormatted(g_rpcCollisionMessage);
         PollIopCommands();
         SyncDataCache(0);
     }
@@ -528,7 +528,7 @@ s32 SendIopCommandAndWait(s32 id, s32 size, void* data)
     }
     ArmIopReplyBuffer((s32*)&g_iopCommandReply, 1);
     while (IsRemoteCallPending(&g_iopCommandRpc)) {
-        PrintFormatted(D_002494E8);
+        PrintFormatted(g_rpcCollisionMessage);
         PollIopCommands();
         SyncDataCache(0);
     }
@@ -556,7 +556,7 @@ void QueueIopCommand(s32 cmd, s32 len, void* data, IopCallbackFn arg, u64 val)
     if (g_iopFlushDeferred == 0 && g_iopReplyBuffer == 0 && len == 0 && arg == 0) {
         ArmIopReplyBuffer((s32*)&g_iopCommandReply, 1);
         while (IsRemoteCallPending(&g_iopCommandRpc) != 0) {
-            PrintFormatted(D_002494E8);
+            PrintFormatted(g_rpcCollisionMessage);
             PollIopCommands();
             SyncDataCache(0);
         }
@@ -581,10 +581,10 @@ void QueueIopCommand(s32 cmd, s32 len, void* data, IopCallbackFn arg, u64 val)
         }
         PollIopCommands();
         if (i == 1)
-            PrintFormatted(D_002497D8, g_iopBufferIndex, *g_iopCommandBuffers[g_iopBufferIndex]);
+            PrintFormatted(g_iopBufferFullMessage, g_iopBufferIndex, *g_iopCommandBuffers[g_iopBufferIndex]);
     }
     if (i != 0)
-        PrintFormatted(D_00249838, i);
+        PrintFormatted(g_iopContinueMessage, i);
     if (flag != 0)
         g_iopFlushDeferred = 1;
 
@@ -620,7 +620,7 @@ void FlushIopCommandBuffer(void)
 {
     ArmIopReplyBuffer(g_iopReplyTables[g_iopBufferIndex], *g_iopCommandBuffers[g_iopBufferIndex]);
     while (IsRemoteCallPending(&g_iopCommandRpc)) {
-        PrintFormatted(D_002494E8);
+        PrintFormatted(g_rpcCollisionMessage);
         SyncDataCache(0);
     }
     (void)CallRemoteService(&g_iopCommandRpc, 0x4D, 1, g_iopCommandBuffers[g_iopBufferIndex],

@@ -26,7 +26,7 @@ void FormatCounterCaption(Self_1AB2B8_eu* self)
         }
         break;
     case 5:
-        if ((u32)(g_saveData->f19D8 - 1) < 4) {
+        if ((u32)(g_saveData->levelIndex - 1) < 4) {
             FormatToStringBounded(buf, 0x200, "%d%c", self->f570, 0x4B);
         } else {
             buf[0] = 0;

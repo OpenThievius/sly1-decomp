@@ -6,7 +6,7 @@ f32 DrawFontGlyph(f32 x, f32 y, Font* self, u16 key, u32 color, PacketWriter* s)
 {
     FontGlyph* e = FindFontGlyph(self, key);
     if (e != 0) {
-        s32 shift = (s32)((self->f60u >> 30) & 0xF);
+        s32 shift = (s32)((self->texWordU >> 30) & 0xF);
         s32 s4 = 1 << shift;
         f32 h = (f32)self->height * self->sy;
         f32 w = (f32)e->w * self->sx;
@@ -17,10 +17,10 @@ f32 DrawFontGlyph(f32 x, f32 y, Font* self, u16 key, u32 color, PacketWriter* s)
             AddGifRegListFloat(s, tag, 0.0f);
             AddGifUvRegListEntry(s, e->u << 4, (s4 - e->v) << 4);
             AddGifXyzfRegListEntry(s, (s32)((x + 1728.0f) * 16.0f),
-                          (s32)((y * 0.5462963f + 1920.0f) * 16.0f), self->f40, 0);
+                          (s32)((y * 0.5462963f + 1920.0f) * 16.0f), self->drawZ, 0);
             AddGifUvRegListEntry(s, (e->u + e->w) << 4, (s4 - (e->v + self->height)) << 4);
             AddGifXyzfRegListEntry(s, (s32)((px + 1728.0f) * 16.0f),
-                          (s32)((py * 0.5462963f + 1920.0f) * 16.0f), self->f40, 0);
+                          (s32)((py * 0.5462963f + 1920.0f) * 16.0f), self->drawZ, 0);
         }
         return (f32)(e->w + 1) * self->sx;
     }

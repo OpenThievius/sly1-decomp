@@ -17,35 +17,35 @@ void StartPathFollower(PathFollower* self)
     s32 id1;
     s32 id2;
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 0x14, D_002752A0);
-    self->f694 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    if (self->fB44 != 0) {
-        StateWalker* v = CreateStateWalker((StateGraph*)self->fB44, self, -1, 0);
-        self->fB48 = v;
-        SetStateWalkerTarget(v, self->fB30 == 1 ? 0x484 : 0x384);
+    ResolveObjectLinks(self, 0x14, g_pathFollowerLinks);
+    self->targetHeading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
+    if (self->walkerGraph != 0) {
+        StateWalker* v = CreateStateWalker((StateGraph*)self->walkerGraph, self, -1, 0);
+        self->walker = v;
+        SetStateWalkerTarget(v, self->kind == 1 ? 0x484 : 0x384);
     }
-    switch (g_currentWorld->f1D70) {
+    switch (g_currentWorld->soundBank) {
     case 3:
-        id0 = self->f550 ? 0x1D2 : 0x1AD;
+        id0 = self->enabled ? 0x1D2 : 0x1AD;
         id1 = 0x1BB;
         id2 = 0x1AF;
         goto spawn;
     case 5:
-        id0 = self->f550 ? 0x2A6 : 0x280;
+        id0 = self->enabled ? 0x2A6 : 0x280;
         id1 = 0x27F;
         id2 = 0x27D;
         goto spawn;
     case 6:
-        id0 = self->f550 ? 0x2DE : 0x2DC;
+        id0 = self->enabled ? 0x2DE : 0x2DC;
         id1 = 0x2DB;
         id2 = 0x2DD;
     spawn:
-        StartSoundEffect(id0, (PlayingSound**)self->fB80, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
-        StartSoundEffect(id1, (PlayingSound**)self->fB84, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
-        StartSoundEffect(id2, (PlayingSound**)self->fB7C, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id0, (PlayingSound**)self->engineSoundB, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id1, (PlayingSound**)self->engineSoundA, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id2, (PlayingSound**)self->slideSound, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
         {
             f32 r = RandomFloatInRange(-0.1f, 0.1f);
-            self->fB8C = self->fB90 = self->fB94 = self->fB98 = r;
+            self->slidePitchOffset = self->engineBPitchOffset = self->engineAPitchOffset = self->fB98 = r;
         }
         break;
     default:
@@ -55,23 +55,23 @@ void StartPathFollower(PathFollower* self)
         void* c = FindFirstObjectById(g_currentWorld, 0x104, 7, self);
         if (c != 0) {
             self->f594 = 200.0f;
-            self->fB78 = c;
+            self->partner = c;
             self->f598 = c;
         }
     }
-    if (self->fB30 == 1) {
+    if (self->kind == 1) {
         s32 n = GatherObjectsByMode((self->world), 0x105, 0x426, 0, 0x10, buf);
         for (s32 i = 0; i < n; i++) {
             buf[i]->desc->m17(buf[i], self);
         }
-        ((BlkP_eu_1D7440*)&D_00272430)->v = 0;
-        ((BlkP_eu_1D7440*)&D_002726B0)->v = 0;
-        ((Blk_eu_1D7440*)&D_00272430)->p574 = &((Blk_eu_1D7440*)&D_00272430)->f58C;
-        ((Blk_eu_1D7440*)&D_002726B0)->p574 = &((Blk_eu_1D7440*)&D_002726B0)->f58C;
+        ((BlkP_eu_1D7440*)&g_firstTallyCaption)->v = 0;
+        ((BlkP_eu_1D7440*)&g_secondTallyCaption)->v = 0;
+        ((Blk_eu_1D7440*)&g_firstTallyCaption)->p574 = &((Blk_eu_1D7440*)&g_firstTallyCaption)->f58C;
+        ((Blk_eu_1D7440*)&g_secondTallyCaption)->p574 = &((Blk_eu_1D7440*)&g_secondTallyCaption)->f58C;
     }
     for (s32 k = 0; k < 4; k++) {
-        Slot19* s = &self->f6B0[k];
-        s->v10 = s->obj->pos;
+        Slot19* s = &self->wheels[k];
+        s->placedPos = s->obj->pos;
     }
     ResetPathFollower(self);
 }

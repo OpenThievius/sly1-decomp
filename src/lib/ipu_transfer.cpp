@@ -52,29 +52,19 @@ void SaveIpuDmaChannels(IpuDmaState* out)
     out->control = *(volatile u32*)0x10002010;
 }
 
-struct Ctx_211988 {
-    s32 f0;
-    s32 f4;
-    s32 f8;
-    s32 fC;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
-};
-void RestoreIpuDmaChannels(Ctx_211988* s0)
+void RestoreIpuDmaChannels(IpuDmaState* s0)
 {
-    u32 v = (u32)s0->f1C;
+    u32 v = (u32)s0->bitPosition;
     u32 s3 = v & 0x7Fu;
     u32 t = ((v >> 16) & 3u) + ((v >> 8) & 0xFu);
-    s32 s1 = s0->f0 - (s32)(t << 4);
-    s32 s2 = s0->f8 + (s32)t;
+    s32 s1 = s0->inAddress - (s32)(t << 4);
+    s32 s2 = s0->inCount + (s32)t;
 
-    if (s0->f10 != 0) {
-        if (s0->f14 != 0) {
-            *(volatile u32*)0x1000B010 = s0->f10;
-            *(volatile u32*)0x1000B020 = s0->f14;
-            StartIpuOutputTransfer(s0->f18 | 0x100);
+    if (s0->outAddress != 0) {
+        if (s0->outCount != 0) {
+            *(volatile u32*)0x1000B010 = s0->outAddress;
+            *(volatile u32*)0x1000B020 = s0->outCount;
+            StartIpuOutputTransfer(s0->outControl | 0x100);
         }
     }
     while (*(volatile s32*)0x10002010 < 0) {
@@ -91,9 +81,9 @@ void RestoreIpuDmaChannels(Ctx_211988* s0)
         return;
     }
     *(volatile u32*)0x1000B410 = s1;
-    *(volatile u32*)0x1000B430 = s0->f4;
+    *(volatile u32*)0x1000B430 = s0->inTagAddress;
     *(volatile u32*)0x1000B420 = s2;
-    StartIpuInputTransfer(s0->fC | 0x100);
+    StartIpuInputTransfer(s0->inControl | 0x100);
 }
 
 u32 SyncIpu(s32 mode, s32 unused1)

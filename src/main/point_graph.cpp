@@ -163,12 +163,12 @@ struct ModelPart {
     f32 nearFade;           // 0x20: and in by, when below farFade (flag60)
     f32 depth;              // 0x24: its sort depth, FLT_MAX for the eye's distance
     u8 pad28[0x34 - 0x28];
-    void* f34;              // 0x34: given to func_00126DE8 for the matrix
-    void* f38;              // 0x38: an object whose slot 4 adjusts the request
+    void* cameraFacing;     // 0x34: given to func_00126DE8 for the matrix
+    void* hook;             // 0x38: an object whose slot 4 adjusts the request
     u8 pad3C[0x60 - 0x3C];
     s32 flag60;             // 0x60: fades in as well
     u8 pad64[0x68 - 0x64];
-    void* f68;              // 0x68: a matrix the transform is multiplied by
+    void* matrix;           // 0x68: a matrix the transform is multiplied by
     u8 pad6C[4];
 };
 
@@ -209,14 +209,14 @@ struct SprTransfer {
     s32 state;              // 0x4C: 2 while its parts are drawn
 };
 
-extern s32 D_00274990;
-extern SprTransfer D_002748F0[2];
+extern s32 g_sprTransferIndex;
+extern SprTransfer g_sprTransfers[2];
 
 // Block n of the current scratchpad transfer.
 struct SprBlock {
     static u32 Of(s32 n)
     {
-        return D_002748F0[D_00274990].addrs[n];
+        return g_sprTransfers[g_sprTransferIndex].addrs[n];
     }
 };
 
@@ -233,7 +233,7 @@ void QueueDeferredRequest(DeferredRequest* src);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern void* g_toSprChannel;
 extern f32 g_gameClock[];
-extern const Mat4A D_00248400;
+extern const Mat4A g_identityMatrix4;
 
 void QueueModelPartDraws(PlacedObject* self, Camera* cam)
 {
@@ -254,8 +254,8 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
     while (i < self->drawPartCount) {
         WaitDmaChannel((DmaChannel*)g_toSprChannel, 0, 0);
         s32 next = i + n;
-        D_00274990 = 1 - D_00274990;
-        D_002748F0[D_00274990].state = 2;
+        g_sprTransferIndex = 1 - g_sprTransferIndex;
+        g_sprTransfers[g_sprTransferIndex].state = 2;
         s32 rest = self->drawPartCount - next;
         s32 m = 0x34;
         if (rest <= 0x33) {
@@ -271,7 +271,7 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
             }
             ModelPart* part = &parts[j];
             u128 ones = Vu0::Ones();
-            u128 d = Vu0::Sub(Vu0::Q(part->at), Vu0::Q(cam->f40));
+            u128 d = Vu0::Sub(Vu0::Q(part->at), Vu0::Q(cam->position));
             f32 radius = part->radius;
             u32 signs = Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, Vu0::Scalar(radius)) ^ 0xF0;
             if (signs != 0) {
@@ -327,21 +327,21 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
                     break;
                 }
             }
-            if (part->f38 != 0) {
-                void (*adjust)(void*, PlacedObject*, PartRequest*) = (*(void (***)(void*, PlacedObject*, PartRequest*))part->f38)[4];
+            if (part->hook != 0) {
+                void (*adjust)(void*, PlacedObject*, PartRequest*) = (*(void (***)(void*, PlacedObject*, PartRequest*))part->hook)[4];
                 if (adjust != 0) {
-                    adjust(part->f38, self, &rec);
+                    adjust(part->hook, self, &rec);
                 }
             }
-            if (part->f68 != 0) {
-                rec.m = MultiplyMatrices(rec.m, *(Mat4A*)part->f68);
+            if (part->matrix != 0) {
+                rec.m = MultiplyMatrices(rec.m, *(Mat4A*)part->matrix);
             }
-            if (part->f34 != 0) {
-                BuildCameraFacingMatrix(self, cam, part->f34, (f32*)&rec.at, &rec.m);
+            if (part->cameraFacing != 0) {
+                BuildCameraFacingMatrix(self, cam, part->cameraFacing, (f32*)&rec.at, &rec.m);
             }
             QueueDeferredRequest((DeferredRequest*)&rec);
-            if (part->f68 != 0 || part->f34 != 0) {
-                rec.m = D_00248400;
+            if (part->matrix != 0 || part->cameraFacing != 0) {
+                rec.m = g_identityMatrix4;
             }
         }
         i = next;
@@ -352,7 +352,7 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
 void InitSeekingAgent(SeekingAgent* self)
 {
     InitAgent(self);
-    self->fBD4 = 0;
+    self->fadesOut = 0;
     self->fBD0 = 0;
 }
 
@@ -361,52 +361,52 @@ void StartSeekingAgent(SeekingAgent* self)
     StartAgent(self);
     ResolveObjectLinks(self, 2, D_00269B60);
     self->f5F0 = (void*)ResolveAgentClip(self, 0xEF);
-    self->fC38 = ResolveAgentClip(self, 0x16C);
-    self->fC3C = ResolveAgentClip(self, 0x16D);
-    self->fC40 = ResolveAgentClip(self, 0x16A);
-    self->fC44 = ResolveAgentClip(self, 0x16B);
+    self->removeClip = ResolveAgentClip(self, 0x16C);
+    self->hurtClip = ResolveAgentClip(self, 0x16D);
+    self->removeClipAlt = ResolveAgentClip(self, 0x16A);
+    self->hurtClipAlt = ResolveAgentClip(self, 0x16B);
 }
 
 void EnterSeekingAgentState(SeekingAgent* self, s32 a1, s32 a2)
 {
     s32 a2v = a2;
-    switch (self->f724) {
+    switch (self->state) {
     case 4:
-        self->fC28 = 0;
-        self->fC10 = 0;
+        self->stateTarget = 0;
+        self->objectCount = 0;
         break;
     case 0x10:
-        if (self->fC30 == 4) {
-            a2v = self->fC44;
+        if (self->requestKind == 4) {
+            a2v = self->hurtClipAlt;
         } else {
-            a2v = self->fC3C;
+            a2v = self->hurtClip;
         }
         break;
     case 0xB:
-        if (self->fC30 == 4) {
-            a2v = self->fC40;
+        if (self->requestKind == 4) {
+            a2v = self->removeClipAlt;
         } else {
-            a2v = self->fC38;
+            a2v = self->removeClip;
         }
-        if (self->f720 != 0) {
-            RemoveItemKeeperMember((ItemKeeper*)self->f720, self);
+        if (self->roster != 0) {
+            RemoveItemKeeperMember((ItemKeeper*)self->roster, self);
         }
         break;
     }
     EnterAgentState(self, a1, (Animation*)a2v);
-    s32 kind = self->f724;
+    s32 kind = self->state;
     if (kind == 0xB || kind == 0x10) {
-        self->fC04 = 0;
+        self->contactsDisabled = 0;
     }
 }
 
 void LeaveSeekingAgentState(SeekingAgent* self, s32 mode)
 {
     LeaveAgentState(self, mode);
-    s32 kind = self->f724;
+    s32 kind = self->state;
     if (kind != 8) {
         if (kind == 0x10) {
-            SeekPartner* child = ((SeekPartner*)self->fC2C);
+            SeekPartner* child = ((SeekPartner*)self->partner);
             if (child != 0) {
                 child->vtbl[0x54](child);
             }
@@ -422,12 +422,12 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
 {
     s32 tmp[4];
 
-    switch (self->f724) {
+    switch (self->state) {
     case 7:
         if (flag != 0) {
             s32 i;
             void** slot;
-            for (i = 0, slot = self->fC14; i < self->fC10; slot++, i++) {
+            for (i = 0, slot = self->objects; i < self->objectCount; slot++, i++) {
                 void* n = *slot;
                 if (IsObjectAttached((BaseObject*)n) != 0) {
                     SetAgentGoalPoint(self, (Vec02*)((u8*)n + 0x140));
@@ -437,9 +437,9 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
         }
         break;
     case 4:
-        if (self->f750 == 0) {
-            if (self->fC24 != 0) {
-                GetObjectWorldPosition((BaseObject*)self->fC24, (Vec02*)tmp);
+        if (self->mainClip == 0) {
+            if (self->walkTarget != 0) {
+                GetObjectWorldPosition((BaseObject*)self->walkTarget, (Vec02*)tmp);
                 SetAgentGoalPoint(self, (Vec02*)tmp);
             } else {
                 SetAgentGoalPoint(self, &self->v140);
@@ -450,8 +450,8 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
         break;
     case 12:
     case 13:
-        if (self->fC28 != 0) {
-            GetObjectWorldPosition((BaseObject*)self->fC28, (Vec02*)tmp);
+        if (self->stateTarget != 0) {
+            GetObjectWorldPosition((BaseObject*)self->stateTarget, (Vec02*)tmp);
             SetAgentGoalPoint(self, (Vec02*)tmp);
         }
         break;
@@ -475,17 +475,17 @@ void UpdateSeekingAgentState(SeekingAgent* self)
     Vec02 third;
     f32 a;
 
-    switch (self->f724) {
+    switch (self->state) {
     case 7:
         FaceAgentTowardGoalPoint(self);
         break;
     case 2:
-        if (self->f754 != 0) {
+        if (self->mainPlayer != 0) {
             UpdateAgentState(self);
             break;
         }
-        if (self->fC24 != 0) {
-            GetObjectWorldRotation((BaseObject*)self->fC24, (Mat02*)&tmp);
+        if (self->walkTarget != 0) {
+            GetObjectWorldRotation((BaseObject*)self->walkTarget, (Mat02*)&tmp);
             a = ArctangentOfRatio(tmp.y, tmp.x);
             SetAgentFacingAngles(self, a, 0.0f);
         } else {
@@ -499,15 +499,15 @@ void UpdateSeekingAgentState(SeekingAgent* self)
         }
         break;
     case 13:
-        if (self->fC28 == 0) {
+        if (self->stateTarget == 0) {
             break;
         }
-        GetObjectWorldRotation((BaseObject*)self->fC28, (Mat02*)&tmp);
+        GetObjectWorldRotation((BaseObject*)self->stateTarget, (Mat02*)&tmp);
         a = ArctangentOfRatio(tmp.y, tmp.x);
         SetAgentFacingAngles(self, a, 0.0f);
         break;
     case 8:
-        if (*(void**)((u8*)self->f7E0 + 8) != self->f5F0) {
+        if (*(void**)((u8*)self->statePlayer + 8) != self->f5F0) {
             break;
         }
         Vu0::Q(tmp) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)g_camera + 0x40)), Vu0::Q(self->v140));
@@ -516,12 +516,12 @@ void UpdateSeekingAgentState(SeekingAgent* self)
         break;
     case 11:
     case 16:
-        if (self->fC34 == 0) {
+        if (self->requestInPool == 0) {
             break;
         }
-        Vu0::Q(tmp) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)((u8*)self->fC2C + 0x140)));
+        Vu0::Q(tmp) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)((u8*)self->partner + 0x140)));
         a = ArctangentOfRatio(tmp.y, tmp.x);
-        if (self->f724 == 0x10) {
+        if (self->state == 0x10) {
             a = WrapAngle(a + 4.0f);
         } else {
             a = WrapAngle(a + 4.7f);
@@ -550,11 +550,11 @@ s32 AcceptSeekingAgentRequest(SeekingAgent* self, AgentRequest* arg)
     if (self->desc05()->m4B(self, arg->kind00)) {
         return 0;
     }
-    self->fC34 = 0;
-    self->fC30 = arg->kind00;
+    self->requestInPool = 0;
+    self->requestKind = arg->kind00;
     if (arg->kind00 == 0 && arg->ref04 != 0) {
-        if (IsObjectInPool((ObjectPool*)((SeekPartner*)self->fC2C)->p618, arg->ref04)) {
-            self->fC34 = 1;
+        if (IsObjectInPool((ObjectPool*)((SeekPartner*)self->partner)->p618, arg->ref04)) {
+            self->requestInPool = 1;
         }
     }
     return AcceptAgentRequest(self, arg);
@@ -563,10 +563,10 @@ s32 AcceptSeekingAgentRequest(SeekingAgent* self, AgentRequest* arg)
 s32 HandleSeekingAgentObjectEvent(SeekingAgent* self, AgentEvent* msg)
 {
     EventNotice args;
-    if (HasSpareCount() != 0 && self->fC34 == 0) {
-        self->fA68 = 1;
+    if (HasSpareCount() != 0 && self->requestInPool == 0) {
+        self->hitsLeft = 1;
     } else {
-        self->fA68 = 0;
+        self->hitsLeft = 0;
     }
     if (HandleAgentObjectEvent(self, (AgentHit*)msg) == 0) {
         return 0;
@@ -580,11 +580,11 @@ s32 HandleSeekingAgentObjectEvent(SeekingAgent* self, AgentEvent* msg)
 s32 HasAttachedSeekingTarget(SeekingAgent* self)
 {
     s32 i;
-    if (self->fC28 != 0) {
-        for (i = 0; i < self->fC10; i++) {
-            Agent* n = (Agent*)self->fC14[i];
+    if (self->stateTarget != 0) {
+        for (i = 0; i < self->objectCount; i++) {
+            Agent* n = (Agent*)self->objects[i];
             if (IsObjectOfKind(n, 8) != 0) {
-                s32 k = n->f724;
+                s32 k = n->state;
                 if (k == 0xB) {
                     continue;
                 }
@@ -596,10 +596,10 @@ s32 HasAttachedSeekingTarget(SeekingAgent* self)
                 break;
             }
         }
-        if (i < self->fC10) {
+        if (i < self->objectCount) {
             return 1;
         }
-        self->fC28 = 0;
+        self->stateTarget = 0;
     }
     return 0;
 }
@@ -612,11 +612,11 @@ s32 IsSeekingAgentTargetInRange(void)
 s32 AddSeekingAgentObject(SeekingAgent* self, Agent* item)
 {
     if (item != 0 && IsObjectAttached(item) != 0) {
-        if (IsObjectOfKind(item, 8) == 0 || item->f724 != 0xB) {
-            s32 n = self->fC10;
+        if (IsObjectOfKind(item, 8) == 0 || item->state != 0xB) {
+            s32 n = self->objectCount;
             if ((u32)n < 4) {
-                self->fC14[n] = item;
-                self->fC10 = n + 1;
+                self->objects[n] = item;
+                self->objectCount = n + 1;
                 return 1;
             }
         }
@@ -626,12 +626,12 @@ s32 AddSeekingAgentObject(SeekingAgent* self, Agent* item)
 
 void SetSeekingAgentStateTarget(SeekingAgent* self, s32 value)
 {
-    self->fC28 = (void*)value;
+    self->stateTarget = (void*)value;
 }
 
 void SetSeekingAgentTarget(SeekingAgent* self, s32 value)
 {
-    self->fC24 = (void*)value;
+    self->walkTarget = (void*)value;
 }
 
 void StartSeekingAgentEffect(SeekingAgent* self, s32 flag, PlacedObject* extra)
@@ -646,7 +646,7 @@ void StartSeekingAgentEffect(SeekingAgent* self, s32 flag, PlacedObject* extra)
 
 s32 GetSeekingAgentStateKind(SeekingAgent* self)
 {
-    switch (self->f724) {
+    switch (self->state) {
     case 0x10: return 1;
     case 0xB: return 2;
     }
@@ -657,7 +657,7 @@ void HandleSeekingAgentNotification(SeekingAgent* self, s32 code, SourceNotice* 
 {
     HandleAgentNotification(self, code, (AgentNotification*)req);
     if (code == 0x13) {
-        if (req->f_0 == (s32)self->f7E0) {
+        if (req->f_0 == (s32)self->statePlayer) {
             if (req->f_8 == 0x53A) {
                 SpendReserveUnit();
             }

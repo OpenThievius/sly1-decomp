@@ -63,16 +63,16 @@ def guard(start, text):
 
 BB18_FILE = "src/lib/mpeg_decoder.cpp"
 BB18_FUNC = "func_0020BB18"
-STORES = "    pic->width = w;\n    pic->height = h;\n"
+STORES = "    handle->pictureWidth = w;\n    handle->pictureHeight = h;\n"
 DECL_AFTER = "    s32 rows;\n"
-ASSIGN_BEFORE = "    RewindMpegRingToMark((s32*)&st->pool);\n"
+ASSIGN_BEFORE = "    RewindMpegRingToMark(&st->ring);\n"
 SIZE = "    size = (u32)(w * 0x180 * h) >> 8;\n"
 
 
 def bb18_neutral(text):
     """The file with func_0020BB18's stand-in test removed and no plane named by a local (the
     near miss's form, 102 lines from retail). Accepts the landed form or the neutral one."""
-    s = text.index("void AllocatePictureBuffers(Picture_20BB18* pic)\n{")
+    s = text.index("void AllocatePictureBuffers(MpegHandle* handle)\n{")
     e = text.index("\n}\n", s) + 3
     body = text[s:e]
     k = body.find("    // NOT THE ORIGINAL'S STATEMENT")
@@ -82,40 +82,41 @@ def bb18_neutral(text):
     r = body.index("        return;\n") + len("        return;\n")
     body = body[:r] + body[body.index(STORES, r):]
     body = body.replace("    u32* p3;\n", "")
-    body = body.replace("    p3 = &st->planes[3].addr;\n", "")
-    body = re.sub(r"\bp3,", "&st->planes[3].addr,", body)
-    body = body.replace("(Item_20B9D0*)p3", "(Item_20B9D0*)&st->planes[3]")
+    body = body.replace("    p3 = &st->views[3].address;\n", "")
+    body = re.sub(r"\bp3,", "&st->views[3].address,", body)
+    body = body.replace("SetPictureDimensions(p3,", "SetPictureDimensions(&st->views[3],")
     assert not re.search(r"\bp\d\b", body), body
     return text[:s] + body + text[e:]
 
 
 def bb18_name(text, planes, typed=False, size_first=False):
-    """Name the planes PLANES by locals p0..p8 (u32* to the address, or Plane_20BB18* to the
+    """Name the planes PLANES by locals p0..p8 (u32* to the address, or MpegPicture* to the
     plane when TYPED), assigned in plane order just before the ring is rewound."""
-    s = text.index("void AllocatePictureBuffers(Picture_20BB18* pic)\n{")
+    s = text.index("void AllocatePictureBuffers(MpegHandle* handle)\n{")
     e = text.index("\n}\n", s) + 3
     body = text[s:e]
-    ty = "Plane_20BB18*" if typed else "u32*"
+    ty = "MpegPicture*" if typed else "u32*"
     body = body.replace(DECL_AFTER, DECL_AFTER + "".join("    %s p%d;\n" % (ty, k) for k in planes), 1)
     body = body.replace(ASSIGN_BEFORE, "".join(
-        "    p%d = &st->planes[%d]%s;\n" % (k, k, "" if typed else ".addr") for k in planes) + ASSIGN_BEFORE, 1)
+        "    p%d = &st->views[%d]%s;\n" % (k, k, "" if typed else ".address") for k in planes) + ASSIGN_BEFORE, 1)
     for k in planes:
-        body = body.replace("&st->planes[%d].addr," % k, ("&p%d->addr," if typed else "p%d,") % k)
-        body = body.replace("(Item_20B9D0*)&st->planes[%d]" % k, "(Item_20B9D0*)p%d" % k)
+        body = body.replace("&st->views[%d].address," % k, ("&p%d->address," if typed else "p%d,") % k)
+        if typed:
+            body = body.replace("SetPictureDimensions(&st->views[%d]," % k, "SetPictureDimensions(p%d," % k)
     if size_first:
         body = body.replace(SIZE, "", 1).replace(STORES, SIZE + STORES, 1)
     return text[:s] + body + text[e:]
 
 
 def bb18_insert(text, stmt):
-    s = text.index("void AllocatePictureBuffers(Picture_20BB18* pic)\n{")
+    s = text.index("void AllocatePictureBuffers(MpegHandle* handle)\n{")
     k = text.index(STORES, s)
     return text[:k] + stmt + text[k:]
 
 
 # The pointer read: (form, needs an integer context). P is the local's name.
 READS_ADDR = [("(u32)P", "i"), ("(s32)P", "i"), ("*P", "i"), ("P", "p")]
-READS_PLANE = [("(u32)P", "i"), ("P->addr", "i"), ("P->width", "i"), ("P", "p")]
+READS_PLANE = [("(u32)P", "i"), ("P->address", "i"), ("P->width", "i"), ("P", "p")]
 
 # Values known to be zero only from the bits of a value set in an earlier block (w and h are
 # shifted left by 4), so that combine folds them and cse does not: (text, foldable).
@@ -153,10 +154,10 @@ SELF_CONDS = [
 ]
 
 ARMS = [
-    ("width0", "pic->width = 0;"), ("height0", "pic->height = 0;"),
-    ("both0", "pic->width = pic->height = 0;"), ("f130", "st->f130 = 0;"), ("f12C", "st->f12C = 0;"),
-    ("f848", "st->f848 = 0;"), ("size0", "size = 0;"), ("empty", "{ }"), ("return", "return;"),
-    ("report", "ReportMpegError((Dec_20B9F0*)st, \"picture size is not a multiple of 16\");"),
+    ("width0", "handle->pictureWidth = 0;"), ("height0", "handle->pictureHeight = 0;"),
+    ("both0", "handle->pictureWidth = handle->pictureHeight = 0;"), ("f130", "st->mbHeight = 0;"), ("f12C", "st->mbWidth = 0;"),
+    ("f848", "st->mpeg2 = 0;"), ("size0", "size = 0;"), ("empty", "{ }"), ("return", "return;"),
+    ("report", "ReportMpegError(st, \"picture size is not a multiple of 16\");"),
     ("ptr0", None),
 ]
 
@@ -168,9 +169,9 @@ def bb18_statements(cond, arm):
     out = [("if", "    if (%s)\n        %s\n" % (cond, arm))]
     if arm.startswith("ReportMpegError"):
         out.append(("assert", "    !(%s) ? (void)0 : (void)%s;\n" % (cond, arm.rstrip(";"))))
-    if arm == "pic->width = 0;":
+    if arm == "handle->pictureWidth = 0;":
         out.append(("expr", "    (void)(%s);\n" % cond))
-        out.append(("ternary", "    (%s) ? (void)(pic->width = 0) : (void)0;\n" % cond))
+        out.append(("ternary", "    (%s) ? (void)(handle->pictureWidth = 0) : (void)0;\n" % cond))
     return out
 
 
@@ -196,7 +197,7 @@ def bb18_candidates(text):
                     pred = "use" if cfold and vfold and not deref else "no"
                     for aname, arm in arms:
                         if aname == "ptr0":
-                            arm = ("%s->addr = 0;" if reads is READS_PLANE else "*%s = 0;") % ptr
+                            arm = ("%s->address = 0;" if reads is READS_PLANE else "*%s = 0;") % ptr
                         for form, stmt in bb18_statements(cond, arm):
                             if forms and form not in forms:
                                 continue

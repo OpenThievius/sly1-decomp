@@ -29,8 +29,8 @@ struct HitTarget : Collider {
     void* notifyRecord;  // 0x574: a record set up by slot 10 (func_00159478); its first word
                             //        is the object func_001A72B0 sends a message to
     void* scaledObject;  // 0x578: the object func_001A7128 scales (its 0x2DC and 0x2E0)
-    f32 f57C;  // 0x57C: the two floats slot 16 copies from scaledObject's 0x2DC
-    f32 f580;  // 0x580
+    f32 spawnerIntervalMin; // 0x57C: the two floats slot 16 copies from scaledObject's 0x2DC
+    f32 spawnerIntervalMax; // 0x580
     u8 pad584[0x590 - 0x584];
     TimePolynomial scalePoly;  // 0x590: 1, 0, 0 at set-up
     u8 pad59C[0x5A0 - 0x59C];

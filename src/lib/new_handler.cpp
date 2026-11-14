@@ -12,17 +12,17 @@
 
 // The tag an allocation that must not throw takes: an empty object.
 struct NoThrow {};
-extern const NoThrow D_0024F1F0 = {};
+extern const NoThrow g_noThrow = {};
 
 typedef void (*NewHandler)(void);
 
 // What an allocation calls when it runs out of memory.
-NewHandler D_002789D8 = 0;
+NewHandler g_newHandler = 0;
 
 NewHandler ReplaceNewHandler(NewHandler handler)
 {
-    NewHandler previous = D_002789D8;
-    D_002789D8 = handler;
+    NewHandler previous = g_newHandler;
+    g_newHandler = handler;
     return previous;
 }
 

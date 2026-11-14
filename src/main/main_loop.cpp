@@ -25,10 +25,10 @@ struct LoadProgress;
 // The objects func_00184D78 orders: by the words at 0x304 and 0x308, then flag bit 38, then
 // the word at 0x2D0 (a placed object's subclass).
 struct SortKeyedObject : PlacedObject {
-    s32 f2D0;               // 0x2D0
-    s32 f2D4;               // 0x2D4: a light's mode, of which CollectLightsForSphere returns the highest
+    s32 kind;               // 0x2D0
+    s32 mode;               // 0x2D4: a light's mode, of which CollectLightsForSphere returns the highest
     u8 pad2D8[0x304 - 0x2D8];
-    s32 f304;               // 0x304
+    s32 dynamic;            // 0x304
     s32 f308;               // 0x308
 };
 
@@ -40,7 +40,7 @@ void InitPoseSource(Attachment* self, PlacedObject* value);
 
 
 extern s32 g_vif0Channel;
-extern u8 D_00211E10[];
+extern u8 g_vu0ProgramChain[];
 extern "C" void SyncDataCache(s32 unused);
 struct DmaChannel;
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
@@ -49,7 +49,7 @@ extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 
 extern u8 g_vif1Channel[];
-extern u8 D_00212110[];
+extern u8 g_vu1ProgramChain[];
 
 extern "C" void SyncDataCache(s32 a);
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
@@ -167,7 +167,7 @@ void InitGlobalElementStack();
 // A run of lights of one kind in g_sortedLights, as UploadLightVolumes groups them for
 // CollectLightsForSphere: the first light, the count, the flag bits a caller can mask out and
 // the kind that picks the VU0 test.
-struct LightGroup { void** lights; s32 count; s32 flags; u16 kind; s16 fE; };
+struct LightGroup { void** lights; s32 count; s32 flags; u16 kind; s16 firstSlot; };
 
 s32 g_lightingChangeFrame = 0;
 s32 g_lightCount = 0;
@@ -192,7 +192,7 @@ s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b)
     SortKeyedObject* y = *b;
     s32 d;
 
-    d = x->f304 - y->f304;
+    d = x->dynamic - y->dynamic;
     if (d != 0) {
         return d;
     }
@@ -204,7 +204,7 @@ s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b)
     if (d != 0) {
         return d;
     }
-    return x->f2D0 - y->f2D0;
+    return x->kind - y->kind;
 }
 
 // A light (class 0x51) as UploadLightVolumes reads it: the sort keys, its direction, the word
@@ -255,12 +255,12 @@ void UploadLightVolumes(World* world)
     s32 i;
     for (i = 0; i < count; i++) {
         l = (LightObject*)g_sortedLights[i];
-        s32 kind = l->f2D0;
+        s32 kind = l->kind;
         if (kind == 3) {
             kind = 2;
         }
         s32 flags = 0;
-        if (l->f304 == 0) {
+        if (l->dynamic == 0) {
             flags |= 1;
         }
         if (l->f308 != 0) {
@@ -280,8 +280,8 @@ void UploadLightVolumes(World* world)
             group->count = 1;
             group->kind = kind;
             group->lights = &g_sortedLights[i];
-            group->fE = slots;
-            if (l->f304 != 0) {
+            group->firstSlot = slots;
+            if (l->dynamic != 0) {
                 g_lightCount = 1;
             }
         }
@@ -301,7 +301,7 @@ void UploadLightVolumes(World* world)
     ReserveVifUnpack(&pw, 0xC, slots, 0, &base, &out);
     for (i = 0; i < count; i++) {
         l = (LightObject*)g_sortedLights[i];
-        switch (l->f2D0) {
+        switch (l->kind) {
         case 1:
             dir.x = -l->v140.x;
             dir.y = -l->v140.y;
@@ -349,7 +349,7 @@ s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 sk
             if (grp->flags & keepOut) {
                 continue;
             }
-            mask = Vu0::NextLightGroup((u16)grp->fE, grp->count);
+            mask = Vu0::NextLightGroup((u16)grp->firstSlot, grp->count);
             switch (grp->kind) {
             case 0:
                 Vu0::MoveToVi<2>(0xFFFF);
@@ -369,8 +369,8 @@ s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 sk
                 if (((s32)mask & bit) && num < maxLights) {
                     LightObject* l = (LightObject*)prev->lights[k];
                     out[num++] = l;
-                    if (strongest < l->f2D4) {
-                        strongest = l->f2D4;
+                    if (strongest < l->mode) {
+                        strongest = l->mode;
                     }
                     flaggedCount += prev->flags & 1;
                 }
@@ -389,13 +389,13 @@ void InitAim(T2195_790* self, PlacedObject* owner)
 {
     InitPoseSource(self, owner);
     self->f20 = -1;
-    self->f40 = 800.0f;
+    self->aimRange = 800.0f;
     self->v50 = *(Vec02*)&D_00264770;
     self->p60 = *(Pk8_2195*)&D_00264780;
     self->v70 = *(Vec02*)&D_00264790;
     self->p80 = *(Pk8_2195*)&D_002647A0;
-    self->f44 = 1;
-    self->f48 = -1;
+    self->nearKey = 1;
+    self->farKey = -1;
 }
 
 void AssignAimTarget(T2195_790* self, void* obj, Vec02* src)
@@ -431,10 +431,10 @@ void SwitchAimByTargetDistance(T2195_790* self)
     if (target != 0) {
         u128 d = Vu0::Sub(Vu0::Q(owner->v140), Vu0::Q(target->v140));
         s32 key;
-        if (self->f40 * self->f40 < Vu0::ToFloatMoved(Vu0::Dot(d, d))) {
-            key = self->f48;
+        if (self->aimRange * self->aimRange < Vu0::ToFloatMoved(Vu0::Dot(d, d))) {
+            key = self->farKey;
         } else {
-            key = self->f44;
+            key = self->nearKey;
             ClearRootTries(owner);
         }
         if (key != self->key) {
@@ -486,7 +486,7 @@ void GetAimRotation(T2195_790* self, f32 dt, Mat02* rot, Vec02* vec)
     Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(m, Vu0::Q(self->point)), Vu0::Q(pos));
     TransformPointBetweenFrames(0, (PlacedObject*)self->owner->parent, &pos, &pos);
     *(u128*)&d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->owner->pos));
-    s32 outside = self->f40 < Vu0::ToFloat(Vu0::Length(*(u128*)&d));
+    s32 outside = self->aimRange < Vu0::ToFloat(Vu0::Length(*(u128*)&d));
     if (outside) {
         *rot = owner->m1A0;
         return;
@@ -576,7 +576,7 @@ void SendVif0StartupPacket(void)
     s32* p = (s32*)g_vif0Channel;
     *p |= 0x40;
     SyncDataCache(0);
-    StartDmaChain((DmaChannel*)g_vif0Channel, D_00211E10);
+    StartDmaChain((DmaChannel*)g_vif0Channel, g_vu0ProgramChain);
     WaitDmaChannel((DmaChannel*)g_vif0Channel, 0, 0);
     s32* q = (s32*)g_vif0Channel;
     *q &= ~0x40;
@@ -587,7 +587,7 @@ void SendVif1StartupPacket()
     DmaChannelFlags* p = *(DmaChannelFlags**)g_vif1Channel;
     p->flags |= 0x40;
     SyncDataCache(0);
-    StartDmaChain((DmaChannel*)(*(void**)g_vif1Channel), D_00212110);
+    StartDmaChain((DmaChannel*)(*(void**)g_vif1Channel), g_vu1ProgramChain);
     WaitDmaChannel((DmaChannel*)(*(void**)g_vif1Channel), 0, 0);
     (*(DmaChannelFlags**)g_vif1Channel)->flags &= ~0x40;
 }

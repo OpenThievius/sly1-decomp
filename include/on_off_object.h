@@ -30,11 +30,11 @@ struct __attribute__((packed)) Pack63 {
 struct Arr63 { u8 pad0[0xC]; s32 count; u8 pad1[4]; f32* data; };
 
 struct OnOffObject : PlacedObject {
-    void* f2D0;             // 0x2D0
+    void* switchedCollider; // 0x2D0: the switched collider the object last saw active
     s32 f2D4;               // 0x2D4
     u8 f2D8[4];             // 0x2D8
     s32 f2DC;               // 0x2DC
-    void* f2E0;             // 0x2E0
+    void* faceTree;         // 0x2E0: the face tree the active collider is tested against
     union {
         Arr63* obj;         // 0x2E4: the list the stream names, or 0
         PathCurve* curve;       // 0x2E4: the same, as the key-frame curve it is
@@ -46,25 +46,25 @@ struct OnOffObject : PlacedObject {
     s32 f388;               // 0x388
     s32 f38C;               // 0x38C
     s32 f390;               // 0x390
-    s32 f394;               // 0x394
-    s32 f398;               // 0x398: -1 at construction
-    f32 f39C;               // 0x39C
+    s32 onOffState;         // 0x394: the current state (0 off, 1 on)
+    s32 forcedState;        // 0x398: -1 at construction
+    f32 stateChangeTime;    // 0x39C: the game time of the last state change
     union {
         s32 f3A0;           // 0x3A0
         f32 angle3A0;       // 0x3A0: the angle round the object the camera is at (func_001E30E8)
     };
     u8 pad3A4[0x3F0 - 0x3A4];
-    f32 f3F0;               // 0x3F0: the list's last value, or 0
+    f32 lastCurveValue;     // 0x3F0: the list's last value, or 0
     u8 pad3F4[0x400 - 0x3F4];
     Vec02 v400;             // 0x400: the point the angle is measured from
-    f32 f410;               // 0x410: scales the angle
+    f32 orbitRadius;        // 0x410: scales the angle
     s32 i414;               // 0x414: 7 with a list, 5 without
     s32 f418;               // 0x418
     s32 f41C;               // 0x41C
-    f32 f420;               // 0x420
-    f32 f424;               // 0x424
-    f32 f428;               // 0x428
-    f32 f42C;               // 0x42C
+    f32 holdRampTime;       // 0x420: seconds the hold weight takes to reach full
+    f32 holdSpeed;          // 0x424: the speed the hold branch asks for
+    f32 limitRampTime;      // 0x428: ramp of the limit branch
+    f32 limitSpeed;         // 0x42C: the speed the limit branch asks for
     s32 f430;               // 0x430: -1 at construction
     u8 pad434[0x450 - 0x434];
     Quad63 quad450;         // 0x450

@@ -77,7 +77,7 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
         TextPointObject* obj = objs[i];
         ConvertPositionToWorld(obj, &pos);
         Camera* cam = (Camera*)g_camera;
-        Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(cam->f40));
+        Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(cam->position));
         if (4000.0f < Vu0::ToFloat(Vu0::Length(d))) {
             continue;
         }
@@ -102,7 +102,7 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
         Layout_137228 layout;
         PanelStyle style;
         TextReader_eu_134CE0 reader;
-        const f32* k = D_002611A0;
+        const f32* k = g_labelAlphaCoefficients;
         const ValueRange* lim = &g_unitRange;
         ProjectPointToCamera((Camera*)g_camera, &pos, (f32*)&screen);
         Vu0::Vec e = Vu0::Vec::Of(screen);
@@ -110,34 +110,34 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
         f32 scale = k[0] + len * (k[1] + len * k[2]);
         f32 alpha = lim->Limit(scale);
         if (obj != nearest) {
-            alpha *= D_002611BC;
+            alpha *= g_otherLabelAlphaFactor;
         }
-        obj->f54 = ApproachValueWithRamp(obj->f54, alpha, g_gameClock[5], (RampProfile*)D_002611B0, 0);
-        obj->f58 = ApproachValueWithRamp(obj->f58, obj == nearest ? D_00261184 : D_00261188, g_gameClock[5], (RampProfile*)D_002611C0, 0);
+        obj->f54 = ApproachValueWithRamp(obj->f54, alpha, g_gameClock[5], (RampProfile*)g_labelAlphaRamp, 0);
+        obj->f58 = ApproachValueWithRamp(obj->f58, obj == nearest ? g_nearestLabelScale : g_otherLabelScale, g_gameClock[5], (RampProfile*)g_labelScaleRamp, 0);
         PushFontScale(self->font, obj->f58, obj->f58);
         ScreenLayout_eu_134CE0::Reset(&layout);
         InitWideTextReader(&reader, obj->text, self->font, 0);
-        BreakTextIntoLines(&reader, &self->lines, D_002611CC * obj->f58);
+        BreakTextIntoLines(&reader, &self->lines, g_labelBaseWidth * obj->f58);
         f32 h = self->lines.height;
-        f32 x = screen.x * 320.0f + 320.0f + D_002611D0 * obj->f58;
-        f32 y = screen.y * -234.305084f + 234.305084f + D_002611D4 * obj->f58 - h;
+        f32 x = screen.x * 320.0f + 320.0f + g_labelOffsetX * obj->f58;
+        f32 y = screen.y * -234.305084f + 234.305084f + g_labelOffsetY * obj->f58 - h;
         layout.x = x;
         layout.y = y;
-        layout.w = D_002611CC * obj->f58;
+        layout.w = g_labelBaseWidth * obj->f58;
         layout.h = h;
         layout.f14 = (s32)&self->lines;
-        style = D_00261168;
+        style = g_objectLabelStyle;
         Font* font = GetFontById(2);
-        style.f0 = (s32)font;
-        ((u8*)&style.f18)[3] = (s32)(alpha * (f32)((u8*)&style.f18)[3]);
-        style.f8 *= obj->f58;
-        style.fC *= obj->f58;
+        style.font = (s32)font;
+        ((u8*)&style.color)[3] = (s32)(alpha * (f32)((u8*)&style.color)[3]);
+        style.paddingX *= obj->f58;
+        style.paddingY *= obj->f58;
         StyleDrawer::Draw((Font**)&style, &layout, q);
         ((u8*)&layout.color)[3] = (s32)(alpha * (f32)((u8*)&layout.color)[3]);
         DrawWrappedAlignedText(&reader, &layout, 0, q);
         BeginGifTag(q, 0xC1, 3, 0x441);
         AddGifRgbaEntry(q, ((u32*)self->frame)[6]);
-        AddGifXyzfEntry(q, Gfx_eu_134CE0::ScreenX(x + D_002611D8 * obj->f58), Gfx_eu_134CE0::ScreenY(y + self->lines.height + D_002611DC * obj->f58), 0, 0);
+        AddGifXyzfEntry(q, Gfx_eu_134CE0::ScreenX(x + g_labelPointerOffsetX * obj->f58), Gfx_eu_134CE0::ScreenY(y + self->lines.height + g_labelPointerOffsetY * obj->f58), 0, 0);
         y = screen.y * -234.305084f + 234.305084f;
         x = screen.x * 320.0f + 320.0f;
         AddGifXyzfEntry(q, Gfx_eu_134CE0::ScreenX(x), Gfx_eu_134CE0::ScreenY(y), 0, 0);

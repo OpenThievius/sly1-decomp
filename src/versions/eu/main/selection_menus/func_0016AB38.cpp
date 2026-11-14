@@ -52,13 +52,13 @@ void SetupCurrentObjectChoices(CurrentPlacedObject* self)
     if (self->walkers[2].walker || self->walkers[3].walker) {
         self->walkerChoice = 0;
         if (self->walkers[2].walker) {
-            s32 key = D_00262860[self->walkerChoice].walkerKey;
+            s32 key = g_choiceKeys[self->walkerChoice].walkerKey;
             TeleportStateWalker(self->walkers[2].walker, key);
         }
         if (self->walkers[3].walker) {
-            s32 key = D_00262860[self->walkerChoice].walkerKey;
+            s32 key = g_choiceKeys[self->walkerChoice].walkerKey;
             TeleportStateWalker(self->walkers[3].walker, key);
         }
     }
-    PushStackElement((ElementStack*)g_elementStack, &D_0026FA90);
+    PushStackElement((ElementStack*)g_elementStack, &g_selectionCaption);
 }

@@ -337,7 +337,7 @@ void ActivatePauseMenuSelection(Menu_195958_eu* self)
             break;
         case -1:
             SetPauseMenuLayerPage(self, 1, -1);
-            D_00273EB0.vt->m14(&D_00273EB0);
+            g_cyclingGlyphElement.vt->m14(&g_cyclingGlyphElement);
             break;
         }
         StartBackgroundJob(&g_backgroundJob, (void*)SaveGameToMemoryCardSlot, &g_memoryCard);

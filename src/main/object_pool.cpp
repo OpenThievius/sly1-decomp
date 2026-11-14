@@ -138,9 +138,9 @@ ObjectPoolEntry* FindObjectPoolEntry(ObjectPool* table, s32 key);
 // Where func_001A94C0 takes a position and a matrix from: an object's world frame (f0 or f4), a
 // placed object's m110 and v140 (f8), or its own copy of both.
 struct FrameSource {
-    void* f0;
-    void* f4;
-    PlacedObject* f8;
+    void* positionObject;
+    void* frameObject;
+    PlacedObject* placedObject;
     u8 pad0[4];
     Vec02 pos;
     Vec02 rot[3];
@@ -202,7 +202,7 @@ extern const Fn_Table D_00217E80[];
 extern const Fn_Table D_00217ED0[];
 extern const Fn_Table D_00217F20[];
 extern const Fn_Table D_00217F70[];
-extern const Fn_Table D_00217FC0[];
+extern const Fn_Table g_gaugeAmountCaptionMethods[];
 extern const Fn_Table D_00218010[];
 extern const Fn_Table D_00218060[];
 extern const Fn_Table D_002180B0[];
@@ -212,26 +212,26 @@ extern const Fn_Table D_002181A0[];
 extern const Fn_Table D_002181F0[];
 extern const Fn_Table D_00218240[];
 extern const Fn_Table D_00218290[];
-extern const Fn_Table D_002182E0[];
+extern const Fn_Table g_gaugeBarElementMethods[];
 extern const Fn_Table D_00218330[];
-extern const Fn_Table D_00218380[];
-extern const Fn_Table D_002183D0[];
-extern const Fn_Table D_00218420[];
-extern const Fn_Table D_00218470[];
-extern const Fn_Table D_002184C0[];
-extern const Fn_Table D_00218510[];
-extern const Fn_Table D_00218560[];
-extern const Fn_Table D_002185B0[];
-extern const Fn_Table D_00218600[];
-extern const Fn_Table D_002186D0[];
-extern const Fn_Table D_00218720[];
-extern const Fn_Table D_0021A3F0[];
-extern const Fn_Table D_0021A440[];
-extern const Fn_Table D_00220BF0[];
-extern const Fn_Table D_002210F0[];
-extern const Fn_Table D_002212E0[];
-extern const Fn_Table D_00221330[];
-extern const Fn_Table D_00221380[];
+extern const Fn_Table g_pointerTextCaptionMethods[];
+extern const Fn_Table g_copiedTextCaptionMethods[];
+extern const Fn_Table g_hintGlyphElementMethods[];
+extern const Fn_Table g_titleElementMethods[];
+extern const Fn_Table g_promptElementMethods[];
+extern const Fn_Table g_timerElementMethods[];
+extern const Fn_Table g_letterboxElementMethods[];
+extern const Fn_Table g_letterGlyphElementMethods[];
+extern const Fn_Table g_cyclingGlyphElementMethods[];
+extern const Fn_Table g_pauseMenuElementMethods[];
+extern const Fn_Table g_stackedCaptionGroupMethods[];
+extern const Fn_Table g_arcElementMethods[];
+extern const Fn_Table g_typedTextCaptionBoxMethods[];
+extern const Fn_Table g_spinningSpriteElementMethods[];
+extern const Fn_Table g_mapScreenListMethods[];
+extern const Fn_Table g_selectionCaptionMethods[];
+extern const Fn_Table g_gridSelectorMethods[];
+extern const Fn_Table g_timerCaptionMethods[];
 extern u8 g_screenFade[];
 
 void ResetScreenFade(ScreenFade* o);
@@ -494,43 +494,43 @@ ElementPlaceTable g_elementPlaces = {
 
 // The 37 screen objects, in address order (D_002486B0 lists them in another order). They have
 // no initialiser: func_001A9C68 installs their tables at run time.
-T217D_E30 D_0026C6C8;
-T217D_E30 D_0026C948;
+T217D_E30 g_reserveCountCaption;
+T217D_E30 g_collectedItemCaption;
 T217D_E30 D_0026CBC8;
 T217D_E30 D_0026CE48;
-T217D_E30 D_0026D0C8;
+T217D_E30 g_pairControllerCountCaption;
 T217D_E30 g_gaugeAmountCaption;
-T217D_E30 D_0026D5C8;
+T217D_E30 g_pathFollowerFirstCountCaption;
 T217D_E30 D_0026D848;
-T217D_E30 D_0026DAC8;
-T217D_E30 D_0026DD48;
-T217D_E30 D_0026DFC8;
+T217D_E30 g_pathFollowerSecondCountCaption;
+T217D_E30 g_hitCountCaptionA;
+T217D_E30 g_hitCountCaptionB;
 T217D_2E0 g_gaugeBarElement;
-T217D_E30 D_0026E4E0;
+T217D_E30 g_gaugeColliderCaption;
 T217D_510 g_timerElement;
 T217D_1380 g_timerCaption;
 T217D_330 g_buttonHintElement;
-T217D_380 D_0026EED0;
-T217D_3D0 D_0026F138;
-T217D_420 D_0026F5A0;
+T217D_380 g_pointerTextCaption;
+T217D_3D0 g_copiedTextCaption;
+T217D_420 g_hintGlyphElement;
 T217D_0F0 g_mapScreenList;
-T217D_12E0 D_0026FA90;
-T217D_1330 D_0026FD00;
+T217D_12E0 g_selectionCaption;
+T217D_1330 g_gridSelector;
 T217D_6D0 g_pauseMenuElement;
 T217D_440 g_typedTextCaptionBox;
-T217D_BF0 D_00270650;
+T217D_BF0 g_spinningSpriteElement;
 T217D_3F0 D_002708E0;
 T217D_3F0 D_00271558;
-T217D_560 D_002721D0;
-T217D_E30 D_00272430;
-T217D_E30 D_002726B0;
-T217D_470 D_00272930;
-T217D_4C0 D_00272B98;
+T217D_560 g_letterboxElement;
+T217D_E30 g_firstTallyCaption;
+T217D_E30 g_secondTallyCaption;
+T217D_470 g_titleElement;
+T217D_4C0 g_promptElement;
 T217D_720 g_stackedCaptionGroup;
 T217D_5B0 D_002739F0;
 T217D_5B0 D_00273C50;
-T217D_600 D_00273EB0;
-T217D_E30 D_00274118;
+T217D_600 g_cyclingGlyphElement;
+T217D_E30 g_completionPercentCaption;
 
 
 
@@ -565,7 +565,7 @@ void InitObjectPool(ObjectPool* self)
     (void)FillMemory(((u8*)self + 0x150), 0, 0x18);
     f32 d = 3.4028235e+38f;
     self->fD8 = 5.0f;
-    self->f168 = 0;
+    self->idsResolved = 0;
     self->f144 = d;
     AppendQueuedCall(self->world, (void*)SpawnObjectPoolCopies, self, 0, 0);
 }
@@ -601,7 +601,7 @@ void SpawnObjectPoolCopies(ObjectPool* self)
 {
     s32 i;
     if (self->sub != 0) {
-        if (self->sub->f4 != 0) {
+        if (self->sub->lentOut != 0) {
             self->sub->qC = (Quad16*)AllocateFrontMemory(self->count << 5);
         }
     }
@@ -614,7 +614,7 @@ void SpawnObjectPoolCopies(ObjectPool* self)
             e->count = 0;
             continue;
         }
-        if (self->sub != 0 && self->sub->f4 != 0) {
+        if (self->sub != 0 && self->sub->lentOut != 0) {
             s32 x = self->sub->f8;
             if (x == 1) goto c1;
             if (x < 2) {
@@ -658,7 +658,7 @@ void SpawnObjectPoolCopies(ObjectPool* self)
         obj->desc->m10(obj);
         obj->desc->m15(obj, 0);
         obj->desc->m03(obj);
-        if (self->sub != 0 && self->sub->f4 != 0) {
+        if (self->sub != 0 && self->sub->lentOut != 0) {
             Quad16* d = self->sub->qC + (i << 1);
             d[0] = *(Quad16*)&obj->v190;
             d[1] = *(Quad16*)&obj->v1D0;
@@ -669,7 +669,7 @@ void SpawnObjectPoolCopies(ObjectPool* self)
 void CopyObjectPool(ObjectPool* self, ObjectPool* other)
 {
     CopyObjectData(self, other);
-    if (self->sub != 0 && self->sub->f4 != 0) {
+    if (self->sub != 0 && self->sub->lentOut != 0) {
         if (other->sub->f8 != 0) {
             self->sub = 0;
         } else {
@@ -678,9 +678,9 @@ void CopyObjectPool(ObjectPool* self, ObjectPool* other)
             self->sub = 0;
         }
         GetObjectPoolShare(self);
-        self->sub->f4 = 1;
+        self->sub->lentOut = 1;
         self->sub->f8 = 2;
-        self->sub->f14 = other;
+        self->sub->lentTo = other;
         AppendToList((List01*)((u8*)other->sub + 0x14), self->sub);
     } else {
         self->items = (ObjectPoolEntry*)CopyToFrontMemory(other->count * 0x14, other->items);
@@ -690,10 +690,10 @@ void CopyObjectPool(ObjectPool* self, ObjectPool* other)
 void StartObjectPool(ObjectPool* self)
 {
     StartObject(self);
-    if (self->f168 != 0) {
+    if (self->idsResolved != 0) {
         return;
     }
-    self->f168 = 1;
+    self->idsResolved = 1;
     if (self->id4C != -1) {
         void* p = FindFirstObjectByIdMode4(self->world, self->id4C, self);
         if (p != 0) {
@@ -781,7 +781,7 @@ s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key)
 {
     Sub8C* group = self->sub;
 
-    if (group != 0 && group->f4 != 0) {
+    if (group != 0 && group->lentOut != 0) {
         List01* list;
         ObjectPool* skip;
         ListFrame it;
@@ -789,23 +789,23 @@ s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key)
 
         switch (group->f8) {
         case 1:
-            list = (List01*)&group->f14;
+            list = (List01*)&group->lentTo;
             skip = 0;
             break;
         case 2: {
-            ObjectPool* e = (ObjectPool*)group->f14;
+            ObjectPool* e = (ObjectPool*)group->lentTo;
             skip = self;
-            if (e->f48 == (s32)key) {
+            if (e->chosenItem == (s32)key) {
                 return 0;
             }
-            list = (List01*)&e->sub->f14;
+            list = (List01*)&e->sub->lentTo;
             break;
         }
         }
         ListWalkBegin::Of(&it, list);
         for (obj = ListWalkNext::Of(&it); obj != 0; obj = ListWalkNext::Of(&it)) {
             ObjectPool* e = *(ObjectPool**)obj;
-            if (e != skip && e->f48 == (s32)key) {
+            if (e != skip && e->chosenItem == (s32)key) {
                 ListWalkEnd::Of(&it);
                 return 0;
             }
@@ -834,7 +834,7 @@ void AdvanceObjectPoolEntry(ObjectPool* self)
         return;
     }
     i = 1;
-    pos = (self->f44 + 1) % self->count;
+    pos = (self->lastItemIndex + 1) % self->count;
     if (!(i < self->count)) {
         return;
     }
@@ -852,7 +852,7 @@ void AdvanceObjectPoolEntry(ObjectPool* self)
     } while (i < self->count);
 found:
     if (i < self->count) {
-        self->f44 = pos;
+        self->lastItemIndex = pos;
     }
 }
 
@@ -864,7 +864,7 @@ void ChooseObjectPoolItem(ObjectPool* self)
         if (self->f40 == 0) {
             AdvanceObjectPoolEntry(self);
         }
-        ObjectPoolEntry* rec = &self->items[self->f44];
+        ObjectPoolEntry* rec = &self->items[self->lastItemIndex];
 
         if (rec->flags & 2) {
             s32 i = 0;
@@ -872,8 +872,8 @@ void ChooseObjectPoolItem(ObjectPool* self)
                 do {
                     if (IsObjectPoolItemFree(self, (PoolCandidate*)rec->objects[i]) != 0) {
                         s4 = (s32)rec->objects[i];
-                        if (self->sub != 0 && self->sub->f4 != 0) {
-                            s5 = self->sub->fC + (self->f44 << 5);
+                        if (self->sub != 0 && self->sub->lentOut != 0) {
+                            s5 = self->sub->fC + (self->lastItemIndex << 5);
                         }
                         if (rec->flags & 1) {
                         } else {
@@ -888,19 +888,19 @@ void ChooseObjectPoolItem(ObjectPool* self)
             }
         }
     }
-    self->f48 = s4;
-    if (self->sub != 0 && self->sub->f4 != 0) {
+    self->chosenItem = s4;
+    if (self->sub != 0 && self->sub->lentOut != 0) {
         self->sub->f10 = s5;
     }
 }
 
 s32 HasObjectPoolChoice(ObjectPool* self)
 {
-    if (self->f48 != 0) {
+    if (self->chosenItem != 0) {
         return 1;
     }
     ChooseObjectPoolItem(self);
-    return self->f48 != 0;
+    return self->chosenItem != 0;
 }
 
 #include "placed_object.h"
@@ -935,7 +935,7 @@ struct Released_1A8C90 {
     u8 pad1E0[0x224 - 0x1E0];
     ReleasedTrack_1A8C90* track;    // 0x224
     u8 pad228[0x554 - 0x228];
-    f32 f554;                       // 0x554
+    f32 expiryTime;                 // 0x554: the game time at which the released object expires
     u8 pad558[0x690 - 0x558];
     f32 speed;                      // 0x690
     u8 pad694[0x6E4 - 0x694];
@@ -1044,7 +1044,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
     SetColliderAnchors((Collider*)obj, 0, 0, 0, 0);
     obj->desc->m84(obj, &pos);
     obj->desc->m88(obj, &rot);
-    if (self->sub != 0 && self->sub->f4 != 0) {
+    if (self->sub != 0 && self->sub->lentOut != 0) {
         Vec02* q = (Vec02*)self->sub->f10;
         obj->v190 = q[0];
         obj->v1D0 = q[1];
@@ -1120,7 +1120,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
         }
     }
     if (0.0f < self->life && IsObjectOfKind((BaseObject*)obj, 0x3B)) {
-        obj->f554 = g_gameTime + self->life;
+        obj->expiryTime = g_gameTime + self->life;
     }
     if (IsObjectOfKind((BaseObject*)obj, 0x3C)) {
         switch (self->aimMode) {
@@ -1155,7 +1155,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
     return 1;
 }
 
-void ClearObjectPoolChoice(ObjectPool* p) { p->f48 = 0; if (p->sub != 0 && p->sub->f4 != 0) p->sub->f10 = 0; }
+void ClearObjectPoolChoice(ObjectPool* p) { p->chosenItem = 0; if (p->sub != 0 && p->sub->lentOut != 0) p->sub->f10 = 0; }
 
 void ResetPlacementRecord(u8* self)
 {
@@ -1182,18 +1182,18 @@ void ClearObjectPoolHeadingRecord(u8* self)
 
 void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* a3)
 {
-    if (self->f0 != 0) {
-        ConvertPositionToWorld((BaseObject*)self->f0, a1);
+    if (self->positionObject != 0) {
+        ConvertPositionToWorld((BaseObject*)self->positionObject, a1);
         a2[0] = self->rot[0];
         a2[1] = self->rot[1];
         a2[2] = self->rot[2];
-    } else if (self->f4 != 0) {
-        GetObjectWorldPosition((BaseObject*)self->f4, a1);
-        GetObjectWorldRotation((BaseObject*)self->f4, (Mat02*)a2);
+    } else if (self->frameObject != 0) {
+        GetObjectWorldPosition((BaseObject*)self->frameObject, a1);
+        GetObjectWorldRotation((BaseObject*)self->frameObject, (Mat02*)a2);
     } else {
-        if (self->f8 != 0) {
-            a1[0] = self->f8->v140;
-            PlacedObject* in = self->f8;
+        if (self->placedObject != 0) {
+            a1[0] = self->placedObject->v140;
+            PlacedObject* in = self->placedObject;
             a2[0] = in->m110.r[0];
             a2[1] = in->m110.r[1];
             a2[2] = in->m110.r[2];
@@ -1320,7 +1320,7 @@ s32 IsWorld4BossFree(World4Boss* self)
 void UpdateWorld4BossGoal(World4Boss* self, s32 flag)
 {
     UpdateAgentGoal(self, flag);
-    if (self->f724 == 0x10) {
+    if (self->state == 0x10) {
         void* r = ((VFn_1A9960*)self->desc)[102](self);
         if (r != 0)
             SetAgentGoalPoint(self, (Vec02*)((u8*)r + 0x140));
@@ -1330,14 +1330,14 @@ void UpdateWorld4BossGoal(World4Boss* self, s32 flag)
 void UpdateWorld4BossState(World4Boss* self)
 {
     UpdateAgentState(self);
-    if (self->f724 == 0x10)
+    if (self->state == 0x10)
         FaceAgentTowardGoalPoint(self);
 }
 
 void EnterWorld4BossState(World4Boss* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
-    if (self->f724 == 0xB) {
+    if (self->state == 0xB) {
         MarkLevelDone(4);
         StartMemoryCardSave((MemoryCard*)g_memoryCard);
     }
@@ -1393,7 +1393,7 @@ s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
         }
         Animation* which;
         if ((ev->extraFlags & 2) != 0) {
-            if (g_player == 0 || g_player->f223C == 4 || g_player->f223C == 6)
+            if (g_player == 0 || g_player->aimMode == 4 || g_player->aimMode == 6)
                 which = self->fC14;
             else
                 which = self->fC18;
@@ -1417,43 +1417,43 @@ void SetWorld4BossValues(World4Boss* self, Animation* a, Animation* b, Animation
 
 void InstallScreenElements()
 {
-    D_0026C6C8.vt = (const T217D_Vt*)D_00217E30;
-    D_0026C948.vt = (const T217D_Vt*)D_00217E80;
+    g_reserveCountCaption.vt = (const T217D_Vt*)D_00217E30;
+    g_collectedItemCaption.vt = (const T217D_Vt*)D_00217E80;
     D_0026CBC8.vt = (const T217D_Vt*)D_00217ED0;
     D_0026CE48.vt = (const T217D_Vt*)D_00217F20;
-    D_0026D0C8.vt = (const T217D_Vt*)D_00217F70;
-    g_gaugeAmountCaption.vt = (const T217D_Vt*)D_00217FC0;
-    D_0026D5C8.vt = (const T217D_Vt*)D_002180B0;
+    g_pairControllerCountCaption.vt = (const T217D_Vt*)D_00217F70;
+    g_gaugeAmountCaption.vt = (const T217D_Vt*)g_gaugeAmountCaptionMethods;
+    g_pathFollowerFirstCountCaption.vt = (const T217D_Vt*)D_002180B0;
     D_0026D848.vt = (const T217D_Vt*)D_00218010;
-    D_0026DAC8.vt = (const T217D_Vt*)D_00218060;
-    D_0026DD48.vt = (const T217D_Vt*)D_00218100;
-    D_0026DFC8.vt = (const T217D_Vt*)D_00218150;
-    g_gaugeBarElement.vt = (const T217D_Vt*)D_002182E0;
-    D_0026E4E0.vt = (const T217D_Vt*)D_002181A0;
-    g_timerElement.vt = (const T217D_Vt*)D_00218510;
-    g_timerCaption.vt = (const T217D_Vt*)D_00221380;
+    g_pathFollowerSecondCountCaption.vt = (const T217D_Vt*)D_00218060;
+    g_hitCountCaptionA.vt = (const T217D_Vt*)D_00218100;
+    g_hitCountCaptionB.vt = (const T217D_Vt*)D_00218150;
+    g_gaugeBarElement.vt = (const T217D_Vt*)g_gaugeBarElementMethods;
+    g_gaugeColliderCaption.vt = (const T217D_Vt*)D_002181A0;
+    g_timerElement.vt = (const T217D_Vt*)g_timerElementMethods;
+    g_timerCaption.vt = (const T217D_Vt*)g_timerCaptionMethods;
     g_buttonHintElement.vt = (const T217D_Vt*)D_00218330;
-    D_0026EED0.vt = (const T217D_Vt*)D_00218380;
-    D_0026F138.vt = (const T217D_Vt*)D_002183D0;
-    D_0026F5A0.vt = (const T217D_Vt*)D_00218420;
-    g_mapScreenList.vt = (const T217D_Vt*)D_002210F0;
-    D_0026FA90.vt = (const T217D_Vt*)D_002212E0;
-    D_0026FD00.vt = (const T217D_Vt*)D_00221330;
-    g_pauseMenuElement.vt = (const T217D_Vt*)D_002186D0;
-    g_typedTextCaptionBox.vt = (const T217D_Vt*)D_0021A440;
-    D_00270650.vt = (const T217D_Vt*)D_00220BF0;
-    D_002708E0.vt = (const T217D_Vt*)D_0021A3F0;
-    D_00271558.vt = (const T217D_Vt*)D_0021A3F0;
-    D_00272430.vt = (const T217D_Vt*)D_00218240;
-    D_002726B0.vt = (const T217D_Vt*)D_00218290;
-    D_00272930.vt = (const T217D_Vt*)D_00218470;
-    D_00272B98.vt = (const T217D_Vt*)D_002184C0;
-    D_002721D0.vt = (const T217D_Vt*)D_00218560;
-    g_stackedCaptionGroup.vt = (const T217D_Vt*)D_00218720;
-    D_002739F0.vt = (const T217D_Vt*)D_002185B0;
-    D_00273C50.vt = (const T217D_Vt*)D_002185B0;
-    D_00273EB0.vt = (const T217D_Vt*)D_00218600;
-    D_00274118.vt = (const T217D_Vt*)D_002181F0;
+    g_pointerTextCaption.vt = (const T217D_Vt*)g_pointerTextCaptionMethods;
+    g_copiedTextCaption.vt = (const T217D_Vt*)g_copiedTextCaptionMethods;
+    g_hintGlyphElement.vt = (const T217D_Vt*)g_hintGlyphElementMethods;
+    g_mapScreenList.vt = (const T217D_Vt*)g_mapScreenListMethods;
+    g_selectionCaption.vt = (const T217D_Vt*)g_selectionCaptionMethods;
+    g_gridSelector.vt = (const T217D_Vt*)g_gridSelectorMethods;
+    g_pauseMenuElement.vt = (const T217D_Vt*)g_pauseMenuElementMethods;
+    g_typedTextCaptionBox.vt = (const T217D_Vt*)g_typedTextCaptionBoxMethods;
+    g_spinningSpriteElement.vt = (const T217D_Vt*)g_spinningSpriteElementMethods;
+    D_002708E0.vt = (const T217D_Vt*)g_arcElementMethods;
+    D_00271558.vt = (const T217D_Vt*)g_arcElementMethods;
+    g_firstTallyCaption.vt = (const T217D_Vt*)D_00218240;
+    g_secondTallyCaption.vt = (const T217D_Vt*)D_00218290;
+    g_titleElement.vt = (const T217D_Vt*)g_titleElementMethods;
+    g_promptElement.vt = (const T217D_Vt*)g_promptElementMethods;
+    g_letterboxElement.vt = (const T217D_Vt*)g_letterboxElementMethods;
+    g_stackedCaptionGroup.vt = (const T217D_Vt*)g_stackedCaptionGroupMethods;
+    D_002739F0.vt = (const T217D_Vt*)g_letterGlyphElementMethods;
+    D_00273C50.vt = (const T217D_Vt*)g_letterGlyphElementMethods;
+    g_cyclingGlyphElement.vt = (const T217D_Vt*)g_cyclingGlyphElementMethods;
+    g_completionPercentCaption.vt = (const T217D_Vt*)D_002181F0;
     for (s32 i = 0x24; i >= 0; i--) {
         ((ScreenElement**)g_screenElements)[i]->vt->m00(((ScreenElement**)g_screenElements)[i], i);
     }
@@ -1541,7 +1541,7 @@ void DrawScreenElements(void)
         }
     }
     DrawScreenFade((ScreenFade*)g_screenFade);
-    DrawCyclingGlyphElement((T217D_600*)&D_00273EB0);
+    DrawCyclingGlyphElement((T217D_600*)&g_cyclingGlyphElement);
 }
 
 void InitScreenElement(ScreenElement* self, s32 index)

@@ -166,8 +166,8 @@ static inline void MulRotationInto(Mat02* out, const Mat02& a, const Mat02& b)
 void ApplyLinkConstraint(PlacedObject* self)
 {
     typedef Vu0::Vec Vec;
-    Rec2195_224* rec = self->f224;
-    s32 flags = rec->f98;
+    Rec2195_224* rec = self->linkRecord;
+    s32 flags = rec->linkFlags;
     PlacedObject* a = (PlacedObject*)rec->f80;
     PlacedObject* b = (PlacedObject*)rec->p84;
     PlacedObject* top = (PlacedObject*)rec->p88;
@@ -185,9 +185,9 @@ void ApplyLinkConstraint(PlacedObject* self)
             self->desc02()->m1D(self, &to);
         }
     }
-    a->rot = MulRotationValue(*(Mat02*)((u8*)a->f224 + 0x30), *(Mat02*)a->f224);
-    Rec2195_224* rb = b->f224;
-    if (rb != 0 && (rb->fB0 & 3)) {
+    a->rot = MulRotationValue(*(Mat02*)((u8*)a->linkRecord + 0x30), *(Mat02*)a->linkRecord);
+    Rec2195_224* rb = b->linkRecord;
+    if (rb != 0 && (rb->flags & 3)) {
         b->rot = MulRotationValue(*(Mat02*)((u8*)rb + 0x30), *(Mat02*)rb);
     } else {
         Mat02* m = &b->rot;
@@ -235,7 +235,7 @@ void ApplyLinkConstraint(PlacedObject* self)
     Vec02 dir;
     dir = t;
     *(Vec*)&dir = Vu0::DivX(Vec::Of(t), Vu0::Length(Vec::Of(t)));
-    BuildAxisAngleMatrix(self->f224->f90, &dir, &twist);
+    BuildAxisAngleMatrix(self->linkRecord->angle, &dir, &twist);
     Mat02 R;
     MulRotationInto(&R, twist, swing);
     swing = R;
@@ -279,7 +279,7 @@ void ApplyLinkConstraint(PlacedObject* self)
         *(Vec*)&n = Vu0::Cross(Vec::Of(t), Vec::Of(rest));
         NormalizeVector(n, g_unitXVector);
         *(Vec*)&swingSpin = Vu0::MulX(Vec::Of(n), Vec::Scalar(lr / lt));
-        *(Vec*)&twistSpin = Vu0::MulX(Vec::Of(dir), Vec::ScalarAtValue(self->f224->f94));
+        *(Vec*)&twistSpin = Vu0::MulX(Vec::Of(dir), Vec::ScalarAtValue(self->linkRecord->angleSlope));
         *(Vec*)&total = Vu0::Add(Vec::Of(twistSpin), Vec::Of(swingSpin));
         *(Vec*)&rel = Vu0::Sub(Vec::Of(total), Vec::Of(spins[3]));
         *(Vec*)&b->v160 = Vu0::RotateTransposed(rot[2], Vec::Of(spin));
@@ -288,6 +288,6 @@ void ApplyLinkConstraint(PlacedObject* self)
         b->v160 = D_00248D30;
         a->v160 = D_00248D30;
     }
-    b->f224->p64 = 0;
-    a->f224->p64 = 0;
+    b->linkRecord->p64 = 0;
+    a->linkRecord->p64 = 0;
 }

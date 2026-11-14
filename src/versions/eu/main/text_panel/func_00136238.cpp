@@ -44,7 +44,7 @@ void SetTextPanelOpen(Obj_136238_eu* self, s32 on)
         self->vt->f40(self, 2);
         GetCurrentLevelBit((u32*)&in);
         if (MaskWorldBitsBySave() & in.v) {
-            if (MaskWorldBitsBySave() & D_00261120[self->f5B8]) ReleasePanelEntries(self, self->f5B8, 1);
+            if (MaskWorldBitsBySave() & g_panelBankReleaseMasks[self->f5B8]) ReleasePanelEntries(self, self->f5B8, 1);
         }
         if (MaskWorldBitsBySave() & 0x800) {
             n = GatherObjectsById(g_currentWorld, 0x205, 0x82, 0, 0x100, arr);

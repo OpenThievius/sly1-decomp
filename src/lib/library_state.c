@@ -32,6 +32,6 @@ typedef struct {
     LibraryStream streams[3];
 } LibraryState;
 
-LibraryState D_00276680 = { { 0, &D_00276680.streams[0], &D_00276680.streams[1], &D_00276680.streams[2],
+LibraryState g_libraryStateStorage = { { 0, &g_libraryStateStorage.streams[0], &g_libraryStateStorage.streams[1], &g_libraryStateStorage.streams[2],
                               0, 0, 0, 0, 0, 0, 0, 0, 0, (void*)"C", 0, 0, 0, 0, 0, 0, 0, 0, (void*)1 } };
-void* g_libraryState = &D_00276680;
+void* g_libraryState = &g_libraryStateStorage;

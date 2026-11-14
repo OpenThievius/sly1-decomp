@@ -67,16 +67,16 @@ f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 
 // The file's .data, 0x264230 to 0x264260, in retail's order.
-ObjectLink D_00264230[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };
+ObjectLink g_pathSpeedColliderLinks[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };
 f32 D_00264248 = 2.5f;
 f32 D_0026424C = 300.0f;
-f32 D_00264250[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
+f32 g_pathSpeedColliderRotationRamp[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
 
 void InitC24Object(C24* self)
 {
     InitPlayerFlaggedCollider(self);
-    self->f6DC = 10.0f;
-    self->f6E0 = 1.0f;
+    self->levelLimit = 10.0f;
+    self->levelRate = 1.0f;
     self->f6D8 = 3000.0f;
     self->f6CC = 1000.0f;
     self->f6D0 = 0;
@@ -86,12 +86,12 @@ void InitC24Object(C24* self)
 void StartC24Object(C24* self)
 {
     StartMaskedCollider(self);
-    ResolveObjectLinks(self, 2, D_00264230);
-    self->x6C8 = (StateWalker*)CreateStateWalker((StateGraph*)self->x6C4, self, 0x36E, 0);
+    ResolveObjectLinks(self, 2, g_pathSpeedColliderLinks);
+    self->walker = (StateWalker*)CreateStateWalker((StateGraph*)self->stateGraph, self, 0x36E, 0);
     Alloc24* n = (Alloc24*)CreateWeightCurve(0);
-    self->x6E8 = n;
+    self->curveTable = n;
     n->field8 = 0;
-    self->x6E8->field_c = AllocateFrontMemory(0xC00);
+    self->curveTable->field_c = AllocateFrontMemory(0xC00);
 }
 
 void UpdateMaskedCollider(MaskedCollider* self, f32 dt);
@@ -110,40 +110,40 @@ void UpdateC24Object(C24* self, f32 dt)
     u8 msg[0x10];
     s32 key;
     UpdateMaskedCollider(self, dt);
-    if (self->x6E8 != 0) {
+    if (self->curveTable != 0) {
         target = (SwitchedCollider*)GetActiveSwitchedCollider();
         if (IsObjectOfKind(target, 0x16) != 0) {
             target = *(SwitchedCollider**)((u8*)target + 0x620);
         }
-        f32 v = self->f6E4 + dt * self->f6E0;
-        f32 hi = self->f6DC;
+        f32 v = self->level + dt * self->levelRate;
+        f32 hi = self->levelLimit;
         if (v < 0.0f) {
             v = 0.0f;
         } else if (hi < v) {
             v = hi;
         }
-        self->f6E4 = v;
-        GetStateWalkerTargetKey(self->x6C8, &key);
+        self->level = v;
+        GetStateWalkerTargetKey(self->walker, &key);
         if (key == -1) {
-            GetStateWalkerCurrentKey(self->x6C8, &key);
+            GetStateWalkerCurrentKey(self->walker, &key);
         }
         s32 hold = 0;
         if (key == 0x36F && target != 0 &&
             Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(target->v140)))) < D_0026424C) {
             hold = 1;
-        } else if (self->f6E4 >= self->f6DC) {
+        } else if (self->level >= self->levelLimit) {
             hold = 1;
         }
         if (hold) {
-            InitOwnerMessage((OwnerMessage*)msg, ((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 0x505 ? 2 : 0, self);
+            InitOwnerMessage((OwnerMessage*)msg, ((g_saveData->levelIndex << 8) | g_saveData->entryIndex) == 0x505 ? 2 : 0, self);
             target->desc05()->m4C(target, msg);
             SendEmptyMessage((MemberObject*)self->x6EC);
             self->desc->m03(self);
             TriggerScriptEvent(self, 2, 0, 0);
             return;
         }
-        if (self->x6C8 != 0 && self->f6DC - self->f6E4 < D_00264248) {
-            SetStateWalkerTarget(self->x6C8, 0x36F);
+        if (self->walker != 0 && self->levelLimit - self->level < D_00264248) {
+            SetStateWalkerTarget(self->walker, 0x36F);
         }
     }
     ClearRootTries(self);
@@ -176,22 +176,22 @@ struct ScopedListFrame {
 
 void MoveC24Object(C24* self, s32 a1, f32 dt)
 {
-    if (self->x6E8 != 0) {
+    if (self->curveTable != 0) {
         Vec02 pos;
         Vec02 dir;
         Vec02 vel;
         Vec02 t;
         Mat02 basis;
         f32 o0, o1;
-        ((WeightCurveFn)(*(void***)self->x6E8)[0])(self->x6E8, self, 0, &o0, &o1, self->f6E4, self->f6E0);
-        PathCurve* curve = ((PathCurveObject*)self->x6C0)->curve;
+        ((WeightCurveFn)(*(void***)self->curveTable)[0])(self->curveTable, self, 0, &o0, &o1, self->level, self->levelRate);
+        PathCurve* curve = ((PathCurveObject*)self->path)->curve;
         CurveSampleDirFn sample = (CurveSampleDirFn)curve->vt->m02;
         if (sample) {
             sample(curve, o0, &pos, &dir);
         }
         u128 w = Vu0::FromFloatAt(o1);
         Vu0::Q(vel) = Vu0::MulX(Vu0::Q(dir), w);
-        void* o = *(void**)((u8*)self->x6C0 + 0x18);
+        void* o = *(void**)((u8*)self->path + 0x18);
         Vu0::Set(t, w);
         TransformStateToAncestorFrame((PlacedObject*)o, 0, &pos, 0, &vel, 0);
         Vu0::Set(t, Vu0::MulXSum(Vu0::Q(self->gravity), Vu0::Scalar(-1.0f),
@@ -199,7 +199,7 @@ void MoveC24Object(C24* self, s32 a1, f32 dt)
         BuildBasisFromXAndZHint(&vel, &t, &basis);
         self->pos = pos;
         self->v150 = vel;
-        ApproachRotationWithRamp(dt, &self->rot, &basis, (RampProfile*)D_00264250, &self->rot, &self->v160);
+        ApproachRotationWithRamp(dt, &self->rot, &basis, (RampProfile*)g_pathSpeedColliderRotationRamp, &self->rot, &self->v160);
     }
     ScopedListFrame frame(&self->children);
     void* head = *(void**)((u8*)self + 0x34);
@@ -243,13 +243,13 @@ void BuildPathSpeedProfile(C24* self, PathCurveObject* path, f32 speed)
     f32 out;
     s32 i;
     PushBackMemoryMark();
-    self->x6C0 = path;
-    self->f6DC = speed;
+    self->path = path;
+    self->levelLimit = speed;
     PathCurve* curve = path->curve;
     f32 total = curve->vt->m08(curve);
     s32 n = curve->count;
-    CurveEntry* entries = (CurveEntry*)self->x6E8->field_c;
-    self->x6E8->field8 = n;
+    CurveEntry* entries = (CurveEntry*)self->curveTable->field_c;
+    self->curveTable->field8 = n;
     f32* lens = (f32*)AllocateBackMemory(n << 2);
     for (i = 0; i < n; i++) {
         if (curve->vt->m02 != 0) {
@@ -286,7 +286,7 @@ void BuildPathSpeedProfile(C24* self, PathCurveObject* path, f32 speed)
         e->k2 = 4;
         e->d = e->c;
     }
-    self->f6E4 = 0.0f;
-    TeleportStateWalker(self->x6C8, 0x36E);
+    self->level = 0.0f;
+    TeleportStateWalker(self->walker, 0x36E);
     PopBackMemoryMark();
 }

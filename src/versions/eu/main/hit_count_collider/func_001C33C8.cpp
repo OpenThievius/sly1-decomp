@@ -3,22 +3,22 @@
 void StartHitCountCollider(HitCountCollider* self)
 {
     StartPlacedObject(self);
-    self->f68C = self->radius3CC;
-    ResolveObjectLinks(self, 0xC, (ObjectLink*)D_002749B0);
-    self->f668 = CreateStateWalker((StateGraph*)self->f664, self, -1, 0);
-    self->f644 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    PlacedObject* v = (PlacedObject*)self->f660;
-    self->f648 = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
+    self->baseRadius = self->radius3CC;
+    ResolveObjectLinks(self, 0xC, (ObjectLink*)g_hitCountColliderLinks);
+    self->walker = CreateStateWalker((StateGraph*)self->walkerGraph, self, -1, 0);
+    self->heading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
+    PlacedObject* v = (PlacedObject*)self->aimObject;
+    self->aimHeading = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
     *(UnalignedFloatPair*)&self->f630 = *(UnalignedFloatPair*)((u8*)self->f62C + 0x2DC);
-    u8* g1 = (u8*)&D_0026DD48;
+    u8* g1 = (u8*)&g_hitCountCaptionA;
     ((UnalignedPointer*)(g1 + 0x574))->p = (u8*)self + 0x690;
-    u8* g2 = (u8*)&D_0026DFC8;
+    u8* g2 = (u8*)&g_hitCountCaptionB;
     ((UnalignedPointer*)(g2 + 0x574))->p = (u8*)self + 0x694;
     *(void**)(g1 + 0x578) = D_00274A40;
     *(f32*)(g2 + 0x57C) = 4.0f;
     SetWorldActiveFollower(self->world, self);
-    s32 c = self->f71C;
-    self->f720[c] = self;
-    self->f71C = c + 1;
+    s32 c = self->itemCount;
+    self->items[c] = self;
+    self->itemCount = c + 1;
     SetHitCountColliderState(self, 1);
 }

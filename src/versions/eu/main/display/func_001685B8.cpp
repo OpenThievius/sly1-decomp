@@ -3,27 +3,27 @@
 
 void ResetDisplayBuffers(void)
 {
-    D_002BE470 = 1;
+    g_displayFlipBusy = 1;
     SendDisplayResetPacket();
     SignalDisplaySync();
-    D_002BE470 = 0;
+    g_displayFlipBusy = 0;
     ResetGs(0, 1, 3, 1);
     u32 flag = (*(u32*)0x12001000 >> 13) & 1;
     s32 cnt = g_displayFrameCounter;
     D_002626CC = 0;
-    D_00262484 = 0;
-    D_002626C8 = flag;
-    D_002626C4 = (flag == 0);
+    g_displayFieldCountdown = 0;
+    g_displayFieldParity = flag;
+    g_drawFieldParity = (flag == 0);
     u8* ptr;
     if (cnt & 1) {
-        ptr = D_002624F0;
+        ptr = g_fieldOffsetPacket0;
     } else {
-        ptr = D_002625E0;
+        ptr = g_fieldOffsetPacket1;
     }
-    s16 half = *(s16*)&D_002626C4;
+    s16 half = *(s16*)&g_drawFieldParity;
     SetFieldDrawOffset((GsOffset*)ptr, 0x800, 0x800, half);
     SyncDataCache(0);
     g_displayFrameCounter = g_displayFrameCounter + 1;
-    SwapDoubleBuffer(D_00262490, g_displayFrameCounter);
+    SwapDoubleBuffer(g_displayRegisters, g_displayFrameCounter);
 }
 

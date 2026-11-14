@@ -30,11 +30,11 @@ struct ImageRecord {
     u32 f4;                 // 0x4
     u8 f8;                  // 0x8
     u8 f9;                  // 0x9
-    u16 f0A;            // 0x0A
+    u16 bumpSize;       // 0x0A
     u32 bytes;          // 0x0C: its size (func_001B2CA8)
-    s32 f10;            // 0x10: an offset, made absolute by func_001B2CA8
-    s32 f14;            // 0x14: the size in 16-byte blocks (func_001B2CA8)
-    u64 f18;            // 0x18
+    s32 data;           // 0x10: an offset, made absolute by func_001B2CA8
+    s32 blockCount;     // 0x14: the size in 16-byte blocks (func_001B2CA8)
+    u64 texWord;        // 0x18
 };
 typedef char check_ImageRecord[sizeof(ImageRecord) == 0x20 ? 1 : -1];   // 32-byte records (D_00274504, func_0015D8A8)
 
@@ -42,10 +42,10 @@ typedef char check_ImageRecord[sizeof(ImageRecord) == 0x20 ? 1 : -1];   // 32-by
 struct PaletteRecord {
     u32 f0;                 // 0x0
     u16 f4;                 // 0x4
-    u16 f6;             // 0x06
-    s32 f8;             // 0x08
-    s32 fC;             // 0x0C
-    u64 f10;            // 0x10
+    u16 bumpSize;       // 0x06
+    s32 data;           // 0x08
+    s32 blockCount;     // 0x0C
+    u64 texWordBits;    // 0x10
 };
 typedef char check_PaletteRecord[sizeof(PaletteRecord) == 0x18 ? 1 : -1];   // 24-byte records (D_0027450C, func_0015D8A8)
 
@@ -86,13 +86,13 @@ struct Font {
     s32 height;             // 0x08: line height in texels
     s32 depth;              // 0x0C: how many scales the stack holds
     FontScale stack[4];      // 0x10: the pushed (x, y) scales
-    s32 f30;                // 0x30
+    s32 useTestWord;        // 0x30
     u8 pad34[4];            // 0x34
     union {
-        s64 f38;            // 0x38: a register word used when f30 is set (func_0015CB88)
-        u64 f38u;
+        s64 testWord;       // 0x38: a register word used when f30 is set (func_0015CB88)
+        u64 testWordU;
     };
-    s32 f40;                // 0x40: the texture word passed to func_001618C0
+    s32 drawZ;              // 0x40: the texture word passed to func_001618C0
     f32 sx;                 // 0x44: horizontal scale
     f32 sy;                 // 0x48: vertical scale
     const FontVt* vt;     // 0x4C
@@ -101,13 +101,13 @@ struct Font {
     PaletteRecord* imgB;       // 0x58
     u8 pad5C[4];            // 0x5C
     union {
-        s64 f60;            // 0x60: the 64-bit register word (bits 30..33 give the texture size)
-        u64 f60u;
+        s64 texWord;        // 0x60: the 64-bit register word (bits 30..33 give the texture size)
+        u64 texWordU;
     };
-    s32 f68;                // 0x68
-    s32 f6C;                // 0x6C
-    s32 f70;                // 0x70
-    s32 f74;                // 0x74
+    s32 imageTagCount;      // 0x68
+    s32 imageTagData;       // 0x6C
+    s32 paletteTagCount;    // 0x70
+    s32 paletteTagData;     // 0x74
     s32 glyphCount;         // 0x78
     FontGlyph* glyphs;    // 0x7C
     u32 mask;               // 0x80: bit in D_002622D8->flags marking the state as sent

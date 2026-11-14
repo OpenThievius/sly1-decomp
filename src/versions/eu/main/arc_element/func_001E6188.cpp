@@ -8,13 +8,13 @@ void CreateArcSprite(Obj_1E6188_eu* self)
     SetupScreenElementText(self);
     self->p58C = (ConeSprite*)CreateTypedRecord(0x51, g_currentWorld, 0, 0x201, -1);
     SetConeVolumeMode((ConeVolume*)self->p58C, 1);
-    SetConeVolumeColor((ConeVolume*)self->p58C, (Quad16*)D_00275640);
-    SetConeVolumeFirstAngle((ConeVolume*)self->p58C, D_00275650);
-    SetConeVolumeSecondLevel((ConeVolume*)self->p58C, D_00275654);
-    SetConeVolumeSecondAngle((ConeVolume*)self->p58C, D_00275658);
-    SetConeVolumeThirdLevel((ConeVolume*)self->p58C, D_0027565C);
-    SetConeVolumeThirdAngle((ConeVolume*)self->p58C, D_00275660);
-    SetConeVolumeRange((ConeVolume*)self->p58C, (U64P*)D_00275B58);
+    SetConeVolumeColor((ConeVolume*)self->p58C, (Quad16*)g_coneVolumeColor);
+    SetConeVolumeFirstAngle((ConeVolume*)self->p58C, g_coneVolumeFirstAngle);
+    SetConeVolumeSecondLevel((ConeVolume*)self->p58C, g_coneVolumeSecondLevel);
+    SetConeVolumeSecondAngle((ConeVolume*)self->p58C, g_coneVolumeSecondAngle);
+    SetConeVolumeThirdLevel((ConeVolume*)self->p58C, g_coneVolumeThirdLevel);
+    SetConeVolumeThirdAngle((ConeVolume*)self->p58C, g_coneVolumeThirdAngle);
+    SetConeVolumeRange((ConeVolume*)self->p58C, (U64P*)g_arcSpriteRange);
     SetConeVolumeValue((ConeVolume*)self->p58C, 1);
     self->p58C->vtbl[7](self->p58C);
 }

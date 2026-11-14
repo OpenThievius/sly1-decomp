@@ -207,7 +207,7 @@ void DrawPauseMenu(Self_eu_194F80* self)
     }
     PopFontScale(self->f4);
     if (menu->title != -1 && menu->count != 0) {
-        Rgba4 c = D_0026A210.color;
+        Rgba4 c = g_pauseMenuBoxStyle.color;
         c.a = alpha;
         s32 y = (s32)((base * 0.5462963f + 1920.0f) * 16.0f);
         DrawLineSegment((s32)((cx + 1728.0f) * 16.0f), y, 0, (s32)((cx + w + 1728.0f) * 16.0f), y, 0, &c, 0);

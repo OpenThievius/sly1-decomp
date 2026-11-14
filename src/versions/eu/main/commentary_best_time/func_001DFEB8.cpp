@@ -16,13 +16,13 @@ void InitCommentaryPromptElement(Obj_11A338_eu* self)
     Ent_11A338_eu* e;
 
     SetupScreenElementText(self);
-    e = (Ent_11A338_eu*)FindLevelEntry((g_saveData->f19D8 << 8) | g_saveData->f19DC);
+    e = (Ent_11A338_eu*)FindLevelEntry((g_saveData->levelIndex << 8) | g_saveData->entryIndex);
     if (e) {
         if (e->f4 != 0.0f) {
-            g_currentWorld->f230C = e->f4;
+            g_currentWorld->timerDuration = e->f4;
         }
-        if (g_currentWorld->f2314 == 0 || !GetStringLength((const char*)g_currentWorld->f2314)) {
-            g_currentWorld->f2314 = e->w8;
+        if (g_currentWorld->creditsText == 0 || !GetStringLength((const char*)g_currentWorld->creditsText)) {
+            g_currentWorld->creditsText = e->w8;
         }
     }
     if (IsFontLoaded(2)) {
@@ -31,13 +31,13 @@ void InitCommentaryPromptElement(Obj_11A338_eu* self)
     }
     SetScreenElementScale(self, 0.6f);
     *(s32*)((u8*)self + 0x518) = (s32)0xDF7F7F7Fu;
-    if (CheckEntryThreeBitRequirement(g_currentWorld, (g_saveData->f19D8 << 8) | g_saveData->f19DC)) {
+    if (CheckEntryThreeBitRequirement(g_currentWorld, (g_saveData->levelIndex << 8) | g_saveData->entryIndex)) {
         SetBestTimeState((T217D_1380*)self, 1);
     } else {
         SetBestTimeState((T217D_1380*)self, 0);
     }
     if (g_currentEntry->bits & 8) {
-        if (((CommentaryRecord*)g_currentWorld->f2310)->differs()) {
+        if (((CommentaryRecord*)g_currentWorld->commentaryRecord)->differs()) {
             self->vt->f20(self, GetTextTableEntry(0xAA));
             SetScreenElementHoldTime(self, 5.0f);
             self->vt->f38(self);

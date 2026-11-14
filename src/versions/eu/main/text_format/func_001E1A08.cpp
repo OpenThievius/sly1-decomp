@@ -33,7 +33,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
         FormatIntegerArg(sp, c, v);
         return;
     case 'e': case 'f': case 'g':
-        if (sp->f24 != 0) {
+        if (sp->vectorCount != 0) {
             const char* s4 = "\n";
             u8* a = *va;
             const char* s8 = ",\n";
@@ -42,17 +42,17 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
             const char* s5 = ", ";
             const char* s6 = " }";
             f32* fp = *(f32**)a;
-            if (sp->f28 >= 2) {
+            if (sp->matrixRows >= 2) {
                 AppendToOutputBuffer(c, (void*)s4, GetStringLength(s4));
             }
-            for (s32 i = 0; i < sp->f28; ) {
+            for (s32 i = 0; i < sp->matrixRows; ) {
                 s32 next;
                 if (i != 0) {
                     AppendToOutputBuffer(c, (void*)s8, GetStringLength(s8));
                 }
                 next = i + 1;
                 AppendToOutputBuffer(c, (void*)s7, GetStringLength(s7));
-                for (s32 j = 0; j < sp->f24; j++) {
+                for (s32 j = 0; j < sp->vectorCount; j++) {
                     if (j != 0) {
                         AppendToOutputBuffer(c, (void*)s5, GetStringLength(s5));
                     }
@@ -61,7 +61,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
                 AppendToOutputBuffer(c, (void*)s6, GetStringLength(s6));
                 i = next;
             }
-            if (sp->f28 >= 2) {
+            if (sp->matrixRows >= 2) {
                 AppendToOutputBuffer(c, (void*)s4, GetStringLength(s4));
             }
         } else {

@@ -49,7 +49,7 @@ struct World5Boss : Collider {
     };
     void* loopHandle;       // 0x600: the handle PlayWorld5BossLoop starts
     u8 loopPlayer[4];       // 0x604: its player (ReplaceAnimationPlayer)
-    s32 f608;               // 0x608: compared with a message's id by HandleWorld5BossEvent
+    s32 eventId;            // 0x608: compared with a message's id by HandleWorld5BossEvent
     void* target;           // 0x60C: the object SetWorld5BossTarget finds
     u8 targetPlayer[0x620 - 0x610]; // 0x610: its player (PlayWorld5BossTarget)
 };

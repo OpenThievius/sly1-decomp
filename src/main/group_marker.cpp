@@ -27,7 +27,7 @@ f32 g_projectionOffset[4] = { 8.623489e+09f, 8.623489e+09f, 1.2884902e+10f, 0.0f
 
 // The next free entry of D_005E4700, a GIF tag and the group markers: no initialiser.
 u8 g_nextDeferredRequest[16];
-s32 D_0026AC20[4];
+s32 g_projectionExtraConstants[4];
 GroupMarker g_groupMarkers[18];
 
 void* InitGifPacket(PacketWriter* self);
@@ -42,19 +42,19 @@ void PrepareUnzoomedGroup(void);
 struct ColorFade;
 typedef void (*DrawHook)(ColorFade* self, void* arg, s32 z);
 void UpdateColorFade(ColorFade* n);
-extern u8 D_0060478C[];
+extern u8 g_projectionConstantsUploaded[];
 void BeginDmaTag(PacketWriter* self);
 void CloseDmaTag(PacketWriter* self);
 void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
 void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
-extern s32 D_00604780;
-extern s32 D_00604784;
-extern u8 D_002BDC20[];
-extern u8 D_002BDEE0[];
+extern s32 g_groupConstantsUploaded;
+extern s32 g_groupConstantsCurrent;
+extern u8 g_screenClearPacketA[];
+extern u8 g_screenClearPacketB[];
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
 void WriteVifFlush(PacketWriter* b);
-extern u8 D_00212160[];
-extern u8 D_00215C50[];
+extern u8 g_groupMicroprogram[];
+extern u8 g_groupMicroprogramEnd[];
 void UploadProjectionConstants(void);
 void UploadCameraOncePerFrame(void);
 void AddDmaRefTagIfChanged(void* self, void* a, void* b);
@@ -207,14 +207,14 @@ void RunWorldFrameLists(World* self, void* arg)
 
 void UploadProjectionConstants(void)
 {
-    if (*(s32*)D_0060478C == 0) {
-        *(s32*)D_0060478C = 1;
+    if (*(s32*)g_projectionConstantsUploaded == 0) {
+        *(s32*)g_projectionConstantsUploaded = 1;
         void* obj = &g_vifPacketWriter;
         BeginDmaTag((PacketWriter*)obj);
         WriteVifBaseOffset((PacketWriter*)obj, 0, 0);
         CopyWordsToWriter((PacketWriter*)obj, 8, 1, (u32*)g_projectionScale, 0);
         CopyWordsToWriter((PacketWriter*)obj, 8, 1, (u32*)g_projectionOffset, 1);
-        CopyWordsToWriter((PacketWriter*)obj, 0xC, 1, (u32*)D_0026AC20, 0xC);
+        CopyWordsToWriter((PacketWriter*)obj, 0xC, 1, (u32*)g_projectionExtraConstants, 0xC);
         CopyWordsToWriter((PacketWriter*)obj, 4, 1, (u32*)&g_currentWorld->f1D68, 3);
         CloseDmaTag((PacketWriter*)obj);
     }
@@ -230,26 +230,26 @@ void UploadCameraOncePerFrame(void)
 
 void UploadGroupConstants(void)
 {
-    if (D_00604780 == 0) {
+    if (g_groupConstantsUploaded == 0) {
         void* self = &g_vifPacketWriter;
         BeginDmaTag((PacketWriter*)self);
-        WriteVifDirect((PacketWriter*)self, 0x2C, D_002BDC20, 0);
+        WriteVifDirect((PacketWriter*)self, 0x2C, g_screenClearPacketA, 0);
         CloseDmaTag((PacketWriter*)self);
-        D_00604780 = 1;
-        D_00604784 = 1;
-    } else if (D_00604784 == 0) {
+        g_groupConstantsUploaded = 1;
+        g_groupConstantsCurrent = 1;
+    } else if (g_groupConstantsCurrent == 0) {
         void* self = &g_vifPacketWriter;
         BeginDmaTag((PacketWriter*)self);
         WriteVifFlush((PacketWriter*)self);
-        WriteVifDirect((PacketWriter*)self, 0x2C, D_002BDEE0, 0);
+        WriteVifDirect((PacketWriter*)self, 0x2C, g_screenClearPacketB, 0);
         CloseDmaTag((PacketWriter*)self);
-        D_00604784 = 1;
+        g_groupConstantsCurrent = 1;
     }
 }
 
 void PrepareBasicGroup(void)
 {
-    AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00212160, D_00215C50);
+    AddDmaRefTagIfChanged(&g_vifPacketWriter, g_groupMicroprogram, g_groupMicroprogramEnd);
 }
 
 void PrepareFlushedGroup(void)
@@ -257,9 +257,9 @@ void PrepareFlushedGroup(void)
     UploadProjectionConstants();
     UploadCameraOncePerFrame();
     void* self = &g_vifPacketWriter;
-    AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
-    D_00604780 = 1;
-    g_buildFrame->f1C = 1;
+    AddDmaRefTagIfChanged(self, g_groupMicroprogram, g_groupMicroprogramEnd);
+    g_groupConstantsUploaded = 1;
+    g_buildFrame->hasMaskedImages = 1;
     BeginDmaTag((PacketWriter*)self);
     WriteVifFlushA((PacketWriter*)self);
     CloseDmaTag((PacketWriter*)self);
@@ -269,7 +269,7 @@ void PrepareGroupWithoutCamera(void)
 {
     UploadProjectionConstants();
     UploadGroupConstants();
-    AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00212160, D_00215C50);
+    AddDmaRefTagIfChanged(&g_vifPacketWriter, g_groupMicroprogram, g_groupMicroprogramEnd);
     g_cameraUploadedThisFrame = 0;
 }
 
@@ -278,7 +278,7 @@ void PrepareStandardGroup(void)
     UploadProjectionConstants();
     UploadCameraOncePerFrame();
     UploadGroupConstants();
-    AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00212160, D_00215C50);
+    AddDmaRefTagIfChanged(&g_vifPacketWriter, g_groupMicroprogram, g_groupMicroprogramEnd);
 }
 
 void PrepareAlternateBlockGroup(void)
@@ -292,7 +292,7 @@ void PrepareAlternateBlockGroup(void)
 void PrepareUnzoomedGroup(void)
 {
     PacketWriter* self = &g_vifPacketWriter;
-    AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
+    AddDmaRefTagIfChanged(self, g_groupMicroprogram, g_groupMicroprogramEnd);
     UploadProjectionConstants();
     UploadCameraOncePerFrame();
 
@@ -306,12 +306,12 @@ void PrepareUnzoomedGroup(void)
 
     {
         Camera* o = g_camera;
-        f32 keep20 = o->f1C4;
-        f32 keep21 = o->f1C8;
+        f32 keep20 = o->zoom;
+        f32 keep21 = o->zoomGoal;
         SnapCameraZoom(o, 1.0f);
         WriteCameraMatricesPacket(g_camera);
         SnapCameraZoom(g_camera, keep20);
-        g_camera->f1C8 = keep21;
+        g_camera->zoomGoal = keep21;
     }
 }
 
@@ -325,20 +325,20 @@ void SubmitDeferredRequests(World* world, void* camera)
     DeferredRequest* list[0x412];
     UploadLightVolumes(world);
     s32 n = *(DeferredRequest**)g_nextDeferredRequest - g_deferredRequests;
-    D_00604780 = 0;
-    D_00604784 = 0;
+    g_groupConstantsUploaded = 0;
+    g_groupConstantsCurrent = 0;
     g_cameraUploadedThisFrame = 0;
-    *(u32*)D_0060478C = 0;
+    *(u32*)g_projectionConstantsUploaded = 0;
     D_00262474 = 0x214;
     s32 count = BucketDeferredRequests(n, g_deferredRequests, (void**)list);
-    g_vifPacketWriter.f20 = 1;
+    g_vifPacketWriter.registerCount = 1;
     CloseDmaTag(&g_vifPacketWriter);
     for (s32 i = 0; i < count; i++) {
         ((void (*)(DeferredRequest*))list[i]->callback)(list[i]);
     }
     BeginDmaTag(&g_vifPacketWriter);
     if (count == 0) {
-        WriteVifDirect(&g_vifPacketWriter, 0x2C, D_002BDC20, 0);
+        WriteVifDirect(&g_vifPacketWriter, 0x2C, g_screenClearPacketA, 0);
     }
     *(DeferredRequest**)g_nextDeferredRequest = 0;
 }
@@ -363,7 +363,7 @@ void InitGroupMarkers(void)
     s32 i;
 
     InitGifPacket(&buf);
-    UsePacketBufferMemory(&buf, 1, D_0026AC20);
+    UsePacketBufferMemory(&buf, 1, g_projectionExtraConstants);
     ReserveGifPackedData(&buf, 0x7D, 0, 3, 0x412, 0);
     rows = g_groupMarkers;
 

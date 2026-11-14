@@ -42,7 +42,7 @@ void SteerWalkerAimAtNearestTarget(T217D_BF0* element, PadStick* pad)
     }
     self->rateX = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateX, pad->x, g_gameClock[2]);
     f32 y = pad->y;
-    if (g_saveData->f19EC & 0x400) {
+    if (g_saveData->optionFlags & 0x400) {
         y = -y;
     }
     self->rateY = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateY, y, g_gameClock[2]);

@@ -35,8 +35,8 @@ void InitPlayerLinkedCollider(PlayerLinkedCollider* self)
 {
     InitSwitchedCollider(self);
     self->f644 = 1;
-    self->f63C = AllocateFrontMemory(0x40);
-    self->f640 = AllocateFrontMemory(0x40);
+    self->linkedObjects = AllocateFrontMemory(0x40);
+    self->linkedIds = AllocateFrontMemory(0x40);
     self->f658 = -1.5f;
     self->f65C = 1.5f;
     self->f650 = -0.7f;
@@ -45,10 +45,10 @@ void InitPlayerLinkedCollider(PlayerLinkedCollider* self)
 
 void AddPlayerLinkedColliderId(PlayerLinkedCollider* self, void* value)
 {
-    s32 n = self->f638;
+    s32 n = self->linkedCount;
     if (n < 0x11) {
-        ((void**)self->f640)[n] = value;
-        self->f638 = n + 1;
+        ((void**)self->linkedIds)[n] = value;
+        self->linkedCount = n + 1;
     }
 }
 
@@ -63,7 +63,7 @@ struct OwnedAgent {
     PlayerLinkedCollider* owner;
 };
 
-extern s32 D_00275B28[10];
+extern s32 g_playerLinkedColliderLinks[10];
 
 void StartPlacedObject(PlacedObject* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
@@ -78,12 +78,12 @@ void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
     void* r;
 
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 3, (ObjectLink*)D_00275B28);
-    self->f614 = (StateWalker*)CreateStateWalker((StateGraph*)self->f610, self, -1, 1);
+    ResolveObjectLinks(self, 3, (ObjectLink*)g_playerLinkedColliderLinks);
+    self->stateWalker = (StateWalker*)CreateStateWalker((StateGraph*)self->stateGraph, self, -1, 1);
     r = FindFirstObjectByIdMode4((World*)g_currentWorld, 7, self);
     if (r != 0) {
-        self->f620 = r;
-        self->f624 = r;
+        self->target = r;
+        self->agent = r;
         ((OwnedAgent*)r)->owner = self;
         self->f598 = r;
         self->f584 = (void*)FindFirstObjectById(self->world, 1, 0x160, r);
@@ -95,18 +95,18 @@ void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
         self->f594 = 300.0f;
         ((ListenerObject*)r)->vtbl[27](r, self);
     } else {
-        self->f620 = (void*)g_player;
+        self->target = (void*)g_player;
     }
 
     n = 0;
-    while (n < self->f638) {
-        r2 = FindFirstObjectByIdMode4(self->world, ((s32*)self->f640)[n], self);
+    while (n < self->linkedCount) {
+        r2 = FindFirstObjectByIdMode4(self->world, ((s32*)self->linkedIds)[n], self);
         if (r2 != 0) {
-            ((void**)self->f63C)[n] = r2;
+            ((void**)self->linkedObjects)[n] = r2;
             n++;
         }
     }
-    self->f638 = n;
+    self->linkedCount = n;
     VectorToAngles((Vec3*)((u8*)self + 0x110), (f32*)((u8*)self + 0x648), (f32*)((u8*)self + 0x64C));
 }
 
@@ -121,16 +121,16 @@ void UpdatePlayerLinkedCollider(PlayerLinkedCollider* self, f32 dt)
     s32 i;
 
     UpdateSwitchedCollider(self, dt);
-    if (((SwitchedCollider*)self->f620) != 0) {
-        if (((SwitchedCollider*)self->f620)->desc05()->m4D(((SwitchedCollider*)self->f620))) {
+    if (((SwitchedCollider*)self->target) != 0) {
+        if (((SwitchedCollider*)self->target)->desc05()->m4D(((SwitchedCollider*)self->target))) {
             n = GatherObjectsById(self->world, 5, 8, 0, 8, arr);
             if (n > 0) {
                 count = n;
                 i = 0;
                 do {
                     void* item = arr[i];
-                    if (item != self->f620) {
-                        if (((Agent*)item)->f724 != 0xB) {
+                    if (item != self->target) {
+                        if (((Agent*)item)->state != 0xB) {
                             ChangeAgentState((Agent*)item, 0xA, 0);
                         }
                     }
@@ -201,21 +201,21 @@ void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
         g_camera->ctl460.f20 = 100.0f;
         PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
         SetTextPanelState(&g_typedTextCaptionBox, 5);
-        g_camera->ctl460.f5C = (void*)self->f61C;
+        g_camera->ctl460.anchorObject = (void*)self->f61C;
         if (self->f630 != 0) {
-            *(Quad16*)g_camera->f80 = *(Quad16*)&self->m110.r[0];
+            *(Quad16*)g_camera->rotation = *(Quad16*)&self->m110.r[0];
             *(Quad16*)g_camera->f90 = *(Quad16*)&self->m110.r[1];
             *(Quad16*)g_camera->fA0 = *(Quad16*)&self->m110.r[2];
         }
         PushCameraController(g_camera, 6, &g_camera->ctl460, self, 0);
         PushStackValue(&g_camera->ctl460, self->f644);
-        SetStateWalkerTarget(self->f614, 0x359);
+        SetStateWalkerTarget(self->stateWalker, 0x359);
     } else {
         g_camera->ctl460.f20 = 10.0f;
         PopStackElement((ElementStack*)g_elementStack);
         RemoveCameraControllers(g_camera, 0xF, 6, &g_camera->ctl460, self, 0);
         PopStackValue(&g_camera->ctl460);
-        SetStateWalkerTarget(self->f614, 0x358);
+        SetStateWalkerTarget(self->stateWalker, 0x358);
     }
 }
 
@@ -232,11 +232,11 @@ s32 IsPlayerLinkedColliderCandidate(PlayerLinkedCollider* self, Collider* node)
     if ((void*)node->root == (void*)self) {
         return 0;
     }
-    if (IsObjectInPool(self->f618, node) != 0) {
+    if (IsObjectInPool(self->pool, node) != 0) {
         return 0;
     }
     a = node->root03();
-    b = (Collider*)self->f618->f48;
+    b = (Collider*)self->pool->chosenItem;
     if (a->desc03()->m38(a, b) != 0 || b->desc03()->m38(b, a) != 0) {
         return 0;
     }
@@ -264,8 +264,8 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
 {
-    if (HasObjectPoolChoice(self->f618) != 0) {
-        ObjectPool* pool = self->f618;
+    if (HasObjectPoolChoice(self->pool) != 0) {
+        ObjectPool* pool = self->pool;
         u8* place = (u8*)pool + 0x60;
         u8* e0 = (u8*)pool + 0xE0;
         u8* ang = (u8*)pool + 0x150;
@@ -300,12 +300,12 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
                 u8* c = found;
                 while (c != 0) {
                     s32 i;
-                    for (i = 0; i < self->f638; i++) {
-                        if (((u8**)self->f63C)[i] == c) {
+                    for (i = 0; i < self->linkedCount; i++) {
+                        if (((u8**)self->linkedObjects)[i] == c) {
                             break;
                         }
                     }
-                    if (i < self->f638) {
+                    if (i < self->linkedCount) {
                         break;
                     }
                     c = *(u8**)(c + 0x18);
@@ -342,11 +342,11 @@ void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self)
 {
     s32 a;
     s32 b;
-    GetStateWalkerCurrentKey(self->f614, &a);
-    GetStateWalkerTargetKey(self->f614, &b);
+    GetStateWalkerCurrentKey(self->stateWalker, &a);
+    GetStateWalkerTargetKey(self->stateWalker, &b);
     if (a == 0x359 && b == a) {
-        if (HasObjectPoolChoice(self->f618) != 0) {
-            SetStateWalkerTarget(self->f614, 0x35A);
+        if (HasObjectPoolChoice(self->pool) != 0) {
+            SetStateWalkerTarget(self->stateWalker, 0x35A);
         }
     }
 }
@@ -359,13 +359,13 @@ void HandlePlayerLinkedColliderNotification(PlayerLinkedCollider* self, s32 kind
 {
     HandleSwitchedColliderNotification(self, kind, rec);
     if (kind == 0x13) {
-        StateWalker* dev = self->f614;
+        StateWalker* dev = self->stateWalker;
         s32 id = rec->sourceId;
         if (id == (s32)dev->player) {
             if (rec->code == 0x35B) {
-                LaunchChosenPoolObject(self->f618, 1);
+                LaunchChosenPoolObject(self->pool, 1);
             }
-        } else if (((Agent*)self->f624) != 0 && id == (s32)((Agent*)self->f624)->f7E0) {
+        } else if (((Agent*)self->agent) != 0 && id == (s32)((Agent*)self->agent)->statePlayer) {
             s32 k = rec->code;
             if (k != 0x15E) {
                 if (k == 0x15F) {
@@ -386,8 +386,8 @@ s32 TestPlayerLinkedColliderMayContact(PlayerLinkedCollider* self, void* arg)
     if (TestCollidersMayContact(self, (Collider*)arg)) {
         return 1;
     }
-    if (self->f618 != 0) {
-        s32 r = IsObjectInPool(self->f618, (BaseObject*)arg);
+    if (self->pool != 0) {
+        s32 r = IsObjectInPool(self->pool, (BaseObject*)arg);
         if (r != 0) {
             return 1;
         }
@@ -401,9 +401,9 @@ void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject*
 
 void StartPlayerLinkedColliderEffect(PlayerLinkedCollider* self, s32 mode, PlacedObject* other)
 {
-    if (self->f624 != 0) {
-        PeerEffectFn fn = *(PeerEffectFn*)(*(u8**)self->f624 + 0x148);
-        fn(self->f624, mode, other);
+    if (self->agent != 0) {
+        PeerEffectFn fn = *(PeerEffectFn*)(*(u8**)self->agent + 0x148);
+        fn(self->agent, mode, other);
     } else {
         StartSwitchedColliderEffect(self, mode, other);
     }
@@ -417,7 +417,7 @@ void GetPlayerLinkedColliderInteractFlags(PlayerLinkedCollider* a0, void* a1, Ze
     out->hi = 0;
 }
 
-void* GetPlayerLinkedColliderTarget(PlayerLinkedCollider* self) { return self->f620 ? self->f620 : self; }
+void* GetPlayerLinkedColliderTarget(PlayerLinkedCollider* self) { return self->target ? self->target : self; }
 
 // A view of the vertices that starts one vertex before the first (0x254): through it, the fields
 // of the vertex i are at 0x2C more (x at 0x2C, y at 0x34, the colours at 0x3C and 0x40, the
@@ -425,21 +425,21 @@ void* GetPlayerLinkedColliderTarget(PlayerLinkedCollider* self) { return self->f
 // 0x04 and 0x0C.
 struct ArcPointStep {
     u8 pad0[4];
-    f32 f4;
+    f32 previousNextX;
     u8 pad1[4];
-    f32 fC;
+    f32 previousNextY;
     u8 pad2[0x2C - 0x10];
-    f32 f2C;
+    f32 x;
     u8 pad3[4];
-    f32 f34;
+    f32 y;
     u8 pad4[4];
-    u32 f3C;
-    u32 f40;
-    f32 f44;
-    f32 f48;
-    f32 f4C;
-    f32 f50;
-    f32 f54;
+    u32 colorA;
+    u32 colorB;
+    f32 level;
+    f32 target;
+    f32 rateA;
+    f32 rateB;
+    f32 rateC;
 };
 
 void InitScreenElement(ScreenElement* self, s32 kind);
@@ -469,22 +469,22 @@ void InitArcPoints(T217D_3F0* self, s32 kind)
     for (p = (ArcPointStep*)(self->pts - 1); i < 0x39; i++) {
         f32 t = (f32)i * step;
         f32 y = t + t - 1.0f;
-        p->f34 = y;
-        p->f2C = sign * Fpu::Sqrt(1.0f - y * y);
-        p->f3C = p->f40 = (i & 1) ? dim : 0x30808080;
-        p->f44 = p->f48 = 0.0f;
+        p->y = y;
+        p->x = sign * Fpu::Sqrt(1.0f - y * y);
+        p->colorA = p->colorB = (i & 1) ? dim : 0x30808080;
+        p->level = p->target = 0.0f;
         if (self->index == special) {
-            p->f4C = RandomFloatInRange(0.6f, 0.8f);
-            p->f50 = RandomFloatInRange(0.4f, 0.6f);
-            p->f54 = RandomFloatInRange(0.05f, 0.2f);
+            p->rateA = RandomFloatInRange(0.6f, 0.8f);
+            p->rateB = RandomFloatInRange(0.4f, 0.6f);
+            p->rateC = RandomFloatInRange(0.05f, 0.2f);
         } else {
-            p->f4C = RandomFloatInRange(0.3f, 0.4f);
-            p->f50 = RandomFloatInRange(0.2f, 0.3f);
-            p->f54 = RandomFloatInRange(0.1f, 0.4f);
+            p->rateA = RandomFloatInRange(0.3f, 0.4f);
+            p->rateB = RandomFloatInRange(0.2f, 0.3f);
+            p->rateC = RandomFloatInRange(0.1f, 0.4f);
         }
         if (i != 0) {
-            p->fC = p->f34;
-            p->f4 = p->f2C;
+            p->previousNextY = p->y;
+            p->previousNextX = p->x;
         }
         p = (ArcPointStep*)((u8*)p + 0x2C);
     }
@@ -502,13 +502,13 @@ void InitArcPoints(T217D_3F0* self, s32 kind)
 }
 
 extern u8* g_currentWorld;
-extern u8 D_00275640[];
-extern f32 D_00275B58[2];
-extern f32 D_00275650;
-extern f32 D_00275654;
-extern f32 D_00275658;
-extern f32 D_0027565C;
-extern f32 D_00275660;
+extern u8 g_coneVolumeColor[];
+extern f32 g_arcSpriteRange[2];
+extern f32 g_coneVolumeFirstAngle;
+extern f32 g_coneVolumeSecondLevel;
+extern f32 g_coneVolumeSecondAngle;
+extern f32 g_coneVolumeThirdLevel;
+extern f32 g_coneVolumeThirdAngle;
 
 typedef void (*ConeSpriteFn)(void* self);
 struct ConeSprite { ConeSpriteFn* vtbl; };
@@ -532,13 +532,13 @@ void CreateArcSprite(T217D_3F0* self)
     SetupScreenElementText(self);
     self->sprite = CreateTypedRecord(0x51, g_currentWorld, 0, 0x201, -1);
     SetConeVolumeMode((ConeVolume*)self->sprite, 1);
-    SetConeVolumeColor((ConeVolume*)self->sprite, (Quad16*)D_00275640);
-    SetConeVolumeFirstAngle((ConeVolume*)self->sprite, D_00275650);
-    SetConeVolumeSecondLevel((ConeVolume*)self->sprite, D_00275654);
-    SetConeVolumeSecondAngle((ConeVolume*)self->sprite, D_00275658);
-    SetConeVolumeThirdLevel((ConeVolume*)self->sprite, D_0027565C);
-    SetConeVolumeThirdAngle((ConeVolume*)self->sprite, D_00275660);
-    SetConeVolumeRange((ConeVolume*)self->sprite, (U64P*)D_00275B58);
+    SetConeVolumeColor((ConeVolume*)self->sprite, (Quad16*)g_coneVolumeColor);
+    SetConeVolumeFirstAngle((ConeVolume*)self->sprite, g_coneVolumeFirstAngle);
+    SetConeVolumeSecondLevel((ConeVolume*)self->sprite, g_coneVolumeSecondLevel);
+    SetConeVolumeSecondAngle((ConeVolume*)self->sprite, g_coneVolumeSecondAngle);
+    SetConeVolumeThirdLevel((ConeVolume*)self->sprite, g_coneVolumeThirdLevel);
+    SetConeVolumeThirdAngle((ConeVolume*)self->sprite, g_coneVolumeThirdAngle);
+    SetConeVolumeRange((ConeVolume*)self->sprite, (U64P*)g_arcSpriteRange);
     SetConeVolumeValue((ConeVolume*)self->sprite, 1);
     ((ConeSprite*)self->sprite)->vtbl[7](self->sprite);
 }
@@ -588,7 +588,7 @@ void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
     }
 }
 
-extern u8 D_00275B50[8];
+extern u8 g_arcGreyColor[8];
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
 
@@ -627,7 +627,7 @@ void WriteArcPointVertices(T217D_3F0* self, PacketWriter* buf)
         Rgba4 c;
         {
             Rgba4 a = *(Rgba4*)&p->colorB;
-            Rgba4 b = *(Rgba4*)D_00275B50;
+            Rgba4 b = *(Rgba4*)g_arcGreyColor;
             f32 t = p->level;
             Rgba4 m;
             m.r = ColorLerp::Of(a.r, b.r, t);
@@ -669,8 +669,8 @@ void WriteArcPointVertices(T217D_3F0* self, PacketWriter* buf)
 
 
 extern f32 g_elapsedTime;
-extern Rgba4 D_002610D8;
-extern Rgba4 D_002610E0;
+extern Rgba4 g_arcTickColorFrom;
+extern Rgba4 g_arcTickColorTo;
 
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
@@ -700,8 +700,8 @@ void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf)
     }
     BeginGifTag(buf, 0, 1, 1);
     {
-        Rgba4 a = D_002610D8;
-        Rgba4 b = D_002610E0;
+        Rgba4 a = g_arcTickColorFrom;
+        Rgba4 b = g_arcTickColorTo;
         Rgba4 r;
         r.r = ColorLerp::Of(a.r, b.r, t);
         r.g = ColorLerp::Of(a.g, b.g, t);
@@ -1081,8 +1081,8 @@ void QueueArcDraw(T217D_3F0* self)
         return;
     }
     if (g_typedTextCaptionBox.state != 4) {
-        zoom = g_camera->f1C4;
-        zoomY = g_camera->f1C8;
+        zoom = g_camera->zoom;
+        zoomY = g_camera->zoomGoal;
         SnapCameraZoom(g_camera, ((ArcHeld*)self->current)->zoom);
     }
     {
@@ -1098,11 +1098,11 @@ void QueueArcDraw(T217D_3F0* self)
         switch (g_typedTextCaptionBox.state) {
         case 2:
             if (self->index == 0x1A) {
-                dist = __builtin_fabsf(g_padRecord.f40) * g_padRecord.f40 * 150.0f + dist;
-                height = __builtin_fabsf(g_padRecord.f44) * g_padRecord.f44 * 150.0f + height;
+                dist = __builtin_fabsf(g_padRecord.stickX) * g_padRecord.stickX * 150.0f + dist;
+                height = __builtin_fabsf(g_padRecord.stickY) * g_padRecord.stickY * 150.0f + height;
             } else {
-                dist = __builtin_fabsf(g_padRecord.f74) * g_padRecord.f74 * -150.0f + dist;
-                height = __builtin_fabsf(g_padRecord.f78) * g_padRecord.f78 * 150.0f + height;
+                dist = __builtin_fabsf(g_padRecord.secondStickX) * g_padRecord.secondStickX * -150.0f + dist;
+                height = __builtin_fabsf(g_padRecord.secondStickY) * g_padRecord.secondStickY * 150.0f + height;
             }
         case 3: {
             Camera* cam;
@@ -1110,13 +1110,13 @@ void QueueArcDraw(T217D_3F0* self)
                 dist = -dist;
             }
             cam = g_camera;
-            Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->f40).q, Vu0::MulX(Vu0::Q(cam->fA0), Vu0::Scalar(height)));
+            Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->position).q, Vu0::MulX(Vu0::Q(cam->fA0), Vu0::Scalar(height)));
             Vu0::Q(aim) = Vu0::Add(Vu0::Q(aim), Vu0::MulX(Vu0::Q(cam->f90), Vu0::Scalar(dist)));
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(aim), Vu0::Q(world));
             BuildBasisFromXAndZHint(&dir, (const Vec02*)&cam->fA0, &basis);
             BuildMatrixFromRotationAndTranslation(&world, &basis, (Mat4A*)&place);
             Vec02 pos;
-            Vu0::Q(pos) = Vu0::Add(Vu0::Q(aim), Vu0::Rotate(*(Mat02*)&g_camera->f80, Vu0::Q(((ArcHeld*)self->current)->offset)));
+            Vu0::Q(pos) = Vu0::Add(Vu0::Q(aim), Vu0::Rotate(*(Mat02*)&g_camera->rotation, Vu0::Q(((ArcHeld*)self->current)->offset)));
             ((PlacedObject*)self->sprite)->desc02()->m1D((PlacedObject*)self->sprite, &pos);
             break;
         }
@@ -1156,7 +1156,7 @@ void QueueArcDraw(T217D_3F0* self)
 done:
     if (g_typedTextCaptionBox.state != 4) {
         SnapCameraZoom(g_camera, zoom);
-        g_camera->f1C8 = zoomY;
+        g_camera->zoomGoal = zoomY;
     }
 }
 
@@ -1191,13 +1191,13 @@ void DrawArcOutlinePacket(ArcDrawRequest* request)
         return;
     }
     if (D_00270458 != 4) {
-        if (AreFloatsNearlyEqual(g_camera->f1C4, *(f32*)((u8*)self->current + 0x2D4), 1e-4f) == 0) {
-            f32 zoom = g_camera->f1C4;
-            f32 f1C8 = g_camera->f1C8;
+        if (AreFloatsNearlyEqual(g_camera->zoom, *(f32*)((u8*)self->current + 0x2D4), 1e-4f) == 0) {
+            f32 zoom = g_camera->zoom;
+            f32 f1C8 = g_camera->zoomGoal;
             SnapCameraZoom(g_camera, *(f32*)((u8*)self->current + 0x2D4));
             WriteCameraMatricesPacket(g_camera);
             SnapCameraZoom(g_camera, zoom);
-            g_camera->f1C8 = f1C8;
+            g_camera->zoomGoal = f1C8;
         }
     }
     PushBackMemoryMark();
@@ -1333,8 +1333,8 @@ void ResetArc(T217D_3F0* self)
     self->phase = 3;
 }
 
-extern u8 D_00275B50[8];
-void ConstructGreyColor(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { D_00275B50[0] = 0x80; D_00275B50[1] = 0x80; D_00275B50[2] = 0x80; D_00275B50[3] = 0x80; } }
+extern u8 g_arcGreyColor[8];
+void ConstructGreyColor(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { g_arcGreyColor[0] = 0x80; g_arcGreyColor[1] = 0x80; g_arcGreyColor[2] = 0x80; g_arcGreyColor[3] = 0x80; } }
 
 void ConstructGreyColor(s32 enabled, u32 value);
 
@@ -1343,6 +1343,6 @@ void ConstructGreyColorAtStartup(void)
     ConstructGreyColor(1, 0xFFFF);
 }
 
-s32 D_00275B28[10] = { 0x00000000, 0x00000356, 0x00000618, 0x00000000, 0x00000357, 0x00000610, 0x00000002, 0x0000035C, 0x0000061C, 0x00000000 };
-u8 D_00275B50[8] = { 0 };
-f32 D_00275B58[2] = { 500.0f, 2500.0f };
+s32 g_playerLinkedColliderLinks[10] = { 0x00000000, 0x00000356, 0x00000618, 0x00000000, 0x00000357, 0x00000610, 0x00000002, 0x0000035C, 0x0000061C, 0x00000000 };
+u8 g_arcGreyColor[8] = { 0 };
+f32 g_arcSpriteRange[2] = { 500.0f, 2500.0f };

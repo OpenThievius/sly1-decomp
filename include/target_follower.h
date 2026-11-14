@@ -55,41 +55,41 @@ struct Tune47 {
 
 struct TargetFollower : Collider {
     List47* list550;        // 0x550: loaded (table D_002629D0, id 0x2EE)
-    void* f554;             // 0x554: func_001B6290(list550, self, -1, 1)
-    FollowableObject* f558;              // 0x558: the class 0x2A object it follows (func_0016D3F0)
+    void* stateWalker;      // 0x554: func_001B6290(list550, self, -1, 1)
+    FollowableObject* followedObject;    // 0x558: the class 0x2A object it follows (func_0016D3F0)
     List01 list55C;         // 0x55C: the 0x2A objects, linked at their +0x7B0 (slot 0, func_0016DFE0)
     void* f568;             // 0x568: loaded (id 0x2F7)
-    f32 f56C;               // 0x56C: the object's z less that of f568
-    Sub47* f570;            // 0x570: the kind-0x8C child (slot 16)
-    f32 f574;               // 0x574: a time (func_0016DAC0, mode 1)
-    s32 f578;               // 0x578: -1 at set-up
+    f32 heightOffset;       // 0x56C: the object's z less that of f568
+    Sub47* launchPool;      // 0x570: the kind-0x8C child (slot 16)
+    f32 nextLaunchTime;     // 0x574: a time (func_0016DAC0, mode 1)
+    s32 followedObjectId;   // 0x578: -1 at set-up
     s32 f57C;               // 0x57C: loaded (id 0x2F8)
     s32 f580;               // 0x580: loaded (id 0x2F9)
     s32 f584;               // 0x584: loaded (id 0x2FA)
     s32 f588;               // 0x588: loaded (id 0x2FB)
     s32 f58C;               // 0x58C: loaded (id 0x2FC)
-    void* f590;             // 0x590: the object it looks at (func_0016DAC0, mode 3)
-    void* f594;             // 0x594: func_0011E580(0x73, ...)
-    s32 f598;               // 0x598: -1 at set-up
-    f32 f59C;               // 0x59C: the clock's time when the mode changed (func_0016DAC0)
-    f32 f5A0;               // 0x5A0: read by slot 28 (func_00188850)
-    f32 f5A4;               // 0x5A4: slot 10 reads it from f550's entry
-    f32 f5A8;               // 0x5A8: FLT_MAX in mode 0
-    f32 f5AC;               // 0x5AC
+    void* lookTarget;       // 0x590: the object it looks at (func_0016DAC0, mode 3)
+    void* trailObject;      // 0x594: func_0011E580(0x73, ...)
+    s32 mode;               // 0x598: -1 at set-up
+    f32 modeStartTime;      // 0x59C: the clock's time when the mode changed (func_0016DAC0)
+    f32 heading;            // 0x5A0: read by slot 28 (func_00188850)
+    f32 leadTime;           // 0x5A4: slot 10 reads it from f550's entry
+    f32 phaseOneEndTime;    // 0x5A8: FLT_MAX in mode 0
+    f32 arrivalTime;        // 0x5AC
     union {
         u8 sub5B0[0x28];    // 0x5B0: handed whole to func_001B9D10 by slot 28
         struct {
             Tune47 tune5B0; // 0x5B0
-            SoundLevelEntry* f5BC; // 0x5BC
-            s32 f5C0;       // 0x5C0
+            SoundLevelEntry* soundLevel; // 0x5BC
+            s32 voiceEnabled; // 0x5C0
             f32 f5C4;       // 0x5C4: 3000.0 at set-up
             f32 f5C8;       // 0x5C8: 1000.0 at set-up
-            s32 f5CC;       // 0x5CC
-            void* f5D0;     // 0x5D0
-            s32 f5D4;       // 0x5D4
+            s32 voicePending; // 0x5CC
+            void* lastTune; // 0x5D0
+            s32 trailCountdown; // 0x5D4
         };
     };
-    s32 w5D8;               // 0x5D8: slot 28 does nothing more when it is set
+    s32 stepHalted;         // 0x5D8: slot 28 does nothing more when it is set
     u8 pad5DC[0x5E0 - 0x5DC];
 };
 

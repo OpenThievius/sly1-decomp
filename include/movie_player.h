@@ -25,13 +25,13 @@ public:
 // A ring buffer in the IOP's memory, read through the SIF.
 class IopRingSink : public TransferSink {
 public:
-    s32 f04;
-    s32 f08;
-    s32 f0C;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
+    s32 iopBase;
+    s32 capacity;
+    s32 writePosition;
+    s32 readPosition;
+    s32 freeBytes;
+    s32 usedBytes;
+    s32 totalWritten;
     s32 Put(s32 size, u8* buf);
     s32 Idle();
 };

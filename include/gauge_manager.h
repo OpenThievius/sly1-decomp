@@ -43,15 +43,15 @@ struct Timer68 {
 
 // The table at +0x2E0: an object, two things found from it, a key (func_0014CF30 clears the
 // key of a slot whose object goes away; func_0014CBA8 starts an animation player into it).
-// func_0014CBA8 hands a free slot to the pool's chosen agent (NumberedAgent::fC28), which
-// clears `taken` when it is done with it (func_0014BD38, func_0014BF88 through ContactAgent::fC20).
+// func_0014CBA8 hands a free slot to the pool's chosen agent (NumberedAgent::slot), which
+// clears `taken` when it is done with it (func_0014BD38, func_0014BF88 through ContactAgent::slot).
 struct GaugeSlot {
     union {
         s32 id;             // 0x00: the object's id, until PostLoad finds it
         BaseObject* obj;    // 0x00
     };
-    void* f4;               // 0x04: the object whose position and rotation the agent takes
-    void* f8;               // 0x08
+    void* anchor;           // 0x04: the object whose position and rotation the agent takes
+    void* animation;        // 0x08
     void* key;              // 0x0C
     s32 taken;              // 0x10: an agent holds the slot
 };
@@ -59,31 +59,31 @@ struct GaugeSlot {
 struct GaugeManager : PlacedObject {
     s32 amount;             // 0x2D0
     s32 maxAmount;          // 0x2D4: 50 at setup
-    f32 f2D8;               // 0x2D8: 90.0 at setup
+    f32 timerSeconds;       // 0x2D8: 90.0 at setup
     s32 slotCount;          // 0x2DC: slots in use
     GaugeSlot slots[16];       // 0x2E0
-    void* f420;             // 0x420: a pool of agents (func_0014C858 takes the next one)
-    void* f424;             // 0x424
-    void* f428;             // 0x428
+    void* contactPool;      // 0x420: a pool of agents (func_0014C858 takes the next one)
+    void* slotPool;         // 0x424
+    void* deviceGraph;      // 0x428
     void* device;           // 0x42C: the device object (func_001B6290 makes it)
     union {
         s32 tag430;         // 0x430: what func_001B6598 reads from the device
         u8 buf430[0x1C];
         struct {
             u8 pad430[0xC];
-            f32 f43C;       // 0x43C: func_0014CD70 waits a random time between this
-            f32 f440;       // 0x440  and this
+            f32 waitMin;    // 0x43C: func_0014CD70 waits a random time between this
+            f32 waitMax;    // 0x440  and this
             u8 pad444[0x448 - 0x444];
             f32 speed448;   // 0x448: the animation speed class 0x11 sets (func_0014BD38)
         };
     };
-    s32 f44C;               // 0x44C
-    s32 f450;               // 0x450: 2 at setup
-    s32 f454;               // 0x454
-    s32 f458;               // 0x458: lowered by each contact (func_0014CD70)
-    f32 f45C;               // 0x45C: the largest float at setup (D_00249FB0)
-    f32 f460;               // 0x460
-    s32 f464;               // 0x464: 0 at setup
+    s32 maxSlotAgents;      // 0x44C
+    s32 maxContactAgents;   // 0x450: 2 at setup
+    s32 slotAgents;         // 0x454
+    s32 contactAgents;      // 0x458: lowered by each contact (func_0014CD70)
+    f32 nextContactTime;    // 0x45C: the largest float at setup (D_00249FB0)
+    f32 nextSlotTime;       // 0x460
+    s32 contactsStarted;    // 0x464: 0 at setup
     u8 pad468[0x470 - 0x468];
     union {
         Timer68 timer;      // 0x470
@@ -92,7 +92,7 @@ struct GaugeManager : PlacedObject {
     u8 pad47C[0x480 - 0x47C];
     GaugeParams params0;       // 0x480
     GaugeParams params1;       // 0x530
-    f32 o5E0[44];           // 0x5E0: the blend of the two sets (func_0014C138)
+    f32 blend[44];          // 0x5E0: the blend of the two sets (func_0014C138)
     s32 setIndex;           // 0x690
     u8 pad694[0x6A0 - 0x694];
 };

@@ -14,5 +14,5 @@ u8 GetDecimalDigit(RegDouble* self0, s32 a, s32 b)
         p = MultiplyDoubles(p, (u64)0x4024000000000000ULL);
         idx = ConvertDoubleToS32(SubtractDoubles(self, p));
     }
-    return ((u8*)&D_00275940)[idx];
+    return ((u8*)&g_hexDigits)[idx];
 }

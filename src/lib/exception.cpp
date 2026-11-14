@@ -71,21 +71,27 @@ void* GetActiveExceptionRecord(ExceptionLookupArg* self)
 
 // The 0x30-byte record of a thrown exception (PushThrownException makes it and puts it on the
 // slot's chain, GetActiveExceptionSlot): the function that tests whether a handler takes it
-// (MatchPendingThrowType), the type it carries, the next record, and the count
-// HasUncaughtException tests.
+// (MatchPendingThrowType), the object a handler matched, the type it carries, the function that
+// destroys the thrown object, the state HasUncaughtException tests, the next record, how many
+// handlers hold it, and the copy of the thrown value.
 struct ThrownException {
-    void* f00;              // 0x00: MatchPendingThrowType
+    void* matchFn;          // 0x00: MatchPendingThrowType
     u16 f04;                // 0x04: 4
     u16 f06;                // 0x06: 1
-    void* f08;              // 0x08: the object the handler matched (set by MatchPendingThrowType)
-    const type_info* f0C;   // 0x0C: the thrown type
-    void* f10;              // 0x10: the cleanup
-    s32 f14;                // 0x14: the count HasUncaughtException tests
-    ThrownException* f18;   // 0x18: the next record in the chain
+    void* object;           // 0x08: the object the handler matched (set by MatchPendingThrowType)
+    const type_info* type;  // 0x0C: the thrown type
+    void (*cleanup)(void*, s32); // 0x10: destroys the thrown object
+    s32 state;              // 0x14: 0 while no handler has begun, the count HasUncaughtException tests
+    ThrownException* next;  // 0x18: the next record in the chain
     u8 pad1C[4];
-    u64 f20;                // 0x20
-    void* f28;              // 0x28: the thrown value
+    s64 refs;               // 0x20: the handlers that hold the record
+    void* value;            // 0x28: the thrown value
     u8 pad2C[4];
+};
+
+// What GetActiveExceptionSlot returns: the record of the exception in flight.
+struct ExceptionSlot {
+    ThrownException* active;
 };
 
 typedef char check_ThrownException[sizeof(ThrownException) == 0x30 ? 1 : -1];
@@ -93,8 +99,8 @@ typedef char check_ThrownException[sizeof(ThrownException) == 0x30 ? 1 : -1];
 ThrownException* BeginCatchHandler(void)
 {
     ThrownException* obj = *(ThrownException**)GetActiveExceptionSlot();
-    obj->f14 = 1;
-    obj->f20++;
+    obj->state = 1;
+    obj->refs++;
     return obj;
 }
 
@@ -133,11 +139,11 @@ void* MatchPendingThrowType(ThrownException* self, void* fn, ThrowMatchHeader* a
         return 0;
     }
     if (fn == (void*)-1) {
-        return self->f08;
+        return self->object;
     }
-    void* r = MatchThrownType(((HandlerTypeFn)fn)(), self->f0C, self->f28);
+    void* r = MatchThrownType(((HandlerTypeFn)fn)(), self->type, self->value);
     if (r != 0) {
-        self->f08 = r;
+        self->object = r;
     }
     return r;
 }
@@ -145,38 +151,26 @@ void* MatchPendingThrowType(ThrownException* self, void* fn, ThrowMatchHeader* a
 void PushThrownException(void* a0, const type_info* a1, void* a2)
 {
     ThrownException* obj = (ThrownException*)AllocateRuntimeBlockOrTerminate(0x30);
-    obj->f0C = a1;
-    obj->f10 = a2;
-    obj->f08 = a0;
-    obj->f28 = a0;
-    obj->f20 = 0;
-    obj->f14 = 0;
-    obj->f00 = (void*)MatchPendingThrowType;
+    obj->type = a1;
+    obj->cleanup = (void (*)(void*, s32))a2;
+    obj->object = a0;
+    obj->value = a0;
+    obj->refs = 0;
+    obj->state = 0;
+    obj->matchFn = (void*)MatchPendingThrowType;
     obj->f04 = 4;
     obj->f06 = 1;
     ThrownException** p = (ThrownException**)GetActiveExceptionSlot();
-    obj->f18 = *p;
+    obj->next = *p;
     *p = obj;
 }
-
-struct Handle_1FEB18 {
-    u8 pad_00[0x8];
-    void* object;
-    void* data;
-    void (*callback)(void*, s32);
-    s32 state;
-    Handle_1FEB18* next;
-    u8 pad_1C[4];
-    s64 refs;
-    void* buf;
-};
 
 void FreeRuntimeBlock(void* block);
 extern "C" bool IsPointerType(const type_info* type);
 
-void PopThrownException(Handle_1FEB18* self)
+void PopThrownException(ThrownException* self)
 {
-    Handle_1FEB18** link = (Handle_1FEB18**)GetActiveExceptionSlot();
+    ThrownException** link = (ThrownException**)GetActiveExceptionSlot();
     if (--self->refs != 0) {
         return;
     }
@@ -192,24 +186,21 @@ void PopThrownException(Handle_1FEB18* self)
         InvokeTerminateHandler();
     }
     *link = self->next;
-    if (self->callback != 0) {
-        self->callback(self->object, 2);
+    if (self->cleanup != 0) {
+        self->cleanup(self->object, 2);
     }
-    if (IsPointerType((const type_info*)self->data) == 0) {
-        FreeRuntimeBlock(self->buf);
+    if (IsPointerType((const type_info*)self->type) == 0) {
+        FreeRuntimeBlock(self->value);
     }
     FreeRuntimeBlock(self);
 }
 
-struct Node_1FEBE0 { u8 pad[0x14]; s32 flag; };
-struct Head_1FEBE0 { Node_1FEBE0* node; };
-
 void AbandonCatchHandler(void)
 {
-    Node_1FEBE0* n = ((Head_1FEBE0*)GetActiveExceptionSlot())->node;
+    ThrownException* n = ((ExceptionSlot*)GetActiveExceptionSlot())->active;
     if (n == 0)
         InvokeTerminateHandler();
-    n->flag = 0;
+    n->state = 0;
 }
 
 void CheckExceptionSpecification(s32 count, void** allowed)
@@ -218,7 +209,7 @@ void CheckExceptionSpecification(s32 count, void** allowed)
     s32 i;
 
     for (i = 0; i < count; i++) {
-        if (MatchThrownType((const type_info*)allowed[i], info->f0C, info->f08)) {
+        if (MatchThrownType((const type_info*)allowed[i], info->type, info->object)) {
             throw;
         }
     }
@@ -228,14 +219,14 @@ void CheckExceptionSpecification(s32 count, void** allowed)
         if (info != (ThrownException*)__exception_info) {
             info = (ThrownException*)__exception_info;
             for (i = 0; i < count; i++) {
-                if (MatchThrownType((const type_info*)allowed[i], info->f0C, info->f08)) {
+                if (MatchThrownType((const type_info*)allowed[i], info->type, info->object)) {
                     throw;
                 }
             }
         }
         const type_info* type = &typeid(bad_exception);
         for (i = 0; i < count; i++) {
-            if (MatchThrownType((const type_info*)allowed[i], type, info->f08)) {
+            if (MatchThrownType((const type_info*)allowed[i], type, info->object)) {
                 throw bad_exception();
             }
         }
@@ -253,14 +244,12 @@ void ThrowTypeidError()
     throw bad_typeid();
 }
 
-struct Slot_1FEEC8 { ThrownException* obj; };
-
 s32 HasUncaughtException(void)
 {
-    ThrownException* obj = ((Slot_1FEEC8*)GetActiveExceptionSlot())->obj;
+    ThrownException* obj = ((ExceptionSlot*)GetActiveExceptionSlot())->active;
     s32 result = 0;
     if (obj != 0) {
-        result = obj->f14 == 0;
+        result = obj->state == 0;
     }
     return result;
 }

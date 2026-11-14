@@ -9,7 +9,7 @@ s32 CompareMemory(const void* a, const void* b, s32 n);
 s32 IsFileServiceVersionUnknown(void)
 {
     const void* version = D_eu_002800DC;
-    const void* reply = &D_00628B68;
+    const void* reply = &g_fileClientResult;
     s32 ok = 0;
     if (CompareMemory(reply, version, 4) != 0) {
         if (CompareMemory(reply, D_002771C8, 4) != 0) {

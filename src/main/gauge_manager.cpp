@@ -199,25 +199,25 @@ struct GaugeCurve {
     static f32 Lerp(f32 s, f32 a, f32 b) { return (1.0f - s) * a + s * b; }
 };
 
-// GaugeManager::o5E0, the blend of the two parameter sets, as func_0014C2F0 reads it: pairs of
+// GaugeManager::blend, the blend of the two parameter sets, as func_0014C2F0 reads it: pairs of
 // limits and the quadratics that pick between them.
 struct BlendedGaugeParams {
-    f32 f00;
-    f32 f04;
+    f32 agentCountFrom;
+    f32 agentCountTo;
     u8 pad08[8];
     Quadratic q10;
     u8 pad1C[4];
-    f32 f20;
-    f32 f24;
-    f32 f28;
-    f32 f2C;
+    f32 delayMinFrom;
+    f32 delayMaxFrom;
+    f32 delayMinTo;
+    f32 delayMaxTo;
     Quadratic q30;
     u8 pad3C[4];
-    f32 f40;
-    f32 f44;
-    f32 f48;
-    f32 f4C;
-    f32 f50;
+    f32 triggerFraction;
+    f32 waitMinFrom;
+    f32 waitMaxFrom;
+    f32 waitMinTo;
+    f32 waitMaxTo;
     u8 pad54[0xC];
     Quadratic q60;
     u8 pad6C[4];
@@ -235,11 +235,11 @@ struct BlendedGaugeParams {
 extern f32 g_gameClock[];
 
 // The file's statics (.bss from 0x27C00C).
-static GaugeManager* D_0027C00C;  // the gauge manager, set by its set-up (func_0014C018)
+static GaugeManager* g_gaugeManager;  // the gauge manager, set by its set-up (func_0014C018)
 
-s32 D_00261C90 = 4;
-f32 D_00261C94 = 900.0f;
-f32 D_00261C98 = 1200.0f;
+s32 g_agentGoalPeriod = 4;
+f32 g_agentNearRadius = 900.0f;
+f32 g_agentFarRadius = 1200.0f;
 ObjectLink g_gaugeManagerLinks[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
 
 void SetSinCosPair(f32 value, SinCosPair* self);
@@ -254,13 +254,13 @@ typedef NumberedAgent* (*TargetOfFn)(NumberedAgent* self);
 void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
 {
     typedef Vu0::Vec Vec;
-    switch (self->f724) {
+    switch (self->state) {
     case 12:
     case 13:
-        if (g_frameCount % D_00261C90 == self->fC2C % D_00261C90) {
+        if (g_frameCount % g_agentGoalPeriod == self->number % g_agentGoalPeriod) {
             f32 step = 0.3926991f;
             f32 best = 3.40282347e+38f;
-            f32 angle = self->f638;
+            f32 angle = self->heading;
             f32 frac;
             Vec02 bestPos;
             Vec02 probe;
@@ -269,10 +269,10 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                 SetSinCosPair(angle, &dir);
                 f32 score = 0.0f;
                 Vu0::Set(probe, Vu0::MulAddX(Vec::Of(self->v140), Vec::Of(*(Vec02*)&dir), Vec::Scalar(3000.0f)).q);
-                if (self->f928 != 0) {
+                if (self->pathGraph != 0) {
                     ColliderSpan hits[8];
                     ScopeMarker scope;
-                    s32 r = CollectSegmentSpansInPlaneTree((PlaneNode*)(*(void**)((u8*)self->f928 + 0x54)), &self->v140, &probe, 8, hits);
+                    s32 r = CollectSegmentSpansInPlaneTree((PlaneNode*)(*(void**)((u8*)self->pathGraph + 0x54)), &self->v140, &probe, 8, hits);
                     switch (r) {
                     case 0:
                         frac = 1.0f;
@@ -324,7 +324,7 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                 }
                 f32 next = angle + step;
                 for (NumberedAgent* o = (NumberedAgent*)self->world->list1CCC.head; o != 0;
-                     o = *(NumberedAgent**)&o->fC10) {
+                     o = *(NumberedAgent**)&o->listLink) {
                     if (o == self) {
                         continue;
                     }
@@ -346,7 +346,7 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                     }
                     score = score + (1.0f - q) * 0.5f;
                 }
-                f32 turn = WrapAngle(angle - self->f638) * 0.31830987f;
+                f32 turn = WrapAngle(angle - self->heading) * 0.31830987f;
                 score = score + (__builtin_fabsf(turn) + __builtin_fabsf(turn));
                 if (score < best) {
                     best = score;
@@ -375,7 +375,7 @@ s32 IsNumberedAgentFree(NumberedAgent* self)
     if (IsPadSelectFlagHeld(self->world) != 0) {
         return 0;
     }
-    switch (self->f724) {
+    switch (self->state) {
     case 4:
     case 0xB:
     case 0x10:
@@ -388,49 +388,49 @@ s32 IsNumberedAgentFree(NumberedAgent* self)
     u128 gap = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(target->v140));
     u128 gap2 = gap;
     f32 dist = Vu0::ToFloat(Vu0::Length(gap));
-    if (self->fC20 != 0) {
-        if (D_00261C98 < dist) {
-            self->fC20 = 0;
+    if (self->targetNear != 0) {
+        if (g_agentFarRadius < dist) {
+            self->targetNear = 0;
         }
-        return self->fC20;
+        return self->targetNear;
     }
-    if (dist < D_00261C94) {
+    if (dist < g_agentNearRadius) {
         u128 facing = Vu0::NormalizeOr(Vu0::Q(target->v150), Vu0::Q(g_unitXVector));
         u128 facing2 = facing;
         u128 toward = Vu0::NormalizeOr(gap2, Vu0::Q(g_unitXVector));
         if (0.3f < Vu0::ToFloat(Vu0::Dot(facing2, toward))) {
-            self->fC20 = 1;
+            self->targetNear = 1;
         }
     }
-    return self->fC20;
+    return self->targetNear;
 }
 
 s32 HandleNumberedAgentObjectEvent(NumberedAgent* self, void* event)
 {
-    if (self->f724 == 0x10) {
+    if (self->state == 0x10) {
         return 1;
     }
-    if (self->f724 == 0xB) {
+    if (self->state == 0xB) {
         return 1;
     }
     if (HandleAgentObjectEvent(self, event) == 0) {
         return 0;
     }
-    self->fC20 = 0;
+    self->targetNear = 0;
     return 1;
 }
 
 void EnterNumberedAgentState(NumberedAgent* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
-    switch (self->f724) {
+    switch (self->state) {
     case 0xB:
-        AddToGaugeAmount(D_0027C00C, self);
-        if (((GaugeSlot*)self->fC28) != 0) { ((GaugeSlot*)self->fC28)->taken = 0; self->fC28 = 0; }
+        AddToGaugeAmount(g_gaugeManager, self);
+        if (((GaugeSlot*)self->slot) != 0) { ((GaugeSlot*)self->slot)->taken = 0; self->slot = 0; }
         break;
     case 0xC:
-        if (((GaugeSlot*)self->fC28) != 0) { ((GaugeSlot*)self->fC28)->taken = 0; self->fC28 = 0; }
-        SetAnimationPlayerSpeed(self->f7E0, D_0027C00C->speed448);
+        if (((GaugeSlot*)self->slot) != 0) { ((GaugeSlot*)self->slot)->taken = 0; self->slot = 0; }
+        SetAnimationPlayerSpeed(self->statePlayer, g_gaugeManager->speed448);
         break;
     }
 }
@@ -457,13 +457,13 @@ s32 ChooseAgentStateByContact(ContactAgent* self)
 s32 IsContactAgentFree(ContactAgent* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0) return 0;
-    if (self->f724 == 0xB || self->f724 == 0x10) return 0;
+    if (self->state == 0xB || self->state == 0x10) return 0;
     return 1;
 }
 
 s32 HandleContactAgentObjectEvent(ContactAgent* self, ListedAgentView** slot)
 {
-    if (self->f724 == 0x10 || self->f724 == 0xB) return 1;
+    if (self->state == 0x10 || self->state == 0xB) return 1;
     if (HandleAgentObjectEvent(self, (AgentHit*)slot) == 0) return 0;
     ListedAgentView* found = (ListedAgentView*)GetActiveSwitchedCollider();
     ListedAgentView* n = *slot;
@@ -478,20 +478,20 @@ s32 HandleContactAgentObjectEvent(ContactAgent* self, ListedAgentView** slot)
 void EnterContactAgentState(ContactAgent* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
-    switch (self->f724) {
+    switch (self->state) {
     case 0xB:
-        CountDownGaugeContacts(D_0027C00C, self);
-        if (((GaugeSlot*)self->fC20) != 0) {
-            ((GaugeSlot*)self->fC20)->taken = 0;
-            self->fC20 = 0;
+        CountDownGaugeContacts(g_gaugeManager, self);
+        if (((GaugeSlot*)self->slot) != 0) {
+            ((GaugeSlot*)self->slot)->taken = 0;
+            self->slot = 0;
         }
         break;
     case 0xC:
-        if (((GaugeSlot*)self->fC20) != 0) {
-            ((GaugeSlot*)self->fC20)->taken = 0;
-            self->fC20 = 0;
+        if (((GaugeSlot*)self->slot) != 0) {
+            ((GaugeSlot*)self->slot)->taken = 0;
+            self->slot = 0;
         }
-        SetAnimationPlayerSpeed(self->f7E0, self->fC24);
+        SetAnimationPlayerSpeed(self->statePlayer, self->clipSpeed);
         break;
     }
 }
@@ -506,17 +506,17 @@ void InitGaugeManager(GaugeManager* self)
 {
     InitPlacedObject(self);
     self->maxAmount = 50;
-    self->f2D8 = 90.0f;
+    self->timerSeconds = 90.0f;
     GaugeParams params = g_defaultGaugeParams;
     self->params0 = params;
     self->params1 = params;
     self->params1.p44.Set(12.0f, 12.0f);
     self->params1.p4C.Set(12.0f, 12.0f);
     self->timer.Init();
-    self->f45C = 3.4028235e+38f;
-    self->f450 = 2;
-    self->f464 = 0;
-    D_0027C00C = self;
+    self->nextContactTime = 3.4028235e+38f;
+    self->maxContactAgents = 2;
+    self->contactsStarted = 0;
+    g_gaugeManager = self;
 }
 
 void BlendParamSets(GaugeManager* self)
@@ -524,15 +524,15 @@ void BlendParamSets(GaugeManager* self)
     s32 i = 0;
     StartPlacedObject(self);
     ResolveObjectLinks(self, 3, g_gaugeManagerLinks);
-    self->device = CreateStateWalker((StateGraph*)self->f428, 0, 0x3FB, 0);
+    self->device = CreateStateWalker((StateGraph*)self->deviceGraph, 0, 0x3FB, 0);
     GetStateWalkerCurrentKey((StateWalker*)self->device, (s32*)self->buf430);
     AddStateWalkerListener((StateWalker*)self->device, (PlacedObject**)self);
     for (; i < self->slotCount; i++) {
         GaugeSlot* s = &self->slots[i];
         BaseObject* n = FindFirstObjectByIdMode4(self->world, s->id, self);
         s->obj = n;
-        s->f8 = FindFirstObjectByIdMode1(n->world, 0x3F7, n);
-        s->f4 = FindFirstObjectByIdMode1(n->world, 0x3F6, n);
+        s->animation = FindFirstObjectByIdMode1(n->world, 0x3F7, n);
+        s->anchor = FindFirstObjectByIdMode1(n->world, 0x3F6, n);
     }
     f32* p = self->poly;
     f32 g = g_currentEntry->dt;
@@ -550,37 +550,37 @@ void BlendParamSets(GaugeManager* self)
     f32 u = 1.0f - t;
     f32* pa = (f32*)&self->params0;
     f32* pb = (f32*)&self->params1;
-    f32* po = self->o5E0;
+    f32* po = self->blend;
     for (u32 k = 0; k < 44; k++) {
         *po++ = u * *pa++ + t * *pb++;
     }
-    self->f44C = (s32)self->o5E0[0];
+    self->maxSlotAgents = (s32)self->blend[0];
     ComputeGaugeOutputs(self);
 }
 
 void ComputeGaugeOutputs(GaugeManager* o)
 {
     f32 t = GaugeCurve::Limit((f32)o->amount / (f32)o->maxAmount, 0.0f, 1.0f);
-    BlendedGaugeParams* p = (BlendedGaugeParams*)o->o5E0;
+    BlendedGaugeParams* p = (BlendedGaugeParams*)o->blend;
     f32 s;
 
     s = GaugeCurve::Limit(GaugeCurve::Eval(&p->q30, t), g_unitRange.lo, g_unitRange.hi);
-    *(f32*)(o->buf430 + 4) = GaugeCurve::Lerp(s, p->f20, p->f28);
-    *(f32*)(o->buf430 + 8) = GaugeCurve::Lerp(s, p->f24, p->f2C);
+    *(f32*)(o->buf430 + 4) = GaugeCurve::Lerp(s, p->delayMinFrom, p->delayMinTo);
+    *(f32*)(o->buf430 + 8) = GaugeCurve::Lerp(s, p->delayMaxFrom, p->delayMaxTo);
 
     s = GaugeCurve::Limit(GaugeCurve::Eval(&p->q60, t), g_unitRange.lo, g_unitRange.hi);
-    *(f32*)(o->buf430 + 0xC) = GaugeCurve::Lerp(s, p->f44, p->f4C);
-    *(f32*)(o->buf430 + 0x10) = GaugeCurve::Lerp(s, p->f48, p->f50);
+    *(f32*)(o->buf430 + 0xC) = GaugeCurve::Lerp(s, p->waitMinFrom, p->waitMinTo);
+    *(f32*)(o->buf430 + 0x10) = GaugeCurve::Lerp(s, p->waitMaxFrom, p->waitMaxTo);
 
     *(f32*)(o->buf430 + 0x14) = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q80, t), g_unitRange.lo, g_unitRange.hi), p->f70, p->f74);
 
     *(f32*)(o->buf430 + 0x18) = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->qA0, t), g_unitRange.lo, g_unitRange.hi), p->f90, p->f94);
 
-    o->f44C = (s32)GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q10, t), g_unitRange.lo, g_unitRange.hi), p->f00, p->f04);
+    o->maxSlotAgents = (s32)GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q10, t), g_unitRange.lo, g_unitRange.hi), p->agentCountFrom, p->agentCountTo);
 
-    if (p->f40 < t && o->f464 == 0) {
-        o->f464 = 1;
-        o->f45C = g_gameClock[1];
+    if (p->triggerFraction < t && o->contactsStarted == 0) {
+        o->contactsStarted = 1;
+        o->nextContactTime = g_gameClock[1];
     }
 }
 
@@ -603,11 +603,11 @@ void FinishGaugeOnTimeout(T217D_510* timer, s32 mode)
 {
     if (mode == 1) {
         s32 t[2];
-        GetStateWalkerTargetKey((StateWalker*)D_0027C00C->device, &t[0]);
-        GetStateWalkerCurrentKey((StateWalker*)D_0027C00C->device, &t[1]);
+        GetStateWalkerTargetKey((StateWalker*)g_gaugeManager->device, &t[0]);
+        GetStateWalkerCurrentKey((StateWalker*)g_gaugeManager->device, &t[1]);
         if (t[0] != 0x3FE && t[1] != 0x3FE) {
-            SetStateWalkerTarget((StateWalker*)D_0027C00C->device, 0x3FF);
-            ApplyGaugeRatioToEffect(D_0027C00C);
+            SetStateWalkerTarget((StateWalker*)g_gaugeManager->device, 0x3FF);
+            ApplyGaugeRatioToEffect(g_gaugeManager);
         }
     }
 }
@@ -618,10 +618,10 @@ void UpdateGaugeManager(GaugeManager* self, f32 dt)
     UpdatePlacedObject(self, dt);
     GetStateWalkerCurrentKey((StateWalker*)self->device, &tag);
     if (tag == 0x3FD) {
-        if (self->f45C < g_gameClock[1]) {
+        if (self->nextContactTime < g_gameClock[1]) {
             RunGaugeTimedEvent(self);
         }
-        if (self->f460 < g_gameClock[1]) {
+        if (self->nextSlotTime < g_gameClock[1]) {
             ActivateRandomGaugeSlot(self);
         }
         void* p = GetActiveSwitchedCollider();
@@ -675,7 +675,7 @@ void RunGaugeTimedEvent(GaugeManager* self)
     Vec02* posp;
     s32 made = 0;
     Vec02* rotp;
-    f32* wait = &self->f43C;
+    f32* wait = &self->waitMin;
     s32 pass;
     s32 best;
     s32 i;
@@ -685,12 +685,12 @@ void RunGaugeTimedEvent(GaugeManager* self)
     s32 slotSize = sizeof(GaugeSlot);
 
     do {
-        if (self->f458 >= 2) {
-            self->f45C = 3.4028235e+38f;
+        if (self->contactAgents >= 2) {
+            self->nextContactTime = 3.4028235e+38f;
             return;
         }
-        ChooseObjectPoolItem((ObjectPool*)self->f420);
-        if (((ObjectPool*)self->f420)->f48 == 0) {
+        ChooseObjectPoolItem((ObjectPool*)self->contactPool);
+        if (((ObjectPool*)self->contactPool)->chosenItem == 0) {
             return;
         }
         player = GetActiveSwitchedCollider();
@@ -703,7 +703,7 @@ void RunGaugeTimedEvent(GaugeManager* self)
                 if (cand->taken != 0 || cand->key != 0) {
                     continue;
                 }
-                GetObjectWorldPosition((BaseObject*)cand->f4, (Vec02*)&pos);
+                GetObjectWorldPosition((BaseObject*)cand->anchor, (Vec02*)&pos);
                 if (pass == 0) {
                     ProjectPointToCamera(*(Camera**)g_camera, (Vec02*)((u8*)cand->obj + 0x140), screen);
                     if (screen[0] < -1.0f || 1.0f < screen[0] || screen[1] < -1.0f || 1.0f < screen[1]) {
@@ -727,14 +727,14 @@ void RunGaugeTimedEvent(GaugeManager* self)
         if (best < 0) {
             return;
         }
-        ObjectPool* h = (ObjectPool*)self->f420;
-        ContactAgent* agent = (ContactAgent*)h->f48;
+        ObjectPool* h = (ObjectPool*)self->contactPool;
+        ContactAgent* agent = (ContactAgent*)h->chosenItem;
         slot = (GaugeSlot*)((u8*)self->slots + best * slotSize);
         LaunchChosenPoolObject(h, 0);
         posp = &pos;
         rotp = &rot[0];
-        GetObjectWorldPosition((BaseObject*)slot->f4, (Vec02*)posp);
-        GetObjectWorldRotation((BaseObject*)slot->f4, (Mat02*)rotp);
+        GetObjectWorldPosition((BaseObject*)slot->anchor, (Vec02*)posp);
+        GetObjectWorldRotation((BaseObject*)slot->anchor, (Mat02*)rotp);
         agent->desc02()->m1D(agent, posp);
         agent->desc02()->m1E(agent, (Mat02*)rotp);
         agent->desc02()->m20(agent, (Vec02*)D_00248D30);
@@ -742,14 +742,14 @@ void RunGaugeTimedEvent(GaugeManager* self)
         if (made == 0) {
             anchor = pos;
         }
-        CreateAnimationPlayerWithoutPresetTargets((Animation*)slot->f8, (BaseObject*)slot->obj, 0, (AnimationPlayer**)&slot->key, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)slot->animation, (BaseObject*)slot->obj, 0, (AnimationPlayer**)&slot->key, 0.0f, 1.0f);
         made++;
         AddAnimationPlayerRecordCallback((AnimationPlayer*)slot->key, (PlacedObject**)self);
-        self->f458 = self->f458 + 1;
-        self->f45C = g_gameClock[1] + RandomFloatInRange(self->f43C, wait[1]);
-        agent->fC20 = slot;
+        self->contactAgents = self->contactAgents + 1;
+        self->nextContactTime = g_gameClock[1] + RandomFloatInRange(self->waitMin, wait[1]);
+        agent->slot = slot;
         slot->taken = 1;
-        agent->fC24 = *(f32*)(self->buf430 + 0x14);
+        agent->clipSpeed = *(f32*)(self->buf430 + 0x14);
     } while (made < 2);
 }
 
@@ -758,12 +758,12 @@ void ActivateRandomGaugeSlot(GaugeManager* self)
     GaugeSlot* list[16];
     f32 v0[4];
     f32 v1[12];
-    if (self->f454 >= self->f44C) {
-        self->f460 = 3.4028235e+38f;
+    if (self->slotAgents >= self->maxSlotAgents) {
+        self->nextSlotTime = 3.4028235e+38f;
         return;
     }
-    ChooseObjectPoolItem((ObjectPool*)self->f424);
-    if (!((ObjectPool*)self->f424)->f48) return;
+    ChooseObjectPoolItem((ObjectPool*)self->slotPool);
+    if (!((ObjectPool*)self->slotPool)->chosenItem) return;
     s32 n = 0;
     for (s32 i = 0; i < self->slotCount; i++) {
         GaugeSlot* s = &self->slots[i];
@@ -771,31 +771,31 @@ void ActivateRandomGaugeSlot(GaugeManager* self)
     }
     if (n <= 0) return;
     s32 idx = RandomIntInRange(0, n - 1);
-    ObjectPool* h = (ObjectPool*)self->f424;
-    NumberedAgent* c = (NumberedAgent*)h->f48;
+    ObjectPool* h = (ObjectPool*)self->slotPool;
+    NumberedAgent* c = (NumberedAgent*)h->chosenItem;
     GaugeSlot* s = list[idx];
     (void)LaunchChosenPoolObject(h, 0);
-    GetObjectWorldPosition((BaseObject*)s->f4, (Vec02*)v0);
-    GetObjectWorldRotation((BaseObject*)s->f4, (Mat02*)v1);
+    GetObjectWorldPosition((BaseObject*)s->anchor, (Vec02*)v0);
+    GetObjectWorldRotation((BaseObject*)s->anchor, (Mat02*)v1);
     c->desc02()->m1D(c, (Vec02*)v0);
     c->desc02()->m1E(c, (Mat02*)v1);
     c->desc02()->m20(c, (Vec02*)D_00248D30);
     c->desc02()->m21(c, (Vec02*)D_00248D30);
-    CreateAnimationPlayerWithoutPresetTargets((Animation*)s->f8, (BaseObject*)s->obj, 0, (AnimationPlayer**)&s->key, 0.0f, 1.0f);
+    CreateAnimationPlayerWithoutPresetTargets((Animation*)s->animation, (BaseObject*)s->obj, 0, (AnimationPlayer**)&s->key, 0.0f, 1.0f);
     AddAnimationPlayerRecordCallback((AnimationPlayer*)s->key, (PlacedObject**)self);
-    self->f454 = self->f454 + 1;
+    self->slotAgents = self->slotAgents + 1;
     f32 r = RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
-    self->f460 = (*(f32*)&g_gameTime) + r;
-    c->fC28 = s;
+    self->nextSlotTime = (*(f32*)&g_gameTime) + r;
+    c->slot = s;
     s->taken = 1;
 }
 
 void CountDownGaugeContacts(GaugeManager* self, ContactAgent* agent)
 {
-    if (self->f458 == self->f450) {
-        self->f45C = g_gameTime[0] + RandomFloatInRange(self->f43C, self->f440);
+    if (self->contactAgents == self->maxContactAgents) {
+        self->nextContactTime = g_gameTime[0] + RandomFloatInRange(self->waitMin, self->waitMax);
     }
-    self->f458 = self->f458 - 1;
+    self->contactAgents = self->contactAgents - 1;
 }
 
 void AddToGaugeAmount(GaugeManager* self, NumberedAgent* arg)
@@ -834,10 +834,10 @@ void AddToGaugeAmount(GaugeManager* self, NumberedAgent* arg)
         StopTimer(&g_timerElement);
     }
     ComputeGaugeOutputs(self);
-    if (self->f454 == self->f44C) {
-        self->f460 = g_gameTime[0] + RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
+    if (self->slotAgents == self->maxSlotAgents) {
+        self->nextSlotTime = g_gameTime[0] + RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
     }
-    self->f454 = self->f454 - 1;
+    self->slotAgents = self->slotAgents - 1;
 }
 
 void HandleGaugeManagerNotification(GaugeManager* self, s32 kind, void* key)
@@ -864,7 +864,7 @@ void HandleGaugeManagerNotification(GaugeManager* self, s32 kind, void* key)
                 g_gaugeAmountCaption.target = &self->amount;
                 g_gaugeAmountCaption.limit = &self->maxAmount;
                 SetWorldActiveFollower(self->world, self);
-                StartTimer(&g_timerElement, self->f2D8);
+                StartTimer(&g_timerElement, self->timerSeconds);
                 SetTimerLimit(&g_timerElement, 0.0f, FinishGaugeOnTimeout);
                 StartTimerCounting(&g_timerElement);
             }

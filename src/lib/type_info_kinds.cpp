@@ -212,139 +212,139 @@ extern "C" void* __dynamic_cast(const type_info& (*from)(void), const type_info&
 }
 
 // The type information of the builtin types, each built in its own storage when first asked for.
-void* D_00278E00[2] = { 0, 0 };
-void* D_00278E08[2] = { 0, 0 };
-void* D_00278E10[2] = { 0, 0 };
-void* D_00278E18[2] = { 0, 0 };
-void* D_00278E20[2] = { 0, 0 };
-void* D_00278E28[2] = { 0, 0 };
-void* D_00278E30[2] = { 0, 0 };
-void* D_00278E38[2] = { 0, 0 };
-void* D_00278E40[2] = { 0, 0 };
-void* D_00278E48[2] = { 0, 0 };
-void* D_00278E50[2] = { 0, 0 };
-void* D_00278E58[2] = { 0, 0 };
-void* D_00278E60[2] = { 0, 0 };
-void* D_00278E68[2] = { 0, 0 };
-void* D_00278E70[2] = { 0, 0 };
-void* D_00278E78[2] = { 0, 0 };
-void* D_00278E80[2] = { 0, 0 };
+void* g_voidTypeInfo[2] = { 0, 0 };
+void* g_longLongTypeInfo[2] = { 0, 0 };
+void* g_longTypeInfo[2] = { 0, 0 };
+void* g_intTypeInfo[2] = { 0, 0 };
+void* g_shortTypeInfo[2] = { 0, 0 };
+void* g_boolTypeInfo[2] = { 0, 0 };
+void* g_charTypeInfo[2] = { 0, 0 };
+void* g_wcharTypeInfo[2] = { 0, 0 };
+void* g_longDoubleTypeInfo[2] = { 0, 0 };
+void* g_doubleTypeInfo[2] = { 0, 0 };
+void* g_floatTypeInfo[2] = { 0, 0 };
+void* g_unsignedIntTypeInfo[2] = { 0, 0 };
+void* g_unsignedLongTypeInfo[2] = { 0, 0 };
+void* g_unsignedLongLongTypeInfo[2] = { 0, 0 };
+void* g_unsignedShortTypeInfo[2] = { 0, 0 };
+void* g_unsignedCharTypeInfo[2] = { 0, 0 };
+void* g_signedCharTypeInfo[2] = { 0, 0 };
 
 extern "C" const type_info& GetTypeInfoOfVoid(void)
 {
-    if (D_00278E00[0] == 0)
-        new (D_00278E00) __builtin_type_info("v");
-    return *(const type_info*)D_00278E00;
+    if (g_voidTypeInfo[0] == 0)
+        new (g_voidTypeInfo) __builtin_type_info("v");
+    return *(const type_info*)g_voidTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfLongLong(void)
 {
-    if (D_00278E08[0] == 0)
-        new (D_00278E08) __builtin_type_info("x");
-    return *(const type_info*)D_00278E08;
+    if (g_longLongTypeInfo[0] == 0)
+        new (g_longLongTypeInfo) __builtin_type_info("x");
+    return *(const type_info*)g_longLongTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfLong(void)
 {
-    if (D_00278E10[0] == 0)
-        new (D_00278E10) __builtin_type_info("l");
-    return *(const type_info*)D_00278E10;
+    if (g_longTypeInfo[0] == 0)
+        new (g_longTypeInfo) __builtin_type_info("l");
+    return *(const type_info*)g_longTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfInt(void)
 {
-    if (D_00278E18[0] == 0)
-        new (D_00278E18) __builtin_type_info("i");
-    return *(const type_info*)D_00278E18;
+    if (g_intTypeInfo[0] == 0)
+        new (g_intTypeInfo) __builtin_type_info("i");
+    return *(const type_info*)g_intTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfShort(void)
 {
-    if (D_00278E20[0] == 0)
-        new (D_00278E20) __builtin_type_info("s");
-    return *(const type_info*)D_00278E20;
+    if (g_shortTypeInfo[0] == 0)
+        new (g_shortTypeInfo) __builtin_type_info("s");
+    return *(const type_info*)g_shortTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfBool(void)
 {
-    if (D_00278E28[0] == 0)
-        new (D_00278E28) __builtin_type_info("b");
-    return *(const type_info*)D_00278E28;
+    if (g_boolTypeInfo[0] == 0)
+        new (g_boolTypeInfo) __builtin_type_info("b");
+    return *(const type_info*)g_boolTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfChar(void)
 {
-    if (D_00278E30[0] == 0)
-        new (D_00278E30) __builtin_type_info("c");
-    return *(const type_info*)D_00278E30;
+    if (g_charTypeInfo[0] == 0)
+        new (g_charTypeInfo) __builtin_type_info("c");
+    return *(const type_info*)g_charTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfWideChar(void)
 {
-    if (D_00278E38[0] == 0)
-        new (D_00278E38) __builtin_type_info("w");
-    return *(const type_info*)D_00278E38;
+    if (g_wcharTypeInfo[0] == 0)
+        new (g_wcharTypeInfo) __builtin_type_info("w");
+    return *(const type_info*)g_wcharTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfLongDouble(void)
 {
-    if (D_00278E40[0] == 0)
-        new (D_00278E40) __builtin_type_info("r");
-    return *(const type_info*)D_00278E40;
+    if (g_longDoubleTypeInfo[0] == 0)
+        new (g_longDoubleTypeInfo) __builtin_type_info("r");
+    return *(const type_info*)g_longDoubleTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfDouble(void)
 {
-    if (D_00278E48[0] == 0)
-        new (D_00278E48) __builtin_type_info("d");
-    return *(const type_info*)D_00278E48;
+    if (g_doubleTypeInfo[0] == 0)
+        new (g_doubleTypeInfo) __builtin_type_info("d");
+    return *(const type_info*)g_doubleTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfFloat(void)
 {
-    if (D_00278E50[0] == 0)
-        new (D_00278E50) __builtin_type_info("f");
-    return *(const type_info*)D_00278E50;
+    if (g_floatTypeInfo[0] == 0)
+        new (g_floatTypeInfo) __builtin_type_info("f");
+    return *(const type_info*)g_floatTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfUnsignedInt(void)
 {
-    if (D_00278E58[0] == 0)
-        new (D_00278E58) __builtin_type_info("Ui");
-    return *(const type_info*)D_00278E58;
+    if (g_unsignedIntTypeInfo[0] == 0)
+        new (g_unsignedIntTypeInfo) __builtin_type_info("Ui");
+    return *(const type_info*)g_unsignedIntTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfUnsignedLong(void)
 {
-    if (D_00278E60[0] == 0)
-        new (D_00278E60) __builtin_type_info("Ul");
-    return *(const type_info*)D_00278E60;
+    if (g_unsignedLongTypeInfo[0] == 0)
+        new (g_unsignedLongTypeInfo) __builtin_type_info("Ul");
+    return *(const type_info*)g_unsignedLongTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfUnsignedLongLong(void)
 {
-    if (D_00278E68[0] == 0)
-        new (D_00278E68) __builtin_type_info("Ux");
-    return *(const type_info*)D_00278E68;
+    if (g_unsignedLongLongTypeInfo[0] == 0)
+        new (g_unsignedLongLongTypeInfo) __builtin_type_info("Ux");
+    return *(const type_info*)g_unsignedLongLongTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfUnsignedShort(void)
 {
-    if (D_00278E70[0] == 0)
-        new (D_00278E70) __builtin_type_info("Us");
-    return *(const type_info*)D_00278E70;
+    if (g_unsignedShortTypeInfo[0] == 0)
+        new (g_unsignedShortTypeInfo) __builtin_type_info("Us");
+    return *(const type_info*)g_unsignedShortTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfUnsignedChar(void)
 {
-    if (D_00278E78[0] == 0)
-        new (D_00278E78) __builtin_type_info("Uc");
-    return *(const type_info*)D_00278E78;
+    if (g_unsignedCharTypeInfo[0] == 0)
+        new (g_unsignedCharTypeInfo) __builtin_type_info("Uc");
+    return *(const type_info*)g_unsignedCharTypeInfo;
 }
 
 extern "C" const type_info& GetTypeInfoOfSignedChar(void)
 {
-    if (D_00278E80[0] == 0)
-        new (D_00278E80) __builtin_type_info("Sc");
-    return *(const type_info*)D_00278E80;
+    if (g_signedCharTypeInfo[0] == 0)
+        new (g_signedCharTypeInfo) __builtin_type_info("Sc");
+    return *(const type_info*)g_signedCharTypeInfo;
 }

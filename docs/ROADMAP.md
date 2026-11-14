@@ -17,147 +17,48 @@ splits are taken from other projects or from the prototype
   units for game code, libraries and data sections, each in its category (`config/<version>/layout.tsv`)
 - [x] The coordination issue and the matching workflow ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md))
 - [x] Repository checks and CI that need no game data, with a scan for proprietary material
+- [x] **Matching** (2026-11-13): every function of both versions. US 4,807 of 4,807 (4,498
+  exact C, 311 original assembly), PAL 4,831 of 4,831 (4,520 exact C, 311 original assembly), no
+  C with inline assembly left to match. `nonmatching/` holds no near misses.
+- [x] **Original assembly**: the 311 functions not made from C, and the linker's leftovers,
+  classified in `config/us/original_asm.tsv` and `config/eu/original_asm.tsv`
+  ([ASM_CLASSIFICATION.md](ASM_CLASSIFICATION.md)).
+- [x] **File boundaries**: every byte of code, 0x100000 to 0x211E0C, in one of 195 proved
+  source files named by role (`config/us/files.tsv`); where an edge is not proved by retail, the
+  file's head says so and gives the range it could lie in.
+- [x] **PAL's own code**: every function only PAL has defined under `src/versions/eu/`, and every
+  C function checked at its PAL counterpart (`tools/version_check.py`: 4,520 match, 24 have none).
+- [x] **Declarations** (2026-11-14, #148): declarations agree with their functions' C
+  definitions in parameters and return type (`tools/params.py`, `tools/decls.py`), so the source
+  links with a normal linker; what is left, and the places a 64-bit port must change, are listed
+  in #148.
 
 ## Next
 
-Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-11: US at
-93.25% of code (4,760 of 4,807 functions) and 99.62% of data, PAL at 93.06% of code and 76.29% of data, 47 US
-functions left, every one with a near miss in `nonmatching/`, the original assembly classified,
-every byte of code in a proved source file, PAL's own game code all defined, and names and types
-well under way. What is still open is the long tail of the matching, the readable names of the
-functions left with their address names, and the disc's data.
+What is still open, on 2026-11-14 (the README's table and `tools/progress.py` have the counts):
 
-1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)). On 2026-11-11,
-   48 US functions are left (76,480 bytes; 657 were on 2026-11-07), each with a near miss in
-   `nonmatching/` that records what still differs. 28 of them (30,676 bytes) are C with inline
-   assembly (item 3): compiled C around a few VU0, MMI or system instructions, matched with
-   shared helpers in `include/` (AGENTS.md). The other 20 are plain C (45,804 bytes: 16 in game
-   code, 4 in the libraries). The largest, func_00109488 (`FillObjectPropertyTable`, 37 KB, 49%
-   of what was left), matched on 2026-11-12 as plain assignment statements: its near miss, a
-   chain of inline helper calls, differed in one global-alloc choice that traced back to where
-   CSE's periodic flushes fall in its one very long block, which the order of a statement's
-   insns decides (docs/toolchain/long-block-constants.md). Models of
-   GCC's register allocation (`tools/globalalloc.py`) and of its first scheduling pass
-   (`tools/sched1.py`) replay the compiler's choices from its dumps, to find such levers without
-   compiling blind. The toolchain's own runtime (`libgcc`) is C, built by `cc1` in `.c`
-   files under `src/lib/`, by Sony's Linux build of 2.9-ee-991111 (docs/TOOLCHAIN.md).
-2. **Data from C.** A C file's `.rodata` literals (float constants, strings) are linked now: the
-   code takes retail's address for them and retail's bytes stay in the image (tools/rodata.py),
-   which opens the functions tagged `rodata`. A C `switch` is linked too: its jump table goes with the
-   object's `.rodata`, the code takes retail's table address, and `tools/check.py` compares the
-   table's case-label addresses with retail's (functions tagged `jtbl`). A global can be defined
-   in C at its address, with its initial value: in `.data`, in `.rodata` as an `extern const`, or
-   in `.bss` as a file's `static` (`-fdata-sections`, tools/c_layout.py). A global built at
-   startup brings the compiler's static initialiser, which `config/us/generated.tsv` names. The
-   reports count the bytes C defines as matched data (`config/us/c_data.tsv`). The rest of the
-   data still comes from the disassembly: on 2026-11-11, 94.56% of US data is defined in C
-   (23,461 bytes left), of which 21,840 are the `.vutext` section's VU microprograms, original
-   assembly that counts as matched data like original-assembly functions
-   (`config/<version>/original_data.tsv`, docs/ASM_CLASSIFICATION.md): 99.62% of US data counts,
-   1,655 bytes left (the alignment padding between files is the linker's, not C). PAL links no C, so its data is checked at its counterparts as its
-   functions are (`tools/version_check.py`, then `tools/data_check.py`, `config/eu/c_data_status.tsv`):
-   a global counts for PAL when its bytes, with every pointer translated to PAL's addresses, equal
-   PAL's at its PAL address. A global PAL holds differently has a definition of its own, as PAL's
-   functions do (`src/versions/eu/<file>/D_XXXXXXXX.cpp`, built in the shared file's unit in place of the
-   US definition, docs/VERSIONS.md "PAL's own data"). On 2026-11-11, 223 of the 262 globals match
-   (332,568 bytes, 71.59% of PAL's data; 76.29% with the `.vutext` microprograms), 18 differ and 21 are absent (all
-   `.bss`, which has no bytes in the file). 13 PAL globals are defined (8 rows they complete, 1 more
-   they bring closer); the 18 are what needs a PAL function that has no C, a global C++ cannot
-   write (an object with a constructor), tables PAL grew past US's labels, included labels, or the hash tables of `global_tables.cpp`
-   not yet defined (docs/VERSIONS.md lists each with its cause).
-3. **Original assembly.** The functions that were not made from C (system-call stubs, crt0,
-   the toolchain's own `.S` routines, the libraries' multimedia routines, frameless VU0 leaves,
-   code scheduled by hand) and the linker's leftovers, in game code and in Sony's libraries, are
-   listed in `config/us/original_asm.tsv` and counted as finished, apart from the exact C matches
-   (docs/ASM_CLASSIFICATION.md; #18): 311 functions on 2026-11-07, and still on 2026-11-11. An audit that day found that
-   most of the 890 listed before were compiled C around a few instructions the compiler cannot
-   emit, which the original developers wrote as small inline-assembly helpers, as retail's bare
-   `sqrt.s` is: GCC's frame and scheduling around them, the same short sequences across hundreds
-   of functions. Those are kind `inline` in the table, C still to match with shared helpers
-   (include/fpu.h's `Fpu::Sqrt`; a VU0 header in progress), and no longer counted. The functions
-   listed for `max.s` or `min.s` alone are plain C: g++'s `>?` and `<?` operators emit them, and
-   func_001EAC68 is word for word one. PAL's own functions are
-   classified in `config/eu/original_asm.tsv`.
-4. **File boundaries, found in retail.** Where one source file ends and the next begins, from
-   retail's own code: which functions share static data, how `.rodata` and `.data` group, and
-   compiler-generated functions (static initialisers) that end a file. The 16 KiB windows of
-   `src/main/` then give way to real files, with names that are ours. A file is proved by
-   building it whole, as the original was, and linking each of its sections in one piece
-   (`config/us/files.tsv`). The first, `src/main/value.cpp` (0x11AE78 to 0x11C128), is one. On
-   2026-11-07 every byte of code, 0x100000 to 0x211E0C, is in one of 167 proved files (74 of
-   game code, 93 of the libraries, the math library and the toolchain's runtime; 168 since
-   `src/main/file_14B6A8.cpp`, now `gauge_manager.cpp`, was cut from its neighbour on
-   2026-11-10), and the data the 16 KiB windows defined is in its files too: in the proved files
-   that read it, and in three files of data only that open .rodata (`class_descriptors.cpp`,
-   `property_registry.cpp`, `global_tables.cpp`; the build proves their place, not where one
-   ends and the next begins). The one window file left, `src/lib/001F8000.cpp` (now
-   `src/lib/constructor_list.cpp`), holds the constructor list the linker builds. Many proved
-   files are one file between two exact edges that could be several; each commit says which. On
-   2026-11-11 the 26 files still named after their first address were searched for inner edges:
-   five splits are proved by retail (a section start after the linker's padding, a vtable that
-   GCC writes after a file's literals and jump tables, a string literal another object holds),
-   and seven more files are cut where the role plainly changes, each with a head comment saying
-   the edge is not proved and the range it could lie in; 192 files then, 26 of them still named
-   after their first address because their roles interleave or the code shows none. On
-   2026-11-12 file_1D62E0.cpp (now path_follower.cpp) was cut in three and curve_segment.cpp cut
-   from placed_object.cpp where no signal shows an edge, by the maintainer's decision, so that
-   func_001D9488 and func_00130C58, retail's only at loop.c's threshold of 94, build in units of
-   their own at `-mvu0-use-vf0-vf30` (docs/toolchain/loops.md, "The splits on the threshold"):
-   195 files, 28 named after their first address. On 2026-11-13 those 28 (27 of game code and
-   `src/lib/file_1FAC00.cpp`) and the window file `src/lib/001F8000.cpp` were named by role:
-   each takes the name of what it holds, or of the family that holds most of its code where
-   several share it, and its head says which (the `refactor(files)` commits). All 195 files now
-   have names by role. A file whose range holds original assembly includes those functions at
-   their place (`INCLUDE_ASM`, include/asm_func.h, tools/asm_func.py):
-   `src/main/arc_element.cpp` (0x1E5378 to 0x1E88D0, five of its 34 functions assembly, then
-   named `file_1E5378.cpp`) is the first. A new file is named after its first address until
-   what it was is known. A function of its range not matched yet is included the same way, so that a
-   file is proved before all of its C is: it still counts as unmatched, and its C replaces the
-   line when it matches. Retail's constructor list (`D_0027B130`) gives the exact end of every
-   file with a static initialiser.
-5. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
-   counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C, in
-   `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)). On 2026-11-11, 50 PAL functions
-   are left: 49 are the counterparts of functions US has left, and one is a library function
-   only PAL has (func_0020A870, 68 bytes). Every game-code function only PAL has is defined.
-   `tools/version_check.py` finds 4,470 C functions matching at their PAL counterparts, 24 with
-   no counterpart, and one that differs (func_001366A0, its near miss in `nonmatching/eu/`).
-   On 2026-11-07, 96 PAL functions
-   are left (62 in game code, 34 in the libraries): two C functions differ at their counterparts
-   (func_001316E8 and func_0016AB38), 11 game-code functions only PAL has are not defined yet
-   (`tools/version_src.py todo`, which lists game code only), and 6 library functions only PAL
-   has (964 bytes: 0x1F7738, 0x1F9538, 0x20A730, 0x20A7D0, 0x20A810, 0x20A870) are not defined
-   either. The other 77 are the counterparts of the functions US has left (two of US's 79,
-   func_001ABE70 and func_001DCEA0, have none). 11 have a near miss in `nonmatching/eu/`.
-6. **Names and types.** Ours, from what the code does, as the C is cleaned up. Types come
-   first, one per object, so that each name is chosen once: a header per class family of
-   retail's class descriptors (`include/cNN.h`, `config/us/classes.tsv`), per kind of the other
-   method tables (`config/us/tables.tsv`), per record several files share and per global several
-   files read, with the common shapes (`shapes.h`) and the hub globals (`globals.h`); each header
-   is named after its role once the code shows it (`box_collider.h`, `font.h`, `anim_curve.h`),
-   and keeps its class id until then. Each
-   field line ends with its offset, which a compiled assertion checks. They replace the views
-   each matched function declared for itself; what is left is the script machine's value and
-   its built-ins, and the views kept for a stated reason. The names come after: a family's
-   types, fields and header are renamed in place, and its functions and globals get readable
-   names as macros over their address names (`config/names/`, `include/names.h`,
-   [NAMING.md](NAMING.md)), one table per source file. On 2026-11-11, 153 functions still
-   have only their address name (stripped leftovers whose code shows no role), no views named
-   by address are left in game code and four in the libraries (each kept for a stated reason),
-   and `tools/decls.py` flags 61 declarations, each with a comment saying which caller's match
-   the definition's type would break. On 2026-11-07, 4,660 symbols have one;
-   266 game functions do not yet (255 of them original assembly, mostly VU0 routines and
-   linker leftovers, and 11 in C whose role the code does not show yet). Two class headers
-   keep their ids (c35.h and c52.h, whose classes only forward their draw slot to a
-   base class), and of the views matched functions declared for themselves (`Obj_XXXXXX`,
-   `Sub_XXXXXX`, 2,018 of them in game code that morning) 18 are left in game code, each for a
-   stated reason (a declaration retail's code needs, data only assembly reads) or a role still
-   unclear; the rest are their shared types or local types named by role. The libraries' 176
-   views (in 22 files) are not named yet: Sony's library code was outside this pass. The
-   sources use the readable names everywhere, in definitions and declarations too
-   (`tools/names.py apply`); the markers, comments and the tools' tables keep the address
-   names, and `tools/symbols.py` maps one to the other.
-7. **The disc's data**, each format from the code that reads it ([DISC.md](DISC.md)). How the
+1. **Data from C.** US: 99.97% of data counts (430,919 of 431,059 bytes). PAL: its data is checked at its counterparts
+   (`tools/version_check.py`, `tools/data_check.py`, `config/eu/c_data_status.tsv`): 231 of the
+   273 globals match (85.8% of PAL's data counts), 25 are absent (`.bss`, no bytes in the file) and 17 differ, each for a cause
+   docs/VERSIONS.md lists (a PAL function with no C, a global C++ cannot write, tables PAL grew past
+   US's labels, included labels, the hash tables of `global_tables.cpp`).
+2. **Names and types.** Ours, from what the code does (docs/NAMING.md). Done: every C function has
+   a readable name (the 151 left with their address names are the linker's leftovers of stripped
+   functions, which have no role and keep them by rule); 6,243 symbols are named in
+   `config/names/`, 1,125 globals among them since 2026-11-14; 1,639 fields named by role that
+   day; the libraries' per-function views made into one type per object (the MPEG decoder, the
+   IOP clients, the exception runtime, `include/mpeg_decoder.h`, `include/mpeg_bit_reader.h`).
+   Left:
+   - about 770 globals used in the source still named by address: float constants and vectors
+     whose only role is their value, flags and buffers no reader explains, the per-class property
+     lists (a name would only restate the class id), and the 108 globals only PAL has
+     (`D_eu_XXXXXXXX`), which `tools/names.py` does not take yet;
+   - 486 fields of `include/` and 303 of the sources' local types still named by offset, where
+     the code shows no role, and PAL's per-function copies of local types (`src/versions/eu/`);
+   - local view types named by role with an address suffix (`Bone_166690`), 97 in game code:
+     views of a class kept for a stated reason or a type still to share;
+   - two class headers by id, `c35.h` and `c52.h`, whose classes only forward their draw slot.
+3. **The disc's data**, each format from the code that reads it ([DISC.md](DISC.md)). How the
    game finds its data is described, and a level's textures, objects, geometry, collision,
    animations and events, and PAL's data. Next are the fields not yet named and the sound
    banks' own format; OpenThievius's extractor is then written from these readers. Unchanged

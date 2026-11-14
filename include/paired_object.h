@@ -19,16 +19,16 @@ struct PairedObject : Collider {
     u8 pad56C[0x574 - 0x56C];
     f32 f574;  // 0x574
     u8 pad578[0x580 - 0x578];
-    f32 f580;  // 0x580: the clock time after which state 2 moves the offset on (func_001A65C8)
-    f32 f584;  // 0x584: 1.0 at set-up
-    f32 f588;  // 0x588: 2.5 at set-up
-    void* f58C;  // 0x58C: handles func_001A6BE0 starts by state (f58C..f5A4)
-    void* f590;  // 0x590
-    void* f594;  // 0x594
-    void* f598;  // 0x598
+    f32 nextOffsetTime; // 0x580: the clock time after which state 2 moves the offset on (func_001A65C8)
+    f32 offsetWaitMin; // 0x584: 1.0 at set-up
+    f32 offsetWaitMax; // 0x588: 2.5 at set-up
+    void* roamAnimation; // 0x58C: handles func_001A6BE0 starts by state (f58C..f5A4)
+    void* pairedAnimation; // 0x590
+    void* attachAnimation; // 0x594
+    void* removeAnimation; // 0x598
     void* activeHandle;  // 0x59C: the one started last (stopped on the next change)
-    void* f5A0;  // 0x5A0
-    void* f5A4;  // 0x5A4
+    void* graphState7; // 0x5A0
+    void* graphState8; // 0x5A4
     void* soundHandle;  // 0x5A8: the sound (func_001B6290) started by states 7 and 8
     void* notifyRecord;  // 0x5AC: a record set up by slot 10 (func_00159478); its first word
                             //        is the object func_001A6DE0 sends a message to

@@ -36,7 +36,7 @@ void InitGridSelector(Self_16BA40_eu* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
-        self->f520 = (void**)&D_002629A8;
+        self->f520 = (void**)&g_gridSelectorFrame;
         *self->f520 = (void*)GetFontById(2);
     }
     Node_16BA40_eu* a1 = self->f4;

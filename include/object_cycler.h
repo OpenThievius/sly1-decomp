@@ -57,17 +57,17 @@ struct ObjectCycler : Collider {
     FloatRange checkDelay;            // 0x63C: D_002621A0; the range func_001EAAE0 picks the delay between checks from
     f32 stepInterval;               // 0x644: seconds between steps of the index (mode 1)
     f32 nextStepTime;               // 0x648: the clock value at which the index steps next
-    f32 f64C;               // 0x64C: twice radius3CC
+    f32 searchRadius;       // 0x64C: twice radius3CC
     FloatRange p650;            // 0x650: D_002621A8
     FloatRange p658;            // 0x658: D_002621B0
     FloatRange p660;            // 0x660: D_002621B8
     f32 nextAdvanceTime;               // 0x668: state 6: the clock value at which the index advances next
-    f32 f66C;               // 0x66C: the clock when func_0015C0A0 last looked
+    f32 lastLookTime;       // 0x66C: the clock when func_0015C0A0 last looked
     FloatRange p670;            // 0x670: D_002621C0
     BaseObject* receiver678; // 0x678: told (message 6) when the clock passes f680
     BaseObject* source67C;  // 0x67C: whose point the message gives, when set
-    f32 f680;               // 0x680
-    f32 f684;               // 0x684: a distance (func_0015BFC0 compares the active collider's point with it)
+    f32 nextMessageTime;    // 0x680: the clock when receiver678 is told next
+    f32 triggerDistance;    // 0x684: a distance (func_0015BFC0 compares the active collider's point with it)
     f32 nextCheckTime;               // 0x688: mode 1: the clock value of the next func_0015BD48 check
     s32 indexStep;               // 0x68C: 1 at set-up, then 1 or -1: how far each step moves the index
     s32 f690;               // 0x690: -1 at set-up

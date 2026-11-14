@@ -17,9 +17,9 @@
 struct Effect;   // the records of list558 (include/t219c.h)
 
 struct EffectOwner : Collider {
-    s32 f550;               // 0x550: 0 or 1, as the world hands the object out (func_0019E040 sets it);
+    s32 exclusive;          // 0x550: 0 or 1, as the world hands the object out (func_0019E040 sets it);
                             // func_0019E558 only runs for 1
-    f32 f554;               // 0x554
+    f32 boundsMargin;       // 0x554: the margin added to its bounds
     List01 list558;         // 0x558: the Effect records of its owners (link offset 0x10, func_00152438)
     EffectOwner* saved564;          // 0x564: the next object in the world's unused list (+0x1B38)
     u8 pad568[0x570 - 0x568];

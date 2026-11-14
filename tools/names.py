@@ -257,11 +257,12 @@ def _is_use(row, path):
 def declares_name(name, text):
     """Whether `text` declares `name` as a type, field, local or parameter (so the macro would
     rewrite that declaration too). A declaration of the symbol itself, which starts in the first
-    column (`extern u8 g_imageEnd[];`, `EntryPool g_pool;`), is not one."""
+    column (`extern u8 g_imageEnd[];`, `EntryPool g_pool;`), is not one. A `*` with a space on both
+    sides is a product (`radius * g_scale)`), never a declaration's pointer."""
     name = re.escape(name)
     declares = re.compile(r"(?:^|[;{}(,])\s*(?P<decl>(?!(?:return|case|goto|else|delete|throw|sizeof)\b)"
                           r"(?:(?:extern|static|const|volatile|unsigned|signed|struct)\s+)*(?!g_)[A-Za-z_]\w*"
-                          r"(?:\s*[\*&])*\s+[\*&]*%s)\s*[;=\[,)]" % name, re.M)
+                          r"(?:[\*&]+\s+|\s+[\*&]*)%s)\s*[;=\[,)]" % name, re.M)
     for m in declares.finditer(text):
         at = m.start("decl")
         if at == 0 or text[at - 1] == "\n":

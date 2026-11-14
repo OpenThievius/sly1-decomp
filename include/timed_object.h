@@ -40,21 +40,21 @@ struct Desc30 : Desc03 {
 
 struct TimedObject : Collider {
     StateTrigger* trigger;  // 0x550: set by slot 76; slot 77 tells it when the state goes from 1 to 2
-    s32 f554;               // 0x554: 0 at set-up
+    s32 repeating;          // 0x554: 0 at set-up
     s32 state;              // 0x558: -1 at set-up
-    f32 f55C;               // 0x55C: the time the state was entered
-    s32 f560;               // 0x560: the state slot 77 is called with when the object is set up
+    f32 stateStartTime;     // 0x55C: the time the state was entered
+    s32 initialState;       // 0x560: the state slot 77 is called with when the object is set up
     Ids03 ids564;           // 0x564: object ids (func_001AF000)
     Ids03 ids578;           // 0x578: object ids (func_001AF028)
     Ids03 ids58C;           // 0x58C: class ids (func_001AF050)
     Ids03 ids5A0;           // 0x5A0: class ids (func_001AF078)
-    s32 f5B4;               // 0x5B4: when set, every object is accepted (func_001AED78)
-    f32 f5B8;               // 0x5B8
-    f32 f5BC;               // 0x5BC
-    s32 f5C0;               // 0x5C0
-    void* f5C4;             // 0x5C4: a sound (func_001BFCD8 starts it, func_001BF788 stops it)
-    TrackPlayer* f5C8;           // 0x5C8
-    f32 f5CC;               // 0x5CC: the value kept out of f5C8's record
+    s32 acceptsAll;         // 0x5B4: when set, every object is accepted (func_001AED78)
+    f32 beginDuration;      // 0x5B8
+    f32 endDuration;        // 0x5BC
+    s32 triggerHeld;        // 0x5C0
+    void* sound;            // 0x5C4: a sound (func_001BFCD8 starts it, func_001BF788 stops it)
+    TrackPlayer* heldTrack;      // 0x5C8
+    f32 heldValue;          // 0x5CC: the value kept out of f5C8's record
 
     const Desc30* desc30() const { return (const Desc30*)desc; }
 };
@@ -82,27 +82,27 @@ struct TimedGroup : TimedObject {
     u8 pad5D8[0x5E0 - 0x5D8];
     TimedGroupChild groups[16];     // 0x5E0
     u8 padAE0[0xAEC - 0xAE0];
-    f32 fAEC;               // 0xAEC
+    f32 repeatEndDuration;  // 0xAEC
     TimedGroup* listNext;          // 0xAF0: the link in the world's list at +0x1CA8
     u8 padAF4[0xAF8 - 0xAF4];
     s32 flagAF8;            // 0xAF8: 1 while it is in the list
-    f32 fAFC;               // 0xAFC
-    s32 fB00;               // 0xB00
-    f32 fB04;               // 0xB04: 1.0 at set-up
-    f32 fB08;               // 0xB08
+    f32 nextStepTime;       // 0xAFC
+    s32 playerAccepted;     // 0xB00
+    f32 fade;               // 0xB04: 1.0 at set-up
+    f32 fadeRate;           // 0xB08
     u8 padB0C[0xB10 - 0xB0C];
 };
 
 // 0x32: two object ids it resolves at load (D_002744D8: +0x5D0 and +0x5D4), a state of its own
 // at +0x5D8 (func_001B1070) and three times.
 struct SequencedObject : TimedObject {
-    Collider* f5D0;              // 0x5D0
-    s32 f5D4;               // 0x5D4
+    Collider* phaseObject;       // 0x5D0
+    s32 beamObject;         // 0x5D4
     s32 state5D8;           // 0x5D8: -1 at set-up
-    f32 f5DC;               // 0x5DC: the time it was entered
-    f32 f5E0;               // 0x5E0
-    f32 f5E4;               // 0x5E4
-    f32 f5E8;               // 0x5E8
+    f32 substateStartTime;  // 0x5DC: the time it was entered
+    f32 substate0Duration;  // 0x5E0
+    f32 substate1Duration;  // 0x5E4
+    f32 substate2Duration;  // 0x5E8
     u8 pad5EC[0x5F0 - 0x5EC];
 };
 
@@ -121,11 +121,11 @@ struct BlinkObject : TimedObject {
     FrameRange animA;           // 0x5F0
     s32 blinkFrame;         // 0x600: -1 at set-up
     f32 blinkRate;          // 0x604
-    f32 f608;               // 0x608
-    f32 f60C;               // 0x60C
-    Elem02* f610;           // 0x610: an entry of PlacedObject's list at 0x280 (a frame target for func_001B1898)
-    f32 f614;               // 0x614
-    s32 f618;               // 0x618
+    f32 blinkDuration;      // 0x608
+    f32 restartDelay;       // 0x60C
+    Elem02* blinkElem;      // 0x610: an entry of PlacedObject's list at 0x280 (a frame target for func_001B1898)
+    f32 savedStartTime;     // 0x614
+    s32 resuming;           // 0x618
     u8 pad61C[0x620 - 0x61C];
 };
 

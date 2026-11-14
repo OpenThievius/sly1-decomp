@@ -29,7 +29,7 @@ class HeadTest(unittest.TestCase):
     def test_landed_form_is_a_candidate(self):
         # The neutral file, plane 3 named and the landed test inserted, is the landed file
         # without the comment over the test.
-        landed = re.search(r"\n    if \(\(u32\)p3 & \(w & 15\)\)\n        pic->width = 0;\n", self.text)
+        landed = re.search(r"\n    if \(\(u32\)p3 & \(w & 15\)\)\n        handle->pictureWidth = 0;\n", self.text)
         if landed is None:
             self.skipTest("the stand-in is no longer in the file")
         want = re.sub(r"    // NOT THE ORIGINAL'S STATEMENT.*?\n(?=    if )", "", self.text, flags=re.S)

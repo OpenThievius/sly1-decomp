@@ -29,7 +29,7 @@ void RegisterProgramFrameInfo();
 extern "C" void DestroyScriptMachineStaticsAtExit();
 void DestroyValuePoolsAtExit();
 void ReleaseProgramFrameInfo();
-void* D_0027B130[26] = {
+void* g_constructorList[26] = {
     (void*)0x12, ConstructScriptMachineStaticsAtStartup, ConstructValuePoolsAtStartup, ConstructTextPanelStaticsAtStartup,
     ConstructCameraStaticColorAtStartup, ResetPacketWriters, ConstructDefaultRgbaColorAtStartup, ConstructBoxStylesAtStartup,
     ConstructTriangleGroupColorsAtStartup, ConstructMovieRingSinkAtStartup, ConstructSwitchedColliderDefaultsAtStartup, ConstructMenuBoxStyleAtStartup,
@@ -42,5 +42,5 @@ void* D_0027B130[26] = {
 // The frame information of the six objects that have it (the libraries' C++ files: allocate.cpp,
 // exception.cpp, new_handler.cpp, type_info.cpp and the two before them), which
 // RegisterProgramFrameInfo hands to the runtime, ending in a zero.
-extern u8 D_00278000[], D_00278050[], D_00278644[], D_002789DC[], D_00278A7C[], D_00278E88[];
-u8* D_0027B198[7] = { D_00278000, D_00278050, D_00278644, D_002789DC, D_00278A7C, D_00278E88, 0 };
+extern u8 g_frameInfoObject0[], g_frameInfoObject1[], g_frameInfoObject2[], g_frameInfoObject3[], g_frameInfoObject4[], g_frameInfoObject5[];
+u8* g_frameInfoList[7] = { g_frameInfoObject0, g_frameInfoObject1, g_frameInfoObject2, g_frameInfoObject3, g_frameInfoObject4, g_frameInfoObject5, 0 };

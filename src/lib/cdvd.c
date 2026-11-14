@@ -28,16 +28,16 @@ typedef struct ReadTail {
 
 /* The .data starts on 64 bytes (0x14 bytes of padding after the DMA library's); the words the
  * end callback writes in the interrupt (whether a command is busy, its status) are volatile. */
-char D_00279400[16] __attribute__((aligned(64))) = "PsIIlibcdvd 2420";
-s32 D_00279410 = 0;
+char g_discLibraryIdentification[16] __attribute__((aligned(64))) = "PsIIlibcdvd 2420";
+s32 g_discMessagesEnabled = 0;
 s32 D_00279414 = 0;
-u32 D_00279418 = 0;
-u32 D_0027941C = 0;
-s32 D_00279420 = -1;
-s32 D_00279424 = 0;
+u32 g_discSLastCommand = 0;
+u32 g_discNLastCommand = 0;
+s32 g_discCallbackSemaphore = -1;
+s32 g_discCallbackSuppressed = 0;
 s32 g_discNSemaphore = -1;
 s32 g_discSSemaphore = -1;
-volatile s32 D_00279430 = 0;
+volatile s32 g_discNCommandBusy = 0;
 volatile u32 D_00279434 = 0;
 s32 D_00279438 = -1;
 s32 D_0027943C = -1;
@@ -45,29 +45,29 @@ s32 D_00279440 = -1;
 s32 D_00279444 = -1;
 s32 D_00279448 = -1;
 s32 D_0027944C = -1;
-u32 D_00279450 = 0;
-volatile s32 D_00279454 = 0;
-volatile s32 D_00279458 = 0;
-u8 D_00279480[128] __attribute__((aligned(64))) = { 0 };
-u8 D_00279500[0x1000] __attribute__((aligned(64))) = { 0 };
-u8 D_0027A500[192] __attribute__((aligned(64))) = { 0 };
-u32 D_0027A5C0[4] __attribute__((aligned(64))) = { 0 };
+u32 g_discInitCount = 0;
+volatile s32 g_discCommandResult = 0;
+volatile s32 g_discLastCommandResult = 0;
+u8 g_discNReceiveBuffer[128] __attribute__((aligned(64))) = { 0 };
+u8 g_discReadRequest[0x1000] __attribute__((aligned(64))) = { 0 };
+u8 g_discReadTail[192] __attribute__((aligned(64))) = { 0 };
+u32 g_discReadResult[4] __attribute__((aligned(64))) = { 0 };
 RemoteCallClient g_discNClient = { 0 };
-u8 D_0027A600[1088] __attribute__((aligned(64))) = { 0 };
-u32 D_0027AA40[0x102] __attribute__((aligned(64))) = { 0 };
+u8 g_discReceiveBuffer[1088] __attribute__((aligned(64))) = { 0 };
+u32 g_discSendBuffer[0x102] __attribute__((aligned(64))) = { 0 };
 RemoteCallClient g_discSClient = { 0 };
 
 static s32 D_0062A7C0;
-static void (*D_0062A7C4)(s32);
+static void (*g_discCallback)(s32);
 /* The callback's argument: 8 bytes in retail, of which only the first word is read. */
-static s32 D_0062A7C8[2];
-static s32 D_0062A7D0;
-static u8 D_0062A7D8[0x210];
-static RemoteCallClient D_0062A9E8;
-static RemoteCallClient D_0062AA10;
-static s32 D_0062AA40[4] __attribute__((aligned(64)));
+static s32 g_discCallbackArguments[2];
+static s32 g_discThreadId;
+static u8 g_discThreadStatus[0x210];
+static RemoteCallClient g_discInitClient;
+static RemoteCallClient g_discModeClient;
+static s32 g_discInitModeBuffer[4] __attribute__((aligned(64)));
 /* What WaitDiscReady sends: its one word, in a buffer that runs to the pad library's .bss. */
-static s32 D_0062AA50[12];
+static s32 g_discModeBuffer[12];
 
 s32 ScheduleAlarm(u16 ticks, void (*handler)(s32, u16, s32), s32 arg);
 s32 GetCurrentThreadId(void);
@@ -126,19 +126,19 @@ LINKER_REMNANT(func_00202D98);
  * the words it reads and writes are shared with the threads, read and written as volatile. */
 void EndDiscCommand(s32* code)
 {
-    D_00279454 = *code;
-    D_00279458 = D_00279454;
-    if (D_00279454 == 11) {
-        D_00279454 = 0;
-        D_00279430 = 0;
+    g_discCommandResult = *code;
+    g_discLastCommandResult = g_discCommandResult;
+    if (g_discCommandResult == 11) {
+        g_discCommandResult = 0;
+        g_discNCommandBusy = 0;
     } else {
         PostSemaphoreFromInterrupt(*(volatile s32*)&g_discNSemaphore);
         if (D_00279414 && D_0062A7C0) {
-            PostSemaphoreFromInterrupt(*(volatile s32*)&D_00279420);
+            PostSemaphoreFromInterrupt(*(volatile s32*)&g_discCallbackSemaphore);
         } else {
-            D_00279430 = 0;
+            g_discNCommandBusy = 0;
         }
-        D_00279454 = 0;
+        g_discCommandResult = 0;
     }
 }
 
@@ -161,7 +161,7 @@ void CopyDiscReadTail(ReadTail* tail)
             d[i] = q->src1[i];
         }
     }
-    EndDiscCommand((s32*)&D_00279454);
+    EndDiscCommand((s32*)&g_discCommandResult);
 }
 
 /* Creates the semaphores of the two clients' commands and of the callback, once. */
@@ -176,8 +176,8 @@ void CreateDiscSemaphores(void)
         *(volatile s32*)&g_discNSemaphore = NewSemaphore(&param);
         *(volatile s32*)&g_discSSemaphore = NewSemaphore(&param);
         param.initCount = 0;
-        *(volatile s32*)&D_00279420 = NewSemaphore(&param);
-        D_00279430 = 0;
+        *(volatile s32*)&g_discCallbackSemaphore = NewSemaphore(&param);
+        g_discNCommandBusy = 0;
     }
 }
 
@@ -187,12 +187,12 @@ void DeleteDiscSemaphores(void)
         /* A bare do/while(0), allowed for this function alone by the project's decision: retail
          * stores -1 here before loading D_00279420, and only this keeps the compiler from moving
          * the load first. */
-        do { D_00279454 = -1; } while (0);
-        PostSemaphore(D_00279420);
+        do { g_discCommandResult = -1; } while (0);
+        PostSemaphore(g_discCallbackSemaphore);
     }
     FreeSemaphore(g_discNSemaphore);
     FreeSemaphore(g_discSSemaphore);
-    FreeSemaphore(D_00279420);
+    FreeSemaphore(g_discCallbackSemaphore);
     DisableInterrupts();
     ClearCommandHandler(0x80000012);
     EnableInterrupts();
@@ -202,18 +202,18 @@ LINKER_REMNANT(func_00203008);
 
 void RunDiscCallback(void)
 {
-    if (D_0062A7C4 && !D_00279424) {
-        D_0062A7C4(D_0062A7C8[0]);
+    if (g_discCallback && !g_discCallbackSuppressed) {
+        g_discCallback(g_discCallbackArguments[0]);
     }
 }
 
 s32 InstallDiscCallbackHandler(void)
 {
-    D_00279424 = 1;
+    g_discCallbackSuppressed = 1;
     DisableInterrupts();
     SetCommandHandler(0x80000012, (void (*)(struct Packet_1FA068*, struct Channel_1FA068*))RunDiscCallback, 0);
     EnableInterrupts();
-    D_00279424 = 0;
+    g_discCallbackSuppressed = 0;
     D_0027943C = 1;
     return 1;
 }
@@ -237,13 +237,13 @@ s32 BeginDiscNCommand(s32 command)
 
     CreateDiscSemaphores();
     if (*(volatile s32*)&g_discNSemaphore != TrySemaphore(*(volatile s32*)&g_discNSemaphore)) {
-        if (D_00279410 > 0) {
-            PrintBuffered("Ncmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_0027941C);
+        if (g_discMessagesEnabled > 0) {
+            PrintBuffered("Ncmd fail sema cur_cmd:%d keep_cmd:%d\n", command, g_discNLastCommand);
         }
         return 0;
     }
-    D_0027941C = command;
-    QueryThreadStatus(D_0062A7D0, D_0062A7D8);
+    g_discNLastCommand = command;
+    QueryThreadStatus(g_discThreadId, g_discThreadStatus);
     if (SyncDiscNCommand(1)) {
         PostSemaphore(*(volatile s32*)&g_discNSemaphore);
         return 0;
@@ -252,7 +252,7 @@ s32 BeginDiscNCommand(s32 command)
     if (D_00279438 < 0) {
         while (1) {
             if (BindRemoteService(&g_discNClient, 0x80000595, 0) < 0) {
-                if (D_00279410 > 0) {
+                if (g_discMessagesEnabled > 0) {
                     PrintBuffered("Libcdvd bind err N CMD\n");
                 }
                 for (i = 0x100000; i != -1; i--) {
@@ -276,7 +276,7 @@ s32 GetDiscDriveState(void)
     if (BeginDiscNCommand(2) == 0) {
         return 0;
     }
-    recv = (u32)D_00279480;
+    recv = (u32)g_discNReceiveBuffer;
     if (CallRemoteService(&g_discNClient, 0xE, 0, 0, 0, (void*)recv, 4, 0, 0) < 0) {
         PostSemaphore(g_discNSemaphore);
         return 0;
@@ -289,15 +289,15 @@ s32 GetDiscDriveState(void)
 s32 SyncDiscNCommand(s32 mode)
 {
     if (mode == 0) {
-        if (D_00279410 > 0) {
+        if (g_discMessagesEnabled > 0) {
             PrintBuffered("N cmd wait\n");
         }
-        while (D_00279430 != 0 || IsRemoteCallPending(&g_discNClient) != 0) {
+        while (g_discNCommandBusy != 0 || IsRemoteCallPending(&g_discNClient) != 0) {
             WaitDiscTicks(60);
         }
         return 0;
     }
-    if (D_00279430 != 0 || IsRemoteCallPending(&g_discNClient)) {
+    if (g_discNCommandBusy != 0 || IsRemoteCallPending(&g_discNClient)) {
         return 1;
     }
     return 0;
@@ -306,7 +306,7 @@ s32 SyncDiscNCommand(s32 mode)
 s32 SyncDiscSCommand(s32 mode)
 {
     if (mode == 0) {
-        if (D_00279410 > 0) {
+        if (g_discMessagesEnabled > 0) {
             PrintBuffered("S cmd wait\n");
         }
         while (IsRemoteCallPending(&g_discSClient) != 0) {
@@ -324,13 +324,13 @@ s32 BeginDiscSCommand(s32 command)
 
     CreateDiscSemaphores();
     if (*(volatile s32*)&g_discSSemaphore != TrySemaphore(*(volatile s32*)&g_discSSemaphore)) {
-        if (D_00279410 > 0) {
-            PrintBuffered("Scmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_00279418);
+        if (g_discMessagesEnabled > 0) {
+            PrintBuffered("Scmd fail sema cur_cmd:%d keep_cmd:%d\n", command, g_discSLastCommand);
         }
         return 0;
     }
-    D_00279418 = command;
-    QueryThreadStatus(D_0062A7D0, D_0062A7D8);
+    g_discSLastCommand = command;
+    QueryThreadStatus(g_discThreadId, g_discThreadStatus);
     if (SyncDiscSCommand(1)) {
         PostSemaphore(*(volatile s32*)&g_discSSemaphore);
         return 0;
@@ -339,7 +339,7 @@ s32 BeginDiscSCommand(s32 command)
     if (D_00279448 < 0) {
         while (1) {
             if (BindRemoteService(&g_discSClient, 0x80000593, 0) < 0) {
-                if (D_00279410 > 0) {
+                if (g_discMessagesEnabled > 0) {
                     PrintBuffered("Libcdvd bind err S cmd\n");
                 }
                 for (i = 0x100000; i != -1; i--) {
@@ -374,8 +374,8 @@ s32 InitDiscLibrary(s32 mode)
         return 0;
     }
     InitRemoteCalls(0);
-    D_0062A7D0 = GetCurrentThreadId();
-    *(volatile s32*)&D_00279424 = 1;
+    g_discThreadId = GetCurrentThreadId();
+    *(volatile s32*)&g_discCallbackSuppressed = 1;
     D_00279440 = -1;
     D_00279438 = -1;
     D_00279448 = -1;
@@ -383,24 +383,24 @@ s32 InitDiscLibrary(s32 mode)
     D_0027944C = -1;
     D_0027943C = -1;
     D_00279434 = 0;
-    D_00279450++;
+    g_discInitCount++;
     while (1) {
-        r = BindRemoteService(&D_0062A9E8, 0x80000592, 0);
+        r = BindRemoteService(&g_discInitClient, 0x80000592, 0);
         if (r < 0) {
-            if (D_00279410 > 0) {
-                PrintBuffered("Libcdvd bind err %d CD_Init %d\n", r, D_00279450);
+            if (g_discMessagesEnabled > 0) {
+                PrintBuffered("Libcdvd bind err %d CD_Init %d\n", r, g_discInitCount);
             }
             for (i = 0x100000; i != -1; i--) {
             }
             continue;
         }
-        if (D_0062A9E8.server != 0) {
-            D_0062AA40[0] = mode;
+        if (g_discInitClient.server != 0) {
+            g_discInitModeBuffer[0] = mode;
             D_0027944C = 0;
-            WriteBackDataCacheRange(D_0062AA40, 4);
-            recv = (u32)D_0027A600;
-            if (CallRemoteService(&D_0062A9E8, 0, 0, D_0062AA40, 4, (void*)recv, 0x10, 0, 0) < 0) {
-                *(volatile s32*)&D_00279424 = 0;
+            WriteBackDataCacheRange(g_discInitModeBuffer, 4);
+            recv = (u32)g_discReceiveBuffer;
+            if (CallRemoteService(&g_discInitClient, 0, 0, g_discInitModeBuffer, 4, (void*)recv, 0x10, 0, 0) < 0) {
+                *(volatile s32*)&g_discCallbackSuppressed = 0;
                 return 0;
             }
             break;
@@ -414,21 +414,21 @@ s32 InitDiscLibrary(s32 mode)
     result = 1;
     if (status != 0xFF) {
         if (status == 0xFE) {
-            D_00279410 = 1;
+            g_discMessagesEnabled = 1;
         } else if (a / 256 < 2 || b / 256 < 2) {
             result = 2;
         }
     }
-    *(volatile s32*)&D_00279424 = 0;
+    *(volatile s32*)&g_discCallbackSuppressed = 0;
     switch (mode) {
     case 5:
-        if (D_00279410 > 0) {
+        if (g_discMessagesEnabled > 0) {
             PrintBuffered("Libcdvd Exit\n");
         }
         DeleteDiscSemaphores();
         *(volatile s32*)&g_discNSemaphore = -1;
         *(volatile s32*)&g_discSSemaphore = -1;
-        *(volatile s32*)&D_00279420 = -1;
+        *(volatile s32*)&g_discCallbackSemaphore = -1;
         break;
     case 0:
     case 1:
@@ -450,7 +450,7 @@ s32 WaitDiscReady(s32 mode)
     s32 r;
     s32 v;
 
-    if (D_00279410 > 0) {
+    if (g_discMessagesEnabled > 0) {
         PrintBuffered("DiskReady 0\n");
     }
     CreateDiscSemaphores();
@@ -464,15 +464,15 @@ s32 WaitDiscReady(s32 mode)
     InitRemoteCalls(0);
     if (D_00279444 < 0) {
         do {
-            if (BindRemoteService(&D_0062AA10, 0x8000059A, 0) < 0) {
-                if (D_00279410 > 0) {
+            if (BindRemoteService(&g_discModeClient, 0x8000059A, 0) < 0) {
+                if (g_discMessagesEnabled > 0) {
                     PrintBuffered("Libcdvd bind err CdDiskReady\n");
                 }
                 for (i = 0x100000; i != -1; i--) {
                 }
                 continue;
             }
-            if (D_0062AA10.server != 0) {
+            if (g_discModeClient.server != 0) {
                 D_00279444 = 0;
                 break;
             }
@@ -480,14 +480,14 @@ s32 WaitDiscReady(s32 mode)
             }
         } while (1);
     }
-    D_0062AA50[0] = mode;
-    WriteBackDataCacheRange(D_0062AA50, 4);
-    r = (s32)D_0027A600;
-    if (CallRemoteService(&D_0062AA10, 0, 0, D_0062AA50, 4, (void*)r, 4, 0, 0) < 0) {
+    g_discModeBuffer[0] = mode;
+    WriteBackDataCacheRange(g_discModeBuffer, 4);
+    r = (s32)g_discReceiveBuffer;
+    if (CallRemoteService(&g_discModeClient, 0, 0, g_discModeBuffer, 4, (void*)r, 4, 0, 0) < 0) {
         PostSemaphore(*(volatile s32*)&g_discSSemaphore);
         return mode != 8 ? 6 : -1;
     }
-    if (D_00279410 > 0) {
+    if (g_discMessagesEnabled > 0) {
         PrintBuffered("DiskReady ended\n");
     }
     v = *(s32*)((u32)r | 0x20000000);
@@ -497,18 +497,18 @@ s32 WaitDiscReady(s32 mode)
 
 u32 SendDiscSCommand22(u32 value)
 {
-    u32* send = D_0027AA40;
+    u32* send = g_discSendBuffer;
     u32 recv;
     s32 r;
 
     if (BeginDiscSCommand(0x22) != 0) {
-        D_0027AA40[0] = value;
+        g_discSendBuffer[0] = value;
     } else {
         return 0;
     }
     WriteBackDataCacheRange(send, 4);
-    recv = (u32)D_0027A600;
-    r = CallRemoteService(&g_discSClient, 0x22, 0, send, 4, D_0027A600, 4, 0, 0);
+    recv = (u32)g_discReceiveBuffer;
+    r = CallRemoteService(&g_discSClient, 0x22, 0, send, 4, g_discReceiveBuffer, 4, 0, 0);
     if (r < 0) {
         PostSemaphore(g_discSSemaphore);
         return 0;
@@ -520,8 +520,8 @@ u32 SendDiscSCommand22(u32 value)
 
 s32 GetDiscReadPosition(void)
 {
-    if (D_00279454 == 1)
-        return *(u32*)((u32)D_0027A5C0 | 0x20000000);
+    if (g_discCommandResult == 1)
+        return *(u32*)((u32)g_discReadResult | 0x20000000);
     return 0;
 }
 
@@ -550,7 +550,7 @@ typedef struct ReadMode {
  * data cache first; the end callback copies the tail. */
 s32 ReadDiscSectors(s32 lsn, s32 sectors, void* buffer, ReadMode* mode)
 {
-    ReadRequest* r = (ReadRequest*)D_00279500;
+    ReadRequest* r = (ReadRequest*)g_discReadRequest;
     s32 size;
 
     if (!(D_00279434 & 1)) {
@@ -565,8 +565,8 @@ s32 ReadDiscSectors(s32 lsn, s32 sectors, void* buffer, ReadMode* mode)
     r->tries = mode->tries;
     r->speed = mode->speed;
     r->pattern = mode->pattern;
-    r->tail = D_0027A500;
-    r->result = D_0027A5C0;
+    r->tail = g_discReadTail;
+    r->result = g_discReadResult;
     switch (mode->pattern) {
     case 1:
         size = sectors * 0x918;
@@ -581,23 +581,23 @@ s32 ReadDiscSectors(s32 lsn, s32 sectors, void* buffer, ReadMode* mode)
         size = sectors << 11;
         break;
     }
-    D_0027A5C0[0] = 0;
+    g_discReadResult[0] = 0;
     if (!(D_00279434 & 2))
         WriteBackDataCacheRange(buffer, size);
-    WriteBackDataCacheRange(D_0027A500, 0x90);
+    WriteBackDataCacheRange(g_discReadTail, 0x90);
     WriteBackDataCacheRange(r, 0x18);
-    WriteBackDataCacheRange(D_0027A5C0, 4);
-    if (D_00279410 > 0)
+    WriteBackDataCacheRange(g_discReadResult, 4);
+    if (g_discMessagesEnabled > 0)
         PrintBuffered("call cdread cmd\n");
-    D_00279454 = 1;
-    D_00279430 = 1;
-    if (CallRemoteService(&g_discNClient, 1, 1, r, 0x18, 0, 0, (void (*)(void*))CopyDiscReadTail, D_0027A500) < 0) {
-        D_00279454 = 0;
-        D_00279430 = 0;
+    g_discCommandResult = 1;
+    g_discNCommandBusy = 1;
+    if (CallRemoteService(&g_discNClient, 1, 1, r, 0x18, 0, 0, (void (*)(void*))CopyDiscReadTail, g_discReadTail) < 0) {
+        g_discCommandResult = 0;
+        g_discNCommandBusy = 0;
         PostSemaphore(*(volatile s32*)&g_discNSemaphore);
         return 0;
     }
-    if (D_00279410 > 0)
+    if (g_discMessagesEnabled > 0)
         PrintBuffered("cdread end\n");
     return 1;
 }
@@ -609,7 +609,7 @@ s32 GetDiscStatus(void)
 
     if (!BeginDiscSCommand(1))
         return 0;
-    base = (u32)D_0027A600;
+    base = (u32)g_discReceiveBuffer;
     if (CallRemoteService(&g_discSClient, 3, 0, 0, 0, (void*)base, 4, 0, 0) < 0) {
         PostSemaphore(g_discSSemaphore);
         return 0;
@@ -626,7 +626,7 @@ s32 GetDiscError(void)
 
     if (!BeginDiscSCommand(3))
         return -1;
-    base = (u32)D_0027A600;
+    base = (u32)g_discReceiveBuffer;
     if (CallRemoteService(&g_discSClient, 4, 0, 0, 0, (void*)base, 4, 0, 0) < 0) {
         PostSemaphore(g_discSSemaphore);
         return -1;
@@ -643,14 +643,14 @@ s32 StopDiscRead(void)
     if (BeginDiscSCommand(0x1E) == 0) {
         return 0;
     }
-    *(volatile s32*)&D_00279454 = 8;
-    if (CallRemoteService(&g_discSClient, 0x16, 0, 0, 0, D_0027A600, 4, 0, 0) < 0) {
+    *(volatile s32*)&g_discCommandResult = 8;
+    if (CallRemoteService(&g_discSClient, 0x16, 0, 0, 0, g_discReceiveBuffer, 4, 0, 0) < 0) {
         PostSemaphore(*(volatile s32*)&g_discSSemaphore);
-        *(volatile s32*)&D_00279454 = 0;
+        *(volatile s32*)&g_discCommandResult = 0;
         return 0;
     }
-    *(volatile s32*)&D_00279454 = 0;
-    r = *(s32*)((u32)D_0027A600 | 0x20000000);
+    *(volatile s32*)&g_discCommandResult = 0;
+    r = *(s32*)((u32)g_discReceiveBuffer | 0x20000000);
     PostSemaphore(*(volatile s32*)&g_discSSemaphore);
     return r;
 }
@@ -659,15 +659,15 @@ s32 CheckDiscChanged(s32 value, s32* out)
 {
     s32 base;
     s32 r;
-    u32* send = D_0027AA40;
+    u32* send = g_discSendBuffer;
 
     if (BeginDiscSCommand(0x1A) != 0) {
-        D_0027AA40[0] = value;
+        g_discSendBuffer[0] = value;
     } else {
         return -1;
     }
     WriteBackDataCacheRange(send, 4);
-    base = (s32)D_0027A600;
+    base = (s32)g_discReceiveBuffer;
     r = CallRemoteService(&g_discSClient, 5, 0, send, 4, (void*)base, 8, 0, 0);
     if (r < 0) {
         PostSemaphore(*(volatile s32*)&g_discSSemaphore);

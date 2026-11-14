@@ -13,13 +13,13 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
     if (a != self->walkerChoice && a > 0) {
         ChoiceSound* slot = 0;
         if (g_saveData->levels[a].f448 & 1) {
-            if (!(g_saveData->f19EC & 2)) {
+            if (!(g_saveData->optionFlags & 2)) {
                 slot = GetLoadedKeyRecord(5);
-                g_saveData->f19EC |= 2;
+                g_saveData->optionFlags |= 2;
             }
         } else {
-            Gl_eu_16B300* gp = (Gl_eu_16B300*)&D_0026FA90;
-            if (D_00262970 <= g_gameClock[1] - gp->f578) {
+            Gl_eu_16B300* gp = (Gl_eu_16B300*)&g_selectionCaption;
+            if (g_choiceSoundGap <= g_gameClock[1] - gp->f578) {
                 slot = GetLoadedKeyRecord(D_eu_00263BC0[a]);
                 gp->f578 = g_gameClock[1];
             }
@@ -33,11 +33,11 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
     if (h) {
         if (self->choice == -1) {
             if (a != 0) {
-                TeleportStateWalker((StateWalker*)h, D_00262860[a].targetKey);
-                SetStateWalkerTarget(self->walkers[0].walker, D_00262860[a].walkerKey);
+                TeleportStateWalker((StateWalker*)h, g_choiceKeys[a].targetKey);
+                SetStateWalkerTarget(self->walkers[0].walker, g_choiceKeys[a].walkerKey);
             }
         } else {
-            SetStateWalkerTarget((StateWalker*)h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
+            SetStateWalkerTarget((StateWalker*)h, *(s32*)((u8*)g_choiceKeys + (a * 8 + b * 4)));
         }
     }
     self->choice = a;

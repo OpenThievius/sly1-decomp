@@ -7,7 +7,7 @@
 // The records come from the world's pool at World::pool1B20 (func_00121228 takes one, stores the
 // table at +0 and calls its slot 0; func_00121358, slot 2, gives it back). An object keeps its
 // attachments in the list at PlacedObject::list1E0 (the link at +8), and the ones that give its position
-// and orientation in PlacedObject::f1EC and PlacedObject::f1F0. Eight tables (D_00219560 ...) of ten slots make
+// and orientation in PlacedObject::positionAttachment and PlacedObject::orientationAttachment. Eight tables (D_00219560 ...) of ten slots make
 // eight variants; they share this base, up to +0x17, and each adds fields from there.
 // Every field line ends with its offset. The size of a record is the pool's, which no code here
 // shows (the largest variant reaches 0xC8), so the variants have no sizeof check.
@@ -64,7 +64,7 @@ struct Attachment {
     s32 key;                // 0x14: the list is kept in descending key order (func_001299E0, func_00129A58)
 };
 
-// The 0xC0-byte record the owner points to at PlacedObject::f224 (func_00128C10 reads it from the
+// The 0xC0-byte record the owner points to at PlacedObject::linkRecord (func_00128C10 reads it from the
 // stream by the flag bits at +0xB0): two matrices, then either the objects it follows (ids until
 // func_00128DB8 resolves them) or, with flag 0x80, four quadwords of its own (func_001261C0).
 struct Rec2195_224 {
@@ -79,15 +79,15 @@ struct Rec2195_224 {
             BaseObject* p84;    // 0x84: flag 0x20
             void* p88;          // 0x88: the ancestor the owner shares with f80
             f32 f8C;            // 0x8C
-            f32 f90;            // 0x90: func_00120AA8
-            f32 f94;            // 0x94: copied with f90 (func_001276C0)
-            s32 f98;            // 0x98: 0 with flag 0x20 (func_00128C10); bit 2 set or cleared by func_001C4578 when fB0 has 0x20
+            f32 angle;          // 0x90: func_00120AA8
+            f32 angleSlope;     // 0x94: copied with f90 (func_001276C0)
+            s32 linkFlags;      // 0x98: 0 with flag 0x20 (func_00128C10); bit 2 set or cleared by func_001C4578 when fB0 has 0x20
         };
     };
     s32 fA0;                // 0xA0: set, the owner's transform is unscaled by its parent's (func_00125C90)
     s32 fA4;                // 0xA4: whether q60 is set (func_001261C0)
     u8 padA8[0xB0 - 0xA8];  // 0xA8
-    s32 fB0;                // 0xB0: the flags; bit 0x20 gives the value at +0x8C
+    s32 flags;              // 0xB0: the flags; bit 0x20 gives the value at +0x8C
 };
 
 // The player an animation track attachment follows (D_002197C0): it holds the animation, a
@@ -100,11 +100,11 @@ struct AnimationPlayer {
     const void* vt;         // 0x00: D_002197B8
     u8 pad04[0x08 - 0x04]; // 0x04
     Animation* anim;              // 0x08: its tracks (Animation::tracks at +0x3C) are what the attachment follows
-    void* fC;               // 0x0C: an object func_0012F760 tells first (its slot 14, Desc01::m0E)
+    void* object;           // 0x0C: an object func_0012F760 tells first (its slot 14, Desc01::m0E)
     f32 f10;                // 0x10
     f32 time;               // 0x14
     f32 speed;              // 0x18
-    f32 f1C;                // 0x1C: a scale of the speed (func_0012F6B0, func_0012F6D0; func_0012C288 sets it)
+    f32 speedScale;         // 0x1C: a scale of the speed (func_0012F6B0, func_0012F6D0; func_0012C288 sets it)
     s32 f20;                // 0x20: the next timed entry (func_0012E4E0, func_0012D5D0)
     s8 state24;             // 0x24: func_0012D448
     u8 pad25[0x28 - 0x25]; // 0x25
@@ -121,8 +121,8 @@ struct AnimationPlayer {
         void* p50;          // 0x50: an object func_0012D5D0 calls through
     };
     u8 f54[8];              // 0x54: handed to func_0015F9A0 (func_0012E760)
-    s32 f5C;                // 0x5C: the number of f60 entries (func_0012C288)
-    void* f60;              // 0x60: its own +0x64 at set-up (func_0012D3F8)
+    s32 rootCount;          // 0x5C: the number of f60 entries (func_0012C288)
+    void* roots;            // 0x60: its own +0x64 at set-up (func_0012D3F8)
     u8 pad64[0xE4 - 0x64]; // 0x64
     QueuedCall* fE4;           // 0xE4: its callbacks, records of World::pool1B14 (func_0012F760 calls each, func_0012E760 gives them back)
     u8 padE8[0xEC - 0xE8]; // 0xE8
@@ -144,7 +144,7 @@ struct T2195_588 : Attachment {
     f32 f84;                // 0x84
     u8 pad88[0x90 - 0x88]; // 0x88
     Mat02 m90;              // 0x90: the identity
-    s32 countC0;            // 0xC0: PlacedObject::f26C
+    s32 countC0;            // 0xC0: PlacedObject::valueCount
     f32* valuesC4;          // 0xC4: the owner's values (+0x274)
 };
 
@@ -158,7 +158,7 @@ struct T2195_5B0 : Attachment {
     f32* p2C;               // 0x2C: &Rec2195_224::f8C, when its flag is set
     f32* p30;               // 0x30: D_00248D30
     Mat02* ident;           // 0x34: D_002483D0
-    s32* count;             // 0x38: &PlacedObject::f26C
+    s32* count;             // 0x38: &PlacedObject::valueCount
     f32* values;            // 0x3C: the owner's values (+0x274)
 };
 
@@ -194,9 +194,9 @@ struct T2195_790 : Attachment {
     void* target;           // 0x24
     u8 pad28[0x30 - 0x28]; // 0x28
     Vec02 point;            // 0x30
-    f32 f40;                // 0x40: 800.0; the aim range, the distance that picks f44 or f48 (func_00185498)
-    s32 f44;                // 0x44: 1; the key taken when the target is within f40
-    s32 f48;                // 0x48: -1; the key taken when the target is beyond f40
+    f32 aimRange;           // 0x40: 800.0; the aim range, the distance that picks f44 or f48 (func_00185498)
+    s32 nearKey;            // 0x44: 1; the key taken when the target is within f40
+    s32 farKey;             // 0x48: -1; the key taken when the target is beyond f40
     s32 hold;               // 0x4C: while set, func_00185538 hands back the owner's own matrix
     Vec02 v50;              // 0x50: the quadratic (a, b, c) applied to the yaw toward the target
     Pk8_2195 p60;           // 0x60: the low and high the yaw is clamped to

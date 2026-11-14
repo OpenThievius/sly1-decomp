@@ -22,7 +22,7 @@ void CancelPauseMenuPage(Self_1961C0_eu* self)
         SetPauseMenuLayerPage(self, 0, 0);
         break;
     case 24: {
-        DisplayRegs* g = &D_00262490;
+        DisplayRegs* g = &g_displayRegisters;
         s32 v = ConvertFloatToU32(D_eu_0026BB38);
         DisplayReg64 a = g->f40;
         DisplayReg32 b = g->f18;

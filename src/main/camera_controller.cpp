@@ -94,9 +94,9 @@ struct CameraSound {
 // The object StartCameraSounds fills (g_camera): two sounds and a flag it sets.
 struct CameraSoundOwner {
     u8 pad000[0x44];
-    s32 f44;
-    CameraSound* f48;
-    s32 f4C;
+    s32 soundPaused;
+    CameraSound* sound;
+    s32 secondSound;
 };
 
 extern u8 g_camera[];
@@ -161,8 +161,8 @@ void UpdateIdleCameraController(CameraController* self, u8* eye, u8* tail, f32 d
 Quad16 GetCameraControllerTargetPoint(TargetCameraController* self)
 {
     Quad16 r;
-    if (self->f5C != 0) {
-        ConvertPositionToWorld((BaseObject*)self->f5C, (Vec02*)&r);
+    if (self->anchorObject != 0) {
+        ConvertPositionToWorld((BaseObject*)self->anchorObject, (Vec02*)&r);
     } else {
         if (GetActiveSwitchedCollider() != 0) {
             r = *(Quad16*)((u8*)GetActiveSwitchedCollider() + 0x140);
@@ -179,12 +179,12 @@ Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self)
     Quad16 r;
     Mat02 m;
     Vec02* offset;
-    if (g_player != 0 && g_player->f2228 == 0x22) {
+    if (g_player != 0 && g_player->subState == 0x22) {
         offset = &D_00261C20;
     } else {
         offset = &D_00261C10;
     }
-    BuildYawPitchMatrix(*(f32*)&self->value, self->f10, &m);
+    BuildYawPitchMatrix(*(f32*)&self->value, self->pitch, &m);
     Quad16 target = GetCameraControllerTargetPoint(self);
     Vu0::Q(r) = Vu0::Add(Vu0::Q(target), Vu0::Rotate(m, Vu0::Q(*(Quad16*)offset)));
     return r;
@@ -192,12 +192,12 @@ Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self)
 
 void StartCameraSounds(CameraSoundOwner* self)
 {
-    StartSoundEffect(0x71, (PlayingSound**)&self->f48, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-    if (self->f48 != 0) {
-        PauseIopVoice(self->f48->voice);
+    StartSoundEffect(0x71, (PlayingSound**)&self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    if (self->sound != 0) {
+        PauseIopVoice(self->sound->voice);
     }
-    StartSoundEffect(0x70, (PlayingSound**)&self->f4C, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-    self->f44 = 1;
+    StartSoundEffect(0x70, (PlayingSound**)&self->secondSound, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    self->soundPaused = 1;
 }
 
 void PushStackValue(TargetCameraController* s, s32 value)
@@ -236,7 +236,7 @@ void InitTargetCameraController(TargetCameraController* self, Camera* owner)
     self->f20 = 10.0f;
     PushStackValue(self, 0);
     self->f54 = 0.5f;
-    self->f58 = -1.0f;
+    self->sizeOverride = -1.0f;
     self->f50 = 0;
 }
 
@@ -246,17 +246,17 @@ void ActivateTargetCameraController(TargetCameraController* self)
     Camera* eng = (Camera*)self->owner;
     VectorToAngles((Vec3*)((u8*)eng + 0x80), (f32*)((u8*)self + 8), (f32*)((u8*)self + 0x10));
     f32 d = self->f20;
-    self->f10 = D_00261BF0;
+    self->pitch = D_00261BF0;
     self->f0C = 0;
     self->f14 = 0;
     self->f18 = 0;
     self->f1C = 0;
-    f32 a = eng->f1C8;
-    self->f28 = a;
-    self->f24 = a / d;
+    f32 a = eng->zoomGoal;
+    self->zoomMax = a;
+    self->zoomMin = a / d;
     GetCameraControllerTargetPoint(&tmp, self);
     SetCameraLookAnchor(eng, (Quad16*)&tmp);
-    self->f2C = eng->f1E4;
+    self->savedNearDistance = eng->nearDistance;
     SetCameraNearDistance(eng, 49.0f);
 }
 
@@ -382,15 +382,15 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
     mode = PeekStackValue(self);
     switch (mode) {
     case 0: {
-        f32 t = self->g18;
-        f32 speed = (D_00261C30[0] + t * (D_00261C30[1] + t * D_00261C30[2])) * pad->f78 * __builtin_fabsf(pad->f78);
-        self->g1C = speed;
-        self->g18 = ClampFloat(t + speed * dt, 0.0f, 1.0f);
+        f32 t = self->zoomFraction;
+        f32 speed = (D_00261C30[0] + t * (D_00261C30[1] + t * D_00261C30[2])) * pad->secondStickY * __builtin_fabsf(pad->secondStickY);
+        self->zoomSpeed = speed;
+        self->zoomFraction = ClampFloat(t + speed * dt, 0.0f, 1.0f);
         break;
     }
     case 1:
     case 2: {
-        u8* obj = self->obj50;
+        u8* obj = self->keptObject;
         s32 near = 0;
         f32 zoom;
         if (obj != 0) {
@@ -399,41 +399,41 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             Vec02 mid;
             Vec02 d;
             Vec02 e;
-            f32 size = (0.0f < self->f58) ? self->f58 : *(f32*)(obj + 0x2A8);
-            f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of((*(Camera**)g_camera)->f40), Vu0::Vec::Of(*(Vec02*)(obj + 0x140)))));
+            f32 size = (0.0f < self->sizeOverride) ? self->sizeOverride : *(f32*)(obj + 0x2A8);
+            f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of((*(Camera**)g_camera)->position), Vu0::Vec::Of(*(Vec02*)(obj + 0x140)))));
             f32 fov = 2.0f * Arctangent(size / (self->f54 * dist));
-            fov = self->f24 >? fov;
+            fov = self->zoomMin >? fov;
             ComputeObjectFrameAtTime((PlacedObject*)obj, 0, &pos, 0, 0, 0, 0.1f);
             Vu0::Q(span) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(*(Vec02*)(obj + 0x140))).q;
             Camera* gc = *(Camera**)g_camera;
             Vu0::Q(mid) = Vu0::Add(Vu0::Vec::Of(*(Vec02*)(obj + 0x140)), Vu0::MulX(Vu0::Vec::Of(span), Vu0::Vec::Scalar(0.5f))).q;
             f32 reach = size + Vu0::ToFloatMoved(Vu0::Length(Vu0::Vec::Of(span))) * 0.5f;
-            Vu0::Q(d) = Vu0::Sub(Vu0::Vec::Of(mid), Vu0::Vec::Of(gc->f40)).q;
-            Vu0::Q(d) = Vu0::RotateTransposed(*(Mat02*)gc->f80, Vu0::Vec::Of(d)).q;
+            Vu0::Q(d) = Vu0::Sub(Vu0::Vec::Of(mid), Vu0::Vec::Of(gc->position)).q;
+            Vu0::Q(d) = Vu0::RotateTransposed(*(Mat02*)gc->rotation, Vu0::Vec::Of(d)).q;
             e.x = -d.y;
             e.y = d.z;
             e.z = d.x;
             f32 fit;
             if (0.0001f < e.z) {
-                f32 a = 2.0f * Arctangent((__builtin_fabsf(e.x) + reach) / (e.z * gc->f1E0));
+                f32 a = 2.0f * Arctangent((__builtin_fabsf(e.x) + reach) / (e.z * gc->aspectScale));
                 f32 b = 2.0f * Arctangent((__builtin_fabsf(e.y) + reach) / e.z);
-                fit = self->f28 <? (b >? a);
+                fit = self->zoomMax <? (b >? a);
             } else {
-                fit = self->f28;
+                fit = self->zoomMax;
             }
-            zoom = ClampFloat(1.0f - RangeFraction(&self->f24, fov >? fit), 0.0f, 1.0f);
-            if (fov < fit && zoom < self->g18) {
+            zoom = ClampFloat(1.0f - RangeFraction(&self->zoomMin, fov >? fit), 0.0f, 1.0f);
+            if (fov < fit && zoom < self->zoomFraction) {
                 near = 1;
             }
         } else {
             zoom = 0.0f;
         }
-        if ((D_00270518 != 1 && (near || (zoom < self->g18 && (self->g1C < 0.0f || 0.025f < self->g18 - zoom))))
-            || (self->g18 < zoom && (0.0f < self->g1C || 0.035f < zoom - self->g18))) {
+        if ((D_00270518 != 1 && (near || (zoom < self->zoomFraction && (self->zoomSpeed < 0.0f || 0.025f < self->zoomFraction - zoom))))
+            || (self->zoomFraction < zoom && (0.0f < self->zoomSpeed || 0.035f < zoom - self->zoomFraction))) {
             void* profile;
             RampProfile scaled;
             if (!near) {
-                f32 gap = __builtin_fabsf(zoom - self->g18);
+                f32 gap = __builtin_fabsf(zoom - self->zoomFraction);
                 f32 w[2] = { 1.0f, 4.0f };
                 f32 s = (1.0f - gap) * w[0] + gap * w[1];
                 scaled = *(RampProfile*)D_00261C40;
@@ -444,81 +444,81 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             } else {
                 profile = D_00261C50;
             }
-            self->g18 = ApproachValueClampingVelocity(self->g18, self->g1C, zoom, dt, profile, &self->g1C);
+            self->zoomFraction = ApproachValueClampingVelocity(self->zoomFraction, self->zoomSpeed, zoom, dt, profile, &self->zoomSpeed);
         } else {
-            self->g1C = ApproachValueWithRamp(self->g1C, 0.0f, dt, (RampProfile*)D_00261C60, 0);
-            self->g18 = ClampFloat(self->g18 + self->g1C * dt, 0.0f, 1.0f);
+            self->zoomSpeed = ApproachValueWithRamp(self->zoomSpeed, 0.0f, dt, (RampProfile*)D_00261C60, 0);
+            self->zoomFraction = ClampFloat(self->zoomFraction + self->zoomSpeed * dt, 0.0f, 1.0f);
         }
         break;
     }
     case 3: {
-        f32 v = ClampFloat(ApproachValueWithRamp(self->g18, D_002704F8, dt, (RampProfile*)D_00261C70, 0), 0.0f, 1.0f);
-        f32 prev = self->g18;
-        self->g18 = v;
-        self->g1C = (v - prev) / dt;
+        f32 v = ClampFloat(ApproachValueWithRamp(self->zoomFraction, D_002704F8, dt, (RampProfile*)D_00261C70, 0), 0.0f, 1.0f);
+        f32 prev = self->zoomFraction;
+        self->zoomFraction = v;
+        self->zoomSpeed = (v - prev) / dt;
         break;
     }
     case 4:
         break;
     }
 
-    CameraSound* sound = (CameraSound*)self->p48;
+    CameraSound* sound = (CameraSound*)self->zoomSound;
     if (sound != 0) {
-        if (self->g1C != 0.0f) {
-            if (self->f44 != 0) {
+        if (self->zoomSpeed != 0.0f) {
+            if (self->soundPaused != 0) {
                 ResumeIopVoice(sound->voice);
-                self->f44 = 0;
+                self->soundPaused = 0;
             }
-            SetSoundRecordPitch((PlayingSound*)self->p48, ClampFloat(__builtin_fabsf(self->g1C), -1.0f, 1.0f));
-            SetSoundRecordVolume((PlayingSound*)self->p48, ClampFloat(__builtin_fabsf(self->g1C) * 0.5f + 0.5f, 0.0f, 1.0f));
-        } else if (self->f44 == 0) {
+            SetSoundRecordPitch((PlayingSound*)self->zoomSound, ClampFloat(__builtin_fabsf(self->zoomSpeed), -1.0f, 1.0f));
+            SetSoundRecordVolume((PlayingSound*)self->zoomSound, ClampFloat(__builtin_fabsf(self->zoomSpeed) * 0.5f + 0.5f, 0.0f, 1.0f));
+        } else if (self->soundPaused == 0) {
             PauseIopVoice(sound->voice);
-            self->f44 = 1;
+            self->soundPaused = 1;
         }
     }
 
-    f32 zoom = RangeLerp(&self->f24, 1.0f - self->g18);
-    if (AreFloatsNearlyEqual(cam->f1C4, zoom, 0.0001f) == 0) {
+    f32 zoom = RangeLerp(&self->zoomMin, 1.0f - self->zoomFraction);
+    if (AreFloatsNearlyEqual(cam->zoom, zoom, 0.0001f) == 0) {
         SnapCameraZoom(cam, zoom);
     }
 
     switch (mode) {
     case 0:
     case 1: {
-        f32 x = ClampToMagnitude(pad->f40 + pad->f74, 1.0f);
-        f32 y = ClampToMagnitude(pad->f44, 1.0f);
-        if (g_player != 0 && g_player == GetActiveSwitchedCollider() && g_player->f2228 != 0x22) {
+        f32 x = ClampToMagnitude(pad->stickX + pad->secondStickX, 1.0f);
+        f32 y = ClampToMagnitude(pad->stickY, 1.0f);
+        if (g_player != 0 && g_player == GetActiveSwitchedCollider() && g_player->subState != 0x22) {
             y = 0.0f;
             x = 0.0f;
         }
-        f32 z = (*(Camera**)g_camera)->f1C4;
+        f32 z = (*(Camera**)g_camera)->zoom;
         f32 limit = z * 1.3f;
         f32 scale = (1.0f - z) * 0.5f + z;
         if (mode == 0) {
             scale = 1.0f;
         }
         f32 yaw = -x * x * x * (scale * 10.0f);
-        if (yaw * self->g0C <= 0.0f) {
-            self->g0C = 0.0f;
+        if (yaw * self->yawSpeed <= 0.0f) {
+            self->yawSpeed = 0.0f;
         }
         f32 pitch = y * y * y * (scale * 10.0f);
-        if ((mode == 0 && (g_saveData->f19EC & 0x200) == 0) || (mode == 1 && (g_saveData->f19EC & 0x400) == 0)) {
+        if ((mode == 0 && (g_saveData->optionFlags & 0x200) == 0) || (mode == 1 && (g_saveData->optionFlags & 0x400) == 0)) {
             pitch = -pitch;
         }
         f32 zero = 0.0f;
-        if (pitch * self->g14 <= zero) {
-            self->g14 = zero;
+        if (pitch * self->pitchSpeed <= zero) {
+            self->pitchSpeed = zero;
         }
-        self->g0C = ApproachValueWithRamp(self->g0C, zero, dt, (RampProfile*)D_00261C80, 0);
-        self->g14 = ApproachValueWithRamp(self->g14, zero, dt, (RampProfile*)D_00261C80, 0);
-        self->g0C = ClampToMagnitude(self->g0C + yaw * dt, limit * 0.9f);
-        self->g14 = ClampToMagnitude(self->g14 + pitch * dt, limit * 0.8f);
-        self->g08 = WrapAngle(self->g08 + self->g0C * dt);
-        self->f10 = ClampFloat(self->f10 + self->g14 * dt, D_00261BFC, D_00261C00);
+        self->yawSpeed = ApproachValueWithRamp(self->yawSpeed, zero, dt, (RampProfile*)D_00261C80, 0);
+        self->pitchSpeed = ApproachValueWithRamp(self->pitchSpeed, zero, dt, (RampProfile*)D_00261C80, 0);
+        self->yawSpeed = ClampToMagnitude(self->yawSpeed + yaw * dt, limit * 0.9f);
+        self->pitchSpeed = ClampToMagnitude(self->pitchSpeed + pitch * dt, limit * 0.8f);
+        self->g08 = WrapAngle(self->g08 + self->yawSpeed * dt);
+        self->pitch = ClampFloat(self->pitch + self->pitchSpeed * dt, D_00261BFC, D_00261C00);
         eye = GetTargetCameraControllerEyePoint(self);
-        f32 since = (g_gameTime[0] - cam->f364) * 2.0f;
+        f32 since = (g_gameTime[0] - cam->controllerSwitchTime) * 2.0f;
         blend = ClampFloat(since, 0.0f, 1.0f);
-        if (g_player != 0 && g_player->f2228 == 0x22) {
+        if (g_player != 0 && g_player->subState == 0x22) {
             flag = 0;
             rise = 0.0f;
             far = 0.0f;
@@ -537,25 +537,25 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         Mat02 basis;
         Vec02 dir;
         if (*(s32*)(coll + 0x634) != 0) {
-            Vu0::Q(dir) = Vu0::Sub(Vu0::Vec::Of(*(Vec02*)(self->obj50 + 0x140)), Vu0::Vec::Of(pt)).q;
+            Vu0::Q(dir) = Vu0::Sub(Vu0::Vec::Of(*(Vec02*)(self->keptObject + 0x140)), Vu0::Vec::Of(pt)).q;
         } else {
             Vec02 screen;
             Vec02 moved;
             Vec02 ahead;
             Vec02 world;
             Vec02 push;
-            const u128* rows = (const u128*)cam->f80;
+            const u128* rows = (const u128*)cam->rotation;
             Vu0::Vec r0, r1, r2;
             r0.q = rows[0];
             r1.q = rows[1];
             r2.q = rows[2];
             Vu0::Q(ahead) = Vu0::Add(Vu0::Vec::Of(pt), Vu0::RotateRowsTied(r0, r1, r2, Vu0::MulX(Vu0::Vec::Of(g_unitXVector), Vu0::Vec::Scalar(100.0f)))).q;
             ProjectPointToCamera(*(Camera**)g_camera, &ahead, (f32*)&screen);
-            push.x = pad->f40;
-            if (g_saveData->f19EC & 0x400) {
-                push.y = pad->f44;
+            push.x = pad->stickX;
+            if (g_saveData->optionFlags & 0x400) {
+                push.y = pad->stickY;
             } else {
-                push.y = -pad->f44;
+                push.y = -pad->stickY;
             }
             push.z = 0.0f;
             Vu0::Q(moved) = Vu0::MulAddX(Vu0::Vec::Of(screen), Vu0::Vec::Of(push), Vu0::Vec::Scalar(D_00261C8C * dt)).q;
@@ -573,7 +573,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         f32 dy = ClampToRange((ValueRange*)(coll + 0x658), WrapAngle(yaw - *(f32*)(coll + 0x648)));
         f32 dp = ClampToRange((ValueRange*)(coll + 0x650), WrapAngle(pitch - *(f32*)(coll + 0x64C)));
         self->g08 = WrapAngle(*(f32*)(coll + 0x648) + dy);
-        self->f10 = WrapAngle(*(f32*)(coll + 0x64C) + dp);
+        self->pitch = WrapAngle(*(f32*)(coll + 0x64C) + dp);
         eye = GetTargetCameraControllerEyePoint(self);
         break;
     }
@@ -612,8 +612,8 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         f32 sx = *(f32*)((u8*)s->target + 0x320) * 2.0f - 1.0f;
         f32 reach = *(f32*)((u8*)s->target + 0x2D8) * 0.22222222f;
         Vec02 dir;
-        if (self->f5C != 0) {
-            ConvertPositionToWorld((BaseObject*)self->f5C, (Vec02*)&target);
+        if (self->anchorObject != 0) {
+            ConvertPositionToWorld((BaseObject*)self->anchorObject, (Vec02*)&target);
             Vu0::Q(dir) = Normalized(Vu0::Sub(Vu0::Vec::Of(target), Vu0::Vec::Of(pos))).q;
         } else {
             Vu0::Vec fwd = Vu0::Vec::Of(*(Vec02*)(obj + 0x110));
@@ -626,12 +626,12 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         f32 tilt;
         f32 length;
         ConvertOffsetToSpherical((const Vec02*)&target, (const Vec02*)&pos, &heading, &tilt, &length);
-        f32 z = cam->f1C4;
-        f32 a = heading + 3.1415927f + sx * z * cam->f1E0 * 0.5f;
+        f32 z = cam->zoom;
+        f32 a = heading + 3.1415927f + sx * z * cam->aspectScale * 0.5f;
         f32 b = -tilt - sy * z * 0.5f;
         Vec02 off;
         ComputeDirectionFromAngles((Vec3*)&off, heading, tilt, length);
-        Vu0::Q(cam->f40) = Vu0::Add(Vu0::Vec::Of(pos), Vu0::Vec::Of(off)).q;
+        Vu0::Q(cam->position) = Vu0::Add(Vu0::Vec::Of(pos), Vu0::Vec::Of(off)).q;
         Mat02 mz;
         Mat02 my;
         Mat02 mx;
@@ -641,7 +641,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         Mat02 rot;
         Mat02 m;
         MulRotationThenCopy(&m, mz, my);
-        MulRotationThenCopyVia((Mat02*)cam->f80, rot, m, mx);
+        MulRotationThenCopyVia((Mat02*)cam->rotation, rot, m, mx);
         UpdateCameraMatrices(cam);
         *(Quad16*)cam->f2D0 = pos;
         return;
@@ -658,15 +658,15 @@ void DeactivateTargetCameraController(TargetCameraController* self)
     Quad16 b = GetTargetCameraControllerEyePoint(self);
     Camera* n;
     n = (Camera*)self->owner;
-    StopSoundRecord((PlayingSound*)self->p48, 0);
+    StopSoundRecord((PlayingSound*)self->zoomSound, 0);
     StopSoundRecord((PlayingSound*)self->p4C, 500);
     PlaceCameraLookingAt(n, (const Vec02*)&b, (const Vec02*)&a);
-    if (AreFloatsNearlyEqual(n->f1C4, self->f28, 1e-4f) == 0) {
-        SnapCameraZoom(n, self->f28);
+    if (AreFloatsNearlyEqual(n->zoom, self->zoomMax, 1e-4f) == 0) {
+        SnapCameraZoom(n, self->zoomMax);
     }
-    self->f5C = 0;
-    if (n->f1E4 == 49.0f) {
-        SetCameraNearDistance(n, self->f2C);
+    self->anchorObject = 0;
+    if (n->nearDistance == 49.0f) {
+        SetCameraNearDistance(n, self->savedNearDistance);
     }
 }
 
@@ -700,7 +700,7 @@ void UpdateFrameCameraController(FrameCameraController* self, f32 dt)
     Vu0::Q(target) = Vu0::Add(Vu0::Q(frame->v140), Vu0::Q(rv));
     Vu0::Q(eye) = Vu0::Add(Vu0::Q(eye), Vu0::Q(rv));
     f32 one = 1.0f;
-    f32 d = g_gameTime[0] - cam->f364;
+    f32 d = g_gameTime[0] - cam->controllerSwitchTime;
     f32 t;
     if (d < 0.0f) {
         t = 0.0f;

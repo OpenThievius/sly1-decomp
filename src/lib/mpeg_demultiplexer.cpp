@@ -9,22 +9,20 @@
 // table. Written for this project from retail's code.
 #include "common.h"
 #include "asm_func.h"
-struct BitReader_2115C0;
-struct Self_20B978;
+#include "mpeg_bit_reader.h"
+#include "mpeg_decoder.h"
 
-struct Self_20B978;
-
-
-struct Pair_20A538 { u64 a; u64 b; };
-extern Pair_20A538 g_streamIds[10];
+// A stream id and the mask of its significant bits.
+struct StreamIdMask { u64 id; u64 mask; };
+extern StreamIdMask g_streamIds[10];
 
 u64 GetStreamId(u32 idx, s32 key)
 {
     u64 r = 0;
     s32 sh = 0;
     if (idx < 10) {
-        Pair_20A538 e;
-        switch (g_streamIds[idx].b) {
+        StreamIdMask e;
+        switch (g_streamIds[idx].mask) {
         case 0xFFFFFFFFFFULL:
             sh = 0;
             break;
@@ -35,159 +33,129 @@ u64 GetStreamId(u32 idx, s32 key)
             sh = 32;
             break;
         }
-        r = g_streamIds[idx].a | ((u64)key << sh);
+        r = g_streamIds[idx].id | ((u64)key << sh);
     }
     return r;
 }
 
 LINKER_REMNANT(func_0020A218);
 
-struct Ctx_20A220;
-enum Kind_20A220 { KIND_6_20A220 = 6 };
-struct Args_20A220 {
-    Kind_20A220 f0;
-    u8* f4;
-    u8* f8;
-    s32 fC;
-    u64 f10;
-    u64 f18;
-};
-typedef s32 (*Handler_20A220)(Ctx_20A220* ctx, Args_20A220* args, void* arg);
-struct Ent_20A220 {
-    u64 f0;
-    u64 f8;
-    Handler_20A220 f10;
-    void* f14;
-};
-struct Prog_20A220 {
-    u8 pad[0x44];
-    Ent_20A220* f44;
-    s32 f48;
-};
-struct Ctx_20A220 {
-    u8 pad[0x40];
-    Prog_20A220* f40;
-};
-struct Bits_20A220 {
-    u64 f0;
-    s32 f8;
-    s32 fC;
-    s32 f10;
-    s32 f14;
-    u64 f18;
-    s32 f20;
-    s32 f24;
-    s32 f28;
-    s32 f2C;
-};
-struct Rec_20A220 {
-    u8 pad[0x18];
-    u64 f18;
-    u64 f20;
-    u64 f28;
-    u64 f30;
-    s32 f38;
-    s32 f3C;
-    s32 f40;
-    s32 f44;
-    s32 f48;
-    s32 f4C;
+// What the pack header yields: its clock's 9-bit extension, its low 32 bits and its top bit, and
+// whether a system header follows.
+struct PackHeaderInfo {
+    s32 clockExtension;     // 0x00
+    s32 clockLow;           // 0x04
+    s32 clockHigh;          // 0x08
+    s32 hasSystemHeader;    // 0x0C
 };
 
-void InitBitReader(Bits_20A220* s, s32 a1, s32 a2, s32 a3);
-s32 PeekBits(Bits_20A220* s, s32 n);
-u8* GetPositionAhead(Bits_20A220* s, s32 n);
-struct PackHeaderReader;
-struct PackHeaderInfo;
-struct Ctx_20A7F0;
-struct Bits_20A7F0;
-struct Hdr_20A7F0;
-s32 ParsePackHeader(PackHeaderReader* r, PackHeaderInfo* o);
-s32 ParsePacketHeader(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr);
-
-s32 DemultiplexPacks(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
+// A packet's header: its stream id, its length, its scrambling, its time stamps (-1 when it has
+// none), and the positions, in bits, of its payload and of the header itself.
+struct PacketHeader
 {
-    Bits_20A220 bits;
-    Rec_20A220 rec;
-    Args_20A220 args;
-    Bits_20A220* s;
-    Rec_20A220* r;
-    Handler_20A220 handler;
+    u64 id;                 // 0x00
+    s32 length;             // 0x08
+    s32 scrambling;         // 0x0C
+    s64 pts;                // 0x10
+    s64 dts;                // 0x18
+    s32 payloadPosition;    // 0x20
+    s32 payloadSize;        // 0x24
+    s32 position;           // 0x28
+};
+
+// What DemultiplexPacks keeps of the pack and the packet it is on.
+struct DemuxRecord {
+    PackHeaderInfo pack;    // 0x00
+    u8 pad10[0x18 - 0x10];
+    PacketHeader packet;    // 0x18
+};
+
+s32 ParsePackHeader(BitReader* r, PackHeaderInfo* o);
+s32 ParsePacketHeader(MpegDecoder* decoder, BitReader* bs, PacketHeader* hdr);
+
+s32 DemultiplexPacks(MpegHandle* ctx, s32 a1, s32 count, s32 a3, s32 a4)
+{
+    BitReader bits;
+    DemuxRecord rec;
+    MpegStreamPacket args;
+    BitReader* s;
+    DemuxRecord* r;
+    MpegStreamFn handler;
     void* handlerArg;
-    Ent_20A220* table;
+    MpegStreamEntry* table;
     s32 result;
-    Prog_20A220* prog;
+    MpegDecoder* prog;
     s32 ok;
-    Kind_20A220 kind;
+    MpegStreamEvent kind;
     s32 i;
 
     r = &rec;
-    prog = ctx->f40;
+    prog = ctx->decoder;
     handler = 0;
     handlerArg = 0;
     ok = 1;
     i = 0;
-    table = prog->f44;
+    table = prog->streamTable;
     InitBitReader(&bits, a1, a3, a4);
     s = &bits;
     result = 0;
-    for (; handler == 0 && i < prog->f48; i++) {
-        if (table[i].f0 == 0xBDFF000000ULL) {
-            handler = table[i].f10;
-            handlerArg = table[i].f14;
+    for (; handler == 0 && i < prog->streamCount; i++) {
+        if (table[i].id == 0xBDFF000000ULL) {
+            handler = table[i].handler;
+            handlerArg = table[i].arg;
         }
     }
     for (;;) {
         if (PeekBits(s, 0x20) == 0x1BA) {
-            ParsePackHeader((PackHeaderReader*)s, (PackHeaderInfo*)r);
+            ParsePackHeader(s, &r->pack);
         }
-        kind = KIND_6_20A220;
+        kind = MPEG_STREAM_PACKET;
         while (PeekBits(s, 0x18) == 1 && PeekBits(s, 0x20) != 0x1BA &&
-               PeekBits(s, 0x20) != 0x1B9 && s->f18 < count * 8 && ok != 0) {
-            (void)ParsePacketHeader((Ctx_20A7F0*)prog, (Bits_20A7F0*)s, (Hdr_20A7F0*)&r->f18);
-            if (s->f18 > count * 8) {
+               PeekBits(s, 0x20) != 0x1B9 && s->consumed < count * 8 && ok != 0) {
+            (void)ParsePacketHeader(prog, s, &r->packet);
+            if (s->consumed > count * 8) {
                 continue;
             }
-            for (i = 0; i < prog->f48; i++) {
-                Ent_20A220* e = &table[i];
-                if (e->f0 == (r->f18 & e->f8)) {
-                    args.f0 = kind;
-                    args.f4 = GetPositionAhead(s, r->f40);
-                    args.f8 = GetPositionAhead(s, r->f38);
-                    args.f10 = r->f28;
-                    args.fC = r->f3C;
-                    args.f18 = r->f30;
-                    ok = e->f10(ctx, &args, e->f14);
+            for (i = 0; i < prog->streamCount; i++) {
+                MpegStreamEntry* e = &table[i];
+                if (e->id == (r->packet.id & e->mask)) {
+                    args.kind = kind;
+                    args.packet = (u8*)GetPositionAhead(s, r->packet.position);
+                    args.payload = (u8*)GetPositionAhead(s, r->packet.payloadPosition);
+                    args.pts = r->packet.pts;
+                    args.payloadSize = r->packet.payloadSize;
+                    args.dts = r->packet.dts;
+                    ok = e->handler(ctx, &args, e->arg);
                     break;
                 }
             }
-            if (i == prog->f48 && handler != 0) {
-                args.f0 = kind;
-                args.f4 = GetPositionAhead(s, r->f40);
-                args.f8 = GetPositionAhead(s, r->f38);
-                args.f10 = r->f28;
-                args.fC = r->f3C;
-                args.f18 = r->f30;
+            if (i == prog->streamCount && handler != 0) {
+                args.kind = kind;
+                args.packet = (u8*)GetPositionAhead(s, r->packet.position);
+                args.payload = (u8*)GetPositionAhead(s, r->packet.payloadPosition);
+                args.pts = r->packet.pts;
+                args.payloadSize = r->packet.payloadSize;
+                args.dts = r->packet.dts;
                 ok = handler(ctx, &args, handlerArg);
             }
             if (ok != 0) {
-                result = (s32)(s->f18 >> 3);
+                result = (s32)(s->consumed >> 3);
             }
         }
-        if (s->f18 > count * 8 || PeekBits(s, 0x20) != 0x1BA) {
+        if (s->consumed > count * 8 || PeekBits(s, 0x20) != 0x1BA) {
             break;
         }
     }
     return result;
 }
 
-s32 DemultiplexBuffer(Ctx_20A220* ctx, s32 a, s32 b)
+s32 DemultiplexBuffer(MpegHandle* ctx, s32 a, s32 b)
 {
     return DemultiplexPacks(ctx, a, b, 0, -1);
 }
 
 // The stream ids the demultiplexer knows, each with the mask of its significant bits.
-Pair_20A538 g_streamIds[10] = {
+StreamIdMask g_streamIds[10] = {
     { 0xE000000000ULL, 0xFF00000000ULL },
     { 0xBDFFC00000ULL, 0xFFFFFFFFFFULL },
     { 0xBDFFA00000ULL, 0xFFFFFFFFFFULL },
@@ -202,52 +170,34 @@ Pair_20A538 g_streamIds[10] = {
 
 // Registers a handler and its argument for the stream's id in the table the demultiplexer looks
 // packets up in (the entries DemultiplexPacks runs), and returns the handler it replaces.
-Handler_20A220 SetStreamCallback(Ctx_20A220* self, s32 idx, s32 key, Handler_20A220 handler, void* arg)
+MpegStreamFn SetStreamCallback(MpegHandle* self, s32 idx, s32 key, MpegStreamFn handler, void* arg)
 {
-    Handler_20A220 result = 0;
-    Prog_20A220* ctx = self->f40;
-    Ent_20A220* ents = ctx->f44;
+    MpegStreamFn result = 0;
+    MpegDecoder* ctx = self->decoder;
+    MpegStreamEntry* ents = ctx->streamTable;
     u64 k = GetStreamId(idx, key);
-    s32 count = ctx->f48;
+    s32 count = ctx->streamCount;
     s32 i;
     for (i = 0; i < count; i++) {
-        if (k == ents[i].f0) {
-            result = ents[i].f10;
+        if (k == ents[i].id) {
+            result = ents[i].handler;
             break;
         }
     }
     if (i < 0x40) {
-        Ent_20A220* e = &ents[i];
-        ctx->f48 = count + 1;
-        e->f0 = k;
-        e->f14 = arg;
-        e->f10 = handler;
-        e->f8 = g_streamIds[idx].b;
+        MpegStreamEntry* e = &ents[i];
+        ctx->streamCount = count + 1;
+        e->id = k;
+        e->arg = arg;
+        e->handler = handler;
+        e->mask = g_streamIds[idx].mask;
     }
     return result;
 }
 
-// The bit reader as func_0020A630 sees it. The pack header's reader and the system header's
-// (SystemHeaderReader below) are separate types because their callers declare ReadBits with
-// different results (s32 here, s64 there), as retail's registers want, and one name cannot be
-// declared both ways on one type.
-struct PackHeaderReader { u8 pad[0x10]; };
-// What the pack header yields: its clock's 9-bit extension, its low 32 bits and its top bit, and
-// whether a system header follows.
-struct PackHeaderInfo {
-    s32 clockExtension;     // 0x00
-    s32 clockLow;           // 0x04
-    s32 clockHigh;          // 0x08
-    s32 hasSystemHeader;    // 0x0C
-};
+s32 ParseSystemHeader(BitReader* self, PackHeaderInfo* info);
 
-s32 ReadBits(PackHeaderReader* r, s32 bits);
-s64 ReadBit(PackHeaderReader* r);
-s32 PeekBits(PackHeaderReader* r, s32 bits);
-struct SystemHeaderReader;
-s32 ParseSystemHeader(SystemHeaderReader* self, PackHeaderInfo* info);
-
-s32 ParsePackHeader(PackHeaderReader* r, PackHeaderInfo* o)
+s32 ParsePackHeader(BitReader* r, PackHeaderInfo* o)
 {
     u32 i; u32 n; u32 a; u32 b; u32 c;
     i = 0;
@@ -268,20 +218,14 @@ s32 ParsePackHeader(PackHeaderReader* r, PackHeaderInfo* o)
     }
     if (PeekBits(r, 0x20) == 0x1BB) {
         o->hasSystemHeader = 1;
-        ParseSystemHeader((SystemHeaderReader*)r, o);
+        ParseSystemHeader(r, o);
     } else {
         o->hasSystemHeader = 0;
     }
     return 1;
 }
 
-// The system header's bit reader (see PackHeaderReader).
-struct SystemHeaderReader;
-
-s64 ReadBits(SystemHeaderReader* self, s32 size);
-s32 PeekBits(SystemHeaderReader* self, s32 n);
-
-s32 ParseSystemHeader(SystemHeaderReader* self, PackHeaderInfo* info)
+s32 ParseSystemHeader(BitReader* self, PackHeaderInfo* info)
 {
     ReadBits(self, 0x38);
     ReadBits(self, 0x28);
@@ -291,42 +235,20 @@ s32 ParseSystemHeader(SystemHeaderReader* self, PackHeaderInfo* info)
     return 1;
 }
 
-struct Ctx_20A7F0;
-
-struct Bits_20A7F0
-{
-    u8 pad00[0x18];
-    s64 pos;
-};
-
-struct Hdr_20A7F0
-{
-    u64 id;
-    s32 len;
-    s32 scramble;
-    s64 pts;
-    s64 dts;
-    s32 start;
-    s32 size;
-    s32 at;
-};
-
-struct Table_20A7F0
+// The lengths of the optional fields.
+struct FieldLengths
 {
     u8 bits[16];
 };
 
 // The length of each optional field the header's flags announce.
-extern const Table_20A7F0 D_00250028 = { { 0x00, 0x10, 0x08, 0x18, 0x08, 0x18, 0x10, 0x20, 0x18, 0x28, 0x20, 0x30, 0x20, 0x30, 0x28, 0x38 } };
+extern const FieldLengths g_packetOptionalFieldLengths = { { 0x00, 0x10, 0x08, 0x18, 0x08, 0x18, 0x10, 0x20, 0x18, 0x28, 0x20, 0x30, 0x20, 0x30, 0x28, 0x38 } };
 
-u32 ReadBits(Bits_20A7F0* bs, s32 n);
-s64 ReadBit(Bits_20A7F0* bs);
-void SkipBytes(Bits_20A7F0* bs, s32 n);
-void ReportMpegError(Self_20B978* self, const char* value);
+void ReportMpegError(MpegDecoder* self, const char* value);
 
-s32 ParsePacketHeader(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
+s32 ParsePacketHeader(MpegDecoder* decoder, BitReader* bs, PacketHeader* hdr)
 {
-    Table_20A7F0 tbl;
+    FieldLengths tbl;
     s32 flags;
     s32 escr;
     s32 opt;
@@ -337,11 +259,11 @@ s32 ParsePacketHeader(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
     s32 skip;
     s32 rest;
 
-    hdr->at = bs->pos;
-    tbl = D_00250028;
+    hdr->position = bs->consumed;
+    tbl = g_packetOptionalFieldLengths;
     ReadBits(bs, 0x18);
     hdr->id = (u64)ReadBits(bs, 8) << 32;
-    hdr->len = ReadBits(bs, 16);
+    hdr->length = ReadBits(bs, 16);
     hdr->dts = -1;
     hdr->pts = -1;
     if (hdr->id != (u64)0xBC << 32 && hdr->id != (u64)0xBE << 32 && hdr->id != (u64)0xBF << 32
@@ -349,14 +271,14 @@ s32 ParsePacketHeader(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
         && hdr->id != (u64)0xF2 << 32 && hdr->id != (u64)0xF8 << 32)
     {
         ReadBits(bs, 2);
-        hdr->scramble = ReadBits(bs, 2);
+        hdr->scrambling = ReadBits(bs, 2);
         ReadBits(bs, 4);
         flags = ReadBits(bs, 2);
         escr = ReadBits(bs, 1);
         opt = ReadBits(bs, 4);
         ext = ReadBits(bs, 1);
         hdrlen = ReadBits(bs, 8);
-        start = bs->pos;
+        start = bs->consumed;
         if (flags & 2)
         {
             u32 a, b, c;
@@ -408,7 +330,7 @@ s32 ParsePacketHeader(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
             }
             if (pack == 1)
             {
-                ReportMpegError((Self_20B978*)ctx, "pack_header_field_flag needs to be '0' in PS\n");
+                ReportMpegError(decoder, "pack_header_field_flag needs to be '0' in PS\n");
                 return 0;
             }
             if (seq == 1)
@@ -431,15 +353,15 @@ s32 ParsePacketHeader(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
                 }
             }
         }
-        skip = hdrlen - (s32)((bs->pos - start) >> 3);
+        skip = hdrlen - (s32)((bs->consumed - start) >> 3);
         if (skip != 0)
         {
             SkipBytes(bs, skip);
         }
-        rest = hdr->len - hdrlen;
+        rest = hdr->length - hdrlen;
         n = rest - 3;
-        hdr->size = n;
-        hdr->start = bs->pos;
+        hdr->payloadSize = n;
+        hdr->payloadPosition = bs->consumed;
         if (hdr->id == (u64)0xBD << 32)
         {
             hdr->id |= ReadBits(bs, 32);
@@ -454,7 +376,7 @@ s32 ParsePacketHeader(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
         || hdr->id == (u64)0xF1 << 32 || hdr->id == (u64)0xFF << 32 || hdr->id == (u64)0xF2 << 32
         || hdr->id == (u64)0xF8 << 32)
     {
-        s32 m = hdr->len;
+        s32 m = hdr->length;
         if (hdr->id == (u64)0xBF << 32)
         {
             hdr->id |= ReadBits(bs, 32);
@@ -467,9 +389,9 @@ s32 ParsePacketHeader(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
     }
     else if (hdr->id == (u64)0xBE << 32)
     {
-        if (hdr->len != 0)
+        if (hdr->length != 0)
         {
-            SkipBytes(bs, hdr->len);
+            SkipBytes(bs, hdr->length);
         }
     }
     }

@@ -16,7 +16,7 @@ void InitPointerTextCaption(Obj_eu_001AD5E0* self)
     self->f4 = b->fC((u8*)a + b->f8, 0.9f, 0.9f);
     self->f518 = 0xDF7F7F7F;
     if (IsFontLoaded(2) != 0) {
-        self->f520 = (void**)&D_002743F0;
+        self->f520 = (void**)&g_pointerCaptionStyle;
         *self->f520 = GetFontById(2);
     }
 }

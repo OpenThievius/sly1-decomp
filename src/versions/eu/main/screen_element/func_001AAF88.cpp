@@ -22,7 +22,7 @@ void InitCounterCaption(Obj_1AAF88_eu* self)
     self->f26C = 6000.0f;
     switch (self->f214) {
     case 3:
-        self->f264 = &g_saveData->f19E0;
+        self->f264 = &g_saveData->reserveCount;
         break;
     case 4:
         self->f264 = &g_currentEntry->count64;
@@ -32,7 +32,7 @@ void InitCounterCaption(Obj_1AAF88_eu* self)
         self->f264 = &g_currentLevelRecord->f438;
         break;
     case 6:
-        self->f264 = &g_saveData->f19E8;
+        self->f264 = &g_saveData->pickupCount;
         break;
     case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
     case 28: case 29:

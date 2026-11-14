@@ -222,23 +222,23 @@ void CopyListedKeepObject(ListedKeepObject* self, ListedKeepObject* src)
 void InitModeWalkerObject(ModeWalker* self)
 {
     InitPathFollower(self);
-    self->fBF4 = -10.0f;
+    self->pulseStartTime = -10.0f;
 }
 
 void StartModeWalkerObject(ModeWalker* self)
 {
     StartPathFollower(self);
     ResolveObjectLinks(self, 0xA, g_modeWalkerLinks);
-    self->fBBC = (StateWalker*)CreateStateWalker((StateGraph*)self->fBB8, self, -1, 0);
+    self->stateWalker = (StateWalker*)CreateStateWalker((StateGraph*)self->stateGraph, self, -1, 0);
     AddMatrixAttachment((PlacedObject*)self->fBCC, 5, (Attachment**)&self->fBD0);
     ((u8*)self->fBD0)[0x10] = 9;
     ((u8*)self->fBD0)[0x11] = 9;
     ((PlacedObject*)self->fBCC)->desc02()->m2B((PlacedObject*)self->fBCC);
     TransformPointBetweenFrames(0, (PlacedObject*)self->fBC0, (Vec02*)((u8*)self->fBCC + 0x140), (Vec02*)((u8*)self + 0xBE0));
     SetModeWalkerMode(self, 1);
-    self->f864 = 3.4028234663852886e+38f;
-    T217D_BF0* base = &D_00270650;
-    ((T217D_Float*)&base->f288)->v = 0.0f;
+    self->paceChangeTime = 3.4028234663852886e+38f;
+    T217D_BF0* base = &g_spinningSpriteElement;
+    ((T217D_Float*)&base->alphaScale)->v = 0.0f;
     base->icon = FindAnimRecord(0x36A);
 }
 
@@ -253,7 +253,7 @@ struct PadStick {
     u16 pressed;            // 0xAA: func_00181078 tests and clears 0x40
 };
 
-extern T217D_BF0 D_00270650;
+extern T217D_BF0 g_spinningSpriteElement;
 extern u8 g_blankPadRecord[];
 extern u8 D_002708C0[];
 void ControlPathFollower(PathFollower* self, PadStick* pad, f32 dt);
@@ -284,14 +284,14 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
     Vec02 d;
     f32 angle;
     ControlPathFollower(self, pad, dt);
-    GetStateWalkerCurrentKey(self->fBBC, &cur);
-    GetStateWalkerTargetKey(self->fBBC, &target);
-    switch (self->fBB0) {
+    GetStateWalkerCurrentKey(self->stateWalker, &cur);
+    GetStateWalkerTargetKey(self->stateWalker, &target);
+    switch (self->walkerMode) {
     case 1:
         if ((pad->held & 0x80) != 0) {
-            SetStateWalkerTarget(self->fBBC, 0x360);
+            SetStateWalkerTarget(self->stateWalker, 0x360);
         } else {
-            SetStateWalkerTarget(self->fBBC, 0x35F);
+            SetStateWalkerTarget(self->stateWalker, 0x35F);
         }
         break;
     case 2:
@@ -300,23 +300,23 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
         } else {
             if ((pad->pressed & 0x40) != 0) {
                 ClearPadPressedBits((PadRecord*)pad, 0x40);
-                self->fBFC = g_gameTime;
+                self->buttonPressTime = g_gameTime;
             }
-            if (self->fC00 != 0 && g_gameTime - self->fBFC < D_00264128) {
+            if (self->fC00 != 0 && g_gameTime - self->buttonPressTime < D_00264128) {
                 self->desc05()->m50(self);
-                TeleportStateWalker(self->fBBC, 0x35F);
-                GetStateWalkerCurrentKey(self->fBBC, &cur);
-                GetStateWalkerTargetKey(self->fBBC, &target);
+                TeleportStateWalker(self->stateWalker, 0x35F);
+                GetStateWalkerCurrentKey(self->stateWalker, &cur);
+                GetStateWalkerTargetKey(self->stateWalker, &target);
             }
         }
         break;
     }
     if ((u32)(cur - 0x35F) < 2) {
         if (target == -1 || target == 0x35F || target == 0x360) {
-            if (self->fBB0 == 2) {
+            if (self->walkerMode == 2) {
                 pad = (PadStick*)g_blankPadRecord;
             }
-            SteerWalkerAimAtNearestTarget(&D_00270650, pad);
+            SteerWalkerAimAtNearestTarget(&g_spinningSpriteElement, pad);
             Vu0::Q(m.r[2]) = Vu0::Q(self->m110.r[2]);
             u128 n = Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(m.r[2]), Vu0::Q(((Vec02*)((u8*)g_camera + 0x80))[0])), *(u128*)&self->m110.r[1]);
             Vu0::Q(m.r[1]) = n;
@@ -348,13 +348,13 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
 {
     s32 buf[4];
     UpdatePathFollower(self, dt);
-    if (self->fC04 != 0) {
-        Contact03* n = (Contact03*)self->fC04;
+    if (self->contactChainHead != 0) {
+        Contact03* n = (Contact03*)self->contactChainHead;
         do {
             s32 j = (n->end[0].body != self);
             Collider* c = n->end[1 - j].part;
-            while (c != 0 && c->f4E0 == 0) c = (Collider*)c->parent;
-            if (c != 0 && (c->f4E0 == 1 || c->f4E0 == 4)) {
+            while (c != 0 && c->partMode == 0) c = (Collider*)c->parent;
+            if (c != 0 && (c->partMode == 1 || c->partMode == 4)) {
                 InitOwnerMessage((OwnerMessage*)buf, 0, c);
                 while (c != 0) {
                     if (((s32 (*)(Collider*, Contact03*, void*))c->desc03()->m47)(c, n, buf) != 0) break;
@@ -364,10 +364,10 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
             }
             n = n->next;
         } while (n != 0);
-        FreePooledContactChain((World*)self->world, (Contact03*)self->fC04);
-        self->fC04 = 0;
+        FreePooledContactChain((World*)self->world, (Contact03*)self->contactChainHead);
+        self->contactChainHead = 0;
     }
-    f32 t = g_gameClock[1] - self->fBF4;
+    f32 t = g_gameClock[1] - self->pulseStartTime;
     f32 v = D_00264140[0] + t * (D_00264140[1] + t * D_00264140[2]);
     f32* r = g_unitRange;
     f32 lo = g_unitRange[0];
@@ -378,7 +378,7 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
     else x = v;
     SetScaledPositionSpring((PlacedObject*)self->fBCC, x * D_00264150);
     SetScaledRotationSpring((PlacedObject*)self->fBCC, x * D_00264154);
-    if (self->fBF0 != 0 && self->fBB0 != 2 && g_gameClock[1] - self->fBF8 > 2.0f) self->fBF0 = 0;
+    if (self->pulseActive != 0 && self->walkerMode != 2 && g_gameClock[1] - self->pulseFadeStart > 2.0f) self->pulseActive = 0;
 }
 
 void RecomputePathFollowerFrame(PathFollower* self);
@@ -399,15 +399,15 @@ static inline void SetMatrixRows(Mat02& m, const s128& a, const s128& b, const s
 void RecomputeModeWalker(ModeWalker* self)
 {
     RecomputePathFollowerFrame(self);
-    if (self->f830 != 0 && self->fC08 != 0) {
+    if (self->path != 0 && self->fC08 != 0) {
         Vec02 pos;
         Vec02 dir;
         Mat02 m1;
         Mat02 m2;
-        PathCurve* curve = self->f830->curve;
+        PathCurve* curve = self->path->curve;
         PathSampleFn fn = (PathSampleFn)curve->vt->m01;
         if (fn) {
-            fn(curve, self->f838, &pos, &dir);
+            fn(curve, self->pathTime, &pos, &dir);
         }
         MultiplyMatrices3x3(&self->m1A0, &self->fC08->m1A0, &m1);
         BuildBasisFromXAndZHint(&dir, (const Vec02*)&g_unitZVector, &m2);
@@ -431,12 +431,12 @@ void HandleModeWalkerActivation(ModeWalker* self, void* active)
 {
     HandlePathFollowerActivation(self, active);
     if (active) {
-        T217D_BF0* e = &D_00270650;
+        T217D_BF0* e = &g_spinningSpriteElement;
         e->vt->m16(e, 2);
         Vu0::Q(e->aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
     } else {
-        D_00270650.vt->m16(&D_00270650, 0);
-        self->fBF0 = 0;
+        g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 0);
+        self->pulseActive = 0;
     }
 }
 
@@ -445,14 +445,14 @@ void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
     Rgba4 c;
     u8 from[4];
     *(u32*)from = 0x800000A0;
-    if (o->fBF0) {
+    if (o->pulseActive) {
         f32 t;
-        if (o->fBB0 != 2) {
-            t = (g_gameClock[1] - o->fBF8) * 0.5f;
+        if (o->walkerMode != 2) {
+            t = (g_gameClock[1] - o->pulseFadeStart) * 0.5f;
         } else {
             t = 0.0f;
         }
-        f32 s = Cosine((g_gameClock[1] - o->fBF4) * 10.0f);
+        f32 s = Cosine((g_gameClock[1] - o->pulseStartTime) * 10.0f);
         f32 p = D_00264160.x + t * (D_00264160.y + t * D_00264160.z);
         f32 x = ClampHelper::Of(p, g_unitRange[0], g_unitRange[1]);
         f32 q = D_00264170.x + s * (D_00264170.y + s * D_00264170.z);
@@ -479,11 +479,11 @@ void CaptureModeWalkerTarget(ModeWalker* self, void* outv)
 
 s32 IsModeWalkerRequestBlocked(ModeWalker* self)
 {
-    if (self->fBB0 != 1 || self->fBF0 != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
+    if (self->walkerMode != 1 || self->pulseActive != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
     return 0;
 }
 
-s32 HasModeWalkerAcceptedRequest(ModeWalker* p) { return p->fBF0 != 0; }
+s32 HasModeWalkerAcceptedRequest(ModeWalker* p) { return p->pulseActive != 0; }
 
 void FinishModeWalker(ModeWalker* self)
 {
@@ -501,7 +501,7 @@ void LaunchPlayerFromModeWalker(void* unused, void* obj_)
     ComputeColliderJumpVelocity(obj, (f32*)&first, (f32*)&second, D_00264190);
     obj->desc02()->m20(obj, &second);
     f32 r = ArctangentOfRatio(second.y, second.x);
-    obj->f638 = WrapAngle(r + 3.1415927f);
+    obj->heading = WrapAngle(r + 3.1415927f);
     TurnColliderTowardHeading(obj);
     SetPlayerState(obj, 4, 0x2B);
 }
@@ -517,9 +517,9 @@ s32 AcceptModeWalkerRequest(ModeWalker* self, s32* arg)
         return 0;
     }
     if (HasSpareCount()) {
-        self->fBF0 = 1;
+        self->pulseActive = 1;
     }
-    self->fBF4 = g_gameTime;
+    self->pulseStartTime = g_gameTime;
     r = HasSpareCount();
     if (r == 0) {
         g = g_player;
@@ -552,7 +552,7 @@ tail:
 void HandleModeWalkerNotification(ModeWalker* self, s32 code, MessageBody* rec)
 {
     if (code == 0x13) {
-        StateWalker* sub = self->fBBC;
+        StateWalker* sub = self->stateWalker;
         s32 key = rec->sourceId;
         if (sub != 0 && key == (s32)sub->player) {
             s32 kind = rec->code;
@@ -577,29 +577,29 @@ void SetModeWalkerMode(ModeWalker* self, s32 mode)
 {
     s32 old;
 
-    if (mode == self->fBB0) {
+    if (mode == self->walkerMode) {
         return;
     }
-    old = self->fBB0;
+    old = self->walkerMode;
     if (old < 4) {
         if (old >= 2) {
-            self->fBF8 = g_gameClock[1];
+            self->pulseFadeStart = g_gameClock[1];
         }
     }
     switch (mode) {
     case 0:
-        SetStateWalkerTarget(self->fBBC, 0x35E);
+        SetStateWalkerTarget(self->stateWalker, 0x35E);
         break;
     case 1:
-        SetStateWalkerTarget(self->fBBC, 0x35F);
+        SetStateWalkerTarget(self->stateWalker, 0x35F);
         break;
     case 2:
-        TeleportStateWalker(self->fBBC, 0x361);
-        self->fBF8 = 3.40282347e+38f;
+        TeleportStateWalker(self->stateWalker, 0x361);
+        self->pulseFadeStart = 3.40282347e+38f;
         break;
     case 3:
-        TeleportStateWalker(self->fBBC, 0x362);
-        self->fBF8 = 3.40282347e+38f;
+        TeleportStateWalker(self->stateWalker, 0x362);
+        self->pulseFadeStart = 3.40282347e+38f;
         break;
     }
     if (mode == 0) {
@@ -613,8 +613,8 @@ void SetModeWalkerMode(ModeWalker* self, s32 mode)
     } else {
         self->f580 = 1;
     }
-    self->fBB0 = mode;
-    self->fBB4 = g_gameClock[1];
+    self->walkerMode = mode;
+    self->walkerModeTime = g_gameClock[1];
 }
 
 extern u8 g_class75List[];
@@ -652,7 +652,7 @@ void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad)
     }
     self->rateX = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateX, pad->x, g_gameClock[2]);
     f32 y = pad->y;
-    if (g_saveData->f19EC & 0x400) {
+    if (g_saveData->optionFlags & 0x400) {
         y = -y;
     }
     self->rateY = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateY, y, g_gameClock[2]);
@@ -692,12 +692,12 @@ void DrawSpinningSpriteElement(T217D_BF0* self)
         return;
     }
     f32 target = AreMenusAndFadeClear() != 0 ? 1.0f : 0.0f;
-    if (g_camera->f224 != 0) {
-        self->f288 = target;
+    if (g_camera->snapping != 0) {
+        self->alphaScale = target;
     } else {
-        self->f288 = ApproachValueWithRamp((RampProfile*)D_002641B8, 0, self->f288, target, g_frameStep);
+        self->alphaScale = ApproachValueWithRamp((RampProfile*)D_002641B8, 0, self->alphaScale, target, g_frameStep);
     }
-    if (self->f288 == 0.0f) {
+    if (self->alphaScale == 0.0f) {
         return;
     }
     AppendPacketQuadwords(&g_gsPacketWriter, ((SpriteIcon*)self->icon)->packets->count - 1, ((SpriteIcon*)self->icon)->packets->data + 0x10);
@@ -706,7 +706,7 @@ void DrawSpinningSpriteElement(T217D_BF0* self)
     *(u32*)&col = 0x80FFFFFF;
     BuildAxisAngleMatrix(&g_unitZVector, &m, g_gameTime * D_002641C4);
     BeginGifTag(&g_gsPacketWriter, 0x5C, 3, 0x412);
-    col.a = (u8)(s32)(self->f288 * (f32)col.a);
+    col.a = (u8)(s32)(self->alphaScale * (f32)col.a);
     for (u32 i = 0; i < 4; i++) {
         f32 sx = self->aim[0] * 320.0f + 320.0f;
         f32 sy = self->aim[1] * -246.400009f + 246.400009f;

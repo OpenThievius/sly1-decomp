@@ -5,7 +5,7 @@ struct Sc_151300_eu { u8 pad[0x584]; u8 f584; u8 pad2[7]; f32 f58C; };
 
 s32 TestStepWaitConditions(StepSequence* self)
 {
-    s32 flags = self->f2E8;
+    s32 flags = self->waitFlags;
     if (flags & 2) {
         SequenceStep* e = self->step2E4 < self->count2DC - 1 ? &((SequenceStep*)self->steps2E0)[self->step2E4 + 1] : 0;
         if (e != 0 && e->type == 2) {
@@ -31,32 +31,32 @@ s32 TestStepWaitConditions(StepSequence* self)
         if (IsTextPanelTextTyped(&g_typedTextCaptionBox) != 0) flags &= 0xFFFFFFDF;
     }
     if (flags & 0x40) {
-        if (g_camera->ctl460.g18 == ((Sc_151300_eu*)&g_typedTextCaptionBox)->f58C) flags &= 0xFFFFFFBF;
+        if (g_camera->ctl460.zoomFraction == ((Sc_151300_eu*)&g_typedTextCaptionBox)->f58C) flags &= 0xFFFFFFBF;
     }
     if (flags & 0x80) {
-        if (self->f2FC <= g_gameTime[0]) flags &= 0xFFFFFF7F;
+        if (self->waitDeadline <= g_gameTime[0]) flags &= 0xFFFFFF7F;
     }
     ((Sc_151300_eu*)&g_typedTextCaptionBox)->f584 = 0;
     if (flags == 0x100) {
         s32 r;
         PadRecord* in = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
-        s32 k = self->f2EC;
+        s32 k = self->waitKey;
         r = 0;
         switch (k) {
         case 9:
-            if (0.8f < in->f48) r = 1;
+            if (0.8f < in->stickMagnitude) r = 1;
             break;
         case 10:
-            if (0.8f < in->f7C) r = 1;
+            if (0.8f < in->secondStickMagnitude) r = 1;
             break;
         case 11:
-            if (0.8f < __builtin_fabsf(in->f40)) r = 1;
+            if (0.8f < __builtin_fabsf(in->stickX)) r = 1;
             break;
         case 12:
-            if (0.8f < __builtin_fabsf(in->f44)) r = 1;
+            if (0.8f < __builtin_fabsf(in->stickY)) r = 1;
             break;
         case 13:
-            if (g_player != 0 && g_player->f2220 == 2) r = g_player->f2228 == 3;
+            if (g_player != 0 && g_player->state == 2) r = g_player->subState == 3;
             break;
         case 14:
         {
@@ -66,16 +66,16 @@ s32 TestStepWaitConditions(StepSequence* self)
         }
             break;
         default:
-            r = (in->flags & D_00261D08[k]) != 0;
+            r = (in->flags & g_stepWaitButtonMasks[k]) != 0;
             break;
         }
         if (r != 0) {
             flags = 0;
         } else {
-            ((Sc_151300_eu*)&g_typedTextCaptionBox)->f584 = D_00261D28[k];
+            ((Sc_151300_eu*)&g_typedTextCaptionBox)->f584 = g_stepWaitButtonGlyphs[k];
         }
     }
-    self->f2E8 = flags;
+    self->waitFlags = flags;
     return flags != 0;
 }
 

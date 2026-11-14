@@ -56,19 +56,19 @@ struct Range50 {
 
 struct EffectSpawner : PlacedObject {
     Rec50* rec;             // 0x2D0
-    s32 f2D4;               // 0x2D4: -1 at setup; the mode, 0 to 3, chosen when it starts (func_00155270)
-    s32 f2D8;               // 0x2D8: -1 at setup
+    s32 mode;               // 0x2D4: -1 at setup; the mode, 0 to 3, chosen when it starts (func_00155270)
+    s32 remaining;          // 0x2D8: -1 at setup
     union {
         struct {
-            f32 f2DC;       // 0x2DC: 10.0 at setup
-            f32 f2E0;       // 0x2E0: 10.0 at setup
+            f32 delayMin;   // 0x2DC: 10.0 at setup
+            f32 delayMax;   // 0x2E0: 10.0 at setup
         };
         Range50 delay;      // 0x2DC: where the first delay is taken from
     };
-    s32 f2E4;               // 0x2E4: set, the volume of the record's box scales the rate
+    s32 scaleByVolume;      // 0x2E4: set, the volume of the record's box scales the rate
     f32 chance;             // 0x2E8: the chance it starts active
     Range50 active;         // 0x2EC: how long it then stays active
-    f32 f2F4;               // 0x2F4
+    f32 targetCount;        // 0x2F4
     union {
         s64 key2F8;         // 0x2F8: the two ids, tested together against -1
         s32 id2F8[2];       // 0x2F8, 0x2FC
@@ -77,19 +77,19 @@ struct EffectSpawner : PlacedObject {
     s32 id304;              // 0x304
     s32 continuous;         // 0x308: set, the spawner stays active forever
     s32 id30C;              // 0x30C
-    s32 f310;               // 0x310: -1 at setup
+    s32 sharedId;           // 0x310: -1 at setup
     u8 list314[0x10];       // 0x314: initialised with func_00152438
     u8 pad324[0x328 - 0x324];
-    f32 f328;               // 0x328: a random delay (func_00155270)
-    f32 f32C;               // 0x32C
-    f32 f330;               // 0x330
-    f32 f334;               // 0x334: 1.0, or the volume of the record's box scaled
+    f32 rate;               // 0x328: a random delay (func_00155270)
+    f32 rateInterval;       // 0x32C
+    f32 nextRateTime;       // 0x330
+    f32 volumeScale;        // 0x334: 1.0, or the volume of the record's box scaled
     f32 margin;             // 0x338: half the side of the box around the target its points wrap in (func_00155868)
-    f32 f33C;               // 0x33C: the fraction of a spawn carried to the next frame (func_00155AB0)
-    f32 f340;               // 0x340: -1.0 at setup
+    f32 spawnRemainder;     // 0x33C: the fraction of a spawn carried to the next frame (func_00155AB0)
+    f32 activeUntil;        // 0x340: -1.0 at setup
     BaseObject* held344;           // 0x344: objects it must let go of when told (slot 13)
     BaseObject* held348;           // 0x348
-    s32 f34C;               // 0x34C
+    s32 changed;            // 0x34C
 };
 
 typedef char check_EffectSpawner[sizeof(EffectSpawner) == 0x350 ? 1 : -1];

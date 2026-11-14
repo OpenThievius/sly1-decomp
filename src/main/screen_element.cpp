@@ -40,14 +40,14 @@ extern void* const g_screenElements[];
 // A 28-byte text style the static initialiser (func_001AEA70) clears (func_001F5C0C with 0x1C)
 // and then fills.
 struct TextStyle {
-    void* f00;
+    void* font;
     u8 f04;
     u8 pad05[3];
     f32 f08;
     f32 f0C;
     f32 f10;
     f32 f14;
-    u32 f18;
+    u32 color;
 };
 
 // The font object's calls.
@@ -103,7 +103,7 @@ void SetListLinkOffset(List01* self, s32 offset);
 PlacedObject* CreateObjectCopy(PlacedObject* a, World* b, BaseObject* c);
 
 void DrawCyclingGlyphElement(u8* a);
-extern Quadratic16 D_002743A0;
+extern Quadratic16 g_slideEaseOutCoefficients;
 
 s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...);
 extern s32 D_002751D4;
@@ -181,10 +181,10 @@ void MeasureText(TextReader* self, f32 f, f32* out1, f32* out2);
 void RebuildPromptText(T217D_4C0* self);
 
 
-extern TextStyle D_002743D0;
+extern TextStyle g_framedElementStyle;
 
 
-extern TextStyle D_002743F0;
+extern TextStyle g_pointerCaptionStyle;
 
 extern "C" s32 CompareStrings(const char* a, const char* b);
 
@@ -195,7 +195,7 @@ s32 MatchesObjectId(void* key, s32 item);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 
-extern TextStyle D_00274410;
+extern TextStyle g_copiedCaptionStyle;
 
 // NEAR: register and load order of D_00262C84 vs D_00269988 (retail keeps the x load in v1, ours in a0; xori placed differently)
 
@@ -219,7 +219,7 @@ extern f32 D_0027446C;
 // The vertical scale of the clone func_001ADF28 makes of its font (D_0027446C is the
 // horizontal one); the label runs on over a word nothing reads.
 extern f32 D_00274470[2];
-extern TextStyle D_00274488;
+extern TextStyle g_promptStyle;
 
 s32 MatchesObjectId(s32 value, s32 item);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
@@ -241,13 +241,13 @@ void* ComputeCompletionPercent(GameProgress* progress);
 void SetElementTextFromEntry(ScreenElement* self, s32 hi, s32 lo);
 
 
-extern f32 D_00274448;
-extern f32 D_0027444C;
-extern TextStyle D_00274450;
+extern f32 g_titleFontScaleX;
+extern f32 g_titleFontScaleY;
+extern TextStyle g_titleStyle;
 
 void* FindAnimRecord(s32 key);
 
-extern f32 D_002744A8;
+extern f32 g_letterGlyphScale;
 
 struct ProgressEntry {
     u32 flags;
@@ -266,8 +266,8 @@ char* GetEntryName(s32 id);
 f32 WrapAngle(f32 a);
 extern "C" f32 Cosine(f32 x);
 
-extern const char* D_00274478[];
-extern const char* D_00274484;
+extern const char* g_promptTexts[];
+extern const char* g_noControllerText;
 
 // A colour and a text reader, one frame slot (func_001ADFF0).
 struct ColoredText { T217D_Rgba col; u8 pad[12]; TextReader reader; };
@@ -278,13 +278,13 @@ f32 MeasureTextWidth(TextReader* self);
 f32 MeasureTextHeight(TextReader* self, f32 limit);
 
 
-extern const char* D_00274430[];
+extern const char* g_worldTitles[];
 
 void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3);
 extern "C" s32 GetStringLength(const char* s);
 
 struct GlyphCycleTable { s8* p; s32 pad; };
-extern GlyphCycleTable D_002744B0;
+extern GlyphCycleTable g_cyclingGlyphSet;
 
 
 
@@ -360,7 +360,7 @@ struct ClampFloat {
 
 struct VEnt_1AC0E8 { s16 delta; s16 index; void (*fn)(void* self, f32 x, f32 y, s32 a, s32 b, void* c); };
 struct Text_1AC0E8 { u8 pad[0x4C]; VEnt_1AC0E8* vtbl; };
-extern RampProfile D_002743C0;
+extern RampProfile g_gaugeFillRamp;
 
 f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p);
@@ -402,7 +402,7 @@ void SetupScreenElementText(ScreenElement* self)
 // The slide's easing, 2p - p * p: a quadratic's coefficients, constant first, as Quadratic16
 // (include/shapes.h) holds them. Its alignment to 16 starts the file's .data on 16, 8 bytes after
 // object_pool.cpp's last screen element (D_00274118, 0x280 bytes) ends: the linker's padding.
-Quadratic16 D_002743A0 = { { 0.0f }, 2.0f, -1.0f, 0.0f };
+Quadratic16 g_slideEaseOutCoefficients = { { 0.0f }, 2.0f, -1.0f, 0.0f };
 
 void UpdateScreenElementSlide(ScreenElement* self) {
     f32 t = *self->clock;
@@ -442,7 +442,7 @@ void UpdateScreenElementSlide(ScreenElement* self) {
     }
     if (s == self->mode) {
         f32 p = self->blend;
-        f32 k = D_002743A0.x + p * (D_002743A0.y + p * D_002743A0.z);
+        f32 k = g_slideEaseOutCoefficients.x + p * (g_slideEaseOutCoefficients.y + p * g_slideEaseOutCoefficients.z);
         self->x = self->hiddenX + k * (self->shownX - self->hiddenX);
         self->y = self->hiddenY + k * (self->shownY - self->hiddenY);
         PlaceAnchoredScreenElements(self);
@@ -789,7 +789,7 @@ void InitCounterCaption(T217D_E30* self)
     self->rate = 6000.0f;
     switch (self->index) {
     case 3:
-        self->target = &g_saveData->f19E0;
+        self->target = &g_saveData->reserveCount;
         break;
     case 4:
         self->target = &g_currentEntry->count64;
@@ -799,7 +799,7 @@ void InitCounterCaption(T217D_E30* self)
         self->target = &g_currentLevelRecord->f438;
         break;
     case 6:
-        self->target = &g_saveData->f19E8;
+        self->target = &g_saveData->pickupCount;
         break;
     case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
     case 28: case 29:
@@ -907,7 +907,7 @@ void FormatCounterCaption(T217D_E30* self)
         }
         break;
     case 5:
-        if ((u32)(g_saveData->f19D8 - 1) < 4) {
+        if ((u32)(g_saveData->levelIndex - 1) < 4) {
             FormatToStringBounded(self->text, 0x200, "%d%c", self->shown, 0x4B);
         } else {
             self->text[0] = 0;
@@ -1205,17 +1205,17 @@ f32 GetGaugeColliderCaptionHoldTime(void)
     return 0.0f;
 }
 
-f32 D_002743B0 = 18.0f;
-f32 D_002743B4 = 8.0f;
-f32 D_002743B8 = 26.0f;
-f32 D_002743BC = 340.0f;
+f32 g_gaugeBarX = 18.0f;
+f32 g_gaugeBarY = 8.0f;
+f32 g_gaugeBarWidth = 26.0f;
+f32 g_gaugeBarHeight = 340.0f;
 
 // Starts the gauge's count from its mode's segments and returns the number of cells.
 static inline s32 StartGaugeCount(T217D_2E0* g)
 {
-    s32 cells = g->f260 * g->f264;
-    g->f26C = g->f260;
-    g->f270 = g->f264;
+    s32 cells = g->segmentCount * g->cellsPerSegment;
+    g->segmentsLeft = g->segmentCount;
+    g->cellsLeft = g->cellsPerSegment;
     return cells;
 }
 
@@ -1227,37 +1227,37 @@ void InitGauge(T217D_2E0* self)
     self->scale = 1.0f;
     self->fillTarget = 1.0f;
     self->fill = 0;
-    switch (g_saveData->f19D8) {
+    switch (g_saveData->levelIndex) {
     case 1:
-        self->f260 = 4;
-        self->f264 = 1;
+        self->segmentCount = 4;
+        self->cellsPerSegment = 1;
         break;
     case 4:
-        self->f260 = 5;
-        self->f264 = 10;
+        self->segmentCount = 5;
+        self->cellsPerSegment = 10;
         break;
     case 2:
-        self->f260 = 3;
-        self->f264 = 1;
+        self->segmentCount = 3;
+        self->cellsPerSegment = 1;
         self->fill = 1.0f;
         break;
     case 3:
-        self->f260 = 4;
-        self->f264 = 1;
+        self->segmentCount = 4;
+        self->cellsPerSegment = 1;
         self->fill = 1.0f;
         break;
     case 5:
-        self->f260 = 4;
-        self->f264 = 5;
+        self->segmentCount = 4;
+        self->cellsPerSegment = 5;
         break;
     default:
         return;
     }
     f32 pad = 5.0f;
-    self->barX = D_002743B0 * self->scale;
-    self->barY = D_002743B4 * self->scale;
-    self->barW = D_002743B8 * self->scale;
-    self->barH = D_002743BC * self->scale;
+    self->barX = g_gaugeBarX * self->scale;
+    self->barY = g_gaugeBarY * self->scale;
+    self->barW = g_gaugeBarWidth * self->scale;
+    self->barH = g_gaugeBarHeight * self->scale;
     PushFontScale(self->font, self->scale, self->scale);
     f32 h = (f32)self->font->height * self->font->sy;
     f32 w = self->font->Width('z');
@@ -1268,34 +1268,34 @@ void InitGauge(T217D_2E0* self)
     n = StartGaugeCount(self);
     self->letterX = h * 0.5f;
     self->letterY = w + pad + h2 * 0.5f;
-    self->f268 = n;
+    self->cellCount = n;
 }
 
 void DecrementGaugeCount(T217D_2E0* self)
 {
-    s32 n = self->f270 - 1;
-    self->f270 = n;
+    s32 n = self->cellsLeft - 1;
+    self->cellsLeft = n;
     if (n <= 0) {
-        n = self->f26C - 1;
-        self->f26C = n;
+        n = self->segmentsLeft - 1;
+        self->segmentsLeft = n;
         if (n <= 0) {
-            self->f270 = 0;
-            self->f26C = 0;
+            self->cellsLeft = 0;
+            self->segmentsLeft = 0;
         } else {
-            self->f270 = self->f264;
+            self->cellsLeft = self->cellsPerSegment;
         }
     }
 
-    s32 a = self->f264;
-    f32 d = (f32)self->f268;
-    s32 v0 = self->f26C - 1;
-    s32 b = self->f270;
+    s32 a = self->cellsPerSegment;
+    f32 d = (f32)self->cellCount;
+    s32 v0 = self->segmentsLeft - 1;
+    s32 b = self->cellsLeft;
     v0 = (-1 < v0) ? v0 : 0;
     self->fillTarget = (f32)(v0 * a + b) / d;
     self->changedAt = g_gameClock.time;
 }
 
-RampProfile D_002743C0 = { 0.5f, 0.25f, 0.2f, 0.0f };
+RampProfile g_gaugeFillRamp = { 0.5f, 0.25f, 0.2f, 0.0f };
 
 void DrawGauge(T217D_2E0* self)
 {
@@ -1308,7 +1308,7 @@ void DrawGauge(T217D_2E0* self)
         flag = d < 0.75f;
     }
     u32 grey = 0xFF808080;
-    self->fill = ApproachValueWithRamp(&D_002743C0, 0, self->fill, self->fillTarget, g_gameClock.dt);
+    self->fill = ApproachValueWithRamp(&g_gaugeFillRamp, 0, self->fill, self->fillTarget, g_gameClock.dt);
     f32 y = self->barH;
     f32 h = self->fill * y;
     y -= h;
@@ -1359,7 +1359,7 @@ void DrawGauge(T217D_2E0* self)
     PopFontScale(self->font);
 }
 
-TextStyle D_002743D0 = {0};
+TextStyle g_framedElementStyle = {0};
 
 void InitFramedElement(T217D_330* self)
 {
@@ -1369,7 +1369,7 @@ void InitFramedElement(T217D_330* self)
     vt = self->font->vt;
     self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), 1.25f, 1.25f);
     if (IsFontLoaded(2)) {
-        self->frame = (Font**)&D_002743D0;
+        self->frame = (Font**)&g_framedElementStyle;
         *self->frame = GetFontById(2);
     }
 }
@@ -1427,7 +1427,7 @@ void DrawElementWithFadedFrame(T217D_330* self)
     }
 }
 
-TextStyle D_002743F0 = {0};
+TextStyle g_pointerCaptionStyle = {0};
 
 void InitPointerTextCaption(T217D_380* self)
 {
@@ -1438,7 +1438,7 @@ void InitPointerTextCaption(T217D_380* self)
     self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), 0.9f, 0.9f);
     self->color = 0xDF7F7F7Fu;
     if (IsFontLoaded(2)) {
-        self->frame = (Font**)&D_002743F0;
+        self->frame = (Font**)&g_pointerCaptionStyle;
         *self->frame = GetFontById(2);
     }
 }
@@ -1557,7 +1557,7 @@ void DrawSlidingGlyphElement(T217D_380* self)
     FontCalls::End(self->font, 0, &g_gsPacketWriter);
 }
 
-TextStyle D_00274410 = {0};
+TextStyle g_copiedCaptionStyle = {0};
 
 void InitCopiedTextCaption(T217D_3D0* self)
 {
@@ -1571,7 +1571,7 @@ void InitCopiedTextCaption(T217D_3D0* self)
     self->scale = 0.8f;
     self->outTime = 0.5f;
     if (IsFontLoaded(2)) {
-        self->frame = (Font**)&D_00274410;
+        self->frame = (Font**)&g_copiedCaptionStyle;
         *self->frame = GetFontById(2);
     }
 }
@@ -1669,7 +1669,7 @@ void SetElementTextFromEntry(ScreenElement* self, s32 a1, s32 a2)
 }
 
 // The names the level picker shows, by level (the first, empty, for none).
-const char* D_00274430[6] = { "", "Tide of Terror", "Sunset Snake Eyes", "Vicious Voodoo", "Fire in the Sky", "The Cold Heart of Hate" };
+const char* g_worldTitles[6] = { "", "Tide of Terror", "Sunset Snake Eyes", "Vicious Voodoo", "Fire in the Sky", "The Cold Heart of Hate" };
 
 void SetElementTextFromIndexedCounts(ScreenElement* self, s32 idx)
 {
@@ -1677,7 +1677,7 @@ void SetElementTextFromIndexedCounts(ScreenElement* self, s32 idx)
     s32 a, b, c;
     CountCategoryFlags(idx, &a, &b, &c);
     G27C230* s1 = &g_saveData->levels[idx];
-    CopyString(buf, D_00274430[idx]);
+    CopyString(buf, g_worldTitles[idx]);
     char* d = buf + GetStringLength(buf);
     if (a)
         d += FormatToString(d, " &1%d^10~b2a83d/%d~.^.&.&3k&.", s1->f438, a);
@@ -1801,7 +1801,7 @@ void UpdateHintGlyphElement(T217D_420* self)
     UpdateScreenElementSlide(self);
     if (self->flag == 0) goto tail;
     g = g_player;
-    if (g != 0 && g->f2220 == 6) goto tail;
+    if (g != 0 && g->state == 6) goto tail;
     m = (ElementStack*)g_elementStack;
     if (m->state == 3 && m->count < 2) {
         self->vt->m14(self);
@@ -1856,12 +1856,12 @@ void SetElementModeFollowingFade(T217D_560* self, s32 newval)
                 newval = 0;
                 if ((*(s32*)D_00275B00 & 8) == 0) {
                     newval = 2;
-                    if (g_saveData->f19D8 != 0 && D_0027051C == 0) {
-                        g = &D_0026F138;
+                    if (g_saveData->levelIndex != 0 && g_activeStepSequence == 0) {
+                        g = &g_copiedTextCaption;
                         g->pending = 0;
                         g->vt->m16(g, 0);
                         gg = g_saveData;
-                        SetElementTextFromEntry(g, gg->f19D8, gg->f19DC);
+                        SetElementTextFromEntry(g, gg->levelIndex, gg->entryIndex);
                         g->announce = 1;
                         SetScreenElementHoldTime(g, 0.0f);
                         g->vt->m16(g, 2);
@@ -1870,11 +1870,11 @@ void SetElementModeFollowingFade(T217D_560* self, s32 newval)
             }
         }
         if (self->mode != newval && newval == 0) {
-            T217D_3D0* a = &D_0026F138;
+            T217D_3D0* a = &g_copiedTextCaption;
             if (a->announce != 0) {
                 a->vt->m16(a, 0);
             }
-            T217D_600* b = &D_00273EB0;
+            T217D_600* b = &g_cyclingGlyphElement;
             if (b->flag != 0) {
                 b->vt->m16(b, 0);
             }
@@ -1897,17 +1897,17 @@ void DrawLetterboxElement(T217D_560* self)
     AddGifXyzfEntry(&g_gsPacketWriter, 0x9400, 0x8700, 0x0FFFFFF0, 0);
 }
 
-f32 D_00274448 = 0.9f;
-f32 D_0027444C = 0.9f;
-TextStyle D_00274450 = {0};
+f32 g_titleFontScaleX = 0.9f;
+f32 g_titleFontScaleY = 0.9f;
+TextStyle g_titleStyle = {0};
 
 void InitTitleElement(T217D_470* self)
 {
     SetupScreenElementText(self);
     Font* in = self->font;
-    self->font = in->vt->clone((Font*)((u8*)in + in->vt->adj1), D_00274448, D_0027444C);
+    self->font = in->vt->clone((Font*)((u8*)in + in->vt->adj1), g_titleFontScaleX, g_titleFontScaleY);
     if (GetFontById(2) != 0) {
-        self->frame = (Font**)&D_00274450;
+        self->frame = (Font**)&g_titleStyle;
         *self->frame = GetFontById(2);
     }
     self->icon = FindAnimRecord(0x493);
@@ -1945,9 +1945,9 @@ void DrawTitleElement(T217D_470* self)
 
 f32 D_0027446C = 0.7f;
 f32 D_00274470[2] = { 0.6f, 0.0f };
-const char* D_00274478[3] = { "Press START button for New Game", "Press START button to Resume Game", "Press SELECT button for Menu" };
-const char* D_00274484 = "No Controller";
-TextStyle D_00274488 = {0};
+const char* g_promptTexts[3] = { "Press START button for New Game", "Press START button to Resume Game", "Press SELECT button for Menu" };
+const char* g_noControllerText = "No Controller";
+TextStyle g_promptStyle = {0};
 
 void InitPromptElement(T217D_4C0* self)
 {
@@ -1957,7 +1957,7 @@ void InitPromptElement(T217D_4C0* self)
     vt = self->font->vt;
     self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), D_0027446C, D_00274470[0]);
     if (GetFontById(2)) {
-        self->frame = (Font**)&D_00274488;
+        self->frame = (Font**)&g_promptStyle;
         *self->frame = GetFontById(2);
     }
     s32 a1 = 0;
@@ -1982,7 +1982,7 @@ void RebuildPromptText(T217D_4C0 *self)
         loc.col.c[2] = 0x6F;
         loc.col.c[3] = 0xFF;
         self->rgba = loc.col;
-        u8 *tbl = (u8*)D_00274478;
+        u8 *tbl = (u8*)g_promptTexts;
         s32 off = self->flagB ? 4 : 0;
         FormatToString(self->text, (const char *)"%s
 %s", *(s32 *)(tbl + off), *(s32 *)(tbl + 8));
@@ -1992,7 +1992,7 @@ void RebuildPromptText(T217D_4C0 *self)
         loc.col.c[2] = 0x1F;
         loc.col.c[3] = 0xFF;
         self->rgba = loc.col;
-        CopyString(self->text, (const char *)D_00274484);
+        CopyString(self->text, (const char *)g_noControllerText);
     }
     PushFontScale(self->font, self->scale, self->scale);
     InitTextReader(&loc.reader, self->text, self->font);
@@ -2077,7 +2077,7 @@ void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* color
 }
 
 f32 D_002744A4 = 0.1f;
-f32 D_002744A8 = 1.3f;
+f32 g_letterGlyphScale = 1.3f;
 
 void InitLetterGlyphElement(T217D_5B0* self)
 {
@@ -2088,7 +2088,7 @@ void InitLetterGlyphElement(T217D_5B0* self)
     } else if (self == &D_002739F0) {
         FormatToString(self->text, "%c", 0x4B);
     }
-    PushFontScale(self->font, D_002744A8, D_002744A8);
+    PushFontScale(self->font, g_letterGlyphScale, g_letterGlyphScale);
     self->w = MeasureFontString(self->font, self->text);
     Font* in = self->font;
     self->h = (f32)in->height * in->sy;
@@ -2111,10 +2111,10 @@ void DrawLetterGlyphElement(ScreenElement* self)
     LayoutBuilder out;
     s32 tmp;
     f32 size = 1.0f;
-    curve.start = D_002744A8;
+    curve.start = g_letterGlyphScale;
     curve.none = 0;
-    curve.k = (1.0f - D_002744A8) / (D_002744A4 * D_002744A4);
-    f32 peak = Fpu::Sqrt(D_002744A8 / curve.k);
+    curve.k = (1.0f - g_letterGlyphScale) / (D_002744A4 * D_002744A4);
+    f32 peak = Fpu::Sqrt(g_letterGlyphScale / curve.k);
     f32 age = g_elapsedTime - self->since;
     if (!(peak + D_002744A4 < age)) {
         f32 t = age - peak;
@@ -2225,13 +2225,13 @@ void DrawCyclingGlyphElement(T217D_600* self)
     PopFontScale(self->font);
 }
 
-GlyphCycleTable D_002744B0 = { (s8*)"ab", 0 };
+GlyphCycleTable g_cyclingGlyphSet = { (s8*)"ab", 0 };
 
 Letter_1AEA08 GetCyclingGlyph(void)
 {
     s32 scaled = (s32)(g_elapsedTime * 5.0f);
-    u32 divisor = GetStringLength((const char*)D_002744B0.p);
-    return D_002744B0.p[(u32)scaled % divisor];
+    u32 divisor = GetStringLength((const char*)g_cyclingGlyphSet.p);
+    return g_cyclingGlyphSet.p[(u32)scaled % divisor];
 }
 
 // The static initialiser GCC writes for this file's text styles (three empty array
@@ -2248,36 +2248,36 @@ void ConstructScreenTextStyles(s32 initialize, s32 priority)
         }
         for (i = 3; i != -1; i--) {
         }
-        FillMemory(&D_002743D0, 0, 0x1C);
-        D_002743D0.f04 = 0x2D;
-        D_002743D0.f08 = 2.0f;
-        D_002743D0.f0C = 1.0f;
-        D_002743D0.f14 = D_002743D0.f10 = 0.3f;
-        D_002743D0.f18 = 0xFF7D4B00;
-        FillMemory(&D_002743F0, 0, 0x1C);
-        D_002743F0.f04 = 0x2D;
-        D_002743F0.f08 = 2.0f;
-        D_002743F0.f0C = -4.0f;
-        D_002743F0.f14 = D_002743F0.f10 = 0.3f;
-        D_002743F0.f18 = 0xFF7D4B00;
-        FillMemory(&D_00274410, 0, 0x1C);
-        D_00274410.f04 = 0x3D;
-        D_00274410.f08 = 2.0f;
-        D_00274410.f0C = -4.0f;
-        D_00274410.f14 = D_00274410.f10 = 0.3f;
-        D_00274410.f18 = 0xFF7D4B00;
-        FillMemory(&D_00274450, 0, 0x1C);
-        D_00274450.f04 = 0x2D;
-        D_00274450.f08 = 2.0f;
-        D_00274450.f0C = -4.0f;
-        D_00274450.f14 = D_00274450.f10 = 0.3f;
-        D_00274450.f18 = 0xFF7D4B00;
-        FillMemory(&D_00274488, 0, 0x1C);
-        D_00274488.f04 = 0x2D;
-        D_00274488.f08 = 2.0f;
-        D_00274488.f0C = -4.0f;
-        D_00274488.f14 = D_00274488.f10 = 0.3f;
-        D_00274488.f18 = 0xFF7D4B00;
+        FillMemory(&g_framedElementStyle, 0, 0x1C);
+        g_framedElementStyle.f04 = 0x2D;
+        g_framedElementStyle.f08 = 2.0f;
+        g_framedElementStyle.f0C = 1.0f;
+        g_framedElementStyle.f14 = g_framedElementStyle.f10 = 0.3f;
+        g_framedElementStyle.color = 0xFF7D4B00;
+        FillMemory(&g_pointerCaptionStyle, 0, 0x1C);
+        g_pointerCaptionStyle.f04 = 0x2D;
+        g_pointerCaptionStyle.f08 = 2.0f;
+        g_pointerCaptionStyle.f0C = -4.0f;
+        g_pointerCaptionStyle.f14 = g_pointerCaptionStyle.f10 = 0.3f;
+        g_pointerCaptionStyle.color = 0xFF7D4B00;
+        FillMemory(&g_copiedCaptionStyle, 0, 0x1C);
+        g_copiedCaptionStyle.f04 = 0x3D;
+        g_copiedCaptionStyle.f08 = 2.0f;
+        g_copiedCaptionStyle.f0C = -4.0f;
+        g_copiedCaptionStyle.f14 = g_copiedCaptionStyle.f10 = 0.3f;
+        g_copiedCaptionStyle.color = 0xFF7D4B00;
+        FillMemory(&g_titleStyle, 0, 0x1C);
+        g_titleStyle.f04 = 0x2D;
+        g_titleStyle.f08 = 2.0f;
+        g_titleStyle.f0C = -4.0f;
+        g_titleStyle.f14 = g_titleStyle.f10 = 0.3f;
+        g_titleStyle.color = 0xFF7D4B00;
+        FillMemory(&g_promptStyle, 0, 0x1C);
+        g_promptStyle.f04 = 0x2D;
+        g_promptStyle.f08 = 2.0f;
+        g_promptStyle.f0C = -4.0f;
+        g_promptStyle.f14 = g_promptStyle.f10 = 0.3f;
+        g_promptStyle.color = 0xFF7D4B00;
     }
 }
 

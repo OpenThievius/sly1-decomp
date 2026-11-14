@@ -23,6 +23,6 @@ s32 IsIopReplyReady(void)
     if (D_eu_0025D6B8 != 0) {
         return 0;
     }
-    PrintFormatted(D_00249460);
+    PrintFormatted(g_rpcNotBusyMessage);
     return 0;
 }

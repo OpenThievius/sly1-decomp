@@ -48,9 +48,9 @@ BufferedStream* InitBufferedStream(BufferedStream* self, s32 a1, s32 a2, s32 a3)
     self->ptr = 0;
     self->nextCount = 0;
     self->remaining = 0;
-    self->f30 = 0;
-    self->f28 = 0;
-    self->f2C = 0;
+    self->progress = 0;
+    self->unpackFlags = 0;
+    self->unpackCarry = 0;
     self->end = align;
     self->start = a1 - (align - a2);
     return self;
@@ -72,13 +72,13 @@ s32 OpenBufferedSectorStream(BufferedStream* r, s32 a1, s32 a2)
 {
     r->mode = 1;
     r->sector = a1;
-    r->f10 = a2;
-    r->f14 = a2;
-    r->f40 = a2;
+    r->totalSize = a2;
+    r->bytesToRead = a2;
+    r->bytesLeft = a2;
     r->nextPtr = r->end;
     r->f38 = 0;
     r->f44 = 0;
-    r->f3C = 0;
+    r->discOpen = 0;
     s32 count = r->start / 0x100000;
     s32 m = 2;
     if (m < count) m = count;
@@ -135,12 +135,12 @@ void CloseBufferedStream(BufferedStream* self)
     s32 next = -1;
     switch (self->mode) {
     case 0:
-        if (self->f34 >= 0) {
-            CloseFile(self->f34);
+        if (self->fileHandle >= 0) {
+            CloseFile(self->fileHandle);
         }
         break;
     case 1:
-        if (self->f3C != 0) {
+        if (self->discOpen != 0) {
             if ((self->flags & 2) != 0) {
                 StopDiscRead();
             } else {
@@ -156,8 +156,8 @@ void CloseBufferedStream(BufferedStream* self)
     self->ptr = 0;
     self->nextCount = 0;
     self->remaining = 0;
-    self->f28 = 0;
-    self->f2C = 0;
+    self->unpackFlags = 0;
+    self->unpackCarry = 0;
 }
 
 s32 IsObjectAttached(void* obj);
@@ -167,7 +167,7 @@ void GetNumberedItemFlag(NumberedItem* self, s32* out);
 
 s32 ReduceBufferedStreamBytesLeft(BufferedStream* self, s32 n)
 {
-    return self->f40 -= n;
+    return self->bytesLeft -= n;
 }
 
 void GetCurrentLevelBit(u32* out);
@@ -177,7 +177,7 @@ f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 struct SectorStreamState {
     s32 flags;      // 0x00
-    s32 f04;
+    s32 mode;
     u8* base;       // 0x08
     s32 total;      // 0x0C
     u8 pad10[0x10];
@@ -289,14 +289,14 @@ void RefillBufferedStreamFromSectors(SectorStreamState* self)
 }
 
 extern s32 ReadFile(s32 fd, void* buf, s32 size);
-struct FileStreamState { u8 pad0[8]; void* f8; s32 fC; u8 pad10[4]; s32 f14; u8 pad18[8]; void* f20; s32 f24; u8 pad28[0xC]; s32 f34; };
+struct FileStreamState { u8 pad0[8]; void* buffer; s32 fC; u8 pad10[4]; s32 fileLeft; u8 pad18[8]; void* fillPtr; s32 fillCount; u8 pad28[0xC]; s32 fileHandle; };
 void RefillBufferedStreamFromFile(FileStreamState* self)
 {
     s32 size = self->fC;
-    s32 limit = self->f14;
-    self->f20 = self->f8;
+    s32 limit = self->fileLeft;
+    self->fillPtr = self->buffer;
     size = (size > 0x8000) ? MinOf::Of(0x8000, limit) : MinOf::Of(size, limit);
-    self->f24 = ReadFile(self->f34, self->f20, size);
+    self->fillCount = ReadFile(self->fileHandle, self->fillPtr, size);
 }
 
 struct MaxOf { static s32 Of(s32 a, s32 b) { return a < b ? b : a; } };
@@ -309,10 +309,10 @@ void RefillBufferedStream(BufferedStream* self)
     case 0: RefillBufferedStreamFromFile((FileStreamState*)self); break;
     case 1: RefillBufferedStreamFromSectors((SectorStreamState*)self); break;
     }
-    s32 value = self->f14 - self->nextCount;
+    s32 value = self->bytesToRead - self->nextCount;
     value = MaxOf::Of(0, value);
-    self->f14 = value;
-    if (self->f30) UpdateLoadProgress((LoadProgress*)self->f30, value);
+    self->bytesToRead = value;
+    if (self->progress) UpdateLoadProgress((LoadProgress*)self->progress, value);
 }
 
 
@@ -328,12 +328,12 @@ void UnpackBufferedStream(BufferedStream* d)
     s32 pos = 0;
     s32 n = d->nextCount;
     u8* p = d->next;
-    s32 flags = d->f28;
+    s32 flags = d->unpackFlags;
     s32 more;
-    s32 carry = d->f2C;
+    s32 carry = d->unpackCarry;
     if (carry > 0) {
         CopyBytes((void*)0x70000000, (void*)0x70002000, carry);
-        pos = d->f2C;
+        pos = d->unpackCarry;
     }
     while ((more = pos < 0x2000) != 0) {
         flags >>= 1;
@@ -372,14 +372,14 @@ void UnpackBufferedStream(BufferedStream* d)
     d->cur = base;
     if (more == 0) {
         d->remaining = 0x2000;
-        d->f2C = pos - 0x2000;
+        d->unpackCarry = pos - 0x2000;
     } else {
         d->remaining = pos;
-        d->f2C = 0;
+        d->unpackCarry = 0;
     }
     d->next = p;
     d->nextCount = n;
-    d->f28 = flags;
+    d->unpackFlags = flags;
 }
 
 
@@ -742,8 +742,8 @@ void CopyCollider(Collider* self, Collider* other);
 struct LinkedItem {
     u8 pad0[0x10];
     f32 f10;
-    s32 f14;
-    s32 f18;
+    s32 linkA;
+    s32 linkB;
     u8 pad1[0x20 - 0x1C];
 };
 
@@ -766,15 +766,15 @@ void ReadLinkedItemArray(BufferedStream* src, s32* count, LinkedItem** out)
 
         s32 v = ReadBufferedU32(src);
         if ((v & 0x80000000) != 0) {
-            item->f14 = v;
+            item->linkA = v;
         } else {
-            item->f14 = (s32)((*out) + v);
+            item->linkA = (s32)((*out) + v);
         }
         v = ReadBufferedU32(src);
         if ((v & 0x80000000) != 0) {
-            item->f18 = v;
+            item->linkB = v;
         } else {
-            item->f18 = (s32)((*out) + v);
+            item->linkB = (s32)((*out) + v);
         }
     }
 }

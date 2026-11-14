@@ -35,7 +35,7 @@ void GatherAxisCurveTimes(WeightCurve** axis, s32* outCount, f32** outTimes);
 
 void FillObjectPropertyTable(void);
 
-extern u8 D_002505D8[];
+extern u8 g_objectPropertyDescriptors[];
 
 void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r);
 
@@ -138,7 +138,7 @@ void DestroyBufferedStream(BufferedStream* self, s32 flags);
 
 // EXACT: reuse parameter a1 directly instead of a local copy
 
-extern u8 D_00247448[];
+extern u8 g_classDescriptorTable[];
 
 void* AllocateZeroedFrontMemory(s32 n);
 
@@ -270,7 +270,7 @@ extern const ScaleCurveVt g_scaleCurveKind0Methods;
 extern const ScaleCurveVt g_scaleCurveKind1Methods;
 void* AllocateZeroedFrontMemory(s32 n);
 
-extern u8 D_00219560[];
+extern u8 g_ownerPoseSourceMethods[];
 
 typedef void (*PositionOutToldFn)(PlacedObject* self, Vec02* out);
 
@@ -304,7 +304,7 @@ void InitObjectBuiltinTable(void)
 BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4)
 {
     s32 off = index << 2;
-    Desc01* owner = *(Desc01**)((u8*)D_00247448 + off);
+    Desc01* owner = *(Desc01**)((u8*)g_classDescriptorTable + off);
     BaseObject* r = (BaseObject*)AllocateZeroedFrontMemory(owner->size);
     r->desc = owner;
     r->id = a3;
@@ -314,7 +314,7 @@ BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a
     }
     r->parent = a2;
     r->world = (World*)a1;
-    r->f2C = GetScriptEntryScope(a4, (World*)a1);
+    r->scriptScope = GetScriptEntryScope(a4, (World*)a1);
     AppendToList((List01*)(GetHashedSlot((u8*)r->world, r->id)), r);
     u8* base = (u8*)r->world + 0x1884;
     void** slot = (void**)(base + off);
@@ -551,7 +551,7 @@ void ReadPropertyRecords(void* self, void* obj)
 {
     s32 r;
     while ((r = ReadBufferedS16((BufferedStream*)obj)) >= 0) {
-        ApplyPropertyRecord(self, (PropertyDescriptor*)(D_002505D8 + (r << 5)), (BufferedStream*)obj);
+        ApplyPropertyRecord(self, (PropertyDescriptor*)(g_objectPropertyDescriptors + (r << 5)), (BufferedStream*)obj);
     }
 }
 
@@ -1312,7 +1312,7 @@ void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 
         }
         if (!out0)
             continue;
-        if (o->f18) {
+        if (o->multiplyRotations) {
             if (w == 0.0f) {
                 BuildEulerRotationMatrix((f32*)&x0, (f32*)out0);
             } else {
@@ -1331,7 +1331,7 @@ void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 
             Vu0::Q(acc0) = Vu0::MulAddX(Vu0::Q(acc0), Vu0::Q(x0), Vu0::ScalarAt(e->weight));
         }
     }
-    if (out0 && !o->f18)
+    if (out0 && !o->multiplyRotations)
         BuildEulerRotationMatrix((f32*)&acc0, (f32*)out0);
     if (out1)
         RotateVectorByTwoAngles((Vec3*)&acc0, (Vec3*)&acc1, (Vec3*)out1);
@@ -1378,7 +1378,7 @@ void EvaluateAngleBlendCurve(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c,
         WeightCurve* tg = o->targets[i];
         if (!tg) {
             if (cam) {
-                f32 r = WrapAngle(((Rec2195_224*)cam->f224)->f90 - v0);
+                f32 r = WrapAngle(((Rec2195_224*)cam->linkRecord)->angle - v0);
                 v0 += r * e->weight / (w + e->weight);
             }
         } else {
@@ -1593,7 +1593,7 @@ Attachment* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* t
 
 Attachment* ClonePoseSource(Attachment* self, World* a, PlacedObject* b)
 {
-    Attachment* node = CreatePoseSource(a, b, (const T2195_Vt*)D_00219560);
+    Attachment* node = CreatePoseSource(a, b, (const T2195_Vt*)g_ownerPoseSourceMethods);
     node->vt->copy(node, self);
     return node;
 }
@@ -1622,10 +1622,10 @@ void ReleasePoseSource(Attachment* self, s32 flags)
     PlacedObject* m = self->owner;
     s32 local[4];
     RemoveFromList(&m->list1E0, self);
-    Attachment* a = m->f1EC;
-    Attachment* b = m->f1F0;
+    Attachment* a = m->positionAttachment;
+    Attachment* b = m->orientationAttachment;
     m->desc02()->m2B(m);
-    if (self == a && m->f1EC == 0 && (flags & 1) != 0) {
+    if (self == a && m->positionAttachment == 0 && (flags & 1) != 0) {
         if ((m->desc->flags & 2) != 0) {
             ConstrainColliderVector(m, (u8*)m + 0x440, (u8*)m + 0x150, local, 0);
             m->desc02()->m20(m, (Vec02*)local);
@@ -1633,7 +1633,7 @@ void ReleasePoseSource(Attachment* self, s32 flags)
             SetPlacedObjectVelocity(m, (Vec02*)D_00248D30);
         }
     }
-    if (self == b && m->f1F0 == 0 && (flags & 2) != 0) {
+    if (self == b && m->orientationAttachment == 0 && (flags & 2) != 0) {
         if ((m->desc->flags & 2) != 0) {
             ConstrainColliderVector(m, (u8*)m + 0x460, (u8*)m + 0x160, local, 0);
             m->desc02()->m21(m, (Vec02*)local);
@@ -1662,7 +1662,7 @@ void GetOwnerRotation(Attachment* self, Mat02* out1, Vec02* out2)
 
 void GetOwnerValue(Attachment* self, f32* value, f32* slope)
 {
-	Rec2195_224* rec = (Rec2195_224*)self->owner->f224;
+	Rec2195_224* rec = (Rec2195_224*)self->owner->linkRecord;
 	*value = rec->f8C;
 	*slope = 0.0f;
 }
@@ -1711,14 +1711,14 @@ void ApplyPoseSource(Attachment* self, s32 flag)
     PoseLocals loc;
     PlacedObject* s2 = self->owner;
 
-    if (self == s2->f1EC) {
+    if (self == s2->positionAttachment) {
         if (flag != 0 || self->mode0 == 2) {
             self->vt->getPos(self, 0.0f, &loc.pos, &loc.vec);
             s2->desc02()->m1D(s2, &loc.pos);
             s2->desc02()->m20(s2, &loc.vec);
         }
     }
-    if (self == s2->f1F0) {
+    if (self == s2->orientationAttachment) {
         if (flag != 0 || self->mode1 == 2) {
             self->vt->getRot(self, 0.0f, &loc.rot, &loc.pos);
 
@@ -1773,12 +1773,12 @@ void ApplyPoseSourcePosition(T2195_7C0* self)
     f32 now;
     Vec02 A;
     Vec02 B;
-    if (owner->f294 != 0) {
+    if (owner->frameStepClock != 0) {
         dt = g_gameClock.step;
     } else {
         dt = g_gameClock.dt;
     }
-    if (owner->f294 != 0) {
+    if (owner->frameStepClock != 0) {
         now = g_gameClock.elapsed;
     } else {
         now = g_gameClock.time;
@@ -1914,18 +1914,18 @@ void ApplyPoseSourceRotation(Attachment* self)
     f32 value;
     f32 slope;
     s32 hasValue;
-    if (owner->f294 != 0) {
+    if (owner->frameStepClock != 0) {
         dt = g_gameClock.step;
     } else {
         dt = g_gameClock.dt;
     }
-    if (owner->f294 != 0) {
+    if (owner->frameStepClock != 0) {
         now = g_gameClock.elapsed;
     } else {
         now = g_gameClock.time;
     }
     self->vt->getRot(self, 0.0f, &A, &B);
-    if (owner->f224 != 0 && (owner->f224->fB0 & 0x20)) {
+    if (owner->linkRecord != 0 && (owner->linkRecord->flags & 0x20)) {
         self->vt->getValue(self, &value, &slope);
         hasValue = 1;
     } else {
@@ -1937,8 +1937,8 @@ void ApplyPoseSourceRotation(Attachment* self)
         owner->rot = A;
         owner->v160 = B;
         if (hasValue) {
-            owner->f224->f90 = value;
-            owner->f224->f94 = slope;
+            owner->linkRecord->angle = value;
+            owner->linkRecord->angleSlope = slope;
         }
         break;
     case 1: {
@@ -1955,7 +1955,7 @@ void ApplyPoseSourceRotation(Attachment* self)
         OrthonormalizeMatrix(&owner->rot);
         Vu0::Q(owner->v160) = Vu0::MulAddX(Vu0::Vec::Of(owner->v160), Vu0::Vec::Of(C), Vu0::Vec::ScalarInGpr(dt)).q;
         if (hasValue) {
-            owner->f224->f90 = ApproachValueWithRamp(owner->f224->f90, value, dt, (RampProfile*)owner->p220, &owner->f224->f94);
+            owner->linkRecord->angle = ApproachValueWithRamp(owner->linkRecord->angle, value, dt, (RampProfile*)owner->p220, &owner->linkRecord->angleSlope);
         }
         break;
     }
@@ -2000,8 +2000,8 @@ void ApplyPoseSourceRotation(Attachment* self)
             Vu0::Q(owner->v160) = Vu0::MulAddX(Vu0::Q(rest), Vu0::Q(axis), Vu0::ScalarAt(rate));
         }
         if (hasValue) {
-            owner->f224->f90 = ApproachValueWithRamp(owner->f224->f90, value, dt, (RampProfile*)owner->p220, &owner->f224->f94);
-            if (owner->f224->f90 != value) {
+            owner->linkRecord->angle = ApproachValueWithRamp(owner->linkRecord->angle, value, dt, (RampProfile*)owner->p220, &owner->linkRecord->angleSlope);
+            if (owner->linkRecord->angle != value) {
                 settle = 0;
             }
         }
@@ -2031,8 +2031,8 @@ void ApplyPoseSourceRotation(Attachment* self)
                 owner->v160 = B;
             }
             if (hasValue) {
-                owner->f224->f90 = value;
-                owner->f224->f94 = 0.0f;
+                owner->linkRecord->angle = value;
+                owner->linkRecord->angleSlope = 0.0f;
             }
         } else {
             Mat02 m;
@@ -2041,7 +2041,7 @@ void ApplyPoseSourceRotation(Attachment* self)
             owner->rot = m;
             owner->v160 = s;
             if (hasValue) {
-                EvaluateHermiteSegment(left, dt, 1.0f, owner->f224->f90, owner->f224->f94, value, slope, &owner->f224->f90, &owner->f224->f94, 0);
+                EvaluateHermiteSegment(left, dt, 1.0f, owner->linkRecord->angle, owner->linkRecord->angleSlope, value, slope, &owner->linkRecord->angle, &owner->linkRecord->angleSlope, 0);
             }
         }
         break;
@@ -2058,7 +2058,7 @@ void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
         break;
     case 3: {
         f32 cur = self->owner->f270[val];
-        f32 limit = self->owner->f294 ? g_frameStep : g_frameDt;
+        f32 limit = self->owner->frameStepClock ? g_frameStep : g_frameDt;
         self->owner->f270[val] = ApproachValueWithRamp((RampProfile*)g_valueRampProfile, 0, cur, ret, limit);
         break;
     }
@@ -2068,7 +2068,7 @@ void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
 void GetPlacedObjectPositionAt(PlacedObject* self, f32 t, Vec02* pos, Vec02* vec)
 {
     Vec02 k;
-    Attachment* source = self->f1EC;
+    Attachment* source = self->positionAttachment;
     if (t == 0.0f) {
         *pos = self->pos;
         *vec = self->v150;
@@ -2087,7 +2087,7 @@ void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat02* rot, Vec02* vec
     Vec02 d;
     Mat02 m;
     Vec02 k;
-    Attachment* source = self->f1F0;
+    Attachment* source = self->orientationAttachment;
     if (t == 0.0f) {
         *rot = self->rot;
         *vec = self->v160;
@@ -2120,9 +2120,9 @@ void InitSnapshotPoseSource(T2195_588* self, PlacedObject* src)
     self->rot.r[0] = src->m1A0.r[0];
     self->rot.r[1] = src->m1A0.r[1];
     self->rot.r[2] = src->m1A0.r[2];
-    Rec2195_224* p = (Rec2195_224*)src->f224;
+    Rec2195_224* p = (Rec2195_224*)src->linkRecord;
     if (p != 0) {
-        if (p->fB0 & 0x20) {
+        if (p->flags & 0x20) {
             self->f80 = p->f8C;
         }
     }
@@ -2130,7 +2130,7 @@ void InitSnapshotPoseSource(T2195_588* self, PlacedObject* src)
     self->m90.r[0] = table[0];
     self->m90.r[1] = table[1];
     self->m90.r[2] = table[2];
-    self->countC0 = src->f26C;
+    self->countC0 = src->valueCount;
     self->valuesC4 = *(f32**)((u8*)src + 0x274);
 }
 
@@ -2179,13 +2179,13 @@ void InitLinkedPoseSource(T2195_5B0* self, PlacedObject* src)
     InitPoseSource(self, src);
     self->pos = &src->v190;
     self->rot = &src->m1A0;
-    self->count = &src->f26C;
+    self->count = &src->valueCount;
     self->vec = (Vec02*)D_00248D30;
     self->vec2 = (Vec02*)D_00248D30;
     self->values = *(f32**)((u8*)src + 0x274);
-    Rec2195_224* o = (Rec2195_224*)src->f224;
+    Rec2195_224* o = (Rec2195_224*)src->linkRecord;
     if (o != 0) {
-        if (o->fB0 & 0x20) {
+        if (o->flags & 0x20) {
             self->p30 = (f32*)D_00248D30;
             self->p2C = &o->f8C;
         }
@@ -2332,7 +2332,7 @@ void GetAimPoseRotation(T2195_600* self, Mat02* out, Vec02* vec)
     Vec02 vel;
     Vec02* pd = &dir;
     PlacedObject* owner = self->owner;
-    Attachment* source = owner->f1EC;
+    Attachment* source = owner->positionAttachment;
     Vu0::Vec g;
     if ((owner->desc->flags & 2) != 0) {
         g = Vu0::MulX(Vu0::Vec::Of(((Collider*)owner)->gravity), Vu0::Vec::Scalar(-1.0f));

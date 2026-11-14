@@ -7,13 +7,13 @@ void StartSoundBankLoad(s32 a0, s32 a1, IopCallbackFn a2, s64 a3)
     g_soundBankLoadError = 0;
     if (g_soundBankLoadBusy.busy != 0) {
         if (D_eu_0025D6B8 == 0) {
-            PrintFormatted(D_00249570);
+            PrintFormatted(g_bankLoadInProgressMessage);
         }
         return;
     }
     if (SyncDiscRead(1) == 1) {
         if (D_eu_0025D6B8 == 0) {
-            PrintFormatted(D_002495A0);
+            PrintFormatted(g_bankLoadCdBusyMessage);
         }
         return;
     }
@@ -24,7 +24,7 @@ void StartSoundBankLoad(s32 a0, s32 a1, IopCallbackFn a2, s64 a3)
     g_soundBankLoadCallback.arg = a3;
     while (IsRemoteCallPending(&g_iopBankLoadRpc)) {
         if (D_eu_0025D6B8 == 0) {
-            PrintFormatted(D_002494E8);
+            PrintFormatted(g_rpcCollisionMessage);
         }
         PollIopCommands();
         SyncDataCache(0);

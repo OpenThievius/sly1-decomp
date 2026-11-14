@@ -34,17 +34,17 @@ struct Zone28 {
     u8 pad00[4];
     Collider* owner;             // 0x04: the object it is in (func_0013E950)
     Pair28 pairs[2];        // 0x08, 0x90
-    f32 f118;               // 0x118: the time handed to func_0012C8F8 (func_0013ED90)
-    s32 f11C;               // 0x11C
+    f32 seekTime;           // 0x118: the time handed to func_0012C8F8 (func_0013ED90)
+    s32 persistent;         // 0x11C
     s32 id120;              // 0x120: an index of the table at D_00261420 (func_00140FF8)
     f32 stamp;              // 0x124: the clock when the mode changed (D_0026185C)
     f32 duration;           // 0x128
     s32 mode;               // 0x12C: func_0013EB68 changes it
     u8 pad130[4];
-    s32 f134;               // 0x134
-    s32 f138;               // 0x138: non-zero reverses the direction (func_0013ED90)
-    s32 f13C;               // 0x13C
-    s32 f140;               // 0x140: -1 at set-up
+    s32 silent;             // 0x134
+    s32 reversed;           // 0x138: non-zero reverses the direction (func_0013ED90)
+    s32 staysActive;        // 0x13C
+    s32 sequenceId;         // 0x140: -1 at set-up
     u8 pad144[4];
     s32 count148;           // 0x148: the entries of table14C (func_0013EC00)
     u8 table14C[0x80];      // 0x14C
@@ -70,8 +70,8 @@ struct TriggerZone : Collider {
     s32 kindsIn[8];         // 0x76C
     s32 countKindsOut;      // 0x78C: kinds it must not be; func_00140710 appends
     s32 kindsOut[8];        // 0x790
-    s32 f7B0;               // 0x7B0: the entry chosen
-    s32 f7B4;               // 0x7B4: the number of quads
+    s32 chosenIndex;        // 0x7B0: the entry chosen
+    s32 quadCount;          // 0x7B4: the number of quads
     u8 pad7B8[0x7C0 - 0x7B8];
     union {
         Quad28 quads[8];    // 0x7C0: state 0's records (func_0013F140 inserts)
@@ -86,7 +86,7 @@ struct TriggerZone : Collider {
     Vec02 v860;             // 0x860: state 0: the unit line through the quads; state 1: a row of the last
                             //        rotation (func_0013F290); negated so that it faces away from v870
     Vec02 v870;             // 0x870: state 0: -v860; state 1: the next row (func_0013F290)
-    s32 id880;              // 0x880: compared with the world's object at +0x2204 (func_0013FD20)
+    s32 markerNode;         // 0x880: compared with the world's object at +0x2204 (func_0013FD20)
     u8 pad884[0x890 - 0x884];
 };
 

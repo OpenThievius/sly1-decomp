@@ -6,18 +6,18 @@ void PlayMovie(MoviePlayer* self, IdentityKey* key)
     KeyId pr;
     SetScreenOwner(4);
     self->movieIndex = FindKeyIndex(key);
-    InitStreamReader(&loc, D_002C3B00);
+    InitStreamReader(&loc, g_packetBufferMemory);
     if (KeyIdOfMovie::Of(&pr, key) && OpenSectorStreamRange(&loc, &pr)) {
         InitMoviePlayback(self, &loc);
         while (!GetMpegDecoderStatus((Device_20B0B0*)&self->decoder)) {
             AdvanceGameClockElapsed((GameClock*)g_gameClock);
             UpdatePadConnection(&g_padRecord);
             s32 flag = 0;
-            if (SameMovieKey::Of(key, &D_00248490)) flag = g_keyedMovieWatched != 0;
+            if (SameMovieKey::Of(key, &g_watchedMovieKey)) flag = g_keyedMovieWatched != 0;
             u32 m;
             if (self->movieIndex >= 16) m = 0;
             else m = 1u << self->movieIndex;
-            if (g_saveData->f19F8 & m) flag = 1;
+            if (g_saveData->movieBits & m) flag = 1;
             if (flag) {
                 s32 stop = 0;
                 if (RestoreFadeRequest((ScreenFade*)g_screenFade, &g_padRecord, 2)) {
@@ -32,7 +32,7 @@ void PlayMovie(MoviePlayer* self, IdentityKey* key)
             if (g_discSectorCheckState != 3) break;
             StepMovieFrame(self);
         }
-        if (SameMovieKey::Of(key, &D_00248490)) g_keyedMovieWatched = 1;
+        if (SameMovieKey::Of(key, &g_watchedMovieKey)) g_keyedMovieWatched = 1;
         FinishMovie(self);
         CloseStreamReader(&loc);
     } else {

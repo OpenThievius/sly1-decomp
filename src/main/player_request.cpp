@@ -24,8 +24,8 @@
 // Types other files define, named by the parameters of their functions declared here.
 struct TargetArcSource;
 
-s32 D_00274FA0[2] = {286, 287};
-s32 D_00274FA8[2] = {288, 289};
+s32 g_playerBlendDeltaIdsA[2] = {286, 287};
+s32 g_playerBlendDeltaIdsB[2] = {288, 289};
 s32 D_00274FB0[2] = {2, 2};
 s32 D_00274FB8[2] = {48, 64};
 
@@ -41,8 +41,8 @@ f32 D_00275050[4] = { -0.5f, -0.0025f, 0.0f, 0.0f };
 f32 D_00275060[2] = { 0.0f, 0.7f };
 f32 D_00275068[1] = { 0 };
 float D_0027506C = 0.25f;
-float D_00275070[14] = {0.0f, 1.0f, 0.781831503f, 0.623489797f, 0.974927902f, -0.222520933f, 0.433883727f, -0.90096885f, -0.433883727f, -0.90096885f, -0.974927902f, -0.222520933f, -0.781831503f, 0.623489797f};
-float D_002750A8[34] = {1.0f, 0.0f, 0.932472229f, 0.361241668f, 0.739008904f, 0.673695624f, 0.445738345f, 0.895163298f, 0.0922683626f, 0.995734155f, -0.273662984f, 0.961825669f, -0.602634609f, 0.798017204f, -0.850217164f, 0.526432157f, -0.982973099f, 0.183749512f, -0.982973099f, -0.183749512f, -0.850217164f, -0.526432157f, -0.602634609f, -0.798017204f, -0.273662984f, -0.961825669f, 0.0922683626f, -0.995734155f, 0.445738345f, -0.895163298f, 0.739008904f, -0.673695624f, 0.932472229f, -0.361241668f};
+float g_ringSevenPoints[14] = {0.0f, 1.0f, 0.781831503f, 0.623489797f, 0.974927902f, -0.222520933f, 0.433883727f, -0.90096885f, -0.433883727f, -0.90096885f, -0.974927902f, -0.222520933f, -0.781831503f, 0.623489797f};
+float g_ringSeventeenPoints[34] = {1.0f, 0.0f, 0.932472229f, 0.361241668f, 0.739008904f, 0.673695624f, 0.445738345f, 0.895163298f, 0.0922683626f, 0.995734155f, -0.273662984f, 0.961825669f, -0.602634609f, 0.798017204f, -0.850217164f, 0.526432157f, -0.982973099f, 0.183749512f, -0.982973099f, -0.183749512f, -0.850217164f, -0.526432157f, -0.602634609f, -0.798017204f, -0.273662984f, -0.961825669f, 0.0922683626f, -0.995734155f, 0.445738345f, -0.895163298f, 0.739008904f, -0.673695624f, 0.932472229f, -0.361241668f};
 
 // The eight blend slots func_001D4148 fills (0x20 bytes each), the weight of slot 6 first.
 struct BlendSlotObject;
@@ -58,7 +58,7 @@ struct SlotMover { SlotMoveFn* vtbl; };
 struct SlotMoverHolder { u8 pad00[4]; SlotMover* mover; };
 struct BlendSlotObject {
     u8 pad00[0x34];
-    f32 f34;                // 0x34
+    f32 duration;           // 0x34
     u8 pad38[0x9C - 0x38];
     SlotMoverHolder* holder; // 0x9C
 };
@@ -74,9 +74,9 @@ struct PlayerBlendItem {
     u8 pad08[0x10 - 0x08];
     Vec02 v10;              // 0x10
     Vec02 v20;              // 0x20
-    f32 f30;                // 0x30
+    f32 timeAtFirstKey;     // 0x30
     u8 pad34[0x40 - 0x34];
-    f32 f40;                // 0x40
+    f32 timeAtSecondKey;    // 0x40
     u8 pad44[0x50 - 0x44];
 };
 struct PlayerBlendCurve { u8 pad00[0x10]; void* f10; };
@@ -96,8 +96,8 @@ void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAni
         return;
     }
     items[0].weight = 1.0f;
-    ComputeWrappedDeltas(0x50, 6, (u8*)items, 0x30, 2, D_00274FA0);
-    ComputeWrappedDeltas(0x50, 6, (u8*)items, 0x40, 2, D_00274FA8);
+    ComputeWrappedDeltas(0x50, 6, (u8*)items, 0x30, 2, g_playerBlendDeltaIdsA);
+    ComputeWrappedDeltas(0x50, 6, (u8*)items, 0x40, 2, g_playerBlendDeltaIdsB);
     for (i = 0; i < 6; i++) {
         PlayerBlendItem* it = &items[i];
         BlendSlotObject* o = it->object;
@@ -106,14 +106,14 @@ void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAni
             SlotMover* m = o->holder->mover;
             (*m->vtbl)((PoseSource*)m, self, 0.0f, one, 0, &a0, 0);
             m = o->holder->mover;
-            (*m->vtbl)((PoseSource*)m, self, o->f34, one, 0, &a10, 0);
-            *(Vu0::Vec*)&it->v10 = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(a0), Vu0::Vec::Of(a10)), Vu0::Vec::ScalarAt(o->f34));
+            (*m->vtbl)((PoseSource*)m, self, o->duration, one, 0, &a10, 0);
+            *(Vu0::Vec*)&it->v10 = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(a0), Vu0::Vec::Of(a10)), Vu0::Vec::ScalarAt(o->duration));
             Vec02 a20;
             m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)it->object, (BaseObject*)self->f610)->mover;
-            (*m->vtbl)((PoseSource*)m, self->f610, it->f30, one, 0, &a20, 0);
+            (*m->vtbl)((PoseSource*)m, self->f610, it->timeAtFirstKey, one, 0, &a20, 0);
             Vec02 a30;
             m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)it->object, (BaseObject*)self->f614)->mover;
-            (*m->vtbl)((PoseSource*)m, self->f614, it->f40, one, 0, &a30, 0);
+            (*m->vtbl)((PoseSource*)m, self->f614, it->timeAtSecondKey, one, 0, &a30, 0);
             Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
             *(Vu0::Vec*)&it->v20 = Vu0::MulXSum(Vu0::Vec::Of(a20), h, Vu0::Vec::Of(a30), h);
         }
@@ -314,18 +314,18 @@ void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView*
 // The six blend records func_001D40A0 hands to func_001399F8 (0x50 bytes each): the weight
 // of each at its start; the second record's word at +4 says whether it blends at all.
 struct TurnBlendRecords {
-    f32 f0;
+    f32 weight0;
     u8 pad4[0x4C];
-    f32 f50;
-    s32 f54;
+    f32 weight1;
+    s32 secondBlends;
     u8 pad58[0x48];
-    s32 fA0;
+    s32 weight2;
     u8 padA4[0x4C];
-    s32 fF0;
+    s32 weight3;
     u8 padF4[0x4C];
-    s32 f140;
+    s32 weight4;
     u8 pad144[0x4C];
-    s32 f190;
+    s32 weight5;
 };
 
 void SetBlendItemWeights(BlendAnimationView* obj, s32 a1, s32 a2, void* a3);
@@ -333,19 +333,19 @@ void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out);
 
 void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecords* a1, BlendAnimationView* a2)
 {
-    a0->f638 = f12;
-    if (a1->f54 == 0) {
-        a1->f0 = 1.0f;
-        a1->f50 = 0.0f;
+    a0->heading = f12;
+    if (a1->secondBlends == 0) {
+        a1->weight0 = 1.0f;
+        a1->weight1 = 0.0f;
     } else {
         f32 one = 1.0f;
-        a1->f50 = f13;
-        a1->f0 = one - f13;
+        a1->weight1 = f13;
+        a1->weight0 = one - f13;
     }
-    a1->fA0 = 0;
-    a1->f140 = 0;
-    a1->fF0 = 0;
-    a1->f190 = 0;
+    a1->weight2 = 0;
+    a1->weight4 = 0;
+    a1->weight3 = 0;
+    a1->weight5 = 0;
     SetBlendItemWeights(a2, 0x50, 6, a1);
     SumBlendEntryVectors(6, (WeightedRow*)a1, (f32*)a2->pC0->p8, (Vec02*)&a0->f640);
 }
@@ -365,9 +365,9 @@ void CreateEightEntryBlend(TurningCollider* self, BlendSlot* slots, BlendAnimati
             SlotMover* m = o->holder->mover;
             (*m->vtbl)((PoseSource*)m, self, 0.0f, 1.0f, 0, &here, 0);
             m = o->holder->mover;
-            (*m->vtbl)((PoseSource*)m, self, o->f34, 1.0f, 0, &there, 0);
+            (*m->vtbl)((PoseSource*)m, self, o->duration, 1.0f, 0, &there, 0);
             Vu0::Q(delta) = Vu0::Sub(Vu0::Q(there), Vu0::Q(here));
-            Vu0::Q(k) = Vu0::FromFloat(-1.0f / o->f34);
+            Vu0::Q(k) = Vu0::FromFloat(-1.0f / o->duration);
             Vu0::Q(e->v10) = Vu0::MulX(Vu0::Q(delta), Vu0::Q(k));
         } else {
             switch (i) {
@@ -401,7 +401,7 @@ static inline void SetSlotWeights(Player* self, BlendSlot* slots, s32 o, f32 sca
     f32 zero;
     u128 v = Vu0::Q(slots[o + 0].v10);
     f32 length = scale * Vu0::ToFloatMoved(Vu0::Dot(v, v));
-    f32 along = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(self->v640), v));
+    f32 along = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(self->headingVelocity), v));
     f32 first = along / length;
     zero = 0.0f;
     u128 v2 = Vu0::Q(slots[o + 2].v10);
@@ -410,10 +410,10 @@ static inline void SetSlotWeights(Player* self, BlendSlot* slots, s32 o, f32 sca
     f32 length4 = scale * Vu0::ToFloatMoved(Vu0::Dot(v4, v4));
     f32 w0 = first >? zero;
     slots[o + 0].weight = w0;
-    f32 second = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v640), v2)) / length2;
+    f32 second = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->headingVelocity), v2)) / length2;
     f32 w2 = second >? zero;
     slots[o + 2].weight = w2;
-    f32 w4 = (Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v640), Vu0::Q(slots[o + 4].v10))) / length4) >? zero;
+    f32 w4 = (Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->headingVelocity), Vu0::Q(slots[o + 4].v10))) / length4) >? zero;
     slots[o + 4].weight = w4;
     f32 sum = w0 + w2 + w4;
     if (sum < 1.0f) {
@@ -429,17 +429,17 @@ static inline void SetSlotWeights(Player* self, BlendSlot* slots, s32 o, f32 sca
 void UpdateEightEntryBlendWeights(Player* self, BlendSlot* slots, BlendAnimationView* gr)
 {
     Vec02 acc;
-    f32 scale = *(f32*)((u8*)self->watched2230 + 0x18);
+    f32 scale = *(f32*)((u8*)self->stateAnimPlayer + 0x18);
     s32 i;
-    if (self->fA14 == -1) {
-        if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v640), Vu0::Q(slots[0].v10))) < 0.0f)
-            self->fA14 = 1;
+    if (self->eightWayHalf == -1) {
+        if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->headingVelocity), Vu0::Q(slots[0].v10))) < 0.0f)
+            self->eightWayHalf = 1;
         else
-            self->fA14 = 0;
+            self->eightWayHalf = 0;
     }
     for (i = 0; i < 8; i++)
         slots[i].weight = 0.0f;
-    switch (self->fA14) {
+    switch (self->eightWayHalf) {
     case -1:
         break;
     case 0:
@@ -455,7 +455,7 @@ void UpdateEightEntryBlendWeights(Player* self, BlendSlot* slots, BlendAnimation
         Vu0::Q(acc) = Vu0::MulAddX(Vu0::Q(acc), Vu0::Q(e->v10), Vu0::ScalarAt(e->weight));
         e++;
     }
-    Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(acc), Vu0::Scalar(scale));
+    Vu0::Q(self->headingVelocity) = Vu0::MulX(Vu0::Q(acc), Vu0::Scalar(scale));
     SetBlendItemWeights(gr, 0x20, 8, slots);
 }
 static inline f32 MinF(f32 a, f32 b) { return b <? a; }
@@ -467,40 +467,40 @@ void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, BlendAnimationView* blend, f32 heading, f32 speed)
 {
     Vec02 h;
-    ComputePolarOffset((Vec3*)&h, heading - self->f638, speed, 0.0f);
+    ComputePolarOffset((Vec3*)&h, heading - self->heading, speed, 0.0f);
     f32 m;
     if (10.0f < h.y) {
-        if (self->fA14 == 0) {
+        if (self->eightWayHalf == 0) {
             h.y = 0.0f;
             m = 0.0f;
         } else {
             m = 1.0f;
         }
     } else if (h.y < -10.0f) {
-        if (self->fA14 == 1) {
+        if (self->eightWayHalf == 1) {
             h.y = 0.0f;
             m = 1.0f;
         } else {
             m = 0.0f;
         }
-    } else if (self->fA14 == -1) {
+    } else if (self->eightWayHalf == -1) {
         m = 0.0f;
     } else {
-        m = (f32)self->fA14;
+        m = (f32)self->eightWayHalf;
     }
     if (m == 1.0f) {
         u128 s = Vu0::Scalar(h.y);
         u128 t = Vu0::Scalar(MaxF(h.x, 0.0f));
         u128 u = Vu0::Scalar(-MinF(h.x, 0.0f));
-        Vu0::Q(self->v640) = Vu0::MulXSum3(Vu0::Q(basis[3]), s, Vu0::Q(basis[7]), t, Vu0::Q(basis[11]), u);
+        Vu0::Q(self->headingVelocity) = Vu0::MulXSum3(Vu0::Q(basis[3]), s, Vu0::Q(basis[7]), t, Vu0::Q(basis[11]), u);
     } else {
         u128 s = Vu0::Scalar(-h.y);
         u128 t = Vu0::Scalar(MaxF(h.x, 0.0f));
         u128 u = Vu0::Scalar(-MinF(h.x, 0.0f));
-        Vu0::Q(self->v640) = Vu0::MulXSum3(Vu0::Q(basis[1]), s, Vu0::Q(basis[5]), t, Vu0::Q(basis[9]), u);
+        Vu0::Q(self->headingVelocity) = Vu0::MulXSum3(Vu0::Q(basis[1]), s, Vu0::Q(basis[5]), t, Vu0::Q(basis[9]), u);
     }
-    self->v640.z = 0.0f;
-    Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(self->v640), Vu0::ScalarAt(*(f32*)((u8*)self->watched2230 + 0x18)));
+    self->headingVelocity.z = 0.0f;
+    Vu0::Q(self->headingVelocity) = Vu0::MulX(Vu0::Q(self->headingVelocity), Vu0::ScalarAt(*(f32*)((u8*)self->stateAnimPlayer + 0x18)));
 }
 
 
@@ -509,10 +509,10 @@ u8* CopyToFrontMemory(s32 size, void* src);
 
 void ResolvePlayerTableObjects(Player* self)
 {
-    self->f26A8 = 7;
-    self->f26AC = CopyToFrontMemory(0x54, g_playerObjectTable);
-    for (s32 i = 0; i < self->f26A8; i++) {
-        PlayerTableEntry* it = (PlayerTableEntry*)self->f26AC + i;
+    self->ringCount = 7;
+    self->ringAnchors = CopyToFrontMemory(0x54, g_playerObjectTable);
+    for (s32 i = 0; i < self->ringCount; i++) {
+        PlayerTableEntry* it = (PlayerTableEntry*)self->ringAnchors + i;
         it->object = FindFirstObjectById(self->world, 1, it->id, self);
     }
 }
@@ -525,7 +525,7 @@ void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain
 void StepPlayerRequestState(Player* self)
 {
     Vec02 force;
-    switch (self->f2228) {
+    switch (self->subState) {
     case 0x25:
     case 0x26: {
         Vec02 k;
@@ -544,12 +544,12 @@ void StepPlayerRequestState(Player* self)
         AddColliderForce(self, &force);
         f32 zero = 0.0f;
         aim = D_00248D30;
-        if (self->v640.z != zero)
+        if (self->headingVelocity.z != zero)
             aim.z = self->v150.z;
         SteerColliderTowardPosition(self, 0, 0, &aim, D_00275020, g_gameClock.dt);
-        if (self->v640.z != zero) {
+        if (self->headingVelocity.z != zero) {
             force = D_00248D30;
-            force.z = (-self->v640.z - aim.z) / g_gameClock.dt;
+            force.z = (-self->headingVelocity.z - aim.z) / g_gameClock.dt;
             AddColliderForce(self, &force);
         }
         break;
@@ -559,7 +559,7 @@ void StepPlayerRequestState(Player* self)
     case 0x2A:
         break;
     }
-    TurnColliderTowardRotation(self, g_gameClock.dt, &self->m660, &self->f6E0);
+    TurnColliderTowardRotation(self, g_gameClock.dt, &self->headingMatrix, &self->turnGain);
 }
 
 struct TargetCand;
@@ -573,33 +573,33 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep);
 void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Vec02* pos, Vec02* acc);
 
 void UpdatePlayerRequestSubState(Player* self) {
-    switch (self->f2228) {
+    switch (self->subState) {
     case 0x2B: {
         f32 t = ArctangentOfRatio(self->v150.y, self->v150.x);
-        self->f638 = ApproachAngleWithRamp(self->f638, t + 3.1415927f, g_gameClock.dt, D_00275030, 0);
-        if (0.25f < g_gameClock.time - self->f222C && self->f690 != 0) {
+        self->heading = ApproachAngleWithRamp(self->heading, t + 3.1415927f, g_gameClock.dt, D_00275030, 0);
+        if (0.25f < g_gameClock.time - self->subStateStartTime && self->groundContact != 0) {
 
             RunPlayerCallback(self);
         }
         break;
     }
     case 0x2C: {
-        if (*(f32*)((u8*)self->f2514 + 0x18) < g_gameClock.time) {
+        if (*(f32*)((u8*)self->selfPoseSource + 0x18) < g_gameClock.time) {
             RunPlayerCallback(self);
-        } else if (self->f2B70 != 0 && *(f32*)((u8*)self->f2514 + 0x18) < g_gameClock.time + 0.25f &&
-                   (IsObjectOfKind((BaseObject*)self->f2B70, 0x76) || IsObjectOfKind((BaseObject*)self->f2B70, 0x70) ||
-                    IsObjectOfKind((BaseObject*)self->f2B70, 0x71) || IsObjectOfKind((BaseObject*)self->f2B70, 0x81) ||
-                    IsObjectOfKind((BaseObject*)self->f2B70, 0x6F) || IsObjectOfKind((BaseObject*)self->f2B70, 0x7F))) {
+        } else if (self->touchedObject != 0 && *(f32*)((u8*)self->selfPoseSource + 0x18) < g_gameClock.time + 0.25f &&
+                   (IsObjectOfKind((BaseObject*)self->touchedObject, 0x76) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x70) ||
+                    IsObjectOfKind((BaseObject*)self->touchedObject, 0x71) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x81) ||
+                    IsObjectOfKind((BaseObject*)self->touchedObject, 0x6F) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x7F))) {
             if (self->f26B0 != 0) {
                 RunPlayerCallback(self);
             } else {
-                void* o = self->f2B70;
+                void* o = self->touchedObject;
                 SetPlayerState(self, 2, 2);
                 s32 r = ChoosePlayerTargetByCost((Chooser*)self, (TargetCand*)o);
                 SetPlayerState(self, 2, r);
             }
         } else {
-            ComputeTargetArc(self, (TargetArcSource*)&self->f2B70, *(f32*)((u8*)self->f2514 + 0x18) - g_gameClock.time, 0, (Vec02*)((u8*)self->f2514 + 0x20), 0);
+            ComputeTargetArc(self, (TargetArcSource*)&self->touchedObject, *(f32*)((u8*)self->selfPoseSource + 0x18) - g_gameClock.time, 0, (Vec02*)((u8*)self->selfPoseSource + 0x20), 0);
         }
         break;
     }
@@ -616,18 +616,18 @@ extern void SetPlayerState(Player* self, s32 mode, s32 count);
 
 void RunPlayerCallback(Player* self)
 {
-    s32 v = self->f2254;
+    s32 v = self->pendingFlags;
     void (*fn)(Player* self) = self->cb26B0;
 
     v &= -0x11;
     self->cb26B0 = 0;
 
-    self->f2254 = v;
+    self->pendingFlags = v;
     if (fn != 0) {
         fn(self);
         return;
     }
-    if ((u32)(self->f2228 - 0x2D) < 5) {
+    if ((u32)(self->subState - 0x2D) < 5) {
         EndPlayerRequestState(self);
     } else {
         SetPlayerState(self, 2, 2);
@@ -659,17 +659,17 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
     if (self->desc05()->m4B(self, msg->kind) != 0) {
         return 0;
     }
-    if (self->f2220 == 6 && self->f239C == 2) {
+    if (self->state == 6 && self->targetMode == 2) {
         Ev07* tmp = msg;
         TriggerScriptEvent((BaseObject*)self->heldObject, 0x13, 1, &tmp);
         SetPlayerState(self, 2, 5);
         return 0;
     }
-    self->f26B4 = *msg;
-    if (self->f2220 != 4 && self->f2220 != 0xB && self->f26C4 == 0 && (g_buttonCodeFlags & 1) == 0 &&
+    self->lastMessage = *msg;
+    if (self->state != 4 && self->state != 0xB && self->pulseActive == 0 && (g_buttonCodeFlags & 1) == 0 &&
         IsPadSelectFlagHeld(self->world) == 0) {
         s32 c;
-        switch (self->f26B4.kind) {
+        switch (self->lastMessage.kind) {
         case 3:
             c = MaskWorldBitsBySave() & 0x100;
             break;
@@ -686,8 +686,8 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
     check:
         if (self->f2730 != 0) {
             if (HasSpareCount() != 0) {
-                self->f26C4 = 1;
-                self->f26C8 = g_gameTime[0];
+                self->pulseActive = 1;
+                self->pulseStartTime = g_gameTime[0];
             }
         }
     }
@@ -696,10 +696,10 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
     case 0:
         StartSoundEffect(0xA3, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         {
-            PlayerRequestFn fn = (PlayerRequestFn)self->f26B4.fn;
+            PlayerRequestFn fn = (PlayerRequestFn)self->lastMessage.fn;
             if (fn != 0) {
-                self->f26B4.fn = 0;
-                fn(self->f26B4.data, self);
+                self->lastMessage.fn = 0;
+                fn(self->lastMessage.data, self);
             } else {
                 SetPlayerState(self, 4, 0x2B);
             }
@@ -708,10 +708,10 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
         break;
     case 6:
         {
-            PlayerRequestFn fn = (PlayerRequestFn)self->f26B4.fn;
+            PlayerRequestFn fn = (PlayerRequestFn)self->lastMessage.fn;
             if (fn != 0) {
-                self->f26B4.fn = 0;
-                fn(self->f26B4.data, self);
+                self->lastMessage.fn = 0;
+                fn(self->lastMessage.data, self);
             } else {
                 SetPlayerState(self, 4, 0x2B);
             }
@@ -724,11 +724,11 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
     case 1:
     case 2: {
         s32 id;
-        if (self->f2220 == 0xD) {
-            (*(Quad16*)&self->v2BB0) = (*(Quad16*)&self->v2BC0) = *(const Quad16*)&D_00248D30;
+        if (self->state == 0xD) {
+            (*(Quad16*)&self->savedVelocity) = (*(Quad16*)&self->savedSpin) = *(const Quad16*)&D_00248D30;
         } else {
-            (*(Quad16*)&self->v2BB0) = (*(Quad16*)&self->v150);
-            (*(Quad16*)&self->v2BC0) = (*(Quad16*)&self->v160);
+            (*(Quad16*)&self->savedVelocity) = (*(Quad16*)&self->v150);
+            (*(Quad16*)&self->savedSpin) = (*(Quad16*)&self->v160);
         }
         self->desc02()->m20(self, (Vec02*)&D_00248D30);
         self->desc02()->m21(self, (Vec02*)&D_00248D30);
@@ -790,13 +790,13 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 
 void ContinuePlayerRequestKind0(Player* self)
 {
-    if (self->f2228 == 0x2C && self->f2B70 != 0 &&
-        (IsObjectOfKind((BaseObject*)self->f2B70, 0x70) || IsObjectOfKind((BaseObject*)self->f2B70, 0x71) ||
-         IsObjectOfKind((BaseObject*)self->f2B70, 0x81) || IsObjectOfKind((BaseObject*)self->f2B70, 0x6F) ||
-         IsObjectOfKind((BaseObject*)self->f2B70, 0x7F) || IsObjectOfKind((BaseObject*)self->f2B70, 0x76))) {
+    if (self->subState == 0x2C && self->touchedObject != 0 &&
+        (IsObjectOfKind((BaseObject*)self->touchedObject, 0x70) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x71) ||
+         IsObjectOfKind((BaseObject*)self->touchedObject, 0x81) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x6F) ||
+         IsObjectOfKind((BaseObject*)self->touchedObject, 0x7F) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x76))) {
         if (HasSpareCount()) {
             FinishSwitchedCollider(self);
-            void* p = self->f2B70;
+            void* p = self->touchedObject;
             SetPlayerState(self, 2, 2);
             SetPlayerState(self, 2, ChoosePlayerTargetByCost((Chooser*)self, (TargetCand*)p));
         } else {
@@ -810,7 +810,7 @@ void ContinuePlayerRequestKind0(Player* self)
             SetPlayerState(self, 4, 0x2D);
         }
     }
-    if (self->f2220 == 4) {
+    if (self->state == 4) {
         f32 t = self->v150.z;
         f32 x = D_00275050[0] + t * (D_00275050[1] + t * D_00275050[2]);
         f32 lo = D_00275060[0];
@@ -846,8 +846,8 @@ void ContinuePlayerSubState2A(Player* self)
 
 void ContinuePlayerRequestKind1Or2(Player* self)
 {
-    self->desc02()->m20(self, &self->v2BB0);
-    self->desc02()->m21(self, &self->v2BC0);
+    self->desc02()->m20(self, &self->savedVelocity);
+    self->desc02()->m21(self, &self->savedSpin);
     if (HasSpareCount()) {
         self->desc05()->m50(self);
     } else {
@@ -864,9 +864,9 @@ s32 IsPlayerRequestBlocked(Player* self, s32 n)
     s32 v;
     s32 k;
     if (n == 3 || n == 5) {
-        switch (self->f2220) {
+        switch (self->state) {
         case 4:
-            switch (self->f2228) {
+            switch (self->subState) {
             case 0x27:
             case 0x29:
             case 0x2C:
@@ -882,17 +882,17 @@ s32 IsPlayerRequestBlocked(Player* self, s32 n)
                 return 0;
             }
         case 6:
-            k = self->f239C;
+            k = self->targetMode;
             if (k != 3) { if (k != 6) return 1; }
             return 0;
         case 2:
-            if (self->f2228 < 16) {
-                if (!(self->f2228 < 9)) return 1;
+            if (self->subState < 16) {
+                if (!(self->subState < 9)) return 1;
             }
         case 5:
         default: {
             s32 r = 0;
-            if (self->f2220 == 11) goto set;
+            if (self->state == 11) goto set;
             if (IsPadSelectFlagHeld((World*)self->world) != 0) {
 set:
                 r = 1;
@@ -905,10 +905,10 @@ set:
             goto one;
         }
     }
-    v = self->f2220;
+    v = self->state;
     if (v == 4) goto one;
     if (v == 11) goto one;
-    if (self->f26C4 != 0) goto one;
+    if (self->pulseActive != 0) goto one;
     if ((g_buttonCodeFlags & 1) != 0) goto one;
     if (IsPadSelectFlagHeld((World*)self->world) != 0) goto one;
     goto zero;
@@ -1168,7 +1168,7 @@ void DrawPlayerMarkerRing1(DeferredRequest* request)
     };
     params.textures[0] = 0;
     params.textures[1] = FindAnimRecord(0x15C);
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)D_00275070, player->f26A8, (RingAnchor*)player->f26AC, &params, request);
+    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
 }
 
 void DrawPlayerMarkerRing2(DeferredRequest* request)
@@ -1185,7 +1185,7 @@ void DrawPlayerMarkerRing2(DeferredRequest* request)
     AnimRecord* texture = FindAnimRecord(0x15D);
     params.textures[1] = texture;
     params.textures[0] = texture;
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)D_00275070, player->f26A8, (RingAnchor*)player->f26AC, &params, request);
+    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
 }
 
 void DrawPlayerMarkerRing3(DeferredRequest* request)
@@ -1204,5 +1204,5 @@ void DrawPlayerMarkerRing3(DeferredRequest* request)
     params.textures[1] = FindAnimRecord(0x15C);
     anchor.scale = 60.0f;
     anchor.obj = (PlacedObject*)player;
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 0x11, (Point2*)D_002750A8, 1, &anchor, &params, request);
+    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 0x11, (Point2*)g_ringSeventeenPoints, 1, &anchor, &params, request);
 }

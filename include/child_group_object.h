@@ -30,24 +30,24 @@ struct Entry3B {
 };
 
 struct ChildGroupObject : Collider {
-    s32 f550;               // 0x550: 0 at set-up; a message of kind 10 starts the clock while it is 0
-    f32 f554;               // 0x554: FLT_MAX at set-up; the clock plus a delay (func_0013BE00)
-    f32 f558;               // 0x558: a speed: slower than it, or once the clock passes f554, slot 17 settles it (func_0013BF68)
-    f32 f55C;               // 0x55C: 200.0
-    f32 f560;               // 0x560: 200.0
+    s32 contactMode;        // 0x550: 0 at set-up; a message of kind 10 starts the clock while it is 0
+    f32 blastTime;          // 0x554: FLT_MAX at set-up; the clock plus a delay (func_0013BE00)
+    f32 settleSpeed;        // 0x558: a speed: slower than it, or once the clock passes f554, slot 17 settles it (func_0013BF68)
+    f32 blastRadius;        // 0x55C: 200.0
+    f32 playerBlastRadius;  // 0x560: 200.0
     u8 pad564[0x568 - 0x564];
-    f32 f568;               // 0x568: 800.0
-    Pair3B f56C;            // 0x56C: 50.0, 5000.0
-    f32 f574;               // 0x574: 5000.0
+    f32 pushStrength;       // 0x568: 800.0
+    Pair3B massRange;       // 0x56C: 50.0, 5000.0
+    f32 maxMass;            // 0x574: 5000.0
     s32 count;              // 0x578: the objects of arr (at most 16)
     s32 arr[16];            // 0x57C: children of kind 0x27 that slot 16 found
     void* member5BC;        // 0x5BC: func_00159478 finds it (slot 10)
     u8 pad5C0[0x5D0 - 0x5C0];
-    Quad3B f5D0;            // 0x5D0
-    Pair3B f5E0;            // 0x5E0
+    Quad3B speedCurve;      // 0x5D0
+    Pair3B speedRange;      // 0x5E0
     u8 pad5E8[0x5F0 - 0x5E8];
-    Quad3B f5F0;            // 0x5F0
-    Pair3B f600;            // 0x600
+    Quad3B spinCurve;       // 0x5F0
+    Pair3B spinRange;       // 0x600
     s32 mode608;            // 0x608: 0, 1 or 2: how RecordChildGroupPose (func_0013BC80) takes the pose
     s32 flag60C;            // 0x60C: set by it (func_0013BA70 and func_0013BC80 do nothing while it is set)
     Vec02 v610;             // 0x610: the position it was given, or the object's own
@@ -55,9 +55,9 @@ struct ChildGroupObject : Collider {
     Vec02 v650;             // 0x650: the object's v150
     Vec02 v660;             // 0x660: the object's v160
     Collider* obj670;       // 0x670: the object it was given
-    s32 f674;               // 0x674: 1 at set-up
+    s32 announceBlast;      // 0x674: 1 at set-up
     s32 f678;               // 0x678: 1 at set-up
-    s32 f67C;               // 0x67C: 0 at set-up
+    s32 ownerMessageMode;   // 0x67C: 0 at set-up
     void* slot;             // 0x680: a copy of the other's (func_0018D568, 0x24 bytes; slot 9)
     void* active;           // 0x684
     s32 entryCount;         // 0x688
@@ -68,11 +68,11 @@ struct ChildGroupObject : Collider {
 // the movie's data (+0x6B4) and a flag.
 struct ContactListObject : ChildGroupObject {
     u8 pad690[4];
-    PlacedObject* f694;     // 0x694
+    PlacedObject* anchorObject; // 0x694
     u8 pad698[0x6A0 - 0x698];
-    Vec02 v6A0;             // 0x6A0
-    Animation* f6B0;        // 0x6B0: the animation slot 0x130 starts into f6B4
-    void* f6B4;             // 0x6B4: given back by slot 7 (func_0012E760)
+    Vec02 anchorOffset;     // 0x6A0
+    Animation* animation;   // 0x6B0: the animation slot 0x130 starts into f6B4
+    void* animationPlayer;  // 0x6B4: given back by slot 7 (func_0012E760)
     s32 ready;              // 0x6B8: 1 at set-up (slot 0); slot 27 tests it
     s32 count6BC;           // 0x6BC: the objects of items6C0
     s32 items6C0[4];        // 0x6C0: their ids
@@ -84,8 +84,8 @@ struct ContactListObject : ChildGroupObject {
 
 // 0x3F, the player's stand-in: SwapInPlayerStandIn puts it in the place of an attached object.
 struct StandIn : ChildGroupObject {
-    f32 f690;               // 0x690: the clock when SwapInPlayerStandIn started it
-    s32 f694;               // 0x694: 1 while it runs
+    f32 startTime;          // 0x690: the clock when SwapInPlayerStandIn started it
+    s32 running;            // 0x694: 1 while it runs
     u8 pad698[0x6A0 - 0x698];
 };
 

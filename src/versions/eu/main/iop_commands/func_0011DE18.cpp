@@ -7,7 +7,7 @@ void FlushIopCommandBuffer(void)
     ArmIopReplyBuffer(g_iopReplyTables[g_iopBufferIndex], *g_iopCommandBuffers[g_iopBufferIndex]);
     while (IsRemoteCallPending(&g_iopCommandRpc)) {
         if (D_eu_0025D6B8 == 0) {
-            PrintFormatted(D_002494E8);
+            PrintFormatted(g_rpcCollisionMessage);
         }
         SyncDataCache(0);
     }

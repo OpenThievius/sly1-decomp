@@ -57,8 +57,8 @@ struct ContactEnd03 {
     Collider* body;              // 0x00
     Collider* part;              // 0x04
     u8 pad08[0x10 - 0x08];
-    Vec02 v10;              // 0x10: handed on with v80 by func_001F5008
-    Vec02 v20;              // 0x20: the point in the part's frame, which func_00185F48 carries
+    Vec02 point;            // 0x10: handed on with v80 by func_001F5008
+    Vec02 localPoint;       // 0x20: the point in the part's frame, which func_00185F48 carries
                             // into v10 (CreatePooledContact sets it from v10)
     Vec02 v30;              // 0x30: the player adds to it (func_00170820)
 };
@@ -87,16 +87,16 @@ struct ColliderSpan {
 // back). Each body's table lists the contacts it is an end of.
 struct Contact03 {
     ContactEnd03 end[2];    // 0x00
-    Vec02 v80;              // 0x80: func_001F5008; its z, signed by the end, is how much end 0 faces up (func_001C5248)
-    f32 f90;                // 0x90: PlaceColliderClearOfContacts (func_001B9860) moves on while it is below -2
-    f32 f94;                // 0x94: set by a body's slot 60 (func_001C5338: 1.5 or 0)
-    f32 f98;                // 0x98: cleared with it (func_001CAC30 sets a float); class 0x43's slot 60
+    Vec02 normal;           // 0x80: func_001F5008; its z, signed by the end, is how much end 0 faces up (func_001C5248)
+    f32 depth;              // 0x90: PlaceColliderClearOfContacts (func_001B9860) moves on while it is below -2
+    f32 friction;           // 0x94: set by a body's slot 60 (func_001C5338: 1.5 or 0)
+    f32 bounce;             // 0x98: cleared with it (func_001CAC30 sets a float); class 0x43's slot 60
                             // scales it by 0.6 (func_001A7290)
     s32 kind;               // 0x9C: 8 and 9 are dropped when a part stops colliding (func_001B94F0)
-    s32 fA0;                // 0xA0: compared with TurningCollider::f6D4 at end 0 (kinds 1, 10; func_001C5248)
-    s32 fA4;                // 0xA4: the same at end 1 (kind 4)
+    s32 featureEnd0;        // 0xA0: compared with TurningCollider::probeVertex at end 0 (kinds 1, 10; func_001C5248)
+    s32 featureEnd1;        // 0xA4: the same at end 1 (kind 4)
     u8 padA8[0xB0 - 0xA8];
-    Vec02 vB0;              // 0xB0: the ends' relative velocity (func_001860A8); func_00154088 limits it
+    Vec02 relativeVelocity; // 0xB0: the ends' relative velocity (func_001860A8); func_00154088 limits it
     u8 padC0[0xC4 - 0xC0];
     f32 timer;              // 0xC4: slot 67 tells both ends' slot 65 while it is positive
     u8 padC8[0xD0 - 0xC8];
@@ -199,8 +199,8 @@ struct Collider : PlacedObject {
     Mat02 inertia;          // 0x2F0: the inertia tensor (the prefix; func_001B9448 scales it)
     Mat02 invInertia;       // 0x320: its inverse (func_001B9448)
     Vec02 gravity;          // 0x350: the world's (+0x1EE0) at set-up
-    f32 f360;               // 0x360: 1.0 in class 0x1F
-    f32 f364;               // 0x364: 1.0 in class 0x1F
+    f32 pushFactor;         // 0x360: 1.0 in class 0x1F
+    f32 dragFactor;         // 0x364: 1.0 in class 0x1F
     f32 mass;               // 0x368: the prefix's mass
     u8 pad36C[0x370 - 0x36C];
     Vec02 v370;             // 0x370: v140 kept by slot 68
@@ -240,11 +240,11 @@ struct Collider : PlacedObject {
     Attach03* attached;     // 0x4B0
     Contact03* contacts4B4; // 0x4B4: a body's contacts outside its table's rows (func_001BD558)
     s32 f4B8;               // 0x4B8: cleared by func_001B94F0 (on the body) and slot 9
-    s32 f4BC;               // 0x4BC: -1 at set-up
+    s32 solverIndex;        // 0x4BC: -1 at set-up
     s32 index;              // 0x4C0: -1 at set-up; the part's number (slot 53)
     u8 pad4C4[0x4D0 - 0x4C4];
     Vec02 offset;           // 0x4D0: the prefix's offset (3 f32)
-    s32 f4E0;               // 0x4E0: 1 in class 0x36; func_001BC4D8 walks up the parents to the first set
+    s32 partMode;           // 0x4E0: 1 in class 0x36; func_001BC4D8 walks up the parents to the first set
     Collider* handler;           // 0x4E4: the nearest object (itself or above) with slot 60, 61, 62 or 65 (func_001BB4A0)
     Mesh03 mesh2;           // 0x4E8: the second mesh as loaded
     Mesh03 mesh2Copy;       // 0x50C: the object's own

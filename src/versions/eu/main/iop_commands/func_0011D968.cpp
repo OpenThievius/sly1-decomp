@@ -15,7 +15,7 @@ s32 SendIopCommandAndWait(s32 id, s32 size, void* data)
     ArmIopReplyBuffer((s32*)&g_iopCommandReply, 1);
     while (IsRemoteCallPending(&g_iopCommandRpc)) {
         if (D_eu_0025D6B8 == 0)
-            PrintFormatted(D_002494E8);
+            PrintFormatted(g_rpcCollisionMessage);
         PollIopCommands();
         SyncDataCache(0);
     }

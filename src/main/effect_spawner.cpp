@@ -123,7 +123,7 @@ void ReadCappedWordList(CappedWordList* self, s32 count, void* unused, void* src
 
 void CopyPlacedObject(PlacedObject* self, PlacedObject* src);
 
-struct SpawnerLinkedObject { u8 pad00[0x18]; void* f18; u8 pad1C[0x18]; s32 f34; };
+struct SpawnerLinkedObject { u8 pad00[0x18]; void* target; u8 pad1C[0x18]; s32 value; };
 
 void PostLoadPlacedObject(PlacedObject* self);
 Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
@@ -164,7 +164,7 @@ void CopyMemory(void* dst, void* src, u32 size);
 void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
 void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6);
 
-struct EffectOwnerSlot { s32* f0; s32* f4; s32 f8; };
+struct EffectOwnerSlot { s32* particleOwnerCache; s32* effectOwnerCache; s32 ownerArgument; };
 EffectOwner* AcquireEffectOwner(World* self, s32 flag);
 void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b);
 Effect* CreateEffect(s32 kind, EffectOwner* sys);
@@ -200,13 +200,13 @@ struct BroadcastMessage {
     s32 kind;
     u8 pad0[0x1C];
     Quad16 pos;
-    f32 f30;
+    f32 value;
     s32 f34;
-    void* f38;
+    void* object;
     u8 pad1[0xC];
 };
 
-struct BroadcastRecord { u8 pad0[0x120]; s32 f120; u8 pad1[0x8C]; s32 f1B0; };
+struct BroadcastRecord { u8 pad0[0x120]; s32 f120; u8 pad1[0x8C]; s32 messageMode; };
 
 struct KeyedObject { BroadcastFn* vtbl; u8 pad0[0x8C]; BroadcastRecord* f90; };
 
@@ -255,15 +255,15 @@ void SetCrossfadeMode(CrossfadeAnimator* self, s32 mode);
 
 s32 IsObjectAttached(BaseObject* self);
 void RemoveObjectNodeFromWorld(WorldObjectNode* self);
-extern PackedFloatPair D_00262180;
-extern PackedFloatPair D_00262188;
-extern PackedFloatPair D_00262190;
-extern PackedFloatPair D_00262198;
-extern PackedFloatPair D_002621A0;
-extern PackedFloatPair D_002621A8;
-extern PackedFloatPair D_002621B0;
-extern PackedFloatPair D_002621B8;
-extern PackedFloatPair D_002621C0;
+extern PackedFloatPair g_cyclerTargetRadiusRange;
+extern PackedFloatPair g_cyclerTargetHeightRange;
+extern PackedFloatPair g_cyclerTangentRadiusRange;
+extern PackedFloatPair g_cyclerTangentHeightRange;
+extern PackedFloatPair g_cyclerCheckDelayRange;
+extern PackedFloatPair g_cyclerHoldExtraRange;
+extern PackedFloatPair g_cyclerAdvanceDelayRange;
+extern PackedFloatPair g_cyclerWrapDelayRange;
+extern PackedFloatPair g_cyclerMessageIntervalRange;
 
 void InitCollider(Collider* self);
 void AppendToList(List01* self, void* item);
@@ -294,11 +294,11 @@ void CopyMemory(void* dst, void* src, u32 size);
 
 struct MemberTargetObject {
     u8 pad0[0x18];
-    void* f18;
+    void* target;
     u8 pad1[0x20 - 0x1c];
     s32 f20;
     u8 pad2[0x34 - 0x24];
-    s32 f34;
+    s32 value;
     u8 pad3[0x7c - 0x38];
     MemberTargetObject* f7c;
 };
@@ -444,7 +444,7 @@ void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
 struct ClassKindNode { ClassKindNode* next; s32 value; };
 
-extern u8 D_00247448[];
+extern u8 g_classDescriptorTable[];
 
 s32 IsObjectAttached(BaseObject* self);
 
@@ -505,8 +505,8 @@ void RemoveFromList(List01* list, void* item);
 
 struct CyclerDrawParams { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
 extern f32 g_gameTime;
-extern f32 D_00262230[4];
-extern f32 D_00262240[4];
+extern f32 g_cyclerShrinkCurve[4];
+extern f32 g_cyclerGrowCurve[4];
 extern f32 g_unitRange[];
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 
@@ -537,8 +537,8 @@ s32 ReadTextChar(TextReader* self);
 // The packet memory a GIF writer fills: quadwords.
 typedef u64 UQuadword128 __attribute__((mode(TI)));
 
-extern u8 D_00212160[];
-extern u8 D_00215C50[];
+extern u8 g_groupMicroprogram[];
+extern u8 g_groupMicroprogramEnd[];
 
 void* InitGifPacket(void* p);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
@@ -601,7 +601,7 @@ void PopBackMemoryMark(void);
 void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 void AddDmaRefTag(void* list, u32 count, s32 value);
-extern s32 D_0026230C;
+extern s32 g_lastDmaRefStart;
 
 void BeginGifTag(void* obj, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(void* obj, s32 a, s32 b);
@@ -614,8 +614,8 @@ void CloseDrawBuffer(void* obj, void* a, u8** b);
 void ClearList(List01* p);
 extern "C" s32 PostSemaphore(void* a);
 
-extern List01 D_002622E0;
-extern List01 D_002622F0;
+extern List01 g_deferredReleaseListA;
+extern List01 g_deferredReleaseListB;
 extern List01 g_deferredReleaseListC;
 extern s32 g_buildFrameData;
 extern void* g_frameReadySemaphore;
@@ -681,8 +681,8 @@ f32 MeasureTextWidth(TextReader* self);
 
 
 
-extern u32 D_002C3B00[];
-extern u8 D_00148D74[];
+extern u32 g_packetBufferMemory[];
+extern u8 g_codeChecksumSize[];
 extern s32 g_codeChecksumFailed;
 
 extern void* g_frameDoneSemaphore;
@@ -713,8 +713,8 @@ struct FontHeader {
 
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 void* AllocateFrontMemory(s32 n);
-extern s32 D_00262258;
-extern s32 D_0026225C;
+extern s32 g_glyphUOffset;
+extern s32 g_glyphVOffset;
 
 FontGlyph* FindFontGlyph(Font* self, s8 key);
 s32 AddFontImagesToFrame(Font* self, void* obj);
@@ -727,7 +727,7 @@ void AddGifXyzfRegListEntry(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
 
 // NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
 
-extern u8 D_003C3B00[], D_005C3B00[];
+extern u8 g_vifPacketMemory[], g_renderFrameDataMemory[];
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
 extern s32 g_mainAndRenderThreads[];
@@ -745,7 +745,7 @@ struct GroundCandidate { u8 pad0[0x50]; s32 f50; u8 pad1[0x278]; u32 f2CC; u8 pa
 
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
-extern u32 D_00262314;
+extern u32 g_renderFrameIndex;
 extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
 extern s32 D_002626CC;
@@ -787,13 +787,13 @@ typedef unsigned long u64;
 typedef float f32;
 struct StringLayout
 {
-  f32 f0;
-  f32 f4;
-  f32 f8;
-  f32 fC;
-  s32 f10;
-  s32 f14;
-  s32 f18;
+  f32 x;
+  f32 y;
+  f32 width;
+  f32 height;
+  s32 color;
+  s32 horizontalAlign;
+  s32 verticalAlign;
 };
 
 
@@ -808,13 +808,13 @@ void PopFontScale(Font* font);
 void PushFontScale(Font* font, f32 a, f32 b);
 
 struct FrameGlyph {
-    Font* f0;
+    Font* font;
     s8 key;
     u8 p5[3];
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    f32 f14;
+    f32 paddingX;
+    f32 paddingY;
+    f32 scaleX;
+    f32 scaleY;
     u32 color;
 };
 struct FrameRect { f32 x, y, w, h; };
@@ -854,7 +854,7 @@ struct SpawnRecordParts {
     u8 pad1F0[0x200 - 0x1F0];
 };
 typedef char check_SpawnRecordParts[sizeof(SpawnRecordParts) == 0x200 ? 1 : -1];
-extern SpawnTable D_00261F80;
+extern SpawnTable g_spawnRecordDefaults;
 
 // The vectors and the block are built once each, as function-local statics with brace
 // initialisers: a vector copied from a global makes each run at run time, through a temporary
@@ -874,23 +874,23 @@ void InitSpawnRecord(void* mem)
     self->f0 = 1;
     self->vectors = vectors;
     self->block = block;
-    self->table = D_00261F80;
+    self->table = g_spawnRecordDefaults;
 }
 
 void InitEffectSpawner(EffectSpawner* self)
 {
     InitPlacedObject(self);
-    self->f2D8=-1;
-    self->f2E0=10.0f;
+    self->remaining=-1;
+    self->delayMax=10.0f;
     self->id2F8[0]=-1;
     self->id2F8[1]=-1;
     self->id304=-1;
     self->id300=-1;
     self->id30C=-1;
-    self->f2D4=-1;
-    self->f2DC=10.0f;
-    self->f340=-1.0f;
-    self->f310=-1;
+    self->mode=-1;
+    self->delayMin=10.0f;
+    self->activeUntil=-1.0f;
+    self->sharedId=-1;
     SetListLinkOffset((List01*)self->list314,0x320);
 }
 
@@ -1026,8 +1026,8 @@ void ResolveEffectSpawnerLinks(EffectSpawner* self)
     }
     if (self->id30C != -1) {
         SpawnerLinkedObject* r = (SpawnerLinkedObject*)FindFirstObjectById(self->world, 0x104, self->id30C, self);
-        s2->value20 = r->f34;
-        s2->target = r->f18;
+        s2->value20 = r->value;
+        s2->target = r->target;
     }
 tail:
     ResolveSpawnRecordTargets((SpawnTargetRecord*)self->rec, (SpawnTargetOwner*)self);
@@ -1044,26 +1044,26 @@ void StartEffectSpawner(EffectSpawner* self)
     StartPlacedObject(self);
     if (self->rec->f1B0 != -1)
         self->rec->f120 = 1;
-    if (self->f2D4 == -1) {
+    if (self->mode == -1) {
         if (self->chance != 0.0f || self->continuous != 0)
-            self->f2D4 = 3;
-        else if (self->f2F4 != 0.0f)
-            self->f2D4 = 1;
+            self->mode = 3;
+        else if (self->targetCount != 0.0f)
+            self->mode = 1;
         else
-            self->f2D4 = 0;
+            self->mode = 0;
     }
-    switch (self->f2D4) {
+    switch (self->mode) {
     case 2:
-        self->f330 = 3.4028235e+38f;
-        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi);
+        self->nextRateTime = 3.4028235e+38f;
+        self->rate = RandomFloatInRange(self->delay.lo, self->delay.hi);
         if (self->continuous != 0)
             SetEffectSpawnerActiveForever(self);
         else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance)
             SetEffectSpawnerActiveFor(self, RandomFloatInRange(self->active.lo, self->active.hi));
         break;
     case 3:
-        self->f330 = 3.4028235e+38f;
-        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi) * 60.0f;
+        self->nextRateTime = 3.4028235e+38f;
+        self->rate = RandomFloatInRange(self->delay.lo, self->delay.hi) * 60.0f;
         if (self->continuous != 0)
             SetEffectSpawnerActiveForever(self);
         else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance)
@@ -1071,12 +1071,12 @@ void StartEffectSpawner(EffectSpawner* self)
         break;
     case 0:
     case 1:
-        self->f330 = 1.0f;
-        self->f32C = 1.0f;
-        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi);
+        self->nextRateTime = 1.0f;
+        self->rateInterval = 1.0f;
+        self->rate = RandomFloatInRange(self->delay.lo, self->delay.hi);
         break;
     }
-    self->f334 = 1.0f;
+    self->volumeScale = 1.0f;
     Rec50* rec = self->rec;
     if (rec->kind == 1) {
         f32* box = (f32*)((u8*)rec + 0x20);
@@ -1087,34 +1087,34 @@ void StartEffectSpawner(EffectSpawner* self)
             f32 m = dy < dx ? (dz >? dx) : (dz >? dy);
             self->margin = m * 0.5f;
         }
-        if (self->f2E4 != 0) {
-            if (self->f2F4 != 0.0f)
-                self->f334 = (box[4] - box[0]) * (box[5] - box[1]) * (box[6] - box[2]) * 1e-6f;
+        if (self->scaleByVolume != 0) {
+            if (self->targetCount != 0.0f)
+                self->volumeScale = (box[4] - box[0]) * (box[5] - box[1]) * (box[6] - box[2]) * 1e-6f;
             else
-                self->f334 = (box[5] - box[1]) * (box[6] - box[2]) * 1e-4f;
+                self->volumeScale = (box[5] - box[1]) * (box[6] - box[2]) * 1e-4f;
         }
     }
-    if (self->f310 != -1) {
-        EffectSpawner* copy = (EffectSpawner*)FindFirstObjectByIdMode1(self->world, self->f310, 0);
+    if (self->sharedId != -1) {
+        EffectSpawner* copy = (EffectSpawner*)FindFirstObjectByIdMode1(self->world, self->sharedId, 0);
         if (copy == 0) {
-            copy = (EffectSpawner*)CreateTypedRecord(0x50, self->world, 0, self->f310, -1);
+            copy = (EffectSpawner*)CreateTypedRecord(0x50, self->world, 0, self->sharedId, -1);
             copy->rec = (Rec50*)AllocateFrontMemory(0x200);
             *copy->rec = *self->rec;
             copy->rec->target = 0;
-            copy->f2D4 = self->f2D4;
-            copy->f2D8 = self->f2D8;
+            copy->mode = self->mode;
+            copy->remaining = self->remaining;
             copy->delay = self->delay;
-            copy->f2E4 = self->f2E4;
+            copy->scaleByVolume = self->scaleByVolume;
             copy->chance = self->chance;
             copy->active = self->active;
-            copy->f2F4 = self->f2F4;
+            copy->targetCount = self->targetCount;
             copy->continuous = self->continuous;
             copy->flags = ((copy->flags | (1ULL << 32)) & ~(3ULL << 40)) | (1ULL << 40);
             copy->rot = copy->m110 = self->rot;
             if (copy->desc->m0F != 0)
                 copy->desc->m0F(copy);
         }
-        self->f34C = 0;
+        self->changed = 0;
         AppendToList((List01*)copy->list314, self);
         InheritFlaggedAncestorValue(self);
     }
@@ -1149,7 +1149,7 @@ Rec50* CloneSharedSpawnRecord(Rec50* self)
 Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode)
 {
     if (mode == 1) {
-        self->f34C = mode;
+        self->changed = mode;
         self->rec = CloneSharedSpawnRecord(self->rec);
     }
     return self->rec;
@@ -1158,7 +1158,7 @@ Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode)
 EffectSpawner* MarkEffectSpawnerChanged(EffectSpawner* self, s32 value)
 {
     if (value == 1) {
-        self->f34C = value;
+        self->changed = value;
     }
     return self;
 }
@@ -1238,11 +1238,11 @@ void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
 {
     ListFrame frame;
 
-    if (self->f34C != 0) {
+    if (self->changed != 0) {
         RandomizeEffectSpawnerDelay((u8*)self);
     }
     UpdatePlacedObject(self, dt);
-    if (self->f310 != -1) {
+    if (self->sharedId != -1) {
         return;
     }
     if (!IsListEmpty((List01*)self->list314)) {
@@ -1261,8 +1261,8 @@ void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
                 }
                 cam = g_camera;
                 near = 1;
-                r = o->f80 * cam->fB0;
-                d = Vu0::Sub(Vu0::Q(o->v140), Vu0::Q(cam->f40));
+                r = o->fadeDistanceFar * cam->fB0;
+                d = Vu0::Sub(Vu0::Q(o->v140), Vu0::Q(cam->position));
                 if (!(r * r > Vu0::ToFloatMoved(Vu0::Dot(d, d)))) {
                     near = 0;
                 }
@@ -1276,10 +1276,10 @@ void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
     } else {
         if (self->parent != 0) {
             Camera* cam = g_camera;
-            f32 r = self->f80 * cam->fB0;
+            f32 r = self->fadeDistanceFar * cam->fB0;
             s32 far = 1;
-            if (!(r * r < Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->f40)),
-                                                 Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->f40)))))) {
+            if (!(r * r < Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->position)),
+                                                 Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->position)))))) {
                 far = 0;
             }
             if (far) {
@@ -1292,60 +1292,60 @@ spawn:
         return;
     }
     s32 n = 0;
-    switch (self->f2D4) {
+    switch (self->mode) {
     case 3: {
-        f32 acc = self->f33C + self->f328 * self->f334 * dt;
+        f32 acc = self->spawnRemainder + self->rate * self->volumeScale * dt;
         n = (s32)acc;
-        self->f33C = acc - (f32)n;
+        self->spawnRemainder = acc - (f32)n;
         if (1.0f < (f32)n) {
-            if (self->f2D8 >= 0) {
-                if (!(n < self->f2D8)) {
-                    n = self->f2D8;
+            if (self->remaining >= 0) {
+                if (!(n < self->remaining)) {
+                    n = self->remaining;
                 }
-                self->f2D8 -= n;
+                self->remaining -= n;
             }
             if (self->continuous != 0) {
                 SetEffectSpawnerActiveForever(self);
-                self->f328 = RandomFloatInRange(self->f2DC, self->f2E0) * 60.0f;
+                self->rate = RandomFloatInRange(self->delayMin, self->delayMax) * 60.0f;
             } else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance) {
                 SetEffectSpawnerActiveFor(self, RandomFloatInRange(self->active.lo, self->active.hi));
-                self->f328 = RandomFloatInRange(self->f2DC, self->f2E0) * 60.0f;
+                self->rate = RandomFloatInRange(self->delayMin, self->delayMax) * 60.0f;
             }
         }
         break;
     }
     case 2:
-        n = (s32)self->f328;
-        if (self->f2D8 >= 0) {
-            if (!(n < self->f2D8)) {
-                n = self->f2D8;
+        n = (s32)self->rate;
+        if (self->remaining >= 0) {
+            if (!(n < self->remaining)) {
+                n = self->remaining;
             }
-            self->f2D8 -= n;
+            self->remaining -= n;
         }
         if (self->continuous != 0) {
             SetEffectSpawnerActiveForever(self);
         } else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance) {
             SetEffectSpawnerActiveFor(self, RandomFloatInRange(self->active.lo, self->active.hi));
         }
-        self->f328 = RandomFloatInRange(self->f2DC, self->f2E0);
+        self->rate = RandomFloatInRange(self->delayMin, self->delayMax);
         break;
     case 0: {
-        f32 acc = self->f33C + self->f328 * self->f334 * dt;
+        f32 acc = self->spawnRemainder + self->rate * self->volumeScale * dt;
         n = (s32)acc;
-        self->f33C = acc - (f32)n;
+        self->spawnRemainder = acc - (f32)n;
         if (n == 0) {
             goto timer;
         }
-        if (self->f2D8 >= 0) {
-            if (!(n < self->f2D8)) {
-                n = self->f2D8;
+        if (self->remaining >= 0) {
+            if (!(n < self->remaining)) {
+                n = self->remaining;
             }
-            self->f2D8 -= n;
+            self->remaining -= n;
         }
         break;
     }
     case 1: {
-        n = (s32)(self->f2F4 * self->f334);
+        n = (s32)(self->targetCount * self->volumeScale);
         s32 have;
         BaseObject* held;
         if (self->rec->f120 == 0) {
@@ -1373,9 +1373,9 @@ spawn:
         self->rec->target = prev;
     }
 timer:
-    if (self->f330 <= g_gameClock[1]) {
-        self->f328 = RandomFloatInRange(self->f2DC, self->f2E0);
-        self->f330 = g_gameClock[1] + self->f32C;
+    if (self->nextRateTime <= g_gameClock[1]) {
+        self->rate = RandomFloatInRange(self->delayMin, self->delayMax);
+        self->nextRateTime = g_gameClock[1] + self->rateInterval;
     }
     WrapSpawnerParticlesIntoBox(self);
 }
@@ -1393,33 +1393,33 @@ void InheritFlaggedAncestorValue(EffectSpawner* self)
         p = (PlacedObject*)p->parent;
     }
     if (p != 0) {
-        self->f88 = p->f88;
+        self->visibilityMask = p->visibilityMask;
     }
 }
 
 void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f)
 {
-    self->f340 = g_gameTime + f;
+    self->activeUntil = g_gameTime + f;
 }
 
 void SetEffectSpawnerActiveForever(EffectSpawner* self)
 {
-    self->f340 = 3.4028234663852886e+38f;
+    self->activeUntil = 3.4028234663852886e+38f;
 }
 
 void SetEffectSpawnerInactive(EffectSpawner* self)
 {
-    self->f340 = -1.0f;
+    self->activeUntil = -1.0f;
 }
 
 s32 IsEffectSpawnerActive(EffectSpawner* self)
 {
-    if (g_gameTime < self->f340) {
+    if (g_gameTime < self->activeUntil) {
         return 1;
     }
-    if (self->f2D4 < 2) {
-        if (self->f2D4 >= 0) {
-            if (self->f2D8 == 0) {
+    if (self->mode < 2) {
+        if (self->mode >= 0) {
+            if (self->remaining == 0) {
                 return 1;
             }
         }
@@ -1459,24 +1459,24 @@ void RandomizeEffectSpawnerDelay(u8* self)
 
 void SetEffectSpawnerLimit(EffectSpawner* self, s32 a1)
 {
-    if (self->f2D4 == -1) {
-        self->f2D8 = a1;
-    } else if (self->f2D4 == 0) {
+    if (self->mode == -1) {
+        self->remaining = a1;
+    } else if (self->mode == 0) {
         if (a1 == 0) {
             SetEffectSpawnerActiveForever();
         } else if (a1 == -1) {
             SetEffectSpawnerInactive(self);
         } else {
-            self->f2D8 = a1;
+            self->remaining = a1;
         }
     }
-    self->f34C = 1;
+    self->changed = 1;
 }
 
 void SetEffectSpawnerContinuous(EffectSpawner* a0, s32 a1)
 {
     a0->continuous = a1;
-    a0->f34C = 1;
+    a0->changed = 1;
 }
 
 void SetSpawnRecordKind(u8* self,s32 kind)
@@ -1537,7 +1537,7 @@ struct __attribute__((aligned(16))) SplashTail {
     s32 f38;                // 0x38
     s32 f3C;                // 0x3C
 };
-extern s32 D_00262050[74];
+extern s32 g_surfaceContactSounds[74];
 s32 RandomIntInRange(s32 a, s32 b);
 void SpawnEffectsAt(Quad16* self, Quad16* a1, s32 a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
 
@@ -1572,7 +1572,7 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
             if (rec != 0) {
                 AT(f32, rec, 0x14) = vol;
             } else {
-                StartSoundEffect(D_00262050[RandomIntInRange(0, 3)], (PlayingSound**)(snd + 0x574), (BaseObject*)snd, 0, 10.0f, 1.0f, vol,
+                StartSoundEffect(g_surfaceContactSounds[RandomIntInRange(0, 3)], (PlayingSound**)(snd + 0x574), (BaseObject*)snd, 0, 10.0f, 1.0f, vol,
                                  0.0f, 0.0f, 0, 0);
             }
         }
@@ -1641,13 +1641,13 @@ struct SpawnCurve {
 // A piece of a ring of segments between two objects: the radii at its ends and its length.
 struct SpawnSegment {
     u8 pad00[8];
-    f32 f08;                // 0x08
-    f32 f0C;                // 0x0C
+    f32 widthStart;         // 0x08: the width at the segment's first end
+    f32 widthEnd;           // 0x0C: the width at the segment's second end
     f32 r0;                 // 0x10
     f32 r1;                 // 0x14
     PlacedObject* from;     // 0x18
     PlacedObject* to;       // 0x1C
-    f32 f20;                // 0x20
+    f32 distance;           // 0x20: the distance between the two end objects
     f32 len;                // 0x24
 };
 
@@ -1784,12 +1784,12 @@ void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Ve
                                               Vu0::Vec::Of(g_unitXVector)).q);
         BuildPerpendicularPair(&frame.r[2], &frame.r[0], &g_unitXVector, &g_unitZVector);
         d += seg->len;
-        if (seg->f0C != seg->f08) {
-            SolveQuadratic((seg->f0C - seg->f08) * 0.5f / seg->f20, seg->f08, -d, roots);
+        if (seg->widthEnd != seg->widthStart) {
+            SolveQuadratic((seg->widthEnd - seg->widthStart) * 0.5f / seg->distance, seg->widthStart, -d, roots);
         } else {
-            roots[0] = d / seg->f08;
+            roots[0] = d / seg->widthStart;
         }
-        f32 u = roots[0] / seg->f20;
+        f32 u = roots[0] / seg->distance;
         ComputePolarOffset((Vec3*)&offset, RandomFloatInRange(-3.14159265f, 3.14159265f), (1.0f - u) * seg->r0 + u * seg->r1,
                            roots[0]);
         Vu0::Set(at, Vu0::Add(Vu0::Vec::Of(seg->from->v140), Vu0::Rotate(frame, Vu0::Vec::Of(offset))).q);
@@ -1952,19 +1952,19 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
     u8* c = (u8*)self + 0x120;
     s32 i;
     if (h) {
-        if (h->f4) node = (EffectOwner*)*h->f4;
+        if (h->effectOwnerCache) node = (EffectOwner*)*h->effectOwnerCache;
     }
     if (!node) {
         node = AcquireEffectOwner((World*)g_currentWorld, AT(s32, c, 0xC4));
         if (!node) return;
         if (h) {
-            if (h->f4) *h->f4 = (s32)node;
+            if (h->effectOwnerCache) *h->effectOwnerCache = (s32)node;
         }
         CopyEffectOwnerMargin(node, self);
         if (h) {
-            if (h->f8) {
+            if (h->ownerArgument) {
                 typedef void (*F)(EffectOwner*, s32);
-                (*(F*)(AT(u8*, node, 0) + 0x6C))(node, h->f8);
+                (*(F*)(AT(u8*, node, 0) + 0x6C))(node, h->ownerArgument);
             }
         }
     }
@@ -2051,7 +2051,7 @@ void EmitParticleChunk(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad
     s32 i;
     ParticleChunk* chunk;
     if (h) {
-        if (h->f0) set = (EffectOwner*)*h->f0;
+        if (h->particleOwnerCache) set = (EffectOwner*)*h->particleOwnerCache;
     }
     if (!set) {
         World* world = g_currentWorld;
@@ -2062,13 +2062,13 @@ void EmitParticleChunk(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad
         set = (EffectOwner*)ResetFirstListedObject(world);
         if (!set) return;
         if (h) {
-            if (h->f0) *h->f0 = (s32)set;
+            if (h->particleOwnerCache) *h->particleOwnerCache = (s32)set;
         }
         ApplyLookSourceToListedObject((WorldListedObject*)set, (LookSource*)self);
         if (h) {
-            if (h->f8) {
+            if (h->ownerArgument) {
                 typedef void (*F)(EffectOwner*, s32);
-                (*(F*)(AT(u8*, set, 0) + 0x6C))(set, h->f8);
+                (*(F*)(AT(u8*, set, 0) + 0x6C))(set, h->ownerArgument);
             }
         }
         if (!set) return;
@@ -2266,14 +2266,14 @@ void BroadcastPointEvent(void* self, void* obj, f32 x)
         frame.kind = 4;
         frame.pos = *(Quad16*)self;
         if (e->f90->f120 == 1) {
-            switch (e->f90->f1B0) {
+            switch (e->f90->messageMode) {
             case 4:
                 frame.kind = 0x14;
-                frame.f30 = x;
+                frame.value = x;
                 break;
             case 2:
                 frame.kind = 0x24;
-                frame.f38 = obj;
+                frame.object = obj;
                 break;
             }
         }
@@ -2288,7 +2288,7 @@ void SpawnBriefEffectAt(void* a0, BriefEffectSource* a1, f32 f)
         ((EffectStartFn)o->vt->m00)(o, a0, 0, f);
         o->life = 0.75f;
         if (a1->f278 != 0) {
-            o->p114 = (void*)a1->f278->fC;
+            o->oscillator = (void*)a1->f278->fC;
         }
     }
 }
@@ -2324,8 +2324,8 @@ void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14
 // distance between those objects with the weight made of it.
 struct SpawnLink {
     s32 ids[2];             // 0x00
-    f32 f08;                // 0x08
-    f32 f0C;                // 0x0C
+    f32 widthStart;         // 0x08: the width at the first object
+    f32 widthEnd;           // 0x0C: the width at the second object
     u8 pad10[0x18 - 0x10];
     PlacedObject* objs[2];  // 0x18
     f32 distance;           // 0x20
@@ -2342,16 +2342,16 @@ struct SpawnTargetRecord {
     u8 pad2C[0x120 - 0x2C];
     s32 f120;               // 0x120
     u8 pad124[0x188 - 0x124];
-    s32 f188;               // 0x188
-    MemberTargetObject* f18C;   // 0x18C
+    s32 targetId;           // 0x188: the id of the target object
+    MemberTargetObject* targetObject; // 0x18C: the object the id names
 };
 
 struct SpawnTargetOwner { u8 pad00[0x14]; void* world; };
 
 void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner)
 {
-    if (rec->f120 == 0 && rec->f188 != -1) {
-        rec->f18C = (MemberTargetObject*)FindFirstObjectById((World*)owner->world, 0x104, rec->f188, owner);
+    if (rec->f120 == 0 && rec->targetId != -1) {
+        rec->targetObject = (MemberTargetObject*)FindFirstObjectById((World*)owner->world, 0x104, rec->targetId, owner);
     }
     if (rec->kind == 3) {
         f32 total = 0.0f;
@@ -2362,7 +2362,7 @@ void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner)
             }
             f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(link->objs[0]->v140), Vu0::Q(link->objs[1]->v140))));
             link->distance = d;
-            link->weight = (link->f08 + link->f0C) * (d * 0.5f);
+            link->weight = (link->widthStart + link->widthEnd) * (d * 0.5f);
             total += link->weight;
         }
         rec->total = total;
@@ -2383,20 +2383,20 @@ struct SpinRecord_158480 {
     s32 mode;           // 0x40
     void* frame;        // 0x44
 };
-extern const Mat4A D_00248400;
+extern const Mat4A g_identityMatrix4;
 void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 s32 ScaleMatrix(Mat4A* out, Mat4A* in, u128 scale);
 void AddMatrices(f32* a, f32* b, f32* out);
 
 void TurnMatrixBySpin(SpinRecord_158480* spin, f32 dt, f32* out)
 {
-    Mat4A place = D_00248400;
+    Mat4A place = g_identityMatrix4;
     Mat4A turn;
     place.m[2][2] = place.m[1][1] = place.m[0][0] = spin->scale;
     place.m[3][0] = spin->tx;
     place.m[3][1] = spin->ty;
     place.m[3][2] = spin->tz;
-    turn = D_00248400;
+    turn = g_identityMatrix4;
     if (spin->rate != 0.0f) {
         Quad16 axis;
         if (spin->mode == 1 && spin->frame != 0) {
@@ -2584,8 +2584,8 @@ void ResolveRecordMemberTargets(RecordMember* self)
         }
         if (self->id98 != none) {
             MemberTargetObject* q = (MemberTargetObject*)FindFirstObjectById(self->world, 260, self->id98, self);
-            r->value20 = q->f34;
-            r->target = q->f18;
+            r->value20 = q->value;
+            r->target = q->target;
         }
     }
 
@@ -2752,7 +2752,7 @@ struct ValueRange;
 f32 ClampToRange(ValueRange* span, f32 x);
 void ComputeChainedWorldFrame(void* a, void* frame, void* out);
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-extern f32 D_00262178[2];
+extern f32 g_spawnScaleRatioRange[2];
 extern const Vec02 D_00248D30;
 
 void HandleSpawnMessage(void* self, void* body)
@@ -2797,7 +2797,7 @@ void HandleSpawnMessage(void* self, void* body)
             else count = (s32)((f32)count / s);
             s32 least = (s32)AT(f32, self, 0xA8) / 2;
             count = least < count ? count : least;
-            f32 r = ClampToRange((ValueRange*)D_00262178, s);
+            f32 r = ClampToRange((ValueRange*)g_spawnScaleRatioRange, s);
             rec.fA0 = rec.fA0 * r;
             rec.fA4 = rec.fA4 * r;
             f32 lowest = 0.5f;
@@ -3085,7 +3085,7 @@ WorldObjectNode* AddObjectNodeToWorld(PlacedObject* self)
 {
     WorldObjectNode* node = (WorldObjectNode*)PopZeroedFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1C18));
     node->owner = self;
-    if (self->f294 != 0) {
+    if (self->frameStepClock != 0) {
         AppendToList((List01*)((u8*)g_currentWorld + 0x1C30), node);
     } else {
         AppendToList((List01*)((u8*)g_currentWorld + 0x1C24), node);
@@ -3095,12 +3095,12 @@ WorldObjectNode* AddObjectNodeToWorld(PlacedObject* self)
 
 void RemoveObjectNodeFromWorld(WorldObjectNode* node)
 {
-    if (node->owner->f294 != 0) {
+    if (node->owner->frameStepClock != 0) {
         RemoveFromList((List01*)((u8*)g_currentWorld + 0x1C30), node);
     } else {
         RemoveFromList((List01*)((u8*)g_currentWorld + 0x1C24), node);
     }
-    node->owner->f298 = 0;
+    node->owner->rampNode = 0;
     PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1C18), node);
 }
 
@@ -3351,7 +3351,7 @@ BaseObject* FindFirstObjectByIdMode1(World* self,s32 kind,void* arg)
 
 s32 IsClassOfKind(s32 index, s32 value)
 {
-    ClassKindNode* p = ((ClassKindNode**)D_00247448)[index];
+    ClassKindNode* p = ((ClassKindNode**)g_classDescriptorTable)[index];
     while (p != 0) {
         if (p->value != value) {
             p = p->next;
@@ -3519,15 +3519,15 @@ s32 IsPointInsideObjectFaces(ScalingVolume* self, void* point)
     return IsPointInsideFaceTree((TreeNode03*)self->out2DC, (FacePoint*)&local);
 }
 
-extern f32 D_002621F8[6];
-extern f32 D_00262210[4];
-extern f32 D_00262220[4];
+extern f32 g_cyclerRotationRamp[6];
+extern f32 g_cyclerFallPositionSteer[4];
+extern f32 g_cyclerFallRotationSteer[4];
 
 // The file's .data, 0x261F70 to 0x262180, in retail's order. The two packet streams
 // (globals.h), whose labels are shorter than PacketWriter, are included from the disassembly.
 // The spawn record's table, copied whole by InitSpawnRecord (func_001549C8), whose two statics'
 // guards (D_00261F70, D_00261F74) the compiler writes out with the function, ahead of it.
-SpawnTable D_00261F80 = { {
+SpawnTable g_spawnRecordDefaults = { {
     { { 0, 0, 0, 0 } },
     { { 0, 45, 0, 0 } },
     { { 0x41C80000, 0, 0, 0 } },
@@ -3542,5 +3542,5 @@ SpawnTable D_00261F80 = { {
     { { 0x3F800000, 0x3F800000, 0, 0 } },
     { { 0, 0, 0, 0 } },
 } };
-s32 D_00262050[74] = { 82, 83, 84, 85, 0, 46, 0, 0, 0x41F00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0x41A00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0 };
-f32 D_00262178[2] = { 0.5f, 2.0f };
+s32 g_surfaceContactSounds[74] = { 82, 83, 84, 85, 0, 46, 0, 0, 0x41F00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0x41A00000, 0, 0, 0, 0, 0, 0, 0, 0, 0x3F800000, 0, 0, 1, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0, 0, 0x3F800000, 0, 0, 0, 0, 0, 0, 0, 0 };
+f32 g_spawnScaleRatioRange[2] = { 0.5f, 2.0f };

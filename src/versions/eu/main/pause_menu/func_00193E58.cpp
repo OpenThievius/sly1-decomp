@@ -17,7 +17,7 @@ void InitPauseMenu(Obj_193E58_eu* self)
 {
     SetupScreenElementText((ScreenElement*)self);
     if (IsFontLoaded(2)) {
-        self->f520 = (void**)&D_0026A210;
+        self->f520 = (void**)&g_pauseMenuBoxStyle;
         *self->f520 = GetFontById(2);
     }
     self->f570 = -1;

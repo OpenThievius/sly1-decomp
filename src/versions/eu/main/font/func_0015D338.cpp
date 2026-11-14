@@ -7,7 +7,7 @@ void DrawFontQuad(Font* self, u32 color, PacketWriter* s, f32 x0, f32 y0, f32 x1
     color = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
     AddGifRegListFloat(s, color, 0.0f);
     AddGifUvRegListEntry(s, (s32)(u0 * 16.0f), (s32)(v0 * 16.0f));
-    AddGifXyzfRegListEntry(s, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 * 0.5462963f + 1920.0f) * 16.0f), self->f40, 0);
+    AddGifXyzfRegListEntry(s, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 * 0.5462963f + 1920.0f) * 16.0f), self->drawZ, 0);
     AddGifUvRegListEntry(s, (s32)(u1 * 16.0f), (s32)(v1 * 16.0f));
-    AddGifXyzfRegListEntry(s, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.5462963f + 1920.0f) * 16.0f), self->f40, 0);
+    AddGifXyzfRegListEntry(s, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.5462963f + 1920.0f) * 16.0f), self->drawZ, 0);
 }
