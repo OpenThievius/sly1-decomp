@@ -21,8 +21,9 @@
 
 // An open handle of the table D_00628940: the IOP's handle and whether it is in use.
 struct FileHandleEntry {
-    s32 id;
-    s32 used;
+    s32 id;       // 0x00
+    s32 used;     // 0x04: 0 when free, else the open flags
+    u8 pad08[8];
 };
 
 // The request CloseFile sends.
@@ -105,7 +106,7 @@ static u32* D_00627844;
 static FileRequest D_00627880 __attribute__((aligned(64)));
 static u8 D_006284C0[0x40] __attribute__((aligned(64)));
 static u8 D_00628500[0x440] __attribute__((aligned(64)));
-static u8 D_00628940[0x200] __attribute__((aligned(64)));
+static FileHandleEntry D_00628940[32] __attribute__((aligned(64)));
 static RemoteCallClient g_fileClient __attribute__((aligned(64)));
 static s32 D_00628B68;
 static u8 D_00628B80[0x40] __attribute__((aligned(64)));
@@ -293,7 +294,7 @@ s32 OpenFileClient(void)
     }
     CreateFileTableLock();
     AwaitSemaphore(D_002771C0);
-    for (u8* p = D_00628940; p < D_00628940 + 0x200; p += 0x10) *(s32*)(p + 4) = 0;
+    for (FileHandleEntry* p = D_00628940; p < D_00628940 + 32; p++) p->used = 0;
     PostSemaphore(D_002771C0);
     D_00627840 = D_00628500;
     if (CallRemoteService(&g_fileClient, 0xFF, 0, &D_00627840, 4, D_006284C0, 4, 0, 0) < 0) return 0xFFFEFFFF;

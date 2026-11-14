@@ -4,11 +4,11 @@ FileHandleEntry* ClaimFreeFileHandle(void)
 {
     CreateFileTableLock();
     AwaitSemaphore(D_002771C0);
-    for (u8* p = D_00628940; p < D_00628940 + 0x200; p += 0x10) {
-        if (((FileHandleEntry*)p)->used == 0) {
-            ((FileHandleEntry*)p)->used = 0x10000000;
+    for (FileHandleEntry* p = D_00628940; p < D_00628940 + 32; p++) {
+        if (p->used == 0) {
+            p->used = 0x10000000;
             PostSemaphore(D_002771C0);
-            return (FileHandleEntry*)p;
+            return p;
         }
     }
     PostSemaphore(D_002771C0);
