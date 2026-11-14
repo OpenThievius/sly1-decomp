@@ -55,8 +55,8 @@ typedef int s128 __attribute__((mode(TI)));
 //   no caller reads that lane; "unchanged" means the result is tied to an input and keeps its lane.
 // - VU0 float arithmetic is not IEEE: results are rounded toward zero, denormals read and write as
 //   zero, and there is no infinity or NaN: an overflow, or an exponent-255 operand, gives the
-//   largest finite float (0x7F7FFFFF) with the result's sign. A port that needs identical
-//   numbers must reproduce these; one that needs only the same behaviour can use IEEE floats.
+//   largest finite float (0x7F7FFFFF) with the result's sign (all from public descriptions of the hardware, not proved by
+//   these builds, which check bytes): a port needing identical numbers must test and reproduce them.
 // - ACC is the accumulator the v...a and v...a-then-madd sequences chain through; each helper
 //   that uses it leaves ACC dead (no helper reads ACC after its sequence).
 // - A float goes in through qmtc2 from a GPR and comes out through qmfc2: the moves carry the

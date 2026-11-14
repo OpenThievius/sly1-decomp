@@ -60,7 +60,15 @@ of plain C++; their bodies are one `__asm__` statement of VU0 instructions each.
 - **Floats** follow the EE's and VU0's rules (rounding toward zero, no infinity or NaN,
   denormals as zero): see the top of include/vu0.h and `Fpu::Sqrt`. Where the game's behaviour
   depends on them (saturating divisions, the square root of a negative), the "Computes:" lines
-  say so.
+  say so. These float rules come from public descriptions of the hardware and are not proved by
+  the decompilation, which checks bytes, not arithmetic: test them before relying on them.
+
+## A warning for anyone editing include/vu0.h
+Adding or removing lines in include/vu0.h can change the compiled code of a function that
+includes it: inserting three comment lines near the top made func_001D7778 (StepPathFollower)
+differ, and the same lines folded into existing ones did not (2026-11-13). The cause is not
+yet traced (line positions reach some pass through the inline helpers' expansion). Rebuild with
+tools/build.py after any edit to the header, comments included.
 
 ## Where to read more
 
