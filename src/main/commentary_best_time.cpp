@@ -110,6 +110,10 @@ s32 IsFontLoaded(s32 k);
 Font* GetFontById(s32 k);
 void SetBestTimeState(T217D_1380* self, s32 n);
 
+// Sets up the commentary prompt element: its text, the level entry's timer length, commentary
+// record and credits (where the world has none), the frame font and the scale 0.6; it starts in
+// state 1 when the entry's requirement is met, else 0, and when the entry has its bit set and the
+// commentary differs, it shows the prompt text and notes that a press is awaited.
 void InitCommentaryPromptElement(T217D_1380* self)
 {
     const LevelEntry* e;
@@ -165,6 +169,10 @@ struct KeyRecord;
 void SetBestTimeState(T217D_1380* self, s32 n);
 extern "C" f32 Power(f32 x, f32 y);
 
+// The per-frame update of the caption element: slides it, and in states 0 and 1 handles a pending
+// prompt (a press of the pad bit 4 starts the commentary's locked stream voice and shows the
+// credits text, or after five seconds the prompt is hidden); in state 2 follows the timer, moving
+// to state 3 when it stops and showing the best-time caption when the menus and fade are clear.
 void UpdateBestTimeState(T217D_1380* self)
 {
     UpdateScreenElementSlide(self);
@@ -219,6 +227,10 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 extern "C" f32 Power(f32 x, f32 y);
 void SetPauseMenuLayerPage(T217D_6D0* y, s32 a, s32 b);
 
+// Changes the state of the timer's caption element (0 off, 1 prompt, 2 timer running, 3 finished).
+// Entering 2 plays a sound and starts the timer counting down from the level's time, with the best
+// time as the caption (or a start message if none); entering 3 compares the time left with the
+// best, records a new best (starting a save) and sets the pause menu page for the outcome.
 void SetBestTimeState(T217D_1380* self, s32 n)
 {
     if (self->state == n) {
@@ -342,6 +354,9 @@ struct Vec4U;
 void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
 void PopFontScale(Font* font);
 
+// Draws the element's text in its frame: with a text set, scales the font, fades the colour and the
+// frame's by blend, draws the frame font box at the shown position (the vertical offset applied)
+// and the text aligned in it.
 void DrawFramedText(T217D_1380* self)
 {
     T217D_Word tmp;

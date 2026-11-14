@@ -90,6 +90,10 @@ struct VectorConstraint;
 void ApplyColliderInverseInertia(void* self, Vec02* in, Vec02* out);
 void ComputeColliderPointVelocity(void* self, void* data, LinkRow* row, Vec02* out);
 
+// Works out the impulse at point that gives objects a and b the relative velocity target: for each
+// axis it measures how the point's velocity on each object changes per unit impulse (mass, inverse
+// inertia), then factors and solves the 3 by 3 system. Each object's linear and angular rows go to
+// out; the second object takes the opposite sign.
 void SolvePlayerLinkSystem(PlacedObject* a, PlacedObject* b, Vec02* point, const LinkVector* target, LinkRow* out)
 {
     PlacedObject* objs[2];
@@ -201,6 +205,9 @@ static inline f32 NormalizeInPlace(Vec02* v, const Vec02& fallback)
     return Vu0::ToFloatMoved(len);
 }
 
+// Places the player on the object it is bound to: takes the bound object's world position, rotation
+// and the velocity of its parent frame, and sets the player's position, orientation and velocity
+// from them (relative to the link's across and along directions).
 void PlacePlayerOnLinkedObject(Player* self)
 {
     Vec02 pos;
@@ -336,6 +343,9 @@ static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
 extern f32 g_frameDt[];
 void AddColliderForce(void* target, void* slot);
 
+// Turns the player toward its bound object: adds the collider force, builds the rotation from the z
+// axis to the direction of the object and spins it by the player's heading, and turns the collider
+// toward it with the link turn ramp.
 void TurnPlayerTowardLinkedObject(Player* self)
 {
     Vec02 pos;
@@ -387,6 +397,9 @@ struct LinkBlend_1CD0C8 { u8 pad0[0x34]; f32 f34; };
 struct LinkRoot_1CD0C8 { s32 pad0; void* root; };
 struct LinkMessage_1CD0C8 { u8 pad0[0x14]; f32 f14; f32 f18; };
 
+// Per-frame control of the player while it is on a linked object: takes the heading from the object
+// (reversed when linkReversed), compares the camera-relative stick direction with it to see whether
+// the player pushes toward or away along the link, and moves the player accordingly.
 void ControlPlayerOnLinkedObject(Player* self, void* pad)
 {
     Vec02 pos;
@@ -643,6 +656,9 @@ struct LinkRecord {
     PlacedObject* object;   // 0x80
 };
 
+// Computes the pose that the player's two link attachments should have: the vector from the
+// player's anchor on the bound object to the held object, the shortest-arc rotation from the x axis
+// to it, and the position and two rotations (the reach scaled) that go to the output.
 void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB)
 {
     Vec02 a;
@@ -708,6 +724,9 @@ static inline void MulRotationInto(LinkPoseTarget* obj, const Mat02& a, const Ma
     obj->rot = r;
 }
 
+// Per-frame update of the player's link attachments: eases their offset and two rotations back
+// toward zero and identity, applies them on top of the pose from ComputePlayerLinkPose, and applies
+// both attachments.
 void UpdatePlayerLinkPose(Player* self)
 {
     Vec02 pos;

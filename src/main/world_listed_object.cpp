@@ -284,6 +284,10 @@ struct PooledContact;
 
 
 
+// Rebuilds the object's texture register write list from its flag record's texture table: the entry
+// count is rounded up to a power of two (below 0x20) and stored in regCount, and each entry becomes
+// a write of register 6 with that texture's bits, entries being duplicated up to that count (the
+// first few of them, in order).
 void RebuildAnimRecordEntries(WorldListedObject* self)
 {
     TextureTable* blk = self->flagRecord->elems;
@@ -360,6 +364,10 @@ struct LookSource {
 
 void FillLookDirectionBlock(void* out, LookSource* src);
 
+// Copies a look source's settings into the listed object: particle mode, colours (halved, in
+// reverse order), anim record, the three quadratic curves (over 1/duration) and a rate for the
+// register count. The mode is the source's still flag, forced to 1 when its vector at vB0 and the
+// floats fC0 and fC4 are all near zero; mode 0 fills the look direction block.
 void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src)
 {
     LookSourceTail* t = &src->tail;

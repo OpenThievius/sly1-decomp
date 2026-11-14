@@ -114,6 +114,10 @@ List01 g_pointObjects = {0};
 extern f32 g_gameClock[];
 void AddColliderForce(void* target, Vec02* force);
 
+// The step of state 2: turns toward the heading matrix, then by sub-state: 6 steers toward the
+// stick's target position, 8 holds the player up against gravity until a marker of its animation
+// and then steers to rest, 4 and 9 to 15 do nothing more, and the others push toward the stick's
+// wanted ground velocity with a lift when falling too slowly.
 void StepPlayerState2(Player* self)
 {
     Vec02 a;
@@ -262,6 +266,10 @@ static inline f32 GroundDistanceSquared(const Vec02& a, const Vec02& b)
 
 static inline f32 MinF(f32 a, f32 b) { return a <? b; }
 
+// The pad control of state 2: sets the heading velocity from the stick (heading, level, jump
+// speed), keeping the current ground speed when the stick leans against it in some sub-states. In
+// the sub-states that may leap it looks for the cheapest target (a score of 1500 or less) among the
+// parts and point objects within 600 units and leaps at it (sub-state 4 for a part, 9 for a point).
 void ControlPlayerState2(Player* p, PadRecord* pad)
 {
     Vec02 aim;
@@ -427,6 +435,9 @@ struct MeshFace {
     u8 pad10[0x20 - 0x10];
 };
 
+// For a mesh edge between a floor face (normal z over 0.7) and a wall face (under 0.55), gives in
+// *out the horizontal unit normal of the edge on the side of the floor, and 1; any other edge gives
+// 0.
 s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdge* e, Vec02* out)
 {
     Mesh03* mesh = &c->meshCopy;
@@ -461,6 +472,10 @@ s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdge* e, Vec02* out)
 
 void BuildPerpendicularPair(Quad16* q, void* out, const Vec02* a, const Vec02* b);
 
+// Probes the surroundings of a ledge point: builds a frame at ctx from the direction in src and
+// tests eleven fixed segments of it (g_probeSegmentEndpoints) against the contacted objects' parts.
+// Gives 1 when at least two segments meet a surface with a normal over 0.7 and none of the first
+// two (or one starting inside) meets anything; otherwise 0.
 s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
 {
     u8 buf[0x100] __attribute__((aligned(16)));
@@ -507,6 +522,10 @@ struct EdgeGroup {
 };
 struct KeyedPointSet;
 struct KeyedEdge;
+// Works out in *out the horizontal direction away from a ledge for a contact on part, by the
+// contact's kind: 1 (a vertex) sums the ledge edges on that vertex, 3 (an edge) takes that edge's,
+// 2 (a face group) sums its edges the tree reaches. Then it tests the probe segments at the point
+// (TestProbeSegmentsAgainstColliders) and gives 1 when the ledge is usable.
 s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s32 kind, void* arg, Vec02* out)
 {
     u8 buf[0x100] __attribute__((aligned(16)));
@@ -575,6 +594,10 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
 extern f32 g_gameTime;
 extern f32 g_contactSideSigns[];
 s32 FindPlaneTreeNodeForPoint(Vec02* p, void* tree);
+// Looks for a contact the player could grab as a ledge (not in the first 0.15 s of the state): of
+// its vertex, edge and face contacts it keeps the highest one with a usable ledge
+// (ComputeLedgeOffsetForContact) that the player is not moving away from and whose point is not
+// just inside the other tree. Gives it with the side in *outEnd and the offset in *outPos, or null.
 Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
 {
     Vec02 tmp;

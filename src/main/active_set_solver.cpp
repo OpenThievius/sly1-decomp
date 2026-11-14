@@ -87,6 +87,9 @@ struct Frame_166690;
 // The file's .data: the view matrix DrawPlacedObjectParts multiplies the object's transform by.
 Mat4A g_unitSquareToClipMatrix = { { { 2.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 2.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f }, { -1.0f, -1.0f, 0.0f, 1.0f } } };
 
+// Deferred draw callback of a placed object with a model: sends the object's first DMA packet,
+// builds the transform of the view (clip matrix times the object's draw range matrix), draws each
+// of its 0x70-byte parts (DrawModelPart) and sends the second packet.
 void DrawPlacedObjectParts(DeferredRequest* self)
 {
     PartDrawFrame f;
@@ -131,6 +134,9 @@ struct ListFrameWords {
 };
 
 
+// Sets up the solver for count constraints: clears the record, allocates (from back memory) room
+// for twice as many items of 0x60 bytes, the item lists linked at +0x4C, and the square matrices
+// and vectors the pivoting uses.
 void InitActiveSetSolver(ActiveSetSolver* self, s32 count)
 {
 	(void)FillMemory(self, 0, 0x50);
@@ -184,6 +190,10 @@ typedef void (*EndRowsFn)(Collider* body, s32 a1, void* contact, s32 end, Active
 typedef void (*EndFillFn)(Collider* body, s32 a1, s32 size, s32 extra, f32* rows);
 void ComputeColliderPointVelocity(Collider* body, Vec02* point, void* motion, Vec02* out);
 
+// Fills in what the solver needs of a constraint item the first time it is used: for each body of
+// its contact the rows of that body's response to a unit impulse (the bodies' slots 58 and 59),
+// then the axes (relative point velocity of the bodies at each other constraint's contact) and
+// its own row of dot products against every item's axis.
 void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6)
 {
     Contact03* contact = (Contact03*)n->owner;
@@ -227,6 +237,10 @@ void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a
     }
 }
 
+// Brings item x (if any) onto the active list, then up to 10 times solves the active items'
+// system and steps along the solution by the longest step (at most 1) before an item hits a
+// bound: an active item that does moves to the at-low or at-high list, one at a bound whose
+// residual turns the wrong way becomes active. Stops on a full step or when x is dropped.
 void PivotActiveSet(ActiveSetSolver* self, ActiveSetItem* x)
 {
     s32 iter;
@@ -359,6 +373,9 @@ void PivotActiveSet(ActiveSetSolver* self, ActiveSetItem* x)
     } while (iter < 10);
 }
 
+// Solves the constraint items for non-negative (or bounded) values: first activates all the
+// equality items (kind 2) and solves, then repeatedly picks the pending item whose residual is
+// most negative (below -0.01) and pivots it in, until none is left.
 void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6)
 {
     ListFrameWords fr;
@@ -409,6 +426,10 @@ void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s
 
 typedef void (*HandlerFn)(void* handler, s32 flags, ActiveSetItem* item, s32 end, f32 dt);
 
+// Runs the solver, then adds friction: for the contact with the largest sliding speed along its
+// surface (above a small threshold) it adds a bounded friction item (limit = the normal force
+// times the friction) paired with the normal item, lets the handlers see it, and solves again;
+// repeats until no contact slides.
 void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, Contact03** contacts, s32 a4, s32 a5, f32 dt)
 {
     u128 zero = Vu0::Zero();
@@ -579,6 +600,8 @@ void ApplySolvedImpulsesToParts(ActiveSetSolver* self, s32 n, s32* counts, Colli
     PopBackMemoryMark();
 }
 
+// Solves a count by count linear system (data is the matrix, values the right-hand side) with the
+// active-set solver, for callers that are not contacts; the solution is written to out.
 void SolveActiveSetSystem(s32 count, u8* data, f32* values, f32* out)
 {
     ActiveSetSolver loc;

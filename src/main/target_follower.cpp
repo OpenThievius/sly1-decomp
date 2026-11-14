@@ -63,6 +63,8 @@ void InitTargetFollower(TargetFollower* self)
     g_currentTargetFollower = 0;
 }
 
+// Loads a target follower: the collider data, its links, and a scan of the state graph's
+// transitions for the one between keys 0x2EF and 0x2F0.
 void LoadTargetFollowerRecords(TargetFollower* self, BufferedStream* stream)
 {
     s32 k1 = 0x2EF;
@@ -185,6 +187,9 @@ extern f32 g_gameTime;
 typedef s32 (*VFnRet_16D1E0)(void* self);
 void* ChooseEntryTableObject(EntryTableObject* self);
 
+// Chooses the follower's next mode from the current one: in modes 2 and 4 it compares the next
+// entry of its followed list with the current followed object (mode 4 when there is none or it
+// shares the anchor without tuning, else 2), and the other modes test their own exit conditions.
 s32 ChooseTargetFollowerMode(TargetFollower* self)
 {
     FollowableObject* next;
@@ -355,6 +360,9 @@ struct FollowTune {
 
 struct FrameSource;
 
+// Launches the item of the follower's pool at the object it looks at: takes the item's current
+// chase target and pose, and when that target is of class 0x3D (or otherwise) computes a launch
+// velocity from the follower's tuning toward the look target's position and gives it to the item.
 void LaunchPoolItemAtTarget(TargetFollower* self)
 {
     Vec02 a;
@@ -433,6 +441,9 @@ void PlaceTargetFollowerOnFollowed(TargetFollower* self) {
 
 extern f32 g_gameTime;
 
+// Throws the follower at the followed object: the target is the anchor's position raised by
+// heightOffset, the ballistic launch velocity to it is computed and applied, and the arrival time
+// (now plus distance / speed) and the end of the first phase (arrival minus leadTime) are stored.
 void LaunchTargetFollowerAtFollowed(TargetFollower* self)
 {
     Vec02 target;
@@ -533,6 +544,10 @@ extern GameClock g_gameClock;
 
 struct FollowerTrail { u8 pad00[0x40]; Vec02 v40; Vec02 v50; Vec02 v60; Vec02 v70; };
 
+// Changes the follower's mode (0 to 4): leaving mode 1 puts it on the followed object, then it
+// records the time, sets up what the new mode needs (the next launch time one second on for mode 1,
+// positions for 0 and 3) and sets the state walker's target key (0x2EF to 0x2F6 by mode and sub-
+// state).
 void SetTargetFollowerMode(TargetFollower* self, s32 mode)
 {
     s32 key;
@@ -665,6 +680,8 @@ void StartEntryTableObject(EntryTableObject* self)
 }
 
 
+// Picks an object from the entry table by its mode at 0x314: mode 1 a random one, mode 0 the one
+// nearest the active switched collider (the player), any other mode gives 0.
 void* ChooseEntryTableObject(EntryTableObject* self)
 {
     if (self->entryCount > 0) {

@@ -204,6 +204,10 @@ extern void* g_toSprChannel;
 extern f32 g_gameClock[];
 extern const Mat4A g_identityMatrix4;
 
+// Queues a draw request (DrawModelPart) for each model part of the object that the camera can see,
+// without the per-part masks of QueuePlacedObjectModelParts: the parts and their states are
+// streamed through the scratchpad in blocks of 0x34, each part is culled against the camera planes
+// and gets its distance fades.
 void QueueModelPartDraws(PlacedObject* self, Camera* cam)
 {
     PartRequest rec;
@@ -336,6 +340,9 @@ void StartSeekingAgent(SeekingAgent* self)
     self->hurtClipAlt = ResolveAgentClip(self, 0x16B);
 }
 
+// Called when the agent moves to a new state: sets up what the state needs (state 4 clears the
+// target and object count, state 0x10 picks the hurt clip by the request kind, and so on) and then
+// starts the animation clip a2.
 void EnterSeekingAgentState(SeekingAgent* self, s32 a1, s32 a2)
 {
     s32 a2v = a2;
@@ -387,6 +394,8 @@ void LeaveSeekingAgentState(SeekingAgent* self, s32 mode)
     }
 }
 
+// Updates the agent's goal point from its state: in state 7 (when flag is set) it takes the
+// position of the first attached object of its list; the other states choose it in their own way.
 void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
 {
     s32 tmp[4];
@@ -435,6 +444,9 @@ void UpdateAgentState(Agent* self);
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Per-frame state handling of a seeking agent, by its state: state 7 turns toward the goal point,
+// state 2 goes on with the general agent update when it has a main player, and the other states run
+// their own checks and moves.
 void UpdateSeekingAgentState(SeekingAgent* self)
 {
     Vec02 tmp;
@@ -544,6 +556,8 @@ s32 HandleSeekingAgentObjectEvent(SeekingAgent* self, AgentEvent* msg)
     return 1;
 }
 
+// True when the agent has a target state and at least one of its objects is attached; agents (kind
+// 8) in state 0xB, and non-kind-9 ones in state 0xA, do not count.
 s32 HasAttachedSeekingTarget(SeekingAgent* self)
 {
     s32 i;
@@ -674,6 +688,9 @@ s32 FindPointGraphTriangle(PlaneNode* node, Vec02* p)
     return 0;
 }
 
+// Finds the graph triangle that contains point p by walking the plane tree from node: each plane
+// sends the walk above or below (both when the point is within 1.0 of the plane) and a neighbouring
+// triangle is returned as soon as one is found; 0 when none.
 s32 FindPointGraphTriangleWithin(PlaneNode* node, Vec02* p)
 {
     while (node != 0) {
@@ -732,6 +749,9 @@ struct SegmentPoint {
     }
 };
 
+// Walks a plane tree along the segment a to b and collects, up to max, the spans (entry and exit)
+// of the segment inside the tree's solid leaves into spans; returns how many. A 32-entry stack
+// holds the far sides still to visit.
 s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans)
 {
     SegmentWalkEntry cur;
@@ -938,6 +958,9 @@ void SearchPointGraph(PointGraph* graph, GraphPoint* from, GraphPoint* goal, s32
     PopBackMemoryMark();
 }
 
+// Shortens a path of point indexes in place: keeps the first and last points and each point after
+// which the straight shortcut from the last kept point is blocked (IsPointPathShortcutBlocked),
+// repeating while it still shortens. *a1 is the count.
 void SimplifyPointPath(void* a0, s32* a1, s32* a2)
 {
     s32 count;
@@ -1124,6 +1147,8 @@ void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out)
     Vu0::Q(*out) = Vu0::MulXSum(pa, s, pb, t).q;
 }
 
+// Reads a point graph from the stream: the object properties, then the counts and arrays of its
+// points (0x20 bytes each), links (12 bytes), triangles (12 bytes) and their plane tree.
 void LoadPointGraph(PointGraphObject* o, Stream8A* in)
 {
     PointGraph* m = &o->graph;

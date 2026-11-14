@@ -605,6 +605,10 @@ struct HeldLandEvent {
 typedef void (*ObjFn)(void* self);
 typedef void (*ObjPtrFn)(void* self, void* a);
 
+// Per-frame update of a held pooled object: finds the part it touches and reacts. When it is the
+// player (and not in state 6 with target mode 2) it asks the player to take the object; when it is
+// another pooled holder (class 0x3A) it plays a sound, rumbles the pad, and frees the earliest
+// child if the holder is full.
 void UpdateHeldPooledObject(PooledObject* self, f32 dt)
 {
     typedef Vu0::Vec Vec;
@@ -709,6 +713,9 @@ void InitPooledHolder(PooledHolder* self)
     self->templateId = -1;
 }
 
+// Notification handler of the holder: after the placed object's handling, when the holder's state
+// walker (message kind 0x14) reaches key 0x2B7 it destroys the walker if the holder holds
+// something, otherwise resets its aim attachment and the two poses.
 void HandlePooledHolderNotification(PooledHolder* self, s32 kind, void* msg)
 {
     s32 result;
@@ -759,6 +766,9 @@ void SyncPooledHolderWithPlayer(PooledHolder* self)
     }
 }
 
+// Start of a pooled holder: starts the collider, resolves its links, then takes the template object
+// (looked up by templateId), saves its pose and parent and makes copies of it, up to cnt in all,
+// which are started too.
 void StartPooledHolder(PooledHolder* self)
 {
     StartMaskedCollider(self);
@@ -788,6 +798,9 @@ void StartPooledHolder(PooledHolder* self)
     self->walker = CreateStateWalker((StateGraph*)self->stateGraph, self, 0x2B7, 1);
 }
 
+// Per-frame update of a pooled holder: updates the collider and, when it holds nothing and has a
+// throw target and state walker, moves the walker between its states (0x2B7 to 0x2BB) by whether it
+// has an object, collected ones and an aim.
 void UpdatePooledHolder(PooledHolder* self, f32 dt)
 {
     s32 st[2];
@@ -887,6 +900,9 @@ void SetPooledHolderWalkerState(PooledHolder* self, s32 code)
     SetStateWalkerTarget((StateWalker*)self->walker, code);
 }
 
+// Per-frame aim and take step of the holder: in state 0x2B8 it takes a pooled object once the
+// acquire delay (seconds) has passed and moves to 0x2BA; otherwise it picks an attached target,
+// points its aim attachment at it and, after the delay, takes an object and moves to 0x2BB.
 void UpdatePooledHolderAim(PooledHolder* self, s32* state)
 {
     if (*state == 0x2B8) {
@@ -913,6 +929,9 @@ void UpdatePooledHolderAim(PooledHolder* self, s32* state)
     }
 }
 
+// Takes the first object from the world's free pooled-object list for the holder: it is placed at
+// the holder's saved pose with zero velocity and made held (state 1). Returns 1 when the holder has
+// one already or now, 0 when none is free.
 s32 AcquirePooledObject(PooledHolder* self) {
     PooledObject* s0;
 
@@ -947,6 +966,10 @@ s32 AcquirePooledObject(PooledHolder* self) {
 struct PooledView { u8 pad00[0x558]; f32 throwSpeed; f32 throwEventRadius; u8 pad560[0x580 - 0x560]; f32 flightTime; f32 throwHeight; };
 void SetPooledObjectState(PooledObject* self, s32 state);
 
+// Throws the object the holder holds: the speed and source are those of the aim target (speed 15)
+// if it has one that is still attached, otherwise the holder's own; it works out the direction and
+// the velocity, hands the object to it, sets its throw speed and flight time and sends the holder's
+// script event.
 void ThrowHeldPooledObject(PooledHolder* self)
 {
     Vec02 pos;
@@ -1086,6 +1109,8 @@ void LoadStepSequence(StepSequence* self, BufferedStream* arg)
     ReadSequenceSteps(self, arg, &self->count2DC, (SequenceStep**)&self->steps2E0);
 }
 
+// Reads a step sequence's steps from the stream: a count byte, then per step (0x28 bytes) a type
+// byte and the fields that type has (key blocks, 16-bit ids, floats).
 void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, SequenceStep** outArr)
 {
     s32 i = 0;
@@ -1155,6 +1180,9 @@ void WriteSequenceTarget(StepSequence* self, s32 value)
     *(s32*)self->target304 = value;
 }
 
+// Moves the step sequence to a new state, first undoing what the old one set up (the hint glyph's
+// owner for 5, the count of waiting sequences for 1, the voice and target flag for 3), then setting
+// up the new state.
 void SetStepSequenceState(StepSequence* self, s32 next)
 {
     s32 cur = self->state2D4;
@@ -1248,6 +1276,9 @@ void SetStepSequenceState(StepSequence* self, s32 next)
     self->time2D8 = g_gameTime[0];
 }
 
+// Per-frame update of a step sequence: updates the placed object, drops back to state 0 when a
+// caption, the timer or a voice is in the way, then (looks like) checks the active controller's
+// buttons for a skip, tests the wait conditions, advances the steps and sets the next state.
 void UpdateStepSequence(StepSequence* self, f32 dt)
 {
     s32 q[2];
@@ -1343,6 +1374,10 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
     }
 }
 
+// Handles a message to a step sequence (a scripted list of steps that shows captions and plays
+// voice lines), by the message's type: 0 opens a key record and waits for it, 1 and 2 look up one
+// or two speaker objects by id, 3 shows a caption in the typed-text box (coloured by the speaker's
+// colour) and sets its percent and subject, and types 4 to 7 do the other step actions.
 void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
 {
     CaptionSpeaker* s2;
@@ -1494,6 +1529,9 @@ void HandleStepSequenceNotification(StepSequence* state, s32 mode, void* value)
 		state->player2F8 = 0;
 }
 
+// Tests what a step sequence is waiting for, as bits of waitFlags: 1 for a streamed voice still
+// pending, 2 and 4 for the two speakers' lines to finish, 8 for a voice stream that exists, and so
+// on. Returns whether any condition is still unmet (non-zero), clearing the bits that are met.
 s32 TestStepWaitConditions(StepSequence* self)
 {
     s32 flags = self->waitFlags;
@@ -1570,6 +1608,9 @@ s32 TestStepWaitConditions(StepSequence* self)
     return flags != 0;
 }
 
+// Skips to the end of the sequence: runs the side effects of every remaining step that has one
+// (script event 0x10 for type 4, showing or hiding the counted screen element for 5 and 6) without
+// playing the captions.
 void SkipRemainingSteps(StepSequence* self)
 {
     if (self->state2D4 != 4) {
@@ -1632,6 +1673,10 @@ void ShowStepSequenceText(StepSequence* value, Ent65* object)
     }
 }
 
+// Chooses the state a step sequence starts in when it is triggered: nothing happens when a caption
+// is open, the timer is pressed, a voice is locked or it is the active sequence; otherwise state 1,
+// or 5 when its target (or one of the extra targets) has been reached, or its current state in mode
+// 2.
 void ChooseStepSequenceState(StepSequence* self)
 {
     T217D_1380* g = &g_timerCaption;
@@ -1689,6 +1734,10 @@ void ClearScatterController(void* state)
 	FillMemory(state, 0, 0x24);
 }
 
+// Resets the scatter controller for a new level: refill and count ranges to defaults, the table
+// chosen by the save data's level (an early-game table, or a plain or flagged one by the current
+// entry's flags), the scatter level from the entry's progress value, and the starting counts
+// interpolated between the table's start and end values.
 void ResetScatterController(ScatterController* self)
 {
     self->refillLo = 4;
@@ -1726,6 +1775,10 @@ void ResetScatterController(ScatterController* self)
     self->spareRaised = 0;
 }
 
+// Keeps the scatter level in step with the save: when the flag in D_00275B00 bit 3 is set, raises
+// the spare count to the table's value for the band the entry is in; otherwise sets the scatter
+// level from the entry's progress value through the table's range, and completes the sound
+// notifiers.
 void UpdateScatterLevelLimits(ScatterController* self)
 {
     if (D_00275B00 & 8) {
@@ -1769,6 +1822,8 @@ void RaiseScatterLevels(ScatterController* self, f32 amount)
     g_currentEntry->f10 = result;
 }
 
+// Raises the scatter level for picking up an object: by the table's "seen" amount when the object's
+// ordinal bit is already set in the entry's bits, else by the "new" amount, then sets that bit.
 void RaiseScatterLevelForObject(ScatterController* obj, FlaggedObject* node)
 {
     f32 value;
@@ -1803,6 +1858,9 @@ void ResetScatterLevels(ScatterController* object)
 	FillMemory(manager->bits74, 0, 1);
 }
 
+// Scatters n pooled objects around a point: with n above 0 it spreads them around a circle (class
+// 0x58). With a negative n it lowers the controller's level by a band step once the countdowns run
+// out, and moves the thresholds as the level crosses the table's ranges.
 void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag)
 {
     s32 did = 0;
@@ -2232,6 +2290,10 @@ void InitTextureRenderObject(TextureRenderObject* self)
     InitPlacedObject(self);
 }
 
+// Builds, for a texture render object, the two DMA packets that draw into the range record's
+// texture: the first clears the texture's area and sets the frame, the second draws the sprites
+// that render into it (GIF register writes, tags and vertices for a texture of tex->w by tex->h).
+// They are kept in the object and sent when it renders.
 void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a)
 {
     PacketWriter pa;

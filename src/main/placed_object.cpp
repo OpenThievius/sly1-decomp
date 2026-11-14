@@ -863,6 +863,8 @@ void InitStateTrigger(StateTrigger* self)
     self->id6B0 = TakeFlagTableIndex((FlagTable*)g_flagTable);
 }
 
+// Start of a state trigger: queues ResolveStateTriggerObjects, starts the placed object, and scans
+// its children, remembering the first of the kind 0x88 as found558.
 void StartStateTrigger(StateTrigger* self)
 {
     WordListFrame fr;
@@ -906,6 +908,9 @@ void CopyStateTrigger(StateTrigger* object, StateTrigger* src)
 	object->id6B0 = value;
 }
 
+// Per-frame update of the trigger: while active (state 2) it falls back to state 0 when the timeout
+// has passed. It goes to state 1 once all its counted objects are done, and while the player is in
+// state 9 it sends each counted object a call (its method m48).
 void UpdateStateTrigger(StateTrigger* self, f32 dt)
 {
     UpdateCollider(self, dt);
@@ -938,6 +943,9 @@ done:
     ;
 }
 
+// Looks up the trigger's three id lists in the world (counters of kind 0x22, timed outputs of kind
+// 0x30, agents of kind 8), registers the trigger with each found, and starts in state 1 when its
+// flag-table bit is set, otherwise 0.
 void ResolveStateTriggerObjects(StateTrigger* self)
 {
     s32 kept = 0;
@@ -972,6 +980,10 @@ void ResolveStateTriggerObjects(StateTrigger* self)
     }
 }
 
+// Switches the trigger to state mode (0, 1 or 2) and records the game time. Leaving state 2 stops
+// its sound and releases its walker targets. Each state sets the walker's target and outputs; state
+// 1 fires script event 0x16 when the flag-table bit of its id was already set, else 3, then sets
+// the bit.
 void SetStateTriggerState(StateTrigger* self, s32 mode)
 {
     s32 cur = self->state;
@@ -1144,6 +1156,9 @@ ASM_FUNC(func_00123E48);
 
 ASM_FUNC(func_00123E88);
 
+// Constructor body of the placed object: sets the link offsets of its lists, the cull modes (a root
+// object starts with mode 2, a child with 1 and 0), the "unset" fade distances (3.4e38), the full
+// visibility mask, and its default tables.
 void InitPlacedObject(PlacedObject* self)
 {
     SetListLinkOffset(&self->children, 0x1C);
@@ -1187,6 +1202,9 @@ void AttachPlacedObject(PlacedObject* self)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
+// Registers the object with its world: root objects go in the world's lists (a different list for
+// objects with a frame-step clock), a child takes its parent's root. It then seeds the pose from
+// the attachments, adds the camera if flagged, adds the range record and fires script event 4.
 void RegisterPlacedObject(PlacedObject* self)
 {
     Vec02 v0;
@@ -1246,6 +1264,8 @@ void DetachPlacedObject(PlacedObject* self)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
+// Undoes RegisterPlacedObject: takes the object out of the world's lists (a root only), dissolves
+// its group link list and clears its own lists, then unregisters it as an object.
 void UnregisterPlacedObject(PlacedObject* self)
 {
     UnregisterObject(self);
@@ -1295,6 +1315,9 @@ void SavePlacedObjectInitialFrame(PlacedObject* object)
 	MatrixToEulerAngles((Mat4*)&object->m1A0, (Vec3*)&object->v1D0);
 }
 
+// Moves the object under a new parent (or none) while keeping its world position, orientation,
+// velocity and spin: they are converted into the new parent's frame and given to the object's
+// setters. Switching between root and non-root also changes its draw-culling modes.
 void ReparentPlacedObject(PlacedObject* self, BaseObject* parent)
 {
     Vec02 pos;
@@ -1362,6 +1385,9 @@ void ReparentPlacedObject(PlacedObject* self, BaseObject* parent)
     self->desc->m02(self);
 }
 
+// Makes the object a child of frame without moving it in the world: its position, rotation,
+// velocity and spin are expressed in the frame's coordinates, adding the frame parent's motion, and
+// are given to its setters; it ends by saving its pose into the previous-pose copy.
 void ReframePlacedObject(PlacedObject* self, BaseObject* frame)
 {
     Vec02 pos;
@@ -1409,6 +1435,9 @@ void PostLoadPlacedObject(PlacedObject* self)
     }
 }
 
+// Start-up of the object once its world is loaded: starts the base object and its attachments,
+// queues the animation start, sets up the range record, starts its sound effect, allocates the
+// indexed attachment slots, and resolves the keyed objects it must start or attach.
 void StartPlacedObject(PlacedObject* self)
 {
     WordListFrame fr;
@@ -1483,6 +1512,9 @@ void StartPlacedObject(PlacedObject* self)
     g_activeListFrames = (ListFrame*)fr.prev;
 }
 
+// Starts the animation named by the object's start record: the start time is a value in seconds
+// (mode 0), a 0..1 fraction of the length (mode 1) or the nearest point on the animation's path to
+// the object (mode 2). Queued by StartPlacedObject.
 void StartAnimationFromContext(PlacedObject* self)
 {
     AnimationStart* ctx = self->animationStart;
@@ -1509,6 +1541,9 @@ void StartAnimationFromContext(PlacedObject* self)
     CreateAnimationPlayer(node, self, 1, &fr, 0, 0, fr.tmp, ctx->speedScale);
 }
 
+// Resolves a table of links on self: each finds an object by id in the world (the flags choose the
+// lookup kind and whether a pointer is stored at the link's offset, the object is started, or self
+// is added as its listener).
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item)
 {
     World* host = self->world;
@@ -1574,6 +1609,8 @@ void UpdateObjectTree(void* self, f32 f)
     *(sptr*)&g_activeListFrames = fr.prev;
 }
 
+// Per-frame update of the object: updates its attachments and range record, pulses its colour,
+// calls each attachment's update, and sends script event 1 with the frame time.
 void UpdatePlacedObject(PlacedObject* self, f32 f)
 {
     UpdateAttachments((AnimatorOwner*)self->sub22C, self, f);
@@ -1644,6 +1681,9 @@ static inline void MulRotationIntoWorld(PlacedObject* o, const Mat02& a, const M
     o->m110 = r;
 }
 
+// Recomputes the world position (v140) and rotation (m110) from the local pose and the parent, or
+// from the link record's frames when its flags 0xC are set. It also refreshes the visibility mask,
+// the range record's position and direction, and calls each child's own update.
 void ComputePlacedObjectWorldFrame(PlacedObject* self)
 {
     Rec2195_224* rec = self->linkRecord;
@@ -1712,6 +1752,9 @@ s32 IsAccelerationNegligible(void* a);
 s32 IsSpinAccelerationNegligible(void* a);
 void OrthonormalizeMatrix(Mat02* m);
 
+// Advances the object by one step: takes the position and rotation from its attachments, or
+// integrates velocity, acceleration and spin over the frame time, then moves each child that wants
+// it (desc flag 1). If anything moved and flag is 0, it calls the object's moved callback.
 void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
 {
     Attachment* pa = self->positionAttachment;
@@ -1767,6 +1810,9 @@ void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
 typedef void (*PositionAtFn)(PlacedObject* self, f32 t, Vec02* pos, Vec02* vel);
 typedef void (*RotationAtFn)(PlacedObject* self, f32 t, Mat02* rot, Vec02* spin);
 
+// Like AccumulateFrameChain, but each object's position and rotation come from its own methods
+// evaluated at time t. Gives the combined position, rotation, velocity and spin of self relative to
+// top (any output may be null).
 void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
 {
     PlacedObject* chain[16];
@@ -1823,6 +1869,8 @@ void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos,
     }
 }
 
+// Converts a position, rotation, velocity and spin from self's frame to top's frame as they are at
+// time t, using ComputeObjectFrameAtTime (any argument may be null).
 void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
 {
     Mat02 m;
@@ -1918,6 +1966,10 @@ static inline void MulRotationRowsXW(Mat02* out, const Mat02& a, const Mat02& b)
     *out = r;
 }
 
+// Decides whether the object is drawn this frame for the camera: gives up when it is hidden,
+// outside its visibility mask or its sphere is outside the camera planes. Otherwise it works out
+// the far and near distance fades, building a faded copy of the transform when the fade is not 1,
+// and draws the object's parts with it.
 void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf)
 {
     ScaledTransform t;
@@ -2116,6 +2168,9 @@ s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x
 void ApplyPoseSourceIndexedValue(Attachment* self, s32 val);
 void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, f32* pos, Mat4A* m);
 
+// Queues one draw request (DrawModelPart) for each visible model part of the object: builds the
+// object's transform, skips parts hidden by the camera mask or outside the camera planes, and
+// scales the block's fades by the per-part distance fade.
 void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
 {
     ModelPartRequest rec;
@@ -2263,6 +2318,9 @@ void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
 }
 
 
+// Draws a flat beam (a quad strip) from p to q: it builds a basis whose long axis is q - p and
+// whose width axis is perpendicular to the direction from the camera, scales it by sx and sy, and
+// draws it as a transform. Falls back to a fixed axis when the beam points at the camera.
 void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy)
 {
     Mat02 m;
@@ -2314,6 +2372,9 @@ void SetObjectRecordValue(PlacedObject* state, u32 value)
 
 extern "C" f32 Sine(f32 x);
 
+// Pulses the object's colour: blends the colour record's two colours by a sine of the game time
+// (period r->factor seconds), converts the result from hue/saturation/value to RGB with alpha 0x80,
+// and stores it on the object tree.
 void ApplyPulsingColorToObjectTree(PlacedObject* self, f32 dt)
 {
     Vec02 hsv;
@@ -2438,6 +2499,9 @@ void ClonePlacedObject(PlacedObject* self, PlacedObject* owner)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
+// Makes self a copy of src: the data is copied, then self's own list links, parent and root, flags
+// bit 37 and children list are put back. Attachments, the link record and the range record are
+// cloned, and the model's attachment block is copied.
 void CopyPlacedObject(PlacedObject* self, PlacedObject* src)
 {
     PlacedObject* s54 = self->f54;
@@ -2590,6 +2654,9 @@ void SetPlacedObjectLocalVelocity(PlacedObject* self, const Vec02* local)
 
 ASM_FUNC(func_00127678);
 
+// Makes self take other's world position, rotation, velocity and spin, converted into self's parent
+// frame, and copies the link record's angle when both have flag 0x20. Children are then given the
+// same frame from the child of other with the same id.
 void CopyPlacedObjectFrame(PlacedObject* self, PlacedObject* other)
 {
     TakeFrameLocals L;
@@ -2627,6 +2694,9 @@ void CopyPlacedObjectFrame(PlacedObject* self, PlacedObject* other)
 
 void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
+// Gives the linear velocity (vel, velSum) and spin (spin, spinSum) of the frame chain self up to
+// top at the point origin, adding each level's own motion plus the cross-product terms of the
+// rotating levels above it.
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum)
 {
     PlacedObject* chain[16];
@@ -2699,6 +2769,9 @@ void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* or
 }
 
 
+// Composes the position, rotation, velocity and spin of every frame from self up to top (following
+// a link record's linked object when flags 0xC are set, otherwise the parent), writing each depth's
+// accumulated value to the arrays at index 0..n-1 (any may be null).
 void AccumulateFrameChain(PlacedObject* self, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin)
 {
     PlacedObject* chain[16];
@@ -2786,6 +2859,9 @@ void AccumulateFrameChain(PlacedObject* self, PlacedObject* top, s32 n, Vec02* p
     }
 }
 
+// Converts a position, rotation, velocity and spin given in self's frame into the frame of the
+// ancestor top (any may be null), using AccumulateFrameChain for the frame between them: positions
+// are rotated and offset, velocities also get the spin-times-offset term.
 void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin)
 {
     Mat02 m;
@@ -2914,6 +2990,9 @@ void ReleaseAnimationDrivenAttachments(Player* self)
     }
 }
 
+// Converts up to four vectors from frame from to frame to via their common ancestor: each is
+// rotated into the ancestor, the motion of from at point pt is added, the motion of to is
+// subtracted, and the result rotated into to. Null vectors are skipped.
 void ConvertVectorsBetweenObjectFrames(BaseObject* from, BaseObject* to, void* pt, void* d, void* e, s32 f, s32 g, u8* h, u8* i, s32 j, s32 k)
 {
     Vec02 a[4];
@@ -2976,6 +3055,9 @@ void ConvertVectorsBetweenObjectFrames(BaseObject* from, BaseObject* to, void* p
 }
 
 
+// Works out a steering heading for the object from its position and orientation attachments (or its
+// own pose), the displacement and the speed. A small state machine on bits30 switches on thresholds
+// (25 distance, 10 speed). Results go to out0..out2; p1 and p3 default to two global vectors.
 void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2)
 {
     Vec02 d;
@@ -3079,6 +3161,10 @@ struct BakedRow {
     f32* values;
 };
 
+// Reads the object's saved data: rotation, position, three culling mode bytes, visibility mask, far
+// and near fade distances (3.4e38 meaning unset: 1e10, and 2000 or the far one, whichever is
+// lower), bounding radius, property records, model, follow record, per-id baked value rows and slot
+// objects.
 void LoadPlacedObject(PlacedObject* self, void* r)
 {
     ReadBufferedRotation3((BufferedStream*)r, (u8*)&self->rot);
@@ -3119,6 +3205,9 @@ void LoadPlacedObject(PlacedObject* self, void* r)
     ReadSlotObjects(self->world, self, r);
 }
 
+// Reads the object's follow (link) record: a flag word, and if it is non-zero a 0xC0-byte record is
+// allocated holding two optional rotations, the object the object follows (by id, kind 3, or a raw
+// index for flag 0x10) and the other values the flags say are present.
 void LoadFollowRecord(PlacedObject* self, void* a1)
 {
     s32 flags = ReadBufferedU32((BufferedStream*)a1);
@@ -3183,6 +3272,9 @@ void ResolveFollowRecordObjects(PlacedObject* self)
     }
 }
 
+// Applies the follow record's two fixed offsets to a pose: flag 1 multiplies the rotation m by the
+// record's first rotation, flag 2 applies the record's second rotation to both m and the vector v.
+// Does nothing with no link record.
 void ApplyObjectFrameOffsetToPose(PlacedObject* self, Mat02* m, Vec02* v)
 {
     Rec2195_224* p = self->linkRecord;
@@ -3445,6 +3537,10 @@ void EnsureAimAttachment(PlacedObject* self)
     }
 }
 
+// Chooses which of the object's attachments drive it: the first one with a position mode, an
+// orientation mode and a matrix mode set (ignoring mode 0), plus one per value slot. When the
+// position or orientation attachment changes it clears the root tries and settles the new
+// attachment's modes.
 void ChooseActiveAttachments(PlacedObject* self)
 {
     Attachment* s3 = 0;
@@ -3508,6 +3604,8 @@ void InsertAttachment(PlacedObject* self, Attachment* src)
     self->desc02()->m2B(self);
 }
 
+// Re-inserts the object's attachments into its list so they are ordered by key, largest first
+// (equal keys stay in their old order); then calls the object's attachment-changed method (m2B).
 void SortAttachments(PlacedObject* self)
 {
     ListFrame it;
@@ -4109,6 +4207,8 @@ void GetSoundRecordPair(PlacedObject* self, U64P* out)
     }
 }
 
+// Sets the object's sound record (sound id, outer and inner range, base volume and a 64-bit value),
+// stops any sound that is playing and starts it again with the new values.
 void StartSoundWithParams(PlacedObject* self, s32 value, U64P* src, f32 x, f32 y, f32 z)
 {
     EnsureSoundRecord(self);
@@ -4251,6 +4351,8 @@ s32 TestOtherFlagged(PlacedObject* self, BaseObject* a1)
     return a1->f0C != 0;
 }
 
+// Selects the baked per-key value row whose key equals key (-1 switches the values off) on the
+// object's keyed-value attachment, creating and inserting that attachment on first use.
 void SelectValueEntryByKey(PlacedObject* self, s32 key)
 {
     s32 callVt = 0;
@@ -4340,6 +4442,9 @@ void GetPlacedObjectSpecialFlag(PlacedObject* ctx, s32* out)
     }
 }
 
+// Sets the two objects the follow record follows, one for position and one for rotation (0xC flags;
+// the parent when one equals it), allocating the record if needed. The object's local pose is then
+// recomputed in the new frames, keeping its world pose.
 void SetFollowObjects(PlacedObject* self, void* a1, void* a2)
 {
     void* t = self->parent;
@@ -4390,6 +4495,8 @@ void InitCodeChecksum(CodeChecksum* self)
     }
 }
 
+// Per-frame step of a CRC-32 over a block of memory, table driven: 64 words per call, until none
+// remain. If the final CRC is non-zero it sets a mismatch flag and sends script event 2.
 void UpdateCodeChecksum(CodeChecksum* self, f32 dt)
 {
     if (self->remaining != 0) {
@@ -4436,6 +4543,9 @@ void InitAnimation(Animation* self)
     self->out = 1.0f;
 }
 
+// Reads an animation from the stream: id, length (16-bit, 1/60 s ticks), the target ids, then each
+// track's target and flag bits that say which position, rotation, scale and weight curves it has.
+// Each curve is created by its type byte and reads its own keys.
 void LoadAnimation(Animation* self, Stream83* other)
 {
     s32 k;
@@ -4508,6 +4618,9 @@ void LoadAnimation(Animation* self, Stream83* other)
     ReadPropertyRecords(self, other);
 }
 
+// Reads an animation's event list from the stream: a count, then per event a kind byte, a time
+// (16-bit, 1/60 s ticks, when flag is set) and a kind-specific payload. Consecutive sound events
+// (kind 0) with the same parameters are merged into one SoundChoice that holds several sound ids.
 void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEvent** out)
 {
     AnimEvent* e;
@@ -4702,6 +4815,10 @@ void StartLinkedObjectAnimation(Animation* self)
     CreateAnimationPlayerWithoutPresetTargets(self, v, 0, (AnimationPlayer**)scratch, 0.0f, 1.0f);
 }
 
+// Makes a player for the animation starting at time fa with speed fb, and links it into the
+// animation's list and the world's (listed or unlisted) player list. Each target of its tracks is
+// then resolved to an object, from the explicit key/object pairs first, otherwise by searching the
+// world by id.
 void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetBinding* pairs, s32 flags, AnimationPlayer** out, f32 fa, f32 fb)
 {
     s32 tmp;
@@ -4980,6 +5097,9 @@ void* FindEntryByObjectId(BlendAnimationView* self, BaseObject* key)
 // time and scale, a vector and a second value (func_0012CD78).
 typedef void (*PoseSampleFn)(void* src, PlacedObject* o, f32 t, f32 scale, s32 z, void* a, Vec02* b);
 
+// Fills per-depth arrays (position, rotation, velocity, spin; any may be null) of the frame chain
+// from o up to top at animation time t, composing each ancestor's pose, scaled by the player's
+// speed factors. Ancestors whose link record has flags 0xC are skipped.
 void SampleAnimationFrameChain(BlendAnimationView* self, f32 t, f32 scale, PlacedObject* o, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot,
                    Vec02* vel, Vec02* spin)
 {
@@ -5099,6 +5219,8 @@ void SampleAnimationFrameChain(BlendAnimationView* self, f32 t, f32 scale, Place
     }
 }
 
+// Finds the objects named by the animation's kind 0x29 timed events: counts them into *outCount
+// and, if outArr is given, fills a back-memory array with each one looked up by id in the world.
 void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount, BaseObject*** outArr)
 {
     s32 n = 0;
@@ -5133,6 +5255,8 @@ void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount
     }
 }
 
+// Moves track p to the end of the animation's track array (after the counted tracks), shifting the
+// later ones down, and records it as the animation's movedTrack.
 void MoveAnimationTrackToEnd(Animation* self, Track83* p)
 {
     Track83 tmp = *p;
@@ -5228,6 +5352,10 @@ T2195_7C0* FindPlayerAttachmentByOwner(AnimationPlayer* a0, s32 owner)
 
 LINKER_REMNANT(func_0012D5C8);
 
+// Runs one event of an animation player, switched on the event's kind: sound events pick a variant
+// from a SoundChoice, others open key records, stop the streamed voice or send script events. Kind
+// 42 holds the player in place (steps its counter back, sets *out = 1) while a streamed voice is
+// still pending.
 void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
 {
     EventScratch u;
@@ -5726,6 +5854,9 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
     }
 }
 
+// Used when a player jumps to a new time: runs the events up to that time that matter for a seek
+// (kinds 9, 10, 14 to 18, 28 and 39), and for kind 8 stops the player at that event's time with
+// speed 0 and sets *out.
 void RunSeekAnimationEvents(AnimationPlayer* self, Animation* sub, s32* out)
 {
     f32 limit = self->time + 0.0001f;
@@ -5754,6 +5885,9 @@ void RunSeekAnimationEvents(AnimationPlayer* self, Animation* sub, s32* out)
     }
 }
 
+// Runs the animation's timed events that lie between the player's event index and its current time,
+// forward when it plays forward and backward when it plays backward, stepping the index as it goes.
+// Stops early when an event sets *out.
 void RunAnimationEventsToTime(AnimationPlayer* self, Animation* list, s32* out)
 {
     if (list->timedCount == 0) return;
@@ -5784,6 +5918,9 @@ void ReleaseWorldListEntry(void* a0)
     PushFreeSlot((Pool6C*)&g_currentWorld->pool1B58, (Attachment*)a0);
 }
 
+// Ends an animation player: runs the animation's end events, notifies callbacks, frees its call
+// records and sound group, removes it from the animation's and the world's lists, releases its
+// attachments and sends script event 0xB.
 void StopAnimationPlayer(AnimationPlayer* self)
 {
     WordListFrame fr;
@@ -5857,6 +5994,8 @@ f32 GetRangeFalloffScale(RangeFalloffOwner* self, f32 value)
     return r;
 }
 
+// Brings a player's time *pos back into the animation's range by its end mode (0 stops at the ends,
+// 1 loops, 2 ping-pongs, flipping the sign of *vel). Returns 1 when the time was past either end.
 s32 ApplyAnimationLoopMode(AnimationPlayer* o, f32* pos, f32* vel)
 {
     s32 r = 0;
@@ -6049,6 +6188,10 @@ void UpdateAnimationPlayer(AnimationPlayer* self, f32 dt)
     }
 }
 
+// Jumps a player to a time: a is absolute (mode 0), added to the current time (mode 1) or to the
+// animation's length (modes 2 and 3), and b is the new speed. It then runs the seek events (mode 3)
+// or moves the event cursor, re-poses the listed attachments and stops the player if an event asked
+// for it.
 void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b)
 {
     s32 flag = 0;
@@ -6281,6 +6424,8 @@ void CopyIdFilterObject(IdFilterObject* self, IdFilterObject* src)
     }
 }
 
+// Start of an id filter: either looks up the object its id names (mode 2), or, with no id, takes
+// the position of its single child of kind 0x7E as a fixed point (mode 1).
 void StartIdFilterObject(IdFilterObject* self)
 {
     StartPlacedObject(self);
@@ -6331,6 +6476,8 @@ void UpdateIdFilterObject(IdFilterObject* self, f32 dt)
     }
 }
 
+// True when the filter lets key through: the collider can contact it, its id is in the filter's
+// object id list, or it is of one of the classes in its class id list.
 s32 TestIdFilterMatch(IdFilterObject* self, Collider* key)
 {
     s32 hit;
@@ -6364,6 +6511,9 @@ tail:
 
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
+// Called when something touches the filter object: fires script events 2 and 0x1D (with the other
+// party's data), then, when it has a mode and no pending target, checks the distance from the
+// placed target to the filter's location (its own position or a found node's).
 void HandleIdFilterObjectContact(IdFilterObject* self, u8* table, s32 which)
 {
     Vec02 loc;

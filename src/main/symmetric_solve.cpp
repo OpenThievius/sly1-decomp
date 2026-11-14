@@ -31,6 +31,9 @@
 #include "ramp_profile.h"
 
 
+// Factors the n by n symmetric matrix a into l (looks like an LDL-transpose decomposition: the
+// pivots and the scaled lower part are kept in one array), with pivots below 1e-8 treated as
+// zero. For SolveFactoredSystem.
 void FactorSymmetricMatrix(s32 n, f32* a, f32* l)
 {
     s32 i;
@@ -103,6 +106,8 @@ void FactorSymmetricMatrix(s32 n, f32* a, f32* l)
     }
 }
 
+// Solves a linear system with the factor FactorSymmetricMatrix made: forward then backward
+// substitution of the right-hand side b into x (a zero pivot gives a zero component).
 void SolveFactoredSystem(s32 n, f32* m, f32* b, f32* x)
 {
     s32 i;

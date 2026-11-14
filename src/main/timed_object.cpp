@@ -315,6 +315,10 @@ void PostLoadTimedGroup(TimedGroup* self)
     g_activeListFrames = frame.prev;
 }
 
+// Starts the object, then for each child group calls its method 3 and, for every group but the
+// first, makes copies of the first group's entries (objects created from them, with their values)
+// for it. Finally records whether the player is the only accepted object and sets the initial
+// state.
 void CloneTimedGroupEntries(TimedGroup* self)
 {
     TimedGroupChild* src = &self->groups[0];
@@ -370,6 +374,10 @@ void StaggerGroupOffsets()
     g_groupStaggerDirty = 0;
 }
 
+// Per-frame update of the timed group: moves its fade toward 0..1 by fadeRate, refreshes the
+// staggered offsets when dirty, and advances the state by the durations (0 to 1 after
+// beginDuration, 4 to 5, 3 to 8 or back to 4 depending on repeating, 7 to 8 after
+// repeatEndDuration), letting method 0x48 change it, then passes the result to method 0x4D.
 void UpdateTimedGroup(TimedGroup* self, f32 amount)
 {
     s32 cmd;
@@ -468,6 +476,10 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 Vec02* AllocateBackMemory(s32 size);
 
+// Draws the group's collider and, in states 0 to 7, for each child group a chain of beam segments
+// through its points (in this object's frame), cut off at the length ComputeTimedGroupRamp gives;
+// records the drawn length in fallScale for the states that use it. The beam object comes from one
+// of two fields by state, or the world's default.
 void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
 {
     DrawCollider(self, a1, a2);
@@ -708,6 +720,9 @@ void FinishTimedGroup(TimedGroup* self)
     self->repeating = 1;
 }
 
+// Enters a new state of the group (nothing if unchanged): starting from -1 or 8 it plays the
+// group's sound 0x1A, states 3 and 7 set each child's effect spawners active for ever, and state 8
+// fades the sound out over the end duration (in ms), calls method 3 and marks the stagger dirty.
 void EnterTimedGroupState(TimedGroup* self, s32 s)
 {
     s32 st = self->state;
@@ -739,6 +754,10 @@ void EnterTimedGroupState(TimedGroup* self, s32 s)
     EnterTimedObjectState(self, s);
 }
 
+// Gives the length that the group's chain of beams should have for a child: the child's riseScale
+// (or fallScale in the ending states 3 and 7) times a fraction by state: rising with time over
+// beginDuration in states 0 and 4, the group's fade in 1, 2, 5 and 6, falling over the end duration
+// in 3 and 7, and 0 in 8.
 f32 ComputeTimedGroupRamp(TimedGroup* o, TimedGroupChild* c)
 {
     f32 s = c->riseScale;
@@ -824,6 +843,10 @@ void SetupSequencedObject(SequencedObject* self)
     self->desc30()->m4D(self, self->initialState);
 }
 
+// Per-frame state update: advances the state by the durations (0 to 1 after beginDuration, 3 and 7
+// to 8 after endDuration, 4 to 5, 2 to 3), lets method 0x48 change it in 1 and 5, restarts from 0
+// or 4 in 8 once the trigger is not held, and in 6 steps its substates (wait for the player, 1,
+// then 2, then state 5). The result goes to method 0x4D.
 void UpdateSequencedObject(SequencedObject* self, f32 dt) {
     s32 st;
     s32 s1;
@@ -915,6 +938,10 @@ static inline f32 ClampRange(f32 v, f32 lo, f32 hi)
     return v;
 }
 
+// Draws the sequenced object unless in state 8: the object's draw with a scale by state: growing 0
+// to 1 over beginDuration in 0 and 4, shrinking over endDuration in 3 and 7, 1 in 1, 2 and 5, and
+// in 6 by its substate (ramp down to 0.1, a beam to the player, growth back to 1). States 0 to 3
+// draw the object, 4 to 7 its phase object.
 void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
 {
     Vec02 scale;
@@ -1137,6 +1164,9 @@ void EnterSequencedObjectState(SequencedObject* self, s32 s)
     }
 }
 
+// Switches the sequenced object's substate (state 6's parts: 0 waiting, 1 the beam, 2 the end):
+// leaving 1 stops its sound; entering 0 or 2 sets the aim attachment's mode to 4 or 0, entering 1
+// starts sound 0x1B; records the time.
 void EnterSequencedSubstate(SequencedObject* self, s32 arg)
 {
     if (self->state5D8 == arg) return;
@@ -1197,6 +1227,10 @@ void SetupBlinkObject(BlinkObject* self)
     self->desc30()->m4D(self, self->initialState);
 }
 
+// Per-frame state update of the blink object: moves between begin, active, blink (3 and 7) and end
+// states by their durations (active turns to blink after blinkDuration if not negative), lets
+// method 0x48 change the state, restarts after restartDelay when the trigger is not held, passes
+// the state to method 0x4D and sets the frame.
 void UpdateBlinkObject(BlinkObject* self, f32 dt)
 {
     s32 state;
@@ -1288,6 +1322,10 @@ inline void TouchQuery::Init(BlinkObject* s, Collider* o, const Vec02* k)
 }
 
 
+// Looks through the owner's contacts for those whose part is this object and whose other body is
+// accepted by its accept lists; unless it is resuming, sets the new state to 2 (or 6 when
+// repeating) and, for those states, notifies the player (and stops the track player when it
+// accepts) or sends a touch query for another object.
 void ChooseBlinkObjectState(BlinkObject* self, s32* out)
 {
     OwnerMessage buf;
@@ -1365,6 +1403,10 @@ void FinishBlinkObject(BlinkObject* self)
     }
 }
 
+// Enters a new state of the blink object (nothing if unchanged): leaving 1 or 5 it stops the sound
+// and saves the start time, leaving 8 clears the trigger; entering 1 or 5 starts its sound (15 or
+// 27), and 2 or 6 mark it as resuming, in which case the state becomes 1 or 5 with the saved start
+// time.
 void EnterBlinkObjectState(BlinkObject* self, s32 n)
 {
     if (self->state == n) return;
@@ -1402,6 +1444,10 @@ void EnterBlinkObjectState(BlinkObject* self, s32 n)
     }
 }
 
+// Chooses the frame of the blink object's element from its state: one of the three animation ranges
+// (A for states 0, 4 and 8, B for 1, C for 5), looping or ping-ponging over its duration; in states
+// 3 and 7 it blinks, alternating at blinkRate per second between the range and the fixed
+// blinkFrame.
 void SetBlinkObjectFrame(BlinkObject* self)
 {
     s32 first, last, mode, frame;

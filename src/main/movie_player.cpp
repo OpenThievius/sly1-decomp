@@ -295,6 +295,8 @@ void MoveContactListObject(ContactListObject* self, void* b, f32 x)
 }
 
 
+// Attaches the object to an anchor object at an offset, starts its animation player if it has an
+// animation, and, when it is ready and moving, turns it to face its velocity.
 void LaunchContactListObject(ContactListObject* self, PlacedObject* a, Vec02* v)
 {
     self->anchorObject = a;
@@ -317,6 +319,9 @@ void LaunchContactListObject(ContactListObject* self, PlacedObject* a, Vec02* v)
     }
 }
 
+// Applies the object's transform to the camera: directly when it has no attachments, otherwise the
+// position and orientation attachment's values (the origin or the identity where one is missing)
+// are combined with the object's own transform first. Skipped when the object has flag bit 32 set.
 void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
 {
     AttachedTransformFrame f;
@@ -421,6 +426,9 @@ void StepContactListObjectWithoutGravity(ContactListGlider* self, f32 dt)
 void LaunchContactListObject(ContactListObject* self);
 extern f32 g_gameTime;
 
+// Launches the object like LaunchContactListObject and sets the time at which it should reach the
+// anchor: speed6F0 seconds from now when that is positive, otherwise computed from the distance to
+// where the anchor will be and rate6F4 (at most four seconds).
 void LaunchTimedContactListObject(ContactListGlider* self, PlacedObject* target, Vec02* offset)
 {
     Mat02 rot;
@@ -468,6 +476,10 @@ void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const 
 // evaluates its float arguments there, and only their place in the list decides that.
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
 
+// Moves the glider-like contact list object one step of dt: until its end time it follows a Hermite
+// curve to the anchor object's position a short time ahead, afterwards it coasts. Once ready it
+// faces its velocity with up from gravity; then it steps its flagged children and calls method 12
+// unless hold is set.
 void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
 {
     Vec02 accel;
@@ -862,6 +874,8 @@ s32 AcceptMovieDecoderEvent(void)
     return 1;
 }
 
+// Builds the packet that copies a decoded picture of w by h pixels from main memory (addr) into GS
+// memory in 16x16 blocks of 0x40 quadwords each, then a flush register write.
 void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h)
 {
     s32 ny = w / 16;
@@ -894,6 +908,9 @@ void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h)
     DetachPacketBuffer(&f, 0, 0);
 }
 
+// Builds the packet that draws the decoded movie picture as one textured sprite across the screen
+// area (0x6C00,0x7900 to 0x9400,0x8700 in GS units), with texture coordinates up to the picture's
+// width a1 and height a2.
 void DrawMovieFrame(void* self, s32 a1, s32 a2)
 {
     PacketWriter buf;
@@ -947,6 +964,10 @@ void PlayQueuedMovies(MoviePlayer* self)
     }
 }
 
+// Plays one movie to the end or until skipped: opens its sector stream, starts the decoder and
+// steps frames (clock, pad, disc check) until it finishes. Skipping (buttons 0x91F or a fade
+// request) is allowed only for a movie watched before (its bit in the save's movie bits); plays
+// sound 0x7B if the stream cannot be opened. Holds screen owner 4.
 void PlayMovie(MoviePlayer* self, IdentityKey* key)
 {
     StreamReader loc;
@@ -986,6 +1007,9 @@ void PlayMovie(MoviePlayer* self, IdentityKey* key)
     DestroyStreamReader(&loc, 2);
 }
 
+// Prepares the player to play from reader v: buffers, the video ring (0x30000 bytes, uncached), the
+// MPEG decoder with its stream and decoder callbacks (fed until it stops asking), the upload and
+// draw packets, and the 256-entry CRC-32 table (0xEDB88320) used by AdvanceCodeChecksum.
 void InitMoviePlayback(MoviePlayer* self, void* v)
 {
     s32 i;
@@ -1026,6 +1050,9 @@ void InitMoviePlayback(MoviePlayer* self, void* v)
     } while (j < 256);
 }
 
+// Folds the next four bytes of the player's data (a range starting at the address stored in cur)
+// into a running CRC-32; when the whole range has been read and the result is not zero it sets the
+// checksum-failed flag.
 void AdvanceCodeChecksum(MoviePlayer* self)
 {
     if (self->remain > 0) {
@@ -1053,6 +1080,9 @@ void AdvanceCodeChecksum(MoviePlayer* self)
     }
 }
 
+// Plays one movie frame: lets the decoder consume until its thread step is done, decodes a picture,
+// and (unless the decoder says not to) uploads and draws it; then feeds the stream and updates the
+// code checksum until the thread step is 0, posts the frame semaphore and updates the movie stream.
 void StepMovieFrame(MoviePlayer* self)
 {
     MovieStream* s1;

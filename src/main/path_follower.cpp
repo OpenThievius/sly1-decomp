@@ -241,6 +241,9 @@ struct RingClamp {
     }
 };
 
+// When the player is in sub state 0x25, 0x26 (or 0x37 with a world bit set), queues a deferred
+// draw of the matching marker ring (DrawPlayerMarkerRing1 to 3), and tints the player's object
+// tree record with a colour pulsing with time while its pulse is active.
 void QueuePlayerMarkerRingDraw(Player* self, RingSource* a, void* b)
 {
     s32 state = self->subState;
@@ -342,6 +345,10 @@ s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out);
 typedef s32 (*MessageHandlerFn)(Collider* self, s32 a, OwnerMessage* msg);
 typedef void (*HitFn)(Collider* self, HitMessage* msg);
 
+// For the player standing on an object (f2438): tests whether the player's feet are inside its
+// plane tree (following any oscillator), sends the object a message when the player lands, and
+// calls the hit method of each recent hit object whose height range contains the contact point,
+// at most every 0.05 s per object.
 void NotifyPlayerGroundObject(Player* self)
 {
     u32 i;
@@ -426,6 +433,8 @@ void NotifyPlayerGroundObject(Player* self)
 }
 
 
+// Casts a short vertical segment at the player's position (shifted back through the collider's
+// oscillator motion) against the collider's plane tree; gives 1 and the hit point when it hits.
 s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out)
 {
     Vec02 moved;
@@ -454,6 +463,9 @@ s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out)
 struct AttachedSet;
 void AddColliderForce(void* a, void* b);
 
+// The player's reaction to touching an attached set: in sub states 6 and 0x2B (while falling) the
+// collider's own reaction, in 0x27 and 0x2F a damped force that follows the set's motion at the
+// point below the player, otherwise the collider's reaction.
 void ApplyPlayerAttachedSetContact(Player* self, Collider* other, f32 t)
 {
     switch (self->subState) {
@@ -488,6 +500,9 @@ void ApplyPlayerAttachedSetContact(Player* self, Collider* other, f32 t)
     ApplyColliderAttachedSetContact(self, (AttachedSet*)other, t);
 }
 
+// Puts the player's stand-in object into play: picks the first of the player's four attached
+// objects that is attached (or the fallback), calls the stand-in's methods with it, records the
+// start time and sets it running.
 void SwapInPlayerStandIn(Player* self)
 {
     StandIn* obj = (StandIn*)self->f1518;
@@ -537,6 +552,8 @@ static inline void StoreScaledQuadword(Vec02* dst, f32 k, u8* p)
     StoreQuadword((u128*)dst, ScaleQuadword(tv, u));
 }
 
+// Per-frame update of the stand-in object (a collider that takes the player's place): steers it
+// upright, and while running adds a spin, a forward push and gains that grow with its age.
 void StepStandIn(StandIn* self, f32 t)
 {
     Mat02 upright;
@@ -603,6 +620,9 @@ void DestroyOutputBuffer(OutputBuffer* a0, s32 a1)
     if (a1 & 1) FreeObjectMemory(a0);
 }
 
+// Appends size bytes to an output buffer: straight into its target memory when it has one (up to
+// its capacity), otherwise into its 0x400-byte staging area, flushing each time that fills. Gives
+// back the count taken.
 s32 AppendToOutputBuffer(OutputBuffer* self, void* src, s32 size)
 {
     s32 n = size;
@@ -640,6 +660,8 @@ s32 AppendToOutputBuffer(OutputBuffer* self, void* src, s32 size)
     return n;
 }
 
+// Writes the pending staged bytes out: to the debug print in 0x80-byte pieces when the buffer has
+// no file handle, otherwise to its file; does nothing when it writes to a target memory.
 void FlushOutputBuffer(OutputBuffer* self)
 {
     u8 buf[0x90];
@@ -687,6 +709,10 @@ void InitPathFollower(PathFollower* self)
     ResetPathFollower(self);
 }
 
+// Starts a path follower: links its objects, creates its state walker, starts three looping
+// sounds (engine, second engine, slide) with ids picked by the world's sound bank, finds its
+// partner object (id 7), for kind 1 resets two tally captions and tells the objects of mode
+// 0x426, notes the wheels' rest positions and resets it.
 void StartPathFollower(PathFollower* self)
 {
     BaseObject* buf[16];
@@ -806,6 +832,10 @@ static inline f32 NormalizeInto(Vec02& out, Vec02 v)
     return Vu0::ToFloat(len);
 }
 
+// Per-frame update of a path follower (a vehicle on four wheel slots that follows a curve): a
+// suspension-like push at each wheel in contact, a drive and grip value from the push, steering
+// torque toward the target heading, and acceleration toward a target speed (limited by grip and
+// the lap-based ramps); it also steers the body upright and, in the air, toward a level attitude.
 void StepPathFollower(PathFollower* self, f32 dt)
 {
     StepCollider(self, dt);
@@ -980,6 +1010,8 @@ void StepPathFollower(PathFollower* self, f32 dt)
     AddColliderTorque(self, &torque2);
 }
 
+// Gives x if it is outside all the spans; otherwise the end of a span that is nearest to x and
+// itself outside all of them (FLT_MAX when there is none).
 f32 FindNearestValueOutsideSpans(s32 count, ValueRange* spans, f32 x)
 {
     if (IsInsideAnyRange(count, spans, x) == 0) {
@@ -1012,6 +1044,9 @@ f32 FindNearestValueOutsideSpans(s32 count, ValueRange* spans, f32 x)
     return best;
 }
 
+// For followers the player does not control: eases the pace toward a target and, when the change
+// time has come, picks a new target from a curve of the lap and marker number (kept within the
+// follower's pace range, with a little random variation) and the next change time.
 void UpdatePathFollowerPace(PathFollower* self)
 {
     if (self != GetActiveSwitchedCollider()) {
@@ -1068,6 +1103,10 @@ s32 IsPathFollowerAhead(PathFollower* self, PathFollower* other)
 }
 
 
+// Chooses the side offset the follower aims for on its path: collects the lateral spans occupied
+// by the other followers on the same path that are not ahead (and the two outside the side
+// limit), takes a look-ahead point of the curve, and moves the target to the nearest free value
+// outside those spans. Gives the count of nearby followers in *nearby.
 void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
 {
     PathFollower* list[16];
@@ -1145,6 +1184,10 @@ void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
 }
 
 
+// Works out where the follower should head: a point a fixed distance ahead on the path, shifted
+// sideways by the side target, gives the target heading; the target speed is the pace times the
+// top speed, capped by a limit object and by the curvature at a probe ahead (sharper turns give a
+// lower speed).
 void ComputePathFollowerHeadingTarget(PathFollower* self)
 {
     Vec02 pos;

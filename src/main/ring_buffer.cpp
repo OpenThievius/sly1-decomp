@@ -31,6 +31,10 @@ void ResetRingBuffer(RingBuffer* ring)
     ring->space = ring->size;
 }
 
+// Reads up to n bytes (all of the free space where n is not positive or exceeds it) from the reader
+// port into the ring buffer, one contiguous run at a time up to the wrap point. Advances writePos
+// and the filled/written/space counters; gives back the bytes read. A non-positive n makes it do a
+// single pass.
 s32 FillRingBuffer(RingBuffer* self, s32 n, MemoryReader* port)
 {
     s32 total = 0;
@@ -59,6 +63,10 @@ s32 FillRingBuffer(RingBuffer* self, s32 n, MemoryReader* port)
     return total;
 }
 
+// Moves up to n bytes (all of the filled bytes where n is not positive or exceeds them) from the
+// ring buffer into the sink o, one contiguous run at a time up to the wrap point. Advances readPos
+// and updates the held/space counters by whether the sink reports itself idle; gives back the bytes
+// moved. A non-positive n makes it do a single pass.
 s32 DrainRingBuffer(RingBuffer* self, s32 n, StreamSink* o)
 {
     s32 total = 0;

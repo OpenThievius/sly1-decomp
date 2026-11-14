@@ -96,6 +96,10 @@ void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag);
 void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1);
 void HandleCountedColliderNotification(CountedCollider* self, s32 kind, ObjectMessage* msg);
 
+// Changes to mode and shows its label: ends what the old mode was doing (releases a held or touched
+// object, resets the player's state for modes 1 and 3) and sets the new mode when the player is the
+// active controlled object, then shows the label (the hint element with g_modeLabels[mode]) unless
+// it was the last one shown.
 void ShowModeLabel(s32 mode)
 {
     switch (g_currentMode) {
@@ -142,6 +146,10 @@ void ShowModeLabel(s32 mode);
 struct RampProfile;
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Per-frame handling of the player's mode selection (g_currentMode, -1 for none; modes 0 to 6):
+// drops the mode label when the mode's mask no longer fits the save, checks whether the current
+// mode can be left or changed, and on the pad flags 3 shows the label for the next mode
+// (ShowModeLabel) and on button 0x10 runs the current mode's action.
 void UpdateModeSelection(Player* self, PadRecord* pad)
 {
     s32 ok;
@@ -362,6 +370,9 @@ void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag)
 
 void UpdateCollider(Collider* self, f32 dt);
 
+// Per-frame update of a counted collider: updates it as a collider, then counts a touch by the
+// player when the player is more than 2000 units away, or by the first object in its contacts when
+// it has no parent, and frees the contact chain.
 void UpdateCountedCollider(CountedCollider* self, f32 dt)
 {
     UpdateCollider(self, dt);

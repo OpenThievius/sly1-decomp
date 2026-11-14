@@ -230,6 +230,9 @@ extern const char D_0024D278[8] = ".Kanji.";
 
 LINKER_REMNANT(func_001B5B48);
 
+// Maps an ASCII character (0x20 to 0x7E) to its 16-bit code in the font's character table:
+// digits, upper case and lower case letters by a range base, punctuation by a table lookup; any
+// other character gives 0.
 u16 MapCharToCode(u8 ch)
 {
     s32 base = 0;
@@ -355,6 +358,9 @@ LINKER_REMNANT(func_001B5F48);
 void ReadPropertyRecords(void* self, void* obj);
 BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
+// Reads a state graph from a stream: its states (a key and an extra link each, links resolved to
+// indexes), its edges (animation flag, the two states, flags and a weight), its property records,
+// and the animation object of each edge that has one (created, loaded and started).
 void LoadStateGraph(StateGraph* self, BufferedStream* s)
 {
     s32 i;
@@ -429,6 +435,9 @@ void SpawnInitialStateWalker(StateGraph* self)
     CreateStateWalker(self, (void*)r, -1, 0);
 }
 
+// Creates a walker on a state graph for an object, takes it from the world's pool and lists it,
+// optionally places it at the state with key a2 (notifying the change), picks its first edge
+// (StartNextStateWalkerEdge) and sends script event 0x11.
 StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3)
 {
     StateWalker* obj = (StateWalker*)PopZeroedFreeSlot(&self->world->pool1B88);
@@ -592,6 +601,10 @@ void TeleportStateWalker(StateWalker* self, s32 key)
 }
 
 
+// Moves a state walker toward its target state: a breadth-first search over the edges (flag 1
+// makes one two-way) gives the step count, then the path is walked choosing at random by weight
+// among the edges on shortest paths. Edges without an animation are taken at once, the first one
+// with an animation is started as the walker's animation. Index -1 when there is no path.
 void StartNextStateWalkerEdge(StateWalker* self)
 {
     StateGraph* g = self->owner;
@@ -881,6 +894,9 @@ void InitCompanionAgent(CompanionAgent* self)
     self->companionId = -1;
 }
 
+// Finds the objects the companion agent uses: its sixteen look-at entries by id, and, among the
+// objects of class 0x60, the one that matches its companion id (the others are started); then
+// attaches an aim pose source to it.
 void ResolveCompanionAgentObjects(CompanionAgent* self)
 {
     s32 best = -1;
@@ -1085,6 +1101,9 @@ void UpdateCompanionAgent(CompanionAgent* self, f32 dt)
     AimCompanionAgentPose(self);
 }
 
+// Aims the companion's pose source each frame: at its look target, or at itself, or at the
+// agent's own target depending on the agent's roster state, and sets the companion's scale-like
+// value (field 2F0) to 1.0, 1.3 or 0.1 for the state.
 void AimCompanionAgentPose(CompanionAgent *self) {
     T2195_790 *t;
     s32 r;

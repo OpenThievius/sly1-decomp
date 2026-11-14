@@ -83,6 +83,9 @@ struct OwnedAgent {
 extern s32 g_playerLinkedColliderLinks[10];
 
 
+// Start of a player-linked collider: starts the placed object, resolves its links, creates its
+// state walker from its state graph, then finds the agent it belongs to (class 7) and the objects
+// with ids 0x160 and 0x161... that it uses.
 void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
 {
     void* r2;
@@ -194,6 +197,9 @@ extern Camera* g_camera;
 extern u8 g_elementStack[];
 
 
+// Called when the collider is switched on (p non-zero) or off: on, pushes the caption box and a
+// camera controller (anchored on its object, using its own orientation if set) and sets the state
+// walker's target 0x359; off, pops the box and removes the controller.
 void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
 {
     HandleSwitchedColliderActivation(self, p);
@@ -254,6 +260,9 @@ void PopBackMemoryMark(void);
 struct FrameSource;
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Chooses which collider the player-linked object points at: when its pool has a choice, takes the
+// caption box's centre, unprojects it through the camera to a segment (distances 10 to 80000),
+// gathers the colliders along it and keeps the best one for the object.
 void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
 {
     if (HasObjectPoolChoice(self->pool) != 0) {
@@ -426,6 +435,9 @@ struct ArcPointStep {
 };
 
 
+// Initialises the arc element (its kinds 0x1A and the other one mirror each other): size 160 by
+// 125.4, the edge positions and the 57 points, each with an angular step of 1/57 and its start
+// state.
 void InitArcPoints(T217D_3F0* self, s32 kind)
 {
     self->w = 160.0f;
@@ -498,6 +510,8 @@ struct ConeVolume;
 struct U64P;
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
+// Creates the arc's sprite: a cone volume object (class 0x51) in mode 1 with the global cone volume
+// colour, angles and levels and the arc's own range.
 void CreateArcSprite(T217D_3F0* self)
 {
     SetupScreenElementText(self);
@@ -518,6 +532,9 @@ void GetArcVisibleRange(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32
 
 extern s32 D_00270458;
 
+// Writes the GIF vertices of the arc's outline: in display mode 4 a plain rectangle at the
+// element's shown position and size (with the y scale for the screen), otherwise the visible part
+// of the arc, between the arc's two edges, as a strip.
 void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
 {
     if (D_00270458 == 4) {
@@ -650,6 +667,9 @@ struct FadeClamp {
     }
 };
 
+// Writes the GIF vertex data for the arc's tick marks: the colour is blended from
+// g_arcTickColorFrom to g_arcTickColorTo by a fade value that moves over 0.2 s (fade 0 up, fade 1
+// down) since fadeSince, then each visible tick's vertices are added.
 void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf)
 {
     Rgba4 c;
@@ -764,6 +784,8 @@ struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
+// Changes the arc's phase: 0 plays sound 0x8C and resets the 57 points to full level with random
+// targets and fixed rates, 2 plays sound 0x8D, and the other phases set their own point levels.
 void SetArcPhase(T217D_3F0* self, s32 mode)
 {
     if (mode == self->phase) {
@@ -799,6 +821,9 @@ void SetArcPhase(T217D_3F0* self, s32 mode)
 
 extern s32 D_00270458;
 
+// Sets the arc's screen element mode; on leaving mode 0 it sets the element's offset and size by
+// the display mode (640 by 360 in mode 4, 160 by 125.4 otherwise), and with mode 2 it restarts the
+// phase 3.
 void SetArcMode(T217D_3F0* self, s32 value)
 {
     s32 old = self->mode;
@@ -825,6 +850,9 @@ extern s32 D_00270458;
 
 struct RampProfile;
 
+// Per-frame update of the arc screen element (a ring of 57 points): works out the mode and phase
+// from whether it has a current and a target object and the display mode, calls SetArcMode and
+// SetArcPhase, and steps each point's level and target by their rates.
 void UpdateArc(T217D_3F0* self)
 {
     UpdateScreenElementSlide(self);
@@ -1121,6 +1149,9 @@ void PopBackMemoryMark(void);
 
 void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* buf, s32 a);
 
+// Draw callback of the arc's outline: skips an empty visible range, resets the camera's zoom to the
+// current object's for the draw when the two differ (and restores it after), then builds the packet
+// from the outline vertices and sends it.
 void DrawArcOutlinePacket(ArcDrawRequest* request)
 {
     PacketWriter buf;
@@ -1176,6 +1207,9 @@ void DrawArcOutlinePacket(ArcDrawRequest* request)
     PopBackMemoryMark();
 }
 
+// Draw callback of the arc's ticks: clips the element's rectangle to the screen (640 by 492.8),
+// builds a GIF packet of the tick vertices in a temporary buffer and sends it. Nothing is drawn
+// when the visible range is empty.
 void DrawArcTickPacket(ArcDrawRequest* request)
 {
     PacketWriter buf;
@@ -1225,6 +1259,9 @@ void DrawArcTickPacket(ArcDrawRequest* request)
 
 void SetArcSpecialObject(T217D_3F0* self, void* a1);
 
+// Sets the object the arc points at. When the caption box is in state 4 the arc is retargeted at
+// once: with a target it goes to phase 1 and fades up, without one it goes to phase 3 and clears
+// its special object.
 void SetArcTarget(T217D_3F0* self, void* value)
 {
     if (value == self->target) return;

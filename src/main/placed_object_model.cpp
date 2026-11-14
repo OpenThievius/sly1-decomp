@@ -576,6 +576,9 @@ s32 g_litStripStmasks[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
 s32 g_litStripUnpackAddresses[5] = { -1, 0, 4, 8, 12 };
 s32 D_00262474 = 0x28;
 
+// Reads a placed object's model data from the stream: the id and link tables, then the parts (their
+// meshes, strips, morph targets and attachment entries) and the object's animators, allocating each
+// in front memory.
 void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
 {
     s32 i;
@@ -898,6 +901,8 @@ void WriteMorphTargetMscal(s32 mode, void* obj)
     }
 }
 
+// Builds the packet of a morph target: a header and a GIF tag, then the target's vectors for the
+// vertices it moves (through the weight entries), so the microprogram can blend them.
 void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n, Vec3* vecs, s32 extra,
                    void* extraData, WeightIndices* ents, Vec3* verts, void* data, PacketWriter* pkt)
 {
@@ -978,6 +983,9 @@ void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* h
     WriteVifMscal(pkt, D_00000ED8);
 }
 
+// Builds the VIF packets of an unlit strip mesh (the lit one is BuildLitStripMeshPacket): the
+// unpack header, then the vertex positions, colours and UVs, with weights and deltas when skinned,
+// per the mesh's kind.
 void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
                    Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs, s32 n, VertexRefs* recs,
                    WeightIndices* ents, Vec3* verts, Vec3* vnrms, f32* weights, PacketWriter* pkt,
@@ -1184,6 +1192,9 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     }
 }
 
+// Builds the VIF packets of a lit strip mesh: the unpack header, then the vertex positions,
+// normals, colours and UVs of the strip (with the skin weights and their deltas when the mesh is
+// skinned or morphs), marking the owner lit.
 void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 mode, StripHeader* hdr,
                    StripMesh* mesh, Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs,
                    s32 n, VertexRefs* recs, WeightIndices* ents, Vec3* verts, Vec3* vnrms,
@@ -1421,6 +1432,8 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     }
 }
 
+// Builds the VIF packets of a part that is not skinned: a STCYCL, an unpack of the part's data (its
+// range divided by 4) and a MSCAL that starts the lit batch microprogram.
 void BuildPartVifPackets(PartPacketContext* a, PartPacketSource* b, PartPackets* c)
 {
     u8 buf[0x30];
@@ -1445,6 +1458,8 @@ void BuildPartVifPackets(PartPacketContext* a, PartPacketSource* b, PartPackets*
     DetachPacketBuffer((PacketWriter*)buf, (u32*)&c->secondQwc, (u8**)&c->secondBuffer);
 }
 
+// Starts the object's attachments: each entry's handler is started and its DMA chain is built, then
+// the attachment nodes are started.
 void StartAttachments(AttachmentBlock* self, PlacedObject* ctx)
 {
     for (s32 i = 0; i < self->count0C; i++)
@@ -1472,6 +1487,8 @@ void StartAttachments(AttachmentBlock* self, PlacedObject* ctx)
     }
 }
 
+// Binds each attachment target to the object it names (found by key in the world): the target's
+// matrix is the product of the inverse of that object's frame and the owner's frame.
 void BindAttachmentTargets(AttachmentTargets* self, PlacedObject* ctx)
 {
     QuadMatrix a;
@@ -1490,6 +1507,8 @@ void BindAttachmentTargets(AttachmentTargets* self, PlacedObject* ctx)
     }
 }
 
+// Copies an object's attachment block from src (0x58 bytes), giving the copy its own tables and
+// records (duplicating the parts that have a handler or a second link) and links them to owner.
 void CopyAttachmentBlock(AttachmentCopy* self, PlacedObject* owner, void* src)
 {
     s32 i = 0;
@@ -1695,6 +1714,8 @@ void UpdateLinkConstraint(PlacedObject* self)
     if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) ApplyLinkConstraint((PlacedObject*)((PlacedObject*)(*(void**)(p+0x60))));
 }
 
+// Updates the frames of the object's attachments: from the inverse of the object's own and its
+// parent's rigid transform, each attachment gets its matrix in the object's space.
 void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par)
 {
     QuadMatrix a;
@@ -1745,6 +1766,9 @@ struct Self_1662A8 { u8 pad[0x40]; s32 nweights; };
 
 void AddDmaRefTag(Buf_1662A8* b, s32 x, s32 y);
 
+// Builds, for an attachment entry that is not skinned, the DMA chain the model draws from: the VIF
+// packets of each pass copied into a buffer and chained with the entry's own tags (the result is
+// kept in out).
 void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ctx)
 {
     Self_1662A8* self = (Self_1662A8*)selfArg;
@@ -2038,6 +2062,10 @@ static inline u64 Rgbaq_166690(u8 a, u8 r, u8 g, u8 b)
 {
     return (u64)r | ((u64)g << 8) | ((u64)b << 16) | ((u64)a << 24) | (1ULL << 32);
 }
+// Draw callback of one model part (queued by QueuePlacedObjectModelParts): collects the lights that
+// reach the part's sphere (or reuses the cached ones while the lighting has not changed), then
+// builds and sends the part's vertex batches, lit or unlit, skinned or not, with the fades and
+// colours of its request.
 void DrawModelPart(Frame_166690* self)
 {
     Batch_166690 b;

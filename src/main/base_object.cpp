@@ -335,6 +335,9 @@ void CloneObject(BaseObject* self, BaseObject* src)
     self->desc->m09(self, src);
 }
 
+// Copies another object's data into this one: its keyed list and script scope are duplicated (and
+// registered with the mark stacks), the bytes after the base object header are copied, the id is
+// taken over (moving the object to the id's hash slot) and so is the alias.
 void CopyObjectData(BaseObject* self, BaseObject* src)
 {
     if (src->keyedList != 0) {
@@ -467,6 +470,9 @@ void GetObjectAliasId(BaseObject* self, s32* out)
     *out = GetAliasId(self);
 }
 
+// Runs the script handler stored under key in the object's script scope (nothing if there is
+// none): makes a new scope under the handler's own, defines the handler's self name as this
+// object and its parameters from list, and evaluates its body. Queued by TriggerScriptEvent.
 void RunScriptEventHandler(BaseObject* self, s32 key, R11B008Node* list)
 {
     ScriptValue q0;
@@ -575,6 +581,9 @@ s32 SuppressScriptEvent(BaseObject* self, s32 key, s32 flag, void* out)
     return 0;
 }
 
+// Sends a script event to the object: when its scope has a handler under idx (and
+// SuppressScriptEvent allows), packs the flag arguments from out into a script list and queues
+// RunScriptEventHandler on the world to run it later. Does nothing when there is no handler.
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out)
 {
     ScriptValue r;
@@ -767,6 +776,8 @@ void FitLineThroughPoints(f32 a, f32 b, f32 c, f32 d, f32* out0, f32* out1)
     }
 }
 
+// Fits y = *out + *scale / x through the two points (x, y) and (z, w); when the points coincide
+// or an x is nearly 0 it gives a constant (scale 0, out = y).
 void FitReciprocalThroughPoints(f32* out, f32* scale, f32 x, f32 y, f32 z, f32 w)
 {
     const f32 eps = 0.0001f;
@@ -809,6 +820,9 @@ extern u8 g_coneProgramMode0[];
 extern u8 g_coneProgramMode1[];
 extern u8 g_coneProgramMode23[];
 
+// Rebuilds the cone volume's vertex-unit packet after a change: picks its shape (0, 1 or 2 by
+// which angles and levels are non-zero), writes its colour, the lines fitted through its angle
+// and level samples, the mode's direction or range data and starts the mode's VU program.
 void RefreshConeVolumeShape(ConeVolume* self)
 {
     PacketWriter w;
@@ -1004,6 +1018,8 @@ void SetConeVolumeVector340(ConeVolume* self, Quad16* src)
     UpdateConeVolumeBounds(self);
 }
 
+// Recomputes the cone volume's constants from its outer and inner angles (limited to 175 and to
+// the outer; the half-angle tangents, the inner-to-outer ratio and its square root).
 void UpdateConeVolumeTangents(ConeVolume* self)
 {
     f32 a = ClampHelper::Of(self->outerAngle, 0.0f, 175.0f);
@@ -1023,6 +1039,9 @@ struct ValueListObject;
 struct Bits128;
 void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
 
+// Updates the mask of which value leaves the cone volume touches: all of them in mode 0, those
+// within rangeMax of the volume in mode 1, and in modes 2 and 3 those within the sphere that
+// encloses the cone (centre half way along the axis).
 void UpdateConeVolumeBounds(ConeVolume* self)
 {
     if (self->value == 0) {

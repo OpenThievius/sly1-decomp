@@ -349,6 +349,9 @@ s32 g_bufferedBlockKey = 0;
 s32 g_bufferedBlockStart = 0;
 
 
+// For each contact of the follower with another body that it has not pushed yet, gives that body a
+// push (the g_pushVelocity turned into the follower's frame plus half its velocity, and a spin from
+// it) and records it as pushed.
 void ProcessPathFollowerContacts(PathFollower* self)
 {
     Vec02 pos;
@@ -386,6 +389,9 @@ void ProcessPathFollowerContacts(PathFollower* self)
     self->contacts = 0;
 }
 
+// Per-frame update of the path follower: updates it as a switched collider, then, in mode 1, its
+// pace, its movement along the path and heading, and in all modes its sound, steering, wheel
+// particles, entry advance and contacts; notes when it is upright.
 void UpdatePathFollower(PathFollower* self, f32 t)
 {
     s32 local = 0;
@@ -515,6 +521,9 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
     }
 }
 
+// Shows or hides the follower's on-screen captions (two count captions and two tally captions)
+// according to its kind: kind 0 shows the counts while a state walker is at a key in 0x42F..0x430
+// and menus and fades are clear, kind 1 shows the tally when menus and fades are clear.
 void UpdatePathFollowerScreenElements(PathFollower* self)
 {
     s32 a = 0;
@@ -571,6 +580,10 @@ static inline s32 IsLowerAlong(const Vec02& a, const Vec02& b, const Vec02& axis
     return Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(a), Vu0::Q(axis))) < Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(b), Vu0::Q(axis)));
 }
 
+// Collision of the path follower's four wheels with another collider that is flagged as ground
+// (flag bit 40 or its class flag 0x10): for each wheel it sweeps a segment from the wheel's last
+// position to its new one, lowered by the wheel radius (front pair and rear pair differ), in the
+// follower's frame and looks for a hit.
 void CollidePathFollowerWithObject(PathFollower* self, Collider* other, s32 a2, void* a3, void* a4)
 {
     if ((other->flags538 & ((u64)0x8000 << 40)) != 0 || (((u32*)other->desc)[2] & 0x10) != 0) {
@@ -654,6 +667,10 @@ static inline void MulMatInto(Mat02* out, const Mat02& a, const Mat02& b)
     out->r[2] = r.r[2];
 }
 
+// Updates the follower's attachment frames, then turns each of its four wheels: advances its spin
+// angle, places it on its contact point (raised by the wheel radius) when it touched the ground
+// this frame, or eases it toward the object's position, and builds the wheel's matrix from the
+// steering tilt (front pair only) and the spin.
 void UpdatePathFollowerAttachmentFrames(PathFollower* self, ParentFrame* frame)
 {
     u32 i = 0;
@@ -693,6 +710,8 @@ struct DrawScale {
 };
 
 
+// Draws the follower as a collider, then its body object (turned upright, scaled by the largest
+// axis lengths, placed at its own offset) and, if they exist, the front and rear beams.
 void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
 {
     DrawCollider(self, a, b);
@@ -756,6 +775,8 @@ void StartPathFollowerEffect(PathFollower* self, s32 a, PlacedObject* b)
     }
 }
 
+// Finds where the follower is on its path: the nearest path time and point, the distance along the
+// path and the signed side offset from it (the dot of the offset with the side direction).
 void FindPathFollowerPathPosition(PathFollower* self)
 {
     if (self->path != 0) {
@@ -822,6 +843,8 @@ void HandlePathFollowerNotification(PathFollower* self, s32 code, CountedNotice*
     }
 }
 
+// Gives the follower a path curve: finds its start time and position on it, takes the path length
+// and the path length position of every marker that is an item (kind 0).
 void SetPathFollowerPath(PathFollower* self, PathCurveObject* arg)
 {
     self->path = arg;
@@ -899,6 +922,8 @@ void SetPathFollowerMode(PathFollower* self, s32 mode)
     }
 }
 
+// Puts the follower back at the start: lap 1, the first marker, the timers at -10 (long ago) and
+// the pace blend recomputed from the current entry's time (dt).
 void ResetPathFollower(PathFollower* self)
 {
     self->lap = 1;
@@ -952,6 +977,8 @@ void InitWorldHashLists(u8* self)
     }
 }
 
+// Sets up a world's memory: the two big buffers, the contact tables and the many fixed-size slot
+// pools (each by its slot size and count), then the world's lists and default values.
 void InitWorldPools(World* self)
 {
     f32 x;
@@ -1027,6 +1054,9 @@ void InitWorldPools(World* self)
     self->flagBits = 0xF03FFFFF;
 }
 
+// Tears down the world's global state before another one loads: switched colliders, the player and
+// pad routing, the camera, object lists, sounds, screen resources, the script pools and front
+// memory, and clears a range of globals.
 void ResetWorldSubsystems(World* a0)
 {
     if (a0 != 0) {
@@ -1058,6 +1088,8 @@ void ResetWorldSubsystems(World* a0)
     }
 }
 
+// Reads the header of a block from a buffered stream (two ints, a size and a key, in the stream's
+// mode) and allocates front memory of that size for the block, adjusting the bytes left to read.
 void ReadBufferedBlockHeader(s32 a0, BufferedStream* self)
 {
     s32 s2 = a0;
@@ -1179,6 +1211,8 @@ QueuedCall* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d)
     self->queuedCallTail = e;
 }
 
+// Removes the queued calls that match: mask bits 1, 2, 4 and 8 say which of the call's code, arg
+// and two keys must equal the arguments given.
 void RemoveQueuedCalls(World* self, u32 mask, void* code, void* arg, s32 k2, s32 k3)
 {
     QueuedCall* prev = 0;
@@ -1242,6 +1276,9 @@ void RunQueuedCalls(World* self)
     }
 }
 
+// Walks the list of delayed script calls kept in a script variable of the world: each entry's time
+// is reduced by the elapsed time limit, and the ones that have run out are evaluated (their
+// expression) and dropped from the list, which is stored back.
 void RunDueDelayedScriptCalls(World* self, f32 limit)
 {
     ScriptValue a;
@@ -1367,6 +1404,9 @@ struct ColliderListWalker {
 };
 void* AllocateBackMemory(s32 size);
 
+// Collects the world's colliders whose bounding boxes touch the box between a and b, apart from
+// skip and those the filter callback refuses, into a back-memory array (*out), and gives their
+// count. Gives none when skip is flagged as not colliding.
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out)
 {
     s32 size = world->count34 * 4;
@@ -1417,6 +1457,9 @@ done:
     *count = cursor - *out;
 }
 
+// Collects the world's colliders whose bounding sphere touches the sphere (center, radius), apart
+// from skip and those the filter callback refuses, into a back-memory array (*out), and gives their
+// count.
 void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out)
 {
     s32 size = world->count34 * 4;
@@ -1512,6 +1555,9 @@ Contacts03* TakeContactTable(World* owner, Collider* self)
     return n;
 }
 
+// Frees a body's contact table: for each row it unlinks the matching row of the other body, frees
+// the pooled contact chain (clearing the root tries of both bodies unless flag bit 55 is set) and
+// returns both rows to the pool.
 void ReleaseContactTable(World* owner, Contacts03* handle)
 {
     ContactRow03* e = handle->head;
@@ -1556,6 +1602,9 @@ void ReleaseContactTable(World* owner, Contacts03* handle)
     PushContactTable(handle, &owner->freeTables);
 }
 
+// Creates the world's default cone volume objects (class 0x51): one for each bit of
+// g_coneVolumeMask, with a colour, three cone angles and levels and a direction taken from the
+// g_coneVolume globals; the second has mode 1.
 void CreateConeVolumes(World* self)
 {
     ConeVolume* p;
@@ -1625,6 +1674,8 @@ void SkipBufferedBlocks(BufferedStream* self)
     }
 }
 
+// After a world loads, makes extra copies of the first object of two classes (0x58 x 0x23 and 0x56
+// x 5) from the world's notifier list, each started in mode 2.
 void SpawnListedObjectCopies(World* self)
 {
     ClassCopyCount pairs[2] = { { 0x58, 0x23 }, { 0x56, 0x5 } };
@@ -1673,6 +1724,10 @@ void ResumeElementStackState(void* stack);
 void PlayStagedBank(void* self);
 void StartWorldSoundEntries(World* self);
 
+// Loads a level's world from the stream: resets the scatter controller and script pools, creates
+// the camera and the pools of 10 and 0x28 helper objects, then reads the script table, properties,
+// credits text, screen resources and the placed objects. After that it starts the sound bank, makes
+// the cone volumes if none were loaded, starts every object and the world's sound entries.
 void LoadWorld(World* self, BufferedStream* s)
 {
     Rgba4 color;
@@ -1752,6 +1807,8 @@ void LoadWorld(World* self, BufferedStream* s)
     StartWorldSoundEntries(self);
 }
 
+// Clips the segment of two 4-component points against the six planes of the clip volume, moving an
+// end that is outside onto the plane. Returns 0 when the whole segment is outside, 1 otherwise.
 s32 ClipSegmentToPlanes(ClipPoint* pts)
 {
     u32 i;
@@ -1786,6 +1843,9 @@ s32 ClipSegmentToPlanes(ClipPoint* pts)
     return 1;
 }
 
+// Draws a line between two points: both are transformed by the object's matrix at +0x100 (w set to
+// 1), clipped by ClipSegmentToPlanes, and, if any of it is left, projected and drawn in the colour
+// c.
 void DrawProjectedLine(ClipPoint* a, ClipPoint* b, PackedColor* c, u8* obj, s32 k)
 {
     SegmentFrame L;

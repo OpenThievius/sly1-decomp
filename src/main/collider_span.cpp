@@ -16,6 +16,9 @@ struct SpanQuery;
 struct SpanSet;
 
 
+// Finds which of the colliders in list the segment a1 to a2 meets first and gives it, with the span
+// in *out when out is given; null when none. With flags bit 0 a segment that starts inside an
+// object counts its second span (where it leaves).
 Collider* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out)
 {
     f32 bestKey = 3.4028235e+38f;
@@ -40,6 +43,9 @@ Collider* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Coll
 }
 
 
+// Collects the spans of the segment a0 to a1 against every collider of the list that is not flagged
+// to be skipped (flags538 bits 42 and 43), merging the overlapping ones, at most a4 in all, into
+// a5. Gives how many there are.
 s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4, ColliderSpan* a5)
 {
     s32 result = 0;
@@ -141,6 +147,9 @@ s32 FindSegmentSphereSpan(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, C
 // The cut roots: the constant in the first register of max.s and min.s, the result in its register.
 static inline f32 MaxF(f32 a, f32 b) { return a >? b; }
 static inline f32 MinF(f32 a, f32 b) { return b <? a; }
+// Intersects the segment a to b with the sphere of the given radius at p: solves the quadratic for
+// the two times the line meets the sphere, clips them to the segment (0 to 1) and gives one span
+// (kind 1) with the entry and exit points and the outward normals, or 0 for a miss.
 s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out)
 {
     if (count <= 0) {
@@ -216,6 +225,10 @@ static inline u128 NormalizeOfCopy(u128 v, u128 vc, u128 fallback)
     return Vu0::DivX(v, len);
 }
 
+// Intersects the segment a to b with the capsule of radius around the segment c to d. Finds the
+// closest approach of the two lines, the span of the segment inside the capsule (time along a-b,
+// parameter along c-d) clipped to both segments, and the entry and exit points with their surface
+// normals. Gives 1 and writes one span into out (kind 2), or 0 for a miss.
 s32 IntersectSegmentWithCapsule(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 radius, s32 count, ColliderSpan* out)
 {
     Vec02 cd;
@@ -356,6 +369,9 @@ SpanEvent* AllocateBackMemory(s32 size);
 void PopBackMemoryMark(void);
 void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
 
+// Merges overlapping spans of the array in place: sorts the endpoints of all spans by time and
+// keeps one span for each run in which some span is open (each takes the first start's and the last
+// end's time, point and normal, kind 4). Gives the number left.
 s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans)
 {
     SpanEvent* mem;
@@ -447,6 +463,10 @@ struct PlaneTreeNode;
 struct PlaneTreeOutput;
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// Collects the spans where the segment p to q, thickened by radius, hits a collision tree: with the
+// segment wholly inside the tree it is one span; otherwise the tree's spans plus those of the edge
+// capsules (IntersectSegmentWithCapsule) of the tree's marked nodes, merged
+// (MergeOverlappingSpans). Gives how many were written, at most max.
 s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, ColliderSpan* out, f32 radius)
 {
     Vec02 mid;

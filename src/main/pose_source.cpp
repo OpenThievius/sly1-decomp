@@ -254,6 +254,10 @@ void InitObjectBuiltinTable(void)
     FillObjectPropertyTable();
 }
 
+// Creates an object of the class with this index in the class table: a zeroed record of the class's
+// size, with its descriptor, id, parent, world and script scope set; it is added to the world's
+// hash list by id and to the list of its class, and the class's method 0 runs. For class 0x6C the
+// object is its own world.
 BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4)
 {
     s32 off = index << 2;
@@ -277,6 +281,10 @@ BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a
     return r;
 }
 
+// Reads one property value from the stream by the descriptor and applies it to obj: with flag 0x400
+// as a script call (arguments read into script values and passed to the setter), with 0x80 by
+// storing it at the descriptor's offset, otherwise through a setter method. The types are byte,
+// int, float, vectors of two to four floats, a rotation given as three floats and a 16-bit id.
 void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r)
 {
     PropertyValues sc;
@@ -514,6 +522,9 @@ s32 MapKeyToSlotIndex(s32 value)
     return ((u32)30 < (u32)r) ? -1 : r;
 }
 
+// Reads a count and then, for each, a class index, an id and a script id from the stream, creates
+// the object with CreateTypedRecord, lets it read its own data, and, when the id maps to one of the
+// world's slots, stores it there and starts it.
 void ReadSlotObjects(World* self, void* a1, void* a2)
 {
     s32 n = ReadBufferedS16((BufferedStream*)a2);
@@ -662,6 +673,8 @@ void GetNoWeightCurveTimes(WeightCurve* unused, s32* a, s32* b)
         *b = 0;
 }
 
+// Reads the keys of a Hermite weight curve from the stream: count, then per key the time (in 1/60
+// s, stored in seconds), the value, two bytes and two slope values.
 void ReadTangentWeightCurve(TangentWeightCurve* self, Stream83* src)
 {
     self->count = ReadBufferedU16((BufferedStream*)src);
@@ -708,6 +721,9 @@ void GetTangentWeightCurveTimes(TangentWeightCurve* src, s32* outCount, f32** ou
     }
 }
 
+// Reads the keys of a Bezier weight curve from the stream: count, then per key the time (stored in
+// 1/60 s, converted to seconds), the value, two bytes, a slope and the two control points as
+// offsets from the value (before and after).
 void ReadControlPointWeightCurve(ControlPointWeightCurve* self, Stream83* src)
 {
     self->count = ReadBufferedU16((BufferedStream*)src);
@@ -762,6 +778,9 @@ void GetControlPointWeightCurveTimes(ControlPointWeightCurve* self, s32* outCoun
     }
 }
 
+// Evaluates a piecewise linear weight curve at key: the value to outF and the slope (the difference
+// to the next key's value times scale over the segment's length) to outI; either may be null. A
+// segment of almost no length gives its first key's value and slope 0.
 void EvaluateLinearWeightCurve(LinearWeightCurve* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
@@ -809,6 +828,8 @@ void GetLinearWeightCurveTimes(LinearWeightCurve* self, s32* count, f32** out)
     }
 }
 
+// Evaluates the three axis curves at key: the values start from base (and the slopes from 0), and
+// each axis that has a curve overwrites its own component; outputs may be null.
 void EvaluateAxisCurves(WeightCurve** axis, PlacedObject* other, s32 flags, Vec02* base, f32* outValues, f32* outSlopes, f32 key, f32 scale)
 {
     if (outValues)
@@ -843,6 +864,9 @@ void ReadAxisCurves(WeightCurve** out, Vec02* dst, Stream83* src)
     } while (i >= 0);
 }
 
+// Collects the key times of up to three curves (one per axis) into one sorted array without
+// duplicates, allocated from back memory, and gives its length in outCount (0 and a null array if
+// there are none).
 void GatherAxisCurveTimes(WeightCurve** objs, s32* outCount, f32** outArr)
 {
     s32 counts[3];
@@ -888,6 +912,8 @@ void EvaluateVectorKeyCurve(s32 count, VectorKey* keys, s32 flags, f32* values, 
     EvaluateHermiteVectorSegment(s.delta, (const Vec02*)(p + 0x10), (const Vec02*)(p + 0x30), (const Vec02*)(p + 0x50), (const Vec02*)(p + 0x60), s.diff, scale, (Vec02*)values, (Vec02*)slopes, 0);
 }
 
+// Reads a list of vector keys from the stream: a count, then per key the time (in 1/60 s, stored in
+// seconds) and three vectors. Gives the count and the allocated array.
 void ReadVectorKeys(s32* outCount, VectorKey** outItems, Stream83* src)
 {
     s32 count = ReadBufferedU16((BufferedStream*)src);
@@ -938,6 +964,9 @@ void EvaluateAxisPositionCurve(AxisPositionCurve* self, PlacedObject* other, s32
         ((VectorCurveToldFn)other->desc02()->m28)(other, e, f);
 }
 
+// Reads the three axis curves of a position curve from the stream and works out whether it is
+// closed: the curve is marked closed when its first and last key positions are less than 1 unit
+// apart (or it has no keys).
 void ReadAxisPositionCurve(AxisPositionCurve* self, Stream83* arg)
 {
     Vec02 v[2];
@@ -1004,6 +1033,9 @@ void* GetAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 fla
     EvaluateAxisCurves(self->axis, other, flags, &self->base, values, slopes, key, scale);
 }
 
+// Reads the three axis curves of a rotation curve from the stream and works out whether it is
+// closed: the rotations at its first and last key are compared and the curve is marked closed when
+// they differ by less than 0.01 in angle (or it has no keys).
 void ReadAxisRotationCurve(AxisRotationCurve* self, Stream83* arg)
 {
     AxisCurveClosure loc;
@@ -1125,6 +1157,10 @@ void GetKeyedScaleCurveKeyTimes(KeyedScaleCurve* self, s32* outCount, f32** outT
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
 
+// Evaluates a weighted blend of position curves at time dt (through the cyclic ranges of its
+// sequence if it has one): out0 gets the weighted sum of the positions and out1 of the velocities
+// (a missing target counts as the object's own value), either may be null; then the owner's method
+// 0x28 sees them.
 void EvaluateBlendedPositionCurve(PositionCurveKind2* o, PlacedObject* cam, s32 c, Vec02* out0, Vec02* out1, f32 dt, f32 scale)
 {
     Vec02 x0;
@@ -1213,6 +1249,10 @@ static inline void MulRotationRowsOnce(Mat02* out, const Mat02& a, const Mat02& 
 }
 
 
+// Evaluates a weighted blend of rotation curves at time dt (through its sequence's cyclic ranges if
+// any): a rotation matrix to out0 and an angular velocity to out1 (either may be null). Targets of
+// weight 0 are skipped, a missing target uses the object's own value; rotations are averaged as
+// angles or, with multiplyRotations, composed by weighted axis-angle.
 void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 c, Mat02* out0, Vec02* out1, f32 dt, f32 scale)
 {
     Vec02 x0;
@@ -1291,6 +1331,9 @@ void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 
         ((KeyedRotationToldFn)cam->desc02()->m29)(cam, out0, out1);
 }
 
+// Evaluates a weighted blend of angle curves at time dt: out0 gets the blended angle (each term
+// added along the shortest way round, using the object's own link angle for a missing target) and
+// out1 the weighted sum of the slopes; either may be null.
 void EvaluateAngleBlendCurve(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
 {
     f32 sum1 = 0.0f;
@@ -1365,6 +1408,9 @@ void EvaluateAngleBlendCurve(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c,
         *out1 = sum1;
 }
 
+// Evaluates a weighted blend of scalar curves at time dt: out0 gets the weighted sum of the values
+// (a missing target uses the object's own value at the curve's index) and out1 the weighted sum of
+// the slopes; either may be null.
 void EvaluateValueBlendCurve(ValueBlendWeightCurve* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
 {
     f32 sum1 = 0.0f;
@@ -1569,6 +1615,10 @@ void InitPoseSource(Attachment* self, PlacedObject* value)
 	self->mode0 = m;
 }
 
+// Removes the pose source from its owner's list and lets the owner's method 0x2B update; if it was
+// the position (or orientation) attachment and the flags say so (1 and 2), the owner's velocity (or
+// spin) is set to the constrained current one for a collider, or to zero for another object. The
+// slot goes back to the world's pool.
 void ReleasePoseSource(Attachment* self, s32 flags)
 {
     PlacedObject* m = self->owner;
@@ -1658,6 +1708,9 @@ void ChoosePoseSourceModes(Attachment* obj)
     }
 }
 
+// Sets the owner's position and velocity (when this is its position attachment) and its rotation
+// and spin (when it is its orientation attachment) from the pose source at once, if flag is set or
+// the mode is 2.
 void ApplyPoseSource(Attachment* self, s32 flag)
 {
     PoseLocals loc;
@@ -1680,6 +1733,10 @@ void ApplyPoseSource(Attachment* self, s32 flag)
     }
 }
 
+// Computes in out the acceleration that pulls the owner's position toward the target position a and
+// its velocity toward b: a spring term along the offset (quadratic coefficients from p20C, as
+// k2*len + k1 + k0/len) and a damping term on the velocity difference (coefficients of p210,
+// limited by 1 over the frame time).
 void ComputePositionSpringAcceleration(PlacedObject* self, f32 dt, Vec02* a, Vec02* b, Vec02* out)
 {
     Vec02 force = *(Vec02*)D_00248D30;
@@ -1718,6 +1775,10 @@ f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
 extern f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 extern const Vec02 g_unitXVector;
 
+// Moves the owner's position toward what the pose source gives (position A and velocity B), once
+// per frame, by mode: 2 and 7 copy it; 1 integrates a spring acceleration; 3, 6 and 9 move toward
+// it with a speed limited by a ramp (6 must also arrive by an end time) and drop to mode 7 once
+// there; 4 follows a Hermite segment that ends exactly at the end time.
 void ApplyPoseSourcePosition(T2195_7C0* self)
 {
     PlacedObject* owner = self->owner;
@@ -1820,6 +1881,10 @@ void ApplyPoseSourcePosition(T2195_7C0* self)
     }
 }
 
+// Computes in out the angular acceleration that pulls the owner's rotation toward the target
+// rotation and spin: a spring term along the axis of the remaining rotation (a quadratic in the
+// angle with the coefficients of p214) and a damping term toward the target's spin (coefficients of
+// p218, limited by 1 over the frame time).
 void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat02* rot, Vec02* spin, Vec02* out)
 {
     Vec02 force = *(Vec02*)D_00248D30;
@@ -1856,6 +1921,10 @@ void OrthonormalizeMatrix(Mat02* m);
 void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Mat02* b, const Vec02* wb, Mat02* out, Vec02* outW,
                             s32 unused6);
 
+// Moves the owner's rotation toward the pose source's orientation A and spin B (and a link angle
+// value) once per frame, by mode: 2 and 7 copy; 1 integrates a spring acceleration; 3, 6 and 9 turn
+// at a speed limited by a ramp (6 must arrive by an end time) and drop to 7 when there; 4 is a
+// timed blend ending exactly at the end time.
 void ApplyPoseSourceRotation(Attachment* self)
 {
     PlacedObject* owner = self->owner;
@@ -2034,6 +2103,9 @@ void GetPlacedObjectPositionAt(PlacedObject* self, f32 t, Vec02* pos, Vec02* vec
     }
 }
 
+// Gives the placed object's rotation and spin at t seconds from now: now if t is zero, from its
+// orientation attachment if it has one, otherwise by turning the current rotation by its spin times
+// t.
 void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat02* rot, Vec02* vec)
 {
     Vec02 d;
@@ -2215,6 +2287,9 @@ void GetIdentityPosePosition(T2195_588* self, f32 t, Vec02* pos, Vec02* vec)
     Vu0::Q(*vec) = Vu0::Add(Vu0::Q(*vec), Vu0::Q(self->vec));
 }
 
+// Gives the rotation and spin of a pose source that stands on another one: the next attachment of
+// the chain with a defined orientation (or the owner's own) is asked, the rotation is composed with
+// this source's rotation, and the spin is rotated by it and offset by v70.
 void GetIdentityPoseRotation(T2195_588* self, f32 t, Mat02* rot, Vec02* vec)
 {
     Attachment* p = self;
@@ -2247,6 +2322,9 @@ void GetNextPoseSourceValue(Attachment* self, f32* a1, f32* a2)
     }
 }
 
+// Gives the matrix of a pose source that stands on another one: the next attachment of the chain
+// with a defined matrix (or the identity) is asked and the result is composed with this source's
+// own matrix.
 void GetIdentityPoseMatrix(T2195_588* self, Mat02* out)
 {
     Mat02 m;
@@ -2277,6 +2355,9 @@ void InitAimPoseSource(T2195_600* self, PlacedObject* a1)
 }
 
 
+// Gives a rotation that points the owner along its velocity with up taken against gravity (the
+// collider's or the world's), tilted toward the change in velocity of the position source over f20
+// seconds, scaled by f1C; the angular velocity is zero.
 void GetAimPoseRotation(T2195_600* self, Mat02* out, Vec02* vec)
 {
     Vec02 dir;
@@ -2319,6 +2400,9 @@ void CopyTrackPoseSource(T2195_7C0* self, Attachment* a1)
     self->player = saved;
 }
 
+// Gives the position and velocity of the pose source's animation track at the player's time (moved
+// ahead by f seconds, with the loop mode applied, and further ahead while in mode 4 until its end
+// time); if the track has no position curve it gives the owner's own.
 void GetTrackPosition(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
 {
     AnimationPlayer* track = self->player;
@@ -2346,6 +2430,9 @@ void GetTrackPosition(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
     GetOwnerPosition(self, a1, a2);
 }
 
+// Gives the rotation and angular velocity of the pose source's animation track at the player's time
+// (moved ahead by f seconds, with the loop mode applied, and further ahead while in mode 4 until
+// its end time); if the track has no rotation curve it gives the owner's own.
 void GetTrackRotation(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
 {
     PlacedObject* p4 = self->owner;

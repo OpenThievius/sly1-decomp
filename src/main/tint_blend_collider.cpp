@@ -98,6 +98,10 @@ void InitRedirectObject(RedirectObject* self)
 }
 
 
+// The start method of a redirect object: starts the placed object and, unless its parent is a
+// redirect object (the head of a chain starts the chain), counts the chain of redirect children,
+// allocates the 0x40-byte step of each link (its object, position, length and the point below it)
+// and the extra last step; with fewer than two links and f310 clear the chain is dropped.
 void StartRedirectObject(RedirectObject* self)
 {
     PlacedObject* p;
@@ -195,6 +199,10 @@ static inline Mat02 MulRotationValue2(const Mat02& a, const Mat02& b) return r
     *(u128*)&r.r[2] = Vu0::Q(z) = Vu0::RotateRows(a0, a1, a2, Vu0::Q(b.r[2]));
 }
 
+// Steps the chain of redirect objects (once per frame): each link after the first is a point with a
+// velocity and a fixed length. Gravity is added, then in sub-steps each link is bent back to within
+// maxBend of the one before it, damped by drag, pulled by the bend stiffness, moved and set back to
+// its length; at the end each link's object is turned along its segment.
 void SimulateRedirectChain(RedirectObject* self)
 {
     typedef Vu0::Vec Vec;
@@ -361,6 +369,9 @@ typedef void (*AttachedEffectFn)(void* self);
 
 
 
+// The start method of the tint collider: starts the turning collider, resolves its nine links and
+// its followed mesh, attaches matrix attachments to its two linked objects, makes its state walker
+// and enters state 0, or state 1 when f73C or the player is missing.
 void StartTintBlendCollider(TintBlendCollider* self)
 {
     TintBlendCollider* s = self;
@@ -395,6 +406,10 @@ typedef void (*OwnerMessageFn)(void* self, void* a1);
 extern f32 g_gameClock[];
 
 
+// The collider's per-frame update: the turning collider's, resets its orientation when an
+// attachment drives it, sends the contacts it holds to their claiming owners (method 0x47, then
+// slot 80) and frees them, sets the springs of its attached object from a curve of the time since
+// the tint began, and ends the tint two seconds after the state left 2.
 void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
 {
     OwnerMessage loc;
@@ -616,6 +631,10 @@ struct UnitClamp {
 
 extern "C" f32 Cosine(f32 x);
 
+// Draws the collider with its tint colour set: while tinted, the base colour is blended toward a
+// fixed colour by the product of two curves, one of the time since the tint faded, the other of a
+// cosine that pulses 10 times a second from the time the tint started; untinted it is the base
+// colour. The colour is set on the object's tree record and the placed object's transform applied.
 void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
 {
     Rgba4 out;
@@ -675,6 +694,9 @@ s32 IsTintBlendColliderRequestBlocked(TintBlendCollider* self, s32 mode)
 extern f32 D_00275894;
 extern f32 D_00275898;
 
+// After a tint request, sends the other collider (a player) off along this collider's horizontal
+// velocity with a fixed speed and vertical speed, faces it back along that direction and puts it in
+// state 4 sub-state 0x2B.
 void ContinueTintBlendColliderRequest(TintBlendCollider* self, TintBlendCollider* other)
 {
     Vec02 d = self->v150;
@@ -693,6 +715,10 @@ void ContinueTintBlendColliderRequest(TintBlendCollider* self, TintBlendCollider
 }
 
 
+// The collider's answer to a request: refused (0) when method 0x4B says so; otherwise it takes the
+// tint when a count allows (HasSpareCount), clears the root's state bits and, for a request of mode
+// 0 that has a reply, calls it and throws the collider and its attached object away from its
+// horizontal heading with fixed speeds and a spin.
 s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
 {
     if (self->desc05()->m4B(self, req->mode)) {
@@ -833,6 +859,10 @@ extern f32 g_gameClock[];
 
 
 
+// Changes the collider's state: leaving state 2 or 3 stamps the tint fade time; entering 0 or 1
+// sets the walker's target (0x351, 0x352), and 2 or 3 teleport it to 0x354 or 0x355 (state 3 also
+// sets partMode) with the fade time held; states 0, 2 and 3 clear the heading velocity and face
+// along the heading.
 void SetTintBlendColliderState(TintBlendCollider* self, s32 mode)
 {
     s32 old = self->state;

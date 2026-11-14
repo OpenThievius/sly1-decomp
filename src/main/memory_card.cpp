@@ -192,6 +192,8 @@ struct CardFileInfo {
     u8 modifiedSecond;
 };
 
+// Converts a card directory entry into the game's file info record: the name and size, the
+// attribute bits moved to the game's flag bits, and the creation and modification times.
 void ConvertMemoryCardDirEntry(CardDirEntry* s, CardFileInfo* d)
 {
     FillMemory(d, 0, 0x5C);
@@ -265,6 +267,10 @@ struct ErrorCodeTail
     }
 };
 
+// Turns the result b of a memory card library call into the game's own error code, by which call a
+// it was (1 to 21): 0 or a non-negative result is success (0), a few results (-2, -3, -4, -5 and
+// others) have codes of their own per call, and the remaining negative ones go through
+// ErrorCodeTail. Unknown calls give 31.
 s32 MapMemoryCardErrorCode(s32 a, s32 b)
 {
     s32 r;
@@ -435,6 +441,10 @@ void InitMemoryCard(MemoryCard* self, s32 a, s32 b)
     self->i4F44 = 0;
 }
 
+// The memory card object's per-frame update: while no background job runs it moves to the target
+// state (SetMemoryCardState) or, at the next poll time, starts a card poll job. In display mode 1,
+// 0.3 s after the state was entered, it puts the pause menu on the page for that state (pages 3, 4,
+// 7 and 10 for states 1 to 4, or 0x15 and 0x20 while saving or in an error).
 void UpdateMemoryCard(MemoryCard* self)
 {
     if (IsBackgroundJobRunning(&g_backgroundJob) != 0) return;
@@ -476,6 +486,9 @@ s32 CompareMemoryCardEntryTimes(void* lhs, void* rhs)
 	return *(u8*)((char*)lhs + 0x58) - *(u8*)((char*)rhs + 0x58);
 }
 
+// Changes the memory card object's state (0 to 5): states 0 and 1 start a card poll job, 3 starts
+// the job that loads the save slots, and 5 picks the newest of the three slots (f4F48), resetting
+// empty ones. Leaving state 5 clears that pick.
 void SetMemoryCardState(MemoryCard* self, s32 value)
 {
     s32 old = self->state;
@@ -567,6 +580,10 @@ extern const char g_saveSlotPathFormat[16] = "/%s/%s%d";
 extern const char g_saveDirectoryName[24] = "BASCUS-97198YAOTWTD!";
 extern const char g_saveSlotBaseName[8] = "save";
 
+// Creates the game's save on the card: checks the card has the blocks needed (the directory, the
+// icon files and three 0x15-block slots), then makes the directory, the title file, the icon header
+// and icon, and the three slot files from the object's three slots, and finally raises the target
+// state to 5. Gives 1 when the card is too full, or the first card error.
 s32 CreateMemoryCardSaveFiles(MemoryCard* self)
 {
     char name[0x50];
@@ -607,6 +624,9 @@ struct CardFileName {
     char s[0x50];
 };
 
+// The background job that reads the save directory and its three slots into the object: with no
+// save directory it asks for state 4 (card full) when under 0xC400 bytes are free and gives 0xE;
+// otherwise it reads each slot file (ReadMemoryCardSlotFile) and raises the target state to 5.
 s32 LoadMemoryCardSaveSlots(void* p) {
     MemoryCard* self = (MemoryCard*)p;
     CardFileName buf;
@@ -647,6 +667,9 @@ s32 ApplyMemoryCardImage(MemoryCard* self)
 }
 
 
+// Saves the game to the slot chosen (p4F44): applies the pad setting, copies the save data into the
+// slot's record, works out the slot's number and writes its file. Gives 0x2C when no slot is
+// chosen.
 s32 SaveGameToMemoryCardSlot(MemoryCard* self)
 {
     CardFileName buf;
@@ -702,6 +725,9 @@ void StartMemoryCardSave(MemoryCard* self)
 }
 
 
+// Lists a card directory: the entries of path b (or, with none, of the previous path, continuing
+// that listing), at most c of them (under 0x13), are converted into d's file info records and their
+// count is stored in *e. Gives 0x25 for too big a count and 0xD for a path over 0x40 characters.
 s32 ListMemoryCardDirectory(void* ctx, u8* b, s32 c, u8* d, s32* e)
 {
     MemoryCard* a = (MemoryCard*)ctx;
@@ -826,6 +852,9 @@ extern const char g_iconFileName[8] = "sly.ico";
 extern const char g_pathJoinFormat[8] = "%s/%s";
 extern const char g_iconSysFileName[24] = "icon.sys";
 
+// Writes the save's icon header file (the one named g_iconSysFileName) into directory a1 on the
+// card: a 0x3C4-byte record with the title (a2, converted to character codes, line break at 0x20),
+// the background colours, the lights, and the three icon file names.
 s32 WriteMemoryCardSaveHeader(void* owner, void* a1, void* a2)
 {
     IconSysHeader c;
@@ -898,6 +927,9 @@ struct KeyIdFromRecord : KeyId {
     }
 };
 
+// Copies the file the key record names (read through a buffered stream, 0x1000 bytes at a time)
+// into a new file called name in directory dir on the card. Gives 0 or the card error code (0x27
+// when the key cannot be opened, 7 on a short write).
 s32 WriteMemoryCardKeyedFile(void* self, const char* dir, void* k, const char* name)
 {
     KeyRecord* key = (KeyRecord*)k;
@@ -941,6 +973,10 @@ s32 WriteMemoryCardKeyedFile(void* self, const char* dir, void* k, const char* n
 }
 
 
+// Reads one save slot file into *out (a game progress record, reset first): the file must exist, be
+// a plain file and be exactly 0x1A00 bytes, and its type must be 18 with matching size and
+// checksum. Gives 0 or a card error code (20 not a save file, 28 wrong size or type, 27 bad
+// checksum, 8 short read); the file's info goes to i when given.
 s32 ReadMemoryCardSlotFile(void* a0, void* a1, GameProgress* out, void* i)
 {
     CardFileInfo* info = (CardFileInfo*)i;

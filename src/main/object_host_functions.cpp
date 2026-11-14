@@ -416,6 +416,8 @@ ScriptValue* SetScriptExtraObjectPropertyFloat(ScriptValue* ret, BaseObject* obj
     return ret;
 }
 
+// Script call: reads an index and a vector from the arguments and stores the vector as that extra
+// property of the object (SetExtraObjectPropertyVectorB); gives back the void script value.
 ScriptValue* SetScriptExtraObjectPropertyVectorB(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -435,6 +437,8 @@ ScriptValue* SetScriptExtraObjectPropertyVectorB(ScriptValue* ret, BaseObject* o
     return ret;
 }
 
+// Script call: reads an index and a vector from the arguments and stores its pair payload as that
+// extra property of the object (SetExtraObjectPropertyPair); gives back the void script value.
 ScriptValue* SetScriptExtraObjectPropertyPair(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -473,6 +477,9 @@ ScriptValue* SetScriptExtraObjectPropertyWord(ScriptValue* ret, BaseObject* obj,
     return ret;
 }
 
+// Script call: reads an index and a vector from the arguments and stores it as that extra
+// property of the object in the A form (SetExtraObjectPropertyVectorA); gives back the void
+// script value.
 ScriptValue* SetScriptExtraObjectPropertyVectorA(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -537,6 +544,8 @@ ScriptValue* SetScriptAimHold(ScriptValue* ret, PlacedObject* obj, s32 unused, S
     return ret;
 }
 
+// Script call: reads a mode, two floats (x, y) and passes them to SetValueAttachment, which
+// creates the object's own value attachment on first use and stores mode, x and y in it.
 ScriptValue* SetScriptValueAttachment(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -602,6 +611,8 @@ ScriptValue* SetScriptCrossfadeRatioDeep(ScriptValue* ret, PlacedObject* obj, s3
     return ret;
 }
 
+// Script call: starts a sound on the object from a sound id, three floats (outer range, inner
+// range, base volume) and a vector (StartSoundWithParams), replacing the sound it was playing.
 ScriptValue* StartScriptSoundWithParams(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -800,6 +811,8 @@ ScriptValue* TestScriptPointInsideCollider(ScriptValue* ret, Collider* obj, s32 
     return ret;
 }
 
+// Script call: reads four integers (a flag, two keys and a value) and upserts that entry in the
+// transform object's keyed table (SetTransformObjectKeyedValue).
 ScriptValue* SetScriptTransformObjectKeyedValue(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -852,6 +865,8 @@ ScriptValue* StartScriptObjectSubGroupFinish(ScriptValue* ret, ObjectSubGroup* o
     return ret;
 }
 
+// Script call: creates an animation player for an owner object from two floats and a flags word
+// (CreateAnimationPlayerReturned) and gives the player back as the script's result.
 ScriptValue* CreateScriptAnimationPlayer(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -873,6 +888,8 @@ ScriptValue* CreateScriptAnimationPlayer(ScriptValue* ret, Animation* obj, s32 u
     return ret;
 }
 
+// Script call: finds the animation player of a key object or creates one, seeks it with the two
+// floats given, and gives the player back as the script's result.
 ScriptValue* FindOrCreateScriptSeekedAnimationPlayer(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -912,6 +929,9 @@ ScriptValue* GetScriptAnimationMarkerTime(ScriptValue* ret, Animation* obj, s32 
     return ret;
 }
 
+// Script call: moves an animation player's time by a mode, a time and a speed
+// (SeekAnimationPlayer): mode 0 is absolute, 1 relative to the current time, 2 and 3 relative to
+// the animation's length.
 ScriptValue* SeekScriptAnimationPlayer(ScriptValue* ret, AnimationPlayer* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1014,6 +1034,8 @@ ScriptValue* HandleScriptMaskedColliderActivation(ScriptValue* ret, MaskedCollid
     return ret;
 }
 
+// Script call: reads four integers and sets that entry of the trigger zone's zone table
+// (SetTriggerZoneEntry).
 ScriptValue* SetScriptTriggerZoneEntry(ScriptValue* ret, TriggerZone* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1035,6 +1057,8 @@ ScriptValue* SetScriptTriggerZoneEntry(ScriptValue* ret, TriggerZone* obj, s32 u
     return ret;
 }
 
+// Script call: reads four integers and sets that entry of the zone collider's zone table
+// (SetZoneColliderEntry).
 ScriptValue* SetScriptZoneColliderEntry(ScriptValue* ret, ZoneCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1107,6 +1131,8 @@ ScriptValue* SetScriptStateTriggerStateFromMessage(ScriptValue* ret, StateTrigge
     return ret;
 }
 
+// Script call: reads four integers and upserts them as an entry of the state trigger's table of
+// at most 8 entries (AddStateTriggerTableEntry).
 ScriptValue* AddScriptStateTriggerTableEntry(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1251,6 +1277,8 @@ ScriptValue* SetScriptEffectSpawnerInactive(ScriptValue* ret, EffectSpawner* obj
     return ret;
 }
 
+// Script call: reads two integers and four floats and adds them as a range entry to the effect
+// spawner's own spawn record (AddSpawnRangeEntry).
 ScriptValue* AddScriptSpawnRangeEntry(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1270,6 +1298,8 @@ ScriptValue* AddScriptSpawnRangeEntry(ScriptValue* ret, EffectSpawner* obj, s32 
     return ret;
 }
 
+// Script call: reads two integers and four floats and adds them as a range entry to the record
+// member's spawn record (AddRecordMemberRangeEntry); same arguments as AddScriptSpawnRangeEntry.
 ScriptValue* AddScriptRecordMemberRangeEntry(ScriptValue* ret, RecordMember* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1304,6 +1334,8 @@ ScriptValue* SendScriptEmptyMessageC7A(ScriptValue* ret, HoldingMember* obj, s32
     return ret;
 }
 
+// Script call: reads two integers, two vectors and two floats and sends them as a two-vector
+// message to the member object (SendTwoVectorMessage); same arguments as the C78 version.
 ScriptValue* SendScriptTwoVectorMessageC7A(ScriptValue* ret, HoldingMember* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1345,6 +1377,8 @@ ScriptValue* SendScriptEmptyMessageC78(ScriptValue* ret, MemberGroup* obj, s32 u
     return ret;
 }
 
+// Script call: reads two integers, two vectors and two floats and sends them as a two-vector
+// message to the member group (SendTwoVectorMessage); same arguments as the C7A version.
 ScriptValue* SendScriptTwoVectorMessageC78(ScriptValue* ret, MemberGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1369,6 +1403,8 @@ ScriptValue* SendScriptTwoVectorMessageC78(ScriptValue* ret, MemberGroup* obj, s
     return ret;
 }
 
+// Script call: creates a state walker on a state graph from an object, a start entry id and a
+// player flags word (CreateStateWalker) and gives the walker back as the script's result.
 ScriptValue* CreateScriptStateWalker(ScriptValue* ret, StateGraph* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1404,6 +1440,8 @@ ScriptValue* DestroyScriptStateWalker(ScriptValue* ret, void* obj, s32 unused, S
     return ret;
 }
 
+// Script call: scatters a random number of objects (between the two integers) around a point
+// given as a vector (ScatterRandomObjects).
 ScriptValue* ScatterScriptRandomObjects(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1596,6 +1634,8 @@ ScriptValue* CheckScriptEntryThreeBitRequirement(ScriptValue* ret, World* obj, s
     return ret;
 }
 
+// Script call: sets a value in one of the four slots of a level entry's slot table, keyed by the
+// middle argument (SetEntrySlotValue).
 ScriptValue* SetScriptEntrySlotValue(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1958,6 +1998,8 @@ ScriptValue* PeekScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unuse
     return ret;
 }
 
+// Script call: sets the camera controller's value and two float settings, the second being a size
+// override (SetCameraControllerSettings).
 ScriptValue* SetScriptCameraControllerSettings(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2008,6 +2050,8 @@ ScriptValue* RequestScriptPlainCameraSnap(ScriptValue* ret, Camera* obj, s32 unu
     return ret;
 }
 
+// Script call: tests a sphere (a point vector, a radius and a second float) against the camera's
+// view planes and gives back a boolean script value (IsSphereInCameraView).
 ScriptValue* TestScriptSphereInCameraView(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2142,6 +2186,8 @@ ScriptValue* GetScriptAgentStateClip(ScriptValue* ret, Agent* obj, s32 unused, S
     return ret;
 }
 
+// Script call: reads four integers and appends them as a clip group of the agent
+// (AddAgentClipGroup, at most 8).
 ScriptValue* AddScriptAgentClipGroup(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2330,6 +2376,8 @@ ScriptValue* StepScriptChildGroupObject(ScriptValue* ret, ChildGroupObject* obj,
     return ret;
 }
 
+// Script call: launches the player toward a target vector on a ballistic path and sets its jump
+// state (PlacePlayerOnGround); the two floats are the launch angle and a jump-speed scale.
 ScriptValue* PlaceScriptPlayerOnGround(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2514,6 +2562,7 @@ ScriptValue* QueueScriptPlayerSecondActivation(ScriptValue* ret, Player* obj, s3
     return ret;
 }
 
+// Script call: sets the aim blend grid's blend vector from three floats (SetAimBlendGridVector).
 ScriptValue* SetScriptAimBlendGridVector(ScriptValue* ret, AimBlendGrid* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2534,6 +2583,8 @@ ScriptValue* SetScriptAimBlendGridVector(ScriptValue* ret, AimBlendGrid* obj, s3
     return ret;
 }
 
+// Script call: sets the aim blend grid's blend vector from three floats and marks that a second
+// vector is present (SetAimBlendGridVectorFlagged).
 ScriptValue* SetScriptAimBlendGridVectorFlagged(ScriptValue* ret, AimBlendGrid* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2623,6 +2674,8 @@ ScriptValue* AddScriptContactListKind(ScriptValue* ret, ContactListObject* obj, 
     return ret;
 }
 
+// Script call: reads four integers and upserts them as an entry of the state reset object's keyed
+// table (AddStateResetEntry).
 ScriptValue* AddScriptStateResetEntry(ScriptValue* ret, StateResetObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2675,6 +2728,8 @@ ScriptValue* ClearScriptCurrentTargetFollower(ScriptValue* ret, TargetFollower* 
     return ret;
 }
 
+// Script call: reads an id, a count and two flag bits and adds them as an item of the object pool
+// (AddObjectPoolEntry).
 ScriptValue* AddScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2953,6 +3008,8 @@ ScriptValue* AddScriptOscillatorYZEntry(ScriptValue* ret, Oscillator* obj, s32 u
     return ret;
 }
 
+// Script call: reads four floats and appends them as a vector to the A list of the oscillator's
+// entry (AddOscillatorEntryVectorA).
 ScriptValue* AddScriptOscillatorEntryVectorA(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2974,6 +3031,8 @@ ScriptValue* AddScriptOscillatorEntryVectorA(ScriptValue* ret, Oscillator* obj, 
     return ret;
 }
 
+// Script call: reads four floats and appends them as a vector to the B list of the oscillator's
+// entry (AddOscillatorEntryVectorB).
 ScriptValue* AddScriptOscillatorEntryVectorB(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3047,6 +3106,8 @@ ScriptValue* AddScriptPathFollowerEntry(ScriptValue* ret, PathFollower* obj, s32
     return ret;
 }
 
+// Script call: reads an item, two floats and two integers and appends them as an active marker of
+// the path follower (AddPathFollowerActiveEntry, at most 16).
 ScriptValue* AddScriptPathFollowerActiveEntry(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3309,6 +3370,8 @@ ScriptValue* AddScriptQueueEntryKind4(ScriptValue* ret, EntryQueue* obj, s32 unu
     return ret;
 }
 
+// Script call: adds an entry of kind 5 to the entry queue from four integers
+// (AddQueueEntryKind5).
 ScriptValue* AddScriptQueueEntryKind5(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3330,6 +3393,8 @@ ScriptValue* AddScriptQueueEntryKind5(ScriptValue* ret, EntryQueue* obj, s32 unu
     return ret;
 }
 
+// Script call: adds an entry of kind 6 to the entry queue from two integers and a float
+// (AddQueueEntryKind6).
 ScriptValue* AddScriptQueueEntryKind6(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3350,6 +3415,8 @@ ScriptValue* AddScriptQueueEntryKind6(ScriptValue* ret, EntryQueue* obj, s32 unu
     return ret;
 }
 
+// Script call: adds an entry of kind 7 to the entry queue from two integers and a float
+// (AddQueueEntryKind7).
 ScriptValue* AddScriptQueueEntryKind7(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3370,6 +3437,8 @@ ScriptValue* AddScriptQueueEntryKind7(ScriptValue* ret, EntryQueue* obj, s32 unu
     return ret;
 }
 
+// Script call: adds an entry of kind 8 to the entry queue from three integers
+// (AddQueueEntryKind8).
 ScriptValue* AddScriptQueueEntryKind8(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3590,6 +3659,8 @@ ScriptValue* DecrementScriptWorld3BossGauge(ScriptValue* ret, World3Boss* obj, s
     return ret;
 }
 
+// Script call: appends an entry of kind 0 (a time and a value) to the world 3 timeline
+// (AppendWorld3TimelineKind0Entry).
 ScriptValue* AppendScriptWorld3TimelineKind0Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3610,6 +3681,8 @@ ScriptValue* AppendScriptWorld3TimelineKind0Entry(ScriptValue* ret, World3Timeli
     return ret;
 }
 
+// Script call: appends an entry of kind 1 (a time and a value) to the world 3 timeline
+// (AppendWorld3TimelineKind1Entry).
 ScriptValue* AppendScriptWorld3TimelineKind1Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3706,6 +3779,7 @@ ScriptValue* AppendScriptWorld3TimelineKind5Entry(ScriptValue* ret, World3Timeli
     return ret;
 }
 
+// Script call: stores three animations in the world 4 boss object (SetWorld4BossValues).
 ScriptValue* SetScriptWorld4BossValues(ScriptValue* ret, World4Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;

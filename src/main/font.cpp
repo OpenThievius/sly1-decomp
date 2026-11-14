@@ -315,6 +315,9 @@ f32 MeasureFontStringHeight(Font* self, u8* s, f32 width)
     return a * (f32)n;
 }
 
+// Counts the lines the string takes when its width is limited to w (0 meaning no limit): the width
+// is summed from the font's glyph widths, and where it passes w the string breaks at the last space
+// or tab, by replacing it with a newline. Returns the number of lines.
 s32 WrapFontString(Font* self, u8* s, f32 w)
 {
     s32 count = 1;
@@ -358,6 +361,10 @@ s32 WrapFontString(Font* self, u8* s, f32 w)
 
 LINKER_REMNANT(func_0015C630);
 
+// Draws a string with a font in a layout rectangle: begins the draw (with the clip), finds the
+// first line's y from the vertical alignment, and for each line finds x from the horizontal
+// alignment (0 left, 1 centre, 2 right) and draws the characters, advancing by each glyph's width.
+// A newline moves down one line height.
 void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s)
 {
   const char *p;
@@ -515,6 +522,8 @@ s32 AddFontImagesToFrame(Font* self, void* obj)
     return r;
 }
 
+// Starts a text draw: sets the clip rectangle, adds the font's images if needed, and writes the GS
+// state (alpha test, texture and the sprite register list) the glyph sprites that follow use.
 void BeginFontDraw(Font* self, Vec4U* clip, void* obj)
 {
     SetFontClipRect(self, clip, (PacketWriter*)obj);
@@ -548,6 +557,10 @@ void BeginFontGlyphPacket(Font* self, void* obj)
     BeginGifRegListTag((PacketWriter*)obj, 5, 0x43431);
 }
 
+// Writes the vertices of one glyph (two UV and two position entries of a sprite) at x, y with the
+// font's scale and colour (the alpha scaled to the GS range), when it is on the screen. Returns the
+// advance in pixels (glyph width plus 1, or the font's default advance for a missing glyph, times
+// the scale).
 f32 DrawFontGlyph(f32 x, f32 y, Font* self, s8 key, u32 color, PacketWriter* s)
 {
     FontGlyph* e = FindFontGlyph(self, key);
@@ -573,6 +586,9 @@ f32 DrawFontGlyph(f32 x, f32 y, Font* self, s8 key, u32 color, PacketWriter* s)
     return (f32)self->advance * self->sx;
 }
 
+// Draws one glyph of the font turned a quarter turn (the glyph's width runs along y and its height
+// along x) at x, y with the given colour, when it is on the screen (640 by 492.8): adds the font's
+// images to the frame if needed and writes the sprite's GIF tag, UVs and positions.
 void DrawFontGlyphTurned(Font* self, s8 key, u32 color, PacketWriter* s, f32 x, f32 y)
 {
     FontGlyph* e = FindFontGlyph(self, key);
@@ -623,6 +639,8 @@ void DrawFontGlyphTurned(Font* self, s8 key, u32 color, PacketWriter* s, f32 x, 
     }
 }
 
+// Writes the vertices of one coloured rectangle from x0, y0 to x1, y1 with the texture area u0, v0
+// to u1, v1 (the alpha scaled to the GS range).
 void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s)
 {
@@ -634,6 +652,9 @@ void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
     AddGifXyzfRegListEntry(s, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), self->drawZ, 0);
 }
 
+// Draws one glyph of a frame (a border drawn from a font glyph) stretched over the rectangle r with
+// the item's padding and scale: the glyph's texture rectangle is cut into corners and edges and
+// drawn as the sprites of the frame around the rectangle.
 void DrawFontFrame(Font* self, FrameGlyph* item, FrameRect* r, PacketWriter* s)
 {
     FontGlyph* e = FindFontGlyph(self, item->key);
@@ -687,6 +708,8 @@ void DrawFontFrame(Font* self, FrameGlyph* item, FrameRect* r, PacketWriter* s);
 extern "C" void HandleAbstractCall();
 extern const VtableEntry g_fontMethods[22] = {{0, 0}, {0, (void (*)())CloneFont}, {0, (void (*)())HasFontGlyph}, {0, (void (*)())GetFontCharWidth}, {0, (void (*)())BeginFontDraw}, {0, (void (*)())BeginFontGlyphPacket}, {0, (void (*)())DrawFontGlyph}, {0, (void (*)())ResetFontClipRect}, {0, (void (*)())(void (*)(Font*, s8, u32, PacketWriter*, f32, f32))DrawFontGlyphTurned}, {0, (void (*)())DrawFontFrame}, {0, 0}, {0, 0}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, (void (*)())SetFontClipRect}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, (void (*)())ResetFontClipRect}, {0, HandleAbstractCall}, {0, HandleAbstractCall}, {0, 0}};
 
+// Loads a font from the stream: a 0x10-byte header (the images, the sizes, the scale and the glyph
+// count), registers it under its id, and allocates and reads the glyph table.
 void LoadFont(Font* obj, BufferedStream* src)
 {
     FontHeader l;
@@ -714,6 +737,8 @@ void LoadFont(Font* obj, BufferedStream* src)
     ReadBufferedStreamBytes((BufferedStream*)src, obj->glyphCount << 3, obj->glyphs);
 }
 
+// Builds the packets that upload a font's glyph image (and its palette, if it has one) to the GS:
+// allocates each one's space, sets the font's texture word and keeps the packet data in the font.
 void UploadFontImages(Font* self, void* arg)
 {
     FontUploadFrame f;
@@ -800,6 +825,9 @@ void SetTextDefaultColor(TextReader* self, Rgba_137248* color)
     ((U32P*)(dst + 0x9C))->v = v;
 }
 
+// Returns the next character of the text reader's string (0 at the end), handling inline codes on
+// the way: "~RRGGBB" sets the colour and "~." restores the default, "&id" and "&." change the font,
+// "^dd" and "^." the scale, and "~~" gives a literal "~".
 s32 ReadTextChar(TextReader* self)
 {
     s32 done = 0;
@@ -941,6 +969,8 @@ f32 SumTextWidth(TextReader* self)
     return acc;
 }
 
+// The same line wrap as WrapFontString for a text reader (which handles inline codes): breaks at
+// the last space or tab before the limit and returns the number of lines.
 s32 WrapTextLines(TextReader* self, f32 limit)
 {
     s32 lines = 1;
@@ -1027,6 +1057,9 @@ void MeasureText(TextReader* self, f32 f, f32* out1, f32* out2)
     }
 }
 
+// Draws the text of a reader in a layout: it first measures each line's width, then positions the
+// lines from the layout's alignment (left, centred or right horizontally, top, middle or bottom
+// vertically) and draws each character with its font and colour.
 void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s)
 {
     f32 f[64];

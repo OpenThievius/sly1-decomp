@@ -408,6 +408,9 @@ f32 D_00263AA0[4] = { 400.0f, -1.0f, 0.0f, 0.0f };
 f32 D_00263AB0[4] = { 0.0f, 1000.0f, 0.0f, 0.0f };
 
 
+// Set-up of a new player object after the turning collider's: marks the state, aim mode, sub-state
+// and jump kind as none (-1), copies the five phase-sound tables, sets the bounds radius (15), the
+// gravity (0, 0, -1750), the ledge hand offset and the trail, and starts the blend scales at 1.
 void InitPlayer(Player* self)
 {
     InitTurningCollider(self);
@@ -456,6 +459,10 @@ void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in
 void SetPlayerState(Player* self, s32 state, s32 sub);
 
 
+// The player's start method, once its links are resolved: builds the animation blends (six-, eight-
+// and three-entry), the pose sources and matrix attachments on its rig object and parts, the trail
+// and the aim blends, the on/off record and the table objects, then enters state 0, sets the camera
+// height (75 below the position) and the gravity scale and mass, and flags its five collider parts.
 void StartPlayer(Player* self)
 {
     StartTurningCollider(self);
@@ -697,6 +704,10 @@ static inline void SteerAlongDirection(Player* self, Vec02* off, Vec02* dir, s12
     SteerColliderTowardRotation(self, 0, 0, off, (f32*)dir, t);
 }
 
+// The player's per-step physics: steps the collider, then applies the steering of the current
+// state: states 2, 3, 7, 4 and 6 have their own step functions, state 13 steers by its sub-state,
+// state 9 holds against gravity for the first quarter second, state 11 does nothing, and the rest
+// use ApplyPlayerDefaultSteering.
 void StepPlayer(Player* self, f32 t)
 {
     Mat02 m;
@@ -759,6 +770,10 @@ void StepPlayer(Player* self, f32 t)
 }
 
 
+// Fills in the friction and bounce of a contact for the player from its state: state 13 uses two
+// fixed rates, state 7 none, a contact the player can stand on (virtual method 90) a fixed
+// friction, and state 4 other fixed rates for most sub-states. The friction is divided by the
+// gravity scale at the end.
 void ComputePlayerSlideRates(Player* self, Contact03* out)
 {
     f32 a;
@@ -847,6 +862,9 @@ void ApplyPendingPlayerStateRequest(Player* self)
 
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void BuildPerpendicularPair(Vec02* dir, Vec02* out, const Vec02* a, const Vec02* b);
+// Frees the player's chain of pooled contacts and, for the states that are pinned to something,
+// puts a contact back: state 7 pins to the path, state 6 to the target, and state 8 (holding a
+// ledge) adds an object contact at the ledge point, offset by the ledge slack and the hand offset.
 void ReleasePlayerContacts(Player* self)
 {
     FreePooledContactChain((World*)self->world, self->contacts4B4);
@@ -896,6 +914,10 @@ s32 IsPlayerGroundContact(Player* self, Contact03* e, s32 idx)
 }
 
 
+// The player's contact resolution for one end of a contact. In state 4, the lowest-vertex contact
+// takes the heading velocity's part along the surface. In other states but 0xD, a ground contact
+// goes through the turning collider's resolution, and a contact on the player's own part gets the
+// velocity of the player's spin at the point subtracted.
 void ResolvePlayerContact(Player* self, Contact03* c, s32 idx)
 {
     ContactEnd03* e = &c->end[idx];
@@ -967,6 +989,10 @@ static inline s32 MinOfCounts(s32 a, s32 b)
     return a < b ? a : b;
 }
 
+// The player's message handler, after the switched collider's: kinds 5 and 7 (an animation player
+// ended) queue the follow-up state or aim mode, kind 0x13 is an animation marker (spin rate, focus
+// hold, root motion, effects, flags by code), kinds 0xA and 0xB set or clear the hit collider, and
+// kind 2 releases the player to state 2 when the object it is bound to goes away.
 void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
 {
     HandleSwitchedColliderNotification(self, kind, msg);
@@ -1283,6 +1309,10 @@ static inline void SampleCurveDirection(PathCurve* c, PlacedObject* frame, f32 t
     TransformDirectionBetweenFrames(frame, 0, dir, dir);
 }
 
+// Poses the player's rig parts each frame. On a track in state 6 (sub-state 0x10, aim mode 4 or 5)
+// the rig gets one of two fixed poses. Then the motion of what the player stands on or rides
+// (ground contact, target node, track) is turned into an offset for the lead part and two others
+// through a pull curve; on a rail the path lean and its three blend weights are eased too.
 void PosePlayerTargetPart(Player* self)
 {
     s32 mode;
@@ -1445,6 +1475,10 @@ struct ProbeBody { u8 pad00[0x60]; Vec02 v60; Vec02 v70; void* f80; ProbeNodeBas
 struct ProbeHolder { u8 pad00[0x224]; ProbeBody* body; };
 s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
 
+// Measures a foot probe for a part, only when the state's animation has changed since the record
+// was filled: samples the animation (at its marker 0x142 time, or 0) for the foot, the part and the
+// body, then stores in the record the probe's start, the segment's ends, the radius (the body's two
+// extents plus 10) and the first collider span hit by the segment.
 void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d)
 {
     Player* pl = (Player*)self;
@@ -1508,6 +1542,10 @@ void PopBackMemoryMark(void);
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 
+// Checks one foot's ground with the probe MeasurePlayerFootProbe stored: casts the stored segment
+// against the colliders in its box, and on a hit writes the offset from the hit to the probe's
+// start into the part's record. Gives 0 only when nothing is hit while the player is on the ground
+// and the segment's far end is below -85; every other case gives 1.
 s32 ProbePlayerFootGround(Player* self, void* record, void* part)
 {
     ProbeRecord* p = (ProbeRecord*)record;
@@ -1546,6 +1584,9 @@ void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 
 
+// The per-frame update of state 0: turns the heading toward the aim target or, standing on a moving
+// object, with its spin (limited to 10), then measures and tests both foot probes. The first time
+// one finds no ground, it moves the state walker to its entry 0x148 and latches that with f118C.
 void UpdatePlayerState0(Player* self)
 {
     Vec3 loc;
@@ -1616,6 +1657,9 @@ void ReleasePlayerToState2(Player* self)
 }
 
 
+// Builds the rotation of the spin part (f61C) at a point in the frame: the player's rotation turned
+// by the spin angle minus the rate times the frame time times t (about the z axis in sub-state 8,
+// the x axis otherwise), then combined with the part's own rotation, into *out.
 void OrientPlayerSpinPart(Player* self, Mat02* out, f32 t)
 {
     Vec02 axis;
@@ -1640,6 +1684,10 @@ f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 void OrientPlayerSpinPart(Player* self, Mat02* out, f32 t);
 void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
+// The player's draw-time pose: eases the two scale factors (f2724, f2728) toward 1, or toward fixed
+// values in state 6 mode 3 when no object is active, and scales the transform while they are under
+// 1. It then sets the bounds radius to 500, adds a trail point (from the spin part while spinning)
+// and, except in state 12 sub-state 0x22, applies the transform to the object.
 void BlendPlayerPose(Player* self, void* a, void* b)
 {
     u8 out[0x50] __attribute__((aligned(16)));
@@ -1742,6 +1790,10 @@ clear:
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 void OrientPlayerSpinPart(Player* self, Mat02* out, f32 t);
 
+// Draws the player: places the two foot parts at their probe spans, and while the spin is on draws
+// the spin part four times at quarter steps of the spin (OrientPlayerSpinPart with t = 0, 0.25,
+// 0.5, 0.75). Then, in state 3, updates the link pose, draws the turning collider, queues the trail
+// ribbon if it is enabled and queues the marker ring.
 void DrawPlayer(Player* self, void* a, void* b)
 {
     f32 buf[12];
@@ -1785,6 +1837,9 @@ extern "C" f32 FloatRemainder(f32 x, f32 y);
 // evaluates its float arguments there, and only their place in the list decides that.
 f32 ApproachValueWithRamp(RampProfile* k, f32 x, f32 y, f32* out, f32 z);
 
+// Advances the player's spin angle (radians): at the target rate while one is set, wrapped at 2 pi;
+// with no target it ramps the angle back to a full turn (spinRate follows the ramp) and zeroes it
+// on arrival.
 void UpdatePlayerSpin(Player* self)
 {
     if (self->spinTargetRate == 0.0f) {
@@ -1820,6 +1875,10 @@ struct ContactChainOwner {
 s32 IsObjectOfKind(void* key, s32 kind, s32 extra);
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
+// Filters the player's contact list after collision: contacts with the held object go back to the
+// pool unless the other side is of kind 0x46, and contacts with the contact owner that method 56
+// accepts are moved onto the owner's chain. In state 8 it also makes the ledge point the ground
+// contact and drops the contacts with the ledge's root, except kind 0xB.
 void PrunePlayerContacts(Player* self)
 {
     ContactRow03* row;
@@ -1939,6 +1998,8 @@ void UpdatePlayerBounds(Player* self)
 }
 
 
+// Looks through the five slot objects at f25D8 in the order 0, 2, 1, 3, 4 and gives back the first
+// that is attached, with *out set to its group (0, 1, 2, 2, 1 for those slots); null when none is.
 void* FindFirstAttachedSlotObject(Player* self, s32* out)
 {
     void* p = self->f25D8[0];
@@ -1970,6 +2031,10 @@ void* FindFirstAttachedSlotObject(Player* self, s32* out)
 }
 
 
+// The player's collision callback for another collider: adds probe contacts (never in states 3, 7
+// and 0xD; in state 4 only for sub-states 0x24, 0x2A and 0x2B; not when probeContactsDisabled is
+// set), updates both foot probes' nearest span and, if an attached slot object is on the other
+// collider's parent chain, adds the mesh contacts between them.
 void CollidePlayerWithObject(Player* self, Collider* a1, s32 a2, void* a3, void* a4, void* a5)
 {
     s32 idx;
@@ -2062,6 +2127,10 @@ struct ColliderPose {
 };
 #define PL(T, o) (*(T*)((u8*)self + (o)))
 
+// Fills the pose the camera reads each frame, after the switched collider's. Unless the focus is
+// held, the focus is the point along the path in state 7, or the player's position with a clamped,
+// ramped camera height. The pose offset is eased to zero, and the flags, weight and stamp time are
+// set by state and sub-state.
 void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
 {
     u8* out = (u8*)pose;
@@ -2234,6 +2303,10 @@ struct PushObject { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PushHold
 struct PushRecord { u8 pad00[0x30]; f32 heading; s32 f34; };
 f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
+// Fills the record the pose takes while the player is pushed along an object (state 6, mode 0): the
+// heading from the heading matrix's x axis and, by the on/off phase, the point v2690 the player is
+// pushed toward. It also eases the force (+0x300) of the player's on/off object, pushing back near
+// each end of the curve.
 void FillPlayerPushRecord(Player* self, PushRecord* out)
 {
     out->heading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
@@ -2342,6 +2415,9 @@ void PopBackMemoryMark(void);
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderSpan* a4);
 
+// Whether there is ground within offset of the player's lowest vertex: gathers the colliders in the
+// box from that vertex to vertex + offset and gives 1 if any span they give along that segment has
+// a surface normal with z above 0.7 (a walkable slope), 0 otherwise.
 s32 HasFloorAtPlayerOffset(Player* self, Vec02* offset)
 {
     s32 count;
@@ -2914,6 +2990,10 @@ static inline s32 ContactEndOf(Contact03* c, void* obj)
     return c->end[0].body != obj;
 }
 
+// The player's per-frame update: the turning collider's, pending state requests, the
+// animation-driven case and the per-state update (blend weights and phase sounds, the ledge hold,
+// facing the host or camera). In aim mode 0 it tests the bounds points against the bound object or
+// curve; it also hands queued contacts to their owners and runs the spin and target upkeep.
 void UpdatePlayer(Player* self, f32 dt)
 {
     UpdateTurningCollider(self, dt);
@@ -3056,6 +3136,10 @@ void UpdatePlayer(Player* self, f32 dt)
     RunPlayerQueuedActivations(self);
 }
 
+// The update used while an attached object drives the player's animation: leaves state 3 for state
+// 2 and puts state 0xD in its sub-state 0x38, clears the aim mode and, in the other states except
+// 2, 3 and 13 to 16, takes heading and speed from ComputeObjectSteeringHeading and switches to
+// state 0 or 1 by whether the speed is positive (states 4 and 12 only zero the heading velocity).
 void UpdatePlayerWhileAnimationDriven(Player* self)
 {
     switch (self->state) {
@@ -3097,6 +3181,10 @@ void UpdatePlayerWhileAnimationDriven(Player* self)
 
 
 
+// Picks the animation node for the player's state and makes the turning collider follow its mesh:
+// state 6 by target mode, state 4 by sub-state (falling back along the D_00263930 chain when a node
+// is missing), state 2 sub-states 0xC and 0xD the special node, other states their own node, and
+// node 0 when the choice is empty. State 0xD changes nothing.
 void SelectPlayerStateAnimation(Player* self)
 {
     void* node;
@@ -3153,6 +3241,9 @@ struct Dev_175078 {
     s8 f10;
 };
 
+// Sets which of the player's parts are drawn: bit 0 of flags selects the three rig parts and bit 1
+// the two foot parts (each part's layer byte becomes 9 when on, -1 when off), then tells the five
+// objects to refresh through method 0x2B.
 void SetPlayerPartLayers(Player* self, s32 flags)
 {
     if (self->f2500 != 0) {
@@ -3284,6 +3375,10 @@ static inline Vu0::Vec NormalizeInPlace_175170(Vec02& v, const Vec02& fallback)
 
 #define AT(T, p, o) (*(T*)((u8*)(p) + (o)))
 
+// Changes the player's state and sub-state (nothing happens if both are unchanged): runs the
+// cleanup for leaving the old ones, then the set-up for the new ones, which picks the animation or
+// state graph, sound, part layers and aim mode. It stores them with the time, selects the state's
+// animation node and replaces the playing animation.
 void SetPlayerState(Player* self, s32 state, s32 sub)
 {
     void* walker;
@@ -4529,6 +4624,10 @@ void SetPlayerProbeContactsDisabled(Player* self, s32 value)
     self->f4B8 = 0;
 }
 
+// Finds the node a node query applies to: starts at the query's holder (or its parent) and walks up
+// the parent chain, giving 0 if a node of the excluded list of n is met. Each node gets the query's
+// out value from its tint slot chosen by the query kind and is asked (method 0x2D) to accept it;
+// the first that does is returned, null when the chain ends.
 PlacedObject* FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list) {
     PlacedObject* node;
     if (((PlacedObject*)q->hold)->desc->flags & 1) {
@@ -4830,6 +4929,10 @@ void RegisterPlayer(Player* self)
 // objects at +0x304 (count at +0x300) whose own walkers it sets.
 struct WalkerListObject;
 
+// In states 0, 1 and 5, activates the queued first or second activation object (method 0x2F) if it
+// is not running yet. Otherwise it handles a queued walker host whose walker waits at key 0x22E:
+// with a positive level-record count the player goes to state 9 (sub-state 0x1E), else the group's
+// walkers are set to target 0x231 and the player turns toward the host.
 void RunPlayerQueuedActivations(Player* self)
 {
     s32 state = self->state;
@@ -5087,6 +5190,10 @@ void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Ve
 void SetPlayerState(Player* self, s32 state, s32 sub);
 
 
+// Starts the player's leap at a target over f seconds: when s2 is null the best candidate is chosen
+// first (ChooseBestTargetCandidate). Computes the arc, records the landing time and the arc's ends
+// in the pose record, gives the player the launch velocity, keeps the target's quads and enters
+// state 4, sub-state 0x2C.
 void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f)
 {
     TargetArcFrame fr;
@@ -5112,6 +5219,10 @@ extern const f32 D_0024AFA0;
 
 s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4, ColliderSpan* a5);
 
+// Picks the flight time of a leap to the target: for each of nine durations in g_targetArcDurations
+// it samples the arc in quarter-second steps, adds up the length of collider spans the arc passes
+// through, and scores that total times the arc's launch strength. The duration with the lowest
+// score is written to *out.
 void ChooseTargetArcTime(PlacedObject* self, void* target, s32 count, Collider** list, f32* out)
 {
     Vec02 start;
@@ -5152,6 +5263,10 @@ extern f32 D_00263A90[4];
 extern f32 D_00263AA0[4];
 extern f32 D_00263AB0[4];
 
+// Scores a leap target candidate, 0 being a clean one: adds penalties when the landing point has no
+// floor (2000), has an obstacle above it (2000) or lacks floor around it (1500), and a cost from
+// the distance of each listed object to the landing point. Gives back the score, with the hit (its
+// landing point) in *out and the arc time from ChooseTargetArcTime in *outTime.
 f32 ScoreTargetCandidate(Player* self, TargetHit* cand, s32 n, TurningCollider** objs, TargetHit* out, f32* outTime)
 {
     typedef Vu0::Vec Vec;
@@ -5293,6 +5408,10 @@ void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, con
 f32 ScoreTargetCandidate(Player* self, TargetHit* cand, s32 n, TurningCollider** objs, TargetHit* out, f32* outTime);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// Chooses the player's leap target among the n objects in items: builds a candidate for each
+// attached one, sorts them by distance from the player and scores them with ScoreTargetCandidate,
+// stopping at a score of 0. If the best is over 1000 it also tries the remembered places of the
+// memo. With no candidate at all it gives a point 75 below the player and time 0.75.
 void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHit* out, f32* outf)
 {
     u8 scratch[0x80];
@@ -5374,6 +5493,10 @@ struct TargetMemo {
 extern const Vec02 D_00248D30;
 void* MoveMemory(void* dst, void* src, s32 size);
 #define History(p) ((TargetMemo*)((u8*)(p) + 0x2770))
+// Keeps the player's memo of places it has stood (up to 32 entries of key object, position or
+// distance along it, and time). Each frame it makes the entry for the current place (the object the
+// state is bound to, the path position or the ground contact; some states record nothing), moves an
+// existing entry within 50 units to the front, or inserts a new one.
 void RecordPlayerTargetMemo(Player* self)
 {
     Vec02 pos = D_00248D30;

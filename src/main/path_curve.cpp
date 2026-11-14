@@ -104,6 +104,9 @@ f32 WrapCurveTime(s32 count, f32* table, s32 wrap, f32 x)
     return x;
 }
 
+// Gives the index of the segment of times arr that contains x (after wrapping it if wrap is set, or
+// clamping to the last segment), and writes to lo the time past its start and to hi the segment's
+// duration when given.
 s32 FindPathCurveSegment(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi)
 {
     f32 r = WrapCurveTime(n, arr, wrap, x);
@@ -119,6 +122,9 @@ s32 FindPathCurveSegment(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi)
 struct VectorConstraint;
 extern const Vec02 g_unitXVector;
 
+// Linear interpolation along a polyline of points at time t (using the segment found by
+// FindPathCurveSegment): writes the position to pos and the unit direction of the segment (or the x
+// axis if it has no length) to tan; either may be null.
 void InterpolatePathCurvePoint(f32 t, s32 count, Vec02* points, f32* times, s32 wrap, Vec02* pos, Vec02* tan)
 {
     f32 lo;
@@ -366,6 +372,10 @@ f32 MeasurePathCurveDistance(NearestTimeQuery* self)
     return o2;
 }
 
+// Finds the time at which the path curve is closest to the segment a1, a2, by a local minimum
+// search from the time f12 (initial step a tenth of the first interval, limited to the curve's
+// times unless it wraps). Gives the curve's position and direction there (a3, a4) by method 1, the
+// time (a5) and its length along the curve (a6).
 void FindPathCurveNearestTime(PathCurve* self, Vec02* a1, Vec02* a2, Vec02* a3, Vec02* a4, f32* a5, f32* a6, f32 f12)
 {
     NearestTimeQuery ctx;
@@ -402,6 +412,8 @@ f32 GetPathCurveSearchStep(PathCurve* self)
     f32 b = p[1]; f32 a = p[0]; return (b - a) * 0.1f;
 }
 
+// Reads a polyline path from the stream: the wrap flag, the point count, and each point's time and
+// position; then calls the curve's method 9 (which fills the lengths).
 void ReadPathCurve(PathCurve* self, void* src)
 {
     self->wrap = ReadBufferedU8((BufferedStream*)src);
@@ -428,6 +440,9 @@ void SamplePathCurveAtLength(PathCurve* self, f32 t, Vec02* pos, Vec02* tan)
     InterpolatePathCurvePoint(t, self->count, (Vec02*)self->points, self->lengths, self->wrap, pos, tan);
 }
 
+// Draws one segment of the path curve as a line from point idx to the next one (the first one, when
+// wrap is set, for the last; otherwise nothing), with the points transformed by the matrix a2, in
+// the colour a4.
 void DrawPathCurveSegment(PathCurve* self, s32 idx, void* a2, u8* a3, void* a4, s32 a5)
 {
     Quad16 A;
@@ -472,6 +487,9 @@ f32 FillPathCurveLengths(PathCurve* self)
     return AccumulateSegmentLengths(self->count, self->points, self->lengths);
 }
 
+// Finds the point of the path curve nearest to the segment a1, a2 (outputs a3 and a4 are those of
+// FindNearestPathCurveSegment) and gives its time (out0) and its length along the curve (out1),
+// interpolated between the segment's two points.
 void FindPathCurveNearestPoint(PathCurve* self, void* a1, void* a2, void* a3, void* a4, f32* out0, f32* out1)
 {
     SegmentFraction f;
@@ -484,6 +502,9 @@ void FindPathCurveNearestPoint(PathCurve* self, void* a1, void* a2, void* a3, vo
     }
 }
 
+// Finds the point of the path curve nearest to the given segment (a1, a2), looking from the segment
+// of time t outwards, and gives its position and direction (a3, a4) and its time (a5) and length
+// along the curve (a6), interpolated between the two points of the segment found.
 void ProjectOntoPathCurveNearTime(PathCurve* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6)
 {
     s32 idx = FindPathCurveSegment(t, self->count, self->times, self->wrap, 0, 0);
@@ -494,6 +515,8 @@ void ProjectOntoPathCurveNearTime(PathCurve* self, f32 t, void* a1, void* a2, f3
     if (a5) *a5 = (1.0f - fb) * self->times[ia] + fb * self->times[ia + 1];
 }
 
+// The same as ProjectOntoPathCurveNearTime, but the starting segment is the one at length t along
+// the curve rather than at time t.
 void ProjectOntoPathCurveNearLength(PathCurve* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6)
 {
     s32 idx = FindPathCurveSegment(t, self->count, self->lengths, self->wrap, 0, 0);
@@ -504,6 +527,9 @@ void ProjectOntoPathCurveNearLength(PathCurve* self, f32 t, void* a1, void* a2, 
     if (a5) *a5 = (1.0f - fb) * self->times[ia] + fb * self->times[ia + 1];
 }
 
+// Reads a spline path from the stream: the wrap flag, the point count, and for each point its time,
+// position, in tangent and out tangent. Calls the curve's method 9 (which fills the lengths) and
+// resets the segment cache.
 void ReadSplinePathCurve(SplinePathCurve* self, void* src)
 {
     self->wrap = ReadBufferedU8((BufferedStream*)src);
@@ -539,6 +565,9 @@ void SampleSplineSegment(SplinePathCurve* self, s32 i)
 }
 
 
+// Evaluates the spline path at time t: finds its segment, evaluates the Hermite segment between its
+// points and tangents (outputs to a1), and writes the normalised direction (the x axis if zero) to
+// a2 if given.
 void SampleSplinePathAtTime(SplinePathCurve* self, f32 t, void* a1, Vec02* a2)
 {
     f32 a;
@@ -583,6 +612,8 @@ void DrawSplinePathSegment(SplinePathCurve* self, s32 idx, Quad16* m, u8* a3, vo
     }
 }
 
+// Transforms every point of the spline path by the matrix that takes the frame of object a to that
+// of b, rotating the tangents too, and resets the segment cache.
 void TransformSplinePathPoints(SplinePathCurve* self, void* a, void* b)
 {
     Vec02 m[4];
@@ -632,6 +663,10 @@ void FillSplinePathLengths(SplinePathCurve* self)
     }
 }
 
+// Finds the point of the spline path nearest to pos: first the control point with the smallest
+// squared distance (optionally with the difference constrained by an anchor), then the nearest time
+// is refined from that point's time with FindSplinePathNearestTime. The outputs a3..a6 are those of
+// that function.
 void FindSplinePathNearestPoint(SplinePathCurve* self, Vec02* pos, void* anchor, s32 a3, s32 a4, f32* a5, f32* a6)
 {
     Vec02 d;
@@ -656,6 +691,9 @@ void FindSplinePathNearestPoint(SplinePathCurve* self, Vec02* pos, void* anchor,
     FindSplinePathNearestTime(self, (s32)pos, (s32)anchor, a3, a4, a5, a6, self->times[best]);
 }
 
+// The spline version of FindPathCurveNearestTime: a local minimum search from time f12 of the
+// distance measured by MeasureSplinePathDistance, then the position and direction (a3, a4), the
+// time (a5) and the length (a6) at the minimum.
 void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
 {
     NearestTimeQuery ctx;

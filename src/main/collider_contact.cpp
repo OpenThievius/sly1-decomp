@@ -110,6 +110,10 @@ struct PooledContact {
 
 struct Pool6C;
 
+// Makes one contact from the pool for two parts (the second may be none): stores the penetration
+// depth, point, normal and kind, the body and the point in each part's frame at both ends, the
+// surface-pair friction and bounce and the vertex and face involved; lets each end's handler
+// (slot 60) see it, completes it (NotifyContactEnds) and links it to the front of the list *a7.
 PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7)
 {
     s32 surfaces[2];
@@ -207,6 +211,9 @@ void RefreshContactEndPoints(World* world, s32 n, Contact03** list)
 }
 
 
+// For each contact of the list, works out the motion of each end's point and calls the part's
+// slot 59 for it, then each end's contact handler (slot 61, the one found by FindHandlerForSlot)
+// and stores the relative velocity of the ends (v B0).
 void NotifyContactEnds(World* world, s32 n, Contact03** list)
 {
     for (s32 i = 0; i < n; i++) {
@@ -244,6 +251,8 @@ void FreePooledContactChain(World* world, Contact03* head)
     }
 }
 
+// Gives the parameter t of the point's projection on the infinite line through a and b (0 when
+// the line is degenerate) and its distance to the line in *dist.
 void MeasurePointToLine(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
 {
     Vec02 e;
@@ -264,6 +273,8 @@ void MeasurePointToLine(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
     *(u32*)dist = Vu0::ToBits(Vu0::Sqrt(d));
 }
 
+// Like MeasurePointToLine but for the segment from a to b: t is clamped to 0 to 1 and the
+// distance is to the nearest point of the segment.
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist)
 {
     Vec02 e;
@@ -358,6 +369,8 @@ struct MeshHit {
 typedef char check_MeshHit[sizeof(MeshHit) == 0x70 ? 1 : -1];
 
 
+// Casts each edge of self's mesh against the plane tree (ctx) of the other and collects up to cap
+// hits into out, each tagged with its edge; gives the count.
 s32 CollectEdgeContacts(Collider* other, Collider* self, u8* ctx, s32 cap, MeshHit* out)
 {
     s32 i = self->meshCopy.edgeCount;
@@ -437,6 +450,9 @@ s32 CollectMeshEdgeHitsFromFaces(Collider* self, Collider* other, s32 n, FaceRef
 
 void* MoveMemory(void* dst, void* src, s32 size);
 
+// Sorts mesh hits (edge-versus-face hits of two meshes) into groups sharing a vertex key (groups,
+// keys, with the group count in *outCount) and a head list of the hits that cross from one face
+// to another; hits are flipped so the shared end is first.
 void GroupEdgesByKey(s32 count, MeshHit* base, s32* outCount, s32* keys, MeshHit** groups, MeshHit** head)
 {
     MeshHit* single = 0;
@@ -519,6 +535,9 @@ struct PathEdge { u8 pad0[0x58]; PathEdgeEnds* pair; u8 pad1[4]; PathEdge* next;
 struct PathVertex { u8 pad0[0x1C]; u16 flags; u8 pad1[2]; };
 struct PathSearchStep { PathSearchStep* parent; PathEdge* node; s32 id; };
 
+// Breadth-first search over a list of edges (pairs of face keys) from face key to target; gives
+// the number of edges of the path found in out (0 when there is none), using bit 4 of each face's
+// flags as the visited mark and clearing it again.
 s32 FindGraphPath(PathVertex* base, s32 key, s32 target, PathEdge* head, PathEdge** out)
 {
     PathSearchStep recs[64];
@@ -585,6 +604,10 @@ static inline f32 DotFloatMoved(Vu0::Vec a, Vu0::Vec b)
     return Vu0::ToFloatMoved(Vu0::Dot(a, b));
 }
 
+// Builds the contacts between two meshes: collects the edges of each against the other's tree,
+// groups them by vertex and makes a vertex-face contact for the deepest face of each group (and
+// edge-face ones for the other edges of that group), then a contact for each pair of crossing
+// edges found by FindGraphPath using the closest points of the two segments.
 void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3, u8* ctx, PooledContact** list)
 {
     s32 counts[2];
@@ -1003,6 +1026,9 @@ void AddMeshContacts(Collider* a0, f32 radius, Vec02* a1, Collider* a2, s32 a3, 
     }
 }
 
+// Adds a sphere-sphere contact (kind 7) when the bounding spheres of two colliders overlap:
+// normal along the line between the centres, point on self's sphere, depth the distance minus the
+// sum of the radii.
 void AddSphereSphereContact(Collider* self, Collider* other, void* a2)
 {
     Vec02 d;
@@ -1062,6 +1088,9 @@ void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f)
 
 
 
+// Tests the segment a part moved along this frame (from its previous position, v370, to the
+// current one) against a plane tree; on a hit adds a contact of kind 8 at the part's support
+// point for the face hit. Gives 1 when it did.
 s32 AddSweptPartMeshContact(void* a0, void* a1, s32 a2, void* a3, void* a4, void* a5)
 {
     MeshHit recs[2];
@@ -1239,6 +1268,10 @@ struct BackMemoryScope {
     ~BackMemoryScope() { PopBackMemoryMark(); }
 };
 
+// For a pair of colliders (the one with the smaller radius is queried against the other's parts):
+// for each part with a plane tree it queries the tree with the point and radius of the other and,
+// where the point is inside, calls slot 57 and 58 of the first collider to make the contacts;
+// then calls slot 58 of the second one against the first's parts. Gives the result count in *res.
 s32 BuildObjectPairContacts(World* world, ColliderPair* pair, s32 arg)
 {
     ColliderPair ord;

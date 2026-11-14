@@ -70,6 +70,10 @@ void InvalidateRangeRecordPacket(RangeRecord* self)
 
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 
+// Recomputes halfLength and the centre point v50 of the record's bounding sphere from its inner and
+// outer distances along its direction and its near and far ranges (the slab is a box when the
+// ranges are equal, otherwise a frustum slice); v50 is placed along the direction from the
+// position.
 void UpdateRangeRecordBounds(RangeRecord* self)
 {
     Vec02 scaled;
@@ -143,6 +147,8 @@ static inline s32 IsNearlyEqual(f32 a, f32 b)
     return AreFloatsNearlyEqual(a, b, 0.0001f);
 }
 
+// Sets the record's position (v10) if the new one differs in any component, then recomputes its
+// bounds and invalidates its cached packet.
 void SetRangeRecordPosition(RangeRecord* self, Vec02* v)
 {
     u128 a = Vu0::Q(self->v10);
@@ -157,6 +163,8 @@ void SetRangeRecordPosition(RangeRecord* self, Vec02* v)
     }
 }
 
+// Sets the record's direction (v20) if the new one differs in any component, then recomputes its
+// bounds and invalidates its cached packet.
 void SetRangeRecordDirection(RangeRecord* self, Vec02* v)
 {
     u128 a = Vu0::Q(self->v20);
@@ -249,6 +257,10 @@ struct RangePartState { s32 w0; RangeSlot* slots; u8 pad08[0x28 - 8]; };
 struct RangeFacePair { s32 part; s32 slot; };
 typedef s32 (*RangeBodyFilter)(void*, Collider*);
 
+// Each frame gathers the colliders within halfLength of the record's centre and, for each one hit
+// by the segment from the inner to the outer distance along the record's direction, registers the
+// record as an owner (up to four per slot) in the slots of that face's draw parts whose kinds
+// match. Slots are reset when their stamp differs from the clock time.
 void UpdateRangeRecord(RangeRecord* self, f32 dt)
 {
     Vec02 a;
@@ -310,6 +322,10 @@ s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 extern u8 g_rangeRecordProgram[];
 extern f32 g_rangeRecordClipMargin;
 
+// When the linked object is visible to the camera, builds the draw packet of a range record: the
+// animation entry's draw plus a uniform block with the view-projection matrix of the record's slab
+// (orthographic when nearRange equals farRange, else perspective from the inner and outer
+// distances), the near, far and clip depths and four halved size bytes of the link.
 void BuildRangeRecordPacket(RangeRecord* self)
 {
     if (self->link != 0) {
@@ -448,6 +464,9 @@ void LoadPathCurveObject(PathCurveObject* self, void* obj)
     ReadPropertyRecords(self, obj);
 }
 
+// Gives the object a new parent. The path curve is told (its method at +4) the transforms of the
+// old and the new parent, with the identity standing for none, so it can convert its points between
+// the two frames; then the object is reparented.
 void ReparentPathCurveObject(PathCurveObject* self, BaseObject* other)
 {
     Mat4A a;

@@ -178,6 +178,10 @@ typedef unsigned long u64;
 extern const Vec02 D_00248D30;
 
 
+// Initialises the collider part, sets the state to -1, points the cycler's random ranges (target
+// and tangent radii and heights, check delay, hold, advance, wrap and message intervals) at their
+// default tables, sets swapKind to -1, indexStep to 1, and adds itself to the world's list at
+// +0x1C48.
 void InitObjectCycler(ObjectCycler* self)
 {
     InitCollider(self);
@@ -197,6 +201,10 @@ void InitObjectCycler(ObjectCycler* self)
     AppendToList(&self->world->list1C48, self);
 }
 
+// Loads the collider, resolves its links and group, then finds the objects with ids 0x23C to 0x24B,
+// starting each and adding it to the list of cycled objects (remembering the index of the swap kind
+// in mode 1). In mode 1 it also gathers the eight alternative objects with ids 0x24D to 0x254 and
+// removes itself from the world's list at +0x1C48.
 void LoadObjectCycler(ObjectCycler* self, void* arg)
 {
     u32 i;
@@ -317,6 +325,10 @@ void StepObjectCycler(ObjectCycler* self, f32 dt)
     }
 }
 
+// Per-frame update of the cycler. When the state's end time has passed it moves on (1 to 2, 5 to
+// the chosen state, 6 to 0, others restart 0). In the moving states mode 0 loops a sound and cycles
+// the index, mode 1 looks for ground to go to and ping-pongs the index; a contact after 0.15 s ends
+// the state. State 6 advances the alternative index on random delays.
 void UpdateObjectCycler(ObjectCycler* self, f32 dt)
 {
     UpdateCollider(self, dt);
@@ -424,6 +436,10 @@ void UpdateObjectCycler(ObjectCycler* self, f32 dt)
     }
 }
 
+// Draws the cycler's current object with the placed object's transform. In state 1 the object is
+// scaled by a quadratic shrink curve of the fraction of the state elapsed, in state 3 by a growth
+// curve (both limited to the unit range), in state 6 an alternative object is drawn, and otherwise
+// object index (or, in mode 1 near the end of the state, the swap index) is drawn.
 void DrawObjectCycler(ObjectCycler* self, void* a1, void* a2)
 {
     CyclerDrawParams out;
@@ -496,6 +512,10 @@ extern u8 g_scatterController[];
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
+// Leaves the old state (stopping its flag, calling method 2, or for 6 clearing anchors and
+// scheduling the next message) and enters the new one. States 0, 3 and 5 pick a random target and
+// tangent and end after a whole number of 1/60 s ticks found from the curve limits; 1 plays sound
+// 0x3A and scatters objects; 2 calls method 3; 6 sets up the alternative pose.
 void SetObjectCyclerState(ObjectCycler* self, s32 state)
 {
     if (self->state == state) {
@@ -714,6 +734,9 @@ s32 IsCyclerGroundCandidate(GroundFilterContext* a0, GroundCandidate* a1)
     return ((s32)v ^ 1) & 1;
 }
 
+// True when nothing solid lies below the cycler: it gathers colliders within searchRadius and tests
+// a segment from the position down by that radius. The test runs at most every 0.05 s; between runs
+// it gives 0 (supported).
 s32 IsObjectCyclerUnsupported(ObjectCycler* self)
 {
     f32* tbl = g_gameClock;

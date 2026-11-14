@@ -90,6 +90,10 @@ extern u8 g_flagTable[];
 
 #define F(T, o) (*(T*)((u8*)self + (o)))
 
+// Set-up of a new agent after the turning collider's: state and path graph id are none (-1), the
+// target range is up to 300, the retarget delay 0.2 to 0.5 s, the angle limit 0.1745 rad (10
+// degrees), all 17 state and secondary clip ids are -1, a flag table index is taken, gravity scale
+// is 1.5 and the state deadlines are set to the largest float (never).
 void InitAgent(Agent* self)
 {
     InitTurningCollider(self);
@@ -192,6 +196,10 @@ void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 extern u8 g_flagTable[];
 
+// The agent's start method: resolves its links and clips, creates an item keeper (adding itself)
+// when it has none, takes the first secondary clip as its followed mesh, resolves its mesh key
+// objects and target pool, enters state 0 and, if its flag table bit is already set, queues its own
+// removal from the world.
 void StartAgent(Agent* self)
 {
     StartTurningCollider(self);
@@ -336,6 +344,10 @@ void AddColliderForce(Agent* self, Vec02* v);
 extern "C" void* CopyBytes(void* dst, void* src, s32 n);
 typedef void (*AgentMotionFn)(void* self, Agent* agent, s32 a, s32 b, Vec02* out, f32 t, f32 u);
 
+// The agent's per-step motion: while following a clip's own motion it pushes along the clip's root
+// motion; with a pitch it steers by the turn blend; during an arrival time it follows a Hermite
+// curve; in state 16 it steers by the clip's progress; otherwise it takes the plain turning
+// collider step.
 void StepAgent(Agent* self, f32 dt)
 {
     if (self->followsClipMotion != 0) {
@@ -488,6 +500,10 @@ static inline void MulRotationInto(Agent* self, const Mat02& a, const Mat02& b)
     self->headingMatrix = r;
 }
 
+// The agent's per-frame update: the turning collider's, the secondary target and the primary target
+// (the player's contact owner while the roster is in state 2). Then it applies pending changes,
+// settles the state, takes the heading velocity from the state clip's root motion, runs the state
+// methods, dispatches contact hits and, with fC08 set, aligns to the floor.
 void UpdateAgent(Agent* self, f32 dt)
 {
     Vec02 push;
@@ -565,6 +581,10 @@ void UpdateAgent(Agent* self, f32 dt)
 
 extern f32 g_gameClock[];
 
+// Chooses the agent's next state from the current one, the roster's state (0, 1 or 2) and the clock
+// against the state deadlines: a due clip-10 deadline gives state 0xA, and otherwise a table of
+// current state by roster state decides (0 goes to 4, 5 or 7 for roster state 0, 1 or 2). Gives
+// back the current state when nothing changes.
 s32 ChooseAgentState(Agent* self)
 {
     s32 s = self->state;
@@ -857,6 +877,10 @@ static inline s32 IsNearPoint(Vu0::Vec a, Vu0::Vec b, f32 reach)
 // The game clock's time (its second word), read through the clock's address.
 static inline f32 ClockTime(const f32* clock) { return clock[1]; }
 
+// Builds the agent's path to its snapped goal point (not again within the retry delay of the last
+// build). With fB90 set it makes a two-point path whose end is limited to fB94 from the agent and
+// set on the floor below; otherwise it asks its path graph for up to 16 points, falling back to the
+// straight two-point path. It resets pathIndex and stamps the time.
 void BuildAgentPath(Agent* self)
 {
     if (self->pathValid != 0) {
@@ -937,6 +961,9 @@ static inline f32 ClampTo(f32 v, const f32* r)
     return out;
 }
 
+// Turns the agent along its path: skips the points it is already near, takes the direction to the
+// next one (or the last segment's) as the yaw, and when it faces with a pitch (usesPitch) works the
+// pitch out from the horizontal and vertical distance to the goal through two clamped curves.
 void FaceAgentAlongPath(Agent* self)
 {
     ((void (*)(Agent*))self->desc08()->m5F)(self);
@@ -996,6 +1023,9 @@ void FaceAgentTowardGoalPoint(Agent* self)
 void FindNearestAnimationPathTime(Animation* self, PlacedObject* owner, f32 start, Vec02* point, f32* outT, Vec02* outPos, Vec02* outDir);
 BlendSourceEntry* FindEntryByObjectId(BlendAnimationView* self, BaseObject* key);
 
+// Keeps the agent's goal point for its state: states 7, 10, 12, 13 and 14 aim at the position of
+// its target (method 0x62), and on flag, state 4 aims at the nearest point on the main clip's path
+// (or its own point when it has no clip) and state 5 at its place position.
 void UpdateAgentGoal(Agent* self, s32 flag)
 {
     Vec02 q;
@@ -1065,6 +1095,9 @@ extern f32 g_frameDt;
 s32 HasAnimationDrivenAttachment(SwitchedCollider *self);
 void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2);
 
+// The per-frame facing of the agent by state: states 1 and 2 take it from the animation's motion
+// when an attachment drives it, state 3 from the animation's steering heading, states 4, 5 and 12
+// face along the path and states 7, 10, 13 and 14 face the goal point.
 void UpdateAgentState(Agent* self)
 {
     self->desc08()->m62(self);
@@ -1134,6 +1167,10 @@ void ForceAgentState(Agent* self, s32 mode, void* value)
 
 void StopAnimationPlayer(AnimationPlayer* self);
 
+// Cleans up when the agent leaves its state: remembers the clip's phase, clears the clip-motion,
+// facing, state-lock and loop-back flags and runs method 3 on the mesh key objects. Per state it
+// then stops the main player (1), hands the state object back (3), sets the retarget time (14),
+// re-enables contacts (11, 16) or clears a deadline (8). The state player is stopped last.
 void LeaveAgentState(Agent* self, s32 mode)
 {
     s32 i;
@@ -1202,6 +1239,10 @@ void FadeOutPlacedObject(Collider* self, f32 time);
 extern u8 g_flagTable[];
 extern u8 g_scatterController[];
 
+// Set-up on entering the agent's new state: follows the state's secondary clip as the mesh, does
+// the per-state work (a main player in state 1, the scatter, flag bit, fade-out and contact change
+// in state 11, one hit used up in state 16, deadlines reset in 6, 7 and 10), then starts the
+// state's clip on the state player at the remembered phase and faces along the path or at the goal.
 void EnterAgentState(Agent* self, s32 evt, Animation* arg)
 {
     Animation* tgt;
@@ -1384,6 +1425,10 @@ struct AgentNotice {
 struct ObjectEvent;
 extern const Vec02 g_unitXVector;
 
+// The agent's reaction to a hit on an object: ignored while requests are blocked or the object is
+// in the target pool; otherwise the generic handler runs. When the hit counts, the agent turns away
+// from the push, changes to state 16 (if it has hits left) or 11, tells its member group the hit
+// point and direction and sends itself notification 0x17.
 s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
 {
     SlotMessage msg;
@@ -1491,6 +1536,10 @@ void ApplyPendingAgentChanges(Agent* self) {
 
 struct ValueRange;
 
+// Starts a leap to the next path point (or the last): works out the flight time from the distance
+// (clamped through the range at +0xB9C, times fB98) and the launch velocity that lands there under
+// gravity, sets the arrival time, faces the direction of travel (reversed when fB94 is negative)
+// and keeps the end and velocity as the Hermite curve StepAgent follows.
 void SteerAgentAlongPath(Agent* self)
 {
     s32 last = self->pathCount - 1;
@@ -1580,6 +1629,10 @@ struct AgentNotification {
 AnimEvent* FindAnimationMarkerEvent(Animation* self, s32 key);
 typedef void (*AgentSlotFn)(Agent* self);
 
+// The agent's message handler, after the switched collider's: kind 5 (an animation player ended)
+// ends the state clip or clears the main clip, 0x15 and 0x16 take a state object in and out of
+// state 3, 0x13 is an animation marker (codes set the motion, path, facing, lock and block flags),
+// and 0xA and 0x17 set the retarget deadline by how many agents are nearer.
 void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
 {
     HandleSwitchedColliderNotification(self, kind, msg);
@@ -1787,6 +1840,10 @@ static inline f32 Limit(f32 g, f32 lo, f32 hi)
     return g;
 }
 
+// Whether the agent may take its target now: it has a target, which is not refusing (method 0x4D
+// for objects of flag 8), its distance is inside the target range, its bearing (scaled by a curve
+// of the distance) is within targetAngleLimit, the retarget time has passed and the target pool, if
+// any, has an object to choose.
 s32 IsAgentTargetInRange(Agent* self)
 {
     SwitchedCollider* target = (SwitchedCollider*)self->desc08()->m62(self);
@@ -2014,6 +2071,9 @@ void SetAgentSecondaryTarget(Agent* self, s32 value)
 }
 
 
+// Picks the agent's secondary target among the objects with its secondary target key: the one whose
+// position, led ahead by its horizontal velocity, is nearest the agent's own led position (the
+// current pick counts as half as far, so it is kept unless another is clearly nearer).
 void PickAgentSecondaryTarget(Agent* self)
 {
     PlacedObject* found[0x20];
@@ -2095,6 +2155,9 @@ struct FaceRef;
 struct PooledContact;
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
+// The agent's collision callback: adds a probe contact unless contacts are disabled and, for its
+// own target (or a parentless object of kind 0x4C), adds the mesh contacts between each attached
+// mesh key object and the other collider into hitContacts, which DispatchAgentContactHits reads.
 void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     if (a0->contactsDisabled == 0) {
@@ -2145,6 +2208,10 @@ inline void InitAgentContactQuery(NodeQuery* q, Agent* self, Collider* part)
     q->p00 = self;
 }
 
+// Acts on the contacts CollideAgentWithObject gathered: for the first contact one of its mesh key
+// objects makes with another object, it sends that object an owner message (for a launch it sets
+// launchVelocity, boosted and clamped from the part's motion) or else runs a node query, then frees
+// the contacts. Skipped briefly after the player has just attacked this agent.
 void DispatchAgentContactHits(Agent* self)
 {
     void* target = self->desc08()->m62(self);
@@ -2288,6 +2355,10 @@ struct Blocker_23A8 {
 
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
+// Whether the agent should leave the player alone: only when its target is the player in state 6,
+// by target mode: mode 3 under some world save bits, modes 0 and 1 by the side of the agent the
+// player's heading axis points to (unless the object it holds says otherwise), mode 2 in
+// sub-state 0x10.
 s32 IsPlayerUntargetableByAgent(Agent* self)
 {
     Player* t = (Player*)self->desc08()->m62(self);
@@ -2420,6 +2491,9 @@ void RemoveItemKeeperMember(ItemKeeper* self, Agent* value)
 
 
 
+// Resolves the item keeper's lists of wanted ids into agents: each found object of the owned list
+// is added to its members and told its roster, and each of the listed list is added to the keeper's
+// list, up to 16 of each.
 void FindWantedItems(ItemKeeper* a0)
 {
     for (s32 i = 0; i < a0->owned.wantedCount; i++) {
@@ -2458,6 +2532,9 @@ struct GatheredObjects {
 
 void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount, BaseObject*** outArr);
 
+// Groups the state objects that the members' main clips refer to: for each member agent it gathers
+// the objects its clip triggers and gives each its own timeout group (owned by the keeper), putting
+// objects with the same id (id2E0) of later members into the same group.
 void GroupAnimationEventObjects(ItemKeeper* self)
 {
     GatheredObjects* arr;
@@ -2550,6 +2627,9 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 
+// Chooses the item keeper's next state (0, 1 or 2) from whether any member is free: state 0 goes to
+// 2 when one is (with a sound if no member is of kind 9), state 1 to 2 when one is free or to 0
+// when the members' poll succeeds, and state 2 back to 1 when none is.
 s32 ChooseItemKeeperState(ItemKeeper* self)
 {
     s32 state = self->state;
@@ -2643,6 +2723,10 @@ extern f32 g_gameClock[];
 
 struct SoundLevelEntry;
 
+// Changes the item keeper's state. Leaving 2 removes its sound level and gives each member a random
+// state-8 deadline; leaving 1 gives each a random state-6 deadline. Entering 2 pushes the sound
+// level 0x6B and sets the trigger states and the members' fBF8 times, entering 1 assigns the
+// members' places, and 0 and 3 set the triggers' states to 1 and 2.
 void SetItemKeeperState(ItemKeeper* self, s32 ns)
 {
     s32 i;

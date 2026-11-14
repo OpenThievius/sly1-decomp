@@ -113,6 +113,10 @@ struct FollowProbe {
     f32 nearestTime;
 };
 
+// Builds a probe segment for the part: if the object's link record has flag 0x20, the probe runs
+// from a point radius below the part's position, back along the direction from the link record's
+// anchor object toward the link's point, for that distance minus 15. Leaves active at 0 when there
+// is no link or the distance is under 0.0001.
 void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, PlacedObject* obj, FollowProbe* out, f32 radius)
 {
     Vec02 pos;
@@ -162,6 +166,10 @@ void KeepNearestPartSpan(void* unused, void* a1, void* a2, Part07* self)
 }
 
 
+// If the probe record is valid, clears it and, when it recorded a hit, moves the part to the point
+// the probe found (converted into the part's parent frame), then removes from its velocity the
+// component going into the hit surface: the new velocity is the old one plus the surface normal
+// times that depth, when the relative velocity along the normal is negative.
 void PlacePartAtProbeSpan(void* unused0, PlacedObject* other, PlacedObject* self, Part07* rec)
 {
     Vec02 dir;
@@ -215,6 +223,10 @@ struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
+// Sets the player's step phase to f and, when it passes a half-cycle crossing of one of two phase
+// offsets in p (and the minimum interval since the last has passed), plays a step sound 0x47 to
+// 0x4A (never the same twice in a row) at the player with the volume p[2] or p[3], then varies the
+// pitch.
 void PlayPhaseCrossingSound(Player* self, f32* p, f32 f) {
     f32 old = self->stepPhase;
     f32 ang;
@@ -351,6 +363,10 @@ void SetTurningColliderRotation(TurningCollider* self, Mat02* rot)
 }
 
 
+// Copies the meshes as the base class does, then picks the vertex with the lowest z (stored as
+// lowestVertex) and replaces the last vertex by a probe vertex probeDepth below it, in the
+// collider's local frame; the probe vertex's index and its copy in world space are stored in
+// probeIndex and probeVertex.
 void CopyTurningColliderMeshesInFrame(TurningCollider* self, Collider* other, s32 mode)
 {
     Mat4 world;
@@ -388,6 +404,9 @@ void StepTurningCollider(TurningCollider* self, f32 dt)
 extern f32 g_frameDt;
 void AddColliderForce(void* target, void* slot);
 
+// Turns the collider toward its heading matrix at the current frame's step (turnGain), then, when
+// it follows a mesh, adds two constrained forces derived from cross products of its two angular
+// vectors with the arm from the ground contact point (or the probe vertex) to its position.
 void ApplyTurningColliderDrive(TurningCollider* self)
 {
     TurnColliderTowardRotation(self, g_frameDt, &self->headingMatrix, &self->turnGain);
@@ -413,6 +432,9 @@ void ApplyTurningColliderDrive(TurningCollider* self)
     AddColliderForce(self, &v);
 }
 
+// True when the contact counts as ground for the collider: it follows a mesh, the contact normal's
+// z (signed for the side) is at least 0.7, and the contact is of kind 1, 4 or 10 at the probe
+// vertex on the matching side.
 s32 IsTurningColliderGroundContact(TurningCollider* self, Contact03* a, s32 idx)
 {
     if (self->followedMesh == 0) {
@@ -594,6 +616,10 @@ static inline Vu0::Vec NormalizeOrElse(Vu0::Vec v, Vu0::Vec fallback)
     return r;
 }
 
+// Looks through the collider's contacts for ground (method 56 says which count) and keeps the one
+// with the smallest height of the collider above it, recording its time, point, normal and part. If
+// the collider follows a mesh it then drops its own part's contacts at the lowest or probe vertex
+// that cannot stay, turns steep side contacts into kind-10 contacts and frees the dropped ones.
 void CollectTurningColliderContacts(TurningCollider* self)
 {
     Contact03* freed = 0;
@@ -694,6 +720,10 @@ void CollideTurningColliderWithObject(TurningCollider* self, Collider* obj, void
 }
 
 
+// Tests the collider's probe vertex against another collider's tree and, if it hits, creates a
+// pooled contact of kind 1 (the probe vertex into the other's surface) or, for the other side of
+// the span, a kind-4 contact with the normal and depth flipped. Does nothing when no mesh is
+// followed.
 void AddTurningColliderProbeContact(TurningCollider* self, Collider* obj, void* filter, void* out)
 {
     if (self->followedMesh != 0) {

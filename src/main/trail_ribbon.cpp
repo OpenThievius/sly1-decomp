@@ -77,6 +77,10 @@ struct TrailFrame { Mat02 rot; Vec02 pos; };
 
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
 
+// Adds a point to the trail ring of a target object: the trail's edge offsets are turned by mat
+// (the target's frame by default) and added to pos, the motion of each edge in the target's root
+// frame gives the speed, and the speed sets the point's alpha and width; nothing is done without a
+// batch mode, a target or a time step.
 void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale, f32 dt)
 {
     Vec02 pts[2];
@@ -213,6 +217,9 @@ void QueueTrailRibbonDraw(TrailRing* self, u8* cam)
     }
 }
 
+// Draws the trail as a ribbon: starts a vertex batch with the ring's batch mode and the target's
+// lights, then goes through the ring's points from the oldest, giving each vertex a colour whose
+// alpha falls with its age (seconds since it was added), and flushes the batch.
 void DrawTrailRibbon(TrailOwner* self)
 {
     VertexBatch b;

@@ -73,6 +73,9 @@ struct StateGraph;
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void SetHitCountColliderState(PlacedObject* self, s32 state);
 
+// Start of the collider: starts the placed object, keeps its radius as the base radius, resolves
+// its links, creates the state walker, and records its heading and its aim object's heading; it
+// also points the two caption elements at its collected count and hits left.
 void StartHitCountCollider(HitCountCollider* self)
 {
     StartPlacedObject(self);
@@ -110,6 +113,9 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit);
 extern "C" f32 Cosine(f32 x);
 
+// Per-frame update of the hit-count collider: updates it as a switched collider, handles a
+// collected or touched object, plays the hit clip (each hit uses one of hitsLeft) and sets the step
+// scale and radius from the clip's progress. The accepted mark clears 2 s after it was set.
 void UpdateHitCountCollider(HitCountCollider* self, f32 t)
 {
     f32 buf[12];
@@ -216,6 +222,9 @@ void ShowHitCountColliderCounters()
 void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 void SetHitCountColliderState(PlacedObject* self, s32 state);
 
+// Per-frame control while the player drives the collider: with an object in f628 that has run out
+// (its value at 0x18 is 0) it calls m50 in state 2 or moves 3 to 4; outside state 1 it resets its
+// movement vector and handles the pad input.
 void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
 {
     void* obj = self->f628;
@@ -311,6 +320,9 @@ s32 IsHitCountColliderRequestBlocked(HitCountCollider* self)
 struct OwnerNotice { void* sender; void* owner; };
 void SetHitCountColliderState(PlacedObject* self, s32 state);
 
+// Handles a request to take over the collider: refused when m4B says so, replies to a mode 0
+// request, and when it is in state 2 to 4 or has a mark it just reports it accepted; otherwise,
+// with a spare available, it goes to state 2 and sets the accepted mark.
 s32 AcceptHitCountColliderRequest(HitCountCollider* self, OwnerMessage* arg)
 {
     OwnerNotice local;
@@ -380,6 +392,9 @@ struct ScatterController;
 f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out);
 void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
 
+// Changes the collider's state (the value at +0x610). Leaving state 2 records the time and sets a
+// mark; entering state 2 or 3 stores the opposite of the heading as the facing angle, and each new
+// state sets the state walker's target and its own values.
 void SetHitCountColliderState(PlacedObject* self, s32 state)
 {
     void* s2;
@@ -431,6 +446,9 @@ void AddHitCountColliderId(HitCountCollider* self, BaseObject* value)
 
 f32 RandomFloatInRange(f32 a, f32 b);
 
+// Puts an item object back into play: when it is not attached, picks the place point farthest from
+// the attached items (in x and y), fades the item in there and, for a class 0x21 item, gives it a
+// random velocity and spin; the item is kept in the collider's item array.
 void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj)
 {
     s32 i;

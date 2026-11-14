@@ -40,6 +40,9 @@ struct TwoEntryBlendEntry {
 struct BlendAnimation;
 struct Collider;
 
+// Builds the player's blend of its two path animation entries: samples the frame chain of each,
+// stores the value, builds the combined blend animation (kind 0x10, 2 entries) and sets the blend's
+// starting values from the average of two stored values.
 void CreatePlayerTwoEntryBlend(Player* self)
 {
     f32 out[4];
@@ -205,6 +208,9 @@ struct PathWatchTarget { u8 pad00[0x34]; f32 f34; };
 void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Mat02* b, const Vec02* wb, Mat02* out, Vec02* outW,
                             s32 unused6);
 
+// Moves the player one step along the path: places the goal pose on the path at the current
+// position, then turns the player's rotation to it with a spin blend (limited by the time left in
+// the sub-states 0x17 and 0x1B, otherwise it takes the placed pose directly).
 void StepPlayerOnPath(Player* self)
 {
     Mat02 placed;
@@ -269,6 +275,10 @@ static inline f32 NormalizeVector(Vec02& v, const Vec02& fallback)
     return Vu0::ToFloatMoved(len);
 }
 
+// Per-frame control of the player while it moves along a path object: reads the stick, turns it
+// into a direction along the path (reversed when the path is flipped), picks the player's sub-state
+// (0x19 and 0x1A for the two directions, 0x1B at the ends) and sets its speed and position along
+// the path.
 void ControlPlayerOnPath(Player* self, PathPad* pad)
 {
     PathObject* path = (PathObject*)self->aimCurve;
@@ -521,6 +531,10 @@ void SetPlayerPadSelectMode(Player* a0, s32 a1)
 }
 
 
+// Binds the player to a path object (or another): when the player was already on a path (state 7)
+// it sends the old one script event 3 and its leave method and the new one event 2 and its enter
+// method, then stores the path, clears the bound object and aim target, and places the player on
+// it.
 void SetPlayerPath(Player* self, PathObject* path)
 {
     Vec02 pos;

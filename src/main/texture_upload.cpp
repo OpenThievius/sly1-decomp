@@ -140,6 +140,9 @@ s32 AllocateBump(s32* self,s32 size)
     return old;
 }
 
+// Starts an image transfer to the GS: writes the BITBLTBUF (destination base, width and pixel
+// format), TRXPOS, TRXREG (width rrw, height rrh) and TRXDIR registers and the IMAGE tag for x
+// quadwords.
 void BeginImageTransfer(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx)
 {
     BeginGifTag((PacketWriter*)ctx, 0, 1, 0xE);
@@ -165,6 +168,8 @@ void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx)
     BeginImageTransfer(p, 1, 0, step, ((n + step) & -step) / step, e->blockCount, ctx);
 }
 
+// Fills the image record's TEX0 word: the base at a1, the buffer width and pixel format from the
+// record, texture width and height as the log2 of its sizes, and the colour component bit set.
 void BuildImageTexRegister(ImageRecord* self, u32 a1)
 {
     GsTex0* bits = (GsTex0*)&self->texWord;
@@ -181,6 +186,9 @@ void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx)
     BeginImageTransfer(dbp, d->f9, d->f8, d->f0, d->f2, d->blockCount, ctx);
 }
 
+// Gives every palette and image record whose mask contains mask its place in the bump allocator b
+// (builds its texture register) and, when the packet c is given, adds each one's upload to it.
+// Returns whether anything was placed.
 s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c)
 {
     s32 saved;
@@ -225,6 +233,9 @@ s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c)
     return (c->curS ^ saved) != 0;
 }
 
+// Sends the images selected by mask to the GS: PlaceMaskedImages into the given bump allocator and
+// a packet that the GIF reads (the closing register writes included). Nothing is done for a zero
+// mask.
 void SendMaskedImagesToGif(s32 self, BumpAllocator* arg)
 {
     TexturePacket f;
@@ -248,6 +259,9 @@ void SendMaskedImagesToGif(s32 self, BumpAllocator* arg)
     PopBackMemoryMark();
 }
 
+// Builds a stand-alone DMA packet that uploads the images selected by mask (PlaceMaskedImages in a
+// fresh bump allocator, then a GS register write and the end tag) and keeps it in the frame's out
+// pointer; returns that packet, or 0 when nothing was placed.
 s32 BuildMaskedImagesPacket(s32 self)
 {
     TextureUploadPacket f;
@@ -286,6 +300,10 @@ void SubmitMeshQueueEntry(FrameTarget* self)
     }
 }
 
+// Queues one mesh strip for the vector unit: picks a queue entry (the pool of 0x4000, or a local
+// one when the strip is shared with an animation cursor) and fills it with the count, destination
+// address, flag and the strip's data pointer at the cursor's frame, submits it and, for a linked
+// entry, records the link on the cursor.
 void QueueMeshStrip(StripMesh* a0, FrameSource* a1, s32 a2, s32 a3, s32 a4, AnimCursor* a5)
 {
     FrameTarget local;
@@ -401,6 +419,10 @@ void FlushMeshQueue(void)
     }
 }
 
+// Uploads, by the DMA, every palette and image record whose mask bits include mask: for each it
+// gives the record space in a bump allocator (0x1400 to 0x1E00), builds its texture register and an
+// upload packet, and sends it together with the record's data. The records' masks are then reset to
+// the loaded flag (0x40000000). Returns the result flag.
 s32 UploadImagesByMask(u32 mask)
 {
     BumpAllocator span;
@@ -477,6 +499,9 @@ s32 UploadImagesByMask(u32 mask)
     return res;
 }
 
+// Writes the GS registers that make a texture the render target: the frame and z buffers at the
+// texture's base (in 64-word blocks), the scissor from its width and height, and the test and alpha
+// state.
 void SetupTextureRenderTarget(TextureHeader* src, void* dst)
 {
     s32 w = 1 << (s32)((src->tex0 >> 26) & 0xF);

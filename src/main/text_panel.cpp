@@ -427,6 +427,9 @@ void InitCurveSpan(CurveSpan* d, const SpanHead* src, f32 x, f32 y, s32 n)
     d->q = src->c0 + 0.5f * (src->c1 + 0.5f * src->c2) + y;
 }
 
+// Evaluates a piecewise curve at integer x: outside its span (lo to hi) the quadratic of the span's
+// head coefficients at x/len, at the two ends the value p, and inside a straight line from p to q
+// at the middle and back to p.
 f32 EvalCurveSpan(const CurveSpan* s, s32 x)
 {
     if (x < s->lo || s->hi < x) {
@@ -554,6 +557,10 @@ struct PanelFont {
 f32 MeasureFontString(Font* font, const char* text);
 void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 
+// Draws the compass strip at the top of the screen: a dark backdrop, a row of eleven scrolling tick
+// marks (shifted by tickScroll), and the names of the three compass directions nearest the camera's
+// heading (eight directions, 45 degrees apart) side by side, the middle one coloured by how well
+// centred it is.
 void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
 {
     Layout_137228 L;
@@ -768,6 +775,10 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     PopFontScale(text);
 }
 
+// Draws the panel's centre frame into the GS packet: two curved bands above and below the centre in
+// colours blended along a travelling wave between the palette's two colours (palette 0 differs in
+// state 5) and, in states other than 5, rows of small tick strokes at the sides. It also advances
+// the spin angle, by 3 or by 6 when the second stick is moved.
 void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
 {
     PanelColor c0;
@@ -942,6 +953,10 @@ void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
     AddGifRegisterWrite(gs, 0x40, 0xDF0000027F0000);
 }
 
+// Draws the panel's four border strips into the GS packet, two above and two below the text area at
+// fixed screen positions: each strip is a quad strip of 24 steps whose edge height comes from the
+// curves g_panelEdgeCurveA and B, in colours that pulse between the two arc tick colours with the
+// spin angle.
 void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
 {
     PanelColor c0;
@@ -1177,6 +1192,10 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
     }
 }
 
+// Draws the four edge blocks of the panel in state 1, when the level's bit is set in the saved
+// world mask (and the markers first when bit 0x800 is): each block's strength is ramped toward 1
+// when something wanted is off screen on that side (set by CollectPanelEntriesOfClass), and its
+// colour pulses between three greys.
 void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q)
 {
     if (self->state == 1)
@@ -1219,6 +1238,8 @@ void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q)
     }
 }
 
+// Changes the panel's screen-element mode. Leaving mode 0 stops every animation player of the
+// object 0x495's list (speed 0) and entering mode 0 sets them all running again (speed 1).
 void SetTextPanelMode(T217D_440* self, s32 value)
 {
     if (value == self->mode) {
@@ -1251,6 +1272,8 @@ void SetTextPanelMode(T217D_440* self, s32 value)
     SetScreenElementMode(self, value);
 }
 
+// Changes the panel's state and stamps the time. Leaving state 0 clears the text, leaving state 1
+// plays sound 0x8F, entering state 1 plays 0x8E and entering state 4 resets the copied caption.
 void SetTextPanelState(T217D_440* self, s32 mode)
 {
     if (mode != self->state) {
@@ -1327,6 +1350,10 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void CopyMemory(void* dst, void* src, u32 size);
 void* CreateEffect(s32 kind, EffectOwner* sys);
 
+// Keeps the panel's markers for the objects of one class: gathers up to 0x80 of them, sorts them by
+// distance from the camera and, for each wanted one (state 1, among the nearest limit and in range,
+// for class 0x2E with its flag clear), sets the edge block of the side it is off screen on, or
+// starts a marker effect (kind 0x12) if visible. Markers of objects no longer wanted end.
 void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s32 limit, BaseObject* a5, f32 range)
 {
     PanelEntry entries[0x80];
@@ -1453,6 +1480,9 @@ void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag)
     self->bankState = state;
 }
 
+// Refreshes the panel's marker entries: releases them all when the level's bit is not set in the
+// saved world mask, and otherwise, with bankState 1, collects the markers of the object classes
+// 0x2E and 0x21 (up to five of each).
 void RefreshPanelEntries(T217D_440* self, PadRecord* pad)
 {
     LevelBit flag;
@@ -1470,6 +1500,10 @@ void RefreshPanelEntries(T217D_440* self, PadRecord* pad)
     }
 }
 
+// The panel's stick update: in state 1 eases the displayed stick point (stickX, stickY, up to 50
+// each way) toward the pads' stick (the sum of the two sticks' x, y flipped by the save option bit
+// 0x200) and scrolls the compass ticks by x; in state 5 it holds y at 50. Then it refreshes the
+// panel's entries.
 void UpdatePanelStick(T217D_440* self, PadRecord* p)
 {
     switch (self->state) {
@@ -1515,6 +1549,10 @@ void UpdatePanelStick(T217D_440* self, PadRecord* p)
 extern const StickLimits D_00249D00 = { 0x4248000042A00000ULL, 0x3F000000 };
 extern const StickLimits D_00249D10 = { 0x43480000437A0000ULL, 0x3DCCCCCD };
 
+// Opens or closes the text panel (nothing when it is already so): pauses or resumes the stream
+// voice of its child sequence, sets the palette to 0 and, on opening, runs method 0x16 with 2,
+// releases the saved bank's entries when the level's bit is set and resets the text points; on
+// closing it runs method 0x16 with 0, saves the bank state and releases the entries.
 void SetTextPanelOpen(T217D_440* self, s32 on)
 {
     LevelBit in;
@@ -1557,6 +1595,9 @@ void ResetTextPanel(T217D_440* self)
     }
 }
 
+// Sets the panel's text from a string (empty when null or empty): copies it, wraps it in lines at
+// 280 units wide (380 and a 0.8 font scale in state 4), records the index of each line break in
+// lineBreaks and stamps the time the text was set.
 void SetTextPanelText(T217D_440* self, const char* name)
 {
     TextScratch buf;

@@ -481,6 +481,9 @@ void LoadWalkerCollider(WalkerCollider* self, BufferedStream* stream)
     ResolveObjectLinks(self, 2, g_walkerColliderLoadLinks);
 }
 
+// Starts the walker collider: when it is enabled (f678), resolves its links, sets its anchors,
+// creates its state and sub-state walkers (if it has their graphs), gathers up to three effect
+// spawners (id 0x50) and enters state 2 and sub-state 0; otherwise the object is turned off.
 void StartWalkerCollider(WalkerCollider* self)
 {
     StartPlacedObject(self);
@@ -503,6 +506,9 @@ void StartWalkerCollider(WalkerCollider* self)
 
 extern const f32 g_walkerControlRamp[4] = { 30.0f, 0.0f, 0.2f, 0.0f };
 
+// Pad control of the walker collider: finishes the state animation player once it is done, reads
+// the stick input, sets the move offset from the heading and the stick length, and turns the
+// controlled object toward the aim heading with an angle ramp, in the walker's frame.
 void ControlWalkerCollider(WalkerCollider* self, PadRecord* src, f32 dt)
 {
     HeadingFrame f;
@@ -535,6 +541,10 @@ static inline u128 NormalizeOrLength(u128 v, u128 fallback, f32& length)
     return Vu0::DivX(v, len);
 }
 
+// Per-frame update of the walker collider: after the base update, when an animation drives it, it
+// takes the attachment's position and velocity (in state 3 it moves toward that position by a
+// ramp), sets them and the heading. It then steps the state and sub-state until
+// ChooseWalkerColliderState and ChooseWalkerColliderSubState agree, and clears the root tries.
 void UpdateWalkerCollider(WalkerCollider* self, f32 dt)
 {
     UpdateSwitchedCollider(self, dt);
@@ -613,6 +623,10 @@ s32 ChooseWalkerColliderState(WalkerCollider* self)
     return r;
 }
 
+// Switches the walker collider's state (nothing if unchanged): picks a sound for the walker's state
+// walker (0x28F or 0x290) and a looping sound (0x14D, or none for state 0), turns its effect
+// spawners on for state 0 and off otherwise, and for 2 and 3 starts an animation (state 3 also
+// begins the level exit).
 void SetWalkerColliderState(WalkerCollider* self, s32 n)
 {
     s32 old = self->state;
@@ -680,6 +694,9 @@ s32 ChooseWalkerColliderSubState(WalkerCollider* self)
     return r;
 }
 
+// Switches the walker collider's sub-state (nothing if unchanged): sends its sub-state walker to
+// key 0x293 (state 0) or 0x294 (state 1), and, for state 1, starts the looping sound 0x150 (state 0
+// has none), replacing the previous sound.
 void SetWalkerColliderSubState(WalkerCollider* self, s32 state)
 {
     s32 old = self->subState;
@@ -723,6 +740,9 @@ void SetWalkerColliderSubState(WalkerCollider* self, s32 state)
     StartSoundEffect(s1, (PlayingSound**)&self->subStateSound, self, 0, 10000.0f, 6000.0f, 1.0f, zero, zero, 0, 0);
 }
 
+// Handles notifications after the base handler: code 5 from the state animation player marks it as
+// done; code 0x13 with message 0x295 or 0x296 plays sound 0x152 at the collider and turns one of
+// its two effect spawners off.
 void HandleWalkerColliderNotification(WalkerCollider* self, s32 code, MessageBody* rec)
 {
     HandleSwitchedColliderNotification(self, code, rec);
@@ -804,6 +824,9 @@ void ComputeWalkerColliderContactValue(WalkerCollider* ctx, Contact03* obj)
     }
 }
 
+// Computes the collision response as the collider's does, but when the other object of the contact
+// is of kind 0x43 or 0x42 it first sets the mode at +0x450 to 1 and the up vector to the z axis for
+// that call, then restores both.
 void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     Vec02 s0;
@@ -842,6 +865,9 @@ extern const PairPose g_pairControllerPoseTable = { {
     { 0.0f, 1.0f, 0.0f, 0.0f }
 } };
 
+// Initialises the controller: its seven lists get the link offsets of the object kind they hold,
+// the ids and state are set to -1, the limit to 0x28, two pose tables are copied from the defaults
+// and the tuning values (1500, 2300, 1.46 and 3000) are set.
 void InitPairController(PairController* self)
 {
     PairPose tmp;
@@ -928,6 +954,10 @@ struct Controlled678 {
 };
 
 
+// After loading, only for the entry variant it belongs to: finds the objects it controls by id (a
+// watched object, two kinds of paired object, an optional target) and tells each its controller;
+// makes copies of the two paired objects (enough for the larger pose count) onto list374 and
+// list390, and finds for each of its ids a kind-0x44 object for list3A0.
 void ResolvePairControllerLinks(PairController* self)
 {
     PostLoadPlacedObject(self);
@@ -979,6 +1009,10 @@ void ResolvePairControllerLinks(PairController* self)
     }
 }
 
+// Starts the object and, if this is the entry variant it belongs to, blends its two tables of 48
+// values by a clamped quadratic of the current entry's time (poseOut = (1 - t) * poseA + t *
+// poseB), updates the tuning values at 0 and enters state 0; for another variant the object is
+// turned off.
 void BlendPairControllerPose(PairController* self)
 {
     StartPlacedObject(self);
@@ -1010,6 +1044,10 @@ void BlendPairControllerPose(PairController* self)
     }
 }
 
+// Per-frame update of the controller: after the placed object update it steps its state until
+// ChoosePairControllerState agrees. In state 2 it spawns paired objects (below the limit and once
+// the start time has come) and attaches them when the attach time has come; in state 5 it starts
+// the target creator once the link is not in its state 3.
 void UpdatePairController(PairController* self, f32 dt)
 {
     ObjectCreator* t;
@@ -1063,6 +1101,10 @@ void ShowPairControllerElement(PairController* self)
     }
 }
 
+// Chooses the controller's next state: 0 goes to 1 when the watched object's state is 1 or less, 1
+// to 2 when the link is not in its state 3, 2 to 3 once a transition is counted or to 5 when the
+// finished count reaches the limit, 3 to 4 when the link leaves its state 3, and 5 to 6 three
+// seconds after the target reached its state 3 (five seconds on with no target). 4 and 6 are final.
 s32 ChoosePairControllerState(PairController* self)
 {
     u32 s = self->state;
@@ -1099,6 +1141,10 @@ s32 ChoosePairControllerState(PairController* self)
 #define W(o, off) (*(s32*)((u8*)(o) + (off)))
 #define P(o, off) (*(void**)((u8*)(o) + (off)))
 #define O(o, off) (*(PairController**)((u8*)(o) + (off)))
+// Switches the controller's state: 1 shows a caption from object 0x33B (some entry variants); 2
+// points the count caption at the finished and limit counts and becomes the world's active
+// follower; 5 shows 0x33D, sets the active objects to state 8 and resets scatter levels; 3 shows
+// 0x33E, sets unpaired ones to 7; 4 opens pause page 0x1A; 6 sets the watched object to state 3.
 void SetPairControllerState(PairController* self, s32 state)
 {
     PairController* o;
@@ -1187,6 +1233,10 @@ static inline s32 IsNearSpotOf(const Vec02& pos, PairedObject* n, PairedObject* 
     return near;
 }
 
+// Brings one object of the free list (list374) into play unless the limit is reached. It tries up
+// to eight random points around the controller and takes the first not near the active collider or
+// any object of the active lists; the object is turned on there with a random heading, moved to the
+// active list, paired with the nearest waiting object, and the next start is scheduled.
 void SpawnPairedObject(PairController* self)
 {
     Vec02 pos;
@@ -1258,6 +1308,10 @@ void SpawnPairedObject(PairController* self)
     }
 }
 
+// Attaches one object of list390 to a random node of list3A0 (both move to their active lists)
+// unless the attach limit is reached (then the next attach time is the largest float). The object
+// is turned on at the node's position and orientation in state 1 with the controller's speed and
+// turn limits, sounds start and the next attach time is scheduled.
 void StartPairedObjects(PairController* self)
 {
     if (self->count39C >= self->attachLimit) {
@@ -1300,6 +1354,10 @@ void StartPairedObjects(PairController* self)
 #define F(o) (*(f32*)((u8*)self + (o)))
 #define I(o) (*(s32*)((u8*)self + (o)))
 #define P(o) ((const QuadraticCoeffs*)((u8*)self + (o)))
+// Recomputes the controller's current tuning values from pairs of start and end values (blended by
+// a clamped quadratic of dt each): the two delay ranges, two further ranges, two single values and
+// the two limits of active objects. When a limit rises while the old limit was reached, the next
+// start (or attach) time is scheduled at once.
 void UpdatePairControllerTuning(PairController* self, f32 dt)
 {
     f32 t0;
@@ -1340,6 +1398,10 @@ void UpdatePairControllerTuning(PairController* self, f32 dt)
 #undef I
 #undef P
 
+// Takes a finished hit target out of play: counts it as finished (and updates the controller's
+// tuning to the finished fraction), returns it to the free list, re-pairs its partner with the
+// nearest free object (state 3) or, if there is none, leaves it unpaired (state 2), turns it off,
+// and, where the limit had been reached, schedules the next start time.
 void RemoveFinishedHitTarget(PairController* self, HitTarget* obj)
 {
     s32 n = self->finishedCount + 1;
@@ -1405,6 +1467,10 @@ void ActivatePairedAttachment(void* unused, PairedObject* obj)
     SetSoundStateObjectState((SoundStateObject*)obj->attachment, 1);
 }
 
+// Ends a pairing: counts the transition, returns the partner to its free list (list374), the object
+// to list390 and the attachment node to list3A0 (and turns the node's state to 0), turns both
+// objects off, clears the links and, where a limit had been reached, schedules the next start and
+// attach times. Plays sound 0x51.
 void FinishPairedObjectTransition(PairController* self, PairedObject* obj)
 {
     self->transitionCount = self->transitionCount + 1;
@@ -1440,6 +1506,10 @@ void FinishPairedObjectTransition(PairController* self, PairedObject* obj)
     StartSoundEffect(0x51, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
+// Takes a paired object out of play: back to the list390 (and its attachment node to list3A0 and
+// state 0), its partner detached and returned to the free list (re-paired with the nearest waiting
+// object if there is one), the links cleared, the object turned off, and, where the attach limit
+// had been reached, the next attach time scheduled.
 void RemovePairedObject(PairController* self, PairedObject* obj)
 {
     RemoveFromList((List01*)self->list384, obj);
@@ -1470,6 +1540,8 @@ void RemovePairedObject(PairController* self, PairedObject* obj)
     self->count39C = self->count39C - 1;
 }
 
+// Pairs the object with the nearest (in xy) object of the free list list368: both become partners
+// and the found one moves to list35C. Gives 1, or 0 if the list is empty.
 s32 PairWithNearestFreeObject(void* self, void* child)
 {
     ListFrame frame;
@@ -1523,6 +1595,9 @@ void LinkPairedObjects(u8* self, PairedObject* obj, PairedObject* node)
     }
 }
 
+// Pairs the object with the nearest (in xy) attached object that has no partner and is in state 2:
+// both become partners, the object moves to list35C, and the other is put in state 3. Gives 1, or 0
+// if there is none.
 s32 PairWithNearestWaitingObject(void* self, void* child)
 {
     ListFrame frame;
@@ -1692,6 +1767,10 @@ static inline u128 Normalized(Vec02 v)
 static inline f32 MinF(f32 a, f32 b) { return a <? b; }
 
 
+// Steers the object toward goal in the horizontal plane without leaving the controller's circular
+// area (a goal outside is moved to 1.5 radii from the centre on the line it crosses). Facing more
+// than 3 degrees off it stops and turns; otherwise it moves at up to maxSpeed (backwards if asked)
+// and turns at up to maxTurn per second.
 void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 backwards)
 {
     Vec02 from;
@@ -1812,6 +1891,10 @@ s32 ChoosePairedObjectState(PairedObject* self)
     return s;
 }
 
+// Switches the paired object's state: stops its animation player and state walker, runs the old
+// state's exit action (release the attachment from 1, activate it from 5 to 6, finish the
+// transition from 6 to 0, remove from 9), then starts what the new state needs: an animation (roam,
+// attach, paired or remove, with the partner bound by key 0x2A0) or the state graph of 7 or 8.
 void SetPairedState(PairedObject* self, s32 mode)
 {
     TargetBinding buf[2];
@@ -1878,6 +1961,10 @@ void SetPairedState(PairedObject* self, s32 mode)
     if (s3) self->soundHandle = CreateStateWalker((StateGraph*)s3, self, -1, 1);
 }
 
+// Handles a hit event (flag 0x20) on a paired object: from most states it goes to state 9
+// (removal), from state 6 it takes its partner target to state 9 as well. When it has reached state
+// 9 it sends its notify record a message (kind 6, with the hit's vectors, 3000 above in z) and
+// plays sound 0x37. Gives whether the event had any flags.
 s32 HandlePairedHit(PairedObject* o, ObjectEvent* ev) {
     if (ev->eventFlags & 0x20) {
         switch (o->state) {
@@ -1962,6 +2049,10 @@ void StartHitTarget(HitTarget* self)
     self->desc->m03(self);
 }
 
+// Per-frame update of the hit target: after the base update it steps its state until
+// ChooseHitTargetState agrees, then drives the effect spawner of its scaled object from the upward
+// speed: stopped while the object is not falling, otherwise its interval range scaled by a clamped
+// quadratic of the speed.
 void UpdateHitTarget(HitTarget* self, f32 dt)
 {
     UpdateCollider(self, dt);
@@ -2012,6 +2103,10 @@ void ComputeHitTargetContactValue(HitTarget* self, Contact03* obj)
     obj->bounce = obj->bounce * 0.6f;
 }
 
+// Handles a hit event on a hit target: if the event has flag 0x10, the target has no parent, is not
+// in state 9 and its hit interval has passed, it steps to the next state; at the hit limit it goes
+// to state 9, sends its notify record a message (kind 6, with the hit's vectors, 1000 above in z)
+// and plays sound 0x23, otherwise it plays sound 0x14F. Gives whether the event had any flags.
 s32 ApplyHitTargetHit(HitTarget* self, ObjectEvent* ev)
 {
     s32 st;
@@ -2198,6 +2293,9 @@ static inline void SetDirectionOr(Vec02& dir, u128 d, const Vec02& fallback)
     }
 }
 
+// Per-frame update of the creator: after the base update it steps its state until it agrees with
+// ChooseObjectCreatorState; in state 2 it flies the created object toward the point of the object
+// it creates for, at a speed taken from a ramp (limit 3000) and turned to face it.
 void UpdateObjectCreator(ObjectCreator* self, f32 dt)
 {
     Vec02 dir;
@@ -2223,6 +2321,9 @@ void UpdateObjectCreator(ObjectCreator* self, f32 dt)
     }
 }
 
+// Switches the creator's state (nothing if unchanged): stops its animation player; state 1 starts
+// its start animation and sends its notify record a message (kind 4, with its position); state 2
+// calls method 0x15 and 0x2F on the created object.
 void SetObjectCreatorState(ObjectCreator* self, s32 idx)
 {
     if (self->state != idx) {
@@ -2303,6 +2404,10 @@ void RequestPadPattern(PadPatternPlayer* self, s32 a1, s32 a2)
     self->slot = a2;
 }
 
+// Steps the vibration pattern player once per frame: in state 2 it counts down the step and total
+// times and, at the end of a step, goes on to the next one (wrapping) and sends its two actuator
+// bytes to the pad; when the total time is used up it goes to state 3. In states 3 and 4 it stops
+// the output while the step time lasts, then changes state (to 1 from state 3).
 void UpdatePadPattern(PadPatternPlayer* s)
 {
     f32 dt = g_gameClock[5];

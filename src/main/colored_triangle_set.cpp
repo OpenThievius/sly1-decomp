@@ -87,6 +87,9 @@ void InitColoredTriangles(ColoredTriangleSet* self)
     g_coloredTriangleSet = self;
 }
 
+// Reads a coloured triangle set from a stream: its property records, its points (x, negated y, w =
+// 1), the bounds, and five lists of triangles as point indexes, each list's colour taken from the
+// animated record 0x48E plus the list number (halved), or grey when there is none.
 void LoadColoredTriangles(ColoredTriangleSet* self, Stream8E* rd)
 {
     s32 i;
@@ -134,6 +137,8 @@ void LoadColoredTriangles(ColoredTriangleSet* self, Stream8E* rd)
     }
 }
 
+// Draws the triangle lists 4 down to 1 of a set at the screen position (a, b), scaled by c and with
+// alpha d: groups 3 and 4 in one fixed grey, groups 1 and 2 in a fixed blue.
 void DrawTriangleGroups(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d)
 {
     f32 sp[16];
@@ -200,6 +205,10 @@ struct BlendColor {
 SwitchedCollider* GetActiveSwitchedCollider(void);
 extern Camera* g_camera;
 
+// Draws the five coloured triangle lists of a set (the last first) as GS triangles, scaled about a
+// centre from full size at t = 0 to a small one at t = 1 and faded in over the first 0.4 of t; the
+// centre follows the active collider's projected position, clamped to the screen, when its target
+// is in state 2. When visible it adds a box between the bounds, with a fading outline at the end.
 void DrawColoredTriangles(ColoredTriangleSet* self, f32 t)
 {
     f32 mat[16];

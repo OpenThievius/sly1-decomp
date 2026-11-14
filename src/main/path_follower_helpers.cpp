@@ -206,6 +206,9 @@ void CountDownPathFollowerLap(PathFollower* self)
     }
 }
 
+// Records the follower's race progress: from its lap and marker (3 markers per lap, a tenth each,
+// kept 0..1) it raises the scatter levels when it is in the first places (or the place's bit is set
+// in the entry), and then goes on with the places behind it.
 void RecordPathFollowerProgress(PathFollower* self)
 {
     f32 lo = 0.0f;
@@ -308,6 +311,9 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
 struct PlayingSound;
 extern const Vec02 g_unitXVector;
 
+// Per-frame update of the follower's engine sound (when its sound is playing): eases a speed value
+// toward the target speed (as a 0..1 fraction of g_followerSoundSpeedScale) and derives the sound's
+// pitch and volume from it and from how much of the velocity is along the follower's forward axis.
 void UpdatePathFollowerSound(PathFollower* self, f32 dt)
 {
     typedef Vu0::Vec Vec;
