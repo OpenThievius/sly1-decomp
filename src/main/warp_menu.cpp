@@ -544,7 +544,12 @@ INCLUDE_DATA(D_00275BC4);
 // size: s32 read as one word (pooled_object.cpp and screen_element.cpp test bit 8)
 // size: s32 compared with 1 in item_column.cpp and 2 in pause_menu.cpp
 s32 D_00275BEC = 0;
-s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };
+// size: s32, the element stack's resumeState (+0x30): compared with 1 and 2 in pause_menu.cpp and
+// screen_element.cpp, with the style in this file
+s32 D_00275BF0 = 0;
+// Unread and unexplained: a zero word and the table {3, 10, 6, 63, 3, 11, 5, 31} follow it up to
+// D_00275C18, which nothing reads; their bytes come from the disassembly.
+INCLUDE_DATA(D_00275BF4);
 f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 f32 D_00275C28[3] = { 1.0f, 0.0f, 0.1f };
 s32 D_00275C34 = 0;
@@ -4211,7 +4216,7 @@ L0374:
 
 L038C:
     {
-        if (self->style == D_00275BF0[0]) {
+        if (self->style == D_00275BF0) {
             s32 idx = g_previousLevelIndex;
             if (idx != -1) {
                 g_mapScreenList.current = g_mapScreenList.nodes[idx];
@@ -4252,7 +4257,7 @@ void StartObjectFade(IdentityKey* obj, s32 value, s32 count)
 
 s32 GetCurrentWarpEntry(void)
 {
-    if (D_00275BF0[0] != 2) {
+    if (D_00275BF0 != 2) {
         return g_saveData->f19DC;
     }
     return 10;
@@ -4488,7 +4493,7 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
                 target = GetCurrentWarpEntry();
             }
             Animation* anim = self->entries[target].f00;
-            if (D_00275BF0[0] != 2) {
+            if (D_00275BF0 != 2) {
                 self->entries[GetCurrentWarpEntry()].f10 = 0.0f;
                 self->entries[self->cursor].f10 = 1.0f;
                 self->entries[self->cursor].f08 = 1.0f;
