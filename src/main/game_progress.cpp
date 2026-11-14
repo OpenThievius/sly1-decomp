@@ -967,7 +967,7 @@ void RegisterObjectGroup(World* self, FoundList* group)
 void RemoveValueFromArray(CountedArray* list, void** arr, void* value)
 {
     s32 i = list->count;
-    void** p = (void**)(((s32)i << 2) + (s32)arr);
+    void** p = (void**)(i * sizeof(void*) + (uptr)arr);
     i--;
     for (;;)
     {
@@ -982,7 +982,7 @@ void RemoveValueFromArray(CountedArray* list, void** arr, void* value)
         }
         i--;
     }
-    (void)MoveMemory(arr, arr + 1, (list->count - i) * 4 - 4);
+    (void)MoveMemory(arr, arr + 1, (list->count - i) * sizeof(void*) - sizeof(void*));
     list->count--;
 }
 
@@ -1654,7 +1654,7 @@ void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
         for (s32 i = 0; i < dst->faceCount; i++) {
             u8* face = (u8*)dst->faces + (i << 5);
             TransformByMatrixWithW((const Quad16*)matrix, (const Vec02*)face, 0.0f, (Vec02*)face);
-            Vec02* vert = (Vec02*)((*(u16*)(face + 0x1E) << 4) + (s32)dst->verts);
+            Vec02* vert = (Vec02*)((*(u16*)(face + 0x1E) << 4) + (uptr)dst->verts);
             *(u32*)(face + 0x10) = Vu0::ToBits(Vu0::Dot(Vu0::Q(*(Vec02*)face), Vu0::Q(*vert)));
             Vec02* p = &((Vec02*)dst->points)[i];
             TransformByMatrixWithW((const Quad16*)matrix, p, 1.0f, p);
@@ -1664,17 +1664,17 @@ void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
 
 s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out)
 {
-    s32 buf[4];
+    sptr buf[4];
 
     PushBackMemoryMark();
     u8* k = AllocateBackMemory(src->count * 12);
-    buf[0] = (s32)k;
+    buf[0] = (sptr)k;
     if (QueryPlaneTreePoint((PlaneTreeNode*)src->base, (Vec02*)(dst->base + key * 16), 1.0f, (PlaneTreeOutput*)buf) != 2) {
         PopBackMemoryMark();
         return 0;
     }
     s32 i = 0;
-    s32 n = (((s32)buf[0] - (s32)k) * (s32)0xAAAAAAAB) >> 2;
+    s32 n = ((s32)(buf[0] - (sptr)k) * (s32)0xAAAAAAAB) >> 2;
     s32 j = 0;
     if (n > 0) {
         for (; i < n; i++) {
@@ -1683,7 +1683,7 @@ s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 ma
             if (p == 0) {
                 continue;
             }
-            KeyedEdge** o = (KeyedEdge**)(j * 4 + (s32)out);
+            KeyedEdge** o = (KeyedEdge**)(j * sizeof(KeyedEdge*) + (uptr)out);
             while (p != 0) {
                 if (key == p->k0 || key == p->k1) {
                     s32 m;

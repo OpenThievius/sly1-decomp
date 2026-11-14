@@ -201,7 +201,7 @@ extern u8 g_screenFade[];
 extern s32 g_discSectorCheckState;
 
 void SetScreenOwner(s32 v);
-void* InitStreamReader(StreamReader* o, u8* d);
+StreamReader* InitStreamReader(StreamReader* o, u8* d);
 struct GameClock;
 s32 OpenSectorStreamRange(StreamReader* self, KeyId* pair);
 void ClearPadPressedBits(PadRecord* self, u32 mask);

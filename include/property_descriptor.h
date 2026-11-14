@@ -25,16 +25,16 @@ struct PropertyDescriptor {
     };
     union {
         void (*setter)(ScriptValue* ret, void* obj, s32 n, ScriptValue* args); // 0x0C: given the values read
-        s32 getter;         // 0x0C: when read (func_001C15D8): the field's offset (flags 2), the
+        sptr getter;        // 0x0C: when read (func_001C15D8): the field's offset (flags 2), the
                             // getter's offset in the object's table, or (flags 4) the getter
     };
-    s32 f10;                // 0x10: func_001C15D8 (flags 1) keeps it in a property reference
+    sptr f10;               // 0x10: func_001C15D8 (flags 1) keeps it in a property reference
     union {
         s32 argCount;       // 0x14: how many values the setter takes
-        s32 putter;         // 0x14: when written (func_001C1F20): the field's offset (flags 0x10),
+        sptr putter;        // 0x14: when written (func_001C1F20): the field's offset (flags 0x10),
                             // the setter's offset in the object's table, or (flags 0x20) the setter
     };
-    s32 offset;             // 0x18: of the field (or of the method slot) in the target
+    sptr offset;            // 0x18: of the field (or of the method slot) in the target
     PropertyTarget target;  // 0x1C: the object holding the field, when set
 };
 

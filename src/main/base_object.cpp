@@ -28,7 +28,7 @@ struct Mat02;
 
 void SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value); // stays void: retail returns a ScriptValue by value through the hidden pointer, a call with no value register, which a pointer return changes in func_00183A90 and func_00183C38
 
-ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, s32* vals);
+ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, sptr* vals);
 
 int AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 
@@ -626,7 +626,7 @@ void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out)
     MarkPoolLiveEnds((MarkStacks*)g_markStacks);
     if (SuppressScriptEvent(self, idx, flag, out) == 0) {
         if (flag != 0) {
-            BuildScriptListFromPairs(&tmp, flag, (s32*)g_scriptEventPairs + g_scriptEventOffsets[idx], (s32*)out);
+            BuildScriptListFromPairs(&tmp, flag, (s32*)g_scriptEventPairs + g_scriptEventOffsets[idx], (sptr*)out);
             AssignScriptValue(&r, &tmp);
             DestroyScriptValue(&tmp, 2);
             a4 = (s32)r.p;

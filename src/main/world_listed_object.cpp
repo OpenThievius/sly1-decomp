@@ -232,20 +232,20 @@ void ReleaseWorldListedObject(WorldListedObject* self)
 {
     WorldListedObject* obj = self;
     WordListFrame fr;
-    s32 e = (s32)&obj->members.head;
+    sptr e = (sptr)&obj->members.head;
     fr.list = e;
     fr.link = e;
-    s32 old = *(s32*)&g_activeListFrames;
+    sptr old = *(sptr*)&g_activeListFrames;
     s32 link = *(s32*)(e + 8);
     fr.prev = old;
     fr.offset = link;
-    *(s32*)&g_activeListFrames = (s32)&fr;
-    s32 head = obj->members.head;
+    *(sptr*)&g_activeListFrames = (sptr)&fr;
+    sptr head = obj->members.head;
     fr.link = head + fr.offset;
-    s32 node = head;
+    sptr node = head;
     while (node != 0) {
         DetachOwnedRecord((OwnedRecord*)node);
-        s32 nx = *(s32*)fr.link;
+        sptr nx = *(sptr*)fr.link;
         fr.link = nx + fr.offset;
         node = nx;
     }
@@ -253,7 +253,7 @@ void ReleaseWorldListedObject(WorldListedObject* self)
     AppendToList(&g_deferredReleaseListA, self);
 
     UnregisterPlacedObject(self);
-    *(s32*)&g_activeListFrames = fr.prev;
+    *(sptr*)&g_activeListFrames = fr.prev;
 }
 
 
@@ -540,16 +540,16 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
     Quadratic16 hi = {{-3.4028235e+38f}, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
     Vec02 mat[4];
     WordListFrame fr;
-    s32 e = (s32)&self->members.head;
+    sptr e = (sptr)&self->members.head;
     fr.list = e;
     fr.link = e;
-    s32 old = *(s32*)&g_activeListFrames;
+    sptr old = *(sptr*)&g_activeListFrames;
     s32 link = *(s32*)(e + 8);
     fr.prev = old;
     fr.offset = link;
-    *(s32*)&g_activeListFrames = (s32)&fr;
+    *(sptr*)&g_activeListFrames = (sptr)&fr;
     TurnMatrixBySpin((SpinRecord_158480*)((u8*)self + 0x330), dt, (f32*)mat);
-    s32 head = *(s32*)fr.link;
+    sptr head = *(sptr*)fr.link;
     fr.link = head + fr.offset;
     OwnedRecord* node = (OwnedRecord*)head;
     Vec02* p = node->points[node->bank];
@@ -561,7 +561,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
         SprTransfer* t = &g_sprTransfers[g_sprTransferIndex];
         t->state = 2;
         OwnedRecord* next = *(OwnedRecord**)fr.link;
-        fr.link = (s32)next + fr.offset;
+        fr.link = (sptr)next + fr.offset;
         if (next != 0) {
             p = next->points[next->bank];
             StartToSprChain(next->count * 16, p, next->count * 16, p + 0x2C, next->count * 16, p + 0x58, 0, 0);
@@ -591,7 +591,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
         self->desc02()->m1D(self, &center);
         self->f2A4 = self->boundRadius = Vu0::Distance(center, *(Vec02*)&hi);
     }
-    *(s32*)&g_activeListFrames = fr.prev;
+    *(sptr*)&g_activeListFrames = fr.prev;
 }
 
 extern f32 g_gameClock[];
@@ -625,15 +625,15 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
     Quadratic16 lo = {{3.4028235e+38f}, 3.4028235e+38f, 3.4028235e+38f, 0.0f};
     Quadratic16 hi = {{-3.4028235e+38f}, -3.4028235e+38f, -3.4028235e+38f, 0.0f};
     WordListFrame fr;
-    s32 e = (s32)&self->members.head;
+    sptr e = (sptr)&self->members.head;
     fr.list = e;
     fr.link = e;
-    s32 old = *(s32*)&g_activeListFrames;
+    sptr old = *(sptr*)&g_activeListFrames;
     s32 link = *(s32*)(e + 8);
     fr.prev = old;
     fr.offset = link;
-    *(s32*)&g_activeListFrames = (s32)&fr;
-    s32 head = *(s32*)fr.link;
+    *(sptr*)&g_activeListFrames = (sptr)&fr;
+    sptr head = *(sptr*)fr.link;
     fr.link = head + fr.offset;
     OwnedRecord* node = (OwnedRecord*)head;
     while (node != 0) {
@@ -687,7 +687,7 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
         } else {
             node->bank = nb;
         }
-        s32 next = *(s32*)fr.link;
+        sptr next = *(sptr*)fr.link;
         fr.link = next + fr.offset;
         node = (OwnedRecord*)next;
     }
@@ -699,7 +699,7 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
         self->desc02()->m1D(self, &center);
         self->f2A4 = self->boundRadius = Vu0::Distance(center, *(Vec02*)&hi);
     }
-    *(s32*)&g_activeListFrames = fr.prev;
+    *(sptr*)&g_activeListFrames = fr.prev;
 }
 
 struct DeferredRadiusRequest { void (*fn)(void* self); s32 zero; s32 count; u8 pad0[0x50 - 0x0C]; f32 radius; u8 pad1[0x60 - 0x54]; void* owner; u8 pad2[0x80 - 0x64]; };

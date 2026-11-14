@@ -132,7 +132,7 @@ void InitPadRecord(PadRecord* self, s32 a, s32 b)
     SetPadConnectionState(self, 1, 0);
     self->port = a;
     self->slot = b;
-    u8* buffer = (u8*)(((s32)ReservePermanentMemory(0x140) + 0x3F) & -0x40);
+    u8* buffer = (u8*)(((sptr)ReservePermanentMemory(0x140) + 0x3F) & -0x40);
     self->buffer = buffer;
     OpenPadPort(self->port, self->slot, buffer);
     self->patternPlayer = ReservePermanentMemory(0x20);

@@ -230,7 +230,7 @@ extern u8 func_00135E40[];
 struct LevelBit { s32 v; };
 void GetCurrentLevelBit(u32* out);
 s32 MaskWorldBitsBySave(void);
-void CollectPanelEntriesOfClass(T217D_440* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
+void CollectPanelEntriesOfClass(T217D_440* self, s32 a1, void* a2, void* a3, s32 a4, BaseObject* a5, f32 f);
 
 struct StickLimits { u64 a __attribute__((packed)); u32 b; };
 typedef u64 Quad_136040 __attribute__((mode(TI)));
@@ -1335,7 +1335,7 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void CopyMemory(void* dst, void* src, u32 size);
 void* CreateEffect(s32 kind, EffectOwner* sys);
 
-void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s32 limit, s32 a5, f32 range)
+void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s32 limit, BaseObject* a5, f32 range)
 {
     PanelEntry entries[0x80];
     void* objs[0x80];
@@ -1405,7 +1405,7 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
             if (fx != 0) {
                 mayStart = 0;
                 (*(void (**)(void*, PanelEntryPosition*, s32, f32))*(void**)fx)(fx, &e->v, 0, 1.0f);
-                *(s32*)((u8*)fx + 0x20) = a5;
+                *(BaseObject**)((u8*)fx + 0x20) = a5;
                 *(void**)((u8*)fx + 0x130) = a3;
                 *(void**)((u8*)fx + 0x134) = e->obj;
                 SetEffectPhase((Effect*)fx, 0);
@@ -1473,8 +1473,8 @@ void RefreshPanelEntries(T217D_440* self, PadRecord* pad)
     if (self->bankState == 1) {
         f32 k = 3.4028235e38f;
         World* world = g_currentWorld;
-        CollectPanelEntriesOfClass(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, (s32)world->slot1CE8[23], k);
-        CollectPanelEntriesOfClass(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (s32)(g_currentWorld)->slot1CE8[27], k);
+        CollectPanelEntriesOfClass(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, world->slot1CE8[23], k);
+        CollectPanelEntriesOfClass(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (g_currentWorld)->slot1CE8[27], k);
     }
 }
 

@@ -52,6 +52,12 @@ struct __attribute__((packed)) U32P {
     u32 v;                  // 0x00
 };
 
+// A pointer read and written with lwl/lwr, as U32P reads a word (a caption's child:
+// SetPairControllerState, StartWarpPage).
+struct __attribute__((packed)) PtrP {
+    void* v;                // 0x00
+};
+
 // A doubleword read and written with ldl/ldr (U64_12A678, U64_1626C0, Pk8_2195).
 struct __attribute__((packed)) U64P {
     u64 v;                  // 0x00

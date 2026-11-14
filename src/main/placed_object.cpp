@@ -1000,18 +1000,18 @@ void InitStateTrigger(StateTrigger* self)
 void StartStateTrigger(StateTrigger* self)
 {
     WordListFrame fr;
-    s32 s0;
+    sptr s0;
     AppendQueuedCall(self->world, (void*)ResolveStateTriggerObjects, self, 0, 0);
     StartPlacedObject(self);
-    s32 e = (s32)&self->children;
+    sptr e = (sptr)&self->children;
     fr.link = e;
     fr.list = e;
     s32 link = *(s32*)(e + 8);
-    s32 old = (s32)g_activeListFrames;
+    sptr old = (sptr)g_activeListFrames;
     fr.prev = old;
     fr.offset = link;
     g_activeListFrames = (ListFrame*)&fr;
-    s32 head = *(s32*)e;
+    sptr head = *(sptr*)e;
     fr.link = head + fr.offset;
     s0 = head;
     if (s0 != 0) {
@@ -1021,7 +1021,7 @@ void StartStateTrigger(StateTrigger* self)
                     self->found558 = (void*)s0;
                 }
             }
-            s32 nx = *(s32*)fr.link;
+            sptr nx = *(sptr*)fr.link;
             fr.link = nx + fr.offset;
             s0 = nx;
         } while (s0 != 0);
@@ -1548,8 +1548,8 @@ void StartPlacedObject(PlacedObject* self)
     WordListFrame fr;
     Key02* k;
     BaseObject* s0;
-    s32 old = (s32)g_activeListFrames;
-    s32 e = (s32)&self->children;
+    sptr old = (sptr)g_activeListFrames;
+    sptr e = (sptr)&self->children;
     fr.list = e;
     fr.link = e;
     fr.offset = *(s32*)(e + 8);
@@ -1603,13 +1603,13 @@ void StartPlacedObject(PlacedObject* self)
     }
     self->keys = 0;
     {
-        s32 head = *(s32*)fr.link;
-        s32 p;
+        sptr head = *(sptr*)fr.link;
+        sptr p;
         fr.link = head + fr.offset;
         p = head;
         while (p != 0) {
             ((BaseObject*)p)->desc->m10((BaseObject*)p);
-            s32 nx = *(s32*)fr.link;
+            sptr nx = *(sptr*)fr.link;
             fr.link = nx + fr.offset;
             p = nx;
         }
@@ -1686,26 +1686,26 @@ void UpdateObjectTree(void* self, f32 f)
     if (IsObjectAttached((BaseObject*)self) == 0) {
         return;
     }
-    s32 e = (s32)&obj->children;
+    sptr e = (sptr)&obj->children;
     fr.list = e;
     fr.link = e;
-    s32 old = *(s32*)&g_activeListFrames;
+    sptr old = *(sptr*)&g_activeListFrames;
     s32 link = *(s32*)(e + 8);
     fr.prev = old;
     fr.offset = link;
-    *(s32*)&g_activeListFrames = (s32)&fr;
-    s32 head = (s32)obj->children.head;
+    *(sptr*)&g_activeListFrames = (sptr)&fr;
+    sptr head = (sptr)obj->children.head;
     fr.link = head + fr.offset;
     BaseObject* node = (BaseObject*)head;
     while (node != 0) {
         if ((node->desc->flags & 1) != 0) {
             UpdateObjectTree(node, saved);
         }
-        s32 nx = *(s32*)fr.link;
+        sptr nx = *(sptr*)fr.link;
         fr.link = nx + fr.offset;
         node = (BaseObject*)nx;
     }
-    *(s32*)&g_activeListFrames = fr.prev;
+    *(sptr*)&g_activeListFrames = fr.prev;
 }
 
 void UpdatePlacedObject(PlacedObject* self, f32 f)
@@ -5958,22 +5958,22 @@ void StopAnimationPlayer(AnimationPlayer* self)
         RemoveFromList((List01*)(base + 0x1B64), self);
     }
     AppendToList((List01*)(base + 0x1B7C), self);
-    s32 s0 = (s32)self + 0xC;
-    s32 e = (s32)self + 0x44;
+    sptr s0 = (sptr)self + 0xC;
+    sptr e = (sptr)self + 0x44;
     fr.link = e;
     fr.list = e;
     s32 link = *(s32*)(e + 8);
-    fr.prev = (s32)g_activeListFrames;
+    fr.prev = (sptr)g_activeListFrames;
     g_activeListFrames = (ListFrame*)&fr;
     fr.offset = link;
-    s32 head = *(s32*)e;
+    sptr head = *(sptr*)e;
     fr.link = head + fr.offset;
-    s32 a = head;
+    sptr a = head;
     if (a != 0) {
         do {
             Attachment* el = (Attachment*)a;
             el->vt->release(el, 7);
-            s32 nx = *(s32*)fr.link;
+            sptr nx = *(sptr*)fr.link;
             fr.link = nx + fr.offset;
             a = nx;
         } while (a != 0);
@@ -6554,10 +6554,10 @@ void AddIdFilterObjectId(IdFilterObject* a0, s32 a1)
 
 void AddIdFilterClassId(IdFilterObject* obj, s32 value) { obj->classIds.items[obj->classIds.count++] = value; }
 
-StreamReader* InitStreamReader(StreamReader* obj, s32 value)
+StreamReader* InitStreamReader(StreamReader* obj, u8* value)
 {
     obj->sector = 0;
-    obj->buffer = (value + 0x3F) & -64;
+    obj->buffer = ((sptr)value + 0x3F) & -64;
     obj->fileHandle = -1;
     obj->pendingDest = 0;
     obj->readyStart = 0;
@@ -6584,7 +6584,7 @@ LINKER_REMNANT(func_0012FD98);
 
 s32 OpenSectorStream(StreamReader *self, s32 a1, s32 a2) {
     self->sector = a1;
-    s32 t = self->buffer;
+    sptr t = self->buffer;
     self->total = a2;
     self->remaining = a2;
     self->sourceKind = 1;
@@ -6626,7 +6626,7 @@ void StartChunkRead(StreamReader* self)
     if (!(size > 0x3FFF)) {
         clamp = size;
     }
-    s32 base = self->buffer;
+    sptr base = self->buffer;
     if (self->readyStart == base) {
         base += 0x4000;
     }

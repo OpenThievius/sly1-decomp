@@ -20,10 +20,10 @@ struct StreamReader {
         void* sectorRef;    // 0x08: the same word handed to func_00140CC8
     };
     s32 pendingLength;      // 0x0C: bytes of the read in flight (at most 0x4000), 0 when none
-    s32 pendingDest;        // 0x10: where that read lands: one of the buffer's two 0x4000-byte halves
-    s32 buffer;             // 0x14: the buffer's address (the set-up argument aligned to 64)
+    sptr pendingDest;       // 0x10: where that read lands: one of the buffer's two 0x4000-byte halves
+    sptr buffer;            // 0x14: the buffer's address (the set-up argument aligned to 64)
     s32 readyLength;        // 0x18: bytes the last finished read delivered
-    s32 readyStart;         // 0x1C: where they are (the buffer's first half, or the second)
+    sptr readyStart;        // 0x1C: where they are (the buffer's first half, or the second)
     s32 usedLength;         // 0x20: how many of them have been consumed
     s32 remaining;          // 0x24: bytes still to read
     s32 total;              // 0x28: bytes to read in all

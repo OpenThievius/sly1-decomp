@@ -1197,10 +1197,10 @@ void SetPairControllerState(PairController* self, s32 state)
                 }
             }
         }
-        s32 w = W(self, 0x658);
+        void* w = P(self, 0x658);
         if (w) {
             T217D_440* box = &g_typedTextCaptionBox;
-            ((U32P*)&box->child)->v = w;
+            ((PtrP*)&box->child)->v = w;
             PushStackElement((ElementStack*)g_elementStack, box);
         }
         break;
