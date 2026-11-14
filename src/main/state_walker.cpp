@@ -21,90 +21,47 @@
 #include "vu0.h"
 #include "game_clock.h"
 #include "object_finder.h"
+#include "functions/agent.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/buffered_stream.h"
+#include "functions/effect_spawner.h"
+#include "functions/flagged_object.h"
+#include "functions/game_progress.h"
+#include "functions/placed_object.h"
+#include "functions/placed_object_model.h"
+#include "functions/pooled_object.h"
+#include "functions/sound_system.h"
+#include "functions/state_walker.h"
+#include "functions/text_format.h"
+#include "functions/warp_menu.h"
 
-f32 RandomFloatInRange(f32 a, f32 b);
 extern f32 g_gameTime;
 // Two floats (CopyVec2).
 struct Point2 { f32 x; f32 y; };
-void SetAnimationPlayerSpeed(AnimationPlayer* self, f32 speed);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
-void SetColliderFrozen(Collider* self, s32 flag);
 struct SoundLevelEntry;
-void ReleaseSoundLevel(SoundLevelEntry* self);
-void NotifyStateWalkerChange(StateWalker* self, s32 a, s32 b);
-void CommitStateWalkerArrival(StateWalker* self);
-void StartNextStateWalkerEdge(StateWalker* self);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 // A free slot of a world pool (Pool6C): its first word links the next.
 struct FreeSlot { FreeSlot* next; };
-void* PopFreeSlot(Pool6C* pool);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void AppendToList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
-void StartObject(BaseObject* self);
 struct T219CHook;
 struct World;
-void SpawnInitialStateWalker(StateGraph* self);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
-s32 FindStateEntryIndex(StateGraph* self, s32 key);
-void StopAnimationPlayer(AnimationPlayer* self);
 void ReleaseCallRecords(World* self, T219CHook* node);
-void RemoveFromList(List01* list, void* item);
-void PushFreeSlot(Pool6C* list, void* item);
 struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
-s32 IsAgentSlotIndex(s32 index);
-void StartPlacedObject(PlacedObject* self);
 void* AllocateFrontMemory(s32 size);
-void BuildFreeList(Pool6C* s, s32 v, s32 n);
-void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx);
-void StartAgent(Agent* self);
-void ResolveCompanionAgentObjects(CompanionAgent* self);
-void UpdateAgent(Agent* self, f32 dt);
-void AimCompanionAgentPose(CompanionAgent *self);
-void EnterAgentState(Agent* self, s32 evt, Animation* arg);
 typedef s32 (*VFn_1B7818)(void* self);
-s32 IsAgentTargetInRange(Agent* self);
 struct AgentNotification;
 struct Agent;
-void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
-void UpdatePlacedObject(PlacedObject* self, f32 f);
-void InitAgent(Agent* self);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-u16 MapCharToCode(u8 ch);
-extern "C" s32 GetStringLength(const char* s);
-void StartNextStateWalkerEdge(StateWalker* self);
-void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b);
-s32 FindStateEntryIndexOrZero(void* self, s32 key);
-void NotifyStateWalkerChange(StateWalker* self, s32 a, s32 b);
-void StartNextStateWalkerEdge(StateWalker* self);
-s32 FindStateEntryIndexOrZero(void* self, s32 key);
-void CommitStateWalkerArrival(StateWalker* self);
-void StopAnimationPlayer(AnimationPlayer* self);
-void StartNextStateWalkerEdge(StateWalker* self);
 // A class descriptor of two words: the parent's and the class id (config/us/classes.tsv, kind head).
 // A class descriptor of two words, the parent's and the class id (classes.tsv, kind head).
 extern const ClassHead g_stateWalkerMethods;
-void* PopZeroedFreeSlot(Pool6C* pool);
-void AppendToList(List01* self, void* item);
 extern u8 g_aimSwitchPoseSourceMethods[];
-s32 MatchesObjectId(BaseObject* a, s32 b);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(u32 bytes);
 void* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* table);
-void InsertAttachment(PlacedObject* self, Attachment* src);
 extern f32 D_002746A0[8];
-s32 GetAgentRosterState(Agent* self);
-s32 IsAgentFacingBlocked(Agent* self);
 void* AllocateBackMemory(s32 size);
-void NotifyStateWalkerChange(StateWalker* self, s32 a, s32 b);
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
-void AddAnimationPlayerCallback(AnimationPlayer* a0, void* a1, void* a2);
-void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, s32 b);
-void ApplyListedPoseSources(AnimationPlayer* a0, s32 flag);
-void StopAnimationPlayer(AnimationPlayer* self);
-void CallStateWalkerListeners(StateWalker* self, s32 a, void* b);
 
 // A Shift-JIS code and the character it stands for (MapCharToCode).
 // A Shift-JIS code and the character it stands for (MapCharToCode reads the tables).
@@ -148,13 +105,8 @@ void CopyVec2(Point2* a0, Point2* a1)
 
 void* MoveMemory(void* dst, void* src, s32 size);
 struct RampProfile;
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void SetCursorCoords(AnimCursor* cursor, f32 u, f32 v);
 struct Frame_166690;
-void DrawModelPart(Frame_166690* self);
 // Drops the first entry of a three-entry window: the other two move down.
 template <class T>
 static inline void DropFirst(T* window)
@@ -400,15 +352,8 @@ void PushFreeSlot(Pool6C* list, void* item)
 
 LINKER_REMNANT(func_001B5F48);
 
-void SetListLinkOffset(List01* self, s32 value);
-s32 ReadBufferedU8(BufferedStream* s);
-s32 ReadBufferedS8(BufferedStream* s);
-s32 ReadBufferedS16(BufferedStream* s);
-s32 ReadBufferedS32(BufferedStream* s);
-f32 ReadBufferedFloat(BufferedStream* s);
 void ReadPropertyRecords(void* self, void* obj);
 BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
-void ResolveAndStartObject(BaseObject* o);
 
 void LoadStateGraph(StateGraph* self, BufferedStream* s)
 {
@@ -1035,11 +980,6 @@ s32 IsCompanionAgentBlocker(CompanionAgent* self, Collider* ent)
 
 s32 IsPadSelectFlagHeld(World* world);
 struct ObjectGatherer;
-s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value);
-SoundLevelEntry* PushSoundLevel(s32 kind);
-void RemoveSoundLevelAndRecompute(SoundLevelEntry* self);
-s32 IsPointInsideObjectFaces(ScalingVolume* self, void* point);
-s32 IsPlayerUntargetableByAgent(Agent* self);
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 

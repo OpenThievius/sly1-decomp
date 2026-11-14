@@ -7,6 +7,8 @@
 #include "entry_pool.h"
 #include "buffered_stream.h"
 #include "script_value.h"
+#include "functions/remote_call.h"
+#include "functions/text_format.h"
 
 // The IOP command and sound channel file, 0x11CBB8-0x11E560: its .rodata (the strings, among
 // them those of functions the linker stripped) runs from 0x249428 to 0x249868, its .data from
@@ -75,9 +77,7 @@ s32 g_iopChannel2Args[8] = { 0 };
 // tells whether a call is still in progress and func_001F8290 makes one.
 extern RemoteCallClient g_iopCommandRpc;
 extern RemoteCallClient g_iopBankLoadRpc;
-extern "C" s32 PrintFormatted(const char* fmt, ...);
 
-extern "C" void InitRemoteCalls(s32 mode);
 s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
 #define ASSERT_0011CBB8(cond, line) \
@@ -545,7 +545,6 @@ s32 SendIopCommandAndWait(s32 id, s32 size, void* data)
 }
 
 void ArmIopReplyBuffer(s32* ptr, s32 count);
-extern "C" s32 PrintFormatted(const char* fmt, ...);
 void CommitQueuedIopCommand(void);
 
 void QueueIopCommand(s32 cmd, s32 len, void* data, IopCallbackFn arg, u64 val)

@@ -39,6 +39,25 @@
 #include "attached_set.h"
 #include "active_set_solver.h"
 #include "sound_level.h"
+#include "functions/active_set_solver.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/effect_spawner.h"
+#include "functions/game_progress.h"
+#include "functions/matrix.h"
+#include "functions/object_properties.h"
+#include "functions/oscillator.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/pose_source.h"
+#include "functions/script_machine.h"
+#include "functions/sound_system.h"
+#include "functions/state_walker.h"
+#include "functions/warp_menu.h"
+#include "functions/world_contacts.h"
+#include "functions/zone_collider.h"
 struct TrackedNodeOffer;
 struct Mat02;
 struct Matrix3x4;
@@ -48,87 +67,40 @@ struct ScriptValueFilter;
 
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
-f32 RandomFloatInRange(f32 a, f32 b);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern f32 g_gameTime[];
-s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 u16 ReadBufferedU16(BufferedStream* self);
 void* AllocateZeroedFrontMemory(s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void AddColliderToSweepAxes(World* self, void* arg);
 Contacts03* TakeContactTable(World* owner, Collider* self);
-void InitContactPairFlags(World* self, Collider* obj);
-void AppendToList(List01* self, void* item);
-void RegisterPlacedObject(PlacedObject* self);
-void SetColliderPartListed(Collider* self, s32 flag);
-void UpdateAnchorModeFlags(Collider* self);
-void ResolveContactHandler(Collider* self);
-void UnregisterPlacedObject(PlacedObject* self);
-void RemoveColliderFromSweepAxes(World* self, void* owner);
 void ReleaseContactTable(World* owner, Contacts03* handle);
-void RemoveFromList(List01* list, void* item);
 void FreeTouchNodes(World* owner, Touch03* node);
-void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask);
-void RemoveFromList(List01* list, void* item);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-void SetListLinkOffset(List01* self, s32 offset);
-void InitPlacedObject(PlacedObject* self);
 struct ClearedRecord;
-void ClearRecordBody(ClearedRecord* self);
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 struct ScriptScope;
-s32 LookupScriptVariable(ScriptScope* scope, s32 key, s32 flag, ScriptValue* out);
 void* AllocateFrontMemory(s32 size);
-void UpdatePlacedObject(PlacedObject* self, f32 f);
-void AppendToList(List01* self, void* item);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(u32 bytes);
 void* AllocateBackMemory(s32 size);
-void RecomputePlacedObjectFrame(PlacedObject* self);
-void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask);
-void SetPlacedObjectVelocity(PlacedObject* self, Vec02* v);
-void SetPlacedObjectSpin(PlacedObject* self, Vec02* v);
-void UpdateWorldContacts(World* w, s32 arg);
-void MarkSweepAxesUnsorted(World* a0);
-void DropColliderContacts(Collider* self, s32 value);
-void InitContactPairFlags(World* self, Collider* obj);
-s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
 s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
-void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
 void AddColliderForce(void* a, void* b);
-void DrawPlacedObject(PlacedObject* self, void* b, void* m);
 // What a vector is constrained by: an axis, and how (0 none, 1 the part along the axis removed,
 // 2 only the part along it kept, 3 zero).
 struct VectorConstraint {
     Vec02 axis;             // 0x00
     s32 kind;               // 0x10
 };
-void ConstrainVectorByAnchor(VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
-void ClearRootTries(PlacedObject* self);
 // A quadword passed by value in one register (func_001B8820's position).
 typedef u64 Qword128 __attribute__((mode(TI)));
-void ComputePlacedObjectWorldFrame(PlacedObject* self);
 void TransformMeshToWorld(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void ReparentPlacedObject(PlacedObject* self, BaseObject* parent);
-s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
-void SendObjectNotification(BaseObject* self, s32 kind, void* arg);
 // An anchor preset (func_001BB028): a direction and a mode.
 struct AnchorPreset { const Vec02* quad; s32 value; };
 extern AnchorPreset g_anchorPresets[8];
 void* AllocateBackMemory(s32 n);
-s32 GetContactRowHead(Collider* self, Collider* other);
 // Matched by indexing the end as (u32)e + (i << 6).
 
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 void FreeTouchNodes(World* owner, Touch03* node);
 Touch03* AllocateTouchNode(World* self);
-void CopyPlacedObject(PlacedObject* self, PlacedObject* src);
-void CopyMeshTransformed(Mesh03* a, s32 b, Mesh03* c);
-void CloneTreeNodes(Mesh03* a, Tree03* b, Mesh03* c, Tree03* d);
 // NEAR: 14 lines: retail preloads f400/f40C into s0 (lw s0 before loop and in the bnel delay slot), we load into v1; f408 loop test reload; last loop pointer s2 vs index
 
 
@@ -138,16 +110,10 @@ void ReadFaceTree(BufferedStream* in, Mesh03* a, Tree03* out);
 f32 ReadBufferedFloat(BufferedStream* in);
 void ReadBufferedRotation3(BufferedStream* self, void* out);
 void ReadBufferedVector3(BufferedStream* src, void* dst);
-void ComputeColliderInverseInertia(Collider* self, f32 x);
 extern "C" void* CopyBytes(void* dst, void* src, s32 n);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void InitColliderMeshMotion(Collider* self);
-s32 InvertMatrix3x3(Matrix3x4* in, Matrix3x4* out);
 u16 ReadBufferedU16(BufferedStream* self);
 s32 ReadBufferedS16(BufferedStream* in);
 s32 ReadBufferedU32(BufferedStream* in);
-void LoadPlacedObject(PlacedObject* self, void* r);
-void InitContactPairFlags(World* self, Collider* obj);
 // What class 0x03's slot 69 (func_001B9F30) writes of a collider.
 struct ColliderPose {
     s32 f00;                // 0x00: 0
@@ -159,13 +125,9 @@ struct ColliderPose {
     f32 time;               // 0x38: g_gameTime
     s32 f3C;                // 0x3C: 0
 };
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
-void FreePooledContactChain(World* world, Contact03* head);
 extern "C" void SyncDataCache(s32 a);
-void RemoveFromList(List01* list, void* item);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void AppendToList(List01* self, void* item);
 // A sound playing in the world: a 0x90-byte record of the pool at World 0x1BA0, kept on
 // World::list1BAC. func_001BF6B8 takes one, func_001BF920 fills it, func_001BFAF8 starts its
 // voice, func_001C0070 updates each one every frame and func_001BF728 gives it back.
@@ -210,18 +172,13 @@ struct PlayingSound {
         return v;
     }
 };
-void RemoveFromList(List01* list, void* item);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void AdvanceColliderMeshMotion(Collider* self, f32 dt);
 void MovePlacedObject(Collider* self, f32 x, void* b);
-void ApplyColliderImpulseEvent(void* a0, f32 x, void* a1, void* a2);
-void AppendToList(List01* self, void* item);
 typedef signed int s32;
 typedef unsigned char u8;
 void* AllocateZeroedFrontMemory(s32 bytes);
 // The comparison func_001BE0A8's heap sort orders its records by.
 typedef s32 (*SortCompareFn)(void* a, void* b);
-void SwapSortRecords(u8* base, s32 stride, s32 rowB, s32 rowA);
 void CopyMemory(void* dst, void* src, u32 size);
 extern f32 g_gameClock[];
 // The counts func_001BD678 fills for func_001BDD00 (its two lists of connected colliders).
@@ -235,10 +192,6 @@ struct ListedCollider {
 };
 void PushBackMemoryMark();
 void PopBackMemoryMark();
-void CollectConnectedColliders(Collider* n, s32* c1, Collider** a1, s32* c2, Collider** a2);
-void ProcessColliderGroup(World* ctx, s32 n, Collider** arr, f32 f, s32 flags);
-s32 IsObjectTreeAtRest(Actor6C* self);
-void ClearRootTries(PlacedObject* self);
 // The list walk of list_iter.h over a List01: push the frame, take each element, pop the frame.
 struct ListWalk {
     static void Begin(ListFrame* it, List01* list)
@@ -257,17 +210,7 @@ struct ListWalk {
     }
     static void End(ListFrame* it) { g_activeListFrames = it->prev; }
 };
-void* TakePoolSlot(Pool6C* pool);
-void FreePooledContactChain(World* world, Contact03* head);
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 struct PooledContact;
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
-void NotifyContactEnds(World* world, s32 n, Contact03** list);
-void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
-void SetColliderForcedState(Collider* obj, s32 mode);
-void StopSoundRecord(PlayingSound* self, s32 n);
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 // A script list being built (func_001C1530 hands one to a getter; func_001C1A28 appends a value
@@ -278,11 +221,8 @@ s32 ReadBufferedU32(BufferedStream* self);
 void* AllocateFrontMemory(u32 size);
 // A type and a list of script values: func_001C1AD8 tells whether a value is among them.
 struct ScriptValueFilter { u32 type; R11B008Node* list; };
-void StopSoundRecord(PlayingSound* self, s32 n);
 s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
-s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
 
-Collider* FindHandlerForSlot(Collider* node, s32 offset);
 
 // The file's .data, in retail's order.
 f32 g_colliderPositionGains[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
@@ -383,8 +323,6 @@ void SetColliderPartListed(Collider* self, s32 flag)
     sub->desc03()->m32(sub);
 }
 
-void SettlePoseSourceModes(Attachment* a);
-void BuildRotationFromVector(Vec02* v, Mat02* mat);
 
 void ApplyColliderPendingMove(Collider* self, s32 quiet)
 {
@@ -434,7 +372,6 @@ void ApplyColliderPendingMove(Collider* self, s32 quiet)
     ListWalk::End(&it);
 }
 
-void SettlePoseSourceModes(Attachment* a);
 void ApplyColliderPendingImpulse(Collider* self, s32 moved)
 {
     s32 still = 0;
@@ -475,7 +412,6 @@ void ApplyColliderPendingImpulse(Collider* self, s32 moved)
     ListWalk::End(&it);
 }
 
-void BuildRotationFromVector(Vec02* v, Mat02* mat);
 extern f32 g_frameDt[];
 
 void ApplyColliderPendingImpulseHalfStep(Collider* self, s32 flag)
@@ -606,7 +542,6 @@ f32 ComputeSegmentParameter(const Vec02* a, const Vec02* b, const Vec02* p)
     return Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(ap), Vu0::Q(ab))) / Vu0::ToFloat(Vu0::Dot(Vu0::Q(ab), Vu0::Q(ab)));
 }
 
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void CopyMemory(void* dst, void* src, u32 size);
 
 // What Collider::hook points at for a mesh that blends per-vertex vectors (func_001B8B90): a
@@ -773,8 +708,6 @@ void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02
     AddColliderForce(self, &acc);
 }
 
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 void AddColliderTorque(Collider* self, Vec02* torque);
 
 void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit)
@@ -931,7 +864,6 @@ struct ColliderMoveNote {
     Vec02 before;           // 0x10
     Vec02 q20;              // 0x20: not written by SetColliderPosition
 };
-void RequestCameraSnap(Camera* self, f32* src);
 
 void SetColliderPosition(Collider* self, Vec02* pos)
 {
@@ -1087,7 +1019,6 @@ void ReparentCollider(Collider* self, BaseObject* p)
     ResolveContactHandler(self);
 }
 
-void ReframePlacedObject(PlacedObject* self, BaseObject* frame);
 
 void ReframeColliderAnchors(Collider* self, PlacedObject* frame)
 {
@@ -1101,7 +1032,6 @@ void ReframeColliderAnchors(Collider* self, PlacedObject* frame)
 
 LINKER_REMNANT(func_001B9D08);
 
-f32 ClampToMagnitude(f32 value, f32 limit);
 
 void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain)
 {
@@ -1332,15 +1262,10 @@ tail:
     ClearRootTries(o);
 }
 
-f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
-void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16* outB);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
 struct Oscillator;
-void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB);
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
-void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
 extern "C" f32 Arccosine(f32 x);
-void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance, Quad16* at, f32 minScale, f32 size);
 
 struct Oscillated_1BA5B0 { u8 pad00[0xC]; void* oscillator; };
 struct SoundOwner_1BA5B0 { u8 pad00[0x574]; PlayingSound* sound; };
@@ -1849,7 +1774,6 @@ s32 RequestColliderLaunch(Collider* self, void* source, TrackedNodeOffer* offer)
     return 0;
 }
 
-s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 
 struct MeshMotion {
     Vec02* velocity;
@@ -1976,11 +1900,6 @@ void MoveCollider(Collider* self, f32 x, void* b)
     MovePlacedObject(self, x, b);
 }
 
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
-void NotifyContactEnds(World* world, s32 n, Contact03** list);
-void SolveColliderGroupContacts(World* ctx, s32 n, Collider** arr, s32 v, Contact03** buf, f32 f, s32 ex);
-void FreePooledContactChain(World* world, Contact03* head);
 
 void ApplyColliderImpulseEvent(void* a0, f32 value, void* a1, void* a2)
 {
@@ -2145,7 +2064,6 @@ struct ImpulseRow {
     Vec02 angular;          // 0x10
 };
 
-void ConstrainVectorByParentAnchor(Collider* self, VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
 void ApplyColliderInverseInertia(Collider* self, Vec02* in, Vec02* out);
 
 void ComputeColliderImpulseResponse(void* self, s32 a1, Contact03* c, s32 idx, ContactEnd03* hit, ImpulseRow* rows)
@@ -2259,15 +2177,9 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
-void AddActiveSetItem(ActiveSetSolver* loc, ActiveSetItem* item);
 // Left with pointers: RunActiveSetSolver takes the contact list, the counts and the lists as s32.
 void RunActiveSetSolver(ActiveSetSolver* self, s32 flags, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
-void ApplySolvedImpulsesToParts(ActiveSetSolver* self, s32 n, s32* counts, Collider*** lists, f32 maxLin, f32 maxAng);
-void ResetActiveSetSolver(ActiveSetSolver* self);
-void RefreshContactEndPoints(World* world, s32 n, Contact03** list);
 void AddFrictionItemsAndSolve(f32 dt, ActiveSetSolver* loc, s32 flags, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
-f32 RandomFloatInRange(f32 a, f32 b);
 
 void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 n, Contact03** list, f32 dt, s32 flags)
 {

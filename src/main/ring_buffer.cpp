@@ -4,18 +4,16 @@
 #include "memory_reader.h"
 #include "stream_sink.h"
 #include "ring_buffer.h"
+#include "functions/ring_buffer.h"
 
 // An entry of the file's two GCC vtables, written out as tables of functions.
 typedef void (*Fn_Table)();
-s32 ReadMemoryReader(MemoryReader* self, s32 want, void* dst);
-int ReadNothing();
 
 // The file's .rodata, in retail's order: the vtable of the reader's base (its one virtual,
 // func_0013CCE8, returns 0; nothing builds that class) and the memory reader's (D_00249D98).
 extern const Fn_Table g_baseReaderMethods[6] = { 0, 0, 0, (Fn_Table)ReadNothing, 0, 0 };
 extern const Fn_Table g_memoryReaderMethods[6] = { 0, 0, 0, (Fn_Table)ReadMemoryReader, 0, 0 };
 
-extern void ResetRingBuffer(RingBuffer* ring);
 
 void InitRingBuffer(RingBuffer* ring, s32 size, u8* buf) {
 	ring->size = size;

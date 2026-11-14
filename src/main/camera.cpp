@@ -15,6 +15,15 @@
 #include "game_clock.h"
 #include "mul_rotation.h"
 #include "value_range.h"
+#include "functions/active_set_solver.h"
+#include "functions/base_object.h"
+#include "functions/camera_controller.h"
+#include "functions/collider_contact.h"
+#include "functions/collider_span.h"
+#include "functions/pooled_object.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
+#include "functions/zone_collider.h"
 
 
 
@@ -49,11 +58,9 @@ struct Target_00143148 {
     f32 distance;
 };
 
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 
 
 
-void FitReciprocalThroughPoints(f32* out, f32* scale, f32 x, f32 y, f32 z, f32 w);
 
 
 
@@ -73,7 +80,6 @@ void SetCameraFarDistance(Camera* self, f32 value);
 
 
 void PlaceCameraLookingAt(Camera* self, const Vec02* target, const Vec02* focus);
-void SetCameraControllerValue(CameraController* p, s32 zero);
 void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, void* arg);
 
 
@@ -153,11 +159,7 @@ struct __attribute__((aligned(16))) FrameRow {
     s32 d;
 };
 
-void InitObject(BaseObject* self);
 void UpdateCameraProjection(Camera* self);
-void SetCameraControllerOwner(CameraController* self, Camera* owner);
-void InitTargetCameraController(TargetCameraController* self, Camera* owner);
-void InitFrameCameraController(FrameCameraController* self, Camera* owner);
 void ResetCamera(Camera* self, s32 a1);
 
 extern u8 g_identityMatrix[];
@@ -173,7 +175,6 @@ extern const Fn_Table g_onOffCameraControllerMethods[];
 
 extern s32 g_padRouting;
 
-f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* out);
 struct Tracking_001433E0;
 void ResetCameraTargetTracking(Tracking_001433E0* self, void* a1, Target_00143148* a2);
 struct Spring_00143208;
@@ -190,7 +191,6 @@ typedef void (*VFn_143E40)(void* self, f32 dt, void* a);
 
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-f32 WrapAngle(f32 a);
 
 
 
@@ -216,13 +216,10 @@ extern f32 g_gameTime;
 
 
 
-void PushStackValue(TargetCameraController* self, s32 value);
 
 
-s32 PopStackValue(TargetCameraController* self);
 
 
-s32 PeekStackValue(TargetCameraController* self);
 
 
 void BuildCameraGroundFrame(void* self);
@@ -238,10 +235,6 @@ extern World* g_currentWorld;
 extern u8 g_vifPacketWriter[];
 
 struct PacketWriter;
-void BeginDmaTag(PacketWriter* self);
-void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
-void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
-void CloseDmaTag(PacketWriter* self);
 
 
 
@@ -275,8 +268,6 @@ void BuildBasisFromX(Vec02* x, Mat02* out);
 
 
 
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
-s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans);
 
 
 
@@ -703,7 +694,6 @@ struct PartFade {
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 void FadeCameraObstructingParts(Camera* self)
 {
@@ -1045,7 +1035,6 @@ void SetCameraLookAnchor(Camera* self, Quad16* arg)
 
 void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist);
 void VectorToAngles(Vec3* v, f32* a1, f32* a2);
-void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale);
 void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 
 void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, const Vec02* focus, s32 e, f32 gain, f32 damp,
@@ -1331,7 +1320,6 @@ void RequestPlainCameraSnap(void* p)
 }
 
 extern const Vec02 D_00248D30;
-void MeasurePointToLine(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
 
 // The view ray through the screen point (x, y): from the camera 100 units along the direction
 // (1, -x f1F0, y f1F4) in its frame, the point of it nearest p; v230 is that point less p.
@@ -1400,7 +1388,6 @@ s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh
     return 1;
 }
 
-void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale);
 
 void FindNearestFreePointAround(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r)
 {
@@ -1442,10 +1429,7 @@ typedef f32 (*MeshHitWeigh)(void* ctx, void* a, void* b, MeshHit* hit);
 struct FaceRef;
 struct Mesh03;
 struct MeshHitEntry;
-s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out);
 void* AllocateBackMemory(s32 size);
-void SolveActiveSetSystem(s32 count, u8* data, f32* values, f32* out);
-void ClampVectorLength(Vec02* in, Vec02* out, f32 limit);
 
 void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWeigh fn, f32 r, f32 limit, void* a4, Vec02* origin, Vec02* out)
 {
@@ -1504,7 +1488,6 @@ struct Heading_00145DE8 {
 };
 
 extern f32 g_frameStep;
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 f32 ComputeCameraHitClearance(Camera* self, void* unused, Quad16* v, Heading_00145DE8* h)
 {

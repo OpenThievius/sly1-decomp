@@ -48,35 +48,39 @@
 #include "ramp_profile.h"
 #include "node_query.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/collider_span.h"
+#include "functions/curve_segment.h"
+#include "functions/effect.h"
+#include "functions/effect_spawner.h"
+#include "functions/matrix.h"
+#include "functions/oscillator.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/state_walker.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
+#include "functions/zone_collider.h"
 struct BriefEffectSource;
 
 
-void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx);
-void RemoveCallbackNode(World* mgr, Callback01** link, void* fn, void* ctx);
 
 
 
-void InitCollider(Collider* self);
 
-void SetListLinkOffset(List01* self, s32 offset);
 
-void* PopFreeSlot(Pool6C* pool);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-const Vt219C* GetEffectKindTable(u32 n);
 
-void AppendToList(List01* self, void* item);
 
-void CountEffectUse(Effect* self);
 
-void RemoveFromList(List01* list, void* item);
 
-void ReleaseEffect(Effect* self);
 
-void ReleaseCallRecords(World* self, T219CHook* node);
 
-void PushFreeSlot(Pool6C* list, void* item);
 
 extern f32 g_gameClock[];
 
@@ -86,27 +90,19 @@ void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 extern f32 g_gameTime;
 
-void RemoveEffect(Effect* self);
 
-s32 IsObjectAttached(BaseObject* self);
 
 struct TreeNode03;
 s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
 
 struct Oscillator;
-void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB);
-
-s32 DrawEffectAt(Effect* self, Camera* cam, Vec02* pos, f32 (*rot)[4]);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
-void BuildBasisFromXAndYHint(Vec02* x, Vec02* hint, Mat02* out);
 
 
 
 
 
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 
-Effect* CreateEffect(s32 kind, EffectOwner* sys);
+
 
 
 extern Camera* g_camera;
@@ -116,7 +112,6 @@ extern Camera* g_camera;
 
 
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 // A list walk whose frame pushes itself when it is made and pops itself when it goes out of scope.
 struct ListWalk : ListFrame {
@@ -144,9 +139,7 @@ struct ListWalk : ListFrame {
     }
 };
 
-void RemoveEffect(Effect* self);
 
-void UnregisterCollider(Collider* self);
 
 // An entry of the effect kinds' tables of functions (src/main/class_descriptors.cpp).
 typedef void (*Fn_Table)();
@@ -212,128 +205,67 @@ extern const Fn_Table g_messageEffectMethods[];
 
 
 
-void RemoveFromList(List01* list, void* item);
-
-void AppendToList(List01* self, void* item);
 
 
-void EndEffect();
 
-s32 HandleEffectContact();
 
-void MoveEffect();
 
-void InitRisingEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void MoveDriftingEffect();
 
-void EndEffectWithImpactOnExit();
 
-void InitImpactEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void UpdateDroppingEffect();
 
-void DrawDroppingEffect();
 
-void EndDroppingEffect();
 
-void InitStreakEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void DrawStreakEffect();
 
-void InitScaledEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void InitTrailSegment(Effect* self, void* pos, f32 scale, s32 flags);
 
-void DetachTrailSegment();
 
-void MoveTrailSegment();
 
-void DrawTrailSegment();
 
-void InitSpawningEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void SpawnFollowUpEffect();
 
-void InitFollowUpEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void InitWideTrailSegment(Effect* self, void* pos, f32 scale, s32 flags);
 
-void InitShortFallingEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void InitCameraSpaceEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void MoveCameraSpaceEffect();
 
-void DrawCameraSpaceEffect();
 
-void RunEffectEndCallback();
 
-void InitLongStreakEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void InitPhasedEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void KeepPhasedEffectStill();
 
-void AdvanceEffectPhases();
 
-void DrawPhasedEffect();
 
-void CopyEffectSourceIds();
 
-void DrawProjectileEffect();
 
-s32 HandleEffectImpact();
 
-void UpdateEffectUntilDetached(Effect* self, f32 dt);
 
-void DrawHitMarkEffect();
 
-void SetRandomEffectSpin();
 
-void MoveTumblingEffect();
 
-s32 HandleTumblingEffectImpact();
 
-void AimEffectAtNearestObject();
 
-void PlaceEffectAtSource();
 
-void DrawStreakedEffect();
 
-s32 HandleStreakedEffectImpact();
 
-void RandomizeEffectSpin();
 
-s32 HandleEffectContactUnlessKind6();
 
-void DrawSpinningEffect();
 
-void InitFacingEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void DrawFacingEffect();
 
-void InitDelayedEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void MoveDelayedEffect();
 
-void UpdateDelayedEffect();
 
-void DrawDelayedEffect(Effect* self, void* a1);
 
-void ResolveEffectTarget();
 
-void SendEffectMessagesAtRate();
 
-void CountEffectUse(Effect* node);
 
-void ReleaseEffect(Effect* node);
 
-u32 IsListEmpty(List01* list);
 
-void CollideEffects(EffectOwner* self);
 
-void ClearRootTries(PlacedObject* self);
+
 
 // The next object of a list walk, and the walk moved past it.
 struct NextEffect {
@@ -381,24 +313,16 @@ void PopBackMemoryMark(void);
 
 struct PlaneTreeNode;
 struct PlaneTreeOutput;
-s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out);
-
-s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, ColliderSpan* a5);
-
-u32 IsListEmpty(List01* p);
 
 
-void UpdateEffect(Effect* self, f32 dt);
 
-s32 IsObjectAttached(BaseObject* self);
+
+
 
 extern Quad219C g_unitXQuad;
 
-void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra);
 
-void InitStreakEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void SetEffectPhase(Effect* self, s32 mode);
 
 // A 0x30-byte point func_001A1F40 sorts by its angle about a centre (its position at 0x10, the
 // angle at 0x20).
@@ -408,24 +332,16 @@ struct AngledPoint { u8 pad00[0x20]; f32 angle; };
 
 extern s32 g_effectImpactIgnoredKinds[4];
 
-void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Vec02* normal, Effect** out);
-
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-
-s32 HandleEffectContact(Effect* self, void* b, void* c, void* d);
 
 
 
-void TakeDelayedEffectSourcePose(Effect* self);
-
-void DrawEffect(Effect* self, void* a1);
-
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-
-void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
 
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
+
+
+
+
+
 
 
 
@@ -443,7 +359,6 @@ extern f32 g_facingEffectSizeCurve[4];
 void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 
-void UpdateEffect(Effect* self, f32 dt);
 
 // A quadword in a 128-bit register (the VU0 helpers func_00118D20 and func_00118D30).
 typedef int Quadword128 __attribute__((mode(TI)));
@@ -466,7 +381,6 @@ extern f32 g_wideTrailAlphaCurve[4];
 
 extern f32 g_wideTrailSizeCurve[4];
 
-void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra);
 
 extern Vec02 g_scaledEffectSizeCurve;
 
@@ -482,27 +396,16 @@ extern f32 g_spawningEffectSizeCurve[4];
 
 extern f32 g_spawningEffectAlphaCurve[4];
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
-void RemoveFromList(List01* list, void* item);
 
-void AppendToList(List01* self, void* item);
 
-f32 RandomFloatInRange(f32 a, f32 b);
 
-void InitCollider(Collider* self);
 
-void RemoveFromList(List01* list, void* item);
 
-void AppendToList(List01* self, void* item);
 
-void RemoveFromList(List01* list, void* item);
 
-void AppendToList(List01* self, void* item);
 
-void RemoveFromList(List01* list, void* item);
 
-void SetListLinkOffset(List01* self, s32 offset);
 
 
 // The coefficients of a quadratic in t (a + bt + ct^2), as the pose holds them.
@@ -921,13 +824,9 @@ void ShortenEffectLife(Effect* self, f32 x)
 }
 
 struct AttachedSet;
-void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16* outB);
 // The larger of two floats (max.s; through an inline function, b >? a reads a first and gives
 // the result b's register).
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
-void SpawnBriefEffectAt(void* a0, BriefEffectSource* a1, f32 f);
 
 // An effect that hits something (slot 7, the shared contact): against a moving object (class
 // flag 0x80) it takes on half the object's motion there; otherwise it bounces as a spinning ball
@@ -1028,10 +927,6 @@ s32 IsSpinNegligible(void* a);
 s32 IsVelocityNegligible(void* a);
 s32 IsAccelerationNegligible(void* a);
 struct SpinRecord_158480;
-// The definition takes the time step last; the EE passes it in its own register, and retail's
-// caller evaluates it before the matrix, as this order does.
-void TurnMatrixBySpin(SpinRecord_158480* self, f32 dt, f32* out);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 // The four rows func_0019F390 builds a turn in and TurnMatrixBySpin fills.
 struct EffectFrame {
@@ -1093,8 +988,6 @@ void UpdateEffect(Effect* self, f32 dt)
     self->vt->m06(self, flag);
 }
 
-void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4]);
-void SubmitScaledPlacedObjectTransform(PlacedObject* self, void* a, Quad16* src);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
 
 // What an effect hands its object's draw method (slot 38): the placement, then the alpha and a
@@ -1222,7 +1115,6 @@ void InitRisingEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->fB0 = -8.0f;
 }
 
-void MoveEffect(Effect* self, f32 dt);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 void ComputeSinCos(f32 angle, f32* sinOut, f32* cosOut);
@@ -1316,7 +1208,6 @@ void UpdateDroppingEffect(Effect* self, f32 dt)
     UpdateEffect(self, dt);
 }
 
-void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy);
 
 void DrawDroppingEffect(Effect* self, void* a1)
 {
@@ -1406,7 +1297,6 @@ void DetachTrailSegment(Effect* self)
     SetTrailSegmentAnchor(self, 0, 0);
 }
 
-void OnTrailAnchorEnded(void* self, s32 kind, void* extra);
 
 void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
 {
@@ -1675,7 +1565,6 @@ void InitShortFallingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 }
 
 void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
 
 void InitCameraSpaceEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
@@ -1691,8 +1580,6 @@ void InitCameraSpaceEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->q30 = *(const Quad219C*)&p->rows[20];
 }
 
-void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
-void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out);
 
 void MoveCameraSpaceEffect(Effect* self, f32 f)
 {
@@ -1707,9 +1594,6 @@ void MoveCameraSpaceEffect(Effect* self, f32 f)
 }
 
 
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 
 // Draws the effect at its point seen from the camera, turned by the part of the camera's turn the
 // effect's age gives (twice its age times pi about the axis of its parameters, +0x40).
@@ -1788,7 +1672,6 @@ void MoveEmitterEffect(Effect* self, f32 dt)
     Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(vel), Vu0::Scalar(dt));
 }
 
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 void UpdateEmitterEffect(Effect* self, f32 dt)
 {
@@ -2087,10 +1970,7 @@ struct HullPoint {
     u8 pad24[0x30 - 0x24];
 };
 
-void InitIdentityMatrix(Mat4* self);
 Mat4A MultiplyMatrices(void* m, void* in);
-void BuildBasisFromX(Vec02* x, Mat02* out);
-s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts);
 
 // The frame looking from the camera toward pos: the camera's position moved to the origin, then
 // the basis built from the direction (its rows as the columns), and the product passed to
@@ -2122,7 +2002,6 @@ s32 ComputeHullSeenFromCamera(Vec02* pos, s32 n, HullPoint* pts)
     return ComputeProjectedHull(&t, n, pts);
 }
 
-void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
 void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
 
 s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts)
@@ -2193,8 +2072,6 @@ void DrawProjectileEffect(Effect* self, void* a1)
     DrawEffectAt(self, (Camera*)a1, (Vec02*)&self->pos, (f32 (*)[4])&rot);
 }
 
-void BuildEulerRotationMatrix(f32* in, f32* out);
-void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
 
 void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Vec02* normal, Effect** out)
 {
@@ -2287,7 +2164,6 @@ void DrawHitMarkEffect(Effect* self, void* a1)
     DrawEffectAt(self, (Camera*)a1, (Vec02*)scratch, (f32 (*)[4])(scratch + 0x10));
 }
 
-void BuildBasisFromX(Vec02* x, Mat02* out);
 
 void SetRandomEffectSpin(Effect* self)
 {
@@ -2419,12 +2295,8 @@ void *StoreFloatAsQuadword(u128* out, f32 f);
 void* CopyQuadword(u128* out, void* src);
 Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 void* StoreQuadword(u128* out, u128 v);
-s32 IsEffectAimCandidate(Rec50* self, Collider* other);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-Collider* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
-void BuildBasisFromX(Vec02* x, Mat02* out);
 extern const Vec02 g_unitZVector;
 
 void AimEffectAtNearestObject(Effect* self, Rec50* src)
@@ -2626,9 +2498,6 @@ void InitDelayedEffect(Effect* self, void* pos, f32 x, s32 flags)
     *(s32*)&self->m30[2] = 0;
 }
 
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 
 // Takes the source object's pose (+0x134) and lets it go: the effect starts there and moves
 // over its life to where its target object (+0x20) will be then, turning by the rotation
@@ -2770,7 +2639,6 @@ LINKER_REMNANT(func_001A3AC8);
 #undef P
 #undef O
 
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 extern const Vec02 g_unitZVector;
 
 #define F(o) (*(f32*)((u8*)self + (o)))

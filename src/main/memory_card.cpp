@@ -13,6 +13,13 @@
 #include "buffered_stream.h"
 #include "key_id.h"
 #include "key_record.h"
+#include "functions/disc_access.h"
+#include "functions/game_progress.h"
+#include "functions/heap.h"
+#include "functions/memory_card_client.h"
+#include "functions/pair_controller.h"
+#include "functions/state_walker.h"
+#include "functions/text_format.h"
 
 // The memory card: the background job its calls run on (a thread of its own), the card object
 // and its states, the save files (the directory, its icon and header, the three slots) and the
@@ -27,36 +34,12 @@ extern const u32 g_memoryCardIconKey[8];
 extern u8 g_cardDirectoryBuffer[];
 extern u8 g_cardDirectoryPath[];
 
-s32 InitMemoryCardClient(void);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 extern "C" s32 AwaitSemaphore(void* a);
 extern "C" void PostSemaphore(void* a);
 s32 EndOwnThread();
 void SetThreadPriority(s32 thread, s32 b);
-s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2);
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 a, s32 b);
-extern "C" s32 GetStringLength(const char* s);
-void* CopyString(void* dst, const char* src);
-s32 FormatToString(char* dst, const char* fmt, ...);
-s32 GetKeyIdSecond(KeyId* key);
-void ApplyPadPatternSetting(GameProgress* ctx);
-void ResetGameProgress(GameProgress* self);
-s32 ChecksumGameProgress(GameProgress* s);
-void ConvertStringToCharCodes(u8* src, u16* dst);
-s32 RequestCardSpaceForPath(s32 a0, s32 a1, const char* a2);
-s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, void* buf);
-s32 GetCardInfo(s32 port, s32 slot, s32* type, s32* freeBlocks, s32* format);
-s32 RequestCardFormat(s32 port, s32 slot);
-s32 MakeCardDirectory(s32 a0, s32 a1, const char* a2);
-s32 OpenCardFile(s32 port, s32 slot, const char* name, s32 mode);
-s32 CloseCardFile(s32 fd);
-s32 ReadCardFile(s32 fd, void* buf, s32 size);
-s32 WriteCardFile(s32 fd, const void* src, s32 n);
-void ClearKeyId(KeyId* p);
-void PushBackMemoryMark(void);
-u8* AllocateBackMemory(s32 size);
-void PopBackMemoryMark(void);
 s32 InitBufferedStream(BufferedStream* o, s32 a, u8* b, s32 c);
 s32 OpenBufferedSectorStreamRange(BufferedStream* o, KeyId* p);
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);

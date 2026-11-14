@@ -2,6 +2,16 @@
 #include "common.h"
 #include "asm_func.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/buffered_stream.h"
+#include "functions/camera.h"
+#include "functions/object_gatherer.h"
+#include "functions/placed_object.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/screen_element.h"
+#include "functions/sound_system.h"
+#include "functions/text_format.h"
 
 #include "list_iter.h"
 #pragma implementation "layout_137228.h"
@@ -56,7 +66,6 @@ struct PanelColor
 };
 
 extern "C" f32 Cosine(f32 x);
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRgbaEntry(PacketWriter* gs, u32 c);
 void AddGifXyzfNoDrawEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
@@ -156,20 +165,16 @@ struct CenterFrameMath {
     }
 };
 
-void ResetScreenElement(void* self);
 
 void SetTextPanelState(T217D_440* self, s32 mode);
-void SetStepSequenceState(StepSequence* obj, s32 mode);
 
 struct SortEntry {
     void* obj;
     f32 key;
 };
 
-s32 IsObjectAttached(BaseObject* self);
 
 struct NumberedItem;
-void GetNumberedItemFlag(NumberedItem* self, s32* out);
 
 void RemoveEffect(Effect* self);
 void SetEffectPhase(Effect* self, s32 mode);
@@ -177,9 +182,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // Newly matched US functions from the small-function wave.
 struct BufferedStream;
-extern void CloseBufferedStream(BufferedStream* self);
 extern void FreeObjectMemory(void*);
-extern void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
 struct PercentClamp {
     static void Set(T217D_440* self, f32 x, f32 lo, f32 hi) {
@@ -203,8 +206,6 @@ struct TextScratch {
     u8 bytes[0xB0];
 };
 
-extern "C" s32 GetStringLength(const char* s);
-void* CopyString(void* dst, const char* src);
 void PushFontScale(Font* font, f32 x, f32 y);
 s32 WrapTextLines(TextReader* self, f32 limit);
 void PopFontScale(Font* font);
@@ -272,17 +273,13 @@ struct ListWalkBegin {
     }
 };
 
-void SetAnimationPlayerSpeed(AnimationPlayer* item, f32 x);
 
 
 extern World* g_currentWorld;
 
-void ResumeStreamVoice(void);
-void PauseStreamVoice(void);
 void GetCurrentLevelBit(u32* out);
 s32 MaskWorldBitsBySave(void);
 void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag);
-void ResetTextPointToHalf(TextPointObject* self);
 
 struct ClampBelow { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
@@ -469,7 +466,6 @@ void ClearTextPanel(T217D_440* self)
     self->tickScroll = 0.4f;
 }
 
-void SetupScreenElementText(ScreenElement* self);
 s32 IsFontLoaded(s32 id);
 Font* GetFontById(s32 id);
 void PushBackMemoryMark(void);
@@ -477,8 +473,6 @@ void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 // Returns its writer (retail sets v0 from it), as a constructor does.
 void* InitGifPacket(PacketWriter* gs);
-void UsePacketBufferMemory(PacketWriter* gs, s32 n, void* mem);
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
 f32 MeasureFontString(Font* font, const char* text);
 
 // Sets a text panel up: its two fonts, the widest compass point, and the GS packet of the two
@@ -660,7 +654,6 @@ void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
 extern const char g_characterFormat[8] = "%c";
 extern const char g_moveLabel[8] = "Move";
 extern const char g_zoomLabel[8] = "Zoom";
-s32 FormatToString(char* dst, const char* fmt, ...);
 
 struct ScreenLayout {
     static void Reset(Layout_137228* l, s32 color)
@@ -1082,7 +1075,6 @@ struct StyleDrawer {
 };
 
 void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
 f32 MeasureFontStringHeight(Font* self, u8* s, f32 width);
 
 // The labels of the text points (class 0x82) in view: each gathered point the camera sees
@@ -1659,7 +1651,6 @@ void DrawCompassStrip(T217D_440* self, PacketWriter* gs);
 void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs);
 void AddDmaRefTag(PacketWriter* gs, void* data, s32 size);
 void SeekTextReader(TextReader* self, s32 n);
-void *AppendString(void* dst, const char* src);
 void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
 
 // A byte from a toward b by t, as the panel fades its alpha (the difference taken as an integer).

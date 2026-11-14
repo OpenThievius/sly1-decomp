@@ -13,6 +13,24 @@
 #include "ramp_profile.h"
 #include "fpu.h"
 #include "object_finder.h"
+#include "functions/collider_contact.h"
+#include "functions/game_progress.h"
+#include "functions/heap.h"
+#include "functions/object_gatherer.h"
+#include "functions/on_off_object.h"
+#include "functions/oscillator.h"
+#include "functions/path_curve.h"
+#include "functions/placed_object.h"
+#include "functions/player.h"
+#include "functions/player_aim.h"
+#include "functions/player_link.h"
+#include "functions/player_request.h"
+#include "functions/player_state2.h"
+#include "functions/point_graph.h"
+#include "functions/target_lists.h"
+#include "functions/turning_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 struct BaseObject;
 struct Vec02;
 
@@ -117,14 +135,6 @@ struct Chooser_1CDFB8 {
     void* f23CC;                    // 0x23CC
 };
 extern List01 g_class75List;
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-s32 CompletesWorldBits(s32 bits);
-void SetPlayerAimMode(Player* self, s32 state);
-void UpdatePlayerAimTarget(Player* s);
-s32 MaskWorldBitsBySave(void);
 
 s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
 {
@@ -270,8 +280,6 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
     return r;
 }
 
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
@@ -338,8 +346,6 @@ struct PathTarget {
 
 typedef f32 (*ShapeScalarFn)(void* self, f32 t);
 typedef f32 (*ShapeLimitFn)(void* self);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
@@ -407,7 +413,6 @@ struct PointPlacementScore { u8 vecA[0x10]; f32 result; };
 
 struct TargetPoint;
 struct TargetCurve;
-void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t);
 void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec02* start, Vec02* extra, f32* outTime, f32* outCost, Vec02* outPoint, Vec02* outVel);
 
 f32 ScoreTargetPointAt(TargetCostContext* self, f32 t)
@@ -418,7 +423,6 @@ f32 ScoreTargetPointAt(TargetCostContext* self, f32 t)
     return f.result;
 }
 
-void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t);
 void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec02* start, Vec02* extra, f32* outTime, f32* outCost, Vec02* outPoint, Vec02* outVel);
 
 f32 ScoreTargetCurveAt(TargetCostContext* self, f32 t)
@@ -552,9 +556,6 @@ struct TargetSpanHit {
     f32 f44;
     u8 pad48[0x28];
 };
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
-void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
@@ -708,20 +709,13 @@ struct PathArgs { Chooser* self; void* frame; u8 pad08[8]; Vec02 c; };
 struct NearestContext { Chooser* self; void* target; };
 
 
-void ComputeUpwardBoostVelocity(PlacedObject* self, Vec02* out);
 void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec02* start, Vec02* extra, f32* outTime, f32* outCost, Vec02* outPoint, Vec02* outVel);
 f32 AddRepeatTargetPenalty(Player* self, void* target, f32 a, f32 b);
 s32 AddTargetObstructionCost(f32 limit, BaseObject* self, void* a1, void* a2, void* pa, void* pb, Vec02* pc, void* pd, Vec02* pe);
-f32 GetPathCurveSearchStep(PathCurve* self);
 void FindLocalMinimum(MinimumFn fn, void* ctx, f32 x, f32 step, f32 lo, f32 hi, f32* outX, f32* outY);
 void PlaceOnTargetObject(Player* self, PathTarget* node, Vec02* outA, Vec02* outB, f32 t);
 void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec02* point, f32* out1, Vec02* out2, Vec02* out3, f32 t);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t);
-void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t);
-f32 RandomFloatInRange(f32 a, f32 b);
-void SetPlayerAimMode(Player* self, s32 state);
-void UpdatePlayerAimTarget(Player* s);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
@@ -1143,24 +1137,12 @@ struct PhasePlayer {
     f32 speed;              // 0x18
 };
 
-void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, void* a3);
-void PlaceTargetPointNearCollider(TargetPoint* self, Vec02* out, f32* angleOut);
-void FindRingPointTowardCollider(PlacedObject* self, Vec02* out, f32* angleOut);
-u128 ApproachPointWithRamp(u128 from, u128 to, f32 dt, RampProfile* ramp, Vec02* vel);
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-f32 WrapAngle(f32 a);
 void SetPlayerOnOffPhase(Player* self, s32 n);
 struct BlendAnimationView;
 struct TurnBlendRecords;
 struct TurningCollider;
-void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecords* a1, BlendAnimationView* a2);
-s32 AimPlayerAtTarget(Player* self);
-void SetPlayerState(Player* self, s32 a, s32 b);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 extern f32 g_frameDt;
 
 // v made unit length, or fallback when shorter than 0.0001 (as player_path.cpp's).
@@ -1427,8 +1409,6 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
 struct TargetPlayerView { u8 pad0[0x23BC]; TargetFrameRecord* record; f32 targetPathPlace; f32 angle; s32 flip; };
 struct TargetProbe { u8 pad0[4]; s32 active; f32 radius; u8 pad0C[4]; Vec02 point; Vec02 end; };
 
-f32 WrapModulo(f32 x, f32 y);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
 
 
@@ -1467,10 +1447,6 @@ void CollectPlayerTargetSpans(TargetPlayerView* self, TargetProbe* t, u8* out)
 
 extern f32 D_00274B64;
 struct BlendSlot;
-void UpdateEightEntryBlendWeights(Player* self, BlendSlot* slots, BlendAnimationView* gr);
-void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView* g, void* a3);
-void PlayPhaseCrossingSound(Player* self, f32* p, f32 f);
-void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d);
 
 void UpdatePlayerTargetPhase(Player* self)
 {
@@ -1551,8 +1527,6 @@ struct ContactPlayerView {
     f32 limit;              // 0x23C4
 };
 
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec02* origin, Vec02* axis, Vec02* offset);
 
 void PinPlayerToTarget(Player* self)
 {
@@ -1615,7 +1589,6 @@ void PinPlayerToTarget(Player* self)
     }
 }
 
-void FreePooledContactChain(World* world, Contact03* head);
 
 void SetPlayerOnOffPhase(Player* self, s32 n)
 {
@@ -1644,7 +1617,6 @@ void SetPlayerOnOffPhase(Player* self, s32 n)
     }
 }
 
-void SetOnOffObjectForcedState(void* selfv, s32 value);
 
 void ResetPlayerOnOffObject(Player* self)
 {
@@ -1664,12 +1636,10 @@ void ResetPlayerOnOffObject(Player* self)
     SetOnOffObjectForcedState(o, 0);
 }
 
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 void AddColliderForce(Player* self, void* v);
-void ApplyPlayerDefaultSteering(Player* self);
 
 void StepPlayerAlongTarget(Player* self)
 {

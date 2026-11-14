@@ -8,6 +8,15 @@
 #include "placed_object.h"
 #include "collider.h"
 #include "aim_blend_grid.h"
+#include "functions/base_object.h"
+#include "functions/blend_animation.h"
+#include "functions/camera.h"
+#include "functions/matrix.h"
+#include "functions/placed_object.h"
+#include "functions/player.h"
+#include "functions/player_path.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 
 // The file's .data, in retail's order. D_00274F0C holds two floats (0.3, 10) under one label, which
 // GCC would align to 8 as one object: it stays included, and ControlPlayerOnPath reads its first.
@@ -30,7 +39,6 @@ struct TwoEntryBlendEntry {
 
 struct BlendAnimation;
 struct Collider;
-void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
 
 void CreatePlayerTwoEntryBlend(Player* self)
 {
@@ -85,11 +93,7 @@ struct PathObject {
     PathObject* guide;      // 0x68: a path the camera follows instead (ControlPlayerOnPath)
 };
 
-void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length);
 
-f32 WrapModulo(f32 x, f32 y);
-void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 // v made unit length, or fallback when shorter than 0.0001, as an if with the fallback in its
 // first arm: retail's bc1f to the divide, with the fallback's qmtc2 in the slot of the branch
@@ -200,8 +204,6 @@ struct PathWatchTarget { u8 pad00[0x34]; f32 f34; };
 
 void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Mat02* b, const Vec02* wb, Mat02* out, Vec02* outW,
                             s32 unused6);
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 
 void StepPlayerOnPath(Player* self)
 {
@@ -239,16 +241,10 @@ struct RampProfile;
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 u128 ApproachPointWithRamp(u128 from, u128 to, RampProfile* ramp, Vec02* vel, f32 limit);
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
 struct RampProfile;
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-f32 WrapModulo(f32 a, f32 b);
-void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
-void SetPlayerState(Player* self, s32 state, s32 sub);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void SetPlayerPadSelectMode(Player* a0, s32 a1);
 
 static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
 {
@@ -508,10 +504,6 @@ void PinPlayerToPath(Player* self)
     *link = (Contact03*)row->head;
 }
 
-void AcquirePadSelectFlag(World* a0);
-void ShowCountedScreenElement(World* self);
-void ReleasePadSelectFlag(World* self);
-void HideCountedScreenElement(World* self);
 
 void SetPlayerPadSelectMode(Player* a0, s32 a1)
 {
@@ -528,9 +520,6 @@ void SetPlayerPadSelectMode(Player* a0, s32 a1)
     }
 }
 
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void SetPlayerState(Player* self, s32 state, s32 sub);
 
 void SetPlayerPath(Player* self, PathObject* path)
 {

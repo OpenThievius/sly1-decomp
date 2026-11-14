@@ -17,6 +17,25 @@
 #include "thread_params.h"
 #include "packet_writer.h"
 #include "list_iter.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/collider.h"
+#include "functions/collider_span.h"
+#include "functions/disc_access.h"
+#include "functions/display.h"
+#include "functions/game_clock.h"
+#include "functions/heap.h"
+#include "functions/iop_commands.h"
+#include "functions/matrix.h"
+#include "functions/mpeg_decoder.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/ring_buffer.h"
+#include "functions/sound_system.h"
+#include "functions/text_format.h"
+#include "functions/warp_menu.h"
 struct BufferedStream;
 struct Device_20B0B0;
 struct MpegHandle;
@@ -59,7 +78,6 @@ extern u8 g_gameClock[];
 
 
 
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 // A transfer to the IOP's memory, as StartIopDma takes it.
 struct IopDmaTransfer {
@@ -74,57 +92,29 @@ extern "C" void* StartIopDma(IopDmaTransfer* span, s32 n);
 extern "C" s32 GetIopDmaStatus(void* obj);
 
 
-s32 MatchesObjectId(BaseObject* self, s32 id);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-s32 TestCollidersMayContact(Collider* a, Collider* b);
 
 
 
-void ResetIopRing(void);
-void ResetRingBuffer(RingBuffer* ring);
 
-void UnregisterCollider(Collider* self);
-void StopAnimationPlayer(AnimationPlayer* self);
 
 extern u8 g_movieDataRingBuffer[];
 
-void SuspendIopVoices(u32 a0);
-void ResumeIopVoices(u32 a0);
-void StopAllIopSounds(void);
-s32 PollIopCommands(void);
-void WaitForIopSoundStop(s32 a0);
-s32 SyncDiscRead(s32 flag);
-s32 GetIopVolumeChannel(s32 arg);
-void SetIopVolumeChannel(s32 a0, s32 a1);
-s32 OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
-void PushIopChannel2Setting(World* self, s32 a, s32 b);
-void InitRingBuffer(RingBuffer* ring, s32 size, u8* buf);
 
-void StopIopMovieStream(void);
-void PopIopChannel2Setting(World* self);
 
-s32 FillRingBufferFromMemory(RingBuffer* self, s32 count, void* src);
 
 // A block of data the decoder hands a stream callback.
 struct MovieDataBlock { u8 pad0[8]; u8* data; s32 size; };
 
 struct StreamSink;
-s32 DrainRingBuffer(RingBuffer* self, s32 n, StreamSink* o);
-void UpdateIopMovieStream(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
 
 
 void* InitGifPacket(PacketWriter* self);
-void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void BeginDmaTag(PacketWriter* self);
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void AddGifUvEntry(PacketWriter* self,s32 a,s32 b);
 void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 void EndGifPacket(PacketWriter* self);
-void AddDmaEndTag(PacketWriter* self);
-void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void AddGifImageTag(PacketWriter* self, s32 count);
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
 
 struct AttachedTransformFrame {
     Vec02 q00;
@@ -142,34 +132,24 @@ struct AttachedTransformFrame {
 
 
 
-void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 void* MultiplyMatrices(void* out, void* b, void* in);
-void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 
 extern s32 g_gifChannel;
 
 extern "C" s32 AwaitSemaphore(s32 a);
-void SendGsPacketAndWait(s32 channel, void* b);
-void ApplyPendingDisplayFlip(void);
-void FlipDisplayFrame(void);
 
 extern u8 g_movieCrcTable[];
 
 extern s32 D_002626CC;
 
 void ResetMpegDecoder(S_20B0C0* d);
-s32 DeleteMpegDecoder(MpegHandle* self);
-void SendResidentImages(void);
 
 
 
 extern const u32 g_movieKeys[128];
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void ConsumeSpan(RingBuffer* p, s32 n);
 
-void ClearKeyId(KeyId* p);
 struct SameMovieKey {
     static s32 Of(IdentityKey* a, const IdentityKey* b)
     {
@@ -200,49 +180,31 @@ extern u8 g_packetBufferMemory[];
 extern u8 g_screenFade[];
 extern s32 g_discSectorCheckState;
 
-void SetScreenOwner(s32 v);
-StreamReader* InitStreamReader(StreamReader* o, u8* d);
 struct GameClock;
-s32 OpenSectorStreamRange(StreamReader* self, KeyId* pair);
-void ClearPadPressedBits(PadRecord* self, u32 mask);
-void AdvanceGameClockElapsed(GameClock* self);
-void UpdatePadConnection(PadRecord* d);
 struct ScreenFade;
-s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, s32 mode);
-void StepDiscSectorCheck();
 s32 GetMpegDecoderStatus(Device_20B0B0* device);
-void CloseStreamReader(StreamReader* o);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void ClearScreenOwner(s32 owner);
-void DestroyStreamReader(StreamReader* self, s32 flags);
 
 extern u8 g_movieDecodeThreadStack[];
 extern u8 g_globalPointer[];
 extern s32 g_movieDecodeThread;
 
-s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 s32 MakeThread(ThreadParams* p);
 void RunThread(s32 thread, void* arg);
 
-s32 GetIopRingPosition(void);
 
-void BuildBasisFromX(Vec02* x, Mat02* out);
-void MoveCollider(Collider* self, f32 x, void* b);
 
 struct ReaderEmpty {
     static bool Of(StreamReaderWindow* b) { return b->readyLength == b->usedLength; }
 };
-void PumpStreamReader(StreamReaderWindow*);
 struct Ctx_20A220;
 struct Args_20A220;
 typedef s32 (*Handler_20A220)(Ctx_20A220* ctx, Args_20A220* args, void* arg);
 s32 DemultiplexBuffer(Ctx_20A220* ctx, s32 a, s32 b);
-void ConsumeStreamBytes(StreamReaderWindow*, s32);
 
 
-s32 DecodeMpegPicture(MpegHandle* obj, void* picture, s32 a2);
 extern "C" void PostSemaphore(s32 a);
 
 
@@ -253,7 +215,6 @@ extern u8 g_movieUploadPacket[];
 extern u8 g_movieDrawPacket[];
 extern u8 D_00148D68[];
 
-void InitMpegLibrary(void);
 s32 CreateMpegDecoder(void* self, void* a, s32 b);
 Handler_20A220 SetStreamCallback(Ctx_20A220* self, s32 idx, s32 key, Handler_20A220 handler, void* arg);
 s32 SetMpegCallback(void* self, s32 a, void* fn, void* arg);
@@ -333,7 +294,6 @@ void MoveContactListObject(ContactListObject* self, void* b, f32 x)
     self->orientationAttachment = (Attachment*)s0;
 }
 
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 
 void LaunchContactListObject(ContactListObject* self, PlacedObject* a, Vec02* v)
 {
@@ -432,8 +392,6 @@ struct ContactListGlider : ContactListObject {
 
 typedef char check_ContactListGlider[sizeof(ContactListGlider) == 0x710 ? 1 : -1];
 
-void StepCollider(Collider* self, f32 t);
-void ClampVectorLength(Vec02* v, Vec02* out, f32 max);
 void AddColliderForce(void* a, void* b);
 
 void InitContactListObjectWithoutGravity(ContactListObject* self)
@@ -460,8 +418,6 @@ void StepContactListObjectWithoutGravity(ContactListGlider* self, f32 dt)
     AddColliderForce(self, &accel);
 }
 
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
-s32 FindSegmentSphereSpan(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
 void LaunchContactListObject(ContactListObject* self);
 extern f32 g_gameTime;
 
@@ -507,12 +463,10 @@ struct GliderListFrame {
     ~GliderListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 
 void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
 {

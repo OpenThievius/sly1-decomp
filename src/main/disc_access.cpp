@@ -2,6 +2,8 @@
 #include "common.h"
 #include "asm_func.h"
 #include "key_id.h"
+#include "functions/iop_commands.h"
+#include "functions/text_format.h"
 
 // Types other files define, named by the parameters of their functions declared here.
 struct T217D_6D0;
@@ -28,12 +30,6 @@ extern u8 g_pauseMenuElement[];
 
 struct ReadMode;
 s32 StartDiscRead(s32 a0, s32 a1, void* a2, ReadMode* a3);
-s32 SyncDiscRead(s32 mode);
-s32 GetDiscReadError(void);
-void UppercaseString(char* p);
-extern "C" s32 GetStringLength(const char* s);
-void* AppendString(void* dst, const char* src);
-s32 FormatToString(char* dst, const char* fmt, ...);
 extern "C" s32 CheckDiscChanged(s32 value, s32* out);
 extern "C" u32 SendDiscSCommand22(u32 value);
 extern "C" s32 ReadDiscSectors(s32 lsn, s32 sectors, void* buffer, ReadMode* mode);

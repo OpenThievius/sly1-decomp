@@ -31,6 +31,24 @@
 #include "pad_record.h"
 #include "ramp_profile.h"
 #include "value_range.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/flagged_object.h"
+#include "functions/game_clock.h"
+#include "functions/game_progress.h"
+#include "functions/matrix.h"
+#include "functions/memory_card.h"
+#include "functions/on_off_object.h"
+#include "functions/oscillator.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/selection_menus.h"
+#include "functions/sound_system.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world_contacts.h"
 struct Mat02;
 struct Vec02;
 
@@ -43,26 +61,19 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 
 
-void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, void* k2, void* k3);
-void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, void* arg);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 extern f32 g_gameTime;
 
 
 
 
-void UpdateOnOffObjectState(OnOffObject* self, s32 unused1, s32 unused2);
 
 
 
 
-void UpdatePlacedObject(PlacedObject* self, f32 f);
-void UpdateOnOffObjectState(OnOffObject* self, s32 unused1, s32 unused2);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 
 
-void DrawPlacedObject(PlacedObject* self, void* arg1, void* arg2);
 
 
 
@@ -75,24 +86,18 @@ extern f32 D_00275980[16];
 
 
 
-void UnregisterPlacedObject(PlacedObject* self);
-void SetOnOffObjectState(void* selfv, s32 state);
 void RemoveQueuedCalls(World* self, u32 mask, void* code, void* arg, s32 k2, s32 k3);
 
 
 
-void StartPlacedObject(PlacedObject* self);
 
 
 
-void SetPlacedObjectFrozen(PlacedObject* self, s32 flag);
-void SetOnOffObjectState(void* selfv, s32 state);
 
 
 
 void ReadBufferedRotation3(BufferedStream* self, void* out);
 void ReadBufferedVector3(BufferedStream* src, void* dst);
-void ReadMeshTables(void* a, void* b, void* c, void* d, void* e);
 s32 ReadBufferedS8(BufferedStream* self);
 void* CreatePathCurve(s32 idx);
 void ReadPropertyRecords(void* a, void* b);
@@ -113,7 +118,6 @@ extern f32 D_00275980[];
 extern f32 D_00275A10[4];
 extern f32 D_00275A20[2];
 
-void InitPlacedObject(PlacedObject* self);
 
 
 
@@ -125,10 +129,7 @@ struct FacePoint {
 };
 
 
-void* GetActiveSwitchedCollider(void);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 s32 IsPointInsideFaceTree(TreeNode03* self, FacePoint* value);
-void SetOnOffObjectState(void* selfv, s32 state);
 
 
 
@@ -178,9 +179,6 @@ struct WorldLoadRequest {
 
 extern FlagTable g_flagTable;
 
-void SetIopVolumeChannel8(f32 x);
-void StartScreenFadeFromFlagTable(FlagTable* r);
-void QueueWorldLoad(WorldLoadRequest* self, WorldKeyBlock* key, s32 a, s32 b, s32 flags);
 
 
 
@@ -202,7 +200,6 @@ extern u8 D_002623D8[];
 
 extern f32 g_frameStep;
 
-void SetScreenOwner(s32 a);
 void ClearKeyId(KeyId* q);
 LoadProgress* InitLoadProgress(LoadProgress* q, U32P* a, U32P* b, U32P* c, U32P* d);
 void* InitBufferedStream(BufferedStream* q, s32 a, u8* b, s32 c);
@@ -212,27 +209,11 @@ void DestroyBufferedStream(BufferedStream* q, s32 n);
 void ResetWorldSubsystems(World* q);
 void ReadBufferedBlockHeader(s32 a, BufferedStream* q);
 struct GameClock;
-void SetGameClockTime(GameClock* self, f32 value);
-s32 SetPadSelectFlags(s32 n);
 struct KeyedEntry;
-void SetCurrentLevelEntry(KeyedEntry* key, s32 flags);
 World* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
-void SetVolumeChannelFactor(s32 a, s32 b, f32 x);
 void CloseBufferedStream(BufferedStream* q);
 void EndLoadProgress(LoadProgress* p);
-void StartMemoryCardSave(MemoryCard* q);
-void ResetCamera(Camera* self, s32 flag);
-void UpdateSoundEmitters(void);
 struct Counter;
-void FindOrActivateSwitchedCollider(World* q, s32 a, s32 b);
-void NotifyScatterControllerLoaded(void* self);
-void ResetCounter(Counter* c);
-void RestoreSelectionCaptionCamera(T217D_12E0* q);
-void UpdateWorldContacts(World* q, s32 n);
-void UpdateCamera(Camera* self, s32 flag, f32 dt);
-void SetGameClockScale(f32 x);
-void ResetVolumeChannelFactors(void);
-void ClearScreenOwner(s32 owner);
 f32 D_00275970 = 0.5f;
 f32 g_onOffCameraRetryDelay = 2.0f;
 s32 D_00275978 = 0;
@@ -255,8 +236,6 @@ Vec02 g_onOffCameraProbeOffsets[5] = { { 0, 0, 0, 0 }, { 0, -50.0f, 0, 0 }, { 0,
 void* GetOnOffObjectBlock(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
 
 struct CameraPlacement { Vec02 q[5]; };
-void PlaceOnOffCameraFrame(OnOffObject* object, Vec02* eye, Vec02* x, Vec02* dir);
-void PlaceOnOffCameraOrbit(f32 angle, f32 offset, OnOffObject* self, f32* x, f32* poly, f32* range, s32 mode, Vec02* out);
 // The orbit's polynomial block: three rows of four floats, cleared before the blend fills them.
 struct OrbitPoly {
     f32 f[12];
@@ -422,8 +401,6 @@ void SetOnOffObjectFrozen(OnOffObject* self, s32 p)
 void SetOnOffObjectBlockValue(OnOffObject* self, f32 value) { *(f32*)(self->block2F0.d + 0x74) = value; *(f32*)(self->block2F0.d + 0x78) = 1.0f; *(f32*)(self->block2F0.d + 0x70) = value; }
 
 typedef void (*OnOffShapeFn)(f32 angle, Arr63* obj, Vec02* out, Vec02* dir);
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 
 void PlaceOnOffCameraFrame(OnOffObject* self, Vec02* eye, Vec02* out, Vec02* dir)
 {
@@ -453,7 +430,6 @@ void PlaceOnOffCameraFrame(OnOffObject* self, Vec02* eye, Vec02* out, Vec02* dir
 }
 
 extern "C" f32 FloatRemainder(f32 x, f32 y);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 void PlaceOnOffCameraOrbit(f32 angle, f32 offset, OnOffObject* self, f32* x, f32* poly, f32* range, s32 mode, Vec02* out)
 {
@@ -521,8 +497,6 @@ void PlaceOnOffCameraOrbit(f32 angle, f32 offset, OnOffObject* self, f32* x, f32
     TransformPointBetweenFrames(self, 0, &t, out);
 }
 
-// The five quadwords func_00143418 gives for a camera and its target: the placement.
-void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object);
 
 // The camera parameters of an on/off object, the 0x90 bytes at 0x2F0 (Block63) that
 // GetOnOffObjectBlock returns: only the floats this function reads are named.
@@ -565,19 +539,10 @@ struct OnOffCameraView {
 };
 struct OnOffEventObject { u8 pad[0x434]; s32 snapsCamera; f32 zoomOverride; f32 savedZoom; };
 typedef void (*OnOffPoseFn)(Arr63* obj, Vec02* out, s32 a, s32 b, s32 c, s32 d, f32* angle);
-void ConvertOffsetToCylindrical(const Vec02* a, const Vec02* b, f32* angle, f32* dist, f32* height);
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
-void RequestCameraSnap(Camera* self, f32* src);
-void SetCameraAimOffsetFromScreenPoint(Camera* camera, Vec02* point, f32 a, f32 b);
-void* GetOnOffObjectBlock(void* self);
-void ComputeOnOffCameraHeading(OnOffCameraController* self, CameraPlacement* eye);
 struct TargetRecord_00143418;
 struct Camera;
-void GetCameraTargetPlacement(Camera* self, void* o, TargetRecord_00143418* out, f32 dt);
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 extern f32 g_gameClock[];
-void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object);
 
 void ActivateOnOffCameraController(OnOffCameraController* self, OnOffObject* object)
 {
@@ -695,25 +660,12 @@ extern f32 g_onOffCameraTurnBlendCoefficients[4];
 extern RampProfile g_onOffCameraFadeRamp;
 extern RampProfile g_onOffCameraAngleRamp;
 extern ValueRange g_unitRange;
-f32 WrapAngle(f32 a);
-f32 ClampToMagnitude(f32 a, f32 b);
-f32 ClampToRange(ValueRange* range, f32 v);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out);
-f32 ApproachAngleClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self, f32* a1);
-void SpringCameraVector(Camera* cam, Vec02* pos, Vec02* vel, Vec02* goal, f32 a, f32 b, f32 dt);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void ClearPadPressedBits(PadRecord* self, u32 mask);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void FindFreeOnOffCameraAngle(CameraController* self, Vec02* p, Vec02* q, Vec02* out);
-void FindFreeOnOffCameraScreenSpan(CameraController* self, Vec02* center);
-void PushCameraOutOfGeometry(Camera* self, Quad16* origin, Quad16* dest, Vec02* out);
-void AimCameraAtPointWithSpring(Camera* cam, Vec02* center, Vec02* pos, f32 a, f32 b);
-void FadeCameraObstructingParts(Camera* cam);
 
 void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* eye, PadRecord* pad, f32 dt)
 {
@@ -1120,12 +1072,7 @@ extern f32 g_gameClock[];
 extern f32 g_gameTime;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
-void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out);
-void QueueCameraSnap(Camera* cam);
-s32 HasColliderSecondTree(void* unused, Collider* other);
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh, f32* lo, f32* hi);
 void FindFreeOnOffCameraScreenSpan(CameraController* self, Vec02* center)
 {
     Vec02 lo;
@@ -1185,7 +1132,6 @@ f32 GetSpanCandidateValue(void* a0, void* a1, void* a2, SpanCandidate* a3)
     return a3->value;
 }
 
-void FindNearestFreePointAround(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r);
 struct MeshHit;
 typedef f32 (*MeshHitWeigh)(void* ctx, void* a, void* b, MeshHit* hit);
 void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWeigh fn, f32 r, f32 limit, void* a4, Vec02* origin, Vec02* out);

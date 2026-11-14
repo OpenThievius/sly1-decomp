@@ -13,6 +13,15 @@
 #include "texture_table.h"
 #include "bump_allocator.h"
 #include "buffered_stream.h"
+#include "functions/anim_record.h"
+#include "functions/buffered_stream.h"
+#include "functions/font.h"
+#include "functions/object_pool.h"
+#include "functions/placed_object_model.h"
+#include "functions/pooled_object.h"
+#include "functions/texture_upload.h"
+#include "functions/warp_menu.h"
+#include "functions/world_listed_object.h"
 #define TEST_1B3510(ate, atst, aref, afail, date, datm, zte, ztst) \
     ((u64)(ate) | ((u64)(atst) << 1) | ((u64)(aref) << 4) | ((u64)(afail) << 12) | ((u64)(date) << 14) | \
      ((u64)(datm) << 15) | ((u64)(zte) << 16) | ((u64)(ztst) << 17))
@@ -28,30 +37,21 @@
 #include "asm_func.h"
 
 extern u32 D_00275718;
-void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 // A GIF register word, built from a zeroed doubleword.
 struct GifWord {
     u64 bits;
 };
-u64 GetTextureRegisterBits(TextureTable* obj, s32 p1, s32 p2);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern s32 g_imageRecordCountB;
 extern s32 g_imageSlotsB;
 void* AllocateZeroedFrontMemory(s32 bytes);
-void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 extern s32 g_imageRecordCountA;
 extern s32 g_imageSlotsA;
 extern s32 g_activeImageMask;
-void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
-void SendMaskedImagesToGif(s32 self, BumpAllocator* arg);
 extern f32 g_gameTime;
 u32* AllocateFrontMemory(s32 bytes);
 extern s32 D_002626CC;
-void FlushCursors(void);
-void ResetBumpAllocator(BumpAllocator* p);
-void FlushMeshQueue(void);
-void UpdateMatchingListedObjects(s32 mask);
 // EXACT (us)
 
 extern s32 g_animRecordCount;
@@ -60,27 +60,10 @@ extern s32 g_cursorAnimatorCount;
 extern CursorAnimator** g_cursorAnimators;
 extern s32 g_maskImageUploads[];
 extern s32 g_maskedImagesPacket;
-void LoadImageRecordsB(void* self);
-void LoadImageRecordsA(void* self);
-void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
-CursorAnimator* ReadAnimator(void* self);
-void ReadTextureTable(void* self, TextureTable* e);
-void LoadFonts(BufferedStream* self);
-void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
-s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c);
-void BuildAnimRecordGifPackets(s32 mask);
-void UploadAllFontImages(void);
-void InitScreenElements(void);
-s32 UploadImagesByMask(u32 mask);
-s32 BuildMaskedImagesPacket(s32 self);
 void* InitGifPacket(PacketWriter* b);
-void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, u8** out);
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
-void SendTextureRegisters(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx);
-void CloseDmaTag(PacketWriter* b);
-void ClearPacketBuffer(PacketWriter* b);
 void CloseGifTag(PacketWriter* b, s32 n);
 void AddGifStEntry(PacketWriter* b, f32 x, f32 y, f32 z);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
@@ -94,40 +77,19 @@ struct LoadedFont : Font {
 extern s32 g_fontCount;
 extern LoadedFont* g_fontRecords;
 extern s32 g_defaultFont;
-u16 ReadBufferedU16(BufferedStream* src);
-void LoadFont(Font* obj, BufferedStream* src);
-s32 GetFontById(s32 n);
-void SetCursorFrame(s32 a, s32 frame);
-void LoadAnimatorBase(CursorAnimator* self, const AnimatorParams* src);
-void BindAnimatorRecord(CursorAnimator* self);
-void SetCursorFrame(AnimCursor* cur, s32 idx);
-void SetCursorCoords(AnimCursor* cur, f32 x, f32 y);
-AnimRecord* FindAnimRecord(s32 key);
 extern AnimCursor* g_lastPendingCursor;
 extern AnimCursor* g_pendingCursors;
-f32 RandomFloatInRange(f32 a, f32 b);
 struct FacingXY { f32 x; f32 y; };
 struct PartFacingSource { u8 pad0[0x34]; s32 i34; };
 struct DrawnPart {
     void* vt; u8 pad0[0xC]; FacingXY vec; u8 pad1[0x60]; PartFacingSource* p78;
 };
 struct Frame_166690;
-void DrawModelPart(Frame_166690* self);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-f32 WrapModulo(f32 a, f32 b);
 extern "C" f32 FloatRemainder(f32 x, f32 y);
-void SubmitMeshQueueEntry(FrameTarget* self);
-s32 ClaimAnimatorStep(CursorAnimator* p);
-s32 GetAnimatorSize(s32 type);
 void* AllocateZeroedFrontMemory(s32 size);
-void* GetAnimatorMethods(s32 type);
-void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
-void ConvertHsvToRgb(Quad_001B4580* hsv, Quad_001B4580* rgb);
-f32 WrapAngle(f32 a);
-void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
-f32 WrapModulo(f32 x, f32 y);
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table g_frameRunAnimatorMethods[];
@@ -656,7 +618,6 @@ void BuildAnimRecordGifPackets(s32 mask)
 }
 
 extern s32 g_fonts[5];
-void InitMeshQueue(void);
 // Clears the level's screen resources: its record tables, fonts, animators and image masks.
 void ResetScreenResources(void)
 {

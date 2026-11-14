@@ -36,6 +36,9 @@
 #include "layout_137228.h"
 #include "scope_marker.h"
 #include "vu0.h"
+#include "functions/buffered_stream.h"
+#include "functions/pooled_object.h"
+#include "functions/texture_upload.h"
 struct BumpAllocator;
 
 
@@ -48,8 +51,6 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void CopyMemory(void* dst, void* src, u32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void CopyMemory(void* dst, void* src, u32 size);
-void BeginDmaTag(PacketWriter* self);
-void CloseDmaTag(PacketWriter* self);
 
 
 // An entry of a GCC 2.95 vtable as this file defines D_0024A220 (the font table).
@@ -67,7 +68,6 @@ void RewindTextReader(TextReader* self);
 s32 ReadTextChar(TextReader* self);
 
 void* InitGifPacket(void* p);
-void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 
@@ -75,9 +75,7 @@ void CopyFontMetrics(Font* self, Font* dst);
 
 FontGlyph* FindFontGlyph(Font* table, s8 key);
 
-void CloseDmaTag(PacketWriter* self);
 void AddDmaRefTag(void* obj, s32 a, s32 b);
-void BeginDmaTag(PacketWriter* self);
 
 void SetFontClipRect(Font* unused, Vec4U* v, PacketWriter* obj);
 s32 AddFontImagesToFrame(Font* self, void* obj);
@@ -120,20 +118,12 @@ s32 WrapFontString(Font* self, u8* s, f32 w);
 
 struct FontUploadFrame { PacketWriter a; u8 buf[0x100]; };
 PacketWriter* InitGifPacket(PacketWriter* p);
-s32 AllocateBump(s32* self,s32 size);
-void BuildImageTexRegister(ImageRecord* self, u32 a1);
-void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx);
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
-void BuildPaletteTexRegister(PaletteRecord* self, u32 a1);
-void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx);
 
 // Matched: for loop over i with D_00262264 + i * 0x88.
 
 extern s32 g_fontCount;
 extern u8* g_fontRecords;
 
-void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
 void UploadFontImages(Font* self, void* arg);
 
 
@@ -161,7 +151,6 @@ struct FontHeader {
 
 
 struct BufferedStream;
-void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 void* AllocateFrontMemory(s32 n);
 extern s32 g_glyphUOffset;
 extern s32 g_glyphVOffset;
@@ -222,8 +211,6 @@ void PushFontScale(Font* p, f32 a, f32 b);
 void PopFontScale(Font* p);
 void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s);
-void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void BeginDmaTag(PacketWriter* self);
 
 
 void ClearDefaultFont(void)

@@ -22,6 +22,22 @@
 #include "pad_record.h"
 #include "camera.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/entry_queue.h"
+#include "functions/game_clock.h"
+#include "functions/matrix.h"
+#include "functions/on_off_object.h"
+#include "functions/oscillator.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object.h"
+#include "functions/player.h"
+#include "functions/player_aim.h"
+#include "functions/player_state2.h"
+#include "functions/player_target.h"
+#include "functions/point_graph.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 struct BaseObject;
 
 struct BaseObject;
@@ -43,7 +59,6 @@ f32 g_queuePathReachTolerance = 15.0f;
 f32 D_00263E40 = 0.200000003f;
 f32 D_00263E44 = 0.5f;
 
-void InitObject(BaseObject* self);
 void* AllocateFrontMemory(int size);
 
 void InitEntryQueue(EntryQueue* self)
@@ -53,13 +68,7 @@ void InitEntryQueue(EntryQueue* self)
     self->flag68 = 1;
 }
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-void GetObjectWorldRotation(BaseObject* self, Mat02* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* outf)
 {
@@ -154,8 +163,6 @@ void SetEntryQueueTargetNode(EntryQueue* self, BaseObject* target)
 }
 
 
-void SetOnOffObjectForcedState(void* p, s32 n);
-s32 IsObjectAttached(BaseObject* self);
 
 void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next)
 {
@@ -196,19 +203,7 @@ struct QueueTargetHolder {
     QueueTargetDriver* driver;  // 0x34
 };
 
-void PlaceAtArrivalPoint(TransformSet* self);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void SetPlayerState(Player* self, s32 state, s32 sub);
 struct Chooser_1CDFB8;
-s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out);
-void ComputePlayerJumpVelocity(Player* self, Vec02* out);
-void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec02* out);
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out);
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_0017BCD0 differs in registers
-void SetPlayerAimMode(Player* self, s32 n);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-void SetGameClockScale(f32 x);
 extern f32 g_gameTime;
 
 void StartNextQueueEntry(EntryQueue* self)
@@ -410,8 +405,6 @@ done:
 }
 
 extern f32 g_gameTime;
-void StopAnimationPlayer(AnimationPlayer* self);
-void SetPlayerState(Player* self, s32 a, s32 b);
 
 s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
 {
@@ -481,7 +474,6 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
     return done;
 }
 
-void StartNextQueueEntry(EntryQueue* self);
 
 void AdvanceEntryQueue(EntryQueue* self)
 {
@@ -499,9 +491,6 @@ void AdvanceEntryQueue(EntryQueue* self)
 
 struct TargetCand;
 struct Chooser;
-s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep);
-f32 WrapAngle(f32 a);
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
 extern f32 g_gameTime;
 extern f32 D_00274F14;
 
@@ -655,7 +644,6 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
     }
 }
 
-void AdvanceEntryQueue(EntryQueue* self);
 
 s32 IsEntryQueueRunning(EntryQueue* self)
 {
@@ -666,7 +654,6 @@ s32 IsEntryQueueRunning(EntryQueue* self)
     return 0;
 }
 
-void UnbindEntryQueue(EntryQueue* self);
 
 void ResetEntryQueue(EntryQueue* self)
 {
@@ -679,9 +666,6 @@ void ResetEntryQueue(EntryQueue* self)
     self->entryIndex = 0;
 }
 
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-s32 SetPadSelectFlags(s32 a);
-void AcquirePadSelectFlag(World* a0);
 
 
 void BindEntryQueueToObject(EntryQueue* self, Player* player)
@@ -697,10 +681,6 @@ void BindEntryQueueToObject(EntryQueue* self, Player* player)
 }
 
 
-void SetGameClockScale(f32 x);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-void ClearPadSelectFlags(u32 mask);
-void ReleasePadSelectFlag(World* self);
 
 void UnbindEntryQueue(EntryQueue* self)
 {

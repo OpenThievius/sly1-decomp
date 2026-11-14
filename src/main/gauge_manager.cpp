@@ -33,6 +33,21 @@
 #include "pad_record.h"
 #include "ramp_profile.h"
 #include "object_finder.h"
+#include "functions/agent.h"
+#include "functions/agent_registration.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/object_pool.h"
+#include "functions/oscillator.h"
+#include "functions/path_follower.h"
+#include "functions/placed_object.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/screen_element.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 struct ColliderSpan;
 struct PlaneNode;
 struct Vec02;
@@ -44,11 +59,8 @@ struct Mat02;
 struct Vec02;
 
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
-void EnterAgentState(Agent* self, s32 evt, Animation* arg);
 
-void SetAnimationPlayerSpeed(AnimationPlayer* self, f32 x);
 // An agent of the world's list at +0x1CCC (linked at +0xC10), seen as its table of slots:
 // slot 0x50 takes an owner message (func_0014BDC8, func_0014BEF8).
 typedef void (*AgentMessageFn)(void* self, void* arg);
@@ -65,78 +77,38 @@ struct Scratch_0014BDC8 {
     s32 words[8];
 };
 
-s32 ChooseAgentState(Agent* self);
 
-s32 IsContactBetweenParts(Collider* self, void* other);
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
-void ChangeAgentState(Agent* self, s32 state, void* context);
-s32 IsPadSelectFlagHeld(World* self);
 
 struct AgentHit;
 struct Agent;
 s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev);
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 
 // What SetSinCosPair fills: the two results of ComputeSinCos and a word it clears.
 struct SinCosPair { f32 a; f32 b; s32 value; };
 
-void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 
-void EnterAgentState(Agent* self, s32 evt, Animation* arg);
 void CountDownGaugeContacts(GaugeManager* self, ContactAgent* agent);
-void SetAnimationPlayerSpeed(AnimationPlayer* self, f32 x);
-f32 RandomFloatInRange(f32 a, f32 b);
 
 s32 HandleAgentObjectEvent(NumberedAgent* self, void* event);
 extern u8 g_camera[];
 extern u8 D_00248D30[];
-f32 RandomFloatInRange(f32 a, f32 b);
 extern u8 D_00248D30[];
-f32 RandomFloatInRange(f32 a, f32 b);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 void ApplyGaugeRatioToEffect(GaugeManager* self);
 extern f32 g_gameClock[];
-void UpdatePlacedObject(PlacedObject* self, f32 f);
 void RunGaugeTimedEvent(GaugeManager* self);
 void ActivateRandomGaugeSlot(GaugeManager* self);
-void* GetActiveSwitchedCollider(void);
 // The active collider seen as its table of slots: slot 81 (func_0014C6E0, func_0014CDC8).
 typedef void (*ColliderSlotFn)(void* self);
 
 struct ColliderSlots { ColliderSlotFn* vtbl; };
 
-s32 AreMenusAndFadeClear(void);
 extern f32 g_gameTime[];
-f32 RandomFloatInRange(f32 a, f32 b);
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
 
 struct StateGraph;
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void AddStateWalkerListener(StateWalker* self, PlacedObject** p);
 void ComputeGaugeOutputs(GaugeManager* self);
 extern f32 g_gameTime[];
 
@@ -145,39 +117,14 @@ typedef s32 (*ColliderQueryFn)(void* self);
 
 struct ColliderQuerySlots { ColliderQueryFn* vtbl; };
 
-f32 RandomFloatInRange(f32 a, f32 b);
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void* GetActiveSwitchedCollider(void);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void ChangeAgentState(Agent* self, s32 state, void* context);
-void StopTimer(T217D_510* self);
 void ComputeGaugeOutputs(GaugeManager* self);
 extern f32 g_gameTime[];
-void RaiseScatterLevels(ScatterController* self, f32 amount);
 extern u8 D_00248D30[];
 extern u8 D_00248D30[];
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
 
 extern u8 D_00248D30[];
-void ChooseObjectPoolItem(ObjectPool* p);
-s32 RandomIntInRange(s32 a, s32 b);
-s32 LaunchChosenPoolObject(ObjectPool* h, s32 v);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-void GetObjectWorldRotation(BaseObject* self, Mat02* out);
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
-void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1);
-f32 RandomFloatInRange(f32 a, f32 b);
 
-void InitPlacedObject(PlacedObject* self);
 typedef void (*TimerDoneFn)(void* self);
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void SetWorldActiveFollower(World* self, void* v);
-void StartTimer(T217D_510* self, f32 v);
-void SetTimerLimit(T217D_510* self, f32 limit, T217D_510_Fn onEnd);
-void StartTimerCounting(T217D_510* self);
 void FinishGaugeOnTimeout(T217D_510* timer, s32 mode);
 
 // The coefficients of a quadratic in the gauge fraction (GaugeCurve::Eval).
@@ -242,13 +189,7 @@ f32 g_agentNearRadius = 900.0f;
 f32 g_agentFarRadius = 1200.0f;
 ObjectLink g_gaugeManagerLinks[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
 
-void SetSinCosPair(f32 value, SinCosPair* self);
 extern s32 g_frameCount;
-s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans);
-void FindClosestPointsOnSegments(const Vec02* p0, const Vec02* p1, const Vec02* q0, const Vec02* q1, f32* st, f32* dist, Vec02* dir);
-void SetAgentGoalPoint(Agent* self, Vec02* goal);
-void UpdateAgentGoal(Agent* self, s32 flag);
-f32 WrapAngle(f32 a);
 typedef NumberedAgent* (*TargetOfFn)(NumberedAgent* self);
 
 void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
@@ -659,7 +600,6 @@ void AppendGaugeSlot(GaugeManager* self, s32 value)
     self->slots[i].id = value;
 }
 
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
 
 // Picks a free gauge slot for each of up to two agents: the farthest from the player (and, for the
 // second, from the first's place) among the slots on screen, then any. The slot's size is a named

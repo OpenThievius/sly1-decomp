@@ -34,44 +34,40 @@
 #include "asm_func.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/blend_animation.h"
+#include "functions/buffered_stream.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/effect.h"
+#include "functions/effect_spawner.h"
+#include "functions/flagged_object.h"
+#include "functions/game_progress.h"
+#include "functions/matrix.h"
+#include "functions/memory_card.h"
+#include "functions/object_gatherer.h"
+#include "functions/on_off_object.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object.h"
+#include "functions/player.h"
+#include "functions/player_mode.h"
+#include "functions/pooled_object.h"
+#include "functions/pose_source.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
 struct BufferedStream;
 struct MemoryCard;
 struct ScaledTransform;
 struct Mat4A;
 // Types other files define, named by the parameters of their functions declared here.
-void InitCollider(Collider* self);
 
-void ChooseObjectGathererCandidate(ObjectGatherer* self);
 struct ScatterController;
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
-void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag);
 extern u8 g_scatterController[];
-void SetObjectGathererSuspended(ObjectGatherer* self, s32 a1);
-void PostLoadPlacedObject(PlacedObject* self);
 // A descriptor slot called by its index (the slots past class 0x01's, whose types the
 // descriptors give differently).
 typedef s32 (*SlotTest)(void* self);
-void StartPlacedObject(PlacedObject* self);
-s32 HasAnimationEventKind19(Animation* a0);
-void ResolveAndStartObject(BaseObject* self);
 typedef void (*SlotFn)(void* self);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-s32 IsObjectAttached(BaseObject* self);
-void CopyCollider(Collider* self, Collider* other);
-void InitObjectSet(ObjectSet*);
-void ApplyColliderPendingImpulse(Collider* self, s32 moved);
-void RegisterObject(BaseObject* self);
-void AppendToList(List01* self, void* item);
-void UnregisterObject(BaseObject* self);
-void RemoveFromList(List01* list, void* item);
-void StartObject(BaseObject* self);
-void RegisterCollider(Collider* self);
-void UnregisterCollider(Collider* self);
-void InitObject(BaseObject* self);
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void* GetActiveSwitchedColliderData();
-s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
 // The active switched collider's data block (SwitchedCollider + 0x580): at 0x18 the collider.
 struct ActiveColliderData {
     u8 pad0[0x18];
@@ -82,81 +78,25 @@ struct LevelTaskRecord { s32 flags; u8 rest[0x74]; };
 // The element stack (g_elementStack), as game_progress.cpp and selection_menus.cpp view it.
 struct ElementStackState { u8 pad0[0x30]; s32 resumeState; };
 extern ElementStackState g_elementStack;
-void MarkLevelRecordComplete(s32 index);
-void RequestWorldLoadByMode(s32 mode);
-void InitSwitchedCollider(SwitchedCollider* self);
 // One of C17's three markers at 0x61C (StartC17Marker): its owner, the object found for it and
 // that object's state walker.
 struct StateWalker;
 struct C17Marker { s32 owner; BaseObject* object; StateWalker* walker; };
 struct StateGraph;
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void ActivateSwitchedCollider(void* value);
-void ShowModeLabel(s32 mode);
-s32 GetPadHorizontalStep(PadRecord* p);
-s32 GetPadVerticalStep(PadRecord* p);
-void ClearPadPressedBits(PadRecord* self, u32 mask);
-void RecordC17ColliderCompletion(C17* self);
 void CopyMemory(void* dst, void* src, u32 size);
-void ResetPadStepRepeat(PadRecord* p);
-s32 ComputeCompletionMask(void);
-void FadeOutAndQueueMovie(s32 value);
-void CopyObjectData(BaseObject* self, BaseObject* src);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 extern u8 g_flagTable[];
-void InitObjectSet(ObjectSet* self);
 struct FlagTable;
-s32 TakeFlagTableIndex(FlagTable* c);
-void LoadObjectSet(ObjectSet* self, BufferedStream* stream);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 void* AllocateFrontMemory(s32 size);
 // What func_0019BE08 is given: two quadwords at 0x20 and 0x30.
 struct GatherTrigger { u8 pad[0x20]; Quad16 q20; Quad16 q30; };
-void SetObjectGathererState(ObjectGatherer* self, s32 mode);
-s32 GetObjectSetActivationState(ObjectSet* self);
-s32 TestFlagTableBit(FlagTable* table, s32 index);
-void SetFlagTableBit(FlagTable* self, s32 bit);
-void CollectObjectSet(ObjectSet* self);
 typedef void (*SlotFnInt)(void* self, s32 a);
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
-s32 HandleObjectEvent(Collider* self, ObjectEvent* shape);
-void CopyCollider(Collider* self, Collider* other);
-void LoadPlacedObject(PlacedObject* self, void* r);
-void FlagNumberedItem(NumberedItem* self);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 extern f32 g_gameTime[];
-f32 RandomGaussian(f32 a, f32 b, f32 c);
-void LoadCollider(Collider* self, BufferedStream* in);
-void FindOrBuildMemberGroup(void** out, void* self);
 extern s32 D_00270454;
 extern u8 g_memoryCard[];
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void PopStackElement(ElementStack* g);
-void ApplyCompletionFlags(s32 mode);
-void StartMemoryCardSave(MemoryCard* self);
 extern s32 D_00275C34;
-void StartObjectSet(ObjectSet* self);
-f32 RandomFloatInRange(f32 a, f32 b);
-s32 RandomIntInRange(s32 a, s32 b);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-Effect* CreateEffect(s32 kind, EffectOwner* sys);
-void SetNumberedItemFlag(NumberedItem* self);
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-void StartC17Marker(C17Marker* self, s32 x);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void GetCurrentLevelBit(u32* out);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void* FindOrCreateSeekedAnimationPlayer(void* self, BaseObject* key, s32 a2, s32 a3, f32 fa, f32 fb);
-void QueuePlayerWalkerActivation(Player* self, u8* other);
 // A list walk's frame (as ListFrame), pushed by its constructor.
 struct ListWalkFrame {
     s32 list; s32 cursor; s32 link; s32 prev;
@@ -168,36 +108,15 @@ struct ListWalkFrame {
         *(s32*)&g_activeListFrames = (s32)this;
     }
 };
-void ResolveAndStartObject(BaseObject* self);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-s32 IsObjectAttached(BaseObject* self);
-void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
-void SetPlayerState(Player* self, s32 state, s32 sub);
-s32 CompletesWorldBits(s32 bits);
-void ChooseStepSequenceState(StepSequence* s);
-void InitCollider(Collider* self);
-void AppendToList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
 extern f32 g_gameClock[];
-void PlaceFramePointInOwnerFrame(void* a, void* b, void* c, f32 d);
-void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void* e);
 // A cell of the grid func_0019D0E0 finds a point in: the indices of its four corners in the
 // point table at 0xA8 and the record table at 0xC4.
 struct GridCell { s32 corner[4]; };
-void BlendCellCornerRecords(AimBlendGrid* self, GridCell* cell, Quad16* point);
-void UnregisterCollider(Collider* self);
 struct LoadStream;
 struct BufferedStream;
-s32 ReadBufferedS16(BufferedStream* self);
 struct BufferedStream;
 struct Mesh03;
-void ReadMeshFromStream(BufferedStream* in, Mesh03* mesh);
 void* AllocateZeroedFrontMemory(s32 n);
-s32 ReadBufferedS8(BufferedStream* self);
-void DecodeAimBlendGridIndex(AimBlendGrid* o, s32 i, f32* x, f32* y, f32* z);
-void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 x, f32 y, f32 z);
-f32 ReadBufferedFloat(BufferedStream* r);
-void ReadPropertyRecords(void* self, void* obj);
 // A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
 struct ListWalker;
 struct ListWalker {
@@ -221,18 +140,7 @@ struct ListWalker {
         return n;
     }
 };
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void PlaceColliderClearOfContacts(Collider* self, Vec02* start, Vec02* step);
-void SetColliderPartListed(Collider* self, s32 flag);
-void StartObject(BaseObject* self);
 struct BlendAnimation;
-void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* vals);
-void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
-void SetBlendEntryRecordFlag(BlendAnimationView* blend, void* key);
-void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 a, f32 b, f32 c);
-void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
 
 // The file's .data, in retail's order. D_0026A910 and D_0026A914 are read by the VU0 function
 // func_00198BD8, D_0026A968 by func_00199698, D_0026ABB0 and D_0026ABC0 by func_0019B298 and
@@ -319,8 +227,6 @@ void StartObjectSet(ObjectSet* self)
     }
 }
 
-void UpdateCollider(Collider* self, f32 dt);
-void* GetActiveSwitchedCollider();
 
 // The part of the active collider's block at 0x580 that UpdateObjectSet reads.
 struct ActiveReach {
@@ -534,7 +440,6 @@ void AddStateWalkerGroupId(StateWalkerGroup* queue, void* item)
 }
 
 // Left with an integer: QueueWalkerActivationOnPlayer takes the walker as an s32.
-void QueuePlayerWalkerActivation(Player* self, s32 other);
 
 void QueueWalkerActivationOnPlayer(StateWalkerGroup* group) {
     if (g_player != 0) {
@@ -619,8 +524,6 @@ struct ActiveColliderTarget {
     u8 pad4[0x18 - 0x4];
     PlacedObject* collider;
 };
-s32 MaskWorldBitsBySave(void);
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 
 // The reach test reads the target's position at the use (*(const u128*)&...), not through Q's
 // reference: the reference's address is a pseudo that CSE then reuses for the &target->v140
@@ -787,12 +690,7 @@ struct SpinKeyframe {
     u8 to[0x10];            // 0x50
 };
 
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
-void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 SpinFrame4 MultiplyMatrices(const SpinFrame4& a, const SpinFrame4& b);
-void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 
 static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
 {
@@ -1416,10 +1314,6 @@ void CopyObjectGatherer(ObjectGatherer* self, ObjectGatherer* src)
     self->q600 = tmp;
 }
 
-void StepCollider(Collider* self, f32 t);
-void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
-void BuildBasisFromX(Vec02* x, Mat02* out);
 
 void StepObjectGatherer(ObjectGatherer* self, f32 dt)
 {
@@ -1476,10 +1370,6 @@ struct GatherCandidate {
     Vec02 pos;              // 0x40
 };
 
-void UpdateCollider(Collider* self, f32 dt);
-void* FindColliderFloorContact(void* self, s32 key, s32* out);
-s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value);
-void ClearRootTries(PlacedObject* self);
 
 // Each update: the state's sound, push and speed.
 void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
@@ -1633,7 +1523,6 @@ ASM_FUNC(func_0019BB10);
 
 ASM_FUNC(func_0019BB90);
 
-void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 
 void ApplyObjectGathererLodObject(ObjectGatherer* self, void* a1, void* a2)
 {
@@ -1697,8 +1586,6 @@ s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
     return 1;
 }
 
-void* GetActiveSwitchedCollider();
-void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
 
 // Picks, of the class 0x7C objects within reach, the one farthest from the active collider along
 // the segment to it, and keeps it in f660.
@@ -2070,7 +1957,6 @@ struct FramePoint_0019CE50 {
     Vec02 point;            // 0x40
 };
 
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 
 void PlaceFramePointAtTime(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
 {

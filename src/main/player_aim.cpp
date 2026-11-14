@@ -14,19 +14,24 @@
 #include "transform_object.h"
 #include "aim_blend_grid.h"
 #include "game_clock.h"
+#include "functions/base_object.h"
+#include "functions/blend_animation.h"
+#include "functions/collider_contact.h"
+#include "functions/matrix.h"
+#include "functions/object_gatherer.h"
+#include "functions/oscillator.h"
+#include "functions/placed_object.h"
+#include "functions/player.h"
+#include "functions/player_aim.h"
+#include "functions/state_walker.h"
+#include "functions/turning_collider.h"
+#include "functions/warp_menu.h"
 struct BaseObject;
 
 
 extern f32 g_gameTime[];
 extern u8 g_class75List[];
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, f32 t, Vec02* vel, Vec02* spin);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-// Left in this order: retail's call here evaluates the time before the pointers.
-void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
-f32 WrapAngle(f32 a);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern const T2195_Vt g_ownerPoseSourceMethods;
 
@@ -168,12 +173,8 @@ struct AimTarget { u8 pad0[0x3E4]; BlendAnimationView* f3E4; };
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void TeleportStateWalker(StateWalker* self, s32 key);
 struct StateGraph;
-s32 FindStateEntryIndex(StateGraph* self, s32 key);
 struct TwoBlendWeights;
-void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx);
-void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 extern f32 g_aimStartDelay;
 extern f32 g_aimDurationLong;
 extern f32 g_aimDurationShort;
@@ -404,10 +405,6 @@ void SetPlayerAimMode(Player* self, s32 state)
     }
 }
 
-s32 IsObjectAttached(BaseObject* self);
-void SetPlayerAimMode(Player* self, s32 mode);
-void TrackAimTargetObject(Player* self, AimBlendGrid* x, void* y);
-void TrackAimTargetPoint(Player* self, AimBlendGrid* dst, PathCurveObject* src, f32* k);
 
 void UpdatePlayerAimTarget(Player* s)
 {
@@ -433,8 +430,6 @@ void UpdatePlayerAimTarget(Player* s)
     }
 }
 
-void SetPlayerState(Player* self, s32 a, s32 b);
-void SetPlayerAimMode(Player* self, s32 state);
 
 void HandlePlayerAimButton(Player* self, PadRecord* other)
 {
@@ -562,10 +557,7 @@ struct NearestAhead {
 // Two entries of a blend record, 0xC bytes apart, whose weights func_001399F8 takes.
 struct TwoBlendWeights { f32 a; u8 pad[0xC - 4]; f32 b; };
 
-void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f32* dir, f32 a, f32 b);
-void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void TurnColliderTowardHeading(TurningCollider* self);
 
 void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
 {

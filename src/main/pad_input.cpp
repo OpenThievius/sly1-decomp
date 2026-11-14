@@ -11,6 +11,11 @@
 #include "screen_element.h"
 #include "asm_func.h"
 #include "fpu.h"
+#include "functions/game_progress.h"
+#include "functions/object_gatherer.h"
+#include "functions/on_off_object.h"
+#include "functions/pair_controller.h"
+#include "functions/text_format.h"
 
 // Types other files define, named by the parameters of their functions declared here.
 struct PadPatternPlayer;
@@ -27,13 +32,9 @@ f32 D_00262A30[8] = { 1.0f, 0.0f, 0.0f, 1.0f, 0.699999988f, 0.699999988f, 0.6999
 u16 g_padButtonMasks[12] = { 0x2000, 0x8000, 0x1000, 0x4000, 0x0010, 0x0020, 0x0040, 0x0080, 0x0004, 0x0008, 0x0001, 0x0002 };
 u32 g_worldLoadButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x100 };
 
-void RequestWorldLoadByMode(s32 mode);
 void ClearButtonCodeFlags(void);
 void SetButtonCodeFlags(s32 flags);
 void ShowPasswordMessage(void);
-void FlagAllNumberedItems(void);
-void SetSavedWorldBits(u32 value);
-void MarkAllLevelRecordsComplete(void);
 ButtonCodeSlot g_worldLoadButtonCode = { { (const u16*)g_worldLoadButtonSequence, 0xB, (ButtonCodeFn)RequestWorldLoadByMode, 0x0 } };
 u32 g_clearFlagsButtonSequence[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800 };
 ButtonCodeSlot g_clearFlagsButtonCode = { { (const u16*)g_clearFlagsButtonSequence, 0xB, (ButtonCodeFn)ClearButtonCodeFlags, 0x0 } };
@@ -149,7 +150,6 @@ extern "C" s32 HasFullPadMask(s32 port, s32 slot);
 extern "C" s32 SendFullPadMask(s32 port, s32 slot);
 extern "C" s32 GetPadRequestMode(s32 port, s32 slot);
 s32 PollPadInput(PadRecord* self);
-void UpdatePadPattern(PadPatternPlayer* s);
 void SetPadConnectionState(PadRecord* self, s32 mode, s32 n);
 
 void UpdatePadConnection(PadRecord* self)
@@ -300,7 +300,6 @@ void UpdatePadConnection(PadRecord* self)
     SetPadConnectionState(self, mode, n);
 }
 
-void RequestPadPattern(PadPatternPlayer* self, s32 a1, s32 a2);
 
 void SetPadConnectionState(PadRecord* self, s32 mode, s32 n)
 {
@@ -472,7 +471,6 @@ void ClearPadPressedBits(PadRecord* self, u32 mask)
 }
 
 struct PadPatternPlayer;
-void StartPadPatternFromTable(PadPatternPlayer* self, s32 index, f32 time);
 
 void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration)
 {
@@ -768,7 +766,6 @@ void RunCompletedButtonCode(void)
 
 extern s32 g_buttonCodeFlags;
 
-void RequestWorldLoadByMode(s32 mode);
 
 void ClearButtonCodeFlags(void)
 {
@@ -778,7 +775,6 @@ void ClearButtonCodeFlags(void)
 
 extern s32 g_buttonCodeFlags;
 
-void RequestWorldLoadByMode(s32 mode);
 
 void SetButtonCodeFlags(s32 flags)
 {
@@ -793,9 +789,6 @@ LINKER_REMNANT(func_0016F470);
 
 extern const char g_scrambledPassword[24];
 
-s32 ComputeCompletionMask(void);
-void* CopyString(void* dst, const char* src);
-s32 FormatToString(char* dst, const char* fmt, ...);
 
 void ShowPasswordMessage(void)
 {

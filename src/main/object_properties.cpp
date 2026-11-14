@@ -37,6 +37,8 @@
 #include "attached_set.h"
 #include "active_set_solver.h"
 #include "sound_level.h"
+#include "functions/matrix.h"
+#include "functions/placed_object.h"
 struct HomogeneousMatrix;
 
 struct ScriptListBuilder;
@@ -54,7 +56,6 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 typedef signed int s32;
 typedef unsigned char u8;
-void EnsureKeyedList(BaseObject* self);
 // An entry of World::scriptEntries: an expression read from the level and the scope it was evaluated in
 // (0 until func_001C13E8 evaluates it).
 struct ScriptScope;
@@ -141,8 +142,6 @@ struct ScriptPair { s32 w[2]; };
 struct ScriptTriple { s32 w[3]; };
 extern void* AcquireVectorAPayload(void);
 extern void* AcquireMatrixPayload(void);
-extern void* CopyRotationMatrix(Quad16* destination, const Quad16* source);
-extern void ResetMatrixHomogeneous(HomogeneousMatrix* self);
 extern void* AcquireVectorBPayload(void);
 extern void* AcquirePairPayload(void);
 extern void* AcquireTriplePayload(void);

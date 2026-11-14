@@ -19,6 +19,10 @@
 #include "render_frame.h"
 #include "warp_page.h"
 #include "asm_func.h"
+#include "functions/effect_spawner.h"
+#include "functions/main_loop.h"
+#include "functions/pooled_object.h"
+#include "functions/warp_menu.h"
 
 // The scale and offset the projection constants upload (func_0019D860); func_001DD3E0 reads
 // them too.
@@ -31,7 +35,6 @@ s32 g_projectionExtraConstants[4];
 GroupMarker g_groupMarkers[18];
 
 void* InitGifPacket(PacketWriter* self);
-void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, u8** out);
 void PrepareBasicGroup(void);
 void PrepareFlushedGroup(void);
@@ -41,24 +44,16 @@ void PrepareAlternateBlockGroup(void);
 void PrepareUnzoomedGroup(void);
 struct ColorFade;
 typedef void (*DrawHook)(ColorFade* self, void* arg, s32 z);
-void UpdateColorFade(ColorFade* n);
 extern u8 g_projectionConstantsUploaded[];
-void BeginDmaTag(PacketWriter* self);
-void CloseDmaTag(PacketWriter* self);
-void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
-void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 extern s32 g_groupConstantsUploaded;
 extern s32 g_groupConstantsCurrent;
 extern u8 g_screenClearPacketA[];
 extern u8 g_screenClearPacketB[];
-void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
-void WriteVifFlush(PacketWriter* b);
 extern u8 g_groupMicroprogram[];
 extern u8 g_groupMicroprogramEnd[];
 void UploadProjectionConstants(void);
 void UploadCameraOncePerFrame(void);
 void AddDmaRefTagIfChanged(void* self, void* a, void* b);
-void WriteVifFlushA(PacketWriter* b);
 extern WarpPage* D_0026FA68;   // the warp page on view (warp_menu sets its mode and cursor)
 extern s32 g_maskImageUploads[];
 extern Camera* g_camera;
@@ -315,7 +310,6 @@ void PrepareUnzoomedGroup(void)
     }
 }
 
-void UploadLightVolumes(World* world);
 extern s32 D_00262474;
 
 // The caller passes the camera too, unused here; the world goes on to UploadLightVolumes. The

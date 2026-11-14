@@ -1,6 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/collider.h"
+#include "functions/game_progress.h"
+#include "functions/matrix.h"
+#include "functions/path_follower.h"
+#include "functions/player.h"
+#include "functions/pooled_object.h"
+#include "functions/sound_system.h"
+#include "functions/switched_collider.h"
+#include "functions/timed_object.h"
+#include "functions/world.h"
 
 // Types other files define, named by the parameters of their functions declared here.
 struct ScaledTransform;
@@ -20,42 +32,27 @@ struct BufferedStream;
 struct EffectSpawner;
 
 
-void InitCollider(Collider* self);
-void UpdateCollider(Collider* self, f32 dt);
 TrackPlayer* FindTrackPlayer(PlacedObject* node);
-// Slot 17 takes the frame time (Desc01::m11); func_001AEFA0 ignores it, but func_001AF5C8's call
-// passes it (retail's frame shows the argument live).
-void UpdateTimedObject(TimedObject* self, f32 dt);
 
 ObjectLink g_timedGroupLinks[2] = { { 2, 0x28A, 0xAE4 }, { 2, 0x28B, 0xAE8 } };
 
-void LoadCollider(Collider* self, BufferedStream* stream);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-s32 MatchesObjectId(BaseObject* self, s32 id);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 extern f32 g_gameClock[];
 s32 g_groupStaggerDirty = 0;
 
-void SetColliderFrozen(Collider* self, s32 flag);
-void AppendToList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
 
 void StartPlacedObject(PlacedObject* self);
-void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 
-s32 IsObjectExcluded(TimedObject* self, void* key);
-s32 MaskWorldBitsBySave();
 
 extern f32 g_gameTime[];
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 ObjectLink g_sequencedObjectLinks[2] = {
     { 2, 0x28C, 0x5D0 },
     { 2, 0x28D, 0x5D4 },
 };
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
 // The record at PlacedObject::aimAttachment of these objects: its word at 0x44 is cleared at start and
 // set to 4 or 0 as the sequence enters state 0 or 2.
@@ -64,25 +61,16 @@ struct Record200 {
     s32 f44;
 };
 
-void* GetActiveSwitchedCollider(void);
 
 struct PlayingSound;
-void StopSoundRecord(PlayingSound* self, s32 n);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void SetEffectSpawnerActiveForever(void* p);
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
 
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
 struct AnimCursor;
-void SetCursorFrame(AnimCursor* a0, s32 a1);
 
-void EnterSequencedSubstate(SequencedObject* self, s32 arg);
-void StopTrackPlayer(TimedObject* self);
-s32 IsSoleAcceptedObject(TimedObject* o, void* p);
-void StaggerGroupOffsets();
-void SetBlinkObjectFrame(BlinkObject* self);
 
 void InitTimedObject(TimedObject* a0) {
     InitCollider(a0);
@@ -475,12 +463,10 @@ struct DrawPoints {
     Vec02* points;
 };
 
-void DrawCollider(Collider* self, void* a, void* m);
 void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 Vec02* AllocateBackMemory(s32 size);
-f32 ComputeTimedGroupRamp(TimedGroup* o, TimedGroupChild* c);
 
 void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
 {
@@ -569,10 +555,8 @@ s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
 }
 
 s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
-void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 void* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
 void SetEffectSpawnerInactive(EffectSpawner* self);
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
 // Slot 72 of class 0x31: walks each group's points (its child's curve, in the world) in pieces,
 // looks for the nearest object across each piece that is in view (the player first when the
@@ -918,7 +902,6 @@ struct SequencedTransform {
     u8 pad48[8];
 };
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
-void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4]);
 void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy);
 
 static inline f32 ClampRange(f32 v, f32 lo, f32 hi)
@@ -1040,10 +1023,8 @@ s32 IsSequencedObjectCandidate(TimedObject* self, Collider* other)
     return ((s32)t ^ 1) & 1;
 }
 
-s32 IsPointInsideCollider(Collider* self, Vec02* p);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 extern const Vec02 g_unitXVector;
 
@@ -1306,9 +1287,6 @@ inline void TouchQuery::Init(BlinkObject* s, Collider* o, const Vec02* k)
     q30 = *k;
 }
 
-s32 IsObjectInAcceptLists(TimedObject* self, void* value);
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
-PlacedObject *FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
 void ChooseBlinkObjectState(BlinkObject* self, s32* out)
 {

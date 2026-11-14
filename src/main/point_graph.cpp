@@ -27,6 +27,23 @@
 #include "object_message.h"
 #include "object_finder.h"
 #include "agent_request.h"
+#include "functions/base_object.h"
+#include "functions/buffered_stream.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/game_progress.h"
+#include "functions/group_marker.h"
+#include "functions/matrix.h"
+#include "functions/object_pool.h"
+#include "functions/object_properties.h"
+#include "functions/oscillator.h"
+#include "functions/placed_object.h"
+#include "functions/placed_object_model.h"
+#include "functions/pooled_object.h"
+#include "functions/pose_source.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 struct ColliderSpan;
 struct PlaneNode;
 struct Vec02;
@@ -37,22 +54,14 @@ struct DeferredRequest;
 struct ItemKeeper;
 struct AgentRequest;
 struct Agent;
-void InitCollider(Collider* self);
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
 void InitAgent(Agent* self);
 void StartAgent(Agent* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 s32 ResolveAgentClip(Agent* self, s32 id);
 void RemoveItemKeeperMember(ItemKeeper* self, Agent* value);
 void EnterAgentState(Agent* self, s32 evt, Animation* arg);
-void* GetActiveSwitchedCollider();
 struct ObjectPool;
-s32 IsObjectInPool(ObjectPool* list, BaseObject* query);
 s32 AcceptAgentRequest(Agent* self, AgentRequest* req);
-void StartObject(BaseObject* self);
-s32 IsObjectAttached();
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 // The object a seeking agent of kind 0x10 keeps at 0xC2C: a method table, and at 0x618 what
 // func_001A8820 tests a request's argument against.
 typedef void (*ChildFn)(void* self);
@@ -64,43 +73,20 @@ struct SeekPartner {
 void LeaveAgentState(Agent* self, s32 mode);
 extern s32 g_buttonCodeFlags;
 struct BufferedStream;
-s32 IsPadSelectFlagHeld(World* self);
 s32 IsAgentRequestBlocked(Agent* self, s32 unused1);
-s32 IsObjectAttached(BaseObject* self);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void ReparentObject(BaseObject* self, BaseObject* value);
-void ReadBufferedString(BufferedStream* self, u8** out);
-void InitCollider(Collider* self);
 extern void ChangeAgentState(Agent* self, s32 state, void* context);
 // Notification 0x13: its source and an id.
 struct SourceNotice { s32 f_0; u8 pad4[4]; s32 f_8; };
 struct AgentNotification;
 extern void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
-extern void SpendReserveUnit(void);
-void* GetActiveSwitchedCollider(void);
 // The point graph FindPointGraphPath and SnapPointToPointGraph take, at 0x34 of its owner.
 s32 FindPointGraphPath(PointGraph* graph, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out);
 s32 FindPointGraphTriangleWithin(PlaneNode* node, Vec02* p);
-void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
 void SnapPointToPointGraph(PointGraph* self, Vec02* p, Vec02* out);
-f32 RandomFloatInRange(f32 lo, f32 hi);
-void ReadBufferedVector3(BufferedStream* src, void* dst);
-void ReadPropertyRecords(void* a, void* b);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 extern "C" void* CopyBytes(void* dst, void* src, s32 n);
 extern "C" void SyncDataCache(s32 a);
-void CopyObjectData(BaseObject* self, BaseObject* src);
-void SetListLinkOffset(List01* self, s32 offset);
-void ClearList(List01* p);
-void RegisterObject(BaseObject* self);
-void AppendToList(List01* self, void* item);
-void UnregisterObject(BaseObject* self);
-void RemoveFromList(List01* list, void* item);
-s32 IsPadSelectFlagHeld(World* self);
 // func_001EA4B8 takes its float arguments first: the caller then sets $f14 before $a0.
 struct RampProfile;
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 // An object event, and notification 0x17 that passes its id on.
 struct AgentEvent { s32 id; };
 struct EventNotice {
@@ -109,20 +95,11 @@ struct EventNotice {
 };
 struct BufferedStream;
 struct AgentHit;
-s32 HasSpareCount(void);
 s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev);
 extern s32 g_buttonCodeFlags;
-void LoadObjectProperties(BaseObject* self, void* stream);
-u16 ReadBufferedU16(BufferedStream* self);
 void* AllocateZeroedFrontMemory(s32 n);
-void ReadBufferedVector3(BufferedStream* src, void* dst);
-s32 ReadBufferedU8(BufferedStream* self);
 void* AllocateFrontMemory(s32 n);
-f32 ReadBufferedFloat(BufferedStream* r);
-s32 ReadBufferedS16(BufferedStream* self);
 void MeasurePointGraphEdges(PointGraph* m);
-void* GetActiveSwitchedCollider(void);
-void InitObject(BaseObject* self);
 // NEAR: the frame, calls and branch shape match; the saved registers are swapped (retail keeps the input base in $s2 and the moving "last" pointer in $s3, ours the other way round), which changes 18 lines.
 
 void PushBackMemoryMark(void);
@@ -132,12 +109,9 @@ void PopBackMemoryMark(void);
 s32 IsPointPathShortcutBlocked(void* self, s32 a, s32 b);
 void UpdateAgentGoal(Agent* self, s32 flag);
 void SetAgentGoalPoint(Agent* self, Vec02* p);
-s32 IsObjectAttached(BaseObject* self);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
 // Up to d spans between two points of the graph (0xE0 bytes for d = 2: two ColliderSpans).
 s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max, ColliderSpan* spans);
 
-void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other);
 
 f32 D_00269B50[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 ObjectLink D_00269B60[2] = { { 0x20, 0x167, 0x59C }, { 0x20, 0x168, 0x5A0 } };
@@ -221,15 +195,10 @@ struct SprBlock {
 };
 
 struct Frame_166690;
-void DrawModelPart(Frame_166690* self);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void StartToSprChain(s32 size, ...);
 struct DmaChannel;
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
 Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
-void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, f32* pos, Mat4A* m);
-void QueueDeferredRequest(DeferredRequest* src);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern void* g_toSprChannel;
 extern f32 g_gameClock[];
@@ -464,9 +433,7 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
 void FaceAgentTowardGoalPoint(Agent* self);
 void UpdateAgentState(Agent* self);
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
-f32 WrapAngle(f32 x);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void GetObjectWorldRotation(BaseObject* self, Mat02* out);
 
 void UpdateSeekingAgentState(SeekingAgent* self)
 {

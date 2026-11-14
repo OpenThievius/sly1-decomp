@@ -22,6 +22,22 @@
 #include "shapes.h"
 #include "list_iter.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/buffered_stream.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/commentary_best_time.h"
+#include "functions/effect.h"
+#include "functions/flagged_object.h"
+#include "functions/game_progress.h"
+#include "functions/matrix.h"
+#include "functions/memory_card.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/state_walker.h"
+#include "functions/warp_menu.h"
+#include "functions/world_contacts.h"
 struct PlacedObject;
 
 struct Mat02;
@@ -32,27 +48,13 @@ struct Vec02;
 struct MemoryCard;
 struct ScaledTransform;
 
-void SetClass75ObjectField90(void* self, s32 value);
-void LoadPlacedObject(PlacedObject* self, void* r);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-void CopyPlacedObject(PlacedObject* self, PlacedObject* src);
 extern u8 g_flagTable[];
-void StartPlacedObject(PlacedObject* self);
-s32 TestFlagTableBit(FlagTable* table, s32 index);
 
 extern s32 D_00270458;
 extern f32 g_frameDt;
 struct BufferedStream;
 struct Collider;
-void LoadCollider(Collider* self, BufferedStream* in);
-f32 ReadBufferedFloat(BufferedStream* r);
-void StartPlacedObject(PlacedObject* self);
 void ApplyScaledOffset(ScaledOffsetObject* self);
-void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask);
-void ClearRootTries(PlacedObject* self);
-void InitCollider(Collider* self);
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void CompleteTimeRangeNotifier(TimeRangeNotifier* self);
 
@@ -80,11 +82,7 @@ struct ListenerMessage {
     u8 pad08[0x50 - 0x08];
 };
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 extern u8 g_flagTable[];
-void InitPlacedObject(PlacedObject* self);
-void AppendToList(List01* self, void* item);
-s32 TakeFlagTableIndex(FlagTable* p);
 
 struct __attribute__((packed)) PSys_1481A0 {
     u8 pad0[0x26C];
@@ -93,11 +91,9 @@ struct __attribute__((packed)) PSys_1481A0 {
 
 void PlaceSpareSoundNotifier(World* self);
 void AddReserveUnit(void);
-s32 GetSpareCountLimit(void);
 
 
 extern s32 D_0026EC58;
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 SwitchedCollider* GetActiveSwitchedCollider(void);
 
 
@@ -105,24 +101,14 @@ extern s32 D_00275C34;
 extern u8 g_scatterController[];
 extern u8 g_memoryCard[];
 struct ScatterController;
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-void ResetScatterLevels(ScatterController* object);
-void StartMemoryCardSave(MemoryCard* self);
 extern void* g_deadlineNotifier;
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 extern f32 g_gameTime;
-void AppendToList(List01* self, void* item);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-void SetBestTimeState(T217D_1380* self, s32 n);
 
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void CompleteCountdownNotifier(CountdownNotifier* self);
 
@@ -131,9 +117,6 @@ extern f32 g_frameDt;
 
 extern void* g_countdownNotifierParams[28];
 extern u8 g_flagTable[];
-f32 RandomFloatInRange(f32 a, f32 b);
-Effect* CreateEffect(s32 kind, EffectOwner* sys);
-void SetFlagTableBit(FlagTable* self, s32 bit);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void AddReserveUnitNow(void* self);
@@ -151,10 +134,8 @@ extern f32 g_scatterStagger;
 void PushBackMemoryMark(void);
 StateNotifier** AllocateBackMemory(s32 size);
 s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out);
-f32 RandomFloatInRange(f32 a, f32 b);
 struct ValueListObject;
 struct Bits128;
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 void PopBackMemoryMark(void);
 
 
@@ -168,14 +149,10 @@ extern u8 g_identityMatrix[];
 extern u8 D_00248D30[];
 extern Quad_148038 g_spareNotifierVelocity;
 s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out);
-s32 GetSpareCountLimit(void);
-void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out);
 void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
 
 extern void* g_effectNotifierParams[28];
-Effect* CreateEffect(s32 kind, EffectOwner* sys);
 void CountPickupTowardHundred(void* self);
-f32 RandomFloatInRange(f32 a, f32 b);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
@@ -347,22 +324,11 @@ extern f32 g_notifierArriveTime;
 extern f32 g_notifierOrbitTarget[4];
 extern f32 g_notifierRollRamp[4];
 extern f32 g_notifierOrbitRamps[12];
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 extern u8 g_unitXVector[];
 extern const Vec02 g_unitZVector;
 void* GetActiveSwitchedColliderData(void);
-void BuildBasisFromX(Vec02* x, Mat02* out);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 extern Player* g_player;
-s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
-f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-f32 WrapAngle(f32 a);
-f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out);
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 
 // What the active switched collider gives the notifier (GetActiveSwitchedColliderData): the
 // object it is placed by, the one it times its frame on and the one whose heading it takes.
@@ -607,7 +573,6 @@ extern u8 g_unitXVector[];
 struct FaceRef;
 struct Mesh03;
 struct MeshHitEntry;
-s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out);
 extern const Vec02 g_unitZVector;
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 f32 SplitVectorAlongAxis(Vec02* v, const Vec02* axis, Vec02* along, Vec02* across);
@@ -687,9 +652,6 @@ struct ActiveNotifierData {
 };
 
 void* GetActiveSwitchedColliderData(void);
-s32 MaskWorldBitsBySave(void);
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out);
 
 void TriggerStateNotifierNearPlayer(StateNotifier* self)
 {
@@ -746,8 +708,6 @@ s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* b)
 extern f32 g_notifierRetriggerDelay;
 extern f32 g_gameClock[];
 extern Player* g_player;
-void UpdatePlacedObject(PlacedObject* self, f32 f);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void BounceStateNotifierOffSurfaces(StateNotifier* self);
 void TriggerStateNotifierNearPlayer(StateNotifier* self);
 void CompleteSoundNotifiers(World* self);
@@ -862,10 +822,7 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
 
 // States 4 and 5 scale the drawn object by a curve of the time in the state: each arm evaluates
 // it and splats it itself, so cross-jumping leaves only the arms' own loads in them.
-void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4]);
-void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 Mat4A MultiplyMatrices(const void* a, const void* b);
-void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 
 void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
 {
@@ -918,16 +875,8 @@ void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
 extern f32 g_gameTime;
 extern u8 g_unitXVector[];
 void* GetActiveSwitchedColliderData(void);
-void ConvertOffsetToCylindrical(const Vec02* a, const Vec02* b, f32* angle, f32* dist, f32* height);
-void BuildBasisFromX(Vec02* x, Mat02* out);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 struct StateGraph;
 struct Node_1B6CF0;
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void DestroyStateWalker(StateWalker* self);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 void AdvanceStateWalkerTime(Node_1B6CF0* self, f32 t);
 // The camera's state setter: keeps the eye and target offsets when the old state is one of -1, 2,
 // 4 and 5, sets the vectors of the new state, tells the object at 0x2EC (add to or remove from
@@ -1354,7 +1303,6 @@ struct Candidate_00148938 {
     StateNotifier* obj;
 };
 
-s32 CountListItems(List01* list);
 void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
 
 s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out)

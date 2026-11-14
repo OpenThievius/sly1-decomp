@@ -14,6 +14,16 @@
 #include "aim_blend_grid.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/effect_spawner.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object.h"
+#include "functions/random.h"
+#include "functions/sound_system.h"
+#include "functions/switched_collider.h"
+#include "functions/text_format.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 struct HomogeneousMatrix;
 
 struct BaseObject;
@@ -99,14 +109,7 @@ void CopyMemory(void* dst, void* src, u32 size);
 
 // Other files' functions the built-ins call.
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-f32 RandomFloatInRange(f32 a, f32 b);
-s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
-f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
-s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, f32 angle);
-void FitQuadraticCurve(f32* a0, f32 x, f32 y, f32 z, f32 w);
 struct ValueRange;
-f32 ClampToRange(ValueRange* span, f32 x);
-s32 IsInsideRange(ValueRange* span, f32 x);
 void CopyTransposedMatrix(Quad16* src, Quad16* dst);
 void* InvertMatrix4x4(void* a0, void* a1);
 void TransformMatrixByObject(u8* self, void* arg, Quad16* out);
@@ -115,30 +118,17 @@ void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
 void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 void ResetMatrixHomogeneous(HomogeneousMatrix* self);
-void SetCachedVoiceParam(s32 index, s32 value);
-void SeedRandom(u32 value);
-void* GetActiveSwitchedCollider(void);
 ScriptValue* UpdateObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
 ScriptValue* SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
 ScriptValue* AddObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
 ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void ClearSoundRecordHandle(PlayingSound** slot);
-void StopSoundRecord(PlayingSound* self, s32 n);
-void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration);
-void SendPointEventToWorldListener(Quad16* a0, f32 f);
-extern "C" s32 PrintFormatted(const char* fmt, ...);
 ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx);
 ScriptScope* GetScriptEntryScope(s32 index, World* self);
-void RunScriptEventHandler(BaseObject* self, s32 idx, R11B008Node* body);
 
 extern f32 g_gameTime;
 extern u8 g_padRecord[];
@@ -326,7 +316,6 @@ void DrainMarkStacks(MarkStacks* self);
 void CollectScriptPools(MarkStacks* self);
 
 // Tables of functions this file's code reads: the math functions of func_00115CA0.
-f32 WrapAngle(f32 x);
 extern "C" f32 Arctangent(f32 x);
 extern "C" f32 Cosine(f32 x);
 extern "C" f32 Sine(f32 x);
@@ -3048,7 +3037,6 @@ ScriptValue* GatherScriptObjectsById(ScriptValue* ret, s32 count, ScriptValue* a
 // ScriptValue::Vector(): the second's `this` is the inliner's fresh pseudo, so its pointer is
 // read again after the store of lo, as retail does (docs/TOOLCHAIN.md, "An inline method's
 // this").
-void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 ScriptValue* FindScriptObjectsInBox(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {

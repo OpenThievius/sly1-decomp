@@ -20,24 +20,22 @@
 #include "shapes.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "functions/agent.h"
+#include "functions/cone_agent.h"
+#include "functions/flagged_object.h"
+#include "functions/heap.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 
 
-void DrawAgent(Agent* self, void* arg1, void* arg2);
 
 struct GatheredEventObject { u8 pad0[0x328]; s32 f328; };
 struct GatheredObjects { s32 count; GatheredEventObject** items; };
 
-void StartAgent(Agent* self);
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
 void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount, BaseObject*** outArr);
-void* CreateRecord2505C0(void);
 struct StateResetObject;
 struct StateResetGroup;
-void AppendToSmallList(StateResetGroup* self, StateResetObject* value);
 
-void InitAgent(Agent* self);
-void InitConeAgent(ConeAgent* self);
 
 
 
@@ -93,12 +91,8 @@ void DrawConeAgent(ConeAgent* self, void* arg1, void* arg2)
     DrawAgent(self, arg1, arg2);
 }
 
-s32 IsPadSelectFlagHeld(World* self);
 typedef s32 (*SlotFnRet)(void* self);
 struct ObjectGatherer;
-s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value);
-f32 ComputeAgentTargetBearing(Agent* self);
-s32 IsPlayerUntargetableByAgent(Agent* self);
 
 s32 IsConeAgentFree(ConeAgent* self)
 {

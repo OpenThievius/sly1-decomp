@@ -9,6 +9,7 @@ struct Ctl_194E60_eu {
     s32 f584;
     s32 f588;
 };
+void SetScreenElementMode(void* self, s32 flag);
 
 void SetPauseMenuMode(Ctl_194E60_eu* self, s32 v)
 {

@@ -26,21 +26,29 @@
 #include "vu0.h"
 #include "object_message.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/camera_controller.h"
+#include "functions/collider.h"
+#include "functions/effect_spawner.h"
+#include "functions/matrix.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/sound_system.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 struct ColliderPose;
 struct Quad16;
 struct SpawnBlock;
 struct SpawnTail;
 struct Mat02;
-void InitCollider(Collider* self);
 
-s32 IsObjectAttached();
 s32 FindSwitchedColliderIndex(void* obj);
 s32 FindSwitchedColliderIndex(void* value);
 void ActivateSwitchedColliderIndex(s32 index);
 void* MoveMemory(void* dst, void* src, s32 size);
-void RegisterCollider(Collider* self);
 void AddToSwitchedColliderList(void* self);
-void UnregisterCollider(Collider* self);
 void RemoveFromSwitchedColliderList(SwitchedCollider* value);
 void AddToSwitchedColliderList(SwitchedCollider* self);
 void RemoveFromSwitchedColliderList(SwitchedCollider* self);
@@ -51,34 +59,20 @@ struct InteractFlags {
     s32 b;
 };
 extern s32 g_buttonCodeFlags;
-s32 IsPadSelectFlagHeld(World* self);
 void* CreateEffect(s32 kind, EffectOwner* sys);
 void AddEffectListener(void* node, void* owner);
-f32 GetAnimationMarkerTime(Animation* self, s32 key);
 // Descriptor slot 72 as func_00192880 calls it, with the collider switched from or to.
 typedef void (*ActivationHook)(void* self, s32 mode, void* other);
 extern u8 g_elementStack[];
-void PushStackElement(ElementStack* self, ScreenElement* node);
 extern s32 g_padRouting;
 extern u8* g_playerStepSequence;
 // A record whose 16-bit flags sit at 0xAA.
 
 
-s32 IsTopCameraController(CameraController* self);
-void SkipRemainingSteps(StepSequence* self);
-void SetStepSequenceState(StepSequence* self, s32 next);
-void ClearPadPressedBits(PadRecord* self, u32 mask);
-s32 IsObjectAttached(BaseObject* self);
-void InitCollider(Collider* self);
 void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 value);
-void CopyCollider(Collider* self, Collider* other);
 void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 mode);
-void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, void* arg);
-void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, void* k2, void* k3);
 void* GetActiveSwitchedCollider(void);
 void ActivateSwitchedCollider(void* value);
-s32 IsPadSelectFlagHeld(World* self);
-void CaptureColliderPose(Collider* self, ColliderPose* out);
 // func_001EA4B8 takes its float arguments first: the caller then sets $f14 before $a0.
 struct RampProfile;
 // The definition's parameters in the order the call below writes them: retail's caller
@@ -88,22 +82,15 @@ extern s32 g_buttonCodeFlags;
 extern u8* g_saveData;
 // The parameters SpawnEffectsAt is given (word 0x28 set by the caller).
 struct EffectSpawnParams { s32 f0, f4, f8, fC; f32 f10, f14; s32 f18, f1C; f32 f20, f24; s32 f28, f2C, f30, f34, f38, f3C; };
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 struct SpawnTail;
 struct SpawnBlock;
-void SpawnEffectsAt(Quad16* self, Quad16* a1, s32 a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
 void* GetActiveSwitchedCollider(void);
 // kind==0x10 loop test at the top (retail tests it with the first slot peeled) and
 // keeps one more register (frame 64 bytes as retail, but a different loop shape).
 
 struct PlayingSound;
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void StopSoundRecord(PlayingSound* self, s32 n);
-s32 IsObjectAttached(BaseObject* self);
 typedef void (*SlotFn)(void* self);
 extern u8* g_saveData;
-void UpdateCollider(Collider* self, f32 dt);
 void EmitSwitchedColliderTrailPoints(SwitchedCollider* self);
 struct ClampInt {
     static s32 Of(s32 v, s32 lo, s32 hi)

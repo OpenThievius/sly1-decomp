@@ -3,6 +3,9 @@
 #include "asm_func.h"
 #include "entry_pool.h"
 #include "script_value.h"
+#include "functions/script_machine.h"
+#include "functions/state_walker.h"
+#include "functions/value_pools.h"
 
 // The pools that follow value.cpp: the entry pool, the keyed values and the five payload pools,
 // 0x11C128-0x11CBB8. Its .data, the payload pools' slot counts, starts where value.cpp's ends
@@ -18,7 +21,6 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void* AllocateZeroedFrontMemory(s32 size);
 
 void* AllocateFrontMemory(s32 bytes);
-void* GetPoolEntry(EntryPool* p, s32 index);
 
 void InitEntryPool(EntryPool* p, s32 count, s32 size)
 {
@@ -56,8 +58,6 @@ struct PoolEntryHeader {
 
 extern u8 g_markStacks[];
 struct MarkStacks;
-void CollectScriptPools(MarkStacks* w);
-void* GetPoolEntryPayload(PoolEntryHeader* entry);
 
 void* PopPoolFreeEntry(EntryPool* self)
 {
@@ -163,8 +163,6 @@ extern s32 D_0025C288;
 extern s32 D_0025C2A8;
 extern s32 D_0025C2C8;
 extern s32 D_0025C2E8;
-R11B008Key* NewKeyedValue(void);
-void CopyKeyedValueChain(R11B008Key* a, R11B008Key* b, s32 c);
 
 void CopyKeyedValueChain(R11B008Key* a, R11B008Key* b, s32 c)
 {
@@ -177,7 +175,6 @@ void CopyKeyedValueChain(R11B008Key* a, R11B008Key* b, s32 c)
     }
 }
 
-void* TakePoolEntry(EntryPool* pool);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 R11B008Key* NewKeyedValue(void)
@@ -196,9 +193,6 @@ void DestroyKeyedValue(R11B008Key* a)
 
 extern s32 g_vectorAPayloadPool;
 struct Pool6C;
-void* PopFreeSlot(Pool6C* pool);
-void* PopZeroedFreeSlot(Pool6C* pool);
-void CollectScriptPools(MarkStacks* w);
 
 void* AcquireVectorAPayload(void)
 {
@@ -224,7 +218,6 @@ s32 AddRefVectorAPayload(void* payload)
     return v;
 }
 
-void PushFreeSlot(Pool6C* list, void* item);
 
 void ReleaseVectorAPayload(void* payload)
 {
@@ -239,8 +232,6 @@ void ReleaseVectorAPayload(void* payload)
 
 LINKER_REMNANT(func_0011C610);
 
-void ShutDownEntryPool(EntryPool* p);
-void ShutDownPayloadPools(void);
 extern u8 g_matrixPayloadPool[];
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
@@ -361,10 +352,7 @@ LINKER_REMNANT(func_0011C960);
 
 extern s32 g_triplePayloadPool[];
 struct TriplePayloadSlot;
-void* PopFreeSlot(Pool6C* pool);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void CollectScriptPools(MarkStacks* w);
-void* PopZeroedFreeSlot(Pool6C* pool);
 
 TriplePayloadSlot* AcquireTriplePayload(void)
 {
@@ -396,7 +384,6 @@ struct SlotPool {
     u8* origin;             // 0x04
 };
 
-void PushFreeSlot(Pool6C* list, void* item);
 
 void ReleaseTriplePayload(void* payload)
 {
@@ -413,7 +400,6 @@ void ReleaseTriplePayload(void* payload)
 extern u8* g_matrixPayloadRefCounts;
 extern u8* g_vectorBPayloadRefCounts;
 extern u8* g_pairPayloadRefCounts;
-void InitSlotPool(Pool6C* s, s32 size, s32 count);
 
 struct PayloadPoolInit {
     static void Load(void* buf, s32 size, s32* id, u8** out)

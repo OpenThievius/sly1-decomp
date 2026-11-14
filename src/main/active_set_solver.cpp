@@ -52,11 +52,15 @@
 #include "switched_collider.h"
 #include "vu0.h"
 #include "fpu.h"
+#include "functions/active_set_solver.h"
+#include "functions/collider.h"
+#include "functions/heap.h"
+#include "functions/placed_object_model.h"
+#include "functions/pooled_object.h"
+#include "functions/symmetric_solve.h"
+#include "functions/warp_menu.h"
 
-extern u8* AllocateBackMemory(s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void SetListLinkOffset(List01* self, s32 offset);
-void ClearList(List01* node);
 
 // What DrawPlacedObjectParts hands the part drawer (DrawModelPart) for each part: the object's
 // transform, the object, its record at +0x22C, the part, and the view matrix.
@@ -76,15 +80,9 @@ struct PartDrawFrame {
 };
 
 
-void AddDmaRefTag(PacketWriter* obj, s32 a, s32 b);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void* MultiplyMatrices(Quad16* out, void* b, void* in);
-void BeginDmaTag(PacketWriter* self);
-void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
-void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
-void CloseDmaTag(PacketWriter* self);
 struct Frame_166690;
-void DrawModelPart(Frame_166690* self);
 
 // The file's .data: the view matrix DrawPlacedObjectParts multiplies the object's transform by.
 Mat4A g_unitSquareToClipMatrix = { { { 2.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 2.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f, 0.0f }, { -1.0f, -1.0f, 0.0f, 1.0f } } };
@@ -132,20 +130,6 @@ struct ListFrameWords {
     s32 prev;
 };
 
-void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6);
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
-void ClearList(List01* p);
-void AppendToList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
-void FactorSymmetricMatrix(s32 n, f32* mat, f32* vec);
-void SolveFactoredSystem(s32 n, f32* a, f32* b, f32* c);
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
-void CopyMemory(void* dst, void* src, u32 size);
-void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
-void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6);
 
 void InitActiveSetSolver(ActiveSetSolver* self, s32 count)
 {
@@ -198,7 +182,6 @@ void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item)
 
 typedef void (*EndRowsFn)(Collider* body, s32 a1, void* contact, s32 end, ActiveSetItem* item, f32* rows);
 typedef void (*EndFillFn)(Collider* body, s32 a1, s32 size, s32 extra, f32* rows);
-void* AllocateZeroedBackMemory(s32 size);
 void ComputeColliderPointVelocity(Collider* body, Vec02* point, void* motion, Vec02* out);
 
 void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6)
@@ -425,8 +408,6 @@ void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s
 }
 
 typedef void (*HandlerFn)(void* handler, s32 flags, ActiveSetItem* item, s32 end, f32 dt);
-Collider* FindHandlerForSlot(Collider* node, s32 offset);
-void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item);
 
 void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, Contact03** contacts, s32 a4, s32 a5, f32 dt)
 {
@@ -502,7 +483,6 @@ void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, Contact03** 
     }
 }
 
-void ConstrainColliderVector(void* self, void* a, void* b, void* c, s32 d);
 
 // A part's share of the solved impulses: a linear and an angular one.
 struct PartImpulse {

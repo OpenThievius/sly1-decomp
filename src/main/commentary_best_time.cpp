@@ -16,6 +16,15 @@
 #include "pad_record.h"
 #include "memory_card.h"
 #include "layout_137228.h"
+#include "functions/game_progress.h"
+#include "functions/memory_card.h"
+#include "functions/pad_input.h"
+#include "functions/screen_element.h"
+#include "functions/sound_system.h"
+#include "functions/state_notifier.h"
+#include "functions/text_format.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 
 extern const char g_levelCredits0100[24] = "Nate Fox\nHokyo Lim";
 extern const char g_levelCredits0102[32] = "Rob McDaniel\nSuzanne Kaufmann";
@@ -97,10 +106,8 @@ struct CommentaryRecord { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 diffe
 
 
 void* FindLevelEntry(s32 k);
-extern "C" s32 GetStringLength(const char* s);
 s32 IsFontLoaded(s32 k);
 Font* GetFontById(s32 k);
-s32 CheckEntryThreeBitRequirement(void* self, s32 obj);
 void SetBestTimeState(T217D_1380* self, s32 n);
 
 void InitCommentaryPromptElement(T217D_1380* self)
@@ -155,12 +162,8 @@ extern s32 D_002701C4;
 extern s32 g_timerRateExponent;
 
 struct KeyRecord;
-void ClearPadPressedBits(PadRecord* self, u32 mask);
-void StartLockedStreamVoice(KeyRecord* self);
 void SetBestTimeState(T217D_1380* self, s32 n);
 extern "C" f32 Power(f32 x, f32 y);
-void SetTimerRate(T217D_510* q, f32 v);
-s32 AreMenusAndFadeClear(void);
 
 void UpdateBestTimeState(T217D_1380* self)
 {
@@ -210,23 +213,11 @@ void UpdateBestTimeState(T217D_1380* self)
 
 extern s32 g_timerRateExponent;
 
-void StopTimer(T217D_510* o);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void SetSpareCount(s32 v);
-void PopActiveSequenceElement(World* g);
-void StartTimer(T217D_510* o, f32 v);
 extern "C" f32 Power(f32 x, f32 y);
-void SetTimerRate(T217D_510* o, f32 v);
-void SetTimerLimit(T217D_510* self, f32 limit, T217D_510_Fn onEnd);
-void StartTimerCounting(T217D_510* o);
-s32 FormatToString(char* dst, const char* fmt, ...);
-void StartMemoryCardSave(MemoryCard* x);
-s32 ComputeCompletionMask(void);
-void ApplyCompletionFlags(s32 m);
 void SetPauseMenuLayerPage(T217D_6D0* y, s32 a, s32 b);
-void CompleteSoundNotifiers(World* self);
 
 void SetBestTimeState(T217D_1380* self, s32 n)
 {

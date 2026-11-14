@@ -18,6 +18,24 @@
 #include "globals.h"
 #include "ring_params.h"
 #include "object_finder.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/blend_animation.h"
+#include "functions/camera.h"
+#include "functions/collider_span.h"
+#include "functions/game_progress.h"
+#include "functions/group_marker.h"
+#include "functions/heap.h"
+#include "functions/memory_card.h"
+#include "functions/object_pool.h"
+#include "functions/oscillator.h"
+#include "functions/placed_object.h"
+#include "functions/player_request.h"
+#include "functions/screen_element.h"
+#include "functions/state_walker.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
+#include "functions/world2_boss.h"
 struct BaseObject;
 
 
@@ -48,34 +66,15 @@ struct BlendAnimationView;
 struct PlayerBlendItem;
 struct TurningCollider;
 struct StateGraph;
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 void StartAgent(Agent* self);
-void SetWorldActiveFollower(World* self, void* v);
-void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAnimationView** out);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 s32 ResolveAgentClip(Agent* self, s32 id);
-u8* CopyToFrontMemory(s32 size, void* src);
-s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, s32 p3, ColliderSpan* p4);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-s32 MatchesObjectId(BaseObject* a, s32 b);
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-s32 IsPadSelectFlagHeld(World* self);
 void EnterAgentState(Agent* self, s32 evt, Animation* arg);
-void MarkLevelDone(s32 n);
-void StartMemoryCardSave(MemoryCard* p);
 struct AgentNotification;
 s32 GetAgentRosterState(Agent* self);
 s32 ChooseAgentState(Agent* self);
-void DecrementGaugeCount(T217D_2E0* self);
 void ChangeAgentState(Agent* self, s32 state, void* context);
 void UpdateAgent(Agent* self, f32 dt);
-s32 AreMenusAndFadeClear(void);
 void LeaveAgentState(Agent* self, s32 mode);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim);
 void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
 
 void InitWorld2Boss(World2Boss* self)
@@ -112,7 +111,6 @@ void StartWorld2Boss(World2Boss* self)
 }
 
 extern f32 g_ringSevenPoints[14];
-AnimRecord* FindAnimRecord(s32 key);
 
 // DrawPlayerMarkerRing2's counterpart (player_request.cpp): the same block, built once as a
 // function-local static with a brace initialiser (include/ring_params.h). DrawWorld2Boss queues
@@ -157,7 +155,6 @@ struct AgentDrawArgs {
 };
 
 void DrawAgent(Agent* self, void* unused1, void* unused2);
-void QueueDeferredRequest(DeferredRequest* src);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void DrawWorld2Boss(World2Boss* self, AgentDrawArgs* args, void* arg2)
@@ -240,7 +237,6 @@ s32 IsWorld2BossBlocker(void* self, BlockerQuery* rec)
 
 typedef s32 (*Cb_18A910)(void* self, BlockerQuery* ctx);
 
-void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 s32 IsWorld2BossLineBlocked(World2Boss* self, void* a1, void* a2)
 {
@@ -397,7 +393,6 @@ void ShowWorld2BossBar(World2Boss* self)
 }
 
 void SetAgentGoalPoint(Agent* self, Vec02* p);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
 void UpdateAgentGoal(Agent* self, s32 flag);
 
 void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
@@ -442,15 +437,9 @@ struct CyclicRanges {
 
 extern ValueRange g_unitRange;
 void UpdateAgentState(Agent* self);
-void GetWorld2BossLevelFactor(World2Boss* a0, f32* a1);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-f32 WrapAngle(f32 a);
 struct TurnBlendRecords;
 struct BlendTimeScale;
-void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecords* a1, BlendAnimationView* a2);
-void* FindEntryByObjectId(BlendAnimationView* self, BaseObject* key);
-s32 FindCyclicRangeIndex(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out);
-void RecordCameraTimestamp(Camera* c);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);

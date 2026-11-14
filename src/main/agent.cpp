@@ -18,6 +18,27 @@
 #include "anim_curve.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "functions/agent.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/curve_segment.h"
+#include "functions/effect_spawner.h"
+#include "functions/flagged_object.h"
+#include "functions/game_progress.h"
+#include "functions/heap.h"
+#include "functions/matrix.h"
+#include "functions/object_pool.h"
+#include "functions/oscillator.h"
+#include "functions/path_follower.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/sound_system.h"
+#include "functions/switched_collider.h"
+#include "functions/turning_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world_contacts.h"
 struct GraphQueryOwner;
 
 struct World;
@@ -33,9 +54,6 @@ extern f32 g_gameTime[];
 // .data starts on 16 (0x274C18 to 0x274C20 is padding after the previous file's), and 0x274C54
 // to 0x274C5F is the quadratic's own.
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-f32 WrapAngle(f32 a);
-void* ResolveAgentClip(Agent* self, s32 id);
-void* ResolveAgentClip(Agent* self, s32 arg);
 
 struct __attribute__((aligned(16))) PaddedQuadratic { f32 c[3]; };
 
@@ -69,9 +87,6 @@ float g_itemKeeperPlaceAngleJitter[2] = {-0.200000003f, 0.200000003f};
 PaddedQuadratic g_itemKeeperPlaceRadiusScale = { { 0.800000012f, 1.20000005f, 0.0f } };
 
 extern u8 g_flagTable[];
-void InitTurningCollider(TurningCollider* self);
-s32 TakeFlagTableIndex(FlagTable* p);
-void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 value);
 
 #define F(T, o) (*(T*)((u8*)self + (o)))
 
@@ -124,10 +139,7 @@ void InitAgent(Agent* self)
 
 struct BufferedStream;
 struct Collider;
-void LoadCollider(Collider* self, BufferedStream* in);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-void ResolveAgentClips(Agent* self);
-void ResolveAgentSecondaryClips(Agent* self);
 
 void LoadAgent(Agent* self, void* a1)
 {
@@ -150,8 +162,6 @@ void CopyAgent(Agent* self, void* src)
 }
 
 void PostLoadPlacedObject(PlacedObject* self);
-void PickAgentSecondaryTarget(Agent* self);
-void FindOrBuildMemberGroup(void** out, void* self);
 
 void PostLoadAgent(Agent* self)
 {
@@ -178,13 +188,6 @@ void RemoveAgentFromParent(Agent* self)
     self->desc->m03(self);
 }
 
-void StartTurningCollider(TurningCollider* self);
-void* CreateItemKeeper(void* host);
-void AddItemKeeperMember(ItemKeeper* self, Agent* value);
-void ResolveAgentClips(void* self);
-void SetTurningColliderGravityScale(TurningCollider* self, f32 s);
-void ChangeAgentState(Agent* self, s32 state, void* context);
-s32 TestFlagTableBit(FlagTable* table, s32 index);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 extern u8 g_flagTable[];
@@ -238,8 +241,6 @@ void StartAgent(Agent* self)
     }
 }
 
-s32 TestCollidersMayContact(Collider* a, Collider* b);
-s32 IsObjectInPool(ObjectPool* list, BaseObject* query);
 
 s32 TestAgentMayContact(Agent* self, Collider* obj)
 {
@@ -259,8 +260,6 @@ s32 TestAgentMayContact(Agent* self, Collider* obj)
     return 0;
 }
 
-void RegisterSwitchedCollider(SwitchedCollider* self);
-void AddItemKeeperMember(ItemKeeper* self, Agent* value);
 
 void RegisterAgent(Agent* self)
 {
@@ -271,9 +270,7 @@ void RegisterAgent(Agent* self)
 }
 
 
-void UnregisterSwitchedCollider(SwitchedCollider* self);
 void StopAnimationPlayer(AnimationPlayer* self);
-void RemoveItemKeeperMember(ItemKeeper* self, Agent* value);
 
 void UnregisterAgent(Agent* self)
 {
@@ -336,13 +333,7 @@ static inline void StoreScaledQuadword(Vec02* dst, f32 k, u8* p)
 }
 extern "C" f32 Arccosine(f32 x);
 void AddColliderForce(Agent* self, Vec02* v);
-void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
-void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void StepTurningCollider(TurningCollider* self, f32 dt);
 extern "C" void* CopyBytes(void* dst, void* src, s32 n);
-void ClampVectorLength(Vec02* in, Vec02* out, f32 max);
-void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
 typedef void (*AgentMotionFn)(void* self, Agent* agent, s32 a, s32 b, Vec02* out, f32 t, f32 u);
 
 void StepAgent(Agent* self, f32 dt)
@@ -418,8 +409,6 @@ f32 ComputeAgentTargetBearing(Agent* self)
     return WrapAngle(a - ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x));
 }
 
-s32 IsAgentFacingBlocked(Agent* self);
-void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 // The definition takes the angle last; the EE passes it in its own register, and retail's
 // callers evaluate it before the matrix, as this order does.
 void BuildAxisAngleMatrix(const Vec02* v, f32 angle, Mat02* out);
@@ -437,7 +426,6 @@ void SetAgentFacingAngles(Agent* self, f32 x, f32 y)
     }
 }
 
-void ChangeAgentState(Agent* self, s32 state, void* context);
 
 void SettleAgentState(Agent* self)
 {
@@ -453,7 +441,6 @@ void SettleAgentState(Agent* self)
 
 extern f32 g_frameDt;
 void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2);
-void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 
 void FaceAgentFromAnimationMotion(Agent* self)
 {
@@ -469,17 +456,9 @@ void FaceAgentFromAnimationMotion(Agent* self)
     SetAgentFacingAngles(self, out[0], y);
 }
 
-void UpdateTurningCollider(TurningCollider* self, f32 dt);
-void* FindColliderFloorContact(void* self, s32 key, s32* out);
-void DispatchAgentContactHits(Agent* self);
 void ClearRootTries(PlacedObject* self);
-void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
 extern f32 g_contactSideSigns[];
 extern const Vec02 D_00248D30;
-s32 IsObjectAttached(BaseObject* self);
-void QueueItemKeeperUpdate(ItemKeeper* a0);
-void SetAgentPrimaryTarget(Agent* self, s32 value);
-void ApplyPendingAgentChanges(Agent* self);
 
 struct AgentBody {
     u8 pad00[0x80];
@@ -585,8 +564,6 @@ void UpdateAgent(Agent* self, f32 dt)
 }
 
 extern f32 g_gameClock[];
-s32 GetAgentRosterState(Agent* self);
-s32 HasAgentReachedPathEnd(Agent* self);
 
 s32 ChooseAgentState(Agent* self)
 {
@@ -822,7 +799,6 @@ done:
     return s;
 }
 
-void SnapPointToOwnerGraph(PointGraphObject* self, Vec02* p, Vec02* out);
 
 void SetAgentGoalPoint(Agent* self, Vec02* p)
 {
@@ -869,11 +845,8 @@ s32 IsAgentPathBlocker(void* unused, Collider* self)
     return 1;
 }
 
-s32 FindOwnerGraphPath(PointGraphObject* self, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out);
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
 
 // Whether two points are within reach of each other in the ground plane (x and y).
 static inline s32 IsNearPoint(Vu0::Vec a, Vu0::Vec b, f32 reach)
@@ -1011,8 +984,6 @@ void FaceAgentAlongPath(Agent* self)
     SetAgentFacingAngles(self, yaw, pitch);
 }
 
-void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist);
-void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 
 void FaceAgentTowardGoalPoint(Agent* self)
 {
@@ -1022,7 +993,6 @@ void FaceAgentTowardGoalPoint(Agent* self)
     SetAgentFacingAngles(self, x, y);
 }
 
-void SetAgentGoalPoint(Agent* self, Vec02* p);
 void FindNearestAnimationPathTime(Animation* self, PlacedObject* owner, f32 start, Vec02* point, f32* outT, Vec02* outPos, Vec02* outDir);
 BlendSourceEntry* FindEntryByObjectId(BlendAnimationView* self, BaseObject* key);
 
@@ -1070,7 +1040,6 @@ void IsAgentNearPathEnd(Agent* self, s32* out) { if (self->pathValid && self->pa
 
 void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetBinding* pairs, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1);
-s32 GetEffectiveObjectId(BaseObject* a);
 Attachment* FindPlayerAttachmentByOwner(AnimationPlayer* a0, s32 owner);
 
 void CreateAgentAnimationPlayer(Agent* self)
@@ -1094,12 +1063,7 @@ void CreateAgentAnimationPlayer(Agent* self)
 
 extern f32 g_frameDt;
 s32 HasAnimationDrivenAttachment(SwitchedCollider *self);
-void FaceAgentFromAnimationMotion(Agent* self);
 void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2);
-void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
-void ScheduleItemTimeouts(StateResetGroup* self);
-void FaceAgentAlongPath(Agent* self);
-void FaceAgentTowardGoalPoint(Agent* self);
 
 void UpdateAgentState(Agent* self)
 {
@@ -1141,7 +1105,6 @@ void UpdateAgentState(Agent* self)
 // What a state change tells the script (event 15): the old state and where the new one is.
 struct StateChangeArgs { s32* oldSlot; s32* stateSlot; };
 extern f32 g_gameClock[];
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 void ChangeAgentState(Agent* self, s32 state, void* context)
 {
@@ -1158,7 +1121,6 @@ void ChangeAgentState(Agent* self, s32 state, void* context)
     TriggerScriptEvent(self, 15, 2, &frame);
 }
 
-void ChangeAgentState(Agent* self, s32 state, void* context);
 
 void ForceAgentState(Agent* self, s32 mode, void* value)
 {
@@ -1171,9 +1133,6 @@ void ForceAgentState(Agent* self, s32 mode, void* value)
 }
 
 void StopAnimationPlayer(AnimationPlayer* self);
-f32 RandomFloatInRange(f32 a, f32 b);
-void SetStateAndNotify(StateResetObject* p, s32 z);
-void InitContactPairFlags(World* self, Collider* obj);
 
 void LeaveAgentState(Agent* self, s32 mode)
 {
@@ -1231,27 +1190,14 @@ void LeaveAgentState(Agent* self, s32 mode)
 
 
 
-void SetTurningColliderFollowedMesh(TurningCollider* self, Collider* other, s32 all);
 void SetAnimationPlayerSpeed(AnimationPlayer* t, f32 x);
-void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
-void CreateAgentAnimationPlayer(Agent* self);
 struct ScatterController;
 void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetBinding* pairs, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
-s32 GetEffectiveObjectId(BaseObject* a);
 Attachment* FindPlayerAttachmentByOwner(AnimationPlayer* a0, s32 owner);
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag);
-void InitContactPairFlags(World* self, Collider* obj);
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
 void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount, BaseObject*** outArr);
-void RemoveFromSmallList(StateResetGroup* self, StateResetObject* value);
-void SetFlagTableBit(FlagTable* self, s32 bit);
 void FadeOutPlacedObject(Collider* self, f32 time);
-f32 RandomFloatInRange(f32 x, f32 y);
-void FaceAgentAlongPath(Agent* self);
-void FaceAgentTowardGoalPoint(Agent* self);
 
 extern u8 g_flagTable[];
 extern u8 g_scatterController[];
@@ -1436,9 +1382,6 @@ struct AgentNotice {
 };
 
 struct ObjectEvent;
-s32 HandleObjectEvent(Collider* self, ObjectEvent* shape);
-void TurnColliderTowardHeading(TurningCollider* self);
-void ChangeAgentState(Agent* self, s32 state, void* arg);
 extern const Vec02 g_unitXVector;
 
 s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
@@ -1522,7 +1465,6 @@ s32 IsAgentRequestBlocked(Agent* self, s32 unused1) { return self->requestsBlock
 
 
 void StopAnimationPlayer(AnimationPlayer* self);
-void ChangeAgentState(Agent* self, s32 state, void* context);
 
 void ApplyPendingAgentChanges(Agent* self) {
     if (self->requestBits == 0) {
@@ -1548,8 +1490,6 @@ void ApplyPendingAgentChanges(Agent* self) {
 }
 
 struct ValueRange;
-f32 ClampToRange(ValueRange* span, f32 x);
-void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 
 void SteerAgentAlongPath(Agent* self)
 {
@@ -1597,7 +1537,6 @@ void RestartAgentClip(Agent* self)
     self->arrivalTime = 0;
 }
 
-s32 IsObjectInPool(ObjectPool* list, BaseObject* query);
 
 s32 TestAgentTargetContact(Agent* self, s32 key, Collider* other)
 {
@@ -1638,10 +1577,7 @@ struct AgentNotification {
     s32 code;               // 0x08
 };
 
-void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
-void SetAgentMainClip(Agent* self, void* value);
 AnimEvent* FindAnimationMarkerEvent(Animation* self, s32 key);
-s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim);
 typedef void (*AgentSlotFn)(Agent* self);
 
 void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
@@ -1842,8 +1778,6 @@ s32 AnswerAgentRosterPoll(void)
     return 2;
 }
 
-s32 IsInsideRange(ValueRange* span, f32 x);
-s32 HasObjectPoolChoice(ObjectPool* self);
 extern f32 g_unitRange[];
 
 static inline f32 Limit(f32 g, f32 lo, f32 hi)
@@ -1883,7 +1817,6 @@ s32 IsAgentTargetInRange(Agent* self)
     return 1;
 }
 
-void DrawTurningCollider(TurningCollider* self, void* unused1, void* unused2);
 
 void DrawAgent(Agent* self, void* unused1, void* unused2)
 {
@@ -1895,7 +1828,6 @@ s32 IsAgentSlotIndex(s32 index)
     return (u32)index < 17;
 }
 
-s32 IsAgentSlotIndex(s32 index);
 
 void SetAgentStateClipId(u8* self, s32 index, s32 value)
 {
@@ -1904,7 +1836,6 @@ void SetAgentStateClipId(u8* self, s32 index, s32 value)
     }
 }
 
-s32 IsAgentSlotIndex(s32 index);
 
 void SetAgentStateClip(Agent* self, s32 index, s32 value)
 {
@@ -1919,7 +1850,6 @@ void SetAgentStateClip(Agent* self, s32 index, s32 value)
     }
 }
 
-s32 IsAgentSlotIndex(s32 index);
 
 s32 GetAgentStateClip(Agent* self, s32 index)
 {
@@ -1941,7 +1871,6 @@ void AddAgentExtraClip(Agent* self, s32 a1, s32 a2)
 }
 
 void MoveObjectAnimationTrackToEnd(Animation* a0, BaseObject* owner);
-void ResolveAndStartObject(BaseObject* self);
 
 void* ResolveAgentClip(Agent* self, s32 id)
 {
@@ -1954,7 +1883,6 @@ void* ResolveAgentClip(Agent* self, s32 id)
     return item;
 }
 
-void* ResolveAgentClip(Agent* self, s32 arg);
 
 void ResolveAgentClips(Agent* self)
 {
@@ -1995,7 +1923,6 @@ void SetAgentTargetSetId(Agent* self, s32 v)
     self->hasTargetSetId = 1;
 }
 
-s32 IsAgentSlotIndex(s32 index);
 
 void SetAgentSecondaryClipId(Agent* self, s32 index, s32 value)
 {
@@ -2003,7 +1930,6 @@ void SetAgentSecondaryClipId(Agent* self, s32 index, s32 value)
         self->secondaryClips[index].id = value;
 }
 
-void ResolveAndStartObject(BaseObject* self);
 
 void ResolveAgentSecondaryClips(Agent* self)
 {
@@ -2045,7 +1971,6 @@ void SetAgentPathObjectId(Agent* self, s32 index)
     self->pathGraph = v;
 }
 
-void* GetActiveSwitchedCollider(void);
 
 void* SelectAgentTarget(Agent* self)
 {
@@ -2151,7 +2076,6 @@ void ComputeAgentContactValue(Agent* self, Contact03* out)
     }
 }
 
-void ClampTurningColliderContactLimit(TurningCollider* self, s32 flags, ContactLimit03* limit);
 
 void ClampAgentContactLimit(Agent* self, s32 flags, ContactLimit03* out)
 { ClampTurningColliderContactLimit(self, flags, out);
@@ -2159,7 +2083,6 @@ void ClampAgentContactLimit(Agent* self, s32 flags, ContactLimit03* out)
 
 void SetAgentAngleLimitDegrees(Agent* self, f32 value) { self->targetAngleLimit = value * 0.017453294f; }
 
-void AddItemKeeperStateTrigger(ItemKeeper* self, StateTrigger* value);
 
 void AddAgentStateTrigger(Agent* self, StateTrigger* value)
 {
@@ -2170,11 +2093,7 @@ void AddAgentClipGroup(Agent* self, s32 a, s32 b, s32 c, s32 d) { if ((u32)self-
 
 struct FaceRef;
 struct PooledContact;
-void AddTurningColliderProbeContact(TurningCollider* self, Collider* obj, void* filter, void* out);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
-s32 IsObjectAttached(BaseObject* self);
-void AddMeshContacts(Collider* a0, f32 radius, Vec02* a1, Collider* a2, s32 a3, FaceRef* a4, FaceRef* a5, PooledContact** a6);
-void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3, u8* ctx, PooledContact** list);
 
 void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
@@ -2214,10 +2133,7 @@ void LaunchObjectWithAgentVelocity(u8* self, PlacedObject* other)
     }
 }
 
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-void ClampVectorLength(Vec02* in, Vec02* out, f32 max);
-void FreePooledContactChain(World* world, Contact03* head);
 
 // A query for the node an agent's contact leads to: the agent, the part it touched and where
 // the agent is.
@@ -2324,7 +2240,6 @@ out:
 }
 
 void StopAnimationPlayer(AnimationPlayer* self);
-s32 GetAgentRosterState(Agent* self);
 void FindNearestAnimationPathTime(Animation* self, PlacedObject* owner, f32 start, Vec02* point, f32* outT, Vec02* outPos,
                    Vec02* outDir);
 
@@ -2371,7 +2286,6 @@ struct Blocker_23A8 {
     s32 untargetable;       // 0x6C: non-zero when the object the player holds stops agents targeting it
 };
 
-s32 MaskWorldBitsBySave(void);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 s32 IsPlayerUntargetableByAgent(Agent* self)
@@ -2448,7 +2362,6 @@ set:
 
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
-void GroupAnimationEventObjects(ItemKeeper* self);
 
 void* CreateItemKeeper(void* a0)
 {
@@ -2457,7 +2370,6 @@ void* CreateItemKeeper(void* a0)
     return obj;
 }
 
-void InitObject(BaseObject* self);
 
 void InitItemKeeper(ItemKeeper* self)
 {
@@ -2465,7 +2377,6 @@ void InitItemKeeper(ItemKeeper* self)
     self->selectedId = -1;
 }
 
-void SetItemKeeperState(ItemKeeper* self, s32 ns);
 
 void AddItemKeeperMember(ItemKeeper* self, Agent* value)
 {
@@ -2485,8 +2396,6 @@ void AddOwnedWantedId(ItemKeeper* self, s32 value) { u32 i = self->owned.wantedC
 
 void AddListedWantedId(ItemKeeper* self, s32 value) { u32 i = self->listed.wantedCount; if (i < 16) { self->listed.wanted[i] = value; self->listed.wantedCount = i + 1; } }
 
-void SetItemKeeperState(ItemKeeper* self, s32 ns);
-void CopyMemory(void* dst, void* src, u32 size);
 
 void RemoveItemKeeperMember(ItemKeeper* self, Agent* value)
 {
@@ -2547,12 +2456,7 @@ struct GatheredObjects {
     StateResetObject** items;
 };
 
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
-void* AllocateZeroedBackMemory(s32 size);
 void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount, BaseObject*** outArr);
-void* CreateRecord2505C0(void);
-void AppendToSmallList(StateResetGroup* self, StateResetObject* value);
 
 void GroupAnimationEventObjects(ItemKeeper* self)
 {
@@ -2597,7 +2501,6 @@ void GroupAnimationEventObjects(ItemKeeper* self)
 }
 
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
-void UpdateItemKeeper(ItemKeeper* self);
 
 
 void QueueItemKeeperUpdate(ItemKeeper* a0)
@@ -2624,9 +2527,6 @@ void* GetItemKeeperTarget(ItemKeeper* self)
 }
 
 
-s32 IsAnyItemKeeperMemberFree(ItemKeeper* self);
-s32 ChooseItemKeeperState(ItemKeeper* self);
-void SetItemKeeperState(ItemKeeper* self, s32 ns);
 
 void UpdateItemKeeper(ItemKeeper* self)
 {
@@ -2645,7 +2545,6 @@ void UpdateItemKeeper(ItemKeeper* self)
     }
 }
 
-s32 PollItemKeeperMembers(ItemKeeper* self);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
@@ -2742,12 +2641,7 @@ void SetItemKeeperTriggerStates(ItemKeeper* self, s32 mode)
 
 extern f32 g_gameClock[];
 
-f32 RandomFloatInRange(f32 a, f32 b);
 struct SoundLevelEntry;
-void RemoveSoundLevelAndRecompute(SoundLevelEntry* self);
-SoundLevelEntry* PushSoundLevel(s32 kind);
-void SetItemKeeperTriggerStates(ItemKeeper* self, s32 a);
-void AssignItemKeeperMemberPlaces(ItemKeeper* self);
 
 void SetItemKeeperState(ItemKeeper* self, s32 ns)
 {
@@ -2820,9 +2714,6 @@ void SetItemKeeperState(ItemKeeper* self, s32 ns)
     self->stateSince = g_gameClock[1];
 }
 
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-void GetObjectWorldRotation(BaseObject* self, Mat02* out);
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 
 static inline s32 MinOfCounts(s32 a, s32 b)
 {

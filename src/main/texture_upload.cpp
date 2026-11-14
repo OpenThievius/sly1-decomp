@@ -22,20 +22,19 @@
 #include "texture_header.h"
 #include "shapes.h"
 #include "vu0.h"
+#include "functions/anim_record.h"
+#include "functions/display.h"
+#include "functions/heap.h"
+#include "functions/pooled_object.h"
+#include "functions/texture_upload.h"
 struct FrameTarget;
 struct ImageRecord;
 struct PacketWriter;
 struct PaletteRecord;
 
 
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
 
 struct DmaChainBlock { u8 bytes[0x20]; };
-void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
-void AddDmaEndTag(PacketWriter* self);
-void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 struct TexturePacket : PacketWriter { u8* packet; };
 
@@ -44,15 +43,9 @@ extern s32 g_imageSlotsA;
 extern s32 g_gifChannel;
 
 void* InitGifPacket(PacketWriter* f);
-void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
-void BeginDmaTag(PacketWriter* f);
-s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c);
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void EndGifPacket(PacketWriter* f);
-void AddDmaEndTag(PacketWriter* f);
-void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
-void SendGsPacketAndWait(s32 channel, void* b);
 
 extern FrameTarget g_meshQueueEntries[];
 
@@ -78,7 +71,6 @@ struct GsTex0 {
     u64 cld : 3;
 };
 
-u32 CeilLog2(u32 n);
 
 void BeginImageTransfer(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
 
@@ -87,38 +79,21 @@ void BeginImageTransfer(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, voi
 s32 g_meshQueueCount = 0;
 BumpAllocator g_bumpAllocator = { 0 };
 
-void SubmitMeshQueueEntry(FrameTarget* self);
-void* AllocateZeroedFrontMemory(u32 n);
-void InitMeshQueue(void);
 
 extern s32 g_gifChannel;
 
-void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
 
 struct TextureUploadPacket : PacketWriter { u8 span[0x10]; s32 out; };
 
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
 
-void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
-s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c);
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
-void BuildAnimRecordGifPackets(void* self);
 
 extern s32 g_gifChannel;
 
-void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
-void SendGsPacketAndWait(s32 channel, void* b);
 
 extern s32 g_imageRecordCountA;
 extern s32 g_imageRecordCountB;
-s32 AllocateBump(s32* self,s32 size);
-void BuildPaletteTexRegister(PaletteRecord* self, u32 a1);
-void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx);
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
-void BuildImageTexRegister(ImageRecord* self, u32 a1);
-void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx);
 
 
 // The start of what a queue entry copies: two GIF tags whose words func_001694A0 marks (bit
@@ -129,34 +104,21 @@ struct QueuedGifTags {
     s32 f10;
 };
 
-void CopyMemory(void* dst, void* src, u32 size);
-void* AllocateZeroedFrontMemory(s32 bytes);
 
 struct TransferBase { s32 v; };
 
 void BeginImageTransfer(TransferBase dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
 
-void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 
 extern s32 g_imageRecordCountB;
 extern s32 g_imageRecordCountA;
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
 
-void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
 void* InitPacketWriter(PacketWriter* f);
 void WriteVifFlush(PacketWriter* f);
-void RewindPacketBuffer(PacketWriter* f);
-void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-s32 AllocateBump(s32* self,s32 size);
-void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx);
-void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx);
-void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void WriteVifDirect(PacketWriter* f, s32 a, s32 b, s32 c);
 void WriteVifDirectRef(PacketWriter* f, s32 a, s32 b, s32 c);
-void CloseDmaTag(PacketWriter* f);
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
-void BuildAnimRecordGifPackets(s32 mask);
 
 
 void InitMeshQueue()

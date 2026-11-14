@@ -22,6 +22,10 @@
 #include "texture_header.h"
 #include "shapes.h"
 #include "vu0.h"
+#include "functions/group_marker.h"
+#include "functions/system_calls.h"
+#include "functions/text_format.h"
+#include "functions/texture_upload.h"
 struct PacketWriter;
 
 
@@ -65,10 +69,7 @@ extern u8 g_screenClearPacketB[];
 struct GsDBuff;
 extern "C" void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag);
 void FillScreenColor(u8* buffer, Rgba4* color, s32 flag);
-s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
-s32 EnableInterruptCause(s32 a0);
-void InitMeshQueue(void);
 void ResetDisplayBuffers(void);
 s32 HandleVblankStart(s32 cause);
 s32 HandleGsFinish(s32 cause);
@@ -114,7 +115,6 @@ struct FadePacket : PacketWriter { s32 value; u8 pad[0x3F0]; };
 extern s32 g_gifChannel;
 
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void SendGsPacketAndWait(s32 channel, void* b);
 void FlipDisplayFrame(void);

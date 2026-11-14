@@ -7,6 +7,31 @@
 #include "asm_func.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "functions/agent.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/collider_span.h"
+#include "functions/effect.h"
+#include "functions/effect_spawner.h"
+#include "functions/flagged_object.h"
+#include "functions/group_marker.h"
+#include "functions/matrix.h"
+#include "functions/object_gatherer.h"
+#include "functions/object_properties.h"
+#include "functions/oscillator.h"
+#include "functions/pair_controller.h"
+#include "functions/placed_object.h"
+#include "functions/point_graph.h"
+#include "functions/render_frame.h"
+#include "functions/screen_element.h"
+#include "functions/script_machine.h"
+#include "functions/sound_system.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/turning_collider.h"
+#include "functions/warp_menu.h"
 
 // Types other files define, named by the parameters of their functions declared here.
 struct NodeQuery;
@@ -46,31 +71,23 @@ struct Vec02;
 
 
 
-void InitPlacedObject(PlacedObject* self);
 void AppendToList(List01* self, void* item);
 
 
 
-void StartPlacedObject(PlacedObject* self);
 
 
 
 
-void LoadCollider(Collider* self, BufferedStream* in);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 
 
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 
 
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-s32 AreMenusAndFadeClear(void);
 
 
-void SetSoundStateObjectState(SoundStateObject* self, s32 idx);
 void RemoveFromList(List01* list, void* item);
 void AppendToList(List01* self, void* item);
 
@@ -81,7 +98,6 @@ void AppendToList(List01* self, void* item);
 
 
 
-void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
 
 
 
@@ -91,9 +107,6 @@ void RaiseScatterLevels(ScatterController* self, f32 amount);
 
 
 
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 void ApplyGaugeColliderRatioToEffect(GaugeCollider* self);
 
 
@@ -101,13 +114,7 @@ void ApplyGaugeColliderRatioToEffect(GaugeCollider* self);
 extern u8 D_0026E744[];
 
 
-void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 void SetWorldActiveFollower(World* self, void* v);
-void StartTimer(T217D_510* self, f32 x);
-void SetTimerLimit(T217D_510* self, f32 limit, T217D_510_Fn onEnd);
-void StartTimerCounting(T217D_510* self);
-void StopTimer(T217D_510* self);
 void EndGaugeColliderTimer(s32 unused, s32 flag);
 
 
@@ -115,11 +122,8 @@ void EndGaugeColliderTimer(s32 unused, s32 flag);
 
 extern f32 g_gameClock[];
 extern s32 CountListItems(List01* list);
-extern s32 RandomIntInRange(s32 a, s32 b);
 extern void RemoveFromList(List01* list, void* item);
 extern void AppendToList(List01* self, void* item);
-extern void ChangeAgentState(Agent* self, s32 state, void* context);
-extern void SetSoundStateObjectState(SoundStateObject* self, s32 idx);
 
 
 
@@ -127,7 +131,6 @@ extern void SetSoundStateObjectState(SoundStateObject* self, s32 idx);
 
 
 
-void InitSwitchedCollider(SwitchedCollider* self);
 void SetListLinkOffset(List01* p, s32 value);
 
 
@@ -136,15 +139,10 @@ void SetListLinkOffset(List01* p, s32 value);
 extern u8 g_aimSwitchPoseSourceMethods[];
 
 struct StateGraph;
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 void* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* table);
-void InsertAttachment(PlacedObject* self, Attachment* src);
 void* AllocateFrontMemory(s32 size);
 void AppendToList(List01* self, void* item);
-void AddStateWalkerListener(StateWalker* self, PlacedObject** p);
 
 
 
@@ -161,8 +159,6 @@ void PushCloneBatch(World* self, void* src, s32 n);
 GroupCell* AllocateZeroedFrontMemory(s32 n);
 void AppendToList(List01* self, void* item);
 struct ScriptScope;
-void* GetScriptEntryScope(s32 index, World* self);
-void AddScriptScopeParent(ScriptScope* scope, ScriptScope* parent);
 s32 ReadBufferedU32(BufferedStream* self);
 s32 ReadBufferedS8(BufferedStream* self);
 f32 ReadBufferedFloat(BufferedStream* r);
@@ -178,57 +174,30 @@ struct NoId {
 
 
 
-void CopyPlacedObject(PlacedObject* self, PlacedObject* src);
 void ClearList(List01* p);
 void AppendToList(List01* self, void* item);
 
 
 
-void CopyCollider(Collider* self, Collider* other);
-void InitObjectSet(void*);
-void ApplyColliderPendingImpulse(Collider* self, s32 moved);
-void RegisterObject(void*);
 void AppendToList(List01* self, void* item);
-void UnregisterObject(void*);
 void RemoveFromList(List01* list, void* item);
-void StartObject(void*);
-void RegisterCollider(Collider* self);
-void UnregisterCollider(Collider* self);
-void InitObject(void*);
-void WriteCameraMatricesPacket(Camera* self);
-void AddDmaRefTagIfChanged(void* list, s32 value, s32 end);
-void UploadProjectionConstants(void);
-void UploadGroupConstants(void);
-void UploadCameraOncePerFrame(void);
-void RemoveEffect(Effect* self);
-void AddCallbackNode(void*, void*, s32, void*);
-void AddCallbackNode(void*, void*, void*, void*);
-void RemoveCallbackNode(void*, void*, void*, void*);
-void EndEffectWithImpact(Effect* self, s32 flag);
 
 
 
 
 
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-
-
-
-void StartAgent(Agent* self);
 
 
 
 
-void* GetActiveSwitchedCollider(void);
+
+
+
 void ReleaseObjectNode(u8* self, GaugeColliderAgent* ctx);
-void LeaveAgentState(Agent* self, s32 mode);
 
 
 
 
-void EnterAgentState(Agent* self, s32 evt, Animation* arg);
-void FaceAgentAlongPath(Agent* self);
 
 
 
@@ -240,13 +209,10 @@ struct AgentValueNotice {
 
 struct AgentNotification;
 struct Agent;
-void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
 
 
 
 
-s32 GetAgentRosterState(Agent* self);
-s32 ChooseAgentState(Agent* self);
 
 
 
@@ -254,9 +220,6 @@ s32 ChooseAgentState(Agent* self);
 
 
 struct ObjectGatherer;
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-s32 IsObjectAttached(BaseObject* self);
-s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value);
 // The query FindNodeForQuery takes, in the 0x40-byte local retail keeps.
 struct NodeQueryFrame {
     void* f00;
@@ -267,7 +230,6 @@ struct NodeQueryFrame {
     u8 pad14[0x40 - 0x14];
 };
 s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
-void UpdateAgent(Agent* self, f32 dt);
 
 // The file's .data, in retail's order.
 f32 D_0026A710 = 2200.0f;
@@ -560,13 +522,7 @@ void StartGaugeCollider(GaugeCollider* self)
     AddStateWalkerListener((StateWalker*)self->phaseWalker, (PlacedObject**)self);
 }
 
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
 Mat02 MultiplyByTransposedMatrix3x3(const Mat02& a, const Mat02& b);
-f32 WrapAngle(f32 a);
-void StepCollider(Collider* self, f32 t);
-void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
 void AddColliderForce(void* self, Vec02* force);
 extern const Vec02 g_unitZVector;
 
@@ -636,19 +592,12 @@ extern f32 D_0026A820;
 extern f32 D_0026A824;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
-void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt);
-void* FindColliderFloorContact(void* self, s32 key, s32* out);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
 struct Oscillator;
-void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB);
-void ClearRootTries(PlacedObject* self);
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-Collider* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 s32 AcceptColliderOfOtherRoot(void* root, Collider* self);
 extern const Vec02 g_unitZVector;
 extern const Vec02 g_unitXVector;
@@ -730,9 +679,6 @@ struct GaugeHeld {
     s32 f55C;               // 0x55C
 };
 
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
-void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 
 GaugeHeld* FindHeldObjectAhead(GaugeCollider* self)
 {
@@ -824,8 +770,6 @@ struct GaugeCarrier : BaseObject {
     GaugeCarrierRec* rec;   // 0x2D0
 };
 
-void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
 GaugeHeld* FindHeldObjectAhead(GaugeCollider* self);
 extern f32 g_gameTime[];
 extern f32 D_0026A834;
@@ -971,17 +915,9 @@ void ComputeGaugeColliderContactValue(GaugeCollider* ctx, Contact03* out)
     out->friction = D_0026A840;
 }
 
-f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
-void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16* outB);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
-void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB);
-void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
 f32 SplitVectorAlongAxis(const Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
-void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance, Quad16* at, f32 minScale, f32 size);
 struct PlayingSound;
-void StopSoundRecord(PlayingSound* self, s32 n);
 
 void ApplyGaugeColliderAttachedSetContact(GaugeCollider* self, AttachedSet* set, f32 dt)
 {
@@ -1098,9 +1034,6 @@ void StartGaugeColliderAgent(GaugeColliderAgent* self)
     StartAgent(self);
 }
 
-void ApplyTurningColliderDrive(TurningCollider* self);
-void ClampVectorLength(Vec02* in, Vec02* out, f32 max);
-void StepAgent(Agent* self, f32 dt);
 
 void StepGaugeColliderAgent(GaugeColliderAgent* self, f32 dt)
 {
@@ -1153,11 +1086,6 @@ s32 ChooseGaugeColliderAgentState(GaugeColliderAgent* self)
     return r;
 }
 
-void UpdateAgentGoal(Agent* self, s32 flag);
-void SetAgentGoalPoint(Agent* self, Vec02* p);
-void PickRandomPointOnPointGraph(PointGraphObject* self, Vec02* out);
-void FitStepToPointGraph(PointGraphObject* self, f32 scale, Vec02* pos, Vec02* step);
-void SnapPointToOwnerGraph(PointGraphObject* self, Vec02* p, Vec02* out);
 
 // The agent's next goal by state: 800 on from the active collider, away on the ground (12
 // and 13); a random point of its graph at least D_0026A890 away (4); its own place on the
@@ -1226,8 +1154,6 @@ void EnterGaugeColliderAgentState(GaugeColliderAgent* self, s32 evt, Animation* 
     }
 }
 
-void UpdateAgentState(Agent* self);
-void SetAnimationPlayerSpeed(AnimationPlayer* p, f32 speed);
 extern G27C230* g_currentEntry;
 
 // In state 12, the animation runs at a speed that grows with the distance on the ground from

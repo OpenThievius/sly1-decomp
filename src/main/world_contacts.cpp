@@ -45,6 +45,10 @@
 #include "object_message.h"
 #include "globals.h"
 #include "list_iter.h"
+#include "functions/collider_contact.h"
+#include "functions/placed_object.h"
+#include "functions/state_walker.h"
+#include "functions/world_contacts.h"
 
 
 
@@ -53,11 +57,6 @@ struct ContactPairLink { Contact03* f0; s32 f4; ContactPairLink* f8; Collider* f
 struct ContactRowNode;
 struct ContactRowList;
 struct ContactRowSource;
-ContactRowNode* PushContactRow(World* self, ContactRowList* list, ContactRowSource* src);
-ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, Contacts03* key);
-void FreePooledContactChain(World* world, Contact03* head);
-void ClearRootTries(PlacedObject* self);
-void PushFreeSlot(Pool6C* list, void* item);
 
 
 void SetContactPairFlags(World* w, Contacts03* a, Contacts03* b, u8 set, u8 clr) {
@@ -100,7 +99,6 @@ struct ContactRowNode { s32 a0; ContactRowNode* next; void* a8; s32 value; };
 struct ContactRowList { ContactRowNode* head; };
 struct ContactRowSource { u8 pad0[4]; s32 value4; };
 
-void* TakePoolSlot(Pool6C* pool);
 
 ContactRowNode* PushContactRow(World* self, ContactRowList* list, ContactRowSource* src)
 {
@@ -143,7 +141,6 @@ void* FindContactRow(Collider* self, Collider* other)
     return 0;
 }
 
-void* FindContactRow(Collider* self, Collider* other);
 
 s32 GetContactRowHead(Collider* self, Collider* other)
 {
@@ -161,7 +158,6 @@ struct SweepAxisSlot {
     void* link;
 };
 
-void MarkSweepAxesUnsorted(World* a0);
 
 void AddColliderToSweepAxes(World* self, void* arg)
 {
@@ -363,12 +359,7 @@ struct ContactBody
     u64 bits538;
 };
 
-void SortSweepAxes(World* w);
 struct ColliderPair;
-void FreePooledContactChain(World* world, Contact03* head);
-s32 BuildObjectPairContacts(World* world, ColliderPair* pair, s32 arg);
-void NotifyContactEnds(World* world, s32 n, Contact03** list);
-void ClearRootTries(PlacedObject* self);
 
 void UpdateWorldContacts(World* w, s32 arg)
 {
@@ -469,7 +460,6 @@ void UpdateWorldContacts(World* w, s32 arg)
     }
 }
 
-void SetContactPairFlags(World* w, Contacts03* a, Contacts03* b, u8 set, u8 clr);
 
 void InitContactPairFlags(World* self, Collider* obj)
 {

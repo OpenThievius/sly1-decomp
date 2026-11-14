@@ -13,30 +13,30 @@
 #include "game_clock.h"
 #include "cursor_animator.h"
 #include "asm_func.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/buffered_stream.h"
+#include "functions/camera.h"
+#include "functions/heap.h"
+#include "functions/matrix.h"
+#include "functions/path_curve.h"
+#include "functions/pooled_object.h"
+#include "functions/pose_source.h"
+#include "functions/range_record.h"
+#include "functions/texture_upload.h"
+#include "functions/world.h"
+#include "functions/zone_collider.h"
 struct Mat02;
 struct Vec02;
 
 
-void InvalidateRangeRecordPacket(RangeRecord* o);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern s32 g_meshQueueCount;
 extern u8 g_meshQueueEntries[];
-void LinkRangeRecord(RangeRecord* self, s32 code);
-s32 HasRangeRecordRanges(RangeRecord* self);
-void StoreRangeRecordNear(RangeRecord* self, f32 v);
-void StoreRangeRecordFar(RangeRecord* self, f32 v);
-AnimRecord* FindAnimRecord(s32 key);
-void UpdateRangeRecordBounds(RangeRecord* o);
 struct BufferedStream;
-s32 ReadBufferedU8(BufferedStream* self);
-PathCurve* CreatePathCurve(s32 kind);
-void ReadPropertyRecords(void* self, void* obj);
-void BuildRangeRecordPacket(void* o);
 s32 RangeRecordReachesSphere(RangeRecord* node, void* a1, f32 f);
 extern "C" f32 Tangent(f32 x);
 extern u8 g_identityMatrix4[];
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void ReparentObject(BaseObject* self, BaseObject* parent);
 
 // The file's .data, in retail's order.
 f32 g_rangeRecordClipMargin = 50.0f;
@@ -134,7 +134,6 @@ void StoreRangeRecordFar(RangeRecord* o, f32 v)
 }
 
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance);
-void UpdateRangeRecordBounds(RangeRecord* self);
 
 // Two floats within 1e-4 of each other, as an inline function of its own: retail sets the
 // tolerance again before each of a vector's three tests, where the constant written at each call
@@ -248,11 +247,7 @@ struct RangeSlot {
 };
 struct RangePartState { s32 w0; RangeSlot* slots; u8 pad08[0x28 - 8]; };
 struct RangeFacePair { s32 part; s32 slot; };
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
 typedef s32 (*RangeBodyFilter)(void*, Collider*);
-void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 
 void UpdateRangeRecord(RangeRecord* self, f32 dt)
 {
@@ -308,18 +303,10 @@ struct RangeUniforms {
     f32 clipZ;
 };
 void* InitPacketWriter(PacketWriter* p);
-void UsePacketBufferMemory(PacketWriter* b, s32 n, void* q);
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifFlushE(PacketWriter* s);
-void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
-void SubmitMeshQueueEntry(FrameTarget* self);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
-void InitIdentityMatrix(Mat4* self);
-void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
-void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out);
-void CopyMemory(void* dst, void* src, u32 size);
 extern u8 g_rangeRecordProgram[];
 extern f32 g_rangeRecordClipMargin;
 

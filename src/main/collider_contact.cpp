@@ -9,6 +9,13 @@
 #include "placed_object.h"
 #include "shapes.h"
 #include "world.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/placed_object.h"
+#include "functions/pose_source.h"
+#include "functions/state_walker.h"
+#include "functions/warp_menu.h"
+#include "functions/zone_collider.h"
 
 // Contacts between colliders: the friction and bounce of a pair of surface kinds, the pooled
 // contact chains, the searches over a collider's edges, and class 0x03's contact method
@@ -48,7 +55,6 @@ SurfaceWeight g_surfaceBounce[13] = {
     {1.0f, 0.5f},
     {1.0f, 1.0f}
 };
-void InitPoseSource(Attachment* self, PlacedObject* value);
 
 // Two surface kinds, indexes into the weight tables.
 struct SurfacePair { s32 a; s32 b; };
@@ -103,10 +109,6 @@ struct PooledContact {
 };
 
 struct Pool6C;
-void* PopZeroedFreeSlot(Pool6C* pool);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-Collider* FindHandlerForSlot(Collider* node, s32 offset);
-void NotifyContactEnds(World* world, s32 n, Contact03** list);
 
 PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7)
 {
@@ -204,8 +206,6 @@ void RefreshContactEndPoints(World* world, s32 n, Contact03** list)
     }
 }
 
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-Collider* FindHandlerForSlot(Collider* node, s32 offset);
 
 void NotifyContactEnds(World* world, s32 n, Contact03** list)
 {
@@ -231,7 +231,6 @@ void NotifyContactEnds(World* world, s32 n, Contact03** list)
     }
 }
 
-void PushFreeSlot(Pool6C* list, void* item);
 
 void FreePooledContactChain(World* world, Contact03* head)
 {
@@ -358,7 +357,6 @@ struct MeshHit {
 
 typedef char check_MeshHit[sizeof(MeshHit) == 0x70 ? 1 : -1];
 
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 
 s32 CollectEdgeContacts(Collider* other, Collider* self, u8* ctx, s32 cap, MeshHit* out)
 {
@@ -572,7 +570,6 @@ done:
     return n;
 }
 
-void FindSegmentClosestParams(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* t, f32* depth, Vec02* normal);
 
 // The dot product of two vectors as a float, the vectors passed as values (each a movti copy
 // into the parameter, which the GCSE table's size counts: docs/TOOLCHAIN.md, "GCSE"). The
@@ -772,8 +769,6 @@ void* AllocateBackMemory(s32 size);
 void PopBackMemoryMark();
 struct PlaneTreeNode;
 struct PlaneTreeOutput;
-s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out);
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 
 // The squared distance between two points.
 static inline f32 DistanceSquared(const Vec02& a, const Vec02& b)
@@ -997,7 +992,6 @@ done:
     return n;
 }
 
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
 void AddMeshContacts(Collider* a0, f32 radius, Vec02* a1, Collider* a2, s32 a3, FaceRef* a4, FaceRef* a5, PooledContact** a6)
 {
@@ -1067,9 +1061,6 @@ void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f)
 }
 
 
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
-void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f);
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
 s32 AddSweptPartMeshContact(void* a0, void* a1, s32 a2, void* a3, void* a4, void* a5)
 {
@@ -1140,9 +1131,6 @@ s32 IntersectSegmentWithSphere(Vec02* a, Vec02* b, Vec02* c, f32* tOut, Vec02* h
 // func_00187E88's locals: the support point, the sphere hit, its distance and the contact's.
 struct SphereHitFrame { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
 
-s32 IntersectSegmentWithSphere(Vec02* a, Vec02* b, Vec02* c, f32* tOut, Vec02* hitOut, Vec02* nOut, f32* dOut, f32 r);
-void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f);
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
 s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
 {
@@ -1238,7 +1226,6 @@ struct ColliderPair {
     Collider* b;
 };
 
-s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out);
 void PushBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 void PopBackMemoryMark(void);

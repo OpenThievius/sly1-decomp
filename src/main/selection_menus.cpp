@@ -26,6 +26,16 @@
 #include "shapes.h"
 #include "object_finder.h"
 #include "layout_137228.h"
+#include "functions/iop_commands.h"
+#include "functions/memory_card.h"
+#include "functions/oscillator.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/screen_element.h"
+#include "functions/sound_system.h"
+#include "functions/state_walker.h"
+#include "functions/warp_menu.h"
 
 // Types other files define, named by the parameters of their functions declared here.
 struct MemoryCard;
@@ -97,8 +107,6 @@ struct CaptionDrawer {
 };
 extern BoxStyle g_gridSelectorFrame;
 
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 u32 GetEntryFlags(s32 idx);
 u32* GetLevelEntryByKey(s32 idx);
 void CallFlaggedParts(PartHolderObject* self)
@@ -135,11 +143,8 @@ void CallFlaggedParts(PartHolderObject* self)
     }
 }
 
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 s32 ComputeCompletionMask();
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
-void TeleportStateWalker(StateWalker* self, s32 key);
-void PushStackElement(ElementStack* self, ScreenElement* node);
 void SetupCurrentObjectChoices(CurrentPlacedObject* self)
 {
     if (self->walkers[0].graph) self->walkers[0].walker = CreateStateWalker((StateGraph*)self->walkers[0].graph, 0, -1, 0);
@@ -213,9 +218,6 @@ void SetupCurrentObjectChoices(CurrentPlacedObject* self)
     PushStackElement((ElementStack*)g_elementStack, &g_selectionCaption);
 }
 
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-void SetElementStackState(ElementStack* self, s32 state);
 void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d); // stays void: retail returns a value, but declared so func_0016AED8 differs in registers
 void BecomeCurrentObject(CurrentPlacedObject* self)
 {
@@ -229,7 +231,6 @@ void BecomeCurrentObject(CurrentPlacedObject* self)
     AppendQueuedCall(self->world, (void*)SetupCurrentObjectChoices, self, 0, 0);
 }
 
-void SetElementTextFromIndexedCounts(ScreenElement* self, s32 idx);
 void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
 {
     s32 s1 = 0;
@@ -263,7 +264,6 @@ void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
     }
 }
 
-s32 GetPadHorizontalStep(PadRecord* self);
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
 void MoveCurrentObjectChoice(CurrentPlacedObject* self, PadRecord* a1)
 {
@@ -292,11 +292,6 @@ void MoveCurrentObjectChoice(CurrentPlacedObject* self, PadRecord* a1)
 void* LookupEntryById(s32 key);
 void MarkProgressStageFlag(s32 idx);
 struct IdentityKey;
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_0016B190 differs in registers
-s32 HasAnimationEventKind19(Animation* a0);
-void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
-void PopStackElement(ElementStack* g);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
 void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
 {
@@ -350,10 +345,6 @@ void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
 // NEAR: only the order of `addiu v0,s5,lo(D_00261858)` vs `sw s4,0x2D4(s3)` differs (2 instrs swapped)
 
 struct KeyRecord;
-void OpenKeyRecord(KeyRecord* self);
-s32 HasStreamVoice(void);
-void TeleportStateWalker(StateWalker* self, s32 key);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
 {
     if (a == self->choice && b == self->keyIndex) return;
@@ -409,7 +400,6 @@ void InitSelectionCaption(T217D_12E0* self)
     self->lastAt = -g_choiceSoundGap;
 }
 
-void PushObjectCameraController(void* p);
 void RestoreSelectionCaptionCamera(T217D_12E0* self)
 {
     if (self->open != 0) {
@@ -426,14 +416,7 @@ void UpdateSelectionCaption(T217D_12E0* self)
 }
 
 // The object the element shows (a view of it: its mode at +0x2D0, its animation clock at +0x2D8).
-s32 CheckStreamVoicePending(void);
-s32 PollIopCommands(void);
-s32 HasStreamVoice(void);
-void StartMemoryCardSave(MemoryCard* self);
-void ChooseStepSequenceState(StepSequence* self);
 void ShowCurrentObjectCaptions(CurrentPlacedObject* o);
-void PushStackElement(ElementStack* self, ScreenElement* node);
-void ClearPadPressedBits(PadRecord* self, u32 mask);
 void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
 void ConfirmCurrentObjectChoice(CurrentPlacedObject* o);
 void MoveCurrentObjectChoice(CurrentPlacedObject* self, PadRecord* a1);
@@ -501,10 +484,6 @@ void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
 }
 
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
-s32 SetPadSelectFlags(s32 bits);
-void ResetPadStepRepeat(PadRecord* p);
-void StopStreamVoice(void);
-void ClearPadSelectFlags(u32 mask);
 void SetSelectionCaptionOpen(T217D_12E0* self, s32 v)
 {
     s32 flag = (v != 0);
@@ -613,13 +592,10 @@ u32 TestGridEntryBit(u32 bit)
     return g_saveData->u19F4 & mask;
 }
 
-void ClearPadPressedBits(PadRecord* self, u32 mask);
 void QueueMovieByIndex(s32 index);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-s32 GetPadHorizontalStep(PadRecord* p);
-s32 GetPadVerticalStep(PadRecord* p);
 void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
 {
     s32 s1;
@@ -664,9 +640,6 @@ void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
     StartSoundEffect(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
-s32 SetPadSelectFlags(s32 n);
-void ClearPadSelectFlags(u32 mask);
-void ResetPadStepRepeat(PadRecord* p);
 void SetGridSelectorOpen(T217D_1330* self, s32 flag)
 {
     if ((flag != 0) != (self->open == 0)) {
@@ -703,7 +676,6 @@ struct StringLayout;
 struct Vec4U;
 void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 const char* GetMovieTitle(s32 index);
-void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* color, s32 flag);
 void DrawGridSelector(T217D_1330* self)
 {
     T217D_Word tmp;

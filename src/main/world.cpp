@@ -40,6 +40,35 @@
 #include "fpu.h"
 #include "scope_marker.h"
 #include "object_finder.h"
+#include "functions/agent.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/child_group_object.h"
+#include "functions/class75_list.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/collider_span.h"
+#include "functions/display.h"
+#include "functions/iop_commands.h"
+#include "functions/matrix.h"
+#include "functions/object_properties.h"
+#include "functions/oscillator.h"
+#include "functions/pad_input.h"
+#include "functions/path_follower.h"
+#include "functions/path_follower_helpers.h"
+#include "functions/placed_object.h"
+#include "functions/placed_object_model.h"
+#include "functions/player_state2.h"
+#include "functions/point_graph.h"
+#include "functions/screen_element.h"
+#include "functions/state_notifier.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/target_lists.h"
+#include "functions/value.h"
+#include "functions/world_contacts.h"
+#include "functions/zone_collider.h"
 struct ColliderPose;
 struct ParentFrame;
 struct PlacedObject;
@@ -54,28 +83,23 @@ struct ScaledTransform;
 
 extern f32 g_gameClock[];
 
-s32 IsObjectAttached(BaseObject* self);
 
 void ResetPathFollower(void* self);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void ResetPathFollower(PathFollower* self);
 
-void CaptureColliderPose(Collider* self, ColliderPose* out);
 
 void SetCachedVoiceParam(s32 index, s32 value);
 
-void* TakePoolSlot(Pool6C* pool);
 
 void RefreshCachedVoiceParam(s32 i, s32 unused1);
 
-void PushFreeSlot(Pool6C* list, void* item);
 
 void* TakeCallRecord(World* self);
 
@@ -85,16 +109,12 @@ void ReleaseCallRecords(World* self, T219CHook* node);
 
 typedef void (*FollowerEffectFn)(void* self, s32 mode, PlacedObject* other);
 struct FollowerEffectTarget { FollowerEffectFn* vtbl; };
-void SetAgentMainClip(Agent* self, void* value);
-void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other);
 
-void RecomputeColliderFrame(Collider* self);
 void FindPathFollowerPathPosition(void* self);
 
 struct NoticeLink { u8 pad[0x50]; void* owner; };
 struct CountedNotice { u8 pad0[8]; s32 kind; u8 pad1[0x6CC - 0xC]; NoticeLink* link; };
 
-void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
 
 void AlignBufferedStreamPosition(BufferedStream* self, s32 n);
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
@@ -102,24 +122,19 @@ void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 void SetListLinkOffset(List01* self, s32 offset);
 
 void UpdateColliderBounds(Collider* self);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void ExpandColliderBoundsBySphere(void* self, void* p, f32 f);
 
 extern u8 D_0026DAAC[];
 
-void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
 void SetWorldActiveFollower(World* self, void* v);
 void SetPathFollowerMode(PathFollower* self, s32 mode);
 
-void GetObjectWorldPosition(BaseObject* self, Vec02* out); // stays void: retail returns a value, but declared so func_001D66A8 and two more differs in registers
 
 s32 ReduceBufferedStreamBytesLeft(BufferedStream* self, s32 n);
 s32 ReadBufferedS32(BufferedStream* self);
 
 struct WalkerHolder { u8 pad[0x48]; void* walker; };
 
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 s32 AreMenusAndFadeClear(void);
 
 struct MarkStacks;
@@ -132,22 +147,10 @@ void* EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
 void* AssignScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value);
 extern u8 g_markStacks[];
 
-void* GetActiveSwitchedCollider(void);
 
-void GetObjectWorldPosition(BaseObject* self, Vec02* out); // stays void: retail returns a value, but declared so func_001D66A8 and two more differs in registers
 
-void ActivateSwitchedCollider(void* self);
 
-void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt);
-void UpdatePathFollowerPace(PathFollower* self);
-void AdvancePathFollowerAlongPath(PathFollower* self, s32* out);
-void ComputePathFollowerHeadingTarget(PathFollower* self);
-void UpdatePathFollowerSound(PathFollower* self, f32 t);
-void SteerPathFollower(PathFollower* self);
-void EmitPathFollowerWheelParticles(PathFollower* self);
-void AdvancePathFollowerEntry(PathFollower* self, s32 v);
 void ProcessPathFollowerContacts(PathFollower* self);
-void ClearRootTries(PlacedObject* self);
 
 extern u8 g_scatterController[];
 
@@ -164,12 +167,9 @@ struct WorldRecord { u8 b; };
 
 extern s32 g_buttonCodeFlags;
 
-void InitObject(BaseObject* self);
 void SetIopChannel2Setting(World* self, s32 a, s32 b);
 void* AllocateZeroedFrontMemory(s32 size);
 void InitContactTables(World* self);
-void InitSlotPool(Pool6C* s, s32 size, s32 count);
-void InitAlignedSlotPool(Pool6C* s, s32 size, s32 count);
 void SetListLinkOffset(List01* self, s32 offset);
 void SetWorldGravityZ(World* self, f32 x);
 
@@ -187,16 +187,7 @@ extern ColoredTriangleSet* g_coloredTriangleSet;
 extern f32 g_stepScale;
 extern s32 D_00261D38;
 
-void ActivateSwitchedColliderIndex(s32 index);
-void UpdatePadRouting(void);
-void ClearCameraObjectList(Camera* obj);
-void ClearClass75List(void);
-void ClearPointObjectList(void);
-void ClearTargetVectorList(void);
-void ClearObjectLists(void);
 void StopAllSoundsAndWait(void);
-void ResetScreenResources(void);
-void ShutDownScriptValuePools(void);
 void ResetElementStack(ElementStack* self);
 void ResetFrontMemory(void);
 
@@ -248,10 +239,8 @@ f32 ClampToRange(ValueRange* span, f32 x);
 
 void* PushSoundLevel(s32 level);
 
-void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
 
 s32 RandomIntInRange(s32 a, s32 b);
-s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec02* a2, s32 n, StateNotifier** arr);
 
 struct ScatterController;
 void SetScatterLevel(ScatterController* object, f32 level);
@@ -280,11 +269,9 @@ struct CloneBatch { s32 count; s32* values; };
 struct __attribute__((packed)) PackedCloneBatch { s32 n; void* buf; };
 
 void* AllocateFrontMemory(s32 size);
-void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 
 s32 HasStreamVoice(void);
 
-void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
 
 struct __attribute__((aligned(16))) CurveSample { s32 v[4]; };
 struct __attribute__((packed)) PackedCurveColor { s32 v; };
@@ -300,26 +287,13 @@ void DrawProjectedLine(ClipPoint* a, ClipPoint* b, PackedColor* c, u8* obj, s32 
 extern u8 g_previousSoundLevel[];
 
 void SetVolumeChannelFactor(s32 a, s32 b, f32 x);
-void SendIopSoundLevel(s32 a);
 
 void* AllocateZeroedFrontMemory(u32 n);
 
 s32 IsPadSelectFlagHeld(World* self);
 
 ConeVolume* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
-void SetConeVolumeMode(ConeVolume* p, s32 v);
-void SetConeVolumeColor(ConeVolume* self, Quad16* src);
-void SetConeVolumeFirstAngle(ConeVolume* p, f32 v);
-void SetConeVolumeSecondLevel(ConeVolume* p, f32 v);
-void SetConeVolumeSecondAngle(ConeVolume* p, f32 v);
-void SetConeVolumeThirdLevel(ConeVolume* p, f32 v);
-void SetConeVolumeThirdAngle(ConeVolume* p, f32 v);
-void SetConeVolumeDirection(ConeVolume* self, Quad16* dir);
-void SetConeVolumeRange(ConeVolume* self, U64P* src);
 
-ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, Contacts03* key);
-void FreePooledContactChain(World* world, Contact03* head);
-void ClearRootTries(PlacedObject* self);
 
 typedef u64 UQuadword __attribute__((mode(TI)));
 struct __attribute__((aligned(16))) ClipPoint { f32 x, y, z, w; };
@@ -332,20 +306,13 @@ extern SegmentEnd g_projectionOffset;
 
 UQuadword TransformVector4(u8* self, UQuadword q);
 s32 ClipSegmentToPlanes(ClipPoint* out);
-void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* color, s32 flag);
 
-s32 SetPadSelectFlags(s32 bits);
 
-void ClearPadSelectFlags(u32 mask);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
-void FreePooledContactChain(World* world, Contact03* head);
 // How many copies func_001DCD28 makes of the first object of a class.
 struct ClassCopyCount { s32 classId; s32 count; };
 
 
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 u32 GetEntryFlags(s32 id);
 
@@ -380,9 +347,6 @@ s32 g_bufferedBlockSize = 0;
 s32 g_bufferedBlockKey = 0;
 s32 g_bufferedBlockStart = 0;
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void ChangeAgentState(Agent* self, s32 state, void* context);
 
 void ProcessPathFollowerContacts(PathFollower* self)
 {
@@ -449,11 +413,6 @@ void UpdatePathFollower(PathFollower* self, f32 t)
     }
 }
 
-void ComputeCameraRelativeStickHeading(Camera* camera, PadRecord* pad, s32 flag, f32* out);
-void ClearPadPressedBits(PadRecord* self, u32 mask);
-void HandleStepSequenceSkipButtons(void* self, PadRecord* rec);
-s32 IsPathFollowerAhead(PathFollower* self, PathFollower* other);
-void CountDownPathFollowerLap(PathFollower* self);
 extern s32 g_movieChecksumFailed;
 extern float D_002751DC;
 extern s32 D_002751D4;
@@ -604,14 +563,6 @@ void ReleasePathFollowerContacts(PathFollower* self) { self->contactStamp++; }
 struct FaceRef;
 struct PooledContact;
 struct MaskedCollider;
-s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, ColliderSpan* a5);
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-void StartChildGroupDelay(ChildGroupObject* self, f32 delta);
-s32 IsObjectAccepted(MaskedCollider* self, BaseObject* msg);
-void SetColliderTurnAnchorPreset(Collider* self, s32 index);
-void SetColliderMoveAnchorPreset(Collider* self, s32 index);
-void AddMeshContacts(Collider* a0, f32 radius, Vec02* a1, Collider* a2, s32 a3, FaceRef* a4, FaceRef* a5, PooledContact** a6);
-void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3, u8* ctx, PooledContact** list);
 
 // Whether a lies below b along axis (their dot products with it).
 static inline s32 IsLowerAlong(const Vec02& a, const Vec02& b, const Vec02& axis)
@@ -681,7 +632,6 @@ void CollidePathFollowerWithObject(PathFollower* self, Collider* other, s32 a2, 
 ASM_FUNC(func_001DA6E0);
 
 typedef u64 Quad_1DA7E0 __attribute__((mode(TI)));
-void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* parent);
 struct Vec02;
 struct RampProfile;
 Quad_1DA7E0 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel);
@@ -741,11 +691,6 @@ struct DrawScale {
     f32 f40;
 };
 
-void DrawCollider(Collider* self, void* a, void* m);
-void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy);
 
 void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
 {
@@ -1705,32 +1650,25 @@ void SpawnListedObjectCopies(World* self)
 }
 
 void ResetScatterController(ScatterController* self);
-void InitScriptValuePools(void);
 s32 ReadBufferedU8(BufferedStream* s);
 s32 ReadBufferedS16(BufferedStream* s);
 void SkipBufferedBlocks(BufferedStream* s);
-void LoadScriptEntryTable(World* self, BufferedStream* s);
 void ReadPropertyRecords(void* self, void* obj);
 void ReadOptionalBufferedBlock(BufferedStream* self, u32* out);
 void ReadBufferedString(BufferedStream* self, u8** out);
-void LoadScreenResources(BufferedStream* self);
 void ReadSlotObjects(World* self, void* a1, void* a2);
 void ReadBufferedBlockBody(BufferedStream* s);
 s32 EnsureSoundBankLoaded(s32 bank);
 void SilenceVolumeChannel2(void);
 struct KeyRecord;
 void RequestStagedBank(KeyRecord* self);
-void SendResidentImages(void);
 s32 IsListEmpty(List01* list);
 void CreateConeVolumes(World* self);
 extern u8 g_screenClearPacketA[];
-void FillScreenColor(u8* buffer, Rgba4* color, s32 flag);
 void SpawnListedObjectCopies(World* self);
 void RunQueuedCalls(World* self);
 void UpdateScatterLevelLimits(ScatterController* self);
 void ResumeElementStackState(void* stack);
-void UpdateCameraLocation(Camera* camera);
-void UpdateWorldContacts(World* self, s32 a);
 void PlayStagedBank(void* self);
 void StartWorldSoundEntries(World* self);
 

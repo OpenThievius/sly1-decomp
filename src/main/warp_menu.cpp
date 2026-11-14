@@ -44,6 +44,34 @@
 #include "vu0.h"
 #include "object_finder.h"
 #include "layout_137228.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/colored_triangle_set.h"
+#include "functions/cone_agent.h"
+#include "functions/disc_access.h"
+#include "functions/display.h"
+#include "functions/effect_spawner.h"
+#include "functions/entry_queue.h"
+#include "functions/flagged_object.h"
+#include "functions/game_clock.h"
+#include "functions/group_marker.h"
+#include "functions/matrix.h"
+#include "functions/memory_card.h"
+#include "functions/object_pool.h"
+#include "functions/on_off_object.h"
+#include "functions/pad_input.h"
+#include "functions/pair_controller.h"
+#include "functions/path_follower.h"
+#include "functions/player.h"
+#include "functions/pose_source.h"
+#include "functions/screen_element.h"
+#include "functions/sound_system.h"
+#include "functions/state_walker.h"
+#include "functions/turning_collider.h"
+#include "functions/world_contacts.h"
+#include "functions/zone_collider.h"
 struct BufferedStream;
 struct WorldObjectNode;
 
@@ -62,32 +90,21 @@ struct ScaledTransform;
 
 void SteerAgentAlongPath(Agent* self);
 void InitElementStack(ElementStack* self);
-void QueueEachScreenElementDraw(void);
 struct StateGraph;
 void StartPlacedObject(PlacedObject* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d); // stays void: retail returns a value, but declared so func_001EB598 differs in registers
 void CopyPlayerAttachBlock(World3BeatPressCollider* self);
 struct SwitchedCollider;
 void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 extern s32 g_buttonCodeFlags;
 s32 IsPadSelectFlagHeld(World* self);
 s32 TestAgentMayContact(Agent* self, Collider* obj);
 void SetElementStackState(ElementStack* self, s32 state);
-s32 IsStreamVoiceLocked(void);
-void PauseStreamVoice(void);
 extern "C" f32 FloatRemainder(f32 x, f32 y);
 s32 IsInsideRange(ValueRange* span, f32 x);
-void ResumeStreamVoice(void);
-void DrawScreenElements(void);
 extern float g_gameTime[];
-void SetVolumeChannelFactor(int a, int b, float t);
-void SetGameClockScale(float x);
-void LoadCollider(Collider* self, BufferedStream* in);
 f32 WrapModulo(f32 x, f32 y);
-void* FindColliderFloorContact(void* self, s32 key, s32* out);
 PlacedObject* FindNearestAgentKey(void* a, void* b);
 void* FindObjectHandle(PlacedObject* self, s32 key);
 void RestartAgentClip(Agent* self);
@@ -100,17 +117,12 @@ void UpdateAgentState(Agent* self);
 extern u8 g_flagTable[];
 struct FlagTable;
 void SetWorldActiveFollower(World* self, void* v);
-s32 TakeFlagTableIndex(FlagTable* c);
-void StartConeAgent(ConeAgent* self);
 s32 AreMenusAndFadeClear(void);
 extern s32 D_00270458;
 extern s32 D_00275DBC;
 void InitAgent(Agent* self);
 void* AllocateFrontMemory(s32 size);
-void StopStagedBankVoice(void);
 void PopStackElement(ElementStack* g);
-void SetPadPatternState(PadPatternPlayer* self, s32 state);
-void ResetScreenElements(void);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
@@ -118,10 +130,7 @@ f32 WrapAngle(f32 a);
 f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* out);
 s32 NextRandom(void);
 s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
-void InitConeAgent(ConeAgent* self);
 void StartAgent(Agent* self);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void AddStateWalkerListener(StateWalker* self, PlacedObject** p);
 void* CopyToFrontMemory(s32 size, void* name);
 // An object the tempo agent finds by id at its start (func_001EBFB0 copies D_00275D48 to
 // 0xC9C and fills each obj).
@@ -131,27 +140,20 @@ s32 ChooseAgentState(Agent* self);
 extern s32 g_previousSoundLevel;
 extern f32 g_elapsedTime[];
 void ApplyStackTimeScale(ElementStack* a, f32 f);
-void SetMemoryCardDisplayMode(MemoryCard* a, s32 v);
 void SetScreenFadeMode(u8* a, s32 v);
 void ReleasePadSelectFlag(World* self);
 void AcquirePadSelectFlag(World* a0);
-void InitPadPatternSetting();
 extern u32 g_padRouting;
 extern u32 g_padSelectFlags;
 extern s32 D_002701B8;
-extern void ClearPadSelectFlags(u32 mask);
 extern void* FindActiveObjectSubGroup(void);
 extern void StartObjectSubGroupFinish(ObjectSubGroup* self);
-extern void ClearPadPressedBits(PadRecord* self, u32 mask);
-extern s32 ApplyMemoryCardImage(MemoryCard* g);
 extern void ResetGameProgress(GameProgress* self);
 extern void ResumeAtSavedLevel(void);
 extern void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
 extern void PushStackElement(ElementStack* o, ScreenElement* g);
 extern void ApplyStackTimeScale(ElementStack* o, f32 v);
 extern void SetElementStackState(ElementStack* o, s32 mode);
-extern void StepDiscSectorCheck(void);
-extern void UpdateScreenElements(void);
 typedef s32 (*World3BeatPressSlotFn)(World3BeatPressCollider* self, void* arg);
 typedef void (*PlayerSlotFn)(Player* g, void* arg);
 void GetObjectWorldPosition(BaseObject* self, Vec02* out);
@@ -161,11 +163,8 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 s32 HasSpareCount(void);
 void ActivateSwitchedCollider(void* value);
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 void ContinueWorld3BeatPressColliderRequest(PlacedObject* from, Player* self);
 void EndHeldWorld3Timeline(World3Boss* o);
-void SetCachedVoiceParam(s32 a, s32 b);
-void BindEntryQueueToObject(EntryQueue* self, Player* player);
 extern s32 D_00275C34;
 extern u32* g_memoryChecksumCursor;
 extern s32 g_memoryChecksumRemaining;
@@ -216,7 +215,6 @@ struct EndNodeWalk {
 };
 void UpdateObjectTree(void* self, f32 f);
 void UpdateAnimationPlayer(AnimationPlayer* self, f32 dt);
-void StepObjectLevelRamp(WorldObjectNode* self, f32 dt);
 void RunQueuedCalls(World* self);
 struct BeginByteWalk {
     static void Of(ListFrame* it, List01* list)
@@ -247,9 +245,6 @@ SwitchedCollider* GetActiveSwitchedCollider(void);
 void UpdateWorldObjectLists(World* self);
 void UpdateObjectTree(void* self, f32 f);
 void UpdateAnimationPlayer(AnimationPlayer* self, f32 dt);
-void StepObjectLevelRamp(WorldObjectNode* self, f32 dt);
-void DispatchDelayedMessages(World* self);
-void UpdateSoundEmitters(void);
 struct NextActor {
     static Actor6C* Of(ListFrame* it)
     {
@@ -271,32 +266,21 @@ struct BeginActorWalk {
 void UpdateWorldStepLists(World* self, f32 t);
 void UpdateWorldDeltaLists(World* self, f32 t);
 void UpdateUnflaggedParts(World* self);
-void UpdateWorldContacts(World* self, s32 a);
-void ProcessColliderGroups(World* self, s32 a, f32 t);
 s32 IsObjectTreeAtRest(Actor6C* n);
 void ClearRootTries(PlacedObject* self);
-void UpdateTouchingParts(Collider* self);
 void RunDueDelayedScriptCalls(World* self, f32 t);
-void StepAnimators(f32 t);
 void NotifyWorldActiveFollower(World* self);
 void ReleaseWorldListEntry(void* a0);
-void UpdateCamera(Camera* a, s32 b, f32 t);
 void StepWorldValueTowardTarget(World* self, f32 t);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 void RunWorld3TimelineEntry(World3Timeline* self, Entry90* msg);
 Entry90* AppendWorld3TimelineEntry(World3Timeline* self, s32 a, s32 b, f32 c);
-void StartObject(void);
 // What ComputeSinCos writes for func_001ED650.
 struct SinCos { f32 sine; f32 cosine; };
 void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
 void RegisterSwitchedCollider(SwitchedCollider* self);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1);
 s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, f32 angle);
 s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c);
-void InitObject(BaseObject* self);
-void RemoveColliderAttachment(Collider* o, Attach03* node);
-void AddColliderAttachment(Collider* o, Attach03* node);
 void ReleaseAttachRecords(World* self, Attach03* node);
 void SetScreenFadeMode(void* o, s32 mode);
 void UnregisterObjectGroup(World* self, FoundList* s);
@@ -307,7 +291,6 @@ void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out);
 void InitPlacedObject(PlacedObject* self);
 void SetStateAndNotify(void* self, s32 b);
 struct ZoneTargetEntry;
-s32 UpsertKeyedEntry(ZoneTargetEntry* tab, s32 cap, s32* count, s32 flag, s32 k1, s32 k2, s32 val);
 void UnregisterSwitchedCollider(SwitchedCollider* self);
 void EndWorld3Timeline(void* p);
 // The definition's parameters in the order the call below writes them: retail's caller
@@ -320,7 +303,6 @@ void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform
 void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 void SetAgentGoalPoint(Agent* self, Vec02* p);
 void UpdateAgentGoal(Agent* self, s32 flag);
-void InitObject(void* self);
 void PadPacketToQuadSlot(void* s, s32 target);
 s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c);
 void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
@@ -330,24 +312,18 @@ struct LinkedItem;
 void ReadLinkedItemArray(BufferedStream* src, s32* count, LinkedItem** out);
 u16 ReadBufferedU16(BufferedStream* self);
 s32 ReadBufferedU32(BufferedStream* self);
-void ReadPropertyRecords(void* a, void* b);
 // The message (kind 11) func_001EF3D8 sends the object it detaches.
 struct DetachMsg { AttachedSet* self; Collider* obj; };
 void RebuildAttachedSet(AttachedSet* self);
 void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void InitCollider(Collider* self);
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 void InitTrackedNodes(Rec36* a, ContactTracker* b);
 extern s32 g_worldLoadRequest;
 s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, s32 mode);
 void SetScreenFadeMode(ScreenFade* self, s32 state);
-void SetVolumeChannel6Factors(s32 flag, f32 x);
 typedef void (*TempoCallFn)(void);
 void UpdateAgent(Agent* self, f32 dt);
 void RestartWorld3Timeline(World3Timeline* sub);
 void RunWorld3TimelineEntries(World3Timeline* sub);
-void RefreshCachedVoiceParam(s32 i, s32 unused1);
-s32 GetCachedVoiceParam(s32 a);
 void SyncWorld3BossEntries(World3Boss* self);
 void LeaveAgentState(Agent* self, s32 mode);
 void AppendPacketQuadwords(PacketWriter* self, s32 n, void* src);
@@ -356,11 +332,8 @@ void* AllocateZeroedFrontMemory(s32 n);
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 struct ColoredTriangleSet;
 extern ColoredTriangleSet* g_coloredTriangleSet;
-void DrawColoredTriangles(ColoredTriangleSet* self, f32 t);
 // retail's caller evaluates them after the integers, as this order does.
 void WriteColoredSpritePacket(s32 r, s32 g, s32 b, s32 a, PacketWriter* p, f32 x0, f32 y0, f32 x1, f32 y1);
-void DecrementGaugeCount(void* p);
-void DecrementGaugeCount(T217D_2E0* self);
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
 extern u8 g_packetWriterVtable[];
 s32 InitPacketBuffer(PacketWriter* self);
@@ -379,11 +352,7 @@ struct StateChangeMsg {
     s32 cur;
 };
 struct ZoneTargetEntry;
-void SetGatheredWalkerTargets(void* self, s32 n, ZoneTargetEntry* ent, void* arg, s32 flag);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 void ScheduleWorld3BossBeatPress(World3Boss* self, Entry90* e);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-void ResetPadStepRepeat(PadRecord* p);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 extern u8 D_00625760[];
@@ -395,9 +364,6 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg);
 void MarkLevelDone(s32 n);
 struct FlaggedObject;
 struct ScatterController;
-void StartMemoryCardSave(MemoryCard* self);
-s32 TestFlagTableBit(FlagTable* table, s32 index);
-void SetFlagTableBit(FlagTable* self, s32 bit);
 void RaiseScatterLevelForObject(ScatterController* obj, FlaggedObject* node);
 extern u8 g_scatterController[];
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
@@ -427,8 +393,6 @@ struct SameAsFixedKey {
         return ((p->signedWords[2] ^ p->signedWords[6]) ^ (t->signedWords[2] ^ t->signedWords[6])) == 0;
     }
 };
-void SnapCameraZoom(void* p, f32 v);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 // A FadeRequest moved as a 16-byte unaligned block and its last word.
 struct FadeRequestBlock {
     QuadP pair;
@@ -436,20 +400,14 @@ struct FadeRequestBlock {
 };
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void SetElementTextFromEntry(ScreenElement* self, s32 a1, s32 a2);
 void SetWarpPageSelectedEntry(void* self, s32 value);
 extern s32 g_pendingWarpEntryAtEnd;
 void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
 void SetWarpPageMode(WarpPage* self, u32 next);
 void* AllocateFrontMemory(int size);
-void StartObject(BaseObject* self);
-void ResolveAndStartObject(void* a);
 // The pad (include/c73.h's neighbours): its buttons at +0xAA, its direction timers at +0x30 .. 0x3C.
 s32 IsWarpEntryAvailable(WarpPage* o, s32 n, s32* a, s32* b);
-s32 GetPadHorizontalStep(PadRecord* t);
-s32 GetPadVerticalStep(PadRecord* t);
 void MoveWarpCursor(WarpPage* o, s32 n);
-void ClearPadPressedBits(PadRecord* self, u32 mask);
 s32 GetCurrentWarpEntry(void);
 void PopStackElement(ElementStack* q);
 IdentityKey* LookupEntryById(s32 k);
@@ -457,15 +415,9 @@ void StartObjectFade(IdentityKey* v, s32 m, s32 n);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
-void HideScreenElements(void);
 s32 IsWarpEntryAvailable(WarpPage* self, s32 kind, s32* outA, s32* outB);
 void SetWarpCursor(WarpPage* self, s32 a1, s32 a2);
 void BeginWarpPageClose(void* self);
-void SetScreenElementSlideInTime(void* self, f32 v);
-void SetScreenElementSlideOutTime(void* self, f32 v);
-void PauseStagedBankVoice(void);
-void ResumeStagedBankVoice(void);
-s32 SetPadSelectFlags(s32 bits);
 struct SameKeys {
     static s32 Of(IdentityKey* t, IdentityKey* o)
     {
@@ -483,10 +435,8 @@ extern s32 g_previousLevelIndex;
 struct WorldLoadRequest;
 struct WorldKeyBlock;
 struct KeyedEntry;
-void QueueWorldLoad(WorldLoadRequest* self, WorldKeyBlock* key, s32 a2, s32 a3, s32 flags);
 s32 GetEntryIdByKey(KeyedEntry* key);
 void ShowCountedScreenElement(World* self);
-void FadeScreenToBlack(f32 t);
 struct WarpTextStyle;
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 // The text style the warp menu draws with: the static initialiser (func_001F2688) zeroes it, then
@@ -519,15 +469,12 @@ s32 IsWarpEntryReachable(void* self, s32 code);
 void SelectWarpPageEntry(WarpPage* o, s32 n);
 void AnnouncePendingWarpEntry(WarpPage* o);
 void SetWarpPageSelectedEntry(WarpPage* o, s32 n);
-void StopSoundRecord(PlayingSound* self, s32 n);
-void RemoveObjectNodeFromWorld(WorldObjectNode* r);
 void EnsureObjectWorldNode(PlacedObject* o);
 void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void PostLoadPlacedObject(PlacedObject* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-void ResolveAndStartObject(BaseObject* node);
 struct NextPageNode {
     static BaseObject* Of(ListFrame* it)
     {
@@ -1533,9 +1480,6 @@ u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec
     return to;
 }
 
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit)
 {
@@ -1899,8 +1843,6 @@ void HandleWorld3BeatPressColliderActivation(World3BeatPressCollider* self, void
     }
 }
 
-void TurnColliderTowardHeading(TurningCollider* self);
-void SetPlayerState(Player* self, s32 a, s32 b);
 
 void ContinueWorld3BeatPressColliderRequest(PlacedObject* from, Player* self)
 {
@@ -2054,7 +1996,6 @@ struct FramePoint_001EBD10 {
     Mat02 m50;              // 0x50
 };
 
-void GetPlacedObjectPositionAt(PlacedObject* self, f32 t, Vec02* pos, Vec02* vec);
 void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 
 void GetWorld3BeatPressColliderPositionAt(World3BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
@@ -2072,7 +2013,6 @@ void GetWorld3BeatPressColliderPositionAt(World3BeatPressCollider* self, f32 t, 
     Vu0::Q(*vel) = Vu0::Add(Vu0::Q(v), Vu0::Cross(Vu0::Q(w), Vu0::Q(((FramePoint_001EBD10*)self->frameAnchor)->point)));
 }
 
-void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat02* rot, Vec02* vec);
 
 void GetWorld3BeatPressColliderRotationAt(World3BeatPressCollider* self, f32 t, Mat02* rot, Vec02* spin)
 {
@@ -2188,7 +2128,6 @@ void* StoreFloatAsQuadword(u128* out, f32 f);
 void* CopyQuadword(u128* out, void* src);
 Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 void* StoreQuadword(u128* out, u128 v);
-AnimRecord* FindAnimRecord(s32 key);
 extern f32 g_ringSevenPoints[14];
 
 // k times the quadword at p, into dst (the quadword helpers' product).
@@ -2398,7 +2337,6 @@ void ApplyWorld3BossTransform(World3Boss* self, void* s, void* c)
 
 #include "deferred_request.h"
 void DrawAgent(Agent* self, void* unused1, void* unused2);
-void QueueDeferredRequest(DeferredRequest* src);
 void DrawWorld3BossRing(DeferredRequest* self);
 
 void DrawWorld3Boss(World3Boss* self, Camera* cam, void* arg2)
@@ -2570,12 +2508,7 @@ struct TempoLine {
 struct FrameSource;
 struct AgentNotification;
 struct Agent;
-void ChooseObjectPoolItem(ObjectPool* self);
-void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* a3);
-s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim);
 void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
-void SetCachedVoiceParam(s32 a, s32 b);
-s32 GetCachedVoiceParam(s32 a);
 
 void HandleWorld3BossNotification(World3Boss* self, s32 kind, TempoNoticeRec* rec)
 {
@@ -3660,13 +3593,10 @@ void ReconcileColliderAttachments(void* owner, Attach03** head)
     ReleaseAttachRecords((World*)owner, removed);
 }
 
-void UpdateCollider(Collider* self, f32 dt);
 Attach03* TakeAttachRecord(World* self);
 f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut);
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void BroadcastPointEvent(void* self, void* obj, f32 x);
 
 void UpdateAttachedSet(AttachedSet* self, f32 dt)
 {
@@ -3842,7 +3772,6 @@ void RebuildAttachedSet(AttachedSet* self)
     }
 }
 
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 
 f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut)
 {
@@ -4844,7 +4773,6 @@ void MoveWarpCursor(WarpPage* self, s32 idx)
 }
 
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
 
 void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
 {

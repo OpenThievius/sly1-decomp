@@ -32,12 +32,25 @@
 #include "buffered_stream.h"
 #include "key_id.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/collider.h"
+#include "functions/disc_access.h"
+#include "functions/effect.h"
+#include "functions/effect_spawner.h"
+#include "functions/game_progress.h"
+#include "functions/iop_commands.h"
+#include "functions/iop_file_client.h"
+#include "functions/object_gatherer.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/screen_element.h"
+#include "functions/text_format.h"
+#include "functions/warp_menu.h"
 
 // Types other files define, named by the parameters of their functions declared here.
 struct LoadProgress;
 
 
-f32 WrapModulo(f32 x, f32 y);
 
 BufferedStream* InitBufferedStream(BufferedStream* self, s32 a1, u8* a2, s32 a3)
 {
@@ -100,8 +113,6 @@ struct TextPointObject;
 struct Effect;
 
 
-void ResetScreenElement(void* self);
-void SetStepSequenceState(StepSequence* self, s32 next);
 
 
 
@@ -114,8 +125,6 @@ s32 OpenBufferedSectorStreamRange(BufferedStream* a, KeyId* pair)
 
 extern f32 g_gameClock[];
 
-extern "C" s32 GetStringLength(const char* s);
-void* CopyString(void* dst, const char* src);
 void PushFontScale(s32 a, f32 x, f32 y);
 struct TextReader;
 void* InitTextReader(TextReader* self, char* text, Font* font);
@@ -124,11 +133,8 @@ void PopFontScale(s32 v);
 void RewindTextReader(TextReader* self);
 s32 ReadTextChar(TextReader* self);
 
-s32 ReadFile(s32 fd, void* buf, s32 size);
 
-s32 CloseFile(s32 p);
 extern "C" s32 StopDiscRead();
-s32 CloseDiscStream(void);
 
 void CloseBufferedStream(BufferedStream* self)
 {
@@ -160,20 +166,16 @@ void CloseBufferedStream(BufferedStream* self)
     self->unpackCarry = 0;
 }
 
-s32 IsObjectAttached(void* obj);
 
 struct NumberedItem;
-void GetNumberedItemFlag(NumberedItem* self, s32* out);
 
 s32 ReduceBufferedStreamBytesLeft(BufferedStream* self, s32 n)
 {
     return self->bytesLeft -= n;
 }
 
-void GetCurrentLevelBit(u32* out);
 struct RampProfile;
 extern "C" f32 Cosine(f32 x);
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 struct SectorStreamState {
     s32 flags;      // 0x00
@@ -201,11 +203,7 @@ struct MinOf {
 
 extern "C" s32 GetDiscReadPosition();
 extern "C" s32 SyncDiscNCommand(s32 mode);
-s32 SyncDiscRead(s32 a);
 extern "C" s32 GetDiscError();
-s32 GetDiscReadError(void);
-void StartLowLevelDiscReadUntilAccepted(s32 sector, s32 count, void* buffer);
-void StartDiscReadUntilAccepted(s32 sector, s32 count, void* buffer);
 
 struct SectorReadIssue {
     static void Read(SectorStreamState* self, s32 sector, s32 len, void* dst)
@@ -288,7 +286,6 @@ void RefillBufferedStreamFromSectors(SectorStreamState* self)
     } while (self->rem == 0 && self->left > 0);
 }
 
-extern s32 ReadFile(s32 fd, void* buf, s32 size);
 struct FileStreamState { u8 pad0[8]; void* buffer; s32 fC; u8 pad10[4]; s32 fileLeft; u8 pad18[8]; void* fillPtr; s32 fillCount; u8 pad28[0xC]; s32 fileHandle; };
 void RefillBufferedStreamFromFile(FileStreamState* self)
 {
@@ -316,7 +313,6 @@ void RefillBufferedStream(BufferedStream* self)
 }
 
 
-void ResetTextPointToHalf(TextPointObject* self);
 
 
 void RefillBufferedStream(BufferedStream* d);
@@ -394,7 +390,6 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 extern u8 func_00135E20[];
 extern u8 func_00135E40[];
 
-s32 MaskWorldBitsBySave(void);
 
 // NEAR: control flow and the calls match; the compiler picks s0 for self and s1 for n (retail: s1, s0),
 // and keeps the loaded count in $a2 where retail uses $v1.
@@ -521,8 +516,6 @@ s32 ReadBufferedS8(BufferedStream* self)
 }
 
 
-void RemoveEffect(Effect* self);
-void SetEffectPhase(Effect* self, s32 mode);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
@@ -737,7 +730,6 @@ void ReadFaceTree(BufferedStream* self, Mesh03* in, Tree03* out)
     }
 }
 
-void CopyCollider(Collider* self, Collider* other);
 
 struct LinkedItem {
     u8 pad0[0x10];
@@ -794,8 +786,6 @@ LINKER_REMNANT(func_00138510);
 extern f32 g_gameTime;
 
 
-void LoadCollider(Collider* self, BufferedStream* in);
-void FindOrBuildMemberGroup(void** out, void* self);
 
 
 u16 ReadBufferedU16(BufferedStream* self);

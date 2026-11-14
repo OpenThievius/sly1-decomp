@@ -32,15 +32,16 @@
 #include "pad_record.h"
 #include "ramp_profile.h"
 #include "value_range.h"
+#include "functions/heap.h"
+#include "functions/path_follower.h"
+#include "functions/render_frame.h"
 struct FormatSpec;
 struct PaddedOutput;
 struct RegDouble;
 
 
 
-OutputBuffer* InitStringOutputBuffer(OutputBuffer* self, u8* target, s32 capacity);
 s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2);
-void DestroyOutputBuffer(OutputBuffer* a0, s32 a1);
 
 
 
@@ -61,9 +62,7 @@ s32 PrintFormattedVa(const char* fmt, void* ap);
 // 0x400 bytes AppendToOutputBuffer fills before it flushes.
 struct OutputBufferStorage { u8 bytes[0x420]; };
 
-OutputBuffer* InitStringOutputBuffer(OutputBuffer* self, u8* target, s32 capacity);
 s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2);
-void DestroyOutputBuffer(OutputBuffer* a0, s32 a1);
 
 
 
@@ -76,19 +75,15 @@ s32 FormatToStringBoundedVa(char* dst, s32 cap, const char* a, void* b);
 
 
 
-OutputBuffer* InitOutputBuffer(OutputBuffer* self, s32 handle);
 s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2);
-void DestroyOutputBuffer(OutputBuffer* a0, s32 a1);
 
 
 
 extern "C" s32 GetStringLength(const char* s);
-void CopyMemory(void* dst, void* src, u32 size);
 
 
 
 extern "C" s32 GetStringLength(const char* s);
-void CopyMemory(void* dst, void* src, u32 size);
 
 
 
@@ -112,7 +107,6 @@ extern u8 g_hexDigits[0x18];
 
 extern "C" u64 DivideUnsigned64(u64 num, u64 den);
 extern "C" s64 RemainderUnsigned64(u64 num, u64 den);
-void CopyMemory(void* dst, void* src, u32 size);
 
 
 
@@ -153,8 +147,6 @@ struct FormatFrame {
     u8 pad44[0xC];
 };
 
-void FlushOutputBuffer(OutputBuffer* ctx);
-s32 AppendToOutputBuffer(OutputBuffer* self, void* src, s32 size);
 char* FindCharInString(const char* s, s32 c);
 extern "C" s32 GetStringLength(const char* s);
 s32 ParseFormatSpec(s8* at, FormatSpec* spec, s32** va);
@@ -183,7 +175,6 @@ s32 ExtractIntegerSign(FormatSpec* self, void* dst);
 extern "C" s32 GetStringLength(const char* s);
 s32 GetConversionRadix(s8 c);
 s32 WriteIntegerDigits(u8* buf, s32 len, u64 value, u32 radixArg);
-s32 AppendToOutputBuffer(OutputBuffer* self, void* src, s32 size);
 void UppercaseString(char* p);
 
 
@@ -199,7 +190,6 @@ extern u8 g_charClassFlags[];
 
 
 extern "C" s32 GetStringLength(const char* s);
-s32 AppendToOutputBuffer(OutputBuffer* self, void* src, s32 size);
 void FormatStringArg(FormatSpec* self, PaddedOutput* ctx, const char* str);
 void FormatIntegerArg(FormatSpec* sp, OutputBuffer* c, u64 v);
 void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, s64 s);
@@ -271,7 +261,6 @@ extern u8 g_globalPointer[];
 struct ThreadIds { s32 main; s32 render; };
 extern ThreadIds g_mainAndRenderThreads;
 
-void RunRenderThread(void);
 extern "C" s32 GetCurrentThreadId(void);
 void SetThreadPriority(s32 a, s32 b);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
