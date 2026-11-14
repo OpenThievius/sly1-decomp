@@ -61,7 +61,7 @@ struct PairController : PlacedObject {
     s32 idCount;  // 0x2E0
     s32 ids[1];  // 0x2E4
     u8 pad2E8[0x330 - 0x2E8];
-    Vec02 f330; // 0x330
+    Vec02 spawnCentre; // 0x330: the centre new objects start around
     union {
         s32 mode340;  // 0x340
         f32 minRadius340;  // 0x340: the shortest distance a new object starts at (added to the radius at 0x3D0)
@@ -117,8 +117,8 @@ struct PairController : PlacedObject {
     f32 attachDelayMin; // 0x638
     f32 attachDelayMax; // 0x63C
     f32 nextAttachTime; // 0x640
-    f32 f644;  // 0x644
-    f32 f648;  // 0x648
+    f32 blendedSpeed; // 0x644: the speed blended from the two blend values
+    f32 blendedTurn; // 0x648: the turn rate blended from the two blend values
     s32 id64C;  // 0x64C: -1 for none; the state func_001A4B30 compares
     s32 state;  // 0x650: -1 for none; the state machine's state
     f32 stateStartTime; // 0x654

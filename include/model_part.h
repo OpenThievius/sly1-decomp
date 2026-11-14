@@ -37,7 +37,7 @@ struct ModelPart {
     void* cameraFacing;     // 0x34: a camera-facing matrix source
     ModelPartHook* hook;    // 0x38
     u8 pad3C[0x60 - 0x3C];
-    s32 f60;                // 0x60
+    s32 usesFarFade;        // 0x60: nonzero: a second fade by the far distance
     u8 pad64[0x68 - 0x64];
     void* matrix;           // 0x68: a matrix the transform is multiplied by
     u8 pad6C[0x70 - 0x6C];

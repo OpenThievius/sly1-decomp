@@ -1225,7 +1225,7 @@ void SpawnPairedObject(PairController* self)
         other = (PairedObject*)GetActiveSwitchedCollider();
         ComputePolarOffset((Vec3*)&pos, angle, radius, 0.0f);
         pos.y = pos.y * self->tune34C;
-        Vu0::Q(pos) = Vu0::Add(Vu0::Q(self->f330), Vu0::Q(pos));
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(self->spawnCentre), Vu0::Q(pos));
         if (other != 0 && IsNearSpot(pos, other, o)) {
             continue;
         }
@@ -1307,8 +1307,8 @@ void StartPairedObjects(PairController* self)
             owner->desc02()->m1E(owner, (Mat02*)(node + 0x110));
             SetPairedState(owner, 1);
             SetSoundStateObjectState(owner->attachment, 1);
-            owner->maxSpeed = self->f644;
-            owner->maxTurn = self->f648;
+            owner->maxSpeed = self->blendedSpeed;
+            owner->maxTurn = self->blendedTurn;
             f32* fp = &self->attachDelayMin;
             self->nextAttachTime = g_gameClock[1] + RandomFloatInRange(self->attachDelayMin, fp[1]);
             StartSoundEffect(-1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -1335,11 +1335,11 @@ void UpdatePairControllerTuning(PairController* self, f32 dt)
 
     f32 t2;
     ClampedQuadratic::Get(t2, &self->blend.speed.q, dt);
-    self->f644 = (1.0f - t2) * self->blend.speed.value[0] + t2 * self->blend.speed.value[1];
+    self->blendedSpeed = (1.0f - t2) * self->blend.speed.value[0] + t2 * self->blend.speed.value[1];
 
     f32 t3;
     ClampedQuadratic::Get(t3, &self->blend.turn.q, dt);
-    self->f648 = (1.0f - t3) * self->blend.turn.value[0] + t3 * self->blend.turn.value[1];
+    self->blendedTurn = (1.0f - t3) * self->blend.turn.value[0] + t3 * self->blend.turn.value[1];
 
     f32 t4;
     ClampedQuadratic::Get(t4, &self->blend.limit.q, dt);

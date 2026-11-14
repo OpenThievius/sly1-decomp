@@ -287,8 +287,8 @@ void StartFlaggedObject(FlaggedObject* self)
     } else {
         self->child = FindFirstObjectByIdMode4(self->world, self->childId, self);
     }
-    if (self->f5A8 != 0) {
-        self->handle = (StateWalker*)CreateStateWalker((StateGraph*)self->f5A8, self, 0x546, 0);
+    if (self->stateGraph != 0) {
+        self->handle = (StateWalker*)CreateStateWalker((StateGraph*)self->stateGraph, self, 0x546, 0);
 
         if (TestFlagTableBit((FlagTable*)g_flagTable, self->flagIndex) != 0)
             SetStateWalkerTarget(self->handle, 0x547);

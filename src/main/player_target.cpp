@@ -578,7 +578,7 @@ f32 ScoreTargetPathNearest(PathScoreContext* self)
 struct TargetSpanHit {
     Vec02 point;
     u8 pad10[0x34];
-    f32 f44;
+    f32 exitTime;
     u8 pad48[0x28];
 };
 // The definition's parameters in the order the call below writes them: retail's caller
@@ -627,7 +627,7 @@ s32 AddTargetObstructionCost(f32 limit, BaseObject* self, void* a1, void* a2, vo
     }
     if (pe != 0) {
         if (FindNearestSpanObject(0, &p, pe, n0, n1, (ColliderSpan*)&hit) != 0) {
-            if (hit.f44 != 1.0f) {
+            if (hit.exitTime != 1.0f) {
                 if (50.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.point), Vu0::Q(*pe))))) {
                     t = limit - 1.0f;
                 }
@@ -1341,7 +1341,7 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         TargetMover* m = rec->mover;
         TransformPointBetweenFrames(0, (PlacedObject*)frame, (Vec02*)self->probeVertex, &a);
         if (m->vt->track != 0) {
-            m->vt->track(m, self->trackPos, &a, 0, &b, &c, &self->trackPos, &self->f23C4);
+            m->vt->track(m, self->trackPos, &a, 0, &b, &c, &self->trackPos, &self->trackDistance);
         }
         TransformPointBetweenFrames((PlacedObject*)frame, 0, &b, &d);
         TransformDirectionBetweenFrames((PlacedObject*)frame, 0, &c, &e);
@@ -1413,10 +1413,10 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
             if (m->wraps != 0) {
                 end = i.x;
             } else if (self->trackReversed != 0) {
-                ApproachValueWithRamp(self->f23C4, g_targetPathEdgeInset, g_frameDt, (RampProfile*)&i, &end);
+                ApproachValueWithRamp(self->trackDistance, g_targetPathEdgeInset, g_frameDt, (RampProfile*)&i, &end);
                 end = -end;
             } else {
-                ApproachValueWithRamp(self->f23C4, m->vt->limit(m) - g_targetPathEdgeInset, g_frameDt, (RampProfile*)&i, &end);
+                ApproachValueWithRamp(self->trackDistance, m->vt->limit(m) - g_targetPathEdgeInset, g_frameDt, (RampProfile*)&i, &end);
             }
             f32 r = (end - i.y) / (i.x - i.y);
             along = ClampBetween(self->stickLevel, 0.0f, r);
@@ -1554,9 +1554,9 @@ void UpdatePlayerTargetPhase(Player* self)
     case 0x10:
         if (self->targetMode == 4) {
             f32 k = 5.0f;
-            u8* p1 = (u8*)&self->f1190;
+            u8* p1 = (u8*)&self->footProbeA;
             MeasurePlayerFootProbe(self, (s32)self->f628, (s32)self->f620, self->footPartA, k, p1);
-            u8* p2 = (u8*)&self->f1290;
+            u8* p2 = (u8*)&self->footProbeB;
             MeasurePlayerFootProbe(self, (s32)self->f62C, (s32)self->f624, self->footPartB, k, p2);
             CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p1, (u8*)self->footPartA);
             CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p2, (u8*)self->footPartB);
@@ -1657,16 +1657,16 @@ void SetPlayerOnOffPhase(Player* self, s32 n)
     }
     if (n >= 3) {
         if (n == 3) {
-            self->f268C = 1;
+            self->cameraSpringMode = 1;
         }
         return;
     }
     {
         s32 v = self->forcedOnOffObject;
         if (v == (s32)self->ownOnOffObject) {
-            self->f268C = 2;
+            self->cameraSpringMode = 2;
         } else {
-            self->f268C = 0;
+            self->cameraSpringMode = 0;
         }
     }
 }
@@ -1682,12 +1682,12 @@ void ResetPlayerOnOffObject(Player* self)
     o->f2DC = 0;
     o->obj = 0;
     o->block2F0 = *(Block63*)&g_onOffObjectDefaults;
-    o->f418 = 1;
-    o->f388 = 3;
-    o->f380 = 0;
+    o->holdEnabled = 1;
+    o->controllerKindBase = 3;
+    o->usesCylindricalFrame = 0;
     o->f384 = 0;
-    o->f41C = 0;
-    o->f390 = 0;
+    o->limitEnabled = 0;
+    o->frameAngleStepLimit = 0;
     o->f3A0 = 0;
     SetOnOffObjectForcedState(o, 0);
 }

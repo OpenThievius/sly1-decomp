@@ -149,7 +149,7 @@ struct T217D_510 : ScreenElement {
     s32 warned;                 // 0x284
     f32 limit;                  // 0x288: the time it stops at
     T217D_510_Fn onEnd;         // 0x28C
-    s32 f290;                   // 0x290: set by func_001AB600 and func_001AB958, 0 by func_001AB890
+    s32 hideWhenStopped;        // 0x290: set by func_001AB600 and func_001AB958, 0 by func_001AB890
 };
 
 void SetTimerState(T217D_510* self, s32 state);
@@ -327,7 +327,7 @@ struct T217D_6D0 : ScreenElement {
     s32 queued;                 // 0x274: 1 while a screen waits for the slide out to finish
     s32 queuedPage;             // 0x278: that screen
     s32 stage;                  // 0x27C: -1 at the start; 2 and 0xB are set by the buttons (func_00195958)
-    s32 f280;                   // 0x280: set by func_001DDB20, cleared by func_00195958
+    s32 walker;                 // 0x280: set by func_001DDB20, cleared by func_00195958
     f32 fade;                   // 0x284: the alpha of the captions drawn over it, 1.0 at the start
     s32 sound;                  // 0x288: the sound handle func_001BE980 gave, 0 for none
 };

@@ -88,7 +88,7 @@ void StartHitCountCollider(HitCountCollider* self)
     self->heading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     PlacedObject* v = self->aimObject;
     self->aimHeading = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
-    *(UnalignedFloatPair*)&self->f630 = *(UnalignedFloatPair*)&((IdLinkedObject*)self->f62C)->f2DC;
+    *(UnalignedFloatPair*)&self->drivenBaseX = *(UnalignedFloatPair*)&((IdLinkedObject*)self->drivenObject)->f2DC;
     T217D_E30* g1 = &g_hitCountCaptionA;
     ((UnalignedPointer*)&g1->target)->p = (u8*)&self->collectedCount;
     T217D_E30* g2 = &g_hitCountCaptionB;
@@ -167,7 +167,7 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
     self->radius3D0 = w;
     self->radius3CC = w;
     if (self->acceptedMark) {
-        if (g_gameTime[0] - self->f640 > 2.0f) self->acceptedMark = 0;
+        if (g_gameTime[0] - self->markStartTime > 2.0f) self->acceptedMark = 0;
     }
     f32 ang = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)buf, self->aimHeading - ang);
@@ -199,9 +199,9 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
         ((u8*)ca)[1] = (s32)r1;
     }
     SetObjectTreeRecordValue(self, ca[0]);
-    ((IdLinkedObject*)self->f62C)->f2DC = self->f670 * self->f630;
-    ((IdLinkedObject*)self->f62C)->f2E0 = self->f670 * self->f634;
-    ((IdLinkedObject*)self->f62C)->linkId = 0;
+    ((IdLinkedObject*)self->drivenObject)->f2DC = self->stickGain * self->drivenBaseX;
+    ((IdLinkedObject*)self->drivenObject)->f2E0 = self->stickGain * self->drivenBaseY;
+    ((IdLinkedObject*)self->drivenObject)->linkId = 0;
 }
 
 bool AreMenusAndFadeClear();
@@ -241,7 +241,7 @@ void ControlHitCountCollider(HitCountCollider* self, PadRecord* ev, f32 dt)
     }
     if (self->state != 1) {
         self->speedLimit = g_hitCountMinSpeedLimit;
-        self->f650 = g_zeroVector;
+        self->desiredVelocity = g_zeroVector;
     } else {
         if (0.0f < ev->stickMagnitude) {
             ComputeCameraRelativeStickHeading(g_camera, ev, 0, &self->heading);
@@ -250,8 +250,8 @@ void ControlHitCountCollider(HitCountCollider* self, PadRecord* ev, f32 dt)
         f32 m = g_hitCountMinSpeedLimit;
         m = m >? ev->stickMagnitude;
         self->speedLimit = m;
-        ComputePolarOffset((Vec3*)&self->f650, self->heading, k * ev->stickMagnitude, 0.0f);
-        self->f670 = (D_00274AA0 >? ev->stickMagnitude);
+        ComputePolarOffset((Vec3*)&self->desiredVelocity, self->heading, k * ev->stickMagnitude, 0.0f);
+        self->stickGain = (D_00274AA0 >? ev->stickMagnitude);
         if (0.0f < ev->secondStickMagnitude) {
             ComputeCameraRelativeStickHeading(g_camera, ev, 1, &self->aimHeading);
             if (self->walker != 0) {
@@ -280,7 +280,7 @@ void StepHitCountCollider(HitCountCollider* self, f32 dt)
     StepCollider(self, dt);
     BuildYawPitchMatrix(self->heading, 0.0f, &rot);
     TurnColliderTowardRotation(self, dt, &rot, g_hitCountTurnRamp);
-    Vu0::Q(accel) = Vu0::Sub(Vu0::Q(self->f650), Vu0::Q(self->v150));
+    Vu0::Q(accel) = Vu0::Sub(Vu0::Q(self->desiredVelocity), Vu0::Q(self->v150));
     ClampVectorLength(&accel, &accel, g_hitCountAccelLimit * self->speedLimit * dt);
     Vu0::Q(t) = Vu0::FromFloat(dt);
     Vu0::Q(accel) = Vu0::DivX(Vu0::Q(accel), Vu0::Q(t));
@@ -418,9 +418,9 @@ void SetHitCountColliderState(HitCountCollider* self, s32 state)
     if (self->state == 2) {
         f32 t = g_gameClock[1];
         self->hitsLeft = 3;
-        self->f640 = t;
+        self->markStartTime = t;
     }
-    *(s32*)&self->f670 = 0;
+    *(s32*)&self->stickGain = 0;
     if (state < 4) if (state >= 2) {
         Vec02 q;
         f32 a = ArctangentOfRatio(self->v150.y, self->v150.x);
@@ -439,7 +439,7 @@ void SetHitCountColliderState(HitCountCollider* self, s32 state)
     switch (state) {
     case 0: s2 = self->stateAnims[0]; break;
     case 1: s2 = self->stateAnims[1]; break;
-    case 2: s2 = self->stateAnims[2]; self->f640 = 3.4028235e+38f; break;
+    case 2: s2 = self->stateAnims[2]; self->markStartTime = 3.4028235e+38f; break;
     case 3: s2 = self->stateAnims[3]; break;
     case 4:
         SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x1A);

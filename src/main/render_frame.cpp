@@ -358,7 +358,7 @@ void BeginRenderFrame(void)
     ReleaseFrameNodes(g_buildFrame);
     {
         RenderFrame* slot = g_buildFrame;
-        s32 v = g_camera->f21C;
+        s32 v = g_camera->areaMask;
         slot->flags = 0;
         slot->imageMask = v;
         slot->hasMaskedImages = 0;

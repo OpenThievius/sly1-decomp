@@ -172,7 +172,7 @@ s32 D_0026ABE0[4] = { 0x10, 0, 0, 0 };
 void InitObjectSet(ObjectSet* self)
 {
     InitCollider(self);
-    self->f554 = 1;
+    self->activated = 1;
 }
 
 // Loads the collider and the member group, then walks the children: each child whose class flags
@@ -180,7 +180,7 @@ void InitObjectSet(ObjectSet* self)
 void LoadObjectSet(ObjectSet* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
-    FindOrBuildMemberGroup(&self->f584, self);
+    FindOrBuildMemberGroup(&self->memberGroup, self);
     ListWalkFrame fr(&self->children);
     fr.cursor = (s32)self->children.head + fr.link;
     BaseObject* p = (BaseObject*)self->children.head;
@@ -246,8 +246,8 @@ void UpdateObjectSet(ObjectSet* self, f32 dt)
 {
     Vec02 d;
     UpdateCollider(self, dt);
-    s32 held = self->f59C;
-    self->f59C = 0;
+    s32 held = self->contactLatched;
+    self->contactLatched = 0;
     SwitchedCollider* a = (SwitchedCollider*)GetActiveSwitchedCollider();
     if (a == 0) {
         return;
@@ -298,7 +298,7 @@ void CollectObjectSet(ObjectSet* self)
 // Sends message kind 1, naming this set, to its member group's object, if there is one.
 void NotifyObjectSetTarget(ObjectSet* self)
 {
-    BaseObject* t = (BaseObject*)self->f584;
+    BaseObject* t = (BaseObject*)self->memberGroup;
     if (t != 0) {
         SlotMessage msg;
         msg.kind = 1;
@@ -311,7 +311,7 @@ void NotifyObjectSetTarget(ObjectSet* self)
 s32 GetObjectSetActivationState(ObjectSet* self)
 {
     if (IsObjectAttached(self)) {
-        return (self->f554 != 0) ? 1 : 2;
+        return (self->activated != 0) ? 1 : 2;
     }
     return 0;
 }
@@ -362,7 +362,7 @@ void LatchObjectSetContact(ObjectSet* self, Contact03* elems, s32 idx)
         s32 one = 1;
         ContactEnd03* e = (ContactEnd03*)((u8*)elems + ((one - idx) << 6));
         if (IsObjectDescendantOf(e->part, (BaseObject*)r->collider) != 0) {
-            self->f59C = one;
+            self->contactLatched = one;
         }
     }
 }
@@ -443,8 +443,8 @@ void StartStateWalkerGroup(StateWalkerGroup* self)
     s32 s4 = (g_currentLevelRecord->f448 & self->flagMask) ? 0x22F : 0x22E;
     for (i = 0; i < self->objectCount; i++) {
         e = (StateWalkerObject*)self->objects[i];
-        e->f2D4 = CreateStateWalker((StateGraph*)e->f2D0, e, -1, 0);
-        SetStateWalkerTarget((StateWalker*)e->f2D4, s4);
+        e->walker = CreateStateWalker((StateGraph*)e->stateGraph, e, -1, 0);
+        SetStateWalkerTarget((StateWalker*)e->walker, s4);
     }
     self->walker = CreateStateWalker((StateGraph*)self->graph, self, -1, 0);
     SetStateWalkerTarget((StateWalker*)self->walker, s4);
@@ -657,9 +657,9 @@ void CollectNumberedItem(NumberedItem* self)
         }
         n->p134 = self;
         n->params = &g_numberedItemEffectParams;
-        TransformPointBetweenFrames(self, 0, &((PlacedObject*)self->f5BC)->pos, (Vec02*)&loc);
+        TransformPointBetweenFrames(self, 0, &((PlacedObject*)self->anchorObject)->pos, (Vec02*)&loc);
         n->vt->m00(n, &loc, 1.0f, 0);
-        n->i20 = *(s32*)&self->f5BC;
+        n->i20 = *(s32*)&self->anchorObject;
     } else {
         SetNumberedItemFlag(self);
     }
@@ -1300,7 +1300,7 @@ void InitC71Object(C71* self)
 {
     InitObject(self);
     self->targetId = -1;
-    self->f4C = 3.4028235e+38f;
+    self->maxHeightAbove = 3.4028235e+38f;
 }
 
 // Registers the object and appends it to the world list at 0x1C90.
@@ -1343,7 +1343,7 @@ void InitObjectGatherer(ObjectGatherer* self)
     self->idleTimeMax = 1.0f;
     self->idleTimeMin = 0.5f;
     self->nextSoundTime = RandomGaussian(*(f32*)g_gameTime + 3.0f, 1.0f, 2.5f);
-    self->f664 = -1;
+    self->scatterCount = -1;
 }
 
 // Loads the collider, joins its member group, resolves its links, and gathers the objects with ids
@@ -1721,11 +1721,11 @@ void ChooseObjectGathererCandidate(ObjectGatherer* self)
 void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
         RemoveFromList(&self->world->list1C60, self);
-        ((BaseObject *)self->f5FC)->desc->m03((BaseObject *)self->f5FC);
+        ((BaseObject *)self->companionObject)->desc->m03((BaseObject *)self->companionObject);
     } else {
         Quad4 buf;
         AppendToList(&self->world->list1C60, self);
-        ((BaseObject *)self->f5FC)->desc->m02((BaseObject *)self->f5FC);
+        ((BaseObject *)self->companionObject)->desc->m02((BaseObject *)self->companionObject);
         TransformPointBetweenFrames((PlacedObject*)((GatherCandidate*)self->candidate)->frame, 0,
                       &((GatherCandidate*)self->candidate)->pos, (Vec02*)&buf);
         PlaceColliderClearOfContacts((Collider*)self, (Vec02*)&buf, (Vec02*)&g_unitZVector);
@@ -1755,7 +1755,7 @@ void SetObjectGathererState(ObjectGatherer* self, s32 mode)
         SetObjectGathererSuspended(self, 0);
         self->candidate = 0;
     }
-    ((PlacedObject*)self->f5FC)->visibilityMask = 14;
+    ((PlacedObject*)self->companionObject)->visibilityMask = 14;
     self->modeEndTime = g_gameClock[1];
     switch (mode) {
     case 0:
@@ -1779,7 +1779,7 @@ void SetObjectGathererState(ObjectGatherer* self, s32 mode)
         break;
     case 3:
         StartSoundEffect(0x3A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->f664, self->f668);
+        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->scatterCount, self->scatterHoldsCounts);
         self->desc->m03(self);
         break;
     case 4:

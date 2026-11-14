@@ -1099,9 +1099,9 @@ void UpdateConeVolumeTangents(ConeVolume* self)
     f32 q = Tangent(b * 0.00872664712f);
     self->innerRatioX = q / self->tangentX;
     self->innerRatioY = q / self->tangentY;
-    self->f36C = self->f364 = 1.0f;
+    self->innerRatioYEnd = self->innerRatioXEnd = 1.0f;
     self->innerRatioRoot = Fpu::Sqrt(self->innerRatioX);
-    self->f35C = 1.0f;
+    self->innerRatioRootEnd = 1.0f;
 }
 
 struct ValueListObject;

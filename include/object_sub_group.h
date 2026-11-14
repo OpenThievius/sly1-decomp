@@ -20,7 +20,7 @@ struct ObjectSubGroup : PlacedObject {
     void* f2D4;             // 0x2D4: set means the object has something to do after its children
     s32 exitsLevel;         // 0x2D8
     s32 nearCheck;          // 0x2DC: tested before the player counts as near (func_001F4AE0)
-    s32 f2E0;               // 0x2E0
+    s32 finishesTimedRun;   // 0x2E0
     s32 state;              // 0x2E4: cleared by the load
     f32 stateStartTime;     // 0x2E8
     s32 f2EC;               // 0x2EC: four values func_001E4C48 reads from the stream
@@ -28,10 +28,10 @@ struct ObjectSubGroup : PlacedObject {
     s32 f2F4;               // 0x2F4
     void* faceTree;         // 0x2F8: and the links (the face tree)
     KeyedEntry* levelEntry; // 0x2FC: the level entry it shows (GetEntryIdByKey)
-    s32 f300;               // 0x300
-    s32 f304;               // 0x304
-    s32 f308;               // 0x308
-    s32 f30C;               // 0x30C
+    s32 defaultFadeValue;   // 0x300
+    s32 flagSource;         // 0x304: which entry word holds the flag
+    s32 flaggedFadeText;    // 0x308
+    s32 flaggedFadeValue;   // 0x30C
     s32 count;              // 0x310: how many children
     BaseObject** items;            // 0x314: the children, each created by func_0011E580
     s32 exitTarget;         // 0x318

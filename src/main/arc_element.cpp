@@ -210,20 +210,20 @@ void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
 {
     HandleSwitchedColliderActivation(self, p);
     if (p != 0) {
-        g_camera->ctl460.f20 = 100.0f;
+        g_camera->ctl460.zoomDivisor = 100.0f;
         PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
         SetTextPanelState(&g_typedTextCaptionBox, 5);
         g_camera->ctl460.anchorObject = (void*)self->f61C;
         if (self->f630 != 0) {
             *(Quad16*)g_camera->rotation = *(Quad16*)&self->m110.r[0];
-            *(Quad16*)g_camera->f90 = *(Quad16*)&self->m110.r[1];
-            *(Quad16*)g_camera->fA0 = *(Quad16*)&self->m110.r[2];
+            *(Quad16*)g_camera->rotationRow1 = *(Quad16*)&self->m110.r[1];
+            *(Quad16*)g_camera->rotationRow2 = *(Quad16*)&self->m110.r[2];
         }
         PushCameraController(g_camera, 6, &g_camera->ctl460, self, 0);
         PushStackValue(&g_camera->ctl460, self->f644);
         SetStateWalkerTarget(self->stateWalker, 0x359);
     } else {
-        g_camera->ctl460.f20 = 10.0f;
+        g_camera->ctl460.zoomDivisor = 10.0f;
         PopStackElement((ElementStack*)g_elementStack);
         RemoveCameraControllers(g_camera, 0xF, 6, &g_camera->ctl460, self, 0);
         PopStackValue(&g_camera->ctl460);
@@ -1116,10 +1116,10 @@ void QueueArcDraw(T217D_3F0* self)
                 dist = -dist;
             }
             cam = g_camera;
-            Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->position).q, Vu0::MulX(Vu0::Q(cam->fA0), Vu0::Scalar(height)));
-            Vu0::Q(aim) = Vu0::Add(Vu0::Q(aim), Vu0::MulX(Vu0::Q(cam->f90), Vu0::Scalar(dist)));
+            Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->position).q, Vu0::MulX(Vu0::Q(cam->rotationRow2), Vu0::Scalar(height)));
+            Vu0::Q(aim) = Vu0::Add(Vu0::Q(aim), Vu0::MulX(Vu0::Q(cam->rotationRow1), Vu0::Scalar(dist)));
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(aim), Vu0::Q(world));
-            BuildBasisFromXAndZHint(&dir, (const Vec02*)&cam->fA0, &basis);
+            BuildBasisFromXAndZHint(&dir, (const Vec02*)&cam->rotationRow2, &basis);
             BuildMatrixFromRotationAndTranslation(&world, &basis, (Mat4A*)&place);
             Vec02 pos;
             Vu0::Q(pos) = Vu0::Add(Vu0::Q(aim), Vu0::Rotate(*(Mat02*)&g_camera->rotation, Vu0::Q(((ArcHeld*)self->current)->offset)));

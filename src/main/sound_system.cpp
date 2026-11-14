@@ -781,7 +781,7 @@ void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f3
             f32 away = b - r;
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(*(Vec02*)pos), Vu0::Q(*(Vec02*)cam->position));
             Vu0::Q(d) = Vu0::DivX(Vu0::Q(d), Vu0::Length(Vu0::Q(d)));
-            f32 across = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)cam->f90)));
+            f32 across = Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)cam->rotationRow1)));
             f32 ratio = away / range;
             *pan = -across * 0.7f * (1.0f - ratio);
             *volume = a * ratio;

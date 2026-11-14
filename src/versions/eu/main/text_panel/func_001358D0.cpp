@@ -26,7 +26,7 @@ void CollectPanelEntriesOfClass(PanelMarkers_1358D0_eu* self, s32 kind, void* a2
         e = &entries[i];
         e->obj = objs[i];
         ((void (*)(void*, PanelEntryPosition*, f32*))a2)(e->obj, &e->v, &e->radius);
-        e->key = Vu0::Distance(e->v, *(PanelEntryPosition*)g_camera->f40) - e->radius;
+        e->key = Vu0::Distance(e->v, *(PanelEntryPosition*)g_camera->position) - e->radius;
     }
     HeapSortRecords(entries, n, 0x20, kind == 0x2E ? CompareEntriesFlaggedLast : CompareEntriesByAttachedKey);
     s32 mayStart = 1;
@@ -44,7 +44,7 @@ void CollectPanelEntriesOfClass(PanelMarkers_1358D0_eu* self, s32 kind, void* a2
         }
         CameraHeading* cam = g_camera;
         u128 ones = Vu0::Ones();
-        Vu0::Q(d) = Vu0::Sub(Vu0::Q(e->v), Vu0::Q(cam->f40));
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(e->v), Vu0::Q(cam->position));
         u32 signs = Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), Vu0::Q(d), ones, Vu0::ScalarAt(e->radius)) ^ 0xF0;
         s32 visible = signs == 0;
         if (want && !visible) {
@@ -53,13 +53,13 @@ void CollectPanelEntriesOfClass(PanelMarkers_1358D0_eu* self, s32 kind, void* a2
             f32 rise = ArctangentOfRatio(d.z, Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(v, v))));
             yaw = WrapAngle(yaw - g_camera->heading);
             f32 pitch = WrapAngle(rise - g_camera->pitch);
-            if (g_camera->f1C4 * (g_camera->f1E0 * 0.45f) < yaw) {
+            if (g_camera->zoom * (g_camera->aspectScale * 0.45f) < yaw) {
                 self->blockA[0] = 1;
-            } else if (yaw < g_camera->f1C4 * (g_camera->f1E0 * -0.45f)) {
+            } else if (yaw < g_camera->zoom * (g_camera->aspectScale * -0.45f)) {
                 self->blockA[1] = 1;
-            } else if (g_camera->f1C4 * 0.45f < pitch) {
+            } else if (g_camera->zoom * 0.45f < pitch) {
                 self->blockA[2] = 1;
-            } else if (pitch < g_camera->f1C4 * -0.45f) {
+            } else if (pitch < g_camera->zoom * -0.45f) {
                 self->blockA[3] = 1;
             }
         }

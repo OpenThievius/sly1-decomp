@@ -52,19 +52,19 @@ struct AnimTiming { u8 pad[8]; f32 f8; };
 struct AnimTimingRef { u8 pad[8]; AnimTiming* p8; };
 struct BlendAnimationView {
     u8 pad0[0x34];
-    f32 f34;                // 0x34
-    s32 f38;                // 0x38
-    u8* f3C;                // 0x3C
+    f32 blendedDuration;    // 0x34: the duration of the blend
+    s32 sourceCount;        // 0x38: number of entries of the table at f3C
+    u8* sourceTable;        // 0x3C: the table of BlendSourceEntry, 0x1C bytes each
     u8 pad40[0x6C - 0x40];
-    void* f6C;              // 0x6C
+    void* playerList;       // 0x6C: head of the list of playing animation players
     u8 pad70[0x78 - 0x70];
     s32 f78;                // 0x78
     f32 f7C;                // 0x7C: a scale of the poses (func_0012CD78, with f98)
     u8 pad80[0x98 - 0x80];
     f32 f98;                // 0x98
     u8 pad9C[0xB8 - 0x9C];
-    void* fB8;              // 0xB8
-    s32 fBC;                // 0xBC
+    void* itemWeights;      // 0xB8: the item weights buffer
+    s32 sequenceCount;      // 0xBC: number of key sequences of pC0
     AnimTimingRef* pC0;              // 0xC0
 };
 

@@ -649,7 +649,7 @@ Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
             if (ComputeLedgeOffsetForContact(self, other, &c->end[1 - side].point, c->kind, (void*)extra, &tmp) == 0) {
                 continue;
             }
-            if ((self->f4B8 & 2) == 0 || (c->end[1 - side].body->f4B8 & 2) == 0) {
+            if ((self->stateBits & 2) == 0 || (c->end[1 - side].body->stateBits & 2) == 0) {
                 NotifyContactEnds(self->world, 1, &c);
             }
             if (0.0f < g_contactSideSigns[side] * c->relativeVelocity.z) {
@@ -747,7 +747,7 @@ void CollectPlayerHoldQueries(Player* self)
     Class75Object* n;
     s32 i;
 
-    if (!IsObjectAttached((BaseObject*)self->f25D8[3])) {
+    if (!IsObjectAttached((BaseObject*)self->slotObjects[3])) {
         return;
     }
     RecordCameraTimestamp(g_camera);

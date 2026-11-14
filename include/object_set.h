@@ -14,18 +14,18 @@
 
 struct ObjectSet : Collider {
     f32 reachBonus;         // 0x550: added to the active collider's reach (func_00198BD8)
-    s32 f554;               // 0x554: slot 0 (func_00198980) sets 1; func_00198E98 (slot 72) tests it
+    s32 activated;          // 0x554: slot 0 (func_00198980) sets 1; func_00198E98 (slot 72) tests it
     s32 f558;               // 0x558: func_00198B28 (slot 16) sets 1 when a kept object answers
     s32 n55C;               // 0x55C: how many ids follow; func_00198ED8 appends at keys560[n55C++]
     s32 keys560[4];         // 0x560: the ids func_00198A88 (slot 15) looks up in the world
     s32 count570;           // 0x570: how many objects were found
     void* found574[4];      // 0x574: the found objects (slots 15, 16, 73, 13: func_00198EF8 compares
                             //        a message's key with each)
-    void* f584;             // 0x584: the fifth found object (slot 74 sends it a message); its
+    void* memberGroup;      // 0x584: the fifth found object (slot 74 sends it a message); its
                             //        address is the record func_001989B0 loads (func_00159478)
     s32 marks588[4];        // 0x588: func_00198EF8 (slot 13) marks the found objects it was told of
     s32 done598;            // 0x598: set with it
-    s32 f59C;               // 0x59C: func_00199000 (slot 60)
+    s32 contactLatched;     // 0x59C: func_00199000 (slot 60)
 };
 
 typedef char check_ObjectSet[sizeof(ObjectSet) == 0x5A0 ? 1 : -1];
@@ -45,7 +45,7 @@ struct NumberedItem : ObjectSet {
     void* keyframes;        // 0x5B0: ... in this 0x80-byte array
     f32 spinSpeed;          // 0x5B4: func_00199500
     f32 spinAngle;          // 0x5B8: the angle round the z axis
-    u8* f5BC;               // 0x5BC: the object func_001999D0 (slot 73) was made for
+    u8* anchorObject;       // 0x5BC: the object func_001999D0 (slot 73) was made for
 };
 
 typedef char check_NumberedItem[sizeof(NumberedItem) == 0x5C0 ? 1 : -1];

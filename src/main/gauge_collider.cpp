@@ -625,7 +625,7 @@ s32 AcceptColliderOfOtherRoot(void* root, Collider* self);
 extern const Vec02 g_unitZVector;
 extern const Vec02 g_unitXVector;
 
-// The record PlacedObject::f278 points at (a swinging part's oscillator): its oscillator at 0xC.
+// The record PlacedObject::oscillatorBlock points at (a swinging part's oscillator): its oscillator at 0xC.
 struct OscillatorBlock { u8 pad00[0x0C]; Oscillator* oscillator; };
 
 // Per-frame update of the gauge collider: after the base update it sets top speed and push strength
@@ -671,11 +671,11 @@ void UpdateGaugeCollider(GaugeCollider* self, f32 dt)
         Collider* hit = FindNearestSpanObject(1, &hi, &lo, n, list, &span);
         if (hit != 0) {
             *(Quad16*)&dir = span.q[2];
-            if (IsObjectOfKind(hit, 0x1F) != 0 && ((PlacedObject*)hit)->f278 != 0) {
+            if (IsObjectOfKind(hit, 0x1F) != 0 && ((PlacedObject*)hit)->oscillatorBlock != 0) {
                 Vec02 pair[2];
                 Vec02 in = dir;
                 BuildPerpendicularPair(&in, pair, &g_unitXVector, &g_unitZVector);
-                ComputeOscillatorDisplacement(((OscillatorBlock*)((PlacedObject*)hit)->f278)->oscillator, 50.0f, (Vec02*)&span, pair, 0, pair, 0);
+                ComputeOscillatorDisplacement(((OscillatorBlock*)((PlacedObject*)hit)->oscillatorBlock)->oscillator, 50.0f, (Vec02*)&span, pair, 0, pair, 0);
                 Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(pair[0]), Vu0::Q(pair[1])), Vu0::Q(g_unitZVector)));
             }
             if (!(dir.z < 0.7f)) {
@@ -982,12 +982,12 @@ void ApplyGaugeColliderAttachedSetContact(GaugeCollider* self, AttachedSet* set,
     Vec02 normal;
     Vec02 gains;
     f32 depth = MeasureAttachedSetContactDepth(set, (TurningCollider*)self, &point, &normal);
-    if (set->f278 != 0) {
+    if (set->oscillatorBlock != 0) {
         Vec02 pair[2];
         Vec02 n;
         n = normal;
         BuildPerpendicularPair(&n, pair, &g_unitXVector, &g_unitZVector);
-        ComputeOscillatorDisplacement(((OscillatorBlock*)set->f278)->oscillator, 50.0f, &point, pair, 0, pair, 0);
+        ComputeOscillatorDisplacement(((OscillatorBlock*)set->oscillatorBlock)->oscillator, 50.0f, &point, pair, 0, pair, 0);
         Vu0::Set(normal, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(pair[0]), Vu0::Q(pair[1])), Vu0::Q(g_unitZVector)));
     }
     f32 push = self->pushFactor * set->pushFactor;

@@ -27,15 +27,15 @@ struct RangeRecord {
     f32 halfLength;         // 0x60: half its length (func_001B1BF8)
     u8 pad64[0x70 - 0x64];
     u8 viewProjection[0x40]; // 0x70: the matrix BuildRangeRecordPacket builds and copies into the packet
-    s32 fB0;                // 0xB0: -1 at set-up; func_00124A48, func_001293D8
-    void* fB4;              // 0xB4: func_00124A48
+    s32 textureObjectId;    // 0xB0: -1 at set-up; func_00124A48, func_001293D8
+    void* textureObject;    // 0xB4: func_00124A48
     RangeRecord* next;      // 0xB8: in World::list1C00 (func_001B2790 walks it)
     u8 padBC[0xC0 - 0xBC];
     s32 packetValid;        // 0xC0: cleared by func_001B1BF0 whenever a value above changes
     u8 padC4[0xD0 - 0xC4];
     u8 packetBlock[0x20];   // 0xD0: the packet buffer memory the record's packet is built in
     u8 padF0[0x2D0 - 0xF0];
-    u8* f2D0;               // 0x2D0: func_001B1B38
+    u8* meshQueueEntry;     // 0x2D0: func_001B1B38
     u8 pad2D4[0x2E0 - 0x2D4];
 };
 

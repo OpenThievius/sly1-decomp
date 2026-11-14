@@ -281,7 +281,7 @@ void PostLoadTimedGroup(TimedGroup* self)
                     TimedGroupChild* g = (TimedGroupChild*)((u8*)self + n * 0x50 + 0x5E0);
                     g->child = node;
                     g->riseScale = curve->lengths[curve->count - 1];
-                    s32* widest = &self->fAE0;
+                    s32* widest = &self->widestCurveCount;
                     s32 w = *widest;
                     if (!(curve->count < w)) {
                         w = curve->count;
@@ -503,19 +503,19 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
     if (st == 8 || st < 0) return;
     void* fp;
     if (st < 4) {
-        fp = self->fAE4;
+        fp = self->firstBeamObject;
     } else if (st < 8) {
-        fp = self->fAE8;
+        fp = self->secondBeamObject;
     } else {
         return;
     }
     if (fp == 0) {
-        fp = (void*)self->world->f1D14;
+        fp = (void*)self->world->defaultBeamObject;
         if (fp == 0) return;
     }
     s32 i = 0;
     PushBackMemoryMark();
-    Vec02* buf = AllocateBackMemory(self->fAE0 << 4);
+    Vec02* buf = AllocateBackMemory(self->widestCurveCount << 4);
     while (i < self->groupCount) {
         TimedGroupChild* g = &self->groups[i];
         f32 acc = 0.0f;
@@ -523,7 +523,7 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
         s32 n = src->count;
         f32 total = ComputeTimedGroupRamp(self, g);
         if (g->fC != 0) {
-            s32 lim = g->f20 + 2;
+            s32 lim = g->hitSegment + 2;
             if (lim < n) n = lim;
         }
         s32 next = i + 1;
@@ -532,7 +532,7 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
             TransformPointBetweenFrames(self, 0, &src->points[k], &buf[k]);
         }
         if (g->fC != 0) {
-            buf[g->f20 + 1] = g->f10;
+            buf[g->hitSegment + 1] = g->hitPoint;
         }
         for (k = 0; k < n - 1; k++) {
             u128 d = Vu0::Sub(Vu0::Q(buf[k]), Vu0::Q(buf[k + 1]));
@@ -606,7 +606,7 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
     s32 i = 0;
     self->nextStepTime = g_gameTime[0] + 0.033333335f;
     PushBackMemoryMark();
-    Vec02* pts = AllocateBackMemory(self->fAE0 << 4);
+    Vec02* pts = AllocateBackMemory(self->widestCurveCount << 4);
     while (i < self->groupCount) {
         TimedGroupChild* g = &self->groups[i];
         f32 acc = 0.0f;
@@ -652,8 +652,8 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
             if (hit != 0) {
                 s32 near = acc + Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of(p0), Vu0::Vec::Of(span.q[0])))) < total;
                 if (near) {
-                    Vu0::Q(g->f10) = Vu0::Q(span.q[0]);
-                    g->f20 = k;
+                    Vu0::Q(g->hitPoint) = Vu0::Q(span.q[0]);
+                    g->hitSegment = k;
                     g->hit = hit;
                     if (*state < 8) {
                         active = *state >= 4;
@@ -858,7 +858,7 @@ void SetupSequencedObject(SequencedObject* self)
         self->phaseObject = self;
     }
     if (self->beamObject == 0) {
-        self->beamObject = self->world->f1D14;
+        self->beamObject = self->world->defaultBeamObject;
     }
     if (self->aimAttachment != 0) {
         ((Record200*)self->aimAttachment)->f44 = 0;

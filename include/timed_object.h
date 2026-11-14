@@ -73,8 +73,8 @@ struct TimedGroupChild {
         s32 fC; // 0xC
         Collider* hit;  // 0xC: the object the group's line hit (UpdateTimedGroup)
     };
-    Vec02 f10; // 0x10
-    s32 f20; // 0x20
+    Vec02 hitPoint; // 0x10: where the group's line hit an object
+    s32 hitSegment; // 0x20: index of the line segment that was hit
     s32 count;              // 0x24
     TimedGroupEntry items[5];       // 0x28
 };
@@ -86,9 +86,9 @@ struct TimedGroup : TimedObject {
     s32 groupCount;         // 0x5D4
     u8 pad5D8[0x5E0 - 0x5D8];
     TimedGroupChild groups[16];     // 0x5E0
-    s32 fAE0; // 0xAE0
-    void* fAE4; // 0xAE4
-    void* fAE8; // 0xAE8
+    s32 widestCurveCount; // 0xAE0
+    void* firstBeamObject; // 0xAE4: the beam object drawn in states 0 to 3
+    void* secondBeamObject; // 0xAE8: the beam object drawn in states 4 to 7
     f32 repeatEndDuration;  // 0xAEC
     TimedGroup* listNext;          // 0xAF0: the link in the world's list at +0x1CA8
     u8 padAF4[0xAF8 - 0xAF4];

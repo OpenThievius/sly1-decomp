@@ -62,7 +62,7 @@ struct ChildGroupObject : Collider {
     Vec02 v660;             // 0x660: the object's v160
     Collider* obj670;       // 0x670: the object it was given
     s32 announceBlast;      // 0x674: 1 at set-up
-    s32 f678;               // 0x678: 1 at set-up
+    s32 selectable;         // 0x678: 1 at set-up
     s32 ownerMessageMode;   // 0x67C: 0 at set-up
     void* slot;             // 0x680: a copy of the other's (func_0018D568, 0x24 bytes; slot 9)
     void* active;           // 0x684

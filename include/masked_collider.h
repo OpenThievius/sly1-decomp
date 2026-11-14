@@ -46,7 +46,7 @@ struct MaskedCollider : Collider {
     BaseObject* receiver;   // 0x618: the object it found (slot 10, func_00159478 when f614 is -1)
     s32 radiusKind;         // 0x61C: which radius slot 72 sends (0 radius3CC or f2A4, 1 radius3D0 or f2A8)
     f32 f620;               // 0x620: sent to f618 with the radius (slot 72)
-    f32 f624;               // 0x624: 1.0 at set-up
+    f32 impulseScale;       // 0x624: 1.0 at set-up
     f32 scaleMin;           // 0x628: 0.8 at set-up
     f32 scaleMax;           // 0x62C: 1.2 at set-up
     f32 spread;             // 0x630: the random speed slot 72 gives each released object
@@ -64,10 +64,10 @@ struct MaskedCollider : Collider {
     s32 hold;               // 0x680: func_0013D820 (an id of the table at D_00261420 is kept at 0x688)
     s32 quiet;              // 0x684: set, slot 72 only marks it done
     s32 id688;              // 0x688: func_00140FF8 at set-up; slot 9 keeps it
-    s32 f68C;               // 0x68C: 1 at set-up
+    s32 hitLimit;           // 0x68C: 1 at set-up
     s32 hitCount;           // 0x690: the hits that reached the script (slot 48 counts it up against f68C)
     u8 pad694[0x698 - 0x694];
-    s32 f698;               // 0x698: -1 in class 0x21
+    s32 scatterCount;       // 0x698: -1 in class 0x21
     u8 pad69C[0x6A0 - 0x69C];
     Vec02 point6A0;         // 0x6A0: where slot 72 scatters, in its own frame
     s32 scatter6B0;         // 0x6B0: what it scatters (func_00152010)

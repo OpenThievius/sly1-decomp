@@ -169,7 +169,7 @@ void ApplyLinkConstraint(PlacedObject* self)
     typedef Vu0::Vec Vec;
     Rec2195_224* rec = self->linkRecord;
     s32 flags = rec->linkFlags;
-    PlacedObject* a = (PlacedObject*)rec->f80;
+    PlacedObject* a = (PlacedObject*)rec->linkParent;
     PlacedObject* b = (PlacedObject*)rec->p84;
     PlacedObject* top = (PlacedObject*)rec->p88;
     if (flags & 2) {
@@ -180,7 +180,7 @@ void ApplyLinkConstraint(PlacedObject* self)
         f32 d = Vu0::ToFloatMoved(Vu0::Length(Vec::Of(diff)));
         if (reach < d) {
             *(Vec*)&diff = Vu0::MulX(Vec::Of(diff), Vec::Scalar(reach / d));
-            *(Vec*)&to = Vu0::Add(Vec::Of(((PlacedObject*)rec->f80)->v140), Vec::Of(diff));
+            *(Vec*)&to = Vu0::Add(Vec::Of(((PlacedObject*)rec->linkParent)->v140), Vec::Of(diff));
             SetPlacedObjectVelocity(self, &g_zeroVector);
             TransformPointBetweenFrames(0, (PlacedObject*)self->parent, &to, &to);
             self->desc02()->m1D(self, &to);

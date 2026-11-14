@@ -312,7 +312,7 @@ void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask)
 {
     Collider* n = owner->root03();
     if (n) {
-        n->f4B8 &= ~mask;
+        n->stateBits &= ~mask;
     }
 }
 
@@ -448,7 +448,7 @@ void UpdateWorldContacts(World* w, s32 arg)
 // the two classes' method 38 says the pair is to be handled.
 void InitContactPairFlags(World* self, Collider* obj)
 {
-    obj->f4B8 = 0;
+    obj->stateBits = 0;
     Contacts03* n = self->usedTables;
     while (n != 0) {
         if (n->owner != obj) {

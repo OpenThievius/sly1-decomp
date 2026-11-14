@@ -51,11 +51,11 @@ struct OnOffObject : PlacedObject {
     };
     u8 f2E8[0x2F0 - 0x2E8]; // 0x2E8
     Block63 block2F0;       // 0x2F0
-    s32 f380;               // 0x380
+    s32 usesCylindricalFrame; // 0x380: nonzero: the camera frame is tracked as an angle
     s32 f384;               // 0x384
-    s32 f388;               // 0x388
-    s32 f38C;               // 0x38C
-    s32 f390;               // 0x390
+    s32 controllerKindBase; // 0x388: camera controller kind, plus 2
+    s32 orbitsPoint;        // 0x38C: nonzero: orbit the point v400 when there is no list
+    s32 frameAngleStepLimit; // 0x390: largest angle step per update (read as a float)
     s32 onOffState;         // 0x394: the current state (0 off, 1 on)
     s32 forcedState;        // 0x398: -1 at construction
     f32 stateChangeTime;    // 0x39C: the game time of the last state change
@@ -71,16 +71,16 @@ struct OnOffObject : PlacedObject {
     Vec02 v400;             // 0x400: the point the angle is measured from
     f32 orbitRadius;        // 0x410: scales the angle
     s32 i414;               // 0x414: 7 with a list, 5 without
-    s32 f418;               // 0x418
-    s32 f41C;               // 0x41C
+    s32 holdEnabled;        // 0x418: passed on as the hold branch flag
+    s32 limitEnabled;       // 0x41C: passed on as the limit branch flag
     f32 holdRampTime;       // 0x420: seconds the hold weight takes to reach full
     f32 holdSpeed;          // 0x424: the speed the hold branch asks for
     f32 limitRampTime;      // 0x428: ramp of the limit branch
     f32 limitSpeed;         // 0x42C: the speed the limit branch asks for
-    s32 f430;               // 0x430: -1 at construction
+    s32 axisMode;           // 0x430: -1 at construction
     u8 pad434[0x440 - 0x434];
-    s32 f440;               // 0x440
-    PlacedObject* f444;     // 0x444
+    s32 skipsGeometryPush;  // 0x440: nonzero: the camera is not pushed out of geometry
+    PlacedObject* lookAtObject; // 0x444: an object the camera keeps its view toward
     u8 pad448[0x450 - 0x448];
     Quad63 quad450;         // 0x450
     Pack63 pack460;         // 0x460

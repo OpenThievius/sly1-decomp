@@ -108,10 +108,10 @@ struct CyclerEventMessage {
     Quad16 target;
 };
 struct __attribute__((aligned(16))) GroupForwardMessage {
-    s32 f0;
+    s32 kind;
     u8 pad0[0x10 - 0x4];
-    Quad16 f10;
-    Quad16 f20;
+    Quad16 target;
+    Quad16 origin;
     u8 pad1[0x50 - 0x30];
 };
 
@@ -190,7 +190,7 @@ void InitObjectCycler(ObjectCycler* self)
     self->p660.pk = g_cyclerWrapDelayRange;
     self->p670.pk = g_cyclerMessageIntervalRange;
     self->indexStep = 1;
-    self->f690 = -1;
+    self->scatterCount = -1;
     AppendToList(&self->world->list1C48, self);
 }
 
@@ -502,9 +502,9 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
         }
         if (self->group != 0) {
             GroupForwardMessage loc;
-            loc.f0 = 6;
-            loc.f20 = r->origin;
-            loc.f10 = r->target;
+            loc.kind = 6;
+            loc.origin = r->origin;
+            loc.target = r->target;
             self->group->desc->m1B(self->group, &loc);
         }
     }
@@ -584,7 +584,7 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
     }
     case 1:
         StartSoundEffect(0x3A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->f690, self->f694);
+        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->scatterCount, self->scatterSkipsCountdown);
         self->stateEnd += 2.0f;
         break;
     case 2:
@@ -620,13 +620,13 @@ void SendObjectCyclerMessage(ObjectCycler* self)
 {
     GroupForwardMessage loc;
     if (self->receiver678 && self->nextMessageTime <= g_gameClock[1]) {
-        loc.f0 = 6;
+        loc.kind = 6;
         if (self->source67C)
-            ConvertPositionToWorld(self->source67C, (Vec02*)&loc.f20);
+            ConvertPositionToWorld(self->source67C, (Vec02*)&loc.origin);
         else
-            loc.f20 = *(Quad16*)&self->v140;
-        Vu0::Q(loc.f10) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-1.0f));
-        ((f32*)&loc.f10)[2] = 0.0f;
+            loc.origin = *(Quad16*)&self->v140;
+        Vu0::Q(loc.target) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-1.0f));
+        ((f32*)&loc.target)[2] = 0.0f;
         self->receiver678->desc->m1B(self->receiver678, &loc);
         self->nextMessageTime = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
     }

@@ -70,7 +70,7 @@ struct ContactEnd03 {
 struct ColliderSpan {
     Quad16 q[4];            // 0x00
     f32 time[2];            // 0x40: entry, exit
-    s32 f48;                // 0x48
+    s32 spanKind;           // 0x48
     s32 group;              // 0x4C: the collider's group the span is in, negative for none (func_00143BE0)
     union {
         struct {
@@ -240,7 +240,7 @@ struct Collider : PlacedObject {
 
     Attach03* attached;     // 0x4B0
     Contact03* contacts4B4; // 0x4B4: a body's contacts outside its table's rows (func_001BD558)
-    s32 f4B8;               // 0x4B8: cleared by func_001B94F0 (on the body) and slot 9
+    s32 stateBits;          // 0x4B8: cleared by func_001B94F0 (on the body) and slot 9
     s32 solverIndex;        // 0x4BC: -1 at set-up
     s32 index;              // 0x4C0: -1 at set-up; the part's number (slot 53)
     u8 pad4C4[0x4D0 - 0x4C4];

@@ -1209,7 +1209,7 @@ void AimCompanionAgentPose(CompanionAgent *self) {
         f = 0.1f;
         break;
     }
-    ((ScalingVolume*)self->companion)->f2F0 = f;
+    ((ScalingVolume*)self->companion)->targetScale = f;
 }
 
 // After the base state entry: state 6 resets the clip-end count, state 0xB tells the companion

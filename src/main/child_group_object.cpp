@@ -76,7 +76,7 @@ void InitChildGroupObject(ChildGroupObject* self)
     self->spinCurve = *(Quad3B*)&g_childGroupSpreadCurve;
     self->spinRange = *(Pair3B*)&g_childGroupSpreadRange;
     self->announceBlast = 1;
-    self->f678 = 1;
+    self->selectable = 1;
     self->ownerMessageMode = 0;
 }
 
@@ -195,7 +195,7 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self)
     }
     self->entryCount = 0;
     for (Class75Object* n = (Class75Object*)g_class75List.head; n != 0; n = *(Class75Object**)&n->link) {
-        if (n->f90 == 0) {
+        if (n->enabled == 0) {
             continue;
         }
         if ((n->count & 0x10) == 0) {

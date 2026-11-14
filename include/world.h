@@ -34,9 +34,9 @@ struct ActorVtbl6C {
 struct Actor6C {
     ActorVtbl6C* vtable;    // 0x00
     u8 pad4[0x1C - 0x4];
-    void* f1C;              // 0x1C
+    void* nextSibling;      // 0x1C: the next object of the same parent
     u8 pad20[0x34 - 0x20];
-    void* f34;              // 0x34
+    void* firstChild;       // 0x34: the first child
     u8 pad38[0x228 - 0x38];
     s32 tries;              // 0x228: how often func_00129D70 failed it
     u8 pad22C[0x30C];
@@ -76,7 +76,7 @@ struct World : BaseObject {
     ActorList6C list6C;     // 0x6C: the objects updated every frame
     List01 list78;          // 0x78: the placed objects without a parent that have +0x294 set
     List01 hashLists[0x200]; // 0x84: the 0x200 hash lists (link offset 0xC, InitWorldHashLists)
-    void* f1884[0x95];      // 0x1884: the objects by id, chained at BaseObject::nextById (func_0015A4F0)
+    void* objectsById[0x95]; // 0x1884: the objects by id, chained at BaseObject::nextById (func_0015A4F0)
     void* buf1AD8;          // 0x1AD8: 0x4800 bytes
     void* buf1ADC;          // 0x1ADC: 0x10000 bytes, a byte for each pair of contact tables (func_001DC828)
     Contacts03* tables;     // 0x1AE0: the bodies' contact tables (func_001DC828 numbers one by its place)
@@ -105,7 +105,7 @@ struct World : BaseObject {
     union {
         List01 list1B70;    // 0x1B70: the second list of animation players (link offset 0x34)
         struct {
-            void* f1B70;    // 0x1B70
+            void* listedAnimationPlayers; // 0x1B70: the animation players of listed objects
             s32 f1B74;      // 0x1B74
             s32 f1B78;      // 0x1B78
         };
@@ -127,7 +127,7 @@ struct World : BaseObject {
     union {
         List01 list1C24;    // 0x1C24: the nodes of objects on the world clock
         struct {
-            u8* f1C24;      // 0x1C24
+            u8* worldClockNodes; // 0x1C24
             s32 f1C28;      // 0x1C28
             s32 f1C2C;      // 0x1C2C
         };
@@ -135,7 +135,7 @@ struct World : BaseObject {
     union {
         List01 list1C30;    // 0x1C30: the nodes of objects on the frame step clock
         struct {
-            void* f1C30;    // 0x1C30
+            void* stepClockNodes; // 0x1C30
             s32 f1C34;      // 0x1C34
             s32 f1C38;      // 0x1C38
         };
@@ -159,11 +159,11 @@ struct World : BaseObject {
         BaseObject* slot1CE8[31];  // 0x1CE8: objects by key, at the index func_0011ECA0 gives (func_0011ECB8)
         struct {
             u8 pad1CE8[0x1D14 - 0x1CE8];
-            s32 f1D14;      // 0x1D14: class 0x32's default for its +0x5D4 (func_001B04D0)
+            s32 defaultBeamObject; // 0x1D14: class 0x32's default for its +0x5D4 (func_001B04D0)
             u8 pad1D18[0x1D28 - 0x1D18];
             s32 f1D28;      // 0x1D28
             u8 pad1D2C[0x1D60 - 0x1D2C];
-            BaseObject* f1D60;     // 0x1D60: told (slot 27) when a 0x55-family object ends
+            BaseObject* endListener; // 0x1D60: told (slot 27) when a 0x55-family object ends
         };
     };
     union {
@@ -175,8 +175,8 @@ struct World : BaseObject {
         };
         Rgba4 color1D64;    // 0x1D64: the colour the screen is filled with at load
     };
-    f32 f1D68;              // 0x1D68
-    f32 f1D6C;              // 0x1D6C
+    f32 lightingParamB;     // 0x1D68
+    f32 lightingParamA;     // 0x1D6C
     s32 soundBank;          // 0x1D70: -1
     KeyRecord* stagedBank;  // 0x1D74: the staged sound bank (RequestStagedBank, PlayStagedBank)
     s32 volumeChannel2On;   // 0x1D78: 0 silences volume channel 2 at load (func_001DCEA0)
@@ -201,7 +201,7 @@ struct World : BaseObject {
     u8 pad1F40[0x2300 - 0x1F40];
     s32 count2300;          // 0x2300: numbers class 0x2E's objects (func_001993F0)
     s32 count2304;          // 0x2304: numbers class 0x38's objects (func_001411A8)
-    f32 f2308;              // 0x2308
+    f32 deadlineTime;       // 0x2308: the game time the timer notifier waits for
     f32 timerDuration;      // 0x230C
     void* commentaryRecord; // 0x2310
     void* creditsText;      // 0x2314
@@ -213,7 +213,7 @@ struct World : BaseObject {
     s32 channel2Count;      // 0x2348
     f32 value;              // 0x234C: the value that approaches valueTarget
     f32 valueTarget;        // 0x2350
-    s32 f2354;              // 0x2354
+    s32 scatterCountEnabled; // 0x2354
     s32 f2358;              // 0x2358: 1 after func_001EBEB0 (class 0x13)
     s32 flagBits;           // 0x235C
 };

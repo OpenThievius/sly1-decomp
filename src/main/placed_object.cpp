@@ -559,7 +559,7 @@ struct SoundChoice {
     s32 nearRange;
     s32 farRange;
     f32 pitch;
-    f32 f20;
+    f32 startParam;
     f32 baseVolume;
 };
 
@@ -1217,7 +1217,7 @@ void RegisterPlacedObject(PlacedObject* self)
             AppendToList((List01*)&ctx->list60, self);
             if (self->desc->flags & 2) AppendToList((List01*)&ctx->list6C, self);
             s32 n = self->count6C;
-            self->f54 = self;
+            self->linkListOwner = self;
             self->list60.tail = self;
             n--;
             self->list60.head = self;
@@ -1279,8 +1279,8 @@ void UnregisterPlacedObject(PlacedObject* self)
                     RemoveFromList((List01*)&s1->list6C, self);
                 }
             }
-            DissolveObjectLinkList(s1, (PlacedObject*)self->f54);
-            self->f54 = 0;
+            DissolveObjectLinkList(s1, (PlacedObject*)self->linkListOwner);
+            self->linkListOwner = 0;
             ClearList(&self->list60);
         }
     }
@@ -1420,8 +1420,8 @@ void PostLoadPlacedObject(PlacedObject* self)
     ResolveFollowRecordObjects(self);
     SavePlacedObjectInitialFrame(self);
     T2195_790* sub = self->aimAttachment;
-    if (sub != 0 && sub->f20 != -1) {
-        void* v = FindFirstObjectByIdMode4(self->world, sub->f20, self);
+    if (sub != 0 && sub->targetId != -1) {
+        void* v = FindFirstObjectByIdMode4(self->world, sub->targetId, self);
         if (v != 0) {
             SetAimTarget(self, v);
         }
@@ -1462,10 +1462,10 @@ void StartPlacedObject(PlacedObject* self)
             StoreRangeRecordNear(self->rangeRecord, self->boundRadius);
             StoreRangeRecordFar(self->rangeRecord, self->boundRadius * 0.5f);
         }
-        if ((self->rangeRecord)->fB0 != -1) {
-            (self->rangeRecord)->fB4 = FindFirstObjectByIdMode4(self->world, (self->rangeRecord)->fB0, self);
-            if ((self->rangeRecord)->fB4 != 0) {
-                BuildTexturePackets((TextureRenderObject*)((self->rangeRecord)->fB4), self->rangeRecord);
+        if ((self->rangeRecord)->textureObjectId != -1) {
+            (self->rangeRecord)->textureObject = FindFirstObjectByIdMode4(self->world, (self->rangeRecord)->textureObjectId, self);
+            if ((self->rangeRecord)->textureObject != 0) {
+                BuildTexturePackets((TextureRenderObject*)((self->rangeRecord)->textureObject), self->rangeRecord);
             }
         }
         PrepareRangeRecord(self->rangeRecord);
@@ -1743,7 +1743,7 @@ void ComputePlacedObjectWorldFrame(PlacedObject* self)
     }
     Rec2195_224* last = self->linkRecord;
     if (last != 0 && (last->flags & 0x8020) == 0x8020) {
-        ((PlacedObject*)last->f80)->linkRecord->p64 = (BaseObject*)1;
+        ((PlacedObject*)last->linkParent)->linkRecord->p64 = (BaseObject*)1;
         ((PlacedObject*)last->p84)->linkRecord->p64 = (BaseObject*)1;
     }
 }
@@ -1989,7 +1989,7 @@ void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform
         return;
     }
     if ((self->flags & 0xC000000) == 0x8000000) {
-        if ((self->visibilityMask & cam->f21C) != cam->f21C) {
+        if ((self->visibilityMask & cam->areaMask) != cam->areaMask) {
             return;
         }
     }
@@ -2037,7 +2037,7 @@ void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform
     }
     if (xf != 0) {
         Rec2195_224* rec = self->linkRecord;
-        if (rec != 0 && (rec->flags & 0x80) && rec->fA0 != 0) {
+        if (rec != 0 && (rec->flags & 0x80) && rec->unscaleByParent != 0) {
             PlacedObject* parent = (PlacedObject*)self->parent;
             if (parent != 0) {
                 Attachment* a = (Attachment*)parent->matrixAttachment;
@@ -2108,14 +2108,14 @@ void DrawPlacedObject(PlacedObject* self, void* b, void* m)
     Rec2195_224* in = self->linkRecord;
     if (in != 0 && (in->flags & 0x80) != 0) {
         if (src != 0) {
-            in->fA4 = 1;
+            in->hasDrawQuads = 1;
             Rec2195_224* p = self->linkRecord;
             p->q60[0] = src[0];
             p->q60[1] = src[1];
             p->q60[2] = src[2];
             p->q60[3] = src[3];
         } else {
-            in->fA4 = 0;
+            in->hasDrawQuads = 0;
         }
     }
     self->desc02()->m26(self, b, src);
@@ -2160,7 +2160,7 @@ void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
         rec.part = part;
         if (self->partStates != 0) {
             state = rec.state = &((ModelPartState*)self->partStates)[i];
-            if (self->bits26 == 1 && (state->mask & cam->f21C) != (u32)cam->f21C) {
+            if (self->bits26 == 1 && (state->mask & cam->areaMask) != (u32)cam->areaMask) {
                 continue;
             }
         }
@@ -2183,7 +2183,7 @@ void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
                 continue;
             }
             rec.block.outerFade = alpha * fade;
-            if (part->f60 != 0) {
+            if (part->usesFarFade != 0) {
                 if (part->farFade < part->nearFade) {
                     if (ComputeCameraDistanceFade(cam, d, &fade, part->radius, part->farFade) == 0) {
                         rec.block.innerFade = 0.0f;
@@ -2282,7 +2282,7 @@ void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
                 if (self->indexedAttachments[j] != 0) {
                     ApplyPoseSourceIndexedValue((Attachment*)self->indexedAttachments[j], j);
                 } else {
-                    self->f270[j] = (self->f274)[j];
+                    self->currentValues[j] = (self->defaultValues)[j];
                 }
             }
         }
@@ -2458,7 +2458,7 @@ void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, f32* pos
         *m = r;
         *(u128*)&k = Vu0::Sub(Vu0::Q(r.m[2]), Vu0::MulX(Vu0::Q(a), Vu0::Dot(Vu0::Q(r.m[2]), Vu0::Q(a))));
     }
-    BuildShortestArcRotation(&k, (const Vec02*)&cam->fA0, &rot);
+    BuildShortestArcRotation(&k, (const Vec02*)&cam->rotationRow2, &rot);
     BuildMatrixFromRotationAndTranslation((const Vec02*)pos, (const Mat02*)&rot, (Mat4A*)&t);
     Mat4A r = MultiplyMatrices(t, *m);
     *m = r;
@@ -2488,7 +2488,7 @@ void ClonePlacedObject(PlacedObject* self, PlacedObject* owner)
 // cloned, and the model's attachment block is copied.
 void CopyPlacedObject(PlacedObject* self, PlacedObject* src)
 {
-    PlacedObject* s54 = self->f54;
+    PlacedObject* s54 = self->linkListOwner;
     PlacedObject* s50 = self->root;
     Link02 t48 = self->link48;
     u64 bit = (self->flags >> 37) & 1;
@@ -2506,7 +2506,7 @@ void CopyPlacedObject(PlacedObject* self, PlacedObject* src)
     self->link40 = t40;
     self->link58 = t58;
     self->list60 = t60;
-    self->f54 = s54;
+    self->linkListOwner = s54;
     self->root = s50;
     self->flags = (self->flags & ~(1ULL << 37)) | ((u64)bit << 37);
     self->list1E0 = t1E0;
@@ -3240,7 +3240,7 @@ void LoadFollowRecord(PlacedObject* self, void* a1)
             ReadBufferedVector3((BufferedStream*)a1, &p->q60[1]);
             f32 f = WrapAngle(ReadBufferedFloat((BufferedStream*)a1));
             p->linkFlags = 0;
-            p->f8C = f;
+            p->initialAngle = f;
             p->angle = f;
         }
         if (flags & 0x40) {
@@ -3248,7 +3248,7 @@ void LoadFollowRecord(PlacedObject* self, void* a1)
             p->p64 = (BaseObject*)ReadBufferedS16((BufferedStream*)a1);
         }
         if (flags & 0x80) {
-            p->fA0 = ReadBufferedU8((BufferedStream*)a1);
+            p->unscaleByParent = ReadBufferedU8((BufferedStream*)a1);
         }
     }
 }
@@ -3270,7 +3270,7 @@ void ResolveFollowRecordObjects(PlacedObject* self)
         BaseObject* r = (BaseObject*)FindFirstObjectByIdMode4(self->world, (s32)p->p84, self);
         p->p84 = r;
         s32 x = (s32)r->parent;
-        p->f80 = x;
+        p->linkParent = x;
         p->p88 = FindCommonAncestor(self, (BaseObject*)x);
     }
     if (p->flags & 0x40) {
@@ -3444,7 +3444,7 @@ void SetRangeRecordVector(void* self, void* src)
 // Stores a code at 0xB0 of the range record (made if needed).
 void SetRangeRecordCode(void* self, s32 value)
 {
-    ((RangeRecord*)EnsureRangeRecord((PlacedObject*)self))->fB0 = value;
+    ((RangeRecord*)EnsureRangeRecord((PlacedObject*)self))->textureObjectId = value;
 }
 
 // The object's range record or, when it has none, a shared default one (re-initialised each time).
@@ -3744,12 +3744,12 @@ s32 IsObjectTreeAtRest(Actor6C* self)
     if (IsSpinNegligible(&((PlacedObject*)self)->v160) != 0) goto body;
     return 0;
 body:
-    n = (Actor6C*)self->f34;
+    n = (Actor6C*)self->firstChild;
     while (n != 0) {
         if ((n->vtable->f8 & 1) != 0) {
             if (IsObjectTreeAtRest(n) == 0) return 0;
         }
-        n = (Actor6C*)n->f1C;
+        n = (Actor6C*)n->nextSibling;
     }
     return 1;
 }
@@ -4077,7 +4077,7 @@ void GetAimFarKey(PlacedObject* self, s32* out)
 void SetAimTargetId(PlacedObject* self, s32 value)
 {
     EnsureAimAttachment(self);
-    self->aimAttachment->f20 = value;
+    self->aimAttachment->targetId = value;
 }
 
 // Gives the id of the aim attachment's target, -1 when the object has none.
@@ -4085,7 +4085,7 @@ void GetAimTargetId(PlacedObject* self, s32* out)
 {
     s32 v = -1;
     if (self->aimAttachment != 0) {
-        v = self->aimAttachment->f20;
+        v = self->aimAttachment->targetId;
     }
     *out = v;
 }
@@ -4124,8 +4124,8 @@ void SetValueAttachment(PlacedObject* self, s32 a1, f32 x, f32 y)
         InsertAttachment(self, r);
     }
     self->ownValueAttachment->mode1 = a1;
-    self->ownValueAttachment->f1C = x;
-    self->ownValueAttachment->f20 = y;
+    self->ownValueAttachment->tiltScale = x;
+    self->ownValueAttachment->sampleTime = y;
     self->desc02()->m2B(self);
 }
 
@@ -4159,7 +4159,7 @@ void SetClass75ObjectScale(void* self, f32 value)
 void SetClass75ObjectField90(void* self, s32 value)
 {
     Class75Object* ctx = FindOrCreateClass75Object((PlacedObject*)self);
-    ctx->f90 = value;
+    ctx->enabled = value;
 }
 
 // Sets the scroll scale (a, b) of every scroll animator (element kind 6) of the object.
@@ -4808,7 +4808,7 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
             t.farRange = ReadBufferedS32((BufferedStream*)r);
             t.baseVolume = ReadBufferedFloat((BufferedStream*)r);
             t.pitch = ReadBufferedFloat((BufferedStream*)r);
-            t.f20 = ReadBufferedFloat((BufferedStream*)r);
+            t.startParam = ReadBufferedFloat((BufferedStream*)r);
             t.count = 1;
             t.cur = 0;
             k = i - 1;
@@ -4997,7 +4997,7 @@ void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetB
     SetAnimationPlayerSpeed(obj, fb);
     AppendToList((List01*)self->props6C, obj);
     if (self->listedInWorld != 0) {
-        AppendToList((List01*)&world->f1B70, obj);
+        AppendToList((List01*)&world->listedAnimationPlayers, obj);
     } else {
         AppendToList((List01*)&world->animationPlayers, obj);
     }
@@ -5262,8 +5262,8 @@ f32 GetAnimationMarkerTime(Animation* self, s32 key)
 // The entry of the blend view's list (0x1C bytes each) whose key matches the object id, or 0.
 void* FindEntryByObjectId(BlendAnimationView* self, BaseObject* key)
 {
-    for (s32 i = 0; i < self->f38; i++) {
-        BlendSourceEntry* e = (BlendSourceEntry*)(self->f3C + i * 0x1C);
+    for (s32 i = 0; i < self->sourceCount; i++) {
+        BlendSourceEntry* e = (BlendSourceEntry*)(self->sourceTable + i * 0x1C);
         if (MatchesObjectId(key, e->key) != 0) {
             return e;
         }
@@ -5516,7 +5516,7 @@ void SeekAnimationEventCursor(AnimationPlayer* self)
                 }
             }
         }
-        self->f20 = i;
+        self->nextEventIndex = i;
     } else {
         for (i = n - 1; i >= 0; i--) {
             AnimEvent* k = &track->timedList[i];
@@ -5524,7 +5524,7 @@ void SeekAnimationEventCursor(AnimationPlayer* self)
                 break;
             }
         }
-        self->f20 = i + 1;
+        self->nextEventIndex = i + 1;
     }
 }
 
@@ -5581,7 +5581,7 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
     case 42:
         if (CheckStreamVoicePending() != 0) {
             self->time = ClampRange::Of(msg->a0.f, 0.0f, owner->length);
-            self->f20--;
+            self->nextEventIndex--;
             *out = 1;
         }
         break;
@@ -5619,7 +5619,7 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         }
         if (tgt != 0) {
             StartSoundEffect(id, busy ? (PlayingSound**)&self->p50 : 0, tgt, 0, (f32)Q_12D5D0->farRange, (f32)Q_12D5D0->nearRange, Q_12D5D0->baseVolume,
-                          Q_12D5D0->pitch, Q_12D5D0->f20, 0, 0);
+                          Q_12D5D0->pitch, Q_12D5D0->startParam, 0, 0);
             if (busy && self->p50 != 0) {
                 tgt->desc->m0E(tgt, 8, self->p50);
             }
@@ -5767,21 +5767,21 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         switch (msg->kind) {
         case 21:
             self->driven = n;
-            self->f2C = msg;
+            self->positionFalloff = msg;
             break;
         case 22:
-            self->f2C = 0;
-            if (self->f30 == 0) {
+            self->positionFalloff = 0;
+            if (self->rotationFalloff == 0) {
                 self->driven = 0;
             }
             break;
         case 23:
             self->driven = n;
-            self->f30 = msg;
+            self->rotationFalloff = msg;
             break;
         case 24:
-            self->f30 = 0;
-            if (self->f2C == 0) {
+            self->rotationFalloff = 0;
+            if (self->positionFalloff == 0) {
                 self->driven = 0;
             }
             break;
@@ -6072,8 +6072,8 @@ void RunSeekAnimationEvents(AnimationPlayer* self, Animation* sub, s32* out)
 {
     f32 limit = self->time + 0.0001f;
     if (sub->timedCount != 0) {
-    while (self->f20 < sub->timedCount && sub->timedList[self->f20].a0.f < limit) {
-        AnimEvent* it = &sub->timedList[self->f20++];
+    while (self->nextEventIndex < sub->timedCount && sub->timedList[self->nextEventIndex].a0.f < limit) {
+        AnimEvent* it = &sub->timedList[self->nextEventIndex++];
         switch (it->kind) {
         case 8:
             self->time = it->a0.f;
@@ -6103,19 +6103,19 @@ void RunAnimationEventsToTime(AnimationPlayer* self, Animation* list, s32* out)
 {
     if (list->timedCount == 0) return;
     for (;;) {
-        if (self->f20 < list->timedCount) {
-            if (list->timedList[self->f20].a0.f < self->time || (self->time == list->timedList[self->f20].a0.f && 0.0f < self->speed)) {
-                AnimEvent* e = &list->timedList[self->f20];
-                self->f20 = self->f20 + 1;
+        if (self->nextEventIndex < list->timedCount) {
+            if (list->timedList[self->nextEventIndex].a0.f < self->time || (self->time == list->timedList[self->nextEventIndex].a0.f && 0.0f < self->speed)) {
+                AnimEvent* e = &list->timedList[self->nextEventIndex];
+                self->nextEventIndex = self->nextEventIndex + 1;
                 RunAnimationEvent(self, e, out);
                 if (*out != 0) return;
                 continue;
             }
         }
-        if (self->f20 <= 0) return;
-        if (self->time < list->timedList[self->f20 - 1].a0.f || (self->time == list->timedList[self->f20 - 1].a0.f && self->speed < 0.0f)) {
-            self->f20 = self->f20 - 1;
-            RunAnimationEvent(self, &list->timedList[self->f20], out);
+        if (self->nextEventIndex <= 0) return;
+        if (self->time < list->timedList[self->nextEventIndex - 1].a0.f || (self->time == list->timedList[self->nextEventIndex - 1].a0.f && self->speed < 0.0f)) {
+            self->nextEventIndex = self->nextEventIndex - 1;
+            RunAnimationEvent(self, &list->timedList[self->nextEventIndex], out);
             if (*out != 0) return;
             continue;
         }
@@ -6147,14 +6147,14 @@ void StopAnimationPlayer(AnimationPlayer* self)
         RunAnimationEvent(self, it, (s32*)&tmp);
     }
     NotifyAnimationPlayerCallbacks(self, 6, self);
-    ReleaseCallRecords((World*)base, (T219CHook*)self->fE4);
-    self->fE4 = 0;
+    ReleaseCallRecords((World*)base, (T219CHook*)self->callbacks);
+    self->callbacks = 0;
     UnregisterObjectGroup((World*)base, (FoundList*)self->f54);
     SetAnimationPlayerPadSelect(self, 0);
     RemoveQueuedCalls((World*)base, 2, 0, self, -1, 0);
     RemoveFromList((List01*)sub->props6C, self);
     if (sub->listedInWorld != 0) {
-        RemoveFromList((List01*)&((World*)base)->f1B70, self);
+        RemoveFromList((List01*)&((World*)base)->listedAnimationPlayers, self);
     } else {
         RemoveFromList((List01*)&((World*)base)->animationPlayers, self);
     }
@@ -6179,8 +6179,8 @@ void StopAnimationPlayer(AnimationPlayer* self)
             a = nx;
         } while (a != 0);
     }
-    if (self->f50 != 0)
-        ClearSoundRecordHandle((PlayingSound**)&self->f50);
+    if (self->soundHandle != 0)
+        ClearSoundRecordHandle((PlayingSound**)&self->soundHandle);
     tmp.b = s0;
     TriggerScriptEvent(sub, 0xB, 1, &tmp.b);
     g_activeListFrames = (ListFrame*)fr.prev;
@@ -6300,7 +6300,7 @@ void UpdateAnimationPlayer(AnimationPlayer* self, f32 dt)
     if (anim->world->f2358 == 0) {
         for (n = (T2195_7C0*)self->list44.head; n != 0; n = (T2195_7C0*)n->w20.lo) {
             if (n->owner->flags & ((u64)0x8000 << 23)) {
-                StopSoundRecord((PlayingSound*)self->f50, 0);
+                StopSoundRecord((PlayingSound*)self->soundHandle, 0);
                 return;
             }
         }
@@ -6310,7 +6310,7 @@ void UpdateAnimationPlayer(AnimationPlayer* self, f32 dt)
     }
     weight = 1.0f;
     if (self->driven != 0) {
-        RangeFalloffOwner* near = (RangeFalloffOwner*)self->f2C;
+        RangeFalloffOwner* near = (RangeFalloffOwner*)self->positionFalloff;
         if (near != 0) {
             n = (T2195_7C0*)self->driven;
             Vec02 pos;
@@ -6326,7 +6326,7 @@ void UpdateAnimationPlayer(AnimationPlayer* self, f32 dt)
                 weight = w;
             }
         }
-        RangeFalloffOwner* turn = (RangeFalloffOwner*)self->f30;
+        RangeFalloffOwner* turn = (RangeFalloffOwner*)self->rotationFalloff;
         if (turn != 0) {
             n = (T2195_7C0*)self->driven;
             Mat02 rot;
@@ -6344,12 +6344,12 @@ void UpdateAnimationPlayer(AnimationPlayer* self, f32 dt)
             return;
         }
     }
-    if (0.0f < self->f10) {
-        f32 left = self->f10 - dt;
-        self->f10 = left;
+    if (0.0f < self->delay) {
+        f32 left = self->delay - dt;
+        self->delay = left;
         if (left <= 0.0f) {
             dt = -left;
-            self->f10 = 0.0f;
+            self->delay = 0.0f;
         } else {
             dt = 0.0f;
         }
@@ -6369,7 +6369,7 @@ void UpdateAnimationPlayer(AnimationPlayer* self, f32 dt)
             break;
         case 1:
             looped = 1;
-            self->f20 = self->speed <= 0.0f ? anim->timedCount : 0;
+            self->nextEventIndex = self->speed <= 0.0f ? anim->timedCount : 0;
             break;
         }
     }
@@ -6616,7 +6616,7 @@ void NotifyAnimationPlayerCallbacks(AnimationPlayer* self, s32 a1, void* a2)
     if (obj != 0) {
         obj->desc->m0E(obj, a1, a2);
     }
-    QueuedCall* node = self->fE4;
+    QueuedCall* node = self->callbacks;
     while (node != 0) {
         QueuedCall* next = node->next;
         node->notify(node->arg, a1, a2);
@@ -6627,13 +6627,13 @@ void NotifyAnimationPlayerCallbacks(AnimationPlayer* self, s32 a1, void* a2)
 // Registers a callback (a1 and its argument a2) on the player.
 void AddAnimationPlayerCallback(AnimationPlayer* a0, void* a1, void* a2)
 {
-    AddCallbackNode(a0->anim->world, (Callback01**)&a0->fE4, a1, a2);
+    AddCallbackNode(a0->anim->world, (Callback01**)&a0->callbacks, a1, a2);
 }
 
 // Registers on the player the callback taken from the object a1 points to, with a1 as argument.
 void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1)
 {
-    AddCallbackNode(a0->anim->world, (Callback01**)&a0->fE4, (void*)(*a1)->link40.prev, a1);
+    AddCallbackNode(a0->anim->world, (Callback01**)&a0->callbacks, (void*)(*a1)->link40.prev, a1);
 }
 
 // Initialises the collider with anchors (3, 0, 3, 0) and no id.

@@ -33,7 +33,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         if ((self->waitFlags & 0x10) != 0 && self->player2F8 != 0) {
             StopAnimationPlayer(self->player2F8);
         }
-        if (self->mode2D0 == 2 && self->f330 != 0) {
+        if (self->mode2D0 == 2 && self->dimsVolume != 0) {
             f32 f = 1.0f;
             SetVolumeChannelFactor(9, 0, f);
             SetVolumeChannelFactor(9, 1, f);
@@ -66,7 +66,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
             PushCameraController(g_camera, 6, &g_camera->ctl460, 0, 0);
             AcquirePadSelectFlag(g_currentWorld);
             SetTextPanelSubject(&g_typedTextCaptionBox, 0);
-            if (self->f330 != 0) {
+            if (self->dimsVolume != 0) {
                 f32 f = 0.6f;
                 SetVolumeChannelFactor(9, 0, f);
                 SetVolumeChannelFactor(9, 1, f);

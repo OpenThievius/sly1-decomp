@@ -27,12 +27,12 @@ struct Camera : BaseObject {
                 s32 rotation[4];    // 0x80: the camera's rotation rows
                 f32 g80[4];         // 0x80: func_00144FF8 reads the first two as floats
             };
-            s32 f90[4];             // 0x90
-            s32 fA0[4];             // 0xA0
+            s32 rotationRow1[4];    // 0x90: the camera's second rotation row
+            s32 rotationRow2[4];    // 0xA0: the camera's third rotation row
         };
         Mat02 rot80;        // 0x80: the three rows as a matrix
     };
-    f32 fB0;                // 0xB0: scales a spawner's range (func_00155AB0)
+    f32 rangeScale;         // 0xB0: scales a spawner's range (func_00155AB0)
     u8 padB4[0xC0 - 0xB4];
     union {
         struct {
@@ -71,7 +71,7 @@ struct Camera : BaseObject {
     f32 aspectScale;        // 0x1E0: scales the yaw offset with f1C4 (func_00144BE8)
     f32 nearDistance;       // 0x1E4: the near clip distance
     f32 farDistance;        // 0x1E8: the far clip distance
-    f32 f1EC; // 0x1EC
+    f32 nearClearance; // 0x1EC: the radius the near plane's corners need
     f32 projectionScaleX;   // 0x1F0: ProjectPointToCamera divides the screen x by it
     f32 projectionScaleY;   // 0x1F4: and the screen y
     f32 fogNear;            // 0x1F8: the distance fog starts
@@ -81,7 +81,7 @@ struct Camera : BaseObject {
     f32 fogTerms[4];        // 0x208: ComputeCameraFogTerms' result for strength 1
 
     f32 swingStartTime;     // 0x218: the game time the view swing started
-    s32 f21C;               // 0x21C
+    s32 areaMask;           // 0x21C: the mask looked up at the camera's position
     s32 snapQueued;         // 0x220: set to ask for a snap on the next update
     s32 snapping;           // 0x224: a snap is in progress this frame
     s32 hasSnapValue;       // 0x228: set when the snap carries a value
@@ -92,13 +92,13 @@ struct Camera : BaseObject {
     Vec02 v270;             // 0x270: the offset the on-off controllers spring (func_001E3380)
     Vec02 v280;             // 0x280: its goal
     u8 pad290[0x2B0 - 0x290];
-    f32 f2B0;               // 0x2B0
-    f32 f2B4;               // 0x2B4
-    f32 f2B8;               // 0x2B8
-    f32 f2BC;               // 0x2BC
-    f32 f2C0;               // 0x2C0
+    f32 headingRate;        // 0x2B0: the rate of the heading of the view around the focus
+    f32 pitchRate;          // 0x2B4: the rate of the pitch of the view around the focus
+    f32 distanceRate;       // 0x2B8: the rate of the distance to the focus
+    f32 yawRate;            // 0x2BC: the rate of the camera's own yaw
+    f32 tiltRate;           // 0x2C0: the rate of the camera's own tilt
     u8 pad2C4[0x2D0 - 0x2C4];
-    s32 f2D0[4];            // 0x2D0
+    s32 lookFocus[4];       // 0x2D0: the point the view was last looking at
     void* currentTarget;    // 0x2E0: the target object the camera last tracked
     void* f2E4; // 0x2E4
     void* f2E8; // 0x2E8

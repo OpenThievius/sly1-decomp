@@ -330,7 +330,7 @@ s32 IsWorld2BossFree(World2Boss* self)
 {
     s32 out;
     if (IsPadSelectFlagHeld(self->world) != 0) goto zero;
-    if (self->fC10 != 0) goto zero;
+    if (self->busy != 0) goto zero;
     if (self->state == 0x10) goto zero;
     if (self->state == 0xB) goto zero;
     if (((VFnI_0018AAE0*)self->desc)[0x66](self) == 0) goto zero;
@@ -430,9 +430,9 @@ void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
 {
     switch (self->state) {
     case 4:
-        if (self->fE14 != 0) {
+        if (self->heldObject != 0) {
             Vec02 pos;
-            GetObjectWorldPosition((BaseObject*)self->fE14, &pos);
+            GetObjectWorldPosition((BaseObject*)self->heldObject, &pos);
             SetAgentGoalPoint(self, &pos);
         } else {
             s32 key;
@@ -505,12 +505,12 @@ void UpdateWorld2BossState(World2Boss* self)
         // global-alloc, which gives retail's v0 and a0 (docs/TOOLCHAIN.md, local-alloc).
         PoseSource* m;
         CyclicRanges* a;
-        m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->f610))->mover;
+        m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->linkPartA))->mover;
         a = m->ranges;
-        s32 offFirst = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
-        m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->f614))->mover;
+        s32 offFirst = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->blendedDuration, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
+        m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->linkPartB))->mover;
         a = m->ranges;
-        s32 offSecond = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
+        s32 offSecond = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->blendedDuration, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
         if (offFirst && self->firstInRange == 0) {
             RecordCameraTimestamp(g_camera);
             StartSoundEffect(0x1CC, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);

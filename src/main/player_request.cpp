@@ -125,18 +125,18 @@ void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAni
             (*m->vtbl)((PoseSource*)m, self, o->duration, one, 0, &a10, 0);
             *(Vu0::Vec*)&it->v10 = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(a0), Vu0::Vec::Of(a10)), Vu0::Vec::ScalarAt(o->duration));
             Vec02 a20;
-            m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)it->object, (BaseObject*)self->f610)->mover;
-            (*m->vtbl)((PoseSource*)m, self->f610, it->timeAtFirstKey, one, 0, &a20, 0);
+            m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)it->object, (BaseObject*)self->linkPartA)->mover;
+            (*m->vtbl)((PoseSource*)m, self->linkPartA, it->timeAtFirstKey, one, 0, &a20, 0);
             Vec02 a30;
-            m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)it->object, (BaseObject*)self->f614)->mover;
-            (*m->vtbl)((PoseSource*)m, self->f614, it->timeAtSecondKey, one, 0, &a30, 0);
+            m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)it->object, (BaseObject*)self->linkPartB)->mover;
+            (*m->vtbl)((PoseSource*)m, self->linkPartB, it->timeAtSecondKey, one, 0, &a30, 0);
             Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
             *(Vu0::Vec*)&it->v20 = Vu0::MulXSum(Vu0::Vec::Of(a20), h, Vu0::Vec::Of(a30), h);
         }
     }
     BuildCombinedBlendAnimation((TurningCollider*)self, 0x50, 6, (u8*)items, 2, D_00274FB8, D_00274FB0, (BlendAnimation**)&blend);
-    for (s32 j = 0; j < blend->f38; j++) {
-        BlendSourceEntry* e = (BlendSourceEntry*)(blend->f3C + j * 0x1C);
+    for (s32 j = 0; j < blend->sourceCount; j++) {
+        BlendSourceEntry* e = (BlendSourceEntry*)(blend->sourceTable + j * 0x1C);
         s32 k = e->key;
         if (k >= 0x37) {
             if (k < 0x3A) {
@@ -307,12 +307,12 @@ void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView*
         f32 now = ((AnimationPlayer*)a3)->time;
         f32 x = sp->a->t - now;
         if (x <= 0.0f) {
-            x += g->f34;
+            x += g->blendedDuration;
         }
         f32 q = x / sp->a->len;
         f32 y = sp->b->t - now;
         if (y <= 0.0f) {
-            y += g->f34;
+            y += g->blendedDuration;
         }
         f32 r = y / sp->a->len;
         hi = q;
@@ -416,16 +416,16 @@ void CreateEightEntryBlend(TurningCollider* self, BlendSlot* slots, BlendAnimati
             case 2:
             case 4:
             case 6: {
-                SlotMover* m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)e->object, (BaseObject*)self->f610)->mover;
-                (*m->vtbl)((PoseSource*)m, self->f610, 0.0f, 1.0f, 0, 0, &e->v10);
+                SlotMover* m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)e->object, (BaseObject*)self->linkPartA)->mover;
+                (*m->vtbl)((PoseSource*)m, self->linkPartA, 0.0f, 1.0f, 0, 0, &e->v10);
                 break;
             }
             case 1:
             case 3:
             case 5:
             case 7: {
-                SlotMover* m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)e->object, (BaseObject*)self->f614)->mover;
-                (*m->vtbl)((PoseSource*)m, self->f614, 0.0f, 1.0f, 0, 0, &e->v10);
+                SlotMover* m = (SlotMover*)FindEntryByObjectId((BlendAnimationView*)e->object, (BaseObject*)self->linkPartB)->mover;
+                (*m->vtbl)((PoseSource*)m, self->linkPartB, 0.0f, 1.0f, 0, 0, &e->v10);
                 break;
             }
             }
@@ -719,14 +719,14 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
             c = MaskWorldBitsBySave() & 0x4000;
             break;
         default:
-            self->f2730 = 1;
+            self->requestAccepted = 1;
             goto check;
         }
         if (c == 0) {
-            self->f2730 = 1;
+            self->requestAccepted = 1;
         }
     check:
-        if (self->f2730 != 0) {
+        if (self->requestAccepted != 0) {
             if (HasSpareCount() != 0) {
                 self->pulseActive = 1;
                 self->pulseStartTime = g_gameTime[0];
@@ -787,7 +787,7 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
         break;
     }
     case 3:
-        if (self->f2730 == 0 || HasSpareCount() != 0) {
+        if (self->requestAccepted == 0 || HasSpareCount() != 0) {
             SetPlayerState(self, 4, 0x27);
             SetPlayerCallback(self, FinishPlayerRequest);
         } else {
@@ -804,7 +804,7 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
         }
         break;
     case 5:
-        if (self->f2730 == 0 || HasSpareCount() != 0) {
+        if (self->requestAccepted == 0 || HasSpareCount() != 0) {
             SetPlayerState(self, 4, 0x29);
             SetPlayerCallback(self, FinishPlayerRequest);
         } else {
@@ -812,13 +812,13 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
         }
         break;
     }
-    if (self->f2730 != 0) {
+    if (self->requestAccepted != 0) {
         PlayerRequestMessage m;
         m.self = self;
         m.v = msg->arg;
         self->desc->m0E(self, 0x17, &m);
     }
-    return self->f2730;
+    return self->requestAccepted;
 }
 
 s32 HasSpareCount(void);

@@ -5,9 +5,9 @@ void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
     Vec02 v;
     BaseObject* o;
     if (flag != 0) {
-        o = (BaseObject*)self->entries[idx].f18;
+        o = (BaseObject*)self->entries[idx].secondAnchor;
     } else {
-        o = (BaseObject*)self->entries[idx].f14;
+        o = (BaseObject*)self->entries[idx].firstAnchor;
     }
     if (o != 0) {
         TransformPointBetweenFrames((PlacedObject*)o->parent, self, (Vec02*)((u8*)o + 0x40), &v);

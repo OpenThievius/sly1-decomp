@@ -58,8 +58,8 @@ void InitMaskedCollider(MaskedCollider* self)
     InitCollider(self);
     o->scaleMin = 0.8f;
     o->scaleMax = 1.2f;
-    o->f68C = 1;
-    o->f624 = 1.0f;
+    o->hitLimit = 1;
+    o->impulseScale = 1.0f;
     o->tintByte4 = 16;
     o->tint[3] = 16;
     o->tint[2] = 16;
@@ -273,7 +273,7 @@ s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
         return 1;
     }
     if ((ev->flags & 8) != 0) {
-        Vu0::Q(k) = Vu0::FromFloatAt(self->f624);
+        Vu0::Q(k) = Vu0::FromFloatAt(self->impulseScale);
         Vu0::Q(push) = Vu0::MulX(Vu0::Q(ev->v30), Vu0::Q(k));
         SetColliderAnchors(self, 0, 0, 0, 0);
         ApplyColliderImpulseEvent(self, ev->strength, &ev->v20, &push);
@@ -289,7 +289,7 @@ s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
     counter = &self->hitCount;
     self->hitCount++;
     TriggerScriptEvent(self, 0x14, 1, &counter);
-    if (self->hitCount >= self->f68C) {
+    if (self->hitCount >= self->hitLimit) {
         self->desc20()->m48(self);
     }
     return 1;
@@ -418,7 +418,7 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
                 SendPointEventToWorldListener((Quad16*)&self->v140, radius);
             }
             TransformPointBetweenFrames(self, 0, &self->point6A0, &point);
-            ScatterObjectsAtPoint((ScatterController*)g_scatterController, &point, self->f698, self->scatter6B0);
+            ScatterObjectsAtPoint((ScatterController*)g_scatterController, &point, self->scatterCount, self->scatter6B0);
             ZoneSound* sound = (ZoneSound*)self->soundParams;
             if (sound != 0) {
                 StartSoundEffect(sound->sound, 0, 0, &self->v140, sound->farRange, sound->nearRange, sound->volume, 0.0f, 0.0f, 0, 0);
@@ -664,7 +664,7 @@ void InitPlayerFlaggedCollider(PlayerFlaggedCollider* self)
 {
     InitMaskedCollider(self);
     self->mask = 5;
-    self->f698 = -1;
+    self->scatterCount = -1;
 }
 
 // Initialises the masked collider with mask 1, scale 1.0 and no anchor presets.

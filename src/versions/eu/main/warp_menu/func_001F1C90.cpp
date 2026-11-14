@@ -51,7 +51,7 @@ void SetWarpMenuOpen(Obj_1F1C90_eu* self, s32 a1)
         SetElementStackState((ElementStack*)g_elementStack, 7);
     } else {
         self->vtbl[15](self);
-        if (self->f570->f560 == 0) {
+        if (self->f570->warpChosen == 0) {
             BeginWarpPageClose(self->f570);
             Animation* an = self->f570->closeAnimation;
             if (an != 0) {

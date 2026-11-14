@@ -60,7 +60,7 @@ void PrepareRangeRecord(RangeRecord* self)
         s32 idx = g_meshQueueCount;
         if (idx < 0x4000) {
             u8* p = g_meshQueueEntries + idx * 16;
-            self->f2D0 = p;
+            self->meshQueueEntry = p;
             g_meshQueueCount = idx + 1;
             FillMemory(p, 0, 16);
         }
@@ -231,7 +231,7 @@ s32 RangeRecordMatchesKinds(RangeRecord* self, u32 bits)
     if (self->link != 0) {
         u32 flags = self->link->maskC;
         Camera* g = g_camera;
-        u32 mask = g->f21C;
+        u32 mask = g->areaMask;
         s32 ok = 0;
         if ((flags & 0x10000000) != 0 || (mask & flags) == mask) {
             ok = 1;
@@ -340,7 +340,7 @@ void BuildRangeRecordPacket(RangeRecord* self)
     if (self->link != 0) {
         Camera* g = g_camera;
         s32 bits = self->link->maskC;
-        s32 need = g->f21C;
+        s32 need = g->areaMask;
         s32 ok = 0;
         if ((bits & 0x10000000) != 0 || (need & bits) == need) {
             ok = 1;
@@ -354,7 +354,7 @@ void BuildRangeRecordPacket(RangeRecord* self)
             Vec02 axis;
             RangeUniforms* p;
             InitPacketWriter(&pw);
-            u8* dst = self->f2D0;
+            u8* dst = self->meshQueueEntry;
             if (dst == 0) {
                 dst = spare;
             }
@@ -414,7 +414,7 @@ void QueueRangeRecordPacket(RangeRecord* o)
     if (o->link != 0) {
         Camera* c = g_camera;
         s32 bits = o->link->maskC;
-        s32 need = c->f21C;
+        s32 need = c->areaMask;
         s32 a2 = 0;
         if ((bits & 0x10000000) != 0) {
             goto set;

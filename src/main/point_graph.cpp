@@ -182,7 +182,7 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
     PartRequest rec;
     s32 i = 0;
     s32 n;
-    u32 views = cam->f21C;
+    u32 views = cam->areaMask;
     FillMemory(&rec, 0, 0x80);
     n = 0x34;
     rec.callback = (void*)DrawModelPart;
@@ -222,7 +222,7 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
             if (!ComputeCameraDistanceFade(cam, d, &rec.fade, radius, part->nearFade)) {
                 continue;
             }
-            if (part->f60 != 0) {
+            if (part->usesFarFade != 0) {
                 if (part->farFade < part->nearFade) {
                     if (!ComputeCameraDistanceFade(cam, d, &rec.fade2, part->radius, part->farFade)) {
                         rec.fade2 = 0.0f;
@@ -770,7 +770,7 @@ s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max,
                         return max;
                     }
                     last = span++;
-                    last->f48 = 3;
+                    last->spanKind = 3;
                     Vu0::Q(last->q[0]) = SegmentPoint::At(*a, *b, cur.t);
                     Vu0::Q(last->q[1]) = SegmentPoint::At(*a, *b, top->t);
                     last->time[0] = cur.t;

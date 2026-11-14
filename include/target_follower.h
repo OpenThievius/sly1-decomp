@@ -17,7 +17,7 @@ struct FollowableObject;
 // points to).
 struct Ref47 {
     u8 pad00[0x34];
-    f32 f34;                // 0x34
+    f32 leadTime;           // 0x34
 };
 
 struct Entry47 {
@@ -58,7 +58,7 @@ struct TargetFollower : Collider {
     void* stateWalker;      // 0x554: func_001B6290(list550, self, -1, 1)
     FollowableObject* followedObject;    // 0x558: the class 0x2A object it follows (func_0016D3F0)
     List01 list55C;         // 0x55C: the 0x2A objects, linked at their +0x7B0 (slot 0, func_0016DFE0)
-    void* f568;             // 0x568: loaded (id 0x2F7)
+    void* heightObject;     // 0x568: loaded (id 0x2F7)
     f32 heightOffset;       // 0x56C: the object's z less that of f568
     Sub47* launchPool;      // 0x570: the kind-0x8C child (slot 16)
     f32 nextLaunchTime;     // 0x574: a time (func_0016DAC0, mode 1)

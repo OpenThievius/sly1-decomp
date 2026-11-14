@@ -168,7 +168,7 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
                 rec.spawn = &spawn;
                 PathEmitter* e = (self->activeZone != 0) ? self->activeZone->firstEmitter : self->firstEmitter;
                 if (e != 0) {
-                    if (e->f18 == 0) {
+                    if (e->takesLocalSpawn == 0) {
                         TransformStateToAncestorFrame(self, 0, &spawn.pos, &spawn.basis, &spawn.vel, 0);
                     }
                     ((EmitFn)e->vt[0x7C / 4])(e, &rec);

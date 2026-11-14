@@ -259,7 +259,7 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
                 ClearPadPressedBits((PadRecord*)pad, 0x40);
                 self->buttonPressTime = g_gameTime;
             }
-            if (self->fC00 != 0 && g_gameTime - self->buttonPressTime < g_walkerButtonPressWindow) {
+            if (self->pressArmed != 0 && g_gameTime - self->buttonPressTime < g_walkerButtonPressWindow) {
                 self->desc05()->m50(self);
                 TeleportStateWalker(self->stateWalker, 0x35F);
                 GetStateWalkerCurrentKey(self->stateWalker, &cur);
@@ -359,7 +359,7 @@ static inline void SetMatrixRows(Mat02& m, const s128& a, const s128& b, const s
 void RecomputeModeWalker(ModeWalker* self)
 {
     RecomputePathFollowerFrame(self);
-    if (self->path != 0 && self->fC08 != 0) {
+    if (self->path != 0 && self->pathFrameObject != 0) {
         Vec02 pos;
         Vec02 dir;
         Mat02 m1;
@@ -369,7 +369,7 @@ void RecomputeModeWalker(ModeWalker* self)
         if (fn) {
             fn(curve, self->pathTime, &pos, &dir);
         }
-        MultiplyMatrices3x3(&self->m1A0, &self->fC08->m1A0, &m1);
+        MultiplyMatrices3x3(&self->m1A0, &self->pathFrameObject->m1A0, &m1);
         BuildBasisFromXAndZHint(&dir, (const Vec02*)&g_unitZVector, &m2);
         u128 r0 = Vu0::Q(m1.r[0]);
         u128 r1 = Vu0::Q(m1.r[1]);
@@ -380,8 +380,8 @@ void RecomputeModeWalker(ModeWalker* self)
         Mat02 rot;
         SetMatrixRows(rot, x, y, z);
         m2 = rot;
-        self->fC08->desc02()->m1D(self->fC08, &pos);
-        self->fC08->desc02()->m1E(self->fC08, &m2);
+        self->pathFrameObject->desc02()->m1D(self->pathFrameObject, &pos);
+        self->pathFrameObject->desc02()->m1E(self->pathFrameObject, &m2);
     }
 }
 
@@ -508,8 +508,8 @@ s32 AcceptModeWalkerRequest(ModeWalker* self, s32* arg)
     goto tail;
 then_block:
     g_player->desc->m02(g_player);
-    g_player->desc02()->m1F(g_player, (PlacedObject*)self->fBC8);
-    ((BaseObject*)self->fBC8)->desc->m03((BaseObject*)self->fBC8);
+    g_player->desc02()->m1F(g_player, (PlacedObject*)self->playerFrameObject);
+    ((BaseObject*)self->playerFrameObject)->desc->m03((BaseObject*)self->playerFrameObject);
     SetSwitchedColliderEnabled((SwitchedCollider*)g_player, 1);
     SetPlayerState(g_player, 2, 2);
     ActivateSwitchedCollider((void*)g_player);
@@ -537,10 +537,10 @@ void HandleModeWalkerNotification(ModeWalker* self, s32 code, MessageBody* rec)
             s32 kind = rec->code;
             if (kind != 0x15E) {
                 if (kind == 0x15F) {
-                    self->fC00 = 0;
+                    self->pressArmed = 0;
                 }
             } else {
-                self->fC00 = 1;
+                self->pressArmed = 1;
             }
         }
     }

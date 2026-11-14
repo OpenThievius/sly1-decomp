@@ -117,7 +117,7 @@ struct RecordMember : MemberObject {
 
 // 0x7A: three more ids, a delay for messages, and two objects it holds.
 struct HoldingMember : RecordMember {
-    s32 fA0;                // 0xA0
+    s32 soundParams;        // 0xA0: the sound record, made on first use
     f32 countMin;           // 0xA4: the range the particle count of a spawn message is drawn from
     f32 countMax;           // 0xA8
     s32 idAC;               // 0xAC
@@ -142,7 +142,7 @@ struct Class75Object : TransformObject {
     Class75Link link;       // 0x80
     s32 count;              // 0x88: 30 at set-up; func_0012A9C8
     f32 scale;              // 0x8C: 25.0 at set-up; func_0012AA00
-    s32 f90;                // 0x90: func_0012AA28
+    s32 enabled;            // 0x90: func_0012AA28
     u8 pad94[0xA0 - 0x94];
 };
 

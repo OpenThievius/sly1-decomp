@@ -408,7 +408,7 @@ void UpdateCameraTargetTracking(Spring_00143208* self, void* target, f32 dt, Rec
 
     ComputeOffsetBehindTarget(self, target, (Target_00143148*)rec, &offset);
     if (target == g_player) {
-        switch (g_player->f268C) {
+        switch (g_player->cameraSpringMode) {
         case 0:
             SpringCameraVector((Camera*)self, &self->v250, &self->v260, &offset, 5.0f, -3.5f, dt);
             SpringCameraVector((Camera*)self, &self->v270, &self->v280, (Vec02*)&g_zeroVector, 5.0f, -3.5f, dt);
@@ -507,9 +507,9 @@ void UpdateCameraProjection(Camera* self)
     self->projectionScaleY = t;
     self->projectionScaleX = t * w;
     f32 d = w * w + one;
-    self->fB0 = (one >? self->distanceScale * inv);
+    self->rangeScale = (one >? self->distanceScale * inv);
     f32 q = t * Fpu::Sqrt(d);
-    self->f1EC = q * self->nearDistance + one;
+    self->nearClearance = q * self->nearDistance + one;
     BuildProjectionMatrix(&self->projection, 640.0f / (t * w * 4096.0f), 224.0f / (t * 4096.0f), 0.0f, 0.0f, self->nearDistance, self->farDistance);
     ComputeCameraFogTerms(self, self->fogTerms, one);
     UpdateCameraMatrices(self);
@@ -675,7 +675,7 @@ void ResetCamera(Camera* self, s32 flag)
     SetCameraControllerValue(&self->ctl454, 0);
     PushCameraController(self, 0, &self->ctl454, 0, 0);
     RequestCameraSnap(self, 0);
-    self->f21C = 0x0FFFFFFF;
+    self->areaMask = 0x0FFFFFFF;
     self->swingStartTime = -10.0f;
 }
 
@@ -905,7 +905,7 @@ void UpdateCameraLocation(Camera* self)
         in = *(Quad16*)self->position;
         LookupValueTreeLeaf((void*)g->valueListObject, &in, &out);
         if (out != 0) {
-            self->f21C = out;
+            self->areaMask = out;
         }
     }
 }
@@ -1044,16 +1044,16 @@ void SetCameraPlacement(Camera* self, Quad16* a, Quad16* b)
     }
     if (b != 0) {
         *(Quad16*)self->rotation = b[0];
-        *(Quad16*)self->f90 = b[1];
-        *(Quad16*)self->fA0 = b[2];
+        *(Quad16*)self->rotationRow1 = b[1];
+        *(Quad16*)self->rotationRow2 = b[2];
     }
     UpdateCameraMatrices(self);
     f32 zero = 0.0f;
-    self->f2C0 = zero;
-    self->f2BC = zero;
-    self->f2B4 = zero;
-    self->f2B0 = zero;
-    self->f2B8 = zero;
+    self->tiltRate = zero;
+    self->yawRate = zero;
+    self->pitchRate = zero;
+    self->headingRate = zero;
+    self->distanceRate = zero;
 }
 
 // Places the camera at target looking at focus, through the orbit camera placement.
@@ -1106,9 +1106,9 @@ void ApplyLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32 x, f32 y, 
 void SetCameraLookAnchor(Camera* self, Quad16* arg)
 {
     Quad16 tmp;
-    ApplyLookFrameCoordinates((Quad16*)self->f2D0, (Quad16*)self->position, &tmp, self->f2B0, self->f2B4, self->f2B8);
-    ComputeLookFrameCoordinates(arg, (Quad16*)self->position, &tmp, &self->f2B0, &self->f2B4, &self->f2B8);
-    *(Quad16*)self->f2D0 = *arg;
+    ApplyLookFrameCoordinates((Quad16*)self->lookFocus, (Quad16*)self->position, &tmp, self->headingRate, self->pitchRate, self->distanceRate);
+    ComputeLookFrameCoordinates(arg, (Quad16*)self->position, &tmp, &self->headingRate, &self->pitchRate, &self->distanceRate);
+    *(Quad16*)self->lookFocus = *arg;
 }
 
 void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist);
@@ -1144,7 +1144,7 @@ void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, co
     ConvertOffsetToSpherical(target, focus, &heading, &pitch, &dist);
     f32 yaw = heading + 3.14159274f + yawOffset * self->zoom * self->aspectScale * 0.5f;
     f32 tilt = -pitch - pitchOffset * self->zoom * 0.5f;
-    ConvertOffsetToSpherical((Vec02*)self->position, (Vec02*)self->f2D0, &curHeading, &curPitch, &curDist);
+    ConvertOffsetToSpherical((Vec02*)self->position, (Vec02*)self->lookFocus, &curHeading, &curPitch, &curDist);
     VectorToAngles((Vec3*)self->rotation, &curYaw, &curTilt);
     if ((flags & 1) == 0) {
         y = yaw;
@@ -1199,26 +1199,26 @@ void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, co
         dd /= s;
         dy /= s;
         dt2 /= s;
-        self->f2B0 += (dh * gain + self->f2B0 * damp) * dt;
-        self->f2B4 += (dp * gain + self->f2B4 * damp) * dt;
-        self->f2B8 += (dd * gain + self->f2B8 * damp) * dt;
-        self->f2BC += (dy * gain + self->f2BC * damp) * dt;
-        self->f2C0 += (dt2 * gain + self->f2C0 * damp) * dt;
-        h = curHeading + self->f2B0 * dt;
-        p = curPitch + self->f2B4 * dt;
-        r = curDist + self->f2B8 * dt;
-        y = curYaw + self->f2BC * dt;
-        t = curTilt + self->f2C0 * dt;
+        self->headingRate += (dh * gain + self->headingRate * damp) * dt;
+        self->pitchRate += (dp * gain + self->pitchRate * damp) * dt;
+        self->distanceRate += (dd * gain + self->distanceRate * damp) * dt;
+        self->yawRate += (dy * gain + self->yawRate * damp) * dt;
+        self->tiltRate += (dt2 * gain + self->tiltRate * damp) * dt;
+        h = curHeading + self->headingRate * dt;
+        p = curPitch + self->pitchRate * dt;
+        r = curDist + self->distanceRate * dt;
+        y = curYaw + self->yawRate * dt;
+        t = curTilt + self->tiltRate * dt;
     }
     ComputeDirectionFromAngles((Vec3*)&dir, h, p, r);
     Vu0::Q(pos) = Vu0::Add(Vu0::Q(*focus), Vu0::Q(dir));
     BuildYawPitchMatrix(y, t, &m);
     *(Vec02*)self->position = pos;
     *(Vec02*)self->rotation = m.r[0];
-    *(Vec02*)self->f90 = m.r[1];
-    *(Vec02*)self->fA0 = m.r[2];
+    *(Vec02*)self->rotationRow1 = m.r[1];
+    *(Vec02*)self->rotationRow2 = m.r[2];
     UpdateCameraMatrices(self);
-    *(Vec02*)self->f2D0 = *focus;
+    *(Vec02*)self->lookFocus = *focus;
 }
 
 // Gives in *out the world heading the stick points to when the camera's view is taken into account:
@@ -1600,7 +1600,7 @@ extern f32 g_frameStep;
 f32 ComputeCameraHitClearance(Camera* self, void* unused, Quad16* v, Heading_00145DE8* h)
 {
     f32 out;
-    ApproachValueWithRamp(&g_cameraClearanceRamp, &out, h->dist, self->f1EC - g_cameraProbeRadius, g_frameStep);
+    ApproachValueWithRamp(&g_cameraClearanceRamp, &out, h->dist, self->nearClearance - g_cameraProbeRadius, g_frameStep);
     return Vu0::ToFloat(Vu0::Dot(Vu0::Q(*v), Vu0::Q(h->dir))) - out;
 }
 
@@ -1645,7 +1645,7 @@ s32 PeekCameraStackValue(Camera* self)
 
 // Sets the target controller's three settings: the value at 0x50, the one at 0x54 and the size
 // override.
-void SetCameraControllerSettings(Camera* obj, s32 value, f32 first, f32 second) { obj->ctl460.f50 = value; obj->ctl460.f54 = first; obj->ctl460.sizeOverride = second; }
+void SetCameraControllerSettings(Camera* obj, s32 value, f32 first, f32 second) { obj->ctl460.f50 = value; obj->ctl460.distanceFactor = first; obj->ctl460.sizeOverride = second; }
 
 // Stores the current game time as the camera's swing start time.
 void RecordCameraTimestamp(Camera* obj) { obj->swingStartTime = g_gameTime; }

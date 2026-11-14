@@ -178,7 +178,7 @@ void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next)
     if (self->forcedOnOffObject != 0) {
         SetOnOffObjectForcedState(self->forcedOnOffObject, -1);
         self->forcedOnOffObject->switchedCollider = 0;
-        if (self->f5C != 0) {
+        if (self->startedForced != 0) {
             self->forcedOnOffObject->desc->m03(self->forcedOnOffObject);
         }
         self->forcedOnOffObject = 0;
@@ -186,7 +186,7 @@ void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next)
     if (next != 0) {
         self->forcedOnOffObject = next;
         s32 isNull = IsObjectAttached(next) == 0;
-        self->f5C = isNull;
+        self->startedForced = isNull;
         if (isNull != 0) {
             next->desc->m02(next);
         }
@@ -276,7 +276,7 @@ void StartNextQueueEntry(EntryQueue* self)
             if (d->vt->m0A == 0) {
                 break;
             }
-            d->vt->m0A(d, &pos, 0, 0, 0, &self->f60, 0);
+            d->vt->m0A(d, &pos, 0, 0, 0, &self->targetTrackPos, 0);
         }
         goto done;
     }
@@ -289,7 +289,7 @@ void StartNextQueueEntry(EntryQueue* self)
         if (d->vt->m0A == 0) {
             break;
         }
-        d->vt->m0A(d, &pos, 0, 0, 0, 0, &self->f64);
+        d->vt->m0A(d, &pos, 0, 0, 0, 0, &self->targetPathPos);
         goto done;
     }
     case 4:
@@ -450,7 +450,7 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
         break;
     }
     case 7:
-        done = __builtin_fabsf(pl->pathPos - self->f64) < g_queuePathReachTolerance;
+        done = __builtin_fabsf(pl->pathPos - self->targetPathPos) < g_queuePathReachTolerance;
         break;
     case 9: {
         void* p = self->animationPlayer;
@@ -591,17 +591,17 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
                     if (s->looped != 0) {
                         f32 fwd;
                         f32 back;
-                        if (self->f60 < p->trackPos) {
-                            fwd = p->trackPos - self->f60;
-                            back = s->desc->m7(s) + self->f60 - p->trackPos;
+                        if (self->targetTrackPos < p->trackPos) {
+                            fwd = p->trackPos - self->targetTrackPos;
+                            back = s->desc->m7(s) + self->targetTrackPos - p->trackPos;
                         } else {
-                            back = self->f60 - p->trackPos;
-                            fwd = s->desc->m7(s) + p->trackPos - self->f60;
+                            back = self->targetTrackPos - p->trackPos;
+                            fwd = s->desc->m7(s) + p->trackPos - self->targetTrackPos;
                         }
                         if (fwd < back) {
                             flip = 1;
                         }
-                    } else if (self->f60 < p->trackPos) {
+                    } else if (self->targetTrackPos < p->trackPos) {
                         flip = 1;
                     }
                     if (flip) {
@@ -642,17 +642,17 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
             if (s->looped != 0) {
                 f32 fwd;
                 f32 back;
-                if (self->f64 < p->pathPos) {
-                    fwd = p->pathPos - self->f64;
-                    back = s->desc->m8(s) + self->f64 - p->pathPos;
+                if (self->targetPathPos < p->pathPos) {
+                    fwd = p->pathPos - self->targetPathPos;
+                    back = s->desc->m8(s) + self->targetPathPos - p->pathPos;
                 } else {
-                    back = self->f64 - p->pathPos;
-                    fwd = s->desc->m8(s) + p->pathPos - self->f64;
+                    back = self->targetPathPos - p->pathPos;
+                    fwd = s->desc->m8(s) + p->pathPos - self->targetPathPos;
                 }
                 if (fwd < back) {
                     flip = 1;
                 }
-            } else if (self->f64 < p->pathPos) {
+            } else if (self->targetPathPos < p->pathPos) {
                 flip = 1;
             }
             if (flip) {

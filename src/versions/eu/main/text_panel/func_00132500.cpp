@@ -50,7 +50,7 @@ void DrawTextPanelCenterFrame(Obj_eu_132500* self, PacketWriter* gs)
     }
     self->f598 = WrapAngle(self->f598 + g_frameDt * k);
 
-    alpha = (s32)(g_camera->f478 * 24.999f) + 0x30;
+    alpha = (s32)(g_camera->zoomFraction * 24.999f) + 0x30;
     switch (self->f5AC) {
     case 0:
         if (self->f570 == 5) {
@@ -90,7 +90,7 @@ void DrawTextPanelCenterFrame(Obj_eu_132500* self, PacketWriter* gs)
     }
 
     GetTextPanelCenter(self, &posX, &posY);
-    scale = g_camera->f478 + 1.0f;
+    scale = g_camera->zoomFraction + 1.0f;
 
     {
         f32 step = 1.0f / 24.0f;

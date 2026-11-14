@@ -449,12 +449,12 @@ void GroupEdgesByKey(s32 count, MeshHit* base, s32* outCount, s32* keys, MeshHit
             e->r3 = t;
             s32 x = e->i50;
             s32 y = e->i54;
-            f32 fa = e->f40;
-            f32 fb = e->f44;
+            f32 fa = e->entryTime;
+            f32 fb = e->exitTime;
             e->i50 = y;
             e->i54 = x;
-            e->f40 = fb;
-            e->f44 = fa;
+            e->entryTime = fb;
+            e->exitTime = fa;
             e->slot5C = 1;
         }
         for (j = 0; j < n; j++) {
@@ -837,7 +837,7 @@ s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef
         for (k = 0; k < m; k++) {
             MeshHit* h = &spans[k];
             MeshFace* f;
-            if (1.0f < h->f40 + h->f44) {
+            if (1.0f < h->entryTime + h->exitTime) {
                 f = h->face50;
             } else {
                 f = h->face54;

@@ -107,8 +107,8 @@ void InitAgent(Agent* self)
     self->targetRangeMin = 0;
     s32 i;
     for (i = 16; i >= 0; i--) self->stateClips[i].id = -1;
-    f32* s3 = &self->fB9C;
-    f32* s4 = (f32*)&self->fBE0;
+    f32* s3 = &self->leapFractionRange;
+    f32* s4 = (f32*)&self->clip10DelayMin;
     s32 m = -1;
     for (i = 16; i >= 0; i--) self->secondaryClips[i].id = m;
     f32 one = 1.0f;
@@ -117,27 +117,27 @@ void InitAgent(Agent* self)
     s32 s0 = -1;
     self->flagIndex = r;
     self->flags538 = (self->flags538 & ~((u64)0xF0 << 32)) | ((u64)1 << 37);
-    self->fB14 = s1;
+    self->usesStartPhase = s1;
     self->secondaryTargetKey = s0;
     self->fB30 = one;
-    self->fB58 = s0;
+    self->scatterCount = s0;
     SetSwitchedColliderEnabled(self, 0);
     f32 d = 3.4028235e+38f;
     self->gravityScale = 1.5f;
     self->startPhase = -1.0f;
-    self->fB9C = one;
+    self->leapFractionRange = one;
     self->copySource = self;
     self->clip10Deadline = d;
     self->state8Deadline = d;
     self->tint[3] = 0x20;
     s3[1] = 2.5f;
-    self->fBE0 = 0;
+    self->clip10DelayMin = 0;
     s4[1] = 0.8f;
     self->bindingKey = s0;
     *(f32*)&self->fBD0 = one;
     self->fadesOut = s1;
     self->contactValue = 1.25f;
-    self->fBDC = s1;
+    self->turnsToPush = s1;
 }
 
 struct BufferedStream;
@@ -311,7 +311,7 @@ void UnregisterAgent(Agent* self)
     self->targetReadyTime = 0;
     self->arrivalTime = 0;
     self->state6Deadline = 3.4028235e+38f;
-    self->fBF8 = 3.4028235e+38f;
+    self->rosterWaitTime = 3.4028235e+38f;
     self->clip10Deadline = 3.4028235e+38f;
     self->state8Deadline = 3.4028235e+38f;
 }
@@ -396,7 +396,7 @@ void StepAgent(Agent* self, f32 dt)
         Vec02 w;
         Vec02 v;
         f32 left = *(f32*)&self->arrivalTime - g_gameTime[0];
-        EvaluateHermiteVectorSegment(left, &self->pos, &self->v150, &self->fBB0, &self->fBC0, left <? dt, 1.0f, &p, &w, 0);
+        EvaluateHermiteVectorSegment(left, &self->pos, &self->v150, &self->hermiteEnd, &self->hermiteEndVelocity, left <? dt, 1.0f, &p, &w, 0);
         Vu0::Q(v) = Vu0::DivX(Vu0::Sub(Vu0::Q(w), Vu0::Q(self->v150)), Vu0::Scalar(dt));
         ClampVectorLength(&v, &v, 20000.0f);
         AddColliderForce(self, &v);
@@ -532,7 +532,7 @@ void UpdateAgent(Agent* self, f32 dt)
     Mat02 arc;
     s32 kind;
     UpdateTurningCollider(self, dt);
-    if (self->fB44 != 0) {
+    if (self->repicksSecondaryTarget != 0) {
         PickAgentSecondaryTarget(self);
     }
     void* held = self->primaryTarget;
@@ -597,7 +597,7 @@ void UpdateAgent(Agent* self, f32 dt)
         MulRotationInto(self, arc, spin);
     }
     ClearRootTries(self);
-    self->fB14 = 0;
+    self->usesStartPhase = 0;
 }
 
 extern f32 g_gameClock[];
@@ -637,7 +637,7 @@ s32 ChooseAgentState(Agent* self)
     case 1:
         switch (m) {
         case 1:
-            if (self->fBF8 < g_gameClock[1]) {
+            if (self->rosterWaitTime < g_gameClock[1]) {
                 s = 5;
             }
             break;
@@ -651,7 +651,7 @@ s32 ChooseAgentState(Agent* self)
             }
             break;
         case 2:
-            if (self->fBF8 < g_gameClock[1]) {
+            if (self->rosterWaitTime < g_gameClock[1]) {
                 s = 7;
             }
             break;
@@ -660,7 +660,7 @@ s32 ChooseAgentState(Agent* self)
     case 2:
         switch (m) {
         case 1:
-            if (self->fBF8 < g_gameClock[1]) {
+            if (self->rosterWaitTime < g_gameClock[1]) {
                 s = 5;
             }
             break;
@@ -672,7 +672,7 @@ s32 ChooseAgentState(Agent* self)
             }
             break;
         case 2:
-            if (self->fBF8 < g_gameClock[1]) {
+            if (self->rosterWaitTime < g_gameClock[1]) {
                 s = 7;
             }
             break;
@@ -683,12 +683,12 @@ s32 ChooseAgentState(Agent* self)
         case 0:
             break;
         case 1:
-            if (self->fBF8 < g_gameClock[1]) {
+            if (self->rosterWaitTime < g_gameClock[1]) {
                 s = 5;
             }
             break;
         case 2:
-            if (self->fBF8 < g_gameClock[1]) {
+            if (self->rosterWaitTime < g_gameClock[1]) {
                 s = 7;
             }
             break;
@@ -734,12 +734,12 @@ s32 ChooseAgentState(Agent* self)
             }
             break;
         case 1:
-            if (self->fBF8 < g_gameClock[1]) {
+            if (self->rosterWaitTime < g_gameClock[1]) {
                 s = 5;
             }
             break;
         case 2:
-            if (self->fBF8 < g_gameClock[1]) {
+            if (self->rosterWaitTime < g_gameClock[1]) {
                 s = 7;
             }
             break;
@@ -756,7 +756,7 @@ s32 ChooseAgentState(Agent* self)
             }
             break;
         case 2:
-            if (self->fBF8 < g_gameClock[1]) {
+            if (self->rosterWaitTime < g_gameClock[1]) {
                 s = 7;
             }
             break;
@@ -911,13 +911,13 @@ static inline f32 ClockTime(const f32* clock) { return clock[1]; }
 void BuildAgentPath(Agent* self)
 {
     if (self->pathValid != 0) {
-        if (!(g_agentPathRetryDelay[0] < ClockTime(g_gameClock) - self->fA64)) return;
+        if (!(g_agentPathRetryDelay[0] < ClockTime(g_gameClock) - self->pathBuiltTime)) return;
     }
-    if (self->fB90 != 0) {
+    if (self->leapActive != 0) {
         self->pathCount = 2;
         u128 pos = Vu0::Q(self->v140);
         Vu0::Q(self->f940) = pos;
-        f32 maxLen = __builtin_fabsf(self->fB94);
+        f32 maxLen = __builtin_fabsf(self->leapSpan);
         u128 goal = Vu0::Q(self->snappedGoal);
         f32 len = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(goal, pos), Vu0::Sub(goal, pos))));
         Vec02 a;
@@ -971,7 +971,7 @@ void BuildAgentPath(Agent* self)
     }
     self->pathIndex = 0;
     self->pathValid = 1;
-    self->fA64 = ClockTime(g_gameClock);
+    self->pathBuiltTime = ClockTime(g_gameClock);
 }
 
 static inline f32 ClampTo(f32 v, const f32* r)
@@ -1070,7 +1070,7 @@ void UpdateAgentGoal(Agent* self, s32 flag)
     case 4:
         if (flag != 0) {
             if (self->mainClip != 0) {
-                switch (self->f920) {
+                switch (self->resumeKind) {
                 case 0:
                     FindNearestAnimationPathTime((Animation*)self->mainClip, self, self->savedClipTime, &self->v140, &self->resumeTime, &q, 0);
                     break;
@@ -1327,7 +1327,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
         s32 count;
         BaseObject** list;
         TransformPointBetweenFrames(self, 0, (Vec02*)self->scatterPoint, (Vec02*)&vec);
-        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &vec, self->fB58, self->fB70);
+        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &vec, self->scatterCount, self->scatterHoldsCounts);
         InitContactPairFlags(g_currentWorld, self);
         if (((Animation*)self->mainClip) != 0) {
             s32 i;
@@ -1364,7 +1364,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
         SetAgentFacingAngles(self, self->placeHeading, 0.0f);
         break;
     case 7:
-        self->fBF8 = 3.4028235e+38f;
+        self->rosterWaitTime = 3.4028235e+38f;
         break;
     case 10:
         self->clip10Deadline = 3.4028235e+38f;
@@ -1374,7 +1374,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
     if (tgt != 0) {
         f32 w;
         s32 mode;
-        if (self->state == 2 && self->fB14 != 0) {
+        if (self->state == 2 && self->usesStartPhase != 0) {
             f32 t = self->startPhase;
             w = (0.0f <= t) ? t : RandomFloatInRange(0.0f, 1.0f);
         } else {
@@ -1488,7 +1488,7 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
             break;
         }
     }
-    if (self->fBDC != 0) {
+    if (self->turnsToPush != 0) {
         if (0.0001f < Vu0::ToFloat(Vu0::Length(Vu0::Q(ev->push)))) {
             self->facingLocked = 0;
             f32 heading = ArctangentOfRatio(-ev->push.y, -ev->push.x);
@@ -1565,7 +1565,7 @@ void ApplyPendingAgentChanges(Agent* self) {
                 self->statePlayer = 0;
             } else {
                 self->statePlayer->time = self->statePlayer->anim->length;
-                self->statePlayer->f10 = 3.4028235e+38f;
+                self->statePlayer->delay = 3.4028235e+38f;
             }
         }
         s32 m = -3;
@@ -1593,19 +1593,19 @@ void SteerAgentAlongPath(Agent* self)
     Vec02 d;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
     f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d))));
-    f32 t = ClampToRange((ValueRange*)&self->fB9C, dist / __builtin_fabsf(self->fB94));
-    f32 time = t * self->fB98;
+    f32 t = ClampToRange((ValueRange*)&self->leapFractionRange, dist / __builtin_fabsf(self->leapSpan));
+    f32 time = t * self->leapDuration;
     Vec02 vel;
     Vu0::Q(vel) = Vu0::MulXSum(Vu0::Q(d), Vu0::Scalar(1.0f / time), Vu0::Q(self->gravity), Vu0::Scalar(time * -0.5f));
     self->desc02()->m20(self, &vel);
     *(f32*)&self->arrivalTime = g_gameTime[0] + time;
     f32 speed = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d))));
-    self->fBB0 = target;
+    self->hermiteEnd = target;
     u128 pos = Vu0::MulAddX(Vu0::Q(vel), Vu0::Q(self->gravity), Vu0::Scalar(time));
-    Vu0::Q(self->fBC0) = pos;
+    Vu0::Q(self->hermiteEndVelocity) = pos;
     if (1.0f < speed) {
         f32 ang = ArctangentOfRatio(d.y, d.x);
-        if (self->fB94 < 0.0f) ang += 3.14159265f;
+        if (self->leapSpan < 0.0f) ang += 3.14159265f;
         SetAgentFacingAngles(self, ang, 0.0f);
         Vec02 w;
         u128 s = Vu0::FromFloat(-1.0f);
@@ -1767,7 +1767,7 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             self->followsClipMotion = 0;
             break;
         case 0x1AC: {
-            self->fB90 = 1;
+            self->leapActive = 1;
             self->pathValid = 0;
             AnimEvent* from = FindAnimationMarkerEvent(anim, 0x1AE);
             AnimEvent* mid = FindAnimationMarkerEvent(anim, 0x1AF);
@@ -1784,12 +1784,12 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             f32 zero = 0.0f;
             anim->movedTrack->pos->vt->eval(anim->movedTrack->pos, self, from->a0.f, zero, 0, &p0, 0);
             anim->movedTrack->pos->vt->eval(anim->movedTrack->pos, self, end->a0.f, zero, 0, &p1, 0);
-            self->fB94 = p1.x - p0.x;
-            self->fB98 = (end->a0.f - from->a0.f) / anim->speedScale;
+            self->leapSpan = p1.x - p0.x;
+            self->leapDuration = (end->a0.f - from->a0.f) / anim->speedScale;
             break;
         }
         case 0x1AD:
-            self->fB90 = 0;
+            self->leapActive = 0;
             break;
         case 0x1AE:
             ((AgentSlotFn)self->desc08()->m61)(self);
@@ -1864,10 +1864,10 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             nearer += closer;
         }
         if (nearer == 0) {
-            self->clip10Deadline = g_gameClock[1] + *(f32*)&self->fBE0;
+            self->clip10Deadline = g_gameClock[1] + *(f32*)&self->clip10DelayMin;
         } else {
             f32 r = RandomFloatInRange((f32)(nearer - 1) / (f32)count, (f32)nearer / (f32)count);
-            self->clip10Deadline = g_gameClock[1] + (1.0f - r) * *(f32*)&self->fBE0 + r * self->fBE4;
+            self->clip10Deadline = g_gameClock[1] + (1.0f - r) * *(f32*)&self->clip10DelayMin + r * self->clip10DelayMax;
         }
         break;
     }
@@ -2878,10 +2878,10 @@ void SetItemKeeperState(ItemKeeper* self, s32 ns)
             do {
                 Agent* it = *p;
                 if (it->desc08()->m57(it) != 0) {
-                    it->fBF8 = g_gameClock[1];
+                    it->rosterWaitTime = g_gameClock[1];
                 } else {
                     f32 r = RandomFloatInRange(D_00274D10[0], D_00274D10[1]);
-                    it->fBF8 = g_gameClock[1] + r;
+                    it->rosterWaitTime = g_gameClock[1] + r;
                 }
                 i++;
                 p++;

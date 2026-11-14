@@ -824,7 +824,7 @@ void DropColliderContacts(Collider* self, s32 mode)
         }
         FreePooledContactChain(self->world, freed);
     }
-    ctx->f4B8 = 0;
+    ctx->stateBits = 0;
 }
 
 // Copies the current position into the previous one (v370).
@@ -1147,7 +1147,7 @@ void CopyCollider(Collider* self, Collider* other)
     self->link414 = d;
     self->handler = s4E4;
     self->attached = 0;
-    self->f4B8 = 0;
+    self->stateBits = 0;
     self->flags538 = (self->flags538 & 0xFFFBFFFFFFFFFFFFULL) | (bit << 50);
     SetColliderPartListed(self, 1);
     if (self->meshCopy.vertCount) CopyMeshTransformed(&other->meshCopy, 0, &self->meshCopy);
@@ -1320,11 +1320,11 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
     if (depth < 0.0001f) {
         return;
     }
-    if (other->f278 != 0) {
+    if (other->oscillatorBlock != 0) {
         Vec02 axes[2];
         Vec02 dir = normal;
         BuildPerpendicularPair(&dir, &axes[0], &g_unitXVector, &g_unitZVector);
-        ComputeOscillatorDisplacement((Oscillator*)(((Oscillated_1BA5B0*)other->f278)->oscillator), 50.0f, &point, &axes[0], 0, &axes[0], 0);
+        ComputeOscillatorDisplacement((Oscillator*)(((Oscillated_1BA5B0*)other->oscillatorBlock)->oscillator), 50.0f, &point, &axes[0], 0, &axes[0], 0);
         Vu0::Set(normal, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(axes[0]), Vu0::Q(axes[1])), Vu0::Q(g_unitZVector)));
     }
     f32 push;
@@ -2027,7 +2027,7 @@ void CopyColliderMeshesInFrame(Collider* self, Collider* src, s32 extra)
     CopyMeshTransformed(&tmp, (s32)m, &self->mesh);
     BuildMatrixFromRotationAndTranslation(&self->v140, &self->m110, (Mat4A*)m);
     CopyMeshTransformed(&self->mesh, (s32)m, &self->meshCopy);
-    self->f4B8 = 0;
+    self->stateBits = 0;
     CloneTreeNodes(&src->meshCopy, &src->tree, &self->meshCopy, &self->tree);
     CloneTreeNodes(&src->mesh2Copy, &src->tree2, &self->mesh2Copy, &self->tree2);
     InitColliderMeshMotion(self);

@@ -58,7 +58,7 @@ void ApplyScaledOffset(ScaledOffsetObject* self);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void CompleteTimeRangeNotifier(TimeRangeNotifier* self);
 
-// What a notifier tells the world's object (World::f1D60, its slot 27) or its listener (slot 31)
+// What a notifier tells the world's object (World::endListener, its slot 27) or its listener (slot 31)
 // when it fires: the state and itself.
 struct StateMessage {
     s32 state;              // 0x00
@@ -282,7 +282,7 @@ void InitStateNotifier(StateNotifier* self)
 {
     self->initialMode = 0;
     self->countRate = 30.0f;
-    self->state = self->f2DC = -1;
+    self->state = self->idleEvent = -1;
     InitPlacedObject(self);
     AppendToList(&self->world->list1C54, self);
     s32 v = TakeFlagTableIndex((FlagTable*)g_flagTable);
@@ -319,7 +319,7 @@ void StartStateNotifier(StateNotifier* self)
 {
     StartPlacedObject(self);
     void* r = FindFirstObjectByIdGathered(self->world, 1, 0x75, self);
-    self->f2EC = (BaseObject*)r;
+    self->joinedObject = (BaseObject*)r;
     if (r != 0) {
         ((void (*)(void*))((void**)*(void***)r)[7])(r);
     }
@@ -753,7 +753,7 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
     Vec02 d;
     UpdatePlacedObject(self, dt);
     TransformDirectionBetweenFrames(self, 0, &g_notifierFacingDirection, &d);
-    if (!(Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)(*(Camera**)g_camera)->f90))) < 0.0f)) {
+    if (!(Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)(*(Camera**)g_camera)->rotationRow1))) < 0.0f)) {
         below = 0;
     }
     if (below != self->belowCameraPlane) {
@@ -809,7 +809,7 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
         if (!(1.0f < g_gameClock[1] - self->stateSince)) {
             break;
         }
-        self->f2EC->desc->m02(self->f2EC);
+        self->joinedObject->desc->m02(self->joinedObject);
     case 6:
         TriggerStateNotifierNearPlayer(self);
         break;
@@ -941,7 +941,7 @@ void SetStateNotifierState(StateNotifier* self, s32 state)
     if ((u32)state < 8) {
         switch (state) {
         case 0: {
-            s32 saved = self->f2DC;
+            s32 saved = self->idleEvent;
             self->motionAccel = *(Vec02*)g_zeroVector;
             event = 0x261;
             if (saved != -1) {
@@ -958,8 +958,8 @@ void SetStateNotifierState(StateNotifier* self, s32 state)
             self->motionAccel = *(Vec02*)g_notifierFallAcceleration;
             break;
         case 2:
-            if (self->f334 == 0) {
-                self->f338 = (void*)1;
+            if (self->timerDisabled == 0) {
+                self->timerEnabled = (void*)1;
             }
             self->desc->m03(self);
             break;
@@ -993,14 +993,14 @@ void SetStateNotifierState(StateNotifier* self, s32 state)
         }
     }
     if (state == 0 || state == 6) {
-        BaseObject* obj = self->f2EC;
+        BaseObject* obj = self->joinedObject;
         if (obj != 0) {
             obj->desc->m02(obj);
         } else {
             obj->desc->m03(0);
         }
     } else {
-        BaseObject* obj = self->f2EC;
+        BaseObject* obj = self->joinedObject;
         if (obj != 0) {
             obj->desc->m03(obj);
         }
@@ -1013,8 +1013,8 @@ void SetStateNotifierState(StateNotifier* self, s32 state)
         if (h == 0) {
             void* made = CreateStateWalker((StateGraph*)(self->stateGraph), self, event, 0);
             self->host = made;
-            if (0.0f < self->f2E0) {
-                AdvanceStateWalkerTime((Node_1B6CF0*)made, self->f2E0);
+            if (0.0f < self->walkerTimeOffset) {
+                AdvanceStateWalkerTime((Node_1B6CF0*)made, self->walkerTimeOffset);
             }
         } else {
             SetStateWalkerTarget((StateWalker*)h, event);
@@ -1061,7 +1061,7 @@ void HandleTimeRangeNotifierNotification(TimeRangeNotifier* self, s32 kind, void
     if (target != self->host) return;
     GetStateWalkerCurrentKey((StateWalker*)target, &fr.code);
     if (fr.code != 0x263) return;
-    BaseObject* obj = self->world->f1D60;
+    BaseObject* obj = self->world->endListener;
     if (obj != 0) {
         fr.note.state = 1;
         fr.note.sender = self;
@@ -1076,7 +1076,7 @@ void UpdateTimeRangeNotifier(TimeRangeNotifier* self, f32 dt)
 {
     UpdateStateNotifier(self, dt);
     if (self->state != 0) return;
-    if (self->f338 == 0) return;
+    if (self->timerEnabled == 0) return;
     if (g_displayMode != 2) {
         self->timeLeft = self->timeLeft - g_frameDt;
     }
@@ -1167,7 +1167,7 @@ void SetEffectNotifierState(TimeRangeNotifier* self, s32 mode)
     if (s->state != mode) {
         switch (mode) {
         case 0:
-            if (s->f338 != 0) {
+            if (s->timerEnabled != 0) {
                 s->timeLeft = RandomFloatInRange(s->timeMin, s->timeMax);
             }
             break;
@@ -1321,7 +1321,7 @@ void HandleDeadlineNotifierNotification(DeadlineNotifier* self, s32 kind, void* 
     if (msg != self->host) return;
     GetStateWalkerCurrentKey((StateWalker*)msg, &fr.code);
     if (fr.code != 0x263) return;
-    BaseObject* dev = self->world->f1D60;
+    BaseObject* dev = self->world->endListener;
     if (dev != 0) {
         fr.note.state = 1;
         fr.note.sender = self;
@@ -1336,7 +1336,7 @@ void UpdateNotifierWorldDeadline(DeadlineNotifier* self, f32 dt)
 {
     UpdateStateNotifier(self, dt);
     if (self->state != 0) return;
-    if (self->world->f2308 <= g_gameTime) self->desc02()->m2F(self, 6);
+    if (self->world->deadlineTime <= g_gameTime) self->desc02()->m2F(self, 6);
 }
 
 // Changes the state. Mode 1 sets the timer caption's best-time state to 2, tells the listener (slot
@@ -1400,7 +1400,7 @@ s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out)
     n = 0;
     recs = (Candidate_00148938*)AllocateBackMemory(CountListItems(&self->list1C54) * 8);
     for (StateNotifier* p = (StateNotifier*)self->list1C54.head; p != 0; p = p->next374) {
-        if (p->f338 != 0 && ((Desc01*)p->desc)->id == kind) {
+        if (p->timerEnabled != 0 && ((Desc01*)p->desc)->id == kind) {
             Candidate_00148938* r = &recs[n++];
             r->obj = p;
             if (p->state == 2) {
@@ -1452,7 +1452,7 @@ s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec02* a2, s32 n, StateNotif
             o->desc02()->m1E(o, (Mat02*)g_identityMatrix);
             o->desc02()->m20(o, (Vec02*)g_zeroVector);
             o->desc02()->m21(o, (Vec02*)g_zeroVector);
-            o->f2E0 = (f32)i * g_scatterStagger;
+            o->walkerTimeOffset = (f32)i * g_scatterStagger;
             o->landed = 0;
             i++;
             o->desc02()->m2F(o, 3);
@@ -1519,7 +1519,7 @@ void HandleCountdownNotifierNotification(CountdownNotifier* self, s32 kind, void
     if (msg != self->host) return;
     GetStateWalkerCurrentKey((StateWalker*)msg, &fr.code);
     if (fr.code != 0x263) return;
-    BaseObject* dev = self->world->f1D60;
+    BaseObject* dev = self->world->endListener;
     if (dev != 0) {
         fr.note.state = 1;
         fr.note.sender = self;
@@ -1534,7 +1534,7 @@ void CountDownNotifierTimer(CountdownNotifier* self, f32 dt)
 {
     UpdateStateNotifier(self, dt);
     if (self->state != 0) return;
-    if (self->f338 == 0) return;
+    if (self->timerEnabled == 0) return;
     if (g_displayMode != 2) {
         self->timeLeft = self->timeLeft - g_frameDt;
     }
@@ -1572,7 +1572,7 @@ void SetCountdownNotifierState(CountdownNotifier* self, s32 mode)
     goto call_tail;
 
 zero_case:
-    if (self->f338 != 0) {
+    if (self->timerEnabled != 0) {
         self->timeLeft = RandomFloatInRange(self->timeMin, self->timeMax);
     }
     goto call_tail;

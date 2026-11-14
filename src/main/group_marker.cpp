@@ -219,7 +219,7 @@ void UploadProjectionConstants(void)
         CopyWordsToWriter((PacketWriter*)obj, 8, 1, (u32*)g_projectionScale, 0);
         CopyWordsToWriter((PacketWriter*)obj, 8, 1, (u32*)g_projectionOffset, 1);
         CopyWordsToWriter((PacketWriter*)obj, 0xC, 1, (u32*)g_projectionExtraConstants, 0xC);
-        CopyWordsToWriter((PacketWriter*)obj, 4, 1, (u32*)&g_currentWorld->f1D68, 3);
+        CopyWordsToWriter((PacketWriter*)obj, 4, 1, (u32*)&g_currentWorld->lightingParamB, 3);
         CloseDmaTag((PacketWriter*)obj);
     }
 }

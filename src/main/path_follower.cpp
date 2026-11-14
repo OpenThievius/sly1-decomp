@@ -309,9 +309,9 @@ s32 GetPlayerRequestPhase(Player* self)
 // own velocity (z at least a minimum) into state 2 with argument 6; clears the jump speed.
 void FinishPlayerRequest(Player* self)
 {
-    if (self->f2730 != 0) {
+    if (self->requestAccepted != 0) {
         FinishSwitchedCollider(self);
-        self->f2730 = 0;
+        self->requestAccepted = 0;
     }
     if (self->lastMessage.fn != 0) {
         s32 fn = self->lastMessage.fn;
@@ -353,7 +353,7 @@ void NotifyPlayerGroundObject(Player* self)
 {
     u32 i;
     // the object's class is not known (a subclass of Collider)
-    if (self->f2438 != 0 && *(s32*)((u8*)self->f2438 + 0x58C) != 0) {
+    if (self->containingCollider != 0 && *(s32*)((u8*)self->containingCollider + 0x58C) != 0) {
         Vec02 p;
         Vec02 moved;
         p = self->v140;
@@ -361,25 +361,25 @@ void NotifyPlayerGroundObject(Player* self)
         if (self->subState == 0x27 || self->subState == 0x2F) {
             p.z = p.z - 10.0f;
         }
-        if (self->f2438->f278 != 0) {
-            ComputeOscillatorDisplacement((Oscillator*)(((void**)self->f2438->f278)[3]), 50.0f, &p, 0, &moved, 0, 0);
+        if (self->containingCollider->oscillatorBlock != 0) {
+            ComputeOscillatorDisplacement((Oscillator*)(((void**)self->containingCollider->oscillatorBlock)[3]), 50.0f, &p, 0, &moved, 0, 0);
             u128 s2 = Vu0::Scalar(2.0f);
             u128 s1 = Vu0::Scalar(-1.0f);
             Vu0::Q(p) = Vu0::MulXSum(Vu0::Q(p), s2, Vu0::Q(moved), s1);
         }
-        i = FindPlaneTreeNodeForPoint((Vec02*)&p, self->f2438->tree.nodes) != 0;
+        i = FindPlaneTreeNodeForPoint((Vec02*)&p, self->containingCollider->tree.nodes) != 0;
     } else {
         i = 0;
     }
     if (i != 0 && (self->v150.z < 0.0f || !(self->state == 2 || self->subState == 0x2C || self->subState == 0x2B))) {
         OwnerMessage msg;
-        InitOwnerMessage(&msg, 3, self->f2438);
-        if (((MessageHandlerFn)self->f2438->desc03()->m47)(self->f2438, 0, &msg) != 0) {
+        InitOwnerMessage(&msg, 3, self->containingCollider);
+        if (((MessageHandlerFn)self->containingCollider->desc03()->m47)(self->containingCollider, 0, &msg) != 0) {
             self->desc05()->m4C(self, (void*)&msg);
         }
     }
     Vec02 out;
-    if (i == 0 || ProbeColliderBelowPoint(self, self->f2438, &out) == 0) {
+    if (i == 0 || ProbeColliderBelowPoint(self, self->containingCollider, &out) == 0) {
         return;
     }
     f32 fresh = 0.05f;
@@ -427,7 +427,7 @@ void NotifyPlayerGroundObject(Player* self)
                 // the object's class is not known
                 if (*(s32*)(e + 0x120) == 1 && *(s32*)(e + 0x1B0) == 2) {
                     m.kind = 0x24;
-                    m.source = self->f2438;
+                    m.source = self->containingCollider;
                 }
                 ((HitFn*)o->desc)[31](o, &m);
                 rec->time = g_gameClock[1];
@@ -446,8 +446,8 @@ s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out)
     Vec02 start;
     Vec02 end;
     ColliderSpan hit;
-    if (col->f278 != 0) {
-        ComputeOscillatorDisplacement((Oscillator*)(((void**)col->f278)[3]), 50.0f, &self->v140, 0, &moved, 0, 0);
+    if (col->oscillatorBlock != 0) {
+        ComputeOscillatorDisplacement((Oscillator*)(((void**)col->oscillatorBlock)[3]), 50.0f, &self->v140, 0, &moved, 0, 0);
         Vu0::Q(shift) = Vu0::Sub(Vu0::Q(moved), Vu0::Q(self->v140));
     } else {
         shift = g_zeroVector;

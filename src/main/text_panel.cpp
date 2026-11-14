@@ -102,18 +102,18 @@ struct BorderColorMix
 
 struct CameraHeading {
     u8 pad0[0x40];
-    s32 f40[4];             // 0x40: the eye
+    s32 position[4];        // 0x40: the eye
     f32 planes[3][4];       // 0x50: the view planes' normals, as columns (camera.h)
     u8 pad80[0x1C4 - 0x80];
-    f32 f1C4;               // 0x1C4
+    f32 zoom;               // 0x1C4: the camera's current zoom
     u8 pad1C8[0x1E0 - 0x1C8];
-    f32 f1E0;               // 0x1E0
+    f32 aspectScale;        // 0x1E0: scales the yaw offset with zoom
     u8 pad1E4[0x468 - 0x1E4];
     f32 heading;            // 0x468
     u8 pad46C[0x470 - 0x46C];
     f32 pitch;              // 0x470
     u8 pad474[0x478 - 0x474];
-    f32 f478;
+    f32 zoomFraction;
 };
 
 extern s32 g_padRouting;
@@ -703,7 +703,7 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     AddGifRegisterWrite(gs, 0x42, 0x44);
     BeginGifTag(gs, 0x84, 5, 0x44441);
     for (s32 i = 0; i < 8; i++) {
-        f32 zoom = g_camera->f478;
+        f32 zoom = g_camera->zoomFraction;
         const PanelColor* const lit = &g_arcTickColorFrom;
         const PanelColor* const dim = &g_arcTickColorTo;
         f32 step = 1.0f / 15.0f;
@@ -805,7 +805,7 @@ void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
     }
     self->spin = WrapAngle(self->spin + g_frameDt * k);
 
-    alpha = (s32)(g_camera->f478 * 24.999f) + 0x30;
+    alpha = (s32)(g_camera->zoomFraction * 24.999f) + 0x30;
     switch (self->palette) {
     case 0:
         if (self->state == 5) {
@@ -845,7 +845,7 @@ void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
     }
 
     GetTextPanelCenter(self, &posX, &posY);
-    scale = g_camera->f478 + 1.0f;
+    scale = g_camera->zoomFraction + 1.0f;
 
     {
         f32 step = 1.0f / 24.0f;
@@ -1073,7 +1073,7 @@ s32 CompareEntriesFarthestFirst(void** a, void** b)
     Vec02 pb;
     ConvertPositionToWorld((BaseObject*)*a, &pa);
     ConvertPositionToWorld((BaseObject*)*b, &pb);
-    u128 cam = Vu0::Q(g_camera->f40);
+    u128 cam = Vu0::Q(g_camera->position);
     u128 da = Vu0::Sub(cam, Vu0::Q(pa));
     u128 db = Vu0::Sub(cam, Vu0::Q(pb));
     s32 c = Vu0::ToFloat(Vu0::Dot(da, da)) < Vu0::ToFloat(Vu0::Dot(db, db));
@@ -1371,7 +1371,7 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
         e = &entries[i];
         e->obj = objs[i];
         ((void (*)(void*, PanelEntryPosition*, f32*))a2)(e->obj, &e->v, &e->radius);
-        e->key = Vu0::Distance(e->v, *(PanelEntryPosition*)g_camera->f40) - e->radius;
+        e->key = Vu0::Distance(e->v, *(PanelEntryPosition*)g_camera->position) - e->radius;
     }
     HeapSortRecords(entries, n, 0x20, kind == 0x2E ? CompareEntriesFlaggedLast : CompareEntriesByAttachedKey);
     s32 mayStart = 1;
@@ -1389,7 +1389,7 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
         }
         CameraHeading* cam = g_camera;
         u128 ones = Vu0::Ones();
-        Vu0::Q(d) = Vu0::Sub(Vu0::Q(e->v), Vu0::Q(cam->f40));
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(e->v), Vu0::Q(cam->position));
         u32 signs = Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), Vu0::Q(d), ones, Vu0::ScalarAt(e->radius)) ^ 0xF0;
         s32 visible = signs == 0;
         if (want && !visible) {
@@ -1398,13 +1398,13 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
             f32 rise = ArctangentOfRatio(d.z, Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(v, v))));
             yaw = WrapAngle(yaw - g_camera->heading);
             f32 pitch = WrapAngle(rise - g_camera->pitch);
-            if (g_camera->f1C4 * (g_camera->f1E0 * 0.45f) < yaw) {
+            if (g_camera->zoom * (g_camera->aspectScale * 0.45f) < yaw) {
                 self->blockA[0] = 1;
-            } else if (yaw < g_camera->f1C4 * (g_camera->f1E0 * -0.45f)) {
+            } else if (yaw < g_camera->zoom * (g_camera->aspectScale * -0.45f)) {
                 self->blockA[1] = 1;
-            } else if (g_camera->f1C4 * 0.45f < pitch) {
+            } else if (g_camera->zoom * 0.45f < pitch) {
                 self->blockA[2] = 1;
-            } else if (pitch < g_camera->f1C4 * -0.45f) {
+            } else if (pitch < g_camera->zoom * -0.45f) {
                 self->blockA[3] = 1;
             }
         }

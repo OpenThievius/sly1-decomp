@@ -508,7 +508,7 @@ void InitEffectOwner(EffectOwner* self)
 
 void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b)
 {
-    a->boundsMargin = b->f1E8;
+    a->boundsMargin = b->boundsMargin;
 }
 
 // Removes every effect of the owner, puts the owner back on the world's free list and clears the
@@ -1084,8 +1084,8 @@ void EndEffectWithImpact(Effect* self, s32 flag)
             p->vt->m00(p, s, 40.0f, 0);
             p->life = 0.75f;
             p->m30[1] = 30.0f;
-            if (self->target->f278 != 0) {
-                p->oscillator = (void*)((s32*)self->target->f278)[3];
+            if (self->target->oscillatorBlock != 0) {
+                p->oscillator = (void*)((s32*)self->target->oscillatorBlock)[3];
             }
         }
         RemoveEffect(self);

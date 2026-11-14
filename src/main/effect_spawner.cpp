@@ -858,7 +858,7 @@ void ResolveEffectSpawnerLinks(EffectSpawner* self)
     PostLoadPlacedObject(self);
     if (self->key2F8 == -1 && self->id304 == -1 && self->id30C == -1 && self->id300 == -1) {
         Rec50* p = self->rec;
-        if (p->kind != 3 && (p->f120 != 0 || p->f188 == -1)) goto tail;
+        if (p->kind != 3 && (p->effectMode != 0 || p->f188 == -1)) goto tail;
     }
     s2 = GetOwnSpawnRecord(self, 1);
     if (self->id2F8[0] != -1) {
@@ -894,8 +894,8 @@ void InheritFlaggedAncestorValue(EffectSpawner* self);
 void StartEffectSpawner(EffectSpawner* self)
 {
     StartPlacedObject(self);
-    if (self->rec->f1B0 != -1)
-        self->rec->f120 = 1;
+    if (self->rec->effectKind != -1)
+        self->rec->effectMode = 1;
     if (self->mode == -1) {
         if (self->chance != 0.0f || self->continuous != 0)
             self->mode = 3;
@@ -993,8 +993,8 @@ Rec50* CloneSharedSpawnRecord(Rec50* self)
     Rec50* n;
     if (self->uses < 2) return self;
     n = (Rec50*)CopyToFrontMemory(0x200, self);
-    if (self->kind == 3 && self->f24 != 0) {
-        n->f24 = CopyToFrontMemory(0x28 * self->value20, self->f24);
+    if (self->kind == 3 && self->links != 0) {
+        n->links = CopyToFrontMemory(0x28 * self->value20, self->links);
     }
     n->uses = 1;
     self->uses -= 1;
@@ -1057,7 +1057,7 @@ void WrapSpawnerParticlesIntoBox(EffectSpawner* self)
         Vu0::Q(lo) = half;
     }
     Vu0::Q(size) = Vu0::Splat(self->margin + self->margin);
-    if (self->rec->f120 != 0) {
+    if (self->rec->effectMode != 0) {
         return;
     }
     WorldListedObject* w = (WorldListedObject*)self->held348;
@@ -1124,7 +1124,7 @@ void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
                 }
                 cam = g_camera;
                 near = 1;
-                r = o->fadeDistanceFar * cam->fB0;
+                r = o->fadeDistanceFar * cam->rangeScale;
                 d = Vu0::Sub(Vu0::Q(o->v140), Vu0::Q(cam->position));
                 if (!(r * r > Vu0::ToFloatMoved(Vu0::Dot(d, d)))) {
                     near = 0;
@@ -1140,7 +1140,7 @@ void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
     } else {
         if (self->parent != 0) {
             Camera* cam = g_camera;
-            f32 r = self->fadeDistanceFar * cam->fB0;
+            f32 r = self->fadeDistanceFar * cam->rangeScale;
             s32 far = 1;
             if (!(r * r < Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->position)),
                                                  Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->position)))))) {
@@ -1212,7 +1212,7 @@ spawn:
         n = (s32)(self->targetCount * self->volumeScale);
         s32 have;
         BaseObject* held;
-        if (self->rec->f120 == 0) {
+        if (self->rec->effectMode == 0) {
             held = self->held348;
             have = held != 0 ? ((WorldListedObject*)held)->particleCount : 0;
         } else {
@@ -1362,7 +1362,7 @@ void SetEffectSpawnerContinuous(EffectSpawner* a0, s32 a1)
 // 0.8 and kind 27 gets -1 and 10.0; others get zeros.
 void SetSpawnRecordKind(Rec50* self,s32 kind)
 {
-    self->f1B0=kind;
+    self->effectKind=kind;
     FillMemory(&self->f1F0,0,12);
     if (kind!=24) {
         if (kind==27) {
@@ -1452,7 +1452,7 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
         } else {
             k = t;
         }
-        if (snd != 0 && set->f584 != 0) {
+        if (snd != 0 && set->splashSoundEnabled != 0) {
             f32 vol = k * 0.9f + 0.1f;
             PlayingSound* rec = (PlayingSound*)snd->playingSound;
             if (rec != 0) {
@@ -1484,7 +1484,7 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
         if (snd != 0) {
             snd->surfaceEffectTime = g_gameTime;
         }
-        if (set->f588 != 0 && 500.0f < dist) {
+        if (set->splashBurstEnabled != 0 && 500.0f < dist) {
             SplashTail tail = { 2, -1, 0, 0, 1.0f, 0.0f, 0, 0, 8.0f, 12.0f, 0, 0, cfg };
             Blk05 block = {
                 { dist * 0.5f, dist * 0.75f, 1.0f }, self->world->gravity, { 0.0f, 0.0f, 0.0f },
@@ -2006,15 +2006,15 @@ void EmitParticleChunk(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad
             FillMemory(rec, 0, 0x10);
             s32 r = RandomIntInRange(0, set->colorCount - 1);
             rec->w[0] = r;
-            if (set->f614 != 0) rec->w[0] = r & 0xFFFFFFFE;
-            if (self->f178 != 0) rec->w[1] = RandomIntInRange(0, set->regCount - 1);
+            if (set->pairedColors != 0) rec->w[0] = r & 0xFFFFFFFE;
+            if (self->randomSecondFrame != 0) rec->w[1] = RandomIntInRange(0, set->regCount - 1);
             if (set->particleMode == 2) {
                 f32 f = RandomInRange(self->range19C);
                 *(f32*)&rec->w[2] = f;
-                if (self->f198 == 0) {
+                if (self->skipCameraFacing == 0) {
                     if (0.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(g_camera->rot80.r[1]), Vu0::Q(*v)))) *(f32*)&rec->w[2] = -f;
                 }
-                if (self->f1A4 != 0) *(f32*)&rec->w[3] = RandomFloatInRange(-3.14159274f, 3.14159274f);
+                if (self->randomTurn != 0) *(f32*)&rec->w[3] = RandomFloatInRange(-3.14159274f, 3.14159274f);
             }
             if (set->mode == 2) {
                 ParticleExtra* x = &chunk->extra[k];
@@ -2117,7 +2117,7 @@ void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* s
             Vec02* p = (Vec02*)(i * 16 + second->out[0]);
             Vu0::Set(tmp, Vu0::Rotate(M, Vu0::Q(*p)));
             Vu0::Q(*p) = Vu0::Add(Vu0::Q(P), *(u128*)&tmp);
-            s32 kind = ((Rec50*)r->rec)->f80;
+            s32 kind = ((Rec50*)r->rec)->secondVelocityMode;
             if (kind != 3) {
                 Vec02* v = (Vec02*)(i * 16 + second->out[1]);
                 Vu0::Q(*v) = Vu0::Rotate(M, Vu0::Q(*v));
@@ -2149,7 +2149,7 @@ void SpawnEffectsFromRecord(s32 a, Rec50* b, void* c)
     PushBackMemoryMark();
     f.flag = 1;
     GenerateSpawnArrays(a, b, f.out);
-    if (b->f120 == 1) {
+    if (b->effectMode == 1) {
         SpawnRecordEffects(b, c, a, f.out[0], f.out[1], f.out[2], f.out[3]);
     } else {
         if (b->f130 == 2) {
@@ -2651,10 +2651,10 @@ void SendMessageAfterDelay(HoldingMember* self, void* message)
 s32 GetOrCreateSoundParams(void* self)
 {
     HoldingMember* o = (HoldingMember*)self;
-    if (o->fA0 == 0) {
-        InitSoundParams((SoundRecord**)&o->fA0);
+    if (o->soundParams == 0) {
+        InitSoundParams((SoundRecord**)&o->soundParams);
     }
-    return o->fA0;
+    return o->soundParams;
 }
 
 // The 0x200-byte spawn record (Rec79) as func_001590A0 changes its copy: the copy is written
@@ -2721,13 +2721,13 @@ void ComputeChainedWorldFrame(void* a, void* frame, void* out);
 extern f32 g_spawnScaleRatioRange[2];
 extern const Vec02 g_zeroVector;
 
-// The sound a spawner member plays (HoldingMember::fA0): the sound, two radii, a volume and a pitch.
+// The sound a spawner member plays (HoldingMember::soundParams): the sound, two radii, a volume and a pitch.
 struct SpawnSoundParams {
     s32 id;
-    f32 f04;
-    f32 f08;
-    f32 f0C;
-    f32 f10;
+    f32 outerRange;
+    f32 innerRange;
+    f32 baseVolume;
+    f32 pitch;
 };
 
 // Handles a spawn message: starts from a copy of the spawner's record, overrides it with what the
@@ -2805,7 +2805,7 @@ void HandleSpawnMessage(void* self, void* body)
         cp = 0;
     }
     SpawnEffectsFromRecord(count, (Rec50*)&rec, cp);
-    if (((HoldingMember*)self)->fA0 != 0) {
+    if (((HoldingMember*)self)->soundParams != 0) {
         switch (rec.kind) {
         case 0:
             v = rec.v20;
@@ -2830,8 +2830,8 @@ void HandleSpawnMessage(void* self, void* body)
             Vu0::Q(v) = Vu0::Add(Vu0::Rotate(fr->rot, Vu0::Q(v)), Vu0::Q(fr->pos));
         }
         TransformPointBetweenFrames((PlacedObject*)rec.target, 0, &v, &v);
-        SpawnSoundParams* snd = (SpawnSoundParams*)((HoldingMember*)self)->fA0;
-        StartSoundEffect(snd->id, 0, 0, &v, snd->f04, snd->f08, snd->f0C, snd->f10, 0.0f, 0, 0);
+        SpawnSoundParams* snd = (SpawnSoundParams*)((HoldingMember*)self)->soundParams;
+        StartSoundEffect(snd->id, 0, 0, &v, snd->outerRange, snd->innerRange, snd->baseVolume, snd->pitch, 0.0f, 0, 0);
     }
 }
 
@@ -3460,7 +3460,7 @@ s32 GatherObjectsById(World* world, u32 flags, s32 id, void* scope, s32 max, voi
             break;
         }
         for (i = id; i < 0x95 && IsClassOfKind(i, id); i++) {
-            for (obj = (PlacedObject*)world->f1884[i]; obj != 0; obj = (PlacedObject*)obj->nextById) {
+            for (obj = (PlacedObject*)world->objectsById[i]; obj != 0; obj = (PlacedObject*)obj->nextById) {
                 CollectObjectByMode(obj, kind, flags & 0x100, 0, root, max, &c, found, &min);
             }
         }
@@ -3502,8 +3502,8 @@ void InitScalingVolume(ScalingVolume* self)
 {
     InitPlacedObject(self);
     f32* v = self->v;
-    self->f2F0 = 1.0f;
-    self->f2EC = 1.0f;
+    self->targetScale = 1.0f;
+    self->currentScale = 1.0f;
     self->v[0] = 1.0f;
     v[1] = 0.2f;
     v[2] = 0.1f;
@@ -3520,14 +3520,14 @@ void LoadScalingVolume(ScalingVolume* self,void* other)
 void UpdateScalingVolume(ScalingVolume* self, f32 dt)
 {
     UpdatePlacedObject(self, dt);
-    self->f2EC = ApproachValueWithRamp((RampProfile*)self->v, 0, self->f2EC, self->f2F0, g_frameDt);
+    self->currentScale = ApproachValueWithRamp((RampProfile*)self->v, 0, self->currentScale, self->targetScale, g_frameDt);
 }
 
 // Draws the placed object with its transform scaled uniformly by its current scale (at 0x2EC).
 void DrawScalingVolume(ScalingVolume* self, void* arg1, void* arg2)
 {
     ScaledDrawFrame f;
-    BuildUniformScaleAboutPoint(0, &f.q0, self->f2EC);
+    BuildUniformScaleAboutPoint(0, &f.q0, self->currentScale);
     BuildPlacedObjectTransform(self, (Quad16*)arg2, (ScaledTransform*)f.m40);
     MultiplyMatrices(f.m90, f.m40, &f.q0);
     f.m40[0] = f.m90[0];
@@ -3547,10 +3547,10 @@ s32 IsPointInsideObjectFaces(ScalingVolume* self, void* point)
 {
     Vec02 local;
     Vec02 k;
-    if (self->f2EC < 0.0001f)
+    if (self->currentScale < 0.0001f)
         return 0;
     TransformPointBetweenFrames(0, self, (Vec02*)point, &local);
-    Vu0::Q(k) = Vu0::FromFloat(1.0f / self->f2EC);
+    Vu0::Q(k) = Vu0::FromFloat(1.0f / self->currentScale);
     Vu0::Q(local) = Vu0::MulX(Vu0::Q(local), Vu0::Q(k));
     return IsPointInsideFaceTree((TreeNode03*)self->out2DC, (FacePoint*)&local);
 }

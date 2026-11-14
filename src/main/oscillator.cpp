@@ -218,7 +218,7 @@ struct TrackedTargetChoice {
     s32 cnt;            // 0x0C
     u8 pad10[0x84];
     s32 s94;            // 0x94
-    BaseObject* f98;    // 0x98: the best candidate ChooseBestTargetCandidate finds
+    BaseObject* bestTarget; // 0x98: the best candidate ChooseBestTargetCandidate finds
 };
 struct TargetLaunchFrame {
     s32 a[4];           // 0x00
@@ -1181,7 +1181,7 @@ larg:
 void LoadObjectSubGroup(ObjectSubGroup* self, void* s3)
 {
     ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)&self->levelEntry);
-    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)&self->f308);
+    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)&self->flaggedFadeText);
     ReadBufferedRotation3((BufferedStream*)s3, &self->rot);
     ReadBufferedVector3((BufferedStream*)s3, &self->pos);
     void (*f)(BaseObject* self) = self->desc->m12;
@@ -1264,7 +1264,7 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
 
     key = (BaseObject*)GetActiveSwitchedCollider();
     if (g_timerCaption.state == 2
-        && (self->f2E0 != 0 || self->f2D4 != 0
+        && (self->finishesTimedRun != 0 || self->f2D4 != 0
             || (g_saveData->entryIndex == 0 && (u8)GetEntryIdByKey(self->levelEntry) == 1))) {
         FinishBestTimeRun(&g_timerCaption);
         SetObjectSubGroupState(self, 2);
@@ -1311,17 +1311,17 @@ void StartObjectSubGroupFade(ObjectSubGroup* self)
     FadeRequest m;
     s32 ok = 0;
     m.kind = 1;
-    switch (self->f304) {
+    switch (self->flagSource) {
     case 0: ok = GetLevelEntryWord(GetEntryIdByKey(self->levelEntry)) >> 1; goto fin;
     case 1: ok = g_currentEntry->flags >> 1;
     fin: ok &= 1;
     }
     if (ok) {
-        m.text = (u8*)self->f308;
-        m.f08 = self->f30C;
+        m.text = (u8*)self->flaggedFadeText;
+        m.f08 = self->flaggedFadeValue;
     } else {
         m.text = (u8*)self->levelEntry;
-        m.f08 = self->f300;
+        m.f08 = self->defaultFadeValue;
     }
     m.f0C = -1;
     m.flags = 0;
@@ -1680,7 +1680,7 @@ void FillTrackedNodes(Rec36* self)
 void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
 {
     TargetLaunchFrame f;
-    ChooseBestTargetCandidate(self, ctx->s94, &ctx->f98, (TargetHit*)f.a, &f.distance);
+    ChooseBestTargetCandidate(self, ctx->s94, &ctx->bestTarget, (TargetHit*)f.a, &f.distance);
     if (ctx->cnt != 0) {
         ComputeTargetArc(self, (TargetArcSource*)f.a, 0.0f, 0, (Vec02*)f.b, 0);
         self->desc02()->m1D(self, (Vec02*)f.b);

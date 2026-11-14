@@ -201,7 +201,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     if (state != -1 && old != -1) {
         chained = state == g_aimModeChain.a[old];
     }
-    AimSlotObject* hold = (AimSlotObject*)self->f25D8[0];
+    AimSlotObject* hold = (AimSlotObject*)self->slotObjects[0];
     if (hold != 0 && chained == 0) {
         hold->vt[7](hold);
     }
@@ -216,7 +216,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     play:
         StartSoundEffect(id, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     case 0:
-        self->f4B8 = 0;
+        self->stateBits = 0;
         break;
     case 6:
     case 7:
@@ -241,17 +241,17 @@ void SetPlayerAimMode(Player* self, s32 state)
         self->aimCurve = 0;
         break;
     case 1:
-        self->f4B8 = 0;
+        self->stateBits = 0;
         break;
     case 2:
-        self->f4B8 = 0;
+        self->stateBits = 0;
         break;
     case 10:
-        self->f4B8 = 0;
+        self->stateBits = 0;
         anim = self->aimAnim10;
         break;
     case 11:
-        self->f4B8 = 0;
+        self->stateBits = 0;
         anim = self->aimAnim11;
         break;
     case 0: {
@@ -260,7 +260,7 @@ void SetPlayerAimMode(Player* self, s32 state)
         sound = 13;
         speed = 0.0f;
         start = g->pC0->p8->f8;
-        self->f4B8 = 0;
+        self->stateBits = 0;
         self->previousBoundObject = 0;
         self->previousAimCurve = 0;
         self->aimEndTime = g_gameClock.time + 0.1f;
@@ -269,7 +269,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     case 3: {
         Vec02 v;
         self->foundNodeCount = 0;
-        self->f21C8 = -1.0f;
+        self->aimHeldTime = -1.0f;
         TransformPointBetweenFrames(0, self, &((PlacedObject*)self->f23D4)->v140, &v);
         Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
         Vu0::Q(v) = Vu0::MulXSum(Vu0::Vec::Of(v), h, Vu0::Vec::Of(((PlacedObject*)self->f61C)->pos), h).q;
@@ -360,7 +360,7 @@ void SetPlayerAimMode(Player* self, s32 state)
         if (s == 0.0f) {
             if (start == 0.0f) {
                 speed = -1.0f;
-            } else if (start == ((AimPlayer*)self->aimAnimPlayer)->anim->f34) {
+            } else if (start == ((AimPlayer*)self->aimAnimPlayer)->anim->blendedDuration) {
                 speed = 1.0f;
             }
         } else {
@@ -489,18 +489,18 @@ void HandlePlayerAimButton(Player* self, PadRecord* other)
         break;
     }
     if (held != 0)
-        self->f21C8 = g_gameTime[0];
+        self->aimHeldTime = g_gameTime[0];
 tail:
     s32 st = self->aimMode;
     if (st == -1) {
         if (flag != 0) {
-            if (g_gameTime[0] - self->f21C8 < 0.35f) st = 3;
+            if (g_gameTime[0] - self->aimHeldTime < 0.35f) st = 3;
         }
     } else if (st >= -1) {
         if (st < 8) {
             if (st >= 4) {
                 if (flag != 0 && self->f2248 != 0) {
-                    if (g_gameTime[0] - self->f21C8 < 0.35f) st = 3;
+                    if (g_gameTime[0] - self->aimHeldTime < 0.35f) st = 3;
                 }
             }
         }

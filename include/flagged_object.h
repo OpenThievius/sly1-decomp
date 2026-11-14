@@ -22,7 +22,7 @@ struct FlaggedObject : Collider {
     void* objsB[4];         // 0x590
     s32 childId;            // 0x5A0: the id of the first child of kind 0x74 (-1 until found)
     void* child;            // 0x5A4: that object
-    void* f5A8;             // 0x5A8: the object of id 0x545 (the loader's table D_00261410)
+    void* stateGraph;       // 0x5A8: the object of id 0x545 (the loader's table D_00261410)
     StateWalker* handle;        // 0x5AC: a handle func_001B6290 makes for f5A8
     s32 flagIndex;          // 0x5B0: an index of the table at D_00261420 (func_00140FF8)
     s32 ordinal;            // 0x5B4: the world's count at +0x2304 when it was made

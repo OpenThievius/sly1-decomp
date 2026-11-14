@@ -90,7 +90,7 @@ void LoadTargetFollowerRecords(TargetFollower* self, BufferedStream* stream)
     if (i < self->list550->count) {
         // address arithmetic over a variable index
         Entry47* p = (Entry47*)((u8*)(i * 0x14) + (s32)self->list550->items);
-        self->leadTime = p->ref->f34;
+        self->leadTime = p->ref->leadTime;
     }
 }
 
@@ -108,7 +108,7 @@ void ResolveTargetFollowerLinks(TargetFollower* self)
     ResolveObjectLinks(self, 2, (ObjectLink*)g_targetFollowerResolveLinks);
     self->stateWalker = CreateStateWalker((StateGraph*)self->list550, self, -1, 1);
     self->launchPool = (Sub47*)FindFirstObjectByIdGathered(self->world, 1, 0x8C, self);
-    ConvertPositionToWorld((BaseObject*)self->f568, (Vec02*)scratch);
+    ConvertPositionToWorld((BaseObject*)self->heightObject, (Vec02*)scratch);
     self->heightOffset = self->v140.z - scratch[2];
     if (self->followedObjectId != -1)
     {
@@ -346,7 +346,7 @@ struct ChaseObject;
 
 struct FollowObject {
     u8 pad00[0x48];
-    ChaseObject* f48;       // 0x48
+    ChaseObject* chaseTarget; // 0x48: the object the pooled item is chasing/launched as
     u8 pad4C[0x60 - 0x4C];
     FollowPoseA poseA;      // 0x60: the record the placement is read from; its v50 is the velocity at 0xB0
     FollowPoseB poseB;      // 0xE0
@@ -356,10 +356,10 @@ struct ChaseObject {
     u8 pad00[0x350];
     Vec02 gravity;          // 0x350
     u8 pad360[0x690 - 0x360];
-    f32 f690;               // 0x690
+    f32 initialSpeed;       // 0x690: the speed the launch starts at
     u8 pad694[0x6F0 - 0x694];
     f32 f6F0;               // 0x6F0
-    f32 f6F4;               // 0x6F4
+    f32 speedChangeRate;    // 0x6F4: how fast the speed changes during the flight
     u8 pad6F8[0x700 - 0x6F8];
     Vec02 v700;             // 0x700
 };
@@ -368,8 +368,8 @@ struct FollowTune {
     u8 pad00[0x31C];
     f32 launchInterval;     // 0x31C: the delay before the next launch
     f32 flightTime;         // 0x320: how long a launched item takes to reach the target
-    f32 f324;               // 0x324
-    f32 f328;               // 0x328
+    f32 speedChangeFraction; // 0x324: the fraction of the flight over which the speed changes
+    f32 endSpeedRatio;      // 0x328: end speed over initial speed
     f32 launchAngle;        // 0x32C: the angle of a ballistic launch
     f32 launchSpeed;        // 0x330: the speed along Z given to the launched object
     f32 f334;               // 0x334
@@ -387,7 +387,7 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
     Mat02 c;
     GetObjectWorldPosition((BaseObject*)self->lookTarget, &a);
     FollowObject* obj = (FollowObject*)self->launchPool;
-    ChaseObject* t = obj->f48;
+    ChaseObject* t = obj->chaseTarget;
     FollowPoseA* sa = &obj->poseA;
     FollowPoseB* sb = &obj->poseB;
     if (t == 0) {
@@ -405,21 +405,21 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
         } else {
             Vu0::Q(dir) = Vu0::DivX(Vu0::Q(dir), len);
         }
-        f32 e = tune->f328;
+        f32 e = tune->endSpeedRatio;
         f32 l = Vu0::ToFloat(len);
-        f32 f5 = tune->f324;
+        f32 f5 = tune->speedChangeFraction;
         if (e == 1.0f) {
             f32 q = l / tune->flightTime;
-            t->f6F4 = 0.0f;
+            t->speedChangeRate = 0.0f;
             t->f6F0 = q;
-            t->f690 = q;
+            t->initialSpeed = q;
         } else {
             f32 q = (l + l) / ((f5 - e * f5 + (e + e)) * tune->flightTime);
-            t->f690 = q;
+            t->initialSpeed = q;
             t->f6F0 = q * e;
-            t->f6F4 = (t->f6F0 - q) / (f5 * tune->flightTime);
+            t->speedChangeRate = (t->f6F0 - q) / (f5 * tune->flightTime);
         }
-        Vu0::Q(sa->v50) = Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(t->f690));
+        Vu0::Q(sa->v50) = Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(t->initialSpeed));
     } else if (IsObjectOfKind((BaseObject*)t, 0x3E) != 0) {
         Vu0::Q(obj->poseA.v50) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::ScalarAt(tune->launchSpeed));
         Vu0::Q(t->v700) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-tune->f334));

@@ -24,7 +24,7 @@ struct HitStamp {
 struct TargetMemo {
     void* key;
     f32 along;
-    f32 f8;
+    f32 time;
     u8 padC[4];
     Vec02 pos;
 };
@@ -246,8 +246,8 @@ struct SwitchedCollider : Collider {
 };
 
 struct TurningCollider : SwitchedCollider {
-    void* f610;             // 0x610
-    void* f614;             // 0x614
+    void* linkPartA;        // 0x610: the first of the two link parts
+    void* linkPartB;        // 0x614: the second link part
     void* f618;             // 0x618
     void* f61C;             // 0x61C
     void* f620;             // 0x620
@@ -330,9 +330,9 @@ struct Player : TurningCollider {
     void* f1014;             // 0x1014
     void* aimAnim10;        // 0x1018: the animation of aim state 10 (func_001C61E0)
     void* aimAnim11;        // 0x101C: that of aim state 11
-    void* f1020;             // 0x1020
-    void* f1024;             // 0x1024
-    void* f1028;             // 0x1028
+    void* jumpAnimDefault;   // 0x1020: the jump animation of kind 0 and the fallback
+    void* jumpAnimKind2;     // 0x1024
+    void* jumpAnimKinds134;  // 0x1028
     u8 pad102C[0x1030 - 0x102C];
     void* f1030;             // 0x1030
     void* f1034;             // 0x1034
@@ -341,7 +341,7 @@ struct Player : TurningCollider {
         u8 f103C[0x20];     // 0x103C
         PlayerBlendEntry blend103C[2];  // 0x103C: the two entries of the path blend (ControlPlayerOnPath)
     };
-    void* f105C;            // 0x105C: the blend item BuildCombinedBlendAnimation makes of blend103C
+    void* pathBlendItem;    // 0x105C: the blend item BuildCombinedBlendAnimation makes of blend103C
     void* f1060;             // 0x1060
     void* f1064;            // 0x1064
     void* f1068;             // 0x1068
@@ -357,8 +357,8 @@ struct Player : TurningCollider {
     void* subStateAnims[59]; // 0x109C: the animation of each sub-state (+0x2228), by its number (SetPlayerState)
     void* stateGraph;       // 0x1188: the state graph the player's walker runs
     s32 f118C;              // 0x118C
-    Part07 f1190;           // 0x1190: given to func_001C4848/func_001C4618 with f610 (slot 37)
-    Part07 f1290;           // 0x1290: the same with f614
+    Part07 footProbeA;      // 0x1190: given to func_001C4848/func_001C4618 with f610 (slot 37)
+    Part07 footProbeB;      // 0x1290: the same with f614
     void* stateNodes[0x11]; // 0x1390: the animation node of each state (func_00174F50)
     void* targetModeNodes[0x11]; // 0x13D4: those of state 6, by +0x239C
     void* subStateNodes[0x15]; // 0x1418: those of state 4, by sub-state
@@ -386,7 +386,7 @@ struct Player : TurningCollider {
     };
     s32 trailEnabled;       // 0x21C0: set, the trail ribbon is drawn
     AimBlendGrid* aimGrid;  // 0x21C4: the aim grid TrackAimTargetObject and TrackAimTargetPoint blend
-    f32 f21C8;              // 0x21C8
+    f32 aimHeldTime;        // 0x21C8: the clock when the aim input was last held
     s32 boundsPointCount;   // 0x21CC: how many points boundsPoints holds
     Vec02 boundsPoints[3];  // 0x21D0: the points the player's bounds are expanded over
     void* aimTarget;        // 0x2200: the object aimed at
@@ -456,7 +456,7 @@ struct Player : TurningCollider {
     void* targetNode;       // 0x23B8: the node object it is bound to
     void* targetTrack;      // 0x23BC: the track record it is bound to
     f32 trackPos;           // 0x23C0: the place along the record at 0x23BC (DrivePlayerFromEntryQueue)
-    f32 f23C4;              // 0x23C4: added to f23C0 with the speed along the record (func_00171238)
+    f32 trackDistance;      // 0x23C4: added to f23C0 with the speed along the record (func_00171238)
     s32 trackReversed;      // 0x23C8: set, the turn is the other way (func_00171238)
     void* targetSwitch;     // 0x23CC: the class 0x17 object that set state 7 (func_0019AB78)
     void* f23D0;            // 0x23D0: an object whose slots 6, 7 and 35 the aim states 2 and 11 swap with f23D8 (func_001C61E0)
@@ -484,8 +484,8 @@ struct Player : TurningCollider {
     f32 spinTargetRate;     // 0x242C: the angular rate the spin approaches
     f32 spinRate;           // 0x2430: the angular rate
     f32 spinAngle;          // 0x2434: the spin angle
-    Collider* f2438;        // 0x2438: the object it is aimed at (func_001D66A8)
-    void* f243C;             // 0x243C
+    Collider* containingCollider; // 0x2438: the object it is aimed at (func_001D66A8)
+    void* textureObject;     // 0x243C
     Vec4U phaseSoundStates[5]; // 0x2440: D_002636A0 to D_002636E0 at set-up, copied whole (InitPlayer)
     void* f2490;             // 0x2490
     void* f2494;             // 0x2494
@@ -501,15 +501,15 @@ struct Player : TurningCollider {
     s32 ledgeKey;           // 0x24F4: the key of the ledge contact
     PlacedObject* rigObject; // 0x24F8: the object of link id 0x60 (D_00262E40); func_00175078 calls its slot 43
     Attachment* f24FC;               // 0x24FC
-    void* f2500;            // 0x2500: five parts whose byte at +0x10 func_00175078 sets to 9 or -1
+    void* rigAttachment;    // 0x2500: five parts whose byte at +0x10 func_00175078 sets to 9 or -1
     void* f2504;            // 0x2504
     void* f2508;            // 0x2508
     void* footPartA;        // 0x250C: also given to func_001719E8 and func_00171C80 with f1190
     void* footPartB;        // 0x2510: the same with f1290
     void* selfPoseSource;   // 0x2514: the player's own pose source
     void* rigPoseSource;    // 0x2518: the pose source on rigObject
-    Attachment* f251C;       // 0x251C
-    Attachment* f2520;               // 0x2520
+    Attachment* snapshotPoseFirst; // 0x251C: a snapshot pose source on f61C
+    Attachment* snapshotPoseSecond;  // 0x2520: a snapshot pose source on f23D0
     u8 pad2524[0x2530 - 0x2524];
     Vec02 poseOffset;       // 0x2530: an offset of the pose eased to zero (func_00172EE0)
     u8 aimBlend4[0x18];     // 0x2540: the blend set up for aim state 4 (func_001C6D00), with its animation
@@ -530,20 +530,20 @@ struct Player : TurningCollider {
     s32 f25CC;              // 0x25CC: ControlPlayer (func_00173888) holds state 12's step 0x21 while it is set
     s32 f25D0;              // 0x25D0: the same for step 0x23
     void* f25D4;             // 0x25D4
-    void* f25D8[5];         // 0x25D8
+    void* slotObjects[5];   // 0x25D8
     s32 foundNodeCount;     // 0x25EC: the number of f25F0 entries (func_00177990 adds up to 32); cleared by aim states 3 to 7 (func_001C61E0)
     PlacedObject* foundNodes[32]; // 0x25F0: the nodes func_00177990 found, which FindNodeForQuery skips
     Contact03* queryContacts; // 0x2670: contacts func_00177990 reads, then gives back to the world's pool
     s32 forcedOnOffObject;  // 0x2674: func_001D1200 compares it with f2678
     OnOffObject* ownOnOffObject;    // 0x2678: the record func_001D1260 fills
     void* f267C;             // 0x267C
-    f32 f2680;              // 0x2680: the last time the pose was stamped (func_00172EE0)
+    f32 poseStampTime;      // 0x2680: the last time the pose was stamped (func_00172EE0)
     s32 onOffPhase;         // 0x2684: the on/off phase
     f32 onOffPhaseTime;     // 0x2688: the time the phase was set
-    s32 f268C;              // 0x268C
+    s32 cameraSpringMode;   // 0x268C: 0, 1 or 2: the camera's spring set
     Vec02 v2690;            // 0x2690
     s32 f26A0;              // 0x26A0
-    void* f26A4;             // 0x26A4
+    void* soundLevelEntry;   // 0x26A4: the pushed sound level
     s32 ringCount;          // 0x26A8: the number of ring entries
     void* ringAnchors;      // 0x26AC: the ring's anchor table
     union {
@@ -561,13 +561,13 @@ struct Player : TurningCollider {
     s32 padSelectMode;      // 0x2718: -1, or a mode that holds the pad-select flag (func_001D27C0)
     void* f271C;             // 0x271C
     void* f2720;             // 0x2720
-    f32 f2724;              // 0x2724: 1.0 at set-up (InitPlayer)
-    f32 f2728;              // 0x2728: 1.0 at set-up
+    f32 outerFadeScale;     // 0x2724: 1.0 at set-up (InitPlayer)
+    f32 innerFadeScale;     // 0x2728: 1.0 at set-up
     BaseObject* f272C;       // 0x272C
-    s32 f2730;              // 0x2730
-    f32 f2734;              // 0x2734: the time state 4 last took the pad's 0x40 press (ControlPlayer)
-    s32 f2738;              // 0x2738: set, ControlPlayer runs the player's callback within D_00263910 of it
-    void* f273C;            // 0x273C: the hook (+0x3C8) put aside on entering state 13, given back on leaving it (func_00175170)
+    s32 requestAccepted;    // 0x2730: set when the request message is taken
+    f32 buttonPressTime;    // 0x2734: the time state 4 last took the pad's 0x40 press (ControlPlayer)
+    s32 pressArmed;         // 0x2738: set, ControlPlayer runs the player's callback within D_00263910 of it
+    void* savedHook;        // 0x273C: the hook (+0x3C8) put aside on entering state 13, given back on leaving it (func_00175170)
     EntryQueue* entryQueue; // 0x2740: the entry queue that drives it (func_0017CE20, func_0017CE80)
     s32 slowDownHeld;       // 0x2744: mode 2's slow-down held (func_001D2BB8)
     f32 speedUpAmount;      // 0x2748: mode 4's speed-up, 1 while held, eased back to 0 (func_001D2BB8)
@@ -578,7 +578,7 @@ struct Player : TurningCollider {
     s32 animSeekValue;      // 0x275C: 0 or 1: where the object animations were last sought
     void* f2760;             // 0x2760
     void* f2764;             // 0x2764
-    s32 f2768;              // 0x2768
+    s32 targetMemoCount;    // 0x2768: how many targetMemo entries are used (up to 0x20)
     u8 pad276C[0x2770 - 0x276C];
     union {
         u8 f2770[0x400];    // 0x2770
@@ -639,7 +639,7 @@ struct Agent : TurningCollider {
     f32 resumeTime;         // 0x914: the animation time the next player starts at
     f32 savedClipTime;      // 0x918: the animation time saved when a clip stops
     f32 savedClipSpeed;     // 0x91C: the speed saved when a clip stops
-    s32 f920;               // 0x920
+    s32 resumeKind;         // 0x920
     s32 pathGraphId;        // 0x924: the id of the point graph
     PointGraphObject* pathGraph; // 0x928: the point graph of f924 (FindFirstObjectByIdMode4)
     s32 pathCount;          // 0x92C: func_001C84C0 compares it with f930
@@ -656,7 +656,7 @@ struct Agent : TurningCollider {
     Vec02 goalPoint;        // 0xA40: the last point func_001C8418 was given
     Vec02 snappedGoal;      // 0xA50: that point (after SnapPointToOwnerGraph) while fA60 is clear
     s32 pathValid;          // 0xA60: cleared by func_001C8418 once the point is 40 (D_00274C90) from vA50 on the ground
-    f32 fA64; // 0xA64
+    f32 pathBuiltTime; // 0xA64
     s32 hitsLeft;           // 0xA68: the hits it takes before it is removed
     s32 fA6C;               // 0xA6C
     f32 fadeDelay;          // 0xA70
@@ -677,7 +677,7 @@ struct Agent : TurningCollider {
     s32 targetSetId;        // 0xB08
     void* targetSet;        // 0xB0C: the pool of objects it may target
     s32 flagIndex;          // 0xB10: its bit in the flag table
-    s32 fB14;               // 0xB14
+    s32 usesStartPhase;     // 0xB14: set at set-up, cleared once ClearRootTries has run
     f32 startPhase;         // 0xB18: the fraction of the clip a state-2 clip starts at
     s32 usesPitch;          // 0xB1C: set when it faces with a pitch as well as a yaw
     u8 fB20[4];             // 0xB20
@@ -686,15 +686,15 @@ struct Agent : TurningCollider {
     f32 fB30; // 0xB30
     u8 padB34[0xB40 - 0xB34];
     s32 hasSecondaryTarget; // 0xB40: set to 1 with fB48 (func_001CAB00)
-    s32 fB44; // 0xB44
+    s32 repicksSecondaryTarget; // 0xB44
     void* secondaryTarget;  // 0xB48
     s32 secondaryTargetKey; // 0xB4C: the id of the objects PickAgentSecondaryTarget picks from
     void* primaryTarget;    // 0xB50
     void* target;           // 0xB54
-    s32 fB58;               // 0xB58
+    s32 scatterCount;       // 0xB58: -1 at set-up
     s32 fB5C;               // 0xB5C
     u8 scatterPoint[0x10];  // 0xB60
-    s32 fB70;               // 0xB70
+    s32 scatterHoldsCounts; // 0xB70
     void* copySource;       // 0xB74: the object CopyAgent copied it from, where its clips are looked up
     s32 followsClipMotion;  // 0xB78: set while the clip's own motion moves it
     s32 facingLocked;       // 0xB7C
@@ -702,26 +702,26 @@ struct Agent : TurningCollider {
     s32 stateLocked;        // 0xB84
     s32 stateForced;        // 0xB88
     s32 loopBackArmed;      // 0xB8C
-    s32 fB90; // 0xB90
-    f32 fB94; // 0xB94
-    f32 fB98; // 0xB98
-    f32 fB9C; // 0xB9C
+    s32 leapActive; // 0xB90: set between the clip's markers 0x1AC and 0x1AD
+    f32 leapSpan; // 0xB94: the x distance of the leap in the clip's motion
+    f32 leapDuration; // 0xB98: the time the leap lasts in the clip
+    f32 leapFractionRange; // 0xB9C
     u8 padBA0[0xBA4 - 0xBA0];
     s32 arrivalTime;        // 0xBA4
     u8 padBA8[0xBB0 - 0xBA8];
-    Vec02 fBB0; // 0xBB0
-    Vec02 fBC0; // 0xBC0
+    Vec02 hermiteEnd; // 0xBB0: the end point of the leap curve
+    Vec02 hermiteEndVelocity; // 0xBC0: the end velocity of the leap curve
     s32 fBD0;               // 0xBD0
     s32 fadesOut;           // 0xBD4: set when state 11 fades the object out
     u32 requestsBlocked;    // 0xBD8: set to refuse requests and object events
-    s32 fBDC; // 0xBDC
-    s32 fBE0; // 0xBE0
-    f32 fBE4; // 0xBE4
+    s32 turnsToPush; // 0xBDC: 1 at set-up
+    s32 clip10DelayMin; // 0xBE0
+    f32 clip10DelayMax; // 0xBE4
     f32 contactValue;       // 0xBE8
     s32 bindingKey;         // 0xBEC: the id its state player's extra target binding uses (-1 none)
     s32 bindingObject;      // 0xBF0: the object that binding gives the state player
     f32 state6Deadline;     // 0xBF4: the clock when state 6 may end
-    f32 fBF8;               // 0xBF8
+    f32 rosterWaitTime;     // 0xBF8: FLT_MAX at set-up: the clock the roster-driven state changes wait for
     f32 clip10Deadline;     // 0xBFC: the clock when the clip of state 10 plays
     f32 state8Deadline;     // 0xC00: the clock when state 8 is chosen
     s32 contactsDisabled;   // 0xC04: set in states 11 and 16
@@ -779,7 +779,7 @@ struct World1Boss : ConeAgent {
     void* stateWalker;      // 0xC54: the state walker
     s32 stageKey;           // 0xC58: its mode, 0x2D8 to 0x2DB
     s32 visitsLeft;         // 0xC5C: the count it lowers (ChooseWorld1BossState stops at 0)
-    void* fC60;             // 0xC60
+    void* goalObject;       // 0xC60
     PlacedObject* keyRoots[6]; // 0xC64: the roots whose colliders slot 56 refuses (func_001E9038)
     PlacedObject* nearestKeyRoot; // 0xC7C: the nearest of fC64 (FindNearestAgentKey)
     s32 stageFlagIndices[4]; // 0xC80: the flag table bits it takes (TakeFlagTableIndex)
@@ -788,7 +788,7 @@ struct World1Boss : ConeAgent {
 };
 
 struct World2Boss : Agent {
-    s32 fC10;               // 0xC10
+    s32 busy;               // 0xC10
     u8 padC14[0xC20 - 0xC14];
     u8 blendItems[0xE00 - 0xC20]; // 0xC20: the six entries of the clip blend (CreateSixEntryBlend)
     BlendAnimationView* blendView; // 0xE00
@@ -796,7 +796,7 @@ struct World2Boss : Agent {
     s32 secondInRange;      // 0xE08: the second's
     void* walkerGraph;      // 0xE0C
     void* walker;           // 0xE10
-    void* fE14;             // 0xE14
+    void* heldObject;       // 0xE14
     void* firstPool;        // 0xE18
     void* secondPool;       // 0xE1C
     s32 keyedCount;         // 0xE20
@@ -809,12 +809,12 @@ struct World2Boss : Agent {
 };
 
 struct World4Boss : Agent {
-    s32 fC10;               // 0xC10
-    Animation* fC14;        // 0xC14: the animations the script gives (SetWorld4BossValues)
-    Animation* fC18;        // 0xC18
-    Animation* fC1C;        // 0xC1C
+    s32 hitCount;           // 0xC10
+    Animation* hitAnimation; // 0xC14: the animations the script gives (SetWorld4BossValues)
+    Animation* altHitAnimation; // 0xC18
+    Animation* thirdHitAnimation; // 0xC1C
     AnimationPlayer* hitPlayer; // 0xC20: the animation player of the hit it plays
-    s32 fC24;               // 0xC24
+    s32 freeFlag;           // 0xC24
     u8 padC28[0xC30 - 0xC28];
 };
 
@@ -847,7 +847,7 @@ struct WorldListedAgent : Agent {
 
 struct NumberedAgent : WorldListedAgent {
     s32 targetNear;         // 0xC20: latched when the target is near and ahead of it
-    s32 fC24;               // 0xC24
+    s32 gaugeValue;         // 0xC24: 1 at set-up
     void* slot;             // 0xC28: the gauge slot it holds
     s32 number;             // 0xC2C: its place in the order the agents started
 };
@@ -907,14 +907,14 @@ struct TintBlendCollider : TurningCollider {
     f32 tintStartTime;      // 0x72C
     f32 tintFadeTime;       // 0x730
     u8 pad734[0x738 - 0x734];
-    s32 f738;               // 0x738
+    s32 pressArmed;         // 0x738: set by message 0x15E, cleared by 0x15F
     s32 f73C;               // 0x73C
     void* heldContacts;     // 0x740
-    void* f744;             // 0x744
-    void* f748;             // 0x748
-    void* f74C;             // 0x74C
-    void* f750;             // 0x750
-    void* f754;             // 0x754
+    void* playerFrameObject; // 0x744: the object whose frame the player takes
+    void* primaryPart;      // 0x748: the part moved by springs
+    void* primaryPartAttachment; // 0x74C
+    void* secondaryPart;    // 0x750
+    void* secondaryPartAttachment; // 0x754
     void* walkerGraph;      // 0x758
     StateWalker* walker;        // 0x75C: a handle (func_001B64D8, func_001B6628 take it)
 };
@@ -1040,7 +1040,7 @@ struct GaugeCollider : SwitchedCollider {
 struct PathEmitter {
     void** vt;              // 0x00
     u8 pad04[0x18 - 0x04];
-    s32 f18;                // 0x18
+    s32 takesLocalSpawn;    // 0x18
 };
 struct PathEmitters {
     u8 pad00[0x18];
@@ -1151,7 +1151,7 @@ struct ModeWalker : PathFollower {
     StateWalker* stateWalker;   // 0xBBC: a handle (func_001B6290)
     PlacedObject* fBC0;     // 0xBC0
     PlacedObject* fBC4;             // 0xBC4: turned to the camera's side (func_00181078)
-    void* fBC8;             // 0xBC8
+    void* playerFrameObject; // 0xBC8: the object whose frame the player takes
     PlacedObject* fBCC;     // 0xBCC
     T2195_588* fBD0;        // 0xBD0: the matrix attachment func_00129D00 adds to fBCC
     u8 padBD4[0xBE0 - 0xBD4];
@@ -1160,9 +1160,9 @@ struct ModeWalker : PathFollower {
     f32 pulseStartTime;     // 0xBF4: the time the pulse began
     f32 pulseFadeStart;     // 0xBF8: the time the pulse's fade began
     f32 buttonPressTime;    // 0xBFC: the clock when the button was pressed (func_00181078)
-    s32 fC00;               // 0xC00
+    s32 pressArmed;         // 0xC00: set by message 0x15E, cleared by 0x15F
     void* contactChainHead; // 0xC04: the head of its contact chain
-    PlacedObject* fC08;     // 0xC08: the object func_00181658 turns to follow the path's frame
+    PlacedObject* pathFrameObject; // 0xC08: the object func_00181658 turns to follow the path's frame
     u8 padC0C[0xC10 - 0xC0C];
 };
 
@@ -1176,12 +1176,12 @@ struct World5ModeCollider : SwitchedCollider {
     void* stateGraph;       // 0x654: the graph of the walker
     void* stateWalker;      // 0x658: the state walker
     u8 pad65C[0x660 - 0x65C];
-    void* f660;             // 0x660
-    PlacedObject* f664;     // 0x664: the object whose position func_00179A68 takes into 0x660's frame
+    void* aimFrame;         // 0x660: the object whose frame the aim is in
+    PlacedObject* aimTargetObject; // 0x664: the object whose position func_00179A68 takes into 0x660's frame
     void* f668;             // 0x668
     u8 pad66C[0x674 - 0x66C];
-    PlacedObject* f674[2];  // 0x674: the two objects func_00179A68 turns toward the aimed point
-    PlacedObject* f67C;     // 0x67C: a third, turned by its own attachment's frame (func_00179A68)
+    PlacedObject* turnedParts[2]; // 0x674: the two objects func_00179A68 turns toward the aimed point
+    PlacedObject* thirdTurnedPart; // 0x67C: a third, turned by its own attachment's frame (func_00179A68)
     BaseObject* f680;       // 0x680: an object g_modeColliderLinks links (func_00124DF8)
     f32 restWeight;         // 0x684: the weight of the neutral animation
     u8 pad688[0x690 - 0x688];
@@ -1201,8 +1201,8 @@ struct World5ModeCollider : SwitchedCollider {
     f32 pulseStartTime;     // 0x6D4: the time the pulse began
     f32 pulseFadeStart;     // 0x6D8: the time the pulse's fade began
     f32 buttonPressTime;    // 0x6DC: the clock when the 0x40 button was last pressed (func_00179A68)
-    s32 f6E0;               // 0x6E0
-    void* f6E4;             // 0x6E4
+    s32 pressArmed;         // 0x6E0: set by message 0x15E, cleared by 0x15F
+    void* playerFrameObject; // 0x6E4: the object whose frame the player takes
     void* f6E8;             // 0x6E8
     f32 aimX;               // 0x6EC: the aim's two values, eased by their speeds (func_00179A68)
     f32 aimY;               // 0x6F0: the aim's y value, eased by its rate
@@ -1237,21 +1237,21 @@ struct HitCountCollider : SwitchedCollider {
     f32 stateTime;          // 0x614
     Animation* stateAnims[4]; // 0x618: the animation of states 0 to 3 (state 4 plays the last)
     AnimationPlayer* animPlayer; // 0x628: the player of the state's animation
-    void* f62C;             // 0x62C
-    f32 f630;               // 0x630
-    f32 f634;               // 0x634
+    void* drivenObject;     // 0x62C
+    f32 drivenBaseX;        // 0x630
+    f32 drivenBaseY;        // 0x634
     s32 acceptedMark;       // 0x638: set after an accepted request
     f32 acceptedTime;       // 0x63C
-    f32 f640;               // 0x640
+    f32 markStartTime;      // 0x640
     f32 heading;            // 0x644: the heading the stick asks for
     f32 aimHeading;         // 0x648: the heading of the second stick
     u8 pad64C[0x650 - 0x64C];
-    Vec02 f650; // 0x650
+    Vec02 desiredVelocity; // 0x650
     PlacedObject* aimObject; // 0x660: an object it turns with itself (func_001C34C8 sets its matrix)
     void* walkerGraph;      // 0x664
     void* walker;           // 0x668
     f32 speedLimit;         // 0x66C: the stick's strength, at least 0.25; bounds the acceleration
-    f32 f670;               // 0x670
+    f32 stickGain;          // 0x670
     u8 pad674[0x678 - 0x674];
     void* hitClip;          // 0x678
     AnimationPlayer* hitPlayer; // 0x67C: the player func_001C34C8 starts from f678 and stops at speed 0

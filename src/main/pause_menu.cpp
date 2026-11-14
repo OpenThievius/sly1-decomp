@@ -99,9 +99,9 @@ struct DisplayReg64 { u64 lo : 12; u64 mid : 11; u64 rest : 41; };
 struct DisplayReg32 { u32 lo : 12; u32 mid : 11; u32 rest : 9; u32 hi; } __attribute__((aligned(8)));
 struct DisplayPositionRegs {
     u8 pad0[0x18];
-    DisplayReg32 f18;
+    DisplayReg32 displayRegA;
     u8 pad20[0x20];
-    DisplayReg64 f40;
+    DisplayReg64 displayRegB;
 };
 extern DisplayPositionRegs g_displayRegisters;
 extern s32 D_00275BF0;
@@ -1022,17 +1022,17 @@ void UpdatePauseMenu(T217D_6D0* self)
         {
             DisplayPositionRegs* gs = &g_displayRegisters;
             s32 h = ConvertFloatToU32(g_screenAdjustX);
-            DisplayReg64 ra = gs->f40;
-            DisplayReg32 rb = gs->f18;
+            DisplayReg64 ra = gs->displayRegB;
+            DisplayReg32 rb = gs->displayRegA;
             ra.lo = h;
             rb.lo = h;
-            gs->f40 = ra;
-            gs->f18 = rb;
+            gs->displayRegB = ra;
+            gs->displayRegA = rb;
             s32 w = ConvertFloatToU32(v);
             ra.mid = w & ~1;
             rb.mid = w & 0x7FE;
-            gs->f40 = ra;
-            gs->f18 = rb;
+            gs->displayRegB = ra;
+            gs->displayRegA = rb;
         }
         break;
     }
@@ -1538,8 +1538,8 @@ void ActivatePauseMenuSelection(T217D_6D0* self)
         ExitLevelFromPauseMenu(self, (u32)sel < 1, 1);
         return;
     case 25: {
-        s32 a = self->f280;
-        self->f280 = 0;
+        s32 a = self->walker;
+        self->walker = 0;
         SetStateWalkerTarget((StateWalker*)a, sel == 0 ? 0x434 : 0x435);
         SetPauseMenuLayerPage(self, 0, -1);
         return;
@@ -1725,17 +1725,17 @@ void CancelPauseMenuPage(T217D_6D0* self)
     case 24: {
         DisplayPositionRegs* g = &g_displayRegisters;
         s32 v = ConvertFloatToU32(g_screenAdjustSavedX);
-        DisplayReg64 a = g->f40;
-        DisplayReg32 b = g->f18;
+        DisplayReg64 a = g->displayRegB;
+        DisplayReg32 b = g->displayRegA;
         a.lo = v;
         b.lo = v;
-        g->f40 = a;
-        g->f18 = b;
+        g->displayRegB = a;
+        g->displayRegA = b;
         s32 w = ConvertFloatToU32(g_screenAdjustSavedY);
         a.mid = w;
         b.mid = w;
-        g->f40 = a;
-        g->f18 = b;
+        g->displayRegB = a;
+        g->displayRegA = b;
         SetPauseMenuLayerPage(self, 0, 0x17);
         break;
     }

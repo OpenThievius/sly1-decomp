@@ -163,7 +163,7 @@ held:
     if (!IsTopCameraController((CameraController*)&g_camera->ctl454)) {
         PadRecord* rec = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
         StepSequence* seq = (StepSequence*)((CaptionBox_eu*)&g_typedTextCaptionBox)->child;
-        if (seq != 0 && seq->state2D4 == 3 && seq->f32C == 0 && (rec->flags & 0xC) && *(s32*)seq->target304 != 0) {
+        if (seq != 0 && seq->state2D4 == 3 && seq->buttonSkipBlocked == 0 && (rec->flags & 0xC) && *(s32*)seq->target304 != 0) {
             if (self->state == 12) {
                 self->pendingCaption = 0;
                 skipStep = 1;
@@ -195,10 +195,10 @@ held:
             if (HasSpareCount()) {
                 if (pad->flags & 0x40) {
                     ClearPadPressedBits(pad, 0x40);
-                    self->f2734 = g_gameTime[0];
+                    self->buttonPressTime = g_gameTime[0];
                 }
             }
-            if (self->f2738 != 0 && g_gameTime[0] - self->f2734 < g_playerCallbackWindow[0]) {
+            if (self->pressArmed != 0 && g_gameTime[0] - self->buttonPressTime < g_playerCallbackWindow[0]) {
                 RunPlayerCallback(self);
                 state = self->state;
                 sub = self->subState;

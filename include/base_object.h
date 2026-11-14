@@ -94,7 +94,7 @@ struct BaseObject {
     BaseObject* parent;            // 0x18
     BaseObject* next;              // 0x1C: the link in the parent's list of children (PlacedObject::children)
     BaseObject* prev;              // 0x20
-    BaseObject* nextById;          // 0x24: the next in its bucket of World::f1884 (func_0015A4F0 walks them)
+    BaseObject* nextById;          // 0x24: the next in its bucket of World::objectsById (func_0015A4F0 walks them)
     Callback01* callbacks;  // 0x28: slot 14 calls each
     void* scriptScope;      // 0x2C: looked up by func_001837E0, copied through func_0011A5B0
     Alias01* alias;         // 0x30

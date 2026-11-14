@@ -746,9 +746,9 @@ void MergeObjectLinkLists(World* ctx, PlacedObject* self, PlacedObject* other)
     if (self != other) {
         PlacedObject* e = (PlacedObject*)other->list60.head;
         if (e != 0) {
-            e->f54 = self;
+            e->linkListOwner = self;
             for (e = (PlacedObject*)e->link58.next; e != 0; e = (PlacedObject*)e->link58.next) {
-                e->f54 = self;
+                e->linkListOwner = self;
             }
         }
         SpliceListToEnd((List01*)&self->list60.head, (List01*)&other->list60.head);
@@ -765,7 +765,7 @@ void DissolveObjectLinkList(World* self, PlacedObject* owner)
     while ((node = NextInLinkList::Of(&it)) != 0) {
         if (node != owner) {
             RemoveFromList(&owner->list60, node);
-            node->f54 = node;
+            node->linkListOwner = node;
             node->list60.tail = node;
             node->list60.head = node;
         }
@@ -788,7 +788,7 @@ void MergeObjectGroupMembers(World* self, FoundList* group)
     s32 first = i;
     for (; i < group->count; i++) {
         if (IsObjectAttached(group->objects[i]) != 0) {
-            MergeObjectLinkLists(self, group->objects[first]->f54, group->objects[i]->f54);
+            MergeObjectLinkLists(self, group->objects[first]->linkListOwner, group->objects[i]->linkListOwner);
         }
     }
 }
@@ -847,8 +847,8 @@ void UnregisterObjectGroup(World* self, FoundList* s)
         }
         for (i = 0; i < s->count; i++) {
             obj = s->objects[i];
-            if (obj->f54 != 0) {
-                DissolveObjectLinkList(self, obj->f54);
+            if (obj->linkListOwner != 0) {
+                DissolveObjectLinkList(self, obj->linkListOwner);
                 break;
             }
         }
@@ -867,7 +867,7 @@ void RegroupQueuedObjects(World* self)
         do {
             PlacedObject* obj = self->regroupObjects[i];
             obj->flags &= mask;
-            if (obj->f54 == obj) {
+            if (obj->linkListOwner == obj) {
                 s32 j = obj->count6C;
                 j--;
                 for (; j >= 0; j--) {
@@ -961,7 +961,7 @@ void RemoveFromList(List01* list, void* item);
 void UpdateGroupsNearCamera(World* self)
 {
     for (PlacedObject* g = (PlacedObject*)self->list54.head; g != 0; g = (PlacedObject*)g->link48.next) {
-        if (g->f54 != g) {
+        if (g->linkListOwner != g) {
             continue;
         }
         PlacedObject* m = (PlacedObject*)g->list60.head;
@@ -977,7 +977,7 @@ void UpdateGroupsNearCamera(World* self)
                 m = 0;
                 goto done;
             }
-            if ((m->visibilityMask & cam->f21C) == cam->f21C) {
+            if ((m->visibilityMask & cam->areaMask) == cam->areaMask) {
                 f32 r = m->fadeDistanceFar + m->boundRadius;
                 u128 diff = Vu0::Sub(Vu0::Q(m->v140), Vu0::Q(cam->position));
                 f32 d = Vu0::ToFloatMoved(Vu0::Dot(diff, diff));
@@ -1643,7 +1643,7 @@ extern const Fn_Table g_gifPacketMethods[6] = { 0, 0, 0, (Fn_Table)(void (*)(Pac
 PacketWriter* InitGifPacket(PacketWriter* self)
 {
     (void)InitPacketBuffer(self);
-    self->f14 = 1;
+    self->closesThroughTable = 1;
     self->vt = (const PacketWriterVt*)g_gifPacketMethods;
     self->openTag = 0;
     self->registerCount = 0;

@@ -1064,14 +1064,14 @@ void InitWorldPools(World* self)
     self->fillRed = 0x10;
     self->fillGreen = 0x10;
     self->fillBlue = 0x40;
-    self->f1D68 = 50.0f;
+    self->lightingParamB = 50.0f;
     self->soundBank = -1;
     self->stagedBank = 0;
-    self->f2308 = 15.0f;
+    self->deadlineTime = 15.0f;
     self->timerDuration = 180.0f;
     self->value = 1.0f;
     self->valueTarget = 1.0f;
-    self->f2354 = 1;
+    self->scatterCountEnabled = 1;
     self->flagBits = 0xF03FFFFF;
 }
 
@@ -1731,7 +1731,7 @@ void SpawnListedObjectCopies(World* self)
     for (i = 0; i < 2; i++) {
         StateNotifier* n;
         for (n = (StateNotifier*)self->list1C54.head; n != 0; n = n->next374) {
-            if (n->f334 == 0 && n->desc->id == pairs[i].classId) {
+            if (n->timerDisabled == 0 && n->desc->id == pairs[i].classId) {
                 break;
             }
         }
@@ -1833,8 +1833,8 @@ void LoadWorld(World* self, BufferedStream* s)
     self->fillAlpha = 0x80;
     color = self->color1D64;
     FillScreenColor(g_screenClearPacketA, &color, 0);
-    self->f1D68 *= 0.003921569f;
-    self->f1D6C *= 0.003921569f;
+    self->lightingParamB *= 0.003921569f;
+    self->lightingParamA *= 0.003921569f;
     SpawnListedObjectCopies(self);
     RunQueuedCalls(self);
     for (BaseObject* o = (BaseObject*)self->list48.head; o != 0; o = o->next) {
@@ -1976,14 +1976,14 @@ void DrawProjectedCurve(void* a0, void* a1, void* a2, void* a3, void* a4, u8* ob
 // Sets the world's first lighting parameter and notes the frame it changed in.
 void SetWorldLightingParamA(World* self, f32 v)
 {
-    self->f1D6C = v;
+    self->lightingParamA = v;
     g_lightingChangeFrame = g_frameCount;
 }
 
 // Sets the world's second lighting parameter and notes the frame it changed in.
 void SetWorldLightingParamB(World* self, f32 v)
 {
-    self->f1D68 = v;
+    self->lightingParamB = v;
     g_lightingChangeFrame = g_frameCount;
 }
 

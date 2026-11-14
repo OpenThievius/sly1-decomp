@@ -119,7 +119,7 @@ struct PlacedObject : BaseObject {
     Link02 link40;          // 0x40
     Link02 link48;          // 0x48
     PlacedObject* root;              // 0x50: the topmost object above it (itself at the top)
-    PlacedObject* f54;      // 0x54: the owner of its link list (func_0015F6C0); given back with func_0015F710 by slot 7
+    PlacedObject* linkListOwner; // 0x54: the owner of its link list (func_0015F6C0); given back with func_0015F710 by slot 7
     Link02 link58;          // 0x58: the link in list60
     List01 list60;          // 0x60: offset 0x58
     s32 count6C;            // 0x6C
@@ -177,9 +177,9 @@ struct PlacedObject : BaseObject {
         };
     };
     s32 valueCount;         // 0x26C: the number of f1F8 entries
-    f32* f270;              // 0x270
-    f32* f274; // 0x274
-    s32 f278;               // 0x278: func_001EECE0 calls slot 50 while it is set
+    f32* currentValues;     // 0x270: the object's value array, valueCount floats
+    f32* defaultValues; // 0x274: the values f270 returns to
+    s32 oscillatorBlock;    // 0x278: func_001EECE0 calls slot 50 while it is set
     s32 elemCount;          // 0x27C
     Elem02** elems;         // 0x280: elemCount of them
     RangeRecord* rangeRecord;   // 0x284: a 0x2E0-byte record in the world's list at 0x1C00

@@ -298,7 +298,7 @@ void InitTargetCurve(TargetCurve* self)
     self->targetId = -1;
     self->f4C = 1;
     self->f50 = 3;
-    self->f58 = 3.4028235e+38f;
+    self->maxHeightAbove = 3.4028235e+38f;
 }
 
 // Registers a target curve as an object and adds it to the list of target curves.

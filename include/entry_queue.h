@@ -36,9 +36,9 @@ struct EntryQueue : BaseObject {
     void* animationPlayer;  // 0x50: the animation player a queue entry started
     void* aimTarget;        // 0x54: the object func_0017BB78 aims the player at
     OnOffObject* forcedOnOffObject; // 0x58: the on-off object it forces on (ReplaceQueueOnOffObject)
-    s32 f5C;                // 0x5C: f58 was not attached, so it was put in its parent's list
-    f32 f60;                // 0x60: a kind 6 entry turns the player round when its place is behind this
-    f32 f64;                // 0x64: a kind 7 entry waits for the player's f2410 to come within 15 of this
+    s32 startedForced;      // 0x5C: f58 was not attached, so it was put in its parent's list
+    f32 targetTrackPos;     // 0x60: a kind 6 entry turns the player round when its place is behind this
+    f32 targetPathPos;      // 0x64: a kind 7 entry waits for the player's f2410 to come within 15 of this
     s32 flag68;             // 0x68
 };
 

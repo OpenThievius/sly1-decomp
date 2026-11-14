@@ -10,6 +10,14 @@ Every function and global keeps its address name: `func_XXXXXXXX` for code and `
 data. The build, the symbol map and every tool read the address out of that name. It is what
 declarations and definitions use, what `INCLUDE_ASM` names, and what the linker sees.
 
+## What has no readable name, and why
+
+Every global the sources use and every field has been read for a role (2026-11-14). The ones
+the code gives no role keep their address or offset name, and `config/unnamed.tsv` lists each
+with the reason: `role not shown` (used, but the code does not say what it is; the third column
+says what was seen), `no reader` (written or defined but never read), `value only` (a constant
+whose only role is its value). Name one when its role turns up, and take its row out.
+
 ## Readable names sit on top, as macros
 
 | File | What it is |

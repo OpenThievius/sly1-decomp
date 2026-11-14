@@ -70,8 +70,8 @@ struct ObjectCycler : Collider {
     f32 triggerDistance;    // 0x684: a distance (func_0015BFC0 compares the active collider's point with it)
     f32 nextCheckTime;               // 0x688: mode 1: the clock value of the next func_0015BD48 check
     s32 indexStep;               // 0x68C: 1 at set-up, then 1 or -1: how far each step moves the index
-    s32 f690;               // 0x690: -1 at set-up
-    s32 f694;               // 0x694
+    s32 scatterCount;       // 0x690: -1 at set-up
+    s32 scatterSkipsCountdown; // 0x694: the flag given to ScatterObjectsAtPoint
     u8 pad698[0x6A0 - 0x698];
 };
 

@@ -443,8 +443,8 @@ void InitPlayer(Player* self)
     self->ledgeHandOffset = *(Vec02*)g_ledgeHandOffsetInitial;
     self->trailEnabled = 1;
     self->padSelectMode = -1;
-    self->f2728 = 1.0f;
-    self->f2724 = 1.0f;
+    self->innerFadeScale = 1.0f;
+    self->outerFadeScale = 1.0f;
     self->animSeekTime = -3.4028235e+38f;
     self->pulseFadeDuration = 2.0f;
 }
@@ -459,7 +459,7 @@ void LoadPlayer(Player* self, BufferedStream* stream)
     ResolveObjectLinks(self, 0x97, g_playerCharacterLinks);
     FindOrBuildMemberGroup((void**)self->pad2428, self);
     self->f2284 = -1.0f;
-    self->f21C8 = -1.0f;
+    self->aimHeldTime = -1.0f;
     g_player = self;
 }
 
@@ -499,11 +499,11 @@ void StartPlayer(Player* self)
     a->f1C = 2;
     InsertAttachment(self->rigObject, a);
     self->f24FC = a;
-    AddMatrixAttachment(self->rigObject, 5, (Attachment**)&self->f2500);
+    AddMatrixAttachment(self->rigObject, 5, (Attachment**)&self->rigAttachment);
     AddMatrixAttachment((PlacedObject*)self->f618, 5, (Attachment**)&self->f2504);
     AddMatrixAttachment((PlacedObject*)self->f61C, 5, (Attachment**)&self->f2508);
-    AddMatrixAttachment((PlacedObject*)self->f610, 7, (Attachment**)&self->footPartA);
-    AddMatrixAttachment((PlacedObject*)self->f614, 7, (Attachment**)&self->footPartB);
+    AddMatrixAttachment((PlacedObject*)self->linkPartA, 7, (Attachment**)&self->footPartA);
+    AddMatrixAttachment((PlacedObject*)self->linkPartB, 7, (Attachment**)&self->footPartB);
     self->rigPoseSource = CreatePoseSource(self->world, self->rigObject, (const T2195_Vt*)g_snapshotPoseSourceMethods);
     ((T2195_588*)self->rigPoseSource)->key = 1;
     InsertAttachment(self->rigObject, (Attachment*)self->rigPoseSource);
@@ -520,10 +520,10 @@ void StartPlayer(Player* self)
     BuildCombinedBlendAnimation(self, 12, 2, self->aimBlend5, 0, 0, 0, (BlendAnimation**)&self->aimAnim5);
     BuildCombinedBlendAnimation(self, 12, 2, self->aimBlend6, 0, 0, 0, (BlendAnimation**)&self->aimAnim6);
     BuildCombinedBlendAnimation(self, 12, 2, self->aimBlend7, 0, 0, 0, (BlendAnimation**)&self->aimAnim7);
-    BaseObject* o = (BaseObject*)self->f243C;
+    BaseObject* o = (BaseObject*)self->textureObject;
     if (o != 0) {
         o->desc->m02(o);
-        BuildTexturePackets((TextureRenderObject*)(self->f243C), self->rangeRecord);
+        BuildTexturePackets((TextureRenderObject*)(self->textureObject), self->rangeRecord);
     }
     self->ownOnOffObject = (OnOffObject*)CreateTypedRecord(0x63, self->world, 0, 0x316, -1);
     ResetPlayerOnOffObject(self);
@@ -534,42 +534,42 @@ void StartPlayer(Player* self)
     self->cameraHeight = self->v140.z - 75.0f;
     SetTurningColliderGravityScale(self, g_playerGravityScale);
     SetColliderMass(self, g_playerMass);
-    Collider* c = (Collider*)self->f25D8[0];
+    Collider* c = (Collider*)self->slotObjects[0];
     if (c != 0) {
         c->flags538 |= (u64)0x8000 << 28;
     }
-    c = (Collider*)self->f25D8[2];
+    c = (Collider*)self->slotObjects[2];
     if (c != 0) {
         c->flags538 |= (u64)0x8000 << 28;
     }
-    c = (Collider*)self->f25D8[1];
+    c = (Collider*)self->slotObjects[1];
     if (c != 0) {
         c->flags538 |= (u64)0x8000 << 28;
     }
-    c = (Collider*)self->f25D8[3];
+    c = (Collider*)self->slotObjects[3];
     if (c != 0) {
         c->flags538 |= (u64)0x8000 << 28;
     }
-    c = (Collider*)self->f25D8[4];
+    c = (Collider*)self->slotObjects[4];
     if (c != 0) {
         c->flags538 |= (u64)0x8000 << 28;
-        if (((PlacedObject*)self->f25D8[4])->linkRecord == 0) {
-            ((PlacedObject*)self->f25D8[4])->linkRecord = (Rec2195_224*)AllocateZeroedFrontMemory(0xC0);
+        if (((PlacedObject*)self->slotObjects[4])->linkRecord == 0) {
+            ((PlacedObject*)self->slotObjects[4])->linkRecord = (Rec2195_224*)AllocateZeroedFrontMemory(0xC0);
         }
-        ((PlacedObject*)self->f25D8[4])->linkRecord->flags |= 8;
-        ((PlacedObject*)self->f25D8[4])->linkRecord->p60 = 0;
+        ((PlacedObject*)self->slotObjects[4])->linkRecord->flags |= 8;
+        ((PlacedObject*)self->slotObjects[4])->linkRecord->p60 = 0;
     }
     if (self->stateNodes[8] == 0) {
         self->stateNodes[8] = self->stateNodes[2];
     }
     self->selfPoseSource = CreatePoseSource(self->world, self, (const T2195_Vt*)g_snapshotPoseSourceMethods);
     InsertAttachment(self, (Attachment*)self->selfPoseSource);
-    self->f251C = (Attachment*)CreatePoseSource(self->world, (PlacedObject*)self->f61C, (const T2195_Vt*)g_snapshotPoseSourceMethods);
-    self->f251C->key = 5;
-    InsertAttachment((PlacedObject*)self->f61C, self->f251C);
-    self->f2520 = (Attachment*)CreatePoseSource(self->world, (PlacedObject*)(self->f23D0), (const T2195_Vt*)g_snapshotPoseSourceMethods);
-    self->f2520->key = 5;
-    InsertAttachment((PlacedObject*)(self->f23D0), self->f2520);
+    self->snapshotPoseFirst = (Attachment*)CreatePoseSource(self->world, (PlacedObject*)self->f61C, (const T2195_Vt*)g_snapshotPoseSourceMethods);
+    self->snapshotPoseFirst->key = 5;
+    InsertAttachment((PlacedObject*)self->f61C, self->snapshotPoseFirst);
+    self->snapshotPoseSecond = (Attachment*)CreatePoseSource(self->world, (PlacedObject*)(self->f23D0), (const T2195_Vt*)g_snapshotPoseSourceMethods);
+    self->snapshotPoseSecond->key = 5;
+    InsertAttachment((PlacedObject*)(self->f23D0), self->snapshotPoseSecond);
     self->flags &= ~(u64)0x0C000000;
     self->flags &= ~(u64)0x30000000;
     BuildCombinedBlendAnimation(self, 12, 3, (u8*)&self->pathLeanRight, 0, 0, 0, (BlendAnimation**)&self->pathLeanBlend);
@@ -1203,10 +1203,10 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
             break;
         }
         case 0x15E:
-            self->f2738 = 1;
+            self->pressArmed = 1;
             break;
         case 0x15F:
-            self->f2738 = 0;
+            self->pressArmed = 0;
             break;
         case 0x144:
             self->pendingFlags |= 0x10;
@@ -1219,15 +1219,15 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
     }
     case 0xA:
         if (msg->obj == self) {
-            self->f2438 = (Collider*)msg->source;
+            self->containingCollider = (Collider*)msg->source;
             for (u32 k = 0; k < 8; k++) {
                 self->hitStamps[k].time = 0;
             }
         }
         break;
     case 0xB:
-        if (msg->obj == self && msg->source == self->f2438) {
-            self->f2438 = 0;
+        if (msg->obj == self && msg->source == self->containingCollider) {
+            self->containingCollider = 0;
         }
         break;
     case 2: {
@@ -1377,7 +1377,7 @@ void PosePlayerTargetPart(Player* self)
     Vu0::Q(rest) = Vu0::Q(g_zeroVector);
     PlacedObject* frame = 0;
     Vec02* at = 0;
-    PosedPart* lead = (PosedPart*)self->f2500;
+    PosedPart* lead = (PosedPart*)self->rigAttachment;
     if (lead == 0 || lead->state == -1)
         return;
     switch (self->state) {
@@ -1410,7 +1410,7 @@ void PosePlayerTargetPart(Player* self)
                     f32 speed = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v150), Vu0::Q(vel)));
                     Vu0::Q(k) = Vu0::FromFloat(speed);
                     Vu0::Q(along) = Vu0::MulX(Vu0::Q(vel), Vu0::Q(k));
-                    f32 t = self->f23C4 + speed * g_motionLookaheadTime;
+                    f32 t = self->trackDistance + speed * g_motionLookaheadTime;
                     f32 len = c->vt->m08(c);
                     if (c->wrap != 0) {
                         t = WrapModulo(t, len);
@@ -1470,7 +1470,7 @@ motion:
     } else {
         Vu0::Q(push) = Vu0::Q(g_zeroVector);
     }
-    Vu0::Q(((PosedPart*)self->f2500)->offset) = Vu0::Q(push);
+    Vu0::Q(((PosedPart*)self->rigAttachment)->offset) = Vu0::Q(push);
     f32 e1 = EvalCurve3(D_00263870, ((PosedPart*)self->footPartA)->offset.z);
     f32 e2 = EvalCurve3(D_00263870, ((PosedPart*)self->footPartB)->offset.z);
     f32 z;
@@ -1478,7 +1478,7 @@ motion:
         z = e2 <? push.z;
     else
         z = e2 <? e1;
-    ((PosedPart*)self->f2500)->offset.z = z;
+    ((PosedPart*)self->rigAttachment)->offset.z = z;
     if (self->aimMode == -1) {
         u128 s = Vu0::MulX(Vu0::Q(push), Vu0::ScalarAt(D_002637E8[0]));
         Vu0::Q(((PosedPart*)self->f2504)->offset) = s;
@@ -1623,10 +1623,10 @@ void UpdatePlayerState0(Player* self)
         }
     }
     if (self->footPartA == 0) return;
-    u8* p1 = (u8*)&self->f1190;
+    u8* p1 = (u8*)&self->footProbeA;
     f32 k = 5.0f;
     MeasurePlayerFootProbe(self, (s32)self->f628, (s32)self->f620, self->footPartA, k, p1);
-    u8* p2 = (u8*)&self->f1290;
+    u8* p2 = (u8*)&self->footProbeB;
     MeasurePlayerFootProbe(self, (s32)self->f62C, (s32)self->f624, self->footPartB, k, p2);
     if (ProbePlayerFootGround(self, p1, self->footPartA) != 0) {
         if (ProbePlayerFootGround(self, p2, self->footPartB) != 0) return;
@@ -1735,21 +1735,21 @@ void BlendPlayerPose(Player* self, void* a, void* b)
         } else {
             k = g_gameClock[2] / (0.5f - since);
         }
-        f32 ramp = self->f2724;
+        f32 ramp = self->outerFadeScale;
         target = D_00263898;
-        self->f2724 = k * D_00263894 + (1.0f - k) * ramp;
+        self->outerFadeScale = k * D_00263894 + (1.0f - k) * ramp;
     } else {
         f32 one = 1.0f;
-        self->f2724 = ApproachValueWithRamp((RampProfile*)g_scaleApproachRamp, 0, self->f2724, one, g_gameClock[2]);
+        self->outerFadeScale = ApproachValueWithRamp((RampProfile*)g_scaleApproachRamp, 0, self->outerFadeScale, one, g_gameClock[2]);
         target = one;
     }
-    f32 spin = ApproachValueWithRamp((RampProfile*)g_scaleApproachRamp, 0, self->f2728, target, g_gameClock[2]);
-    self->f2728 = spin;
-    if (self->f2724 < 1.0f || spin < 1.0f) {
+    f32 spin = ApproachValueWithRamp((RampProfile*)g_scaleApproachRamp, 0, self->innerFadeScale, target, g_gameClock[2]);
+    self->innerFadeScale = spin;
+    if (self->outerFadeScale < 1.0f || spin < 1.0f) {
         BuildPlacedObjectTransform(self, (Quad16*)b, &out);
         b = &out;
-        out.innerFade = self->f2728;
-        out.outerFade = out.outerFade * self->f2724;
+        out.innerFade = self->innerFadeScale;
+        out.outerFade = out.outerFade * self->outerFadeScale;
     }
     self->boundRadius = 500.0f;
     if (self->spinAngle != 0.0f || self->spinRate != 0.0f) {
@@ -1797,26 +1797,26 @@ void RecomputePlayerFrame(Player* self)
 {
     RecomputeTurningColliderFrame(self);
     if (self->state == 6 && self->targetMode == 7) {
-        self->f1290.valid = 0;
+        self->footProbeB.valid = 0;
         goto clear;
     }
     {
-        void* a1 = self->f610;
+        void* a1 = self->linkPartA;
         if (a1 == 0) {
-            self->f1290.valid = 0;
+            self->footProbeB.valid = 0;
             goto clear;
         }
-        if (self->f614 == 0) {
-            self->f1290.valid = 0;
+        if (self->linkPartB == 0) {
+            self->footProbeB.valid = 0;
             goto clear;
         }
         f32 k = 6.0f;
-        BuildPartProbeTowardLink(self, (PlacedObject*)a1, a1, (PlacedObject*)self->f620, k, (FollowProbe*)((u8*)&self->f1190));
-        BuildPartProbeTowardLink(self, (PlacedObject*)self->f614, self->f614, (PlacedObject*)self->f624, k, (FollowProbe*)((u8*)&self->f1290));
+        BuildPartProbeTowardLink(self, (PlacedObject*)a1, a1, (PlacedObject*)self->f620, k, (FollowProbe*)((u8*)&self->footProbeA));
+        BuildPartProbeTowardLink(self, (PlacedObject*)self->linkPartB, self->linkPartB, (PlacedObject*)self->f624, k, (FollowProbe*)((u8*)&self->footProbeB));
     }
     return;
 clear:
-    self->f1190.valid = 0;
+    self->footProbeA.valid = 0;
 }
 
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
@@ -1834,8 +1834,8 @@ void DrawPlayer(Player* self, void* a, void* b)
 
     if (!(self->state == 6 && self->targetMode == 7))
     {
-        PlacePartAtProbeSpan(self, (PlacedObject*)self->f610, (PlacedObject*)self->f610, &self->f1190);
-        PlacePartAtProbeSpan(self, (PlacedObject*)self->f614, (PlacedObject*)self->f614, &self->f1290);
+        PlacePartAtProbeSpan(self, (PlacedObject*)self->linkPartA, (PlacedObject*)self->linkPartA, &self->footProbeA);
+        PlacePartAtProbeSpan(self, (PlacedObject*)self->linkPartB, (PlacedObject*)self->linkPartB, &self->footProbeB);
     }
     if (self->spinAngle != 0.0f || self->spinRate != 0.0f)
     {
@@ -2037,30 +2037,30 @@ void UpdatePlayerBounds(Player* self)
 // that is attached, with *out set to its group (0, 1, 2, 2, 1 for those slots); null when none is.
 void* FindFirstAttachedSlotObject(Player* self, s32* out)
 {
-    void* p = self->f25D8[0];
+    void* p = self->slotObjects[0];
     if (p != 0 && IsObjectAttached((BaseObject*)p) != 0) {
         *out = 0;
-        return self->f25D8[0];
+        return self->slotObjects[0];
     }
-    p = self->f25D8[2];
+    p = self->slotObjects[2];
     if (p != 0 && IsObjectAttached((BaseObject*)p) != 0) {
         *out = 1;
-        return self->f25D8[2];
+        return self->slotObjects[2];
     }
-    p = self->f25D8[1];
+    p = self->slotObjects[1];
     if (p != 0 && IsObjectAttached((BaseObject*)p) != 0) {
         *out = 2;
-        return self->f25D8[1];
+        return self->slotObjects[1];
     }
-    p = self->f25D8[3];
+    p = self->slotObjects[3];
     if (p != 0 && IsObjectAttached((BaseObject*)p) != 0) {
         *out = 2;
-        return self->f25D8[3];
+        return self->slotObjects[3];
     }
-    p = self->f25D8[4];
+    p = self->slotObjects[4];
     if (p != 0 && IsObjectAttached((BaseObject*)p) != 0) {
         *out = 1;
-        return self->f25D8[4];
+        return self->slotObjects[4];
     }
     return 0;
 }
@@ -2102,8 +2102,8 @@ void CollidePlayerWithObject(Player* self, Collider* a1, s32 a2, void* a3, void*
         }
         break;
     }
-    KeepNearestPartSpan(self, a1, a4, &self->f1190);
-    KeepNearestPartSpan(self, a1, a4, &self->f1290);
+    KeepNearestPartSpan(self, a1, a4, &self->footProbeA);
+    KeepNearestPartSpan(self, a1, a4, &self->footProbeB);
     v = (Collider*)FindFirstAttachedSlotObject(self, &idx);
     if (v)
     {
@@ -2271,9 +2271,9 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
         break;
     }
     if (stamp != 0) {
-        self->f2680 = g_gameTime[0];
+        self->poseStampTime = g_gameTime[0];
     }
-    pose->stampTime = self->f2680;
+    pose->stampTime = self->poseStampTime;
     switch (self->state) {
     case 0: {
         f32 a = __builtin_fabsf(self->v160.z);
@@ -2653,7 +2653,7 @@ held:
     if (!IsTopCameraController((CameraController*)((u8*)&g_camera->ctl454))) {
         PadRecord* rec = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
         StepSequence* seq = (StepSequence*)g_typedTextCaptionBox.child;
-        if (seq != 0 && seq->state2D4 == 3 && seq->f32C == 0 && (rec->flags & 0xC) && *(s32*)seq->target304 != 0) {
+        if (seq != 0 && seq->state2D4 == 3 && seq->buttonSkipBlocked == 0 && (rec->flags & 0xC) && *(s32*)seq->target304 != 0) {
             if (self->state == 12) {
                 self->pendingCaption = 0;
                 skipStep = 1;
@@ -2685,10 +2685,10 @@ held:
             if (HasSpareCount()) {
                 if (pad->flags & 0x40) {
                     ClearPadPressedBits(pad, 0x40);
-                    self->f2734 = g_gameTime[0];
+                    self->buttonPressTime = g_gameTime[0];
                 }
             }
-            if (self->f2738 != 0 && g_gameTime[0] - self->f2734 < g_playerCallbackWindow[0]) {
+            if (self->pressArmed != 0 && g_gameTime[0] - self->buttonPressTime < g_playerCallbackWindow[0]) {
                 RunPlayerCallback(self);
                 state = self->state;
                 sub = self->subState;
@@ -3274,9 +3274,9 @@ struct Dev_175078 {
 // objects to refresh through method 0x2B.
 void SetPlayerPartLayers(Player* self, s32 flags)
 {
-    if (self->f2500 != 0) {
+    if (self->rigAttachment != 0) {
         s32 a = flags & 1;
-        ((Dev_175078*)self->f2500)->f10 = a ? 9 : -1;
+        ((Dev_175078*)self->rigAttachment)->f10 = a ? 9 : -1;
         ((Dev_175078*)self->f2504)->f10 = a ? 9 : -1;
         ((Dev_175078*)self->f2508)->f10 = a ? 9 : -1;
         s32 b = flags & 2;
@@ -3288,9 +3288,9 @@ void SetPlayerPartLayers(Player* self, s32 flags)
         o->desc02()->m2B(o);
         o = (PlacedObject*)self->f61C;
         o->desc02()->m2B(o);
-        o = (PlacedObject*)self->f610;
+        o = (PlacedObject*)self->linkPartA;
         o->desc02()->m2B(o);
-        o = (PlacedObject*)self->f614;
+        o = (PlacedObject*)self->linkPartB;
         o->desc02()->m2B(o);
     }
 }
@@ -3438,7 +3438,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if (self->aimMode == 0 && state != 7 && state != 3) {
                 SetPlayerAimMode(self, -1);
             }
-            if (self->f2438 == 0) {
+            if (self->containingCollider == 0) {
                 void* m = 0;
                 switch (state) {
                 case 6:
@@ -3486,11 +3486,11 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             o->desc->m18(o, self);
             self->previousBoundObject = self->boundObject;
             SetPlayerAimMode(self, -1);
-            ((Attachment*)self->f251C)->mode0 = -1;
-            ((Attachment*)self->f251C)->mode1 = -1;
+            ((Attachment*)self->snapshotPoseFirst)->mode0 = -1;
+            ((Attachment*)self->snapshotPoseFirst)->mode1 = -1;
             PlacedObject* p = (PlacedObject*)self->f61C;
             p->desc02()->m2B(p);
-            ((Attachment*)self->f2520)->mode1 = -1;
+            ((Attachment*)self->snapshotPoseSecond)->mode1 = -1;
             p = (PlacedObject*)self->f23D0;
             p->desc02()->m2B(p);
             SetTurningColliderLinkFlag(self, 1);
@@ -3598,10 +3598,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 SetOnOffObjectForcedState((void*)self->forcedOnOffObject, 0);
                 self->forcedOnOffObject = 0;
             }
-            self->f268C = 0;
-            if (self->f26A4 != 0) {
-                ReleaseSoundLevel((SoundLevelEntry*)(self->f26A4));
-                self->f26A4 = 0;
+            self->cameraSpringMode = 0;
+            if (self->soundLevelEntry != 0) {
+                ReleaseSoundLevel((SoundLevelEntry*)(self->soundLevelEntry));
+                self->soundLevelEntry = 0;
             }
             BaseObject* o = self->f272C;
             if (o != 0) {
@@ -3614,7 +3614,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             SetColliderTreeContactsDropped(self, 0);
             break;
         case 10: {
-            BaseObject* o = (BaseObject*)self->f25D8[2];
+            BaseObject* o = (BaseObject*)self->slotObjects[2];
             self->aimTarget = 0;
             self->boundObject = 0;
             if (o != 0) {
@@ -3650,7 +3650,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         case 13:
             self->flags538 &= ~((u64)1 << 40);
-            self->hook = self->f273C;
+            self->hook = self->savedHook;
             if (self->stateNodes[13] != 0) {
                 SetTurningColliderFollowedMesh(self, (Collider*)self->stateNodes[13], 1);
             }
@@ -3702,11 +3702,11 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             start = 0.5f;
             SetTurningColliderLinkFlag(self, 0);
             speed = 0.0f;
-            ((Attachment*)self->f251C)->mode0 = 2;
-            ((Attachment*)self->f251C)->mode1 = 2;
+            ((Attachment*)self->snapshotPoseFirst)->mode0 = 2;
+            ((Attachment*)self->snapshotPoseFirst)->mode1 = 2;
             PlacedObject* p = (PlacedObject*)self->f61C;
             p->desc02()->m2B(p);
-            ((Attachment*)self->f2520)->mode1 = 2;
+            ((Attachment*)self->snapshotPoseSecond)->mode1 = 2;
             p = (PlacedObject*)self->f23D0;
             p->desc02()->m2B(p);
             Vec02 pos;
@@ -3921,7 +3921,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             self->onOffPhase = -1;
             if (loud) {
-                self->f26A4 = PushSoundLevel(-20);
+                self->soundLevelEntry = PushSoundLevel(-20);
             }
             break;
         }
@@ -3954,7 +3954,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             break;
         case 13:
-            self->f273C = self->hook;
+            self->savedHook = self->hook;
             self->hook = 0;
             self->flags538 |= (u64)1 << 40;
             self->radius3CC = D_00262E30;
@@ -4058,11 +4058,11 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 self->aimTarget = 0;
                 self->boundObject = 0;
             }
-            BaseObject* o = (BaseObject*)self->f25D8[1];
+            BaseObject* o = (BaseObject*)self->slotObjects[1];
             if (o != 0) {
                 o->desc->m03(o);
             }
-            o = (BaseObject*)self->f25D8[3];
+            o = (BaseObject*)self->slotObjects[3];
             if (o != 0) {
                 o->desc->m03(o);
             }
@@ -4099,7 +4099,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             break;
         case 55: {
-            BaseObject* o = (BaseObject*)self->f25D8[4];
+            BaseObject* o = (BaseObject*)self->slotObjects[4];
             if (o != 0) {
                 o->desc->m03(o);
             }
@@ -4125,27 +4125,27 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             ComputePlayerJumpVelocity(self, &v);
             switch (self->jumpKind) {
             case 1:
-                anim = self->f1028;
+                anim = self->jumpAnimKinds134;
                 break;
             case 4:
                 self->jumpSpeed *= g_jumpKind4SpeedScale;
-                anim = self->f1028;
+                anim = self->jumpAnimKinds134;
                 break;
             case 3:
                 self->jumpSpeed *= g_jumpKind3SpeedScale;
-                anim = self->f1028;
+                anim = self->jumpAnimKinds134;
                 break;
             case 0:
             case 2:
                 if (self->jumpKind == 2) {
-                    anim = self->f1024;
+                    anim = self->jumpAnimKind2;
                 } else {
-                    anim = self->f1020;
+                    anim = self->jumpAnimDefault;
                 }
                 break;
             }
             if (anim == 0) {
-                anim = self->f1020;
+                anim = self->jumpAnimDefault;
             }
             if (self->jumpKind == 4 && self->stickLevel == 0.0f) {
                 ComputePolarOffset((Vec3*)&v, self->heading, 100.0f, v.z);
@@ -4165,13 +4165,13 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 case 1:
                 case 3:
                 case 4:
-                    anim = self->f1028;
+                    anim = self->jumpAnimKinds134;
                     break;
                 case 0:
-                    anim = self->f1020;
+                    anim = self->jumpAnimDefault;
                     break;
                 case 2:
-                    anim = self->f1024;
+                    anim = self->jumpAnimKind2;
                     break;
                 }
                 start = GetAnimationMarkerTime((Animation*)anim, 0x134);
@@ -4185,7 +4185,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if (self->state == 2) {
                 skip = 1;
             } else {
-                anim = self->f1020;
+                anim = self->jumpAnimDefault;
             }
             InitContactPairFlags(((Collider*)self->heldObject)->world, (Collider*)self->heldObject);
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
@@ -4199,7 +4199,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if (self->state == 2) {
                 skip = 1;
             } else {
-                anim = self->f1020;
+                anim = self->jumpAnimDefault;
             }
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             // the object's class is not known
@@ -4252,16 +4252,16 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->v2290 = self->v150;
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             self->groundContact = 0;
-            anim = self->f1020;
+            anim = self->jumpAnimDefault;
             self->v2290.z = 0.0f;
             break;
         case 44:
             self->f2498 = 1;
             self->groundContact = 0;
-            if (self->f2730 != 0) {
+            if (self->requestAccepted != 0) {
                 anim = self->subStateAnims[43];
             } else {
-                anim = self->f1020;
+                anim = self->jumpAnimDefault;
             }
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             if (self->touchedObject != 0 && IsObjectOfKind((BaseObject*)self->touchedObject, 0x70)) {
@@ -4362,7 +4362,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                             ResetPlayerOnOffObject(self);
                             OnOffObject* p = (OnOffObject*)self->forcedOnOffObject;
                             p->desc->m15(p, ((BaseObject*)self->targetPoint)->parent);
-                            ((OnOffObject*)self->forcedOnOffObject)->f38C = 1;
+                            ((OnOffObject*)self->forcedOnOffObject)->orbitsPoint = 1;
                             ((OnOffObject*)self->forcedOnOffObject)->v400 = *(Vec02*)&((TargetVector*)self->targetPoint)->q40;
                             ((OnOffObject*)self->forcedOnOffObject)->orbitRadius = ((TargetVector*)self->targetPoint)->f5C;
                         }
@@ -4439,10 +4439,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             anim = self->f1064;
             break;
         case 25:
-            anim = self->f105C;
+            anim = self->pathBlendItem;
             break;
         case 26:
-            anim = self->f105C;
+            anim = self->pathBlendItem;
             speed = -1.0f;
             break;
         case 27:
@@ -4597,9 +4597,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vu0::Q(spin) = Vu0::FromFloats(-k * v.y, k * v.x, 0.0f);
             self->desc02()->m21(self, &spin);
             anim = self->f25D4;
-            if (self->f25D8[4] != 0) {
+            if (self->slotObjects[4] != 0) {
                 if (MaskWorldBitsBySave() & 0x400) {
-                    BaseObject* o = (BaseObject*)self->f25D8[4];
+                    BaseObject* o = (BaseObject*)self->slotObjects[4];
                     o->desc->m02(o);
                 }
             }
@@ -4667,7 +4667,7 @@ void SwitchPlayerState11(void* self, s32 flag)
 void SetPlayerProbeContactsDisabled(Player* self, s32 value)
 {
     self->probeContactsDisabled = value;
-    self->f4B8 = 0;
+    self->stateBits = 0;
 }
 
 // Finds the node a node query applies to: starts at the query's holder (or its parent) and walks up
@@ -4742,19 +4742,19 @@ void UpdatePlayerGrabs(Player* self)
         goto done;
     }
     if (self->subState == 7) {
-        target = (Collider*)self->f25D8[1];
+        target = (Collider*)self->slotObjects[1];
         mask = 4;
     } else if (self->aimMode == 4 || self->aimMode == 6 || self->aimMode == 5 || self->aimMode == 7) {
-        target = (Collider*)self->f25D8[0];
+        target = (Collider*)self->slotObjects[0];
         mask = 2;
     } else if (self->state == 10) {
-        target = (Collider*)self->f25D8[2];
+        target = (Collider*)self->slotObjects[2];
         mask = 8;
     } else if (self->subState == 8) {
-        target = (Collider*)self->f25D8[3];
+        target = (Collider*)self->slotObjects[3];
         mask = 4;
     } else if (self->subState == 0x37 && (MaskWorldBitsBySave() & 0x400)) {
-        target = (Collider*)self->f25D8[4];
+        target = (Collider*)self->slotObjects[4];
         mask = 8;
     } else {
         goto done;
@@ -4764,7 +4764,7 @@ void UpdatePlayerGrabs(Player* self)
         f32 scale = 1000.0f;
         Class75Object* o;
         for (o = (Class75Object*)g_class75List.head; o != 0; o = *(Class75Object**)&o->link) {
-            if (o->f90 == 0) {
+            if (o->enabled == 0) {
                 continue;
             }
             if (!(o->count & mask)) {
@@ -4959,7 +4959,7 @@ void SetPlayerPosition(Player* self, Vec02* pos)
 {
     SetColliderPosition(self, pos);
     ResetTrailRing((TrailRing*)self->trail);
-    self->f2768 = 0;
+    self->targetMemoCount = 0;
 }
 
 
@@ -5518,7 +5518,7 @@ void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHi
     }
     if (best <= 1000.0f)
         goto done;
-    for (s32 i = 0; i < self->f2768; i++) {
+    for (s32 i = 0; i < self->targetMemoCount; i++) {
         TargetCandidate* q = &((TargetCandidate*)self->f2770)[i];
         if (q->node == 0 || IsObjectAttached(q->node) != 0) {
             r = ScoreTargetCandidate(self, (TargetHit*)q, v, (TurningCollider**)scratch, &hit, &dist);
@@ -5573,7 +5573,7 @@ void RecordPlayerTargetMemo(Player* self)
                 return;
             }
             key = o;
-            w = self->f23C4;
+            w = self->trackDistance;
             break;
         }
         case 5: {
@@ -5654,7 +5654,7 @@ void RecordPlayerTargetMemo(Player* self)
         break;
     }
         s32 i;
-    for (i = 1; i < self->f2768; i++) {
+    for (i = 1; i < self->targetMemoCount; i++) {
         TargetMemo* e = &self->targetMemo[i];
         s32 match = 0;
         if (key == e->key) {
@@ -5673,15 +5673,15 @@ void RecordPlayerTargetMemo(Player* self)
             break;
         }
     }
-    if (i >= self->f2768) {
-        if ((u32)self->f2768 < 0x20) {
-            self->f2768++;
+    if (i >= self->targetMemoCount) {
+        if ((u32)self->targetMemoCount < 0x20) {
+            self->targetMemoCount++;
         }
-        MoveMemory(&self->targetMemo[1], &self->targetMemo[0], self->f2768 * 0x20 - 0x20);
+        MoveMemory(&self->targetMemo[1], &self->targetMemo[0], self->targetMemoCount * 0x20 - 0x20);
         FillMemory(&self->targetMemo[0], 0, 0x20);
     }
     self->targetMemo[0].key = key;
     self->targetMemo[0].pos = pos;
     self->targetMemo[0].along = w;
-    self->targetMemo[0].f8 = g_gameClock[1];
+    self->targetMemo[0].time = g_gameClock[1];
 }

@@ -21,12 +21,12 @@ struct StateResetMsg {
 // message names the id at 0x2DC.
 struct StateResetObject : PlacedObject {
     s32 id2D0;              // 0x2D0: -1 for none
-    f32 f2D4;               // 0x2D4
-    f32 f2D8;               // 0x2D8: how long state 2 lasts (UpdateItemTimeouts)
+    f32 stateTime;          // 0x2D4: the game time its state last changed
+    f32 stateDuration;      // 0x2D8: how long state 2 lasts (UpdateItemTimeouts)
     s32 id2DC;              // 0x2DC
     s32 id2E0;              // 0x2E0: -1 for none
-    s32 f2E4;               // 0x2E4
-    u8 f2E8[1];             // 0x2E8
+    s32 targetCount;        // 0x2E4
+    u8 targets[1];          // 0x2E8: the table of up to four keyed walker targets
     u8 pad2E9[0x328 - 0x2E9];
     void* group;            // 0x328: the record of the ones sharing id2E0 (func_001CB8B8), whose timeouts an agent schedules
     u8 pad32C[0x330 - 0x32C];

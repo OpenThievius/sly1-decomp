@@ -1,0 +1,856 @@
+item	reason	what the code shows
+D_0020DED0	no reader	constant in .text of original assembly, only a comment)
+D_00217380	no reader	24 zero bytes defined as a ClassDescriptor<2>, nothing reads it)
+D_00217ED0	role not shown	table of caption D_0026CBC8, unnamed; its owner is another worker's)
+D_00217F20	role not shown	table of caption D_0026CE48, unnamed)
+D_00218010	role not shown	table of caption D_0026D848, unnamed)
+D_002191E0	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_00219260	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_00219330	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_002194E0	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_002198F0	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_00219A20	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_0021A9D0	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_0021B158	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_0021B1D8	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_0021B7F8	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_0021C168	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_0021C298	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_0021D1D8	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_0021D338	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_0021F338	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_00220958	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_00220C40	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_00220E20	role not shown	class descriptor of a class with no name yet: its methods are still named by class id)
+D_00221EF8	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_00228D48	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_0022C5A8	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_0022D118	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_0022F690	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_00232868	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_002331F0	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_0023A6B8	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_0023B598	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_002428D0	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_00242C38	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_00242D18	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_00243418	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_002434E8	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_00243870	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_00243CC8	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_00243E18	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_002447A8	role not shown	property list of a class whose descriptor is still unnamed, class id in g_classPropertyLists position)
+D_00245024	role not shown	second word of the sounds table, read only by assembly)
+D_00248D50	value only	largest-float vector, defined, no C reader)
+D_00248D60	value only	eight float words, no C reader)
+D_00249DD0	value only	largest float vector)
+D_00249E48	value only	largest float)
+D_00249FB0	no reader	largest float at setup, only a declaration/comment)
+D_00249FB8	no reader	declared only)
+D_0024A218	value only	largest float start for a minimum search)
+D_0024A7E0	value only	largest float)
+D_0024A7E4	value only	largest float)
+D_0024AFA0	value only	a float constant, initial best time)
+D_0024D278	no reader	the string ".Kanji.", defined only)
+D_0024E600	value only	largest-float vector read by assembly)
+D_0024EB88	no reader	the string "all", a string no code reads)
+D_0024F560	no reader	debug string of libcdvd, only defined)
+D_0024F588	no reader	debug string of libcdvd, only defined)
+D_0024F5A8	no reader	debug string of libcdvd, only defined)
+D_0024F5C0	no reader	debug string of libcdvd, only defined)
+D_0024F5D0	no reader	debug string of libcdvd, only defined)
+D_0024F5E0	no reader	debug string of libcdvd, only defined)
+D_00250580	no reader	56 zero bytes, defined only)
+D_00259DE8	role not shown	a label inside g_scriptBuiltins, the count word of record 97)
+D_0025C268	role not shown	a field at +0x18 inside one of the entry pools of value_pools.cpp, only declared; assembly zeroes it)
+D_0025C288	role not shown	a field at +0x18 inside one of the entry pools of value_pools.cpp, only declared; assembly zeroes it)
+D_0025C2A8	role not shown	a field at +0x18 inside one of the entry pools of value_pools.cpp, only declared; assembly zeroes it)
+D_0025C2C8	role not shown	a field at +0x18 inside one of the entry pools of value_pools.cpp, only declared; assembly zeroes it)
+D_0025C2E8	role not shown	a field at +0x18 inside one of the entry pools of value_pools.cpp, only declared; assembly zeroes it)
+D_00261118	no reader	a PanelColor 0x2F,0x72,0x3E,0x80 only defined)
+D_00261BE4	value only	1.0 passed as one argument of StartSoundEffect)
+D_00261BF0	value only	0.0, the initial pitch)
+D_00261F70	no reader	defined or declared, never read in C)
+D_00261F74	no reader	defined or declared, never read in C)
+D_002623D8	role not shown	tuning value or table used in game_progress.cpp, on_off_object.cpp, placed_object.cpp; the use does not show what it controls)
+D_002623E4	no reader	defined or declared, never read in C)
+D_00262474	role not shown	tuning value or table used in group_marker.cpp, placed_object_model.cpp; the use does not show what it controls)
+D_00262974	no reader	defined or declared, never read in C)
+D_00262978	no reader	defined or declared, never read in C)
+D_0026297C	no reader	defined or declared, never read in C)
+D_00262980	no reader	defined or declared, never read in C)
+D_00262984	no reader	defined or declared, never read in C)
+D_002629A4	no reader	defined or declared, never read in C)
+D_002629C0	role not shown	tuning value or table used in selection_menus.cpp; the use does not show what it controls)
+D_00262A28	role not shown	tuning value or table used in target_follower.cpp; the use does not show what it controls)
+D_00262C84	role not shown	tuning value or table used in screen_element.cpp; the use does not show what it controls)
+D_00262CEC	role not shown	tuning value or table used in pause_menu.cpp; the use does not show what it controls)
+D_00262D18	role not shown	tuning value or table used in pad_input.cpp, player_state2.cpp; the use does not show what it controls)
+D_00262E28	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00262E2C	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00262E30	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263708	no reader	defined or declared, never read in C)
+D_0026370C	no reader	defined or declared, never read in C)
+D_00263710	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263720	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263790	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002637A0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002637B0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002637B4	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002637B8	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002637BC	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002637C0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002637CC	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002637E0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002637E4	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002637E8	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263800	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263810	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263820	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263830	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263840	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263850	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263854	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263870	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263880	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263884	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263894	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263898	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002638D0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263928	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263970	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263980	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263990	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263994	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263998	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_0026399C	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002639A0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002639B0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002639B8	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002639BC	no reader	defined or declared, never read in C)
+D_002639C0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002639D0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_002639E0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263AA0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263AB0	role not shown	tuning value or table used in player.cpp; the use does not show what it controls)
+D_00263AC0	role not shown	tuning value or table used in world5_boss.cpp; the use does not show what it controls)
+D_00263C00	no reader	defined or declared, never read in C)
+D_00263C10	no reader	defined or declared, never read in C)
+D_00263C20	role not shown	tuning value or table used in player.cpp, world5_boss.cpp; the use does not show what it controls)
+D_00263C30	role not shown	tuning value or table used in player.cpp, world5_boss.cpp; the use does not show what it controls)
+D_00263C40	role not shown	tuning value or table used in player.cpp, world5_boss.cpp; the use does not show what it controls)
+D_00263D30	role not shown	tuning value or table used in world5_boss.cpp; the use does not show what it controls)
+D_00263D40	role not shown	tuning value or table used in world5_boss.cpp; the use does not show what it controls)
+D_00263DF4	role not shown	tuning value or table used in world5_boss.cpp; the use does not show what it controls)
+D_00263DF8	role not shown	tuning value or table used in world5_boss.cpp; the use does not show what it controls)
+D_00263DFC	role not shown	tuning value or table used in world5_boss.cpp; the use does not show what it controls)
+D_00263E00	role not shown	tuning value or table used in world5_boss.cpp; the use does not show what it controls)
+D_00263E34	role not shown	tuning value or table used in entry_queue.cpp; the use does not show what it controls)
+D_00263E50	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E54	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E58	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E5C	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E60	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E64	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E68	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E6C	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E70	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E74	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E78	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E7C	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263E90	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263EA0	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00263EB0	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264020	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264024	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264028	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264030	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264034	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264038	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264040	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264044	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264048	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264050	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264060	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264070	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_00264080	role not shown	tuning value or table used in player_state2.cpp; the use does not show what it controls)
+D_0026413C	role not shown	tuning value or table used in mode_walker.cpp; the use does not show what it controls)
+D_00264140	role not shown	tuning value or table used in mode_walker.cpp; the use does not show what it controls)
+D_00264150	role not shown	tuning value or table used in mode_walker.cpp; the use does not show what it controls)
+D_00264154	role not shown	tuning value or table used in mode_walker.cpp; the use does not show what it controls)
+D_00264160	role not shown	tuning value or table used in mode_walker.cpp; the use does not show what it controls)
+D_00264170	role not shown	tuning value or table used in mode_walker.cpp; the use does not show what it controls)
+D_00264180	role not shown	tuning value or table used in mode_walker.cpp; the use does not show what it controls)
+D_00264190	role not shown	tuning value or table used in mode_walker.cpp; the use does not show what it controls)
+D_00264248	role not shown	tuning value or table used in path_speed_collider.cpp; the use does not show what it controls)
+D_0026424C	role not shown	tuning value or table used in path_speed_collider.cpp; the use does not show what it controls)
+D_00264770	role not shown	tuning value or table used in main_loop.cpp; the use does not show what it controls)
+D_00264780	role not shown	tuning value or table used in main_loop.cpp; the use does not show what it controls)
+D_00264790	role not shown	tuning value or table used in main_loop.cpp; the use does not show what it controls)
+D_002647A0	role not shown	tuning value or table used in main_loop.cpp; the use does not show what it controls)
+D_00264834	no reader	defined or declared, never read in C)
+D_00264838	no reader	defined or declared, never read in C)
+D_002649A8	no reader	defined or declared, never read in C)
+D_002649C8	role not shown	tuning value or table used in world2_boss.cpp; the use does not show what it controls)
+D_002649D0	role not shown	tuning value or table used in world2_boss.cpp; the use does not show what it controls)
+D_00264A20	role not shown	tuning value or table used in world2_boss.cpp; the use does not show what it controls)
+D_00264A34	role not shown	tuning value or table used in world2_boss.cpp; the use does not show what it controls)
+D_00264A38	role not shown	tuning value or table used in world2_boss.cpp; the use does not show what it controls)
+D_00264A4C	role not shown	tuning value or table used in pause_menu.cpp; the use does not show what it controls)
+D_00269984	role not shown	tuning value or table used in game_progress.cpp, pause_menu.cpp; the use does not show what it controls)
+D_00269988	role not shown	tuning value or table used in screen_element.cpp; the use does not show what it controls)
+D_0026A7D8	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A7F0	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A800	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A810	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A820	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A824	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A828	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A82C	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A844	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A850	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A860	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A870	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A880	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A8A0	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A8B0	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A8C0	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A8D0	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A8D8	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026A8DC	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026AA50	role not shown	tuning value or table used in object_gatherer.cpp; the use does not show what it controls)
+D_0026ABD0	role not shown	tuning value or table used in object_gatherer.cpp; the use does not show what it controls)
+D_0026ABD8	role not shown	tuning value or table used in object_gatherer.cpp; the use does not show what it controls)
+D_0026ABE0	role not shown	tuning value or table used in object_gatherer.cpp; the use does not show what it controls)
+D_0026B530	no reader	defined or declared, never read in C)
+D_0026CBC8	role not shown	tuning value or table used in global_tables.cpp, object_pool.cpp, pause_menu.cpp, screen_element.h, state_notifier.cpp, warp_menu.cpp; the use does not show what it controls)
+D_0026CE48	role not shown	tuning value or table used in global_tables.cpp, object_pool.cpp, pause_menu.cpp, screen_element.h, state_notifier.cpp, warp_menu.cpp, world.cpp; the use does not show what it controls)
+D_0026D848	role not shown	tuning value or table used in global_tables.cpp, object_pool.cpp, screen_element.h, world.cpp; the use does not show what it controls)
+D_0026DAAC	role not shown	tuning value or table used in world.cpp; the use does not show what it controls)
+D_0026E228	no reader	defined or declared, never read in C)
+D_0026E744	role not shown	tuning value or table used in gauge_collider.cpp; the use does not show what it controls)
+D_0026EC58	role not shown	tuning value or table used in flagged_object.cpp, pause_menu.cpp, state_notifier.cpp; the use does not show what it controls)
+D_0026EC60	role not shown	tuning value or table used in state_notifier.cpp; the use does not show what it controls)
+D_0026F388	role not shown	tuning value or table used in oscillator.cpp; the use does not show what it controls)
+D_0026FA64	role not shown	tuning value or table used in on_off_object.cpp, oscillator.cpp; the use does not show what it controls)
+D_002701B8	role not shown	tuning value or table used in disc_access.cpp, warp_menu.cpp; the use does not show what it controls)
+D_002701C4	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00270448	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00270454	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_002704F4	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_002704F8	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00270518	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00270B30	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00270B54	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_002717A8	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_002717CC	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_0027240C	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00272420	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00274118	role not shown	already named g_completionPercentCaption in config/names/data.tsv)
+D_002746E0	role not shown	already named g_anchorPresets in config/names/data.tsv)
+D_002748EC	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_002748F0	role not shown	already named g_sprTransfers in config/names/data.tsv)
+D_00274990	role not shown	already named g_sprTransferIndex in config/names/data.tsv)
+D_00274A40	no reader	defined or declared, never read in C)
+D_00274A50	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00274A70	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00274A80	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00274AA0	value only	a literal constant or table with no role the uses show)
+D_00274B78	value only	a literal constant or table with no role the uses show)
+D_00274B7C	value only	a literal constant or table with no role the uses show)
+D_00274C10	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00274C14	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00274D10	value only	a literal constant or table with no role the uses show)
+D_00274E14	value only	a literal constant or table with no role the uses show)
+D_00274E1C	value only	a literal constant or table with no role the uses show)
+D_00274E2C	value only	a literal constant or table with no role the uses show)
+D_00274E38	value only	a literal constant or table with no role the uses show)
+D_00274E40	value only	a literal constant or table with no role the uses show)
+D_00274E48	value only	a literal constant or table with no role the uses show)
+D_00274E50	value only	a literal constant or table with no role the uses show)
+D_00274E54	value only	a literal constant or table with no role the uses show)
+D_00274E58	value only	a literal constant or table with no role the uses show)
+D_00274E5C	value only	a literal constant or table with no role the uses show)
+D_00274EF0	value only	a literal constant or table with no role the uses show)
+D_00274FB0	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00274FB8	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00275068	value only	a literal constant or table with no role the uses show)
+D_002751D4	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_002751D8	role not shown	already named g_pathFollowerRampTime in config/names/data.tsv)
+D_00275240	role not shown	already named g_pathFollowerFadeCurve in config/names/data.tsv)
+D_00275250	value only	a literal constant or table with no role the uses show)
+D_00275518	role not shown	already named g_followerSpeedRamp in config/names/data.tsv)
+D_00275524	role not shown	already named g_followerSoundSpeedScale in config/names/data.tsv)
+D_00275618	value only	a literal constant or table with no role the uses show)
+D_00275710	role not shown	already named g_currentWorld in config/names/data.tsv)
+D_00275728	role not shown	already named g_bufferedBlockStart in config/names/data.tsv)
+D_002757E0	role not shown	already named g_reachCurve in config/names/data.tsv)
+D_00275800	role not shown	already named g_tintLeanCurve in config/names/data.tsv)
+D_00275820	value only	a literal constant or table with no role the uses show)
+D_002758B0	value only	a literal constant or table with no role the uses show)
+D_002758C0	value only	a literal constant or table with no role the uses show)
+D_00275940	role not shown	already named g_hexDigits in config/names/data.tsv)
+D_00275964	role not shown	already named g_movieDecodeThread in config/names/data.tsv)
+D_00275978	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00275B00	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00275B04	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00275BC0	role not shown	already named g_elementStack in config/names/data.tsv)
+D_00275BC4	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00275BEC	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00275BF0	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00275BF4	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00275C34	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00275C68	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00275D48	role not shown	already named g_world3BossObjectRefs in config/names/data.tsv)
+D_00275DB4	no reader	only mentioned in comments; the code does not use it or names the object locally)
+D_00276620	role not shown	already named g_warpTextStyle in config/names/data.tsv)
+D_00276658	no reader	defined or declared, never read in C)
+D_00276660	no reader	defined or declared, never read in C)
+D_00276670	no reader	defined or declared, never read in C)
+D_0027696C	role not shown	already named g_libraryState in config/names/data.tsv)
+D_00276970	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00276980	role not shown	already named g_firstKernelPatchCode in config/names/data.tsv)
+D_002770C0	role not shown	already named g_secondKernelPatchCode in config/names/data.tsv)
+D_002770E8	role not shown	already named g_kernelPatchHandlers in config/names/data.tsv)
+D_00277128	role not shown	already named g_requestThreadId in config/names/data.tsv)
+D_0027712C	role not shown	already named g_outputLineLength in config/names/data.tsv)
+D_00277130	role not shown	already named g_outputHook in config/names/data.tsv)
+D_00277134	role not shown	already named g_remoteCallsReady in config/names/data.tsv)
+D_002771B8	role not shown	already named g_fileClientOpen in config/names/data.tsv)
+D_002771BC	role not shown	already named g_fileRequestSemaphore in config/names/data.tsv)
+D_002771C0	role not shown	already named g_fileHandleTableSemaphore in config/names/data.tsv)
+D_002771C4	role not shown	already named g_fileReplySemaphore in config/names/data.tsv)
+D_002771C8	no reader	defined or declared, never read in C)
+D_002771CC	role not shown	already named g_moduleLoaderBound in config/names/data.tsv)
+D_002771D0	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_002771D8	role not shown	already named g_kernelWordSearchCall in config/names/data.tsv)
+D_002771E4	role not shown	already named g_librarySemaphore0 in config/names/data.tsv)
+D_002771E8	role not shown	already named g_librarySemaphore1 in config/names/data.tsv)
+D_002771F0	role not shown	already named g_secondInstallerCode in config/names/data.tsv)
+D_00277998	role not shown	already named g_secondKernelPatchHandlers in config/names/data.tsv)
+D_002779B8	role not shown	already named g_commandChannelReady in config/names/data.tsv)
+D_002779C0	role not shown	already named g_thirdKernelPatchCode in config/names/data.tsv)
+D_00277D30	role not shown	already named g_thirdKernelPatchHandlers in config/names/data.tsv)
+D_00277FE0	role not shown	already named g_tlbSetup in config/names/data.tsv)
+D_00279300	no reader	defined or declared, never read in C)
+D_00279310	no reader	defined or declared, never read in C)
+D_002793F0	no reader	defined or declared, never read in C)
+D_00279414	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00279420	role not shown	already named g_discCallbackSemaphore in config/names/data.tsv)
+D_00279434	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00279438	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_0027943C	no reader	defined or declared, never read in C)
+D_00279440	no reader	defined or declared, never read in C)
+D_00279444	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00279448	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_0027944C	no reader	defined or declared, never read in C)
+D_0027AEB4	no reader	defined or declared, never read in C)
+D_0027AEC8	role not shown	already named g_cardRequestInFlight in config/names/data.tsv)
+D_0027AED0	role not shown	already named g_streamIds in config/names/data.tsv)
+D_0027B000	role not shown	already named g_lumaBlockFunctions in config/names/data.tsv)
+D_0027B020	role not shown	already named g_chromaBlockFunctions in config/names/data.tsv)
+D_0027B068	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_0027B0A8	no reader	defined or declared, never read in C)
+D_0027B130	role not shown	already named g_constructorList in config/names/data.tsv)
+D_0027B180	no reader	only mentioned in comments; the code does not use it or names the object locally)
+D_0027B184	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_0027B198	role not shown	already named g_frameInfoList in config/names/data.tsv)
+D_0027B300	role not shown	already named g_payloadRefCounts in config/names/data.tsv)
+D_0027B314	role not shown	already named g_activeListFrames in config/names/data.tsv)
+D_0027B380	no reader	only mentioned in comments; the code does not use it or names the object locally)
+D_0027C008	role not shown	already named g_numberedAgentCounter in config/names/data.tsv)
+D_0027C00C	role not shown	already named g_gaugeManager in config/names/data.tsv)
+D_0027C230	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_002BE478	role not shown	already named g_queueOverflowEntry in config/names/data.tsv)
+D_002C2A10	no reader	defined or declared, never read in C)
+D_002C2A24	no reader	defined or declared, never read in C)
+D_005E4700	role not shown	already named g_deferredRequests in config/names/data.tsv)
+D_00604700	role not shown	already named g_defaultSwitchedColliderData in config/names/data.tsv)
+D_00604780	role not shown	already named g_groupConstantsUploaded in config/names/data.tsv)
+D_00625760	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00625770	role not shown	already named g_requestThreadStack in config/names/data.tsv)
+D_00625B70	role not shown	already named g_requestSemaphore in config/names/data.tsv)
+D_00625B78	role not shown	already named g_requestRing in config/names/data.tsv)
+D_00625F80	role not shown	already named g_outputLine in config/names/data.tsv)
+D_00626000	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00626800	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00627000	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_00627800	role not shown	already named g_remoteCallState in config/names/data.tsv)
+D_00628500	role not shown	already named g_fileReplyBuffer in config/names/data.tsv)
+D_00628940	role not shown	already named g_fileHandleTable in config/names/data.tsv)
+D_00628B40	role not shown	already named g_fileClient in config/names/data.tsv)
+D_00628C00	role not shown	already named g_moduleLoaderBuffer in config/names/data.tsv)
+D_00628E00	role not shown	already named g_moduleLoaderClient in config/names/data.tsv)
+D_00628E28	role not shown	already named g_moduleLoaderVersion in config/names/data.tsv)
+D_00628E40	role not shown	already named g_iopResetPacket in config/names/data.tsv)
+D_006292C0	role not shown	already named g_commandReceiveBuffer in config/names/data.tsv)
+D_00629340	role not shown	already named g_commandReceiveBuffer2 in config/names/data.tsv)
+D_00629398	role not shown	already named g_commandChannel in config/names/data.tsv)
+D_006293C0	role not shown	already named g_commandSystemSlots in config/names/data.tsv)
+D_006294C0	role not shown	already named g_commandChannelWords in config/names/data.tsv)
+D_0062A540	role not shown	already named g_constructorSavedRegisters in config/names/data.tsv)
+D_0062A740	no reader	defined or declared, never read in C)
+D_0062A748	no reader	defined or declared, never read in C)
+D_0062A750	no reader	defined or declared, never read in C)
+D_0062A758	no reader	defined or declared, never read in C)
+D_0062A760	no reader	defined or declared, never read in C)
+D_0062A768	no reader	defined or declared, never read in C)
+D_0062A7C0	role not shown	used as a flag, state word or table whose meaning the callers do not show)
+D_0062AD80	no reader	defined or declared, never read in C)
+D_0062C540	role not shown	already named g_programFrameTable in config/names/data.tsv)
+D_BC23D70A	no reader	defined or declared, never read in C)
+include/aim_blend_grid.h:AimBlendGrid.f50	no reader	set to 1 at the end of start)
+include/aim_blend_grid.h:AimBlendGrid.fD4	no reader	copy of nodeCount)
+include/aim_blend_grid.h:AimBlendGrid.fE0	no reader	float read last from the stream)
+include/aim_blend_grid.h:BlendAnimationView.f78	role not shown	copied from another view only)
+include/aim_blend_grid.h:BlendAnimationView.f7C	role not shown	one of two pose scales, with f98)
+include/aim_blend_grid.h:BlendAnimationView.f98	role not shown	as f7C)
+include/attachment.h:AnimationPlayer.f54	role not shown	an 8-byte array handed to RegisterObjectGroup/UnregisterObjectGroup)
+include/attachment.h:T2195_588.f80	role not shown	copy of the link value, set at init only)
+include/attachment.h:T2195_588.f84	no reader	
+include/attachment.h:T2195_790.f80	no reader	union alias of p80)
+include/attachment.h:T2195_790.f84	no reader	union alias of p80)
+include/base_object.h:BaseObject.f0C	role not shown	a flag word tested nonzero on the other object by TestOtherFlagged)
+include/buffered_stream.h:BufferedStream.f38	no reader	cleared at open)
+include/buffered_stream.h:BufferedStream.f44	no reader	cleared at open)
+include/buffered_stream.h:BufferedStream.f50	no reader	cleared at open)
+include/buffered_stream.h:BufferedStream.f54	no reader	cleared at open)
+include/camera.h:Camera.f100	no reader	union member, never accessed by name)
+include/camera.h:Camera.f140	no reader	union member, never accessed by name)
+include/camera.h:Camera.f150	no reader	union member, never accessed by name; ->f150 belongs to another struct)
+include/camera.h:Camera.f2E4	role not shown	only accessed through other structs)
+include/camera.h:Camera.f2E8	role not shown	only accessed through other structs)
+include/camera.h:Camera.f2EC	role not shown	BaseObject pointer; uses are through other structs)
+include/camera.h:Camera.f2F0	role not shown	copied as a record by camera.cpp, other uses are other structs)
+include/camera.h:Camera.f300	no reader	
+include/camera.h:Camera.f310	no reader	
+include/camera.h:Camera.f334	role not shown	uses belong to other structs)
+include/camera.h:Camera.f338	role not shown	uses belong to other structs)
+include/camera.h:Camera.f370	no reader	
+include/camera.h:Camera.fC0	role not shown	alias of projection row 0; only copied to a VU1 packet)
+include/camera.h:Camera.fD4	role not shown	alias of projection element; only copied to a VU1 packet)
+include/camera_controller.h:OnOffCameraController.f20	no reader	set to 4 when no free span is found)
+include/camera_controller.h:TargetCameraController.f0C	role not shown	integer view of the union with yawSpeed)
+include/camera_controller.h:TargetCameraController.f14	role not shown	integer view of the union with pitchSpeed)
+include/camera_controller.h:TargetCameraController.f18	role not shown	integer view of the union with zoomFraction)
+include/camera_controller.h:TargetCameraController.f1C	role not shown	integer view of the union with zoomSpeed)
+include/camera_controller.h:TargetCameraController.f50	role not shown	integer view of the union with keptObject)
+include/child_group_object.h:ContactListGlider.f6F8	no reader	no use found)
+include/child_group_object.h:ContactListObject.f6E4	role not shown	object_pool.cpp stores the parent's root in it; world5_boss calls slot 3 on it)
+include/collider.h:Collider.fD4	no reader	a 12-byte tail copied with the rest of the record)
+include/collider_pose.h:ColliderPose.f3C	no reader	only written to 1 in player.cpp)
+include/colored_triangle_set.h:ColoredTriangleSet.f4C	value only	1.0 set at init, no reader)
+include/colored_triangle_set.h:ColoredTriangleSet.f5C	value only	1.0 set at init, no reader)
+include/contact_tracker.h:Rec36.f04	no reader	0 at set-up)
+include/contact_tracker.h:Rec36.f08	no reader	150.0 at set-up)
+include/cursor_animator.h:AnimatorParams.f10	role not shown	a block word each animator type reads differently in its Load function)
+include/cursor_animator.h:AnimatorParams.f14	role not shown	a block word each animator type reads differently in its Load function)
+include/cursor_animator.h:AnimatorParams.f18	role not shown	a block word each animator type reads differently in its Load function)
+include/cursor_animator.h:AnimatorParams.f4	role not shown	a block word each animator type reads differently in its Load function)
+include/cursor_animator.h:AnimatorParams.f8	role not shown	a block word each animator type reads differently in its Load function)
+include/cursor_animator.h:AnimatorParams.fC	role not shown	a block word each animator type reads differently in its Load function)
+include/effect.h:Effect.f120	role not shown	union of float, int and pointer, kind-specific)
+include/effect.h:Effect.f124	role not shown	union, kind-specific)
+include/effect.h:Effect.f128	role not shown	union, kind-specific)
+include/effect.h:Effect.f130	role not shown	union of params, points and an angle; kind-specific)
+include/effect.h:Effect.fB0	role not shown	union of float and int, kind-specific)
+include/effect_spawner.h:Rec50.f130	role not shown	a mode; == 2 needs a pooled slot and a setup pair; aliased by words130)
+include/effect_spawner.h:Rec50.f188	role not shown	tested against -1 at post-load; aliased by words130)
+include/effect_spawner.h:Rec50.f1F0	role not shown	kind-dependent parameter, union of float, int and object id)
+include/effect_spawner.h:Rec50.f1F0f	role not shown	kind-dependent parameter)
+include/effect_spawner.h:Rec50.f1F4	role not shown	kind-dependent parameter)
+include/effect_spawner.h:Rec50.f1F8	role not shown	kind 24's third parameter, copied to an effect's f128)
+include/flag_table.h:FlagTable.f000	no reader	no use found)
+include/font.h:Font.f00	no reader	no use found)
+include/game_progress.h:G27C230.f08	role not shown	read through extern views in other files)
+include/game_progress.h:G27C230.f10	role not shown	read through extern views in other files)
+include/game_progress.h:G27C230.f14	role not shown	read through extern views in other files)
+include/game_progress.h:G27C230.f438	role not shown	read through extern views in other files)
+include/game_progress.h:G27C230.f43C	role not shown	read through extern views in other files)
+include/game_progress.h:G27C230.f440	role not shown	read through extern views in other files)
+include/game_progress.h:G27C230.f448	role not shown	read through extern views in other files)
+include/game_progress.h:GameProgress.f19F0	role not shown	mask word used as unsigned bits in several files)
+include/game_progress.h:GameProgress.f19F4	role not shown	bits set by level, read through extern views)
+include/gauge_counted_object.h:GaugeCountedObject.f554	no reader	loaded by id; f55C only copied to a record field elsewhere)
+include/gauge_counted_object.h:GaugeCountedObject.f558	no reader	loaded by id; f55C only copied to a record field elsewhere)
+include/gauge_counted_object.h:GaugeCountedObject.f55C	no reader	loaded by id; f55C only copied to a record field elsewhere)
+include/group_marker.h:GroupMarker.f04	no reader	no C reads or writes it
+include/group_marker.h:GroupMarker.f08	no reader	only set to -1 at start; never read in C
+include/id_linked_object.h:IdLinkedObject.f2D4	role not shown	0.5 at set-up, no reader)
+include/id_linked_object.h:IdLinkedObject.f2D8	no reader	400.0 at set-up)
+include/id_linked_object.h:IdLinkedObject.f2DC	role not shown	a pair with f2E0 scaled by the hit-count collider; meaning unclear)
+include/id_linked_object.h:IdLinkedObject.f2E0	role not shown	pair with f2DC)
+include/id_linked_object.h:IdLinkedObject.f320	no reader	0.3 at set-up)
+include/id_linked_object.h:IdLinkedObject.f324	no reader	0.5 at set-up)
+include/layout_137228.h:Layout_137228.f14	role not shown	set through SetF14 only)
+include/layout_137228.h:Layout_137228.f18	role not shown	set through SetF18 only)
+include/listed_collision_part.h:ListedCollisionPart.f568	no reader	300.0 at set-up only; never read by this struct
+include/load_progress.h:LoadProgress.f14	no reader	union alias of barColor)
+include/load_progress.h:LoadProgress.f18	no reader	union alias of color0)
+include/load_progress.h:LoadProgress.f1C	no reader	union alias of color1)
+include/load_progress.h:LoadProgress.f20	no reader	union alias of color2)
+include/masked_collider.h:C24.f6CC	role not shown	start of an embedded ramp profile with f6D0, f6D4)
+include/masked_collider.h:C24.f6D0	role not shown	ramp profile word)
+include/masked_collider.h:C24.f6D4	role not shown	ramp profile word)
+include/masked_collider.h:C24.f6D8	role not shown	3000.0 scale: lens = sqrt(f6D8 / len))
+include/masked_collider.h:Held23.f4C	role not shown	set to 1 and 0 on the aim attachment)
+include/masked_collider.h:MaskedCollider.f620	role not shown	copied into a message field f30)
+include/masked_collider.h:PooledHolder.f7B0	role not shown	set by a kind 7 item, picks the 0x2B8 state; meaning unclear)
+include/memory_card.h:CardSlot.f0C	role not shown	a float of the save image; nonzero tells a used slot, no name from the code)
+include/memory_card.h:MemoryCard.f00	no reader	
+include/memory_card.h:MemoryCard.f24	role not shown	first output of GetCardInfo, never read)
+include/memory_card.h:MemoryCard.f4F44	role not shown	union with image/i4F44: pointer to the selected slot in pause_menu and the written block elsewhere)
+include/memory_card.h:MemoryCard.f4F48	role not shown	union member used as a pointer to the newest entry in one function)
+include/memory_card.h:MemoryCard.f4F4C	role not shown	union member; a slot pointer copied to f4F44 by pause_menu)
+include/model_build.h:StripMeshInfo.f14	no reader	no C use found
+include/model_build.h:StripMeshInfo.f18	no reader	no C use found
+include/mpeg_decoder.h:MpegDecoder.f144	role not shown	a byte read from the stream, set to 5)
+include/mpeg_decoder.h:MpegDecoder.f70	role not shown	read as a timestamp-synthesis switch, only ever 0)
+include/mpeg_decoder.h:MpegDecoder.f78	role not shown	used in timestamp arithmetic in FillPictureOutputInfo)
+include/mpeg_decoder.h:MpegDecoder.f80	role not shown	a timestamp base, -1 at init)
+include/mpeg_decoder.h:MpegDecoder.f814	no reader	cleared only)
+include/mpeg_decoder.h:MpegDecoder.f88	role not shown	timestamp arithmetic)
+include/mpeg_decoder.h:MpegDecoder.f90	role not shown	timestamp arithmetic counter)
+include/mpeg_decoder.h:MpegDecoder.fE8	role not shown	cleared flag read with brokenLink in SelectPictureBuffer)
+include/mpeg_decoder.h:MpegDecoder.fF0	role not shown	1 at init, never set to a value)
+include/mpeg_decoder.h:MpegDecoder.fF8	role not shown	0 at init; compared with 1 and 2)
+include/mpeg_decoder.h:MpegMacroblock.f134	no reader	
+include/node_query.h:NodeQuery.f00	role not shown	union with p00; a first word two functions use differently)
+include/object_cycler.h:ObjectCycler.f5DC	role not shown	a packed float pair kept across the copy)
+include/object_message.h:ObjectMessage.f30	role not shown	a float whose meaning depends on the event kind)
+include/object_message.h:ObjectMessage.f38	role not shown	a pointer whose meaning depends on the event kind)
+include/object_pool.h:ObjectPool.f120	role not shown	0 at init)
+include/object_pool.h:ObjectPool.f124	role not shown	20000.0 at init)
+include/object_pool.h:ObjectPool.f144	role not shown	
+include/object_pool.h:ObjectPool.f150	role not shown	cleared at init only)
+include/object_pool.h:ObjectPool.f160	role not shown	object found from id54)
+include/object_pool.h:ObjectPool.f164	role not shown	as f160)
+include/object_pool.h:ObjectPool.f40	role not shown	tested before AdvanceObjectPoolEntry)
+include/object_pool.h:ObjectPool.f5C	role not shown	object found by id58, no reader naming it)
+include/object_pool.h:ObjectPool.f60	role not shown	object of one kind found from id4C; kind unnamed)
+include/object_pool.h:ObjectPool.f64	role not shown	as f60)
+include/object_pool.h:ObjectPool.f68	role not shown	as f60)
+include/object_pool.h:ObjectPool.fD8	role not shown	5.0 at init)
+include/object_pool.h:ObjectPool.fE0	role not shown	object found from id50, used as follower)
+include/object_pool.h:ObjectPool.fE4	role not shown	as fE0)
+include/object_set.h:ObjectSet.f558	role not shown	set when a found object has animation event kind 19; no reader found)
+include/object_sub_group.h:ObjectSubGroup.f2D4	role not shown	tested nonzero in the finish check; other uses are other structs)
+include/object_sub_group.h:ObjectSubGroup.f2EC	no reader	filled by ReadMeshTables only)
+include/object_sub_group.h:ObjectSubGroup.f2F0	no reader	filled by ReadMeshTables only)
+include/object_sub_group.h:ObjectSubGroup.f2F4	no reader	filled by ReadMeshTables only)
+include/on_off_object.h:OnOffObject.f2D4	role not shown	ReadMeshTables output only)
+include/on_off_object.h:OnOffObject.f2D8	role not shown	ReadMeshTables output only)
+include/on_off_object.h:OnOffObject.f2DC	role not shown	ReadMeshTables output only)
+include/on_off_object.h:OnOffObject.f384	role not shown	nonzero stops the forced-state check for a player in state 2; meaning unclear)
+include/pad_record.h:PadRecord.f20	role not shown	union with lastReadTime)
+include/pad_record.h:PadRecord.fA8	role not shown	union with buttons)
+include/path_curve_object.h:TargetCurve.f4C	no reader	1 at setup)
+include/path_curve_object.h:TargetCurve.f50	no reader	3 at setup)
+include/path_curve_object.h:TargetVector.f50	no reader	8 at setup)
+include/path_curve_object.h:TargetVector.f54	no reader	9 at setup)
+include/path_curve_object.h:TargetVector.f58	no reader	1 at setup)
+include/path_curve_object.h:TargetVector.f5C	role not shown	player_target compares it with the player height in the vector search, but player.cpp reads the same offset through a cast as the orbit radius of a point: two roles)
+include/placed_model_parts.h:BatchVertexWords.f20	role not shown	a packet word)
+include/placed_model_parts.h:StripHeader.f14	role not shown	a byte read from the stream, scaled into a packet word)
+include/placed_model_parts.h:StripUnpack.f10	role not shown	a packet header constant, 3 or 4)
+include/placed_model_parts.h:StripUnpack.f12	role not shown	packet word computed from the strip header byte)
+include/placed_object.h:Elem02.f14	role not shown	
+include/placed_object.h:PlacedObject.f29C	role not shown	integer view of the union with eventTimer)
+include/placed_object.h:PlacedObject.f2A4	role not shown	a radius set with boundRadius; zone_collider takes the max with radius3CC)
+include/placed_object.h:PlacedObject.f8C	role not shown	read as a face tree by TestPointAgainstObjectShape; no writer found)
+include/placed_object.h:PlacedObject.f98	role not shown	
+include/point_object.h:ListedPointObject.f58	no reader	largest float at set-up)
+include/point_object.h:TargetPoint.f68	no reader	1 at set-up)
+include/point_object.h:TargetPoint.f70	no reader	largest float at set-up)
+include/point_object.h:TextPointObject.f54	no reader	0.5 set when the text panel gathers the object)
+include/point_object.h:TextPointObject.f58	no reader	0.5 set when the text panel gathers the object)
+include/pooled_object.h:PooledObject.f57C	role not shown	union with holder, which already names it)
+include/pooled_object.h:PooledObject.f580	no reader	zeroed when the state leaves 2)
+include/pooled_object.h:PooledObject.f584	role not shown	union with holdHeight, which already names it)
+include/property_descriptor.h:PropertyDescriptor.f10	role not shown	kept in a property reference by the getter code, never interpreted)
+include/redirect_object.h:RedirectObject.f310	role not shown	selects the first step index and a pinned first link of the chain; meaning unclear)
+include/remote_call_client.h:RemoteCallClient.f10	no reader	cleared by BindRemoteService)
+include/remote_call_client.h:RemoteCallClient.f14	role not shown	a word of the bind's reply)
+include/remote_call_client.h:RemoteCallClient.f18	role not shown	a word of the bind's reply)
+include/scaled_transform.h:ScaledTransform.f48	no reader	never accessed by name
+include/scaled_transform.h:ScaledTransform.f4c	no reader	never accessed by name
+include/scatter_controller.h:ScatterTable.f00	no reader	never accessed by name in pooled_object.cpp)
+include/scatter_controller.h:ScatterTable.f04	no reader	never accessed by name in pooled_object.cpp)
+include/scatter_controller.h:ScatterTable.f3C	no reader	never accessed by name in pooled_object.cpp)
+include/scatter_controller.h:ScatterTable.f40	no reader	never accessed by name in pooled_object.cpp)
+include/scatter_controller.h:ScatterTable.f4C	no reader	never accessed by name in pooled_object.cpp)
+include/scatter_controller.h:ScatterTable.f50	no reader	never accessed by name in pooled_object.cpp)
+include/scatter_controller.h:ScatterTable.f5C	no reader	never accessed by name in pooled_object.cpp)
+include/screen_element.h:T217D_1380.f270	no reader	only cleared)
+include/screen_element.h:T217D_6D0.f280	role not shown	read two ways: a state walker held as an s32, and a page value
+include/screen_fade.h:FadeRequest.f08	role not shown	copied through to WorldLoadRequest.f8; meaning of the word is not seen
+include/screen_fade.h:FadeRequest.f0C	role not shown	copied through to WorldLoadRequest.fC; meaning not seen
+include/screen_fade.h:ScreenFade.f00	no reader	only asm-named callers; no C reads it
+include/sound_record.h:SoundRecord.f14	role not shown	union with b14; -1.0 at set-up)
+include/sound_record.h:SoundRecord.f18	role not shown	union with b14)
+include/state_notifier.h:StateNotifier.f344	role not shown	250, 300 or 500 set by each subclass init; no reader in C)
+include/state_trigger.h:StateTrigger.f628	role not shown	a pointer passed to MeasurePlayerFootProbe; other uses are other structs)
+include/step_sequence.h:StepSequence.f2F0	role not shown	union with p2F0; int use only compared with another object's +0x270)
+include/step_sequence.h:StepSequence.f2F4	role not shown	union with p2F4; compared with another object's +0x270)
+include/switched_collider.h:Agent.f734	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Agent.f940	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Agent.f950	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Agent.fA6C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Agent.fB20	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Agent.fB30	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Agent.fB5C	no reader	never accessed by name in src/ or include/
+include/switched_collider.h:Agent.fB80	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Agent.fBD0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Agent.fC08	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Blk05.f40	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Blk05.f44	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Blk05.f48	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Blk05.f4C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:C17.f654	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:CompanionAgent.fCC8	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:CompanionAgent.fCCC	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:CompanionAgent.fCD0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:GaugeCollider.f678	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:ModeWalker.fBC0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:ModeWalker.fBC4	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:ModeWalker.fBCC	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:ModeWalker.fBD0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PathFollower.fB98	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1014	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1030	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1034	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1038	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f103C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1060	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1064	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1068	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f118C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1504	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1508	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1518	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1530	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1538	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1540	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1560	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f1570	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2218	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2238	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2248	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2250	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2284	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f22F0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2300	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2330	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f23D0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f23D4	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f23D8	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f23DC	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f23E0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f23E4	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f23F0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f23F4	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2490	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2494	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2498	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f249C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f24FC	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2504	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2508	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f25B8	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f25BC	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f25C0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f25CC	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f25D0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f25D4	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f267C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f26A0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f26B0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f271C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2720	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f272C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f274C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2754	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2760	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2764	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2770	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.f2B74	no reader	never accessed by name in src/ or include/
+include/switched_collider.h:Player.f2B78	no reader	never accessed by name in src/ or include/
+include/switched_collider.h:Player.f2B7C	no reader	never accessed by name in src/ or include/
+include/switched_collider.h:Player.f2B80	no reader	never accessed by name in src/ or include/
+include/switched_collider.h:Player.f2B84	no reader	never accessed by name in src/ or include/
+include/switched_collider.h:Player.f2B88	no reader	never accessed by name in src/ or include/
+include/switched_collider.h:Player.f2B8C	no reader	never accessed by name in src/ or include/
+include/switched_collider.h:Player.f2BD4	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.fB24	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.fB28	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.fB2C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.fC34	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.fC38	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.fC3C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.fE24	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:Player.fE2C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PlayerLinkedCollider.f61C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PlayerLinkedCollider.f628	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PlayerLinkedCollider.f630	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PlayerLinkedCollider.f634	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PlayerLinkedCollider.f644	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PlayerLinkedCollider.f648	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PlayerLinkedCollider.f64C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PlayerLinkedCollider.f650	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PlayerLinkedCollider.f654	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PlayerLinkedCollider.f658	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:PlayerLinkedCollider.f65C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:SwitchedCollider.f580	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:SwitchedCollider.f584	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:SwitchedCollider.f588	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:SwitchedCollider.f594	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:SwitchedCollider.f598	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:SwitchedCollider.f59C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:SwitchedCollider.f5E0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:SwitchedCollider.f5F0	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:SwitchedCollider.f600	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:SwitchedCollider.f604	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TintBlendCollider.f73C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TurningCollider.f618	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TurningCollider.f61C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TurningCollider.f620	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TurningCollider.f624	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TurningCollider.f628	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TurningCollider.f62C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TurningCollider.f640	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TurningCollider.f698	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TurningCollider.f6C8	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TurningCollider.f6E4	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:TurningCollider.f6E8	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:WalkerCollider.f64C	role not shown	an alternate view of a field this struct's derived classes use (World5ModeCollider, PlayerLinkedCollider); not named through this view
+include/switched_collider.h:WalkerCollider.f65C	role not shown	an alternate view of a field this struct's derived classes use (World5ModeCollider, PlayerLinkedCollider); not named through this view
+include/switched_collider.h:WalkerCollider.f660	role not shown	an alternate view of a field this struct's derived classes use (World5ModeCollider, PlayerLinkedCollider); not named through this view
+include/switched_collider.h:WalkerCollider.f664	role not shown	an alternate view of a field this struct's derived classes use (World5ModeCollider, PlayerLinkedCollider); not named through this view
+include/switched_collider.h:WalkerCollider.f678	role not shown	an alternate view of a field this struct's derived classes use (World5ModeCollider, PlayerLinkedCollider); not named through this view
+include/switched_collider.h:WalkerCollider.f67C	role not shown	an alternate view of a field this struct's derived classes use (World5ModeCollider, PlayerLinkedCollider); not named through this view
+include/switched_collider.h:WalkerCollider.f680	role not shown	an alternate view of a field this struct's derived classes use (World5ModeCollider, PlayerLinkedCollider); not named through this view
+include/switched_collider.h:World3Boss.fC4C	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:World5ModeCollider.f650	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:World5ModeCollider.f668	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:World5ModeCollider.f680	role not shown	read in a few places, none shows what it holds
+include/switched_collider.h:World5ModeCollider.f6E8	role not shown	read in a few places, none shows what it holds
+include/target_follower.h:List47.f38	no reader	
+include/target_follower.h:Sub47.f44	role not shown	set from the tune object's +0x318 before ChooseObjectPoolItem)
+include/target_follower.h:TargetFollower.f57C	no reader	loaded by id only)
+include/target_follower.h:TargetFollower.f580	no reader	loaded by id only)
+include/target_follower.h:TargetFollower.f584	no reader	loaded by id only)
+include/target_follower.h:TargetFollower.f588	no reader	loaded by id only)
+include/target_follower.h:TargetFollower.f58C	no reader	loaded by id only)
+include/target_follower.h:TargetFollower.f5C4	role not shown	3000.0, passed as a sound parameter to PlaySoundAndApplyVolumePan)
+include/target_follower.h:TargetFollower.f5C8	role not shown	1000.0, passed as a sound parameter to PlaySoundAndApplyVolumePan)
+include/texture_upload_packet.h:QueuedGifTags.f10	role not shown	a word of the queued GIF tags)
+include/thread_params.h:ThreadParams.f00	no reader	first word of the thread record, not read)
+include/timed_object.h:TimedGroup.f5D0	role not shown	tested == 1 together with the player's state before a span search)
+include/timed_object.h:TrackPlayer.f18	value only	a value given back as the record is cleared)
+include/timed_state_object.h:Child27.f694	role not shown	tested by func_0013DD08)
+include/vertex_batch.h:VertexBatch.f0AC	no reader	1.0 at set-up)
+include/vertex_batch.h:VertexBatch.f94	no reader	1 at set-up, 4 once lights are selected)
+include/vertex_batch.h:VertexBatch.f98	no reader	set to 1 in one place)
+include/world.h:World.f1B68	no reader	union alias of list1B64)
+include/world.h:World.f1B6C	no reader	union alias of list1B64)
+include/world.h:World.f1B74	no reader	union alias of list1B70)
+include/world.h:World.f1B78	no reader	union alias of list1B70)
+include/world.h:World.f1C28	no reader	union alias of list1C24)
+include/world.h:World.f1C2C	no reader	union alias of list1C24)
+include/world.h:World.f1C34	no reader	union alias of list1C30)
+include/world.h:World.f1C38	no reader	union alias of list1C30)
+include/world.h:World.f1CE4	role not shown	the class 0x17 object registered at its init; player_target reads its +0x618 position)
+include/world.h:World.f1D28	role not shown	copied into effects' i20 at their init)
+include/world.h:World.f2358	role not shown	set to 1 by a warp menu init and tested before a list walk in placed_object.cpp)
+include/world5_countdown.h:World5Countdown.f55C	no reader	no use through this struct)
+include/world5_countdown.h:World5Countdown.f560	no reader	no use through this struct)
+include/world5_countdown.h:World5Countdown.f564	no reader	no use through this struct)
+include/world_listed_object.h:WorldListedObject.f300	no reader	zeroed with q300 and uploaded whole)
+include/world_listed_object.h:WorldListedObject.f61C	role not shown	copied from the source's +0x194 and uploaded as a VU1 word)
+src/main/arc_element.cpp:ArcQueueRequest.f04	no reader	
+src/main/arc_element.cpp:pool.f60	role not shown	address of a place block passed on)
+src/main/buffered_stream.cpp:LinkedItem.f10	role not shown	a float read from the stream)
+src/main/commentary_best_time.cpp:BestTimeTextStyle.f10	role not shown	a text style float cleared and filled for the font)
+src/main/commentary_best_time.cpp:BestTimeTextStyle.f14	role not shown	a text style float)
+src/main/effect_spawner.cpp:*	role not shown	SplashTail, SpawnSoundParams, SpawnRecord fA0/fA4/f1D0/f1D4/f1E0/f120, SpawnMessage.f38, BroadcastRecord.f120, MemberTargetObject.f20: brace-initialised or positional values whose meaning the code does not show; SpawnMessage.f38 only copied to rec.f1E0)
+src/main/effect_spawner.cpp:*	role not shown	remaining SplashTail, SpawnRecord, SpawnMessage and BroadcastRecord fields; SpawnSoundParams was named from the sound call)
+src/main/game_progress.cpp:ClearedRecord.f4	role not shown	words of a cleared record not read by name)
+src/main/game_progress.cpp:VertexBatch.f94	no reader	set to -1 at set-up)
+src/main/gauge_collider.cpp:GaugeCarrierRecord.f18C	role not shown	assigned from f678 or the held object's f55C, never read)
+src/main/gauge_collider.cpp:GaugeHeld.f55C	role not shown	copied into a carrier record field, never used otherwise)
+src/main/gauge_collider.cpp:NodeQueryFrame.f00	no reader	slots of a local query frame)
+src/main/gauge_collider.cpp:NodeQueryFrame.f08	no reader	slots of a local query frame)
+src/main/link_constraint.cpp:C76.f88	no reader	set to 1 at set-up)
+src/main/link_constraint.cpp:C76.fA8	no reader	set to 8 at set-up)
+src/main/link_constraint.cpp:C76.fAC	no reader	set to 9 at set-up)
+src/main/link_constraint.cpp:C76.fB4	no reader	largest float at set-up)
+src/main/main_loop.cpp:LightObject.f334	role not shown	only sent as the w word of a directional light)
+src/main/memory_card.cpp:IconSysHeader.f004	role not shown	copy of the magic's trailing byte)
+src/main/object_pool.cpp:Released_1A8C90.f6E4	role not shown	a Player view in a local struct: set from the parent's root before a release; same field as TurningCollider.f6E4, role not shown
+src/main/object_pool.cpp:Released_1A8C90.fC3C	role not shown	a Player view in a local struct: set to 1 for kind 0xA objects, same field as Player.fC3C, role not shown
+src/main/on_off_object.cpp:OnOffView.f40	role not shown	max of eye z over frames; no consumer seen)
+src/main/on_off_object.cpp:OnOffView.f60	no reader	
+src/main/oscillator.cpp:TrackerHit.f80	role not shown	tested after the span call; looks like part of the collision span result
+src/main/oscillator.cpp:TrackerHit.f84	role not shown	same as f80
+src/main/path_curve.cpp:f13,f14 (4 hits)	value only	the hits are locals and parameters named like registers, not fields)
+src/main/path_follower.cpp:HitMessage.f30	role not shown	a float in the hit message)
+src/main/pause_menu.cpp:MenuBoxStyle.f10	role not shown	0.6, read by the font's drawBox)
+src/main/pause_menu.cpp:MenuBoxStyle.f14	role not shown	0.6, read by the font's drawBox)
+src/main/pause_menu.cpp:MenuBoxStyle.f18	role not shown	union with color)
+src/main/pause_menu.cpp:MenuBoxStyle.f4	value only	0x2D set by the constructor, read by the font's drawBox)
+src/main/pause_menu.cpp:MenuBoxStyle.f8	role not shown	the size argument as float, read by the font's drawBox)
+src/main/pause_menu.cpp:MenuBoxStyle.fC	no reader	
+src/main/player.cpp:ChildSumPoseSource.f1C	no reader	2 at set-up)
+src/main/player.cpp:ContactBody_174808.f4E0	role not shown	a small kind tested 0, 1 or 4 while walking parents)
+src/main/player.cpp:WalkerHost.f2D8	role not shown	a target object for effects)
+src/main/player_request.cpp:PlayerBlendCurve.f10	no reader	only written)
+src/main/player_request.cpp:SixBlendEntry.f10	role not shown	a reference value subtracted from the heading velocity)
+src/main/player_request.cpp:SixBlendEntry.f144	role not shown	flag tested in the next branch)
+src/main/player_request.cpp:SixBlendEntry.f34	role not shown	weight multiplied by a heading velocity difference)
+src/main/player_request.cpp:SixBlendEntry.f54	role not shown	flag: nonzero computes a heading-velocity blend t)
+src/main/player_request.cpp:SixBlendEntry.f60	role not shown	second reference value subtracted from the heading velocity)
+src/main/player_request.cpp:SixBlendEntry.f84	role not shown	second weight)
+src/main/player_request.cpp:SixBlendEntry.fA4	role not shown	flag: nonzero takes the span times path)
+src/main/player_target.cpp:C17_1CDFB8.f618	role not shown	an object whose world position is taken; partial view)
+src/main/player_target.cpp:Chooser.f2200	no reader	mirrors aimObject in this file)
+src/main/player_target.cpp:Chooser.f23C4	role not shown	a place along a path shape approached with ramps; unclear)
+src/main/player_target.cpp:Chooser.f358	role not shown	multiplied by an arc time to step z; a vertical rate of unclear kind)
+src/main/player_target.cpp:Chooser.f6D4	role not shown	a point passed to obstruction costs and frame transforms)
+src/main/player_target.cpp:Chooser_1CDFB8.f2200	no reader	mirrors aimObject in this file)
+src/main/player_target.cpp:Chooser_1CDFB8.f23CC	no reader	written with the class 0x17 object only)
+src/main/player_target.cpp:TargetCand.f4C	role not shown	height threshold of a candidate kind, compared with the player's height over it)
+src/main/player_target.cpp:TargetCand.f58	role not shown	height threshold, shared view of several real structs)
+src/main/player_target.cpp:TargetCand.f5C	role not shown	height threshold or turn scale, shared view of several structs)
+src/main/player_target.cpp:TargetCand.f70	role not shown	height threshold, shared view)
+src/main/player_target.cpp:TargetCand.fB4	role not shown	height threshold, shared view)
+src/main/player_target.cpp:World_1CDFB8.f1CE4	role not shown	class 0x17 object; same field as World::f1CE4)
+src/main/pooled_object.cpp:f20	role not shown	not a field (a local variable)
+src/main/screen_element.cpp:TextStyle.f04	role not shown	a style byte set to 0x2D or 0x3D; font draw reads it by cast)
+src/main/screen_element.cpp:TextStyle.f08	role not shown	2.0 in every style, read by the font draw only)
+src/main/screen_element.cpp:TextStyle.f0C	role not shown	1.0 or -4.0 per style)
+src/main/screen_element.cpp:TextStyle.f10	role not shown	0.3 in every style)
+src/main/screen_element.cpp:TextStyle.f14	role not shown	0.3 in every style)
+src/main/script_machine.cpp:MarkEntry.f10	no reader	
+src/main/script_machine.cpp:MarkRecord.f8	no reader	
+src/main/script_machine.cpp:MarkRecord.fC	no reader	
+src/main/selection_menus.cpp:BoxStyle.f4	value only	set to the constant 0x2D by the constructor
+src/main/selection_menus.cpp:ChoiceLevelEntry.f0	no reader	never used
+src/main/selection_menus.cpp:ChoiceLevelEntry.f1C	role not shown	compared with f4
+src/main/selection_menus.cpp:ChoiceLevelEntry.f4	role not shown	compared with f1C by StartObjectFade, meaning not seen
+src/main/state_notifier.cpp:NotifierLead.f00	no reader	no use found)
+src/main/state_notifier.cpp:PSys_1481A0.f26C	role not shown	a single float set to 250.0 through a view of a global)
+src/main/target_follower.cpp:ChaseObject.f6F0	role not shown	end speed for class 0x3D, flight time for class 0x3E)
+src/main/target_follower.cpp:FollowTune.f334	role not shown	negated into a vector along Z of a class 0x3E item; velocity or acceleration unclear)
+src/main/target_lists.cpp:TargetedObject.f398	role not shown	one word of a partial view)
+src/main/timed_object.cpp:Record200.f44	role not shown	set to 4 or 0 as a sequence changes state; a record of the aim attachment, meaning not seen
+src/main/tint_blend_collider.cpp:f20	role not shown	not a field (a local variable)
+src/main/warp_menu.cpp:WarpLabelLayout.f14	role not shown	always set to 0 by SetF14 callers
+src/main/warp_menu.cpp:WarpLabelLayout.f18	role not shown	always set to 0 by SetF18 callers
+src/main/world.cpp:DrawScale.f40	role not shown	a scale word read in a draw)
+src/main/world.cpp:world.cpp:f10	role not shown	g_currentEntry->f10, a word copied out)
+src/main/world5_boss.cpp:World5ModeColliderSource.f18	role not shown	tested for 0.0 to end the mode; the record is an animation player and the field is not named
+src/main/world_listed_object.cpp:LookSource.fC0	role not shown	compared with 0 as part of the stillness test)
+src/main/world_listed_object.cpp:LookSource.fC4	role not shown	as fC0)
+src/main/world_listed_object.cpp:LookSourceTail.f184	role not shown	copied to the listed object's field only)
+src/main/world_listed_object.cpp:LookSourceTail.f190	role not shown	copied to particleMode, already named at its destination)
+src/main/world_listed_object.cpp:LookSourceTail.f194	role not shown	copied to a field of another class)

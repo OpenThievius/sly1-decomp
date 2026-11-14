@@ -6,6 +6,6 @@
 
 #include "common.h"
 
-char* FindSubstring(char* s, char* t);
+char* func_001F6880(char* s, char* t);
 
 #endif

@@ -69,9 +69,9 @@ struct StepSequence : PlacedObject {
     s32 extraTargetCount;   // 0x310: the entries of extraTargets
     void* extraTargets[4];  // 0x314: up to four extra target slots
     s32 startPending;       // 0x324: set when the sequence should start as soon as it can
-    s32 f328;               // 0x328
-    s32 f32C;               // 0x32C
-    s32 f330;               // 0x330
+    s32 otherSkipBlocked;   // 0x328
+    s32 buttonSkipBlocked;  // 0x32C
+    s32 dimsVolume;         // 0x330
     u8 pad334[0x340 - 0x334];
 };
 

@@ -949,7 +949,7 @@ void FormatCounterCaption(T217D_E30* self)
         }
         break;
     case 6:
-        if (g_currentWorld->f2354 != 0) {
+        if (g_currentWorld->scatterCountEnabled != 0) {
             FormatToStringBounded(self->text, 0x200, "%c%d", 0x43, self->shown);
         } else {
             self->text[0] = 0;
@@ -1012,7 +1012,7 @@ void InitTimerElement(T217D_510* self)
     self->font = GetFontById(2);
     self->lastTenth = self->lastSecond = -1;
     self->warnAt = 3.4028235e+38f;
-    self->f290 = 1;
+    self->hideWhenStopped = 1;
     SetTimerState(self, 0);
 }
 
@@ -1028,7 +1028,7 @@ void UpdateTimerElement(T217D_510* self)
     if (self->state == 0) {
         s32 close = (1.0f <= g_gameTime - self->stateSince);
         if ((u32)(self->mode - 1) < 2) {
-            if (self->f290 != 0 || close) {
+            if (self->hideWhenStopped != 0 || close) {
                 self->vt->m15(self);
             }
         }
@@ -1090,7 +1090,7 @@ void StartTimer(T217D_510* self, f32 x)
     self->warned = 0;
     self->limit = 0;
     self->onEnd = 0;
-    self->f290 = 0;
+    self->hideWhenStopped = 0;
     self->color = 0xFF808080;
     self->rate = -1.0f;
     self->lastSecond = -1;
@@ -1123,7 +1123,7 @@ void StartTimerCounting(T217D_510* self)
 // Stops the timer element (state 0) and sets its f290 flag.
 void StopTimer(T217D_510* self)
 {
-    self->f290 = 1;
+    self->hideWhenStopped = 1;
     SetTimerState(self, 0);
 }
 

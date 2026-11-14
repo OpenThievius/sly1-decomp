@@ -853,33 +853,33 @@ struct IconSysHeader {
     s32 backgroundColor3Green;
     s32 backgroundColor3Blue;
     u8 pad4C[4];
-    s32 f050;
-    f32 f054;
-    f32 f058;
+    s32 lightDir1X;
+    f32 lightDir1Y;
+    f32 lightDir1Z;
     u8 pad5C[4];
-    f32 f060;
-    f32 f064;
-    f32 f068;
+    f32 lightDir2X;
+    f32 lightDir2Y;
+    f32 lightDir2Z;
     u8 pad6C[4];
-    f32 f070;
-    f32 f074;
-    f32 f078;
+    f32 lightDir3X;
+    f32 lightDir3Y;
+    f32 lightDir3Z;
     u8 pad7C[4];
-    f32 f080;
-    f32 f084;
-    f32 f088;
+    f32 lightColor1Red;
+    f32 lightColor1Green;
+    f32 lightColor1Blue;
     u8 pad8C[4];
-    f32 f090;
-    s32 f094;
-    f32 f098;
+    f32 lightColor2Red;
+    s32 lightColor2Green;
+    f32 lightColor2Blue;
     u8 pad9C[4];
-    f32 f0A0;
-    f32 f0A4;
-    f32 f0A8;
+    f32 lightColor3Red;
+    f32 lightColor3Green;
+    f32 lightColor3Blue;
     u8 padAC[4];
-    f32 f0B0;
-    f32 f0B4;
-    f32 f0B8;
+    f32 ambientRed;
+    f32 ambientGreen;
+    f32 ambientBlue;
     u8 padBC[4];
     u8 pad0C0[0x104 - 0xC0];
     IconFileName listIconName;
@@ -921,27 +921,27 @@ s32 WriteMemoryCardSaveHeader(void* owner, void* a1, void* a2)
     c.backgroundColor3Red = 0;
     c.backgroundColor3Green = 0x87;
     c.backgroundColor3Blue = 0xFF;
-    c.f050 = 0;
-    c.f054 = 0.5f;
-    c.f058 = -0.5f;
-    c.f060 = 0.5f;
-    c.f064 = -0.4f;
-    c.f068 = 0.1f;
-    c.f070 = -0.5f;
-    c.f074 = 0.5f;
-    c.f078 = 0.5f;
-    c.f080 = 0.14f;
-    c.f084 = 0.03f;
-    c.f088 = 0.48f;
-    c.f090 = 0.33f;
-    c.f094 = 0;
-    c.f098 = 0.33f;
-    c.f0A0 = 0.14f;
-    c.f0A4 = 0.14f;
-    c.f0A8 = 0.38f;
-    c.f0B0 = 0.5f;
-    c.f0B4 = 0.5f;
-    c.f0B8 = 0.5f;
+    c.lightDir1X = 0;
+    c.lightDir1Y = 0.5f;
+    c.lightDir1Z = -0.5f;
+    c.lightDir2X = 0.5f;
+    c.lightDir2Y = -0.4f;
+    c.lightDir2Z = 0.1f;
+    c.lightDir3X = -0.5f;
+    c.lightDir3Y = 0.5f;
+    c.lightDir3Z = 0.5f;
+    c.lightColor1Red = 0.14f;
+    c.lightColor1Green = 0.03f;
+    c.lightColor1Blue = 0.48f;
+    c.lightColor2Red = 0.33f;
+    c.lightColor2Green = 0;
+    c.lightColor2Blue = 0.33f;
+    c.lightColor3Red = 0.14f;
+    c.lightColor3Green = 0.14f;
+    c.lightColor3Blue = 0.38f;
+    c.ambientRed = 0.5f;
+    c.ambientGreen = 0.5f;
+    c.ambientBlue = 0.5f;
     ConvertStringToCharCodes((u8*)a2, (u16*)((u8*)&c + 0xC0));
     c.listIconName = (*(IconFileName*)&g_iconFileName);
     c.copyIconName = (*(IconFileName*)&g_iconFileName);
@@ -1090,7 +1090,7 @@ s32 WriteMemoryCardSlot(void* a0, void* a1, void* a2, void* a3)
 // formatted. Schedules the next poll 0.3 s later.
 s32 PollMemoryCard(MemoryCard* o)
 {
-    s32 r = FinishMemoryCardCall(GetCardInfo(o->port, o->slot, &o->f24, &o->freeBlocks, &o->f2C), 1, 0);
+    s32 r = FinishMemoryCardCall(GetCardInfo(o->port, o->slot, &o->f24, &o->freeBlocks, &o->formatted), 1, 0);
     switch (r) {
     case 9:
     case 11:
@@ -1103,7 +1103,7 @@ s32 PollMemoryCard(MemoryCard* o)
         r = 12;
         break;
     case 0:
-        if (o->f2C != 0) {
+        if (o->formatted != 0) {
             if (o->targetState < 3)
                 o->targetState = 3;
             else
@@ -1121,7 +1121,7 @@ s32 PollMemoryCard(MemoryCard* o)
 s32 GetMemoryCardFreeBytes(void* p, s32* a1)
 {
     MemoryCard* a0 = (MemoryCard*)p;
-    s32 v = FinishMemoryCardCall(GetCardInfo(a0->port, a0->slot, &a0->f24, &a0->freeBlocks, &a0->f2C), 1, 0);
+    s32 v = FinishMemoryCardCall(GetCardInfo(a0->port, a0->slot, &a0->f24, &a0->freeBlocks, &a0->formatted), 1, 0);
     switch (v) {
     case 9: v = 0; break;
     case 10: v = 12; break;

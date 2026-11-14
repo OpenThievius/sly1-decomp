@@ -1233,7 +1233,7 @@ s32 IsWorld4BossFree(World4Boss* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0)
         return 0;
-    return self->fC24;
+    return self->freeFlag;
 }
 
 // Slot 94 of the fourth boss: the agent's goal, and in state 0x10 the position of the object its
@@ -1308,8 +1308,8 @@ extern const Vec02 g_unitXVector;
 // the event's extra flags and the player's aim mode); then handles the event as an agent.
 s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
 {
-    if (self->fC14 != 0 && (ev->eventFlags & 0x20) != 0) {
-        self->fC10 = self->fC10 + 1;
+    if (self->hitAnimation != 0 && (ev->eventFlags & 0x20) != 0) {
+        self->hitCount = self->hitCount + 1;
         DecrementGaugeCount(&g_gaugeBarElement);
         if (self->memberGroup != 0) {
             SlotMessage msg;
@@ -1322,13 +1322,13 @@ s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
         Animation* which;
         if ((ev->extraFlags & 2) != 0) {
             if (g_player == 0 || g_player->aimMode == 4 || g_player->aimMode == 6)
-                which = self->fC14;
+                which = self->hitAnimation;
             else
-                which = self->fC18;
+                which = self->altHitAnimation;
         } else if ((ev->extraFlags & 4) != 0) {
-            which = self->fC1C;
+            which = self->thirdHitAnimation;
         } else {
-            which = self->fC14;
+            which = self->hitAnimation;
         }
         ReplaceAnimationPlayer(which, self, 1, &self->hitPlayer, 0.0f, 1.0f);
         ev->eventFlags &= ~0x20;
@@ -1339,9 +1339,9 @@ s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
 // Stores three animation values in the fourth boss (+0xC14, +0xC18, +0xC1C).
 void SetWorld4BossValues(World4Boss* self, Animation* a, Animation* b, Animation* c)
 {
-    self->fC14 = a;
-    self->fC18 = b;
-    self->fC1C = c;
+    self->hitAnimation = a;
+    self->altHitAnimation = b;
+    self->thirdHitAnimation = c;
 }
 
 // Sets the method table of each screen element global (captions, gauges, timer, prompts, menus,

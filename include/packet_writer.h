@@ -28,15 +28,15 @@ struct PacketWriterVt {
 struct PacketWriter {
     u8* end;                // 0x00: end of the buffer (func_001529C8 sets begin and cur to its base)
     u8* begin;              // 0x04: start of the buffer
-    s32* f08;               // 0x08: the open packet's header word (func_00152D70)
+    s32* openHeader;        // 0x08: the open packet's header word (func_00152D70)
     union {
         u8* cur;            // 0x0C: where the next word goes
         u64* cur64;
         u32 curU;           // (func_00161278 pads it as an address)
         s32 curS;           // (func_00152D70)
     };
-    s32 f10;                // 0x10: nonzero: closing pads `cur` to 16 bytes (func_00152D70)
-    s32 f14;                // 0x14: nonzero (set by func_001611B8): closing calls the virtual (func_00152D70)
+    s32 padsOnClose;        // 0x10: nonzero: closing pads `cur` to 16 bytes (func_00152D70)
+    s32 closesThroughTable; // 0x14: nonzero (set by func_001611B8): closing calls the virtual (func_00152D70)
     const PacketWriterVt* vt;     // 0x18
     union {
         u32* openTag;       // 0x1C: the open packet's header word (func_00161278)

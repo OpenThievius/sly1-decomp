@@ -169,13 +169,13 @@ struct BlendedGaugeParams {
     u8 pad54[0xC];
     Quadratic q60;
     u8 pad6C[4];
-    f32 f70;
-    f32 f74;
+    f32 clipSpeedFrom;
+    f32 clipSpeedTo;
     u8 pad78[8];
     Quadratic q80;
     u8 pad8C[4];
-    f32 f90;
-    f32 f94;
+    f32 speedFrom;
+    f32 speedTo;
     u8 pad98[8];
     Quadratic qA0;
 };
@@ -545,9 +545,9 @@ void ComputeGaugeOutputs(GaugeManager* o)
     o->waitMin = GaugeCurve::Lerp(s, p->waitMinFrom, p->waitMinTo);
     o->waitMax = GaugeCurve::Lerp(s, p->waitMaxFrom, p->waitMaxTo);
 
-    o->clipSpeed = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q80, t), g_unitRange.lo, g_unitRange.hi), p->f70, p->f74);
+    o->clipSpeed = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q80, t), g_unitRange.lo, g_unitRange.hi), p->clipSpeedFrom, p->clipSpeedTo);
 
-    o->speed448 = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->qA0, t), g_unitRange.lo, g_unitRange.hi), p->f90, p->f94);
+    o->speed448 = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->qA0, t), g_unitRange.lo, g_unitRange.hi), p->speedFrom, p->speedTo);
 
     o->maxSlotAgents = (s32)GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q10, t), g_unitRange.lo, g_unitRange.hi), p->agentCountFrom, p->agentCountTo);
 
@@ -792,7 +792,7 @@ void CountDownGaugeContacts(GaugeManager* self, ContactAgent* agent)
 void AddToGaugeAmount(GaugeManager* self, NumberedAgent* arg)
 {
     s32 hi = self->maxAmount;
-    s32 v = self->amount + arg->fC24;
+    s32 v = self->amount + arg->gaugeValue;
     if (v < 0) {
         v = 0;
     } else {

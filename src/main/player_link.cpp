@@ -546,7 +546,7 @@ void ReleaseFarPlayerLinks(Player* self)
         TransformPointBetweenFrames((PlacedObject*)a->parent, 0, &a->point, &pos);
         if (Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(((PlacedObject*)self->f23D4)->v140), Vu0::Q(pos)))) > 50.0f) {
             self->previousBoundObject = 0;
-            self->f4B8 = 0;
+            self->stateBits = 0;
         }
     } else {
         if (self->previousAimCurve != 0) {
@@ -580,7 +580,7 @@ void SetFlaggedLinkContactMask(Collider* self, BaseObject* node, s32 flag)
                                 flag != 0 ? 0x40 : 0, flag != 0 ? 0 : 0x40);
         }
     }
-    self->f4B8 = 0;
+    self->stateBits = 0;
 }
 
 struct PooledContact;
@@ -748,11 +748,11 @@ void UpdatePlayerLinkPose(Player* self)
     *(Quad128*)&v->offset = ApproachPointWithRamp(*(Quad128*)&v->offset, *(const Quad128*)&g_zeroVector, g_gameClock[2], (RampProfile*)g_linkPoseOffsetRamp, 0);
     ApproachRotationWithRamp(&v->rotA, (Mat02*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotA, 0, g_gameClock[2]);
     ApproachRotationWithRamp(&v->rotB, (Mat02*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotB, 0, g_gameClock[2]);
-    Vu0::Q(((LinkPoseTarget*)self->f251C)->pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(v->offset));
-    MulRotationInto((LinkPoseTarget*)self->f251C, v->rotA, a);
-    MulRotationInto((LinkPoseTarget*)self->f2520, v->rotB, b);
-    ApplyPoseSource((Attachment*)self->f251C, 1);
-    ApplyPoseSource((Attachment*)self->f2520, 1);
+    Vu0::Q(((LinkPoseTarget*)self->snapshotPoseFirst)->pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(v->offset));
+    MulRotationInto((LinkPoseTarget*)self->snapshotPoseFirst, v->rotA, a);
+    MulRotationInto((LinkPoseTarget*)self->snapshotPoseSecond, v->rotB, b);
+    ApplyPoseSource((Attachment*)self->snapshotPoseFirst, 1);
+    ApplyPoseSource((Attachment*)self->snapshotPoseSecond, 1);
 }
 
 

@@ -426,7 +426,7 @@ void HandleStepSequenceSkipButtons(void* self, PadRecord* rec)
         return;
     PadRecord* a1 = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
     StepSequence* ctx = g_activeStepSequence;
-    if (ctx != 0 && ctx->state2D4 == 3 && ctx->f32C == 0 && (a1->flags & 0xC) != 0
+    if (ctx != 0 && ctx->state2D4 == 3 && ctx->buttonSkipBlocked == 0 && (a1->flags & 0xC) != 0
         && *(s32*)ctx->target304 != 0) {
         SkipRemainingSteps(ctx);
     } else if ((rec->flags & 0xC) != 0 && g_playerStepSequence != 0) {

@@ -49,14 +49,14 @@ void CreatePlayerTwoEntryBlend(Player* self)
     TwoEntryBlendEntry* e = (TwoEntryBlendEntry*)self->f103C;
     s32 i = 1;
     do {
-        SampleAnimationFrameChain((BlendAnimationView*)e->p4, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, 0, 0, (Vec02*)out, 0);
+        SampleAnimationFrameChain((BlendAnimationView*)e->p4, 0.0f, 1.0f, (PlacedObject*)self->linkPartB, (PlacedObject*)self, 1, 0, 0, (Vec02*)out, 0);
         e->fC = out[2];
         e++;
         i--;
     } while (i >= 0);
-    BuildCombinedBlendAnimation(self, 0x10, 2, self->f103C, 0, 0, 0, (BlendAnimation**)&self->f105C);
+    BuildCombinedBlendAnimation(self, 0x10, 2, self->f103C, 0, 0, 0, (BlendAnimation**)&self->pathBlendItem);
     SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f618, (PlacedObject*)self, 1, (Vec02*)&self->v23E0, 0, 0, 0);
-    SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, (Vec02*)&self->f23F0, 0, 0, 0);
+    SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->linkPartB, (PlacedObject*)self, 1, (Vec02*)&self->f23F0, 0, 0, 0);
     f32 avg = (self->f23E0 + self->f23F0) * 0.5f;
     self->f23F4 = 0.0f;
     self->f23E4 = 0.0f;
@@ -463,7 +463,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
         amount = ClampBetween(amount, 0.0f, 1.0f);
         self->blend103C[1].weight = amount;
         self->blend103C[0].weight = 1.0f - amount;
-        SetBlendItemWeights((BlendAnimationView*)self->f105C, 0x10, 2, self->f103C);
+        SetBlendItemWeights((BlendAnimationView*)self->pathBlendItem, 0x10, 2, self->f103C);
     }
     SetPlayerState(self, 7, state);
 }

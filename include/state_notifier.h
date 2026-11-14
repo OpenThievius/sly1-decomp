@@ -41,11 +41,11 @@ struct StateNotifier : PlacedObject {
     s32 state;              // 0x2D0
     f32 stateSince;         // 0x2D4: the clock when the state was set
     s32 initialMode;               // 0x2D8
-    s32 f2DC;               // 0x2DC
-    f32 f2E0;               // 0x2E0: i times D_00261B40 for the i-th scattered (func_00148AC0)
+    s32 idleEvent;          // 0x2DC: the event state 0 starts, -1 for the default
+    f32 walkerTimeOffset;   // 0x2E0: i times D_00261B40 for the i-th scattered (func_00148AC0)
     void* stateGraph;       // 0x2E4: the graph of the walker kept at host (SetStateNotifierState)
     void* host;             // 0x2E8: the object whose message ends it (func_00147EF8)
-    BaseObject* f2EC;       // 0x2EC: told to join or leave its parent's list by the state (SetStateNotifierState)
+    BaseObject* joinedObject; // 0x2EC: told to join or leave its parent's list by the state (SetStateNotifierState)
     Vec02 motionPos;        // 0x2F0: pushed clear of what it overlaps (func_00146DB0)
     Vec02 motionVel;        // 0x300: its motion, split along the push (func_00146DB0)
     Vec02 motionAccel;      // 0x310: the push (func_001478F0 sets it, func_00146518 adds it to the motion)
@@ -57,8 +57,8 @@ struct StateNotifier : PlacedObject {
     PlacedObject* splashAnchorToward; // 0x328: and facing it (func_00147428)
     s32 belowCameraPlane;   // 0x32C: which side of the camera's plane it was last frame
     f32 lastSplashTime;     // 0x330: the time of the last splash
-    s32 f334;               // 0x334: func_001DCD28 copies only one whose word is 0
-    void* f338;             // 0x338
+    s32 timerDisabled;      // 0x334: func_001DCD28 copies only one whose word is 0
+    void* timerEnabled;     // 0x338
     s32 landed;             // 0x33C: set once it has landed on a slope (func_00146DB0)
     s32 armed;               // 0x340
     f32 f344;               // 0x344

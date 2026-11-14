@@ -360,15 +360,15 @@ void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src)
             self->color[k][j] = ((src->tail.colors + i * 4)[j] + 1) >> 1;
         }
     }
-    self->f614 = src->tail.f184;
+    self->pairedColors = src->tail.f184;
     AssignAnimRecord(self, t->anim);
     FillMemory(&self->q300, 0, 0x10);
     s32 n = self->regCount;
     if (n >= 2) {
         if (t->rateSpan != 0.0f) {
-            self->f304 = (f32)n / t->rateSpan;
+            self->registerRate = (f32)n / t->rateSpan;
         } else if (t->rateOverDuration != 0) {
-            self->f304 = (f32)n / src->duration;
+            self->registerRate = (f32)n / src->duration;
         } else {
             self->q300 = t->q150;
         }
@@ -410,7 +410,7 @@ void UpdateWorldListedObject(WorldListedObject* self, f32 dt)
     Camera* g = g_camera;
     s32 hit = 0;
     u32 flags = sub->maskC;
-    u32 mask = g->f21C;
+    u32 mask = g->areaMask;
 
     if ((flags & 0x10000000) != 0 || (mask & flags) == mask)
         hit = 1;
@@ -760,7 +760,7 @@ void WriteListedObjectParticlePacket(void* self)
         ViewedFrame* cur = frames;
         ViewedPart* e;
         while ((e = (ViewedPart*)walk.Next()) != 0) {
-            if ((e->visibilityMask & g_camera->f21C) == g_camera->f21C && IsObjectAttached(e)) {
+            if ((e->visibilityMask & g_camera->areaMask) == g_camera->areaMask && IsObjectAttached(e)) {
                 Vec02 pos;
                 Mat02 rot;
                 if (e->rec->frame != 0) {
@@ -813,7 +813,7 @@ void WriteListedObjectParticlePacket(void* self)
             p[3] = g_gameClock[1];
             ReserveVifUnpack(&g_vifPacketWriter, 0xC, 1, 6, 0, (u8**)&q);
             q[0] = 0;
-            if (obj->f614 != 0)
+            if (obj->pairedColors != 0)
                 q[0] |= 1;
             q[1] = obj->colorCount;
             q[2] = obj->regCount;

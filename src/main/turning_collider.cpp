@@ -75,14 +75,14 @@ void StartTurningCollider(TurningCollider* self)
     ResolveObjectLinks(self, 6, g_turningColliderLinks);
     SetTurningColliderLinkFlag(self, 1);
     if (self->f628 == 0) {
-        self->f610 = self->f620;
+        self->linkPartA = self->f620;
     } else {
-        self->f610 = self->f628;
+        self->linkPartA = self->f628;
     }
     if (self->f62C == 0) {
-        self->f614 = self->f624;
+        self->linkPartB = self->f624;
     } else {
-        self->f614 = self->f62C;
+        self->linkPartB = self->f62C;
     }
     Mat02* dst = &self->headingMatrix;
     *dst = g_identityMatrix;
@@ -133,7 +133,7 @@ void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, 
     Rec2195_224* rec = obj->linkRecord;
     if (rec != 0 && (rec->flags & 0x20) != 0) {
         TransformPointBetweenFrames(obj, 0, (Vec02*)&rec->q60[0], &pos);
-        Vu0::Q(dir) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(((PlacedObject*)obj->linkRecord->f80)->v140));
+        Vu0::Q(dir) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(((PlacedObject*)obj->linkRecord->linkParent)->v140));
         u128 len = Vu0::Length(Vu0::Q(dir));
         const Vec02* fallback = &g_unitXVector;
         if (Vu0::ToFloat(len) < 0.0001f) {
@@ -754,7 +754,7 @@ void AddTurningColliderProbeContact(TurningCollider* self, Collider* obj, void* 
         if (CollectColliderSpansInTree(obj, filter, &self->v140, (void*)self->probeVertex, 1, &span) > 0 && span.time[0] > 0.0f) {
             Vec02 diff;
             Vu0::Q(diff) = Vu0::Sub(Vu0::Q(*(Vec02*)self->probeVertex), Vu0::Q(span.q[0]));
-            switch (span.f48) {
+            switch (span.spanKind) {
             case 0: {
                 f32 d0 = Vu0::ToFloat(Vu0::Dot(Vu0::Q(diff), Vu0::Q(span.q[2])));
                 CreatePooledContact(d0, self, obj, (void*)self->probeVertex, &span.q[2], 1, (void*)self->probeVertex, span.face50, out);

@@ -1128,7 +1128,7 @@ void StepMovieFrame(MoviePlayer* self)
     if (DecodeMpegPicture((MpegHandle*)&self->decoder, self->picture, 0x4B0) < 0) {
         return;
     }
-    if (self->decoder.f08 == 0) {
+    if (self->decoder.skipPicture == 0) {
         UploadMovieFrame(self->uploadPacket, (s32)self->picture, self->decoder.width, self->decoder.height);
         DrawMovieFrame(self->drawPacket, self->decoder.width, self->decoder.height);
         SyncDataCache(0);

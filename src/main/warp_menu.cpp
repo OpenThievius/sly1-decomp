@@ -821,7 +821,7 @@ void UpdateWorld1BossGoal(World1Boss* self, s32 flag)
         if (self->disabled != 0) {
             SetAgentGoalPoint(self, &self->v190);
         } else {
-            GetObjectWorldPosition((BaseObject*)self->fC60, (Vec02*)&loc);
+            GetObjectWorldPosition((BaseObject*)self->goalObject, (Vec02*)&loc);
             SetAgentGoalPoint(self, (Vec02*)&loc);
         }
         break;
@@ -1290,7 +1290,7 @@ void UpdateWorldDeltaLists(World* self, f32 dt)
     }
     {
         ListFrame it;
-        BeginByteWalk::Of(&it, (List01*)&self->f1C24);
+        BeginByteWalk::Of(&it, (List01*)&self->worldClockNodes);
         for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
             StepObjectLevelRamp((WorldObjectNode*)n, dt);
         }
@@ -1335,10 +1335,10 @@ void UpdateWorldStepLists(World* self, f32 dt)
     BeginNodeWalk::Of(&it, &self->list78);
     for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) UpdateObjectTree(obj, dt);
     EndNodeWalk::Of(&it);
-    BeginNodeWalk::Of(&it, (List01*)&self->f1B70);
+    BeginNodeWalk::Of(&it, (List01*)&self->listedAnimationPlayers);
     for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) UpdateAnimationPlayer((AnimationPlayer*)obj, dt);
     EndNodeWalk::Of(&it);
-    BeginNodeWalk::Of(&it, (List01*)&self->f1C30);
+    BeginNodeWalk::Of(&it, (List01*)&self->stepClockNodes);
     for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) StepObjectLevelRamp((WorldObjectNode*)obj, dt);
     EndNodeWalk::Of(&it);
     BeginNodeWalk::Of(&it, &self->list78);
@@ -3448,7 +3448,7 @@ void ClampVectorLength(Vec02* v, Vec02* out, f32 max)
 PacketWriter* InitPacketWriter(PacketWriter* self)
 {
     (void)InitPacketBuffer(self);
-    self->f10 = 1;
+    self->padsOnClose = 1;
     self->vt = (const PacketWriterVt*)g_packetWriterVtable;
     self->openTag = 0;
     self->registerCount = 0;
@@ -3643,7 +3643,7 @@ void WriteVifUnpack(PacketWriter* self, s32 a, s32 b, s32 c, s32 d, s32* out)
         s32 n = (t >= 0) ? t : u;
         AddDmaRefTag(self, n >> 4, c);
         if (out != 0) {
-            *out = (s32)self->f08 - 0xC;
+            *out = (s32)self->openHeader - 0xC;
         }
     }
 }
@@ -3780,8 +3780,8 @@ void InitAttachedSet(AttachedSet* self)
     one = 0x8000;
     bits |= (u64)one << 28;
     self->flags538 = bits;
-    self->f584 = 1;
-    self->f588 = 1;
+    self->splashSoundEnabled = 1;
+    self->splashBurstEnabled = 1;
     self->dragFactor = 1.0f;
     self->pushFactor = 1.0f;
     SetColliderAnchors(self, 3, 0, 3, 0);
@@ -3798,7 +3798,7 @@ void StartAttachedSet(AttachedSet* self)
     StartPlacedObject(self);
     FillTrackedNodes(&self->trackedNodes);
     self->group.items = (void**)AllocateFrontMemory(0x80);
-    if (self->f278 != 0) {
+    if (self->oscillatorBlock != 0) {
         self->desc03()->m32(self);
     }
 }
@@ -3819,12 +3819,12 @@ void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16
     Quad16 c;
     Vec02 d;
     TransformDirectionBetweenFrames(0, self, (Vec02*)in, &a);
-    b = *(Quad16*)&self->f570;
+    b = *(Quad16*)&self->baseVelocity;
     a.z = 0.0f;
     c = *(Quad16*)&g_zeroVector;
     TransformStateToAncestorFrame(self, 0, &a, 0, (Vec02*)&b, (Vec02*)&c);
-    if (self->f278 != 0) {
-        ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->f278 + 0xC)), 50.0f, (Vec02*)in, 0, 0, 0, &d);
+    if (self->oscillatorBlock != 0) {
+        ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->oscillatorBlock + 0xC)), 50.0f, (Vec02*)in, 0, 0, 0, &d);
         Vu0::Q(*(Vec02*)&b) = Vu0::Add(Vu0::Q(*(Vec02*)&b), Vu0::Q(d));
     }
     if (outA != 0) {
@@ -3904,7 +3904,7 @@ void UpdateAttachedSet(AttachedSet* self, f32 dt)
             continue;
         }
         c->flags538 |= 1ULL << 60;
-        if (self->f278 != 0) {
+        if (self->oscillatorBlock != 0) {
             ClearRootTries((PlacedObject*)(c));
         }
         if (c->flags538 & (1ULL << 59)) {
@@ -3925,9 +3925,9 @@ void UpdateAttachedSet(AttachedSet* self, f32 dt)
         Vec02 to;
         ColliderSpan spans[16];
         Vec02 off;
-        if (self->f278 != 0) {
+        if (self->oscillatorBlock != 0) {
             Vec02 d;
-            ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->f278 + 0xC)), 50.0f, &c->v140, 0, &d, 0, 0);
+            ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->oscillatorBlock + 0xC)), 50.0f, &c->v140, 0, &d, 0, 0);
             Vu0::Q(off) = Vu0::Sub(Vu0::Vec::Of(d), Vu0::Vec::Of(c->v140)).q;
         } else {
             off = g_zeroVector;
@@ -4071,8 +4071,8 @@ f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02*
     Vec02 from;
     Vec02 to;
     ColliderSpan spans[16];
-    if (self->f278 != 0) {
-        ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->f278 + 0xC)), 50.0f, &o->v140, 0, &from, 0, 0);
+    if (self->oscillatorBlock != 0) {
+        ComputeOscillatorDisplacement((Oscillator*)(*(void**)(self->oscillatorBlock + 0xC)), 50.0f, &o->v140, 0, &from, 0, 0);
         Vu0::Q(from) = Vu0::Q(to) = Vu0::MulXSum(Vu0::Q(o->v140), Vu0::Scalar(2.0f), Vu0::Q(from), Vu0::Scalar(-1.0f));
     } else {
         from = to = o->v140;
@@ -4118,7 +4118,7 @@ void ComputeOscillatorMaxDisplacement(Oscillator* osc, Vec02* out);
 void UpdateAttachedSetBounds(AttachedSet* self)
 {
     UpdateColliderBounds(self);
-    SwingRecord* r = (SwingRecord*)self->f278;
+    SwingRecord* r = (SwingRecord*)self->oscillatorBlock;
     if (r != 0 && r->osc != 0) {
         Vec02 d;
         ComputeOscillatorMaxDisplacement(r->osc, &d);
@@ -4172,7 +4172,7 @@ void StartStateResetObject(StateResetObject* self)
 // Adds or updates a keyed entry in the object's table of 4 (a script built-in calls it).
 s32 AddStateResetEntry(StateResetObject* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
-    return UpsertKeyedEntry((ZoneTargetEntry*)self->f2E8, 4, &self->f2E4, a1, a2, a3, a4);
+    return UpsertKeyedEntry((ZoneTargetEntry*)self->targets, 4, &self->targetCount, a1, a2, a3, a4);
 }
 
 // Update slot of the state-reset object: does nothing.
@@ -4186,17 +4186,17 @@ void SetStateAndNotify(StateResetObject* self, s32 state)
     if (self->id2D0 != state) {
         if (state != 0) {
             if (state == 2)
-                SetGatheredWalkerTargets((World*)g_currentWorld, self->f2E4, (ZoneTargetEntry*)self->f2E8, self, 1);
+                SetGatheredWalkerTargets((World*)g_currentWorld, self->targetCount, (ZoneTargetEntry*)self->targets, self, 1);
         } else {
             if (self->id2D0 == 2)
-                SetGatheredWalkerTargets((World*)g_currentWorld, self->f2E4, (ZoneTargetEntry*)self->f2E8, self, 0);
+                SetGatheredWalkerTargets((World*)g_currentWorld, self->targetCount, (ZoneTargetEntry*)self->targets, self, 0);
         }
         StateChangeMsg evt;
         evt.old = self->id2D0;
         evt.self = self;
         evt.cur = state;
         self->id2D0 = state;
-        self->f2D4 = g_gameTime[0];
+        self->stateTime = g_gameTime[0];
         self->desc->m0E(self, 0x16, &evt);
     }
 }
@@ -4261,8 +4261,8 @@ void UpdateItemTimeouts(StateResetGroup* s)
         StateResetObject* it = s->items[i];
         if (it->id2D0 != 2) continue;
         if (it->id2DC != 0) continue;
-        f32 d = g_gameClock.time - it->f2D4;
-        if (it->f2D8 < d) {
+        f32 d = g_gameClock.time - it->stateTime;
+        if (it->stateDuration < d) {
             SetStateAndNotify(it, 0);
         }
     }
@@ -4802,7 +4802,7 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
         break;
     case 3:
         if (self->lastCursor != self->cursor) {
-            if (self->f560 == 0) {
+            if (self->warpChosen == 0) {
                 SelectWarpPageEntry(self, self->cursor);
                 SetScreenElementHoldTime(&g_copiedTextCaption, 0.0f);
                 g_copiedTextCaption.vt->m14(&g_copiedTextCaption);
@@ -4811,7 +4811,7 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
             // `target = self->cursor`, which retail loads again (docs/TOOLCHAIN.md, "GCSE").
             s64 cursor = self->cursor;
             s32 back = 0;
-            if (cursor != 1 || self->f560 != 0) {
+            if (cursor != 1 || self->warpChosen != 0) {
                 back = 1;
             }
             s32 target;
@@ -4839,7 +4839,7 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
                 ReplaceAnimationPlayer(anim, self, 1, (AnimationPlayer**)&self->entryPlayer, start, rate);
                 SetPendingWarpEntry((s32)self, target, back);
             }
-            self->f560 = 0;
+            self->warpChosen = 0;
             self->lastCursor = self->cursor;
         }
         break;
@@ -4929,7 +4929,7 @@ void SetWarpPageMode(WarpPage* self, u32 next)
         StopSoundRecord((PlayingSound*)self->sound, 0);
         break;
     case 2:
-        if (self->f560 == 0) {
+        if (self->warpChosen == 0) {
             g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
         }
         for (s32 k = 0; k < 11; k++) {
@@ -5020,7 +5020,7 @@ void SetWarpPageMode(WarpPage* self, u32 next)
                 if (r != 0 && ((u32)(i - 2) < 6 || i == 0)) {
                     v = 1;
                 }
-                s->f20 = v;
+                s->brightColors = v;
                 s->dim = s->dimTarget = 0.0f;
             }
         }
@@ -5032,7 +5032,7 @@ void SetWarpPageMode(WarpPage* self, u32 next)
         goto Lz;
     }
     case 4: {
-        if (self->f560 == 0) {
+        if (self->warpChosen == 0) {
             g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
             if (self->openKind == 2) {
                 StartSoundEffect(0x8B, (PlayingSound**)&self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -5157,9 +5157,9 @@ void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
     Vec02 v;
     BaseObject* o;
     if (flag != 0) {
-        o = (BaseObject*)self->entries[idx].f18;
+        o = (BaseObject*)self->entries[idx].secondAnchor;
     } else {
-        o = (BaseObject*)self->entries[idx].f14;
+        o = (BaseObject*)self->entries[idx].firstAnchor;
     }
     if (o != 0) {
         TransformPointBetweenFrames((PlacedObject*)o->parent, self, (Vec02*)&((TransformObject*)o)->pos, &v);
@@ -5223,7 +5223,7 @@ void HandleWarpMenuInput(T217D_0F0* self, PadRecord* t)
 
     if (self->current == 0) return;
     if (self->current->mode != 2) return;
-    if (self->current->f560 != 0) return;
+    if (self->current->warpChosen != 0) return;
     if ((t->flags & 0x910) != 0 || t->connectionMode == 1) {
         PopStackElement((ElementStack*)g_elementStack);
         ClearPadPressedBits(&g_padRecord, 0x910);
@@ -5250,7 +5250,7 @@ void HandleWarpMenuInput(T217D_0F0* self, PadRecord* t)
         if (self->current->cursor != GetCurrentWarpEntry()) {
             if (s3 != 0) {
                 IdentityKey* v = LookupEntryById((loc[0] << 8) | loc[1]);
-                self->current->f560 = 1;
+                self->current->warpChosen = 1;
                 PopStackElement((ElementStack*)g_elementStack);
                 StartObjectFade(v, -1, 2);
             } else {
@@ -5295,7 +5295,7 @@ void SetWarpMenuOpen(T217D_0F0* self, s32 a1)
         SetElementStackState((ElementStack*)g_elementStack, 7);
     } else {
         self->vt->m15(self);
-        if (self->current->f560 == 0) {
+        if (self->current->warpChosen == 0) {
             BeginWarpPageClose(self->current);
             Animation* an = self->current->closeAnimation;
             if (an != 0) {
@@ -5430,7 +5430,7 @@ void DrawWarpMenu(T217D_0F0* self)
             continue;
         }
         WarpColor c0, c1, c2;
-        if (e->f20 != 0) {
+        if (e->brightColors != 0) {
             c0 = WarpColor(0x9F, 0xFF, 0xE8, 0x4B);
             c1 = WarpColor(0x5C, 0xFF, 0xB6, 0);
             c2 = WarpColor(0x19, 0xFF, 0x64, 0);

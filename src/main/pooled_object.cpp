@@ -1250,7 +1250,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         if ((self->waitFlags & 0x10) != 0 && self->player2F8 != 0) {
             StopAnimationPlayer(self->player2F8);
         }
-        if (self->mode2D0 == 2 && self->f330 != 0) {
+        if (self->mode2D0 == 2 && self->dimsVolume != 0) {
             f32 f = 1.0f;
             SetVolumeChannelFactor(9, 0, f);
             SetVolumeChannelFactor(9, 1, f);
@@ -1283,7 +1283,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
             PushCameraController(g_camera, 6, &g_camera->ctl460, 0, 0);
             AcquirePadSelectFlag(g_currentWorld);
             SetTextPanelSubject(&g_typedTextCaptionBox, 0);
-            if (self->f330 != 0) {
+            if (self->dimsVolume != 0) {
                 f32 f = 0.6f;
                 SetVolumeChannelFactor(9, 0, f);
                 SetVolumeChannelFactor(9, 1, f);
@@ -1374,7 +1374,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
                 ShowStepSequenceText(self, s2);
                 s1 = self->state2D4;
             } else if (o != self) {
-                if (o->f328 == 0 && o->state2D4 == 3) {
+                if (o->otherSkipBlocked == 0 && o->state2D4 == 3) {
                     SkipRemainingSteps(o);
                 }
             }
@@ -1931,7 +1931,7 @@ void ResetScatterLevels(ScatterController* object)
 void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag)
 {
     s32 did = 0;
-    if ((g_currentWorld)->f2354 != 0 && n != 0) {
+    if ((g_currentWorld)->scatterCountEnabled != 0 && n != 0) {
         if (!flag) {
             self->bandCountdown--;
             self->countdown--;
@@ -2172,8 +2172,8 @@ extern const VtableEntry g_packetWriterVtable[4] = {{0, 0}, {0, SkipDisplayListW
 // Clears the buffer and installs the packet writer's method table.
 PacketWriter* InitPacketBuffer(PacketWriter* self)
 {
-    self->f10 = 0;
-    self->f14 = 0;
+    self->padsOnClose = 0;
+    self->closesThroughTable = 0;
     self->vt = (const PacketWriterVt*)g_packetWriterVtable;
     ClearPacketBuffer(self);
     return self;
@@ -2184,7 +2184,7 @@ void ClearPacketBuffer(PacketWriter* p)
 {
 	p->end = 0;
 	p->begin = 0;
-	p->f08 = 0;
+	p->openHeader = 0;
 	p->cur = 0;
 }
 
@@ -2192,7 +2192,7 @@ void ClearPacketBuffer(PacketWriter* p)
 void RewindPacketBuffer(PacketWriter* p)
 {
 	u8* b = p->begin;
-	p->f08 = 0;
+	p->openHeader = 0;
 	p->cur = b;
 }
 
@@ -2285,10 +2285,10 @@ void BeginDmaTag(PacketWriter* self)
 {
     CloseDmaTag(self);
     u8* q = self->cur;
-    self->f08 = (s32*)q;
+    self->openHeader = (s32*)q;
     self->cur = q + 16;
     *(u64*)q = 0x10000000;
-    *(u64*)((u8*)self->f08 + 8) = 0;
+    *(u64*)((u8*)self->openHeader + 8) = 0;
 }
 
 // Appends a DMA ref tag (id 4) with the given address and size halves. If a tag was open it is
@@ -2296,7 +2296,7 @@ void BeginDmaTag(PacketWriter* self)
 void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi)
 {
     s32 flag = 0;
-    if (self->f08 != 0) {
+    if (self->openHeader != 0) {
         CloseDmaTag(self);
         flag = 1;
     }
@@ -2307,11 +2307,11 @@ void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi)
     *(u64*)(p + 8) = 0;
     if (flag != 0) {
         u8* q = self->cur;
-        self->f08 = (s32*)q;
+        self->openHeader = (s32*)q;
         self->cur = q + 16;
         *(u64*)q = 0x10000000;
         // DMA tag record in the packet buffer, not an object
-        *(u64*)((u8*)self->f08 + 8) = 0;
+        *(u64*)((u8*)self->openHeader + 8) = 0;
     }
 }
 
@@ -2320,7 +2320,7 @@ void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi)
 void AddDmaCallTag(PacketWriter* self, s32 hi)
 {
     s32 flag = 0;
-    if (self->f08 != 0) {
+    if (self->openHeader != 0) {
         CloseDmaTag(self);
         flag = 1;
     }
@@ -2331,11 +2331,11 @@ void AddDmaCallTag(PacketWriter* self, s32 hi)
     *(u64*)(p + 8) = 0;
     if (flag != 0) {
         u8* q = self->cur;
-        self->f08 = (s32*)q;
+        self->openHeader = (s32*)q;
         self->cur = q + 16;
         *(u64*)q = 0x10000000;
         // DMA tag record in the packet buffer, not an object
-        *(u64*)((u8*)self->f08 + 8) = 0;
+        *(u64*)((u8*)self->openHeader + 8) = 0;
     }
 }
 
@@ -2372,7 +2372,7 @@ void AddDmaEndTag(PacketWriter* self)
 // its low bits and clears it. A writer with a close method of its own calls that instead.
 void CloseDmaTag(PacketWriter* self)
 {
-    if (self->f10 != 0) {
+    if (self->padsOnClose != 0) {
         s32 p = self->curS;
         if ((p & 0xF) != 0) {
             *(s32*)p = 0;
@@ -2380,14 +2380,14 @@ void CloseDmaTag(PacketWriter* self)
             while ((p & 0xF) != 0) { *(s32*)p = 0; p += 4; }
         }
         self->curS = p;
-    } else if (self->f14 != 0) {
+    } else if (self->closesThroughTable != 0) {
         const PacketWriterVt* t = self->vt;
         t->close((PacketWriter*)((u8*)self + t->adj1), 0);
     }
-    s32* q = self->f08;
+    s32* q = self->openHeader;
     if (q != 0) {
         *q = *q | (((self->curS - (s32)q) >> 4) - 1);
-        self->f08 = 0;
+        self->openHeader = 0;
     }
 }
 

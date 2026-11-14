@@ -60,7 +60,7 @@ struct SortKeyedObject : PlacedObject {
     s32 mode;               // 0x2D4: a light's mode, of which CollectLightsForSphere returns the highest
     u8 pad2D8[0x304 - 0x2D8];
     s32 dynamic;            // 0x304
-    s32 f308;               // 0x308
+    s32 sortKey;            // 0x308: the second sort key
 };
 
 
@@ -176,7 +176,7 @@ s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b)
     if (d != 0) {
         return d;
     }
-    d = x->f308 - y->f308;
+    d = x->sortKey - y->sortKey;
     if (d != 0) {
         return d;
     }
@@ -238,7 +238,7 @@ void UploadLightVolumes(World* world)
         if (l->dynamic == 0) {
             flags |= 1;
         }
-        if (l->f308 != 0) {
+        if (l->sortKey != 0) {
             flags |= 2;
         }
         if ((l->flags & (1ULL << 38)) != 0) {
@@ -311,7 +311,7 @@ s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 sk
     s32 flaggedCount = 0;
     LightGroup* prev = 0;
     u32 mask;
-    s32 strongest = world->f1D6C != 0.0f;
+    s32 strongest = world->lightingParamA != 0.0f;
     Vec02 sphere = *centre;
     sphere.w = radius;
     Vu0::LoadVf<31>(&sphere);
@@ -365,7 +365,7 @@ s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 sk
 void InitAim(T2195_790* self, PlacedObject* owner)
 {
     InitPoseSource(self, owner);
-    self->f20 = -1;
+    self->targetId = -1;
     self->aimRange = 800.0f;
     self->v50 = *(Vec02*)&D_00264770;
     self->p60 = *(Pk8_2195*)&D_00264780;

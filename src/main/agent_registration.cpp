@@ -62,7 +62,7 @@ void UnregisterWorldListedAgent(WorldListedAgent* self) { UnregisterAgent(self);
 void CopyWorldListedAgent(WorldListedAgent* self, void* other) { Pack10 save=self->listLink; CopyAgent(self,other); self->listLink=save; }
 
 // Initialises the agent, sets its field C24 to 1 and resets the shared running count to 0.
-void InitNumberedAgent(NumberedAgent* self) { InitAgent(self); self->fC24=1; g_numberedAgentCounter=0; }
+void InitNumberedAgent(NumberedAgent* self) { InitAgent(self); self->gaugeValue=1; g_numberedAgentCounter=0; }
 
 // Starts the agent and gives it the next number from a running count shared by all of them.
 void StartNumberedAgent(NumberedAgent* self) { StartAgent(self); self->number=g_numberedAgentCounter++; }

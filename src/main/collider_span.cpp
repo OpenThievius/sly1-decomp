@@ -146,7 +146,7 @@ s32 FindSegmentSphereSpan(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, C
         *(Vu0::Vec*)&out->q[j + 2] = d;
         *(Vu0::Vec*)&out->q[j + 2] = Vu0::NormalizeOr(d, Vu0::Vec::Of(g_unitXVector));
     }
-    out->f48 = 1;
+    out->spanKind = 1;
     return 1;
 }
 
@@ -199,7 +199,7 @@ s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, Coll
         *(Vu0::Vec*)&out->q[j + 2] = d;
         *(Vu0::Vec*)&out->q[j + 2] = Vu0::NormalizeOr(d, Vu0::Vec::Of(g_unitXVector));
     }
-    out->f48 = 1;
+    out->spanKind = 1;
     return 1;
 }
 
@@ -349,7 +349,7 @@ s32 IntersectSegmentWithCapsule(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 radi
             Vu0::Q(out->q[i + 2]) = Vu0::NormalizeOr(Vu0::Vec::Of(out->q[i + 2]), Vu0::Vec::Of(g_unitZVector)).q;
         }
     }
-    out->f48 = 2;
+    out->spanKind = 2;
     return 1;
 }
 
@@ -419,7 +419,7 @@ s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans)
                 dst->time[0] = rec->time;
                 dst->q[0] = rec->q10;
                 dst->q[2] = rec->q20;
-                dst->f48 = 4;
+                dst->spanKind = 4;
             }
         } else {
             depth--;

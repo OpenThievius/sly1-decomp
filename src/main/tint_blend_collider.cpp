@@ -386,13 +386,13 @@ void StartTintBlendCollider(TintBlendCollider* self)
     StartTurningCollider(self);
     ResolveObjectLinks(self, 9, (ObjectLink*)&g_tintBlendColliderLinks);
     ((LinkTargetFn)s->desc03()->m34)(self, s->followedMesh, 1);
-    AddMatrixAttachment((PlacedObject*)s->f748, 5, (Attachment**)&s->f74C);
-    ((u8*)s->f74C)[0x10] = 1;
-    ((u8*)s->f74C)[0x11] = 1;
-    ((AttachedEffectFn)((AttachedEffect*)s->f748)->vtbl[47])(s->f748);
-    AddMatrixAttachment((PlacedObject*)s->f750, 5, (Attachment**)&s->f754);
-    ((u8*)s->f754)[0x11] = 1;
-    ((AttachedEffectFn)((AttachedEffect*)s->f750)->vtbl[47])(s->f750);
+    AddMatrixAttachment((PlacedObject*)s->primaryPart, 5, (Attachment**)&s->primaryPartAttachment);
+    ((u8*)s->primaryPartAttachment)[0x10] = 1;
+    ((u8*)s->primaryPartAttachment)[0x11] = 1;
+    ((AttachedEffectFn)((AttachedEffect*)s->primaryPart)->vtbl[47])(s->primaryPart);
+    AddMatrixAttachment((PlacedObject*)s->secondaryPart, 5, (Attachment**)&s->secondaryPartAttachment);
+    ((u8*)s->secondaryPartAttachment)[0x11] = 1;
+    ((AttachedEffectFn)((AttachedEffect*)s->secondaryPart)->vtbl[47])(s->secondaryPart);
     s->walker = (StateWalker*)CreateStateWalker((StateGraph*)s->walkerGraph, self, -1, 1);
     if (s->f73C == 0 || g_player == 0) {
         flag = 1;
@@ -469,8 +469,8 @@ void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
             f20 = x;
         }
     }
-    SetScaledPositionSpring((PlacedObject*)self->f748, f20 * g_tintPositionSpringScale[0]);
-    SetScaledRotationSpring((PlacedObject*)self->f748, f20 * g_tintRotationSpringScale);
+    SetScaledPositionSpring((PlacedObject*)self->primaryPart, f20 * g_tintPositionSpringScale[0]);
+    SetScaledRotationSpring((PlacedObject*)self->primaryPart, f20 * g_tintRotationSpringScale);
     if (self->tinted != 0 && self->state != 2) {
         f32 e = g_gameClock[1] - self->tintFadeTime;
         if (2.0f < e) {
@@ -550,7 +550,7 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     if (self->state == 2) {
         if (cur == 0x352) {
             ((TintSelfFn*)self->desc)[84](self);
-        } else if (self->f738 != 0 && 0.7f < pad->secondStickMagnitude) {
+        } else if (self->pressArmed != 0 && 0.7f < pad->secondStickMagnitude) {
             ((TintSelfFn*)self->desc)[84](self);
             TeleportStateWalker((StateWalker*)self->walker, 0x352);
             GetStateWalkerCurrentKey(self->walker, &cur);
@@ -597,10 +597,10 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     // "Argument moves held back").
     f32 lean2 = g_unitRange.Limit(Quadratic(D_00275820, pad->stickMagnitude));
     BuildAxisAngleMatrix(&axis, &m, g_tintBodyLeanFactor[0] * lean);
-    PlacedObject* frame = ((TintPart*)self->f748)->frame;
+    PlacedObject* frame = ((TintPart*)self->primaryPart)->frame;
     rot = MultiplyByTransposedMatrix3x3(frame->m110, RotatedRows(m, frame->m110));
-    ((TintBody*)self->f74C)->m40 = rot;
-    ((TintBody*)self->f754)->m40 = rot;
+    ((TintBody*)self->primaryPartAttachment)->m40 = rot;
+    ((TintBody*)self->secondaryPartAttachment)->m40 = rot;
     f32 speed = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150)));
     f32 k;
     if (0.0f < speed) {
@@ -612,7 +612,7 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     ComputePolarOffset((Vec3*)&axis, stick, 1.0f, 0.0f);
     Vec02 vel;
     Vu0::Q(vel) = Vu0::MulXSum(Vu0::Q(self->v150), Vu0::Scalar(k), Vu0::Q(axis), Vu0::Scalar(w));
-    Vu0::Q(((TintBody*)self->f74C)->v20) = Vu0::RotateTransposedMembers(((TintPart*)self->f748)->frame->m110, Vu0::Q(vel));
+    Vu0::Q(((TintBody*)self->primaryPartAttachment)->v20) = Vu0::RotateTransposedMembers(((TintPart*)self->primaryPart)->frame->m110, Vu0::Q(vel));
     if (self->f73C != 0 && g_player != 0 && (pad->flags & 0x40)) {
         ClearPadPressedBits(pad, 0x40);
         SetTintBlendColliderState(self, 0);
@@ -686,7 +686,7 @@ void ApplyTintBlendColliderPendingImpulse(TintBlendCollider* self, s32 moved)
     Vec02 local;
     Vec02 k;
     u128 s = Vu0::FromFloatAt(g_tintEffectImpulseScale);
-    PlacedObject* effect = (PlacedObject*)self->f748;
+    PlacedObject* effect = (PlacedObject*)self->primaryPart;
     Vu0::Q(local) = Vu0::RotateTransposed(((PlacedObject*)effect->parent)->m110, Vu0::Q(self->v490));
     u128 v = Vu0::Q(effect->v150);
     Vu0::Q(k) = s;
@@ -764,12 +764,12 @@ s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
         self->desc02()->m20(self, &v);
         Vu0::Set(v, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(g_tintBodyPushSpeed)));
         v.z = g_tintBodyPushLift;
-        TransformDirectionBetweenFrames(0, (PlacedObject*)(((PlacedObject*)self->f748)->parent), &v, &v);
-        ((PlacedObject*)self->f748)->desc02()->m20((PlacedObject*)self->f748, &v);
+        TransformDirectionBetweenFrames(0, (PlacedObject*)(((PlacedObject*)self->primaryPart)->parent), &v, &v);
+        ((PlacedObject*)self->primaryPart)->desc02()->m20((PlacedObject*)self->primaryPart, &v);
         Vu0::Set(dir, Vu0::FromFloats(-dir.y, dir.x, 0.0f));
         Vu0::Set(w, Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(g_tintBodySpinSpeed)));
-        TransformDirectionBetweenFrames(0, (PlacedObject*)(((PlacedObject*)self->f748)->parent), &w, &w);
-        ((PlacedObject*)self->f748)->desc02()->m21((PlacedObject*)self->f748, &w);
+        TransformDirectionBetweenFrames(0, (PlacedObject*)(((PlacedObject*)self->primaryPart)->parent), &w, &w);
+        ((PlacedObject*)self->primaryPart)->desc02()->m21((PlacedObject*)self->primaryPart, &w);
 }
     }
     OwnerMessage msg;
@@ -777,8 +777,8 @@ s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
         SetTintBlendColliderState(self, 2);
     } else {
         g_player->desc->m02(g_player);
-        g_player->desc02()->m1F(g_player, (PlacedObject*)self->f744);
-        ((BaseObject*)self->f744)->desc->m03((BaseObject*)self->f744);
+        g_player->desc02()->m1F(g_player, (PlacedObject*)self->playerFrameObject);
+        ((BaseObject*)self->playerFrameObject)->desc->m03((BaseObject*)self->playerFrameObject);
         ActivateSwitchedCollider(g_player);
         SetTintBlendColliderState(self, 3);
         InitOwnerMessage(&msg, 0, self);
@@ -857,10 +857,10 @@ void HandleTintBlendColliderNotification(TintBlendCollider* self, s32 code, Mess
             s32 kind = rec->code;
             if (kind != 0x15E) {
                 if (kind == 0x15F) {
-                    self->f738 = 0;
+                    self->pressArmed = 0;
                 }
             } else {
-                self->f738 = 1;
+                self->pressArmed = 1;
             }
         }
     }

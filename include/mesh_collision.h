@@ -39,8 +39,8 @@ struct MeshHit {
     Vec02 r1;               // 0x10
     Vec02 r2;               // 0x20
     Vec02 r3;               // 0x30
-    f32 f40;                // 0x40
-    f32 f44;                // 0x44
+    f32 entryTime;          // 0x40
+    f32 exitTime;           // 0x44
     u8 pad48[0x50 - 0x48];
     union {
         s32 i50;            // 0x50

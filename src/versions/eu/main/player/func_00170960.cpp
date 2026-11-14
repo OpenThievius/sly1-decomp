@@ -207,15 +207,15 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
     }
     case 0xA:
         if (msg->obj == self) {
-            self->f2438 = (Collider*)msg->source;
+            self->containingCollider = (Collider*)msg->source;
             for (u32 k = 0; k < 8; k++) {
                 self->hitStamps[k].time = 0;
             }
         }
         break;
     case 0xB:
-        if (msg->obj == self && msg->source == self->f2438) {
-            self->f2438 = 0;
+        if (msg->obj == self && msg->source == self->containingCollider) {
+            self->containingCollider = 0;
         }
         break;
     case 2: {

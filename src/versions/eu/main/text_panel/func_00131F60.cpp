@@ -63,7 +63,7 @@ void DrawTextPanelControlLabels(Obj_eu_131F60* self, PacketWriter* gs)
     AddGifRegisterWrite(gs, 0x42, 0x44);
     BeginGifTag(gs, 0x84, 5, 0x44441);
     for (s32 i = 0; i < 8; i++) {
-        f32 zoom = g_camera->f478;
+        f32 zoom = g_camera->zoomFraction;
         const PanelColor* const lit = &g_arcTickColorFrom;
         const PanelColor* const dim = &g_arcTickColorTo;
         f32 step = 1.0f / 15.0f;

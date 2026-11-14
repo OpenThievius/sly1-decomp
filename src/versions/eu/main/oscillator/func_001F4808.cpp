@@ -11,7 +11,7 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
 
     key = (BaseObject*)GetActiveSwitchedCollider();
     if (((Gl_eu_1F4808*)&g_timerCaption)->f570 == 2
-        && (self->f2E0 != 0 || self->f2D4 != 0
+        && (self->finishesTimedRun != 0 || self->f2D4 != 0
             || (g_saveData->entryIndex == 0 && (u8)GetEntryIdByKey(self->levelEntry) == 1))) {
         FinishBestTimeRun(&g_timerCaption);
         SetObjectSubGroupState(self, 2);

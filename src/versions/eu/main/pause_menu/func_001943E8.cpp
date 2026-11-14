@@ -144,17 +144,17 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
         {
             DisplayPositionRegs* gs = &g_displayRegisters;
             s32 h = ConvertFloatToU32(D_eu_0026BB30);
-            DisplayReg64 ra = gs->f40;
-            DisplayReg32 rb = gs->f18;
+            DisplayReg64 ra = gs->displayRegB;
+            DisplayReg32 rb = gs->displayRegA;
             ra.lo = h;
             rb.lo = h;
-            gs->f40 = ra;
-            gs->f18 = rb;
+            gs->displayRegB = ra;
+            gs->displayRegA = rb;
             s32 w = ConvertFloatToU32(v);
             ra.mid = w & ~1;
             rb.mid = w & 0x7FE;
-            gs->f40 = ra;
-            gs->f18 = rb;
+            gs->displayRegB = ra;
+            gs->displayRegA = rb;
         }
         break;
     }

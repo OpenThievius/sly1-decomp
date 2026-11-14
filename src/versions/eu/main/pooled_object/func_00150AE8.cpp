@@ -59,7 +59,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
                 ShowStepSequenceText(self, s2);
                 s1 = self->state2D4;
             } else if (o != self) {
-                if (o->f328 == 0 && o->state2D4 == 3) {
+                if (o->otherSkipBlocked == 0 && o->state2D4 == 3) {
                     SkipRemainingSteps(o);
                 }
             }

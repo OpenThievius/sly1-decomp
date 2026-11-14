@@ -24,17 +24,17 @@ void CancelPauseMenuPage(Self_1961C0_eu* self)
     case 24: {
         DisplayPositionRegs* g = &g_displayRegisters;
         s32 v = ConvertFloatToU32(D_eu_0026BB38);
-        DisplayReg64 a = g->f40;
-        DisplayReg32 b = g->f18;
+        DisplayReg64 a = g->displayRegB;
+        DisplayReg32 b = g->displayRegA;
         a.lo = v;
         b.lo = v;
-        g->f40 = a;
-        g->f18 = b;
+        g->displayRegB = a;
+        g->displayRegA = b;
         s32 w = ConvertFloatToU32(D_eu_0026BB3C);
         a.mid = w;
         b.mid = w;
-        g->f40 = a;
-        g->f18 = b;
+        g->displayRegB = a;
+        g->displayRegA = b;
         SetPauseMenuLayerPage(self, 0, 0x17);
         break;
     }

@@ -128,8 +128,8 @@ void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale,
     }
     if (0.0f < self->edgeSpread) {
         f32 f = self->edgeSpread;
-        Vu0::Q(pts[0]) = Vu0::MulAddX(Vu0::Q(pts[0]), Vu0::Q(g_camera->fA0), Vu0::Scalar(f));
-        Vu0::Q(pts[1]) = Vu0::MulAddX(Vu0::Q(pts[1]), Vu0::Q(g_camera->fA0), Vu0::Scalar(-f));
+        Vu0::Q(pts[0]) = Vu0::MulAddX(Vu0::Q(pts[0]), Vu0::Q(g_camera->rotationRow2), Vu0::Scalar(f));
+        Vu0::Q(pts[1]) = Vu0::MulAddX(Vu0::Q(pts[1]), Vu0::Q(g_camera->rotationRow2), Vu0::Scalar(-f));
     }
     {
         Mat02 step;

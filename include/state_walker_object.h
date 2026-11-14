@@ -14,8 +14,8 @@
 struct BufferedStream;
 
 struct StateWalkerObject : PlacedObject {
-    void* f2D0;             // 0x2D0: what its state walker is made from (func_00199218)
-    void* f2D4;             // 0x2D4: its state walker (func_00199218)
+    void* stateGraph;       // 0x2D0: what its state walker is made from (func_00199218)
+    void* walker;           // 0x2D4: its state walker (func_00199218)
     u8 pad2D8[0x2E0 - 0x2D8];
 };
 

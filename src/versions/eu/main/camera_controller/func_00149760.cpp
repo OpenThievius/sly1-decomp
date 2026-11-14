@@ -47,7 +47,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             Vec02 e;
             f32 size = (0.0f < self->sizeOverride) ? self->sizeOverride : *(f32*)(obj + 0x2A8);
             f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of((*(Camera**)g_camera)->position), Vu0::Vec::Of(*(Vec02*)(obj + 0x140)))));
-            f32 fov = 2.0f * Arctangent(size / (self->f54 * dist));
+            f32 fov = 2.0f * Arctangent(size / (self->distanceFactor * dist));
             fov = self->zoomMin >? fov;
             ComputeObjectFrameAtTime((PlacedObject*)obj, 0, &pos, 0, 0, 0, 0.1f);
             Vu0::Q(span) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(*(Vec02*)(obj + 0x140))).q;
@@ -289,7 +289,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         MulRotationThenCopy(&m, mz, my);
         MulRotationThenCopyVia((Mat02*)cam->rotation, rot, m, mx);
         UpdateCameraMatrices(cam);
-        *(Quad16*)cam->f2D0 = pos;
+        *(Quad16*)cam->lookFocus = pos;
         return;
     }
     }
