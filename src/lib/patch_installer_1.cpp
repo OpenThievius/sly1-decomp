@@ -96,12 +96,12 @@ u32 g_secondKernelPatchCode[10] = {
     0x00000000, 0x00000000,
 };
 
-struct Slot_1F6F48 {
+struct SyscallPatchSlot {
     s32 key;
     void* value;
 };
 
-Slot_1F6F48 g_kernelPatchHandlers[8] = {
+SyscallPatchSlot g_kernelPatchHandlers[8] = {
     { 0x5A, (void*)CopyKernelWords },
     { 0x5B, (void*)0x80076000 },
     { 0xFC, 0 },

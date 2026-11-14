@@ -7,9 +7,9 @@
 // Sorts n elements of size bytes each in place with a three-way-partition quicksort:
 // insertion sort below seven elements, a median of three (of nine above forty) as the
 // pivot, elements equal to it gathered at both ends and moved to the middle afterwards.
-typedef s32 (*Compare_1F5CD0)(const void* x, const void* y);
+typedef s32 (*CompareFn)(const void* x, const void* y);
 
-struct Sort_1F5CD0 {
+struct SortHelpers {
     // Exchanges count bytes at x and y, by 64-bit words when kind allows it.
     static inline void Exchange(char* x, char* y, s32 count, s32 kind)
     {
@@ -35,7 +35,7 @@ struct Sort_1F5CD0 {
     }
 
     // The middle one of three elements.
-    static inline char* Median(char* x, char* y, char* z, Compare_1F5CD0 compare)
+    static inline char* Median(char* x, char* y, char* z, CompareFn compare)
     {
         return compare(x, y) < 0
             ? (compare(y, z) < 0 ? y : (compare(x, z) < 0 ? z : x))
@@ -43,18 +43,18 @@ struct Sort_1F5CD0 {
     }
 };
 
-#define SWAP_1F5CD0(x, y) \
+#define SWAP_ELEMENTS(x, y) \
     if (kind == 0) { \
         s64 t = *(s64*)(x); \
         *(s64*)(x) = *(s64*)(y); \
         *(s64*)(y) = t; \
     } else \
-        Sort_1F5CD0::Exchange(x, y, size, kind)
+        SortHelpers::Exchange(x, y, size, kind)
 
-#define BLOCKSWAP_1F5CD0(x, y, count) \
-    if ((count) > 0) Sort_1F5CD0::Exchange(x, y, count, kind)
+#define BLOCK_SWAP(x, y, count) \
+    if ((count) > 0) SortHelpers::Exchange(x, y, count, kind)
 
-void SortElements(void* base, u32 n, u32 size, Compare_1F5CD0 compare)
+void SortElements(void* base, u32 n, u32 size, CompareFn compare)
 {
     char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
     s32 d, r, kind, swapped;
@@ -65,7 +65,7 @@ again:
     if (n < 7) {
         for (pm = (char*)base + size; pm < (char*)base + n * size; pm += size) {
             for (pl = pm; pl > (char*)base && compare(pl - size, pl) > 0; pl -= size) {
-                SWAP_1F5CD0(pl, pl - size);
+                SWAP_ELEMENTS(pl, pl - size);
             }
         }
         return;
@@ -76,20 +76,20 @@ again:
         pn = (char*)base + (n - 1) * size;
         if (n > 40) {
             d = (n / 8) * size;
-            pl = Sort_1F5CD0::Median(pl, pl + d, pl + 2 * d, compare);
-            pm = Sort_1F5CD0::Median(pm - d, pm, pm + d, compare);
-            pn = Sort_1F5CD0::Median(pn - 2 * d, pn - d, pn, compare);
+            pl = SortHelpers::Median(pl, pl + d, pl + 2 * d, compare);
+            pm = SortHelpers::Median(pm - d, pm, pm + d, compare);
+            pn = SortHelpers::Median(pn - 2 * d, pn - d, pn, compare);
         }
-        pm = Sort_1F5CD0::Median(pl, pm, pn, compare);
+        pm = SortHelpers::Median(pl, pm, pn, compare);
     }
-    SWAP_1F5CD0((char*)base, pm);
+    SWAP_ELEMENTS((char*)base, pm);
     pa = pb = (char*)base + size;
     pc = pd = (char*)base + (n - 1) * size;
     for (;;) {
         while (pb <= pc && (r = compare(pb, base)) <= 0) {
             if (r == 0) {
                 swapped = 1;
-                SWAP_1F5CD0(pa, pb);
+                SWAP_ELEMENTS(pa, pb);
                 pa += size;
             }
             pb += size;
@@ -97,7 +97,7 @@ again:
         while (pb <= pc && (r = compare(pc, base)) >= 0) {
             if (r == 0) {
                 swapped = 1;
-                SWAP_1F5CD0(pc, pd);
+                SWAP_ELEMENTS(pc, pd);
                 pd -= size;
             }
             pc -= size;
@@ -105,7 +105,7 @@ again:
         if (pb > pc) {
             break;
         }
-        SWAP_1F5CD0(pb, pc);
+        SWAP_ELEMENTS(pb, pc);
         swapped = 1;
         pb += size;
         pc -= size;
@@ -113,20 +113,20 @@ again:
     if (swapped == 0) {
         for (pm = (char*)base + size; pm < (char*)base + n * size; pm += size) {
             for (pl = pm; pl > (char*)base && compare(pl - size, pl) > 0; pl -= size) {
-                SWAP_1F5CD0(pl, pl - size);
+                SWAP_ELEMENTS(pl, pl - size);
             }
         }
         return;
     }
     pn = (char*)base + n * size;
     r = pa - (char*)base < pb - pa ? pa - (char*)base : pb - pa;
-    BLOCKSWAP_1F5CD0((char*)base, pb - r, r);
+    BLOCK_SWAP((char*)base, pb - r, r);
     if (pd - pc < pn - pd - (s32)size) {
         r = pd - pc;
     } else {
         r = pn - pd - (s32)size;
     }
-    BLOCKSWAP_1F5CD0(pb, pn - r, r);
+    BLOCK_SWAP(pb, pn - r, r);
     if ((u32)(r = pb - pa) > size) {
         SortElements(base, r / size, size, compare);
     }

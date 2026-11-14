@@ -29,15 +29,15 @@ s32 CopyKernelWordsSecondPatch(s32* dst, s32* src, u32 bytes)
 
 ASM_FUNC(func_001F9F40);
 
-struct Word_1F9F50 { u32 value; };
+struct ConfigWord { u32 value; };
 
-void ReadSystemConfig(Word_1F9F50* w);
-void WriteSystemConfig(Word_1F9F50* w);
+void ReadSystemConfig(ConfigWord* w);
+void WriteSystemConfig(ConfigWord* w);
 
 s32 IsSecondKernelPatchNeeded(void)
 {
-    Word_1F9F50 a;
-    Word_1F9F50 b;
+    ConfigWord a;
+    ConfigWord b;
     ReadSystemConfig(&a);
     b.value = (a.value & 0xFFFF1FFF) | 0x2000;
     WriteSystemConfig(&b);
@@ -111,8 +111,8 @@ u32 g_secondInstallerCode[490] = {
     0xFFFFC402, 0x80074498
 };
 
-struct Slot_1F9FB8 { s32 key; s32 value; };
-Slot_1F9FB8 g_secondKernelPatchHandlers[3] = { { 0x5A, (s32)CopyKernelWordsSecondPatch }, { 0x5B, 0x80074000 }, { (s32)0xFFFFC402, 0 } };
+struct SyscallPatchSlot { s32 key; s32 value; };
+SyscallPatchSlot g_secondKernelPatchHandlers[3] = { { 0x5A, (s32)CopyKernelWordsSecondPatch }, { 0x5B, 0x80074000 }, { (s32)0xFFFFC402, 0 } };
 s32 IsSecondKernelPatchNeeded(void);
 void SetSystemCallHandlerSecondPatch(s32 a, s32 b);
 void CopyKernelWordsSyscallSecondPatch(s32 a, void* b, s32 c);
@@ -121,7 +121,7 @@ s32 RunSyscall5BSecondPatch(s32 key);
 
 void InstallSecondKernelPatch(void)
 {
-    Slot_1F9FB8* q;
+    SyscallPatchSlot* q;
     u32 i;
     if (IsSecondKernelPatchNeeded() != 0) {
         SetSystemCallHandlerSecondPatch(g_secondKernelPatchHandlers[0].key, g_secondKernelPatchHandlers[0].value);

@@ -10,9 +10,9 @@
 #include "common.h"
 
 /* A frame's unwind table entry: its first word is 0xFFFFFFFE when the frame has no handler. */
-typedef struct Tag_1FE198 {
+typedef struct UnwindEntry {
     u32 word;
-} Tag_1FE198;
+} UnwindEntry;
 
 /* A frame's unwind state, 0x2F0 bytes: its canonical frame address, the unwind table entry of
  * its code, then the registers it saved: a table of 8-byte values (what each register held)
@@ -21,8 +21,8 @@ typedef struct Tag_1FE198 {
  * (FindHandlerAndRestoreRegisters reads the alias of a register that way). */
 typedef struct __attribute__((aligned(8))) UnwindFrame {
     s32 cfa;                /* 0x00 */
-    Tag_1FE198* f4;         /* 0x04 */
-    s32 f8;                 /* 0x08 */
+    UnwindEntry* entry;     /* 0x04 */
+    s32 cfaAdjust;          /* 0x08 */
     s32 fC;                 /* 0x0C */
     union {
         s32 words[0xA2];    /* 0x10 */
@@ -31,19 +31,26 @@ typedef struct __attribute__((aligned(8))) UnwindFrame {
             s64 tbl[80];    /* 0x18 */
         } wide;
     } saved;
-    u16 f298;               /* 0x298 */
-    u16 f29A;               /* 0x29A */
-    s8 f29C[0x54];          /* 0x29C: 0 unsaved, 1 in memory, 2 alias */
+    u16 cfaReg;               /* 0x298 */
+    u16 returnReg;               /* 0x29A */
+    s8 how[0x54];          /* 0x29C: 0 unsaved, 1 in memory, 2 alias */
 } UnwindFrame;
 
 typedef char check_UnwindFrame[sizeof(UnwindFrame) == 0x2F0 ? 1 : -1];
 
-/* The runtime's exception context (func_001FD9E8's): the pending object at 8, its index at 0xC. */
+typedef struct ActiveException ActiveException;
+/* The record of the exception being handled: the function that asks whether it matches a type. */
+struct ActiveException {
+    s32 (*match)(ActiveException* self, void* type, void* extra);
+};
+
+/* The runtime's exception context, one per thread (GetExceptionContext): the handler found at 0,
+ * the chain of handlers at 4, the active exception at 8 and the index a throw recorded at 0xC. */
 typedef struct EhContext {
-    s32 f0;
-    s32 f4;
-    s32 f8;
-    s32 fC;
+    s32 handler;            /* 0x00 */
+    void** chain;           /* 0x04 */
+    ActiveException* active; /* 0x08 */
+    s32 pending;            /* 0x0C */
 } EhContext;
 
 UnwindFrame* FindFrameUnwindState(void* pc, UnwindFrame* frame);
@@ -120,13 +127,8 @@ void InstallExceptionContextGetter(void)
     f();
 }
 
-typedef struct Once_1FDA60 {
-    s32 a;
-    void* b;
-    u8 pad8[8];
-} Once_1FDA60;
 
-static Once_1FDA60 g_staticExceptionContext;
+static EhContext g_staticExceptionContext;
 static s32 g_staticExceptionContextReady;
 static void* g_staticHandlerChain[2];
 
@@ -135,7 +137,7 @@ EhContext* GetStaticExceptionContext(void)
     if (g_staticExceptionContextReady == 0) {
         g_staticExceptionContextReady = 1;
         (void)FillMemory(&g_staticExceptionContext, 0, 0x10);
-        g_staticExceptionContext.b = g_staticHandlerChain;
+        g_staticExceptionContext.chain = g_staticHandlerChain;
     }
     return (EhContext*)&g_staticExceptionContext;
 }
@@ -145,19 +147,13 @@ u8* GetHandlerChainSlot(void)
     return (u8*)(*g_exceptionContextGetter)() + 4;
 }
 
-/* The runtime's exception context: the handler chain at +4, the active exception at +8. */
-typedef struct Ctx_1FDAF0 {
-    s32 f0;
-    void** chain;
-    void* active;
-} Ctx_1FDAF0;
 
 void ThrowToTopHandler(void) __attribute__((noreturn));
 
 /* Throws: runs the cleanups registered in the top handler, then jumps to that handler. */
 void ThrowToTopHandler(void)
 {
-    Ctx_1FDAF0* ctx = (Ctx_1FDAF0*)(*g_exceptionContextGetter)();
+    EhContext* ctx = (EhContext*)(*g_exceptionContextGetter)();
     void*** chain = &ctx->chain;
     void*** cleanups = (void***)&(*chain)[1];
     void* buf;
@@ -193,7 +189,7 @@ void ThrowToTopHandler(void)
 /* Pops the top handler after running its cleanups, then throws again. */
 void PopHandlerAndThrow(void)
 {
-    Ctx_1FDAF0* ctx = (Ctx_1FDAF0*)(*g_exceptionContextGetter)();
+    EhContext* ctx = (EhContext*)(*g_exceptionContextGetter)();
     void*** chain = &ctx->chain;
     void*** cleanups = (void***)&(*chain)[1];
 
@@ -221,15 +217,11 @@ void PopHandlerAndThrow(void)
 }
 
 /* The active exception, asked whether it matches a runtime type through its matcher. */
-typedef struct Info_1FDD80 Info_1FDD80;
-struct Info_1FDD80 {
-    void* (*match)(Info_1FDD80* info, void* type, void* extra);
-};
 
 s32 ActiveExceptionMatches(void* type)
 {
-    Info_1FDD80* info = *(Info_1FDD80**)GetActiveExceptionSlot();
-    void* (*match)(Info_1FDD80*, void*, void*) = info->match;
+    ActiveException* info = *(ActiveException**)GetActiveExceptionSlot();
+    s32 (*match)(ActiveException*, void*, void*) = info->match;
     if (match == 0) {
         return 0;
     }
@@ -246,13 +238,13 @@ s16 GetExceptionRecordKind(void* object)
     return *(s16*)((u8*)object + 4);
 }
 
-typedef struct Range_1FDDD8 {
+typedef struct UnwindRange {
     u32 lo;
     u32 hi;
     s32 value;
-} Range_1FDDD8;
+} UnwindRange;
 
-s32 FindInnermostRangeValue(u32 key, Range_1FDDD8* t)
+s32 FindInnermostRangeValue(u32 key, UnwindRange* t)
 {
     s32 best, i;
     if (t == 0) goto none;
@@ -282,17 +274,13 @@ typedef struct HandlerSpan {
     s32 value;
     void* cb;
 } HandlerSpan;
-/* The record the context's word at 8 points to: the function that matches a handler. */
-typedef struct HandlerMatcher {
-    void* fn;
-} HandlerMatcher;
 /* The pending record the context's word at 0xC points to: its count is the key to resume from. */
 typedef struct PendingHandlerRecord {
     s32 pad0;
     s32 count;
 } PendingHandlerRecord;
 
-s32 FindHandlerInSpanTable(s32 a0, void* a1, HandlerMatcher* a2, s32 a3, s32* a4)
+s32 FindHandlerInSpanTable(s32 a0, void* a1, ActiveException* a2, s32 a3, s32* a4)
 {
     s32 result = 0;
     s32 key = a0;
@@ -316,8 +304,8 @@ s32 FindHandlerInSpanTable(s32 a0, void* a1, HandlerMatcher* a2, s32 a3, s32* a4
         while (base[idx].lo != 0xFFFFFFFF) {
             if ((u32)key >= base[idx].lo && (u32)key < base[idx].hi) {
                 if (base[idx].cb != 0) {
-                    if (a2->fn != 0) {
-                        r = ((s32 (*)(HandlerMatcher*, void*, void*))a2->fn)(a2, base[idx].cb, a1);
+                    if (a2->match != 0) {
+                        r = a2->match(a2, base[idx].cb, a1);
                         if (r != 0) {
                             if (result == 0) {
                                 result = base[idx].value;
@@ -340,10 +328,10 @@ s32 FindHandlerInSpanTable(s32 a0, void* a1, HandlerMatcher* a2, s32 a3, s32* a4
 
 u8* ResolveSavedRegisterSlot(u32 idx, UnwindFrame* self, UnwindFrame* other)
 {
-    while (self->f29C[idx] == 2) {
+    while (self->how[idx] == 2) {
         idx = self->saved.wide.tbl[idx];
     }
-    if (self->f29C[idx] == 1) {
+    if (self->how[idx] == 1) {
         return (u8*)self->cfa + self->saved.wide.tbl[idx];
     }
     AbortProgram();
@@ -365,35 +353,35 @@ s32 CopySavedRegister(s32 a0, u32 a1, u32 a2)
     return CopyBytes(r2, r1, n);
 }
 
-typedef struct Pc_1FE198 Pc_1FE198;
+typedef struct CodeAddress CodeAddress;
 
-UnwindFrame* UnwindOneFrame(Pc_1FE198* a0, UnwindFrame* a1, UnwindFrame* a2)
+UnwindFrame* UnwindOneFrame(CodeAddress* a0, UnwindFrame* a1, UnwindFrame* a2)
 {
     UnwindFrame* s0 = FindFrameUnwindState(a0, a2);
     u16 idx;
     if (s0 == 0) {
         return 0;
     }
-    idx = s0->f298;
+    idx = s0->cfaReg;
     if (*(s8*)((u8*)a1 + idx + 0x29C) != 0) {
         s64 v = *(s64*)ResolveSavedRegisterSlot(idx, (UnwindFrame*)a1, 0);
         s0->cfa = (s32)v;
     } else {
         s0->cfa = a1->cfa;
     }
-    s0->cfa += s0->f8;
+    s0->cfa += s0->cfaAdjust;
     return s0;
 }
 
 void NoteCleanupOnlyHandler(void) {}
 
-static inline Pc_1FE198* ReturnAddr_1FE198(UnwindFrame* f, UnwindFrame* g)
+static inline CodeAddress* FrameReturnAddress(UnwindFrame* f, UnwindFrame* g)
 {
-    s64 w = *(s64*)ResolveSavedRegisterSlot(f->f29A, (UnwindFrame*)f, (UnwindFrame*)g);
-    return (Pc_1FE198*)(s32)w;
+    s64 w = *(s64*)ResolveSavedRegisterSlot(f->returnReg, (UnwindFrame*)f, (UnwindFrame*)g);
+    return (CodeAddress*)(s32)w;
 }
 
-static inline s32 RegWindow_1FE198_In(s32 i, UnwindFrame* f)
+static inline s32 RegisterInWindow(s32 i, UnwindFrame* f)
 {
     return 0;
 }
@@ -401,20 +389,20 @@ static inline s32 RegWindow_1FE198_In(s32 i, UnwindFrame* f)
 void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_, UnwindFrame** pout_)
 {
     EhContext* obj = eh;
-    Pc_1FE198* pc = (Pc_1FE198*)pc_;
+    CodeAddress* pc = (CodeAddress*)pc_;
     UnwindFrame* fb = (UnwindFrame*)fb_;
     UnwindFrame** pout = (UnwindFrame**)pout_;
     UnwindFrame sub;
     UnwindFrame saved;
     UnwindFrame* udata = *pout;
     UnwindFrame* subp = &sub;
-    Pc_1FE198* startPc = pc;
+    CodeAddress* startPc = pc;
     s32 res = 0;
-    s32 pending = obj->fC != 0;
-    HandlerMatcher* a8 = (HandlerMatcher*)obj->f8;
+    s32 pending = obj->pending != 0;
+    ActiveException* a8 = obj->active;
     s32 cleanup;
     s32 savedRes;
-    Pc_1FE198* savedPc;
+    CodeAddress* savedPc;
     s32 onlyCleanup;
     s32 savedState;
     s32 i;
@@ -430,19 +418,19 @@ void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_,
         if (udata == 0) {
             break;
         }
-        if (udata->f4 == 0) {
+        if (udata->entry == 0) {
             isNew = 0;
         } else {
-            isNew = udata->f4->word == 0xFFFFFFFEu;
+            isNew = udata->entry->word == 0xFFFFFFFEu;
         }
         if (pending) {
             pending = 0;
-            res = FindHandlerInSpanTable(obj->fC, udata->f4, a8, 1, &cleanup);
-            obj->fC = 0;
+            res = FindHandlerInSpanTable(obj->pending, udata->entry, a8, 1, &cleanup);
+            obj->pending = 0;
         } else if (isNew) {
-            res = FindHandlerInSpanTable((s32)pc, udata->f4, a8, 0, &cleanup);
+            res = FindHandlerInSpanTable((s32)pc, udata->entry, a8, 0, &cleanup);
         } else {
-            res = FindInnermostRangeValue((u32)pc, (Range_1FDDD8*)udata->f4);
+            res = FindInnermostRangeValue((u32)pc, (UnwindRange*)udata->entry);
         }
         if (res != 0) {
             if (cleanup != 0) {
@@ -458,7 +446,7 @@ void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_,
                 break;
             }
         }
-        pc = (Pc_1FE198*)((s8*)ReturnAddr_1FE198(udata, subp) - 1);
+        pc = (CodeAddress*)((s8*)FrameReturnAddress(udata, subp) - 1);
     }
     if (savedState != 0) {
         udata = &saved;
@@ -471,11 +459,11 @@ void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_,
     if (res == 0) {
         RunTerminateHook();
     }
-    obj->f0 = res;
+    obj->handler = res;
     if (pc == startPc) {
         udata = fb;
     } else {
-        Pc_1FE198* handlerPc = pc;
+        CodeAddress* handlerPc = pc;
         pc = startPc;
         *udata = *fb;
         while (pc != handlerPc) {
@@ -483,15 +471,15 @@ void* FindHandlerAndRestoreRegisters(EhContext* eh, void* pc_, UnwindFrame* fb_,
             udata = UnwindOneFrame(pc, udata, subp);
             subp = p;
             for (i = 0; i < 0x4F; i++) {
-                if (i != udata->f29A && udata->f29C[i] != 0) {
+                if (i != udata->returnReg && udata->how[i] != 0) {
                     CopySavedRegister(i, (u32)udata, (u32)fb);
                 }
             }
-            pc = (Pc_1FE198*)((s8*)ReturnAddr_1FE198(udata, subp) - 1);
+            pc = (CodeAddress*)((s8*)FrameReturnAddress(udata, subp) - 1);
         }
-        if (udata->f29C[udata->f29A] == 2) {
-            i = udata->saved.words[udata->f29A];
-            if (RegWindow_1FE198_In(i, udata)) {
+        if (udata->how[udata->returnReg] == 2) {
+            i = udata->saved.words[udata->returnReg];
+            if (RegisterInWindow(i, udata)) {
                 CopySavedRegister(i, (u32)udata, (u32)fb);
             }
         }
@@ -510,7 +498,7 @@ void RethrowActiveException(void)
     void* handler;
     s32 offset;
 
-    if (ctx->f8 == 0)
+    if (ctx->active == 0)
         RunTerminateHook();
 
     __builtin_unwind_init();
@@ -535,9 +523,9 @@ void ThrowException(void* index)
     void* handler;
     s32 offset;
 
-    if (ctx->f8 == 0)
+    if (ctx->active == 0)
         RunTerminateHook();
-    ctx->fC = (s32)index;
+    ctx->pending = (s32)index;
 
     __builtin_unwind_init();
 here:
