@@ -25,7 +25,7 @@ struct FileHandleEntry {
     s32 used;
 };
 
-// The request func_001F8C38 sends.
+// The request CloseFile sends.
 struct FileCloseRequest {
     s32 sema;
     s32 result;
@@ -34,7 +34,7 @@ struct FileCloseRequest {
     s32 index;
 };
 
-// The request func_001F92E8 sends.
+// The request ControlFile sends: the control block goes with it.
 struct FileControlBlock {
     u8 b[0x400];
 };
@@ -51,7 +51,43 @@ struct FileControlRequest {
     s32 size;
 };
 
-// The handler of the command 0x80000013 and its argument; what the handler is given with a command: a function and its argument.
+// The request ReadFile sends.
+struct FileReadRequest {
+    s32 sema;
+    s32 result;
+    s32 resultSize;
+    s32 id;
+    void* buf;
+    s32 size;
+    s32 f18;
+    s32 index;
+};
+
+// The request WriteFile sends: the bytes before the buffer's first 16-byte boundary go with it.
+struct FileWriteRequest {
+    s32 sema;
+    s32 result;
+    s32 resultSize;
+    s32 id;
+    void* buf;
+    s32 size;
+    s32 head;
+    u8 bytes[16];
+    s32 index;
+};
+
+// The request buffer of the file client: each call fills the layout of its own request in it,
+// which all begin with the reply slot (the semaphore it waits on, where the result goes and its
+// size) and the IOP's handle.
+union FileRequest {
+    FileCloseRequest close;
+    FileReadRequest read;
+    FileWriteRequest write;
+    FileControlRequest control;
+    u8 bytes[0xC40];
+};
+
+// What the handler of the command 0x80000013 is given with a command: a function and its argument.
 struct FileCommandCall {
     void (*fn)(void* arg);  // 0x00: run when set
     void* arg;              // 0x04
@@ -66,11 +102,11 @@ s32 D_002771C4 = -1;
 
 static u8* D_00627840;
 static u32* D_00627844;
-static u8 D_00627880[0xC40] __attribute__((aligned(64)));
+static FileRequest D_00627880 __attribute__((aligned(64)));
 static u8 D_006284C0[0x40] __attribute__((aligned(64)));
 static u8 D_00628500[0x440] __attribute__((aligned(64)));
 static u8 D_00628940[0x200] __attribute__((aligned(64)));
-static u8 g_fileClient[0x28] __attribute__((aligned(64)));
+static RemoteCallClient g_fileClient __attribute__((aligned(64)));
 static s32 D_00628B68;
 static u8 D_00628B80[0x40] __attribute__((aligned(64)));
 static FileCommandCall D_00628BC0 __attribute__((aligned(64)));
@@ -250,7 +286,7 @@ s32 OpenFileClient(void)
     SetCommandHandler(0x80000013, (CommandHandler)&RunFileClientCallback, (void*)g);
     (s32)EnableInterrupts();
     for (;;) {
-        q = (RemoteCallClient*)g_fileClient;
+        q = &g_fileClient;
         if (BindRemoteService(q, 0x80000001, 0) < 0) return -1;
         if (q->server != 0) break;
         for (i = 0x100000; i != -1; ) i--;
@@ -260,7 +296,7 @@ s32 OpenFileClient(void)
     for (u8* p = D_00628940; p < D_00628940 + 0x200; p += 0x10) *(s32*)(p + 4) = 0;
     PostSemaphore(D_002771C0);
     D_00627840 = D_00628500;
-    if (CallRemoteService((RemoteCallClient*)g_fileClient, 0xFF, 0, &D_00627840, 4, D_006284C0, 4, 0, 0) < 0) return 0xFFFEFFFF;
+    if (CallRemoteService(&g_fileClient, 0xFF, 0, &D_00627840, 4, D_006284C0, 4, 0, 0) < 0) return 0xFFFEFFFF;
     *(UnalignedWord*)&D_00628B68 = *(UnalignedWord*)UNCACHED(D_006284C0);
     g_fileClientOpen = 1;
     return 0;
@@ -282,7 +318,7 @@ struct MinOf { static s32 Of(s32 a, s32 b) { return a < b ? a : b; } };
 
 s32 CloseFile(s32 a0)
 {
-    FileCloseRequest* g = (FileCloseRequest*)D_00627880;
+    FileCloseRequest* g = &D_00627880.close;
     FileHandleEntry* p;
     s32 h;
     s32 out;
@@ -309,7 +345,7 @@ s32 CloseFile(s32 a0)
     g->result = (s32)&out;
     g->resultSize = 4;
     q = D_006284C0;
-    v = CallRemoteService((RemoteCallClient*)g_fileClient, 1, 0, g, 0x14, q, 4, 0, 0);
+    v = CallRemoteService(&g_fileClient, 1, 0, g, 0x14, q, 4, 0, 0);
     if (v >= 0) {
         p->used = 0;
     } else {
@@ -328,21 +364,10 @@ s32 CloseFile(s32 a0)
     return MinOf::Of(out, 0);
 }
 
-// The request func_001F8DB8 sends.
-struct FileReadRequest {
-    s32 sema;
-    s32 result;
-    s32 resultSize;
-    s32 id;
-    void* buf;
-    s32 size;
-    s32 f18;
-    s32 index;
-};
 
 s32 ReadFile(s32 fd, void* buf, s32 size)
 {
-    FileReadRequest* g = (FileReadRequest*)D_00627880;
+    FileReadRequest* g = &D_00627880.read;
     FileHandleEntry* p;
     s32 mode;
     s32 h;
@@ -388,7 +413,7 @@ s32 ReadFile(s32 fd, void* buf, s32 size)
     }
     WriteBackDataCacheRange(D_00628500, 0xA4);
     WriteBackDataCacheRange(g, 0x20);
-    if (CallRemoteService((RemoteCallClient*)g_fileClient, 2, 0, D_00627880, 0x20, D_006284C0, 4, 0, 0) < 0) {
+    if (CallRemoteService(&g_fileClient, 2, 0, &D_00627880, 0x20, D_006284C0, 4, 0, 0) < 0) {
         FreeSemaphore(h);
         UnlockFileRequests();
         return -0xB;
@@ -408,22 +433,10 @@ s32 ReadFile(s32 fd, void* buf, s32 size)
     return out;
 }
 
-// The request func_001F9028 sends: the bytes before the buffer's first 16-byte boundary go with it.
-struct FileWriteRequest {
-    s32 sema;
-    s32 result;
-    s32 resultSize;
-    s32 id;
-    void* buf;
-    s32 size;
-    s32 head;
-    u8 bytes[16];
-    s32 index;
-};
 
 s32 WriteFile(s32 fd, void* buf, s32 size)
 {
-    FileWriteRequest* g = (FileWriteRequest*)D_00627880;
+    FileWriteRequest* g = &D_00627880.write;
     FileHandleEntry* p;
     s32 mode;
     s32 h;
@@ -477,7 +490,7 @@ s32 WriteFile(s32 fd, void* buf, s32 size)
     g->head = head;
     for (s32 j = 0; j < head; j++)
         g->bytes[j] = ((u8*)buf)[j];
-    if (CallRemoteService((RemoteCallClient*)g_fileClient, 3, 0, D_00627880, 0x30, D_006284C0, 4, 0, 0) < 0) {
+    if (CallRemoteService(&g_fileClient, 3, 0, &D_00627880, 0x30, D_006284C0, 4, 0, 0) < 0) {
         FreeSemaphore(h);
         UnlockFileRequests();
         return -0xB;
@@ -499,7 +512,7 @@ s32 WriteFile(s32 fd, void* buf, s32 size)
 
 s32 ControlFile(s32 a0, s32 mode, u32* out)
 {
-    FileControlRequest* g = (FileControlRequest*)D_00627880;
+    FileControlRequest* g = &D_00627880.control;
     s32 ret = 1;
     FileHandleEntry* ent = (FileHandleEntry*)FindFileHandle(a0);
     (void)LockFileRequests(5);
@@ -557,8 +570,8 @@ s32 ControlFile(s32 a0, s32 mode, u32* out)
     g->sema = h;
     g->result = (s32)&sp30;
     g->resultSize = 4;
-    WriteBackDataCacheRange(D_00627880, 0x420);
-    if (CallRemoteService((RemoteCallClient*)g_fileClient, 5, 0, D_00627880, 0x420, D_006284C0, 4, 0, 0) < 0) {
+    WriteBackDataCacheRange(&D_00627880, 0x420);
+    if (CallRemoteService(&g_fileClient, 5, 0, &D_00627880, 0x420, D_006284C0, 4, 0, 0) < 0) {
         FreeSemaphore(h);
         UnlockFileRequests();
         return -0xB;

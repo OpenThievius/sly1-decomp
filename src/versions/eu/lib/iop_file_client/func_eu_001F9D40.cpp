@@ -20,7 +20,7 @@ s32 IsFileServiceVersionUnknown(void);
 
 s32 OpenFile(const char* name, u32 flags, ...)
 {
-    FileOpenRequest* g = (FileOpenRequest*)D_00627880;
+    FileOpenRequest* g = (FileOpenRequest*)&D_00627880;
     FileHandleEntry* p;
     s32 mode;
     s32 h;
@@ -64,7 +64,7 @@ s32 OpenFile(const char* name, u32 flags, ...)
     g->result = (s32)&out;
     g->sema = h;
     g->result_size = 4;
-    if (CallRemoteService((RemoteCallClient*)g_fileClient, 0, 0, D_00627880, 0x418, D_006284C0, 4, 0, 0) < 0) {
+    if (CallRemoteService(&g_fileClient, 0, 0, &D_00627880, 0x418, D_006284C0, 4, 0, 0) < 0) {
         FreeSemaphore(h);
         UnlockFileRequests();
         return -0xB;
