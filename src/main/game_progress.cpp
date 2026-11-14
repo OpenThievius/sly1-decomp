@@ -1181,7 +1181,7 @@ LINKER_REMNANT(func_00160090);
 KeyedEntry* FindKeyEntry(KeyedEntry* key)
 {
     KeyedEntry* p = (KeyedEntry*)g_keyedEntries;
-    KeyedEntry* end = (KeyedEntry*)((u8*)g_keyedEntries + 0x7E8);
+    KeyedEntry* end = (KeyedEntry*)(g_keyedEntries + 46);
     s32 m;
 
     do {
@@ -1193,7 +1193,7 @@ KeyedEntry* FindKeyEntry(KeyedEntry* key)
             m = ((key->key.signedWords[2] ^ key->key.signedWords[6]) ^ (p->key.signedWords[2] ^ p->key.signedWords[6])) == 0;
         }
         if (!m) {
-            p = (KeyedEntry*)((u8*)p + 0x2C);
+            p++;
         } else {
             return p;
         }
@@ -1205,7 +1205,7 @@ KeyedEntry* FindKeyEntry(KeyedEntry* key)
 void* FindEntryById(s32 key)
 {
     KeyedEntry* p = (KeyedEntry*)g_keyedEntries;
-    u8* end = (u8*)g_keyedEntries + 0x7E8;
+    const KeyedEntry* end = g_keyedEntries + 46;
     for (;;) {
         if (key != p->id) {
             p++;
@@ -1270,7 +1270,7 @@ void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3)
     *a2 = 0;
     p = (KeyedEntry*)g_keyedEntries;
     *a1 = 0;
-    end = (KeyedEntry*)((u8*)g_keyedEntries + 0x7E8);
+    end = (KeyedEntry*)(g_keyedEntries + 46);
     do {
         if ((p->id >> 8) == key) {
             if (p->i28 & 2) {
@@ -1293,7 +1293,7 @@ void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3)
 s32 ComputeCompletionMask(void) {
     u32 mask = 0xE;
     KeyedEntry* p = (KeyedEntry*)g_keyedEntries;
-    KeyedEntry* end = (KeyedEntry*)((u8*)g_keyedEntries + 0x7E8);
+    KeyedEntry* end = (KeyedEntry*)(g_keyedEntries + 46);
     do {
         u32* r = (u32*)GetLevelEntryByKey(p->id);
         mask &= ~p->flags | *r;
@@ -1301,6 +1301,7 @@ s32 ComputeCompletionMask(void) {
     } while (p < end);
     s32 clear = -3;
     s32 n = 4;
+    // a field access here changes retail's code (walks levels[1..5].f448 by 0x44C)
     u8* q = (u8*)&g_saveData->levels[1].f448;
     do {
         u32 flag = *(u32*)q & 0x20;
@@ -1422,6 +1423,7 @@ void SetCurrentLevelEntry(KeyedEntry* key, s32 flags)
     GameProgress* g = g_saveData;
     s32 gate = g->reserveCount;
     g_currentLevelRecord = base;
+    // address arithmetic over a variable index
     g_currentEntry = (G27C230*)((u8*)base + lo * 0x78);
     if (gate < 0 || (flags & 2) != 0) {
         ResetReserveCounts();
@@ -1453,6 +1455,7 @@ void AddElapsedTime(f32 dx)
 // byte, 0x78 bytes per entry), or 0 for -1.
 void* GetLevelEntryByKey(s32 key)
 {
+    // address arithmetic over a variable index
     return key == -1 ? 0 : (u8*)&g_saveData->levels[key >> 8] + (key & 0xFF) * 0x78;
 }
 
@@ -1547,6 +1550,7 @@ s32 ComputeCompletionPercent(GameProgress* progress)
         s32 idx = (s32)v >> 8;
         if (idx != 0) {
             u32 flags = e->flags;
+            // address arithmetic over a variable index
             u32* w = (u32*)(p + (idx * 0x44C + 0x10) + (v & 0xFF) * 0x78);
             u32 bit;
             total++;
@@ -1561,6 +1565,7 @@ s32 ComputeCompletionPercent(GameProgress* progress)
     }
     for (k = 0; k < 5; k++) {
         total++;
+        // a field access here changes retail's code (it is levels[k + 1].f448)
         if (*(u32*)(p + 0x8A4 + k * 0x44C) & 0x20) done++;
     }
     if (done == 0) return 0;
@@ -1588,6 +1593,7 @@ LINKER_REMNANT(func_00160C90);
 void* GetIndexedTargetSlot(void* self,s32 index)
 {
     if ((u32)(index-0x33B)>=12) return 0;
+    // address arithmetic over a variable index
     else return (u8*)self+(index*4-0xCD8);
 }
 
@@ -1658,6 +1664,7 @@ void SpendReserveUnit(void)
         FadeRequest args;
         args.kind = m;
         args.text = (u8*)&D_00275B04;
+        // the record's type is not known (it lies behind a global's address)
         u8* base = args.text - 0x14;
         args.f08 = *(s32*)(base + 0x8);
         args.f0C = *(s32*)(base + 0xC);
@@ -1682,6 +1689,15 @@ void ClearRecordBody(ClearedRecord* self)
     self->f18 = 0;
 }
 
+// A face of a collision mesh (Mesh03::faces, 0x20 bytes): its normal, the plane's offset (as bits)
+// and the index of one of its vertices.
+struct MeshFace03 {
+    Vec02 normal;           // 0x00
+    u32 offsetBits;         // 0x10
+    u8 pad14[0x1E - 0x14];
+    u16 vert;               // 0x1E
+};
+
 // Copies a mesh (vertices, faces, face points and words) into front memory, sharing its edge list,
 // and when a matrix is given transforms the copied vertices (and the face data) by it.
 void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
@@ -1700,10 +1716,10 @@ void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
             TransformByMatrixWithW((const Quad16*)matrix, v, 1.0f, v);
         }
         for (s32 i = 0; i < dst->faceCount; i++) {
-            u8* face = (u8*)dst->faces + (i << 5);
-            TransformByMatrixWithW((const Quad16*)matrix, (const Vec02*)face, 0.0f, (Vec02*)face);
-            Vec02* vert = (Vec02*)((*(u16*)(face + 0x1E) << 4) + (uptr)dst->verts);
-            *(u32*)(face + 0x10) = Vu0::ToBits(Vu0::Dot(Vu0::Q(*(Vec02*)face), Vu0::Q(*vert)));
+            MeshFace03* face = &((MeshFace03*)dst->faces)[i];
+            TransformByMatrixWithW((const Quad16*)matrix, &face->normal, 0.0f, &face->normal);
+            Vec02* vert = (Vec02*)((face->vert << 4) + (uptr)dst->verts);
+            face->offsetBits = Vu0::ToBits(Vu0::Dot(Vu0::Q(face->normal), Vu0::Q(*vert)));
             Vec02* p = &((Vec02*)dst->points)[i];
             TransformByMatrixWithW((const Quad16*)matrix, p, 1.0f, p);
         }
@@ -1778,10 +1794,12 @@ void EndGifPacket(PacketWriter* self)
 {
     if (self->openTag != 0) {
         const PacketWriterVt* s = self->vt;
+        // the class's this-adjustment from its vtable, not a field
         s->close((PacketWriter*)((u8*)self + s->adj1), 1);
     } else {
         BeginGifTag(self, 0, 1, 0xE);
         const PacketWriterVt* s = self->vt;
+        // the class's this-adjustment from its vtable, not a field
         s->close((PacketWriter*)((u8*)self + s->adj1), 1);
     }
 }
@@ -1821,11 +1839,13 @@ void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64
 {
     PacketWriter* w = self;
     const PacketWriterVt* sub = w->vt;
+    // the class's this-adjustment from its vtable, not a field
     sub->close((PacketWriter*)((u8*)self + sub->adj1), 0);
 
     u8* p = w->cur;
     u64 tag = (prim << 47) | (1ULL << 46) | (u64)nloop | ((u64)nreg << 60);
     w->cur = p + 16;
+    // packet record, not an object
     *(u64*)(p + 8) = data;
     *(u64*)p = tag;
     if (out != 0) {
@@ -1839,12 +1859,15 @@ void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3)
 {
     const PacketWriterVt* d = self->vt;
+    // the class's this-adjustment from its vtable, not a field
     d->close((PacketWriter*)((u8*)self + d->adj1), 0);
     u8* blk = self->cur;
     s64 lo = ((s64)a2 << 60) | ((s64)1 << 46);
     s64 hdr = ((s64)a1 << 47) | lo;
+    // packet record, not an object
     self->cur = blk + 0x10;
     *(s64*)blk = hdr;
+    // packet record, not an object
     *(u64*)(blk + 8) = a3;
     self->block = blk;
     self->registerCount = a2;
@@ -1890,6 +1913,7 @@ void AddGifXyzEntry(PacketWriter* self, s32 a1, s32 a2, u64 a3)
 {
     CountGifEntry(self, 1, 5);
     u8* p = self->cur;
+    // packet record, not an object
     self->cur = p + 0x10;
     *(s32*)(p + 0x0) = a1;
     *(s32*)(p + 0x4) = a2;
@@ -1939,6 +1963,7 @@ LINKER_REMNANT(func_00161760);
 void BeginGifRegListTag(PacketWriter* self, u32 a1, u64 a2)
 {
     const PacketWriterVt* sub = self->vt;
+    // the class's this-adjustment from its vtable, not a field
     sub->close((PacketWriter*)((u8*)self + sub->adj1), 0);
     u64* p = self->cur64;
     self->cur64 = p + 2;
@@ -1998,28 +2023,25 @@ void AddGifImageTag(PacketWriter* self, s32 count)
     p[1] = 0;
 }
 
-struct CameraBlock16 { u8 b[16]; };
-
 // Clears a vertex batch, sets its defaults (scale 1.0, no light selection, a copy of 16 bytes
 // of the camera at +0x208) and resets it with ResetVertexBatch.
 u8* InitVertexBatch(VertexBatch* batch)
 {
-    u8* self = (u8*)batch;
     s32 i;
     for (i = 0x93; i != -1; i--) {
     }
-    FillMemory(self + 0xFC, 0, 0x28);
-    FillMemory(self, 0, 0xB0);
-    u8* camera = g_camera;
-    *(s32*)(self + 0x98) = 1;
-    *(f32*)(self + 0x90) = 1.0f;
-    *(CameraBlock16*)(self + 0x80) = *(CameraBlock16*)(camera + 0x208);
-    *(s32*)(self + 0xB0) = 0;
-    *(s32*)(self + 0xB4) = 0;
-    *(s32*)(self + 0x94) = -1;
-    *(f32*)(self + 0xAC) = 1.0f;
+    FillMemory(&batch->x, 0, 0x28);
+    FillMemory(batch, 0, 0xB0);
+    Camera* camera = (Camera*)g_camera;
+    batch->f98 = 1;
+    batch->scale = 1.0f;
+    batch->camera080 = *(CameraBlock16*)camera->fogTerms;
+    batch->flaggedLightCount = 0;
+    batch->lightCount = 0;
+    batch->f94 = -1;
+    batch->f0AC = 1.0f;
     ResetVertexBatch(batch);
-    return self;
+    return (u8*)batch;
 }
 
 // Frees the batch's memory when bit 0 of flag is set.
@@ -2034,10 +2056,9 @@ void DestroyVertexBatch(VertexBatch* self, s32 flag)
 // stores the rigid inverse at +0x40.
 void SetVertexBatchTransform(VertexBatch* batch, void* a1, void* a2)
 {
-    u8* self = (u8*)batch;
     FlushVertexBatch(batch);
-    BuildMatrixFromRotationAndTranslation((const Vec02*)a1, (const Mat02*)a2, (Mat4A*)self);
-    InvertRigidTransform(a1, a2, (Quad16*)(self + 0x40));
+    BuildMatrixFromRotationAndTranslation((const Vec02*)a1, (const Mat02*)a2, (Mat4A*)batch);
+    InvertRigidTransform(a1, a2, (Quad16*)batch->inverse040);
 }
 
 // The lights a batch is lit by: CollectLightsForSphere (main_loop.cpp) takes the world, the
@@ -2077,10 +2098,9 @@ void SelectVertexBatchLights(VertexBatch* batch, void* center, f32 radius)
 // Clears the batch's two buffer counters and its 0x1720-byte vertex area.
 void ResetVertexBatch(VertexBatch* batch)
 {
-    u8* self = (u8*)batch;
-    *(s32*)(self+0xF8)=0;
-    *(s32*)(self+0x124)=0;
-    ((MemoryFillFn)FillMemory)(self+0x128,0,0x1720);
+    *(s32*)&batch->mode=0;
+    batch->vertexCount=0;
+    ((MemoryFillFn)FillMemory)(batch->vertices,0,0x1720);
 }
 
 // Flushes the batch, sets its mode pointer to value and resets the vertex colour to opaque
@@ -2313,8 +2333,7 @@ LINKER_REMNANT(func_001626A0);
 // Copies a packed 32-bit colour into the batch as the colour of the vertices that follow.
 void SetVertexColor(VertexBatch* batch, void* src)
 {
-    u8* dst = (u8*)batch;
-    *(U32P*)(dst + 0x114) = *(U32P*)src;
+    batch->color = *(U32P*)src;
 }
 
 void SetVertexTexCoord(VertexBatch* dst, U64P* src)

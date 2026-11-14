@@ -55,7 +55,7 @@ void CreatePlayerTwoEntryBlend(Player* self)
         i--;
     } while (i >= 0);
     BuildCombinedBlendAnimation(self, 0x10, 2, self->f103C, 0, 0, 0, (BlendAnimation**)&self->f105C);
-    SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f618, (PlacedObject*)self, 1, (Vec02*)&self->f23E0, 0, 0, 0);
+    SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f618, (PlacedObject*)self, 1, (Vec02*)&self->v23E0, 0, 0, 0);
     SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, (Vec02*)&self->f23F0, 0, 0, 0);
     f32 avg = (self->f23E0 + self->f23F0) * 0.5f;
     self->f23F4 = 0.0f;
@@ -506,7 +506,7 @@ void PinPlayerToPath(Player* self)
     TransformDirectionBetweenFrames(((PathObject*)self->aimCurve)->frame, 0, &dir, &dir);
     Vu0::Set(dir, Vu0::NormalizeOrMoved(Vu0::Q(dir), *(const u128*)&g_unitZVector));
     BuildPerpendicularPair(&dir, perp, &g_unitXVector, &g_unitZVector);
-    TransformPointBetweenFrames(self, 0, (Vec02*)&self->f23E0, &local);
+    TransformPointBetweenFrames(self, 0, &self->v23E0, &local);
     Vu0::Q(delta) = Vu0::Sub(Vu0::Add(Vu0::Q(local), Vu0::Q(self->pathPoseOffset)), Vu0::Q(pos));
     CreatePooledContact(self, path->frame, &local, &perp[0], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[0]))));
     CreatePooledContact(self, path->frame, &local, &perp[1], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[1]))));
@@ -564,7 +564,7 @@ void SetPlayerPath(Player* self, PathObject* path)
         path->holder->desc->m2(path->holder, &pos, self->aimCurvePos, 0);
     }
     TransformPointBetweenFrames(path->frame, self, &pos, &local);
-    Vu0::Q(local) = Vu0::Sub(Vu0::Q(local), Vu0::Q(*(Vec02*)((u8*)self + 0x23E0)));
+    Vu0::Q(local) = Vu0::Sub(Vu0::Q(local), Vu0::Q(self->v23E0));
     TransformPointBetweenFrames(self, 0, &local, &world);
     self->desc02()->m1D(self, &world);
     SetPlayerState(self, 7, 0x17);

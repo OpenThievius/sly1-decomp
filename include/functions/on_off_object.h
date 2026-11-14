@@ -16,7 +16,7 @@ struct Vec02;
 struct WorldKeyBlock;
 struct WorldLoadRequest;
 
-void* GetOnOffObjectBlock(void* self);
+void* GetOnOffObjectBlock(OnOffObject* self);
 void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object);
 void InitOnOffObject(OnOffObject* self);
 void UnregisterOnOffObject(OnOffObject* self);

@@ -93,6 +93,8 @@ void StartC24Object(C24* self)
 }
 
 
+
+
 // Per-frame update of the path-speed object: advances its level by levelRate (kept between 0 and
 // levelLimit), and when it reaches the limit (or the player is near the end, in state key 0x36F)
 // sends the player a message, notifies its member, calls slot 3 on itself and sends script event
@@ -106,7 +108,7 @@ void UpdateC24Object(C24* self, f32 dt)
     if (self->curveTable != 0) {
         target = (SwitchedCollider*)GetActiveSwitchedCollider();
         if (IsObjectOfKind(target, 0x16) != 0) {
-            target = *(SwitchedCollider**)((u8*)target + 0x620);
+            target = (SwitchedCollider*)((PlayerLinkedCollider*)target)->target;
         }
         f32 v = self->level + dt * self->levelRate;
         f32 hi = self->levelLimit;
@@ -185,7 +187,7 @@ void MoveC24Object(C24* self, s32 a1, f32 dt)
         }
         u128 w = Vu0::FromFloatAt(o1);
         Vu0::Q(vel) = Vu0::MulX(Vu0::Q(dir), w);
-        void* o = *(void**)((u8*)self->path + 0x18);
+        void* o = ((PathCurveObject*)self->path)->parent;
         Vu0::Set(t, w);
         TransformStateToAncestorFrame((PlacedObject*)o, 0, &pos, 0, &vel, 0);
         Vu0::Set(t, Vu0::MulXSum(Vu0::Q(self->gravity), Vu0::Scalar(-1.0f),

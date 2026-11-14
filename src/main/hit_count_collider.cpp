@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "id_linked_object.h"
 #include "asm_func.h"
 #include "vu0.h"
 #include "base_object.h"
@@ -87,13 +88,13 @@ void StartHitCountCollider(HitCountCollider* self)
     self->heading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     PlacedObject* v = self->aimObject;
     self->aimHeading = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
-    *(UnalignedFloatPair*)&self->f630 = *(UnalignedFloatPair*)((u8*)self->f62C + 0x2DC);
-    u8* g1 = (u8*)&g_hitCountCaptionA;
-    ((UnalignedPointer*)(g1 + 0x264))->p = (u8*)&self->collectedCount;
-    u8* g2 = (u8*)&g_hitCountCaptionB;
-    ((UnalignedPointer*)(g2 + 0x264))->p = (u8*)&self->hitsLeft;
-    *(void**)(g1 + 0x268) = D_00274A40;
-    *(f32*)(g2 + 0x26C) = 4.0f;
+    *(UnalignedFloatPair*)&self->f630 = *(UnalignedFloatPair*)&((IdLinkedObject*)self->f62C)->f2DC;
+    T217D_E30* g1 = &g_hitCountCaptionA;
+    ((UnalignedPointer*)&g1->target)->p = (u8*)&self->collectedCount;
+    T217D_E30* g2 = &g_hitCountCaptionB;
+    ((UnalignedPointer*)&g2->target)->p = (u8*)&self->hitsLeft;
+    *(void**)&g1->limit = D_00274A40;
+    g2->rate = 4.0f;
     SetWorldActiveFollower(self->world, self);
     s32 c = self->itemCount;
     self->items[c] = self;
@@ -198,9 +199,9 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
         ((u8*)ca)[1] = (s32)r1;
     }
     SetObjectTreeRecordValue(self, ca[0]);
-    *(f32*)(((u8*)self->f62C) + 0x2DC) = self->f670 * self->f630;
-    *(f32*)(((u8*)self->f62C) + 0x2E0) = self->f670 * self->f634;
-    *(s32*)(((u8*)self->f62C) + 0x32C) = 0;
+    ((IdLinkedObject*)self->f62C)->f2DC = self->f670 * self->f630;
+    ((IdLinkedObject*)self->f62C)->f2E0 = self->f670 * self->f634;
+    ((IdLinkedObject*)self->f62C)->linkId = 0;
 }
 
 bool AreMenusAndFadeClear();
@@ -428,7 +429,7 @@ void SetHitCountColliderState(HitCountCollider* self, s32 state)
         self->aimHeading = b;
         q = D_00248D30;
         f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-        ApproachAngleWithRamp(r, self->heading, 0.0f, g_hitCountTurnRamp, (f32*)((u8*)&q + 8));
+        ApproachAngleWithRamp(r, self->heading, 0.0f, g_hitCountTurnRamp, &q.z);
         self->desc02()->m21(self, (Vec02*)&q);
         self->hitsLeft = 0;
         D_0026E228[0] = -1;

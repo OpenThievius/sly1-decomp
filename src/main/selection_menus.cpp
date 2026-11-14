@@ -72,7 +72,27 @@ extern ChoiceSound g_defaultChoiceSound;
 extern f32 g_gameClock[];
 extern f32 g_choiceSoundGap;
 extern s32 D_0026FCF4;
-struct BoxStyle;
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+
+struct BoxStyle {
+    void* font;
+    u8 f4;
+    f32 paddingX;
+    f32 paddingY;
+    f32 scaleX;
+    f32 scaleY;
+    u32 color;
+    BoxStyle(f32 w, f32 h)
+    {
+        FillMemory(this, 0, 0x1C);
+        f4 = 0x2D;
+        paddingX = w;
+        paddingY = h;
+        scaleX = 0.3f;
+        scaleY = 0.3f;
+        color = 0xFF7D4B00;
+    }
+};
 extern BoxStyle g_selectionCaptionFrame;
 extern s32 D_00272420;
 struct CaptionLayout;
@@ -101,6 +121,7 @@ struct CaptionDrawer {
     {
         if (*h != 0) {
             const FontVt* vt = (*h)->vt;
+            // the class's this-adjustment from its vtable, not a field
             vt->drawBox((Font*)((u8*)*h + vt->adj9), h, out, tbl);
         }
     }
@@ -321,6 +342,7 @@ void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
         if (idx != self->walkerChoice) {
             s32 s2 = 1;
             void* elt;
+            // address arithmetic over a variable index
             u8* table = (u8*)self->choiceAnimations;
             MarkProgressStageFlag(idx);
             elt = *(void**)(table + (self->choice << 2));
@@ -383,6 +405,7 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
             f32 t = g_gameClock[1];
             if (g_choiceSoundGap <= t - g_selectionCaption.lastAt) {
                 g_selectionCaption.lastAt = t;
+                // address arithmetic over a variable index
                 slot = (ChoiceSound*)((u8*)g_choiceSounds + (a << 5));
             }
         }
@@ -399,6 +422,7 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
                 SetStateWalkerTarget(self->walkers[0].walker, g_choiceKeys[a].walkerKey);
             }
         } else {
+            // address arithmetic over a variable index
             SetStateWalkerTarget((StateWalker*)h, *(s32*)((u8*)g_choiceKeys + (a * 8 + b * 4)));
         }
     }
@@ -570,12 +594,12 @@ void DrawSelectionCaption(T217D_12E0* self)
         out.FlagA(1);
         out.FlagB(1);
 
-        u8* h = (u8*)self->frame;
+        BoxStyle* h = (BoxStyle*)self->frame;
         if (h != 0) {
-            slot = *(T217D_Word*)(h + 0x18);
-            h[0x1B] = (u8)((f32)h[0x1B] * self->blend);
+            slot = *(T217D_Word*)&h->color;
+            ((u8*)&h->color)[3] = (u8)((f32)((u8*)&h->color)[3] * self->blend);
             CaptionDrawer::Draw(self->frame, &out, &g_gsPacketWriter);
-            *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
+            *(T217D_Word*)&((BoxStyle*)self->frame)->color = slot;
         }
         f32 r = Sine(g_elapsedTime * 10.0f);
         f32 t = r * 0.5f + 0.5f;
@@ -605,6 +629,7 @@ void InitGridSelector(T217D_1330* self)
     f32 f20 = 60.0f;
     f32 f21 = 90.0f;
     const FontVt* vt = a1->vt;
+    // the class's this-adjustment from its vtable, not a field
     Font* n = vt->clone((Font*)((u8*)a1 + vt->adj1), 1.0f, 1.0f);
     self->font = n;
     self->color = 0xDF7F7F7F;
@@ -612,6 +637,7 @@ void InitGridSelector(T217D_1330* self)
     Font* s0 = GetFontById(4);
     PushFontScale(s0, 1.3f, 1.3f);
     const FontVt* v = s0->vt;
+    // the class's this-adjustment from its vtable, not a field
     f32 r = v->width((Font*)((u8*)s0 + v->adj3), 0x5F);
     f21 = r * 4.0f + f21;
     f20 = f20 + (f32)s0->height * s0->sy * 4.0f;
@@ -748,12 +774,12 @@ void DrawGridSelector(T217D_1330* self)
         out.Color(color);
         out.FlagA(1);
         out.FlagB(0);
-        u8* h = (u8*)self->frame;
+        BoxStyle* h = (BoxStyle*)self->frame;
         if (h != 0) {
-            slot = *(T217D_Word*)(h + 0x18);
-            h[0x1B] = (u8)((f32)h[0x1B] * self->blend);
+            slot = *(T217D_Word*)&h->color;
+            ((u8*)&h->color)[3] = (u8)((f32)((u8*)&h->color)[3] * self->blend);
             CaptionDrawer::Draw(self->frame, &out, &g_gsPacketWriter);
-            *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
+            *(T217D_Word*)&((BoxStyle*)self->frame)->color = slot;
         }
     }
     const char* title = "???";
@@ -795,7 +821,7 @@ void DrawGridSelector(T217D_1330* self)
     }
     PopFontScale(f);
     s32 y = (s32)(((self->y + (f32)self->font->height * self->font->sy + -1.0f) * 0.45454547f + 1936.0f) * 16.0f);
-    T217D_Word slot = *(T217D_Word*)((u8*)&g_gridSelectorFrame + 0x18);
+    T217D_Word slot = *(T217D_Word*)&g_gridSelectorFrame.color;
     DrawLineSegment((s32)((self->x + 1728.0f) * 16.0f), y, 0, (s32)((self->x + self->w + 1728.0f) * 16.0f), y, 0,
                     &slot, 0);
 }
@@ -804,27 +830,6 @@ void DrawGridSelector(T217D_1330* self)
 // initialiser GCC writes for them (func_0016C360); their bytes are zero until then.
 // The rodata from 0x24A7A0 is func_0016AF80's strings ("" to the mission prompt) and
 // func_0016BEA0's "???", all literals.
-extern "C" void* FillMemory(void* p, s32 value, s32 size);
-
-struct BoxStyle {
-    void* font;
-    u8 f4;
-    f32 paddingX;
-    f32 paddingY;
-    f32 scaleX;
-    f32 scaleY;
-    u32 color;
-    BoxStyle(f32 w, f32 h)
-    {
-        FillMemory(this, 0, 0x1C);
-        f4 = 0x2D;
-        paddingX = w;
-        paddingY = h;
-        scaleX = 0.3f;
-        scaleY = 0.3f;
-        color = 0xFF7D4B00;
-    }
-};
 
 ChoiceTable g_partHolderLinks = {
     { { 2, 0x51A, 0x2D0 }, { 2, 0x51B, 0x2D4 }, { 2, 0x51C, 0x2D8 }, { 2, 0x51D, 0x2DC },

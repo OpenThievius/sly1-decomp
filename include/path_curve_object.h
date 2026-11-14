@@ -36,7 +36,7 @@ struct TargetCurve : PathCurveObject {
     s32 f50;                // 0x50: 3 at setup
     u8 pad54[0x58 - 0x54];
     f32 f58;                // 0x58: the largest float at setup (D_0024A794)
-    u8 pad5C[0x60 - 0x5C];
+    s32 f5C;                // 0x5C: nonzero keeps the player's memo of places from recording it (RecordPlayerTargetMemo)
 };
 
 struct __attribute__((aligned(16))) TargetVectorQuad { u8 b[16]; };

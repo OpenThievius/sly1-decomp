@@ -102,7 +102,7 @@ void SetZoneColliderMode(ZoneCollider* self, s32 flag);
 void UpdateZoneCollider(ZoneCollider* self, f32 dt);
 s32 TestListedEntriesAccepted(ZoneCollider* self, void* arg);
 void AppendZoneFirstQueue(void* a, void* b, s32 c);
-void AppendTriggerZoneFirstQueue(u8* self, s32 value);
+void AppendTriggerZoneFirstQueue(TriggerZone* self, s32 value);
 void AppendZoneColliderFirstQueue(void* self, int value);
 void AppendZoneSecondQueue(void* self, void* unused, int value);
 void AppendTriggerZoneSecondQueue(TriggerZone* self, int value);

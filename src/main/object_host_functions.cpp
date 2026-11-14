@@ -132,7 +132,7 @@ void AddRecordMemberRangeEntry(RecordMember* self, s32 a, s32 b, f32 x, f32 y, f
 void StartColorFade(ColorFade* a0);
 s32 IsPointInsideObjectFaces(ScalingVolume* self, void* point);
 void ForceAgentState(Agent* self, s32 mode, void* value);
-void SetAgentStateClipId(u8* self, s32 index, s32 value);
+void SetAgentStateClipId(Agent* self, s32 index, s32 value);
 void SetAgentStateClip(Agent* self, s32 a, s32 b);
 void* GetAgentStateClip(Agent* self, s32 index);
 void AddAgentExtraClip(Agent* self, s32 a, s32 b);
@@ -2263,7 +2263,7 @@ ScriptValue* SetScriptAgentStateClipId(ScriptValue* ret, Agent* obj, s32 unused,
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &out1, &out2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetAgentStateClipId((u8*)obj, out1, out2);
+    SetAgentStateClipId((Agent*)obj, out1, out2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

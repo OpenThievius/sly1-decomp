@@ -99,7 +99,8 @@ struct Contact03 {
     Vec02 relativeVelocity; // 0xB0: the ends' relative velocity (func_001860A8); func_00154088 limits it
     u8 padC0[0xC4 - 0xC0];
     f32 timer;              // 0xC4: slot 67 tells both ends' slot 65 while it is positive
-    u8 padC8[0xD0 - 0xC8];
+    u8 padC8[0xCC - 0xC8];
+    s32 axesIndex;          // 0xCC: the index of its axes in ActiveSetItem::axes (func_001536C8)
     Contact03* next;        // 0xD0
     u8 fD4[0x0C];           // 0xD4: the tail func_001BC4D8 copies with the rest
 };

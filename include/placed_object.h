@@ -171,6 +171,9 @@ struct PlacedObject : BaseObject {
             s32 drawPartCount;      // 0x238: the parts func_001533A8 draws
             void* drawParts;        // 0x23C: drawPartCount parts of 0x70 bytes
             void* partStates;       // 0x240: drawPartCount entries of 0x28 bytes (func_001250C8 clears their +8 to -1)
+            u8 pad244[0x264 - 0x244];
+            u32 recordFlags;        // 0x264: bit 2 set when a value was stored (SetObjectTreeRecordValue)
+            u32 recordValue;        // 0x268: a value stored in the record and in its children's
         };
     };
     s32 valueCount;         // 0x26C: the number of f1F8 entries

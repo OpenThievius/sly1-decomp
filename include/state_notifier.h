@@ -37,9 +37,9 @@ struct StateNotifier : PlacedObject {
     s32 initialMode;               // 0x2D8
     s32 f2DC;               // 0x2DC
     f32 f2E0;               // 0x2E0: i times D_00261B40 for the i-th scattered (func_00148AC0)
-    u8 pad2E4[0x2E8 - 0x2E4];
+    void* stateGraph;       // 0x2E4: the graph of the walker kept at host (SetStateNotifierState)
     void* host;             // 0x2E8: the object whose message ends it (func_00147EF8)
-    void* f2EC;             // 0x2EC
+    BaseObject* f2EC;       // 0x2EC: told to join or leave its parent's list by the state (SetStateNotifierState)
     Vec02 motionPos;        // 0x2F0: pushed clear of what it overlaps (func_00146DB0)
     Vec02 motionVel;        // 0x300: its motion, split along the push (func_00146DB0)
     Vec02 motionAccel;      // 0x310: the push (func_001478F0 sets it, func_00146518 adds it to the motion)

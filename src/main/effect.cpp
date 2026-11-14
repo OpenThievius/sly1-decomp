@@ -714,7 +714,7 @@ void DrawEffects(EffectOwner* self, void* arg, void* arg2)
     fr.link = (u8*)e;
     fr.list = (void*)e;
     s32 old = (s32)g_activeListFrames;
-    s32 link = *(s32*)(e + 8);
+    s32 link = ((List01*)e)->offset;
     g_activeListFrames = &fr;
     fr.prev = (ListFrame*)old;
     s32 h = *(s32*)e;
@@ -1082,8 +1082,10 @@ void DrawEffect(Effect* self, void* a1)
     void* a2;
     void* a3;
     if (self->oscillator != 0) {
+        // stack scratch, not an object
         ComputeOscillatorDisplacement((Oscillator*)self->oscillator, 50.0f, (Vec02*)&self->pos, (Vec02*)self->rotation, (Vec02*)scratch, (Vec02*)(scratch + 0x10), 0);
         a2 = scratch;
+        // stack scratch, not an object
         a3 = scratch + 0x10;
     } else {
         a2 = &self->pos;
@@ -1385,7 +1387,7 @@ void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
         break;
     case 2: {
         BaseObject* anchor = (BaseObject*)self->p128;
-        ((void (*)(BaseObject*, void*, void*))((s32*)anchor->desc)[0x78 / 4])(anchor, (void*)OnTrailAnchorEnded, self);
+        anchor->desc->m1A(anchor, (s32)OnTrailAnchorEnded, (s32)self);
         if (kind == 0) {
             if (extra != 0) {
                 Vu0::Q(self->prevPos) = Vu0::Q(*(Quad219C*)extra);
@@ -1414,7 +1416,7 @@ void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
         Vu0::Q(self->pos) = Vu0::Q(other->v140);
         Vu0::Q(self->qA0) = Vu0::Q(other->v150);
         self->p128 = (Effect*)other;
-        ((void (*)(BaseObject*, void*, void*))((s32*)other->desc)[0x74 / 4])(other, (void*)OnTrailAnchorEnded, self);
+        other->desc->m19(other, (void*)OnTrailAnchorEnded, (s32)self);
         break;
     }
     case 0:
@@ -1533,10 +1535,10 @@ void DrawTrailSegment(Effect* self, Camera* cam)
         switch (self->i120) {
         case 1:
         case 3:
-            to = (u8*)self->p124 + 0x80;
+            to = &self->p124->pos;
             break;
         case 2:
-            to = (u8*)self->p128 + 0x140;
+            to = &((PlacedObject*)self->p128)->v140;
             break;
         case 0:
             to = &self->prevPos;
@@ -1571,6 +1573,7 @@ zero:
     SetTrailSegmentAnchor(self, 0, 0);
     return;
 three:
+    // the hook's message record, not an object
     SetTrailSegmentAnchor(self, 0, (u8*)extra + 16);
 }
 
@@ -1710,7 +1713,7 @@ void DrawCameraSpaceEffect(Effect* self, Camera* cam)
     MatrixToAxisAngle(&view, &angle, &axis);
     t = (g_gameTime - self->start) / self->life;
     BuildAxisAngleMatrix(&axis, &a, angle * t);
-    BuildAxisAngleMatrix((Vec02*)((u8*)self->params + 0x40), &b, (t + t) * 3.14159274f);
+    BuildAxisAngleMatrix((Vec02*)&self->params->rows[16], &b, (t + t) * 3.14159274f);
     MulRotationRowsInto(&r1, a, b);
     MulRotationRowsIntoIndexed(&r2, r1, *c);
     out = r2;
@@ -1778,7 +1781,7 @@ void UpdateEmitterEffect(Effect* self, f32 dt)
 {
     Mat02 axisRot;
     Mat02 m;
-    BuildAxisAngleMatrix(&g_unitZVector, &axisRot, *(f32*)((u8*)self + 0xA4) * dt);
+    BuildAxisAngleMatrix(&g_unitZVector, &axisRot, *(f32*)&self->qA0.b * dt);
     MulRotationRowsIndexed(&m, axisRot, *(Mat02*)self->rotation);
     s32 fire = 0;
     Vec02* cam = (Vec02*)&g_camera->g80;
@@ -2286,7 +2289,9 @@ void DrawHitMarkEffect(Effect* self, void* a1)
     u8 scratch[0x40];
 
     TransformPointBetweenFrames((PlacedObject*)self->p120, 0, (Vec02*)&self->pos, (Vec02*)scratch);
+    // stack scratch, not an object
     TransformRotationBetweenFrames((PlacedObject*)self->p120, 0, (Mat02*)self->rotation, (Mat02*)(scratch + 0x10));
+    // stack scratch, not an object
     DrawEffectAt(self, (Camera*)a1, (Vec02*)scratch, (f32 (*)[4])(scratch + 0x10));
 }
 
@@ -2502,7 +2507,7 @@ void DrawStreakedEffect(Effect* self, void* a1)
         DrawBeamBetweenPoints((PlacedObject*)tmpl, (PlacedObject*)a1, &tail, (Vec02*)&self->pos, 10.0f, 1.0f);
     } else {
         Mat02 rot;
-        BuildBasisFromXAndYHint((Vec02*)&self->qA0, (Vec02*)((u8*)a1 + 0x80), &rot);
+        BuildBasisFromXAndYHint((Vec02*)&self->qA0, (Vec02*)((Camera*)a1)->g80, &rot);
         DrawEffectAt(self, (Camera*)a1, (Vec02*)&self->pos, (f32 (*)[4])&rot);
     }
 }
@@ -2783,22 +2788,6 @@ void SendEffectMessagesAtRate(Effect* self, f32 scale)
 
 LINKER_REMNANT(func_001A3AC8);
 
-#define F(o, off) (*(f32*)((u8*)(o) + (off)))
-#define W(o, off) (*(s32*)((u8*)(o) + (off)))
-#define P(o, off) (*(void**)((u8*)(o) + (off)))
-#define O(o, off) (*(PairController**)((u8*)(o) + (off)))
-
-#undef F
-#undef W
-#undef P
-#undef O
-
 extern const Vec02 g_unitZVector;
 
-#define F(o) (*(f32*)((u8*)self + (o)))
-#define I(o) (*(s32*)((u8*)self + (o)))
-#define P(o) ((const QuadraticCoeffs*)((u8*)self + (o)))
 
-#undef F
-#undef I
-#undef P

@@ -3,6 +3,7 @@
 #include "asm_func.h"
 #include "list_iter.h"
 #include "flagged_object.h"
+#include "transform_object.h"
 #include "object_gatherer.h"
 #include "world.h"
 #include "object_event.h"
@@ -154,12 +155,12 @@ struct BufferedStream;
 
 // Reads an object's rotation (at +0x50), position (+0x40), four mesh tables (+0x80 to +0x8C)
 // and its property records from the stream.
-void ReadObjectTransformAndTables(void* a0, void* a1)
+void ReadObjectTransformAndTables(MeshObject* self, BufferedStream* stream)
 {
-    ReadBufferedRotation3((BufferedStream*)a1, (u8*)a0 + 0x50);
-    ReadBufferedVector3((BufferedStream*)a1, (u8*)a0 + 0x40);
-    ReadMeshTables(a1, (u8*)a0 + 0x80, (u8*)a0 + 0x84, (u8*)a0 + 0x88, (u8*)a0 + 0x8C);
-    ReadPropertyRecords(a0, a1);
+    ReadBufferedRotation3(stream, &self->rot);
+    ReadBufferedVector3(stream, &self->pos);
+    ReadMeshTables(stream, &self->pointCount, &self->points, &self->linkCount, &self->links);
+    ReadPropertyRecords(self, stream);
 }
 
 struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
@@ -216,6 +217,7 @@ void CollectChildLists(FlaggedObject* self, BufferedStream* stream)
     ResolveObjectLinks(self, 1, (ObjectLink*)g_flaggedObjectLinks);
 
     ScopedListFrame frame(&self->children);
+    // a field access here changes retail's code
     void* head = *(void**)((u8*)self + 0x34);
     frame.cursor = (void*)((s32)head + frame.next_off);
     void* node = head;
@@ -309,7 +311,7 @@ void StartFlaggedObject(FlaggedObject* self)
             if (IsObjectOfKind((BaseObject*)obj, 0x74) != 0) {
                 self->childId = GetAliasId((BaseObject*)obj);
                 if (self->childId == -1)
-                    self->childId = *(s32*)(obj + 8);
+                    self->childId = ((BaseObject*)obj)->id;
                 self->child = obj;
             }
         }

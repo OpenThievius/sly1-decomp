@@ -241,6 +241,7 @@ struct DrawBoxWithFont { static void Do(MenuBoxStyle* o, Layout_137228* out, voi
 {
     Font* hk = o->font;
     if (hk != 0) {
+        // the class's this-adjustment from its vtable, not a field
         hk->vt->drawBox((Font*)((u8*)hk + hk->vt->adj9), o, out, d);
     }
 } };
@@ -532,6 +533,7 @@ s32 FindObject42CStateWalker(void)
     if (r == 0) {
         v = 0;
     } else {
+        // the object's class is not known
         v = *(s32*)((u8*)r + 0x48);
     }
     return v;
