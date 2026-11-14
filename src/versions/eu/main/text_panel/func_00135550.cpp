@@ -15,7 +15,7 @@ void SetTextPanelMode(Obj_135550_eu* self, s32 value)
             ListFrame it;
             ListWalkBegin::Of(&it, &g->list);
             AnimationPlayer* obj;
-            while ((obj = ListWalkNext::Of(&it)) != 0) {
+            while ((obj = ListWalkNextPlayer::Of(&it)) != 0) {
                 SetAnimationPlayerSpeed(obj, 0.0f);
             }
             g_activeListFrames = (ListFrame*)it.prev;
@@ -27,7 +27,7 @@ void SetTextPanelMode(Obj_135550_eu* self, s32 value)
             ListFrame it;
             ListWalkBegin::Of(&it, &g->list);
             AnimationPlayer* obj;
-            while ((obj = ListWalkNext::Of(&it)) != 0) {
+            while ((obj = ListWalkNextPlayer::Of(&it)) != 0) {
                 SetAnimationPlayerSpeed(obj, 1.0f);
             }
             g_activeListFrames = (ListFrame*)it.prev;

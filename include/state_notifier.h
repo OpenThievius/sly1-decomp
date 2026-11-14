@@ -24,10 +24,16 @@ struct StateListener {
 
 struct StateNotifier;
 
-// An object a message names whose flags (+0xC) func_001473E0 tests.
+// An object a message names whose flags (+0xC) func_001473E0 tests; the player's modes read its
+// class table, its parent and its root.
 struct ContactObject {
-    u8 pad0[0xC];
-    s32 fC;
+    s32* vtbl;              // 0x00
+    u8 pad4[0xC - 4];
+    s32 fC;                 // 0x0C
+    u8 pad10[0x18 - 0x10];
+    ContactObject* parent;  // 0x18
+    u8 pad1C[0x50 - 0x1C];
+    s32 root;               // 0x50
 };
 
 // 0x55: a state, a few movement numbers set by each subclass's constructor.
@@ -37,9 +43,9 @@ struct StateNotifier : PlacedObject {
     s32 initialMode;               // 0x2D8
     s32 f2DC;               // 0x2DC
     f32 f2E0;               // 0x2E0: i times D_00261B40 for the i-th scattered (func_00148AC0)
-    u8 pad2E4[0x2E8 - 0x2E4];
+    void* stateGraph;       // 0x2E4: the graph of the walker kept at host (SetStateNotifierState)
     void* host;             // 0x2E8: the object whose message ends it (func_00147EF8)
-    void* f2EC;             // 0x2EC
+    BaseObject* f2EC;       // 0x2EC: told to join or leave its parent's list by the state (SetStateNotifierState)
     Vec02 motionPos;        // 0x2F0: pushed clear of what it overlaps (func_00146DB0)
     Vec02 motionVel;        // 0x300: its motion, split along the push (func_00146DB0)
     Vec02 motionAccel;      // 0x310: the push (func_001478F0 sets it, func_00146518 adds it to the motion)

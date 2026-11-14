@@ -32,6 +32,7 @@
 #include "buffered_stream.h"
 #include "key_id.h"
 #include "object_finder.h"
+#include "mesh_face03.h"
 #include "functions/base_object.h"
 #include "functions/collider.h"
 #include "functions/disc_access.h"
@@ -206,9 +207,7 @@ struct SectorStreamState {
     s32 writeIdx;   // 0x58
 };
 
-struct MinOf {
-    static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
-};
+#include "min_of.h"
 
 extern "C" s32 GetDiscReadPosition();
 extern "C" s32 SyncDiscNCommand(s32 mode);
@@ -653,23 +652,7 @@ void ReadBufferedVector3(BufferedStream* src, void* dst);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(s32 size);
 
-struct MeshEdge03 {
-    u16 a;
-    u16 b;
-    s16 face;
-    s16 other;
-    MeshEdge03* next;
-    MeshEdge03* link;
-};
 
-struct MeshFace03 {
-    Vec02 normal;
-    u32 offset;
-    MeshEdge03* first;
-    MeshEdge03* edges;
-    u16 pad1C;
-    u16 vert;
-};
 
 s32 ReadBufferedU8(BufferedStream* self);
 f32 ReadBufferedFloat(BufferedStream* r);

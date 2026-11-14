@@ -9,7 +9,7 @@
 struct C80;
 struct Collider;
 struct Contact03;
-struct MeshEdge;
+struct MeshEdgePair;
 struct PadRecord;
 struct PlacedObject;
 struct Player;
@@ -18,7 +18,7 @@ struct Vec02;
 
 void StepPlayerState2(Player* self);
 void ControlPlayerState2(Player* p, PadRecord* pad);
-s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdge* e, Vec02* out);
+s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdgePair* e, Vec02* out);
 s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src);
 s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s32 kind, void* arg, Vec02* out);
 Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos);

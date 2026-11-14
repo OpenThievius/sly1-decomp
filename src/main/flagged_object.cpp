@@ -3,6 +3,7 @@
 #include "asm_func.h"
 #include "list_iter.h"
 #include "flagged_object.h"
+#include "transform_object.h"
 #include "object_gatherer.h"
 #include "world.h"
 #include "object_event.h"
@@ -10,6 +11,7 @@
 #include "flag_table.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "list_walk.h"
 #include "functions/base_object.h"
 #include "functions/buffered_stream.h"
 #include "functions/collider.h"
@@ -154,12 +156,12 @@ struct BufferedStream;
 
 // Reads an object's rotation (at +0x50), position (+0x40), four mesh tables (+0x80 to +0x8C)
 // and its property records from the stream.
-void ReadObjectTransformAndTables(void* a0, void* a1)
+void ReadObjectTransformAndTables(MeshObject* self, BufferedStream* stream)
 {
-    ReadBufferedRotation3((BufferedStream*)a1, (u8*)a0 + 0x50);
-    ReadBufferedVector3((BufferedStream*)a1, (u8*)a0 + 0x40);
-    ReadMeshTables(a1, (u8*)a0 + 0x80, (u8*)a0 + 0x84, (u8*)a0 + 0x88, (u8*)a0 + 0x8C);
-    ReadPropertyRecords(a0, a1);
+    ReadBufferedRotation3(stream, &self->rot);
+    ReadBufferedVector3(stream, &self->pos);
+    ReadMeshTables(stream, &self->pointCount, &self->points, &self->linkCount, &self->links);
+    ReadPropertyRecords(self, stream);
 }
 
 struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
@@ -190,21 +192,6 @@ void InitFlaggedObject(FlaggedObject* self)
     SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
-struct ScopedListFrame {
-    void* list;
-    void* cursor;
-    s32 next_off;
-    ScopedListFrame* prev;
-    ScopedListFrame(List01* l)
-    {
-        list = l;
-        cursor = l;
-        next_off = l->offset;
-        prev = (ScopedListFrame*)g_activeListFrames;
-        g_activeListFrames = (ListFrame*)this;
-    }
-    ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
-};
 
 
 // Loads the flagged object (as a collider), resolves its links, and sorts its children into two
@@ -216,6 +203,7 @@ void CollectChildLists(FlaggedObject* self, BufferedStream* stream)
     ResolveObjectLinks(self, 1, (ObjectLink*)g_flaggedObjectLinks);
 
     ScopedListFrame frame(&self->children);
+    // a field access here changes retail's code
     void* head = *(void**)((u8*)self + 0x34);
     frame.cursor = (void*)((s32)head + frame.next_off);
     void* node = head;
@@ -270,24 +258,6 @@ void ResolveListIds(FlaggedObject* self)
     }
 }
 
-struct ListWalkNext {
-    static u8* Of(ListFrame* it)
-    {
-        u8* obj = *(u8**)it->link;
-        it->link = obj + it->offset;
-        return obj;
-    }
-};
-struct ListWalkBegin {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
 
 struct StateGraph;
 
@@ -309,7 +279,7 @@ void StartFlaggedObject(FlaggedObject* self)
             if (IsObjectOfKind((BaseObject*)obj, 0x74) != 0) {
                 self->childId = GetAliasId((BaseObject*)obj);
                 if (self->childId == -1)
-                    self->childId = *(s32*)(obj + 8);
+                    self->childId = ((BaseObject*)obj)->id;
                 self->child = obj;
             }
         }

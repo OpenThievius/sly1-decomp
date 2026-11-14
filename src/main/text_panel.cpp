@@ -2,6 +2,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "object_finder.h"
+#include "list_walk.h"
 #include "functions/base_object.h"
 #include "functions/buffered_stream.h"
 #include "functions/camera.h"
@@ -25,6 +26,7 @@
 #include "game_progress.h"
 #include "world.h"
 #include "vu0.h"
+#include "effect.h"
 #include "camera.h"
 #include "point_object.h"
 #include "value_range.h"
@@ -184,7 +186,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 struct BufferedStream;
 extern void FreeObjectMemory(void*);
 
-struct PercentClamp {
+struct PercentClampStore {
     static void Set(T217D_440* self, f32 x, f32 lo, f32 hi) {
         if (x < lo) x = lo;
         else if (hi < x) x = hi;
@@ -253,7 +255,7 @@ s32 ComputeHullSeenFromCamera(PanelEntryPosition* v, s32 mode);
 
 struct PlayerListHolder { u8 pad0[0x6C]; List01 list; };
 
-struct ListWalkNext {
+struct ListWalkNextPlayer {
     static AnimationPlayer* Of(ListFrame* it)
     {
         AnimationPlayer* obj = *(AnimationPlayer**)it->link;
@@ -262,16 +264,6 @@ struct ListWalkNext {
     }
 };
 
-struct ListWalkBegin {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
 
 
 
@@ -1260,7 +1252,7 @@ void SetTextPanelMode(T217D_440* self, s32 value)
             ListFrame it;
             ListWalkBegin::Of(&it, &g->list);
             AnimationPlayer* obj;
-            while ((obj = ListWalkNext::Of(&it)) != 0) {
+            while ((obj = ListWalkNextPlayer::Of(&it)) != 0) {
                 SetAnimationPlayerSpeed(obj, 0.0f);
             }
             g_activeListFrames = (ListFrame*)it.prev;
@@ -1272,7 +1264,7 @@ void SetTextPanelMode(T217D_440* self, s32 value)
             ListFrame it;
             ListWalkBegin::Of(&it, &g->list);
             AnimationPlayer* obj;
-            while ((obj = ListWalkNext::Of(&it)) != 0) {
+            while ((obj = ListWalkNextPlayer::Of(&it)) != 0) {
                 SetAnimationPlayerSpeed(obj, 1.0f);
             }
             g_activeListFrames = (ListFrame*)it.prev;
@@ -1360,7 +1352,7 @@ typedef s32 (*SortCompareFn)(void* a, void* b);
 void HeapSortRecords(void* records, s32 n, s32 size, SortCompareFn cmp);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void CopyMemory(void* dst, void* src, u32 size);
-void* CreateEffect(s32 kind, EffectOwner* sys);
+Effect* CreateEffect(s32 kind, EffectOwner* sys);
 
 // Keeps the panel's markers for the objects of one class: gathers up to 0x80 of them, sorts them by
 // distance from the camera and, for each wanted one (state 1, among the nearest limit and in range,
@@ -1432,14 +1424,14 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
                 self->count--;
             }
         } else if (want && mayStart && visible) {
-            void* fx = CreateEffect(0x12, 0);
+            Effect* fx = CreateEffect(0x12, 0);
             if (fx != 0) {
                 mayStart = 0;
                 (*(void (**)(void*, PanelEntryPosition*, s32, f32))*(void**)fx)(fx, &e->v, 0, 1.0f);
-                *(BaseObject**)((u8*)fx + 0x20) = a5;
-                *(void**)((u8*)fx + 0x130) = a3;
-                *(void**)((u8*)fx + 0x134) = e->obj;
-                SetEffectPhase((Effect*)fx, 0);
+                fx->p20 = a5;
+                fx->params = (const T219C_Params*)a3;
+                fx->p134 = e->obj;
+                SetEffectPhase(fx, 0);
                 *(f32*)&self->countA = g_gameClock[1];
                 self->markers[self->count].obj = e->obj;
                 self->markers[self->count].effect = fx;
@@ -1679,7 +1671,7 @@ void SetTextPanelSubject(T217D_440* self, BaseObject* value) { self->subject = v
 // Sets the panel's value from a percentage (divided by 100 and limited to 0..1).
 void SetTextPanelValuePercent(T217D_440* self, f32 value)
 {
-    PercentClamp::Set(self, value * 0.01f, 0.0f, 1.0f);
+    PercentClampStore::Set(self, value * 0.01f, 0.0f, 1.0f);
 }
 
 // Slot 11 of the text panel: 0 in states 1, 2 and 5, otherwise the element's usual slide-in time.

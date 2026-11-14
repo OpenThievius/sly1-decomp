@@ -23,6 +23,7 @@
 #include "vu0.h"
 #include "packet_writer.h"
 #include "asm_func.h"
+#include "clamp_helper.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
 #include "functions/camera.h"
@@ -158,16 +159,6 @@ struct Quad_001B4580;
 
 extern "C" f32 Tangent(f32 x);
 
-struct ClampHelper {
-    static f32 Of(f32 v, f32 lo, f32 hi)
-    {
-        if (v < lo)
-            return lo;
-        if (hi < v)
-            return hi;
-        return v;
-    }
-};
 
 extern "C" f32 Cosine(f32 x);
 
@@ -325,6 +316,7 @@ s32 IsObjectAttached(BaseObject* self)
         if (next != 0) {
             sub = &((PlacedObject*)next)->children;
         } else {
+            // a field access here changes retail's code (the list at World::list48)
             sub = node->world;
             sub = (u8*)sub + 0x48;
         }
@@ -1174,5 +1166,5 @@ void SetConeVolumeColorRgb(ConeVolume* self, void* a1)
 // Writes the cone volume's colour, stored as HSV, into out as RGB (0..255).
 void GetConeVolumeColorRgb(u8* self, f32* out)
 {
-    ConvertHsv255ToRgb255((Quad_001B4580*)(self + 736), out);
+    ConvertHsv255ToRgb255((Quad_001B4580*)&((ConeVolume*)self)->hsv, out);
 }

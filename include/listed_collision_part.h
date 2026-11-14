@@ -17,7 +17,8 @@ struct ListedCollisionPart : Collider {
     s32 skipSteering;       // 0x550: 0 means func_0016A580 (slot 28) lets the parts follow it
     u8 pad554[0x558 - 0x554];
     Link02 listLink;         // 0x558: the link in the list (func_00152438 gets the offset)
-    u8 pad560[0x568 - 0x560];
+    u8 pad560[0x564 - 0x560];
+    s32 heldLimit;          // 0x564: how many pooled children it holds at most (a thrown one past it makes the earliest let go)
     f32 f568;               // 0x568: 300.0 at set-up
     u8 pad56C[0x570 - 0x56C];
 };

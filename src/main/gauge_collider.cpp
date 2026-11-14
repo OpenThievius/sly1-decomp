@@ -193,7 +193,7 @@ void RemoveFromList(List01* list, void* item);
 
 
 
-void ReleaseObjectNode(u8* self, GaugeColliderAgent* ctx);
+void ReleaseObjectNode(GaugeCollider* self, GaugeColliderAgent* ctx);
 
 
 
@@ -295,7 +295,7 @@ void EndGaugeColliderTimer(s32 unused, s32 flag);
 void HandleGaugeColliderActivation(GaugeCollider* a, void* b);
 void UpdateGaugeColliderVisibility(GaugeCollider* self);
 void PlaceObjectAtRandomNode(GaugeCollider* self);
-void ReleaseObjectNode(u8* self, GaugeColliderAgent* ctx);
+void ReleaseObjectNode(GaugeCollider* self, GaugeColliderAgent* ctx);
 void ComputeGaugeColliderContactValue(GaugeCollider* ctx, Contact03* out);
 void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec);
 void StartGaugeColliderAgent(GaugeColliderAgent* self);
@@ -625,7 +625,8 @@ s32 AcceptColliderOfOtherRoot(void* root, Collider* self);
 extern const Vec02 g_unitZVector;
 extern const Vec02 g_unitXVector;
 
-struct GaugeSpanOwner { u8 pad00[0x278]; u8* oscillatorBlock; };
+// The record PlacedObject::f278 points at (a swinging part's oscillator): its oscillator at 0xC.
+struct OscillatorBlock { u8 pad00[0x0C]; Oscillator* oscillator; };
 
 // Per-frame update of the gauge collider: after the base update it sets top speed and push strength
 // by whether it is on the floor (or a notice value is set), and averages the surface normals under
@@ -670,11 +671,11 @@ void UpdateGaugeCollider(GaugeCollider* self, f32 dt)
         Collider* hit = FindNearestSpanObject(1, &hi, &lo, n, list, &span);
         if (hit != 0) {
             *(Quad16*)&dir = span.q[2];
-            if (IsObjectOfKind(hit, 0x1F) != 0 && ((GaugeSpanOwner*)hit)->oscillatorBlock != 0) {
+            if (IsObjectOfKind(hit, 0x1F) != 0 && ((PlacedObject*)hit)->f278 != 0) {
                 Vec02 pair[2];
                 Vec02 in = dir;
                 BuildPerpendicularPair(&in, pair, &g_unitXVector, &g_unitZVector);
-                ComputeOscillatorDisplacement((Oscillator*)(*(void**)(((GaugeSpanOwner*)hit)->oscillatorBlock + 0xC)), 50.0f, (Vec02*)&span, pair, 0, pair, 0);
+                ComputeOscillatorDisplacement(((OscillatorBlock*)((PlacedObject*)hit)->f278)->oscillator, 50.0f, (Vec02*)&span, pair, 0, pair, 0);
                 Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(pair[0]), Vu0::Q(pair[1])), Vu0::Q(g_unitZVector)));
             }
             if (!(dir.z < 0.7f)) {
@@ -946,12 +947,12 @@ void PlaceObjectAtRandomNode(GaugeCollider* self)
 
 // Gives the agent's node back: sets its sound state object state to 0, moves it from the used
 // list (0x6A8) to the other list (0x69C) and clears the agent's node.
-void ReleaseObjectNode(u8* self, GaugeColliderAgent* ctx)
+void ReleaseObjectNode(GaugeCollider* self, GaugeColliderAgent* ctx)
 {
     void* p = ctx->node;
     SetSoundStateObjectState((SoundStateObject*)p, 0);
-    RemoveFromList((List01*)(self + 0x6A8), p);
-    AppendToList((List01*)(self + 0x69C), p);
+    RemoveFromList(&self->usedNodes, p);
+    AppendToList(&self->freeNodes, p);
     ctx->node = 0;
 }
 
@@ -986,7 +987,7 @@ void ApplyGaugeColliderAttachedSetContact(GaugeCollider* self, AttachedSet* set,
         Vec02 n;
         n = normal;
         BuildPerpendicularPair(&n, pair, &g_unitXVector, &g_unitZVector);
-        ComputeOscillatorDisplacement((Oscillator*)(*(void**)(set->f278 + 0xC)), 50.0f, &point, pair, 0, pair, 0);
+        ComputeOscillatorDisplacement(((OscillatorBlock*)set->f278)->oscillator, 50.0f, &point, pair, 0, pair, 0);
         Vu0::Set(normal, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(pair[0]), Vu0::Q(pair[1])), Vu0::Q(g_unitZVector)));
     }
     f32 push = self->pushFactor * set->pushFactor;
@@ -1062,7 +1063,7 @@ void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec)
         }
         GetStateWalkerCurrentKey((StateWalker*)rec, &code);
         if (code == 0x3F3) {
-            *(void**)D_0026E744 = (u8*)self + 0x67C;
+            *(void**)D_0026E744 = &self->waitingCount;
             g_gaugeAmountCaption.target = &self->deliveredCount;
             g_gaugeAmountCaption.limit = &self->deliveryLimit;
             SetWorldActiveFollower(self->world, self);
@@ -1203,7 +1204,7 @@ void LeaveGaugeColliderAgentState(GaugeColliderAgent* self, s32 arg)
 {
     if (self->state == 0x10) {
         void* h = GetActiveSwitchedCollider();
-        ReleaseObjectNode((u8*)h, self);
+        ReleaseObjectNode((GaugeCollider*)h, self);
         Vec02 ctx = self->v150;
         ctx.z = 0;
         self->desc02()->m20(self, &ctx);
@@ -1282,7 +1283,7 @@ void UpdateGaugeColliderAgent(GaugeColliderAgent* s1, f32 f)
     if (IsObjectOfKind(s0, 0x18) != 0) {
         if (s0->dropZone != 0) {
             if (IsObjectAttached((BaseObject*)s0->dropZone) != 0) {
-                if (TestPointAgainstObjectShape((ObjectGatherer*)s0->dropZone, (u8*)s1 + 0x140) != 0) {
+                if (TestPointAgainstObjectShape((ObjectGatherer*)s0->dropZone, &s1->v140) != 0) {
                     NodeQueryFrame t;
                     t.f00 = s1;
                     t.kind = 2;

@@ -33,6 +33,7 @@
 #include "value_range.h"
 #include "common.h"
 #include "object_finder.h"
+#include "list_walk.h"
 #include "functions/buffered_stream.h"
 #include "functions/camera.h"
 #include "functions/collider.h"
@@ -146,9 +147,7 @@ f32 HashToUnitFloat(s32 i);
 
 
 
-struct MinOf {
-    static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
-};
+#include "min_of.h"
 
 extern s32 (*g_warpCursorTables[6])[4];
 
@@ -219,6 +218,7 @@ struct TrackedTargetChoice {
     s32 cnt;            // 0x0C
     u8 pad10[0x84];
     s32 s94;            // 0x94
+    BaseObject* f98;    // 0x98: the best candidate ChooseBestTargetCandidate finds
 };
 struct TargetLaunchFrame {
     s32 a[4];           // 0x00
@@ -251,16 +251,6 @@ struct NextListed {
     }
 };
 
-struct BeginListWalk {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-};
 
 void AddTrackedNode(Rec36* self, BaseObject* n);
 
@@ -757,6 +747,7 @@ void AddOscillatorXEntry(Oscillator* o)
     o->currentEntry = o->currentEntry + 1;
     off = n * 0xD0;
     off += 0x50;
+    // address arithmetic over a variable index
     node = (OscillatorAxisEntry*)((u8*)o + off);
     node->kind = 0;
     node->q10 = *(Quad16*)&g_unitXVector;
@@ -779,6 +770,7 @@ void AddOscillatorYZEntry(Oscillator* self)
 {
     s32 n6 = self->currentEntry;
     s32 idx = self->entryCount;
+    // address arithmetic over a variable index
     OscillatorPlaneEntry* e = (OscillatorPlaneEntry*)(self->entries + 0xD0 * idx);
     n6 = n6 + 1;
     idx = idx + 1;
@@ -801,6 +793,7 @@ void* GetOscillatorCurrentEntry(Oscillator* obj, s32 value, s32 flag)
     if (value == 1) {
         obj->framesDirty = value;
     }
+    // address arithmetic over a variable index
     return (u8*)obj + (obj->currentEntry * 0xD0 + 0x50);
 }
 
@@ -848,18 +841,25 @@ void AppendVector4ToBuffer(VectorList4* buf, f32 x, f32 y, f32 z, f32 w)
     }
 }
 
+// The entry of a kind that keeps two lists of vectors (0xD0 bytes, from +0x50 of the oscillator).
+struct OscillatorListEntry {
+    u8 pad00[0x30];
+    VectorList4 listA;      // 0x30
+    VectorList4 listB;      // 0x80
+};
+
 // Appends the vector (a, b, c, d) to the first vector list (at +0x30) of the current entry.
 void AddOscillatorEntryVectorA(void* self, f32 a, f32 b, f32 c, f32 d)
 {
-    u8* p = (u8*)GetOscillatorEntryForVectors(self, 1);
-    AppendVector4ToBuffer((VectorList4*)(p + 0x30), a, b, c, d);
+    OscillatorListEntry* p = (OscillatorListEntry*)GetOscillatorEntryForVectors(self, 1);
+    AppendVector4ToBuffer(&p->listA, a, b, c, d);
 }
 
 // Appends the vector (a, b, c, d) to the second vector list (at +0x80) of the current entry.
 void AddOscillatorEntryVectorB(void* self, f32 a, f32 b, f32 c, f32 d)
 {
-    u8* p = (u8*)GetOscillatorEntryForVectors(self, 1);
-    AppendVector4ToBuffer((VectorList4*)(p + 0x80), a, b, c, d);
+    OscillatorListEntry* p = (OscillatorListEntry*)GetOscillatorEntryForVectors(self, 1);
+    AppendVector4ToBuffer(&p->listB, a, b, c, d);
 }
 
 // Initialiser of the transform object: the identity rotation.
@@ -1451,9 +1451,11 @@ void StartLookupObject(LookupObject* self)
 }
 
 // Pushes camera controller 7 for the object if it has not pushed one yet (flag at +0x310).
+// the object's class is not known
 void PushObjectCameraController(void* self) { if (!*(s32*)((u8*)self + 0x310)) { PushCameraController(g_camera, 7, &g_camera->ctl510, 0, self); *(s32*)((u8*)self + 0x310) = 1; } }
 
 // Removes the camera controller that PushObjectCameraController pushed, if it did.
+// the object's class is not known
 void RemoveObjectCameraController(void* self) { if (*(s32*)((u8*)self + 0x310)) { RemoveCameraControllers(g_camera, 0xB, 7, &g_camera->ctl510, 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
 
 void InitTrackedNodes(Rec36* a, ContactTracker* b);
@@ -1562,7 +1564,7 @@ void UpdateC37(C37* self, f32 dt)
     if (self->partMode != 1 && self->partMode != 4) {
         return;
     }
-    if ((*(TargetHitFn*)((u8*)target->desc + 0x13C))(target, self->rec.f04) != 0) {
+    if (((SwitchedCollider*)target)->desc05()->m4B((SwitchedCollider*)target, self->rec.f04) != 0) {
         return;
     }
     s32 far = 1;
@@ -1579,7 +1581,7 @@ void UpdateC37(C37* self, f32 dt)
     }
     result = 0;
     if (self->rec.f04 == 5) {
-        if (0.0f < ((f32*)target)[0x158 / 4]) {
+        if (0.0f < target->v150.z) {
             return;
         }
         if (FindPlaneTreeNodeForPoint((Vec02*)pos, self->tree.nodes) == 0) {
@@ -1591,6 +1593,7 @@ void UpdateC37(C37* self, f32 dt)
             }
         } else {
             for (s32 i = 0; i < target->meshCopy.edgeCount; i++) {
+                // address arithmetic over a variable index
                 s16* edge = (s16*)((u8*)target->meshCopy.edges + i * 16);
                 Quad16* verts = (Quad16*)target->meshCopy.verts;
                 if (CollectTreeNodeSpans(self->tree.nodes, (Vec02*)&verts[edge[0]], (Vec02*)&verts[edge[1]], 0, 1, (ColliderSpan*)hit.span) == 0) {
@@ -1637,7 +1640,7 @@ void UpdateC37(C37* self, f32 dt)
     }
     InitOwnerMessage((OwnerMessage*)&hit, self->rec.f04, self);
     OfferTrackedNodeLaunch(&self->rec, (void*)result, (TrackedNodeOffer*)&hit);
-    (*(TargetNotifyFn*)((u8*)target->desc + 0x140))(target, &hit);
+    ((SwitchedCollider*)target)->desc05()->m4C((SwitchedCollider*)target, &hit);
     FreePooledContactChain((World*)self->world, (Contact03*)result);
 }
 
@@ -1677,7 +1680,7 @@ void FillTrackedNodes(Rec36* self)
 void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
 {
     TargetLaunchFrame f;
-    ChooseBestTargetCandidate(self, ctx->s94, (BaseObject**)((u8*)ctx + 0x98), (TargetHit*)f.a, &f.distance);
+    ChooseBestTargetCandidate(self, ctx->s94, &ctx->f98, (TargetHit*)f.a, &f.distance);
     if (ctx->cnt != 0) {
         ComputeTargetArc(self, (TargetArcSource*)f.a, 0.0f, 0, (Vec02*)f.b, 0);
         self->desc02()->m1D(self, (Vec02*)f.b);

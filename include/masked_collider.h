@@ -98,7 +98,7 @@ struct PooledHolder : PlayerFlaggedCollider {
     BaseObject* heldObject;        // 0x6C8: slot 72 lets go of it
     PooledObject* reservedObject;    // 0x6CC: the object of class 0x46 it holds while its state is 5 (func_0014FEC0)
     f32 acquireDelay;       // 0x6D0: how long before func_0014FEC0 is tried again
-    u8 pad6D4[0x6D8 - 0x6D4];
+    f32 defaultThrowSpeed;  // 0x6D4: the speed a thrown object has when it has no target (ThrowHeldPooledObject)
     f32 acquireTime;        // 0x6D8: the clock when func_0014FEC0 took the object
     s32 throwTarget;        // 0x6DC
     PooledObject* targetObject;      // 0x6E0

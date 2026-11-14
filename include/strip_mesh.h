@@ -26,7 +26,7 @@ struct StripMesh {
     u8 pad10[0x18 - 0x10];
     s32 nstrips;            // 0x18: func_00163ED8, func_00164868
     FrameSource* strips;    // 0x1C
-    u8 pad20[0x24 - 0x20];
+    s32 frameCount;         // 0x20: the frames of a strip; its end is base + frameCount * stride quadwords
     void* hook;             // 0x24: an object whose first slot gives the node (CursorHook, placed_object_model.cpp)
 };
 

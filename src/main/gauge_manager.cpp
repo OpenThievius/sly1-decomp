@@ -9,6 +9,7 @@
 // are now item_column.cpp, symmetric_solve.cpp and agent_registration.cpp, cut by role only). Classes 0x11, 0x12
 // and 0x68 share it, since all three read the static D_0027C00C. Its name is ours, after its
 // largest family, the gauge manager (class 0x68), which holds most of its code.
+#include "point_graph_object.h"
 #include "common.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -85,7 +86,7 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev);
 
 
 // What SetSinCosPair fills: the two results of ComputeSinCos and a word it clears.
-struct SinCosPair { f32 a; f32 b; s32 value; };
+#include "sin_cos_pair.h"
 
 
 void CountDownGaugeContacts(GaugeManager* self, ContactAgent* agent);
@@ -217,7 +218,7 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                 if (self->pathGraph != 0) {
                     ColliderSpan hits[8];
                     ScopeMarker scope;
-                    s32 r = CollectSegmentSpansInPlaneTree((PlaneNode*)(*(void**)((u8*)self->pathGraph + 0x54)), &self->v140, &probe, 8, hits);
+                    s32 r = CollectSegmentSpansInPlaneTree((PlaneNode*)self->pathGraph->graph.faces, &self->v140, &probe, 8, hits);
                     switch (r) {
                     case 0:
                         frac = 1.0f;
@@ -493,7 +494,7 @@ void BlendParamSets(GaugeManager* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 3, g_gaugeManagerLinks);
     self->device = CreateStateWalker((StateGraph*)self->deviceGraph, 0, 0x3FB, 0);
-    GetStateWalkerCurrentKey((StateWalker*)self->device, (s32*)self->buf430);
+    GetStateWalkerCurrentKey((StateWalker*)self->device, &self->tag430);
     AddStateWalkerListener((StateWalker*)self->device, (PlacedObject**)self);
     for (; i < self->slotCount; i++) {
         GaugeSlot* s = &self->slots[i];
@@ -537,16 +538,16 @@ void ComputeGaugeOutputs(GaugeManager* o)
     f32 s;
 
     s = GaugeCurve::Limit(GaugeCurve::Eval(&p->q30, t), g_unitRange.lo, g_unitRange.hi);
-    *(f32*)(o->buf430 + 4) = GaugeCurve::Lerp(s, p->delayMinFrom, p->delayMinTo);
-    *(f32*)(o->buf430 + 8) = GaugeCurve::Lerp(s, p->delayMaxFrom, p->delayMaxTo);
+    o->delayMin = GaugeCurve::Lerp(s, p->delayMinFrom, p->delayMinTo);
+    o->delayMax = GaugeCurve::Lerp(s, p->delayMaxFrom, p->delayMaxTo);
 
     s = GaugeCurve::Limit(GaugeCurve::Eval(&p->q60, t), g_unitRange.lo, g_unitRange.hi);
-    *(f32*)(o->buf430 + 0xC) = GaugeCurve::Lerp(s, p->waitMinFrom, p->waitMinTo);
-    *(f32*)(o->buf430 + 0x10) = GaugeCurve::Lerp(s, p->waitMaxFrom, p->waitMaxTo);
+    o->waitMin = GaugeCurve::Lerp(s, p->waitMinFrom, p->waitMinTo);
+    o->waitMax = GaugeCurve::Lerp(s, p->waitMaxFrom, p->waitMaxTo);
 
-    *(f32*)(o->buf430 + 0x14) = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q80, t), g_unitRange.lo, g_unitRange.hi), p->f70, p->f74);
+    o->clipSpeed = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q80, t), g_unitRange.lo, g_unitRange.hi), p->f70, p->f74);
 
-    *(f32*)(o->buf430 + 0x18) = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->qA0, t), g_unitRange.lo, g_unitRange.hi), p->f90, p->f94);
+    o->speed448 = GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->qA0, t), g_unitRange.lo, g_unitRange.hi), p->f90, p->f94);
 
     o->maxSlotAgents = (s32)GaugeCurve::Lerp(GaugeCurve::Limit(GaugeCurve::Eval(&p->q10, t), g_unitRange.lo, g_unitRange.hi), p->agentCountFrom, p->agentCountTo);
 
@@ -631,7 +632,7 @@ void ShowGaugeManagerDisplays(GaugeManager* self)
 // The manager's parameter block for the set in use (0xB0 bytes each from +0x480).
 void* GetGaugeParams(GaugeManager* self)
 {
-    return (u8*)self + (self->setIndex * 0xB0 + 0x480);
+    return &self->params0 + self->setIndex;
 }
 
 // Adds an entry with the given id to the manager's list of slots.
@@ -687,7 +688,7 @@ void RunGaugeTimedEvent(GaugeManager* self)
                 }
                 GetObjectWorldPosition((BaseObject*)cand->anchor, (Vec02*)&pos);
                 if (pass == 0) {
-                    ProjectPointToCamera(*(Camera**)g_camera, (Vec02*)((u8*)cand->obj + 0x140), screen);
+                    ProjectPointToCamera(*(Camera**)g_camera, &((PlacedObject*)cand->obj)->v140, screen);
                     if (screen[0] < -1.0f || 1.0f < screen[0] || screen[1] < -1.0f || 1.0f < screen[1]) {
                         continue;
                     }
@@ -731,7 +732,7 @@ void RunGaugeTimedEvent(GaugeManager* self)
         self->nextContactTime = g_gameClock[1] + RandomFloatInRange(self->waitMin, wait[1]);
         agent->slot = slot;
         slot->taken = 1;
-        agent->clipSpeed = *(f32*)(self->buf430 + 0x14);
+        agent->clipSpeed = self->clipSpeed;
     } while (made < 2);
 }
 
@@ -769,7 +770,7 @@ void ActivateRandomGaugeSlot(GaugeManager* self)
     CreateAnimationPlayerWithoutPresetTargets((Animation*)s->animation, (BaseObject*)s->obj, 0, (AnimationPlayer**)&s->key, 0.0f, 1.0f);
     AddAnimationPlayerRecordCallback((AnimationPlayer*)s->key, (PlacedObject**)self);
     self->slotAgents = self->slotAgents + 1;
-    f32 r = RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
+    f32 r = RandomFloatInRange(self->delayMin, self->delayMax);
     self->nextSlotTime = (*(f32*)&g_gameTime) + r;
     c->slot = s;
     s->taken = 1;
@@ -825,7 +826,7 @@ void AddToGaugeAmount(GaugeManager* self, NumberedAgent* arg)
     }
     ComputeGaugeOutputs(self);
     if (self->slotAgents == self->maxSlotAgents) {
-        self->nextSlotTime = g_gameTime[0] + RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
+        self->nextSlotTime = g_gameTime[0] + RandomFloatInRange(self->delayMin, self->delayMax);
     }
     self->slotAgents = self->slotAgents - 1;
 }

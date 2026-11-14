@@ -84,8 +84,7 @@ extern PackedFloatPair g_cyclerMessageIntervalRange;
 
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
 // list at +0x1BDC, linked at +0x64): the receiver, the 0x50-byte message, the time it is due.
-struct DelayedMessageBody { Quad16 q[5]; };
-struct DelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 due; };
+#include "delayed_message_body.h"
 
 extern f32 g_gameClock[];
 
@@ -144,7 +143,7 @@ extern s32 g_objectCyclerLoadLinks[6];
 
 struct BufferedStream;
 
-struct CyclerDrawParams { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
+#include "cycler_draw_params.h"
 extern f32 g_gameTime;
 extern f32 g_cyclerShrinkCurve[4];
 extern f32 g_cyclerGrowCurve[4];
@@ -168,12 +167,6 @@ struct GroundFilterContext { u8 pad[0x50]; s32 root; };
 struct GroundCandidate { u8 pad0[0x50]; s32 root; u8 pad1[0x278]; u32 flagsHigh; u8 pad2[0x268]; u64 flags; };
 
 
-struct FrameNode {
-    u8 pad0[0x14];
-    u8* f14;
-    u8 pad18[0x1088 - 0x18];
-    void* f1088;
-};
 typedef unsigned long u64;
 extern const Vec02 D_00248D30;
 

@@ -304,11 +304,12 @@ struct LayoutBuilder : Layout_137228 {
     void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
     void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
 };
-struct StyleDrawer {
+struct StyleDrawerBuilder {
     static void Draw(Font** h, LayoutBuilder* out, void* tbl)
     {
         if (*h != 0) {
             const FontVt* vt = (*h)->vt;
+            // the class's this-adjustment from its vtable, not a field
             vt->drawBox((Font*)((u8*)*h + vt->adj9), h, out, tbl);
         }
     }
@@ -339,13 +340,17 @@ struct LayoutByValue : Layout_137228 {
 };
 
 struct FontCalls {
+    // the class's this-adjustment from its vtable, not a field
     static f32 Advance(Font* f, s32 ch) { return f->vt->width((Font*)((u8*)f + f->vt->adj3), ch); }
+    // the class's this-adjustment from its vtable, not a field
     static void Begin(Font* f, Vec4U* clip, PacketWriter* d) { f->vt->begin((Font*)((u8*)f + f->vt->adj4), clip, d); }
+    // the class's this-adjustment from its vtable, not a field
     static void Glyph(Font* f, s32 ch, s32 color, PacketWriter* d, f32 x, f32 y) { f->vt->draw(x, y, (Font*)((u8*)f + f->vt->adj6), ch, color, d); }
+    // the class's this-adjustment from its vtable, not a field
     static void End(Font* f, Vec4U* clip, PacketWriter* d) { f->vt->end((Font*)((u8*)f + f->vt->adj7), clip, d); }
 };
 
-struct ClampFloat {
+struct ClampFloatSelect {
     static f32 Of(f32 x, f32 lo, f32 hi)
     {
         return x < lo ? lo : (hi < x ? hi : x);
@@ -542,10 +547,9 @@ void DrawScreenElementText(ScreenElement* self)
         if (handle != 0) {
             void* obj = *(void**)handle;
             if (obj != 0) {
-                void* vt = *(void**)((u8*)obj + 76);
-                VirtualCall_1AA790 fn = *(VirtualCall_1AA790*)((u8*)vt + 76);
-                s16 adj = *(s16*)((u8*)vt + 72);
-                fn((u8*)obj + adj, handle, out, &g_gsPacketWriter);
+                const FontVt* vt = ((Font*)obj)->vt;
+                // the class's this-adjustment from its vtable, not a field
+                vt->drawBox((Font*)((u8*)obj + vt->adj9), handle, out, &g_gsPacketWriter);
             }
         }
         x = self->scale;
@@ -1055,6 +1059,7 @@ void DrawTimerElement(T217D_510* self)
             Font* sub = *(Font**)obj;
             if (sub != 0) {
                 const FontVt* d = sub->vt;
+                // the class's this-adjustment from its vtable, not a field
                 d->drawBox((Font*)((u8*)sub + d->adj9), obj, &L, &g_gsPacketWriter);
             }
         }
@@ -1072,7 +1077,7 @@ void DrawTimerElement(T217D_510* self)
             warn = self->warnColor;
             *(T217D_Word*)&L.color = warn;
         }
-        DrawFontString(self->font, (const char*)((u8*)self + 9), (StringLayout*)&L, 0, (PacketWriter*)dp);
+        DrawFontString(self->font, &self->text[1], (StringLayout*)&L, 0, (PacketWriter*)dp);
         PopFontScale(self->font);
     }
 }
@@ -1398,6 +1403,7 @@ void DrawGauge(T217D_2E0* self)
     PushFontScale(self->font, self->scale, self->scale);
     Text_1AC0E8* text = (Text_1AC0E8*)self->font;
     VEnt_1AC0E8* ve = &text->vtbl[8];
+    // the class's this-adjustment from its vtable, not a field
     ve->fn((u8*)self->font + ve->delta, self->x, self->y, 0x7A, out.color.value, &g_gsPacketWriter);
     f32 dx = 0.0f;
     f32 dy = dx;
@@ -1425,6 +1431,7 @@ void InitFramedElement(T217D_330* self)
 
     SetupScreenElementText(self);
     vt = self->font->vt;
+    // the class's this-adjustment from its vtable, not a field
     self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), 1.25f, 1.25f);
     if (IsFontLoaded(2)) {
         self->frame = (Font**)&g_framedElementStyle;
@@ -1475,12 +1482,12 @@ void DrawElementWithFadedFrame(T217D_330* self)
         out.FlagA(0);
         out.FlagB(0);
 
-        u8* h = (u8*)self->frame;
+        TextStyle* h = (TextStyle*)self->frame;
         if (h != 0) {
-            slot = *(T217D_Word*)(h + 0x18);
-            h[0x1B] = (u8)((f32)h[0x1B] * self->blend);
-            StyleDrawer::Draw(self->frame, &out, &g_gsPacketWriter);
-            *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
+            slot = *(T217D_Word*)&h->color;
+            ((u8*)&h->color)[3] = (u8)((f32)((u8*)&h->color)[3] * self->blend);
+            StyleDrawerBuilder::Draw(self->frame, &out, &g_gsPacketWriter);
+            *(T217D_Word*)&((TextStyle*)self->frame)->color = slot;
         }
         PushFontScale(self->font, self->scale, self->scale);
         InitTextReader((TextReader*)loc, &self->text[0], self->font);
@@ -1498,6 +1505,7 @@ void InitPointerTextCaption(T217D_380* self)
 
     SetupScreenElementText(self);
     vt = self->font->vt;
+    // the class's this-adjustment from its vtable, not a field
     self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), 0.9f, 0.9f);
     self->color = 0xDF7F7F7Fu;
     if (IsFontLoaded(2)) {
@@ -1600,7 +1608,7 @@ void DrawSlidingGlyphElement(T217D_380* self)
     }
     x = self->shownX;
     y = self->hiddenX;
-    c = ClampFloat::Of(self->blend / (1.0f / (f32)n), 0.0f, 1.0f);
+    c = ClampFloatSelect::Of(self->blend / (1.0f / (f32)n), 0.0f, 1.0f);
     rest = 1.0f - c;
     if (self->frame != 0) {
         s32 grey = 0xFF808080;
@@ -1613,6 +1621,7 @@ void DrawSlidingGlyphElement(T217D_380* self)
         out.FlagB(0);
         Font* o = *self->frame;
         if (o != 0) {
+            // the class's this-adjustment from its vtable, not a field
             o->vt->drawBox((Font*)((u8*)o + o->vt->adj9), self->frame, &out, &g_gsPacketWriter);
         }
     }
@@ -1620,7 +1629,7 @@ void DrawSlidingGlyphElement(T217D_380* self)
     for (i = 0; i < n; i++) {
         s32 ch = self->text[i];
         f32 d;
-        c = ClampFloat::Of(self->blend / ((f32)(i + 1) / (f32)n), 0.0f, 1.0f);
+        c = ClampFloatSelect::Of(self->blend / ((f32)(i + 1) / (f32)n), 0.0f, 1.0f);
         rest = 1.0f - c;
         FontCalls::Glyph(self->font, ch, self->color, &g_gsPacketWriter, c * x + rest * y, self->shownY);
         d = FontCalls::Advance(self->font, ch);
@@ -1642,6 +1651,7 @@ void InitCopiedTextCaption(T217D_3D0* self)
     SetupScreenElementText(self);
     o = GetFontById(0);
     vt = o->vt;
+    // the class's this-adjustment from its vtable, not a field
     self->font = vt->clone((Font*)((u8*)o + vt->adj1), 1.0f, 1.0f);
     self->scale = 0.8f;
     self->outTime = 0.5f;
@@ -1740,6 +1750,7 @@ void SetElementTextFromEntry(ScreenElement* self, s32 a1, s32 a2)
     u32 packed;
 
     p = *(u8**)((u8*)&g_saveData);
+    // address arithmetic over a variable index
     p += a1 * 0x44C + 0x10;
     p += a2 * 0x78;
     packed = (a1 << 8) | a2;
@@ -1883,6 +1894,7 @@ void InitHintGlyphElement(T217D_420* self)
     SetupScreenElementText(self);
     o = GetFontById(2);
     vt = o->vt;
+    // the class's this-adjustment from its vtable, not a field
     self->font = vt->clone((Font*)((u8*)o + vt->adj1), 1.0f, 1.0f);
     self->vt->m08(self, "B");
     self->flag = 0;
@@ -2014,6 +2026,7 @@ void InitTitleElement(T217D_470* self)
 {
     SetupScreenElementText(self);
     Font* in = self->font;
+    // the class's this-adjustment from its vtable, not a field
     self->font = in->vt->clone((Font*)((u8*)in + in->vt->adj1), g_titleFontScaleX, g_titleFontScaleY);
     if (GetFontById(2) != 0) {
         self->frame = (Font**)&g_titleStyle;
@@ -2069,6 +2082,7 @@ void InitPromptElement(T217D_4C0* self)
 
     SetupScreenElementText(self);
     vt = self->font->vt;
+    // the class's this-adjustment from its vtable, not a field
     self->font = vt->clone((Font*)((u8*)self->font + vt->adj1), D_0027446C, D_00274470[0]);
     if (GetFontById(2)) {
         self->frame = (Font**)&g_promptStyle;
@@ -2177,7 +2191,7 @@ void DrawPromptElement(T217D_4C0* self)
     out.FlagA(2);
     out.FlagB(0);
     if (self->frame != 0) {
-        StyleDrawer::Draw(self->frame, &out, &g_gsPacketWriter);
+        StyleDrawerBuilder::Draw(self->frame, &out, &g_gsPacketWriter);
     }
     PushFontScale(self->font, self->scale, self->scale);
     InitTextReader((TextReader*)loc, &self->text[0], self->font);

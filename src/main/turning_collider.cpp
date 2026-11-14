@@ -11,6 +11,7 @@
 #include "game_clock.h"
 #include "ramp_profile.h"
 #include "vu0.h"
+#include "mesh_collision.h"
 #include "functions/camera.h"
 #include "functions/collider.h"
 #include "functions/collider_contact.h"
@@ -131,7 +132,7 @@ void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, 
     out->active = 0;
     Rec2195_224* rec = obj->linkRecord;
     if (rec != 0 && (rec->flags & 0x20) != 0) {
-        TransformPointBetweenFrames(obj, 0, (Vec02*)((u8*)rec + 0x60), &pos);
+        TransformPointBetweenFrames(obj, 0, (Vec02*)&rec->q60[0], &pos);
         Vu0::Q(dir) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(((PlacedObject*)obj->linkRecord->f80)->v140));
         u128 len = Vu0::Length(Vu0::Q(dir));
         const Vec02* fallback = &g_unitXVector;
@@ -292,11 +293,6 @@ void TrackFollowedMeshVertexVelocities(TurningCollider* self)
 }
 
 // A face of a collision mesh as func_001C4D60 reads it: its plane, the normal and the distance.
-struct MeshFace {
-    Vec02 normal;           // 0x00
-    f32 d;                  // 0x10
-    u8 pad14[0x20 - 0x14];
-};
 
 
 // The point is a Vu0::Vec value: its temporaries are stores in the plane loop when CSE runs,
@@ -321,7 +317,7 @@ void SetTurningColliderFollowedMesh(TurningCollider* self, Collider* other, s32 
             if (all == 0) {
                 for (s32 j = 0; j < other->mesh.faceCount; j++) {
                     MeshFace* f = &((MeshFace*)self->mesh.faces)[j];
-                    if (Vu0::ToFloat(Vu0::Dot(p, Vu0::Vec::Of(f->normal))) - f->d > 1.0f) {
+                    if (Vu0::ToFloat(Vu0::Dot(p, Vu0::Vec::Of(f->normal))) - f->dist > 1.0f) {
                         goto next;
                     }
                 }

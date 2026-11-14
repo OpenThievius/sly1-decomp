@@ -89,8 +89,6 @@ PaddedQuadratic g_itemKeeperPlaceRadiusScale = { { 0.800000012f, 1.20000005f, 0.
 
 extern u8 g_flagTable[];
 
-#define F(T, o) (*(T*)((u8*)self + (o)))
-
 // Set-up of a new agent after the turning collider's: state and path graph id are none (-1), the
 // target range is up to 300, the retarget delay 0.2 to 0.5 s, the angle limit 0.1745 rad (10
 // degrees), all 17 state and secondary clip ids are -1, a flag table index is taken, gravity scale
@@ -136,7 +134,7 @@ void InitAgent(Agent* self)
     self->fBE0 = 0;
     s4[1] = 0.8f;
     self->bindingKey = s0;
-    F(f32, 0xBD0) = one;
+    *(f32*)&self->fBD0 = one;
     self->fadesOut = s1;
     self->contactValue = 1.25f;
     self->fBDC = s1;
@@ -393,11 +391,11 @@ void StepAgent(Agent* self, f32 dt)
         Vu0::Q(v) = Vu0::Rotate(m2, Vu0::Q(self->headingVelocity));
         SteerColliderTowardPosition(self, 0, 0, &v, (f32*)self->p210, dt);
         TurnColliderTowardRotation(self, g_gameClock[2], &self->headingMatrix, &self->turnGain);
-    } else if (g_gameTime[0] < F(f32, 0xBA4)) {
+    } else if (g_gameTime[0] < *(f32*)&self->arrivalTime) {
         Vec02 p;
         Vec02 w;
         Vec02 v;
-        f32 left = F(f32, 0xBA4) - g_gameTime[0];
+        f32 left = *(f32*)&self->arrivalTime - g_gameTime[0];
         EvaluateHermiteVectorSegment(left, &self->pos, &self->v150, &self->fBB0, &self->fBC0, left <? dt, 1.0f, &p, &w, 0);
         Vu0::Q(v) = Vu0::DivX(Vu0::Sub(Vu0::Q(w), Vu0::Q(self->v150)), Vu0::Scalar(dt));
         ClampVectorLength(&v, &v, 20000.0f);
@@ -954,7 +952,7 @@ void BuildAgentPath(Agent* self)
         Vu0::Set(d4, Vu0::MulAddX(Vu0::Q(c), Vu0::Q(g_unitZVector), Vu0::Scalar(500.0f)));
         GatherCollidersInBox(self->world, self, &d1, &d4, IsAgentPathBlocker, self, &count, &list);
         if (FindNearestSpanObject(1, &d4, &d1, count, list, &span) != 0) {
-            f32 h = -((f32*)F(void*, 0x388))[(self->probeIndex << 2) + 2] - 1.0f;
+            f32 h = -((f32*)self->mesh.verts)[(self->probeIndex << 2) + 2] - 1.0f;
             if (self->contactsDisabled != 0) h += self->probeDepth;
             Vu0::Q(c) = Vu0::MulAddX(Vu0::Q(span.q[0]), Vu0::Q(g_unitZVector), Vu0::Scalar(h));
         }
@@ -1026,7 +1024,7 @@ void FaceAgentAlongPath(Agent* self)
         f32 dz = self->snappedGoal.z - self->v140.z;
         switch (self->state) {
         case 5: case 6: case 7: case 10: case 12: case 13: case 14: case 15:
-            dz += F(f32, 0xB20);
+            dz += *(f32*)self->fB20;
             break;
         }
         f32 g1 = g_agentPitchDistanceCoefficients.c[0] + dist * (g_agentPitchDistanceCoefficients.c[1] + dist * g_agentPitchDistanceCoefficients.c[2]);
@@ -1440,7 +1438,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
 }
 
 // The state of the agent's keeper (3 when it has none).
-s32 GetAgentRosterState(Agent* self) { if (!self->roster) return 3; return *(s32*)((u32)self->roster + 0x50); }
+s32 GetAgentRosterState(Agent* self) { if (!self->roster) return 3; return ((ItemKeeper*)self->roster)->state; }
 
 #include "object_message.h"
 struct TrackedNodeOffer;
@@ -1600,7 +1598,7 @@ void SteerAgentAlongPath(Agent* self)
     Vec02 vel;
     Vu0::Q(vel) = Vu0::MulXSum(Vu0::Q(d), Vu0::Scalar(1.0f / time), Vu0::Q(self->gravity), Vu0::Scalar(time * -0.5f));
     self->desc02()->m20(self, &vel);
-    F(f32, 0xBA4) = g_gameTime[0] + time;
+    *(f32*)&self->arrivalTime = g_gameTime[0] + time;
     f32 speed = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d))));
     self->fBB0 = target;
     u128 pos = Vu0::MulAddX(Vu0::Q(vel), Vu0::Q(self->gravity), Vu0::Scalar(time));
@@ -1866,10 +1864,10 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             nearer += closer;
         }
         if (nearer == 0) {
-            self->clip10Deadline = g_gameClock[1] + F(f32, 0xBE0);
+            self->clip10Deadline = g_gameClock[1] + *(f32*)&self->fBE0;
         } else {
             f32 r = RandomFloatInRange((f32)(nearer - 1) / (f32)count, (f32)nearer / (f32)count);
-            self->clip10Deadline = g_gameClock[1] + (1.0f - r) * F(f32, 0xBE0) + r * self->fBE4;
+            self->clip10Deadline = g_gameClock[1] + (1.0f - r) * *(f32*)&self->fBE0 + r * self->fBE4;
         }
         break;
     }
@@ -1938,10 +1936,10 @@ s32 IsAgentSlotIndex(s32 index)
 }
 
 
-void SetAgentStateClipId(u8* self, s32 index, s32 value)
+void SetAgentStateClipId(Agent* self, s32 index, s32 value)
 {
     if (IsAgentSlotIndex(index)) {
-        *(s32*)(self + (index << 3) + 0x758) = value;
+        self->stateClips[index].id = value;
     }
 }
 
@@ -2256,9 +2254,9 @@ void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32
             if (a1->flags538 & 0x10000000000ULL) {
                 AddMeshContacts(a1, a1->radius3CC, &a1->v140, (Collider*)e->obj,
                               ((Collider*)e->obj)->tree.count,
-                              (FaceRef*)((Collider*)e->obj)->tree.nodes, 0, (PooledContact**)((u8*)a0 + 0xAAC));
+                              (FaceRef*)((Collider*)e->obj)->tree.nodes, 0, (PooledContact**)&a0->hitContacts);
             } else if (a3 != 0) {
-                CreateMeshPairContacts((Collider*)e->obj, a1, a2, (FaceRef*)a3, (u8*)a4, (PooledContact**)((u8*)a0 + 0xAAC));
+                CreateMeshPairContacts((Collider*)e->obj, a1, a2, (FaceRef*)a3, (u8*)a4, (PooledContact**)&a0->hitContacts);
             }
         }
     }
@@ -2269,9 +2267,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub);
 
 // Gives the other object the agent's launch velocity (at +0xAB0) and, when it is the player, puts
 // the player into state 4 with 0x2B.
-void LaunchObjectWithAgentVelocity(u8* self, PlacedObject* other)
+void LaunchObjectWithAgentVelocity(Agent* self, PlacedObject* other)
 {
-    other->desc02()->m20(other, (Vec02*)(self + 0xAB0));
+    other->desc02()->m20(other, &self->launchVelocity);
     if (IsObjectOfKind(other, 7) != 0) {
         SetPlayerState((Player*)other, 4, 0x2B);
     }
@@ -2309,8 +2307,8 @@ void DispatchAgentContactHits(Agent* self)
             if (self->sparePlayerContacts == 0) {
                 void* h = p->aimTarget;
                 if (h != 0) {
-                    h = *(void**)((u8*)h + 0x18);
-                    if (h != 0 && *(Agent**)((u8*)h + 0x50) == self) {
+                    h = ((BaseObject*)h)->parent;
+                    if (h != 0 && ((PlacedObject*)h)->root == self) {
                         switch (p->aimMode) {
                         case 4:
                         case 5:
@@ -2620,7 +2618,7 @@ struct ItemTimeoutGroup {
     void* keeper;           // 0x2C
 };
 // What GatherAnimationEventObjects hands back for one agent: the objects and their count.
-struct GatheredObjects {
+struct GatheredStateResetObjects {
     s32 count;
     StateResetObject** items;
 };
@@ -2632,14 +2630,14 @@ void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount
 // objects with the same id (id2E0) of later members into the same group.
 void GroupAnimationEventObjects(ItemKeeper* self)
 {
-    GatheredObjects* arr;
+    GatheredStateResetObjects* arr;
     s32 i;
     s32 j;
     s32 k;
     s32 m;
 
     PushBackMemoryMark();
-    arr = (GatheredObjects*)AllocateZeroedBackMemory(self->owned.count * 8);
+    arr = (GatheredStateResetObjects*)AllocateZeroedBackMemory(self->owned.count * 8);
     for (i = 0; i < self->owned.count; i++) {
         Agent* agent = self->owned.found[i];
         if (agent->mainClip != 0) {
@@ -2647,7 +2645,7 @@ void GroupAnimationEventObjects(ItemKeeper* self)
         }
     }
     for (i = 0; i < self->owned.count; i++) {
-        GatheredObjects* e = &arr[i];
+        GatheredStateResetObjects* e = &arr[i];
         for (j = 0; j < e->count; j++) {
             StateResetObject* node = e->items[j];
             if (node->group == 0) {
@@ -2656,7 +2654,7 @@ void GroupAnimationEventObjects(ItemKeeper* self)
                 AppendToSmallList((StateResetGroup*)node->group, node);
                 if (node->id2E0 != -1) {
                     for (k = i + 1; k < self->owned.count; k++) {
-                        GatheredObjects* e2 = &arr[k];
+                        GatheredStateResetObjects* e2 = &arr[k];
                         for (m = 0; m < e2->count; m++) {
                             StateResetObject* item = e2->items[m];
                             if (item->id2E0 == node->id2E0) {

@@ -10,6 +10,7 @@
 #include "common.h"
 #include "id_lookup_object.h"
 #include "placed_object.h"
+#include "model_build.h"
 #include "world.h"
 #include "animation.h"
 #include "sound_record.h"
@@ -28,6 +29,8 @@
 #include "word_copy.h"
 #include "camera.h"
 #include "object_finder.h"
+#include "element_stack_state.h"
+#include "mesh_face03.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
 #include "functions/collider.h"
@@ -151,19 +154,11 @@ void ResetGameSession(void);
 
 void* AllocateFrontMemory(s32 size);
 
-struct RefItem { u8 pad[0x38]; void* ref; u8 rest[0x70 - 0x3C]; };
+#include "placed_model_parts.h"
 
-struct RefOwner
-{
-    u8 pad0[0xC];
-    s32 count;
-    RefItem* items;
-    u8 pad1[0x50 - 0x14];
-    s32 capacity;
-    void** refs;
-};
 
-extern "C" void* FillMemory(void* p, s32 value, s32 size);
+
+
 
 struct Counter
 {
@@ -294,7 +289,6 @@ struct PlayerListWalk {
     }
 };
 
-struct ElementStackState { u8 pad0[0x30]; s32 f30; };
 extern ElementStackState g_elementStack;
 extern SessionKey g_sessionFadeKey;
 extern s32 g_resumeSoundSetupDone;
@@ -347,21 +341,10 @@ void ApplyCompletionFlags(s32 mode);
 
 // EXACT: self->block store ahead of self->f20 store.
 
-struct MorphTargetHeader
-{
-    u16* p;
-    s32 count;
-};
+
 // Built at startup: the compiler's initialiser and constructor for this file are func_00167D20
 // and func_00167D48 (config/us/generated.tsv).
-struct ColorWord
-{
-    union {
-        struct { u8 r, g, b, a; };
-        u32 rgba;
-    };
-    ColorWord(u32 v) { rgba = v; }
-};
+
 
 // The file's .data, in retail's order. It begins with the game progress pointers
 // (game_progress.h), which this file's functions read and render_frame.cpp's do not.
@@ -390,15 +373,9 @@ void WriteVifStmask(PacketWriter* s, s32 value);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifFlushE(PacketWriter* s);
 
-struct QuadClear
-{
-    static void Clear(u32* q)
-    {
-        FillMemory(q, 0, 0x10);
-    }
-};
 
-struct PercentClamp {
+
+struct PercentClampS32 {
     static s32 Of(s32 v, s32 lo, s32 hi)
     {
         if (v < lo) return lo;
@@ -419,15 +396,7 @@ void ResetVertexBatch(VertexBatch* batch);
 void BuildUnlitVertexPacket(VertexBatch* batch);
 void BuildLitVertexPacket(VertexBatch* batch);
 
-struct __attribute__((packed)) BatchVertexWords {
-    u64 q0;
-    u64 q8;
-    u64 q10;
-    u64 q18;
-    s32 f20;
-    s32 value;
-    BatchVertexWords() {}
-};
+
 
 struct AppendVertexBatch {
     u8 pad0[0xF8];
@@ -455,7 +424,7 @@ struct UnlitVertexBatch {
     UnlitVertex e[1];
 };
 struct UnlitUnpackHeader { u16 arrayOffset; u16 frameDataOffset; u8 pad[4]; u16 frameOffsets[4]; u16 arrayCount; u8 pad3[6]; };
-struct CopiedGifTags { u32 w[8]; };
+
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern u8 g_unlitBatchProgram[];
@@ -463,7 +432,7 @@ extern u8 g_unlitBatchFinishProgram[];
 void CopyMemory(void* dst, void* src, u32 size);
 
 // A run of bytes, for the fill and copy calls.
-struct ByteSpan { u8 b[1]; };
+
 struct LitUnpackHeader { u16 arrayOffset; u16 f2; u8 pad4[4]; u16 frameOffsets[3]; u16 fE; u16 arrayCount; u8 pad12[6]; };
 struct LitVertex
 {
@@ -516,70 +485,10 @@ void AddDmaRefTag(PacketWriter* s, s32 n, void* data);
 void BeginDmaTag(PacketWriter* s);
 void CopyMemory(void* dst, void* src, u32 size);
 
-struct MeshUv {
-    f32 u;
-    f32 v;
-};
+
 // A vertex's indices into the position, normal and uv arrays, and its flags.
-struct VertexRefs {
-    u8 pos;
-    u8 nrm;
-    u8 uv;
-    u8 flags;
-};
+
 // A weight's two index lists: the positions it moves, then the normals.
-struct WeightIndices {
-    u16* pos;
-    u16* nrm;
-};
-struct MeshBuildState {
-    u8 pad00[0x40];
-    s32 f40;
-};
-struct StripMeshInfo {
-    u8 pad00[0x10];
-    s32 f10;
-    s32 f14;
-    s32 f18;
-};
-struct CursorHook;
-typedef AnimCursor* (*CursorHookFn)(CursorHook* self, StripMesh* mesh);
-struct CursorHook {
-    CursorHookFn* vt;
-};
-struct StripMeshOwner {
-    u8 pad00[0x18];
-    s32 f18;
-    u8 pad1C[0x28 - 0x1C];
-    s32 f28;
-    u8 pad2C[0x38 - 0x2C];
-    CursorHook* f38;
-    u8 pad3C[0x40 - 0x3C];
-    f32 f40;
-    u8 pad44[0x54 - 0x44];
-    StripMeshInfo* f54;
-};
-struct StripExtra {
-    s32 f0;
-    s32 a4[4];
-    s32 a14[4];
-    s32 a24[4];
-};
-struct StripUnpack {
-    u16 off[4];
-    u16 strip[4];
-    u16 f10;
-    u16 f12;
-    u16 pad14[2];
-};
-struct StripHeader {
-    u8 pad00[0x14];
-    u32 f14;
-    u8 pad18[0x1C - 0x18];
-    StripUnpack* p;
-    StripExtra* extra;
-    s32 count;
-};
 
 extern u8 g_unlitBatchFinishProgram[];
 extern u8 g_unlitBatchProgram[];
@@ -609,46 +518,25 @@ void* AllocateZeroedFrontMemory(s32 bytes);
 void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
 
 
-typedef void (*AttachmentHandlerFn)(void* self);
-struct AttachmentHandler { AttachmentHandlerFn* vtbl; };
-struct AttachmentEntry { u8 pad0[0x38]; AttachmentHandler* f38; u8 pad1[0x70 - 0x3C]; };
-struct AttachmentNode { u8 pad0[4]; void* f4; s32 f8; u8 pad1[0x80 - 0xC]; AttachmentNode* next80; };
-struct AttachmentBlock { u8 pad0[0xC]; s32 count0C; AttachmentEntry* f10; u8* f14; u8 pad1[0x4C - 0x18]; AttachmentNode* f4C; };
 
 
 // Four quadwords: a matrix as the attachment code copies it.
-struct QuadMatrix { Quad16 q[4]; };
-struct TargetObject { u8 pad0[0x110]; u8 sub110[0x30]; u8 sub140[0x40]; };
-struct AttachmentTarget { TargetObject* p0; u8 pad0[0xC]; QuadMatrix m; u8 tail[0x90 - 0x50]; };
-struct AttachmentTargets { s32 count; AttachmentTarget* elems; s32* keys; };
+
+
+
+
 struct TargetFrames { Quad16 a; u8 pad0[0x30]; Quad16 b; u8 pad1[0x30]; QuadMatrix m; };
 
 
-struct AnimatorStep;
-typedef void (*AnimatorStepFn)(void* self, f32 f);
 
-struct AnimatorStep {
-    AnimatorStepFn* vtbl;
-    u8 pad4[0x8];
-    void* f0C;
-    u8 pad10[0x70];
-    AnimatorStep* next80;
-};
 
-struct AnimatorOwner {
-    u8 pad0[0x4C];
-    AnimatorStep* head4C;
-};
+
 
 
 
 extern u8 g_litBatchFinishProgram[];
 extern u8 D_000000F0[];
 
-struct PartPacketContext { u8 pad0[0x28]; s32 f28; };
-struct PartRange { u16 lo; u16 hi; };
-struct PartPacketSource { u8 pad0[0x18]; u8* f18; PartRange* f1C; };
-struct PartPackets { void* f0; void* f4; void* f8; void* fC; void* f10; void* f14; };
 
 void* InitPacketWriter(PacketWriter* self);
 void AllocateQuadwordBuffer(PacketWriter* buffer, u32 count, u32 kind);
@@ -657,10 +545,6 @@ void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8*
 void WriteVifMscal(void* s, void* n);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-struct AttachmentLink { s32 tag; AttachmentLink* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; AttachmentLink* next; u8 pad84[0xC]; };
-struct AttachmentPartInfo { u8 pad[0x10]; u32 flags; };
-struct AttachmentPart { u8 pad[0x38]; AttachmentPartInfo* a; u8 pad3C[0x18]; void* b; };
-struct AttachmentCopy { s32 n0; void* p4; u8 pad8[4]; s32 count; AttachmentPart* recs; void* p14; u8 pad18[0x28]; s32 n40; void* p44; u8 pad48[4]; AttachmentLink* head; s32 f50; };
 
 void CopyMemory(void* dst, void* src, u32 size);
 void* AllocateZeroedFrontMemory(s32 n);
@@ -668,27 +552,12 @@ void* CopyToFrontMemory(s32 size, void* src);
 void CollectNonNullRefs(AttachmentCopy* o);
 
 // Index written (i << 4) * 9: a plain &items[i] gives a mult that loop.c does not strength-reduce (no s4 offset giv).
-struct FramedObject;
-typedef void (*FramedObjectFn)(FramedObject* self);
-struct FramedObjectVt { u8 pad[0xC0]; FramedObjectFn f; };
-struct FrameLinkConstraint { u8 pad0[0x60]; QuadMatrix m60; u8 pad[4]; s32 a4; u8 pad2[8]; u32 flags; };
-struct FramedObject { FramedObjectVt* vt; u8 pad0[0x10C]; u8 sub110[0x30]; u8 sub140[0x40]; u8 pad180[0xA4]; FrameLinkConstraint* link; };
-struct FramedAttachment { FramedObject* obj; u8 pad[0xC]; Quad16 q10[4]; QuadMatrix m50;  };
-struct FramedAttachmentList { s32 count; FramedAttachment* items; };
-struct ParentFrame { u8 pad[0x30]; };
 
 QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
 // The lit strip builder's packets: 0x24-byte slots, written two apart.
-struct PacketSlot {
-    u8 pad[0x24];
-};
-struct QuadLanes {
-    f32 x[4];
-    f32 y[4];
-    f32 z[4];
-    f32 w[4];
-};
+
+
 
 extern u8 g_litBatchProgram[];
 extern u8 g_litBatchThirdProgram[];
@@ -1181,7 +1050,7 @@ LINKER_REMNANT(func_00160090);
 KeyedEntry* FindKeyEntry(KeyedEntry* key)
 {
     KeyedEntry* p = (KeyedEntry*)g_keyedEntries;
-    KeyedEntry* end = (KeyedEntry*)((u8*)g_keyedEntries + 0x7E8);
+    KeyedEntry* end = (KeyedEntry*)(g_keyedEntries + 46);
     s32 m;
 
     do {
@@ -1193,7 +1062,7 @@ KeyedEntry* FindKeyEntry(KeyedEntry* key)
             m = ((key->key.signedWords[2] ^ key->key.signedWords[6]) ^ (p->key.signedWords[2] ^ p->key.signedWords[6])) == 0;
         }
         if (!m) {
-            p = (KeyedEntry*)((u8*)p + 0x2C);
+            p++;
         } else {
             return p;
         }
@@ -1205,7 +1074,7 @@ KeyedEntry* FindKeyEntry(KeyedEntry* key)
 void* FindEntryById(s32 key)
 {
     KeyedEntry* p = (KeyedEntry*)g_keyedEntries;
-    u8* end = (u8*)g_keyedEntries + 0x7E8;
+    const KeyedEntry* end = g_keyedEntries + 46;
     for (;;) {
         if (key != p->id) {
             p++;
@@ -1270,7 +1139,7 @@ void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3)
     *a2 = 0;
     p = (KeyedEntry*)g_keyedEntries;
     *a1 = 0;
-    end = (KeyedEntry*)((u8*)g_keyedEntries + 0x7E8);
+    end = (KeyedEntry*)(g_keyedEntries + 46);
     do {
         if ((p->id >> 8) == key) {
             if (p->i28 & 2) {
@@ -1293,7 +1162,7 @@ void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3)
 s32 ComputeCompletionMask(void) {
     u32 mask = 0xE;
     KeyedEntry* p = (KeyedEntry*)g_keyedEntries;
-    KeyedEntry* end = (KeyedEntry*)((u8*)g_keyedEntries + 0x7E8);
+    KeyedEntry* end = (KeyedEntry*)(g_keyedEntries + 46);
     do {
         u32* r = (u32*)GetLevelEntryByKey(p->id);
         mask &= ~p->flags | *r;
@@ -1301,6 +1170,7 @@ s32 ComputeCompletionMask(void) {
     } while (p < end);
     s32 clear = -3;
     s32 n = 4;
+    // a field access here changes retail's code (walks levels[1..5].f448 by 0x44C)
     u8* q = (u8*)&g_saveData->levels[1].f448;
     do {
         u32 flag = *(u32*)q & 0x20;
@@ -1422,6 +1292,7 @@ void SetCurrentLevelEntry(KeyedEntry* key, s32 flags)
     GameProgress* g = g_saveData;
     s32 gate = g->reserveCount;
     g_currentLevelRecord = base;
+    // address arithmetic over a variable index
     g_currentEntry = (G27C230*)((u8*)base + lo * 0x78);
     if (gate < 0 || (flags & 2) != 0) {
         ResetReserveCounts();
@@ -1453,6 +1324,7 @@ void AddElapsedTime(f32 dx)
 // byte, 0x78 bytes per entry), or 0 for -1.
 void* GetLevelEntryByKey(s32 key)
 {
+    // address arithmetic over a variable index
     return key == -1 ? 0 : (u8*)&g_saveData->levels[key >> 8] + (key & 0xFF) * 0x78;
 }
 
@@ -1506,9 +1378,9 @@ void ResumeAtSavedLevel(void)
         k = &g_sessionFadeKey;
     }
     ClearTwoWords(D_002623D8);
-    if (g_elementStack.f30 != 1 || g_saveData->totalTime != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
+    if (g_elementStack.resumeState != 1 || g_saveData->totalTime != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
-    } else if (g_elementStack.f30 == 1) {
+    } else if (g_elementStack.resumeState == 1) {
         if (g_resumeSoundSetupDone == 0) {
             SilenceVolumeChannel3(g_saveData->optionFlags & 0x80);
             ApplySoundOptionFlag(g_saveData->optionFlags & 0x40);
@@ -1525,7 +1397,7 @@ void ResumeAtSavedLevel(void)
                     } while (node != 0);
                 }
             }
-            g_elementStack.f30 = -1;
+            g_elementStack.resumeState = -1;
             SetElementStackState((ElementStack*)&g_elementStack, 3);
         }
     }
@@ -1547,6 +1419,7 @@ s32 ComputeCompletionPercent(GameProgress* progress)
         s32 idx = (s32)v >> 8;
         if (idx != 0) {
             u32 flags = e->flags;
+            // address arithmetic over a variable index
             u32* w = (u32*)(p + (idx * 0x44C + 0x10) + (v & 0xFF) * 0x78);
             u32 bit;
             total++;
@@ -1561,11 +1434,12 @@ s32 ComputeCompletionPercent(GameProgress* progress)
     }
     for (k = 0; k < 5; k++) {
         total++;
+        // a field access here changes retail's code (it is levels[k + 1].f448)
         if (*(u32*)(p + 0x8A4 + k * 0x44C) & 0x20) done++;
     }
     if (done == 0) return 0;
     if (done == total) return 100;
-    return PercentClamp::Of(done * 100 / total, 1, 99);
+    return PercentClampS32::Of(done * 100 / total, 1, 99);
 }
 
 void SetSpareCount(s32 value)
@@ -1588,6 +1462,7 @@ LINKER_REMNANT(func_00160C90);
 void* GetIndexedTargetSlot(void* self,s32 index)
 {
     if ((u32)(index-0x33B)>=12) return 0;
+    // address arithmetic over a variable index
     else return (u8*)self+(index*4-0xCD8);
 }
 
@@ -1658,6 +1533,7 @@ void SpendReserveUnit(void)
         FadeRequest args;
         args.kind = m;
         args.text = (u8*)&D_00275B04;
+        // the record's type is not known (it lies behind a global's address)
         u8* base = args.text - 0x14;
         args.f08 = *(s32*)(base + 0x8);
         args.f0C = *(s32*)(base + 0xC);
@@ -1682,6 +1558,9 @@ void ClearRecordBody(ClearedRecord* self)
     self->f18 = 0;
 }
 
+// A face of a collision mesh (Mesh03::faces, 0x20 bytes): its normal, the plane's offset (as bits)
+// and the index of one of its vertices.
+
 // Copies a mesh (vertices, faces, face points and words) into front memory, sharing its edge list,
 // and when a matrix is given transforms the copied vertices (and the face data) by it.
 void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
@@ -1700,10 +1579,10 @@ void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
             TransformByMatrixWithW((const Quad16*)matrix, v, 1.0f, v);
         }
         for (s32 i = 0; i < dst->faceCount; i++) {
-            u8* face = (u8*)dst->faces + (i << 5);
-            TransformByMatrixWithW((const Quad16*)matrix, (const Vec02*)face, 0.0f, (Vec02*)face);
-            Vec02* vert = (Vec02*)((*(u16*)(face + 0x1E) << 4) + (uptr)dst->verts);
-            *(u32*)(face + 0x10) = Vu0::ToBits(Vu0::Dot(Vu0::Q(*(Vec02*)face), Vu0::Q(*vert)));
+            MeshFace03* face = &((MeshFace03*)dst->faces)[i];
+            TransformByMatrixWithW((const Quad16*)matrix, &face->normal, 0.0f, &face->normal);
+            Vec02* vert = (Vec02*)((face->vert << 4) + (uptr)dst->verts);
+            face->offset = Vu0::ToBits(Vu0::Dot(Vu0::Q(face->normal), Vu0::Q(*vert)));
             Vec02* p = &((Vec02*)dst->points)[i];
             TransformByMatrixWithW((const Quad16*)matrix, p, 1.0f, p);
         }
@@ -1778,10 +1657,12 @@ void EndGifPacket(PacketWriter* self)
 {
     if (self->openTag != 0) {
         const PacketWriterVt* s = self->vt;
+        // the class's this-adjustment from its vtable, not a field
         s->close((PacketWriter*)((u8*)self + s->adj1), 1);
     } else {
         BeginGifTag(self, 0, 1, 0xE);
         const PacketWriterVt* s = self->vt;
+        // the class's this-adjustment from its vtable, not a field
         s->close((PacketWriter*)((u8*)self + s->adj1), 1);
     }
 }
@@ -1821,11 +1702,13 @@ void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64
 {
     PacketWriter* w = self;
     const PacketWriterVt* sub = w->vt;
+    // the class's this-adjustment from its vtable, not a field
     sub->close((PacketWriter*)((u8*)self + sub->adj1), 0);
 
     u8* p = w->cur;
     u64 tag = (prim << 47) | (1ULL << 46) | (u64)nloop | ((u64)nreg << 60);
     w->cur = p + 16;
+    // packet record, not an object
     *(u64*)(p + 8) = data;
     *(u64*)p = tag;
     if (out != 0) {
@@ -1839,12 +1722,15 @@ void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3)
 {
     const PacketWriterVt* d = self->vt;
+    // the class's this-adjustment from its vtable, not a field
     d->close((PacketWriter*)((u8*)self + d->adj1), 0);
     u8* blk = self->cur;
     s64 lo = ((s64)a2 << 60) | ((s64)1 << 46);
     s64 hdr = ((s64)a1 << 47) | lo;
+    // packet record, not an object
     self->cur = blk + 0x10;
     *(s64*)blk = hdr;
+    // packet record, not an object
     *(u64*)(blk + 8) = a3;
     self->block = blk;
     self->registerCount = a2;
@@ -1890,6 +1776,7 @@ void AddGifXyzEntry(PacketWriter* self, s32 a1, s32 a2, u64 a3)
 {
     CountGifEntry(self, 1, 5);
     u8* p = self->cur;
+    // packet record, not an object
     self->cur = p + 0x10;
     *(s32*)(p + 0x0) = a1;
     *(s32*)(p + 0x4) = a2;
@@ -1939,6 +1826,7 @@ LINKER_REMNANT(func_00161760);
 void BeginGifRegListTag(PacketWriter* self, u32 a1, u64 a2)
 {
     const PacketWriterVt* sub = self->vt;
+    // the class's this-adjustment from its vtable, not a field
     sub->close((PacketWriter*)((u8*)self + sub->adj1), 0);
     u64* p = self->cur64;
     self->cur64 = p + 2;
@@ -1998,28 +1886,25 @@ void AddGifImageTag(PacketWriter* self, s32 count)
     p[1] = 0;
 }
 
-struct CameraBlock16 { u8 b[16]; };
-
 // Clears a vertex batch, sets its defaults (scale 1.0, no light selection, a copy of 16 bytes
 // of the camera at +0x208) and resets it with ResetVertexBatch.
 u8* InitVertexBatch(VertexBatch* batch)
 {
-    u8* self = (u8*)batch;
     s32 i;
     for (i = 0x93; i != -1; i--) {
     }
-    FillMemory(self + 0xFC, 0, 0x28);
-    FillMemory(self, 0, 0xB0);
-    u8* camera = g_camera;
-    *(s32*)(self + 0x98) = 1;
-    *(f32*)(self + 0x90) = 1.0f;
-    *(CameraBlock16*)(self + 0x80) = *(CameraBlock16*)(camera + 0x208);
-    *(s32*)(self + 0xB0) = 0;
-    *(s32*)(self + 0xB4) = 0;
-    *(s32*)(self + 0x94) = -1;
-    *(f32*)(self + 0xAC) = 1.0f;
+    FillMemory(&batch->x, 0, 0x28);
+    FillMemory(batch, 0, 0xB0);
+    Camera* camera = (Camera*)g_camera;
+    batch->f98 = 1;
+    batch->scale = 1.0f;
+    batch->camera080 = *(CameraBlock16*)camera->fogTerms;
+    batch->flaggedLightCount = 0;
+    batch->lightCount = 0;
+    batch->f94 = -1;
+    batch->f0AC = 1.0f;
     ResetVertexBatch(batch);
-    return self;
+    return (u8*)batch;
 }
 
 // Frees the batch's memory when bit 0 of flag is set.
@@ -2034,10 +1919,9 @@ void DestroyVertexBatch(VertexBatch* self, s32 flag)
 // stores the rigid inverse at +0x40.
 void SetVertexBatchTransform(VertexBatch* batch, void* a1, void* a2)
 {
-    u8* self = (u8*)batch;
     FlushVertexBatch(batch);
-    BuildMatrixFromRotationAndTranslation((const Vec02*)a1, (const Mat02*)a2, (Mat4A*)self);
-    InvertRigidTransform(a1, a2, (Quad16*)(self + 0x40));
+    BuildMatrixFromRotationAndTranslation((const Vec02*)a1, (const Mat02*)a2, (Mat4A*)batch);
+    InvertRigidTransform(a1, a2, (Quad16*)batch->inverse040);
 }
 
 // The lights a batch is lit by: CollectLightsForSphere (main_loop.cpp) takes the world, the
@@ -2077,10 +1961,9 @@ void SelectVertexBatchLights(VertexBatch* batch, void* center, f32 radius)
 // Clears the batch's two buffer counters and its 0x1720-byte vertex area.
 void ResetVertexBatch(VertexBatch* batch)
 {
-    u8* self = (u8*)batch;
-    *(s32*)(self+0xF8)=0;
-    *(s32*)(self+0x124)=0;
-    ((MemoryFillFn)FillMemory)(self+0x128,0,0x1720);
+    *(s32*)&batch->mode=0;
+    batch->vertexCount=0;
+    ((MemoryFillFn)FillMemory)(batch->vertices,0,0x1720);
 }
 
 // Flushes the batch, sets its mode pointer to value and resets the vertex colour to opaque
@@ -2313,8 +2196,7 @@ LINKER_REMNANT(func_001626A0);
 // Copies a packed 32-bit colour into the batch as the colour of the vertices that follow.
 void SetVertexColor(VertexBatch* batch, void* src)
 {
-    u8* dst = (u8*)batch;
-    *(U32P*)(dst + 0x114) = *(U32P*)src;
+    batch->color = *(U32P*)src;
 }
 
 void SetVertexTexCoord(VertexBatch* dst, U64P* src)

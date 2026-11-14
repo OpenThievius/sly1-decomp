@@ -265,8 +265,6 @@ s32 IsWorld2BossLineBlocked(World2Boss* self, void* a1, void* a2)
     return r != 0;
 }
 
-typedef void* (*FnSelf_18A9A8)(void* self);
-typedef s32 (*FnSub_18A9A8)(void* self);
 
 // func_0018A9A8's locals: a point and the walker's current key.
 struct LineCheckFrame {
@@ -280,20 +278,19 @@ struct LineCheckFrame {
 // ahead; state 0x43E needs no check. Any other state gives 0.
 s32 HasWorld2BossClearLine(World2Boss* self)
 {
-    u8* obj = (u8*)self;
     LineCheckFrame loc;
-    void* sub;
+    SwitchedCollider* sub;
     s32 code;
 
     if (g_gameTime < self->targetReadyTime) {
         return 0;
     }
-    sub = ((FnSelf_18A9A8)(*(void***)obj)[0x198 / 4])(obj);
+    sub = (SwitchedCollider*)self->desc08()->m62(self);
     if (sub == 0) {
         return 0;
     }
-    if (*(u32*)((u8*)*(void**)sub + 8) & 8) {
-        if (((FnSub_18A9A8)(*(void***)sub)[0x144 / 4])(sub)) {
+    if (sub->desc->flags & 8) {
+        if (sub->desc05()->m4D(sub)) {
             return 0;
         }
     }
@@ -311,14 +308,14 @@ s32 HasWorld2BossClearLine(World2Boss* self)
             return 0;
         }
     }
-    if (IsWorld2BossLineBlocked((World2Boss*)obj, obj + 0x140, (u8*)sub + 0x140) != 0) {
+    if (IsWorld2BossLineBlocked(self, &self->v140, &sub->v140) != 0) {
         goto second;
     }
 one:
     return 1;
 second:
     ComputeObjectFrameAtTime((PlacedObject*)sub, 0, (Vec02*)loc.buf, 0, 0, 0, D_002649C8);
-    if (IsWorld2BossLineBlocked((World2Boss*)obj, obj + 0x140, loc.buf) == 0) {
+    if (IsWorld2BossLineBlocked(self, &self->v140, loc.buf) == 0) {
         goto one;
     }
     return 0;
@@ -457,17 +454,7 @@ void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
     }
 }
 
-struct QuadraticCurve {
-    f32 c[3];
-    f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
-};
-
-// The sequence an BlendSourceEntry's mover holds at 0x10 (func_0018AE38): FindCyclicRangeIndex's pairs.
-struct CyclicRanges {
-    u8 pad00[0x04];
-    s32 count;              // 0x04
-    void* pairs;            // 0x08
-};
+#include "quadratic_curve.h"
 
 extern ValueRange g_unitRange;
 void UpdateAgentState(Agent* self);
@@ -497,7 +484,7 @@ void UpdateWorld2BossState(World2Boss* self)
         if (g_player != 0 && g_player->animSeekValue != 0) {
             return;
         }
-        Agent* tgt = ((GaugeTargetFn)((void**)self->desc)[0x198 / 4])(self);
+        Agent* tgt = (Agent*)self->desc08()->m62(self);
         f32 weight;
         if (tgt != 0) {
             f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vec::Of(self->v140), Vec::Of(tgt->v140)).q,
@@ -519,10 +506,10 @@ void UpdateWorld2BossState(World2Boss* self)
         PoseSource* m;
         CyclicRanges* a;
         m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->f610))->mover;
-        a = *(CyclicRanges**)((u8*)m + 0x10);
+        a = m->ranges;
         s32 offFirst = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
         m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->f614))->mover;
-        a = *(CyclicRanges**)((u8*)m + 0x10);
+        a = m->ranges;
         s32 offSecond = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
         if (offFirst && self->firstInRange == 0) {
             RecordCameraTimestamp(g_camera);
@@ -546,7 +533,7 @@ void UpdateWorld2BossState(World2Boss* self)
         GetWorld2BossLevelFactor(self, &level);
         f32 rest = 1.0f - level;
         f32 limit = (1.0f - rest) * D_002649D0[0] + rest * D_002649D0[1];
-        Agent* tgt = ((GaugeTargetFn)((void**)self->desc)[0x198 / 4])(self);
+        Agent* tgt = (Agent*)self->desc08()->m62(self);
         if (tgt != 0) {
             f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vec::Of(tgt->v140), Vec::Of(self->v140)).q,
                                                         Vu0::Sub(Vec::Of(tgt->v140), Vec::Of(self->v140)).q)));

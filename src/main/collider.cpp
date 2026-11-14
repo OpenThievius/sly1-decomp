@@ -39,6 +39,10 @@
 #include "attached_set.h"
 #include "active_set_solver.h"
 #include "sound_level.h"
+#include "list_walk.h"
+#include "collider_pose.h"
+#include "playing_sound.h"
+#include "mesh_collision.h"
 #include "functions/active_set_solver.h"
 #include "functions/base_object.h"
 #include "functions/camera.h"
@@ -115,63 +119,9 @@ u16 ReadBufferedU16(BufferedStream* self);
 s32 ReadBufferedS16(BufferedStream* in);
 s32 ReadBufferedU32(BufferedStream* in);
 // What class 0x03's slot 69 (func_001B9F30) writes of a collider.
-struct ColliderPose {
-    s32 f00;                // 0x00: 0
-    u8 pad04[0x0C];
-    Vec02 position;         // 0x10: v140
-    Vec02 v150;             // 0x20
-    f32 heading;            // 0x30: from the first row of the matrix
-    f32 f34;                // 0x34: 100.0
-    f32 time;               // 0x38: g_gameTime
-    s32 f3C;                // 0x3C: 0
-};
 extern "C" void SyncDataCache(s32 a);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-// A sound playing in the world: a 0x90-byte record of the pool at World 0x1BA0, kept on
-// World::list1BAC. func_001BF6B8 takes one, func_001BF920 fills it, func_001BFAF8 starts its
-// voice, func_001C0070 updates each one every frame and func_001BF728 gives it back.
-struct PlayingSound {
-    s32 entry;              // 0x00: its row of g_soundEntries, -2 for the stream voice
-    s32 serial;             // 0x04: g_nextSoundRecordId when filled, checked by MarkSoundRecordIfIdMatches
-    s32 bank;               // 0x08: the bank handle its voice starts from (StartSoundRecordVoice)
-    PlayingSound** owner;   // 0x0C: the caller's pointer to it, cleared when it ends
-    f32 startTime;          // 0x10: g_gameTime when its voice started
-    f32 baseVolume;         // 0x14: the volume before distance; SetSoundRecordVolume rescales by it
-    s32 voice;              // 0x18: the IOP voice handle, 0 while silent
-    u8 pad1C[4];
-    Quad16 position;        // 0x20: where it plays when it follows no object
-    BaseObject* object;     // 0x30: the object it follows (its position at 0x140)
-    f32 farRange;           // 0x34: beyond it the sound is silenced or ended (UpdateSoundEmitters)
-    f32 nearRange;          // 0x38
-    s32 keepWhenFar;        // 0x3C: silenced instead of ended out of range
-    s32 silent;             // 0x40: no voice is playing
-    s32 positional;         // 0x44: volume and pan follow the listener
-    s32 finished;           // 0x48: its voice has ended (MarkSoundRecordIfIdMatches sets it)
-    u8 pollTick;            // 0x4C: frames to the next end-of-voice query, modulo 4
-    f32 volume;             // 0x50
-    f32 pan;                // 0x54
-    f32 pitch;              // 0x58: in octaves, 1524 units each (SetSoundRecordPitch)
-    f32 dopplerScale;       // 0x5C
-    s32 pitchOffset;        // 0x60: added to the pitch (SetSoundRecordPitch)
-    U64P link;              // 0x64: kept when InitSoundRecord clears the record
-    s32 pitchBaseValid;     // 0x6C
-    s32 pitchBase;          // 0x70: the entry's pitch from GetSoundPitchBase, cached
-    f32 nextTime;           // 0x74: when an ambient repeat plays next
-    union { U64P bytes; f32 value; } interval;  // 0x78: the ambient repeat interval, < 0 for none
-    union { U64P bytes; f32 value; } f80;       // 0x80
-    u8 pad88[8];
-    s32 Clamp(s32 v, s32 lo, s32 hi)
-    {
-        if (v < lo) {
-            return lo;
-        }
-        if (hi < v) {
-            return hi;
-        }
-        return v;
-    }
-};
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void MovePlacedObject(Collider* self, f32 x, void* b);
 typedef signed int s32;
@@ -193,34 +143,17 @@ struct ListedCollider {
 void PushBackMemoryMark();
 void PopBackMemoryMark();
 // The list walk of list_iter.h over a List01: push the frame, take each element, pop the frame.
-struct ListWalk {
-    static void Begin(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-    static u8* Next(ListFrame* it)
-    {
-        u8* obj = *(u8**)it->link;
-        it->link = obj + it->offset;
-        return obj;
-    }
-    static void End(ListFrame* it) { g_activeListFrames = it->prev; }
-};
 struct PooledContact;
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 // A script list being built (func_001C1530 hands one to a getter; func_001C1A28 appends a value
 // of `type` to it).
-struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
+#include "script_list.h"
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 s32 ReadBufferedU32(BufferedStream* self);
 void* AllocateFrontMemory(u32 size);
 // A type and a list of script values: func_001C1AD8 tells whether a value is among them.
-struct ScriptValueFilter { u32 type; R11B008Node* list; };
+
 s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
 
 
@@ -374,8 +307,8 @@ void ApplyColliderPendingMove(Collider* self, s32 quiet)
         moved = 1;
     }
     ListFrame it;
-    ListWalk::Begin(&it, &self->children);
-    for (PlacedObject* c = (PlacedObject*)ListWalk::Next(&it); c != 0; c = (PlacedObject*)ListWalk::Next(&it)) {
+    ListWalkSteps::Begin(&it, &self->children);
+    for (PlacedObject* c = (PlacedObject*)ListWalkSteps::Next(&it); c != 0; c = (PlacedObject*)ListWalkSteps::Next(&it)) {
         if (c->desc->flags & 2) {
             c->desc02()->m2F(c, moved);
         }
@@ -383,7 +316,7 @@ void ApplyColliderPendingMove(Collider* self, s32 quiet)
     if (moved && !quiet && self->desc->m12 != 0) {
         self->desc->m12(self);
     }
-    ListWalk::End(&it);
+    ListWalkSteps::End(&it);
 }
 
 // Folds the queued v490 and spin4A0 into the velocity (v150) and the spin (v160) instead of the
@@ -420,13 +353,13 @@ void ApplyColliderPendingImpulse(Collider* self, s32 moved)
         moved = 1;
     }
     ListFrame it;
-    ListWalk::Begin(&it, &self->children);
-    for (PlacedObject* c = (PlacedObject*)ListWalk::Next(&it); c != 0; c = (PlacedObject*)ListWalk::Next(&it)) {
+    ListWalkSteps::Begin(&it, &self->children);
+    for (PlacedObject* c = (PlacedObject*)ListWalkSteps::Next(&it); c != 0; c = (PlacedObject*)ListWalkSteps::Next(&it)) {
         if (c->desc->flags & 2) {
             ((Collider*)c)->desc03()->m30((Collider*)c, moved);
         }
     }
-    ListWalk::End(&it);
+    ListWalkSteps::End(&it);
 }
 
 extern f32 g_frameDt[];
@@ -472,9 +405,9 @@ void ApplyColliderPendingImpulseHalfStep(Collider* self, s32 flag)
         moved = 1;
     }
     ListFrame it;
-    ListWalk::Begin(&it, &self->children);
+    ListWalkSteps::Begin(&it, &self->children);
     PlacedObject* c;
-    while ((c = (PlacedObject*)ListWalk::Next(&it)) != 0) {
+    while ((c = (PlacedObject*)ListWalkSteps::Next(&it)) != 0) {
         if (c->desc->flags & 2) {
             ((Collider*)c)->desc03()->m31((Collider*)c, moved);
         }
@@ -486,7 +419,7 @@ void ApplyColliderPendingImpulseHalfStep(Collider* self, s32 flag)
             }
         }
     }
-    ListWalk::End(&it);
+    ListWalkSteps::End(&it);
 }
 
 ASM_FUNC(func_001B8420);
@@ -1146,12 +1079,12 @@ void CaptureColliderPose(Collider* self, ColliderPose* out)
 {
     Vec02 tmp[3];
     out->position = self->v140;
-    out->v150 = self->v150;
+    out->dir = self->v150;
     RotateMatrixUpright(&self->m110, 0, (Mat02*)&tmp[0]);
     out->heading = ArctangentOfRatio(-tmp[0].y, -tmp[0].x);
-    out->f34 = 100.0f;
-    out->f00 = 0;
-    out->time = g_gameTime[0];
+    out->weight = 100.0f;
+    out->flags = 0;
+    out->stampTime = g_gameTime[0];
     out->f3C = 0;
 }
 
@@ -1908,20 +1841,7 @@ struct MeshMotion {
     struct Tri { s32 i[3]; } *tris;
 };
 
-struct MeshFace {
-    Vec02 normal;
-    f32 dist;
-    u8 pad14[0xA];
-    u16 ref;
-};
 
-// An edge of a collision mesh (Mesh03::edges, 0x10 bytes): its two vertices and the two
-// faces it joins.
-struct MeshEdge {
-    s16 verts[2];           // 0x00
-    s16 faces[2];           // 0x04
-    u8 pad08[0x10 - 0x08];
-};
 
 void* AllocateZeroedBackMemory(s32 size);
 
@@ -1948,10 +1868,10 @@ void InitColliderMeshMotion(Collider* self)
     for (s32 i = 0; i < self->meshCopy.edgeCount; i++) {
         MeshEdge* e = &((MeshEdge*)self->meshCopy.edges)[i];
         for (s32 j = 0; j < 2; j++) {
-            f = e->faces[j];
+            f = e->face[j];
             tri = &h->tris[f];
             for (s32 k = 0; k < 2; k++) {
-                s32 v = e->verts[k];
+                s32 v = e->v[k];
                 s32 m;
                 for (m = 0; m < counts[f]; m++) {
                     if (v == tri->i[m]) {
@@ -2693,19 +2613,19 @@ void ProcessColliderGroup(World* ctx, s32 n, Collider** arr, f32 f, s32 ex)
         arr[i]->flags538 &= ~(1ULL << 58);
     }
     for (i = half; i < n; i++) {
-        ListWalk::Begin(&it, &arr[i]->parts);
-        for (p = ListWalk::Next(&it); p; p = ListWalk::Next(&it)) {
+        ListWalkSteps::Begin(&it, &arr[i]->parts);
+        for (p = ListWalkSteps::Next(&it); p; p = ListWalkSteps::Next(&it)) {
             SetColliderForcedState((Collider*)p, 1);
         }
-        ListWalk::End(&it);
+        ListWalkSteps::End(&it);
     }
     ProcessColliderGroup(ctx, half, arr, f, ex);
     for (i = half; i < n; i++) {
-        ListWalk::Begin(&it, &arr[i]->parts);
-        for (p = ListWalk::Next(&it); p; p = ListWalk::Next(&it)) {
+        ListWalkSteps::Begin(&it, &arr[i]->parts);
+        for (p = ListWalkSteps::Next(&it); p; p = ListWalkSteps::Next(&it)) {
             SetColliderForcedState((Collider*)p, 0);
         }
-        ListWalk::End(&it);
+        ListWalkSteps::End(&it);
     }
 }
 

@@ -167,7 +167,6 @@ void UpdatePlayerLinkedCollider(PlayerLinkedCollider* self, f32 dt)
 
 extern u8* g_player;
 
-typedef void (*PlayerFrameFn)(void* self, f32 t, void* buf);
 
 void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self);
 void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self);
@@ -188,14 +187,12 @@ void ControlPlayerLinkedCollider(PlayerLinkedCollider* self, void* obj, f32 t)
     }
     o = g_player;
     if (o != 0) {
-        if (*(s32*)(o + 0x2740) != 0) {
+        if (((Player*)o)->entryQueue != 0) {
             if (IsObjectAttached((BaseObject*)o)) {
-                PlayerFrameFn fn;
                 FillMemory(buf, 0, 0xC4);
                 o = g_player;
-                fn = *(PlayerFrameFn*)(*(u8**)o + 0x134);
-                if (fn != 0) {
-                    fn(o, t, buf);
+                if (((Player*)o)->desc05()->m49 != 0) {
+                    ((Player*)o)->desc05()->m49((Player*)o, t, (PadRecord*)buf);
                 }
             }
         }
@@ -269,7 +266,7 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 u8* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 void PopBackMemoryMark(void);
-struct FrameSource;
+struct PlacementRecord;
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 // Chooses which collider the player-linked object points at: when its pool has a choice, takes the
@@ -300,17 +297,17 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         SpanHit hit;
         PushBackMemoryMark();
         GatherCollidersInBox(self->world, 0, &lo, &hi, IsPlayerLinkedColliderCandidate, self, &n, &list);
-        u8* found = FindNearestSpanObject(0, &lo, &hi, n, list, (ColliderSpan*)&hit);
-        if (found != 0 && *(s32*)(found + 8) != 1) {
-            *(u8**)e0 = found;
+        Collider* found = (Collider*)FindNearestSpanObject(0, &lo, &hi, n, list, (ColliderSpan*)&hit);
+        if (found != 0 && found->id != 1) {
+            *(u8**)e0 = (u8*)found;
             TransformPointBetweenFrames(0, (PlacedObject*)found, (Vec02*)&hit, (Vec02*)&pool->fF0);
             pos = hit.point;
-            if (IsObjectOfKind((BaseObject*)(*(void**)(found + 0x50)), 0xE) != 0 || IsObjectOfKind((BaseObject*)(*(void**)(found + 0x50)), 7) != 0) {
+            if (IsObjectOfKind(found->root, 0xE) != 0 || IsObjectOfKind(found->root, 7) != 0) {
                 g_typedTextCaptionBox.palette = 2;
-            } else if (IsObjectOfKind((BaseObject*)(*(void**)(found + 0x50)), 8) != 0) {
+            } else if (IsObjectOfKind(found->root, 8) != 0) {
                 g_typedTextCaptionBox.palette = 1;
             } else {
-                u8* c = found;
+                u8* c = (u8*)found;
                 while (c != 0) {
                     s32 i;
                     for (i = 0; i < self->linkedCount; i++) {
@@ -321,7 +318,7 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
                     if (i < self->linkedCount) {
                         break;
                     }
-                    c = *(u8**)(c + 0x18);
+                    c = (u8*)((BaseObject*)c)->parent;
                 }
                 if (c != 0) {
                     g_typedTextCaptionBox.palette = 1;
@@ -331,6 +328,7 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
             }
         } else {
             *(u8**)e0 = 0;
+            // a field access here changes retail's code (the record pointer e0 is kept in a register)
             *(Vec02*)(e0 + 0x10) = hi;
             g_typedTextCaptionBox.palette = 0;
             pos = hi;
@@ -339,8 +337,9 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         Vec02 c0;
         Mat02 rot;
         Vec02 d;
-        GetPlacementRecordTransform((FrameSource*)place, &c0, rot.r, 0);
+        GetPlacementRecordTransform((PlacementRecord*)place, &c0, rot.r, 0);
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(c0));
+        // a field access here changes retail's code (the record pointer is kept in a register)
         *(f32*)(ang + 8) = ArctangentOfRatio(d.y, d.x);
         *(f32*)(ang + 4) = ArctangentOfRatio(d.z, Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d)))));
     }
@@ -407,7 +406,6 @@ s32 TestPlayerLinkedColliderMayContact(PlayerLinkedCollider* self, void* arg)
     return 0;
 }
 
-typedef void (*PeerEffectFn)(void* self, s32 mode, PlacedObject* other);
 
 
 // Starts an effect: through the linked agent's method 0x148 when there is an agent, else as a
@@ -415,8 +413,7 @@ typedef void (*PeerEffectFn)(void* self, s32 mode, PlacedObject* other);
 void StartPlayerLinkedColliderEffect(PlayerLinkedCollider* self, s32 mode, PlacedObject* other)
 {
     if (self->agent != 0) {
-        PeerEffectFn fn = *(PeerEffectFn*)(*(u8**)self->agent + 0x148);
-        fn(self->agent, mode, other);
+        ((SwitchedCollider*)self->agent)->desc05()->m4E((SwitchedCollider*)self->agent, mode, other);
     } else {
         StartSwitchedColliderEffect(self, mode, other);
     }
@@ -502,6 +499,7 @@ void InitArcPoints(T217D_3F0* self, s32 kind)
             p->previousNextY = p->y;
             p->previousNextX = p->x;
         }
+        // address arithmetic: steps to the next 0x2C-byte record (p++ changes retail's code)
         p = (ArcPointStep*)((u8*)p + 0x2C);
     }
     self->pts[56].nextY = 1.0f;
@@ -1193,10 +1191,10 @@ void DrawArcOutlinePacket(ArcDrawRequest* request)
         return;
     }
     if (D_00270458 != 4) {
-        if (AreFloatsNearlyEqual(g_camera->zoom, *(f32*)((u8*)self->current + 0x2D4), 1e-4f) == 0) {
+        if (AreFloatsNearlyEqual(g_camera->zoom, ((ArcHeld*)self->current)->zoom, 1e-4f) == 0) {
             f32 zoom = g_camera->zoom;
             f32 f1C8 = g_camera->zoomGoal;
-            SnapCameraZoom(g_camera, *(f32*)((u8*)self->current + 0x2D4));
+            SnapCameraZoom(g_camera, ((ArcHeld*)self->current)->zoom);
             WriteCameraMatricesPacket(g_camera);
             SnapCameraZoom(g_camera, zoom);
             g_camera->zoomGoal = f1C8;

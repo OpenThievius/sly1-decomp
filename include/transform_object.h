@@ -28,6 +28,15 @@ struct TransformObject : BaseObject {
     Mat3_73 rot;            // 0x50
 };
 
+// 0x7B (0x90 bytes): a placed transform with a mesh of points and links read from the level
+// stream (func_00141108, ReadMeshTables).
+struct MeshObject : TransformObject {
+    s32 pointCount;         // 0x80
+    void* points;           // 0x84
+    s32 linkCount;          // 0x88
+    void* links;            // 0x8C
+};
+
 // 0x74 (0x100 bytes): a set of objects of its own. Loading (slot 10, func_001F3D80) makes each
 // object from the stream and has it load itself, then reads a list of ids; copying (slot 9,
 // func_001F3EE0) copies the objects; starting (slot 16, func_001F3F80) gives each its parent
@@ -109,12 +118,13 @@ struct RecordMember : MemberObject {
 // 0x7A: three more ids, a delay for messages, and two objects it holds.
 struct HoldingMember : RecordMember {
     s32 fA0;                // 0xA0
-    u8 padA4[0xAC - 0xA4];
+    f32 countMin;           // 0xA4: the range the particle count of a spawn message is drawn from
+    f32 countMax;           // 0xA8
     s32 idAC;               // 0xAC
     s32 idB0;               // 0xB0
     s32 idB4;               // 0xB4
     f32 delay;              // 0xB8
-    u8 padBC[0xC0 - 0xBC];
+    s32 chained;            // 0xBC: set, a spawn message chains the two objects it holds to the effects
     BaseObject* heldC0;            // 0xC0
     BaseObject* heldC4;            // 0xC4
     u8 padC8[0xD0 - 0xC8];

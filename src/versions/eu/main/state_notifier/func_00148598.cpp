@@ -20,5 +20,5 @@ void SetSaveNotifierState(SaveNotifier* self, s32 mode)
         ResetScatterLevels((ScatterController*)g_scatterController);
         StartMemoryCardSave((MemoryCard*)g_memoryCard);
     }
-    SetStateNotifierState((Camera*)self, mode);
+    SetStateNotifierState(self, mode);
 }

@@ -47,6 +47,7 @@
 #include "ramp_profile.h"
 #include "node_query.h"
 #include "object_finder.h"
+#include "list_walk.h"
 #include "functions/base_object.h"
 #include "functions/camera.h"
 #include "functions/collider.h"
@@ -86,30 +87,6 @@ extern f32 g_gameTime;
 extern Camera* g_camera;
 
 // A list walk whose frame pushes itself when it is made and pops itself when it goes out of scope.
-struct ListWalk : ListFrame {
-    ListWalk(List01* l)
-    {
-        list = l;
-        link = (u8*)l;
-        offset = l->offset;
-        prev = g_activeListFrames;
-        g_activeListFrames = this;
-    }
-    ~ListWalk() { g_activeListFrames = prev; }
-    // The list's first element, from the list's head.
-    void* First()
-    {
-        void* n = *(void**)list;
-        link = (u8*)n + offset;
-        return n;
-    }
-    void* Next()
-    {
-        void* n = *(void**)link;
-        link = (u8*)n + offset;
-        return n;
-    }
-};
 
 // The loop walks an intrusive list with an iterator that registers itself on a global stack
 // (D_0027B314) for its lifetime and unregisters in its destructor.
@@ -380,32 +357,8 @@ void AttachPairedPartner(void* a0, void* a1);
 
 
 
-// The coefficients of a quadratic in t (a + bt + ct^2), as the pose holds them.
-typedef BlendQuad QuadraticCoeffs;
-
 // A quadratic evaluated at t and clamped to a range (func_001A5760).
-struct ClampedQuadratic {
-    static f32 Eval(const QuadraticCoeffs* p, f32 t)
-    {
-        return p->a + t * (p->b + t * p->c);
-    }
-    static void Clamp(f32& c, f32 v, const ValueRange* r)
-    {
-        f32 lo = r->lo;
-        f32 hi = r->hi;
-        if (v < lo) {
-            c = lo;
-        } else if (hi < v) {
-            c = hi;
-        } else {
-            c = v;
-        }
-    }
-    static void Get(f32& c, const QuadraticCoeffs* p, f32 t)
-    {
-        Clamp(c, Eval(p, t), &g_unitRange);
-    }
-};
+#include "clamped_quadratic.h"
 
 ObjectLink g_walkerColliderLoadLinks[2] = { { 0x2, 0x28E, 0x640 }, { 0x2, 0x292, 0x650 } };
 

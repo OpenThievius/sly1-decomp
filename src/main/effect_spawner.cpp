@@ -9,6 +9,8 @@
 // family, the effect spawner, whose spawn record the member objects share.
 #include "common.h"
 #include "effect_spawner.h"
+#include "attached_set.h"
+#include "switched_collider.h"
 #include "vu0.h"
 #include "asm_func.h"
 #include "system.h"
@@ -37,6 +39,8 @@
 #include "scope_marker.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "list_walk.h"
+#include "playing_sound.h"
 #include "functions/active_set_solver.h"
 #include "functions/anim_record.h"
 #include "functions/collider.h"
@@ -171,7 +175,6 @@ void FillLookDirectionBlock(Effect* a, Rec50* b);
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 IsListEmpty(List01* p);
 
-#define AT(T, p, o) (*(T*)((u8*)(p) + (o)))
 typedef void (*VFn)();
 
 struct SpawnSpan {
@@ -268,8 +271,8 @@ struct MemberTargetObject;
 
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
 // list at +0x1BDC, linked at +0x64): the receiver, the 0x50-byte message, the time it is due.
-struct DelayedMessageBody { Quad16 q[5]; };
-struct DelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 due; };
+#include "delayed_message_body.h"
+struct QueuedDelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 due; u8 link[8]; /* 0x64: the link in World::list1BDC */ };
 
 extern f32 g_gameClock[];
 
@@ -343,14 +346,6 @@ void AppendToList(List01* self, void* item);
 
 void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15, void* owner);
 
-struct CyclerEventMessage {
-    u8 pad0[0x8];
-    f32 f8;
-    s32 fC;
-    u8 pad1[0x20 - 0x10];
-    Quad16 f20;
-    Quad16 f30;
-};
 struct __attribute__((aligned(16))) GroupForwardMessage {
     s32 f0;
     u8 pad0[0x10 - 0x4];
@@ -378,7 +373,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 // The colour UpdateColorFade blends, word-aligned, and its request: DeferredRequest's layout
 // with that colour at +0x60 (DeferredRequest's Rgba4 would copy it unaligned).
 struct __attribute__((aligned(4))) FadeColor { u8 c[4]; };
-struct FadeRequest { void* fn; f32 f; s32 mode; u8 pad[0x54]; FadeColor col; u8 pad2[0x1C]; };
+struct FadeEffectRequest { void* fn; f32 f; s32 mode; u8 pad[0x54]; FadeColor col; u8 pad2[0x1C]; };
 extern s32 D_00275BC4;
 
 extern s32 D_00270458;
@@ -436,16 +431,6 @@ void RemoveFromList(List01* list, void* item);
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
 // (list_iter.h) and each step reads the next item through the link.
-struct BeginListWalk {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = g_activeListFrames;
-        g_activeListFrames = it;
-    }
-};
 
 template <class T> struct NextInList {
     static T* Of(ListFrame* it)
@@ -462,7 +447,7 @@ void FindOrBuildMemberGroup(void** out, void* self);
 s32 IsInList(List01* self, void* item);
 void RemoveFromList(List01* list, void* item);
 
-struct CyclerDrawParams { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
+#include "cycler_draw_params.h"
 extern f32 g_gameTime;
 extern f32 g_cyclerShrinkCurve[4];
 extern f32 g_cyclerGrowCurve[4];
@@ -476,7 +461,7 @@ void CollectObjectByMode(PlacedObject* obj, s32 kind, s32 all, s32 zero, PlacedO
 
 
 // An entry of a GCC 2.95 vtable as this file defines D_0024A220 (the font table).
-struct VtableEntry { s32 delta; void (*fn)(); };
+#include "vtable_entry.h"
 struct FloatPair2 { f32 x; f32 y; };
 extern const VtableEntry g_fontMethods[22];
 void* AllocateObjectMemory(u32);
@@ -526,11 +511,6 @@ void* InitGifPacket(void* p);
 void* InitPacketWriter(PacketWriter* self);
 
 
-struct GroundProbe {
-    Vec02 q;
-    s32 a;
-    s32 b;
-};
 
 extern f32 g_gameClock[];
 
@@ -583,7 +563,7 @@ extern s32 g_fonts[];
 // NEAR: the first load of self->p54 goes to $v0 (retail $v1), so two
 // pointer loads differ in register choice; everything else matches.
 
-struct FontUploadFrame { PacketWriter a; u8 buf[0x100]; };
+#include "font_frame.h"
 PacketWriter* InitGifPacket(PacketWriter* p);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
@@ -614,17 +594,6 @@ extern s32 D_002626CC;
 
 extern "C" s32 AwaitSemaphore(void* a);
 
-struct FontHeader {
-    u16 u0;
-    u16 u2;
-    u8 b4;
-    u8 b5;
-    u8 b6;
-    u8 b7;
-    f32 f8;
-    u16 uC;
-    u16 padE;
-};
 
 
 
@@ -653,8 +622,6 @@ void RunThread(void* a, s32 b);
 void func_0015E678(void);
 
 
-struct GroundFilterContext { u8 pad[0x50]; s32 f50; };
-struct GroundCandidate { u8 pad0[0x50]; s32 f50; u8 pad1[0x278]; u32 f2CC; u8 pad2[0x268]; u64 f538; };
 
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
@@ -667,12 +634,6 @@ extern "C" s32 AwaitSemaphore(void* p);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 
-struct FrameNode {
-    u8 pad0[0x14];
-    u8* f14;
-    u8 pad18[0x1088 - 0x18];
-    void* f1088;
-};
 
 
 s32 IsListEmpty(List01* l);
@@ -692,32 +653,14 @@ typedef unsigned int u32;
 typedef signed long s64;
 typedef unsigned long u64;
 typedef float f32;
-struct StringLayout
-{
-  f32 x;
-  f32 y;
-  f32 width;
-  f32 height;
-  s32 color;
-  s32 horizontalAlign;
-  s32 verticalAlign;
-};
+
 
 
 
 // Inline text codes: ~RRGGBB / ~. colour, &<id> / &. font, ^<d><d> / ^. scale.
 
-struct FrameGlyph {
-    Font* font;
-    s8 key;
-    u8 p5[3];
-    f32 paddingX;
-    f32 paddingY;
-    f32 scaleX;
-    f32 scaleY;
-    u32 color;
-};
-struct FrameRect { f32 x, y, w, h; };
+
+
 
 void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s);
@@ -1081,6 +1024,7 @@ EffectSpawner* MarkEffectSpawnerChanged(EffectSpawner* self, s32 value)
 // Adds a range entry to the spawner's own (copied if shared) spawn record.
 void AddSpawnRangeEntry(EffectSpawner* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w)
 {
+    // the range emitter is a local view at 0x10 of the spawn record
     u8* p=(u8*)GetOwnSpawnRecord(self,1);
     AddRangeEntry((RangeEmitter*)(p+16),a,b,x,y,z,w,self);
 }
@@ -1189,6 +1133,7 @@ void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
                     goto spawn;
                 }
             }
+            // the list link at 0x320 of the objects walked: their class is not known
             o = *(PlacedObject**)((u8*)o + 0x320);
         } while (o != 0);
         return;
@@ -1479,19 +1424,22 @@ extern s32 g_surfaceContactSounds[74];
 s32 RandomIntInRange(s32 a, s32 b);
 void SpawnEffectsAt(Quad16* self, Quad16* a1, s32 a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
 
+// A playing sound, as far as the surface-contact effects reach into it.
+
 // Both callers (gauge_collider.cpp and collider.cpp) declare it with these parameters and are
 // retail's code with them; a float takes its register wherever it is declared.
 void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance, Quad16* at, f32 minScale, f32 size)
 {
-    if (AT(s32, cfg, 0x580) == 0) {
+    AttachedSet* set = (AttachedSet*)cfg;
+    if (set->tellsLanding == 0) {
         return;
     }
-    f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*p), Vu0::Q(AT(Quad16, self, 0x150)))));
+    f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(*p), Vu0::Q(((PlacedObject*)self)->v150))));
     f32 zero = 0.0f;
     s32 go = RandomFloatInRange(zero, 3.0f) < chance;
-    u8* snd = 0;
+    SwitchedCollider* snd = 0;
     if (self->desc->flags & 8) {
-        snd = (u8*)self;
+        snd = (SwitchedCollider*)self;
     }
     if (10.0f < dist || go) {
         f32 hi = 1.0f;
@@ -1504,20 +1452,20 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
         } else {
             k = t;
         }
-        if (snd != 0 && AT(s32, cfg, 0x584) != 0) {
+        if (snd != 0 && set->f584 != 0) {
             f32 vol = k * 0.9f + 0.1f;
-            void* rec = AT(void*, snd, 0x574);
+            PlayingSound* rec = (PlayingSound*)snd->playingSound;
             if (rec != 0) {
-                AT(f32, rec, 0x14) = vol;
+                rec->baseVolume = vol;
             } else {
-                StartSoundEffect(g_surfaceContactSounds[RandomIntInRange(0, 3)], (PlayingSound**)(snd + 0x574), (BaseObject*)snd, 0, 10.0f, 1.0f, vol,
+                StartSoundEffect(g_surfaceContactSounds[RandomIntInRange(0, 3)], (PlayingSound**)&snd->playingSound, (BaseObject*)snd, 0, 10.0f, 1.0f, vol,
                                  0.0f, 0.0f, 0, 0);
             }
         }
         if (!go) {
             f32 period = 1.0f - k * (1.0f - minScale);
             if (snd != 0) {
-                go = period < g_gameTime - AT(f32, snd, 0x570);
+                go = period < g_gameTime - snd->surfaceEffectTime;
             } else {
                 f32 now = g_gameTime;
                 s32 a = (s32)(now / period);
@@ -1534,12 +1482,12 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
         }
         ((EffectStartFn)e->vt->m00)(e, at, 0, size);
         if (snd != 0) {
-            AT(f32, snd, 0x570) = g_gameTime;
+            snd->surfaceEffectTime = g_gameTime;
         }
-        if (AT(s32, cfg, 0x588) != 0 && 500.0f < dist) {
+        if (set->f588 != 0 && 500.0f < dist) {
             SplashTail tail = { 2, -1, 0, 0, 1.0f, 0.0f, 0, 0, 8.0f, 12.0f, 0, 0, cfg };
             Blk05 block = {
-                { dist * 0.5f, dist * 0.75f, 1.0f }, AT(Vec02, self->world, 0x1EE0), { 0.0f, 0.0f, 0.0f },
+                { dist * 0.5f, dist * 0.75f, 1.0f }, self->world->gravity, { 0.0f, 0.0f, 0.0f },
                 *(Quad16*)&g_unitZVector, 0.0f, 0.392699093f, 1.04719758f, 0,
                 { 1.0f, 5.0f, 0.0f }, { { 0, 0, 0, 0 } }, { 1.0f, 0.0f, -1.0f }
             };
@@ -1548,7 +1496,7 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
             SpawnEffectsAt((Quad16*)&pos, (Quad16*)&g_unitZVector, RandomIntInRange(4, 6), (SpawnTail*)&tail, (SpawnBlock*)&block, 0, 0);
         }
     } else if (snd != 0) {
-        StopSoundRecord((PlayingSound*)(AT(void*, snd, 0x574)), 0);
+        StopSoundRecord((PlayingSound*)snd->playingSound, 0);
     }
 }
 
@@ -1641,6 +1589,11 @@ void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* 
 void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 
 static inline f32 RandomInRange(const SpawnRange& r)
+{
+    return RandomFloatInRange(r.lo, r.hi);
+}
+
+static inline f32 RandomInRange(const Range50& r)
 {
     return RandomFloatInRange(r.lo, r.hi);
 }
@@ -1892,20 +1845,38 @@ void ChooseSpawnDirectionAndLifetime(SpawnPlacement* self, SpawnRing* ring, s32 
     }
 }
 
+// The part of the spawn record that SpawnRecordEffects reads, from 0x120 on (Rec50, effect_spawner.h).
+struct SpawnEffectParams {
+    u8 pad00[0x90];
+    s32 effectKind;         // 0x1B0: the kind of effect made for each point
+    s32 trailKind;          // 0x1B4: the kind of effect that trails each one, -1 for none
+    u8 pad98[0xA4 - 0x98];
+    f32 poly1;              // 0x1C4: the second and third words of the quadratic at 0x1C0, put in each effect
+    f32 poly2;              // 0x1C8
+    u8 padAC[0xB0 - 0xAC];
+    f32 scaleMin;           // 0x1D0: the range each effect's scale is drawn from
+    f32 scaleMax;           // 0x1D4
+    s32 found0;             // 0x1D8: the first object the ids name
+    u8 padBC[0xC0 - 0xBC];
+    s32 found2;             // 0x1E0: the third
+    s32 ownerFlag;          // 0x1E4: the flag AcquireEffectOwner is asked with
+};
+
 // Spawns effects for a spawn record in its owner mode: finds (or acquires and caches in the slot h)
 // the effect owner for the record, copies the record's margin into it, and gives it n entries with
 // positions pos and the other arrays.
 void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* q2, f32* v5, f32* v6)
 {
-    u8* s7 = AT(u8*, self, 0x7C);
+    PlacedObject* s7 = (PlacedObject*)self->target;
     EffectOwner* node = 0;
-    u8* c = (u8*)self + 0x120;
+    // a field access here changes retail's code: the part of the record from 0x120 is held in a register
+    SpawnEffectParams* c = (SpawnEffectParams*)((u8*)self + 0x120);
     s32 i;
     if (h) {
         if (h->effectOwnerCache) node = (EffectOwner*)*h->effectOwnerCache;
     }
     if (!node) {
-        node = AcquireEffectOwner((World*)g_currentWorld, AT(s32, c, 0xC4));
+        node = AcquireEffectOwner((World*)g_currentWorld, c->ownerFlag);
         if (!node) return;
         if (h) {
             if (h->effectOwnerCache) *h->effectOwnerCache = (s32)node;
@@ -1914,52 +1885,50 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
         if (h) {
             if (h->ownerArgument) {
                 typedef void (*F)(EffectOwner*, s32);
-                (*(F*)(AT(u8*, node, 0) + 0x6C))(node, h->ownerArgument);
+                ((F)node->desc->m17)(node, h->ownerArgument);
             }
         }
     }
     if (node) {
     for (i = 0; i < n; i++) {
-        Effect* it = CreateEffect(AT(s32, c, 0x90), (EffectOwner*)node);
+        Effect* it = CreateEffect(c->effectKind, (EffectOwner*)node);
         if (!it) break;
         Quad16* s1 = pos + i;
-        u8* cls = AT(u8*, it, 0);
-        f32 f = RandomFloatInRange(AT(f32, c, 0xB0), AT(f32, c, 0xB4));
+        u8* cls = (u8*)it->vt;
+        f32 f = RandomFloatInRange(c->scaleMin, c->scaleMax);
         typedef void (*F0)(Effect*, Quad16*, s32, f32);
-        (*(F0*)cls)(it, s1, AT(s32, c, 0xC0), f);
-        f32 f1 = AT(f32, c, 0xA4);
-        if (f1 != 0.0f || AT(f32, c, 0xA8) != 0.0f) {
-            AT(f32, it, 0x34) = f1;
-            AT(f32, it, 0x38) = AT(f32, c, 0xA8);
+        (*(F0*)cls)(it, s1, c->found2, f);
+        f32 f1 = c->poly1;
+        if (f1 != 0.0f || c->poly2 != 0.0f) {
+            it->m30[1] = f1;
+            it->m30[2] = c->poly2;
         }
-        AT(Quad16, it, 0xA0) = q2[i];
-        AT(f32, it, 0x18) = v5[i];
-        AT(f32, it, 0x1C) = v6[i] - v5[i];
-        AT(Quad16, it, 0x40) = AT(Quad16, self, 0x110);
-        FillLookDirectionBlock((Effect*)((u8*)it + 0xB0), self);
-        if (AT(s32, c, 0xB8)) AT(s32, it, 0x20) = AT(s32, c, 0xB8);
+        *(Quad16*)&it->qA0 = q2[i];
+        it->start = v5[i];
+        it->life = v6[i] - v5[i];
+        *(Quad16*)&it->q40 = self->q110;
+        FillLookDirectionBlock((Effect*)&it->fB0, self);
+        if (c->found0) it->i20 = c->found0;
         if (s7) {
-            AT(Quad16, it, 0x50) = AT(Quad16, s7, 0x110);
-            AT(Quad16, it, 0x60) = AT(Quad16, s7, 0x120);
-            AT(Quad16, it, 0x70) = AT(Quad16, s7, 0x130);
+            it->rotation[0] = s7->m110.r[0];
+            it->rotation[1] = s7->m110.r[1];
+            it->rotation[2] = s7->m110.r[2];
         }
-        if (AT(s32, c, 0x94) != -1) {
-            EffectOwner* o = (EffectOwner*)CreateEffect(AT(s32, c, 0x94), 0);
+        if (c->trailKind != -1) {
+            EffectOwner* o = (EffectOwner*)CreateEffect(c->trailKind, 0);
             if (!o) break;
             typedef void (*F1)(f32, EffectOwner*, void*, s32);
-            F1 fn = *(F1*)(*(u8**)o);
-            fn(AT(f32, it, 0x30) * 0.5f, o, (u8*)it + 0x80, 0);
+            F1 fn = (F1)((Effect*)o)->vt->m00;
+            fn(it->m30[0] * 0.5f, o, &it->pos, 0);
             SetTrailSegmentAnchor(o, 1, it);
         }
         {
-            u8* cl = AT(u8*, it, 0);
-            VFn* p = (VFn*)(cl + 4);
-            if (*p) ((void (*)(Effect*, Rec50*))*p)(it, self);
+            if (it->vt->m01) ((void (*)(Effect*, Rec50*))it->vt->m01)(it, self);
         }
     }
     if (IsListEmpty(&node->list558)) {
         typedef void (*F2)(EffectOwner*);
-        (*(F2*)(AT(u8*, node, 0) + 0x1C))(node);
+        node->desc->m03(node);
     }
     }
 }
@@ -1995,35 +1964,35 @@ struct ParticleChunk {
 // loop.c then reduces the record's address and the copy's as two registers (docs/TOOLCHAIN.md).
 void EmitParticleChunk(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* vel, f32* size, f32* spin, Quad16* e, Quad16* g)
 {
-    EffectOwner* set = 0;
+    WorldListedObject* set = 0;
     s32 i;
     ParticleChunk* chunk;
     if (h) {
-        if (h->particleOwnerCache) set = (EffectOwner*)*h->particleOwnerCache;
+        if (h->particleOwnerCache) set = (WorldListedObject*)*h->particleOwnerCache;
     }
     if (!set) {
         World* world = g_currentWorld;
-        if (AT(s32, world, 0x1B48) == 0) return;
-        if (AT(s32, self, 0x130) == 2) {
-            if (AT(s32, world, 0x1B54) == 0) return;
+        if (world->pool1B40.head == 0) return;
+        if (self->f130 == 2) {
+            if (world->pool1B4C.head == 0) return;
         }
-        set = (EffectOwner*)ResetFirstListedObject(world);
+        set = ResetFirstListedObject(world);
         if (!set) return;
         if (h) {
             if (h->particleOwnerCache) *h->particleOwnerCache = (s32)set;
         }
-        ApplyLookSourceToListedObject((WorldListedObject*)set, (LookSource*)self);
+        ApplyLookSourceToListedObject(set, (LookSource*)self);
         if (h) {
             if (h->ownerArgument) {
-                typedef void (*F)(EffectOwner*, s32);
-                (*(F*)(AT(u8*, set, 0) + 0x6C))(set, h->ownerArgument);
+                typedef void (*F)(WorldListedObject*, s32);
+                ((F)set->desc->m17)(set, h->ownerArgument);
             }
         }
         if (!set) return;
     }
-    chunk = AT(ParticleChunk*, set, 0x624);
+    chunk = (ParticleChunk*)set->members.head;
     i = 0;
-    while (i < n && (chunk != 0 || (chunk = (ParticleChunk*)AcquireOwnedRecord((WorldListedObject*)set)) != 0)) {
+    while (i < n && (chunk != 0 || (chunk = (ParticleChunk*)AcquireOwnedRecord(set)) != 0)) {
         u32 k = chunk->count;
         ParticleState* last = &chunk->prev;
         while (k < 0x2C && i < n) {
@@ -2031,23 +2000,23 @@ void EmitParticleChunk(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad
             Quad16* v = &chunk->cur.vel[k];
             Quad16* rec = &chunk->cur.rec[k];
             *p = pos[i];
-            AT(f32, p, 0xC) = size[i];
+            *(f32*)&p->w[3] = size[i];
             *v = vel[i];
-            AT(f32, v, 0xC) = spin[i];
+            *(f32*)&v->w[3] = spin[i];
             FillMemory(rec, 0, 0x10);
-            s32 r = RandomIntInRange(0, AT(s32, set, 0x590) - 1);
-            AT(s32, rec, 0) = r;
-            if (AT(s32, set, 0x614) != 0) AT(s32, rec, 0) = r & 0xFFFFFFFE;
-            if (AT(s32, self, 0x178) != 0) AT(s32, rec, 4) = RandomIntInRange(0, AT(s32, set, 0x384) - 1);
-            if (AT(s32, set, 0x618) == 2) {
-                f32 f = RandomInRange(AT(SpawnRange, self, 0x19C));
-                AT(f32, rec, 8) = f;
-                if (AT(s32, self, 0x198) == 0) {
-                    if (0.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(AT(Quad16, g_camera, 0x90)), Vu0::Q(*v)))) AT(f32, rec, 8) = -f;
+            s32 r = RandomIntInRange(0, set->colorCount - 1);
+            rec->w[0] = r;
+            if (set->f614 != 0) rec->w[0] = r & 0xFFFFFFFE;
+            if (self->f178 != 0) rec->w[1] = RandomIntInRange(0, set->regCount - 1);
+            if (set->particleMode == 2) {
+                f32 f = RandomInRange(self->range19C);
+                *(f32*)&rec->w[2] = f;
+                if (self->f198 == 0) {
+                    if (0.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(g_camera->rot80.r[1]), Vu0::Q(*v)))) *(f32*)&rec->w[2] = -f;
                 }
-                if (AT(s32, self, 0x1A4) != 0) AT(f32, rec, 0xC) = RandomFloatInRange(-3.14159274f, 3.14159274f);
+                if (self->f1A4 != 0) *(f32*)&rec->w[3] = RandomFloatInRange(-3.14159274f, 3.14159274f);
             }
-            if (AT(s32, set, 0x320) == 2) {
+            if (set->mode == 2) {
                 ParticleExtra* x = &chunk->extra[k];
                 x->a = e[i];
                 x->b = g[i];
@@ -2056,7 +2025,7 @@ void EmitParticleChunk(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad
             last->vel[k] = *v;
             last->rec[k] = *rec;
             chunk->count = chunk->count + 1;
-            AT(s32, set, 0x620) = AT(s32, set, 0x620) + 1;
+            set->particleCount = set->particleCount + 1;
             i++;
             k++;
         }
@@ -2079,6 +2048,8 @@ struct SpawnFrame {
 void GenerateSpawnArrays(s32 n, void* b, sptr* out)
 {
     u8* rec = (u8*)b;
+    // the record is viewed through local types at fixed offsets (ring 0xE4, shape 0x10, placement 0xA0):
+    // no one type of ours covers them
     SpawnRing ring;
     Vec02 axis;
     out[0] = (sptr)AllocateBackMemory(n * 16);
@@ -2090,7 +2061,7 @@ void GenerateSpawnArrays(s32 n, void* b, sptr* out)
         ChooseSpawnPosition((SpawnShape*)(rec + 0x10), i, n, (Vec02*)out[0] + i, &axis);
         ChooseSpawnDirectionAndLifetime((SpawnPlacement*)(rec + 0xA0), &ring, (s32)(rec + 0x10), i, (Vec02*)out[0] + i, &axis,
                       (Vec02*)out[1] + i, (f32*)out[2] + i, (f32*)out[3] + i);
-        SpawnFrame* o = *(SpawnFrame**)(rec + 0x78);
+        SpawnFrame* o = (SpawnFrame*)((Rec50*)b)->frame;
         if (o != 0) {
             Vec02* pos = (Vec02*)(i * 16 + out[0]);
             Vu0::Q(*pos) = Vu0::Add(Vu0::Rotate(o->rot, Vu0::Q(*pos)), Vu0::Q(o->pos));
@@ -2122,31 +2093,31 @@ void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* s
     Vec02 W;
     Mat02 M;
     Vec02 tmp;
-    Rec50* r = AT(Rec50*, owner, 0x18C);
-    Rec50* sub = AT(Rec50*, r, 0x90);
+    RecordMember* r = ((Rec50*)owner)->member;
+    Rec50* sub = (Rec50*)r->rec;
     void* saved = sub->target;
-    if (AT(s32, r, 0x94) == -1) {
-        sub->target = AT(void*, r, 0x18);
+    if (r->id94 == -1) {
+        sub->target = r->parent;
     }
-    if (AT(Rec50*, r, 0x90)->target == AT(void*, r, 0x18)) {
+    if (((Rec50*)r->rec)->target == r->parent) {
         ComputeChainedWorldFrame(r, &frame.pos, &frame.rot);
-        AT(SpawnFrame*, AT(Rec50*, r, 0x90), 0x78) = &frame;
+        ((Rec50*)r->rec)->frame = &frame;
     }
     second->flag = 0;
-    GenerateSpawnArrays(n, AT(Rec50*, r, 0x90), second->out);
-    AT(SpawnFrame*, AT(Rec50*, r, 0x90), 0x78) = 0;
+    GenerateSpawnArrays(n, (Rec50*)r->rec, second->out);
+    ((Rec50*)r->rec)->frame = 0;
     f32 last = 3.40282347e+38f;
     for (s32 i = 0; i < n; i++) {
-        if (AT(Rec50*, r, 0x90)->target != 0) {
+        if (((Rec50*)r->rec)->target != 0) {
             f32 t = ((f32*)first->out[3])[i] - g_gameClock[1];
             if (!AreFloatsNearlyEqual(t, last, 0.0001f)) {
                 last = t;
-                ComputeObjectFrameAtTime((PlacedObject*)(AT(Rec50*, r, 0x90)->target), 0, last, &P, &M, &V, &W);
+                ComputeObjectFrameAtTime((PlacedObject*)(((Rec50*)r->rec)->target), 0, last, &P, &M, &V, &W);
             }
             Vec02* p = (Vec02*)(i * 16 + second->out[0]);
             Vu0::Set(tmp, Vu0::Rotate(M, Vu0::Q(*p)));
             Vu0::Q(*p) = Vu0::Add(Vu0::Q(P), *(u128*)&tmp);
-            s32 kind = AT(s32, AT(Rec50*, r, 0x90), 0x80);
+            s32 kind = ((Rec50*)r->rec)->f80;
             if (kind != 3) {
                 Vec02* v = (Vec02*)(i * 16 + second->out[1]);
                 Vu0::Q(*v) = Vu0::Rotate(M, Vu0::Q(*v));
@@ -2163,7 +2134,7 @@ void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* s
         *(Vu0::Vec*)&tmp = neg;
         Vu0::Q(*(Vec02*)(i * 16 + second->out[1])) = r;
     }
-    AT(Rec50*, r, 0x90)->target = saved;
+    ((Rec50*)r->rec)->target = saved;
 }
 
 // Generates the arrays for a spawn of "a" effects from record b, then spawns them as effect owners
@@ -2456,6 +2427,7 @@ void LoadGroupMembers(MemberGroup* self, void* src)
                     o->desc->m03(o);
                     u32 c = self->count;
                     if (c < 8) {
+                        // address arithmetic over a variable index
                         *(void**)((u8*)dst + (c << 2)) = o;
                         self->count = c + 1;
                         o->group = self;
@@ -2586,6 +2558,7 @@ void SendRecordMemberMessage(void)
 // Adds a range entry to the member's own (copied if shared) spawn record.
 void AddRecordMemberRangeEntry(RecordMember* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w)
 {
+    // the range emitter is a local view at 0x10 of the spawn record
     u8* p = (u8*)GetOwnedSpawnRecord(self, 1);
     AddRangeEntry((RangeEmitter*)(p+16),a,b,x,y,z,w,self);
 }
@@ -2653,19 +2626,19 @@ void ReleaseHeldObject(HoldingMember* self, s32 kind, BaseObject* other)
 // DispatchDelayedMessages later handles the queued ones.
 void SendMessageAfterDelay(HoldingMember* self, void* message)
 {
-    DelayedMessage* r;
+    QueuedDelayedMessage* r;
     f32* k;
     s32 done = 0;
 
     if (0.0f < self->delay) {
-        r = (DelayedMessage*)PopFreeSlot(&self->world->pool1BD0);
+        r = (QueuedDelayedMessage*)PopFreeSlot(&self->world->pool1BD0);
         if (r != 0) {
             r->owner = self;
             r->body = *(DelayedMessageBody*)message;
             done = 1;
             k = (f32*)g_gameClock;
             r->due = k[1] + self->delay;
-            ClearListLinks((ListLink*)((u8*)r + 0x64));
+            ClearListLinks((ListLink*)r->link);
             AppendToList(&self->world->list1BDC, r);
         }
     }
@@ -2748,6 +2721,15 @@ void ComputeChainedWorldFrame(void* a, void* frame, void* out);
 extern f32 g_spawnScaleRatioRange[2];
 extern const Vec02 D_00248D30;
 
+// The sound a spawner member plays (HoldingMember::fA0): the sound, two radii, a volume and a pitch.
+struct SpawnSoundParams {
+    s32 id;
+    f32 f04;
+    f32 f08;
+    f32 f0C;
+    f32 f10;
+};
+
 // Handles a spawn message: starts from a copy of the spawner's record, overrides it with what the
 // message's flags carry (target, colour or placement, a frame, a count, a scale or percent), picks
 // the particle count (the message's or random in the spawner's range), and then spawns the effects
@@ -2762,13 +2744,13 @@ void HandleSpawnMessage(void* self, void* body)
     Vec02 half;
     Vec02 qa;
     Vec02 qb;
-    rec = *AT(SpawnRecordView*, self, 0x90);
+    rec = *(SpawnRecordView*)((HoldingMember*)self)->rec;
 
     s32 count;
     if (m->flags & 0x80) {
         count = m->count;
     } else {
-        count = (s32)RandomFloatInRange(AT(f32, self, 0xA4), AT(f32, self, 0xA8));
+        count = (s32)RandomFloatInRange(((HoldingMember*)self)->countMin, ((HoldingMember*)self)->countMax);
     }
     if (m->flags & 1) rec.target = m->target;
     if (m->flags & 2) rec.q60 = m->q10;
@@ -2777,12 +2759,13 @@ void HandleSpawnMessage(void* self, void* body)
         rec.q20 = m->q20;
     } else if (m->flags & 0x40) {
         rec.frame = m->frame;
-        rec.target = AT(s32, self, 0x18);
+        rec.target = (s32)((BaseObject*)self)->parent;
     } else {
         frame.Clear();
+        // the second output is the rotation, at 0x10 of the chained frame record
         ComputeChainedWorldFrame(self, &frame, (u8*)&frame + 0x10);
         rec.frame = &frame;
-        if (!(m->flags & 1)) rec.target = AT(s32, self, 0x18);
+        if (!(m->flags & 1)) rec.target = (s32)((BaseObject*)self)->parent;
     }
     if (m->flags & 8) {
         if (rec.f120 == 0) {
@@ -2792,7 +2775,7 @@ void HandleSpawnMessage(void* self, void* body)
             else s = t;
             if (s < 1.0f) count = (s32)((f32)count * s);
             else count = (s32)((f32)count / s);
-            s32 least = (s32)AT(f32, self, 0xA8) / 2;
+            s32 least = (s32)((HoldingMember*)self)->countMax / 2;
             count = least < count ? count : least;
             f32 r = ClampToRange((ValueRange*)g_spawnScaleRatioRange, s);
             rec.fA0 = rec.fA0 * r;
@@ -2813,7 +2796,7 @@ void HandleSpawnMessage(void* self, void* body)
         if (m->flags & 0x20) rec.f1E0 = m->f38;
     }
     void* cp;
-    if (AT(s32, self, 0xBC) != 0) {
+    if (((HoldingMember*)self)->chained != 0) {
         chain[0] = &((HoldingMember*)self)->heldC4;
         chain[1] = &((HoldingMember*)self)->heldC0;
         chain[2] = self;
@@ -2822,7 +2805,7 @@ void HandleSpawnMessage(void* self, void* body)
         cp = 0;
     }
     SpawnEffectsFromRecord(count, (Rec50*)&rec, cp);
-    if (AT(s32, self, 0xA0) != 0) {
+    if (((HoldingMember*)self)->fA0 != 0) {
         switch (rec.kind) {
         case 0:
             v = rec.v20;
@@ -2832,7 +2815,8 @@ void HandleSpawnMessage(void* self, void* body)
             Vu0::Q(v) = Vu0::MulXSum(Vu0::Q(rec.v20), Vu0::Q(half), Vu0::Q(rec.v30), Vu0::Q(half));
             break;
         case 2:
-            v = *AT(Vec02*, rec.p20, 0x18);
+            // the class of the object (kind 2) is not known: a pointer to its point at 0x18
+            v = **(Vec02**)(rec.p20 + 0x18);
             break;
         case 3:
             v = D_00248D30;
@@ -2842,12 +2826,12 @@ void HandleSpawnMessage(void* self, void* body)
             break;
         }
         if (rec.frame != 0) {
-            u8* fr = (u8*)rec.frame;
-            Vu0::Q(v) = Vu0::Add(Vu0::Rotate(AT(Mat02, fr, 0x10), Vu0::Q(v)), Vu0::Q(AT(Vec02, fr, 0)));
+            SpawnFrame* fr = (SpawnFrame*)rec.frame;
+            Vu0::Q(v) = Vu0::Add(Vu0::Rotate(fr->rot, Vu0::Q(v)), Vu0::Q(fr->pos));
         }
         TransformPointBetweenFrames((PlacedObject*)rec.target, 0, &v, &v);
-        u8* snd = AT(u8*, self, 0xA0);
-        StartSoundEffect(AT(s32, snd, 0), 0, 0, &v, AT(f32, snd, 4), AT(f32, snd, 8), AT(f32, snd, 0xC), AT(f32, snd, 0x10), 0.0f, 0, 0);
+        SpawnSoundParams* snd = (SpawnSoundParams*)((HoldingMember*)self)->fA0;
+        StartSoundEffect(snd->id, 0, 0, &v, snd->f04, snd->f08, snd->f0C, snd->f10, 0.0f, 0, 0);
     }
 }
 
@@ -2894,8 +2878,8 @@ void DispatchDelayedMessages(World* self)
 {
     ListFrame it;
     BeginListWalk::Of(&it, &self->list1BDC);
-    DelayedMessage* node;
-    while ((node = NextInList<DelayedMessage>::Of(&it)) != 0) {
+    QueuedDelayedMessage* node;
+    while ((node = NextInList<QueuedDelayedMessage>::Of(&it)) != 0) {
         if (!(g_gameClock[1] < node->due)) {
             HandleSpawnMessage(node->owner, &node->body);
             RemoveFromList(&self->list1BDC, node);
@@ -3129,7 +3113,7 @@ void RemoveObjectNodeFromWorld(WorldObjectNode* node)
 void DrawScreenFill(u8* a0)
 {
     ScreenFillPacket f;
-    f.value = *(s32*)(a0 + 0x60);
+    f.value = *(s32*)&((DeferredRequest*)a0)->col;
     FillScreenColor(f.buf, (Rgba4*)&f.value, 0);
     PacketWriter* s = &g_vifPacketWriter;
     BeginDmaTag(s);
@@ -3172,7 +3156,7 @@ void UpdateColorFade(ColorFade* self)
     f32 r = t / d;
     for (s32 i = 0; i < 4; i++)
         out.c[i] = (s32)((1.0f - r) * ((u8*)&a)[i] + r * ((u8*)&b)[i]);
-    FadeRequest q;
+    FadeEffectRequest q;
     q.f = -1.0f;
 
     q.fn = (void*)(void (*)(ColorFade*))DrawScreenFill;
@@ -3198,7 +3182,7 @@ void StartColorFade(ColorFade* a0)
 // Gives the slot of n in a hash table of 512 twelve-byte entries that starts 0x84 bytes into base.
 u8* GetHashedSlot(u8* base, s32 n)
 {
-    return base + (((n * 0x95675) & 0x1FF) * 12 + 0x84);
+    return (u8*)&((World*)base)->hashLists[(n * 0x95675) & 0x1FF];
 }
 
 // Tests one object found by id against the search mode (see GatherObjectsByMode) and, if it passes,

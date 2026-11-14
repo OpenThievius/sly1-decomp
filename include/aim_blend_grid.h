@@ -14,6 +14,7 @@
 #include "base_object.h"
 
 #include "shapes.h"   // Quad16
+#include "collider.h"  // Mesh03
 
 struct SlotObject;
 typedef void (*SlotObjectFn)(SlotObject* n);
@@ -28,7 +29,17 @@ struct GridRecord { s32 id; u8 pos[96]; };
 // (func_001C8C08), and a record whose flag at 0x18 func_00139B38 sets.
 struct PoseSource;
 typedef void (*PoseSourceFn)(PoseSource* m, void* body, f32 x, f32 y, s32 z, void* out, s32 w);
-struct PoseSource { PoseSourceFn* vtbl; };
+// The sequence a mover holds at 0x10 (func_0018AE38): FindCyclicRangeIndex's pairs.
+struct CyclicRanges {
+    u8 pad00[0x04];
+    s32 count;              // 0x04
+    void* pairs;            // 0x08
+};
+struct PoseSource {
+    PoseSourceFn* vtbl;
+    u8 pad04[0x10 - 0x04];
+    CyclicRanges* ranges;   // 0x10: of a clip's mover (func_0018AE38)
+};
 struct FlaggedSource { u8 pad[0x18]; s32 flag; };
 struct BlendSourceEntry {
     s32 key;                // 0x00: the object id func_0012CCE8 matches
@@ -94,11 +105,7 @@ struct AimBlendGrid : BaseObject {
     f32 secondBlendY;       // 0x88
     f32 secondBlendZ;       // 0x8C
     Quad16 originPoint;     // 0x90
-    u8 fA0[4];              // 0xA0: read by func_00137FB0 (the field after it, fA4, is a count)
-    s32 pointCount;         // 0xA4
-    u8 padA8[8];
-    u8* faces;              // 0xB0
-    u8 padB4[0xC4 - 0xB4];
+    Mesh03 mesh;            // 0xA0: the grid's points (vertCount, verts at 0xA8) and faces (0xB0), as read by func_00137FB0
     GridRecord* pointRecords;    // 0xC4: fA4 records of 100 bytes
     s32 cellCount;          // 0xC8
     u8* cells;              // 0xCC: fC8 records of 16 bytes

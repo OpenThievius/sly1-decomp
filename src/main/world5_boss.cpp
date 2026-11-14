@@ -295,7 +295,7 @@ void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
     f32 m = 1.0f - k;
     wx = k * wx + m * self->poseRateX;
     wy = k * wy + m * self->poseRateY;
-    TransformPointBetweenFrames(0, (PlacedObject*)self->f668, (Vec02*)((u8*)self->f660 + 0x140), &tmp);
+    TransformPointBetweenFrames(0, (PlacedObject*)self->f668, &((PlacedObject*)self->f660)->v140, &tmp);
     if (tmp.x < 0.0f) {
         wx = -wx;
     }
@@ -431,7 +431,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         Vu0::Q(pos) = Vu0::FromFloats(at.x, g_world5AimMapY[0] + h * (g_world5AimMapY[1] + h * g_world5AimMapY[2]),
                                       g_world5AimMapZ[0] + w * (g_world5AimMapZ[1] + w * g_world5AimMapZ[2]));
         TransformPointBetweenFrames((PlacedObject*)self->f660, 0, &pos, &pos);
-        TransformPointBetweenFrames(0, (PlacedObject*)self->f660, &pos, (Vec02*)((u8*)self->f650 + 0xF0));
+        TransformPointBetweenFrames(0, (PlacedObject*)self->f660, &pos, &((PlacedObject*)self->f650)->rot.r[2]);
         ProjectPointToCamera(g_camera, &pos, g_spinningSpriteElement.aim);
         for (i = 0; i < 2; i++) {
             Vec02 dir;
@@ -932,6 +932,7 @@ void SetWorld5BossMode(World5Boss* self, s32 mode)
         }
     }
     (void)ReplaceAnimationPlayer((Animation*)x, self, 1, (AnimationPlayer**)self->modePlayer, 0.0f, 1.0f);
+    // a field access here changes retail's code
     *(s32*)((u8*)self + 0x550) = mode;
     self->modeTime = g_gameTime;
 done:

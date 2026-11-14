@@ -51,7 +51,7 @@ void DrawSlidingGlyphElement(Element_eu_1AD800* self)
     }
     x = self->shownX;
     y = self->hiddenX;
-    c = ClampFloat::Of(self->blend / (1.0f / (f32)n), 0.0f, 1.0f);
+    c = ClampFloatSelect::Of(self->blend / (1.0f / (f32)n), 0.0f, 1.0f);
     rest = 1.0f - c;
     if (self->frame != 0) {
         s32 grey = 0xFF808080;
@@ -72,7 +72,7 @@ void DrawSlidingGlyphElement(Element_eu_1AD800* self)
     for (i = 0; i < n; i++) {
         s32 ch = self->text[i];
         f32 d;
-        c = ClampFloat::Of(self->blend / ((f32)(i + 1) / (f32)n), 0.0f, 1.0f);
+        c = ClampFloatSelect::Of(self->blend / ((f32)(i + 1) / (f32)n), 0.0f, 1.0f);
         rest = 1.0f - c;
         FontCalls::Glyph(self->font, ch, self->color, &g_gsPacketWriter, c * x + rest * y, self->shownY);
         d = FontCalls::Advance(self->font, ch);

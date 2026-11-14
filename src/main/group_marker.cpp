@@ -151,11 +151,11 @@ void RunWorldFrameLists(World* self, void* arg)
     ListFrame f1;
     ListFrame f2;
     ListFrame f3;
-    s32 e = (s32)self + 0x60;
+    s32 e = (s32)&self->list60;
     f1.link = (u8*)e;
     f1.list = (void*)e;
     s32 old = (s32)g_activeListFrames;
-    s32 link = *(s32*)(e + 8);
+    s32 link = ((List01*)e)->offset;
     *(s32*)g_nextDeferredRequest = (s32)g_deferredRequests;
     g_activeListFrames = &f1;
     f1.prev = (ListFrame*)old;
@@ -170,14 +170,14 @@ void RunWorldFrameLists(World* self, void* arg)
         f1.link = (u8*)(nx + f1.offset);
         n = nx;
     }
-    s32 e2 = (s32)self + 0x78;
+    s32 e2 = (s32)&self->list78;
     s32 old2 = (s32)g_activeListFrames;
     f2.link = (u8*)e2;
     f2.list = (void*)e2;
     s32 link2 = *(s32*)(e2 + 8);
     g_activeListFrames = &f2;
     f2.prev = (ListFrame*)old2;
-    s32 h2 = *(s32*)((s32)self + 0x78);
+    s32 h2 = *(s32*)&self->list78;
     f2.offset = link2;
     f2.link = (u8*)(h2 + link2);
     n = h2;
@@ -188,13 +188,13 @@ void RunWorldFrameLists(World* self, void* arg)
         f2.link = (u8*)(nx + f2.offset);
         n = nx;
     }
-    s32 e3 = (s32)self + 0x1CD8;
+    s32 e3 = (s32)&self->list1CD8;
     s32 old3 = (s32)g_activeListFrames;
     s32 link3 = *(s32*)(e3 + 8);
     f3.prev = (ListFrame*)old3;
     g_activeListFrames = &f3;
     f3.list = (void*)e3;
-    s32 h3 = *(s32*)((s32)self + 0x1CD8);
+    s32 h3 = *(s32*)&self->list1CD8;
     f3.offset = link3;
     f3.link = (u8*)(h3 + link3);
     n = h3;
@@ -384,7 +384,7 @@ void InitGroupMarkers(void)
 {
     PacketWriter buf;
     GroupMarker* rows;
-    u8* p;
+    s32* p;
     s32 i;
 
     InitGifPacket(&buf);
@@ -411,11 +411,11 @@ void InitGroupMarkers(void)
     rows[16].handler = PrepareStandardGroup;
     rows[17].handler = PrepareUnzoomedGroup;
 
-    p = (u8*)g_groupMarkers + 0x888;
+    p = &g_groupMarkers[17].f08;
     i = 17;
     do {
-        *(s32*)p = -1;
+        *p = -1;
         i--;
-        p -= 0x80;
+        p -= sizeof(GroupMarker) / sizeof(s32);
     } while (i >= 0);
 }

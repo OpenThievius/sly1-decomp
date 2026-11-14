@@ -395,17 +395,6 @@ void AddContactListKind(ContactListObject* self, s32 value)
     }
 }
 
-// Class 0x3D, a contact-list object without gravity that keeps a velocity of its own.
-struct ContactListGlider : ContactListObject {
-    f32 speed6F0;           // 0x6F0: the speed of the velocity it keeps (func_0018DDD8)
-    f32 rate6F4;            // 0x6F4: how fast it turns to that velocity (func_0018DE70)
-    f32 f6F8;               // 0x6F8
-    f32 time6FC;
-    Vec02 v700;             // 0x700: the velocity it keeps
-};
-
-typedef char check_ContactListGlider[sizeof(ContactListGlider) == 0x710 ? 1 : -1];
-
 void AddColliderForce(void* a, void* b);
 
 // Initialises the contact list object and sets its gravity to a fixed constant.

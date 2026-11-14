@@ -70,10 +70,12 @@ struct GaugeManager : PlacedObject {
         s32 tag430;         // 0x430: what func_001B6598 reads from the device
         u8 buf430[0x1C];
         struct {
-            u8 pad430[0xC];
+            u8 pad430[4];
+            f32 delayMin;   // 0x434: the shortest delay (ComputeGaugeOutputs); slot agents start a random time between it
+            f32 delayMax;   // 0x438  and this apart
             f32 waitMin;    // 0x43C: func_0014CD70 waits a random time between this
             f32 waitMax;    // 0x440  and this
-            u8 pad444[0x448 - 0x444];
+            f32 clipSpeed;  // 0x444: the speed a slot agent clips by
             f32 speed448;   // 0x448: the animation speed class 0x11 sets (func_0014BD38)
         };
     };

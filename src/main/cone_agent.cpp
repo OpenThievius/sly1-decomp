@@ -29,8 +29,7 @@
 
 
 
-struct GatheredEventObject { u8 pad0[0x328]; s32 f328; };
-struct GatheredObjects { s32 count; GatheredEventObject** items; };
+#include "gathered_event_object.h"
 
 void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount, BaseObject*** outArr);
 struct StateResetObject;

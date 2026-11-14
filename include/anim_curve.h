@@ -170,7 +170,8 @@ struct __attribute__((aligned(16))) VectorKey {
 // Kind 0 (D_002196B8, 0x30 bytes): a base vector and a weight curve for each axis (func_0011F798
 // reads them, func_0011F850 gathers their key times).
 struct AxisPositionCurve : PositionCurve {
-    u8 pad08[0x10 - 0x08]; // 0x08
+    s32 closed;                 // 0x08: the first and last values are under 1.0 apart (or there are none)
+    u8 pad0C[0x10 - 0x0C]; // 0x0C
     Vec02 base;                 // 0x10
     WeightCurve* axis[3];      // 0x20
     u8 pad2C[0x30 - 0x2C]; // 0x2C

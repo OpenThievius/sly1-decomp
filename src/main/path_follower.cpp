@@ -40,6 +40,7 @@
 #include "fpu.h"
 #include "scope_marker.h"
 #include "object_finder.h"
+#include "walker_holder.h"
 #include "functions/base_object.h"
 #include "functions/child_group_object.h"
 #include "functions/collider.h"
@@ -95,7 +96,6 @@ f32 GetWrappedDifference(f32 x, f32 lim, f32 base);
 
 
 
-struct WalkerHolder { u8 pad[0x48]; void* f48; };
 
 
 extern f32 g_gameClock[];
@@ -112,14 +112,9 @@ void SteerPathFollower(PathFollower* self);
 
 
 // A quadratic by its three coefficients (func_001D8578).
-struct QuadraticCurve {
-    f32 c[3];
-    f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
-};
+#include "quadratic_curve.h"
 
-struct WorldRecord { u8 b; };
 
-#define SUB(off) ((WorldRecord*)((u8*)self + (off)))
 
 extern f32 g_steerAngleGain;
 extern f32 g_steerAngleLimit;
@@ -357,6 +352,7 @@ typedef void (*HitFn)(Collider* self, HitMessage* msg);
 void NotifyPlayerGroundObject(Player* self)
 {
     u32 i;
+    // the object's class is not known (a subclass of Collider)
     if (self->f2438 != 0 && *(s32*)((u8*)self->f2438 + 0x58C) != 0) {
         Vec02 p;
         Vec02 moved;
@@ -411,8 +407,9 @@ void NotifyPlayerGroundObject(Player* self)
             Vec02 hi;
             s32 hit = 0;
             GetObjectWorldPosition(o, &lo);
+            // the object's class is not known
             hi = *(Vec02*)((u8*)o + 0x40);
-            TransformPointAtTime((PlacedObject*)(*(void**)((u8*)obj + 0x18)), 0, &hi, 0, 0, 0, g_gameClock[2]);
+            TransformPointAtTime((PlacedObject*)((BaseObject*)obj)->parent, 0, &hi, 0, 0, 0, g_gameClock[2]);
             if (out.z <= lo.z) {
                 if (hi.z <= out.z) {
                     hit = 1;
@@ -425,7 +422,9 @@ void NotifyPlayerGroundObject(Player* self)
                 m.v20 = lo;
                 m.v20.z = out.z;
                 m.kind = 4;
+                // the object's class is not known
                 u8* e = *(u8**)((u8*)o + 0x90);
+                // the object's class is not known
                 if (*(s32*)(e + 0x120) == 1 && *(s32*)(e + 0x1B0) == 2) {
                     m.kind = 0x24;
                     m.source = self->f2438;
@@ -664,6 +663,7 @@ s32 AppendToOutputBuffer(OutputBuffer* self, void* src, s32 size)
             s32 rem = n - done;
             s32 take = (room < rem) ? room : rem;
             if (take != 0) {
+                // address arithmetic over a variable index
                 CopyMemory((u8*)self + (self->pending + 0x18), (u8*)src + done, take);
                 done += take;
                 self->pending += take;
@@ -880,6 +880,7 @@ void StepPathFollower(PathFollower* self, f32 dt)
         Vec02 accel;
         Vec02 spin;
         s32 front = (s32)i < 2;
+        // the object's class is not known
         a = *(Vec02*)((u8*)s->obj8 + 0x40);
         a.z -= front ? self->frontWheelRadius : self->rearWheelRadius;
         TransformPointBetweenFrames(self, 0, &a, &a);

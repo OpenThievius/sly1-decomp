@@ -28,6 +28,9 @@
 #include "object_message.h"
 #include "object_finder.h"
 #include "agent_request.h"
+#include "model_part.h"
+#include "plane_node.h"
+#include "spr_transfer.h"
 #include "functions/base_object.h"
 #include "functions/buffered_stream.h"
 #include "functions/collider.h"
@@ -130,32 +133,8 @@ void InitContactlessCollider(ContactlessCollider* self)
 
 // A part of a placed object's model (0x70 bytes, drawParts): its centre, radius, group and the
 // distances its fade works by.
-struct ModelPart {
-    Vec02 at;               // 0x00
-    f32 radius;             // 0x10
-    s32 group;              // 0x14
-    u8 pad18[4];
-    f32 farFade;            // 0x1C: the distance it fades out by (ComputeCameraDistanceFade)
-    f32 nearFade;           // 0x20: and in by, when below farFade (flag60)
-    f32 depth;              // 0x24: its sort depth, FLT_MAX for the eye's distance
-    u8 pad28[0x34 - 0x28];
-    void* cameraFacing;     // 0x34: given to func_00126DE8 for the matrix
-    void* hook;             // 0x38: an object whose slot 4 adjusts the request
-    u8 pad3C[0x60 - 0x3C];
-    s32 flag60;             // 0x60: fades in as well
-    u8 pad64[0x68 - 0x64];
-    void* matrix;           // 0x68: a matrix the transform is multiplied by
-    u8 pad6C[4];
-};
 
 // A part's state (0x28 bytes, partStates): which views see it and its eased alpha.
-struct ModelPartState {
-    u32 views;              // 0x00: the camera's view bits it is drawn in
-    u8 pad04[0x10 - 0x04];
-    f32 alpha;              // 0x10: eased toward 1.0, or 0.5 while far
-    f32 dist;               // 0x14
-    u8 pad18[0x28 - 0x18];
-};
 
 // The request queued for a part: the part drawer, the depth and group, the transform and the
 // fades, the part's centre, the object and the part.
@@ -176,25 +155,13 @@ struct __attribute__((aligned(16))) PartRequest {
 };
 
 // One of the two scratchpad transfer buffers (object_properties.cpp): the blocks StartToSprChain sent.
-struct SprTransfer {
-    void* tags;             // 0x00
-    s32 base;               // 0x04
-    u32 addrs[8];           // 0x08: each block's scratchpad address
-    s32 sizes[8];           // 0x28
-    s32 count;              // 0x48
-    s32 state;              // 0x4C: 2 while its parts are drawn
-};
+#include "spr_block.h"
 
-extern s32 g_sprTransferIndex;
-extern SprTransfer g_sprTransfers[2];
+
+
 
 // Block n of the current scratchpad transfer.
-struct SprBlock {
-    static u32 Of(s32 n)
-    {
-        return g_sprTransfers[g_sprTransferIndex].addrs[n];
-    }
-};
+
 
 struct Frame_166690;
 struct DmaChannel;
@@ -241,23 +208,23 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
         ModelPartState* states = (ModelPartState*)SprBlock::Of(1);
         for (s32 j = 0; j < n; j++) {
             ModelPartState* st = &states[j];
-            if ((st->views & views) != views) {
+            if ((st->mask & views) != views) {
                 continue;
             }
             ModelPart* part = &parts[j];
             u128 ones = Vu0::Ones();
-            u128 d = Vu0::Sub(Vu0::Q(part->at), Vu0::Q(cam->position));
+            u128 d = Vu0::Sub(Vu0::Q(part->pos), Vu0::Q(cam->position));
             f32 radius = part->radius;
             u32 signs = Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, Vu0::Scalar(radius)) ^ 0xF0;
             if (signs != 0) {
                 continue;
             }
-            if (!ComputeCameraDistanceFade(cam, d, &rec.fade, radius, part->farFade)) {
+            if (!ComputeCameraDistanceFade(cam, d, &rec.fade, radius, part->nearFade)) {
                 continue;
             }
-            if (part->flag60 != 0) {
-                if (part->nearFade < part->farFade) {
-                    if (!ComputeCameraDistanceFade(cam, d, &rec.fade2, part->radius, part->nearFade)) {
+            if (part->f60 != 0) {
+                if (part->farFade < part->nearFade) {
+                    if (!ComputeCameraDistanceFade(cam, d, &rec.fade2, part->radius, part->farFade)) {
                         rec.fade2 = 0.0f;
                     }
                 } else {
@@ -265,28 +232,28 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
                 }
             }
             f32 target = 1.0f;
-            if (g_gameClock[4] < st->dist) {
+            if (g_gameClock[4] < st->until) {
                 target = 0.5f;
             }
-            if (target != st->alpha) {
+            if (target != st->fade) {
                 ModelPartState* home = (ModelPartState*)((u8*)self->partStates + (j + i) * 0x28);
-                f32 a = ApproachValueWithRamp((RampProfile*)D_00269B50, 0, st->alpha, target, g_gameClock[2]);
-                st->alpha = a;
-                home->alpha = a;
+                f32 a = ApproachValueWithRamp((RampProfile*)D_00269B50, 0, st->fade, target, g_gameClock[2]);
+                st->fade = a;
+                home->fade = a;
             }
-            rec.fade *= st->alpha;
+            rec.fade *= st->fade;
             if (rec.fade <= 0.0f) {
                 continue;
             }
             rec.part = (ModelPart*)((u8*)self->drawParts + (j + i) * 0x70);
             rec.partState = (ModelPartState*)((u8*)self->partStates + (j + i) * 0x28);
-            rec.at = part->at;
-            if (part->depth != 3.4028235e+38f) {
-                rec.depth = part->depth;
+            rec.at = part->pos;
+            if (part->dist != 3.4028235e+38f) {
+                rec.depth = part->dist;
             } else {
                 rec.depth = Vu0::ToFloat(Vu0::Dot(d, d));
             }
-            rec.group = part->group;
+            rec.group = part->kind;
             rec.fade2 *= rec.fade;
             if (rec.fade < 1.0f) {
                 switch (rec.group) {
@@ -685,12 +652,6 @@ s32 GetNeighbourTriangle(s32 value)
 // A node of the binary tree over the point graph's triangles: a plane (normal and offset) and
 // the two sides. A side with its low bit set is a triangle (GetNeighbourTriangle), otherwise
 // another node.
-struct PlaneNode {
-    Vec02 normal;           // 0x00
-    f32 offset;             // 0x10
-    s32 below;              // 0x14
-    s32 above;              // 0x18
-};
 
 // Walks a plane tree from node with point p: on the side p lies (more than 1e-4 above the node's
 // plane or not), a tagged child gives its triangle (GetNeighbourTriangle) and an untagged one is

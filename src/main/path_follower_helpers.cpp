@@ -28,6 +28,7 @@
 #include "game_progress.h"
 #include "value_range.h"
 #include "object_finder.h"
+#include "walker_holder.h"
 #include "functions/flagged_object.h"
 #include "functions/matrix.h"
 #include "functions/placed_object.h"
@@ -43,7 +44,6 @@ extern f32 g_gameTime;
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-struct WalkerHolder { u8 pad[0x48]; void* f48; };
 
 struct RampProfile;
 
@@ -52,10 +52,7 @@ extern u8 g_scatterController[];
 struct ScatterController;
 
 // A quadratic by its three coefficients (func_001D8E40, func_001D9678).
-struct QuadraticCurve {
-    f32 c[3];
-    f32 Eval(f32 t) { return c[0] + t * (c[1] + t * c[2]); }
-};
+#include "quadratic_curve.h"
 
 extern float g_pathFollowerRampTime;
 extern float g_pathFollowerFadeCurve[4];
@@ -108,8 +105,10 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
 {
     if (self->lapObject != 0) {
         f32 t = (g_gameTime - self->lapTime) / g_pathFollowerRampTime;
+        // the lap object (class 0x22) is read at 0x334, inside Collider::invInertia: its role there is not known
         *(f32*)((u8*)self->lapObject + 0x334) = g_unitRange.Clamp(((QuadraticCurve*)g_pathFollowerFadeCurve)->Eval(t));
         BaseObject* o = self->lapObject;
+        // the same word of the lap object (role not known)
         if (*(f32*)((u8*)o + 0x334) == 0.0f) {
             ((void (*)(BaseObject*))o->desc->m03)(o);
         }
@@ -270,7 +269,7 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
                     s32 n = self->lap + 1;
                     self->lap = n;
                     if (self->lapCount < n) {
-                        void* w = ((WalkerHolder*)FindFirstObjectById(self->world, 4, 0x42C, self))->f48;
+                        void* w = ((WalkerHolder*)FindFirstObjectById(self->world, 4, 0x42C, self))->walker;
                         s32 key;
                         GetStateWalkerTargetKey((StateWalker*)w, &key);
                         if (key == -1) {
@@ -301,9 +300,9 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
             break;
         case 1:
             if (r != 0) {
-                *(PathMarker**)((u8*)self + 0xAFC) = e;
+                self->activeZone = (PathEmitters*)e;
             } else {
-                *(PathMarker**)((u8*)self + 0xAFC) = 0;
+                self->activeZone = 0;
             }
             break;
         }

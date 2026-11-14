@@ -22,6 +22,7 @@
 #include "vu0.h"
 #include "game_clock.h"
 #include "object_finder.h"
+#include "point2.h"
 #include "functions/agent.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
@@ -39,7 +40,6 @@
 
 extern f32 g_gameTime;
 // Two floats (CopyVec2).
-struct Point2 { f32 x; f32 y; };
 struct SoundLevelEntry;
 // A free slot of a world pool (Pool6C): its first word links the next.
 struct FreeSlot { FreeSlot* next; };
@@ -540,7 +540,7 @@ void DestroyStateWalker(StateWalker* self)
     ReleaseCallRecords(self->owner->world, (T219CHook*)self->calls);
     self->calls = 0;
     RemoveFromList(&self->owner->walkers, self);
-    RemoveFromList((List01*)((u8*)self->owner->world + 0x1B94), self);
+    RemoveFromList(&self->owner->world->list1B94, self);
     PushFreeSlot(&self->owner->world->pool1B88, self);
     TriggerScriptEvent(owner, 0x12, 0, 0);
 }
@@ -1052,7 +1052,7 @@ struct ObjectGatherer;
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 
-#define F(T, o) (*(T*)((u8*)self + (o)))
+
 
 // Whether the companion can reach its target (slot 0x16C of class 0x09): not while select is
 // held or the agent is busy; the target must be near enough (or inside the agent's volume), the
@@ -1072,8 +1072,8 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
         if (self->companion == 0 || self->state == 0xB || self->state == 0x10) return 0;
         Vec02 a;
         if (IsObjectOfKind(target, 6) != 0) {
-            if (*(s32*)((u8*)target + 0x690) != 0) {
-                a = *(Vec02*)((u8*)target + 0x6A0);
+            if (((TurningCollider*)target)->groundContact != 0) {
+                a = ((TurningCollider*)target)->groundContactPoint;
             } else {
                 a = target->v140;
                 a.z -= 70.0f;
@@ -1146,7 +1146,7 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
     return 0;
 }
 
-#undef F
+
 
 // Updates the agent, then aims its pose.
 void UpdateCompanionAgent(CompanionAgent* self, f32 dt)
@@ -1232,6 +1232,7 @@ void EnterCompanionAgentState(CompanionAgent* self, s32 evt, Animation* arg)
         break;
     }
     }
+    // address arithmetic over a variable index
     self->lookTarget = *(s32*)((u8*)self + (self->state << 3) + 0xC3C);
 }
 

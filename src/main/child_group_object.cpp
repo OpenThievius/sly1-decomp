@@ -3,6 +3,7 @@
 #include "asm_func.h"
 #include "list_iter.h"
 #include "child_group_object.h"
+#include "switched_collider.h"
 #include "object_message.h"
 #include "vu0.h"
 #include "object_event.h"
@@ -97,18 +98,18 @@ void CopyChildGroupObject(ChildGroupObject* self, ChildGroupObject* other)
     if (other->slot) self->slot = (void*)CopyToFrontMemory(0x24, other->slot);
 }
 
-struct ScopedListFrame;
-struct ScopedListFrame {
-    void* base; void* cur; s32 off; ScopedListFrame* prev;
-    ScopedListFrame(List01* l) {
+struct ChildListFrame;
+struct ChildListFrame {
+    void* base; void* cur; s32 off; ChildListFrame* prev;
+    ChildListFrame(List01* l) {
         cur = l;
         base = l;
-        ScopedListFrame* p = (ScopedListFrame*)g_activeListFrames;
+        ChildListFrame* p = (ChildListFrame*)g_activeListFrames;
         off = l->offset;
         g_activeListFrames = (ListFrame*)this;
         prev = p;
     }
-    ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
+    ~ChildListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
 void* AllocateFrontMemory(s32 size);
@@ -118,7 +119,7 @@ void* AllocateFrontMemory(s32 size);
 void StartChildGroupObject(ChildGroupObject* self)
 {
     StartPlacedObject(self);
-    ScopedListFrame f(&self->children);
+    ChildListFrame f(&self->children);
     void* n;
     void* t = *(void**)f.base;
     f.cur = (u8*)t + f.off;
@@ -415,7 +416,7 @@ void ApplyChildGroupKnockback(ChildGroupObject* self, Collider* other)
     Vec02 d;
     Vec02 r;
     if (IsObjectOfKind(self, 0x3D) != 0) {
-        d = *(Vec02*)((u8*)self + 0x700);
+        d = ((ContactListGlider*)self)->v700;
     } else {
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(other->v140), Vu0::Q(self->v140));
     }
@@ -452,8 +453,6 @@ extern ValueRange g_unitRange;
 
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
 
-typedef void (*ColliderMsgFn)(Collider* self, void* msg);
-typedef s32 (*ColliderQueryFn)(Collider* self, void* msg);
 
 // The query func_0013BF68 sends for each object it hits (0x40 bytes, FillMemory'd).
 struct BlastQuery { ChildGroupObject* from; Collider* to; u8 pad08[0x10 - 0x08]; s32 kind; u8 pad14[0x20 - 0x14]; Vec02 pos; Vec02 vel; };
@@ -477,7 +476,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
     RecordChildGroupPose(self, 0, 0, 0);
     player = (Collider*)GetActiveSwitchedCollider();
     PushBackMemoryMark();
-    if (*(s32*)self->pad564 != 0) {
+    if (self->contactBlast != 0) {
         CollectContactingParts(self, &count, (void***)&list);
         if (self->obj670 != 0) {
             s32 i;
@@ -509,7 +508,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             StartChildGroupDelay((ChildGroupObject*)c, 0.1f);
             continue;
         }
-        if (*(s32*)self->pad564 == 0 && c->tree.nodes != 0) {
+        if (self->contactBlast == 0 && c->tree.nodes != 0) {
             u8 hits[0x30];
             if (!CollectMeshHits(pos, c->root == player ? self->playerBlastRadius : self->blastRadius, c->tree.count2, (FaceRef*)c->tree.nodes, 0, &c->meshCopy, 1, (MeshHitEntry*)hits))
                 continue;
@@ -518,7 +517,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             OwnerMessage msg;
             InitOwnerMessage(&msg, self->ownerMessageMode, self);
             msg.fn = (void (*)())ApplyChildGroupKnockback;
-            (*(ColliderQueryFn*)((u8*)c->desc + 0x140))(c, &msg);
+            ((const Desc05*)c->desc)->m4C((SwitchedCollider*)c, &msg);
             continue;
         }
         if (c->mass < self->maxMass && c->parent == 0) {
@@ -581,10 +580,10 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
         if (self->member5BC != 0) {
             BlastMessage msg;
             msg.kind = 9;
-            msg.f30 = *(f32*)self->pad5C0;
+            msg.f30 = self->blastStrength;
             msg.f34 = self->blastRadius;
             msg.from = self;
-            (*(ColliderMsgFn*)((u8*)*(void**)self->member5BC + 0x7C))((Collider*)self->member5BC, &msg);
+            ((BaseObject*)self->member5BC)->desc->m1B((BaseObject*)self->member5BC, &msg);
             at = &self->v140;
         } else {
             SendPointEventToWorldListener((Quad16*)&self->v140, self->blastRadius);

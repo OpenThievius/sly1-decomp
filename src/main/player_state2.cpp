@@ -35,6 +35,7 @@
 #include "functions/world_contacts.h"
 #include "functions/zone_collider.h"
 #include "attachment.h"
+#include "mesh_collision.h"
 struct BaseObject;
 
 struct BaseObject;
@@ -423,23 +424,21 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
 }
 
 // An edge of a mesh: the two vertices it joins and the two faces it lies between.
-struct MeshEdge {
+
+
+// An edge of a mesh as the ledge test reads it: the two vertices it joins and the two faces it lies
+// between.
+struct MeshEdgePair {
     s16 vertA;
     s16 vertB;
     s16 faceA;
     s16 faceB;
 };
 
-// A face of a mesh: its normal, then its slope (the normal's y) at +8.
-struct MeshFace {
-    Vec02 normal;           // 0x00
-    u8 pad10[0x20 - 0x10];
-};
-
 // For a mesh edge between a floor face (normal z over 0.7) and a wall face (under 0.55), gives in
 // *out the horizontal unit normal of the edge on the side of the floor, and 1; any other edge gives
 // 0.
-s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdge* e, Vec02* out)
+s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdgePair* e, Vec02* out)
 {
     Mesh03* mesh = &c->meshCopy;
     MeshFace* faces = (MeshFace*)mesh->faces;
@@ -483,6 +482,7 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
     Quad16& q = *(Quad16*)buf;
     q = *src;
     s32 hits = 0;
+    // stack scratch: a frame and the segment spans, not an object
     BuildPerpendicularPair(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
     BuildMatrixFromRotationAndTranslation((const Vec02*)ctx, (const Mat02*)&q, (Mat4A*)(buf + 0x30));
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
@@ -495,6 +495,7 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
                 Collider* c = (Collider*)a->parts.head;
                 while (c) {
                     if (!(c->flags538 & 0x80000000000ULL)) {
+                        // stack scratch: the span buffer, not an object
                         if (CollectColliderSpans(c, (Vec02*)(buf + 0x70), (Vec02*)(buf + 0x80), 1, (ColliderSpan*)(buf + 0x90)) > 0) {
                             if (i < 4) return 0;
                             if (*(f32*)(buf + 0xD0) == 0.0f) return 0;
@@ -510,7 +511,7 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
     return hits >= 2;
 }
 
-struct EdgeNode : MeshEdge {
+struct EdgeNode : MeshEdgePair {
     EdgeNode* next8;
     EdgeNode* nextC;
 };
@@ -538,7 +539,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
         s32 found = 0;
         s32 n = CollectEntriesForKey((KeyedPointSet*)mesh, (KeyedPointSet*)&part->tree, (Vec02*)arg - (Vec02*)mesh->verts, 0x40, (KeyedEdge**)buf);
         for (s32 i = 0; i < n; i++) {
-            if (ComputeLedgeEdgeOffset(self, part, ((MeshEdge**)buf)[i], &gap) != 0) {
+            if (ComputeLedgeEdgeOffset(self, part, ((MeshEdgePair**)buf)[i], &gap) != 0) {
                 found = 1;
                 acc = Vu0::Add(acc, Vu0::Q(gap));
             }
@@ -550,7 +551,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
         break;
     }
     case 3:
-        if (ComputeLedgeEdgeOffset(self, part, (MeshEdge*)arg, out) == 0) {
+        if (ComputeLedgeEdgeOffset(self, part, (MeshEdgePair*)arg, out) == 0) {
             return 0;
         }
         break;
@@ -565,6 +566,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
         for (EdgeNode* e = g->list14; e != 0; e = e->next8) {
             if (ComputeLedgeEdgeOffset(self, part, e, (Vec02*)buf) != 0) {
                 verts = (Vec02*)part->meshCopy.verts;
+                // stack scratch: the span buffer, not an object
                 if (CollectTreeNodeSpans(self->tree.nodes, verts + e->vertA, verts + e->vertB, 0, 2, (ColliderSpan*)(buf + 0x10)) > 0) {
                     found = 1;
                     sum = Vu0::Add(sum, Vu0::Q(*(Vec02*)buf));
@@ -574,6 +576,7 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
         for (EdgeNode* e = g->list18; e != 0; e = e->nextC) {
             if (ComputeLedgeEdgeOffset(self, part, e, (Vec02*)buf) != 0) {
                 verts = (Vec02*)part->meshCopy.verts;
+                // stack scratch: the span buffer, not an object
                 if (CollectTreeNodeSpans(self->tree.nodes, verts + e->vertA, verts + e->vertB, 0, 2, (ColliderSpan*)(buf + 0x10)) > 0) {
                     found = 1;
                     sum = Vu0::Add(sum, Vu0::Q(*(Vec02*)buf));
@@ -649,7 +652,7 @@ Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
             if ((self->f4B8 & 2) == 0 || (c->end[1 - side].body->f4B8 & 2) == 0) {
                 NotifyContactEnds(self->world, 1, &c);
             }
-            if (0.0f < g_contactSideSigns[side] * *(f32*)((u8*)c + 0xB8)) {
+            if (0.0f < g_contactSideSigns[side] * c->relativeVelocity.z) {
                 continue;
             }
             Vu0::Q(p) = Vu0::MulAddX2(Vu0::Vec::Of(c->end[1 - side].point), Vu0::Vec::Of(tmp), Vu0::Vec::Scalar(-D_00264020),
@@ -696,7 +699,7 @@ extern List01 g_class75List;
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
 // (list_iter.h) and each step reads the next item through the link (as effect_spawner.cpp's).
-struct BeginListWalk {
+struct BeginListWalkFromFrame {
     static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
@@ -755,7 +758,7 @@ void CollectPlayerHoldQueries(Player* self)
     }
     band[0] = self->groundContactPoint.z + D_00264038[0];
     band[1] = self->groundContactPoint.z + D_00264038[1];
-    BeginListWalk::Of(&fr, &g_class75List);
+    BeginListWalkFromFrame::Of(&fr, &g_class75List);
     n = NextInList<Class75Object>::Of(&fr);
     while (n != 0) {
         NodeQuery q;
@@ -1252,7 +1255,7 @@ void ComputePlayerJumpVelocity(Player* self, Vec02* out)
         break;
     case 0:
     case 2:
-        z = Fpu::Sqrt(MaxF(0.0f, ((self->v140.z - (*(f32*)((u8*)self + 0x6A8) + D_00263E84)) + (self->v140.z - (*(f32*)((u8*)self + 0x6A8) + D_00263E84))) * self->gravity.z));
+        z = Fpu::Sqrt(MaxF(0.0f, ((self->v140.z - (self->groundContactPoint.z + D_00263E84)) + (self->v140.z - (self->groundContactPoint.z + D_00263E84))) * self->gravity.z));
         break;
     }
     *out = self->v150;

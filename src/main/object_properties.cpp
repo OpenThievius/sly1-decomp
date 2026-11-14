@@ -37,6 +37,7 @@
 #include "attached_set.h"
 #include "active_set_solver.h"
 #include "sound_level.h"
+#include "spr_transfer.h"
 #include "functions/matrix.h"
 #include "functions/placed_object.h"
 struct HomogeneousMatrix;
@@ -80,14 +81,6 @@ extern DmaTag g_sprChainTagsB[8];
 // One of the two scratchpad transfer buffers (D_002748F0; D_00274990 picks the current one):
 // func_001C2430 sends up to 8 blocks into the scratchpad by a DMA chain, func_001C25B0 sends
 // them back to memory.
-struct SprTransfer {
-    DmaTag* tags;           // 0x00: the chain's tags
-    s32 base;               // 0x04: the scratchpad address of the first block's tag
-    u32 addrs[8];           // 0x08: each block's address, after its 16-byte tag
-    s32 sizes[8];           // 0x28: each block's size, rounded up to 16
-    s32 count;              // 0x48: the number of blocks
-    s32 state;              // 0x4C: 1 sent in, 3 sending back (StartFromSprChain), 0 done
-};
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
@@ -114,7 +107,7 @@ extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 extern "C" void StartDmaChainToMemory(DmaChannel* ch);
 // A script list being built (func_001C1530 hands one to a getter; func_001C1A28 appends a value
 // of `type` to it).
-struct ScriptListBuilder { s32 type; R11B008Node* head; R11B008Node* tail; };
+#include "script_list.h"
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 // Declared void with an address-sized integer: retail's func_001C1A28 schedules its call as one
 // whose result is unused (the definition, below, returns out and takes the address as void*).
@@ -133,10 +126,10 @@ void* DefineScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, Script
 extern u32 g_scriptStreamExtras;
 // NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
 
-struct R11B008Node;
+
 void EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope); // stays void: retail returns a value, but declared so func_001C13E8 differs in registers
 // A type and a list of script values: func_001C1AD8 tells whether a value is among them.
-struct ScriptValueFilter { u32 type; R11B008Node* list; };
+
 // The payloads of script values of kind 10 and 11 (two and three words), copied word by word.
 struct ScriptPair { s32 w[2]; };
 struct ScriptTriple { s32 w[3]; };

@@ -14,6 +14,7 @@ struct FrameRect;
 struct Layout_137228;
 struct PacketWriter;
 struct Rgba_137248;
+struct StringLayout;
 struct TextReader;
 struct Vec4U;
 
@@ -27,6 +28,7 @@ void ResetFontClipRect(Font* unused, Vec4U* clip, PacketWriter* obj);
 f32 MeasureFontString(Font* self, const char* s);
 f32 MeasureFontStringHeight(Font* self, u8* s, f32 width);
 s32 WrapFontString(Font* self, u8* s, f32 w);
+void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 void PushFontScale(Font* trail, f32 su, f32 sv);
 void PopFontScale(Font* obj);
 Font* CloneFont(Font* owner, f32 x, f32 y);

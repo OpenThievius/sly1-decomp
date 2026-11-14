@@ -262,6 +262,7 @@ void InitObjectBuiltinTable(void)
 BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4)
 {
     s32 off = index << 2;
+    // address arithmetic over a variable index
     Desc01* owner = *(Desc01**)((u8*)g_classDescriptorTable + off);
     BaseObject* r = (BaseObject*)AllocateZeroedFrontMemory(owner->size);
     r->desc = owner;
@@ -274,6 +275,7 @@ BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a
     r->world = (World*)a1;
     r->scriptScope = GetScriptEntryScope(a4, (World*)a1);
     AppendToList((List01*)(GetHashedSlot((u8*)r->world, r->id)), r);
+    // address arithmetic over a variable index
     u8* base = (u8*)r->world->f1884;
     void** slot = (void**)(base + off);
     r->nextById = (BaseObject*)*slot;
@@ -370,8 +372,10 @@ void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r)
     } else if (flags & 0x80) {
         u8* dst;
         if (flags & 0x1000) {
+            // address arithmetic over a variable index
             dst = (u8*)d->target(obj, 1) + d->offset;
         } else {
+            // address arithmetic over a variable index
             dst = (u8*)obj + d->offset;
         }
         switch (d->type) {
@@ -1019,7 +1023,7 @@ void ReadAxisPositionCurve(AxisPositionCurve* self, Stream83* arg)
     } else {
         result = 1;
     }
-    *(s32*)((u8*)self + 8) = result;
+    self->closed = result;
     PopBackMemoryMark();
 }
 
@@ -1144,9 +1148,8 @@ void ReadKeyedRotationCurve(KeyedRotationCurve* self, Stream83* arg)
     if (self->count < 2) {
         result = 1;
     } else {
-        BuildEulerRotationMatrix((f32*)((u8*)self->keys + 0x10), (f32*)loc.a);
-        u8* tail = (u8*)((self->count << 6) + (s32)self->keys) - 0x30;
-        BuildEulerRotationMatrix((f32*)tail, (f32*)loc.b);
+        BuildEulerRotationMatrix((f32*)&self->keys[0].v0, (f32*)loc.a);
+        BuildEulerRotationMatrix((f32*)&self->keys[self->count - 1].v0, (f32*)loc.b);
         MultiplyMatrices3x3((Mat02*)loc.a, (Mat02*)loc.b, (Mat02*)loc.c);
         MatrixToAxisAngle((Mat02*)loc.c, &loc.first, (Vec02*)loc.d);
         result = (loc.first < 0.01f) ? 1 : 0;
@@ -1260,6 +1263,7 @@ void EvaluateBlendedPositionCurve(PositionCurveKind2* o, PlacedObject* cam, s32 
                 b = s / cfg->length;
                 a = t * s;
             } else {
+                // address arithmetic over a variable index
                 BlendTimeScale* q = (BlendTimeScale*)((u8*)e + seq->stride + idx * 8);
                 b = q->b;
                 a = q->a + t * b;
@@ -1348,6 +1352,7 @@ void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 
                 b = s / cfg->length;
                 a = t * s;
             } else {
+                // address arithmetic over a variable index
                 BlendTimeScale* q = (BlendTimeScale*)((u8*)e + seq->stride + idx * 8);
                 b = q->b;
                 a = q->a + t * b;
@@ -1440,6 +1445,7 @@ void EvaluateAngleBlendCurve(AngleBlendWeightCurve* o, PlacedObject* cam, s32 c,
                 b = s / cfg->length;
                 a = t * s;
             } else {
+                // address arithmetic over a variable index
                 BlendTimeScale* q = (BlendTimeScale*)((u8*)e + seq->stride + idx * 8);
                 b = q->b;
                 a = q->a + t * b;
@@ -1515,6 +1521,7 @@ void EvaluateValueBlendCurve(ValueBlendWeightCurve* o, PlacedObject* cam, s32 c,
                 b = s / cfg->length;
                 a = t * s;
             } else {
+                // address arithmetic over a variable index
                 BlendTimeScale* q = (BlendTimeScale*)((u8*)e + seq->stride + idx * 8);
                 b = q->b;
                 a = q->a + t * b;

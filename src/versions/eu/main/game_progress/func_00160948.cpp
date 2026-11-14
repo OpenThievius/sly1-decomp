@@ -10,9 +10,9 @@ void ResumeAtSavedLevel(void)
         k = (SessionKey*)((u8*)&g_sessionFadeKey + D_eu_00263710 * 0x20);
     }
     ClearTwoWords(D_002623D8);
-    if (g_elementStack.f30 != 1 || g_saveData->totalTime != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
+    if (g_elementStack.resumeState != 1 || g_saveData->totalTime != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
-    } else if (g_elementStack.f30 == 1) {
+    } else if (g_elementStack.resumeState == 1) {
         if (g_resumeSoundSetupDone == 0) {
             SilenceVolumeChannel3(g_saveData->optionFlags & 0x80);
             ApplySoundOptionFlag(g_saveData->optionFlags & 0x40);
@@ -29,7 +29,7 @@ void ResumeAtSavedLevel(void)
                     } while (node != 0);
                 }
             }
-            g_elementStack.f30 = -1;
+            g_elementStack.resumeState = -1;
             SetElementStackState((ElementStack*)&g_elementStack, 3);
         }
     }

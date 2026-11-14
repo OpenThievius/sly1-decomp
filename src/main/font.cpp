@@ -54,7 +54,7 @@ void CopyMemory(void* dst, void* src, u32 size);
 
 
 // An entry of a GCC 2.95 vtable as this file defines D_0024A220 (the font table).
-struct VtableEntry { s32 delta; void (*fn)(); };
+#include "vtable_entry.h"
 extern const VtableEntry g_fontMethods[22];
 void* AllocateObjectMemory(u32);
 void CopyFont(Font*, Font*);
@@ -116,7 +116,7 @@ s32 WrapFontString(Font* self, u8* s, f32 w);
 // NEAR: the first load of self->p54 goes to $v0 (retail $v1), so two
 // pointer loads differ in register choice; everything else matches.
 
-struct FontUploadFrame { PacketWriter a; u8 buf[0x100]; };
+#include "font_frame.h"
 PacketWriter* InitGifPacket(PacketWriter* p);
 
 // Matched: for loop over i with D_00262264 + i * 0x88.
@@ -172,16 +172,7 @@ void RewindTextReader(TextReader* self);
 typedef struct StringLayout StringLayout;
 typedef signed long s64;
 typedef unsigned long u64;
-struct StringLayout
-{
-  f32 x;
-  f32 y;
-  f32 width;
-  f32 height;
-  s32 color;
-  s32 horizontalAlign;
-  s32 verticalAlign;
-};
+
 
 
 void RewindTextReader(TextReader* self);
@@ -194,17 +185,8 @@ void CopyFont(Font* font, Font* out);
 void PopFontScale(Font* font);
 void PushFontScale(Font* font, f32 a, f32 b);
 
-struct FrameGlyph {
-    Font* font;
-    s8 key;
-    u8 p5[3];
-    f32 paddingX;
-    f32 paddingY;
-    f32 scaleX;
-    f32 scaleY;
-    u32 color;
-};
-struct FrameRect { f32 x, y, w, h; };
+
+
 
 FontGlyph* FindFontGlyph(Font* self, s8 key);
 void PushFontScale(Font* p, f32 a, f32 b);
@@ -835,6 +817,7 @@ void RewindTextReader(TextReader* self)
     s32 t;
     self->cur = (char*)self->text;
     self->font = self->defaultFont;
+    // a field access here changes retail's code (the packed word copies)
     t = ((U32P*)((u8*)self + 0xA4))->v;
     ((U32P*)((u8*)self + 0xA0))->v = t;
     t = ((U32P*)((u8*)self + 0xA0))->v;
@@ -846,6 +829,7 @@ void RewindTextReader(TextReader* self)
 // colour.
 void SetTextDefaultColor(TextReader* self, Rgba_137248* color)
 {
+    // a field access here changes retail's code (the packed word stores)
     u8* dst = (u8*)self;
     s32 v = ((U32P*)color)->v;
     ((U32P*)(dst + 0xA4))->v = v;

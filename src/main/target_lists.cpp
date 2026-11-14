@@ -45,18 +45,17 @@ struct BaseObject;
 
 struct FrameTarget;
 struct ImageRecord;
-struct PacketWriter;
+#include "gs_display.h"
 struct PaletteRecord;
 
 struct Mat02;
 struct Vec02;
 
-struct PacketWriter;
+#include "texture_upload_packet.h"
 
 
 
-struct GatheredEventObject { u8 pad0[0x328]; s32 f328; };
-struct GatheredObjects { s32 count; GatheredEventObject** items; };
+#include "gathered_event_object.h"
 
 void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount, BaseObject*** outArr);
 void* CreateRecord2505C0(void);
@@ -76,7 +75,7 @@ extern "C" void SetFieldDrawOffset(GsOffset* self, s16 a1, s16 a2, s16 a3);
 extern "C" void SyncDataCache(s32 a0);
 extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 
-struct DmaChainBlock { u8 bytes[0x20]; };
+#include "dma_chain_block.h"
 
 extern u8 g_screenClearPacketC[];
 void* InitPacketBuffer(PacketWriter* self);
@@ -85,7 +84,7 @@ void AddDmaRefTag(DmaChainBlock* a, s32 n, void* table);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-struct TexturePacket : PacketWriter { s32 value; };
+struct TexturePacketValue : PacketWriter { s32 value; };
 
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
@@ -126,20 +125,7 @@ void AddGifImageTag(void* p, s32 x);
 // The GS register TEX0 an image or palette record keeps (ImageRecord at 0x18, PaletteRecord
 // at 0x10), as func_00168E78 and func_00168FB0 fill it: the base, width and format, the size
 // as powers of two, then the palette's base, format and load mode.
-struct GsTex0 {
-    u64 tbp : 14;
-    u64 tbw : 6;
-    u64 psm : 6;
-    u64 tw : 4;
-    u64 th : 4;
-    u64 tcc : 1;
-    u64 tfx : 2;
-    u64 cbp : 14;
-    u64 cpsm : 4;
-    u64 csm : 1;
-    u64 csa : 5;
-    u64 cld : 3;
-};
+
 
 
 
@@ -168,14 +154,14 @@ extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 s32 WaitGsPaths(s32 a0, s32 a1);
 
-struct TextureUploadPacket : PacketWriter { u8 span[0x10]; s32 out; };
+
 
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
 
 void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
 
-struct FadePacket : PacketWriter { s32 value; u8 pad[0x3F0]; };
+
 
 extern s32 g_gifChannel;
 
@@ -246,11 +232,7 @@ extern f32 g_gameTime[];
 
 // The start of what a queue entry copies: two GIF tags whose words func_001694A0 marks (bit
 // 15) when the entry has a flag.
-struct QueuedGifTags {
-    s32 f0;
-    u8 pad0[0xC];
-    s32 f10;
-};
+
 
 
 extern "C" s32 GetGsInterruptMask(s32 mask);
@@ -261,21 +243,15 @@ extern "C" s32 AwaitSemaphore(s32 a);
 
 extern f32 g_gameTime[];
 
-struct TransferBase { s32 v; };
+
 
 
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 
-struct GsPmode { u32 en1 : 1; u32 rest : 31; u32 hi : 32; };
-struct GsDispFb { u32 fbp : 9; u32 fbw : 6; u32 psm : 5; u32 pad0 : 12; u32 dbx : 11; u32 dby : 11; u32 pad1 : 10; };
-struct GsDisplay { u32 dx : 12; u32 dy : 11; u32 magh : 4; u32 magv : 2; u32 pad0 : 3; u32 dw : 12; u32 dh : 11; u32 pad1 : 9; };
-struct DisplayRegs { GsPmode pmode; u64 pad; GsDispFb dispfb; GsDisplay display; u64 pad2; };
-struct GsPrivRegs {
-    GsPmode pmode; u8 pad0[0x70 - 8];
-    GsDispFb dispfb2; u8 pad1[8];
-    GsDisplay display2; u8 pad2[0x1000 - 0x88];
-    u32 csr;
-};
+
+
+
+
 
 extern s32 g_imageRecordCountB;
 extern s32 g_imageRecordCountA;
@@ -405,10 +381,10 @@ void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t)
 void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, void* a3)
 {
     CurveProbe f;
-    u8* node = (u8*)GetActiveSwitchedCollider();
+    PlacedObject* node = (PlacedObject*)GetActiveSwitchedCollider();
     PathCurve* o = self->curve;
     f.c = 1;
-    TransformPointBetweenFrames(0, (PlacedObject*)self->parent, (Vec02*)(node + 0x140), (Vec02*)&f.a);
+    TransformPointBetweenFrames(0, (PlacedObject*)self->parent, &node->v140, (Vec02*)&f.a);
     TransformDirectionBetweenFrames(0, (PlacedObject*)self->parent, (Vec02*)&g_unitZVector, (Vec02*)&f.b);
     if (o->vt->m10 != 0) {
         o->vt->m10(o, &f.a, &f.b, 0, 0, 0, &f.x);
@@ -683,6 +659,7 @@ void FindRingPointTowardCollider(PlacedObject* self, Vec02* out, f32* angleOut)
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(active->v140), p);
     d.z = 0.0f;
     if (out) {
+        // the held object's class is not known: its ring radius is at 0x560
         u128 k = Vu0::Scalar(*(f32*)((u8*)self + 0x560) + 70.0f);
         Vu0::Q(*out) = Vu0::MulAddX(p, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_unitXVector)), k);
     }

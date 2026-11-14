@@ -270,9 +270,9 @@ void SetPlayerAimMode(Player* self, s32 state)
         Vec02 v;
         self->foundNodeCount = 0;
         self->f21C8 = -1.0f;
-        TransformPointBetweenFrames(0, self, (Vec02*)((u8*)self->f23D4 + 0x140), &v);
+        TransformPointBetweenFrames(0, self, &((PlacedObject*)self->f23D4)->v140, &v);
         Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
-        Vu0::Q(v) = Vu0::MulXSum(Vu0::Vec::Of(v), h, Vu0::Vec::Of(*(Vec02*)((u8*)self->f61C + 0x100)), h).q;
+        Vu0::Q(v) = Vu0::MulXSum(Vu0::Vec::Of(v), h, Vu0::Vec::Of(((PlacedObject*)self->f61C)->pos), h).q;
         if (self->state == 0) {
             if (D_00274C10 != 0) {
                 state = 6;
@@ -537,7 +537,7 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
     TransformPointBetweenFrames(self, 0, (Vec02*)tbl, &here);
     Vu0::Q(world) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(*(Vec02*)tbl)), Vu0::Q(eye));
     Vu0::Q(local) = Vu0::Sub(Vu0::Q(world), Vu0::Q(here));
-    for (Class75Object* n = *(Class75Object**)list; n != 0; n = *(Class75Object**)((u8*)n + 0x80)) {
+    for (Class75Object* n = *(Class75Object**)list; n != 0; n = *(Class75Object**)&n->link) {
         Vec02 bestDir;
         f32 hit[2];
         if ((n->count & mode) == 0) {
@@ -546,7 +546,7 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
         ComputeObjectFrameAtTime((PlacedObject*)n->parent, 0, &objOrigin, &objRot, a, 0, 0);
         GetObjectWorldPosition(n, &delta);
         Vu0::Q(delta) = Vu0::Add(Vu0::Q(delta), Vu0::Q(local));
-        Vu0::Q(hitPoint) = Vu0::Add(Vu0::Rotate(objRot, Vu0::Q(*(Vec02*)((u8*)n + 0x40))), Vu0::Q(objOrigin));
+        Vu0::Q(hitPoint) = Vu0::Add(Vu0::Rotate(objRot, Vu0::Q(*(Vec02*)&n->pos)), Vu0::Q(objOrigin));
         MeasurePointToSegment(&world, &delta, &hitPoint, &hit[0], &hit[1]);
         if (n->parent != 0) {
             if (((PlacedObject*)n->parent)->root->desc->flags & 8) {

@@ -234,7 +234,7 @@ RampProfile g_onOffCameraAngleRamp = { 2.5f, 0.0f, 0.35f, 15.0f };
 Vec02 g_onOffCameraProbeOffsets[5] = { { 0, 0, 0, 0 }, { 0, -50.0f, 0, 0 }, { 0, 50.0f, 0, 0 }, { 0, 0, 75.0f, 0 }, { 0, 0, -50.0f, 0 } };
 
 // Gives the block at 0x2F0 of the object, or the default block when there is no object.
-void* GetOnOffObjectBlock(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
+void* GetOnOffObjectBlock(OnOffObject* self) { return self ? (void*)&self->block2F0 : (void*)D_00275980; }
 
 struct CameraPlacement { Vec02 q[5]; };
 // The orbit's polynomial block: three rows of four floats, cleared before the blend fills them.
@@ -431,7 +431,7 @@ void PlaceOnOffCameraFrame(OnOffObject* self, Vec02* eye, Vec02* out, Vec02* dir
     Mat02 m;
     TransformPointBetweenFrames(0, self, eye, &a);
     if (self->obj != 0) {
-        OnOffShapeFn fn = *(OnOffShapeFn*)(*(u8**)self->obj + 8);
+        OnOffShapeFn fn = (OnOffShapeFn)((PathCurve*)self->obj)->vt->m02;
         if (fn != 0) {
             fn(self->angle3A0, self->obj, &b, dir);
         }
@@ -493,7 +493,7 @@ void PlaceOnOffCameraOrbit(f32 angle, f32 offset, OnOffObject* self, f32* x, f32
         } else {
             a = angle + offset;
         }
-        OnOffShapeFn fn = *(OnOffShapeFn*)(*(u8**)self->obj + 8);
+        OnOffShapeFn fn = (OnOffShapeFn)((PathCurve*)self->obj)->vt->m02;
         if (fn != 0) {
             fn(a, self->obj, &t, &dir);
         }
@@ -592,7 +592,7 @@ void ActivateOnOffCameraController(OnOffCameraController* self, OnOffObject* obj
     if (object != 0) {
         if (object->obj != 0) {
             TransformPointBetweenFrames(0, object, &blended, &here);
-            OnOffPoseFn fn = *(OnOffPoseFn*)(*(u8**)object->obj + 0x28);
+            OnOffPoseFn fn = (OnOffPoseFn)((PathCurve*)object->obj)->vt->m10;
             if (fn != 0) {
                 fn(object->obj, &here, 0, 0, 0, 0, &object->angle3A0);
             }
@@ -669,7 +669,7 @@ void ComputeOnOffCameraHeading(OnOffCameraController* self, CameraPlacement* eye
     TransformPointBetweenFrames(0, object, &blended, &here);
     if (object->obj) {
         typedef void (*Fn)(f32, Arr63*, Vec02*, s32, s32, s32, s32, f32*);
-        Fn fn = *(Fn*)(*(u8**)object->obj + 0x30);
+        Fn fn = (Fn)((PathCurve*)object->obj)->vt->m12;
         if (!fn)
             return;
         fn(object->angle3A0, object->obj, &here, 0, 0, 0, 0, &object->angle3A0);
@@ -1234,7 +1234,7 @@ void FindFreeOnOffCameraAngle(CameraController* self, Vec02* p, Vec02* q, Vec02*
     } else {
         Vu0::Q(best) = Vu0::MulXSum(Vu0::Q(pos), Vu0::Scalar(1.0f - spanHi), Vu0::Q(*q), Vu0::Scalar(spanHi));
     }
-    ComputeConstrainedPushOut(cam, count, list, (MeshHitWeigh)GetSpanCandidateValue, ((f32*)cam)[0x1EC / 4], ((f32*)cam)[0x1EC / 4], &best, &best, out);
+    ComputeConstrainedPushOut(cam, count, list, (MeshHitWeigh)GetSpanCandidateValue, cam->f1EC, cam->f1EC, &best, &best, out);
     FindFirstFreeSpan(count, list, &best, out, 0.0f, &spanLo, &spanHi);
     if (spanHi != 1.0f) {
         f32 w = (spanLo + spanHi) * 0.5f;

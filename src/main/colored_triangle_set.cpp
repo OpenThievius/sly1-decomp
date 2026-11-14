@@ -11,6 +11,7 @@
 #include "packet_writer.h"
 #include "switched_collider.h"
 #include "object_finder.h"
+#include "clamp_helper.h"
 #include "functions/base_object.h"
 #include "functions/buffered_stream.h"
 #include "functions/camera.h"
@@ -178,12 +179,6 @@ void DrawTriangleGroups(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d)
     }
 }
 
-struct ClampHelper {
-    static f32 Clamp(f32 v, f32 lo, f32 hi)
-    {
-        return v < lo ? lo : (hi < v ? hi : v);
-    }
-};
 struct BlendColor {
     u8 c[4];
     // One channel moved from a to b by t, rounding up towards b.
@@ -223,9 +218,9 @@ void DrawColoredTriangles(ColoredTriangleSet* self, f32 t)
         Vec02 v;
         f32 x, y;
         ProjectPointToCamera(g_camera, &o->v140, (f32*)&v);
-        x = ClampHelper::Clamp(v.x * 320.0f + 320.0f, 10.0f, 630.0f);
+        x = ClampHelper::Of(v.x * 320.0f + 320.0f, 10.0f, 630.0f);
         mat[12] = (1.0f - t) * 320.0f + t * x;
-        y = ClampHelper::Clamp(v.y * -246.40001f + 246.40001f, 16.0f, 476.80002f);
+        y = ClampHelper::Of(v.y * -246.40001f + 246.40001f, 16.0f, 476.80002f);
         mat[13] = (1.0f - t) * 246.40001f + t * y;
     } else {
         mat[12] = 320.0f;

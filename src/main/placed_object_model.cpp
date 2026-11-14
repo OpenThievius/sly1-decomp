@@ -15,8 +15,11 @@
 // the vertex batch before it (0x1619C0 to 0x162890) could belong to either file or to a third.
 // The name is ours, after its role.
 #include "common.h"
+#include "cone_volume.h"
+#include "attachment.h"
 #include "id_lookup_object.h"
 #include "placed_object.h"
+#include "model_build.h"
 #include "world.h"
 #include "animation.h"
 #include "sound_record.h"
@@ -54,19 +57,11 @@ void* AllocateFrontMemory(s32 size);
 
 void* AllocateFrontMemory(s32 size);
 
-struct RefItem { u8 pad[0x38]; void* ref; u8 rest[0x70 - 0x3C]; };
+#include "placed_model_parts.h"
 
-struct RefOwner
-{
-    u8 pad0[0xC];
-    s32 count;
-    RefItem* items;
-    u8 pad1[0x50 - 0x14];
-    s32 capacity;
-    void** refs;
-};
 
-extern "C" void* FillMemory(void* p, s32 value, s32 size);
+
+
 
 
 extern World* g_currentWorld;
@@ -108,21 +103,10 @@ void WriteVifMscal(void* s, s32 n);
 
 // EXACT: self->block store ahead of self->f20 store.
 
-struct MorphTargetHeader
-{
-    u16* p;
-    s32 count;
-};
+
 // Built at startup: the compiler's initialiser and constructor for this file are func_00167D20
 // and func_00167D48 (config/us/generated.tsv).
-struct ColorWord
-{
-    union {
-        struct { u8 r, g, b, a; };
-        u32 rgba;
-    };
-    ColorWord(u32 v) { rgba = v; }
-};
+
 extern u8 D_00001298[];
 extern u8 D_00001368[];
 extern u8 D_00000ED8[];
@@ -131,31 +115,17 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteMorphTargetMscal(s32 mode, void* obj);
 
-struct QuadClear
-{
-    static void Clear(u32* q)
-    {
-        FillMemory(q, 0, 0x10);
-    }
-};
+
 
 extern PacketWriter g_vifPacketWriter;
 extern u8 g_flushBatchProgram[];
 
 void FlipVifBaseOffset(void);
 
-struct __attribute__((packed)) BatchVertexWords {
-    u64 q0;
-    u64 q8;
-    u64 q10;
-    u64 q18;
-    s32 f20;
-    s32 value;
-    BatchVertexWords() {}
-};
+
 
 void CopyMemory(void* dst, void* src, u32 size);
-struct CopiedGifTags { u32 w[8]; };
+
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern u8 g_unlitBatchProgram[];
@@ -163,7 +133,7 @@ extern u8 g_unlitBatchFinishProgram[];
 void CopyMemory(void* dst, void* src, u32 size);
 
 // A run of bytes, for the fill and copy calls.
-struct ByteSpan { u8 b[1]; };
+
 
 extern u8 g_litBatchProgram[];
 extern u8 g_litBatchSecondProgram[];
@@ -176,70 +146,10 @@ void WriteVifMscalf(PacketWriter* s, void* data);
 void AddDmaRefTag(PacketWriter* s, s32 n, void* data);
 void CopyMemory(void* dst, void* src, u32 size);
 
-struct MeshUv {
-    f32 u;
-    f32 v;
-};
+
 // A vertex's indices into the position, normal and uv arrays, and its flags.
-struct VertexRefs {
-    u8 pos;
-    u8 nrm;
-    u8 uv;
-    u8 flags;
-};
+
 // A weight's two index lists: the positions it moves, then the normals.
-struct WeightIndices {
-    u16* pos;
-    u16* nrm;
-};
-struct MeshBuildState {
-    u8 pad00[0x40];
-    s32 nweights;
-};
-struct StripMeshInfo {
-    u8 pad00[0x10];
-    s32 extraCount;
-    s32 f14;
-    s32 f18;
-};
-struct CursorHook;
-typedef AnimCursor* (*CursorHookFn)(CursorHook* self, StripMesh* mesh);
-struct CursorHook {
-    CursorHookFn* vt;
-};
-struct StripMeshOwner {
-    u8 pad00[0x18];
-    s32 lit;
-    u8 pad1C[0x28 - 0x1C];
-    s32 skinned;
-    u8 pad2C[0x38 - 0x2C];
-    CursorHook* animator;
-    u8 pad3C[0x40 - 0x3C];
-    f32 fogBias;
-    u8 pad44[0x54 - 0x44];
-    StripMeshInfo* link;
-};
-struct StripExtra {
-    s32 positions;
-    s32 a4[4];
-    s32 a14[4];
-    s32 a24[4];
-};
-struct StripUnpack {
-    u16 off[4];
-    u16 strip[4];
-    u16 f10;
-    u16 f12;
-    u16 pad14[2];
-};
-struct StripHeader {
-    u8 pad00[0x14];
-    u32 f14;
-    u8 pad18[0x1C - 0x18];
-    StripUnpack* p;
-    StripExtra* extra;
-    s32 count;
-};
 
 extern u8 g_unlitBatchFinishProgram[];
 extern u8 g_unlitBatchProgram[];
@@ -260,37 +170,20 @@ void WriteStripMeshMscal(s32 mode, void* obj);
 
 
 
-typedef void (*AttachmentHandlerFn)(void* self);
-struct AttachmentHandler { AttachmentHandlerFn* vtbl; };
-struct AttachmentEntry { u8 pad0[0x38]; AttachmentHandler* handler; u8 pad1[0x70 - 0x3C]; };
-struct AttachmentNode { u8 pad0[4]; void* attachment; s32 targetId; u8 pad1[0x80 - 0xC]; AttachmentNode* next80; };
-struct AttachmentBlock { u8 pad0[0xC]; s32 count0C; AttachmentEntry* entries; u8* chainData; u8 pad1[0x4C - 0x18]; AttachmentNode* nodes; };
 
 void BuildAttachmentDmaChain(void* self, void* entry, void* sub, void* ctx);
 
 // Four quadwords: a matrix as the attachment code copies it.
-struct QuadMatrix { Quad16 q[4]; };
-struct TargetObject { u8 pad0[0x110]; u8 sub110[0x30]; u8 sub140[0x40]; };
-struct AttachmentTarget { TargetObject* p0; u8 pad0[0xC]; QuadMatrix m; u8 tail[0x90 - 0x50]; };
-struct AttachmentTargets { s32 count; AttachmentTarget* elems; s32* keys; };
+
+
+
+
 
 QuadMatrix MultiplyMatrices(const QuadMatrix& a, const QuadMatrix& b);
 
-struct AnimatorStep;
-typedef void (*AnimatorStepFn)(void* self, f32 f);
 
-struct AnimatorStep {
-    AnimatorStepFn* vtbl;
-    u8 pad4[0x8];
-    void* oscillator;
-    u8 pad10[0x70];
-    AnimatorStep* next80;
-};
 
-struct AnimatorOwner {
-    u8 pad0[0x4C];
-    AnimatorStep* head4C;
-};
+
 
 
 s32 ClaimAnimatorStep(CursorAnimator* a0);
@@ -298,17 +191,6 @@ s32 ClaimAnimatorStep(CursorAnimator* a0);
 extern u8 g_litBatchFinishProgram[];
 extern u8 D_000000F0[];
 
-struct PartPacketContext { u8 pad0[0x28]; s32 skinned; };
-struct PartRange { u16 lo; u16 hi; };
-struct PartPacketSource { u8 pad0[0x18]; u8* mesh; PartRange* unpack; };
-struct PartPackets { void* firstQwc; void* firstBuffer; void* firstUnpackCursor; void* secondQwc; void* secondBuffer; void* secondUnpackCursor; };
-
-void WriteVifMscal(void* s, void* n);
-
-struct AttachmentLink { PlacedObject* owner; AttachmentLink* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; AttachmentLink* next; u8 pad84[0xC]; };
-struct AttachmentPartInfo { u8 pad[0x10]; u32 flags; };
-struct AttachmentPart { u8 pad[0x38]; AttachmentPartInfo* a; u8 pad3C[0x18]; void* b; };
-struct AttachmentCopy { s32 n0; void* p4; u8 pad8[4]; s32 count; AttachmentPart* recs; void* p14; u8 pad18[0x28]; s32 n40; void* p44; u8 pad48[4]; AttachmentLink* head; s32 f50; };
 
 void CopyMemory(void* dst, void* src, u32 size);
 void* AllocateZeroedFrontMemory(s32 n);
@@ -316,27 +198,12 @@ void* CopyToFrontMemory(s32 size, void* src);
 void CopyAttachmentPart(AttachmentCopy* o, void* a, void* b);
 
 // Index written (i << 4) * 9: a plain &items[i] gives a mult that loop.c does not strength-reduce (no s4 offset giv).
-struct FramedObject;
-typedef void (*FramedObjectFn)(FramedObject* self);
-struct FramedObjectVt { u8 pad[0xC0]; FramedObjectFn f; };
-struct FrameLinkConstraint { u8 pad0[0x60]; QuadMatrix m60; u8 pad[4]; s32 a4; u8 pad2[8]; u32 flags; };
-struct FramedObject { FramedObjectVt* vt; u8 pad0[0x10C]; u8 sub110[0x30]; u8 sub140[0x40]; u8 pad180[0xA4]; FrameLinkConstraint* link; };
-struct FramedAttachment { FramedObject* obj; u8 pad[0xC]; Quad16 q10[4]; QuadMatrix m50;  };
-struct FramedAttachmentList { s32 count; FramedAttachment* items; };
-struct ParentFrame { u8 pad[0x30]; };
 
 QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
 // The lit strip builder's packets: 0x24-byte slots, written two apart.
-struct PacketSlot {
-    u8 pad[0x24];
-};
-struct QuadLanes {
-    f32 x[4];
-    f32 y[4];
-    f32 z[4];
-    f32 w[4];
-};
+
+
 
 extern u8 g_litBatchProgram[];
 extern u8 g_litBatchThirdProgram[];
@@ -841,6 +708,7 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
                         }
                     }
                 }
+                // address arithmetic over a variable index
                 strip->unpack = (StripUnpack*)((u8*)strip->unpack + (strip->addr[0] - starts[0]));
                 BuildPartVifPackets((PartPacketContext*)part, (PartPacketSource*)strip, (PartPackets*)pp);
                 PopBackMemoryMark();
@@ -891,6 +759,7 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
                 u32 start;
                 DetachPacketBufferCopy((PacketWriter*)&pw, &m->qwc, &start, (s32*)&m->addr, 0x13);
                 RemapMeshQueueValues(queued, m->qwc * 16, start, m->addr);
+                // address arithmetic over a variable index
                 m->p = (u16*)((u8*)m->p + (m->addr - start));
                 PopBackMemoryMark();
             }
@@ -960,8 +829,10 @@ void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* h
     AddGifXyzfEntry(&f, 0, 0, 0, 0);
     CloseGifTag(&f, 1);
     CopyWordsToWriter(pkt, 0xC, 2, (u32*)f.begin, 0x1B);
+    // packet record, not an object
     CopyWordsToWriter(pkt, 0xC, 2, (u32*)(f.begin + 0x40), 0x1F);
     CopyWordsToWriter(pkt, 0xC, 2, (u32*)f.begin, 0x23);
+    // packet record, not an object
     CopyWordsToWriter(pkt, 0xC, 2, (u32*)(f.begin + 0x40), 0x27);
 
     hdr->p[0] = off;
@@ -1546,6 +1417,7 @@ void CopyAttachmentBlock(AttachmentCopy* self, PlacedObject* owner, void* src)
     self->p14 = CopyToFrontMemory(self->count * 0x28, self->p14);
     AttachmentPart* old = self->recs;
     for (; i < self->count; i++) {
+        // address arithmetic over a variable index
         AttachmentPart* r = (AttachmentPart*)((u8*)self->recs + i * 0x70);
         if ((r->a && (r->a->flags & 4)) || r->b) {
             self->recs = (AttachmentPart*)CopyToFrontMemory(self->count * 0x70, self->recs);
@@ -1578,6 +1450,7 @@ void CopyAttachmentBlock(AttachmentCopy* self, PlacedObject* owner, void* src)
         s32 b = 0, a = 0;
         do {
             i++;
+            // address arithmetic over a variable index
             CopyAttachmentPart(self, (u8*)self->recs + a, (u8*)self->p14 + b);
             a += 0x70;
             b += 0x28;
@@ -1625,6 +1498,7 @@ s32 GetAnimatorSize(s32 type);
 static inline void MovePointerInto(void** p, u8* from, s32 size, u8* to)
 {
     if (p != 0 && !((u8*)*p < from) && (u8*)*p < from + size) {
+        // address arithmetic over a variable index
         *p = (u8*)*p + (to - from);
     }
 }
@@ -1688,7 +1562,7 @@ void CopyAttachmentPart(AttachmentCopy* owner, void* partp, void* recp)
                                 FrameSource* strip = 0;
                                 for (s32 n = 0; n < e->mesh->nstrips; n++) {
                                     FrameSource* s = &e->mesh->strips[n];
-                                    u32 limit = (u32)s->base + ((*(s32*)((u8*)e->mesh + 0x20) * s->stride) << 4);
+                                    u32 limit = (u32)s->base + ((e->mesh->frameCount * s->stride) << 4);
                                     if (!((u32)t->value < (u32)s->base) && (u32)t->value < limit) {
                                         strip = s;
                                         break;
@@ -1740,8 +1614,8 @@ void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f)
 // (0x10) set and a linked object, ApplyLinkConstraint is run on that object.
 void UpdateLinkConstraint(PlacedObject* self)
 {
-    u8* p=(u8*)self->linkRecord;
-    if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) ApplyLinkConstraint((PlacedObject*)((PlacedObject*)(*(void**)(p+0x60))));
+    Rec2195_224* p = self->linkRecord;
+    if (p && (p->flags & 16) && p->p64) ApplyLinkConstraint((PlacedObject*)p->p60);
 }
 
 // Updates the frames of the object's attachments: from the inverse of the object's own and its
@@ -1758,11 +1632,12 @@ void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par)
     if (l->count > 0) {
         InvertRigidTransform(&self->v140, &self->m110, (Quad16*)&a);
         if (par != 0) {
-            InvertRigidTransform((u8*)par + 0x30, par, (Quad16*)&b);
+            InvertRigidTransform(&par->pos, &par->rot, (Quad16*)&b);
         } else {
             b = a;
         }
         for (i = 0; i < l->count; i++) {
+            // address arithmetic over a variable index
             FramedAttachment* el = (FramedAttachment*)((u8*)l->items + (i << 4) * 9);
             if (el->obj != 0) {
                 el->obj->vt->f(el->obj);
@@ -1836,6 +1711,7 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
             Cmd_1662A8* c;
             Row_1662A8* r;
             s32 prev;
+            // address arithmetic over a variable index
             c = (Cmd_1662A8*)((u8*)cfg->strips + co);
             r = (Row_1662A8*)((u8*)out->packets + ro);
             sz = total - sz;
@@ -2277,8 +2153,8 @@ slow:
                 Vif_166690::Refs(&g_vifPacketWriter, c->f0C, c->f10);
                 Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n304; k++) {
-                    u8* l = (u8*)lights[k];
-                    Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                    ConeVolume* l = (ConeVolume*)lights[k];
+                    Vif_166690::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
                 Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -2300,8 +2176,8 @@ slow:
             case 4:
                 Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n304; k++) {
-                    u8* l = (u8*)lights[k];
-                    Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                    ConeVolume* l = (ConeVolume*)lights[k];
+                    Vif_166690::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
                 Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -2322,8 +2198,8 @@ slow:
             case 3: {
                 Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n300; k++) {
-                    u8* l = (u8*)lights[k];
-                    Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                    ConeVolume* l = (ConeVolume*)lights[k];
+                    Vif_166690::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
                 Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -2341,8 +2217,8 @@ slow:
                 if (k < n304) {
                     Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                     for (k = 0; k < n304; k++) {
-                        u8* l = (u8*)lights[k];
-                        Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                        ConeVolume* l = (ConeVolume*)lights[k];
+                        Vif_166690::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
                     }
                     Vif_166690::Cnt1(&g_vifPacketWriter);
                     Vif_166690::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);

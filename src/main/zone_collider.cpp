@@ -12,8 +12,10 @@
 #include "object_message.h"
 #include "world.h"
 #include "object_event.h"
+#include "transform_object.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "list_walk.h"
 #include "functions/base_object.h"
 #include "functions/camera.h"
 #include "functions/collider.h"
@@ -156,7 +158,7 @@ void AttachMaskedColliderChildren(MaskedCollider* self)
     fr.cursor = l;
     fr.list = l;
     s32 old = *(s32*)&g_activeListFrames;
-    s32 link = *(s32*)(l + 8);
+    s32 link = ((List01*)l)->offset;
     *(s32*)&g_activeListFrames = (s32)&fr;
     fr.prev = old;
     s32 h = (s32)self->children.head;
@@ -646,6 +648,7 @@ void FadeOutPlacedObject(Collider* self, f32 time);
 void SetTimedState(TimedStateObject* self, s32 state)
 {
     if (state != self->state) {
+        // a field access here changes retail's code
         *(s32*)((u8*)self + 0x550) = state;
         f32 t = g_gameTime;
         self->stamp = t;
@@ -1027,25 +1030,7 @@ void InitZoneRecord(Zone28* s)
 
 
 
-struct ListWalkNext {
-    static BaseObject* Of(ListFrame* it)
-    {
-        BaseObject* obj = *(BaseObject**)it->link;
-        it->link = (u8*)obj + it->offset;
-        return obj;
-    }
-};
 
-struct ListWalkBegin {
-    static void Of(ListFrame* it, List01* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = (g_activeListFrames);
-        g_activeListFrames = (ListFrame*)it;
-    }
-};
 
 // Takes the children of a collider that are of flag 0x40 into the zone record's first queue (and
 // records the collider as its owner), skipping the ones already seen in either of its queues.
@@ -1055,7 +1040,7 @@ void CollectZoneChildren(Zone28* self, Collider* a1)
     ListWalkBegin::Of(&it, &a1->children);
     self->owner = a1;
     BaseObject* node;
-    while ((node = ListWalkNext::Of(&it)) != 0) {
+    while ((node = ListWalkNextBase::Of(&it)) != 0) {
         if (node->desc->flags & 0x40) {
             if (IsObjectInIdList(&self->pairs[1].seen, node) == 0) {
                 if (IsObjectInIdList(&self->pairs[0].seen, node) == 0) {
@@ -1136,6 +1121,7 @@ void SetZoneMode(Zone28* self, s32 b)
             s2 = 1;
         }
     }
+    // a field access here changes retail's code
     *(s32*)((u8*)self + 0x12C) = b;
     self->stamp = g_gameTime;
     ClearRootTries(self->owner);
@@ -1353,6 +1339,7 @@ void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q)
         if (n > 0) {
             u8* p = (u8*)self + n * 16;
             s32 o = n * 16;
+            // address arithmetic over a variable index
             MoveMemory((u8*)(o + (s32)self) + 0x7C0, &self->quads[0], o);
         }
     } else {
@@ -1388,21 +1375,21 @@ void AddTriggerZoneRotation(TriggerZone* self, BaseObject* a1, Mat02* e)
 }
 
 
-struct ScopedListFrame {
+struct ZoneListFrame {
     void* list;
     void* cursor;
     s32 next_off;
-    ScopedListFrame* prev;
-    ScopedListFrame(List01* l)
+    ZoneListFrame* prev;
+    ZoneListFrame(List01* l)
     {
         list = l;
         cursor = l;
-        ScopedListFrame* p = (ScopedListFrame*)g_activeListFrames;
+        ZoneListFrame* p = (ZoneListFrame*)g_activeListFrames;
         next_off = l->offset;
         g_activeListFrames = (ListFrame*)this;
         prev = p;
     }
-    ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
+    ~ZoneListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
 void StartPlacedObject(PlacedObject* self);
@@ -1426,7 +1413,7 @@ static inline Vec02* RowOf(Mat02* m, s32 i)
 // node. It then constrains the points (state 0) or works out the plane vectors (state 1).
 void StartTriggerZone(TriggerZone* self)
 {
-    ScopedListFrame frame(&self->children);
+    ZoneListFrame frame(&self->children);
     Vec02 v;
     StartPlacedObject(self);
     StartZoneRecord(&self->zone);
@@ -1438,11 +1425,11 @@ void StartTriggerZone(TriggerZone* self)
     if (node != 0) {
         do {
             if (state == 0 && IsObjectOfKind(node, 0x7E)) {
-                TransformPointBetweenFrames(self, (PlacedObject*)self->parent, (Vec02*)((u8*)node + 0x40), &v);
+                TransformPointBetweenFrames(self, (PlacedObject*)self->parent, (Vec02*)&((TransformObject*)node)->pos, &v);
                 AddTriggerZoneQuad(self, node, (Quad28*)&v);
             } else if (state == 1 && IsObjectOfKind(node, 0x73) && !IsObjectOfKind(node, 0x75)) {
                 Mat02 m;
-                TransformRotationBetweenFrames(self, (PlacedObject*)self->parent, (Mat02*)((u8*)node + 0x50), &m);
+                TransformRotationBetweenFrames(self, (PlacedObject*)self->parent, (Mat02*)&((TransformObject*)node)->rot, &m);
                 AddTriggerZoneRotation(self, node, &m);
                 node->desc->m03(node);
             }
@@ -1482,20 +1469,20 @@ void StartTriggerZone(TriggerZone* self)
             rows.r[0] = ((Mat02*)self->entries)->r[2];
             side = &((Mat02*)self->entries)->r[1];
             up = &g_unitYVector;
-            last = RowOf((Mat02*)((u8*)self + k * 0x30 + 0x7F0), 1);
-            rows.r[1] = ((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[2];
+            last = RowOf((Mat02*)&self->entries[k], 1);
+            rows.r[1] = ((Mat02*)&self->entries[k])->r[2];
         } else if (0.9f < dir.y) {
             rows.r[0] = ((Mat02*)self->entries)->r[0];
             side = &((Mat02*)self->entries)->r[2];
             up = &g_unitZVector;
-            last = RowOf((Mat02*)((u8*)self + k * 0x30 + 0x7F0), 2);
-            rows.r[1] = ((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[0];
+            last = RowOf((Mat02*)&self->entries[k], 2);
+            rows.r[1] = ((Mat02*)&self->entries[k])->r[0];
         } else {
             rows.r[0] = ((Mat02*)self->entries)->r[1];
             side = &((Mat02*)self->entries)->r[0];
             up = &g_unitXVector;
-            last = RowOf((Mat02*)((u8*)self + k * 0x30 + 0x7F0), 0);
-            rows.r[1] = ((Mat02*)((u8*)self + k * 0x30 + 0x7F0))->r[1];
+            last = RowOf((Mat02*)&self->entries[k], 0);
+            rows.r[1] = ((Mat02*)&self->entries[k])->r[1];
         }
         if (self->parent != 0) {
             rows.r[2] = self->pos;
@@ -1819,7 +1806,7 @@ void UpdateTriggerZone(TriggerZone* self, f32 dt)
 s32 HandleTriggerZoneEvent(TriggerZone* a0, void* a1)
 {
     s32 r = HandleObjectEvent(a0, (ObjectEvent*)a1);
-    if (r != 0 && (*(s32*)((u8*)a1 + 0xC) & 4) == 0 && a0->state == 3 && a0->zone.mode == 0) {
+    if (r != 0 && (((ObjectEvent*)a1)->eventFlags & 4) == 0 && a0->state == 3 && a0->zone.mode == 0) {
         SetTriggerZoneMode(a0, 1);
     }
     return r;
@@ -2026,9 +2013,9 @@ void AppendZoneFirstQueue(void* a, void* b, s32 c)
 
 
 
-void AppendTriggerZoneFirstQueue(u8* self, s32 value)
+void AppendTriggerZoneFirstQueue(TriggerZone* self, s32 value)
 {
-    AppendZoneFirstQueue(self + 0x554, self, value);
+    AppendZoneFirstQueue(&self->zone, self, value);
 }
 
 
