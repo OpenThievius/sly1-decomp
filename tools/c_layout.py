@@ -124,6 +124,15 @@ def placements(objects):
     starts = {a: n for n, (a, s, k) in functions.items()}
     placed, aliases, defined, data = [], {}, set(), []
     libcalls = check.load_libcalls("us")  # named by address in the script: no alias for them
+    # The functions config/us/generated.tsv renames in the file that writes them out (a class's
+    # methods under #pragma implementation): other files call them by the compiler's name.
+    gen_path = ROOT / "config" / "us" / "generated.tsv"
+    generated = {}
+    if gen_path.exists():
+        for line in gen_path.read_text().splitlines()[1:]:
+            parts = line.split("\t")
+            if len(parts) == 3 and not parts[1].endswith("*"):
+                generated[parts[1]] = parts[2]
     for src, path in objects.items():
         obj = elf.Elf(path.read_bytes())
         rel = path.relative_to(ROOT)
@@ -176,6 +185,9 @@ def placements(objects):
             if starts[addr] != sym["name"]:
                 aliases[starts[addr]] = sym["name"]       # the disassembly calls it by its splat name
         for sym in obj.symbols:
+            if sym["shndx"] == elf.SHN_UNDEF and sym["name"] in generated:
+                aliases.setdefault(sym["name"], generated[sym["name"]])  # a class's method another file writes out
+                continue
             if sym["shndx"] == elf.SHN_UNDEF and sym["name"] and sym["name"] not in libcalls:
                 base = check.base_name(sym["name"])
                 if base != sym["name"]:
