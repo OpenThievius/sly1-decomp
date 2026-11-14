@@ -548,7 +548,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
     fr.prev = old;
     fr.offset = link;
     *(sptr*)&g_activeListFrames = (sptr)&fr;
-    TurnMatrixBySpin((SpinRecord_158480*)((u8*)self + 0x330), dt, (f32*)mat);
+    TurnMatrixBySpin((SpinRecord_158480*)self->block330, dt, (f32*)mat);
     sptr head = *(sptr*)fr.link;
     fr.link = head + fr.offset;
     OwnedRecord* node = (OwnedRecord*)head;

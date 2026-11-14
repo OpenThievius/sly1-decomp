@@ -307,7 +307,7 @@ void PostLoadTimedGroup(TimedGroup* self)
         }
     }
     if ((self->flags & 0x3000000) != 0x2000000) {
-        QueryValueListMask((ValueListObject*)(*(void**)((u8*)self->world + 0x1EC4)), self->boundRadius, (Bits128*)&self->v140, (s32*)((u8*)self + 0x88));
+        QueryValueListMask((ValueListObject*)(*(void**)((u8*)self->world + 0x1EC4)), self->boundRadius, (Bits128*)&self->v140, &self->visibilityMask);
     }
     PlacedObject* o = self;
     if (o->parent != 0) {
@@ -319,7 +319,7 @@ void PostLoadTimedGroup(TimedGroup* self)
             }
             up->boundRadius = reach;
             if ((up->flags & 0x3000000) != 0x2000000) {
-                QueryValueListMask((ValueListObject*)(*(void**)((u8*)up->world + 0x1EC4)), reach, (Bits128*)&up->v140, (s32*)((u8*)up + 0x88));
+                QueryValueListMask((ValueListObject*)(*(void**)((u8*)up->world + 0x1EC4)), reach, (Bits128*)&up->v140, &up->visibilityMask);
             }
             o = (PlacedObject*)o->parent;
         } while (o->parent != 0);
@@ -489,9 +489,9 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
     if (st == 8 || st < 0) return;
     void* fp;
     if (st < 4) {
-        fp = *(void**)((u8*)self + 0xAE4);
+        fp = self->fAE4;
     } else if (st < 8) {
-        fp = *(void**)((u8*)self + 0xAE8);
+        fp = self->fAE8;
     } else {
         return;
     }
@@ -501,15 +501,15 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
     }
     s32 i = 0;
     PushBackMemoryMark();
-    Vec02* buf = AllocateBackMemory(*(s32*)((u8*)self + 0xAE0) << 4);
+    Vec02* buf = AllocateBackMemory(self->fAE0 << 4);
     while (i < self->groupCount) {
         TimedGroupChild* g = &self->groups[i];
         f32 acc = 0.0f;
         DrawPoints* src = *(DrawPoints**)((u8*)g->child + 0x34);
         s32 n = src->count;
         f32 total = ComputeTimedGroupRamp(self, g);
-        if (*(s32*)((u8*)g + 0xC) != 0) {
-            s32 lim = *(s32*)((u8*)g + 0x20) + 2;
+        if (g->fC != 0) {
+            s32 lim = g->f20 + 2;
             if (lim < n) n = lim;
         }
         s32 next = i + 1;
@@ -517,8 +517,8 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
         for (k = 0; k < n; k++) {
             TransformPointBetweenFrames(self, 0, &src->points[k], &buf[k]);
         }
-        if (*(s32*)((u8*)g + 0xC) != 0) {
-            buf[*(s32*)((u8*)g + 0x20) + 1] = *(Vec02*)((u8*)g + 0x10);
+        if (g->fC != 0) {
+            buf[g->f20 + 1] = g->f10;
         }
         for (k = 0; k < n - 1; k++) {
             u128 d = Vu0::Sub(Vu0::Q(buf[k]), Vu0::Q(buf[k + 1]));
@@ -591,7 +591,7 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
     s32 i = 0;
     self->nextStepTime = g_gameTime[0] + 0.033333335f;
     PushBackMemoryMark();
-    Vec02* pts = AllocateBackMemory(*(s32*)((u8*)self + 0xAE0) << 4);
+    Vec02* pts = AllocateBackMemory(self->fAE0 << 4);
     while (i < self->groupCount) {
         TimedGroupChild* g = &self->groups[i];
         f32 acc = 0.0f;
@@ -619,7 +619,7 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
                 u128 v = Vu0::Sub(Vu0::Q(mid), Vu0::Q(cam->position));
                 u32 signs = Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), v, ones, Vu0::Scalar(radius)) ^ 0xF0;
                 look = signs == 0;
-                if (look && g_player != 0 && *(s32*)((u8*)self + 0x5D0) == 1) {
+                if (look && g_player != 0 && self->f5D0 == 1) {
                     if (g_player->state != 6 || g_player->targetMode != 3 || (MaskWorldBitsBySave() & 0x12000) == 0) {
                         hit = (Collider*)FindNearestSpanObject(0, &p0, &p1, 1, (Collider**)&g_player, &span);
                         look = 0;
@@ -638,7 +638,7 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
                 s32 near = acc + Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of(p0), Vu0::Vec::Of(span.q[0])))) < total;
                 if (near) {
                     Vu0::Q(*(Quad16*)((u8*)g + 0x10)) = Vu0::Q(span.q[0]);
-                    *(s32*)((u8*)g + 0x20) = k;
+                    g->f20 = k;
                     *(Collider**)((u8*)g + 0xC) = hit;
                     if (*state < 8) {
                         active = *state >= 4;

@@ -16,6 +16,7 @@
 #include "switched_collider.h"
 #include "state_trigger.h"
 #include "child_group_object.h"
+#include "masked_collider.h"
 #include "screen_element.h"
 #include "object_link.h"
 #include "object_message.h"
@@ -650,20 +651,20 @@ void CollidePathFollowerWithObject(PathFollower* self, Collider* other, s32 a2, 
                 }
                 if (other->id != 1) {
                     if ((other->desc->flags & 0x20) != 0) {
-                        if (*(s32*)((u8*)other + 0x550) == 0) {
+                        if (((ChildGroupObject*)other)->contactMode == 0) {
                             StartChildGroupDelay((ChildGroupObject*)other, 0.0f);
                         }
-                    } else if (IsObjectOfKind(other, 0x25) != 0 && *(s32*)((u8*)other + 0x678) == 0 && IsObjectAccepted((MaskedCollider*)other, self) != 0) {
-                        if (*(s32*)((u8*)other + 0x6C4) != -1) {
-                            SetColliderTurnAnchorPreset(other, *(s32*)((u8*)other + 0x6C4));
+                    } else if (IsObjectOfKind(other, 0x25) != 0 && ((MassScalingCollider*)other)->busy == 0 && IsObjectAccepted((MaskedCollider*)other, self) != 0) {
+                        if (((MassScalingCollider*)other)->sel6C4 != -1) {
+                            SetColliderTurnAnchorPreset(other, ((MassScalingCollider*)other)->sel6C4);
                         }
-                        if (*(s32*)((u8*)other + 0x6C8) != -1) {
-                            SetColliderMoveAnchorPreset(other, *(s32*)((u8*)other + 0x6C8));
+                        if (((MassScalingCollider*)other)->sel6C8 != -1) {
+                            SetColliderMoveAnchorPreset(other, ((MassScalingCollider*)other)->sel6C8);
                         }
                         f32 m = other->mass;
-                        *(s32*)((u8*)other + 0x678) = 1;
-                        *(void**)((u8*)other + 0x6CC) = self;
-                        other->mass = m * *(f32*)((u8*)other + 0x6C0);
+                        ((MassScalingCollider*)other)->busy = 1;
+                        ((MassScalingCollider*)other)->cur = self;
+                        other->mass = m * ((MassScalingCollider*)other)->scale;
                     }
                 }
             }
@@ -671,9 +672,9 @@ void CollidePathFollowerWithObject(PathFollower* self, Collider* other, s32 a2, 
     } else if (self->contactMesh != 0 && IsObjectAttached((Collider*)self->contactMesh) != 0) {
         if ((other->flags538 & ((u64)0x8000 << 25)) != 0) {
             Collider* c = (Collider*)self->contactMesh;
-            AddMeshContacts(other, other->radius3CC, (Vec02*)((u8*)other + 0x140), c, c->tree.count, (FaceRef*)c->tree.nodes, 0, (PooledContact**)((u8*)self + 0xB74));
+            AddMeshContacts(other, other->radius3CC, &other->v140, c, c->tree.count, (FaceRef*)c->tree.nodes, 0, (PooledContact**)&self->contacts);
         } else if (a3 != 0) {
-            CreateMeshPairContacts((Collider*)self->contactMesh, other, a2, (FaceRef*)a3, (u8*)a4, (PooledContact**)((u8*)self + 0xB74));
+            CreateMeshPairContacts((Collider*)self->contactMesh, other, a2, (FaceRef*)a3, (u8*)a4, (PooledContact**)&self->contacts);
         }
     }
 }
@@ -818,12 +819,12 @@ void FindPathFollowerPathPosition(PathFollower* self)
         Vec02 side;
         PathCurve* o = self->path->curve;
         if (o->vt->m11) {
-            o->vt->m11(o, *(f32*)((u8*)self + 0x838), (u8*)self + 0x100, 0, (f32*)&p, (f32*)&tangent, (f32*)((u8*)self + 0x838), 0);
+            o->vt->m11(o, self->pathTime, (u8*)&self->pos, 0, (f32*)&p, (f32*)&tangent, &self->pathTime, 0);
         }
         u128 c = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(tangent));
         Vu0::Q(side) = Vu0::DivX(c, Vu0::Length(c));
-        self->pathDistance = self->path->curve->vt->m05(self->path->curve, *(f32*)((u8*)self + 0x838));
-        Vu0::StoreX(self->sideOffset, Vu0::Dot(Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x100)), Vu0::Q(p)), Vu0::Q(side)));
+        self->pathDistance = self->path->curve->vt->m05(self->path->curve, self->pathTime);
+        Vu0::StoreX(self->sideOffset, Vu0::Dot(Vu0::Sub(Vu0::Q(self->pos), Vu0::Q(p)), Vu0::Q(side)));
     }
 }
 
@@ -843,13 +844,13 @@ void HandlePathFollowerActivation(PathFollower* self, void* v)
     HandleSwitchedColliderActivation(self, v);
     if (v != 0) {
         T217D_E30* a = &g_pathFollowerFirstCountCaption;
-        *(void**)(D_0026DAAC) = (u8*)self + 0x858;
+        *(void**)(D_0026DAAC) = (u8*)&self->lapsLeft;
         T217D_E30* b = &g_pathFollowerSecondCountCaption;
-        a->target = (s32*)((u8*)self + 0xB00);
-        a->limit = (s32*)((u8*)self + 0xB04);
-        b->target = (s32*)((u8*)self + 0xB08);
-        b->limit = (s32*)((u8*)self + 0xB0C);
-        SetWorldActiveFollower((World*)(*(void**)((u8*)self + 0x14)), self);
+        a->target = &self->lap;
+        a->limit = &self->lapCount;
+        b->target = &self->place;
+        b->limit = &self->placeCount;
+        SetWorldActiveFollower(self->world, self);
     } else {
         if (self->mode == 2) {
             SetPathFollowerMode(self, 0);
@@ -880,7 +881,7 @@ void SetPathFollowerPath(PathFollower* self, PathCurveObject* arg)
 {
     self->path = arg;
     PathCurve* o = arg->curve;
-    if (o->vt->m10) o->vt->m10(o, (u8*)self + 0x100, 0, 0, 0, (f32*)((u8*)self + 0x838), 0);
+    if (o->vt->m10) o->vt->m10(o, (u8*)&self->pos, 0, 0, 0, &self->pathTime, 0);
     FindPathFollowerPathPosition(self);
     self->sideTarget = self->sideOffset;
     self->pathLength = self->path->curve->vt->m08(self->path->curve);
@@ -946,7 +947,7 @@ void SetPathFollowerMode(PathFollower* self, s32 mode)
 {
     if (mode != self->mode) {
         *(s32*)((u8*)self + 0xB34) = mode;
-        *(f32*)((u8*)self + 0xB38) = g_gameTime;
+        self->modeTime = g_gameTime;
         if (mode == 2 && self != GetActiveSwitchedCollider()) {
             ActivateSwitchedCollider(self);
         }
@@ -1423,8 +1424,8 @@ void* AllocateBackMemory(s32 size);
 
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out)
 {
-    s32 size = *(s32*)((u8*)world + 0x34) * 4;
-    ColliderListWalker walk((List01*)((u8*)world + 0x6C));
+    s32 size = world->count34 * 4;
+    ColliderListWalker walk((List01*)&world->list6C);
     Collider** cursor = *out = (Collider**)AllocateBackMemory(size);
     if (skip != 0 && ((skip->flags538 & 0x80000000000ull) != 0 || (skip->root03()->flags538 & 0x40000000000ull) != 0)) {
         goto done;
@@ -1473,8 +1474,8 @@ done:
 
 void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out)
 {
-    s32 size = *(s32*)((u8*)world + 0x34) * 4;
-    ColliderListWalker walk((List01*)((u8*)world + 0x6C));
+    s32 size = world->count34 * 4;
+    ColliderListWalker walk((List01*)&world->list6C);
     Collider** cursor = *out = (Collider**)AllocateBackMemory(size);
     if (skip != 0 && ((skip->flags538 & 0x80000000000ull) != 0 || (skip->root03()->flags538 & 0x40000000000ull) != 0)) {
         goto done;

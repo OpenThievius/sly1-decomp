@@ -1026,7 +1026,7 @@ void ResolvePairControllerLinks(PairController* self)
             if (i == 0) {
                 o = a;
             } else {
-                o = CreateObjectCopy(a, g_currentWorld, *(BaseObject**)((u8*)a + 0x18));
+                o = CreateObjectCopy(a, g_currentWorld, a->parent);
             }
             AppendToList((List01*)(s + 0x374), o);
         }
@@ -1035,7 +1035,7 @@ void ResolvePairControllerLinks(PairController* self)
             if (i == 0) {
                 o = b;
             } else {
-                o = CreateObjectCopy(b, g_currentWorld, *(BaseObject**)((u8*)b + 0x18));
+                o = CreateObjectCopy(b, g_currentWorld, b->parent);
             }
             AppendToList((List01*)(s + 0x390), o);
         }
@@ -1180,16 +1180,16 @@ void SetPairControllerState(PairController* self, s32 state)
     PairController* o;
     void* v;
     ListFrame frame;
-    if (W(self, 0x650) == state) return;
-    W(self, 0x650) = state;
-    F(self, 0x654) = g_gameClock[1];
+    if (self->state == state) return;
+    self->state = state;
+    self->stateStartTime = g_gameClock[1];
     W(self, 0x658) = 0;
     switch (state) {
     case 0:
         break;
     case 1: {
-        if (W(self, 0x64C) < 3) {
-            if (W(self, 0x64C) >= 0) {
+        if (self->id64C < 3) {
+            if (self->id64C >= 0) {
                 if (g_currentEntry->f14) {
                     W(self, 0x658) = 0;
                 } else {
@@ -1238,7 +1238,7 @@ void SetPairControllerState(PairController* self, s32 state)
         SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x1A);
         break;
     case 6:
-        SetWalkerColliderState((WalkerCollider*)(P(self, 0x354)), 3);
+        SetWalkerColliderState((WalkerCollider*)(self->watchedObject), 3);
         g_buttonHintElement.vt->m15(&g_buttonHintElement);
         break;
     }
@@ -1283,11 +1283,11 @@ void SpawnPairedObject(PairController* self)
     o = *(PairedObject**)self->list374;
     for (i = 0; i < 8; i++) {
         f32 angle = RandomFloatInRange(0.0f, 6.2831855f);
-        f32 radius = RandomFloatInRange(*(f32*)((u8*)self + 0x340) + o->radius3D0, *(f32*)((u8*)self + 0x344));
+        f32 radius = RandomFloatInRange(*(f32*)((u8*)self + 0x340) + o->radius3D0, self->tune344);
         other = (PairedObject*)GetActiveSwitchedCollider();
         ComputePolarOffset((Vec3*)&pos, angle, radius, 0.0f);
         pos.y = pos.y * self->tune34C;
-        Vu0::Q(pos) = Vu0::Add(Vu0::Q(*(Vec02*)((u8*)self + 0x330)), Vu0::Q(pos));
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(self->f330), Vu0::Q(pos));
         if (other != 0 && IsNearSpot(pos, other, o)) {
             continue;
         }
@@ -1364,9 +1364,9 @@ void StartPairedObjects(PairController* self)
             owner->desc02()->m1D(owner, (Vec02*)(node + 0x140));
             owner->desc02()->m1E(owner, (Mat02*)(node + 0x110));
             SetPairedState(owner, 1);
-            SetSoundStateObjectState((SoundStateObject*)(*(void**)((u8*)owner + 0x560)), 1);
-            *(f32*)((u8*)owner + 0x564) = self->f644;
-            *(f32*)((u8*)owner + 0x568) = self->f648;
+            SetSoundStateObjectState((SoundStateObject*)(owner->attachment), 1);
+            owner->maxSpeed = self->f644;
+            owner->maxTurn = self->f648;
             f32* fp = &self->attachDelayMin;
             self->nextAttachTime = g_gameClock[1] + RandomFloatInRange(self->attachDelayMin, fp[1]);
             StartSoundEffect(-1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);

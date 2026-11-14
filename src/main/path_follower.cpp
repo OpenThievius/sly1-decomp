@@ -408,8 +408,8 @@ void NotifyPlayerGroundObject(Player* self)
         Collider* list[8];
         s32 count;
         if (IsObjectOfKind(obj, 0x78) != 0) {
-            CopyMemory(list, (u8*)obj + 0x94, 0x20);
-            count = *(s32*)((u8*)obj + 0x90);
+            CopyMemory(list, (u8*)&obj->save94, 0x20);
+            count = obj->save90;
         } else {
             list[0] = obj;
             count = 1;
@@ -1205,7 +1205,7 @@ void ComputePathFollowerHeadingTarget(PathFollower* self)
         Vu0::Q(side) = Vu0::DivX(c, Vu0::Length(c));
         Vu0::Set(ahead, k);
         u128 p2 = Vu0::MulAddX(base, Vu0::Q(side), k);
-        Vu0::Q(w) = Vu0::Sub(p2, Vu0::Q(*(Vec02*)((u8*)self + 0x100)));
+        Vu0::Q(w) = Vu0::Sub(p2, Vu0::Q(self->pos));
         Vu0::Q(pos) = p2;
         self->targetHeading = ArctangentOfRatio(w.y, w.x);
         o = self->path->curve;

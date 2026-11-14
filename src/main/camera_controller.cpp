@@ -244,7 +244,7 @@ void ActivateTargetCameraController(TargetCameraController* self)
 {
     Quad4 tmp;
     Camera* eng = (Camera*)self->owner;
-    VectorToAngles((Vec3*)((u8*)eng + 0x80), (f32*)((u8*)self + 8), (f32*)((u8*)self + 0x10));
+    VectorToAngles((Vec3*)eng->g80, (f32*)((u8*)self + 8), &self->pitch);
     f32 d = self->f20;
     self->pitch = D_00261BF0;
     self->f0C = 0;

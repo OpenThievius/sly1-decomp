@@ -1292,7 +1292,7 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         if (self->subState == 0x10 || self->subState == 0x14) {
             if (0.0f < self->stickLevel) {
                 sub = 0x14;
-                SetPlayerBlendWeights(self->stickHeading, self->stickLevel, self, (TurnBlendRecords*)((u8*)self + 0xC40), *(BlendAnimationView**)((u8*)self + 0xE20));
+                SetPlayerBlendWeights(self->stickHeading, self->stickLevel, self, (TurnBlendRecords*)self->sixItemsB, self->sixBlendB);
             } else {
                 Vu0::Q(self->headingVelocity) = Vu0::Zero();
                 sub = 0x10;
@@ -1303,7 +1303,7 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         if (MaskWorldBitsBySave() & 0x2000) {
             if (0.0f < self->stickLevel) {
                 sub = 0x14;
-                SetPlayerBlendWeights(self->stickHeading, self->stickLevel * D_00274E58, self, (TurnBlendRecords*)((u8*)self + 0x720), self->sixWayBlend);
+                SetPlayerBlendWeights(self->stickHeading, self->stickLevel * D_00274E58, self, (TurnBlendRecords*)self->sixWayItems, self->sixWayBlend);
             } else {
                 Vu0::Q(self->headingVelocity) = Vu0::Zero();
                 sub = 0x10;
@@ -1407,7 +1407,7 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         }
         if (0.0f < along) {
             sub = 0x14;
-            SetPlayerBlendWeights(angle, along, self, (TurnBlendRecords*)((u8*)self + 0xE30), *(BlendAnimationView**)((u8*)self + 0x1010));
+            SetPlayerBlendWeights(angle, along, self, (TurnBlendRecords*)self->sixItemsC, self->sixBlendC);
         } else {
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             self->heading = angle;
@@ -1481,19 +1481,19 @@ void UpdatePlayerTargetPhase(Player* self)
         void* sounds;
         switch (self->targetMode) {
         case 0:
-            slots = (u8*)self + 0xA20;
-            n = *(BlendAnimationView**)((u8*)self + 0xB20);
-            sounds = (u8*)self + 0x2470;
+            slots = self->eightSlotsB;
+            n = self->eightBlendB;
+            sounds = &self->phaseSoundStates[3];
             break;
         case 1:
-            slots = (u8*)self + 0xB30;
-            n = *(BlendAnimationView**)((u8*)self + 0xC30);
-            sounds = (u8*)self + 0x2480;
+            slots = self->eightSlotsC;
+            n = self->eightBlendC;
+            sounds = &self->phaseSoundStates[4];
             break;
         case 3:
-            slots = (u8*)self + 0x910;
+            slots = self->eightWaySlots;
             n = self->eightWayBlend;
-            sounds = (u8*)self + 0x2450;
+            sounds = &self->phaseSoundStates[1];
             break;
         }
         UpdateEightEntryBlendWeights(self, (BlendSlot*)slots, n);
@@ -1503,7 +1503,7 @@ void UpdatePlayerTargetPhase(Player* self)
             s32 m = self->onOffPhase;
             if (m < 3) {
                 if (m > 0) {
-                    if (m == 1) *(f32*)&self->f26A0 >?= *(f32*)((u8*)self + 0xA40); else *(f32*)&self->f26A0 >?= *(f32*)((u8*)self + 0xA20);
+                    if (m == 1) *(f32*)&self->f26A0 >?= *(f32*)((u8*)self + 0xA40); else *(f32*)&self->f26A0 >?= *(f32*)self->eightSlotsB;
                 }
             }
         }
@@ -1513,26 +1513,26 @@ void UpdatePlayerTargetPhase(Player* self)
     case 0x14: {
         switch (self->targetMode) {
         case 4:
-            UpdateSixEntryBlendWeights(self, (u8*)self + 0xE30, *(BlendAnimationView**)((u8*)self + 0x1010), self->stateAnimPlayer);
+            UpdateSixEntryBlendWeights(self, self->sixItemsC, self->sixBlendC, self->stateAnimPlayer);
             break;
         case 2:
-            UpdateSixEntryBlendWeights(self, (u8*)self + 0xC40, *(BlendAnimationView**)((u8*)self + 0xE20), self->stateAnimPlayer);
+            UpdateSixEntryBlendWeights(self, self->sixItemsB, self->sixBlendB, self->stateAnimPlayer);
             break;
         case 3:
-            UpdateSixEntryBlendWeights(self, (u8*)self + 0x720, self->sixWayBlend, self->stateAnimPlayer);
+            UpdateSixEntryBlendWeights(self, self->sixWayItems, self->sixWayBlend, self->stateAnimPlayer);
             break;
         }
         PhasePlayer* ph = (PhasePlayer*)self->stateAnimPlayer;
         f32 t = WrapModulo((ph->time + D_00274B64 * ph->speed) / ph->clip->length, 1.0f);
-        PlayPhaseCrossingSound(self, (f32*)((u8*)self + 0x2440), t);
+        PlayPhaseCrossingSound(self, (f32*)self->phaseSoundStates, t);
         break;
     }
     case 0x10:
         if (self->targetMode == 4) {
             f32 k = 5.0f;
-            u8* p1 = (u8*)self + 0x1190;
+            u8* p1 = (u8*)&self->f1190;
             MeasurePlayerFootProbe(self, (s32)self->f628, (s32)self->f620, self->footPartA, k, p1);
-            u8* p2 = (u8*)self + 0x1290;
+            u8* p2 = (u8*)&self->f1290;
             MeasurePlayerFootProbe(self, (s32)self->f62C, (s32)self->f624, self->footPartB, k, p2);
             CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p1, (u8*)self->footPartA);
             CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p2, (u8*)self->footPartB);

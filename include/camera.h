@@ -31,7 +31,12 @@ struct Camera : BaseObject {
     f32 fC0;                // 0xC0: sent to VU1 with a listed object's draw (func_0013AD80)
     u8 padC4[0xD4 - 0xC4];
     f32 fD4;                // 0xD4: and this
-    u8 padD8[0x1C0 - 0xD8];
+    u8 padD8[0x100 - 0xD8];
+    Vec02 f100; // 0x100
+    u8 pad110[0x140 - 0x110];
+    Vec02 f140; // 0x140
+    Vec02 f150; // 0x150
+    u8 pad160[0x1C0 - 0x160];
     f32 distanceScale;      // 0x1C0: scales the spawner range and the VU1 draw distance
     f32 zoom;               // 0x1C4: the current zoom
     f32 zoomGoal;           // 0x1C8: the zoom UpdateCamera approaches
@@ -44,7 +49,7 @@ struct Camera : BaseObject {
     f32 aspectScale;        // 0x1E0: scales the yaw offset with f1C4 (func_00144BE8)
     f32 nearDistance;       // 0x1E4: the near clip distance
     f32 farDistance;        // 0x1E8: the far clip distance
-    u8 pad1EC[0x1F0 - 0x1EC];
+    f32 f1EC; // 0x1EC
     f32 projectionScaleX;   // 0x1F0: ProjectPointToCamera divides the screen x by it
     f32 projectionScaleY;   // 0x1F4: and the screen y
     f32 fogNear;            // 0x1F8: the distance fog starts
@@ -69,11 +74,22 @@ struct Camera : BaseObject {
     u8 pad2C4[0x2D0 - 0x2C4];
     s32 f2D0[4];            // 0x2D0
     void* currentTarget;    // 0x2E0: the target object the camera last tracked
-    u8 pad2E4[0x340 - 0x2E4];
+    void* f2E4; // 0x2E4
+    void* f2E8; // 0x2E8
+    BaseObject* f2EC; // 0x2EC
+    Vec02 f2F0; // 0x2F0
+    Vec02 f300; // 0x300
+    Vec02 f310; // 0x310
+    u8 pad320[0x334 - 0x320];
+    s32 f334; // 0x334
+    s32 f338; // 0x338
+    u8 pad33C[0x340 - 0x33C];
     s32 objectCount;        // 0x340: how many objects are in the list at f344
     void* objects[8];       // 0x344: up to eight objects the camera keeps in view
     f32 controllerSwitchTime; // 0x364: the game time the first controller last started
-    u8 pad368[0x3A0 - 0x368];
+    u8 pad368[0x370 - 0x368];
+    s32 f370; // 0x370
+    u8 pad374[0x3A0 - 0x374];
     Mat02 rot3A0;           // 0x3A0: a rotation DrawPhasedEffect turns each piece of its strip by
     s32 stackCount;         // 0x3D0: how many entries are in use
     CameraControllerEntry stack[8];    // 0x3D4: the first is in action

@@ -131,7 +131,7 @@ void DrawWorld2BossMarkerRing(DeferredRequest* request)
     AnimRecord* texture = FindAnimRecord(0x15D);
     params.textures[1] = texture;
     params.textures[0] = texture;
-    DrawAngleSortedRing((Vec02*)((u8*)agent + 0x140), 7, (Point2*)g_ringSevenPoints, agent->keyedCount, (RingAnchor*)agent->keyedObjects, &params, request);
+    DrawAngleSortedRing(&agent->v140, 7, (Point2*)g_ringSevenPoints, agent->keyedCount, (RingAnchor*)agent->keyedObjects, &params, request);
 }
 
 // The static's guard (D_002649A8) is written out with the function above, so the data below
@@ -414,7 +414,7 @@ void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
             switch (key) {
             case 0x438:
             case 0x439:
-                SetAgentGoalPoint(self, (Vec02*)((u8*)self + 0x140));
+                SetAgentGoalPoint(self, &self->v140);
                 break;
             default:
                 SetAgentGoalPoint(self, (Vec02*)((u8*)g_player + 0x140));

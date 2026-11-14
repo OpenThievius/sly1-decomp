@@ -196,7 +196,7 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self)
             continue;
         }
         GetObjectWorldPosition(n, &tmp);
-        if (CollectBoundsSpans(&tmp, (Vec02*)((u8*)self + 0x370), &self->v140, n->scale, 1, &span) == 0) {
+        if (CollectBoundsSpans(&tmp, &self->v370, &self->v140, n->scale, 1, &span) == 0) {
             continue;
         }
         SetContactPairFlags(self->world, self->contacts, ((Collider*)a->root)->contacts, 0x40, 0);
@@ -274,7 +274,7 @@ void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s3
         return;
     }
     case 0:
-        if (FindNearestSpanObject(0, (Vec02*)((u8*)self + 0x370), &self->v140, 1, &side->obj, &span) != 0) {
+        if (FindNearestSpanObject(0, &self->v370, &self->v140, 1, &side->obj, &span) != 0) {
             pos = *(Vec02*)&span.q[0];
         }
         break;
@@ -325,26 +325,26 @@ static inline void MulPoseRows(ChildGroupObject* o, const Mat02& a, const Mat02&
     Vu0::Q(m.r[0]) = Vu0::Q(x) = Vu0::RotateUntied(a, q[0]);
     Vu0::Q(m.r[1]) = Vu0::Q(y) = Vu0::RotateUntied(a, q[1]);
     Vu0::Q(z) = Vu0::Q(m.r[2]) = Vu0::RotateUntied(a, q[2]);
-    *(Mat02*)((u8*)o + 0x620) = m;
+    o->m620 = m;
 }
 
 void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* z)
 {
     Mat02 a;
 
-    if ((*(s32*)((u8*)self + 0x60C)) != 0) {
+    if ((self->flag60C) != 0) {
         return;
     }
-    (*(Collider**)((u8*)self + 0x670)) = obj;
-    (*(s32*)((u8*)self + 0x60C)) = 1;
+    (self->obj670) = obj;
+    (self->flag60C) = 1;
     if (pos != 0) {
-        (*(Vec02*)((u8*)self + 0x610)) = *pos;
+        (self->v610) = *pos;
     } else {
-        (*(Vec02*)((u8*)self + 0x610)) = self->v140;
+        (self->v610) = self->v140;
     }
-    (*(Vec02*)((u8*)self + 0x650)) = self->v150;
-    (*(Vec02*)((u8*)self + 0x660)) = self->v160;
-    switch ((*(s32*)((u8*)self + 0x608))) {
+    (self->v650) = self->v150;
+    (self->v660) = self->v160;
+    switch ((self->mode608)) {
     case 0: {
         BuildShortestArcRotation(&self->m110.r[2], z ? z : (Vec02*)&g_unitZVector, &a);
         MulPoseRows(self, a, self->m110);
@@ -359,14 +359,14 @@ void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec
         } else {
             frame = self->parent;
         }
-        TransformRotationBetweenFrames(0, (PlacedObject*)frame, (Mat02*)((u8*)self + 0x620), (Mat02*)((u8*)self + 0x620));
+        TransformRotationBetweenFrames(0, (PlacedObject*)frame, &self->m620, &self->m620);
         break;
     }
     case 1:
-        BuildBasisFromXAndZHint((Vec02*)((u8*)self + 0x650), (const Vec02*)&g_unitZVector, (Mat02*)((u8*)self + 0x620));
+        BuildBasisFromXAndZHint(&self->v650, (const Vec02*)&g_unitZVector, &self->m620);
         break;
     case 2:
-        (*(Mat02*)((u8*)self + 0x620)) = self->rot;
+        (self->m620) = self->rot;
         break;
     }
 }

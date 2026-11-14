@@ -764,7 +764,7 @@ void UpdateCamera(Camera* self, s32 flag, f32 dt)
                 void* o = self->stack[0].target;
                 u8* x;
                 if (o != 0) {
-                    x = (u8*)self + 0x2F0;
+                    x = (u8*)&self->f2F0;
                     if (o != last) {
                         ((VFn_143E40)(*(void***)o)[0x124 / 4])(o, dt, x);
                         if (prev != 0 || o != self->currentTarget) {
@@ -1509,7 +1509,7 @@ f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 f32 ComputeCameraHitClearance(Camera* self, void* unused, Quad16* v, Heading_00145DE8* h)
 {
     f32 out;
-    ApproachValueWithRamp(&g_cameraClearanceRamp, &out, h->dist, *(f32*)((u8*)self + 0x1EC) - g_cameraProbeRadius, g_frameStep);
+    ApproachValueWithRamp(&g_cameraClearanceRamp, &out, h->dist, self->f1EC - g_cameraProbeRadius, g_frameStep);
     return Vu0::ToFloat(Vu0::Dot(Vu0::Q(*v), Vu0::Q(h->dir))) - out;
 }
 

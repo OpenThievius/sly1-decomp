@@ -76,9 +76,9 @@ void StartHitCountCollider(HitCountCollider* self)
     self->aimHeading = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
     *(UnalignedFloatPair*)&self->f630 = *(UnalignedFloatPair*)((u8*)self->f62C + 0x2DC);
     u8* g1 = (u8*)&g_hitCountCaptionA;
-    ((UnalignedPointer*)(g1 + 0x264))->p = (u8*)self + 0x690;
+    ((UnalignedPointer*)(g1 + 0x264))->p = (u8*)&self->collectedCount;
     u8* g2 = (u8*)&g_hitCountCaptionB;
-    ((UnalignedPointer*)(g2 + 0x264))->p = (u8*)self + 0x694;
+    ((UnalignedPointer*)(g2 + 0x264))->p = (u8*)&self->hitsLeft;
     *(void**)(g1 + 0x268) = D_00274A40;
     *(f32*)(g2 + 0x26C) = 4.0f;
     SetWorldActiveFollower(self->world, self);
@@ -220,7 +220,7 @@ void SetHitCountColliderState(PlacedObject* self, s32 state);
 
 void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
 {
-    void* obj = P(self, 0x628);
+    void* obj = self->f628;
     if (obj != 0 && F(obj, 0x18) == 0.0f) {
         switch (self->state) {
         case 2:
@@ -233,7 +233,7 @@ void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
     }
     if (self->state != 1) {
         F(self, 0x66C) = D_00274A98;
-        *(Vec02*)((u8*)self + 0x650) = D_00248D30;
+        self->f650 = D_00248D30;
     } else {
         if (0.0f < F(ev, 0x48)) {
             ComputeCameraRelativeStickHeading(g_camera, (PadRecord*)ev, 0, &self->heading);
@@ -272,7 +272,7 @@ void StepHitCountCollider(HitCountCollider* self, f32 dt)
     StepCollider(self, dt);
     BuildYawPitchMatrix(self->heading, 0.0f, &rot);
     TurnColliderTowardRotation(self, dt, &rot, g_hitCountTurnRamp);
-    Vu0::Q(accel) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x650)), Vu0::Q(self->v150));
+    Vu0::Q(accel) = Vu0::Sub(Vu0::Q(self->f650), Vu0::Q(self->v150));
     ClampVectorLength(&accel, &accel, D_00274A9C * F(self, 0x66C) * dt);
     Vu0::Q(t) = Vu0::FromFloat(dt);
     Vu0::Q(accel) = Vu0::DivX(Vu0::Q(accel), Vu0::Q(t));

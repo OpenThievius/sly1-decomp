@@ -1255,7 +1255,7 @@ void AddStateTriggerAgentId(StateTrigger* self, s32 value)
 
 void AddStateTriggerTableEntry(StateTrigger* object, s32 a1, s32 a2, s32 a3, s32 a4)
 {
-	UpsertKeyedEntry((ZoneTargetEntry*)((u8*)object + 0x630), 8, (s32*)((u8*)object + 0x62C),
+	UpsertKeyedEntry((ZoneTargetEntry*)object->table630, 8, &object->count62C,
 			  a1, a2, a3, a4);
 }
 
@@ -1861,7 +1861,7 @@ void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
     if (pa != 0 && pa->mode0 != 5) {
         ApplyPoseSourcePosition((T2195_7C0*)pa);
         moved = 1;
-    } else if (IsVelocityNegligible(&self->v150) == 0 || IsAccelerationNegligible(&self->v170) == 0) {
+    } else if (IsVelocityNegligible((u8*)self + 0x150) == 0 || IsAccelerationNegligible(&self->v170) == 0) {
         moved = 1;
         GameClock* clk = &g_gameClock;
         Vu0::Q(self->pos) = Vu0::MulAddX2(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Scalar(clk->dt), Vu0::Q(self->v170), Vu0::Scalar(clk->dt * (clk->dt * 0.5f)));
@@ -1870,7 +1870,7 @@ void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
     if (ra != 0 && ra->mode1 != 5) {
         ApplyPoseSourceRotation(ra);
         moved = 1;
-    } else if (IsSpinNegligible(&self->v160) == 0 || IsSpinAccelerationNegligible(&self->v180) == 0) {
+    } else if (IsSpinNegligible((u8*)self + 0x160) == 0 || IsSpinAccelerationNegligible(&self->v180) == 0) {
         GameClock* clk = &g_gameClock;
         Vec02 prev;
         Vec02 w;
@@ -2398,7 +2398,7 @@ void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
                 if (self->indexedAttachments[j] != 0) {
                     ApplyPoseSourceIndexedValue((Attachment*)self->indexedAttachments[j], j);
                 } else {
-                    self->f270[j] = (*(f32**)((u8*)self + 0x274))[j];
+                    self->f270[j] = (self->f274)[j];
                 }
             }
         }
@@ -3419,7 +3419,7 @@ void* EnsureRangeRecord(PlacedObject* self)
         void* o = PopZeroedFreeSlot(&self->world->pool1BF4);
         self->rangeRecord = (RangeRecord*)o;
         InitRangeRecord(o);
-        AppendToList((List01*)((u8*)self->world + 0x1C00), self->rangeRecord);
+        AppendToList(&self->world->list1C00, self->rangeRecord);
     }
     return self->rangeRecord;
 }
@@ -3433,7 +3433,7 @@ void SetRangeRecordPresent(PlacedObject* self, s32 flag)
     if (self->rangeRecord == 0) {
         return;
     }
-    RemoveFromList((List01*)((u8*)self->world + 0x1C00), self->rangeRecord);
+    RemoveFromList(&self->world->list1C00, self->rangeRecord);
     AppendToList(&g_deferredReleaseListC, self->rangeRecord);
     self->rangeRecord = 0;
 }
@@ -3957,7 +3957,7 @@ void SetAimYawCurve(PlacedObject* self, Vec02* src)
 
 void GetAimYawCurve(PlacedObject* self, Quad16* out)
 {
-    Quad16* src = self->aimAttachment != 0 ? (Quad16*)((u8*)self->aimAttachment + 0x50) : (Quad16*)g_zeroQuad;
+    Quad16* src = self->aimAttachment != 0 ? (Quad16*)&self->aimAttachment->v50 : (Quad16*)g_zeroQuad;
     *out = *src;
 }
 
@@ -3969,7 +3969,7 @@ void SetAimYawLimits(PlacedObject* self, Pk8_2195* src)
 
 void GetAimYawLimits(PlacedObject* self, U64P* out)
 {
-    U64P* src = self->aimAttachment != 0 ? (U64P*)((u8*)self->aimAttachment + 0x60) : (U64P*)g_unitRange;
+    U64P* src = self->aimAttachment != 0 ? (U64P*)&self->aimAttachment->p60 : (U64P*)g_unitRange;
     *out = *src;
 }
 
@@ -3981,7 +3981,7 @@ void SetAimPitchCurve(PlacedObject* self, Vec02* src)
 
 void GetAimPitchCurve(PlacedObject* self, Quad16* out)
 {
-    Quad16* src = self->aimAttachment != 0 ? (Quad16*)((u8*)self->aimAttachment + 0x70) : (Quad16*)g_zeroQuad;
+    Quad16* src = self->aimAttachment != 0 ? (Quad16*)&self->aimAttachment->v70 : (Quad16*)g_zeroQuad;
     *out = *src;
 }
 
@@ -3993,7 +3993,7 @@ void SetAimPitchLimits(PlacedObject* self, Pk8_2195* src)
 
 void GetAimPitchLimits(PlacedObject* self, U64P* out)
 {
-    U64P* src = self->aimAttachment != 0 ? (U64P*)((u8*)self->aimAttachment + 0x80) : (U64P*)g_unitRange;
+    U64P* src = self->aimAttachment != 0 ? (U64P*)&self->aimAttachment->p80 : (U64P*)g_unitRange;
     *out = *src;
 }
 
@@ -4301,24 +4301,24 @@ void GetColorPreset(PlacedObject* self, s32* out) { *out = self->colorRecord ? *
 void SetColorRecordFirstColor(PlacedObject* self, Quad16* input)
 {
     EnsureColorRecord(self);
-    *(Quad16*)((u8*)self->colorRecord + 0x10) = *input;
+    *(Quad16*)&self->colorRecord->c10 = *input;
 }
 
 void GetColorRecordFirstColor(PlacedObject* self, Quad16* out)
 {
-    u8* src = self->colorRecord ? (u8*)self->colorRecord + 0x10 : (u8*)&D_00248D30;
+    u8* src = self->colorRecord ? (u8*)&self->colorRecord->c10 : (u8*)&D_00248D30;
     *out = *(Quad16*)src;
 }
 
 void SetColorRecordSecondColor(PlacedObject* self, Quad16* input)
 {
     EnsureColorRecord(self);
-    *(Quad16*)((u8*)self->colorRecord + 0x20) = *input;
+    *(Quad16*)&self->colorRecord->c20 = *input;
 }
 
 void GetColorRecordSecondColor(PlacedObject* self, Quad16* out)
 {
-    u8* src = self->colorRecord ? (u8*)self->colorRecord + 0x20 : (u8*)&D_00248D30;
+    u8* src = self->colorRecord ? (u8*)&self->colorRecord->c20 : (u8*)&D_00248D30;
     *out = *(Quad16*)src;
 }
 
@@ -4511,8 +4511,8 @@ void SetFollowObjects(PlacedObject* self, void* a1, void* a2)
         } else {
             p->flags = p->flags & 8;
         }
-        TransformPointBetweenFrames(0, (PlacedObject*)a1, (Vec02*)((u8*)self + 0x140), (Vec02*)((u8*)self + 0x100));
-        TransformRotationBetweenFrames(0, (PlacedObject*)a2, (Mat02*)((u8*)self + 0x110), (Mat02*)((u8*)self + 0xD0));
+        TransformPointBetweenFrames(0, (PlacedObject*)a1, &self->v140, &self->pos);
+        TransformRotationBetweenFrames(0, (PlacedObject*)a2, &self->m110, &self->rot);
     }
 }
 
@@ -5316,7 +5316,7 @@ AnimationPlayer* NewAnimationPlayer(World* pool)
 
     o->vt = &g_animationPlayerMethods;
     SetListLinkOffset(&o->list44, 0x20);
-    o->roots = (u8*)o + 0x64;
+    o->roots = (u8*)o->pad64;
 
     return o;
 }
@@ -5606,7 +5606,7 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         break;
     case 27: {
         Player* g = g_player;
-        if (g != 0 && *(s32*)((u8*)g + 0x2220) == 9 && *(s32*)((u8*)g + 0x2228) == 0x1C && g_currentEntry == g_currentLevelRecord) {
+        if (g != 0 && g->state == 9 && g->subState == 0x1C && g_currentEntry == g_currentLevelRecord) {
             return;
         }
         BeginLevelExit(msg->a8.i, msg->aC.i);
