@@ -172,17 +172,21 @@ struct ClampHelper {
 extern "C" f32 Cosine(f32 x);
 
 
+// Runs the class's methods 1 and 2 in turn.
 void InitObject(BaseObject* self)
 {
     self->desc->m01(self);
     self->desc->m02(self);
 }
 
+// Runs script event 0 (the start event) on the object.
 void StartObject(BaseObject* self)
 {
     TriggerScriptEvent(self, 0, 0, 0);
 }
 
+// Appends the object to its parent's child list (the world's list when it has no parent) unless
+// it is already there, and calls the class's method 4 on it when it is attached.
 void AddObjectToParentList(BaseObject* self)
 {
     List01* sub;
@@ -200,17 +204,21 @@ void AddObjectToParentList(BaseObject* self)
     }
 }
 
+// Calls the class's method 6 and then sends notification 1.
 void AttachObject(BaseObject* self)
 {
     self->desc->m06(self);
     self->desc->m0E(self, 1, self);
 }
 
+// Does nothing: the base class has nothing to register.
 void RegisterObject(BaseObject* self)
 {
     (void)self;
 }
 
+// Takes the object out of its parent's child list (the world's list when it has no parent); when
+// it is attached it also calls the class's method 5 on it.
 void RemoveObjectFromParentList(BaseObject* self)
 {
     List01* sub;
@@ -229,6 +237,8 @@ void RemoveObjectFromParentList(BaseObject* self)
     }
 }
 
+// Puts the object's id on the key list of its owner: the object itself when its class has flag 1,
+// else its parent; nothing if there is none.
 void AddObjectKeyToOwner(BaseObject* self)
 {
     PlacedObject* target;
@@ -245,6 +255,7 @@ void AddObjectKeyToOwner(BaseObject* self)
     }
 }
 
+// Adds the object's key to its owner only when the current entry's level value lies in the range.
 void AddObjectKeyIfLevelInRange(BaseObject* self, void* target)
 {
     if (IsInsideRange((ValueRange*)target, g_currentEntry->dt)) {
@@ -252,17 +263,21 @@ void AddObjectKeyIfLevelInRange(BaseObject* self, void* target)
     }
 }
 
+// Calls the class's method 7 and then sends notification 2.
 void DetachObject(BaseObject* self)
 {
     self->desc->m07(self);
     self->desc->m0E(self, 2, self);
 }
 
+// Does nothing: the base class has nothing to unregister.
 void UnregisterObject(BaseObject* self)
 {
     (void)self;
 }
 
+// When the object is attached, calls the class's resolve methods (0xF if any, then 0x10) and then
+// method 3 (start).
 void ResolveAndStartObject(BaseObject* self)
 {
     if (IsObjectAttached(self)) {
@@ -275,6 +290,8 @@ void ResolveAndStartObject(BaseObject* self)
     }
 }
 
+// Whether node is target or has it among its parents; a null node never is, and a null target is
+// true for any non-null node.
 s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target)
 {
     if (node == 0) {
@@ -289,6 +306,7 @@ s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target)
     return target == 0;
 }
 
+// Moves the object under parent: calls method 3 before and method 2 after the change.
 void ReparentObject(BaseObject* self, BaseObject* parent)
 {
     self->desc->m03(self);
@@ -296,6 +314,8 @@ void ReparentObject(BaseObject* self, BaseObject* parent)
     self->desc->m02(self);
 }
 
+// Whether the object and every parent above it is in its parent's list (the world's list at the
+// top), i.e. it is part of the live tree.
 s32 IsObjectAttached(BaseObject* self)
 {
     BaseObject* node = self;
@@ -316,6 +336,7 @@ s32 IsObjectAttached(BaseObject* self)
     return 1;
 }
 
+// Writes IsObjectAttached into *out (the script-facing form).
 void GetObjectAttached(BaseObject* a0, s32* out)
 {
     *out = IsObjectAttached(a0);
@@ -323,6 +344,8 @@ void GetObjectAttached(BaseObject* a0, s32* out)
 
 LINKER_REMNANT(func_00183050);
 
+// Creates a new object of the same class and id under parent in world and has it copy this one's
+// data (method 8).
 void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent)
 {
     BaseObject* r = (BaseObject*)CreateTypedRecord(self->desc->id, world, parent, self->id, -1);
@@ -330,6 +353,7 @@ void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent)
     return r;
 }
 
+// Has the object copy the data of src through its class's method 9.
 void CloneObject(BaseObject* self, BaseObject* src)
 {
     self->desc->m09(self, src);
@@ -365,6 +389,7 @@ void CopyObjectData(BaseObject* self, BaseObject* src)
     self->alias = src->alias;
 }
 
+// Adds a callback (function and context) at the head of the list, taking its node from the world.
 void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx)
 {
     Callback01* n = (Callback01*)TakeCallRecord(world);
@@ -374,6 +399,7 @@ void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx)
     *head = n;
 }
 
+// Removes the first callback of the list with this function and context, if any.
 void RemoveCallbackNode(World* mgr, Callback01** link, void* fn, void* ctx)
 {
     Callback01* node;
@@ -393,26 +419,33 @@ test:
     ReleaseCallRecords(mgr, (T219CHook*)node);
 }
 
+// Registers a callback (function and context) on the object.
 void AddObjectCallback(BaseObject* self, void* fn, void* ctx)
 {
     AddCallbackNode(self->world, &self->callbacks, fn, ctx);
 }
 
+// Removes a callback that AddObjectCallback registered.
 void RemoveObjectCallback(BaseObject* self, void* fn, void* ctx)
 {
     RemoveCallbackNode(self->world, &self->callbacks, fn, ctx);
 }
 
+// Registers the object src as a listener: its notification method (0xD) is called with src as
+// context.
 void AddObjectListener(BaseObject* self, BaseObject* src)
 {
     AddCallbackNode(self->world, &self->callbacks, (void*)src->desc->m0D, src);
 }
 
+// Removes the listener AddObjectListener registered for src.
 void RemoveObjectListener(BaseObject* self, BaseObject* src)
 {
     RemoveCallbackNode(self->world, &self->callbacks, (void*)src->desc->m0D, src);
 }
 
+// Sends a notification kind to the object: first its own handler (method 0xD), then every
+// callback registered on it with the kind and argument.
 void SendObjectNotification(BaseObject* self, s32 kind, void* arg)
 {
     if (self->desc->m0D != 0) {
@@ -422,11 +455,13 @@ void SendObjectNotification(BaseObject* self, s32 kind, void* arg)
     while (n) { void* c = n->ctx; void (*f)(void*, s32, void*) = n->fn; n = n->next; f(c, kind, arg); }
 }
 
+// Reads the object's property records from the stream.
 void LoadObjectProperties(BaseObject* self, void* stream)
 {
     ReadPropertyRecords(self, stream);
 }
 
+// Whether id is the object's id or its alias id; -1 never matches.
 s32 MatchesObjectId(BaseObject* self, s32 id)
 {
     Alias01* link;
@@ -450,6 +485,7 @@ missing:
     return 0;
 }
 
+// The id of the object's alias, or -1 if it has none.
 s32 GetAliasId(BaseObject* self)
 {
     Alias01* link = self->alias;
@@ -459,12 +495,14 @@ s32 GetAliasId(BaseObject* self)
     return -1;
 }
 
+// The alias id when the object has an alias, else its own id.
 s32 GetEffectiveObjectId(BaseObject* a)
 {
     if (a->alias) return a->alias->id;
     return a->id;
 }
 
+// Writes the object's alias id (or -1) into *out.
 void GetObjectAliasId(BaseObject* self, s32* out)
 {
     *out = GetAliasId(self);
@@ -612,6 +650,7 @@ done:
     ;
 }
 
+// Sets the object's extra property a1 to a bool value.
 void SetExtraObjectPropertyBool(BaseObject* a0, s32 a1, s32 a2)
 {
     ScriptValue a;
@@ -623,6 +662,7 @@ void SetExtraObjectPropertyBool(BaseObject* a0, s32 a1, s32 a2)
     DestroyScriptValue(&a, 2);
 }
 
+// Sets the object's extra property a1 to an int value.
 void SetExtraObjectPropertyInt(BaseObject* a0, s32 a1, s32 n)
 {
     ScriptValue a;
@@ -634,6 +674,7 @@ void SetExtraObjectPropertyInt(BaseObject* a0, s32 a1, s32 n)
     DestroyScriptValue(&a, 2);
 }
 
+// Sets the object's extra property a1 to a float value.
 void SetExtraObjectPropertyFloat(BaseObject* a0, s32 a1, f32 x)
 {
     ScriptValue a;
@@ -645,6 +686,7 @@ void SetExtraObjectPropertyFloat(BaseObject* a0, s32 a1, f32 x)
     DestroyScriptValue(&a, 2);
 }
 
+// Sets the object's extra property a1 to a vector B value (a pooled copy of the 16 bytes at a2).
 void SetExtraObjectPropertyVectorB(BaseObject* a0, s32 a1, void* a2)
 {
     ScriptValue a;
@@ -658,6 +700,8 @@ void SetExtraObjectPropertyVectorB(BaseObject* a0, s32 a1, void* a2)
     DestroyScriptValue(&a, 2);
 }
 
+// Sets the object's extra property a1 to a pair value (a pooled copy of the 8 bytes at a2),
+// dropping the old value.
 void SetExtraObjectPropertyPair(BaseObject* a0, s32 a1, void* a2)
 {
     ScriptValue a;
@@ -672,6 +716,7 @@ void SetExtraObjectPropertyPair(BaseObject* a0, s32 a1, void* a2)
     DestroyScriptValue(&a, 2);
 }
 
+// Sets the object's extra property a1 to a word, stored as an int value.
 void SetExtraObjectPropertyWord(BaseObject* a0, s32 a1, s32 n)
 {
     ScriptValue a;
@@ -683,6 +728,7 @@ void SetExtraObjectPropertyWord(BaseObject* a0, s32 a1, s32 n)
     DestroyScriptValue(&a, 2);
 }
 
+// Sets the object's extra property a1 to a vector A value (a pooled copy of the 16 bytes at a2).
 void SetExtraObjectPropertyVectorA(BaseObject* a0, s32 a1, void* a2)
 {
     ScriptValue a;
@@ -697,6 +743,8 @@ void SetExtraObjectPropertyVectorA(BaseObject* a0, s32 a1, void* a2)
     DestroyScriptValue(&a, 2);
 }
 
+// Sets the cone volume's defaults (mode 0, axis and side vectors, range 200 to 2000, angles 180,
+// 240, 180 and outer 60) and works out its tangents, then initialises the placed object.
 void InitConeVolume(ConeVolume* self)
 {
     self->flags = (self->flags & ~(0x3ULL << 40)) | ((u64)0x8000 << 25);
@@ -713,6 +761,7 @@ void InitConeVolume(ConeVolume* self)
     InitPlacedObject(self);
 }
 
+// Recomputes the world frame, then the shape and bounds.
 void RefreshConeVolume(ConeVolume* self)
 {
     ComputePlacedObjectWorldFrame(self);
@@ -720,12 +769,14 @@ void RefreshConeVolume(ConeVolume* self)
     UpdateConeVolumeBounds(self);
 }
 
+// Takes the cone volume off the world's list at 0x1BE8 and notes the lighting change.
 void RemoveConeVolumeFromWorldList(ConeVolume* self)
 {
     RemoveFromList(&self->world->list1BE8, self);
     NoteConeVolumeLightingChange(self);
 }
 
+// Appends the cone volume to the world's list at 0x1BE8 and calls the class's method 0x12.
 void AddConeVolumeToWorldList(ConeVolume* self)
 {
     void (*fn)(BaseObject*);
@@ -735,18 +786,22 @@ void AddConeVolumeToWorldList(ConeVolume* self)
     if (fn != 0) fn(self);
 }
 
+// Registers the placed object and adds the volume to the world's list.
 void RegisterConeVolume(ConeVolume* self)
 {
     RegisterPlacedObject(self);
     AddConeVolumeToWorldList(self);
 }
 
+// Unregisters the placed object and takes the volume off the world's list.
 void UnregisterConeVolume(ConeVolume* self)
 {
     UnregisterPlacedObject(self);
     RemoveConeVolumeFromWorldList(self);
 }
 
+// Copies the placed object from other but keeps its own saved block; when the volume is attached
+// and its value changes it is taken off the world list and put back so the lists agree.
 void CopyConeVolume(ConeVolume* self, ConeVolume* other)
 {
     s32 changed = 0;
@@ -764,6 +819,8 @@ void CopyConeVolume(ConeVolume* self, ConeVolume* other)
     }
 }
 
+// Fits y = out0 + out1 * x through the points (a, b) and (c, d); when a and c are nearly equal it
+// gives a constant (out1 = 0, out0 = b).
 void FitLineThroughPoints(f32 a, f32 b, f32 c, f32 d, f32* out0, f32* out1)
 {
     if (AreFloatsNearlyEqual(a, c, 1e-4f)) {
@@ -791,11 +848,16 @@ void FitReciprocalThroughPoints(f32* out, f32* scale, f32 x, f32 y, f32 z, f32 w
     *out = y - t / x;
 }
 
+// Fits the line through (x, 1) and (y, 0): a ramp that is 1 at the first point and 0 at the
+// second.
 void FitUnitRampBetweenPair(LinePoints* self, f32* out0, f32* out1)
 {
     FitLineThroughPoints(self->x, 1.0f, self->y, 0.0f, out0, out1);
 }
 
+// Fits the line used for a cone's falloff through two samples: each angle (in degrees) is halved,
+// turned into radians and then into cos + cos^3, each level is scaled from 0..255 to 0..1, and the
+// two points go to FitLineThroughPoints.
 void FitLineThroughAngleSamples(f32 a, f32 b, f32 c, f32 d, f32* out0, f32* out1)
 {
     f32 x = Cosine(a * 0.0087266471f);
@@ -805,6 +867,7 @@ void FitLineThroughAngleSamples(f32 a, f32 b, f32 c, f32 d, f32* out0, f32* out1
     FitLineThroughPoints(x, b * 0.003921569f, y, d * 0.003921569f, out0, out1);
 }
 
+// Records the current frame as the last lighting change when the volume's value is 0.
 void NoteConeVolumeLightingChange(ConeVolume* self)
 {
     if (self->value == 0) {
@@ -916,6 +979,8 @@ void RefreshConeVolumeShape(ConeVolume* self)
     DetachPacketBuffer(&w, &self->packetSize, 0);
 }
 
+// Sets the cone volume's mode; mode 0 sets flag 0x8000<<25 and clears the two bits at 40, other
+// modes only clear them; then rebuilds the shape and bounds.
 void SetConeVolumeMode(ConeVolume* self, s32 flag)
 {
     self->mode = flag;
@@ -928,42 +993,50 @@ void SetConeVolumeMode(ConeVolume* self, s32 flag)
     UpdateConeVolumeBounds(self);
 }
 
+// Stores the colour (a Quad16 in HSV) and rebuilds the shape.
 void SetConeVolumeColor(ConeVolume* self, Quad16* src)
 {
     *(Quad16*)self->color = *src;
     RefreshConeVolumeShape(self);
 }
 
+// Sets the second level and rebuilds the shape.
 void SetConeVolumeSecondLevel(ConeVolume* self, f32 v)
 {
     self->secondLevel = v;
     RefreshConeVolumeShape(self);
 }
 
+// Sets the third level and rebuilds the shape.
 void SetConeVolumeThirdLevel(ConeVolume* self, f32 v)
 {
     self->thirdLevel = v;
     RefreshConeVolumeShape(self);
 }
 
+// Sets the first angle and rebuilds the shape.
 void SetConeVolumeFirstAngle(ConeVolume* self, f32 v)
 {
     self->firstAngle = v;
     RefreshConeVolumeShape(self);
 }
 
+// Sets the second angle and rebuilds the shape.
 void SetConeVolumeSecondAngle(ConeVolume* self, f32 v)
 {
     self->secondAngle = v;
     RefreshConeVolumeShape(self);
 }
 
+// Sets the third angle and rebuilds the shape.
 void SetConeVolumeThirdAngle(ConeVolume* self, f32 v)
 {
     self->thirdAngle = v;
     RefreshConeVolumeShape(self);
 }
 
+// Stores the direction (q310) and the unit vector against it (q320, the up vector when it is too
+// short), then rebuilds the shape and bounds.
 void SetConeVolumeDirection(ConeVolume* self, Quad16* dir)
 {
     self->q310 = *dir;
@@ -980,6 +1053,7 @@ void SetConeVolumeDirection(ConeVolume* self, Quad16* dir)
     UpdateConeVolumeBounds(self);
 }
 
+// Sets the volume's value and rebuilds the shape when it changed.
 void SetConeVolumeValue(ConeVolume* self, s32 v)
 {
     if (v != self->value) {
@@ -988,6 +1062,7 @@ void SetConeVolumeValue(ConeVolume* self, s32 v)
     }
 }
 
+// Copies the 8-byte range (minimum and maximum) in and rebuilds the shape and bounds.
 void SetConeVolumeRange(ConeVolume* self, U64P* src)
 {
     *(U64P*)&self->rangeMin = *src;
@@ -995,6 +1070,7 @@ void SetConeVolumeRange(ConeVolume* self, U64P* src)
     UpdateConeVolumeBounds(self);
 }
 
+// Sets the outer angle and recomputes the tangents, shape and bounds.
 void SetConeVolumeOuterAngle(ConeVolume* self, f32 v)
 {
     self->outerAngle = v;
@@ -1003,6 +1079,7 @@ void SetConeVolumeOuterAngle(ConeVolume* self, f32 v)
     UpdateConeVolumeBounds(self);
 }
 
+// Sets the inner angle and recomputes the tangents and shape.
 void SetConeVolumeInnerAngle(ConeVolume* self, f32 v)
 {
     self->innerAngle = v;
@@ -1073,17 +1150,20 @@ void UpdateConeVolumeBounds(ConeVolume* self)
     }
 }
 
+// Sets both the second and the third level to v.
 void SetConeVolumeOuterLevels(ConeVolume* self, f32 v)
 {
     SetConeVolumeSecondLevel(self, v);
     SetConeVolumeThirdLevel(self, v);
 }
 
+// Writes the second level into *out.
 void GetConeVolumeSecondLevel(ConeVolume* self, f32* out)
 {
     *out = self->secondLevel;
 }
 
+// Takes a colour as RGB (0..255), converts it to HSV and sets it as the cone volume's colour.
 void SetConeVolumeColorRgb(ConeVolume* self, void* a1)
 {
     Quad16 q;
@@ -1091,6 +1171,7 @@ void SetConeVolumeColorRgb(ConeVolume* self, void* a1)
     SetConeVolumeColor(self, &q);
 }
 
+// Writes the cone volume's colour, stored as HSV, into out as RGB (0..255).
 void GetConeVolumeColorRgb(u8* self, f32* out)
 {
     ConvertHsv255ToRgb255((Quad_001B4580*)(self + 736), out);

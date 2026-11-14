@@ -48,6 +48,8 @@ struct StateGraph;
 
 extern TargetFollower* g_currentTargetFollower;
 
+// Initialises the collider and sets the follower's defaults (no followed id, no mode, 3000 and
+// 1000 for f5C4 and f5C8, its tune values) and clears the current target follower.
 void InitTargetFollower(TargetFollower* self)
 {
     InitCollider(self);
@@ -93,6 +95,9 @@ void LoadTargetFollowerRecords(TargetFollower* self, BufferedStream* stream)
 void FollowObjectById(TargetFollower* self, s32 x);
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
+// Starts the placed object and resolves its links: creates its state walker, finds the launch
+// pool, works out the height offset of the follower above its anchor, and follows the object with
+// the saved id if there is one.
 void ResolveTargetFollowerLinks(TargetFollower* self)
 {
     f32 scratch[4];
@@ -118,6 +123,8 @@ void SetFollowedObject(TargetFollower* self, FollowableObject* x);
 void PlaceTargetFollowerOnFollowed(TargetFollower* self);
 void SetTargetFollowerMode(TargetFollower* self, s32 mode);
 
+// Remembers the id, finds that object and, if it exists, follows it and puts the follower on it,
+// into mode 2 when the object has a tune object and mode 4 when it has none.
 void FollowObjectById(TargetFollower* self, s32 x)
 {
     self->followedObjectId = x;
@@ -136,6 +143,8 @@ void FollowObjectById(TargetFollower* self, s32 x)
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 
+// Steps the collider and, unless stepping is halted, turns the collider toward a rotation about
+// the up axis by the follower's heading.
 void StepTargetFollower(TargetFollower* self, f32 t)
 {
     Mat3U buf;
@@ -154,6 +163,9 @@ void SetTargetFollowerMode(TargetFollower* self, s32 mode);
 Collider* GetActiveSwitchedCollider(void);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Per-frame update: updates the collider and any pending sound; only the current target follower
+// goes on, changing mode until the chosen mode is stable and, in modes 2 and 4, turning its
+// heading toward the active switched collider.
 void UpdateTargetFollower(TargetFollower* self, f32 dt)
 {
     UpdateCollider(self, dt);
@@ -281,6 +293,8 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 struct Item_16D3F0 { u8 pad0[0x318]; s32 f318; };
 
 
+// Makes x the followed object (nothing if it is already); when its tune object differs it records
+// it and sets the trail countdown to 3, and passes the tune's value to the launch pool.
 void SetFollowedObject(TargetFollower* self, FollowableObject* x)
 {
     if (x == self->followedObject) {
@@ -429,6 +443,8 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
 typedef void (*VFn_16D788)(TargetFollower* self, const void* arg);
 
 
+// Puts the follower on the followed object's anchor: clears the anchors and velocities, and moves
+// it to the anchor's world position raised by the height offset.
 void PlaceTargetFollowerOnFollowed(TargetFollower* self) {
     Vec3 v;
     SetColliderAnchors(self, 3, 0, 3, 0);
@@ -465,6 +481,8 @@ void LaunchTargetFollowerAtFollowed(TargetFollower* self)
 extern const KeyRecord g_streamVoiceKeys[7];
 
 
+// With a 20 in 100 chance, when voices are enabled and none is playing, opens one of six stream
+// voice keys at random and marks the voice pending.
 void StartRandomStreamVoice(TargetFollower* self)
 {
     s32 r;
@@ -486,6 +504,8 @@ void StartRandomStreamVoice(TargetFollower* self)
 
 struct PlayingSound;
 
+// When a voice is pending and the stream voice has finished loading, clears the pending flag and
+// plays the sound with the follower's volume and pan.
 void PlayPendingFollowerSound(TargetFollower* self)
 {
     if (self->voicePending != 0) {
@@ -501,6 +521,9 @@ void LaunchTargetFollowerAtFollowed(void* self);
 void StartRandomStreamVoice(void* self);
 void SetTargetFollowerMode(void* self, s32 mode);
 
+// On notification 0x13 reacts to the message code: 0x2FD launches a pool item at the target,
+// 0x2FE and 0x2FF are the cases handled by the calls at the end of the function (0x2FF sets mode
+// 2), 0x300 launches the follower at the followed object.
 void HandleTargetFollowerNotification(TargetFollower* self, s32 type, Packet47* packet)
 {
     HandlePlacedObjectNotification(self, type, packet);
@@ -636,6 +659,7 @@ void SetTargetFollowerMode(TargetFollower* self, s32 mode)
 
 extern TargetFollower* g_currentTargetFollower;
 
+// Makes follower the current target follower (a global).
 void SetCurrentTargetFollower(TargetFollower* follower)
 {
     g_currentTargetFollower = follower;
@@ -643,12 +667,14 @@ void SetCurrentTargetFollower(TargetFollower* follower)
 
 extern TargetFollower* g_currentTargetFollower;
 
+// Clears the current target follower, whichever it was.
 void ClearCurrentTargetFollower(TargetFollower* follower)
 {
     g_currentTargetFollower = 0;
 }
 
 
+// Initialises the placed object and sets its tuning values (2.25, 2, 0.8, 4, 0.5, 1000, 2000).
 void InitEntryTableObject(EntryTableObject* self)
 {
     InitPlacedObject(self);
@@ -662,6 +688,8 @@ void InitEntryTableObject(EntryTableObject* self)
 }
 
 
+// Loads the placed object and gathers up to 16 objects of the entry kind (0x201, 0x73) into its
+// entries, storing their count.
 void LoadEntryTable(EntryTableObject* self, BufferedStream* stream)
 {
     LoadPlacedObject(self, stream);
@@ -673,6 +701,7 @@ void LoadEntryTable(EntryTableObject* self, BufferedStream* stream)
 }
 
 
+// Starts the placed object and then calls the class's method 3 on it.
 void StartEntryTableObject(EntryTableObject* self)
 {
     StartPlacedObject(self);
@@ -712,6 +741,8 @@ void* ChooseEntryTableObject(EntryTableObject* self)
     return 0;
 }
 
+// Initialises the zone collider and clears the zone duration and the two ids (anchor and tune
+// object) to -1.
 void InitFollowableObject(FollowableObject* self)
 {
     InitZoneCollider(self);
@@ -721,6 +752,8 @@ void InitFollowableObject(FollowableObject* self)
 }
 
 
+// Finishes loading the placed object and finds its anchor (by its own id, or the first gathered
+// object of the kind 0x7E when it has none) and its tune object.
 void ResolveFollowableObjectLinks(FollowableObject* self)
 {
     PostLoadPlacedObject(self);
@@ -735,6 +768,9 @@ void ResolveFollowableObjectLinks(FollowableObject* self)
 extern TargetFollower* g_currentTargetFollower;
 
 
+// Handles the placed-object notification and keeps the current target follower's list of
+// followables in step: kind 0xC appends this object, kind 0xD removes it, and kind 2 removes it
+// if it is listed.
 void HandleFollowableObjectNotification(FollowableObject* self, s32 kind, void* arg)
 {
     HandlePlacedObjectNotification(self, kind, arg);

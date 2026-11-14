@@ -292,6 +292,9 @@ void RegisterCollider(Collider* self)
     ResolveContactHandler(self);
 }
 
+// Takes a collider out of the world: unlists it as a part, unregisters the placed object, and for
+// a body without parent removes it from the sweep axes, frees its contact table and body list
+// entry; frees its touch nodes and refreshes the anchor flags of its old root.
 void UnregisterCollider(Collider* self)
 {
     Collider* old50 = self->root03();
@@ -313,6 +316,8 @@ void UnregisterCollider(Collider* self)
     }
 }
 
+// Lists or unlists the collider among its root's parts (flag bit 50), clears the root's state
+// bits and calls the root's method 0x32 when the flag changes.
 void SetColliderPartListed(Collider* self, s32 flag)
 {
     if (flag == ((self->flags538 >> 50) & 1)) {
@@ -490,6 +495,8 @@ ASM_FUNC(func_001B8540);
 
 ASM_FUNC(func_001B8820);
 
+// Computes the placed object's world frame and moves both of the collider's meshes into the world
+// with it.
 void ComputeColliderWorldFrame(Collider* self)
 {
     ComputePlacedObjectWorldFrame(self);
@@ -497,6 +504,8 @@ void ComputeColliderWorldFrame(Collider* self)
     TransformMeshToWorld(&self->mesh2, &self->mesh2Copy, *(Qword128*)&self->v140, &self->m110);
 }
 
+// Recomputes the placed object's frame, calls the root's method 0x32, clears its state bits and
+// marks the sweep axes as unsorted.
 void RecomputeColliderFrame(Collider* self)
 {
     RecomputePlacedObjectFrame(self);
@@ -505,6 +514,7 @@ void RecomputeColliderFrame(Collider* self)
     MarkSweepAxesUnsorted(self->world);
 }
 
+// Whether a and b may touch: only when a has flag 47 or 55 set and b has flag 55 set.
 s32 TestCollidersMayContact(Collider* a, Collider* b)
 {
     u64 m1 = 0x8080;
@@ -550,6 +560,7 @@ void NotifyContactHandlers(Collider* self)
     }
 }
 
+// Where the point p projects onto the line a to b, as a fraction of its length (0 at a, 1 at b).
 f32 ComputeSegmentParameter(const Vec02* a, const Vec02* b, const Vec02* p)
 {
     Vec02 ap;
@@ -769,6 +780,9 @@ void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02
     AddColliderTorque(self, &acc);
 }
 
+// Per-step work of a collider: for a body without parent and without flag 0x8000<<36 adds the
+// gravity, limited by the anchor, as a force; then calls method 0x33 of each attached object with
+// the time step.
 void StepCollider(Collider* self, f32 t)
 {
     Vec4U local;
@@ -801,6 +815,7 @@ void UpdateCollider(Collider* self, f32 dt)
     UpdatePlacedObject(self, dt);
 }
 
+// Sets the mass to v and scales the inertia by the same ratio.
 void SetColliderMass(Collider* self, f32 v)
 {
     f32 a = self->mass;
@@ -809,6 +824,8 @@ void SetColliderMass(Collider* self, f32 v)
     ComputeColliderInverseInertia(self, q);
 }
 
+// Scales the inertia matrix by scale and recomputes its inverse (zeros when it cannot be
+// inverted).
 void ComputeColliderInverseInertia(Collider* self, f32 scale)
 {
     Mat02 m;
@@ -877,6 +894,7 @@ void DropColliderContacts(Collider* self, s32 mode)
     ctx->f4B8 = 0;
 }
 
+// Copies the current position into the previous one (v370).
 void SaveColliderPreviousPosition(Collider* self)
 {
     self->v370 = self->v140;
@@ -926,6 +944,8 @@ void SetColliderPosition(Collider* self, Vec02* pos)
     self->desc->m0E(self, 3, &note);
 }
 
+// Sets the rotation matrix; when the collider is in a world it calls method 0x12 and drops its
+// contacts (mode 1), and in any case sends notification 4.
 void SetColliderRotation(Collider* self, Mat02* src)
 {
     self->rot.r[0] = src->r[0];
@@ -940,6 +960,9 @@ void SetColliderRotation(Collider* self, Mat02* src)
     self->desc->m0E(self, 4, self);
 }
 
+// Tries up to ten positions starting at start and moving by step each time: puts the collider
+// there, updates the world's contacts and stops at the first position where none of its contacts
+// is deeper than 2 units.
 void PlaceColliderClearOfContacts(Collider* self, Vec02* start, Vec02* step)
 {
     Vec02 pos = *start;
@@ -962,6 +985,8 @@ void PlaceColliderClearOfContacts(Collider* self, Vec02* start, Vec02* step)
 
 LINKER_REMNANT(func_001B9938);
 
+// Sets the velocity; when it differs from the old one by 2 or more in some axis, clears the
+// root's state bits 2 (the body is no longer at rest).
 void SetColliderVelocity(Collider* self, Vec02* v)
 {
     SetPlacedObjectVelocity(self, v);
@@ -978,6 +1003,8 @@ void SetColliderVelocity(Collider* self, Vec02* v)
     }
 }
 
+// Sets the spin; when it differs from the old one by 0.02 or more in some axis, clears the root's
+// state bits 2 (the body is no longer at rest).
 void SetColliderSpin(Collider* self, Vec02* v)
 {
     SetPlacedObjectSpin(self, v);
@@ -1000,6 +1027,8 @@ ASM_FUNC(func_001B9AB0);
 
 ASM_FUNC(func_001B9AC8);
 
+// Sets the two anchors (mode and vector each, the vector left alone when null) and refreshes the
+// root's anchor flags if flag 54 no longer says whether both modes are 3.
 void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
 {
     self->mode450 = a1;
@@ -1054,6 +1083,8 @@ void ReparentCollider(Collider* self, BaseObject* p)
 }
 
 
+// Reframes the placed object against frame and rotates both anchor vectors by the frame's
+// rotation, keeping their modes.
 void ReframeColliderAnchors(Collider* self, PlacedObject* frame)
 {
     Vec02 a;
@@ -1124,6 +1155,7 @@ void CaptureColliderPose(Collider* self, ColliderPose* out)
     out->f3C = 0;
 }
 
+// Whether there is a contact between a descendant of this collider and a descendant of other.
 s32 IsContactBetweenParts(Collider* self, void* other)
 {
     PlacedObject* key;
@@ -1141,6 +1173,8 @@ s32 IsContactBetweenParts(Collider* self, void* other)
     return 0;
 }
 
+// Walks the contacts of the collider's root and gives the object at the far end of the first one
+// whose near end is the collider or one of its descendants; 0 if none.
 void* FindContactingPart(Collider* self)
 {
     Collider* s3 = self->root03();
@@ -1240,6 +1274,9 @@ void ConstrainVectorByParentAnchor(Collider* self, VectorConstraint* c, Vec02* i
     }
 }
 
+// Limits the vector in by the anchor's kind: 0 keeps it, 1 removes its part along the axis, 2
+// keeps only that part, 3 gives zero. The result goes in out (or a scratch vector) and what was
+// removed in rem if given.
 void ConstrainVectorByAnchor(VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem)
 {
     Vec02 tmp;
@@ -1267,11 +1304,14 @@ void ConstrainVectorByAnchor(VectorConstraint* c, Vec02* in, Vec02* out, Vec02* 
     }
 }
 
+// Calls ConstrainVectorByAnchor with the arguments passed as untyped pointers (rem as a number),
+// for the class tables.
 void ConstrainColliderVector(void* self, void* a, void* b, void* c, s32 d)
 {
     ConstrainVectorByAnchor((VectorConstraint*)a, (Vec02*)b, (Vec02*)c, (Vec02*)(s32)d);
 }
 
+// Puts the node at the head of the collider's attached list and resets the root's tries.
 void AddColliderAttachment(Collider* self, Attach03* node)
 {
     node->next = self->attached;
@@ -1279,6 +1319,8 @@ void AddColliderAttachment(Collider* self, Attach03* node)
     ClearRootTries(self);
 }
 
+// Removes the node from the collider's attached list, if it is on it, and resets the root's
+// tries.
 void RemoveColliderAttachment(Collider* o, Attach03* node)
 {
     Attach03** link = &o->attached;
@@ -1423,6 +1465,7 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
     }
 }
 
+// Empty: this collider takes no part in an attachment's step.
 void IgnoreColliderAttachmentStep(Collider* self, Attach03* node, f32 dt)
 {
 }
@@ -1508,23 +1551,28 @@ void LoadCollider(Collider* self, BufferedStream* in)
     }
 }
 
+// Sets the bounding radius and flag 0x8000<<25 which makes it count.
 void SetColliderOverrideRadius(Collider* self, f32 v)
 {
     self->flags538 |= (u64)0x8000 << 25;
     self->radius3CC = v;
 }
 
+// Gives both anchors mode 3 and leaves their vectors.
 void ResetColliderAnchors(void* self)
 {
     SetColliderAnchors((Collider*)self, 3, 0, 3, 0);
 }
 
+// Gives the mode and the vector of anchor preset index (a table of eight).
 void GetAnchorPreset(s32 index, s32* out, Vec02* dst)
 {
     *out = g_anchorPresets[index].value;
     *dst = *g_anchorPresets[index].quad;
 }
 
+// Takes preset index for the turn anchor (the first one): its mode and its vector rotated by the
+// collider's rotation; the move anchor stays.
 void SetColliderTurnAnchorPreset(Collider* self, s32 index)
 {
     Vec02 v;
@@ -1535,6 +1583,8 @@ void SetColliderTurnAnchorPreset(Collider* self, s32 index)
     SetColliderAnchors(self, mode, &v, self->mode470, &self->v460);
 }
 
+// Takes preset index for the move anchor (the second one): its mode and its vector rotated by the
+// collider's rotation; the turn anchor stays.
 void SetColliderMoveAnchorPreset(Collider* self, s32 index)
 {
     Vec02 v;
@@ -1558,6 +1608,8 @@ void SetColliderSurfaceKind(Collider* self, u8 value) { self->b2C8 = value; }
 
 void SetColliderFlagNibble36(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 36)) | ((u64)(value & 0xF) << 36); }
 
+// Sends the notification to the collider and then to the notification method of every other
+// object attached to it.
 void SendColliderNotification(Collider* self, s32 kind, void* arg)
 {
     SendObjectNotification(self, kind, arg);
@@ -1619,6 +1671,7 @@ void SetColliderGravityDisabled(Collider* self, s32 flag)
     self->flags538 = (self->flags538 & ~(1ULL << 51)) | ((u64)(flag & 1) << 51);
 }
 
+// Sets flag 42 and drops the contacts of the object and its descendants (mode 1) when set.
 void SetColliderTreeContactsDropped(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 42;
@@ -1626,6 +1679,7 @@ void SetColliderTreeContactsDropped(Collider* self, s32 value)
     DropColliderContacts(self, value != 0);
 }
 
+// Sets flag 43 and drops the contacts at exactly this object (mode 2) when set.
 void SetColliderContactsDropped(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 43;
@@ -1633,6 +1687,7 @@ void SetColliderContactsDropped(Collider* self, s32 value)
     DropColliderContacts(self, value != 0 ? 2 : 0);
 }
 
+// Sets flag 44 and drops the contacts of kind 8 or 9 at this object (mode 3) when set.
 void SetColliderKindContactsDropped(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 44;
@@ -1640,6 +1695,9 @@ void SetColliderKindContactsDropped(Collider* self, s32 value)
     DropColliderContacts(self, value != 0 ? 3 : 0);
 }
 
+// Works out which collider handles this one's contacts: itself when its class has handler methods
+// (0x3C, 0x3D, 0x3E or 0x41), otherwise its parent's handler (none without parent); then does the
+// same for the children that are colliders.
 void ResolveContactHandler(Collider* self)
 {
     ListFrame frame;
@@ -1663,6 +1721,8 @@ void ResolveContactHandler(Collider* self)
     }
 }
 
+// Walks from node through each handler and its parent until one whose class has a method at
+// offset in its table, and gives that handler; 0 if none.
 Collider* FindHandlerForSlot(Collider* node, s32 offset)
 {
     Collider* s;
@@ -1769,6 +1829,7 @@ s32 CollectContactingParts(Collider* obj, s32* outCount, void*** outArr)
     return cnt;
 }
 
+// Whether value is on the touching list.
 s32 IsInTouchingList(Touch03* node, Collider* value)
 {
     while (node != 0) {
@@ -1834,6 +1895,7 @@ void UpdateTouchingParts(Collider* self)
     }
 }
 
+// Always 0: a plain collider does not take the offer of a launch.
 s32 RequestColliderLaunch(Collider* self, void* source, TrackedNodeOffer* offer)
 {
     return 0;
@@ -1960,6 +2022,7 @@ void AdvanceColliderMeshMotion(Collider* self, f32 dt)
     }
 }
 
+// Advances the mesh motion when the collider has a hook, then moves the placed object by x.
 void MoveCollider(Collider* self, f32 x, void* b)
 {
     if (self->hook != 0) {
@@ -1997,6 +2060,9 @@ void ApplyColliderImpulseEvent(void* a0, f32 value, void* a1, void* a2)
 }
 
 
+// Works out the velocity that takes the collider from where it is to the point p, rising a above
+// the higher of the two heights under its own gravity: z from the height to climb, x and y from
+// the horizontal distance over the flight time.
 void ComputeColliderJumpVelocity(Collider* self, f32* p, f32* out, f32 a)
 {
     f32 roots[4];
@@ -2011,6 +2077,8 @@ void ComputeColliderJumpVelocity(Collider* self, f32* p, f32* out, f32 a)
     out[1] = (p[1] - self->v140.y) / t;
 }
 
+// Applies an impulse from the event when its flag 8 is set (position and direction at 0x20 and
+// 0x30); gives whether the event had any flags.
 s32 HandleObjectEvent(Collider* self, ObjectEvent* shape)
 {
     if (shape->eventFlags & 0x8) {
@@ -2094,6 +2162,8 @@ void ExtractContactsByPartMode(Collider* self, Contact03** out)
 struct TreeNode03;
 s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
 
+// Whether the point lies inside the collider: within the bounding radius when flag 0x8000<<25 is
+// set, or inside its plane tree.
 s32 IsPointInsideCollider(Collider* self, Vec02* p)
 {
     if ((self->flags538 & ((u64)0x8000 << 25)) != 0) {
@@ -2119,6 +2189,8 @@ void GetColliderFlagBit52(Collider* self, u32* out)
     *out = bit;
 }
 
+// Gives the collider the next index, enters it in list and does the same for its collider
+// children (class flag 2), in order.
 void NumberColliderParts(Collider* self, s32* index, Collider** list)
 {
     ListFrame frame;
@@ -2711,6 +2783,8 @@ void ProcessColliderGroups(World* self, s32 flags, f32 f)
     PopBackMemoryMark();
 }
 
+// Swaps two records of stride bytes at rows rowA and rowB of a table, word by word (the swap the
+// sort uses).
 void SwapSortRecords(u8* base, s32 stride, s32 rowB, s32 rowA)
 {
     s32* b = (s32*)(base + rowB * stride);

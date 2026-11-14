@@ -174,18 +174,21 @@ f32 D_002641C4 = 3.0f;
 f32 D_002641C8[10] = { 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
 f32 D_002641F0[16] = { 24.0f, -24.0f, 0.0f, 0.0f, 24.0f, 24.0f, 0.0f, 0.0f, -24.0f, -24.0f, 0.0f, 0.0f, -24.0f, 24.0f, 0.0f, 0.0f };
 
+// Registers the object and appends it to the world's list at 0x1C9C.
 void RegisterListedKeepObject(ListedKeepObject* self)
 {
     RegisterObject(self);
     AppendToList(&self->world->list1C9C, self);
 }
 
+// Unregisters the object and removes it from the world's list at 0x1C9C.
 void UnregisterListedKeepObject(ListedKeepObject* self)
 {
     UnregisterObject(self);
     RemoveFromList(&self->world->list1C9C, self);
 }
 
+// Copies the object's data from src but keeps its own kept bits (they belong to this instance).
 void CopyListedKeepObject(ListedKeepObject* self, ListedKeepObject* src)
 {
     PathCurveKeptBits saved = self->keep;
@@ -193,6 +196,7 @@ void CopyListedKeepObject(ListedKeepObject* self, ListedKeepObject* src)
     self->keep = saved;
 }
 
+// Initialises the path follower and sets the pulse start time to -10 s (long ago).
 void InitModeWalkerObject(ModeWalker* self)
 {
     InitPathFollower(self);
@@ -394,6 +398,8 @@ void RecomputeModeWalker(ModeWalker* self)
 }
 
 
+// Activates the path follower, then switches the spinning sprite element to its active look and
+// aims it at (0, 0, 2000); on deactivation it resets the element and clears the pulse flag.
 void HandleModeWalkerActivation(ModeWalker* self, void* active)
 {
     HandlePathFollowerActivation(self, active);
@@ -440,6 +446,8 @@ void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
     ApplyPlacedObjectTransform(o, (Camera*)a, (ScaledTransform*)b);
 }
 
+// Captures the path follower's pose into outv and stores the owner's position vector (v140) of
+// the object at fBC0 after it, at offset 0x10.
 void CaptureModeWalkerTarget(ModeWalker* self, void* outv)
 {
     Vec02* out = (Vec02*)((u8*)outv + 0x10);
@@ -447,20 +455,27 @@ void CaptureModeWalkerTarget(ModeWalker* self, void* outv)
     *out = ((PlacedObject*)self->fBC0)->v140;
 }
 
+// Gives 1 (blocked) unless the walker is in mode 1 with no pulse running and the pad select flag
+// not held.
 s32 IsModeWalkerRequestBlocked(ModeWalker* self)
 {
     if (self->walkerMode != 1 || self->pulseActive != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
     return 0;
 }
 
+// Gives whether a pulse is running, which is how the walker shows it took the request.
 s32 HasModeWalkerAcceptedRequest(ModeWalker* p) { return p->pulseActive != 0; }
 
+// Finishes the switched collider and puts the walker back into mode 1.
 void FinishModeWalker(ModeWalker* self)
 {
     FinishSwitchedCollider(self);
     SetModeWalkerMode(self, 1);
 }
 
+// Throws the player (obj) from the walker's frame: works out a jump velocity from a fixed point
+// and gives it to the player, turns the player's heading to face against that velocity, and sets
+// the player to state 4 with argument 0x2B.
 void LaunchPlayerFromModeWalker(void* unused, void* obj_)
 {
     Player* obj = (Player*)obj_;
@@ -522,6 +537,8 @@ tail:
     return 1;
 }
 
+// On notification 0x13 from the state walker's player, sets fC00 to 1 for message 0x15E and to 0
+// for 0x15F; then passes everything on to the path follower's handler.
 void HandleModeWalkerNotification(ModeWalker* self, s32 code, MessageBody* rec)
 {
     if (code == 0x13) {
@@ -541,6 +558,7 @@ void HandleModeWalkerNotification(ModeWalker* self, s32 code, MessageBody* rec)
     HandlePathFollowerNotification(self, code, (CountedNotice*)rec);
 }
 
+// Extracts the contacts by part mode into the contact list at offset 0xC04.
 void ExtractModeWalkerContacts(ModeWalker* self)
 {
     ExtractContactsByPartMode(self, (Contact03**)((u8*)self + 0xC04));

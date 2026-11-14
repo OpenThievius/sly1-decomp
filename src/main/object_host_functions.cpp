@@ -225,6 +225,8 @@ extern const s32 g_takeScriptCountedColliderTouchArgKinds[2] = { 0x2000, 0 };
 PropertyDescriptor g_objectPropertyDescriptors[1179];
 
 
+// Script function: whether the object is of the given kind (class or one of its parents), as a
+// bool.
 ScriptValue* TestScriptObjectOfKind(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -242,6 +244,7 @@ ScriptValue* TestScriptObjectOfKind(ScriptValue* ret, void* obj, s32 unused, Scr
     return ret;
 }
 
+// Script function: puts the object's key on its owner's list (AddObjectKeyToOwner).
 ScriptValue* AddScriptObjectKeyToOwner(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -257,6 +260,7 @@ ScriptValue* AddScriptObjectKeyToOwner(ScriptValue* ret, BaseObject* obj, s32 un
     return ret;
 }
 
+// Script function: calls the object's class method 3 (taking it out of play).
 ScriptValue* RemoveScriptObjectFromParentList(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -272,6 +276,7 @@ ScriptValue* RemoveScriptObjectFromParentList(ScriptValue* ret, BaseObject* obj,
     return ret;
 }
 
+// Script function: calls the object's class method 2 (putting it into play).
 ScriptValue* AddScriptObjectToParentList(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -287,6 +292,8 @@ ScriptValue* AddScriptObjectToParentList(ScriptValue* ret, BaseObject* obj, s32 
     return ret;
 }
 
+// Script function: makes a copy of the object in the given world under the given parent, and
+// gives the new object back as a pointer value.
 ScriptValue* CreateScriptObjectCopy(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -305,6 +312,7 @@ ScriptValue* CreateScriptObjectCopy(ScriptValue* ret, BaseObject* obj, s32 unuse
     return ret;
 }
 
+// Script function: calls the object's class method 0x15 to move it under the given parent.
 ScriptValue* ReparentScriptObject(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -323,6 +331,7 @@ ScriptValue* ReparentScriptObject(ScriptValue* ret, BaseObject* obj, s32 unused,
     return ret;
 }
 
+// Script function: whether the object is the given object or lies under it, as a bool.
 ScriptValue* TestScriptObjectDescendantOf(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -341,6 +350,7 @@ ScriptValue* TestScriptObjectDescendantOf(ScriptValue* ret, BaseObject* obj, s32
     return ret;
 }
 
+// Script function: whether the object's id (or its alias id) is the given id, as a bool.
 ScriptValue* TestScriptObjectIdMatch(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -359,6 +369,7 @@ ScriptValue* TestScriptObjectIdMatch(ScriptValue* ret, BaseObject* obj, s32 unus
     return ret;
 }
 
+// Script function: sets the extra property (id, bool) on the object.
 ScriptValue* SetScriptExtraObjectPropertyBool(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -378,6 +389,7 @@ ScriptValue* SetScriptExtraObjectPropertyBool(ScriptValue* ret, BaseObject* obj,
     return ret;
 }
 
+// Script function: sets the extra property (id, int) on the object.
 ScriptValue* SetScriptExtraObjectPropertyInt(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -397,6 +409,7 @@ ScriptValue* SetScriptExtraObjectPropertyInt(ScriptValue* ret, BaseObject* obj, 
     return ret;
 }
 
+// Script function: sets the extra property (id, float) on the object.
 ScriptValue* SetScriptExtraObjectPropertyFloat(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -458,6 +471,7 @@ ScriptValue* SetScriptExtraObjectPropertyPair(ScriptValue* ret, BaseObject* obj,
     return ret;
 }
 
+// Script function: sets the extra property (id, word) on the object, stored as an int.
 ScriptValue* SetScriptExtraObjectPropertyWord(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -499,6 +513,7 @@ ScriptValue* SetScriptExtraObjectPropertyVectorA(ScriptValue* ret, BaseObject* o
     return ret;
 }
 
+// Script function: sets the value of each of the placed object's part records to -1.
 ScriptValue* ClearScriptObjectRecordValues(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -514,6 +529,7 @@ ScriptValue* ClearScriptObjectRecordValues(ScriptValue* ret, PlacedObject* obj, 
     return ret;
 }
 
+// Script function: clears the hold flag of the object's aim attachment.
 ScriptValue* ClearScriptAimHold(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -529,6 +545,7 @@ ScriptValue* ClearScriptAimHold(ScriptValue* ret, PlacedObject* obj, s32 unused,
     return ret;
 }
 
+// Script function: sets the hold flag of the object's aim attachment.
 ScriptValue* SetScriptAimHold(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -574,6 +591,8 @@ ScriptValue* SetScriptValueAttachment(ScriptValue* ret, PlacedObject* obj, s32 u
     return ret;
 }
 
+// Script function: sets the scroll scale (x, y) of the object's scrolling elements (those of kind
+// 6).
 ScriptValue* SetScriptElementsScrollScale(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -593,6 +612,8 @@ ScriptValue* SetScriptElementsScrollScale(ScriptValue* ret, PlacedObject* obj, s
     return ret;
 }
 
+// Script function: sets the crossfade ratio of the object's crossfade elements and, recursively,
+// of its children's.
 ScriptValue* SetScriptCrossfadeRatioDeep(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -633,6 +654,7 @@ ScriptValue* StartScriptSoundWithParams(ScriptValue* ret, PlacedObject* obj, s32
     return ret;
 }
 
+// Script function: stops the sound the object is playing, if any.
 ScriptValue* StopScriptPlayingSound(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -648,6 +670,7 @@ ScriptValue* StopScriptPlayingSound(ScriptValue* ret, PlacedObject* obj, s32 unu
     return ret;
 }
 
+// Script function: fades the placed object in over the given time in seconds.
 ScriptValue* FadeInScriptPlacedObject(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -666,6 +689,8 @@ ScriptValue* FadeInScriptPlacedObject(ScriptValue* ret, PlacedObject* obj, s32 u
     return ret;
 }
 
+// Script function: fades the placed object out over the given time in seconds (at once when it is
+// 0).
 ScriptValue* FadeOutScriptPlacedObject(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -684,6 +709,8 @@ ScriptValue* FadeOutScriptPlacedObject(ScriptValue* ret, PlacedObject* obj, s32 
     return ret;
 }
 
+// Script function: finds the state walker of the object (with the given owner id, or any for -1)
+// and gives it back as a pointer value.
 ScriptValue* FindScriptObjectHandle(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -701,6 +728,8 @@ ScriptValue* FindScriptObjectHandle(ScriptValue* ret, PlacedObject* obj, s32 unu
     return ret;
 }
 
+// Script function: finds the animation player of the object (for the given animation id, or any
+// for -1) and gives it back as a pointer value.
 ScriptValue* FindScriptObjectAnimationPlayer(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -720,6 +749,8 @@ ScriptValue* FindScriptObjectAnimationPlayer(ScriptValue* ret, PlacedObject* obj
     return ret;
 }
 
+// Script function: looks from the object up through its parents for a position or orientation
+// attachment that is a track pose source and gives back its animation player.
 ScriptValue* FindScriptTrackPlayer(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -734,6 +765,8 @@ ScriptValue* FindScriptTrackPlayer(ScriptValue* ret, PlacedObject* obj, s32 unus
     return ret;
 }
 
+// Script function: calls the placed object's class method 0x1F to copy the frame of the other
+// placed object.
 ScriptValue* CopyScriptPlacedObjectFrame(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -754,6 +787,8 @@ ScriptValue* CopyScriptPlacedObjectFrame(ScriptValue* ret, PlacedObject* obj, s3
     return ret;
 }
 
+// Script function: sets the two objects the placed object follows (its position follower and its
+// rotation follower).
 ScriptValue* SetScriptFollowObjects(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -773,6 +808,8 @@ ScriptValue* SetScriptFollowObjects(ScriptValue* ret, PlacedObject* obj, s32 unu
     return ret;
 }
 
+// Script function: sets the four bits of the collider's flags starting at bit 36 to the given
+// value.
 ScriptValue* SetScriptColliderFlagNibble36(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -793,6 +830,7 @@ ScriptValue* SetScriptColliderFlagNibble36(ScriptValue* ret, Collider* obj, s32 
     return ret;
 }
 
+// Script function: whether the point lies inside the collider (IsPointInsideCollider).
 ScriptValue* TestScriptPointInsideCollider(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -835,6 +873,8 @@ ScriptValue* SetScriptTransformObjectKeyedValue(ScriptValue* ret, TransformObjec
     return ret;
 }
 
+// Script function: places the player, or only the camera when there is none, at the arrival point
+// (PlaceAtArrivalPoint).
 ScriptValue* PlaceScriptAtArrivalPoint(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -850,6 +890,7 @@ ScriptValue* PlaceScriptAtArrivalPoint(ScriptValue* ret, TransformObject* obj, s
     return ret;
 }
 
+// Script function: starts the finish of the object's sub group (StartObjectSubGroupFinish).
 ScriptValue* StartScriptObjectSubGroupFinish(ScriptValue* ret, ObjectSubGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -911,6 +952,8 @@ ScriptValue* FindOrCreateScriptSeekedAnimationPlayer(ScriptValue* ret, Animation
     return ret;
 }
 
+// Script function: gives the time of the animation's marker with the given key as a float (0 if
+// it has none).
 ScriptValue* GetScriptAnimationMarkerTime(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -952,6 +995,7 @@ ScriptValue* SeekScriptAnimationPlayer(ScriptValue* ret, AnimationPlayer* obj, s
     return ret;
 }
 
+// Script function: stops the animation player (StopAnimationPlayer).
 ScriptValue* StopScriptAnimationPlayer(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -967,6 +1011,7 @@ ScriptValue* StopScriptAnimationPlayer(ScriptValue* ret, void* obj, s32 unused, 
     return ret;
 }
 
+// Script function: applies every pose source on the animation player's list, with the given flag.
 ScriptValue* ApplyScriptListedPoseSources(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -985,6 +1030,8 @@ ScriptValue* ApplyScriptListedPoseSources(ScriptValue* ret, void* obj, s32 unuse
     return ret;
 }
 
+// Script function: finds the animation player's attachment of the given owner and releases it in
+// the given way.
 ScriptValue* ReleaseScriptPlayerAttachment(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1004,6 +1051,7 @@ ScriptValue* ReleaseScriptPlayerAttachment(ScriptValue* ret, void* obj, s32 unus
     return ret;
 }
 
+// Script function: clears the found flag of the attached set's tracked nodes.
 ScriptValue* ClearScriptAttachedSetTrackedNodes(ScriptValue* ret, AttachedSet* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1019,6 +1067,7 @@ ScriptValue* ClearScriptAttachedSetTrackedNodes(ScriptValue* ret, AttachedSet* o
     return ret;
 }
 
+// Script function: calls the masked collider's class method 0x48 (its activation).
 ScriptValue* HandleScriptMaskedColliderActivation(ScriptValue* ret, MaskedCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1080,6 +1129,7 @@ ScriptValue* SetScriptZoneColliderEntry(ScriptValue* ret, ZoneCollider* obj, s32
     return ret;
 }
 
+// Script function: makes the switched collider the active one unless it already is.
 ScriptValue* ActivateScriptSwitchedColliderUnlessActive(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1095,6 +1145,8 @@ ScriptValue* ActivateScriptSwitchedColliderUnlessActive(ScriptValue* ret, Switch
     return ret;
 }
 
+// Script function: asks the switched collider's class (method 0x4B) whether the given request is
+// blocked, and gives the answer as a bool.
 ScriptValue* TestScriptRequestBlocked(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1113,6 +1165,8 @@ ScriptValue* TestScriptRequestBlocked(ScriptValue* ret, SwitchedCollider* obj, s
     return ret;
 }
 
+// Script function: sets the state trigger's state from a message value, mapping 0, 1 and 2 to its
+// states 2, 0 and 1 and ignoring others.
 ScriptValue* SetScriptStateTriggerStateFromMessage(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1154,6 +1208,8 @@ ScriptValue* AddScriptStateTriggerTableEntry(ScriptValue* ret, StateTrigger* obj
     return ret;
 }
 
+// Script function: calls the timed object's class method 0x49 with the given mode, when the class
+// has it.
 ScriptValue* SetScriptTimedObjectMode(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1175,6 +1231,7 @@ ScriptValue* SetScriptTimedObjectMode(ScriptValue* ret, TimedObject* obj, s32 un
     return ret;
 }
 
+// Script function: calls the timed object's class method 0x4A (ending it) when the class has it.
 ScriptValue* RequestScriptTimedObjectEnd(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1193,6 +1250,7 @@ ScriptValue* RequestScriptTimedObjectEnd(ScriptValue* ret, TimedObject* obj, s32
     return ret;
 }
 
+// Script function: sets the timed group's fade rate so a fade in takes the given time in seconds.
 ScriptValue* SetScriptTimedGroupFadeInTime(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1211,6 +1269,8 @@ ScriptValue* SetScriptTimedGroupFadeInTime(ScriptValue* ret, TimedGroup* obj, s3
     return ret;
 }
 
+// Script function: sets the timed group's fade rate so a fade out takes the given time in
+// seconds.
 ScriptValue* SetScriptTimedGroupFadeOutTime(ScriptValue* ret, TimedGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1229,6 +1289,7 @@ ScriptValue* SetScriptTimedGroupFadeOutTime(ScriptValue* ret, TimedGroup* obj, s
     return ret;
 }
 
+// Script function: keeps the effect spawner active for the given time in seconds from now.
 ScriptValue* SetScriptEffectSpawnerActiveFor(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1247,6 +1308,7 @@ ScriptValue* SetScriptEffectSpawnerActiveFor(ScriptValue* ret, EffectSpawner* ob
     return ret;
 }
 
+// Script function: keeps the effect spawner active with no end (SetEffectSpawnerActiveForever).
 ScriptValue* SetScriptEffectSpawnerActiveForever(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1262,6 +1324,7 @@ ScriptValue* SetScriptEffectSpawnerActiveForever(ScriptValue* ret, EffectSpawner
     return ret;
 }
 
+// Script function: ends the effect spawner's activity (its end time becomes -1).
 ScriptValue* SetScriptEffectSpawnerInactive(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1319,6 +1382,8 @@ ScriptValue* AddScriptRecordMemberRangeEntry(ScriptValue* ret, RecordMember* obj
     return ret;
 }
 
+// Script function: sends an empty (cleared 0x50 byte) message to the object through its class
+// method 0x1B; used for the object of class 0xC7A.
 ScriptValue* SendScriptEmptyMessageC7A(ScriptValue* ret, HoldingMember* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1362,6 +1427,8 @@ ScriptValue* SendScriptTwoVectorMessageC7A(ScriptValue* ret, HoldingMember* obj,
     return ret;
 }
 
+// Script function: sends an empty (cleared 0x50 byte) message to the object through its class
+// method 0x1B; used for the object of class 0xC78.
 ScriptValue* SendScriptEmptyMessageC78(ScriptValue* ret, MemberGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1425,6 +1492,8 @@ ScriptValue* CreateScriptStateWalker(ScriptValue* ret, StateGraph* obj, s32 unus
     return ret;
 }
 
+// Script function: destroys the state walker, stopping its animation player and taking it off its
+// lists.
 ScriptValue* DestroyScriptStateWalker(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1462,6 +1531,7 @@ ScriptValue* ScatterScriptRandomObjects(ScriptValue* ret, World* obj, s32 unused
     return ret;
 }
 
+// Script function: sets the IOP channel 2 setting (index, value) as the world's only one.
 ScriptValue* SetScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1481,6 +1551,8 @@ ScriptValue* SetScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unuse
     return ret;
 }
 
+// Script function: adds an IOP channel 2 setting (index, value) to the world's list, which holds
+// up to four.
 ScriptValue* PushScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1500,6 +1572,8 @@ ScriptValue* PushScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unus
     return ret;
 }
 
+// Script function: removes the last IOP channel 2 setting of the world's list and applies the one
+// before it (nothing when only one is left).
 ScriptValue* PopScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1515,6 +1589,7 @@ ScriptValue* PopScriptIopChannel2Setting(ScriptValue* ret, World* obj, s32 unuse
     return ret;
 }
 
+// Script function: whether bit 0x1 of the level entry's word is set, as a bool.
 ScriptValue* TestScriptLevelEntryFlag1(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1532,6 +1607,7 @@ ScriptValue* TestScriptLevelEntryFlag1(ScriptValue* ret, World* obj, s32 unused,
     return ret;
 }
 
+// Script function: whether bit 0x2 of the level entry's word is set, as a bool.
 ScriptValue* TestScriptLevelEntryFlag2(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1549,6 +1625,7 @@ ScriptValue* TestScriptLevelEntryFlag2(ScriptValue* ret, World* obj, s32 unused,
     return ret;
 }
 
+// Script function: whether bit 0x4 of the level entry's word is set, as a bool.
 ScriptValue* TestScriptLevelEntryFlag4(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1566,6 +1643,7 @@ ScriptValue* TestScriptLevelEntryFlag4(ScriptValue* ret, World* obj, s32 unused,
     return ret;
 }
 
+// Script function: whether bit 0x8 of the level entry's word is set, as a bool.
 ScriptValue* TestScriptLevelEntryFlag8(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1583,6 +1661,8 @@ ScriptValue* TestScriptLevelEntryFlag8(ScriptValue* ret, World* obj, s32 unused,
     return ret;
 }
 
+// Script function: whether the entry has a one-bit requirement (its flag 2) and the current entry
+// has bit 1 set, as a bool.
 ScriptValue* CheckScriptEntryOneBitRequirement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1600,6 +1680,8 @@ ScriptValue* CheckScriptEntryOneBitRequirement(ScriptValue* ret, World* obj, s32
     return ret;
 }
 
+// Script function: whether the entry has a two-bit requirement (its flag 4) and the current entry
+// has all of its two low bits set, as a bool.
 ScriptValue* CheckScriptEntryTwoBitRequirement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1617,6 +1699,8 @@ ScriptValue* CheckScriptEntryTwoBitRequirement(ScriptValue* ret, World* obj, s32
     return ret;
 }
 
+// Script function: whether the entry has a three-bit requirement (its flag 8) and the current
+// entry has all of its three low bits set, as a bool.
 ScriptValue* CheckScriptEntryThreeBitRequirement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1656,6 +1740,8 @@ ScriptValue* SetScriptEntrySlotValue(ScriptValue* ret, World* obj, s32 unused, S
     return ret;
 }
 
+// Script function: gives the value of the slot with the given key in a level entry's four slots
+// (0 if none).
 ScriptValue* GetScriptEntrySlotValue(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1675,6 +1761,7 @@ ScriptValue* GetScriptEntrySlotValue(ScriptValue* ret, World* obj, s32 unused, S
     return ret;
 }
 
+// Script function: whether bit 1 of the saved level record's flags is set, as a bool.
 ScriptValue* IsScriptLevelRecordComplete(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1692,6 +1779,7 @@ ScriptValue* IsScriptLevelRecordComplete(ScriptValue* ret, World* obj, s32 unuse
     return ret;
 }
 
+// Script function: whether bit 0x20 of the saved level record's flags is set, as a bool.
 ScriptValue* IsScriptLevelDone(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1709,6 +1797,7 @@ ScriptValue* IsScriptLevelDone(ScriptValue* ret, World* obj, s32 unused, ScriptV
     return ret;
 }
 
+// Script function: gives the save data's completion percentage as an int.
 ScriptValue* RecomputeScriptSaveCompletion(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1723,6 +1812,8 @@ ScriptValue* RecomputeScriptSaveCompletion(ScriptValue* ret, World* obj, s32 unu
     return ret;
 }
 
+// Script function: pops the element stack when a step sequence is active and in mode 1 or 2 (and
+// not in state 4).
 ScriptValue* PopScriptActiveSequenceElement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1738,6 +1829,7 @@ ScriptValue* PopScriptActiveSequenceElement(ScriptValue* ret, World* obj, s32 un
     return ret;
 }
 
+// Script function: shows the pause menu's page with the given layer page and value.
 ScriptValue* ShowScriptPauseMenuPageWith(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1757,6 +1849,8 @@ ScriptValue* ShowScriptPauseMenuPageWith(ScriptValue* ret, World* obj, s32 unuse
     return ret;
 }
 
+// Script function: adds one hold on the letterbox screen element, which is shown by the first
+// hold.
 ScriptValue* ShowScriptCountedScreenElement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1772,6 +1866,8 @@ ScriptValue* ShowScriptCountedScreenElement(ScriptValue* ret, World* obj, s32 un
     return ret;
 }
 
+// Script function: removes one hold on the letterbox screen element, which is hidden when none is
+// left.
 ScriptValue* HideScriptCountedScreenElement(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1787,6 +1883,7 @@ ScriptValue* HideScriptCountedScreenElement(ScriptValue* ret, World* obj, s32 un
     return ret;
 }
 
+// Script function: pushes a sound level and gives back its handle as an int.
 ScriptValue* PushScriptSoundLevel(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1805,6 +1902,8 @@ ScriptValue* PushScriptSoundLevel(ScriptValue* ret, World* obj, s32 unused, Scri
     return ret;
 }
 
+// Script function: removes the sound level whose handle PushScriptSoundLevel gave, and recomputes
+// the level.
 ScriptValue* RemoveScriptSoundLevel(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1823,6 +1922,7 @@ ScriptValue* RemoveScriptSoundLevel(ScriptValue* ret, World* obj, s32 unused, Sc
     return ret;
 }
 
+// Script function: sets a cached voice parameter (index, value).
 ScriptValue* SetScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1842,6 +1942,7 @@ ScriptValue* SetScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused,
     return ret;
 }
 
+// Script function: gives the cached voice parameter with the given index as an int.
 ScriptValue* GetScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1860,6 +1961,7 @@ ScriptValue* GetScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused,
     return ret;
 }
 
+// Script function: refreshes a cached voice parameter (index, value).
 ScriptValue* RefreshScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1885,6 +1987,7 @@ ScriptValue* RefreshScriptCachedVoiceParam(ScriptValue* ret, World* obj, s32 unu
     return ret;
 }
 
+// Script function: adds one hold on the pad select flag (flag 2), which is set by the first hold.
 ScriptValue* AcquireScriptPadSelectFlag(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1900,6 +2003,8 @@ ScriptValue* AcquireScriptPadSelectFlag(ScriptValue* ret, World* obj, s32 unused
     return ret;
 }
 
+// Script function: removes one hold on the pad select flag (flag 2), which is cleared when none
+// is left.
 ScriptValue* ReleaseScriptPadSelectFlag(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1915,6 +2020,7 @@ ScriptValue* ReleaseScriptPadSelectFlag(ScriptValue* ret, World* obj, s32 unused
     return ret;
 }
 
+// Script function: clears bit number n of the world's flag bits.
 ScriptValue* ClearScriptWorldFlagBit(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1933,6 +2039,7 @@ ScriptValue* ClearScriptWorldFlagBit(ScriptValue* ret, World* obj, s32 unused, S
     return ret;
 }
 
+// Script function: sets bit number n of the world's flag bits.
 ScriptValue* SetScriptWorldFlagBit(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1951,6 +2058,7 @@ ScriptValue* SetScriptWorldFlagBit(ScriptValue* ret, World* obj, s32 unused, Scr
     return ret;
 }
 
+// Script function: pushes a value on the camera's control stack.
 ScriptValue* PushScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1969,6 +2077,7 @@ ScriptValue* PushScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unuse
     return ret;
 }
 
+// Script function: pops the camera's control stack and gives the value as an int.
 ScriptValue* PopScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -1983,6 +2092,8 @@ ScriptValue* PopScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unused
     return ret;
 }
 
+// Script function: gives the top value of the camera's control stack as an int without popping
+// it.
 ScriptValue* PeekScriptCameraStackValue(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2020,6 +2131,7 @@ ScriptValue* SetScriptCameraControllerSettings(ScriptValue* ret, Camera* obj, s3
     return ret;
 }
 
+// Script function: records the current game time as the camera's swing start time.
 ScriptValue* RecordScriptCameraTimestamp(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2035,6 +2147,7 @@ ScriptValue* RecordScriptCameraTimestamp(ScriptValue* ret, Camera* obj, s32 unus
     return ret;
 }
 
+// Script function: asks the camera to snap, with mode 0.
 ScriptValue* RequestScriptPlainCameraSnap(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2071,6 +2184,7 @@ ScriptValue* TestScriptSphereInCameraView(ScriptValue* ret, Camera* obj, s32 unu
     return ret;
 }
 
+// Script function: pushes a camera controller (kind 7) for the object unless it already has one.
 ScriptValue* PushScriptObjectCameraController(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2086,6 +2200,8 @@ ScriptValue* PushScriptObjectCameraController(ScriptValue* ret, LookupObject* ob
     return ret;
 }
 
+// Script function: removes the camera controllers (0xB and kind 7) the object pushed, if it has
+// one.
 ScriptValue* RemoveScriptObjectCameraController(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2101,6 +2217,7 @@ ScriptValue* RemoveScriptObjectCameraController(ScriptValue* ret, LookupObject* 
     return ret;
 }
 
+// Script function: clears the found flag of the contact tracker's record.
 ScriptValue* ClearScriptTrackedNodes(ScriptValue* ret, ContactTracker* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2116,6 +2233,7 @@ ScriptValue* ClearScriptTrackedNodes(ScriptValue* ret, ContactTracker* obj, s32 
     return ret;
 }
 
+// Script function: calls the numbered item's class method 77, its collect.
 ScriptValue* CollectScriptNumberedItem(ScriptValue* ret, NumberedItem* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2131,6 +2249,8 @@ ScriptValue* CollectScriptNumberedItem(ScriptValue* ret, NumberedItem* obj, s32 
     return ret;
 }
 
+// Script function: sets the clip id of the agent's state slot (index, id), if the index is a
+// valid slot.
 ScriptValue* SetScriptAgentStateClipId(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2150,6 +2270,8 @@ ScriptValue* SetScriptAgentStateClipId(ScriptValue* ret, Agent* obj, s32 unused,
     return ret;
 }
 
+// Script function: sets the agent's state slot (index, id) and looks up the clip for it (none for
+// -1).
 ScriptValue* SetScriptAgentStateClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2169,6 +2291,8 @@ ScriptValue* SetScriptAgentStateClip(ScriptValue* ret, Agent* obj, s32 unused, S
     return ret;
 }
 
+// Script function: gives the clip of the agent's state slot with the given index as a pointer
+// value (0 for an invalid slot).
 ScriptValue* GetScriptAgentStateClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2209,6 +2333,7 @@ ScriptValue* AddScriptAgentClipGroup(ScriptValue* ret, Agent* obj, s32 unused, S
     return ret;
 }
 
+// Script function: adds a mesh key (key, message kind) to the agent, which holds up to four.
 ScriptValue* AddScriptAgentMeshKey(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2228,6 +2353,7 @@ ScriptValue* AddScriptAgentMeshKey(ScriptValue* ret, Agent* obj, s32 unused, Scr
     return ret;
 }
 
+// Script function: adds an extra clip (mask, id) to the agent, which holds up to four.
 ScriptValue* AddScriptAgentExtraClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2247,6 +2373,7 @@ ScriptValue* AddScriptAgentExtraClip(ScriptValue* ret, Agent* obj, s32 unused, S
     return ret;
 }
 
+// Script function: forces the agent into a state (mode, value); a mode of -1 ends the forcing.
 ScriptValue* ForceScriptAgentState(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2266,6 +2393,8 @@ ScriptValue* ForceScriptAgentState(ScriptValue* ret, Agent* obj, s32 unused, Scr
     return ret;
 }
 
+// Script function: sets the id of the agent's secondary clip slot (index, id), if the index is
+// valid.
 ScriptValue* SetScriptAgentSecondaryClipId(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2291,6 +2420,7 @@ ScriptValue* SetScriptAgentSecondaryClipId(ScriptValue* ret, Agent* obj, s32 unu
     return ret;
 }
 
+// Script function: calls the agent's class method 0x61, which steers it along its path.
 ScriptValue* SteerScriptAgentAlongPath(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2306,6 +2436,7 @@ ScriptValue* SteerScriptAgentAlongPath(ScriptValue* ret, Agent* obj, s32 unused,
     return ret;
 }
 
+// Script function: sets the agent's main clip, stopping the animation player of the old one.
 ScriptValue* SetScriptAgentMainClip(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2324,6 +2455,7 @@ ScriptValue* SetScriptAgentMainClip(ScriptValue* ret, Agent* obj, s32 unused, Sc
     return ret;
 }
 
+// Script function: sets the id of the companion agent's look entry (index, id).
 ScriptValue* SetScriptCompanionAgentLookId(ScriptValue* ret, CompanionAgent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2343,6 +2475,8 @@ ScriptValue* SetScriptCompanionAgentLookId(ScriptValue* ret, CompanionAgent* obj
     return ret;
 }
 
+// Script function: starts the child group's blast delay of the given number of seconds
+// (StartChildGroupDelay).
 ScriptValue* StartScriptChildGroupDelay(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2361,6 +2495,7 @@ ScriptValue* StartScriptChildGroupDelay(ScriptValue* ret, ChildGroupObject* obj,
     return ret;
 }
 
+// Script function: applies the child group's blast (ApplyChildGroupRepulsion).
 ScriptValue* StepScriptChildGroupObject(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2406,6 +2541,8 @@ ScriptValue* PlaceScriptPlayerOnGround(ScriptValue* ret, Player* obj, s32 unused
     return ret;
 }
 
+// Script function: when the player is in state 3 or 7, releases it to state 2
+// (ReleasePlayerToState2).
 ScriptValue* ReleaseScriptPlayerToState2(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2421,6 +2558,7 @@ ScriptValue* ReleaseScriptPlayerToState2(ScriptValue* ret, Player* obj, s32 unus
     return ret;
 }
 
+// Script function: does nothing with its argument; the player is not changed.
 ScriptValue* IgnoreScriptPlayerArgument(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2439,6 +2577,7 @@ ScriptValue* IgnoreScriptPlayerArgument(ScriptValue* ret, Player* obj, s32 unuse
     return ret;
 }
 
+// Script function: binds the player to the given path object (SetPlayerPath).
 ScriptValue* SetScriptPlayerPath(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2457,6 +2596,8 @@ ScriptValue* SetScriptPlayerPath(ScriptValue* ret, Player* obj, s32 unused, Scri
     return ret;
 }
 
+// Script function: puts the player into state 11 when the flag is set and into state 0 when it is
+// clear.
 ScriptValue* SwitchScriptPlayerState11(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2475,6 +2616,8 @@ ScriptValue* SwitchScriptPlayerState11(ScriptValue* ret, Player* obj, s32 unused
     return ret;
 }
 
+// Script function: when the value changes, seeks the animation of every class 0x105 object to its
+// start (value nonzero) or its end (value 0).
 ScriptValue* SeekScriptObjects105Animations(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2493,6 +2636,7 @@ ScriptValue* SeekScriptObjects105Animations(ScriptValue* ret, Player* obj, s32 u
     return ret;
 }
 
+// Script function: puts the player's stand-in object into play (SwapInPlayerStandIn).
 ScriptValue* SwapInScriptPlayerStandIn(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2508,6 +2652,8 @@ ScriptValue* SwapInScriptPlayerStandIn(ScriptValue* ret, Player* obj, s32 unused
     return ret;
 }
 
+// Script function: queues the other object as the player's walker activation, unless the player
+// is in state 9 or the other's state walker is not at (and not heading elsewhere from) key 0x22E.
 ScriptValue* QueueScriptPlayerWalkerActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2526,6 +2672,8 @@ ScriptValue* QueueScriptPlayerWalkerActivation(ScriptValue* ret, Player* obj, s3
     return ret;
 }
 
+// Script function: queues the target as the player's first activation, unless the player is in
+// state 9 or the target's mode is not 0.
 ScriptValue* QueueScriptPlayerFirstActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2544,6 +2692,8 @@ ScriptValue* QueueScriptPlayerFirstActivation(ScriptValue* ret, Player* obj, s32
     return ret;
 }
 
+// Script function: queues the target as the player's second activation, under the same conditions
+// as the first.
 ScriptValue* QueueScriptPlayerSecondActivation(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2605,6 +2755,7 @@ ScriptValue* SetScriptAimBlendGridVectorFlagged(ScriptValue* ret, AimBlendGrid* 
     return ret;
 }
 
+// Script function: clears the holder's count of collected items and its flag.
 ScriptValue* ResetScriptCollectedItems(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2620,6 +2771,8 @@ ScriptValue* ResetScriptCollectedItems(ScriptValue* ret, PooledHolder* obj, s32 
     return ret;
 }
 
+// Script function: records that the player collected the given item (RecordCollectedItem): a kind
+// 7 object sets a flag, a kind 0x41 object goes on a list of collected items.
 ScriptValue* CollectScriptItem(ScriptValue* ret, PooledHolder* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2638,6 +2791,7 @@ ScriptValue* CollectScriptItem(ScriptValue* ret, PooledHolder* obj, s32 unused, 
     return ret;
 }
 
+// Script function: adds an id to the contact list object's first list, which holds up to four.
 ScriptValue* AddScriptContactListId(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2656,6 +2810,7 @@ ScriptValue* AddScriptContactListId(ScriptValue* ret, ContactListObject* obj, s3
     return ret;
 }
 
+// Script function: adds a kind to the contact list object's second list, which holds up to four.
 ScriptValue* AddScriptContactListKind(ScriptValue* ret, ContactListObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2698,6 +2853,7 @@ ScriptValue* AddScriptStateResetEntry(ScriptValue* ret, StateResetObject* obj, s
     return ret;
 }
 
+// Script function: makes the target follower the current one (SetCurrentTargetFollower).
 ScriptValue* SetScriptCurrentTargetFollower(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2713,6 +2869,7 @@ ScriptValue* SetScriptCurrentTargetFollower(ScriptValue* ret, TargetFollower* ob
     return ret;
 }
 
+// Script function: clears the current target follower (ClearCurrentTargetFollower).
 ScriptValue* ClearScriptCurrentTargetFollower(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2751,6 +2908,7 @@ ScriptValue* AddScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unu
     return ret;
 }
 
+// Script function: sets flag 2 (enabled) on the pool entry with the given key.
 ScriptValue* EnableScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2769,6 +2927,7 @@ ScriptValue* EnableScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 
     return ret;
 }
 
+// Script function: clears flag 2 (enabled) on the pool entry with the given key.
 ScriptValue* DisableScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2787,6 +2946,7 @@ ScriptValue* DisableScriptObjectPoolEntry(ScriptValue* ret, ObjectPool* obj, s32
     return ret;
 }
 
+// Script function: sets the count of the pool entry with the given key, limited to its total.
 ScriptValue* SetScriptObjectPoolEntryCount(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2806,6 +2966,7 @@ ScriptValue* SetScriptObjectPoolEntryCount(ScriptValue* ret, ObjectPool* obj, s3
     return ret;
 }
 
+// Script function: has the object pool pick the next item to release (ChooseObjectPoolItem).
 ScriptValue* ChooseScriptObjectPoolItem(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2821,6 +2982,8 @@ ScriptValue* ChooseScriptObjectPoolItem(ScriptValue* ret, ObjectPool* obj, s32 u
     return ret;
 }
 
+// Script function: releases the pool's chosen object (LaunchChosenPoolObject) and gives back a
+// bool.
 ScriptValue* ReleaseScriptObjectPoolItem(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2839,6 +3002,8 @@ ScriptValue* ReleaseScriptObjectPoolItem(ScriptValue* ret, ObjectPool* obj, s32 
     return ret;
 }
 
+// Script function: clears the pool's placement record (0x80 bytes at 0x60) and sets its matrix to
+// the identity.
 ScriptValue* ResetScriptPlacementRecord(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2854,6 +3019,8 @@ ScriptValue* ResetScriptPlacementRecord(ScriptValue* ret, ObjectPool* obj, s32 u
     return ret;
 }
 
+// Script function: resets the pool's release record to its defaults (cleared, with a scale of 1
+// and a distance limit of 20000).
 ScriptValue* ResetScriptObjectPoolReleaseRecord(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2869,6 +3036,7 @@ ScriptValue* ResetScriptObjectPoolReleaseRecord(ScriptValue* ret, ObjectPool* ob
     return ret;
 }
 
+// Script function: clears the pool's heading record (0x18 bytes at 0x150).
 ScriptValue* ClearScriptObjectPoolHeadingRecord(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2884,6 +3052,7 @@ ScriptValue* ClearScriptObjectPoolHeadingRecord(ScriptValue* ret, ObjectPool* ob
     return ret;
 }
 
+// Script function: sets the step sequence's mode to 1.
 ScriptValue* SetScriptStepSequenceModeOne(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2899,6 +3068,7 @@ ScriptValue* SetScriptStepSequenceModeOne(ScriptValue* ret, StepSequence* obj, s
     return ret;
 }
 
+// Script function: sets the step sequence's mode to 2 (the one with the camera).
 ScriptValue* SetScriptStepSequenceCameraMode(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2914,6 +3084,8 @@ ScriptValue* SetScriptStepSequenceCameraMode(ScriptValue* ret, StepSequence* obj
     return ret;
 }
 
+// Script function: adds a target (level entry key, kind) to the step sequence, which holds up to
+// four.
 ScriptValue* AddScriptSequenceExtraTarget(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2933,6 +3105,7 @@ ScriptValue* AddScriptSequenceExtraTarget(ScriptValue* ret, StepSequence* obj, s
     return ret;
 }
 
+// Script function: has the step sequence choose the state it starts in (ChooseStepSequenceState).
 ScriptValue* ChooseScriptStepSequenceState(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2948,6 +3121,7 @@ ScriptValue* ChooseScriptStepSequenceState(ScriptValue* ret, StepSequence* obj, 
     return ret;
 }
 
+// Script function: sets the step sequence back to state 0 unless it is in state 1 or 3.
 ScriptValue* ResetScriptStepSequence(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2963,6 +3137,8 @@ ScriptValue* ResetScriptStepSequence(ScriptValue* ret, StepSequence* obj, s32 un
     return ret;
 }
 
+// Script function: queues the state walker group as the player's walker activation, when there is
+// a player.
 ScriptValue* QueueScriptWalkerActivationOnPlayer(ScriptValue* ret, StateWalkerGroup* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2978,6 +3154,8 @@ ScriptValue* QueueScriptWalkerActivationOnPlayer(ScriptValue* ret, StateWalkerGr
     return ret;
 }
 
+// Script function: adds an entry that oscillates along the X axis to the oscillator and makes it
+// the current one.
 ScriptValue* AddScriptOscillatorXEntry(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -2993,6 +3171,8 @@ ScriptValue* AddScriptOscillatorXEntry(ScriptValue* ret, Oscillator* obj, s32 un
     return ret;
 }
 
+// Script function: adds an entry that oscillates in the Y and Z plane (axes Y and Z) to the
+// oscillator and makes it the current one.
 ScriptValue* AddScriptOscillatorYZEntry(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3054,6 +3234,8 @@ ScriptValue* AddScriptOscillatorEntryVectorB(ScriptValue* ret, Oscillator* obj, 
     return ret;
 }
 
+// Script function: takes the next phase of the world 2 boss: lowers the gauge count, changes the
+// agent state to the phase's and sets the walker target.
 ScriptValue* AdvanceScriptWorld2BossPhase(ScriptValue* ret, World2Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3069,6 +3251,8 @@ ScriptValue* AdvanceScriptWorld2BossPhase(ScriptValue* ret, World2Boss* obj, s32
     return ret;
 }
 
+// Script function: adds a key to record number index (of 0x2C bytes) of the object, which holds
+// up to four per record.
 ScriptValue* AddScriptEntryRecordKey(ScriptValue* ret, C17* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3088,6 +3272,8 @@ ScriptValue* AddScriptEntryRecordKey(ScriptValue* ret, C17* obj, s32 unused, Scr
     return ret;
 }
 
+// Script function: adds an object to the path follower's list of 16 markers; a null object is
+// ignored.
 ScriptValue* AddScriptPathFollowerEntry(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3130,6 +3316,7 @@ ScriptValue* AddScriptPathFollowerActiveEntry(ScriptValue* ret, PathFollower* ob
     return ret;
 }
 
+// Script function: puts the path follower back at its start (ResetPathFollower).
 ScriptValue* ResetScriptPathFollower(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3145,6 +3332,7 @@ ScriptValue* ResetScriptPathFollower(ScriptValue* ret, PathFollower* obj, s32 un
     return ret;
 }
 
+// Script function: whether the point, taken into the object's frame, lies inside its face tree.
 ScriptValue* TestScriptPointAgainstObjectShape(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3162,6 +3350,8 @@ ScriptValue* TestScriptPointAgainstObjectShape(ScriptValue* ret, TransformObject
     return ret;
 }
 
+// Script function: whether the point lies inside the scaling volume's face tree
+// (IsPointInsideObjectFaces).
 ScriptValue* TestScriptPointInsideFaceTreeObject(ScriptValue* ret, ScalingVolume* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3179,6 +3369,8 @@ ScriptValue* TestScriptPointInsideFaceTreeObject(ScriptValue* ret, ScalingVolume
     return ret;
 }
 
+// Script function: adds an agent to the seeking agent's list of four objects when it is attached
+// (and, if it is of kind 8, not in state 0xB), and gives whether it was added.
 ScriptValue* AddScriptSeekingAgentObject(ScriptValue* ret, SeekingAgent* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3196,6 +3388,8 @@ ScriptValue* AddScriptSeekingAgentObject(ScriptValue* ret, SeekingAgent* obj, s3
     return ret;
 }
 
+// Script function: builds the speed table of a path curve for the given time
+// (BuildPathSpeedProfile).
 ScriptValue* StartScriptC24ObjectPath(ScriptValue* ret, C24* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3215,6 +3409,7 @@ ScriptValue* StartScriptC24ObjectPath(ScriptValue* ret, C24* obj, s32 unused, Sc
     return ret;
 }
 
+// Script function: resets the entry queue (ResetEntryQueue).
 ScriptValue* ResetScriptEntryQueue(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q, t;
@@ -3229,6 +3424,7 @@ ScriptValue* ResetScriptEntryQueue(ScriptValue* ret, EntryQueue* obj, s32 unused
     return ret;
 }
 
+// Script function: binds the entry queue to the given player (BindEntryQueueToObject).
 ScriptValue* BindScriptEntryQueueToObject(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3247,6 +3443,7 @@ ScriptValue* BindScriptEntryQueueToObject(ScriptValue* ret, EntryQueue* obj, s32
     return ret;
 }
 
+// Script function: unbinds the entry queue from its player (UnbindEntryQueue).
 ScriptValue* UnbindScriptEntryQueue(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q, t;
@@ -3261,6 +3458,7 @@ ScriptValue* UnbindScriptEntryQueue(ScriptValue* ret, EntryQueue* obj, s32 unuse
     return ret;
 }
 
+// Script function: adds a kind 0 entry (an object) to the entry queue.
 ScriptValue* AddScriptQueueEntryKind0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3279,6 +3477,7 @@ ScriptValue* AddScriptQueueEntryKind0(ScriptValue* ret, EntryQueue* obj, s32 unu
     return ret;
 }
 
+// Script function: adds a kind 1 entry (an arrival point or node) to the entry queue.
 ScriptValue* AddScriptQueueEntryKind1(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3297,6 +3496,7 @@ ScriptValue* AddScriptQueueEntryKind1(ScriptValue* ret, EntryQueue* obj, s32 unu
     return ret;
 }
 
+// Script function: adds a kind 10 entry (a node to aim at) to the entry queue.
 ScriptValue* AddScriptQueueEntryKind10(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3315,6 +3515,7 @@ ScriptValue* AddScriptQueueEntryKind10(ScriptValue* ret, EntryQueue* obj, s32 un
     return ret;
 }
 
+// Script function: adds a kind 2 entry (a script event value) to the entry queue.
 ScriptValue* AddScriptQueueEntryKind2(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3333,6 +3534,7 @@ ScriptValue* AddScriptQueueEntryKind2(ScriptValue* ret, EntryQueue* obj, s32 unu
     return ret;
 }
 
+// Script function: adds a kind 3 entry (an on/off object to force) to the entry queue.
 ScriptValue* AddScriptQueueEntryKind3(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3351,6 +3553,7 @@ ScriptValue* AddScriptQueueEntryKind3(ScriptValue* ret, EntryQueue* obj, s32 unu
     return ret;
 }
 
+// Script function: adds a kind 4 entry, a wait, to the entry queue (an integer and the time).
 ScriptValue* AddScriptQueueEntryKind4(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3459,6 +3662,7 @@ ScriptValue* AddScriptQueueEntryKind8(ScriptValue* ret, EntryQueue* obj, s32 unu
     return ret;
 }
 
+// Script function: adds a kind 9 entry (object, flag) to the entry queue.
 ScriptValue* AddScriptQueueEntryKind9(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3478,6 +3682,7 @@ ScriptValue* AddScriptQueueEntryKind9(ScriptValue* ret, EntryQueue* obj, s32 unu
     return ret;
 }
 
+// Script function: adds a kind 11 entry (a game clock scale) to the entry queue.
 ScriptValue* AddScriptQueueEntryKind11(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3496,6 +3701,7 @@ ScriptValue* AddScriptQueueEntryKind11(ScriptValue* ret, EntryQueue* obj, s32 un
     return ret;
 }
 
+// Script function: adds a kind 12 entry (wait for the jump sub state) to the entry queue.
 ScriptValue* AddScriptQueueEntryKind12(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3511,6 +3717,8 @@ ScriptValue* AddScriptQueueEntryKind12(ScriptValue* ret, EntryQueue* obj, s32 un
     return ret;
 }
 
+// Script function: starts the colour fade, noting the time and adding it to the world's list at
+// 0x1CD8; nothing if it is already running.
 ScriptValue* StartScriptColorFade(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3526,6 +3734,7 @@ ScriptValue* StartScriptColorFade(ScriptValue* ret, BaseObject* obj, s32 unused,
     return ret;
 }
 
+// Script function: plays the world 5 boss's target animation on its target player.
 ScriptValue* PlayScriptWorld5BossTarget(ScriptValue* ret, World5Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3541,6 +3750,8 @@ ScriptValue* PlayScriptWorld5BossTarget(ScriptValue* ret, World5Boss* obj, s32 u
     return ret;
 }
 
+// Script function: sets the world 5 boss's target to the first object of class 0x101 with the
+// given id, or to none for -1.
 ScriptValue* SetScriptWorld5BossTarget(ScriptValue* ret, World5Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3559,6 +3770,8 @@ ScriptValue* SetScriptWorld5BossTarget(ScriptValue* ret, World5Boss* obj, s32 un
     return ret;
 }
 
+// Script function: places the collider at its anchor point and gives it the anchor's velocity
+// vector (through its class methods 0x1D and 0x20).
 ScriptValue* PlaceScriptWorld5ModeColliderAtAnchor(ScriptValue* ret, World5ModeCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3574,6 +3787,7 @@ ScriptValue* PlaceScriptWorld5ModeColliderAtAnchor(ScriptValue* ret, World5ModeC
     return ret;
 }
 
+// Script function: stores the timeline the world 3 boss is to start next.
 ScriptValue* SetScriptWorld3BossPendingTimeline(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3592,6 +3806,7 @@ ScriptValue* SetScriptWorld3BossPendingTimeline(ScriptValue* ret, World3Boss* ob
     return ret;
 }
 
+// Script function: ends the timeline the world 3 boss holds and forgets it.
 ScriptValue* EndScriptHeldWorld3Timeline(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3607,6 +3822,8 @@ ScriptValue* EndScriptHeldWorld3Timeline(ScriptValue* ret, World3Boss* obj, s32 
     return ret;
 }
 
+// Script function: adds an animation player and its beat count to the list of the world 3 boss's
+// players.
 ScriptValue* AddScriptC13Entry(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3626,6 +3843,7 @@ ScriptValue* AddScriptC13Entry(ScriptValue* ret, World3Boss* obj, s32 unused, Sc
     return ret;
 }
 
+// Script function: removes the animation player's entry from the world 3 boss's list.
 ScriptValue* RemoveScriptWorld3BossEntry(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3644,6 +3862,8 @@ ScriptValue* RemoveScriptWorld3BossEntry(ScriptValue* ret, World3Boss* obj, s32 
     return ret;
 }
 
+// Script function: lowers the gauge count, sets the boss's hits left to 2 and makes the bar jump
+// to its target fill.
 ScriptValue* DecrementScriptWorld3BossGauge(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3703,6 +3923,7 @@ ScriptValue* AppendScriptWorld3TimelineKind1Entry(ScriptValue* ret, World3Timeli
     return ret;
 }
 
+// Script function: appends a kind 2 entry (value, time) to the world 3 timeline.
 ScriptValue* AppendScriptWorld3TimelineKind2Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3722,6 +3943,7 @@ ScriptValue* AppendScriptWorld3TimelineKind2Entry(ScriptValue* ret, World3Timeli
     return ret;
 }
 
+// Script function: appends a kind 3 entry (value, time) to the world 3 timeline.
 ScriptValue* AppendScriptWorld3TimelineKind3Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3741,6 +3963,7 @@ ScriptValue* AppendScriptWorld3TimelineKind3Entry(ScriptValue* ret, World3Timeli
     return ret;
 }
 
+// Script function: appends a kind 4 entry (value, time) to the world 3 timeline.
 ScriptValue* AppendScriptWorld3TimelineKind4Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3760,6 +3983,7 @@ ScriptValue* AppendScriptWorld3TimelineKind4Entry(ScriptValue* ret, World3Timeli
     return ret;
 }
 
+// Script function: appends a kind 5 entry (value, time) to the world 3 timeline.
 ScriptValue* AppendScriptWorld3TimelineKind5Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3800,6 +4024,8 @@ ScriptValue* SetScriptWorld4BossValues(ScriptValue* ret, World4Boss* obj, s32 un
     return ret;
 }
 
+// Script function: sends the hit count collider (through its class's method 0x4C) a request from
+// the given object, which pushes the requester away from the sender.
 ScriptValue* SendScriptHitCountColliderRequest(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3818,6 +4044,7 @@ ScriptValue* SendScriptHitCountColliderRequest(ScriptValue* ret, HitCountCollide
     return ret;
 }
 
+// Script function: appends the object to the hit count collider's list of place points.
 ScriptValue* AddScriptHitCountColliderId(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3836,6 +4063,8 @@ ScriptValue* AddScriptHitCountColliderId(ScriptValue* ret, HitCountCollider* obj
     return ret;
 }
 
+// Script function: puts the item back into play at one of the collider's place points
+// (PlaceHitCountColliderItem).
 ScriptValue* AddScriptHitCountColliderItem(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -3854,6 +4083,8 @@ ScriptValue* AddScriptHitCountColliderItem(ScriptValue* ret, HitCountCollider* o
     return ret;
 }
 
+// Script function: tells the counted collider that a touch was taken (the object and a flag); the
+// collider counts it down and sends its message when none are left.
 ScriptValue* TakeScriptCountedColliderTouch(ScriptValue* ret, CountedCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
@@ -4073,6 +4304,9 @@ void SetPathFollowerPath(PathFollower* self, PathCurveObject* arg);
 void SetPathFollowerSecondPath(u8* self, PathCurveObject* obj);
 void SetPathFollowerMode(PathFollower* self, s32 mode);
 
+// Fills the 1179 property descriptors the scripts see (type, flags and the getter, field offset
+// or script function of each), one record after another; called once from pose_source.cpp's
+// start-up.
 void FillObjectPropertyTable()
 {
     PropertyDescriptor* p = g_objectPropertyDescriptors;
