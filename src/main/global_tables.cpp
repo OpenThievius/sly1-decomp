@@ -146,7 +146,7 @@ extern const ClassDescriptor<100> g_seekingAgentClass;
 extern const ClassDescriptor<84> g_gaugeColliderClass;
 extern const ClassDescriptor<100> g_gaugeColliderAgentClass;
 extern const ClassDescriptor<72> g_gaugeCountedObjectClass;
-extern const ClassDescriptor<72> g_boxColliderClass;
+extern const ClassDescriptor<72> g_contactlessColliderClass;
 extern const ClassDescriptor<100> g_worldListedAgentClass;
 extern const ClassDescriptor<100> g_numberedAgentClass;
 extern const ClassDescriptor<100> g_contactAgentClass;
@@ -429,7 +429,7 @@ extern const void* const g_classDescriptorTable[149] = {
     &g_pooledObjectClass,
     &g_targetFollowerClass,
     &g_gaugeCountedObjectClass,
-    &g_boxColliderClass,
+    &g_contactlessColliderClass,
     &g_world5BossClass,
     &g_countdownColliderClass,
     &g_countedColliderClass,

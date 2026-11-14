@@ -13,7 +13,7 @@
 #include "transform_object.h"
 #include "asm_func.h"
 #include "switched_collider.h"
-#include "box_collider.h"
+#include "contactless_collider.h"
 #include "object_link.h"
 #include "path_curve_object.h"
 #include "point_object.h"
@@ -121,7 +121,7 @@ s32 g_screenOwner = 0;
 List_269BA8 g_targetVectors = { 0 };
 
 // Initialises the collider, sets flag bit 43 of its flags and its anchors (3, 0, 3, 0).
-void InitBoxCollider(BoxCollider* self)
+void InitContactlessCollider(ContactlessCollider* self)
 {
     InitCollider(self);
     self->flags538 |= (u64)0x8000 << 28;
