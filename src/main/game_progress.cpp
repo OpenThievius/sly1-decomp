@@ -854,6 +854,8 @@ extern const char g_entryNameATemporaryTruce[24] = "A Temporary Truce";
 extern const char g_entryNameSinkingPeril[16] = "Sinking Peril";
 extern const char g_entryNameAStrangeReunion[24] = "A Strange Reunion";
 
+// Adds the object to the world's regroup queue, once: bit 0x80 of its high flags marks it as
+// queued (cleared by RegroupQueuedObjects).
 void QueueObjectForRegroup(World* owner, PlacedObject* obj)
 {
     u64 flags = obj->flags;
@@ -867,6 +869,8 @@ void QueueObjectForRegroup(World* owner, PlacedObject* obj)
     }
 }
 
+// Joins other's link list onto the end of self's, pointing every member of other at self as its
+// owner; nothing happens if they are the same object.
 void MergeObjectLinkLists(World* ctx, PlacedObject* self, PlacedObject* other)
 {
     ListFrame frame;
@@ -882,6 +886,8 @@ void MergeObjectLinkLists(World* ctx, PlacedObject* self, PlacedObject* other)
     }
 }
 
+// Breaks the link list owned by owner apart: every other member gets a list of its own again,
+// and every member (the owner included) is queued for regrouping.
 void DissolveObjectLinkList(World* self, PlacedObject* owner)
 {
     LinkListWalk it;
@@ -899,6 +905,8 @@ void DissolveObjectLinkList(World* self, PlacedObject* owner)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
+// Joins the link lists of the group's attached objects into one: starting from the first
+// attached member, each later attached member's list is merged into the first one's.
 void MergeObjectGroupMembers(World* self, FoundList* group)
 {
     s32 i = 0;
@@ -916,6 +924,8 @@ void MergeObjectGroupMembers(World* self, FoundList* group)
     }
 }
 
+// Adds a group of two or more objects to each member's list of groups (at most four) and merges
+// the members' link lists.
 void RegisterObjectGroup(World* self, FoundList* group)
 {
     if (group->count >= 2) {
@@ -931,6 +941,8 @@ void RegisterObjectGroup(World* self, FoundList* group)
     }
 }
 
+// Removes the last entry equal to value from the pointer array, moving the later ones down and
+// decrementing the array's count; does nothing if it is not there.
 void RemoveValueFromArray(CountedArray* list, void** arr, void* value)
 {
     s32 i = list->count;
@@ -953,6 +965,8 @@ void RemoveValueFromArray(CountedArray* list, void** arr, void* value)
     list->count--;
 }
 
+// Takes a group of two or more objects out of each member's group list and then dissolves the
+// link list of the first member that has one.
 void UnregisterObjectGroup(World* self, FoundList* s)
 {
     s32 i;
@@ -972,6 +986,9 @@ void UnregisterObjectGroup(World* self, FoundList* s)
     }
 }
 
+// Drains the world's regroup queue (QueueObjectForRegroup): clears each queued object's bit
+// 0x80 and, for an object that heads its own list, re-merges the link lists of the groups it
+// belongs to.
 void RegroupQueuedObjects(World* self)
 {
     s32 i = self->regroupCount;
@@ -994,6 +1011,8 @@ void RegroupQueuedObjects(World* self)
     self->regroupCount = 0;
 }
 
+// Calls the class's visit method on a node, then recurses into each child whose class has flag
+// 1.
 void VisitObjectTree(VisitNode* self, void* arg)
 {
     ListFrame frame;
@@ -1043,6 +1062,9 @@ void SetPlacedObjectFrozen(PlacedObject* self, s32 flag)
     }
 }
 
+// Freezes or unfreezes a collider: freezing saves its two modes, sets both anchors to 3, zeroes
+// two vectors, frees the touch nodes and freezes the object; unfreezing undoes that and
+// restores the modes.
 void SetColliderFrozen(Collider* self, s32 flag)
 {
     if (flag != 0) {
@@ -1125,12 +1147,15 @@ void UpdateGroupsNearCamera(World* self)
     }
 }
 
+// Per-frame step: regroups the queued objects, then updates the groups near the camera.
 void UpdateWorldObjectLists(World* self)
 {
     RegroupQueuedObjects(self);
     UpdateGroupsNearCamera(self);
 }
 
+// Starts the object, looks up each of its ids under its parent (the first object found with
+// that id) into a freshly allocated list, then registers that list as a group.
 void ResolveLookupIds(IdLookupObject* self)
 {
     StartObject(self);
@@ -1146,10 +1171,13 @@ void ResolveLookupIds(IdLookupObject* self)
 
 void AddLookupId(IdLookupObject* obj, s32 value) { obj->ids[obj->idCount++] = value; }
 
+// Resets the game session, then starts the session object fade (the fade that follows a reset).
 void RunResetGameSession() { ResetGameSessionAndFade(); }
 
 LINKER_REMNANT(func_00160090);
 
+// Gives back the entry of the keyed-entry table whose key equals the key of the entry passed in
+// (or the same entry), or 0.
 KeyedEntry* FindKeyEntry(KeyedEntry* key)
 {
     KeyedEntry* p = (KeyedEntry*)g_keyedEntries;
@@ -1173,6 +1201,7 @@ KeyedEntry* FindKeyEntry(KeyedEntry* key)
     return 0;
 }
 
+// Gives the keyed entry whose id (at +0x20) equals key, or 0.
 void* FindEntryById(s32 key)
 {
     u8* p = (u8*)g_keyedEntries;
@@ -1189,6 +1218,7 @@ void* FindEntryById(s32 key)
     }
 }
 
+// The name of the keyed entry with that id, or the shared "missing" name when there is none.
 void* GetEntryName(s32 id)
 {
     void* p = FindEntryById(id);
@@ -1206,6 +1236,7 @@ void* LookupEntryById(s32 id)
     return FindEntryById(id);
 }
 
+// The id of the entry found by FindKeyEntry, or -1.
 s32 GetEntryIdByKey(KeyedEntry* key)
 {
     s32 v;
@@ -1217,6 +1248,7 @@ s32 GetEntryIdByKey(KeyedEntry* key)
 
 LINKER_REMNANT(func_001601D0);
 
+// The flag word of the keyed entry with that id, or 0.
 s32 GetEntryFlags(s32 id)
 {
     EntryFlags* e = (EntryFlags*)FindEntryById(id);
@@ -1227,6 +1259,8 @@ s32 GetEntryFlags(s32 id)
     return r;
 }
 
+// Counts, over the keyed entries whose id (>> 8) equals key, how many have bit 2, bit 4 and bit
+// 8 of their flag word, into *a1, *a2 and *a3.
 void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3)
 {
     KeyedEntry* p;
@@ -1253,6 +1287,9 @@ void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3)
     } while (p < end);
 }
 
+// Builds the completion mask (bits 2, 4 and 8, starting from 0xE): the keyed-entry table can
+// only clear bits whose requirement the entry's level record lacks, and bit 2 is also cleared
+// if any of levels 1 to 5 is not marked done (0x20).
 s32 ComputeCompletionMask(void) {
     u32 mask = 0xE;
     u8* p = (u8*)g_keyedEntries;
@@ -1274,6 +1311,8 @@ s32 ComputeCompletionMask(void) {
     return mask;
 }
 
+// Sets, for stage 1 to 5, one progress bit (0x10, 0x40, 0x100, 0x400, 0x1000) in the save's
+// flag word at +0x19F4.
 void MarkProgressStageFlag(s32 n)
 {
     switch (n) {
@@ -1285,6 +1324,8 @@ void MarkProgressStageFlag(s32 n)
     }
 }
 
+// Marks level n finished in the save (flag 0x20 of its record) and sets the matching progress
+// bits in the save's two flag words; level 5 goes through ApplyCompletionFlags(2).
 void MarkLevelDone(s32 n)
 {
     g_saveData->levels[n].f448 |= 0x20;
@@ -1308,6 +1349,8 @@ void MarkLevelDone(s32 n)
     }
 }
 
+// Sets the save's progress bits for a completion mode: 2 always, 4 and 8 only when
+// ComputeCompletionMask says that completion was reached (mode 8 also sets movie bits 0xC).
 void ApplyCompletionFlags(s32 mode)
 {
     switch (mode) {
@@ -1329,6 +1372,7 @@ void ApplyCompletionFlags(s32 mode)
     }
 }
 
+// Starts the screen fade out and, for kind 2 or 4, queues the movie 0xD or 0xE followed by 0xF.
 void FadeOutAndQueueMovie(s32 kind)
 {
     s32 s0 = -1;
@@ -1340,6 +1384,8 @@ void FadeOutAndQueueMovie(s32 kind)
     }
 }
 
+// Clears the whole 0x1A00-byte save record and sets its defaults (type 0x12, size, entry 3,
+// five reserves, no last hint mode), then applies the pad pattern setting.
 void ResetGameProgress(GameProgress* self)
 {
     FillMemory(self, 0, 0x1A00);
@@ -1353,6 +1399,7 @@ void ResetGameProgress(GameProgress* self)
     ApplyPadPatternSetting(self);
 }
 
+// Byte sum of the save record from its total-time field to its end.
 s32 ChecksumGameProgress(GameProgress* s)
 {
     u8* p = (u8*)&s->totalTime;
@@ -1393,6 +1440,8 @@ void SetCurrentLevelEntry(KeyedEntry* key, s32 flags)
     g_currentEntry->flags |= 1;
 }
 
+// Adds dx (seconds) to the save's total time, the current level's elapsed time and the current
+// entry's elapsed time.
 void AddElapsedTime(f32 dx)
 {
     g_saveData->totalTime += dx;
@@ -1400,11 +1449,14 @@ void AddElapsedTime(f32 dx)
     g_currentEntry->elapsedTime += dx;
 }
 
+// Gives the level entry of a key (level number in the bits above 8, entry number in the low
+// byte, 0x78 bytes per entry), or 0 for -1.
 void* GetLevelEntryByKey(s32 key)
 {
     return key == -1 ? 0 : (u8*)&g_saveData->levels[key >> 8] + (key & 0xFF) * 0x78;
 }
 
+// The first word of the level entry for key, or 0 if there is none.
 s32 GetLevelEntryWord(s32 key)
 {
     s32* p = (s32*)GetLevelEntryByKey(key);
@@ -1416,6 +1468,8 @@ s32 GetLevelEntryWord(s32 key)
     return value;
 }
 
+// Resets the whole game session: clears the save record, a couple of globals and the scatter
+// controller, forgets the previous level and resets the reserve counts.
 void ResetGameSession(void)
 {
     ResetGameProgress(g_saveData);
@@ -1427,6 +1481,7 @@ void ResetGameSession(void)
     ResetReserveCounts();
 }
 
+// Sets the reserve count to 5 and the spare count to 0 in the save and resets the flag table.
 void ResetReserveCounts(void)
 {
     GameProgress* g = g_saveData;
@@ -1518,6 +1573,7 @@ void SetSpareCount(s32 value)
     g_saveData->spareCount = value;
 }
 
+// 1 if the save has a spare count above 0 or bit 2 of the button-code flags is set, else 0.
 s32 HasSpareCount()
 {
     s32 result=0;
@@ -1527,12 +1583,15 @@ s32 HasSpareCount()
 
 LINKER_REMNANT(func_00160C90);
 
+// Gives the address of slot index in a table of 12 words at self-0xCD8 (indices 0x33B to
+// 0x346), or 0 outside it.
 void* GetIndexedTargetSlot(void* self,s32 index)
 {
     if ((u32)(index-0x33B)>=12) return 0;
     else return (u8*)self+(index*4-0xCD8);
 }
 
+// Zeroes 8 bytes.
 void ClearTwoWords(void* p)
 {
     FillMemory(p, 0, 8);
@@ -1553,11 +1612,14 @@ void ReleaseCounterRef(RefCounted* self)
     self->refs--;
 }
 
+// The save's progress bits (+0x19F0) ANDed with the current world's flag bits.
 s32 MaskWorldBitsBySave()
 {
     return g_saveData->f19F0 & g_currentWorld->flagBits;
 }
 
+// Gives through *out the bit (0x10000000 to 0x80000000) for the save's current level, or 0 for
+// levels 0 and 5.
 void GetCurrentLevelBit(u32* out)
 {
     s32 m;
@@ -1572,6 +1634,7 @@ void GetCurrentLevelBit(u32* out)
     if (out) *out = m;
 }
 
+// The most spare units the game allows: always 2.
 s32 GetSpareCountLimit(void)
 {
     return 2;
@@ -1608,6 +1671,7 @@ void SpendReserveUnit(void)
     RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f);
 }
 
+// Zeroes the six words after the first word of a record.
 void ClearRecordBody(ClearedRecord* self)
 {
     self->f4 = 0;
@@ -1695,6 +1759,8 @@ s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 ma
 
 extern const Fn_Table g_gifPacketMethods[6] = { 0, 0, 0, (Fn_Table)(void (*)(PacketWriter* f, s32 n))CloseGifTag, 0, 0 };
 
+// Initialises a packet writer for GIF data (its method table closes tags with CloseGifTag) with
+// no tag open.
 PacketWriter* InitGifPacket(PacketWriter* self)
 {
     (void)InitPacketBuffer(self);
@@ -1706,6 +1772,8 @@ PacketWriter* InitGifPacket(PacketWriter* self)
     return self;
 }
 
+// Closes the writer's open GIF tag and ends the packet; with no tag open it first writes a one-
+// register tag (descriptor 0xE) so the packet still ends properly.
 void EndGifPacket(PacketWriter* self)
 {
     if (self->openTag != 0) {
@@ -1718,6 +1786,8 @@ void EndGifPacket(PacketWriter* self)
     }
 }
 
+// Closes the open GIF tag: pads the data to a quadword, then stores into the tag the loop count
+// (entries / registers) and, if n is set, the 0x8000 end-of-packet bit.
 void CloseGifTag(PacketWriter* f, s32 n)
 {
     if (f->openTag == 0)
@@ -1741,8 +1811,12 @@ void CloseGifTag(PacketWriter* f, s32 n)
     f->openTag = 0;
 }
 
+// Counts one entry on the open tag (its two other arguments are unused).
 void CountGifEntry(PacketWriter* obj, s32 unused1, s32 unused2) { ++obj->entryCount; }
 
+// Writes a PACKED GIF tag with EOP set for nloop loops of nreg registers (prim, register
+// descriptor word data) after closing any open tag, and gives back through out the start of the
+// room reserved for the data, which it then skips.
 void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, u8** out)
 {
     PacketWriter* w = self;
@@ -1760,6 +1834,8 @@ void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64
     w->cur = w->cur + nloop * nreg * 16;
 }
 
+// Closes any open GIF tag and starts a new one at the writer's cursor with EOP set (a1 is the
+// prim word, a2 the register count, a3 the register descriptor); the entry count is reset.
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3)
 {
     const PacketWriterVt* d = self->vt;
@@ -1775,6 +1851,8 @@ void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3)
     self->entryCount = 0;
 }
 
+// Appends one RGBA entry: the four bytes of the packed colour, each widened to a word, as one
+// quadword.
 void AddGifRgbaEntry(PacketWriter* self, u32 value)
 {
     CountGifEntry(self, 1, 1);
@@ -1786,6 +1864,7 @@ void AddGifRgbaEntry(PacketWriter* self, u32 value)
     p[3] = value >> 24;
 }
 
+// Appends one UV entry (two words) to the open tag.
 void AddGifUvEntry(PacketWriter* self,s32 a,s32 b)
 {
     CountGifEntry(self,1,3);
@@ -1795,6 +1874,7 @@ void AddGifUvEntry(PacketWriter* self,s32 a,s32 b)
     p[1]=b;
 }
 
+// Appends one ST entry (s, t, q floats) to the open tag.
 void AddGifStEntry(PacketWriter* self,f32 a,f32 b,f32 c)
 {
     CountGifEntry(self,1,2);
@@ -1805,6 +1885,7 @@ void AddGifStEntry(PacketWriter* self,f32 a,f32 b,f32 c)
     p[2]=c;
 }
 
+// Appends one XYZ entry to the open tag: two words and a 64-bit value.
 void AddGifXyzEntry(PacketWriter* self, s32 a1, s32 a2, u64 a3)
 {
     CountGifEntry(self, 1, 5);
@@ -1815,6 +1896,8 @@ void AddGifXyzEntry(PacketWriter* self, s32 a1, s32 a2, u64 a3)
     *(u64*)(p + 0x8) = a3;
 }
 
+// Appends one XYZF entry (x, y, z, then the 8-bit fog value shifted left 4) to the open tag as
+// one quadword.
 void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     CountGifEntry(self, 1, 4);
@@ -1826,6 +1909,8 @@ void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
     p[3] = (a4 & 0xFF) << 4;
 }
 
+// Appends one XYZF entry to the open tag; like AddGifXyzfEntry but with the 0x8000 (no-draw)
+// bit set in the last word.
 void AddGifXyzfNoDrawEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     CountGifEntry(self, 1, 4);
@@ -1837,6 +1922,7 @@ void AddGifXyzfNoDrawEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4)
     p[3] = ((a4 & 0xFF) << 4) | 0x8000;
 }
 
+// Appends an A+D (register 0xE) entry: a1 is the register address and a2 the data.
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2)
 {
     CountGifEntry(self, 1, 14);
@@ -1848,6 +1934,8 @@ void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2)
 
 LINKER_REMNANT(func_00161760);
 
+// Closes any open tag and starts a REGLIST-format GIF tag with a1 registers (a2 is its register
+// descriptor word); the entry count is reset.
 void BeginGifRegListTag(PacketWriter* self, u32 a1, u64 a2)
 {
     const PacketWriterVt* sub = self->vt;
@@ -1861,6 +1949,7 @@ void BeginGifRegListTag(PacketWriter* self, u32 a1, u64 a2)
     self->entryCount = 0;
 }
 
+// Appends one 64-bit REGLIST entry: tag in the low word and the float's bits in the high word.
 void AddGifRegListFloat(PacketWriter* self, s32 tag, f32 value)
 {
     CountGifEntry(self, 0, 1);
@@ -1874,6 +1963,8 @@ void AddGifRegListFloat(PacketWriter* self, s32 tag, f32 value)
 
 LINKER_REMNANT(func_00161858);
 
+// Appends one UV entry in a REGLIST tag, packed into one 64-bit word (u in the low half, v from
+// bit 16).
 void AddGifUvRegListEntry(PacketWriter* self, s32 a1, s32 a2)
 {
     CountGifEntry(self, 0, 3);
@@ -1883,6 +1974,8 @@ void AddGifUvRegListEntry(PacketWriter* self, s32 a1, s32 a2)
     *p = v;
 }
 
+// Appends one XYZF entry in a REGLIST tag, packed into a single 64-bit word (x, y, a 24-bit z,
+// then a4 in the top byte).
 void AddGifXyzfRegListEntry(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4)
 {
     CountGifEntry(self, 0, 4);
@@ -1895,6 +1988,7 @@ void AddGifXyzfRegListEntry(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4)
 
 LINKER_REMNANT(func_00161950);
 
+// Closes any open tag and writes an IMAGE-format GIF tag for count quadwords.
 void AddGifImageTag(PacketWriter* self, s32 count)
 {
     self->Close(0);
@@ -1906,6 +2000,8 @@ void AddGifImageTag(PacketWriter* self, s32 count)
 
 struct CameraBlock16 { u8 b[16]; };
 
+// Clears a vertex batch, sets its defaults (scale 1.0, no light selection, a copy of 16 bytes
+// of the camera at +0x208) and resets it with ResetVertexBatch.
 u8* InitVertexBatch(VertexBatch* batch)
 {
     u8* self = (u8*)batch;
@@ -1926,6 +2022,7 @@ u8* InitVertexBatch(VertexBatch* batch)
     return self;
 }
 
+// Frees the batch's memory when bit 0 of flag is set.
 void DestroyVertexBatch(VertexBatch* self, s32 flag)
 {
     if (flag & 1) {
@@ -1933,6 +2030,8 @@ void DestroyVertexBatch(VertexBatch* self, s32 flag)
     }
 }
 
+// Flushes the batch, then sets its transform from a rotation and translation (a1, a2) and
+// stores the rigid inverse at +0x40.
 void SetVertexBatchTransform(VertexBatch* batch, void* a1, void* a2)
 {
     u8* self = (u8*)batch;
@@ -1959,6 +2058,8 @@ struct LightedVertexBatch {
     u8* mode;
 };
 
+// Chooses the lights for a vertex batch around a sphere (center, radius) with
+// CollectLightsForSphere, or clears the selection when the batch's mode is not 0.
 void SelectVertexBatchLights(VertexBatch* batch, void* center, f32 radius)
 {
     LightedVertexBatch* self = (LightedVertexBatch*)batch;
@@ -1973,6 +2074,7 @@ void SelectVertexBatchLights(VertexBatch* batch, void* center, f32 radius)
     }
 }
 
+// Clears the batch's two buffer counters and its 0x1720-byte vertex area.
 void ResetVertexBatch(VertexBatch* batch)
 {
     u8* self = (u8*)batch;
@@ -1981,6 +2083,8 @@ void ResetVertexBatch(VertexBatch* batch)
     ((MemoryFillFn)FillMemory)(self+0x128,0,0x1720);
 }
 
+// Flushes the batch, sets its mode pointer to value and resets the vertex colour to opaque
+// white.
 void SetVertexBatchMode(VertexBatch* batch, u8* value)
 {
     ColoredVertexBatch* self = (ColoredVertexBatch*)batch;
@@ -2206,6 +2310,7 @@ void SetVertexPosition(VertexBatch* body, Vec3* v)
 
 LINKER_REMNANT(func_001626A0);
 
+// Copies a packed 32-bit colour into the batch as the colour of the vertices that follow.
 void SetVertexColor(VertexBatch* batch, void* src)
 {
     u8* dst = (u8*)batch;
@@ -2243,6 +2348,8 @@ void AddVertex(VertexBatch* batch, s32 value)
     }
 }
 
+// Allocates an array of capacity pointers and fills it with the non-null refs of the owner's
+// items, in order.
 void CollectNonNullRefs(RefOwner* owner)
 {
     owner->refs = (void**)AllocateFrontMemory(owner->capacity << 2);

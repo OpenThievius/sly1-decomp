@@ -51,6 +51,8 @@ struct __attribute__((packed)) UnalignedPair { u64 v; };
 struct ThreeWords { UnalignedPair a; s32 b; };
 
 
+// Initialises the switched collider with a gravity scale of 1.0, its push factor, the ramp
+// scaled by 1.0 and its heading curve and rest and sink ramps taken from constants.
 void InitTurningCollider(TurningCollider* self)
 {
     InitSwitchedCollider(self);
@@ -63,6 +65,9 @@ void InitTurningCollider(TurningCollider* self)
 }
 
 
+// Starts the placed object, resolves its six links and sets their link flag, picks its two link
+// values (f610, f614) from the second candidate when set and otherwise the first, and sets the
+// heading matrix to identity.
 void StartTurningCollider(TurningCollider* self)
 {
     StartPlacedObject(self);
@@ -82,6 +87,8 @@ void StartTurningCollider(TurningCollider* self)
     *dst = g_identityMatrix;
 }
 
+// Sets or clears bit 2 of the link flags of the link records of the two objects it is linked to
+// (f61C and f618), for those whose record has flag 0x20.
 void SetTurningColliderLinkFlag(TurningCollider* self, s32 a1)
 {
     PlacedObject* h = (PlacedObject*)self->f61C;
@@ -148,6 +155,8 @@ void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, 
 }
 
 
+// Collects up to 2 collider spans between the part's two points in the tree a1 (skipping one
+// that starts at time 0) and keeps the nearest one (smallest first time) in the part's span.
 void KeepNearestPartSpan(void* unused, void* a1, void* a2, Part07* self)
 {
     ColliderSpan ents[2];
@@ -204,6 +213,9 @@ void DrawTurningCollider(TurningCollider* self, void* unused1, void* unused2)
 }
 
 
+// Takes the heading of the pad's stick relative to the camera when the stick is pushed harder
+// than it was a moment ago (the remembered level falls by 0.25 per call), otherwise keeps the
+// current heading; remembers the stick level.
 void ReadTurningColliderStickHeading(TurningCollider* self, PadRecord* pad)
 {
     g_previousStickLevel = (g_previousStickLevel - 0.25f >? 0.0f);
@@ -331,18 +343,22 @@ void SetTurningColliderFollowedMesh(TurningCollider* self, Collider* other, s32 
 
 
 
+// Updates the switched collider and tracks the velocities of the mesh vertices it follows.
 void UpdateTurningCollider(TurningCollider* self, f32 dt)
 {
     UpdateSwitchedCollider(self, dt);
     TrackFollowedMeshVertexVelocities(self);
 }
 
+// Always 3.
 s32 GetTurningColliderContactMode(void) { return 3; }
 
 struct Contact03;
 struct ContactEnd03;
 struct ImpulseRow;
 
+// Computes the collider's impulse response with its mode (mode470) temporarily set to the one
+// the class's method 55 gives.
 void ComputeTurningColliderImpulseResponse(TurningCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     s32 old = self->mode470;
@@ -353,6 +369,7 @@ void ComputeTurningColliderImpulseResponse(TurningCollider* self, s32 a1, s32 a2
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Sets the collider's rotation and takes the heading and stick heading from it.
 void SetTurningColliderRotation(TurningCollider* self, Mat02* rot)
 {
     SetColliderRotation(self, rot);
@@ -395,6 +412,7 @@ void CopyTurningColliderMeshesInFrame(TurningCollider* self, Collider* other, s3
 }
 
 
+// Steps the collider, then applies its drive.
 void StepTurningCollider(TurningCollider* self, f32 dt)
 {
     StepCollider(self, dt);
@@ -473,6 +491,8 @@ s32 IsTurningColliderGroundContact(TurningCollider* self, Contact03* a, s32 idx)
 // Slot 86 (func_001C5248: does a contact hold the body up), called with the caller's own
 // arguments left in place.
 typedef s32 (*ContactTestFn)(void* self);
+// Sets the contact's friction to a constant and bounce to 0 when the class's method at 0x168
+// says so, otherwise friction and bounce to 0.
 void ComputeTurningColliderContactValue(TurningCollider* self, Contact03* out)
 {
     if (((ContactTestFn*)self->desc)[0x168 / 4](self)) {
@@ -491,17 +511,20 @@ void ClampTurningColliderContactLimit(TurningCollider* self, s32 flags, ContactL
     ClampColliderContactLimit(self, flags, limit);
 }
 
+// Does nothing; the base collider puts no extra limit on a contact.
 void ClampColliderContactLimit(Collider* self, s32 flags, ContactLimit03* limit)
 {
 }
 
 
+// Builds the heading matrix: a rotation about Z by the heading.
 void BuildTurningColliderHeadingMatrix(TurningCollider* self)
 {
     BuildAxisAngleMatrix(&g_unitZVector, (Mat02*)((u8*)self + 0x660), self->heading);
 }
 
 
+// Resolves the ground contact when the class's method 90 says it applies.
 void ResolveTurningColliderContact(TurningCollider* self, void* b, s32 c)
 {
     if (((ContactTestFn*)self->desc)[90](self)) {
@@ -512,6 +535,8 @@ void ResolveTurningColliderContact(TurningCollider* self, void* b, s32 c)
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Recomputes the collider's frame, then its heading weight: a quadratic curve of the angle
+// between its facing and its heading, clamped to the unit range.
 void RecomputeTurningColliderFrame(TurningCollider* self)
 {
     RecomputeColliderFrame(self);
@@ -713,6 +738,8 @@ void CollectTurningColliderContacts(TurningCollider* self)
 }
 
 
+// Adds a probe contact against the object (the filter and the output only; the other arguments
+// are unused).
 void CollideTurningColliderWithObject(TurningCollider* self, Collider* obj, void* unused2, void* unused3, void* filter,
                                       void* out)
 {
@@ -753,6 +780,8 @@ void AddTurningColliderProbeContact(TurningCollider* self, Collider* obj, void* 
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Turns the collider's spin toward its heading with the ramp and gives the new spin to the
+// class's method 21.
 void TurnColliderTowardHeading(TurningCollider* self)
 {
     Vec02 q = self->v160;
@@ -761,6 +790,8 @@ void TurnColliderTowardHeading(TurningCollider* self)
     self->desc02()->m21(self, &q);
 }
 
+// Gives the rotation matrix of the collider turned toward its heading by at most limit
+// (matrix), and the turn rate as a vector along Z (out).
 void GetTurningColliderPose(TurningCollider* self, void* matrix, Vec02* out, f32 limit)
 {
     f32 turn;
@@ -773,6 +804,8 @@ void GetTurningColliderPose(TurningCollider* self, void* matrix, Vec02* out, f32
 }
 
 
+// Resets the turn ramp (turnGain and two more values) from constants and scales it by s (the
+// last by 1/sqrt(s)).
 void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
 {
     *(ThreeWords*)&self->turnGain = *(ThreeWords*)D_00274B80;
@@ -782,6 +815,8 @@ void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
 }
 
 
+// Sets the gravity scale (at least 0.1), rescaling the collider's mass and gravity vector by
+// the change.
 void SetTurningColliderGravityScale(TurningCollider* self, f32 s)
 {
     f32 n = 0.1f;

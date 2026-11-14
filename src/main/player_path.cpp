@@ -515,6 +515,8 @@ void PinPlayerToPath(Player* self)
 }
 
 
+// Changes the player's pad select mode; leaving -1 takes a pad-select hold and shows the
+// counted screen element, and going back to -1 releases and hides them.
 void SetPlayerPadSelectMode(Player* a0, s32 a1)
 {
     if (a0->padSelectMode != a1) {

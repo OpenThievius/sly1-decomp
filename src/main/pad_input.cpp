@@ -72,6 +72,7 @@ void UpdatePadRouting(void);
 extern "C" s32 InitPadLibrary(s32 mode);
 void InitPadRecord(PadRecord* self, s32 a, s32 b);
 
+// Sets the pad routing, initialises the pad library and the main pad record (port 0, slot 0).
 void InitPadSystem(void)
 {
     UpdatePadRouting();
@@ -83,6 +84,7 @@ extern s32 g_padSelectFlags;
 
 void UpdatePadRouting();
 
+// Sets the given pad-select flags and updates the routing.
 s32 SetPadSelectFlags(s32 bits)
 {
     g_padSelectFlags |= bits;
@@ -91,6 +93,7 @@ s32 SetPadSelectFlags(s32 bits)
 
 void UpdatePadRouting(void);
 
+// Clears the given pad-select flags and updates the routing.
 void ClearPadSelectFlags(u32 mask)
 {
     mask = ~mask;
@@ -101,6 +104,8 @@ void ClearPadSelectFlags(u32 mask)
 extern s32 g_padSelectFlags;
 extern s32 g_padRouting;
 
+// Chooses the pad routing from the pad-select flags: 0 when bit 0x84 is set, else 5 for bit 1,
+// 4 for bit 2, otherwise 7.
 void UpdatePadRouting()
 {
     s32 flags = g_padSelectFlags;
@@ -127,6 +132,8 @@ void* ReservePermanentMemory(s32 size);
 extern "C" s32 OpenPadPort(s32 port, s32 slot, u8* buffer);
 void SetPadConnectionState(PadRecord* self, s32 mode, s32 n);
 
+// Initialises a pad record for port a, slot b: clears it, allocates its 64-byte-aligned buffer
+// and its pattern player, and opens the pad port.
 void InitPadRecord(PadRecord* self, s32 a, s32 b)
 {
     FillMemory(self, 0, 0xC4);
@@ -475,6 +482,7 @@ s32 PollPadInput(PadRecord* self)
     return res;
 }
 
+// Clears the given bits of the pad record's pressed flags.
 void ClearPadPressedBits(PadRecord* self, u32 mask)
 {
     u16 m = (u16)mask;
@@ -483,6 +491,8 @@ void ClearPadPressedBits(PadRecord* self, u32 mask)
 
 struct PadPatternPlayer;
 
+// Starts a rumble pattern of the given duration on the pad, when the pad is connected and in
+// the right mode.
 void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration)
 {
     if (self->pC0 == 0) return;
@@ -493,6 +503,7 @@ void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration)
 
 LINKER_REMNANT(func_0016EC80);
 
+// Zeroes the pad record's two step-repeat counters.
 void ResetPadStepRepeat(PadRecord* p) { p->stepX = 0; p->stepY = 0; }
 
 extern f32 g_elapsedTime[];
@@ -661,6 +672,8 @@ done:
     return self->stepY;
 }
 
+// How far button idx is pressed, from 0 to 1: 0 when it is up, 1 for a pad without pressure
+// data, otherwise the pressure byte (at least 1) divided by 255.
 f32 GetPadButtonAnalog(PadRecord* self, s32 idx)
 {
     if (self->buttons & g_padButtonMasks[idx]) {
@@ -679,6 +692,8 @@ f32 GetPadButtonAnalog(PadRecord* self, s32 idx)
 
 extern u16 D_00262D18;
 
+// Adds a button-code sequence to the list (once); it starts at position 1 when its first button
+// is what is pressed now, else at 0.
 void AddButtonCode(ButtonCode* node)
 {
     ButtonCode* p = g_buttonCodes;
@@ -701,6 +716,7 @@ void AddButtonCode(ButtonCode* node)
 
 LINKER_REMNANT(func_0016F1F0);
 
+// Puts every button-code sequence back to its start.
 void ResetButtonCodes(void)
 {
     ButtonCode* p = g_buttonCodes;
@@ -728,6 +744,8 @@ struct ButtonCodeAdvance {
     }
 };
 
+// When the main pad's buttons change to a new nonzero value, steps the first registered button-
+// code sequence and notes the time (a second later) for the sequence timeout.
 void AdvanceButtonCodes(PadRecord* self, s32 value)
 {
     u16 id = (u16)value;
@@ -787,6 +805,7 @@ void RunCompletedButtonCode(void)
 extern s32 g_buttonCodeFlags;
 
 
+// Clears all button-code flags and requests a world load.
 void ClearButtonCodeFlags(void)
 {
     g_buttonCodeFlags = 0;
@@ -796,6 +815,8 @@ void ClearButtonCodeFlags(void)
 extern s32 g_buttonCodeFlags;
 
 
+// ORs the flags into the button-code flags; bit 0x4000 is not kept and requests a world load
+// instead.
 void SetButtonCodeFlags(s32 flags)
 {
     g_buttonCodeFlags = g_buttonCodeFlags | (flags & ~0x4000);
@@ -838,6 +859,7 @@ void ShowPasswordMessage(void)
 
 void AddButtonCode(ButtonCode* entry);
 
+// Adds the game's nine built-in button-code sequences to the list the pad watches.
 void RegisterButtonCodes(void)
 {
     AddButtonCode(&g_worldLoadButtonCode.rec);
