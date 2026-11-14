@@ -81,7 +81,7 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
 void InitWorld2Boss(World2Boss* self)
 {
 	InitAgent(self);
-	*(s32*)((char*)self + 0xE3C) = -1;
+	self->pendingWalkerTarget = -1;
 }
 
 // Loads the boss as an agent and resolves its two links.
@@ -102,7 +102,7 @@ void StartWorld2Boss(World2Boss* self)
     StartAgent(self);
     SetWorldActiveFollower(self->world, self);
     ResolveObjectLinks(self, 3, g_world2BossStartLinks);
-    CreateSixEntryBlend(self, (PlayerBlendItem*)((u8*)self + 0xC20), (BlendAnimationView**)((u8*)self + 0xE00));
+    CreateSixEntryBlend(self, (PlayerBlendItem*)self->blendItems, &self->blendView);
     self->stateClips[12].obj = (void*)self->blendView;
     self->walker = CreateStateWalker((StateGraph*)self->walkerGraph, 0, 0x438, 0);
     for (n = 0; n < 3; n++)
@@ -285,7 +285,7 @@ s32 HasWorld2BossClearLine(World2Boss* self)
     void* sub;
     s32 code;
 
-    if (g_gameTime < *(f32*)(obj + 0x748)) {
+    if (g_gameTime < self->targetReadyTime) {
         return 0;
     }
     sub = ((FnSelf_18A9A8)(*(void***)obj)[0x198 / 4])(obj);
@@ -297,7 +297,7 @@ s32 HasWorld2BossClearLine(World2Boss* self)
             return 0;
         }
     }
-    GetStateWalkerCurrentKey((StateWalker*)(*(void**)(obj + 0xE10)), &loc.code);
+    GetStateWalkerCurrentKey((StateWalker*)self->walker, &loc.code);
     code = loc.code;
     if (code != 0x43C) {
         if (code < 0x43D) {
@@ -446,7 +446,7 @@ void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
                 SetAgentGoalPoint(self, &self->v140);
                 break;
             default:
-                SetAgentGoalPoint(self, (Vec02*)((u8*)g_player + 0x140));
+                SetAgentGoalPoint(self, &g_player->v140);
                 break;
             }
         }
@@ -513,7 +513,7 @@ void UpdateWorld2BossState(World2Boss* self)
         f32 heading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
         f32 turn = __builtin_fabsf(WrapAngle(heading - self->heading));
         f32 k = g_unitRange.Clamp(((QuadraticCurve*)D_00264A20)->Eval(turn));
-        SetPlayerBlendWeights(self->heading, weight * k, self, (TurnBlendRecords*)((u8*)self + 0xC20), self->blendView);
+        SetPlayerBlendWeights(self->heading, weight * k, self, (TurnBlendRecords*)self->blendItems, self->blendView);
         // One mover and one sequence variable for both objects: set twice, they are left to
         // global-alloc, which gives retail's v0 and a0 (docs/TOOLCHAIN.md, local-alloc).
         PoseSource* m;

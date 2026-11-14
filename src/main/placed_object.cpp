@@ -1794,7 +1794,7 @@ void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
     if (pa != 0 && pa->mode0 != 5) {
         ApplyPoseSourcePosition((T2195_7C0*)pa);
         moved = 1;
-    } else if (IsVelocityNegligible((u8*)self + 0x150) == 0 || IsAccelerationNegligible(&self->v170) == 0) {
+    } else if (IsVelocityNegligible(&self->v150) == 0 || IsAccelerationNegligible(&self->v170) == 0) {
         moved = 1;
         GameClock* clk = &g_gameClock;
         Vu0::Q(self->pos) = Vu0::MulAddX2(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Scalar(clk->dt), Vu0::Q(self->v170), Vu0::Scalar(clk->dt * (clk->dt * 0.5f)));
@@ -1803,7 +1803,7 @@ void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
     if (ra != 0 && ra->mode1 != 5) {
         ApplyPoseSourceRotation(ra);
         moved = 1;
-    } else if (IsSpinNegligible((u8*)self + 0x160) == 0 || IsSpinAccelerationNegligible(&self->v180) == 0) {
+    } else if (IsSpinNegligible(&self->v160) == 0 || IsSpinAccelerationNegligible(&self->v180) == 0) {
         GameClock* clk = &g_gameClock;
         Vec02 prev;
         Vec02 w;
@@ -2361,7 +2361,7 @@ void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02*
     ScaledTransform out;
     const Vec02* fallback = &D_00248D30;
     Vu0::Q(m.r[2]) = Vu0::Sub(Vu0::Q(*q), Vu0::Q(*p));
-    Vu0::Q(e) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*(Vec02*)((u8*)b + 0x40)));
+    Vu0::Q(e) = Vu0::Sub(Vu0::Q(*p), Vu0::Q(*(Vec02*)&b->link40));
     u128 c = Vu0::Cross(Vu0::Q(e), Vu0::Q(m.r[2]));
     Vu0::Q(m.r[1]) = c;
     u128 len = Vu0::Length(c);
@@ -3276,39 +3276,39 @@ void LoadFollowRecord(PlacedObject* self, void* a1)
 {
     s32 flags = ReadBufferedU32((BufferedStream*)a1);
     if (flags) {
-        u8* p = (u8*)AllocateZeroedFrontMemory(0xC0);
-        self->linkRecord = (Rec2195_224*)p;
-        *(s32*)(p + 0xB0) = flags;
+        Rec2195_224* p = (Rec2195_224*)AllocateZeroedFrontMemory(0xC0);
+        self->linkRecord = p;
+        p->flags = flags;
 
-        u8* q = p + 0x30;
+        u8* q = (u8*)p + 0x30;
         *(Mat02*)p = g_identityMatrix;
         *(Mat02*)q = g_identityMatrix;
-        if (flags & 1) ReadBufferedRotation3((BufferedStream*)a1, p);
+        if (flags & 1) ReadBufferedRotation3((BufferedStream*)a1, (u8*)p);
         if (flags & 2) ReadBufferedRotation3((BufferedStream*)a1, q);
         if (flags & 0xC) {
             s32 r = ReadBufferedS16((BufferedStream*)a1);
             if (r != -1) {
-                *(BaseObject**)(p + 0x60) = FindFirstObjectById(self->world, 3, r, self);
+                p->p60 = (BaseObject*)FindFirstObjectById(self->world, 3, r, self);
             }
         }
         if (flags & 0x10) {
-            *(s32*)(p + 0x60) = ReadBufferedS16((BufferedStream*)a1);
+            p->p60 = (BaseObject*)ReadBufferedS16((BufferedStream*)a1);
         }
         if (flags & 0x20) {
-            *(s32*)(p + 0x84) = ReadBufferedS16((BufferedStream*)a1);
-            ReadBufferedVector3((BufferedStream*)a1, p + 0x60);
-            ReadBufferedVector3((BufferedStream*)a1, p + 0x70);
+            p->p84 = (BaseObject*)ReadBufferedS16((BufferedStream*)a1);
+            ReadBufferedVector3((BufferedStream*)a1, (u8*)p + 0x60);
+            ReadBufferedVector3((BufferedStream*)a1, (u8*)p + 0x70);
             f32 f = WrapAngle(ReadBufferedFloat((BufferedStream*)a1));
-            *(s32*)(p + 0x98) = 0;
-            *(f32*)(p + 0x8C) = f;
-            *(f32*)(p + 0x90) = f;
+            p->linkFlags = 0;
+            p->f8C = f;
+            p->angle = f;
         }
         if (flags & 0x40) {
-            *(s32*)(p + 0x60) = ReadBufferedS16((BufferedStream*)a1);
-            *(s32*)(p + 0x64) = ReadBufferedS16((BufferedStream*)a1);
+            p->p60 = (BaseObject*)ReadBufferedS16((BufferedStream*)a1);
+            p->p64 = (BaseObject*)ReadBufferedS16((BufferedStream*)a1);
         }
         if (flags & 0x80) {
-            *(s32*)(p + 0xA0) = ReadBufferedU8((BufferedStream*)a1);
+            p->fA0 = ReadBufferedU8((BufferedStream*)a1);
         }
     }
 }
@@ -3800,8 +3800,8 @@ void AddMatrixAttachment(PlacedObject* self, s32 key, Attachment** out)
 s32 IsObjectTreeAtRest(Actor6C* self)
 {
     Actor6C* n;
-    if (IsVelocityNegligible((u8*)self + 0x150) == 0) return 0;
-    if (IsSpinNegligible((u8*)self + 0x160) != 0) goto body;
+    if (IsVelocityNegligible(&((PlacedObject*)self)->v150) == 0) return 0;
+    if (IsSpinNegligible(&((PlacedObject*)self)->v160) != 0) goto body;
     return 0;
 body:
     n = (Actor6C*)self->f34;
@@ -3963,10 +3963,10 @@ void SetRotationRamp(PlacedObject* self, RampProfile* src)
 }
 
 // Stores the default position mode (byte at 0x2C9).
-void SetDefaultPositionMode(void* self, s8 value) { *((s8*)((u8*)self + 0x2C9)) = value; }
+void SetDefaultPositionMode(void* self, s8 value) { ((PlacedObject*)self)->b2C9 = value; }
 
 // Stores the default orientation mode (byte at 0x2CA).
-void SetDefaultOrientationMode(void* self, s8 value) { *((s8*)((u8*)self + 0x2CA)) = value; }
+void SetDefaultOrientationMode(void* self, s8 value) { ((PlacedObject*)self)->b2CA = value; }
 
 // Sets the base attachment's position mode to 1 when value is non-zero and to -1 otherwise.
 void SetPositionSourceEnabled(void* self, s32 value) { SetPositionSourceMode((PlacedObject*)self, value ? 1 : -1); }
@@ -5053,7 +5053,7 @@ void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetB
     obj->time = fa;
     obj->anim = self;
     obj->object = alt;
-    obj->speedScale = *(f32*)((u8*)self + 0x7C);
+    obj->speedScale = self->speedScale;
     SetAnimationPlayerSpeed(obj, fb);
     AppendToList((List01*)self->props6C, obj);
     if (self->listedInWorld != 0) {
@@ -5096,7 +5096,7 @@ void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetB
         TrackAttachmentBits* n = (TrackAttachmentBits*)CreateTrackAttachment(h);
         n->index = k;
         n->player = obj;
-        n->key = *(s32*)((u8*)self + 0x78);
+        n->key = self->key;
         if (k >= self->trackCount) {
             if (e->scale == 0 && e->morph == 0) {
                 PushFreeSlot((Pool6C*)&self->world->pool1B20, (Attachment*)n);
@@ -6081,9 +6081,9 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         break;
     case 56:
     {
-        u8* sys = g_elementStack;
-        *(s32*)(sys + 0x30) = 1;
-        SetElementStackState((ElementStack*)sys, 1);
+        ElementStack* sys = (ElementStack*)g_elementStack;
+        sys->resumeState = 1;
+        SetElementStackState(sys, 1);
     }
         break;
     case 57:
@@ -6710,7 +6710,7 @@ void StartIdFilterObject(IdFilterObject* self)
         g_activeListFrames = (ListFrame*)it.prev;
         return;
     }
-    TransformPointBetweenFrames(self, 0, (Vec02*)((u8*)n + 0x40), &self->pos);
+    TransformPointBetweenFrames(self, 0, (Vec02*)&n->link40, &self->pos);
     self->mode = 1;
     n->desc->m03(n);
     g_activeListFrames = (ListFrame*)it.prev;
@@ -6804,7 +6804,7 @@ void HandleIdFilterObjectContact(IdFilterObject* self, u8* table, s32 which)
                 }
                 }
                 f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(self->placedTarget->v140), Vu0::Q(loc))));
-                close = d <= *(f32*)((u8*)self->placedTarget + 0x3D0) * 2.0f;
+                close = d <= ((Collider*)self->placedTarget)->radius3D0 * 2.0f;
                 if (close) {
                     return;
                 }

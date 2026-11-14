@@ -8,17 +8,18 @@
 
 #include "collider.h"
 
+struct SoundStateObject;  // the attachment (sound_state_object.h)
+
 struct PairedObject : Collider {
     s32 state;  // 0x550: -1 at set-up (func_001A6498); func_001A6BE0 sets it
     f32 stateTime;  // 0x554: the time of the last state change (func_001A6BE0)
     void* controller;  // 0x558: the object func_001A6BE0 hands to the state's functions
     void* partner;  // 0x55C: an object (func_001A6DE0 tells its slot 31 when it is hit)
-    void* attachment;  // 0x560
+    SoundStateObject* attachment;  // 0x560
     f32 maxSpeed;  // 0x564: the fastest it steers (func_001A6788)
     f32 maxTurn;  // 0x568: the fastest it turns, in radians a second (func_001A6788)
-    u8 pad56C[0x574 - 0x56C];
-    f32 f574;  // 0x574
-    u8 pad578[0x580 - 0x578];
+    u8 pad56C[0x570 - 0x56C];
+    Vec02 offset570;  // 0x570: the offset state 2 steers to (func_001A65C8); its y (0x574) is scaled by the controller's
     f32 nextOffsetTime; // 0x580: the clock time after which state 2 moves the offset on (func_001A65C8)
     f32 offsetWaitMin; // 0x584: 1.0 at set-up
     f32 offsetWaitMax; // 0x588: 2.5 at set-up
@@ -27,12 +28,18 @@ struct PairedObject : Collider {
     void* attachAnimation; // 0x594
     void* removeAnimation; // 0x598
     void* activeHandle;  // 0x59C: the one started last (stopped on the next change)
-    void* graphState7; // 0x5A0
+    union {
+        void* graphState7; // 0x5A0
+        PairedObject* nextFree;  // 0x5A0: the link of the controller's free and paired lists
+    };
     void* graphState8; // 0x5A4
     void* soundHandle;  // 0x5A8: the sound (func_001B6290) started by states 7 and 8
     void* notifyRecord;  // 0x5AC: a record set up by slot 10 (func_00159478); its first word
                             //        is the object func_001A6DE0 sends a message to
-    u8 blob5B0[8];  // 0x5B0: kept across slot 9 (func_001A6540)
+    union {
+        PairedObject* nextActive;  // 0x5B0: the link of the controller's active list
+        u8 blob5B0[8];  // 0x5B0: kept across slot 9 (func_001A6540)
+    };
     u8 pad5B8[0x5C0 - 0x5B8];
 };
 

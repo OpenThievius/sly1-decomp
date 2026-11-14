@@ -21,6 +21,7 @@
 #include "step_sequence.h"
 #include "screen_element.h"
 #include "globals.h"
+#include "game_progress.h"
 #include "pad_record.h"
 #include "effect.h"
 #include "vu0.h"
@@ -79,7 +80,6 @@ struct RampProfile;
 // evaluates its float arguments there, and only their place in the list decides that.
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 extern s32 g_buttonCodeFlags;
-extern u8* g_saveData;
 // The parameters SpawnEffectsAt is given (word 0x28 set by the caller).
 struct EffectSpawnParams { s32 f0, f4, f8, fC; f32 f10, f14; s32 f18, f1C; f32 f20, f24; s32 f28, f2C, f30, f34, f38, f3C; };
 struct SpawnTail;
@@ -90,7 +90,6 @@ void* GetActiveSwitchedCollider(void);
 
 struct PlayingSound;
 typedef void (*SlotFn)(void* self);
-extern u8* g_saveData;
 void EmitSwitchedColliderTrailPoints(SwitchedCollider* self);
 struct ClampInt {
     static s32 Of(s32 v, s32 lo, s32 hi)
@@ -185,14 +184,14 @@ void CaptureSwitchedColliderPose(SwitchedCollider* self, u8* out, f32 a)
 {
     CaptureColliderPose(self, (ColliderPose*)out);
     if (self->holdFocus != 0) {
-        *(Quad16*)(out + 0x10) = *(Quad16*)((u8*)self + 0x560);
+        *(Quad16*)(out + 0x10) = *(Quad16*)&self->focusPoint;
         return;
     }
     Camera* base = g_camera;
     if (base->snapping == 0) {
         *(f32*)(out + 0x18) = ApproachValueWithRamp(self->focusPoint.z, self->v140.z, a, (RampProfile*)g_followZRamp, 0);
     }
-    *(Quad16*)((u8*)self + 0x560) = *(Quad16*)(out + 0x10);
+    *(Quad16*)&self->focusPoint = *(Quad16*)(out + 0x10);
 }
 
 // Always 1: the base collider does not hold the camera.
@@ -399,7 +398,7 @@ void ActivateSwitchedCollider(void* value)
 void* GetActiveSwitchedColliderData()
 {
     void* r = GetActiveSwitchedCollider();
-    if (r) return (u8*)r + 0x580;
+    if (r) return &((SwitchedCollider*)r)->blk580;
     return &g_defaultSwitchedColliderData;
 }
 
@@ -443,8 +442,7 @@ void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt)
 {
     UpdateCollider(self, dt);
 
-    u8* ctx = g_saveData;
-    s32 cnt = *(s32*)(ctx + 0x19E4);
+    s32 cnt = g_saveData->spareCount;
     s32 lim = ClampInt::Of(cnt, 0, 2);
 
     for (s32 i = 0; i < 3; i++) {
@@ -473,9 +471,8 @@ void FinishSwitchedCollider(SwitchedCollider* self)
 {
     s32 flags = g_buttonCodeFlags & 2;
     if (flags == 0) {
-        u8* g = g_saveData;
-        s32 n = *(s32*)(g + 0x19E4) - 1;
-        *(s32*)(g + 0x19E4) = flags < n ? n : 0;
+        s32 n = g_saveData->spareCount - 1;
+        g_saveData->spareCount = flags < n ? n : 0;
     }
 
     PlacedObject* s1 = self->f604;
@@ -483,8 +480,8 @@ void FinishSwitchedCollider(SwitchedCollider* self)
         Mat02 tmp;
         s1->desc->m02(s1);
         s1->desc->m15(s1, 0);
-        RotateMatrixUpright((Mat02*)(((u8*)self->f584) + 0x110), 0, &tmp);
-        s1->desc02()->m1D(s1, (Vec02*)(((u8*)self->f584) + 0x140));
+        RotateMatrixUpright(&((PlacedObject*)self->f584)->m110, 0, &tmp);
+        s1->desc02()->m1D(s1, &((PlacedObject*)self->f584)->v140);
         s1->desc02()->m1E(s1, &tmp);
         s1->desc02()->m20(s1, (Vec02*)&D_00248D30);
         s1->desc02()->m21(s1, (Vec02*)&D_00248D30);
@@ -497,7 +494,7 @@ void FinishSwitchedCollider(SwitchedCollider* self)
         if (v != 0) {
             u8* g = (u8*)&g_switchedEffectParams;
             *(s32*)(g + 0x28) = v;
-            SpawnEffectsAt((Quad16*)(((u8*)self->f584) + 0x140), (Quad16*)&g_unitZVector, 1, (SpawnTail*)g, (SpawnBlock*)&g_switchedEffectBlock, 0, 0);
+            SpawnEffectsAt((Quad16*)&((PlacedObject*)self->f584)->v140, (Quad16*)&g_unitZVector, 1, (SpawnTail*)g, (SpawnBlock*)&g_switchedEffectBlock, 0, 0);
         }
     }
 }
@@ -523,11 +520,11 @@ void EmitSwitchedColliderTrailPoints(SwitchedCollider* self)
     SlotMessage msg;
     Vec02 a;
     Vec02 b;
-    BaseObject* sink = *(BaseObject**)((u8*)self->world + 0x1D5C);
+    BaseObject* sink = self->world->slot1CE8[29];
     s32 count;
     if (sink != 0) {
         PlacedObject* target = 0;
-        void** nodes = (void**)((u8*)self + 0x59C);
+        void** nodes = (void**)&self->f59C;
         for (u32 k = 0; k < 4; k++) {
             if (nodes[k] != 0 && IsObjectAttached((BaseObject*)nodes[k]) != 0) {
                 target = (PlacedObject*)nodes[k];

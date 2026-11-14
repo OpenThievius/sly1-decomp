@@ -11,6 +11,7 @@
 
 #include "placed_object.h"
 #include "path_curve.h"
+#include "transform_object.h"
 struct BufferedStream;
 
 // The record the object points to (func_00154F98 makes it, func_00155778 makes it the object's
@@ -21,31 +22,49 @@ struct __attribute__((aligned(16))) Rec50 {
     s32 kind;               // 0x10: 3, 4 seen
     u8 pad14[0x20 - 0x14];
     union {
-        PathCurve* curve20;     // 0x20: the key-frame curve found by index (func_00154F98)
-        s32 value20;        // 0x20: a value taken from another object (func_001550E8)
+        struct {
+            union {
+                PathCurve* curve20;     // 0x20: the key-frame curve found by index (func_00154F98)
+                s32 value20;        // 0x20: a value taken from another object (func_001550E8)
+            };
+            void* f24;              // 0x24
+            u8 pad28[0x40 - 0x28];
+        };
+        Vec02 point20;      // 0x20: a point (PlaceEffectAtSource)
+        f32 box20[8];       // 0x20: kind 1's box: two corners (WrapSpawnerParticlesIntoBox)
     };
-    void* f24;              // 0x24
-    u8 pad28[0x7C - 0x28];
+    u8 pad40[0x7C - 0x40];
     void* target;           // 0x7C
     u8 pad80[0x120 - 0x80];
     s32 f120;               // 0x120
     u8 pad124[0x130 - 0x124];
-    s32 f130;               // 0x130
-    u8 pad134[0x188 - 0x134];
-    s32 f188;               // 0x188
+    union {
+        struct {
+            s32 f130;               // 0x130
+            u8 pad134[0x188 - 0x134];
+            s32 f188;               // 0x188
+        };
+        CappedWordList words130;    // 0x130: the ids the record reads from the stream
+    };
     u8 pad18C[0x1B0 - 0x18C];
     s32 f1B0;               // 0x1B0: -1 or a value; set, starting the spawner sets f120 (func_00155270)
-    u8 pad1B4[0x1D8 - 0x1B4];
+    u8 pad1B4[0x1C0 - 0x1B4];
+    f32 poly1C0[3];         // 0x1C0: a quadratic (AimEffectAtNearestObject)
+    u8 pad1CC[0x1D8 - 0x1CC];
     void* found[3];         // 0x1D8: objects named by the ids
     u8 pad1E4[0x1E8 - 0x1E4];
     f32 f1E8;               // 0x1E8
     u8 pad1EC[0x1F0 - 0x1EC];
-    s32 f1F0;               // 0x1F0: an effect's i124 takes it (func_001A22C8, func_001A2D30), an object id (func_001A39C8)
+    union {
+        f32 f1F0f;          // 0x1F0: kind 24's first parameter
+        s32 f1F0;           // 0x1F0: an effect's i124 takes it (func_001A22C8, func_001A2D30), an object id (func_001A39C8)
+    };
     union {
         s32 i1F4;           // 0x1F4: an effect's i120 (func_001A2D30)
         f32 f1F4;           // 0x1F4: an effect's rate (func_001A39C8)
     };
-    u8 pad1F8[0x200 - 0x1F8];
+    f32 f1F8;               // 0x1F8: kind 24's third parameter
+    u8 pad1FC[0x200 - 0x1FC];
 };
 
 // Two floats a random value is taken between (func_001EAAE0), copied as one unaligned doubleword.

@@ -7,6 +7,7 @@
 #define HIT_TARGET_H
 
 #include "collider.h"
+#include "effect_spawner.h"
 
 // Three floats func_001A7128 reads as a polynomial in time: x + t * (y + t * z) (Eval; a
 // trail's alpha over a point's age is one too, trail_ribbon.cpp).
@@ -28,9 +29,14 @@ struct HitTarget : Collider {
     f32 hitInterval;  // 0x570: 0.2 at set-up (the time between two hits)
     void* notifyRecord;  // 0x574: a record set up by slot 10 (func_00159478); its first word
                             //        is the object func_001A72B0 sends a message to
-    void* scaledObject;  // 0x578: the object func_001A7128 scales (its 0x2DC and 0x2E0)
-    f32 spawnerIntervalMin; // 0x57C: the two floats slot 16 copies from scaledObject's 0x2DC
-    f32 spawnerIntervalMax; // 0x580
+    EffectSpawner* scaledObject;  // 0x578: the object func_001A7128 scales (its 0x2DC and 0x2E0)
+    union {
+        struct {
+            f32 spawnerIntervalMin; // 0x57C: the two floats slot 16 copies from scaledObject's 0x2DC
+            f32 spawnerIntervalMax; // 0x580
+        };
+        Range50 spawnerInterval;  // 0x57C
+    };
     u8 pad584[0x590 - 0x584];
     TimePolynomial scalePoly;  // 0x590: 1, 0, 0 at set-up
     u8 pad59C[0x5A0 - 0x59C];

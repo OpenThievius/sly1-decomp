@@ -852,7 +852,7 @@ void UpdateWorld5Boss(World5Boss* self, f32 dt)
     }
     void* target = *(void**)self->targetPlayer;
     if (target != 0) {
-        if (*(f32*)((u8*)target + 0x18) == 0.0f) {
+        if (((AnimationPlayer*)target)->speed == 0.0f) {
             StopAnimationPlayer((AnimationPlayer*)target);
             *(void**)self->targetPlayer = 0;
         }

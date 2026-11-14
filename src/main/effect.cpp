@@ -981,7 +981,7 @@ void MoveEffect(Effect* self, f32 dt)
     }
     self->prevPos = self->pos;
     if (IsVelocityNegligible(&self->qA0) == 0 || IsAccelerationNegligible(&self->qC0) == 0) {
-        TurnMatrixBySpin((SpinRecord_158480*)((u8*)self + 0xB0), dt, (f32*)&frame);
+        TurnMatrixBySpin((SpinRecord_158480*)&self->fB0, dt, (f32*)&frame);
         u128 nv = Vu0::Transform(frame, Vu0::Q(self->qA0), 1.0f);
         Vu0::Q(self->qA0) = nv;
         Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), nv, Vu0::Scalar(dt));
@@ -2403,7 +2403,7 @@ s32 HandleTumblingEffectImpact(Effect* self, void* a1, void* a2, void* a3)
     AttachHitMarkEffect(self, self->i20, other, (Vec02*)a2, (Vec02*)a3, (Effect**)out);
     p = *(void**)out;
     if (p != 0) {
-        TransformRotationBetweenFrames(0, other, (Mat02*)((u8*)p + 0x50), (Mat02*)((u8*)p + 0x50));
+        TransformRotationBetweenFrames(0, other, (Mat02*)((Effect*)p)->rotation, (Mat02*)((Effect*)p)->rotation);
     }
     RemoveEffect(self);
     return 1;
@@ -2437,7 +2437,7 @@ extern const Vec02 g_unitZVector;
 // (q30), its orientation is built from the direction and the direction is cleared.
 void AimEffectAtNearestObject(Effect* self, Rec50* src)
 {
-    f32* poly = (f32*)((u8*)src + 0x1C0);
+    f32* poly = src->poly1C0;
     f32 speed = self->m30[0];
     f32 peak = poly[0];
     f32 a = peak;
@@ -2478,7 +2478,7 @@ void AimEffectAtNearestObject(Effect* self, Rec50* src)
 void PlaceEffectAtSource(Effect* dst, void* a1)
 {
     Rec50* src = (Rec50*)a1;
-    TransformPointBetweenFrames((PlacedObject*)src->target, 0, (Vec02*)((u8*)src + 0x20), (Vec02*)&dst->pos);
+    TransformPointBetweenFrames((PlacedObject*)src->target, 0, &src->point20, (Vec02*)&dst->pos);
     dst->iB0 = 0;
     dst->i110 = 0;
     dst->i120 = src->i1F4;
@@ -2552,9 +2552,9 @@ void RandomizeEffectSpin(Effect* self, Rec50* src)
     self->life *= RandomFloatInRange(g_spinLifeScaleRange[0], g_spinLifeScaleRange[1]);
     f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->qA0)));
     f32 t;
-    self->f120 = *(f32*)((u8*)src + 0x1F0);
-    self->f124 = *(f32*)((u8*)src + 0x1F4);
-    self->f128 = *(f32*)((u8*)src + 0x1F8);
+    self->f120 = src->f1F0f;
+    self->f124 = src->f1F4;
+    self->f128 = src->f1F8;
     ClampedQuadratic::Get(t, (const QuadraticCoeffs*)g_spinSpeedCurve, len);
     f32 s = t * 10.0f;
     f32* p = (f32*)&self->spin;
@@ -2587,9 +2587,8 @@ void InitFacingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
     f32 half = 0.5f;
-    u8* sys = (u8*)g_currentWorld;
     self->life = half;
-    self->i20 = *(s32*)(sys + 0x1D30);
+    self->i20 = (s32)g_currentWorld->slot1CE8[18];
     self->q40 = *(Quad219C*)g_facingEffectAlphaCurve;
     self->q30 = *(Quad219C*)g_facingEffectSizeCurve;
 }

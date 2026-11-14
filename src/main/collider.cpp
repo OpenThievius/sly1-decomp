@@ -1634,24 +1634,24 @@ void SendColliderNotification(Collider* self, s32 kind, void* arg)
 // float at +0x18 of the end is the smallest; out gets which end.
 void* FindColliderFloorContact(void* self, s32 key, s32* out)
 {
-    u8* n = *(u8**)(*(u8**)((u8*)self + 0x480));
-    u8* bestIt = 0;
+    ContactRow03* n = ((Collider*)self)->contacts->head;
+    Contact03* bestIt = 0;
     s32 bestSel = 0;
     f32 bestF = 3.4028235e38f;
     while (n) {
-        u8* nxt = *(u8**)(n + 4);
-        for (u8* it = *(u8**)n; it; it = *(u8**)(it + 0xD0)) {
-            s32 sel = *(u32*)it != (u32)self;
+        ContactRow03* nxt = n->next;
+        for (Contact03* it = n->head; it; it = it->next) {
+            s32 sel = (u32)it->end[0].body != (u32)self;
             if (key != 0) {
-                if (*(s32*)(it + (sel << 6) + 4) != key) {
+                if ((s32)it->end[sel].part != key) {
                     continue;
                 }
             }
-            f32 f0 = *(f32*)(it + 0x88);
+            f32 f0 = it->normal.z;
             if (!(sel == 0 ? 0.7f < f0 : f0 < -0.7f)) {
                 continue;
             }
-            f0 = *(f32*)(it + (sel << 6) + 0x18);
+            f0 = it->end[sel].point.z;
             if (f0 < bestF) {
                 bestF = f0;
                 bestSel = sel;
@@ -2082,7 +2082,7 @@ void ComputeColliderJumpVelocity(Collider* self, f32* p, f32* out, f32 a)
 s32 HandleObjectEvent(Collider* self, ObjectEvent* shape)
 {
     if (shape->eventFlags & 0x8) {
-        ApplyColliderImpulseEvent(self, shape->radius, (u8*)shape + 0x20, (u8*)shape + 0x30);
+        ApplyColliderImpulseEvent(self, shape->radius, &shape->pos, &shape->v30);
     }
     return shape->eventFlags != 0;
 }
@@ -2777,7 +2777,7 @@ void ProcessColliderGroups(World* self, s32 flags, f32 f)
             }
         }
     }
-    for (s = (Collider*)self->bodies.head; s != 0; s = *(Collider**)((u8*)s + 0x2D0)) {
+    for (s = (Collider*)self->bodies.head; s != 0; s = (Collider*)s->link2D0.next) {
         s->flags538 &= ~(1ULL << 57);
     }
     PopBackMemoryMark();

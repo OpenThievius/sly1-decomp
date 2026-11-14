@@ -284,10 +284,10 @@ s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
             StartPadRecordPattern((PadRecord*)g_padRecord, 9, 0.3f);
         }
     }
-    counter = &(*(s32*)((u8*)self + 0x690));
-    (*(s32*)((u8*)self + 0x690))++;
+    counter = &self->hitCount;
+    self->hitCount++;
     TriggerScriptEvent(self, 0x14, 1, &counter);
-    if ((*(s32*)((u8*)self + 0x690)) >= self->f68C) {
+    if (self->hitCount >= self->f68C) {
         self->desc20()->m48(self);
     }
     return 1;
@@ -1609,7 +1609,7 @@ s32 FindLargestEntryIndex(TriggerZone* s, f32* out)
         return 0;
     }
     for (i = s->count7E0 - 1; i >= 0; i--) {
-        Entry28* e = (Entry28*)((u8*)s + 0x7F0 + i * 0x30);
+        Entry28* e = &s->entries[i];
         MultiplyMatrices3x3(&s->rot, (Mat02*)e, (Mat02*)&loc);
         f32 t = GetMatrixRotationCosine((f32*)&loc);
         if (best < t) {
@@ -1635,7 +1635,7 @@ void StepTriggerZone(TriggerZone* self, f32 t)
     switch (self->state) {
     case 0:
         if (self->quadCount != 0) {
-            u8* p = (u8*)self + 0x7C0;
+            u8* p = (u8*)self->quads;
             if (self->zone.mode != 4) {
                 p += self->chosenIndex << 4;
             }
@@ -1644,7 +1644,7 @@ void StepTriggerZone(TriggerZone* self, f32 t)
         break;
     case 1:
         if (self->count7E0 != 0) {
-            u8* p = (u8*)self + 0x7F0;
+            u8* p = (u8*)self->entries;
             if (self->zone.mode != 4) {
                 p += self->chosenIndex * 0x30;
             }
@@ -1681,9 +1681,9 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
     }
     for (i = 0; i < 2; i++) {
         if (i < self->quadCount) {
-            TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)((u8*)self + 0x7C0 + i * 16), &v[i]);
+            TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)&self->quads[i], &v[i]);
         }
-        TransformDirectionBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)((u8*)self + 0x860 + i * 16), &w[i]);
+        TransformDirectionBetweenFrames((PlacedObject*)self->parent, 0, &(&self->v860)[i], &w[i]);
     }
     if (self->state == 0) {
         where = &self->v140;
@@ -1692,7 +1692,7 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
         gb = Vu0::ToFloat(Vu0::Dot(Vu0::Q(v[1]), Vu0::Q(w[1])));
         fb = -fa;
     } else {
-        TransformPointBetweenFrames(self, 0, (Vec02*)((u8*)self + 0x850), &p);
+        TransformPointBetweenFrames(self, 0, &self->v850, &p);
         where = &p;
         ga = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(w[0])));
         gb = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->v140), Vu0::Q(w[1])));
@@ -1712,7 +1712,7 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
     }
 }
 
-extern u8* g_player;
+extern Player* g_player;
 extern f32 g_gameTime;
 
 s32 FindNearestStoredPoint(TriggerZone* self, f32* out);
@@ -1727,10 +1727,10 @@ void UpdateTriggerZone(TriggerZone* self, f32 dt)
     UpdateCollider(self, dt);
     switch (self->zone.mode) {
     case 2: {
-        u8* g = g_player;
+        Player* g = g_player;
         f32 t;
         if (g) {
-            if (*(s32*)(g + 0x2220) == 3 && *(s32*)(g + 0x2204) == self->markerNode) self->zone.stamp = g_gameTime;
+            if (g->state == 3 && (s32)g->boundObject == self->markerNode) self->zone.stamp = g_gameTime;
         }
         t = self->zone.duration;
         if (0.0f <= t) {
@@ -1760,10 +1760,10 @@ void UpdateTriggerZone(TriggerZone* self, f32 dt)
         case 3:
             break;
         case 4: {
-            u8* g = g_player;
+            Player* g = g_player;
             r = 0;
             if (g) {
-                if (*(s32*)(g + 0x2220) == 3) r = *(s32*)(g + 0x2204) == self->markerNode;
+                if (g->state == 3) r = (s32)g->boundObject == self->markerNode;
             }
             break;
         }
@@ -2021,7 +2021,7 @@ s32 TestListedEntriesAccepted(ZoneCollider* self, void* arg)
 
 void AppendZoneFirstQueue(void* a, void* b, s32 c)
 {
-    AppendToObjectQueue((Queue28*)((u8*)a + 0x8), c);
+    AppendToObjectQueue(&((Zone28*)a)->pairs[0].seen, c);
 }
 
 
@@ -2034,13 +2034,13 @@ void AppendTriggerZoneFirstQueue(u8* self, s32 value)
 
 void AppendZoneColliderFirstQueue(void* self, int value)
 {
-    AppendZoneFirstQueue((u8*)self + 0x5C0, self, value);
+    AppendZoneFirstQueue(&((ZoneCollider*)self)->zone, self, value);
 }
 
 
 void AppendZoneSecondQueue(void* self, void* unused, int value)
 {
-    AppendToObjectQueue((Queue28*)((u8*)self + 0x90), value);
+    AppendToObjectQueue(&((Zone28*)self)->pairs[1].seen, value);
 }
 
 
@@ -2052,7 +2052,7 @@ void AppendTriggerZoneSecondQueue(TriggerZone* self, int value)
 
 void AppendZoneColliderSecondQueue(ZoneCollider* self, s32 b)
 {
-    AppendZoneSecondQueue((u8*)self + 0x5C0, self, b);
+    AppendZoneSecondQueue(&self->zone, self, b);
 }
 
 // Adds an object id to the zone's list of ids that count.
@@ -2091,10 +2091,9 @@ void AddExcludedKind(TriggerZone* self, s32 value)
 // Adds an object id to the collider's list of ids to look for when it starts.
 void AddZoneColliderId(ZoneCollider* self, s32 value)
 {
-    s32 i = *(s32*)((u8*)self + 0x550);
-    u32 address = (u32)self + (u32)(i << 2);
-    *(s32*)(address + 0x554) = value;
-    *(s32*)((u8*)self + 0x550) = i + 1;
+    s32 i = self->countIds;
+    self->ids[i] = value;
+    self->countIds = i + 1;
 }
 
 void SetTriggerZoneEntry(TriggerZone* self, s32 a, s32 b, s32 c, s32 d)

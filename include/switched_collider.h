@@ -136,7 +136,7 @@ struct Slot19 {
 struct PathMarker {
     s32 kind;               // 0x00: 0 an object, 1 a point
     void* item;             // 0x04: the object (the point's id for kind 1)
-    u8 pad08[0x0C - 0x08];
+    s32 inside;             // 0x08: the last result of the shape test of the follower's position (AdvancePathFollowerEntry)
     s32 index;              // 0x0C: one more than the marker before it in the ring
     f32 pathLength;         // 0x10: the arc length of its place on the path
     PathMarker* next;       // 0x14
@@ -624,9 +624,14 @@ struct Agent : TurningCollider {
     s32 pathCount;          // 0x92C: func_001C84C0 compares it with f930
     s32 pathIndex;          // 0x930: the point of the path it heads for
     u8 pad934[0x940 - 0x934];
-    Vec02 f940; // 0x940
-    Vec02 f950; // 0x950
-    u8 pad960[0xA40 - 0x960];
+    union {
+        struct {
+            Vec02 f940; // 0x940
+            Vec02 f950; // 0x950
+            u8 pad960[0xA40 - 0x960];
+        };
+        Vec02 pathPoints[16];   // 0x940: the points of the path it follows (FindOwnerGraphPath fills them)
+    };
     Vec02 goalPoint;        // 0xA40: the last point func_001C8418 was given
     Vec02 snappedGoal;      // 0xA50: that point (after SnapPointToOwnerGraph) while fA60 is clear
     s32 pathValid;          // 0xA60: cleared by func_001C8418 once the point is 40 (D_00274C90) from vA50 on the ground
@@ -763,7 +768,8 @@ struct World1Boss : ConeAgent {
 
 struct World2Boss : Agent {
     s32 fC10;               // 0xC10
-    u8 padC14[0xE00 - 0xC14];
+    u8 padC14[0xC20 - 0xC14];
+    u8 blendItems[0xE00 - 0xC20]; // 0xC20: the six entries of the clip blend (CreateSixEntryBlend)
     BlendAnimationView* blendView; // 0xE00
     s32 firstInRange;       // 0xE04: its first clip was in range last frame (func_0018AE38)
     s32 secondInRange;      // 0xE08: the second's

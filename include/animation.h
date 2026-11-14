@@ -79,7 +79,9 @@ struct Animation : BaseObject {
     AnimEvent* timedList;   // 0x60
     s32 endCount;           // 0x64: the list that runs when it ends
     AnimEvent* endList;     // 0x68
-    u8 props6C[0x80 - 0x6C]; // 0x6C: the property list (func_00152438 sets its element size 0x3C)
+    u8 props6C[0x78 - 0x6C]; // 0x6C: the property list (func_00152438 sets its element size 0x3C)
+    s32 key;                // 0x78: the key a player's track attachments are given (CreateAnimationPlayer)
+    f32 speedScale;         // 0x7C: handed to the player as its speed scale
     Kin83 kin;              // 0x80
     u8 pad8C[0x90 - 0x8C];
     f32 lo;                 // 0x90

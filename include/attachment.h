@@ -68,7 +68,10 @@ struct Attachment {
 // stream by the flag bits at +0xB0): two matrices, then either the objects it follows (ids until
 // func_00128DB8 resolves them) or, with flag 0x80, four quadwords of its own (func_001261C0).
 struct Rec2195_224 {
-    u8 pad00[0x60];         // 0x00: two matrices (flags 1 and 2), each the identity at first
+    union {
+        u8 pad00[0x60];
+        Mat02 m[2];         // 0x00: two matrices (flags 1 and 2), each the identity at first
+    };
     union {
         Quad16 q60[4];      // 0x60: flag 0x80, given by func_001261C0
         struct {
