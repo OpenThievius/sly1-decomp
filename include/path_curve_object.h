@@ -53,7 +53,7 @@ struct TargetVector : PathCurveObject {
     f32 f5C;                // 0x5C: D_0024B650 at setup
     u8 pad60[0x64 - 0x60];
     s32 targetId;           // 0x64: -1 for none
-    s32 target;             // 0x68: what func_0015A418 returns for targetId
+    BaseObject* target;     // 0x68: what func_0015A418 returns for targetId
     u8 pad6C[0x70 - 0x6C];
 };
 
@@ -65,7 +65,7 @@ struct C71 : PathCurveObject {
     f32 f4C;                // 0x4C: D_0024C8C4 at setup
     u8 pad50[0x54 - 0x50];
     s32 targetId;           // 0x54: -1 for none
-    s32 target;             // 0x58: what func_0015A418 returns for targetId
+    BaseObject* target;     // 0x58: what func_0015A418 returns for targetId
 };
 
 // 0x72: registers itself in the world's list at +0x1C9C (slots 6 and 7, RegisterListedKeepObject)
@@ -82,25 +82,25 @@ typedef char check_C71[sizeof(C71) == 0x5C ? 1 : -1];
 typedef char check_ListedKeepObject[sizeof(ListedKeepObject) == 0x40 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void LoadPathCurveObject(PathCurveObject* self, void* stream);        // 0x6E slot 10
+void LoadPathCurveObject(PathCurveObject* self, void* obj);        // 0x6E slot 10
 void ReparentPathCurveObject(PathCurveObject* self, BaseObject* other);   // 0x6E slot 21
 void InitTargetCurve(TargetCurve* self);                          // 0x6F slot 0
 void RegisterTargetCurve(TargetCurve* self);                          // 0x6F slot 6
 void UnregisterTargetCurve(TargetCurve* self);                          // 0x6F slot 7
-void CopyTargetCurve(TargetCurve* self);                          // 0x6F slot 9
+void CopyTargetCurve(TargetCurve* self, TargetCurve* src);                          // 0x6F slot 9
 void PostLoadTargetCurve(TargetCurve* self);                          // 0x6F slot 15
 void InitTargetVector(TargetVector* self);                         // 0x70 slot 0
 void RegisterTargetVector(TargetVector* self);                         // 0x70 slot 6
 void UnregisterTargetVector(TargetVector* self);                         // 0x70 slot 7
-void CopyTargetVector(TargetVector* self);                         // 0x70 slot 9
+void CopyTargetVector(TargetVector* self, TargetVector* src);                         // 0x70 slot 9
 void StartTargetVector(TargetVector* self);                         // 0x70 slot 16
 void InitC71Object(C71* self);                                  // 0x71 slot 0
 void RegisterC71Object(C71* self);                                  // 0x71 slot 6
 void UnregisterC71Object(C71* self);                                  // 0x71 slot 7
-void CopyC71Object(C71* self);                                  // 0x71 slot 9
+void CopyC71Object(C71* self, C71* src);                                  // 0x71 slot 9
 void StartC71Object(C71* self);                                  // 0x71 slot 16
 void RegisterListedKeepObject(ListedKeepObject* self);                     // 0x72 slot 6
 void UnregisterListedKeepObject(ListedKeepObject* self);                     // 0x72 slot 7
-void CopyListedKeepObject(ListedKeepObject* self);                     // 0x72 slot 9
+void CopyListedKeepObject(ListedKeepObject* self, ListedKeepObject* src); // 0x72 slot 9
 
 #endif

@@ -13,7 +13,7 @@ struct WarpMenu_eu {
 extern f32 D_eu_0027FDA0[];
 extern char D_eu_0024FAF8[];
 extern char D_eu_0024FB00[];
-void DrawFontString(Font* font, const void* text, WarpLabelLayout* out, s32 zero, void* d);
+void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 
 void DrawWarpMenu(WarpMenu_eu* self)
 {
@@ -48,7 +48,7 @@ void DrawWarpMenu(WarpMenu_eu* self)
         outer.a = 0;
         DrawColoredCircle(out[0], out[1], 40.0f, WrapAngle(g_gameClock.elapsed), 12, (s32*)&inner, (s32*)&outer, 2);
         f32 s = Sine(g_gameClock.elapsed * 10.0f);
-        DrawTriangleGroups((void*)g_coloredTriangleSet, out[0], out[1], s * 0.2f + one, b2);
+        DrawTriangleGroups(g_coloredTriangleSet, out[0], out[1], s * 0.2f + one, b2);
     }
     for (s32 i = 0; i < 11; i++) {
         WarpEntry* e = &self->current->entries[i];
@@ -103,7 +103,7 @@ void DrawWarpMenu(WarpMenu_eu* self)
                 L.FlagA(0);
                 L.FlagB(1);
                 L.FlagC(1);
-                DrawFontString(font, (flags & 2) ? D_eu_0024FAF8 : D_eu_0024FB00, &L, 0, &g_gsPacketWriter);
+                DrawFontString(font, (flags & 2) ? D_eu_0024FAF8 : D_eu_0024FB00, (StringLayout*)&L, 0, &g_gsPacketWriter);
                 PopFontScale(font);
             }
         }

@@ -32,7 +32,7 @@ struct EntryQueue : BaseObject {
     s32 f40;                // 0x40
     f32 f44;                // 0x44: a kind 4 entry is done once its value is below minus this
     void* f48;              // 0x48: a queued entry (func_0017C660 hands it to func_0017C428)
-    s32 f4C;                // 0x4C
+    BaseObject* f4C;        // 0x4C: the object the last entry found, where the next looks from
     void* f50;              // 0x50
     void* f54;              // 0x54: the object func_0017BB78 aims the player at
     OnOffObject* f58;       // 0x58: the on-off object it forces on (ReplaceQueueOnOffObject)

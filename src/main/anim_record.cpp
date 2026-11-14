@@ -28,24 +28,23 @@
 #include "asm_func.h"
 
 extern u32 D_00275718;
-void ReadBufferedStreamBytes(void* a, s32 b, void* c);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 // A GIF register word, built from a zeroed doubleword.
 struct GifWord {
     u64 bits;
 };
 u64 GetTextureRegisterBits(TextureTable* obj, s32 p1, s32 p2);
-void AddGifRegisterWrite(void* ctx, s32 kind, u64 value);
-void* FillMemory(void* p, s32 value, s32 size);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern s32 g_imageRecordCountB;
 extern s32 g_imageSlotsB;
-u16 ReadBufferedU16(void* self);
 void* AllocateZeroedFrontMemory(s32 bytes);
-void ReadBufferedStreamBytes(void* self, s32 size, void* obj);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 extern s32 g_imageRecordCountA;
 extern s32 g_imageSlotsA;
 extern s32 g_activeImageMask;
-void InitBumpAllocator(void* dst, s32 size, s32 align);
-void SendMaskedImagesToGif(s32 a, void* b);
+void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
+void SendMaskedImagesToGif(s32 self, BumpAllocator* arg);
 extern f32 g_gameTime;
 u32* AllocateFrontMemory(s32 bytes);
 extern s32 D_002626CC;
@@ -63,30 +62,30 @@ extern s32 g_maskImageUploads[];
 extern s32 g_maskedImagesPacket;
 void LoadImageRecordsB(void* self);
 void LoadImageRecordsA(void* self);
-void ReadBufferedStreamBytes(void* self, s32 key, AnimRecord* out);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 CursorAnimator* ReadAnimator(void* self);
 void ReadTextureTable(void* self, TextureTable* e);
-void LoadFonts(void* self);
-void InitBumpAllocator(BumpAllocator* p, s32 a, s32 b);
-s32 PlaceMaskedImages(s32 mask, BumpAllocator* arg, s32 f);
+void LoadFonts(BufferedStream* self);
+void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
+s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c);
 void BuildAnimRecordGifPackets(s32 mask);
 void UploadAllFontImages(void);
 void InitScreenElements(void);
-s32 UploadImagesByMask(s32 mask);
-s32 BuildMaskedImagesPacket(s32 mask);
+s32 UploadImagesByMask(u32 mask);
+s32 BuildMaskedImagesPacket(s32 self);
 void* InitGifPacket(PacketWriter* b);
-void UsePacketBufferMemory(PacketWriter* b, s32 n, Quad4* q);
-void ReserveGifPackedData(PacketWriter* b, s32 a, s32 c, s32 d, s32 e, s32 f);
-void BeginGifTag(PacketWriter* b, s32 a, s32 c, u64 d);
-void AddGifRegisterWrite(PacketWriter* b, s32 reg, u64 v);
-void SendTextureRegisters(TextureTable* e, s32 j, s32 pass, s32 kind, PacketWriter* b);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, u8** out);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
+void SendTextureRegisters(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx);
 void CloseDmaTag(PacketWriter* b);
 void ClearPacketBuffer(PacketWriter* b);
 void CloseGifTag(PacketWriter* b, s32 n);
 void AddGifStEntry(PacketWriter* b, f32 x, f32 y, f32 z);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
 extern u8 g_fontMethods[];
-void* AllocateOrThrow(s32 size);
+void* AllocateOrThrow(u32 size);
 // A font of the level's table (g_fontRecords), built with the font's table in place.
 struct LoadedFont : Font {
     LoadedFont() { vt = (const FontVt*)g_fontMethods; }
@@ -95,8 +94,8 @@ struct LoadedFont : Font {
 extern s32 g_fontCount;
 extern LoadedFont* g_fontRecords;
 extern s32 g_defaultFont;
-s32 ReadBufferedU16(BufferedStream* src);
-void LoadFont(LoadedFont* e, BufferedStream* self);
+u16 ReadBufferedU16(BufferedStream* src);
+void LoadFont(Font* obj, BufferedStream* src);
 s32 GetFontById(s32 n);
 void SetCursorFrame(s32 a, s32 frame);
 void LoadAnimatorBase(CursorAnimator* self, const AnimatorParams* src);
@@ -112,21 +111,22 @@ struct PartFacingSource { u8 pad0[0x34]; s32 i34; };
 struct DrawnPart {
     void* vt; u8 pad0[0xC]; FacingXY vec; u8 pad1[0x60]; PartFacingSource* p78;
 };
-extern u8 DrawModelPart[];
-f32 ArctangentOfRatio(f32 a, f32 b);
+struct Frame_166690;
+void DrawModelPart(Frame_166690* self);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 f32 WrapModulo(f32 a, f32 b);
-f32 FloatRemainder(f32 a, f32 b);
-void SubmitMeshQueueEntry(void* p);
+extern "C" f32 FloatRemainder(f32 x, f32 y);
+void SubmitMeshQueueEntry(FrameTarget* self);
 s32 ClaimAnimatorStep(CursorAnimator* p);
 s32 GetAnimatorSize(s32 type);
 void* AllocateZeroedFrontMemory(s32 size);
 void* GetAnimatorMethods(s32 type);
-void ReadBufferedStreamBytes(void* owner, s32 key, void* out);
-void* FillMemory(void* p, s32 value, s32 size);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
-void ConvertHsvToRgb(Quad_001B4580* p);
+void ConvertHsvToRgb(Quad_001B4580* hsv, Quad_001B4580* rgb);
 f32 WrapAngle(f32 a);
-void ComputeSinCos(f32 angle, f32* a, f32* b);
+void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
 f32 WrapModulo(f32 x, f32 y);
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
@@ -190,14 +190,14 @@ void SendTextureRegisters(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx
     if (sel != 0) {
         kindA = 6;
     }
-    AddGifRegisterWrite(ctx, kindA, a.bits);
+    AddGifRegisterWrite((PacketWriter*)ctx, kindA, a.bits);
 
     b.bits = ((b.bits | one | 0x20) & ~0x1C0ULL) | 0x40;
     s32 kindB = 0x15;
     if (sel != 0) {
         kindB = 0x14;
     }
-    AddGifRegisterWrite(ctx, kindB, b.bits);
+    AddGifRegisterWrite((PacketWriter*)ctx, kindB, b.bits);
 
     if (obj->flags & 1) {
         e.bits = (e.bits & ~3ULL) | one;
@@ -209,12 +209,12 @@ void SendTextureRegisters(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx
     if (sel != 0) {
         kindC = 8;
     }
-    AddGifRegisterWrite(ctx, kindC, e.bits);
+    AddGifRegisterWrite((PacketWriter*)ctx, kindC, e.bits);
 }
 
 void ReadImageRecordB(void* a0, PaletteRecord* a1)
 {
-    ReadBufferedStreamBytes(a0, 12, a1);
+    ReadBufferedStreamBytes((BufferedStream*)a0, 12, a1);
     a1->f8 = D_00275718 + a1->f8;
     a1->fC = (u32)((a1->f4 << 2) + 15) >> 4;
 }
@@ -222,7 +222,7 @@ void ReadImageRecordB(void* a0, PaletteRecord* a1)
 void LoadImageRecordsB(void* self)
 {
     s32 i;
-    s32 count = ReadBufferedU16(self);
+    s32 count = ReadBufferedU16((BufferedStream*)self);
     g_imageRecordCountB = count;
     g_imageRecordsB = (PaletteRecord*)AllocateZeroedFrontMemory(count * 0x18);
     g_imageSlotsB = 0;
@@ -243,7 +243,7 @@ void LoadImageRecordsB(void* self)
 
 void ReadImageRecordA(void* self, ImageRecord* obj)
 {
-    ReadBufferedStreamBytes(self, 0x14, obj);
+    ReadBufferedStreamBytes((BufferedStream*)self, 0x14, obj);
     s32 base = D_00275718;
     u32 bytes = obj->bytes;
     s32 off = obj->f10;
@@ -255,7 +255,7 @@ void ReadImageRecordA(void* self, ImageRecord* obj)
 void LoadImageRecordsA(void* self)
 {
     s32 i;
-    s32 count = ReadBufferedU16(self);
+    s32 count = ReadBufferedU16((BufferedStream*)self);
     g_imageRecordCountA = count;
     g_imageRecordsA = (ImageRecord*)AllocateZeroedFrontMemory(count * 0x20);
     g_imageSlotsA = 0;
@@ -287,18 +287,18 @@ void LoadFonts(BufferedStream* self)
 
 void ReadTextureTable(void* self, TextureTable* o)
 {
-    ReadBufferedStreamBytes(self, 6, o);
+    ReadBufferedStreamBytes((BufferedStream*)self, 6, o);
     if (o->entryCount != 0) {
         o->entries = (void**)AllocateFrontMemory(o->entryCount * 4);
         for (s32 i = 0; i < o->entryCount; i++) {
-            u16 idx = ReadBufferedU16(self);
+            u16 idx = ReadBufferedU16((BufferedStream*)self);
             o->entries[i] = (void*)((u32)g_imageRecordsA + (idx << 5));
         }
     }
     if (o->cellCount != 0) {
         o->cells = (void**)AllocateFrontMemory(o->cellCount * 4);
         for (s32 i = 0; i < o->cellCount; i++) {
-            u16 idx = ReadBufferedU16(self);
+            u16 idx = ReadBufferedU16((BufferedStream*)self);
             if (idx == 0xFFFF) {
                 o->cells[i] = 0;
             } else {
@@ -308,7 +308,7 @@ void ReadTextureTable(void* self, TextureTable* o)
     }
 }
 
-void LoadScreenResources(void* self)
+void LoadScreenResources(BufferedStream* self)
 {
     s32 i;
     s32 j;
@@ -318,14 +318,14 @@ void LoadScreenResources(void* self)
 
     LoadImageRecordsB(self);
     LoadImageRecordsA(self);
-    g_animRecordCount = ReadBufferedU16(self);
+    g_animRecordCount = ReadBufferedU16((BufferedStream*)self);
     g_animRecords = (AnimRecord*)AllocateZeroedFrontMemory(g_animRecordCount * 0x28);
-    g_cursorAnimatorCount = ReadBufferedU16(self);
+    g_cursorAnimatorCount = ReadBufferedU16((BufferedStream*)self);
     g_cursorAnimators = (CursorAnimator**)AllocateZeroedFrontMemory(g_cursorAnimatorCount * 4);
     out = g_cursorAnimators;
     for (i = 0; i < g_animRecordCount; i++) {
         rec = &g_animRecords[i];
-        ReadBufferedStreamBytes(self, 0x14, rec);
+        ReadBufferedStreamBytes((BufferedStream*)self, 0x14, rec);
         rec->owner = ReadAnimator(self);
         if (rec->owner) {
             rec->owner->cursor.record = rec;
@@ -429,8 +429,8 @@ void LoadScreenResources(void* self)
 void SendResidentImages(void)
 {
     s32 scratch[4];
-    InitBumpAllocator(scratch, 0x1E00, 0x4000);
-    SendMaskedImagesToGif(0x10000000, scratch);
+    InitBumpAllocator((BumpAllocator*)scratch, 0x1E00, 0x4000);
+    SendMaskedImagesToGif(0x10000000, (BumpAllocator*)scratch);
     g_activeImageMask = 0;
 }
 
@@ -439,7 +439,7 @@ void SwitchActiveImageMask(s32 self)
     FlushCursors();
     if (self != g_activeImageMask) {
         ResetBumpAllocator(&g_bumpAllocator);
-        SendMaskedImagesToGif(self, (u8*)&g_bumpAllocator);
+        SendMaskedImagesToGif(self, (BumpAllocator*)&g_bumpAllocator);
         BuildAnimRecordGifPackets(self);
         FlushMeshQueue();
         UpdateMatchingListedObjects(self);
@@ -684,7 +684,7 @@ LINKER_REMNANT(func_001B4180);
 
 ASM_FUNC(func_001B4188);
 
-f32 RoundDown(f32 x);
+extern "C" f32 RoundDown(f32 x);
 
 // A value clamped to [lo, hi], as an inline function of its own: each clamp of ConvertHsvToRgb
 // sets its 0 and 1 again.
@@ -748,7 +748,7 @@ void ConvertHsv255ToRgb255(Quad_001B4580* src, f32* dst)
     Quad_001B4580 tmp = *src;
     tmp.v[1] = tmp.v[1] * 0.003921569f;
     tmp.v[2] = tmp.v[2] * 0.003921569f;
-    ConvertHsvToRgb(&tmp);
+    ConvertHsvToRgb(&tmp, (Quad_001B4580*)dst);
     dst[0] = dst[0] * 255.0f;
     dst[1] = dst[1] * 255.0f;
     dst[2] = dst[2] * 255.0f;
@@ -896,7 +896,7 @@ void* GetAnimatorMethods(s32 n)
 
 CursorAnimator* ReadAnimator(void* a0)
 {
-    s32 type = ReadBufferedU16(a0);
+    s32 type = ReadBufferedU16((BufferedStream*)a0);
     CursorAnimator* result = 0;
     if (type != 0) {
         CursorAnimator* o = (CursorAnimator*)AllocateZeroedFrontMemory(GetAnimatorSize(type));
@@ -904,7 +904,7 @@ CursorAnimator* ReadAnimator(void* a0)
         o->type = type;
         o->methods = (const CursorAnimatorMethods*)vt;
         u32 buf[8];
-        ReadBufferedStreamBytes(a0, 0x1C, buf);
+        ReadBufferedStreamBytes((BufferedStream*)a0, 0x1C, buf);
         o->methods->load(o, (AnimatorParams*)buf);
         result = o;
     }
@@ -1177,7 +1177,7 @@ void StepCircleAnimator(CircleAnimator* self)
     if (self->cursor.record != 0) {
         f32 t[2];
         f32 ang = WrapAngle(g_gameTime * self->omega);
-        ComputeSinCos(ang, &t[0], &t[1]);
+        ComputeSinCos(&t[0], &t[1], ang);
         t[0] = t[0] * self->radius + self->centerU;
         t[1] = t[1] * self->radius + self->centerV;
         SetCursorCoords(&self->cursor, t[0], t[1]);

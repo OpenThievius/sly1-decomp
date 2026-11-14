@@ -71,7 +71,7 @@ typedef struct GsOffset {
     u64 in;
 } GsOffset;
 
-s32 PrintFormatted(const char* format, ...);
+s32 PrintFormatted(const char* fmt, ...);
 void SetVideoModeSyscall(s32 interlace, s32 mode, s32 field);
 void RemoveInterruptHandler(s32 cause, s32 id);
 s32 ReadGsInterruptMask(s32 mask);

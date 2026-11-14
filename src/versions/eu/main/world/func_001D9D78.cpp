@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "object_finder.h"
 // PAL: the count fields of the two counters are at 0x58C (US 0x27C).
 struct Counter_1D9D78_eu { u8 pad[0x58C]; s32 count; };
 
 // The pad's control of a path follower: its heading from the stick, its pace in mode 2 and the
 // button 0x80, then by kind the race places (0) or the end of the round (1).
-void ControlPathFollower(PathFollower* self, PadRecord* pad)
+void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
 {
     if (self->fB34 != 1) {
         if (0.0f < pad->f48) {
@@ -31,7 +32,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad)
                 break;
             case 1:
                 if (self->fB44 != 0) {
-                    SetStateWalkerTarget((StateTrigger*)self->fB48, 0x485);
+                    SetStateWalkerTarget((StateWalker*)self->fB48, 0x485);
                     self->pushedCount = 0;
                 }
                 break;
@@ -50,9 +51,9 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad)
         if (r != 0) {
             void* dev = r->f48;
             s32 code;
-            GetStateWalkerTargetKey(dev, &code);
+            GetStateWalkerTargetKey((StateWalker*)dev, &code);
             if (code == -1) {
-                GetStateWalkerCurrentKey(dev, &code);
+                GetStateWalkerCurrentKey((StateWalker*)dev, &code);
             }
             if (code < 0x431) {
                 if (code >= 0x42F && 0.5f < g_gameClock[1] - self->fB10 && self->f830 != 0) {
@@ -79,16 +80,16 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad)
         if (r != 0) {
             void* dev = r->f48;
             s32 code;
-            GetStateWalkerTargetKey(dev, &code);
+            GetStateWalkerTargetKey((StateWalker*)dev, &code);
             if (code == -1) {
-                GetStateWalkerCurrentKey(dev, &code);
+                GetStateWalkerCurrentKey((StateWalker*)dev, &code);
             }
             if (code == 0x42F) {
                 if (((Counter_1D9D78_eu*)&D_00272430)->count >= D_002751D4) {
-                    SetStateWalkerTarget((StateTrigger*)dev, 0x432);
+                    SetStateWalkerTarget((StateWalker*)dev, 0x432);
                 } else if (((Counter_1D9D78_eu*)&D_002726B0)->count >= D_002751D4) {
-                    SetStateWalkerTarget((StateTrigger*)dev, 0x431);
-                    RaiseScatterLevels(g_scatterController, 1.0f);
+                    SetStateWalkerTarget((StateWalker*)dev, 0x431);
+                    RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f);
                 }
             }
         }

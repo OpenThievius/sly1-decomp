@@ -90,16 +90,16 @@ s32 DrainRingBuffer(RingBuffer* self, s32 n, StreamSink* o)
     return total;
 }
 
-s32 FillRingBufferFromMemory(RingBuffer* self, void* a1, void* a2)
+s32 FillRingBufferFromMemory(RingBuffer* self, s32 count, void* src)
 {
-    if (a1 != 0) {
+    if (count != 0) {
         MemoryReader arg;
         arg.methods = (const MemoryReaderMethods*)g_memoryReaderMethods;
-        arg.base = (u8*)a2;
-        arg.f10 = a1;
-        arg.f08 = a1;
+        arg.base = (u8*)src;
+        arg.remain = count;
+        arg.size = count;
         arg.pos = 0;
-        return FillRingBuffer(self, (s32)a1, &arg);
+        return FillRingBuffer(self, count, &arg);
     }
     return 0;
 }
@@ -116,7 +116,7 @@ void ConsumeSpan(RingBuffer* p, s32 n)
     p->held -= n;
 }
 
-void* CopyBytes(void* dst, void* src, s32 n);
+extern "C" void* CopyBytes(void* dst, void* src, s32 n);
 
 s32 ReadMemoryReader(MemoryReader* self, s32 want, void* dst)
 {

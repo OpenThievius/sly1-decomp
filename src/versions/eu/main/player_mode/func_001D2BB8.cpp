@@ -73,7 +73,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         } else if (pad->keyA8 & 0x10) {
             self->f2748 = 1.0f;
         } else {
-            self->f2748 = ApproachValueWithRamp(D_00274F78, 0, self->f2748, 0.0f, g_frameStep);
+            self->f2748 = ApproachValueWithRamp((RampProfile*)D_00274F78, 0, self->f2748, 0.0f, g_frameStep);
         }
         g_stepScale = self->f2748 * D_00274F84 + (1.0f - self->f2748);
         break;
@@ -137,7 +137,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
     case 3:
         if ((u32)self->f2220 < 2 && (pad->flags & 0x10) && self->f1518 != 0) {
             ClearPadPressedBits(pad, 0x10);
-            if (IsObjectAttached((PlayerHeldObject*)self->f1518)) {
+            if (IsObjectAttached((BaseObject*)self->f1518)) {
                 Vec02 d;
                 Vu0::Q(d) = Vu0::Sub(Vu0::Q(((PlacedObject*)self->f1518)->v140), Vu0::Q(self->v140));
                 self->f638 = ArctangentOfRatio(d.y, d.x);

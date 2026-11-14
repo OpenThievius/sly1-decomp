@@ -59,10 +59,8 @@ struct StepSequence : PlacedObject {
         s32 f2F4;           // 0x2F4: compared with D_00271558's +0x270 (func_00151300)
         void* p2F4;         // 0x2F4: another (func_00150DC0)
     };
-    union {
-        u32 value2F8;       // 0x2F8: cleared when message 6 brings it back (func_001512A8)
-        AnimationPlayer* player2F8;  // 0x2F8: the player func_0012E760 ends (func_00150DC0 reads its animation)
-    };
+    AnimationPlayer* player2F8;  // 0x2F8: the player func_0012E760 ends (func_00150DC0 reads its animation);
+                            // cleared when message 6 brings it back (func_001512A8)
     f32 f2FC;               // 0x2FC
     s32 second300;          // 0x300: -1 at load
     void* target304;        // 0x304: object found for id 30C, else the default at 0x308
@@ -81,8 +79,8 @@ typedef char check_StepSequence[sizeof(StepSequence) == 0x340 ? 1 : -1];
 
 void InitStepSequence(StepSequence* self);                          // 0x65 slot 0
 void LoadStepSequence(StepSequence* self, void* arg);               // 0x65 slot 10
-void HandleStepSequenceNotification(StepSequence* self, u32 mode, u32 value);     // 0x65 slot 13
+void HandleStepSequenceNotification(StepSequence* self, s32 mode, void* value);     // 0x65 slot 13
 void StartStepSequence(StepSequence* self);                          // 0x65 slot 16
-void UpdateStepSequence(StepSequence* self);                          // 0x65 slot 17
+void UpdateStepSequence(StepSequence* self, f32 dt);                          // 0x65 slot 17
 
 #endif

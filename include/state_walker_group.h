@@ -11,6 +11,7 @@
 #define STATE_WALKER_GROUP_H
 
 #include "placed_object.h"
+struct BufferedStream;
 
 struct StateWalkerGroup : PlacedObject {
     s32 mask2D0;            // 0x2D0: tested against the global's flags (0x448) to choose 0x22F or 0x22E
@@ -25,7 +26,7 @@ struct StateWalkerGroup : PlacedObject {
 
 typedef char check_StateWalkerGroup[sizeof(StateWalkerGroup) == 0x330 ? 1 : -1];
 
-void LoadStateWalkerGroup(StateWalkerGroup* self);  // 0x5D slot 10 (load)
+void LoadStateWalkerGroup(StateWalkerGroup* self, BufferedStream* stream);  // 0x5D slot 10 (load)
 void StartStateWalkerGroup(StateWalkerGroup* self);  // 0x5D slot 16 (after loading)
 
 #endif

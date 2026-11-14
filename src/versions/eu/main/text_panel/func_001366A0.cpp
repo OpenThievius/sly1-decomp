@@ -63,11 +63,11 @@ struct TextReader_eu_1367B8 { u8 bytes[0xC0]; };
 
 void* InitWideTextReader(void* buf, void* name, Font* v, s32 zero);  // returns buf
 s32 CopyWideString(void* dst, const char* src);
-void SeekTextReader(void* reader, s32 n);
+void SeekTextReader(TextReader* self, s32 n);
 s32 GetTextReaderLength(void* reader);
 void AppendStringToWide(u16* dst, const u8* src);
 void DrawWrappedAlignedText(void* reader, Layout_137228* layout, Layout_137228* frame, PacketWriter* gs);
-void DrawFontString(Font* font, const char* text, Layout_137228* out, s32 zero, void* d);
+void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 void SetTextLayoutVerticalPlacement(Layout_137228* layout, s32 value);
 
 struct PanelLayout_eu_1367B8 {
@@ -183,7 +183,7 @@ void DrawTextPanel(Obj_eu_1367B8* self)
         CopyWideString(text, (const char*)self->text);
         TextReader_eu_1367B8 typed;
         InitWideTextReader(&typed, text, self->font, 0);
-        SeekTextReader(&typed, shown);
+        SeekTextReader((TextReader*)&typed, shown);
         if (height < self->textHeight) {
             s32 at = GetTextReaderLength(&typed);
             TextLines_eu_1367B8* p = &lines;
@@ -240,9 +240,9 @@ void DrawTextPanel(Obj_eu_1367B8* self)
         s32 glyphColor = 0xFF808080;
         Layout_eu_1367B8 at;
         Layout_eu_1367B8* l = (Layout_eu_1367B8*)PanelLayout_eu_1367B8::Set(&at, x, y, 0.0f, 0.0f, glyphColor, 0);
-        l->f18 = (void*)1;
+        l->f18 = 1;
         l->f1C = 1;
-        DrawFontString(font, glyph, l, 0, &g_gsPacketWriter);
+        DrawFontString(font, glyph, (StringLayout*)l, 0, &g_gsPacketWriter);
         PopFontScale(font);
     }
 }

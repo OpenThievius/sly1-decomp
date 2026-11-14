@@ -92,6 +92,23 @@ def base_name(sym):
     return sym.split("__", 1)[0] if "__" in sym[1:] else sym
 
 
+_GENERATED = None
+
+
+def generated_functions():
+    """{compiler's symbol: function} of config/us/generated.tsv, without the wildcard rows."""
+    global _GENERATED
+    if _GENERATED is None:
+        _GENERATED = {}
+        path = ROOT / "config" / "us" / "generated.tsv"
+        if path.exists():
+            for line in path.read_text().splitlines()[1:]:
+                parts = line.split("\t")
+                if len(parts) == 3 and not parts[1].endswith("*"):
+                    _GENERATED[parts[1]] = parts[2]
+    return _GENERATED
+
+
 class Resolver:
     """Names and addresses of the US build, translated to another version's when asked."""
 
@@ -114,6 +131,9 @@ class Resolver:
             return self.symbols[b]
         if b in self.functions:
             return self.functions[b][0]
+        g = generated_functions().get(sym)
+        if g and g in self.functions:
+            return self.functions[g][0]  # a class's method another file writes out (config/us/generated.tsv)
         m = ADDR_NAME.match(sym)
         if m:
             return int(m.group(1), 16)

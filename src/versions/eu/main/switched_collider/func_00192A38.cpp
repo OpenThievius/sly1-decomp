@@ -6,5 +6,5 @@ void ShowTypedTextCaptionBox(SwitchedCollider* self, u32 value)
 {
     BlockAt5B0_eu* block = (BlockAt5B0_eu*)&g_typedTextCaptionBox;
     block->field = value;
-    PushStackElement(g_elementStack, &g_typedTextCaptionBox);
+    PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
 }

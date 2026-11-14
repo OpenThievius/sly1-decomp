@@ -19,11 +19,11 @@ void BeginLevelExit(s32 flag, s32 n)
         goto l4470;
     }
 lm1:
-    StartObjectFade((LevelFadeEntry*)(D_00247AD0 + 0x80 + D_eu_00263710 * 32), -1, n);
+    StartObjectFade((IdentityKey*)(D_00247AD0 + 0x80 + D_eu_00263710 * 32), -1, n);
     return;
 l4470:
     k = LookupEntryById((ctx->f19D8 << 8) | 1);
-    StartObjectFade(k, 0x1BD, n);
+    StartObjectFade((IdentityKey*)k, 0x1BD, n);
     return;
 l4490:
     v = (ObjectSubGroup*)FindActiveObjectSubGroup();

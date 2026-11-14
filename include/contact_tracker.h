@@ -10,6 +10,11 @@
 #define CONTACT_TRACKER_H
 
 #include "collider.h"
+struct TrackedNodeOffer;
+struct ScaledTransform;
+struct Camera;
+struct C37;
+
 
 struct ContactTracker;
 
@@ -22,7 +27,7 @@ struct Rec36 {
     f32 f08;                // 0x08: 150.0 at set-up
     u8 pad0C[0x10 - 0x0C];
     s32 count;              // 0x10: the ids in keys
-    void* keys[32];         // 0x14: object ids (func_001F5840)
+    s32 keys[32];           // 0x14: object ids (func_001F5840)
     u32 found;              // 0x94: the objects in nodes
     void* nodes[32];        // 0x98
     u8 pad118[0x120 - 0x118];
@@ -56,11 +61,11 @@ typedef char check_C37[sizeof(C37) == 0x860 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitContactTracker(ContactTracker* self);                       // 0x36 slot 0
-void CopyContactTracker(ContactTracker* self);                       // 0x36 slot 9
+void CopyContactTracker(ContactTracker* self, ContactTracker* src);                       // 0x36 slot 9
 void StartContactTracker(ContactTracker* self);                       // 0x36 slot 16
-void CollectTouchingObjects(ContactTracker* self);                       // 0x36 slot 17
-void ApplyContactTrackerTransform();                                // 0x36 slot 36 (empty)
-int RequestContactTrackerLaunch(ContactTracker* self);                        // 0x36 slot 71
-void InitC37(C37* self);                       // 0x37 slot 0
+void CollectTouchingObjects(ContactTracker* self, f32 dt);                       // 0x36 slot 17
+void ApplyContactTrackerTransform(ContactTracker* self, Camera* cam, ScaledTransform* xf); // 0x36 slot 36 (the common slot)
+int RequestContactTrackerLaunch(ContactTracker* self, void* source, TrackedNodeOffer* offer);                        // 0x36 slot 71
+void InitC37(C37* o);                       // 0x37 slot 0
 
 #endif

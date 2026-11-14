@@ -19,7 +19,7 @@ static u8 D_00625770[0x400];
 static s32 g_requestSemaphore;
 static Queue_1F7020 g_requestRing;
 
-s32 AwaitSemaphore(s32 h);
+extern "C" s32 AwaitSemaphore(s32 h);
 void RotateReadyThreads(s32 v);
 void WakeThread(s32 v);
 void PauseThread(s32 v);
@@ -57,11 +57,11 @@ struct Frame_1F70F8 { Ctx_1F70F8 ctx; u8 pad[0x18]; Init_1F70F8 init; u8 pad2[0x
 s32 g_requestThreadId = 0;
 extern u8 D_002832F0[];
 
-s32 NewSemaphore(Init_1F70F8* p);
+extern "C" s32 NewSemaphore(Init_1F70F8* p);
 s32 MakeThread(Ctx_1F70F8* p);
-s32 FreeSemaphore(s32 h);
+extern "C" s32 FreeSemaphore(s32 h);
 void RunThread(s32 h, Queue_1F7020* q);
-s32 GetCurrentThreadId(void);
+extern "C" s32 GetCurrentThreadId(void);
 void SetThreadPriority(s32 h, s32 v);
 
 s32 StartRequestThread(void)
@@ -94,7 +94,7 @@ s32 StartRequestThread(void)
 }
 
 s32 WakeThreadFromInterrupt(s32 tid);
-s32 PostSemaphoreFromInterrupt(s32 h);
+extern "C" s32 PostSemaphoreFromInterrupt(s32 h);
 
 // From an interrupt handler: wakes thread tid unless it is the current one; for the current
 // one, queues an empty request carrying its id and signals the request semaphore. Returns the

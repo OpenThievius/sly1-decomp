@@ -2,7 +2,7 @@
 // PAL: each debug print is skipped when the PAL-only flag D_eu_0025D6B8 is set.
 extern s32 D_eu_0025D6B8;
 
-void StartSoundBankLoad(void* a0, s32 a1, s32 a2, s64 a3)
+void StartSoundBankLoad(s32 a0, s32 a1, IopCallbackFn a2, s64 a3)
 {
     g_soundBankLoadError = 0;
     if (g_soundBankLoadBusy.busy != 0) {
@@ -18,7 +18,7 @@ void StartSoundBankLoad(void* a0, s32 a1, s32 a2, s64 a3)
         return;
     }
     (*(u32*)&g_iopChannel2Result.result) = 0xFFFFFFFF;
-    (*(WordPairArgs*)&g_iopChannel2Args).a = (s32)a0;
+    (*(WordPairArgs*)&g_iopChannel2Args).a = a0;
     (*(WordPairArgs*)&g_iopChannel2Args).b = a1;
     g_soundBankLoadCallback.fn = a2;
     g_soundBankLoadCallback.arg = a3;

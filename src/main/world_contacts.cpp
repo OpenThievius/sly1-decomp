@@ -48,20 +48,23 @@
 
 
 
-struct ContactPairLink { s32 f0; s32 f4; ContactPairLink* f8; Collider* fC; };
+struct ContactPairLink { Contact03* f0; s32 f4; ContactPairLink* f8; Collider* fC; };
 
-ContactPairLink* PushContactRow(World* w, s32 a, s32 b);
-ContactPairLink* UnlinkContactRow(World* w, s32 a, s32 b);
-void FreePooledContactChain(World* w, s32 a);
-void ClearRootTries(Collider* e);
-void PushFreeSlot(u8* w, ContactPairLink* l);
+struct ContactRowNode;
+struct ContactRowList;
+struct ContactRowSource;
+ContactRowNode* PushContactRow(World* self, ContactRowList* list, ContactRowSource* src);
+ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, Contacts03* key);
+void FreePooledContactChain(World* world, Contact03* head);
+void ClearRootTries(PlacedObject* self);
+void PushFreeSlot(Pool6C* list, void* item);
 
 
-void SetContactPairFlags(World* w, s32 a, s32 b, u8 set, u8 clr) {
+void SetContactPairFlags(World* w, Contacts03* a, Contacts03* b, u8 set, u8 clr) {
     ContactPairLink* n1;
     ContactPairLink* n2;
-    s32 ia = (a - (s32)w->tables) >> 4;
-    s32 ib = (b - (s32)w->tables) >> 4;
+    s32 ia = a - w->tables;
+    s32 ib = b - w->tables;
     u8* p = (u8*)w->buf1ADC + (ia << 8) + ib;
     u8* q = (u8*)w->buf1ADC + (ib << 8) + ia;
     u8 v = (set | *p) & ~clr;
@@ -72,24 +75,24 @@ void SetContactPairFlags(World* w, s32 a, s32 b, u8 set, u8 clr) {
         u8 v2 = v | 0x80;
         *p = v2;
         *q = v2;
-        n1 = PushContactRow(w, a, b);
-        n2 = PushContactRow(w, b, a);
+        n1 = (ContactPairLink*)PushContactRow(w, (ContactRowList*)a, (ContactRowSource*)b);
+        n2 = (ContactPairLink*)PushContactRow(w, (ContactRowList*)b, (ContactRowSource*)a);
         n1->f8 = n2;
         n2->f8 = n1;
     } else if (v & 0x80) {
         u8 v2 = v & 0x7F;
         *p = v2;
         *q = v2;
-        n1 = UnlinkContactRow(w, a, b);
-        n2 = UnlinkContactRow(w, b, a);
+        n1 = (ContactPairLink*)UnlinkContactRow(w, &a->head, b);
+        n2 = (ContactPairLink*)UnlinkContactRow(w, &b->head, a);
         if (n1->f0) {
             u64 m = (u64)0x8000 << 40;
             FreePooledContactChain(w, n1->f0);
             if (!(n1->fC->flags538 & m)) ClearRootTries(n1->fC);
             if (!(n2->fC->flags538 & m)) ClearRootTries(n2->fC);
         }
-        PushFreeSlot((u8*)w + 0x1AF0, n1);
-        PushFreeSlot((u8*)w + 0x1AF0, n2);
+        PushFreeSlot(&w->pool1AF0, n1);
+        PushFreeSlot(&w->pool1AF0, n2);
     }
 }
 
@@ -97,11 +100,11 @@ struct ContactRowNode { s32 a0; ContactRowNode* next; void* a8; s32 value; };
 struct ContactRowList { ContactRowNode* head; };
 struct ContactRowSource { u8 pad0[4]; s32 value4; };
 
-void* TakePoolSlot(void* pool);
+void* TakePoolSlot(Pool6C* pool);
 
 ContactRowNode* PushContactRow(World* self, ContactRowList* list, ContactRowSource* src)
 {
-    ContactRowNode* n = (ContactRowNode*)TakePoolSlot((u8*)self + 0x1AF0);
+    ContactRowNode* n = (ContactRowNode*)TakePoolSlot(&self->pool1AF0);
     n->a0 = 0;
     n->value = src->value4;
     n->next = list->head;
@@ -140,9 +143,9 @@ void* FindContactRow(Collider* self, Collider* other)
     return 0;
 }
 
-void* FindContactRow(void* self, void* other);
+void* FindContactRow(Collider* self, Collider* other);
 
-s32 GetContactRowHead(void* self, void* other)
+s32 GetContactRowHead(Collider* self, Collider* other)
 {
     s32* p = (s32*)FindContactRow(self, other);
     s32 r = 0;
@@ -158,7 +161,7 @@ struct SweepAxisSlot {
     void* link;
 };
 
-void MarkSweepAxesUnsorted(void* self);
+void MarkSweepAxesUnsorted(World* a0);
 
 void AddColliderToSweepAxes(World* self, void* arg)
 {
@@ -277,9 +280,9 @@ void SortSweepAxes(World* self)
                     }
                     if (p->end != q->end) {
                         if (p->end == 0) {
-                            SetContactPairFlags(self, (s32)p->body->contacts, (s32)q->body->contacts, bit, 0);
+                            SetContactPairFlags(self, p->body->contacts, q->body->contacts, bit, 0);
                         } else {
-                            SetContactPairFlags(self, (s32)p->body->contacts, (s32)q->body->contacts, 0, bit);
+                            SetContactPairFlags(self, p->body->contacts, q->body->contacts, 0, bit);
                         }
                     }
                     q--;
@@ -361,10 +364,11 @@ struct ContactBody
 };
 
 void SortSweepAxes(World* w);
-void FreePooledContactChain(World* w, Contact03* item);
-Contact03* BuildObjectPairContacts(World* w, ContactBody** pair, s32 arg);
-void NotifyContactEnds(World* w, s32 one, Contact03** item);
-void ClearRootTries(ContactBody* o);
+struct ColliderPair;
+void FreePooledContactChain(World* world, Contact03* head);
+s32 BuildObjectPairContacts(World* world, ColliderPair* pair, s32 arg);
+void NotifyContactEnds(World* world, s32 n, Contact03** list);
+void ClearRootTries(PlacedObject* self);
 
 void UpdateWorldContacts(World* w, s32 arg)
 {
@@ -408,18 +412,18 @@ void UpdateWorldContacts(World* w, s32 arg)
                 {
                     FreePooledContactChain(w, old);
                 }
-                Contact03* nw = BuildObjectPairContacts(w, pair, arg);
+                Contact03* nw = (Contact03*)BuildObjectPairContacts(w, (ColliderPair*)pair, arg);
                 node->f0 = nw;
                 node->f8->f0 = nw;
                 if ((old == 0) != (node->f0 == 0))
                 {
                     if (!(pair[0]->bits538 & (0x8000ull << 40)))
                     {
-                        ClearRootTries(pair[0]);
+                        ClearRootTries((PlacedObject*)pair[0]);
                     }
                     if (!(pair[1]->bits538 & (0x8000ull << 40)))
                     {
-                        ClearRootTries(pair[1]);
+                        ClearRootTries((PlacedObject*)pair[1]);
                     }
                 }
             }
@@ -465,7 +469,7 @@ void UpdateWorldContacts(World* w, s32 arg)
     }
 }
 
-void SetContactPairFlags(World* a0, s32 a1, Contacts03* a2, s32 a3, s32 a4);
+void SetContactPairFlags(World* w, Contacts03* a, Contacts03* b, u8 set, u8 clr);
 
 void InitContactPairFlags(World* self, Collider* obj)
 {
@@ -477,7 +481,7 @@ void InitContactPairFlags(World* self, Collider* obj)
             if (obj->desc03()->m38(obj, n->owner) || n->owner->desc03()->m38(n->owner, obj)) {
                 s2 = 1;
             }
-            SetContactPairFlags(self, (s32)obj->contacts, n, s2 == 0 ? 8 : 0, s2 ? 8 : 0);
+            SetContactPairFlags(self, obj->contacts, n, s2 == 0 ? 8 : 0, s2 ? 8 : 0);
         }
         n = n->next;
     }

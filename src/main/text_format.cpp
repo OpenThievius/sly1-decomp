@@ -32,24 +32,28 @@
 #include "pad_record.h"
 #include "ramp_profile.h"
 #include "value_range.h"
-
-
-void* InitStringOutputBuffer(u8* buf, char* dst, s32 cap);
-s32 FormatToOutputBuffer(u8* buf, s32 a, s32 b);
-void DestroyOutputBuffer(u8* buf, s32 n);
-
-
-
-void* FillMemory(void* p, s32 value, s32 size);
-s32 NewSemaphore(void* self);
+struct FormatSpec;
+struct PaddedOutput;
+struct RegDouble;
 
 
 
+OutputBuffer* InitStringOutputBuffer(OutputBuffer* self, u8* target, s32 capacity);
+s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2);
+void DestroyOutputBuffer(OutputBuffer* a0, s32 a1);
+
+
+
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+extern "C" s32 NewSemaphore(void* self);
 
 
 
 
-s32 PrintFormattedVa(void* self, void* ap);
+
+
+
+s32 PrintFormattedVa(const char* fmt, void* ap);
 
 
 
@@ -57,9 +61,9 @@ s32 PrintFormattedVa(void* self, void* ap);
 // 0x400 bytes AppendToOutputBuffer fills before it flushes.
 struct OutputBufferStorage { u8 bytes[0x420]; };
 
-void* InitStringOutputBuffer(void* stream, char* dst, s32 cap);
-s32 FormatToOutputBuffer(void* stream, const char* fmt, void* ap);
-void DestroyOutputBuffer(void* stream, s32 mode);
+OutputBuffer* InitStringOutputBuffer(OutputBuffer* self, u8* target, s32 capacity);
+s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2);
+void DestroyOutputBuffer(OutputBuffer* a0, s32 a1);
 
 
 
@@ -67,30 +71,30 @@ s32 FormatToStringVa(char* dst, const char* fmt, void* ap);
 
 
 
-s32 FormatToStringBoundedVa(char* dst, s32 cap, const char* fmt, void* ap);
+s32 FormatToStringBoundedVa(char* dst, s32 cap, const char* a, void* b);
 
 
 
 
-void* InitOutputBuffer(void* stream, s32 cap);
-s32 FormatToOutputBuffer(void* stream, const char* fmt, void* ap);
-void DestroyOutputBuffer(void* stream, s32 mode);
+OutputBuffer* InitOutputBuffer(OutputBuffer* self, s32 handle);
+s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2);
+void DestroyOutputBuffer(OutputBuffer* a0, s32 a1);
 
 
 
-s32 GetStringLength(void* p);
-void CopyMemory(void* dst, void* src, s32 count);
+extern "C" s32 GetStringLength(const char* s);
+void CopyMemory(void* dst, void* src, u32 size);
 
 
 
-s32 GetStringLength(void* p);
-void CopyMemory(void* dst, void* src, s32 count);
+extern "C" s32 GetStringLength(const char* s);
+void CopyMemory(void* dst, void* src, u32 size);
 
 
 
 
 
-s32 CreateLockSemaphore(s32 a, s32 b);
+s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 
 // A lock one thread may take again (InitRecursiveLock, EnterRecursiveLock, LeaveRecursiveLock):
 // how many times its holder took it, the holder's thread id (-1 for none) and the semaphore.
@@ -98,23 +102,23 @@ struct RecursiveLock { s32 count; s32 last; void* sema; };
 
 
 
-extern void PostSemaphore(void* a);
+extern "C" void PostSemaphore(void* a);
 
 
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 extern u8 D_00275940[0x18];
 
-u64 DivideUnsigned64(u64 value, u64 radix);
-s64 RemainderUnsigned64(u64 value, u64 radix);
-void CopyMemory(void* dst, void* src, s32 count);
+extern "C" u64 DivideUnsigned64(u64 num, u64 den);
+extern "C" s64 RemainderUnsigned64(u64 num, u64 den);
+void CopyMemory(void* dst, void* src, u32 size);
 
 
 
 
-extern s32 GetCurrentThreadId(void);
-extern s32 AwaitSemaphore(void* a);
+extern "C" s32 GetCurrentThreadId(void);
+extern "C" s32 AwaitSemaphore(void* a);
 
 
 
@@ -150,11 +154,11 @@ struct FormatFrame {
 };
 
 void FlushOutputBuffer(OutputBuffer* ctx);
-s32 AppendToOutputBuffer(OutputBuffer* ctx, const char* p, s32 n);
+s32 AppendToOutputBuffer(OutputBuffer* self, void* src, s32 size);
 char* FindCharInString(const char* s, s32 c);
-s32 GetStringLength(const char* s);
-s32 ParseFormatSpec(const char* at, FormatSpec* spec, void* va);
-void FormatConversionArg(FormatSpec* spec, OutputBuffer* ctx, void* va, const char* at, s32 len);
+extern "C" s32 GetStringLength(const char* s);
+s32 ParseFormatSpec(s8* at, FormatSpec* spec, s32** va);
+void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len);
 
 
 
@@ -175,17 +179,17 @@ struct IntegerArg {
 
 
 
-s32 ExtractIntegerSign(FormatSpec* self, IntegerArg* v);
-s32 GetStringLength(char* p);
+s32 ExtractIntegerSign(FormatSpec* self, void* dst);
+extern "C" s32 GetStringLength(const char* s);
 s32 GetConversionRadix(s8 c);
-s32 WriteIntegerDigits(char* buf, s32 len, u64 value, u32 radix);
-s32 AppendToOutputBuffer(OutputBuffer* sink, const char* p, s32 n);
+s32 WriteIntegerDigits(u8* buf, s32 len, u64 value, u32 radixArg);
+s32 AppendToOutputBuffer(OutputBuffer* self, void* src, s32 size);
 void UppercaseString(char* p);
 
 
 
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 s32 ParseSignedDecimal(s8* s, s32* out);
 extern u8 g_charClassFlags[];
 
@@ -194,15 +198,15 @@ extern u8 g_charClassFlags[];
 
 
 
-s32 GetStringLength(const char* s);
-s32 AppendToOutputBuffer(OutputBuffer* c, const char* s, s32 n);
-void FormatStringArg(FormatSpec* sp, OutputBuffer* c, const char* s);
+extern "C" s32 GetStringLength(const char* s);
+s32 AppendToOutputBuffer(OutputBuffer* self, void* src, s32 size);
+void FormatStringArg(FormatSpec* self, PaddedOutput* ctx, const char* str);
 void FormatIntegerArg(FormatSpec* sp, OutputBuffer* c, u64 v);
 void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, s64 s);
 void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, double value);
 s32 FormatFloatDigits(char* buf, s32 n, FormatSpec* sp, double value);
 void UppercaseString(char* p);
-double ConvertFloatToDouble(f32 f);
+extern "C" double ConvertFloatToDouble(f32 x);
 
 
 
@@ -211,7 +215,7 @@ struct PaddedOutput : OutputBuffer {
     {
         u8 buf = ch;
         while (count-- > 0) {
-            if (AppendToOutputBuffer(this, (const char*)&buf, 1) != 1) {
+            if (AppendToOutputBuffer(this, (void*)&buf, 1) != 1) {
                 break;
             }
         }
@@ -230,7 +234,7 @@ struct PaddedOutput : OutputBuffer {
 struct RegDouble { u8 pad; };
 
 
-f32 Power(f32 a, f32 b);
+extern "C" f32 Power(f32 x, f32 y);
 RegDouble* MultiplyDoubles(RegDouble* self, u64 v);
 RegDouble* MultiplyDoubles(RegDouble* self, double v); // soft-float double in a1
 RegDouble* TruncateDouble(RegDouble* self);
@@ -244,14 +248,14 @@ extern u8 D_00275940[];
 
 
 
-void* CopyString(char* dst, char* src);
-s32 GetStringLength(char* p);
+void* CopyString(void* dst, const char* src);
+extern "C" s32 GetStringLength(const char* s);
 s32 GetDecimalExponent(double v);
 u8 GetDecimalDigit(double v, s32 e, s32 i);
-f32 Power(f32 a, f32 b);
-double ConvertFloatToDouble(f32 f);
-double MultiplyDoubles(double a, double b);
-double AddDoubles(double a, double b);
+extern "C" f32 Power(f32 x, f32 y);
+extern "C" double ConvertFloatToDouble(f32 x);
+extern "C" double MultiplyDoubles(double a, double b);
+extern "C" double AddDoubles(double a, double b);
 
 union DoubleBits {
     double d;
@@ -268,23 +272,23 @@ struct ThreadIds { s32 main; s32 render; };
 extern ThreadIds g_mainAndRenderThreads;
 
 void RunRenderThread(void);
-s32 GetCurrentThreadId(void);
+extern "C" s32 GetCurrentThreadId(void);
 void SetThreadPriority(s32 a, s32 b);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 s32 MakeThread(ThreadParams* p);
 
 
 
-s32 CompareDoubles(double a, double b);
-f32 ConvertDoubleToFloat(double a);
-f32 LogarithmBase10(f32 x);
-double ConvertFloatToDouble(f32 x);
-s32 ConvertDoubleToS32(double a);
-double ConvertS32ToDouble(s32 a);
+extern "C" s32 CompareDoubles(double a, double b);
+extern "C" f32 ConvertDoubleToFloat(double a);
+extern "C" f32 LogarithmBase10(f32 x);
+extern "C" double ConvertFloatToDouble(f32 x);
+extern "C" s32 ConvertDoubleToS32(double a);
+extern "C" double ConvertS32ToDouble(s32 a);
 
 
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // The file's .data, in retail's order; the labels only its assembly reads are included.
 u8 D_00275940[0x18] = "0123456789abcdef";
@@ -513,7 +517,7 @@ void FormatStringArg(FormatSpec* self, PaddedOutput* ctx, const char* str) {
         }
     }
     ctx->Pad(pad, left);
-    AppendToOutputBuffer(ctx, str, n);
+    AppendToOutputBuffer(ctx, (void*)str, n);
     ctx->Pad(0x20, right);
 }
 
@@ -648,7 +652,7 @@ void FormatIntegerArg(FormatSpec* self, OutputBuffer* sink, u64 value)
             break;
         }
         plen = GetStringLength(pfx);
-        ndig = WriteIntegerDigits(buf, 0x40, val.v, GetConversionRadix(self->conv));
+        ndig = WriteIntegerDigits((u8*)buf, 0x40, val.v, GetConversionRadix(self->conv));
         zeros -= ndig;
         zeros = zeros >= 0 ? zeros : 0;
     }
@@ -861,7 +865,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
     u64 v;
     switch (sp->conv) {
     case '%':
-        AppendToOutputBuffer(c, (const char*)&sp->conv, 1);
+        AppendToOutputBuffer(c, (void*)&sp->conv, 1);
         return;
     case 'c': {
         signed char buf[16];
@@ -869,13 +873,13 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
         *va = p + 8;
         s32 ch = *(s8*)p;
         buf[0] = ch;
-        AppendToOutputBuffer(c, (const char*)buf, 1);
+        AppendToOutputBuffer(c, (void*)buf, 1);
         return;
     }
     case 's': {
         u8* p = *va;
         *va = p + 8;
-        FormatStringArg(sp, c, *(const char**)p);
+        FormatStringArg(sp, (PaddedOutput*)c, *(const char**)p);
         return;
     }
     case 'p':
@@ -902,26 +906,26 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
             const char* s6 = " }";
             f32* fp = *(f32**)a;
             if (sp->f28 >= 2) {
-                AppendToOutputBuffer(c, s4, GetStringLength(s4));
+                AppendToOutputBuffer(c, (void*)s4, GetStringLength(s4));
             }
             for (s32 i = 0; i < sp->f28; ) {
                 s32 next;
                 if (i != 0) {
-                    AppendToOutputBuffer(c, s8, GetStringLength(s8));
+                    AppendToOutputBuffer(c, (void*)s8, GetStringLength(s8));
                 }
                 next = i + 1;
-                AppendToOutputBuffer(c, s7, GetStringLength(s7));
+                AppendToOutputBuffer(c, (void*)s7, GetStringLength(s7));
                 for (s32 j = 0; j < sp->f24; j++) {
                     if (j != 0) {
-                        AppendToOutputBuffer(c, s5, GetStringLength(s5));
+                        AppendToOutputBuffer(c, (void*)s5, GetStringLength(s5));
                     }
                     FormatFloatArg(sp, c, ConvertFloatToDouble(*fp++));
                 }
-                AppendToOutputBuffer(c, s6, GetStringLength(s6));
+                AppendToOutputBuffer(c, (void*)s6, GetStringLength(s6));
                 i = next;
             }
             if (sp->f28 >= 2) {
-                AppendToOutputBuffer(c, s4, GetStringLength(s4));
+                AppendToOutputBuffer(c, (void*)s4, GetStringLength(s4));
             }
         } else {
             u8* p = *va;
@@ -937,7 +941,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
         }
         return;
     default:
-        AppendToOutputBuffer(c, fmt, len);
+        AppendToOutputBuffer(c, (void*)fmt, len);
         return;
     }
 }
@@ -958,14 +962,14 @@ s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2)
                 s2 = (char*)((s32)s1 + n);
             }
             if (n != 0) {
-                if (AppendToOutputBuffer(ctx, s1, n) < n) {
+                if (AppendToOutputBuffer(ctx, (void*)s1, n) < n) {
                     break;
                 }
                 s1 = s2;
             }
             if (*s1 == '%') {
-                s32 n2 = ParseFormatSpec(s1, &loc.spec, (void*)&loc.va);
-                FormatConversionArg(&loc.spec, ctx, (void*)&loc.va, s1, n2);
+                s32 n2 = ParseFormatSpec((s8*)s1, &loc.spec, (s32**)&loc.va);
+                FormatConversionArg(&loc.spec, ctx, (u8**)&loc.va, s1, n2);
                 s1 = s1 + n2;
             }
         } while (*s1 != 0);
@@ -977,26 +981,26 @@ s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2)
 s32 PrintFormattedVa(const char* fmt, void* ap)
 {
     OutputBufferStorage buf;
-    InitOutputBuffer(&buf, -1);
-    s32 n = FormatToOutputBuffer(&buf, fmt, ap);
-    DestroyOutputBuffer(&buf, 2);
+    InitOutputBuffer((OutputBuffer*)&buf, -1);
+    s32 n = FormatToOutputBuffer((OutputBuffer*)&buf, fmt, ap);
+    DestroyOutputBuffer((OutputBuffer*)&buf, 2);
     return n;
 }
 
-s32 PrintFormatted(void* self, ...)
+extern "C" s32 PrintFormatted(const char* fmt, ...)
 {
-    void* ap = (char*)__builtin_next_arg(self) - 56;
-    return PrintFormattedVa(self, ap);
+    void* ap = (char*)__builtin_next_arg(fmt) - 56;
+    return PrintFormattedVa(fmt, ap);
 }
 
 s32 FormatToStringVa(char* dst, const char* fmt, void* ap)
 {
     OutputBufferStorage buf;
-    InitStringOutputBuffer(&buf, dst, 0);
-    s32 n = FormatToOutputBuffer(&buf, fmt, ap);
+    InitStringOutputBuffer((OutputBuffer*)&buf, (u8*)dst, 0);
+    s32 n = FormatToOutputBuffer((OutputBuffer*)&buf, fmt, ap);
     dst += n;
     *dst = 0;
-    DestroyOutputBuffer(&buf, 2);
+    DestroyOutputBuffer((OutputBuffer*)&buf, 2);
     return n;
 }
 
@@ -1006,20 +1010,20 @@ s32 FormatToString(char* dst, const char* fmt, ...)
     return FormatToStringVa(dst, fmt, ap);
 }
 
-s32 FormatToStringBoundedVa(char* dst, s32 cap, s32 a, s32 b)
+s32 FormatToStringBoundedVa(char* dst, s32 cap, const char* a, void* b)
 {
     u8 buf[0x420];
     s32 n;
 
-    InitStringOutputBuffer(buf, dst, cap);
-    n = FormatToOutputBuffer(buf, a, b);
+    InitStringOutputBuffer((OutputBuffer*)buf, (u8*)dst, cap);
+    n = FormatToOutputBuffer((OutputBuffer*)buf, a, b);
     if (n >= cap) {
         n = -1;
         dst[cap - 1] = 0;
     } else {
         dst[n] = 0;
     }
-    DestroyOutputBuffer(buf, 2);
+    DestroyOutputBuffer((OutputBuffer*)buf, 2);
     return n;
 }
 
@@ -1033,20 +1037,20 @@ s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...)
 
 LINKER_REMNANT(func_001E20F8);
 
-s32 GetStringLength(const char* s) { s32 length = 0; while (*s) { s++; length++; } return length; }
+extern "C" s32 GetStringLength(const char* s) { s32 length = 0; while (*s) { s++; length++; } return length; }
 
-void* CopyString(void* dst, void* src)
+void* CopyString(void* dst, const char* src)
 {
     s32 n = GetStringLength(src);
-    CopyMemory(dst, src, n + 1);
+    CopyMemory(dst, (void*)src, n + 1);
     return dst;
 }
 
-void* AppendString(void* dst, void* src)
+void* AppendString(void* dst, const char* src)
 {
-    s32 len = GetStringLength(dst);
+    s32 len = GetStringLength((const char*)dst);
     s32 n = GetStringLength(src);
-    CopyMemory((u8*)dst + len, src, n + 1);
+    CopyMemory((u8*)dst + len, (void*)src, n + 1);
     return dst;
 }
 
@@ -1063,7 +1067,7 @@ char* FindCharInString(char* s, s32 c)
 
 LINKER_REMNANT(func_001E2210);
 
-void UppercaseString(s8* p)
+void UppercaseString(char* p)
 {
     while (*p != 0) {
         s32 c = *p;
@@ -1076,13 +1080,13 @@ void UppercaseString(s8* p)
     }
 }
 
-s32 CreateLockSemaphore(void* a, void* b)
+s32 CreateLockSemaphore(s32 initCount, s32 maxCount)
 {
     SemaphoreParams tmp;
 
     FillMemory(&tmp, 0, 0x18);
-    tmp.initCount = (s32)a;
-    tmp.maxCount = (s32)b;
+    tmp.initCount = initCount;
+    tmp.maxCount = maxCount;
     return NewSemaphore(&tmp);
 }
 

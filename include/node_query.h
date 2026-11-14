@@ -8,7 +8,7 @@
 #include "common.h"
 #include "placed_object.h"
 
-void* FillMemory(void* dst, s32 value, s32 size);
+extern "C" void* FillMemory(void* dst, s32 value, s32 size);
 
 struct NodeQuery {
     union {

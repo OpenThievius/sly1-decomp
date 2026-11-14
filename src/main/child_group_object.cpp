@@ -13,6 +13,18 @@
 #include "owner_message.h"
 #include "hit_target.h"
 #include "value_range.h"
+struct BufferedStream;
+struct Quad16;
+
+struct BaseObject;
+struct Vec02;
+
+struct Mat02;
+struct Vec02;
+
+
+// Types other files define, named by the parameters of their functions declared here.
+struct NodeQuery;
 
 // The file's .data, in retail's order: class 0x3B's set-up values, then the constants of its
 // assembly functions.
@@ -50,16 +62,16 @@ void InitChildGroupObject(ChildGroupObject* self)
     self->f67C = 0;
 }
 
-void LoadCollider(void* self);
-void FindOrBuildMemberGroup(void* sub, void* self);
+void LoadCollider(Collider* self, BufferedStream* in);
+void FindOrBuildMemberGroup(void** out, void* self);
 
-void LoadChildGroupObject(ChildGroupObject* self)
+void LoadChildGroupObject(ChildGroupObject* self, BufferedStream* stream)
 {
-    LoadCollider(self);
+    LoadCollider(self, stream);
     FindOrBuildMemberGroup(&self->member5BC, self);
 }
 
-void CopyCollider(void* self, void* other);
+void CopyCollider(Collider* self, Collider* other);
 u32 CopyToFrontMemory(s32 size, void* src);
 
 void CopyChildGroupObject(ChildGroupObject* self, ChildGroupObject* other)
@@ -82,9 +94,9 @@ struct ScopedListFrame {
     ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
-void StartPlacedObject(void* self);
-s32 IsObjectOfKind(void* node, s32 kind);
-void ResolveAndStartObject(s32 a);
+void StartPlacedObject(PlacedObject* self);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void ResolveAndStartObject(BaseObject* self);
 void* AllocateFrontMemory(s32 size);
 
 void StartChildGroupObject(ChildGroupObject* self)
@@ -97,12 +109,12 @@ void StartChildGroupObject(ChildGroupObject* self)
     n = t;
     if (n != 0) {
         do {
-            if (IsObjectOfKind(n, 0x27)) {
+            if (IsObjectOfKind((BaseObject*)n, 0x27)) {
                 s32 c = self->count;
                 if ((u32)c < 16) {
                     self->arr[c] = (s32)n;
                     self->count = c + 1;
-                    ResolveAndStartObject((s32)n);
+                    ResolveAndStartObject((BaseObject*)n);
                 }
             }
             void* c = f.cur; s32 o = f.off; void* a = *(void**)c;
@@ -114,7 +126,7 @@ void StartChildGroupObject(ChildGroupObject* self)
     }
 }
 
-void HandlePlacedObjectNotification(ChildGroupObject* self, s32 kind, ObjectMessage* msg);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
 void StartChildGroupDelay(ChildGroupObject* p, f32 delta);
 
 void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessage* msg)
@@ -130,17 +142,17 @@ void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessag
 }
 
 extern f32 g_gameTime;
-void UpdateCollider(Collider* self);
+void UpdateCollider(Collider* self, f32 dt);
 void RefreshChildGroupObjectContacts(ChildGroupObject* self);
 void ApplyChildGroupRepulsion(ChildGroupObject* self);
 
-void UpdateChildGroupObject(ChildGroupObject* self)
+void UpdateChildGroupObject(ChildGroupObject* self, f32 dt)
 {
     s32 slow;
     if (self->f554 <= g_gameTime || (slow = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v150))) < self->f558)) {
         ApplyChildGroupRepulsion(self);
     } else {
-        UpdateCollider(self);
+        UpdateCollider(self, dt);
         if (self->active != 0) {
             RefreshChildGroupObjectContacts(self);
         }
@@ -148,10 +160,10 @@ void UpdateChildGroupObject(ChildGroupObject* self)
 }
 
 extern List01 g_class75List;
-void SetContactPairFlags(World* w, s32 a, s32 b, u8 set, u8 clr);
-s32 IsObjectAttached(void* p);
-s32 GetObjectWorldPosition(void* self, Vec02* out);
-s32 CollectBoundsSpans(Vec02* a, void* b, void* c, s32 d, ColliderSpan* e, f32 x);
+void SetContactPairFlags(World* w, Contacts03* a, Contacts03* b, u8 set, u8 clr);
+s32 IsObjectAttached(BaseObject* self);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
+s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
 
 void RefreshChildGroupObjectContacts(ChildGroupObject* self)
 {
@@ -162,7 +174,7 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self)
     for (s32 i = 0; i < self->entryCount; i++) {
         PlacedObject* o = (PlacedObject*)self->entries[i].key;
         if (o->root != 0) {
-            SetContactPairFlags(self->world, (s32)self->contacts, (s32)((Collider*)o->root)->contacts, 0, 0x40);
+            SetContactPairFlags(self->world, self->contacts, ((Collider*)o->root)->contacts, 0, 0x40);
         }
     }
     self->entryCount = 0;
@@ -184,10 +196,10 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self)
             continue;
         }
         GetObjectWorldPosition(n, &tmp);
-        if (CollectBoundsSpans(&tmp, (u8*)self + 0x370, &self->v140, 1, &span, n->scale) == 0) {
+        if (CollectBoundsSpans(&tmp, (Vec02*)((u8*)self + 0x370), &self->v140, n->scale, 1, &span) == 0) {
             continue;
         }
-        SetContactPairFlags(self->world, (s32)self->contacts, (s32)((Collider*)a->root)->contacts, 0x40, 0);
+        SetContactPairFlags(self->world, self->contacts, ((Collider*)a->root)->contacts, 0x40, 0);
         Entry3B* e = &self->entries[self->entryCount++];
         e->key = (s32)a;
         u128 point = Vu0::Q(span.q[0]);
@@ -230,9 +242,9 @@ struct ContactPair {
     Vec02 v80;              // 0x80
 };
 
-Collider* FindNearestSpanObject(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 Collider* GetActiveSwitchedCollider(void);
-s32 IsObjectDescendantOf(void* a, void* b);
+s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
 void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* dir);
 
 void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s32 which)
@@ -262,7 +274,7 @@ void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s3
         return;
     }
     case 0:
-        if (FindNearestSpanObject(0, (u8*)self + 0x370, &self->v140, 1, &side->obj, &span) != 0) {
+        if (FindNearestSpanObject(0, (Vec02*)((u8*)self + 0x370), &self->v140, 1, &side->obj, &span) != 0) {
             pos = *(Vec02*)&span.q[0];
         }
         break;
@@ -282,7 +294,7 @@ void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s3
 }
 
 s32 HandleObjectEvent(Collider* self, ObjectEvent* ev);
-void RecordChildGroupPose(ChildGroupObject* self, s32 a, s32 b, Vec02* dir);
+void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* z);
 
 s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev)
 {
@@ -296,9 +308,9 @@ s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev)
     return handled;
 }
 
-void BuildShortestArcRotation(void* from, void* to, void* out);
-void BuildBasisFromXAndZHint(void* x, void* z, void* out);
-void TransformRotationBetweenFrames(void* a, void* b, void* c, void* d);
+void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
+void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
 
 // The product of the turn a and the object's matrix b into the pose at +0x620: b's rows read by
 // index, each result stored to its vector local and to the matrix local, the last in the other
@@ -347,11 +359,11 @@ void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec
         } else {
             frame = self->parent;
         }
-        TransformRotationBetweenFrames(0, frame, (Mat02*)((u8*)self + 0x620), (Mat02*)((u8*)self + 0x620));
+        TransformRotationBetweenFrames(0, (PlacedObject*)frame, (Mat02*)((u8*)self + 0x620), (Mat02*)((u8*)self + 0x620));
         break;
     }
     case 1:
-        BuildBasisFromXAndZHint((Vec02*)((u8*)self + 0x650), (void*)&g_unitZVector, (Mat02*)((u8*)self + 0x620));
+        BuildBasisFromXAndZHint((Vec02*)((u8*)self + 0x650), (const Vec02*)&g_unitZVector, (Mat02*)((u8*)self + 0x620));
         break;
     case 2:
         (*(Mat02*)((u8*)self + 0x620)) = self->rot;
@@ -367,8 +379,9 @@ void StartChildGroupDelay(ChildGroupObject* self, f32 delta)
 }
 
 extern f32 D_00261364;
-void SetPlayerState(PlacedObject* self, s32 a, s32 b);
-void ConstrainVectorByParentAnchor(Collider* self, Vec02* anchor, Vec02* in, Vec02* out, Vec02* dir);
+struct VectorConstraint;
+void SetPlayerState(Player* self, s32 state, s32 sub);
+void ConstrainVectorByParentAnchor(Collider* self, VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
 
 // The owner-message callback of a group's knockback: pushes the object away from the group
 // (from the group to it, flat and unit length, or along X when they coincide; a kind-0x3D
@@ -392,17 +405,17 @@ void ApplyChildGroupKnockback(ChildGroupObject* self, Collider* other)
     Vec02* p = &d;
     *(Vu0::Vec*)p = Vu0::NormalizeOr(Vu0::Vec::Of(d), Vu0::Vec::Of(g_unitXVector));
     Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(D_00261360), Vu0::Q(g_unitZVector), Vu0::ScalarAtValue(D_00261364));
-    ConstrainVectorByParentAnchor(other, &other->v440, &r, &r, 0);
+    ConstrainVectorByParentAnchor(other, (VectorConstraint*)&other->v440, &r, &r, 0);
     other->desc02()->m20(other, &r);
     if (IsObjectOfKind(other, 7) != 0) {
-        SetPlayerState(other, 4, 0x2B);
+        SetPlayerState((Player*)other, 4, 0x2B);
     }
 }
 
-void RecordChildGroupPose(ChildGroupObject* self, s32 a, s32 b, Vec02* dir);
+void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* z);
 void StartChildGroupDelay(ChildGroupObject* self, f32 delta);
-s32 IsObjectOfKind(void* node, s32 kind);
-s32 IsObjectAttached(void* p);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+s32 IsObjectAttached(BaseObject* self);
 Collider* GetActiveSwitchedCollider();
 extern f32 D_00261370[4];
 extern f32 D_00261380[4];
@@ -410,21 +423,27 @@ extern f32 D_00261380[4];
 void PushBackMemoryMark();
 void PopBackMemoryMark();
 void* AllocateBackMemory(s32 size);
-void CopyMemory(void* dst, void* src, s32 size);
-s32 CollectContactingParts(ChildGroupObject* self, s32* count, Collider*** list);
-void GatherCollidersInSphere(f32 radius, World* w, s32 a1, Vec02* center, s32 a3, s32 a4, s32* count, Collider*** list);
-s32 CollectMeshHits(f32 radius, Vec02* p, void* a, void* b, s32 c, void* mesh, s32 d, void* out);
-void InitOwnerMessage(void* msg, s32 kind, void* self);
-f32 ClampToRange(void* range, f32 x);
-void ConstrainColliderVector(Collider* c, Vec02* frame, Vec02* in, Vec02* out, s32 flag);
+struct FaceRef;
+struct Mesh03;
+struct MeshHitEntry;
+void CopyMemory(void* dst, void* src, u32 size);
+s32 CollectContactingParts(Collider* obj, s32* outCount, void*** outArr);
+void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out);
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
+f32 ClampToRange(ValueRange* span, f32 x);
+void ConstrainColliderVector(void* self, void* a, void* b, void* c, s32 d);
 f32 RandomFloatInRange(f32 lo, f32 hi);
-void* FillMemory(void* p, s32 value, s32 size);
-PlacedObject *FindNodeForQuery(void* q, s32 a, s32 b);
-void TransformPointBetweenFramesCG(void* from, void* to, Vec02* p, Vec02* out) __asm__("func_00128018");
-void SendPointEventToWorldListener(Vec02* p, f32 radius);
-void StartSoundEffect(s32 id, void* a, void* b, Vec02* pos, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void SetTimedState(Collider* c, s32 state);
-void TriggerScriptEvent(void* self, s32 kind, s32 a, s32* b);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+PlacedObject *FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void SendPointEventToWorldListener(Quad16* a0, f32 f);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
+struct TimedStateObject;
+void SetTimedState(TimedStateObject* self, s32 state);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 extern const Vec02 g_unitZVector;
 extern ValueRange g_unitRange;
 
@@ -453,7 +472,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
     player = (Collider*)GetActiveSwitchedCollider();
     PushBackMemoryMark();
     if (*(s32*)self->pad564 != 0) {
-        CollectContactingParts(self, &count, &list);
+        CollectContactingParts(self, &count, (void***)&list);
         if (self->obj670 != 0) {
             s32 i;
             for (i = 0; i < count; i++) {
@@ -468,7 +487,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             }
         }
     } else {
-        GatherCollidersInSphere(MaxF(self->f55C, self->f560), self->world, 0, &self->v610, 0, 0, &count, &list);
+        GatherCollidersInSphere(self->world, 0, MaxF(self->f55C, self->f560), &self->v610, 0, 0, &count, &list);
     }
     pos = &self->v610;
     rot = &self->m620;
@@ -486,7 +505,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
         }
         if (*(s32*)self->pad564 == 0 && c->tree.nodes != 0) {
             u8 hits[0x30];
-            if (!CollectMeshHits(c->root == player ? self->f560 : self->f55C, pos, (void*)c->tree.count2, c->tree.nodes, 0, &c->meshCopy, 1, hits))
+            if (!CollectMeshHits(pos, c->root == player ? self->f560 : self->f55C, c->tree.count2, (FaceRef*)c->tree.nodes, 0, &c->meshCopy, 1, (MeshHitEntry*)hits))
                 continue;
         }
         if (IsObjectOfKind(c, 5)) {
@@ -507,7 +526,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             Vu0::Q(off) = Vu0::Q(dir);
             dir.z += 200.0f;
             Vu0::Q(dir) = Vu0::NormalizeOr(Vu0::Q(dir), Vu0::Q(g_unitZVector));
-            f32 m = 1.0f / Fpu::Sqrt(ClampToRange(&self->f56C, c->mass) / *(f32*)&self->f56C.a);
+            f32 m = 1.0f / Fpu::Sqrt(ClampToRange((ValueRange*)&self->f56C, c->mass) / *(f32*)&self->f56C.a);
             f32 sv = g_unitRange.Limit(((TimePolynomial*)D_00261370)->Eval(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(c->v150), Vu0::Q(dir))) / self->f568));
             f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(off))) - (c->radius3CC + self->radius3D0);
             f32 sd = g_unitRange.Limit(((TimePolynomial*)D_00261380)->Eval((d >? 0.0f) / self->f55C));
@@ -535,17 +554,17 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
         Vu0::Q(q.vel) = Vu0::Q(self->v150);
         q.kind = 0x10;
         q.from = self;
-        FindNodeForQuery(&q, 0, 0);
+        FindNodeForQuery((NodeQuery*)&q, 0, 0);
     }
     PopBackMemoryMark();
     Vec02 at;
     {
-        void* frame;
+        PlacedObject* frame;
         if (self->f224 != 0 && (*(u32*)((u8*)self->f224 + 0xB0) & 4) != 0)
-            frame = *(void**)((u8*)self->f224 + 0x60);
+            frame = *(PlacedObject**)((u8*)self->f224 + 0x60);
         else
-            frame = self->parent;
-        TransformPointBetweenFramesCG(0, frame, pos, &at);
+            frame = (PlacedObject*)self->parent;
+        TransformPointBetweenFrames(0, frame, pos, &at);
         ((const Desc02*)self->desc)->m1D(self, &at);
     }
     ((const Desc02*)self->desc)->m1E(self, rot);
@@ -562,7 +581,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             (*(ColliderMsgFn*)((u8*)*(void**)self->member5BC + 0x7C))((Collider*)self->member5BC, &msg);
             at = &self->v140;
         } else {
-            SendPointEventToWorldListener(&self->v140, self->f55C);
+            SendPointEventToWorldListener((Quad16*)&self->v140, self->f55C);
             at = &self->v140;
         }
         BlastSound* snd = (BlastSound*)self->slot;
@@ -586,7 +605,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             Vec02 rv;
             o->desc->m02(o);
             o->desc->m15(o, 0);
-            SetTimedState(o, 1);
+            SetTimedState((TimedStateObject*)o, 1);
             ((const Desc02*)o->desc)->m1D(o, &self->v140);
             x = RandomFloatInRange(0.0f, sa * 2.5f);
             y = RandomFloatInRange(na, sa);
@@ -607,12 +626,12 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
     self->f554 = 3.4028235e+38f;
 }
 
-void InitSoundParams(void* p);
+void InitSoundParams(SoundRecord** self);
 
 s32 GetChildGroupSoundParams(ChildGroupObject* self)
 {
     if (self->slot == 0) {
-        InitSoundParams(&self->slot);
+        InitSoundParams((SoundRecord**)&self->slot);
     }
     return (s32)self->slot;
 }

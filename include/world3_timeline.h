@@ -21,7 +21,7 @@ struct World3Timeline : BaseObject {
     s32 f34;                // 0x34
     void* buffer;           // 0x38: f34 Entry90 records (0xC00 bytes, func_001ED168)
     s32 index;              // 0x3C: the entry func_001ED278 is at
-    s32 found;              // 0x40
+    PlacedObject* found;    // 0x40
     s32 f44;                // 0x44: added to an entry's f4 (func_001ED278)
 
     Entry90* Cur() { return &((Entry90*)buffer)[index]; }

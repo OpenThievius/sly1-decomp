@@ -31,8 +31,9 @@ extern s32 g_iopReplyTable0[272];
 extern s32 g_iopReplyTable1[272];
 
 struct LoadBusyFlag { s32 busy; s32 pad; };
+typedef void (*IopCallbackFn)(s32 reply, s64 arg);
 // A callback and its argument, as the callback tables and the bank load keep them.
-struct IopCallback { s32 fn; s32 pad; u64 arg; };
+struct IopCallback { IopCallbackFn fn; s32 pad; u64 arg; };
 struct ReplyCallback { s32 fn; s32 pad; };
 struct IopCommandReply { s32 head; s32 result; s32 pad[14]; };
 struct IopRpcResult { s32 result; s32 pad[15]; };
@@ -74,9 +75,9 @@ s32 g_iopChannel2Args[8] = { 0 };
 // tells whether a call is still in progress and func_001F8290 makes one.
 extern RemoteCallClient g_iopCommandRpc;
 extern RemoteCallClient g_iopBankLoadRpc;
-s32 PrintFormatted(const char* fmt, ...);
+extern "C" s32 PrintFormatted(const char* fmt, ...);
 
-void InitRemoteCalls(s32 mode);
+extern "C" void InitRemoteCalls(s32 mode);
 s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
 #define ASSERT_0011CBB8(cond, line) \
@@ -121,12 +122,11 @@ void InitIopCommandChannels(void)
     SendIopCommandAndWait(0, 4, &n);
 }
 
-typedef s32 (*IopCallbackFn)(s32 ctx, u64 arg);
 typedef void (*IopNotifyFn)(s32 a0);
 s32 IsIopReplyReady(void);
 void FlushIopCommandBuffer(void);
 s32 SyncDiscRead(s32 flag);
-void SyncDataCache(s32 a0);
+extern "C" void SyncDataCache(s32 a0);
 
 s32 PollIopCommands(void)
 {
@@ -190,7 +190,7 @@ s32 PollIopCommands(void)
 
 LINKER_REMNANT(func_0011D060);
 
-void SyncDataCache(s32 a);
+extern "C" void SyncDataCache(s32 a);
 
 s32 IsIopReplyReady(void)
 {
@@ -270,9 +270,9 @@ s32 LoadSoundBankAtLocation(s32 a0, s32 a1)
 
 // Two argument words.
 struct WordPairArgs { s32 a; s32 b; };
-void SyncDataCache(s32 a);
+extern "C" void SyncDataCache(s32 a);
 
-void StartSoundBankLoad(void* a0, s32 a1, s32 a2, s64 a3)
+void StartSoundBankLoad(s32 a0, s32 a1, IopCallbackFn a2, s64 a3)
 {
     g_soundBankLoadError = 0;
     if (g_soundBankLoadBusy.busy != 0) {
@@ -284,7 +284,7 @@ void StartSoundBankLoad(void* a0, s32 a1, s32 a2, s64 a3)
         return;
     }
     (*(u32*)&g_iopChannel2Result.result) = 0xFFFFFFFF;
-    (*(WordPairArgs*)&g_iopChannel2Args).a = (s32)a0;
+    (*(WordPairArgs*)&g_iopChannel2Args).a = a0;
     (*(WordPairArgs*)&g_iopChannel2Args).b = a1;
     g_soundBankLoadCallback.fn = a2;
     g_soundBankLoadCallback.arg = a3;
@@ -299,7 +299,7 @@ void StartSoundBankLoad(void* a0, s32 a1, s32 a2, s64 a3)
 
 LINKER_REMNANT(func_0011D3E8);
 
-void QueueIopCommand(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
+void QueueIopCommand(s32 cmd, s32 len, void* data, IopCallbackFn arg, u64 val);
 
 void NotifyIopBanksChanged(void)
 {
@@ -336,7 +336,7 @@ s32 SetIopSoundOptionFlag(s32 arg)
 
 LINKER_REMNANT(func_0011D510);
 
-void QueueIopCommand(s32 a, s32 b, void* args, void* c, void* d);
+void QueueIopCommand(s32 cmd, s32 len, void* data, IopCallbackFn arg, u64 val);
 
 void QueueIopCommandD(s32 x, s32 y)
 {
@@ -349,12 +349,12 @@ void QueueIopCommandD(s32 x, s32 y)
 // The argument words of a command that takes an address and two words.
 struct AddressCommandArgs
 {
-    void* a0;
+    s32 a0;
     s32 a1;
     s32 a2;
 };
 
-void QueueIopChannelConfig(void* a0, s32 a1, s32 a2)
+void QueueIopChannelConfig(s32 a0, s32 a1, s32 a2)
 {
     AddressCommandArgs args;
     args.a0 = a0;
@@ -363,7 +363,7 @@ void QueueIopChannelConfig(void* a0, s32 a1, s32 a2)
     QueueIopCommand(0x4E, 0xC, &args, 0, 0);
 }
 
-s32 SendIopCommandAndWait(s32 a, s32 b, void* args);
+s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
 s32 StartSoundVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
@@ -395,10 +395,10 @@ void PauseIopVoice(s32 value)
 
 struct AddressArg
 {
-    void* a0;
+    s32 a0;
 };
 
-void ResumeIopVoice(void* a0)
+void ResumeIopVoice(s32 a0)
 {
     AddressArg args;
     args.a0 = a0;
@@ -407,13 +407,13 @@ void ResumeIopVoice(void* a0)
 
 LINKER_REMNANT(func_0011D6A0);
 
-void SuspendIopVoices(s32 a0)
+void SuspendIopVoices(u32 a0)
 {
     s32 buf = a0;
     QueueIopCommand(0x16, 4, &buf, 0, 0);
 }
 
-void ResumeIopVoices(s32 a0)
+void ResumeIopVoices(u32 a0)
 {
     s32 buf = a0;
     QueueIopCommand(0x17, 4, &buf, 0, 0);
@@ -425,7 +425,7 @@ s32 IsVoiceBusy(s32 a0)
     return SendIopCommandAndWait(0x19, 4, &buf);
 }
 
-void RequestVoiceCallback(s32 value, s32 a1, s32 a2)
+void RequestVoiceCallback(s32 value, IopCallbackFn a1, u64 a2)
 {
     s32 local = value;
     QueueIopCommand(0x19, 4, &local, a1, a2);
@@ -441,7 +441,7 @@ s32 TestSoundInBank(s32 a0, s32 a1)
 
 LINKER_REMNANT(func_0011D790);
 
-void SetVoiceVolumePan(void* a0, s32 a1, s32 a2)
+void SetVoiceVolumePan(s32 a0, s32 a1, s32 a2)
 {
     AddressCommandArgs args;
     args.a0 = a0;
@@ -450,7 +450,7 @@ void SetVoiceVolumePan(void* a0, s32 a1, s32 a2)
     QueueIopCommand(0x1B, 0xC, &args, 0, 0);
 }
 
-s32 SendIopCommandAndWait(s32 kind, s32 count, void* words);
+s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
 s32 GetSoundPitchBase(s32 a, s32 b)
 {
@@ -484,7 +484,7 @@ void FadeOutSoundVoice(s32 a0, s32 a1, s32 a2, s32 a3)
 
 LINKER_REMNANT(func_0011D8A0);
 
-void SetVoiceParam(void* a0, s32 a1, s32 a2)
+void SetVoiceParam(s32 a0, s32 a1, s32 a2)
 {
     AddressCommandArgs args;
     args.a0 = a0;
@@ -514,7 +514,7 @@ void SendIopSoundLevel(s32 a)
 
 LINKER_REMNANT(func_0011D958);
 
-void ArmIopReplyBuffer(void* p, s32 n);
+void ArmIopReplyBuffer(s32* ptr, s32 count);
 
 s32 SendIopCommandAndWait(s32 id, s32 size, void* data)
 {
@@ -526,7 +526,7 @@ s32 SendIopCommandAndWait(s32 id, s32 size, void* data)
         PollIopCommands();
         SyncDataCache(0);
     }
-    ArmIopReplyBuffer(&g_iopCommandReply, 1);
+    ArmIopReplyBuffer((s32*)&g_iopCommandReply, 1);
     while (IsRemoteCallPending(&g_iopCommandRpc)) {
         PrintFormatted(D_002494E8);
         PollIopCommands();
@@ -544,17 +544,17 @@ s32 SendIopCommandAndWait(s32 id, s32 size, void* data)
     return r;
 }
 
-void ArmIopReplyBuffer(void* ptr, s32 count);
-s32 PrintFormatted(const char* fmt, ...);
+void ArmIopReplyBuffer(s32* ptr, s32 count);
+extern "C" s32 PrintFormatted(const char* fmt, ...);
 void CommitQueuedIopCommand(void);
 
-void QueueIopCommand(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
+void QueueIopCommand(s32 cmd, s32 len, void* data, IopCallbackFn arg, u64 val)
 {
     s32 flag = 0;
     s32 i;
 
     if (g_iopFlushDeferred == 0 && g_iopReplyBuffer == 0 && len == 0 && arg == 0) {
-        ArmIopReplyBuffer((&g_iopCommandReply), 1);
+        ArmIopReplyBuffer((s32*)&g_iopCommandReply, 1);
         while (IsRemoteCallPending(&g_iopCommandRpc) != 0) {
             PrintFormatted(D_002494E8);
             PollIopCommands();
@@ -596,12 +596,12 @@ void QueueIopCommand(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
         *p = len;
         p++;
         for (j = 0; j < len; j++)
-            ((u8*)p)[j] = data[j];
+            ((u8*)p)[j] = ((u8*)data)[j];
     }
     {
         s32 k = g_iopBufferIndex;
         g_iopCommandSpace[k] -= size;
-        *(s32*)(((u8**)g_iopCallbackTables)[k] + *g_iopCommandBuffers[k] * 16) = arg;
+        *(IopCallbackFn*)(((u8**)g_iopCallbackTables)[k] + *g_iopCommandBuffers[k] * 16) = arg;
         *(u64*)(((u8**)g_iopCallbackTables)[k] + *g_iopCommandBuffers[k] * 16 + 8) = val;
     }
     CommitQueuedIopCommand();
@@ -659,9 +659,9 @@ void StopAllIopSounds()
 
 LINKER_REMNANT(func_0011E040);
 
-struct PackedCommandArgs { void* w0; s32 w1; s32 w2; s32 w3; s32 w4; s32 w5; s32 w6; };
+struct PackedCommandArgs { s32 w0; s32 w1; s32 w2; s32 w3; s32 w4; s32 w5; s32 w6; };
 
-s32 StartStreamedVoice(void* a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)
+s32 StartStreamedVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)
 {
     PackedCommandArgs buf;
     buf.w0 = a0;
@@ -682,7 +682,7 @@ void QueryIopStreamVoice(s32 a0)
     QueueIopCommand(0x2E, 4, &buf, 0, 0);
 }
 
-void RequestStreamCallback(s32 a0, s32 a1, s32 a2)
+void RequestStreamCallback(s32 a0, IopCallbackFn a1, u64 a2)
 {
     s32 buf = a0;
     QueueIopCommand(0x4F, 4, &buf, a1, a2);
@@ -694,11 +694,11 @@ void WaitForIopSoundStop(s32 a0)
     SendIopCommandAndWait(0x36, 4, &buf);
 }
 
-s32 ReadDiscSectors(s32 a0, s32 a1, s32 a2, u8* a3);
+typedef struct ReadMode ReadMode;
+extern "C" s32 ReadDiscSectors(s32 lsn, s32 sectors, void* buffer, ReadMode* mode);
 
-s32 StartDiscRead(s32 a0, s32 a1, s32 a2, u8* a3)
+s32 StartDiscRead(s32 a0, s32 a1, void* a2, ReadMode* a3)
 {
-    void QueueIopCommand(s32 id, s32 size, s32* args, s32 a3, s32 a4);  // the argument words
     if (g_iopDiscAccess == 0) {
         return ReadDiscSectors(a0, a1, a2, a3);
     }
@@ -710,15 +710,15 @@ s32 StartDiscRead(s32 a0, s32 a1, s32 a2, u8* a3)
     g_iopSharedPacket.busy = 1;
     g_iopSharedPacket.result = 0;
     args[1] = a1;
-    args[2] = a2;
+    args[2] = (s32)a2;
     QueueIopCommand(0x38, 0xC, args, 0, 0);
     g_discReadPending = 1;
     g_discReadDone = 0;
     return 1;
 }
 
-s32 SyncDiscNCommand(s32 value);
-void SyncDataCache(s32 value);
+extern "C" s32 SyncDiscNCommand(s32 mode);
+extern "C" void SyncDataCache(s32 value);
 
 s32 SyncDiscRead(s32 flag)
 {
@@ -742,7 +742,7 @@ s32 SyncDiscRead(s32 flag)
     return 0;
 }
 
-s32 StopDiscRead(void);
+extern "C" s32 StopDiscRead();
 
 s32 CloseDiscStream()
 {
@@ -754,7 +754,7 @@ s32 CloseDiscStream()
 
 // D_00260DC0 is the RPC packet shared with the IOP, declared volatile above; the volatile
 // access keeps lui+addiu+lw 16(base).
-s32 GetDiscError();
+extern "C" s32 GetDiscError();
 
 s32 GetDiscReadError()
 {
@@ -790,7 +790,7 @@ void QueueIopCommand51(s32 a0, s32 a1)
 
 LINKER_REMNANT(func_0011E3D8);
 
-s32 SendIopCommandAndWait(s32 id, s32 flags, void* args);
+s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
 s32 OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
 {
@@ -826,7 +826,7 @@ void UpdateIopMovieStream(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
     SendIopCommandAndWait(0x3E, 0x14, args);
 }
 
-s32 SendIopCommandAndWait(s32 kind, s32 a1, s32 a2);
+s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
 s32 GetIopRingPosition()
 {

@@ -4,7 +4,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
     u64 v;
     switch (sp->conv) {
     case '%':
-        AppendToOutputBuffer(c, (const char*)&sp->conv, 1);
+        AppendToOutputBuffer(c, (void*)&sp->conv, 1);
         return;
     case 'c': {
         signed char buf[16];
@@ -12,13 +12,13 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
         *va = p + 8;
         s32 ch = *(u8*)p;
         buf[0] = ch;
-        AppendToOutputBuffer(c, (const char*)buf, 1);
+        AppendToOutputBuffer(c, (void*)buf, 1);
         return;
     }
     case 's': {
         u8* p = *va;
         *va = p + 8;
-        FormatStringArg(sp, c, *(const char**)p);
+        FormatStringArg(sp, (PaddedOutput*)c, *(const char**)p);
         return;
     }
     case 'p':
@@ -43,26 +43,26 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
             const char* s6 = " }";
             f32* fp = *(f32**)a;
             if (sp->f28 >= 2) {
-                AppendToOutputBuffer(c, s4, GetStringLength(s4));
+                AppendToOutputBuffer(c, (void*)s4, GetStringLength(s4));
             }
             for (s32 i = 0; i < sp->f28; ) {
                 s32 next;
                 if (i != 0) {
-                    AppendToOutputBuffer(c, s8, GetStringLength(s8));
+                    AppendToOutputBuffer(c, (void*)s8, GetStringLength(s8));
                 }
                 next = i + 1;
-                AppendToOutputBuffer(c, s7, GetStringLength(s7));
+                AppendToOutputBuffer(c, (void*)s7, GetStringLength(s7));
                 for (s32 j = 0; j < sp->f24; j++) {
                     if (j != 0) {
-                        AppendToOutputBuffer(c, s5, GetStringLength(s5));
+                        AppendToOutputBuffer(c, (void*)s5, GetStringLength(s5));
                     }
                     FormatFloatArg(sp, c, ConvertFloatToDouble(*fp++));
                 }
-                AppendToOutputBuffer(c, s6, GetStringLength(s6));
+                AppendToOutputBuffer(c, (void*)s6, GetStringLength(s6));
                 i = next;
             }
             if (sp->f28 >= 2) {
-                AppendToOutputBuffer(c, s4, GetStringLength(s4));
+                AppendToOutputBuffer(c, (void*)s4, GetStringLength(s4));
             }
         } else {
             u8* p = *va;
@@ -78,7 +78,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
         }
         return;
     default:
-        AppendToOutputBuffer(c, fmt, len);
+        AppendToOutputBuffer(c, (void*)fmt, len);
         return;
     }
 }

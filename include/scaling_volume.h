@@ -10,12 +10,14 @@
 #define SCALING_VOLUME_H
 
 #include "placed_object.h"
+struct ScalingVolume;
+
 
 struct ScalingVolume : PlacedObject {
-    s32 out2D0;             // 0x2D0: written by func_001E4C48 (slot 10)
-    s32 out2D4;             // 0x2D4
-    s32 out2D8;             // 0x2D8
-    s32 out2DC;             // 0x2DC
+    s32 out2D0;             // 0x2D0: written by func_001E4C48 (slot 10): the point count,
+    void* out2D4;           // 0x2D4: the points,
+    s32 out2D8;             // 0x2D8: the link count
+    void* out2DC;           // 0x2DC: and the links (the face tree IsPointInsideFaceTree walks)
     f32 v[3];               // 0x2E0: 1.0, 0.2, 0.1 at setup
     f32 f2EC;               // 0x2EC: 1.0 at setup; read by slots 17 and 37
     f32 f2F0;               // 0x2F0: 1.0 at setup; read by slot 17
@@ -25,8 +27,8 @@ struct ScalingVolume : PlacedObject {
 typedef char check_ScalingVolume[sizeof(ScalingVolume) == 0x300 ? 1 : -1];
 
 void InitScalingVolume(ScalingVolume* self);                       // slot 0
-void LoadScalingVolume(ScalingVolume* self, void* other);          // slot 10
-void UpdateScalingVolume(ScalingVolume* self);                       // slot 17
+void LoadScalingVolume(ScalingVolume* self,void* other);          // slot 10
+void UpdateScalingVolume(ScalingVolume* self, f32 dt);                       // slot 17
 void DrawScalingVolume(ScalingVolume* self, void* arg1, void* arg2); // slot 37
 
 #endif

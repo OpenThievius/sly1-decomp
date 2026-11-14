@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "object_finder.h"
 // PAL: the name is a 16-bit string (measured by func_eu_001E3018), and the HUD fields sit at 0x57C/0x580.
 struct Vt_150DC0_eu { u8 pad[0x20]; void (*f20)(void*, u16*); };
 struct Hud_150DC0_eu {
@@ -10,19 +11,19 @@ struct Hud_150DC0_eu {
 
 u32 GetWideStringLength(u16* a);
 void SetTextPanelValuePercent(Hud_150DC0_eu* a, f32 b);
-void SetTextPanelSubject(Hud_150DC0_eu* a, s32 b);
+void SetTextPanelSubject(Hud_150DC0_eu* a, BaseObject* b);
 
 void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
 {
     CaptionSpeaker* s2;
     CaptionSpeaker* s4;
     s32 a2;
-    s32 a0;
+    BaseObject* a0;
     f32 f20;
     u16* nm;
     switch (msg->type) {
     case 0:
-        OpenKeyRecord(msg->f4.i);
+        OpenKeyRecord(msg->f4.key);
         self->f2E8 |= 1;
         break;
     case 1:
@@ -62,11 +63,11 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
         }
         break;
     case 3:
-        if (self->p2F0 && MatchesObjectId((CaptionSpeaker*)self->p2F0, msg->f18)) {
+        if (self->p2F0 && MatchesObjectId((BaseObject*)self->p2F0, msg->f18)) {
             s2 = (CaptionSpeaker*)self->p2F0;
             SetArcFade(&D_002708E0, 1);
             SetArcFade(&D_00271558, 0);
-        } else if (self->p2F4 && MatchesObjectId((CaptionSpeaker*)self->p2F4, msg->f18)) {
+        } else if (self->p2F4 && MatchesObjectId((BaseObject*)self->p2F4, msg->f18)) {
             s2 = (CaptionSpeaker*)self->p2F4;
             SetArcFade(&D_00271558, 1);
             SetArcFade(&D_002708E0, 0);
@@ -84,8 +85,8 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             }
         }
         if (a0) {
-            CreateAnimationPlayerWithoutPresetTargets(0.0f, 1.0f, (CaptionSpeaker*)a0, (s32)s2, 1, &self->player2F8);
-            AddAnimationPlayerRecordCallback(self->player2F8, self);
+            CreateAnimationPlayerWithoutPresetTargets((Animation*)a0, (BaseObject*)s2, 1, &self->player2F8, 0.0f, 1.0f);
+            AddAnimationPlayerRecordCallback(self->player2F8, (PlacedObject**)self);
         }
         nm = (u16*)msg->f14;
         if (nm && *nm) {
@@ -121,7 +122,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             self->f2FC = g_gameTime[0] + msg->f8.f;
         }
         if (msg->f20 != -1) {
-            s32 r = FindFirstObjectById(self->world, 0x104, msg->f20, self->root ? self->root : self);
+            BaseObject* r = FindFirstObjectById(self->world, 0x104, msg->f20, self->root ? self->root : self);
             SetTextPanelSubject(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), r);
         }
         if (msg->f24 != -1) {
@@ -149,7 +150,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
         HideCountedScreenElement(self->world);
         break;
     case 7:
-        QueueMovie(g_moviePlayer, msg->f4.i);
+        QueueMovie((MoviePlayer*)g_moviePlayer, msg->f4.p);
         break;
     }
 }

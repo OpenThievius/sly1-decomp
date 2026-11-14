@@ -79,10 +79,10 @@ typedef char check_ObjectCycler[sizeof(ObjectCycler) == 0x6A0 ? 1 : -1];
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 // (Slot 45, func_0015B720, takes a message record only that file knows.)
 void InitObjectCycler(ObjectCycler* self);                       // 0x40 slot 0
-void CopyObjectCycler(ObjectCycler* self);                       // 0x40 slot 9
+void CopyObjectCycler(ObjectCycler* self, ObjectCycler* src);                       // 0x40 slot 9
 void LoadObjectCycler(ObjectCycler* self, void* stream);         // 0x40 slot 10
 void StartObjectCycler(ObjectCycler* self);                       // 0x40 slot 16
-void UpdateObjectCycler(ObjectCycler* self);                       // 0x40 slot 17
+void UpdateObjectCycler(ObjectCycler* self, f32 dt);                       // 0x40 slot 17
 void SetObjectCyclerHandle(ObjectCycler* self, s32 flag);             // 0x40 slot 20
 void DrawObjectCycler(ObjectCycler* self, void* a1, void* a2);   // 0x40 slot 37
 

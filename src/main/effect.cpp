@@ -47,37 +47,40 @@
 #include "mul_rotation.h"
 #include "ramp_profile.h"
 #include "node_query.h"
+#include "object_finder.h"
+struct BriefEffectSource;
 
-void AddCallbackNode(void* world, void* list, void* a, void* b);
-void RemoveCallbackNode(void* world, void* list, void* a, void* b);
+
+void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx);
+void RemoveCallbackNode(World* mgr, Callback01** link, void* fn, void* ctx);
 
 
 
 void InitCollider(Collider* self);
 
-void SetListLinkOffset(void* p, s32 n);
+void SetListLinkOffset(List01* self, s32 offset);
 
-void* PopFreeSlot(void* p);
+void* PopFreeSlot(Pool6C* pool);
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 const Vt219C* GetEffectKindTable(u32 n);
 
-void AppendToList(void* list, void* item);
+void AppendToList(List01* self, void* item);
 
 void CountEffectUse(Effect* self);
 
-void RemoveFromList(void* table, void* self);
+void RemoveFromList(List01* list, void* item);
 
 void ReleaseEffect(Effect* self);
 
-void ReleaseCallRecords(void* a, void* b);
+void ReleaseCallRecords(World* self, T219CHook* node);
 
-void PushFreeSlot(void* a, void* b);
+void PushFreeSlot(Pool6C* list, void* item);
 
 extern f32 g_gameClock[];
 
-void InitEffect(Effect* self);
+void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 
 
@@ -85,21 +88,23 @@ extern f32 g_gameTime;
 
 void RemoveEffect(Effect* self);
 
-s32 IsObjectAttached(void* p);
+s32 IsObjectAttached(BaseObject* self);
 
-s32 FindPlaneTreeNodeForPoint(void* a, s32 b);
+struct TreeNode03;
+s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
 
-void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5);
+struct Oscillator;
+void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB);
 
-s32 DrawEffectAt(void* self, void* a1, void* a2, void* a3);
-void BuildBasisFromXAndZHint(void* a, void* b, void* c);
-void BuildBasisFromXAndYHint(void* a, void* b, void* c);
-
-
-
+s32 DrawEffectAt(Effect* self, Camera* cam, Vec02* pos, f32 (*rot)[4]);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
+void BuildBasisFromXAndYHint(Vec02* x, Vec02* hint, Mat02* out);
 
 
-s32 CollectTreeNodeSpans(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+
+
+
+s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 
 Effect* CreateEffect(s32 kind, EffectOwner* sys);
 
@@ -111,7 +116,7 @@ extern Camera* g_camera;
 
 
 
-void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 // A list walk whose frame pushes itself when it is made and pops itself when it goes out of scope.
 struct ListWalk : ListFrame {
@@ -139,7 +144,7 @@ struct ListWalk : ListFrame {
     }
 };
 
-void RemoveEffect(Effect* node);
+void RemoveEffect(Effect* self);
 
 void UnregisterCollider(Collider* self);
 
@@ -207,9 +212,9 @@ extern const Fn_Table g_messageEffectMethods[];
 
 
 
-void RemoveFromList(List01 *a, ObjectGatherer *b);
+void RemoveFromList(List01* list, void* item);
 
-void AppendToList(List01 *a, ObjectGatherer *b);
+void AppendToList(List01* self, void* item);
 
 
 void EndEffect();
@@ -218,13 +223,13 @@ s32 HandleEffectContact();
 
 void MoveEffect();
 
-void InitRisingEffect();
+void InitRisingEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 void MoveDriftingEffect();
 
 void EndEffectWithImpactOnExit();
 
-void InitImpactEffect();
+void InitImpactEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 void UpdateDroppingEffect();
 
@@ -232,13 +237,13 @@ void DrawDroppingEffect();
 
 void EndDroppingEffect();
 
-void InitStreakEffect();
+void InitStreakEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 void DrawStreakEffect();
 
-void InitScaledEffect();
+void InitScaledEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void InitTrailSegment();
+void InitTrailSegment(Effect* self, void* pos, f32 scale, s32 flags);
 
 void DetachTrailSegment();
 
@@ -246,17 +251,17 @@ void MoveTrailSegment();
 
 void DrawTrailSegment();
 
-void InitSpawningEffect();
+void InitSpawningEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 void SpawnFollowUpEffect();
 
-void InitFollowUpEffect();
+void InitFollowUpEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void InitWideTrailSegment();
+void InitWideTrailSegment(Effect* self, void* pos, f32 scale, s32 flags);
 
-void InitShortFallingEffect();
+void InitShortFallingEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void InitCameraSpaceEffect();
+void InitCameraSpaceEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 void MoveCameraSpaceEffect();
 
@@ -264,9 +269,9 @@ void DrawCameraSpaceEffect();
 
 void RunEffectEndCallback();
 
-void InitLongStreakEffect();
+void InitLongStreakEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void InitPhasedEffect();
+void InitPhasedEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 void KeepPhasedEffectStill();
 
@@ -280,7 +285,7 @@ void DrawProjectileEffect();
 
 s32 HandleEffectImpact();
 
-void UpdateEffectUntilDetached();
+void UpdateEffectUntilDetached(Effect* self, f32 dt);
 
 void DrawHitMarkEffect();
 
@@ -304,17 +309,17 @@ s32 HandleEffectContactUnlessKind6();
 
 void DrawSpinningEffect();
 
-void InitFacingEffect();
+void InitFacingEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 void DrawFacingEffect();
 
-void InitDelayedEffect();
+void InitDelayedEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 void MoveDelayedEffect();
 
 void UpdateDelayedEffect();
 
-void DrawDelayedEffect();
+void DrawDelayedEffect(Effect* self, void* a1);
 
 void ResolveEffectTarget();
 
@@ -374,24 +379,26 @@ void* AllocateBackMemory(s32 size);
 
 void PopBackMemoryMark(void);
 
-s32 QueryPlaneTreePoint(u8* a0, u8* a1, void** a2, f32 scale);
+struct PlaneTreeNode;
+struct PlaneTreeOutput;
+s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out);
 
 s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, ColliderSpan* a5);
 
 u32 IsListEmpty(List01* p);
 
 
-void UpdateEffect(Effect* self);
+void UpdateEffect(Effect* self, f32 dt);
 
-s32 IsObjectAttached(s32 handle);
+s32 IsObjectAttached(BaseObject* self);
 
 extern Quad219C D_00275C50;
 
-void SetTrailSegmentAnchor(void* self, s32 kind, s32 extra);
+void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra);
 
-void InitStreakEffect(Effect* self);
+void InitStreakEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void SetEffectPhase(Effect* self, s32 n);
+void SetEffectPhase(Effect* self, s32 mode);
 
 // A 0x30-byte point func_001A1F40 sorts by its angle about a centre (its position at 0x10, the
 // angle at 0x20).
@@ -403,22 +410,22 @@ extern s32 D_0026B6C0[4];
 
 void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Vec02* normal, Effect** out);
 
-s32 IsObjectOfKind(void* self, s32 kind);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
-s32 HandleEffectContact(Effect* a, void* b, void* c, void* d);
+s32 HandleEffectContact(Effect* self, void* b, void* c, void* d);
 
 
 
 void TakeDelayedEffectSourcePose(Effect* self);
 
-void DrawEffect(Effect* self);
+void DrawEffect(Effect* self, void* a1);
 
-void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
-void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
 
 
-s32 IsObjectOfKind(void* node, s32 kind);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 
 
@@ -428,29 +435,28 @@ extern f32 D_0026B5B0[4];
 
 extern f32 D_0026B5C0[4];
 
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 
 extern f32 D_0026B710[4];
 
 extern f32 D_0026B720[4];
 
-void InitEffect(Effect* self, f32 x);
+void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
 
-void UpdateEffect(Effect* self, f32 s);
+void UpdateEffect(Effect* self, f32 dt);
 
 // A quadword in a 128-bit register (the VU0 helpers func_00118D20 and func_00118D30).
 typedef int Quadword128 __attribute__((mode(TI)));
 
-void InitEffect(Effect* self, f32 f);
+void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
-void *StoreFloatAsQuadword(void* out, f32 f);
+void *StoreFloatAsQuadword(u128* out, f32 f);
 
-void* CopyQuadword(void* out, void* in);
+void* CopyQuadword(u128* out, void* src);
 
 Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 
-void* StoreQuadword(void* dst, Quadword128 v);
+void* StoreQuadword(u128* out, u128 v);
 
 extern f32 D_0026B570[4];
 
@@ -460,43 +466,43 @@ extern f32 D_0026B5D0[4];
 
 extern f32 D_0026B5E0[4];
 
-void SetTrailSegmentAnchor(void* self, s32 kind, void* extra);
+void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra);
 
 extern Vec02 D_0026B560;
 
-f32 ArctangentOfRatio(f32 a, f32 b);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 extern f32 D_0026B6A0[4];
 
 extern f32 D_0026B6B0[4];
 
-void* StoreQuadword(Quad219C* dst, Quadword128 v);
+void* StoreQuadword(u128* out, u128 v);
 
 extern f32 D_0026B590[4];
 
 extern f32 D_0026B5A0[4];
 
-s32 IsObjectOfKind(void* self, int kind);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
-void RemoveFromList(void* a, void* b);
+void RemoveFromList(List01* list, void* item);
 
-void AppendToList(void* a, void* b);
+void AppendToList(List01* self, void* item);
 
 f32 RandomFloatInRange(f32 a, f32 b);
 
-void InitCollider(void* self);
+void InitCollider(Collider* self);
 
-void RemoveFromList(void* table, void* node);
+void RemoveFromList(List01* list, void* item);
 
-void AppendToList(void* table, void* node);
+void AppendToList(List01* self, void* item);
 
-void RemoveFromList(u8* a, void* b);
+void RemoveFromList(List01* list, void* item);
 
-void AppendToList(u8* a, void* b);
+void AppendToList(List01* self, void* item);
 
-void RemoveFromList(void* list, void* item);
+void RemoveFromList(List01* list, void* item);
 
-void SetListLinkOffset(void* self, s32 value);
+void SetListLinkOffset(List01* self, s32 offset);
 
 
 // The coefficients of a quadratic in t (a + bt + ct^2), as the pose holds them.
@@ -752,7 +758,7 @@ void CollideEffects(EffectOwner* self)
             PushBackMemoryMark();
             if (s2->tree.count > 0) {
                 buf = AllocateBackMemory(s2->tree.count2 * 12);
-                if (QueryPlaneTreePoint((u8*)s2->tree.nodes, (u8*)&self->v140, &buf, self->radius3D0) != 2) goto skip;
+                if (QueryPlaneTreePoint((PlaneTreeNode*)s2->tree.nodes, &self->v140, self->radius3D0, (PlaneTreeOutput*)&buf) != 2) goto skip;
                 buf = (u8*)buf - 12;
             } else {
                 buf = 0;
@@ -781,7 +787,7 @@ void CollideEffects(EffectOwner* self)
     }
 }
 
-void DrawEffects(EffectOwner* self, void* arg)
+void DrawEffects(EffectOwner* self, void* arg, void* arg2)
 {
     ListFrame fr;
     s32 e = (s32)&self->list558;
@@ -914,13 +920,14 @@ void ShortenEffectLife(Effect* self, f32 x)
     }
 }
 
-void GetAttachedSetPointMotion(void* self, Vec02* in, Vec02* outA, Vec02* outB);
+struct AttachedSet;
+void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16* outB);
 // The larger of two floats (max.s; through an inline function, b >? a reads a first and gives
 // the result b's register).
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
-void ComputeObjectMotionInFrame(void* obj, s32 b, Vec02* pos, Vec02* vel, s32 e, s32 f, s32 g);
-void MeasurePointToSegment(const Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
-void SpawnBriefEffectAt(Vec02* at, PlacedObject* other, f32 scale);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
+void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
+void SpawnBriefEffectAt(void* a0, BriefEffectSource* a1, f32 f);
 
 // An effect that hits something (slot 7, the shared contact): against a moving object (class
 // flag 0x80) it takes on half the object's motion there; otherwise it bounces as a spinning ball
@@ -947,13 +954,13 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     radius *= ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, t);
     if (other->desc->flags & 0x80) {
         Vec02 target;
-        GetAttachedSetPointMotion(other, at, &target, 0);
+        GetAttachedSetPointMotion((AttachedSet*)other, at, (Quad16*)&target, 0);
         Vu0::Vec vel = Vu0::MulAddX(Vu0::Vec::Of(self->qA0), Vu0::Sub(Vu0::Vec::Of(target), Vu0::Vec::Of(self->qA0)), Vu0::Vec::ScalarAt(D_0026B544));
         f32 time = D_0026B540;
         Vu0::Q(self->qA0) = vel.q;
         Vu0::Q(self->qC0) = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(target), vel), Vu0::Vec::Scalar(time)).q;
         ShortenEffectLife(self, time);
-        SpawnBriefEffectAt(at, other, radius * D_0026B548);
+        SpawnBriefEffectAt(at, (BriefEffectSource*)other, radius * D_0026B548);
         return 1;
     }
     Collider* o = (Collider*)self->p20;
@@ -1005,7 +1012,7 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     Vu0::Set(t2, tang2.q);
     f32 along;
     f32 off;
-    MeasurePointToSegment(&D_00248D30, &t1, &t2, &along, &off);
+    MeasurePointToSegment((Vec02*)&D_00248D30, &t1, &t2, &along, &off);
     *(Vu0::Vec*)&self->qA0 = Vu0::Add(Vu0::Vec::Of(self->qA0), Vu0::MulXSum(d1, Vu0::Vec::Scalar((1.0f - along) * j1), dir, Vu0::Vec::Scalar(along * j2)));
     *(Vu0::Vec*)&self->v100 = Vu0::MulAddX(Vu0::Vec::Of(self->v100), Vu0::MulXSum(c1, Vu0::Vec::Scalar((1.0f - along) * j1), c2, Vu0::Vec::Scalar(along * j2)), Vu0::Vec::Scalar(2.5f / (radius * radius)));
     if (((Vec02*)&self->qA0)->z < D_0026B54C) {
@@ -1020,8 +1027,11 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
 s32 IsSpinNegligible(void* a);
 s32 IsVelocityNegligible(void* a);
 s32 IsAccelerationNegligible(void* a);
-void TurnMatrixBySpin(void* spin, f32 dt, void* out);
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+struct SpinRecord_158480;
+// The definition takes the time step last; the EE passes it in its own register, and retail's
+// caller evaluates it before the matrix, as this order does.
+void TurnMatrixBySpin(SpinRecord_158480* self, f32 dt, f32* out);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 // The four rows func_0019F390 builds a turn in and TurnMatrixBySpin fills.
 struct EffectFrame {
@@ -1049,14 +1059,14 @@ void MoveEffect(Effect* self, f32 dt)
     }
     self->q90 = self->q80;
     if (IsVelocityNegligible(&self->qA0) == 0 || IsAccelerationNegligible(&self->qC0) == 0) {
-        TurnMatrixBySpin((u8*)self + 0xB0, dt, &frame);
+        TurnMatrixBySpin((SpinRecord_158480*)((u8*)self + 0xB0), dt, (f32*)&frame);
         u128 nv = Vu0::Transform(frame, Vu0::Q(self->qA0), 1.0f);
         Vu0::Q(self->qA0) = nv;
         Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), nv, Vu0::Scalar(dt));
     }
 }
 
-void UpdateEffect(Effect* self)
+void UpdateEffect(Effect* self, f32 dt)
 {
     f32 t = g_gameTime - self->start;
     if (self->life < t) {
@@ -1076,7 +1086,7 @@ void UpdateEffect(Effect* self)
     }
     s32 flag = 0;
     if (IsObjectAttached(h) != 0) {
-        if (FindPlaneTreeNodeForPoint(&self->q80, (s32)self->target->tree.nodes) != 0) {
+        if (FindPlaneTreeNodeForPoint((Vec02*)&self->q80, self->target->tree.nodes) != 0) {
             flag = 1;
         }
     }
@@ -1084,7 +1094,7 @@ void UpdateEffect(Effect* self)
 }
 
 void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4]);
-void SubmitScaledPlacedObjectTransform(PlacedObject* self, Camera* cam, void* m);
+void SubmitScaledPlacedObjectTransform(PlacedObject* self, void* a, Quad16* src);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
 
 // What an effect hands its object's draw method (slot 38): the placement, then the alpha and a
@@ -1131,7 +1141,7 @@ s32 DrawEffectAt(Effect* self, Camera* cam, Vec02* pos, f32 (*rot)[4])
     f32 keep = o->f28C;
     if (0.0f < keep) {
         o->f28C = keep * b;
-        SubmitScaledPlacedObjectTransform(o, cam, &draw);
+        SubmitScaledPlacedObjectTransform(o, cam, (Quad16*)&draw);
         o->f28C = keep;
     }
     return 1;
@@ -1143,15 +1153,14 @@ void DrawEffect(Effect* self, void* a1)
     void* a2;
     void* a3;
     if (self->p114 != 0) {
-        ComputeOscillatorDisplacement(50.0f, self->p114, &self->q80, self->rot50,
-                      scratch, scratch + 0x10, 0);
+        ComputeOscillatorDisplacement((Oscillator*)self->p114, 50.0f, (Vec02*)&self->q80, (Vec02*)self->rot50, (Vec02*)scratch, (Vec02*)(scratch + 0x10), 0);
         a2 = scratch;
         a3 = scratch + 0x10;
     } else {
         a2 = &self->q80;
         a3 = self->rot50;
     }
-    s32 r = DrawEffectAt(self, a1, a2, a3);
+    s32 r = DrawEffectAt(self, (Camera*)a1, (Vec02*)a2, (f32 (*)[4])a3);
     if (r == 0) {
         RemoveEffect(self);
     }
@@ -1160,22 +1169,22 @@ void DrawEffect(Effect* self, void* a1)
 void AddEffectListener(void* obj, void* arg)
 {
     const Desc01* desc = ((BaseObject*)arg)->desc;
-    AddCallbackNode((void*)g_currentWorld, (u8*)obj + 0x118, (void*)desc->m0D, arg);
+    AddCallbackNode(g_currentWorld, (Callback01**)((u8*)obj + 0x118), (void*)desc->m0D, arg);
 }
 
 void AddEffectCallback(void* obj, void* a1, void* a2)
 {
-    AddCallbackNode((void*)g_currentWorld, (u8*)obj + 0x118, a1, a2);
+    AddCallbackNode(g_currentWorld, (Callback01**)((u8*)obj + 0x118), a1, a2);
 }
 
 void RemoveEffectCallback(void* obj, void* a1, void* a2)
 {
-    RemoveCallbackNode((void*)g_currentWorld, (u8*)obj + 0x118, a1, a2);
+    RemoveCallbackNode(g_currentWorld, (Callback01**)((u8*)obj + 0x118), a1, a2);
 }
 
-void InitFallingEffect(Effect* self)
+void InitFallingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
-    InitEffect(self);
+    InitEffect(self, pos, scale, flags);
     self->life = 5.0f;
     World* g = g_currentWorld;
     self->i20 = (s32)g->slot1CE8[1];
@@ -1188,7 +1197,7 @@ void EndEffectWithImpact(Effect* self, s32 flag)
         ColliderSpan s[16];
         *(Quad219C*)&s[0].q[0] = self->q80;
         if (self->target->tree.nodes != 0) {
-            CollectTreeNodeSpans(self->target->tree.nodes, &self->q90, &self->q80, 0, 0x10, s);
+            CollectTreeNodeSpans(self->target->tree.nodes, (Vec02*)&self->q90, (Vec02*)&self->q80, 0, 0x10, s);
         }
         Effect* p = CreateEffect(4, 0);
         if (p != 0) {
@@ -1203,10 +1212,10 @@ void EndEffectWithImpact(Effect* self, s32 flag)
     }
 }
 
-void InitRisingEffect(Effect* self)
+void InitRisingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     Vec02 k;
-    InitFallingEffect(self);
+    InitFallingEffect(self, pos, scale, flags);
     self->m30[0] = 0.33f;
     Vu0::Q(k) = Vu0::FromFloat(-0.2f);
     Vu0::Q(self->vC0) = Vu0::MulX(Vu0::Q(g_currentWorld->gravity), Vu0::Q(k));
@@ -1214,7 +1223,9 @@ void InitRisingEffect(Effect* self)
 }
 
 void MoveEffect(Effect* self, f32 dt);
-void ComputeSinCos(f32 angle, f32* s, f32* c);
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
+void ComputeSinCos(f32 angle, f32* sinOut, f32* cosOut);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
 void MoveDriftingEffect(Effect* self, f32 dt)
 {
@@ -1263,9 +1274,9 @@ void InitImpactEffect(Effect* self, void* pos, f32 limit, s32 flags)
     self->m30[1] = v * 0.6f;
 }
 
-void InitGrowingEffect(Effect* self)
+void InitGrowingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
-    InitEffect(self);
+    InitEffect(self, pos, scale, flags);
     self->life = 3.0f;
     World* g = g_currentWorld;
     s32 v = (s32)g->slot1CE8[3];
@@ -1273,18 +1284,18 @@ void InitGrowingEffect(Effect* self)
     self->i20 = v;
 }
 
-void InitShrinkingFallEffect(Effect* self)
+void InitShrinkingFallEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
-    InitEffect(self);
+    InitEffect(self, pos, scale, flags);
     self->life = 2.0f;
     World* g = g_currentWorld;
     self->qC0 = *(Quad219C*)&g->gravity;
     self->m30[2] = -1.0f;
 }
 
-void InitDroppingEffect(Effect* self)
+void InitDroppingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
-    InitEffect(self);
+    InitEffect(self, pos, scale, flags);
     World* g = g_currentWorld;
     s32 v = (s32)g->slot1CE8[6];
     self->life = 0.5f;
@@ -1305,7 +1316,7 @@ void UpdateDroppingEffect(Effect* self, f32 dt)
     UpdateEffect(self, dt);
 }
 
-void DrawBeamBetweenPoints(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy);
 
 void DrawDroppingEffect(Effect* self, void* a1)
 {
@@ -1315,7 +1326,7 @@ void DrawDroppingEffect(Effect* self, void* a1)
         f32 t = (g_gameTime - self->start) / self->life;
         f32 x;
         ClampedQuadratic::Get(x, (const QuadraticCoeffs*)&self->q40, t);
-        DrawBeamBetweenPoints(g_currentWorld->slot1CE8[7], a1, &self->q90, &self->q80, 0.1f, x);
+        DrawBeamBetweenPoints((PlacedObject*)g_currentWorld->slot1CE8[7], (PlacedObject*)a1, (Vec02*)&self->q90, (Vec02*)&self->q80, 0.1f, x);
     }
 }
 
@@ -1326,9 +1337,9 @@ void EndDroppingEffect(Effect* self, void* other)
     }
 }
 
-void InitStreakEffect(Effect* self)
+void InitStreakEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
-    InitEffect(self);
+    InitEffect(self, pos, scale, flags);
     self->life = 0.25f;
     s32 v = (s32)g_currentWorld->slot1CE8[4];
     self->i20 = v;
@@ -1352,29 +1363,29 @@ void DrawStreakEffect(Effect* self, void* a1)
     if (x <= 0.0f || y <= 0.0f) {
         RemoveEffect(self);
     } else {
-        DrawBeamBetweenPoints(self->p20, a1, &pos, &self->q80, y, x);
+        DrawBeamBetweenPoints((PlacedObject*)self->p20, (PlacedObject*)a1, &pos, (Vec02*)&self->q80, y, x);
     }
 }
 
-void InitScaledEffect(Effect* self, f32 f)
+void InitScaledEffect(Effect* self, void* pos, f32 f, s32 flags)
 {
-    InitEffect(self, f);
+    InitEffect(self, pos, f, flags);
     self->life = 0.5f;
     s32 v = (s32)g_currentWorld->slot1CE8[5];
     u8* p = (u8*)&D_0026B560;
     self->i20 = v;
     Quadword128 t;
-    StoreFloatAsQuadword(&t, f);
+    StoreFloatAsQuadword((u128*)&t, f);
     Quad219C* sub = &self->q30;
     Quadword128 tv = t;
     Quadword128 u;
-    CopyQuadword(&u, p);
-    StoreQuadword(sub, ScaleQuadword(tv, u));
+    CopyQuadword((u128*)&u, p);
+    StoreQuadword((u128*)sub, ScaleQuadword(tv, u));
 }
 
-void InitTrailSegment(Effect* self, f32 f)
+void InitTrailSegment(Effect* self, void* pos, f32 f, s32 flags)
 {
-    InitEffect(self, f);
+    InitEffect(self, pos, f, flags);
     Quad219C* sub = &self->q30;
     u8* p = (u8*)D_0026B580;
     s32 v = (s32)g_currentWorld->slot1CE8[7];
@@ -1383,11 +1394,11 @@ void InitTrailSegment(Effect* self, f32 f)
     self->q40 = *(Quad219C*)D_0026B570;
     self->life = 0.35f;
     Quadword128 t;
-    StoreFloatAsQuadword(&t, f);
+    StoreFloatAsQuadword((u128*)&t, f);
     Quadword128 tv = t;
     Quadword128 u;
-    CopyQuadword(&u, p);
-    StoreQuadword(sub, ScaleQuadword(tv, u));
+    CopyQuadword((u128*)&u, p);
+    StoreQuadword((u128*)sub, ScaleQuadword(tv, u));
 }
 
 void DetachTrailSegment(Effect* self)
@@ -1395,7 +1406,7 @@ void DetachTrailSegment(Effect* self)
     SetTrailSegmentAnchor(self, 0, 0);
 }
 
-void OnTrailAnchorEnded(void* self, s32 kind, s32 extra);
+void OnTrailAnchorEnded(void* self, s32 kind, void* extra);
 
 void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
 {
@@ -1562,13 +1573,13 @@ void DrawTrailSegment(Effect* self, Camera* cam)
             to = &self->q90;
             break;
         }
-        DrawBeamBetweenPoints(self->p20, cam, &self->q80, to, b * 100.0f, a * fade);
+        DrawBeamBetweenPoints((PlacedObject*)self->p20, (PlacedObject*)cam, (Vec02*)&self->q80, (Vec02*)to, b * 100.0f, a * fade);
         return;
     }
     RemoveEffect(self);
 }
 
-void OnTrailAnchorEnded(void* self, s32 kind, s32 extra)
+void OnTrailAnchorEnded(void* self, s32 kind, void* extra)
 {
     if (kind == 3) {
         goto three;
@@ -1589,30 +1600,30 @@ zero:
     SetTrailSegmentAnchor(self, 0, 0);
     return;
 three:
-    SetTrailSegmentAnchor(self, 0, extra + 16);
+    SetTrailSegmentAnchor(self, 0, (u8*)extra + 16);
 }
 
-void InitSpawningEffect(Effect* self, f32 f)
+void InitSpawningEffect(Effect* self, void* pos, f32 f, s32 flags)
 {
-    InitEffect(self, f);
+    InitEffect(self, pos, f, flags);
     Quad219C* sub = &self->q30;
     u8* p = (u8*)D_0026B590;
     s32 v = (s32)g_currentWorld->slot1CE8[8];
     self->life = 0.25f;
     self->i20 = v;
     Quadword128 t;
-    StoreFloatAsQuadword(&t, f);
+    StoreFloatAsQuadword((u128*)&t, f);
     Quadword128 tv = t;
     Quadword128 u;
-    CopyQuadword(&u, p);
-    (void)StoreQuadword(sub, ScaleQuadword(tv, u));
+    CopyQuadword((u128*)&u, p);
+    (void)StoreQuadword((u128*)sub, ScaleQuadword(tv, u));
     u8* q = (u8*)D_0026B5A0;
     self->q40 = *(Quad219C*)q;
 }
 
 void SpawnFollowUpEffect(Effect* self, f32 arg)
 {
-    UpdateEffect(self);
+    UpdateEffect(self, arg);
     f32 d = g_gameTime - self->start;
     d = d - 0.15f;
     if (0.0f <= d && d < arg) {
@@ -1624,9 +1635,9 @@ void SpawnFollowUpEffect(Effect* self, f32 arg)
     }
 }
 
-void InitFollowUpEffect(Effect* self)
+void InitFollowUpEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
-    InitEffect(self);
+    InitEffect(self, pos, scale, flags);
     World* sys = g_currentWorld;
     self->i20 = (s32)sys->slot1CE8[9];
     self->life = 3.0f;
@@ -1636,9 +1647,9 @@ void InitFollowUpEffect(Effect* self)
     self->fB0 = -1.0f;
 }
 
-void InitWideTrailSegment(Effect* self, f32 f)
+void InitWideTrailSegment(Effect* self, void* pos, f32 f, s32 flags)
 {
-    InitTrailSegment(self, f);
+    InitTrailSegment(self, pos, f, flags);
     Quad219C* sub = &self->q30;
     u8* p = (u8*)D_0026B5E0;
     s32 v = (s32)g_currentWorld->slot1CE8[10];
@@ -1646,16 +1657,16 @@ void InitWideTrailSegment(Effect* self, f32 f)
     self->i20 = v;
     self->q40 = *(Quad219C*)D_0026B5D0;
     Quadword128 t;
-    StoreFloatAsQuadword(&t, f);
+    StoreFloatAsQuadword((u128*)&t, f);
     Quadword128 tv = t;
     Quadword128 u;
-    CopyQuadword(&u, p);
-    StoreQuadword(sub, ScaleQuadword(tv, u));
+    CopyQuadword((u128*)&u, p);
+    StoreQuadword((u128*)sub, ScaleQuadword(tv, u));
 }
 
-void InitShortFallingEffect(Effect* self)
+void InitShortFallingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
-    InitEffect(self);
+    InitEffect(self, pos, scale, flags);
     World* g = g_currentWorld;
     s32 v = (s32)g->slot1CE8[1];
     self->life = 0.5f;
@@ -1664,13 +1675,13 @@ void InitShortFallingEffect(Effect* self)
 }
 
 void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
-void ProjectPointToCamera(Camera* cam, void* pos, void* out);
+void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
 
 void InitCameraSpaceEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
     const T219C_Params* p = self->params;
-    ProjectPointToCamera(g_camera, pos, &self->f120);
+    ProjectPointToCamera(g_camera, (Vec02*)pos, &self->f120);
     f32 x = RandomFloatInRange(p->rows[8], p->rows[12]);
     f32 y = RandomFloatInRange(p->rows[9], p->rows[13]);
     f32 z = RandomFloatInRange(p->rows[10], p->rows[14]);
@@ -1680,8 +1691,8 @@ void InitCameraSpaceEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->q30 = *(const Quad219C*)&p->rows[20];
 }
 
-void EvaluateHermiteVectorSegment(void* a, void* b, const T219C_Params* c, const f32* d, void* e, void* f, s32 g, f32 t, f32 u, f32 v);
-void UnprojectCameraPoint(Camera* cam, void* point, void* out);
+void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
+void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out);
 
 void MoveCameraSpaceEffect(Effect* self, f32 f)
 {
@@ -1689,16 +1700,16 @@ void MoveCameraSpaceEffect(Effect* self, f32 f)
     Quad219C b;
     f32 t = self->start + self->life - g_gameTime;
     t = t >? f;
-    EvaluateHermiteVectorSegment(&self->f120, &self->qA0, self->params, self->params->rows + 4, &a, &b, 0, t, f, 1.0f);
+    EvaluateHermiteVectorSegment(t, (const Vec02*)&self->f120, (const Vec02*)&self->qA0, (const Vec02*)self->params, (const Vec02*)(self->params->rows + 4), f, 1.0f, (Vec02*)&a, (Vec02*)&b, 0);
     *(Quad219C*)&self->f120 = a;
     self->qA0 = b;
-    UnprojectCameraPoint(g_camera, &a, &self->q80);
+    UnprojectCameraPoint(g_camera, (f32*)&a, (Vec02*)&self->q80);
 }
 
 
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void MatrixToAxisAngle(Mat02* m, f32* angle, void* axis);
+void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 
 // Draws the effect at its point seen from the camera, turned by the part of the camera's turn the
 // effect's age gives (twice its age times pi about the axis of its parameters, +0x40).
@@ -1736,9 +1747,9 @@ void RunEffectEndCallback(Effect* self)
     }
 }
 
-void InitEmitterEffect(Effect* self)
+void InitEmitterEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
-    InitEffect(self);
+    InitEffect(self, pos, scale, flags);
     self->q40 = D_00275C50;
     self->life = 2.0f;
 }
@@ -1777,7 +1788,7 @@ void MoveEmitterEffect(Effect* self, f32 dt)
     Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(vel), Vu0::Scalar(dt));
 }
 
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 void UpdateEmitterEffect(Effect* self, f32 dt)
 {
@@ -1819,21 +1830,21 @@ void DrawEmitterEffect(Effect* self, void* a1)
     Vu0::Q(pos) = Vu0::Rotate(self->rot50, Vu0::Q(self->q80));
     Vu0::Q(pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(((PlacedObject*)self->p120)->v140));
     rot = g_identityMatrix;
-    DrawEffectAt(self, a1, &pos, &rot);
+    DrawEffectAt(self, (Camera*)a1, &pos, (f32 (*)[4])&rot);
 }
 
-void InitLongStreakEffect(Effect* self)
+void InitLongStreakEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
-    InitStreakEffect(self);
+    InitStreakEffect(self, pos, scale, flags);
     World* ctx = g_currentWorld;
     s32 v = ctx->f1D28;
     self->f120 = 0.15f;
     self->i20 = v;
 }
 
-void InitPhasedEffect(Effect* self)
+void InitPhasedEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
-    InitEffect(self);
+    InitEffect(self, pos, scale, flags);
     s32 v = g_currentWorld->f1D28;
     self->i120 = -1;
     self->i20 = v;
@@ -2076,9 +2087,9 @@ struct HullPoint {
     u8 pad24[0x30 - 0x24];
 };
 
-void InitIdentityMatrix(void* self);
+void InitIdentityMatrix(Mat4* self);
 Mat4A MultiplyMatrices(void* m, void* in);
-void BuildBasisFromX(void* x, void* out);
+void BuildBasisFromX(Vec02* x, Mat02* out);
 s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts);
 
 // The frame looking from the camera toward pos: the camera's position moved to the origin, then
@@ -2111,8 +2122,8 @@ s32 ComputeHullSeenFromCamera(Vec02* pos, s32 n, HullPoint* pts)
     return ComputeProjectedHull(&t, n, pts);
 }
 
-void TransformByMatrixWithW(void* m, Vec02* in, f32 w, Vec02* out);
-void SortElements(void* base, s32 n, s32 size, s32 (*cmp)(AngledPoint*, AngledPoint*));
+void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
+void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
 
 s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts)
 {
@@ -2123,7 +2134,7 @@ s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts)
     HullPoint* p;
     for (i = 0; i < n; i++) {
         p = &pts[i];
-        TransformByMatrixWithW(m, &p->world, 1.0f, &p->screen);
+        TransformByMatrixWithW((const Quad16*)m, &p->world, 1.0f, &p->screen);
         f32 z = p->screen.z;
         p->screen.y /= z;
         p->screen.x /= z;
@@ -2140,7 +2151,7 @@ s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts)
         Vu0::Q(tmp.world) = Vu0::Sub(Vu0::Q(p->screen), Vu0::Q(pts[0].screen));
         p->angle = ArctangentOfRatio(tmp.world.y, tmp.world.x);
     }
-    SortElements(&pts[1], n - 1, 0x30, CompareByFloatKeyAscending);
+    SortElements(&pts[1], n - 1, 0x30, (s32 (*)(const void*, const void*))CompareByFloatKeyAscending);
     HullPoint* out = pts;
     for (i = 0; i < n; i++) {
         p = &pts[i];
@@ -2178,12 +2189,12 @@ void DrawProjectileEffect(Effect* self, void* a1)
         d = Vu0::Q(g_unitZVector);
     }
     Vu0::Q(*p) = d;
-    BuildBasisFromXAndZHint(&self->qA0, &dir, &rot);
-    DrawEffectAt(self, a1, &self->q80, &rot);
+    BuildBasisFromXAndZHint((const Vec02*)&self->qA0, &dir, &rot);
+    DrawEffectAt(self, (Camera*)a1, (Vec02*)&self->q80, (f32 (*)[4])&rot);
 }
 
-void BuildEulerRotationMatrix(Vec02* angles, Mat02* out);
-void BuildShortestArcRotation(Vec02* from, Vec02* to, Mat02* out);
+void BuildEulerRotationMatrix(f32* in, f32* out);
+void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
 
 void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Vec02* normal, Effect** out)
 {
@@ -2195,7 +2206,7 @@ void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Ve
             Mat02 basis;
             Vec02 angles;
             Mat02 turn;
-            TransformPointBetweenFrames(0, other, point, &local);
+            TransformPointBetweenFrames(0, (PlacedObject*)other, point, &local);
             f32 zero = 0.0f;
             f32 t = (g_gameTime - self->start) / self->life;
             f32* m = self->m30;
@@ -2211,7 +2222,7 @@ void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Ve
             angles.y = zero;
             angles.x = zero;
             angles.z = RandomFloatInRange(zero, 6.2831855f);
-            BuildEulerRotationMatrix(&angles, &turn);
+            BuildEulerRotationMatrix((f32*)&angles, (f32*)&turn);
             {
                 Mat02 r;
                 Vec02 x;
@@ -2256,10 +2267,10 @@ s32 HandleEffectImpact(Effect* self, PlacedObject* other, void* a2, void* a3)
     return 1;
 }
 
-void UpdateEffectUntilDetached(Effect* self)
+void UpdateEffectUntilDetached(Effect* self, f32 dt)
 {
-    UpdateEffect(self);
-    s32 h = self->i120;
+    UpdateEffect(self, dt);
+    BaseObject* h = (BaseObject*)self->p120;
     if (h != 0) {
         if (IsObjectAttached(h) == 0) {
             RemoveEffect(self);
@@ -2271,12 +2282,12 @@ void DrawHitMarkEffect(Effect* self, void* a1)
 {
     u8 scratch[0x40];
 
-    TransformPointBetweenFrames(self->p120, 0, &self->q80, scratch);
-    TransformRotationBetweenFrames(self->p120, 0, self->rot50, scratch + 0x10);
-    DrawEffectAt(self, a1, scratch, scratch + 0x10);
+    TransformPointBetweenFrames((PlacedObject*)self->p120, 0, (Vec02*)&self->q80, (Vec02*)scratch);
+    TransformRotationBetweenFrames((PlacedObject*)self->p120, 0, (Mat02*)self->rot50, (Mat02*)(scratch + 0x10));
+    DrawEffectAt(self, (Camera*)a1, (Vec02*)scratch, (f32 (*)[4])(scratch + 0x10));
 }
 
-void BuildBasisFromX(void* x, void* out);
+void BuildBasisFromX(Vec02* x, Mat02* out);
 
 void SetRandomEffectSpin(Effect* self)
 {
@@ -2285,7 +2296,7 @@ void SetRandomEffectSpin(Effect* self)
     f32 y = RandomFloatInRange(-1.0f, 1.0f);
     f32 z = RandomFloatInRange(0.1f, 0.9f) + 0.1f;
     Vu0::Q(axis) = Vu0::FromFloats(x, y, z);
-    BuildBasisFromX(&axis, self->rot50);
+    BuildBasisFromX((Vec02*)&axis, (Mat02*)self->rot50);
 }
 
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
@@ -2386,7 +2397,7 @@ s32 HandleTumblingEffectImpact(Effect* self, void* a1, void* a2, void* a3)
     AttachHitMarkEffect(self, self->i20, other, (Vec02*)a2, (Vec02*)a3, (Effect**)out);
     p = *(void**)out;
     if (p != 0) {
-        TransformRotationBetweenFrames(0, other, (u8*)p + 0x50, (u8*)p + 0x50);
+        TransformRotationBetweenFrames(0, other, (Mat02*)((u8*)p + 0x50), (Mat02*)((u8*)p + 0x50));
     }
     RemoveEffect(self);
     return 1;
@@ -2404,16 +2415,16 @@ s32 IsEffectAimCandidate(Rec50* self, Collider* other)
 }
 
 typedef int Quadword128 __attribute__((mode(TI)));
-void *StoreFloatAsQuadword(void* out, f32 f);
-void* CopyQuadword(void* out, void* in);
+void *StoreFloatAsQuadword(u128* out, f32 f);
+void* CopyQuadword(u128* out, void* src);
 Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
-void* StoreQuadword(void* dst, Quadword128 v);
+void* StoreQuadword(u128* out, u128 v);
 s32 IsEffectAimCandidate(Rec50* self, Collider* other);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(void*, Collider*), s32 p4, s32* n, Collider*** list);
-Collider* FindNearestSpanObject(s32 flags, void* a1, void* a2, s32 count, Collider** list, ColliderSpan* out);
-void BuildBasisFromX(void* x, void* out);
+void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+Collider* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
+void BuildBasisFromX(Vec02* x, Mat02* out);
 extern const Vec02 g_unitZVector;
 
 void AimEffectAtNearestObject(Effect* self, Rec50* src)
@@ -2441,23 +2452,23 @@ void AimEffectAtNearestObject(Effect* self, Rec50* src)
     Vu0::Q(self->qA0) = Vu0::NormalizeOr(Vu0::Q(self->qA0), Vu0::Q(g_unitZVector));
     Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(*from), Vu0::Q(self->qA0), Vu0::Scalar(reach * 100.0f));
     PushBackMemoryMark();
-    GatherCollidersInBox(g_currentWorld, 0, from, &end, (s32 (*)(void*, Collider*))IsEffectAimCandidate, (s32)src, &n, &list);
+    GatherCollidersInBox(g_currentWorld, 0, from, &end, (s32 (*)(void*, Collider*))IsEffectAimCandidate, src, &n, &list);
     if (FindNearestSpanObject(1, from, &end, n, list, &span) != 0) {
         speed = speed * span.time[0];
     }
     PopBackMemoryMark();
-    StoreFloatAsQuadword(&tq, speed);
+    StoreFloatAsQuadword((u128*)&tq, speed);
     Quadword128 tv = tq;
-    CopyQuadword(&uq, poly);
-    StoreQuadword(&self->q30, ScaleQuadword(tv, uq));
-    BuildBasisFromX(&self->qA0, self->rot50);
+    CopyQuadword((u128*)&uq, poly);
+    StoreQuadword((u128*)&self->q30, ScaleQuadword(tv, uq));
+    BuildBasisFromX((Vec02*)&self->qA0, (Mat02*)self->rot50);
     Vu0::Q(self->qA0) = Vu0::Zero();
 }
 
 void PlaceEffectAtSource(Effect* dst, void* a1)
 {
     Rec50* src = (Rec50*)a1;
-    TransformPointBetweenFrames(src->target, 0, (u8*)src + 0x20, &dst->q80);
+    TransformPointBetweenFrames((PlacedObject*)src->target, 0, (Vec02*)((u8*)src + 0x20), (Vec02*)&dst->q80);
     dst->iB0 = 0;
     dst->i110 = 0;
     dst->i120 = src->i1F4;
@@ -2478,15 +2489,15 @@ void DrawStreakedEffect(Effect* self, void* a1)
         Vu0::Q(dir) = v;
         Vu0::Q(dir) = Vu0::DivX(v, Vu0::Length(v));
         Vu0::Q(tail) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(dir), Vu0::Scalar(100.0f));
-        DrawBeamBetweenPoints(tmpl, a1, &tail, &self->q80, 10.0f, 1.0f);
+        DrawBeamBetweenPoints((PlacedObject*)tmpl, (PlacedObject*)a1, &tail, (Vec02*)&self->q80, 10.0f, 1.0f);
     } else {
         Mat02 rot;
-        BuildBasisFromXAndYHint(&self->qA0, (u8*)a1 + 0x80, &rot);
-        DrawEffectAt(self, a1, &self->q80, &rot);
+        BuildBasisFromXAndYHint((Vec02*)&self->qA0, (Vec02*)((u8*)a1 + 0x80), &rot);
+        DrawEffectAt(self, (Camera*)a1, (Vec02*)&self->q80, (f32 (*)[4])&rot);
     }
 }
 
-s32 FindNodeForQuery(void* p, s32 a, s32 b);
+s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
 s32 HandleStreakedEffectImpact(Effect* self, void* hold, Vec02* where, Vec02* dir)
 {
@@ -2550,12 +2561,12 @@ void DrawSpinningEffect(Effect* self, void* a1)
     Vec02 k;
     Vu0::Q(k) = Vu0::FromFloatAt(self->f120);
     Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(g_unitZVector), Vu0::Q(k));
-    DrawEffectAt(self, a1, &pos, self->rot50);
+    DrawEffectAt(self, (Camera*)a1, &pos, (f32 (*)[4])self->rot50);
 }
 
-void InitFacingEffect(Effect* self)
+void InitFacingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
-    InitEffect(self);
+    InitEffect(self, pos, scale, flags);
     f32 half = 0.5f;
     u8* sys = (u8*)g_currentWorld;
     self->life = half;
@@ -2577,7 +2588,7 @@ void DrawFacingEffect(Effect* self, Camera* cam)
     EffectDraw draw;
     PlacedObject* o = (PlacedObject*)self->p20;
     if (o != 0) {
-        TransformPointBetweenFrames(self->p120, 0, &self->q80, &pos);
+        TransformPointBetweenFrames((PlacedObject*)self->p120, 0, (Vec02*)&self->q80, &pos);
         u128 r = Vu0::ScalarAt(o->f2A8);
         u128 ones = Vu0::Ones();
         u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(cam->f40));
@@ -2586,7 +2597,7 @@ void DrawFacingEffect(Effect* self, Camera* cam)
             return;
         }
         Vu0::Q(dir) = Vu0::Sub(Vu0::Q(g_camera->f40), Vu0::Q(pos));
-        BuildBasisFromXAndZHint(&dir, (void*)&g_unitZVector, &basis);
+        BuildBasisFromXAndZHint(&dir, (const Vec02*)&g_unitZVector, &basis);
         f32 t = (g_gameTime - self->start) / self->life;
         f32 k = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(dir))) * 0.001f;
         f32 s = ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, t);
@@ -2606,18 +2617,18 @@ void DrawFacingEffect(Effect* self, Camera* cam)
     }
 }
 
-void InitDelayedEffect(Effect* self, f32 x)
+void InitDelayedEffect(Effect* self, void* pos, f32 x, s32 flags)
 {
-    InitEffect(self, x);
+    InitEffect(self, pos, x, flags);
     self->q40 = *(Quad219C*)&D_00275C50;
     self->m30[0] = x;
     self->m30[1] = 1.0f - x;
     *(s32*)&self->m30[2] = 0;
 }
 
-void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void MatrixToAxisAngle(Mat02* m, f32* angle, void* axis);
+void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 
 // Takes the source object's pose (+0x134) and lets it go: the effect starts there and moves
 // over its life to where its target object (+0x20) will be then, turning by the rotation
@@ -2632,11 +2643,11 @@ void TakeDelayedEffectSourcePose(Effect* self)
     self->rot50[0] = src->m110.r[0];
     self->rot50[1] = src->m110.r[1];
     self->rot50[2] = src->m110.r[2];
-    ComputeObjectFrameAtTime(self->p20, 0, &pos, &rot, 0, 0, self->life);
+    ComputeObjectFrameAtTime((PlacedObject*)self->p20, 0, &pos, &rot, 0, 0, self->life);
     Vu0::Q(self->qA0) = Vu0::MulXSum(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->q80)), Vu0::Scalar(1.0f / self->life),
                                      Vu0::Q(self->qC0), Vu0::Scalar(self->life * -0.5f));
     MultiplyMatrices3x3(&rot, (Mat02*)self->rot50, &turn);
-    MatrixToAxisAngle(&turn, &self->f130, &self->f120);
+    MatrixToAxisAngle(&turn, &self->f130, (Vec02*)&self->f120);
     if (0.0f < self->f130) {
         self->f130 = self->f130 + 6.28318548f;
     } else {
@@ -2682,14 +2693,14 @@ void MoveDelayedEffect(Effect* self, f32 f)
         self->q90 = self->q80;
         t = self->start + self->life - g_gameClock[1];
         t = f >? t;
-        ComputeObjectFrameAtTime(self->p20, 0, &pos, &rot, 0, 0, t);
+        ComputeObjectFrameAtTime((PlacedObject*)self->p20, 0, &pos, &rot, 0, 0, t);
         u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->q80));
         u128 w1 = Vu0::Scalar(1.5f / t);
         u128 w2 = Vu0::Scalar(-0.5f);
         u128 w3 = Vu0::Scalar(0.25f);
         u128 c = Vu0::MulX(Vu0::Q(self->qC0), Vu0::Scalar(t));
         Vu0::Q(v10) = Vu0::MulXSum3(d, w1, Vu0::Q(self->qA0), w2, c, w3);
-        EvaluateHermiteVectorSegment(&self->q80, &self->qA0, (const T219C_Params*)&pos, (const f32*)&v10, &v20, &v30, 0, t, f, 1.0f);
+        EvaluateHermiteVectorSegment(t, (const Vec02*)&self->q80, (const Vec02*)&self->qA0, &pos, &v10, f, 1.0f, &v20, &v30, 0);
         BuildAxisAngleMatrix((Vec02*)&self->f120, &turn, self->f130 * t / self->life);
         self->q80 = *(Quad219C*)&v20;
         self->qA0 = *(Quad219C*)&v30;
@@ -2712,18 +2723,18 @@ void UpdateDelayedEffect(Effect* self)
     }
 }
 
-void DrawDelayedEffect(Effect* self)
+void DrawDelayedEffect(Effect* self, void* a1)
 {
     if (g_gameTime < self->start) {
         return;
     }
-    DrawEffect(self);
+    DrawEffect(self, a1);
 }
 
 void ResolveEffectTarget(Effect* self, void* otherv)
 {
     Rec50* other = (Rec50*)otherv;
-    self->i120 = FindFirstObjectById(g_currentWorld, 0x104, other->f1F0, other->target);
+    self->p120 = FindFirstObjectById(g_currentWorld, 0x104, other->f1F0, other->target);
     self->f124 = other->f1F4;
 }
 
@@ -2759,7 +2770,7 @@ LINKER_REMNANT(func_001A3AC8);
 #undef P
 #undef O
 
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 extern const Vec02 g_unitZVector;
 
 #define F(o) (*(f32*)((u8*)self + (o)))

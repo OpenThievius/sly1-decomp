@@ -23,7 +23,7 @@ s32 FeedMovieDecoder(MoviePlayer* self_, s32 wait)
     }
     SyncDataCache(0);
     Buffer_18F890_eu* buffer = self->buffer;
-    s32 result = DemultiplexBuffer(self->pad10, buffer->base + buffer->tail, count);
+    s32 result = DemultiplexBuffer((Ctx_20A220*)self->pad10, buffer->base + buffer->tail, count);
     ConsumeStreamBytes((StreamReaderWindow*)self->buffer, result);
     if (result != 0) return 0;
     if (self->f70 >= count) {

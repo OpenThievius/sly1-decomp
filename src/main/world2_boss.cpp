@@ -17,6 +17,9 @@
 #include "attachment.h"
 #include "globals.h"
 #include "ring_params.h"
+#include "object_finder.h"
+struct BaseObject;
+
 
 // The methods of class 0x0C (0xE50 bytes, an agent): its links and clips, the search for the
 // object it acts on, its states and the notifications it answers.
@@ -26,7 +29,7 @@
 struct GaugeTarget {
     s32 key;                // 0x00
     f32 f;                  // 0x04
-    s32 value;              // 0x08: FindFirstObjectById's result
+    BaseObject* value;      // 0x08: FindFirstObjectById's result
 };
 
 ObjectLink D_00264910[2] = { { 0, 0x82, 0xC24 }, { 0, 0x83, 0xC74 } };
@@ -39,37 +42,41 @@ GaugeTarget D_00264960[6] = {
 
 extern f32 g_gameTime;
 
-void InitAgent(void*);
+void InitAgent(Agent* self);
 void LoadAgent(Agent* self, void* reader);
-void ResolveObjectLinks(void* self, s32 n, void* table);
-void StartAgent(void* self);
-void SetWorldActiveFollower(void* sub, void* self);
-void CreateSixEntryBlend(void* self, void* a, void* b);
-void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
-s32 ResolveAgentClip(void* self, s32 id);
+struct BlendAnimationView;
+struct PlayerBlendItem;
+struct TurningCollider;
+struct StateGraph;
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+void StartAgent(Agent* self);
+void SetWorldActiveFollower(World* self, void* v);
+void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAnimationView** out);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+s32 ResolveAgentClip(Agent* self, s32 id);
 u8* CopyToFrontMemory(s32 size, void* src);
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-s32 TestColliderSegmentHit(void* self, void* p1, void* p2, f32 x, s32 p3, void* p4);
-s32 IsObjectOfKind(BaseObject* a, s32 b);
+s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, s32 p3, ColliderSpan* p4);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 s32 MatchesObjectId(BaseObject* a, s32 b);
-void PushBackMemoryMark(void* self, void* a1, void* a2);
+void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void ComputeObjectFrameAtTime(void* a, s32 b, void* c, s32 d, s32 e, s32 f, f32 g);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
-s32 IsPadSelectFlagHeld(void* p);
-void EnterAgentState(void* self);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+s32 IsPadSelectFlagHeld(World* self);
+void EnterAgentState(Agent* self, s32 evt, Animation* arg);
 void MarkLevelDone(s32 n);
 void StartMemoryCardSave(MemoryCard* p);
-s32 GetAgentRosterState(void* self);
-s32 ChooseAgentState(void* self);
-void DecrementGaugeCount(void* p);
-void ChangeAgentState(void* node, s32 kind, s32 flag);
-void UpdateAgent(void);
+struct AgentNotification;
+s32 GetAgentRosterState(Agent* self);
+s32 ChooseAgentState(Agent* self);
+void DecrementGaugeCount(T217D_2E0* self);
+void ChangeAgentState(Agent* self, s32 state, void* context);
+void UpdateAgent(Agent* self, f32 dt);
 s32 AreMenusAndFadeClear(void);
-void LeaveAgentState(void*);
-void SetStateWalkerTarget(s32, s32);
-s32 LaunchChosenPoolObject(void* obj, s32 v);
-void HandleAgentNotification(void* self, s32 code, void* req);
+void LeaveAgentState(Agent* self, s32 mode);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
+s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim);
+void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
 
 void InitWorld2Boss(World2Boss* self)
 {
@@ -91,9 +98,9 @@ void StartWorld2Boss(World2Boss* self)
     StartAgent(self);
     SetWorldActiveFollower(self->world, self);
     ResolveObjectLinks(self, 3, D_00264928);
-    CreateSixEntryBlend(self, (u8*)self + 0xC20, (u8*)self + 0xE00);
+    CreateSixEntryBlend(self, (PlayerBlendItem*)((u8*)self + 0xC20), (BlendAnimationView**)((u8*)self + 0xE00));
     self->f758[12].obj = (void*)self->fE00;
-    self->fE10 = CreateStateWalker(self->fE0C, 0, 0x438, 0);
+    self->fE10 = CreateStateWalker((StateGraph*)self->fE0C, 0, 0x438, 0);
     for (n = 0; n < 3; n++)
         self->fE30[n] = ResolveAgentClip(self, D_00264950[n]);
     self->fE20 = 6;
@@ -149,13 +156,13 @@ struct AgentDrawArgs {
     Vec02 weights;          // 0x80
 };
 
-void DrawAgent(Agent* self, AgentDrawArgs* args);
-void QueueDeferredRequest(DeferredRequest* request);
-void* FillMemory(void* p, s32 value, s32 size);
+void DrawAgent(Agent* self, void* unused1, void* unused2);
+void QueueDeferredRequest(DeferredRequest* src);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-void DrawWorld2Boss(World2Boss* self, AgentDrawArgs* args)
+void DrawWorld2Boss(World2Boss* self, AgentDrawArgs* args, void* arg2)
 {
-    DrawAgent(self, args);
+    DrawAgent(self, args, arg2);
     if (self->fE2C) {
         DeferredRequest request;
         FillMemory(&request, 0, 0x80);
@@ -180,7 +187,7 @@ s32 FindNearestHitObject(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f
 
     for (i = 0; i < a3; i++) {
         s32 self = table[i];
-        s32 r = TestColliderSegmentHit((void*)self, a1, a2, f, 2, (void*)buf);
+        s32 r = TestColliderSegmentHit((Collider*)self, a1, a2, f, 2, (ColliderSpan*)buf);
         s32 k = 0;
         if (r > 0) {
             if (buf[0].score == 0.0f && (a0 & 1)) {
@@ -233,15 +240,15 @@ s32 IsWorld2BossBlocker(void* self, BlockerQuery* rec)
 
 typedef s32 (*Cb_18A910)(void* self, BlockerQuery* ctx);
 
-void GatherCollidersInBox(void* a0, s32 a1, void* a2, void* a3, Cb_18A910 a4, void* a5, s32* a6, s32* a7);
+void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 s32 IsWorld2BossLineBlocked(World2Boss* self, void* a1, void* a2)
 {
     u8 buf[0x70];
     s32 x;
     s32 y;
-    PushBackMemoryMark(self, a1, a2);
-    GatherCollidersInBox(self->world, 0, a1, a2, IsWorld2BossBlocker, self, &x, &y);
+    PushBackMemoryMark();
+    GatherCollidersInBox(self->world, 0, (Vec02*)a1, (Vec02*)a2, (s32 (*)(void*, Collider*))IsWorld2BossBlocker, self, &x, (Collider***)&y);
     s32 r = FindNearestHitObject(0, a1, a2, x, y, buf, D_002649C4);
     PopBackMemoryMark();
     return r != 0;
@@ -275,7 +282,7 @@ s32 HasWorld2BossClearLine(World2Boss* self)
             return 0;
         }
     }
-    GetStateWalkerCurrentKey(*(void**)(obj + 0xE10), &loc.code);
+    GetStateWalkerCurrentKey((StateWalker*)(*(void**)(obj + 0xE10)), &loc.code);
     code = loc.code;
     if (code != 0x43C) {
         if (code < 0x43D) {
@@ -295,7 +302,7 @@ s32 HasWorld2BossClearLine(World2Boss* self)
 one:
     return 1;
 second:
-    ComputeObjectFrameAtTime(sub, 0, loc.buf, 0, 0, 0, D_002649C8);
+    ComputeObjectFrameAtTime((PlacedObject*)sub, 0, (Vec02*)loc.buf, 0, 0, 0, D_002649C8);
     if (IsWorld2BossLineBlocked((World2Boss*)obj, obj + 0x140, loc.buf) == 0) {
         goto one;
     }
@@ -312,7 +319,7 @@ s32 IsWorld2BossFree(World2Boss* self)
     if (self->f724 == 0x10) goto zero;
     if (self->f724 == 0xB) goto zero;
     if (((VFnI_0018AAE0*)self->desc)[0x66](self) == 0) goto zero;
-    GetStateWalkerCurrentKey(self->fE10, &out);
+    GetStateWalkerCurrentKey((StateWalker*)self->fE10, &out);
     if (out == 0x43C) goto one;
     if (out < 0x43D) {
         if (out == 0x43A) goto one;
@@ -325,9 +332,9 @@ one:
     return 1;
 }
 
-void EnterWorld2BossState(World2Boss* self)
+void EnterWorld2BossState(World2Boss* self, s32 evt, Animation* arg)
 {
-    EnterAgentState(self);
+    EnterAgentState(self, evt, arg);
     s32 st = self->f724;
     if (st != 0xB) {
         if (st == 0x10) {
@@ -345,7 +352,7 @@ s32 ChooseWorld2BossState(World2Boss* self)
 {
     if (self->f724 == 4) {
         s32 kind;
-        GetStateWalkerCurrentKey(self->fE10, &kind);
+        GetStateWalkerCurrentKey((StateWalker*)self->fE10, &kind);
         if (kind == 0x438) {
             if (GetAgentRosterState(self) == 0)
                 return 2;
@@ -356,23 +363,23 @@ s32 ChooseWorld2BossState(World2Boss* self)
 
 void AdvanceWorld2BossPhase(World2Boss* self)
 {
-    DecrementGaugeCount((u8*)&g_gaugeBarElement);
+    DecrementGaugeCount((T217D_2E0*)&g_gaugeBarElement);
     s32 idx = self->fE28;
-    ChangeAgentState(self, D_002649D8[idx], self->fE30[idx]);
+    ChangeAgentState(self, D_002649D8[idx], (void*)self->fE30[idx]);
     s32 n = self->fE28;
     self->fE3C = D_002649E8[n];
     self->fE28 = n + 1;
 }
 
-void UpdateWorld2Boss(void)
+void UpdateWorld2Boss(World2Boss* self, f32 dt)
 {
-    UpdateAgent();
+    UpdateAgent(self, dt);
 }
 
 void ShowWorld2BossBar(World2Boss* self)
 {
     s32 kind;
-    GetStateWalkerCurrentKey(self->fE10, &kind);
+    GetStateWalkerCurrentKey((StateWalker*)self->fE10, &kind);
     s32 pick = 0;
     switch (kind) {
     case 0x43A:
@@ -389,9 +396,9 @@ void ShowWorld2BossBar(World2Boss* self)
         g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
-void SetAgentGoalPoint(void* self, void* p);
-s32 GetObjectWorldPosition(void* obj, Vec02* out);
-void UpdateAgentGoal(void* self, s32 flag);
+void SetAgentGoalPoint(Agent* self, Vec02* p);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
+void UpdateAgentGoal(Agent* self, s32 flag);
 
 void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
 {
@@ -399,18 +406,18 @@ void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
     case 4:
         if (self->fE14 != 0) {
             Vec02 pos;
-            GetObjectWorldPosition(self->fE14, &pos);
+            GetObjectWorldPosition((BaseObject*)self->fE14, &pos);
             SetAgentGoalPoint(self, &pos);
         } else {
             s32 key;
-            GetStateWalkerCurrentKey(self->fE10, &key);
+            GetStateWalkerCurrentKey((StateWalker*)self->fE10, &key);
             switch (key) {
             case 0x438:
             case 0x439:
-                SetAgentGoalPoint(self, (u8*)self + 0x140);
+                SetAgentGoalPoint(self, (Vec02*)((u8*)self + 0x140));
                 break;
             default:
-                SetAgentGoalPoint(self, (u8*)g_player + 0x140);
+                SetAgentGoalPoint(self, (Vec02*)((u8*)g_player + 0x140));
                 break;
             }
         }
@@ -434,17 +441,21 @@ struct CyclicRanges {
 };
 
 extern ValueRange g_unitRange;
-void UpdateAgentState(void* self);
+void UpdateAgentState(Agent* self);
 void GetWorld2BossLevelFactor(World2Boss* a0, f32* a1);
-f32 ArctangentOfRatio(f32 y, f32 x);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 f32 WrapAngle(f32 a);
-void SetPlayerBlendWeights(f32 angle, f32 weight, void* self, void* blend, s32 table);
-void* FindEntryByObjectId(BlendAnimationView* self, void* key);
-s32 FindCyclicRangeIndex(s32 count, void* pairs, f32 x, f32 period, f32* out);
+struct TurnBlendRecords;
+struct BlendTimeScale;
+void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecords* a1, BlendAnimationView* a2);
+void* FindEntryByObjectId(BlendAnimationView* self, BaseObject* key);
+s32 FindCyclicRangeIndex(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out);
 void RecordCameraTimestamp(Camera* c);
-void StartSoundEffect(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-s32 IsAgentFacingBlocked(void* self);
-void SetAgentFacingAngles(void* self, f32 yaw, f32 pitch);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
+s32 IsAgentFacingBlocked(Agent* self);
+void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 typedef Agent* (*GaugeTargetFn)(World2Boss* self);
 
 void UpdateWorld2BossState(World2Boss* self)
@@ -475,17 +486,17 @@ void UpdateWorld2BossState(World2Boss* self)
         f32 heading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
         f32 turn = __builtin_fabsf(WrapAngle(heading - self->f638));
         f32 k = g_unitRange.Clamp(((QuadraticCurve*)D_00264A20)->Eval(turn));
-        SetPlayerBlendWeights(self->f638, weight * k, self, (u8*)self + 0xC20, self->fE00);
+        SetPlayerBlendWeights(self->f638, weight * k, self, (TurnBlendRecords*)((u8*)self + 0xC20), self->fE00);
         // One mover and one sequence variable for both objects: set twice, they are left to
         // global-alloc, which gives retail's v0 and a0 (docs/TOOLCHAIN.md, local-alloc).
         PoseSource* m;
         CyclicRanges* a;
-        m = ((BlendSourceEntry*)FindEntryByObjectId((BlendAnimationView*)self->fE00, self->f610))->mover;
+        m = ((BlendSourceEntry*)FindEntryByObjectId(self->fE00, (BaseObject*)self->f610))->mover;
         a = *(CyclicRanges**)((u8*)m + 0x10);
-        s32 offFirst = FindCyclicRangeIndex(a->count, a->pairs, self->f7E0->time, ((BlendAnimationView*)self->fE00)->f34, 0) == 0;
-        m = ((BlendSourceEntry*)FindEntryByObjectId((BlendAnimationView*)self->fE00, self->f614))->mover;
+        s32 offFirst = FindCyclicRangeIndex(self->f7E0->time, self->fE00->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
+        m = ((BlendSourceEntry*)FindEntryByObjectId(self->fE00, (BaseObject*)self->f614))->mover;
         a = *(CyclicRanges**)((u8*)m + 0x10);
-        s32 offSecond = FindCyclicRangeIndex(a->count, a->pairs, self->f7E0->time, ((BlendAnimationView*)self->fE00)->f34, 0) == 0;
+        s32 offSecond = FindCyclicRangeIndex(self->f7E0->time, self->fE00->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
         if (offFirst && self->fE04 == 0) {
             RecordCameraTimestamp(g_camera);
             StartSoundEffect(0x1CC, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -522,13 +533,13 @@ void UpdateWorld2BossState(World2Boss* self)
     }
 }
 
-void LeaveWorld2BossState(World2Boss* self)
+void LeaveWorld2BossState(World2Boss* self, s32 mode)
 {
-    LeaveAgentState(self);
+    LeaveAgentState(self, mode);
     if (self->f724 == 16) {
         s32 token = self->fE3C;
         if (token == -1) return;
-        SetStateWalkerTarget((s32)self->fE10, token);
+        SetStateWalkerTarget((StateWalker*)self->fE10, token);
         self->fE3C = -1;
     }
 }
@@ -546,7 +557,7 @@ void HandleWorld2BossNotification(World2Boss* self, s32 a1, MessageBody* key)
                 obj = (ObjectPool*)self->fE1C;
             }
             s32 kind;
-            GetStateWalkerCurrentKey(self->fE10, &kind);
+            GetStateWalkerCurrentKey((StateWalker*)self->fE10, &kind);
             switch (kind) {
             case 0x43A:
             case 0x43C:
@@ -569,14 +580,14 @@ void HandleWorld2BossNotification(World2Boss* self, s32 a1, MessageBody* key)
             break;
         }
     }
-    HandleAgentNotification(self, a1, key);
+    HandleAgentNotification(self, a1, (AgentNotification*)key);
 }
 
 // Hoisting 1.0f into a local `one` matched the constant scheduling.
 void GetWorld2BossLevelFactor(World2Boss* a0, f32* a1)
 {
     s32 kind;
-    GetStateWalkerCurrentKey(a0->fE10, &kind);
+    GetStateWalkerCurrentKey((StateWalker*)a0->fE10, &kind);
     switch (kind) {
     case 0x43A:
         {

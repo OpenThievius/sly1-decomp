@@ -46,41 +46,61 @@
 #include "switched_collider.h"
 #include "vu0.h"
 #include "fpu.h"
+#include "object_finder.h"
+struct BufferedStream;
+struct StateNotifier;
+struct Vec02;
+
+struct StateNotifier;
+
+struct PlacedObject;
+
+struct BaseObject;
+struct Mat02;
+struct Vec02;
+
+struct Mat02;
+struct Vec02;
+
+
+// Types other files define, named by the parameters of their functions declared here.
+struct ScaledTransform;
+struct NodeQuery;
 
 
 s32 FindPathCurveSegment(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
 
 
-s32 ReadBufferedU8(void* src);
-f32 ReadBufferedFloat(void* src);
-void ReadBufferedVector3(void* src, void* dst);
-void* AllocateFrontMemory(s32 size);
+s32 ReadBufferedU8(BufferedStream* self);
+f32 ReadBufferedFloat(BufferedStream* r);
+void ReadBufferedVector3(BufferedStream* src, void* dst);
+u8* AllocateFrontMemory(s32 size);
 
 s32 FindPathCurveSegmentByTime(void* self, f32* a, f32* b);
 
 void WalkToNearestPathCurveSegment(void* a0, void* a1, s32 a2, void* a3, s32 idx, s32 a5, f32* a6, f32* a7, s32* p9, f32* p10);
 
-void MeasureCurveSegmentLength(void* p0, void* p1, void* p2, void* p3, f32 x, f32 y);
+f32 MeasureCurveSegmentLength(const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 dur, f32 end);
 
 void RegisterCollider(Collider* self);
-s32 IsInList(void* a, void* b);
-void RemoveFromList(void* a, void* b);
-s32 IsObjectOfKind(void* a, s32 b);
+s32 IsInList(List01* self, void* item);
+void RemoveFromList(List01* list, void* item);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 extern ObjectLink g_pooledObjectLinks[1];
-void StartPlacedObject(void* self);
-void ResolveObjectLinks(void* self, s32 idx, void* table);
+void StartPlacedObject(PlacedObject* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 
 extern GaugeManager* D_0027C00C;
 
-void GetStateWalkerTargetKey(void* dev, s32* out);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
-void SetStateWalkerTarget(void* dev, s32 value);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 void ApplyGaugeRatioToEffect(GaugeManager* self);
 
 extern f32 g_gameClock[];
 
-void UpdatePlacedObject(void* self);
+void UpdatePlacedObject(PlacedObject* self, f32 f);
 void RunGaugeTimedEvent(void* self);
 void ActivateRandomGaugeSlot(void* self);
 
@@ -93,41 +113,44 @@ extern f32 g_gameTime[];
 f32 RandomFloatInRange(f32 a, f32 b);
 
 
-void PostLoadPlacedObject(void* self);
-void* FindFirstObjectByIdMode4(void* a, void* b, void* c);
-s32 IsObjectOfKind(void* obj, s32 kind);
+void PostLoadPlacedObject(PlacedObject* self);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
-s32 TestCollidersMayContact(void* self, void* obj);
+s32 TestCollidersMayContact(Collider* a, Collider* b);
 
 // Slot 2 of the held record's table, as func_0014FC38 calls it.
 typedef void (*Held23Slot2Fn)(void* self, s32 arg);
 
-void TeleportStateWalker(void* h, s32 arg);
-void GetStateWalkerCurrentKey(void* h, s32* out);
-void DestroyStateWalker(void* h);
-void HandleMaskedColliderActivation(void* self);
+void TeleportStateWalker(StateWalker* self, s32 key);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void DestroyStateWalker(StateWalker* self);
+void HandleMaskedColliderActivation(MaskedCollider* self);
 
-void GetStateWalkerTargetKey(void* h, s32* out);
-void SetStateWalkerTarget(void* h, s32 code);
-
-void InterpolatePathCurvePoint(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 void InterpolatePathCurvePoint(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
-void TransformByMatrixWithW(void* a, void* b, f32 w, void* c);
-void DrawProjectedLine(void* a, void* b, void* c, s32 d, s32 e);
+void InterpolatePathCurvePoint(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
-void SampleCurvePoints(void* a, void* b, void* c, void* d, f32 x, f32 y, f32 z, s32 n, void* buf);
+struct ClipPoint;
+struct PackedColor;
+void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
+void DrawProjectedLine(ClipPoint* a, ClipPoint* b, PackedColor* c, u8* obj, s32 k);
+
+struct CurvePoint;
+void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, s32 count,
+                       CurvePoint* out, f32 start, f32 end);
 f32 AccumulateSegmentLengths(s32 n, void* buf, void* other);
 
 
 void InitCollider(Collider* self);
 
-void TransformByMatrixWithW(void* a, void* b, f32 w, void* c);
+void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
 
 void FindNearestPathCurveSegment(void* a0, void* a1, s32 count, void* a3, void* a4, void* a5, s32* outIdx, f32* outT);
 
-void InitPlayerFlaggedCollider(void* self);
+void InitPlayerFlaggedCollider(PlayerFlaggedCollider* self);
 
 s32 FindPathCurveSegment(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
 
@@ -135,48 +158,48 @@ s32 FindPathCurveSegment(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
 void WalkToNearestPathCurveSegment(void* a0, void* a1, s32 a2, void* a3, s32 idx, s32 a5, f32* a6, f32* a7, s32* p9, f32* p10);
 
 
-s32 ReadBufferedU8(void* src);
-f32 ReadBufferedFloat(void* src);
-void ReadBufferedVector3(void* src, void* dst);
-void* AllocateFrontMemory(s32 size);
+s32 ReadBufferedU8(BufferedStream* self);
+f32 ReadBufferedFloat(BufferedStream* r);
+void ReadBufferedVector3(BufferedStream* src, void* dst);
+u8* AllocateFrontMemory(s32 size);
 void ResetSplineSegmentCache(void* self);
+void RemoveObjectFromParentList(BaseObject* self);
+void AppendToList(List01* self, void* item);
 
-void RemoveObjectFromParentList(void*);
-void AppendToList(void*,void*);
 
 void CopyCollider(Collider* self, Collider* other);
 
-void LoadCollider(Collider* self);
+void LoadCollider(Collider* self, BufferedStream* stream);
 void FindOrBuildMemberGroup(void** out, void* self);
 
-void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
 
-void HandlePlacedObjectNotification(void* self, s32 kind, void* msg);
-void GetStateWalkerTargetKey(void* dev, s32* out);
-void DestroyStateWalker(void* h);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void DestroyStateWalker(StateWalker* self);
 
 s32 FindPathCurveSegment(f32 x, s32 n, f32* arr, void* p2, f32* lo, f32* hi);
 
 
 extern ObjectLink g_takerLinks[3];
 
-void StartMaskedCollider(void* self);
-void ResolveObjectLinks(void* self, s32 n, void* table);
-PlacedObject* FindFirstObjectByIdMode1(void* a, s32 kind, void* arg);
-void* CreateObjectCopy(void* item, void* x, void* self);
+void StartMaskedCollider(MaskedCollider* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 void SyncPooledHolderWithPlayer(PooledHolder* self);
-void* AppendQueuedCall(void* owner, void* fn, void* arg, s32 a3, s32 a4);
-void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
+struct StateGraph;
+void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 
 
 
 extern ObjectLink g_gaugeManagerLinks[3];
 
-void StartPlacedObject(GaugeManager* self);
-void ResolveObjectLinks(GaugeManager* self, s32 n, void* table);
-void* CreateStateWalker(void* a, s32 b, s32 c, s32 d);
-void GetStateWalkerCurrentKey(void* a, void* b);
-void AddStateWalkerListener(void* a, void* b);
+void StartPlacedObject(PlacedObject* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void AddStateWalkerListener(StateWalker* self, PlacedObject** p);
 void ComputeGaugeOutputs(GaugeManager* self);
 
 extern f32 g_gameTime[];
@@ -184,11 +207,10 @@ extern f32 g_gameTime[];
 
 
 f32 RandomFloatInRange(f32 a, f32 b);
-void GetStateWalkerTargetKey(void* dev, s32* out);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
-void SetStateWalkerTarget(void* dev, s32 value);
-s32 GatherObjectsById(void* obj, s32 a1, s32 a2, s32 a3, s32 a4, s32* out);
-void ChangeAgentState(s32 value, s32 a1, s32 a2);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
+void ChangeAgentState(Agent* self, s32 state, void* context);
 void StopTimer(void* obj);
 void ComputeGaugeOutputs(GaugeManager* self);
 
@@ -196,9 +218,9 @@ void ComputeGaugeOutputs(GaugeManager* self);
 
 extern f32 g_gameTime[];
 
-void FadeOutPlacedObject(PlacedObject* sub, f32 value);
+void FadeOutPlacedObject(Collider* self, f32 time);
 
-void RaiseScatterLevels(void* self, f32 amount);
+void RaiseScatterLevels(ScatterController* self, f32 amount);
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
@@ -212,26 +234,26 @@ void* AllocateZeroedFrontMemory(u32 n);
 
 s32 AcquirePooledObject(PooledHolder* self);
 PooledObject* FindFirstAttachedPooledObject(PooledHolder* self);
-s32 IsObjectAttached(PooledObject* p);
-void AssignAimTarget(Held23* a, PooledObject* b, u8* c);
+s32 IsObjectAttached(BaseObject* self);
+void AssignAimTarget(T2195_790* self, void* obj, Vec02* src);
 
 // NEAR: the tail stores differ in order and register: retail does sw f6C8, then lui v1 / li v0,1 / lwc1 v1, we do lui v0 before the sw and use v0 for the address.
 
 
-s32 IsListEmpty(void* p);
+u32 IsListEmpty(List01* p);
 void SelectEarliestPooledObject(PooledHolder* self);
-void SetColliderAnchors(Collider* o, s32 a, s32 b, s32 c, s32 d);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
 // NEAR: the search index is kept in a0 where retail uses a2, and hi is saved in s3 before the call in retail; the loop shape is otherwise the same.
 
 
 
-void UpdateCollider(Collider* self);
+void UpdateCollider(Collider* self, f32 dt);
 void UpdateHeldPooledObject(PooledObject* self, f32 f);
 
-void UpdateMaskedCollider(PooledHolder* self);
-void GetStateWalkerCurrentKey(void* p, s32* out);
-void GetStateWalkerTargetKey(void* p, s32* out);
+void UpdateMaskedCollider(MaskedCollider* self, f32 dt);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
 void UpdatePooledHolderAim(PooledHolder* self, s32* state);
 void ThrowHeldPooledObject(PooledHolder* self);
 void SetPooledHolderWalkerState(PooledHolder* self, s32 state);
@@ -239,10 +261,10 @@ void SetPooledHolderWalkerState(PooledHolder* self, s32 state);
 extern const f32 D_00249FB8;
 
 s32 RandomIntInRange(s32 a, s32 b);
-s32 GetObjectWorldPosition(void* p, f32* out);
-s32 GetObjectWorldRotation(void* p, f32* out);
-s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, void* out, f32 fa, f32 fb);
-void AddAnimationPlayerRecordCallback(void* a, GaugeManager* self);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
+void GetObjectWorldRotation(BaseObject* self, Mat02* out);
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
+void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1);
 f32 RandomFloatInRange(f32 a, f32 b);
 
 
@@ -254,45 +276,21 @@ f32 MeasureSplinePathDistance(void);
 extern const GaugeParams g_defaultGaugeParams;
 extern const f32 D_00249FB0;
 
-void InitPlacedObject(GaugeManager* self);
+void InitPlacedObject(PlacedObject* self);
 
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 // Defined in src/main/path_curve.cpp.
-f32 GetPathCurveEndTime();
-f32 GetPathCurveEndLength();
-void ReadPathCurve();
-void SamplePathCurveAtTime();
-void SamplePathCurveAtLength();
-void DrawPathCurveSegment();
-void TransformPathCurvePoints();
-f32 GetPathCurveLengthAtTime();
-f32 GetPathCurveTimeAtLength();
-f32 FillPathCurveLengths();
-void FindPathCurveNearestPoint();
-void ProjectOntoPathCurveNearTime();
-void ProjectOntoPathCurveNearLength();
-void ReadSplinePathCurve();
-void SampleSplinePathAtTime();
-void SampleSplinePathAtLength();
-void DrawSplinePathSegment();
-void TransformSplinePathPoints();
-f32 GetSplineLengthAtTime();
-f32 GetSplineTimeAtLength();
-void FillSplinePathLengths();
-void FindSplinePathNearestPoint();
-void FindSplinePathNearestTime();
-void ProjectOntoSplinePathNearLength();
 extern const Fn_Table g_pathCurveKind0Methods[14];
 extern const Fn_Table g_pathCurveKind1Methods[14];
 
 
-void HandlePlacedObjectNotification(GaugeManager* self, s32 kind, void* key);
-void GetStateWalkerCurrentKey(void* key, s32* out);
-void SetWorldActiveFollower(void* sub, GaugeManager* self);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void SetWorldActiveFollower(World* self, void* v);
 void StartTimer(T217D_510* self, f32 v);
 void StartTimerCounting(T217D_510* self);
-void FinishGaugeOnTimeout(void* self);
+void FinishGaugeOnTimeout(T217D_510* timer, s32 mode);
 
 
 
@@ -301,24 +299,23 @@ extern f32 g_gameClock[];
 extern const GaugeParams g_defaultGaugeParams;
 
 
-PooledObject* FindEarliestPooledChild(PooledObject*);
+PooledObject* FindEarliestPooledChild(PlacedObject* self);
 
-extern s32 IsObjectAttached(void*);
+extern s32 IsObjectAttached(BaseObject* self);
 
-s32 IsObjectOfKind(void* event, s32 kind);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
-extern void InitPlacedObject();
 
-void LoadPlacedObject(void* self, void* arg);
-void ReadSequenceSteps(void* self, void* arg, void* a, void* b);
+void LoadPlacedObject(PlacedObject* self, void* r);
+void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, SequenceStep** outArr);
 
-void StartPlacedObject(void* self);
-void* GetIndexedTargetSlot(void* base, s32 index);
+void StartPlacedObject(PlacedObject* self);
+void* GetIndexedTargetSlot(void* self, s32 index);
 
-extern void HandlePlacedObjectNotification(void*, u32, u32);
+extern void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
 
 extern u8 g_elementStack[];
-void PushStackElement(void* a, void* b);
+void PushStackElement(ElementStack* self, ScreenElement* node);
 
 
 // The caption box as func_00150790 clears its child (T217D_440::child, +0x324): an unaligned
@@ -327,60 +324,61 @@ struct __attribute__((packed)) CaptionBoxPacked { u8 pad0[0x324]; void* child; }
 
 void SetStepSequenceState(StepSequence* self, s32 arg);
 
-extern void* GetLevelEntryByKey(const char*);
-extern void* GetIndexedTargetSlot(void*, u32);
+extern void* GetLevelEntryByKey(s32 key);
+extern void* GetIndexedTargetSlot(void* self, s32 index);
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-f32 ClampToRange(void*, f32);
+f32 ClampToRange(ValueRange* span, f32 x);
 void SetScatterLevel(ScatterController* object, f32 unused);
-f32 ClampToRange(void*, f32);
+f32 ClampToRange(ValueRange* span, f32 x);
 
-extern f32 ClampToRange(void*, f32);
+extern f32 ClampToRange(ValueRange* span, f32 x);
 
 // An item's link in a list (List01::offset bytes into it): the next and the previous item.
-struct ListLink { s32 next; s32 prev; };
+struct ListLink { void* next; void* prev; };
 
 void PrependToList(List01*, u32);
 
-extern u32 ResetDmaController(u32);
+extern "C" s32 ResetDmaController(s32 mode);
 extern void ResetGsPaths();
-extern u32 GetDmaChannel(u32);
+struct DmaChannel;
+extern "C" u32 GetDmaChannel(u32 index);
 extern u32 g_vif0Channel, g_vif1Channel, g_gifChannel, g_fromSprChannel, g_toSprChannel;
 
 u8* ReservePermanentMemory(s32 size);
 
-extern u8* AllocateFrontMemory(u32);
-
-extern u8* AllocateBackMemory(u32);
+extern u8* AllocateBackMemory(s32 size);
 
 void CloseDmaTag(PacketWriter* self);
 
-void CloseDmaTag(void* self);
-u32 CopyToFrontMemory(u32 size, u32 src);
+void CloseDmaTag(PacketWriter* self);
+u32 CopyToFrontMemory(s32 size, void* src);
 
-void SyncDataCache(s32 unused);
-void StartDmaChain(void* dma, void* addr);
+extern "C" void SyncDataCache(s32 unused);
+struct DmaChannel;
+extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
 
-void CopyQuadwords(void* cursor, s32 count, s32 index);
+void CopyQuadwords(void* dst, void* src, s32 n);
 
-void CloseDmaTag(void* self);
+void CloseDmaTag(PacketWriter* self);
 
-void HandleStepSequenceMessage(StepSequence* self, u8* item);
+struct SequenceMessage;
+void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg);
 s32 TestStepWaitConditions(StepSequence* self);
-void StopAnimationPlayer(void* obj);
+void StopAnimationPlayer(AnimationPlayer* self);
 void SkipRemainingSteps(StepSequence* self);
 
 
 void DrawPlacedObjectParts(DeferredRequest* self);
-void* FillMemory(void* p, s32 value, s32 size);
-void BuildPlacedObjectTransform(void* obj, void* c, void* out);
-void QueueDeferredRequest(void* p);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
+void QueueDeferredRequest(DeferredRequest* src);
 
 
 void* GetListLinks(void* a, void* b);
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void SetListLinkOffset(List01* self, s32 offset);
 
 
@@ -394,9 +392,9 @@ void ClearList(List01* node);
 
 extern s32 D_00275B00;
 void SetSpareCount(s32 value);
-f32 ClampToRange(void*, f32);
+f32 ClampToRange(ValueRange* span, f32 x);
 void SetScatterLevel(void*, f32);
-void CompleteSoundNotifiers(void*);
+void CompleteSoundNotifiers(World* self);
 
 // An entry of a GCC 2.95 vtable as this file defines D_0024A0E0 (packet_writer.h).
 struct VtableEntry { s32 delta; void (*fn)(); };
@@ -408,60 +406,59 @@ extern s32 D_00261D38;
 extern f32 g_gameTime[];
 
 void StopStreamVoice(void);
-void TriggerScriptEvent(StepSequence* self, s32 a, s32 b, s32 c);
-void RemoveCameraControllers(Camera* m, s32 a, s32 b, void* c, s32 d, s32 e);
-void ReleasePadSelectFlag(void* a);
-void AcquirePadSelectFlag(void* a);
-s32 PopStackValue(void* a);
-void PushStackValue(void* a, s32 b);
-void PushCameraController(Camera* m, s32 a, void* b, s32 c, s32 d);
-void StopAnimationPlayer(void* a);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, void* k2, void* k3);
+void ReleasePadSelectFlag(World* self);
+void AcquirePadSelectFlag(World* a0);
+s32 PopStackValue(TargetCameraController* s);
+void PushStackValue(TargetCameraController* s, s32 value);
+void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, void* arg);
+void StopAnimationPlayer(AnimationPlayer* self);
 void SetVolumeChannelFactor(s32 a, s32 b, f32 f);
 void SetTextPanelState(T217D_440* a, s32 b);
-void SetTextPanelSubject(T217D_440* a, s32 b);
-void* FindFirstObjectByIdMode4(void* a, s32 b, s32 c);
-void SetArcTarget(T217D_3F0* a, s32 b);
-void SetArcSpecialObject(T217D_3F0* a, s32 b);
+void SetTextPanelSubject(T217D_440* a, BaseObject* b);
+void SetArcTarget(T217D_3F0* self, void* value);
+void SetArcSpecialObject(T217D_3F0* self, void* a1);
 
 void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6);
-void RemoveFromList(void* list, ActiveSetItem* n);
-void AppendToList(void* list, ActiveSetItem* n);
+void RemoveFromList(List01* list, void* item);
+void AppendToList(List01* self, void* item);
 extern f32 D_BC23D70A;
 
 
-void ClearList(void* p);
-void AppendToList(void* list, void* item);
+void ClearList(List01* p);
+void AppendToList(List01* self, void* item);
 
 
 s32 ReadBufferedS8(BufferedStream* r);
 void* AllocateZeroedFrontMemory(s32 n);
-void ReadOptionalBufferedBlock(BufferedStream* r, void* out);
+void ReadOptionalBufferedBlock(BufferedStream* self, u32* out);
 s32 ReadBufferedS16(BufferedStream* r);
 f32 ReadBufferedFloat(BufferedStream* r);
 s32 ReadBufferedU8(BufferedStream* r);
-void ReadBufferedString(BufferedStream* r, void* out);
+void ReadBufferedString(BufferedStream* self, u8** out);
 
 extern u8 g_elementStack[];
-void TriggerScriptEvent(StepSequence* self, s32 a, s32 b, s32* c);
-void ShowCountedScreenElement(void* a);
-void HideCountedScreenElement(void* a);
-void PopStackElement(void* p);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void ShowCountedScreenElement(World* self);
+void HideCountedScreenElement(World* self);
+void PopStackElement(ElementStack* g);
 
 extern s32 D_00275F84;
 extern s32 D_00270B30;
 extern s32 D_002717A8;
 extern u8 g_elementStack[];
 
-void UpdatePlacedObject(StepSequence* self);
+void UpdatePlacedObject(PlacedObject* self, f32 f);
 s32 IsStreamVoiceLocked(void);
 void SetStepSequenceState(StepSequence* self, s32 mode);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 Ent65* GetActiveSwitchedCollider(void);
 s32 IsTopCameraController(CameraController* p);
 void ChooseStepSequenceState(StepSequence* self);
 void ShowStepSequenceText(StepSequence* value, Ent65* object);
 void SkipRemainingSteps(StepSequence* self);
-void PopStackElement(void* p);
+void PopStackElement(ElementStack* g);
 void RunStepSequence(StepSequence* self);
 
 
@@ -475,16 +472,18 @@ s32 IsTextPanelTextTyped(T217D_440* p);
 
 
 
-void RemoveFromList(List01* list, ActiveSetItem* n);
-void AppendToList(List01* list, ActiveSetItem* n);
+void RemoveFromList(List01* list, void* item);
+void AppendToList(List01* self, void* item);
 void FactorSymmetricMatrix(s32 n, f32* mat, f32* vec);
 void SolveFactoredSystem(s32 n, f32* a, f32* b, f32* c);
 
 // The object a caption is spoken by (kind 0x104, found by id by func_00150DC0): its colour
 // becomes the caption box's highlight, its state walker (+0x334) is sent key 0x34C.
-struct CaptionSpeaker { u8 pad0[0x2D0]; Rgba4 f2D0; u8 pad1[0x334 - 0x2D4]; s32 f334; };
+struct StateWalker;
+struct CaptionSpeaker { u8 pad0[0x2D0]; Rgba4 f2D0; u8 pad1[0x334 - 0x2D4]; StateWalker* f334; };
 // A word of a step sequence's message, read as an id or a time.
-union MessageWord { s32 i; f32 f; };
+struct KeyRecord;
+union MessageWord { s32 i; f32 f; KeyRecord* key; void* p; };
 
 // The message HandleStepSequenceMessage takes.
 struct SequenceMessage {
@@ -497,28 +496,26 @@ struct SequenceMessage {
 
 extern u8 g_moviePlayer[];
 
-void OpenKeyRecord(s32 a);
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-void SetStateWalkerTarget(s32 a, s32 b);
-void SetArcTarget(T217D_3F0* a, CaptionSpeaker* b);
-void SetArcSpecialObject(T217D_3F0* a, CaptionSpeaker* b);
-s32 MatchesObjectId(CaptionSpeaker* a, s32 b);
+void OpenKeyRecord(KeyRecord* self);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
+void SetArcTarget(T217D_3F0* self, void* value);
+void SetArcSpecialObject(T217D_3F0* self, void* a1);
+s32 MatchesObjectId(BaseObject* self, s32 id);
 void SetArcFade(T217D_3F0* a, s32 b);
-s32 CreateAnimationPlayerWithoutPresetTargets(f32 e, f32 f, CaptionSpeaker* a, s32 b, s32 c, AnimationPlayer** d);
-void AddAnimationPlayerRecordCallback(AnimationPlayer* a, StepSequence* b);
-u32 GetStringLength(s8* a);
+void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1);
+extern "C" u32 GetStringLength(const char* s);
 void SetTextPanelValuePercent(T217D_440* a, f32 b);
-void SetTextPanelSubject(T217D_440* a, s32 b);
-void* FindFirstObjectByIdMode4(void* a, s32 b, s32 c);
-void TriggerScriptEvent(StepSequence* a, s32 b, s32 c, void* d);
-void ShowCountedScreenElement(void* a);
-void HideCountedScreenElement(void* a);
-void QueueMovie(u8* a, s32 b);
+void SetTextPanelSubject(T217D_440* a, BaseObject* b);
+struct MoviePlayer;
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void ShowCountedScreenElement(World* self);
+void HideCountedScreenElement(World* self);
+void QueueMovie(MoviePlayer* self, void* p);
 
 
 s32 RandomIntInRange(s32 lo, s32 hi);
-f32 ClampToRange(void* p, f32 v);
-s32 ScatterObjectsAroundCircle(World* mgr, s32 kind, void* p, s32 n, void* arr);
+f32 ClampToRange(ValueRange* span, f32 x);
+s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec02* a2, s32 n, StateNotifier** arr);
 
 // Draws a count between two bounds by the level (g_currentEntry->dt), rounding toward the second.
 struct LevelLerp
@@ -536,21 +533,21 @@ struct LevelLerp
 void* InitGifPacket(PacketWriter* p);
 void* InitPacketWriter(PacketWriter* p);
 void PushBackMemoryMark(void);
-void AllocateTempPacketBuffer(PacketWriter* p, s32 size);
+void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
 void WriteVifFlushE(PacketWriter* p);
-void SetupTextureRenderTarget(TextureHeader* t, PacketWriter* p);
-void BeginGifTag(PacketWriter* p, s32 a, s32 b, u64 c);
-void AddGifRgbaEntry(PacketWriter* p, s32 a);
+void SetupTextureRenderTarget(TextureHeader* src, void* dst);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRgbaEntry(PacketWriter* self, u32 value);
 void AddGifXyzEntry(PacketWriter* p, s32 a, s32 b, u64 c);
-void AddGifRegisterWrite(PacketWriter* p, s32 a, u64 v);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void EndGifPacket(PacketWriter* p);
 void WriteVifDirectFromWriter(PacketWriter* p, PacketWriter* q);
-void WriteVifBaseOffset(PacketWriter* p, s32 a, s32 b);
-void CopyWordsToWriter(PacketWriter* p, s32 size, s32 count, void* data, s32 flags);
+void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
+void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void ClearPacketBuffer(PacketWriter* p);
-void UsePacketBufferMemory(PacketWriter* p, s32 n, Quad4* q);
-void ReserveGifPackedData(PacketWriter* p, s32 a, s32 b, s32 c, u64 d, s32 e);
-void DetachPacketBufferCopy(PacketWriter* p, s32* a, s32 b, s32* c, s32 d);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, u8** out);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
 void PopBackMemoryMark(void);
 void AddGifUvEntry(PacketWriter* p, s32 a, s32 b);
 void WriteVifFlush(PacketWriter* p);
@@ -564,7 +561,7 @@ extern ScatterTable D_00261E30;
 extern ScatterTable D_00261E90;
 s32 RandomIntInRange(s32 a, s32 b);
 
-void InitPlacedObject(void* self);
+void InitPlacedObject(PlacedObject* self);
 
 
 
@@ -572,8 +569,8 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void CopyMemory(void* dst, void* src, s32 size);
 void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
-void AppendToList(void* tmp, ActiveSetItem* item);
-void RunActiveSetSolver(ActiveSetSolver* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+void AppendToList(List01* self, void* item);
+void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6);
 void InitPooledObject(PooledObject* self)
 {
     InitCollider(self);
@@ -605,9 +602,9 @@ void CopyPooledObject(PooledObject* self, Collider* other)
     self->keep56C = save;
 }
 
-void LoadPooledObject(PooledObject* self)
+void LoadPooledObject(PooledObject* self, BufferedStream* stream)
 {
-    LoadCollider(self);
+    LoadCollider(self, stream);
     FindOrBuildMemberGroup(&self->member58C, self);
 }
 
@@ -630,7 +627,7 @@ void StartPooledObject(PooledObject* self)
 
 void UpdatePooledObject(PooledObject* self, f32 f)
 {
-    UpdateCollider(self);
+    UpdateCollider(self, f);
     switch (self->state) {
     case 0:
     case 1:
@@ -670,7 +667,7 @@ void SetPooledObjectState(PooledObject* self, s32 state)
 
 extern f32 D_00261CD4;
 extern f32 D_00261CD8;
-void SetPlayerState(PlacedObject* self, s32 a, s32 b);
+void SetPlayerState(Player* self, s32 state, s32 sub);
 
 // The owner-message callback of a pooled object's launch: gives the other object, through its
 // slot 36, the pooled object's horizontal direction (its velocity with z cleared, unit length,
@@ -691,20 +688,21 @@ void LaunchObjectFromPooledObject(PlacedObject* self, PlacedObject* other)
     Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(D_00261CD4), Vu0::Q(g_unitZVector), Vu0::ScalarAtValue(D_00261CD8));
     desc->m20(other, &r);
     if (IsObjectOfKind(other, 7) != 0) {
-        SetPlayerState(other, 4, 0x2B);
+        SetPlayerState((Player*)other, 4, 0x2B);
     }
 }
 
-Collider* FindContactingPart(void* self);
-void InitOwnerMessage(OwnerMessage* m, s32 mode, void* owner);
-void StartPadRecordPattern(void* rec, s32 n, f32 t);
-s32 CountHeldPooledChildren(void* self);
-PlacedObject *FindNodeForQuery(void* query, s32 a, s32 b);
-void SendPointEventToWorldListener(Vec02* at, f32 x);
-void ComputeObjectFrameAtTime(void* self, void* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
-void BuildBasisFromX(Vec02* v, Mat02* out);
-void StartSoundEffect(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void CreateAnimationPlayerWithoutPresetTargets(void* a, PooledObject* b, s32 c, void** out, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_0014F270 differs in registers
+void* FindContactingPart(Collider* self);
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
+void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration);
+s32 CountHeldPooledChildren(PlacedObject* self);
+PlacedObject *FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
+void SendPointEventToWorldListener(Quad16* a0, f32 f);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
+void BuildBasisFromX(Vec02* x, Mat02* out);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // The query FindNodeForQuery takes for an object that touched a held one (func_0014F270).
 struct HeldTouchQuery {
@@ -727,10 +725,10 @@ struct HeldLandEvent {
 typedef void (*ObjFn)(void* self);
 typedef void (*ObjPtrFn)(void* self, void* a);
 
-void UpdateHeldPooledObject(PooledObject* self)
+void UpdateHeldPooledObject(PooledObject* self, f32 dt)
 {
     typedef Vu0::Vec Vec;
-    Collider* c = FindContactingPart(self);
+    Collider* c = (Collider*)FindContactingPart(self);
     if (c != 0) {
         s32 lands = 1;
         if (c == (Collider*)g_player && (g_player->f2220 != 6 || g_player->f239C != 2)) {
@@ -755,7 +753,7 @@ void UpdateHeldPooledObject(PooledObject* self)
             SetColliderAnchors(self, 3, 0, 3, 0);
             SetPooledObjectState(self, 4);
             if (self->f574 != 0) {
-                CreateAnimationPlayerWithoutPresetTargets(self->f574, self, 0, &self->watched, 0.0f, 1.0f);
+                CreateAnimationPlayerWithoutPresetTargets((Animation*)self->f574, self, 0, (AnimationPlayer**)&self->watched, 0.0f, 1.0f);
                 if (self->watched != 0) {
                     SetPooledObjectState(self, 3);
                 }
@@ -782,7 +780,7 @@ void UpdateHeldPooledObject(PooledObject* self)
             q.pos = self->v140;
             q.vel = self->v150;
             q.self = self;
-            FindNodeForQuery(&q, 0, 0);
+            FindNodeForQuery((NodeQuery*)&q, 0, 0);
         }
         if (lands) {
             StartSoundEffect(0x33, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -793,7 +791,7 @@ void UpdateHeldPooledObject(PooledObject* self)
                 ev.pos = self->v140;
                 ((ObjPtrFn)((void**)*(void**)g)[0x7C / 4])(g, &ev);
             } else {
-                SendPointEventToWorldListener(&self->v140, self->f560);
+                SendPointEventToWorldListener((Quad16*)&self->v140, self->f560);
             }
             ((ObjPtrFn)((void**)self->desc)[0x64 / 4])(self, 0);
             ((ObjFn)((void**)self->desc)[0x1C / 4])(self);
@@ -838,10 +836,10 @@ void HandlePooledHolderNotification(PooledHolder* self, s32 kind, void* msg)
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 0x14) {
         if (msg == self->p740) {
-            GetStateWalkerTargetKey(msg, &result);
+            GetStateWalkerTargetKey((StateWalker*)msg, &result);
             if (result == 0x2B7) {
                 if (self->hold != 0) {
-                    DestroyStateWalker(self->p740);
+                    DestroyStateWalker((StateWalker*)self->p740);
                     self->p740 = 0;
                 } else {
                     ((Held23*)self->p734->f200)->f4C = 1;
@@ -863,7 +861,7 @@ void PostLoadPooledHolder(PooledHolder* self)
         do {
             void* p = FindFirstObjectByIdMode4(self->world, self->items748[i], self);
             if (p != 0) {
-                if (IsObjectOfKind(p, 0x41) != 0) {
+                if (IsObjectOfKind((BaseObject*)p, 0x41) != 0) {
                     s32 n = self->count768;
                     self->items76C[n] = p;
                     self->count768 = n + 1;
@@ -886,7 +884,7 @@ void StartPooledHolder(PooledHolder* self)
     StartMaskedCollider(self);
     ResolveObjectLinks(self, 3, g_takerLinks);
     ((Held23*)self->p734->f200)->f4C = 1;
-    PlacedObject* s2 = FindFirstObjectByIdMode1(self->world, self->f6C0, self);
+    PlacedObject* s2 = (PlacedObject*)FindFirstObjectByIdMode1(self->world, self->f6C0, self);
     *(Quad16*)&self->q6F0[0] = *(Quad16*)&s2->v190;
     *(Quad16*)&self->q6F0[1] = *(Quad16*)&s2->m1A0.r[0];
     *(Quad16*)&self->q6F0[2] = *(Quad16*)&s2->m1A0.r[1];
@@ -907,16 +905,16 @@ void StartPooledHolder(PooledHolder* self)
     s2->desc->m15(s2, 0);
     s2->desc->m03(s2);
     AppendQueuedCall(self->world, (void*)(void (*)(void*))SyncPooledHolderWithPlayer, self, 0, 0);
-    self->p740 = CreateStateWalker(self->p73C, self, 0x2B7, 1);
+    self->p740 = CreateStateWalker((StateGraph*)self->p73C, self, 0x2B7, 1);
 }
 
-void UpdatePooledHolder(PooledHolder* self)
+void UpdatePooledHolder(PooledHolder* self, f32 dt)
 {
     s32 st[2];
-    UpdateMaskedCollider(self);
+    UpdateMaskedCollider(self, dt);
     if (self->hold == 0 && self->f6DC != 0 && self->p740 != 0) {
-        GetStateWalkerCurrentKey(self->p740, &st[0]);
-        GetStateWalkerTargetKey(self->p740, &st[1]);
+        GetStateWalkerCurrentKey((StateWalker*)self->p740, &st[0]);
+        GetStateWalkerTargetKey((StateWalker*)self->p740, &st[1]);
         if (st[1] == -1) st[1] = st[0];
         if (st[0] == st[1]) {
             switch (st[0]) {
@@ -970,10 +968,10 @@ void ReleasePooledHolder(PooledHolder* self)
         self->p6C8->desc->m03(self->p6C8);
     }
     if (self->p740 != 0) {
-        TeleportStateWalker(self->p740, 0x2B7);
-        GetStateWalkerCurrentKey(self->p740, &status);
+        TeleportStateWalker((StateWalker*)self->p740, 0x2B7);
+        GetStateWalkerCurrentKey((StateWalker*)self->p740, &status);
         if (status == 0x2B7) {
-            DestroyStateWalker(self->p740);
+            DestroyStateWalker((StateWalker*)self->p740);
             self->p740 = 0;
         }
     }
@@ -988,9 +986,9 @@ void SetPooledHolderWalkerState(PooledHolder* self, s32 code)
 {
     s32 r;
 
-    GetStateWalkerTargetKey(self->p740, &r);
+    GetStateWalkerTargetKey((StateWalker*)self->p740, &r);
     if (r == -1) {
-        GetStateWalkerCurrentKey(self->p740, &r);
+        GetStateWalkerCurrentKey((StateWalker*)self->p740, &r);
     }
     if (code == r) {
         return;
@@ -1006,7 +1004,7 @@ void SetPooledHolderWalkerState(PooledHolder* self, s32 code)
             }
         }
     }
-    SetStateWalkerTarget(self->p740, code);
+    SetStateWalkerTarget((StateWalker*)self->p740, code);
 }
 
 void UpdatePooledHolderAim(PooledHolder* self, s32* state)
@@ -1027,7 +1025,7 @@ void UpdatePooledHolderAim(PooledHolder* self, s32* state)
     if (self->p6E0 == 0) {
         return;
     }
-    AssignAimTarget((Held23*)self->p734->f200, self->p6E0, (u8*)&D_00248D30);
+    AssignAimTarget((T2195_790*)self->p734->f200, self->p6E0, (Vec02*)&D_00248D30);
     if (self->f6D0 < g_gameTime[0] - self->f6D8) {
         if (AcquirePooledObject(self)) {
             *state = 0x2BB;
@@ -1068,10 +1066,10 @@ s32 AcquirePooledObject(PooledHolder* self) {
 #define OBJV ((PooledView*)obj)
 struct PooledView { u8 pad00[0x558]; f32 f558; f32 f55C; u8 pad560[0x580 - 0x560]; f32 f580; f32 f584; };
 void SetPooledObjectState(PooledObject* self, s32 state);
-void BuildBasisFromX(Vec02* dir, Mat02* out);
-void SendPointEventToWorldListener(Vec02* point, f32 radius);
-void TriggerScriptEvent(PooledHolder* host, s32 a, s32 b, void** args);
-void TransformDirectionBetweenFrames(void* frame, s32 zero, void* in, Vec02* out);
+void BuildBasisFromX(Vec02* x, Mat02* out);
+void SendPointEventToWorldListener(Quad16* a0, f32 f);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 void ThrowHeldPooledObject(PooledHolder* self)
 {
@@ -1125,7 +1123,7 @@ void ThrowHeldPooledObject(PooledHolder* self)
     SetPooledObjectState(obj, 2);
     obj->f57C = (s32)source;
     OBJV->f584 = speed;
-    SendPointEventToWorldListener(&obj->v140, OBJV->f55C);
+    SendPointEventToWorldListener((Quad16*)&obj->v140, OBJV->f55C);
     args[0] = &obj;
     TriggerScriptEvent(self, 0xD, 1, args);
 }
@@ -1158,7 +1156,7 @@ PooledObject* FindFirstAttachedPooledObject(PooledHolder* state)
 	return 0;
 }
 
-void AddPooledHolderItem(PooledHolder* self, void* item)
+void AddPooledHolderItem(PooledHolder* self, s32 item)
 {
     u32 n = (u32)self->count744;
     if (n < 8) {
@@ -1175,11 +1173,11 @@ void ResetCollectedItems(PooledHolder* self)
 
 void RecordCollectedItem(PooledHolder* self, void* event)
 {
-    if (IsObjectOfKind(event, 7)) {
+    if (IsObjectOfKind((BaseObject*)event, 7)) {
         self->f7B0 = 1;
         return;
     }
-    if (!IsObjectOfKind(event, 0x41)) {
+    if (!IsObjectOfKind((BaseObject*)event, 0x41)) {
         return;
     }
     s32 found = 0;
@@ -1200,16 +1198,16 @@ void RecordCollectedItem(PooledHolder* self, void* event)
 
 void InitStepSequence(StepSequence* state)
 {
-	InitPlacedObject();
+	InitPlacedObject(state);
 	state->flags |= ((u64)0x8000u << 17);
 	state->second300 = -1;
 	state->first30C = -1;
 }
 
-void LoadStepSequence(StepSequence* self, void* arg)
+void LoadStepSequence(StepSequence* self, BufferedStream* arg)
 {
     LoadPlacedObject(self, arg);
-    ReadSequenceSteps(self, arg, &self->count2DC, &self->steps2E0);
+    ReadSequenceSteps(self, arg, &self->count2DC, (SequenceStep**)&self->steps2E0);
 }
 
 void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, SequenceStep** outArr)
@@ -1223,7 +1221,7 @@ void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, Sequence
         switch (e->type) {
         case 0:
         case 7:
-            ReadOptionalBufferedBlock(rd, &e->w4);
+            ReadOptionalBufferedBlock(rd, (u32*)&e->w4);
             break;
         case 1:
         case 2:
@@ -1239,7 +1237,7 @@ void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, Sequence
             e->w1C = ReadBufferedS16(rd);
             e->w20 = ReadBufferedS16(rd);
             e->w24 = ReadBufferedS16(rd);
-            ReadBufferedString(rd, e->w14);
+            ReadBufferedString(rd, (u8**)e->w14);
             break;
         case 4:
             e->w4 = ReadBufferedS16(rd);
@@ -1307,8 +1305,8 @@ void SetStepSequenceState(StepSequence* self, s32 next)
             ReleasePadSelectFlag(g_currentWorld);
         }
         (void)PopStackValue(&g_camera->ctl460);
-        if ((self->f2E8 & 0x10) != 0 && self->value2F8 != 0) {
-            StopAnimationPlayer((void*)self->value2F8);
+        if ((self->f2E8 & 0x10) != 0 && self->player2F8 != 0) {
+            StopAnimationPlayer(self->player2F8);
         }
         if (self->mode2D0 == 2 && self->f330 != 0) {
             f32 f = 1.0f;
@@ -1374,13 +1372,13 @@ void SetStepSequenceState(StepSequence* self, s32 next)
     self->time2D8 = g_gameTime[0];
 }
 
-void UpdateStepSequence(StepSequence* self)
+void UpdateStepSequence(StepSequence* self, f32 dt)
 {
     s32 q[2];
     s32 s1;
     Ent65* s2;
 
-    UpdatePlacedObject(self);
+    UpdatePlacedObject(self, dt);
     if (!(g_timerCaption.state < 2 && g_timerCaption.pressed == 0 && IsStreamVoiceLocked() == 0 && D_00275F84 != 1)) {
         s32 st = self->state2D4;
         switch (st) {
@@ -1443,7 +1441,7 @@ void UpdateStepSequence(StepSequence* self)
     case 3:
         if (self->mode2D0 != 2) {
             if (!(self->step2E4 < self->count2DC) || D_00275F84 == 1) {
-                PopStackElement(g_elementStack);
+                PopStackElement((ElementStack*)g_elementStack);
                 s1 = self->state2D4;
             }
         }
@@ -1474,12 +1472,12 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
     CaptionSpeaker* s2;
     CaptionSpeaker* s4;
     s32 a2;
-    s32 a0;
+    BaseObject* a0;
     f32 f20;
     s8* nm;
     switch (msg->type) {
     case 0:
-        OpenKeyRecord(msg->f4.i);
+        OpenKeyRecord(msg->f4.key);
         self->f2E8 |= 1;
         break;
     case 1:
@@ -1519,11 +1517,11 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
         }
         break;
     case 3:
-        if (self->p2F0 && MatchesObjectId((CaptionSpeaker*)self->p2F0, msg->f18)) {
+        if (self->p2F0 && MatchesObjectId((BaseObject*)self->p2F0, msg->f18)) {
             s2 = (CaptionSpeaker*)self->p2F0;
             SetArcFade(&D_002708E0, 1);
             SetArcFade(&D_00271558, 0);
-        } else if (self->p2F4 && MatchesObjectId((CaptionSpeaker*)self->p2F4, msg->f18)) {
+        } else if (self->p2F4 && MatchesObjectId((BaseObject*)self->p2F4, msg->f18)) {
             s2 = (CaptionSpeaker*)self->p2F4;
             SetArcFade(&D_00271558, 1);
             SetArcFade(&D_002708E0, 0);
@@ -1541,8 +1539,8 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             }
         }
         if (a0) {
-            CreateAnimationPlayerWithoutPresetTargets(0.0f, 1.0f, (CaptionSpeaker*)a0, (s32)s2, 1, &self->player2F8);
-            AddAnimationPlayerRecordCallback(self->player2F8, self);
+            CreateAnimationPlayerWithoutPresetTargets((Animation*)a0, (BaseObject*)s2, 1, &self->player2F8, 0.0f, 1.0f);
+            AddAnimationPlayerRecordCallback(self->player2F8, (PlacedObject**)self);
         }
         nm = msg->f14;
         if (nm && *nm) {
@@ -1563,7 +1561,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             }
             if (0.0f < f20) {
                 T217D_440* h2 = &g_typedTextCaptionBox;
-                h2->charsPerSecond = (f32)(GetStringLength(msg->f14) + 10) / f20;
+                h2->charsPerSecond = (f32)(GetStringLength((const char*)msg->f14) + 10) / f20;
             } else {
                 T217D_440* h3 = &g_typedTextCaptionBox;
                 h3->charsPerSecond = 15.0f;
@@ -1579,7 +1577,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             self->f2FC = g_gameTime[0] + msg->f8.f;
         }
         if (msg->f20 != -1) {
-            s32 r = FindFirstObjectById(self->world, 0x104, msg->f20, self->root ? self->root : self);
+            BaseObject* r = FindFirstObjectById(self->world, 0x104, msg->f20, self->root ? self->root : self);
             SetTextPanelSubject(&g_typedTextCaptionBox, r);
         }
         if (msg->f24 != -1) {
@@ -1607,16 +1605,17 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
         HideCountedScreenElement(self->world);
         break;
     case 7:
-        QueueMovie(g_moviePlayer, msg->f4.i);
+        QueueMovie((MoviePlayer*)g_moviePlayer, msg->f4.p);
         break;
     }
 }
 
-void HandleStepSequenceNotification(StepSequence* state, u32 mode, u32 value)
+
+void HandleStepSequenceNotification(StepSequence* state, s32 mode, void* value)
 {
 	HandlePlacedObjectNotification(state, mode, value);
-	if (mode == 6 && value == state->value2F8)
-		state->value2F8 = 0;
+	if (mode == 6 && value == state->player2F8)
+		state->player2F8 = 0;
 }
 
 s32 TestStepWaitConditions(StepSequence* self)
@@ -1641,7 +1640,7 @@ s32 TestStepWaitConditions(StepSequence* self)
         if (HasStreamVoice() == 0) flags &= 0xFFFFFFF7;
     }
     if (flags & 0x10) {
-        if (self->value2F8 == 0) flags &= 0xFFFFFFEF;
+        if (self->player2F8 == 0) flags &= 0xFFFFFFEF;
     }
     if (flags & 0x20) {
         if (IsTextPanelTextTyped(&g_typedTextCaptionBox) != 0) flags &= 0xFFFFFFDF;
@@ -1706,7 +1705,7 @@ void SkipRemainingSteps(StepSequence* self)
                     break;
                 case 4: {
                     s32* p = &it->w4;
-                    TriggerScriptEvent(self, 0x10, 1, (s32*)&p);
+                    TriggerScriptEvent(self, 0x10, 1, &p);
                     break;
                 }
                 case 5:
@@ -1719,7 +1718,7 @@ void SkipRemainingSteps(StepSequence* self)
             }
         }
         if (self->mode2D0 == 2)
-            PopStackElement(g_elementStack);
+            PopStackElement((ElementStack*)g_elementStack);
     }
 }
 
@@ -1732,28 +1731,28 @@ void RunStepSequence(StepSequence* self)
             if (TestStepWaitConditions(self) != 0) {
                 return;
             }
-            if (self->value2F8 != 0) {
-                StopAnimationPlayer((void*)self->value2F8);
-                self->value2F8 = 0;
+            if (self->player2F8 != 0) {
+                StopAnimationPlayer(self->player2F8);
+                self->player2F8 = 0;
             }
             index = self->step2E4 + 1;
             self->step2E4 = index;
             if (!(index < self->count2DC)) {
                 break;
             }
-            HandleStepSequenceMessage(self, (u8*)self->steps2E0 + index * 0x28);
+            HandleStepSequenceMessage(self, (SequenceMessage*)((u8*)self->steps2E0 + index * 0x28));
         }
         SkipRemainingSteps(self);
     }
 }
 
-void ShowStepSequenceText(void* value, Ent65* object)
+void ShowStepSequenceText(StepSequence* value, Ent65* object)
 {
     if (object != 0) {
         object->vt->f158(object, value);
     } else {
         g_typedTextCaptionBox.child = value;
-        PushStackElement(g_elementStack, &g_typedTextCaptionBox);
+        PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
     }
 }
 
@@ -1792,10 +1791,10 @@ void ResetStepSequence(StepSequence* self)
     }
 }
 
-void AddSequenceExtraTarget(StepSequence* collection, const char* name, u32 kind)
+void AddSequenceExtraTarget(StepSequence* collection, s32 key, u32 kind)
 {
 	if ((u32)collection->f310 >= 4) return;
-	void* item = GetLevelEntryByKey(name);
+	void* item = GetLevelEntryByKey(key);
 	if (!item) return;
 	void* value = GetIndexedTargetSlot(item, kind);
 	if (!value) return;
@@ -1866,7 +1865,7 @@ void UpdateScatterLevelLimits(ScatterController* self)
             }
         }
     } else {
-        f32 v = ClampToRange((u8*)((ScatterTable*)self->table)->levelRange, g_currentEntry->dt);
+        f32 v = ClampToRange((ValueRange*)((u8*)((ScatterTable*)self->table)->levelRange), g_currentEntry->dt);
         SetScatterLevel(self, v);
     }
     CompleteSoundNotifiers(g_currentWorld);
@@ -1937,7 +1936,7 @@ void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag)
             self->countdown--;
         }
         if (n > 0) {
-            ScatterObjectsAroundCircle(g_currentWorld, 0x58, p, n, 0);
+            ScatterObjectsAroundCircle(g_currentWorld, 0x58, (Vec02*)p, n, 0);
         } else {
             if (self->bandCountdown < 0) {
                 if (g_currentEntry->f10 != 0.0f) {
@@ -1964,7 +1963,7 @@ void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag)
             done:;
             }
             if (did) {
-                ScatterObjectsAroundCircle(g_currentWorld, 0x57, p, 1, 0);
+                ScatterObjectsAroundCircle(g_currentWorld, 0x57, (Vec02*)p, 1, 0);
             } else {
                 s32 a, b;
                 if (self->countdown < 0) {
@@ -1976,7 +1975,7 @@ void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag)
                     b = self->countHi;
                 }
                 n = RandomIntInRange(a, b);
-                if (n) ScatterObjectsAroundCircle(g_currentWorld, 0x58, p, n, 0);
+                if (n) ScatterObjectsAroundCircle(g_currentWorld, 0x58, (Vec02*)p, n, 0);
             }
         }
     }
@@ -2008,97 +2007,97 @@ void ClearListLinks(ListLink* p)
 	p->next = 0;
 }
 
-u32 GetListLinks(List01* p, u32 value)
+ListLink* GetListLinks(List01* p, void* item)
 {
-	return value + p->offset;
+	return (ListLink*)((u8*)item + p->offset);
 }
 
-void AppendToList(List01* self, u32 value)
+void AppendToList(List01* self, void* item)
 {
-    u32* slot = (u32*)GetListLinks(self, value);
+    ListLink* slot = GetListLinks(self, item);
     if (self->tail == 0) {
-        self->head = (void*)value;
+        self->head = item;
     } else {
-        u32* oldTail = (u32*)GetListLinks(self, (u32)self->tail);
-        slot[1] = (u32)self->tail;
-        oldTail[0] = value;
+        ListLink* oldTail = GetListLinks(self, self->tail);
+        slot->prev = self->tail;
+        oldTail->next = item;
     }
-    self->tail = (void*)value;
+    self->tail = item;
 }
 
-void PrependToList(List01* self, u32 value)
+void PrependToList(List01* self, void* item)
 {
-    u32* slot = (u32*)GetListLinks(self, value);
+    ListLink* slot = GetListLinks(self, item);
     if (self->head == 0) {
-        *(u32*)((u8*)self + 4) = value;
-        *(u32*)self = value;
+        self->tail = item;
+        self->head = item;
         return;
     }
     {
-        u32* oldHead = (u32*)GetListLinks(self, (u32)self->head);
-        slot[0] = (u32)self->head;
-        oldHead[1] = value;
-        self->head = (void*)value;
+        ListLink* oldHead = GetListLinks(self, self->head);
+        slot->next = self->head;
+        oldHead->prev = item;
+        self->head = item;
     }
 }
 
-void InsertBeforeInList(List01* self, u32 before, u32 value)
+void InsertBeforeInList(List01* self, void* before, void* item)
 {
     if (before == 0) {
-        AppendToList(self, value);
+        AppendToList(self, item);
         return;
     }
-    if (before == (u32)self->head) {
-        PrependToList(self, value);
+    if (before == self->head) {
+        PrependToList(self, item);
         return;
     }
-    u32* next = (u32*)GetListLinks(self, value);
-    u32* previous = (u32*)GetListLinks(self, before);
-    u32 after = previous[1];
-    u32* afterSlot = (u32*)GetListLinks(self, after);
-    next[0] = before;
-    next[1] = after;
-    previous[1] = value;
-    afterSlot[0] = value;
+    ListLink* next = GetListLinks(self, item);
+    ListLink* previous = GetListLinks(self, before);
+    void* after = previous->prev;
+    ListLink* afterSlot = GetListLinks(self, after);
+    next->next = before;
+    next->prev = after;
+    previous->prev = item;
+    afterSlot->next = item;
 }
 
 LINKER_REMNANT(func_001525F8);
 
-void RemoveFromList(u8* a, void* b)
+void RemoveFromList(List01* list, void* item)
 {
-    ListLink* link = (ListLink*)GetListLinks(a, b);
+    ListLink* link = GetListLinks(list, item);
     ListFrame* e = g_activeListFrames;
     while (e != 0) {
-        if ((s32)e->link != (s32)link) {
+        if (e->link != (u8*)link) {
             e = e->prev;
             continue;
         }
-        if (link->prev != 0) e->link = (u8*)GetListLinks(a, (void*)link->prev);
-        else e->link = a;
+        if (link->prev != 0) e->link = (u8*)GetListLinks(list, link->prev);
+        else e->link = (u8*)list;
         e = e->prev;
     }
     if (link->prev != 0) {
-        *(s32*)GetListLinks(a, (void*)link->prev) = link->next;
+        GetListLinks(list, link->prev)->next = link->next;
     } else {
-        *(s32*)a = link->next;
+        list->head = link->next;
     }
     if (link->next != 0) {
-        *(s32*)((u8*)GetListLinks(a, (void*)link->next) + 4) = link->prev;
+        GetListLinks(list, link->next)->prev = link->prev;
     } else {
-        *(s32*)(a + 4) = link->prev;
+        list->tail = link->prev;
     }
     link->next = 0;
     link->prev = 0;
 }
 
-s32 IsInList(void* self, u8* item)
+s32 IsInList(List01* self, void* item)
 {
-    u8* slot = (u8*)GetListLinks((List01*)self, (u32)item);
+    ListLink* slot = GetListLinks(self, item);
     s32 result = 0;
-    if (*(void**)slot != 0) {
+    if (slot->next != 0) {
         goto matched;
     }
-    if (*(void**)((u8*)self + 4) != item) {
+    if (self->tail != item) {
         goto done;
     }
 matched:
@@ -2119,10 +2118,10 @@ void SpliceListToEnd(List01* dst, List01* src)
             *dst = *src;
             ClearList(src);
         } else {
-            u32 p1 = GetListLinks(dst, (u32)dst->tail);
-            u32 p2 = GetListLinks(src, (u32)src->head);
-            *(u32*)p1 = (u32)src->head;
-            *(u32*)(p2 + 4) = (u32)dst->tail;
+            ListLink* p1 = GetListLinks(dst, dst->tail);
+            ListLink* p2 = GetListLinks(src, src->head);
+            p1->next = src->head;
+            p2->prev = dst->tail;
             dst->tail = src->tail;
             ClearList(src);
         }
@@ -2189,7 +2188,7 @@ void AllocatePacketBuffer(PacketWriter* self, s32 count)
     self->begin = base;
 }
 
-void AllocateQuadwordBuffer(PacketWriter* buffer, u32 count)
+void AllocateQuadwordBuffer(PacketWriter* buffer, u32 count, u32 kind)
 {
 	u32 bytes = count << 4;
 	u8* memory = AllocateFrontMemory(bytes);
@@ -2207,8 +2206,9 @@ void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count)
 	buffer->begin = memory;
 }
 
-void UsePacketBufferMemory(PacketWriter* self, s32 count, u8* base)
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory)
 {
+    u8* base = (u8*)memory;
     self->begin = base;
     self->cur = base;
     self->end = base + count * 16;
@@ -2226,7 +2226,7 @@ void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin)
     ClearPacketBuffer(self);
 }
 
-void DetachPacketBufferCopy(PacketWriter* self, u32* count, u32* begin, u32* out)
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags)
 {
     CloseDmaTag(self);
     u32 n = (self->curU - (u32)self->begin) >> 4;
@@ -2237,7 +2237,7 @@ void DetachPacketBufferCopy(PacketWriter* self, u32* count, u32* begin, u32* out
         *begin = (u32)self->begin;
     }
     if (out != 0) {
-        *out = CopyToFrontMemory(n << 4, (u32)self->begin);
+        *out = CopyToFrontMemory(n << 4, self->begin);
     }
     ClearPacketBuffer(self);
 }
@@ -2246,7 +2246,7 @@ void SubmitPacketBuffer(PacketWriter* self, void* dma)
 {
     CloseDmaTag(self);
     SyncDataCache(0);
-    StartDmaChain(dma, self->begin);
+    StartDmaChain((DmaChannel*)dma, self->begin);
     self->cur = self->begin;
 }
 
@@ -2311,13 +2311,13 @@ void AddDmaReturnTag(PacketWriter* self)
     p[1] = 0;
 }
 
-void AppendPacketQuadwords(void* self, s32 index, s32 count)
+void AppendPacketQuadwords(PacketWriter* self, s32 n, void* src)
 {
-    CopyQuadwords(*(void**)((u8*)self + 0xC), count, index);
-    *(u8**)((u8*)self + 0xC) += index * 16;
+    CopyQuadwords(*(void**)((u8*)self + 0xC), src, n);
+    *(u8**)((u8*)self + 0xC) += n * 16;
 }
 
-void AddDmaEndTag(void* self)
+void AddDmaEndTag(PacketWriter* self)
 {
     CloseDmaTag(self);
     u8* cursor = *(u8**)((u8*)self + 0xC);
@@ -2398,12 +2398,12 @@ void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a)
     v1.y = (f32)(tex->h * 8) * 1024.0f + 8589934592.0f;
     v1.z = 0;
     WriteVifBaseOffset(&pb, 0, 0);
-    CopyWordsToWriter(&pb, 8, 1, &v0, 0);
-    CopyWordsToWriter(&pb, 8, 1, &v1, 1);
+    CopyWordsToWriter(&pb, 8, 1, (u32*)&v0, 0);
+    CopyWordsToWriter(&pb, 8, 1, (u32*)&v1, 1);
     ClearPacketBuffer(&pa);
     UsePacketBufferMemory(&pa, 1, &q);
     ReserveGifPackedData(&pa, 0x24D, 0, 3, 0x412, 0);
-    CopyWordsToWriter(&pb, 0xC, 1, &q, 0xC);
+    CopyWordsToWriter(&pb, 0xC, 1, (u32*)&q, 0xC);
     DetachPacketBufferCopy(&pb, &self->f2D4, 0, &self->f2D8, 0x13);
     PopBackMemoryMark();
     PushBackMemoryMark();
@@ -2455,7 +2455,7 @@ void QueuePlacedObjectDraw(TextureRenderObject* self, s32 unused, void* a2)
         (void)FillMemory(&f, 0, 0x80);
         f.callback = (void*)DrawPlacedObjectParts;
         f.group = 0;
-        BuildPlacedObjectTransform(self, a2, &f.block);
+        BuildPlacedObjectTransform(self, (Quad16*)a2, (ScaledTransform*)&f.block);
         f.arg = self;
         QueueDeferredRequest(&f);
     }

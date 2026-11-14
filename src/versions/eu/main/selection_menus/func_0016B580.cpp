@@ -46,9 +46,9 @@ void HandleSelectionCaptionInput(Obj_16B580_eu* self, PadRecord* arg)
     StateWalker* p = self->f2E0;
     if (self->f308 != 0) {
         if (self->f308 == self->f33C) {
-            StartMemoryCardSave(g_memoryCard);
+            StartMemoryCardSave((MemoryCard*)g_memoryCard);
         }
-        ChooseStepSequenceState(self->f308);
+        ChooseStepSequenceState((StepSequence*)self->f308);
         self->f308 = 0;
     }
     ShowCurrentObjectCaptions(self);
@@ -60,7 +60,7 @@ void HandleSelectionCaptionInput(Obj_16B580_eu* self, PadRecord* arg)
             if (g->f250 != 0) {
                 return;
             }
-            PushStackElement(g_elementStack, &D_0026FD00);
+            PushStackElement((ElementStack*)g_elementStack, &D_0026FD00);
             return;
         }
         Obj_16B580_eu* g = (Obj_16B580_eu*)&g_mapScreenList;
@@ -68,7 +68,7 @@ void HandleSelectionCaptionInput(Obj_16B580_eu* self, PadRecord* arg)
             return;
         }
         g->p260 = *(Obj_16B580_eu**)((u8*)&g_mapScreenList + idx * 4 + 0x264 + 0x310);
-        PushStackElement(g_elementStack, &g_mapScreenList);
+        PushStackElement((ElementStack*)g_elementStack, &g_mapScreenList);
         return;
     }
     if (p->f28 != p->index) {

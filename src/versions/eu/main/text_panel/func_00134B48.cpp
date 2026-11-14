@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "object_finder.h"
 // PAL's own definition: a label's name is read into a text reader (0xC0 bytes, func_eu_0015DCB8)
 // and laid out into the panel's line record at 0x408 (func_eu_0015E4A8), whose height (0x410)
 // places and sizes the label; the layout carries that record in its word at 0x14 and has a fourth
@@ -69,8 +70,8 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
     s32 i;
     s32 shown = 0;
     TextPointObject* nearest = 0;
-    s32 count = GatherObjectsById(*(s32*)g_currentWorld, 5, 0x82, 0, 0x20, objs);
-    SortElements(objs, count, 4, CompareEntriesFarthestFirst);
+    s32 count = GatherObjectsById(g_currentWorld, 5, 0x82, 0, 0x20, objs);
+    SortElements(objs, count, 4, (s32 (*)(const void*, const void*))CompareEntriesFarthestFirst);
     f32 best = 3.4028235e+38f;
     for (i = 0; i < count; i++) {
         TextPointObject* obj = objs[i];
@@ -86,7 +87,7 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
             ResetTextPointToHalf(obj);
         } else {
             objs[shown++] = obj;
-            ProjectPointToCamera((Camera*)g_camera, &pos, &screen);
+            ProjectPointToCamera((Camera*)g_camera, &pos, (f32*)&screen);
             Vu0::Vec e = Vu0::Sub(Vu0::Vec::Of(screen), Vu0::Vec::Of(D_00261190));
             f32 c = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(e, e)));
             if (c < best) {
@@ -103,7 +104,7 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
         TextReader_eu_134CE0 reader;
         const f32* k = D_002611A0;
         const ValueRange* lim = &g_unitRange;
-        ProjectPointToCamera((Camera*)g_camera, &pos, &screen);
+        ProjectPointToCamera((Camera*)g_camera, &pos, (f32*)&screen);
         Vu0::Vec e = Vu0::Vec::Of(screen);
         f32 len = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(e.q, e.q)));
         f32 scale = k[0] + len * (k[1] + len * k[2]);
@@ -111,8 +112,8 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
         if (obj != nearest) {
             alpha *= D_002611BC;
         }
-        obj->f54 = ApproachValueWithRamp(obj->f54, alpha, g_gameClock[5], D_002611B0, 0);
-        obj->f58 = ApproachValueWithRamp(obj->f58, obj == nearest ? D_00261184 : D_00261188, g_gameClock[5], D_002611C0, 0);
+        obj->f54 = ApproachValueWithRamp(obj->f54, alpha, g_gameClock[5], (RampProfile*)D_002611B0, 0);
+        obj->f58 = ApproachValueWithRamp(obj->f58, obj == nearest ? D_00261184 : D_00261188, g_gameClock[5], (RampProfile*)D_002611C0, 0);
         PushFontScale(self->font, obj->f58, obj->f58);
         ScreenLayout_eu_134CE0::Reset(&layout);
         InitWideTextReader(&reader, obj->text, self->font, 0);

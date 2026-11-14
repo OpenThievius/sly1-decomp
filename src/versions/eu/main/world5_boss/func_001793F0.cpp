@@ -5,12 +5,12 @@ void StartWorld5ModeCollider(World5ModeCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0x1A, g_modeColliderLinks);
-    SetFollowObjects(self->f6E8, self->f680, self->f680);
+    SetFollowObjects((PlacedObject*)self->f6E8, self->f680, self->f680);
     ((World5ModeColliderLinked*)self->f650)->frame = self->f660;
-    self->f658 = CreateStateWalker(self->f654, self, -1, 0);
-    BuildCombinedBlendAnimation(self, 0xC, 5, &self->f684, 0, 0, 0, &self->f6C0);
+    self->f658 = CreateStateWalker((StateGraph*)self->f654, self, -1, 0);
+    BuildCombinedBlendAnimation(self, 0xC, 5, (u8*)&self->f684, 0, 0, 0, (BlendAnimation**)&self->f6C0);
     self->f684 = 1.0f;
-    SetBlendItemWeights(self->f6C0, 0xC, 5, &self->f684);
+    SetBlendItemWeights((BlendAnimationView*)self->f6C0, 0xC, 5, &self->f684);
     SetWorld5ModeColliderMode(self, 2);
     u8* base = (u8*)&D_00270650;
     ((T217D_Float*)(base + 0x598))->v = 0.0f;

@@ -15,14 +15,14 @@ s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2)
                 s2 = (char*)((s32)s1 + n);
             }
             if (n != 0) {
-                if (AppendToOutputBuffer(ctx, (const char*)s1, n) < n) {
+                if (AppendToOutputBuffer(ctx, (void*)s1, n) < n) {
                     break;
                 }
                 s1 = (const u8*)s2;
             }
             if (*s1 == '%') {
-                s32 n2 = ParseFormatSpec((const char*)s1, &loc.spec, (void*)&loc.va);
-                FormatConversionArg(&loc.spec, ctx, (void*)&loc.va, (const char*)s1, n2);
+                s32 n2 = ParseFormatSpec((s8*)s1, &loc.spec, (s32**)&loc.va);
+                FormatConversionArg(&loc.spec, ctx, (u8**)&loc.va, (const char*)s1, n2);
                 s1 = s1 + n2;
             }
         } while (*s1 != 0);

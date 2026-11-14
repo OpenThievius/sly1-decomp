@@ -88,7 +88,7 @@ void UpdateArc(Obj_1E77C0_eu* self)
         }
         if (D_00270458 != 4)
         {
-            self->fC5C = ApproachValueWithRamp(&self->fC64, 0, self->fC5C, self->fC60, g_gameClock[5]);
+            self->fC5C = ApproachValueWithRamp((RampProfile*)&self->fC64, 0, self->fC5C, self->fC60, g_gameClock[5]);
             if (AreFloatsNearlyEqual(self->fC5C, self->fC60, 1e-4f) != 0)
             {
                 self->fC5C = 1.0f;
@@ -147,7 +147,7 @@ void UpdateArc(Obj_1E77C0_eu* self)
                 }
                 else
                 {
-                    e->f18 = ApproachValueWithRamp(q, 0, e->f18, e->f1C, g_gameClock[5]);
+                    e->f18 = ApproachValueWithRamp((RampProfile*)q, 0, e->f18, e->f1C, g_gameClock[5]);
                 }
             }
         }

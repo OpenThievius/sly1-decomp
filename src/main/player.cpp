@@ -43,6 +43,37 @@
 #include "on_off_object.h"
 #include "mul_rotation.h"
 #include "value_range.h"
+#include "counted_collider.h"
+#include "pooled_object.h"
+#include "object_pool.h"
+#include "sound_level.h"
+#include "state_graph.h"
+#include "target_binding.h"
+#include "point_object.h"
+#include "texture_render_object.h"
+#include "object_finder.h"
+struct BufferedStream;
+
+// Types other files define, named by the parameters of their functions declared here.
+struct BlendAnimation;
+struct BlendSlot;
+struct CameraSoundOwner;
+struct Chooser;
+struct Chooser_1CDFB8;
+struct FaceRef;
+struct FollowProbe;
+struct MeshHitEntry;
+struct PathObject;
+struct PathPad;
+struct PlayerBlendItem;
+struct PlayingSound;
+struct PooledContact;
+struct RingSource;
+struct ScaledTransform;
+struct TargetCand;
+struct ThreeBlendRecord;
+struct TrailRing;
+struct TurnBlendRecords;
 
 extern f32 g_frameDt[];
 extern f32 g_gameTime[];
@@ -342,7 +373,7 @@ f32 D_00263A90[4] = { 200.0f, 200.0f, 200.0f, 0.0f };
 f32 D_00263AA0[4] = { 400.0f, -1.0f, 0.0f, 0.0f };
 f32 D_00263AB0[4] = { 0.0f, 1000.0f, 0.0f, 0.0f };
 
-void InitTurningCollider(void* self);
+void InitTurningCollider(TurningCollider* self);
 
 void InitPlayer(Player* self)
 {
@@ -368,42 +399,42 @@ void InitPlayer(Player* self)
     self->f26D0 = 2.0f;
 }
 
-void LoadCollider(void* self);
-void ResolveObjectLinks(void* self, s32 id, void* table);
-void FindOrBuildMemberGroup(void* a, void* b);
+void LoadCollider(Collider* self, BufferedStream* in);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+void FindOrBuildMemberGroup(void** out, void* self);
 
-void LoadPlayer(Player* self)
+void LoadPlayer(Player* self, BufferedStream* stream)
 {
-    LoadCollider(self);
+    LoadCollider(self, stream);
     ResolveObjectLinks(self, 0x97, g_playerCharacterLinks);
-    FindOrBuildMemberGroup((u8*)self + 0x2428, self);
+    FindOrBuildMemberGroup((void**)((u8*)self + 0x2428), self);
     self->f2284 = -1.0f;
     self->f21C8 = -1.0f;
     g_player = self;
 }
 
 void StartTurningCollider(TurningCollider* self);
-void CreateSixEntryBlend(void* self, void* a, void* b);
+void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAnimationView** out);
 void CreatePlayerTwoEntryBlend(Player* self);
-void CreateEightEntryBlend(void* self, void* a, void* b);
-void CreateThreeEntryBlend(void* self, void* a, void* b);
-u8* CreatePoseSource(World* root, void* value, u8* table);
-void InsertAttachment(void* a, void* b);
-void AddMatrixAttachment(void* a, s32 b, void* c);
+void CreateEightEntryBlend(TurningCollider* self, BlendSlot* slots, BlendAnimationView** gr);
+void CreateThreeEntryBlend(void* a0, ThreeBlendRecord* a1, void** a2);
+u8* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* table);
+void InsertAttachment(PlacedObject* self, Attachment* src);
+void AddMatrixAttachment(PlacedObject* self, s32 key, Attachment** out);
 s32 FindAnimRecord(s32 key);
-void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
-void BuildTexturePackets(void* a, RangeRecord* b);
-void* CreateTypedRecord(s32 a, void* b, s32 c, s32 d, s32 e);
+void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
+void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a);
+void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 void ResetPlayerOnOffObject(Player* self);
 void ResolvePlayerTableObjects(Player* self);
-void SetTurningColliderGravityScale(void* self, f32 v);
+void SetTurningColliderGravityScale(TurningCollider* self, f32 s);
 void SetColliderMass(Collider* self, f32 m);
-void* AllocateZeroedFrontMemory(s32 bytes);
-void SetBlendItemWeights(void* obj, s32 a1, s32 a2, void* a3);
+void* AllocateZeroedFrontMemory(s32 n);
+void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
 extern u8 D_0021A9A8[];
 extern u8 D_00219588[];
-void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
-void SetPlayerState(Player* self, s32 a, s32 b);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void SetPlayerState(Player* self, s32 state, s32 sub);
 
 #define PS(T, o) (*(T*)((u8*)self + (o)))
 
@@ -411,51 +442,51 @@ void StartPlayer(Player* self)
 {
     StartTurningCollider(self);
     ResolveObjectLinks(self, 27, D_00263558);
-    CreateSixEntryBlend(self, (u8*)self + 0x720, (u8*)self + 0x900);
+    CreateSixEntryBlend(self, (PlayerBlendItem*)((u8*)self + 0x720), (BlendAnimationView**)((u8*)self + 0x900));
     CreatePlayerTwoEntryBlend(self);
-    CreateEightEntryBlend(self, (u8*)self + 0xA20, (u8*)self + 0xB20);
-    CreateEightEntryBlend(self, (u8*)self + 0xB30, (u8*)self + 0xC30);
-    CreateSixEntryBlend(self, (u8*)self + 0xC40, (u8*)self + 0xE20);
-    CreateThreeEntryBlend(self, (u8*)self + 0x2360, (u8*)self + 0x2384);
-    CreateSixEntryBlend(self, (u8*)self + 0xE30, (u8*)self + 0x1010);
+    CreateEightEntryBlend(self, (BlendSlot*)((u8*)self + 0xA20), (BlendAnimationView**)((u8*)self + 0xB20));
+    CreateEightEntryBlend(self, (BlendSlot*)((u8*)self + 0xB30), (BlendAnimationView**)((u8*)self + 0xC30));
+    CreateSixEntryBlend(self, (PlayerBlendItem*)((u8*)self + 0xC40), (BlendAnimationView**)((u8*)self + 0xE20));
+    CreateThreeEntryBlend(self, (ThreeBlendRecord*)((u8*)self + 0x2360), (void**)((u8*)self + 0x2384));
+    CreateSixEntryBlend(self, (PlayerBlendItem*)((u8*)self + 0xE30), (BlendAnimationView**)((u8*)self + 0x1010));
     self->f598 = self;
     self->f5F0 = PS(void*, 0x110C);
-    u8* a = CreatePoseSource(self->world, self->f24F8, D_0021A9A8);
+    u8* a = CreatePoseSource(self->world, self->f24F8, (const T2195_Vt*)D_0021A9A8);
     *(s8*)(a + 0x10) = 9;
     *(s8*)(a + 0x11) = 9;
     *(s32*)(a + 0x14) = 3;
     *(s32*)(a + 0x1C) = 2;
-    InsertAttachment(self->f24F8, a);
+    InsertAttachment(self->f24F8, (Attachment*)a);
     PS(u8*, 0x24FC) = a;
-    AddMatrixAttachment(self->f24F8, 5, &self->f2500);
-    AddMatrixAttachment(self->f618, 5, &self->f2504);
-    AddMatrixAttachment(self->f61C, 5, &self->f2508);
-    AddMatrixAttachment(self->f610, 7, &self->f250C);
-    AddMatrixAttachment(self->f614, 7, &self->f2510);
-    PS(u8*, 0x2518) = CreatePoseSource(self->world, self->f24F8, D_00219588);
+    AddMatrixAttachment(self->f24F8, 5, (Attachment**)&self->f2500);
+    AddMatrixAttachment((PlacedObject*)self->f618, 5, (Attachment**)&self->f2504);
+    AddMatrixAttachment((PlacedObject*)self->f61C, 5, (Attachment**)&self->f2508);
+    AddMatrixAttachment((PlacedObject*)self->f610, 7, (Attachment**)&self->f250C);
+    AddMatrixAttachment((PlacedObject*)self->f614, 7, (Attachment**)&self->f2510);
+    PS(u8*, 0x2518) = CreatePoseSource(self->world, self->f24F8, (const T2195_Vt*)D_00219588);
     *(s32*)(PS(u8*, 0x2518) + 0x14) = 1;
-    InsertAttachment(self->f24F8, PS(u8*, 0x2518));
+    InsertAttachment(self->f24F8, (Attachment*)(PS(u8*, 0x2518)));
     PS(void*, 0x1520) = PS(void*, 0x23D0);
     PS(s32, 0x1524) = FindAnimRecord(0x15A);
     PS(f32, 0x1530) = 0.5f;
     PS(Vec02, 0x1560) = *(Vec02*)D_00263710;
     PS(Vec02, 0x1570) = *(Vec02*)D_00263720;
     PS(s32, 0x1538) = 2;
-    TransformPointBetweenFrames(0, PS(s32, 0x23D0), (u8*)self->f23D4 + 0x140, (u8*)self + 0x1540);
+    TransformPointBetweenFrames(0, PS(PlacedObject*, 0x23D0), (Vec02*)((u8*)self->f23D4 + 0x140), (Vec02*)((u8*)self + 0x1540));
     f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(PS(Vec02, 0x1540))));
     Vu0::Q(PS(Vec02, 0x1540)) = Vu0::MulX(Vu0::Q(PS(Vec02, 0x1540)), Vu0::Scalar((len + self->f2420) / len));
-    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2540, 0, 0, 0, (void**)((u8*)self + 0x2558));
-    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x255C, 0, 0, 0, (void**)((u8*)self + 0x2574));
-    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2578, 0, 0, 0, (void**)((u8*)self + 0x2590));
-    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2594, 0, 0, 0, (void**)((u8*)self + 0x25AC));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2540, 0, 0, 0, (BlendAnimation**)((u8*)self + 0x2558));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x255C, 0, 0, 0, (BlendAnimation**)((u8*)self + 0x2574));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2578, 0, 0, 0, (BlendAnimation**)((u8*)self + 0x2590));
+    BuildCombinedBlendAnimation(self, 12, 2, (u8*)self + 0x2594, 0, 0, 0, (BlendAnimation**)((u8*)self + 0x25AC));
     BaseObject* o = PS(BaseObject*, 0x243C);
     if (o != 0) {
         o->desc->m02(o);
-        BuildTexturePackets(PS(void*, 0x243C), self->f284);
+        BuildTexturePackets((TextureRenderObject*)(PS(void*, 0x243C)), self->f284);
     }
     self->f2678 = (OnOffObject*)CreateTypedRecord(0x63, self->world, 0, 0x316, -1);
     ResetPlayerOnOffObject(self);
-    CreateEightEntryBlend(self, (u8*)self + 0x910, (u8*)self + 0xA10);
+    CreateEightEntryBlend(self, (BlendSlot*)((u8*)self + 0x910), (BlendAnimationView**)((u8*)self + 0xA10));
     ResolvePlayerTableObjects(self);
     ((void (*)(Player*, void*, s32))((void**)self->desc)[0xE0 / 4])(self, self->f1390[0], 1);
     SetPlayerState(self, 0, -1);
@@ -490,20 +521,20 @@ void StartPlayer(Player* self)
     if (self->f1390[8] == 0) {
         self->f1390[8] = self->f1390[2];
     }
-    self->f2514 = CreatePoseSource(self->world, self, D_00219588);
-    InsertAttachment(self, self->f2514);
-    PS(u8*, 0x251C) = CreatePoseSource(self->world, self->f61C, D_00219588);
+    self->f2514 = CreatePoseSource(self->world, self, (const T2195_Vt*)D_00219588);
+    InsertAttachment(self, (Attachment*)self->f2514);
+    PS(u8*, 0x251C) = CreatePoseSource(self->world, (PlacedObject*)self->f61C, (const T2195_Vt*)D_00219588);
     *(s32*)(PS(u8*, 0x251C) + 0x14) = 5;
-    InsertAttachment(self->f61C, PS(u8*, 0x251C));
-    PS(u8*, 0x2520) = CreatePoseSource(self->world, PS(void*, 0x23D0), D_00219588);
+    InsertAttachment((PlacedObject*)self->f61C, (Attachment*)(PS(u8*, 0x251C)));
+    PS(u8*, 0x2520) = CreatePoseSource(self->world, (PlacedObject*)(PS(void*, 0x23D0)), (const T2195_Vt*)D_00219588);
     *(s32*)(PS(u8*, 0x2520) + 0x14) = 5;
-    InsertAttachment(PS(void*, 0x23D0), PS(u8*, 0x2520));
+    InsertAttachment((PlacedObject*)(PS(void*, 0x23D0)), (Attachment*)(PS(u8*, 0x2520)));
     self->flags &= ~(u64)0x0C000000;
     self->flags &= ~(u64)0x30000000;
-    BuildCombinedBlendAnimation(self, 12, 3, (u8*)self + 0x106C, 0, 0, 0, (void**)((u8*)self + 0x1090));
+    BuildCombinedBlendAnimation(self, 12, 3, (u8*)self + 0x106C, 0, 0, 0, (BlendAnimation**)((u8*)self + 0x1090));
     PS(f32, 0x1078) = 1.0f;
     if (PS(void*, 0x1090) != 0) {
-        SetBlendItemWeights(PS(void*, 0x1090), 12, 3, (u8*)self + 0x106C);
+        SetBlendItemWeights((BlendAnimationView*)(PS(void*, 0x1090)), 12, 3, (u8*)self + 0x106C);
     }
     void* q = PS(void*, 0x2490);
     if (q != 0) {
@@ -518,8 +549,8 @@ static inline f32 EvalCurve3(const f32* c, f32 t) { return c[0] + t * (c[1] + t 
 
 extern f32 g_gameClock[];
 
-f32 ComputeAngleBetweenVectors(const Vec02* a, const Vec02* b, Vec02* axis);
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 f32 SplitVectorAlongAxis(const Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
 f32 ApproachValueClampingVelocity(f32 x, f32 v, f32 target, f32 dt, void* params, f32* outv);
 void AddColliderTorque(void* self, Vec02* torque);
@@ -544,8 +575,8 @@ static inline f32 BlendRamp(f32 t, f32 a, f32 b)
 static inline f32 TiltRotation(Mat02* out, Mat02* turn, const Mat02& m, const Vec02& to, Vec02* axis)
 {
     const u128* q = (const u128*)&m;
-    f32 angle = ComputeAngleBetweenVectors((const Vec02*)&q[2], &to, axis);
-    BuildAxisAngleMatrix(axis, turn, angle);
+    f32 angle = ComputeAngleBetweenVectors((Vec02*)((const Vec02*)&q[2]), (Vec02*)&to, axis);
+    BuildAxisAngleMatrix((const Vec02*)axis, (Mat02*)turn, angle);
     const u128* p = (const u128*)turn;
     u128 a0 = p[0];
     u128 a1 = p[1];
@@ -634,21 +665,21 @@ void ApplyPlayerDefaultSteering(Player* self)
     }
 }
 
-void StepCollider(void* self, f32 t);
+void StepCollider(Collider* self, f32 t);
 void ApplyPlayerDefaultSteering(Player* self);
 void StepPlayerState2(Player* self);
 void TurnPlayerTowardLinkedObject(Player* self);
 void StepPlayerOnPath(Player* self);
 void StepPlayerRequestState(Player* self);
 void StepPlayerAlongTarget(Player* self);
-void ComputePolarOffset(Vec02* out, f32 angle, f32 dist, f32 z);
-void *StoreFloatAsQuadword(void* out, f32 f);
-void* CopyQuadword(void* out, void* in);
+void ComputePolarOffset(Vec3* out, f32 unused, f32 scale, f32 z);
+void *StoreFloatAsQuadword(u128* out, f32 f);
+void* CopyQuadword(u128* out, void* src);
 s128 ScaleQuadword(s128 a, s128 b);
-void* StoreQuadword(void* dst, s128 v);
-void SteerColliderTowardRotation(Player* self, s32 a, s32 b, Vec02* offset, Vec02* dir, f32 t);
-void SteerColliderTowardPosition(Player* self, s32 a, s32 b, const Vec02* pos, void* params, f32 t);
-void TurnColliderTowardRotation(Player* self, f32 t, void* rot, void* data);
+void* StoreQuadword(u128* out, u128 v);
+void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
+void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
+void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
 
 // Stores v as the direction at dir and steers the player toward the offset along it. Both
 // addresses are the inline's parameters, so each call forms its frame address again where
@@ -657,8 +688,8 @@ void TurnColliderTowardRotation(Player* self, f32 t, void* rot, void* data);
 // is not GCSE's").
 static inline void SteerAlongDirection(Player* self, Vec02* off, Vec02* dir, s128 v, f32 t)
 {
-    StoreQuadword(dir, v);
-    SteerColliderTowardRotation(self, 0, 0, off, dir, t);
+    StoreQuadword((u128*)dir, v);
+    SteerColliderTowardRotation(self, 0, 0, off, (f32*)dir, t);
 }
 
 void StepPlayer(Player* self, f32 t)
@@ -687,16 +718,16 @@ void StepPlayer(Player* self, f32 t)
     case 13:
         switch (self->f2228) {
         case 0x38:
-            BuildAxisAngleMatrix(&g_unitZVector, &m, self->f638);
+            BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)&m, self->f638);
             TurnColliderTowardRotation(self, g_frameDt[0], &m, D_00263780);
             break;
         case 0x36:
         case 0x37: {
-            ComputePolarOffset(&m.r[0], self->f638 + 1.5707964f, self->f634 * D_00262E28 / self->radius3CC, 0.0f);
+            ComputePolarOffset((Vec3*)&m.r[0], self->f638 + 1.5707964f, self->f634 * D_00262E28 / self->radius3CC, 0.0f);
             u8* table = (u8*)D_00263790;
-            StoreFloatAsQuadword(&a, self->f634);
+            StoreFloatAsQuadword((u128*)&a, self->f634);
             qa = a;
-            CopyQuadword(&b, table);
+            CopyQuadword((u128*)&b, table);
             s128 prod = ScaleQuadword(qa, b);
             SteerAlongDirection(self, &m.r[0], &m.r[1], prod, t);
             break;
@@ -708,8 +739,8 @@ void StepPlayer(Player* self, f32 t)
             Vu0::Q(m.r[1]) = Vu0::FromFloat(-1.0f);
             Vu0::Q(m.r[0]) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(m.r[1]));
             AddColliderForce(self, &m.r[0]);
-            SteerColliderTowardPosition(self, 0, 0, &D_00248D30, D_002637A0, t);
-            TurnColliderTowardRotation(self, g_gameClock[2], (u8*)self + 0x660, (u8*)self + 0x6E0);
+            SteerColliderTowardPosition(self, 0, 0, (Vec02*)&D_00248D30, D_002637A0, t);
+            TurnColliderTowardRotation(self, g_gameClock[2], (Mat02*)((u8*)self + 0x660), (f32*)((u8*)self + 0x6E0));
         } else {
             ApplyPlayerDefaultSteering(self);
         }
@@ -765,7 +796,7 @@ divide:
 }
 extern f32 D_002637C0[3];
 
-void ClampColliderContactLimit(void* self, s32 flags, void* out);
+void ClampColliderContactLimit(Collider* self, s32 flags, ContactLimit03* limit);
 
 void ClampPlayerContactLimit(Player* self, s32 flags, ContactLimit03* out)
 {
@@ -786,10 +817,10 @@ void ClampPlayerContactLimit(Player* self, s32 flags, ContactLimit03* out)
     }
 }
 
-void SetPlayerState(void* self, s32 mode, s32 count);
-void SetPlayerAimMode(void* self, s32 arg);
-void ComputeObjectSteeringHeading(void* self, s32 a, s32 b, f32* heading, s32 c, f32* speed, f32 dt, f32 h);
-void RunPlayerCallback(void* self);
+void SetPlayerState(Player* self, s32 state, s32 sub);
+void SetPlayerAimMode(Player* self, s32 state);
+void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2);
+void RunPlayerCallback(Player* self);
 
 void ApplyPendingPlayerStateRequest(Player* self)
 {
@@ -812,15 +843,15 @@ void ApplyPendingPlayerStateRequest(Player* self)
     }
 }
 
-void FreePooledContactChain(void* a, Contact03* b);
-void PinPlayerToPath(void* self);
-void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
-void PinPlayerToTarget(void* self);
+void FreePooledContactChain(World* world, Contact03* head);
+void PinPlayerToPath(Player* self);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void PinPlayerToTarget(Player* self);
 void BuildPerpendicularPair(Vec02* dir, Vec02* out, const Vec02* a, const Vec02* b);
-void AddPlayerObjectContacts(void* self, s32 a, void* b, Vec02* c, s32 d, Vec02* e);
+void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec02* origin, Vec02* axis, Vec02* offset);
 void ReleasePlayerContacts(Player* self)
 {
-    FreePooledContactChain(self->world, self->contacts4B4);
+    FreePooledContactChain((World*)self->world, self->contacts4B4);
     self->contacts4B4 = 0;
     switch (self->f2220) {
     case 7:
@@ -833,13 +864,13 @@ void ReleasePlayerContacts(Player* self)
         Vec02 pos;
         Mat02 m;
         Vec02 k;
-        TransformPointBetweenFrames(self->f24A0, 0, self->f24B0, &pos);
+        TransformPointBetweenFrames((PlacedObject*)self->f24A0, 0, (Vec02*)self->f24B0, &pos);
         Vu0::Q(k) = Vu0::FromFloat(-1.0f);
         Vu0::Q(m.r[0]) = Vu0::MulX(Vu0::Q(self->v24C0), Vu0::Q(k));
         Vu0::Q(pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(self->v24D0));
         BuildPerpendicularPair(&m.r[0], &m.r[1], &g_unitZVector, &g_unitZVector);
         Vu0::Q(pos) = Vu0::Sub(Vu0::Q(pos), Vu0::Rotate(m, Vu0::Q(self->v24E0)));
-        AddPlayerObjectContacts(self, 7, self->f24A0, &pos, 0, &self->v140);
+        AddPlayerObjectContacts(self, 7, (BaseObject*)self->f24A0, &pos, 0, &self->v140);
         break;
     }
     }
@@ -847,12 +878,12 @@ void ReleasePlayerContacts(Player* self)
 
 extern f32 D_00274AD0[];
 
-s32 IsTurningColliderGroundContact(void* self);
+s32 IsTurningColliderGroundContact(TurningCollider* self, Contact03* a, s32 idx);
 
 s32 IsPlayerGroundContact(Player* self, Contact03* e, s32 idx)
 {
     if (self->f2220 != 0xD) {
-        return IsTurningColliderGroundContact(self);
+        return IsTurningColliderGroundContact(self, e, idx);
     }
     f32 scale = D_00274AD0[idx];
     if (e->v80.z * scale < 0.7f) {
@@ -925,13 +956,13 @@ struct PlayerNoticeEffect {
     u8 padD0[0x134 - 0xD0];
     void* p134;             // 0x134
 };
-PlayerNoticeEffect* CreateEffect(s32 a, s32 b);
+PlayerNoticeEffect* CreateEffect(s32 kind, EffectOwner* sys);
 void AddEffectListener(void* obj, void* arg);
-f32 GetAnimationMarkerTime(Animation* anim, s32 key);
+f32 GetAnimationMarkerTime(Animation* self, s32 key);
 f32* FindAnimationMarkerEvent(Animation* anim, s32 key);
-void SetStateWalkerTarget(void* p, s32 key);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 void ReleasePlayerToState2(Player* self);
-void HandleSwitchedColliderNotification(void* self, s32 kind, void* rec);
+void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
 extern f32 D_002637CC;
 extern s32 D_002637D0;
 extern s32 D_002637D4;
@@ -1086,19 +1117,19 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
                 s32 most = g_currentLevelRecord->f438;
                 if (i < most) {
                     if (!(most < ((WalkerHost*)self->f26D4)->count)) {
-                        SetStateWalkerTarget(h->f2D4, 0x22F);
+                        SetStateWalkerTarget((StateWalker*)h->f2D4, 0x22F);
                     } else {
-                        SetStateWalkerTarget(h->f2D4, 0x230);
+                        SetStateWalkerTarget((StateWalker*)h->f2D4, 0x230);
                     }
                 } else {
-                    SetStateWalkerTarget(h->f2D4, 0x231);
+                    SetStateWalkerTarget((StateWalker*)h->f2D4, 0x231);
                 }
             }
             if (!(g_currentLevelRecord->f438 < ((WalkerHost*)self->f26D4)->count)) {
-                SetStateWalkerTarget(((WalkerHost*)self->f26D4)->f2D8, 0x22F);
+                SetStateWalkerTarget((StateWalker*)(((WalkerHost*)self->f26D4)->f2D8), 0x22F);
                 g_currentLevelRecord->f448 |= ((WalkerHost*)self->f26D4)->f2D0;
             } else {
-                SetStateWalkerTarget(((WalkerHost*)self->f26D4)->f2D8, 0x230);
+                SetStateWalkerTarget((StateWalker*)(((WalkerHost*)self->f26D4)->f2D8), 0x230);
             }
             f32* e = FindAnimationMarkerEvent(((PlayerNoticePlayer*)self->watched2230)->anim, 0x13F);
             if (e == 0) {
@@ -1196,9 +1227,9 @@ struct PoseHolderDesc { u8 pad00[8]; void (*m2)(PoseHolder47* self, Vec02* out, 
 struct PoseHolder47 { PoseHolderDesc* desc; };
 // The object at 0x2208: a frame at +0x18 and a holder of poses at +0x34.
 struct PoseTarget { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PoseHolder47* holder; };
-s32 GetObjectWorldPosition(void* p, Vec02* out);
-void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
-f32 ArctangentOfRatio(f32 a, f32 b);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 s32 AimPlayerAtTarget(Player* self)
 {
@@ -1208,7 +1239,7 @@ s32 AimPlayerAtTarget(Player* self)
     f32 y;
     f32 x;
     if (self->f2200 != 0) {
-        GetObjectWorldPosition(self->f2200, &pos);
+        GetObjectWorldPosition((BaseObject*)self->f2200, &pos);
         Vu0::Q(d1) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
         y = d1.y;
         x = d1.x;
@@ -1217,7 +1248,7 @@ s32 AimPlayerAtTarget(Player* self)
         if (h->desc->m2 != 0) {
             h->desc->m2(h, &pos, *(f32*)((u8*)self + 0x220C), 0);
         }
-        TransformPointBetweenFrames(((PoseTarget*)self->f2208)->frame, 0, &pos, &d1);
+        TransformPointBetweenFrames((PlacedObject*)(((PoseTarget*)self->f2208)->frame), 0, &pos, &d1);
         Vu0::Q(d2) = Vu0::Sub(Vu0::Q(d1), Vu0::Q(self->v140));
         y = d2.y;
         x = d2.x;
@@ -1232,15 +1263,15 @@ s32 AimPlayerAtTarget(Player* self)
 // for (0x11), its offset and its rotation (BuildEulerRotationMatrix).
 struct PosedPart { u8 pad00[0x10]; s8 state; s8 next; u8 pad12[0x20 - 0x12]; Vec02 offset; u8 pad30[0x40 - 0x30]; Mat02 rotation; };
 
-void BuildEulerRotationMatrix(void* angles, void* out);
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
-void ConvertPositionToWorld(void* rec, Vec02* out);
-void TransformDirectionBetweenFrames(void* a, s32 b, void* c, void* d);
+void BuildEulerRotationMatrix(f32* in, f32* out);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
+void ConvertPositionToWorld(BaseObject* self, Vec02* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 f32 WrapModulo(f32 x, f32 m);
 f32 SplitVectorAlongAxis(const Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
 f32 ApproachValueClampingVelocity(f32 x, f32 v, f32 target, f32 dt, void* params, f32* outv);
-void ComputeObjectMotionInFrame(void* obj, s32 z, void* point, Vec02* out, s32 a, s32 b, s32 c);
-void TransformPointAtTime(void* obj, s32 a, f32 t, Vec02* in, s32 b, Vec02* out, s32 c);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
+void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 
 // The smaller of two floats (min.s; through an inline function the result takes b's register).
 static inline f32 MinF(f32 a, f32 b) { return a <? b; }
@@ -1279,11 +1310,11 @@ void PosePlayerTargetPart(Player* self)
             Mat02 m;
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(((PosedPart*)self->f250C)->offset), Vu0::Q(((PosedPart*)self->f2510)->offset));
             f32 angle = D_00263850 * ArctangentOfRatio(d.z, D_00263854);
-            BuildAxisAngleMatrix(&g_unitYVector, &m, angle);
+            BuildAxisAngleMatrix((const Vec02*)&g_unitYVector, (Mat02*)&m, angle);
             Vu0::Q(((PosedPart*)self->f2518)->offset) = Vu0::Add(Vu0::Q(*(Vec02*)D_00263840), Vu0::Rotate(m, Vu0::Sub(Vu0::Q(*(Vec02*)D_00263800), Vu0::Q(*(Vec02*)D_00263840))));
             angles = D_00263810;
         }
-        BuildEulerRotationMatrix(angles, &((PosedPart*)self->f2518)->rotation);
+        BuildEulerRotationMatrix((f32*)angles, (f32*)(&((PosedPart*)self->f2518)->rotation));
     } else {
         mode = -1;
     }
@@ -1320,7 +1351,7 @@ void PosePlayerTargetPart(Player* self)
             case 5: {
                 PathRecord* rec = (PathRecord*)self->f23B8;
                 frame = rec->frame;
-                ConvertPositionToWorld(rec, &pos);
+                ConvertPositionToWorld((BaseObject*)rec, &pos);
                 at = &pos;
                 break;
             }
@@ -1365,7 +1396,7 @@ void PosePlayerTargetPart(Player* self)
                         self->f106C = a;
                         self->f1084 = b;
                         self->f1078 = 1.0f - a - b;
-                        SetBlendItemWeights(self->f1090, 0xC, 3, &self->f106C);
+                        SetBlendItemWeights((BlendAnimationView*)self->f1090, 0xC, 3, &self->f106C);
                     }
                     goto motion;
                 }
@@ -1379,9 +1410,9 @@ void PosePlayerTargetPart(Player* self)
         return;
 motion:
     ComputeObjectMotionInFrame(frame, 0, at, &vel, 0, 0, 0);
-    TransformPointBetweenFrames(0, (s32)frame, at, &along);
+    TransformPointBetweenFrames(0, (PlacedObject*)frame, at, &along);
     Vu0::Q(side) = Vu0::Zero();
-    TransformPointAtTime(frame, 0, D_002637D8, &along, 0, &side, 0);
+    TransformPointAtTime(frame, 0, &along, 0, &side, 0, D_002637D8);
     Vu0::Q(k) = Vu0::DivX(Vu0::Sub(Vu0::Add(Vu0::Q(rest), Vu0::Q(side)), Vu0::Q(vel)), Vu0::ScalarAt(D_002637D8));
     f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(k), Vu0::Q(k))));
     if (0.0001f < dist) {
@@ -1425,7 +1456,7 @@ struct ProbeNode { u8 pad00[8]; Animation* f08; };
 struct ProbeNodeBase { u8 pad00[0x100]; Vec02 v100; };
 struct ProbeBody { u8 pad00[0x60]; Vec02 v60; Vec02 v70; void* f80; ProbeNodeBase* f84; };
 struct ProbeHolder { u8 pad00[0x224]; ProbeBody* body; };
-s32 CollectBoundsSpans(Vec02* out, Vec02* lo, Vec02* hi, s32 one, ColliderSpan* span, f32 radius);
+s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
 
 void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d)
 {
@@ -1477,17 +1508,17 @@ void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d
     Vu0::Vec up = Vu0::Vec::Of(g_unitZVector);
     *(Vu0::Vec*)&v60 = Vu0::MulAddX(Vu0::Vec::Of(v0), up, Vu0::Vec::ScalarAtValue(D_00263880));
     *(Vu0::Vec*)&v70 = Vu0::MulAddX(Vu0::Vec::Of(v0), up, Vu0::Vec::ScalarAtValue(D_00263884));
-    rec->f04 = 0 < CollectBoundsSpans(&rec->v20, &v60, &v70, 1, &span, rec->f08);
+    rec->f04 = 0 < CollectBoundsSpans(&rec->v20, &v60, &v70, rec->f08, 1, &span);
     rec->v10 = v0;
     rec->v30 = *(Vec02*)&span.q[0];
     rec->v40 = *(Vec02*)&span.q[1];
 }
 
 struct ProbeResult { u8 pad00[0x20]; Vec02 v20; };
-s32 FindNearestSpanObject(void* a, Vec02* from, Vec02* to, s32 count, Collider** list, void* out);
+s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, s32 c, s32 d, s32* count, Collider*** list);
+void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 
 s32 ProbePlayerFootGround(Player* self, void* record, void* part)
@@ -1506,12 +1537,12 @@ s32 ProbePlayerFootGround(Player* self, void* record, void* part)
     Collider** list;
     TransformPointBetweenFrames(self, 0, &p->v30, &from);
     TransformPointBetweenFrames(self, 0, &p->v40, &to);
-    GatherCollidersInBox(self->world, self->root, &from, &to, 0, 0, &count, &list);
+    GatherCollidersInBox(self->world, (Collider*)self->root, &from, &to, 0, 0, &count, &list);
     s32 found = FindNearestSpanObject(0, &from, &to, count, list, &span);
     PopBackMemoryMark();
     if (found != 0) {
         Vu0::Q(span.q[0]) = Vu0::Sub(Vu0::Q(span.q[0]), Vu0::Q(g_unitZVector));
-        TransformPointBetweenFrames(0, (s32)self, &span, &world);
+        TransformPointBetweenFrames(0, (PlacedObject*)self, (Vec02*)&span, &world);
         Vu0::Q(result->v20) = Vu0::Sub(Vu0::Q(world), Vu0::Q(p->v10));
         return 1;
     }
@@ -1525,10 +1556,10 @@ s32 ProbePlayerFootGround(Player* self, void* record, void* part)
 s32 AimPlayerAtTarget(void* self);
 
 void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d);
-void ComputeObjectMotionInFrame(s32 a, s32 b, void* c, s32 d, void* e, s32 f, s32 g);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 f32 ClampToMagnitude(f32 a, f32 b);
-s32 FindStateEntryIndex(void* p, s32 n);
-void TeleportStateWalker(void* p, s32 n);
+s32 FindStateEntryIndex(StateGraph* self, s32 key);
+void TeleportStateWalker(StateWalker* self, s32 key);
 
 
 void UpdatePlayerState0(Player* self)
@@ -1536,7 +1567,7 @@ void UpdatePlayerState0(Player* self)
     Vec3 loc;
     if (AimPlayerAtTarget(self) == 0) {
         if (self->f690 != 0) {
-            ComputeObjectMotionInFrame((s32)self->f6C0, 0, (u8*)self + 0x6A0, 0, &loc, 0, 0);
+            ComputeObjectMotionInFrame((PlacedObject*)self->f6C0, 0, (Vec02*)((u8*)self + 0x6A0), 0, (Vec02*)&loc, 0, 0);
             loc.z = ClampToMagnitude(loc.z, 10.0f);
             self->f638 = self->f638 + loc.z * g_frameDt[0];
         }
@@ -1552,19 +1583,18 @@ void UpdatePlayerState0(Player* self)
     }
     if (self->f118C != 0) return;
     if (self->f1188 == 0) return;
-    if (FindStateEntryIndex(self->f1188, 0x148) >= 0) TeleportStateWalker(self->f2234, 0x148);
+    if (FindStateEntryIndex((StateGraph*)self->f1188, 0x148) >= 0) TeleportStateWalker((StateWalker*)self->f2234, 0x148);
     self->f118C = 1;
 }
 
-s32 ComputeBallisticLaunchVelocity(void* a0, void* a1, void* a2, void* a3);
+s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, f32 angle);
 
-void PlacePlayerOnGround(Player* self, f32 unusedF12, f32 scale)
+void PlacePlayerOnGround(Player* self, void* target, f32 angle, f32 scale)
 {
     Vec02 tmp = self->v140;
     tmp.z = tmp.z - 75.0f;
     Vec02 out;
-    void* a1;
-    ComputeBallisticLaunchVelocity(&tmp, a1, &out, self);
+    ComputeBallisticLaunchVelocity(&tmp, (Vec02*)target, &out, (u8*)self, angle);
     self->desc02()->m20(self, &out);
     if (self->f2220 != 4) {
         SetPlayerState(self, 2, 6);
@@ -1602,7 +1632,7 @@ void ReleasePlayerToState2(Player* self)
     }
 }
 
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 void OrientPlayerSpinPart(Player* self, Mat02* out, f32 t)
 {
@@ -1613,7 +1643,7 @@ void OrientPlayerSpinPart(Player* self, Mat02* out, f32 t)
     } else {
         axis = g_unitXVector;
     }
-    BuildAxisAngleMatrix(&axis, &m, self->f2434 - g_frameDt[0] * self->f2430 * t);
+    BuildAxisAngleMatrix((const Vec02*)&axis, (Mat02*)&m, self->f2434 - g_frameDt[0] * self->f2430 * t);
     Mat02 a;
     Mat02 c;
     MulRotationThenCopy(&c, self->rot, m);
@@ -1624,12 +1654,12 @@ extern void* D_0026FA68;
 extern f32 D_00263894;
 extern f32 D_00263898;
 extern f32 D_00263888[3];
-s32 HasNoActiveObject89(void);
-f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, Quad16* p, s32 zero);
-void BuildPlacedObjectTransform(void* a, void* b, void* out);
-void OrientPlayerSpinPart(void* self, void* out, f32 t);
-void AddTrailPoint(void* record, Vec02* pos, Mat02* m, s32 flag, f32 a, f32 dt);
-void ApplyPlacedObjectTransform(void* self, void* a, void* b);
+s32 HasNoActiveObject89(Player* self);
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
+void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
+void OrientPlayerSpinPart(Player* self, Mat02* out, f32 t);
+void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale, f32 dt);
+void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 void BlendPlayerPose(Player* self, void* a, void* b)
 {
     u8 out[0x50] __attribute__((aligned(16)));
@@ -1640,7 +1670,7 @@ void BlendPlayerPose(Player* self, void* a, void* b)
         return;
     }
     f32 target;
-    if (self->f2220 == 6 && self->f239C == 3 && HasNoActiveObject89() != 0) {
+    if (self->f2220 == 6 && self->f239C == 3 && HasNoActiveObject89(self) != 0) {
         f32 since = g_gameClock[1] - self->f2224;
         f32 k;
         if (0.5f <= since) {
@@ -1653,13 +1683,13 @@ void BlendPlayerPose(Player* self, void* a, void* b)
         *(f32*)((u8*)self + 0x2724) = k * D_00263894 + (1.0f - k) * ramp;
     } else {
         f32 one = 1.0f;
-        *(f32*)((u8*)self + 0x2724) = ApproachValueWithRamp(*(f32*)((u8*)self + 0x2724), one, g_gameClock[2], (Quad16*)D_00263888, 0);
+        *(f32*)((u8*)self + 0x2724) = ApproachValueWithRamp((RampProfile*)D_00263888, 0, *(f32*)((u8*)self + 0x2724), one, g_gameClock[2]);
         target = one;
     }
-    f32 spin = ApproachValueWithRamp(*(f32*)((u8*)self + 0x2728), target, g_gameClock[2], (Quad16*)D_00263888, 0);
+    f32 spin = ApproachValueWithRamp((RampProfile*)D_00263888, 0, *(f32*)((u8*)self + 0x2728), target, g_gameClock[2]);
     *(f32*)((u8*)self + 0x2728) = spin;
     if (*(f32*)((u8*)self + 0x2724) < 1.0f || spin < 1.0f) {
-        BuildPlacedObjectTransform(self, b, out);
+        BuildPlacedObjectTransform(self, (Quad16*)b, (ScaledTransform*)out);
         b = out;
         *(f32*)(out + 0x44) = *(f32*)((u8*)self + 0x2728);
         *(f32*)(out + 0x40) = *(f32*)(out + 0x40) * *(f32*)((u8*)self + 0x2724);
@@ -1675,7 +1705,7 @@ void BlendPlayerPose(Player* self, void* a, void* b)
         Vu0::Q(pos) = Vu0::RotateRows(r0, r1, r2, Vu0::Q(*(Vec02*)(obj + 0x100)));
         Vu0::Q(pos) = Vu0::Add(Vu0::Q(((Collider*)self->f61C)->v140), Vu0::Q(pos));
         MulRotationCopied(&turned, m90, *b3);
-        AddTrailPoint((u8*)self + 0x1520, &pos, &turned, 0, self->f2430, g_gameClock[2]);
+        AddTrailPoint((TrailRing*)((u8*)self + 0x1520), &pos, &turned, 0, self->f2430, g_gameClock[2]);
         ((Collider*)self->f61C)->flags |= (0x8000ULL << 17);
     } else {
         s32 flag;
@@ -1689,7 +1719,7 @@ void BlendPlayerPose(Player* self, void* a, void* b)
             flag = 0;
             break;
         }
-        AddTrailPoint((u8*)self + 0x1520, 0, 0, flag, 0.0f, g_gameClock[2]);
+        AddTrailPoint((TrailRing*)((u8*)self + 0x1520), 0, 0, flag, 0.0f, g_gameClock[2]);
     }
     if (self->f2220 == 12 && self->f2228 == 0x22) {
         return;
@@ -1697,12 +1727,12 @@ void BlendPlayerPose(Player* self, void* a, void* b)
     if (D_0026FA68 != 0 && (u32)(*(s32*)((u8*)D_0026FA68 + 0x2D0) - 2) < 2) {
         return;
     }
-    ApplyPlacedObjectTransform(self, a, b);
+    ApplyPlacedObjectTransform(self, (Camera*)a, (ScaledTransform*)b);
     ((Collider*)self->f61C)->flags &= ~(0x8000ULL << 17);
 }
 
-void RecomputeTurningColliderFrame(Player* self);
-void BuildPartProbeTowardLink(Player* self, void* a1, void* a2, s32 a3, f32 f12, void* a4);
+void RecomputeTurningColliderFrame(TurningCollider* self);
+void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, PlacedObject* obj, f32 radius, FollowProbe* out); // the float where retail's caller passes it; the definition has it last
 
 void RecomputePlayerFrame(Player* self)
 {
@@ -1722,22 +1752,22 @@ void RecomputePlayerFrame(Player* self)
             goto clear;
         }
         f32 k = 6.0f;
-        BuildPartProbeTowardLink(self, a1, a1, (s32)self->f620, k, (u8*)self + 0x1190);
-        BuildPartProbeTowardLink(self, self->f614, self->f614, (s32)self->f624, k, (u8*)self + 0x1290);
+        BuildPartProbeTowardLink(self, (PlacedObject*)a1, a1, (PlacedObject*)self->f620, k, (FollowProbe*)((u8*)self + 0x1190));
+        BuildPartProbeTowardLink(self, (PlacedObject*)self->f614, self->f614, (PlacedObject*)self->f624, k, (FollowProbe*)((u8*)self + 0x1290));
     }
     return;
 clear:
     self->f1190.f50 = 0;
 }
 
-void PlacePartAtProbeSpan(Player* s, void* a, void* b, void* c);
-void BuildPlacedObjectTransform(Player* s, void* c, f32* out);
-void OrientPlayerSpinPart(Player* s, f32* buf, f32 t);
-void BuildMatrixFromRotationAndTranslation(void* a, f32* b, f32* out);
+void PlacePartAtProbeSpan(void* unused0, PlacedObject* other, PlacedObject* self, Part07* rec);
+void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
+void OrientPlayerSpinPart(Player* self, Mat02* out, f32 t);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 void UpdatePlayerLinkPose(Player* s);
-void DrawTurningCollider(Player* s, void* a, void* b);
-void QueueTrailRibbonDraw(void* a, void* b);
-void QueuePlayerMarkerRingDraw(Player* s, void* a, void* b);
+void DrawTurningCollider(TurningCollider* self, void* unused1, void* unused2);
+void QueueTrailRibbonDraw(TrailRing* self, u8* cam);
+void QueuePlayerMarkerRingDraw(Player* self, RingSource* a, void* b);
 
 void DrawPlayer(Player* self, void* a, void* b)
 {
@@ -1747,18 +1777,18 @@ void DrawPlayer(Player* self, void* a, void* b)
 
     if (!(self->f2220 == 6 && self->f239C == 7))
     {
-        PlacePartAtProbeSpan(self, self->f610, self->f610, &self->f1190);
-        PlacePartAtProbeSpan(self, self->f614, self->f614, &self->f1290);
+        PlacePartAtProbeSpan(self, (PlacedObject*)self->f610, (PlacedObject*)self->f610, &self->f1190);
+        PlacePartAtProbeSpan(self, (PlacedObject*)self->f614, (PlacedObject*)self->f614, &self->f1290);
     }
     if (self->f2434 != 0.0f || self->f2430 != 0.0f)
     {
         ((PlacedObject*)self->f61C)->flags &= ~(1ULL << 32);
-        BuildPlacedObjectTransform(self, b, out);
+        BuildPlacedObjectTransform(self, (Quad16*)b, (ScaledTransform*)out);
         out[16] *= 0.25f;
         for (i = 0; i < 4; i++)
         {
-            OrientPlayerSpinPart(self, buf, (f32)i * 0.25f);
-            BuildMatrixFromRotationAndTranslation(&((PlacedObject*)self->f61C)->v140, buf, out);
+            OrientPlayerSpinPart(self, (Mat02*)buf, (f32)i * 0.25f);
+            BuildMatrixFromRotationAndTranslation((const Vec02*)&((PlacedObject*)self->f61C)->v140, (const Mat02*)buf, (Mat4A*)out);
             ((PlacedObject*)self->f61C)->desc02()->m24((PlacedObject*)self->f61C, a, out);
         }
         ((PlacedObject*)self->f61C)->flags |= 0x100000000UL;
@@ -1770,14 +1800,17 @@ void DrawPlayer(Player* self, void* a, void* b)
     DrawTurningCollider(self, a, b);
     if (self->f21C0)
     {
-        QueueTrailRibbonDraw(self->f1520, a);
+        QueueTrailRibbonDraw((TrailRing*)self->f1520, (u8*)a);
     }
-    QueuePlayerMarkerRingDraw(self, a, b);
+    QueuePlayerMarkerRingDraw(self, (RingSource*)a, b);
 }
 
 
-f32 FloatRemainder(f32 v, f32 m);
-f32 ApproachValueWithRamp(void* p, f32 a, f32 b, void* o, f32 c);
+extern "C" f32 FloatRemainder(f32 x, f32 y);
+// The floats where retail's caller passes them; the definition has them last.
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
+f32 ApproachValueWithRamp(RampProfile* k, f32 x, f32 y, f32* out, f32 z);
 
 void UpdatePlayerSpin(Player* self)
 {
@@ -1793,7 +1826,7 @@ void UpdatePlayerSpin(Player* self)
         if (self->f2434 == 0.0f) {
             return;
         }
-        f32 r = ApproachValueWithRamp(&D_002638A0, self->f2434, 6.2831855f, &self->f2430, g_frameDt[0]);
+        f32 r = ApproachValueWithRamp((RampProfile*)&D_002638A0, self->f2434, 6.2831855f, &self->f2430, g_frameDt[0]);
         self->f2434 = r;
         if (r == 6.2831855f) {
             self->f2434 = 0.0f;
@@ -1809,11 +1842,13 @@ struct ContactChainOwner {
     Contact03* chain;       // 0x554
 };
 
-void ExtractContactsByPartMode(Player* a, void* b);
+void ExtractContactsByPartMode(Collider* self, Contact03** out);
+// Left with a third argument: PrunePlayerContacts matches only with k passed in $a2, which no
+// other call of IsObjectOfKind sets.
 s32 IsObjectOfKind(void* key, s32 kind, s32 extra);
-void CollectTurningColliderContacts(Player* a);
-void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
-void FreePooledContactChain(void* a, Contact03* b);
+void CollectTurningColliderContacts(TurningCollider* self);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void FreePooledContactChain(World* world, Contact03* head);
 
 void PrunePlayerContacts(Player* self)
 {
@@ -1821,7 +1856,7 @@ void PrunePlayerContacts(Player* self)
     Contact03** slot;
     Contact03* n;
     Contact03* head = 0;
-    ExtractContactsByPartMode(self, self->f151C);
+    ExtractContactsByPartMode(self, (Contact03**)self->f151C);
     row = self->contacts->head;
     if (row) {
         do {
@@ -1857,7 +1892,7 @@ void PrunePlayerContacts(Player* self)
     if (self->f2220 == 8) {
         self->f690 = 1;
         self->f694 = g_gameTime[0];
-        TransformPointBetweenFrames(self->f24A0, 0, self->f24B0, &self->v6A0);
+        TransformPointBetweenFrames((PlacedObject*)self->f24A0, 0, (Vec02*)self->f24B0, &self->v6A0);
         self->v6B0 = g_unitZVector;
         self->f6C0 = self->f24A0;
         row = self->contacts->head;
@@ -1887,10 +1922,10 @@ void PrunePlayerContacts(Player* self)
             } while (row);
         }
     }
-    FreePooledContactChain(self->world, head);
+    FreePooledContactChain((World*)self->world, head);
 }
 
-void SaveColliderPreviousPosition(void* self);
+void SaveColliderPreviousPosition(Collider* self);
 
 void SavePlayerPreviousPosition(Player* self)
 {
@@ -1901,13 +1936,13 @@ void SavePlayerPreviousPosition(Player* self)
 // EXACT: declaring D_00261860 as an array (extern f32 D_00261860[], passed as D_00261860[0]) moved the float load into the jal delay slot.
 
 
-void MoveCollider(void* self, void* b, f32 x);
+void MoveCollider(Collider* self, f32 x, void* b);
 
 void SetPlayerBoundsPoints(Player* self)
 {
     self->v21D0[1] = ((PlacedObject*)self->f23D4)->v140;
     self->f21CC = 0;
-    MoveCollider(self, 0, g_frameDt[0]);
+    MoveCollider(self, g_frameDt[0], 0);
     if (self->f223C == 0) {
         self->v21D0[0] = self->v140;
         self->v21D0[2] = ((PlacedObject*)self->f23D4)->v140;
@@ -1918,7 +1953,7 @@ void SetPlayerBoundsPoints(Player* self)
     }
 }
 
-void UpdateColliderBounds(void* self);
+void UpdateColliderBounds(Collider* self);
 void ExpandColliderBoundsBySphere(void* self, void* p, f32 f);
 
 void UpdatePlayerBounds(Player* self)
@@ -1935,44 +1970,44 @@ void UpdatePlayerBounds(Player* self)
     }
 }
 
-s32 IsObjectAttached(void* p);
+s32 IsObjectAttached(BaseObject* self);
 
 void* FindFirstAttachedSlotObject(Player* self, s32* out)
 {
     void* p = self->f25D8[0];
-    if (p != 0 && IsObjectAttached(p) != 0) {
+    if (p != 0 && IsObjectAttached((BaseObject*)p) != 0) {
         *out = 0;
         return self->f25D8[0];
     }
     p = self->f25D8[2];
-    if (p != 0 && IsObjectAttached(p) != 0) {
+    if (p != 0 && IsObjectAttached((BaseObject*)p) != 0) {
         *out = 1;
         return self->f25D8[2];
     }
     p = self->f25D8[1];
-    if (p != 0 && IsObjectAttached(p) != 0) {
+    if (p != 0 && IsObjectAttached((BaseObject*)p) != 0) {
         *out = 2;
         return self->f25D8[1];
     }
     p = self->f25D8[3];
-    if (p != 0 && IsObjectAttached(p) != 0) {
+    if (p != 0 && IsObjectAttached((BaseObject*)p) != 0) {
         *out = 2;
         return self->f25D8[3];
     }
     p = self->f25D8[4];
-    if (p != 0 && IsObjectAttached(p) != 0) {
+    if (p != 0 && IsObjectAttached((BaseObject*)p) != 0) {
         *out = 1;
         return self->f25D8[4];
     }
     return 0;
 }
 
-void AddTurningColliderProbeContact(Player* a, Collider* b, void* c, void* d);
-void KeepNearestPartSpan(Player* a, Collider* b, void* c, void* d);
-void AddMeshContacts(Collider* a, f32 f, void* b, void* c, s32 d, s32 e, s32 g, void* h);
-void CreateMeshPairContacts(void* a, Collider* b, void* c, void* d, void* e, void* f);
+void AddTurningColliderProbeContact(TurningCollider* self, Collider* obj, void* filter, void* out);
+void KeepNearestPartSpan(void* unused, void* a1, void* a2, Part07* self);
+void AddMeshContacts(Collider* a0, f32 radius, Vec02* a1, Collider* a2, s32 a3, FaceRef* a4, FaceRef* a5, PooledContact** a6);
+void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3, u8* ctx, PooledContact** list);
 
-void CollidePlayerWithObject(Player* self, Collider* a1, void* a2, void* a3, void* a4, void* a5)
+void CollidePlayerWithObject(Player* self, Collider* a1, s32 a2, void* a3, void* a4, void* a5)
 {
     s32 idx;
     Collider* v;
@@ -2015,11 +2050,11 @@ void CollidePlayerWithObject(Player* self, Collider* a1, void* a2, void* a3, voi
             {
                 if (a1->flags538 & (1ULL << 40))
                 {
-                    AddMeshContacts(a1, a1->radius3CC, (u8*)a1 + 0x140, v, v->tree.count, (s32)v->tree.nodes, 0, (u8*)self + 0x2670);
+                    AddMeshContacts(a1, a1->radius3CC, (Vec02*)((u8*)a1 + 0x140), v, v->tree.count, (FaceRef*)v->tree.nodes, 0, (PooledContact**)((u8*)self + 0x2670));
                 }
                 else if (a3)
                 {
-                    CreateMeshPairContacts(v, a1, a2, a3, a4, (u8*)self + 0x2670);
+                    CreateMeshPairContacts(v, a1, a2, (FaceRef*)a3, (u8*)a4, (PooledContact**)((u8*)self + 0x2670));
                 }
                 return;
             }
@@ -2044,13 +2079,12 @@ extern f32 D_002638D0[4];
 extern f32 D_002638E0[4];
 extern f32 D_002638F0[4];
 
-void CaptureSwitchedColliderPose(Player* self, u8* out, f32 dt);
-void TransformDirectionBetweenFrames(void* a, s32 b, void* c, void* d);
-f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, s32 zero);
-u128 ApproachPointWithRamp(u128 a, u128 b, f32 dt, f32* ramp, s32 zero);
+void CaptureSwitchedColliderPose(SwitchedCollider* self, u8* out, f32 a);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
+u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel);
 struct PushRecord;
 void FillPlayerPushRecord(Player* self, PushRecord* out);
-void GetObjectWorldPosition(s32 obj, Vec02* out); // stays void: retail returns a value, but declared so func_00172EE0 differs in registers
 #include "value_range.h"
 typedef void (*PoseAtFn)(PoseHolder47* self, Vec02* pos, Vec02* dir, f32 t);
 
@@ -2081,9 +2115,9 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
             if (fn != 0) {
                 fn(h, &pos, &dir, self->f2410);
             }
-            TransformPointBetweenFrames(((PoseTarget*)self->f2208)->frame, 0, &pos, &pos);
+            TransformPointBetweenFrames((PlacedObject*)(((PoseTarget*)self->f2208)->frame), 0, &pos, &pos);
             Vu0::Q(pose->pos) = Vu0::Q(pos);
-            TransformDirectionBetweenFrames(((PoseTarget*)self->f2208)->frame, 0, &dir, &dir);
+            TransformDirectionBetweenFrames((PlacedObject*)(((PoseTarget*)self->f2208)->frame), 0, &dir, &dir);
             u128 d = Vu0::Q(dir);
             d = Vu0::NormalizeOr(d, Vu0::Q(D_00248D30));
             Vu0::Q(pose->dir) = Vu0::MulX(d, Vu0::ScalarAt(self->f2414));
@@ -2115,7 +2149,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
             if (g_camera->f224 != 0) {
                 pose->pos.z = z;
             } else {
-                f32 v = ApproachValueWithRamp(last.z, z, g_gameClock[2], D_002638F0, 0);
+                f32 v = ApproachValueWithRamp((RampProfile*)D_002638F0, 0, last.z, z, g_gameClock[2]);
                 pose->pos.z = v;
                 f32 zlo = self->pos.z + D_002638BC;
                 f32 zhi = self->pos.z + D_002638B8;
@@ -2133,7 +2167,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
         if (self->f2220 == 6 && self->f239C == 0) {
             FillPlayerPushRecord(self, (PushRecord*)out);
         }
-        u128 d = ApproachPointWithRamp(Vu0::Q(self->v2530), Vu0::Q(D_00248D30), dt, D_002638E0, 0);
+        u128 d = ApproachPointWithRamp(Vu0::Q(self->v2530), Vu0::Q(D_00248D30), dt, (RampProfile*)D_002638E0, 0);
         Vu0::Q(self->v2530) = d;
         Vu0::Q(pose->pos) = Vu0::Add(Vu0::Q(pose->pos), d);
     }
@@ -2237,7 +2271,7 @@ struct PushHolderDesc {
 };
 struct PushObject { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PushHolder* holder; u8 pad38[0x50 - 0x38]; u32 flags; };
 struct PushRecord { u8 pad00[0x30]; f32 f30; s32 f34; };
-f32 ApproachValueWithRamp(void* p, s32 zero, f32 a, f32 b, f32 c);
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 void FillPlayerPushRecord(Player* self, PushRecord* out)
 {
@@ -2277,7 +2311,7 @@ void FillPlayerPushRecord(Player* self, PushRecord* out)
             if (holder->desc->m2 != 0) {
                 holder->desc->m2(holder, &point, limit, 0);
             }
-            TransformPointBetweenFrames(((PushObject*)self->f23A0)->frame, 0, &point, &self->v2690);
+            TransformPointBetweenFrames((PlacedObject*)(((PushObject*)self->f23A0)->frame), 0, &point, &self->v2690);
             self->v2690.z = self->v2690.z + 125.0f;
         } else {
             Vec02 k;
@@ -2328,12 +2362,12 @@ void FillPlayerPushRecord(Player* self, PushRecord* out)
     }
     OnOffObject* target = self->f2678;
     f32* slot = (f32*)((u8*)target + 0x300);
-    *(f32*)((u8*)self->f2678 + 0x300) = ApproachValueWithRamp(D_00263900, 0, *slot, force, g_frameDt[0]);
+    *(f32*)((u8*)self->f2678 + 0x300) = ApproachValueWithRamp((RampProfile*)D_00263900, 0, *slot, force, g_frameDt[0]);
 }
 
 
-void HandleSwitchedColliderActivation(void* a, void* b);
-void ShowModeLabel(s32 id);
+void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
+void ShowModeLabel(s32 mode);
 
 void SetPlayerTracked(Player* a, void* b)
 {
@@ -2346,8 +2380,8 @@ void SetPlayerTracked(Player* a, void* b)
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, s32 c, s32 d, s32* count, Collider*** list);
-s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, void* a4);
+void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderSpan* a4);
 
 s32 HasFloorAtPlayerOffset(Player* self, Vec02* offset)
 {
@@ -2379,39 +2413,39 @@ s32 HasFloorAtPlayerOffset(Player* self, Vec02* offset)
 #include "step_sequence.h"
 #include "identity_key.h"
 
-s32 HasAnimationDrivenAttachment(void* ctx);
-void ReleaseAnimationDrivenAttachments(void* ctx);
-void* FillMemory(void* p, s32 value, s32 size);
-s32 IsObjectOfKind(BaseObject* n, s32 kind);
-s32 IsTopCameraController(u8* p);
+s32 HasAnimationDrivenAttachment(SwitchedCollider *self);
+void ReleaseAnimationDrivenAttachments(Player* self);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+s32 IsTopCameraController(CameraController* self);
 s32 HasSpareCount(void);
 s32 MaskWorldBitsBySave(void);
-void SetPlayerBlendWeights(f32 angle, f32 t, Player* self, void* records, s32 n);
+void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecords* a1, BlendAnimationView* a2); // the floats first, as the definition takes them
 extern s32 g_currentMode;
 extern s32 g_padRouting;
 extern s32 g_padSelectFlags;
 s32 IsEntryQueueRunning(EntryQueue* q);
 void DrivePlayerFromEntryQueue(EntryQueue* q, PadRecord* pad);
 void UnbindEntryQueue(EntryQueue* q);
-void StartObjectFade(void* key, s32 id, s32 on);
-void ClearPadPressedBits(PadRecord* pad, s32 mask);
-BaseObject* FindFirstObjectById(World* world, s32 kind, s32 id, s32 ctx);
-void ReadTurningColliderStickHeading(Player* self, PadRecord* pad);
+void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
+void ClearPadPressedBits(PadRecord* self, u32 mask);
+void ReadTurningColliderStickHeading(TurningCollider* self, PadRecord* pad);
 f32 WrapAngle(f32 a);
 void UpdateModeSelection(Player* self, PadRecord* pad);
 void SkipRemainingSteps(StepSequence* self);
 void SetStepSequenceState(StepSequence* self, s32 state);
-s32 ChooseNearbyPlayerTarget(Player* self, s32 a, s32* out);
-void StartSoundEffect(s32 sound, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-s32 ChoosePlayerTargetByCost(Player* self, void* target);
+s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
+s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep);
 s32 ChoosePlayerNextState(Player* self);
-void PopStackElement(void* q);
+void PopStackElement(ElementStack* g);
 void HandlePlayerAimButton(Player* self, PadRecord* pad);
 // player_request.cpp defines it with four parameters; retail's call here also loads the word at
 // 0xA10 into $a2 (first, as the argument order below gives).
-void SetPlayerVelocityFromHeading(Player* self, void* basis, s32 n, f32 heading, f32 speed);
-void ControlPlayerOnLinkedObject(Player* self, PadRecord* pad);
-void ControlPlayerOnPath(Player* self, PadRecord* pad);
+void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, BlendAnimationView* blend, f32 heading, f32 speed);
+void ControlPlayerOnLinkedObject(Player* self, void* pad);
+void ControlPlayerOnPath(Player* self, PathPad* pad);
 void ControlPlayerState2(Player* self, PadRecord* pad);
 void ControlPlayerOnTarget(Player* self, PadRecord* pad);
 void UpdatePlayerGrabs(Player* self);
@@ -2427,7 +2461,7 @@ extern u8 g_elementStack[];
 // (the goto, past the stamp). In the
 // default case the offset is stored through a cast, so its address is not a register CSE hands on to
 // the call, which retail computes after the time test.
-void ControlPlayer(Player* self, PadRecord* pad)
+void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
 {
     if (HasAnimationDrivenAttachment(self)) {
         if (!(0.0f < pad->f48) && (pad->flags & 0xF0) == 0) {
@@ -2475,7 +2509,7 @@ void ControlPlayer(Player* self, PadRecord* pad)
                 for (s32 i = start; i < q->f34; i++) {
                     QueueEntry* e = &((QueueEntry*)q->buffer)[i];
                     if (e->kind == 1) {
-                        BaseObject* o = FindFirstObjectById(q->world, 0x104, e->id, q->f4C);
+                        BaseObject* o = FindFirstObjectById(q->world, 0x104, e->id, (void*)q->f4C);
                         if (o != 0 && IsObjectOfKind(o, 0x74)) {
                             StartObjectFade(&D_00275B04, o->id, 1);
                             ClearPadPressedBits(&g_padRecord, 0x800);
@@ -2579,7 +2613,7 @@ held:
         modeKey = g_currentMode == 0;
     }
     UpdateModeSelection(self, pad);
-    if (!IsTopCameraController((u8*)&g_camera->ctl454)) {
+    if (!IsTopCameraController((CameraController*)((u8*)&g_camera->ctl454))) {
         PadRecord* rec = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
         StepSequence* seq = (StepSequence*)g_typedTextCaptionBox.child;
         if (seq != 0 && seq->state2D4 == 3 && seq->f32C == 0 && (rec->flags & 0xC) && *(s32*)seq->target304 != 0) {
@@ -2643,7 +2677,7 @@ held:
                 break;
             }
             if (aim) {
-                target = ChooseNearbyPlayerTarget(self, 0, &self->f239C);
+                target = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)self, 0, &self->f239C);
                 if (target != -1) {
                     state = 6;
                     sub = target;
@@ -2681,7 +2715,7 @@ held:
                 break;
             }
             if (aim) {
-                target = ChooseNearbyPlayerTarget(self, 0, &self->f239C);
+                target = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)self, 0, &self->f239C);
                 if (target != -1) {
                     state = 6;
                     sub = target;
@@ -2713,7 +2747,7 @@ held:
                 break;
             }
             if (aim) {
-                target = ChooseNearbyPlayerTarget(self, 0, &self->f239C);
+                target = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)self, 0, &self->f239C);
                 if (target != -1) {
                     state = 6;
                     sub = target;
@@ -2738,7 +2772,7 @@ held:
                 if (pad->flags & 0x20) {
                     ClearPadPressedBits(pad, 0x20);
                     SetPlayerAimMode(self, -1);
-                    sub = ChoosePlayerTargetByCost(self, 0);
+                    sub = ChoosePlayerTargetByCost((Chooser*)self, 0);
                     break;
                 }
                 if ((sub != 6 || self->f226C != 0.0f) && (pad->flags & 0x80)) {
@@ -2822,7 +2856,7 @@ held:
             if (skipStep) {
                 if (self->f2228 == 0x22) {
                     sub = 0x23;
-                    PopStackElement(g_elementStack);
+                    PopStackElement((ElementStack*)g_elementStack);
                     break;
                 }
             } else if (self->f2228 == 0x22) {
@@ -2868,10 +2902,10 @@ held:
     HandlePlayerAimButton(self, pad);
     switch (self->f2220) {
     case 5:
-        SetPlayerVelocityFromHeading(self, (u8*)self + 0x910, self->fA10, self->f630, self->f634);
+        SetPlayerVelocityFromHeading(self, (const Vec02*)((u8*)self + 0x910), self->fA10, self->f630, self->f634);
         break;
     case 1:
-        SetPlayerBlendWeights(self->f630, self->f634, self, (u8*)self + 0x720, self->f900);
+        SetPlayerBlendWeights(self->f630, self->f634, self, (TurnBlendRecords*)((u8*)self + 0x720), self->f900);
         break;
     case 4:
     case 10: {
@@ -2894,7 +2928,7 @@ held:
         ControlPlayerOnLinkedObject(self, pad);
         break;
     case 7:
-        ControlPlayerOnPath(self, pad);
+        ControlPlayerOnPath(self, (PathPad*)pad);
         break;
     case 2:
         ControlPlayerState2(self, pad);
@@ -2909,25 +2943,25 @@ held:
     UpdatePlayerGrabs(self);
 }
 
-void UpdateTurningCollider(Player* self, f32 dt);
-s32 HasAnimationDrivenAttachment(void* ctx);
+void UpdateTurningCollider(TurningCollider* self, f32 dt);
+s32 HasAnimationDrivenAttachment(SwitchedCollider *self);
 void UpdatePlayerWhileAnimationDriven(Player* self);
-void UpdateSixEntryBlendWeights(Player* self, void* blend, s32 n, void* msg);
+void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView* g, void* a3);
 f32 WrapModulo(f32 x, f32 y);
-void PlayPhaseCrossingSound(Player* self, void* p, f32 f);
-void UpdateEightEntryBlendWeights(Player* self, void* blend, s32 n);
+void PlayPhaseCrossingSound(Player* self, f32* p, f32 f);
+void UpdateEightEntryBlendWeights(Player* self, BlendSlot* slots, BlendAnimationView* gr);
 void UpdatePlayerState2(Player* self);
 void UpdatePlayerTargetPhase(Player* self);
-u128 ApproachPointWithRamp(u128 cur, u128 target, f32 dt, const f32* params, s32 flag);
-s32 ComputeLedgeOffsetForContact(Player* self, void* frame, Vec02* pos, s32 a, s32 b, Vec02* out);
+u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel);
+s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s32 kind, void* arg, Vec02* out);
 void UpdatePlayerRequestSubState(Player* self);
 void UpdatePlayerAimTarget(Player* self);
 void ReleaseFarPlayerLinks(Player* self);
 void NotifyPlayerGroundObject(Player* self);
-void ClearRootTries(void* self);
+void ClearRootTries(PlacedObject* self);
 void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
-void FindClosestPointsOnSegments(Vec02* a0, Vec02* a1, Vec02* b0, Vec02* b1, Vec02* out, f32* d, Vec02* out2);
-void InitOwnerMessage(void* out, s32 mode, void* owner);
+void FindClosestPointsOnSegments(const Vec02* p0, const Vec02* p1, const Vec02* q0, const Vec02* q1, f32* st, f32* dist, Vec02* dir);
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 void PosePlayerTargetPart(Player* self);
 void RecordPlayerTargetMemo(Player* self);
 void RunPlayerQueuedActivations(Player* self);
@@ -2978,14 +3012,14 @@ void UpdatePlayer(Player* self, f32 dt)
         UpdateSixEntryBlendWeights(self, (u8*)self + 0x720, self->f900, self->watched2230);
         {
             f32 phase = WrapModulo((((PhaseMessage_174808*)self->watched2230)->f14 + D_00274B64 * ((PhaseMessage_174808*)self->watched2230)->f18) / ((PhaseMessage_174808*)self->watched2230)->f8->f34, 1.0f);
-            PlayPhaseCrossingSound(self, &self->f2440[0], phase);
+            PlayPhaseCrossingSound(self, (f32*)&self->f2440[0], phase);
         }
         break;
     case 5:
-        UpdateEightEntryBlendWeights(self, (u8*)self + 0x910, self->fA10);
+        UpdateEightEntryBlendWeights(self, (BlendSlot*)((u8*)self + 0x910), self->fA10);
         {
             f32 phase = WrapModulo((((PhaseMessage_174808*)self->watched2230)->f14 + D_00274B64 * ((PhaseMessage_174808*)self->watched2230)->f18) / ((PhaseMessage_174808*)self->watched2230)->f8->f34, 1.0f);
-            PlayPhaseCrossingSound(self, &self->f2440[1], phase);
+            PlayPhaseCrossingSound(self, (f32*)&self->f2440[1], phase);
         }
         break;
     case 2:
@@ -2999,9 +3033,9 @@ void UpdatePlayer(Player* self, f32 dt)
         break;
     case 8: {
         Vec02 local;
-        Vu0::Q(self->v24D0) = ApproachPointWithRamp(Vu0::Q(self->v24D0), Vu0::Q(D_00248D30), dt, D_00263918, 0);
-        TransformPointBetweenFrames(self->f24A0, 0, self->f24B0, &local);
-        if (ComputeLedgeOffsetForContact(self, self->f24A0, &local, self->f24F0, self->f24F4, &self->v24C0) == 0) {
+        Vu0::Q(self->v24D0) = ApproachPointWithRamp(Vu0::Q(self->v24D0), Vu0::Q(D_00248D30), dt, (RampProfile*)D_00263918, 0);
+        TransformPointBetweenFrames((PlacedObject*)self->f24A0, 0, (Vec02*)self->f24B0, &local);
+        if (ComputeLedgeOffsetForContact(self, (Collider*)self->f24A0, &local, self->f24F0, (void*)self->f24F4, &self->v24C0) == 0) {
             SetPlayerState(self, 2, 2);
             break;
         }
@@ -3053,7 +3087,7 @@ void UpdatePlayer(Player* self, f32 dt)
         f32 dist;
         f32 gap;
         if (self->f2204 != 0) {
-            GetObjectWorldPosition((void*)self->f2204, &local);
+            GetObjectWorldPosition((BaseObject*)self->f2204, &local);
             for (s32 i = 1; i < self->f21CC; i++) {
                 MeasurePointToSegment(&local, &self->v21D0[i - 1], &self->v21D0[i], &t, &dist);
                 if (dist < ((LinkTarget_174808*)self->f2200)->radius + self->f2420) {
@@ -3064,14 +3098,14 @@ void UpdatePlayer(Player* self, f32 dt)
         } else if (self->f2208 != 0) {
             s32 i;
             for (i = 0; i < self->f21CC; i++) {
-                TransformPointBetweenFrames(0, (s32)((PathTarget_174808*)self->f2208)->frame, &self->v21D0[i], &pts[i]);
+                TransformPointBetweenFrames(0, (PlacedObject*)((PathTarget_174808*)self->f2208)->frame, &self->v21D0[i], &pts[i]);
                 PathShape_174808* s = ((PathTarget_174808*)self->f2208)->shape;
                 if (s->desc->m30 != 0) {
                     s->desc->m30(s, &pts[i], *(f32*)((u8*)self + 0x220C), 0, &dirs[i], 0, 0, 0);
                 }
             }
             for (i = 1; i < self->f21CC; i++) {
-                FindClosestPointsOnSegments(&pts[i - 1], &pts[i], &dirs[i - 1], &dirs[i], &local, &gap, &closest);
+                FindClosestPointsOnSegments(&pts[i - 1], &pts[i], &dirs[i - 1], &dirs[i], (f32*)&local, &gap, &closest);
                 if (gap < self->f2420) {
                     SetPlayerState(self, 7, 0x17);
                     break;
@@ -3096,7 +3130,7 @@ void UpdatePlayer(Player* self, f32 dt)
                 ((ContactBody_174808*)self)->desc->m140((ContactBody_174808*)self, &msg);
             }
         }
-        FreePooledContactChain(self->world, *(Contact03**)self->f151C);
+        FreePooledContactChain((World*)self->world, *(Contact03**)self->f151C);
         *(Contact03**)self->f151C = 0;
     }
     UpdatePlayerSpin(self);
@@ -3133,7 +3167,7 @@ void UpdatePlayerWhileAnimationDriven(Player* self)
         f32 heading;
         f32 speed;
         state = 0;
-        ComputeObjectSteeringHeading(self, 0, 0, &heading, 0, &speed, g_frameDt[0], self->f638);
+        ComputeObjectSteeringHeading(g_frameDt[0], self->f638, self, 0, 0, &heading, 0, &speed);
         if (speed > 0.0f) {
             state = 1;
         }
@@ -3145,7 +3179,7 @@ void UpdatePlayerWhileAnimationDriven(Player* self)
 }
 
 
-void SetTurningColliderFollowedMesh(Player* self, void* a1, s32 zero);
+void SetTurningColliderFollowedMesh(TurningCollider* self, Collider* other, s32 all);
 
 void SelectPlayerStateAnimation(Player* self)
 {
@@ -3195,7 +3229,7 @@ void SelectPlayerStateAnimation(Player* self)
     if (node == 0) {
         node = self->f1390[0];
     }
-    SetTurningColliderFollowedMesh(self, node, 0);
+    SetTurningColliderFollowedMesh(self, (Collider*)node, 0);
 }
 
 struct Dev_175078 {
@@ -3230,42 +3264,42 @@ void SetPlayerPartLayers(Player* self, s32 flags)
 
 
 
-void CreateAnimationPlayer(void* anim, void* owner, s32 count, void* args, s32 flag, void* out, f32 start, f32 speed);
-void InitContactPairFlags(void* world, void* obj);
-void PushCameraController(void* camera, s32 kind, void* sounds, void* owner, s32 a4);
-void RemoveCameraControllers(void* camera, s32 mask, s32 kind, void* sounds, void* owner, s32 a5);
-void RequestCameraSnap(Camera* camera, s32 mode);
-void StartCameraSounds(void* sounds);
-void SendEmptyMessage(void* x);
-void SetPooledObjectPlayerHold(void* obj, s32 hold);
+void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetBinding* pairs, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
+void InitContactPairFlags(World* self, Collider* obj);
+void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, void* arg);
+void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, void* k2, void* k3);
+void RequestCameraSnap(Camera* self, f32* src);
+void StartCameraSounds(CameraSoundOwner* self);
+void SendEmptyMessage(MemberObject* a0);
+void SetPooledObjectPlayerHold(PooledObject* self, s32 v);
 void ComputePlayerJumpVelocity(Player* self, Vec02* out);
-void ComputeUpwardBoostVelocity(Player* self, Vec02* out);
-void ComputeUpwardBoostVelocityUnitSlope(Player* self, Vec02* out);
+void ComputeUpwardBoostVelocity(PlacedObject* self, Vec02* out);
+void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec02* out);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 void ActivateSwitchedCollider(void* obj);
-void DestroyStateWalker(void* h);
-void SetColliderAnchors(void* self, s32 a, s32 b, s32 c, s32 d);
+void DestroyStateWalker(StateWalker* self);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 void AddColliderAttachment(Collider* o, Attach03* node);
 void RemoveColliderAttachment(Collider* o, Attach03* node);
-void SetColliderTreeContactsDropped(void* self, s32 dropped);
-void* PushSoundLevel(s32 level);
-void ReleaseSoundLevel(void* p);
+void SetColliderTreeContactsDropped(Collider* self, s32 value);
+SoundLevelEntry* PushSoundLevel(s32 level);
+void ReleaseSoundLevel(SoundLevelEntry* self);
 void SetVolumeChannelFactor(s32 a, s32 b, f32 x);
-void SetTurningColliderLinkFlag(void* self, s32 a1);
-void TurnColliderTowardHeading(Player* self);
+void SetTurningColliderLinkFlag(TurningCollider* self, s32 a1);
+void TurnColliderTowardHeading(TurningCollider* self);
 void TurnPlayerToClass75AheadMask8(Player* self);
 void TurnPlayerToClass75AheadMask4(Player* self);
 void PlacePlayerOnLinkedObject(Player* self);
-void SetFlaggedLinkContactMask(Player* self, void* obj, s32 on);
-void GetLinkedObjectHeading(Player* self, f32* out);
+void SetFlaggedLinkContactMask(Collider* self, BaseObject* node, s32 flag);
+void GetLinkedObjectHeading(Player* self, f32* heading);
 void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB);
 s32 HasNoActiveObject89(Player* self);
-void TakeCountedColliderTouch(void* obj, Player* a, s32 b);
-Attach03* TakeAttachRecord(void* world);
-void ReleaseAttachRecords(void* owner, Attach03* list);
-void PopActiveSequenceElement(void* x);
+void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag);
+Attach03* TakeAttachRecord(World* self);
+void ReleaseAttachRecords(World* self, Attach03* node);
+void PopActiveSequenceElement(World* world);
 void SetOnOffObjectForcedState(void* p, s32 n);
-void ComputePolarOffset(void* out, f32 x, f32 y, f32 z);
+void ComputePolarOffset(Vec3* out, f32 unused, f32 scale, f32 z);
 
 extern s32 D_00270454;
 extern f32 D_00274F00;
@@ -3297,33 +3331,33 @@ struct AnimArg_175170 {
 };
 
 // The animation player of the player's state, or its state walker, stopped.
-void SetPlayerAimMode(void* self, s32 arg);
-void SetTurningColliderFollowedMesh(Player* self, void* a1, s32 zero);
-s32 FindStateEntryIndex(void* p, s32 n);
-f32 ArctangentOfRatio(f32 a, f32 b);
-s32 IsObjectAttached(void* p);
+void SetPlayerAimMode(Player* self, s32 state);
+void SetTurningColliderFollowedMesh(TurningCollider* self, Collider* other, s32 all);
+s32 FindStateEntryIndex(StateGraph* self, s32 key);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
+s32 IsObjectAttached(BaseObject* self);
 void ResetPlayerOnOffObject(Player* self);
 void ReleaseFarPlayerLinks(Player* self);
-void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
-void TransformDirectionBetweenFrames(void* a, s32 b, void* c, void* d);
-f32 GetAnimationMarkerTime(Animation* anim, s32 key);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+f32 GetAnimationMarkerTime(Animation* self, s32 key);
 void BuildPerpendicularPair(Vec02* dir, Vec02* out, const Vec02* a, const Vec02* b);
-void StopAnimationPlayer(void* p);
+void StopAnimationPlayer(AnimationPlayer* self);
 s32 MaskWorldBitsBySave(void);
-void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
-void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
-void ResetTrailRing(void* sub);
-void PushStackElement(void* a, void* b);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void ResetTrailRing(TrailRing* o);
+void PushStackElement(ElementStack* self, ScreenElement* node);
 f32 WrapAngle(f32 a);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 static inline void StopPlayerAnimation(Player* self)
 {
     if (self->watched2230 != 0) {
-        StopAnimationPlayer(self->watched2230);
+        StopAnimationPlayer((AnimationPlayer*)self->watched2230);
         self->watched2230 = 0;
     } else if (self->f2234 != 0) {
-        DestroyStateWalker(self->f2234);
+        DestroyStateWalker((StateWalker*)self->f2234);
         self->f2234 = 0;
     }
 }
@@ -3400,9 +3434,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
     if (self->f2220 != state) {
         switch (self->f2220) {
         case 2: {
-            self->penalizedTargetId = 0;
+            self->penalizedTarget = 0;
             if (state != 3 && state != 7) {
-                StartSoundEffect(0x49, 0, (s32)self, 0, 1000.0f, 500.0f, 0.7f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x49, 0, self, 0, 1000.0f, 500.0f, 0.7f, 0.0f, 0.0f, 0, 0);
             }
             self->f224C = -1;
             if (self->f223C == 0 && state != 7 && state != 3) {
@@ -3436,7 +3470,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                     break;
                 }
                 if (m != 0) {
-                    SendEmptyMessage(m);
+                    SendEmptyMessage((MemberObject*)m);
                 }
             }
             if (!(MaskWorldBitsBySave() & 0x1000)) {
@@ -3449,9 +3483,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         case 3: {
             if (state == 2) {
-                self->penalizedTargetId = self->f2204;
+                self->penalizedTarget = (void*)self->f2204;
             }
-            TriggerScriptEvent((void*)self->f2204, 3, 0, 0);
+            TriggerScriptEvent((BaseObject*)self->f2204, 3, 0, 0);
             BaseObject* o = (BaseObject*)self->f2204;
             o->desc->m18(o, self);
             self->f2210 = self->f2204;
@@ -3466,20 +3500,20 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             SetTurningColliderLinkFlag(self, 1);
             if (self->f22AC != 0) {
                 RemoveColliderAttachment(((Attach03*)self->f22AC)->target, (Attach03*)self->f22AC);
-                ReleaseAttachRecords(self->world, (Attach03*)self->f22AC);
+                ReleaseAttachRecords((World*)self->world, (Attach03*)self->f22AC);
                 self->f22AC = 0;
             }
-            ResetTrailRing(self->f1520);
+            ResetTrailRing((TrailRing*)self->f1520);
             break;
         }
         case 7: {
             if (state == 2) {
-                self->penalizedTargetId = self->f2208;
+                self->penalizedTarget = (void*)self->f2208;
             }
-            TriggerScriptEvent((void*)self->f2208, 3, 0, 0);
+            TriggerScriptEvent((BaseObject*)self->f2208, 3, 0, 0);
             BaseObject* o = (BaseObject*)self->f2208;
             o->desc->m18(o, self);
-            SetFlaggedLinkContactMask(self, (void*)self->f2208, 0);
+            SetFlaggedLinkContactMask(self, (BaseObject*)self->f2208, 0);
             self->f2214 = self->f2208;
             PS(f32, 0x2218) = PS(f32, 0x220C);
             s32 aim = -1;
@@ -3489,11 +3523,11 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             SetPlayerAimMode(self, aim);
             Vu0::Q(self->v2530) = Vu0::Sub(Vu0::Q(self->v560), Vu0::Q(self->pos));
             self->v2530.z = 0.0f;
-            ResetTrailRing(self->f1520);
+            ResetTrailRing((TrailRing*)self->f1520);
             break;
         }
         case 8:
-            SetFlaggedLinkContactMask(self, self->f24A0, 0);
+            SetFlaggedLinkContactMask(self, (BaseObject*)self->f24A0, 0);
             self->f24A0 = 0;
             break;
         case 4:
@@ -3505,26 +3539,26 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 AT(Vec02, PS(void*, 0x2494), 0x300) = D_00248D30;
             }
             self->f580 = 1;
-            ResetTrailRing(self->f1520);
+            ResetTrailRing((TrailRing*)self->f1520);
             self->f26CC = g_gameTime[0];
             break;
         case 6: {
             switch (self->f239C) {
             case 2:
                 StopPlayerAnimation(self);
-                StartSoundEffect(0x4E, 0, (s32)self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-                SetPooledObjectPlayerHold(self->heldObject, 0);
+                StartSoundEffect(0x4E, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                SetPooledObjectPlayerHold((PooledObject*)self->heldObject, 0);
                 break;
             case 5:
-                TriggerScriptEvent(self->f23B8, 3, 0, 0);
+                TriggerScriptEvent((BaseObject*)self->f23B8, 3, 0, 0);
                 ((BaseObject*)self->f23B8)->desc->m18((BaseObject*)self->f23B8, self);
-                SetFlaggedLinkContactMask(self, self->f23B8, 0);
+                SetFlaggedLinkContactMask(self, (BaseObject*)self->f23B8, 0);
                 self->heldObject = 0;
                 break;
             case 4:
-                TriggerScriptEvent(self->f23BC, 3, 0, 0);
+                TriggerScriptEvent((BaseObject*)self->f23BC, 3, 0, 0);
                 ((BaseObject*)self->f23BC)->desc->m18((BaseObject*)self->f23BC, self);
-                SetFlaggedLinkContactMask(self, self->f23BC, 0);
+                SetFlaggedLinkContactMask(self, (BaseObject*)self->f23BC, 0);
                 self->heldObject = 0;
                 break;
             case 6:
@@ -3545,15 +3579,15 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             if (state == 2) {
                 if (self->f23A0 != 0) {
-                    self->penalizedTargetId = (s32)self->f23A0;
+                    self->penalizedTarget = self->f23A0;
                 } else if (self->f23A8 != 0) {
-                    self->penalizedTargetId = (s32)self->f23A8;
+                    self->penalizedTarget = self->f23A8;
                 } else if (self->f23B8 != 0) {
-                    self->penalizedTargetId = (s32)self->f23B8;
+                    self->penalizedTarget = self->f23B8;
                 } else if (self->f23BC != 0) {
-                    self->penalizedTargetId = (s32)self->f23BC;
+                    self->penalizedTarget = self->f23BC;
                 } else {
-                    self->penalizedTargetId = 0;
+                    self->penalizedTarget = 0;
                 }
             }
             self->fA14 = -1;
@@ -3568,7 +3602,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             self->f268C = 0;
             if (PS(void*, 0x26A4) != 0) {
-                ReleaseSoundLevel(PS(void*, 0x26A4));
+                ReleaseSoundLevel((SoundLevelEntry*)(PS(void*, 0x26A4)));
                 PS(void*, 0x26A4) = 0;
             }
             BaseObject* o = PS(BaseObject*, 0x272C);
@@ -3591,9 +3625,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         }
         case 12:
-            RemoveCameraControllers(g_camera, 0xF, 6, (u8*)g_camera + 0x460, self, 0);
+            RemoveCameraControllers(g_camera, 0xF, 6, (CameraController*)((u8*)g_camera + 0x460), self, 0);
             if (D_00270454 != 0) {
-                PopStackElement(g_elementStack);
+                PopStackElement((ElementStack*)g_elementStack);
             }
             break;
         case 9:
@@ -3620,7 +3654,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->flags538 &= ~((u64)1 << 40);
             self->hook = self->f273C;
             if (self->f1390[13] != 0) {
-                SetTurningColliderFollowedMesh(self, self->f1390[13], 1);
+                SetTurningColliderFollowedMesh(self, (Collider*)self->f1390[13], 1);
             }
             break;
         }
@@ -3639,9 +3673,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                     }
                     late = limit < g_gameTime[0] - self->f2224;
                 }
-                if (late == 1 && FindStateEntryIndex(walker, 0x14A)) {
+                if (late == 1 && FindStateEntryIndex((StateGraph*)walker, 0x14A)) {
                     walkerId = 0x14A;
-                } else if (FindStateEntryIndex(walker, 0x149)) {
+                } else if (FindStateEntryIndex((StateGraph*)walker, 0x149)) {
                     walkerId = 0x149;
                 }
             }
@@ -3685,7 +3719,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vu0::Q(PS(Vec02, 0x22F0)) = Vu0::Sub(Vu0::Q(((PlacedObject*)self->f61C)->pos), Vu0::Q(pos));
             MultiplyMatrices3x3(&rotA, &((PlacedObject*)self->f61C)->rot, &PS(Mat02, 0x2300));
             MultiplyMatrices3x3(&rotB, &((PlacedObject*)self->f23D0)->rot, &PS(Mat02, 0x2330));
-            TriggerScriptEvent((void*)self->f2204, 2, 0, 0);
+            TriggerScriptEvent((BaseObject*)self->f2204, 2, 0, 0);
             BaseObject* o = (BaseObject*)self->f2204;
             o->desc->m17(o, self);
             GetLinkedObjectHeading(self, &heading);
@@ -3720,7 +3754,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 if (c->desc->flags & 2) {
                     if ((c->mode450 != 3 && c->f1EC != 0 && c->f1EC->mode0 == 1) ||
                         (c->mode470 != 3 && c->f1F0 != 0 && c->f1F0->mode1 == 1)) {
-                        Attach03* a = TakeAttachRecord(self->world);
+                        Attach03* a = TakeAttachRecord((World*)self->world);
                         a->owner = self;
                         a->target = c;
                         AddColliderAttachment(c, a);
@@ -3734,10 +3768,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         }
         case 7: {
-            TriggerScriptEvent((void*)self->f2208, 2, 0, 0);
+            TriggerScriptEvent((BaseObject*)self->f2208, 2, 0, 0);
             BaseObject* o = (BaseObject*)self->f2208;
             o->desc->m17(o, self);
-            SetFlaggedLinkContactMask(self, (void*)self->f2208, 1);
+            SetFlaggedLinkContactMask(self, (BaseObject*)self->f2208, 1);
             self->f241C = -1;
             void* track = (void*)self->f2208;
             TrackShape_175170* s = AT(TrackShape_175170*, track, 0x34);
@@ -3758,8 +3792,8 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                         s->desc->m2(s, self->f2410 - D_00274F14, &b, 0);
                     }
                 }
-                TransformPointBetweenFrames(AT(void*, self->f2208, 0x18), 0, &a, &a);
-                TransformPointBetweenFrames(AT(void*, self->f2208, 0x18), 0, &b, &b);
+                TransformPointBetweenFrames((PlacedObject*)(AT(void*, self->f2208, 0x18)), 0, &a, &a);
+                TransformPointBetweenFrames((PlacedObject*)(AT(void*, self->f2208, 0x18)), 0, &b, &b);
                 Vec02 d;
                 *(u128*)&d = NormalizeOrElse_175170(Vu0::Sub(Vu0::Vec::Of(a), Vu0::Vec::Of(b)), Vu0::Vec::Of(g_unitZVector)).q;
                 self->f221C = d.z < -D_00274F08;
@@ -3778,8 +3812,8 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if (s->desc->m2 != 0) {
                 s->desc->m2(s, self->f2410, &a, 0);
             }
-            TransformPointBetweenFrames(AT(void*, self->f2208, 0x18), 0, &a, &a);
-            TransformPointBetweenFrames(self, 0, &self->f23E0, &b);
+            TransformPointBetweenFrames((PlacedObject*)(AT(void*, self->f2208, 0x18)), 0, &a, &a);
+            TransformPointBetweenFrames(self, 0, (Vec02*)&self->f23E0, &b);
             Vu0::Q(self->v2400) = Vu0::Sub(Vu0::Q(a), Vu0::Q(b));
             sound = AT(s32, self->f2208, 0x50);
             Vu0::Q(self->v2530) = Vu0::Sub(Vu0::Q(self->v560), Vu0::Q(a));
@@ -3788,11 +3822,11 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 8: {
             SetPlayerAimMode(self, -1);
             sound = 0x59;
-            SetFlaggedLinkContactMask(self, self->f24A0, 1);
+            SetFlaggedLinkContactMask(self, (BaseObject*)self->f24A0, 1);
             Vec02 pos;
             Mat02 m;
             Vec02 k;
-            TransformPointBetweenFrames(self->f24A0, 0, self->f24B0, &pos);
+            TransformPointBetweenFrames((PlacedObject*)self->f24A0, 0, (Vec02*)self->f24B0, &pos);
             Vu0::Q(k) = Vu0::FromFloat(-1.0f);
             Vu0::Q(m.r[0]) = Vu0::MulX(Vu0::Q(self->v24C0), Vu0::Q(k));
             BuildPerpendicularPair(&m.r[0], &m.r[1], &g_unitZVector, &g_unitZVector);
@@ -3820,22 +3854,22 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             switch (self->f239C) {
             case 2:
                 StopPlayerAnimation(self);
-                StartSoundEffect(0x4D, 0, (s32)self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x4D, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
                 loud = 1;
-                SetPooledObjectPlayerHold(self->heldObject, 1);
+                SetPooledObjectPlayerHold((PooledObject*)self->heldObject, 1);
                 break;
             case 5:
-                TriggerScriptEvent(self->f23B8, 2, 0, 0);
+                TriggerScriptEvent((BaseObject*)self->f23B8, 2, 0, 0);
                 ((BaseObject*)self->f23B8)->desc->m17((BaseObject*)self->f23B8, self);
-                SetFlaggedLinkContactMask(self, self->f23B8, 1);
+                SetFlaggedLinkContactMask(self, (BaseObject*)self->f23B8, 1);
                 layers = 1;
                 break;
             case 4: {
                 void* track = self->f23BC;
                 layers = 1;
-                TriggerScriptEvent(track, 2, 0, 0);
+                TriggerScriptEvent((BaseObject*)track, 2, 0, 0);
                 ((BaseObject*)track)->desc->m17((BaseObject*)track, self);
-                SetFlaggedLinkContactMask(self, track, 1);
+                SetFlaggedLinkContactMask(self, (BaseObject*)track, 1);
                 self->f241C = -1;
                 Vec02 dir;
                 Vec02 tan;
@@ -3843,7 +3877,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 if (s->desc->m1 != 0) {
                     s->desc->m1(s, self->f23C0, 0, &tan);
                 }
-                TransformDirectionBetweenFrames(AT(void*, track, 0x18), 0, &tan, &dir);
+                TransformDirectionBetweenFrames((PlacedObject*)(AT(void*, track, 0x18)), 0, &tan, &dir);
                 dir.z = 0.0f;
                 AsVec_175170(dir) = NormalizeOrElse_175170(Vu0::Vec::Of(dir), Vu0::Vec::Of(g_unitXVector));
                 s32 back = 1;
@@ -3932,7 +3966,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 14: {
             BaseObject* o = (BaseObject*)self->f2750;
             if (IsObjectAttached(o)) {
-                TakeCountedColliderTouch(self->f2750, self, 1);
+                TakeCountedColliderTouch((CountedCollider*)self->f2750, self, 1);
             }
             o = (BaseObject*)self->f2750;
             o->desc->m02(o);
@@ -4081,7 +4115,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->f2274 = now;
             self->f226C = D_00262E14 * Fpu::Sqrt(self->f700);
             self->f690 = 0;
-            StartSoundEffect(0x4F, 0, (s32)self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(0x4F, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             ComputePlayerJumpVelocity(self, &v);
             switch (self->f224C) {
             case 1:
@@ -4108,10 +4142,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 anim = PS(void*, 0x1020);
             }
             if (self->f224C == 4 && self->f634 == 0.0f) {
-                ComputePolarOffset(&v, self->f638, 100.0f, v.z);
+                ComputePolarOffset((Vec3*)&v, self->f638, 100.0f, v.z);
                 self->f2270 = 3;
             } else {
-                ComputePolarOffset(&v, self->f630, self->f226C * self->f634, v.z);
+                ComputePolarOffset((Vec3*)&v, self->f630, self->f226C * self->f634, v.z);
             }
             self->desc02()->m20(self, &v);
             break;
@@ -4147,7 +4181,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             } else {
                 anim = PS(void*, 0x1020);
             }
-            InitContactPairFlags(((Collider*)self->heldObject)->world, self->heldObject);
+            InitContactPairFlags(((Collider*)self->heldObject)->world, (Collider*)self->heldObject);
             Vu0::Q(self->v640) = Vu0::Zero();
             break;
         case 9: {
@@ -4431,24 +4465,24 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if (PS(void*, 0x25CC) != 0) {
                 anim = PS(void*, 0x25CC);
             }
-            PushCameraController(g_camera, 6, (u8*)g_camera + 0x460, self, 0);
+            PushCameraController(g_camera, 6, (CameraController*)((u8*)g_camera + 0x460), self, 0);
             break;
         case 34: {
             f32 dim = 0.6f;
             SetVolumeChannelFactor(5, 0, dim);
             SetVolumeChannelFactor(5, 1, dim);
-            StartCameraSounds((u8*)g_camera + 0x460);
+            StartCameraSounds((CameraSoundOwner*)((u8*)g_camera + 0x460));
             RequestCameraSnap(g_camera, 0);
             g_typedTextCaptionBox.child = self->f2BD0;
             self->f2BD0 = 0;
-            PushStackElement(g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
             break;
         }
         case 35:
             if (PS(void*, 0x25D0) != 0) {
                 anim = PS(void*, 0x25D0);
             }
-            RemoveCameraControllers(g_camera, 0xF, 6, (u8*)g_camera + 0x460, self, 0);
+            RemoveCameraControllers(g_camera, 0xF, 6, (CameraController*)((u8*)g_camera + 0x460), self, 0);
             RequestCameraSnap(g_camera, 0);
             break;
         case 39:
@@ -4539,7 +4573,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vu0::Q(v) = vel;
             s32 slow = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(vel, vel))) < D_002639B0[0];
             if (slow) {
-                ComputePolarOffset(&v, self->f638, most, 0.0f);
+                ComputePolarOffset((Vec3*)&v, self->f638, most, 0.0f);
             } else {
                 f32 len = Vu0::ToFloatMoved(Vu0::Length(vel));
                 if (len < most) {
@@ -4598,9 +4632,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 arg->value = self->heldObject;
                 arg++;
             }
-            CreateAnimationPlayer(anim, self, arg - args, args, flag, &self->watched2230, start, speed);
+            CreateAnimationPlayer((Animation*)anim, self, arg - args, (TargetBinding*)args, flag, (AnimationPlayer**)&self->watched2230, start, speed);
         } else if (walker != 0) {
-            self->f2234 = CreateStateWalker(walker, self, walkerId, flag);
+            self->f2234 = CreateStateWalker((StateGraph*)walker, self, walkerId, flag);
         }
     }
 }
@@ -4608,15 +4642,15 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
 #undef AT
 #undef PS
 
-void IgnorePlayerArgument(void)
+void IgnorePlayerArgument(Player* self, s32 arg)
 {
 }
 
-void SetPlayerState(void* self, s32 mode, s32 count);
+void SetPlayerState(Player* self, s32 state, s32 sub);
 
 void SwitchPlayerState11(void* self, s32 flag)
 {
-    SetPlayerState(self, flag ? 11 : 0, -1);
+    SetPlayerState((Player*)self, flag ? 11 : 0, -1);
 }
 
 void SetPlayerProbeContactsDisabled(Player* self, s32 value)
@@ -4665,15 +4699,17 @@ s32 CompareKeysAscending(FloatKeyedItem* a, FloatKeyedItem* b)
 
 extern List01 g_class75List;
 s32 MaskWorldBitsBySave(void);
-s32 IsObjectAttached(void* p);
+s32 IsObjectAttached(BaseObject* self);
 // A hit CollectMeshHits gives (0x30 bytes).
 struct MeshHit {
     u8 pad00[0x30];
 };
-s32 CollectMeshHits(f32 radius, Vec02* point, s32 count, void* nodes, void* a3, Mesh03* mesh, s32 max, MeshHit* out);
-void HeapSortRecords(void* base, s32 count, s32 size, s32 (*compare)(FloatKeyedItem* a, FloatKeyedItem* b));
-void SetPlayerAimMode(Player* self, s32 n);
-void* FillMemory(void* p, s32 value, s32 size);
+// The float where retail's caller passes it; the definition has it last.
+s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out);
+typedef s32 (*SortCompareFn)(void* a, void* b);
+void HeapSortRecords(void* records, s32 n, s32 size, SortCompareFn cmp);
+void SetPlayerAimMode(Player* self, s32 state);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // The player's grabs of the frame. The state picks the object it reaches with (one of the five
 // at 0x25D8) and the kinds of hold it takes (2, 4 or 8). Each class 0x75 object of those kinds
@@ -4728,7 +4764,7 @@ void UpdatePlayerGrabs(Player* self)
                 continue;
             }
             GetObjectWorldPosition(o, &pos);
-            if (CollectMeshHits(o->scale, &pos, target->tree.count2, target->tree.nodes, 0, &target->meshCopy, 1, &hit) <= 0) {
+            if (CollectMeshHits(&pos, o->scale, target->tree.count2, (FaceRef*)target->tree.nodes, 0, &target->meshCopy, 1, (MeshHitEntry*)&hit) <= 0) {
                 continue;
             }
             if (n >= sizeof(recs) / sizeof(recs[0])) {
@@ -4737,8 +4773,8 @@ void UpdatePlayerGrabs(Player* self)
             rec = &recs[n];
             FillMemory(rec, 0, 0x40);
             n++;
-            ComputeObjectMotionInFrame((s32)o->parent, 0, &pos, (s32)&rec->dir, 0, 0, 0);
-            ComputeObjectMotionInFrame((s32)o->parent, 0, &pos, (s32)&motion, 0, 0, 0);
+            ComputeObjectMotionInFrame((PlacedObject*)o->parent, 0, &pos, (Vec02*)&rec->dir, 0, 0, 0);
+            ComputeObjectMotionInFrame((PlacedObject*)o->parent, 0, &pos, (Vec02*)&motion, 0, 0, 0);
             rec->p00 = self;
             rec->hold = o;
             rec->pos = pos;
@@ -4766,7 +4802,7 @@ void UpdatePlayerGrabs(Player* self)
         rec->pos = c->end[1 - e].v10;
         rec->kind = mask;
         rec->weight = self->mass * 1000.0f;
-        ComputeObjectMotionInFrame((s32)c->end[e].part, 0, &rec->pos, (s32)&rec->dir, 0, 0, 0);
+        ComputeObjectMotionInFrame((PlacedObject*)c->end[e].part, 0, &rec->pos, (Vec02*)&rec->dir, 0, 0, 0);
         Vu0::StoreX(rec->key, Vu0::Dot(Vu0::Q(target->m110.r[0]), Vu0::Q(rec->pos)));
     }
     HeapSortRecords(recs, n, 0x40, CompareKeysAscending);
@@ -4803,24 +4839,24 @@ void UpdatePlayerGrabs(Player* self)
         }
     }
 done:
-    FreePooledContactChain(self->world, self->f2670);
+    FreePooledContactChain((World*)self->world, self->f2670);
     self->f2670 = 0;
 }
 
-s32 IsTopCameraController(u8* p);
+s32 IsTopCameraController(CameraController* self);
 
 s32 IsPlayerCameraFree(Player* self)
 {
     if (self->f2220 == 12 && self->f2228 == 0x22) return 0;
-    return IsTopCameraController((u8*)&g_camera->ctl454) == 0;
+    return IsTopCameraController((CameraController*)&g_camera->ctl454) == 0;
 }
 
-void StartSwitchedColliderEffect(void* self, s32 mode);
-void SetPlayerState(void* self, s32 a, s32 b);
+void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other);
+void SetPlayerState(Player* self, s32 state, s32 sub);
 
-void StartPlayerEffect(Player* self, s32 mode)
+void StartPlayerEffect(Player* self, s32 mode, PlacedObject* other)
 {
-    StartSwitchedColliderEffect(self, mode);
+    StartSwitchedColliderEffect(self, mode, other);
     switch (mode) {
     case 0:
         (void)SetPlayerState(self, 9, 0x1C);
@@ -4886,13 +4922,13 @@ void GetPlayerInteractFlags(Player* self, InteractTarget* other, s32* out)
 
 extern u8 g_elementStack[];
 
-void PushStackElement(void* a, void* b);
+void PushStackElement(ElementStack* self, ScreenElement* node);
 
 void ReceivePlayerNode(Player* self, InteractTarget* node)
 {
     if ((u32)(node->mode - 1) < 2) {
         g_typedTextCaptionBox.child = node;
-        PushStackElement(g_elementStack, &g_typedTextCaptionBox);
+        PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
         return;
     }
     if (self->f2220 != 0xC) {
@@ -4904,45 +4940,45 @@ void ReceivePlayerNode(Player* self, InteractTarget* node)
     }
 }
 
-void SetColliderPosition(void* self);
-void ResetTrailRing(void* sub);
+void SetColliderPosition(Collider* self, Vec02* pos);
+void ResetTrailRing(TrailRing* o);
 
-void SetPlayerPosition(Player* self)
+void SetPlayerPosition(Player* self, Vec02* pos)
 {
-    SetColliderPosition(self);
-    ResetTrailRing(self->f1520);
+    SetColliderPosition(self, pos);
+    ResetTrailRing((TrailRing*)self->f1520);
     self->f2768 = 0;
 }
 
-void InitSwitchedCollider(void* self);
+void InitSwitchedCollider(SwitchedCollider* self);
 
 
 
 void StartPlacedObject(void* self);
-void ResolveObjectLinks(void* self, s32 a1, void* a2);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 void SetFollowObjects(void* a, s32 b, s32 c);
-void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
-void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
-void SetBlendItemWeights(void* obj, s32 a1, s32 a2, void* a3);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
+void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
 void SetWorld5ModeColliderMode(void* self, s32 a1);
 s32 FindAnimRecord(s32 key);
 
 
-void ResetTrailRing(void* sub);
-void RegisterSwitchedCollider(void* self);
+void ResetTrailRing(TrailRing* o);
+void RegisterSwitchedCollider(SwitchedCollider* self);
 
 void RegisterPlayer(Player* self)
 {
-    ResetTrailRing(self->f1520);
+    ResetTrailRing((TrailRing*)self->f1520);
     RegisterSwitchedCollider(self);
 }
 
 // An object the player was queued to (+0x2BE0): a walker handle at +0x2D8, and the list of the
 // objects at +0x304 (count at +0x300) whose own walkers it sets.
 struct WalkerListObject;
-void GetStateWalkerCurrentKey(void* p, s32* out);
-void GetStateWalkerTargetKey(void* p, s32* out);
-void SetStateWalkerTarget(void* p, s32 key);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 void RunPlayerQueuedActivations(Player* self)
 {
@@ -4976,8 +5012,8 @@ walker:
         self->walkerActivation = 0;
         s32 cur;
         s32 target;
-        GetStateWalkerCurrentKey(host->f2D8, &cur);
-        GetStateWalkerTargetKey(host->f2D8, &target);
+        GetStateWalkerCurrentKey((StateWalker*)host->f2D8, &cur);
+        GetStateWalkerTargetKey((StateWalker*)host->f2D8, &target);
         if (cur != 0x22E) {
             return;
         }
@@ -4990,7 +5026,7 @@ walker:
             return;
         }
         for (s32 i = 0; i < host->count; i++) {
-            SetStateWalkerTarget(host->list[i]->f2D4, 0x231);
+            SetStateWalkerTarget((StateWalker*)host->list[i]->f2D4, 0x231);
         }
         Vec02 d;
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(host->v140), Vu0::Q(g_player->v140));
@@ -5004,7 +5040,7 @@ walker:
 
 s32 HasSpareCount(void);
 void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
-void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
+void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 void SetWorld5ModeColliderMode(void* self, s32 a1);
 
 
@@ -5014,12 +5050,12 @@ void SetWorld5ModeColliderMode(void* self, s32 a1);
 extern s32 D_00263E2C;
 
 void DecrementGaugeCount(void* p);
-void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
-void ReplaceAnimationPlayer(void* a, World5Countdown* b, s32 c, void* d, f32 e, f32 f);
-s32 HandleObjectEvent(void* self, ObjectEvent* msg);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
+s32 HandleObjectEvent(Collider* self, ObjectEvent* shape);
 
 
-void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 // Matches retail's bytes (EXACT us and eu): the call result is tested directly with a goto to the zero return.
 
@@ -5027,48 +5063,48 @@ void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
 // A walker's current and target keys (GetStateWalkerCurrentKey, GetStateWalkerTargetKey).
 struct WalkerKeys { s32 a, b; };
 
-void GetStateWalkerCurrentKey(void* ptr, s32* out);
-void GetStateWalkerTargetKey(void* ptr, s32* out);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
 
 void QueuePlayerWalkerActivation(Player* self, u8* other)
 {
     WalkerKeys r;
     if (self->f2220 != 9) {
-        GetStateWalkerCurrentKey(*(void**)(other + 0x2D8), &r.a);
-        GetStateWalkerTargetKey(*(void**)(other + 0x2D8), &r.b);
+        GetStateWalkerCurrentKey((StateWalker*)(*(void**)(other + 0x2D8)), &r.a);
+        GetStateWalkerTargetKey((StateWalker*)(*(void**)(other + 0x2D8)), &r.b);
         if (r.a == 0x22E && (r.b == r.a || r.b == -1)) {
             self->walkerActivation = other;
         }
     }
 }
 
-void InitCollider(void* self);
+void InitCollider(Collider* self);
 
 
-void ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 
 
 
 
 
-s32 IsObjectAttached(void* p);
+s32 IsObjectAttached(BaseObject* self);
 
 
 extern s32 D_00263E2C;
 
 
 void StartPlacedObject(void* self);
-void ResolveObjectLinks(void* self, int n, void* table);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 
 void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
-void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
+void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 
 
 void StartPlacedObject(void* self);
-void ResolveObjectLinks(void* self, s32 a1, void* a2);
-void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
-void SetBlendItemWeights(void* obj, s32 a1, s32 a2, void* a3);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
+void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
 void SetWorld5BossMode(World5Boss* self, s32 a1);
 s32 PlayWorld5BossLoop(World5Boss* self, s32 a1);
 
@@ -5076,10 +5112,8 @@ s32 PlayWorld5BossLoop(World5Boss* self, s32 a1);
 
 void DecrementGaugeCount(void* p);
 void PlayWorld5BossTarget(World5Boss* self);
-void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
-
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 
 
 void QueuePlayerFirstActivation(Player* a0, InteractTarget* a1)
@@ -5112,12 +5146,12 @@ struct TargetShaped {
     u8 pad00[0x34];
     ShapeOwner* shape;
 };
-s32 IsObjectOfKind(void* obj, s32 kind);
-void PlaceOnPathAt(void* self, void* obj, f32 t, Mat02* out);
-void PlaceOnTargetCurve(void* obj, Vec02* out, f32 t, s32 x);
-void PlaceOnTargetPoint(void* obj, Vec02* out, f32 t, s32 x);
-void TransformPointBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
-void TransformPointAtTime(void* obj, s32 a, f32 t, Vec02* in, s32 b, Vec02* out, s32 c);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length);
+void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t);
+void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformPointAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin); // the float where retail's caller passes it; the definition has it last
 // EXACT: gravity read in each expression that weights it, as a value of its own: the -0.5 dt
 // weight then comes before the load in the insn order, and sched1 keeps it there
 // (docs/TOOLCHAIN.md, "sched1").
@@ -5140,14 +5174,14 @@ void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Ve
                 shape->vtbl[2](shape, src->t, &p, 0);
             }
             Mat02 frame;
-            PlaceOnPathAt(self, obj, src->t, &frame);
+            PlaceOnPathAt(self, (PathObject*)obj, &frame, src->t);
             Vu0::Q(off) = Vu0::MulX(Vu0::Q(frame.r[0]), Vu0::ScalarAt(D_002639E0[0]));
         } else if (IsObjectOfKind(src->target, 0x6F)) {
-            PlaceOnTargetCurve(src->target, &p, src->t, 0);
-            TransformPointBetweenFrames(0, parent, &p, &p);
+            PlaceOnTargetCurve((TargetCurve*)src->target, &p, 0, src->t);
+            TransformPointBetweenFrames(0, (PlacedObject*)parent, &p, &p);
         } else if (IsObjectOfKind(src->target, 0x7F)) {
-            PlaceOnTargetPoint(src->target, &p, src->t, 0);
-            TransformPointBetweenFrames(0, parent, &p, &p);
+            PlaceOnTargetPoint((TargetPoint*)src->target, &p, 0, src->t);
+            TransformPointBetweenFrames(0, (PlacedObject*)parent, &p, &p);
         } else if (IsObjectOfKind(src->target, 0x6E)) {
             ShapeOwner* shape = ((TargetShaped*)src->target)->shape;
             if (shape->vtbl[2] != 0) {
@@ -5163,7 +5197,7 @@ void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Ve
         p = src->v10;
     }
     a = D_00248D30;
-    TransformPointAtTime(parent, 0, dt, &p, 0, &a, 0);
+    TransformPointAtTime((PlacedObject*)parent, 0, dt, &p, 0, &a, 0);
     u128 end = Vu0::Add(Vu0::Q(p), Vu0::Q(off));
     u128 v = Vu0::DivX(Vu0::Sub(end, Vu0::Q(self->v140)), Vu0::Scalar(dt));
     v = Vu0::MulAddX(v, Vu0::Q(self->gravity), Vu0::Scalar(dt * -0.5f));
@@ -5185,11 +5219,11 @@ void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Ve
 void MoveCollider(void* self, void* b);
 
 
-void FinishSwitchedCollider(void* self);
+void FinishSwitchedCollider(SwitchedCollider* self);
 void SetWorld5ModeColliderMode(void* self, s32 a1);
 
 
-void HandleSwitchedColliderNotification(void* self, s32 kind, MessageBody* rec);
+void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
 
 
 // A target the player may aim at: two quads (ScoreTargetCandidate's hit, ChooseBestTargetCandidate's
@@ -5221,9 +5255,9 @@ struct TargetArcFrame {
     f32 fl;
 };
 
-void ChooseBestTargetCandidate(void* self, s32 a1, s32 a2, void* a3, void* a4);
-void ComputeTargetArc(void* self, void* s2, f32 f, void* a2, void* a3, void* a4);
-void SetPlayerState(void* self, s32 a, s32 b);
+void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHit* out, f32* outf);
+void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Vec02* pos, Vec02* acc);
+void SetPlayerState(Player* self, s32 state, s32 sub);
 
 
 void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f)
@@ -5231,11 +5265,11 @@ void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f)
     TargetArcFrame fr;
     fr.fl = f;
     if (s2 == 0) {
-        ChooseBestTargetCandidate(self, 0, 0, &fr.p0, &fr.fl);
+        ChooseBestTargetCandidate(self, 0, 0, (TargetHit*)&fr.p0, &fr.fl);
         s2 = (TargetHit*)&fr.p0;
     }
     void* q1 = &fr.q1;
-    ComputeTargetArc(self, s2, fr.fl, q1, &fr.q0, &fr.q2);
+    ComputeTargetArc(self, (TargetArcSource*)s2, fr.fl, (Vec02*)q1, &fr.q0, &fr.q2);
     ((TargetLaunch*)self->f2514)->landTime = g_gameTime[0] + fr.fl;
     ((TargetLaunch*)self->f2514)->q20 = fr.q0;
     ((TargetLaunch*)self->f2514)->q30 = fr.q2;
@@ -5249,7 +5283,7 @@ void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f)
 INCLUDE_RODATA(D_0024AFA0);
 extern const f32 D_0024AFA0;
 
-void EvaluateHermiteVectorSegment(void* a, void* b, void* c, void* d, f32 f12, f32 f13, f32 f14, void* a4, s32 a5, s32 a6);
+void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
 s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4, ColliderSpan* a5);
 
 void ChooseTargetArcTime(PlacedObject* self, void* target, s32 count, Collider** list, f32* out)
@@ -5266,12 +5300,12 @@ void ChooseTargetArcTime(PlacedObject* self, void* target, s32 count, Collider**
     start = self->v140;
     start.z = start.z - 75.0f;
     for (u32 i = 0; i < 9; i++) {
-        ComputeTargetArc(self, target, D_002639E8[i], &a, &b, &c);
+        ComputeTargetArc((Player*)self, (TargetArcSource*)target, D_002639E8[i], &a, &b, &c);
         b.z = b.z - 75.0f;
         prev = start;
         f32 total = 1.0f;
         for (f32 u = 0.0f; u < D_002639E8[i]; u += 0.25f) {
-            EvaluateHermiteVectorSegment(&start, &a, &b, &c, D_002639E8[i], D_002639E8[i] <? (u + 0.25f), 1.0f, &cur, 0, 0);
+            EvaluateHermiteVectorSegment(D_002639E8[i], &start, &a, &b, &c, D_002639E8[i] <? (u + 0.25f), 1.0f, &cur, 0, 0);
             s32 n = CollectSpansFromList(&prev, &cur, count, list, 8, spans);
             for (s32 k = 0; k < n; k++) {
                 total += Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(spans[k].q[0]), Vu0::Q(spans[k].q[1]))));
@@ -5300,7 +5334,7 @@ f32 ScoreTargetCandidate(Player* self, TargetHit* cand, s32 n, TurningCollider**
     Vec02 lo;
     Vec02 hi;
     Vec02 q;
-    ComputeTargetArc(self, cand, t, 0, &q, 0);
+    ComputeTargetArc(self, (TargetArcSource*)cand, t, 0, &q, 0);
     f32 score = 0.0f;
     Vu0::Q(hi) = Vu0::Max(Vec::Of(self->v140), Vec::Of(q)).q;
     Vu0::Q(lo) = Vu0::Min(Vec::Of(self->v140), Vec::Of(q)).q;
@@ -5377,15 +5411,15 @@ ASM_FUNC(func_00178D18);
 
 
 
-void SetWorldActiveFollower(void* a, void* b);
-void ReplaceAnimationPlayer(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+void SetWorldActiveFollower(World* self, void* v);
+void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 
 
 extern s32 D_00263E2C;
 extern s32 g_timeoutFired;
 
-void UpdateCollider(void* self);
-void StopAnimationPlayer(void* p);
+void UpdateCollider(Collider* self, f32 dt);
+void StopAnimationPlayer(AnimationPlayer* self);
 void SetWorld5CountdownState(void* self, s32 state);
 void FadeOutAndQueueMovie(s32 n);
 
@@ -5405,9 +5439,9 @@ s32 AreMenusAndFadeClear(void* self);
 extern f32 g_gameClock[];
 extern Rgba4 D_002623E0;
 
-f32 Cosine(f32 x);
+extern "C" f32 Cosine(f32 x);
 void SetObjectTreeRecordValue(World5ModeCollider* o, u32 value);
-void ApplyPlacedObjectTransform(World5ModeCollider* o, void* s, void* out);
+void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 
 
 // NEAR: last call (func_001B9D10) loads a2 before $f12 is moved; retail moves $f12 first. Otherwise every instruction matches.
@@ -5416,10 +5450,10 @@ extern f32 D_00263C20[];
 extern f32 D_00263C30[];
 extern f32 D_00263C40[];
 
-void StepCollider(World5ModeCollider* self, f32 t);
+void StepCollider(Collider* self, f32 t);
 void ComputeWorld5ModeColliderAnchors(World5ModeCollider* self, Vec02* a, Vec02* b);
-void SteerColliderTowardPosition(World5ModeCollider* self, void* buf, f32 f, void* d1, void* d2, void* d3);
-void TurnColliderTowardRotation(World5ModeCollider* self, f32 scale, void* out, void* data);
+void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
+void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
 
 
 // A 0x20-byte candidate: an object, its distance along its curve (class 0x6E) and the point
@@ -5430,17 +5464,16 @@ struct TargetCandidate {
     u8 pad08[8];
     u8 f10[16];             // 0x10
 };
-s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 void PushBackMemoryMark(void);
 TargetCandidate* AllocateZeroedBackMemory(s32 size);
 void PopBackMemoryMark(void);
-s32 IsObjectOfKind(BaseObject* n, s32 kind);
-void TransformPointBetweenFrames(void* a, void* b, Vec02* c, Vec02* d);
-void ComputeTargetArc(Player* self, TargetCandidate* e, f32 f, void* a2, void* a3, void* a4);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Vec02* pos, Vec02* acc);
 s32 CompareDistanceFromPlayer(TargetCandidate* a, TargetCandidate* b);
-void SortElements(TargetCandidate* base, s32 n, s32 size, s32 (*cmp)(TargetCandidate*, TargetCandidate*));
-f32 ScoreTargetCandidate(Player* self, void* e, s32 v, void* a3, TargetHit* a4, f32* a5);
-void* FillMemory(void* p, s32 value, s32 size);
+void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
+f32 ScoreTargetCandidate(Player* self, TargetHit* cand, s32 n, TurningCollider** objs, TargetHit* out, f32* outTime);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHit* out, f32* outf)
 {
@@ -5454,7 +5487,7 @@ void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHi
     f32 best;
     s32 cnt = 0;
 
-    v = GatherObjectsById(self->world, 5, 8, 0, 0x20, scratch);
+    v = GatherObjectsById(self->world, 5, 8, 0, 0x20, (PlacedObject**)scratch);
     PushBackMemoryMark();
     buf = AllocateZeroedBackMemory(n << 5);
     for (s32 i = 0; i < n; i++) {
@@ -5464,7 +5497,7 @@ void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHi
             cnt = cnt + 1;
             e->node = node;
             if (IsObjectOfKind(node, 0x6E) != 0) {
-                TransformPointBetweenFrames(0, node->parent, &self->v140, &tmp);
+                TransformPointBetweenFrames(0, (PlacedObject*)node->parent, &self->v140, &tmp);
                 PathCurve* s = ((PathCurveObject*)node)->curve;
                 if (s->vt->m10 != 0) {
                     s->vt->m10(s, &tmp, 0, 0, 0, 0, &e->f4);
@@ -5472,13 +5505,13 @@ void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHi
             } else {
                 e->f4 = 0;
             }
-            ComputeTargetArc(self, e, 0.7f, 0, e->f10, 0);
+            ComputeTargetArc(self, (TargetArcSource*)e, 0.7f, 0, (Vec02*)e->f10, 0);
         }
     }
-    SortElements(buf, cnt, 0x20, CompareDistanceFromPlayer);
+    SortElements(buf, cnt, 0x20, (s32 (*)(const void*, const void*))CompareDistanceFromPlayer);
     best = 3.40282347e+38f;
     for (s32 i = 0; i < cnt; i++) {
-        r = ScoreTargetCandidate(self, &buf[i], v, scratch, &hit, &dist);
+        r = ScoreTargetCandidate(self, (TargetHit*)&buf[i], v, (TurningCollider**)scratch, &hit, &dist);
         if (r < best) {
             best = r;
             *out = hit;
@@ -5492,7 +5525,7 @@ void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHi
     for (s32 i = 0; i < self->f2768; i++) {
         TargetCandidate* q = &((TargetCandidate*)self->f2770)[i];
         if (q->node == 0 || IsObjectAttached(q->node) != 0) {
-            r = ScoreTargetCandidate(self, q, v, scratch, &hit, &dist);
+            r = ScoreTargetCandidate(self, (TargetHit*)q, v, (TurningCollider**)scratch, &hit, &dist);
             if (r < best) {
                 best = r;
                 *out = hit;
@@ -5521,7 +5554,7 @@ struct TargetMemo {
     Vec02 pos;
 };
 extern const Vec02 D_00248D30;
-void ConvertPositionToWorld(void* obj, Vec02* out);
+void ConvertPositionToWorld(BaseObject* self, Vec02* out);
 void* MoveMemory(void* dst, void* src, s32 size);
 #define History(p) ((TargetMemo*)((u8*)(p) + 0x2770))
 void RecordPlayerTargetMemo(Player* self)
@@ -5572,7 +5605,7 @@ void RecordPlayerTargetMemo(Player* self)
                     return;
                 }
                 key = o;
-                ConvertPositionToWorld(o, (Vec02*)&tmp);
+                ConvertPositionToWorld((BaseObject*)o, (Vec02*)&tmp);
                 Vu0::Q(tmp.pos) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)&tmp));
                 w = ArctangentOfRatio(tmp.pos.y, tmp.pos.x) * *(f32*)((u8*)self->f23A8 + 0x5C);
             }

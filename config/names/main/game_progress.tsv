@@ -56,7 +56,7 @@ func_00161028	CollectEntriesForKey	runs a query over src's data and gathers up t
 func_001611B8	InitGifPacket	runs the base buffer set-up func_00152888, switches on the GIF-mode flag, installs the table D_0024A6F8 and clears the tag fields at 0x1C..0x24
 func_00161200	EndGifPacket	opens a final tag (func_001613C0) when none is open, then calls the table's close entry with flag 1
 func_00161278	CloseGifTag	slot 3 of D_0024A6F8: pads the cursor to 16 bytes and ORs the entry count (f24 / f20) and, when n is set, bit 15 into the open tag's first word
-func_001612E8	CountGifEntry	increments the entry counter at +0x24 of the packet and returns it; every Add* writer below calls it first
+func_001612E8	CountGifEntry	increments the entry counter at +0x24 of the packet; every Add* writer below calls it first
 func_001612F8	ReserveGifPackedData	closes any open tag, writes a tag with nloop, nreg and prim, stores the pointer past it in *out and advances the cursor over nloop * nreg quadwords
 func_001613C0	BeginGifTag	closes any open tag then writes a new one: prim a1 at bit 47, register count a2 at bit 60, register list a3, remembering it as the open tag
 func_00161458	AddGifRgbaEntry	adds a packed entry whose four words are the four bytes of value (register 1, RGBAQ)

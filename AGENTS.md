@@ -72,6 +72,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/regdiff.py FILE FUNC` (or `--all`) | whether an attempt differs from retail only in its registers (`registers`), in instruction order too (`order`), or in its code (`code`) |
 | `python3 tools/regalloc.py FILE FUNC [--version eu]` | for each register that differs from retail's, the value (pseudo) that holds it, where it is born and dies, which allocator placed it, what took retail's register and the likely lever, from the compiler's `.lreg`/`.greg` dumps |
 | `python3 tools/decls.py` | declarations whose return type contradicts the function's C definition or retail's callers (a wrong `void` looks like a register tie in the caller) |
+| `python3 tools/params.py [--file main/x.cpp] [--summary] [--version eu]` | declarations whose parameters differ from the function's C definition, read from the mangled symbols of the last build, with the kind of difference (count, linkage, pointer against integer, `void*`, pointee, scalar, float order); the build links by address and does not see them, a port's linker does |
 | `python3 tools/nonmatching.py check` | re-scores the near misses in `nonmatching/` and writes the index (`--check` in CI) |
 | `python3 tools/progress.py [--check]` | the ByteMatch reports and the README table |
 | `python3 tools/padding.py [--check]` | the alignment padding between C data: `config/us/padding.tsv` (`--check` needs the disc, `asm/us/` and the last build) |

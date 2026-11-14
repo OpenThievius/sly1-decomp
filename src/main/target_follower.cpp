@@ -18,26 +18,30 @@
 #include "shapes.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "object_finder.h"
+struct BufferedStream;
+
+// Types other files define, named by the parameters of their functions declared here.
+struct ObjectLink;
 
 // The target follower (class 0x47), the entry-table object (0x64) and the followable object
 // (0x2A). Its .data runs from 0x2629C8 to 0x262A30: the current follower, the two link tables of
 // class 0x47 and the two floats func_0016D490 reads. Its .rodata, from 0x24A7F0, is the jump
 // tables and FLT_MAX literals of its VU0 functions.
 
-s32 g_currentTargetFollower = 0;
+TargetFollower* g_currentTargetFollower = 0;
 s32 g_targetFollowerLoadLinks[16] = { 0x0, 0x2EE, 0x550, 0x0, 0x2F8, 0x57C, 0x0, 0x2F9, 0x580, 0x0, 0x2FB, 0x588, 0x0, 0x2FC, 0x58C, 0x0 };
 s32 g_targetFollowerResolveLinks[6] = { 0x0, 0x2FA, 0x584, 0x0, 0x2F7, 0x568 };
 f32 D_00262A28[2] = { 1.25f, 1.5f };
 
-void LoadCollider(void* self);
-void ResolveObjectLinks(void* self, s32 id, void* table);
-s32 GetStateEntryKey(void* a, s32 b);
-s32 FindFirstObjectById(void* a0, s32 a1, s32 a2, void* a3);
-s32 FindFirstObjectByIdGathered(void* a0, s32 a1, s32 a2, void* a3);
+void LoadCollider(Collider* self, BufferedStream* in);
+struct StateGraph;
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+u32 GetStateEntryKey(StateGraph* a0, s32 a1);
+void InitCollider(Collider* self);
+void SetListLinkOffset(List01* self, s32 offset);
 
-void InitCollider(void* self);
-void SetListLinkOffset(void* self, s32 value);
-extern s32 g_currentTargetFollower;
+extern TargetFollower* g_currentTargetFollower;
 
 void InitTargetFollower(TargetFollower* self)
 {
@@ -54,20 +58,20 @@ void InitTargetFollower(TargetFollower* self)
     g_currentTargetFollower = 0;
 }
 
-void LoadTargetFollowerRecords(TargetFollower* self)
+void LoadTargetFollowerRecords(TargetFollower* self, BufferedStream* stream)
 {
     s32 k1 = 0x2EF;
     s32 k2 = 0x2F0;
     s32 i = 0;
     s32 off = 0;
-    LoadCollider(self);
-    ResolveObjectLinks(self, 5, g_targetFollowerLoadLinks);
+    LoadCollider(self, stream);
+    ResolveObjectLinks(self, 5, (ObjectLink*)g_targetFollowerLoadLinks);
     for (;;) {
         if (i >= self->list550->count) {
             return;
         }
         Entry47* e = (Entry47*)((u8*)self->list550->items + off);
-        if (GetStateEntryKey(self->list550, e->a) == k1 && GetStateEntryKey(self->list550, e->b) == k2) {
+        if (GetStateEntryKey((StateGraph*)self->list550, e->a) == k1 && GetStateEntryKey((StateGraph*)self->list550, e->b) == k2) {
             break;
         }
         off += 0x14;
@@ -79,26 +83,26 @@ void LoadTargetFollowerRecords(TargetFollower* self)
     }
 }
 
-void StartPlacedObject(void* self);
-void ResolveObjectLinks(void* self, s32 n, void* table);
-void* CreateStateWalker(void* a, void* b, s32 c, s32 d);
-void ConvertPositionToWorld(void* self, f32* arg);
-void FollowObjectById(TargetFollower* self, void* x);
-void* CreateTypedRecord(s32 a, void* b, s32 c, s32 d, s32 e);
+void StartPlacedObject(PlacedObject* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void ConvertPositionToWorld(BaseObject* self, Vec02* out);
+void FollowObjectById(TargetFollower* self, s32 x);
+void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
 void ResolveTargetFollowerLinks(TargetFollower* self)
 {
     f32 scratch[4];
 
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 2, g_targetFollowerResolveLinks);
-    self->f554 = CreateStateWalker(self->list550, self, -1, 1);
+    ResolveObjectLinks(self, 2, (ObjectLink*)g_targetFollowerResolveLinks);
+    self->f554 = CreateStateWalker((StateGraph*)self->list550, self, -1, 1);
     self->f570 = (Sub47*)FindFirstObjectByIdGathered(self->world, 1, 0x8C, self);
-    ConvertPositionToWorld(self->f568, scratch);
+    ConvertPositionToWorld((BaseObject*)self->f568, (Vec02*)scratch);
     self->f56C = self->v140.z - scratch[2];
     if (self->f578 != -1)
     {
-        FollowObjectById(self, (void*)self->f578);
+        FollowObjectById(self, self->f578);
     }
     u64 m = 0x8000;
     s32 sh = 27;
@@ -107,14 +111,13 @@ void ResolveTargetFollowerLinks(TargetFollower* self)
     self->f594 = CreateTypedRecord(0x73, g_currentWorld, 0, 0x302, -1);
 }
 
-void* FindFirstObjectByIdMode4(void* obj, void* id, void* owner);
 void SetFollowedObject(TargetFollower* self, FollowableObject* x);
 void PlaceTargetFollowerOnFollowed(TargetFollower* self);
 void SetTargetFollowerMode(TargetFollower* self, s32 mode);
 
-void FollowObjectById(TargetFollower* self, void* x)
+void FollowObjectById(TargetFollower* self, s32 x)
 {
-    self->f578 = (s32)x;
+    self->f578 = x;
     FollowableObject* p = (FollowableObject*)FindFirstObjectByIdMode4(self->world, x, self);
     if (p != 0) {
         SetFollowedObject(self, p);
@@ -127,11 +130,11 @@ void FollowObjectById(TargetFollower* self, void* x)
     }
 }
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void StepCollider(Collider* self, f32 t);
-void BuildAxisAngleMatrix(const Vec02* tab, Mat3U* out, f32 v);
-void TurnColliderTowardRotation(Collider* self, f32 t, Mat3U* out, void* data);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
+void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
 
 void StepTargetFollower(TargetFollower* self, f32 t)
 {
@@ -141,22 +144,22 @@ void StepTargetFollower(TargetFollower* self, f32 t)
     if (self->w5D8 != 0) {
         return;
     }
-    BuildAxisAngleMatrix(&g_unitZVector, &buf, self->f5A0);
-    TurnColliderTowardRotation(self, t, &buf, self->sub5B0);
+    BuildAxisAngleMatrix(&g_unitZVector, (Mat02*)&buf, self->f5A0);
+    TurnColliderTowardRotation((Collider*)self, t, (Mat02*)&buf, (f32*)self->sub5B0);
 }
 
-void UpdateCollider(Collider* self);
+void UpdateCollider(Collider* self, f32 dt);
 void PlayPendingFollowerSound(TargetFollower* self);
 s32 ChooseTargetFollowerMode(TargetFollower* self);
 void SetTargetFollowerMode(TargetFollower* self, s32 mode);
 Collider* GetActiveSwitchedCollider(void);
-f32 ArctangentOfRatio(f32 a, f32 b);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
-void UpdateTargetFollower(TargetFollower* self)
+void UpdateTargetFollower(TargetFollower* self, f32 dt)
 {
-    UpdateCollider(self);
+    UpdateCollider(self, dt);
     PlayPendingFollowerSound(self);
-    if ((s32)self != g_currentTargetFollower) {
+    if (self != g_currentTargetFollower) {
         return;
     }
     s32 mode;
@@ -182,9 +185,9 @@ void UpdateTargetFollower(TargetFollower* self)
 }
 
 extern f32 g_gameTime;
-s32 HasObjectPoolChoice(void* p);
+s32 HasObjectPoolChoice(ObjectPool* self);
 typedef s32 (*VFnRet_16D1E0)(void* self);
-void* ChooseEntryTableObject(void* x);
+void* ChooseEntryTableObject(EntryTableObject* self);
 
 s32 ChooseTargetFollowerMode(TargetFollower* self)
 {
@@ -205,7 +208,7 @@ s32 ChooseTargetFollowerMode(TargetFollower* self)
                 }
             } else {
                 Vec02 v;
-                ConvertPositionToWorld(next->f7A4, (f32*)&v);
+                ConvertPositionToWorld((BaseObject*)next->f7A4, (Vec02*)&v);
                 u128 d = Vu0::Sub(Vu0::Q(v), Vu0::Q(self->v140));
                 f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
                 if (len < 5.0f) {
@@ -236,8 +239,8 @@ s32 ChooseTargetFollowerMode(TargetFollower* self)
             if (self->f570 == 0) {
                 goto end;
             }
-            if (HasObjectPoolChoice(self->f570) != 0) {
-                void* t = ChooseEntryTableObject(self->f558->f7AC);
+            if (HasObjectPoolChoice((ObjectPool*)self->f570) != 0) {
+                void* t = ChooseEntryTableObject((EntryTableObject*)self->f558->f7AC);
                 if (t != 0) {
                     self->f590 = t;
                     mode = 3;
@@ -272,11 +275,11 @@ extern s32 g_padSelectFlags;
 
 extern s32 g_padSelectFlags;
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 struct Item_16D3F0 { u8 pad0[0x318]; s32 f318; };
 
-void ChooseObjectPoolItem(void* p);
+void ChooseObjectPoolItem(ObjectPool* self);
 SoundLevelEntry* PushSoundLevel(s32 kind);
 void RemoveSoundLevelAndRecompute(SoundLevelEntry* p);
 
@@ -296,7 +299,7 @@ void SetFollowedObject(TargetFollower* self, FollowableObject* x)
     self->f558 = x;
     if (v != 0) {
         self->f570->f44 = ((Item_16D3F0*)x->f7AC)->f318;
-        ChooseObjectPoolItem(self->f570);
+        ChooseObjectPoolItem((ObjectPool*)self->f570);
         if (self->f5BC != 0) {
             return;
         }
@@ -310,8 +313,8 @@ void SetFollowedObject(TargetFollower* self, FollowableObject* x)
 }
 
 extern f32 g_gameTime;
-s32 GetObjectWorldPosition(void* p, Vec02* out);
-s32 ComputeBallisticLaunchVelocity(f32 t, Vec02* from, Vec02* to, Vec02* out, void* self);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
+s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, f32 angle);
 extern const Vec02 g_unitZVector;
 
 struct FollowPoseA {
@@ -359,16 +362,17 @@ struct FollowTune {
     f32 f334;               // 0x334
 };
 
-void GetPlacementRecordTransform(void* rec, Vec02* a, Mat02* b, s32 zero);
-s32 IsObjectOfKind(void* obj, s32 kind);
-s32 LaunchChosenPoolObject(void* obj, s32 zero);
+struct FrameSource;
+void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* a3);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim);
 
 void LaunchPoolItemAtTarget(TargetFollower* self)
 {
     Vec02 a;
     Vec02 b;
     Mat02 c;
-    GetObjectWorldPosition(self->f590, &a);
+    GetObjectWorldPosition((BaseObject*)self->f590, &a);
     FollowObject* obj = (FollowObject*)self->f570;
     ChaseObject* t = obj->f48;
     FollowPoseA* sa = (FollowPoseA*)((u8*)obj + 0x60);
@@ -376,9 +380,9 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
     if (t == 0) {
         return;
     }
-    GetPlacementRecordTransform(sa, &b, &c, 0);
+    GetPlacementRecordTransform((FrameSource*)sa, &b, c.r, 0);
     FollowTune* tune = (FollowTune*)self->f558->f7AC;
-    if (IsObjectOfKind(t, 0x3D) != 0) {
+    if (IsObjectOfKind((BaseObject*)t, 0x3D) != 0) {
         Vec02 dir;
         const Vec02* fb = &g_unitXVector;
         Vu0::Q(dir) = Vu0::Sub(Vu0::Q(a), Vu0::Q(b));
@@ -403,13 +407,13 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
             t->f6F4 = (t->f6F0 - q) / (f5 * tune->f320);
         }
         Vu0::Q(sa->v50) = Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(t->f690));
-    } else if (IsObjectOfKind(t, 0x3E) != 0) {
+    } else if (IsObjectOfKind((BaseObject*)t, 0x3E) != 0) {
         Vu0::Q(obj->vB0) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::ScalarAt(tune->f330));
         Vu0::Q(t->v700) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-tune->f334));
         t->f6F0 = tune->f320;
     } else {
         Vec02 dir;
-        if (ComputeBallisticLaunchVelocity(tune->f32C, &b, &a, &dir, 0) == 0) {
+        if (ComputeBallisticLaunchVelocity(&b, &a, &dir, 0, tune->f32C) == 0) {
             return;
         }
         u128 d1 = Vu0::Sub(Vu0::Q(b), Vu0::Q(a));
@@ -421,27 +425,27 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
     }
     sa->f78 = tune->f320 * D_00262A28[0];
     sb->v10 = a;
-    if (LaunchChosenPoolObject(self->f570, 0) != 0) {
+    if (LaunchChosenPoolObject((ObjectPool*)self->f570, 0) != 0) {
         self->f574 = g_gameTime + ((FollowTune*)self->f558->f7AC)->f31C;
     }
 }
 
 typedef void (*VFn_16D788)(TargetFollower* self, const void* arg);
 
-void SetColliderAnchors(Collider* self, s32 a, s32 b, s32 c, s32 d);
-void ConvertPositionToWorld(void* arg, Vec3* out);
+void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
+void ConvertPositionToWorld(BaseObject* self, Vec02* out);
 
 void PlaceTargetFollowerOnFollowed(TargetFollower* self) {
     Vec3 v;
     SetColliderAnchors(self, 3, 0, 3, 0);
     ((VFn_16D788*)self->desc)[36](self, &D_00248D30);
     ((VFn_16D788*)self->desc)[37](self, &D_00248D30);
-    ConvertPositionToWorld(self->f558->f7A4, &v);
+    ConvertPositionToWorld((BaseObject*)self->f558->f7A4, (Vec02*)&v);
     v.z = v.z + self->f56C;
     ((VFn_16D788*)self->desc)[33](self, &v);
 }
 
-s32 ComputeBallisticLaunchVelocity(f32 t, Vec02* from, Vec02* to, Vec02* out, void* self);
+s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, f32 angle);
 extern f32 g_gameTime;
 
 void LaunchTargetFollowerAtFollowed(TargetFollower* self)
@@ -449,9 +453,9 @@ void LaunchTargetFollowerAtFollowed(TargetFollower* self)
     Vec02 target;
     Vec02 vel;
     Vec02 d;
-    ConvertPositionToWorld(self->f558->f7A4, (Vec3*)&target);
+    ConvertPositionToWorld((BaseObject*)self->f558->f7A4, (Vec02*)&target);
     target.z = target.z + self->f56C;
-    ComputeBallisticLaunchVelocity(0.5f, &self->v140, &target, &vel, self);
+    ComputeBallisticLaunchVelocity(&self->v140, &target, &vel, (u8*)self, 0.5f);
     SetColliderAnchors(self, 0, 0, 3, 0);
     ((VFn_16D788*)self->desc)[36](self, &vel);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
@@ -465,7 +469,7 @@ void LaunchTargetFollowerAtFollowed(TargetFollower* self)
 extern const KeyRecord g_streamVoiceKeys[7];
 
 s32 HasStreamVoice(void);
-s32 RandomIntInRange(void* a, s32 b);
+s32 RandomIntInRange(s32 a, s32 b);
 void OpenKeyRecord(KeyRecord* slot);
 
 void StartRandomStreamVoice(TargetFollower* self)
@@ -487,20 +491,21 @@ void StartRandomStreamVoice(TargetFollower* self)
     self->f5CC = 1;
 }
 
-s32 CheckStreamVoicePending(void* self);
-void PlaySoundAndApplyVolumePan(void* self, s32 mode, f32 a, f32 b);
+s32 CheckStreamVoicePending(void);
+struct PlayingSound;
+void PlaySoundAndApplyVolumePan(BaseObject* a0, PlayingSound** a1, f32 f12, f32 f13);
 
 void PlayPendingFollowerSound(TargetFollower* self)
 {
     if (self->f5CC != 0) {
-        if (CheckStreamVoicePending(self) == 0) {
+        if (CheckStreamVoicePending() == 0) {
             self->f5CC = 0;
             PlaySoundAndApplyVolumePan(self, 0, self->f5C4, self->f5C8);
         }
     }
 }
 
-void HandlePlacedObjectNotification(void* self, s32 type, void* packet);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
 void LaunchPoolItemAtTarget(void* self);
 void LaunchTargetFollowerAtFollowed(void* self);
 void StartRandomStreamVoice(void* self);
@@ -540,16 +545,16 @@ call928:
 }
 
 void PlaceTargetFollowerOnFollowed(TargetFollower* self);
-f32 ArctangentOfRatio(f32 a, f32 b);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 Collider* GetActiveSwitchedCollider(void);
 s32 RandomIntInRange(s32 a, s32 b);
-void ConvertPositionToWorld(void* arg, Vec3* out);
+void ConvertPositionToWorld(BaseObject* self, Vec02* out);
 
 extern const Mat02 g_identityMatrix;
-s32 GetObjectWorldPosition(void* p, Vec02* out);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 RandomIntInRange(s32 a, s32 b);
-void SetStateWalkerTarget(void* p, s32 key);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 void* ChooseEntryTableObject(EntryTableObject* self);
 extern GameClock g_gameClock;
 
@@ -571,7 +576,7 @@ void SetTargetFollowerMode(TargetFollower* self, s32 mode)
         Vec02 pos;
         Vec02 d;
         key = 0x2EF;
-        ConvertPositionToWorld(self->f558->f7A4, (Vec3*)&pos);
+        ConvertPositionToWorld((BaseObject*)self->f558->f7A4, (Vec02*)&pos);
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
         self->f5A0 = ArctangentOfRatio(d.y, d.x);
         f32 big = 3.4028234663852886e+38f;
@@ -608,7 +613,7 @@ void SetTargetFollowerMode(TargetFollower* self, s32 mode)
             key = 0x2F1;
             break;
         }
-        GetObjectWorldPosition(self->f590, &pos);
+        GetObjectWorldPosition((BaseObject*)self->f590, &pos);
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
         self->f5A0 = ArctangentOfRatio(d.y, d.x);
         break;
@@ -638,24 +643,24 @@ void SetTargetFollowerMode(TargetFollower* self, s32 mode)
         key = 0x2F3;
         break;
     }
-    SetStateWalkerTarget(self->f554, key);
+    SetStateWalkerTarget((StateWalker*)self->f554, key);
 }
 
-extern s32 g_currentTargetFollower;
+extern TargetFollower* g_currentTargetFollower;
 
-void SetCurrentTargetFollower(s32 value)
+void SetCurrentTargetFollower(TargetFollower* follower)
 {
-    g_currentTargetFollower = value;
+    g_currentTargetFollower = follower;
 }
 
-extern s32 g_currentTargetFollower;
+extern TargetFollower* g_currentTargetFollower;
 
-void ClearCurrentTargetFollower(void)
+void ClearCurrentTargetFollower(TargetFollower* follower)
 {
     g_currentTargetFollower = 0;
 }
 
-void InitPlacedObject(void* self);
+void InitPlacedObject(PlacedObject* self);
 
 void InitEntryTableObject(EntryTableObject* self)
 {
@@ -669,20 +674,19 @@ void InitEntryTableObject(EntryTableObject* self)
     self->tune334 = 2000.0f;
 }
 
-void LoadPlacedObject(void* self);
-s32 GatherObjectsById(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
+void LoadPlacedObject(PlacedObject* self, void* r);
 
-void LoadEntryTable(EntryTableObject* self)
+void LoadEntryTable(EntryTableObject* self, BufferedStream* stream)
 {
-    LoadPlacedObject(self);
-    s32 r = GatherObjectsById((s32)self->world, 0x201, 0x73, self, 0x10, self->entries);
+    LoadPlacedObject(self, stream);
+    s32 r = GatherObjectsById(self->world, 0x201, 0x73, self, 0x10, self->entries);
     self->entryCount = r;
     if ((u32)r >= 0x11) {
         self->entryCount = 0x10;
     }
 }
 
-void StartPlacedObject(void* self);
+void StartPlacedObject(PlacedObject* self);
 
 void StartEntryTableObject(EntryTableObject* self)
 {
@@ -690,7 +694,7 @@ void StartEntryTableObject(EntryTableObject* self)
     self->desc->m03(self);
 }
 
-s32 GetObjectWorldPosition(void* p, Vec02* out);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
 
 void* ChooseEntryTableObject(EntryTableObject* self)
 {
@@ -709,7 +713,7 @@ void* ChooseEntryTableObject(EntryTableObject* self)
         for (s32 i = 0; i < self->entryCount; i++) {
             void* obj = ((void**)self->entries)[i];
             Vec02 pos;
-            GetObjectWorldPosition(obj, &pos);
+            GetObjectWorldPosition((BaseObject*)obj, &pos);
             u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(player->v140));
             f32 dist = Vu0::ToFloat(Vu0::Dot(d, d));
             if (dist < best) {
@@ -730,9 +734,7 @@ void InitFollowableObject(FollowableObject* self)
     self->id7A8 = -1;
 }
 
-void PostLoadPlacedObject(void* self);
-s32 FindFirstObjectById(void* a0, s32 a1, s32 a2, void* a3);
-s32 FindFirstObjectByIdGathered(void* a0, s32 a1, s32 a2, void* a3);
+void PostLoadPlacedObject(PlacedObject* self);
 
 void ResolveFollowableObjectLinks(FollowableObject* self)
 {
@@ -745,37 +747,37 @@ void ResolveFollowableObjectLinks(FollowableObject* self)
     self->f7AC = (void*)FindFirstObjectById(self->world, 4, self->id7A8, self);
 }
 
-extern s32 g_currentTargetFollower;
+extern TargetFollower* g_currentTargetFollower;
 
-void HandlePlacedObjectNotification(void* self, s32 kind);
-s32 IsInList(void* a, void* b);
-void AppendToList(void* list, void* item);
-void RemoveFromList(void* table, void* self);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
+s32 IsInList(List01* self, void* item);
+void AppendToList(List01* self, void* item);
+void RemoveFromList(List01* list, void* item);
 
-void HandleFollowableObjectNotification(FollowableObject* self, s32 kind)
+void HandleFollowableObjectNotification(FollowableObject* self, s32 kind, void* arg)
 {
-    HandlePlacedObjectNotification(self, kind);
+    HandlePlacedObjectNotification(self, kind, arg);
     switch (kind)
     {
     case 2:
         if (g_currentTargetFollower != 0)
         {
-            if (IsInList(&((TargetFollower*)g_currentTargetFollower)->list55C, self) != 0)
+            if (IsInList(&g_currentTargetFollower->list55C, self) != 0)
             {
-                RemoveFromList(&((TargetFollower*)g_currentTargetFollower)->list55C, self);
+                RemoveFromList(&g_currentTargetFollower->list55C, self);
             }
         }
         break;
     case 0xC:
         if (g_currentTargetFollower != 0)
         {
-            AppendToList(&((TargetFollower*)g_currentTargetFollower)->list55C, self);
+            AppendToList(&g_currentTargetFollower->list55C, self);
         }
         break;
     case 0xD:
         if (g_currentTargetFollower != 0)
         {
-            RemoveFromList(&((TargetFollower*)g_currentTargetFollower)->list55C, self);
+            RemoveFromList(&g_currentTargetFollower->list55C, self);
         }
         break;
     }

@@ -26,7 +26,7 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
         return;
     }
     if (key == 0 || IsObjectOfKind(key, 0x16) == 0) {
-        RemoveCameraControllers((*(u8**)&g_camera), 2, 0, (*(u8**)&g_camera) + 0x460, 0, 0);
+        RemoveCameraControllers(g_camera, 2, 0, (CameraController*)((u8*)g_camera + 0x460), 0, 0);
     }
     SetObjectSubGroupState(self, 5);
     for (i = 0; i < self->count; i++) {

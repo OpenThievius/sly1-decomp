@@ -25,16 +25,23 @@
 #include "effect.h"
 #include "vu0.h"
 #include "object_message.h"
-void InitCollider(void* self);
+#include "object_finder.h"
+struct ColliderPose;
+struct Quad16;
+struct SpawnBlock;
+struct SpawnTail;
+struct Mat02;
+void InitCollider(Collider* self);
+
 s32 IsObjectAttached();
-s32 FindSwitchedColliderIndex(SwitchedCollider* value);
+s32 FindSwitchedColliderIndex(void* obj);
 s32 FindSwitchedColliderIndex(void* value);
 void ActivateSwitchedColliderIndex(s32 index);
 void* MoveMemory(void* dst, void* src, s32 size);
-void RegisterCollider(void* self);
+void RegisterCollider(Collider* self);
 void AddToSwitchedColliderList(void* self);
-void UnregisterCollider(void* self);
-void RemoveFromSwitchedColliderList(void* self);
+void UnregisterCollider(Collider* self);
+void RemoveFromSwitchedColliderList(SwitchedCollider* value);
 void AddToSwitchedColliderList(SwitchedCollider* self);
 void RemoveFromSwitchedColliderList(SwitchedCollider* self);
 void* GetActiveSwitchedCollider();
@@ -43,56 +50,60 @@ struct InteractFlags {
     s32 a;
     s32 b;
 };
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 extern s32 g_buttonCodeFlags;
-s32 IsPadSelectFlagHeld(void* p);
-void* CreateEffect(s32 kind, s32 zero);
+s32 IsPadSelectFlagHeld(World* self);
+void* CreateEffect(s32 kind, EffectOwner* sys);
 void AddEffectListener(void* node, void* owner);
-f32 GetAnimationMarkerTime(void* obj, s32 id);
+f32 GetAnimationMarkerTime(Animation* self, s32 key);
 // Descriptor slot 72 as func_00192880 calls it, with the collider switched from or to.
 typedef void (*ActivationHook)(void* self, s32 mode, void* other);
 extern u8 g_elementStack[];
-void PushStackElement(void* a, void* b);
+void PushStackElement(ElementStack* self, ScreenElement* node);
 extern s32 g_padRouting;
 extern u8* D_0026F800;
 // A record whose 16-bit flags sit at 0xAA.
 
 
-s32 IsTopCameraController(void* p);
-void SkipRemainingSteps(StepSequence* ctx, PadRecord* rec);
-void SetStepSequenceState(void* p, s32 n);
-void ClearPadPressedBits(PadRecord* rec, s32 n);
-s32 IsObjectAttached(void* p);
-void InitCollider(void* self);
+s32 IsTopCameraController(CameraController* self);
+void SkipRemainingSteps(StepSequence* self);
+void SetStepSequenceState(StepSequence* self, s32 next);
+void ClearPadPressedBits(PadRecord* self, u32 mask);
+s32 IsObjectAttached(BaseObject* self);
+void InitCollider(Collider* self);
 void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 value);
-void CopyCollider(SwitchedCollider* self);
+void CopyCollider(Collider* self, Collider* other);
 void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 mode);
-void PushCameraController(void* mgr, s32 a1, void* a2, SwitchedCollider* self, s32 a4);
-void RemoveCameraControllers(void* mgr, s32 a1, s32 a2, s32 a3, SwitchedCollider* self, s32 a5);
+void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, void* arg);
+void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, void* k2, void* k3);
 void* GetActiveSwitchedCollider(void);
 void ActivateSwitchedCollider(void* value);
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-s32 IsPadSelectFlagHeld(void* p);
-void CaptureColliderPose(void);
+s32 IsPadSelectFlagHeld(World* self);
+void CaptureColliderPose(Collider* self, ColliderPose* out);
 // func_001EA4B8 takes its float arguments first: the caller then sets $f14 before $a0.
-f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, Quad16* p, s32 zero);
+struct RampProfile;
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
+f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 extern s32 g_buttonCodeFlags;
 extern u8* g_saveData;
 // The parameters SpawnEffectsAt is given (word 0x28 set by the caller).
 struct EffectSpawnParams { s32 f0, f4, f8, fC; f32 f10, f14; s32 f18, f1C; f32 f20, f24; s32 f28, f2C, f30, f34, f38, f3C; };
-void RotateMatrixUpright(void* sub, s32 zero, void* out);
-s32 CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb);
-void SpawnEffectsAt(void* a, void* b, s32 c, void* d, void* e, s32 f, s32 g);
+void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
+struct SpawnTail;
+struct SpawnBlock;
+void SpawnEffectsAt(Quad16* self, Quad16* a1, s32 a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
 void* GetActiveSwitchedCollider(void);
 // kind==0x10 loop test at the top (retail tests it with the first slot peeled) and
 // keeps one more register (frame 64 bytes as retail, but a different loop shape).
 
-void HandlePlacedObjectNotification(SwitchedCollider* self, s32 kind, void* msg);
-void StopSoundRecord(void* self, s32 n);
-s32 IsObjectAttached(void* p);
+struct PlayingSound;
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
+void StopSoundRecord(PlayingSound* self, s32 n);
+s32 IsObjectAttached(BaseObject* self);
 typedef void (*SlotFn)(void* self);
 extern u8* g_saveData;
-void UpdateCollider(SwitchedCollider* self);
+void UpdateCollider(Collider* self, f32 dt);
 void EmitSwitchedColliderTrailPoints(SwitchedCollider* self);
 struct ClampInt {
     static s32 Of(s32 v, s32 lo, s32 hi)
@@ -131,9 +142,9 @@ void InitSwitchedCollider(SwitchedCollider* self)
     SetSwitchedColliderEnabled(self, 1);
 }
 
-void CopySwitchedCollider(SwitchedCollider* self)
+void CopySwitchedCollider(SwitchedCollider* self, SwitchedCollider* src)
 {
-    CopyCollider(self);
+    CopyCollider(self, src);
     if (self->f550 != 0) {
         return;
     }
@@ -146,7 +157,7 @@ void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* 
     HandlePlacedObjectNotification(self, kind, msg);
     switch (kind) {
     case 0xB:
-        StopSoundRecord(self->f574, 0);
+        StopSoundRecord((PlayingSound*)self->f574, 0);
         break;
     case 0x10: {
         s32 i;
@@ -161,9 +172,9 @@ void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* 
     }
 }
 
-void HandleSwitchedColliderActivation(SwitchedCollider* self, s32 mode)
+void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator)
 {
-    if (mode != 0) {
+    if (activator != 0) {
         self->v560 = self->v140;
         PushCameraController(g_camera, 1, &g_camera->ctl520, self, 0);
         return;
@@ -175,14 +186,14 @@ void HandleSwitchedColliderActivation(SwitchedCollider* self, s32 mode)
 
 void CaptureSwitchedColliderPose(SwitchedCollider* self, u8* out, f32 a)
 {
-    CaptureColliderPose();
+    CaptureColliderPose(self, (ColliderPose*)out);
     if (self->f554 != 0) {
         *(Quad16*)(out + 0x10) = *(Quad16*)((u8*)self + 0x560);
         return;
     }
     Camera* base = g_camera;
     if (base->f224 == 0) {
-        *(f32*)(out + 0x18) = ApproachValueWithRamp(self->v560.z, self->v140.z, a, (Quad16*)D_00269BC0, 0);
+        *(f32*)(out + 0x18) = ApproachValueWithRamp(self->v560.z, self->v140.z, a, (RampProfile*)D_00269BC0, 0);
     }
     *(Quad16*)((u8*)self + 0x560) = *(Quad16*)(out + 0x10);
 }
@@ -232,7 +243,7 @@ void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject*
                 void (*init)(Effect* self, void* pos, f32 scale, s32 flags) = n->vt->m00;
                 init(n, (u8*)other + 0x140, 1.0f, 0);
                 AddEffectListener(n, self);
-                f32 r = GetAnimationMarkerTime(self->f5F0, 0x13F);
+                f32 r = GetAnimationMarkerTime((Animation*)self->f5F0, 0x13F);
                 n->life = r;
                 n->i20 = self->f59C;
                 n->vC0 = other->world->gravity;
@@ -272,11 +283,11 @@ void* GetCurrentSwitchedCollider(void)
     return r;
 }
 
-s32 FindSwitchedColliderIndex(s32 key)
+s32 FindSwitchedColliderIndex(void* obj)
 {
     s32 i;
     for (i = 0; i < g_switchedColliderCount; i++) {
-        if (key == (s32)g_switchedColliders[i]) {
+        if (obj == g_switchedColliders[i]) {
             return i;
         }
     }
@@ -287,7 +298,7 @@ void AddToSwitchedColliderList(SwitchedCollider* self)
 {
     if (self->f550 == 0) return;
     if (self->parent != 0) return;
-    if (!IsObjectAttached()) return;
+    if (!IsObjectAttached(self)) return;
     if (FindSwitchedColliderIndex(self) >= 0) return;
     s32 n = g_switchedColliderCount;
     if ((u32)n < 16) {
@@ -298,7 +309,7 @@ void AddToSwitchedColliderList(SwitchedCollider* self)
     }
 }
 
-void RemoveFromSwitchedColliderList(void* value)
+void RemoveFromSwitchedColliderList(SwitchedCollider* value)
 {
     s32 idx = FindSwitchedColliderIndex(value);
     if (idx < 0) return;
@@ -378,7 +389,7 @@ void ShowTypedTextCaptionBox(SwitchedCollider* self, u32 value)
 {
     T217D_440* block = &g_typedTextCaptionBox;
     ((T217D_Word*)&block->child)->v = value;
-    PushStackElement(g_elementStack, &g_typedTextCaptionBox);
+    PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
 }
 
 void HandleStepSequenceSkipButtons(void* self, PadRecord* rec)
@@ -389,16 +400,16 @@ void HandleStepSequenceSkipButtons(void* self, PadRecord* rec)
     StepSequence* ctx = D_0027051C;
     if (ctx != 0 && ctx->state2D4 == 3 && ctx->f32C == 0 && (a1->flags & 0xC) != 0
         && *(s32*)ctx->target304 != 0) {
-        SkipRemainingSteps(ctx, a1);
+        SkipRemainingSteps(ctx);
     } else if ((rec->flags & 0xC) != 0 && D_0026F800 != 0) {
-        SetStepSequenceState(D_0026F800, 1);
+        SetStepSequenceState((StepSequence*)D_0026F800, 1);
     }
     ClearPadPressedBits(rec, 0xC);
 }
 
-void UpdateSwitchedCollider(SwitchedCollider* self)
+void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt)
 {
-    UpdateCollider(self);
+    UpdateCollider(self, dt);
 
     u8* ctx = g_saveData;
     s32 cnt = *(s32*)(ctx + 0x19E4);
@@ -436,21 +447,21 @@ void FinishSwitchedCollider(SwitchedCollider* self)
         Mat02 tmp;
         s1->desc->m02(s1);
         s1->desc->m15(s1, 0);
-        RotateMatrixUpright(((u8*)self->f584) + 0x110, 0, &tmp);
+        RotateMatrixUpright((Mat02*)(((u8*)self->f584) + 0x110), 0, &tmp);
         s1->desc02()->m1D(s1, (Vec02*)(((u8*)self->f584) + 0x140));
         s1->desc02()->m1E(s1, &tmp);
         s1->desc02()->m20(s1, (Vec02*)&D_00248D30);
         s1->desc02()->m21(s1, (Vec02*)&D_00248D30);
         void* r = (void*)FindFirstObjectById(self->world, 1, 0x18C, s1);
         if (r != 0) {
-            CreateAnimationPlayerWithoutPresetTargets(r, s1, 0, 0, 0.0f, 1.0f);
+            CreateAnimationPlayerWithoutPresetTargets((Animation*)r, s1, 0, 0, 0.0f, 1.0f);
         }
     } else {
         s32 v = (s32)self->f588[1];
         if (v != 0) {
             u8* g = (u8*)&D_00269BD0;
             *(s32*)(g + 0x28) = v;
-            SpawnEffectsAt(((u8*)self->f584) + 0x140, (void*)&g_unitZVector, 1, g, &D_00269C10, 0, 0);
+            SpawnEffectsAt((Quad16*)(((u8*)self->f584) + 0x140), (Quad16*)&g_unitZVector, 1, (SpawnTail*)g, (SpawnBlock*)&D_00269C10, 0, 0);
         }
     }
 }
@@ -482,7 +493,7 @@ void EmitSwitchedColliderTrailPoints(SwitchedCollider* self)
         PlacedObject* target = 0;
         void** nodes = (void**)((u8*)self + 0x59C);
         for (u32 k = 0; k < 4; k++) {
-            if (nodes[k] != 0 && IsObjectAttached(nodes[k]) != 0) {
+            if (nodes[k] != 0 && IsObjectAttached((BaseObject*)nodes[k]) != 0) {
                 target = (PlacedObject*)nodes[k];
                 break;
             }

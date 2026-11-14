@@ -11,55 +11,55 @@
 u8 g_class75List[16] = {0};
 
 
-void SetListLinkOffset(void* p, s32 n);
+void SetListLinkOffset(List01* self, s32 offset);
 
 void InitClass75List()
 {
-    SetListLinkOffset(g_class75List, 0x80);
+    SetListLinkOffset((List01*)g_class75List, 0x80);
 }
 
 
-void ClearList(void* p);
+void ClearList(List01* p);
 
 void ClearClass75List()
 {
-    ClearList(g_class75List);
+    ClearList((List01*)g_class75List);
 }
 
-void InitTransformObject(void* self);
+void InitTransformObject(TransformObject* self);
 
 void InitClass75Object(void* self)
 {
     Class75Object* o = (Class75Object*)self;
-    InitTransformObject(self);
+    InitTransformObject((TransformObject*)self);
     o->count = 30;
     o->scale = 25.0f;
 }
 
-void RegisterObject(void* self);
-void AppendToList(void* table, void* self);
+void RegisterObject(BaseObject* self);
+void AppendToList(List01* self, void* item);
 
 void RegisterClass75Object(void* self)
 {
-    RegisterObject(self);
-    AppendToList(g_class75List, self);
+    RegisterObject((BaseObject*)self);
+    AppendToList((List01*)g_class75List, self);
 }
 
-void UnregisterObject(void* self);
-void RemoveFromList(void* table, void* self);
+void UnregisterObject(BaseObject* self);
+void RemoveFromList(List01* list, void* item);
 
 void UnregisterClass75Object(void* self)
 {
-    UnregisterObject(self);
-    RemoveFromList(g_class75List, self);
+    UnregisterObject((BaseObject*)self);
+    RemoveFromList((List01*)g_class75List, self);
 }
 
-void CopyObjectData(void* self);
+void CopyObjectData(BaseObject* self, BaseObject* src);
 
-void CopyClass75ObjectData(Class75Object* self)
+void CopyClass75ObjectData(Class75Object* self, Class75Object* src)
 {
     Class75Link tmp;
     tmp = self->link;
-    CopyObjectData(self);
+    CopyObjectData(self, src);
     self->link = tmp;
 }

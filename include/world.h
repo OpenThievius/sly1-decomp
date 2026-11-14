@@ -14,6 +14,7 @@
 #include "shapes.h"      // U64P
 
 struct C17;
+struct KeyRecord;
 struct EffectOwner;
 struct Contacts03;
 struct QueuedCall;     // an entry of the callback list at 0x1EC8 (queued_call.h)
@@ -111,7 +112,8 @@ struct World : BaseObject {
     List01 list1BE8;        // 0x1BE8: class 0x51's objects (func_00183DC0)
     Pool6C pool1BF4;        // 0x1BF4: the 0x2E0-byte records of PlacedObject::f284
     List01 list1C00;        // 0x1C00: the PlacedObject::f284 records in use
-    u8 pad1C0C[0x1C24 - 0x1C0C];
+    Pool6C pool1C0C;        // 0x1C0C: the 8-byte touch nodes (func_001DC0C8, func_001DC108)
+    u8 pad1C18[0x1C24 - 0x1C18];
     u8* f1C24;              // 0x1C24
     s32 f1C28;              // 0x1C28
     s32 f1C2C;              // 0x1C2C
@@ -156,7 +158,7 @@ struct World : BaseObject {
     f32 f1D68;              // 0x1D68
     f32 f1D6C;              // 0x1D6C
     s32 f1D70;              // 0x1D70: -1
-    s32 f1D74;              // 0x1D74
+    KeyRecord* f1D74;       // 0x1D74: the staged sound bank (RequestStagedBank, PlayStagedBank)
     s32 f1D78;              // 0x1D78: 0 silences volume channel 2 at load (func_001DCEA0)
     f32 f1D7C;              // 0x1D7C
     s32 soundCount;         // 0x1D80: the number of soundEntries (func_001C0A50)
@@ -199,6 +201,6 @@ struct World : BaseObject {
 typedef char check_World[sizeof(World) == 0x2360 ? 1 : -1];
 
 void InitWorldPools(World* self);      // 0x6C slot 0
-void UpdateWorld(World* self);      // 0x6C slot 17 (every frame)
+void UpdateWorld(World* self, f32 dt);      // 0x6C slot 17 (every frame)
 
 #endif

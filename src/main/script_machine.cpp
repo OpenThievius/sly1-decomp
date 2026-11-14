@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "vu0.h"
+#include "entry_pool.h"
 #include "asm_func.h"
 #include "vu0.h"
 #include "world.h"
@@ -12,6 +13,11 @@
 #include "queued_call.h"
 #include "aim_blend_grid.h"
 #include "vu0.h"
+#include "object_finder.h"
+struct HomogeneousMatrix;
+
+struct BaseObject;
+
 
 // The script machine's built-in functions (the table D_00259958, which func_00119BB0 calls through,
 // lists them from func_00112698 on), their helpers and the collector's mark stacks: one source
@@ -77,62 +83,62 @@ R11B008Key* NewKeyedValue(void);
 void CopyKeyedValueChain(R11B008Key* src, R11B008Key* dst, s32 first);
 
 // The pools (value.cpp) and the collector's calls on them (value_pools.cpp).
-void BuildBasisFromXAndZHint(void* self, void* table, void* value);
-extern u8 g_valueNodePool[];
-extern u8 g_scopePool[];
-extern u8 g_keyedValuePool[];
-extern u8 g_payloadPool[];
-extern u8 g_propertyRefPool[];
-void* TakePoolEntry(void* pool);
-void MarkPoolLiveEnd(void* pool);
-void ClearPoolLiveStates(u8* pool);
-void ReleaseDeadPoolEntries(u8* pool);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
+extern EntryPool g_valueNodePool;
+extern EntryPool g_scopePool;
+extern EntryPool g_keyedValuePool;
+extern EntryPool g_payloadPool;
+extern EntryPool g_propertyRefPool;
+void* TakePoolEntry(EntryPool* self);
+void MarkPoolLiveEnd(EntryPool* self);
+void ClearPoolLiveStates(EntryPool* self);
+void ReleaseDeadPoolEntries(EntryPool* self);
 
-void* FillMemory(void* p, s32 value, s32 size);
-void CopyMemory(void* dst, void* src, s32 bytes);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void CopyMemory(void* dst, void* src, u32 size);
 
 // Other files' functions the built-ins call.
-f32 ArctangentOfRatio(f32 x, f32 y);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
-f32 ComputeAngleBetweenVectors(s32 a, s32 b, f32* c);
-s32 ComputeBallisticLaunchVelocity(void* a0, void* a1, f32* a2, void* a3, f32 f);
+f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
+s32 ComputeBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec, f32 angle);
 void FitQuadraticCurve(f32* a0, f32 x, f32 y, f32 z, f32 w);
-f32 ClampToRange(void* span, f32 x);
-s32 IsInsideRange(void* target, f32 scale);
-void CopyTransposedMatrix(s32 a, f32* b);
-void* InvertMatrix4x4(s32 a, f32* b);
-void TransformMatrixByObject(s32 a, s32 b, f32* c);
-void MatrixToEulerAngles(void* a, f32* b);
-void MatrixToAxisAngle(void* a, f32* b, f32* c);
-void RotateMatrixUpright(void* sub, s32 zero, void* out);
-void BuildMatrixFromRotationAndTranslation(void* a, void* b, f32* c);
-void ResetMatrixHomogeneous(void* p);
+struct ValueRange;
+f32 ClampToRange(ValueRange* span, f32 x);
+s32 IsInsideRange(ValueRange* span, f32 x);
+void CopyTransposedMatrix(Quad16* src, Quad16* dst);
+void* InvertMatrix4x4(void* a0, void* a1);
+void TransformMatrixByObject(u8* self, void* arg, Quad16* out);
+void MatrixToEulerAngles(Mat4* self, Vec3* out);
+void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
+void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
+void ResetMatrixHomogeneous(HomogeneousMatrix* self);
 void SetCachedVoiceParam(s32 index, s32 value);
-void SeedRandom(s32 v);
-void* FindFirstObjectById(void* host, s32 a1, s32 a2, s32 ctx);
-s32 GatherObjectsByMode(void* host, s32 a1, s32 a2, void* ctx, s32 a4, u8* a5);
-s32 GatherObjectsById(void* host, s32 a1, s32 a2, void* ctx, s32 a4, u8* a5);
+void SeedRandom(u32 value);
 void* GetActiveSwitchedCollider(void);
-ScriptValue* UpdateObjectProperty(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
-ScriptValue* SetExtraObjectProperty(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
-ScriptValue* AddObjectProperty(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
-ScriptValue* GetObjectProperty(ScriptValue* out, s32 a1, s32 a2);
+ScriptValue* UpdateObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
+ScriptValue* SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
+ScriptValue* AddObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
+ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInSphere(void* self, f32 scale, s32 p1, s32 p2, s32 p3, s32 p4, s32* o1, u8** o2);
-void TransformPointBetweenFrames(void* a, s32 b, void* c, f32* d);
-void TransformDirectionBetweenFrames(void* a, s32 b, void* c, f32* d);
-void TransformRotationBetweenFrames(s32 a, s32 b, s32 c, f32* d);
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
-void ClearSoundRecordHandle(void* slot);
-void StopSoundRecord(void* self, s32 n);
-void StartPadRecordPattern(void* p, s32 n, f32 f);
-void SendPointEventToWorldListener(void* obj, f32 f);
-s32 PrintFormatted(const char* x);
-ScriptValue* EvalScriptEntry(ScriptValue* out, s32 id, u8* ctx);
-ScriptScope* GetScriptEntryScope(s32 id, u8* ctx);
-void RunScriptEventHandler(void* a);
+void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
+void ClearSoundRecordHandle(PlayingSound** slot);
+void StopSoundRecord(PlayingSound* self, s32 n);
+void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration);
+void SendPointEventToWorldListener(Quad16* a0, f32 f);
+extern "C" s32 PrintFormatted(const char* fmt, ...);
+ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx);
+ScriptScope* GetScriptEntryScope(s32 index, World* self);
+void RunScriptEventHandler(BaseObject* self, s32 idx, R11B008Node* body);
 
 extern f32 g_gameTime;
 extern u8 g_padRecord[];
@@ -143,10 +149,10 @@ extern ScriptBuiltin g_scriptBuiltins[];
 extern s32 D_00259DE8;
 
 // The collector's calls on the pooled entries (value_pools.cpp).
-s32 IsPoolEntryUnmarked(MarkEntry* e);
-void MarkPoolEntryUsed(MarkEntry* e);
+s32 IsPoolEntryUnmarked(void* payload);
+void MarkPoolEntryUsed(void* payload);
 
-s32 FindNearestSpanObject(Quad16* z, s32 a, s32 b, s32 c, void** d, ColliderSpan* e);
+s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 
 // This file's functions. The built-ins (ScriptBuiltinFn) and their helpers:
 ScriptValue* IgnoreScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
@@ -248,7 +254,7 @@ ScriptValue* MakeScriptRefList(ScriptValue* ret, s32 count, void** values);
 // function that gives a class back, a `call` with no value (expand_call has no value register when
 // the result goes through the hidden address), which schedules the argument moves differently
 // from a call of a function returning a pointer. The plain value cannot say that.
-void MakeScriptRefList(ScriptValue* ret, s32 count, u8* values); // stays void: retail returns a value, but declared so func_00117C48 and two more differs in registers
+void MakeScriptRefList(ScriptValue* ret, s32 count, u8* values); // stays void: retail returns a ScriptValue by value through the hidden pointer, a call with no value register, which a pointer return changes in func_00117C48, func_00117D78 and func_00117F28
 ScriptValue* FindScriptObject(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* FindScriptObjectList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* FindScriptObjectById(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
@@ -270,14 +276,8 @@ ScriptValue* StopScriptEffect(ScriptValue* ret, s32 count, ScriptValue* args, Sc
 ScriptValue* StartScriptPadRecordPattern(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* SendScriptPointEventToWorldListener(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 
-// A 128-bit value, copied as one quadword.
-typedef u64 Quad_118D10 __attribute__((mode(TI)));
-
-// A 128-bit value, stored as one quadword.
-typedef u64 Quad_118D20 __attribute__((mode(TI)));
-
-Quad_118D10* CopyQuadword(Quad_118D10* out, void* src);
-Quad_118D20* StoreQuadword(Quad_118D20* out, Quad_118D20 v);
+u128* CopyQuadword(u128* out, void* src);
+u128* StoreQuadword(u128* out, u128 v);
 
 // The evaluator (func_0011A080) and the handlers it dispatches to by the expression's kind.
 ScriptValue* EvalScriptVariable(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
@@ -312,7 +312,7 @@ void ReleaseScriptScope(void);
 
 // The collector.
 void ResetMarkRoots(MarkStacks* self);
-void ShutDownMarkRoots();
+void ShutDownMarkRoots(MarkStacks* stacks);
 void AddUniqueMarkRoot(MarkStacks* self, MarkEntry* value);
 void AddMarkRootList(MarkStacks* self, R11B008List* list);
 void PushMarkObject(MarkStacks* self, MarkEntry* value);
@@ -321,19 +321,19 @@ void PushMarkChain(MarkStacks* self, MarkEntry* value);
 MarkEntry* PopMarkChain(MarkStacks* self);
 void PushMarkRecord(MarkStacks* self, MarkRecord* value);
 MarkRecord* PopMarkRecord(MarkStacks* self);
-void MarkPoolLiveEnds(void);
+void MarkPoolLiveEnds(MarkStacks* stacks);
 void DrainMarkStacks(MarkStacks* self);
 void CollectScriptPools(MarkStacks* self);
 
 // Tables of functions this file's code reads: the math functions of func_00115CA0.
 f32 WrapAngle(f32 x);
-f32 Arctangent(f32 x);
-f32 Cosine(f32 x);
-f32 Sine(f32 x);
-f32 Tangent(f32 x);
-f32 Arccosine(f32 x);
-f32 Arcsine(f32 x);
-f32 SquareRoot(f32 x);
+extern "C" f32 Arctangent(f32 x);
+extern "C" f32 Cosine(f32 x);
+extern "C" f32 Sine(f32 x);
+extern "C" f32 Tangent(f32 x);
+extern "C" f32 Arccosine(f32 x);
+extern "C" f32 Arcsine(f32 x);
+extern "C" f32 SquareRoot(f32 x);
 MathFn_259938 g_scriptMathFunctions[8] = { SquareRoot, Sine, Cosine, Tangent, Arcsine, Arccosine, Arctangent, WrapAngle };
 // The built-ins not matched yet (INCLUDE_ASM below) have the built-in signature.
 ScriptValue* AddScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
@@ -650,7 +650,7 @@ struct __attribute__((aligned(16))) ScriptVectorRow {
 };
 // Declared void here: retail's calls leave v0 free for the copy that follows (a value the call
 // set would end in v0, and the next lq would take v1).
-void CopyBytes(void* dst, void* src, s32 n); // stays void (see above): retail returns a value, but func_00113240 differs in registers if declared
+extern "C" void CopyBytes(void* dst, void* src, s32 n); // stays void (see above): retail returns a value, but func_00113240 differs in registers if declared
 struct ScriptMatrixPayload {
     ScriptVectorRow row[4];      // 0x00
     ScriptMatrixPayload() {}
@@ -660,7 +660,7 @@ struct ScriptMatrixPayload {
 struct ScriptFloatPair {
     f32 v[2];
 };
-Quad_118D20 ScaleQuadword(Quad_118D20 s, Quad_118D20 v);
+u128 ScaleQuadword(u128 s, u128 v);
 s32 ScaleMatrix(ScriptMatrixPayload* out, const ScriptMatrixPayload* m, u128 s);
 // A matrix scaled by a weight in a GPR (Vu0::ScalarInGpr), returned by value: ScaleMatrix into
 // the inline's own matrix, which the return copies into the caller's with CopyBytes. Inlined, the
@@ -672,8 +672,8 @@ static inline ScriptMatrixPayload ScaledMatrix(const ScriptMatrixPayload* m, u12
     ScaleMatrix(&r, m, s);
     return r;
 }
-Quad_118D20* StoreFloatAsQuadword(Quad_118D20* out, f32 f);
-void TransformByMatrixWithW(const ScriptMatrixPayload* m, const void* v, f32 w, void* out);
+u128* StoreFloatAsQuadword(u128* out, f32 f);
+void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
 ScriptMatrixPayload MultiplyMatrices(const ScriptMatrixPayload* a, const void* b);
 void FreeMatrixPayload(void* p);
 
@@ -752,13 +752,13 @@ ScriptValue* MultiplyScriptValues(ScriptValue* ret, s32 count, ScriptValue* args
             case 0x18: {
                 vb = (ScriptVectorRow*)AcquireVectorBPayload();
                 tag = 0x18;
-                Quad_118D20 t;
+                u128 t;
                 f32* p = x->v;
                 StoreFloatAsQuadword(&t, n);
-                Quad_118D20 tv = t;
-                Quad_118D10 u;
+                u128 tv = t;
+                u128 u;
                 CopyQuadword(&u, p);
-                StoreQuadword((Quad_118D20*)vb, ScaleQuadword(tv, *(Quad_118D20*)&u));
+                StoreQuadword((u128*)vb, ScaleQuadword(tv, *&u));
                 break;
             }
             case 0x19: {
@@ -796,7 +796,7 @@ ScriptValue* MultiplyScriptValues(ScriptValue* ret, s32 count, ScriptValue* args
             case 0x16:
                 va = (ScriptVectorRow*)AcquireVectorAPayload();
                 tag = 0x16;
-                TransformByMatrixWithW(m, x->v, 1.0f, va);
+                TransformByMatrixWithW((const Quad16*)m, (const Vec02*)x->v, 1.0f, (Vec02*)va);
                 break;
             case 0x17: {
                 ScriptMatrixPayload c;
@@ -809,21 +809,21 @@ ScriptValue* MultiplyScriptValues(ScriptValue* ret, s32 count, ScriptValue* args
         case 0x18:
             switch (x->tag) {
             case 0x14: {
-                Quad_118D20 t;
+                u128 t;
                 StoreFloatAsQuadword(&t, (f32)x->i);
-                Quad_118D20 tv = t;
-                Quad_118D10 u;
+                u128 tv = t;
+                u128 u;
                 CopyQuadword(&u, vb);
-                StoreQuadword((Quad_118D20*)vb, ScaleQuadword(tv, *(Quad_118D20*)&u));
+                StoreQuadword((u128*)vb, ScaleQuadword(tv, *&u));
                 break;
             }
             case 0x15: {
-                Quad_118D20 t;
+                u128 t;
                 StoreFloatAsQuadword(&t, x->f);
-                Quad_118D20 tv = t;
-                Quad_118D10 u;
+                u128 tv = t;
+                u128 u;
                 CopyQuadword(&u, vb);
-                StoreQuadword((Quad_118D20*)vb, ScaleQuadword(tv, *(Quad_118D20*)&u));
+                StoreQuadword((u128*)vb, ScaleQuadword(tv, *&u));
                 break;
             }
             }
@@ -959,21 +959,21 @@ ScriptValue* DivideScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, 
         case 0x18:
             switch (x->tag) {
             case 0x14: {
-                Quad_118D20 t;
+                u128 t;
                 StoreFloatAsQuadword(&t, 1.0f / (f32)x->i);
-                Quad_118D20 tv = t;
-                Quad_118D10 u;
+                u128 tv = t;
+                u128 u;
                 CopyQuadword(&u, vb);
-                StoreQuadword((Quad_118D20*)vb, ScaleQuadword(tv, *(Quad_118D20*)&u));
+                StoreQuadword((u128*)vb, ScaleQuadword(tv, *&u));
                 break;
             }
             case 0x15: {
-                Quad_118D20 t;
+                u128 t;
                 StoreFloatAsQuadword(&t, 1.0f / x->f);
-                Quad_118D20 tv = t;
-                Quad_118D10 u;
+                u128 tv = t;
+                u128 u;
                 CopyQuadword(&u, vb);
-                StoreQuadword((Quad_118D20*)vb, ScaleQuadword(tv, *(Quad_118D20*)&u));
+                StoreQuadword((u128*)vb, ScaleQuadword(tv, *&u));
                 break;
             }
             }
@@ -1907,7 +1907,7 @@ ScriptValue* MakeScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, Sc
     switch (count) {
     case 3:
     case 4: {
-        ResetMatrixHomogeneous(a);
+        ResetMatrixHomogeneous((HomogeneousMatrix*)a);
         for (s32 i = 0; i < count; i++) {
             a[i] = *(Row_115510*)n->v;
             n = n->next;
@@ -1915,7 +1915,7 @@ ScriptValue* MakeScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, Sc
         break;
     }
     case 9:
-        ResetMatrixHomogeneous(a);
+        ResetMatrixHomogeneous((HomogeneousMatrix*)a);
     case 16: {
         s32 m = count == 9 ? 3 : 4;
         for (s32 i = 0; i < m; i++) {
@@ -2324,7 +2324,7 @@ ScriptValue* GetScriptBallisticVelocity(ScriptValue* ret, s32 count, ScriptValue
     void* s1 = args[0].p;
     void* fc = args[1].p;
     ConvertScriptValueToFloat(&v, &args[2]);
-    ComputeBallisticLaunchVelocity(s1, fc, p, s3, v.f);
+    ComputeBallisticLaunchVelocity((Vec02*)s1, (Vec02*)fc, (Vec02*)p, (u8*)s3, v.f);
     DestroyScriptValue(&v, 2);
     SetScriptValueVectorA(&q, p);
     CopyConstructScriptValue(ret, &q);
@@ -2341,7 +2341,7 @@ ScriptValue* GetScriptAngleAndAxis(ScriptValue* ret, s32 count, ScriptValue* arg
     a->next = b;
     f32* c = AcquireVectorAPayload();
     SetScriptValueVectorA(b, c);
-    f32 d = ComputeAngleBetweenVectors(args[0].i, args[1].i, c);
+    f32 d = ComputeAngleBetweenVectors((Vec02*)args[0].p, (Vec02*)args[1].p, (Vec02*)c);
     SetScriptValueFloat(a, d);
     SetScriptValueChain(&t, a);
     CopyConstructScriptValue(ret, &t);
@@ -2354,7 +2354,7 @@ ScriptValue* TransposeScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* arg
     ScriptValue t;
     InitScriptValue(&t);
     f32* a = AcquireMatrixPayload();
-    CopyTransposedMatrix(args[0].i, a);
+    CopyTransposedMatrix((Quad16*)args[0].p, (Quad16*)a);
     SetScriptValueMatrix(&t, a);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -2366,7 +2366,7 @@ ScriptValue* InvertScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, 
     ScriptValue t;
     InitScriptValue(&t);
     f32* a = AcquireMatrixPayload();
-    InvertMatrix4x4(args[0].i, a);
+    InvertMatrix4x4(args[0].p, a);
     SetScriptValueMatrix(&t, a);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -2378,7 +2378,7 @@ ScriptValue* TransformScriptMatrixByObject(ScriptValue* ret, s32 count, ScriptVa
     ScriptValue t;
     InitScriptValue(&t);
     f32* a = AcquireMatrixPayload();
-    TransformMatrixByObject(args[0].i, args[1].i, a);
+    TransformMatrixByObject((u8*)args[0].p, args[1].p, (Quad16*)a);
     SetScriptValueMatrix(&t, a);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -2387,11 +2387,11 @@ ScriptValue* TransformScriptMatrixByObject(ScriptValue* ret, s32 count, ScriptVa
 
 typedef f32 (*MathFn_259938)(f32 x);
 f32* AcquireMatrixPayload(void);
-void MatrixToAxisAngle(void* a, f32* b, f32* c);
-void ResetMatrixHomogeneous(void* p);
+void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
+void ResetMatrixHomogeneous(HomogeneousMatrix* self);
 
-void MultiplyMatrices3x3(void* a, void* b, void* out);
-void BuildAxisAngleMatrix(void* axis, void* out, f32 angle);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 ScriptValue* InterpolateScriptRotation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
@@ -2403,8 +2403,8 @@ ScriptValue* InterpolateScriptRotation(ScriptValue* ret, s32 count, ScriptValue*
     f32 angle;
     InitScriptValue(&obj);
     f32* m = AcquireMatrixPayload();
-    MultiplyMatrices3x3(args[0].p, args[1].p, &delta);
-    MatrixToAxisAngle(&delta, &angle, (f32*)&axis);
+    MultiplyMatrices3x3((Mat02*)args[0].p, (Mat02*)args[1].p, &delta);
+    MatrixToAxisAngle(&delta, &angle, (Vec02*)&axis);
     BuildAxisAngleMatrix(&axis, &delta, angle * args[2].f);
     const Mat02* src = (const Mat02*)args[0].p;
     u128 v0 = Vu0::Q(src->r[0]);
@@ -2412,7 +2412,7 @@ ScriptValue* InterpolateScriptRotation(ScriptValue* ret, s32 count, ScriptValue*
     Vu0::Q(b.r[1]) = Vu0::Q(a.r[1]) = Vu0::RotateUntied(delta, Vu0::Q(src->r[1]));
     Vu0::Q(b.r[2]) = Vu0::Q(a.r[2]) = Vu0::RotateUntied(delta, Vu0::Q(src->r[2]));
     *(Mat02*)m = a;
-    ResetMatrixHomogeneous(m);
+    ResetMatrixHomogeneous((HomogeneousMatrix*)m);
     SetScriptValueMatrix(&obj, m);
     CopyConstructScriptValue(ret, &obj);
     DestroyScriptValue(&obj, 2);
@@ -2438,7 +2438,7 @@ ScriptValue* GetScriptMatrixRotation(ScriptValue* ret, s32 count, ScriptValue* a
     InitScriptValue(&q);
     obj = AcquireMatrixPayload();
     *(Mat4A*)obj = *(Mat4A*)args[0].v;
-    ResetMatrixHomogeneous(obj);
+    ResetMatrixHomogeneous((HomogeneousMatrix*)obj);
     SetScriptValueMatrix(&q, obj);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2450,7 +2450,7 @@ ScriptValue* GetScriptMatrixEuler(ScriptValue* ret, s32 count, ScriptValue* args
     ScriptValue t;
     InitScriptValue(&t);
     f32* c = AcquireVectorAPayload();
-    MatrixToEulerAngles(args[0].p, c);
+    MatrixToEulerAngles((Mat4*)args[0].p, (Vec3*)c);
     SetScriptValueVectorA(&t, c);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -2467,7 +2467,7 @@ ScriptValue* GetScriptMatrixAxisAngle(ScriptValue* ret, s32 count, ScriptValue* 
     f32* c = AcquireVectorAPayload();
     SetScriptValueVectorA(b, c);
     a->next = b;
-    MatrixToAxisAngle(args[0].p, &vec.x, c);
+    MatrixToAxisAngle((Mat02*)args[0].p, &vec.x, (Vec02*)c);
     SetScriptValueFloat(a, vec.x);
     SetScriptValueChain(&t, a);
     CopyConstructScriptValue(ret, &t);
@@ -2488,8 +2488,8 @@ ScriptValue* MakeScriptDirectionMatrix(ScriptValue* ret, s32 count, ScriptValue*
     }
     dir = Vu0::Sub(Vu0::Q(*(Vec02*)args[1].v), Vu0::Q(*(Vec02*)args[0].v));
     f32* m = AcquireMatrixPayload();
-    BuildBasisFromXAndZHint(&dir, (void*)up, m);
-    ResetMatrixHomogeneous(m);
+    BuildBasisFromXAndZHint((const Vec02*)&dir, (const Vec02*)up, (Mat02*)m);
+    ResetMatrixHomogeneous((HomogeneousMatrix*)m);
     SetScriptValueMatrix(&obj, m);
     CopyConstructScriptValue(ret, &obj);
     DestroyScriptValue(&obj, 2);
@@ -2507,8 +2507,8 @@ ScriptValue* MakeScriptUprightObjectMatrix(ScriptValue* ret, s32 count, ScriptVa
     UprightBasis v;
     InitScriptValue(&t);
     f32* a = AcquireMatrixPayload();
-    RotateMatrixUpright(args[0].p, 0, &v);
-    BuildMatrixFromRotationAndTranslation((u8*)args[0].p + 0x30, &v, a);
+    RotateMatrixUpright((Mat02*)args[0].p, 0, (Mat02*)&v);
+    BuildMatrixFromRotationAndTranslation((const Vec02*)((u8*)args[0].p + 0x30), (const Mat02*)&v, (Mat4A*)a);
     SetScriptValueMatrix(&t, a);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -2590,7 +2590,7 @@ ScriptValue* ClampScriptToRange(ScriptValue* ret, s32 count, ScriptValue* args, 
     InitScriptValue(&q0);
     void* span = args[0].p;
     ConvertScriptValueToFloat(&q1, args + 1);
-    f32 r = ClampToRange(span, q1.f);
+    f32 r = ClampToRange((ValueRange*)span, q1.f);
     SetScriptValueFloat(&q0, r);
     DestroyScriptValue(&q1, 2);
     CopyConstructScriptValue(ret, &q0);
@@ -2605,7 +2605,7 @@ ScriptValue* TestScriptInsideRange(ScriptValue* ret, s32 count, ScriptValue* arg
     InitScriptValue(&q);
     void* s1 = args[0].p;
     ConvertScriptValueToFloat(&v, &args[1]);
-    s32 flag = IsInsideRange(s1, v.f);
+    s32 flag = IsInsideRange((ValueRange*)s1, v.f);
     SetScriptValueBool(&q, flag);
     DestroyScriptValue(&v, 2);
     CopyConstructScriptValue(ret, &q);
@@ -2860,7 +2860,7 @@ ScriptValue* DispatchScriptObjectProperty(ScriptValue* ret, s32 count, ScriptVal
     ScriptValue q2;
 
     InitScriptValue(&q1);
-    s32 x1 = args[0].i;
+    BaseObject* x1 = (BaseObject*)args[0].p;
     s32 x2 = args[1].i;
     switch (kind) {
     case 0x63:
@@ -2950,7 +2950,7 @@ ScriptValue* FindScriptObject(ScriptValue* ret, s32 count, ScriptValue* args, Sc
     s32 flag = 0x105;
     s32 k = 0x101;
     if (args[1].i != 0) flag = k;
-    r = FindFirstObjectById(g_currentWorld, flag, args[0].i, args[1].i);
+    r = FindFirstObjectById(g_currentWorld, flag, args[0].i, args[1].p);
     SetScriptValuePointerB(&q, r);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2977,7 +2977,7 @@ ScriptValue* FindScriptObjectById(ScriptValue* ret, s32 count, ScriptValue* args
     ScriptValue q;
     void* r;
     InitScriptValue(&q);
-    r = FindFirstObjectById(g_currentWorld, 0x104, args[0].i, args[1].i);
+    r = FindFirstObjectById(g_currentWorld, 0x104, args[0].i, args[1].p);
     SetScriptValuePointerB(&q, r);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3048,7 +3048,7 @@ ScriptValue* GatherScriptObjectsById(ScriptValue* ret, s32 count, ScriptValue* a
 // ScriptValue::Vector(): the second's `this` is the inliner's fresh pseudo, so its pointer is
 // read again after the store of lo, as retail does (docs/TOOLCHAIN.md, "An inline method's
 // this").
-void GatherCollidersInBox(void* self, s32 p1, Vec02* lo, Vec02* hi, s32 p4, s32 p5, s32* o1, u8** o2);
+void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 ScriptValue* FindScriptObjectsInBox(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
@@ -3062,7 +3062,7 @@ ScriptValue* FindScriptObjectsInBox(ScriptValue* ret, s32 count, ScriptValue* ar
     Vu0::Set(lo, Vu0::Min(Vu0::Q(*args[0].Vector()), Vu0::Q(*args[1].Vector())));
     Vu0::Set(hi, Vu0::Max(Vu0::Q(*args[0].Vector()), Vu0::Q(*args[1].Vector())));
     PushBackMemoryMark();
-    GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, 0, 0, &n, &list);
+    GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, 0, 0, &n, (Collider***)&list);
     MakeScriptRefList(&t, n, list);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3082,7 +3082,7 @@ ScriptValue* FindScriptObjectsInSphere(ScriptValue* ret, s32 count, ScriptValue*
     InitScriptValue(&q);
     if (args[1].tag == 0x14) scale = (f32)args[1].i; else scale = args[1].f;
     PushBackMemoryMark();
-    GatherCollidersInSphere(g_currentWorld, scale, 0, args[0].i, 0, 0, &n, &list);
+    GatherCollidersInSphere(g_currentWorld, 0, scale, (Vec02*)args[0].v, 0, 0, &n, (Collider***)&list);
     MakeScriptRefList(&t, n, list);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -3115,7 +3115,7 @@ RetValue SearchScriptObjectHits(s32 id, s32 count, ScriptValue* args, ScriptScop
             if (e == 0)
                 continue;
             slot = e;
-            if (FindNearestSpanObject(0, pa->i, pb->i, 1, &slot, &hit) == 0)
+            if (FindNearestSpanObject(0, (Vec02*)pa->p, (Vec02*)pb->p, 1, (Collider**)&slot, &hit) == 0)
                 continue;
             if (id == kind) {
                 n1 = NewScriptValueNode();
@@ -3188,7 +3188,7 @@ ScriptValue* TransformScriptPointBetweenFrames(ScriptValue* ret, s32 count, Scri
     ScriptValue t;
     InitScriptValue(&t);
     f32* p = AcquireVectorAPayload();
-    TransformPointBetweenFrames(args[0].p, args[1].i, args[2].p, p);
+    TransformPointBetweenFrames((PlacedObject*)args[0].p, (PlacedObject*)args[1].p, (Vec02*)args[2].p, (Vec02*)p);
     SetScriptValueVectorA(&t, p);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -3200,7 +3200,7 @@ ScriptValue* TransformScriptDirectionBetweenFrames(ScriptValue* ret, s32 count, 
     ScriptValue t;
     InitScriptValue(&t);
     f32* p = AcquireVectorAPayload();
-    TransformDirectionBetweenFrames(args[0].p, args[1].i, args[2].p, p);
+    TransformDirectionBetweenFrames((PlacedObject*)args[0].p, (PlacedObject*)args[1].p, (Vec02*)args[2].p, (Vec02*)p);
     SetScriptValueVectorA(&t, p);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -3213,8 +3213,8 @@ ScriptValue* TransformScriptRotationBetweenFrames(ScriptValue* ret, s32 count, S
     f32* obj;
     InitScriptValue(&q);
     obj = AcquireMatrixPayload();
-    TransformRotationBetweenFrames(args[0].i, args[1].i, args[2].i, obj);
-    ResetMatrixHomogeneous(obj);
+    TransformRotationBetweenFrames((PlacedObject*)args[0].p, (PlacedObject*)args[1].p, (Mat02*)args[2].v, (Mat02*)obj);
+    ResetMatrixHomogeneous((HomogeneousMatrix*)obj);
     SetScriptValueMatrix(&q, obj);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3244,9 +3244,9 @@ ScriptValue* StartScriptEffect(ScriptValue* ret, s32 count, ScriptValue* args, S
     s32 n;
     InitScriptValue(&q);
     n = 0;
-    StartSoundEffect(args[0].i, args[1].i ? &n : 0, args[1].i, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
+    StartSoundEffect(args[0].i, (PlayingSound**)(args[1].i ? &n : 0), (BaseObject*)args[1].i, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     SetScriptValueInt(&q, n);
-    if (n != 0) ClearSoundRecordHandle(&n);
+    if (n != 0) ClearSoundRecordHandle((PlayingSound**)&n);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -3256,7 +3256,7 @@ ScriptValue* StopScriptEffect(ScriptValue* ret, s32 count, ScriptValue* args, Sc
 {
     ScriptValue t;
     InitScriptValue(&t);
-    StopSoundRecord(args[0].p, 0);
+    StopSoundRecord((PlayingSound*)args[0].p, 0);
     t.tag = 0x22;
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -3271,7 +3271,7 @@ ScriptValue* StartScriptPadRecordPattern(ScriptValue* ret, s32 count, ScriptValu
     void* p = g_padRecord;
     s32 n = args[0].i;
     ConvertScriptValueToFloat(&u, args + 1);
-    StartPadRecordPattern(p, n, u.f);
+    StartPadRecordPattern((PadRecord*)p, n, u.f);
     DestroyScriptValue(&u, 2);
     CopyConstructScriptValue(ret, &t);
     DestroyScriptValue(&t, 2);
@@ -3285,7 +3285,7 @@ ScriptValue* SendScriptPointEventToWorldListener(ScriptValue* ret, s32 count, Sc
     InitScriptValue(&t);
     void* s1 = args[0].p;
     ConvertScriptValueToFloat(&u, args + 1);
-    SendPointEventToWorldListener(s1, u.f);
+    SendPointEventToWorldListener((Quad16*)s1, u.f);
     DestroyScriptValue(&u, 2);
     SetScriptValueTag(&t, 0x22);
     CopyConstructScriptValue(ret, &t);
@@ -3303,7 +3303,7 @@ struct __attribute__((aligned(16))) ScriptSampleRotation {
 };
 
 void* AllocateBackMemory(s32 size);
-void *CopyRotationMatrix(f32* dst, ScriptSampleRotation* src);
+void *CopyRotationMatrix(Quad16* destination, const Quad16* source);
 
 ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
@@ -3374,7 +3374,7 @@ ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* arg
             }
             case 2: {
                 f32* m = AcquireMatrixPayload();
-                CopyRotationMatrix(m, (ScriptSampleRotation*)(rotations + rot));
+                CopyRotationMatrix((Quad16*)m, (const Quad16*)(rotations + rot));
                 SetScriptValueMatrix(node, m);
                 break;
             }
@@ -3410,20 +3410,20 @@ ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* arg
     return ret;
 }
 
-Quad_118D20* StoreFloatAsQuadword(Quad_118D20* out, f32 f)
+u128* StoreFloatAsQuadword(u128* out, f32 f)
 {
-    *out = (Quad_118D20)Vu0::ScalarInGpr(f);
+    *out = (u128)Vu0::ScalarInGpr(f);
     return out;
 }
 
-Quad_118D10* CopyQuadword(Quad_118D10* out, void* src)
+u128* CopyQuadword(u128* out, void* src)
 {
-    Quad_118D10 v = *(Quad_118D10*)src;
+    u128 v = *(u128*)src;
     *out = v;
     return out;
 }
 
-Quad_118D20* StoreQuadword(Quad_118D20* out, Quad_118D20 v)
+u128* StoreQuadword(u128* out, u128 v)
 {
     *out = v;
     return out;
@@ -3958,12 +3958,12 @@ ScriptValue* EvalScriptImportScope(ScriptValue* ret, R11B008Node* expr, ScriptSc
 
     InitScriptValue(&a);
     id = expr->node->next->i;
-    found = GetScriptEntryScope(id, (u8*)g_currentWorld);
+    found = GetScriptEntryScope(id, (World*)g_currentWorld);
     if (found == 0) {
-        EvalScriptEntry(&b, id, (u8*)g_currentWorld);
+        EvalScriptEntry(&b, id, (World*)g_currentWorld);
         AssignScriptValue(&a, &b);
         DestroyScriptValue(&b, 2);
-        found = GetScriptEntryScope(id, (u8*)g_currentWorld);
+        found = GetScriptEntryScope(id, (World*)g_currentWorld);
     }
     AddScriptScopeParent(scope, found);
     SetScriptValueTag(&a, 0x22);
@@ -4127,7 +4127,7 @@ void CopyScriptScope(ScriptScope* src, ScriptScope* dst)
 
 ScriptScope* NewScriptScope(void)
 {
-    ScriptScope* p = (ScriptScope*)TakePoolEntry(g_scopePool);
+    ScriptScope* p = (ScriptScope*)TakePoolEntry(&g_scopePool);
     FillMemory(p, 0, 0x1C);
     return p;
 }
@@ -4149,7 +4149,7 @@ void ResetMarkRoots(MarkStacks* self)
     self->listCount = 0;
 }
 
-void ShutDownMarkRoots() {}
+void ShutDownMarkRoots(MarkStacks* stacks) {}
 
 void AddUniqueMarkRoot(MarkStacks* self, MarkEntry* value)
 {
@@ -4200,13 +4200,13 @@ MarkRecord* PopMarkRecord(MarkStacks* self)
     return 0;
 }
 
-void MarkPoolLiveEnds(void)
+void MarkPoolLiveEnds(MarkStacks* stacks)
 {
-    MarkPoolLiveEnd(g_valueNodePool);
-    MarkPoolLiveEnd(g_scopePool);
-    MarkPoolLiveEnd(g_keyedValuePool);
-    MarkPoolLiveEnd(g_payloadPool);
-    MarkPoolLiveEnd(g_propertyRefPool);
+    MarkPoolLiveEnd(&g_valueNodePool);
+    MarkPoolLiveEnd(&g_scopePool);
+    MarkPoolLiveEnd(&g_keyedValuePool);
+    MarkPoolLiveEnd(&g_payloadPool);
+    MarkPoolLiveEnd(&g_propertyRefPool);
 }
 
 void DrainMarkStacks(MarkStacks* self)
@@ -4313,11 +4313,11 @@ void DrainMarkStacks(MarkStacks* self)
 }
 
 void CollectScriptPools(MarkStacks* w) {
-    ClearPoolLiveStates(g_valueNodePool);
-    ClearPoolLiveStates(g_scopePool);
-    ClearPoolLiveStates(g_keyedValuePool);
-    ClearPoolLiveStates(g_payloadPool);
-    ClearPoolLiveStates(g_propertyRefPool);
+    ClearPoolLiveStates(&g_valueNodePool);
+    ClearPoolLiveStates(&g_scopePool);
+    ClearPoolLiveStates(&g_keyedValuePool);
+    ClearPoolLiveStates(&g_payloadPool);
+    ClearPoolLiveStates(&g_propertyRefPool);
     s32 i = w->rootCount;
     w->objectCount = 0;
     w->chainCount = 0;
@@ -4369,9 +4369,9 @@ void CollectScriptPools(MarkStacks* w) {
         }
     }
     DrainMarkStacks(w);
-    ReleaseDeadPoolEntries(g_valueNodePool);
-    ReleaseDeadPoolEntries(g_scopePool);
-    ReleaseDeadPoolEntries(g_keyedValuePool);
-    ReleaseDeadPoolEntries(g_payloadPool);
-    ReleaseDeadPoolEntries(g_propertyRefPool);
+    ReleaseDeadPoolEntries(&g_valueNodePool);
+    ReleaseDeadPoolEntries(&g_scopePool);
+    ReleaseDeadPoolEntries(&g_keyedValuePool);
+    ReleaseDeadPoolEntries(&g_payloadPool);
+    ReleaseDeadPoolEntries(&g_propertyRefPool);
 }

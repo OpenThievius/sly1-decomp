@@ -12,6 +12,7 @@
 
 // 0x66: func_001C1030 sets the id: it lets go of the old link (func_001B6438), looks the id
 // up (func_0015A418 with 0x101) and links to what it finds (func_001B6290).
+struct StateWalker;
 struct IdLinkedObject : PlacedObject {
     u32 color;              // 0x2D0: 0x80808080 at set-up (InitIdLinkedObject)
     f32 f2D4;               // 0x2D4: 0.5 at set-up
@@ -26,8 +27,8 @@ struct IdLinkedObject : PlacedObject {
     f32 f324;               // 0x324: 0.5 at set-up
     u8 pad328[0x32C - 0x328];
     s32 linkId;             // 0x32C
-    s32 linkTarget;         // 0x330: what func_0015A418 returns for linkId
-    s32 link;               // 0x334: what func_001B6290 returns, 0 for none
+    BaseObject* linkTarget; // 0x330: what func_0015A418 returns for linkId
+    StateWalker* link;      // 0x334: what func_001B6290 returns, 0 for none
     u8 pad338[0x340 - 0x338];
 };
 

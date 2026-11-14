@@ -116,7 +116,7 @@ Slot_1F9FB8 D_00277998[3] = { { 0x5A, (s32)CopyKernelWordsSecondPatch }, { 0x5B,
 s32 IsSecondKernelPatchNeeded(void);
 void SetSystemCallHandlerSecondPatch(s32 a, s32 b);
 void CopyKernelWordsSyscallSecondPatch(s32 a, void* b, s32 c);
-void SyncDataCache(s32 a);
+extern "C" void SyncDataCache(s32 a);
 s32 RunSyscall5BSecondPatch(s32 key);
 
 void InstallSecondKernelPatch(void)

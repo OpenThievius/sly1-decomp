@@ -12,10 +12,11 @@
 
 struct QueuedCall {
     union {
-        s32 k0;             // 0x00: func_001DBC60, func_001DBCC8, func_001DBD40
-        void (*fn)(s32 a, s32 b, s32 c);    // 0x00: func_001DBE48 calls it with k1..k3; func_0011AB58 compares it
+        void* code;         // 0x00: the function, as func_001DBCC8 stores it and func_001DBC60, func_001DBD40 compare it
+        void (*fn)(void* arg, s32 b, s32 c);    // 0x00: func_001DBE48 calls it with arg, k2, k3; func_0011AB58 compares it
+        void (*notify)(void* arg, s32 kind, void* payload); // 0x00: an animation player's callbacks, told a message and its object (func_0012F760)
     };
-    s32 k1;                 // 0x04
+    void* arg;              // 0x04: the object the call is for
     s32 k2;                 // 0x08
     union {
         s32 k3;             // 0x0C

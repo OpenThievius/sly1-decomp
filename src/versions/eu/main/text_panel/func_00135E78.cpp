@@ -21,10 +21,10 @@ void ReleasePanelEntries(SlotBank_135E78_eu* self, s32 state, s32 flag)
         T217D_440_Slot* e = self->entries;
         do {
             if (flag != 0) {
-                RemoveEffect(e->handle);
+                RemoveEffect((Effect*)e->handle);
                 FillMemory(self->blockB, 0, 16);
             } else {
-                SetEffectPhase(e->handle, 2);
+                SetEffectPhase((Effect*)e->handle, 2);
             }
             i++;
             e++;

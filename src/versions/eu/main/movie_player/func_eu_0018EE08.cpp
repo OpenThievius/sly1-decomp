@@ -10,7 +10,7 @@ struct Obj_eu_18EE08 {
 
 void PushBackMemoryMark(void);
 u8* AllocateBackMemory(s32 n);
-void CopyMemory(u8* dst, u8* src, u32 bytes);
+void CopyMemory(void* dst, void* src, u32 size);
 void PopBackMemoryMark(void);
 
 void GroupRingBlockColumns(Obj_eu_18EE08* self, s32 len, u8* dst)

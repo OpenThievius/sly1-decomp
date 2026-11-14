@@ -15,7 +15,7 @@ void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec)
         if (rec != self->f6B8) {
             return;
         }
-        GetStateWalkerCurrentKey(rec, &code);
+        GetStateWalkerCurrentKey((StateWalker*)rec, &code);
         if (code == 0x3F3) {
             u8* tbl;
             *(void**)D_0026E744 = (u8*)self + 0x67C;
@@ -24,7 +24,7 @@ void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec)
             *(void**)(tbl + 0x578) = (u8*)self + 0x684;
             SetWorldActiveFollower(self->world, self);
             StartTimer(&g_timerElement, self->f688);
-            SetTimerLimit(&g_timerElement, 0.0f, (void*)EndGaugeColliderTimer);
+            SetTimerLimit(&g_timerElement, 0.0f, (T217D_510_Fn)EndGaugeColliderTimer);
             StartTimerCounting(&g_timerElement);
         } else {
             if (code < 0x3F3) {

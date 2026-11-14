@@ -60,16 +60,19 @@ typedef char check_FontGlyph[sizeof(FontGlyph) == 8 ? 1 : -1];   // `n << 3` byt
 
 struct FontScale { f32 x, y; };
 
+struct Vec4U;
+struct PacketWriter;
+
 struct FontVt {
     s16 adj0; s16 idx0; void* fn0;                                              // 0x00
     s16 adj1; s16 idx1; Font* (*clone)(Font* self, f32 sx, f32 sy);           // 0x08
     s16 adj2; s16 idx2; s32 (*has)(Font* self, s32 key);                       // 0x10
     s16 adj3; s16 idx3; f32 (*width)(Font* self, s32 key);                     // 0x18
-    s16 adj4; s16 idx4; void (*begin)(Font* self, s32 a, s32 b);               // 0x20
-    s16 adj5; s16 idx5; void (*flush)(Font* self, s32 a);                      // 0x28
-    s16 adj6; s16 idx6; f32 (*draw)(f32 x, f32 y, Font* self, s32 key, s32 color, s32 s);  // 0x30
-    s16 adj7; s16 idx7; void (*end)(Font* self, s32 a, s32 b);                 // 0x38
-    s16 adj8; s16 idx8; void (*drawTurned)(Font* self, s32 key, u32 color, void* s, f32 x, f32 y);  // 0x40
+    s16 adj4; s16 idx4; void (*begin)(Font* self, Vec4U* clip, PacketWriter* s);  // 0x20
+    s16 adj5; s16 idx5; void (*flush)(Font* self, PacketWriter* s);            // 0x28
+    s16 adj6; s16 idx6; f32 (*draw)(f32 x, f32 y, Font* self, s32 key, s32 color, PacketWriter* s);  // 0x30
+    s16 adj7; s16 idx7; void (*end)(Font* self, Vec4U* clip, PacketWriter* s);    // 0x38
+    s16 adj8; s16 idx8; void (*drawTurned)(Font* self, s32 key, u32 color, PacketWriter* s, f32 x, f32 y);  // 0x40
     s16 adj9; s16 idx9; void (*drawBox)(Font* self, void* item, void* rect, void* s);  // 0x48
 };
 
@@ -117,10 +120,10 @@ struct Font {
     // Entries 3 to 7, as func_0015E318 calls them: a character's width, then the begin, flush,
     // draw and end of a run of characters.
     f32 Width(s32 c) { return vt->width((Font*)((u8*)this + vt->adj3), c); }
-    void Begin(s32 a, s32 b) { vt->begin((Font*)((u8*)this + vt->adj4), a, b); }
-    void Flush(s32 a) { vt->flush((Font*)((u8*)this + vt->adj5), a); }
-    f32 Draw(f32 x, f32 y, s32 c, s32 color, s32 s) { return vt->draw(x, y, (Font*)((u8*)this + vt->adj6), c, color, s); }
-    void End(s32 a, s32 b) { vt->end((Font*)((u8*)this + vt->adj7), a, b); }
+    void Begin(Vec4U* clip, PacketWriter* s) { vt->begin((Font*)((u8*)this + vt->adj4), clip, s); }
+    void Flush(PacketWriter* s) { vt->flush((Font*)((u8*)this + vt->adj5), s); }
+    f32 Draw(f32 x, f32 y, s32 c, s32 color, PacketWriter* s) { return vt->draw(x, y, (Font*)((u8*)this + vt->adj6), c, color, s); }
+    void End(Vec4U* clip, PacketWriter* s) { vt->end((Font*)((u8*)this + vt->adj7), clip, s); }
 };
 
 typedef char check_Font[sizeof(Font) == 0x88 ? 1 : -1];

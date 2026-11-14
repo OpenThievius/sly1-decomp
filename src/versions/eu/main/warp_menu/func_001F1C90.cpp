@@ -13,16 +13,16 @@ struct Obj_1F1C90_eu {
 
 void HideScreenElements(void* self);
 s32 GetCurrentWarpEntry(void);
-s32 IsWarpEntryAvailable(void* o, s32 n, s32* a, s32* b);
-void SetWarpCursor(void* self, s32 a1, s32 a2);
+s32 IsWarpEntryAvailable(WarpPage* self, s32 kind, s32* outA, s32* outB);
+void SetWarpCursor(WarpPage* self, s32 a1, s32 a2);
 void BeginWarpPageClose(void* self);
 void SetScreenElementSlideInTime(void* self, f32 v);
 void SetScreenElementSlideOutTime(void* self, f32 v);
 void PauseStagedBankVoice(void);
 void ResumeStagedBankVoice(void);
 s32 SetPadSelectFlags(s32 bits);
-void ClearPadSelectFlags(s32 n);
-void ResetPadStepRepeat(void* p);
+void ClearPadSelectFlags(u32 mask);
+void ResetPadStepRepeat(PadRecord* p);
 void SetElementStackState(void* obj, s32 mode);
 
 void SetWarpMenuOpen(Obj_1F1C90_eu* self, s32 a1)
@@ -48,7 +48,7 @@ void SetWarpMenuOpen(Obj_1F1C90_eu* self, s32 a1)
         self->vtbl[14](self);
         SetPadSelectFlags(1);
         ResetPadStepRepeat(&g_padRecord);
-        SetElementStackState(g_elementStack, 7);
+        SetElementStackState((ElementStack*)g_elementStack, 7);
     } else {
         self->vtbl[15](self);
         if (self->f570->f560 == 0) {
@@ -58,7 +58,7 @@ void SetWarpMenuOpen(Obj_1F1C90_eu* self, s32 a1)
                 SetScreenElementSlideOutTime(self, an->length);
             }
             ClearPadSelectFlags(1);
-            SetElementStackState(g_elementStack, 3);
+            SetElementStackState((ElementStack*)g_elementStack, 3);
             GameProgress* g = g_saveData;
             if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
                 ResumeStagedBankVoice();

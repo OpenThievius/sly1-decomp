@@ -27,14 +27,12 @@ struct Self_eu_194F80 {
     u8 pad6[0x594 - 0x578];
     f32 f284;
 };
-void SetTextLayoutPosition(Out_eu_194F80* out, f32 x, f32 y);
-void SetTextLayoutSize(Out_eu_194F80* out, f32 x, f32 y);
-void SetTextLayoutColor(Out_eu_194F80* out, Rgba_137248* value);
-void SetTextLayoutVerticalAlign(Out_eu_194F80* out, s32 flag);
 void SetTextLayoutVerticalPlacement(Out_eu_194F80* out, s32 v);
-void SetTextLayoutHorizontalAlign(Out_eu_194F80* out, Lines_eu_194F80* lines);
 Buf_eu_194F80* InitTextReaderFromTextTable(Buf_eu_194F80* out, s32 id, Font* font, s32 zero);
 Buf_eu_194F80* InitWideTextReader(Buf_eu_194F80* out, void* str, Font* font, s32 zero);
+// PAL hands the layout's word at 0x14 the lines it wraps where the US build passes flags: left as
+// the free function it was on that word (a 64-bit hazard for a port), not a cast to the method's s32.
+void SetTextLayoutHorizontalAlign(Out_eu_194F80* out, Lines_eu_194F80* lines);
 void BreakTextIntoLines(Buf_eu_194F80* buf, Lines_eu_194F80* lines, f32 w);
 void DrawWrappedAlignedText(Buf_eu_194F80* buf, Out_eu_194F80* out, s32 zero, void* data);
 f32 SumTextWidth(Buf_eu_194F80* buf);
@@ -42,13 +40,13 @@ void* GetMenuChoiceLabel(s32 menu, s32 id);
 
 struct Setup_eu_194F80 { static void Do(Out_eu_194F80* out, f32 x, f32 y, f32 w, f32 h, s32 color, Lines_eu_194F80* lines, s32 flag)
 {
-    SetTextLayoutPosition(out, x, y);
-    SetTextLayoutSize(out, w, h);
+    ((Layout_137228*)out)->Pos(x, y);
+    ((Layout_137228*)out)->Size(w, h);
     Rgba_137248 tmp;
     tmp.value = color;
-    SetTextLayoutColor(out, &tmp);
+    ((Layout_137228*)out)->Color((s32*)&tmp);
     SetTextLayoutHorizontalAlign(out, lines);
-    SetTextLayoutVerticalAlign(out, flag);
+    ((Layout_137228*)out)->SetF18(flag);
     SetTextLayoutVerticalPlacement(out, 0);
 } };
 
@@ -89,20 +87,20 @@ void DrawPauseMenu(Self_eu_194F80* self)
     if (page == 0 && D_00275BEC == 2) {
         fade = 1.0f - D_00262CEC;
     }
-    self->f284 = ApproachValueWithRamp(g_fadeRampProfile, 0, self->f284, fade, g_gameClock[5]);
+    self->f284 = ApproachValueWithRamp((RampProfile*)g_fadeRampProfile, 0, self->f284, fade, g_gameClock[5]);
     alpha = (u8)(s32)(self->f284 * 255.0f);
     if (self->f210 != 0) {
         Out_eu_194F80 out;
         s32 backColor = 0xFF808080;
-        SetTextLayoutPosition(&out, cx, cy);
-        SetTextLayoutSize(&out, w, h);
+        ((Layout_137228*)&out)->Pos(cx, cy);
+        ((Layout_137228*)&out)->Size(w, h);
         {
             Rgba_137248 tmp;
             tmp.value = backColor;
-            SetTextLayoutColor(&out, &tmp);
+            ((Layout_137228*)&out)->Color((s32*)&tmp);
         }
-        SetTextLayoutHorizontalAlign(&out, 0);
-        SetTextLayoutVerticalAlign(&out, 0);
+        ((Layout_137228*)&out)->SetF14(0);
+        ((Layout_137228*)&out)->SetF18(0);
         SetTextLayoutVerticalPlacement(&out, 0);
         Rgba4 saved = self->f210->color;
         {

@@ -24,7 +24,7 @@ void StepMovieFrame(MoviePlayer* self_)
             (void)FeedMovieDecoder((MoviePlayer*)self, 0);
         } while (self->f148 == 1);
     }
-    if (DecodeMpegPicture((u8*)self + 0x10, self->f5C, 0x4B0) < 0) {
+    if (DecodeMpegPicture((MpegHandle*)((u8*)self + 0x10), (void*)self->f5C, 0x4B0) < 0) {
         return;
     }
     if (self->f18 == 0) {

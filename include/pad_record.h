@@ -16,7 +16,7 @@ struct PadRecord {
     u8 pad00[0x04];
     s32 f04;                // 0x04: func_0016E1A0, func_0016E238, func_0016E940
     s32 f08;                // 0x08: func_0016E1A0, func_0016E238, func_0016E940
-    s32 f0C;                // 0x0C: func_0016E1A0
+    u8* f0C;                // 0x0C: the 64-byte aligned buffer func_0016E1A0 gives the pad library
     s32 f10;                // 0x10: func_0016E1A0, func_0016E940
     s32 f14;                // 0x14: func_0016B580, func_0016BBA8, func_0016EC38, func_001E9108, func_001F1A08
     s32 f18;                // 0x18: func_0016E940, func_0016EC38, func_0016F108

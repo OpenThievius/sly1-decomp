@@ -2,8 +2,8 @@
 // Only in PAL: thread body that loops forever, stepping the frame state and running a three-phase update, with every third pass skipping the final one.
 struct Glob_eu_18EBE8 {
     u8 pad0[0x128];
-    s32 f128;
-    s32 f12C;
+    void* uploadPacket;     // 0x128: the GS packet that uploads a picture
+    void* drawPacket;       // 0x12C: the GS packet that draws it
     u8 pad130[0x144 - 0x130];
     s32 f144;
     volatile s32 f148;  // state word another thread reads
@@ -11,8 +11,8 @@ struct Glob_eu_18EBE8 {
 
 extern Glob_eu_18EBE8 D_eu_0026AC60;
 extern s32 D_eu_0026321C;
-s32 AwaitSemaphore(s32 a);
-void SendGsPacketAndWait(s32 a, s32 b);
+extern "C" s32 AwaitSemaphore(s32 a);
+void SendGsPacketAndWait(s32 channel, void* b);
 void ApplyPendingDisplayFlip(void);
 void FlipDisplayFrame(void);
 
@@ -25,13 +25,13 @@ void RunMovieDecodeThread(void)
         g->f148 = 0;
         AwaitSemaphore(g->f144);
         g->f148 = 1;
-        SendGsPacketAndWait(D_eu_0026321C, g->f128);
+        SendGsPacketAndWait(D_eu_0026321C, g->uploadPacket);
         g->f148 = 2;
         ApplyPendingDisplayFlip();
-        SendGsPacketAndWait(D_eu_0026321C, g->f12C);
+        SendGsPacketAndWait(D_eu_0026321C, g->drawPacket);
         FlipDisplayFrame();
         if (i % 3 != 0) {
-            SendGsPacketAndWait(D_eu_0026321C, g->f12C);
+            SendGsPacketAndWait(D_eu_0026321C, g->drawPacket);
             FlipDisplayFrame();
         }
     }

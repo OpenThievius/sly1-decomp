@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Sets the text of an object: a string that is set is passed to the inner object, otherwise its id is cleared; then the virtual at slot 8 is called.
-s32 GetStringLength(const char* s);
+extern "C" s32 GetStringLength(const char* s);
 void CopyStringToWide(void* inner, const char* s);
 
 void SetScreenElementByteText(void* self, const char* s)

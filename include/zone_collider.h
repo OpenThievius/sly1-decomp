@@ -8,6 +8,7 @@
 
 #include "collider.h"
 #include "trigger_zone.h"
+struct BufferedStream;
 
 struct ZoneCollider : Collider {
     s32 countIds;           // 0x550: how many ids it was loaded with (slot 16 looks each up)
@@ -38,11 +39,11 @@ typedef char check_ZoneCollider[sizeof(ZoneCollider) == 0x7A0 ? 1 : -1];
 typedef char check_FollowableObject[sizeof(FollowableObject) == 0x7C0 ? 1 : -1];
 
 void InitZoneCollider(ZoneCollider* self);                          // slot 0
-void CopyZoneCollider(ZoneCollider* self);                          // slot 9
-void LoadZoneCollider(ZoneCollider* self);                          // slot 10
+void CopyZoneCollider(ZoneCollider* self, ZoneCollider* src);                          // slot 9
+void LoadZoneCollider(ZoneCollider* self, BufferedStream* stream);                          // slot 10
 void StartZoneCollider(ZoneCollider* self);                          // slot 16
 void InitFollowableObject(FollowableObject* self);                          // slot 0
-void HandleFollowableObjectNotification(FollowableObject* self, s32 kind);                // slot 13
+void HandleFollowableObjectNotification(FollowableObject* self, s32 kind, void* arg);                // slot 13
 void ResolveFollowableObjectLinks(FollowableObject* self);                          // slot 15
 
 #endif

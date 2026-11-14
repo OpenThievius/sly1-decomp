@@ -12,7 +12,7 @@ struct Obj_131140_eu {
     f32 f314;
 };
 
-void SetTextPanelSubject(Obj_131140_eu* self, s32 value);
+void SetTextPanelSubject(Obj_131140_eu* self, BaseObject* value);
 
 void ClearTextPanel(Obj_131140_eu* self)
 {

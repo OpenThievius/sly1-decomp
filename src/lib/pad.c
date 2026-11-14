@@ -103,7 +103,7 @@ static PadSlot g_padSlots[2][4];
 static u32 D_0062ABC0[2][4][8] __attribute__((aligned(64)));
 static u8 g_padRequest[0x80] __attribute__((aligned(64)));
 
-s32 PrintFormatted(const char* format, ...);
+s32 PrintFormatted(const char* fmt, ...);
 void* CopyBytes(void* dst, const void* src, s32 size);
 void* FillMemory(void* p, s32 value, s32 size);
 s32 SendPadDma(s32 port, s32 slot);

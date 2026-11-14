@@ -15,13 +15,13 @@ struct Holder_eu_15E438 {
     Node_eu_15E438* node;
 };
 
-void RewindTextReader(void* self);
+void RewindTextReader(TextReader* self);
 s32 ReadTextCharAnyWidth(void* self);
 
 f32 SumTextWidth(Holder_eu_15E438* self)
 {
     f32 total = 0.0f;
-    RewindTextReader(self);
+    RewindTextReader((TextReader*)self);
     s32 r;
     while ((r = ReadTextCharAnyWidth(self)) != 0) {
         Node_eu_15E438* n = self->node;

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "object_finder.h"
 // PAL: the caption box's state and child sit at 0x570 and 0x5B0 (not 0x260 and 0x324).
 struct CaptionBox_eu {
     u8 pad000[0x570];
@@ -7,7 +8,7 @@ struct CaptionBox_eu {
     void* child;            // 0x5B0
 };
 
-void ControlPlayer(Player* self, PadRecord* pad)
+void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
 {
     if (HasAnimationDrivenAttachment(self)) {
         if (!(0.0f < pad->f48) && (pad->flags & 0xF0) == 0) {
@@ -55,7 +56,7 @@ void ControlPlayer(Player* self, PadRecord* pad)
                 for (s32 i = start; i < q->f34; i++) {
                     QueueEntry* e = &((QueueEntry*)q->buffer)[i];
                     if (e->kind == 1) {
-                        BaseObject* o = FindFirstObjectById(q->world, 0x104, e->id, q->f4C);
+                        BaseObject* o = FindFirstObjectById(q->world, 0x104, e->id, (void*)q->f4C);
                         if (o != 0 && IsObjectOfKind(o, 0x74)) {
                             StartObjectFade(&D_00275B04, o->id, 1);
                             ClearPadPressedBits(&g_padRecord, 0x800);
@@ -159,7 +160,7 @@ held:
         modeKey = g_currentMode == 0;
     }
     UpdateModeSelection(self, pad);
-    if (!IsTopCameraController((u8*)&g_camera->ctl454)) {
+    if (!IsTopCameraController((CameraController*)&g_camera->ctl454)) {
         PadRecord* rec = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
         StepSequence* seq = (StepSequence*)((CaptionBox_eu*)&g_typedTextCaptionBox)->child;
         if (seq != 0 && seq->state2D4 == 3 && seq->f32C == 0 && (rec->flags & 0xC) && *(s32*)seq->target304 != 0) {
@@ -223,7 +224,7 @@ held:
                 break;
             }
             if (aim) {
-                target = ChooseNearbyPlayerTarget(self, 0, &self->f239C);
+                target = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)self, 0, &self->f239C);
                 if (target != -1) {
                     state = 6;
                     sub = target;
@@ -261,7 +262,7 @@ held:
                 break;
             }
             if (aim) {
-                target = ChooseNearbyPlayerTarget(self, 0, &self->f239C);
+                target = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)self, 0, &self->f239C);
                 if (target != -1) {
                     state = 6;
                     sub = target;
@@ -293,7 +294,7 @@ held:
                 break;
             }
             if (aim) {
-                target = ChooseNearbyPlayerTarget(self, 0, &self->f239C);
+                target = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)self, 0, &self->f239C);
                 if (target != -1) {
                     state = 6;
                     sub = target;
@@ -318,7 +319,7 @@ held:
                 if (pad->flags & 0x20) {
                     ClearPadPressedBits(pad, 0x20);
                     SetPlayerAimMode(self, -1);
-                    sub = ChoosePlayerTargetByCost(self, 0);
+                    sub = ChoosePlayerTargetByCost((Chooser*)self, 0);
                     break;
                 }
                 if ((sub != 6 || self->f226C != 0.0f) && (pad->flags & 0x80)) {
@@ -402,7 +403,7 @@ held:
             if (skipStep) {
                 if (self->f2228 == 0x22) {
                     sub = 0x23;
-                    PopStackElement(g_elementStack);
+                    PopStackElement((ElementStack*)g_elementStack);
                     break;
                 }
             } else if (self->f2228 == 0x22) {
@@ -448,10 +449,10 @@ held:
     HandlePlayerAimButton(self, pad);
     switch (self->f2220) {
     case 5:
-        SetPlayerVelocityFromHeading(self, (u8*)self + 0x910, self->fA10, self->f630, self->f634);
+        SetPlayerVelocityFromHeading(self, (const Vec02*)((u8*)self + 0x910), self->fA10, self->f630, self->f634);
         break;
     case 1:
-        SetPlayerBlendWeights(self->f630, self->f634, self, (u8*)self + 0x720, self->f900);
+        SetPlayerBlendWeights(self->f630, self->f634, self, (TurnBlendRecords*)((u8*)self + 0x720), self->f900);
         break;
     case 4:
     case 10: {
@@ -474,7 +475,7 @@ held:
         ControlPlayerOnLinkedObject(self, pad);
         break;
     case 7:
-        ControlPlayerOnPath(self, pad);
+        ControlPlayerOnPath(self, (PathPad*)pad);
         break;
     case 2:
         ControlPlayerState2(self, pad);

@@ -28,7 +28,9 @@ struct TwoEntryBlendEntry {
     f32 fC;
 };
 
-void BuildCombinedBlendAnimation(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+struct BlendAnimation;
+struct Collider;
+void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
 
 void CreatePlayerTwoEntryBlend(Player* self)
 {
@@ -41,7 +43,7 @@ void CreatePlayerTwoEntryBlend(Player* self)
         e++;
         i--;
     } while (i >= 0);
-    BuildCombinedBlendAnimation(self, 0x10, 2, self->f103C, 0, 0, 0, &self->f105C);
+    BuildCombinedBlendAnimation(self, 0x10, 2, self->f103C, 0, 0, 0, (BlendAnimation**)&self->f105C);
     SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f618, (PlacedObject*)self, 1, (Vec02*)&self->f23E0, 0, 0, 0);
     SampleAnimationFrameChain((BlendAnimationView*)self->f1064, 0.0f, 1.0f, (PlacedObject*)self->f614, (PlacedObject*)self, 1, (Vec02*)&self->f23F0, 0, 0, 0);
     f32 avg = (self->f23E0 + self->f23F0) * 0.5f;
@@ -87,7 +89,7 @@ void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length);
 
 f32 WrapModulo(f32 x, f32 y);
 void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
-void TransformDirectionBetweenFrames(void* from, void* to, Vec02* dir, Vec02* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 // v made unit length, or fallback when shorter than 0.0001, as an if with the fallback in its
 // first arm: retail's bc1f to the divide, with the fallback's qmtc2 in the slot of the branch
@@ -196,9 +198,10 @@ void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length)
 struct PathWatch { u8 pad00[8]; struct PathWatchTarget* target; u8 pad0C[8]; f32 f14; };
 struct PathWatchTarget { u8 pad00[0x34]; f32 f34; };
 
-void BlendRotationsWithSpin(f32 a, f32 b, f32 c, Mat02* rot, Vec02* vel, Mat02* target, const Vec02* zero, Mat02* out, s32 d, s32 e);
+void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Mat02* b, const Vec02* wb, Mat02* out, Vec02* outW,
+                            s32 unused6);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void MatrixToAxisAngle(Mat02* m, Vec02* angle, Vec02* axis);
+void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 
 void StepPlayerOnPath(Player* self)
 {
@@ -218,7 +221,7 @@ void StepPlayerOnPath(Player* self)
         goal = placed;
     }
     MultiplyMatrices3x3(&self->rot, &goal, &delta);
-    MatrixToAxisAngle(&delta, &angle, &axis);
+    MatrixToAxisAngle(&delta, (f32*)&angle, &axis);
     Vu0::Q(k) = Vu0::FromFloat(angle.x / g_gameClock.dt);
     Vu0::Q(self->v160) = Vu0::MulX(Vu0::Q(axis), Vu0::Q(k));
 }
@@ -231,13 +234,20 @@ struct PathPad { u8 pad00[0x40]; f32 x; f32 y; };
 // The easing ApproachValueWithRamp takes: a rate, then two more values.
 struct PathRamp { f32 rate; f32 f04; f32 f08; f32 f0C; };
 
-u128 ApproachPointWithRamp(u128 cur, u128 goal, const f32* params, s32 flag, f32 dt);
-void ProjectPointToCamera(Camera* cam, Vec02* in, Vec02* out);
-f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, PathRamp* p, f32* out);
+struct Vec02;
+struct RampProfile;
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
+u128 ApproachPointWithRamp(u128 from, u128 to, RampProfile* ramp, Vec02* vel, f32 limit);
+void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
+struct RampProfile;
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
+f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 f32 WrapModulo(f32 a, f32 b);
-void SetBlendItemWeights(void* item, s32 a, s32 n, void* entries);
-void SetPlayerState(void* self, s32 mode, s32 count);
-void TransformPointBetweenFrames(void* a, void* b, void* c, void* d);
+void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
+void SetPlayerState(Player* self, s32 state, s32 sub);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void SetPlayerPadSelectMode(Player* a0, s32 a1);
 
 static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
@@ -281,7 +291,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     s32 rev;
     f32 k;
 
-    Vu0::Q(self->v2400) = ApproachPointWithRamp(Vu0::Q(self->v2400), Vu0::Q(D_00248D30), D_00274F28, 0,
+    Vu0::Q(self->v2400) = ApproachPointWithRamp(Vu0::Q(self->v2400), Vu0::Q(D_00248D30), (RampProfile*)D_00274F28, 0,
                                                 g_gameClock.dt);
     if (self->f2228 == 0x17 || self->f2228 == 0x1B) {
         Vu0::Set(self->v640, Vu0::Zero());
@@ -318,14 +328,14 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
         }
     }
     if (path->guide == 0) {
-        ProjectPointToCamera(g_camera, &a, &pa);
-        ProjectPointToCamera(g_camera, &b, &pb);
+        ProjectPointToCamera(g_camera, &a, (f32*)&pa);
+        ProjectPointToCamera(g_camera, &b, (f32*)&pb);
     } else {
         Vec02 c;
         Vec02 d;
         void* frame = path->guide->frame;
         PathHolder* guide = path->guide->holder;
-        TransformPointBetweenFrames(0, frame, &self->v140, &c);
+        TransformPointBetweenFrames(0, (PlacedObject*)frame, &self->v140, &c);
         if (guide->desc->m10) {
             guide->desc->m10(guide, &c, 0, 0, 0, 0, &t);
         }
@@ -333,13 +343,13 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
         if (guide->desc->m2) {
             guide->desc->m2(guide, &c, t + D_00274F14, 0);
         }
-        TransformPointBetweenFrames(frame, 0, &c, &d);
-        ProjectPointToCamera(g_camera, &c, &pa);
+        TransformPointBetweenFrames((PlacedObject*)frame, 0, &c, &d);
+        ProjectPointToCamera(g_camera, &c, (f32*)&pa);
         if (guide->desc->m2) {
             guide->desc->m2(guide, &c, t - D_00274F14, 0);
         }
-        TransformPointBetweenFrames(frame, 0, &c, &d);
-        ProjectPointToCamera(g_camera, &c, &pb);
+        TransformPointBetweenFrames((PlacedObject*)frame, 0, &c, &d);
+        ProjectPointToCamera(g_camera, &c, (f32*)&pb);
     }
     Vu0::Set(dir, Vu0::Sub(Vu0::Q(pa), Vu0::Q(pb)));
     dir.z = 0.0f;
@@ -429,8 +439,8 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
             start = holder->first[0] + D_00274F04;
             end = holder->first[holder->count - 1] - D_00274F00;
         }
-        ApproachValueWithRamp(self->f2410, start, g_gameClock.dt, &ramp, &lo);
-        ApproachValueWithRamp(self->f2410, end, g_gameClock.dt, &ramp, &hi);
+        ApproachValueWithRamp(self->f2410, start, g_gameClock.dt, (RampProfile*)&ramp, &lo);
+        ApproachValueWithRamp(self->f2410, end, g_gameClock.dt, (RampProfile*)&ramp, &hi);
         vel = ClampBetween(vel, -hi, -lo);
     }
     self->f2414 = -vel;
@@ -447,7 +457,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
         amount = ClampBetween(amount, 0.0f, 1.0f);
         self->blend103C[1].weight = amount;
         self->blend103C[0].weight = 1.0f - amount;
-        SetBlendItemWeights(self->f105C, 0x10, 2, self->f103C);
+        SetBlendItemWeights((BlendAnimationView*)self->f105C, 0x10, 2, self->f103C);
     }
     SetPlayerState(self, 7, state);
 }
@@ -490,7 +500,7 @@ void PinPlayerToPath(Player* self)
     TransformDirectionBetweenFrames(((PathObject*)self->f2208)->frame, 0, &dir, &dir);
     Vu0::Set(dir, Vu0::NormalizeOrMoved(Vu0::Q(dir), *(const u128*)&g_unitZVector));
     BuildPerpendicularPair(&dir, perp, &g_unitXVector, &g_unitZVector);
-    TransformPointBetweenFrames(self, 0, &self->f23E0, &local);
+    TransformPointBetweenFrames(self, 0, (Vec02*)&self->f23E0, &local);
     Vu0::Q(delta) = Vu0::Sub(Vu0::Add(Vu0::Q(local), Vu0::Q(*(Vec02*)((u8*)self + 0x2400))), Vu0::Q(pos));
     CreatePooledContact(self, path->frame, &local, &perp[0], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[0]))));
     CreatePooledContact(self, path->frame, &local, &perp[1], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[1]))));
@@ -498,10 +508,10 @@ void PinPlayerToPath(Player* self)
     *link = (Contact03*)row->head;
 }
 
-void AcquirePadSelectFlag(void* a);
-void ShowCountedScreenElement(void* a);
-void ReleasePadSelectFlag(void* a);
-void HideCountedScreenElement(void* a);
+void AcquirePadSelectFlag(World* a0);
+void ShowCountedScreenElement(World* self);
+void ReleasePadSelectFlag(World* self);
+void HideCountedScreenElement(World* self);
 
 void SetPlayerPadSelectMode(Player* a0, s32 a1)
 {
@@ -518,9 +528,9 @@ void SetPlayerPadSelectMode(Player* a0, s32 a1)
     }
 }
 
-void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
-void TransformPointBetweenFrames(void* a, void* b, void* c, void* d);
-void SetPlayerState(void* self, s32 mode, s32 count);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void SetPlayerState(Player* self, s32 state, s32 sub);
 
 void SetPlayerPath(Player* self, PathObject* path)
 {
@@ -530,9 +540,9 @@ void SetPlayerPath(Player* self, PathObject* path)
     Vec02 world;
     if ((PathObject*)self->f2208 != path) {
         if (self->f2220 == 7) {
-            TriggerScriptEvent((void*)self->f2208, 3, 0, 0);
+            TriggerScriptEvent((BaseObject*)self->f2208, 3, 0, 0);
             ((PathObject*)self->f2208)->desc->m18((BaseObject*)self->f2208, self);
-            TriggerScriptEvent(path, 2, 0, 0);
+            TriggerScriptEvent((BaseObject*)path, 2, 0, 0);
             path->desc->m17((BaseObject*)path, self);
         }
         self->f2208 = (s32)path;

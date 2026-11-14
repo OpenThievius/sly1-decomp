@@ -57,18 +57,18 @@ static Cmd_1F9AD8 D_00628E40 __attribute__((aligned(64)));
 void StopIopDma(char* text, void* q);
 s32 ReadIopRegister(u32 a0);
 u32 WriteIopRegister(u32 reg, u32 value);
-s32 StartIopDma(Span_1F9AD8* span, s32 n);
-s32 NewSemaphore(SemaphoreParamsPair* q);
+extern "C" s32 StartIopDma(Span_1F9AD8* span, s32 n);
+extern "C" s32 NewSemaphore(SemaphoreParamsPair* q);
 void InstallFirstKernelPatch();
 s32 StartRequestThread();
-void PrintBuffered(const char* fmt, ...);
-void InitRemoteCalls(s32 a);
+extern "C" void PrintBuffered(const char* fmt, ...);
+extern "C" void InitRemoteCalls(s32 mode);
 void ShutDownRemoteCalls(void);
 void SetSystemCallHandlerForWordSearch(s32 num, s32* (*handler)(s32 value));
 s32 RunKernelWordSearchSyscall(s32* (*handler)(s32 value));
 void InstallSecondKernelPatch();
 void ClearImageEndRecordWord(void);
-void WriteBackDataCacheRange(Cmd_1F9AD8* a0, s32 a1);
+extern "C" void WriteBackDataCacheRange(Cmd_1F9AD8* a0, s32 a1);
 void InstallThirdKernelPatch();
 
 s32 SendIopReset(char* text, void* q)
@@ -188,7 +188,7 @@ ASM_FUNC(func_001F9E90);
 
 LINKER_REMNANT(func_001F9EA0);
 
-void InitKernelLibrary()
+extern "C" void InitKernelLibrary()
 {
     CreateLibrarySemaphores();
     InstallKernelWordSearch();

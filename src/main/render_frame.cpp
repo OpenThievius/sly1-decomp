@@ -77,31 +77,31 @@ typedef char check_VifWriterState[sizeof(VifWriterState) == 0x24 ? 1 : -1];
 extern GsWriterState g_gsPacketWriter;
 extern VifWriterState g_vifPacketWriter;
 
-void SetListLinkOffset(void*,s32);
-s32 IsListEmpty(void* p);
-void AppendToList(List01* a, ObjectCycler* b);
+void SetListLinkOffset(List01* self, s32 offset);
+s32 IsListEmpty(List01* p);
+void AppendToList(List01* self, void* item);
 
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
 // list at +0x1BDC, linked at +0x64): the receiver, the 0x50-byte message, the time it is due.
 struct DelayedMessageBody { Quad16 q[5]; };
 struct DelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 due; };
-void AppendToList(void* list, void* item);
-void AppendToList(void* where, WorldObjectNode* node);
+void AppendToList(List01* self, void* item);
+void AppendToList(List01* self, void* item);
 
 
 
-void RemoveFromList(void* where, WorldObjectNode* node);
-void PushFreeSlot(void* where, WorldObjectNode* node);
-void PushFreeSlot(void* l, void* n);
-void BeginDmaTag(void* self);
-void CloseDmaTag(void* self);
+void RemoveFromList(List01* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
+void BeginDmaTag(PacketWriter* self);
+void CloseDmaTag(PacketWriter* self);
 
 
-void AppendToList(void* list, void* item);
-void RemoveFromList(void* data, ObjectCycler* self);
-void RemoveFromList(u8* a, ColorFade* b);
-void RemoveFromList(List01* list, DelayedMessage* node);
-void PushFreeSlot(Pool6C* set, DelayedMessage* node);
+void AppendToList(List01* self, void* item);
+void RemoveFromList(List01* list, void* item);
+void RemoveFromList(List01* list, void* item);
+void RemoveFromList(List01* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
 
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
@@ -125,7 +125,7 @@ template <class T> struct NextInList {
         return obj;
     }
 };
-void RemoveFromList(List01* data, ObjectCycler* self);
+void RemoveFromList(List01* list, void* item);
 
 // The packet memory a GIF writer fills: quadwords.
 typedef u64 UQuadword128 __attribute__((mode(TI)));
@@ -133,49 +133,48 @@ typedef u64 UQuadword128 __attribute__((mode(TI)));
 extern u8 D_00212160[];
 extern u8 D_00215C50[];
 
-void* InitGifPacket(void* p);
-void UsePacketBufferMemory(void* p, s32 n, void* q);
-void BeginGifTag(void* p, s32 a, s32 b, s32 c);
-void AddGifRegisterWrite(void* p, s32 a, s32 b);
-void EndGifPacket(void* p);
-void WriteVifFlush(void* self);
-void WriteVifDirectFromWriter(void* self, void* p);
+PacketWriter* InitGifPacket(PacketWriter* self);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
+void EndGifPacket(PacketWriter* self);
+void WriteVifFlush(PacketWriter* b);
+void WriteVifDirectFromWriter(PacketWriter* a0, PacketWriter* a1);
 void AddDmaRefTagIfChanged(void* self, void* a, void* b);
-void AddDmaEndTag(void* self);
-void DetachPacketBuffer(void* self, void* p, s32 n);
+void AddDmaEndTag(PacketWriter* self);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-void CloseDmaTag(void* obj);
+void CloseDmaTag(PacketWriter* self);
 void AddDmaRefTag(void* obj, s32 a, s32 b);
-void BeginDmaTag(void* obj);
-void BeginGifTag(void* obj, s32 a, s32 b, s32 c);
-void AddGifRegisterWrite(void* obj, s32 tag, s64 value);
+void BeginDmaTag(PacketWriter* self);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 
 
 extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
 
+void SendGsPacketAndWait(s32 channel, void* b);
+PacketWriter* InitGifPacket(PacketWriter* self);
+void* InitPacketWriter(PacketWriter* self);
 void ActivateRenderFrame(void* a, s32 b);
-void SendGsPacketAndWait(s32 a, s32 b);
 
-
-void* InitGifPacket(void* p);
-void* InitPacketWriter(void* p);
 
 void ConstructPacketWriters(s32 flag, s32 code);
 
 void AddDmaRefTag(void* list, u32 count, s32 value);
 extern s32 D_0026230C;
 
-void BeginGifTag(void* obj, s32 a, s32 b, s32 c);
-void AddGifRegisterWrite(void* obj, s32 a, s32 b);
-void EndGifPacket(void* obj);
-void AddDmaEndTag(void* obj);
-void DetachPacketBuffer(void* obj, void* a, s32 b);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
+void EndGifPacket(PacketWriter* self);
+void AddDmaEndTag(PacketWriter* self);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-void WriteGsFinishPacket(void* list, void* a, s32 b);
-void CloseDrawBuffer(void* obj, void* a, s32 b);
-void ClearList(void* p);
-s32 PostSemaphore(void* a);
+void WriteGsFinishPacket(void* self, void* p, u8** n);
+void CloseDrawBuffer(void* obj, void* a, u8** b);
+void ClearList(List01* p);
+extern "C" s32 PostSemaphore(void* a);
 
 extern List01 D_002622E0;
 extern List01 D_002622F0;
@@ -190,9 +189,10 @@ extern s32 g_maskedImagesPacket;
 extern s32 g_gifChannel;
 
 void SwitchActiveImageMask(s32 value);
-void StartDmaChain(s32 a, s32 b);
-PacketWriter* InitGifPacket(PacketWriter* p);
-void UsePacketBufferMemory(void* self, s32 count, void* base);
+struct DmaChannel;
+extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
+PacketWriter* InitGifPacket(PacketWriter* self);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 
 
 
@@ -205,26 +205,26 @@ extern volatile s32 g_renderThreadWaiting;
 extern void* g_drawingFrame;
 extern s32 D_002626CC;
 
-s32 AwaitSemaphore(void* a);
-void SendRenderFrameToDma(void* self, s32 flag);
+extern "C" s32 AwaitSemaphore(void* a);
+void SendRenderFrameToDma(RenderFrame* self, s32 flag);
 void BlitFrameToDisplay(void);
 void FlipDisplayFrame(void);
-void ReleaseFrameNodes(void* p);
-void ClearScreenOwner(s32 a);
-void BeginGifTag(PacketWriter* s, s32 a, s32 b, s32 c);
-void AddGifRegisterWrite(PacketWriter* s, s32 a, u64 b);
+void ReleaseFrameNodes(RenderFrame* self);
+void ClearScreenOwner(s32 owner);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 
 // NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
 
 extern u8 D_003C3B00[], D_005C3B00[];
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
-extern void* g_mainAndRenderThreads[];
+extern s32 g_mainAndRenderThreads[];
 void SetListLinkOffset(List01* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
 s32 EnableInterruptCause(s32 a0);
-void* CreateLockSemaphore(s32 a, s32 b);
-void RunThread(void* a, s32 b);
+void* CreateLockSemaphore(s32 initCount, s32 maxCount);
+void RunThread(s32 thread, void* arg);
 void func_0015E678(void);
 
 extern void* g_frameReadySemaphore;
@@ -235,12 +235,12 @@ extern s32 g_gifChannel;
 extern s32 D_002626CC;
 
 void VerifyCodeChecksum(void);
-s32 AwaitSemaphore(void* p);
+extern "C" s32 AwaitSemaphore(void* p);
 void ActivateRenderFrame(RenderFrame* f);
 void ApplyPendingDisplayFlip(void);
-void SendGsPacketAndWait(s32 a, s32 b);
+void SendGsPacketAndWait(s32 channel, void* b);
 void BlitFrameToDisplay(void);
-s32 WaitDmaChannel(s32 a, s32 b, s32 c);
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 void FlipDisplayFrame(void);
 
 
@@ -253,8 +253,8 @@ struct FrameNode {
 
 
 s32 IsListEmpty(List01* l);
-void RemoveFromList(List01* l, FrameNode* n);
-void AppendToList(u8* l, FrameNode* n);
+void RemoveFromList(List01* list, void* item);
+void AppendToList(List01* self, void* item);
 void ClearList(List01* l);
 typedef signed long s64;
 typedef unsigned long u64;
@@ -267,9 +267,9 @@ extern s32 g_nextBuildFrameIndex;
 extern s32 g_buildFrameData;
 
 void SetScreenOwner(s32 v);
-s32 AwaitSemaphore(void* a);
-void UsePacketBufferMemory(void* self, s32 count, void* base);
-void BeginDmaTag(void* self);
+extern "C" s32 AwaitSemaphore(void* a);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void BeginDmaTag(PacketWriter* self);
 
 
 // A frame's colour record, as func_0015E6A8 reads it: 64-byte entries whose quadwords at +0x10
@@ -399,30 +399,30 @@ void AddDmaRefTagIfChanged(void* list, s32 value, s32 end)
     }
 }
 
-void WriteGsFinishPacket(void* self, void* p, s32 n)
+void WriteGsFinishPacket(void* self, void* p, u8** n)
 {
     UQuadword128 mem[8];
     PacketWriter gif;
     void* buf = &gif;
-    InitGifPacket(buf);
-    UsePacketBufferMemory(buf, 8, mem);
-    BeginGifTag(buf, 0, 1, 0xE);
-    AddGifRegisterWrite(buf, 0x61, 0);
-    EndGifPacket(buf);
-    WriteVifFlush(self);
-    WriteVifDirectFromWriter(self, buf);
+    InitGifPacket((PacketWriter*)buf);
+    UsePacketBufferMemory((PacketWriter*)buf, 8, mem);
+    BeginGifTag((PacketWriter*)buf, 0, 1, 0xE);
+    AddGifRegisterWrite((PacketWriter*)buf, 0x61, 0);
+    EndGifPacket((PacketWriter*)buf);
+    WriteVifFlush((PacketWriter*)self);
+    WriteVifDirectFromWriter((PacketWriter*)self, (PacketWriter*)buf);
     AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
-    AddDmaEndTag(self);
-    DetachPacketBuffer(self, p, n);
+    AddDmaEndTag((PacketWriter*)self);
+    DetachPacketBuffer((PacketWriter*)self, (u32*)p, n);
 }
 
-void CloseDrawBuffer(void* obj, void* a, s32 b)
+void CloseDrawBuffer(void* obj, void* a, u8** b)
 {
-    BeginGifTag(obj, 0, 1, 0xE);
-    AddGifRegisterWrite(obj, 0x61, 0);
-    EndGifPacket(obj);
-    AddDmaEndTag(obj);
-    DetachPacketBuffer(obj, a, b);
+    BeginGifTag((PacketWriter*)obj, 0, 1, 0xE);
+    AddGifRegisterWrite((PacketWriter*)obj, 0x61, 0);
+    EndGifPacket((PacketWriter*)obj);
+    AddDmaEndTag((PacketWriter*)obj);
+    DetachPacketBuffer((PacketWriter*)obj, (u32*)a, b);
 }
 
 void SubmitRenderFrame(void)
@@ -446,7 +446,7 @@ void ActivateRenderFrame(RenderFrame* self)
     SwitchActiveImageMask(self->f44);
     if (self->f1C != 0 && g_maskedImagesPacket != 0) {
         *(volatile s32*)0x10003010 = 4;
-        StartDmaChain(g_gifChannel, g_maskedImagesPacket);
+        StartDmaChain((DmaChannel*)g_gifChannel, (void*)g_maskedImagesPacket);
     }
 }
 
@@ -486,11 +486,11 @@ void RunRenderThread(void)
         }
         ActivateRenderFrame((RenderFrame*)g_drawingFrame);
         ApplyPendingDisplayFlip();
-        SendGsPacketAndWait(g_vif1Channel, ((RenderFrame*)g_drawingFrame)->bufBAddr);
+        SendGsPacketAndWait(g_vif1Channel, ((RenderFrame*)g_drawingFrame)->bufB);
         *(volatile s32*)0x10003010 = 0;
-        SendGsPacketAndWait(g_gifChannel, ((RenderFrame*)g_drawingFrame)->bufAAddr);
+        SendGsPacketAndWait(g_gifChannel, ((RenderFrame*)g_drawingFrame)->bufA);
         BlitFrameToDisplay();
-        WaitDmaChannel(g_vif1Channel, 0, 0);
+        WaitDmaChannel((DmaChannel*)g_vif1Channel, 0, 0);
         PostSemaphore(g_frameDoneSemaphore);
         FlipDisplayFrame();
         D_002626CC = 1;
@@ -499,11 +499,11 @@ void RunRenderThread(void)
 
 void SendRenderFrameToDma(RenderFrame* self, s32 flag)
 {
-    ActivateRenderFrame(self, flag);
-    SendGsPacketAndWait(g_vif1Channel, self->bufBAddr);
+    ActivateRenderFrame(self);
+    SendGsPacketAndWait(g_vif1Channel, self->bufB);
     if (flag != 0) {
         *(volatile s32*)0x10003010 = 0;
-        SendGsPacketAndWait(g_gifChannel, self->bufAAddr);
+        SendGsPacketAndWait(g_gifChannel, self->bufA);
     }
 }
 
@@ -515,7 +515,7 @@ void ReleaseFrameNodes(RenderFrame* self)
         BeginListWalk::Of(&it, &self->l20);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
             RemoveFromList(&self->l20, n);
-            AppendToList(n->f14 + 0x1CC0, n);
+            AppendToList((List01*)(n->f14 + 0x1CC0), n);
         }
         ClearList(&self->l20);
         g_activeListFrames = it.prev;
@@ -524,10 +524,10 @@ void ReleaseFrameNodes(RenderFrame* self)
         BeginListWalk::Of(&it, &self->l2C);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
             if (n->f1088 != 0) {
-                PushFreeSlot((u8*)g_currentWorld + 0x1B4C, n->f1088);
+                PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1B4C), n->f1088);
             }
             RemoveFromList(&self->l2C, n);
-            PushFreeSlot((u8*)g_currentWorld + 0x1B40, n);
+            PushFreeSlot(&g_currentWorld->pool1B40, n);
         }
         ClearList(&self->l2C);
         g_activeListFrames = it.prev;
@@ -536,7 +536,7 @@ void ReleaseFrameNodes(RenderFrame* self)
         BeginListWalk::Of(&it, &self->l38);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
             RemoveFromList(&self->l38, n);
-            PushFreeSlot((u8*)g_currentWorld + 0x1BF4, n);
+            PushFreeSlot(&g_currentWorld->pool1BF4, n);
         }
         g_activeListFrames = it.prev;
     }
@@ -555,7 +555,7 @@ void DrainRenderFrames(s32 flag)
     if (flag != 0 && g_drawingFrame != 0) {
         s32 n = 2;
         do {
-            SendRenderFrameToDma(g_drawingFrame, 1);
+            SendRenderFrameToDma((RenderFrame*)g_drawingFrame, 1);
             BlitFrameToDisplay();
             FlipDisplayFrame();
         } while (--n >= 0);
@@ -564,7 +564,7 @@ void DrainRenderFrames(s32 flag)
     u8* p = (u8*)g_renderFrames;
     u8* end = p + 0x90;
     do {
-        ReleaseFrameNodes(p);
+        ReleaseFrameNodes((RenderFrame*)p);
         p += 0x48;
     } while (p < end);
     ClearScreenOwner(3);
@@ -580,7 +580,7 @@ extern u8 D_002625F0[];
 extern s32 g_displayFrameCounter;
 extern s32 D_002626C8;
 void AddGifUvEntry(PacketWriter* p, s32 u, s32 v);
-void AddGifXyzfEntry(PacketWriter* p, s32 x, s32 y, s32 z, s32 f);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 
 // A FRAME word's buffer base and the low bits of its pixel format, without width or mask.
 static inline u64 FrameBits(const u64& f)
@@ -623,7 +623,7 @@ void BlitFrameToDisplay(void)
     EndGifPacket(&w);
     AddDmaEndTag(&w);
     CloseDmaTag(&w);
-    SendGsPacketAndWait(g_gifChannel, (s32)buf);
+    SendGsPacketAndWait(g_gifChannel, buf);
 }
 
 void ConstructPacketWriters(s32 flag, s32 code)

@@ -4,8 +4,8 @@ void StartHitCountCollider(HitCountCollider* self)
 {
     StartPlacedObject(self);
     self->f68C = self->radius3CC;
-    ResolveObjectLinks(self, 0xC, D_002749B0);
-    self->f668 = CreateStateWalker(self->f664, self, -1, 0);
+    ResolveObjectLinks(self, 0xC, (ObjectLink*)D_002749B0);
+    self->f668 = CreateStateWalker((StateGraph*)self->f664, self, -1, 0);
     self->f644 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     PlacedObject* v = (PlacedObject*)self->f660;
     self->f648 = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);

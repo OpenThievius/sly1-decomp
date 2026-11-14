@@ -2,13 +2,13 @@
 // PAL: the three debug messages are only printed while a global (US 0x25C3B8) is zero
 extern s32 D_0025C3B8;
 
-void QueueIopCommand(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
+void QueueIopCommand(s32 cmd, s32 len, void* data, IopCallbackFn arg, u64 val)
 {
     s32 flag = 0;
     s32 i;
 
     if (g_iopFlushDeferred == 0 && g_iopReplyBuffer == 0 && len == 0 && arg == 0) {
-        ArmIopReplyBuffer((&g_iopCommandReply), 1);
+        ArmIopReplyBuffer((s32*)&g_iopCommandReply, 1);
         while (IsRemoteCallPending(&g_iopCommandRpc) != 0) {
             if (D_0025C3B8 == 0)
                 PrintFormatted("989snd.c: RPC collision!\n");
@@ -51,12 +51,12 @@ void QueueIopCommand(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
         *p = len;
         p++;
         for (j = 0; j < len; j++)
-            ((u8*)p)[j] = data[j];
+            ((u8*)p)[j] = ((u8*)data)[j];
     }
     {
         s32 k = g_iopBufferIndex;
         g_iopCommandSpace[k] -= size;
-        *(s32*)(((u8**)g_iopCallbackTables)[k] + *g_iopCommandBuffers[k] * 16) = arg;
+        *(IopCallbackFn*)(((u8**)g_iopCallbackTables)[k] + *g_iopCommandBuffers[k] * 16) = arg;
         *(u64*)(((u8**)g_iopCallbackTables)[k] + *g_iopCommandBuffers[k] * 16 + 8) = val;
     }
     CommitQueuedIopCommand();

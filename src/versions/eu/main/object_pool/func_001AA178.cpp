@@ -20,6 +20,6 @@ void DrawScreenElements(void)
             o->vtbl[9](o);
         }
     }
-    DrawScreenFade(D_eu_0027F700);
-    DrawCyclingGlyphElement(D_eu_0027CFE8);
+    DrawScreenFade((ScreenFade*)D_eu_0027F700);
+    DrawCyclingGlyphElement((T217D_600*)D_eu_0027CFE8);
 }

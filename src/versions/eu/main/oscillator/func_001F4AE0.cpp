@@ -4,11 +4,11 @@
 // (US 0x464).
 struct Ann_eu_1F4AE0 { u8 pad[0x974]; s32 announce; };
 struct Cap_eu_1F4AE0 { u8 pad00[8]; u16 t8; u8 pad0A[0x570 - 0x0A]; s32 f570; };
-void UpdateObjectSubGroup(ObjectSubGroup* self)
+void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
 {
     Vec02 local;
     Vec02 radius;
-    UpdatePlacedObject(self);
+    UpdatePlacedObject(self, dt);
     switch (self->f2E4) {
     case 5: {
         f32 t = self->f31C;
@@ -45,7 +45,7 @@ void UpdateObjectSubGroup(ObjectSubGroup* self)
         return;
     }
     TransformPointBetweenFrames(0, self, &player->v140, &local);
-    s32 inside = IsPointInsideFaceTree(self->f2F8, &local);
+    s32 inside = IsPointInsideFaceTree((TreeNode03*)self->f2F8, (FacePoint*)&local);
     s32 near = 0;
     if (inside == 0 && self->f2DC != 0 && __builtin_fabsf(local.z) < 300.0f) {
         if (Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(local), Vu0::Q(local)))) <= 1000.0f) {

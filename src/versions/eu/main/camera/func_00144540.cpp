@@ -15,7 +15,7 @@ void UpdateCameraMatrices(Camera* self)
         u128 turn = Vu0::Rotate(*(Mat02*)self->f80, Vu0::Q(*(Vec02*)D_002618E0));
         Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(*(Vec02*)self->f40), turn, Vu0::Scalar(swing));
         Vu0::Q(dir) = Vu0::MulX(Vu0::Q(*(Vec02*)D_002618F0), Vu0::Scalar(swing));
-        BuildRotationFromVector(&dir, (Mat4*)&rotation);
+        BuildRotationFromVector(&dir, (Mat02*)&rotation);
         MulRotationRowsX(&rotation, *(Mat02*)self->f80, rotation);
         Vec02 corner;
         Vec02 tilt;

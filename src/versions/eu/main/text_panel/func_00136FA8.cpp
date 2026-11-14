@@ -2,16 +2,13 @@
 // PAL: the child pointer is at 0x5B0 (US 0x324).
 struct Owner_136FA8_eu { u8 pad[0x5B0]; void* child; };
 
-s32 SetTextPanelState(Owner_136FA8_eu* self, s32 mode); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
+void SetTextPanelState(Owner_136FA8_eu* self, s32 mode);
 
-s32 EndTextPanelState(Owner_136FA8_eu* self)
+void EndTextPanelState(Owner_136FA8_eu* self)
 {
-    s32 r;
     if (self->child != 0) {
-        r = SetStepSequenceState(self->child, 4);
-        goto done;
+        SetStepSequenceState((StepSequence*)self->child, 4);
+    } else {
+        SetTextPanelState(self, 0);
     }
-    r = SetTextPanelState(self, 0);
-done:
-    return r;
 }

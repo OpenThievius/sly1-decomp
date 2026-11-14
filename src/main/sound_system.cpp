@@ -45,48 +45,48 @@
 #include "attached_set.h"
 #include "active_set_solver.h"
 #include "sound_level.h"
+#include "object_finder.h"
 #define VA_ARG_WORD(ap, T) (*(T*)((ap += 8) - 8))
 
 f32 RandomFloatInRange(f32 a, f32 b);
-f32 Cosine(f32 a);
-f32 Sine(f32 a);
+extern "C" f32 Cosine(f32 x);
+extern "C" f32 Sine(f32 x);
 extern f32 g_gameTime[];
-void ReleaseSoundLevel(void* p);
+void ReleaseSoundLevel(SoundLevelEntry* self);
 void* AllocateZeroedFrontMemory(s32 size);
-void* FillMemory(void* p, s32 value, s32 size);
-void AppendToList(void* p, void* self);
-void RemoveFromList(void* p, void* self);
-void RemoveFromList(void* a, void* b);
-void PushFreeSlot(void* a, void* b);
-void InitPlacedObject(void* self);
-void StartPlacedObject(void* self);
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-void* CreateStateWalker(void* bank, s32 r, s32 minus_one, s32 zero);
-void AppendToList(List01* list, StateWalker* item);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void AppendToList(List01* self, void* item);
+void RemoveFromList(List01* list, void* item);
+void RemoveFromList(List01* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
+void InitPlacedObject(PlacedObject* self);
+void StartPlacedObject(PlacedObject* self);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void AppendToList(List01* self, void* item);
 struct RandomRangeLow { s32 v; };
-s32 RandomIntInRange(RandomRangeLow lo, s32 hi);
+s32 RandomIntInRange(s32 a, s32 b);
 extern s32 g_streamVoiceLocked;
 void StopStreamVoice(void);
 extern s32 g_stagedBankVoice;
-void RequestStagedBank(void* self);
+void RequestStagedBank(KeyRecord* self);
 s32 PollIopCommands(void);
-void SyncDataCache(s32 a);
+extern "C" void SyncDataCache(s32 a);
 s32 StartSoundVoice(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f);
-void RemoveFromList(u8* a, void* b);
-void PushFreeSlot(u8* a, void* b);
+void RemoveFromList(List01* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
 extern u8 g_soundBankHandles[];
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void InitIopCommandChannels(void);
 s32 EnsureSoundBankLoaded(s32 a);
 s32 EnableIopDiscAccess(s32 a, s32 b, s32 c, s32 d);
 void SendIopSoundLevel(s32 a);
 void ResetVolumeChannelFactors(void);
 void QueueIopCommandD(s32 a, s32 b);
-void QueueIopChannelConfig(s32 a, s32 b, s32 c);
+void QueueIopChannelConfig(s32 a0, s32 a1, s32 a2);
 void QueueIopCommand51(s32 a, s32 b);
-void* PopFreeSlot(void* p);
-void* FillMemory(void* p, s32 value, s32 size);
-void AppendToList(void* list, void* item);
+void* PopFreeSlot(Pool6C* pool);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void AppendToList(List01* self, void* item);
 // A sound playing in the world: a 0x90-byte record of the pool at World 0x1BA0, kept on
 // World::list1BAC. func_001BF6B8 takes one, func_001BF920 fills it, func_001BFAF8 starts its
 // voice, func_001C0070 updates each one every frame and func_001BF728 gives it back.
@@ -131,57 +131,59 @@ struct PlayingSound {
         return v;
     }
 };
-void RemoveFromList(u8* p, PlayingSound* self);
-void PushFreeSlot(u8* p, PlayingSound* self);
+void RemoveFromList(List01* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
 void FreeSoundRecord(PlayingSound* self);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void FadeOutSoundVoice(s32 voice, s32 a, s32 b, s32 c);
 void ApplySoundRecordVolumePan(PlayingSound* self);
 void SetVolumeChannelFactor(s32 a, s32 b, f32 x);
 void PauseIopVoice(s32 a);
-void ResumeIopVoice(s32 a);
-void AppendToList(u8* a, void* b);
+void ResumeIopVoice(s32 a0);
+void AppendToList(List01* self, void* item);
 extern s32 D_002748EC;
 extern s32 g_currentSoundLevel;
 extern s32 g_previousSoundLevel;
 void RemoveSoundLevelEntry(void* self);
-void RecomputeSoundLevel(void* self);
+void RecomputeSoundLevel(SoundLevelEntry* entry);
 typedef signed int s32;
 typedef unsigned char u8;
 extern s32 g_stagedBankState;
 extern s32 g_stagedBankHandle;
 void UnloadSoundBank(s32 handle);
 void StopSoundVoice(s32 handle);
-void RemoveSoundLevelEntry(SoundLevelEntry* self);
+void RemoveSoundLevelEntry(void* self);
 void RecomputeSoundLevel(SoundLevelEntry* self);
 extern s32 g_streamVoice;
 // How far the listener is from a position (func_001BF2E0 or func_001BF398, as func_001BF578 chooses).
 typedef f32 (*ListenerDistanceFn)(void* listener, void* position);
-s32 IsTopCameraController(u8* p);
-s32 PeekStackValue(u8* s);
+s32 IsTopCameraController(CameraController* self);
+s32 PeekStackValue(TargetCameraController* s);
 f32 MeasureListenerDistance(void* listener, void* position);
-f32 MeasureCameraWeightedDistance(void* listener, void* position);
+f32 MeasureCameraWeightedDistance(Vec02* a, Vec02* b);
 void* AllocateZeroedFrontMemory(s32 bytes);
 extern s32 g_streamVoicePending;
 s32 HasStreamVoice(void);
-void ClearKeyId(void* p);
+void ClearKeyId(KeyId* p);
 s32 StartStreamedVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
-void ClearStreamVoicePending(void);
-void RequestStreamCallback(s32 a0, void (*a1)(void), u64 a2);
+void ClearStreamVoicePending(s32 reply, s64 arg);
+typedef void (*IopCallbackFn)(s32 reply, s64 arg);
+void RequestStreamCallback(s32 a0, IopCallbackFn a1, u64 a2);
 void NotifyIopBanksChanged(void);
 void* GetActiveSwitchedCollider(void);
 f32 ComputeSoundListenerFactor(void* self);
-void ComputeSoundVolumeAndPan(f32 r, void* self, f32* out, s32* flag, f32 a, f32 b, f32 c);
-void SetVoiceVolumePan(s32 voice, s32 volume, s32 pan);
-void StartSoundEffect(s32 a0, PlayingSound** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c);
+void SetVoiceVolumePan(s32 a0, s32 a1, s32 a2);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void ClearSoundRecordHandle(PlayingSound** slot);
 void StopStagedBankVoice(void);
 void UnloadStagedBank(void);
 s32 SyncDiscRead(s32 a);
-void StoreStagedBankHandle(s32 h);
-void StartSoundBankLoad(s32 a0, s32 a1, void* a2, s32 a3);
-void CopyMemory(void* dst, void* src, s32 count);
-s32 IsListEmpty(void* a);
+void StoreStagedBankHandle(s32 h, s64 arg);
+void StartSoundBankLoad(s32 a0, s32 a1, IopCallbackFn a2, s64 a3);
+void CopyMemory(void* dst, void* src, u32 size);
+s32 IsListEmpty(List01* p);
 void* AllocateSoundLevelEntry(void);
 s32 IsVoiceBusy(s32 handle);
 extern f32 g_gameClock[];
@@ -204,13 +206,12 @@ void SetSoundRecordPitch(PlayingSound* self, f32 x);
 s32 GetSoundPitchBase(s32 a, s32 b);
 void SetVoicePitch(s32 x, s32 y);
 extern const KeyRecord g_soundBankKeys[7];
-void UnloadSoundBank(void);
 void ClearKeyId(KeyId* p);
-s32 WaitDiscReady(s32 a);
+extern "C" s32 WaitDiscReady(s32 mode);
 s32 LoadSoundBankAtLocation(s32 a, s32 b);
 s32 TestSoundInBank(s32 a, s32 b);
 s32 IsSoundEntryAvailable(s32 id);
-void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 a2, s32 a3, s32 a4, f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* a5, s32 a6);
+void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, BaseObject* object, Quad16* position, f32 farRange, f32 nearRange, f32 baseVolume, f32 pitch, f32 f16, U64P* interval, U64P* p80);
 void ScheduleAmbientSoundRecord(PlayingSound* self);
 void StartSoundRecordVoice(PlayingSound* self, s32 id);
 // The list walk of list_iter.h over a List01: push the frame, take each element, pop the frame.
@@ -232,7 +233,7 @@ struct ListWalk {
     static void End(ListFrame* it) { g_activeListFrames = it->prev; }
 };
 s32 RandomIntInRange(s32 a, s32 b);
-void ComputeSoundAttenuation(Quad16* position, f32* volume, f32* pan, f32 a, f32 b, f32 c);
+void ComputeSoundAttenuation(void* self, f32* out, s32* flag, f32 a, f32 b, f32 c);
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 // The list walk of World::list1BAC, element by element.
 struct PlayingSoundFrame : ListFrame {
@@ -240,11 +241,11 @@ struct PlayingSoundFrame : ListFrame {
 };
 s32 IsSoundEmitterUpdateDisabled(void);
 void* GetSoundListenerPosition(void);
-s32 IsVoiceBusy(ListFrame* h);
+s32 IsVoiceBusy(s32 a0);
 s32 IsObjectAttached(BaseObject* o);
 void StopSoundVoice(s32 h);
-void RequestVoiceCallback(s32 h, void (*fn)(void), s64 arg);
-void MarkSoundRecordIfIdMatches(void);
+void RequestVoiceCallback(s32 value, IopCallbackFn a1, u64 a2);
+void MarkSoundRecordIfIdMatches(s32 reply, s64 key);
 void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c);
 void StopSoundRecord(PlayingSound* self, s32 n);
 s32 SetIopSoundOptionFlag(s32 flag);
@@ -252,14 +253,14 @@ extern U64P D_00274820;
 extern U64P D_00274828;
 extern s32 D_006053E0[];
 s32 GetVoiceParam(s32 a, s32 b);
-void UnregisterObject(void* self);
-void RemoveFromList(void* table, void* self);
+void UnregisterObject(BaseObject* self);
+void RemoveFromList(List01* list, void* item);
 void SetCachedVoiceParam(s32 index, s32 value);
-void DestroyStateWalker(s32 p);
-s32 CreateStateWalker(s32 p, void* ctx, s32 a2, s32 a3);
-void RegisterObject(void* self);
-void AppendToList(void* table, void* self);
-void CopyObjectData(void* self);
+void DestroyStateWalker(StateWalker* self);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void RegisterObject(BaseObject* self);
+void AppendToList(List01* self, void* item);
+void CopyObjectData(BaseObject* self, BaseObject* src);
 void SetIopVolumeChannel(s32 a, s32 b);
 extern s32 D_00274808[6];
 void SetIopChannelValue(s32 a, s32 b);
@@ -269,20 +270,21 @@ extern f32 g_volumeChannelFactors[11][4];
 void SetIopVolumeChannel(s32 slot, s32 value);
 void ApplyVolumeChannelFactors(s32 column);
 extern u8 D_002748E8[4];
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, void* a4, void* a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void StopAllIopSounds(void);
 void WaitForIopSoundStop(s32 a0);
 s32 SyncDiscRead(s32 flag);
-void StopWorldSoundRecords(s32 a0);
+void StopWorldSoundRecords(s32 item);
 void ClearSoundLevels(void);
 void ClearCachedVoiceParams(void);
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern f32 g_defaultVolumeChannelFactors[11][4];
 extern s32 D_00274808[];
 void SetIopChannelValue(s32 channel, s32 value);
 void SetIopChannelValuePair(s32 channel, s32 value, s32 value2);
-void* FillMemory(void* p, s32 value, s32 size); // stays void: retail returns a value, but declared so func_001C1A28 differs in registers
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 s32 StepBiasedRandomWalk(void);
 // func_001C0CF0's random walk: six steps for each of seven rows, and the row for each position
 // from -12 to 12, copied to the stack.
@@ -291,15 +293,15 @@ struct RandomWalkRows { s32 v[25]; };
 extern const RandomWalkSteps D_0024D2A8;
 extern const RandomWalkRows D_0024D350;
 extern s32 D_00274830;
-void SetVoiceParam(s32 voice, s32 a1, s32 a2);
+void SetVoiceParam(s32 a0, s32 a1, s32 a2);
 void InitObject(BaseObject* self);
-void StopSoundRecord(u8* obj, void* item);
+void StopSoundRecord(PlayingSound* self, s32 n);
 void SetIopVolumeChannel8(f32 x);
 void SetVolumeChannelFactor(s32 row, s32 column, f32 value);
 void SilenceVolumeChannel3(s32 flag);
-s32 ApplySoundOptionFlag(s32 value);
+void ApplySoundOptionFlag(s32 value);
 void StopAllSoundsAndWait(void);
-void StopWorldSoundRecords(void* item);
+void StopWorldSoundRecords(s32 item);
 void PushIopChannel2Setting(World* self, s32 a, s32 b);
 void PopIopChannel2Setting(World* self);
 void SetIopChannel2Setting(World* self, s32 index, s32 value);
@@ -309,7 +311,7 @@ void SetLastWorldSoundEntryValues(World* self, U64P* item);
 void StartWorldSoundEntries(World* self);
 void SetCachedVoiceParam(s32 idx, s32 val);
 s32 GetCachedVoiceParam(s32 index);
-void RefreshCachedVoiceParam(s32 i);
+void RefreshCachedVoiceParam(s32 i, s32 unused1);
 s32 StepBiasedRandomWalk();
 void PlaySoundWithWanderingPitch(void);
 extern const s32 g_soundEntryForcedAvailable[772];
@@ -335,10 +337,10 @@ s32 D_00274830 = 0;
 f32 g_volumeChannelFactors[11][4] = { 0 };
 u8 D_002748E8[4] = { 0 };
 s32 D_002748EC = 0;
-void CopyMemory(void* dst, void* src, s32 count);
+void CopyMemory(void* dst, void* src, u32 size);
 
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 f32 RandomFloatInRange(f32 a, f32 b);
 
 void UnloadStagedBank(void)
@@ -371,7 +373,7 @@ s32 EnsureSoundBankLoaded(s32 n)
     } else {
         UnloadStagedBank();
         if (g_loadedSoundBank >= 0 && (h = ((s32*)&g_soundBankHandles)[g_loadedSoundBank]) != 0) {
-            UnloadSoundBank();
+            UnloadSoundBank(h);
             while (PollIopCommands() != 0) {
             }
             ((s32*)&g_soundBankHandles)[g_loadedSoundBank] = 0;
@@ -438,7 +440,7 @@ s32 IsSoundEntryAvailable(s32 idx)
     return ((s32*)g_soundEntryAvailable)[idx];
 }
 
-void ClearStreamVoicePending(void)
+void ClearStreamVoicePending(s32 reply, s64 arg)
 {
     g_streamVoicePending = 0;
 }
@@ -539,7 +541,7 @@ void ApplySoundRecordVolumePan(PlayingSound* self)
     SetVoiceVolumePan(self->voice, a1, a2);
 }
 
-void PlaySoundAndApplyVolumePan(s32 a0, PlayingSound** a1, f32 f12, f32 f13)
+void PlaySoundAndApplyVolumePan(BaseObject* a0, PlayingSound** a1, f32 f12, f32 f13)
 {
     s32 flag = 0;
     PlayingSound* local;
@@ -602,7 +604,7 @@ void StopStagedBankVoice(void)
     }
 }
 
-void StoreStagedBankHandle(s32 h)
+void StoreStagedBankHandle(s32 h, s64 arg)
 {
     g_stagedBankHandle = h;
     if (h != 0) {
@@ -616,7 +618,7 @@ void StoreStagedBankHandle(s32 h)
 
 void RequestStagedBank(KeyRecord* self)
 {
-    s32 local[2];
+    KeyId local;
     s32 same;
     s32 flag;
 
@@ -642,25 +644,25 @@ void RequestStagedBank(KeyRecord* self)
     }
     UnloadStagedBank();
     g_stagedBankRecord = (s32)self;
-    ClearKeyId(local);
+    ClearKeyId(&local);
     if (self == 0) {
         flag = 0;
     } else {
         s32 x = self->wordB ^ self->maskB;
-        local[0] = self->wordA ^ self->maskA;
-        local[1] = x;
+        local.first = self->wordA ^ self->maskA;
+        local.second = x;
         flag = x != 0;
     }
     if (flag != 0) {
         g_stagedBankState = 1;
         SyncDiscRead(0);
-        StartSoundBankLoad(local[0], 0, (void*)StoreStagedBankHandle, 0);
+        StartSoundBankLoad(local.first, 0, StoreStagedBankHandle, 0);
     }
 }
 
 void PlayStagedBank(void* self)
 {
-    RequestStagedBank(self);
+    RequestStagedBank((KeyRecord*)self);
     if (self == 0) return;
     while (PollIopCommands() != 0 && g_stagedBankState == 1) {
         SyncDataCache(0);
@@ -695,18 +697,18 @@ void ResumeStagedBankVoice(void)
 
 void* AllocateSoundLevelEntry(void)
 {
-    void* p = PopFreeSlot((u8*)g_currentWorld + 0x1BB8);
+    void* p = PopFreeSlot(&g_currentWorld->pool1BB8);
     if (p != 0) {
         FillMemory((u8*)p, 0, 12);
-        AppendToList((u8*)g_currentWorld + 0x1BC4, p);
+        AppendToList((List01*)((u8*)g_currentWorld + 0x1BC4), p);
     }
     return p;
 }
 
 void RemoveSoundLevelEntry(void* self)
 {
-    RemoveFromList((u8*)g_currentWorld + 0x1BC4, self);
-    PushFreeSlot((u8*)g_currentWorld + 0x1BB8, self);
+    RemoveFromList((List01*)((u8*)g_currentWorld + 0x1BC4), self);
+    PushFreeSlot(&g_currentWorld->pool1BB8, self);
 }
 
 void ClearSoundLevels(void)
@@ -725,9 +727,9 @@ void ClearSoundLevels(void)
 
 }
 
-void* PushSoundLevel(s32 x)
+SoundLevelEntry* PushSoundLevel(s32 x)
 {
-    s32 flag = IsListEmpty((u8*)g_currentWorld + 0x1BC4);
+    s32 flag = IsListEmpty((List01*)((u8*)g_currentWorld + 0x1BC4));
     SoundLevelEntry* p = (SoundLevelEntry*)AllocateSoundLevelEntry();
     s32 hi = 0x6B;
     s32 v = -20;
@@ -745,7 +747,7 @@ void* PushSoundLevel(s32 x)
     return p;
 }
 
-void RecomputeSoundLevel(void)
+void RecomputeSoundLevel(SoundLevelEntry* entry)
 {
     ListFrame f;
     u8* P = (u8*)g_currentWorld + 0x1BC4;
@@ -755,7 +757,7 @@ void RecomputeSoundLevel(void)
     f.offset = *(s32*)(P + 8);
     f.prev = g_activeListFrames;
     g_activeListFrames = &f;
-    if (IsListEmpty(P) != 0) {
+    if (IsListEmpty((List01*)P) != 0) {
         g_currentSoundLevel = 0;
     } else {
         g_currentSoundLevel = -20;
@@ -913,8 +915,8 @@ void ComputeSoundRecordDoppler(PlayingSound* self)
 ListenerDistanceFn ChooseSoundListenerFunction(void)
 {
     s32 n;
-    if (IsTopCameraController((u8*)g_camera + 0x460) == 0) return MeasureListenerDistance;
-    n = PeekStackValue((u8*)g_camera + 0x460);
+    if (IsTopCameraController((CameraController*)((u8*)g_camera + 0x460)) == 0) return MeasureListenerDistance;
+    n = PeekStackValue((TargetCameraController*)((u8*)g_camera + 0x460));
     if (n >= 3) return MeasureListenerDistance;
     if (n <= 0) return MeasureListenerDistance;
     return MeasureCameraWeightedDistance;
@@ -930,7 +932,7 @@ void ComputeSoundAttenuation(void* self, f32* out, s32* flag, f32 a, f32 b, f32 
 {
     if (self != 0) {
         f32 r = ComputeSoundListenerFactor(self);
-        ComputeSoundVolumeAndPan(r, self, out, flag, a, b, c);
+        ComputeSoundVolumeAndPan(r, self, out, (f32*)flag, a, b, c);
     } else {
         *out = a;
         *flag = 0;
@@ -939,10 +941,10 @@ void ComputeSoundAttenuation(void* self, f32* out, s32* flag, f32 a, f32 b, f32 
 
 void* AllocateSoundRecord(void)
 {
-    void* s = PopFreeSlot((u8*)g_currentWorld + 0x1BA0);
+    void* s = PopFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1BA0));
     if (s) {
         FillMemory(s, 0, 0x90);
-        AppendToList((u8*)g_currentWorld + 0x1BAC, s);
+        AppendToList((List01*)((u8*)g_currentWorld + 0x1BAC), s);
     }
     return s;
 }
@@ -960,8 +962,8 @@ void FreeSoundRecord(PlayingSound* self)
         *self->owner = 0;
     }
     self->serial = -1;
-    RemoveFromList((u8*)g_currentWorld + 0x1BAC, self);
-    PushFreeSlot((u8*)g_currentWorld + 0x1BA0, self);
+    RemoveFromList((List01*)((u8*)g_currentWorld + 0x1BAC), self);
+    PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1BA0), self);
 }
 
 void StopSoundRecord(PlayingSound* self, s32 n)
@@ -1038,7 +1040,7 @@ void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, 
     s32 fl = 0;
     if (position || self->interval.value >= 0.0f) fl = 1;
     self->positional = fl;
-    ComputeSoundAttenuation(position, &self->volume, &self->pan, baseVolume, farRange, nearRange);
+    ComputeSoundAttenuation(position, &self->volume, (int*)&self->pan, baseVolume, farRange, nearRange);
     ComputeSoundRecordDoppler(self);
 }
 
@@ -1084,8 +1086,8 @@ void ScheduleAmbientSoundRecord(PlayingSound* self)
     }
 }
 
-void StartSoundEffect(s32 id, PlayingSound** out, s32 p2, s32 p3,
-                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, s32 p5) {
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5) {
     PlayingSound* s1;
     s32 s0;
     if (id == -1) return;
@@ -1100,7 +1102,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, s32 p2, s32 p3,
     if (p3 || p2 || out) {
         if (s0 == 0 && (p4 == 0 || *p4 < 0.0f)) {
             PlayingSound tmp;
-            InitSoundRecord(&tmp, out, 0, p2, p3, fa, fb, fc, fd, fe, 0, 0);
+            InitSoundRecord(&tmp, out, 0, p2, (Quad16*)p3, fa, fb, fc, fd, fe, 0, 0);
             if (tmp.volume != 0.0f) {
                 s1 = (PlayingSound*)AllocateSoundRecord();
                 if (s1) {
@@ -1114,7 +1116,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, s32 p2, s32 p3,
         } else {
             s1 = (PlayingSound*)AllocateSoundRecord();
             if (!s1) return;
-            InitSoundRecord(s1, out, s0, p2, p3, fa, fb, fc, fd, fe, p4, p5);
+            InitSoundRecord(s1, out, s0, p2, (Quad16*)p3, fa, fb, fc, fd, fe, (U64P*)p4, p5);
         }
         if (s1) {
             if (0.0f <= s1->interval.value) {
@@ -1129,9 +1131,9 @@ void StartSoundEffect(s32 id, PlayingSound** out, s32 p2, s32 p3,
     }
 }
 
-void MarkSoundRecordIfIdMatches(void* guard, s64 key)
+void MarkSoundRecordIfIdMatches(s32 reply, s64 key)
 {
-    if (guard == 0) {
+    if (reply == 0) {
         s32 tag = (s32)(key >> 32);
         PlayingSound* r = (PlayingSound*)(s32)(key & 0xFFFFFFFFu);
         if (r->serial == tag) {
@@ -1334,9 +1336,9 @@ void SilenceVolumeChannel3(s32 flag)
     SetVolumeChannelFactor(3, 1, flag ? 0.0f : 1.0f);
 }
 
-s32 ApplySoundOptionFlag(s32 value)
+void ApplySoundOptionFlag(s32 value)
 {
-    return SetIopSoundOptionFlag(value != 0);
+    SetIopSoundOptionFlag(value != 0);
 }
 
 void StopAllSoundsAndWait(void)
@@ -1351,14 +1353,14 @@ void StopAllSoundsAndWait(void)
     SyncDiscRead(0);
 }
 
-void StopWorldSoundRecords(void* item)
+void StopWorldSoundRecords(s32 item)
 {
     if (g_currentWorld) {
         ListFrame it;
         u8* obj;
         ListWalk::Begin(&it, &g_currentWorld->list1BAC);
         for (obj = ListWalk::Next(&it); obj; obj = ListWalk::Next(&it)) {
-            StopSoundRecord(obj, item);
+            StopSoundRecord((PlayingSound*)obj, item);
         }
         ListWalk::End(&it);
     }
@@ -1428,7 +1430,7 @@ void StartWorldSoundEntries(World* self)
 {
     for (s32 i = 0; i < self->soundCount; i++) {
         WorldSoundEntry* e = &self->soundEntries[i];
-        StartSoundEffect(e->sound, D_002748E8, 0, 0, &e->repeat, &e->range, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f);
+        StartSoundEffect(e->sound, (PlayingSound**)D_002748E8, 0, 0, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f, (f32*)&e->repeat, &e->range);
     }
 }
 
@@ -1445,7 +1447,7 @@ s32 GetCachedVoiceParam(s32 index)
     return D_006053E0[index];
 }
 
-void RefreshCachedVoiceParam(s32 i)
+void RefreshCachedVoiceParam(s32 i, s32 unused1)
 {
     D_006053E0[i] = GetVoiceParam(g_stagedBankVoice, i);
 }
@@ -1504,10 +1506,10 @@ void SetObjectLinkId(IdLinkedObject* self, s32 v)
         DestroyStateWalker(self->link);
         self->link = 0;
     }
-    s32 r = FindFirstObjectById(self->world, 0x101, v, self);
+    BaseObject* r = FindFirstObjectById(self->world, 0x101, v, self);
     self->linkTarget = r;
     if (r != 0) {
-        self->link = CreateStateWalker(r, self, -1, 1);
+        self->link = CreateStateWalker((StateGraph*)r, self, -1, 1);
     }
     self->linkId = v;
 }
@@ -1530,10 +1532,10 @@ void UnregisterListedPointObject(ListedPointObject* self)
     RemoveFromList(&self->world->list1C84, self);
 }
 
-void CopyListedPointObject(ListedPointObject* self)
+void CopyListedPointObject(ListedPointObject* self, ListedPointObject* src)
 {
     KeptBits saved;
     saved = self->keep;
-    CopyObjectData(self);
+    CopyObjectData(self, src);
     self->keep = saved;
 }

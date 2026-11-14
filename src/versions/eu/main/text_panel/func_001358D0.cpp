@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "object_finder.h"
 // PAL: the caption box's fields are later (state at 0x570, blockA at 0x5BC, countA at 0x5DC,
 // count at 0x5E0, the markers at 0x5E4); the code is US's.
 struct PanelMarkers_1358D0_eu {
@@ -19,7 +20,7 @@ void CollectPanelEntriesOfClass(PanelMarkers_1358D0_eu* self, s32 kind, void* a2
     Vec02 d;
     s32 want;
     s32 i = 0;
-    s32 n = GatherObjectsById(*(s32*)g_currentWorld, 0x105, kind, 0, 0x80, objs);
+    s32 n = GatherObjectsById(g_currentWorld, 0x105, kind, 0, 0x80, objs);
     PanelEntry* e;
     for (; i < n; i++) {
         e = &entries[i];
@@ -36,10 +37,10 @@ void CollectPanelEntriesOfClass(PanelMarkers_1358D0_eu* self, s32 kind, void* a2
     for (i = 0; i < n;) {
         e = &entries[i];
         if (kind == 0x2E) {
-            GetNumberedItemFlag(e->obj, &want);
+            GetNumberedItemFlag((NumberedItem*)e->obj, &want);
             want = want == 0 && self->state == 1 && i < limit && e->key < range;
         } else {
-            want = self->state == 1 && IsObjectAttached(e->obj) && i < limit && e->key < range;
+            want = self->state == 1 && IsObjectAttached((BaseObject*)e->obj) && i < limit && e->key < range;
         }
         CameraHeading* cam = g_camera;
         u128 ones = Vu0::Ones();
@@ -73,7 +74,7 @@ void CollectPanelEntriesOfClass(PanelMarkers_1358D0_eu* self, s32 kind, void* a2
         }
         if (effect != 0) {
             if (!want) {
-                SetEffectPhase(effect, 2);
+                SetEffectPhase((Effect*)effect, 2);
                 CopyMemory(&self->markers[j], &self->markers[j + 1], (self->count - j - 1) * 8);
                 self->count--;
             }
@@ -85,7 +86,7 @@ void CollectPanelEntriesOfClass(PanelMarkers_1358D0_eu* self, s32 kind, void* a2
                 *(s32*)((u8*)fx + 0x20) = a5;
                 *(void**)((u8*)fx + 0x130) = a3;
                 *(void**)((u8*)fx + 0x134) = e->obj;
-                SetEffectPhase(fx, 0);
+                SetEffectPhase((Effect*)fx, 0);
                 *(f32*)&self->countA = g_gameClock[1];
                 self->markers[self->count].obj = e->obj;
                 self->markers[self->count].effect = fx;

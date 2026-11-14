@@ -25,9 +25,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
     if (self->f2220 != state) {
         switch (self->f2220) {
         case 2: {
-            self->penalizedTargetId = 0;
+            self->penalizedTarget = 0;
             if (state != 3 && state != 7) {
-                StartSoundEffect(0x49, 0, (s32)self, 0, 1000.0f, 500.0f, 0.7f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x49, 0, self, 0, 1000.0f, 500.0f, 0.7f, 0.0f, 0.0f, 0, 0);
             }
             self->f224C = -1;
             if (self->f223C == 0 && state != 7 && state != 3) {
@@ -61,7 +61,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                     break;
                 }
                 if (m != 0) {
-                    SendEmptyMessage(m);
+                    SendEmptyMessage((MemberObject*)m);
                 }
             }
             if (!(MaskWorldBitsBySave() & 0x1000)) {
@@ -74,9 +74,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         case 3: {
             if (state == 2) {
-                self->penalizedTargetId = self->f2204;
+                self->penalizedTarget = (void*)self->f2204;
             }
-            TriggerScriptEvent((void*)self->f2204, 3, 0, 0);
+            TriggerScriptEvent((BaseObject*)self->f2204, 3, 0, 0);
             BaseObject* o = (BaseObject*)self->f2204;
             o->desc->m18(o, self);
             self->f2210 = self->f2204;
@@ -91,20 +91,20 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             SetTurningColliderLinkFlag(self, 1);
             if (self->f22AC != 0) {
                 RemoveColliderAttachment(((Attach03*)self->f22AC)->target, (Attach03*)self->f22AC);
-                ReleaseAttachRecords(self->world, (Attach03*)self->f22AC);
+                ReleaseAttachRecords((World*)self->world, (Attach03*)self->f22AC);
                 self->f22AC = 0;
             }
-            ResetTrailRing(self->f1520);
+            ResetTrailRing((TrailRing*)self->f1520);
             break;
         }
         case 7: {
             if (state == 2) {
-                self->penalizedTargetId = self->f2208;
+                self->penalizedTarget = (void*)self->f2208;
             }
-            TriggerScriptEvent((void*)self->f2208, 3, 0, 0);
+            TriggerScriptEvent((BaseObject*)self->f2208, 3, 0, 0);
             BaseObject* o = (BaseObject*)self->f2208;
             o->desc->m18(o, self);
-            SetFlaggedLinkContactMask(self, (void*)self->f2208, 0);
+            SetFlaggedLinkContactMask(self, (BaseObject*)self->f2208, 0);
             self->f2214 = self->f2208;
             PS(f32, 0x2218) = PS(f32, 0x220C);
             s32 aim = -1;
@@ -114,11 +114,11 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             SetPlayerAimMode(self, aim);
             Vu0::Q(self->v2530) = Vu0::Sub(Vu0::Q(self->v560), Vu0::Q(self->pos));
             self->v2530.z = 0.0f;
-            ResetTrailRing(self->f1520);
+            ResetTrailRing((TrailRing*)self->f1520);
             break;
         }
         case 8:
-            SetFlaggedLinkContactMask(self, self->f24A0, 0);
+            SetFlaggedLinkContactMask(self, (BaseObject*)self->f24A0, 0);
             self->f24A0 = 0;
             break;
         case 4:
@@ -130,26 +130,26 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 AT(Vec02, PS(void*, 0x2494), 0x300) = D_00248D30;
             }
             self->f580 = 1;
-            ResetTrailRing(self->f1520);
+            ResetTrailRing((TrailRing*)self->f1520);
             self->f26CC = g_gameTime[0];
             break;
         case 6: {
             switch (self->f239C) {
             case 2:
                 StopPlayerAnimation(self);
-                StartSoundEffect(0x4E, 0, (s32)self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-                SetPooledObjectPlayerHold(self->heldObject, 0);
+                StartSoundEffect(0x4E, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                SetPooledObjectPlayerHold((PooledObject*)self->heldObject, 0);
                 break;
             case 5:
-                TriggerScriptEvent(self->f23B8, 3, 0, 0);
+                TriggerScriptEvent((BaseObject*)self->f23B8, 3, 0, 0);
                 ((BaseObject*)self->f23B8)->desc->m18((BaseObject*)self->f23B8, self);
-                SetFlaggedLinkContactMask(self, self->f23B8, 0);
+                SetFlaggedLinkContactMask(self, (BaseObject*)self->f23B8, 0);
                 self->heldObject = 0;
                 break;
             case 4:
-                TriggerScriptEvent(self->f23BC, 3, 0, 0);
+                TriggerScriptEvent((BaseObject*)self->f23BC, 3, 0, 0);
                 ((BaseObject*)self->f23BC)->desc->m18((BaseObject*)self->f23BC, self);
-                SetFlaggedLinkContactMask(self, self->f23BC, 0);
+                SetFlaggedLinkContactMask(self, (BaseObject*)self->f23BC, 0);
                 self->heldObject = 0;
                 break;
             case 6:
@@ -170,15 +170,15 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             if (state == 2) {
                 if (self->f23A0 != 0) {
-                    self->penalizedTargetId = (s32)self->f23A0;
+                    self->penalizedTarget = self->f23A0;
                 } else if (self->f23A8 != 0) {
-                    self->penalizedTargetId = (s32)self->f23A8;
+                    self->penalizedTarget = self->f23A8;
                 } else if (self->f23B8 != 0) {
-                    self->penalizedTargetId = (s32)self->f23B8;
+                    self->penalizedTarget = self->f23B8;
                 } else if (self->f23BC != 0) {
-                    self->penalizedTargetId = (s32)self->f23BC;
+                    self->penalizedTarget = self->f23BC;
                 } else {
-                    self->penalizedTargetId = 0;
+                    self->penalizedTarget = 0;
                 }
             }
             self->fA14 = -1;
@@ -193,7 +193,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             self->f268C = 0;
             if (PS(void*, 0x26A4) != 0) {
-                ReleaseSoundLevel(PS(void*, 0x26A4));
+                ReleaseSoundLevel((SoundLevelEntry*)(PS(void*, 0x26A4)));
                 PS(void*, 0x26A4) = 0;
             }
             BaseObject* o = PS(BaseObject*, 0x272C);
@@ -216,9 +216,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         }
         case 12:
-            RemoveCameraControllers(g_camera, 0xF, 6, (u8*)g_camera + 0x460, self, 0);
+            RemoveCameraControllers(g_camera, 0xF, 6, (CameraController*)((u8*)g_camera + 0x460), self, 0);
             if (D_00270454 != 0) {
-                PopStackElement(g_elementStack);
+                PopStackElement((ElementStack*)g_elementStack);
             }
             break;
         case 9:
@@ -245,7 +245,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->flags538 &= ~((u64)1 << 40);
             self->hook = self->f273C;
             if (self->f1390[13] != 0) {
-                SetTurningColliderFollowedMesh(self, self->f1390[13], 1);
+                SetTurningColliderFollowedMesh(self, (Collider*)self->f1390[13], 1);
             }
             break;
         }
@@ -264,9 +264,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                     }
                     late = limit < g_gameTime[0] - self->f2224;
                 }
-                if (late == 1 && FindStateEntryIndex(walker, 0x14A)) {
+                if (late == 1 && FindStateEntryIndex((StateGraph*)walker, 0x14A)) {
                     walkerId = 0x14A;
-                } else if (FindStateEntryIndex(walker, 0x149)) {
+                } else if (FindStateEntryIndex((StateGraph*)walker, 0x149)) {
                     walkerId = 0x149;
                 }
             }
@@ -310,7 +310,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vu0::Q(PS(Vec02, 0x22F0)) = Vu0::Sub(Vu0::Q(((PlacedObject*)self->f61C)->pos), Vu0::Q(pos));
             MultiplyMatrices3x3(&rotA, &((PlacedObject*)self->f61C)->rot, &PS(Mat02, 0x2300));
             MultiplyMatrices3x3(&rotB, &((PlacedObject*)self->f23D0)->rot, &PS(Mat02, 0x2330));
-            TriggerScriptEvent((void*)self->f2204, 2, 0, 0);
+            TriggerScriptEvent((BaseObject*)self->f2204, 2, 0, 0);
             BaseObject* o = (BaseObject*)self->f2204;
             o->desc->m17(o, self);
             GetLinkedObjectHeading(self, &heading);
@@ -345,7 +345,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 if (c->desc->flags & 2) {
                     if ((c->mode450 != 3 && c->f1EC != 0 && c->f1EC->mode0 == 1) ||
                         (c->mode470 != 3 && c->f1F0 != 0 && c->f1F0->mode1 == 1)) {
-                        Attach03* a = TakeAttachRecord(self->world);
+                        Attach03* a = TakeAttachRecord((World*)self->world);
                         a->owner = self;
                         a->target = c;
                         AddColliderAttachment(c, a);
@@ -359,10 +359,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         }
         case 7: {
-            TriggerScriptEvent((void*)self->f2208, 2, 0, 0);
+            TriggerScriptEvent((BaseObject*)self->f2208, 2, 0, 0);
             BaseObject* o = (BaseObject*)self->f2208;
             o->desc->m17(o, self);
-            SetFlaggedLinkContactMask(self, (void*)self->f2208, 1);
+            SetFlaggedLinkContactMask(self, (BaseObject*)self->f2208, 1);
             self->f241C = -1;
             void* track = (void*)self->f2208;
             TrackShape_175170* s = AT(TrackShape_175170*, track, 0x34);
@@ -383,8 +383,8 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                         s->desc->m2(s, self->f2410 - D_00274F14, &b, 0);
                     }
                 }
-                TransformPointBetweenFrames(AT(void*, self->f2208, 0x18), 0, &a, &a);
-                TransformPointBetweenFrames(AT(void*, self->f2208, 0x18), 0, &b, &b);
+                TransformPointBetweenFrames((PlacedObject*)(AT(void*, self->f2208, 0x18)), 0, &a, &a);
+                TransformPointBetweenFrames((PlacedObject*)(AT(void*, self->f2208, 0x18)), 0, &b, &b);
                 Vec02 d;
                 *(u128*)&d = NormalizeOrElse_175170(Vu0::Sub(Vu0::Vec::Of(a), Vu0::Vec::Of(b)), Vu0::Vec::Of(g_unitZVector)).q;
                 self->f221C = d.z < -D_00274F08;
@@ -403,8 +403,8 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if (s->desc->m2 != 0) {
                 s->desc->m2(s, self->f2410, &a, 0);
             }
-            TransformPointBetweenFrames(AT(void*, self->f2208, 0x18), 0, &a, &a);
-            TransformPointBetweenFrames(self, 0, &self->f23E0, &b);
+            TransformPointBetweenFrames((PlacedObject*)(AT(void*, self->f2208, 0x18)), 0, &a, &a);
+            TransformPointBetweenFrames(self, 0, (Vec02*)&self->f23E0, &b);
             Vu0::Q(self->v2400) = Vu0::Sub(Vu0::Q(a), Vu0::Q(b));
             sound = AT(s32, self->f2208, 0x50);
             Vu0::Q(self->v2530) = Vu0::Sub(Vu0::Q(self->v560), Vu0::Q(a));
@@ -413,11 +413,11 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 8: {
             SetPlayerAimMode(self, -1);
             sound = 0x59;
-            SetFlaggedLinkContactMask(self, self->f24A0, 1);
+            SetFlaggedLinkContactMask(self, (BaseObject*)self->f24A0, 1);
             Vec02 pos;
             Mat02 m;
             Vec02 k;
-            TransformPointBetweenFrames(self->f24A0, 0, self->f24B0, &pos);
+            TransformPointBetweenFrames((PlacedObject*)self->f24A0, 0, (Vec02*)self->f24B0, &pos);
             Vu0::Q(k) = Vu0::FromFloat(-1.0f);
             Vu0::Q(m.r[0]) = Vu0::MulX(Vu0::Q(self->v24C0), Vu0::Q(k));
             BuildPerpendicularPair(&m.r[0], &m.r[1], &g_unitZVector, &g_unitZVector);
@@ -445,22 +445,22 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             switch (self->f239C) {
             case 2:
                 StopPlayerAnimation(self);
-                StartSoundEffect(0x4D, 0, (s32)self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x4D, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
                 loud = 1;
-                SetPooledObjectPlayerHold(self->heldObject, 1);
+                SetPooledObjectPlayerHold((PooledObject*)self->heldObject, 1);
                 break;
             case 5:
-                TriggerScriptEvent(self->f23B8, 2, 0, 0);
+                TriggerScriptEvent((BaseObject*)self->f23B8, 2, 0, 0);
                 ((BaseObject*)self->f23B8)->desc->m17((BaseObject*)self->f23B8, self);
-                SetFlaggedLinkContactMask(self, self->f23B8, 1);
+                SetFlaggedLinkContactMask(self, (BaseObject*)self->f23B8, 1);
                 layers = 1;
                 break;
             case 4: {
                 void* track = self->f23BC;
                 layers = 1;
-                TriggerScriptEvent(track, 2, 0, 0);
+                TriggerScriptEvent((BaseObject*)track, 2, 0, 0);
                 ((BaseObject*)track)->desc->m17((BaseObject*)track, self);
-                SetFlaggedLinkContactMask(self, track, 1);
+                SetFlaggedLinkContactMask(self, (BaseObject*)track, 1);
                 self->f241C = -1;
                 Vec02 dir;
                 Vec02 tan;
@@ -468,7 +468,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 if (s->desc->m1 != 0) {
                     s->desc->m1(s, self->f23C0, 0, &tan);
                 }
-                TransformDirectionBetweenFrames(AT(void*, track, 0x18), 0, &tan, &dir);
+                TransformDirectionBetweenFrames((PlacedObject*)(AT(void*, track, 0x18)), 0, &tan, &dir);
                 dir.z = 0.0f;
                 AsVec_175170(dir) = NormalizeOrElse_175170(Vu0::Vec::Of(dir), Vu0::Vec::Of(g_unitXVector));
                 s32 back = 1;
@@ -557,7 +557,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 14: {
             BaseObject* o = (BaseObject*)self->f2750;
             if (IsObjectAttached(o)) {
-                TakeCountedColliderTouch(self->f2750, self, 1);
+                TakeCountedColliderTouch((CountedCollider*)self->f2750, self, 1);
             }
             o = (BaseObject*)self->f2750;
             o->desc->m02(o);
@@ -706,7 +706,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->f2274 = now;
             self->f226C = D_00262E14 * Fpu::Sqrt(self->f700);
             self->f690 = 0;
-            StartSoundEffect(0x4F, 0, (s32)self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(0x4F, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             ComputePlayerJumpVelocity(self, &v);
             switch (self->f224C) {
             case 1:
@@ -733,10 +733,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 anim = PS(void*, 0x1020);
             }
             if (self->f224C == 4 && self->f634 == 0.0f) {
-                ComputePolarOffset(&v, self->f638, 100.0f, v.z);
+                ComputePolarOffset((Vec3*)&v, self->f638, 100.0f, v.z);
                 self->f2270 = 3;
             } else {
-                ComputePolarOffset(&v, self->f630, self->f226C * self->f634, v.z);
+                ComputePolarOffset((Vec3*)&v, self->f630, self->f226C * self->f634, v.z);
             }
             self->desc02()->m20(self, &v);
             break;
@@ -772,7 +772,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             } else {
                 anim = PS(void*, 0x1020);
             }
-            InitContactPairFlags(((Collider*)self->heldObject)->world, self->heldObject);
+            InitContactPairFlags(((Collider*)self->heldObject)->world, (Collider*)self->heldObject);
             Vu0::Q(self->v640) = Vu0::Zero();
             break;
         case 9: {
@@ -1053,24 +1053,24 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if (PS(void*, 0x25CC) != 0) {
                 anim = PS(void*, 0x25CC);
             }
-            PushCameraController(g_camera, 6, (u8*)g_camera + 0x460, self, 0);
+            PushCameraController(g_camera, 6, (CameraController*)((u8*)g_camera + 0x460), self, 0);
             break;
         case 34: {
             f32 dim = 0.6f;
             SetVolumeChannelFactor(5, 0, dim);
             SetVolumeChannelFactor(5, 1, dim);
-            StartCameraSounds((u8*)g_camera + 0x460);
+            StartCameraSounds((CameraSoundOwner*)((u8*)g_camera + 0x460));
             RequestCameraSnap(g_camera, 0);
             ((CaptionBox_175170_eu*)&g_typedTextCaptionBox)->child = self->f2BD0;
             self->f2BD0 = 0;
-            PushStackElement(g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
             break;
         }
         case 35:
             if (PS(void*, 0x25D0) != 0) {
                 anim = PS(void*, 0x25D0);
             }
-            RemoveCameraControllers(g_camera, 0xF, 6, (u8*)g_camera + 0x460, self, 0);
+            RemoveCameraControllers(g_camera, 0xF, 6, (CameraController*)((u8*)g_camera + 0x460), self, 0);
             RequestCameraSnap(g_camera, 0);
             break;
         case 39:
@@ -1161,7 +1161,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vu0::Q(v) = vel;
             s32 slow = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(vel, vel))) < D_002639B0[0];
             if (slow) {
-                ComputePolarOffset(&v, self->f638, most, 0.0f);
+                ComputePolarOffset((Vec3*)&v, self->f638, most, 0.0f);
             } else {
                 f32 len = Vu0::ToFloatMoved(Vu0::Length(vel));
                 if (len < most) {
@@ -1220,9 +1220,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 arg->value = self->heldObject;
                 arg++;
             }
-            CreateAnimationPlayer(anim, self, arg - args, args, flag, &self->watched2230, start, speed);
+            CreateAnimationPlayer((Animation*)anim, (Animation*)self, arg - args, (TargetBinding*)args, flag, (AnimationPlayer**)&self->watched2230, start, speed);
         } else if (walker != 0) {
-            self->f2234 = CreateStateWalker(walker, self, walkerId, flag);
+            self->f2234 = CreateStateWalker((StateGraph*)walker, self, walkerId, flag);
         }
     }
 }

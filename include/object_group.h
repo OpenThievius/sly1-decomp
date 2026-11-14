@@ -11,6 +11,9 @@
 #define OBJECT_GROUP_H
 
 #include "placed_object.h"
+struct LoadStream;
+struct ObjectGroup;
+
 
 struct LoadStream;  // the level stream an object is loaded from
 
@@ -49,7 +52,7 @@ typedef char check_ObjectGroup[sizeof(ObjectGroup) == 0x2F0 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitObjectGroup(ObjectGroup* self);                       // 0x53 slot 0
-void LoadObjectGroup(ObjectGroup* self, LoadStream* stream);       // 0x53 slot 10
+void LoadObjectGroup(ObjectGroup* self, LoadStream* rd);       // 0x53 slot 10
 void CopyObjectGroup(ObjectGroup* self, ObjectGroup* src);             // 0x53 slot 9
 void StartObjectGroup(ObjectGroup* self);                       // 0x53 slot 16
 

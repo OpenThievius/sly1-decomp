@@ -9,7 +9,7 @@ void SetScreenFadeMode(ScreenFade* self, s32 mode)
     if (self->mode == mode) goto L0410;
     if (self->mode == 2) {
         if (D_0026FA68 != 0) {
-            SetWarpPageMode(D_0026FA68, 0);
+            SetWarpPageMode((WarpPage*)D_0026FA68, 0);
         }
     }
     if (mode == 1) goto L02E0;
@@ -29,7 +29,7 @@ void SetScreenFadeMode(ScreenFade* self, s32 mode)
 L02A0:
     if (self->active.kind != 0) {
         FadeRequest* q = &self->active;
-        QueueWorldLoad((u8*)&g_worldLoadRequest, (s32)q->key, q->f08, q->f0C, q->flags);
+        QueueWorldLoad((WorldLoadRequest*)&g_worldLoadRequest, (WorldKeyBlock*)q->key, q->f08, q->f0C, q->flags);
     }
     self->active.kind = 0;
     self->opacity = 1.0f;
@@ -46,14 +46,14 @@ L02E0:
 
 L0300:
     {
-        s32 v = GetEntryIdByKey((s32)self->active.key);
+        s32 v = GetEntryIdByKey((KeyedEntry*)self->active.key);
         s32 a3 = v >> 8;
         s32 a2 = v & 0xFF;
         if (D_0026FA68 == 0) goto L034C;
         if (v == -1) goto L034C;
         s32 a1 = 10;
         if (a3 != 0) a1 = a2;
-        SetWarpCursor(D_0026FA68, a1, 3);
+        SetWarpCursor((WarpPage*)D_0026FA68, a1, 3);
         ShowCountedScreenElement(g_currentWorld);
         goto L0364;
     }
@@ -68,7 +68,7 @@ L0354:
 
 L0364:
     ((Sys_1F0220_eu*)g_elementStack)->f30 = 8;
-    SetElementStackState(g_elementStack, 8);
+    SetElementStackState((ElementStack*)g_elementStack, 8);
     self->mode = mode;
     goto L0404;
 
@@ -91,7 +91,7 @@ L038C:
         }
         if (D_eu_00274868.f570 != 0) {
             ((WarpPage*)D_eu_00274868.f570)->f2E0 = 3;
-            SetWarpPageMode(D_eu_00274868.f570, 4);
+            SetWarpPageMode((WarpPage*)D_eu_00274868.f570, 4);
             self->mode = mode;
             goto L0404;
         }

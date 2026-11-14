@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the D_00270650 aim at 0x580 (US 0x270; PAL's ScreenElement is 0x310 bytes longer).
 
-void HandleModeWalkerActivation(ModeWalker* self, s32 active)
+void HandleModeWalkerActivation(ModeWalker* self, void* active)
 {
     HandlePathFollowerActivation(self, active);
     if (active) {

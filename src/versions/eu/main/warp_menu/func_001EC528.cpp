@@ -5,7 +5,7 @@ struct Glob_1EC528_eu { u8 pad0[0x584]; f32 f584; f32 f588; };
 void DecrementWorld3BossGauge(World3Boss* self)
 {
     Glob_1EC528_eu* g = (Glob_1EC528_eu*)&g_gaugeBarElement;
-    DecrementGaugeCount((u8*)&g_gaugeBarElement);
+    DecrementGaugeCount((T217D_2E0*)&g_gaugeBarElement);
     self->fA68 = 2;
     g->f584 = g->f588;
 }

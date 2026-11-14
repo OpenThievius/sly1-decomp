@@ -24,6 +24,12 @@
 #include "bump_allocator.h"
 #include "texture_header.h"
 #include "shapes.h"
+#include "object_finder.h"
+#include "layout_137228.h"
+
+// Types other files define, named by the parameters of their functions declared here.
+struct MemoryCard;
+struct ObjectLink;
 
 extern f32 g_gameTime[];
 extern f32 g_elapsedTime;
@@ -60,11 +66,6 @@ struct BoxStyle;
 extern BoxStyle D_00262988;
 extern s32 D_00272420;
 struct CaptionLayout;
-void SetTextLayoutPosition(CaptionLayout* out, f32 x, f32 y);
-void SetTextLayoutSize(CaptionLayout* out, f32 x, f32 y);
-void SetTextLayoutColor(CaptionLayout* out, s32* value);
-void SetTextLayoutHorizontalAlign(CaptionLayout* out, s32 flag);
-void SetTextLayoutVerticalAlign(CaptionLayout* out, s32 flag);
 struct CaptionLayout {
     union {
         u8 b[32];
@@ -79,11 +80,11 @@ struct CaptionLayout {
             s32 vAlign;
         };
     };
-    void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
-    void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
-    void Color(s32* c) { SetTextLayoutColor(this, c); }
-    void FlagA(s32 f) { SetTextLayoutHorizontalAlign(this, f); }
-    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
+    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
+    void Color(s32* c) { ((Layout_137228*)this)->Color(c); }
+    void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
+    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
 };
 struct CaptionDrawer {
     static void Draw(Font** h, CaptionLayout* out, void* tbl)
@@ -96,14 +97,14 @@ struct CaptionDrawer {
 };
 extern BoxStyle D_002629A8;
 
-void StartPlacedObject(void* self);
-void ResolveObjectLinks(void* self, s32 n, void* table);
+void StartPlacedObject(PlacedObject* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 u32 GetEntryFlags(s32 idx);
 u32* GetLevelEntryByKey(s32 idx);
 void CallFlaggedParts(PartHolderObject* self)
 {
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 9, &g_partHolderLinks);
+    ResolveObjectLinks(self, 9, (ObjectLink*)&g_partHolderLinks);
 
     if ((u32)(self->id - 0x515) < 5) {
         s32 t = self->id - 0x514;
@@ -134,17 +135,17 @@ void CallFlaggedParts(PartHolderObject* self)
     }
 }
 
-StateWalker* CreateStateWalker(StateTrigger* o, s32 a, s32 b, s32 c);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 s32 ComputeCompletionMask();
-void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 idx, s32 z);
-void TeleportStateWalker(StateWalker* o, s32 id);
-void PushStackElement(u8* a, u8* b);
+void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
+void TeleportStateWalker(StateWalker* self, s32 key);
+void PushStackElement(ElementStack* self, ScreenElement* node);
 void SetupCurrentObjectChoices(CurrentPlacedObject* self)
 {
-    if (self->walkers[0].graph) self->walkers[0].walker = CreateStateWalker(self->walkers[0].graph, 0, -1, 0);
-    if (self->walkers[1].graph) self->walkers[1].walker = CreateStateWalker(self->walkers[1].graph, 0, -1, 0);
-    if (self->walkers[2].graph) self->walkers[2].walker = CreateStateWalker(self->walkers[2].graph, 0, -1, 0);
-    if (self->walkers[3].graph) self->walkers[3].walker = CreateStateWalker(self->walkers[3].graph, 0, -1, 1);
+    if (self->walkers[0].graph) self->walkers[0].walker = CreateStateWalker((StateGraph*)self->walkers[0].graph, 0, -1, 0);
+    if (self->walkers[1].graph) self->walkers[1].walker = CreateStateWalker((StateGraph*)self->walkers[1].graph, 0, -1, 0);
+    if (self->walkers[2].graph) self->walkers[2].walker = CreateStateWalker((StateGraph*)self->walkers[2].graph, 0, -1, 0);
+    if (self->walkers[3].graph) self->walkers[3].walker = CreateStateWalker((StateGraph*)self->walkers[3].graph, 0, -1, 1);
     self->lastChoice = 5;
     for (;;) {
         s32 c = self->lastChoice;
@@ -209,26 +210,26 @@ void SetupCurrentObjectChoices(CurrentPlacedObject* self)
         if (self->walkers[2].walker) TeleportStateWalker(self->walkers[2].walker, D_00262860[self->walkerChoice].walkerKey);
         if (self->walkers[3].walker) TeleportStateWalker(self->walkers[3].walker, D_00262860[self->walkerChoice].walkerKey);
     }
-    PushStackElement(g_elementStack, (u8*)&D_0026FA90);
+    PushStackElement((ElementStack*)g_elementStack, &D_0026FA90);
 }
 
-void StartPlacedObject(void* self);
-void ResolveObjectLinks(void* self, s32 n, void* table);
-void SetElementStackState(void* obj, s32 mode);
-void AppendQueuedCall(void* owner, void* fn, void* arg, s32 a3, s32 a4); // stays void: retail returns a value, but declared so func_0016AED8 differs in registers
+void StartPlacedObject(PlacedObject* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+void SetElementStackState(ElementStack* self, s32 state);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d); // stays void: retail returns a value, but declared so func_0016AED8 differs in registers
 void BecomeCurrentObject(CurrentPlacedObject* self)
 {
     StartPlacedObject(self);
     self->flags = (self->flags & ~(3ULL << 40)) | (1ULL << 40);
     g_currentPlacedObject = (s32)self;
     ((ElementStackState*)g_elementStack)->f30 = 2;
-    SetElementStackState(g_elementStack, 2);
-    ResolveObjectLinks(self, 0x12, g_currentPlacedObjectLinks);
+    SetElementStackState((ElementStack*)g_elementStack, 2);
+    ResolveObjectLinks(self, 0x12, (ObjectLink*)g_currentPlacedObjectLinks);
     self->choice = -1;
     AppendQueuedCall(self->world, (void*)SetupCurrentObjectChoices, self, 0, 0);
 }
 
-void SetElementTextFromIndexedCounts(T217D_3D0* self);
+void SetElementTextFromIndexedCounts(ScreenElement* self, s32 idx);
 void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
 {
     s32 s1 = 0;
@@ -241,7 +242,7 @@ void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
     } else {
         s32 flags = g_saveData->levels[self->choice].f448;
         if (flags & 1) {
-            SetElementTextFromIndexedCounts(&D_0026F138);
+            SetElementTextFromIndexedCounts(&D_0026F138, self->choice);
         } else if (self->choice == self->walkerChoice) {
             D_0026F138.vt->m08(&D_0026F138, "Murray");
         } else {
@@ -262,12 +263,12 @@ void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
     }
 }
 
-s32 GetPadHorizontalStep(void* p);
-void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 idx, s32 zero);
-void MoveCurrentObjectChoice(CurrentPlacedObject* self, void* a1)
+s32 GetPadHorizontalStep(PadRecord* self);
+void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
+void MoveCurrentObjectChoice(CurrentPlacedObject* self, PadRecord* a1)
 {
     s32 n = self->choice;
-    s32 r = GetPadHorizontalStep(a1);
+    s32 r = GetPadHorizontalStep((PadRecord*)a1);
     f32 f = (f32)r;
     s32 v = self->lastChoice;
     s32 k = (v == 5);
@@ -290,12 +291,13 @@ void MoveCurrentObjectChoice(CurrentPlacedObject* self, void* a1)
 
 void* LookupEntryById(s32 key);
 void MarkProgressStageFlag(s32 idx);
-void CreateAnimationPlayerWithoutPresetTargets(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_0016B190 differs in registers
-s32 HasAnimationEventKind19(void* a);
-void StartObjectFade(void* a, s32 b, s32 c);
-void PopStackElement(void* p);
-void SetStateWalkerTarget(void* a, s32 b);
-void SetCurrentObjectChoice(void* self, s32 idx, s32 flag);
+struct IdentityKey;
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_0016B190 differs in registers
+s32 HasAnimationEventKind19(Animation* a0);
+void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
+void PopStackElement(ElementStack* g);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
+void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
 void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
 {
     s32 callB = 1;
@@ -309,9 +311,9 @@ void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
             MarkProgressStageFlag(idx);
             elt = *(void**)(table + (self->choice << 2));
             if (elt != 0) {
-                CreateAnimationPlayerWithoutPresetTargets(elt, self, 0, 0, 0.0f, 1.0f);
+                CreateAnimationPlayerWithoutPresetTargets((Animation*)elt, self, 0, 0, 0.0f, 1.0f);
                 elt = *(void**)(table + (self->choice << 2));
-                if (elt != 0 && HasAnimationEventKind19(elt) != 0) {
+                if (elt != 0 && HasAnimationEventKind19((Animation*)elt) != 0) {
                     goto tail;
                 }
             }
@@ -322,20 +324,20 @@ void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
                     flag = (a->f4 != a->f1C);
                 }
                 if (flag) {
-                    StartObjectFade(a, -1, 1);
+                    StartObjectFade((IdentityKey*)a, -1, 1);
                 } else {
                     s2 = 0;
                 }
             }
         tail:
             if (s2) {
-                PopStackElement(g_elementStack);
+                PopStackElement((ElementStack*)g_elementStack);
             }
         } else {
             void* h = self->walkers[3].walker;
             callB = 0;
             if (h != 0) {
-                { SetStateWalkerTarget(h, D_00262860[idx].targetKey); }
+                { SetStateWalkerTarget((StateWalker*)h, D_00262860[idx].targetKey); }
             }
         }
         }
@@ -347,10 +349,11 @@ void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
 
 // NEAR: only the order of `addiu v0,s5,lo(D_00261858)` vs `sw s4,0x2D4(s3)` differs (2 instrs swapped)
 
-void OpenKeyRecord(ChoiceSound* s);
+struct KeyRecord;
+void OpenKeyRecord(KeyRecord* self);
 s32 HasStreamVoice(void);
-void TeleportStateWalker(void* h, s32 arg);
-void SetStateWalkerTarget(void* h, s32 arg);
+void TeleportStateWalker(StateWalker* self, s32 key);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
 {
     if (a == self->choice && b == self->keyIndex) return;
@@ -370,7 +373,7 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
             }
         }
         if (slot) {
-            OpenKeyRecord(slot);
+            OpenKeyRecord((KeyRecord*)slot);
             D_0026FCF4 = HasStreamVoice();
         }
     }
@@ -378,11 +381,11 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
     if (h) {
         if (self->choice == -1) {
             if (a != 0) {
-                TeleportStateWalker(h, D_00262860[a].targetKey);
+                TeleportStateWalker((StateWalker*)h, D_00262860[a].targetKey);
                 SetStateWalkerTarget(self->walkers[0].walker, D_00262860[a].walkerKey);
             }
         } else {
-            SetStateWalkerTarget(h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
+            SetStateWalkerTarget((StateWalker*)h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
         }
     }
     self->choice = a;
@@ -406,7 +409,6 @@ void InitSelectionCaption(T217D_12E0* self)
     self->lastAt = -D_00262970;
 }
 
-void* FindFirstObjectByIdMode4(void* obj, s32 id, s32 flags);
 void PushObjectCameraController(void* p);
 void RestoreSelectionCaptionCamera(T217D_12E0* self)
 {
@@ -427,14 +429,14 @@ void UpdateSelectionCaption(T217D_12E0* self)
 s32 CheckStreamVoicePending(void);
 s32 PollIopCommands(void);
 s32 HasStreamVoice(void);
-void StartMemoryCardSave(u8* p);
-void ChooseStepSequenceState(void* p);
+void StartMemoryCardSave(MemoryCard* self);
+void ChooseStepSequenceState(StepSequence* self);
 void ShowCurrentObjectCaptions(CurrentPlacedObject* o);
-void PushStackElement(u8* a, void* b);
-void ClearPadPressedBits(PadRecord* a, s32 mask);
+void PushStackElement(ElementStack* self, ScreenElement* node);
+void ClearPadPressedBits(PadRecord* self, u32 mask);
 void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
 void ConfirmCurrentObjectChoice(CurrentPlacedObject* o);
-void MoveCurrentObjectChoice(CurrentPlacedObject* o, PadRecord* a);
+void MoveCurrentObjectChoice(CurrentPlacedObject* self, PadRecord* a1);
 void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
 {
     if (self->node == 0) {
@@ -459,9 +461,9 @@ void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
     StateWalker* p = o->walkers[0].walker;
     if (o->pendingSequence != 0) {
         if (o->pendingSequence == o->sequences[0]) {
-            StartMemoryCardSave(g_memoryCard);
+            StartMemoryCardSave((MemoryCard*)g_memoryCard);
         }
-        ChooseStepSequenceState(o->pendingSequence);
+        ChooseStepSequenceState((StepSequence*)o->pendingSequence);
         o->pendingSequence = 0;
     }
     ShowCurrentObjectCaptions(o);
@@ -472,14 +474,14 @@ void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
             if (D_0026FD00.mode != 0) {
                 return;
             }
-            PushStackElement(g_elementStack, &D_0026FD00);
+            PushStackElement((ElementStack*)g_elementStack, &D_0026FD00);
             return;
         }
         if (g_mapScreenList.mode != 0) {
             return;
         }
         g_mapScreenList.current = g_mapScreenList.nodes[idx];
-        PushStackElement(g_elementStack, &g_mapScreenList);
+        PushStackElement((ElementStack*)g_elementStack, &g_mapScreenList);
         return;
     }
     if (p->f28 != p->index) {
@@ -498,11 +500,11 @@ void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
     MoveCurrentObjectChoice(o, arg);
 }
 
-void SetCurrentObjectChoice(void* self, s32 idx, s32 flag);
+void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
 s32 SetPadSelectFlags(s32 bits);
-void ResetPadStepRepeat(void* p);
+void ResetPadStepRepeat(PadRecord* p);
 void StopStreamVoice(void);
-void ClearPadSelectFlags(s32 n);
+void ClearPadSelectFlags(u32 mask);
 void SetSelectionCaptionOpen(T217D_12E0* self, s32 v)
 {
     s32 flag = (v != 0);
@@ -510,7 +512,7 @@ void SetSelectionCaptionOpen(T217D_12E0* self, s32 v)
         return;
     }
     if (v != 0) {
-        SetCurrentObjectChoice(self->node, ((CurrentPlacedObject*)self->node)->choice, 0);
+        SetCurrentObjectChoice((CurrentPlacedObject*)self->node, ((CurrentPlacedObject*)self->node)->choice, 0);
         SetPadSelectFlags(1);
         ResetPadStepRepeat(&g_padRecord);
     } else {
@@ -525,10 +527,14 @@ void SetSelectionCaptionOpen(T217D_12E0* self, s32 v)
     self->open = v;
 }
 
-f32 Sine(f32 x);
+extern "C" f32 Sine(f32 x);
 void PushFontScale(Font* font, f32 a, f32 b);
-void* InitTextReader(void* out, void* p, Font* font);
-void DrawAlignedText(void* a, void* b, s32 c, void* d);
+struct TextReader;
+void* InitTextReader(TextReader* self, char* text, Font* font);
+struct Layout_137228;
+struct Layout_137228;
+struct TextReader;
+void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
 void PopFontScale(Font* font);
 void DrawSelectionCaption(T217D_12E0* self)
 {
@@ -562,8 +568,8 @@ void DrawSelectionCaption(T217D_12E0* self)
         f32 k = (1.0f - t) * 0.9f + t;
         f32 v = self->scale * k;
         PushFontScale(self->font, v, v);
-        InitTextReader(loc, &self->text[0], self->font);
-        DrawAlignedText(loc, &out, 0, &g_gsPacketWriter);
+        InitTextReader((TextReader*)loc, &self->text[0], self->font);
+        DrawAlignedText((TextReader*)loc, (Layout_137228*)&out, 0, &g_gsPacketWriter);
         PopFontScale(self->font);
     }
 }
@@ -607,9 +613,11 @@ u32 TestGridEntryBit(u32 bit)
     return g_saveData->u19F4 & mask;
 }
 
-void ClearPadPressedBits(PadRecord* self, s32 mask);
+void ClearPadPressedBits(PadRecord* self, u32 mask);
 void QueueMovieByIndex(s32 index);
-void StartSoundEffect(s32 sound, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 r2, s32 a5);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 s32 GetPadHorizontalStep(PadRecord* p);
 s32 GetPadVerticalStep(PadRecord* p);
 void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
@@ -619,7 +627,7 @@ void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
 
     if ((o->flags & 0x9B0) != 0 || (o->f14 == 1 && 5.0f <= g_gameTime[0])) {
         ClearPadPressedBits(o, 0x9B0);
-        PopStackElement(g_elementStack);
+        PopStackElement((ElementStack*)g_elementStack);
         return;
     }
     if ((o->flags & 0x40) != 0) {
@@ -657,9 +665,8 @@ void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
 }
 
 s32 SetPadSelectFlags(s32 n);
-void ClearPadSelectFlags(s32 n);
-void ResetPadStepRepeat(void* p);
-s32 TestGridEntryBit(s32 n);
+void ClearPadSelectFlags(u32 mask);
+void ResetPadStepRepeat(PadRecord* p);
 void SetGridSelectorOpen(T217D_1330* self, s32 flag)
 {
     if ((flag != 0) != (self->open == 0)) {
@@ -690,9 +697,13 @@ void PushFontScale(Font* font, f32 x, f32 y);
 // One scale for both axes: the argument goes straight into $f12 and $f13 (an inline's unmodified
 // parameter is its constant), so no pseudo of the push's 1.3 is left for the loop's 1.3 to copy.
 inline void PushUniformFontScale(Font* font, f32 s) { PushFontScale(font, s, s); }
-void DrawFontString(Font* font, const char* text, CaptionLayout* out, s32 zero, void* d);
+struct Font;
+struct PacketWriter;
+struct StringLayout;
+struct Vec4U;
+void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 const char* GetMovieTitle(s32 index);
-void DrawLineSegment(s32 x0, s32 y0, s32 z0, s32 x1, s32 y1, s32 z1, T217D_Word* color, s32 k);
+void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* color, s32 flag);
 void DrawGridSelector(T217D_1330* self)
 {
     T217D_Word tmp;
@@ -728,7 +739,7 @@ void DrawGridSelector(T217D_1330* self)
         title = GetMovieTitle(self->cursor);
     CaptionLayout* o = &out;
     f32 half = 0.5f;
-    DrawFontString(self->font, title, o, 0, &g_gsPacketWriter);
+    DrawFontString(self->font, title, (StringLayout*)o, 0, &g_gsPacketWriter);
     f32 left = 18.0f;
     f32 gap = 12.0f;
     Font* f = GetFontById(4);
@@ -756,7 +767,7 @@ void DrawGridSelector(T217D_1330* self)
                 k = (k - (Sine(g_gameClock[4] * 10.0f) * 0.5f + 0.5f)) * 0.1f + k;
             f32 v = self->blend * (k * 1.3f);
             PushFontScale(f, v, v);
-            DrawFontString(f, s, &out, 0, &g_gsPacketWriter);
+            DrawFontString(f, s, (StringLayout*)&out, 0, &g_gsPacketWriter);
             PopFontScale(f);
         }
     }
@@ -771,7 +782,7 @@ void DrawGridSelector(T217D_1330* self)
 // initialiser GCC writes for them (func_0016C360); their bytes are zero until then.
 // The rodata from 0x24A7A0 is func_0016AF80's strings ("" to the mission prompt) and
 // func_0016BEA0's "???", all literals.
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 struct BoxStyle {
     void* f0;

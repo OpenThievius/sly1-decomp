@@ -11,6 +11,7 @@
 
 #include "placed_object.h"
 #include "shapes.h"
+struct AnimationPlayer;
 
 // One of the page's eleven entries; PostLoadWarpPage clears two values and draws a phase and a
 // speed at random from a range.
@@ -40,7 +41,7 @@ struct WarpPage : PlacedObject {
     s32 f2E0;               // 0x2E0
     Animation* f2E4;        // 0x2E4: the animation of the page opening (SetWarpPageMode)
     Animation* f2E8;        // 0x2E8: the one of it closing; its start events of kind 10 name objects func_001F0908 restarts
-    s32 f2EC;               // 0x2EC
+    AnimationPlayer* f2EC;  // 0x2EC: the player ReplaceAnimationPlayer starts
     void* f2F0;             // 0x2F0: its address goes to func_0012C918 (func_001F1050)
     s32 slot;               // 0x2F4: 1..5 by id, else the value in the global block at +0x19D8
     WarpEntry entries[11];  // 0x2F8

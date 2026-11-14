@@ -225,7 +225,7 @@ u64 SubtractDoubles(u64 pa, u64 pb)
     return PackDouble(AddUnpackedDoubles(&a, &b, &c));
 }
 
-u64 MultiplySigned64(u64 a, u64 b);
+u64 MultiplySigned64(s64 u, s64 v);
 static inline Unpacked* Multiply(Unpacked* a, Unpacked* b, Unpacked* tmp)
 {
     u64 high;

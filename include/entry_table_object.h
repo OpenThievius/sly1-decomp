@@ -9,6 +9,7 @@
 #define ENTRY_TABLE_OBJECT_H
 
 #include "placed_object.h"
+struct BufferedStream;
 
 // 0x64: func_0016DD10 sets the tuning values; func_0016DD90 loads the table (the entries
 // func_0015A4F0 finds for the object, at most 0x10 of them) after the common load.
@@ -31,7 +32,7 @@ typedef char check_EntryTableObject[sizeof(EntryTableObject) == 0x340 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitEntryTableObject(EntryTableObject* self);                       // 0x64 slot 0
-void LoadEntryTable(EntryTableObject* self);                       // 0x64 slot 10
+void LoadEntryTable(EntryTableObject* self, BufferedStream* stream);                       // 0x64 slot 10
 void StartEntryTableObject(EntryTableObject* self);                       // 0x64 slot 16
 
 #endif

@@ -22,7 +22,7 @@ void SteerWalkerAimAtNearestTarget(T217D_BF0* element, PadStick* pad)
     Class75Object* chosen = 0;
     for (Class75Object* o = *(Class75Object**)g_class75List; o != 0; o = *(Class75Object**)&o->link) {
         GetObjectWorldPosition(o, &p);
-        ProjectPointToCamera(g_camera, &p, &p);
+        ProjectPointToCamera(g_camera, &p, (f32*)&p);
         if (p.z < 100.0f) {
             continue;
         }
@@ -40,15 +40,15 @@ void SteerWalkerAimAtNearestTarget(T217D_BF0* element, PadStick* pad)
             chosen = o;
         }
     }
-    self->rateX = ApproachValueWithRamp(self->rateX, pad->x, g_gameClock[2], D_00264198, 0);
+    self->rateX = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateX, pad->x, g_gameClock[2]);
     f32 y = pad->y;
     if (g_saveData->f19EC & 0x400) {
         y = -y;
     }
-    self->rateY = ApproachValueWithRamp(self->rateY, y, g_gameClock[2], D_00264198, 0);
+    self->rateY = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateY, y, g_gameClock[2]);
     self->aim[0] = ClampHelper::Of(self->aim[0] + g_gameClock[2] * self->rateX * D_002641A4, -1.0f, 1.0f);
     self->aim[1] = ClampHelper::Of(self->aim[1] - g_gameClock[2] * self->rateY * D_002641A4, -1.0f, 1.0f);
     f32 far = 1000.0f;
-    self->aim[2] = ApproachValueWithRamp(self->aim[2], far >? best.z, g_gameClock[2], D_002641A8, 0);
+    self->aim[2] = ApproachValueWithRamp((RampProfile*)D_002641A8, 0, self->aim[2], far >? best.z, g_gameClock[2]);
     self->target = chosen;
 }

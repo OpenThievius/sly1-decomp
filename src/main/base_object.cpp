@@ -23,43 +23,46 @@
 #include "vu0.h"
 #include "packet_writer.h"
 #include "asm_func.h"
+struct Mat02;
 
-void SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value); // stays void: retail returns a value, but declared so func_00183A90 and func_00183C38 differs in registers
+
+void SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value); // stays void: retail returns a ScriptValue by value through the hidden pointer, a call with no value register, which a pointer return changes in func_00183A90 and func_00183C38
 
 ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, s32* vals);
 
 int AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 
-void CopyObjectData(void* self);
+void CopyObjectData(void* self, void* src);
 
 
-void* TakeCallRecord(void);
+void* TakeCallRecord(World* self);
 
-void RemoveFromList(void* a, void* b);
+void RemoveFromList(List01* list, void* item);
 
-void NoteConeVolumeLightingChange(void* a);
+void NoteConeVolumeLightingChange(ConeVolume* self);
 
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
 
 void* AllocateFrontMemory(s32 size);
 
-void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
-s32 IsObjectAttached(void* p);
+s32 IsObjectAttached(BaseObject* self);
 
-void* CreateTypedRecord(s32 a, void* b, s32 c, s32 d, s32 e);
+void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
 
 
-void UnregisterPlacedObject(void* self);
+void UnregisterPlacedObject(PlacedObject* self);
 
 void RemoveConeVolumeFromWorldList(void* self);
 
-s32 IsInsideRange(void* target, f32 scale);
+struct ValueRange;
+s32 IsInsideRange(ValueRange* span, f32 x);
 
-void AddObjectKeyToOwner(void* self);
+void AddObjectKeyToOwner(BaseObject* self);
 
-s32 IsObjectAttached(void* self);
+s32 IsObjectAttached(BaseObject* self);
 
 struct __attribute__((packed)) Pack_183B20 { u64 v; };
 
@@ -67,69 +70,69 @@ void* AcquirePairPayload(void);
 
 void* AcquireVectorAPayload(void);
 
-void ComputePlacedObjectWorldFrame(void* self);
+void ComputePlacedObjectWorldFrame(PlacedObject* self);
 
-void RefreshConeVolumeShape(void* self);
+void RefreshConeVolumeShape(ConeVolume* self);
 
-void UpdateConeVolumeBounds(void* self);
+void UpdateConeVolumeBounds(ConeVolume* self);
 
 extern u8 g_markStacks[];
 
-void AddMarkRootList(u8* a, void* b);
+struct MarkStacks;
+void AddMarkRootList(MarkStacks* self, R11B008List* list);
 
-void CopyMemory(void* dst, void* src, s32 size);
+void CopyMemory(void* dst, void* src, u32 size);
 
-u8* GetHashedSlot(World* world, s32 n);
+u8* GetHashedSlot(u8* base, s32 n);
 
-void RemoveFromList(u8* p, void* self);
+void RemoveFromList(List01* list, void* item);
 
-void AppendToList(u8* p, void* self);
+void AppendToList(List01* self, void* item);
 
-void* NewScriptScope(void);
+ScriptScope* NewScriptScope(void);
 
-void MarkPoolLiveEnds(u8* a);
+void MarkPoolLiveEnds(MarkStacks* stacks);
 
-void CopyScriptScope(void* a, void* b);
+void CopyScriptScope(ScriptScope* src, ScriptScope* dst);
 
-void AddUniqueMarkRoot(u8* a, void* b);
+struct MarkEntry;
+void AddUniqueMarkRoot(MarkStacks* self, MarkEntry* value);
 
-void AppendToList(void* sub, void* self);
+void AppendToList(List01* self, void* item);
 
-void RegisterPlacedObject(void* self);
+void RegisterPlacedObject(PlacedObject* self);
 
 void AddConeVolumeToWorldList(ConeVolume* self);
 
 void RegisterObject(void* self);
 
-void AppendToList(u8* table, void* self);
+void AppendToList(List01* self, void* item);
 
-s32 IsInList(List01* list, BaseObject* item);
+s32 IsInList(List01* self, void* item);
 
 s32 IsObjectAttached(BaseObject* self);
 
-void RemoveFromList(List01* list, BaseObject* item);
+void RemoveFromList(List01* list, void* item);
 
 void UnregisterObject(void* self);
 
-void RemoveFromList(u8* table, void* self);
+void RemoveFromList(List01* list, void* item);
 
 
-void ReleaseCallRecords(void* a, void* b);
+struct T219CHook;
+struct World;
+void ReleaseCallRecords(World* self, T219CHook* node);
 
-s32 GetAliasId(void* self);
+s32 GetAliasId(BaseObject* self);
 
-void AppendToList(List01* list, BaseObject* item);
+void AppendToList(List01* self, void* item);
 
-s32 IsInList(void* sub, BaseObject* self);
+s32 IsInList(List01* self, void* item);
 
 // The callback list's helpers (func_001831E8 adds, func_00183238 removes), as the slots call them.
-void AddCallbackNode(World* world, Callback01** head, void* fn, s32 ctx);
+void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx);
 
-void RemoveCallbackNode(World* world, Callback01** head, s32 fn, s32 ctx);
-
-void AddCallbackNode(World* world, Callback01** head, void (*fn)(BaseObject*, s32, void*), BaseObject* ctx);
-
-void RemoveCallbackNode(World* world, Callback01** head, void (*fn)(BaseObject*, s32, void*), BaseObject* ctx);
+void RemoveCallbackNode(World* world, Callback01** head, void* fn, void* ctx);
 
 void* AcquireVectorBPayload(void);
 
@@ -137,46 +140,46 @@ void ReadPropertyRecords(void* a, void* b);
 
 // The script function func_001834A0 calls (the value of a script variable): the scope it was
 // made in, its parameters, its body.
-struct ScriptParam { s32 a; void* name; ScriptParam* next; };
+struct ScriptParam { s32 a; s32 name; ScriptParam* next; };
 
-struct ScriptParams { s32 pad0; void* selfName; ScriptParam* head; };
+struct ScriptParams { s32 pad0; s32 selfName; ScriptParam* head; };
 
-struct ScriptMethod { s32 scope; ScriptParams* params; s32 pad8; s32 padC; void* body; };
+struct ScriptMethod { ScriptScope* scope; ScriptParams* params; s32 pad8; s32 padC; void* body; };
 
-void MarkPoolLiveEnds(void* d);
+void MarkPoolLiveEnds(MarkStacks* stacks);
 
-s32 LookupScriptVariable(void* a, s32 b, s32 c, ScriptValue* d);
+s32 LookupScriptVariable(ScriptScope* scope, s32 key, s32 flag, ScriptValue* out);
 
-void SetScriptScopeParent(ScriptScope* slot, s32 value);
+void SetScriptScopeParent(ScriptScope* scope, ScriptScope* parent);
 
-void* DefineScriptVariable(ScriptValue* out, ScriptScope* owner, void* kind, void* body);
+void* DefineScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value);
 
-void* EvalScriptBody(ScriptValue* out, void* list, ScriptScope* c);
+void* EvalScriptBody(ScriptValue* ret, R11B008Node* list, ScriptScope* scope);
 
 extern const s32 D_00244EC0[];
 extern s32 D_00244DFC[];
 
 s32 SuppressScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
-void* AppendQueuedCall(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 void RunScriptEventHandler(BaseObject* self, s32 key, R11B008Node* list);
 
 void UpdateConeVolumeTangents(ConeVolume* self);
 
-void InitPlacedObject(ConeVolume* self);
+void InitPlacedObject(PlacedObject* self);
 
-s32 IsObjectAttached(ConeVolume*);
+s32 IsObjectAttached(BaseObject* self);
 
 void RemoveConeVolumeFromWorldList(ConeVolume*);
 
-void CopyPlacedObject(ConeVolume*, ConeVolume*);
+void CopyPlacedObject(PlacedObject* self, PlacedObject* src);
 
-f32 Cosine(f32 x);
+extern "C" f32 Cosine(f32 x);
 
 struct LinePoints { f32 x; f32 y; };
 
-void FitLineThroughPoints(f32* out0, f32* out1, f32 a, f32 b, f32 c, f32 d);
+void FitLineThroughPoints(f32 a, f32 b, f32 c, f32 d, f32* out0, f32* out1);
 
 extern s32 g_frameCount;
 
@@ -184,13 +187,13 @@ extern s32 g_lightingChangeFrame;
 
 void UpdateConeVolumeTangents(void* self);
 
-void ConvertRgb255ToHsv255(void* a0, void* a1);
+struct Quad_001B4580;
+void ConvertRgb255ToHsv255(Quad_001B4580* src, f32* dst);
 
-void SetConeVolumeColor(void* self, void* a1);
+void SetConeVolumeColor(ConeVolume* self, Quad16* src);
 
-void ConvertHsv255ToRgb255(void* self);
 
-f32 Tangent(f32 a);
+extern "C" f32 Tangent(f32 x);
 
 struct ClampHelper {
     static f32 Of(f32 v, f32 lo, f32 hi)
@@ -203,9 +206,8 @@ struct ClampHelper {
     }
 };
 
-f32 Cosine(f32 value);
+extern "C" f32 Cosine(f32 x);
 
-void FitLineThroughPoints(f32 a, f32 b, f32 c, f32 d, f32* out0, void* out1);
 
 void InitObject(BaseObject* self)
 {
@@ -264,11 +266,11 @@ void RemoveObjectFromParentList(BaseObject* self)
     }
 }
 
-void AddObjectKeyToOwner(PlacedObject* self)
+void AddObjectKeyToOwner(BaseObject* self)
 {
     PlacedObject* target;
     if (self->desc->flags & 1) {
-        target = self;
+        target = (PlacedObject*)self;
     } else {
         target = (PlacedObject*)self->parent;
     }
@@ -280,9 +282,9 @@ void AddObjectKeyToOwner(PlacedObject* self)
     }
 }
 
-void AddObjectKeyIfLevelInRange(void* self, void* target)
+void AddObjectKeyIfLevelInRange(BaseObject* self, void* target)
 {
-    if (IsInsideRange(target, g_currentEntry->dt)) {
+    if (IsInsideRange((ValueRange*)target, g_currentEntry->dt)) {
         AddObjectKeyToOwner(self);
     }
 }
@@ -343,7 +345,7 @@ s32 IsObjectAttached(BaseObject* self)
             sub = node->world;
             sub = (u8*)sub + 0x48;
         }
-        if (IsInList(sub, node) == 0) {
+        if (IsInList((List01*)sub, node) == 0) {
             return 0;
         }
         node = next;
@@ -351,16 +353,16 @@ s32 IsObjectAttached(BaseObject* self)
     return 1;
 }
 
-void GetObjectAttached(void* a0, s32* out)
+void GetObjectAttached(BaseObject* a0, s32* out)
 {
     *out = IsObjectAttached(a0);
 }
 
 LINKER_REMNANT(func_00183050);
 
-void* CreateObjectCopy(BaseObject* self, void* a1, s32 a2)
+void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent)
 {
-    BaseObject* r = (BaseObject*)CreateTypedRecord(self->desc->id, a1, a2, self->id, -1);
+    BaseObject* r = (BaseObject*)CreateTypedRecord(self->desc->id, world, parent, self->id, -1);
     r->desc->m08(r, self);
     return r;
 }
@@ -376,37 +378,37 @@ void CopyObjectData(BaseObject* self, BaseObject* src)
         R11B008List* p = NewKeyedList();
         CopyKeyedList((R11B008List*)src->f04, p);
         self->f04 = p;
-        AddMarkRootList(g_markStacks, p);
+        AddMarkRootList((MarkStacks*)g_markStacks, p);
     }
     const Desc01* d = src->desc;
     World* s0 = self->world;
     CopyMemory((u8*)self + sizeof(BaseObject), (u8*)src + sizeof(BaseObject), d->size - sizeof(BaseObject));
-    u8* t = GetHashedSlot(s0, self->id);
-    RemoveFromList(t, self);
-    t = GetHashedSlot(s0, src->id);
-    AppendToList(t, self);
+    u8* t = GetHashedSlot((u8*)s0, self->id);
+    RemoveFromList((List01*)t, self);
+    t = GetHashedSlot((u8*)s0, src->id);
+    AppendToList((List01*)t, self);
     self->id = src->id;
     if (src->f2C != 0) {
         u8* s1 = g_markStacks;
-        MarkPoolLiveEnds(s1);
-        void* p = NewScriptScope();
-        CopyScriptScope(src->f2C, p);
+        MarkPoolLiveEnds((MarkStacks*)s1);
+        ScriptScope* p = NewScriptScope();
+        CopyScriptScope((ScriptScope*)src->f2C, p);
         self->f2C = p;
-        AddUniqueMarkRoot(s1, p);
+        AddUniqueMarkRoot((MarkStacks*)s1, (MarkEntry*)p);
     }
     self->alias = src->alias;
 }
 
-void AddCallbackNode(World* world, Callback01** head, void* fn, s32 ctx)
+void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx)
 {
-    Callback01* n = (Callback01*)TakeCallRecord();
+    Callback01* n = (Callback01*)TakeCallRecord(world);
     n->fn = (void (*)(void*, s32, void*))fn;
-    n->ctx = (void*)ctx;
+    n->ctx = ctx;
     n->next = *head;
     *head = n;
 }
 
-void RemoveCallbackNode(World* mgr, Callback01** link, s32 key1, s32 key2)
+void RemoveCallbackNode(World* mgr, Callback01** link, void* fn, void* ctx)
 {
     Callback01* node;
     goto test;
@@ -417,32 +419,32 @@ test:
     if (node == 0) {
         return;
     }
-    if ((s32)node->fn != key1 || (s32)node->ctx != key2) {
+    if ((void*)node->fn != fn || node->ctx != ctx) {
         goto advance;
     }
     *link = node->next;
     node->next = 0;
-    ReleaseCallRecords(mgr, node);
+    ReleaseCallRecords(mgr, (T219CHook*)node);
 }
 
-void AddObjectCallback(BaseObject* self, void* fn, s32 ctx)
+void AddObjectCallback(BaseObject* self, void* fn, void* ctx)
 {
     AddCallbackNode(self->world, &self->callbacks, fn, ctx);
 }
 
-void RemoveObjectCallback(BaseObject* self, s32 fn, s32 ctx)
+void RemoveObjectCallback(BaseObject* self, void* fn, void* ctx)
 {
     RemoveCallbackNode(self->world, &self->callbacks, fn, ctx);
 }
 
 void AddObjectListener(BaseObject* self, BaseObject* src)
 {
-    AddCallbackNode(self->world, &self->callbacks, src->desc->m0D, src);
+    AddCallbackNode(self->world, &self->callbacks, (void*)src->desc->m0D, src);
 }
 
 void RemoveObjectListener(BaseObject* self, BaseObject* src)
 {
-    RemoveCallbackNode(self->world, &self->callbacks, src->desc->m0D, src);
+    RemoveCallbackNode(self->world, &self->callbacks, (void*)src->desc->m0D, src);
 }
 
 void SendObjectNotification(BaseObject* self, s32 kind, void* arg)
@@ -497,7 +499,7 @@ s32 GetEffectiveObjectId(BaseObject* a)
     return a->id;
 }
 
-void GetObjectAliasId(void* self, s32* out)
+void GetObjectAliasId(BaseObject* self, s32* out)
 {
     *out = GetAliasId(self);
 }
@@ -511,15 +513,15 @@ void RunScriptEventHandler(BaseObject* self, s32 key, R11B008Node* list)
     InitScriptValue(&q0);
     InitScriptValue(&q1);
     InitScriptValue(&q2);
-    MarkPoolLiveEnds(g_markStacks);
-    if (LookupScriptVariable(self->f2C, key, 1, &q0) == 0) {
+    MarkPoolLiveEnds((MarkStacks*)g_markStacks);
+    if (LookupScriptVariable((ScriptScope*)self->f2C, key, 1, &q0) == 0) {
         DestroyScriptValue(&q2, 2);
         DestroyScriptValue(&q1, 2);
         DestroyScriptValue(&q0, 2);
         return;
     }
     ScriptMethod* rec = (ScriptMethod*)q0.p;
-    ScriptScope* slot = (ScriptScope*)NewScriptScope();
+    ScriptScope* slot = NewScriptScope();
     SetScriptScopeParent(slot, rec->scope);
     SetScriptValuePointerB(&q1, self);
     DefineScriptVariable(&q3, slot, rec->params->selfName, &q1);
@@ -536,7 +538,7 @@ void RunScriptEventHandler(BaseObject* self, s32 key, R11B008Node* list)
             l = l->next;
         } while (it != 0);
     }
-    EvalScriptBody(&q3, rec->body, slot);
+    EvalScriptBody(&q3, (R11B008Node*)rec->body, slot);
     AssignScriptValue(&q2, &q3);
     DestroyScriptValue(&q3, 2);
     DestroyScriptValue(&q2, 2);
@@ -580,7 +582,7 @@ s32 SuppressScriptEvent(BaseObject* self, s32 key, s32 flag, void* out)
     }
     QueuedCall* prev = 0;
     for (QueuedCall* n = self->world->f1EC8; n != 0; n = n->next) {
-        if ((void*)n->fn == (void*)RunScriptEventHandler && (BaseObject*)n->k1 == self) {
+        if ((void*)n->fn == (void*)RunScriptEventHandler && (BaseObject*)n->arg == self) {
             if (n->k2 == key) {
                 if (key >= 8) return 1;
                 else if (key >= 6) { s32* q = p[0]; return ((ScriptEventArg*)n->p0C)->value == *q; }
@@ -601,7 +603,7 @@ s32 SuppressScriptEvent(BaseObject* self, s32 key, s32 flag, void* out)
                     c->f1EC8 = 0;
                 }
                 n->next = 0;
-                ReleaseCallRecords(self->world, n);
+                ReleaseCallRecords(self->world, (T219CHook*)n);
                 return 1;
             }
         }
@@ -610,21 +612,21 @@ s32 SuppressScriptEvent(BaseObject* self, s32 key, s32 flag, void* out)
     return 0;
 }
 
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, s32* out)
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out)
 {
     ScriptValue r;
     ScriptValue tmp;
     s32 a4;
 
     InitScriptValue(&r);
-    if (self->f2C == 0 || LookupScriptVariable(self->f2C, idx, 1, &r) == 0) {
+    if (self->f2C == 0 || LookupScriptVariable((ScriptScope*)self->f2C, idx, 1, &r) == 0) {
         DestroyScriptValue(&r, 2);
         goto done;
     }
-    MarkPoolLiveEnds(g_markStacks);
+    MarkPoolLiveEnds((MarkStacks*)g_markStacks);
     if (SuppressScriptEvent(self, idx, flag, out) == 0) {
         if (flag != 0) {
-            BuildScriptListFromPairs(&tmp, flag, (s32*)D_00244DFC + D_00244EC0[idx], out);
+            BuildScriptListFromPairs(&tmp, flag, (s32*)D_00244DFC + D_00244EC0[idx], (s32*)out);
             AssignScriptValue(&r, &tmp);
             DestroyScriptValue(&tmp, 2);
             a4 = (s32)r.p;
@@ -748,7 +750,7 @@ void RefreshConeVolume(ConeVolume* self)
 
 void RemoveConeVolumeFromWorldList(ConeVolume* self)
 {
-    RemoveFromList((u8*)self->world + 0x1BE8, self);
+    RemoveFromList((List01*)((u8*)self->world + 0x1BE8), self);
     NoteConeVolumeLightingChange(self);
 }
 
@@ -756,7 +758,7 @@ void AddConeVolumeToWorldList(ConeVolume* self)
 {
     void (*fn)(BaseObject*);
 
-    AppendToList((u8*)self->world + 0x1BE8, self);
+    AppendToList((List01*)((u8*)self->world + 0x1BE8), self);
     fn = self->desc->m12;
     if (fn != 0) fn(self);
 }
@@ -790,7 +792,7 @@ void CopyConeVolume(ConeVolume* self, ConeVolume* other)
     }
 }
 
-void FitLineThroughPoints(f32* out0, f32* out1, f32 a, f32 b, f32 c, f32 d)
+void FitLineThroughPoints(f32 a, f32 b, f32 c, f32 d, f32* out0, f32* out1)
 {
     if (AreFloatsNearlyEqual(a, c, 1e-4f)) {
         *(s32*)out1 = 0;
@@ -802,25 +804,25 @@ void FitLineThroughPoints(f32* out0, f32* out1, f32 a, f32 b, f32 c, f32 d)
     }
 }
 
-void FitReciprocalThroughPoints(f32* out, s32* flag, f32 x, f32 y, f32 z, f32 w)
+void FitReciprocalThroughPoints(f32* out, f32* scale, f32 x, f32 y, f32 z, f32 w)
 {
     const f32 eps = 0.0001f;
     if (AreFloatsNearlyEqual(x, z, eps) || __builtin_fabsf(x) < eps || __builtin_fabsf(z) < eps) {
-        *flag = 0;
+        *scale = 0.0f;
         *out = y;
         return;
     }
     f32 t = (x * z) * (w - y) / (x - z);
-    *(f32*)flag = t;
+    *scale = t;
     *out = y - t / x;
 }
 
 void FitUnitRampBetweenPair(LinePoints* self, f32* out0, f32* out1)
 {
-    FitLineThroughPoints(out0, out1, self->x, 1.0f, self->y, 0.0f);
+    FitLineThroughPoints(self->x, 1.0f, self->y, 0.0f, out0, out1);
 }
 
-void FitLineThroughAngleSamples(f32 a, f32 b, f32 c, f32 d, f32* out0, void* out1)
+void FitLineThroughAngleSamples(f32 a, f32 b, f32 c, f32 d, f32* out0, f32* out1)
 {
     f32 x = Cosine(a * 0.0087266471f);
     x = x + x * x * x;
@@ -838,16 +840,16 @@ void NoteConeVolumeLightingChange(ConeVolume* self)
 
 void *InitPacketWriter(PacketWriter* p);
 void UsePacketBufferMemory(PacketWriter* p, s32 n, void* q);
-void CopyWordsToWriter(PacketWriter* p, s32 size, s32 count, void* data, s32 addr);
+void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifMscal(PacketWriter* p, void* code);
 void WriteVifFlushE(PacketWriter* p);
 void DetachPacketBuffer(PacketWriter* p, u32* outCount, u8** outBegin);
-void ConvertHsv255ToRgb255(Vec02* hsv, Vec02* rgb);
-void TransformDirectionBetweenFrames(void* frame, s32 zero, void* in, Vec02* out);
-void BuildBasisFromXAndZHint(void* x, void* z, void* out);
+void ConvertHsv255ToRgb255(Quad_001B4580* src, f32* dst);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 void BuildFrustumSideNormals(Mat02* m, Vec02* out, f32 x, f32 y);
-void BuildProjectionMatrix(f32 (*out)[4], f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
-void BuildViewProjectionMatrix(void* pos, void* basis, f32 (*proj)[4], f32 (*out)[4]);
+void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
+void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out);
 extern u8 D_00000BF0[];
 extern u8 D_00000D30[];
 extern u8 D_00000EF0[];
@@ -867,30 +869,30 @@ void RefreshConeVolumeShape(ConeVolume* self)
     UsePacketBufferMemory(&w, 0x20, self->packet);
     Vec02 c;
     if (0.0001f < self->hsv.z) {
-        ConvertHsv255ToRgb255(&self->hsv, &c);
+        ConvertHsv255ToRgb255((Quad_001B4580*)&self->hsv, (f32*)&c);
         Vu0::Q(c) = Vu0::MulX(Vu0::Q(c), Vu0::Scalar(1.0f / self->hsv.z));
     } else {
         Vu0::Q(c) = Vu0::Zero();
     }
-    CopyWordsToWriter(&w, 0xC, 1, &c, 0x16);
+    CopyWordsToWriter(&w, 0xC, 1, (u32*)&c, 0x16);
     f32 fit[2][4];
     FitLineThroughAngleSamples(self->firstAngle, 0.0f, 0.0f, self->hsv.z, &fit[1][2], &fit[0][2]);
     FitLineThroughAngleSamples(self->secondAngle, 0.0f, 0.0f, self->secondLevel, &fit[1][1], &fit[0][1]);
     FitLineThroughAngleSamples(360.0f - self->thirdAngle, 0.0f, 360.0f, self->thirdLevel, &fit[1][0], &fit[0][0]);
-    CopyWordsToWriter(&w, 0xC, 2, fit, 0x17);
+    CopyWordsToWriter(&w, 0xC, 2, (u32*)fit, 0x17);
     switch (self->mode) {
     case 0: {
         Vec02 d;
-        TransformDirectionBetweenFrames(self, 0, &self->q320, &d);
-        CopyWordsToWriter(&w, 8, 1, &d, 0x19);
+        TransformDirectionBetweenFrames(self, 0, (Vec02*)&self->q320, &d);
+        CopyWordsToWriter(&w, 8, 1, (u32*)&d, 0x19);
         WriteVifMscal(&w, D_00000BF0);
         break;
     }
     case 1: {
         f32 r[4];
-        FitReciprocalThroughPoints(&r[0], (s32*)&r[1], self->rangeMin, 1.0f, self->rangeMax, 0.0f);
-        CopyWordsToWriter(&w, 4, 1, r, 0x19);
-        CopyWordsToWriter(&w, 8, 1, &self->v140, 0x1A);
+        FitReciprocalThroughPoints(&r[0], &r[1], self->rangeMin, 1.0f, self->rangeMax, 0.0f);
+        CopyWordsToWriter(&w, 4, 1, (u32*)r, 0x19);
+        CopyWordsToWriter(&w, 8, 1, (u32*)&self->v140, 0x1A);
         WriteVifMscal(&w, D_00000D30);
         break;
     }
@@ -898,9 +900,9 @@ void RefreshConeVolumeShape(ConeVolume* self)
     case 3: {
         Vec02 d;
         Vec02 up;
-        TransformDirectionBetweenFrames(self, 0, &self->q320, &d);
+        TransformDirectionBetweenFrames(self, 0, (Vec02*)&self->q320, &d);
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(d), Vu0::Scalar(-1.0f));
-        TransformDirectionBetweenFrames(self, 0, &self->q340, &up);
+        TransformDirectionBetweenFrames(self, 0, (Vec02*)&self->q340, &up);
         BuildBasisFromXAndZHint(&d, &up, &self->basis);
         BuildFrustumSideNormals(&self->basis, self->planes, self->f350, self->f354);
         Vec02& far = self->planes[4];
@@ -918,8 +920,8 @@ void RefreshConeVolumeShape(ConeVolume* self)
         u128 neg = Vu0::ScalarInGpr(-1.0f);
         Vu0::Q(self->planes[5]) = Vu0::MulX(Vu0::Q(self->basis.r[0]), neg);
         near.w = 50.0f - Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(self->v140), Vu0::Vec::Of(self->planes[5])));
-        BuildProjectionMatrix(proj, one / self->f350, one / self->f354, zero, zero, 50.0f, self->rangeMax);
-        BuildViewProjectionMatrix(&self->v140, &self->basis, proj, view);
+        BuildProjectionMatrix((Mat4*)proj, one / self->f350, one / self->f354, zero, zero, 50.0f, self->rangeMax);
+        BuildViewProjectionMatrix((f32*)&self->v140, (f32*)&self->basis, proj, (Quad16*)view);
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(d), Vu0::ScalarInGpr(-1.0f));
         if (self->mode == 2) {
             FitUnitRampBetweenPair((LinePoints*)&self->f360, &ramp[0][0], &ramp[1][0]);
@@ -934,9 +936,9 @@ void RefreshConeVolumeShape(ConeVolume* self)
             FitUnitRampBetweenPair((LinePoints*)&self->f358, &ramp[0][2], &ramp[1][2]);
         }
         FitUnitRampBetweenPair((LinePoints*)&self->rangeMin, &ramp[0][3], &ramp[1][3]);
-        CopyWordsToWriter(&w, 0xC, 2, ramp, 0x19);
-        CopyWordsToWriter(&w, 8, 1, &d, 0x1B);
-        CopyWordsToWriter(&w, 0xC, 4, view, 0x1C);
+        CopyWordsToWriter(&w, 0xC, 2, (u32*)ramp, 0x19);
+        CopyWordsToWriter(&w, 8, 1, (u32*)&d, 0x1B);
+        CopyWordsToWriter(&w, 0xC, 4, (u32*)view, 0x1C);
         WriteVifMscal(&w, D_00000EF0);
         break;
     }
@@ -1062,7 +1064,9 @@ void UpdateConeVolumeTangents(ConeVolume* self)
     self->f35C = 1.0f;
 }
 
-s32 QueryValueListMask(void* self, f32 radius, void* center, void* out);
+struct ValueListObject;
+struct Bits128;
+void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
 
 void UpdateConeVolumeBounds(ConeVolume* self)
 {
@@ -1074,7 +1078,7 @@ void UpdateConeVolumeBounds(ConeVolume* self)
         self->mask = 0x0FFFFFFF;
         break;
     case 1:
-        QueryValueListMask(self->world->f1EC4, self->rangeMax, &self->v140, &self->mask);
+        QueryValueListMask((ValueListObject*)self->world->f1EC4, self->rangeMax, (Bits128*)&self->v140, &self->mask);
         break;
     case 2:
     case 3: {
@@ -1089,7 +1093,7 @@ void UpdateConeVolumeBounds(ConeVolume* self)
         f32 r = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(v)));
         Vu0::Q(v) = Vu0::MulX(Vu0::Q(self->axis), Vu0::Scalar(self->rangeMax * 0.5f));
         Vu0::Q(center) = Vu0::Add(Vu0::Q(self->v140), Vu0::Q(v));
-        QueryValueListMask(self->world->f1EC4, r, &center, &self->mask);
+        QueryValueListMask((ValueListObject*)self->world->f1EC4, r, (Bits128*)&center, &self->mask);
         break;
     }
     }
@@ -1106,14 +1110,14 @@ void GetConeVolumeSecondLevel(ConeVolume* self, f32* out)
     *out = self->secondLevel;
 }
 
-void SetConeVolumeColorRgb(void* self, void* a1)
+void SetConeVolumeColorRgb(ConeVolume* self, void* a1)
 {
     Quad16 q;
-    ConvertRgb255ToHsv255(a1, &q);
+    ConvertRgb255ToHsv255((Quad_001B4580*)a1, (f32*)&q);
     SetConeVolumeColor(self, &q);
 }
 
-void GetConeVolumeColorRgb(u8* self)
+void GetConeVolumeColorRgb(u8* self, f32* out)
 {
-    ConvertHsv255ToRgb255(self + 736);
+    ConvertHsv255ToRgb255((Quad_001B4580*)(self + 736), out);
 }

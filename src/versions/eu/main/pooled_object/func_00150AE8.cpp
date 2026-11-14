@@ -2,13 +2,13 @@
 // PAL: the Gl_150AE8 global has f260 at 0x570 and f26C at 0x57C (US 0x260, 0x26C).
 struct Gl_150AE8_eu { u8 pad0[0x570]; s32 f570; u8 pad1[8]; s32 f57C; };
 
-void UpdateStepSequence(StepSequence* self)
+void UpdateStepSequence(StepSequence* self, f32 dt)
 {
     s32 q[2];
     s32 s1;
     Ent65* s2;
 
-    UpdatePlacedObject(self);
+    UpdatePlacedObject(self, dt);
     if (!(((Gl_150AE8_eu*)&g_timerCaption)->f570 < 2 && ((Gl_150AE8_eu*)&g_timerCaption)->f57C == 0 && IsStreamVoiceLocked() == 0 && D_00275F84 != 1)) {
         s32 st = self->state2D4;
         switch (st) {
@@ -71,7 +71,7 @@ void UpdateStepSequence(StepSequence* self)
     case 3:
         if (self->mode2D0 != 2) {
             if (!(self->step2E4 < self->count2DC) || D_00275F84 == 1) {
-                PopStackElement(g_elementStack);
+                PopStackElement((ElementStack*)g_elementStack);
                 s1 = self->state2D4;
             }
         }

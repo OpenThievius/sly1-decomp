@@ -8,6 +8,8 @@
 #define CHILD_GROUP_OBJECT_H
 
 #include "collider.h"
+struct ContactPair;
+struct BufferedStream;
 
 struct __attribute__((aligned(16))) Quad3B {
     s32 a, b, c, d;
@@ -73,9 +75,9 @@ struct ContactListObject : ChildGroupObject {
     void* f6B4;             // 0x6B4: given back by slot 7 (func_0012E760)
     s32 ready;              // 0x6B8: 1 at set-up (slot 0); slot 27 tests it
     s32 count6BC;           // 0x6BC: the objects of items6C0
-    void* items6C0[4];      // 0x6C0
+    s32 items6C0[4];        // 0x6C0: their ids
     s32 count6D0;           // 0x6D0: the ids of items6D4
-    void* items6D4[4];      // 0x6D4
+    s32 items6D4[4];        // 0x6D4: object kinds (AddContactListKind)
     void* f6E4;             // 0x6E4
     u8 pad6E8[0x6F0 - 0x6E8];
 };
@@ -93,17 +95,17 @@ typedef char check_StandIn[sizeof(StandIn) == 0x6A0 ? 1 : -1];
 
 void InitChildGroupObject(ChildGroupObject* self);                          // slot 0
 void CopyChildGroupObject(ChildGroupObject* self, ChildGroupObject* other);              // slot 9
-void LoadChildGroupObject(ChildGroupObject* self);                          // slot 10
+void LoadChildGroupObject(ChildGroupObject* self, BufferedStream* stream);                          // slot 10
 void StartChildGroupObject(ChildGroupObject* self);                          // slot 16
 void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5);   // slot 58
-void HandleChildGroupObjectContact(ChildGroupObject* self);                          // slot 60
+void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s32 kind);                       // slot 60
 void InitContactListObject(ContactListObject* self);                          // slot 0
-void LoadContactListObject(ContactListObject* self);                          // slot 10
+void LoadContactListObject(ContactListObject* self, BufferedStream* stream);                          // slot 10
 void UnregisterContactListObject(ContactListObject* self);                          // slot 7
 void MoveContactListObject(ContactListObject* self, void* b, f32 x);          // slot 27
 void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2);    // slot 36
 s32 TestContactListMayContact(ContactListObject* self, void* key);                // slot 56
-s32 TestStandInMayContact(StandIn* self, s32 value);                // slot 56
-void StopStandIn(StandIn* self);                          // slot 60
+s32 TestStandInMayContact(StandIn* self, Collider* value);                // slot 56
+void StopStandIn(StandIn* self, ContactPair* pair, s32 kind);                          // slot 60
 
 #endif

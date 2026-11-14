@@ -13,7 +13,7 @@ void UpdateCameraProjection(Camera* self)
     *(f32*)(s + 0xB0) = (one >? self->f1C0 * inv);
     f32 q = t * Fpu::Sqrt(d);
     *(f32*)(s + 0x1EC) = q * self->f1E4 + one;
-    BuildProjectionMatrix(s + 0xC0, 640.0f / (t * w * 4096.0f), 256.0f / (t * 4096.0f), 0.0f, 0.0f, self->f1E4, self->f1E8);
+    BuildProjectionMatrix((Mat4*)(s + 0xC0), 640.0f / (t * w * 4096.0f), 256.0f / (t * 4096.0f), 0.0f, 0.0f, self->f1E4, self->f1E8);
     ComputeCameraFogTerms(self, (f32*)(s + 0x208), one);
     UpdateCameraMatrices(self);
 }

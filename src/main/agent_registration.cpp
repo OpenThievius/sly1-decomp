@@ -33,21 +33,21 @@
 #include "pad_record.h"
 #include "ramp_profile.h"
 
-void RegisterAgent(void* self);
-void AppendToList(void* table, void* self);
+void RegisterAgent(Agent* self);
+void AppendToList(List01* self, void* item);
 
 // What SetSinCosPair fills: the two results of ComputeSinCos and a word it clears.
 struct SinCosPair { f32 a; f32 b; s32 value; };
 
-void ComputeSinCos(void* a, void* b, f32 value);
-void UnregisterAgent(void*);
-void RemoveFromList(void*, void*);
-void CopyAgent(void*, void*);
-void InitAgent(void*);
-void StartAgent(void*);
-void RemoveFromList(void* a, void* b);
+void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
+void UnregisterAgent(Agent* self);
+void RemoveFromList(List01* list, void* item);
+void CopyAgent(Agent* self, void* src);
+void InitAgent(Agent* self);
+void StartAgent(Agent* self);
+void RemoveFromList(List01* list, void* item);
 
-void AppendToList(void*,void*);
+void AppendToList(List01* self, void* item);
 
 
 // The file's statics (.bss from 0x27C008).
@@ -69,6 +69,6 @@ void StartNumberedAgent(NumberedAgent* self) { StartAgent(self); self->fC2C=D_00
 
 void SetSinCosPair(f32 value, SinCosPair* self)
 {
-    ComputeSinCos(&self->b, self, value);
+    ComputeSinCos(&self->b, (f32*)self, value);
     self->value = 0;
 }

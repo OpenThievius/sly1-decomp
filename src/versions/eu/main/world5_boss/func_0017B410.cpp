@@ -30,7 +30,7 @@ void SetWorld5BossMode(World5Boss* self, s32 mode)
             SetWorldActiveFollower(self->world, 0);
         }
     }
-    (void)ReplaceAnimationPlayer(x, self, 1, self->modePlayer, 0.0f, 1.0f);
+    (void)ReplaceAnimationPlayer((Animation*)x, self, 1, (AnimationPlayer**)self->modePlayer, 0.0f, 1.0f);
     *(s32*)((u8*)self + 0x550) = mode;
     self->modeTime = g_gameTime;
 done:

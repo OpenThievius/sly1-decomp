@@ -19,8 +19,8 @@ struct Text_eu_15E7E0 {
 };
 
 f32 SumTextWidth(void* self);
-void SetTextDefaultColor(void* self, void* color);
-void RewindTextReader(void* self);
+void SetTextDefaultColor(TextReader* self, Rgba_137248* color);
+void RewindTextReader(TextReader* self);
 s32 GetTextReaderOffset(void* self);
 s32 ReadTextCharAnyWidth(void* self);
 s32 IsWideCharSpace(s32 ch);
@@ -61,10 +61,10 @@ void DrawWrappedAlignedText(Text_eu_15E7E0* self, Box_eu_15E7E0* box, s32 a, s32
         }
     }
     Rgba_eu_15E7E0 color = box->color;
-    SetTextDefaultColor(self, &color);
+    SetTextDefaultColor((TextReader*)self, (Rgba_137248*)&color);
     s32 started = 0;
     s32 right = 2;
-    RewindTextReader(self);
+    RewindTextReader((TextReader*)self);
     while ((ch = ReadTextCharAnyWidth(self)) != 0) {
         s32 pos = GetTextReaderOffset(self);
         if (lineStart == 0) {

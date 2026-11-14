@@ -50,7 +50,7 @@ UnwindFrame* FindFrameUnwindState(void* pc, UnwindFrame* frame);
 void* FillMemory(void* p, s32 value, s32 size);
 s32 CopyBytes(void* dst, void* src, s32 n);
 s32 CompareStrings(void* self, s32 v);
-void* EnterRuntimeLock(s32 size);
+void* EnterRuntimeLock(u32 size);
 void AbortProgram(void) __attribute__((noreturn));
 
 void AbortOnTerminate(void);

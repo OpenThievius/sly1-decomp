@@ -11,9 +11,9 @@ void SetAnimationPlayerPadSelect(Obj_12D448_eu* self, s32 v)
         return;
     }
     if (v != 0) {
-        AcquirePadSelectFlag(*(void**)&g_currentWorld);
+        AcquirePadSelectFlag((World*)(*(void**)&g_currentWorld));
     } else {
-        ReleasePadSelectFlag(*(void**)&g_currentWorld);
+        ReleasePadSelectFlag((World*)(*(void**)&g_currentWorld));
     }
     self->state = (s8)v;
 }

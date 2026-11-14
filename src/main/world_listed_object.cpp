@@ -28,23 +28,30 @@
 #include "vu0.h"
 #include "placed_object.h"
 #include "collider.h"
+struct Mat4A;
+
+struct DeferredRequest;
+
 
 // The file's .data: the two words func_00139C38 registers with func_00139B70 (4-aligned, so
 // the .data starts right after text_panel.cpp's; 0x26131C is padding before class 0x3B's).
 s32 g_alphaStatePacket1 = 0;
 s32 g_alphaStatePacket2 = 0;
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void InitCollider(Collider* self);
 
 
 struct ContactPairLink { s32 f0; s32 f4; ContactPairLink* f8; Collider* fC; };
 
-ContactPairLink* PushContactRow(World* w, s32 a, s32 b);
-ContactPairLink* UnlinkContactRow(World* w, s32 a, s32 b);
-void FreePooledContactChain(World* w, s32 a);
-void ClearRootTries(Collider* e);
-void PushFreeSlot(u8* w, ContactPairLink* l);
+struct ContactRowNode;
+struct ContactRowList;
+struct ContactRowSource;
+ContactRowNode* PushContactRow(World* self, ContactRowList* list, ContactRowSource* src);
+ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, Contacts03* key);
+void FreePooledContactChain(World* world, Contact03* head);
+void ClearRootTries(PlacedObject* self);
+void PushFreeSlot(Pool6C* list, void* item);
 
 struct ContactBody;
 struct ContactPart;
@@ -96,15 +103,15 @@ struct ContactBody
     u8 pad5[0x538 - 0x4BC];
     u64 bits538;
 };
-void ClearRootTries(ContactBody* o);
+void ClearRootTries(PlacedObject* self);
 
 void* InitGifPacket(PacketWriter* f);
 void AllocatePacketBuffer(PacketWriter* f, s32 n);
-void BeginGifTag(PacketWriter* f, s32 a, s32 b, s32 c);
-void AddGifRegisterWrite(PacketWriter* f, s32 a, u64 b);
-void ReserveGifPackedData(PacketWriter* f, s32 a, s32 b, s32 c, u64 d, s32 e);
+void BeginGifTag(PacketWriter* f, s32 a, s32 b, u64 c);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
+void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, u8** out);
 void CloseDmaTag(PacketWriter* f);
-void DetachPacketBuffer(PacketWriter* f, s32 a, void* b);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 void BuildAlphaStatePacket(s32 idx, void* arg)
 {
@@ -117,7 +124,7 @@ void BuildAlphaStatePacket(s32 idx, void* arg)
     AddGifRegisterWrite(&f, 0x42, ((u64)(s64)idx << 2) | 0x40);
     ReserveGifPackedData(&f, 0x54, 0, 0xA, 0x424242412EULL, 0);
     CloseDmaTag(&f);
-    DetachPacketBuffer(&f, 0, arg);
+    DetachPacketBuffer((PacketWriter*)&f, 0, (u8**)arg);
 }
 
 
@@ -129,14 +136,14 @@ void InitAlphaStatePackets(void)
     BuildAlphaStatePacket(2, &g_alphaStatePacket2);
 }
 
-void* PopFreeSlot(void* p);
-void PushFreeSlot(void* p, void* q);
-void* FillMemory(void* p, s32 value, s32 size);
-void AppendToList(void* list, void* item);
+void* PopFreeSlot(Pool6C* pool);
+void PushFreeSlot(Pool6C* list, void* item);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void AppendToList(List01* self, void* item);
 
 OwnedRecord* AcquireOwnedRecord(WorldListedObject* o)
 {
-    OwnedRecord* s = (OwnedRecord*)PopFreeSlot((u8*)o->world + 0x1B40);
+    OwnedRecord* s = (OwnedRecord*)PopFreeSlot(&o->world->pool1B40);
     if (!s) {
         return 0;
     }
@@ -144,28 +151,28 @@ OwnedRecord* AcquireOwnedRecord(WorldListedObject* o)
     if (o->mode != 2) {
         s->owner = o;
     } else {
-        void* r = PopFreeSlot((u8*)o->world + 0x1B4C);
+        void* r = PopFreeSlot((Pool6C*)((u8*)o->world + 0x1B4C));
         s->extraRecord = r;
         if (r) {
             FillMemory(r, 0, 0x580);
             s->owner = o;
         } else {
-            PushFreeSlot((u8*)o->world + 0x1B40, s);
+            PushFreeSlot(&o->world->pool1B40, s);
             return 0;
         }
     }
-    AppendToList(&o->members, s);
+    AppendToList((List01*)&o->members, s);
     return s;
 }
 
 
 
-void RemoveFromList(void* list, void* item);
-void AppendToList(void* list, void* item);
+void RemoveFromList(List01* list, void* item);
+void AppendToList(List01* self, void* item);
 
 void DetachOwnedRecord(OwnedRecord* o)
 {
-    RemoveFromList(&((WorldListedObject*)o->owner)->members, o);
+    RemoveFromList((List01*)(&((WorldListedObject*)o->owner)->members), o);
     AppendToList(&D_002622F0, o);
 }
 
@@ -183,19 +190,19 @@ WorldListedObject* ResetFirstListedObject(World* self)
     return s0;
 }
 
-void HandlePlacedObjectNotification(ChildGroupObject* self, s32 kind, ObjectMessage* msg);
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
 void StartChildGroupDelay(ChildGroupObject* p, f32 delta);
 
 
-void AppendToList(void* list, void* item);
-void SetListLinkOffset(void* self, s32 value);
-void InitPlacedObject(void* self);
+void AppendToList(List01* self, void* item);
+void SetListLinkOffset(List01* self, s32 offset);
+void InitPlacedObject(PlacedObject* self);
 
 void InitWorldListedObject(WorldListedObject* self)
 {
     AppendToList(&self->world->list1CC0, self);
     InitPlacedObject(self);
-    SetListLinkOffset(&self->members, 0x1090);
+    SetListLinkOffset((List01*)&self->members, 0x1090);
     u64 b = self->flags;
     b &= 0xFFFFFFFFCFFFFFFFull;
     b |= 0x20000000ull;
@@ -205,9 +212,9 @@ void InitWorldListedObject(WorldListedObject* self)
     self->flags = b;
 }
 
-void RemoveFromList(void* sub, void* self);
-void AppendToList(void* sub, void* self);
-void RegisterPlacedObject(void* self);
+void RemoveFromList(List01* list, void* item);
+void AppendToList(List01* self, void* item);
+void RegisterPlacedObject(PlacedObject* self);
 
 void LeaveWorldLists(WorldListedObject* self)
 {
@@ -216,10 +223,10 @@ void LeaveWorldLists(WorldListedObject* self)
     RegisterPlacedObject(self);
 }
 
-void DetachOwnedRecord(void* a);
-void RemoveFromList(u8* a, void* b);
-void AppendToList(u8* a, void* b);
-void UnregisterPlacedObject(void* self);
+void DetachOwnedRecord(OwnedRecord* o);
+void RemoveFromList(List01* list, void* item);
+void AppendToList(List01* self, void* item);
+void UnregisterPlacedObject(PlacedObject* self);
 
 void ReleaseWorldListedObject(WorldListedObject* self)
 {
@@ -237,7 +244,7 @@ void ReleaseWorldListedObject(WorldListedObject* self)
     fr.link = head + fr.offset;
     s32 node = head;
     while (node != 0) {
-        DetachOwnedRecord((void*)node);
+        DetachOwnedRecord((OwnedRecord*)node);
         s32 nx = *(s32*)fr.link;
         fr.link = nx + fr.offset;
         node = nx;
@@ -251,13 +258,13 @@ void ReleaseWorldListedObject(WorldListedObject* self)
 
 
 extern s32 g_animRecords;
-s32 FindAnimRecord(void* x);
+AnimRecord* FindAnimRecord(s32 key);
 void RebuildAnimRecordEntries(WorldListedObject* self);
 
-void AssignAnimRecord(WorldListedObject* self, void* x)
+void AssignAnimRecord(WorldListedObject* self, s32 x)
 {
-    s32 r = FindAnimRecord(x);
-    self->flagRecord = (AnimRecord*)r;
+    AnimRecord* r = FindAnimRecord(x);
+    self->flagRecord = r;
     if (r == 0) {
         self->flagRecord = (AnimRecord*)g_animRecords;
     }
@@ -274,11 +281,12 @@ void AssignAnimRecord(WorldListedObject* self, void* x)
     RebuildAnimRecordEntries(self);
 }
 
-s32 CreatePooledContact(void*, s32, void*, void*, s32, s32, s32, void*, f32);
+struct PooledContact;
+PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
 
 
-u64 GetTextureRegisterBits(void* t, s32 i, s32 j);
+u64 GetTextureRegisterBits(TextureTable* t, s32 i, s32 j);
 
 void RebuildAnimRecordEntries(WorldListedObject* self)
 {
@@ -315,13 +323,13 @@ void RebuildAnimRecordEntries(WorldListedObject* self)
     }
 }
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // The part of the record from +0x120 that func_0013A128 reads through one pointer.
 struct LookSourceTail {
     u8 pad00[0x10];
     s32 still;          // 0x130
-    void* anim;         // 0x134: the anim record's key (AssignAnimRecord)
+    s32 anim;           // 0x134: the anim record's key (AssignAnimRecord)
     u8 pad18[0x20 - 0x18];
     Vec3 curve140;      // 0x140: quadratic coefficients (RemapQuadraticParameter)
     u8 pad2C[0x30 - 0x2C];
@@ -408,12 +416,12 @@ void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src)
     }
 }
 
-void UpdatePlacedObject(void* self);
-void ClearRootTries(void* self);
+void UpdatePlacedObject(PlacedObject* self, f32 f);
+void ClearRootTries(PlacedObject* self);
 
-void UpdateWorldListedObject(WorldListedObject* self)
+void UpdateWorldListedObject(WorldListedObject* self, f32 dt)
 {
-    UpdatePlacedObject(self);
+    UpdatePlacedObject(self, dt);
     ClearRootTries(self);
     AnimRecord* sub = self->flagRecord;
     Camera* g = g_camera;
@@ -427,9 +435,9 @@ void UpdateWorldListedObject(WorldListedObject* self)
         self->desc->m03(self);
 }
 
-void AddObjectListener(WorldListedObject* self, BaseObject* src);
-s32 IsObjectOfKind(BaseObject* src, s32 kind);
-s32 IsListEmpty(void* sub);
+void AddObjectListener(BaseObject* self, BaseObject* src);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+s32 IsListEmpty(List01* p);
 
 void CopyWorldListedObject(WorldListedObject* self, BaseObject* src)
 {
@@ -438,7 +446,7 @@ void CopyWorldListedObject(WorldListedObject* self, BaseObject* src)
         EffectSpawner* from = (EffectSpawner*)src;
         self->source = from;
         self->f80 = from->f80;
-        if (IsListEmpty(from->list314) == 0) {
+        if (IsListEmpty((List01*)from->list314) == 0) {
             self->flags &= 0xFFFFFFFFF3FFFFFFULL;
             self->flags &= 0xFFFFFFFFCFFFFFFFULL;
         }
@@ -500,8 +508,10 @@ struct SprBlock {
     }
 };
 
-void TurnMatrixBySpin(void* spin, Vec02* out);
-s32 WaitDmaChannel(void* dma, s32 b, s32 c);
+struct SpinRecord_158480;
+void TurnMatrixBySpin(SpinRecord_158480* spin, f32 dt, f32* out);
+struct DmaChannel;
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 void StartToSprChain(s32 size, ...);
 void StartFromSprChain(void* first, ...);
 
@@ -538,7 +548,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
     fr.prev = old;
     fr.offset = link;
     *(s32*)&g_activeListFrames = (s32)&fr;
-    TurnMatrixBySpin((u8*)self + 0x330, mat);
+    TurnMatrixBySpin((SpinRecord_158480*)((u8*)self + 0x330), dt, (f32*)mat);
     s32 head = *(s32*)fr.link;
     fr.link = head + fr.offset;
     OwnedRecord* node = (OwnedRecord*)head;
@@ -546,7 +556,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
     StartToSprChain(node->count * 16, p, node->count * 16, p + 0x2C, node->count * 16, p + 0x58, 0, 0);
     while (node != 0) {
         void* ch = g_toSprChannel;
-        WaitDmaChannel(ch, 0, 0);
+        WaitDmaChannel((DmaChannel*)ch, 0, 0);
         D_00274990 = 1 - D_00274990;
         SprTransfer* t = &D_002748F0[D_00274990];
         t->state = 2;
@@ -586,7 +596,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
 
 extern f32 g_gameClock[];
 void StepListedObjectParticles(WorldListedObject* self, f32 dt);
-void EvaluateHermiteVectorSegment(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 t, f32 span, f32 scale, Vec02* pos, Vec02* vel, s32 flags);
+void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
 
 // One entry of a record's extra block: the two vectors a mode-2 point's segment ends on.
 struct VecPair { Vec02 a; Vec02 b; };
@@ -651,7 +661,7 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
             }
             case 2: {
                 end -= g_gameClock[1];
-                EvaluateHermiteVectorSegment(pos, vel, &((VecPair*)node->extraRecord)[j].a, &((VecPair*)node->extraRecord)[j].b, end, end <? dt, 1.0f, npos, nvel, 0);
+                EvaluateHermiteVectorSegment(end, pos, vel, &((VecPair*)node->extraRecord)[j].a, &((VecPair*)node->extraRecord)[j].b, end <? dt, 1.0f, npos, nvel, 0);
                 if (out != j) {
                     ((VecPair*)node->extraRecord)[out] = ((VecPair*)node->extraRecord)[j];
                 }
@@ -695,8 +705,8 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
 struct DeferredRadiusRequest { void (*fn)(void* self); s32 zero; s32 count; u8 pad0[0x50 - 0x0C]; f32 radius; u8 pad1[0x60 - 0x54]; void* owner; u8 pad2[0x80 - 0x64]; };
 struct Src_13AD08 { u8 pad[0x40]; f32 scale; };
 
-void* FillMemory(void* p, s32 value, s32 size);
-void QueueDeferredRequest(void* block);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void QueueDeferredRequest(DeferredRequest* src);
 void WriteListedObjectParticlePacket(void* self);
 
 void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, Src_13AD08* src)
@@ -712,13 +722,13 @@ void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, Src_13AD
         blk.radius = 1.0f;
     }
     blk.owner = owner;
-    QueueDeferredRequest(&blk);
+    QueueDeferredRequest((DeferredRequest*)&blk);
 }
 
 extern f32 g_gameClock[];
 extern s32 g_alphaStatePacket1;
 extern s32 g_alphaStatePacket2;
-s32 IsListEmpty(void* sub);
+s32 IsListEmpty(List01* p);
 void PopBackMemoryMark(void);
 
 // An object of a spawner's list as func_0013AD80 draws it: the record whose 0x7C gives the frame.
@@ -732,17 +742,17 @@ struct ViewedFrame { f32 m[4][4]; f32 fade; u8 pad44[0x50 - 0x44]; };
 
 void PushBackMemoryMark();
 void* AllocateBackMemory(s32 size);
-s32 CountListItems(void* list);
-s32 IsObjectAttached(void* obj);
+s32 CountListItems(List01* list);
+s32 IsObjectAttached(BaseObject* self);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
-void BuildMatrixFromRotationAndTranslation(Vec02* pos, Mat02* rot, ViewedFrame* out);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 void BeginDmaTag(PacketWriter* w);
 void CloseDmaTag(PacketWriter* w);
 void FlipVifBaseOffset();
-void ReserveVifUnpack(PacketWriter* w, s32 tag, s32 size, s32 a3, void* a4, void* out);
-void CopyWordsToWriter(PacketWriter* w, s32 tag, s32 size, void* src, s32 addr);
+void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
+void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifUnpack(PacketWriter* w, s32 tag, s32 size, void* src, s32 addr, s32 flag);
-void WriteVifStcycl(PacketWriter* w, s32 cl, s32 wl);
+void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
 void WriteVifMscal(PacketWriter* w, void* addr);
 void WriteVifFlush(PacketWriter* w);
 extern const f32 D_00248400[28];
@@ -785,10 +795,10 @@ void WriteListedObjectParticlePacket(void* self)
     s32 count;
     PushBackMemoryMark();
     WorldListedObject* obj = (WorldListedObject*)req->owner;
-    if (obj->source != 0 && IsListEmpty(((EffectSpawner*)obj->source)->list314) == 0) {
+    if (obj->source != 0 && IsListEmpty((List01*)(((EffectSpawner*)obj->source)->list314)) == 0) {
         count = 0;
         ViewListWalk walk(((EffectSpawner*)obj->source)->list314);
-        frames = (ViewedFrame*)AllocateBackMemory(CountListItems(((EffectSpawner*)obj->source)->list314) * sizeof(ViewedFrame));
+        frames = (ViewedFrame*)AllocateBackMemory(CountListItems((List01*)(((EffectSpawner*)obj->source)->list314)) * sizeof(ViewedFrame));
         ViewedFrame* cur = frames;
         ViewedPart* e;
         while ((e = (ViewedPart*)walk.Next()) != 0) {
@@ -811,7 +821,7 @@ void WriteListedObjectParticlePacket(void* self)
                 u128 ones = Vu0::Ones();
                 if ((Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, Vu0::Scalar(radius)) ^ 0xF0) == 0) {
                     if (ComputeCameraDistanceFade(cam, d, &cur->fade, radius, e->f80) != 0) {
-                        BuildMatrixFromRotationAndTranslation(&pos, &rot, cur);
+                        BuildMatrixFromRotationAndTranslation(&pos, &rot, (Mat4A*)cur);
                         cur++;
                         count++;
                     }
@@ -837,25 +847,25 @@ void WriteListedObjectParticlePacket(void* self)
         if (sent++ < 2) {
             f32* p;
             s32* q;
-            ReserveVifUnpack(&g_vifPacketWriter, 0xC, 1, 5, 0, &p);
+            ReserveVifUnpack(&g_vifPacketWriter, 0xC, 1, 5, 0, (u8**)&p);
             Camera* cam = g_camera;
             p[0] = cam->fC0;
             p[1] = cam->fD4;
             p[2] = obj->f61C;
             p[3] = g_gameClock[1];
-            ReserveVifUnpack(&g_vifPacketWriter, 0xC, 1, 6, 0, &q);
+            ReserveVifUnpack(&g_vifPacketWriter, 0xC, 1, 6, 0, (u8**)&q);
             q[0] = 0;
             if (obj->f614 != 0)
                 q[0] |= 1;
             q[1] = obj->colorCount;
             q[2] = obj->regCount;
             *(f32*)&q[3] = g_gameClock[5];
-            CopyWordsToWriter(&g_vifPacketWriter, 0xE, obj->colorCount, obj->color, 0x30 - obj->colorCount);
-            CopyWordsToWriter(&g_vifPacketWriter, 8, 1, obj->curve2F0, 1);
-            CopyWordsToWriter(&g_vifPacketWriter, 8, 1, obj->curve2E0, 2);
-            CopyWordsToWriter(&g_vifPacketWriter, 8, 1, &obj->q300, 3);
-            CopyWordsToWriter(&g_vifPacketWriter, 8, 1, obj->curve310, 4);
-            CopyWordsToWriter(&g_vifPacketWriter, 0xC, 4, (void*)((obj->flagRecord->flags & 1) != 0 ? g_alphaStatePacket2 : g_alphaStatePacket1), 0x30);
+            CopyWordsToWriter(&g_vifPacketWriter, 0xE, obj->colorCount, (u32*)obj->color, 0x30 - obj->colorCount);
+            CopyWordsToWriter(&g_vifPacketWriter, 8, 1, (u32*)obj->curve2F0, 1);
+            CopyWordsToWriter(&g_vifPacketWriter, 8, 1, (u32*)obj->curve2E0, 2);
+            CopyWordsToWriter(&g_vifPacketWriter, 8, 1, (u32*)&obj->q300, 3);
+            CopyWordsToWriter(&g_vifPacketWriter, 8, 1, (u32*)obj->curve310, 4);
+            CopyWordsToWriter(&g_vifPacketWriter, 0xC, 4, (u32*)((void*)((obj->flagRecord->flags & 1) != 0 ? g_alphaStatePacket2 : g_alphaStatePacket1)), 0x30);
             WriteVifUnpack(&g_vifPacketWriter, 0xC, obj->regCount, obj->regs, 0xF, 0);
         }
         u8* bank = mesh->bank[mesh->current];
@@ -863,13 +873,13 @@ void WriteListedObjectParticlePacket(void* self)
         hdr[0] = 0x34;
         hdr[1] = mesh->count * 10 + 0x34;
         hdr[2] = mesh->count;
-        CopyWordsToWriter(&g_vifPacketWriter, 9, 1, hdr, 0);
+        CopyWordsToWriter(&g_vifPacketWriter, 9, 1, (u32*)hdr, 0);
         for (s32 i = 0; i < count; i++) {
             ViewedFrame* f = &frames[i];
             Vec02 fade;
-            CopyWordsToWriter(&g_vifPacketWriter, 0xC, 4, f, 7);
+            CopyWordsToWriter(&g_vifPacketWriter, 0xC, 4, (u32*)f, 7);
             fade.x = f->fade;
-            CopyWordsToWriter(&g_vifPacketWriter, 0xC, 1, &fade, 0xB);
+            CopyWordsToWriter(&g_vifPacketWriter, 0xC, 1, (u32*)&fade, 0xB);
             WriteVifStcycl(&g_vifPacketWriter, 1, 10);
             if (obj->f618 == 1)
                 WriteVifUnpack(&g_vifPacketWriter, 0xC, mesh->count, bank + 0x2C0, hdr[0] + 1, 0);

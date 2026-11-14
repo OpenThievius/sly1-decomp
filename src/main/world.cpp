@@ -39,90 +39,106 @@
 #include "state_notifier.h"
 #include "fpu.h"
 #include "scope_marker.h"
+#include "object_finder.h"
+struct ColliderPose;
+struct ParentFrame;
+struct PlacedObject;
+
+struct BaseObject;
+
+struct Mat02;
+
+
+// Types other files define, named by the parameters of their functions declared here.
+struct ScaledTransform;
 
 extern f32 g_gameClock[];
 
-s32 IsObjectAttached(void* node);
+s32 IsObjectAttached(BaseObject* self);
 
 void ResetPathFollower(void* self);
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-f32 ArctangentOfRatio(f32 a, f32 b);
-void SetStateWalkerTarget(StateTrigger* a, s32 b);
-void StartSoundEffect(s32 id, void* a1, PathFollower* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void* FindFirstObjectById(World* host, s32 a1, s32 a2, PathFollower* ctx);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void ResetPathFollower(PathFollower* self);
 
-void CaptureColliderPose(void);
+void CaptureColliderPose(Collider* self, ColliderPose* out);
 
-void SetCachedVoiceParam(void* a, void* b);
+void SetCachedVoiceParam(s32 index, s32 value);
 
-void* TakePoolSlot(void* p);
+void* TakePoolSlot(Pool6C* pool);
 
-void* RefreshCachedVoiceParam(void* a, void* b); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
+void RefreshCachedVoiceParam(s32 i, s32 unused1);
 
-void PushFreeSlot(void* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
 
-void* TakeCallRecord(void* self);
+void* TakeCallRecord(World* self);
 
 extern f32 g_gameTime;
 
-void ReleaseCallRecords(void* self, void* node);
+void ReleaseCallRecords(World* self, T219CHook* node);
 
-typedef void (*FollowerEffectFn)(void* self, void* a, void* b);
+typedef void (*FollowerEffectFn)(void* self, s32 mode, PlacedObject* other);
 struct FollowerEffectTarget { FollowerEffectFn* vtbl; };
-void SetAgentMainClip(void* self, void* value);
-void StartSwitchedColliderEffect(void* self, void* a, void* b);
+void SetAgentMainClip(Agent* self, void* value);
+void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other);
 
-void RecomputeColliderFrame(void* self);
+void RecomputeColliderFrame(Collider* self);
 void FindPathFollowerPathPosition(void* self);
 
 struct NoticeLink { u8 pad[0x50]; void* owner; };
 struct CountedNotice { u8 pad0[8]; s32 kind; u8 pad1[0x6CC - 0xC]; NoticeLink* link; };
 
-void HandleSwitchedColliderNotification(void* self, s32 kind, CountedNotice* rec);
+void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
 
-void AlignBufferedStreamPosition(void* self, s32 n);
-void ReadBufferedStreamBytes(void* self, s32 size, s32 obj);
+void AlignBufferedStreamPosition(BufferedStream* self, s32 n);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
-void SetListLinkOffset(void* self, s32 value);
+void SetListLinkOffset(List01* self, s32 offset);
 
-void UpdateColliderBounds(void* self);
-void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
+void UpdateColliderBounds(Collider* self);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void ExpandColliderBoundsBySphere(void* self, void* p, f32 f);
 
 extern u8 D_0026DAAC[];
 
-void HandleSwitchedColliderActivation(void* a, void* b);
-void SetWorldActiveFollower(void* sub, void* self);
-void SetPathFollowerMode(void* self, s32 mode);
+void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
+void SetWorldActiveFollower(World* self, void* v);
+void SetPathFollowerMode(PathFollower* self, s32 mode);
 
-void GetObjectWorldPosition(void* self, void* arg); // stays void: retail returns a value, but declared so func_001D66A8 and two more differs in registers
+void GetObjectWorldPosition(BaseObject* self, Vec02* out); // stays void: retail returns a value, but declared so func_001D66A8 and two more differs in registers
 
-s32 ReduceBufferedStreamBytesLeft(void* self, s32 n);
-s32 ReadBufferedS32(void* self);
+s32 ReduceBufferedStreamBytesLeft(BufferedStream* self, s32 n);
+s32 ReadBufferedS32(BufferedStream* self);
 
 struct WalkerHolder { u8 pad[0x48]; void* f48; };
 
-WalkerHolder* FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-void GetStateWalkerTargetKey(void* dev, s32* out);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
 s32 AreMenusAndFadeClear(void);
 
-void MarkPoolLiveEnds(void* a);
-s32 LookupScriptVariable(void* a, s32 b, s32 c, ScriptValue* d);
-void* EvalScriptExpression(ScriptValue* t, R11B008Node* n, void* c);
-void* AssignScriptVariable(ScriptValue* self, void* table, s32 key, ScriptValue* item);
+struct MarkStacks;
+void MarkPoolLiveEnds(MarkStacks* stacks);
+struct ScriptScope;
+s32 LookupScriptVariable(ScriptScope* scope, s32 key, s32 flag, ScriptValue* out);
+struct R11B008Node;
+struct ScriptValue;
+void* EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+void* AssignScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value);
 extern u8 g_markStacks[];
 
 void* GetActiveSwitchedCollider(void);
 
-void GetObjectWorldPosition(void* item, void* out); // stays void: retail returns a value, but declared so func_001D66A8 and two more differs in registers
+void GetObjectWorldPosition(BaseObject* self, Vec02* out); // stays void: retail returns a value, but declared so func_001D66A8 and two more differs in registers
 
 void ActivateSwitchedCollider(void* self);
 
-void UpdateSwitchedCollider(PathFollower* self, f32 t);
+void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt);
 void UpdatePathFollowerPace(PathFollower* self);
 void AdvancePathFollowerAlongPath(PathFollower* self, s32* out);
 void ComputePathFollowerHeadingTarget(PathFollower* self);
@@ -131,11 +147,12 @@ void SteerPathFollower(PathFollower* self);
 void EmitPathFollowerWheelParticles(PathFollower* self);
 void AdvancePathFollowerEntry(PathFollower* self, s32 v);
 void ProcessPathFollowerContacts(PathFollower* self);
-void ClearRootTries(PathFollower* self);
+void ClearRootTries(PlacedObject* self);
 
 extern u8 g_scatterController[];
 
-void RaiseScatterLevels(void* msg, f32 value);
+struct ScatterController;
+void RaiseScatterLevels(ScatterController* self, f32 amount);
 
 // A quadratic by its three coefficients (func_001DB290).
 struct QuadraticCurve {
@@ -147,31 +164,32 @@ struct WorldRecord { u8 b; };
 
 extern s32 g_buttonCodeFlags;
 
-void InitObject(World* self);
+void InitObject(BaseObject* self);
 void SetIopChannel2Setting(World* self, s32 a, s32 b);
 void* AllocateZeroedFrontMemory(s32 size);
 void InitContactTables(World* self);
-void InitSlotPool(WorldRecord* p, s32 a, s32 b);
-void InitAlignedSlotPool(WorldRecord* p, s32 a, s32 b);
-void SetListLinkOffset(WorldRecord* p, s32 a);
+void InitSlotPool(Pool6C* s, s32 size, s32 count);
+void InitAlignedSlotPool(Pool6C* s, s32 size, s32 count);
+void SetListLinkOffset(List01* self, s32 offset);
 void SetWorldGravityZ(World* self, f32 x);
 
 #define SUB(off) ((WorldRecord*)((u8*)self + (off)))
 
 typedef s32 VoiceParamIndex;
 
-s32 GetCachedVoiceParam(VoiceParamIndex index);
+s32 GetCachedVoiceParam(s32 index);
 
 extern s32 g_switchedColliderCount;
 extern s32 g_padSelectFlags;
 extern u8 g_elementStack[];
-extern s32 g_coloredTriangleSet;
+struct ColoredTriangleSet;
+extern ColoredTriangleSet* g_coloredTriangleSet;
 extern f32 g_stepScale;
 extern s32 D_00261D38;
 
 void ActivateSwitchedColliderIndex(s32 index);
 void UpdatePadRouting(void);
-void ClearCameraObjectList(void* obj);
+void ClearCameraObjectList(Camera* obj);
 void ClearClass75List(void);
 void ClearPointObjectList(void);
 void ClearTargetVectorList(void);
@@ -179,16 +197,16 @@ void ClearObjectLists(void);
 void StopAllSoundsAndWait(void);
 void ResetScreenResources(void);
 void ShutDownScriptValuePools(void);
-void ResetElementStack(void* a);
+void ResetElementStack(ElementStack* self);
 void ResetFrontMemory(void);
 
 struct __attribute__((packed)) PackedWord { s32 v; };
 
 typedef int Quadword __attribute__((mode(TI)));
 
-void *StoreFloatAsQuadword(void* out, f32 f);
-void* CopyQuadword(void* out, void* in);
-void* StoreQuadword(void* dst, Quadword v);
+void *StoreFloatAsQuadword(u128* out, f32 f);
+void* CopyQuadword(u128* out, void* src);
+void* StoreQuadword(u128* out, u128 v);
 Quadword AddWeightedVectors(Quadword a, Quadword b, Quadword c, Quadword d);
 
 struct BlendRange {
@@ -213,31 +231,34 @@ struct RangeClamp {
     }
 };
 
-s32 GetLevelEntryWord(void* obj);
+s32 GetLevelEntryWord(s32 key);
 
 // The four key/value slots after offset 0x44 of a level entry (SetEntrySlotValue, GetEntrySlotValue).
 struct EntrySlot { s32 key; s32 value; };
 struct EntrySlotTable { u8 pad[0x44]; EntrySlot slots[4]; };
 
-void* GetLevelEntryByKey(void* obj);
+void* GetLevelEntryByKey(s32 key);
 
-s32 ComputeCompletionPercent(void* p);
+s32 ComputeCompletionPercent(GameProgress* progress);
 
 extern void* g_frameCount;
 extern void* g_lightingChangeFrame;
 
-f32 ClampToRange(void* p);
+f32 ClampToRange(ValueRange* span, f32 x);
 
-void* PushSoundLevel(void* p);
+void* PushSoundLevel(s32 level);
 
-void HandleSwitchedColliderActivation(void* self, void* p);
+void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
 
-void* RandomIntInRange(void* a, void* b);
-s32 ScatterObjectsAroundCircle(void* heap, int size, void* c, void* d, int e);
+s32 RandomIntInRange(s32 a, s32 b);
+s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec02* a2, s32 n, StateNotifier** arr);
 
-void SetScatterLevel(void* p);
+struct ScatterController;
+void SetScatterLevel(ScatterController* object, f32 level);
 
-void* RemoveSoundLevelAndRecompute(void* p); // stays non-void: the C definition is void, and the caller here uses the value it leaves in the register
+struct SoundLevelEntry;
+struct SoundLevelEntry;
+void RemoveSoundLevelAndRecompute(SoundLevelEntry* p);
 
 typedef void (*ActiveFollowerFn)(void* self);
 struct ActiveFollowerChild { ActiveFollowerFn* vtbl; };
@@ -245,32 +266,36 @@ struct ActiveFollowerChild { ActiveFollowerFn* vtbl; };
 void UnlinkContactTable(Contacts03* node, Contacts03** head);
 void PushContactTable(Contacts03* node, Contacts03** head);
 
-void PopStackElement(void* g);
+void PopStackElement(ElementStack* g);
 
 struct __attribute__((packed)) PackedPageWord { s32 v; };
 
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 mode, s32 value);
 
-s32 ReadBufferedU32(void* src);
-void SkipBufferedBlock(void* self);
+s32 ReadBufferedU32(BufferedStream* self);
+void SkipBufferedBlock(BufferedStream* self);
 
 struct CloneBatch { s32 count; s32* values; };
 
 struct __attribute__((packed)) PackedCloneBatch { s32 n; void* buf; };
 
 void* AllocateFrontMemory(s32 size);
-void* CreateObjectCopy(void* a, void* b, void* c);
+void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 
 s32 HasStreamVoice(void);
 
-void HandleSwitchedColliderNotification(void* self, s32 kind, MessageBody* rec);
+void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
 
 struct __attribute__((aligned(16))) CurveSample { s32 v[4]; };
 struct __attribute__((packed)) PackedCurveColor { s32 v; };
 struct CurveFrame { CurveSample pts[10]; PackedCurveColor c; };
 
-void SampleCurvePoints(void* a0, void* a1, void* a2, void* a3, s32 n, void* out, f32 w0, f32 w1, f32 w2);
-void DrawProjectedLine(void* a, void* b, void* c, s32 d, s32 e);
+struct CurvePoint;
+void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, s32 count,
+                       CurvePoint* out, f32 start, f32 end);
+struct ClipPoint;
+struct PackedColor;
+void DrawProjectedLine(ClipPoint* a, ClipPoint* b, PackedColor* c, u8* obj, s32 k);
 
 extern u8 g_previousSoundLevel[];
 
@@ -279,22 +304,22 @@ void SendIopSoundLevel(s32 a);
 
 void* AllocateZeroedFrontMemory(u32 n);
 
-s32 IsPadSelectFlagHeld(void* p);
+s32 IsPadSelectFlagHeld(World* self);
 
-ConeVolume* CreateTypedRecord(s32 a0, World* a1, void* a2, s32 a3, s32 a4);
+ConeVolume* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 void SetConeVolumeMode(ConeVolume* p, s32 v);
-void SetConeVolumeColor(ConeVolume* p, void* q);
+void SetConeVolumeColor(ConeVolume* self, Quad16* src);
 void SetConeVolumeFirstAngle(ConeVolume* p, f32 v);
 void SetConeVolumeSecondLevel(ConeVolume* p, f32 v);
 void SetConeVolumeSecondAngle(ConeVolume* p, f32 v);
 void SetConeVolumeThirdLevel(ConeVolume* p, f32 v);
 void SetConeVolumeThirdAngle(ConeVolume* p, f32 v);
-void SetConeVolumeDirection(ConeVolume* p, void* q);
-void SetConeVolumeRange(ConeVolume* p, void* q);
+void SetConeVolumeDirection(ConeVolume* self, Quad16* dir);
+void SetConeVolumeRange(ConeVolume* self, U64P* src);
 
-ContactRow03* UnlinkContactRow(void* owner, Contacts03* h, Contacts03* handle);
-void FreePooledContactChain(void* a, Contact03* b);
-void ClearRootTries(void* self);
+ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, Contacts03* key);
+void FreePooledContactChain(World* world, Contact03* head);
+void ClearRootTries(PlacedObject* self);
 
 typedef u64 UQuadword __attribute__((mode(TI)));
 struct __attribute__((aligned(16))) ClipPoint { f32 x, y, z, w; };
@@ -307,23 +332,22 @@ extern SegmentEnd g_projectionOffset;
 
 UQuadword TransformVector4(u8* self, UQuadword q);
 s32 ClipSegmentToPlanes(ClipPoint* out);
-void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* tmp, s32 k);
+void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* color, s32 flag);
 
 s32 SetPadSelectFlags(s32 bits);
 
-void ClearPadSelectFlags(s32 n);
-void BuildAxisAngleMatrix(const Vec02* t, void* out, f32 x);
+void ClearPadSelectFlags(u32 mask);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
-void FreePooledContactChain(World* a0, Contact03* a1);
+void FreePooledContactChain(World* world, Contact03* head);
 // How many copies func_001DCD28 makes of the first object of a class.
 struct ClassCopyCount { s32 classId; s32 count; };
 
-StateNotifier* CreateObjectCopy(StateNotifier* node, World* self, void* z);
 
-void SetStateWalkerTarget(StateTrigger* h, s32 b);
-void BuildAxisAngleMatrix(const Vec02* tab, void* out, f32 v);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
-u32 GetEntryFlags(void* a);
+u32 GetEntryFlags(s32 id);
 
 struct ClipPlane { f32 x, y, z, w; };
 
@@ -350,15 +374,15 @@ ClipPlane D_002756B0[6] = {
 };
 World* g_currentWorld = 0;
 u32 D_00275714 = 0;
-s32 D_00275718 = 0;
+u8* D_00275718 = 0;
 s32 D_0027571C = 0;
 s32 D_00275720 = 0;
 s32 D_00275724 = 0;
 s32 D_00275728 = 0;
 
-s32 IsObjectOfKind(void* node, s32 kind);
-void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
-void ChangeAgentState(void* node, s32 kind, s32 flag);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void ChangeAgentState(Agent* self, s32 state, void* context);
 
 void ProcessPathFollowerContacts(PathFollower* self)
 {
@@ -390,7 +414,7 @@ void ProcessPathFollowerContacts(PathFollower* self)
         if (IsObjectOfKind(other, 0x19)) {
             ((PathFollower*)other)->f86C = g_gameClock[1];
         } else if (IsObjectOfKind(other, 8)) {
-            ChangeAgentState(other, 0x10, 0);
+            ChangeAgentState((Agent*)other, 0x10, 0);
         }
     }
     FreePooledContactChain(self->world, self->contacts);
@@ -426,9 +450,8 @@ void UpdatePathFollower(PathFollower* self, f32 t)
 }
 
 void ComputeCameraRelativeStickHeading(Camera* camera, PadRecord* pad, s32 flag, f32* out);
-void ClearPadPressedBits(PadRecord* pad, s32 bits);
-void HandleStepSequenceSkipButtons(PathFollower* self, PadRecord* pad);
-s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void ClearPadPressedBits(PadRecord* self, u32 mask);
+void HandleStepSequenceSkipButtons(void* self, PadRecord* rec);
 s32 IsPathFollowerAhead(PathFollower* self, PathFollower* other);
 void CountDownPathFollowerLap(PathFollower* self);
 extern s32 g_movieChecksumFailed;
@@ -437,7 +460,7 @@ extern s32 D_002751D4;
 
 // The pad's control of a path follower: its heading from the stick, its pace in mode 2 and the
 // button 0x80, then by kind the race places (0) or the end of the round (1).
-void ControlPathFollower(PathFollower* self, PadRecord* pad)
+void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
 {
     if (self->fB34 != 1) {
         if (0.0f < pad->f48) {
@@ -464,7 +487,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad)
                 break;
             case 1:
                 if (self->fB44 != 0) {
-                    SetStateWalkerTarget((StateTrigger*)self->fB48, 0x485);
+                    SetStateWalkerTarget((StateWalker*)self->fB48, 0x485);
                     self->pushedCount = 0;
                 }
                 break;
@@ -483,9 +506,9 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad)
         if (r != 0) {
             void* dev = r->f48;
             s32 code;
-            GetStateWalkerTargetKey(dev, &code);
+            GetStateWalkerTargetKey((StateWalker*)dev, &code);
             if (code == -1) {
-                GetStateWalkerCurrentKey(dev, &code);
+                GetStateWalkerCurrentKey((StateWalker*)dev, &code);
             }
             if (code < 0x431) {
                 if (code >= 0x42F && 0.5f < g_gameClock[1] - self->fB10 && self->f830 != 0) {
@@ -512,16 +535,16 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad)
         if (r != 0) {
             void* dev = r->f48;
             s32 code;
-            GetStateWalkerTargetKey(dev, &code);
+            GetStateWalkerTargetKey((StateWalker*)dev, &code);
             if (code == -1) {
-                GetStateWalkerCurrentKey(dev, &code);
+                GetStateWalkerCurrentKey((StateWalker*)dev, &code);
             }
             if (code == 0x42F) {
                 if (D_00272430.own >= D_002751D4) {
-                    SetStateWalkerTarget((StateTrigger*)dev, 0x432);
+                    SetStateWalkerTarget((StateWalker*)dev, 0x432);
                 } else if (D_002726B0.own >= D_002751D4) {
-                    SetStateWalkerTarget((StateTrigger*)dev, 0x431);
-                    RaiseScatterLevels(g_scatterController, 1.0f);
+                    SetStateWalkerTarget((StateWalker*)dev, 0x431);
+                    RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f);
                 }
             }
         }
@@ -542,9 +565,9 @@ void UpdatePathFollowerScreenElements(PathFollower* self)
         if (r != 0) {
             void* dev = r->f48;
             s32 code;
-            GetStateWalkerTargetKey(dev, &code);
+            GetStateWalkerTargetKey((StateWalker*)dev, &code);
             if (code == -1) {
-                GetStateWalkerCurrentKey(dev, &code);
+                GetStateWalkerCurrentKey((StateWalker*)dev, &code);
             }
             if (code < 0x431) {
                 if (code >= 0x42F) {
@@ -578,14 +601,17 @@ void UpdatePathFollowerScreenElements(PathFollower* self)
 
 void ReleasePathFollowerContacts(PathFollower* self) { self->f6A0++; }
 
-s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, void* a5);
-void ComputeObjectMotionInFrame(void* obj, void* a, void* b, void* c, s32 d, s32 e, s32 f);
-void StartChildGroupDelay(void* obj, f32 t);
-s32 IsObjectAccepted(void* obj, void* by);
-void SetColliderTurnAnchorPreset(void* obj, s32 n);
-void SetColliderMoveAnchorPreset(void* obj, s32 n);
-void AddMeshContacts(Collider* a, f32 f, void* b, Collider* c, s32 d, s32 e, s32 g, void* h);
-void CreateMeshPairContacts(void* a, Collider* b, void* c, void* d, void* e, void* f);
+struct FaceRef;
+struct PooledContact;
+struct MaskedCollider;
+s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, ColliderSpan* a5);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
+void StartChildGroupDelay(ChildGroupObject* self, f32 delta);
+s32 IsObjectAccepted(MaskedCollider* self, BaseObject* msg);
+void SetColliderTurnAnchorPreset(Collider* self, s32 index);
+void SetColliderMoveAnchorPreset(Collider* self, s32 index);
+void AddMeshContacts(Collider* a0, f32 radius, Vec02* a1, Collider* a2, s32 a3, FaceRef* a4, FaceRef* a5, PooledContact** a6);
+void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3, u8* ctx, PooledContact** list);
 
 // Whether a lies below b along axis (their dot products with it).
 static inline s32 IsLowerAlong(const Vec02& a, const Vec02& b, const Vec02& axis)
@@ -593,7 +619,7 @@ static inline s32 IsLowerAlong(const Vec02& a, const Vec02& b, const Vec02& axis
     return Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(a), Vu0::Q(axis))) < Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(b), Vu0::Q(axis)));
 }
 
-void CollidePathFollowerWithObject(PathFollower* self, Collider* other, void* a2, void* a3, void* a4)
+void CollidePathFollowerWithObject(PathFollower* self, Collider* other, s32 a2, void* a3, void* a4)
 {
     if ((other->flags538 & ((u64)0x8000 << 40)) != 0 || (((u32*)other->desc)[2] & 0x10) != 0) {
         for (u32 i = 0; i < 4; i++) {
@@ -625,9 +651,9 @@ void CollidePathFollowerWithObject(PathFollower* self, Collider* other, void* a2
                 if (other->id != 1) {
                     if ((other->desc->flags & 0x20) != 0) {
                         if (*(s32*)((u8*)other + 0x550) == 0) {
-                            StartChildGroupDelay(other, 0.0f);
+                            StartChildGroupDelay((ChildGroupObject*)other, 0.0f);
                         }
-                    } else if (IsObjectOfKind(other, 0x25) != 0 && *(s32*)((u8*)other + 0x678) == 0 && IsObjectAccepted(other, self) != 0) {
+                    } else if (IsObjectOfKind(other, 0x25) != 0 && *(s32*)((u8*)other + 0x678) == 0 && IsObjectAccepted((MaskedCollider*)other, self) != 0) {
                         if (*(s32*)((u8*)other + 0x6C4) != -1) {
                             SetColliderTurnAnchorPreset(other, *(s32*)((u8*)other + 0x6C4));
                         }
@@ -645,9 +671,9 @@ void CollidePathFollowerWithObject(PathFollower* self, Collider* other, void* a2
     } else if (self->fB4C != 0 && IsObjectAttached((Collider*)self->fB4C) != 0) {
         if ((other->flags538 & ((u64)0x8000 << 25)) != 0) {
             Collider* c = (Collider*)self->fB4C;
-            AddMeshContacts(other, other->radius3CC, (u8*)other + 0x140, c, c->tree.count, (s32)c->tree.nodes, 0, (u8*)self + 0xB74);
+            AddMeshContacts(other, other->radius3CC, (Vec02*)((u8*)other + 0x140), c, c->tree.count, (FaceRef*)c->tree.nodes, 0, (PooledContact**)((u8*)self + 0xB74));
         } else if (a3 != 0) {
-            CreateMeshPairContacts((Collider*)self->fB4C, other, a2, a3, a4, (u8*)self + 0xB74);
+            CreateMeshPairContacts((Collider*)self->fB4C, other, a2, (FaceRef*)a3, (u8*)a4, (PooledContact**)((u8*)self + 0xB74));
         }
     }
 }
@@ -655,8 +681,10 @@ void CollidePathFollowerWithObject(PathFollower* self, Collider* other, void* a2
 ASM_FUNC(func_001DA6E0);
 
 typedef u64 Quad_1DA7E0 __attribute__((mode(TI)));
-void UpdateAttachmentFrames(void* self);
-Quad_1DA7E0 ApproachPointWithRamp(Quad_1DA7E0 a, Quad_1DA7E0 b, void* ramp, s32 c, f32 dt);
+void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* parent);
+struct Vec02;
+struct RampProfile;
+Quad_1DA7E0 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel);
 
 static inline void MulMatInto(Mat02* out, const Mat02& a, const Mat02& b)
 {
@@ -675,10 +703,10 @@ static inline void MulMatInto(Mat02* out, const Mat02& a, const Mat02& b)
     out->r[2] = r.r[2];
 }
 
-void UpdatePathFollowerAttachmentFrames(PathFollower* self)
+void UpdatePathFollowerAttachmentFrames(PathFollower* self, ParentFrame* frame)
 {
     u32 i = 0;
-    UpdateAttachmentFrames(self);
+    UpdateAttachmentFrames(self, frame);
     for (; i < 4; i++) {
         Slot19* s = &self->f6B0[i];
         Mat02 world;
@@ -689,7 +717,7 @@ void UpdatePathFollowerAttachmentFrames(PathFollower* self)
             TransformPointBetweenFrames(0, self, &s->v20, &s->v10);
             s->v10.z = s->v10.z + (((s32)i < 2) ? self->f610 : self->f614);
         } else {
-            *(Quad_1DA7E0*)&s->v10 = ApproachPointWithRamp(*(Quad_1DA7E0*)&s->v10, *(Quad_1DA7E0*)&s->obj->v190, D_00275620, 0, g_gameClock[2]);
+            *(Quad_1DA7E0*)&s->v10 = ApproachPointWithRamp(*(Quad_1DA7E0*)&s->v10, *(Quad_1DA7E0*)&s->obj->v190, g_gameClock[2], (RampProfile*)D_00275620, 0);
         }
         if ((s32)i < 2) {
             BuildAxisAngleMatrix(&g_unitZVector, &tilt, self->f69C);
@@ -700,7 +728,7 @@ void UpdatePathFollowerAttachmentFrames(PathFollower* self)
         MulMatInto(&world, tilt, turn);
         if (s->obj2 != 0) {
             Vec02 moved;
-            TransformPointBetweenFrames(s->obj->parent, s->obj2->parent, &s->v10, &moved);
+            TransformPointBetweenFrames((PlacedObject*)s->obj->parent, (PlacedObject*)s->obj2->parent, &s->v10, &moved);
             s->obj2->desc02()->m1D(s->obj2, &moved);
         }
         s->obj->desc02()->m1D(s->obj, &s->v10);
@@ -714,10 +742,10 @@ struct DrawScale {
 };
 
 void DrawCollider(Collider* self, void* a, void* m);
-void BuildPlacedObjectTransform(void* obj, void* c, void* out);
+void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
-void BuildMatrixFromRotationAndTranslation(void* pos, void* rot, void* out);
-void DrawBeamBetweenPoints(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
+void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy);
 
 void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
 {
@@ -730,14 +758,14 @@ void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
         for (s32 i = 0; i < 3; i++) {
             Vu0::StoreX(len[i], Vu0::Length(Vu0::Q(self->m110.r[i])));
         }
-        BuildPlacedObjectTransform(self, b, &m);
+        BuildPlacedObjectTransform(self, (Quad16*)b, (ScaledTransform*)&m);
         RotateMatrixUpright(&self->m110, 0, &rot);
         f32 sx = len[2] >? len[0];
         f32 sy = len[2] >? len[1];
         Vu0::Q(rot.r[0]) = Vu0::MulX(Vu0::Q(rot.r[0]), Vu0::Scalar(sx));
         Vu0::Q(rot.r[1]) = Vu0::MulX(Vu0::Q(rot.r[1]), Vu0::Scalar(sy));
         Vu0::Q(pos) = Vu0::Add(Vu0::Q(self->v140), Vu0::Rotate(rot, Vu0::Q(self->f690->pos)));
-        BuildMatrixFromRotationAndTranslation(&pos, &rot, &m);
+        BuildMatrixFromRotationAndTranslation(&pos, &rot, (Mat4A*)&m);
         self->f690->desc02()->m26(self->f690, a, &m);
     }
     if (self->fB28 != 0 || self->fB2C != 0) {
@@ -746,10 +774,10 @@ void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
             TransformPointBetweenFrames(self, 0, &self->f6B0[i].v10, &q[i]);
         }
         if (self->fB28 != 0) {
-            DrawBeamBetweenPoints(self->fB28, a, &q[0], &q[1], 1.0f, b != 0 ? b->f40 : 1.0f);
+            DrawBeamBetweenPoints((PlacedObject*)self->fB28, (PlacedObject*)a, &q[0], &q[1], 1.0f, b != 0 ? b->f40 : 1.0f);
         }
         if (self->fB2C != 0) {
-            DrawBeamBetweenPoints(self->fB2C, a, &q[2], &q[3], 1.0f, b != 0 ? b->f40 : 1.0f);
+            DrawBeamBetweenPoints((PlacedObject*)self->fB2C, (PlacedObject*)a, &q[2], &q[3], 1.0f, b != 0 ? b->f40 : 1.0f);
         }
     }
 }
@@ -764,17 +792,17 @@ void UpdatePathFollowerBounds(PathFollower* self)
         if (slot->obj != 0) {
             f32 f;
             q = *(Quad16*)&slot->obj->v190;
-            TransformPointBetweenFrames(self, 0, &q, &q);
+            TransformPointBetweenFrames(self, 0, (Vec02*)&q, (Vec02*)&q);
             f = ((s32)i < 2) ? self->f610 : self->f614;
             ExpandColliderBoundsBySphere(self, &q, f);
         }
     }
 }
 
-void StartPathFollowerEffect(PathFollower* self, void* a, void* b)
+void StartPathFollowerEffect(PathFollower* self, s32 a, PlacedObject* b)
 {
     if (((FollowerEffectTarget*)self->fB78) != 0) {
-        SetAgentMainClip(((FollowerEffectTarget*)self->fB78), 0);
+        SetAgentMainClip((Agent*)(((FollowerEffectTarget*)self->fB78)), 0);
         FollowerEffectTarget* t = ((FollowerEffectTarget*)self->fB78);
         t->vtbl[82](t, a, b);
     } else {
@@ -805,9 +833,9 @@ void RecomputePathFollowerFrame(PathFollower* self)
     FindPathFollowerPathPosition(self);
 }
 
-void CapturePathFollowerPose(void)
+void CapturePathFollowerPose(PathFollower* self, ColliderPose* pose)
 {
-    CaptureColliderPose();
+    CaptureColliderPose(self, pose);
 }
 
 void HandlePathFollowerActivation(PathFollower* self, void* v)
@@ -821,7 +849,7 @@ void HandlePathFollowerActivation(PathFollower* self, void* v)
         a->limit = (s32*)((u8*)self + 0xB04);
         b->target = (s32*)((u8*)self + 0xB08);
         b->limit = (s32*)((u8*)self + 0xB0C);
-        SetWorldActiveFollower(*(void**)((u8*)self + 0x14), self);
+        SetWorldActiveFollower((World*)(*(void**)((u8*)self + 0x14)), self);
     } else {
         if (self->fB34 == 2) {
             SetPathFollowerMode(self, 0);
@@ -860,7 +888,7 @@ void SetPathFollowerPath(PathFollower* self, PathCurveObject* arg)
         PathMarker* e = &self->f874[i];
         if (e->kind == 0) {
             s32 loc[4];
-            GetObjectWorldPosition(e->item, loc);
+            GetObjectWorldPosition((BaseObject*)e->item, (Vec02*)loc);
             PathCurve* o2 = self->f830->curve;
             if (o2->vt->m10) o2->vt->m10(o2, loc, 0, 0, 0, 0, &e->pathLength);
         }
@@ -903,7 +931,7 @@ void AddPathFollowerEntry(PathFollower* self, void* item)
     }
     if (self->f830 != 0) {
         Quad16 tmp;
-        GetObjectWorldPosition(item, &tmp);
+        GetObjectWorldPosition((BaseObject*)item, (Vec02*)&tmp);
         PathCurve* o = self->f830->curve;
         void (*fn)(PathCurve*, void*, void*, void*, void*, f32*, f32*) = o->vt->m10;
         if (fn != 0) {
@@ -912,7 +940,7 @@ void AddPathFollowerEntry(PathFollower* self, void* item)
     }
 }
 
-void AddPathFollowerActiveEntry(PathFollower* self, s32 a, s32 b, s32 c, f32 x, f32 y) { if (a && (u32)self->f870 < 16) { PathMarker* e = &self->f874[self->f870]; self->f870++; e->item = (void*)a; e->kind = 1; e->x = x; e->y = y; e->b = b; e->c = c; } }
+void AddPathFollowerActiveEntry(PathFollower* self, void* a, f32 x, f32 y, s32 b, s32 c) { if (a && (u32)self->f870 < 16) { PathMarker* e = &self->f874[self->f870]; self->f870++; e->item = a; e->kind = 1; e->x = x; e->y = y; e->b = b; e->c = c; } }
 
 void SetPathFollowerMode(PathFollower* self, s32 mode)
 {
@@ -951,15 +979,15 @@ void ResetPathFollower(PathFollower* self)
     u8* p670 = self->v670;
     Quadword a, b, c, d;
     Quadword a2, b2, c2, d2;
-    StoreFloatAsQuadword(&a, y);
+    StoreFloatAsQuadword((u128*)&a, y);
     a2 = a;
-    CopyQuadword(&b, p630);
+    CopyQuadword((u128*)&b, p630);
     b2 = b;
-    StoreFloatAsQuadword(&c, x);
+    StoreFloatAsQuadword((u128*)&c, x);
     c2 = c;
-    CopyQuadword(&d, p650);
+    CopyQuadword((u128*)&d, p650);
     d2 = d;
-    StoreQuadword(p670, AddWeightedVectors(a2, b2, c2, d2));
+    StoreQuadword((u128*)p670, AddWeightedVectors(a2, b2, c2, d2));
     ((BlendRange*)&self->f680)->Blend(y, *(BlendRange*)&self->f640, x, *(BlendRange*)&self->f660);
     f32 r = ((RangeClamp*)&self->f680)->Clamp(*(f32*)p670);
     self->f860 = r;
@@ -974,7 +1002,7 @@ void InitWorldHashLists(u8* self)
 {
     u32 i;
     for (i = 0; i < 0x200; i++) {
-        SetListLinkOffset(self + 0x84 + i * 0xC, 0xC);
+        SetListLinkOffset((List01*)(self + 0x84 + i * 0xC), 0xC);
     }
 }
 
@@ -986,54 +1014,54 @@ void InitWorldPools(World* self)
     self->buf1AD8 = (void*)AllocateFrontMemory(0x4800);
     self->buf1ADC = AllocateZeroedFrontMemory(0x10000);
     InitContactTables(self);
-    InitSlotPool(SUB(0x1AF0), 0x10, 0x400);
-    InitSlotPool(SUB(0x1AFC), 0xE0, 0x100);
-    InitSlotPool(SUB(0x1B08), 0x10, 0x80);
-    InitSlotPool(SUB(0x1B14), 0x14, 0x400);
-    InitSlotPool(SUB(0x1B2C), 0x140, 0x180);
-    InitAlignedSlotPool(SUB(0x1B40), 0x10C0, 0x80);
-    InitSlotPool(SUB(0x1B4C), 0x580, 0x20);
-    InitSlotPool(SUB(0x1B58), 0xEC, 0x100);
-    InitSlotPool(SUB(0x1B20), 0xD0, 0x400);
-    InitSlotPool(SUB(0x1BA0), 0x90, 0x80);
-    InitSlotPool(SUB(0x1BB8), 0xC, 0x20);
-    InitSlotPool(SUB(0x1B88), 0x40, 0x100);
-    InitSlotPool(SUB(0x1BF4), 0x2E0, 0x20);
-    InitSlotPool(SUB(0x1BD0), 0x70, 0x20);
-    InitSlotPool(SUB(0x1C0C), 0x8, 0x80);
-    InitSlotPool(SUB(0x1C18), 0x14, 0x100);
+    InitSlotPool(&self->pool1AF0, 0x10, 0x400);
+    InitSlotPool(&self->pool1AFC, 0xE0, 0x100);
+    InitSlotPool(&self->pool1B08, 0x10, 0x80);
+    InitSlotPool(&self->pool1B14, 0x14, 0x400);
+    InitSlotPool(&self->pool1B2C, 0x140, 0x180);
+    InitAlignedSlotPool(&self->pool1B40, 0x10C0, 0x80);
+    InitSlotPool((Pool6C*)(SUB(0x1B4C)), 0x580, 0x20);
+    InitSlotPool(&self->pool1B58, 0xEC, 0x100);
+    InitSlotPool(&self->pool1B20, 0xD0, 0x400);
+    InitSlotPool((Pool6C*)(SUB(0x1BA0)), 0x90, 0x80);
+    InitSlotPool(&self->pool1BB8, 0xC, 0x20);
+    InitSlotPool(&self->pool1B88, 0x40, 0x100);
+    InitSlotPool(&self->pool1BF4, 0x2E0, 0x20);
+    InitSlotPool(&self->pool1BD0, 0x70, 0x20);
+    InitSlotPool((Pool6C*)(SUB(0x1C0C)), 0x8, 0x80);
+    InitSlotPool((Pool6C*)(SUB(0x1C18)), 0x14, 0x100);
     self->regroupObjects = (PlacedObject**)AllocateFrontMemory(0x1000);
-    SetListLinkOffset(SUB(0x48), 0x1C);
-    SetListLinkOffset(SUB(0x54), 0x48);
-    SetListLinkOffset(SUB(0x78), 0x48);
-    SetListLinkOffset(SUB(0x60), 0x40);
-    SetListLinkOffset(SUB(0x6C), 0x414);
-    SetListLinkOffset(SUB(0x3C), 0x2D0);
-    SetListLinkOffset(SUB(0x1B64), 0x34);
-    SetListLinkOffset(SUB(0x1B70), 0x34);
-    SetListLinkOffset(SUB(0x1B7C), 0x34);
-    SetListLinkOffset(SUB(0x1B94), 0x10);
-    SetListLinkOffset(SUB(0x1BAC), 0x64);
-    SetListLinkOffset(SUB(0x1BC4), 0x4);
-    SetListLinkOffset(SUB(0x1BE8), 0x410);
-    SetListLinkOffset(SUB(0x1C00), 0xB8);
-    SetListLinkOffset(SUB(0x1BDC), 0x64);
-    SetListLinkOffset(SUB(0x1C3C), 0x2DC);
-    SetListLinkOffset(SUB(0x1C48), 0x5DC);
-    SetListLinkOffset(SUB(0x1C54), 0x374);
-    SetListLinkOffset(SUB(0x1C60), 0x600);
-    SetListLinkOffset(SUB(0x1C6C), 0x90);
-    SetListLinkOffset(SUB(0x1C78), 0x56C);
-    SetListLinkOffset(SUB(0x1C84), 0x50);
-    SetListLinkOffset(SUB(0x1C90), 0x38);
-    SetListLinkOffset(SUB(0x1C9C), 0x38);
-    SetListLinkOffset(SUB(0x1CA8), 0xAF0);
-    SetListLinkOffset(SUB(0x1CB4), 0x630);
-    SetListLinkOffset(SUB(0x1CC0), 0x630);
-    SetListLinkOffset(SUB(0x1C24), 0xC);
-    SetListLinkOffset(SUB(0x1C30), 0xC);
-    SetListLinkOffset(SUB(0x1CCC), 0xC10);
-    SetListLinkOffset(SUB(0x1CD8), 0x34);
+    SetListLinkOffset((List01*)(SUB(0x48)), 0x1C);
+    SetListLinkOffset((List01*)(SUB(0x54)), 0x48);
+    SetListLinkOffset((List01*)(SUB(0x78)), 0x48);
+    SetListLinkOffset((List01*)(SUB(0x60)), 0x40);
+    SetListLinkOffset((List01*)(SUB(0x6C)), 0x414);
+    SetListLinkOffset((List01*)(SUB(0x3C)), 0x2D0);
+    SetListLinkOffset((List01*)(SUB(0x1B64)), 0x34);
+    SetListLinkOffset((List01*)(SUB(0x1B70)), 0x34);
+    SetListLinkOffset((List01*)(SUB(0x1B7C)), 0x34);
+    SetListLinkOffset((List01*)(SUB(0x1B94)), 0x10);
+    SetListLinkOffset((List01*)(SUB(0x1BAC)), 0x64);
+    SetListLinkOffset((List01*)(SUB(0x1BC4)), 0x4);
+    SetListLinkOffset((List01*)(SUB(0x1BE8)), 0x410);
+    SetListLinkOffset((List01*)(SUB(0x1C00)), 0xB8);
+    SetListLinkOffset((List01*)(SUB(0x1BDC)), 0x64);
+    SetListLinkOffset((List01*)(SUB(0x1C3C)), 0x2DC);
+    SetListLinkOffset((List01*)(SUB(0x1C48)), 0x5DC);
+    SetListLinkOffset((List01*)(SUB(0x1C54)), 0x374);
+    SetListLinkOffset((List01*)(SUB(0x1C60)), 0x600);
+    SetListLinkOffset((List01*)(SUB(0x1C6C)), 0x90);
+    SetListLinkOffset((List01*)(SUB(0x1C78)), 0x56C);
+    SetListLinkOffset((List01*)(SUB(0x1C84)), 0x50);
+    SetListLinkOffset((List01*)(SUB(0x1C90)), 0x38);
+    SetListLinkOffset((List01*)(SUB(0x1C9C)), 0x38);
+    SetListLinkOffset((List01*)(SUB(0x1CA8)), 0xAF0);
+    SetListLinkOffset((List01*)(SUB(0x1CB4)), 0x630);
+    SetListLinkOffset((List01*)(SUB(0x1CC0)), 0x630);
+    SetListLinkOffset((List01*)(SUB(0x1C24)), 0xC);
+    SetListLinkOffset((List01*)(SUB(0x1C30)), 0xC);
+    SetListLinkOffset((List01*)(SUB(0x1CCC)), 0xC10);
+    SetListLinkOffset((List01*)(SUB(0x1CD8)), 0x34);
     x = -1500.0f;
     if (g_buttonCodeFlags & 4) {
         x = -900.0f;
@@ -1053,7 +1081,7 @@ void InitWorldPools(World* self)
     self->f235C = 0xF03FFFFF;
 }
 
-void ResetWorldSubsystems(s32 a0)
+void ResetWorldSubsystems(World* a0)
 {
     if (a0 != 0) {
         ActivateSwitchedColliderIndex(-1);
@@ -1069,7 +1097,7 @@ void ResetWorldSubsystems(s32 a0)
         StopAllSoundsAndWait();
         ResetScreenResources();
         ShutDownScriptValuePools();
-        ResetElementStack(g_elementStack);
+        ResetElementStack((ElementStack*)g_elementStack);
         ResetFrontMemory();
         u8* c = (u8*)&D_0026CE48;
         u8* e = (u8*)&g_timerElement;
@@ -1105,7 +1133,7 @@ void ReadBufferedBlockHeader(s32 a0, BufferedStream* self)
             self->f14 = (s2 < v) ? v : 0;
         }
     }
-    s32 r = (s32)AllocateFrontMemory(s3);
+    u8* r = (u8*)AllocateFrontMemory(s3);
     D_00275724 = s0;
     D_00275720 = s3;
     D_00275718 = r;
@@ -1126,65 +1154,65 @@ void SetWorldGravityZ(World* self, f32 z)
     Vu0::Q(self->gravity) = Vu0::FromFloats(0.0f, 0.0f, z);
 }
 
-void SetCachedVoiceParamBuiltin(void* self, void* a, void* b)
+void SetCachedVoiceParamBuiltin(void* self, s32 a, s32 b)
 {
     SetCachedVoiceParam(a, b);
 }
 
-s32 GetCachedVoiceParamBuiltin(s32 unused, VoiceParamIndex index)
+s32 GetCachedVoiceParamBuiltin(void* unused, s32 index)
 {
     return GetCachedVoiceParam(index);
 }
 
-void* RefreshCachedVoiceParamBuiltin(void* unused, void* a1, void* a2)
+void* RefreshCachedVoiceParamBuiltin(void* unused, s32 a1, s32 a2)
 {
-    return RefreshCachedVoiceParam(a1, a2);
+    RefreshCachedVoiceParam(a1, a2);
 }
 
 s32 IsWorldBodyLimitReached(World* self, BaseObject* obj, u32 value) { return (obj->desc->flags & 2) && self->count38 >= 0xF7 && value == 0; }
 
-void* TakeAttachRecord(u8* self)
+void* TakeAttachRecord(World* self)
 {
-    void* p = TakePoolSlot(self + 0x1B08);
+    void* p = TakePoolSlot(&self->pool1B08);
     FillMemory(p, 0, 16);
     return p;
 }
 
-void ReleaseAttachRecords(u8* self, Attach03* node)
+void ReleaseAttachRecords(World* self, Attach03* node)
 {
     if (node) {
         do {
             Attach03* next = node->nextOwn;
-            PushFreeSlot(self + 0x1B08, node);
+            PushFreeSlot(&self->pool1B08, node);
             node = next;
         } while (node);
     }
 }
 
-void* TakeCallRecord(u8* self)
+void* TakeCallRecord(World* self)
 {
-    void* p = TakePoolSlot(self + 0x1B14);
+    void* p = TakePoolSlot(&self->pool1B14);
     FillMemory(p, 0, 0x14);
     return p;
 }
 
-void ReleaseCallRecords(u8* self, T219CHook* node)
+void ReleaseCallRecords(World* self, T219CHook* node)
 {
     while (node != 0) {
         T219CHook* next = node->next;
-        PushFreeSlot(self + 0x1B14, node);
+        PushFreeSlot(&self->pool1B14, node);
         node = next;
     }
 }
 
-QueuedCall* AppendQueuedCall(World* self, s32 a, s32 b, s32 c, s32 d);
+QueuedCall* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
-void AppendQueuedCallOnce(World* self, s32 a1, s32 a2, s32 a3, s32 a4)
+void AppendQueuedCallOnce(World* self, void* a1, void* a2, s32 a3, s32 a4)
 {
     QueuedCall* n = self->f1EC8;
     if (n != 0) {
         do {
-            if (n->k0 == a1 && n->k1 == a2 && n->k2 == a3 && n->k3 == a4) {
+            if (n->code == a1 && n->arg == a2 && n->k2 == a3 && n->k3 == a4) {
                 return;
             }
             n = n->next;
@@ -1193,20 +1221,19 @@ void AppendQueuedCallOnce(World* self, s32 a1, s32 a2, s32 a3, s32 a4)
     AppendQueuedCall(self, a1, a2, a3, a4);
 }
 
-QueuedCall* AppendQueuedCall(World* self, s32 a, s32 b, s32 c, s32 d)
+QueuedCall* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d)
 {
     QueuedCall* e = (QueuedCall*)TakeCallRecord(self);
-    e->k0 = a;
-    e->k1 = b;
+    e->code = code;
+    e->arg = arg;
     e->k2 = c;
     e->k3 = d;
     if (self->f1ECC != 0) self->f1ECC->next = e;
     else self->f1EC8 = e;
     self->f1ECC = e;
-    return e;
 }
 
-void RemoveQueuedCalls(World* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
+void RemoveQueuedCalls(World* self, u32 mask, void* code, void* arg, s32 k2, s32 k3)
 {
     QueuedCall* prev = 0;
     QueuedCall* removed = 0;
@@ -1222,10 +1249,10 @@ void RemoveQueuedCalls(World* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
                 if (mask & bit) {
                     switch (bit) {
                     case 1:
-                        if (cur->k0 != k0) goto miss;
+                        if (cur->code != code) goto miss;
                         break;
                     case 2:
-                        if (cur->k1 != k1) goto miss;
+                        if (cur->arg != arg) goto miss;
                         break;
                     case 4:
                         if (cur->k2 != k2) goto miss;
@@ -1254,7 +1281,7 @@ void RemoveQueuedCalls(World* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
             cur = next;
         } while (cur != 0);
     }
-    ReleaseCallRecords(self, removed);
+    ReleaseCallRecords(self, (T219CHook*)removed);
 }
 
 void RunQueuedCalls(World* self)
@@ -1264,8 +1291,8 @@ void RunQueuedCalls(World* self)
         if (node == self->f1ECC) self->f1ECC = 0;
         self->f1EC8 = node->next;
         node->next = 0;
-        node->fn(node->k1, node->k2, node->k3);
-        ReleaseCallRecords(self, node);
+        node->fn(node->arg, node->k2, node->k3);
+        ReleaseCallRecords(self, (T219CHook*)node);
     }
 }
 
@@ -1276,8 +1303,8 @@ void RunDueDelayedScriptCalls(World* self, f32 limit)
     ScriptValue t;
     InitScriptValue(&a);
     InitScriptValue(&q);
-    MarkPoolLiveEnds(g_markStacks);
-    LookupScriptVariable(self->f2C, self->f1EF8, 0, &a);
+    MarkPoolLiveEnds((MarkStacks*)g_markStacks);
+    LookupScriptVariable((ScriptScope*)self->f2C, self->f1EF8, 0, &a);
     R11B008Node* n;
     s32 found;
     if (a.tag != 0x1E) {
@@ -1291,7 +1318,7 @@ void RunDueDelayedScriptCalls(World* self, f32 limit)
             f32 d = e->f - limit;
             if (d <= 0.0f) {
                 found = 1;
-                EvalScriptExpression(&t, e->next, self->f2C);
+                EvalScriptExpression(&t, (R11B008Node*)e->next, (ScriptScope*)self->f2C);
                 AssignScriptValue(&q, &t);
                 DestroyScriptValue(&t, 2);
                 SetScriptValueTag(n, 0);
@@ -1307,7 +1334,7 @@ void RunDueDelayedScriptCalls(World* self, f32 limit)
             return;
         }
     }
-    LookupScriptVariable(self->f2C, self->f1EF8, 0, &a);
+    LookupScriptVariable((ScriptScope*)self->f2C, self->f1EF8, 0, &a);
     {
         R11B008Node* head = a.node;
         R11B008Node* prev = 0;
@@ -1326,7 +1353,7 @@ void RunDueDelayedScriptCalls(World* self, f32 limit)
             } else {
                 SetScriptValueTag(&a, 0);
             }
-            AssignScriptVariable(&t, self->f2C, self->f1EF8, &a);
+            AssignScriptVariable(&t, (ScriptScope*)self->f2C, self->f1EF8, &a);
             DestroyScriptValue(&t, 2);
         }
     }
@@ -1334,18 +1361,18 @@ void RunDueDelayedScriptCalls(World* self, f32 limit)
     DestroyScriptValue(&a, 2);
 }
 
-void* AllocateTouchNode(u8* self)
+void* AllocateTouchNode(World* self)
 {
-    void* p = TakePoolSlot(self + 0x1C0C);
+    void* p = TakePoolSlot(&self->pool1C0C);
     FillMemory(p, 0, 0x8);
     return p;
 }
 
-void FreeTouchNodes(u8* owner, Touch03* node)
+void FreeTouchNodes(World* owner, Touch03* node)
 {
     while (node != 0) {
         Touch03* next = node->next;
-        PushFreeSlot(owner + 0x1C0C, node);
+        PushFreeSlot(&owner->pool1C0C, node);
         node = next;
     }
 }
@@ -1360,7 +1387,7 @@ void PushCloneBatch(World* self, void* src, s32 n)
     if (tmp.n > 0) {
         tmp.buf = AllocateFrontMemory(tmp.n * 4);
         for (i = 0; i < tmp.n; i++) {
-            ((void**)tmp.buf)[i] = CreateObjectCopy(src, self, 0);
+            ((void**)tmp.buf)[i] = CreateObjectCopy((BaseObject*)src, self, 0);
         }
     }
     idx = self->f1EFC;
@@ -1546,7 +1573,7 @@ void ReleaseContactTable(World* owner, Contacts03* handle)
         void* freeList = &owner->pool1AF0;
         do {
             ContactRow03* next = e->next;
-            ContactRow03* s1 = UnlinkContactRow(owner, e->other->contacts, handle);
+            ContactRow03* s1 = UnlinkContactRow(owner, &e->other->contacts->head, handle);
             if (e->head != 0) {
                 FreePooledContactChain(owner, e->head);
                 if (!(e->other->flags538 & (1ULL << 55))) {
@@ -1558,8 +1585,8 @@ void ReleaseContactTable(World* owner, Contacts03* handle)
             }
             s1->head = 0;
             e->head = 0;
-            PushFreeSlot(freeList, e);
-            PushFreeSlot(freeList, s1);
+            PushFreeSlot((Pool6C*)freeList, e);
+            PushFreeSlot((Pool6C*)freeList, s1);
             e = next;
         } while (e != 0);
     }
@@ -1589,55 +1616,55 @@ void CreateConeVolumes(World* self)
 
     if (g_coneVolumeMask[0] & 1) {
         p = CreateTypedRecord(0x51, self, 0, 0x201, -1);
-        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeColor(p, (Quad16*)D_00275640);
         SetConeVolumeFirstAngle(p, D_00275650);
         SetConeVolumeSecondLevel(p, D_00275654);
         SetConeVolumeSecondAngle(p, D_00275658);
         SetConeVolumeThirdLevel(p, D_0027565C);
         SetConeVolumeThirdAngle(p, D_00275660);
-        SetConeVolumeDirection(p, &D_00275670);
+        SetConeVolumeDirection(p, (Quad16*)&D_00275670);
     }
     if (g_coneVolumeMask[0] & 2) {
         p = CreateTypedRecord(0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 1);
-        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeColor(p, (Quad16*)D_00275640);
         SetConeVolumeFirstAngle(p, D_00275650);
         SetConeVolumeSecondLevel(p, D_00275654);
         SetConeVolumeSecondAngle(p, D_00275658);
         SetConeVolumeThirdLevel(p, D_0027565C);
         SetConeVolumeThirdAngle(p, D_00275660);
-        SetConeVolumeRange(p, D_00275690);
+        SetConeVolumeRange(p, (U64P*)D_00275690);
         p->desc02()->m1D(p, (Vec02*)D_00275680);
     }
     if (g_coneVolumeMask[0] & 4) {
         p = CreateTypedRecord(0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 2);
-        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeColor(p, (Quad16*)D_00275640);
         SetConeVolumeFirstAngle(p, D_00275650);
         SetConeVolumeSecondLevel(p, D_00275654);
         SetConeVolumeSecondAngle(p, D_00275658);
         SetConeVolumeThirdLevel(p, D_0027565C);
         SetConeVolumeThirdAngle(p, D_00275660);
-        SetConeVolumeDirection(p, &D_00275670);
-        SetConeVolumeRange(p, D_00275698);
+        SetConeVolumeDirection(p, (Quad16*)&D_00275670);
+        SetConeVolumeRange(p, (U64P*)D_00275698);
         p->desc02()->m1D(p, (Vec02*)D_00275680);
     }
     if (g_coneVolumeMask[0] & 8) {
         p = CreateTypedRecord(0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 3);
-        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeColor(p, (Quad16*)D_00275640);
         SetConeVolumeFirstAngle(p, D_00275650);
         SetConeVolumeSecondLevel(p, D_00275654);
         SetConeVolumeSecondAngle(p, D_00275658);
         SetConeVolumeThirdLevel(p, D_0027565C);
         SetConeVolumeThirdAngle(p, D_00275660);
-        SetConeVolumeDirection(p, &D_00275670);
-        SetConeVolumeRange(p, D_002756A0);
+        SetConeVolumeDirection(p, (Quad16*)&D_00275670);
+        SetConeVolumeRange(p, (U64P*)D_002756A0);
         p->desc02()->m1D(p, (Vec02*)D_00275680);
     }
 }
 
-void SkipBufferedBlocks(void* self)
+void SkipBufferedBlocks(BufferedStream* self)
 {
     s32 n = ReadBufferedU32(self);
     if (D_00275714) {
@@ -1667,7 +1694,7 @@ void SpawnListedObjectCopies(World* self)
             continue;
         }
         for (s32 k = 0; k < pairs[i].count; k++) {
-            StateNotifier* o = CreateObjectCopy(n, self, 0);
+            StateNotifier* o = (StateNotifier*)CreateObjectCopy(n, self, 0);
             o->initialMode = 2;
             if (o->desc->m0F != 0) {
                 o->desc->m0F(o);
@@ -1677,33 +1704,34 @@ void SpawnListedObjectCopies(World* self)
     }
 }
 
-void ResetScatterController(void* scatter);
+void ResetScatterController(ScatterController* self);
 void InitScriptValuePools(void);
 s32 ReadBufferedU8(BufferedStream* s);
 s32 ReadBufferedS16(BufferedStream* s);
 void SkipBufferedBlocks(BufferedStream* s);
 void LoadScriptEntryTable(World* self, BufferedStream* s);
-void ReadPropertyRecords(void* self, BufferedStream* s);
-void ReadOptionalBufferedBlock(BufferedStream* s, void* out);
-void ReadBufferedString(BufferedStream* s, void* out);
-void LoadScreenResources(BufferedStream* s);
-void ReadSlotObjects(World* self, BaseObject* parent, BufferedStream* s);
+void ReadPropertyRecords(void* self, void* obj);
+void ReadOptionalBufferedBlock(BufferedStream* self, u32* out);
+void ReadBufferedString(BufferedStream* self, u8** out);
+void LoadScreenResources(BufferedStream* self);
+void ReadSlotObjects(World* self, void* a1, void* a2);
 void ReadBufferedBlockBody(BufferedStream* s);
 s32 EnsureSoundBankLoaded(s32 bank);
 void SilenceVolumeChannel2(void);
-void RequestStagedBank(s32 bank);
+struct KeyRecord;
+void RequestStagedBank(KeyRecord* self);
 void SendResidentImages(void);
 s32 IsListEmpty(List01* list);
 void CreateConeVolumes(World* self);
 extern u8 D_002BDC20[];
-void FillScreenColor(void* screen, Rgba4* color, s32 a);
+void FillScreenColor(u8* buffer, Rgba4* color, s32 flag);
 void SpawnListedObjectCopies(World* self);
 void RunQueuedCalls(World* self);
-void UpdateScatterLevelLimits(void* scatter);
+void UpdateScatterLevelLimits(ScatterController* self);
 void ResumeElementStackState(void* stack);
 void UpdateCameraLocation(Camera* camera);
 void UpdateWorldContacts(World* self, s32 a);
-void PlayStagedBank(s32 bank);
+void PlayStagedBank(void* self);
 void StartWorldSoundEntries(World* self);
 
 void LoadWorld(World* self, BufferedStream* s)
@@ -1712,7 +1740,7 @@ void LoadWorld(World* self, BufferedStream* s)
     ListFrame walk;
     ListFrame frame;
     s32 i;
-    ResetScatterController(g_scatterController);
+    ResetScatterController((ScatterController*)g_scatterController);
     InitScriptValuePools();
     D_00275714 = ReadBufferedU8(s);
     self->f1D70 = ReadBufferedS16(s);
@@ -1728,9 +1756,9 @@ void LoadWorld(World* self, BufferedStream* s)
     }
     LoadScriptEntryTable(self, s);
     ReadPropertyRecords(self, s);
-    ReadOptionalBufferedBlock(s, &self->f2310);
-    ReadBufferedString(s, &self->f2314);
-    ReadOptionalBufferedBlock(s, &self->f1D74);
+    ReadOptionalBufferedBlock(s, (u32*)&self->f2310);
+    ReadBufferedString(s, (u8**)&self->f2314);
+    ReadOptionalBufferedBlock(s, (u32*)&self->f1D74);
     LoadScreenResources(s);
     ReadSlotObjects(self, 0, s);
     ReadBufferedBlockBody(s);
@@ -1774,7 +1802,7 @@ void LoadWorld(World* self, BufferedStream* s)
     }
     g_activeListFrames = frame.prev;
     RunQueuedCalls(self);
-    UpdateScatterLevelLimits(g_scatterController);
+    UpdateScatterLevelLimits((ScatterController*)g_scatterController);
     ResumeElementStackState(g_elementStack);
     if (g_mapScreenList.current == 0 && g_saveData->f19D8 != 0) {
         AllocateZeroedFrontMemory(0x80000);
@@ -1860,20 +1888,20 @@ void DrawProjectedLine(ClipPoint* a, ClipPoint* b, PackedColor* c, u8* obj, s32 
     }
 }
 
-void DrawProjectedCurve(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, f32 x)
+void DrawProjectedCurve(void* a0, void* a1, void* a2, void* a3, void* a4, u8* obj, s32 unused6, f32 x)
 {
     CurveFrame L;
     CurveSample* p;
     CurveSample* q;
     u32 i;
 
-    SampleCurvePoints(a0, a1, a2, a3, 10, L.pts, x, 0.0f, x);
+    SampleCurvePoints(x, (const Vec02*)a0, (const Vec02*)a1, (const Vec02*)a2, (const Vec02*)a3, 10, (CurvePoint*)L.pts, 0.0f, x);
     i = 1;
     q = &L.pts[1];
     p = &L.pts[0];
     do {
         L.c = *(PackedCurveColor*)a4;
-        DrawProjectedLine(p, q, &L.c, a5, 1);
+        DrawProjectedLine((ClipPoint*)p, (ClipPoint*)q, (PackedColor*)&L.c, obj, 1);
         i++;
         q++;
         p++;
@@ -1902,27 +1930,27 @@ void SetWorldSoundLevel(void* self, f32 x)
     SendIopSoundLevel((s32)(s->f2318 + 0.5f));
 }
 
-s32 TestLevelEntryFlag1(void* self, void* obj)
+s32 TestLevelEntryFlag1(void* self, s32 obj)
 {
     return GetLevelEntryWord(obj) & 0x1;
 }
 
-s32 TestLevelEntryFlag2(void* self, void* obj)
+s32 TestLevelEntryFlag2(void* self, s32 obj)
 {
     return GetLevelEntryWord(obj) & 0x2;
 }
 
-s32 TestLevelEntryFlag4(void* self, void* obj)
+s32 TestLevelEntryFlag4(void* self, s32 obj)
 {
     return GetLevelEntryWord(obj) & 0x4;
 }
 
-s32 TestLevelEntryFlag8(void* self, void* obj)
+s32 TestLevelEntryFlag8(void* self, s32 obj)
 {
     return GetLevelEntryWord(obj) & 0x8;
 }
 
-s32 CheckEntryOneBitRequirement(World* a0, void* a1)
+s32 CheckEntryOneBitRequirement(World* a0, s32 a1)
 {
     s32 one = 1;
     u32 m = GetEntryFlags(a1);
@@ -1931,7 +1959,7 @@ s32 CheckEntryOneBitRequirement(World* a0, void* a1)
     return r;
 }
 
-s32 CheckEntryTwoBitRequirement(void* self, void* obj)
+s32 CheckEntryTwoBitRequirement(void* self, s32 obj)
 {
     u32 flags = GetEntryFlags(obj);
     u32 bits = flags & 3;
@@ -1944,7 +1972,7 @@ s32 CheckEntryTwoBitRequirement(void* self, void* obj)
     return r;
 }
 
-s32 CheckEntryThreeBitRequirement(void* self, void* obj)
+s32 CheckEntryThreeBitRequirement(void* self, s32 obj)
 {
     u32 flags = GetEntryFlags(obj);
     u32 bits = flags & 7;
@@ -1957,7 +1985,7 @@ s32 CheckEntryThreeBitRequirement(void* self, void* obj)
     return r;
 }
 
-void SetEntrySlotValue(void* self, void* obj, s32 key, s32 value)
+void SetEntrySlotValue(void* self, s32 obj, s32 key, s32 value)
 {
     EntrySlotTable* t = (EntrySlotTable*)GetLevelEntryByKey(obj);
     if (t) {
@@ -1980,7 +2008,7 @@ void SetEntrySlotValue(void* self, void* obj, s32 key, s32 value)
     }
 }
 
-s32 GetEntrySlotValue(void* self, void* obj, s32 key)
+s32 GetEntrySlotValue(void* self, s32 obj, s32 key)
 {
     EntrySlotTable* t = (EntrySlotTable*)GetLevelEntryByKey(obj);
     if (t != 0) {
@@ -2010,17 +2038,17 @@ s32 RecomputeSaveCompletion(void* self)
     return ComputeCompletionPercent(g_saveData);
 }
 
-void ScatterRandomObjects(void* unused, void* a, void* b, void* c)
+void ScatterRandomObjects(void* unused, s32 a, s32 b, void* c)
 {
-    void* r = RandomIntInRange(a, b);
+    s32 r = RandomIntInRange(a, b);
     if (r != 0) {
-        ScatterObjectsAroundCircle(g_currentWorld, 0x58, c, r, 0);
+        ScatterObjectsAroundCircle(g_currentWorld, 0x58, (Vec02*)c, r, 0);
     }
 }
 
-void SetScatterLevelBuiltin(void)
+void SetScatterLevelBuiltin(f32 level)
 {
-    SetScatterLevel(g_scatterController);
+    SetScatterLevel((ScatterController*)g_scatterController, level);
 }
 
 void GetGameStateDeltaTime(void* unused, f32* out)
@@ -2028,9 +2056,9 @@ void GetGameStateDeltaTime(void* unused, f32* out)
     *out = g_currentEntry->dt;
 }
 
-void SetCurrentScatterLevel()
+void SetCurrentScatterLevel(void* unused, f32 level)
 {
-    f32 r = ClampToRange(&g_unitRange);
+    f32 r = ClampToRange(&g_unitRange, level);
     g_currentEntry->f10 = r;
 }
 
@@ -2071,12 +2099,12 @@ void SetWorldValueAndTarget(World* self, f32 v)
 
 void SetWorldValueTarget(World* self, f32 value) { self->f2350 = value; }
 
-void PopActiveSequenceElement(void)
+void PopActiveSequenceElement(World* world)
 {
     StepSequence* ctx = D_0027051C;
     if (ctx != 0 && ctx->state2D4 != 4) {
         u32 t = (u32)(ctx->mode2D0 - 1);
-        if (t < 2) PopStackElement(g_elementStack);
+        if (t < 2) PopStackElement((ElementStack*)g_elementStack);
     }
 }
 
@@ -2105,14 +2133,14 @@ void HideCountedScreenElement(World* self)
 
 LINKER_REMNANT(func_001DDBF0);
 
-void* PushSoundLevelBuiltin(void* self, void* p)
+void* PushSoundLevelBuiltin(void* self, s32 p)
 {
     return PushSoundLevel(p);
 }
 
-void* RemoveSoundLevelBuiltin(void* unused, void* p)
+void RemoveSoundLevelBuiltin(void* unused, void* p)
 {
-    return RemoveSoundLevelAndRecompute(p);
+    RemoveSoundLevelAndRecompute((SoundLevelEntry*)p);
 }
 
 void SetWorldActiveFollower(World* self, void* v)

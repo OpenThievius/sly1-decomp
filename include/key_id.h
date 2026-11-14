@@ -11,9 +11,8 @@
 
 struct KeyId {
     union {
-        s32 first;          // 0x00: func_0018CC20, func_001BE268 (s32)
+        s32 first;          // 0x00: func_0018CC20, func_001BE268 (s32), func_001373B0 (the start sector)
         u32 k0;             // 0x00: func_0018F198 (u32)
-        void* p0;           // 0x00: func_001373B0
     };
     union {
         s32 second;         // 0x04

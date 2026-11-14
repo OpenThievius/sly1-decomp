@@ -37,34 +37,34 @@ void FillObjectPropertyTable(void);
 
 extern u8 D_002505D8[];
 
-void ApplyPropertyRecord(void* self, void* slot, void* obj);
+void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r);
 
-s32 ReadBufferedS16(void* p);
+s32 ReadBufferedS16(BufferedStream* self);
 
 // The owner's slot 44 (Desc02::m28) is told what was asked.
-typedef void (*VectorCurveToldFn)(PlacedObject* self, s32 a, s32 b);
+typedef void (*VectorCurveToldFn)(PlacedObject* self, f32* a, f32* b);
 
-void EvaluateAxisCurves(WeightCurve** a, PlacedObject* b, s32 c, Vec02* d, s32 e, s32 f, f32 g, f32 h);
+void EvaluateAxisCurves(WeightCurve** axis, PlacedObject* other, s32 flags, Vec02* base, f32* outValues, f32* outSlopes, f32 key, f32 scale);
 
-void EvaluateVectorKeyCurve(s32 a, s32 b, s32 c, s32 d, s32 e, f32 g, f32 h);
+void EvaluateVectorKeyCurve(s32 count, VectorKey* keys, s32 flags, f32* values, f32* slopes, f32 key, f32 scale);
 
 void GetVectorKeyTimes(s32 count, VectorKey* src, s32* outCount, f32** outArr);
 
-s32 ReadBufferedU16(void* stream);
+u16 ReadBufferedU16(BufferedStream* self);
 
-s32 ReadBufferedS16(void* src);
+s32 ReadBufferedS16(BufferedStream* self);
 
-f32 ReadBufferedFloat(void* src);
+f32 ReadBufferedFloat(BufferedStream* r);
 
-s32 ReadBufferedS8(void* src);
+s32 ReadBufferedS8(BufferedStream* self);
 
 void* AllocateFrontMemory(s32 size);
 
-s32 ReadBufferedU8(void* src);
+s32 ReadBufferedU8(BufferedStream* self);
 
-void ReadBufferedVector3(void* src, void* dst);
+void ReadBufferedVector3(BufferedStream* src, void* dst);
 
-WeightCurve* CreateWeightCurve(s32 index);
+WeightCurve* CreateWeightCurve(u32 kind);
 
 // What FindCurveSegment (func_0011EE70) gives back: the segment's length and the time into it,
 // and the segment's first key.
@@ -72,7 +72,7 @@ struct CurveSegment { f32 diff; f32 delta; u8* ptr; };
 
 void FindCurveSegment(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
 
-void EvaluateHermiteVectorSegment(u8* a, u8* b, u8* c, u8* d, f32 f12, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
+void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
 
 // The owner's slot 45 (Desc02::m29) is told what was asked.
 typedef void (*AxisRotationToldFn)(PlacedObject* self, void* a, void* b);
@@ -80,13 +80,11 @@ typedef void (*AxisRotationToldFn)(PlacedObject* self, void* a, void* b);
 // The angles and their rates EvaluateAxisCurves gives an axis rotation curve (func_0011FF08).
 struct AngleSample { s32 a[4]; s32 b[4]; };
 
-void EvaluateAxisCurves(WeightCurve** a, PlacedObject* b, s32 c, Vec02* d, void* e, void* f);
 
-void BuildEulerRotationMatrix(void* a, void* b);
+void BuildEulerRotationMatrix(f32* in, f32* out);
 
-void RotateVectorByTwoAngles(void* a, void* b, void* c);
+void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out);
 
-extern void EvaluateAxisCurves(void*, u32, u32, void*, u32, u32);
 
 struct AxisCurveClosure {
     u8 a[0x30];
@@ -100,9 +98,9 @@ struct AxisCurveClosure {
 
 extern void ReadAxisCurves(WeightCurve**, Vec02*, Stream83*);
 
-extern void MultiplyMatrices3x3(void*, void*, void*);
+extern void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 
-extern void MatrixToAxisAngle(void*, void*, void*);
+extern void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 
 extern void PushBackMemoryMark(void);
 
@@ -110,17 +108,19 @@ extern void PopBackMemoryMark(void);
 
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f18` and the `move $a0`); the argument setup is scheduled differently.
 
-void EvaluateHermiteSegment(f32 delta, f32 diff, f32 scale, f32 p4, f32 p14, f32 p1C, f32 p24, f32* outF, f32* outI, s32 zero);
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
+void EvaluateHermiteSegment(f32 dur, f32 t, f32 e, f32 a, f32 b, f32 c, f32 dd, f32* p0, f32* p1, f32* p2);
 
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f12` and the `move $a0`); the argument setup is scheduled differently.
 
 void SolveBezierSegment(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero);
 
-void* CreateTypedRecord(s32 slot, void* self, void* a1, s32 key, s32 flag);
+BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
 s32 MapKeyToSlotIndex(s32 value);
 
-void ResolveAndStartObject(void* obj);
+void ResolveAndStartObject(BaseObject* self);
 
 // A class's property list (g_classPropertyLists) seen from its first descriptor pointer: the
 // descriptor, then the word before the next one.
@@ -132,7 +132,7 @@ void* InitBufferedStream(BufferedStream* self, s32 a, s32 b, s32 c);
 
 void OpenBufferedMemoryStream(BufferedStream* self, s32 a1, u8* a2);
 
-void ApplyPropertyRecord(BaseObject* self, PropertyDescriptor* slot, BufferedStream* obj);
+void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r);
 
 void DestroyBufferedStream(BufferedStream* self, s32 flags);
 
@@ -140,15 +140,15 @@ void DestroyBufferedStream(BufferedStream* self, s32 flags);
 
 extern u8 D_00247448[];
 
-void* AllocateZeroedFrontMemory(s32 bytes);
+void* AllocateZeroedFrontMemory(s32 n);
 
-void InitWorldHashLists(void* self);
+void InitWorldHashLists(u8* self);
 
-void* GetScriptEntryScope(s32 index, void* ctx);
+void* GetScriptEntryScope(s32 index, World* self);
 
-void* GetHashedSlot(void* base, s32 n);
+u8* GetHashedSlot(u8* base, s32 n);
 
-void AppendToList(void* list, void* item);
+void AppendToList(List01* self, void* item);
 
 // EXACT: dtor of the temp called before e = rp; array dtor written as while (buf != e) { e--; dtor(e,0); }
 
@@ -170,38 +170,36 @@ s32 ReadBufferedU32(BufferedStream* r);
 
 f32 ReadBufferedFloat(BufferedStream* r);
 
-void BuildRotationFromVector(f32* in, f32* out);
+void BuildRotationFromVector(Vec02* v, Mat02* mat);
 
-void CopyMemory(f32* dst, f32* src, s32 n);
+void CopyMemory(void* dst, void* src, u32 size);
 
-void SortElements(f32* base, s32 n, s32 size, void* cmp);
+void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
 
-extern u8 CompareFloats[];
+s32 CompareFloats(f32* a, f32* b);
 
 // The angles and their rates EvaluateVectorKeyCurve gives a keyed rotation curve (func_00120130).
 struct KeyedAngleSample { u8 bytes[0x20]; };
 typedef void (*KeyedRotationToldFn)(PlacedObject* self, void* output, void* state);
+extern void BuildEulerRotationMatrix(f32* in, f32* out);
 extern void EvaluateVectorKeyCurve(s32, VectorKey*, s32, void*, void*);
+extern void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out);
 extern void BuildEulerRotationMatrix(void*, void*);
-extern void RotateVectorByTwoAngles(void*, void*, void*);
 
-extern void EvaluateVectorKeyCurve(s32, VectorKey*);
 extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
 
-extern void EvaluateAxisCurves(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void ReadAxisCurves(WeightCurve** a, Vec02* b, Stream83* c);
 
-extern void EvaluateVectorKeyCurve(s32, VectorKey*, void*, f32*, s32, f32, f32);
 
 extern void ReadVectorKeys(s32*, VectorKey**, Stream83*);
 
-extern void* PopZeroedFreeSlot(void*);
+extern void* PopZeroedFreeSlot(Pool6C* pool);
 
 extern World* g_currentWorld;
 
-void CopyMemory(Attachment* self, Attachment* src, s32 size);
+void CopyMemory(void* dst, void* src, u32 size);
 
 // Gives the owner the position and the orientation this attachment gives (slots 29, 30, 32, 33).
 struct PoseLocals {
@@ -217,9 +215,9 @@ typedef void (*OrientationToldFn)(PlacedObject* self, Mat02* b, Vec02* q);
 
 typedef void (*OwnerToldFn)(PlacedObject* self);
 
-void InitPoseSource(Attachment* self, PlacedObject* a1);
+void InitPoseSource(Attachment* self, PlacedObject* value);
 
-void RemoveFromList(void* list, void* item);
+void RemoveFromList(List01* list, void* item);
 void ReleasePoseSource(Attachment* self, s32 flags);
 
 extern f32 g_gameTime[];
@@ -239,7 +237,7 @@ struct KeyedCurveClosure {
 f32 g_valueRampProfile[4] = { 3.0f, 1.0f, 0.1f, 0.0f };
 extern f32 g_frameStep;
 extern f32 g_frameDt;
-extern f32 ApproachValueWithRamp(void*, s32, f32, f32, f32);
+extern f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 void GetOwnerValue(Attachment* self, f32* value, f32* slope);
 
@@ -253,11 +251,11 @@ extern const PositionCurveVt g_positionCurveKind1Methods;
 extern const PositionCurveVt g_positionCurveKind2Methods;
 
 extern u8 D_00248D30[];
-void RemoveFromList(void* a, void* b);
+void RemoveFromList(List01* list, void* item);
 void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
-void SetPlacedObjectVelocity(void* a, void* b);
-void SetPlacedObjectSpin(void* a, void* b);
-void PushFreeSlot(void* a, void* b);
+void SetPlacedObjectVelocity(PlacedObject* self, Vec02* src);
+void SetPlacedObjectSpin(PlacedObject* self, Vec02* src);
+void PushFreeSlot(Pool6C* list, void* item);
 
 extern u8 g_identityMatrix[];
 
@@ -270,13 +268,12 @@ extern const RotationCurveVt g_rotationCurveKind2Methods;
 
 extern const ScaleCurveVt g_scaleCurveKind0Methods;
 extern const ScaleCurveVt g_scaleCurveKind1Methods;
-void* AllocateZeroedFrontMemory(u32 n);
+void* AllocateZeroedFrontMemory(s32 n);
 
 extern u8 D_00219560[];
 
 typedef void (*PositionOutToldFn)(PlacedObject* self, Vec02* out);
 
-void InitPoseSource(Attachment* self);
 
 // The dispatch tables func_00121160 gives each kind of curve: three functions, or one and a
 // shared one, each table followed by a zero word.
@@ -295,7 +292,7 @@ extern const WeightCurveVt g_weightCurveKind1Methods;
 extern const WeightCurveVt g_weightCurveKind2Methods;
 extern const WeightCurveVt g_weightCurveKind3Methods;
 extern const WeightCurveVt g_weightCurveKind4Methods;
-void* AllocateZeroedFrontMemory(WeightCurve* n);
+void* AllocateZeroedFrontMemory(s32 n);
 
 typedef void (*FrameOutToldFn)(PlacedObject* self, Mat02* out1, Vec02* out2);
 
@@ -304,7 +301,7 @@ void InitObjectBuiltinTable(void)
     FillObjectPropertyTable();
 }
 
-BaseObject* CreateTypedRecord(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
+BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4)
 {
     s32 off = index << 2;
     Desc01* owner = *(Desc01**)((u8*)D_00247448 + off);
@@ -313,12 +310,12 @@ BaseObject* CreateTypedRecord(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
     r->id = a3;
     if (index == 0x6C) {
         a1 = r;
-        InitWorldHashLists(r);
+        InitWorldHashLists((u8*)r);
     }
-    r->parent = (BaseObject*)a2;
+    r->parent = a2;
     r->world = (World*)a1;
-    r->f2C = GetScriptEntryScope(a4, a1);
-    AppendToList(GetHashedSlot(r->world, r->id), r);
+    r->f2C = GetScriptEntryScope(a4, (World*)a1);
+    AppendToList((List01*)(GetHashedSlot((u8*)r->world, r->id)), r);
     u8* base = (u8*)r->world + 0x1884;
     void** slot = (void**)(base + off);
     r->nextById = (BaseObject*)*slot;
@@ -451,7 +448,7 @@ void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r)
             t[0] = ReadBufferedFloat(r);
             t[1] = ReadBufferedFloat(r);
             t[2] = ReadBufferedFloat(r);
-            BuildRotationFromVector(t, (f32*)dst);
+            BuildRotationFromVector((Vec02*)t, (Mat02*)dst);
             break;
         }
         case 6:
@@ -531,7 +528,7 @@ void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r)
             t[1] = ReadBufferedFloat(r);
             t[2] = ReadBufferedFloat(r);
             o = sc.f + 4;
-            BuildRotationFromVector(t, o);
+            BuildRotationFromVector((Vec02*)t, (Mat02*)o);
             ((void (*)(void*, f32*))fn)(tgt, o);
             break;
         }
@@ -553,8 +550,8 @@ void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r)
 void ReadPropertyRecords(void* self, void* obj)
 {
     s32 r;
-    while ((r = ReadBufferedS16(obj)) >= 0) {
-        ApplyPropertyRecord(self, D_002505D8 + (r << 5), obj);
+    while ((r = ReadBufferedS16((BufferedStream*)obj)) >= 0) {
+        ApplyPropertyRecord(self, (PropertyDescriptor*)(D_002505D8 + (r << 5)), (BufferedStream*)obj);
     }
 }
 
@@ -566,14 +563,14 @@ s32 MapKeyToSlotIndex(s32 value)
 
 void ReadSlotObjects(World* self, void* a1, void* a2)
 {
-    s32 n = ReadBufferedS16(a2);
+    s32 n = ReadBufferedS16((BufferedStream*)a2);
     if (n > 0) {
         s32 i = n;
         do {
-            s32 slot = ReadBufferedS16(a2);
-            s32 key = ReadBufferedS16(a2);
-            s32 flag = ReadBufferedS16(a2);
-            BaseObject* obj = (BaseObject*)CreateTypedRecord(slot, self, a1, key, flag);
+            s32 slot = ReadBufferedS16((BufferedStream*)a2);
+            s32 key = ReadBufferedS16((BufferedStream*)a2);
+            s32 flag = ReadBufferedS16((BufferedStream*)a2);
+            BaseObject* obj = CreateTypedRecord(slot, self, (BaseObject*)a1, key, flag);
             obj->desc->m0A(obj, a2);
             s32 r = MapKeyToSlotIndex(key);
             if (r >= 0) {
@@ -714,16 +711,16 @@ void GetNoWeightCurveTimes(WeightCurve* unused, s32* a, s32* b)
 
 void ReadTangentWeightCurve(TangentWeightCurve* self, Stream83* src)
 {
-    self->count = ReadBufferedU16(src);
+    self->count = ReadBufferedU16((BufferedStream*)src);
     self->keys = (TangentWeightKey*)AllocateFrontMemory(0x18 * self->count);
     for (s32 i = 0; i < self->count; i++) {
         TangentWeightKey* e = self->keys + i;
-        e->time = (f32)ReadBufferedS16(src) * 0.016666668f;
-        e->value = ReadBufferedFloat(src);
-        e->c = ReadBufferedS8(src);
-        e->kind = ReadBufferedS8(src);
-        e->d = ReadBufferedFloat(src);
-        e->f = ReadBufferedFloat(src);
+        e->time = (f32)ReadBufferedS16((BufferedStream*)src) * 0.016666668f;
+        e->value = ReadBufferedFloat((BufferedStream*)src);
+        e->c = ReadBufferedS8((BufferedStream*)src);
+        e->kind = ReadBufferedS8((BufferedStream*)src);
+        e->d = ReadBufferedFloat((BufferedStream*)src);
+        e->f = ReadBufferedFloat((BufferedStream*)src);
     }
 }
 
@@ -760,19 +757,19 @@ void GetTangentWeightCurveTimes(TangentWeightCurve* src, s32* outCount, f32** ou
 
 void ReadControlPointWeightCurve(ControlPointWeightCurve* self, Stream83* src)
 {
-    self->count = ReadBufferedU16(src);
+    self->count = ReadBufferedU16((BufferedStream*)src);
     self->keys = (ControlPointWeightKey*)AllocateFrontMemory(0x20 * self->count);
     for (s32 i = 0; i < self->count; i++) {
         ControlPointWeightKey* e = self->keys + i;
-        e->time = (f32)ReadBufferedS16(src) * 0.016666668f;
-        e->value = ReadBufferedFloat(src);
-        e->c = ReadBufferedS8(src);
-        e->kind = ReadBufferedS8(src);
-        e->d = ReadBufferedFloat(src);
-        f32 t = ReadBufferedFloat(src);
+        e->time = (f32)ReadBufferedS16((BufferedStream*)src) * 0.016666668f;
+        e->value = ReadBufferedFloat((BufferedStream*)src);
+        e->c = ReadBufferedS8((BufferedStream*)src);
+        e->kind = ReadBufferedS8((BufferedStream*)src);
+        e->d = ReadBufferedFloat((BufferedStream*)src);
+        f32 t = ReadBufferedFloat((BufferedStream*)src);
         e->e = e->value - t;
-        e->g = ReadBufferedFloat(src);
-        f32 u = ReadBufferedFloat(src);
+        e->g = ReadBufferedFloat((BufferedStream*)src);
+        f32 u = ReadBufferedFloat((BufferedStream*)src);
         e->h = e->value + u;
     }
 }
@@ -838,12 +835,12 @@ void EvaluateLinearWeightCurve(LinearWeightCurve* self, s32 unused, s32 flags, f
 
 void ReadLinearWeightCurve(LinearWeightCurve* self, Stream83* src)
 {
-    self->count = ReadBufferedU16(src);
+    self->count = ReadBufferedU16((BufferedStream*)src);
     self->keys = (LinearWeightKey*)AllocateFrontMemory(self->count << 3);
     for (s32 i = 0; i < self->count; i++) {
         LinearWeightKey* e = self->keys + i;
-        e->time = (f32)ReadBufferedS16(src) * 0.016666668f;
-        e->value = ReadBufferedFloat(src);
+        e->time = (f32)ReadBufferedS16((BufferedStream*)src) * 0.016666668f;
+        e->value = ReadBufferedFloat((BufferedStream*)src);
     }
 }
 
@@ -874,15 +871,15 @@ void EvaluateAxisCurves(WeightCurve** axis, PlacedObject* other, s32 flags, Vec0
 
 void ReadAxisCurves(WeightCurve** out, Vec02* dst, Stream83* src)
 {
-    s32 mask = ReadBufferedU8(src);
+    s32 mask = ReadBufferedU8((BufferedStream*)src);
     WeightCurve** slot = out;
-    ReadBufferedVector3(src, dst);
+    ReadBufferedVector3((BufferedStream*)src, dst);
     s32 i = 2;
     do {
         s32 bit = mask & 1;
         mask >>= 1;
         if (bit) {
-            WeightCurve* o = CreateWeightCurve(ReadBufferedU8(src));
+            WeightCurve* o = CreateWeightCurve(ReadBufferedU8((BufferedStream*)src));
             void (*fn)(WeightCurve*, Stream83*) = o->vt->read;
             if (fn)
                 fn(o, src);
@@ -920,7 +917,7 @@ void GatherAxisCurveTimes(WeightCurve** objs, s32* outCount, f32** outArr)
         w += counts[i];
     }
     w = arr + 1;
-    SortElements(arr, total, 4, CompareFloats);
+    SortElements(arr, total, 4, (s32 (*)(const void*, const void*))CompareFloats);
     f32* r = w;
     for (total = last - 1; total >= 0; total--) {
         if (*r != w[-1]) { *w = *r; w++; }
@@ -930,17 +927,17 @@ void GatherAxisCurveTimes(WeightCurve** objs, s32* outCount, f32** outArr)
     if (outArr) *outArr = arr;
 }
 
-void EvaluateVectorKeyCurve(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 scale)
+void EvaluateVectorKeyCurve(s32 count, VectorKey* keys, s32 flags, f32* values, f32* slopes, f32 key, f32 scale)
 {
     CurveSegment s;
-    FindCurveSegment(key, flags, 0x40, count, (u8*)base, &s.diff, &s.delta, &s.ptr);
+    FindCurveSegment(key, flags, 0x40, count, (u8*)keys, &s.diff, &s.delta, &s.ptr);
     u8* p = s.ptr;
-    EvaluateHermiteVectorSegment(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
+    EvaluateHermiteVectorSegment(s.delta, (const Vec02*)(p + 0x10), (const Vec02*)(p + 0x30), (const Vec02*)(p + 0x50), (const Vec02*)(p + 0x60), s.diff, scale, (Vec02*)values, (Vec02*)slopes, 0);
 }
 
 void ReadVectorKeys(s32* outCount, VectorKey** outItems, Stream83* src)
 {
-    s32 count = ReadBufferedU16(src);
+    s32 count = ReadBufferedU16((BufferedStream*)src);
     VectorKey* items = (VectorKey*)AllocateFrontMemory(count << 6);
     if (count > 0) {
         u8* p2 = (u8*)&items->v2;
@@ -950,12 +947,12 @@ void ReadVectorKeys(s32* outCount, VectorKey** outItems, Stream83* src)
         s32 left = count;
         do {
             left--;
-            it->time = (f32)ReadBufferedS16(src) * 0.016666668f;
-            ReadBufferedVector3(src, p0);
+            it->time = (f32)ReadBufferedS16((BufferedStream*)src) * 0.016666668f;
+            ReadBufferedVector3((BufferedStream*)src, p0);
             p0 += 0x40;
-            ReadBufferedVector3(src, p1);
+            ReadBufferedVector3((BufferedStream*)src, p1);
             p1 += 0x40;
-            ReadBufferedVector3(src, p2);
+            ReadBufferedVector3((BufferedStream*)src, p2);
             p2 += 0x40;
             it++;
         } while (left != 0);
@@ -981,7 +978,7 @@ void GetVectorKeyTimes(s32 count, VectorKey* src, s32* outCount, f32** outArr)
     }
 }
 
-void EvaluateAxisPositionCurve(AxisPositionCurve* self, PlacedObject* other, s32 c, s32 e, s32 f, f32 p12, f32 p13)
+void EvaluateAxisPositionCurve(AxisPositionCurve* self, PlacedObject* other, s32 c, f32* e, f32* f, f32 p12, f32 p13)
 {
     EvaluateAxisCurves(self->axis, other, c, &self->base, e, f, p12, p13);
     if (other && other->desc02()->m28)
@@ -1014,9 +1011,9 @@ void GetAxisPositionCurveTimes(AxisPositionCurve* self, s32* outCount, f32** out
     GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
-void EvaluateVectorKeyPositionCurve(VectorKeyPositionCurve* self, PlacedObject* other, s32 a2, s32 a3, s32 a4, f32 p12, f32 p13)
+void EvaluateVectorKeyPositionCurve(VectorKeyPositionCurve* self, PlacedObject* other, s32 a2, f32* a3, f32* a4, f32 p12, f32 p13)
 {
-    EvaluateVectorKeyCurve(self->count, (s32)self->keys, a2, a3, a4, p12, p13);
+    EvaluateVectorKeyCurve(self->count, self->keys, a2, a3, a4, p12, p13);
     if (other && other->desc02()->m28)
         ((VectorCurveToldFn)other->desc02()->m28)(other, a3, a4);
 }
@@ -1037,21 +1034,21 @@ void GetVectorKeyPositionCurveTimes(VectorKeyPositionCurve* self, s32* outCount,
     GetVectorKeyTimes(self->count, self->keys, outCount, outArr);
 }
 
-void EvaluateAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 c, void* p3, void* p4)
+void EvaluateAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 c, void* p3, void* p4, f32 key, f32 scale)
 {
     AngleSample tmp;
-    EvaluateAxisCurves(self->axis, other, c, &self->base, p3 ? (void*)&tmp : 0, p4 ? (void*)tmp.b : 0);
+    EvaluateAxisCurves(self->axis, other, c, &self->base, p3 ? (f32*)&tmp : 0, p4 ? (f32*)tmp.b : 0, key, scale);
     if (p3)
-        BuildEulerRotationMatrix(&tmp, p3);
+        BuildEulerRotationMatrix((f32*)&tmp, (f32*)p3);
     if (p4)
-        RotateVectorByTwoAngles(&tmp, tmp.b, p4);
+        RotateVectorByTwoAngles((Vec3*)&tmp, (Vec3*)tmp.b, (Vec3*)p4);
     if (other)
         ((AxisRotationToldFn)other->desc02()->m29)(other, p3, p4);
 }
 
-void* GetAxisRotationCurve(AxisRotationCurve* self, u32 a1, u32 a2, u32 a3, u32 a4)
+void* GetAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 flags, f32* values, f32* slopes, f32 key, f32 scale)
 {
-    EvaluateAxisCurves(self->axis, a1, a2, &self->base, a3, a4);
+    EvaluateAxisCurves(self->axis, other, flags, &self->base, values, slopes, key, scale);
 }
 
 void ReadAxisRotationCurve(AxisRotationCurve* self, Stream83* arg)
@@ -1065,8 +1062,8 @@ void ReadAxisRotationCurve(AxisRotationCurve* self, Stream83* arg)
     if (loc.count > 0) {
         self->vt->eval(self, 0, 0, loc.a, 0, loc.values[0], 1.0f);
         self->vt->eval(self, 0, 0, loc.b, 0, loc.values[loc.count - 1], 1.0f);
-        MultiplyMatrices3x3(loc.a, loc.b, loc.c);
-        MatrixToAxisAngle(loc.c, &loc.first, loc.d);
+        MultiplyMatrices3x3((Mat02*)loc.a, (Mat02*)loc.b, (Mat02*)loc.c);
+        MatrixToAxisAngle((Mat02*)loc.c, &loc.first, (Vec02*)loc.d);
         result = (loc.first < 0.01f) ? 1 : 0;
     } else {
         result = 1;
@@ -1081,26 +1078,26 @@ void GetAxisRotationCurveKeyTimes(AxisRotationCurve* self, s32* outCount, f32** 
 }
 
 void EvaluateKeyedRotationCurve(KeyedRotationCurve* self, PlacedObject* parent, s32 mode,
-                   void* output, void* state)
+                   void* output, void* state, f32 key, f32 scale)
 {
     KeyedAngleSample buffer;
     EvaluateVectorKeyCurve(self->count, self->keys, mode,
-                  output ? &buffer.bytes[0] : 0,
-                  state ? &buffer.bytes[0x10] : 0);
+                  output ? (f32*)&buffer.bytes[0] : 0,
+                  state ? (f32*)&buffer.bytes[0x10] : 0, key, scale);
     if (output) {
-        BuildEulerRotationMatrix(&buffer.bytes[0], output);
+        BuildEulerRotationMatrix((f32*)&buffer.bytes[0], (f32*)output);
     }
     if (state) {
-        RotateVectorByTwoAngles(&buffer.bytes[0], &buffer.bytes[0x10], state);
+        RotateVectorByTwoAngles((Vec3*)&buffer.bytes[0], (Vec3*)&buffer.bytes[0x10], (Vec3*)state);
     }
     if (parent) {
         ((KeyedRotationToldFn)parent->desc02()->m29)(parent, output, state);
     }
 }
 
-void GetKeyedRotationCurve(KeyedRotationCurve* self)
+void GetKeyedRotationCurve(KeyedRotationCurve* self, PlacedObject* other, s32 flags, f32* values, f32* slopes, f32 key, f32 scale)
 {
-	EvaluateVectorKeyCurve(self->count, self->keys);
+	EvaluateVectorKeyCurve(self->count, self->keys, flags, values, slopes, key, scale);
 }
 
 void ReadKeyedRotationCurve(KeyedRotationCurve* self, Stream83* arg)
@@ -1112,11 +1109,11 @@ void ReadKeyedRotationCurve(KeyedRotationCurve* self, Stream83* arg)
     if (self->count < 2) {
         result = 1;
     } else {
-        BuildEulerRotationMatrix((u8*)self->keys + 0x10, loc.a);
+        BuildEulerRotationMatrix((f32*)((u8*)self->keys + 0x10), (f32*)loc.a);
         u8* tail = (u8*)((self->count << 6) + (s32)self->keys) - 0x30;
-        BuildEulerRotationMatrix(tail, loc.b);
-        MultiplyMatrices3x3(loc.a, loc.b, loc.c);
-        MatrixToAxisAngle(loc.c, &loc.first, loc.d);
+        BuildEulerRotationMatrix((f32*)tail, (f32*)loc.b);
+        MultiplyMatrices3x3((Mat02*)loc.a, (Mat02*)loc.b, (Mat02*)loc.c);
+        MatrixToAxisAngle((Mat02*)loc.c, &loc.first, (Vec02*)loc.d);
         result = (loc.first < 0.01f) ? 1 : 0;
     }
     self->closed = result;
@@ -1127,12 +1124,12 @@ void GetKeyedRotationCurveKeyTimes(KeyedRotationCurve* self, s32* outCount, f32*
 	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
 
-void EvaluateAxisScaleCurve(AxisScaleCurve* self, PlacedObject* second, void* third,
+void EvaluateAxisScaleCurve(AxisScaleCurve* self, PlacedObject* second, s32 third,
                    Mat3U* output, f32 factor)
 {
     Vec3 result;
     EvaluateAxisCurves(self->axis, second, third, &self->base,
-                  output ? &result : 0, 0, factor, 1.0f);
+                  output ? (f32*)&result : 0, 0, factor, 1.0f);
     if (output) {
         FillMemory(output, 0, 0x30);
         output->m[0][0] = result.x;
@@ -1151,7 +1148,7 @@ void GetAxisScaleCurveKeyTimes(AxisScaleCurve* self, s32* outCount, f32** outTim
 	GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
-void EvaluateKeyedScaleCurve(KeyedScaleCurve* self, PlacedObject* unused, void* mode,
+void EvaluateKeyedScaleCurve(KeyedScaleCurve* self, PlacedObject* unused, s32 mode,
                    Mat3U* output, f32 factor)
 {
     Vec3 result;
@@ -1262,7 +1259,7 @@ static inline void MulRotationRowsOnce(Mat02* out, const Mat02& a, const Mat02& 
     *out = r;
 }
 
-void BuildAxisAngleMatrix(const Vec02* axis, f32 angle, Mat02* out);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 c, Mat02* out0, Vec02* out1, f32 dt, f32 scale)
 {
@@ -1317,16 +1314,16 @@ void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 
             continue;
         if (o->f18) {
             if (w == 0.0f) {
-                BuildEulerRotationMatrix(&x0, out0);
+                BuildEulerRotationMatrix((f32*)&x0, (f32*)out0);
             } else {
                 Vec02 axis;
                 Mat02 rotA;
                 Mat02 prod;
                 f32 angle;
-                BuildEulerRotationMatrix(&x0, &rotA);
+                BuildEulerRotationMatrix((f32*)&x0, (f32*)&rotA);
                 MultiplyMatrices3x3(&rotA, out0, &prod);
                 MatrixToAxisAngle(&prod, &angle, &axis);
-                BuildAxisAngleMatrix(&axis, angle * w / (w + e->weight), &prod);
+                BuildAxisAngleMatrix(&axis, &prod, angle * w / (w + e->weight));
                 MulRotationRowsOnce(out0, prod, rotA);
             }
             w += e->weight;
@@ -1335,9 +1332,9 @@ void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 
         }
     }
     if (out0 && !o->f18)
-        BuildEulerRotationMatrix(&acc0, out0);
+        BuildEulerRotationMatrix((f32*)&acc0, (f32*)out0);
     if (out1)
-        RotateVectorByTwoAngles(&acc0, &acc1, out1);
+        RotateVectorByTwoAngles((Vec3*)&acc0, (Vec3*)&acc1, (Vec3*)out1);
     if (cam)
         ((KeyedRotationToldFn)cam->desc02()->m29)(cam, out0, out1);
 }
@@ -1559,23 +1556,23 @@ WeightCurve* CreateWeightCurve(u32 kind)
     WeightCurve* o;
     switch (kind) {
     case 0:
-        o = (WeightCurve*)AllocateZeroedFrontMemory((WeightCurve*)0x10);
+        o = (WeightCurve*)AllocateZeroedFrontMemory(0x10);
         o->vt = &g_weightCurveKind0Methods;
         break;
     case 1:
-        o = (WeightCurve*)AllocateZeroedFrontMemory((WeightCurve*)0x10);
+        o = (WeightCurve*)AllocateZeroedFrontMemory(0x10);
         o->vt = &g_weightCurveKind1Methods;
         break;
     case 3:
-        o = (WeightCurve*)AllocateZeroedFrontMemory((WeightCurve*)0x14);
+        o = (WeightCurve*)AllocateZeroedFrontMemory(0x14);
         o->vt = &g_weightCurveKind3Methods;
         break;
     case 4:
-        o = (WeightCurve*)AllocateZeroedFrontMemory((WeightCurve*)0x18);
+        o = (WeightCurve*)AllocateZeroedFrontMemory(0x18);
         o->vt = &g_weightCurveKind4Methods;
         break;
     case 2:
-        o = (WeightCurve*)AllocateZeroedFrontMemory((WeightCurve*)0x10);
+        o = (WeightCurve*)AllocateZeroedFrontMemory(0x10);
         o->vt = &g_weightCurveKind2Methods;
         break;
     default:
@@ -1633,7 +1630,7 @@ void ReleasePoseSource(Attachment* self, s32 flags)
             ConstrainColliderVector(m, (u8*)m + 0x440, (u8*)m + 0x150, local, 0);
             m->desc02()->m20(m, (Vec02*)local);
         } else {
-            SetPlacedObjectVelocity(m, D_00248D30);
+            SetPlacedObjectVelocity(m, (Vec02*)D_00248D30);
         }
     }
     if (self == b && m->f1F0 == 0 && (flags & 2) != 0) {
@@ -1641,7 +1638,7 @@ void ReleasePoseSource(Attachment* self, s32 flags)
             ConstrainColliderVector(m, (u8*)m + 0x460, (u8*)m + 0x160, local, 0);
             m->desc02()->m21(m, (Vec02*)local);
         } else {
-            SetPlacedObjectSpin(m, D_00248D30);
+            SetPlacedObjectSpin(m, (Vec02*)D_00248D30);
         }
     }
     PushFreeSlot(&m->world->pool1B20, self);
@@ -1761,10 +1758,12 @@ void ComputePositionSpringAcceleration(PlacedObject* self, f32 dt, Vec02* a, Vec
     *out = force;
 }
 
-f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, s32 zero, Vec02* rest);
+f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
 // The ramp with its floats first (the value, the target, the step), as retail sets $f12 to
 // $f14 before the profile and the rate's address.
-extern f32 ApproachValueWithRamp(f32, f32, f32, void*, f32*);
+// The definition's parameters in the order the call below writes them: retail's caller
+// evaluates its float arguments there, and only their place in the list decides that.
+extern f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 extern const Vec02 g_unitXVector;
 
 void ApplyPoseSourcePosition(T2195_7C0* self)
@@ -1860,7 +1859,7 @@ void ApplyPoseSourcePosition(T2195_7C0* self)
         } else {
             Vec02 p;
             Vec02 v;
-            EvaluateHermiteVectorSegment((u8*)&owner->pos, (u8*)&owner->v150, (u8*)&A, (u8*)&B, left, dt, 1.0f, (s32)&p, (s32)&v, 0);
+            EvaluateHermiteVectorSegment(left, &owner->pos, &owner->v150, &A, &B, dt, 1.0f, &p, &v, 0);
             owner->pos = p;
             owner->v150 = v;
         }
@@ -1902,7 +1901,8 @@ void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat02* rot, V
 }
 
 void OrthonormalizeMatrix(Mat02* m);
-void BlendRotationsWithSpin(f32 a, f32 b, f32 c, Mat02* rot, Vec02* vel, Mat02* target, Vec02* spin, Mat02* out, Vec02* outSpin, s32 d);
+void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Mat02* b, const Vec02* wb, Mat02* out, Vec02* outW,
+                            s32 unused6);
 
 void ApplyPoseSourceRotation(Attachment* self)
 {
@@ -1950,12 +1950,12 @@ void ApplyPoseSourceRotation(Attachment* self)
         Vu0::Vec s;
         s.q = Vu0::ScalarInGpr(dt);
         Vu0::Q(w) = Vu0::MulXSum(Vu0::Vec::Of(owner->v160), s, Vu0::Vec::Of(C), Vu0::Vec::Scalar(dt * (dt * 0.5f))).q;
-        BuildRotationFromVector((f32*)&w, (f32*)&m);
+        BuildRotationFromVector((Vec02*)&w, (Mat02*)&m);
         MulRotationIntoRotX(owner, m, owner->rot);
         OrthonormalizeMatrix(&owner->rot);
         Vu0::Q(owner->v160) = Vu0::MulAddX(Vu0::Vec::Of(owner->v160), Vu0::Vec::Of(C), Vu0::Vec::ScalarInGpr(dt)).q;
         if (hasValue) {
-            owner->f224->f90 = ApproachValueWithRamp(owner->f224->f90, value, dt, owner->p220, &owner->f224->f94);
+            owner->f224->f90 = ApproachValueWithRamp(owner->f224->f90, value, dt, (RampProfile*)owner->p220, &owner->f224->f94);
         }
         break;
     }
@@ -1975,7 +1975,7 @@ void ApplyPoseSourceRotation(Attachment* self)
         prof.x = ((f32*)owner->p220)[0] + r;
         prof.y = ((f32*)owner->p220)[1] + r;
         prof.z = ((f32*)owner->p220)[2];
-        f32 reach = ApproachValueWithRamp(0.0f, angle, dt, &prof, &rate);
+        f32 reach = ApproachValueWithRamp(0.0f, angle, dt, (RampProfile*)&prof, &rate);
         if (self->mode1 == 6) {
             f32 end = ((T2195_7C0*)self)->f18;
             f32 lim;
@@ -1994,13 +1994,13 @@ void ApplyPoseSourceRotation(Attachment* self)
             owner->v160 = B;
             settle = self->mode1 != 9;
         } else {
-            BuildAxisAngleMatrix(&axis, reach, &m);
+            BuildAxisAngleMatrix(&axis, &m, reach);
             MulRotationIntoRotX(owner, m, owner->rot);
             OrthonormalizeMatrix(&owner->rot);
             Vu0::Q(owner->v160) = Vu0::MulAddX(Vu0::Q(rest), Vu0::Q(axis), Vu0::ScalarAt(rate));
         }
         if (hasValue) {
-            owner->f224->f90 = ApproachValueWithRamp(owner->f224->f90, value, dt, owner->p220, &owner->f224->f94);
+            owner->f224->f90 = ApproachValueWithRamp(owner->f224->f90, value, dt, (RampProfile*)owner->p220, &owner->f224->f94);
             if (owner->f224->f90 != value) {
                 settle = 0;
             }
@@ -2026,7 +2026,7 @@ void ApplyPoseSourceRotation(Attachment* self)
                 Vec02 w;
                 Mat02 m;
                 Vu0::Q(w) = Vu0::MulX(Vu0::Q(B), Vu0::Scalar(now + dt - ((T2195_7C0*)self)->f18));
-                BuildRotationFromVector((f32*)&w, (f32*)&m);
+                BuildRotationFromVector((Vec02*)&w, (Mat02*)&m);
                 MulRotationIntoRotMatFirst(owner, m, A);
                 owner->v160 = B;
             }
@@ -2059,7 +2059,7 @@ void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
     case 3: {
         f32 cur = self->owner->f270[val];
         f32 limit = self->owner->f294 ? g_frameStep : g_frameDt;
-        self->owner->f270[val] = ApproachValueWithRamp(g_valueRampProfile, 0, cur, ret, limit);
+        self->owner->f270[val] = ApproachValueWithRamp((RampProfile*)g_valueRampProfile, 0, cur, ret, limit);
         break;
     }
     }
@@ -2098,7 +2098,7 @@ void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat02* rot, Vec02* vec
         Vu0::Q(k) = Vu0::FromFloat(t);
         Vu0::Q(*vec) = w;
         Vu0::Q(d) = Vu0::MulX(w, Vu0::Q(k));
-        BuildRotationFromVector((f32*)&d, (f32*)&m);
+        BuildRotationFromVector((Vec02*)&d, (Mat02*)&m);
         MulRotationRowsIndexed(rot, m, self->rot);
     }
 }
@@ -2232,9 +2232,9 @@ f32 GetLinkedIndexedValue(T2195_5B0* self, s32 i)
     return self->values[i];
 }
 
-void InitIdentityPoseSource(T2195_5D8* self)
+void InitIdentityPoseSource(T2195_5D8* self, PlacedObject* owner)
 {
-    InitPoseSource(self);
+    InitPoseSource(self, owner);
     Vec02* src = (Vec02*)g_identityMatrix;
     Vec02* d1 = self->m40.r;
     Vec02* d2 = self->m90.r;
@@ -2324,7 +2324,7 @@ void InitAimPoseSource(T2195_600* self, PlacedObject* a1)
     self->f20 = 0.25f;
 }
 
-void BuildBasisFromXAndZHint(void* x, void* hint, void* out);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 
 void GetAimPoseRotation(T2195_600* self, Mat02* out, Vec02* vec)
 {

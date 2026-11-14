@@ -75,7 +75,7 @@ void QueueArcDraw(Arc_eu_1E7C60* self)
         f32 sx = ((1.0f - held->u) * self->x + held->u * (self->x + self->w)) * 0.003125f - 1.0f;
         f32 sy = 1.0f - ((1.0f - held->v) * self->y + held->v * (self->y + self->h)) * 0.00426793983f;
         Vu0::Q(screen) = Vu0::FromFloats(sx, sy, held->depth);
-        UnprojectCameraPoint(g_camera, &screen, &world);
+        UnprojectCameraPoint(g_camera, (f32*)&screen, &world);
     }
     {
         f32 dist = 150.0f;
@@ -98,8 +98,8 @@ void QueueArcDraw(Arc_eu_1E7C60* self)
             Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->f40).q, Vu0::MulX(Vu0::Q(cam->fA0), Vu0::Scalar(height)));
             Vu0::Q(aim) = Vu0::Add(Vu0::Q(aim), Vu0::MulX(Vu0::Q(cam->f90), Vu0::Scalar(dist)));
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(aim), Vu0::Q(world));
-            BuildBasisFromXAndZHint(&dir, &cam->fA0, &basis);
-            BuildMatrixFromRotationAndTranslation(&world, &basis, &place);
+            BuildBasisFromXAndZHint(&dir, (const Vec02*)&cam->fA0, &basis);
+            BuildMatrixFromRotationAndTranslation(&world, &basis, (Mat4A*)&place);
             Vec02 pos;
             Vu0::Q(pos) = Vu0::Add(Vu0::Q(aim), Vu0::Rotate(*(Mat02*)&g_camera->f80, Vu0::Q(((ArcHeld*)self->current)->offset)));
             ((PlacedObject*)self->sprite)->desc02()->m1D((PlacedObject*)self->sprite, &pos);
@@ -111,8 +111,8 @@ void QueueArcDraw(Arc_eu_1E7C60* self)
             if (special == 0) {
                 goto done;
             }
-            BuildMatrixFromRotationAndTranslation(&special->v140, &special->m110, &place);
-            TransformPointBetweenFrames(self->special, 0, &((ArcHeld*)self->current)->point, &pos);
+            BuildMatrixFromRotationAndTranslation(&special->v140, &special->m110, (Mat4A*)&place);
+            TransformPointBetweenFrames((PlacedObject*)self->special, 0, &((ArcHeld*)self->current)->point, &pos);
             ((PlacedObject*)self->sprite)->desc02()->m1D((PlacedObject*)self->sprite, &pos);
             break;
         }
@@ -124,7 +124,7 @@ void QueueArcDraw(Arc_eu_1E7C60* self)
         request.count = 2;
         request.fn = DrawArcOutlinePacket;
         request.arc = self;
-        QueueDeferredRequest(&request);
+        QueueDeferredRequest((DeferredRequest*)&request);
     }
     ((ArcHeld*)self->current)->flags &= ~((u64)1 << 32);
     place.scaleX = place.scaleY = 1.0f;
@@ -136,7 +136,7 @@ void QueueArcDraw(Arc_eu_1E7C60* self)
         request.count = 2;
         request.fn = DrawArcTickPacket;
         request.arc = self;
-        QueueDeferredRequest(&request);
+        QueueDeferredRequest((DeferredRequest*)&request);
     }
 done:
     if (((Cap_eu_1E7C60*)&g_typedTextCaptionBox)->state != 4) {

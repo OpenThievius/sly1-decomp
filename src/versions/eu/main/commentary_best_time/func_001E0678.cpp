@@ -24,8 +24,10 @@ struct Obj_eu_1E0678 {
 };
 
 extern f32 D_eu_0027939C;
-void SetTextLayoutHorizontalAlign(TextLayout* out, void* tex);
 void SetTextLayoutVerticalPlacement(TextLayout* out, s32 flag);
+// PAL hands the layout's word at 0x14 an address where the US build passes flags: left as the free
+// function it was on that word (a 64-bit hazard for a port), not a cast to the method's s32.
+void SetTextLayoutHorizontalAlign(TextLayout* out, void* tex);
 void PushFontScale(s32 handle, f32 a, f32 b);
 void InitWideTextReader(void* out, void* p, s32 handle, s32 z);
 void DrawWrappedAlignedText(void* a, void* b, s32 c, void* d);

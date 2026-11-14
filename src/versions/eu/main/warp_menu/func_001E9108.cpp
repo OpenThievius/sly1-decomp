@@ -32,7 +32,7 @@ void UpdateElementStack(ElementStack* obj)
             }
         }
         if (a2) {
-            StartObjectSubGroupFinish(FindActiveObjectSubGroup());
+            StartObjectSubGroupFinish((ObjectSubGroup*)FindActiveObjectSubGroup());
         }
         break;
     }

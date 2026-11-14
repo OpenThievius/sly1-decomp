@@ -12,8 +12,8 @@
 #include "common.h"
 #include "mpeg_decoder.h"
 
-s32 DisableInterrupts(void);
-s32 EnableInterrupts(void);
+extern "C" s32 DisableInterrupts(void);
+extern "C" s32 EnableInterrupts(void);
 
 void StartIpuOutputTransfer(u32 value)
 {
@@ -96,7 +96,7 @@ void RestoreIpuDmaChannels(Ctx_211988* s0)
     StartIpuInputTransfer(s0->fC | 0x100);
 }
 
-u32 SyncIpu(s32 mode)
+u32 SyncIpu(s32 mode, s32 unused1)
 {
     u32 result = 0;
     switch (mode) {

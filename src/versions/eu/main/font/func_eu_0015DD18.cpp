@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Sets up an object: kind 1, the table D_0024A220 at +0x64, the pointer that func_eu_001DDAB0 returns at +0x4, two fields, four 0xFF808080 colours, then runs RewindTextReader.
 const char* GetTextTableEntry(s32 id);
-void RewindTextReader(void* self);
+void RewindTextReader(TextReader* self);
 
 struct Obj_eu_0015DD18 {
     s32 f0;
@@ -29,6 +29,6 @@ void* InitTextReaderFromTextTable(Obj_eu_0015DD18* self, s32 id, s32 a, s32 b)
     self->fAC = 0xFF808080;
     self->fA8 = 0xFF808080;
     self->fA4 = 0xFF808080;
-    RewindTextReader(self);
+    RewindTextReader((TextReader*)self);
     return self;
 }

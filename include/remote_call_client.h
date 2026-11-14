@@ -36,10 +36,16 @@ typedef struct RemoteCallClient {
     s32 server;                      // 0x24: the service's record on the IOP, 0 until bound
 } RemoteCallClient;
 
-// src/lib/remote_call.cpp defines them; every client library declares them here.
-s32 BindRemoteService(RemoteCallClient* client, u32 server, s32 mode);
-s32 CallRemoteService(RemoteCallClient* client, s32 function, s32 mode, void* send, s32 sendSize, void* recv,
-                      s32 recvSize, RemoteCallEndFn end, void* endArg);
-s32 IsRemoteCallPending(RemoteCallClient* client);
+// src/lib/remote_call.cpp defines them, with C linkage; every client library declares them here.
+#ifdef __cplusplus
+extern "C" {
+#endif
+s32 BindRemoteService(RemoteCallClient* self, u32 cmd, s32 mode);
+s32 CallRemoteService(RemoteCallClient* self, s32 cmd, s32 mode, void* send, s32 sendSize, void* recv, s32 recvSize,
+                      RemoteCallEndFn callback, void* callbackArg);
+s32 IsRemoteCallPending(RemoteCallClient* self);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

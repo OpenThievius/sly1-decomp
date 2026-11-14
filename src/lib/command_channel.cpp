@@ -70,9 +70,9 @@ static s32 D_006294C0[32];
 s32 SetUpTlbForMemory(void);
 void ExitProgramSyscall(s32 status);
 void CallDebugService(s32 req, void* arg);
-s32 DisableInterrupts(void);
-s32 EnableInterrupts(void);
-void SyncDataCache(s32 a);
+extern "C" s32 DisableInterrupts(void);
+extern "C" s32 EnableInterrupts(void);
+extern "C" void SyncDataCache(s32 a);
 void ArmIopDmaChain(void);
 s32 AddDmaHandler(s32 cause, void* handler, s32 arg);
 s32 RemoveDmaHandler(s32 cause, s32 id);
@@ -81,9 +81,9 @@ s32 DisableDmaInterrupt(s32 cause);
 s32 ReadIopRegister(u32 reg);
 u32 WriteIopRegister(u32 reg, u32 value);
 s32 StartIopDmaFromInterrupt(Transfer_1FA4F8* transfers, s32 n);
-s32 StartIopDma(Transfer_1FA4F8* transfers, s32 n);
-s32 HandleCommandInterrupt(void);
-void WriteBackDataCacheRange(void* data, s32 size);
+extern "C" s32 StartIopDma(Transfer_1FA4F8* transfers, s32 n);
+s32 HandleCommandInterrupt(s32 cause);
+extern "C" void WriteBackDataCacheRange(void* data, s32 size);
 
 void SetUpTlb(void)
 {
@@ -92,7 +92,7 @@ void SetUpTlb(void)
 
 LINKER_REMNANT(func_001FA070);
 
-void TerminateProgram(s32 status)
+extern "C" void TerminateProgram(s32 status)
 {
     SetUpTlb();
     ExitProgramSyscall(status);
@@ -105,12 +105,12 @@ void ClearImageEndRecordWord(void)
 
 LINKER_REMNANT(func_001FA0B0);
 
-s32 GetProcessId(void)
+extern "C" s32 GetProcessId(void)
 {
     return 1;
 }
 
-s32 SignalProcess(s32 mode, s32 status)
+extern "C" s32 SignalProcess(s32 mode, s32 status)
 {
     if (mode == 1) {
         TerminateProgram(status);
@@ -120,9 +120,9 @@ s32 SignalProcess(s32 mode, s32 status)
 
 LINKER_REMNANT(func_001FA108);
 
-void PrintToDebugConsole(s32 value)
+void PrintToDebugConsole(const u8* text)
 {
-    s32 local = value;
+    const u8* local = text;
     CallDebugService(0x10, &local);
 }
 
@@ -210,7 +210,7 @@ void ShutDownCommandChannel(void)
     D_002779B8[0] = 0;
 }
 
-void SetCommandHandler(s32 cmd, Handler_1FA068 handler, void* arg)
+extern "C" void SetCommandHandler(s32 cmd, Handler_1FA068 handler, void* arg)
 {
     s32 off = cmd << 3;
     if (cmd < 0) {
@@ -224,7 +224,7 @@ void SetCommandHandler(s32 cmd, Handler_1FA068 handler, void* arg)
     slot->arg = arg;
 }
 
-void ClearCommandHandler(s32 cmd)
+extern "C" void ClearCommandHandler(s32 cmd)
 {
     s32 off = cmd << 3;
     if (cmd < 0) {

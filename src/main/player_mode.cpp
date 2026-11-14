@@ -11,6 +11,16 @@
 #include "screen_element.h"
 #include "game_clock.h"
 #include "vu0.h"
+#include "object_finder.h"
+struct MemberObject;
+struct PlacedObject;
+struct World;
+
+struct Mat02;
+
+
+// Types other files define, named by the parameters of their functions declared here.
+struct ObjectLink;
 
 s32 g_modeMasks[8] = { 0x12, 0x404, 0x1008, 0x40, 0x80, 0x200, 0x8000, 0 };
 const char* g_modeLabels[7] = { "&2T&.: Dive", "&2T&.: Roll", "&2T&.: Slow", "&2T&.: Mine", "&2T&.: Fast", "&2T&.: Decoy", "&2T&.: Stun" };
@@ -37,58 +47,60 @@ struct ContactObject {
 };
 
 
-void* HandleObjectEvent(Collider* a);
-void FreePooledContactChain(void* a, s32 b);
+void* HandleObjectEvent(Collider* a, void* event);
+void FreePooledContactChain(World* world, Contact03* head);
 
-void ExtractContactsByPartMode(void* self, void* sub);
+void ExtractContactsByPartMode(Collider* self, Contact03** out);
 
-void StartPlacedObject(void* self);
-void ResolveObjectLinks(void* self, s32 a1, void* a2);
+void StartPlacedObject(PlacedObject* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 struct CountedTouchMessage {
     void* self;
     void* v;
 };
 
-void SendEmptyMessage(void* x);
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
-void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
+void SendEmptyMessage(MemberObject* a0);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
+void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 struct AnimatedObject105 { u8 pad[0x7E0]; void* obj; };
 
 
-s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-void SeekAnimationPlayer(void* obj, s32 a1, f32 fa, f32 fb);
+void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b);
 
 
 void StepCollider(Collider* self, f32 t);
-void RotateMatrixUpright(Mat02* sub, s32 zero, void* out);
-void SteerColliderTowardRotation(Collider* self, void* buf, s32 a, void* p, s32 b, f32 t);
+void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
+void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
 
 
-void HandlePlacedObjectNotification(PlacedObject* self, s32 kind, ObjectMessage* msg);
-s32 CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+struct PooledContact;
+void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
+PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
-void ClearPadPressedBits(PadRecord* self, s32 mask);
+void ClearPadPressedBits(PadRecord* self, u32 mask);
 s32 MaskWorldBitsBySave(void);
 
 struct PlayerHeldObject;
 extern f32 g_stepScale;
 
 void SetPlayerState(Player* self, s32 a, s32 b);
-s32 IsObjectAttached(PlayerHeldObject* self);
-void FadeOutPlacedObject(PlayerHeldObject* self, f32 v);
-void TakeCountedColliderTouch(PlayerHeldObject* self, Player* a, s32 b);
-void SeekObjects105Animations(Player* self, s32 a);
+s32 IsObjectAttached(BaseObject* self);
+void FadeOutPlacedObject(Collider* self, f32 time);
+void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag);
+void SeekObjects105Animations(Player* self, s32 value);
 void* GetActiveSwitchedCollider(void);
 
-void ShowModeLabel(u32 mode);
+void ShowModeLabel(s32 mode);
 s32 FindNextTableIndexMatchingMask(PadRecord* self, s32 start, s32 count, s32* table);
 void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag);
 void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1);
 void HandleCountedColliderNotification(CountedCollider* self, s32 kind, ObjectMessage* msg);
 
-void ShowModeLabel(u32 mode)
+void ShowModeLabel(s32 mode)
 {
     switch (g_currentMode) {
     case 1:
@@ -101,16 +113,16 @@ void ShowModeLabel(u32 mode)
         if (g_player == 0)
             goto tail;
         if (((PlayerHeldObject*)g_player->f1518) != 0) {
-            if (IsObjectAttached(((PlayerHeldObject*)g_player->f1518)) != 0)
-                FadeOutPlacedObject(((PlayerHeldObject*)g_player->f1518), 0.5f);
+            if (IsObjectAttached((BaseObject*)g_player->f1518) != 0)
+                FadeOutPlacedObject((Collider*)((g_player->f1518)), 0.5f);
         }
         break;
     }
     if (g_player != 0) {
         g_stepScale = 1.0f;
         if (((PlayerHeldObject*)g_player->f2750) != 0) {
-            if (IsObjectAttached(((PlayerHeldObject*)g_player->f2750)) != 0)
-                TakeCountedColliderTouch(((PlayerHeldObject*)g_player->f2750), g_player, 1);
+            if (IsObjectAttached((BaseObject*)g_player->f2750) != 0)
+                TakeCountedColliderTouch((CountedCollider*)g_player->f2750, g_player, 1);
         }
         SeekObjects105Animations(g_player, 0);
         if (g_player != 0) {
@@ -119,7 +131,7 @@ void ShowModeLabel(u32 mode)
         }
     }
 tail:
-    if (mode != g_saveData->f19FC && mode < 7) {
+    if (mode != g_saveData->f19FC && (u32)mode < 7) {
         SetScreenElementHoldTime(&g_buttonHintElement, (g_player != 0 && (void*)g_player == GetActiveSwitchedCollider()) ? 3.0f : 8.0f);
         SetScreenElementScale(&g_buttonHintElement, 0.6f);
         g_buttonHintElement.vt->m08(&g_buttonHintElement, g_modeLabels[mode]);
@@ -132,9 +144,10 @@ extern f32 g_frameStep;
 extern s32 g_padSelectFlags;
 void ShowModeLabel(s32 mode);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
-f32 ApproachValueWithRamp(f32* ramp, s32 zero, f32 value, f32 target, f32 step);
-f32 ArctangentOfRatio(f32 a, f32 b);
-void TurnColliderTowardHeading(Player* self);
+struct RampProfile;
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
+void TurnColliderTowardHeading(TurningCollider* self);
 
 void UpdateModeSelection(Player* self, PadRecord* pad)
 {
@@ -207,7 +220,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         } else if (pad->keyA8 & 0x10) {
             self->f2748 = 1.0f;
         } else {
-            self->f2748 = ApproachValueWithRamp(D_00274F78, 0, self->f2748, 0.0f, g_frameStep);
+            self->f2748 = ApproachValueWithRamp((RampProfile*)D_00274F78, 0, self->f2748, 0.0f, g_frameStep);
         }
         g_stepScale = self->f2748 * D_00274F84 + (1.0f - self->f2748);
         break;
@@ -271,7 +284,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
     case 3:
         if ((u32)self->f2220 < 2 && (pad->flags & 0x10) && self->f1518 != 0) {
             ClearPadPressedBits(pad, 0x10);
-            if (IsObjectAttached((PlayerHeldObject*)self->f1518)) {
+            if (IsObjectAttached((BaseObject*)self->f1518)) {
                 Vec02 d;
                 Vu0::Q(d) = Vu0::Sub(Vu0::Q(((PlacedObject*)self->f1518)->v140), Vu0::Q(self->v140));
                 self->f638 = ArctangentOfRatio(d.y, d.x);
@@ -322,7 +335,7 @@ void SeekObjects105Animations(Player* self, s32 value)
     for (s32 i = 0; i < n; i++) {
         AnimatedObject105* item = (AnimatedObject105*)buf[i];
         if (item->obj != 0) {
-            SeekAnimationPlayer(item->obj, 1, 0.0f, value != 0 ? 0.0f : 1.0f);
+            SeekAnimationPlayer((AnimationPlayer*)item->obj, 1, 0.0f, value != 0 ? 0.0f : 1.0f);
         }
     }
     self->f275C = value;
@@ -332,7 +345,7 @@ void SeekObjects105Animations(Player* self, s32 value)
 void StartCountedCollider(CountedCollider* self)
 {
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 1, g_countedColliderLinkIds);
+    ResolveObjectLinks(self, 1, (ObjectLink*)g_countedColliderLinkIds);
     self->desc->m03(self);
 }
 
@@ -348,17 +361,17 @@ void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag)
             return;
         }
     }
-    SendEmptyMessage(self->target);
-    StartSoundEffect(0x67, 0, 0, (s32)&self->v140, 0, 0, 4000.0f, 750.0f, 1.0f, 0.0f, 0.0f);
+    SendEmptyMessage((MemberObject*)self->target);
+    StartSoundEffect(0x67, 0, 0, &self->v140, 4000.0f, 750.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     TriggerScriptEvent(self, 2, 0, 0);
     self->desc->m03(self);
 }
 
-void UpdateCollider(Collider* self);
+void UpdateCollider(Collider* self, f32 dt);
 
-void UpdateCountedCollider(CountedCollider* self)
+void UpdateCountedCollider(CountedCollider* self, f32 dt)
 {
-    UpdateCollider(self);
+    UpdateCollider(self, dt);
     if (g_player != 0 && 2000.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(g_player->v140))))) {
         TakeCountedColliderTouch(self, g_player, 1);
     } else if (self->parent == 0) {
@@ -378,19 +391,19 @@ void StepCountedCollider(CountedCollider* self, f32 t)
 
     StepCollider(self, t);
     if (self->parent == 0) {
-        RotateMatrixUpright(&self->rot, 0, buf);
-        SteerColliderTowardRotation(self, buf, (s32)self->p214, (void*)&D_00248D30, (s32)self->p218, t);
+        RotateMatrixUpright(&self->rot, 0, (Mat02*)buf);
+        SteerColliderTowardRotation(self, (Mat02*)buf, (f32*)self->p214, (Vec02*)&D_00248D30, (f32*)self->p218, t);
     }
 }
 
 void CollectCountedColliderContacts(CountedCollider* self)
 {
-    ExtractContactsByPartMode(self, &self->contacts);
+    ExtractContactsByPartMode(self, (Contact03**)&self->contacts);
 }
 
 void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1)
 {
-    void* r = HandleObjectEvent(a0);
+    void* r = HandleObjectEvent(a0, a1);
     if (r != 0 && (a1->flags & 0x20)) {
         ContactObject* a2 = a1->ref;
         s32 v1;
@@ -410,7 +423,7 @@ struct FrameSource;
 struct FrameSourceDesc { u8 pad00[0x1C]; void (*getFrame)(FrameSource* self, Mat02* out); };
 struct FrameSource { FrameSourceDesc* desc; };
 typedef u64 Qword128 __attribute__((mode(TI)));
-void ComputePlacedObjectWorldFrame(void* self);
+void ComputePlacedObjectWorldFrame(PlacedObject* self);
 void ComputeColliderWorldFrame(Collider* self);
 void TransformMeshToWorld(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
 

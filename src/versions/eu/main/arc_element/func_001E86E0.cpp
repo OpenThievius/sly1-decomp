@@ -2,7 +2,7 @@
 // PAL: fields at 0x578/0x580 and the manager state at 0x570; calls PAL's func_eu_001AB238 where US calls vtable slot 8.
 void ApplyArcTarget(void* self);
 void SetArcFade(void* self, s32 v);
-void SetArcSpecialObject(void* self, void* a1);
+void SetArcSpecialObject(T217D_3F0* self, void* a1);
 void SetArcPhase(void* self, s32 mode);
 struct Obj_1E86E0_eu {
     u8 pad0[0x578];
@@ -38,7 +38,7 @@ void SetArcTarget(Obj_1E86E0_eu* self, s32 value)
             ((void (*)(void*, s32))vt[16])(self, 0);
             SetArcPhase(self, 3);
             SetArcFade(self, 0);
-            SetArcSpecialObject(self, 0);
+            SetArcSpecialObject((T217D_3F0*)self, 0);
         }
     } else {
         s32 st = self->f578;

@@ -36,9 +36,9 @@ typedef char check_IdFilterObject[sizeof(IdFilterObject) == 0x5B0 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitIdFilterObject(IdFilterObject* self);                      // 0x34 slot 0
-void CopyIdFilterObject(IdFilterObject* self);                      // 0x34 slot 9
+void CopyIdFilterObject(IdFilterObject* self, IdFilterObject* src);                      // 0x34 slot 9
 void StartIdFilterObject(IdFilterObject* self);                      // 0x34 slot 16
-void UpdateIdFilterObject(IdFilterObject* self);                      // 0x34 slot 17
+void UpdateIdFilterObject(IdFilterObject* self, f32 dt);                      // 0x34 slot 17
 s32 TestIdFilterMatch(IdFilterObject* self, Collider* key);             // 0x34 slot 56
 void AddIdFilterObjectId(IdFilterObject* self, s32 id);              // the first list's add
 void AddIdFilterClassId(IdFilterObject* self, s32 id);              // the second list's add

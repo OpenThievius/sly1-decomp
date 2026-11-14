@@ -36,18 +36,34 @@
 #include "layout_137228.h"
 #include "scope_marker.h"
 #include "vu0.h"
+#include "object_finder.h"
+struct CappedWordList;
+struct EffectOwnerSlot;
+struct PlacedObject;
+struct SpawnSetup;
+struct SpawnTargetOwner;
+struct SpawnTargetRecord;
+
+struct BumpAllocator;
+
+struct Mat02;
+struct Vec02;
 
 
-void TransformPointBetweenFrames(void* from, void* to, void* point, Vec02* out);
+// Types other files define, named by the parameters of their functions declared here.
+struct ScaledTransform;
 
-void SetEffectSpawnerActiveForever();
+
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+
+void SetEffectSpawnerActiveForever(EffectSpawner* self);
 void SetEffectSpawnerInactive(EffectSpawner* self);
 
-void* GetOwnSpawnRecord(void* a0, s32 a1);
-void SetSpawnRecordKind(void* self, s32 a1);
+Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
+void SetSpawnRecordKind(u8* self,s32 kind);
 
 void* GetOwnedSpawnRecord(void* a0, s32 a1);
-void SetSpawnRecordKind(void* self, s32 a1);
+void SetSpawnRecordKind(u8* self,s32 kind);
 
 // The message SendPointEventToWorldListener sends (kind 12): a point and a float.
 struct PointEventMessage {
@@ -73,10 +89,10 @@ struct SpawnSetup {
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GenerateSpawnArrays(void* a, void* b, s32* out);
-void SpawnRecordEffects(void* b, void* c, void* a, s32 o0, s32 o1, s32 o2, s32 o3);
-void GenerateSpawnSetupPair(void* a, void* b, s32* out, s32* pair);
-void EmitParticleChunk(void* b, void* c, void* a, s32 o0, s32 o1, s32 o2, s32 o3, s32 p0, s32 p1);
+void GenerateSpawnArrays(s32 n, void* b, s32* out);
+void SpawnRecordEffects(void* b, void* c, s32 n, s32 o0, s32 o1, s32 o2, s32 o3);
+void GenerateSpawnSetupPair(s32 n, void* b, s32* out, s32* pair);
+void EmitParticleChunk(void* b, void* c, s32 n, s32 o0, s32 o1, s32 o2, s32 o3, s32 p0, s32 p1);
 
 struct StreamWord {
     s32 value;
@@ -90,68 +106,72 @@ struct CappedWordList {
 };
 
 void* AllocateFrontMemory(s32 size);
-void* ReadBufferedU8(void* src);
-StreamWord ReadBufferedU32(void* src);
+struct BufferedStream;
+void* ReadBufferedU8(BufferedStream* self);
+StreamWord ReadBufferedU32(BufferedStream* self);
 
 void* AllocateFrontMemory(s32 size);
 void InitSpawnRecord(void* mem);
-void LoadPlacedObject(void* self, s32 count);
-s32 ReadBufferedS8(s32 count);
+void LoadPlacedObject(PlacedObject* self, void* r);
+s32 ReadBufferedS8(BufferedStream* self);
 PathCurve* CreatePathCurve(s32 kind);
-void ReadSpawnMesh(void* self, s32 count);
-s32 ReadBufferedU16(s32 count);
-void* GetOwnSpawnRecord(void* self, s32 flag);
-void ReadCappedWordList(void* self, s32 count, void* unused, s32 src);
+void ReadSpawnMesh(void* p, void* other);
+u16 ReadBufferedU16(BufferedStream* self);
+Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
+struct CappedWordList;
+void ReadCappedWordList(CappedWordList* self, s32 count, void* unused, void* src);
 
-void CopyPlacedObject(void* self);
+void CopyPlacedObject(PlacedObject* self, PlacedObject* src);
 
 struct SpawnerLinkedObject { u8 pad00[0x18]; void* f18; u8 pad1C[0x18]; s32 f34; };
 
-void PostLoadPlacedObject(EffectSpawner* self);
+void PostLoadPlacedObject(PlacedObject* self);
 Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
-void ResolveSpawnRecordTargets(Rec50* p, EffectSpawner* self);
-SpawnerLinkedObject* FindFirstObjectById(void* a0, s32 a1, s32 a2, EffectSpawner* a3);
-s32 IsObjectOfKind(SpawnerLinkedObject* p, s32 k);
-void* AppendQueuedCall(void* a0, void (*cb)(void), EffectSpawner* a2, s32 a3, s32 a4);
+void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 void* CopyToFrontMemory(s32 size, void* owner);
 
 extern f32 g_gameTime;
 
 
-void SetEffectSpawnerActiveForever();
+void SetEffectSpawnerActiveForever(); // stays without its argument: SetEffectSpawnerLimit leaves self in a0 and retail does not set it again
 
 
 s32 IsEffectSpawnerActive(EffectSpawner* self);
 
-void InitPlacedObject(void*);
-void SetListLinkOffset(void*,s32);
+void InitPlacedObject(PlacedObject* self);
+void SetListLinkOffset(List01* self, s32 offset);
 
-void AddRangeEntry(void*,void*,void*,f32,f32,f32,f32,void*);
+struct RangeEmitter;
+void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15, void* owner);
 
-void ApplyLookSourceToListedObject(void*,void*);
-void CopyEffectOwnerMargin(void*,void*);
+struct LookSource;
+struct WorldListedObject;
+void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src);
+void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b);
 f32 RandomFloatInRange(f32,f32);
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
-void CopyMemory(void* dst, void* src, s32 size);
+void CopyMemory(void* dst, void* src, u32 size);
 void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
-void RunActiveSetSolver(ActiveSetSolver* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6);
 
 struct EffectOwnerSlot { s32* f0; s32* f4; s32 f8; };
-EffectOwner* AcquireEffectOwner(u8* ctx, s32 flag);
+EffectOwner* AcquireEffectOwner(World* self, s32 flag);
 void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b);
-Effect* CreateEffect(s32 a, EffectOwner* b);
-void SetTrailSegmentAnchor(EffectOwner* self, s32 kind, Effect* extra);
+Effect* CreateEffect(s32 kind, EffectOwner* sys);
+void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra);
 void FillLookDirectionBlock(Effect* a, Rec50* b);
 f32 RandomFloatInRange(f32 a, f32 b);
-s32 IsListEmpty(void* p);
+s32 IsListEmpty(List01* p);
 
 #define AT(T, p, o) (*(T*)((u8*)(p) + (o)))
 typedef void (*VFn)();
@@ -196,21 +216,21 @@ struct KeyedWorldView { u8 pad0[0x1CE8]; KeyedObjectList* list; };
 
 struct __attribute__((aligned(16))) SpawnBlock { Quad16 q[8]; };
 struct __attribute__((aligned(16))) SpawnTail { Quad16 q[4]; };
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 struct SpawnFlags { s32 z; s32 b; s32 c; SpawnFlags() { FillMemory(this, 0, sizeof(*this)); } };
 struct __attribute__((aligned(16))) SpawnRecord { u8 pad0[0x20]; Quad16 self_copy; u8 pad1[0x30]; Quad16 a1_copy; u8 pad2[0x30]; SpawnBlock blk; s32 f120; u8 pad3[0x8C]; SpawnTail tail; u8 pad4[0x10]; };
 
 void InitSpawnRecord(void* mem);
-void SpawnEffectsFromRecord(void* a, void* b, void* c);
+void SpawnEffectsFromRecord(s32 count, Rec50* rec, void* flags);
 
 
 struct BriefEffectParams { u8 pad0[0xC]; s32 fC; };
 struct BriefEffectSource { u8 pad0[0x278]; BriefEffectParams* f278; };
 typedef void (*EffectStartFn)(Effect* self, void* a, s32 z, f32 f);
 
-void* CreateEffect(s32 a, s32 b);
+Effect* CreateEffect(s32 kind, EffectOwner* sys);
 
-void StartObject(void* a0);
+void StartObject(BaseObject* self);
 
 struct EmptyMessage { u8 data[0x50]; };
 
@@ -226,14 +246,14 @@ struct TwoVectorMessage {
     u8 pad1[0x50 - 0x38];
 };
 
-void CopyObjectData(void* self);
-MemberObject* CreateObjectCopy(void* a, void* b, void* c);
+void CopyObjectData(BaseObject* self, BaseObject* src);
+MemberObject* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 
 void BindAnimatorRecord(CursorAnimator* self);
 AnimRecord* FindAnimRecord(s32 key);
 void SetCrossfadeMode(CrossfadeAnimator* self, s32 mode);
 
-s32 IsObjectAttached(void* obj);
+s32 IsObjectAttached(BaseObject* self);
 void RemoveObjectNodeFromWorld(WorldObjectNode* self);
 extern PackedFloatPair D_00262180;
 extern PackedFloatPair D_00262188;
@@ -246,13 +266,12 @@ extern PackedFloatPair D_002621B8;
 extern PackedFloatPair D_002621C0;
 
 void InitCollider(Collider* self);
-void AppendToList(List01* a, ObjectCycler* b);
+void AppendToList(List01* self, void* item);
 
 void* CloneSharedSpawnRecord(void* x);
 
 struct MemberTargetObject;
-MemberTargetObject* FindFirstObjectById(void* a0, s32 a1, s32 a2, void* a3);
-s32 IsObjectOfKind(void* self, s32 kind);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
 // list at +0x1BDC, linked at +0x64): the receiver, the 0x50-byte message, the time it is due.
@@ -261,17 +280,17 @@ struct DelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 
 
 extern f32 g_gameClock[];
 
-void* PopFreeSlot(void* p);
-void ClearListLinks(void* p);
-void AppendToList(void* list, void* item);
+struct ListLink;
+void* PopFreeSlot(Pool6C* pool);
+void ClearListLinks(ListLink* p);
+void AppendToList(List01* self, void* item);
 void HandleSpawnMessage(void* self, void* body);
 
-void InitSoundParams(void* p);
+void InitSoundParams(SoundRecord** self);
 
 
-void* CreateTypedRecord(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
-void CopyMemory(void* dst, void* src, s32 size);
-s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
+void CopyMemory(void* dst, void* src, u32 size);
 
 struct MemberTargetObject {
     u8 pad0[0x18];
@@ -284,8 +303,7 @@ struct MemberTargetObject {
     MemberTargetObject* f7c;
 };
 
-MemberTargetObject* FindFirstObjectById(void* a0, s32 a1, s32 a2, void* a3);
-void ResolveSpawnRecordTargets(Rec79* rec, RecordMember* self);
+void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner);
 
 extern f32 g_gameTime;
 f32 RandomFloatInRange(f32 a, f32 b);
@@ -297,61 +315,58 @@ void SetCursorFrame(AnimCursor* cur, s32 idx);
 
 void* AllocateZeroedFrontMemory(s32 size);
 void InitSpawnRecord(void* p);
-s32 ReadBufferedS8(void* other);
 PathCurve* CreatePathCurve(s32 kind);
-void* ReadBufferedU16(void* other);
-void ReadSpawnMesh(void* p, void* other);
-void ReadCappedWordList(void* a, void* b, void* c, void* d);
 extern s32 g_objectCyclerStartLinks[6];
 
 void ResolveObjectLinks(void* self, s32 n, void* p);
 f32 RandomFloatInRange(f32 a, f32 b);
 void SetObjectCyclerState(ObjectCycler* self, s32 x);
-void StartPlacedObject(void* self);
+void StartPlacedObject(PlacedObject* self);
 
 
 
-void* PopZeroedFreeSlot(void* where);
-void AppendToList(void* where, WorldObjectNode* node);
+void* PopZeroedFreeSlot(Pool6C* pool);
+void AppendToList(List01* self, void* item);
 
 
 
-void RemoveFromList(void* where, WorldObjectNode* node);
-void PushFreeSlot(void* where, WorldObjectNode* node);
-void PushFreeSlot(void* l, void* n);
+void RemoveFromList(List01* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
 
 extern f32 g_frameDt;
-void UpdatePlacedObject(void* self);
-f32 ApproachValueWithRamp(void* p, s32 zero, f32 a, f32 b, f32 c);
+void UpdatePlacedObject(void* self, f32 dt);
+struct RampProfile;
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 struct ScaledDrawFrame { Quad16 q0; u8 pad1[0x30]; Quad16 m40[4]; u8 pad2[0x10]; Quad16 m90[4]; };
 
-void BuildUniformScaleAboutPoint(s32 zero, void* out, f32 v);
-void BuildPlacedObjectTransform(void* obj, void* c, void* out);
-void MultiplyMatrices(Quad16* out, void* b, Quad16* in); // stays void: retail returns a value, but declared so func_00158480 differs in registers
-void DrawPlacedObject(void* obj, void* b, void* m);
+void BuildUniformScaleAboutPoint(void* point, void* out, f32 s);
+void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
+void* MultiplyMatrices(Quad16* out, void* b, Quad16* in);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
+void DrawPlacedObject(PlacedObject* self, void* b, void* m);
 
 
 struct ScreenFillPacket { u8 buf[0x2C0]; s32 value; };
 
-void FillScreenColor(void* buf, s32* value, s32 flag);
-void BeginDmaTag(void* self);
-void WriteVifDirect(void* self, s32 n, void* buf, s32 flag);
-void CloseDmaTag(void* self);
+void FillScreenColor(u8* buffer, Rgba4* color, s32 flag);
+void BeginDmaTag(PacketWriter* self);
+void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
+void CloseDmaTag(PacketWriter* self);
 
 extern f32 g_gameTime;
 
 
-void AppendToList(void* list, void* item);
+void AppendToList(List01* self, void* item);
 
-s32 GatherObjectsByMode(void*,s32,s32,void*,s32,void*);
 
-void LoadPlacedObject(void*,void*);
-s32 ReadMeshTables(void*,void*,void*,void*,void*);
+void LoadPlacedObject(PlacedObject* self, void* r);
+void ReadMeshTables(void*,void*,void*,void*,void*);
 
 AnimCursor* FindAnimatorCursor(CursorAnimator* self, const AnimRecord* key);
 
-void AddRangeEntry(void*,void*,void*,f32,f32,f32,f32,void*);
+void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15, void* owner);
 
 struct CyclerEventMessage {
     u8 pad0[0x8];
@@ -369,22 +384,25 @@ struct __attribute__((aligned(16))) GroupForwardMessage {
     u8 pad1[0x50 - 0x30];
 };
 
-void SetObjectCyclerState(void* self, s32 x);
+void SetObjectCyclerState(ObjectCycler* self, s32 state);
 void ApplyColliderImpulseEvent(void* a0, f32 x, void* a1, void* a2);
 
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
 
-void CopyCollider();
-s32 IsInList(void* sub, ObjectCycler* self);
-void RemoveFromList(void* data, ObjectCycler* self);
-void StartSoundEffect(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
+void CopyCollider(Collider* self, Collider* other);
+s32 IsInList(List01* self, void* item);
+void RemoveFromList(List01* list, void* item);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
 
-void StopSoundRecord(void* self, s32 n);
-void StartSoundEffect(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
+void StopSoundRecord(PlayingSound* self, s32 n);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // The colour UpdateColorFade blends, word-aligned, and its request: DeferredRequest's layout
 // with that colour at +0x60 (DeferredRequest's Rgba4 would copy it unaligned).
@@ -394,9 +412,9 @@ extern s32 D_00275BC4;
 
 extern s32 D_00270458;
 extern f32 g_gameTime;
-void RemoveFromList(u8* a, ColorFade* b);
-void DrawScreenFill(ColorFade* o);
-void QueueDeferredRequest(FadeRequest* r);
+void RemoveFromList(List01* list, void* item);
+void DrawScreenFill(u8* a0);
+void QueueDeferredRequest(DeferredRequest* src);
 
 struct RangeEntry {
     s32 a;
@@ -420,21 +438,21 @@ void* AllocateZeroedFrontMemory(s32 bytes);
 
 // A cell of a group's list (ObjectGroup::cells): the object and the next cell.
 
-s32 ReadBufferedS16(void* src);
-s32 IsObjectOfKind(void* node, s32 kind);
-void* CreateTypedRecord(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
+s32 ReadBufferedS16(BufferedStream* self);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
 struct ClassKindNode { ClassKindNode* next; s32 value; };
 
 extern u8 D_00247448[];
 
-s32 IsObjectAttached(PlacedObject* o);
+s32 IsObjectAttached(BaseObject* self);
 
 typedef int Quadword128 __attribute__((mode(TI)));
 
 extern f32 g_gameClock[];
 
-void UpdateCollider(ObjectCycler* self);
+void UpdateCollider(Collider* self, f32 dt);
 void SetObjectCyclerState(ObjectCycler* self, s32 mode);
 s32 ChooseObjectCyclerNextState(ObjectCycler* self);
 s32 FindObjectCyclerGroundPoint(ObjectCycler* self, Quadword128* out);
@@ -442,16 +460,17 @@ void SendObjectCyclerMessage(ObjectCycler* self);
 s32 IsObjectCyclerUnsupported(ObjectCycler* self);
 s32 IsActiveColliderNearObjectCycler(ObjectCycler* self);
 f32 RandomFloatInRange(f32 a, f32 b);
-void StartSoundEffect(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
-void InitPlacedObject(void* self);
+void InitPlacedObject(PlacedObject* self);
 
 extern f32 g_gameClock[];
 
 
 void HandleSpawnMessage(void* a, void* b);
-void RemoveFromList(List01* list, DelayedMessage* node);
-void PushFreeSlot(Pool6C* set, DelayedMessage* node);
+void RemoveFromList(List01* list, void* item);
+void PushFreeSlot(Pool6C* list, void* item);
 
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
@@ -477,24 +496,23 @@ template <class T> struct NextInList {
 };
 extern s32 g_objectCyclerLoadLinks[6];
 
-void LoadCollider(ObjectCycler* self, void* arg);
+struct BufferedStream;
+void LoadCollider(Collider* self, BufferedStream* in);
 void ResolveObjectLinks(ObjectCycler* self, s32 n, void* table);
-void FindOrBuildMemberGroup(void** out, ObjectCycler* self);
-s32 FindFirstObjectByIdMode1(u8* self, s32 kind, ObjectCycler* arg);
-void ResolveAndStartObject(s32 a);
-s32 IsInList(List01* sub, ObjectCycler* self);
-void RemoveFromList(List01* data, ObjectCycler* self);
+void FindOrBuildMemberGroup(void** out, void* self);
+s32 IsInList(List01* self, void* item);
+void RemoveFromList(List01* list, void* item);
 
 struct CyclerDrawParams { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
 extern f32 g_gameTime;
 extern f32 D_00262230[4];
 extern f32 D_00262240[4];
 extern f32 g_unitRange[];
-void BuildPlacedObjectTransform(ObjectCycler* self, void* c, void* out);
+void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 
-s32 IsObjectOfKind(PlacedObject* obj, s32 id);
-s32 IsObjectAttached(PlacedObject* obj);
-s32 IsClassOfKind(u32 i, s32 id);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
+s32 IsObjectAttached(BaseObject* self);
+s32 IsClassOfKind(s32 index, s32 value);
 void CollectObjectByMode(PlacedObject* obj, s32 kind, s32 all, s32 zero, PlacedObject* root, s32 max,
                    s32* countOut, PlacedObject** found, s32* minOut);
 
@@ -513,8 +531,8 @@ extern s32 g_defaultFont;
 
 FontGlyph* FindFontGlyph(Font* a, s32 b);
 
-void RewindTextReader(void* self);
-s32 ReadTextChar(void* self);
+void RewindTextReader(TextReader* self);
+s32 ReadTextChar(TextReader* self);
 
 // The packet memory a GIF writer fills: quadwords.
 typedef u64 UQuadword128 __attribute__((mode(TI)));
@@ -523,44 +541,44 @@ extern u8 D_00212160[];
 extern u8 D_00215C50[];
 
 void* InitGifPacket(void* p);
-void UsePacketBufferMemory(void* p, s32 n, void* q);
-void BeginGifTag(void* p, s32 a, s32 b, s32 c);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void BeginGifTag(void* p, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(void* p, s32 a, s32 b);
 void EndGifPacket(void* p);
-void WriteVifFlush(void* self);
-void WriteVifDirectFromWriter(void* self, void* p);
+void WriteVifFlush(PacketWriter* b);
+void WriteVifDirectFromWriter(PacketWriter* a0, PacketWriter* a1);
 void AddDmaRefTagIfChanged(void* self, void* a, void* b);
-void AddDmaEndTag(void* self);
-void DetachPacketBuffer(void* self, void* p, s32 n);
+void AddDmaEndTag(PacketWriter* self);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 void CopyFontMetrics(Font* self, Font* dst);
 
 FontGlyph* FindFontGlyph(Font* table, s8 key);
 
-void CloseDmaTag(void* obj);
+void CloseDmaTag(PacketWriter* self);
 void AddDmaRefTag(void* obj, s32 a, s32 b);
-void BeginDmaTag(void* obj);
+void BeginDmaTag(PacketWriter* self);
 
-void SetFontClipRect(Font* a0, s32 a1, void* a2);
+void SetFontClipRect(Font* unused, Vec4U* v, PacketWriter* obj);
 s32 AddFontImagesToFrame(Font* self, void* obj);
-void BeginGifTag(void* obj, s32 a, s32 b, s32 c);
+void BeginGifTag(void* obj, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(void* obj, s32 tag, s64 value);
 void BeginGifRegListTag(void* obj, s32 tag, s64 value);
 
 extern s32 g_defaultFont;
 
-void CopyMemory(void* dst, void* src, s32 size);
+void CopyMemory(void* dst, void* src, u32 size);
 
 
 extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
 
+void SendGsPacketAndWait(s32 channel, void* b);
 void ActivateRenderFrame(void* a, s32 b);
-void SendGsPacketAndWait(s32 a, s32 b);
 
 
 void* InitGifPacket(void* p);
-void* InitPacketWriter(void* p);
+void* InitPacketWriter(PacketWriter* self);
 
 void ConstructPacketWriters(s32 flag, s32 code);
 
@@ -574,25 +592,27 @@ extern f32 g_gameClock[];
 
 typedef s32 (*ObjectFilterFn)(void* a, void* b);
 
-s32 IsCyclerGroundCandidate(void* a, void* b);
+struct GroundCandidate;
+struct GroundFilterContext;
+s32 IsCyclerGroundCandidate(GroundFilterContext* a0, GroundCandidate* a1);
 void PushBackMemoryMark(void* self);
-s32 FindNearestSpanObject(s32 zero, void* p, void* q, s32 a, s32 b, s32 c);
+s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 void PopBackMemoryMark(void);
-void GatherCollidersInSphere(s32 a0, s32 a1, void* a2, ObjectFilterFn a3, void* a4, s32* a5, s32* a6, f32 f12);
+void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 void AddDmaRefTag(void* list, u32 count, s32 value);
 extern s32 D_0026230C;
 
-void BeginGifTag(void* obj, s32 a, s32 b, s32 c);
+void BeginGifTag(void* obj, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(void* obj, s32 a, s32 b);
 void EndGifPacket(void* obj);
-void AddDmaEndTag(void* obj);
-void DetachPacketBuffer(void* obj, void* a, s32 b);
+void AddDmaEndTag(PacketWriter* self);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-void WriteGsFinishPacket(void* list, void* a, s32 b);
-void CloseDrawBuffer(void* obj, void* a, s32 b);
-void ClearList(void* p);
-s32 PostSemaphore(void* a);
+void WriteGsFinishPacket(void* self, void* p, u8** n);
+void CloseDrawBuffer(void* obj, void* a, u8** b);
+void ClearList(List01* p);
+extern "C" s32 PostSemaphore(void* a);
 
 extern List01 D_002622E0;
 extern List01 D_002622F0;
@@ -607,46 +627,47 @@ extern s32 g_maskedImagesPacket;
 extern s32 g_gifChannel;
 
 void SwitchActiveImageMask(s32 value);
-void StartDmaChain(s32 a, s32 b);
+struct DmaChannel;
+extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
 
 
-void RewindTextReader(void* self);
-s32 ReadTextChar(void* self);
+void RewindTextReader(TextReader* self);
+s32 ReadTextChar(TextReader* self);
 
-void RewindTextReader(void* self);
-s32 ReadTextChar(void* self);
+void RewindTextReader(TextReader* self);
+s32 ReadTextChar(TextReader* self);
 
 
-void RewindTextReader(void* self);
-s32 ReadTextChar(void* self);
+void RewindTextReader(TextReader* self);
+s32 ReadTextChar(TextReader* self);
 
-s32 WrapTextLines(void* self);
+s32 WrapTextLines(TextReader* self, f32 limit);
 
 extern s8 g_fontEscapeKeys[];
 extern s32 g_fonts[];
 
-s32 WrapFontString(Font* self, u8* s);
+s32 WrapFontString(Font* self, u8* s, f32 w);
 
 // NEAR: the first load of self->p54 goes to $v0 (retail $v1), so two
 // pointer loads differ in register choice; everything else matches.
 
 struct FontUploadFrame { PacketWriter a; u8 buf[0x100]; };
 PacketWriter* InitGifPacket(PacketWriter* p);
-s32 AllocateBump(void* self, s32 size);
-void BuildImageTexRegister(void* self, s32 v);
-void UsePacketBufferMemory(void* self, s32 count, void* base);
-void StartImageUpload(void* self, s32 dbp, void* ctx);
-void DetachPacketBufferCopy(void* self, s32* count, u32* begin, s32* out, s32 flag);
-void BuildPaletteTexRegister(void* self, s32 v);
-void StartPaletteUpload(void* self, s32 v, void* ctx);
+s32 AllocateBump(s32* self,s32 size);
+void BuildImageTexRegister(ImageRecord* self, u32 a1);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
+void BuildPaletteTexRegister(PaletteRecord* self, u32 a1);
+void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx);
 
 // Matched: for loop over i with D_00262264 + i * 0x88.
 
 extern s32 g_fontCount;
 extern u8* g_fontRecords;
 
-void InitBumpAllocator(void* dst, s32 size, s32 align);
-void UploadFontImages(void* item, void* buf);
+void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
+void UploadFontImages(Font* self, void* arg);
 
 
 void AddGifRegListFloat(PacketWriter* s, u32 tag, f32 value);
@@ -655,8 +676,8 @@ void AddGifXyzfRegListEntry(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
 
 FontGlyph* FindFontGlyph(Font* self, s8 key);
 
-s32 WrapTextLines(void* self, f32 f);
-f32 MeasureTextWidth(void* self);
+s32 WrapTextLines(TextReader* self, f32 limit);
+f32 MeasureTextWidth(TextReader* self);
 
 
 
@@ -669,12 +690,12 @@ extern volatile s32 g_renderThreadWaiting;
 extern void* g_drawingFrame;
 extern s32 D_002626CC;
 
-s32 AwaitSemaphore(void* a);
-void SendRenderFrameToDma(void* self, s32 flag);
+extern "C" s32 AwaitSemaphore(void* a);
+void SendRenderFrameToDma(RenderFrame* self, s32 flag);
 void BlitFrameToDisplay(void);
 void FlipDisplayFrame(void);
-void ReleaseFrameNodes(void* p);
-void ClearScreenOwner(s32 a);
+void ReleaseFrameNodes(RenderFrame* self);
+void ClearScreenOwner(s32 owner);
 
 struct FontHeader {
     u16 u0;
@@ -690,14 +711,14 @@ struct FontHeader {
 
 
 
-void ReadBufferedStreamBytes(void* src, s32 n, void* dst);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 void* AllocateFrontMemory(s32 n);
 extern s32 D_00262258;
 extern s32 D_0026225C;
 
 FontGlyph* FindFontGlyph(Font* self, s8 key);
-s32 AddFontImagesToFrame(Font* self, PacketWriter* s);
-void BeginGifTag(PacketWriter* s, s32 a, s32 b, s32 c);
+s32 AddFontImagesToFrame(Font* self, void* obj);
+void BeginGifTag(PacketWriter* s, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(PacketWriter* s, s32 a, u64 b);
 void BeginGifRegListTag(PacketWriter* s, s32 a, u64 b);
 void AddGifRegListFloat(PacketWriter* s, u32 tag, f32 value);
@@ -709,11 +730,11 @@ void AddGifXyzfRegListEntry(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
 extern u8 D_003C3B00[], D_005C3B00[];
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
-extern void* g_mainAndRenderThreads[];
+extern s32 g_mainAndRenderThreads[];
 void SetListLinkOffset(List01* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
 s32 EnableInterruptCause(s32 a0);
-void* CreateLockSemaphore(s32 a, s32 b);
+void* CreateLockSemaphore(s32 initCount, s32 maxCount);
 void RunThread(void* a, s32 b);
 void func_0015E678(void);
 
@@ -730,12 +751,12 @@ extern s32 g_gifChannel;
 extern s32 D_002626CC;
 
 void VerifyCodeChecksum(void);
-s32 AwaitSemaphore(void* p);
+extern "C" s32 AwaitSemaphore(void* p);
 void ActivateRenderFrame(RenderFrame* f);
 void ApplyPendingDisplayFlip(void);
-void SendGsPacketAndWait(s32 a, s32 b);
+void SendGsPacketAndWait(s32 channel, void* b);
 void BlitFrameToDisplay(void);
-s32 WaitDmaChannel(s32 a, s32 b, s32 c);
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 void FlipDisplayFrame(void);
 
 
@@ -748,8 +769,8 @@ struct FrameNode {
 
 
 s32 IsListEmpty(List01* l);
-void RemoveFromList(List01* l, FrameNode* n);
-void AppendToList(u8* l, FrameNode* n);
+void RemoveFromList(List01* list, void* item);
+void AppendToList(List01* self, void* item);
 void ClearList(List01* l);
 
 
@@ -812,9 +833,9 @@ extern s32 g_nextBuildFrameIndex;
 extern s32 g_buildFrameData;
 
 void SetScreenOwner(s32 v);
-s32 AwaitSemaphore(void* a);
-void UsePacketBufferMemory(void* self, s32 count, void* base);
-void BeginDmaTag(void* self);
+extern "C" s32 AwaitSemaphore(void* a);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void BeginDmaTag(PacketWriter* self);
 
 // The spawn record (SpawnRecord above, 0x200 bytes) as InitSpawnRecord fills it: nine vectors,
 // an effect's spawn block (Blk05, the block SpawnBlock is a view of) and a table of thirteen
@@ -870,11 +891,12 @@ void InitEffectSpawner(EffectSpawner* self)
     self->f2DC=10.0f;
     self->f340=-1.0f;
     self->f310=-1;
-    SetListLinkOffset(self->list314,0x320);
+    SetListLinkOffset((List01*)self->list314,0x320);
 }
 
-f32 ReadBufferedFloat(void* stream);
-void ReadBufferedVector3(void* stream, Vec02* out);
+f32 ReadBufferedFloat(BufferedStream* r);
+struct BufferedStream;
+void ReadBufferedVector3(BufferedStream* src, void* dst);
 
 struct MeshTriangle {
     s32 corner[3];          // 0x00
@@ -895,21 +917,21 @@ void ReadSpawnMesh(void* p, void* other)
 {
     MeshData* m = (MeshData*)p;
     s32 i;
-    m->vertexCount = (s32)ReadBufferedU16(other);
+    m->vertexCount = ReadBufferedU16((BufferedStream*)other);
     m->vertices = (Vec02*)AllocateFrontMemory(m->vertexCount << 4);
     m->normals = (Vec02*)AllocateZeroedFrontMemory(m->vertexCount << 4);
     for (i = 0; i < m->vertexCount; i++) {
-        ReadBufferedVector3(other, &m->vertices[i]);
+        ReadBufferedVector3((BufferedStream*)other, &m->vertices[i]);
     }
-    m->triangleCount = (s32)ReadBufferedU16(other);
+    m->triangleCount = ReadBufferedU16((BufferedStream*)other);
     m->triangles = (MeshTriangle*)AllocateFrontMemory(m->triangleCount << 4);
     m->totalArea = 0.0f;
     for (s32 k = 0; k < m->triangleCount; k++) {
         MeshTriangle* t = &m->triangles[k];
         for (i = 0; i < 3; i++) {
-            t->corner[i] = (s32)ReadBufferedU16(other);
+            t->corner[i] = ReadBufferedU16((BufferedStream*)other);
         }
-        t->area = ReadBufferedFloat(other);
+        t->area = ReadBufferedFloat((BufferedStream*)other);
         m->totalArea = m->totalArea + t->area;
         u128 first = Vu0::Q(m->vertices[t->corner[0]]);
         u128 e1 = Vu0::Sub(Vu0::Q(m->vertices[t->corner[1]]), first);
@@ -920,7 +942,7 @@ void ReadSpawnMesh(void* p, void* other)
             Vu0::Q(*v) = Vu0::Add(Vu0::Q(*v), n);
         }
     }
-    ReadBufferedVector3(other, &m->extent);
+    ReadBufferedVector3((BufferedStream*)other, &m->extent);
     for (i = 0; i < m->vertexCount; i++) {
         Vu0::Q(m->normals[i]) = Vu0::NormalizeOr(Vu0::Q(m->normals[i]), Vu0::Q(g_unitZVector));
     }
@@ -932,16 +954,16 @@ void ReadCappedWordList(CappedWordList* self, s32 count, void* unused, void* src
     s32 cap = (limit < count) ? 32 : count;
     self->cap = cap;
     self->items = (U32P*)AllocateFrontMemory(cap * 4);
-    self->source = ReadBufferedU8(src);
+    self->source = ReadBufferedU8((BufferedStream*)src);
     for (s32 i = 0; i < count; i++) {
-        StreamWord tmp = ReadBufferedU32(src);
+        StreamWord tmp = ReadBufferedU32((BufferedStream*)src);
         if (i < self->cap) {
             self->items[i] = *(U32P*)&tmp;
         }
     }
 }
 
-void LoadEffectSpawner(EffectSpawner* self, s32 count)
+void LoadEffectSpawner(EffectSpawner* self, BufferedStream* count)
 {
     void* mem = AllocateFrontMemory(0x200);
     self->rec = (Rec50*)mem;
@@ -953,7 +975,7 @@ void LoadEffectSpawner(EffectSpawner* self, s32 count)
         self->rec->curve20 = obj;
         void (*fn)(PathCurve* self, void* stream) = obj->vt->m00;
         if (fn != 0) {
-            fn(obj, (void*)count);
+            fn(obj, count);
         }
     }
     if (self->rec->kind == 4) {
@@ -962,13 +984,13 @@ void LoadEffectSpawner(EffectSpawner* self, s32 count)
     s32 n = ReadBufferedU16(count);
     if (n != 0) {
         void* b = GetOwnSpawnRecord(self, 1);
-        ReadCappedWordList((u8*)b + 0x130, n, self, count);
+        ReadCappedWordList((CappedWordList*)((u8*)b + 0x130), n, self, count);
     }
 }
 
-void CopyEffectSpawner(EffectSpawner* self)
+void CopyEffectSpawner(EffectSpawner* self, EffectSpawner* src)
 {
-    CopyPlacedObject(self);
+    CopyPlacedObject(self, src);
     self->rec->uses++;
 }
 
@@ -988,7 +1010,7 @@ void ResolveEffectSpawnerLinks(EffectSpawner* self)
     }
     s2 = GetOwnSpawnRecord(self, 1);
     if (self->id2F8[0] != -1) {
-        SpawnerLinkedObject* r = FindFirstObjectById(self->world, 0x104, self->id2F8[0], self);
+        SpawnerLinkedObject* r = (SpawnerLinkedObject*)FindFirstObjectById(self->world, 0x104, self->id2F8[0], self);
         s2->target = r;
         if (r != 0) AppendQueuedCall(self->world, (void (*)(void))ReparentEffectSpawnerToSource, self, 0, 0);
     }
@@ -999,16 +1021,16 @@ void ResolveEffectSpawnerLinks(EffectSpawner* self)
         s2->found[1] = FindFirstObjectById(self->world, 0x104, self->id304, self);
     }
     if (self->id300 != -1) {
-        SpawnerLinkedObject* s1 = FindFirstObjectById(self->world, 0x104, self->id300, self);
-        if (IsObjectOfKind(s1, 3) != 0) s2->found[2] = s1;
+        SpawnerLinkedObject* s1 = (SpawnerLinkedObject*)FindFirstObjectById(self->world, 0x104, self->id300, self);
+        if (IsObjectOfKind((BaseObject*)s1, 3) != 0) s2->found[2] = s1;
     }
     if (self->id30C != -1) {
-        SpawnerLinkedObject* r = FindFirstObjectById(self->world, 0x104, self->id30C, self);
+        SpawnerLinkedObject* r = (SpawnerLinkedObject*)FindFirstObjectById(self->world, 0x104, self->id30C, self);
         s2->value20 = r->f34;
         s2->target = r->f18;
     }
 tail:
-    ResolveSpawnRecordTargets(self->rec, self);
+    ResolveSpawnRecordTargets((SpawnTargetRecord*)self->rec, (SpawnTargetOwner*)self);
 }
 
 void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f);
@@ -1073,7 +1095,7 @@ void StartEffectSpawner(EffectSpawner* self)
         }
     }
     if (self->f310 != -1) {
-        EffectSpawner* copy = (EffectSpawner*)FindFirstObjectByIdMode1((u8*)self->world, self->f310, (ObjectCycler*)0);
+        EffectSpawner* copy = (EffectSpawner*)FindFirstObjectByIdMode1(self->world, self->f310, 0);
         if (copy == 0) {
             copy = (EffectSpawner*)CreateTypedRecord(0x50, self->world, 0, self->f310, -1);
             copy->rec = (Rec50*)AllocateFrontMemory(0x200);
@@ -1093,7 +1115,7 @@ void StartEffectSpawner(EffectSpawner* self)
                 copy->desc->m0F(copy);
         }
         self->f34C = 0;
-        AppendToList(copy->list314, self);
+        AppendToList((List01*)copy->list314, self);
         InheritFlaggedAncestorValue(self);
     }
 }
@@ -1141,10 +1163,10 @@ EffectSpawner* MarkEffectSpawnerChanged(EffectSpawner* self, s32 value)
     return self;
 }
 
-void AddSpawnRangeEntry(void* self,void* a,void* b,f32 x,f32 y,f32 z,f32 w)
+void AddSpawnRangeEntry(EffectSpawner* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w)
 {
     u8* p=(u8*)GetOwnSpawnRecord(self,1);
-    AddRangeEntry(p+16,a,b,x,y,z,w,self);
+    AddRangeEntry((RangeEmitter*)(p+16),a,b,x,y,z,w,self);
 }
 
 f32 WrapModulo(f32 x, f32 m);
@@ -1204,21 +1226,20 @@ void WrapSpawnerParticlesIntoBox(EffectSpawner* self)
     }
 }
 
-void RandomizeEffectSpawnerDelay(EffectSpawner* self);
-void UpdatePlacedObject(void* self, f32 dt);
-s32 CountListItems(void* list);
+void RandomizeEffectSpawnerDelay(u8* self);
+void UpdatePlacedObject(PlacedObject* self, f32 f);
+s32 CountListItems(List01* list);
 void WrapSpawnerParticlesIntoBox(EffectSpawner* self);
 void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f);
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
 s32 IsEffectSpawnerActive(EffectSpawner* self);
-void SpawnEffectsFromRecord(s32 count, Rec50* rec, SpawnFlags* p);
 
 void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
 {
     ListFrame frame;
 
     if (self->f34C != 0) {
-        RandomizeEffectSpawnerDelay(self);
+        RandomizeEffectSpawnerDelay((u8*)self);
     }
     UpdatePlacedObject(self, dt);
     if (self->f310 != -1) {
@@ -1332,7 +1353,7 @@ spawn:
             have = held != 0 ? *(s32*)((u8*)held + 0x620) : 0;
         } else {
             held = self->held344;
-            have = held != 0 ? CountListItems((u8*)held + 0x558) : 0;
+            have = held != 0 ? CountListItems((List01*)((u8*)held + 0x558)) : 0;
         }
         s32 left = n - have;
         n = 0; if (left > n) { n = left; }
@@ -1411,7 +1432,7 @@ void SetEffectSpawnerDisabled(EffectSpawner* self, s32 a1)
     if (a1 != 0) {
         SetEffectSpawnerInactive(self);
     } else {
-        SetEffectSpawnerActiveForever();
+        SetEffectSpawnerActiveForever(self);
     }
 }
 
@@ -1428,8 +1449,8 @@ void GetEffectSpawnerActive(void* self,s32* out)
 void RandomizeEffectSpawnerDelay(u8* self)
 {
     *(s32*)(self+0x34C)=0;
-    if (*(void**)(self+0x348)) ApplyLookSourceToListedObject(*(void**)(self+0x348),*(void**)(self+0x2D0));
-    if (*(void**)(self+0x344)) CopyEffectOwnerMargin(*(void**)(self+0x344),*(void**)(self+0x2D0));
+    if (*(void**)(self+0x348)) ApplyLookSourceToListedObject((WorldListedObject*)(*(void**)(self+0x348)),(LookSource*)(*(void**)(self+0x2D0)));
+    if (*(void**)(self+0x344)) CopyEffectOwnerMargin((EffectOwner*)(*(void**)(self+0x344)),(Rec50*)(*(void**)(self+0x2D0)));
     f32 value;
     if (*(s32*)(self+0x2D4)==3) value=RandomFloatInRange(*(f32*)(self+0x2DC),*(f32*)(self+0x2E0))*60.0f;
     else value=RandomFloatInRange(*(f32*)(self+0x2DC),*(f32*)(self+0x2E0));
@@ -1476,14 +1497,14 @@ void SetSpawnRecordKind(u8* self,s32 kind)
 
 void SetEffectSpawnerKind(void* a0, s32 a1)
 {
-    void* r = GetOwnSpawnRecord(a0, 1);
-    SetSpawnRecordKind(r, a1);
+    void* r = GetOwnSpawnRecord((EffectSpawner*)a0, 1);
+    SetSpawnRecordKind((u8*)r, a1);
 }
 
 void SetOwnedSpawnRecordKind(void* a0, s32 a1)
 {
     void* r = GetOwnedSpawnRecord(a0, 1);
-    SetSpawnRecordKind(r, a1);
+    SetSpawnRecordKind((u8*)r, a1);
 }
 
 // The splash of an object on a surface: its sound by distance, the effect, and from 500 on a
@@ -1518,7 +1539,7 @@ struct __attribute__((aligned(16))) SplashTail {
 };
 extern s32 D_00262050[74];
 s32 RandomIntInRange(s32 a, s32 b);
-void SpawnEffectsAt(Quad16* self, Quad16* a1, void* a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
+void SpawnEffectsAt(Quad16* self, Quad16* a1, s32 a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6);
 
 // Both callers (gauge_collider.cpp and collider.cpp) declare it with these parameters and are
 // retail's code with them; a float takes its register wherever it is declared.
@@ -1551,7 +1572,7 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
             if (rec != 0) {
                 AT(f32, rec, 0x14) = vol;
             } else {
-                StartSoundEffect(D_00262050[RandomIntInRange(0, 3)], snd + 0x574, (s32)snd, 0, 10.0f, 1.0f, vol,
+                StartSoundEffect(D_00262050[RandomIntInRange(0, 3)], (PlayingSound**)(snd + 0x574), (BaseObject*)snd, 0, 10.0f, 1.0f, vol,
                                  0.0f, 0.0f, 0, 0);
             }
         }
@@ -1586,10 +1607,10 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
             };
             Vec02 pos = *(Vec02*)at;
             pos.z += 30.0f;
-            SpawnEffectsAt((Quad16*)&pos, (Quad16*)&g_unitZVector, (void*)RandomIntInRange(4, 6), (SpawnTail*)&tail, (SpawnBlock*)&block, 0, 0);
+            SpawnEffectsAt((Quad16*)&pos, (Quad16*)&g_unitZVector, RandomIntInRange(4, 6), (SpawnTail*)&tail, (SpawnBlock*)&block, 0, 0);
         }
     } else if (snd != 0) {
-        StopSoundRecord(AT(void*, snd, 0x574), 0);
+        StopSoundRecord((PlayingSound*)(AT(void*, snd, 0x574)), 0);
     }
 }
 
@@ -1678,8 +1699,8 @@ struct SpawnShape {
 
 s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
-void ComputePolarOffset(Vec02* out, f32 angle, f32 a, f32 b);
-void TransformDirectionBetweenFrames(void* from, void* to, void* dir, Vec02* out);
+void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 static inline f32 RandomInRange(const SpawnRange& r)
 {
@@ -1769,18 +1790,18 @@ void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Ve
             roots[0] = d / seg->f08;
         }
         f32 u = roots[0] / seg->f20;
-        ComputePolarOffset(&offset, RandomFloatInRange(-3.14159265f, 3.14159265f), (1.0f - u) * seg->r0 + u * seg->r1,
+        ComputePolarOffset((Vec3*)&offset, RandomFloatInRange(-3.14159265f, 3.14159265f), (1.0f - u) * seg->r0 + u * seg->r1,
                            roots[0]);
         Vu0::Set(at, Vu0::Add(Vu0::Vec::Of(seg->from->v140), Vu0::Rotate(frame, Vu0::Vec::Of(offset))).q);
-        TransformPointBetweenFrames(0, shape->anchor, &at, pos);
+        TransformPointBetweenFrames(0, (PlacedObject*)shape->anchor, &at, pos);
         switch (shape->mode) {
         case 2:
-            TransformDirectionBetweenFrames(0, shape->anchor, &frame.r[2], axis);
+            TransformDirectionBetweenFrames(0, (PlacedObject*)shape->anchor, &frame.r[2], axis);
             goto normalize;
         case 3: {
             Vu0::Set(side, NormalizedOr(Vu0::Cross(Vu0::Vec::Of(frame.r[2]), Vu0::Vec::Of(shape->dir)),
                                             Vu0::Vec::Of(g_unitXVector)).q);
-            TransformDirectionBetweenFrames(0, shape->anchor, &side, axis);
+            TransformDirectionBetweenFrames(0, (PlacedObject*)shape->anchor, &side, axis);
             goto normalize;
         }
         }
@@ -1851,8 +1872,8 @@ struct AnchoredSpawn {
     s32 mode;               // 0x70: 1, 2 and 3 take less of the anchor's motion
 };
 
-void TransformDirectionBetweenFrames(void* from, void* to, void* dir, Vec02* out);
-void ComputeObjectMotionInFrame(void* obj, s32 z, void* point, Vec02* out, s32 a, s32 b, s32 c);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 
 void ConvertSpawnToAnchorSpace(AnchoredSpawn* self, Vec02* pos, Vec02* dir)
 {
@@ -1874,7 +1895,7 @@ void ConvertSpawnToAnchorSpace(AnchoredSpawn* self, Vec02* pos, Vec02* dir)
 
 void InitSpawnRing(s32 n, SpawnSpan* span, s32 k, SpawnRing* out) { if (n > 0) { out->count = n < k ? n : k; } else { out->count = k; } s32 steps = k - 1; steps += out->count; steps = steps / out->count; f32 w = WrapAngle(span->hi - span->lo); f32 rate = 6.2831855f / (f32)out->count; f32 step = w / (f32)steps; out->rate = rate; out->step = step; out->phase = span->lo + step * 0.5f; out->out10 = RandomFloatInRange(0.0f, 6.2831855f); }
 
-void ComputeDirectionFromAngles(Vec02* out, f32 first, f32 second, f32 scale);
+void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
 
 void ComputeSpawnRingDirection(SpawnRing* ring, SpawnSpan* range, Vec02* axis, s32 index, Vec02* out, f32 jitter, f32 flatten)
@@ -1891,7 +1912,7 @@ void ComputeSpawnRingDirection(SpawnRing* ring, SpawnSpan* range, Vec02* axis, s
     }
     first = WrapAngle(first + 1.57079637f);
     second = WrapAngle(second);
-    ComputeDirectionFromAngles(&dir, second, first, RandomFloatInRange(range->lo, range->hi));
+    ComputeDirectionFromAngles((Vec3*)&dir, second, first, RandomFloatInRange(range->lo, range->hi));
     basis.r[2] = *axis;
     dir.z *= flatten;
     BuildPerpendicularPair(&basis.r[2], &basis.r[0], &g_unitXVector, &g_unitZVector);
@@ -1934,7 +1955,7 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
         if (h->f4) node = (EffectOwner*)*h->f4;
     }
     if (!node) {
-        node = AcquireEffectOwner((u8*)g_currentWorld, AT(s32, c, 0xC4));
+        node = AcquireEffectOwner((World*)g_currentWorld, AT(s32, c, 0xC4));
         if (!node) return;
         if (h) {
             if (h->f4) *h->f4 = (s32)node;
@@ -1949,7 +1970,7 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
     }
     if (node) {
     for (i = 0; i < n; i++) {
-        Effect* it = CreateEffect(AT(s32, c, 0x90), node);
+        Effect* it = CreateEffect(AT(s32, c, 0x90), (EffectOwner*)node);
         if (!it) break;
         Quad16* s1 = pos + i;
         u8* cls = AT(u8*, it, 0);
@@ -1986,7 +2007,7 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
             if (*p) ((void (*)(Effect*, Rec50*))*p)(it, self);
         }
     }
-    if (IsListEmpty((u8*)node + 0x558)) {
+    if (IsListEmpty((List01*)((u8*)node + 0x558))) {
         typedef void (*F2)(EffectOwner*);
         (*(F2*)(AT(u8*, node, 0) + 0x1C))(node);
     }
@@ -2043,7 +2064,7 @@ void EmitParticleChunk(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad
         if (h) {
             if (h->f0) *h->f0 = (s32)set;
         }
-        ApplyLookSourceToListedObject(set, self);
+        ApplyLookSourceToListedObject((WorldListedObject*)set, (LookSource*)self);
         if (h) {
             if (h->f8) {
                 typedef void (*F)(EffectOwner*, s32);
@@ -2107,9 +2128,8 @@ struct SpawnFrame {
 
 // Makes the count points of a spawn record, their directions and times, in the four arrays out
 // holds (positions, directions, starts, ends), moved to the followed object's frame.
-void GenerateSpawnArrays(void* a, void* b, s32* out)
+void GenerateSpawnArrays(s32 n, void* b, s32* out)
 {
-    s32 n = (s32)a;
     u8* rec = (u8*)b;
     SpawnRing ring;
     Vec02 axis;
@@ -2140,7 +2160,8 @@ void GenerateSpawnArrays(void* a, void* b, s32* out)
 
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 void ComputeChainedWorldFrame(void* a, void* frame, void* out);
-void ComputeObjectFrameAtTime(void* self, void* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
+// Left in this order: retail's call here evaluates the time before the pointers.
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 
 void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* second)
 {
@@ -2161,7 +2182,7 @@ void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* s
         AT(SpawnFrame*, AT(Rec50*, r, 0x90), 0x78) = &frame;
     }
     second->flag = 0;
-    GenerateSpawnArrays((void*)n, AT(Rec50*, r, 0x90), second->out);
+    GenerateSpawnArrays(n, AT(Rec50*, r, 0x90), second->out);
     AT(SpawnFrame*, AT(Rec50*, r, 0x90), 0x78) = 0;
     f32 last = 3.40282347e+38f;
     for (s32 i = 0; i < n; i++) {
@@ -2169,7 +2190,7 @@ void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* s
             f32 t = ((f32*)first->out[3])[i] - g_gameClock[1];
             if (!AreFloatsNearlyEqual(t, last, 0.0001f)) {
                 last = t;
-                ComputeObjectFrameAtTime(AT(Rec50*, r, 0x90)->target, 0, last, &P, &M, &V, &W);
+                ComputeObjectFrameAtTime((PlacedObject*)(AT(Rec50*, r, 0x90)->target), 0, last, &P, &M, &V, &W);
             }
             Vec02* p = (Vec02*)(i * 16 + second->out[0]);
             Vu0::Set(tmp, Vu0::Rotate(M, Vu0::Q(*p)));
@@ -2194,7 +2215,7 @@ void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* s
     AT(Rec50*, r, 0x90)->target = saved;
 }
 
-void SpawnEffectsFromRecord(void* a, Rec50* b, void* c)
+void SpawnEffectsFromRecord(s32 a, Rec50* b, void* c)
 {
     SpawnSetup f;
     if (a == 0) {
@@ -2217,7 +2238,7 @@ void SpawnEffectsFromRecord(void* a, Rec50* b, void* c)
     PopBackMemoryMark();
 }
 
-void SpawnEffectsAt(Quad16* self, Quad16* a1, void* a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6)
+void SpawnEffectsAt(Quad16* self, Quad16* a1, s32 a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6)
 {
     SpawnRecord f;
     InitSpawnRecord(&f);
@@ -2229,7 +2250,7 @@ void SpawnEffectsAt(Quad16* self, Quad16* a1, void* a2, SpawnTail* a3, SpawnBloc
     p.c = a6;
     f.f120 = 1;
     f.tail = *a3;
-    SpawnEffectsFromRecord(a2, &f, &p);
+    SpawnEffectsFromRecord(a2, (Rec50*)&f, &p);
 }
 
 LINKER_REMNANT(func_00157FF0);
@@ -2272,7 +2293,7 @@ void SpawnBriefEffectAt(void* a0, BriefEffectSource* a1, f32 f)
     }
 }
 
-void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15)
+void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15, void* owner)
 {
     self->kind = 3;
     if (self->entries == 0) {
@@ -2330,14 +2351,14 @@ struct SpawnTargetOwner { u8 pad00[0x14]; void* world; };
 void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner)
 {
     if (rec->f120 == 0 && rec->f188 != -1) {
-        rec->f18C = FindFirstObjectById(owner->world, 0x104, rec->f188, owner);
+        rec->f18C = (MemberTargetObject*)FindFirstObjectById((World*)owner->world, 0x104, rec->f188, owner);
     }
     if (rec->kind == 3) {
         f32 total = 0.0f;
         for (s32 i = 0; i < rec->count; i++) {
             SpawnLink* link = &rec->links[i];
             for (s32 j = 0; j < 2; j++) {
-                link->objs[j] = (PlacedObject*)FindFirstObjectById(owner->world, 0x104, link->ids[j], owner);
+                link->objs[j] = (PlacedObject*)FindFirstObjectById((World*)owner->world, 0x104, link->ids[j], owner);
             }
             f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(link->objs[0]->v140), Vu0::Q(link->objs[1]->v140))));
             link->distance = d;
@@ -2363,11 +2384,11 @@ struct SpinRecord_158480 {
     void* frame;        // 0x44
 };
 extern const Mat4A D_00248400;
-void BuildAxisAngleMatrix(void* axis, Mat4A* out, f32 angle);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 s32 ScaleMatrix(Mat4A* out, Mat4A* in, u128 scale);
 void AddMatrices(f32* a, f32* b, f32* out);
 
-void TurnMatrixBySpin(SpinRecord_158480* spin, f32* out, f32 dt)
+void TurnMatrixBySpin(SpinRecord_158480* spin, f32 dt, f32* out)
 {
     Mat4A place = D_00248400;
     Mat4A turn;
@@ -2379,17 +2400,16 @@ void TurnMatrixBySpin(SpinRecord_158480* spin, f32* out, f32 dt)
     if (spin->rate != 0.0f) {
         Quad16 axis;
         if (spin->mode == 1 && spin->frame != 0) {
-            TransformDirectionBetweenFrames(spin->frame, 0, &spin->axis, (Vec02*)&axis);
+            TransformDirectionBetweenFrames((PlacedObject*)spin->frame, 0, (Vec02*)&spin->axis, (Vec02*)&axis);
         } else {
             axis = spin->axis;
         }
-        BuildAxisAngleMatrix(&axis, &turn, spin->rate * dt);
+        BuildAxisAngleMatrix((const Vec02*)&axis, (Mat02*)&turn, spin->rate * dt);
     }
     Mat4A term;
     Mat4A scaled;
-    Mat4A product;
     Mat4A* result = &scaled;
-    MultiplyMatrices((Quad16*)&product, &turn, (Quad16*)&place);
+    Mat4A product = MultiplyMatrices(turn, place);
     ScaleMatrix(result, &product, Vu0::ScalarInGpr(dt));
     term = scaled;
     AddMatrices((f32*)&turn, (f32*)&term, out);
@@ -2432,11 +2452,11 @@ void LoadGroupMembers(MemberGroup* self, void* src)
     s32 total;
     s32 i;
     ReadTransformObject(self, src);
-    total = ReadBufferedS16(src);
+    total = ReadBufferedS16((BufferedStream*)src);
     for (i = 0; i < total; i++) {
-        s32 r1 = ReadBufferedS16(src);
-        s32 r2 = ReadBufferedS16(src);
-        s32 r3 = ReadBufferedS16(src);
+        s32 r1 = ReadBufferedS16((BufferedStream*)src);
+        s32 r2 = ReadBufferedS16((BufferedStream*)src);
+        s32 r3 = ReadBufferedS16((BufferedStream*)src);
         BaseObject* obj = (BaseObject*)CreateTypedRecord(r1, self->world, self->parent, r2, r3);
         s32 n;
         obj->desc->m0A(obj, src);
@@ -2474,9 +2494,9 @@ void LoadGroupMembers(MemberGroup* self, void* src)
     }
 }
 
-void CopyGroupMembers(MemberGroup* self)
+void CopyGroupMembers(MemberGroup* self, MemberGroup* src)
 {
-    CopyObjectData(self);
+    CopyObjectData(self, src);
     for (s32 i = 0; i < self->count; i++) {
         MemberObject* o = CreateObjectCopy(self->members[i], self->world, self->parent);
         o->desc->m03(o);
@@ -2517,7 +2537,7 @@ void LoadRecordMember(RecordMember* self, void* stream)
     self->rec = p;
     InitSpawnRecord(p);
     ReadTransformObject(self, stream);
-    s32 idx = ReadBufferedS8(stream);
+    s32 idx = ReadBufferedS8((BufferedStream*)stream);
     if (idx != -1) {
         Rec79* n = GetOwnedSpawnRecord(self, 1);
         n->curve20 = CreatePathCurve(idx);
@@ -2529,16 +2549,16 @@ void LoadRecordMember(RecordMember* self, void* stream)
     if (q->kind == 4) {
         ReadSpawnMesh(&q->curve20, stream);
     }
-    void* t = ReadBufferedU16(stream);
+    s32 t = ReadBufferedU16((BufferedStream*)stream);
     if (t != 0) {
         Rec79* m = GetOwnedSpawnRecord(self, 1);
-        ReadCappedWordList((u8*)m + 0x130, t, self, stream);
+        ReadCappedWordList((CappedWordList*)((u8*)m + 0x130), t, self, stream);
     }
 }
 
-void CopyRecordMember(RecordMember* self)
+void CopyRecordMember(RecordMember* self, RecordMember* src)
 {
-    CopyObjectData(self);
+    CopyObjectData(self, src);
     self->rec->uses += 1;
 }
 
@@ -2563,7 +2583,7 @@ void ResolveRecordMemberTargets(RecordMember* self)
             r->target = FindFirstObjectById(self->world, 260, self->id94, self);
         }
         if (self->id98 != none) {
-            MemberTargetObject* q = FindFirstObjectById(self->world, 260, self->id98, self);
+            MemberTargetObject* q = (MemberTargetObject*)FindFirstObjectById(self->world, 260, self->id98, self);
             r->value20 = q->f34;
             r->target = q->f18;
         }
@@ -2572,17 +2592,17 @@ void ResolveRecordMemberTargets(RecordMember* self)
 tail:
     c = self->rec;
 tail_c:
-    ResolveSpawnRecordTargets(c, self);
+    ResolveSpawnRecordTargets((SpawnTargetRecord*)c, (SpawnTargetOwner*)self);
 }
 
 void SendRecordMemberMessage(void)
 {
 }
 
-void AddRecordMemberRangeEntry(RecordMember* self, void* a, void* b, f32 x, f32 y, f32 z, f32 w)
+void AddRecordMemberRangeEntry(RecordMember* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w)
 {
     u8* p = (u8*)GetOwnedSpawnRecord(self, 1);
-    AddRangeEntry(p+16,a,b,x,y,z,w,self);
+    AddRangeEntry((RangeEmitter*)(p+16),a,b,x,y,z,w,self);
 }
 
 Rec79* GetOwnedSpawnRecord(RecordMember* self, s32 own)
@@ -2619,7 +2639,7 @@ void ResolveHoldingMemberTargets(HoldingMember* self)
     }
     if (self->idB4 != -1) {
         p = FindFirstObjectById(self->world, 0x104, self->idB4, self);
-        if (IsObjectOfKind(p, 3) != 0) {
+        if (IsObjectOfKind((BaseObject*)p, 3) != 0) {
             s->found[2] = p;
         }
     }
@@ -2652,7 +2672,7 @@ void SendMessageAfterDelay(HoldingMember* self, void* message)
             done = 1;
             k = (f32*)g_gameClock;
             r->due = k[1] + self->delay;
-            ClearListLinks((u8*)r + 0x64);
+            ClearListLinks((ListLink*)((u8*)r + 0x64));
             AppendToList(&self->world->list1BDC, r);
         }
     }
@@ -2665,7 +2685,7 @@ s32 GetOrCreateSoundParams(void* self)
 {
     HoldingMember* o = (HoldingMember*)self;
     if (o->fA0 == 0) {
-        InitSoundParams(&o->fA0);
+        InitSoundParams((SoundRecord**)&o->fA0);
     }
     return o->fA0;
 }
@@ -2724,14 +2744,14 @@ struct __attribute__((aligned(16))) ChainFrame {
     void Clear() { FillMemory(this, 0, sizeof(*this)); }
 };
 
-void *StoreFloatAsQuadword(void* out, f32 f);
-void* CopyQuadword(void* out, void* in);
+void *StoreFloatAsQuadword(u128* out, f32 f);
+void* CopyQuadword(u128* out, void* src);
 Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
-void* StoreQuadword(void* dst, Quadword128 v);
-f32 ClampToRange(void* range, f32 x);
+void* StoreQuadword(u128* out, u128 v);
+struct ValueRange;
+f32 ClampToRange(ValueRange* span, f32 x);
 void ComputeChainedWorldFrame(void* a, void* frame, void* out);
-void SpawnEffectsFromRecord(s32 count, void* rec, void* chain);
-void TransformPointBetweenFrames(void* from, s32 to, Vec02* point, Vec02* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 extern f32 D_00262178[2];
 extern const Vec02 D_00248D30;
 
@@ -2777,16 +2797,16 @@ void HandleSpawnMessage(void* self, void* body)
             else count = (s32)((f32)count / s);
             s32 least = (s32)AT(f32, self, 0xA8) / 2;
             count = least < count ? count : least;
-            f32 r = ClampToRange(D_00262178, s);
+            f32 r = ClampToRange((ValueRange*)D_00262178, s);
             rec.fA0 = rec.fA0 * r;
             rec.fA4 = rec.fA4 * r;
             f32 lowest = 0.5f;
             s = lowest >? s;
             Quad16* q = &rec.q140;
-            StoreFloatAsQuadword(&qa, s);
+            StoreFloatAsQuadword((u128*)&qa, s);
             Quadword128 q0 = *(Quadword128*)&qa;
-            CopyQuadword(&qb, q);
-            StoreQuadword(q, ScaleQuadword(q0, *(Quadword128*)&qb));
+            CopyQuadword((u128*)&qb, q);
+            StoreQuadword((u128*)q, ScaleQuadword(q0, *(Quadword128*)&qb));
         }
     }
     if (rec.f120 == 1) {
@@ -2804,7 +2824,7 @@ void HandleSpawnMessage(void* self, void* body)
     } else {
         cp = 0;
     }
-    SpawnEffectsFromRecord(count, &rec, cp);
+    SpawnEffectsFromRecord(count, (Rec50*)&rec, cp);
     if (AT(s32, self, 0xA0) != 0) {
         switch (rec.kind) {
         case 0:
@@ -2828,9 +2848,9 @@ void HandleSpawnMessage(void* self, void* body)
             u8* fr = (u8*)rec.frame;
             Vu0::Q(v) = Vu0::Add(Vu0::Rotate(AT(Mat02, fr, 0x10), Vu0::Q(v)), Vu0::Q(AT(Vec02, fr, 0)));
         }
-        TransformPointBetweenFrames((void*)rec.target, 0, &v, &v);
+        TransformPointBetweenFrames((PlacedObject*)rec.target, 0, &v, &v);
         u8* snd = AT(u8*, self, 0xA0);
-        StartSoundEffect(AT(s32, snd, 0), 0, 0, (s32)&v, AT(f32, snd, 4), AT(f32, snd, 8), AT(f32, snd, 0xC), AT(f32, snd, 0x10), 0.0f, 0, 0);
+        StartSoundEffect(AT(s32, snd, 0), 0, 0, &v, AT(f32, snd, 4), AT(f32, snd, 8), AT(f32, snd, 0xC), AT(f32, snd, 0x10), 0.0f, 0, 0);
     }
 }
 
@@ -2852,7 +2872,7 @@ void FindOrBuildMemberGroup(void** out, void* self)
         *out = arr[0];
         return;
     }
-    s2 = (MemberGroup*)CreateTypedRecord(0x78, o->world, self, 0x202, -1);
+    s2 = (MemberGroup*)CreateTypedRecord(0x78, o->world, (BaseObject*)self, 0x202, -1);
     cnt = 8;
     if (n < 8) {
         cnt = n;
@@ -3063,12 +3083,12 @@ void StepObjectLevelRamp(WorldObjectNode* self, f32 dt)
 
 WorldObjectNode* AddObjectNodeToWorld(PlacedObject* self)
 {
-    WorldObjectNode* node = (WorldObjectNode*)PopZeroedFreeSlot((u8*)g_currentWorld + 0x1C18);
+    WorldObjectNode* node = (WorldObjectNode*)PopZeroedFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1C18));
     node->owner = self;
     if (self->f294 != 0) {
-        AppendToList((u8*)g_currentWorld + 0x1C30, node);
+        AppendToList((List01*)((u8*)g_currentWorld + 0x1C30), node);
     } else {
-        AppendToList((u8*)g_currentWorld + 0x1C24, node);
+        AppendToList((List01*)((u8*)g_currentWorld + 0x1C24), node);
     }
     return node;
 }
@@ -3076,19 +3096,19 @@ WorldObjectNode* AddObjectNodeToWorld(PlacedObject* self)
 void RemoveObjectNodeFromWorld(WorldObjectNode* node)
 {
     if (node->owner->f294 != 0) {
-        RemoveFromList((u8*)g_currentWorld + 0x1C30, node);
+        RemoveFromList((List01*)((u8*)g_currentWorld + 0x1C30), node);
     } else {
-        RemoveFromList((u8*)g_currentWorld + 0x1C24, node);
+        RemoveFromList((List01*)((u8*)g_currentWorld + 0x1C24), node);
     }
     node->owner->f298 = 0;
-    PushFreeSlot((u8*)g_currentWorld + 0x1C18, node);
+    PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1C18), node);
 }
 
 void DrawScreenFill(u8* a0)
 {
     ScreenFillPacket f;
     f.value = *(s32*)(a0 + 0x60);
-    FillScreenColor(&f, &f.value, 0);
+    FillScreenColor(f.buf, (Rgba4*)&f.value, 0);
     PacketWriter* s = &g_vifPacketWriter;
     BeginDmaTag(s);
     WriteVifDirect(s, 0x2C, &f, 0);
@@ -3118,7 +3138,7 @@ void UpdateColorFade(ColorFade* self)
             if (!(t < self->fadeOutTime)) {
                 u8* p = (u8*)g_currentWorld + 0x1CD8;
                 self->running = 0;
-                RemoveFromList(p, self);
+                RemoveFromList((List01*)p, self);
                 return;
             }
             a = self->holdColor; b = self->endColor;
@@ -3137,7 +3157,7 @@ void UpdateColorFade(ColorFade* self)
     case 0: q.mode = 1; break;
     case 1: q.mode = 0x10; break;
     }
-    QueueDeferredRequest(&q);
+    QueueDeferredRequest((DeferredRequest*)&q);
 }
 
 void StartColorFade(ColorFade* a0)
@@ -3145,7 +3165,7 @@ void StartColorFade(ColorFade* a0)
     if (a0->running == 0) {
         a0->running = 1;
         a0->startTime = g_gameTime;
-        AppendToList((u8*)g_currentWorld + 0x1CD8, a0);
+        AppendToList((List01*)((u8*)g_currentWorld + 0x1CD8), a0);
     }
 }
 
@@ -3246,7 +3266,7 @@ struct HashedObject {
     GroupMemberLink* members; // 0x2D0
 };
 
-s32 GatherObjectsByMode(void* host, s32 flags, s32 id, void* rootp, s32 max, void* foundp)
+s32 GatherObjectsByMode(World* host, s32 flags, s32 id, void* rootp, s32 max, void* foundp)
 {
     s32 count;
     s32 min;
@@ -3308,23 +3328,23 @@ s32 GatherObjectsByMode(void* host, s32 flags, s32 id, void* rootp, s32 max, voi
     return count;
 }
 
-MemberTargetObject* FindFirstObjectById(void* self,s32 flags,s32 kind,void* arg)
+BaseObject* FindFirstObjectById(World* self,s32 flags,s32 kind,void* arg)
 {
-    s32 out=0;
+    BaseObject* out=0;
     GatherObjectsByMode(self,flags|0x200,kind,arg,1,&out);
-    return (MemberTargetObject*)out;
+    return out;
 }
 
-s32 FindFirstObjectByIdMode4(void* self,s32 kind,void* arg)
+BaseObject* FindFirstObjectByIdMode4(World* self,s32 kind,void* arg)
 {
-    s32 out=0;
+    BaseObject* out=0;
     GatherObjectsByMode(self,0x204,kind,arg,1,&out);
     return out;
 }
 
-s32 FindFirstObjectByIdMode1(void* self,s32 kind,void* arg)
+BaseObject* FindFirstObjectByIdMode1(World* self,s32 kind,void* arg)
 {
-    s32 out=0;
+    BaseObject* out=0;
     GatherObjectsByMode(self,0x201,kind,arg,1,&out);
     return out;
 }
@@ -3342,8 +3362,10 @@ s32 IsClassOfKind(s32 index, s32 value)
     return 0;
 }
 
-s32 GatherObjectsById(World* world, u32 flags, s32 id, PlacedObject* root, s32 max, PlacedObject** found)
+s32 GatherObjectsById(World* world, u32 flags, s32 id, void* scope, s32 max, void* foundp)
 {
+    PlacedObject* root = (PlacedObject*)scope;
+    PlacedObject** found = (PlacedObject**)foundp;
     s32 c;
     s32 min;
     s32 kind;
@@ -3424,9 +3446,9 @@ s32 GatherObjectsById(World* world, u32 flags, s32 id, PlacedObject* root, s32 m
     return c;
 }
 
-s32 FindFirstObjectByIdGathered(void* self,s32 flags,s32 kind,void* arg)
+PlacedObject* FindFirstObjectByIdGathered(World* self,s32 flags,s32 kind,void* arg)
 {
-    s32 out=0;
+    PlacedObject* out=0;
     GatherObjectsById(self,flags|0x200,kind,arg,1,&out);
     return out;
 }
@@ -3462,17 +3484,17 @@ void LoadScalingVolume(ScalingVolume* self,void* other)
     ReadMeshTables(other,&self->out2D0,&self->out2D4,&self->out2D8,&self->out2DC);
 }
 
-void UpdateScalingVolume(ScalingVolume* self)
+void UpdateScalingVolume(ScalingVolume* self, f32 dt)
 {
-    UpdatePlacedObject(self);
-    self->f2EC = ApproachValueWithRamp(self->v, 0, self->f2EC, self->f2F0, g_frameDt);
+    UpdatePlacedObject(self, dt);
+    self->f2EC = ApproachValueWithRamp((RampProfile*)self->v, 0, self->f2EC, self->f2F0, g_frameDt);
 }
 
 void DrawScalingVolume(ScalingVolume* self, void* arg1, void* arg2)
 {
     ScaledDrawFrame f;
     BuildUniformScaleAboutPoint(0, &f.q0, self->f2EC);
-    BuildPlacedObjectTransform(self, arg2, f.m40);
+    BuildPlacedObjectTransform(self, (Quad16*)arg2, (ScaledTransform*)f.m40);
     MultiplyMatrices(f.m90, f.m40, &f.q0);
     f.m40[0] = f.m90[0];
     f.m40[1] = f.m90[1];
@@ -3481,7 +3503,9 @@ void DrawScalingVolume(ScalingVolume* self, void* arg1, void* arg2)
     DrawPlacedObject(self, arg1, f.m40);
 }
 
-s32 IsPointInsideFaceTree(s32 tree, Vec02* point);
+struct TreeNode03;
+struct FacePoint;
+s32 IsPointInsideFaceTree(TreeNode03* self, FacePoint* value);
 
 s32 IsPointInsideObjectFaces(ScalingVolume* self, void* point)
 {
@@ -3489,10 +3513,10 @@ s32 IsPointInsideObjectFaces(ScalingVolume* self, void* point)
     Vec02 k;
     if (self->f2EC < 0.0001f)
         return 0;
-    TransformPointBetweenFrames(0, self, point, &local);
+    TransformPointBetweenFrames(0, self, (Vec02*)point, &local);
     Vu0::Q(k) = Vu0::FromFloat(1.0f / self->f2EC);
     Vu0::Q(local) = Vu0::MulX(Vu0::Q(local), Vu0::Q(k));
-    return IsPointInsideFaceTree(self->out2DC, &local);
+    return IsPointInsideFaceTree((TreeNode03*)self->out2DC, (FacePoint*)&local);
 }
 
 extern f32 D_002621F8[6];

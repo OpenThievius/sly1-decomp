@@ -21,9 +21,9 @@ extern CardSlot D_eu_00255538[];
 
 void CancelPauseMenuPage(Menu_195958_eu* self);
 void SetPauseMenuLayerPage(Menu_195958_eu* self, s32 a, s32 b);
-void ExitLevelFromPauseMenu(Menu_195958_eu* self, s32 a, s32 b);
+void ExitLevelFromPauseMenu(T217D_6D0* a0, s32 a1, s32 a2);
 void BuildPauseMenuPage(Menu_195958_eu* self);
-void PushStackElement(u8* a, Sub_195958_eu* b);
+void PushStackElement(ElementStack* self, ScreenElement* node);
 void SelectLanguage(s32 a);
 u8* LookupEntryById(s32 a);
 
@@ -44,7 +44,7 @@ void ActivatePauseMenuSelection(Menu_195958_eu* self)
             Sub_195958_eu* s = (Sub_195958_eu*)&g_mapScreenList;
             if (s->f260 != 0) {
                 SetPauseMenuLayerPage(self, 0, -1);
-                PushStackElement(g_elementStack, s);
+                PushStackElement((ElementStack*)g_elementStack, (ScreenElement*)s);
                 return;
             }
             StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -54,12 +54,12 @@ void ActivatePauseMenuSelection(Menu_195958_eu* self)
             s32 v;
             void* s2 = (void*)FindObject42CStateWalker();
             void* s0 = GetActiveSwitchedCollider();
-            if (s2 != 0 && s0 != 0 && IsObjectOfKind(s0, 0x19) != 0) {
-                GetStateWalkerCurrentKey(s2, &v);
+            if (s2 != 0 && s0 != 0 && IsObjectOfKind((BaseObject*)s0, 0x19) != 0) {
+                GetStateWalkerCurrentKey((StateWalker*)s2, &v);
                 if (v < 0x431) {
                     if (v >= 0x42F) {
-                        RecordPathFollowerProgress(s0);
-                        TeleportStateWalker(s2, 0x42E);
+                        RecordPathFollowerProgress((PathFollower*)s0);
+                        TeleportStateWalker((StateWalker*)s2, 0x42E);
                     }
                 }
             }
@@ -68,7 +68,7 @@ void ActivatePauseMenuSelection(Menu_195958_eu* self)
         }
         case 19:
         case 20:
-            ExitLevelFromPauseMenu(self, 1, 1);
+            ExitLevelFromPauseMenu((T217D_6D0*)self, 1, 1);
             return;
         case 21:
             SetPauseMenuLayerPage(self, 0, -1);
@@ -76,7 +76,7 @@ void ActivatePauseMenuSelection(Menu_195958_eu* self)
             return;
         case 22:
             SetPauseMenuLayerPage(self, 0, -1);
-            StartObjectFade(D_eu_00249050[D_eu_00263710], -1, 2);
+            StartObjectFade((IdentityKey*)D_eu_00249050[D_eu_00263710], -1, 2);
             return;
         case 9:
             SetPauseMenuLayerPage(self, 0, 2);
@@ -149,19 +149,19 @@ void ActivatePauseMenuSelection(Menu_195958_eu* self)
             FadeOutAndQueueMovie(8);
             return;
         }
-        ExitLevelFromPauseMenu(self, 0, 2);
+        ExitLevelFromPauseMenu((T217D_6D0*)self, 0, 2);
         return;
     case 1:
     case 26:
     case 28:
     case 29:
     case 30:
-        ExitLevelFromPauseMenu(self, (u32)sel < 1, 1);
+        ExitLevelFromPauseMenu((T217D_6D0*)self, (u32)sel < 1, 1);
         return;
     case 25: {
         s32 a = self->f280;
         self->f280 = 0;
-        SetStateWalkerTarget(a, sel == 0 ? 0x434 : 0x435);
+        SetStateWalkerTarget((StateWalker*)a, sel == 0 ? 0x434 : 0x435);
         SetPauseMenuLayerPage(self, 0, -1);
         return;
     }
@@ -218,7 +218,7 @@ void ActivatePauseMenuSelection(Menu_195958_eu* self)
             return;
         }
         SelectLanguage(sel - 0x1B);
-        StartObjectFade(LookupEntryById(3), 0x1BE, 1);
+        StartObjectFade((IdentityKey*)(LookupEntryById(3)), 0x1BE, 1);
         return;
     case 34:
         SetPauseMenuLayerPage(self, 0, -1);

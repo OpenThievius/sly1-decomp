@@ -49,7 +49,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of((*(Camera**)g_camera)->f40), Vu0::Vec::Of(*(Vec02*)(obj + 0x140)))));
             f32 fov = 2.0f * Arctangent(size / (self->f54 * dist));
             fov = self->f24 >? fov;
-            ComputeObjectFrameAtTime(obj, 0, &pos, 0, 0, 0, 0.1f);
+            ComputeObjectFrameAtTime((PlacedObject*)obj, 0, &pos, 0, 0, 0, 0.1f);
             Vu0::Q(span) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(*(Vec02*)(obj + 0x140))).q;
             Camera* gc = *(Camera**)g_camera;
             Vu0::Q(mid) = Vu0::Add(Vu0::Vec::Of(*(Vec02*)(obj + 0x140)), Vu0::MulX(Vu0::Vec::Of(span), Vu0::Vec::Scalar(0.5f))).q;
@@ -92,13 +92,13 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             }
             self->g18 = ApproachValueClampingVelocity(self->g18, self->g1C, zoom, dt, profile, &self->g1C);
         } else {
-            self->g1C = ApproachValueWithRamp(self->g1C, 0.0f, dt, D_00261C60, 0);
+            self->g1C = ApproachValueWithRamp(self->g1C, 0.0f, dt, (RampProfile*)D_00261C60, 0);
             self->g18 = ClampFloat(self->g18 + self->g1C * dt, 0.0f, 1.0f);
         }
         break;
     }
     case 3: {
-        f32 v = ClampFloat(ApproachValueWithRamp(self->g18, D_002704F8, dt, D_00261C70, 0), 0.0f, 1.0f);
+        f32 v = ClampFloat(ApproachValueWithRamp(self->g18, D_002704F8, dt, (RampProfile*)D_00261C70, 0), 0.0f, 1.0f);
         f32 prev = self->g18;
         self->g18 = v;
         self->g1C = (v - prev) / dt;
@@ -115,8 +115,8 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
                 ResumeIopVoice(sound->voice);
                 self->f44 = 0;
             }
-            SetSoundRecordPitch(self->p48, ClampFloat(__builtin_fabsf(self->g1C), -1.0f, 1.0f));
-            SetSoundRecordVolume(self->p48, ClampFloat(__builtin_fabsf(self->g1C) * 0.5f + 0.5f, 0.0f, 1.0f));
+            SetSoundRecordPitch((PlayingSound*)self->p48, ClampFloat(__builtin_fabsf(self->g1C), -1.0f, 1.0f));
+            SetSoundRecordVolume((PlayingSound*)self->p48, ClampFloat(__builtin_fabsf(self->g1C) * 0.5f + 0.5f, 0.0f, 1.0f));
         } else if (self->f44 == 0) {
             PauseIopVoice(sound->voice);
             self->f44 = 1;
@@ -155,8 +155,8 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         if (pitch * self->g14 <= zero) {
             self->g14 = zero;
         }
-        self->g0C = ApproachValueWithRamp(self->g0C, zero, dt, D_00261C80, 0);
-        self->g14 = ApproachValueWithRamp(self->g14, zero, dt, D_00261C80, 0);
+        self->g0C = ApproachValueWithRamp(self->g0C, zero, dt, (RampProfile*)D_00261C80, 0);
+        self->g14 = ApproachValueWithRamp(self->g14, zero, dt, (RampProfile*)D_00261C80, 0);
         self->g0C = ClampToMagnitude(self->g0C + yaw * dt, limit * 0.9f);
         self->g14 = ClampToMagnitude(self->g14 + pitch * dt, limit * 0.8f);
         self->g08 = WrapAngle(self->g08 + self->g0C * dt);
@@ -196,7 +196,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             r1.q = rows[1];
             r2.q = rows[2];
             Vu0::Q(ahead) = Vu0::Add(Vu0::Vec::Of(pt), Vu0::RotateRowsTied(r0, r1, r2, Vu0::MulX(Vu0::Vec::Of(g_unitXVector), Vu0::Vec::Scalar(100.0f)))).q;
-            ProjectPointToCamera(*(Camera**)g_camera, &ahead, &screen);
+            ProjectPointToCamera(*(Camera**)g_camera, &ahead, (f32*)&screen);
             push.x = pad->f40;
             if (g_saveData->f19EC & 0x400) {
                 push.y = pad->f44;
@@ -205,19 +205,19 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             }
             push.z = 0.0f;
             Vu0::Q(moved) = Vu0::MulAddX(Vu0::Vec::Of(screen), Vu0::Vec::Of(push), Vu0::Vec::Scalar(D_00261C8C * dt)).q;
-            UnprojectCameraPoint(*(Camera**)g_camera, &moved, &world);
+            UnprojectCameraPoint(*(Camera**)g_camera, (f32*)&moved, &world);
             Vu0::Q(dir) = Vu0::Sub(Vu0::Vec::Of(world), Vu0::Vec::Of(pt)).q;
         }
         BuildBasisFromX(&dir, &basis);
         f32 yaw;
         f32 pitch;
-        VectorToAngles(&basis, &yaw, &pitch);
+        VectorToAngles((Vec3*)&basis, &yaw, &pitch);
         flag = 1;
         far = 20.0f;
         rise = -7.0f;
         blend = 0.0f;
-        f32 dy = ClampToRange(coll + 0x658, WrapAngle(yaw - *(f32*)(coll + 0x648)));
-        f32 dp = ClampToRange(coll + 0x650, WrapAngle(pitch - *(f32*)(coll + 0x64C)));
+        f32 dy = ClampToRange((ValueRange*)(coll + 0x658), WrapAngle(yaw - *(f32*)(coll + 0x648)));
+        f32 dp = ClampToRange((ValueRange*)(coll + 0x650), WrapAngle(pitch - *(f32*)(coll + 0x64C)));
         self->g08 = WrapAngle(*(f32*)(coll + 0x648) + dy);
         self->f10 = WrapAngle(*(f32*)(coll + 0x64C) + dp);
         eye = GetTargetCameraControllerEyePoint(self);
@@ -259,7 +259,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         f32 reach = *(f32*)((u8*)s->target + 0x2D8) * 0.22222222f;
         Vec02 dir;
         if (self->f5C != 0) {
-            ConvertPositionToWorld(self->f5C, &target);
+            ConvertPositionToWorld((BaseObject*)self->f5C, (Vec02*)&target);
             Vu0::Q(dir) = Normalized(Vu0::Sub(Vu0::Vec::Of(target), Vu0::Vec::Of(pos))).q;
         } else {
             Vu0::Vec fwd = Vu0::Vec::Of(*(Vec02*)(obj + 0x110));
@@ -271,12 +271,12 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         f32 heading;
         f32 tilt;
         f32 length;
-        ConvertOffsetToSpherical(&target, &pos, &heading, &tilt, &length);
+        ConvertOffsetToSpherical((const Vec02*)&target, (const Vec02*)&pos, &heading, &tilt, &length);
         f32 z = cam->f1C4;
         f32 a = heading + 3.1415927f + sx * z * cam->f1E0 * 0.5f;
         f32 b = -tilt - sy * z * 0.5f;
         Vec02 off;
-        ComputeDirectionFromAngles(&off, heading, tilt, length);
+        ComputeDirectionFromAngles((Vec3*)&off, heading, tilt, length);
         Vu0::Q(cam->f40) = Vu0::Add(Vu0::Vec::Of(pos), Vu0::Vec::Of(off)).q;
         Mat02 mz;
         Mat02 my;
@@ -293,6 +293,6 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         return;
     }
     }
-    UpdateOrbitCameraPlacement(cam, flag, &eye, &target, 0, Blend(blend, 20.0f, far), Blend(blend, -7.0f, rise),
+    UpdateOrbitCameraPlacement(cam, flag, (const Vec02*)&eye, (const Vec02*)&target, 0, Blend(blend, 20.0f, far), Blend(blend, -7.0f, rise),
                   Blend(blend, 1.0f, 0.25f), 0.0f, ease, dt);
 }

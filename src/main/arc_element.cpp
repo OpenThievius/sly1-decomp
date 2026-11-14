@@ -16,10 +16,19 @@
 #include "object_pool.h"
 #include "vu0.h"
 #include "pad_record.h"
+#include "object_finder.h"
+struct ObjectLink;
+struct PlacedObject;
+struct World;
+struct Mat02;
+struct Vec02;
+struct DeferredRequest;
+// Types other files define, named by the parameters of their functions declared here.
+
 extern u8* g_player;
 extern u8* g_currentWorld;
 
-void InitSwitchedCollider(void* self);
+void InitSwitchedCollider(SwitchedCollider* self);
 void* AllocateFrontMemory(s32 size);
 
 void InitPlayerLinkedCollider(PlayerLinkedCollider* self)
@@ -56,12 +65,10 @@ struct OwnedAgent {
 
 extern s32 D_00275B28[10];
 
-void StartPlacedObject(void* self);
-void ResolveObjectLinks(void* self, s32 n, void* table);
-void* CreateStateWalker(void* a, void* self, s32 b, s32 c);
-void* FindFirstObjectByIdMode4(void* a, s32 b, void* c);
-s32 FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-void VectorToAngles(void* a, void* b, void* c);
+void StartPlacedObject(PlacedObject* self);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
+void VectorToAngles(Vec3* v, f32* a1, f32* a2);
 
 void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
 {
@@ -71,9 +78,9 @@ void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
     void* r;
 
     StartPlacedObject(self);
-    ResolveObjectLinks(self, 3, D_00275B28);
-    self->f614 = (StateWalker*)CreateStateWalker(self->f610, self, -1, 1);
-    r = FindFirstObjectByIdMode4(g_currentWorld, 7, self);
+    ResolveObjectLinks(self, 3, (ObjectLink*)D_00275B28);
+    self->f614 = (StateWalker*)CreateStateWalker((StateGraph*)self->f610, self, -1, 1);
+    r = FindFirstObjectByIdMode4((World*)g_currentWorld, 7, self);
     if (r != 0) {
         self->f620 = r;
         self->f624 = r;
@@ -100,21 +107,20 @@ void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
         }
     }
     self->f638 = n;
-    VectorToAngles((u8*)self + 0x110, (u8*)self + 0x648, (u8*)self + 0x64C);
+    VectorToAngles((Vec3*)((u8*)self + 0x110), (f32*)((u8*)self + 0x648), (f32*)((u8*)self + 0x64C));
 }
 
-void UpdateSwitchedCollider(void* self);
-s32 GatherObjectsById(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-void ChangeAgentState(void* node, s32 kind, s32 flag);
+void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt);
+void ChangeAgentState(Agent* self, s32 state, void* context);
 
-void UpdatePlayerLinkedCollider(PlayerLinkedCollider* self)
+void UpdatePlayerLinkedCollider(PlayerLinkedCollider* self, f32 dt)
 {
     void* arr[8];
     s32 n;
     s32 count;
     s32 i;
 
-    UpdateSwitchedCollider(self);
+    UpdateSwitchedCollider(self, dt);
     if (((SwitchedCollider*)self->f620) != 0) {
         if (((SwitchedCollider*)self->f620)->desc05()->m4D(((SwitchedCollider*)self->f620))) {
             n = GatherObjectsById(self->world, 5, 8, 0, 8, arr);
@@ -125,7 +131,7 @@ void UpdatePlayerLinkedCollider(PlayerLinkedCollider* self)
                     void* item = arr[i];
                     if (item != self->f620) {
                         if (((Agent*)item)->f724 != 0xB) {
-                            ChangeAgentState(item, 0xA, 0);
+                            ChangeAgentState((Agent*)item, 0xA, 0);
                         }
                     }
                     count--;
@@ -143,26 +149,26 @@ extern u8* g_player;
 
 typedef void (*PlayerFrameFn)(void* self, f32 t, void* buf);
 
-void ChoosePlayerLinkedColliderTarget(void);
-void ClearPadPressedBits(void* obj, s32 n);
-void AdvancePlayerLinkedColliderWalker(void* self);
-s32 IsObjectAttached(void);
-void* FillMemory(void* p, s32 value, s32 size);
+void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self);
+void ClearPadPressedBits(PadRecord* self, u32 mask);
+void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self);
+s32 IsObjectAttached(BaseObject* self);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void ControlPlayerLinkedCollider(PlayerLinkedCollider* self, void* obj, f32 t)
 {
     u8 buf[0xC4];
     u8* o;
 
-    ChoosePlayerLinkedColliderTarget();
+    ChoosePlayerLinkedColliderTarget(self);
     if (*(u16*)((u8*)obj + 0xAA) & 0xC0) {
-        ClearPadPressedBits(obj, 0xC0);
+        ClearPadPressedBits((PadRecord*)obj, 0xC0);
         AdvancePlayerLinkedColliderWalker(self);
     }
     o = g_player;
     if (o != 0) {
         if (*(s32*)(o + 0x2740) != 0) {
-            if (IsObjectAttached()) {
+            if (IsObjectAttached((BaseObject*)o)) {
                 PlayerFrameFn fn;
                 FillMemory(buf, 0, 0xC4);
                 o = g_player;
@@ -178,22 +184,22 @@ void ControlPlayerLinkedCollider(PlayerLinkedCollider* self, void* obj, f32 t)
 extern Camera* g_camera;
 extern u8 g_elementStack[];
 
-void HandleSwitchedColliderActivation(void* a, void* b);
-void PushStackElement(void* self, void* node);
-void PopStackElement(void* self);
+void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
+void PushStackElement(ElementStack* self, ScreenElement* node);
+void PopStackElement(ElementStack* g);
 void SetTextPanelState(T217D_440* self, s32 mode);
-void PushCameraController(void* a, s32 b, void* c, void* d, s32 e);
-void PushStackValue(void* a, s32 b);
-void RemoveCameraControllers(void* a, s32 b, s32 c, void* d, void* e, s32 f);
-s32 PopStackValue(void* a);
-void SetStateWalkerTarget(void* a, s32 b);
+void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, void* arg);
+void PushStackValue(TargetCameraController* s, s32 value);
+void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, void* k2, void* k3);
+s32 PopStackValue(TargetCameraController* s);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
 {
     HandleSwitchedColliderActivation(self, p);
     if (p != 0) {
         g_camera->ctl460.f20 = 100.0f;
-        PushStackElement(g_elementStack, &g_typedTextCaptionBox);
+        PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
         SetTextPanelState(&g_typedTextCaptionBox, 5);
         g_camera->ctl460.f5C = (void*)self->f61C;
         if (self->f630 != 0) {
@@ -206,14 +212,14 @@ void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
         SetStateWalkerTarget(self->f614, 0x359);
     } else {
         g_camera->ctl460.f20 = 10.0f;
-        PopStackElement(g_elementStack);
+        PopStackElement((ElementStack*)g_elementStack);
         RemoveCameraControllers(g_camera, 0xF, 6, &g_camera->ctl460, self, 0);
         PopStackValue(&g_camera->ctl460);
         SetStateWalkerTarget(self->f614, 0x358);
     }
 }
 
-s32 IsObjectInPool(void* p, void* v);
+s32 IsObjectInPool(ObjectPool* list, BaseObject* query);
 
 s32 IsPlayerLinkedColliderCandidate(PlayerLinkedCollider* self, Collider* node)
 {
@@ -242,18 +248,19 @@ struct SpanHit {
     u8 pad10[0x60];
 };
 
-s32 HasObjectPoolChoice(void* pool);
+s32 HasObjectPoolChoice(ObjectPool* self);
 void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
-void UnprojectCameraPoint(void* camera, void* in, void* out);
+void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInBox(void* world, void* self, Vec02* lo, Vec02* hi, s32 (*filter)(PlayerLinkedCollider*, Collider*), PlayerLinkedCollider* owner, s32* n, Collider*** list);
-u8* FindNearestSpanObject(s32 zero, Vec02* lo, Vec02* hi, s32 n, Collider** list, SpanHit* out);
-void TransformPointBetweenFrames(void* from, void* to, void* point, void* out);
-s32 IsObjectOfKind(void* obj, s32 kind);
+void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+u8* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 void PopBackMemoryMark(void);
-void GetPlacementRecordTransform(void* place, Vec02* a, Vec02* b, void* c);
-f32 ArctangentOfRatio(f32 y, f32 x);
+struct FrameSource;
+void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* a3);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
 {
@@ -274,20 +281,20 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         GetTextPanelCenter(&g_typedTextCaptionBox, &cx, &cy);
         Vu0::Set(a, Vu0::FromFloats(cx * 0.003125f - 1.0f, 1.0f - cy * 0.0040584416f, 10.0f));
         Vu0::Set(b, Vu0::FromFloats(cx * 0.003125f - 1.0f, 1.0f - cy * 0.0040584416f, 80000.0f));
-        UnprojectCameraPoint(g_camera, &a, &lo);
-        UnprojectCameraPoint(g_camera, &b, &hi);
+        UnprojectCameraPoint(g_camera, (f32*)&a, &lo);
+        UnprojectCameraPoint(g_camera, (f32*)&b, &hi);
         Vec02 pos;
         SpanHit hit;
         PushBackMemoryMark();
         GatherCollidersInBox(self->world, 0, &lo, &hi, IsPlayerLinkedColliderCandidate, self, &n, &list);
-        u8* found = FindNearestSpanObject(0, &lo, &hi, n, list, &hit);
+        u8* found = FindNearestSpanObject(0, &lo, &hi, n, list, (ColliderSpan*)&hit);
         if (found != 0 && *(s32*)(found + 8) != 1) {
             *(u8**)e0 = found;
-            TransformPointBetweenFrames(0, found, &hit, &pool->fF0);
+            TransformPointBetweenFrames(0, (PlacedObject*)found, (Vec02*)&hit, (Vec02*)&pool->fF0);
             pos = hit.point;
-            if (IsObjectOfKind(*(void**)(found + 0x50), 0xE) != 0 || IsObjectOfKind(*(void**)(found + 0x50), 7) != 0) {
+            if (IsObjectOfKind((BaseObject*)(*(void**)(found + 0x50)), 0xE) != 0 || IsObjectOfKind((BaseObject*)(*(void**)(found + 0x50)), 7) != 0) {
                 g_typedTextCaptionBox.palette = 2;
-            } else if (IsObjectOfKind(*(void**)(found + 0x50), 8) != 0) {
+            } else if (IsObjectOfKind((BaseObject*)(*(void**)(found + 0x50)), 8) != 0) {
                 g_typedTextCaptionBox.palette = 1;
             } else {
                 u8* c = found;
@@ -319,17 +326,17 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         Vec02 c0;
         Mat02 rot;
         Vec02 d;
-        GetPlacementRecordTransform(place, &c0, rot.r, 0);
+        GetPlacementRecordTransform((FrameSource*)place, &c0, rot.r, 0);
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(c0));
         *(f32*)(ang + 8) = ArctangentOfRatio(d.y, d.x);
         *(f32*)(ang + 4) = ArctangentOfRatio(d.z, Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d)))));
     }
 }
 
-void GetStateWalkerCurrentKey(void* dev, s32* out);
-void GetStateWalkerTargetKey(void* dev, s32* out);
-s32 HasObjectPoolChoice(void* a);
-void SetStateWalkerTarget(void* dev, s32 value);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+s32 HasObjectPoolChoice(ObjectPool* self);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self)
 {
@@ -345,8 +352,8 @@ void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self)
 }
 
 
-void HandleSwitchedColliderNotification(void* self, s32 kind, MessageBody* rec);
-s32 LaunchChosenPoolObject(void* a, s32 b);
+void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
+s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim);
 
 void HandlePlayerLinkedColliderNotification(PlayerLinkedCollider* self, s32 kind, MessageBody* rec)
 {
@@ -371,16 +378,16 @@ void HandlePlayerLinkedColliderNotification(PlayerLinkedCollider* self, s32 kind
     }
 }
 
-s32 TestCollidersMayContact(void* a, void* b);
-s32 IsObjectInPool(void* p, void* v);
+s32 TestCollidersMayContact(Collider* a, Collider* b);
+s32 IsObjectInPool(ObjectPool* list, BaseObject* query);
 
 s32 TestPlayerLinkedColliderMayContact(PlayerLinkedCollider* self, void* arg)
 {
-    if (TestCollidersMayContact(self, arg)) {
+    if (TestCollidersMayContact(self, (Collider*)arg)) {
         return 1;
     }
     if (self->f618 != 0) {
-        s32 r = IsObjectInPool(self->f618, arg);
+        s32 r = IsObjectInPool(self->f618, (BaseObject*)arg);
         if (r != 0) {
             return 1;
         }
@@ -388,17 +395,17 @@ s32 TestPlayerLinkedColliderMayContact(PlayerLinkedCollider* self, void* arg)
     return 0;
 }
 
-typedef void (*PeerEffectFn)(void* self);
+typedef void (*PeerEffectFn)(void* self, s32 mode, PlacedObject* other);
 
-void StartSwitchedColliderEffect(void* self);
+void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other);
 
-void StartPlayerLinkedColliderEffect(PlayerLinkedCollider* self)
+void StartPlayerLinkedColliderEffect(PlayerLinkedCollider* self, s32 mode, PlacedObject* other)
 {
     if (self->f624 != 0) {
         PeerEffectFn fn = *(PeerEffectFn*)(*(u8**)self->f624 + 0x148);
-        fn(self->f624);
+        fn(self->f624, mode, other);
     } else {
-        StartSwitchedColliderEffect(self);
+        StartSwitchedColliderEffect(self, mode, other);
     }
 }
 
@@ -507,38 +514,40 @@ typedef void (*ConeSpriteFn)(void* self);
 struct ConeSprite { ConeSpriteFn* vtbl; };
 
 void SetupScreenElementText(ScreenElement* self);
-void* CreateTypedRecord(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
-void SetConeVolumeMode(void* p, s32 v);
-void SetConeVolumeColor(void* p, void* q);
-void SetConeVolumeFirstAngle(void* p, f32 v);
-void SetConeVolumeSecondLevel(void* p, f32 v);
-void SetConeVolumeSecondAngle(void* p, f32 v);
-void SetConeVolumeThirdLevel(void* p, f32 v);
-void SetConeVolumeThirdAngle(void* p, f32 v);
-void SetConeVolumeRange(void* p, void* q);
-void SetConeVolumeValue(void* p, s32 v);
+struct ConeVolume;
+struct U64P;
+void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
+void SetConeVolumeMode(ConeVolume* self, s32 flag);
+void SetConeVolumeColor(ConeVolume* self, Quad16* src);
+void SetConeVolumeFirstAngle(ConeVolume* self, f32 v);
+void SetConeVolumeSecondLevel(ConeVolume* self, f32 v);
+void SetConeVolumeSecondAngle(ConeVolume* self, f32 v);
+void SetConeVolumeThirdLevel(ConeVolume* self, f32 v);
+void SetConeVolumeThirdAngle(ConeVolume* self, f32 v);
+void SetConeVolumeRange(ConeVolume* self, U64P* src);
+void SetConeVolumeValue(ConeVolume* self, s32 v);
 
 void CreateArcSprite(T217D_3F0* self)
 {
     SetupScreenElementText(self);
     self->sprite = CreateTypedRecord(0x51, g_currentWorld, 0, 0x201, -1);
-    SetConeVolumeMode(self->sprite, 1);
-    SetConeVolumeColor(self->sprite, D_00275640);
-    SetConeVolumeFirstAngle(self->sprite, D_00275650);
-    SetConeVolumeSecondLevel(self->sprite, D_00275654);
-    SetConeVolumeSecondAngle(self->sprite, D_00275658);
-    SetConeVolumeThirdLevel(self->sprite, D_0027565C);
-    SetConeVolumeThirdAngle(self->sprite, D_00275660);
-    SetConeVolumeRange(self->sprite, D_00275B58);
-    SetConeVolumeValue(self->sprite, 1);
+    SetConeVolumeMode((ConeVolume*)self->sprite, 1);
+    SetConeVolumeColor((ConeVolume*)self->sprite, (Quad16*)D_00275640);
+    SetConeVolumeFirstAngle((ConeVolume*)self->sprite, D_00275650);
+    SetConeVolumeSecondLevel((ConeVolume*)self->sprite, D_00275654);
+    SetConeVolumeSecondAngle((ConeVolume*)self->sprite, D_00275658);
+    SetConeVolumeThirdLevel((ConeVolume*)self->sprite, D_0027565C);
+    SetConeVolumeThirdAngle((ConeVolume*)self->sprite, D_00275660);
+    SetConeVolumeRange((ConeVolume*)self->sprite, (U64P*)D_00275B58);
+    SetConeVolumeValue((ConeVolume*)self->sprite, 1);
     ((ConeSprite*)self->sprite)->vtbl[7](self->sprite);
 }
 
 void GetArcVisibleRange(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
 
 extern s32 D_00270458;
-void AddGifXyzfNoDrawEntry(PacketWriter* c, s32 a, s32 b, s32 d, s32 e);
-void AddGifXyzfEntry(PacketWriter* c, s32 a, s32 b, s32 d, s32 e);
+void AddGifXyzfNoDrawEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 
 void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
 {
@@ -580,7 +589,7 @@ void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
 }
 
 extern u8 D_00275B50[8];
-void BeginGifTag(PacketWriter* b, s32 a1, s32 a2, u64 regs);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
 
 struct ColorLerp {
@@ -663,9 +672,9 @@ extern f32 g_elapsedTime;
 extern Rgba4 D_002610D8;
 extern Rgba4 D_002610E0;
 
-void BeginGifTag(PacketWriter* b, s32 a1, s32 a2, u64 regs);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
-void AddGifXyzfEntry(PacketWriter* b, s32 x, s32 y, s32 a3, s32 a4);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 
 
 struct FadeClamp {
@@ -739,20 +748,20 @@ void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf)
 extern u8 g_gsPacketWriter[];
 
 s32 IsArcDrawAllowed(void);
-void BeginGifTag(void* p, s32 a, s32 b, u64 regs);
-void AddGifRegisterWrite(void* p, s32 a, u64 b);
-void WriteArcPointVertices(void* self, void* p);
-void WriteArcTickVertices(void* self, void* p);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
+void WriteArcPointVertices(T217D_3F0* self, PacketWriter* buf);
+void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf);
 
 void DrawArc(T217D_3F0* self)
 {
     u8* s = g_gsPacketWriter;
     if (IsArcDrawAllowed()) {
-        BeginGifTag(s, 0, 1, 0xE);
-        AddGifRegisterWrite(s, 0x47, 0x31001);
-        AddGifRegisterWrite(s, 0x42, 0x44);
-        WriteArcPointVertices(self, s);
-        WriteArcTickVertices(self, s);
+        BeginGifTag((PacketWriter*)s, 0, 1, 0xE);
+        AddGifRegisterWrite((PacketWriter*)s, 0x47, 0x31001);
+        AddGifRegisterWrite((PacketWriter*)s, 0x42, 0x44);
+        WriteArcPointVertices(self, (PacketWriter*)s);
+        WriteArcTickVertices(self, (PacketWriter*)s);
     }
 }
 
@@ -766,7 +775,7 @@ void SetArcFade(T217D_3F0* a0, s32 a1)
     }
 }
 
-void SetObjectTreeRecordsValue(PlacedObject* node, T217D_3F0* self);
+void SetObjectTreeRecordsValue(PlacedObject* object, void* value);
 extern s32 D_00270458;
 
 void ApplyArcTarget(T217D_3F0* self)
@@ -792,7 +801,9 @@ void ApplyArcTarget(T217D_3F0* self)
 
 extern f32 g_gameClock[];
 f32 RandomFloatInRange(f32 a, f32 b);
-void StartSoundEffect(s32 id, s32 a, s32 b, s32 c, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, s32 d, s32 e);
+struct PlayingSound;
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+                   f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 void SetArcPhase(T217D_3F0* self, s32 mode)
 {
@@ -855,7 +866,8 @@ extern s32 D_00270448;
 extern s32 D_00270458;
 
 void UpdateScreenElementSlide(ScreenElement* self);
-f32 ApproachValueWithRamp(f32* p, s32 zero, f32 a, f32 b, f32 c);
+struct RampProfile;
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
 f32 RandomFloatInRange(f32 a, f32 b);
 
@@ -917,7 +929,7 @@ void UpdateArc(T217D_3F0* self)
         }
         if (D_00270458 != 4)
         {
-            self->pulse = ApproachValueWithRamp(&self->pulseA, 0, self->pulse, self->pulseTarget, g_gameClock[5]);
+            self->pulse = ApproachValueWithRamp((RampProfile*)&self->pulseA, 0, self->pulse, self->pulseTarget, g_gameClock[5]);
             if (AreFloatsNearlyEqual(self->pulse, self->pulseTarget, 1e-4f) != 0)
             {
                 self->pulse = 1.0f;
@@ -976,7 +988,7 @@ void UpdateArc(T217D_3F0* self)
                 }
                 else
                 {
-                    e->level = ApproachValueWithRamp(q, 0, e->level, e->target, g_gameClock[5]);
+                    e->level = ApproachValueWithRamp((RampProfile*)q, 0, e->level, e->target, g_gameClock[5]);
                 }
             }
         }
@@ -988,10 +1000,10 @@ void UpdateArc(T217D_3F0* self)
 
 s32 AreArcMenusClosed(void);
 extern PadRecord g_padRecord;
-void SnapCameraZoom(Camera* camera, f32 zoom);
-void BuildBasisFromXAndZHint(void* x, void* hint, void* out);
-void BuildMatrixFromRotationAndTranslation(void* translation, void* rotation, void* out);
-void QueueDeferredRequest(void* request);
+void SnapCameraZoom(void* self, f32 x);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
+void QueueDeferredRequest(DeferredRequest* src);
 struct ArcDrawRequest;
 void DrawArcOutlinePacket(ArcDrawRequest* request);
 void DrawArcTickPacket(ArcDrawRequest* request);
@@ -1078,7 +1090,7 @@ void QueueArcDraw(T217D_3F0* self)
         f32 sx = ((1.0f - held->u) * self->x + held->u * (self->x + self->w)) * 0.003125f - 1.0f;
         f32 sy = 1.0f - ((1.0f - held->v) * self->y + held->v * (self->y + self->h)) * 0.00405844161f;
         Vu0::Q(screen) = Vu0::FromFloats(sx, sy, held->depth);
-        UnprojectCameraPoint(g_camera, &screen, &world);
+        UnprojectCameraPoint(g_camera, (f32*)&screen, &world);
     }
     {
         f32 dist = 150.0f;
@@ -1101,8 +1113,8 @@ void QueueArcDraw(T217D_3F0* self)
             Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->f40).q, Vu0::MulX(Vu0::Q(cam->fA0), Vu0::Scalar(height)));
             Vu0::Q(aim) = Vu0::Add(Vu0::Q(aim), Vu0::MulX(Vu0::Q(cam->f90), Vu0::Scalar(dist)));
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(aim), Vu0::Q(world));
-            BuildBasisFromXAndZHint(&dir, &cam->fA0, &basis);
-            BuildMatrixFromRotationAndTranslation(&world, &basis, &place);
+            BuildBasisFromXAndZHint(&dir, (const Vec02*)&cam->fA0, &basis);
+            BuildMatrixFromRotationAndTranslation(&world, &basis, (Mat4A*)&place);
             Vec02 pos;
             Vu0::Q(pos) = Vu0::Add(Vu0::Q(aim), Vu0::Rotate(*(Mat02*)&g_camera->f80, Vu0::Q(((ArcHeld*)self->current)->offset)));
             ((PlacedObject*)self->sprite)->desc02()->m1D((PlacedObject*)self->sprite, &pos);
@@ -1114,8 +1126,8 @@ void QueueArcDraw(T217D_3F0* self)
             if (special == 0) {
                 goto done;
             }
-            BuildMatrixFromRotationAndTranslation(&special->v140, &special->m110, &place);
-            TransformPointBetweenFrames(self->special, 0, &((ArcHeld*)self->current)->point, &pos);
+            BuildMatrixFromRotationAndTranslation(&special->v140, &special->m110, (Mat4A*)&place);
+            TransformPointBetweenFrames((PlacedObject*)self->special, 0, &((ArcHeld*)self->current)->point, &pos);
             ((PlacedObject*)self->sprite)->desc02()->m1D((PlacedObject*)self->sprite, &pos);
             break;
         }
@@ -1127,7 +1139,7 @@ void QueueArcDraw(T217D_3F0* self)
         request.count = 2;
         request.fn = DrawArcOutlinePacket;
         request.arc = self;
-        QueueDeferredRequest(&request);
+        QueueDeferredRequest((DeferredRequest*)&request);
     }
     ((ArcHeld*)self->current)->flags &= ~((u64)1 << 32);
     place.scaleX = place.scaleY = 1.0f;
@@ -1139,7 +1151,7 @@ void QueueArcDraw(T217D_3F0* self)
         request.count = 2;
         request.fn = DrawArcTickPacket;
         request.arc = self;
-        QueueDeferredRequest(&request);
+        QueueDeferredRequest((DeferredRequest*)&request);
     }
 done:
     if (g_typedTextCaptionBox.state != 4) {
@@ -1158,15 +1170,15 @@ extern PacketWriter g_vifPacketWriter;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 PacketWriter* InitGifPacket(PacketWriter* p);
-void AllocateTempPacketBuffer(PacketWriter* p, s32 count);
+void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
 void EndGifPacket(PacketWriter* p);
 void BeginDmaTag(PacketWriter* p);
 void CloseDmaTag(PacketWriter* p);
 void WriteVifFlushE(PacketWriter* p);
 void WriteVifDirectFromWriter(PacketWriter* p, PacketWriter* src);
 
-void SnapCameraZoom(Camera* camera, f32 zoom);
-void WriteCameraMatricesPacket(Camera* camera);
+void SnapCameraZoom(void* self, f32 x);
+void WriteCameraMatricesPacket(Camera* self);
 void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* buf, s32 a);
 
 void DrawArcOutlinePacket(ArcDrawRequest* request)
@@ -1324,7 +1336,7 @@ void ResetArc(T217D_3F0* self)
 extern u8 D_00275B50[8];
 void ConstructGreyColor(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { D_00275B50[0] = 0x80; D_00275B50[1] = 0x80; D_00275B50[2] = 0x80; D_00275B50[3] = 0x80; } }
 
-void ConstructGreyColor(s32 a0, s32 a1);
+void ConstructGreyColor(s32 enabled, u32 value);
 
 void ConstructGreyColorAtStartup(void)
 {

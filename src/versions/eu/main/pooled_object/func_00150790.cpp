@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "object_finder.h"
 // PAL: D_0026F5A0.f260 is at 0x570 (US 0x260) and D_002701F8.f324 at 0x5B0 (US 0x324).
 struct Glob_150790_eu { u8 pad0[0x570]; StepSequence* f260; };
 struct __attribute__((packed)) Blk_150790_eu { u8 pad0[0x5B0]; s32 f5B0; };
@@ -29,8 +30,8 @@ void SetStepSequenceState(StepSequence* self, s32 next)
             ReleasePadSelectFlag(g_currentWorld);
         }
         (void)PopStackValue(&g_camera->ctl460);
-        if ((self->f2E8 & 0x10) != 0 && self->value2F8 != 0) {
-            StopAnimationPlayer((void*)self->value2F8);
+        if ((self->f2E8 & 0x10) != 0 && self->player2F8 != 0) {
+            StopAnimationPlayer(self->player2F8);
         }
         if (self->mode2D0 == 2 && self->f330 != 0) {
             f32 f = 1.0f;

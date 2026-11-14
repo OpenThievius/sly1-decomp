@@ -5,6 +5,11 @@
 #include "fpu.h"
 #include "shapes.h"
 #include "vu0.h"
+#include "placed_object.h"
+struct HomogeneousMatrix;
+struct Mat02;
+struct Vec02;
+
 
 // Matrices and vectors: identity and transposition, rotations from angles and an axis, the
 // transforms of placed objects, angles back from a matrix or a vector, inversion, a projection;
@@ -12,18 +17,18 @@
 
 extern u8 g_unitZVector[];
 
-void ResetMatrixHomogeneous(void*);
-void* FillMemory(void* p, s32 value, s32 size);
-void ComputeSinCos(f32 angle, f32* s, f32* c);
+void ResetMatrixHomogeneous(HomogeneousMatrix* self);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
 f32 ClampToMagnitude(f32, f32);
-f32 Arcsine(f32 x);
-f32 ArctangentOfRatio(f32 y, f32 x);
+extern "C" f32 Arcsine(f32 x);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void InvertRigidTransform(void* a, void* b, Quad16* out);
 Mat4A MultiplyMatrices(Quad16* m, Quad16* in);
-void BuildBasisFromXAndZHint(void* self, void* table, void* value);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 void PushBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
-void CopyMemory(void* dst, void* src, s32 count);
+void CopyMemory(void* dst, void* src, u32 size);
 void PopBackMemoryMark(void);
 s32 InvertSquareMatrix(s32 n, f32* a, f32* b);
 
@@ -51,7 +56,7 @@ void* CopyRotationMatrix(Quad16* destination, const Quad16* source)
 	destination[0] = source[0];
 	destination[1] = source[1];
 	destination[2] = source[2];
-	ResetMatrixHomogeneous(destination);
+	ResetMatrixHomogeneous((HomogeneousMatrix*)destination);
 	return destination;
 }
 
@@ -92,7 +97,7 @@ Mat4A MultiplyMatrices(Quad16* m, Quad16* in) return out
 LINKER_REMNANT(func_001886F8);
 
 // The point v through m, with w as its fourth coordinate.
-void TransformByMatrixWithW(const Quad16* m, const Quad16* v, f32 w, Quad16* out)
+void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out)
 {
     Vu0::Q(*out) = Vu0::Transform(*m, Vu0::Q(*v), w);
 }
@@ -125,40 +130,42 @@ void AddMatrices(f32* a, f32* b, f32* out)
 
 LINKER_REMNANT(func_00188848);
 
-void BuildAxisAngleMatrix(f32* axis, Mat4* mat, f32 angle)
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle)
 {
+    const f32* axis = &v->x;
+    f32 (*m)[4] = (f32 (*)[4])out;
     f32 s;
     f32 c;
     s32 i;
     s32 j;
     f32 t;
 
-    ComputeSinCos(angle, &s, &c);
+    ComputeSinCos(&s, &c, angle);
     t = 1.0f - c;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
-            mat->m[i][j] = t * axis[i] * axis[j];
+            m[i][j] = t * axis[i] * axis[j];
         }
     }
     for (i = 0; i < 3; i++) {
-        mat->m[i][i] += c;
+        m[i][i] += c;
     }
     t = s * axis[2];
-    mat->m[0][1] += t;
-    mat->m[1][0] -= t;
+    m[0][1] += t;
+    m[1][0] -= t;
     t = s * axis[1];
-    mat->m[0][2] -= t;
-    mat->m[2][0] += t;
+    m[0][2] -= t;
+    m[2][0] += t;
     t = s * axis[0];
-    mat->m[1][2] += t;
-    mat->m[2][1] -= t;
+    m[1][2] += t;
+    m[2][1] -= t;
 }
 
 struct __attribute__((aligned(16))) Matrix3x4 { f32 f[3][4]; };
 
 extern Matrix3x4 g_identityMatrix;
 
-void BuildRotationFromVector(Vec02* v, Mat4* mat)
+void BuildRotationFromVector(Vec02* v, Mat02* mat)
 {
     u128 q = Vu0::Q(*v);
     f32 len = Vu0::ToFloat(Vu0::Length(q));
@@ -167,7 +174,7 @@ void BuildRotationFromVector(Vec02* v, Mat4* mat)
         Vec02 k;
         Vu0::Q(k) = Vu0::FromFloat(1.0f / len);
         Vu0::Q(axis) = Vu0::MulX(q, Vu0::Q(k));
-        BuildAxisAngleMatrix(&axis.x, mat, len);
+        BuildAxisAngleMatrix(&axis, mat, len);
     } else {
         *(Matrix3x4*)mat = g_identityMatrix;
     }
@@ -176,9 +183,9 @@ void BuildRotationFromVector(Vec02* v, Mat4* mat)
 void BuildEulerRotationMatrix(f32* in, f32* out)
 {
     f32 sc[6];
-    ComputeSinCos(in[0], &sc[0], &sc[1]);
-    ComputeSinCos(in[1], &sc[2], &sc[3]);
-    ComputeSinCos(in[2], &sc[4], &sc[5]);
+    ComputeSinCos(&sc[0], &sc[1], in[0]);
+    ComputeSinCos(&sc[2], &sc[3], in[1]);
+    ComputeSinCos(&sc[4], &sc[5], in[2]);
     f32 sa = sc[0], ca = sc[1], sb = sc[2], cb = sc[3], cg = sc[5], sg = sc[4];
     f32 sasb = sa * sb;
     f32 casb = ca * sb;
@@ -193,8 +200,11 @@ void BuildEulerRotationMatrix(f32* in, f32* out)
     out[10] = ca * cb;
 }
 
-void BuildMatrixFromRotationAndTranslation(Quad16* a, Quad16* b, Quad16* dst)
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out)
 {
+    const Quad16* a = (const Quad16*)pos;
+    const Quad16* b = (const Quad16*)rot;
+    Quad16* dst = (Quad16*)out;
     dst[0] = b[0];
     dst[1] = b[1];
     dst[2] = b[2];
@@ -235,12 +245,12 @@ void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[
 
 LINKER_REMNANT(func_00188CC8);
 
-void GetMatrixRotationCosine(f32* p)
+f32 GetMatrixRotationCosine(f32* p)
 {
-	ClampToMagnitude((p[0] + p[5] + p[10] - 1.0f) * 0.5f, 1.0f);
+	return ClampToMagnitude((p[0] + p[5] + p[10] - 1.0f) * 0.5f, 1.0f);
 }
 
-f32 Arccosine(f32 x);
+extern "C" f32 Arccosine(f32 x);
 
 void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis)
 {
@@ -359,17 +369,17 @@ void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out)
 {
     Mat02 a;
     Mat02 b;
-    BuildAxisAngleMatrix((f32*)g_unitZVector, (Mat4*)&a, yaw);
-    BuildAxisAngleMatrix((f32*)g_unitYVector, (Mat4*)&b, -pitch);
+    BuildAxisAngleMatrix((const Vec02*)g_unitZVector, &a, yaw);
+    BuildAxisAngleMatrix((const Vec02*)g_unitYVector, &b, -pitch);
     MulRotation(out, a, b);
 }
 
-void BuildBasisFromX(void* self, void* value)
+void BuildBasisFromX(Vec02* x, Mat02* out)
 {
-    BuildBasisFromXAndZHint(self, g_unitZVector, value);
+    BuildBasisFromXAndZHint(x, (const Vec02*)g_unitZVector, out);
 }
 
-void BuildShortestArcRotation(void* from, void* to, void* out);
+void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
 
 void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out)
 {
@@ -377,7 +387,7 @@ void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out)
     Mat02 m;
     Mat02 t;
     Mat02* z = scratch ? scratch : &local;
-    BuildShortestArcRotation(&self->r[2], g_unitZVector, z);
+    BuildShortestArcRotation(&self->r[2], (const Vec02*)g_unitZVector, z);
     if (out) {
         u128 x0 = Vu0::RotateUntied(*z, Vu0::Q(self->r[0]));
         u128 x1 = Vu0::RotateUntied(*z, Vu0::Q(self->r[1]));
@@ -546,7 +556,7 @@ void BuildBasisFromXAndYHint(Vec02* x, Vec02* hint, Mat02* out)
     Vu0::Q(out->r[1]) = Vu0::Cross(Vu0::Q(out->r[2]), Vu0::Q(out->r[0]));
 }
 
-void BuildBasisFromXAndZHint(Vec02* x, Vec02* hint, Mat02* out)
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out)
 {
     Vec02 c;
     out->r[0] = *x;
@@ -568,10 +578,10 @@ void BuildBasisFromXAndZHint(Vec02* x, Vec02* hint, Mat02* out)
 // (*(u128*)&axis): through Vu0::Q or Set its address would stay in a saved register for the last
 // call, where retail forms it again. Its length is a float the compiler keeps in the GPR of its
 // qmfc2, which the divide's Scalar moves back with qmtc2.
-void BuildShortestArcRotation(void* fromp, void* top, void* outp)
+void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out)
 {
-    Vec02 a = *(Vec02*)fromp;
-    Vec02 b = *(Vec02*)top;
+    Vec02 a = *from;
+    Vec02 b = *to;
     Vec02 axis;
     Vu0::Q(a) = Vu0::NormalizeOr(Vu0::Q(a), Vu0::Q(*(Vec02*)g_unitZVector));
     u128 bn = Vu0::NormalizeOr(Vu0::Q(b), Vu0::Q(*(Vec02*)g_unitZVector));
@@ -589,7 +599,7 @@ void BuildShortestArcRotation(void* fromp, void* top, void* outp)
     u128 cosine = Vu0::Dot(Vu0::Q(a), Vu0::Q(b));
     *(u128*)&axis = Vu0::DivX(*(u128*)&axis, Vu0::Scalar(len));
     f32 angle = Arccosine(Vu0::ToFloatMoved(cosine));
-    BuildAxisAngleMatrix(&axis.x, (Mat4*)outp, angle);
+    BuildAxisAngleMatrix(&axis, out, angle);
 }
 
 void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
@@ -605,13 +615,13 @@ void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
     self->m[2][3] = 1.0f;
 }
 
-void BuildScaleAboutFrame(Quad16* pos, Quad16* rot, f32* scale, Mat4A* out);
+void BuildScaleAboutFrame(Vec02* pos, Mat02* rot, f32* scale, Mat4A* out);
 
 void BuildUniformScaleAboutPoint(void* point, void* out, f32 s)
 {
     Quad16 scale;
     Vu0::Q(scale) = Vu0::Splat(s);
-    BuildScaleAboutFrame((Quad16*)point, 0, (f32*)&scale, (Mat4A*)out);
+    BuildScaleAboutFrame((Vec02*)point, 0, (f32*)&scale, (Mat4A*)out);
 }
 
 extern u8 D_00248D30[];
@@ -624,7 +634,7 @@ static inline void ClearMatrix(Mat4A* m)
 
 // The transform that scales by scale along the axes of the frame of rotation rot at pos (the
 // origin and identity when they are null): back into the frame, scaled, out again.
-void BuildScaleAboutFrame(Quad16* pos, Quad16* rot, f32* scale, Mat4A* out)
+void BuildScaleAboutFrame(Vec02* pos, Mat02* rot, f32* scale, Mat4A* out)
 {
     Mat4A frame;
     Mat4A inverse;
@@ -632,10 +642,10 @@ void BuildScaleAboutFrame(Quad16* pos, Quad16* rot, f32* scale, Mat4A* out)
     Mat4A step;
 
     if (pos == 0)
-        pos = (Quad16*)D_00248D30;
+        pos = (Vec02*)D_00248D30;
     if (rot == 0)
-        rot = (Quad16*)&g_identityMatrix;
-    BuildMatrixFromRotationAndTranslation(pos, rot, (Quad16*)&frame);
+        rot = (Mat02*)&g_identityMatrix;
+    BuildMatrixFromRotationAndTranslation(pos, rot, &frame);
     InvertRigidTransform(pos, rot, (Quad16*)&inverse);
     ClearMatrix(&scaling);
     scaling.m[0][0] = scale[0];

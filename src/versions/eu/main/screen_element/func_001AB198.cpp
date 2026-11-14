@@ -23,10 +23,12 @@ struct Glob_1AB198_eu {
     f32 f594;
 };
 
-void SetTextLayoutHorizontalAlign(void* out, void* p);
 void PushFontScale(s32 handle, f32 a, f32 b);
 void PopFontScale(s32 handle);
 void SetTextLayoutVerticalPlacement(void* out, s32 flag);
+// PAL hands the layout's word at 0x14 an object where the US build passes flags: left as the free
+// function it was on that word (a 64-bit hazard for a port), not a cast to the method's s32.
+void SetTextLayoutHorizontalAlign(void* out, void* p);
 void InitWideTextReader(void* buf, void* out, s32 handle, s32 zero);
 void DrawWrappedAlignedText(void* buf, void* out, s32 zero, void* data);
 
@@ -56,12 +58,12 @@ void DrawCounterCaption(Obj_1AB198_eu* self)
     held = packed.v;
     px = self->f544;
     py = self->f548;
-    SetTextLayoutPosition(out, self->f52c, self->f530);
-    SetTextLayoutSize(out, px, py);
+    ((Layout_137228*)out)->Pos(self->f52c, self->f530);
+    ((Layout_137228*)out)->Size(px, py);
     tmp[0] = held;
-    SetTextLayoutColor(out, &tmp[0]);
+    ((Layout_137228*)out)->Color(&tmp[0]);
     SetTextLayoutHorizontalAlign(out, q);
-    SetTextLayoutVerticalAlign(out, 0);
+    ((Layout_137228*)out)->SetF18(0);
     SetTextLayoutVerticalPlacement(out, 0);
     PushFontScale(self->f4, self->f51c, self->f51c);
     InitWideTextReader(buf, &self->f8, self->f4, 0);

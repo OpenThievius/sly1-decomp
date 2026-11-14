@@ -7,6 +7,7 @@
 #define FLAGGED_OBJECT_H
 
 #include "collider.h"
+struct BufferedStream;
 
 struct StateWalker;     // a handle func_001B6290 makes (s1b6290.h)
 
@@ -31,8 +32,8 @@ struct FlaggedObject : Collider {
 typedef char check_FlaggedObject[sizeof(FlaggedObject) == 0x5C0 ? 1 : -1];
 
 void InitFlaggedObject(FlaggedObject* self);                  // slot 0
-void CopyFlaggedObject(FlaggedObject* self);                  // slot 9
-void CollectChildLists(FlaggedObject* self);                  // slot 10
+void CopyFlaggedObject(FlaggedObject* self, FlaggedObject* src);                  // slot 9
+void CollectChildLists(FlaggedObject* self, BufferedStream* stream);                  // slot 10
 void ResolveListIds(FlaggedObject* self);                  // slot 15
 void StartFlaggedObject(FlaggedObject* self);                  // slot 16
 

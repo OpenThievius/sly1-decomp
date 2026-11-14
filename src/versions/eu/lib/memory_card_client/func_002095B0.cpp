@@ -4,16 +4,16 @@ s32 CopyStringBounded(Name_2095B0* dst, const char* src, s32 max);
 
 s32 OpenCardFile(s32 a0, s32 a1, const char* a2, s32 a3)
 {
-    if (TrySemaphore((Handle_2095B0*)g_cardSemaphore) < 0) {
+    if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
     u8* pool = g_cardClient;
     if (*(s32*)(pool + 0x24) == 0) {
-        PostSemaphore((Handle_2095B0*)g_cardSemaphore);
+        PostSemaphore(g_cardSemaphore);
         return -100;
     }
     if (a2 == 0 || *a2 == 0) {
-        PostSemaphore((Handle_2095B0*)g_cardSemaphore);
+        PostSemaphore(g_cardSemaphore);
         return -210;
     }
     u8* name = D_0062ADF0 + 0x14;
@@ -27,7 +27,7 @@ s32 OpenCardFile(s32 a0, s32 a1, const char* a2, s32 a3)
     if (result == 0) {
         g_cardRequestInFlight = 2;
     } else {
-        PostSemaphore((Handle_2095B0*)g_cardSemaphore);
+        PostSemaphore(g_cardSemaphore);
     }
     return result;
 }

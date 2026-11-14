@@ -11,6 +11,7 @@
 #define STATE_WALKER_OBJECT_H
 
 #include "placed_object.h"
+struct BufferedStream;
 
 struct StateWalkerObject : PlacedObject {
     void* f2D0;             // 0x2D0: what its state walker is made from (func_00199218)
@@ -20,7 +21,7 @@ struct StateWalkerObject : PlacedObject {
 
 typedef char check_StateWalkerObject[sizeof(StateWalkerObject) == 0x2E0 ? 1 : -1];
 
-void LoadStateWalkerObject(StateWalkerObject* self);  // 0x5C slot 10 (load)
+void LoadStateWalkerObject(StateWalkerObject* self, BufferedStream* stream);  // 0x5C slot 10 (load)
 void StartStateWalkerObject(StateWalkerObject* self);  // 0x5C slot 16 (after loading)
 
 #endif

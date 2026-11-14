@@ -20,15 +20,20 @@
 #include "vu0.h"
 #include "mul_rotation.h"
 #include "globals.h"
+struct Mat02;
+struct Vec02;
 
-extern void MultiplyMatrices3x3(void*, void*, void*);
-extern void MatrixToAxisAngle(void*, void*, void*);
+
+extern void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+extern void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 
 void SampleCurvePoints(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y, f32 z, s32 n, void* buf);
-f32 AccumulateSegmentLengths(s32 n, void* buf, s32 zero);
+f32 AccumulateSegmentLengths(s32 n, void* buf, void* other);
 
-struct SampledCurve;
 struct CurvePoint { u8 pad0[16]; };
+
+void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, s32 count,
+                       CurvePoint* out, f32 start, f32 end);
 
 void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
 
@@ -166,7 +171,7 @@ void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, con
     }
 }
 
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 // v made unit length where it is, or fallback when shorter than 0.0001: its length.
 static inline f32 NormalizeAxis(Vec02& v, const Vec02& fallback)
@@ -180,7 +185,8 @@ static inline f32 NormalizeAxis(Vec02& v, const Vec02& fallback)
     return Vu0::ToFloatMoved(len);
 }
 
-void BlendRotationsWithSpin(Mat02* a, Vec02* wa, Mat02* b, Vec02* wb, Mat02* out, Vec02* outW, f32 dur, f32 t, f32 e)
+void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Mat02* b, const Vec02* wb, Mat02* out, Vec02* outW,
+                            s32 unused6)
 {
     f32 u = t / dur;
     f32 v = 1.0f - u;
@@ -224,26 +230,27 @@ void BlendRotationsWithSpin(Mat02* a, Vec02* wa, Mat02* b, Vec02* wb, Mat02* out
     }
 }
 
-void SampleCurvePoints(f32 k, SampledCurve* self, u8* a1, u8* a2, u8* a3, s32 count, CurvePoint* out, f32 start, f32 end)
+void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, s32 count,
+                       CurvePoint* out, f32 start, f32 end)
 {
     f32 step = (end - start) / (f32)(count - 1);
     f32 cur = start;
     s32 i;
     for (i = 0; i < count; i++) {
-        EvaluateHermiteVectorSegment(k, (const Vec02*)self, (const Vec02*)a1, (const Vec02*)a2, (const Vec02*)a3, cur, 1.0f, (Vec02*)(out + i), 0, 0);
+        EvaluateHermiteVectorSegment(dur, p0, m0, p1, m1, cur, 1.0f, (Vec02*)(out + i), 0, 0);
         cur += step;
     }
 }
 
-void MeasureCurveSegmentLength(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y)
+f32 MeasureCurveSegmentLength(const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 dur, f32 end)
 {
-    u8 buf[0x140];
-    SampleCurvePoints(a, b, c, d, x, 0.0f, y, 20, buf);
-    AccumulateSegmentLengths(20, buf, 0);
+    CurvePoint buf[20];
+    SampleCurvePoints(dur, p0, m0, p1, m1, 20, buf, 0.0f, end);
+    return AccumulateSegmentLengths(20, buf, 0);
 }
 
 
-f32 ConvertDoubleToFloat(u64 v);
+extern "C" f32 ConvertDoubleToFloat(u64 bits);
 s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 
 // The search's start, a statement macro: how many window ends there are, and the cursor before

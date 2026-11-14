@@ -34,8 +34,13 @@
 #include "shapes.h"
 #include "word_copy.h"
 #include "camera.h"
+#include "object_finder.h"
+struct NodeAttachment;
+struct NodeOwner;
+struct Oscillator;
 
-void TransformByMatrixWithW(void* m, const void* src, f32 w, void* out);
+
+void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
 void* AllocateFrontMemory(s32 size);
 
 
@@ -53,14 +58,14 @@ struct RefOwner
     void** refs;
 };
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 
 extern World* g_currentWorld;
-void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* c);
-void InvertRigidTransform(void* a, void* b, void* c);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
+void InvertRigidTransform(void* a, void* b, Quad16* out);
 
-void BeginGifTag(void* self, s32 a, s32 b, s32 c);
+void BeginGifTag(void* self, s32 a, s32 b, u64 c);
 
 void PushBackMemoryMark(void);
 u8* AllocateBackMemory(s32 size);
@@ -85,8 +90,6 @@ extern u8 D_000018C0[];
 extern u8 D_000018F8[];
 
 void WriteVifMscal(void* obj, void* text);
- // stays void: retail returns a value, but declared so func_00160948 differs in registers
-Animation* FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
 
 extern u8 D_000018C0[];
 extern u8 D_000018F8[];
@@ -119,20 +122,20 @@ extern u8 D_00001298[];
 extern u8 D_00001368[];
 extern u8 D_00000ED8[];
 
-void ReserveVifUnpack(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
-void* FillMemory(void* p, s32 value, s32 size);
-void AllocateTempPacketBuffer(PacketWriter* f, s32 size);
-void BeginGifTag(PacketWriter* f, s32 a, s32 b, s32 c);
-void AddGifRegisterWrite(PacketWriter* f, s32 a, u64 b);
+void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
+void BeginGifTag(PacketWriter* f, s32 a, s32 b, u64 c);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void CloseGifTag(PacketWriter* f, s32 n);
-void CopyWordsToWriter(PacketWriter* s, s32 a, s32 b, void* data, s32 flags);
+void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void RewindPacketBuffer(PacketWriter* f);
-void AddGifXyzfEntry(PacketWriter* f, s32 a1, s32 a2, s32 a3, s32 a4);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 void WriteVifStrow(PacketWriter* s, u32* src);
 void WriteVifStmask(PacketWriter* s, s32 value);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifFlushE(PacketWriter* s);
-void WriteMorphTargetMscal(s32 mode, PacketWriter* obj);
+void WriteMorphTargetMscal(s32 mode, void* obj);
 
 struct QuadClear
 {
@@ -157,13 +160,13 @@ struct __attribute__((packed)) BatchVertexWords {
     BatchVertexWords() {}
 };
 
-void CopyMemory(BatchVertexWords* dst, const void* src, s32 size);
+void CopyMemory(void* dst, void* src, u32 size);
 struct CopiedGifTags { u32 w[8]; };
 
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern u8 D_00001A50[];
 extern u8 D_000002F8[];
-void CopyMemory(CopiedGifTags* dst, u8* src, s32 n);
+void CopyMemory(void* dst, void* src, u32 size);
 
 // A run of bytes, for the fill and copy calls.
 struct ByteSpan { u8 b[1]; };
@@ -173,15 +176,15 @@ extern u8 D_00001210[];
 extern u8 D_00001AB0[];
 extern u8 D_00000010[];
 
-void ReserveVifUnpack(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
-void* FillMemory(void* p, s32 value, s32 size);
+void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifMscalf(PacketWriter* s, void* data);
 void WriteVifFlushE(PacketWriter* s);
 void CloseDmaTag(PacketWriter* s);
 void AddDmaRefTag(PacketWriter* s, s32 n, void* data);
 void BeginDmaTag(PacketWriter* s);
-void CopyMemory(ByteSpan* dst, void* src, s32 count);
+void CopyMemory(void* dst, void* src, u32 size);
 
 struct MeshUv {
     f32 u;
@@ -261,24 +264,24 @@ extern u8 D_00003A90[];
 void BeginDmaTag(PacketWriter* pkt);
 void CloseDmaTag(PacketWriter* pkt);
 void AddDmaReturnTag(PacketWriter* pkt);
-void ReserveVifUnpack(PacketWriter* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
-void* FillMemory(void* p, s32 value, s32 size);
-void WriteVifStcycl(PacketWriter* s, s32 a, s32 b);
+void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
 void WriteVifStrow(PacketWriter* s, u32* src);
 void WriteVifStmask(PacketWriter* s, s32 value);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifMscalf(PacketWriter* s, void* data);
 void WriteVifFlushE(PacketWriter* s);
-void CopyWordsToWriter(PacketWriter* s, s32 a, s32 b, void* data, s32 flags);
+void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifUnpack(PacketWriter* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* AllocateZeroedFrontMemory(s32 bytes);
-void WriteStripMeshMscal(s32 mode, PacketWriter* pkt);
+void WriteStripMeshMscal(s32 mode, void* obj);
 void QueueNodeLink(s32 a, s32 b, AnimCursor* node);
 void QueueMeshStrip(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
 
-void WriteVifBaseOffset(void* obj, s32 size, s32 flags);
+void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
 
-void ApplyLinkConstraint(void*);
+void ApplyLinkConstraint(PlacedObject* self);
 
 typedef void (*AttachmentHandlerFn)(void* self);
 struct AttachmentHandler { AttachmentHandlerFn* vtbl; };
@@ -287,19 +290,17 @@ struct AttachmentNode { u8 pad0[4]; void* f4; s32 f8; u8 pad1[0x80 - 0xC]; Attac
 struct AttachmentBlock { u8 pad0[0xC]; s32 count0C; AttachmentEntry* f10; u8* f14; u8 pad1[0x4C - 0x18]; AttachmentNode* f4C; };
 
 void BuildAttachmentDmaChain(void* self, void* entry, void* sub, void* ctx);
-void AttachNodeToOwner(void* owner, void* unused, void* ctx);
+void AttachNodeToOwner(NodeOwner* self, void* unused, NodeAttachment* ctx);
 
 // Four quadwords: a matrix as the attachment code copies it.
 struct QuadMatrix { Quad16 q[4]; };
 struct TargetObject { u8 pad0[0x110]; u8 sub110[0x30]; u8 sub140[0x40]; };
 struct AttachmentTarget { TargetObject* p0; u8 pad0[0xC]; QuadMatrix m; u8 tail[0x90 - 0x50]; };
 struct AttachmentTargets { s32 count; AttachmentTarget* elems; s32* keys; };
-struct TargetFrames { Quad16 a; u8 pad0[0x30]; Quad16 b; u8 pad1[0x30]; QuadMatrix m; };
 
-void* FindFirstObjectByIdMode4(void* a, s32 b, void* c);
-void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
-void InvertRigidTransform(void* a, void* b, void* out);
-void MultiplyMatrices(void* out, void* b, void* in); // stays void: retail returns a value, but declared so func_00165828 differs in registers
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
+void InvertRigidTransform(void* a, void* b, Quad16* out);
+QuadMatrix MultiplyMatrices(const QuadMatrix& a, const QuadMatrix& b);
 
 struct AnimatorStep;
 typedef void (*AnimatorStepFn)(void* self, f32 f);
@@ -318,8 +319,8 @@ struct AnimatorOwner {
 };
 
 
-s32 ClaimAnimatorStep(void* p);
-void EvaluateOscillator(void* p);
+s32 ClaimAnimatorStep(CursorAnimator* a0);
+void EvaluateOscillator(Oscillator* self);
 
 extern u8 D_00000010[];
 extern u8 D_000000F0[];
@@ -329,23 +330,23 @@ struct PartRange { u16 lo; u16 hi; };
 struct PartPacketSource { u8 pad0[0x18]; u8* f18; PartRange* f1C; };
 struct PartPackets { void* f0; void* f4; void* f8; void* fC; void* f10; void* f14; };
 
-void* InitPacketWriter(void* p);
-void AllocateQuadwordBuffer(void* buf, u32 count, u32 kind);
-void WriteVifStcycl(void* b, u32 x, u32 y);
-void ReserveVifUnpack(void* s, u32 tag, s32 size, s32 a3, void* a4, void* a5);
+PacketWriter* InitPacketWriter(PacketWriter* self);
+void AllocateQuadwordBuffer(PacketWriter* buffer, u32 count, u32 kind);
+void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
+void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 void WriteVifMscal(void* s, void* n);
-void DetachPacketBuffer(void* self, void* a, void* b);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-struct AttachmentLink { s32 tag; AttachmentLink* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; AttachmentLink* next; u8 pad84[0xC]; };
+struct AttachmentLink { PlacedObject* owner; AttachmentLink* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; AttachmentLink* next; u8 pad84[0xC]; };
 struct AttachmentPartInfo { u8 pad[0x10]; u32 flags; };
 struct AttachmentPart { u8 pad[0x38]; AttachmentPartInfo* a; u8 pad3C[0x18]; void* b; };
 struct AttachmentCopy { s32 n0; void* p4; u8 pad8[4]; s32 count; AttachmentPart* recs; void* p14; u8 pad18[0x28]; s32 n40; void* p44; u8 pad48[4]; AttachmentLink* head; s32 f50; };
 
-void CopyMemory(AttachmentCopy* dst, void* src, s32 n);
+void CopyMemory(void* dst, void* src, u32 size);
 void* AllocateZeroedFrontMemory(s32 n);
 void* CopyToFrontMemory(s32 size, void* src);
 void CopyAttachmentPart(AttachmentCopy* o, void* a, void* b);
-void CollectNonNullRefs(AttachmentCopy* o);
+void CollectNonNullRefs(RefOwner* owner);
 
 // Index written (i << 4) * 9: a plain &items[i] gives a mult that loop.c does not strength-reduce (no s4 offset giv).
 struct FramedObject;
@@ -357,8 +358,8 @@ struct FramedAttachment { FramedObject* obj; u8 pad[0xC]; Quad16 q10[4]; QuadMat
 struct FramedAttachmentList { s32 count; FramedAttachment* items; };
 struct ParentFrame { u8 pad[0x30]; };
 
-void InvertRigidTransform(void* a, void* b, void* out);
-void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
+void InvertRigidTransform(void* a, void* b, Quad16* out);
+void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
 // The lit strip builder's packets: 0x24-byte slots, written two apart.
@@ -383,25 +384,25 @@ extern u8 D_000027C0[];
 extern u8 D_00003A80[];
 extern u8 D_00003AA0[];
 
-void BeginDmaTag(PacketSlot* pkt);
-void CloseDmaTag(PacketSlot* pkt);
-void AddDmaReturnTag(PacketSlot* pkt);
-void ReserveVifUnpack(PacketSlot* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
-void* FillMemory(void* p, s32 value, s32 size);
-void WriteVifStcycl(PacketSlot* s, s32 a, s32 b);
-void WriteVifStrow(PacketSlot* s, u32* src);
-void WriteVifStmask(PacketSlot* s, s32 value);
+void BeginDmaTag(PacketWriter* self);
+void CloseDmaTag(PacketWriter* self);
+void AddDmaReturnTag(PacketWriter* self);
+void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
+void WriteVifStrow(PacketWriter* b, u32* src);
+void WriteVifStmask(PacketWriter* self, s32 value);
 void WriteVifMscal(PacketSlot* s, void* data);
-void WriteVifFlushE(PacketSlot* s);
-void CopyWordsToWriter(PacketSlot* s, s32 a, s32 b, void* data, s32 flags);
+void WriteVifFlushE(PacketWriter* b);
+void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifUnpack(PacketSlot* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* AllocateZeroedFrontMemory(s32 bytes);
-void WriteStripMeshMscal(s32 mode, PacketSlot* pkt);
+void WriteStripMeshMscal(s32 mode, void* obj);
 void QueueNodeLink(s32 a, s32 b, AnimCursor* node);
 void QueueMeshStrip(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
 PacketWriter* InitGifPacket(PacketWriter* self);
 void CloseGifTag(PacketWriter* f, s32 n);
-void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, s32 a3);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void CollectNonNullRefs(RefOwner* owner);
@@ -410,8 +411,8 @@ void WriteMorphTargetMscal(s32 mode, void* obj);
 void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n, Vec3* vecs, s32 extra,
                    void* extraData, WeightIndices* ents, Vec3* verts, void* data, PacketWriter* pkt);
 void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
-                   Vec3* vecs, s32 unused6, u8 (*tints)[4], MeshUv* uvs, s32 n, VertexRefs* recs,
-                   WeightIndices* ents, Vec3* verts, s32 unused13, f32* weights, PacketWriter* pkt,
+                   Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs, s32 n, VertexRefs* recs,
+                   WeightIndices* ents, Vec3* verts, Vec3* vnrms, f32* weights, PacketWriter* pkt,
                    s32** outs);
 void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 mode, StripHeader* hdr,
                    StripMesh* mesh, Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs,
@@ -420,7 +421,7 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
 void BuildPartVifPackets(PartPacketContext* a, PartPacketSource* b, PartPackets* c);
 void StartAttachments(AttachmentBlock* self, PlacedObject* ctx);
 void BindAttachmentTargets(AttachmentTargets* self, PlacedObject* ctx);
-void CopyAttachmentBlock(AttachmentCopy* self, s32 arg, void* src);
+void CopyAttachmentBlock(AttachmentCopy* self, PlacedObject* owner, void* src);
 void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f);
 void UpdateLinkConstraint(PlacedObject* self);
 void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par);
@@ -431,8 +432,9 @@ extern u8* g_camera;
 // The lights a batch is lit by: CollectLightsForSphere (main_loop.cpp) takes the world, the
 // sphere's centre in a1 and its radius in $f12, which this function passes on untouched (the
 // caller, trail_ribbon.cpp's builder, sets both), then a mask, a maximum and the three outputs.
-s32 CollectLightsForSphere(void* world, void* center, f32 radius, s32 mask, s32 max,
-                           s32* first, s32* count, s32* mode);
+struct LightObject;
+s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 skipMask, s32 maxLights, s32* flagged, s32* outCount,
+                  LightObject** out);
 
 
 // A packet buffer this reader fills (0x24 bytes: the three are 0x24 apart).
@@ -452,7 +454,7 @@ struct ModelRecord;
 
 // The 0x90-byte record a part with flag 0x100 links to its model.
 struct ModelLink {
-    s32 owner;              // 0x00
+    PlacedObject* owner;    // 0x00
     ModelPart* part;        // 0x04
     s32 id;                 // 0x08
     u8 pad0C[4];
@@ -562,11 +564,11 @@ struct ModelRecord {
     s32 nanimators;         // 0x50
 };
 
-PacketWriter *InitPacketWriter(ModelPacket* p);
+PacketWriter *InitPacketWriter(PacketWriter* self);
 
 // A packet buffer of the model reader, set up where it is declared.
 struct StripPacket : ModelPacket {
-    StripPacket() { InitPacketWriter(this); }
+    StripPacket() { InitPacketWriter((PacketWriter*)this); }
 };
 
 struct StripOutputs {
@@ -587,35 +589,37 @@ struct MovedPointer {
     }
 };
 
-s32 ReadBufferedU8(void* stream);
-s32 ReadBufferedU16(void* stream);
-s32 ReadBufferedS16(void* stream);
-s32 ReadBufferedS8(void* stream);
-u32 ReadBufferedU32(void* stream);
-f32 ReadBufferedFloat(void* stream);
-void ReadBufferedStreamBytes(void* stream, s32 size, void* dst);
-void ReadBufferedMatrix4(void* stream, void* dst);
-void ReadBufferedVector3(void* stream, void* dst);
-void ReadBufferedVector4(void* stream, void* dst);
-void AlignBufferedStreamPosition(void* stream, s32 n);
+struct BufferedStream;
+s32 ReadBufferedU8(BufferedStream* self);
+s32 ReadBufferedU16(BufferedStream* self);
+s32 ReadBufferedS16(BufferedStream* self);
+s32 ReadBufferedS8(BufferedStream* self);
+u32 ReadBufferedU32(BufferedStream* self);
+f32 ReadBufferedFloat(BufferedStream* r);
+void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
+void ReadBufferedMatrix4(BufferedStream* self, void* out);
+struct BufferedStream;
+void ReadBufferedVector3(BufferedStream* src, void* dst);
+void ReadBufferedVector4(BufferedStream* self, void* out);
+void AlignBufferedStreamPosition(BufferedStream* self, s32 n);
 ModelAnimator* ReadAnimator(void* stream);
-void ComputeCameraFogTerms(u8* camera, f32* out, f32 p);
-void CopyAttachmentPart(ModelRecord* self, ModelPart* part, ModelPose* pose);
-void CollectNonNullRefs(ModelRecord* self);
-void AllocateTempPacketBuffer(ModelPacket* p, s32 size);
-void DetachPacketBufferCopy(ModelPacket* p, s32* qwc, u32* start, u32* addr, s32 flags);
+void ComputeCameraFogTerms(Camera* self, f32* out, f32 p);
+void CopyAttachmentPart(AttachmentCopy* owner, void* partp, void* recp);
+void CollectNonNullRefs(RefOwner* owner);
+void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
 void RemapMeshQueueValues(s32 idx, u32 lo, u32 take, u32 give);
-void BuildStripMeshPacket(ModelRecord* self, ModelPart* obj, s32 mode, ModelStrip* hdr, StripMesh* mesh,
+void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
                    Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs, s32 n, VertexRefs* recs,
-                   WeightIndices* ents, Vec3* verts, Vec3* vnrms, f32* weights, ModelPacket* pkt,
+                   WeightIndices* ents, Vec3* verts, Vec3* vnrms, f32* weights, PacketWriter* pkt,
                    s32** outs);
-void BuildLitStripMeshPacket(ModelRecord* self, ModelPart* obj, s32 unused2, s32 mode, ModelStrip* hdr,
+void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unused2, s32 mode, StripHeader* hdr,
                    StripMesh* mesh, Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs,
                    s32 n, VertexRefs* recs, WeightIndices* ents, Vec3* verts, Vec3* vnrms,
-                   f32* weights, ModelPacket* pkt, s32** outs);
-void BuildMorphTargetPacket(ModelRecord* self, s32 mode, ModelMorph* hdr, s32 n, Vec3* vecs, s32 extra,
-                   void* extraData, WeightIndices* ents, Vec3* verts, f32* data, ModelPacket* pkt);
-void BuildPartVifPackets(ModelPart* a, ModelStrip* b, StripPackets* c);
+                   f32* weights, PacketSlot* pkt, s32** outs);
+void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n, Vec3* vecs, s32 extra,
+                   void* extraData, WeightIndices* ents, Vec3* verts, void* data, PacketWriter* pkt);
+void BuildPartVifPackets(PartPacketContext* a, PartPacketSource* b, PartPackets* c);
 extern s32 g_meshQueueCount;
 extern u8* g_animRecords;
 
@@ -630,26 +634,26 @@ s32 D_00262448[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
 s32 D_00262460[5] = { -1, 0, 4, 8, 12 };
 s32 D_00262474 = 0x28;
 
-void ReadPlacedObjectModel(ModelRecord* self, void* stream, s32 owner)
+void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
 {
     s32 i;
     s32 a;
     s32 b;
 
     self->nanimators = 0;
-    a = ReadBufferedU8(stream);
-    b = ReadBufferedU8(stream);
-    self->nids = ReadBufferedU8(stream);
+    a = ReadBufferedU8((BufferedStream*)stream);
+    b = ReadBufferedU8((BufferedStream*)stream);
+    self->nids = ReadBufferedU8((BufferedStream*)stream);
     self->links = AllocateZeroedFrontMemory(self->nids * 0x90);
     self->ids = (s32*)AllocateZeroedFrontMemory(self->nids * 4);
     for (s32 n = 0; n < self->nids; n++) {
-        self->ids[n] = ReadBufferedS16(stream);
+        self->ids[n] = ReadBufferedS16((BufferedStream*)stream);
     }
-    self->nweights = ReadBufferedU8(stream);
+    self->nweights = ReadBufferedU8((BufferedStream*)stream);
     self->weights = AllocateZeroedFrontMemory(self->nweights * 4);
-    ReadBufferedStreamBytes(stream, self->nweights * 4, self->weights);
+    ReadBufferedStreamBytes((BufferedStream*)stream, self->nweights * 4, self->weights);
     self->weightsCopy = CopyToFrontMemory(self->nweights * 4, self->weights);
-    self->count = ReadBufferedU16(stream);
+    self->count = ReadBufferedU16((BufferedStream*)stream);
     self->parts = (ModelPart*)AllocateZeroedFrontMemory(self->count * 0x70);
     self->poses = (ModelPose*)AllocateZeroedFrontMemory(self->count * 0x28);
     for (i = 0; i < self->count; i++) {
@@ -657,13 +661,13 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, s32 owner)
         ModelPose* pose = &self->poses[i];
         s32 j;
         s32 k;
-        s32 flags = ReadBufferedU16(stream);
+        s32 flags = ReadBufferedU16((BufferedStream*)stream);
         if (flags & 1) {
-            s32 idx = ReadBufferedS16(stream);
+            s32 idx = ReadBufferedS16((BufferedStream*)stream);
             *part = self->parts[idx];
             *pose = self->poses[idx];
             part->matrix = AllocateFrontMemory(0x40);
-            ReadBufferedMatrix4(stream, part->matrix);
+            ReadBufferedMatrix4((BufferedStream*)stream, part->matrix);
         } else {
             part->far = 1.0e10f;
             part->near = 2000.0f;
@@ -684,13 +688,13 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, s32 owner)
         s32 hasVecs = flags & 0x80;
         s32 hasLink = flags & 0x100;
         if (hasWord) {
-            pose->f0 = ReadBufferedU32(stream);
+            pose->f0 = ReadBufferedU32((BufferedStream*)stream);
         }
         if (hasF50) {
-            part->f50 = ReadBufferedFloat(stream);
+            part->f50 = ReadBufferedFloat((BufferedStream*)stream);
         }
         if (hasScale) {
-            f32 v = ReadBufferedFloat(stream);
+            f32 v = ReadBufferedFloat((BufferedStream*)stream);
             if (v == 3.402823466e+38f) {
                 part->f24 = 3.402823466e+38f;
             } else {
@@ -698,16 +702,16 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, s32 owner)
             }
         }
         if (hasF3C) {
-            part->f3C = ReadBufferedFloat(stream);
+            part->f3C = ReadBufferedFloat((BufferedStream*)stream);
         }
         if (hasFar) {
-            part->far = ReadBufferedFloat(stream);
+            part->far = ReadBufferedFloat((BufferedStream*)stream);
             if (part->far == 3.402823466e+38f) {
                 part->far = 1.0e10f;
             }
         }
         if (hasNear) {
-            part->near = ReadBufferedFloat(stream);
+            part->near = ReadBufferedFloat((BufferedStream*)stream);
             if (part->near == 3.402823466e+38f) {
                 part->near = 2000.0f;
             }
@@ -719,8 +723,8 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, s32 owner)
         }
         if (hasVecs) {
             part->vecs = (f32*)AllocateFrontMemory(0x20);
-            ReadBufferedVector3(stream, part->vecs);
-            ReadBufferedVector4(stream, part->vecs + 4);
+            ReadBufferedVector3((BufferedStream*)stream, part->vecs);
+            ReadBufferedVector4((BufferedStream*)stream, part->vecs + 4);
         } else {
             part->vecs = 0;
         }
@@ -728,36 +732,36 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, s32 owner)
             ModelLink* link = (ModelLink*)AllocateZeroedFrontMemory(0x90);
             link->owner = owner;
             link->part = part;
-            link->id = ReadBufferedS16(stream);
-            link->bone = ReadBufferedS8(stream);
+            link->id = ReadBufferedS16((BufferedStream*)stream);
+            link->bone = ReadBufferedS8((BufferedStream*)stream);
             if (link->bone != -1) {
-                link->f24 = ReadBufferedFloat(stream);
-                link->f28 = ReadBufferedFloat(stream);
-                link->f2C = ReadBufferedFloat(stream);
-                link->f30 = ReadBufferedFloat(stream);
-                ReadBufferedMatrix4(stream, link->matrix);
+                link->f24 = ReadBufferedFloat((BufferedStream*)stream);
+                link->f28 = ReadBufferedFloat((BufferedStream*)stream);
+                link->f2C = ReadBufferedFloat((BufferedStream*)stream);
+                link->f30 = ReadBufferedFloat((BufferedStream*)stream);
+                ReadBufferedMatrix4((BufferedStream*)stream, link->matrix);
             }
-            link->f10 = ReadBufferedU8(stream);
-            link->f14 = ReadBufferedU8(stream);
-            link->f18 = ReadBufferedU8(stream);
+            link->f10 = ReadBufferedU8((BufferedStream*)stream);
+            link->f14 = ReadBufferedU8((BufferedStream*)stream);
+            link->f18 = ReadBufferedU8((BufferedStream*)stream);
             part->link = link;
             link->next = self->head;
             self->head = link;
         } else {
             part->link = 0;
         }
-        ReadBufferedVector3(stream, part);
-        part->f10 = ReadBufferedFloat(stream);
-        ReadBufferedS16(stream);
-        part->f34 = ReadBufferedU8(stream);
-        part->f14 = ReadBufferedU8(stream);
-        part->f2C = ReadBufferedU8(stream);
-        ComputeCameraFogTerms(g_camera, part->fog, part->f3C);
+        ReadBufferedVector3((BufferedStream*)stream, part);
+        part->f10 = ReadBufferedFloat((BufferedStream*)stream);
+        ReadBufferedS16((BufferedStream*)stream);
+        part->f34 = ReadBufferedU8((BufferedStream*)stream);
+        part->f14 = ReadBufferedU8((BufferedStream*)stream);
+        part->f2C = ReadBufferedU8((BufferedStream*)stream);
+        ComputeCameraFogTerms((Camera*)g_camera, part->fog, part->f3C);
         if (copied) {
-            CopyAttachmentPart(self, part, pose);
+            CopyAttachmentPart((AttachmentCopy*)self, part, pose);
         } else {
             k = 0;
-            part->nstrips = ReadBufferedU16(stream);
+            part->nstrips = ReadBufferedU16((BufferedStream*)stream);
             part->strips = (ModelStrip*)AllocateZeroedFrontMemory(part->nstrips * 0x50);
             pose->packets = (StripPackets*)AllocateZeroedFrontMemory(part->nstrips * 0x30);
             for (j = 0; j < part->nstrips; j++) {
@@ -779,54 +783,54 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, s32 owner)
                 StripMesh* mesh;
                 f32* weights;
                 PushBackMemoryMark();
-                ReadBufferedVector3(stream, strip);
-                strip->f10 = ReadBufferedFloat(stream);
-                nvecs = ReadBufferedU8(stream);
-                nnrms = ReadBufferedU8(stream);
-                ntints = ReadBufferedU8(stream);
-                nuvs = ReadBufferedU8(stream);
-                nrefs = ReadBufferedU8(stream);
-                AlignBufferedStreamPosition(stream, 4);
+                ReadBufferedVector3((BufferedStream*)stream, strip);
+                strip->f10 = ReadBufferedFloat((BufferedStream*)stream);
+                nvecs = ReadBufferedU8((BufferedStream*)stream);
+                nnrms = ReadBufferedU8((BufferedStream*)stream);
+                ntints = ReadBufferedU8((BufferedStream*)stream);
+                nuvs = ReadBufferedU8((BufferedStream*)stream);
+                nrefs = ReadBufferedU8((BufferedStream*)stream);
+                AlignBufferedStreamPosition((BufferedStream*)stream, 4);
                 vecs = (Vec3*)AllocateBackMemory(nvecs * 12);
-                ReadBufferedStreamBytes(stream, nvecs * 12, vecs);
+                ReadBufferedStreamBytes((BufferedStream*)stream, nvecs * 12, vecs);
                 nrms = (Vec3*)AllocateBackMemory(nnrms * 12);
-                ReadBufferedStreamBytes(stream, nnrms * 12, nrms);
+                ReadBufferedStreamBytes((BufferedStream*)stream, nnrms * 12, nrms);
                 tints = (u8 (*)[4])AllocateBackMemory(ntints * 4);
-                ReadBufferedStreamBytes(stream, ntints * 4, tints);
+                ReadBufferedStreamBytes((BufferedStream*)stream, ntints * 4, tints);
                 uvs = (MeshUv*)AllocateBackMemory(nuvs * 8);
-                ReadBufferedStreamBytes(stream, nuvs * 8, uvs);
+                ReadBufferedStreamBytes((BufferedStream*)stream, nuvs * 8, uvs);
                 refs = (VertexRefs*)AllocateBackMemory(nrefs * 4);
-                ReadBufferedStreamBytes(stream, nrefs * 4, refs);
-                mesh = (StripMesh*)(g_animRecords + ReadBufferedU16(stream) * 0x28);
+                ReadBufferedStreamBytes((BufferedStream*)stream, nrefs * 4, refs);
+                mesh = (StripMesh*)(g_animRecords + ReadBufferedU16((BufferedStream*)stream) * 0x28);
                 strip->mesh = mesh;
-                strip->f14 = ReadBufferedU8(stream);
-                strip->nkeys = ReadBufferedU8(stream);
+                strip->f14 = ReadBufferedU8((BufferedStream*)stream);
+                strip->nkeys = ReadBufferedU8((BufferedStream*)stream);
                 for (s32 n = 0; n < strip->nkeys; n++) {
-                    strip->keys[n] = ReadBufferedU8(stream);
+                    strip->keys[n] = ReadBufferedU8((BufferedStream*)stream);
                 }
                 s32 size = strip->nkeys * nvecs * 4;
                 weights = (f32*)AllocateBackMemory(size);
-                ReadBufferedStreamBytes(stream, size, weights);
+                ReadBufferedStreamBytes((BufferedStream*)stream, size, weights);
                 if (self->nweights != 0) {
                     s32 w;
-                    s32 nverts = ReadBufferedU16(stream);
+                    s32 nverts = ReadBufferedU16((BufferedStream*)stream);
                     verts = (Vec3*)AllocateBackMemory(nverts * 12);
-                    ReadBufferedStreamBytes(stream, nverts * 12, verts);
-                    s32 nvnrms = ReadBufferedU16(stream);
+                    ReadBufferedStreamBytes((BufferedStream*)stream, nverts * 12, verts);
+                    s32 nvnrms = ReadBufferedU16((BufferedStream*)stream);
                     vnrms = (Vec3*)AllocateBackMemory(nvnrms * 12);
-                    ReadBufferedStreamBytes(stream, nvnrms * 12, vnrms);
+                    ReadBufferedStreamBytes((BufferedStream*)stream, nvnrms * 12, vnrms);
                     ents = (WeightIndices*)AllocateBackMemory(self->nweights * 8);
                     for (w = 0; w < self->nweights; w++) {
                         ents[w].pos = (u16*)AllocateBackMemory(nrefs * 2);
-                        ReadBufferedStreamBytes(stream, nrefs * 2, ents[w].pos);
+                        ReadBufferedStreamBytes((BufferedStream*)stream, nrefs * 2, ents[w].pos);
                         ents[w].nrm = (u16*)AllocateBackMemory(nrefs * 2);
-                        ReadBufferedStreamBytes(stream, nrefs * 2, ents[w].nrm);
+                        ReadBufferedStreamBytes((BufferedStream*)stream, nrefs * 2, ents[w].nrm);
                     }
                 }
                 StripPacket pw[3];
                 s32 queued = g_meshQueueCount;
                 for (s32 n = 0; n < 3; n++) {
-                    AllocateTempPacketBuffer(&pw[n], 0x400);
+                    AllocateTempPacketBuffer((PacketWriter*)&pw[n], 0x400);
                 }
                 StripOutputs outs;
                 ModelAnimator* anim = part->animator;
@@ -842,18 +846,20 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, s32 owner)
                 case 8:
                 case 9:
                 case 10:
-                    BuildStripMeshPacket(self, part, k++, strip, mesh, vecs, nrms, tints, uvs, nrefs, refs,
-                                         ents, verts, vnrms, weights, pw, outs.p);
+                    BuildStripMeshPacket((MeshBuildState*)self, (StripMeshOwner*)part, k++, (StripHeader*)strip, mesh,
+                                         vecs, nrms, tints, uvs, nrefs, refs, ents, verts, vnrms, weights,
+                                         (PacketWriter*)pw, outs.p);
                     break;
                 case 0:
-                    BuildLitStripMeshPacket(self, part, b, k++, strip, mesh, vecs, nrms, tints, uvs, nrefs,
-                                            refs, ents, verts, vnrms, weights, pw, outs.p);
+                    BuildLitStripMeshPacket((MeshBuildState*)self, (StripMeshOwner*)part, b, k++, (StripHeader*)strip,
+                                            mesh, vecs, nrms, tints, uvs, nrefs, refs, ents, verts, vnrms, weights,
+                                            (PacketSlot*)pw, outs.p);
                     break;
                 }
                 u32 starts[3];
                 for (s32 n = 0; n < 3; n++) {
                     if (pw[n].cur != pw[n].begin) {
-                        DetachPacketBufferCopy(&pw[n], &strip->qwc[n], &starts[n], &strip->addr[n], 0x13);
+                        DetachPacketBufferCopy((PacketWriter*)&pw[n], &strip->qwc[n], &starts[n], (s32*)&strip->addr[n], 0x13);
                         RemapMeshQueueValues(queued, strip->qwc[n] * 16, starts[n], strip->addr[n]);
                         MovedPointer::Fix(outs.p[1], strip->qwc[n] * 16, starts[n], strip->addr[n]);
                         MovedPointer::Fix(outs.p[2], strip->qwc[n] * 16, starts[n], strip->addr[n]);
@@ -869,10 +875,10 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, s32 owner)
                     }
                 }
                 strip->unpack = (StripUnpack*)((u8*)strip->unpack + (strip->addr[0] - starts[0]));
-                BuildPartVifPackets(part, strip, pp);
+                BuildPartVifPackets((PartPacketContext*)part, (PartPacketSource*)strip, (PartPackets*)pp);
                 PopBackMemoryMark();
             }
-            part->nmorphs = ReadBufferedU16(stream);
+            part->nmorphs = ReadBufferedU16((BufferedStream*)stream);
             part->morphs = (ModelMorph*)AllocateZeroedFrontMemory(part->nmorphs * 32);
             for (s32 t = 0; t < part->nmorphs; t++) {
                 ModelMorph* m = &part->morphs[t];
@@ -885,45 +891,45 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, s32 owner)
                 WeightIndices* ents;
                 Vec3* verts;
                 PushBackMemoryMark();
-                nvecs = ReadBufferedU8(stream);
+                nvecs = ReadBufferedU8((BufferedStream*)stream);
                 vecs = (Vec3*)AllocateBackMemory(nvecs * 12);
-                ReadBufferedStreamBytes(stream, nvecs * 12, vecs);
-                nextra = ReadBufferedU8(stream);
+                ReadBufferedStreamBytes((BufferedStream*)stream, nvecs * 12, vecs);
+                nextra = ReadBufferedU8((BufferedStream*)stream);
                 extra = AllocateBackMemory(nextra * 4);
-                ReadBufferedStreamBytes(stream, nextra * 4, extra);
-                m->nkeys = ReadBufferedU8(stream);
+                ReadBufferedStreamBytes((BufferedStream*)stream, nextra * 4, extra);
+                m->nkeys = ReadBufferedU8((BufferedStream*)stream);
                 for (n = 0; n < m->nkeys; n++) {
-                    m->keys[n] = ReadBufferedU8(stream);
+                    m->keys[n] = ReadBufferedU8((BufferedStream*)stream);
                 }
                 s32 size = m->nkeys * nvecs * 4;
                 weights = (f32*)AllocateBackMemory(size);
-                ReadBufferedStreamBytes(stream, size, weights);
+                ReadBufferedStreamBytes((BufferedStream*)stream, size, weights);
                 if (self->nweights != 0) {
                     s32 w;
-                    s32 nverts = ReadBufferedU16(stream);
+                    s32 nverts = ReadBufferedU16((BufferedStream*)stream);
                     verts = (Vec3*)AllocateBackMemory(nverts * 12);
-                    ReadBufferedStreamBytes(stream, nverts * 12, verts);
+                    ReadBufferedStreamBytes((BufferedStream*)stream, nverts * 12, verts);
                     ents = (WeightIndices*)AllocateBackMemory(self->nweights * 8);
                     for (w = 0; w < self->nweights; w++) {
                         ents[w].pos = (u16*)AllocateBackMemory(nvecs * 2);
-                        ReadBufferedStreamBytes(stream, nvecs * 2, ents[w].pos);
+                        ReadBufferedStreamBytes((BufferedStream*)stream, nvecs * 2, ents[w].pos);
                         ents[w].nrm = 0;
                     }
                 }
                 ModelPacket pw;
-                InitPacketWriter(&pw);
+                InitPacketWriter((PacketWriter*)&pw);
                 s32 queued = g_meshQueueCount;
-                AllocateTempPacketBuffer(&pw, self->nweights * 128 + 0x400);
-                BuildMorphTargetPacket(self, k++, m, nvecs, vecs, nextra, extra, ents, verts, weights, &pw);
+                AllocateTempPacketBuffer((PacketWriter*)&pw, self->nweights * 128 + 0x400);
+                BuildMorphTargetPacket((MeshBuildState*)self, k++, (MorphTargetHeader*)m, nvecs, vecs, nextra, extra, ents, verts, weights, (PacketWriter*)&pw);
                 u32 start;
-                DetachPacketBufferCopy(&pw, &m->qwc, &start, &m->addr, 0x13);
+                DetachPacketBufferCopy((PacketWriter*)&pw, &m->qwc, &start, (s32*)&m->addr, 0x13);
                 RemapMeshQueueValues(queued, m->qwc * 16, start, m->addr);
                 m->p = (u16*)((u8*)m->p + (m->addr - start));
                 PopBackMemoryMark();
             }
         }
     }
-    CollectNonNullRefs(self);
+    CollectNonNullRefs((RefOwner*)self);
 }
 
 void WriteStripMeshMscal(s32 mode, void* obj)
@@ -959,7 +965,7 @@ void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* h
     Vec3* out;
     s32 off = 0x2B;
 
-    ReserveVifUnpack(pkt, 0xD, 2, 0x16, 0, hdr);
+    ReserveVifUnpack(pkt, 0xD, 2, 0x16, 0, (u8**)hdr);
     FillMemory(hdr->p, 0, 0x10);
     InitGifPacket(&f);
     AllocateTempPacketBuffer(&f, 8);
@@ -968,7 +974,7 @@ void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* h
     AddGifRegisterWrite(&f, 1, (u64)D_002623E0.r | ((u64)D_002623E0.g << 8) | ((u64)D_002623E0.b << 16)
                              | ((u64)D_002623E0.a << 24) | (1ULL << 32));
     CloseGifTag(&f, 1);
-    CopyWordsToWriter(pkt, 0xC, 2, f.begin, 0x18);
+    CopyWordsToWriter(pkt, 0xC, 2, (u32*)f.begin, 0x18);
     RewindPacketBuffer(&f);
     BeginGifTag(&f, 0xC1, 3, 0x44E);
     AddGifRegisterWrite(&f, 0x47, 0x70000);
@@ -980,15 +986,15 @@ void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* h
     AddGifXyzfEntry(&f, 0, 0, 0, 0);
     AddGifXyzfEntry(&f, 0, 0, 0, 0);
     CloseGifTag(&f, 1);
-    CopyWordsToWriter(pkt, 0xC, 2, f.begin, 0x1B);
-    CopyWordsToWriter(pkt, 0xC, 2, f.begin + 0x40, 0x1F);
-    CopyWordsToWriter(pkt, 0xC, 2, f.begin, 0x23);
-    CopyWordsToWriter(pkt, 0xC, 2, f.begin + 0x40, 0x27);
+    CopyWordsToWriter(pkt, 0xC, 2, (u32*)f.begin, 0x1B);
+    CopyWordsToWriter(pkt, 0xC, 2, (u32*)(f.begin + 0x40), 0x1F);
+    CopyWordsToWriter(pkt, 0xC, 2, (u32*)f.begin, 0x23);
+    CopyWordsToWriter(pkt, 0xC, 2, (u32*)(f.begin + 0x40), 0x27);
 
     hdr->p[0] = off;
     off += n;
     hdr->p[1] = off;
-    CopyWordsToWriter(pkt, 8, n, vecs, hdr->p[0]);
+    CopyWordsToWriter(pkt, 8, n, (u32*)vecs, hdr->p[0]);
     if (hdr->count > 0)
     {
         hdr->p[4] = off;
@@ -998,7 +1004,7 @@ void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* h
         off += n;
         WriteVifStrow(pkt, buf);
         WriteVifStmask(pkt, D_002623E8[hdr->count]);
-        CopyWordsToWriter(pkt, D_00262400[hdr->count], n, data, hdr->p[5]);
+        CopyWordsToWriter(pkt, D_00262400[hdr->count], n, (u32*)data, hdr->p[5]);
         WriteVifStmask(pkt, 0);
     }
     s32 end = off + extra;
@@ -1008,8 +1014,8 @@ void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* h
         hdr->p[6] = self->f40 + off;
         for (i = 0; i < self->f40; i++)
         {
-            CopyWordsToWriter(pkt, 0, 1, &i, 0x1D);
-            ReserveVifUnpack(pkt, 8, n, hdr->p[6], 0, &out);
+            CopyWordsToWriter(pkt, 0, 1, (u32*)&i, 0x1D);
+            ReserveVifUnpack(pkt, 8, n, hdr->p[6], 0, (u8**)&out);
             u16* idx = ents[i].pos;
             for (s32 k = 0; k < n; k++)
             {
@@ -1024,15 +1030,15 @@ void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* h
     }
     hdr->p[2] = off;
     hdr->p[3] = end;
-    CopyWordsToWriter(pkt, 0xE, extra, extraData, hdr->p[2]);
+    CopyWordsToWriter(pkt, 0xE, extra, (u32*)extraData, hdr->p[2]);
     WriteMorphTargetMscal(mode, pkt);
     WriteVifMscal(pkt, D_00001368);
     WriteVifMscal(pkt, D_00000ED8);
 }
 
 void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
-                   Vec3* vecs, s32 unused6, u8 (*tints)[4], MeshUv* uvs, s32 n, VertexRefs* recs,
-                   WeightIndices* ents, Vec3* verts, s32 unused13, f32* weights, PacketWriter* pkt,
+                   Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs, s32 n, VertexRefs* recs,
+                   WeightIndices* ents, Vec3* verts, Vec3* vnrms, f32* weights, PacketWriter* pkt,
                    s32** outs)
 {
     u32 buf[4];
@@ -1058,7 +1064,7 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     if (obj->f54 != 0) {
         BeginDmaTag(pkt);
     }
-    ReserveVifUnpack(pkt, 0xD, 3, 0xB, 0, &hdr->p);
+    ReserveVifUnpack(pkt, 0xD, 3, 0xB, 0, (u8**)&hdr->p);
     off = 0x24;
     FillMemory(hdr->p, 0, 0x18);
     hdr->p->f10 = 3;
@@ -1094,9 +1100,9 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     uvOut = 0;
     WriteVifStcycl(pkt, 1, 3);
     if (hasUv) {
-        ReserveVifUnpack(pkt, 8, n, hdr->p->off[0], 0, &uvOut);
+        ReserveVifUnpack(pkt, 8, n, hdr->p->off[0], 0, (u8**)&uvOut);
     }
-    ReserveVifUnpack(pkt, 0xC, n, hdr->p->off[0] + 2, 0, &posOut);
+    ReserveVifUnpack(pkt, 0xC, n, hdr->p->off[0] + 2, 0, (u8**)&posOut);
     WriteVifStcycl(pkt, 1, 1);
     if (outs[0] != 0) {
         *outs[0] = n;
@@ -1141,7 +1147,7 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     }
     WriteStripMeshMscal(mode, pkt);
     if (node != 0 && (node->flags & 2)) {
-        ReserveVifUnpack(pkt, 4, 1, 0x16, &a, &b);
+        ReserveVifUnpack(pkt, 4, 1, 0x16, &a, (u8**)&b);
         QueueNodeLink(b, a, node);
         WriteVifMscal(pkt, D_000027C0);
     }
@@ -1153,7 +1159,7 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
         FillMemory(buf, 0, 0x10);
         WriteVifStrow(pkt, buf);
         WriteVifStmask(pkt, D_00262418[hdr->count]);
-        ReserveVifUnpack(pkt, D_00262430[hdr->count], n, hdr->p->off[3], 0, &wOut);
+        ReserveVifUnpack(pkt, D_00262430[hdr->count], n, hdr->p->off[3], 0, (u8**)&wOut);
         WriteVifStmask(pkt, 0);
         for (i = 0; i < n; i++) {
             r = &recs[i];
@@ -1171,8 +1177,8 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
             if (k > 0) {
                 WriteVifFlushE(pkt);
             }
-            CopyWordsToWriter(pkt, 0, 1, &k, 0x16);
-            ReserveVifUnpack(pkt, 8, n, hdr->p->strip[3], 0, &dOut);
+            CopyWordsToWriter(pkt, 0, 1, (u32*)&k, 0x16);
+            ReserveVifUnpack(pkt, 8, n, hdr->p->strip[3], 0, (u8**)&dOut);
             u16* idx = ents[k].pos;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
@@ -1187,7 +1193,7 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     if (hdr->extra != 0) {
         StripExtra* e = hdr->extra;
         for (s32 i = 0; i < obj->f54->f10; i++) {
-            ReserveVifUnpack(pkt, 0xC, n, off, 0, &e->a24[i]);
+            ReserveVifUnpack(pkt, 0xC, n, off, 0, (u8**)&e->a24[i]);
             if (obj->f54->f18 != 0) {
                 WriteVifUnpack(pkt, 0xC, 4, 0, 0x16, &e->a14[i]);
                 WriteVifMscal(pkt, D_00003A80);
@@ -1224,7 +1230,7 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     }
     for (s32 i = 0; i < mesh->nstrips; i++) {
         FrameSource* s = &mesh->strips[i];
-        ReserveVifUnpack(pkt, 0xC, s->stride, off, &c, &d);
+        ReserveVifUnpack(pkt, 0xC, s->stride, off, &c, (u8**)&d);
         QueueMeshStrip(mesh, s, d, c, n, node);
         hdr->p->strip[i] = off;
         off += s->stride;
@@ -1261,10 +1267,10 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     VertexRefs* r;
 
     if (obj->f54 != 0) {
-        BeginDmaTag(&pkt[2]);
+        BeginDmaTag((PacketWriter*)&pkt[2]);
     }
     obj->f18 = 1;
-    ReserveVifUnpack(&pkt[0], 0xD, 3, 0xB, 0, &hdr->p);
+    ReserveVifUnpack((PacketWriter*)&pkt[0], 0xD, 3, 0xB, 0, (u8**)&hdr->p);
     off = 0x24;
     FillMemory(hdr->p, 0, 0x18);
     hdr->p->f10 = 4;
@@ -1280,9 +1286,9 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     }
     hdr->p->strip[3] = off;
     off += n;
-    WriteVifStcycl(&pkt[0], 1, 4);
-    ReserveVifUnpack(&pkt[0], 0xC, n, hdr->p->off[0] + 3, 0, &posOut);
-    WriteVifStcycl(&pkt[0], 1, 1);
+    WriteVifStcycl((PacketWriter*)&pkt[0], 1, 4);
+    ReserveVifUnpack((PacketWriter*)&pkt[0], 0xC, n, hdr->p->off[0] + 3, 0, (u8**)&posOut);
+    WriteVifStcycl((PacketWriter*)&pkt[0], 1, 1);
     if (outs[0] != 0) {
         *outs[0] = n;
     }
@@ -1311,10 +1317,10 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
         hdr->p->off[3] = off;
         off += n;
         FillMemory(buf, 0, 0x10);
-        WriteVifStrow(&pkt[0], buf);
-        WriteVifStmask(&pkt[0], D_00262448[hdr->count]);
-        ReserveVifUnpack(&pkt[0], D_00262460[hdr->count], n, hdr->p->off[3], 0, &wOut);
-        WriteVifStmask(&pkt[0], 0);
+        WriteVifStrow((PacketWriter*)&pkt[0], buf);
+        WriteVifStmask((PacketWriter*)&pkt[0], D_00262448[hdr->count]);
+        ReserveVifUnpack((PacketWriter*)&pkt[0], D_00262460[hdr->count], n, hdr->p->off[3], 0, (u8**)&wOut);
+        WriteVifStmask((PacketWriter*)&pkt[0], 0);
         for (i = 0; i < n; i++) {
             r = &recs[i];
             for (s32 j = 0; j < hdr->count; j++) {
@@ -1327,8 +1333,8 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
         hdr->p->off[3] = off;
         off += self->f40;
         for (k = 0; k < self->f40; k++) {
-            CopyWordsToWriter(&pkt[0], 0, 1, &k, 0x16);
-            ReserveVifUnpack(&pkt[0], 8, n, hdr->p->strip[3], 0, &dOut);
+            CopyWordsToWriter((PacketWriter*)&pkt[0], 0, 1, (u32*)&k, 0x16);
+            ReserveVifUnpack((PacketWriter*)&pkt[0], 8, n, hdr->p->strip[3], 0, (u8**)&dOut);
             u16* idx = ents[k].pos;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
@@ -1338,28 +1344,28 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
                 dOut[i].z = v->z - vecs[r->pos].z;
             }
             WriteVifMscal(&pkt[0], D_000023B8);
-            WriteVifFlushE(&pkt[0]);
+            WriteVifFlushE((PacketWriter*)&pkt[0]);
         }
     }
-    WriteVifStcycl(&pkt[1], 1, 4);
+    WriteVifStcycl((PacketWriter*)&pkt[1], 1, 4);
     if (obj->f28 != 0 && hdr->count == 0 && self->f40 == 0) {
-        ReserveVifUnpack(&pkt[1], 0xC, (n + 3) & ~3, hdr->p->off[0], 0, &quads);
+        ReserveVifUnpack((PacketWriter*)&pkt[1], 0xC, (n + 3) & ~3, hdr->p->off[0], 0, (u8**)&quads);
         nOut = 0;
     } else {
-        ReserveVifUnpack(&pkt[1], 0xC, n, hdr->p->off[0], 0, &nOut);
+        ReserveVifUnpack((PacketWriter*)&pkt[1], 0xC, n, hdr->p->off[0], 0, (u8**)&nOut);
         quads = 0;
     }
-    ReserveVifUnpack(&pkt[1], 0xE, n, hdr->p->off[0] + 1, 0, &cOut);
-    WriteVifStcycl(&pkt[1], 1, 1);
+    ReserveVifUnpack((PacketWriter*)&pkt[1], 0xE, n, hdr->p->off[0] + 1, 0, &cOut);
+    WriteVifStcycl((PacketWriter*)&pkt[1], 1, 1);
     if (hdr->count > 0) {
         WriteVifMscal(&pkt[1], D_00002088);
     }
     if (self->f40 > 0) {
         for (s32 m = 0; m < self->f40; m++) {
             if (m > 0) {
-                WriteVifFlushE(&pkt[1]);
+                WriteVifFlushE((PacketWriter*)&pkt[1]);
             }
-            ReserveVifUnpack(&pkt[1], 8, n, hdr->p->strip[3], 0, &nDelta);
+            ReserveVifUnpack((PacketWriter*)&pkt[1], 8, n, hdr->p->strip[3], 0, (u8**)&nDelta);
             u16* idx = ents[m].nrm;
             for (i = 0; i < n; i++) {
                 r = &recs[i];
@@ -1411,9 +1417,9 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
             quads++;
         }
     }
-    WriteVifStcycl(&pkt[2], 1, 4);
-    ReserveVifUnpack(&pkt[2], 8, n, hdr->p->off[0], 0, &uvOut);
-    WriteVifStcycl(&pkt[2], 1, 1);
+    WriteVifStcycl((PacketWriter*)&pkt[2], 1, 4);
+    ReserveVifUnpack((PacketWriter*)&pkt[2], 8, n, hdr->p->off[0], 0, (u8**)&uvOut);
+    WriteVifStcycl((PacketWriter*)&pkt[2], 1, 1);
     if (outs[2] != 0) {
         *outs[2] = (s32)uvOut;
     }
@@ -1436,23 +1442,23 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
         node = ((CursorHook*)mesh->hook)->vt[5]((CursorHook*)mesh->hook, mesh);
     }
     if (node != 0 && (node->flags & 2)) {
-        ReserveVifUnpack(&pkt[2], 4, 1, 0x16, &a, &b);
+        ReserveVifUnpack((PacketWriter*)&pkt[2], 4, 1, 0x16, &a, (u8**)&b);
         QueueNodeLink(b, a, node);
         WriteVifMscal(&pkt[2], D_000027C0);
     }
     if (hdr->extra != 0) {
         StripExtra* e = hdr->extra;
         for (s32 i = 0; i < obj->f54->f10; i++) {
-            ReserveVifUnpack(&pkt[2], 0xC, n, off, 0, &e->a24[i]);
+            ReserveVifUnpack((PacketWriter*)&pkt[2], 0xC, n, off, 0, (u8**)&e->a24[i]);
             if (obj->f54->f18 != 0) {
                 WriteVifUnpack(&pkt[2], 0xC, 4, 0, 0x16, &e->a14[i]);
                 WriteVifMscal(&pkt[2], D_00003A80);
-                WriteVifFlushE(&pkt[2]);
+                WriteVifFlushE((PacketWriter*)&pkt[2]);
             }
             if (obj->f54->f14 != 0) {
                 WriteVifUnpack(&pkt[2], 0xC, 4, 0, 0x16, &e->a4[i]);
                 WriteVifMscal(&pkt[2], D_00003AA0);
-                WriteVifFlushE(&pkt[2]);
+                WriteVifFlushE((PacketWriter*)&pkt[2]);
             }
         }
         hdr->p->off[3] = off;
@@ -1462,14 +1468,14 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     s32 slot = 0;
     for (s32 i = 0; i < mesh->nstrips; i++) {
         FrameSource* s = &mesh->strips[i];
-        ReserveVifUnpack(&pkt[2], 0xC, s->stride, off, &c, &d);
+        ReserveVifUnpack((PacketWriter*)&pkt[2], 0xC, s->stride, off, &c, (u8**)&d);
         QueueMeshStrip(mesh, s, d, c, n, node);
         hdr->p->strip[slot++] = off;
         off += s->stride;
     }
     if (obj->f54 != 0) {
-        CloseDmaTag(&pkt[2]);
-        AddDmaReturnTag(&pkt[2]);
+        CloseDmaTag((PacketWriter*)&pkt[2]);
+        AddDmaReturnTag((PacketWriter*)&pkt[2]);
     }
 }
 
@@ -1480,21 +1486,21 @@ void BuildPartVifPackets(PartPacketContext* a, PartPacketSource* b, PartPackets*
 
     if (*b->f18 != 0) return;
     if (a->f28 != 0) return;
-    InitPacketWriter(buf);
+    InitPacketWriter((PacketWriter*)buf);
     s0 = (b->f1C->hi - b->f1C->lo) / 4;
-    AllocateQuadwordBuffer(buf, (u32)((s0 + 7) / 4), 0x1A);
-    WriteVifStcycl(buf, 1, 4);
-    ReserveVifUnpack(buf, 0xE, s0, b->f1C->lo + 1, 0, &c->f8);
-    WriteVifStcycl(buf, 1, 1);
+    AllocateQuadwordBuffer((PacketWriter*)buf, (u32)((s0 + 7) / 4), 0x1A);
+    WriteVifStcycl((PacketWriter*)buf, 1, 4);
+    ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->f1C->lo + 1, 0, (u8**)&c->f8);
+    WriteVifStcycl((PacketWriter*)buf, 1, 1);
     WriteVifMscal(buf, D_00000010);
-    DetachPacketBuffer(buf, &c->f0, &c->f4);
-    AllocateQuadwordBuffer(buf, (u32)((s0 + 4) / 2), 0x1A);
-    WriteVifStcycl(buf, 1, 4);
-    ReserveVifUnpack(buf, 0xE, s0, b->f1C->lo + 2, 0, &c->f14);
-    WriteVifStcycl(buf, 1, 1);
-    ReserveVifUnpack(buf, 0xE, s0, b->f1C->hi, 0, 0);
+    DetachPacketBuffer((PacketWriter*)buf, (u32*)&c->f0, (u8**)&c->f4);
+    AllocateQuadwordBuffer((PacketWriter*)buf, (u32)((s0 + 4) / 2), 0x1A);
+    WriteVifStcycl((PacketWriter*)buf, 1, 4);
+    ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->f1C->lo + 2, 0, (u8**)&c->f14);
+    WriteVifStcycl((PacketWriter*)buf, 1, 1);
+    ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->f1C->hi, 0, 0);
     WriteVifMscal(buf, D_000000F0);
-    DetachPacketBuffer(buf, &c->fC, &c->f10);
+    DetachPacketBuffer((PacketWriter*)buf, (u32*)&c->fC, (u8**)&c->f10);
 }
 
 void StartAttachments(AttachmentBlock* self, PlacedObject* ctx)
@@ -1517,7 +1523,7 @@ void StartAttachments(AttachmentBlock* self, PlacedObject* ctx)
             void* v = FindFirstObjectById(ctx->world, 0x104, n->f8, ctx);
             if (v != 0)
             {
-                AttachNodeToOwner(v, ctx, n->f4);
+                AttachNodeToOwner((NodeOwner*)v, ctx, (NodeAttachment*)n->f4);
             }
             n = n->next80;
         } while (n != 0);
@@ -1526,7 +1532,8 @@ void StartAttachments(AttachmentBlock* self, PlacedObject* ctx)
 
 void BindAttachmentTargets(AttachmentTargets* self, PlacedObject* ctx)
 {
-    TargetFrames f;
+    QuadMatrix a;
+    QuadMatrix b;
     s32 i;
 
     for (i = 0; i < self->count; i++) {
@@ -1534,15 +1541,14 @@ void BindAttachmentTargets(AttachmentTargets* self, PlacedObject* ctx)
         TargetObject* r = (TargetObject*)FindFirstObjectByIdMode4(ctx->world, self->keys[i], ctx);
         e->p0 = r;
         if (r != 0) {
-            BuildMatrixFromRotationAndTranslation(&ctx->v140, &ctx->m110, &f.a);
-            InvertRigidTransform(&e->p0->sub140, &e->p0->sub110, &f.b);
-            MultiplyMatrices(&f.m, &f.b, &f.a);
-            e->m = f.m;
+            BuildMatrixFromRotationAndTranslation(&ctx->v140, &ctx->m110, (Mat4A*)&a);
+            InvertRigidTransform(&e->p0->sub140, &e->p0->sub110, (Quad16*)&b);
+            e->m = MultiplyMatrices(b, a);
         }
     }
 }
 
-void CopyAttachmentBlock(AttachmentCopy* self, s32 arg, void* src)
+void CopyAttachmentBlock(AttachmentCopy* self, PlacedObject* owner, void* src)
 {
     s32 i = 0;
     AttachmentLink** link;
@@ -1564,7 +1570,7 @@ void CopyAttachmentBlock(AttachmentCopy* self, s32 arg, void* src)
     if (s) {
         do {
             AttachmentLink* n = (AttachmentLink*)CopyToFrontMemory(0x90, s);
-            n->tag = arg;
+            n->owner = owner;
             AttachmentLink** pf = &n->p4;
             u32 sz = self->count * 0x70;
             u32 nb = (u32)self->recs;
@@ -1590,7 +1596,7 @@ void CopyAttachmentBlock(AttachmentCopy* self, s32 arg, void* src)
             b += 0x28;
         } while (i < self->count);
     }
-    CollectNonNullRefs(self);
+    CollectNonNullRefs((RefOwner*)self);
 }
 
 // What CopyAttachmentPart copies: a part's 0x50-byte entries (the mesh, a record of pointers
@@ -1729,7 +1735,7 @@ void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f)
 
     for (i = 0; i < sub->elemCount; i++) {
         e = ((AnimatorStep**)sub->elems)[i];
-        if (ClaimAnimatorStep(e) != 0) {
+        if (ClaimAnimatorStep((CursorAnimator*)e) != 0) {
             AnimatorStepFn fn = e->vtbl[2];
             if (fn != 0) {
                 fn(e, f);
@@ -1737,14 +1743,14 @@ void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f)
         }
     }
     for (e = self->head4C; e != 0; e = e->next80) {
-        EvaluateOscillator(e->f0C);
+        EvaluateOscillator((Oscillator*)e->f0C);
     }
 }
 
 void UpdateLinkConstraint(PlacedObject* self)
 {
     u8* p=(u8*)self->f224;
-    if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) ApplyLinkConstraint(*(void**)(p+0x60));
+    if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) ApplyLinkConstraint((PlacedObject*)((PlacedObject*)(*(void**)(p+0x60))));
 }
 
 void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par)
@@ -1757,9 +1763,9 @@ void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par)
     FramedAttachmentList* l = (FramedAttachmentList*)self->sub22C;
 
     if (l->count > 0) {
-        InvertRigidTransform(&self->v140, &self->m110, &a);
+        InvertRigidTransform(&self->v140, &self->m110, (Quad16*)&a);
         if (par != 0) {
-            InvertRigidTransform((u8*)par + 0x30, par, &b);
+            InvertRigidTransform((u8*)par + 0x30, par, (Quad16*)&b);
         } else {
             b = a;
         }
@@ -1772,7 +1778,7 @@ void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par)
                     c = t->m60;
                     e = MultiplyMatrices(b, &c);
                 } else {
-                    BuildMatrixFromRotationAndTranslation(el->obj->sub140, el->obj->sub110, &c);
+                    BuildMatrixFromRotationAndTranslation((const Vec02*)el->obj->sub140, (const Mat02*)el->obj->sub110, (Mat4A*)&c);
                     e = MultiplyMatrices(a, &c);
                 }
                 el->m50 = MultiplyMatrices(e, &el->q10);
@@ -1795,16 +1801,16 @@ struct Cfg_1662A8 {
 struct Out_1662A8 { u8 pad0[4]; Row_1662A8* f4; u8 pad8[0x18 - 8]; s32 f18[2]; s32 f20[2]; };
 struct Self_1662A8 { u8 pad[0x40]; s32 f40; };
 
-Buf_1662A8* InitPacketWriter(Buf_1662A8* b);
-void AllocateTempPacketBuffer(Buf_1662A8* b, s32 n);
-void BeginDmaTag(Buf_1662A8* b);
-void WriteVifBaseOffset(Buf_1662A8* b, s32 n, s32 f);
-void CloseDmaTag(Buf_1662A8* b);
+PacketWriter* InitPacketWriter(PacketWriter* self);
+void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
+void BeginDmaTag(PacketWriter* self);
+void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
+void CloseDmaTag(PacketWriter* self);
 void AddDmaRefTag(Buf_1662A8* b, s32 x, s32 y);
-void AddDmaCallTag(Buf_1662A8* b, s32 x);
-void CopyWordsToWriter(Buf_1662A8* b, s32 a, s32 c, Q_1662A8* q, s32 d);
-void AddDmaReturnTag(Buf_1662A8* b);
-void DetachPacketBufferCopy(Buf_1662A8* b, s32* a1, s32 a2, s32* a3, s32 a4);
+void AddDmaCallTag(PacketWriter* self, s32 hi);
+void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
+void AddDmaReturnTag(PacketWriter* self);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
 
 void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ctx)
 {
@@ -1818,7 +1824,7 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
     s32 n;
     s32 sz;
 
-    InitPacketWriter(&buf);
+    InitPacketWriter((PacketWriter*)&buf);
     if (cfg->f28) return;
     if (!out) return;
     if (self->f40) return;
@@ -1832,7 +1838,7 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
         s32 total = 0x23C;
         sz = 0x214;
         PushBackMemoryMark();
-        AllocateTempPacketBuffer(&buf, 0x1000);
+        AllocateTempPacketBuffer((PacketWriter*)&buf, 0x1000);
         n = 0;
         if (pass == 0) sz = 0x28;
         s32 co, ro;
@@ -1847,15 +1853,15 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
             r = (Row_1662A8*)((u8*)out->f4 + ro);
             sz = total - sz;
             if (n++ > 0) {
-                BeginDmaTag(&buf);
-                WriteVifBaseOffset(&buf, sz, 0);
-                CloseDmaTag(&buf);
+                BeginDmaTag((PacketWriter*)&buf);
+                WriteVifBaseOffset((PacketWriter*)&buf, sz, 0);
+                CloseDmaTag((PacketWriter*)&buf);
             }
             switch (*c->f18) {
             case 0:
                 AddDmaRefTag(&buf, c->f38, c->f44);
                 if (cfg->f54) {
-                    AddDmaCallTag(&buf, c->f4C);
+                    AddDmaCallTag((PacketWriter*)&buf, c->f4C);
                 } else {
                     AddDmaRefTag(&buf, c->f40, c->f4C);
                 }
@@ -1865,7 +1871,7 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
             case 1:
             case 4: case 5: case 6: case 7: case 8: case 9: case 10:
                 if (cfg->f54) {
-                    AddDmaCallTag(&buf, c->f44);
+                    AddDmaCallTag((PacketWriter*)&buf, c->f44);
                 } else {
                     AddDmaRefTag(&buf, c->f38, c->f44);
                 }
@@ -1877,16 +1883,16 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
         for (k = 0; k < cfg->f60; k++) {
             Spr_1662A8* s = &cfg->f64[k];
             sz = total - sz;
-            BeginDmaTag(&buf);
-            if (n++ > 0) WriteVifBaseOffset(&buf, sz, 0);
+            BeginDmaTag((PacketWriter*)&buf);
+            if (n++ > 0) WriteVifBaseOffset((PacketWriter*)&buf, sz, 0);
             q.b = 1;
             q.a = (u64)D_002623E0.r | ((u64)D_002623E0.g << 8) | ((u64)D_002623E0.b << 16) | ((u64)D_002623E0.a << 24) | ((u64)1 << 32);
-            CopyWordsToWriter(&buf, 0xC, 1, &q, 0x1A);
-            CloseDmaTag(&buf);
+            CopyWordsToWriter((PacketWriter*)&buf, 0xC, 1, (u32*)&q, 0x1A);
+            CloseDmaTag((PacketWriter*)&buf);
             AddDmaRefTag(&buf, s->f18, s->f1C);
         }
-        AddDmaReturnTag(&buf);
-        DetachPacketBufferCopy(&buf, &out->f18[pass], 0, &out->f20[pass], 0x19);
+        AddDmaReturnTag((PacketWriter*)&buf);
+        DetachPacketBufferCopy((PacketWriter*)&buf, &out->f18[pass], 0, &out->f20[pass], 0x19);
         PopBackMemoryMark();
         if (n < 2) {
             out->f18[1] = out->f18[0];
@@ -2015,10 +2021,10 @@ extern s32 g_frameCount;
 extern Quad4* g_buildFrameData;
 extern f32 g_gameClock[];
 extern f32 g_gameTime;
-void CollectRangeRecordsInReach(World* world, void* pos, s32 max, s32* count, void** out, f32 r);
-s32 RangeRecordMatchesKinds(void* node, u32 bits);
+void CollectRangeRecordsInReach(World* self, void* a1, s32 max, s32* outCount, RangeRecord** out, f32 f);
+s32 RangeRecordMatchesKinds(RangeRecord* self, u32 bits);
 s32 RangeRecordReachesSphere(void* node, void* v, f32 f);
-void QueueRangeRecordPacket(void* node);
+void QueueRangeRecordPacket(RangeRecord* o);
 struct Vif_166690 {
     static u32* Open(PacketWriter* w)
     {
@@ -2125,7 +2131,7 @@ void DrawModelPart(Frame_166690* self)
     f32 r;
 
     b.m = self->m;
-    InvertRigidTransform(&self->m.m[3], &self->m, &b.m40);
+    InvertRigidTransform(&self->m.m[3], &self->m, (Quad16*)&b.m40);
     b.f80 = part->f40;
     n300 = 0;
     n304 = 0;
@@ -2138,15 +2144,15 @@ void DrawModelPart(Frame_166690* self)
             b.mode = 4;
             b.f9C = 2;
         } else if (part->f28 != 0) {
-            b.f9C = CollectLightsForSphere(g_currentWorld, &self->f60, part->f10, 1, 0x80, &n300, &n304, (s32*)lights);
+            b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 1, 0x80, &n300, &n304, (LightObject**)lights);
             b.fA0 = self->f60;
             b.mode = 4;
         } else if (cache == 0) {
-            b.f9C = CollectLightsForSphere(g_currentWorld, &self->f60, part->f10, 3, 0x80, &n300, &n304, (s32*)lights);
+            b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 3, 0x80, &n300, &n304, (LightObject**)lights);
             b.mode = 2;
         } else if (cache->f8 >= g_lightingChangeFrame) {
             if (g_lightCount != 0) {
-                b.f9C = CollectLightsForSphere(g_currentWorld, &self->f60, part->f10, 2, 0x80, 0, &n304, (s32*)lights);
+                b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 2, 0x80, 0, &n304, (LightObject**)lights);
             }
             if (n304 != 0) {
                 b.mode = 1;
@@ -2158,7 +2164,7 @@ void DrawModelPart(Frame_166690* self)
                 b.f9C = cache->fC;
             }
         } else {
-            b.f9C = CollectLightsForSphere(g_currentWorld, &self->f60, part->f10, 7, 0x80, &n300, &n304, (s32*)lights);
+            b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 7, 0x80, &n300, &n304, (LightObject**)lights);
             if (n300 == 0 && n304 > 0) {
                 b.mode = 2;
             } else {
@@ -2175,7 +2181,7 @@ void DrawModelPart(Frame_166690* self)
     useCache = cache != 0 && (owner->cls->flags & 2) && owner->f410 != 0;
     n308 = 0;
     if (!useCache && (part->flags & 3)) {
-        CollectRangeRecordsInReach(g_currentWorld, &self->f60, 0x10, &n308, nodes, part->f10);
+        CollectRangeRecordsInReach(g_currentWorld, &self->f60, 0x10, &n308, (RangeRecord**)nodes, part->f10);
     }
     b.f90 = self->f50;
     b.f98 = 1;
@@ -2388,7 +2394,7 @@ slow:
             }
         }
         if (n308 != 0) {
-            TransformByMatrixWithW(&b, e, 1.0f, &q);
+            TransformByMatrixWithW((const Quad16*)&b, (const Vec02*)e, 1.0f, (Vec02*)&q);
             r = e->f10 * part->f50;
         }
         for (j = 0; j < n308; j++) {
@@ -2397,12 +2403,12 @@ slow:
                 node = c->nodes[j];
             } else {
                 node = nodes[j];
-                if (RangeRecordMatchesKinds(node, part->flags) == 0) {
+                if (RangeRecordMatchesKinds((RangeRecord*)node, part->flags) == 0) {
                     continue;
                 }
             }
             if (RangeRecordReachesSphere(node, &q, r) != 0) {
-                QueueRangeRecordPacket(node);
+                QueueRangeRecordPacket((RangeRecord*)node);
             }
         }
     }

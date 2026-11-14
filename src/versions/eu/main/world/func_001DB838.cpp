@@ -16,7 +16,7 @@ void ResetWorldSubsystems(s32 a0)
         StopAllSoundsAndWait();
         ResetScreenResources();
         ShutDownScriptValuePools();
-        ResetElementStack(g_elementStack);
+        ResetElementStack((ElementStack*)g_elementStack);
         ResetFrontMemory();
         u8* c = (u8*)&D_0026CE48;
         u8* e = (u8*)&g_timerElement;

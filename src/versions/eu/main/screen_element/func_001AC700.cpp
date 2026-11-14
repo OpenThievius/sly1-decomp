@@ -6,19 +6,17 @@ struct Actor_eu_1AD438 {
     f32 f52C; f32 f530; u8 pad4[0x10]; f32 f544; f32 f548; f32 f54C;
 };
 struct Out_eu_1AD438;
-void SetTextLayoutPosition(Out_eu_1AD438* out, f32 x, f32 y);
-void SetTextLayoutSize(Out_eu_1AD438* out, f32 x, f32 y);
-void SetTextLayoutColor(Out_eu_1AD438* out, s32* value);
-void SetTextLayoutHorizontalAlign(Out_eu_1AD438* out, void* p);
-void SetTextLayoutVerticalAlign(Out_eu_1AD438* out, s32 flag);
 void SetTextLayoutVerticalPlacement(Out_eu_1AD438* out, s32 v);
+// PAL hands the layout's word at 0x14 an object where the US build passes flags: left as the free
+// function it was on that word (a 64-bit hazard for a port), not a cast to the method's s32.
+void SetTextLayoutHorizontalAlign(Out_eu_1AD438* out, void* p);
 struct Out_eu_1AD438 {
     u8 d[0x20];
-    void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
-    void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
-    void Color(s32* c) { SetTextLayoutColor(this, c); }
+    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
+    void Color(s32* c) { ((Layout_137228*)this)->Color(c); }
     void Link(void* p) { SetTextLayoutHorizontalAlign(this, p); }
-    void FlagB(s32 f) { SetTextLayoutVerticalAlign(this, f); }
+    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
     void FlagC(s32 f) { SetTextLayoutVerticalPlacement(this, f); }
 };
 struct Attach_eu_1AD438 { u8 pad0[0x18]; T217D_Word col; };

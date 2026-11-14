@@ -27,26 +27,30 @@
 #include "globals.h"
 #include "game_progress.h"
 #include "value_range.h"
+#include "object_finder.h"
+struct Mat02;
+
 
 extern f32 g_gameTime;
 
 f32 RandomFloatInRange(f32 a, f32 b);
-void* FillMemory(void* p, s32 value, s32 size);
-void TransformPointBetweenFrames(void* a0, void* a1, void* a2, void* a3);
-void BuildAxisAngleMatrix(const Vec02* t, void* out, f32 x);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 struct WalkerHolder { u8 pad[0x48]; void* f48; };
 
-WalkerHolder* FindFirstObjectById(void* host, s32 a1, s32 a2, void* ctx);
-void GetStateWalkerTargetKey(void* dev, s32* out);
-void GetStateWalkerCurrentKey(void* dev, s32* out);
-void SetStateWalkerTarget(StateTrigger* a, s32 b);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 void* GetActiveSwitchedCollider(void);
-f32 ApproachValueWithRamp(void* p, s32 zero, f32 a, f32 b, f32 c);
+struct RampProfile;
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 extern u8 g_scatterController[];
 
-void RaiseScatterLevels(void* msg, f32 value);
+struct ScatterController;
+void RaiseScatterLevels(ScatterController* self, f32 amount);
 
 // A quadratic by its three coefficients (func_001D8E40, func_001D9678).
 struct QuadraticCurve {
@@ -98,9 +102,9 @@ struct WheelSpawn {
 };
 
 typedef void (*EmitFn)(PathEmitter* self, WheelEmit* rec);
-void TransformStateToAncestorFrame(void* obj, s32 a1, void* a2, void* a3, void* a4, s32 a5);
-void BuildBasisFromX(Vec02* v, Mat02* out);
-void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
+void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
+void BuildBasisFromX(Vec02* x, Mat02* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 // The wheels' particles: the lap timer's fade, then for each wheel the emitters of its two
 // spawn counts (the first with a random turn and tilt, the second plain).
@@ -224,7 +228,7 @@ void RecordPathFollowerProgress(PathFollower* self)
         t = g_currentEntry->bits74[s0 / 8] & mk;
     }
     if (s0 < 3 || t) {
-        RaiseScatterLevels(g_scatterController, f);
+        RaiseScatterLevels((ScatterController*)g_scatterController, f);
     }
     if (s0 >= 0) {
         do {
@@ -241,8 +245,9 @@ void RecordPathFollowerProgress(PathFollower* self)
     }
 }
 
-s32 TestPointAgainstObjectShape(void* item, void* point);
-void ResetScatterLevels(void* scatter);
+struct ObjectGatherer;
+s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value);
+void ResetScatterLevels(ScatterController* object);
 
 // For each entry marker the follower moves into or out of: kind 0 advances the current entry,
 // counts the laps and at the last one moves the state walker on; kind 1 holds the marker at +0xAFC
@@ -252,7 +257,7 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
 {
     for (s32 i = 0; i < self->f870; i++) {
         PathMarker* e = &self->f874[i];
-        s32 r = TestPointAgainstObjectShape(e->item, (u8*)self + 0x100);
+        s32 r = TestPointAgainstObjectShape((ObjectGatherer*)e->item, (u8*)self + 0x100);
         if (r == *(s32*)((u8*)e + 8)) {
             continue;
         }
@@ -266,11 +271,11 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
                     s32 n = self->fB00 + 1;
                     self->fB00 = n;
                     if (self->fB04 < n) {
-                        void* w = FindFirstObjectById((void*)self->world, 4, 0x42C, (void*)self)->f48;
+                        void* w = ((WalkerHolder*)FindFirstObjectById(self->world, 4, 0x42C, self))->f48;
                         s32 key;
-                        GetStateWalkerTargetKey(w, &key);
+                        GetStateWalkerTargetKey((StateWalker*)w, &key);
                         if (key == -1) {
-                            GetStateWalkerCurrentKey(w, &key);
+                            GetStateWalkerCurrentKey((StateWalker*)w, &key);
                         }
                         if (self == GetActiveSwitchedCollider()) {
                             self->fB00 = self->fB04;
@@ -278,15 +283,15 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
                         switch (key) {
                         case 0x42F:
                             if (self == GetActiveSwitchedCollider()) {
-                                SetStateWalkerTarget((StateTrigger*)w, 0x432);
-                                ResetScatterLevels(g_scatterController);
+                                SetStateWalkerTarget((StateWalker*)w, 0x432);
+                                ResetScatterLevels((ScatterController*)g_scatterController);
                             } else {
-                                SetStateWalkerTarget((StateTrigger*)w, 0x430);
+                                SetStateWalkerTarget((StateWalker*)w, 0x430);
                             }
                             break;
                         case 0x430:
                             if (self == GetActiveSwitchedCollider()) {
-                                SetStateWalkerTarget((StateTrigger*)w, 0x431);
+                                SetStateWalkerTarget((StateWalker*)w, 0x431);
                                 RecordPathFollowerProgress(self);
                             }
                             break;
@@ -309,7 +314,7 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
 struct PlayingSound;
 void SetSoundRecordPitch(PlayingSound* self, f32 x);
 void SetSoundRecordVolume(PlayingSound* self, f32 x);
-void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, Vec02* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 extern const Vec02 g_unitXVector;
 
 void UpdatePathFollowerSound(PathFollower* self, f32 dt)
@@ -326,7 +331,7 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
     } else if (hi < t) {
         t = hi;
     }
-    self->fBA0 = ApproachValueWithRamp(D_00275518, 0, self->fBA0, t, dt);
+    self->fBA0 = ApproachValueWithRamp((RampProfile*)D_00275518, 0, self->fBA0, t, dt);
     f32 fwd = Vu0::ToFloat(Vu0::Dot(Vec::Of(self->v150), Vec::Of(self->m110.r[0]))) / D_00275524;
     f32 lo1 = 0.0f;
     f32 hi1 = 1.0f;

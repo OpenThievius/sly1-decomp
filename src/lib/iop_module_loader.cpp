@@ -26,8 +26,8 @@ static s32 g_moduleLoaderVersion;
 extern char D_00276970[16];
 
 s32 CompareMemory(const void* a, const void* b, s32 n);
-void* CopyBytes(void* dst, const void* src, s32 n);
-void* FillMemory(void* p, s32 value, s32 size);
+extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void* CopyStringBounded(Blob_1F9868* dst, Blob_1F9868* src, s32 n);
 s32 BindModuleLoader(void);
 

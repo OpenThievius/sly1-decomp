@@ -4,10 +4,10 @@
 // always start at choice 0.
 void SetupCurrentObjectChoices(CurrentPlacedObject* self)
 {
-    if (self->walkers[0].graph) self->walkers[0].walker = CreateStateWalker(self->walkers[0].graph, 0, -1, 0);
-    if (self->walkers[1].graph) self->walkers[1].walker = CreateStateWalker(self->walkers[1].graph, 0, -1, 0);
-    if (self->walkers[2].graph) self->walkers[2].walker = CreateStateWalker(self->walkers[2].graph, 0, -1, 0);
-    if (self->walkers[3].graph) self->walkers[3].walker = CreateStateWalker(self->walkers[3].graph, 0, -1, 1);
+    if (self->walkers[0].graph) self->walkers[0].walker = CreateStateWalker((StateGraph*)self->walkers[0].graph, 0, -1, 0);
+    if (self->walkers[1].graph) self->walkers[1].walker = CreateStateWalker((StateGraph*)self->walkers[1].graph, 0, -1, 0);
+    if (self->walkers[2].graph) self->walkers[2].walker = CreateStateWalker((StateGraph*)self->walkers[2].graph, 0, -1, 0);
+    if (self->walkers[3].graph) self->walkers[3].walker = CreateStateWalker((StateGraph*)self->walkers[3].graph, 0, -1, 1);
     self->lastChoice = 5;
     for (;;) {
         s32 c = self->lastChoice;
@@ -60,5 +60,5 @@ void SetupCurrentObjectChoices(CurrentPlacedObject* self)
             TeleportStateWalker(self->walkers[3].walker, key);
         }
     }
-    PushStackElement(g_elementStack, (u8*)&D_0026FA90);
+    PushStackElement((ElementStack*)g_elementStack, &D_0026FA90);
 }

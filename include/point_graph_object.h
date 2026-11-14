@@ -9,6 +9,9 @@
 #define POINT_GRAPH_OBJECT_H
 
 #include "base_object.h"
+struct PointGraphObject;
+struct Stream8A;
+
 
 struct Stream8A;  // the level stream the graph is read from (func_00137BE0 and friends)
 
@@ -46,6 +49,6 @@ typedef char check_PointGraphObject[sizeof(PointGraphObject) == 0x58 ? 1 : -1];
 typedef char check_PointGraph[sizeof(PointGraph) == 0x24 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void LoadPointGraph(PointGraphObject* self, Stream8A* stream);     // 0x8A slot 10
+void LoadPointGraph(PointGraphObject* o, Stream8A* in);     // 0x8A slot 10
 
 #endif

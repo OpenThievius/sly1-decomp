@@ -22,46 +22,50 @@
 #include "texture_header.h"
 #include "shapes.h"
 #include "vu0.h"
+struct PacketWriter;
+
 
 
 void SendDisplayResetPacket(void);
 void SignalDisplaySync(void);
-void ResetGs(s32 a0, s32 a1, s32 a2, s32 a3);
-void SetFieldDrawOffset(void* p, s32 a1, s32 a2, s32 a3);
-void SyncDataCache(s32 a0);
-s32 SwapDoubleBuffer(void* p, s32 a1);
+extern "C" void ResetGs(s16 mode, s16 x, s16 y, s16 flag);
+struct GsOffset;
+extern "C" void SetFieldDrawOffset(GsOffset* self, s16 a1, s16 a2, s16 a3);
+extern "C" void SyncDataCache(s32 a0);
+extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 
 struct DmaChainBlock { u8 bytes[0x20]; };
 
 extern u8 D_002BE1A0[];
-void* InitPacketBuffer(DmaChainBlock* a);
-void UsePacketBufferMemory(DmaChainBlock* a, s32 n, DmaChainBlock* b);
+void* InitPacketBuffer(PacketWriter* self);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void AddDmaRefTag(DmaChainBlock* a, s32 n, void* table);
-void AddDmaEndTag(DmaChainBlock* a);
-void DetachPacketBuffer(DmaChainBlock* a, s32 x, s32 y);
-void SendPacketToBothBuffers(DmaChainBlock* b);
+void AddDmaEndTag(PacketWriter* self);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
+void SendPacketToBothBuffers(void* chain);
 extern s32 g_gifChannel;
 
 void* InitGifPacket(PacketWriter* f);
 void BeginDmaTag(PacketWriter* f);
-void BeginGifTag(PacketWriter* f, s32 a, s32 b, s32 c);
-void AddGifRegisterWrite(PacketWriter* f, s32 a, u64 b);
+void BeginGifTag(PacketWriter* f, s32 a, s32 b, u64 c);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void EndGifPacket(PacketWriter* f);
 void AddDmaEndTag(PacketWriter* f);
-void DetachPacketBuffer(PacketWriter* f, s32 a, s32* out);
-void SendGsPacketAndWait(s32 a, s32 b);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
+void SendGsPacketAndWait(s32 channel, void* b);
 
-void BeginGifTag(void* p, s32 a, s32 b, s32 c);
-void AddGifRegisterWrite(void* p, s32 a, u64 b);
+void BeginGifTag(void* p, s32 a, s32 b, u64 c);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 
 
 extern u8 D_002BDC20[];
 extern u8 D_002BE1A0[];
 extern u8 D_002BDEE0[];
 
-void SetUpDoubleBuffer(void* p, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
-void FillScreenColor(void* ctx, Rgba4* v, s32 flag);
-s32 CreateLockSemaphore(void* a, void* b);
+struct GsDBuff;
+extern "C" void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag);
+void FillScreenColor(u8* buffer, Rgba4* color, s32 flag);
+s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
 s32 EnableInterruptCause(s32 a0);
 void InitMeshQueue(void);
@@ -71,9 +75,10 @@ s32 HandleGsFinish(s32 cause);
 
 extern s32 g_gifChannel;
 
-s32 SendDrawEnvironment(void* p);
-void StartDmaChain(s32 a, void* b);
-s32 WaitDmaChannel(s32 a, s32 b, s32 c);
+extern "C" s32 SendDrawEnvironment(void* self);
+struct DmaChannel;
+extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
+extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 // The file's .data, in retail's order (0x262480 to 0x2626D0): the word func_001682C0 reads,
 // the display's two records (0x28 bytes each, read by func_00168130; retail puts them on 16
@@ -108,19 +113,19 @@ struct FadePacket : PacketWriter { s32 value; u8 pad[0x3F0]; };
 
 extern s32 g_gifChannel;
 
-void UsePacketBufferMemory(PacketWriter* f, s32 n, s32* p);
-void WriteColoredSpritePacket(f32 x, f32 y, f32 z, f32 w, s32 a, s32 b, s32 c, s32 d, FadePacket* e);
-void DetachPacketBuffer(PacketWriter* f, s32 a, s32 b);
-void SendGsPacketAndWait(s32 a, s32* b);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
+void SendGsPacketAndWait(s32 channel, void* b);
 void FlipDisplayFrame(void);
 void AddDmaRefTag(void* self, s32 lo, s32 hi);
 
-s32 GetGsInterruptMask(void);
-s32 SwapGsInterruptMask(s32 a);
-void SyncDataCache(s32 a);
-s32 AwaitSemaphore(s32 a);
+extern "C" s32 GetGsInterruptMask(void);
+extern "C" s32 SwapGsInterruptMask(s32 mask);
+extern "C" void SyncDataCache(s32 a);
+extern "C" s32 AwaitSemaphore(s32 a);
 
-void UsePacketBufferMemory(PacketWriter* f, s32 n, PacketWriter* p);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 
 struct GsPmode { u32 en1 : 1; u32 rest : 31; u32 hi : 32; };
 struct GsDispFb { u32 fbp : 9; u32 fbw : 6; u32 psm : 5; u32 pad0 : 12; u32 dbx : 11; u32 dby : 11; u32 pad1 : 10; };
@@ -132,8 +137,8 @@ struct GsPrivRegs {
     GsDisplay display2; u8 pad2[0x1000 - 0x88];
     u32 csr;
 };
-void UsePacketBufferMemory(PacketWriter* f, s32 n, u8* buf);
-void DetachPacketBuffer(PacketWriter* f, s32* o0, s32* o1);
+void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
+void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 
 void ApplyFieldDisplayOffset(void)
@@ -158,8 +163,8 @@ void ApplyFieldDisplayOffset(void)
     ((GsPrivRegs*)0x12000000)->pmode = pm;
 }
 
-void PostSemaphoreFromInterrupt(s32 sema);
-void WriteDisplayRegisters(void* self);
+extern "C" void PostSemaphoreFromInterrupt(s32 sema);
+extern "C" void WriteDisplayRegisters(void* self);
 
 // The vertical blank start handler: wakes a waiter of the next blank, then by the display's
 // mode puts the field offset or the next frame's display registers; then ends the handler.
@@ -220,7 +225,7 @@ void FlipDisplayFrame(void)
         ptr = D_002625E0;
     }
     s16 half = *(s16*)&D_002626C4;
-    SetFieldDrawOffset(ptr, 0x800, 0x800, half);
+    SetFieldDrawOffset((GsOffset*)ptr, 0x800, 0x800, half);
     SyncDataCache(0);
     g_displayFrameCounter = g_displayFrameCounter + 1;
     SwapDoubleBuffer(D_00262490, g_displayFrameCounter);
@@ -247,7 +252,7 @@ void ApplyPendingDisplayFlip(void)
             ptr = D_002624F0;
         }
         s16 half = *(s16*)&D_002626C4;
-        SetFieldDrawOffset(ptr, 0x800, 0x800, half);
+        SetFieldDrawOffset((GsOffset*)ptr, 0x800, 0x800, half);
         SyncDataCache(0);
         u8* ptr2;
         if (g_displayFrameCounter & 1) {
@@ -279,13 +284,13 @@ void ResetDisplayBuffers(void)
         ptr = D_002625E0;
     }
     s16 half = *(s16*)&D_002626C4;
-    SetFieldDrawOffset(ptr, 0x800, 0x800, half);
+    SetFieldDrawOffset((GsOffset*)ptr, 0x800, 0x800, half);
     SyncDataCache(0);
     g_displayFrameCounter = g_displayFrameCounter + 1;
     SwapDoubleBuffer(D_00262490, g_displayFrameCounter);
 }
 
-void PostSemaphoreFromInterrupt(s32 sema);
+extern "C" void PostSemaphoreFromInterrupt(s32 sema);
 
 // The GS FINISH interrupt handler: when SendGsPacketAndWait is waiting and the CSR shows FINISH,
 // clears the wait and posts its semaphore; then ends the handler.
@@ -306,19 +311,19 @@ void SendGsPacketAndWait(s32 channel, void* b)
     s32 r = GetGsInterruptMask();
     SwapGsInterruptMask(r & -0x201);
     SyncDataCache(0);
-    StartDmaChain(channel, b);
+    StartDmaChain((DmaChannel*)channel, b);
     AwaitSemaphore(D_002BE464);
 }
 
-void FillScreenColor(PacketWriter* self, u8* color, s32 flag)
+void FillScreenColor(u8* buffer, Rgba4* color, s32 flag)
 {
     PacketWriter f;
     s32 x;
 
     InitGifPacket(&f);
-    UsePacketBufferMemory(&f, 0x2C, self);
-    BeginGifTag(&f, (s8)color[3] >= 0 ? 0x46 : 6, 1, 0xE);
-    AddGifRegisterWrite(&f, 1, (u64)color[0] | ((u64)color[1] << 8) | ((u64)color[2] << 16) | ((u64)color[3] << 24));
+    UsePacketBufferMemory(&f, 0x2C, buffer);
+    BeginGifTag(&f, (s8)color->a >= 0 ? 0x46 : 6, 1, 0xE);
+    AddGifRegisterWrite(&f, 1, (u64)color->r | ((u64)color->g << 8) | ((u64)color->b << 16) | ((u64)color->a << 24));
     AddGifRegisterWrite(&f, 0x47, flag != 0 ? 0x32001 : 0x32000);
     for (x = 0; x < 0x280; x += 0x20) {
         AddGifRegisterWrite(&f, 5, (u64)((0x6C0 + x) << 4) | ((u64)(0x790 << 4) << 16));
@@ -335,7 +340,7 @@ void InitDisplay(void)
 
     ResetGs(0, 1, 2, 1);
     u8* s0 = D_00262490;
-    SetUpDoubleBuffer(s0, 0, 0x280, 0xE0, 3, 0x30, 0);
+    SetUpDoubleBuffer((GsDBuff*)s0, 0, 0x280, 0xE0, 3, 0x30, 0);
     u8* p = s0;
     s32 end = (s32)s0 + 0x50;
     do {
@@ -354,8 +359,8 @@ void InitDisplay(void)
     FillScreenColor(D_002BE1A0, &t, 0);
     t = k;
     FillScreenColor(D_002BDEE0, &t, 1);
-    D_002BE460 = CreateLockSemaphore((void*)0, (void*)1);
-    D_002BE464 = CreateLockSemaphore((void*)0, (void*)1);
+    D_002BE460 = CreateLockSemaphore(0, 1);
+    D_002BE464 = CreateLockSemaphore(0, 1);
     AddInterruptHandler(2, (void (*)(void))HandleVblankStart, 0);
     EnableInterruptCause(2);
     AddInterruptHandler(0, (void (*)(void))HandleGsFinish, 0);
@@ -364,7 +369,7 @@ void InitDisplay(void)
     ResetDisplayBuffers();
 }
 
-void SendPacketToBothBuffers(DmaChainBlock* b)
+void SendPacketToBothBuffers(void* chain)
 {
     s32 i = 0;
     SyncDataCache(0);
@@ -377,9 +382,9 @@ void SendPacketToBothBuffers(DmaChainBlock* b)
         }
         SendDrawEnvironment(p);
         i++;
-        StartDmaChain(g_gifChannel, b);
+        StartDmaChain((DmaChannel*)g_gifChannel, chain);
     } while (i < 2);
-    WaitDmaChannel(g_gifChannel, 0, 0);
+    WaitDmaChannel((DmaChannel*)g_gifChannel, 0, 0);
 }
 
 void SendDisplayResetPacket(void)
@@ -387,11 +392,11 @@ void SendDisplayResetPacket(void)
     DmaChainBlock a;
     DmaChainBlock b;
 
-    InitPacketBuffer(&a);
-    UsePacketBufferMemory(&a, 2, &b);
+    InitPacketBuffer((PacketWriter*)&a);
+    UsePacketBufferMemory((PacketWriter*)&a, 2, &b);
     AddDmaRefTag(&a, 0x2C, D_002BE1A0);
-    AddDmaEndTag(&a);
-    DetachPacketBuffer(&a, 0, 0);
+    AddDmaEndTag((PacketWriter*)&a);
+    DetachPacketBuffer((PacketWriter*)&a, 0, 0);
     SendPacketToBothBuffers(&b);
 }
 

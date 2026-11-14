@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "object_finder.h"
 // PAL's own definition: resets the two engines after a pending change and restores the slot's pose.
 struct Eng_1F0908;
 typedef void (*SetFn_1F0908)(Eng_1F0908* e, s32 mode);
@@ -30,7 +31,7 @@ void AnnouncePendingWarpEntry(WarpPage* self)
     if (sl != 0) {
         f32 f = 0.0f;
         if (D_00276654 == 0) f = sl->length;
-        ReplaceAnimationPlayer(sl, self, 0, &self->f2F0, f, 0.0f);
+        ReplaceAnimationPlayer(sl, self, 0, (AnimationPlayer**)&self->f2F0, f, 0.0f);
     }
     if (self->f2E8 != 0) {
         for (s32 i = 0; i < self->f2E8->startCount; i++) {

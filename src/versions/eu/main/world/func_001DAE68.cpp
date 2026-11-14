@@ -11,7 +11,7 @@ void HandlePathFollowerActivation(PathFollower* self, void* v)
         *(void**)(a + 0x578) = (u8*)self + 0xB04;
         *(void**)(b + 0x574) = (u8*)self + 0xB08;
         *(void**)(b + 0x578) = (u8*)self + 0xB0C;
-        SetWorldActiveFollower(*(void**)((u8*)self + 0x14), self);
+        SetWorldActiveFollower((World*)(*(void**)((u8*)self + 0x14)), self);
     } else {
         if (self->fB34 == 2) {
             SetPathFollowerMode(self, 0);

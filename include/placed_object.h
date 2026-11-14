@@ -112,16 +112,18 @@ struct Desc02 : Desc01 {
     void (*m2F)(PlacedObject* self, s32 state);              // 0xCC: set the state (class 0x55: func_00147AB0)
 };
 
+struct FoundList;
+
 struct PlacedObject : BaseObject {
     List01 children;        // 0x34: the child objects, linked at BaseObject::next (offset 0x1C)
     Link02 link40;          // 0x40
     Link02 link48;          // 0x48
     PlacedObject* root;              // 0x50: the topmost object above it (itself at the top)
-    void* f54;              // 0x54: given back with func_0015F710 by slot 7
+    PlacedObject* f54;      // 0x54: the owner of its link list (func_0015F6C0); given back with func_0015F710 by slot 7
     Link02 link58;          // 0x58: the link in list60
     List01 list60;          // 0x60: offset 0x58
     s32 count6C;            // 0x6C
-    PlacedObject* items70[4];        // 0x70: count6C of them
+    FoundList* items70[4];  // 0x70: count6C of the groups it is in (func_0015F8B0)
     f32 f80;                // 0x80: FLT_MAX at set-up
     f32 f84;                // 0x84: FLT_MAX at set-up
     s32 f88;                // 0x88: 0x0FFFFFFF at set-up

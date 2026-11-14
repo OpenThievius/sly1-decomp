@@ -27,78 +27,90 @@
 #include "transform_object.h"
 #include "ramp_profile.h"
 #include "path_curve.h"
+struct PathFollower;
+struct ColliderPose;
+struct BaseObject;
 
-void CopyObjectData(void* self);
+struct Mat02;
 
-void FinishSwitchedCollider(void* self);
+
+struct ScaledTransform;
+// Types other files define, named by the parameters of their functions declared here.
+
+void CopyObjectData(BaseObject* self, BaseObject* src);
+
+void FinishSwitchedCollider(SwitchedCollider* self);
 
 void SetModeWalkerMode(ModeWalker* self, s32 n);
 
-void RemoveFromList(void* a, void* b);
+void RemoveFromList(List01* list, void* item);
 
-void TransformPointBetweenFrames(void* a0, s32 zero, void* table, void* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
-void ComputeColliderJumpVelocity(f32 t, void* obj, void* a, void* b);
+void ComputeColliderJumpVelocity(Collider* self, f32* p, f32* out, f32 a);
 
-f32 ArctangentOfRatio(f32 a, f32 b);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 f32 WrapAngle(f32 a);
 
-void TurnColliderTowardHeading(void* obj);
+void TurnColliderTowardHeading(TurningCollider* self);
 
-void SetPlayerState(void* obj, s32 a, s32 b);
+void SetPlayerState(Player* self, s32 state, s32 sub);
 
-void ExtractContactsByPartMode(void* self, void* sub);
+void ExtractContactsByPartMode(Collider* self, Contact03** out);
 
 void StartMaskedCollider(void* self);
 
-void ResolveObjectLinks(void* self, s32 a, void* table);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-s32 CreateStateWalker(void* a0, void* self, s32 b, s32 c);
+StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 
 s32 CreateWeightCurve(s32 a);
 
 void* AllocateFrontMemory(s32 size);
 
-void RemoveFromList(u8* p, void* self);
+void RemoveFromList(List01* list, void* item);
 
-void AppendToList(u8* p, void* self);
+void AppendToList(List01* self, void* item);
 
-void AppendToList(void* sub, void* self);
+void AppendToList(List01* self, void* item);
 
-void RegisterObject(void* self);
+void RegisterObject(BaseObject* self);
 
-void AppendToList(u8* table, void* self);
+void AppendToList(List01* self, void* item);
 
-void RemoveFromList(List01* list, BaseObject* item);
+void RemoveFromList(List01* list, void* item);
 
-void UnregisterObject(void* self);
+void UnregisterObject(BaseObject* self);
 
-void RemoveFromList(u8* table, void* self);
+void RemoveFromList(List01* list, void* item);
 
-void InitPathFollower(void* self);
+void InitPathFollower(PathFollower* self);
 
-void CapturePathFollowerPose(void);
+void CapturePathFollowerPose(PathFollower* self, ColliderPose* pose);
 
-void HandlePathFollowerNotification(void* self, s32 code, MessageBody* rec);
+struct CountedNotice;
+struct PathFollower;
+void HandlePathFollowerNotification(PathFollower* self, s32 code, CountedNotice* rec);
 
 void InitPlayerFlaggedCollider(void* self);
 
-void AppendToList(List01* list, BaseObject* item);
+void AppendToList(List01* self, void* item);
 
-typedef void (*LaunchFn)(void);
+typedef void (*LaunchFn)(void* unused, void* obj);
 
 s32 HasSpareCount();
 
-void SetSwitchedColliderEnabled(void* self, s32 value);
+void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 value);
 
-void SetPlayerState(void* self, s32 a, s32 b);
+void SetPlayerState(Player* self, s32 state, s32 sub);
 
 void ActivateSwitchedCollider(void* value);
 
-void InitOwnerMessage(void* out, s32 mode, void* owner);
+struct OwnerMessage;
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
-void LaunchPlayerFromModeWalker(void);
+void LaunchPlayerFromModeWalker(void* unused, void* obj_);
 
 extern f32 g_gameTime;
 
@@ -110,32 +122,32 @@ extern f32 g_gameClock[];
 
 extern f32 g_unitRange[];
 
-void UpdatePathFollower(ModeWalker* self, f32 dt);
+void UpdatePathFollower(PathFollower* self, f32 t);
 
-void InitOwnerMessage(void* out, s32 mode, Collider* c);
+void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
-void FreePooledContactChain(void* a, void* head);
+void FreePooledContactChain(World* world, Contact03* head);
 
-void SetScaledPositionSpring(void* o, f32 v);
+void SetScaledPositionSpring(PlacedObject* self, f32 scale);
 
-void SetScaledRotationSpring(void* o, f32 v);
+void SetScaledRotationSpring(PlacedObject* self, f32 scale);
 
-s32 IsPadSelectFlagHeld(void* p);
+s32 IsPadSelectFlagHeld(World* self);
 
 
-void StartPathFollower(void* self);
+void StartPathFollower(PathFollower* self);
 
-void ResolveObjectLinks(void* self, s32 a1, void* a2);
+void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-void AddMatrixAttachment(void* a, s32 b, void* c);
+void AddMatrixAttachment(PlacedObject* self, s32 key, Attachment** out);
 
-void TransformPointBetweenFrames(void* a, void* b, void* c, void* d);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 s32 FindAnimRecord(s32 key);
 
-void SetStateWalkerTarget(void* p, s32 n);
+void SetStateWalkerTarget(StateWalker* self, s32 key);
 
-void TeleportStateWalker(void* p, s32 n);
+void TeleportStateWalker(StateWalker* self, s32 key);
 
 struct ClampHelper
 {
@@ -155,13 +167,13 @@ struct ClampHelper
 
 extern Rgba4 D_002623E0[];
 
-f32 Cosine(f32 x);
+extern "C" f32 Cosine(f32 x);
 
-void SetObjectTreeRecordValue(ModeWalker* o, u32 c);
+void SetObjectTreeRecordValue(PlacedObject* object, u32 value);
 
-void ApplyPlacedObjectTransform(ModeWalker* o, void* a, void* b);
+void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 
-f32 Cosine(f32 value);
+extern "C" f32 Cosine(f32 x);
 
 // The file's .data, 0x2640B0 to 0x264230, in retail's order. GCC puts an object of eight bytes
 // or more on 8, so the words after D_00264128, D_00264154 and D_00264190 are padding: the three
@@ -200,10 +212,10 @@ void UnregisterListedKeepObject(ListedKeepObject* self)
     RemoveFromList(&self->world->list1C9C, self);
 }
 
-void CopyListedKeepObject(ListedKeepObject* self)
+void CopyListedKeepObject(ListedKeepObject* self, ListedKeepObject* src)
 {
     PathCurveKeptBits saved = self->keep;
-    CopyObjectData(self);
+    CopyObjectData(self, src);
     self->keep = saved;
 }
 
@@ -217,12 +229,12 @@ void StartModeWalkerObject(ModeWalker* self)
 {
     StartPathFollower(self);
     ResolveObjectLinks(self, 0xA, g_modeWalkerLinks);
-    self->fBBC = (StateWalker*)CreateStateWalker(self->fBB8, self, -1, 0);
-    AddMatrixAttachment(self->fBCC, 5, &self->fBD0);
+    self->fBBC = (StateWalker*)CreateStateWalker((StateGraph*)self->fBB8, self, -1, 0);
+    AddMatrixAttachment((PlacedObject*)self->fBCC, 5, (Attachment**)&self->fBD0);
     ((u8*)self->fBD0)[0x10] = 9;
     ((u8*)self->fBD0)[0x11] = 9;
     ((PlacedObject*)self->fBCC)->desc02()->m2B((PlacedObject*)self->fBCC);
-    TransformPointBetweenFrames(0, self->fBC0, (u8*)self->fBCC + 0x140, (u8*)self + 0xBE0);
+    TransformPointBetweenFrames(0, (PlacedObject*)self->fBC0, (Vec02*)((u8*)self->fBCC + 0x140), (Vec02*)((u8*)self + 0xBE0));
     SetModeWalkerMode(self, 1);
     self->f864 = 3.4028234663852886e+38f;
     T217D_BF0* base = &D_00270650;
@@ -245,18 +257,18 @@ extern T217D_BF0 D_00270650;
 extern u8 g_blankPadRecord[];
 extern u8 D_002708C0[];
 void ControlPathFollower(PathFollower* self, PadStick* pad, f32 dt);
-void GetStateWalkerCurrentKey(void* h, s32* out);
-void GetStateWalkerTargetKey(void* h, s32* out);
-void ClearPadPressedBits(PadStick* pad, s32 mask);
-void UnprojectCameraPoint(void* camera, void* a, Vec02* out);
-void BuildBasisFromXAndZHint(void* a, void* b, void* c);
-void TransformRotationBetweenFrames(void* from, void* to, Mat02* in, Mat02* out);
-void TransformDirectionBetweenFrames(void* from, void* to, Vec02* in, void* out);
-void ApproachRotationWithRamp(f32 dt, void* rot, void* target, void* ramp, void* outRot, void* outSpin);
+void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
+void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
+void ClearPadPressedBits(PadRecord* self, u32 mask);
+void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
+void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
-void ClearRootTries(void* self);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
+void ClearRootTries(PlacedObject* self);
 void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad);
 typedef void (*FrameFn)(void* self, Mat02* m);
 
@@ -287,7 +299,7 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
             self->desc05()->m50(self);
         } else {
             if ((pad->pressed & 0x40) != 0) {
-                ClearPadPressedBits(pad, 0x40);
+                ClearPadPressedBits((PadRecord*)pad, 0x40);
                 self->fBFC = g_gameTime;
             }
             if (self->fC00 != 0 && g_gameTime - self->fBFC < D_00264128) {
@@ -309,22 +321,22 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
             u128 n = Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(m.r[2]), Vu0::Q(((Vec02*)((u8*)g_camera + 0x80))[0])), *(u128*)&self->m110.r[1]);
             Vu0::Q(m.r[1]) = n;
             Vu0::Q(m.r[0]) = Vu0::Cross(n, Vu0::Q(m.r[2]));
-            TransformRotationBetweenFrames(0, ((PlacedObject*)self->fBC4)->parent, &m, &m);
-            ApproachRotationWithRamp(dt, (u8*)self->fBC4 + 0xD0, &m, D_00264130, &m, 0);
+            TransformRotationBetweenFrames(0, (PlacedObject*)(((PlacedObject*)self->fBC4)->parent), &m, &m);
+            ApproachRotationWithRamp((Mat02*)((u8*)self->fBC4 + 0xD0), &m, (RampProfile*)D_00264130, &m, 0, dt);
             (*(FrameFn**)self->fBC4)[34](self->fBC4, &m);
-            UnprojectCameraPoint(g_camera, D_002708C0, &pos);
+            UnprojectCameraPoint(g_camera, (f32*)D_002708C0, &pos);
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(((PlacedObject*)self->fBC0)->v140));
-            BuildBasisFromXAndZHint(&d, (void*)&g_unitZVector, &m);
-            TransformRotationBetweenFrames(0, ((PlacedObject*)self->fBC0)->parent, &m, &m);
+            BuildBasisFromXAndZHint(&d, (const Vec02*)&g_unitZVector, &m);
+            TransformRotationBetweenFrames(0, (PlacedObject*)(((PlacedObject*)self->fBC0)->parent), &m, &m);
             (*(FrameFn**)self->fBC0)[34](self->fBC0, &m);
             u128 v = Vu0::Q(self->vBE0);
             u128 rot = Vu0::RotateUntied(m, v);
             Vu0::Q(d) = Vu0::MulX(Vu0::Sub(rot, v), Vu0::ScalarAt(D_0026413C));
             Mat02 m2;
             Vec02 k;
-            TransformDirectionBetweenFrames(((PlacedObject*)self->fBC0)->parent, ((PlacedObject*)self->fBCC)->parent, &d, (u8*)self->fBD0 + 0x20);
+            TransformDirectionBetweenFrames((PlacedObject*)((PlacedObject*)self->fBC0)->parent, (PlacedObject*)((PlacedObject*)self->fBCC)->parent, &d, (Vec02*)((u8*)self->fBD0 + 0x20));
             MultiplyMatrices3x3((Mat02*)((u8*)self->fBC0 + 0x1A0), &m, &m2);
-            TransformRotationBetweenFrames(((PlacedObject*)self->fBC0)->parent, ((PlacedObject*)self->fBCC)->parent, &m2, &m2);
+            TransformRotationBetweenFrames((PlacedObject*)((PlacedObject*)self->fBC0)->parent, (PlacedObject*)((PlacedObject*)self->fBCC)->parent, &m2, &m2);
             MatrixToAxisAngle(&m2, &angle, &k);
             BuildAxisAngleMatrix(&k, (Mat02*)((u8*)self->fBD0 + 0x40), D_0026413C * angle);
             ClearRootTries(self);
@@ -343,7 +355,7 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
             Collider* c = n->end[1 - j].part;
             while (c != 0 && c->f4E0 == 0) c = (Collider*)c->parent;
             if (c != 0 && (c->f4E0 == 1 || c->f4E0 == 4)) {
-                InitOwnerMessage(buf, 0, c);
+                InitOwnerMessage((OwnerMessage*)buf, 0, c);
                 while (c != 0) {
                     if (((s32 (*)(Collider*, Contact03*, void*))c->desc03()->m47)(c, n, buf) != 0) break;
                     c = (Collider*)c->parent;
@@ -352,7 +364,7 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
             }
             n = n->next;
         } while (n != 0);
-        FreePooledContactChain(self->world, self->fC04);
+        FreePooledContactChain((World*)self->world, (Contact03*)self->fC04);
         self->fC04 = 0;
     }
     f32 t = g_gameClock[1] - self->fBF4;
@@ -364,14 +376,14 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
     if (v < lo) x = lo;
     else if (hi < v) x = hi;
     else x = v;
-    SetScaledPositionSpring(self->fBCC, x * D_00264150);
-    SetScaledRotationSpring(self->fBCC, x * D_00264154);
+    SetScaledPositionSpring((PlacedObject*)self->fBCC, x * D_00264150);
+    SetScaledRotationSpring((PlacedObject*)self->fBCC, x * D_00264154);
     if (self->fBF0 != 0 && self->fBB0 != 2 && g_gameClock[1] - self->fBF8 > 2.0f) self->fBF0 = 0;
 }
 
 void RecomputePathFollowerFrame(PathFollower* self);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void BuildBasisFromXAndZHint(void* a, void* b, void* c);
+void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 typedef void (*PathSampleFn)(PathCurve* self, f32 t, Vec02* pos, Vec02* dir);
 
 // A matrix set from three rows passed by reference as the signed 128-bit type: the unsigned rows
@@ -398,7 +410,7 @@ void RecomputeModeWalker(ModeWalker* self)
             fn(curve, self->f838, &pos, &dir);
         }
         MultiplyMatrices3x3(&self->m1A0, &self->fC08->m1A0, &m1);
-        BuildBasisFromXAndZHint(&dir, (void*)&g_unitZVector, &m2);
+        BuildBasisFromXAndZHint(&dir, (const Vec02*)&g_unitZVector, &m2);
         u128 r0 = Vu0::Q(m1.r[0]);
         u128 r1 = Vu0::Q(m1.r[1]);
         u128 r2 = Vu0::Q(m1.r[2]);
@@ -413,9 +425,9 @@ void RecomputeModeWalker(ModeWalker* self)
     }
 }
 
-void HandlePathFollowerActivation(void* self, s32 active);
+void HandlePathFollowerActivation(PathFollower* self, void* v);
 
-void HandleModeWalkerActivation(ModeWalker* self, s32 active)
+void HandleModeWalkerActivation(ModeWalker* self, void* active)
 {
     HandlePathFollowerActivation(self, active);
     if (active) {
@@ -455,13 +467,13 @@ void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
         c = D_002623E0[0];
     }
     SetObjectTreeRecordValue(o, *(u32*)&c);
-    ApplyPlacedObjectTransform(o, a, b);
+    ApplyPlacedObjectTransform(o, (Camera*)a, (ScaledTransform*)b);
 }
 
 void CaptureModeWalkerTarget(ModeWalker* self, void* outv)
 {
     Vec02* out = (Vec02*)((u8*)outv + 0x10);
-    CapturePathFollowerPose();
+    CapturePathFollowerPose((PathFollower*)self, (ColliderPose*)outv);
     *out = ((PlacedObject*)self->fBC0)->v140;
 }
 
@@ -485,8 +497,8 @@ void LaunchPlayerFromModeWalker(void* unused, void* obj_)
     Vec02 first;
     Vec02 second;
 
-    TransformPointBetweenFrames(unused, 0, &D_00264180, &first);
-    ComputeColliderJumpVelocity(D_00264190, obj, &first, &second);
+    TransformPointBetweenFrames((PlacedObject*)unused, 0, &D_00264180, &first);
+    ComputeColliderJumpVelocity(obj, (f32*)&first, (f32*)&second, D_00264190);
     obj->desc02()->m20(obj, &second);
     f32 r = ArctangentOfRatio(second.y, second.x);
     obj->f638 = WrapAngle(r + 3.1415927f);
@@ -521,11 +533,11 @@ then_block:
     g_player->desc->m02(g_player);
     g_player->desc02()->m1F(g_player, (PlacedObject*)self->fBC8);
     ((BaseObject*)self->fBC8)->desc->m03((BaseObject*)self->fBC8);
-    SetSwitchedColliderEnabled((void*)g_player, 1);
-    SetPlayerState((void*)g_player, 2, 2);
+    SetSwitchedColliderEnabled((SwitchedCollider*)g_player, 1);
+    SetPlayerState(g_player, 2, 2);
     ActivateSwitchedCollider((void*)g_player);
     SetModeWalkerMode(self, 3);
-    InitOwnerMessage(&loc, 0, self);
+    InitOwnerMessage((OwnerMessage*)&loc, 0, self);
     gp = g_player;
     gp = g_player;
     loc.fn = LaunchPlayerFromModeWalker;
@@ -553,12 +565,12 @@ void HandleModeWalkerNotification(ModeWalker* self, s32 code, MessageBody* rec)
             }
         }
     }
-    HandlePathFollowerNotification(self, code, rec);
+    HandlePathFollowerNotification(self, code, (CountedNotice*)rec);
 }
 
 void ExtractModeWalkerContacts(ModeWalker* self)
 {
-    ExtractContactsByPartMode(self, (u8*)self + 0xC04);
+    ExtractContactsByPartMode(self, (Contact03**)((u8*)self + 0xC04));
 }
 
 void SetModeWalkerMode(ModeWalker* self, s32 mode)
@@ -606,9 +618,9 @@ void SetModeWalkerMode(ModeWalker* self, s32 mode)
 }
 
 extern u8 g_class75List[];
-s32 GetObjectWorldPosition(void* obj, Vec02* out);
-void ProjectPointToCamera(Camera* cam, void* pos, Vec02* out);
-f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, f32* p, f32* out);
+void GetObjectWorldPosition(BaseObject* self, Vec02* out);
+void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
+f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 
 void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad)
@@ -620,7 +632,7 @@ void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad)
     Class75Object* chosen = 0;
     for (Class75Object* o = *(Class75Object**)g_class75List; o != 0; o = *(Class75Object**)&o->link) {
         GetObjectWorldPosition(o, &p);
-        ProjectPointToCamera(g_camera, &p, &p);
+        ProjectPointToCamera(g_camera, &p, (f32*)&p);
         if (p.z < 100.0f) {
             continue;
         }
@@ -638,22 +650,22 @@ void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad)
             chosen = o;
         }
     }
-    self->rateX = ApproachValueWithRamp(self->rateX, pad->x, g_gameClock[2], D_00264198, 0);
+    self->rateX = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateX, pad->x, g_gameClock[2]);
     f32 y = pad->y;
     if (g_saveData->f19EC & 0x400) {
         y = -y;
     }
-    self->rateY = ApproachValueWithRamp(self->rateY, y, g_gameClock[2], D_00264198, 0);
+    self->rateY = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateY, y, g_gameClock[2]);
     self->aim[0] = ClampHelper::Of(self->aim[0] + g_gameClock[2] * self->rateX * D_002641A4, -1.0f, 1.0f);
     self->aim[1] = ClampHelper::Of(self->aim[1] - g_gameClock[2] * self->rateY * D_002641A4, -1.0f, 1.0f);
     f32 far = 1000.0f;
-    self->aim[2] = ApproachValueWithRamp(self->aim[2], far >? best.z, g_gameClock[2], D_002641A8, 0);
+    self->aim[2] = ApproachValueWithRamp((RampProfile*)D_002641A8, 0, self->aim[2], far >? best.z, g_gameClock[2]);
     self->target = chosen;
 }
 
 struct SpritePackets {
     s32 count;
-    s32 data;
+    u8* data;               // the quadwords, a GIF tag first
 };
 
 struct SpriteIcon {
@@ -663,13 +675,13 @@ struct SpriteIcon {
 
 extern f32 g_frameStep;
 s32 AreMenusAndFadeClear(void);
-void AppendPacketQuadwords(PacketWriter* w, s32 count, s32 data);
-void BeginGifTag(PacketWriter* b, s32 a, s32 c, u64 d);
-void AddGifRegisterWrite(PacketWriter* b, s32 reg, u64 v);
+void AppendPacketQuadwords(PacketWriter* self, s32 n, void* src);
+void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
+void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void AddGifStEntry(PacketWriter* b, f32 x, f32 y, f32 z);
 void AddGifRgbaEntry(PacketWriter* b, u32 c);
-void AddGifXyzfEntry(PacketWriter* b, s32 x, s32 y, s32 z, s32 f);
-void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
+void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 void DrawSpinningSpriteElement(T217D_BF0* self)
 {
@@ -683,7 +695,7 @@ void DrawSpinningSpriteElement(T217D_BF0* self)
     if (g_camera->f224 != 0) {
         self->f288 = target;
     } else {
-        self->f288 = ApproachValueWithRamp(self->f288, target, g_frameStep, D_002641B8, 0);
+        self->f288 = ApproachValueWithRamp((RampProfile*)D_002641B8, 0, self->f288, target, g_frameStep);
     }
     if (self->f288 == 0.0f) {
         return;
