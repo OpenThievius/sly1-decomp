@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Spawns the boss arena effects and sounds for its object (PAL timing and addresses).
+// StartPathFollower, PAL's definition: starts the placed object, its links, heading, state walker,
+// engine sounds and partner as US does (config/names/main/path_follower.tsv), at PAL's addresses.
 struct Blk_eu_1D7440 {
     u8 pad0[0x574];
     void* p574;
