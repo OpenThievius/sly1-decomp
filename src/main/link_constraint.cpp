@@ -158,6 +158,10 @@ static inline void MulRotationInto(Mat02* out, const Mat02& a, const Mat02& b)
     *out = r;
 }
 
+// Poses a two-segment chain (a above b, under top) so its end reaches the target stored in the
+// link record: two-bone inverse kinematics, the bend from the law of cosines on the segment
+// lengths, then a swing toward the target and a twist about it. Flag 2 first pulls self in when
+// out of reach; flag 1 also sets the spins from the target's velocity.
 void ApplyLinkConstraint(PlacedObject* self)
 {
     typedef Vu0::Vec Vec;

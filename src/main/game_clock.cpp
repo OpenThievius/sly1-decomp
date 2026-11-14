@@ -21,6 +21,10 @@ void SetGameClockScale(f32 x)
     SetGameClockRunning(&g_gameClock, x > 0.0f ? 1 : 0);
 }
 
+// Advances the game clock by the time since the last call, read from the cycle counter (at
+// 294.912 MHz, converted to seconds), limited to between 1/60 and 1/30 s; the game time moves by
+// that step scaled by the step and time scales and only while the clock runs, and the previous
+// step is kept.
 void AdvanceGameClock(GameClock* self)
 {
     s64 now = ReadCycleCounter();

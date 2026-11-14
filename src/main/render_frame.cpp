@@ -312,6 +312,10 @@ s32 PackFrameColors(s32 cause)
     return -1;
 }
 
+// Sets up double-buffered rendering: gives each of the two render frames its GS and VIF packet
+// buffers and release lists, installs the vertical-blank interrupt handler (cause 5), creates the
+// frame-ready and frame-done semaphores, writes a CRC-32 table (polynomial 0xEDB88320) into the
+// packet buffer memory and starts the render thread.
 void InitRenderFrames(void)
 {
     for (u32 i = 0; i < 2; i++) {
@@ -345,6 +349,9 @@ void InitRenderFrames(void)
     RunThread(g_mainAndRenderThreads[1], 0);
 }
 
+// Starts building a frame: waits until a frame is free (the done semaphore), takes the next of
+// the two render frames, releases the nodes it held (ReleaseFrameNodes), resets its flags and
+// image mask from the camera and points the GS and VIF packet writers at its buffers.
 void BeginRenderFrame(void)
 {
     s32 idx;
@@ -406,6 +413,9 @@ void CloseDrawBuffer(void* obj, void* a, u8** b)
     DetachPacketBuffer((PacketWriter*)obj, (u32*)a, b);
 }
 
+// Finishes the frame being built: closes the GS and VIF packets, moves the objects released
+// during the frame into the frame's own release lists, and posts the frame-ready semaphore for
+// the render thread.
 void SubmitRenderFrame(void)
 {
     WriteGsFinishPacket((PacketWriter*)&g_vifPacketWriter, (u8*)g_buildFrame + 8, 0);
@@ -453,6 +463,9 @@ void VerifyCodeChecksum(void)
     }
 }
 
+// The render thread's loop: waits for a frame to be ready, sends its VIF and GIF packets to the
+// hardware, blits the result to the display (BlitFrameToDisplay), signals the frame is done and
+// flips the displayed frame. It first verifies a checksum of the game code (VerifyCodeChecksum).
 void RunRenderThread(void)
 {
     VerifyCodeChecksum();
@@ -488,6 +501,9 @@ void SendRenderFrameToDma(RenderFrame* self, s32 flag)
     }
 }
 
+// Returns what a finished frame held back: released objects go back to their owner's list,
+// detached records and their pooled slots back to the world's pools, and the deferred releases to
+// the pool they came from.
 void ReleaseFrameNodes(RenderFrame* self)
 {
     ListFrame it;
@@ -523,6 +539,9 @@ void ReleaseFrameNodes(RenderFrame* self)
     }
 }
 
+// Waits until both render frames are done and the render thread is idle; when flag is set and a
+// frame is on screen it redraws and flips it three times, then releases the nodes of both frames
+// and gives the screen back.
 void DrainRenderFrames(s32 flag)
 {
     for (s32 i = 0; (u32)i < 2; i++) {
@@ -567,6 +586,9 @@ static inline u64 FrameBits(const u64& f)
     return (f & 0x1FF) | (((f >> 24) & 0xF) << 24);
 }
 
+// Writes a GS packet that copies the finished frame buffer to the display with a strip of
+// 32-pixel-wide sprites (640 wide) on the field matching the interlace parity, and waits for the
+// DMA to send it.
 void BlitFrameToDisplay(void)
 {
     PacketWriter w;

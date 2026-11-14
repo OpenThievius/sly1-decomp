@@ -238,6 +238,9 @@ AnchorPreset g_anchorPresets[8] = {
     { &g_unitXVector, 1 },
 };
 
+// Set-up of a collider's own state: links its part list, clears and copies its mesh record, gives
+// a child the free anchors (mode 3), marks its solver index and index unused (-1), sets flag bit
+// 63 when its script scope defines variables 6 or 7, and takes the world's gravity.
 void InitCollider(Collider* self)
 {
     ScriptValue local;
@@ -264,6 +267,9 @@ void InitCollider(Collider* self)
     DestroyScriptValue(&local, 2);
 }
 
+// Adds a collider to its world: counts it, and for a body (no parent) adds it to the sweep axes,
+// gives it a contact table and puts it on the world's body list. Also lists it as a part,
+// refreshes the anchor-mode flags of its body and resolves its contact handler.
 void RegisterCollider(Collider* self)
 {
     World* owner = self->world;
@@ -324,6 +330,9 @@ void SetColliderPartListed(Collider* self, s32 flag)
 }
 
 
+// Applies the move and the spin queued in v490 and spin4A0 to the position and rotation (rotating
+// by the axis-times-angle vector), clears them, settles the attachments and tells each child.
+// Calls the class's slot 18 when anything moved and quiet is 0.
 void ApplyColliderPendingMove(Collider* self, s32 quiet)
 {
     Mat02 rot;
@@ -372,6 +381,9 @@ void ApplyColliderPendingMove(Collider* self, s32 quiet)
     ListWalk::End(&it);
 }
 
+// Folds the queued v490 and spin4A0 into the velocity (v150) and the spin (v160) instead of the
+// position and rotation, clears them, settles the attachments and passes whether anything changed
+// to each child.
 void ApplyColliderPendingImpulse(Collider* self, s32 moved)
 {
     s32 still = 0;
@@ -414,6 +426,9 @@ void ApplyColliderPendingImpulse(Collider* self, s32 moved)
 
 extern f32 g_frameDt[];
 
+// Like ApplyColliderPendingImpulse, but also advances the position and rotation by half a frame
+// (g_frameDt * 0.5) of the queued change, so the integration is centred in the step; calls slot
+// 18 when something moved and flag is 0.
 void ApplyColliderPendingImpulseHalfStep(Collider* self, s32 flag)
 {
     s32 still = 0;
@@ -506,6 +521,8 @@ s32 TestCollidersMayContact(Collider* a, Collider* b)
     return r;
 }
 
+// For every contact of the collider whose timer is above 0.0001, calls the contact handler (slot
+// 65 of the class) of the object at each end, if it has one, and clears the timer.
 void NotifyContactHandlers(Collider* self)
 {
     ContactRow03* node = self->contacts->head;
@@ -552,6 +569,9 @@ struct VertexBlend03 {
     s32 (*faceVerts)[3];    // 0x08: one triple per face
 };
 
+// For a contact on a mesh that moves per vertex (hook), works out which vertex, edge or face the
+// contact touches, blends that feature's per-vertex vectors by barycentric weights and adds the
+// result, brought into the world frame, to the contact end's velocity (v30).
 void AddContactVertexBlendVelocity(Collider* self, Contact03* c, s32 which)
 {
     typedef Vu0::Vec Vec;
@@ -678,6 +698,9 @@ ASM_FUNC(func_001B8FE8);
 
 void AddColliderForce(Collider* self, Vec02* force);
 
+// Adds a force that pulls the collider's position toward target and one that pulls its velocity
+// toward aim. Each uses a gain triple (c2*x + c1 + c0/x of the distance); the velocity pull is
+// capped at 1/limit.
 void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit)
 {
     Vec02 acc;
@@ -710,6 +733,8 @@ void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02
 
 void AddColliderTorque(Collider* self, Vec02* torque);
 
+// Adds a torque that turns the collider toward the rotation target (the gain triple applied to
+// the angle) and one that pulls its spin toward aim (the velocity-style gain capped at 1/limit).
 void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit)
 {
     Vec02 acc;
@@ -800,6 +825,9 @@ void ComputeColliderInverseInertia(Collider* self, f32 scale)
     }
 }
 
+// Removes contacts from the collider's body: mode 1 those whose other end is the object or one of
+// its descendants, mode 2 those at exactly the object, mode 3 only those of kind 8 or 9 at it;
+// frees them, and clears field 0x4B8.
 void DropColliderContacts(Collider* self, s32 mode)
 {
     Collider* ctx = self->root03();
@@ -865,6 +893,9 @@ struct ColliderMoveNote {
     Vec02 q20;              // 0x20: not written by SetColliderPosition
 };
 
+// Moves the collider to a new position: snaps the camera when a camera-followed collider jumps
+// more than 10 units, drops its contacts, refreshes its parts and sends event 3 with the previous
+// position.
 void SetColliderPosition(Collider* self, Vec02* pos)
 {
     ColliderMoveNote note;
@@ -992,6 +1023,9 @@ void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
     }
 }
 
+// Gives the collider a new parent while keeping its anchor vectors: they are taken to the world
+// frame and back into the new parent's. Updates the anchor flags of the old and new bodies and
+// resolves the contact handler.
 void ReparentCollider(Collider* self, BaseObject* p)
 {
     Vec02 local0;
@@ -1033,6 +1067,9 @@ void ReframeColliderAnchors(Collider* self, PlacedObject* frame)
 LINKER_REMNANT(func_001B9D08);
 
 
+// Adds a torque that turns the collider toward the target rotation without overshooting, in the
+// manner of a motor with a speed limit (gain[0]), a rate set by gain[1] and gain[2] and a braking
+// zone; also brakes the spin when it is above the limit.
 void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain)
 {
     Mat02 m;
@@ -1072,6 +1109,8 @@ void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain
 
 LINKER_REMNANT(func_001B9F28);
 
+// Writes a small pose record for the collider (position, velocity, a heading angle taken from its
+// matrix, 100.0 and the game time).
 void CaptureColliderPose(Collider* self, ColliderPose* out)
 {
     Vec02 tmp[3];
@@ -1119,6 +1158,9 @@ void* FindContactingPart(Collider* self)
     return 0;
 }
 
+// Copies another collider's data into this one (CopyPlacedObject), keeping this one's own links,
+// contact table, part list and handler; then copies the meshes and their plane trees and relists
+// the part.
 void CopyCollider(Collider* self, Collider* other)
 {
     u64 bit = (self->flags538 >> 50) & 1;
@@ -1149,6 +1191,9 @@ void CopyCollider(Collider* self, Collider* other)
     self->flags538 |= 0x20000000000ULL;
 }
 
+// Restricts a vector by an anchor constraint (kind 0 none, 1 removes the part along the axis, 2
+// keeps only that part, 3 zero); the axis is rotated by the parent's frame when there is a
+// parent. Writes the result to out and what was taken off to rem.
 void ConstrainVectorByParentAnchor(Collider* self, VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem)
 {
     Vec02 axis;
@@ -1283,6 +1328,10 @@ static inline Mat02 RotateRowsBy(const Mat02& r, const Mat02& m) return out
     out.r[2] = t.r[2];
 }
 
+// Reacts to a collider touching an attached set: measures the penetration depth, then adds a push
+// against gravity, drag-like pulls of the position and spin toward the set's own motion, a torque
+// that tilts the collider onto the surface normal, and spawns surface contact effects or stops
+// its sound.
 void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
 {
     Vec02 hit;
@@ -1378,6 +1427,9 @@ void IgnoreColliderAttachmentStep(Collider* self, Attach03* node, f32 dt)
 {
 }
 
+// Reads a collider from a stream: the mesh and its face tree, mass, inertia, offset, the groups
+// and face references, a second mesh with its tree, then the placed object's own part; lists it
+// as a part and, for a body, adds its contact pair flags.
 void LoadCollider(Collider* self, BufferedStream* in)
 {
     s32 i;
@@ -1525,6 +1577,9 @@ void SendColliderNotification(Collider* self, s32 kind, void* arg)
     }
 }
 
+// Gives back the contact of the collider (optionally only with the object key) that best looks
+// like ground: its normal's z component is above 0.7 (or below -0.7 at the other end) and its
+// float at +0x18 of the end is the smallest; out gets which end.
 void* FindColliderFloorContact(void* self, s32 key, s32* out)
 {
     u8* n = *(u8**)(*(u8**)((u8*)self + 0x480));
@@ -1618,6 +1673,9 @@ Collider* FindHandlerForSlot(Collider* node, s32 offset)
     return 0;
 }
 
+// Recomputes the anchor flags of a collider and, recursively, of its children: bit 54 when both
+// anchor modes are 3, bit 56 when that holds up to the body, bit 55 when it holds for it and all
+// of its children. Refreshes the pair flags of a body when bit 55 changes.
 void UpdateAnchorModeFlags(Collider* self)
 {
     ListFrame frame;
@@ -1649,6 +1707,8 @@ void UpdateAnchorModeFlags(Collider* self)
     }
 }
 
+// Adds to a script list each object touching this collider (without repeats); gives 1 when all
+// fit and 0 when appending fails.
 s32 CollectContactingPartsToScriptList(Collider* self, s32 value)
 {
     Collider* ctx = self->root03();
@@ -1671,6 +1731,8 @@ s32 CollectContactingPartsToScriptList(Collider* self, s32 value)
     return 1;
 }
 
+// Gives back the count and an array (back memory) of the distinct objects in contact with this
+// collider or its descendants.
 s32 CollectContactingParts(Collider* obj, s32* outCount, void*** outArr)
 {
     Collider* own = obj->root03();
@@ -1716,6 +1778,9 @@ s32 IsInTouchingList(Touch03* node, Collider* value)
     return 0;
 }
 
+// Compares the collider's touching list with the contacts it has now and sends script events: 6
+// for each object newly touching, 7 for each one no longer touching; then rebuilds the touching
+// list from the contacts.
 void UpdateTouchingParts(Collider* self)
 {
     Collider* core = self->root03();
@@ -1854,6 +1919,9 @@ void InitColliderMeshMotion(Collider* self)
     PopBackMemoryMark();
 }
 
+// Moves the vertices of a collider whose mesh deforms (hook): each vertex advances by its
+// velocity and acceleration over dt, the velocity by the acceleration; then recomputes the radius
+// and every face's normal and plane distance.
 void AdvanceColliderMeshMotion(Collider* self, f32 dt)
 {
     Vec02 a, b;
@@ -1901,6 +1969,9 @@ void MoveCollider(Collider* self, f32 x, void* b)
 }
 
 
+// Applies an impulse event to the collider: builds a contact at origin pushing along the
+// direction from the object's velocity toward target, solves it for the collider's body
+// (SolveColliderGroupContacts) and frees it.
 void ApplyColliderImpulseEvent(void* a0, f32 value, void* a1, void* a2)
 {
     Collider* self = (Collider*)a0;
@@ -1948,6 +2019,8 @@ s32 HandleObjectEvent(Collider* self, ObjectEvent* shape)
     return shape->eventFlags != 0;
 }
 
+// Rebuilds this collider's meshes from another's, transformed by its position and rotation (with
+// extra vertices), copies the face trees and sets up the per-vertex motion.
 void CopyColliderMeshesInFrame(Collider* self, Collider* src, s32 extra)
 {
     Vec02 m[4];
@@ -1972,6 +2045,8 @@ void CopyColliderMeshesInFrame(Collider* self, Collider* src, s32 extra)
     InitColliderMeshMotion(self);
 }
 
+// For a body, goes through its contacts: those whose other part (or its nearest ancestor with a
+// partMode) has mode 1 are copied to *out, mode 4 moved to *out, mode 3 freed.
 void ExtractContactsByPartMode(Collider* self, Contact03** out)
 {
     Contact03* freed = 0;
@@ -2066,6 +2141,9 @@ struct ImpulseRow {
 
 void ApplyColliderInverseInertia(Collider* self, Vec02* in, Vec02* out);
 
+// For one end of a contact, fills the rows (indexed by part) with the change of velocity and spin
+// the unit impulse along the contact makes on that part and each of its ancestors, up to a rigid
+// one, honouring each part's anchor constraints.
 void ComputeColliderImpulseResponse(void* self, s32 a1, Contact03* c, s32 idx, ContactEnd03* hit, ImpulseRow* rows)
 {
     Vec02 dir;
@@ -2098,6 +2176,9 @@ void ComputeColliderImpulseResponse(void* self, s32 a1, Contact03* c, s32 idx, C
 
 void ComputeColliderPointVelocity(Collider* body, Vec02* point, ImpulseRow* row, Vec02* out);
 
+// For each part below the root, adds to its impulse row the motion it gets from its parent's row
+// (the point velocity at the part's position and the parent's spin), honouring the anchor
+// constraints and the part's offset.
 void AddParentVelocityToChildRows(void* unusedA, void* unusedB, s32 n, Collider** list, ImpulseRow* rows)
 {
     Vec02 vel;
@@ -2181,6 +2262,10 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void RunActiveSetSolver(ActiveSetSolver* self, s32 flags, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
 void AddFrictionItemsAndSolve(f32 dt, ActiveSetSolver* loc, s32 flags, s32 n, SolveContact_1BCD00** contacts, s32* counts, void** lists);
 
+// Solves a group of contacts for a set of parts with the active-set solver (InitActiveSetSolver,
+// RunActiveSetSolver). flags: 4 is a position-correction pass (depths), 1 a solve for the half-step
+// integration (slot 49 of the parts) that stores each contact's push, 2 a velocity solve (slot 48)
+// that stores each contact's impulse; passes nothing needs are dropped first. Friction is added.
 void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 n, Contact03** list, f32 dt, s32 flags)
 {
     SolveContact_1BCD00** contacts = (SolveContact_1BCD00**)list;
@@ -2349,6 +2434,9 @@ done:
     PopBackMemoryMark();
 }
 
+// Gathers up to cap contacts of the given bodies (their loose ones, then those of each contact
+// row whose other body is not already marked) into out, marking and unmarking the bodies with
+// flag bit 58; gives the count.
 s32 CollectGroupItems(s32 count, Collider** roots, s32 cap, Contact03** out)
 {
     s32 n = 0;
@@ -2386,6 +2474,8 @@ done:
     return n;
 }
 
+// Starting from one collider, follows its contact rows to find the bodies connected to it. Bodies
+// with flag 55 go to the second list, others to the queue; gives both counts.
 void CollectConnectedColliders(Collider* self, s32* outQueued, Collider** queue, s32* outFlagged, Collider** list)
 {
     s32 nq = 1;
@@ -2424,6 +2514,8 @@ void CollectConnectedColliders(Collider* self, s32* outQueued, Collider** queue,
     *outFlagged = nl;
 }
 
+// Mode 1 makes the collider look rigid for a solve (anchor modes forced to 3, flags 54 and 55
+// set), saving the old values; mode 0 restores them.
 void SetColliderForcedState(Collider* obj, s32 mode)
 {
     if (mode) {
@@ -2455,6 +2547,8 @@ void SetColliderForcedState(Collider* obj, s32 mode)
     }
 }
 
+// Sorts the colliders by how many of their rows have contacts (0 to 3, capped at 4) with a
+// counting sort, stable, in place.
 void SortCollidersByContactCount(s32 n, Collider** objs)
 {
     s32 local[5];
@@ -2503,6 +2597,9 @@ void SortCollidersByContactCount(s32 n, Collider** objs)
     PopBackMemoryMark();
 }
 
+// Solves one connected group. When it has fewer than 64 contacts (or fewer than 2 bodies) it is
+// solved directly; otherwise the group is sorted, split in halves, the second half solved with
+// the first marked and then the first with the second forced rigid.
 void ProcessColliderGroup(World* ctx, s32 n, Collider** arr, f32 f, s32 ex)
 {
     Contact03* buf[0x40];
@@ -2540,6 +2637,9 @@ void ProcessColliderGroup(World* ctx, s32 n, Collider** arr, f32 f, s32 ex)
     }
 }
 
+// Per frame, for each group of connected colliders in the world: when flags has bit 0, steps
+// (slot 27) the colliders that have not settled, then solves the group (ProcessColliderGroup) and
+// clears the retry count of those not at rest.
 void ProcessColliderGroups(World* self, s32 flags, f32 f)
 {
     ListFrame fr;
@@ -2625,6 +2725,8 @@ void SwapSortRecords(u8* base, s32 stride, s32 rowB, s32 rowA)
     }
 }
 
+// Heap sort of n records of size bytes (a multiple of 4) in place, ordered by cmp; called with
+// other files' tables.
 void HeapSortRecords(void* records, s32 n, s32 size, SortCompareFn cmp)
 {
     u8* base = (u8*)records;

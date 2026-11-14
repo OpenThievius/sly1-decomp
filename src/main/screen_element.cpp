@@ -396,6 +396,10 @@ void SetupScreenElementText(ScreenElement* self)
 // object_pool.cpp's last screen element (D_00274118, 0x280 bytes) ends: the linker's padding.
 Quadratic16 g_slideEaseOutCoefficients = { { 0.0f }, 2.0f, -1.0f, 0.0f };
 
+// Per-frame slide of a screen element between its hidden and shown positions. Mode 1 slides in
+// (blend rising 0 to 1 over the time slot 17 gives), 2 holds (ends after the hold time of slot
+// 18), 3 slides out (time of slot 19); the position follows an ease-out curve of the blend. It
+// calls slot 22 with the new mode.
 void UpdateScreenElementSlide(ScreenElement* self) {
     f32 t = *self->clock;
     s32 s = self->mode;
@@ -459,6 +463,9 @@ void SetScreenElementText(ScreenElement* self, const char* arg)
 
 }
 
+// Rewrites the element's text: a character the element's font lacks is wrapped in an escape that
+// selects font 3 or 4 where that has it, and a '/' followed by digits gets a small-digits escape.
+// The result replaces the text.
 void SubstituteScreenElementGlyphs(ScreenElement* self)
 {
     char buf[0x200];
@@ -508,6 +515,7 @@ void SetScreenElementScale(ScreenElement* self, f32 v)
     self->scale = v;
 }
 
+// Draws the element's frame, if any, and its text at its position and size.
 void DrawScreenElementText(ScreenElement* self)
 {
     u8 out[32];
@@ -612,6 +620,9 @@ void HideScreenElement(ScreenElement* self)
     }
 }
 
+// Changes a screen element's mode (0 hidden, 1 sliding in, 2 shown, 3 sliding out): computes how
+// far into the slide it is, snaps the position for 0 and 2, remembers the time and places the
+// element again when it was fully hidden or shown.
 void SetScreenElementMode(ScreenElement* self, s32 mode)
 {
     if (self->mode == mode) {
@@ -676,6 +687,10 @@ void SetScreenElementSize(ScreenElement *self, f32 x, f32 y) {
     PlaceScreenElement(self);
 }
 
+// Works out where a screen element shows and hides: it is placed inside the 640 x 492.8 screen,
+// after the other elements it is anchored to (relation 0 to 3 is right, left, below, above them),
+// with dx and dy as margins (0 centres; negative counts from the far edge). Then sets the hidden
+// position from the side it slides in from and moves the element to match its mode.
 void PlaceScreenElement(ScreenElement* self) {
     T217D_Place* r = self->place;
     f32 x0 = 0.0f;
@@ -801,6 +816,9 @@ void InitCounterCaption(T217D_E30* self)
     }
 }
 
+// Per-frame update of a counter caption: slides it, makes the shown value approach the target by
+// rate per second (at once for a negative value), calls the done callback once when it arrives,
+// rebuilds the text and sets the element's size to the text's.
 void UpdateCounterCaption(T217D_E30* self)
 {
     TextReader loc;
@@ -847,6 +865,7 @@ void UpdateCounterCaption(T217D_E30* self)
     }
 }
 
+// Draws the counter caption's text, faded by the pause menu's fade when that is up.
 void DrawCounterCaption(T217D_E30* self)
 {
     u8 out[0x20];
@@ -884,6 +903,9 @@ void DrawCounterCaption(T217D_E30* self)
     PopFontScale(self->font);
 }
 
+// Builds the text of a counter caption from its kind (index) and the shown value: the value with
+// its limit and a one-letter glyph suffix or prefix, a row of icons for kind 13, a percent for
+// 36, and empty text where the kind does not apply; then substitutes glyph escapes.
 void FormatCounterCaption(T217D_E30* self)
 {
     switch (self->index) {
@@ -988,6 +1010,8 @@ void UpdateTimerElement(T217D_510* self)
     }
 }
 
+// Draws the timer: a frame box, the first character (a fixed glyph), then the time text after it,
+// in the warning colour once the timer has warned.
 void DrawTimerElement(T217D_510* self)
 {
     Layout_137228 L;
@@ -1070,6 +1094,10 @@ void StopTimer(T217D_510* self)
     SetTimerState(self, 0);
 }
 
+// Per-frame update of the timer element (state 2 is running): plays tick sounds (a 10-second
+// countdown has its own pair of sounds at the tenths 9 and 4), advances the time by dt * rate,
+// raises the warning once at warnAt, ends at the limit (sound, state 0, onEnd) and rebuilds its
+// text when a displayed digit changes.
 void StepTimer(T217D_510* self, f32 dt)
 {
     f32 t = __builtin_fabsf(self->time);
@@ -1211,6 +1239,9 @@ static inline s32 StartGaugeCount(T217D_2E0* g)
     return cells;
 }
 
+// Sets up the gauge element: font, scale, bar size and position from the gauge constants, and the
+// number of segments and cells per segment according to the current level index (the fill starts
+// full for levels 2 and 3); the letter position is derived from the font's size.
 void InitGauge(T217D_2E0* self)
 {
     s32 n = 4;
@@ -1289,6 +1320,9 @@ void DecrementGaugeCount(T217D_2E0* self)
 
 RampProfile g_gaugeFillRamp = { 0.5f, 0.25f, 0.2f, 0.0f };
 
+// Draws the vertical gauge element: a dark background bar, a fill bar in proportion to the fill
+// value (which eases toward its target), whose colour flashes from red toward grey for about half
+// a second after a change, and the gauge's letter, which shakes for 0.75 s after a change.
 void DrawGauge(T217D_2E0* self)
 {
     Layout_137228 out;
@@ -1385,6 +1419,8 @@ void SetCaptionTextAndSize(T217D_330* self, const char* p)
     PopFontScale(self->font);
 }
 
+// Draws the element's frame and text, both faded by multiplying their alpha by the element's
+// blend.
 void DrawElementWithFadedFrame(T217D_330* self)
 {
     T217D_Word tmp;
@@ -1493,6 +1529,9 @@ void HideElementOrDropPendingText(T217D_380* self)
     }
 }
 
+// Draws a text element whose characters slide in one by one, each blended from its hidden x to
+// its shown x as the element's blend rises (the first character first), with the frame box
+// stretching along. In mode 2 it is drawn as plain text.
 void DrawSlidingGlyphElement(T217D_380* self)
 {
     LayoutByValue out;
@@ -1595,6 +1634,9 @@ void SetElementTextCopiedAfterSlideOut(T217D_3D0* self, const char* v)
     self->vt->m16(self, 3);
 }
 
+// Writes into buf the glyphs for the flags of a progress entry that mask asks for: bit 2 and bit
+// 4 a glyph each for whether the flag is set, bit 8 a glyph and, when set, a time as seconds
+// below 1, otherwise minutes and seconds.
 void FormatFlagGlyphs(char* buf, ProgressEntry* info, u32 mask)
 {
     u32 flags = info->flags;
@@ -1639,6 +1681,8 @@ void SetElementTextFromPackedEntry(ScreenElement* self, s32 value)
     }
 }
 
+// Sets the element's text to the name of a level entry (level a1, entry a2) followed by its flag
+// glyphs.
 void SetElementTextFromEntry(ScreenElement* self, s32 a1, s32 a2)
 {
     char buf[64];
@@ -1663,6 +1707,8 @@ void SetElementTextFromEntry(ScreenElement* self, s32 a1, s32 a2)
 // The names the level picker shows, by level (the first, empty, for none).
 const char* g_worldTitles[6] = { "", "Tide of Terror", "Sunset Snake Eyes", "Vicious Voodoo", "Fire in the Sky", "The Cold Heart of Hate" };
 
+// Sets the element's text to a world's title followed by its collected counts for each category
+// that has any (count and total, with a glyph).
 void SetElementTextFromIndexedCounts(ScreenElement* self, s32 idx)
 {
     char buf[0x200];
@@ -1708,6 +1754,9 @@ void HideElementOrDropCopiedText(T217D_3D0* self)
     }
 }
 
+// Draws a message element: its text, faded by the element's blend, with a translucent black bar
+// behind it at the bottom of the screen when it is not an announcement; hidden while the typed-
+// text caption box is on screen.
 void DrawMessageElement(T217D_3D0* self)
 {
     T217D_Word packed;
@@ -1803,6 +1852,8 @@ tail:
     self->vt->m15(self);
 }
 
+// Draws the element's text plus the glyph "L" of font 1 on top, with its size pulsing with the
+// elapsed time.
 void DrawHintGlyphElement(T217D_420* self)
 {
     Layout_137228 buf;
@@ -1832,6 +1883,10 @@ void InitLetterboxElement(T217D_560* self)
     self->outTime = 0.5f;
 }
 
+// Sets the mode of the element (a screen element 0x560) but lets the screen fade override it:
+// while the fade is in mode 1 it ignores a change to 3 or 0; in mode 3 it shows or hides the
+// element depending on a flag and, to show it, posts the caption of the current level entry.
+// Closes the caption and the cycling glyph element when going to 0.
 void SetElementModeFollowingFade(T217D_560* self, s32 newval)
 {
     T217D_3D0* g;
@@ -1875,6 +1930,8 @@ void SetElementModeFollowingFade(T217D_560* self, s32 newval)
     SetScreenElementMode(self, newval);
 }
 
+// Draws the black bar at the bottom of the screen, 66.4 high at full blend (the screen is 492.8
+// high), as one sprite on the GS.
 void DrawLetterboxElement(T217D_560* self)
 {
     f32 x = self->blend * 66.40001f;
@@ -1911,6 +1968,8 @@ and the Thievius Raccoonus");
     }
 }
 
+// Draws a title element: as a textured sprite of its icon, with the size of the element, when it
+// has one; otherwise as plain text.
 void DrawTitleElement(T217D_470* self)
 {
     if (self->icon != 0) {
@@ -1963,6 +2022,8 @@ void InitPromptElement(T217D_4C0* self)
     RebuildPromptText(self);
 }
 
+// Rebuilds the prompt text: two lines from the prompt texts when a controller is present (grey),
+// or the no-controller text (red); then sizes the element to the text.
 void RebuildPromptText(T217D_4C0 *self)
 {
     ColoredText loc;
@@ -2025,6 +2086,8 @@ void UpdatePromptElement(T217D_4C0* self)
 
 extern f32 D_00272B6C;
 
+// Draws the prompt element: its frame and text, positioned between hidden and shown by the blend,
+// with the colour's alpha pulsing as a sine of the elapsed time.
 void DrawPromptElement(T217D_4C0* self)
 {
     LayoutBuilder out;
@@ -2055,6 +2118,9 @@ void DrawPromptElement(T217D_4C0* self)
     PopFontScale(self->font);
 }
 
+// Draws one line between two points (a0 to a2 and a3 to a5 are the x, y and z of the ends in GS
+// units) in the RGBA colour given, with alpha blending when the alpha is below 255; flag selects
+// another register value.
 void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* color, s32 flag)
 {
     u8* rgba = (u8*)color;
@@ -2097,6 +2163,8 @@ struct PopCurve {
     f32 k;
 };
 
+// Draws the element's text scaled by a popping curve of the time since it appeared (it shrinks
+// from the start scale to a floor along a parabola); nothing is drawn when the size is 0.
 void DrawLetterGlyphElement(ScreenElement* self)
 {
     PopCurve curve;
@@ -2162,6 +2230,9 @@ void SetElementModeClearingFlag(T217D_600* self, s32 flag)
     SetScreenElementMode(self, flag);
 }
 
+// Draws the line of the completion percent with a changing glyph in front, using the current time
+// to slide it in and out (it is kept shown for 2 seconds in mode 2, then closed after one second
+// once the background job has ended).
 void DrawCyclingGlyphElement(T217D_600* self)
 {
     u8 out[0x20];

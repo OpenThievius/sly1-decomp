@@ -367,6 +367,10 @@ void* InvertMatrix4x4(void* a0, void* a1);
 Mat4R MultiplyMatrices(const Mat4R& a, const Mat4R& b);
 void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 
+// Rebuilds the oscillator's per-vertex tables after its parts or entries changed (framesDirty):
+// each vertex of a part's mesh blocks gets a weight (1, or a ramp of its distance along the
+// part's axis), and each entry stores its weighted phase terms (cos and sin) or weighted offset
+// from a pivot for EvaluateOscillator.
 void RefreshOscillatorFrames(Oscillator* self)
 {
     for (OscPart* part = (OscPart*)self->partList; part != 0; part = part->next) {
@@ -525,6 +529,10 @@ static inline Vu0::Vec WeightOf(u128 w)
     return r;
 }
 
+// Gives where the oscillator's wave entries (kind 0) move a point at the current game time: outA
+// gets the moved point, outB the matching second vector (the derivative), and outDeltas the
+// displaced copies of three offset vectors relative to it. Entries whose period is shorter than
+// time are skipped.
 void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB)
 {
     Vu0::Vec pos = Vu0::Vec::Of(*in);
@@ -599,6 +607,9 @@ f32 HashToUnitFloat(s32 a0)
     return (f32)n * 4.656612873077393e-10f;
 }
 
+// One-dimensional smooth noise of the game time: hashes the integers on each side of t = 2x *
+// time + y and blends them with a smoothstep; z (0 to 1) scales the amplitude, alternating which
+// of the two neighbours is damped.
 f32 SampleSmoothNoise(f32 x, f32 y, f32 z)
 {
     f32 t = (x + x) * g_gameTime + y;
@@ -658,6 +669,10 @@ struct OscillatorEntry {
 
 void RefreshOscillatorFrames(Oscillator* self);
 
+// Per-frame evaluation of the oscillator (once per game time): for each entry fills its frame
+// rows, either from a sine/cosine of the phase (frequency times the game time plus an offset)
+// along two vectors, or from a rotation matrix built from two noise-blended angles; the rows are
+// stored as the difference from identity.
 void EvaluateOscillator(Oscillator* self)
 {
     if (g_gameClock.time == self->lastTime) {
@@ -874,6 +889,9 @@ void GetObjectWorldRotation(BaseObject* self, Mat02* out)
     TransformRotationBetweenFrames((PlacedObject*)self->parent, 0, (Mat02*)((u8*)self + 0x50), out);
 }
 
+// Looks up the arrival point for an id: first the object of class 0x101 with that id under the
+// given parent, otherwise among the objects of kind 0x74 the one with the same id, or else one
+// picked while a screen fade of style 2 is running, or any that has a record.
 HoldingMember* FindArrivalPoint(s32 id, s32 parent)
 {
     HoldingMember* found = 0;
@@ -914,6 +932,9 @@ HoldingMember* FindArrivalPoint(s32 id, s32 parent)
     return found;
 }
 
+// Reads an arrival point from a stream: rotation, position, its property records, the objects to
+// create (a type and two ids each, loaded with slot 10) and the list of ids of objects to start
+// on arrival.
 void LoadArrivalPoint(TransformSet* self, void* other)
 {
     ReadBufferedRotation3((BufferedStream*)other, &self->rot);
@@ -978,6 +999,10 @@ struct ArrivalWatcher {
 void SetObjectSubGroupState(ObjectSubGroup* self, s32 state);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Moves the player (or just the camera, when there is no player) to the arrival point: places it
+// clear of contacts with the point's direction, zero spin and its velocity, starts the animations
+// and watchers of the point, resets sub groups, snaps the camera behind it and sends script event
+// 2.
 void PlaceAtArrivalPoint(TransformSet* self)
 {
     Vec02 pos;
@@ -1064,6 +1089,10 @@ ObjectSubGroup* FindActiveObjectSubGroup(void)
     return found;
 }
 
+// Starts leaving the level: depending on the current level and entry it starts a fade-out to the
+// entry (StartObjectFade), finishes the active sub group (clearing its object count when flag is
+// set) or starts the screen fade with a default request. n is passed on to the fade as its
+// argument.
 void BeginLevelExit(s32 flag, s32 n)
 {
     GameProgress* ctx = g_saveData;
@@ -1107,6 +1136,9 @@ larg:
     StartScreenFade(&g_screenFade, &args, n);
 }
 
+// Reads an object sub group from a stream: its entries and keys, rotation, position, mesh tables
+// and property records, then creates and loads each of its child objects (with slot 3 called on
+// each).
 void LoadObjectSubGroup(ObjectSubGroup* self, void* s3)
 {
     ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)&self->levelEntry);
@@ -1135,6 +1167,8 @@ void LoadObjectSubGroup(ObjectSubGroup* self, void* s3)
     }
 }
 
+// Starts an object sub group: starts each of its items (slots 15 and 16) and, when f2D4 is set
+// and the current entry's flag 2 is clear, calls slot 3 on the top object of its tree.
 void StartObjectSubGroup(ObjectSubGroup* self)
 {
     StartPlacedObject(self);
@@ -1175,6 +1209,10 @@ void SetObjectSubGroupState(ObjectSubGroup* self, s32 state)
     }
 }
 
+// Finishes a sub group when the player reaches it: ends a best-time run if the timer is running,
+// or exits the level (BeginLevelExit) when it is an exit, otherwise removes the camera
+// controllers, starts its objects' animations and sets the fade time for state 5; sends script
+// event 2.
 void StartObjectSubGroupFinish(ObjectSubGroup* self)
 {
     BaseObject* key;
@@ -1258,6 +1296,10 @@ struct FacePoint;
 s32 IsPointInsideFaceTree(TreeNode03* self, FacePoint* value);
 void StartObjectSubGroupFinish(ObjectSubGroup* self);
 
+// Per-frame update of a sub group, a state machine on where the player is relative to its face
+// tree: state 5 waits for fadeTime and starts the fade, state 4 shows the entry's caption, 3
+// finishes when the player is inside, 1 times out toward 3, 0 goes to 1 once the player is
+// outside.
 void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
 {
     Vec02 local;
@@ -1375,8 +1417,12 @@ void InitContactTracker(ContactTracker* self)
     self->flags538 = (self->flags538 & ~0xF000000000ULL) | 0x2000000000ULL;
 }
 
+// Fills the tracker's list of nodes (at most 32): the owner's children of class 0x7E or 0x6E,
+// then the objects found by the tracker's list of keys.
 void StartContactTracker(ContactTracker* self) { StartPlacedObject(self); FillTrackedNodes(&self->rec); }
 
+// Per-frame update of a contact tracker: collects the objects of kind 0x41 that touch it or its
+// children (with the contact point and normal), then queries a node for each.
 void CollectTouchingObjects(ContactTracker* self, f32 dt) {
     GathererQuery tmp;
     ObjectGatherer* p;
@@ -1443,6 +1489,10 @@ void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out);
 struct TreeNode03;
 s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
 
+// Per-frame update of a collider that reacts to the active switched collider overlapping it (part
+// mode 1 or 4): checks that the bounding spheres overlap, then tests the other's mesh or point
+// against its own tree and builds the contacts (sphere-sphere, mesh, or mesh pair). Returns early
+// when nothing touches.
 void UpdateC37(C37* self, f32 dt)
 {
     TrackerHit hit;
@@ -1560,6 +1610,10 @@ void FillTrackedNodes(Rec36* self)
     g_activeListFrames = it.prev;
 }
 
+// Launches the player at the best target of a tracked choice: when the choice has candidates it
+// computes the arc (ComputeTargetArc), places the player there with zero velocity and spin and
+// the heading, and sets player state 2/2; otherwise it launches at the target
+// (LaunchPlayerAtTarget).
 void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
 {
     TargetLaunchFrame f;
