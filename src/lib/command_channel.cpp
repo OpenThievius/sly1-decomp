@@ -50,11 +50,12 @@ struct ChannelRequest {
     void* buffer;
 };
 
+// One transfer of the DMA chain to the IOP: its source, its destination, its size and its mode word.
+struct DmaTransfer { s32 src; s32 dst; s32 size; s32 mode; };
+
 // The first words of a command packet: its size in the low byte (and the length of the data that
 // goes with it above), the data's address, and the command.
 struct PacketHeader { s32 sizeCount; s32 addr; s32 cmd; };
-// One transfer of the DMA chain to the IOP: its source, its destination, its size and its mode word.
-struct DmaTransfer { s32 src; s32 dst; s32 size; s32 mode; };
 
 struct ImageEndRecord { s32 a; void* b; };
 extern u8 D_0064C700[];

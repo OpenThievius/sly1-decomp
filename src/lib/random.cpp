@@ -5,17 +5,18 @@
 // g_libraryState points to. No data of its own.
 #include "common.h"
 
-struct RandomState_1F6708 { u8 pad[0x58]; u32 state; };
-extern RandomState_1F6708* g_libraryState;
+// The part of the library state the generator uses: its seed, at 0x58.
+struct LibraryState { u8 pad[0x58]; u32 randomSeed; };
+extern LibraryState* g_libraryState;
 
 void SeedRandom(u32 value)
 {
-    g_libraryState->state = value;
+    g_libraryState->randomSeed = value;
 }
 
 u32 NextRandom(void)
 {
-    u32 state = g_libraryState->state * 0x41C64E6Du + 0x3039u;
-    g_libraryState->state = state;
+    u32 state = g_libraryState->randomSeed * 0x41C64E6Du + 0x3039u;
+    g_libraryState->randomSeed = state;
     return state & 0x7FFFFFFFu;
 }

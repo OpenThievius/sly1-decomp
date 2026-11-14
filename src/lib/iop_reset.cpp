@@ -11,36 +11,42 @@
 // .rodata holds four "TTY:" messages no code reads.
 #include "common.h"
 #include "asm_func.h"
+#include "semaphore_params.h"
 
-// A transfer to the IOP: the data, where it goes, its size and its flags.
-struct Span_1F9AD8 {
-    void* a;
-    s32 b;
-    s32 c;
-    s32 d;
+// A transfer to the IOP: the data, where it goes, its size and its flags (the command channel's
+// DmaTransfer, which holds the address as a word).
+struct IopTransfer {
+    void* src;
+    s32 dst;
+    s32 size;
+    s32 mode;
 };
 
 // The reset command: the channel's header, the command, the argument's length and the argument
 // (the 0x68 bytes sent), then the rest of the label, which no code reads.
-struct Cmd_1F9AD8 {
+struct IopResetCommand {
     union {
         u64 hdr;
         s32 w[2];
     };
-    s32 w8;
+    s32 cmd;      // 0x08
     s32 padC;
-    s32 len;
-    void* q;
+    s32 len;      // 0x10: the argument's length
+    void* q;      // 0x14: the second argument
     u8 text[0x50];
     u8 rest[0x418];
 };
 
-// The kernel's semaphore parameters (func_001F6B20 creates one), two of them side by side, eight
-// words apart: kept as one frame, which is what the compiler gives the two records declared together.
-struct SemaphoreParamsPair { s32 w[16]; };
+// Two semaphore parameter records side by side, eight words apart: kept as one frame, which is
+// what the compiler gives the two records declared together.
+struct SemaphoreParamsPair {
+    SemaphoreParams first;
+    u8 pad18[8];
+    SemaphoreParams second;
+};
 
 // A system call to install: its number and its handler.
-struct Syscall_1F9E50 {
+struct SyscallEntry {
     s32 num;
     s32* (*handler)(s32 value);
     s32 f8;
@@ -48,17 +54,17 @@ struct Syscall_1F9E50 {
 
 s32* FindKernelWord(s32 value);
 
-Syscall_1F9E50 D_002771D8 = { 0x83, FindKernelWord, 0 };
+SyscallEntry D_002771D8 = { 0x83, FindKernelWord, 0 };
 s32 D_002771E4;
 s32 D_002771E8;
 
-static Cmd_1F9AD8 D_00628E40 __attribute__((aligned(64)));
+static IopResetCommand D_00628E40 __attribute__((aligned(64)));
 
 void StopIopDma(char* text, void* q);
 s32 ReadIopRegister(u32 a0);
 u32 WriteIopRegister(u32 reg, u32 value);
-extern "C" s32 StartIopDma(Span_1F9AD8* span, s32 n);
-extern "C" s32 NewSemaphore(SemaphoreParamsPair* q);
+extern "C" s32 StartIopDma(IopTransfer* span, s32 n);
+extern "C" s32 NewSemaphore(SemaphoreParams* q);
 void InstallFirstKernelPatch();
 s32 StartRequestThread();
 extern "C" void PrintBuffered(const char* fmt, ...);
@@ -68,12 +74,12 @@ void SetSystemCallHandlerForWordSearch(s32 num, s32* (*handler)(s32 value));
 s32 RunKernelWordSearchSyscall(s32* (*handler)(s32 value));
 void InstallSecondKernelPatch();
 void ClearImageEndRecordWord(void);
-extern "C" void WriteBackDataCacheRange(Cmd_1F9AD8* a0, s32 a1);
+extern "C" void WriteBackDataCacheRange(IopResetCommand* a0, s32 a1);
 void InstallThirdKernelPatch();
 
 s32 SendIopReset(char* text, void* q)
 {
-    Span_1F9AD8 span;
+    IopTransfer span;
     s32 len;
     s32 w;
 
@@ -89,13 +95,13 @@ s32 SendIopReset(char* text, void* q)
     }
     D_00628E40.w[1] = 0;
     D_00628E40.len = len;
-    D_00628E40.w8 = (s32)0x80000003;
+    D_00628E40.cmd = (s32)0x80000003;
     D_00628E40.hdr = D_00628E40.hdr & 0xFFFFFFFF000000FFULL;
     *(u8*)&D_00628E40 = 0x68;
-    span.a = &D_00628E40;
-    span.b = w;
-    span.c = 0x68;
-    span.d = 0x44;
+    span.src = &D_00628E40;
+    span.dst = w;
+    span.size = 0x68;
+    span.mode = 0x44;
     WriteBackDataCacheRange(&D_00628E40, 0x68);
     WriteIopRegister(4, 0x40000);
     if (StartIopDma(&span, 1) != 0) {
@@ -159,12 +165,12 @@ ASM_FUNC(func_001F9DA8);
 void CreateLibrarySemaphores(void)
 {
     SemaphoreParamsPair f;
-    f.w[1] = 1;
-    f.w[2] = 1;
-    f.w[9] = 1;
-    f.w[10] = 1;
-    D_002771E4 = NewSemaphore(&f);
-    D_002771E8 = NewSemaphore((SemaphoreParamsPair*)&f.w[8]);
+    f.first.maxCount = 1;
+    f.first.initCount = 1;
+    f.second.maxCount = 1;
+    f.second.initCount = 1;
+    D_002771E4 = NewSemaphore(&f.first);
+    D_002771E8 = NewSemaphore(&f.second);
 }
 
 s32* FindKernelWord(s32 value)

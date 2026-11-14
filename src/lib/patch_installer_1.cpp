@@ -96,12 +96,12 @@ u32 D_002770C0[10] = {
     0x00000000, 0x00000000,
 };
 
-struct Slot_1F6F48 {
+struct SyscallPatchSlot {
     s32 key;
     void* value;
 };
 
-Slot_1F6F48 D_002770E8[8] = {
+SyscallPatchSlot D_002770E8[8] = {
     { 0x5A, (void*)CopyKernelWords },
     { 0x5B, (void*)0x80076000 },
     { 0xFC, 0 },
