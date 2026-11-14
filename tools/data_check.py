@@ -209,6 +209,8 @@ def run():
             eu, status, note = check_global(obj, row, resolver, image, whole)
             rows[row[0]] = ("-" if eu is None else "%08X" % eu, row[2], status, note)
     write(rows)
+    import padding
+    padding.write("eu")     # the alignment padding between the data that matches (config/eu/padding.tsv)
     return 0
 
 

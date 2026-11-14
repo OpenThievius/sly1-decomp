@@ -53,6 +53,20 @@ class PaddingRuleTest(unittest.TestCase):
             self.assertLess(int(size), int(align))
             self.assertEqual((int(addr, 16) + int(size)) % int(align), 0)
 
+    def test_pal_table_lies_between_the_data_pal_credits(self):
+        # PAL's runs are zeros the same rule allows, outside every global that matches PAL's
+        # bytes and every original data row, each ending on its section's alignment.
+        path = padding.table_path("eu")
+        rows = padding.read_table(path)
+        self.assertTrue(rows)
+        credited = progress.c_data("eu") + progress.original_data("eu")
+        for addr, size in rows:
+            self.assertFalse([a for a, s in credited if a < addr + size and addr < a + s and s])
+        for line in path.read_text().splitlines()[1:]:
+            addr, size, align, _before = line.split("\t")
+            self.assertLess(int(size), int(align))
+            self.assertEqual((int(addr, 16) + int(size)) % int(align), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
