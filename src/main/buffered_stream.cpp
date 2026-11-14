@@ -213,6 +213,10 @@ struct SectorReadIssue {
     }
 };
 
+// Refills a stream that reads the disc in whole sectors from a ring of chunks: moves the position
+// past what was consumed, wraps it to the next chunk of the ring when it reaches the end of one,
+// and requests the next sectors (the chunk size is the total divided by the chunk count, in
+// 0x800-byte sectors).
 void RefillBufferedStreamFromSectors(SectorStreamState* self)
 {
     self->pos += self->rem;
@@ -318,6 +322,9 @@ void RefillBufferedStream(BufferedStream* self)
 void RefillBufferedStream(BufferedStream* d);
 extern "C" void* CopyBytes(void* dst, void* src, s32 n);
 
+// Decompresses the next block of the stream into the scratchpad at 0x70000000 (0x2000 bytes at a
+// time): a flag byte per eight items says whether each is a literal byte or a back-reference copy,
+// in the manner of an LZ scheme; the bytes left over at the end are carried to the next call.
 void UnpackBufferedStream(BufferedStream* d)
 {
     u8* base = (u8*)0x70000000;
@@ -397,6 +404,8 @@ void UnpackBufferedStream(BufferedStream* self);
 void RefillBufferedStream(BufferedStream* self);
 void CopyMemory(void* dst, void* src, u32 size);
 
+// Reads the given number of bytes from the stream into out, refilling the buffer (by unpacking or
+// reading the next block) whenever it runs dry. Does nothing for a stream in an error state.
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out)
 {
     u8* dst = (u8*)out;
@@ -642,6 +651,8 @@ f32 ReadBufferedFloat(BufferedStream* r);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(s32 size);
 
+// Reads a collision mesh from the stream: the radius, the vertices (16 bytes each), then the faces
+// (32 bytes each) with their points and words, and the edge data.
 void ReadMeshFromStream(BufferedStream* in, Mesh03* mesh)
 {
     s32 i = 0;
@@ -708,6 +719,9 @@ void ReadMeshFromStream(BufferedStream* in, Mesh03* mesh)
 u16 ReadBufferedU16(BufferedStream* self);
 void* AllocateZeroedFrontMemory(s32 size);
 
+// Reads a face tree (a binary tree over a mesh's faces) from the stream: the counts, then for each
+// node the face, the two child indexes (0xFFFF for none) and the rest of its record, linked to the
+// nodes and faces by pointer.
 void ReadFaceTree(BufferedStream* self, Mesh03* in, Tree03* out)
 {
     s32 x = ReadBufferedU16(self);
@@ -745,6 +759,9 @@ void ReadBufferedVector3(BufferedStream* src, void* dst);
 f32 ReadBufferedFloat(BufferedStream* r);
 u32 ReadBufferedU32(BufferedStream* self);
 
+// Reads an array of linked items (32 bytes each) from the stream: a count, then each item's vector,
+// a float and two link words; a link with the top bit set is kept as a plain value, otherwise it is
+// an index turned into a pointer into the same array.
 void ReadLinkedItemArray(BufferedStream* src, s32* count, LinkedItem** out)
 {
     s32 n = ReadBufferedU16(src);

@@ -409,6 +409,9 @@ struct PayloadPoolInit {
     }
 };
 
+// Initialises the five pools that hold the script values' payloads (vectors of 0x10 bytes, matrices
+// of 0x40, vectors of 0x10, pairs of 8 and triples of 0xC), each with its capacity and reference
+// counts.
 void InitPayloadPools(void)
 {
     PayloadPoolInit::Load(((u8*)&g_vectorAPayloadPool), 0x10, &g_vectorAPayloadCapacity, &g_payloadRefCounts[0]);

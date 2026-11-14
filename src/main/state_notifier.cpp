@@ -411,6 +411,9 @@ static inline void SetRotationProductRows(PlacedObject* o, const Mat02& a, const
     o->rot = r;
 }
 
+// Moves the notifier for its state each frame (dt in seconds; quiet suppresses the sounds): state 4
+// makes it orbit the active controlled object, steering its angle toward the heading of the object
+// it leads, and the other states move it by their own rules (see the cases).
 void MoveStateNotifier(StateNotifier* self, f32 dt, s32 quiet)
 {
     switch (self->state) {
@@ -577,6 +580,9 @@ extern const Vec02 g_unitZVector;
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 f32 SplitVectorAlongAxis(Vec02* v, const Vec02* axis, Vec02* along, Vec02* across);
 
+// Bounces the notifier off the surfaces around it: gathers the colliders in a box of its collision
+// radius, finds the nearest triangle hit among the eligible ones and reflects its motion off that
+// surface's normal.
 void BounceStateNotifierOffSurfaces(StateNotifier* self)
 {
     typedef Vu0::Vec Vec;
@@ -653,6 +659,10 @@ struct ActiveNotifierData {
 
 void* GetActiveSwitchedColliderData(void);
 
+// When the notifier is armed and the active switched collider has a tracked object, checks the
+// squared distance to it against g_notifierTriggerRadius and the collider's own trigger radius;
+// when inside it calls the notifier's method m2F(1) (collect), otherwise it tests the segment to
+// the object for a hit.
 void TriggerStateNotifierNearPlayer(StateNotifier* self)
 {
     Vec02 hit[3];
@@ -714,6 +724,9 @@ void CompleteSoundNotifiers(World* self);
 void* GetActiveSwitchedColliderData(void);
 extern World* g_currentWorld;
 
+// Per-frame update of a notifier: updates the placed object and tracks whether it is below the
+// camera's plane; when that changes it may (by splashChance and a retrigger delay) start an effect
+// at the anchor on the side the camera faces.
 void UpdateStateNotifier(StateNotifier* self, f32 dt)
 {
     s32 below = 1;
@@ -824,6 +837,9 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
 // it and splats it itself, so cross-jumping leaves only the arms' own loads in them.
 Mat4A MultiplyMatrices(const void* a, const void* b);
 
+// Draw hook that scales the notifier: in states 4 and 5 the scale grows (state 4, over
+// g_notifierGrowTime seconds from the state's start) or shrinks and is applied to the draw
+// transform; does nothing for objects flagged hidden (bit 32).
 void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
 {
     if (self->flags & (1ULL << 32)) return;
@@ -1042,6 +1058,9 @@ void UpdateTimeRangeNotifier(TimeRangeNotifier* self, f32 dt)
     }
 }
 
+// Gives the player a spare: when no sound notifier of class 0x56 is free it raises the spare count
+// by one (up to the limit), otherwise it starts that notifier and places it where the spare
+// counter's screen point is unprojected into the world.
 void PlaceSpareSoundNotifier(World* self)
 {
     SoundNotifier* obj;
@@ -1078,6 +1097,9 @@ void AddReserveUnit(void)
     g->reserveCount = r;
 }
 
+// Counts one pickup in the save data; at 100 it resets the count and starts a spare (a particle
+// system that calls PlaceSpareSoundNotifier when done) when the spare count is below its limit,
+// else adds a reserve unit when fewer than 99.
 void CountPickupTowardHundred(void* self)
 {
     Effect* s = (Effect*)self;
@@ -1108,6 +1130,9 @@ void CountPickupTowardHundred(void* self)
     }
 }
 
+// Switches the effect notifier's state: 0 picks a random time left (timeMin to timeMax seconds), 1
+// creates its effect (class 0x10, with its own parameters) at its position and orientation; other
+// states pass on to the base.
 void SetEffectNotifierState(TimeRangeNotifier* self, s32 mode)
 {
     TimeRangeNotifier* s = self;
@@ -1196,6 +1221,9 @@ void InitSaveNotifier(SaveNotifier* self)
     }
 }
 
+// Switches the save notifier's state: 1 marks the current entry as collected (flag 2) and counts it
+// in the level record (once), shows its caption, calls the active switched collider's method m4E
+// and sends script event 2, then goes on to state 2.
 void SetSaveNotifierState(SaveNotifier* self, s32 mode)
 {
     if (self->state == mode) return;
@@ -1305,6 +1333,9 @@ struct Candidate_00148938 {
 
 void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
 
+// Collects up to max free objects of class kind (the ones not held) nearest to the viewer (the
+// active switched collider, or else the camera) into out, and returns how many were found; it sorts
+// the candidates by distance.
 s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out)
 {
     Vec02 origin;
@@ -1347,6 +1378,9 @@ s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out)
     return max;
 }
 
+// Places n objects of class a1 (from GatherObjectsOfKind) evenly around a circle of angle step
+// 2*pi/n at a point, starting at a random angle, and starts each one; the objects are written into
+// arr when it is given.
 s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec02* a2, s32 n, StateNotifier** arr)
 {
     StateNotifier** p;
@@ -1471,6 +1505,10 @@ void AddReserveUnitNow(void* self)
     }
 }
 
+// Switches the countdown notifier's state: 0 picks a random time left (seconds, timeMin to timeMax)
+// when f338 is set, and 1 creates its effect (or adds a reserve unit when no effect is free), shows
+// the reserve count caption, sets its flag-table bit, plays sound 0x69 and tells its listener, then
+// goes on to state 2.
 void SetCountdownNotifierState(CountdownNotifier* self, s32 mode)
 {
     if (self->state == mode) return;

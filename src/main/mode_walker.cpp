@@ -199,6 +199,9 @@ void InitModeWalkerObject(ModeWalker* self)
     self->pulseStartTime = -10.0f;
 }
 
+// Start of a mode walker: starts the path follower, resolves its links, creates its state walker,
+// adds a matrix attachment to its object, expresses the object's position in its parent frame,
+// enters mode 1, and sets up the spinning sprite element's icon (animation 0x36A) with zero alpha.
 void StartModeWalkerObject(ModeWalker* self)
 {
     StartPathFollower(self);
@@ -306,6 +309,9 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
     }
 }
 
+// Per-frame update of the mode walker: updates it as a path follower, then for each contact with a
+// part of mode 1 or 4 offers that part's owner chain a contact message (method m47) until one of
+// them handles it.
 void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
 {
     s32 buf[4];
@@ -355,6 +361,9 @@ static inline void SetMatrixRows(Mat02& m, const s128& a, const s128& b, const s
     Vu0::Q(m.r[2]) = (u128)c;
 }
 
+// Recomputes the walker's frame after it moved: updates the path follower frame and, when it has a
+// path and a parent object, turns its rotation by the parent's and by a basis built from the path
+// direction at the walker's time.
 void RecomputeModeWalker(ModeWalker* self)
 {
     RecomputePathFollowerFrame(self);
@@ -398,6 +407,9 @@ void HandleModeWalkerActivation(ModeWalker* self, void* active)
     }
 }
 
+// Draw hook that tints the walker while its pulse is active: the colour is blended from the base
+// 0x800000A0 by a polynomial in a fade value (which grows over 2 s once the mode has changed) and
+// in the cosine of the time since the pulse began (10 radians per second).
 void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
 {
     Rgba4 c;
@@ -464,6 +476,9 @@ void LaunchPlayerFromModeWalker(void* unused, void* obj_)
     SetPlayerState(obj, 4, 0x2B);
 }
 
+// Handles a request to the walker: refuses when its method m4B says no, starts the colour pulse
+// when a spare is available, records the time, and then sends a launch message that starts the
+// walker's reaction (see the spare-count branches).
 s32 AcceptModeWalkerRequest(ModeWalker* self, s32* arg)
 {
     LaunchMessage loc;
@@ -531,6 +546,9 @@ void ExtractModeWalkerContacts(ModeWalker* self)
     ExtractContactsByPartMode(self, (Contact03**)((u8*)self + 0xC04));
 }
 
+// Changes the walker's mode (0 to 4): leaving mode 2 or 3 records the time of the change for the
+// tint, then each new mode sets the state walker's target (0x35E for mode 0 and so on) and the
+// follower's behaviour.
 void SetModeWalkerMode(ModeWalker* self, s32 mode)
 {
     s32 old;
@@ -578,6 +596,10 @@ void SetModeWalkerMode(ModeWalker* self, s32 mode)
 extern u8 g_class75List[];
 
 
+// Moves the element's aim point toward the nearest candidate: each object of the class 75 list that
+// is in front of the camera (depth at least 100) is projected to the screen, scored by its distance
+// from the current aim point scaled by its apparent size, and the best one is chosen; the pad stick
+// input is then applied around it.
 void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad)
 {
     Vec02 p;
@@ -630,6 +652,9 @@ struct SpriteIcon {
 
 extern f32 g_frameStep;
 
+// Draws the spinning sprite element (an icon): its alpha fades toward 1 while menus and fades are
+// clear and toward 0 otherwise (snapping at once when the camera snaps), and when visible it draws
+// the icon turned by the element's angle.
 void DrawSpinningSpriteElement(T217D_BF0* self)
 {
     Rgba4 col;

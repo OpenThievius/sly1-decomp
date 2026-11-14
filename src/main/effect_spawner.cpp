@@ -815,6 +815,9 @@ struct MeshData {
     Vec02 extent;           // 0x20
 };
 
+// Reads a mesh for spawning on its surface from the stream: the vertices, then each triangle with
+// its three vertex indexes and area (the areas are summed, apparently so a random point can be
+// chosen by area), and builds each triangle's normal.
 void ReadSpawnMesh(void* p, void* other)
 {
     MeshData* m = (MeshData*)p;
@@ -865,6 +868,8 @@ void ReadCappedWordList(CappedWordList* self, s32 count, void* unused, void* src
     }
 }
 
+// Loads an effect spawner from the stream: its record, the placed object's data, an optional path
+// curve (index byte, -1 for none), a mesh for kind 4 and the capped word list.
 void LoadEffectSpawner(EffectSpawner* self, BufferedStream* count)
 {
     void* mem = AllocateFrontMemory(0x200);
@@ -901,6 +906,9 @@ void ReparentEffectSpawnerToSource(EffectSpawner* self)
     self->desc->m15(self, (BaseObject*)self->rec->target);
 }
 
+// After loading, finds the objects the spawner refers to by id (its target, the two ends, and a
+// kind 3 object) and stores them in its own record; queues ReparentEffectSpawnerToSource when it
+// has a source object. Does nothing for a spawner with no ids.
 void ResolveEffectSpawnerLinks(EffectSpawner* self)
 {
     Rec50* s2;
@@ -1135,6 +1143,10 @@ void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f);
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
 s32 IsEffectSpawnerActive(EffectSpawner* self);
 
+// Per-frame update of an effect spawner: updates the placed object, then, when the spawner is
+// active and one of its linked objects is attached (and near the camera), spawns effects from its
+// record. It cycles the spawner between active and idle by random delays in seconds
+// (delayMin..delayMax and active.lo..hi) and wraps its particles into the box.
 void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
 {
     ListFrame frame;
@@ -1796,6 +1808,10 @@ void InitSpawnRing(s32 n, SpawnSpan* span, s32 k, SpawnRing* out) { if (n > 0) {
 void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
 
+// Gives the direction of particle number index of a ring spawn: the index is split into a step
+// along the ring (index / count) and one across it (index % count), each adds an angle (with
+// optional random jitter), the angles become a direction of a random length in the span, flattened
+// in z, and turned into the frame of axis.
 void ComputeSpawnRingDirection(SpawnRing* ring, SpawnSpan* range, Vec02* axis, s32 index, Vec02* out, f32 jitter, f32 flatten)
 {
     Vec02 dir;
@@ -1829,6 +1845,9 @@ struct SpawnPlacement {
     f32 hi64;               // 0x64
 };
 
+// Picks a direction, start time and end time for particle index: the direction from the ring, a
+// start time randomly before now, the end time start plus life, and a random push of the position
+// along the direction.
 void ChooseSpawnDirectionAndLifetime(SpawnPlacement* self, SpawnRing* ring, s32 unused, s32 index, Vec02* pos, Vec02* axis,
                    Vec02* dir, f32* start, f32* end)
 {
@@ -1843,6 +1862,9 @@ void ChooseSpawnDirectionAndLifetime(SpawnPlacement* self, SpawnRing* ring, s32 
     }
 }
 
+// Spawns effects for a spawn record in its owner mode: finds (or acquires and caches in the slot h)
+// the effect owner for the record, copies the record's margin into it, and gives it n entries with
+// positions pos and the other arrays.
 void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* q2, f32* v5, f32* v6)
 {
     u8* s7 = AT(u8*, self, 0x7C);
@@ -2059,6 +2081,9 @@ void ComputeChainedWorldFrame(void* a, void* frame, void* out);
 // Left in this order: retail's call here evaluates the time before the pointers.
 void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 
+// Generates two sets of spawn arrays for the record (for the effects that need a start and an end):
+// the second set through the record's own sub-record, then, for each of the n entries, the pair of
+// values the first set needs.
 void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* second)
 {
     SpawnFrame frame;
@@ -2111,6 +2136,9 @@ void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* s
     AT(Rec50*, r, 0x90)->target = saved;
 }
 
+// Generates the arrays for a spawn of "a" effects from record b, then spawns them as effect owners
+// (record kind 1) or as particle chunks (otherwise, with a second setup pair for kind 2). Memory
+// for the arrays is taken from the back-memory mark.
 void SpawnEffectsFromRecord(s32 a, Rec50* b, void* c)
 {
     SpawnSetup f;
@@ -2134,6 +2162,8 @@ void SpawnEffectsFromRecord(s32 a, Rec50* b, void* c)
     PopBackMemoryMark();
 }
 
+// Spawns "a2" effects at a point without a spawner: builds a temporary spawn record from the given
+// positions, block and tail (kind 1) and calls SpawnEffectsFromRecord with it.
 void SpawnEffectsAt(Quad16* self, Quad16* a1, s32 a2, SpawnTail* a3, SpawnBlock* a4, s32 a5, s32 a6)
 {
     SpawnRecord f;
@@ -2151,6 +2181,8 @@ void SpawnEffectsAt(Quad16* self, Quad16* a1, s32 a2, SpawnTail* a3, SpawnBlock*
 
 LINKER_REMNANT(func_00157FF0);
 
+// Sends every keyed object of the current world an event for the point self: kind 4 normally, 0x14
+// (with value x) or 0x24 (with obj) when the object's record is in message mode 4 or 2.
 void BroadcastPointEvent(void* self, void* obj, f32 x)
 {
     BroadcastMessage frame;
@@ -2189,6 +2221,8 @@ void SpawnBriefEffectAt(void* a0, BriefEffectSource* a1, f32 f)
     }
 }
 
+// Adds an entry to the range emitter (at most 0x20, allocating the 0x500-byte table on first use):
+// the two ids, and the five floats, where a negative optional value takes the value of another (c).
 void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15, void* owner)
 {
     self->kind = 3;
@@ -2244,6 +2278,9 @@ struct SpawnTargetRecord {
 
 struct SpawnTargetOwner { u8 pad00[0x14]; void* world; };
 
+// Looks up the objects a spawn record names: its target by id and, for kind 3 (strips between two
+// objects), the two ends of each link, with the distance between them and a weight (average width
+// times half the distance) summed into total.
 void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner)
 {
     if (rec->f120 == 0 && rec->targetId != -1) {
@@ -2282,6 +2319,9 @@ struct SpinRecord_158480 {
 extern const Mat4A g_identityMatrix4;
 s32 ScaleMatrix(Mat4A* out, Mat4A* in, u128 scale);
 
+// Builds the spawner's per-step transform: a scale and translation, turned by the spin's axis (in
+// the spin frame's world axes when the mode is 1) at rate times dt, multiplied and scaled by dt;
+// the result goes to out.
 void TurnMatrixBySpin(SpinRecord_158480* spin, f32 dt, f32* out)
 {
     Mat4A place = g_identityMatrix4;
@@ -2340,6 +2380,9 @@ void SendMemberObjectMessage()
 {
 }
 
+// Reads a group of objects from the stream: the transform, then for each member three ids that
+// create it (by type) as a child of the group, and its own data. Where a member is itself a group,
+// up to 8 of its members are gathered and registered.
 void LoadGroupMembers(MemberGroup* self, void* src)
 {
     void* arr[8];
@@ -2425,6 +2468,9 @@ void InitRecordMember(RecordMember* self)
     self->id98 = -1;
 }
 
+// Loads a record member object: allocates and initialises its spawn record, reads the transform, an
+// optional path curve (index byte, -1 for none), a mesh for kind 4, and the capped word list (an id
+// list read from the stream).
 void LoadRecordMember(RecordMember* self, void* stream)
 {
     Rec79* p = (Rec79*)AllocateZeroedFrontMemory(0x200);
@@ -2552,6 +2598,9 @@ void ReleaseHeldObject(HoldingMember* self, s32 kind, BaseObject* other)
     }
 }
 
+// Sends a spawn message to the member: queued with a due time of now plus its delay (in seconds)
+// when the delay is positive and a pool slot is free, otherwise handled at once.
+// DispatchDelayedMessages later handles the queued ones.
 void SendMessageAfterDelay(HoldingMember* self, void* message)
 {
     DelayedMessage* r;
@@ -2648,6 +2697,10 @@ void ComputeChainedWorldFrame(void* a, void* frame, void* out);
 extern f32 g_spawnScaleRatioRange[2];
 extern const Vec02 D_00248D30;
 
+// Handles a spawn message: starts from a copy of the spawner's record, overrides it with what the
+// message's flags carry (target, colour or placement, a frame, a count, a scale or percent), picks
+// the particle count (the message's or random in the spawner's range), and then spawns the effects
+// from the changed record.
 void HandleSpawnMessage(void* self, void* body)
 {
     SpawnMessage* m = (SpawnMessage*)body;
@@ -2747,6 +2800,8 @@ void HandleSpawnMessage(void* self, void* body)
     }
 }
 
+// Finds the member objects (class 0x77) below self: none gives *out = 0, one gives that one, and
+// several are collected (up to 8 used) in a new group object (class 0x78) made as a child of self.
 void FindOrBuildMemberGroup(void** out, void* self)
 {
     BaseObject* o = (BaseObject*)self;
@@ -2782,6 +2837,8 @@ void FindOrBuildMemberGroup(void** out, void* self)
     *out = s2;
 }
 
+// Handles every queued message whose due time has arrived (HandleSpawnMessage on its owner) and
+// returns the slot to the pool.
 void DispatchDelayedMessages(World* self)
 {
     ListFrame it;
@@ -2835,6 +2892,8 @@ void BindCrossfadeAnimator(CrossfadeAnimator* self)
     SetCrossfadeMode(self, 0);
 }
 
+// Switches the crossfade animator to a new mode (0 to 3), setting the position, step and level the
+// new mode starts from (some random in 0..1 against its limit).
 void SetCrossfadeMode(CrossfadeAnimator* s, s32 mode)
 {
     if (s->mode == mode) return;
@@ -2880,6 +2939,9 @@ tail:
     s->stamp2 = g_gameTime;
 }
 
+// Per-frame step of a crossfade animator (count of 2 or more): its mode 0 waits level seconds, 1
+// and 2 move the position along by step times dt (1 forwards, 2 back), 3 holds, and each can move
+// on to another mode through SetCrossfadeMode.
 void StepCrossfadeAnimator(CrossfadeAnimator* s, f32 dt)
 {
     s32 count = s->count;
@@ -2953,6 +3015,9 @@ AnimCursor* FindCrossfadeCursor(CrossfadeAnimator* self, const AnimRecord* key)
     return p;
 }
 
+// Per-frame step of a ramp of an object's level: adds rate times dt; it ends (and leaves the world)
+// when the level reaches 0 (the owner then gets its method m03 called), when it reaches 1, or when
+// the owner is no longer attached.
 void StepObjectLevelRamp(WorldObjectNode* self, f32 dt)
 {
     if (self->rate != 0.0f) {
@@ -3008,6 +3073,9 @@ void DrawScreenFill(u8* a0)
     CloseDmaTag(s);
 }
 
+// Per-frame step of a timed colour fade: the colour goes from the start colour to the hold colour
+// over fadeInTime, stays for holdTime, then fades out over fadeOutTime; at the end it stops and
+// leaves the world's fade list. Does nothing unless the game is in state 3 and not in 1 or 2.
 void UpdateColorFade(ColorFade* self)
 {
     if (D_00275BC4 != 3) return;
@@ -3067,6 +3135,10 @@ u8* GetHashedSlot(u8* base, s32 n)
     return base + (((n * 0x95675) & 0x1FF) * 12 + 0x84);
 }
 
+// Tests one object found by id against the search mode (see GatherObjectsByMode) and, if it passes,
+// appends it to arr (up to cap) and counts it. Mode 2 takes children of the root, 1 and 4 walk up
+// the ancestors with their marks (4 picks the nearest group level), 3 takes objects flagged in bits
+// 30..45, 5 takes all.
 void CollectObjectByMode(PlacedObject* self, s32 mode, s32 a2, s32 a3, PlacedObject* a4, s32 cap,
                    s32* count, PlacedObject** arr, s32* lvlp)
 {
@@ -3159,6 +3231,10 @@ struct HashedObject {
     GroupMemberLink* members; // 0x2D0
 };
 
+// Collects the objects that have the given object id (from the world's hash table, a group counting
+// through its members) and lie in the scope that flags' low byte names, up to max, and returns the
+// count. Marks the scope's ancestor chain for the duration so CollectObjectByMode can test it;
+// 0x100 takes unattached objects, 0x200 returns the true count.
 s32 GatherObjectsByMode(World* host, s32 flags, s32 id, void* rootp, s32 max, void* foundp)
 {
     s32 count;
@@ -3255,6 +3331,10 @@ s32 IsClassOfKind(s32 index, s32 value)
     return 0;
 }
 
+// Collects the objects of the class id (IsObjectOfKind) that the search scope allows, up to max,
+// into found, and returns how many there are (more than max when flag 0x200 is set). Flags low
+// byte: 3 walks the scope's ancestors, 2 its children, other values scan the world's per-class
+// lists; 0x100 also takes unattached objects.
 s32 GatherObjectsById(World* world, u32 flags, s32 id, void* scope, s32 max, void* foundp)
 {
     PlacedObject* root = (PlacedObject*)scope;

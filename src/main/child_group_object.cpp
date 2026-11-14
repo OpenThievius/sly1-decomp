@@ -57,6 +57,9 @@ f32 g_childGroupApproachCurve[4] __attribute__((aligned(16))) = { 1.0f, -1.0f, 0
 f32 g_childGroupDistanceCurve[4] __attribute__((aligned(16))) = { 2.0f, -1.5f, 0.0f, 0.0f };
 
 
+// Constructor body of the child group: sets the defaults of its blast (never timed, radius 200 for
+// both group and player, mode 0), mass range, push strength 800, maximum mass 5000, and the speed
+// and spin curves and ranges from the globals.
 void InitChildGroupObject(ChildGroupObject* self)
 {
     InitCollider(self);
@@ -107,6 +110,8 @@ struct ScopedListFrame {
 
 void* AllocateFrontMemory(s32 size);
 
+// Start of a child group: starts the placed object and collects its children of class 0x27 (at most
+// 16) into the group's array, resolving and starting each.
 void StartChildGroupObject(ChildGroupObject* self)
 {
     StartPlacedObject(self);
@@ -164,6 +169,9 @@ void UpdateChildGroupObject(ChildGroupObject* self, f32 dt)
 
 extern List01 g_class75List;
 
+// Rebuilds the group's list of up to 4 contacting attached objects: it first clears the contact
+// flags set for the old ones, then looks through the class 75 list for objects whose bounds touch
+// the group's, sets the flags again and records each one's contact point and direction.
 void RefreshChildGroupObjectContacts(ChildGroupObject* self)
 {
     ListFrame frame;
@@ -243,6 +251,9 @@ struct ContactPair {
 
 Collider* GetActiveSwitchedCollider(void);
 
+// Called for a contact of the group with another collider (side which of the pair); unless a pose
+// is already recorded, it works from the group's contact mode (mode 1 ignores it) and the span of
+// the contact to record the hit.
 void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s32 which)
 {
     Vec02 pos;
@@ -290,6 +301,9 @@ void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s3
 }
 
 
+// Handles an event for the group: after the normal handling, a handled event with flag 0x10 records
+// the hit pose with the event's direction (normalised, z axis when zero) and starts the group's
+// delay at 0.
 s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev)
 {
     s32 handled = HandleObjectEvent(self, ev);
@@ -319,6 +333,9 @@ static inline void MulPoseRows(ChildGroupObject* o, const Mat02& a, const Mat02&
     o->m620 = m;
 }
 
+// Records the group's pose at the moment it is hit (once: it does nothing when already recorded):
+// the object that hit it, the hit position (or its own), its velocity and spin, and the hit
+// direction z, which is stored as the group's frame.
 void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* z)
 {
     Mat02 a;
@@ -433,6 +450,9 @@ struct BlastMessage { s32 kind; ChildGroupObject* from; u8 pad08[0x30 - 0x08]; f
 // The sound slot at +0x680.
 struct BlastSound { s32 id; f32 a; f32 b; f32 c; };
 
+// Applies the group's blast: from the pose recorded when it was hit, it takes the colliders
+// touching the group (or those within the larger of its blast and player blast radius) and pushes
+// each away, using the group's push strength, mass limits and its speed and spin curves.
 void ApplyChildGroupRepulsion(ChildGroupObject* self)
 {
     Collider* player;

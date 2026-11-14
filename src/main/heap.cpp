@@ -201,6 +201,9 @@ void CopyQuadwords(void* dst, void* src, s32 n)
     }
 }
 
+// memcpy of the game: byte by byte when the addresses or the size are not word aligned; word by
+// word (the remainder first, then four words per step) when they are word aligned only; and
+// CopyQuadwords when all three are 16-byte aligned.
 void CopyMemory(void* dst, void* src, u32 size)
 {
     u32 any = (u32)dst | (u32)src | size;

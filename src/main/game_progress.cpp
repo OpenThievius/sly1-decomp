@@ -1018,6 +1018,8 @@ s32 GetPlacedObjectFrozen(PlacedObject* self, s32* out)
     return bit;
 }
 
+// Freezes (flag non-zero) or unfreezes a placed object: freezing saves its velocity and spin, stops
+// its sound, zeroes both and sets flag bit 38; unfreezing clears the bit and restores them.
 void SetPlacedObjectFrozen(PlacedObject* self, s32 flag)
 {
     if (flag != 0) {
@@ -1361,6 +1363,9 @@ s32 ChecksumGameProgress(GameProgress* s)
     return sum;
 }
 
+// Makes the entry key the current one (g_currentEntry and the level record it belongs to), then, by
+// flags, resets the reserve counts (bit 2 or a negative count), restores the flag table snapshot
+// (bit 1) or resets the session (bit 4).
 void SetCurrentLevelEntry(KeyedEntry* key, s32 flags)
 {
     s32 r = GetEntryIdByKey(key);
@@ -1436,6 +1441,9 @@ void ResetGameSessionAndFade(void)
     StartObjectFade(&g_sessionFadeKey, -1, 0);
 }
 
+// Resumes the game at the level and entry in the save data: looks the entry up, and starts the
+// object fade to it, or, when the game is already there with no time played, only restores the
+// sound options and the player's animations.
 void ResumeAtSavedLevel(void)
 {
     SessionKey* k = (SessionKey*)LookupEntryById((g_saveData->levelIndex << 8) | g_saveData->entryIndex);
@@ -1468,6 +1476,9 @@ void ResumeAtSavedLevel(void)
     }
 }
 
+// Percentage of the save's completion: counts each keyed entry's done flags (bit 0, plus the bits 1
+// to 3 the entry has) and 5 further flags (bit 5 of each level's record), and gives done * 100 /
+// total, kept between 1 and 99 unless none or all are done.
 s32 ComputeCompletionPercent(GameProgress* progress)
 {
     u8* p = (u8*)progress;
@@ -1566,6 +1577,10 @@ s32 GetSpareCountLimit(void)
     return 2;
 }
 
+// Spends one reserve unit (reserveCount - 1): pops the active sequence element, stops the locked
+// voice, then starts a screen fade (from the entry at D_00275B04 when in entry 1, from the flag
+// table when reserves remain) or shows the pause menu page when reserves are out, and raises the
+// scatter levels.
 void SpendReserveUnit(void)
 {
     GameProgress* o = g_saveData;
@@ -1603,6 +1618,8 @@ void ClearRecordBody(ClearedRecord* self)
     self->f18 = 0;
 }
 
+// Copies a mesh (vertices, faces, face points and words) into front memory, sharing its edge list,
+// and when a matrix is given transforms the copied vertices (and the face data) by it.
 void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
 {
     dst->vertCount = src->vertCount;
@@ -1629,6 +1646,9 @@ void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
     }
 }
 
+// Collects the keyed edges that touch key: queries src's plane tree with the point of dst at key,
+// then walks the edge list of each hit and adds every edge whose end key is the key (without
+// duplicates, up to maxOut) to out. Returns how many.
 s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out)
 {
     sptr buf[4];
@@ -1971,6 +1991,8 @@ void SetVertexBatchMode(VertexBatch* batch, u8* value)
     SetVertexColor(batch, &local);
 }
 
+// Turns an unlit vertex batch into a VIF unpack packet in the VIF writer: the unpack header, then
+// each vertex's position, colour and texture coordinates, with the batch's GIF tags copied in.
 void BuildUnlitVertexPacket(VertexBatch* batch)
 {
     UnlitVertexBatch* self = (UnlitVertexBatch*)batch;
@@ -2035,6 +2057,9 @@ void BuildUnlitVertexPacket(VertexBatch* batch)
     WriteVifMscalf(&g_vifPacketWriter, g_unlitBatchFinishProgram);
 }
 
+// Turns a lit vertex batch into a VIF unpack packet in the VIF writer: reserves the unpack header,
+// copies the batch's transform and tags, and writes each vertex's position, normal, colour and
+// texture coordinates in the layout the microprogram reads.
 void BuildLitVertexPacket(VertexBatch* batch)
 {
     LitVertexBatch* self = (LitVertexBatch*)batch;
@@ -2137,6 +2162,9 @@ void BuildLitVertexPacket(VertexBatch* batch)
     WriteVifMscalf(&g_vifPacketWriter, g_litBatchFinishProgram);
 }
 
+// Sends the vertex batch: nothing in mode 0, a batch of fewer than 3 vertices is just reset,
+// otherwise it flips the VIF base offset, writes an unpack header and copies the batch words into
+// the packet.
 void FlushVertexBatch(VertexBatch* batch)
 {
     FlushedVertexBatch* self = (FlushedVertexBatch*)batch;
@@ -2189,6 +2217,9 @@ void SetVertexTexCoord(VertexBatch* dst, U64P* src)
     dst->texCoord.v = src->v;
 }
 
+// Adds a vertex with value to the batch's record list; when the list reaches its limit (0x50, or
+// 0x94 in the other mode) it flushes the batch and keeps the last two records as the start of the
+// next strip.
 void AddVertex(VertexBatch* batch, s32 value)
 {
     AppendVertexBatch* self = (AppendVertexBatch*)batch;

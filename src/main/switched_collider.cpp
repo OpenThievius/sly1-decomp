@@ -216,6 +216,9 @@ void StoreSwitchedColliderAccepted(SwitchedCollider* self, s32* out)
     *out = ((s32 (*)(SwitchedCollider*, s32*))self->desc05()->m4D)(self, out);
 }
 
+// Starts the collider's effect for a mode: in mode 0 it creates an effect (class 0x1A) at the other
+// object, registers the collider as its listener and sets its life from the animation's marker
+// 0x13F; the other modes start theirs.
 void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other)
 {
     switch (mode) {
@@ -319,6 +322,9 @@ void UnregisterSwitchedCollider(SwitchedCollider* self)
     RemoveFromSwitchedColliderList(self);
 }
 
+// Makes the switched collider with this index the active one (-1 for none): the old one loses flag
+// bit 45 and gets its activation method (slot 0x130) called with 0, and the new one gets the bit
+// and the call with 1, each told the other.
 void ActivateSwitchedColliderIndex(s32 index)
 {
     if (index == g_activeSwitchedCollider)
@@ -379,6 +385,9 @@ void ShowTypedTextCaptionBox(SwitchedCollider* self, u32 value)
     PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
 }
 
+// Skip handling for step sequences: unless a camera controller is on top, a press of the buttons
+// 0xC while the active sequence is in state 3 (and its target is reached) skips its remaining
+// steps; otherwise the player's own sequence goes to state 1. The pressed bits are then cleared.
 void HandleStepSequenceSkipButtons(void* self, PadRecord* rec)
 {
     if (IsTopCameraController(&g_camera->ctl454) != 0)
@@ -394,6 +403,9 @@ void HandleStepSequenceSkipButtons(void* self, PadRecord* rec)
     ClearPadPressedBits(rec, 0xC);
 }
 
+// Per-frame update of a switched collider: updates it as a collider, then, of its three slot
+// objects, calls slot method 6 on the one at the level read from the save's counter (0 to 2) unless
+// it is hidden, and method 7 on the others; in states 1 and 3 it emits trail points.
 void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt)
 {
     UpdateCollider(self, dt);
@@ -420,6 +432,10 @@ void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt)
     }
 }
 
+// Ends a switched collider's turn: lowers the save's counter at 0x19E4 by one (not below 0) unless
+// button code flag 2 is set, then, when it has an object f604, places that object at the collider's
+// frame and starts its animation (found by id 0x18C), otherwise spawns an effect at the collider
+// with the object in slot 1.
 void FinishSwitchedCollider(SwitchedCollider* self)
 {
     s32 flags = g_buttonCodeFlags & 2;
