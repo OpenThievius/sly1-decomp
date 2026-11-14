@@ -55,7 +55,7 @@ struct IopCallPacket {
 
 // An IOP-side list the command 0x80000009 searches: groups of entries, each entry keyed by its
 // first word.
-struct Entry_1F7FC0 {
+struct ServiceRecord {
     u32 key;
     s32 f4;
     s32 f8;
@@ -63,31 +63,32 @@ struct Entry_1F7FC0 {
     s32 f10;
     s32 f14;
     u8 f18[0x20];
-    Entry_1F7FC0* next;
+    ServiceRecord* next;
 };
 
-struct Group_1F7FC0 {
+struct ServiceGroup {
     s32 f0;
     s32 f4;
-    Entry_1F7FC0* entries;
+    ServiceRecord* entries;
     s32 fC;
     s32 f10;
-    Group_1F7FC0* next;
+    ServiceGroup* next;
 };
 
-// The client's state: the next packet id, the pool of request packets, the reply ring.
-struct Pools_1F7BE8 {
-    s32 next_id;
+// The client's state: the next packet id, the pool of request packets, the reply ring and the
+// service groups of the IOP.
+struct RemoteCallState {
+    s32 nextId;
     RemoteCallPacket* packets;
-    s32 packet_count;
+    s32 packetCount;
     s32 fC;
     s32 f10;
     IopCallPacket* replies;
-    s32 reply_count;
-    RemoteCallPacket* f1C;
-    s32 f20;
-    s32 cursor;
-    Group_1F7FC0* groups;
+    s32 replyCount;
+    RemoteCallPacket* thirdPool;
+    s32 thirdPoolCount;
+    s32 replyCursor;
+    ServiceGroup* serviceGroups;
     s32 f2C;
     s32 f30;
     s32 f34;
@@ -100,7 +101,7 @@ s32 g_remoteCallsReady = 0;
 static u8 D_00626000[0x800];
 static u8 D_00626800[0x800];
 static u8 D_00627000[0x800];
-static Pools_1F7BE8 g_remoteCallState;
+static RemoteCallState g_remoteCallState;
 
 extern "C" s32 DisableInterrupts(void);
 extern "C" s32 EnableInterrupts(void);
@@ -123,9 +124,9 @@ extern "C" void SetCommandHandler(s32 cmd, CommandHandler handler, void* arg);
 s32 ReadIopRegister(u32 reg);
 u32 WriteIopRegister(u32 reg, u32 value);
 void HandleRemoteCallReply(RemoteCallPacket* reply);
-void AnswerServiceLookup(IopCallPacket* src, Pools_1F7BE8* pools);
+void AnswerServiceLookup(IopCallPacket* src, RemoteCallState* pools);
 void QueueServerRequest(struct ServerRequestPacket* self);
-void AnswerIopCall(IopCallPacket* src, Pools_1F7BE8* pools);
+void AnswerIopCall(IopCallPacket* src, RemoteCallState* pools);
 
 extern "C" void InitRemoteCalls(s32 mode)
 {
@@ -138,19 +139,19 @@ extern "C" void InitRemoteCalls(s32 mode)
     EnableInterrupts();
     InitCommandChannel();
     DisableInterrupts();
-    Pools_1F7BE8* s = &g_remoteCallState;
+    RemoteCallState* s = &g_remoteCallState;
     s->packets = (RemoteCallPacket*)((u32)D_00626000 | 0x20000000);
-    s->packet_count = 0x20;
+    s->packetCount = 0x20;
     s->fC = 0;
     s->f10 = 0;
     s->replies = (IopCallPacket*)((u32)D_00626800 | 0x20000000);
-    s->reply_count = 0x20;
-    s->f1C = (RemoteCallPacket*)((u32)D_00627000 | 0x20000000);
-    s->f20 = 0x20;
-    s->cursor = 0;
+    s->replyCount = 0x20;
+    s->thirdPool = (RemoteCallPacket*)((u32)D_00627000 | 0x20000000);
+    s->thirdPoolCount = 0x20;
+    s->replyCursor = 0;
     // The id counter is set after the pools: Sony's compiler then stores it after the pool
     // sizes (docs/TOOLCHAIN.md, "A run of stores in two alias classes").
-    s->next_id = 1;
+    s->nextId = 1;
     SetCommandHandler(0x80000008, (CommandHandler)HandleRemoteCallReply, s);
     SetCommandHandler(0x80000009, (CommandHandler)AnswerServiceLookup, s);
     SetCommandHandler(0x8000000A, (CommandHandler)QueueServerRequest, s);
@@ -173,10 +174,10 @@ void ShutDownRemoteCalls(void)
     g_remoteCallsReady = 0;
 }
 
-RemoteCallPacket* TakeRequestPacket(Pools_1F7BE8* self)
+RemoteCallPacket* TakeRequestPacket(RemoteCallState* self)
 {
     DisableInterrupts();
-    s32 count = self->packet_count;
+    s32 count = self->packetCount;
     s32 index = 0;
     RemoteCallPacket* item = self->packets;
     if (count > 0) {
@@ -184,11 +185,11 @@ RemoteCallPacket* TakeRequestPacket(Pools_1F7BE8* self)
             if ((item->flags & 1) == 0) {
                 item->flags = (index << 16) | 5;
                 s32 id;
-                self->next_id++;
-                if (self->next_id == 1) {
-                    id = self->next_id++;
+                self->nextId++;
+                if (self->nextId == 1) {
+                    id = self->nextId++;
                 } else {
-                    id = self->next_id;
+                    id = self->nextId;
                 }
                 item->self = item;
                 item->id = id;
@@ -209,11 +210,11 @@ void FreeRequestPacket(RemoteCallPacket* packet)
     packet->flags &= ~1u;
 }
 
-IopCallPacket* NextReplyPacket(Pools_1F7BE8* r)
+IopCallPacket* NextReplyPacket(RemoteCallState* r)
 {
-    s32 index = r->cursor % r->reply_count;
+    s32 index = r->replyCursor % r->replyCount;
     s32 off = index << 6;
-    r->cursor = index + 1;
+    r->replyCursor = index + 1;
     return (IopCallPacket*)((u8*)r->replies + off);
 }
 
@@ -248,7 +249,7 @@ after:
     s0->packet.ptr = 0;
 }
 
-void AnswerIopCall(IopCallPacket* src, Pools_1F7BE8* pools)
+void AnswerIopCall(IopCallPacket* src, RemoteCallState* pools)
 {
     IopCallPacket* m = NextReplyPacket(pools);
     u32 a = src->self;
@@ -259,11 +260,11 @@ void AnswerIopCall(IopCallPacket* src, Pools_1F7BE8* pools)
     SendCommandFromInterrupt(0x80000008, m, 0x40, (void*)src->cmd, src->f24, src->f28);
 }
 
-Entry_1F7FC0* FindRemoteService(u32 key, Pools_1F7BE8* pools)
+ServiceRecord* FindRemoteService(u32 key, RemoteCallState* pools)
 {
-    Group_1F7FC0* group = pools->groups;
+    ServiceGroup* group = pools->serviceGroups;
     while (group) {
-        Entry_1F7FC0* entry = group->entries;
+        ServiceRecord* entry = group->entries;
         while (entry) {
             if (entry->key == key) return entry;
             entry = entry->next;
@@ -273,7 +274,7 @@ Entry_1F7FC0* FindRemoteService(u32 key, Pools_1F7BE8* pools)
     return 0;
 }
 
-void AnswerServiceLookup(IopCallPacket* src, Pools_1F7BE8* pools)
+void AnswerServiceLookup(IopCallPacket* src, RemoteCallState* pools)
 {
     IopCallPacket* m = NextReplyPacket(pools);
     u32 a = src->self;
@@ -281,7 +282,7 @@ void AnswerServiceLookup(IopCallPacket* src, Pools_1F7BE8* pools)
     m->self = a;
     m->client = b;
     m->cmd = 0x80000009;
-    Entry_1F7FC0* n = FindRemoteService(src->cmd, pools);
+    ServiceRecord* n = FindRemoteService(src->cmd, pools);
     if (n == 0) {
         m->f24 = 0;
         m->f28 = 0;
@@ -357,8 +358,8 @@ struct ServerRequestEntry {
     s32 f30;
     s32 f34;
     s32 f38;
-    s32 f3C;
-    ServerRequestEntry* f40;
+    s32 next;
+    ServerRequestEntry* list;
 };
 
 // The request packet func_001F8200 handles: RemoteCallPacket's layout, with the entry it was
@@ -385,11 +386,11 @@ struct ServerRequestPacket {
 void QueueServerRequest(ServerRequestPacket* self)
 {
     ServerRequestEntry* n = self->f34;
-    ServerRequestEntry* list = n->f40;
+    ServerRequestEntry* list = n->list;
     if (list->f0C == 0) {
         list->f0C = (s32)n;
     } else {
-        ((ServerRequestEntry*)list->f10)->f3C = (s32)n;
+        ((ServerRequestEntry*)list->f10)->next = (s32)n;
     }
     list->f10 = (s32)n;
     s32 a = self->f14;
