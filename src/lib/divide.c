@@ -5,6 +5,9 @@
  * code. */
 #include "divide.h"
 
+/* Signed 64-bit division (the compiler's __divdi3): divides the magnitudes with divide() and
+ * negates the quotient when exactly one operand was negative. Division by zero is not handled
+ * here. */
 s64 func_001FAE38(s64 num, s64 den)
 {
     int neg = 0;

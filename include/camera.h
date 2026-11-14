@@ -8,6 +8,7 @@
 #include "base_object.h"
 #include "camera_controller.h"
 #include "placed_object.h"   // Vec02
+#include "shapes.h"          // Mat4
 
 // func_00143648 (slot 0) fills the identity frame at 0x80 and the settings at 0x1C0..0x208,
 // then five sub-objects at 0x454, 0x460, 0x4C0, 0x510 and 0x520.
@@ -21,22 +22,43 @@ struct Camera : BaseObject {
     f32 planes[3][4];       // 0x50: the rows of a 3x4 matrix whose columns are the normals of
                             //       four planes through f40 (func_00146038)
     union {
-        s32 rotation[4];    // 0x80: the camera's rotation rows
-        f32 g80[4];         // 0x80: func_00144FF8 reads the first two as floats
+        struct {
+            union {
+                s32 rotation[4];    // 0x80: the camera's rotation rows
+                f32 g80[4];         // 0x80: func_00144FF8 reads the first two as floats
+            };
+            s32 f90[4];             // 0x90
+            s32 fA0[4];             // 0xA0
+        };
+        Mat02 rot80;        // 0x80: the three rows as a matrix
     };
-    s32 f90[4];             // 0x90
-    s32 fA0[4];             // 0xA0
     f32 fB0;                // 0xB0: scales a spawner's range (func_00155AB0)
     u8 padB4[0xC0 - 0xB4];
-    f32 fC0;                // 0xC0: sent to VU1 with a listed object's draw (func_0013AD80)
-    u8 padC4[0xD4 - 0xC4];
-    f32 fD4;                // 0xD4: and this
-    u8 padD8[0x100 - 0xD8];
-    Vec02 f100; // 0x100
-    u8 pad110[0x140 - 0x110];
-    Vec02 f140; // 0x140
-    Vec02 f150; // 0x150
-    u8 pad160[0x1C0 - 0x160];
+    union {
+        struct {
+            f32 fC0;                // 0xC0: sent to VU1 with a listed object's draw (func_0013AD80)
+            u8 padC4[0xD4 - 0xC4];
+            f32 fD4;                // 0xD4: and this
+            u8 padD8[0x100 - 0xD8];
+        };
+        Mat4 projection;    // 0xC0: the projection matrix (UpdateCameraProjection)
+    };
+    union {
+        struct {
+            Vec02 f100; // 0x100
+            Mat02 m110;             // 0x110
+        };
+        Mat4 viewProjection;    // 0x100: the view and projection together (UpdateCameraMatrices)
+    };
+    union {
+        struct {
+            Vec02 f140; // 0x140
+            Vec02 f150; // 0x150
+            u8 pad160[0x180 - 0x160];
+        };
+        Mat4 inverseViewProjection; // 0x140
+    };
+    Vec02 frustum[4];       // 0x180: the side normals of the view frustum (BuildFrustumSideNormals); planes copies them
     f32 distanceScale;      // 0x1C0: scales the spawner range and the VU1 draw distance
     f32 zoom;               // 0x1C4: the current zoom
     f32 zoomGoal;           // 0x1C8: the zoom UpdateCamera approaches
@@ -56,7 +78,8 @@ struct Camera : BaseObject {
     f32 fogFar;             // 0x1FC: the distance the fog is full
     f32 fogStrength;        // 0x200: how strong the fog is at fogFar
     u32 fogColor;           // 0x204: the word func_001B3510 writes to GIF register 0x3D (FOGCOL)
-    u8 pad208[0x218 - 0x208];
+    f32 fogTerms[4];        // 0x208: ComputeCameraFogTerms' result for strength 1
+
     f32 swingStartTime;     // 0x218: the game time the view swing started
     s32 f21C;               // 0x21C
     s32 snapQueued;         // 0x220: set to ask for a snap on the next update

@@ -10,13 +10,14 @@ struct BaseObject;
 struct Contact03;
 struct HitCountCollider;
 struct OwnerMessage;
+struct PadRecord;
 struct PlacedObject;
 
 void InitHitCountCollider(HitCountCollider* self);
 void StartHitCountCollider(HitCountCollider* self);
 void UpdateHitCountCollider(HitCountCollider* self, f32 t);
 void ShowHitCountColliderCounters();
-void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt);
+void ControlHitCountCollider(HitCountCollider* self, PadRecord* ev, f32 dt);
 void StepHitCountCollider(HitCountCollider* self, f32 dt);
 void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end);
 void ResolveHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end);
@@ -26,7 +27,7 @@ s32 HasHitCountColliderAcceptedRequest(HitCountCollider* self);
 void FinishHitCountCollider(HitCountCollider* self);
 void PushRequesterAwayFromSender(void* c, void* receiver);
 void SendHitCountColliderRequest(HitCountCollider* self, BaseObject* value);
-void SetHitCountColliderState(PlacedObject* self, s32 state);
+void SetHitCountColliderState(HitCountCollider* self, s32 state);
 void AddHitCountColliderId(HitCountCollider* self, BaseObject* value);
 void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj);
 

@@ -68,7 +68,10 @@ struct Attachment {
 // stream by the flag bits at +0xB0): two matrices, then either the objects it follows (ids until
 // func_00128DB8 resolves them) or, with flag 0x80, four quadwords of its own (func_001261C0).
 struct Rec2195_224 {
-    u8 pad00[0x60];         // 0x00: two matrices (flags 1 and 2), each the identity at first
+    union {
+        u8 pad00[0x60];
+        Mat02 m[2];         // 0x00: two matrices (flags 1 and 2), each the identity at first
+    };
     union {
         Quad16 q60[4];      // 0x60: flag 0x80, given by func_001261C0
         struct {
@@ -135,7 +138,8 @@ struct __attribute__((packed)) Pair2195 { s32 lo; s32 hi; };
 
 // D_00219588: a copy of the owner's position, matrix and values, taken when it is set up.
 struct T2195_588 : Attachment {
-    u8 pad18[0x20 - 0x18]; // 0x18
+    f32 time18;             // 0x18: the time of the snapshot (the player compares it with the game clock)
+    u8 pad1C[0x20 - 0x1C]; // 0x1C
     Vec02 pos;              // 0x20: PlacedObject::v190
     Vec02 vec;              // 0x30
     Mat02 rot;              // 0x40: PlacedObject::m1A0

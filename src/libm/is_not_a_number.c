@@ -4,6 +4,7 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
+/* 1 if the float is a NaN (magnitude bits above 0x7F800000), else 0. */
 s32 IsNotANumber(f32 x)
 {
     s32 bits;

@@ -5,6 +5,8 @@
  * code. */
 #include "divide.h"
 
+/* Signed 64-bit remainder (the compiler's __moddi3): the remainder of the magnitudes from
+ * divide(), negated when the dividend is negative, so it takes the dividend's sign. */
 s64 func_001FB790(s64 num, s64 den)
 {
     int neg = 0;

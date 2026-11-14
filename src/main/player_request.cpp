@@ -3,6 +3,7 @@
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "state_trigger.h"
+#include "attachment.h"
 #include "child_group_object.h"
 #include "screen_element.h"
 #include "object_link.h"
@@ -249,8 +250,23 @@ extern "C" u64 ConvertFloatToDouble(f32 x);
 struct BlendSpan { f32 t; u8 pad4[8]; f32 len; };
 struct BlendSpans { u8 pad0[8]; BlendSpan* a; u8 padC[8]; BlendSpan* b; };
 
-#define F(o, off) (*(f32*)((u8*)(o) + (off)))
-#define W(o, off) (*(s32*)((u8*)(o) + (off)))
+// One entry of the six-entry blend, a record of 0x148 bytes or more.
+struct SixBlendEntry {
+    u8 pad00[0x10];
+    f32 f10;                // 0x10
+    u8 pad14[0x34 - 0x14];
+    f32 f34;                // 0x34
+    u8 pad38[0x54 - 0x38];
+    s32 f54;                // 0x54
+    u8 pad58[0x60 - 0x58];
+    f32 f60;                // 0x60
+    u8 pad64[0x84 - 0x64];
+    f32 f84;                // 0x84
+    u8 pad88[0xA4 - 0x88];
+    s32 fA4;                // 0xA4
+    u8 padA8[0x144 - 0xA8];
+    s32 f144;               // 0x144
+};
 
 void InterpolateBlendEntryPosition(void* p, void* e, f32 a, f32 b, s32 i, s32 j, void* out);
 
@@ -260,6 +276,7 @@ void InterpolateBlendEntryPosition(void* p, void* e, f32 a, f32 b, s32 i, s32 j,
 // and, when any weight changed, sets them and the player's heading velocity.
 void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView* g, void* a3)
 {
+    SixBlendEntry* en = (SixBlendEntry*)e;
     f32 t;
     f32 lo;
     f32 hi;
@@ -267,27 +284,27 @@ void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView*
     Vec02 vb;
     Vec02 vd;
     Vec02 vc;
-    if (W(e, 0x54) == 0) {
+    if (en->f54 == 0) {
         t = 0.0f;
     } else {
         f32 zero = 0.0f;
         f32 one = 1.0f;
-        f32 d0 = F(p, 0x640) - F(e, 0x10);
-        f32 d1 = F(p, 0x640) - F(e, 0x60);
-        f32 n = F(e, 0x34) * d0;
-        t = n / (n - F(e, 0x84) * d1);
+        f32 d0 = p->headingVelocity.x - en->f10;
+        f32 d1 = p->headingVelocity.x - en->f60;
+        f32 n = en->f34 * d0;
+        t = n / (n - en->f84 * d1);
         if (t < zero) {
             t = zero;
         } else if (one < t) {
             t = one;
         }
     }
-    if (W(e, 0xA4) == 0) {
+    if (en->fA4 == 0) {
         lo = 0.0f;
         hi = lo;
     } else {
         BlendSpans* sp = (BlendSpans*)g->pC0;
-        f32 now = F(a3, 0x14);
+        f32 now = ((AnimationPlayer*)a3)->time;
         f32 x = sp->a->t - now;
         if (x <= 0.0f) {
             x += g->f34;
@@ -305,7 +322,7 @@ void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView*
         if (FindObjectAlongSegment(p, &va, &vb, (f32*)&vc)) {
             lo = 0.0f;
             hi = 1.0f - vc.x;
-        } else if (W(e, 0x144) != 0) {
+        } else if (en->f144 != 0) {
             InterpolateBlendEntryPosition(p, e, lo, t, 4, 5, &vd);
             if (FindObjectAlongSegment(p, &vb, &vd, (f32*)&vc)) {
                 lo = vc.x;
@@ -457,7 +474,7 @@ static inline void SetSlotWeights(Player* self, BlendSlot* slots, s32 o, f32 sca
 void UpdateEightEntryBlendWeights(Player* self, BlendSlot* slots, BlendAnimationView* gr)
 {
     Vec02 acc;
-    f32 scale = *(f32*)((u8*)self->stateAnimPlayer + 0x18);
+    f32 scale = ((AnimationPlayer*)self->stateAnimPlayer)->speed;
     s32 i;
     if (self->eightWayHalf == -1) {
         if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->headingVelocity), Vu0::Q(slots[0].v10))) < 0.0f)
@@ -527,7 +544,7 @@ void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, BlendAnimati
         Vu0::Q(self->headingVelocity) = Vu0::MulXSum3(Vu0::Q(basis[1]), s, Vu0::Q(basis[5]), t, Vu0::Q(basis[9]), u);
     }
     self->headingVelocity.z = 0.0f;
-    Vu0::Q(self->headingVelocity) = Vu0::MulX(Vu0::Q(self->headingVelocity), Vu0::ScalarAt(*(f32*)((u8*)self->stateAnimPlayer + 0x18)));
+    Vu0::Q(self->headingVelocity) = Vu0::MulX(Vu0::Q(self->headingVelocity), Vu0::ScalarAt(((AnimationPlayer*)self->stateAnimPlayer)->speed));
 }
 
 
@@ -612,9 +629,9 @@ void UpdatePlayerRequestSubState(Player* self) {
         break;
     }
     case 0x2C: {
-        if (*(f32*)((u8*)self->selfPoseSource + 0x18) < g_gameClock.time) {
+        if (((T2195_588*)self->selfPoseSource)->time18 < g_gameClock.time) {
             RunPlayerCallback(self);
-        } else if (self->touchedObject != 0 && *(f32*)((u8*)self->selfPoseSource + 0x18) < g_gameClock.time + 0.25f &&
+        } else if (self->touchedObject != 0 && ((T2195_588*)self->selfPoseSource)->time18 < g_gameClock.time + 0.25f &&
                    (IsObjectOfKind((BaseObject*)self->touchedObject, 0x76) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x70) ||
                     IsObjectOfKind((BaseObject*)self->touchedObject, 0x71) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x81) ||
                     IsObjectOfKind((BaseObject*)self->touchedObject, 0x6F) || IsObjectOfKind((BaseObject*)self->touchedObject, 0x7F))) {
@@ -627,7 +644,7 @@ void UpdatePlayerRequestSubState(Player* self) {
                 SetPlayerState(self, 2, r);
             }
         } else {
-            ComputeTargetArc(self, (TargetArcSource*)&self->touchedObject, *(f32*)((u8*)self->selfPoseSource + 0x18) - g_gameClock.time, 0, (Vec02*)((u8*)self->selfPoseSource + 0x20), 0);
+            ComputeTargetArc(self, (TargetArcSource*)&self->touchedObject, ((T2195_588*)self->selfPoseSource)->time18 - g_gameClock.time, 0, &((T2195_588*)self->selfPoseSource)->pos, 0);
         }
         break;
     }

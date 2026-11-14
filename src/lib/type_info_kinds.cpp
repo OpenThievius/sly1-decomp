@@ -67,6 +67,7 @@ public:
 // The type information of void (defined below with the other builtin types).
 extern "C" const type_info& GetTypeInfoOfVoid(void);
 
+// Orders type informations by comparing their names as strings (the sort order of typeid's before).
 bool type_info::before(const type_info& other) const
 {
     return CompareStrings(name_, other.name_) < 0;

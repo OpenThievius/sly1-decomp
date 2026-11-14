@@ -5,6 +5,7 @@
  * code. */
 #include "divide.h"
 
+/* Unsigned 64-bit remainder (the compiler's __umoddi3): the remainder that divide() leaves. */
 u64 func_001FC3D0(u64 num, u64 den)
 {
     u64 rem;

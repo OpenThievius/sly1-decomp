@@ -565,11 +565,11 @@ s32 SuppressScriptEvent(BaseObject* self, s32 key, s32 flag, void* out)
     s32 tag = -1;
     switch (key) {
     case 1: {
-        f32 f = *(f32*)((u8*)self + 0x29C);
+        f32 f = ((PlacedObject*)self)->eventTimer;
         if (f <= 0.0f) return 0;
         f32 g = f - *(f32*)p[0];
         s32 r = 1;
-        *(f32*)((u8*)self + 0x29C) = g;
+        ((PlacedObject*)self)->eventTimer = g;
         if (!(0.0f < g)) r = 0;
         return r;
     }

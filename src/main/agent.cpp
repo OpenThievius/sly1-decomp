@@ -11,6 +11,7 @@
 #include "flag_table.h"
 #include "node_query.h"
 #include "state_reset_object.h"
+#include "object_pool.h"
 #include "animation.h"
 #include "attachment.h"
 #include "aim_blend_grid.h"
@@ -100,24 +101,24 @@ void InitAgent(Agent* self)
     f32 c300 = 300.0f;
     self->state = -1;
     self->pathGraphId = -1;
-    F(u64, 0x538) = (F(u64, 0x538) & ~((u64)0xF0 << 32)) | ((u64)1 << 37);
+    self->flags538 = (self->flags538 & ~((u64)0xF0 << 32)) | ((u64)1 << 37);
     self->targetRangeMax = c300;
     self->retargetDelayMin = 0.2f;
     self->retargetDelayMax = 0.5f;
     self->targetAngleLimit = 0.17453294f;
     self->targetRangeMin = 0;
     s32 i;
-    for (i = 16; i >= 0; i--) F(s32, 0x758 + i * 8) = -1;
-    f32* s3 = (f32*)((u8*)self + 0xB9C);
-    f32* s4 = (f32*)((u8*)self + 0xBE0);
+    for (i = 16; i >= 0; i--) self->stateClips[i].id = -1;
+    f32* s3 = &self->fB9C;
+    f32* s4 = (f32*)&self->fBE0;
     s32 m = -1;
-    for (i = 16; i >= 0; i--) F(s32, 0x870 + i * 8) = m;
+    for (i = 16; i >= 0; i--) self->secondaryClips[i].id = m;
     f32 one = 1.0f;
     s32 r = TakeFlagTableIndex((FlagTable*)g_flagTable);
     s32 s1 = 1;
     s32 s0 = -1;
     self->flagIndex = r;
-    F(u64, 0x538) = (F(u64, 0x538) & ~((u64)0xF0 << 32)) | ((u64)1 << 37);
+    self->flags538 = (self->flags538 & ~((u64)0xF0 << 32)) | ((u64)1 << 37);
     self->fB14 = s1;
     self->secondaryTargetKey = s0;
     self->fB30 = one;
@@ -130,7 +131,7 @@ void InitAgent(Agent* self)
     self->copySource = self;
     self->clip10Deadline = d;
     self->state8Deadline = d;
-    F(u8, 0x2B3) = 0x20;
+    self->tint[3] = 0x20;
     s3[1] = 2.5f;
     self->fBE0 = 0;
     s4[1] = 0.8f;
@@ -366,9 +367,9 @@ void StepAgent(Agent* self, f32 dt)
     if (self->followsClipMotion != 0) {
         Vec02 motion;
         Vec02 v;
-        u8* ap = (u8*)self->statePlayer;
-        u8* src = *(u8**)(*(u8**)(*(u8**)(ap + 8) + 0x9C) + 4);
-        (**(AgentMotionFn**)src)(src, self, 0, 0, &motion, *(f32*)(ap + 0x14), *(f32*)(ap + 0x18));
+        AnimationPlayer* ap = self->statePlayer;
+        PositionCurve* src = ap->anim->movedTrack->pos;
+        (**(AgentMotionFn**)src)(src, self, 0, 0, &motion, ap->time, ap->speed);
         Vu0::Q(v) = Vu0::DivX(Vu0::Add(Vu0::Vec::Of(motion), Vu0::Vec::Of(self->headingVelocity)), Vu0::Vec::Scalar(dt)).q;
         Vu0::Q(v) = Vu0::RotateMembers(self->headingMatrix, Vu0::Q(v));
         AddColliderForce(self, &v);
@@ -390,7 +391,7 @@ void StepAgent(Agent* self, f32 dt)
         Vu0::Q(m.r[2]) = Vu0::MulX(Vu0::Q(self->m110.r[2]), s);
         CopyBytes(&m2, &m, 0x30);
         Vu0::Q(v) = Vu0::Rotate(m2, Vu0::Q(self->headingVelocity));
-        SteerColliderTowardPosition(self, 0, 0, &v, F(f32*, 0x210), dt);
+        SteerColliderTowardPosition(self, 0, 0, &v, (f32*)self->p210, dt);
         TurnColliderTowardRotation(self, g_gameClock[2], &self->headingMatrix, &self->turnGain);
     } else if (g_gameTime[0] < F(f32, 0xBA4)) {
         Vec02 p;
@@ -406,9 +407,9 @@ void StepAgent(Agent* self, f32 dt)
         Vec02 q2;
         Vec02 q;
         f32 x;
-        u8* ap = (u8*)self->statePlayer;
+        AnimationPlayer* ap = self->statePlayer;
         if (ap != 0) {
-            x = *(f32*)(ap + 0x14) / *(f32*)(*(u8**)(ap + 8) + 0x34);
+            x = ap->time / ap->anim->length;
         } else {
             x = 1.0f;
         }
@@ -962,7 +963,7 @@ void BuildAgentPath(Agent* self)
     } else {
         self->pathCount = 0;
         if (self->pathGraph != 0) {
-            self->pathCount = FindOwnerGraphPath(self->pathGraph, &self->v140, &self->snappedGoal, 0x10, (Vec02*)((u8*)self + 0x940));
+            self->pathCount = FindOwnerGraphPath(self->pathGraph, &self->v140, &self->snappedGoal, 0x10, self->pathPoints);
         }
         if (self->pathCount == 0) {
             self->pathCount = 2;
@@ -998,17 +999,17 @@ void FaceAgentAlongPath(Agent* self)
     for (;;) {
         if (!(self->pathIndex < self->pathCount)) break;
         s32 i = self->pathIndex;
-        u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (i << 4))));
+        u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(self->pathPoints[i]));
         s32 far = g_agentFacingFarDistance < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
         if (far) break;
         self->pathIndex = i + 1;
     }
     Vec02 dir;
     if (self->pathIndex < self->pathCount) {
-        Vu0::Set(dir, Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (self->pathIndex << 4))), Vu0::Q(self->v140)));
+        Vu0::Set(dir, Vu0::Sub(Vu0::Q(self->pathPoints[self->pathIndex]), Vu0::Q(self->v140)));
     } else {
         s32 m = self->pathCount;
-        Vu0::Set(dir, Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x930 + (m << 4))), Vu0::Q(*(Vec02*)((u8*)self + 0x920 + (m << 4)))));
+        Vu0::Set(dir, Vu0::Sub(Vu0::Q(self->pathPoints[m - 1]), Vu0::Q(self->pathPoints[m - 2])));
     }
     f32 yaw;
     if (1.0f < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(dir), Vu0::Q(dir))))) {
@@ -1045,7 +1046,7 @@ void FaceAgentTowardGoalPoint(Agent* self)
 {
     f32 x;
     f32 y;
-    ConvertOffsetToSpherical((const Vec02*)((u8*)self + 0xA40), (const Vec02*)((u8*)self + 0x140), &x, &y, 0);
+    ConvertOffsetToSpherical(&self->goalPoint, &self->v140, &x, &y, 0);
     SetAgentFacingAngles(self, x, y);
 }
 
@@ -1064,8 +1065,8 @@ void UpdateAgentGoal(Agent* self, s32 flag)
     case 12:
     case 13:
     case 14: {
-        void* v = self->desc08()->m62(self);
-        if (v != 0) SetAgentGoalPoint(self, (Vec02*)((u8*)v + 0x140));
+        PlacedObject* v = (PlacedObject*)self->desc08()->m62(self);
+        if (v != 0) SetAgentGoalPoint(self, &v->v140);
         break;
     }
     case 4:
@@ -1337,7 +1338,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
             GatherAnimationEventObjects(((Animation*)self->mainClip), self, &count, &list);
             while (i < count) {
                 BaseObject* e = list[i++];
-                RemoveFromSmallList((StateResetGroup*)(*(s32*)((u8*)e + 0x328)), (StateResetObject*)e);
+                RemoveFromSmallList((StateResetGroup*)((StateResetObject*)e)->group, (StateResetObject*)e);
             }
             PopBackMemoryMark();
         }
@@ -1590,11 +1591,11 @@ void SteerAgentAlongPath(Agent* self)
     s32 n = self->pathIndex;
     n = (n < last) ? n : last;
     Vec02 target;
-    Vu0::Q(target) = Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (n << 4)));
+    Vu0::Q(target) = Vu0::Q(self->pathPoints[n]);
     Vec02 d;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
     f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d))));
-    f32 t = ClampToRange((ValueRange*)((u8*)self + 0xB9C), dist / __builtin_fabsf(self->fB94));
+    f32 t = ClampToRange((ValueRange*)&self->fB9C, dist / __builtin_fabsf(self->fB94));
     f32 time = t * self->fB98;
     Vec02 vel;
     Vu0::Q(vel) = Vu0::MulXSum(Vu0::Q(d), Vu0::Scalar(1.0f / time), Vu0::Q(self->gravity), Vu0::Scalar(time * -0.5f));
@@ -1786,7 +1787,7 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             anim->movedTrack->pos->vt->eval(anim->movedTrack->pos, self, from->a0.f, zero, 0, &p0, 0);
             anim->movedTrack->pos->vt->eval(anim->movedTrack->pos, self, end->a0.f, zero, 0, &p1, 0);
             self->fB94 = p1.x - p0.x;
-            self->fB98 = (end->a0.f - from->a0.f) / *(f32*)&anim->props6C[0x10];
+            self->fB98 = (end->a0.f - from->a0.f) / anim->speedScale;
             break;
         }
         case 0x1AD:
@@ -1824,10 +1825,10 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             self->requestsBlocked = 0;
             break;
         case 0x1A5: {
-            u8* g = (u8*)self->targetSet;
+            ObjectPool* g = (ObjectPool*)self->targetSet;
             if (g != 0) {
-                if (*(s32*)(g + 0x50) == -1) {
-                    *(void**)(g + 0xE0) = self->desc08()->m62(self);
+                if (g->id50 == -1) {
+                    g->fE0 = self->desc08()->m62(self);
                 }
                 LaunchChosenPoolObject((ObjectPool*)self->targetSet, 1);
             }

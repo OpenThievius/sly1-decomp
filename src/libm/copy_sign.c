@@ -4,6 +4,7 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
+/* A float with the magnitude of x and the sign of y. */
 f32 CopySign(f32 x, f32 y)
 {
     s32 xBits, yBits;

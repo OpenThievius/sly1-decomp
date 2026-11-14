@@ -30,6 +30,8 @@ static Unpacked D_0062A770;
 /* Tiny values read as zero. */
 #define FLUSH_TINY 1
 
+/* Packs a double taken apart (kind, sign, exponent, fraction) back into its 64 bits, rounding and
+ * handling NaN, zero, infinity and denormals. */
 u64 PackDouble(Unpacked* p)
 {
     union {
@@ -88,6 +90,8 @@ u64 PackDouble(Unpacked* p)
     return bits.u;
 }
 
+/* Takes a double's 64 bits apart into kind, sign, unbiased exponent and fraction (every operation
+ * of soft_float.c starts with it). */
 void UnpackDouble(u64* in, Unpacked* out)
 {
     u64 bits = *in;
@@ -126,6 +130,8 @@ void UnpackDouble(u64* in, Unpacked* out)
     }
 }
 
+/* Adds two unpacked doubles, aligning their exponents and handling the special kinds (the double
+ * add and subtract call it). */
 Unpacked* AddUnpackedDoubles(Unpacked* a, Unpacked* b, Unpacked* tmp)
 {
     s32 ae, be;
@@ -202,6 +208,8 @@ Unpacked* AddUnpackedDoubles(Unpacked* a, Unpacked* b, Unpacked* tmp)
     return tmp;
 }
 
+/* Unpacks two doubles, adds them with AddUnpackedDoubles and packs the sum; the compiler calls it
+ * for a double add. */
 u64 AddDoubles(u64 pa, u64 pb)
 {
     Unpacked a;
@@ -213,6 +221,8 @@ u64 AddDoubles(u64 pa, u64 pb)
     return PackDouble(AddUnpackedDoubles(&a, &b, &c));
 }
 
+/* Flips the sign of the second unpacked double, adds with AddUnpackedDoubles and packs the
+ * result; the compiler calls it for a double subtract. */
 u64 SubtractDoubles(u64 pa, u64 pb)
 {
     Unpacked a;
@@ -226,6 +236,10 @@ u64 SubtractDoubles(u64 pa, u64 pb)
 }
 
 u64 MultiplySigned64(s64 u, s64 v);
+/* Multiplies two unpacked doubles (the soft-float multiply core): NaN and infinity/zero cases
+ * first (infinity times zero gives the NaN record D_0062A770), then the 64-bit fractions through
+ * four 32-bit partial products, the exponents added and the result renormalised and rounded to
+ * nearest even. */
 static inline Unpacked* Multiply(Unpacked* a, Unpacked* b, Unpacked* tmp)
 {
     u64 high;
@@ -315,6 +329,8 @@ static inline Unpacked* Multiply(Unpacked* a, Unpacked* b, Unpacked* tmp)
     return tmp;
 }
 
+/* Unpacks two doubles, multiplies the fractions through four 32-bit products, adds the exponents
+ * and packs the result. */
 u64 MultiplyDoubles(u64 x, u64 y)
 {
     Unpacked a;
@@ -331,6 +347,10 @@ u64 MultiplyDoubles(u64 x, u64 y)
 }
 
 
+/* Divides one unpacked double by another (the soft-float divide core): NaN, infinity and zero
+ * cases first (a zero or infinite pair gives the NaN record D_0062A770; a zero divisor gives kind
+ * 4, infinity), then a restoring division of the fractions bit by bit with the exponents
+ * subtracted, rounded to nearest even. */
 static inline Unpacked* Divide(Unpacked* a, Unpacked* b)
 {
     u64 rem;
@@ -388,6 +408,7 @@ static inline Unpacked* Divide(Unpacked* a, Unpacked* b)
     return a;
 }
 
+/* Unpacks two doubles, divides them and packs the result (FormatExponent calls it). */
 u64 DivideDoubles(u64 x, u64 y)
 {
     Unpacked pa;
@@ -398,6 +419,8 @@ u64 DivideDoubles(u64 x, u64 y)
     return PackDouble((Unpacked*)Divide(&pa, &pb));
 }
 
+/* Compares two unpacked doubles by kind, sign, exponent and fraction (the double comparison calls
+ * it). */
 s32 CompareUnpackedDoubles(Unpacked* a, Unpacked* b)
 {
     if (a->kind < 2) {
@@ -442,6 +465,8 @@ s32 CompareUnpackedDoubles(Unpacked* a, Unpacked* b)
     return 0;
 }
 
+/* Unpacks two doubles and returns the order CompareUnpackedDoubles finds; the compiler calls it
+ * for a double comparison. */
 s32 CompareDoubles(u64 pa, u64 pb)
 {
     Unpacked a;
@@ -452,6 +477,8 @@ s32 CompareDoubles(u64 pa, u64 pb)
     return CompareUnpackedDoubles(&a, &b);
 }
 
+/* Builds a double from a signed 32-bit integer: sign, normalised magnitude and exponent, then
+ * PackDouble. */
 u64 ConvertS32ToDouble(s32 value)
 {
     Unpacked parts;
@@ -488,6 +515,7 @@ u64 ConvertS32ToDouble(s32 value)
     return PackDouble(&parts);
 }
 
+/* Converts a double to a signed 32-bit integer, 0 for NaN and zero, saturating at the limits. */
 s32 ConvertDoubleToS32(u64 value)
 {
     u64 in = value;
@@ -520,6 +548,8 @@ compute:
     return v;
 }
 
+/* Converts a double to an unsigned 32-bit integer, 0 for negative values and NaN, 0xFFFFFFFF
+ * above the range. */
 u32 ConvertDoubleToU32(u64 value)
 {
     Unpacked d;
@@ -553,6 +583,8 @@ u32 ConvertDoubleToU32(u64 value)
     return (u32)(d.fraction.ll >> (0x3C - e));
 }
 
+/* Packs a double from a kind, sign, exponent and fraction passed as loose arguments (fptodp,
+ * ConvertFloatToDouble, calls it). */
 u64 PackDoubleFromParts(s32 a0, s32 a1, s32 a2, u64 a3)
 {
     Unpacked args;
@@ -566,6 +598,8 @@ u64 PackDoubleFromParts(s32 a0, s32 a1, s32 a2, u64 a3)
 
 f32 PackFloatFromParts(s32 a0, s32 a1, s32 a2, s32 a3);
 
+/* Unpacks a double, narrows its fraction to 32 bits with a sticky low bit and packs it as a float
+ * with PackFloatFromParts. */
 f32 ConvertDoubleToFloat(u64 bits)
 {
     Unpacked u;

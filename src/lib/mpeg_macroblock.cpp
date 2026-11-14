@@ -1,18 +1,17 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-// The MPEG library's macroblock layer, from 0x20C1A0 to 0x20D138, built whole
-// (config/us/files.tsv): the decoding of a macroblock's modes and motion vectors
-// (func_0020C1A0, func_0020C3F0, func_0020E120's prediction set-up), the prediction that calls the
-// hand-written routines of src/lib/mpeg_motion_compensation.cpp through the two tables of this file's .data
-// (func_0020CAF8), and the residual's addition (func_0020CF18). Its start is the 16-byte boundary
-// after func_0020C188's padding (two more words of nops than 8-byte alignment explains), its end
-// the hand-written object. Its .rodata is its messages. Written for
-// this project from retail's code.
+// SPDX-License-Identifier: AGPL-3.0-or-later The MPEG library's macroblock layer, from 0x20C1A0 to
+// 0x20D138, built whole (config/us/files.tsv): the decoding of a macroblock's modes and motion
+// vectors (func_0020C1A0, func_0020C3F0, func_0020E120's prediction set-up), the prediction that
+// calls the hand-written routines of src/lib/mpeg_motion_compensation.cpp through the two tables of
+// this file's .data (func_0020CAF8), and the residual's addition (func_0020CF18). Its start is the
+// 16-byte boundary after func_0020C188's padding (two more words of nops than 8-byte alignment
+// explains), its end the hand-written object. Its .rodata is its messages. Written for this project
+// from retail's code.
 #include "common.h"
 #include "asm_func.h"
 #include "mpeg_decoder.h"
 
-// The hand-written prediction routines (src/lib/mpeg_motion_compensation.cpp), by kind of motion: whole
-// pixel and half pixel.
+// The hand-written prediction routines (src/lib/mpeg_motion_compensation.cpp), by kind of motion:
+// whole pixel and half pixel.
 void FetchLumaBlock(MpegBlockPart*);
 void FetchChromaBlock(MpegBlockPart*);
 void FetchLumaBlockHalfVertical(MpegBlockPart*);
@@ -36,6 +35,9 @@ void ReportMpegErrorFormat(MpegDecoder* d, const char* msg, s32 code);
 void ComputeMotionVectors(MpegDecoder* self, s32 x, s32 y, s32 flags, s32 type, MpegMotionVector* vec, s32* sel, s32* base);
 void StartBlockChainToScratchpad(MpegDecoder* self);
 
+// For macroblock n, checks its motion type (reporting "Invalid modion type -- ignored" outside 1
+// to 3), computes its motion vectors and prediction and waits for the IPU's output DMA channel
+// before marking the buffer.
 s32 PrepareMacroblockPrediction(MpegDecoder* d, s32 n, s32 mode, s32 flags, s32 code, MpegMotionVector* vec, s32* sel,
                                 s32* base)
 {
@@ -86,6 +88,8 @@ void ComputeDualPrimeVectors(MpegDecoder* self, s32* out, s32* in, s32 x, s32 y)
 void ReportMpegErrorFormat(MpegDecoder* self, const char* fmt, s32 value);
 
 
+// Works out a macroblock's motion vectors from its position and flags and fetches its prediction
+// through PredictMacroblock; PrepareMacroblockPrediction calls it.
 void ComputeMotionVectors(MpegDecoder* self, s32 x, s32 y, s32 flags, s32 type, MpegMotionVector* vec,
                    s32* sel, s32* base)
 {
@@ -177,6 +181,9 @@ void ComputeMotionVectors(MpegDecoder* self, s32 x, s32 y, s32 flags, s32 type, 
     }
 }
 
+// Runs the hand-written prediction routines of mpeg_motion_compensation.cpp through the two tables
+// g_lumaBlockFunctions and g_chromaBlockFunctions, selected by the kind of motion and whole or half
+// pixel.
 void PredictMacroblock(MpegDecoder* self, MpegPicture* src, s32 srcField, s32 dstField, s32 dstY, s32 height,
                        s32 x, s32 y, s32 dx, s32 dy, s32 half, s32 average)
 {
@@ -288,6 +295,8 @@ void ReportMpegError(MpegDecoder* self, const char* value);
 void ClampMacroblock(s32 destination, u32 buffer);
 void AddAndClampMacroblock(s32 destination, u32 scratch, u32 output);
 
+// Adds the prediction to the decoded residual through the hand-written routines
+// AddAndClampMacroblock and ClampMacroblock (DecodeAllMacroblocks calls it).
 void AddMacroblockResiduals(MpegDecoder* d, s32 n)
 {
     s32 i;

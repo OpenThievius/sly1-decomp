@@ -7,6 +7,9 @@
 static const f32 g_one = 1.0f;
 static const f32 g_tenToMinus30 = 1.0e-30f;
 
+/* Unchecked square root of a float, computed bit by bit on the mantissa (a shift and subtract
+ * loop, correctly rounded, no hardware instruction); a signed zero comes back unchanged, NaN for
+ * a negative. */
 f32 SquareRootKernel(f32 x)
 {
     s32 bits, exponent, i, twiceRoot, root, trial, bit;

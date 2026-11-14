@@ -17,11 +17,16 @@ struct FrameTable;
 extern "C" void RegisterFrameInfo(void* begin, FrameTable* ob);
 extern "C" void* DeregisterFrameInfo(void* value);
 
+// Run at startup (the last entry of the constructor list): registers the program's exception frame
+// information (g_frameInfoList) with the runtime's RegisterFrameInfo, using the file's 0x18-byte
+// record.
 void RegisterProgramFrameInfo(void)
 {
     RegisterFrameInfo(g_frameInfoList, (FrameTable*)g_programFrameTable);
 }
 
+// Run at exit (the last entry of the destructor list): gives the program's exception frame
+// information back to the runtime (DeregisterFrameInfo).
 void ReleaseProgramFrameInfo(void)
 {
     DeregisterFrameInfo(g_frameInfoList);

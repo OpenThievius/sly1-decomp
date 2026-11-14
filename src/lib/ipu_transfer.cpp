@@ -15,6 +15,7 @@
 extern "C" s32 DisableInterrupts(void);
 extern "C" s32 EnableInterrupts(void);
 
+// Starts DMA channel 3 (from the IPU) with the DMA suspended while its control register is written.
 void StartIpuOutputTransfer(u32 value)
 {
     DisableInterrupts();
@@ -24,6 +25,7 @@ void StartIpuOutputTransfer(u32 value)
     EnableInterrupts();
 }
 
+// Starts DMA channel 4 (to the IPU) the same way.
 void StartIpuInputTransfer(u32 value)
 {
     DisableInterrupts();
@@ -34,6 +36,7 @@ void StartIpuInputTransfer(u32 value)
 }
 
 
+// Saves the state of the IPU's two DMA channels (SaveMpegDmaState calls it).
 void SaveIpuDmaChannels(IpuDmaState* out)
 {
     StartIpuInputTransfer(1);
@@ -52,6 +55,8 @@ void SaveIpuDmaChannels(IpuDmaState* out)
     out->control = *(volatile u32*)0x10002010;
 }
 
+// Restores the state of the IPU's two DMA channels and restarts them (RestoreMpegDmaState calls
+// it).
 void RestoreIpuDmaChannels(IpuDmaState* s0)
 {
     u32 v = (u32)s0->bitPosition;
@@ -86,6 +91,7 @@ void RestoreIpuDmaChannels(IpuDmaState* s0)
     StartIpuInputTransfer(s0->inControl | 0x100);
 }
 
+// Waits while the IPU is busy (mode 0) or tells whether it is (mode 1).
 u32 SyncIpu(s32 mode, s32 unused1)
 {
     u32 result = 0;

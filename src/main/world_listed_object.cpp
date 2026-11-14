@@ -162,7 +162,7 @@ OwnedRecord* AcquireOwnedRecord(WorldListedObject* o)
     if (o->mode != 2) {
         s->owner = o;
     } else {
-        void* r = PopFreeSlot((Pool6C*)((u8*)o->world + 0x1B4C));
+        void* r = PopFreeSlot(&o->world->pool1B4C);
         s->extraRecord = r;
         if (r) {
             FillMemory(r, 0, 0x580);

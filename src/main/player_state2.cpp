@@ -34,6 +34,7 @@
 #include "functions/world.h"
 #include "functions/world_contacts.h"
 #include "functions/zone_collider.h"
+#include "attachment.h"
 struct BaseObject;
 
 struct BaseObject;
@@ -135,11 +136,11 @@ void StepPlayerState2(Player* self)
     case 8: {
         f32 t0 = GetAnimationMarkerTime((Animation*)self->markerAnim, 0x1BA);
         f32 t1 = GetAnimationMarkerTime((Animation*)self->markerAnim, 0x1BB);
-        if (*(f32*)((u8*)self->stateAnimPlayer + 0x14) < t1) {
+        if (((AnimationPlayer*)self->stateAnimPlayer)->time < t1) {
             Vu0::Q(a) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Scalar(-1.0f));
             AddColliderForce(self, &a);
         }
-        if (*(f32*)((u8*)self->stateAnimPlayer + 0x14) < t0) {
+        if (((AnimationPlayer*)self->stateAnimPlayer)->time < t0) {
             b = D_00248D30;
         } else {
             Vu0::Q(b) = Vu0::FromFloats(0.0f, 0.0f, self->v150.z);
@@ -1181,7 +1182,7 @@ void UpdatePlayerState2(Player* p)
         if (rec->time < g_gameTime) {
             SetPlayerState(p, 3, 0x33);
         } else {
-            ScorePlayerLeapToPoint(p, (BaseObject*)(((TrackOwner_17F018*)p->boundObject)->frame), (Vec02*)((u8*)p->boundObject + 0x40), 0, &rec->aim, &rec->land, rec->time - g_gameTime);
+            ScorePlayerLeapToPoint(p, (BaseObject*)(((TrackOwner_17F018*)p->boundObject)->frame), &((LeapTarget_17F018*)p->boundObject)->pos, 0, &rec->aim, &rec->land, rec->time - g_gameTime);
         }
         break;
     }

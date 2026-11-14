@@ -168,12 +168,16 @@ extern "C" void InitRemoteCalls(s32 mode)
     WriteIopRegister(0x80000002, 1);
 }
 
+// Shuts the command channel down (ShutDownCommandChannel) and clears g_remoteCallsReady (ResetIop
+// calls it).
 void ShutDownRemoteCalls(void)
 {
     ShutDownCommandChannel();
     g_remoteCallsReady = 0;
 }
 
+// With interrupts disabled, marks the first free packet of the pool in use, gives it the next id
+// and returns it, or 0 when none is free.
 RemoteCallPacket* TakeRequestPacket(RemoteCallState* self)
 {
     DisableInterrupts();
@@ -204,12 +208,14 @@ RemoteCallPacket* TakeRequestPacket(RemoteCallState* self)
     return 0;
 }
 
+// Clears a packet's id and its in-use bit.
 void FreeRequestPacket(RemoteCallPacket* packet)
 {
     packet->id = 0;
     packet->flags &= ~1u;
 }
 
+// Returns the next packet of the reply ring, wrapping at its count.
 IopCallPacket* NextReplyPacket(RemoteCallState* r)
 {
     s32 index = r->replyCursor % r->replyCount;
@@ -218,6 +224,8 @@ IopCallPacket* NextReplyPacket(RemoteCallState* r)
     return (IopCallPacket*)((u8*)r->replies + off);
 }
 
+// The handler of the IOP's replies: runs the client's callback for 0x8000000A, copies the found
+// service for 0x80000009, signals the waiting client's semaphore and frees its packet.
 void HandleRemoteCallReply(RemoteCallPacket* reply)
 {
     RemoteCallClient* s0;
@@ -249,6 +257,8 @@ after:
     s0->packet.ptr = 0;
 }
 
+// Answers an IOP call with a 0x8000000C packet from the reply ring through
+// SendCommandFromInterrupt.
 void AnswerIopCall(IopCallPacket* src, RemoteCallState* pools)
 {
     IopCallPacket* m = NextReplyPacket(pools);
@@ -260,6 +270,8 @@ void AnswerIopCall(IopCallPacket* src, RemoteCallState* pools)
     SendCommandFromInterrupt(0x80000008, m, 0x40, (void*)src->cmd, src->f24, src->f28);
 }
 
+// Walks the groups of services in g_remoteCallState and returns the entry whose first word is the
+// key, or 0.
 ServiceRecord* FindRemoteService(u32 key, RemoteCallState* pools)
 {
     ServiceGroup* group = pools->serviceGroups;
@@ -274,6 +286,8 @@ ServiceRecord* FindRemoteService(u32 key, RemoteCallState* pools)
     return 0;
 }
 
+// Answers a 0x80000009 lookup with the entry FindRemoteService finds (or zeros) through
+// SendCommandFromInterrupt.
 void AnswerServiceLookup(IopCallPacket* src, RemoteCallState* pools)
 {
     IopCallPacket* m = NextReplyPacket(pools);
@@ -383,6 +397,8 @@ struct ServerRequestPacket {
 
 
 
+// Appends an incoming request to its server's list and, when the server's thread is idle, wakes it
+// with QueueThreadRequest.
 void QueueServerRequest(ServerRequestPacket* self)
 {
     ServerRequestEntry* n = self->f34;

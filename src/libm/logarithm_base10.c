@@ -7,6 +7,9 @@
 
 f32 LogarithmBase10Kernel(f32 x);
 
+/* Checked base-10 logarithm: runs LogarithmBase10Kernel, and for x <= 0 reports an error "log10f"
+ * through the error hook (kind 2 for 0, kind 1 for a negative) and sets the error number (0x22 or
+ * 0x21) unless the error mode is -1. */
 f32 LogarithmBase10(f32 x)
 {
     MathError e;

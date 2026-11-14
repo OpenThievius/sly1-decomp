@@ -21,9 +21,14 @@ struct Pair3B {
 
 // A 0x30-byte entry of the table at +0x68C (func_0013B9D8 finds the one with the key).
 struct Entry3B {
-    u8 pad00[0x10];
-    void* data;             // 0x10
-    u8 pad14[0x0C];
+    union {
+        struct {
+            u8 pad00[0x10];
+            void* data;             // 0x10
+            u8 pad14[0x0C];
+        };
+        Vec02 v[2];         // 0x00: the point of the hit and the direction (0x10), as vectors
+    };
     f32 value;              // 0x20
     s32 key;                // 0x24
     u8 pad28[8];

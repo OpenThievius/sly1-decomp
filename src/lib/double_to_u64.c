@@ -10,6 +10,9 @@ typedef long long s64_t;
 u32 ConvertDoubleToU32(double a);
 double ConvertS64ToDouble(s64_t x);
 
+/* A double converted to an unsigned 64-bit integer: 0 for a negative; otherwise the high word
+ * from a / 2^32, then the remainder corrected in a second step through ConvertS64ToDouble, so the
+ * result is exact for large values. */
 u64_t ConvertDoubleToU64(double a)
 {
     double t;

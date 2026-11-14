@@ -33,6 +33,7 @@ Quad_27B0C0 g_ipuColourTable[2] = {
 extern "C" s32 DisableInterrupts(void);
 extern "C" s32 EnableInterrupts(void);
 
+// The IPU initialisation's own copy of StartIpuInputTransfer, for channel 4.
 void StartIpuInputForReset(u32 value)
 {
     DisableInterrupts();
@@ -42,6 +43,8 @@ void StartIpuInputForReset(u32 value)
     EnableInterrupts();
 }
 
+// Resets the IPU and loads its default quantiser matrices and colour table (InitMpegLibrary calls
+// it).
 void ResetIpu(void)
 {
     StartIpuInputForReset(1);

@@ -38,6 +38,8 @@ s32 BindModuleLoader(void);
 struct __attribute__((packed)) UnalignedWord { u32 v; };
 
 
+// Binds g_moduleLoaderClient to the IOP's service 0x80000006 once, retrying until it is bound, and
+// keeps the service's version word in g_moduleLoaderVersion.
 s32 BindModuleLoader(void)
 {
     s32 i;
@@ -63,6 +65,8 @@ s32 BindModuleLoader(void)
     return 0;
 }
 
+// Tells whether g_moduleLoaderVersion, the library's own version (the end of its identification
+// string D_00276970) and the string D_002771D0 points to all differ.
 s32 IsModuleLoaderMismatched(void)
 {
     s32 result = 0;
@@ -75,6 +79,7 @@ s32 IsModuleLoaderMismatched(void)
     return result;
 }
 
+// Sets g_moduleLoaderBound back to -1 and clears the version word (LoadIopModules calls it).
 s32 ForgetModuleLoader(void)
 {
     g_moduleLoaderBound = -1;
@@ -84,6 +89,8 @@ s32 ForgetModuleLoader(void)
 
 LINKER_REMNANT(func_001F9858);
 
+// Sends the module loader a file name of up to 0xFB characters and up to 0xFC bytes of arguments
+// with a command, and returns the reply's size and word.
 s32 SendModuleLoadRequest(ModuleBlob* src, s32 size, ModuleBlob* data, s32* out, s32 cmd)
 {
     if (BindModuleLoader() < 0) {
@@ -118,6 +125,8 @@ s32 SendModuleLoadRequest(ModuleBlob* src, s32 size, ModuleBlob* data, s32* out,
     return ret;
 }
 
+// Sends a module load request (command 0) for a file name and its arguments; LoadIopModules loads
+// each name of g_iopModuleNames with it.
 s32 LoadIopModuleFile(ModuleBlob* src, s32 size, ModuleBlob* data)
 {
     s32 out[4];

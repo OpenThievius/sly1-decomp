@@ -19,6 +19,8 @@ typedef void (*NewHandler)(void);
 // What an allocation calls when it runs out of memory.
 NewHandler g_newHandler = 0;
 
+// Installs the handler an allocation failure calls (g_newHandler) and returns the previous one; the
+// handler is a plain function with no arguments.
 NewHandler ReplaceNewHandler(NewHandler handler)
 {
     NewHandler previous = g_newHandler;
@@ -32,6 +34,7 @@ void* ReturnPlacement(u32 size, void* place)
     return place;
 }
 
+// Placement new for arrays: returns the given address and ignores the size.
 void* ReturnArrayPlacement(u32 size, void* place)
 {
     return place;

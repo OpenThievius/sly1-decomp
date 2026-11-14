@@ -186,10 +186,10 @@ void ApplyLinkConstraint(PlacedObject* self)
             self->desc02()->m1D(self, &to);
         }
     }
-    a->rot = MulRotationValue(*(Mat02*)((u8*)a->linkRecord + 0x30), *(Mat02*)a->linkRecord);
+    a->rot = MulRotationValue(a->linkRecord->m[1], a->linkRecord->m[0]);
     Rec2195_224* rb = b->linkRecord;
     if (rb != 0 && (rb->flags & 3)) {
-        b->rot = MulRotationValue(*(Mat02*)((u8*)rb + 0x30), *(Mat02*)rb);
+        b->rot = MulRotationValue(rb->m[1], rb->m[0]);
     } else {
         Mat02* m = &b->rot;
         *m = g_identityMatrix;

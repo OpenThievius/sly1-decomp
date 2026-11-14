@@ -168,6 +168,8 @@ extern "C" s32 DisableInterruptCause(s32 n)
     return r;
 }
 
+// Runs EnableInterruptCauseSyscall (0x14) on a cause the same way; InitDisplay and InitRenderFrames
+// call it after AddInterruptHandler.
 s32 EnableInterruptCause(s32 n)
 {
     u32 enabled = ReadCop0Status();
@@ -183,6 +185,8 @@ s32 EnableInterruptCause(s32 n)
     return r;
 }
 
+// Runs DisableDmaInterruptSyscall (0x17) on a channel the same way; ShutDownCommandChannel and the
+// colour conversion's set-ups call it.
 s32 DisableDmaInterrupt(s32 n)
 {
     u32 enabled = ReadCop0Status();
@@ -198,6 +202,8 @@ s32 DisableDmaInterrupt(s32 n)
     return r;
 }
 
+// Runs EnableDmaInterruptSyscall (0x16) on a channel the same way; InitCommandChannel and the
+// colour conversion's set-ups call it.
 s32 EnableDmaInterrupt(s32 n)
 {
     u32 enabled = ReadCop0Status();

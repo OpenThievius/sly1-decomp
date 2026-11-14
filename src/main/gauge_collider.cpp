@@ -525,7 +525,7 @@ void StartGaugeCollider(GaugeCollider* self)
     InsertAttachment((PlacedObject*)self->poseObject, (Attachment*)self->poseSource);
     ((T2195_790*)self->poseSource)->hasTarget = 1;
     ((T2195_790*)self->poseSource)->target = self->restTarget;
-    *(Quad16*)((u8*)self->poseSource + 0x30) = *(Quad16*)&D_00248D30;
+    *(Quad16*)&((T2195_790*)self->poseSource)->point = *(Quad16*)&D_00248D30;
     s32 n1 = GatherObjectsById(self->world, 0x305, 0xF, 0, 0, 0);
     self->agentCount = n1;
     void* buf = AllocateFrontMemory(n1 * 4);

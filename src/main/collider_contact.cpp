@@ -133,7 +133,7 @@ PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3
         part = (e != 0) ? (Collider*)a1 : (Collider*)a0;
         end->part = part;
         if (part != 0) {
-            end->body = *(Collider**)((u8*)part + 0x50);
+            end->body = (Collider*)part->root;
         } else {
             Vu0::Q(end->v30) = Vu0::Zero();
             end->body = 0;
@@ -153,7 +153,7 @@ PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3
             pe->surface = 0;
         } else {
             TransformPointBetweenFrames(0, part, &pe->v10, &pe->v20);
-            s32 surface = *(s8*)((u8*)part + 0x2C8);
+            s32 surface = (s8)part->b2C8;
             surfaces[e] = surface;
             pe->surface = surface;
         }
@@ -238,7 +238,7 @@ void NotifyContactEnds(World* world, s32 n, Contact03** list)
                 }
             }
         }
-        Vu0::Q(*(Vec02*)((u8*)c + 0xB0)) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)&c->end[0] + 0x30)), Vu0::Q(*(Vec02*)((u8*)&c->end[1] + 0x30)));
+        Vu0::Q(c->relativeVelocity) = Vu0::Sub(Vu0::Q(c->end[0].v30), Vu0::Q(c->end[1].v30));
     }
 }
 

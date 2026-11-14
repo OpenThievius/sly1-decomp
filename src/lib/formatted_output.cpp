@@ -18,6 +18,8 @@ typedef void (*PutChar_1F7588)(s32 c);
 static u8 g_outputLine[0x80];
 s32 g_outputLineLength = 0;
 
+// Waits on the status word at 0x1000F130 and writes a character to the serial
+// port at 0x1000F180 (WriteConsoleChar calls it).
 s32 WriteSerialChar(s32 c)
 {
     while (*(volatile u32*)0x1000F130 & 0x8000) {
@@ -28,6 +30,8 @@ s32 WriteSerialChar(s32 c)
 
 void PrintToDebugConsole(const u8* text);
 
+// Gathers characters in g_outputLine and hands the line to PrintToDebugConsole at a newline or when
+// it is full (PrintBuffered's output).
 void BufferOutputChar(s32 c)
 {
     s32 pos = g_outputLineLength;
@@ -48,6 +52,8 @@ void BufferOutputChar(s32 c)
     g_outputLine[pos] = (u8)c;
 }
 
+// Writes a character to the serial port with WriteSerialChar, a newline as a carriage return and a
+// line feed; g_outputHook's default.
 void WriteConsoleChar(s32 c)
 {
     if (c == 10) {
@@ -60,6 +66,9 @@ void WriteConsoleChar(s32 c)
 
 PutChar_1F7588 g_outputHook = WriteConsoleChar;  // where formatted output sends each character
 
+// Takes a double's bits, returns 0 for magnitudes below 2^-2, 9999 for those of 2^13 and over, else
+// the mantissa shifted to an integer and rounded to nearest; FormatExponent turns its scaled digits
+// into an integer with it.
 s32 RoundDoubleToInteger(double a)
 {
     union {
@@ -103,6 +112,7 @@ extern "C" double ConvertDoubleToU64(double a);
 s32 RoundDoubleToInteger(double a);
 void PrintToOutputHook(const char* fmt, ...);
 
+// Writes a double through the output hook in the form 0.ddddddde+n (the formatter's %e and %f).
 void FormatExponent(double value)
 {
     s32 exp10 = 0;
@@ -135,6 +145,8 @@ void FormatExponent(double value)
 
 #define NEXT_ARG_1F7588(ap, T) (ap += 8, *(T*)(ap - 8))
 
+// The small formatter of %c %d %u %o %x %s %e %f with l, h and a zero-padded width, writing each
+// character through its character function (PrintToOutputHook and PrintBuffered call it).
 void FormatOutput(const char* fmt, char* ap)
 {
     char buf[32];
@@ -393,6 +405,8 @@ void FormatOutput(const char* fmt, char* ap)
     }
 }
 
+// Formats its arguments through FormatOutput to g_outputHook (RunRequestThread and the TLB set-up
+// print with it).
 void PrintToOutputHook(const char* fmt, ...)
 {
     char* ap = (char*)__builtin_next_arg(fmt) - 56;

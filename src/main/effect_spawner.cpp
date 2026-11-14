@@ -78,10 +78,10 @@ void SetEffectSpawnerActiveForever(EffectSpawner* self);
 void SetEffectSpawnerInactive(EffectSpawner* self);
 
 Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
-void SetSpawnRecordKind(u8* self,s32 kind);
+void SetSpawnRecordKind(Rec50* self,s32 kind);
 
 void* GetOwnedSpawnRecord(void* a0, s32 a1);
-void SetSpawnRecordKind(u8* self,s32 kind);
+void SetSpawnRecordKind(Rec50* self,s32 kind);
 
 // The message SendPointEventToWorldListener sends (kind 12): a point and a float.
 struct PointEventMessage {
@@ -116,12 +116,6 @@ struct StreamWord {
     s32 value;
 };
 
-struct CappedWordList {
-    u8 pad0[0x4C];
-    s32 cap;
-    U32P* items;
-    void* source;
-};
 
 void* AllocateFrontMemory(s32 size);
 struct BufferedStream;
@@ -893,8 +887,8 @@ void LoadEffectSpawner(EffectSpawner* self, BufferedStream* count)
     }
     s32 n = ReadBufferedU16(count);
     if (n != 0) {
-        void* b = GetOwnSpawnRecord(self, 1);
-        ReadCappedWordList((CappedWordList*)((u8*)b + 0x130), n, self, count);
+        Rec50* b = GetOwnSpawnRecord(self, 1);
+        ReadCappedWordList(&b->words130, n, self, count);
     }
 }
 
@@ -994,7 +988,7 @@ void StartEffectSpawner(EffectSpawner* self)
     self->volumeScale = 1.0f;
     Rec50* rec = self->rec;
     if (rec->kind == 1) {
-        f32* box = (f32*)((u8*)rec + 0x20);
+        f32* box = rec->box20;
         if (self->id2F8[0] != -1) {
             f32 dx = __builtin_fabsf(box[4] - box[0]);
             f32 dy = __builtin_fabsf(box[5] - box[1]);
@@ -1148,7 +1142,7 @@ void WrapSpawnerParticlesIntoBox(EffectSpawner* self)
     }
 }
 
-void RandomizeEffectSpawnerDelay(u8* self);
+void RandomizeEffectSpawnerDelay(EffectSpawner* self);
 s32 CountListItems(List01* list);
 void WrapSpawnerParticlesIntoBox(EffectSpawner* self);
 void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f);
@@ -1164,7 +1158,7 @@ void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
     ListFrame frame;
 
     if (self->changed != 0) {
-        RandomizeEffectSpawnerDelay((u8*)self);
+        RandomizeEffectSpawnerDelay(self);
     }
     UpdatePlacedObject(self, dt);
     if (self->sharedId != -1) {
@@ -1275,10 +1269,10 @@ spawn:
         BaseObject* held;
         if (self->rec->f120 == 0) {
             held = self->held348;
-            have = held != 0 ? *(s32*)((u8*)held + 0x620) : 0;
+            have = held != 0 ? ((WorldListedObject*)held)->particleCount : 0;
         } else {
             held = self->held344;
-            have = held != 0 ? CountListItems((List01*)((u8*)held + 0x558)) : 0;
+            have = held != 0 ? CountListItems(&((EffectOwner*)held)->list558) : 0;
         }
         s32 left = n - have;
         n = 0; if (left > n) { n = left; }
@@ -1383,15 +1377,15 @@ void GetEffectSpawnerActive(void* self,s32* out)
 // Re-arms the spawner: clears its counter, passes the record's look source to the listed object and
 // the margin to the effect owner if they exist, and draws a new random delay between delayMin and
 // delayMax (in seconds, scaled by 60 for record kind 3).
-void RandomizeEffectSpawnerDelay(u8* self)
+void RandomizeEffectSpawnerDelay(EffectSpawner* self)
 {
-    *(s32*)(self+0x34C)=0;
-    if (*(void**)(self+0x348)) ApplyLookSourceToListedObject((WorldListedObject*)(*(void**)(self+0x348)),(LookSource*)(*(void**)(self+0x2D0)));
-    if (*(void**)(self+0x344)) CopyEffectOwnerMargin((EffectOwner*)(*(void**)(self+0x344)),(Rec50*)(*(void**)(self+0x2D0)));
+    self->changed=0;
+    if (self->held348) ApplyLookSourceToListedObject((WorldListedObject*)self->held348,(LookSource*)self->rec);
+    if (self->held344) CopyEffectOwnerMargin((EffectOwner*)self->held344,self->rec);
     f32 value;
-    if (*(s32*)(self+0x2D4)==3) value=RandomFloatInRange(*(f32*)(self+0x2DC),*(f32*)(self+0x2E0))*60.0f;
-    else value=RandomFloatInRange(*(f32*)(self+0x2DC),*(f32*)(self+0x2E0));
-    *(f32*)(self+0x328)=value;
+    if (self->mode==3) value=RandomFloatInRange(self->delayMin,self->delayMax)*60.0f;
+    else value=RandomFloatInRange(self->delayMin,self->delayMax);
+    self->rate=value;
 }
 
 // Sets how many more spawns are allowed. In mode -1 that is the counter; in mode 0, 0 means active
@@ -1421,19 +1415,19 @@ void SetEffectSpawnerContinuous(EffectSpawner* a0, s32 a1)
 
 // Stores the effect kind in the record and resets its three kind parameters: kind 24 gets 25, 0.8,
 // 0.8 and kind 27 gets -1 and 10.0; others get zeros.
-void SetSpawnRecordKind(u8* self,s32 kind)
+void SetSpawnRecordKind(Rec50* self,s32 kind)
 {
-    *(s32*)(self+0x1B0)=kind;
-    FillMemory(self+0x1F0,0,12);
+    self->f1B0=kind;
+    FillMemory(&self->f1F0,0,12);
     if (kind!=24) {
         if (kind==27) {
-            *(s32*)(self+0x1F0)=-1;
-            *(f32*)(self+0x1F4)=10.0f;
+            self->f1F0=-1;
+            self->f1F4=10.0f;
         }
     } else {
-        *(f32*)(self+0x1F0)=25.0f;
-        *(f32*)(self+0x1F4)=0.8f;
-        *(f32*)(self+0x1F8)=0.8f;
+        self->f1F0f=25.0f;
+        self->f1F4=0.8f;
+        self->f1F8=0.8f;
     }
 }
 
@@ -1441,14 +1435,14 @@ void SetSpawnRecordKind(u8* self,s32 kind)
 void SetEffectSpawnerKind(void* a0, s32 a1)
 {
     void* r = GetOwnSpawnRecord((EffectSpawner*)a0, 1);
-    SetSpawnRecordKind((u8*)r, a1);
+    SetSpawnRecordKind((Rec50*)r, a1);
 }
 
 // Sets the effect kind on the member's own spawn record.
 void SetOwnedSpawnRecordKind(void* a0, s32 a1)
 {
     void* r = GetOwnedSpawnRecord(a0, 1);
-    SetSpawnRecordKind((u8*)r, a1);
+    SetSpawnRecordKind((Rec50*)r, a1);
 }
 
 // The splash of an object on a surface: its sound by distance, the effect, and from 500 on a
@@ -1794,9 +1788,9 @@ void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Ve
     case 4:
         if (shape->anchor != 0) {
             Vu0::Set(*axis, Vu0::RotateTransposed(((PlacedObject*)shape->anchor)->m110,
-                                                  Vu0::Rotate(*(Mat02*)((u8*)g_camera + 0x80), Vu0::Vec::Of(shape->dir))).q);
+                                                  Vu0::Rotate(g_camera->rot80, Vu0::Vec::Of(shape->dir))).q);
         } else {
-            Vu0::Set(*axis, Vu0::Rotate(*(Mat02*)((u8*)g_camera + 0x80), Vu0::Vec::Of(shape->dir)).q);
+            Vu0::Set(*axis, Vu0::Rotate(g_camera->rot80, Vu0::Vec::Of(shape->dir)).q);
         }
         break;
     default:
@@ -1963,7 +1957,7 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
             if (*p) ((void (*)(Effect*, Rec50*))*p)(it, self);
         }
     }
-    if (IsListEmpty((List01*)((u8*)node + 0x558))) {
+    if (IsListEmpty(&node->list558)) {
         typedef void (*F2)(EffectOwner*);
         (*(F2*)(AT(u8*, node, 0) + 0x1C))(node);
     }
@@ -2538,7 +2532,7 @@ void LoadRecordMember(RecordMember* self, void* stream)
     s32 t = ReadBufferedU16((BufferedStream*)stream);
     if (t != 0) {
         Rec79* m = GetOwnedSpawnRecord(self, 1);
-        ReadCappedWordList((CappedWordList*)((u8*)m + 0x130), t, self, stream);
+        ReadCappedWordList(&m->words130, t, self, stream);
     }
 }
 
@@ -2820,8 +2814,8 @@ void HandleSpawnMessage(void* self, void* body)
     }
     void* cp;
     if (AT(s32, self, 0xBC) != 0) {
-        chain[0] = (u8*)self + 0xC4;
-        chain[1] = (u8*)self + 0xC0;
+        chain[0] = &((HoldingMember*)self)->heldC4;
+        chain[1] = &((HoldingMember*)self)->heldC0;
         chain[2] = self;
         cp = chain;
     } else {
@@ -3107,12 +3101,12 @@ void StepObjectLevelRamp(WorldObjectNode* self, f32 dt)
 // for objects that run on the frame step clock or the one for those that do not.
 WorldObjectNode* AddObjectNodeToWorld(PlacedObject* self)
 {
-    WorldObjectNode* node = (WorldObjectNode*)PopZeroedFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1C18));
+    WorldObjectNode* node = (WorldObjectNode*)PopZeroedFreeSlot(&g_currentWorld->pool1C18);
     node->owner = self;
     if (self->frameStepClock != 0) {
-        AppendToList((List01*)((u8*)g_currentWorld + 0x1C30), node);
+        AppendToList(&g_currentWorld->list1C30, node);
     } else {
-        AppendToList((List01*)((u8*)g_currentWorld + 0x1C24), node);
+        AppendToList(&g_currentWorld->list1C24, node);
     }
     return node;
 }
@@ -3122,12 +3116,12 @@ WorldObjectNode* AddObjectNodeToWorld(PlacedObject* self)
 void RemoveObjectNodeFromWorld(WorldObjectNode* node)
 {
     if (node->owner->frameStepClock != 0) {
-        RemoveFromList((List01*)((u8*)g_currentWorld + 0x1C30), node);
+        RemoveFromList(&g_currentWorld->list1C30, node);
     } else {
-        RemoveFromList((List01*)((u8*)g_currentWorld + 0x1C24), node);
+        RemoveFromList(&g_currentWorld->list1C24, node);
     }
     node->owner->rampNode = 0;
-    PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1C18), node);
+    PushFreeSlot(&g_currentWorld->pool1C18, node);
 }
 
 // Draws a full-screen colour fill: builds the packet from the colour at 0x60 and sends it to the
@@ -3167,9 +3161,8 @@ void UpdateColorFade(ColorFade* self)
         } else {
             t -= self->holdTime;
             if (!(t < self->fadeOutTime)) {
-                u8* p = (u8*)g_currentWorld + 0x1CD8;
                 self->running = 0;
-                RemoveFromList((List01*)p, self);
+                RemoveFromList(&g_currentWorld->list1CD8, self);
                 return;
             }
             a = self->holdColor; b = self->endColor;
@@ -3198,7 +3191,7 @@ void StartColorFade(ColorFade* a0)
     if (a0->running == 0) {
         a0->running = 1;
         a0->startTime = g_gameTime;
-        AppendToList((List01*)((u8*)g_currentWorld + 0x1CD8), a0);
+        AppendToList(&g_currentWorld->list1CD8, a0);
     }
 }
 

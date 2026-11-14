@@ -1072,8 +1072,8 @@ void SetColliderFrozen(Collider* self, s32 flag)
         self->save94 = self->mode470;
         SetColliderAnchors(self, 3, 0, 3, 0);
         u128 zero = Vu0::Zero();
-        Vu0::Q(*(Vec02*)((u8*)self + 0x170)) = zero;
-        Vu0::Q(*(Vec02*)((u8*)self + 0x180)) = zero;
+        Vu0::Q(self->v170) = zero;
+        Vu0::Q(self->v180) = zero;
         FreeTouchNodes(self->world, self->touching);
         self->touching = 0;
         SetPlacedObjectFrozen(self, 1);
@@ -1204,11 +1204,11 @@ KeyedEntry* FindKeyEntry(KeyedEntry* key)
 // Gives the keyed entry whose id (at +0x20) equals key, or 0.
 void* FindEntryById(s32 key)
 {
-    u8* p = (u8*)g_keyedEntries;
+    KeyedEntry* p = (KeyedEntry*)g_keyedEntries;
     u8* end = (u8*)g_keyedEntries + 0x7E8;
     for (;;) {
-        if (key != *(s32*)(p + 0x20)) {
-            p += 0x2C;
+        if (key != p->id) {
+            p++;
             if ((u32)p < (u32)end) {
                 continue;
             }
@@ -1226,7 +1226,7 @@ void* GetEntryName(s32 id)
     {
         return g_missingEntryName;
     }
-    return *(void**)((u8*)p + 0x24);
+    return (void*)((KeyedEntry*)p)->name;
 }
 
 LINKER_REMNANT(func_00160178);
@@ -1292,12 +1292,12 @@ void CountCategoryFlags(s32 key, s32* a1, s32* a2, s32* a3)
 // if any of levels 1 to 5 is not marked done (0x20).
 s32 ComputeCompletionMask(void) {
     u32 mask = 0xE;
-    u8* p = (u8*)g_keyedEntries;
-    u8* end = (u8*)g_keyedEntries + 0x7E8;
+    KeyedEntry* p = (KeyedEntry*)g_keyedEntries;
+    KeyedEntry* end = (KeyedEntry*)((u8*)g_keyedEntries + 0x7E8);
     do {
-        u32* r = (u32*)GetLevelEntryByKey(*(s32*)(p + 0x20));
-        mask &= ~*(u32*)(p + 0x28) | *r;
-        p += 0x2C;
+        u32* r = (u32*)GetLevelEntryByKey(p->id);
+        mask &= ~p->flags | *r;
+        p++;
     } while (p < end);
     s32 clear = -3;
     s32 n = 4;
@@ -1542,11 +1542,11 @@ s32 ComputeCompletionPercent(GameProgress* progress)
     u32 i;
     s32 k;
     for (i = 0; i < 0x2E; i++) {
-        u8* e = (u8*)g_keyedEntries + i * 0x2C;
-        u32 v = *(u32*)(e + 0x20);
+        KeyedEntry* e = (KeyedEntry*)g_keyedEntries + i;
+        u32 v = e->id;
         s32 idx = (s32)v >> 8;
         if (idx != 0) {
-            u32 flags = *(u32*)(e + 0x28);
+            u32 flags = e->flags;
             u32* w = (u32*)(p + (idx * 0x44C + 0x10) + (v & 0xFF) * 0x78);
             u32 bit;
             total++;

@@ -1411,10 +1411,25 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
     }
 }
 
-// Handles a message to a step sequence (a scripted list of steps that shows captions and plays
-// voice lines), by the message's type: 0 opens a key record and waits for it, 1 and 2 look up one
-// or two speaker objects by id, 3 shows a caption in the typed-text box (coloured by the speaker's
-// colour) and sets its percent and subject, and types 4 to 7 do the other step actions.
+// Handles one message of a step sequence (a scripted run of steps that shows captions, plays
+// voice lines and starts movies), by the message's type. self->waitFlags collects the things the
+// sequence must wait for before its next step (probably cleared as each finishes elsewhere).
+//  0: opens the key record in the message and waits for it (flag 0x01).
+//  1, 2: look up up to two caption speaker objects by id (type 0x104, -1 means none; searched
+//     under the sequence's root or itself), send the first speaker's state walker to state 0x34C,
+//     and set the speaker as the target and the second as the special object of the left (1,
+//     arc D_002708E0, stored in p2F0, wait 0x02) or right (2, arc D_00271558, p2F4, wait 0x04) arc.
+//  3: a caption step. Picks which stored speaker the id in the message names and fades that
+//     speaker's arc in and the other out; finds an animation (type 2 by id, wait 0x10, or else
+//     type 1 id 0x54A of the speaker) and starts it on the speaker as a player (player2F8) with a
+//     record callback; if the message has text, sets it in the typed-text caption box, coloured
+//     with the speaker's colour (grey 0x80808080 if none), with a typing speed of (length + 10)
+//     over the duration (the animation's length or the message's time; 15 chars/s if no duration)
+//     (wait 0x20); sets the panel's value percent if given (wait 0x40); sets a time deadline
+//     (wait 0x80) and a subject object; sets the camera's anchor object from the message or the
+//     sequence's own default (second300); waits for a key if asked (wait 0x100); always waits 0x08.
+//  4: triggers script event 0x10 with the message's payload; 5, 6: show and hide the world's
+//     counted screen element; 7: queues a movie on the movie player.
 void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
 {
     CaptionSpeaker* s2;
@@ -1855,16 +1870,16 @@ void NotifyScatterControllerLoaded(void* self)
 // 0..1.
 void RaiseScatterLevels(ScatterController* self, f32 amount)
 {
-    f32 x = g_currentEntry->dt + amount * *(f32*)((u8*)self->table + 0x10);
+    f32 x = g_currentEntry->dt + amount * ((ScatterTable*)self->table)->levelScale;
     SetScatterLevel(self, x);
     s32 index = g_saveData->reserveCount;
     f32 y;
     if (index < 0) {
-        y = *(f32*)((u8*)self->table + 0x40);
+        y = ((ScatterTable*)self->table)->f40;
     } else {
-        y = *(f32*)((u8*)self->table + 0x3C);
-        if (index <= *(s32*)((u8*)self->table + 0x4C)) {
-            y += *(f32*)((u8*)self->table + 0x50);
+        y = ((ScatterTable*)self->table)->f3C;
+        if (index <= ((ScatterTable*)self->table)->f4C) {
+            y += ((ScatterTable*)self->table)->f50;
         }
     }
     f32 result = ((f32 (*)(void*, f32))ClampToRange)(&g_unitRange, g_currentEntry->f10 + amount * y);

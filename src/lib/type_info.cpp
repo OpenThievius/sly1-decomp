@@ -14,10 +14,13 @@
 
 extern "C" int CompareStrings(const char* a, const char* b);
 
+// The destructor of the C++ runtime's type information record; it has no work of its own.
 type_info::~type_info()
 {
 }
 
+// Two type informations are equal when they are the same object or their names compare equal as
+// strings.
 bool type_info::operator==(const type_info& other) const
 {
     return &other == this || CompareStrings(name_, other.name_) == 0;
@@ -38,11 +41,15 @@ extern "C" void __rtti_user(void* at, const char* name)
     new (at) __user_type_info(name);
 }
 
+// The pointer to the target type inside an object of this class: the object itself when this is the
+// target, else 0 (a class with no bases).
 void* __user_type_info::findBase(const type_info& target, int, void* object, const type_info*, void*) const
 {
     return *this == target ? object : 0;
 }
 
+// The pointer to the target type inside an object of this single-inheritance class: the object when
+// this is the target, else the answer of its one base class.
 void* __si_type_info::findBase(const type_info& target, int publicOnly, void* object, const type_info* sub,
                             void* subObject) const
 {
@@ -51,6 +58,10 @@ void* __si_type_info::findBase(const type_info& target, int publicOnly, void* ob
     return base_.findBase(target, publicOnly, object, sub, subObject);
 }
 
+// The pointer to the target type inside an object of this class with several bases: the object when
+// this is the target, else the answer of each base (skipping non-public bases when publicOnly and
+// following a virtual base through its pointer); 0 when two bases find it at different places that
+// the sub-object test cannot settle.
 void* __class_type_info::findBase(const type_info& target, int publicOnly, void* object, const type_info* sub,
                                void* subObject) const
 {

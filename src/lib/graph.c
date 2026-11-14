@@ -87,6 +87,9 @@ LINKER_REMNANT(func_002018E0);
 ASM_FUNC(func_002018E8);
 ASM_FUNC(func_00201988);
 
+/* In mode 0 resets the GS, records the interlacing, video mode, field mode and GS version in
+ * g_gsParams, removes its handler and sets the video mode; mode 1 only resets, mode 5 only
+ * records and sets (InitDisplay calls it). */
 void ResetGs(s16 mode, s16 x, s16 y, s16 flag)
 {
     GsParam* p;
@@ -126,11 +129,14 @@ void ResetGs(s16 mode, s16 x, s16 y, s16 flag)
     }
 }
 
+/* Returns g_gsParams. */
 GsParam* GetGsParams(void)
 {
     return &g_gsParams;
 }
 
+/* Writes a display environment's words to the GS's privileged registers (0x12000000 on), by the
+ * layout of the GS version in g_gsParams. */
 void WriteDisplayRegisters(void* self)
 {
     s16 kind = GetGsParams()->version;
@@ -148,6 +154,7 @@ void WriteDisplayRegisters(void* self)
     }
 }
 
+/* Waits for DMA channel 2 to finish and sends a drawing environment's packet through it. */
 s32 SendDrawEnvironment(void* self)
 {
     u32 n = 0;
@@ -169,6 +176,8 @@ s32 SendDrawEnvironment(void* self)
     return 0;
 }
 
+/* Defines the two display and drawing environments of a double buffer for a pixel format, width
+ * and height, with an optional clear (InitDisplay calls it). */
 void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag)
 {
     u8* base = (u8*)self;
@@ -203,6 +212,8 @@ void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 
     }
 }
 
+/* Writes the display registers of one half of a double buffer and sends the other half's drawing
+ * environment (FlipDisplayFrame calls it). */
 s32 SwapDoubleBuffer(void* self, s32 flag)
 {
     u8* base = (u8*)self;
@@ -218,6 +229,7 @@ s32 SwapDoubleBuffer(void* self, s32 flag)
     return r;
 }
 
+/* Reads the GS interrupt mask, writes a new one and returns the old. */
 s32 SwapGsInterruptMask(s32 mask)
 {
     s32 r = ReadGsInterruptMask(mask);
@@ -225,6 +237,8 @@ s32 SwapGsInterruptMask(s32 mask)
     return r;
 }
 
+/* Sets a drawing environment's offset from its centre, half a line lower on the odd field
+ * (FlipDisplayFrame calls it). */
 void SetFieldDrawOffset(GsOffset* self, s16 a1, s16 a2, s16 a3)
 {
     u64 v = self->in;
@@ -248,6 +262,7 @@ void SetFieldDrawOffset(GsOffset* self, s16 a1, s16 a2, s16 a3)
     self->out = lo | hi;
 }
 
+/* Returns the GS interrupt mask (ReadGsInterruptMask). */
 s32 GetGsInterruptMask(s32 mask)
 {
     return ReadGsInterruptMask(mask);
@@ -263,6 +278,8 @@ s32 GetGsInterruptMask(s32 mask)
  * as retail's is (docs/toolchain/sched1.md, "The zero trap of func_00202140"). */
 #define MAGH(w) (((w) + 0x9FF) / (w))
 
+/* Fills a display environment for a pixel format and size, printing its message for an
+ * unsupported display mode (SetUpDoubleBuffer calls it). */
 void DefineDisplayEnvironment(GsDispEnv* env, s16 psm, s16 w, s16 h, s16 dx, s16 dy)
 {
     GsParam* p = GetGsParams();
@@ -299,6 +316,8 @@ void DefineDisplayEnvironment(GsDispEnv* env, s16 psm, s16 w, s16 h, s16 dx, s16
     env->bgcolor = 0;
 }
 
+/* Returns the GS pages a frame buffer of a pixel format and size takes, doubled when g_gsParams
+ * says interlaced frame mode. */
 s32 CountFrameBufferPages(s16 px, s16 py, s16 pz)
 {
     u64* bits = (u64*)GetGsParams();

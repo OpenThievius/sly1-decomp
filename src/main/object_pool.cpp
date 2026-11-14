@@ -8,6 +8,8 @@
 // of the file's .data in definition order. Its name is ours, after its first and largest family,
 // the object pool.
 #include "common.h"
+#include "attachment.h"
+
 #include "switched_collider.h"
 #include "list_iter.h"
 #include "world.h"
@@ -439,7 +441,7 @@ void SpawnObjectPoolCopies(ObjectPool* self);
 void InitObjectPool(ObjectPool* self)
 {
     InitObject(self);
-    u8* s1 = (u8*)self + 0x60;
+    u8* s1 = (u8*)&self->f60;
     self->id4C = -1;
     self->id50 = -1;
     self->id54 = -1;
@@ -449,14 +451,14 @@ void InitObjectPool(ObjectPool* self)
     *(Quad16*)(s1 + 0x20) = src[0];
     *(Quad16*)(s1 + 0x30) = src[1];
     *(Quad16*)(s1 + 0x40) = src[2];
-    (void)FillMemory(((u8*)self + 0xE0), 0, 0x70);
+    (void)FillMemory(&self->fE0, 0, 0x70);
     V8C* p = &self->v110;
     p->a = 0;
     p->b = 1.0f;
     p->c = 0;
     self->f120 = 0;
     self->f124 = 20000.0f;
-    (void)FillMemory(((u8*)self + 0x150), 0, 0x18);
+    (void)FillMemory(&self->f150, 0, 0x18);
     f32 d = 3.4028235e+38f;
     self->fD8 = 5.0f;
     self->idsResolved = 0;
@@ -527,9 +529,9 @@ void SpawnObjectPoolCopies(ObjectPool* self)
             goto done;
         c0:
             self->sub->f8 = 1;
-            SetListLinkOffset((List01*)((u8*)self->sub + 0x14), 0x18);
+            SetListLinkOffset((List01*)&self->sub->lentTo, 0x18);
         c1: {
-                s32 r = CountListItems((List01*)((u8*)self->sub + 0x14));
+                s32 r = CountListItems((List01*)&self->sub->lentTo);
                 s32 lim = r + 1;
                 s32 m = e->count;
                 s32 q = lim;
@@ -577,14 +579,14 @@ void CopyObjectPool(ObjectPool* self, ObjectPool* other)
             self->sub = 0;
         } else {
             other->sub->f8 = 1;
-            SetListLinkOffset((List01*)((u8*)other->sub + 0x14), 0x18);
+            SetListLinkOffset((List01*)&other->sub->lentTo, 0x18);
             self->sub = 0;
         }
         GetObjectPoolShare(self);
         self->sub->lentOut = 1;
         self->sub->f8 = 2;
         self->sub->lentTo = other;
-        AppendToList((List01*)((u8*)other->sub + 0x14), self->sub);
+        AppendToList((List01*)&other->sub->lentTo, self->sub);
     } else {
         self->items = (ObjectPoolEntry*)CopyToFrontMemory(other->count * 0x14, other->items);
     }
@@ -940,8 +942,8 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
         }
         obj = self->chosen;
     }
-    GetPlacementRecordTransform((FrameSource*)((u8*)self + 0x60), &pos, rot.r, self->frame);
-    ComputeFrameFollowerPoint((FrameFollower*)((u8*)self + 0xE0), &pos, &to, self->frame);
+    GetPlacementRecordTransform((FrameSource*)&pool->f60, &pos, rot.r, self->frame);
+    ComputeFrameFollowerPoint((FrameFollower*)&pool->fE0, &pos, &to, self->frame);
     Vu0::Q(dir) = Vu0::Sub(Vu0::Q(to), Vu0::Q(pos));
     u128 len = NormalizeVectorOr(dir, g_unitXVector);
     f32 reach = self->range.Clamp(self->poly.Eval(Vu0::ToFloatMoved(len)));
@@ -1086,7 +1088,7 @@ void ResetPlacementRecord(u8* self)
 // 20000.0, as InitObjectPool does; a script host function calls it.
 void ResetObjectPoolReleaseRecord(ObjectPool* self)
 {
-    FillMemory((u8*)self + 0xE0, 0, 0x70);
+    FillMemory(&self->fE0, 0, 0x70);
     V8C* t = &self->v110;
     t->a = 0;
     t->b = 1.0f;
@@ -1287,13 +1289,12 @@ void EnterWorld4BossState(World4Boss* self, s32 evt, Animation* arg)
 // +0xC20 once its rate has fallen to 0.
 void UpdateWorld4Boss(World4Boss* self, f32 dt)
 {
-    u8* s = (u8*)self;
     UpdateAgent(self, dt);
-    void* p = *(void**)(s + 0xC20);
+    AnimationPlayer* p = self->hitPlayer;
     if (p != 0) {
-        if (*(f32*)((u8*)p + 0x18) == 0.0f) {
-            StopAnimationPlayer((AnimationPlayer*)p);
-            *(void**)(s + 0xC20) = 0;
+        if (p->speed == 0.0f) {
+            StopAnimationPlayer(p);
+            self->hitPlayer = 0;
         }
     }
 }
@@ -1327,12 +1328,12 @@ s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
     if (self->fC14 != 0 && (ev->eventFlags & 0x20) != 0) {
         self->fC10 = self->fC10 + 1;
         DecrementGaugeCount(&g_gaugeBarElement);
-        if (*(void**)((u8*)self + 0xB00) != 0) {
+        if (self->memberGroup != 0) {
             SlotMessage msg;
             msg.kind = 6;
             msg.vb = ev->pos;
             Vu0::Set(msg.va, Vu0::NormalizeOrMoved(Vu0::Q(ev->v30), Vu0::Q(g_unitXVector)));
-            void* o = *(void**)((u8*)self + 0xB00);
+            void* o = self->memberGroup;
             ((VFn_1A9AE8*)(*(void***)o))[0x7C / 4](o, &msg);
         }
         Animation* which;
@@ -1346,7 +1347,7 @@ s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
         } else {
             which = self->fC14;
         }
-        ReplaceAnimationPlayer(which, self, 1, (AnimationPlayer**)((u8*)self + 0xC20), 0.0f, 1.0f);
+        ReplaceAnimationPlayer(which, self, 1, &self->hitPlayer, 0.0f, 1.0f);
         ev->eventFlags &= ~0x20;
     }
     return HandleAgentObjectEvent(self, (AgentHit*)ev);

@@ -105,10 +105,10 @@ s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32
 s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, s32 p3, ColliderSpan* p4)
 {
     if (self->tree.nodes != 0) {
-        return TestTreeSegmentHit((SpanQuery*)((u8*)self + 0x3F0), (SpanSet*)((u8*)self + 0x3A4), (Vec02*)p1, (Vec02*)p2, p3, p4, x);
+        return TestTreeSegmentHit((SpanQuery*)&self->tree, (SpanSet*)&self->meshCopy, (Vec02*)p1, (Vec02*)p2, p3, p4, x);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return TestBoundsSegmentHit((u8*)self + 0x140, p1, p2, p3, p4, self->radius3CC, x);
+        return TestBoundsSegmentHit((u8*)&self->v140, p1, p2, p3, p4, self->radius3CC, x);
     }
     return 0;
 }

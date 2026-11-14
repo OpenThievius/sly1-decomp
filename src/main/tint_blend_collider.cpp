@@ -41,6 +41,7 @@
 #include "functions/warp_menu.h"
 #include "functions/world.h"
 #include "functions/world_contacts.h"
+#include "attachment.h"
 struct Mat02;
 struct Vec02;
 
@@ -318,8 +319,8 @@ void SimulateRedirectChain(RedirectObject* self)
         *(Vec*)&a = Vu0::Sub(Vec::Of(step[1].pos), Vec::Of(step->pos));
         Rec2195_224* rec = step->node->linkRecord;
         if (rec != 0) {
-            M = MulRotationValue(MulRotationValue(MulRotationValue(m, *(Mat02*)((u8*)rec + 0x30)), step->node->m1A0),
-                                 *(Mat02*)step->node->linkRecord);
+            M = MulRotationValue(MulRotationValue(MulRotationValue(m, rec->m[1]), step->node->m1A0),
+                                 step->node->linkRecord->m[0]);
         } else {
             M = MulRotationValue(m, step->node->m1A0);
         }
@@ -360,7 +361,7 @@ void InitTintBlendCollider(TintBlendCollider* self)
     InitTurningCollider(self);
     f = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     self->heading = f;
-    BuildAxisAngleMatrix(&g_unitZVector, (Mat02*)((u8*)self + 0x660), f);
+    BuildAxisAngleMatrix(&g_unitZVector, &self->headingMatrix, f);
     self->state = -1;
     self->tintStartTime = -10.0f;
     (*(Quad16*)&self->headingWeightCurve) = D_00275740;
@@ -796,7 +797,7 @@ s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
 // collider's contacts.
 void CollectTintBlendColliderContacts(TintBlendCollider* self)
 {
-    ExtractContactsByPartMode(self, (Contact03**)((u8*)self + 0x740));
+    ExtractContactsByPartMode(self, (Contact03**)&self->heldContacts);
     CollectTurningColliderContacts(self);
 }
 

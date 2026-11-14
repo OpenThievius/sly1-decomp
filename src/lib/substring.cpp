@@ -4,6 +4,8 @@
 // from a .c source. No data of its own. Retail pads it to 0x1F6900, where Sony's kernel library
 // starts.
 
+// The C library's substring search (strstr): returns the first place in s where t occurs, s itself
+// when t is empty, or 0 when it does not occur.
 char* func_001F6880(char* s, char* t)
 {
     int i;

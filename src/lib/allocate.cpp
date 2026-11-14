@@ -9,6 +9,9 @@
 
 void* AllocateObjectMemory(u32 size);
 
+// The C++ runtime's operator new: returns a block of size bytes from the game's allocator
+// (AllocateObjectMemory), with an exception specification allowing only bad_alloc; the function
+// itself has no failure path.
 void* AllocateOrThrow(u32 size) throw(bad_alloc)
 {
     return AllocateObjectMemory(size);

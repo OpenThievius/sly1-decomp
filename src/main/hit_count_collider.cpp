@@ -9,6 +9,7 @@
 #include "attachment.h"
 #include "animation.h"
 #include "owner_message.h"
+#include "pad_record.h"
 #include "object_finder.h"
 #include "functions/base_object.h"
 #include "functions/camera.h"
@@ -72,7 +73,7 @@ struct __attribute__((packed)) UnalignedPointer { void* p; };
 
 struct StateGraph;
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void SetHitCountColliderState(PlacedObject* self, s32 state);
+void SetHitCountColliderState(HitCountCollider* self, s32 state);
 
 // Start of the collider: starts the placed object, keeps its radius as the base radius, resolves
 // its links, creates the state walker, and records its heading and its aim object's heading; it
@@ -100,7 +101,6 @@ void StartHitCountCollider(HitCountCollider* self)
     SetHitCountColliderState(self, 1);
 }
 
-extern f32 g_unitRange[];
 extern f32 g_gameTime[];
 extern f32 g_stepScale;
 extern f32 g_gameClock[];
@@ -148,7 +148,7 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
     self->hitPending = 0;
     f32 u;
     if (self->hitPlayer) {
-        f32* lim = g_unitRange;
+        f32* lim = &g_unitRange.lo;
         f32 r = self->hitPlayer->time / self->hitPlayer->anim->length;
         f32* pp = D_00274A50.c;
         f32 lo = lim[0];
@@ -180,12 +180,12 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
         else q = 0.0f;
         f32 z = Cosine((g_gameClock[1] - self->acceptedTime) * 10.0f);
         f32 x0 = D_00274A70.c[0] + q * (D_00274A70.c[1] + q * D_00274A70.c[2]);
-        f32 lo = g_unitRange[0];
-        f32 hi = g_unitRange[1];
+        f32 lo = g_unitRange.lo;
+        f32 hi = g_unitRange.hi;
         f32 x = x0 < lo ? lo : (hi < x0 ? hi : x0);
         f32 y = D_00274A80.c[0] + z * (D_00274A80.c[1] + z * D_00274A80.c[2]);
-        f32 lo2 = g_unitRange[0];
-        f32 hi2 = g_unitRange[1];
+        f32 lo2 = g_unitRange.lo;
+        f32 hi2 = g_unitRange.hi;
         if (y < lo2) y = lo2;
         else if (hi2 < y) y = hi2;
         f32 m = x * y;
@@ -218,20 +218,17 @@ void ShowHitCountColliderCounters()
     }
 }
 
-#define F(o, off) (*(f32*)((u8*)(o) + (off)))
-#define W(o, off) (*(s32*)((u8*)(o) + (off)))
-#define P(o, off) (*(void**)((u8*)(o) + (off)))
 
 void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
-void SetHitCountColliderState(PlacedObject* self, s32 state);
+void SetHitCountColliderState(HitCountCollider* self, s32 state);
 
 // Per-frame control while the player drives the collider: with an object in f628 that has run out
 // (its value at 0x18 is 0) it calls m50 in state 2 or moves 3 to 4; outside state 1 it resets its
 // movement vector and handles the pad input.
-void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
+void ControlHitCountCollider(HitCountCollider* self, PadRecord* ev, f32 dt)
 {
-    void* obj = self->f628;
-    if (obj != 0 && F(obj, 0x18) == 0.0f) {
+    AnimationPlayer* obj = self->animPlayer;
+    if (obj != 0 && obj->speed == 0.0f) {
         switch (self->state) {
         case 2:
             self->desc05()->m50(self);
@@ -242,20 +239,20 @@ void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
         }
     }
     if (self->state != 1) {
-        F(self, 0x66C) = D_00274A98;
+        self->speedLimit = D_00274A98;
         self->f650 = D_00248D30;
     } else {
-        if (0.0f < F(ev, 0x48)) {
-            ComputeCameraRelativeStickHeading(g_camera, (PadRecord*)ev, 0, &self->heading);
+        if (0.0f < ev->stickMagnitude) {
+            ComputeCameraRelativeStickHeading(g_camera, ev, 0, &self->heading);
         }
         f32 k = D_00274A90[0];
         f32 m = D_00274A98;
-        m = m >? F(ev, 0x48);
-        F(self, 0x66C) = m;
-        ComputePolarOffset((Vec3*)((u8*)self + 0x650), self->heading, k * F(ev, 0x48), 0.0f);
-        self->f670 = (D_00274AA0 >? F(ev, 0x48));
-        if (0.0f < F(ev, 0x7C)) {
-            ComputeCameraRelativeStickHeading(g_camera, (PadRecord*)ev, 1, &self->aimHeading);
+        m = m >? ev->stickMagnitude;
+        self->speedLimit = m;
+        ComputePolarOffset((Vec3*)&self->f650, self->heading, k * ev->stickMagnitude, 0.0f);
+        self->f670 = (D_00274AA0 >? ev->stickMagnitude);
+        if (0.0f < ev->secondStickMagnitude) {
+            ComputeCameraRelativeStickHeading(g_camera, ev, 1, &self->aimHeading);
             if (self->walker != 0) {
                 SetStateWalkerTarget((StateWalker*)self->walker, 0x485);
             }
@@ -263,7 +260,7 @@ void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
             SetStateWalkerTarget((StateWalker*)self->walker, 0x484);
         }
     }
-    HandleStepSequenceSkipButtons(self, (PadRecord*)ev);
+    HandleStepSequenceSkipButtons(self, ev);
     ClearRootTries(self);
 }
 
@@ -283,7 +280,7 @@ void StepHitCountCollider(HitCountCollider* self, f32 dt)
     BuildYawPitchMatrix(self->heading, 0.0f, &rot);
     TurnColliderTowardRotation(self, dt, &rot, g_hitCountTurnRamp);
     Vu0::Q(accel) = Vu0::Sub(Vu0::Q(self->f650), Vu0::Q(self->v150));
-    ClampVectorLength(&accel, &accel, D_00274A9C * F(self, 0x66C) * dt);
+    ClampVectorLength(&accel, &accel, D_00274A9C * self->speedLimit * dt);
     Vu0::Q(t) = Vu0::FromFloat(dt);
     Vu0::Q(accel) = Vu0::DivX(Vu0::Q(accel), Vu0::Q(t));
     AddColliderForce(self, &accel);
@@ -328,7 +325,7 @@ s32 IsHitCountColliderRequestBlocked(HitCountCollider* self)
 
 // What slot 76 tells its own slot 14 (kind 0x17) when it is hit: itself and the message's owner.
 struct OwnerNotice { void* sender; void* owner; };
-void SetHitCountColliderState(PlacedObject* self, s32 state);
+void SetHitCountColliderState(HitCountCollider* self, s32 state);
 
 // Handles a request to take over the collider: refused when m4B says so, replies to a mode 0
 // request, and when it is in state 2 to 4 or has a mark it just reports it accepted; otherwise,
@@ -362,7 +359,7 @@ s32 AcceptHitCountColliderRequest(HitCountCollider* self, OwnerMessage* arg)
 // True while in states 2 to 4 or once the accepted mark is set.
 s32 HasHitCountColliderAcceptedRequest(HitCountCollider* self) { if (self->state < 5) { if (self->state >= 2) return 1; } return self->acceptedMark != 0; }
 
-void SetHitCountColliderState(PlacedObject* self, s32 state);
+void SetHitCountColliderState(HitCountCollider* self, s32 state);
 
 // Finishes the switched collider and enters state 1.
 void FinishHitCountCollider(HitCountCollider* self)
@@ -412,46 +409,46 @@ void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
 // Changes the collider's state (the value at +0x610). Leaving state 2 records the time and sets a
 // mark; entering state 2 or 3 stores the opposite of the heading as the facing angle, and each new
 // state sets the state walker's target and its own values.
-void SetHitCountColliderState(PlacedObject* self, s32 state)
+void SetHitCountColliderState(HitCountCollider* self, s32 state)
 {
-    void* s2;
+    Animation* s2;
     f32 f12;
-    if (state == W(self, 0x610)) return;
-    if (W(self, 0x610) == 2) {
+    if (state == self->state) return;
+    if (self->state == 2) {
         f32 t = g_gameClock[1];
-        W(self, 0x694) = 3;
-        F(self, 0x640) = t;
+        self->hitsLeft = 3;
+        self->f640 = t;
     }
-    W(self, 0x670) = 0;
+    *(s32*)&self->f670 = 0;
     if (state < 4) if (state >= 2) {
         Vec02 q;
-        f32 a = ArctangentOfRatio(F(self, 0x154), F(self, 0x150));
+        f32 a = ArctangentOfRatio(self->v150.y, self->v150.x);
         f32 b = WrapAngle(a + 3.14159274f);
-        F(self, 0x644) = b;
-        F(self, 0x648) = b;
+        self->heading = b;
+        self->aimHeading = b;
         q = D_00248D30;
-        f32 r = ArctangentOfRatio(F(self, 0xD4), F(self, 0xD0));
-        ApproachAngleWithRamp(r, F(self, 0x644), 0.0f, g_hitCountTurnRamp, (f32*)((u8*)&q + 8));
+        f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
+        ApproachAngleWithRamp(r, self->heading, 0.0f, g_hitCountTurnRamp, (f32*)((u8*)&q + 8));
         self->desc02()->m21(self, (Vec02*)&q);
-        W(self, 0x694) = 0;
+        self->hitsLeft = 0;
         D_0026E228[0] = -1;
         if (state == 3) RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f);
     }
     f12 = 0.0f;
     switch (state) {
-    case 0: s2 = P(self, 0x618); break;
-    case 1: s2 = P(self, 0x61C); break;
-    case 2: s2 = P(self, 0x620); F(self, 0x640) = 3.4028235e+38f; break;
-    case 3: s2 = P(self, 0x624); break;
+    case 0: s2 = self->stateAnims[0]; break;
+    case 1: s2 = self->stateAnims[1]; break;
+    case 2: s2 = self->stateAnims[2]; self->f640 = 3.4028235e+38f; break;
+    case 3: s2 = self->stateAnims[3]; break;
     case 4:
         SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x1A);
-        s2 = P(self, 0x624);
-        f12 = F(s2, 0x34);
+        s2 = self->stateAnims[3];
+        f12 = s2->length;
         break;
     }
-    ReplaceAnimationPlayer((Animation*)s2, self, 1, (AnimationPlayer**)((u8*)self + 0x628), f12, 1.0f);
-    W(self, 0x610) = state;
-    F(self, 0x614) = g_gameClock[1];
+    ReplaceAnimationPlayer(s2, self, 1, &self->animPlayer, f12, 1.0f);
+    self->state = state;
+    self->stateTime = g_gameClock[1];
 }
 
 // Appends value to the collider's list of place points.

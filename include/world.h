@@ -113,13 +113,23 @@ struct World : BaseObject {
     Pool6C pool1BF4;        // 0x1BF4: the 0x2E0-byte records of PlacedObject::rangeRecord
     List01 list1C00;        // 0x1C00: the PlacedObject::rangeRecord records in use
     Pool6C pool1C0C;        // 0x1C0C: the 8-byte touch nodes (func_001DC0C8, func_001DC108)
-    u8 pad1C18[0x1C24 - 0x1C18];
-    u8* f1C24;              // 0x1C24
-    s32 f1C28;              // 0x1C28
-    s32 f1C2C;              // 0x1C2C
-    void* f1C30;            // 0x1C30
-    s32 f1C34;              // 0x1C34
-    s32 f1C38;              // 0x1C38
+    Pool6C pool1C18;        // 0x1C18: the nodes of the two lists below (func_00155AB0's AddObjectNodeToWorld)
+    union {
+        List01 list1C24;    // 0x1C24: the nodes of objects on the world clock
+        struct {
+            u8* f1C24;      // 0x1C24
+            s32 f1C28;      // 0x1C28
+            s32 f1C2C;      // 0x1C2C
+        };
+    };
+    union {
+        List01 list1C30;    // 0x1C30: the nodes of objects on the frame step clock
+        struct {
+            void* f1C30;    // 0x1C30
+            s32 f1C34;      // 0x1C34
+            s32 f1C38;      // 0x1C38
+        };
+    };
     List01 list1C3C;        // 0x1C3C: class 0x53's objects
     List01 list1C48;        // 0x1C48: class 0x40's objects (offset 0x5DC)
     List01 list1C54;        // 0x1C54: the 0x55 family's objects
@@ -133,7 +143,7 @@ struct World : BaseObject {
     List01 list1CB4;        // 0x1CB4: class 0x4D's objects
     List01 list1CC0;        // 0x1CC0: class 0x4D's objects
     List01 list1CCC;        // 0x1CCC: class 0x10's objects (offset 0xC10)
-    u8 pad1CD8[0x1CE4 - 0x1CD8];
+    List01 list1CD8;        // 0x1CD8: the colour fades that are running (StartColorFade)
     C17* f1CE4;             // 0x1CE4: the class 0x17 object (func_0019A1E0)
     union {
         BaseObject* slot1CE8[31];  // 0x1CE8: objects by key, at the index func_0011ECA0 gives (func_0011ECB8)

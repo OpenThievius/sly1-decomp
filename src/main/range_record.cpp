@@ -218,7 +218,7 @@ void ScaleRangeRecordByAngle(RangeRecord* o, f32 s) {
 // Stores a vector at 0x30 and invalidates the packet.
 void StoreRangeRecordVector(RangeRecord* self, Quad16* src)
 {
-    *(Quad16*)((u8*)self + 0x30) = *src;
+    *(Quad16*)&self->v30 = *src;
     InvalidateRangeRecordPacket(self);
 }
 
@@ -368,7 +368,7 @@ void BuildRangeRecordPacket(RangeRecord* self)
             if (dst == 0) {
                 dst = spare;
             }
-            UsePacketBufferMemory(&pw, 0x20, (u8*)self + 0xD0);
+            UsePacketBufferMemory(&pw, 0x20, self->packetBlock);
             ReserveVifUnpack(&pw, 0xC, 6, 0x16, 0, (u8**)&p);
             AnimRecordEntry* ents = self->link->ents;
             ReserveVifUnpack(&pw, 0xC, ents->type, 0x1C, (s32*)dst, (u8**)(dst + 8));
@@ -407,8 +407,8 @@ void BuildRangeRecordPacket(RangeRecord* self)
                 }
                 p->clipZ = p->nearZ - g_rangeRecordClipMargin;
             }
-            BuildViewProjectionMatrix((f32*)&pos, (f32*)&basis, &proj, (Quad16*)((u8*)self + 0x70));
-            CopyMemory(p, (u8*)self + 0x70, 0x40);
+            BuildViewProjectionMatrix((f32*)&pos, (f32*)&basis, &proj, (Quad16*)self->viewProjection);
+            CopyMemory(p, self->viewProjection, 0x40);
             for (s32 i = 0; i < 4; i++) {
                 p->sizes[i] = ((((u8*)self->link) + i)[4] + 1) >> 1;
             }
@@ -443,7 +443,7 @@ void QueueRangeRecordPacket(RangeRecord* o)
                 }
             }
             PacketWriter* g = &g_vifPacketWriter;
-            u64 hi = (u64)(u32)((u8*)o + 0xD0) << 32;
+            u64 hi = (u64)(u32)o->packetBlock << 32;
             u64 v = (u64)(s64)(o->packetValid | 0x40000000) | hi;
             *(u64*)g->cur = v;
             g->cur = g->cur + 0x10;

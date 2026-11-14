@@ -1192,7 +1192,7 @@ void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
             b = g_currentWorld->count2300;
             k = -1;
             if (a == b) {
-                k = CompletesWorldBits(*(s32*)((u8*)self + 0x760)) ? 5 : 4;
+                k = CompletesWorldBits(self->levelBit) ? 5 : 4;
             } else if ((g_saveData->u19F0 & 0xF0000000) == 0) {
                 if (a == b - 1) {
                     k = 3;
@@ -1220,7 +1220,7 @@ void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
 // Appends a key to record index of the entry list (at most 4 per record, 0x2C bytes each).
 void AddEntryRecordKey(C17* list, u32 index, s32 key)
 {
-    Ent17* record = (Ent17*)((u8*)list + 0x658 + index * 0x2C);
+    Ent17* record = &list->sequenceGroups[index];
     u32 count = record->count;
     if (count < 4) {
         record->keys[count] = key;
@@ -1404,6 +1404,13 @@ void CopyObjectGatherer(ObjectGatherer* self, ObjectGatherer* src)
 }
 
 
+
+struct GatherCandidate {
+    u8 pad00[0x18];
+    void* frame;            // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Vec02 pos;              // 0x40
+};
 // Physics step of the gatherer: after the collider step it turns toward its wander point (state 1)
 // or its candidate's point (state 2) in the horizontal plane, and otherwise steers its rotation
 // toward zero.
@@ -1421,7 +1428,7 @@ void StepObjectGatherer(ObjectGatherer* self, f32 dt)
         TurnColliderTowardRotation(self, dt, &basis, g_gathererTurnRamp);
         break;
     case 2:
-        TransformPointBetweenFrames((PlacedObject*)(*(void**)((u8*)self->candidate + 0x18)), 0, (Vec02*)((u8*)self->candidate + 0x40), &target);
+        TransformPointBetweenFrames((PlacedObject*)((GatherCandidate*)self->candidate)->frame, 0, &((GatherCandidate*)self->candidate)->pos, &target);
         Vu0::Q(delta) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
         delta.z = 0.0f;
         BuildBasisFromX(&delta, &basis);
@@ -1455,12 +1462,6 @@ template <class T> struct NextInList {
     }
 };
 
-struct GatherCandidate {
-    u8 pad00[0x18];
-    void* frame;            // 0x18
-    u8 pad1C[0x40 - 0x1C];
-    Vec02 pos;              // 0x40
-};
 
 
 // Each update: the state's sound, push and speed.
@@ -1706,12 +1707,12 @@ void ChooseObjectGathererCandidate(ObjectGatherer* self)
     GatherCandidate* node;
     while ((node = NextInList<GatherCandidate>::Of(&frame)) != 0) {
         TransformPointBetweenFrames((PlacedObject*)node->frame, 0, &node->pos, &point);
-        f32 reach = *(f32*)((u8*)self + 0x624);
+        f32 reach = self->neighborRadius;
         f32 reach2 = reach * reach;
         u128 off = Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140));
         s32 far = reach2 < Vu0::ToFloatMoved(Vu0::Dot(off, off));
         if (!far) {
-            MeasurePointToSegment((Vec02*)((u8*)GetActiveSwitchedCollider() + 0x140), &self->v140, &point, &t, &dist);
+            MeasurePointToSegment(&((PlacedObject*)GetActiveSwitchedCollider())->v140, &self->v140, &point, &t, &dist);
             f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140))));
             if (bestDist < dist || (t < 0.0001f && bestT < 0.0001f && len < bestLen)) {
                 bestT = t;

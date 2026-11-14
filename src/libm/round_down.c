@@ -6,6 +6,8 @@
 #include "float_bits.h"
 static const f32 g_tenTo30 = 1.0e30f;
 
+/* The float rounded toward minus infinity (floor), by masking the fraction bits; values with no
+ * fraction, infinities and NaNs come back unchanged (NaN as x + x). */
 f32 RoundDown(f32 x)
 {
     s32 bits = *(s32*)&x;

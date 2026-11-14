@@ -7,6 +7,9 @@
 typedef long long s64_t;
 typedef unsigned long long u64_t;
 
+/* A signed 64-bit integer as a float, rounded once: for large magnitudes it first sets a sticky
+ * bit (0x800) below the float's 24 bits so the double step and the final narrowing do not round
+ * twice. */
 f32 ConvertS64ToFloat(s64_t x)
 {
     double f;

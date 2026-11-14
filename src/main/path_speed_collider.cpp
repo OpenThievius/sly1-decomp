@@ -196,7 +196,7 @@ void MoveC24Object(C24* self, s32 a1, f32 dt)
         ApproachRotationWithRamp(dt, &self->rot, &basis, (RampProfile*)g_pathSpeedColliderRotationRamp, &self->rot, &self->v160);
     }
     ScopedListFrame frame(&self->children);
-    void* head = *(void**)((u8*)self + 0x34);
+    void* head = *(void**)&self->children;
     frame.cursor = (void*)((s32)head + frame.next_off);
     BaseObject* n = (BaseObject*)head;
     while (n != 0) {

@@ -26,6 +26,7 @@ extern s32 D_00278640;
 
 void InvokeTerminateHandler(void) __attribute__((noreturn));
 
+// Calls the terminate hook D_00278048 and never returns.
 void InvokeTerminateHandler(void)
 {
 	((TerminateHandler)D_00278048)();
@@ -33,11 +34,13 @@ void InvokeTerminateHandler(void)
 
 void DefaultUnexpectedHandler(void) __attribute__((noreturn));
 
+// The first value of the unexpected handler D_00278640: calls InvokeTerminateHandler.
 void DefaultUnexpectedHandler(void)
 {
 	InvokeTerminateHandler();
 }
 
+// Stores a new terminate hook in D_00278048 and returns the old one.
 TerminateHandler ReplaceTerminateHandler(TerminateHandler handler)
 {
 	TerminateHandler old = (TerminateHandler)D_00278048;
@@ -45,6 +48,7 @@ TerminateHandler ReplaceTerminateHandler(TerminateHandler handler)
 	return old;
 }
 
+// Stores a new unexpected handler in D_00278640 and returns the old one.
 s32 ReplaceUnexpectedHandler(s32 value)
 {
     s32 previous = D_00278640;
@@ -54,16 +58,19 @@ s32 ReplaceUnexpectedHandler(s32 value)
 
 void InvokeUnexpectedHandler(void) __attribute__((noreturn));
 
+// Calls the unexpected handler D_00278640 and never returns; CheckExceptionSpecification calls it.
 void InvokeUnexpectedHandler(void)
 {
 	((UnexpectedHandler)D_00278640)();
 }
 
+// Returns the thrown object's address: the active exception record's pointer plus 8.
 void* GetThrownObjectAddress(void)
 {
 	return *(u8**)GetActiveExceptionSlot() + 8;
 }
 
+// Returns the active exception record from the exception context.
 void* GetActiveExceptionRecord(ExceptionLookupArg* self)
 {
 	return *(void**)GetActiveExceptionSlot();
@@ -96,6 +103,8 @@ struct ExceptionSlot {
 
 typedef char check_ThrownException[sizeof(ThrownException) == 0x30 ? 1 : -1];
 
+// Marks the active exception record as being handled (flag 1), counts the entry in its 64-bit count
+// and returns it; the compiler calls it on entering a catch.
 ThrownException* BeginCatchHandler(void)
 {
     ThrownException* obj = *(ThrownException**)GetActiveExceptionSlot();
@@ -106,6 +115,8 @@ ThrownException* BeginCatchHandler(void)
 
 extern "C" void* EnterRuntimeLock(u32 size);
 
+// Allocates a block under the runtime lock and calls InvokeTerminateHandler when that fails;
+// PushThrownException allocates its record with it.
 void* AllocateRuntimeBlockOrTerminate(u32 size)
 {
     void* p = EnterRuntimeLock(size);
@@ -116,6 +127,8 @@ void* AllocateRuntimeBlockOrTerminate(u32 size)
 
 extern "C" void LeaveRuntimeLock(void* p);
 
+// Releases a block through LeaveRuntimeLock; PopThrownException frees its record and buffer with
+// it.
 void FreeRuntimeBlock(void* block)
 {
     LeaveRuntimeLock(block);
@@ -133,6 +146,9 @@ typedef const type_info* (*HandlerTypeFn)();
 
 extern "C" void* MatchThrownType(const type_info* want, const type_info* have, void* object);
 
+// Exception record callback: with -1 returns the type match already found; otherwise gets the
+// thrown type from the given function, matches it with MatchThrownType against the record's type
+// and object and remembers a hit.
 void* MatchPendingThrowType(ThrownException* self, void* fn, ThrowMatchHeader* a2)
 {
     if (a2 != 0 && a2->kind != 4) {
@@ -148,6 +164,9 @@ void* MatchPendingThrowType(ThrownException* self, void* fn, ThrowMatchHeader* a
     return r;
 }
 
+// Allocates a 0x30-byte exception record holding the thrown object, its type and its destructor,
+// sets MatchPendingThrowType as its callback and links it at the head of the active chain; the
+// compiler's throw calls it.
 void PushThrownException(void* a0, const type_info* a1, void* a2)
 {
     ThrownException* obj = (ThrownException*)AllocateRuntimeBlockOrTerminate(0x30);
@@ -168,6 +187,8 @@ void PushThrownException(void* a0, const type_info* a1, void* a2)
 void FreeRuntimeBlock(void* block);
 extern "C" bool IsPointerType(const type_info* type);
 
+// Drops one reference of an exception record and, at the last, unlinks it, runs its destructor
+// callback, frees its buffer and the record; terminates when it is not on the chain.
 void PopThrownException(ThrownException* self)
 {
     ThrownException** link = (ThrownException**)GetActiveExceptionSlot();
@@ -195,6 +216,8 @@ void PopThrownException(ThrownException* self)
     FreeRuntimeBlock(self);
 }
 
+// Clears the handled flag of the active exception record; terminates when none is active; the
+// compiler calls it on leaving a handler without catching.
 void AbandonCatchHandler(void)
 {
     ThrownException* n = ((ExceptionSlot*)GetActiveExceptionSlot())->active;
@@ -203,6 +226,9 @@ void AbandonCatchHandler(void)
     n->state = 0;
 }
 
+// Checks the active exception against a list of allowed types: rethrows when one matches, otherwise
+// runs the unexpected handler and rethrows a match or throws the unexpected-exception class, else
+// terminates.
 void CheckExceptionSpecification(s32 count, void** allowed)
 {
     ThrownException* info = *(ThrownException**)GetActiveExceptionSlot();
@@ -234,16 +260,19 @@ void CheckExceptionSpecification(s32 count, void** allowed)
     }
 }
 
+// Throws the exception a failed cast to a reference raises.
 void ThrowCastError()
 {
     throw bad_cast();
 }
 
+// Throws the exception typeid of a null pointer raises.
 void ThrowTypeidError()
 {
     throw bad_typeid();
 }
 
+// Returns 1 when an exception record is active and its handler count is still 0.
 s32 HasUncaughtException(void)
 {
     ThrownException* obj = ((ExceptionSlot*)GetActiveExceptionSlot())->active;
@@ -254,6 +283,8 @@ s32 HasUncaughtException(void)
     return result;
 }
 
+// The exception base class's description: the name of the object's own type information (typeid of
+// *this).
 const char* exception::what() const
 {
     return typeid(*this).name();

@@ -12,6 +12,8 @@ static const f32 g_sinX9 = 2.7557314297e-06f;
 static const f32 g_sinX11 = -2.5050759689e-08f;
 static const f32 g_sinX13 = 1.5896910177e-10f;
 
+/* Sine of x + y for |x| up to about pi/4: an odd polynomial of degree 13; hasTail 0 means y is
+ * zero and is skipped. */
 f32 SineKernel(s32 hasTail, f32 x, f32 y)
 {
     s32 bits, magnitude;

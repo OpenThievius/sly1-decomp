@@ -13,6 +13,8 @@ ASM_FUNC(func_001F6EE0);
 
 ASM_FUNC(func_001F6EF0);
 
+// Copies bytes / 4 words from src to dst and returns 0; the first patch installer installs it as
+// system call 0x5A and copies its code into the kernel through it.
 s32 CopyKernelWords(s32* dst, const s32* src, u32 bytes)
 {
     u32 n = bytes >> 2;
@@ -117,6 +119,9 @@ void CopyKernelWordsSyscallFirstPatch(u32 a, void* b, s32 c);
 extern "C" void SyncDataCache(s32 a);
 s32 RunSyscall5BFirstPatch(s32 key);
 
+// Unless bit 8 of the hardware word at 0x10001810 is set, copies g_firstKernelPatchCode to
+// 0x80076000 and g_secondKernelPatchCode to 0x82000, syncs the caches and sets the system calls
+// g_kernelPatchHandlers lists (InitKernelLibrary calls it).
 void InstallFirstKernelPatch(void)
 {
     if ((*(volatile u32*)0x10001810 & 0x100) != 0) {

@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "object_finder.h"
+#define F(o, off) (*(f32*)((u8*)(o) + (off)))
+#define W(o, off) (*(s32*)((u8*)(o) + (off)))
+#define P(o, off) (*(void**)((u8*)(o) + (off)))
+#define O(o, off) (*(PairController**)((u8*)(o) + (off)))
 // PAL: the packed word of D_002701F8 is at 0x5B0 (not 0x324) and the two slots of D_0026D0C8 are at 0x574 and 0x578 (not 0x264 and 0x268).
 struct __attribute__((packed)) Packed_1A4EF0_eu { u8 pad[0x5B0]; s32 v __attribute__((packed)); };
 struct Glob_1A4EF0_eu { u8 pad[0x5B0]; void* v; };
@@ -72,3 +76,7 @@ void SetPairControllerState(PairController* self, s32 state)
         break;
     }
 }
+#undef F
+#undef W
+#undef P
+#undef O

@@ -12,6 +12,8 @@ static const f32 g_cosX10 = -2.7557314297e-07f;
 static const f32 g_cosX12 = 2.0875723372e-09f;
 static const f32 g_cosX14 = -1.1359647598e-11f;
 
+/* Cosine of x + y for |x| up to about pi/4, with y the small tail of the reduction: a degree-14
+ * even polynomial. */
 f32 CosineKernel(f32 x, f32 y)
 {
     s32 bits, magnitude;

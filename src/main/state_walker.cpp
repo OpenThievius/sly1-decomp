@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "transform_object.h"
 #include "shapes.h"
 #include "script_value.h"
 #include "cursor_animator.h"
@@ -144,9 +145,9 @@ void UpdateTriangleAnimatorCursor(TriangleAnimator* self, PlacedObject* obj, voi
     f32 u;
     f32 v;
     BaseObject* end = obj->linkRecord->p64;
-    TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec02*)((u8*)end + 0x40), &b);
+    TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec02*)&((TransformObject*)end)->pos, &b);
     end = obj->linkRecord->p60;
-    TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec02*)((u8*)end + 0x40), &a);
+    TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec02*)&((TransformObject*)end)->pos, &a);
     CopyVec3((Vec3*)&tri[1], (Vec3*)&self->points[0]);
     CopyVec3((Vec3*)&tri[2], (Vec3*)&self->points[1]);
     CopyVec2(&uv[1], (Point2*)&self->coords[0]);

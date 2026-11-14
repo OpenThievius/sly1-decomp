@@ -218,10 +218,10 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self)
         Entry3B* e = &self->entries[self->entryCount++];
         e->key = (s32)a;
         u128 point = Vu0::Q(span.q[0]);
-        Vu0::Q(*(Vec02*)((u8*)e + 0x00)) = point;
+        Vu0::Q(e->v[0]) = point;
         u128 dir = Vu0::Q(span.q[2]);
         Vu0::StoreX(*(u32*)&e->value, Vu0::Dot(point, dir));
-        Vu0::Q(*(Vec02*)((u8*)e + 0x10)) = dir;
+        Vu0::Q(e->v[1]) = dir;
         if (self->entryCount >= 4) {
             return;
         }
@@ -566,8 +566,8 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
     Vec02 at;
     {
         PlacedObject* frame;
-        if (self->linkRecord != 0 && (*(u32*)((u8*)self->linkRecord + 0xB0) & 4) != 0)
-            frame = *(PlacedObject**)((u8*)self->linkRecord + 0x60);
+        if (self->linkRecord != 0 && ((u32)self->linkRecord->flags & 4) != 0)
+            frame = (PlacedObject*)self->linkRecord->p60;
         else
             frame = (PlacedObject*)self->parent;
         TransformPointBetweenFrames(0, frame, pos, &at);

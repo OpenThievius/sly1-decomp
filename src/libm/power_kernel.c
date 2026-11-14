@@ -40,6 +40,9 @@ f32 AbsoluteValue(f32 x);
 f32 SquareRootKernel(f32 x);
 f32 ScaleByPowerOfTwo(f32 x, s32 n);
 
+/* Unchecked x to the power y: handles the special arguments (zeros, infinities, NaNs, +-1,
+ * negative base with an integer or odd y) first, then forms y times the logarithm of |x| in
+ * extended precision and scales by a power of two; the sign follows an odd integer y. */
 f32 PowerKernel(f32 x, f32 y)
 {
     f32 value, absX, logHead, logTail, prodHead, prodTail;

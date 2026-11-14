@@ -13,6 +13,9 @@ static const f32 g_tenTo30 = 1.0e30f;
 
 f32 AbsoluteValue(f32 x);
 
+/* Arctangent of a float in radians, -pi/2 to pi/2: |x| is reduced to one of four anchor angles
+ * (0.4636, pi/4, 0.9828, pi/2) by an angle-subtraction identity, then an 11-term series; tiny x
+ * returns x, huge x +-pi/2, NaN returns NaN. */
 f32 Arctangent(f32 x)
 {
     s32 bits;

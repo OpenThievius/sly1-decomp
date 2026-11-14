@@ -3,6 +3,8 @@
  * (config/us/files.tsv). C, built by the Linux cc1 of 2.9-ee-991111-01 (config/cflags.tsv,
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "libm.h"
+/* The math library's error hook, which the checked functions call with a MathError record; the
+ * library has no handler, so it always returns 0 (the caller then sets the error number itself). */
 s32 HandleMathError(MathError* e)
 {
     s32 n = 0;

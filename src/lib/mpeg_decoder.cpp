@@ -23,6 +23,8 @@ extern "C" s32 DisableInterrupts(void);
 extern "C" s32 EnableInterrupts(void);
 void ResetIpu(void);
 
+// Initialises the MPEG library: resets the IPU (ResetIpu); InitMoviePlayback calls it once before
+// it makes a decoder.
 void InitMpegLibrary(void) {
     DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
@@ -42,10 +44,14 @@ s32 AllocateFromMpegRing(MpegDecoder* owner, MpegRing* pool, u32 offset, u32 ali
 void SetUpMpegScratchpadBuffers(MpegDecoder* self);
 void ResetMpegDecoder(MpegHandle* d);
 s32 ReleaseMpegPictures(MpegHandle* device);
+// Copies a ring buffer's allocation position (+8) into its mark (+0xC), which RewindMpegRingToMark
+// returns to; CreateMpegDecoder sets it once the ring is made.
 void MarkMpegRing(MpegRing* r); // stays void: retail returns a value, but declared so func_0020AE40 differs in registers
 void SaveMpegDmaState(MpegHandle* self);
 void RestoreMpegDmaState(MpegHandle* self);
 
+// Sets up a decoder in a work area, reporting "The size of work area is too small" when it is, with
+// its ring buffer and DMA hooks (InitMoviePlayback calls it).
 s32 CreateMpegDecoder(MpegHandle* out, s32 mem, u32 size)
 {
     FillMemory(mem, 0, size);
@@ -128,6 +134,7 @@ s32 CreateMpegDecoder(MpegHandle* out, s32 mem, u32 size)
     in->scratchDestination = 0x70003600;
 }
 
+// Releases a decoder; it does nothing and always returns 1 (FinishMovie calls it).
 s32 DeleteMpegDecoder(MpegHandle* self) {
 	return 1;
 }
@@ -137,6 +144,8 @@ LINKER_REMNANT(func_0020B050);
 
 s32 RunMpegPictureLoop(MpegHandle* self);
 
+// Sets the output address and size of a decoder and runs its picture loop (StepMovieFrame calls
+// it).
 s32 DecodeMpegPicture(MpegHandle* obj, void* picture, s32 a2)
 {
     MpegDecoder* st = obj->decoder;
@@ -150,12 +159,15 @@ s32 DecodeMpegPicture(MpegHandle* obj, void* picture, s32 a2)
 
 LINKER_REMNANT(func_0020B0A0);
 
+// The first word of a decoder's state, its status (PlayMovie reads it).
 s32 GetMpegDecoderStatus(MpegHandle* device) {
 	return device->decoder->ended;
 }
 
 void ResetMpegPictureMode(MpegDecoder* s);
 void ResetMpegDmaAndIpu(MpegDecoder* c);
+// Clears a decoder's state words and its pictures' bookkeeping so the next stream starts clean
+// (FinishMovie and CreateMpegDecoder call it).
 void ResetMpegDecoder(MpegHandle* d) {
     MpegDecoder* s = d->decoder;
     s->ended = 0;
@@ -169,6 +181,8 @@ void ResetMpegDecoder(MpegHandle* d) {
     ResetMpegPictureMode(s);
 }
 
+// Clears the in-use word (+0x28) of each of the decoder's six picture records that is set, so
+// their buffers can be reused.
 s32 ReleaseMpegPictures(MpegHandle* device) {
 	MpegDecoder* state = device->decoder;
 	if (state->pictures[0]) state->pictures[0]->decoded = 0;
@@ -198,6 +212,9 @@ s32 SetMpegCallback(MpegHandle* obj, s32 index, s32 value, s32 second)
     return old;
 }
 
+// Runs the decoder's callback for the kind a message names (kinds 0 to 4: error text, stall,
+// quantiser matrix load, colour conversion start and end as the callers use them) with the
+// message's argument.
 s32 RunMpegCallback(MpegHandle* p, MpegMessage* idx) {
     s32 r = 0;
     if (p != 0) {
@@ -212,6 +229,8 @@ s32 RunMpegCallback(MpegHandle* p, MpegMessage* idx) {
     return r;
 }
 
+// Runs the decoder's callback of kind 1; the IPU waits call it each time the IPU stays busy too
+// long.
 s32 RunMpegStallCallback(MpegHandle* q)
 {
     MpegSignal flag;
@@ -221,6 +240,7 @@ s32 RunMpegStallCallback(MpegHandle* q)
 
 LINKER_REMNANT(func_0020B208);
 
+// Sets a ring buffer's start, size, read and write positions.
 void InitMpegRing(MpegRing* ring, u32 start, u32 size)
 {
     ring->start = start;
@@ -233,6 +253,8 @@ void MarkMpegRing(MpegRing* ring) {
 	ring->mark = ring->cursor;
 }
 
+// Copies a ring buffer's word at +0xC into its word at +8, going back to the mark MarkMpegRing took
+// (the picture buffer allocation calls it).
 s32 RewindMpegRingToMark(MpegRing* ring)
 {
     s32 value = ring->mark;
@@ -242,6 +264,8 @@ s32 RewindMpegRingToMark(MpegRing* ring)
 
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Takes an aligned block of a size from a decoder's ring buffer, reporting an error when it does
+// not fit.
 s32 AllocateFromMpegRing(MpegDecoder* owner, MpegRing* pool, u32 offset, u32 align)
 {
     u32 base;
@@ -263,6 +287,8 @@ s32 ParseMpegHeaders(MpegDecoder* self);
 s32 DecodePictureByStructure(MpegHandle* self, s32 a, s32 b);
 s32 FlushPendingPicture(MpegHandle* self);
 
+// The decoder's picture loop: parses headers and decodes pictures until a picture is out or the
+// stream ends (DecodeMpegPicture calls it).
 s32 RunMpegPictureLoop(MpegHandle* self)
 {
     s32 s3 = 1;
@@ -325,6 +351,9 @@ struct FramePictureStep {
     }
 };
 
+// The picture loop's step for a picture whose structure is 3: selects the output picture, decodes
+// its data when its number is below the limit, runs the stall callback when it is not, and advances
+// the picture counters.
 s32 DecodeFramePicture(MpegHandle* s1, s32 a1, s32 a2)
 {
     s32 s2;
@@ -358,6 +387,8 @@ s32 DecodeFramePicture(MpegHandle* s1, s32 a1, s32 a2)
 
 s32 DecodeFieldPicture(MpegHandle* self, s32 a1, s32 a2);
 
+// Runs DecodeFieldPicture when the current picture's structure is not 3 and DecodeFramePicture when
+// it is.
 s32 DecodePictureByStructure(MpegHandle* self, s32 a, s32 b)
 {
     if (self->decoder->pictureStructure != 3) {
@@ -366,6 +397,8 @@ s32 DecodePictureByStructure(MpegHandle* self, s32 a, s32 b)
     return DecodeFramePicture(self, a, b);
 }
 
+// The picture loop's step for a field picture: decodes the first field, parses the headers up to
+// the second field's and decodes it, and returns -1 when the second field's structure is wrong.
 s32 DecodeFieldPicture(MpegHandle* self, s32 a1, s32 a2)
 {
     s32 s3 = 0;
@@ -424,6 +457,8 @@ s32 DecodeFieldPicture(MpegHandle* self, s32 a1, s32 a2)
 
 extern void OutputPendingPicture(MpegDecoder* self);
 
+// When a picture has been decoded and is waiting, outputs it with OutputPendingPicture, records its
+// size in the owner and clears the waiting flag, returning 1.
 s32 FlushPendingPicture(MpegHandle* self)
 {
     s32 r = 0;
@@ -441,6 +476,8 @@ s32 FlushPendingPicture(MpegHandle* self)
 }
 
 void SetIpuMpeg1Mode(u32 value);
+// Clears the decoder state's word at +0x848 and puts the IPU in MPEG-1 mode (SetIpuMpeg1Mode(1));
+// ResetMpegDecoder calls it.
 void ResetMpegPictureMode(MpegDecoder* s) {
     s->mpeg2 = 0;
     SetIpuMpeg1Mode(1);
@@ -450,6 +487,9 @@ void ReportMpegError(MpegDecoder* self, const char* value);
 void OutputFramePicture(MpegDecoder* c, MpegPicture* s, s32 count);
 void OutputFieldPicturePair(MpegDecoder* c, MpegPicture* a, MpegPicture* b, s32 count);
 
+// Outputs the decoded picture by its structure, with OutputFramePicture for 3 and
+// OutputFieldPicturePair otherwise, reporting "the second field is missing" when a second field is
+// still expected.
 void OutputPendingPicture(MpegDecoder *self)
 {
     s32 n = self->pictureNumber;
@@ -464,6 +504,8 @@ void OutputPendingPicture(MpegDecoder *self)
 
 void SetIpuMpeg1Mode(u32 value);
 
+// Sets the IPU to MPEG-1 mode and points the decoder's two pictures' buffers at 0x70000000,
+// +0x1800, +0x1B00 and +0x3300 in the scratchpad (CreateMpegDecoder calls it).
 void SetUpMpegScratchpadBuffers(MpegDecoder* self)
 {
     u32 spr = 0x70000000;
@@ -479,6 +521,8 @@ extern "C" s32 DisableInterrupts(void);
 extern "C" s32 EnableInterrupts(void);
 u32 SyncIpu(s32 a, s32 b);
 
+// With interrupts disabled, clears the control registers of the IPU's DMA channels 3, 4 and 8,
+// resets the IPU (0x40000000 into its control register) and waits for it with SyncIpu.
 void ResetMpegDmaAndIpu(MpegDecoder* c) {
     c->windowInvalid = 1;
     c->dcReset = 0;
@@ -498,12 +542,15 @@ void ResetMpegDmaAndIpu(MpegDecoder* c) {
 
 extern "C" s32 PrintFormatted(const char* fmt, ...);
 
+// Prints a message after the prefix "[MPEG ERROR]"; the default when the decoder has no error
+// callback.
 void PrintMpegError(const char* msg) {
     PrintFormatted("[MPEG ERROR]%s\n", msg);
 }
 
 s32 FormatToString(char* dst, const char* fmt, ...);
 
+// Formats a message into a buffer and reports it with ReportMpegError.
 void ReportMpegErrorFormat(MpegDecoder* self, const char* fmt, s32 value)
 {
     char buf[0x100];
@@ -511,6 +558,8 @@ void ReportMpegErrorFormat(MpegDecoder* self, const char* fmt, s32 value)
     ReportMpegError(self, buf);
 }
 
+// Hands a message to the decoder's callback of kind 0, or prints it with PrintMpegError when there
+// is none.
 void ReportMpegError(MpegDecoder* self, const char* value)
 {
     MpegErrorMessage message;
@@ -524,6 +573,8 @@ void ReportMpegError(MpegDecoder* self, const char* value)
     PrintMpegError(value);
 }
 
+// Stores a width and height and the same divided by 16, the dimensions in macroblocks
+// (AllocatePictureBuffers calls it for each picture buffer).
 s32 SetPictureDimensions(MpegPicture* picture, s32 x, s32 y)
 {
     picture->width = x;
@@ -540,6 +591,9 @@ void LoadIpuQuantiserMatrix(MpegDecoder* d, u32 value, u8* table);
 void ReadExtensionsAndUserData(MpegDecoder* self);
 void AllocatePictureBuffers(MpegHandle* handle);
 
+// Reads a sequence header (start code 0x1B3) and the extensions after it: the picture size, rate
+// and aspect, an optional intra and non-intra quantiser matrix (else the defaults, loaded with
+// LoadIpuQuantiserMatrix); ParseMpegHeaders calls it.
 void ReadSequenceHeader(MpegDecoder* d) {
     d->firstStructure = 0;
     u32 v = ReadIpuBits(d, 0x20);
@@ -573,6 +627,9 @@ void ReadSequenceHeader(MpegDecoder* d) {
 
 void SetUpPictureBufferAddresses(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6, u32* a7, u32* p9, u32 p10, u32 p11, u32 p12, s32 p13, s32 p14);
 
+// After a sequence header, when the width or height in macroblocks changed,
+// rewinds the ring, allocates three 64-byte aligned picture buffers from it, fills the pictures'
+// plane addresses with SetUpPictureBufferAddresses and sets each plane's dimensions.
 void AllocatePictureBuffers(MpegHandle* handle)
 {
     MpegDecoder* st = handle->decoder;
@@ -634,6 +691,9 @@ void AllocatePictureBuffers(MpegHandle* handle)
     SetPictureDimensions(&st->views[8], w, h >> 1);
 }
 
+// Fills the addresses of a picture's luma and two chroma planes for both halves from three buffer
+// addresses, the second half starting at a macroblock count times 0x180 into each, as uncached
+// addresses.
 void SetUpPictureBufferAddresses(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6, u32* a7, u32* p9, u32 p10, u32 p11, u32 p12, s32 p13, s32 p14)
 {
     u32 mask = 0x0FFFFFFF;
@@ -661,6 +721,9 @@ void SendIpuCommand(MpegDecoder* obj, u32 value);
 extern "C" s32 DisableInterrupts(void);
 extern "C" s32 EnableInterrupts(void);
 
+// Runs the callback with kinds 2 and 3 around a DMA of a 64-byte matrix to the IPU through channel
+// 4 followed by a command (0x50000000 or 0x58000000 from the caller), waiting for the IPU each step
+// (ReadSequenceHeader calls it for the default matrices).
 void LoadIpuQuantiserMatrix(MpegDecoder* obj, u32 value, u32 mask)
 {
     MpegSignal req;
@@ -686,6 +749,8 @@ void SetIpuMpeg1Mode(u32 value);
 u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Reads the sequence extension: the profile and level (reporting "Unsupported profile/level"), the
+// chroma format (it must be 420) and the high bits of the width, height and bit rate.
 void ReadSequenceExtension(MpegDecoder *self)
 {
     u32 s2;
@@ -716,6 +781,8 @@ void ReadSequenceExtension(MpegDecoder *self)
     self->vbvBufferSize += s2 << 10;
 }
 
+// Reads the sequence display extension: a 3-bit format, an optional colour description of three
+// bytes, and two 14-bit display sizes.
 void ReadSequenceDisplayExtension(MpegDecoder* self)
 {
     ReadIpuBits(self, 3);
@@ -731,6 +798,7 @@ void ReadSequenceDisplayExtension(MpegDecoder* self)
 
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Reports "_sequenceScalableExtension() is not implemented".
 void RejectSequenceScalableExtension(MpegDecoder* self)
 {
     ReportMpegError(self, "_sequenceScalableExtension() is not implemented");
@@ -738,6 +806,7 @@ void RejectSequenceScalableExtension(MpegDecoder* self)
 
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Reports "Unknown Extension".
 void RejectUnknownExtension(MpegDecoder* self)
 {
     ReportMpegError(self, "Unknown Extension");
@@ -745,6 +814,7 @@ void RejectUnknownExtension(MpegDecoder* self)
 
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Reports "_pictureSpatialScalableExtension is not supported".
 void RejectSpatialScalableExtension(MpegDecoder* self)
 {
     ReportMpegError(self, "_pictureSpatialScalableExtension is not supported");
@@ -752,6 +822,7 @@ void RejectSpatialScalableExtension(MpegDecoder* self)
 
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Reports "_pictureTemporalScalableExtension is not supported".
 void RejectTemporalScalableExtension(MpegDecoder* self)
 {
     ReportMpegError(self, "_pictureTemporalScalableExtension is not supported");
@@ -759,6 +830,7 @@ void RejectTemporalScalableExtension(MpegDecoder* self)
 
 void SaveIpuDmaChannels(IpuDmaState* out);
 
+// Saves the IPU's two DMA channels before a picture (SaveIpuDmaChannels); a decoder's hook.
 void SaveMpegDmaState(MpegHandle* self)
 {
     SaveIpuDmaChannels(&self->decoder->dmaState);
@@ -766,6 +838,7 @@ void SaveMpegDmaState(MpegHandle* self)
 
 void RestoreIpuDmaChannels(IpuDmaState* s0);
 
+// Restores the IPU's two DMA channels after a picture (RestoreIpuDmaChannels); a decoder's hook.
 void RestoreMpegDmaState(MpegHandle* self)
 {
     RestoreIpuDmaChannels(&self->decoder->dmaState);

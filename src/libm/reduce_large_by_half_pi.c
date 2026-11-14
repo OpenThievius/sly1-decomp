@@ -21,6 +21,10 @@ static const f32 g_invDigitBase = 3.9062500000e-03f;
 f32 ScaleByPowerOfTwo(f32 x, s32 n);
 f32 RoundDown(f32 x);
 
+/* The slow path of the range reduction, for huge arguments: multiplies the argument's base-2^8
+ * digits by a table of the digits of 2/pi (twoOverPi), keeps the fraction and the low bits of the
+ * integer part, and rebuilds the reduced angle in parts[0] and parts[1]; returns the integer
+ * part, modulo 8, as the quadrant count. */
 s32 ReduceLargeByHalfPi(f32* digits, f32* parts, s32 exponent, s32 digitCount, s32 precision, const s32* twoOverPi)
 {
     s32 lastTerm, lastDigit, firstIndex, termCount, carry, quadrant, chunks[20], i, j, k, limit, chunkExp, roundState;
