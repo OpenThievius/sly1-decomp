@@ -59,6 +59,9 @@ void InitConeAgent(ConeAgent* self)
     self->targetAngleLimit = 1.04719755f;
 }
 
+// Starts the agent, then resolves its zone and sight zone objects by id (where the ids are set)
+// and, if it has a main clip, gives each animation event object it gathers a state reset record
+// (once) holding that object.
 void StartConeAgent(ConeAgent* self)
 {
     GatheredObjects out;
@@ -94,6 +97,10 @@ void DrawConeAgent(ConeAgent* self, void* arg1, void* arg2)
 typedef s32 (*SlotFnRet)(void* self);
 struct ObjectGatherer;
 
+// Decides whether the agent may act on its target (1) or not (0). It says no while the pad select
+// flag is held, in states 0x10 and 0xB, or when the target is outside the leash (height, XY
+// distance or a zone shape), which also clears engaged. Otherwise the target must be in the sight
+// zone or within farRange and a bearing limit blended from nearAngle to farAngle, and targetable.
 s32 IsConeAgentFree(ConeAgent* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0) {

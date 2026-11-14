@@ -141,6 +141,10 @@ void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 
+// Used when the field being shown is not the one the draw field parity expects: writes to the GS
+// display registers a display rectangle one line shorter and shifted by one line (the display
+// position for one parity, the frame buffer offset for the other) and enables the first read
+// circuit, so interlaced output stays aligned. Otherwise it just rewrites PMODE unchanged.
 void ApplyFieldDisplayOffset(void)
 {
     s32 i = g_displayFrameCounter & 1;
@@ -203,6 +207,10 @@ void SignalDisplaySync(void) {
     AwaitSemaphore(g_vblankSemaphore);
 }
 
+// Ends a frame: waits for the display sync, picks the next draw field parity (0 for a few frames
+// after a reset, then opposite to the GS's current field), sets the field draw offset packet of the
+// buffer pair, advances the frame counter and swaps the double buffer, applying the field display
+// offset while D_002626CC is 1 or 2. Ends by waiting for the GS paths.
 void FlipDisplayFrame(void)
 {
     g_displayFlipBusy = 1;
@@ -264,6 +272,9 @@ void ApplyPendingDisplayFlip(void)
     }
 }
 
+// Sends the display reset packet, waits for the sync, resets the GS, and restarts the frame
+// counting: field parity from the GS's current field, countdown and D_002626CC cleared, the field
+// draw offset set and the double buffer swapped once.
 void ResetDisplayBuffers(void)
 {
     g_displayFlipBusy = 1;
@@ -315,6 +326,10 @@ void SendGsPacketAndWait(s32 channel, void* b)
     AwaitSemaphore(g_gsFinishSemaphore);
 }
 
+// Builds a GIF packet in buffer that clears the screen to the colour (r, g, b, a): it writes the
+// fill colour, then a column of sprites 32 pixels wide across the 640-pixel width, and finishes
+// with a register write. flag picks one of two values of the second register (0x32001 or 0x32000),
+// and the alpha's top bit picks the first GIF tag's flags.
 void FillScreenColor(u8* buffer, Rgba4* color, s32 flag)
 {
     PacketWriter f;
@@ -333,6 +348,10 @@ void FillScreenColor(u8* buffer, Rgba4* color, s32 flag)
     EndGifPacket(&f);
 }
 
+// Resets the GS and sets up a 640x224 double buffer, prepares three screen-clear packets (black,
+// alpha 0x80), creates the vblank and GS-finish semaphores, hooks the interrupt handlers for vblank
+// start (cause 2) and GS finish (cause 0), initialises the mesh queue and resets the display
+// buffers.
 void InitDisplay(void)
 {
     Rgba4 k;
@@ -400,6 +419,9 @@ void SendDisplayResetPacket(void)
     SendPacketToBothBuffers(&b);
 }
 
+// Fades the screen to black over t seconds (about 60 steps per second) by drawing, in each step, a
+// black full-screen sprite whose alpha grows with the square of the step's fraction (up to 255) and
+// flipping the display; it blocks until done. Clears the field-offset mode D_002626CC first.
 void FadeScreenToBlack(f32 t)
 {
     FadePacket f;

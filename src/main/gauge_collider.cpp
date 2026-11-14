@@ -313,6 +313,10 @@ void InitObjectGroup(ObjectGroup* self)
     AppendToList(&self->world->list1C3C, self);
 }
 
+// Loads a group of placed objects: rotation, position, then entries, each a clone from the world's
+// spawned list or a new typed record that reads itself, given a cell on the group's list. It then
+// reads per-object overrides (script scope, visibility mask, fade distance, properties), attaches
+// the objects to the group (and a one-entry group's children to it).
 void LoadObjectGroup(ObjectGroup* self, LoadStream* rd)
 {
     PlacedObject* arr[64];
@@ -443,6 +447,9 @@ void LoadObjectGroup(ObjectGroup* self, LoadStream* rd)
     self->desc->m02(self);
 }
 
+// Copies a group from src: the placed object copy, then the cell list is rebuilt, each cell
+// pointing to the matching child of the parent (found by its alias) or, if there is none, to the
+// old cell's node.
 void CopyObjectGroup(ObjectGroup* self, ObjectGroup* src)
 {
     Pair53 saved = self->kept;
@@ -495,6 +502,10 @@ void LoadGaugeCollider(GaugeCollider* self, BufferedStream* stream)
     ResolveObjectLinks(self, 1, g_gaugeColliderLoadLinks);
 }
 
+// Starts the gauge collider: resolves its links, takes the heading from its rotation, creates the
+// carry walker and a pose source for the pose object (with the rest target), gathers its agents
+// (ids 0x305 and 0x105 of kind 0xF) and up to 32 nodes (id 5 of kind 0x44) onto its free list, and
+// creates the phase walker with itself as its listener.
 void StartGaugeCollider(GaugeCollider* self)
 {
     s32 arr[32];
@@ -527,6 +538,10 @@ void AddColliderForce(void* self, Vec02* force);
 extern const Vec02 g_unitZVector;
 
 
+// Physics step of the gauge collider: turns it toward the heading rotation tilted to the ground
+// normal, then adds a driving force along its forward axis (scaled by the push, by how far it has
+// to turn, and by the time since it last touched the ground) and a drag force against its
+// horizontal velocity that grows with speed.
 void StepGaugeCollider(GaugeCollider* self, f32 dt)
 {
     Mat02 b;
@@ -604,6 +619,9 @@ extern const Vec02 g_unitXVector;
 
 struct GaugeSpanOwner { u8 pad00[0x278]; u8* oscillatorBlock; };
 
+// Per-frame update of the gauge collider: after the base update it sets top speed and push strength
+// by whether it is on the floor (or a notice value is set), and averages the surface normals under
+// its four probe points into groundNormal (the old one where a hit is steeper than 0.7 in z).
 void UpdateGaugeCollider(GaugeCollider* self, f32 dt)
 {
     Vec02 sum;
@@ -680,6 +698,10 @@ struct GaugeHeld {
 };
 
 
+// Gives the not yet taken object (of the ones found by id 0x48) that the collider is moving toward:
+// it tests each object's anchor segment against a point ahead of the collider, takes the one with
+// the smallest parameter below a limit whose direction is within a limit angle of the heading, or 0
+// if there is none.
 GaugeHeld* FindHeldObjectAhead(GaugeCollider* self)
 {
     GaugeHeld* list[0x40];
@@ -774,6 +796,10 @@ GaugeHeld* FindHeldObjectAhead(GaugeCollider* self);
 extern f32 g_gameTime[];
 extern f32 D_0026A834;
 
+// Pad control: the stick sets the heading (camera-relative) and the push. A button press (0xC0) at
+// the carry walker's rest key with agents waiting drops the held object and starts a delivery;
+// after its delay the object is taken, counted, and at the delivery limit the phase walker moves on
+// and the timer stops. While the carrier is attached it picks up a held object ahead.
 void ControlGaugeCollider(GaugeCollider* self, PadRecord* pad, f32 dt)
 {
     s32 cur;
@@ -864,6 +890,10 @@ void UpdateGaugeColliderVisibility(GaugeCollider* self)
     g_timerElement.vt->m15(&g_timerElement);
 }
 
+// Once the next place time has come, takes the first unattached agent and places it at a random
+// free node (moved to the used list): position and orientation from the node, velocities cleared,
+// agent state 0x10, node state 1, and schedules the next time. With no free agent the time becomes
+// the largest float, so it stops trying.
 void PlaceObjectAtRandomNode(GaugeCollider* self)
 {
     ListFrame frame;
@@ -919,6 +949,10 @@ void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* 
 f32 SplitVectorAlongAxis(const Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
 struct PlayingSound;
 
+// Applies the contact of the collider with the attached set it rests on, from the depth
+// MeasureAttachedSetContactDepth gives (and a normal perturbed by the set's oscillator): pushes out
+// against gravity by the depth and steers position and rotation toward the set's motion. A shallow
+// flat contact spawns effects, otherwise the sound stops.
 void ApplyGaugeColliderAttachedSetContact(GaugeCollider* self, AttachedSet* set, f32 dt)
 {
     Vec02 at;
@@ -989,6 +1023,10 @@ void ApplyGaugeColliderAttachedSetContact(GaugeCollider* self, AttachedSet* set,
     }
 }
 
+// Handles notifications after the base handler: 0xB clears the notice value, 0xA sets it, and 0x14
+// from the phase walker reacts to its key. At 0x3F3 the game starts (caption targets, the world's
+// active follower and the timer with its limit, calling EndGaugeColliderTimer); keys 0x3F4 and
+// 0x3F5 stop the timer, hide the captions and the timer and release the active follower.
 void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec)
 {
     s32 code;
@@ -1035,6 +1073,10 @@ void StartGaugeColliderAgent(GaugeColliderAgent* self)
 }
 
 
+// Physics step of an agent of the gauge collider: when it has a notice value and its arrival time
+// has passed, it applies the turning collider's drive, an acceleration toward the heading velocity
+// (limited by a curve of the turn angle), gravity if it has no parent and the flag is clear, and
+// the force steps of the attached objects; otherwise it steps as a plain agent.
 void StepGaugeColliderAgent(GaugeColliderAgent* self, f32 dt)
 {
     if (self->noticeValue != 0 && *(f32*)&self->arrivalTime <= g_gameTime[0]) {
@@ -1203,6 +1245,10 @@ void HandleGaugeColliderAgentNotification(GaugeColliderAgent* self, s32 code, Ag
     }
 }
 
+// Per-frame update of an agent: when the active collider is a gauge collider with a drop zone
+// attached and the agent is inside that zone and a node query finds it, it counts one more waiting
+// agent for that collider (limited by a maximum) and, if no placement is scheduled, schedules one.
+// Then does the base agent's update.
 void UpdateGaugeColliderAgent(GaugeColliderAgent* s1, f32 f)
 {
     GaugeCollider* s0 = (GaugeCollider*)GetActiveSwitchedCollider();

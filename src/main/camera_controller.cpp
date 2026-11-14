@@ -176,6 +176,8 @@ Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self)
     return r;
 }
 
+// Starts the camera's two looping sound effects (0x71 and 0x70, 3000 range, 300 near), pauses the
+// first one's voice at once and marks the sounds as paused.
 void StartCameraSounds(CameraSoundOwner* self)
 {
     StartSoundEffect(0x71, (PlayingSound**)&self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -327,6 +329,10 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, const Vec02* focus, s32 e, f32 gain, f32 damp,
                    f32 unused, f32 yawOffset, f32 pitchOffset, f32 dt);
 
+// Per-frame update of the target camera controller. Its mode (from a value stack) picks how the
+// zoom fraction moves (stick, fit to a kept object, fixed, none) and drives the zoom sound; the
+// sticks then give yaw and pitch speeds (mode 2 aims within a collider's ranges, 3 looks at an
+// object, 4 frames one directly), and it ends in UpdateOrbitCameraPlacement.
 void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRecord* pad, f32 dt)
 {
     Quad16 target = GetCameraControllerTargetPoint(self);
@@ -649,6 +655,10 @@ void ActivateFrameCameraController(FrameCameraController* self)
 void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, const Vec02* focus, s32 e, f32 gain, f32 damp,
                    f32 unused, f32 yawOffset, f32 pitchOffset, f32 dt);
 
+// Places the camera relative to the placed object at the top of its stack: the eye sits 10 units
+// along the object's frame rotated by the controller's frame, the target is offset by a rotated
+// vector, and UpdateOrbitCameraPlacement gets distance, height and zoom values blended over one
+// second from the defaults (20, -7, 1) to (100, -15, 0.25).
 void UpdateFrameCameraController(FrameCameraController* self, f32 dt)
 {
     Camera* cam = self->owner;
@@ -681,6 +691,10 @@ void ActivateValueCameraController(ValueCameraController* obj, s32 value) { obj-
 void DeactivateValueCameraController(ValueCameraController* obj) { obj->value = 0; }
 
 
+// Sets the camera's position and orientation from a placed object that carries them: the position
+// comes from a point in the object's frame, and the basis looks at the object's target (an object,
+// or a converted position) or, with neither, is built from two stored vectors and rotated by the
+// object's matrix. Ends with SetCameraPlacement.
 void UpdateValueCameraController(ValueCameraController* ctl)
 {
     Vec02 pos;

@@ -36,6 +36,10 @@ void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p
                        CurvePoint* out, f32 start, f32 end);
 
 
+// Evaluates one cubic Bezier key segment of a value curve at time diff within a segment of length
+// delta. First it inverts the time polynomial by 16 bisection steps to find the curve parameter,
+// then writes the value to outF and the slope (value derivative times scale over the time
+// derivative) to outI; either may be null.
 void SolveBezierSegment(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero)
 {
     f32 c[4];
@@ -94,6 +98,9 @@ void SolveBezierSegment(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C
     }
 }
 
+// Evaluates one cubic Hermite segment of a scalar curve at time t of a segment of length dur,
+// between values a and c with slopes b and dd. Writes the value to p0, the first derivative (times
+// e) to p1 and the second derivative (times e squared) to p2; each may be null.
 void EvaluateHermiteSegment(f32* p0, f32* p1, f32* p2, f32 dur, f32 t, f32 e, f32 a, f32 b, f32 c, f32 dd)
 {
     f32 u = t / dur;
@@ -183,6 +190,10 @@ static inline f32 NormalizeAxis(Vec02& v, const Vec02& fallback)
     return Vu0::ToFloatMoved(len);
 }
 
+// Blends from rotation a to rotation b over dur seconds, at time t, with angular velocities wa and
+// wb at the ends (a cubic Hermite blend of orientation). Writes the interpolated rotation to out
+// and its angular velocity (scaled by e) to outW; either may be null. Used for the player's path
+// moves and the pose source's link blends.
 void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Mat02* b, const Vec02* wb, Mat02* out, Vec02* outW,
                             s32 unused6)
 {
@@ -228,6 +239,9 @@ void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Ma
     }
 }
 
+// Samples a Hermite vector segment (points p0 and p1 with tangents m0 and m1, length dur) at count
+// evenly spaced times from start to end inclusive, writing the positions to out. Used to build the
+// 20-point polyline of a path curve segment.
 void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, s32 count,
                        CurvePoint* out, f32 start, f32 end)
 {

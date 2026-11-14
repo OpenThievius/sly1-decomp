@@ -109,6 +109,9 @@ extern BoxStyle g_gridSelectorFrame;
 
 u32 GetEntryFlags(s32 idx);
 u32* GetLevelEntryByKey(s32 idx);
+// Starts the placed object and resolves its nine part links. For ids 0x515 to 0x519, each existing
+// part whose flag is set (a level bit 0x20 for the ninth, else the entry's own flag, 2 or 1 by its
+// flags) has its method at slot 6 called.
 void CallFlaggedParts(PartHolderObject* self)
 {
     StartPlacedObject(self);
@@ -145,6 +148,10 @@ void CallFlaggedParts(PartHolderObject* self)
 
 s32 ComputeCompletionMask();
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
+// Sets up the choice screen: creates the state walkers of the four walker slots that have a graph,
+// finds the last available choice from the save's level flags (from 5), starts the finished level
+// objects, picks the first step sequence whose condition holds as pending, and selects the starting
+// choice; then positions walkers 2 and 3 and pushes the caption.
 void SetupCurrentObjectChoices(CurrentPlacedObject* self)
 {
     if (self->walkers[0].graph) self->walkers[0].walker = CreateStateWalker((StateGraph*)self->walkers[0].graph, 0, -1, 0);
@@ -231,6 +238,9 @@ void BecomeCurrentObject(CurrentPlacedObject* self)
     AppendQueuedCall(self->world, (void*)SetupCurrentObjectChoices, self, 0, 0);
 }
 
+// Updates the two captions for the current choice: the first shows a name ("Bentley" for choice 0,
+// "Murray" for the walker's choice, the counts for a completed level, otherwise empty) and the
+// second shows "Press X to Start Mission!" when the choice is not yet done, or is hidden.
 void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
 {
     s32 s1 = 0;
@@ -293,6 +303,10 @@ void* LookupEntryById(s32 key);
 void MarkProgressStageFlag(s32 idx);
 struct IdentityKey;
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
+// Confirms the current choice: for a level not yet done other than the walker's one it marks its
+// progress flag and plays its animation, and, unless that animation leads to an event, starts the
+// object fade and pops the stack element when it can; for the walker's choice it sets the target of
+// walker 3 instead. Then, unless that was the case, it moves on to key index 1.
 void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
 {
     s32 callB = 1;
@@ -345,6 +359,10 @@ void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
 // NEAR: only the order of `addiu v0,s5,lo(D_00261858)` vs `sw s4,0x2D4(s3)` differs (2 instrs swapped)
 
 struct KeyRecord;
+// Selects choice a with key index b (does nothing if both are unchanged): plays a sound for a
+// choice that is not the walker's (the first-time one when it is done, otherwise a per-choice sound
+// spaced by a minimum gap), moves the walker to that choice's keys (teleporting it first if there
+// was no choice yet), and records the choice and the time.
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
 {
     if (a == self->choice && b == self->keyIndex) return;
@@ -420,6 +438,10 @@ void ShowCurrentObjectCaptions(CurrentPlacedObject* o);
 void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
 void ConfirmCurrentObjectChoice(CurrentPlacedObject* o);
 void MoveCurrentObjectChoice(CurrentPlacedObject* self, PadRecord* a1);
+// Input of the selection caption: (with no step sequence running) starts a pending sequence (saving
+// the memory card for the first) and refreshes captions. With key index 1 and the walker arrived
+// (or 0.3 s) it pushes the grid selector or the map screen list. Once arrived, 0x800 (or no pad for
+// 5 s) opens pause page 0x17, 0x140 confirms, else it moves the choice.
 void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
 {
     if (self->node == 0) {
@@ -515,6 +537,8 @@ struct Layout_137228;
 struct TextReader;
 void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
 void PopFontScale(Font* font);
+// Draws the selection caption when it has a node and text: its frame with alpha applied, and the
+// text, scaled by a pulse (between 0.9 and 1) driven by the elapsed time.
 void DrawSelectionCaption(T217D_12E0* self)
 {
     T217D_Word tmp;
@@ -556,6 +580,9 @@ void DrawSelectionCaption(T217D_12E0* self)
 s32 IsFontLoaded(s32 k);
 void PushFontScale(Font* font, f32 x, f32 y);
 void PopFontScale(Font* font);
+// Sets the grid selector up: text element, the frame from font 2 (if loaded), a clone of its font,
+// its colour (0xDF7F7F7F) and its size, computed from the font heights and four cells of font 4 at
+// scale 1.3, plus margins (60 high, 90 wide).
 void InitGridSelector(T217D_1330* self)
 {
     SetupScreenElementText(self);
@@ -596,6 +623,10 @@ void QueueMovieByIndex(s32 index);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
+// Input of the grid selector: the buttons 0x9B0 (or no pad for 5 s) pop it; button 0x40 queues the
+// movie of the cursor's entry if its bit is set, else plays sound 0x7B; the d-pad or stick steps
+// move the cursor around the 4x4 grid with wrap-around (a horizontal step off an edge also moves a
+// row), playing sound 0x79.
 void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
 {
     s32 s1;
@@ -676,6 +707,10 @@ struct StringLayout;
 struct Vec4U;
 void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 const char* GetMovieTitle(s32 index);
+// Draws the 4x4 grid selector: the frame (with the element's alpha applied to its colour), the
+// title of the cursor's entry ("???" until that entry's bit is set), sixteen cells of letters
+// 'a'..'p' (an underscore where the bit is not set) with the cursor's cell pulsing in size, and a
+// line under the title.
 void DrawGridSelector(T217D_1330* self)
 {
     T217D_Word tmp;
