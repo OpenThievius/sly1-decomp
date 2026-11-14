@@ -138,6 +138,7 @@ extern s32 g_world5CountdownRequest;
 s32 g_timeoutFired = 0;
 
 
+// Initialiser of the mode collider: a switched collider with no mode yet (-1).
 void InitWorld5ModeCollider(World5ModeCollider* self)
 {
     InitSwitchedCollider(self);
@@ -223,6 +224,7 @@ tail:
 }
 
 
+// Moves the collider, then calls slot 0x12 of its descriptor if it has one.
 void MoveWorld5ModeCollider(World5ModeCollider* self, f32 t, void* arg)
 {
     MoveCollider(self, t, 0);
@@ -519,12 +521,16 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
 
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode);
 
+// Finishes the switched collider and puts it in mode 2.
 void FinishWorld5ModeCollider(World5ModeCollider* self)
 {
     FinishSwitchedCollider(self);
     SetWorld5ModeColliderMode(self, 2);
 }
 
+// Reacts to the mode collider becoming the active switched collider (or no longer being it): the
+// spinning sprite is aimed at (0, 0, 2000) on activation, and hidden with the pulse cleared on
+// deactivation.
 void HandleWorld5ModeColliderActivation(World5ModeCollider* self, void* active)
 {
     HandleSwitchedColliderActivation(self, active);
@@ -659,6 +665,9 @@ s32 AcceptWorld5ModeColliderRequest(World5ModeCollider* self, s32* arg)
 }
 
 
+// Notification handler: for a kind 0x13 message from its mode animation player, codes 0x15E and
+// 0x15F set and clear f6E0 and code 0x467 sets releasePending; then the switched collider's own
+// handler runs.
 void HandleWorld5ModeColliderNotification(World5ModeCollider* self, s32 kind, MessageBody* rec)
 {
     if (kind == 0x13 && rec->sourceId == self->modeAnimPlayer) {
@@ -677,6 +686,7 @@ void HandleWorld5ModeColliderNotification(World5ModeCollider* self, s32 kind, Me
     HandleSwitchedColliderNotification(self, kind, rec);
 }
 
+// Whether the mode collider's pulse is active.
 s32 HasWorld5ModeColliderAcceptedRequest(World5ModeCollider* self)
 {
     return self->pulseActive != 0;
@@ -725,6 +735,8 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
 
 void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
 
+// Computes the collider's two anchor points, converts them to the ancestor frame and passes them
+// to descriptor slots 0x1D and 0x20 of the collider.
 void PlaceWorld5ModeColliderAtAnchor(World5ModeCollider* self)
 {
     u8 bufA[16];
@@ -736,6 +748,7 @@ void PlaceWorld5ModeColliderAtAnchor(World5ModeCollider* self)
 }
 
 
+// Initialiser of the boss object: a collider with no mode yet (-1).
 void InitWorld5Boss(World5Boss* self)
 {
     InitCollider(self);
@@ -850,6 +863,8 @@ extern s32 D_00270458;
 extern s32 D_00270B54;
 extern s32 D_002717CC;
 
+// Shows the shared gauge bar while the boss object is in mode 0 or 1 and nothing else (menus, a
+// fade) is covering the screen, otherwise hides it.
 void ShowWorld5BossBar(World5Boss* self)
 {
     s32 busy = 0;
@@ -867,6 +882,9 @@ void ShowWorld5BossBar(World5Boss* self)
 
 void PlayWorld5BossTarget(World5Boss* self);
 
+// Event handler of the boss object: an event with flag 0x10 and the boss's own id takes one
+// away from the gauge count, plays the target's animation and sends script event 2. Always gives
+// 1.
 s32 HandleWorld5BossEvent(World5Boss* self, ObjectEvent* msg)
 {
     if (msg->extraFlags & 0x10) {
@@ -921,6 +939,7 @@ done:
 }
 
 
+// Starts the boss's looping animation (or replaces it by none when flag is 0) on the loop player.
 s32 PlayWorld5BossLoop(World5Boss* self, s32 flag)
 {
     void* p = 0;
@@ -931,6 +950,7 @@ s32 PlayWorld5BossLoop(World5Boss* self, s32 flag)
 }
 
 
+// Sets the object the boss plays animations on: the object found by id index, or none for -1.
 void SetWorld5BossTarget(World5Boss* self, s32 index)
 {
     if (index == -1) {
@@ -940,11 +960,13 @@ void SetWorld5BossTarget(World5Boss* self, s32 index)
     }
 }
 
+// Plays the target's animation on the target player.
 void PlayWorld5BossTarget(World5Boss* self)
 {
     ReplaceAnimationPlayer((Animation*)self->target, self, 1, (AnimationPlayer**)self->targetPlayer, 0.0f, 1.0f);
 }
 
+// Initialiser of the countdown: a count of 0x10, no pending request and the timeout not fired.
 void InitWorld5Countdown(World5Countdown* self)
 {
     InitCollider(self);
@@ -954,6 +976,7 @@ void InitWorld5Countdown(World5Countdown* self)
 }
 
 
+// Start of the countdown: the placed object's start, then resolves its three links.
 void StartWorld5Countdown(World5Countdown* self)
 {
     StartPlacedObject(self);
@@ -963,6 +986,9 @@ extern f32 g_gameTime;
 
 void SetWorld5CountdownState(World5Countdown* self, s32 state);
 
+// Per-frame update of the countdown: ends its animation record once it has run out, applies a
+// pending mode request (g_world5CountdownRequest), and in mode 2 queues a movie (after a fade)
+// once g_timeoutLimit seconds have passed.
 void UpdateWorld5Countdown(World5Countdown* self, f32 dt)
 {
     World5CountdownRecord* p;
@@ -992,6 +1018,7 @@ extern s32 D_00270458;
 extern s32 D_00270B54;
 extern s32 D_002717CC;
 
+// Same as ShowWorld5BossBar for the countdown object, which shows the bar in mode 1 only.
 void UpdateWorld5CountdownVisibility(World5Countdown* self)
 {
     s32 busy = 0;
@@ -1049,6 +1076,9 @@ s32 HandleWorld5CountdownObjectEvent(World5Countdown* self, ObjectEvent* msg)
 }
 
 
+// Switches the countdown object's mode. Mode 1 sets up the shared gauge bar (4 segments of 4
+// cells, 0x10 in all, empty) and makes the object the world's active follower; mode 2 marks level
+// 5 done and starts a memory card save. Records the time of the change.
 void SetWorld5CountdownState(World5Countdown* self, s32 state)
 {
     if (state == self->mode) {

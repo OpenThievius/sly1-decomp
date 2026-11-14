@@ -86,6 +86,7 @@ BestTimeTextStyle g_commentaryFrameStyle(2, 1);
 struct BestTimeTextBuffer { char c[0x40]; };
 BestTimeTextBuffer g_bestTimeText = {};
 
+// The entry of the table of 33 level entries whose level id is key, or null.
 void* FindLevelEntry(s32 key)
 {
     const LevelEntry* p = g_levelEntries;
@@ -393,6 +394,7 @@ void DrawFramedText(T217D_1380* self)
 
 LINKER_REMNANT(func_001E0820);
 
+// Sets the best time display to state 3.
 void FinishBestTimeRun(void* self)
 {
     SetBestTimeState((T217D_1380*)self, 3);
