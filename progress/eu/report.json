@@ -26310,7 +26310,7 @@
      "address": "0",
      "metadata": {
       "virtual_address": "1639696",
-      "demangled_name": "InitBoxCollider"
+      "demangled_name": "InitContactlessCollider"
      }
     },
     {

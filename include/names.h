@@ -252,7 +252,7 @@
 #define g_gaugeColliderClass                              D_0021F928
 #define g_gaugeColliderAgentClass                         D_0021FA88
 #define g_gaugeCountedObjectClass                         D_0021FC28
-#define g_boxColliderClass                                D_0021FD58
+#define g_contactlessColliderClass                        D_0021FD58
 #define g_worldListedAgentClass                           D_0021FE88
 #define g_numberedAgentClass                              D_00220028
 #define g_contactAgentClass                               D_002201C8
@@ -4264,7 +4264,7 @@
 #define FeedMovieDecoder                                  func_0018F890
 #define ConstructMovieRingSink                            func_0018F940
 #define ConstructMovieRingSinkAtStartup                   func_0018F968
-#define InitBoxCollider                                   func_0018F988
+#define InitContactlessCollider                           func_0018F988
 #define QueueModelPartDraws                               func_0018F9D8
 #define InitSeekingAgent                                  func_0018FEF8
 #define StartSeekingAgent                                 func_0018FF28
