@@ -56,7 +56,7 @@ The records are grouped in tables (US addresses):
 
 | Table | Entries | What | Format on the disc |
 | --- | ---: | --- | --- |
-| 0x247AF0 | 46 × 0x2C | levels: record, level code (world × 0x100 + level), name, flags | LZ-compressed |
+| 0x247AF0 | 46 × 0x2C | levels: record, level code (world × 0x100 + level), name, goal flags | LZ-compressed |
 | 0x248490 | 17 × 0x20 | videos | MPEG program streams |
 | 0x244F40 | 7 × 0x20 | sound banks, loaded by the IOP sound driver | |
 | 0x248748 | 33 × 0x2C | music, by level code | VAG |
@@ -64,6 +64,13 @@ The records are grouped in tables (US addresses):
 | 0x248470 | 1 | a file copied to the memory card | |
 
 PAL has the same scheme at other addresses (see PAL).
+
+A level's goal flags (0, 2 or 0xE) say which goals it offers, each kept done or not in
+the bit of the same value in the level's save word, whose bit 0x1 says it has been
+entered: 0x4 a collection goal, set by the collection code (0x19AD68), 0x8 a best time
+(0x1E02C8), and 0x2 a further goal whose setter is not identified. The
+completion percentage and the unlocks count these bits over every level that offers
+them (0x160B28, 0x1602A0).
 
 Reading goes through the CD library's sector read (0x203B18), called by a blocking retry
 wrapper (0x140CC8). Levels are read by a ring-buffered stream (0x137490) and decompressed
@@ -85,7 +92,7 @@ little-endian reads:
 | Part | Format | Reader |
 | --- | --- | --- |
 | header | s32 size of the texture data at the end; u32 time stamp | 0x1DB928 |
-| flags | u8 names flag (0 on retail); s16 sound bank (index into 0x244F40); u32 string count | 0x1DCEA0, 0x1DCCC0 |
+| flags | u8 debug-data flag (0 on retail); s16 sound bank (index into 0x244F40); u32 count of debug blocks | 0x1DCEA0, 0x1DCCC0 |
 | values | u32 count and two u32 counts of names, then the values, each a tagged type | 0x1C1190, 0x11BA28 |
 | world properties | s16 field ids, ended by a negative one, each with its value | 0x11EC40 |
 | music | an optional disc record and name, overriding the music table; empty on US | 0x138550, 0x1384A0 |
@@ -99,6 +106,11 @@ The texture data starts at the multiple of 16 after the objects; the file ends w
 is loaded again, or another with the same time stamp, the texture data is still in memory
 and the stream stops before it. Every byte of every US level is read by retail's loaders
 (see Objects).
+
+The debug-data flag, when set, makes the loaders read and skip blocks the game never uses:
+count − 1 length-prefixed blocks after the flags (0x1DCCC0), three per script entry and
+the two counts' worth after the values (0x1C1190), and five u16 per value (0x11BA28). It is
+0 in every retail level, so none of these blocks is there and the count is read and ignored.
 
 The time stamps read as Unix times on 25 August 2002, within 32 minutes; the code only
 compares them.
@@ -119,8 +131,8 @@ how the GS draws it. Each table is counted by a u16:
 | --- | --- | --- |
 | CLUTs | 12 bytes: u32 load class; u16 colour count; u16 GS blocks; u32 offset in the data | 0x1B2B50 |
 | images | 20 bytes: u16 width, height; u32 load class; u8 PSM; u8 buffer width (TBW); u16 GS blocks; u32 byte size; u32 offset in the data | 0x1B2CA8 |
-| shaders | a u16 count of animated ones, then per shader 20 bytes (u8 type 0–10, u8 flags, s16 id, two RGBA colours, u32 load class, s16, u8, u8 set count), a texture animation (0x1B4A10) and its texture sets: u16, u16 clamp bits, u8 image count, u8 CLUT count, then u16 image and CLUT indices | 0x1B3040, 0x1B2F00 |
-| fonts | 16 bytes: u16 image, u16 CLUT, three u8, u8 slot, f32 scale, u16 glyph count; per glyph u16 character, x, y, width | 0x15D8A8 |
+| shaders | a u16 count of animated ones, then per shader 20 bytes (u8 type 0–10, u8 flags, s16 id, two RGBA colours, u32 load class, s16 id of the shader whose textures a type-0 shader's third pass takes, u8 never read, u8 set count), a texture animation (0x1B4A10) and its texture sets: u16 never read, u16 clamp bits, u8 image count, u8 CLUT count, then u16 image and CLUT indices | 0x1B3040, 0x1B2F00 |
+| fonts | 16 bytes: u16 image, u16 CLUT, u8 never read, u8 advance of a character the font lacks, u8 line height, u8 slot, f32 scale, u16 glyph count; per glyph u16 character, x, y, width | 0x15D8A8 |
 
 Images are 4-bit (PSMT4, 11,003), 8-bit (PSMT8, 2,570) or 32-bit (41), of powers of two
 from 8 to 1,024 texels, their pixels in GS rows, low nibble first. A CLUT holds RGBA
@@ -152,11 +164,11 @@ the others inherit their parent's. Most objects end with the common block (0x128
 | Part | Format |
 | --- | --- |
 | placement | 3×3 matrix, 3-float position |
-| flags and ranges | three u8, a u32, four f32 |
+| view and fade | three u8 modes (whether the view mask follows the world's zones, per-part view masks, per-part fades); u32 view mask, the camera's bits the object is drawn in; f32 far and near fade distances (the largest float for the defaults, 10¹⁰ and 2,000); f32 a second radius, read by zone colliders; f32 bounding radius |
 | properties | s16 field ids ended by a negative one, each with its value |
 | geometry | model entries and meshes (0x162890) |
 | options | u32 flags, then the matrices, references and values they select (0x128C10) |
-| a list | u8 count of {s16, one f32 per geometry channel} |
+| value sets | u8 count of {s16 key, one f32 per morph channel}: a script selects one by key and its floats become the channels' weights (0x12B2F8) |
 | children | an object list, with this object as parent |
 
 Class 0x03 and the classes under it put collision meshes before the common block
@@ -176,10 +188,19 @@ entries, each either an instance of an earlier entry or a set of meshes:
 
 | Part | Format |
 | --- | --- |
-| header | two u8 flags; u8 count of s16 bones; u8 count of f32 morph weights (channels); u16 entry count |
-| entry | u16 flags; for 0x1 an s16 entry index and a 4×3 matrix (an instance); fields selected by 0x2–0x200 (distances, a texture animation, an attachment); a bounding sphere; s16; three u8 |
-| meshes | u16 count; each a bounding sphere, five u8 counts, then at a multiple of 4 the positions (3 f32), normals (3 f32), RGBA colours, UVs (2 f32) and four-byte vertex records; u16 shader; u8; u8 count of bone indices and their weights (f32 per position and bone); with channels, morph target positions and normals and per vertex u16 indices into them |
+| header | u8 skinned (drawn on the dynamic, lit path; the loader also sets it for bones or morphs); u8 never read; u8 count of s16 bones; u8 count of f32 morph weights (channels); u16 entry count |
+| entry | u16 flags; for 0x1 an s16 entry index and a 4×3 matrix (an instance); the fields the other flags select (below); a bounding sphere; s16 never read; u8 billboard (faces the camera when nonzero); u8 draw kind; u8 lighting mask (the light kinds that reach it) |
+| meshes | u16 count; each a bounding sphere, five u8 counts (positions, normals, colours, UVs, vertex records), then at a multiple of 4 the positions (3 f32), normals (3 f32), RGBA colours, UVs (2 f32) and four-byte vertex records; u16 shader; u8 a 0–255 value the lit conversion scales to 0x7FA6 in its VIF header; u8 count of bone indices and their weights (f32 per position and bone); with channels, morph target positions and normals and per vertex u16 indices into them |
 | line meshes | u16 count; each positions (3 f32), four-byte records of position indices, bones and weights, and morph targets |
+
+An entry's flags select, in order: 0x2 a u32 never read; 0x4 an f32 sort depth, stored
+squared with its sign (the largest float: the camera distance); 0x8 an f32 fog value; 0x10
+and 0x20 the far and near fade distances, used in per-part fade mode; 0x40 a texture
+animation; 0x80 a facing axis and cubic (32 bytes) that fade the entry as the camera sees it
+edge-on; 0x100 an attachment (s16 id, s8 bone and, for a bone, four f32 and a 4×4 matrix,
+then three u8, the first sizing the extra positions); 0x200 an f32 scale of its radius for
+the lights' sphere tests. A draw kind of 3, 4, 7 or 8 becomes 0xD while the object fades,
+5 or 9 becomes 0xE.
 
 A vertex record holds the indices of its position, normal, UV (0xFF none) and colour
 (0x7F none), and in the colour byte's top bit the start of a triangle strip. The shader's
@@ -199,10 +220,10 @@ Class 0x03 and the classes under it read a collision prefix before the common bl
 | Part | Format |
 | --- | --- |
 | flag | u8: the meshes are used in place (class 0x04, the scenery) or copied per object |
-| collision mesh | f32 radius; u16 count of vertices (3 f32); u16 face count; u16 link count; per face three u16 vertex indices (its plane), a bounding sphere (f32 radius, 3 f32 centre) and a u8 count of links {u16, u16 vertices of a shared edge, u16 the other face} |
+| collision mesh | f32 radius; u16 count of vertices (3 f32); u16 face count; u16 link count; per face three u16 vertex indices (its plane), a bounding sphere (f32 radius, 3 f32 centre) and a u8 count of links {u16, u16 the shared edge's two vertices, u16 the other face} |
 | its tree | u16 node count, u16 (the same count), per node u16 face, u16 back child, u16 front child (0xFFFF none) |
 | mass | f32 mass, 3×3 inertia tensor, 3 f32 offset |
-| groups | u16 count of {s16, u16 geometry entry}; u32 count (0 or the node count) of s16 node groups |
+| groups | u16 count of {s16, u16 geometry entry}, runs that each start at an s16 of 0 or more; u32 count (0 or the node count) of s16 node groups, per tree node the run it starts |
 | face references | u32 count of {s16 geometry entry, s16 mesh}, then if any an s16 start index per face and one more |
 | second mesh | a mesh and its tree, the same format (empty in most objects) |
 
@@ -210,9 +231,10 @@ Faces are planar polygons: the three indices only give the plane, which the load
 computes. Each shared edge is stored once, with the face that owns it. The tree is a BSP
 tree over the faces' planes, rooted at node 0, its back child always the next node; a
 sphere goes to the front child when wholly in front of the plane, to the back child when
-wholly behind, to both otherwise. Node groups name runs of geometry entries that segments
-through the tree mark (our guess, models the camera fades); face references are empty on
-US. Objects with no collision mesh often carry a unit-density sphere's mass and inertia.
+wholly behind, to both otherwise. Node groups fade the scenery between the camera and the
+player: the camera's line to the followed object is run through the tree, and each node it
+crosses fades its run of geometry entries for 0.1 s (0x143BE0); face references are empty
+on US. Objects with no collision mesh often carry a unit-density sphere's mass and inertia.
 
 A standalone parser written from this reads every prefix of the 46 US levels (4,637
 objects) exactly as retail's loader does, read for read.
@@ -224,20 +246,25 @@ Classes 0x83 and 0x88 (20% of all level bytes) are animations. An animation (0x8
 time below), a u16 count of target object ids, an s8 count of tracks, three event lists
 and a property list. A track is an s16 target and s8 flags selecting a position (0x1),
 a rotation in Euler angles (0x2), a scale (0x4), a weight (0x8) and a u8 count of morph
-channels (0x10), each a curve whose s8 kind chooses its reader:
+channels (0x10), each a curve whose s8 kind chooses its reader. Flag 0x20 marks the track
+whose position moves the object itself: the loader keeps it apart from the others, and the
+characters' movement reads it.
+
 
 | Curve | Reader | Format |
 | --- | --- | --- |
-| Hermite | 0x11EFC8 | u16 count; per key time, f32 value, two s8 modes, f32 in and out slopes |
-| Bézier | 0x11F210 | u16 count; per key time, f32 value, two s8 modes, four f32 handle offsets |
+| Hermite | 0x11EFC8 | u16 count; per key time, f32 value, s8 never read, s8 mode (5 holds the value to the next key), f32 in and out slopes |
+| Bézier | 0x11F210 | u16 count; per key time, f32 value, s8 never read, s8 mode (as Hermite), four f32 handle offsets |
 | linear | 0x11F568 | u16 count; per key time, f32 value |
 | per axis | 0x11F798 | u8 axis mask, 3-float constant, a u8 kind and a scalar curve per set bit |
 | vector | 0x11FA88 | u16 count; per key time, 3-float value, in and out tangents (Hermite) |
 
 Vector keys are 73% of these bytes. A graph (0x88, 0x1B5F50) holds u8-counted states
-{s16 id, s16 next} and transitions {s8, s16 from, s16 to, s32, f32}, a property list,
-an s16 it drops, then for each transition whose s8 is set an animation created inline
-(class, id and value index as in an object list).
+{s16 id, s16 next: the state to go on to on arriving, -1 none} and transitions {s8 has an
+animation, s16 from, s16 to, s32 flags (0x1 walked both ways, 0x2 cut short when the target
+changes), f32 weight in a random choice among equal routes}, a property list, an s16 never
+read, then for each transition with an animation the animation, created inline (class, id
+and value index as in an object list); a transition without one is taken at once.
 
 ### Events
 
@@ -298,7 +325,9 @@ sound banks, 70 voices and 2,625 event and step sounds (525 per language). What 
 
 ## Next
 
-1. **The fields not yet named,** listed in each section above, and the sound banks' own
-   format; then the extractor, written in OpenThievius from these readers.
+1. **The sound banks' own format,** which the IOP's sound driver reads, not the executable;
+   then the extractor, written in OpenThievius from these readers. Every level field the
+   executable reads has its role above where the code shows one (2026-11-14); the rest are
+   marked never read or by their shape.
 2. **What the data is in the game.** The event kinds and object classes, which so far
    have only a shape; PAL's language-specific music and its voice index 5.
