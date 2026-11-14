@@ -83,7 +83,7 @@ L0374:
 
 L038C:
     {
-        if (self->style == D_00275BF0[0]) {
+        if (self->style == D_00275BF0) {
             s32 idx = g_previousLevelIndex;
             if (idx != -1) {
                 D_eu_00274868.f570 = D_eu_00274868.f574[idx];

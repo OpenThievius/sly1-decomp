@@ -91,6 +91,7 @@ src/lib/ipu_transfer.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/ipu_reset.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/abort.c	-O2 -G0	2.9-ee-991111-01
 src/lib/errno.c	-O2 -G0	2.9-ee-991111-01
+src/lib/char_class_table.c	-O2 -G0	2.9-ee-991111-01
 src/lib/library_state.c	-O2 -G0	2.9-ee-991111-01
 src/lib/signal.c	-O2 -G0	2.9-ee-991111-01
 src/lib/signal_calls.c	-O2 -G0	2.9-ee-991111-01

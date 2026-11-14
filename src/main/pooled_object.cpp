@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// 0x14EE40 to 0x153528 (its .rodata from 0x249FE0, its .data from 0x261CC8): the methods of
-// classes 0x46, 0x23, 0x65 and 0x61, the threshold tables of ScatterController and the
+// 0x14EE40 to 0x1533A8 (its .rodata from 0x249FE0, its .data from 0x261CC8 to 0x261F28): the
+// methods of classes 0x46, 0x23, 0x65 and 0x61, the threshold tables of ScatterController and the
 // display-list writer (PacketWriter, with its base vtable D_0024A0E0). Its .rodata ends with
 // that vtable at 0x24A100: GCC 2.95 writes a file's vtables after all of its functions' literals
 // and jump tables, so PivotActiveSet's jump table after it starts the next file
-// (active_set_solver.cpp, which says why its start in the code is a choice). One file between
-// two edges otherwise; it could be several. Its name is ours, after its first and largest family,
-// the pooled objects and their holder; the step sequence is nearly as large, and none of its
-// families names the whole.
+// (active_set_solver.cpp, which says why its start in the code is a choice). Its .data ends with
+// the fifth DMA channel word: DrawPlacedObjectParts' matrix D_00261F30, which MultiplyMatrices
+// reads with lqc2, is 16-aligned and this file's .data starts at 8 mod 16, so the matrix starts
+// the next file's .data. One file between two edges otherwise; it could be several. Its name is
+// ours, after its first and largest family, the pooled objects and their holder; the step
+// sequence is nearly as large, and none of its families names the whole.
 #include "common.h"
 #include "gauge_manager.h"
 #include "asm_func.h"
@@ -556,33 +558,6 @@ void WriteVifFlush(PacketWriter* p);
 
 
 
-// What func_001533A8 hands the part drawer (DrawModelPart) for each part: the object's
-// transform, the object, its record at +0x22C, the part, and the view matrix.
-struct PartDrawFrame {
-    void* fn;
-    u8 pad0[4];
-    s32 f08;
-    u8 pad1[0x10 - 0x0C];
-    DrawTransform copy;
-    u8 pad2[0x70 - 0x60];
-    TextureRenderObject* f70;
-    void* f74;
-    void* f78;
-    u8 pad3[0x80 - 0x7C];
-    Quad16 q80[4];
-    Quad16 qC0[4];
-};
-
-extern f32 D_00261F30[16];
-
-void AddDmaRefTag(PacketWriter* obj, s32 a, s32 b);
-void* FillMemory(void* p, s32 value, s32 size);
-void* MultiplyMatrices(Quad16* out, void* b, void* in);
-void BeginDmaTag(PacketWriter* self);
-void WriteVifBaseOffset(PacketWriter* obj, s32 a, s32 b);
-void CopyWordsToWriter(PacketWriter* obj, s32 a, s32 b, void* c, s32 d);
-void CloseDmaTag(PacketWriter* self);
-void DrawModelPart(PartDrawFrame* frame);
 
 extern ScatterTable D_00261D70[2];
 extern ScatterTable D_00261E30;
@@ -2486,42 +2461,8 @@ void QueuePlacedObjectDraw(TextureRenderObject* self, s32 unused, void* a2)
     }
 }
 
-void DrawPlacedObjectParts(DeferredRequest* self)
-{
-    PartDrawFrame f;
-    s32 i;
-    u8* base = (u8*)&g_vifPacketWriter;
-    TextureRenderObject* s1 = (TextureRenderObject*)self->arg;
-    AddDmaRefTag((PacketWriter*)base, s1->f2D4, s1->f2D8);
-    FillMemory(&f, 0, 0x80);
-    f.f08 = 3;
-    f.fn = (void*)DrawModelPart;
-    f.copy = self->block;
-    f.f70 = s1;
-    f.f74 = s1->sub22C;
-    i = 0;
-    MultiplyMatrices(f.qC0, D_00261F30, (u8*)s1->f2D0 + 0x70);
-    f.q80[0] = f.qC0[0];
-    f.q80[1] = f.qC0[1];
-    f.q80[2] = f.qC0[2];
-    f.q80[3] = f.qC0[3];
-    BeginDmaTag((PacketWriter*)&g_vifPacketWriter);
-    WriteVifBaseOffset((PacketWriter*)&g_vifPacketWriter, 0, 0);
-    CopyWordsToWriter((PacketWriter*)&g_vifPacketWriter, 0xC, 4, f.q80, 4);
-    CloseDmaTag((PacketWriter*)&g_vifPacketWriter);
-    if (s1->drawPartCount > 0) {
-        s32 off = 0;
-        do {
-            i++;
-            f.f78 = (u8*)s1->drawParts + off;
-            DrawModelPart(&f);
-            off += 0x70;
-        } while (i < s1->drawPartCount);
-    }
-    AddDmaRefTag((PacketWriter*)&g_vifPacketWriter, s1->f2DC, s1->f2E0);
-}
 
-// The file's .data, 0x261CC8 to 0x261F70, in retail's order: the globals its functions read
+// The file's .data, 0x261CC8 to 0x261F28, in retail's order: the globals its functions read
 // (D_00261EF0 and the DMA channel words are read by many files, which keep them extern).
 ObjectLink g_pooledObjectLinks[1] = { { 2, 0x2BC, 0x574 } };
 f32 D_00261CD4 = 500.0f;
@@ -2547,7 +2488,6 @@ u32 g_vif0Channel = 0;
 u32 g_vif1Channel = 0;
 u32 g_gifChannel = 0;
 u32 g_fromSprChannel = 0;
-// The fifth channel word's label runs 12 bytes to D_00261F30, more than the word its readers use
-// and more than the file's 8-byte alignment pads: included from the disassembly.
-INCLUDE_DATA(D_00261F24);
-f32 D_00261F30[16] = {2.0f,0,0,0,0,2.0f,0,0,0,0,0,0,-1.0f,-1.0f,0,1.0f};
+// The file's last .data: the 8 zero bytes after it are the linker's padding before
+// active_set_solver.cpp's 16-aligned .data (D_00261F30).
+u32 g_toSprChannel = 0;

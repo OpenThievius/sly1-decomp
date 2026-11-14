@@ -29,6 +29,7 @@ procedure; read it before you match anything.
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
 | `config/eu/c_data_status.tsv` | each global of `config/us/c_data.tsv` checked at its PAL address (counted as PAL's matched data) | `tools/version_check.py` (`tools/data_check.py`) |
 | `config/us/original_asm.tsv`, `config/eu/original_asm.tsv` | the game-code functions that are original assembly or linker leftovers, counted as finished apart from the exact C (docs/ASM_CLASSIFICATION.md); PAL's table holds the functions only PAL has | `tools/classify_asm.py` |
+| `config/us/padding.tsv` | the zero bytes between C data that the linker adds to reach the next section's alignment, counted as matched data | `tools/build.py` (through `tools/padding.py`) |
 | `config/<version>/original_data.tsv` | the data units that are original assembly (the `.vutext` VU microprograms), counted as matched data (docs/ASM_CLASSIFICATION.md) | by hand |
 | `config/us/classes.tsv`, `methods.tsv`, `creators.tsv` | the game's class map from retail's class descriptors: each class's parent, id, flags, size and method slots (own or inherited), the classes each function is a method of, and the functions that create an object of a class | `tools/classes.py` |
 | `tools/symbols.py` | the shared name map: either name of a symbol, for the tools that read source text | by hand |
@@ -73,6 +74,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/decls.py` | declarations whose return type contradicts the function's C definition or retail's callers (a wrong `void` looks like a register tie in the caller) |
 | `python3 tools/nonmatching.py check` | re-scores the near misses in `nonmatching/` and writes the index (`--check` in CI) |
 | `python3 tools/progress.py [--check]` | the ByteMatch reports and the README table |
+| `python3 tools/padding.py [--check]` | the alignment padding between C data: `config/us/padding.tsv` (`--check` needs the disc, `asm/us/` and the last build) |
 | `python3 tools/inventory.py [--check]` | the function tables and PAL's pairing |
 | `python3 tools/classify_asm.py [--check]` | which game-code functions are original assembly (needs `asm/us/`) |
 | `python3 tools/classes.py [--check]` | the class map: classes, their methods and creators (needs `asm/us/`) |

@@ -90,4 +90,3 @@ func_00152E18	SkipDisplayListWriterSlot	slot 3 of the display-list writer's base
 func_00152E28	InitTextureRenderObject	slot 0 of class 0x61: runs InitPlacedObject only
 func_00152E48	BuildTexturePackets	for a texture, builds two DMA packets (one clearing/copying through its dimensions, one drawing edge quads) and stores their pointers and sizes at +0x2D4..+0x2E0
 func_00153328	QueuePlacedObjectDraw	builds the placed-object transform and queues func_001533A8 as a deferred request with the object as its argument
-func_001533A8	DrawPlacedObjectParts	deferred draw callback queued by func_00153328: adds DMA ref tags, writes a matrix to VIF, then runs the part drawer func_00166690 for each 0x70-byte part

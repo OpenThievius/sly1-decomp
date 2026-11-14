@@ -62,8 +62,11 @@ struct T219CHook {
 // The parameter block a kind-0x10 record points to (+0x130): D_00261AD0, D_00261B60 and
 // D_0026A970, 0x70 bytes each, const data of the three owners that create such a record
 // (func_00148298, func_00148FF0, func_001999D0). Six rows of floats, then the function the
-// record runs with its owner (+0x134) when it ends (func_001A0F88).
-struct T219C_Params {
+// record runs with its owner (+0x134) when it ends (func_001A0F88). The block is 16-aligned:
+// InitCameraSpaceEffect (func_001A0C98) copies its sixth row (+0x50) with one lq. So D_0026A970
+// starts object_gatherer.cpp's .data on 16, 8 bytes after gauge_collider.cpp's ends (the
+// linker's padding).
+struct __attribute__((aligned(16))) T219C_Params {
     f32 rows[24];                   // 0x00
     void (*fn60)(void* owner);      // 0x60
     u8 pad64[0x70 - 0x64];          // 0x64
@@ -144,7 +147,7 @@ struct Effect {
 
 typedef char check_Quad219C[sizeof(Quad219C) == 0x10 ? 1 : -1];
 typedef char check_T219CHook[sizeof(T219CHook) == 0x14 ? 1 : -1];
-typedef char check_T219C_Params[sizeof(T219C_Params) == 0x70 ? 1 : -1];
+typedef char check_T219C_Params[sizeof(T219C_Params) == 0x70 && __alignof__(T219C_Params) == 16 ? 1 : -1];
 typedef char check_Effect[sizeof(Effect) == 0x140 ? 1 : -1];
 
 #endif

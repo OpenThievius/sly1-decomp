@@ -38,8 +38,8 @@ src/main/selection_menus.cpp	0016AA18	0016C470	0024A7A0	00262718	-	-
 src/main/warp_menu.cpp	001E88D0	001F2758	0024E600	00275B60	006256E0	-
 src/main/oscillator.cpp	001F2758	001F59C4	0024E840	-	-	-
 src/main/screen_element.cpp	001AA268	001AECB0	0024CBD0	002743A0	-	-
-src/main/pooled_object.cpp	0014EE40	00153528	00249FE0	00261CC8	-	-
-src/main/active_set_solver.cpp	00153528	001549C8	0024A100	-	-	-
+src/main/pooled_object.cpp	0014EE40	001533A8	00249FE0	00261CC8	-	-
+src/main/active_set_solver.cpp	001533A8	001549C8	0024A100	00261F30	-	-
 src/main/effect_spawner.cpp	001549C8	0015AAE0	0024A120	00261F70	0027C010	-
 src/main/object_cycler.cpp	0015AAE0	0015C178	0024A190	00262180	-	-
 src/main/font.cpp	0015C178	0015E6A8	0024A220	00262250	-	-
@@ -114,6 +114,7 @@ src/lib/graph.c	002018E0	00202768	0024F4E0	00279300	-	-
 src/lib/dma.c	00202768	00202D08	0024F548	00279340	-	-
 src/lib/cdvd.c	00202D08	00203FD0	0024F560	00279400	0062A7C0	-
 src/lib/global_constructors.cpp	001FAC00	001FAE38	-	-	0062A540	-
+src/lib/char_class_table.c	001F6900	001F6900	0024E878	-	-	-
 src/lib/library_state.c	001F6900	001F6900	0024E980	00276680	-	-
 src/lib/system_calls.cpp	001F6900	001F6EE0	-	00276970	-	-
 src/main/colored_triangle_set.cpp	0017FE00	00180EB0	-	00264098	-	-

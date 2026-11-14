@@ -314,9 +314,10 @@ def aligned(lines):
 ALIGNS = {}
 
 
-def data_plan(chunks, data_placed):
+def data_plan(chunks, data_placed, section_end=None):
     """The order of .data: [("run", [(label, address, lines)]) or ("c", placement)], and the labels
-    a C global covers. A global starts at a label and ends where a later one starts."""
+    a C global covers. A global starts at a label and ends where a later one starts, or where the
+    section ends (section_end: the last label runs on through the zeros before the next section)."""
     at = {d[0]: d for d in data_placed}
     missing = sorted(set(at) - {a for _, a, _ in chunks})
     if missing:
@@ -336,14 +337,14 @@ def data_plan(chunks, data_placed):
             # section), or a global's ending on a word when the next label is 8-aligned, as GCC
             # aligns an aggregate of 8 bytes or more, or ending in the padding before a C global
             # whose type is aligned further (a 16-byte vector).
-            gap = later[0] - end if later else 16
+            gap = later[0] - end if later else 0 if end == section_end else 16
             whole = d[3].count(".") <= 1
             padded = later and later[0] in at and not end % 4 and gap < ALIGNS.get(later[0], 1)
             if not padded and (gap >= (min(16, later[0] & -later[0]) if whole and later else 8) or
                                (gap and not whole and (end % 4 or later[0] % 8))):
                 raise LayoutError("%s (%d bytes) does not end where a label of .data starts"
                                   % (d[4], d[1]))
-            end = later[0]
+            end = later[0] if later else end
             plan.append(("c", d))
         elif plan and plan[-1][0] == "run" and not aligned(lines):
             plan[-1][1].append((name, addr, lines))
@@ -356,7 +357,8 @@ def data_entries(data_placed, main_start, kind="data"):
     """The linker-script lines for .data (or .bss) with the C globals placed, the run sources, and
     the labels a C global covers (PROVIDEd at their addresses). main_start: the output section's."""
     header, chunks = split_data("us", kind)
-    plan, covered = data_plan(chunks, data_placed)
+    ends = [r[3] for r in todo.layout("us") if r[0] == "data" and r[1] == kind]
+    plan, covered = data_plan(chunks, data_placed, ends[0] if ends else None)
     data_dir = ROOT / "build" / "us" / kind
     entries, runs = [], []
     for what, item in plan:

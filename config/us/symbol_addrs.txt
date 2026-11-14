@@ -193,3 +193,6 @@ D_002BE510 = 0x002BE510;
 // The end of InitSpawnRecord's second static (func_001549C8's spawn block, D_0027C0A0, 0x80
 // bytes), inside splat's label D_0027C0A0: what follows, up to D_0027C220, no instruction names.
 D_0027C120 = 0x0027C120;
+// The word after the element stack's resumeState (D_00275BF0) and the unread table that follows it,
+// up to D_00275C18: no instruction names them.
+D_00275BF4 = 0x00275BF4;

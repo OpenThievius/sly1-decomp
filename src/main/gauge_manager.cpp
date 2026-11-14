@@ -648,10 +648,7 @@ void AppendGaugeSlot(GaugeManager* self, s32 value)
     self->slots[i].obj = (void*)value;
 }
 
-INCLUDE_RODATA(D_00249FB4);
-
 void ProjectPointToCamera(void* cam, void* point, f32* out);
-extern const f32 D_00249FB4;
 
 // Picks a free gauge slot for each of up to two agents: the farthest from the player (and, for the
 // second, from the first's place) among the slots on screen, then any. The slot's size is a named
@@ -678,7 +675,7 @@ void RunGaugeTimedEvent(GaugeManager* self)
 
     do {
         if (self->f458 >= 2) {
-            self->f45C = D_00249FB4;
+            self->f45C = 3.4028235e+38f;
             return;
         }
         ChooseObjectPoolItem((ObjectPool*)self->f420);

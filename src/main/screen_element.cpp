@@ -101,7 +101,7 @@ void SetListLinkOffset(void* p, s32 a);
 PlacedObject* CreateObjectCopy(PlacedObject* a, World* b, BaseObject* c);
 
 void DrawCyclingGlyphElement(u8* a);
-extern f32 D_002743A0[4];
+extern Quadratic16 D_002743A0;
 
 s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...);
 extern s32 D_002751D4;
@@ -401,7 +401,10 @@ void SetupScreenElementText(ScreenElement* self)
     self->text[0] = 0;
 }
 
-f32 D_002743A0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+// The slide's easing, 2p - p * p: a quadratic's coefficients, constant first, as Quadratic16
+// (include/shapes.h) holds them. Its alignment to 16 starts the file's .data on 16, 8 bytes after
+// object_pool.cpp's last screen element (D_00274118, 0x280 bytes) ends: the linker's padding.
+Quadratic16 D_002743A0 = { { 0.0f }, 2.0f, -1.0f, 0.0f };
 
 void UpdateScreenElementSlide(ScreenElement* self) {
     f32 t = *self->clock;
@@ -441,7 +444,7 @@ void UpdateScreenElementSlide(ScreenElement* self) {
     }
     if (s == self->mode) {
         f32 p = self->blend;
-        f32 k = D_002743A0[0] + p * (D_002743A0[1] + p * D_002743A0[2]);
+        f32 k = D_002743A0.x + p * (D_002743A0.y + p * D_002743A0.z);
         self->x = self->hiddenX + k * (self->shownX - self->hiddenX);
         self->y = self->hiddenY + k * (self->shownY - self->hiddenY);
         PlaceAnchoredScreenElements(self);

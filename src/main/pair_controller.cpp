@@ -1239,9 +1239,6 @@ void SetPairControllerState(PairController* self, s32 state)
 #undef P
 #undef O
 
-INCLUDE_RODATA(D_0024CAEC);
-
-extern const f32 D_0024CAEC;
 void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
 void* GetActiveSwitchedCollider(void);
 extern const Vec02 g_unitZVector;
@@ -1271,7 +1268,7 @@ void SpawnPairedObject(PairController* self)
     s32 i;
 
     if (self->count380 >= self->limit624) {
-        self->f634 = D_0024CAEC;
+        self->f634 = 3.4028235e+38f;
         return;
     }
     o = *(PairedObject**)self->list374;

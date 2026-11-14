@@ -211,6 +211,8 @@ def main(argv=None):
     if sha1 == v["boot"]["sha1"]:
         if key == versions.primary():
             write_c_data(key, data_placed)
+            import padding
+            padding.write(key)  # the alignment padding between that data (config/us/padding.tsv)
         print("MATCH: %s sha1 %s%s" % (rel, sha1, linked))
         return 0
     retail = versions.boot_path(key).read_bytes()
