@@ -62,9 +62,10 @@ What is still open, on 2026-11-14 (the README's table and `tools/progress.py` ha
    game finds its data is described, and a level's textures, objects, geometry, collision,
    animations and events, PAL's data, and since 2026-11-14 (#150) every level field's role
    where the code shows one and the sound banks, measured from the disc's bytes and the
-   calls the game sends the IOP's sound driver. Left: what the event kinds and object classes
-   are in the game, which so far have only a shape; the sound banks' fields only the driver
-   uses; then OpenThievius's extractor, written from these readers.
+   calls the game sends the IOP's sound driver. What every object class and event kind
+   is in the game, from the code that loads and runs it, is in [OBJECTS.md](OBJECTS.md). Left:
+   the roles the code does not show, the sound banks' fields only the driver uses; then
+   OpenThievius's extractor, written from these readers.
 4. **A 64-bit port** ([PORTING.md](PORTING.md)). The addresses the code keeps in integers are
    pointer-sized (`sptr`, `uptr`, #151). Left for the port itself: the script values' handles,
    the hardware layers (graphics, DMA, the IOP and its sound driver), and the structures'
