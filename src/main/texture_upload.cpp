@@ -121,18 +121,24 @@ void WriteVifDirect(PacketWriter* f, s32 a, s32 b, s32 c);
 void WriteVifDirectRef(PacketWriter* f, s32 a, s32 b, s32 c);
 
 
+// Sets up the bump allocator (0x1E00 to 0x4000) and empties the mesh queue.
 void InitMeshQueue()
 {
     InitBumpAllocator(&g_bumpAllocator,0x1E00,0x4000);
     g_meshQueueCount=0;
 }
 
+// The smallest n (at most 31) with 1 << n not below the argument; used for texture width and height
+// exponents.
 u32 CeilLog2(u32 n) { u32 count = 0; u32 value = 1; while (value < n && count < 31) { value <<= 1; count++; } return count; }
 
+// Sets the allocator's start and cursor to value and its limit to other.
 void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other) { p->next = value; p->start = value; p->limit = other; }
 
+// Puts the cursor back at the start.
 void ResetBumpAllocator(BumpAllocator* p) { p->next = p->start; }
 
+// Returns the allocator's cursor and moves it on by size.
 s32 AllocateBump(s32* self,s32 size)
 {
     s32 old=self[1];
@@ -153,12 +159,16 @@ void BeginImageTransfer(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, voi
     AddGifImageTag((PacketWriter*)ctx, x);
 }
 
+// Sets a palette's TEX0 fields: its VRAM address, a pixel format by whether it has at most 16
+// colours, and the palette load flag.
 void BuildPaletteTexRegister(PaletteRecord* self, u32 a1){
  GsTex0* bits = (GsTex0*)&self->texWordBits;
  bits->cbp = a1;
  bits->psm = (self->f4 <= 0x10) ? 0x14 : 0x13;
  bits->cpsm=0; bits->csm=0; bits->csa=0; bits->cld=1;}
 
+// Starts uploading a palette to VRAM address v, as an image 16 or 8 wide by the colour count and
+// tall enough to hold them.
 void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx)
 {
     s32 step = (e->f4 > 16) ? 16 : 8;
@@ -181,6 +191,7 @@ void BuildImageTexRegister(ImageRecord* self, u32 a1)
     bits->tcc = 1;
 }
 
+// Starts uploading an image record to VRAM address dbp with its format, buffer width and size.
 void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx)
 {
     BeginImageTransfer(dbp, d->f9, d->f8, d->f0, d->f2, d->blockCount, ctx);
@@ -284,6 +295,8 @@ s32 BuildMaskedImagesPacket(s32 self)
     return f.out;
 }
 
+// Copies the entry's source block to its destination and, when it has a flag, ORs 0x8000 and the
+// flag into two words of the destination.
 void SubmitMeshQueueEntry(FrameTarget* self)
 {
     CopyMemory(self->dst, (void*)self->value, self->count);
@@ -366,6 +379,8 @@ store:
     }
 }
 
+// Adds a copy entry (count, source and destination address) to the mesh queue, or uses a local one
+// when the queue is full, submits it and links the entry into the node's list.
 void QueueNodeLink(s32 a0, s32 a1, AnimCursor* a2)
 {
     FrameTarget local;
@@ -392,6 +407,8 @@ void QueueNodeLink(s32 a0, s32 a1, AnimCursor* a2)
     }
 }
 
+// For the queue entries from idx on, moves destination addresses in [take, take + lo) to the same
+// offset from give.
 void RemapMeshQueueValues(s32 idx, u32 lo, u32 take, u32 give)
 {
     u32 end = take + lo;
@@ -410,6 +427,7 @@ void RemapMeshQueueValues(s32 idx, u32 lo, u32 take, u32 give)
     }
 }
 
+// Submits every entry of the mesh queue.
 void FlushMeshQueue(void)
 {
     s32 i;

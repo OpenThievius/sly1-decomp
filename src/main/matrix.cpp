@@ -39,6 +39,7 @@ struct HomogeneousMatrix {
 // The fourth row of a 4x4 matrix: 0 0 0 1.
 extern const Quad16 g_unitWQuad = { { 0, 0, 0, 0x3F800000 } };
 
+// Clears the w of the first three rows and sets the fourth row to the unit w quad (0, 0, 0, 1).
 void ResetMatrixHomogeneous(HomogeneousMatrix* self)
 {
     self->f0C = 0;
@@ -47,6 +48,8 @@ void ResetMatrixHomogeneous(HomogeneousMatrix* self)
     self->q30 = g_unitWQuad;
 }
 
+// Copies the first three rows of a matrix and resets the homogeneous parts; returns the
+// destination.
 void* CopyRotationMatrix(Quad16* destination, const Quad16* source)
 {
 	destination[0] = source[0];
@@ -58,6 +61,7 @@ void* CopyRotationMatrix(Quad16* destination, const Quad16* source)
 
 ASM_FUNC(func_00188520);
 
+// Sets a 4x4 matrix to the identity.
 void InitIdentityMatrix(Mat4* self)
 {
     FillMemory(self, 0, 0x40);
@@ -100,6 +104,7 @@ void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out)
 
 ASM_FUNC(func_00188740);
 
+// Copies a 4x4 matrix and transposes the copy.
 void CopyTransposedMatrix(Quad16* src, Quad16* dst)
 {
     dst[0] = src[0];
@@ -116,6 +121,7 @@ void CopyTransposedMatrix(Quad16* src, Quad16* dst)
     }
 }
 
+// out = a + b, element by element, for 16 floats.
 void AddMatrices(f32* a, f32* b, f32* out)
 {
 	s32 count = 15;
@@ -163,6 +169,8 @@ struct __attribute__((aligned(16))) Matrix3x4 { f32 f[3][4]; };
 
 extern Matrix3x4 g_identityMatrix;
 
+// Rotation about the vector's direction by its length in radians, or the identity when the vector
+// is shorter than 0.0001.
 void BuildRotationFromVector(Vec02* v, Mat02* mat)
 {
     u128 q = Vu0::Q(*v);
@@ -201,6 +209,7 @@ void BuildEulerRotationMatrix(f32* in, f32* out)
     out[10] = ca * cb;
 }
 
+// Builds a 4x4 transform from a rotation (rows with w 0) and a position (fourth row, w 1).
 void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out)
 {
     const Quad16* a = (const Quad16*)pos;
@@ -216,6 +225,8 @@ void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, M
     *(f32*)&dst[3].w[3] = 1.0f;
 }
 
+// Inverse of a rigid transform given as a translation and a rotation: the transposed rotation, with
+// the translation rotated by it and negated as the fourth row (w 1).
 void InvertRigidTransform(void* a, void* b, Quad16* out)
 {
     *(Vu0::Rows*)out = Vu0::Transpose(*(Vu0::Rows*)b);
@@ -227,6 +238,8 @@ void InvertRigidTransform(void* a, void* b, Quad16* out)
     *(f32*)&out[3].w[3] = 1.0f;
 }
 
+// Builds a transform: each rotation row times its scale component, the position as the fourth row
+// and 0, 0, 0, 1 as the last column.
 void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4])
 {
     s32 i;
@@ -246,6 +259,7 @@ void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[
 
 LINKER_REMNANT(func_00188CC8);
 
+// The cosine of the matrix's rotation angle: (trace - 1) / 2, limited to -1..1.
 f32 GetMatrixRotationCosine(f32* p)
 {
 	return ClampToMagnitude((p[0] + p[5] + p[10] - 1.0f) * 0.5f, 1.0f);
@@ -309,6 +323,8 @@ void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis)
 
 LINKER_REMNANT(func_00188FD0);
 
+// Euler angles (radians) from a rotation matrix: the second from the arcsine of one element, the
+// others from arctangents; at the singular pitch (about +-pi/2) the first angle is 0.
 void MatrixToEulerAngles(Mat4* self, Vec3* out)
 {
     f32 k = 1.57069635f;
@@ -338,6 +354,8 @@ void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out)
     *out = t;
 }
 
+// Multiplies the matrix arg by the inverse of the object's rigid transform and writes the result to
+// out.
 void TransformMatrixByObject(u8* self, void* arg, Quad16* out)
 {
     Quad16 tmp[4];
@@ -346,6 +364,8 @@ void TransformMatrixByObject(u8* self, void* arg, Quad16* out)
     *(Mat4A*)out = MultiplyMatrices((Quad16*)arg, tmp);
 }
 
+// The angle of a vector in the xy plane and its elevation, in radians, written through the two out
+// pointers.
 void VectorToAngles(Vec3* v, f32* a1, f32* a2)
 {
     *a1 = ArctangentOfRatio(v->y, v->x);
@@ -370,6 +390,7 @@ static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
     *out = r;
 }
 
+// Rotation matrix for a yaw about z followed by a pitch about y (negated).
 void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out)
 {
     Mat02 a;
@@ -379,12 +400,15 @@ void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out)
     MulRotation(out, a, b);
 }
 
+// Builds a rotation basis whose x axis is x, taking up (z) as the hint for the other axes.
 void BuildBasisFromX(Vec02* x, Mat02* out)
 {
     BuildBasisFromXAndZHint(x, (const Vec02*)g_unitZVector, out);
 }
 
 
+// Builds the rotation that turns the matrix's third row onto the up (z) axis, into scratch when
+// given, and writes the matrix rotated by it to out when given.
 void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out)
 {
     Mat02 local;
@@ -539,6 +563,7 @@ done:
     return ok;
 }
 
+// Inverts a 4x4 matrix (InvertSquareMatrix with size 4).
 s32 InvertMatrix4x4(void* a0, void* a1)
 {
 	return InvertSquareMatrix(4, (f32*)a0, (f32*)a1);
@@ -614,6 +639,8 @@ void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out)
     BuildAxisAngleMatrix(&axis, out, angle);
 }
 
+// Fills a projection matrix from six floats: x and y scales, x and y offsets, and the depth terms
+// from the near and far values e and f.
 void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
 {
     FillMemory(self, 0, 0x40);
@@ -628,6 +655,7 @@ void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
 }
 
 
+// Builds the transform that scales by s on all axes about a point, without rotation.
 void BuildUniformScaleAboutPoint(void* point, void* out, f32 s)
 {
     Quad16 scale;

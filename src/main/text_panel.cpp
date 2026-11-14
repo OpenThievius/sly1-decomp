@@ -405,6 +405,9 @@ void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
 void ChooseTextPanelState(T217D_440* self);
 void EndTextPanelState(T217D_440* self);
 
+// Sets up a span of n steps over a quadratic: copies its three coefficients, stores the length and
+// middle, a window around the middle of half width x * n / 2, and the curve's values at the
+// window's start and at the middle plus y.
 void InitCurveSpan(CurveSpan* d, const SpanHead* src, f32 x, f32 y, s32 n)
 {
     f32 fn = (f32)n;
@@ -450,6 +453,8 @@ f32 EvalCurveSpan(const CurveSpan* s, s32 x)
     return s->q;
 }
 
+// Slot 0 of the text panel: full-screen size (640 by 492.8), typing speed 15 characters a second
+// and highlight colour 0x80FFFFFF, then the screen element init.
 void InitTextPanel(T217D_440* self, s32 a1)
 {
     self->w = 640.0f;
@@ -459,6 +464,8 @@ void InitTextPanel(T217D_440* self, s32 a1)
     InitScreenElement(self, a1);
 }
 
+// Empties the panel: clears its text (slot 8), subject, value and stick offsets and sets the tick
+// scroll to 0.4.
 void ClearTextPanel(T217D_440* self)
 {
     self->vt->m08(self, 0);
@@ -1066,6 +1073,8 @@ void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
     AddGifXyzfEntry(gs, 0x9400, 0x80C0, 0, 0);
 }
 
+// Sort comparison by distance from the camera: 1 when the first entry's world position is nearer
+// than the second's, else -1, so the farthest sorts first.
 s32 CompareEntriesFarthestFirst(void** a, void** b)
 {
     Vec02 pa;
@@ -1304,6 +1313,7 @@ void SetTextPanelState(T217D_440* self, s32 mode)
     }
 }
 
+// Sort comparison: an entry whose object is not attached sorts first, otherwise by key.
 s32 CompareEntriesByAttachedKey(SortEntry* a, SortEntry* b)
 {
     if (IsObjectAttached((BaseObject*)a->obj) == 0) {
@@ -1318,6 +1328,8 @@ s32 CompareEntriesByAttachedKey(SortEntry* a, SortEntry* b)
     return 1;
 }
 
+// Sort comparison: an entry whose object has its numbered item flag set orders after the other,
+// otherwise by key.
 s32 CompareEntriesFlaggedLast(SortEntry* a, SortEntry* b)
 {
     s32 flag;
@@ -1440,6 +1452,7 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
 
 LINKER_REMNANT(func_00135E20);
 
+// Position callback for the panel entries: the object's position as it is, with the flag cleared.
 void ReadPanelEntryPosition(PanelEntrySource* self, PanelEntryPosition* out, s32* flag)
 {
     *out = self->v;
@@ -1448,6 +1461,8 @@ void ReadPanelEntryPosition(PanelEntrySource* self, PanelEntryPosition* out, s32
 
 LINKER_REMNANT(func_00135E40);
 
+// Position callback for the panel entries: the object's position seen from the camera
+// (ComputeHullSeenFromCamera).
 void ReadAdjustedPanelEntryPosition(PanelEntrySource* self, s32 unused, PanelEntryPosition* out)
 {
     *out = self->v;
@@ -1456,6 +1471,9 @@ void ReadAdjustedPanelEntryPosition(PanelEntrySource* self, s32 unused, PanelEnt
 
 LINKER_REMNANT(func_00135E70);
 
+// When the state changes, releases every effect the panel holds (removing it and clearing the
+// second block, or ending it with phase 2), clears the counts and the first block and stores the
+// new state.
 void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag)
 {
     if (state == self->bankState) return;
@@ -1587,6 +1605,7 @@ void SetTextPanelOpen(T217D_440* self, s32 on)
     }
 }
 
+// Slot 5 of the text panel: resets the screen element and puts its child into state 2.
 void ResetTextPanel(T217D_440* self)
 {
     ResetScreenElement(self);
@@ -1639,6 +1658,8 @@ tail:
     self->textSince = tab[1];
 }
 
+// True when the text is empty or the typing effect (elapsed time times characters per second) has
+// revealed all its characters.
 s32 IsTextPanelTextTyped(T217D_440* self)
 {
     u8 buf[0xB0];
@@ -1652,13 +1673,16 @@ s32 IsTextPanelTextTyped(T217D_440* self)
     return v >= n;
 }
 
+// Sets the object the panel is about.
 void SetTextPanelSubject(T217D_440* self, BaseObject* value) { self->subject = value; }
 
+// Sets the panel's value from a percentage (divided by 100 and limited to 0..1).
 void SetTextPanelValuePercent(T217D_440* self, f32 value)
 {
     PercentClamp::Set(self, value * 0.01f, 0.0f, 1.0f);
 }
 
+// Slot 11 of the text panel: 0 in states 1, 2 and 5, otherwise the element's usual slide-in time.
 f32 GetTextPanelSlideInTime(T217D_440* self)
 {
     switch (self->state) {
@@ -1673,6 +1697,8 @@ f32 GetTextPanelSlideInTime(T217D_440* self)
     }
 }
 
+// The slide-out twin of GetTextPanelSlideInTime: 0 in states 1, 2 and 5, otherwise the element's
+// usual slide-out time.
 f32 GetTextPanelSlideOutTime(T217D_440* s) {
     switch (s->state) {
     case 1:
@@ -1879,12 +1905,15 @@ void DrawTextPanel(T217D_440* self)
     }
 }
 
+// The panel's centre on screen: its stick offset plus (320, 180.4).
 void GetTextPanelCenter(T217D_440* self, f32* x, f32* y)
 {
     *x = self->stickX + 320.0f;
     *y = self->stickY + 180.4000091552734375f;
 }
 
+// Slot 6 of the text panel: with a child, takes state 2, 3 or 4 by the child's mode and sets the
+// child to state 3; without one takes state 1.
 void ChooseTextPanelState(T217D_440* self)
 {
     if (self->child != 0) {
@@ -1905,6 +1934,8 @@ void ChooseTextPanelState(T217D_440* self)
     }
 }
 
+// Slot 7 of the text panel, after ChooseTextPanelState: puts the child into state 4, or returns the
+// panel to state 0 when it has none.
 void EndTextPanelState(T217D_440* self)
 {
     if (self->child != 0) {

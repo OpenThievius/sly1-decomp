@@ -52,6 +52,8 @@ struct LoadProgress;
 
 
 
+// Initialises a stream over a buffer (a2, a1 bytes) rounded up to a 0x40 boundary, with no
+// mode, no data and the flags a3.
 BufferedStream* InitBufferedStream(BufferedStream* self, s32 a1, u8* a2, s32 a3)
 {
     sptr align = ((sptr)a2 + 0x3F) & -0x40;
@@ -75,12 +77,15 @@ extern void CloseBufferedStream(BufferedStream* self);
 extern void FreeObjectMemory(void*);
 extern void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
+// Closes the stream and frees it when bit 0 of flags is set.
 void DestroyBufferedStream(BufferedStream* self, s32 flags)
 {
     CloseBufferedStream(self);
     if (flags & 1) FreeObjectMemory(self);
 }
 
+// Sets the stream up to read size bytes (a2) from disc sector a1: mode 1, nothing read yet, and
+// a chunk count of at least 2 (buffer size in MiB).
 s32 OpenBufferedSectorStream(BufferedStream* r, s32 a1, s32 a2)
 {
     r->mode = 1;
@@ -102,6 +107,7 @@ s32 OpenBufferedSectorStream(BufferedStream* r, s32 a1, s32 a2)
     return 1;
 }
 
+// Sets the stream to read size bytes from memory at data (mode 2).
 void OpenBufferedMemoryStream(BufferedStream* self, s32 size, u8* data) { self->remaining = size; self->cur = data; self->mode = 2; }
 
 #include "common.h"
@@ -118,6 +124,7 @@ struct Effect;
 
 s32 OpenBufferedSectorStream(BufferedStream* r, s32 a1, s32 a2);
 
+// Opens a sector stream from a (sector, size) pair.
 s32 OpenBufferedSectorStreamRange(BufferedStream* a, KeyId* pair)
 {
     return OpenBufferedSectorStream(a, pair->first, pair->second);
@@ -136,6 +143,8 @@ s32 ReadTextChar(TextReader* self);
 
 extern "C" s32 StopDiscRead();
 
+// Closes the stream's file (mode 0) or stops its disc read (mode 1), and clears its mode,
+// pointers, counts and unpack state.
 void CloseBufferedStream(BufferedStream* self)
 {
     s32 next = -1;
@@ -291,6 +300,8 @@ void RefillBufferedStreamFromSectors(SectorStreamState* self)
 }
 
 struct FileStreamState { u8 pad0[8]; void* buffer; s32 fC; u8 pad10[4]; s32 fileLeft; u8 pad18[8]; void* fillPtr; s32 fillCount; u8 pad28[0xC]; s32 fileHandle; };
+// Reads the next piece of the file (at most 0x8000 bytes, and no more than is left) into the
+// stream's buffer.
 void RefillBufferedStreamFromFile(FileStreamState* self)
 {
     s32 size = self->fC;
@@ -304,6 +315,8 @@ struct MaxOf { static s32 Of(s32 a, s32 b) { return a < b ? b : a; } };
 void RefillBufferedStreamFromFile(FileStreamState* self);
 void RefillBufferedStreamFromSectors(SectorStreamState* self);
 void UpdateLoadProgress(LoadProgress* self, s32 value);
+// Refills the stream's buffer from its file or from its sectors (by mode), lowers the count of
+// bytes still to read and reports the load progress.
 void RefillBufferedStream(BufferedStream* self)
 {
     switch (self->mode) {
@@ -451,6 +464,8 @@ void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out)
     } while (remaining > 0);
 }
 
+// Skips ahead to the next multiple of n in the stream's position, reducing the bytes remaining
+// by the same amount.
 void AlignBufferedStreamPosition(BufferedStream* self, s32 n)
 {
     sptr head = self->ptr;
@@ -462,6 +477,7 @@ void AlignBufferedStreamPosition(BufferedStream* self, s32 n)
     self->remaining -= delta;
 }
 
+// Reads one unsigned byte from the stream.
 s32 ReadBufferedU8(BufferedStream* self)
 {
     s32 count = self->remaining;
@@ -477,6 +493,7 @@ s32 ReadBufferedU8(BufferedStream* self)
     return value;
 }
 
+// Reads a little-endian 16-bit unsigned value from the stream.
 u16 ReadBufferedU16(BufferedStream* self)
 {
     s32 count = self->remaining;
@@ -492,6 +509,7 @@ u16 ReadBufferedU16(BufferedStream* self)
     return value;
 }
 
+// Reads a little-endian 32-bit unsigned value from the stream.
 u32 ReadBufferedU32(BufferedStream* self)
 {
     s32 count = self->remaining;
@@ -509,6 +527,7 @@ u32 ReadBufferedU32(BufferedStream* self)
 
 LINKER_REMNANT(func_00137CB8);
 
+// Reads one signed byte from the stream.
 s32 ReadBufferedS8(BufferedStream* self)
 {
     s32 count = self->remaining;
@@ -529,6 +548,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
+// Reads a little-endian 16-bit signed value from the stream.
 s32 ReadBufferedS16(BufferedStream* self)
 {
     if (self->remaining >= 2) {
@@ -544,6 +564,7 @@ s32 ReadBufferedS16(BufferedStream* self)
     return tmp;
 }
 
+// Reads a little-endian 32-bit signed value from the stream.
 s32 ReadBufferedS32(BufferedStream* self)
 {
     s32 count = self->remaining;
@@ -563,6 +584,7 @@ LINKER_REMNANT(func_00137DF0);
 
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
+// Reads a little-endian float from the stream.
 f32 ReadBufferedFloat(BufferedStream* r)
 {
     s32 left = r->remaining;
@@ -587,6 +609,7 @@ void ReadBufferedVector3(BufferedStream* src, void* dst)
 
 void ReadBufferedVector4(BufferedStream* self, void* out) { ReadBufferedStreamBytes(self, 0x10, out); }
 
+// Reads a 3x3 rotation stored as three 12-byte rows into rows of 16 bytes.
 void ReadBufferedRotation3(BufferedStream* self, void* out)
 {
     u8* buffer = (u8*)out;
@@ -604,6 +627,8 @@ s32 CountTextChars(void* self);
 
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
+// Reads a 4x4 matrix stored as four 12-byte rows into rows of 16 bytes, setting the fourth
+// column to (0, 0, 0, 1).
 void ReadBufferedMatrix4(BufferedStream* self, void* out)
 {
     u8* p = (u8*)out;
@@ -789,6 +814,8 @@ void ReadLinkedItemArray(BufferedStream* src, s32* count, LinkedItem** out)
 }
 
 void* AllocateFrontMemory(s32 size);
+// Reads a 16-bit length and that many bytes into freshly allocated front memory, zero-
+// terminated, and gives its address through *out.
 void ReadBufferedString(BufferedStream* self, u8** out)
 {
     s32 size = ReadBufferedU16(self);
@@ -808,6 +835,7 @@ extern f32 g_gameTime;
 u16 ReadBufferedU16(BufferedStream* self);
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 
+// Skips a block stored as a 16-bit length followed by that many bytes.
 void SkipBufferedBlock(BufferedStream* self)
 {
     s32 n = ReadBufferedU16(self);
@@ -821,6 +849,8 @@ struct OptionalBlock {
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 u32 CopyToFrontMemory(s32 size, void* src);
 
+// Reads a 0x20-byte block and gives a copy of it in front memory through *out, or 0 when its
+// two key words (1 and 7) are equal, which marks it as absent.
 void ReadOptionalBufferedBlock(BufferedStream* self, u32* out)
 {
     OptionalBlock r;

@@ -307,6 +307,7 @@ void UpdateGaugeColliderAgent(GaugeColliderAgent* s1, f32 f);
 u32 IsGaugeColliderAgentTargetInRange(void);
 void StartGaugeCountedObject(GaugeCountedObject* self);
 
+// Initialises the placed object and appends it to the world's list at 0x1C3C.
 void InitObjectGroup(ObjectGroup* self)
 {
     InitPlacedObject(self);
@@ -477,12 +478,16 @@ void CopyObjectGroup(ObjectGroup* self, ObjectGroup* src)
     }
 }
 
+// Starts the placed object and then calls the class's method 3 on it.
 void StartObjectGroup(ObjectGroup* self)
 {
     StartPlacedObject(self);
     self->desc->m03(self);
 }
 
+// Initialises the switched collider and sets the gauge's defaults (last ground time -10 s, the up
+// vector as its ground normal, a 120 s time limit, push strength and top speed) and the links of
+// its node lists; it also becomes the global gauge collider.
 void InitGaugeCollider(GaugeCollider* self)
 {
     InitSwitchedCollider(self);
@@ -496,6 +501,7 @@ void InitGaugeCollider(GaugeCollider* self)
     g_gaugeCollider = self;
 }
 
+// Loads the collider from the stream and resolves its load links.
 void LoadGaugeCollider(GaugeCollider* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -590,6 +596,8 @@ void StepGaugeCollider(GaugeCollider* self, f32 dt)
     AddColliderForce(self, &force);
 }
 
+// Whether the collider counts: with flag 0x80000000000 set it must be of kind 0x1F, and in any
+// case it must not share the given root.
 s32 AcceptColliderOfOtherRoot(void* root, Collider* self)
 {
     if (self->flags538 & 0x80000000000ULL) {
@@ -747,6 +755,8 @@ GaugeHeld* FindHeldObjectAhead(GaugeCollider* self)
     return best;
 }
 
+// Takes the delivered count over the delivery limit, clamped to 0..1, and lowers the scatter
+// controller's levels to 1 minus 0.8 of it.
 void ApplyGaugeColliderRatioToEffect(GaugeCollider* self)
 {
     f32 one = 1.0f;
@@ -762,6 +772,8 @@ void ApplyGaugeColliderRatioToEffect(GaugeCollider* self)
     RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f - c * 0.8f);
 }
 
+// Timer end callback: when flag is 1 and the phase walker is neither at nor heading to key 0x3F4,
+// sets its target to 0x3F5 and applies the delivered ratio to the effect.
 void EndGaugeColliderTimer(s32 unused, s32 flag)
 {
     s32 out[4];
@@ -873,6 +885,9 @@ settled:
     }
 }
 
+// Looks at the phase walker's current key: when it is 0x3F3 and the menus and fade are clear,
+// calls method 14 of the amount caption, the collider caption and the timer element (probably
+// showing them), otherwise method 15 of the same three (probably hiding them).
 void UpdateGaugeColliderVisibility(GaugeCollider* self)
 {
     s32 v;
@@ -929,6 +944,8 @@ void PlaceObjectAtRandomNode(GaugeCollider* self)
 }
 
 
+// Gives the agent's node back: sets its sound state object state to 0, moves it from the used
+// list (0x6A8) to the other list (0x69C) and clears the agent's node.
 void ReleaseObjectNode(u8* self, GaugeColliderAgent* ctx)
 {
     void* p = ctx->node;
@@ -938,6 +955,7 @@ void ReleaseObjectNode(u8* self, GaugeColliderAgent* ctx)
     ctx->node = 0;
 }
 
+// Fills the contact's bounce and friction with fixed values; the collider itself is not read.
 void ComputeGaugeColliderContactValue(GaugeCollider* ctx, Contact03* out)
 {
     (void)ctx;
@@ -1103,6 +1121,9 @@ void StepGaugeColliderAgent(GaugeColliderAgent* self, f32 dt)
     }
 }
 
+// The agent's next state: from state 2 it goes to 4 when the roster state is 0; state 0x10 is
+// kept until a notice value is set, then it becomes 0; other cases take the ordinary agent
+// choice.
 s32 ChooseGaugeColliderAgentState(GaugeColliderAgent* self)
 {
     s32 r;
@@ -1176,6 +1197,8 @@ void UpdateGaugeColliderAgentGoal(GaugeColliderAgent* self, s32 pick)
     }
 }
 
+// Leaving state 0x10 releases the agent's node on the active collider and gives the agent its own
+// velocity with z cleared; then the ordinary agent leave.
 void LeaveGaugeColliderAgentState(GaugeColliderAgent* self, s32 arg)
 {
     if (self->state == 0x10) {
@@ -1188,6 +1211,7 @@ void LeaveGaugeColliderAgentState(GaugeColliderAgent* self, s32 arg)
     LeaveAgentState(self, arg);
 }
 
+// The ordinary agent enter, and then in state 0x10 turns the agent along its path.
 void EnterGaugeColliderAgentState(GaugeColliderAgent* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
@@ -1229,6 +1253,8 @@ void UpdateGaugeColliderAgentState(GaugeColliderAgent* self)
     SetAnimationPlayerSpeed(self->statePlayer, v);
 }
 
+// Handles the agent notification and tracks a notice value: kind 10 aimed at this agent stores
+// the message's value, kind 11 aimed at it clears it.
 void HandleGaugeColliderAgentNotification(GaugeColliderAgent* self, s32 code, AgentValueNotice* req)
 {
     HandleAgentNotification(self, code, (AgentNotification*)req);
@@ -1278,8 +1304,11 @@ void UpdateGaugeColliderAgent(GaugeColliderAgent* s1, f32 f)
     UpdateAgent(s1, f);
 }
 
+// Always 0: this agent never counts its target as in range.
 u32 IsGaugeColliderAgentTargetInRange(void) { return 0; }
 
+// Whether the active collider, if it is of kind 0x18, is near the agent in the XY plane; the
+// answer has hysteresis, switching to near under one distance and back only past a larger one.
 s32 IsGaugeColliderAgentNear(GaugeColliderAgent* self)
 {
     SwitchedCollider* c = (SwitchedCollider*)GetActiveSwitchedCollider();
@@ -1298,6 +1327,8 @@ s32 IsGaugeColliderAgentNear(GaugeColliderAgent* self)
     return self->nearCollider;
 }
 
+// Resolves its links and starts the placed object, then adds one to the delivery limit of the
+// gauge collider found in the world (so the limit counts these objects).
 void StartGaugeCountedObject(GaugeCountedObject* self)
 {
     ResolveObjectLinks(self, 3, g_gaugeCountedObjectLinks);

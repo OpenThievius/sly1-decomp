@@ -48,6 +48,7 @@ void* AllocateZeroedFrontMemory(s32 bytes);
 void* AllocateFrontMemory(s32 size);
 
 
+// Loops min(a, c) times doing nothing; probably what is left of a compiled-out loop.
 void LoopOverMinCountNoOp(s32 a, s32 b, s32 c, s32 d)
 {
     s32 i;
@@ -329,6 +330,9 @@ void ComputeBlendedDuration(s32 stride, s32 count, void* items, s32 offset, s32 
     }
 }
 
+// Gives the index of the first range (start a, length b) that contains x on a cycle of the
+// given period (and through out the offset of x into it), or count when none does; ranges with
+// length 0 are skipped.
 s32 FindCyclicRangeIndex(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out)
 {
     s32 i;
@@ -396,6 +400,7 @@ void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3)
 
 void* FindEntryByObjectId(BlendAnimationView* self, void* key);
 
+// Sets flag 1 of the sub-record of the blend entry for this object id, if it has one.
 void SetBlendEntryRecordFlag(BlendAnimationView* blend, void* key)
 {
     BlendSourceEntry* o = (BlendSourceEntry*)FindEntryByObjectId(blend, key);

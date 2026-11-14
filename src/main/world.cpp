@@ -568,6 +568,8 @@ void UpdatePathFollowerScreenElements(PathFollower* self)
     }
 }
 
+// Advances the follower's contact stamp by one, which makes its current contacts count as
+// released.
 void ReleasePathFollowerContacts(PathFollower* self) { self->contactStamp++; }
 
 struct FaceRef;
@@ -747,6 +749,8 @@ void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
     }
 }
 
+// Updates the collider bounds and expands them by a sphere around each of the four wheel
+// objects (front wheels use the front radius, rear ones the rear radius).
 void UpdatePathFollowerBounds(PathFollower* self)
 {
     u32 i;
@@ -764,6 +768,8 @@ void UpdatePathFollowerBounds(PathFollower* self)
     }
 }
 
+// Starts an effect through the follower's partner (after resetting the partner's main clip),
+// or, with no partner, through the base switched collider.
 void StartPathFollowerEffect(PathFollower* self, s32 a, PlacedObject* b)
 {
     if (((FollowerEffectTarget*)self->partner) != 0) {
@@ -794,6 +800,7 @@ void FindPathFollowerPathPosition(PathFollower* self)
     }
 }
 
+// Recomputes the collider's frame, then the follower's position on its path.
 void RecomputePathFollowerFrame(PathFollower* self)
 {
     RecomputeColliderFrame(self);
@@ -805,6 +812,9 @@ void CapturePathFollowerPose(PathFollower* self, ColliderPose* pose)
     CaptureColliderPose(self, pose);
 }
 
+// After the base handling, an activation points the two count captions at the follower's lap
+// and place counters and makes it the world's active follower; a deactivation puts a follower
+// in mode 2 back to mode 0.
 void HandlePathFollowerActivation(PathFollower* self, void* v)
 {
     HandleSwitchedColliderActivation(self, v);
@@ -824,6 +834,9 @@ void HandlePathFollowerActivation(PathFollower* self, void* v)
     }
 }
 
+// After the base switched-collider handling, on notification 0xE of kind 0x426 counts one for
+// the first or the second caption counter (by which follower the notice's link belongs to)
+// while both are under their limit.
 void HandlePathFollowerNotification(PathFollower* self, s32 code, CountedNotice* rec)
 {
     HandleSwitchedColliderNotification(self, code, rec);
@@ -864,6 +877,8 @@ void SetPathFollowerPath(PathFollower* self, PathCurveObject* arg)
     }
 }
 
+// Sets the follower's second path object and asks its curve for the position along it nearest
+// the follower, stored at +0x84C.
 void SetPathFollowerSecondPath(u8* self, PathCurveObject* obj)
 {
     s32 loc[4];
@@ -876,6 +891,9 @@ void SetPathFollowerSecondPath(u8* self, PathCurveObject* obj)
     }
 }
 
+// Adds an object as a passive marker (kind 0, at most 16) to the follower's circular marker
+// list; with a path set, also asks the path's curve for the object's position along it (stored
+// in the marker's pathLength).
 void AddPathFollowerEntry(PathFollower* self, void* item)
 {
     if (item == 0) {
@@ -909,8 +927,12 @@ void AddPathFollowerEntry(PathFollower* self, void* item)
     }
 }
 
+// Adds an object as an active marker (kind 1, at most 16) with two floats and two words of
+// parameters.
 void AddPathFollowerActiveEntry(PathFollower* self, void* a, f32 x, f32 y, s32 b, s32 c) { if (a && (u32)self->markerCount < 16) { PathMarker* e = &self->markers[self->markerCount]; self->markerCount++; e->item = a; e->kind = 1; e->x = x; e->y = y; e->b = b; e->c = c; } }
 
+// Changes the follower's mode (recording the time of the change); mode 2 also makes it the
+// active switched collider.
 void SetPathFollowerMode(PathFollower* self, s32 mode)
 {
     if (mode != self->mode) {
@@ -969,6 +991,7 @@ LINKER_REMNANT(func_001DB448);
 
 ASM_FUNC(func_001DB460);
 
+// Sets the link offset (0xC) of each of the world's 0x200 hash lists.
 void InitWorldHashLists(u8* self)
 {
     u32 i;
@@ -1118,6 +1141,8 @@ void ReadBufferedBlockHeader(s32 a0, BufferedStream* self)
     g_bufferedBlockLoad = s2;
 }
 
+// When a block load is wanted, notes where the block starts, aligns to 16 bytes and reads the
+// block's bytes into its buffer.
 void ReadBufferedBlockBody(BufferedStream* self)
 {
     if (g_bufferedBlockLoad != 0) {
@@ -1127,6 +1152,7 @@ void ReadBufferedBlockBody(BufferedStream* self)
     }
 }
 
+// Sets the world's gravity vector to (0, 0, z).
 void SetWorldGravityZ(World* self, f32 z)
 {
     Vu0::Q(self->gravity) = Vu0::FromFloats(0.0f, 0.0f, z);
@@ -1147,8 +1173,11 @@ void* RefreshCachedVoiceParamBuiltin(void* unused, s32 a1, s32 a2)
     RefreshCachedVoiceParam(a1, a2);
 }
 
+// True for an object whose descriptor has flag 2 when the world already holds 0xF7 or more
+// bodies and value is 0.
 s32 IsWorldBodyLimitReached(World* self, BaseObject* obj, u32 value) { return (obj->desc->flags & 2) && self->count38 >= 0xF7 && value == 0; }
 
+// Takes a 16-byte attach record from the world's pool, zeroed.
 void* TakeAttachRecord(World* self)
 {
     void* p = TakePoolSlot(&self->pool1B08);
@@ -1156,6 +1185,7 @@ void* TakeAttachRecord(World* self)
     return p;
 }
 
+// Gives a chain of attach records (linked through nextOwn) back to the world's attach pool.
 void ReleaseAttachRecords(World* self, Attach03* node)
 {
     if (node) {
@@ -1167,6 +1197,7 @@ void ReleaseAttachRecords(World* self, Attach03* node)
     }
 }
 
+// Takes a 0x14-byte call record from the world's pool, zeroed.
 void* TakeCallRecord(World* self)
 {
     void* p = TakePoolSlot(&self->pool1B14);
@@ -1174,6 +1205,7 @@ void* TakeCallRecord(World* self)
     return p;
 }
 
+// Gives a chain of call records back to the world's call-record pool.
 void ReleaseCallRecords(World* self, T219CHook* node)
 {
     while (node != 0) {
@@ -1185,6 +1217,7 @@ void ReleaseCallRecords(World* self, T219CHook* node)
 
 QueuedCall* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
+// Queues a call unless an identical one is already waiting in the world's queue.
 void AppendQueuedCallOnce(World* self, void* a1, void* a2, s32 a3, s32 a4)
 {
     QueuedCall* n = self->queuedCallHead;
@@ -1199,6 +1232,8 @@ void AppendQueuedCallOnce(World* self, void* a1, void* a2, s32 a3, s32 a4)
     AppendQueuedCall(self, a1, a2, a3, a4);
 }
 
+// Queues a call (code, arg and two more words) at the end of the world's queued-call list, to
+// be run by RunQueuedCalls.
 QueuedCall* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d)
 {
     QueuedCall* e = (QueuedCall*)TakeCallRecord(self);
@@ -1264,6 +1299,8 @@ void RemoveQueuedCalls(World* self, u32 mask, void* code, void* arg, s32 k2, s32
     ReleaseCallRecords(self, (T219CHook*)removed);
 }
 
+// Runs and releases every call queued on the world (AppendQueuedCall), in order, calling fn
+// with the call's arg and two keys.
 void RunQueuedCalls(World* self)
 {
     while (self->queuedCallHead != 0) {
@@ -1344,6 +1381,7 @@ void RunDueDelayedScriptCalls(World* self, f32 limit)
     DestroyScriptValue(&a, 2);
 }
 
+// Takes an 8-byte touch node from the world's pool, zeroed.
 void* AllocateTouchNode(World* self)
 {
     void* p = TakePoolSlot(&self->pool1C0C);
@@ -1351,6 +1389,7 @@ void* AllocateTouchNode(World* self)
     return p;
 }
 
+// Gives a chain of touch nodes back to the world's touch-node pool.
 void FreeTouchNodes(World* owner, Touch03* node)
 {
     while (node != 0) {
@@ -1360,6 +1399,8 @@ void FreeTouchNodes(World* owner, Touch03* node)
     }
 }
 
+// Makes n-1 copies of the source object (CreateObjectCopy) in a freshly allocated array and
+// records the array and count as the world's next clone batch.
 void PushCloneBatch(World* self, void* src, s32 n)
 {
     struct PackedCloneBatch tmp;
@@ -1378,6 +1419,7 @@ void PushCloneBatch(World* self, void* src, s32 n)
     self->cloneBatchCount = idx + 1;
 }
 
+// Pops and gives back the last value of the world's clone batch number index.
 s32 PopSpawnedClone(World* self, s32 index) { CloneBatch* s = &((CloneBatch*)self->cloneBatches)[index]; s->count--; return s->values[s->count]; }
 
 // A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
@@ -1509,6 +1551,7 @@ done:
     *count = cursor - *out;
 }
 
+// Removes a contact table from the doubly linked list whose head is *a1.
 void UnlinkContactTable(Contacts03* a0, Contacts03** a1) {
     Contacts03* next;
     if (a0->next == 0) {
@@ -1524,6 +1567,7 @@ void UnlinkContactTable(Contacts03* a0, Contacts03** a1) {
     }
 }
 
+// Allocates 0x100 contact tables of 16 bytes and links them into a free list.
 void InitContactTables(World* self)
 {
     void* mem = AllocateZeroedFrontMemory(0x1000);
@@ -1536,6 +1580,7 @@ void InitContactTables(World* self)
     }
 }
 
+// Puts a contact table at the head of the doubly linked list *head.
 void PushContactTable(Contacts03* node, Contacts03** head)
 {
     node->next = *head;
@@ -1546,6 +1591,7 @@ void PushContactTable(Contacts03* node, Contacts03** head)
     *head = node;
 }
 
+// Moves a table from the world's free list to its used list and gives it to the collider.
 Contacts03* TakeContactTable(World* owner, Collider* self)
 {
     Contacts03* n = owner->freeTables;
@@ -1659,6 +1705,8 @@ void CreateConeVolumes(World* self)
     }
 }
 
+// Reads a block count and, when the script stream has its extras, skips all but the first of
+// that many blocks.
 void SkipBufferedBlocks(BufferedStream* self)
 {
     s32 n = ReadBufferedU32(self);
@@ -1887,6 +1935,8 @@ void DrawProjectedLine(ClipPoint* a, ClipPoint* b, PackedColor* c, u8* obj, s32 
     }
 }
 
+// Draws a curve through four control points as 9 projected line segments (10 samples) in the
+// colour a4 points to.
 void DrawProjectedCurve(void* a0, void* a1, void* a2, void* a3, void* a4, u8* obj, s32 unused6, f32 x)
 {
     CurveFrame L;
@@ -1907,18 +1957,22 @@ void DrawProjectedCurve(void* a0, void* a1, void* a2, void* a3, void* a4, u8* ob
     } while (i < 10);
 }
 
+// Sets the world's first lighting parameter and notes the frame it changed in.
 void SetWorldLightingParamA(World* self, f32 v)
 {
     self->f1D6C = v;
     g_lightingChangeFrame = g_frameCount;
 }
 
+// Sets the world's second lighting parameter and notes the frame it changed in.
 void SetWorldLightingParamB(World* self, f32 v)
 {
     self->f1D68 = v;
     g_lightingChangeFrame = g_frameCount;
 }
 
+// Sets the world's sound level, forces the previous-level cache to refresh and sends the
+// rounded level to the IOP.
 void SetWorldSoundLevel(void* self, f32 x)
 {
     World* s = (World*)self;
@@ -1929,26 +1983,31 @@ void SetWorldSoundLevel(void* self, f32 x)
     SendIopSoundLevel((s32)(s->soundLevel + 0.5f));
 }
 
+// Whether bit 1 of the level entry's first word is set (script builtin).
 s32 TestLevelEntryFlag1(void* self, s32 obj)
 {
     return GetLevelEntryWord(obj) & 0x1;
 }
 
+// Whether bit 2 of the level entry's first word is set (script builtin).
 s32 TestLevelEntryFlag2(void* self, s32 obj)
 {
     return GetLevelEntryWord(obj) & 0x2;
 }
 
+// Whether bit 4 of the level entry's first word is set (script builtin).
 s32 TestLevelEntryFlag4(void* self, s32 obj)
 {
     return GetLevelEntryWord(obj) & 0x4;
 }
 
+// Whether bit 8 of the level entry's first word is set (script builtin).
 s32 TestLevelEntryFlag8(void* self, s32 obj)
 {
     return GetLevelEntryWord(obj) & 0x8;
 }
 
+// True when the entry's flags have bit 2 set and the current entry has flag bit 1.
 s32 CheckEntryOneBitRequirement(World* a0, s32 a1)
 {
     s32 one = 1;
@@ -1958,6 +2017,8 @@ s32 CheckEntryOneBitRequirement(World* a0, s32 a1)
     return r;
 }
 
+// True when the entry's flags have bit 4 set and the current entry has every flag bit in the
+// low two bits of the entry's flags.
 s32 CheckEntryTwoBitRequirement(void* self, s32 obj)
 {
     u32 flags = GetEntryFlags(obj);
@@ -1971,6 +2032,8 @@ s32 CheckEntryTwoBitRequirement(void* self, s32 obj)
     return r;
 }
 
+// True when the entry's flags have bit 8 set and the current entry has every flag bit in the
+// low three bits of the entry's flags.
 s32 CheckEntryThreeBitRequirement(void* self, s32 obj)
 {
     u32 flags = GetEntryFlags(obj);
@@ -1984,6 +2047,8 @@ s32 CheckEntryThreeBitRequirement(void* self, s32 obj)
     return r;
 }
 
+// Stores value under key in the first of the four slots of the level entry obj, reusing the
+// slot that already has that key and otherwise the first free one.
 void SetEntrySlotValue(void* self, s32 obj, s32 key, s32 value)
 {
     EntrySlotTable* t = (EntrySlotTable*)GetLevelEntryByKey(obj);
@@ -2007,6 +2072,7 @@ void SetEntrySlotValue(void* self, s32 obj, s32 key, s32 value)
     }
 }
 
+// The value stored under key in the four slots of the level entry obj, or 0.
 s32 GetEntrySlotValue(void* self, s32 obj, s32 key)
 {
     EntrySlotTable* t = (EntrySlotTable*)GetLevelEntryByKey(obj);
@@ -2022,11 +2088,13 @@ s32 GetEntrySlotValue(void* self, s32 obj, s32 key)
     return 0;
 }
 
+// Whether bit 1 of the saved level record's flag word is set.
 s32 IsLevelRecordComplete(void* self, s32 index)
 {
     return g_saveData->levels[index].f448 & 1;
 }
 
+// Whether bit 0x20 (set by MarkLevelDone) of the saved level record's flag word is set.
 s32 IsLevelDone(void* self, s32 index)
 {
     return g_saveData->levels[index].f448 & 0x20;
@@ -2037,6 +2105,8 @@ s32 RecomputeSaveCompletion(void* self)
     return ComputeCompletionPercent(g_saveData);
 }
 
+// Picks a random count between a and b and, if it is not 0, scatters that many objects (type
+// 0x58) around the point c in the current world.
 void ScatterRandomObjects(void* unused, s32 a, s32 b, void* c)
 {
     s32 r = RandomIntInRange(a, b);
@@ -2055,6 +2125,7 @@ void GetGameStateDeltaTime(void* unused, f32* out)
     *out = g_currentEntry->dt;
 }
 
+// Clamps level to the unit range and stores it in the current entry.
 void SetCurrentScatterLevel(void* unused, f32 level)
 {
     f32 r = ClampToRange(&g_unitRange, level);
@@ -2066,6 +2137,7 @@ void GetCurrentScatterLevel(void* unused, f32* out)
     *out = g_currentEntry->f10;
 }
 
+// Counts one more hold on the pad-select flag; the first hold sets pad select flag 2.
 void AcquirePadSelectFlag(World* a0) {
     s32 n = a0->padSelectHolds + 1;
     a0->padSelectHolds = n;
@@ -2074,6 +2146,8 @@ void AcquirePadSelectFlag(World* a0) {
     }
 }
 
+// Drops one hold on the pad-select flag; when the count reaches 0, pad select flag 2 is
+// cleared.
 void ReleasePadSelectFlag(World* self)
 {
     s32 v = self->padSelectHolds - 1;
@@ -2090,6 +2164,7 @@ void GetHasStreamVoice(void* self, s32* out)
     *out = HasStreamVoice();
 }
 
+// Sets both the world's value and its target to v, so there is no transition.
 void SetWorldValueAndTarget(World* self, f32 v)
 {
     self->valueTarget = v;
@@ -2098,6 +2173,7 @@ void SetWorldValueAndTarget(World* self, f32 v)
 
 void SetWorldValueTarget(World* self, f32 value) { self->valueTarget = value; }
 
+// Pops the element stack when the active step sequence is in mode 1 or 2 and not in state 4.
 void PopActiveSequenceElement(World* world)
 {
     StepSequence* ctx = g_activeStepSequence;
@@ -2107,6 +2183,7 @@ void PopActiveSequenceElement(World* world)
     }
 }
 
+// Stores a2 as the pause menu's page word and shows page a1 of its layer.
 void ShowPauseMenuPageWith(void* unused, s32 a1, s32 a2)
 {
     s32 saved = a1;
@@ -2115,6 +2192,7 @@ void ShowPauseMenuPageWith(void* unused, s32 a1, s32 a2)
     SetPauseMenuLayerPage(&g_pauseMenuElement, 0, saved);
 }
 
+// Counts one more hold on the letterbox element; the first hold shows it with a hold time of 0.
 void ShowCountedScreenElement(World* self)
 {
     if (++self->elementHolds == 1) {
@@ -2123,6 +2201,7 @@ void ShowCountedScreenElement(World* self)
     }
 }
 
+// Drops one hold on the letterbox element; when the count reaches 0 it is hidden.
 void HideCountedScreenElement(World* self)
 {
     if (--self->elementHolds == 0) {
@@ -2147,6 +2226,7 @@ void SetWorldActiveFollower(World* self, void* v)
     self->activeFollower = v;
 }
 
+// Calls slot 50 of the active follower's method table, if there is a follower and a method.
 void NotifyWorldActiveFollower(World* self)
 {
     ActiveFollowerChild* p = (ActiveFollowerChild*)self->activeFollower;
@@ -2158,6 +2238,7 @@ void NotifyWorldActiveFollower(World* self)
     }
 }
 
+// Sets bit number bit of the world's flag bits.
 void SetWorldFlagBit(World* self, s32 bit)
 {
     s32 m = 1;
@@ -2165,6 +2246,7 @@ void SetWorldFlagBit(World* self, s32 bit)
     self->flagBits |= m;
 }
 
+// Clears bit number bit of the world's flag bits.
 void ClearWorldFlagBit(World* self, s32 bit)
 {
     s32 m = 1;

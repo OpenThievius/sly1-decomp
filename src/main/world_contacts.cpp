@@ -104,6 +104,8 @@ struct ContactRowList { ContactRowNode* head; };
 struct ContactRowSource { u8 pad0[4]; s32 value4; };
 
 
+// Takes a row from the world's pool, fills it from the source's value and pushes it on the
+// front of the list.
 ContactRowNode* PushContactRow(World* self, ContactRowList* list, ContactRowSource* src)
 {
     ContactRowNode* n = (ContactRowNode*)TakePoolSlot(&self->pool1AF0);
@@ -114,6 +116,8 @@ ContactRowNode* PushContactRow(World* self, ContactRowList* list, ContactRowSour
     return n;
 }
 
+// Removes from the singly linked list the row whose other collider is the table's owner and
+// gives it back, or 0 when there is none.
 ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, Contacts03* key)
 {
     ContactRow03* node = *head;
@@ -129,6 +133,7 @@ ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, Contacts03* ke
     return node;
 }
 
+// The contact row of this collider's root that is about the other collider's root, or 0.
 void* FindContactRow(Collider* self, Collider* other)
 {
     ContactRow03* cur = self->root03()->contacts->head;
@@ -146,6 +151,7 @@ void* FindContactRow(Collider* self, Collider* other)
 }
 
 
+// The first word of the contact row between the two colliders, or 0 when there is none.
 s32 GetContactRowHead(Collider* self, Collider* other)
 {
     s32* p = (s32*)FindContactRow(self, other);
@@ -163,6 +169,8 @@ struct SweepAxisSlot {
 };
 
 
+// Adds two entries (the collider's start and end links) to each of the three sweep axes' tables
+// and marks the axes unsorted.
 void AddColliderToSweepAxes(World* self, void* arg)
 {
     World* t = self;
@@ -237,6 +245,7 @@ void RemoveColliderFromSweepAxes(World* self, void* owner)
 #include "object_message.h"
 #include "globals.h"
 
+// Marks the world's sweep axes as needing a new sort.
 void MarkSweepAxesUnsorted(World* a0)
 {
     a0->sweepSorted = 0;
@@ -298,6 +307,7 @@ void SortSweepAxes(World* self)
     self->sweepSorted = 1;
 }
 
+// Clears the given state bits (f4B8) of the owner's root collider.
 void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask)
 {
     Collider* n = owner->root03();
@@ -469,6 +479,9 @@ void UpdateWorldContacts(World* w, s32 arg)
 }
 
 
+// Clears the collider's state bits and sets contact pair flags against every collider that has
+// a contact table in use; flag 8 goes on one side or the other depending on whether either of
+// the two classes' method 38 says the pair is to be handled.
 void InitContactPairFlags(World* self, Collider* obj)
 {
     obj->f4B8 = 0;

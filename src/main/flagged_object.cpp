@@ -42,6 +42,8 @@ u8 g_flagTableSaved[544] = {0};
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// Clears the flag table: no live or saved flags, the index counter at 0, the point set to a
+// huge value and no fade recorded.
 void ResetFlagTable(FlagTable* r)
 {
     r->nextIndex = 0;
@@ -55,6 +57,8 @@ void ResetFlagTable(FlagTable* r)
     r->fadeB = -1;
 }
 
+// Saves a copy of the live flags (clearing the changed mark) together with the two fade values
+// a and b, to be restored later by RestoreFlagTableSnapshot.
 void SaveFlagTableSnapshot(FlagTable* r, s32 a, s32 b)
 {
     r->changed = 0;
@@ -65,6 +69,8 @@ void SaveFlagTableSnapshot(FlagTable* r, s32 a, s32 b)
 }
 
 
+// Starts a screen fade, using the fade values the table saved (flags 0x11) or none (flags
+// 0x10).
 void StartScreenFadeFromFlagTable(FlagTable* r)
 {
     FadeRequest args;
@@ -82,6 +88,7 @@ void StartScreenFadeFromFlagTable(FlagTable* r)
     StartScreenFade(&g_screenFade, &args, 1);
 }
 
+// Puts the saved flags back as the live ones and clears the changed mark and the index counter.
 void RestoreFlagTableSnapshot(FlagTable* p)
 {
     p->nextIndex = 0;
@@ -89,12 +96,14 @@ void RestoreFlagTableSnapshot(FlagTable* p)
     p->changed = 0;
 }
 
+// Gives the next free flag index of the table (counting from 1).
 s32 TakeFlagTableIndex(FlagTable* c)
 {
     c->nextIndex = c->nextIndex + 1;
     return c->nextIndex;
 }
 
+// Whether the flag with this index is set in the table's live flags.
 s32 TestFlagTableBit(FlagTable* table, s32 index)
 {
     u8* bits = (u8*)table;
@@ -103,6 +112,8 @@ s32 TestFlagTableBit(FlagTable* table, s32 index)
     return (bits[0xC] & mask) != 0;
 }
 
+// Sets one flag of the table, raising the live count and marking the table changed when it was
+// clear.
 void SetFlagTableBit(FlagTable* self, s32 bit)
 {
     u8* base = self->live.bits;
@@ -120,6 +131,8 @@ done:
     }
 }
 
+// Clears one flag of the table, lowering the live count and marking the table changed when it
+// was set.
 void ClearFlagTableBit(FlagTable* self, s32 bit)
 {
     u8* base = self->live.bits;
@@ -139,6 +152,8 @@ done:
 
 struct BufferedStream;
 
+// Reads an object's rotation (at +0x50), position (+0x40), four mesh tables (+0x80 to +0x8C)
+// and its property records from the stream.
 void ReadObjectTransformAndTables(void* a0, void* a1)
 {
     ReadBufferedRotation3((BufferedStream*)a1, (u8*)a0 + 0x50);
@@ -150,6 +165,8 @@ void ReadObjectTransformAndTables(void* a0, void* a1)
 struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
 s32 IsPointInsideFaceTree(void* self, void* value);
 
+// Whether a point lies inside the object's shape: converts it to the object's frame and tests
+// it against the face tree.
 s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value)
 {
     Quad_00141170 local;
@@ -158,6 +175,8 @@ s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value)
 }
 
 
+// Initialises the collider, gives it a flag-table index and the next ordinal of the world's
+// count at +0x2304, no child id and anchors of 3.
 void InitFlaggedObject(FlaggedObject* self)
 {
     InitCollider(self);
@@ -307,6 +326,8 @@ void StartFlaggedObject(FlaggedObject* self)
 }
 
 
+// Copies the collider but keeps its own flag index and ordinal, and gives the copy its own
+// copies of the objects in both of its lists.
 void CopyFlaggedObject(FlaggedObject* self, FlaggedObject* src)
 {
     s32 keepB = self->flagIndex;
@@ -364,6 +385,9 @@ extern u8 g_padRecord[];
 
 struct PadRecord;
 
+// An event from the active switched collider gives a short pad pattern (unless the event's flag
+// 0x10 is set) and raises the object's flag, and counts as handled; any other event takes the
+// base handling.
 s32 HandleFlaggedObjectEvent(FlaggedObject* self, ObjectEvent* ev)
 {
     void* r = GetActiveSwitchedCollider();
@@ -414,11 +438,13 @@ void RaiseObjectFlag(FlaggedObject* self)
     }
 }
 
+// Adds an id to the object's second list of ids.
 void AppendFlaggedObjectIdB(FlaggedObject* q, s32 value)
 {
     q->idsB[q->nIdsB++] = value;
 }
 
+// Adds an id to the object's first list of ids.
 void AppendFlaggedObjectIdA(FlaggedObject* obj, void* item)
 {
     s32 n = obj->nIdsA;

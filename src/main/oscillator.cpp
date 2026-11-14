@@ -300,6 +300,7 @@ void SetObjectSubGroupState(ObjectSubGroup* self, s32 state);
 void BeginLevelExit(s32 flag, s32 n);
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
+// Initialiser of the oscillator: no pending id, no entry current and no last time.
 void InitOscillator(Oscillator* self)
 {
     InitObject(self);
@@ -308,6 +309,8 @@ void InitOscillator(Oscillator* self)
     self->currentEntry = -1;
 }
 
+// Links a node into the owner's node list and points each element's slot pointers (two lists) at
+// the owner's matching item arrays.
 void AttachNodeToOwner(NodeOwner* self, void* unused, NodeAttachment* ctx)
 {
     OwnedNode* node = ctx->node54;
@@ -599,6 +602,7 @@ void ComputeOscillatorMaxDisplacement(Oscillator* self, Vec02* out)
     *out = sum;
 }
 
+// A pseudo-random float in [0, 1) from an integer, by a fixed integer hash.
 f32 HashToUnitFloat(s32 a0)
 {
     s32 n = a0;
@@ -628,11 +632,15 @@ f32 SampleSmoothNoise(f32 x, f32 y, f32 z)
     return a + u * (b - a);
 }
 
+// Bends a 0..1 value by a bias curve: value / (1 + (1/b - 2) * (1 - value)), which maps 0 to 0
+// and 1 to 1, and 0.5 to b.
 f32 ApplyBiasCurve(f32 value, f32 denominator)
 {
     return value / (1.0f + (1.0f / denominator - 2.0f) * (1.0f - value));
 }
 
+// A weighted blend of smooth-noise samples (one per octave record), shaped by the bias curve and
+// mapped into the object's lo..hi range.
 f32 EvaluateNoiseBlend(NoiseBlend* obj)
 {
     f32 num = 0.0f;
@@ -737,6 +745,8 @@ void EvaluateOscillator(Oscillator* self)
     self->lastTime = g_gameClock.time;
 }
 
+// Appends an entry (0xD0 bytes) with the X axis to the oscillator, taking an id (pending ids
+// first) for its frame, and makes it current.
 void AddOscillatorXEntry(Oscillator* o)
 {
     s32 n = o->entryCount;
@@ -764,6 +774,7 @@ void AddOscillatorXEntry(Oscillator* o)
     }
 }
 
+// Appends an entry with the Y and Z axes and blend scales of 0.5, and makes it current.
 void AddOscillatorYZEntry(Oscillator* self)
 {
     s32 n6 = self->currentEntry;
@@ -781,6 +792,7 @@ void AddOscillatorYZEntry(Oscillator* self)
     self->nextId = self->nextId + 1;
 }
 
+// The oscillator's current entry (0 when it has none); a value of 1 also marks its frames dirty.
 void* GetOscillatorCurrentEntry(Oscillator* obj, s32 value, s32 flag)
 {
     if (obj->entryCount == 0) {
@@ -792,16 +804,19 @@ void* GetOscillatorCurrentEntry(Oscillator* obj, s32 value, s32 flag)
     return (u8*)obj + (obj->currentEntry * 0xD0 + 0x50);
 }
 
+// The entry that the period functions work on (the current one, in mode 1).
 void* GetOscillatorEntryForPeriod(Oscillator* self, s32 mode)
 {
     return GetOscillatorCurrentEntry(self, mode, 0);
 }
 
+// The entry that the vector list functions work on (the current one, in mode 1).
 void* GetOscillatorEntryForVectors(void* self, s32 mode)
 {
     return GetOscillatorCurrentEntry((Oscillator*)self, mode, 1);
 }
 
+// Sets the current entry's rate to the reciprocal of period x (0 when x is 0).
 void SetOscillatorEntryPeriod(void* self, f32 x)
 {
     OscillatorEntryScale* s = (OscillatorEntryScale*)GetOscillatorEntryForPeriod((Oscillator*)self, 1);
@@ -809,6 +824,8 @@ void SetOscillatorEntryPeriod(void* self, f32 x)
     else s->scale = 1.0f / x;
 }
 
+// The period of the oscillator's current entry (the reciprocal of its stored rate; 0 when the
+// rate is 0).
 void GetOscillatorEntryPeriod(void* self, f32* out)
 {
     OscillatorEntryScale* s = (OscillatorEntryScale*)GetOscillatorEntryForPeriod((Oscillator*)self, 1);
@@ -817,6 +834,7 @@ void GetOscillatorEntryPeriod(void* self, f32* out)
     else *out = 1.0f / v;
 }
 
+// Appends (x, y, z, w) to a list of at most four vectors.
 void AppendVector4ToBuffer(VectorList4* buf, f32 x, f32 y, f32 z, f32 w)
 {
     u32 n = buf->count;
@@ -830,18 +848,21 @@ void AppendVector4ToBuffer(VectorList4* buf, f32 x, f32 y, f32 z, f32 w)
     }
 }
 
+// Appends the vector (a, b, c, d) to the first vector list (at +0x30) of the current entry.
 void AddOscillatorEntryVectorA(void* self, f32 a, f32 b, f32 c, f32 d)
 {
     u8* p = (u8*)GetOscillatorEntryForVectors(self, 1);
     AppendVector4ToBuffer((VectorList4*)(p + 0x30), a, b, c, d);
 }
 
+// Appends the vector (a, b, c, d) to the second vector list (at +0x80) of the current entry.
 void AddOscillatorEntryVectorB(void* self, f32 a, f32 b, f32 c, f32 d)
 {
     u8* p = (u8*)GetOscillatorEntryForVectors(self, 1);
     AppendVector4ToBuffer((VectorList4*)(p + 0x80), a, b, c, d);
 }
 
+// Initialiser of the transform object: the identity rotation.
 void InitTransformObject(TransformObject* self)
 {
     InitObject(self);
@@ -849,6 +870,8 @@ void InitTransformObject(TransformObject* self)
     *dst = *(Mat3_73*)&g_identityMatrix;
 }
 
+// Reads a transform object from the level data: a rotation, a position, then the property
+// records.
 void ReadTransformObject(TransformObject* self, void* stream)
 {
     ReadBufferedRotation3((BufferedStream*)stream, &self->rot);
@@ -856,6 +879,8 @@ void ReadTransformObject(TransformObject* self, void* stream)
     ReadPropertyRecords(self, stream);
 }
 
+// Moves the object under another parent, converting its position and rotation from the old
+// parent's frame to the new one's so it stays where it is.
 void ReparentObjectKeepingTransform(TransformObject* self, BaseObject* other)
 {
     TransformPointBetweenFrames((PlacedObject*)self->parent, (PlacedObject*)other, (Vec02*)&self->pos, (Vec02*)&self->pos);
@@ -863,6 +888,8 @@ void ReparentObjectKeepingTransform(TransformObject* self, BaseObject* other)
     ReparentObject(self, other);
 }
 
+// Converts the object's position and rotation from other's frame to world coordinates (in
+// place).
 void TransformObjectIntoFrame(TransformObject* self, BaseObject* other)
 {
     TransformPointBetweenFrames((PlacedObject*)other, 0, (Vec02*)&self->pos, (Vec02*)&self->pos);
@@ -879,11 +906,13 @@ void ConvertPointIntoObjectFrame(TransformObject* self, Vec02* p, Vec02* out)
     Vu0::Q(*out) = Vu0::RotateTransposed(self->rot, Vu0::Q(t));
 }
 
+// The object's position (at +0x40) converted from its parent's frame to world coordinates.
 void GetObjectWorldPosition(BaseObject* self, Vec02* out)
 {
     TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)((u8*)self + 0x40), out);
 }
 
+// The object's rotation (at +0x50) converted from its parent's frame to world coordinates.
 void GetObjectWorldRotation(BaseObject* self, Mat02* out)
 {
     TransformRotationBetweenFrames((PlacedObject*)self->parent, 0, (Mat02*)((u8*)self + 0x50), out);
@@ -958,6 +987,8 @@ void LoadArrivalPoint(TransformSet* self, void* other)
     }
 }
 
+// Copy for an arrival point: copies the object data, then makes its own copy of each object it
+// holds.
 void CopyArrivalPoint(TransformSet* self, TransformSet* other)
 {
     CopyObjectData(self, other);
@@ -967,6 +998,8 @@ void CopyArrivalPoint(TransformSet* self, TransformSet* other)
     }
 }
 
+// Start of an arrival point: starts the object itself and then each object it holds (after
+// giving it the arrival point's parent).
 void StartArrivalPoint(TransformSet* self)
 {
     StartObject(self);
@@ -1054,10 +1087,14 @@ void PlaceAtArrivalPoint(TransformSet* self)
     TriggerScriptEvent(self, 2, 0, 0);
 }
 
+// Adds or updates one of the object's four keyed values (UpsertKeyedEntry).
 s32 SetTransformObjectKeyedValue(TransformObject* self, s32 flag, s32 k1, s32 k2, s32 val) { return UpsertKeyedEntry((ZoneTargetEntry*)((TransformSet*)self)->keyed, 4, &((TransformSet*)self)->keyedCount, flag, k1, k2, val); }
 
+// Stores value and marks it as set (state 1).
 void StoreValueAndMarkSet(TimedValue* self, f32 value) { self->value = value; self->state = 1; }
 
+// Places the player at the arrival point (a, b) if there is one; otherwise, when no switched
+// collider is active, activates the current one.
 void FindOrActivateSwitchedCollider(World* unused, s32 a, s32 b)
 {
     void* r = FindArrivalPoint(a, b);
@@ -1071,6 +1108,8 @@ void FindOrActivateSwitchedCollider(World* unused, s32 a, s32 b)
     }
 }
 
+// The first object sub-group (class 0x7D, up to 64 gathered) whose selected field is set, or
+// null.
 ObjectSubGroup* FindActiveObjectSubGroup(void)
 {
     void* arr[64];
@@ -1193,6 +1232,8 @@ void StartObjectSubGroup(ObjectSubGroup* self)
     }
 }
 
+// Changes the sub-group's state (and stamps the time): leaving state 4 for anything but 5 runs the
+// copied caption's slot 0x15; entering state 5 sets a flag bit and acquires the pad select flag.
 void SetObjectSubGroupState(ObjectSubGroup* self, s32 state)
 {
     if (state != self->state) {
@@ -1263,6 +1304,8 @@ tail:
     TriggerScriptEvent(self, 2, 0, 0);
 }
 
+// Starts the screen fade of an object sub-group (to its exit target): the text and value pair
+// used is chosen by whether a level entry flag (bit 1 of the entry word, by f304) is set.
 void StartObjectSubGroupFade(ObjectSubGroup* self)
 {
     FadeRequest m;
@@ -1386,8 +1429,12 @@ void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
     }
 }
 
+// Initialiser of the lookup object: no id yet.
 void InitLookupObject(LookupObject* self) { InitPlacedObject(self); self->id = -1; }
 
+// Start of the lookup object: finds the object it names by id and keeps it in one of two fields
+// according to what it is (found2D8 when the descriptor's flag bit 0 is set, found2D4 for class
+// 0x7E).
 void StartLookupObject(LookupObject* self)
 {
     StartPlacedObject(self);
@@ -1403,12 +1450,16 @@ void StartLookupObject(LookupObject* self)
     }
 }
 
+// Pushes camera controller 7 for the object if it has not pushed one yet (flag at +0x310).
 void PushObjectCameraController(void* self) { if (!*(s32*)((u8*)self + 0x310)) { PushCameraController(g_camera, 7, &g_camera->ctl510, 0, self); *(s32*)((u8*)self + 0x310) = 1; } }
 
+// Removes the camera controller that PushObjectCameraController pushed, if it did.
 void RemoveObjectCameraController(void* self) { if (*(s32*)((u8*)self + 0x310)) { RemoveCameraControllers(g_camera, 0xB, 7, &g_camera->ctl510, 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
 
 void InitTrackedNodes(Rec36* a, ContactTracker* b);
 
+// Initialiser of the contact tracker: a collider whose tracked-node record points back to it,
+// with part mode 1 and a set of flag bits.
 void InitContactTracker(ContactTracker* self)
 {
     InitCollider(self);
@@ -1454,16 +1505,22 @@ void CollectTouchingObjects(ContactTracker* self, f32 dt) {
     }
 }
 
+// Copy of a contact tracker: copies the collider and points the tracked-node record at the
+// copy.
 void CopyContactTracker(ContactTracker* self, ContactTracker* src) { CopyCollider(self, src); self->rec.owner = self; }
 
 void ApplyContactTrackerTransform(ContactTracker* self, Camera* cam, ScaledTransform* xf) { ApplyPlacedObjectTransform(self, cam, xf); }
 
+// The tracker's reply to a launch request: OfferTrackedNodeLaunch, giving 1.
 int RequestContactTrackerLaunch(ContactTracker* self, void* source, TrackedNodeOffer* offer) { OfferTrackedNodeLaunch(&self->rec, source, offer); return 1; }
 
 void* GetContactTrackerRecord(void* self) { return &((ContactTracker*)self)->rec; }
 
+// Forgets all the tracker's found nodes.
 void ClearTrackedNodes(ContactTracker* self) { self->rec.found = 0; }
 
+// Initialiser of class 0x37: the contact tracker's, one more flag bit and collider anchors
+// (3, 0, 3, 0).
 void InitC37(C37* o) {
     InitContactTracker(o);
     o->flags538 |= ((u64)0x8000 << 28);
@@ -1584,8 +1641,11 @@ void UpdateC37(C37* self, f32 dt)
     FreePooledContactChain((World*)self->world, (Contact03*)result);
 }
 
+// Initialises the tracked-node record: its owner, f04 = 0 and f08 = 150.
 void InitTrackedNodes(Rec36* a, ContactTracker* b) { a->owner = b; a->f04 = 0; a->f08 = 150.0f; }
 
+// Fills the tracker's node list: the owner's children of class 0x7E or 0x6E, then the objects
+// found by each stored key (AddTrackedNode filters those). Called when the tracker starts.
 void FillTrackedNodes(Rec36* self)
 {
     ListFrame it;
@@ -1631,6 +1691,8 @@ void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
     }
 }
 
+// Fills out with the tracker record, its f04 value and the launch routine
+// (LaunchPlayerAtTrackedNode), and sends the owner script event 2.
 void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out)
 {
     GetActiveSwitchedCollider();
@@ -1641,8 +1703,11 @@ void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out)
     TriggerScriptEvent(self->owner, 2, 0, 0);
 }
 
+// Adds the key entry to the tracker's list of up to 32 keys (resolved by FillTrackedNodes).
 void AddTrackedKey(Rec36* self, s32 entry) { u32 n = self->count; if (n < 32) { self->keys[n] = entry; self->count = n + 1; } }
 
+// Adds e to the tracker's list of up to 32 nodes when it is one of the six accepted classes
+// (0x7E, 0x6E, 0x76, 0x70, 0x71, 0x81).
 void AddTrackedNode(Rec36* self, BaseObject* e) {
     if (self->found < 0x20) {
         if (IsObjectOfKind(e, 0x7E) || IsObjectOfKind(e, 0x6E) || IsObjectOfKind(e, 0x76) ||
@@ -1652,6 +1717,7 @@ void AddTrackedNode(Rec36* self, BaseObject* e) {
     }
 }
 
+// Removes the node value from the tracker's list (shifting the rest down), if it is there.
 void RemoveTrackedNode(Rec36* self, s32 value)
 {
     s32 i;

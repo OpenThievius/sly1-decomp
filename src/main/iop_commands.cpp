@@ -200,6 +200,9 @@ LINKER_REMNANT(func_0011D060);
 
 extern "C" void SyncDataCache(s32 a);
 
+// True when no reply buffer is armed or the IOP has filled the armed one (both marker words changed
+// from 0xFFFFFFFF); the buffer is then disarmed. Prints a message while the RPC is idle but the
+// reply has not arrived.
 s32 IsIopReplyReady(void)
 {
     u32* table;
@@ -222,6 +225,8 @@ s32 IsIopReplyReady(void)
     return 0;
 }
 
+// Arms a reply buffer for the IOP: remembers it and its word count and zeroes its first word and
+// the word after the count, which IsIopReplyReady waits to see filled.
 void ArmIopReplyBuffer(s32* ptr, s32 count)
 {
     g_iopReplyWordCount = count;
@@ -315,18 +320,21 @@ LINKER_REMNANT(func_0011D3E8);
 
 void QueueIopCommand(s32 cmd, s32 len, void* data, IopCallbackFn arg, u64 val);
 
+// Queues IOP command 8 (no data): tells the IOP the loaded sound banks changed.
 void NotifyIopBanksChanged(void)
 {
     QueueIopCommand(0x8, 0, 0, 0, 0);
 }
 
 
+// Queues IOP command 6: unloads a sound bank by handle.
 void UnloadSoundBank(s32 arg)
 {
     s32 local = arg;
     QueueIopCommand(6, 4, &local, 0, 0);
 }
 
+// Queues IOP command 9: sets a volume channel's value (callers scale by 1024).
 void SetIopVolumeChannel(s32 a0, s32 a1)
 {
     s32 buf[2];
@@ -335,6 +343,7 @@ void SetIopVolumeChannel(s32 a0, s32 a1)
     QueueIopCommand(0x9, 0x8, buf, 0, 0);
 }
 
+// Asks the IOP (command 10) for a volume channel's value.
 s32 GetIopVolumeChannel(s32 arg)
 {
     s32 local = arg;
@@ -342,6 +351,7 @@ s32 GetIopVolumeChannel(s32 arg)
 }
 
 
+// Queues IOP command 11 with a flag taken from the save data's option bit 0x40.
 s32 SetIopSoundOptionFlag(s32 arg)
 {
     s32 local = arg;
@@ -352,6 +362,7 @@ LINKER_REMNANT(func_0011D510);
 
 void QueueIopCommand(s32 cmd, s32 len, void* data, IopCallbackFn arg, u64 val);
 
+// Queues IOP command 0xD with two values (sound start-up sends 0 and 1).
 void QueueIopCommandD(s32 x, s32 y)
 {
     s32 args[2];
@@ -368,6 +379,8 @@ struct AddressCommandArgs
     s32 a2;
 };
 
+// Queues IOP command 0x4E: a channel index and two values (sound start-up sends it for channels 0
+// to 3).
 void QueueIopChannelConfig(s32 a0, s32 a1, s32 a2)
 {
     AddressCommandArgs args;
@@ -379,6 +392,8 @@ void QueueIopChannelConfig(s32 a0, s32 a1, s32 a2)
 
 s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
+// Starts a sound voice (IOP command 0x11) from a bank handle, a sound index and four parameters;
+// returns the voice handle the other voice functions take.
 s32 StartSoundVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     s32 args[6];
@@ -393,6 +408,7 @@ s32 StartSoundVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 
 LINKER_REMNANT(func_0011D5D8);
 
+// Queues IOP command 0x15: stops a voice.
 void StopSoundVoice(s32 value)
 {
     s32 buf = value;
@@ -401,6 +417,8 @@ void StopSoundVoice(s32 value)
 
 LINKER_REMNANT(func_0011D630);
 
+// Queues IOP command 0x13: pauses a voice; the menus and panels call it when they open,
+// ResumeIopVoice when they close.
 void PauseIopVoice(s32 value)
 {
     s32 local = value;
@@ -412,6 +430,7 @@ struct AddressArg
     s32 a0;
 };
 
+// Queues IOP command 0x14: resumes a voice paused with PauseIopVoice.
 void ResumeIopVoice(s32 a0)
 {
     AddressArg args;
@@ -421,30 +440,37 @@ void ResumeIopVoice(s32 a0)
 
 LINKER_REMNANT(func_0011D6A0);
 
+// Queues IOP command 0x16 for a mask of voices (all of them before the disc is synced).
 void SuspendIopVoices(u32 a0)
 {
     s32 buf = a0;
     QueueIopCommand(0x16, 4, &buf, 0, 0);
 }
 
+// Queues IOP command 0x17 for a mask of voices, undoing SuspendIopVoices.
 void ResumeIopVoices(u32 a0)
 {
     s32 buf = a0;
     QueueIopCommand(0x17, 4, &buf, 0, 0);
 }
 
+// Asks the IOP (command 0x19) whether a voice is still playing; returns the reply (0 when
+// finished).
 s32 IsVoiceBusy(s32 a0)
 {
     s32 buf = a0;
     return SendIopCommandAndWait(0x19, 4, &buf);
 }
 
+// Queues IOP command 0x19 for a voice with a callback function and a 64-bit argument that
+// PollIopCommands calls when the reply comes.
 void RequestVoiceCallback(s32 value, IopCallbackFn a1, u64 a2)
 {
     s32 local = value;
     QueueIopCommand(0x19, 4, &local, a1, a2);
 }
 
+// Asks the IOP (command 0x1A) whether a sound is in a bank; returns the reply.
 s32 TestSoundInBank(s32 a0, s32 a1)
 {
     s32 local[2];
@@ -455,6 +481,7 @@ s32 TestSoundInBank(s32 a0, s32 a1)
 
 LINKER_REMNANT(func_0011D790);
 
+// Queues IOP command 0x1B: voice volume (scaled by 1024) and pan.
 void SetVoiceVolumePan(s32 a0, s32 a1, s32 a2)
 {
     AddressCommandArgs args;
@@ -466,6 +493,7 @@ void SetVoiceVolumePan(s32 a0, s32 a1, s32 a2)
 
 s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
+// Asks the IOP (command 0x1C) for a sound's base pitch from its bank handle and index.
 s32 GetSoundPitchBase(s32 a, s32 b)
 {
     WordPairArgs w;
@@ -476,6 +504,7 @@ s32 GetSoundPitchBase(s32 a, s32 b)
 
 LINKER_REMNANT(func_0011D808);
 
+// Queues IOP command 0x1E: sets a voice's pitch (callers clamp it to -0x8000..0x7FFF).
 void SetVoicePitch(s32 x, s32 y)
 {
     s32 args[2];
@@ -486,6 +515,8 @@ void SetVoicePitch(s32 x, s32 y)
 
 LINKER_REMNANT(func_0011D848);
 
+// Queues IOP command 0x22: fades a voice out, with its fade parameters; StopSoundRecord uses it
+// when the fade time is not 0.
 void FadeOutSoundVoice(s32 a0, s32 a1, s32 a2, s32 a3)
 {
     s32 local[4];
@@ -498,6 +529,7 @@ void FadeOutSoundVoice(s32 a0, s32 a1, s32 a2, s32 a3)
 
 LINKER_REMNANT(func_0011D8A0);
 
+// Queues IOP command 0x29: sets one parameter (by index) of a voice.
 void SetVoiceParam(s32 a0, s32 a1, s32 a2)
 {
     AddressCommandArgs args;
@@ -507,6 +539,7 @@ void SetVoiceParam(s32 a0, s32 a1, s32 a2)
     QueueIopCommand(0x29, 0xC, &args, 0, 0);
 }
 
+// Asks the IOP (command 0x28) for one parameter of a voice and returns the reply.
 s32 GetVoiceParam(s32 a, s32 b)
 {
     WordPairArgs w;
@@ -519,6 +552,7 @@ LINKER_REMNANT(func_0011D920);
 
 struct WordArg { s32 a; };
 
+// Queues IOP command 0x27 with a sound level (callers pass the level plus 0x14).
 void SendIopSoundLevel(s32 a)
 {
     WordArg w;
@@ -626,6 +660,8 @@ void QueueIopCommand(s32 cmd, s32 len, void* data, IopCallbackFn arg, u64 val)
     CommitQueuedIopCommand();
 }
 
+// Counts the command just written into the current command buffer and polls the IOP; the last step
+// of queueing a command.
 void CommitQueuedIopCommand()
 {
     s32* p = g_iopCommandBuffers[g_iopBufferIndex];
@@ -653,6 +689,9 @@ void FlushIopCommandBuffer(void)
     g_iopCommandSpace[n] = 0xFFC;
 }
 
+// Asks the IOP (command 0x2A) to take over disc reads, after draining pending sound bank commands
+// and syncing any read; the reply is kept as the flag that routes the disc functions through the
+// IOP. Returns 0 when already enabled.
 s32 EnableIopDiscAccess(s32 a, s32 b, s32 c, s32 d)
 {
     s32 buf[4];
@@ -673,6 +712,7 @@ s32 EnableIopDiscAccess(s32 a, s32 b, s32 c, s32 d)
     return r;
 }
 
+// Queues IOP command 0x34: stops every sound.
 void StopAllIopSounds()
 {
     QueueIopCommand(0x34, 0, 0, 0, 0);
@@ -682,6 +722,8 @@ LINKER_REMNANT(func_0011E040);
 
 struct PackedCommandArgs { s32 w0; s32 w1; s32 w2; s32 w3; s32 w4; s32 w5; s32 w6; };
 
+// Starts a streamed voice (IOP command 0x2C) from a location, two packed halfword pairs and three
+// flags and returns its voice handle.
 s32 StartStreamedVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)
 {
     PackedCommandArgs buf;
@@ -697,18 +739,22 @@ s32 StartStreamedVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s
 
 LINKER_REMNANT(func_0011E0A8);
 
+// Queues IOP command 0x2E for a stream voice; CheckStreamVoicePending sends it while no reply is
+// pending.
 void QueryIopStreamVoice(s32 a0)
 {
     s32 buf = a0;
     QueueIopCommand(0x2E, 4, &buf, 0, 0);
 }
 
+// Queues IOP command 0x4F for a stream handle with a callback function and a 64-bit argument.
 void RequestStreamCallback(s32 a0, IopCallbackFn a1, u64 a2)
 {
     s32 buf = a0;
     QueueIopCommand(0x4F, 4, &buf, a1, a2);
 }
 
+// Sends IOP command 0x36 and waits; follows StopAllIopSounds.
 void WaitForIopSoundStop(s32 a0)
 {
     s32 buf = a0;
@@ -718,6 +764,9 @@ void WaitForIopSoundStop(s32 a0)
 typedef struct ReadMode ReadMode;
 extern "C" s32 ReadDiscSectors(s32 lsn, s32 sectors, void* buffer, ReadMode* mode);
 
+// Starts a disc read (sector, count, buffer, mode): without IOP disc access it uses the direct
+// read; otherwise, when the IOP is idle, it marks the shared packet busy and queues IOP command
+// 0x38. Returns 1 when started, 0 when the caller must retry.
 s32 StartDiscRead(s32 a0, s32 a1, void* a2, ReadMode* a3)
 {
     if (g_iopDiscAccess == 0) {
@@ -741,6 +790,9 @@ s32 StartDiscRead(s32 a0, s32 a1, void* a2, ReadMode* a3)
 extern "C" s32 SyncDiscNCommand(s32 mode);
 extern "C" void SyncDataCache(s32 value);
 
+// Waits for the running disc read: without IOP disc access it uses the direct sync; otherwise it
+// polls until the IOP clears the shared packet's busy word. With flag 1 it only tests and returns 1
+// while still busy.
 s32 SyncDiscRead(s32 flag)
 {
     if (g_iopDiscAccess == 0) {
@@ -765,6 +817,8 @@ s32 SyncDiscRead(s32 flag)
 
 extern "C" s32 StopDiscRead();
 
+// Closes the disc stream: the direct stop without IOP disc access, otherwise IOP command 0x37
+// (returns 1).
 s32 CloseDiscStream()
 {
     if (g_iopDiscAccess == 0)
@@ -777,6 +831,8 @@ s32 CloseDiscStream()
 // access keeps lui+addiu+lw 16(base).
 extern "C" s32 GetDiscError();
 
+// The error of the last disc read: the direct one without IOP disc access, else the result word the
+// IOP wrote in the shared packet.
 s32 GetDiscReadError()
 {
     if (g_iopDiscAccess == 0)
@@ -784,6 +840,7 @@ s32 GetDiscReadError()
     return g_iopSharedPacket.result;
 }
 
+// Queues IOP command 0xE: a channel number and a value (used for channel 2's setting).
 void SetIopChannelValue(s32 a0, s32 a1)
 {
     s32 local[2];
@@ -792,6 +849,7 @@ void SetIopChannelValue(s32 a0, s32 a1)
     QueueIopCommand(0xE, 8, local, 0, 0);
 }
 
+// Queues IOP command 0xF: a channel number and two values.
 void SetIopChannelValuePair(s32 a0, s32 a1, s32 a2)
 {
     s32 local[3];
@@ -801,6 +859,7 @@ void SetIopChannelValuePair(s32 a0, s32 a1, s32 a2)
     QueueIopCommand(0xF, 12, local, 0, 0);
 }
 
+// Queues IOP command 0x51 with two values (sound start-up sends 2 and 4).
 void QueueIopCommand51(s32 a0, s32 a1)
 {
     s32 local[2];
@@ -813,6 +872,8 @@ LINKER_REMNANT(func_0011E3D8);
 
 s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
+// Opens the IOP's ring buffer for the movie stream (command 0x3B, five words) and returns the
+// reply, the ring's address.
 s32 OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     s32 args[5];
@@ -824,6 +885,7 @@ s32 OpenIopRing(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
     return SendIopCommandAndWait(0x3B, 0x14, args);
 }
 
+// Sends IOP command 0x3D and waits: resets the movie ring buffer.
 void ResetIopRing(void)
 {
     SendIopCommandAndWait(0x3D, 0, 0);
@@ -831,11 +893,13 @@ void ResetIopRing(void)
 
 LINKER_REMNANT(func_0011E488);
 
+// Sends IOP command 0x3C and waits: stops the movie stream.
 void StopIopMovieStream(void)
 {
     SendIopCommandAndWait(0x3C, 0, 0);
 }
 
+// Sends IOP command 0x3E with five words and waits; UpdateMovieStream calls it.
 void UpdateIopMovieStream(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     s32 args[5];
@@ -849,6 +913,7 @@ void UpdateIopMovieStream(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
 
 s32 SendIopCommandAndWait(s32 id, s32 size, void* data);
 
+// Asks the IOP (command 0x40) for its position in the movie ring buffer.
 s32 GetIopRingPosition()
 {
     return SendIopCommandAndWait(0x40, 0, 0);
@@ -856,6 +921,7 @@ s32 GetIopRingPosition()
 
 LINKER_REMNANT(func_0011E520);
 
+// Converts a relative speed to a pitch offset (speed * 1524 / 741) for the Doppler effect.
 s32 ConvertSpeedToPitchOffset(s32 a0)
 {
     return (a0 * 0x5F4) / 0x2E5;

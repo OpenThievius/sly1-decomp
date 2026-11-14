@@ -60,6 +60,7 @@ s32 ReadBufferedU32(BufferedStream* r);
 
 extern u32 g_scriptStreamExtras;
 
+// Takes an entry from the property ref pool and clears its 12 bytes.
 void* TakeZeroedPoolEntry(void)
 {
     void* p = TakePoolEntry(&g_propertyRefPool);
@@ -67,6 +68,8 @@ void* TakeZeroedPoolEntry(void)
     return p;
 }
 
+// Copies a chain of script value nodes: clones each node's value and makes a new node for each
+// next link.
 void CopyScriptValueChain(R11B008Node* src, R11B008Node* dst, s32 first)
 {
     CloneScriptValue(src, dst, first);
@@ -77,6 +80,7 @@ void CopyScriptValueChain(R11B008Node* src, R11B008Node* dst, s32 first)
     }
 }
 
+// Takes a node from the value node pool, clears its 12 bytes and gives it the tag -1 (empty).
 R11B008Node* NewScriptValueNode(void)
 {
     R11B008Node* node = (R11B008Node*)TakePoolEntry(&g_valueNodePool);
@@ -86,11 +90,14 @@ R11B008Node* NewScriptValueNode(void)
     return node;
 }
 
+// Pool callback: destroys the node's value (without freeing its memory).
 void DestroyScriptValueNode(R11B008Node* self)
 {
     DestroyScriptValue(self, 2);
 }
 
+// Copies the record's five words into dst, using first as the first word when it is nonzero and
+// the source's own otherwise.
 void CopyScriptValueRecord(R11AFC8* src, R11AFC8* dst, s32 first)
 {
     if (first == 0) {
@@ -103,6 +110,7 @@ void CopyScriptValueRecord(R11AFC8* src, R11AFC8* dst, s32 first)
     dst->w10 = src->w10;
 }
 
+// Takes a record from the payload pool and clears its 0x14 bytes.
 R11AFC8* NewScriptValueRecord(void)
 {
     R11AFC8* p = (R11AFC8*)TakePoolEntry(&g_payloadPool);
@@ -110,12 +118,14 @@ R11AFC8* NewScriptValueRecord(void)
     return p;
 }
 
+// Gives the value the tag -1 (empty).
 ScriptValue* InitScriptValue(ScriptValue* self)
 {
     self->tag = -1;
     return self;
 }
 
+// Makes self a copy of src (tag and word) and adds a reference to its payload.
 ScriptValue* CopyConstructScriptValue(ScriptValue* self, const ScriptValue* src)
 {
     AddRefScriptValuePayload(src);
@@ -124,6 +134,7 @@ ScriptValue* CopyConstructScriptValue(ScriptValue* self, const ScriptValue* src)
     return self;
 }
 
+// Releases the value's payload and, when bit 0 of flags is set, frees the value's memory.
 void DestroyScriptValue(ScriptValue* self, s32 flags)
 {
     ReleaseScriptValuePayload(self);
@@ -132,6 +143,8 @@ void DestroyScriptValue(ScriptValue* self, s32 flags)
     }
 }
 
+// Makes self a copy of src: adds a reference to src's payload, drops the one self had, then
+// copies its tag and word.
 ScriptValue* AssignScriptValue(ScriptValue* self, const ScriptValue* src)
 {
     AddRefScriptValuePayload(src);
@@ -257,6 +270,9 @@ void CloneScriptValue(const ScriptValue* src, ScriptValue* dst, s32 first)
     }
 }
 
+// Drops the value's reference on its pooled payload when its tag is one of the pooled kinds
+// (vector A 0x16, matrix 0x17, vector B 0x18, pair 0x19, triple 0x1A); other tags hold plain
+// words.
 void ReleaseScriptValuePayload(ScriptValue* self)
 {
     switch (self->tag) {
@@ -268,6 +284,8 @@ void ReleaseScriptValuePayload(ScriptValue* self)
     }
 }
 
+// Adds a reference to the value's pooled payload (tags 0x16 to 0x1A, as in
+// ReleaseScriptValuePayload) so a copy can share it.
 void AddRefScriptValuePayload(const ScriptValue* self)
 {
     switch (self->tag) {
@@ -279,12 +297,15 @@ void AddRefScriptValuePayload(const ScriptValue* self)
     }
 }
 
+// Releases the value's payload and sets just its tag (no payload), as in tag 0x22 for a result
+// with no value.
 void SetScriptValueTag(ScriptValue* self, s32 tag)
 {
     ReleaseScriptValuePayload(self);
     self->tag = tag;
 }
 
+// Makes the value an int (tag 0x14).
 void SetScriptValueInt(ScriptValue* self, s32 value)
 {
     ReleaseScriptValuePayload(self);
@@ -292,6 +313,7 @@ void SetScriptValueInt(ScriptValue* self, s32 value)
     self->tag = 0x14;
 }
 
+// Makes the value a float (tag 0x15).
 void SetScriptValueFloat(ScriptValue* self, f32 value)
 {
     ReleaseScriptValuePayload(self);
@@ -299,6 +321,7 @@ void SetScriptValueFloat(ScriptValue* self, f32 value)
     self->tag = 0x15;
 }
 
+// Makes the value a bool (tag 0x1B), 1 for any nonzero flag.
 void SetScriptValueBool(ScriptValue* self, s32 flag)
 {
     ReleaseScriptValuePayload(self);
@@ -309,6 +332,7 @@ void SetScriptValueBool(ScriptValue* self, s32 flag)
     self->tag = 0x1B;
 }
 
+// Makes the value a pointer (tag 0x1C).
 void SetScriptValuePointer(ScriptValue* self, void* p)
 {
     ReleaseScriptValuePayload(self);
@@ -316,6 +340,7 @@ void SetScriptValuePointer(ScriptValue* self, void* p)
     self->tag = 0x1C;
 }
 
+// Makes the value an int of tag 0x1D.
 void SetScriptValueIntB(ScriptValue* self, s32 value)
 {
     ReleaseScriptValuePayload(self);
@@ -323,6 +348,7 @@ void SetScriptValueIntB(ScriptValue* self, s32 value)
     self->tag = 0x1D;
 }
 
+// Makes the value a chain of nodes (tag 0x1E).
 void SetScriptValueChain(ScriptValue* self, R11B008Node* node)
 {
     ReleaseScriptValuePayload(self);
@@ -330,6 +356,7 @@ void SetScriptValueChain(ScriptValue* self, R11B008Node* node)
     self->tag = 0x1E;
 }
 
+// Makes the value a record (tag 0x1F).
 void SetScriptValueRecord(ScriptValue* self, R11AFC8* rec)
 {
     ReleaseScriptValuePayload(self);
@@ -337,6 +364,8 @@ void SetScriptValueRecord(ScriptValue* self, R11AFC8* rec)
     self->tag = 0x1F;
 }
 
+// Makes the value a vector A (tag 0x16) pointing at the pooled payload v, taking a reference on
+// it.
 void SetScriptValueVectorA(ScriptValue* self, f32* v)
 {
     AddRefVectorAPayload(v);
@@ -345,6 +374,7 @@ void SetScriptValueVectorA(ScriptValue* self, f32* v)
     self->tag = 0x16;
 }
 
+// Makes the value a matrix (tag 0x17) pointing at the pooled payload v, taking a reference on it.
 void SetScriptValueMatrix(ScriptValue* self, f32* v)
 {
     (void)AddRefMatrixPayload(v);
@@ -353,6 +383,8 @@ void SetScriptValueMatrix(ScriptValue* self, f32* v)
     self->tag = 23;
 }
 
+// Makes the value a vector B (tag 0x18) pointing at the pooled payload v, taking a reference on
+// it.
 void SetScriptValueVectorB(ScriptValue* self, f32* v)
 {
     (void)AddRefVectorBPayload(v);
@@ -361,6 +393,7 @@ void SetScriptValueVectorB(ScriptValue* self, f32* v)
     self->tag = 24;
 }
 
+// Makes the value a pair (tag 0x19) pointing at the pooled payload v, taking a reference on it.
 void SetScriptValuePair(ScriptValue* self, f32* v)
 {
     (void)AddRefPairPayload(v);
@@ -369,6 +402,7 @@ void SetScriptValuePair(ScriptValue* self, f32* v)
     self->tag = 25;
 }
 
+// Makes the value a triple (tag 0x1A) pointing at the pooled payload v, taking a reference on it.
 void SetScriptValueTriple(ScriptValue* self, f32* v)
 {
     (void)AddRefTriplePayload(v);
@@ -377,6 +411,7 @@ void SetScriptValueTriple(ScriptValue* self, f32* v)
     self->tag = 26;
 }
 
+// Makes the value a pointer of tag 0x20.
 void SetScriptValuePointerB(ScriptValue* self, void* p)
 {
     ReleaseScriptValuePayload(self);
@@ -384,6 +419,7 @@ void SetScriptValuePointerB(ScriptValue* self, void* p)
     self->tag = 0x20;
 }
 
+// Makes the value an int of tag 0x21.
 void SetScriptValueIntC(ScriptValue* self, s32 value)
 {
     ReleaseScriptValuePayload(self);
@@ -391,6 +427,8 @@ void SetScriptValueIntC(ScriptValue* self, s32 value)
     self->i = value;
 }
 
+// Gives the value as an int (tag 0x14) in out: copied as it is when it already is one, otherwise
+// the float truncated.
 ScriptValue* ConvertScriptValueToInt(ScriptValue* out, const ScriptValue* in)
 {
     if (in->tag == 0x14) {
@@ -405,6 +443,8 @@ ScriptValue* ConvertScriptValueToInt(ScriptValue* out, const ScriptValue* in)
     return out;
 }
 
+// Gives the value as a float (tag 0x15) in out: copied as it is when it already is one, otherwise
+// the int converted.
 ScriptValue* ConvertScriptValueToFloat(ScriptValue* out, const ScriptValue* in)
 {
     if (in->tag == 0x15) {
@@ -546,6 +586,8 @@ R11B008Node* ReadScriptValueChain(BufferedStream* rd)
     return n;
 }
 
+// Adds a new entry with the key and a copy of value at the head of the list, and gives back a
+// value with tag 0x22 in out.
 ScriptValue* AddKeyedValue(ScriptValue* out, R11B008List* list, s32 key, const ScriptValue* value)
 {
     ScriptValue tmp;
@@ -561,6 +603,8 @@ ScriptValue* AddKeyedValue(ScriptValue* out, R11B008List* list, s32 key, const S
     return out;
 }
 
+// Looks for key in the list and, if found, assigns value to that entry; either way it gives back
+// a value with tag 0x22 in out.
 ScriptValue* UpdateKeyedValue(ScriptValue* out, R11B008List* list, s32 key, const ScriptValue* value)
 {
     ScriptValue tmp;
@@ -584,6 +628,8 @@ done:
     return out;
 }
 
+// Looks for key in the list; if found, copies its value into *out when out is given, and gives 1,
+// else 0.
 s32 FindKeyedValue(R11B008List* list, s32 key, ScriptValue* out)
 {
     R11B008Key* n = list->head;
@@ -599,6 +645,8 @@ s32 FindKeyedValue(R11B008List* list, s32 key, ScriptValue* out)
     return 0;
 }
 
+// Makes a copy of the list's whole chain of keyed values in a new first node and sets it as out's
+// head.
 void CopyKeyedList(R11B008List* self, R11B008List* out)
 {
     R11B008Key* copy = NewKeyedValue();
@@ -606,6 +654,7 @@ void CopyKeyedList(R11B008List* self, R11B008List* out)
     out->head = copy;
 }
 
+// Allocates a keyed list (one word, its head) from front memory, empty.
 R11B008List* NewKeyedList(void)
 {
     R11B008List* p = (R11B008List*)AllocateZeroedFrontMemory(4);
@@ -613,6 +662,9 @@ R11B008List* NewKeyedList(void)
     return p;
 }
 
+// Sets up the script value pools at startup: the mark roots, then the pools of value nodes,
+// scopes, keyed values, payload records and property refs (each with the callback that cleans up
+// an entry the collector frees), and the payload pools.
 void InitScriptValuePools(void)
 {
     ResetMarkRoots((MarkStacks*)g_markStacks);
@@ -627,6 +679,7 @@ void InitScriptValuePools(void)
     InitEntryPool(&g_propertyRefPool, 0xC, 0x80);
 }
 
+// Shuts down the pools InitScriptValuePools set up, in the same order, and the mark roots.
 void ShutDownScriptValuePools(void)
 {
     ShutDownEntryPool(&g_valueNodePool);

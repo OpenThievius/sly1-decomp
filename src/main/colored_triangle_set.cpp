@@ -66,6 +66,7 @@ Quad128 TransformVector4(void* m, Quad128 v);
 
 void DrawTriangleGroups(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d);
 
+// Copies the object's data but keeps its own bits (the keep field).
 void CopyPointObject(C80* self, C80* src)
 {
     KeptBits tmp = self->keep;
@@ -73,6 +74,7 @@ void CopyPointObject(C80* self, C80* src)
     self->keep = tmp;
 }
 
+// Starts the object and finds its target object by id (lookup mode 0x104) unless it has none.
 void StartPointObject(C80* self)
 {
     StartObject(self);
@@ -81,6 +83,7 @@ void StartPointObject(C80* self)
     }
 }
 
+// Initialises the object and makes it the game's colored triangle set (global).
 void InitColoredTriangles(ColoredTriangleSet* self)
 {
     InitObject(self);

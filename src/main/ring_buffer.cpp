@@ -15,12 +15,14 @@ extern const Fn_Table g_baseReaderMethods[6] = { 0, 0, 0, (Fn_Table)ReadNothing,
 extern const Fn_Table g_memoryReaderMethods[6] = { 0, 0, 0, (Fn_Table)ReadMemoryReader, 0, 0 };
 
 
+// Sets the ring's size and buffer and resets it.
 void InitRingBuffer(RingBuffer* ring, s32 size, u8* buf) {
 	ring->size = size;
 	ring->buf = buf;
 	ResetRingBuffer(ring);
 }
 
+// Empties the ring: all its space free and its positions at 0.
 void ResetRingBuffer(RingBuffer* ring)
 {
     ring->written = 0;
@@ -96,6 +98,8 @@ s32 DrainRingBuffer(RingBuffer* self, s32 n, StreamSink* o)
     return total;
 }
 
+// Puts count bytes from memory into the ring buffer, through a memory reader; gives back the
+// number taken, 0 for count 0.
 s32 FillRingBufferFromMemory(RingBuffer* self, s32 count, void* src)
 {
     if (count != 0) {
@@ -110,6 +114,7 @@ s32 FillRingBufferFromMemory(RingBuffer* self, s32 count, void* src)
     return 0;
 }
 
+// Releases n held bytes (all of them for 0) back as free space.
 void ConsumeSpan(RingBuffer* p, s32 n)
 {
     if (n == 0) {
@@ -124,6 +129,8 @@ void ConsumeSpan(RingBuffer* p, s32 n)
 
 extern "C" void* CopyBytes(void* dst, void* src, s32 n);
 
+// Reads up to want bytes from the memory reader into dst, advances it and gives back the count
+// read.
 s32 ReadMemoryReader(MemoryReader* self, s32 want, void* dst)
 {
     s32 n = self->remain;
@@ -138,6 +145,7 @@ s32 ReadMemoryReader(MemoryReader* self, s32 want, void* dst)
     return n;
 }
 
+// A reader that gives back no data: always 0.
 int ReadNothing() {
 	return 0;
 }

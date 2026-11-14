@@ -32,6 +32,8 @@ struct C76 {
     f32 fB4;
 };
 
+// Initialiser of class 0x4C: the class 0x4B object's, with f88 = 1, fA8 = 8, fAC = 9 and the
+// largest float in fB4.
 void InitC76Object(void* a0)
 {
     C76* self = (C76*)a0;

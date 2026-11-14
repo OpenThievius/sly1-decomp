@@ -120,6 +120,8 @@ s32 g_cursorAnimatorCount = 0;
 CursorAnimator** g_cursorAnimators = 0;
 AnimCursor* g_lastPendingCursor = 0;
 
+// ORs the image's texture word with the palette cell's bits (if there is one) for entry i and cell
+// j; the cell table has three cells per entry for records of kind 0.
 u64 GetTextureRegisterBits(TextureTable* t, s32 i, s32 j)
 {
     ImageRecord* e = ((ImageRecord**)t->entries)[i];
@@ -177,6 +179,8 @@ void SendTextureRegisters(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx
     AddGifRegisterWrite((PacketWriter*)ctx, kindC, e.bits);
 }
 
+// Reads a 12-byte palette record, makes its data an address from the image base and computes its
+// size in 16-byte blocks.
 void ReadImageRecordB(void* a0, PaletteRecord* a1)
 {
     ReadBufferedStreamBytes((BufferedStream*)a0, 12, a1);
@@ -209,6 +213,8 @@ void LoadImageRecordsB(void* self)
     }
 }
 
+// Reads a 0x14-byte image record, makes its data an address from the image base and computes its
+// size in 16-byte blocks.
 void ReadImageRecordA(void* self, ImageRecord* obj)
 {
     ReadBufferedStreamBytes((BufferedStream*)self, 0x14, obj);
@@ -406,6 +412,8 @@ void LoadScreenResources(BufferedStream* self)
     g_maskedImagesPacket = BuildMaskedImagesPacket(0x20000000);
 }
 
+// Sends the resident images (mask 0x10000000) to the GIF with a small temporary allocator and
+// resets the active mask to 0.
 void SendResidentImages(void)
 {
     s32 scratch[4];
@@ -414,6 +422,8 @@ void SendResidentImages(void)
     g_activeImageMask = 0;
 }
 
+// Flushes the cursors, and when the mask changes sends the images of the new mask to the GIF,
+// rebuilds the animated records' packets and the mesh queue, and updates the listed objects.
 void SwitchActiveImageMask(s32 self)
 {
     FlushCursors();
@@ -729,6 +739,8 @@ void ConvertHsvToRgb(Quad_001B4580* hsv, Quad_001B4580* rgb)
     }
 }
 
+// Converts a colour from hue, saturation, value (the last two 0 to 255) to red, green, blue (0 to
+// 255).
 void ConvertHsv255ToRgb255(Quad_001B4580* src, f32* dst)
 {
     Quad_001B4580 tmp = *src;
@@ -742,6 +754,8 @@ void ConvertHsv255ToRgb255(Quad_001B4580* src, f32* dst)
 
 void ConvertRgbToHsv(Quad_001B4580* p, f32* dst);
 
+// Converts a colour from red, green, blue (0 to 255) to hue, saturation, value with the last two
+// scaled to 0 to 255.
 void ConvertRgb255ToHsv255(Quad_001B4580* src, f32* dst)
 {
     Quad_001B4580 tmp;
@@ -755,6 +769,7 @@ void ConvertRgb255ToHsv255(Quad_001B4580* src, f32* dst)
 
 LINKER_REMNANT(func_001B4670);
 
+// Looks up the animation record with this key in the table; null for -1 or no match.
 AnimRecord* FindAnimRecord(s32 key)
 {
     if (key == -1) {
@@ -774,6 +789,8 @@ AnimRecord* FindAnimRecord(s32 key)
     return 0;
 }
 
+// Moves the cursor to a frame (clamped to its record) and, if it changed, queues it for the next
+// flush.
 void SetCursorFrame(AnimCursor* a0, s32 a1)
 {
     if (a0->record != 0) {
@@ -799,6 +816,7 @@ void SetCursorFrame(AnimCursor* a0, s32 a1)
     }
 }
 
+// Moves the cursor's texture coordinates and, if they changed, queues it for the next flush.
 void SetCursorCoords(AnimCursor* a0, f32 a, f32 b)
 {
     if (a0->record == 0) return;
@@ -813,6 +831,9 @@ void SetCursorCoords(AnimCursor* a0, f32 a, f32 b)
     g_pendingCursors = a0;
 }
 
+// Applies every cursor changed since the last flush: for each link of a cursor with flag 1 the
+// destination's data pointer is moved to the current frame, and the destination mesh queue entry is
+// resubmitted. The pending list is then emptied.
 void FlushCursors(void)
 {
     AnimCursor* n = g_pendingCursors;
@@ -831,6 +852,7 @@ void FlushCursors(void)
     g_lastPendingCursor = 0;
 }
 
+// Runs the step method of each cursor animator, at most once per game tick (ClaimAnimatorStep).
 void StepAnimators(f32 t)
 {
     for (s32 i = 0; i < g_cursorAnimatorCount; i++) {
@@ -844,6 +866,7 @@ void StepAnimators(f32 t)
     }
 }
 
+// Gives the size in bytes of an animator of type 1 to 8, 0 for another.
 s32 GetAnimatorSize(s32 k)
 {
     switch (k) {
@@ -865,6 +888,8 @@ s32 GetAnimatorSize(s32 k)
     return 0;
 }
 
+// Gives the method table of animator type 1 to 8 (frame run, ping-pong, random jump, angle frame,
+// crossfade, scroll, circle, triangle), null otherwise.
 void* GetAnimatorMethods(s32 n)
 {
     switch (n) {
@@ -880,6 +905,8 @@ void* GetAnimatorMethods(s32 n)
     return 0;
 }
 
+// Reads an animator type from the stream (0 means none), allocates the animator of that size, sets
+// its method table and has it load its 0x1C bytes of parameters.
 CursorAnimator* ReadAnimator(void* a0)
 {
     s32 type = ReadBufferedU16((BufferedStream*)a0);
@@ -897,6 +924,7 @@ CursorAnimator* ReadAnimator(void* a0)
     return result;
 }
 
+// Stores the record key and sets cursor flag 1 (and 4 when the parameters ask for it).
 void LoadAnimatorBase(CursorAnimator* self, const AnimatorParams* src)
 {
     s32 old = self->cursor.flags;
@@ -907,6 +935,7 @@ void LoadAnimatorBase(CursorAnimator* self, const AnimatorParams* src)
     }
 }
 
+// Looks up the animator's record by its key if it has none yet.
 void BindAnimatorRecord(CursorAnimator* self)
 {
     if (self->cursor.record == 0) {
@@ -914,6 +943,7 @@ void BindAnimatorRecord(CursorAnimator* self)
     }
 }
 
+// True the first time it is called in a game tick, so an animator is stepped only once per tick.
 s32 ClaimAnimatorStep(CursorAnimator* a0)
 {
     if (a0->stamp != g_gameTime) {
@@ -923,11 +953,13 @@ s32 ClaimAnimatorStep(CursorAnimator* a0)
     return 0;
 }
 
+// Progress of an animator that has none: always 0.
 f32 GetAnimatorZeroProgress(void)
 {
     return 0.0f;
 }
 
+// Gives the animator's cursor if the record has its key, else null.
 AnimCursor* FindAnimatorCursor(CursorAnimator* self, const AnimRecord* key)
 {
     if (key->key == self->recordKey) {
@@ -936,6 +968,7 @@ AnimCursor* FindAnimatorCursor(CursorAnimator* self, const AnimRecord* key)
     return 0;
 }
 
+// Loads the base, then the play length and wait ranges and the starting position.
 void LoadFrameRunAnimator(FrameRunAnimator* p, AnimatorParams* s)
 {
     LoadAnimatorBase(p, s);
@@ -946,6 +979,8 @@ void LoadFrameRunAnimator(FrameRunAnimator* p, AnimatorParams* s)
     p->pos = (f32)s->u14;
 }
 
+// Binds the record, then draws the play length and wait from their ranges: the rate is the frame
+// count over the length, and the starting wait is the one drawn.
 void BindFrameRunAnimator(FrameRunAnimator* p)
 {
     BindAnimatorRecord(p);
@@ -986,11 +1021,13 @@ void StepFrameRunAnimator(FrameRunAnimator* p, f32 dt)
     SetCursorFrame(&p->cursor, (s32)t);
 }
 
+// How far through a play and its wait the animator is, 0 to 1.
 f32 GetFrameRunProgress(FrameRunAnimator* p)
 {
     return (p->pos / p->rate) / ((f32)p->cursor.record->count / p->rate + p->wait0);
 }
 
+// Loads the base, then the play length and wait ranges and the starting position.
 void LoadFramePingPongAnimator(FramePingPongAnimator* p, AnimatorParams* s)
 {
     LoadAnimatorBase(p, s);
@@ -1001,6 +1038,8 @@ void LoadFramePingPongAnimator(FramePingPongAnimator* p, AnimatorParams* s)
     p->pos = (f32)s->u14;
 }
 
+// Binds the record, then draws the play length and wait from their ranges: the rate is twice the
+// frame count over the length, and the starting wait is the one drawn.
 void BindFramePingPongAnimator(FramePingPongAnimator* p)
 {
     BindAnimatorRecord(p);
@@ -1044,6 +1083,8 @@ void StepFramePingPongAnimator(FramePingPongAnimator* p, f32 dt)
     SetCursorFrame(&p->cursor, (s32)p->pos);
 }
 
+// How far through a play and its wait the animator is, 0 to 1 (the position counted back from the
+// end on the way back).
 f32 GetFramePingPongProgress(FramePingPongAnimator* p)
 {
     f32 x = p->rate;
@@ -1057,6 +1098,7 @@ f32 GetFramePingPongProgress(FramePingPongAnimator* p)
     return (a / x) / ((f32)(p->cursor.record->count << 1) / x + p->wait0);
 }
 
+// Loads the base and the shortest and longest wait.
 void LoadRandomJumpAnimator(RandomJumpAnimator* p, AnimatorParams* s)
 {
     LoadAnimatorBase(p, s);
@@ -1064,6 +1106,8 @@ void LoadRandomJumpAnimator(RandomJumpAnimator* p, AnimatorParams* s)
     p->waitMax = s->f8;
 }
 
+// Counts down the wait; when over, jumps the cursor by a random 1 to count-1 frames (wrapping) and
+// draws the next wait. Does nothing with fewer than two frames.
 void StepRandomJumpAnimator(RandomJumpAnimator* self, f32 x)
 {
     AnimRecord* p = self->cursor.record;
@@ -1084,6 +1128,8 @@ void StepRandomJumpAnimator(RandomJumpAnimator* self, f32 x)
     self->wait = RandomFloatInRange(self->waitMin, self->waitMax);
 }
 
+// Loads the base, then the start phase (the largest float means a random one) and the size of one
+// sector, 2 pi divided by the sector count.
 void LoadAngleFrameAnimator(AngleFrameAnimator* self, AnimatorParams* key)
 {
     LoadAnimatorBase(self, key);
@@ -1096,6 +1142,7 @@ void LoadAngleFrameAnimator(AngleFrameAnimator* self, AnimatorParams* key)
     }
 }
 
+// Binds the record and sets the step to one sector divided by the frame count (two frames or more).
 void BindAngleFrameAnimator(AngleFrameAnimator* p)
 {
     BindAnimatorRecord(p);
@@ -1107,6 +1154,9 @@ void BindAngleFrameAnimator(AngleFrameAnimator* p)
     }
 }
 
+// For a part drawn with the model draw function, turns the angle of its facing (or the camera's
+// when the part has no own facing) into the frame of the cursor: the angle taken from the start
+// phase, wrapped to one sector, then divided by the step.
 void FollowObjectAngle(AngleFrameAnimator* p, void* unused, DrawnPart* q)
 {
     if (p->cursor.record == 0) {
@@ -1130,6 +1180,8 @@ void FollowObjectAngle(AngleFrameAnimator* p, void* unused, DrawnPart* q)
     SetCursorFrame(&p->cursor, k);
 }
 
+// Loads the base, then the two velocities and wrap sizes; both scales start at 1 and the cursor is
+// set to the coordinate mode.
 void LoadScrollAnimator(ScrollAnimator* p, AnimatorParams* s)
 {
     LoadAnimatorBase(p, s);
@@ -1142,6 +1194,7 @@ void LoadScrollAnimator(ScrollAnimator* p, AnimatorParams* s)
     p->cursor.flags = (p->cursor.flags & ~1) | 2;
 }
 
+// Advances the cursor's texture coordinates by velocity times scale times t, wrapped.
 void StepScrollAnimator(ScrollAnimator* p, f32 t)
 {
     if (p->cursor.record != 0) {
@@ -1151,20 +1204,26 @@ void StepScrollAnimator(ScrollAnimator* p, f32 t)
     }
 }
 
+// How far the scroll has gone, 0 to 1: the mean of the two axes' fractions of their wrap (an axis
+// with no velocity counts as half).
 f32 GetScrollProgress(ScrollAnimator* p) { f32 result=0.0f; if (p->velU != 0.0f) result=(p->cursor.u/p->wrapU)*0.5f; else result=0.5f; if (p->velV != 0.0f) result += (p->cursor.v/p->wrapV)*0.5f; else result += 0.5f; return result; }
 
+// Sets the scale of the scroll's two axes.
 void SetScrollScale(ScrollAnimator* p, f32 a, f32 b)
 {
     p->mulU = a;
     p->mulV = b;
 }
 
+// Loads the base, then omega, radius and circle centre; the cursor is set to the coordinate mode.
 void LoadCircleAnimator(CircleAnimator* p, AnimatorParams* s)
 {
     LoadAnimatorBase(p, s);
     p->omega = s->f4; p->radius = s->f8; p->centerU = s->fC; p->centerV = s->f10; p->cursor.flags = (p->cursor.flags & ~1) | 2;
 }
 
+// Moves the cursor's texture coordinates on a circle: angle from the game time and omega, scaled by
+// the radius around the centre.
 void StepCircleAnimator(CircleAnimator* self)
 {
     if (self->cursor.record != 0) {
@@ -1177,12 +1236,15 @@ void StepCircleAnimator(CircleAnimator* self)
     }
 }
 
+// How far round the circle the animator is, 0 to 1.
 f32 GetCircleProgress(CircleAnimator* p)
 {
     f32 a = WrapModulo(g_gameTime * p->omega, 6.2831855f);
     return a * 0.15915494f;
 }
 
+// Loads the base, then the origin and the four limits (stored relative to the origin) of the
+// triangle's coordinates, and sets the cursor to the coordinate mode.
 void LoadTriangleAnimator(TriangleAnimator* self, AnimatorParams* src)
 {
     LoadAnimatorBase(self, src);
@@ -1197,4 +1259,5 @@ void LoadTriangleAnimator(TriangleAnimator* self, AnimatorParams* src)
     self->vMax = d;
 }
 
+// Gives the addresses of the animator's count, points and coordinates.
 void GetTriangleOutputs(TriangleAnimator* self, void** out) { out[0] = &self->count; out[1] = &self->points; out[2] = &self->coords; }

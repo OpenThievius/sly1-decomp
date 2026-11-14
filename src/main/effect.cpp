@@ -524,6 +524,8 @@ f32 g_facingEffectFadeCurve[4] = { 0.5f, 0.0f, 0.5f, 0.0f };
 
 f32 g_facingEffectFadeRange[2] = { 0.5f, 1.0f };
 
+// An effect owner for the world: the shared one when flag is 0 and it exists, otherwise one
+// taken from the free list (it becomes the shared one when flag is 0).
 EffectOwner* AcquireEffectOwner(World* self, s32 flag)
 {
     if (flag == 0 && self->sharedEffectOwner != 0) {
@@ -541,6 +543,8 @@ EffectOwner* AcquireEffectOwner(World* self, s32 flag)
     return n;
 }
 
+// Initialiser of class 0x1E: a collider whose list of effects is linked at offset 0x10, with its
+// flag bits set for drawing and a far fade distance of 1e10.
 void InitEffectOwner(EffectOwner* self)
 {
     InitCollider(self);
@@ -564,6 +568,8 @@ void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b)
     a->boundsMargin = b->f1E8;
 }
 
+// Removes every effect of the owner, puts the owner back on the world's free list and clears the
+// shared-owner pointer if it was this one.
 void ReleaseEffectOwner(EffectOwner* self)
 {
     ListWalk cur(&self->list558);
@@ -700,6 +706,7 @@ void CollideEffects(EffectOwner* self)
     }
 }
 
+// Draws every effect of the owner's list whose start time has passed (virtual draw slot 5).
 void DrawEffects(EffectOwner* self, void* arg, void* arg2)
 {
     ListFrame fr;
@@ -764,6 +771,8 @@ const Vt219C* GetEffectKindTable(u32 n)
     }
 }
 
+// Takes an effect from the world's pool for an owner (the shared one when sys is null), clears it,
+// sets its kind and function table and links it into the owner's list.
 Effect* CreateEffect(s32 kind, EffectOwner* sys)
 {
     if (sys == 0) {
@@ -785,6 +794,7 @@ Effect* CreateEffect(s32 kind, EffectOwner* sys)
 
 ASM_FUNC(func_0019EB28);
 
+// Takes the effect out of its owner's list and drops the list's use of it (ReleaseEffect).
 void RemoveEffect(Effect* self)
 {
     RemoveFromList(&self->owner->list558, self);
@@ -796,6 +806,8 @@ void CountEffectUse(Effect* counter)
     counter->uses++;
 }
 
+// Drops one use of the effect; when the last one goes, calls its kind's destructor slot, sends
+// each hook the 0x10 (ended) message and returns the effect to the pool.
 void ReleaseEffect(Effect* self)
 {
     s32 n = self->uses - 1;
@@ -818,11 +830,14 @@ void ReleaseEffect(Effect* self)
     PushFreeSlot(&self->owner->world->pool1B2C, self);
 }
 
+// Removes the effect when enabled.
 void EndEffect(Effect* value, s32 enabled)
 {
     if (enabled) RemoveEffect(value);
 }
 
+// Cuts the effect's remaining life down to x seconds, if it is longer, keeping the fraction of
+// its curve already played.
 void ShortenEffectLife(Effect* self, f32 x)
 {
     f32 span = g_gameClock[1] - self->start;
@@ -973,6 +988,9 @@ void MoveEffect(Effect* self, f32 dt)
     }
 }
 
+// Common per-frame update of an effect: removes it when its life is over, and otherwise (unless
+// the owner is exclusive) tests whether its position is behind the target's collision tree and
+// calls its end-or-impact slot (6) with that flag.
 void UpdateEffect(Effect* self, f32 dt)
 {
     f32 t = g_gameTime - self->start;
@@ -1056,6 +1074,8 @@ s32 DrawEffectAt(Effect* self, Camera* cam, Vec02* pos, f32 (*rot)[4])
     return 1;
 }
 
+// Draws an effect at its position and rotation (or, with an oscillator, at the oscillator's
+// displaced pose); removes it when the draw reports it is finished.
 void DrawEffect(Effect* self, void* a1)
 {
     u8 scratch[0x40];
@@ -1075,22 +1095,26 @@ void DrawEffect(Effect* self, void* a1)
     }
 }
 
+// Adds an object's own listener method (slot 0x0D of its descriptor) to the effect's hook list.
 void AddEffectListener(void* obj, void* arg)
 {
     const Desc01* desc = ((BaseObject*)arg)->desc;
     AddCallbackNode(g_currentWorld, (Callback01**)&((Effect*)obj)->hooks, (void*)desc->m0D, arg);
 }
 
+// Adds a callback to the effect's hook list (called when the effect ends).
 void AddEffectCallback(void* obj, void* a1, void* a2)
 {
     AddCallbackNode(g_currentWorld, (Callback01**)&((Effect*)obj)->hooks, a1, a2);
 }
 
+// Removes a callback from the effect's hook list.
 void RemoveEffectCallback(void* obj, void* a1, void* a2)
 {
     RemoveCallbackNode(g_currentWorld, (Callback01**)&((Effect*)obj)->hooks, a1, a2);
 }
 
+// Initialiser of the falling effect: life 5 s, accelerates with the world's gravity.
 void InitFallingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
@@ -1100,6 +1124,8 @@ void InitFallingEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->qC0 = *(Quad219C*)&g->gravity;
 }
 
+// End of an effect that hit something (flag set): spawns an impact effect (kind 4, 0.75 s) at its
+// last segment against the target's tree, copying the target's oscillator, and removes itself.
 void EndEffectWithImpact(Effect* self, s32 flag)
 {
     if (flag != 0) {
@@ -1121,6 +1147,8 @@ void EndEffectWithImpact(Effect* self, s32 flag)
     }
 }
 
+// Initialiser of the rising effect: the falling effect's, with scale 0.33, damping -8 and a
+// gentle upward acceleration (-0.2 of gravity).
 void InitRisingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     Vec02 k;
@@ -1168,6 +1196,7 @@ void MoveDriftingEffect(Effect* self, f32 dt)
     }
 }
 
+// End slot that calls EndEffectWithImpact with its flag set only when enabled is 0.
 void EndEffectWithImpactOnExit(Effect* value, u32 enabled)
 {
     EndEffectWithImpact(value, enabled < 1);
@@ -1175,6 +1204,8 @@ void EndEffectWithImpactOnExit(Effect* value, u32 enabled)
 
 void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
+// Initialiser of the impact effect: its size is limit capped at 200, with 0.6 of it as the second
+// size.
 void InitImpactEffect(Effect* self, void* pos, f32 limit, s32 flags)
 {
     InitEffect(self, pos, limit, flags);
@@ -1185,6 +1216,7 @@ void InitImpactEffect(Effect* self, void* pos, f32 limit, s32 flags)
     self->m30[1] = v * 0.6f;
 }
 
+// Initialiser of the growing effect: life 3 s with a second scale of 0.6.
 void InitGrowingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
@@ -1195,6 +1227,8 @@ void InitGrowingEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->i20 = v;
 }
 
+// Initialiser of the shrinking, falling effect: life 2 s, accelerates with the world's gravity
+// while its third scale value goes down at -1.
 void InitShrinkingFallEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
@@ -1204,6 +1238,7 @@ void InitShrinkingFallEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->m30[2] = -1.0f;
 }
 
+// Initialiser of the dropping effect: life 0.5 s.
 void InitDroppingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
@@ -1213,6 +1248,9 @@ void InitDroppingEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->i20 = v;
 }
 
+// Per-frame update of a dropping effect: follows its target up the parent chain while the target
+// is detached, and 0.15 s after its start switches to a gentle fall (half the world's gravity,
+// damping -8), then runs the common UpdateEffect.
 void UpdateDroppingEffect(Effect* self, f32 dt)
 {
     Vec02 k;
@@ -1242,6 +1280,7 @@ void DrawDroppingEffect(Effect* self, void* a1)
     }
 }
 
+// End slot of the dropping effect: removes it when it hit something (other is not null).
 void EndDroppingEffect(Effect* self, void* other)
 {
     if (other != 0) {
@@ -1249,6 +1288,7 @@ void EndDroppingEffect(Effect* self, void* other)
     }
 }
 
+// Initialiser of the streak effect: life 0.25 s.
 void InitStreakEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
@@ -1282,6 +1322,7 @@ void DrawStreakEffect(Effect* self, void* a1)
     }
 }
 
+// Initialiser of the scaled effect: life 0.5 s, a size curve scaled by f.
 void InitScaledEffect(Effect* self, void* pos, f32 f, s32 flags)
 {
     InitEffect(self, pos, f, flags);
@@ -1298,6 +1339,8 @@ void InitScaledEffect(Effect* self, void* pos, f32 f, s32 flags)
     StoreQuadword((u128*)sub, ScaleQuadword(tv, u));
 }
 
+// Initialiser of a trail segment effect: life 0.35 s, damping -15, and the size and alpha curves
+// of the trail (the size scaled by f).
 void InitTrailSegment(Effect* self, void* pos, f32 f, s32 flags)
 {
     InitEffect(self, pos, f, flags);
@@ -1505,6 +1548,8 @@ void DrawTrailSegment(Effect* self, Camera* cam)
     RemoveEffect(self);
 }
 
+// Hook of a trail segment: when its anchor object sends message 2, 10 or 16 it detaches the
+// segment, and on message 3 it re-anchors it at the position in the message.
 void OnTrailAnchorEnded(void* self, s32 kind, void* extra)
 {
     if (kind == 3) {
@@ -1529,6 +1574,8 @@ three:
     SetTrailSegmentAnchor(self, 0, (u8*)extra + 16);
 }
 
+// Initialiser of the spawning effect: life 0.25 s, with its own size curve (scaled by f) and alpha
+// curve.
 void InitSpawningEffect(Effect* self, void* pos, f32 f, s32 flags)
 {
     InitEffect(self, pos, f, flags);
@@ -1547,6 +1594,8 @@ void InitSpawningEffect(Effect* self, void* pos, f32 f, s32 flags)
     self->q40 = *(Quad219C*)q;
 }
 
+// Updates the effect and, in the frame 0.15 s after its start, spawns a follow-up effect (kind
+// 12) at its position.
 void SpawnFollowUpEffect(Effect* self, f32 arg)
 {
     UpdateEffect(self, arg);
@@ -1561,6 +1610,7 @@ void SpawnFollowUpEffect(Effect* self, f32 arg)
     }
 }
 
+// Initialiser of the follow-up effect: life 3 s, a drifting acceleration and an alpha curve.
 void InitFollowUpEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
@@ -1573,6 +1623,8 @@ void InitFollowUpEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->fB0 = -1.0f;
 }
 
+// Initialiser of the wide trail segment: the trail segment's, then the wide size and alpha
+// curves.
 void InitWideTrailSegment(Effect* self, void* pos, f32 f, s32 flags)
 {
     InitTrailSegment(self, pos, f, flags);
@@ -1590,6 +1642,7 @@ void InitWideTrailSegment(Effect* self, void* pos, f32 f, s32 flags)
     StoreQuadword((u128*)sub, ScaleQuadword(tv, u));
 }
 
+// Like InitFallingEffect but with life 0.5 s.
 void InitShortFallingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
@@ -1602,6 +1655,9 @@ void InitShortFallingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 
 void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
 
+// Initialiser of the effect kind that lives in camera space: projects its position into the
+// camera's frame and picks a random offset within the kind's parameter ranges, with the shared
+// camera-space life.
 void InitCameraSpaceEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
@@ -1617,6 +1673,8 @@ void InitCameraSpaceEffect(Effect* self, void* pos, f32 scale, s32 flags)
 }
 
 
+// Moves a camera-space effect along a Hermite segment toward its target pose over the time left
+// of its life, then converts the result back to a world position.
 void MoveCameraSpaceEffect(Effect* self, f32 f)
 {
     Quad219C a;
@@ -1659,6 +1717,8 @@ void DrawCameraSpaceEffect(Effect* self, Camera* cam)
     DrawEffectAt(self, cam, &point, (f32 (*)[4])&out);
 }
 
+// At the end of its life removes the effect and calls the callback of its kind's parameters
+// with the stored argument (p134).
 void RunEffectEndCallback(Effect* self)
 {
     if (self->life < g_gameTime - self->start) {
@@ -1667,6 +1727,7 @@ void RunEffectEndCallback(Effect* self)
     }
 }
 
+// Initialiser of the emitter effect: life 2 s.
 void InitEmitterEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
@@ -1746,6 +1807,7 @@ void UpdateEmitterEffect(Effect* self, f32 dt)
 }
 
 
+// Draws an emitter effect at its position rotated and offset by the object it is tied to.
 void DrawEmitterEffect(Effect* self, void* a1)
 {
     Vec02 pos;
@@ -1756,6 +1818,7 @@ void DrawEmitterEffect(Effect* self, void* a1)
     DrawEffectAt(self, (Camera*)a1, &pos, (f32 (*)[4])&rot);
 }
 
+// Initialiser of the long streak effect: the streak effect's with a longer length (0.15).
 void InitLongStreakEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitStreakEffect(self, pos, scale, flags);
@@ -1765,6 +1828,7 @@ void InitLongStreakEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->i20 = v;
 }
 
+// Initialiser of the phased effect: starts with its two phase values unset (-1).
 void InitPhasedEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
@@ -2001,6 +2065,7 @@ void SetEffectPhase(Effect* self, s32 mode)
     self->i120 = mode;
 }
 
+// Sort comparison on the angle field: -1 when a's is smaller, else 1.
 s32 CompareByFloatKeyAscending(AngledPoint* a, AngledPoint* b)
 {
     if (a->angle < b->angle) return -1;
@@ -2096,12 +2161,15 @@ s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts)
     return out - pts;
 }
 
+// Copies the found object and the f1F0 value of a source record into the effect.
 void CopyEffectSourceIds(Effect* self, Rec50* src)
 {
     self->p120 = src->found[1];
     self->i124 = src->f1F0;
 }
 
+// Draws a projectile effect along its direction (qA0), with up pointing at the camera when i124
+// is set and along Z otherwise.
 void DrawProjectileEffect(Effect* self, void* a1)
 {
     Vec02 dir;
@@ -2182,6 +2250,8 @@ void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Ve
     }
 }
 
+// Impact handler: ignores the colliders of four kinds, otherwise attaches a hit mark to the
+// object hit (unless it is of kind 0x1F) and removes the effect; gives 1 when it handled it.
 s32 HandleEffectImpact(Effect* self, PlacedObject* other, void* a2, void* a3)
 {
     u32 i;
@@ -2197,6 +2267,7 @@ s32 HandleEffectImpact(Effect* self, PlacedObject* other, void* a2, void* a3)
     return 1;
 }
 
+// Updates the effect and removes it when the object it follows is no longer attached.
 void UpdateEffectUntilDetached(Effect* self, f32 dt)
 {
     UpdateEffect(self, dt);
@@ -2208,6 +2279,8 @@ void UpdateEffectUntilDetached(Effect* self, f32 dt)
     }
 }
 
+// Draws a hit mark at its position and rotation, which are stored in the frame of the object it
+// is attached to, converted to world coordinates.
 void DrawHitMarkEffect(Effect* self, void* a1)
 {
     u8 scratch[0x40];
@@ -2218,6 +2291,8 @@ void DrawHitMarkEffect(Effect* self, void* a1)
 }
 
 
+// Gives the effect a random orientation: a basis built around a random axis (x and y in -1..1,
+// z in 0.2..1.0).
 void SetRandomEffectSpin(Effect* self)
 {
     Quad16 axis;
@@ -2311,6 +2386,8 @@ void MoveTumblingEffect(Effect* self, f32 dt)
 }
 
 
+// Impact handler of the tumbling effect: ignores objects of kinds 0x40 and 6, otherwise attaches a
+// hit mark, re-expresses its rotation in the struck object's frame and removes the effect.
 s32 HandleTumblingEffectImpact(Effect* self, void* a1, void* a2, void* a3)
 {
     PlacedObject* other = (PlacedObject*)a1;
@@ -2332,6 +2409,8 @@ s32 HandleTumblingEffectImpact(Effect* self, void* a1, void* a2, void* a3)
     return 1;
 }
 
+// Whether other can be aimed at from the source record: it is not the record's own target and
+// does not have bit 43 of its flags set.
 s32 IsEffectAimCandidate(Rec50* self, Collider* other)
 {
     u64 flag = 0x8000;
@@ -2394,6 +2473,8 @@ void AimEffectAtNearestObject(Effect* self, Rec50* src)
     Vu0::Q(self->qA0) = Vu0::Zero();
 }
 
+// Places an effect at a source record's point (converted from the source's target's frame to
+// world coordinates) and copies two of its values.
 void PlaceEffectAtSource(Effect* dst, void* a1)
 {
     Rec50* src = (Rec50*)a1;
@@ -2482,6 +2563,7 @@ void RandomizeEffectSpin(Effect* self, Rec50* src)
     }
 }
 
+// Contact handler that ignores objects of kind 6 and otherwise defers to HandleEffectContact.
 s32 HandleEffectContactUnlessKind6(Effect* a0, PlacedObject* a1, void* a2, void* a3)
 {
     if (IsObjectOfKind(a1->root, 6) != 0) {
@@ -2500,6 +2582,7 @@ void DrawSpinningEffect(Effect* self, void* a1)
     DrawEffectAt(self, (Camera*)a1, &pos, (f32 (*)[4])self->rotation);
 }
 
+// Initialiser of the camera-facing effect: life 0.5 s and its own alpha and size curves.
 void InitFacingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 {
     InitEffect(self, pos, scale, flags);
@@ -2553,6 +2636,7 @@ void DrawFacingEffect(Effect* self, Camera* cam)
     }
 }
 
+// Initialiser of the delayed effect: keeps x and 1 - x as its two scale values.
 void InitDelayedEffect(Effect* self, void* pos, f32 x, s32 flags)
 {
     InitEffect(self, pos, x, flags);
@@ -2641,6 +2725,8 @@ void MoveDelayedEffect(Effect* self, f32 f)
     }
 }
 
+// Update of the delayed effect: once started, copies the source pose while i134 is set; at the end
+// of its life calls slot 2 of the object it holds and removes itself.
 void UpdateDelayedEffect(Effect* self)
 {
     if (self->start <= g_gameClock[1]) {
@@ -2656,6 +2742,7 @@ void UpdateDelayedEffect(Effect* self)
     }
 }
 
+// Draws the effect only once its start time has come.
 void DrawDelayedEffect(Effect* self, void* a1)
 {
     if (g_gameTime < self->start) {
@@ -2664,6 +2751,8 @@ void DrawDelayedEffect(Effect* self, void* a1)
     DrawEffect(self, a1);
 }
 
+// Finds the object (by id and name from the source record) that the effect follows and copies the
+// record's rate value.
 void ResolveEffectTarget(Effect* self, void* otherv)
 {
     Rec50* other = (Rec50*)otherv;
@@ -2671,6 +2760,8 @@ void ResolveEffectTarget(Effect* self, void* otherv)
     self->f124 = other->f1F4;
 }
 
+// Updates the effect, and sends the object it is tied to (p120) a kind 4 message at the
+// effect's position f124 times per unit of scale, carrying the remainder over.
 void SendEffectMessagesAtRate(Effect* self, f32 scale)
 {
     UpdateEffect(self, scale);

@@ -250,12 +250,14 @@ void StepMovieFrame(MoviePlayer* self);
 void FinishMovie(MoviePlayer* self);
 s32 FeedMovieDecoder(MoviePlayer* self, s32 wait);
 
+// Initialises the child group object and marks it ready.
 void InitContactListObject(ContactListObject* self)
 {
     InitChildGroupObject(self);
     self->ready = 1;
 }
 
+// Loads the child group object, resolves its links and sets flag bit 40 (clearing bit 41).
 void LoadContactListObject(ContactListObject* self, BufferedStream* stream)
 {
     u64 mask = (u64)(s64)-0x301;
@@ -270,6 +272,7 @@ void LoadContactListObject(ContactListObject* self, BufferedStream* stream)
     self->flags = (self->flags & mask) | set;
 }
 
+// Unregisters the collider and stops its animation player.
 void UnregisterContactListObject(ContactListObject* self)
 {
     UnregisterCollider(self);
@@ -280,6 +283,8 @@ void UnregisterContactListObject(ContactListObject* self)
     }
 }
 
+// Moves the collider with its position and orientation attachments set aside for the move,
+// after rebuilding its basis from its velocity when it is ready.
 void MoveContactListObject(ContactListObject* self, void* b, f32 x)
 {
     if (self->ready != 0) {
@@ -350,6 +355,8 @@ void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
     }
 }
 
+// Whether the object may touch key: its own f6E4 object, anything matching one of its listed
+// ids or kinds, or whatever the base collider test allows.
 s32 TestContactListMayContact(ContactListObject* self, void* key)
 {
     if (key == self->f6E4) {
@@ -368,6 +375,7 @@ s32 TestContactListMayContact(ContactListObject* self, void* key)
     return TestCollidersMayContact(self, (Collider*)key);
 }
 
+// Adds an object id to the object's list of 4 ids it may contact.
 void AddContactListId(ContactListObject* self, s32 item)
 {
     u32 n = self->count6BC;
@@ -377,6 +385,7 @@ void AddContactListId(ContactListObject* self, s32 item)
     }
 }
 
+// Adds a kind to the object's list of 4 kinds it may contact.
 void AddContactListKind(ContactListObject* self, s32 value)
 {
     s32 n = self->count6D0;
@@ -399,12 +408,15 @@ typedef char check_ContactListGlider[sizeof(ContactListGlider) == 0x710 ? 1 : -1
 
 void AddColliderForce(void* a, void* b);
 
+// Initialises the contact list object and sets its gravity to a fixed constant.
 void InitContactListObjectWithoutGravity(ContactListObject* self)
 {
     InitContactListObject(self);
     self->gravity = D_00248D30;
 }
 
+// Launches the object as the base does, then sets its target velocity to the unit X direction
+// of its velocity scaled by its speed.
 void LaunchContactListObjectWithoutGravity(ContactListGlider* self, PlacedObject* target, Vec02* offset)
 {
     LaunchContactListObject(self, target, offset);
@@ -412,6 +424,8 @@ void LaunchContactListObjectWithoutGravity(ContactListGlider* self, PlacedObject
     Vu0::Q(self->v700) = Vu0::MulX(Vu0::NormalizeOrMoved(Vu0::Q(self->v150), Vu0::Q(g_unitXVector)), speed);
 }
 
+// Steps the collider, then adds a force that pulls its velocity toward the target velocity
+// within one step, its length clamped to the object's rate limit.
 void StepContactListObjectWithoutGravity(ContactListGlider* self, f32 dt)
 {
     Vec02 accel;
@@ -555,6 +569,7 @@ void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
     }
 }
 
+// The index (0 to 15) of the movie key equal to key, or -1.
 s32 FindKeyIndex(IdentityKey* key)
 {
     IdentityKey* p = (IdentityKey*)(u8*)g_movieKeys;
@@ -579,6 +594,7 @@ s32 FindKeyIndex(IdentityKey* key)
     return -1;
 }
 
+// The title string of movie index (0 to 15), "Nil" for -1, otherwise "(unknown)".
 u8* GetMovieTitle(s32 index)
 {
     if ((u32)index < 16) {
@@ -590,11 +606,14 @@ u8* GetMovieTitle(s32 index)
     return (u8*)"(unknown)";
 }
 
+// Queues the movie with key number idx.
 void QueueMovieByIndex(s32 idx)
 {
     QueueMovie(&g_moviePlayer, (u8*)g_movieKeys + (idx << 5));
 }
 
+// Queues movie idx to play, with movie n queued to play right after it, and marks movie n as
+// seen in the save's movie bits.
 void QueueMovieWithSuccessor(s32 idx, u32 n)
 {
     GameProgress* dev;
@@ -607,6 +626,8 @@ void QueueMovieWithSuccessor(s32 idx, u32 n)
     dev->u19F4 |= m;
 }
 
+// The decode thread's loop: wait for a frame, send the upload packet to the GS, apply the
+// pending display flip, then send the draw packet and flip twice (once per field or buffer).
 void RunMovieDecodeThread(void)
 {
     MoviePlayer* t = &g_moviePlayer;
@@ -625,6 +646,8 @@ void RunMovieDecodeThread(void)
     }
 }
 
+// Creates the frame semaphore and starts the movie decode thread (priority 2, 0x1000-byte
+// stack) running RunMovieDecodeThread.
 void CreateMovieDecodeThread(void)
 {
     ThreadParams l;
@@ -643,6 +666,7 @@ void CreateMovieDecodeThread(void)
     RunThread(v, 0);
 }
 
+// Sets the sink's capacity and IOP base address, and resets it.
 void InitIopRingSink(IopRingSink* self, s32 a1, s32 a2)
 {
     self->iopBase = a2;
@@ -650,6 +674,7 @@ void InitIopRingSink(IopRingSink* self, s32 a1, s32 a2)
     ResetIopRingSink(self);
 }
 
+// Marks the sink empty: all of its capacity free, nothing used, positions at 0.
 void ResetIopRingSink(IopRingSink* c)
 {
     c->freeBytes = c->capacity;
@@ -690,6 +715,8 @@ s32 IopRingSink::Put(s32 count, u8* dst)
     return total;
 }
 
+// Copies size bytes to the sink's IOP ring at the write position by DMA and waits for the
+// transfer to finish.
 s32 WriteIopRingBlock(IopRingSink* p, s32 size, u8* buf)
 {
     IopDmaTransfer span;
@@ -706,6 +733,8 @@ s32 WriteIopRingBlock(IopRingSink* p, s32 size, u8* buf)
     return size;
 }
 
+// Reads the IOP ring's position and recomputes the sink's free bytes (keeping 0x400 spare),
+// used bytes and read position, all modulo the capacity.
 void UpdateIopRingSink(IopRingSink* self) { s32 raw = GetIopRingPosition(); s32 x = (raw & 0xFFFFFF) - self->iopBase; x = x - self->writePosition; x = x - 0x400; x = x + self->capacity; self->freeBytes = x; self->freeBytes = x % self->capacity; s32 d = self->capacity - self->freeBytes; self->usedBytes = d; s32 y = self->writePosition - d; y += self->capacity; self->readPosition = y; self->readPosition = y % self->capacity; }
 
 s32 IopRingSink::Idle()
@@ -759,6 +788,7 @@ s32 StartMovieStream(MovieStream* self)
     }
 }
 
+// Resets a running movie stream to state 1: the IOP ring, both rings and the sink.
 void ResetMovieStream(MovieStream* self)
 {
     if (self->state != 0) {
@@ -770,6 +800,8 @@ void ResetMovieStream(MovieStream* self)
     }
 }
 
+// Stops the movie audio stream: state 0, stops the IOP stream, restores the two saved channel
+// volumes and the channel 2 setting and resumes all IOP voices.
 void StopMovieStream(MovieStream* self)
 {
     self->state = 0;
@@ -780,6 +812,8 @@ void StopMovieStream(MovieStream* self)
     ResumeIopVoices(0xFFFFFFFF);
 }
 
+// Takes one block of movie data (after a 4-byte header): state 1 fills the header ring first,
+// then the data ring; 0 when the data ring has no room for it yet.
 s32 FeedMovieStream(MovieStream* self, s32 left, u8* right)
 {
     s32 n;
@@ -809,6 +843,9 @@ one:
     return 1;
 }
 
+// Per-frame movie audio step: state 2 drains the data ring to the IOP sink and, once the sink
+// is full, starts the IOP stream and moves to state 3; state 3 refreshes the sink's free space
+// and keeps draining.
 void UpdateMovieStream(MovieStream* self)
 {
     switch (self->state) {
@@ -829,6 +866,7 @@ void UpdateMovieStream(MovieStream* self)
     }
 }
 
+// Puts a block of movie data into the video ring if it has room; 1 when it did, otherwise 0.
 s32 AcceptMovieDataIntoRing(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
 {
     if ((u32)a2->videoRing.space >= (u32)a1->size) {
@@ -838,11 +876,14 @@ s32 AcceptMovieDataIntoRing(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
     return 0;
 }
 
+// Hands a block of movie data to the movie stream (FeedMovieStream).
 void PassMovieDataToStream(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
 {
     FeedMovieStream(&a2->stream, a1->size, a1->data);
 }
 
+// Decoder callback: feeds the decoder until the video ring holds 0x1000 bytes, padding the ring
+// with zeros if the data runs out, then drains the ring to the IPU by DMA.
 s32 FlushMovieToIpu(void* u0, void* u1, MoviePlayer* self)
 {
     s32 total = 0x40;
@@ -863,6 +904,7 @@ s32 FlushMovieToIpu(void* u0, void* u1, MoviePlayer* self)
     return 1;
 }
 
+// Feeds the decoder once without waiting for data; always 1.
 s32 FeedMovieDecoderWithoutWaiting(void* a0, s32 a1, MoviePlayer* a2)
 {
     FeedMovieDecoder(a2, 0);
@@ -934,6 +976,8 @@ void DrawMovieFrame(void* self, s32 a1, s32 a2)
     DetachPacketBuffer(&buf, 0, 0);
 }
 
+// Queues a movie (a key) to play unless one is queued already, and marks it in the save's movie
+// bits.
 void QueueMovie(MoviePlayer* self, void* p)
 {
     s32 m;
@@ -952,6 +996,7 @@ void QueueMovie(MoviePlayer* self, void* p)
     g_saveData->u19F4 |= m;
 }
 
+// Plays the queued movie and then the one queued after it, clearing both.
 void PlayQueuedMovies(MoviePlayer* self)
 {
     IdentityKey* pending = self->queuedNext;
@@ -1110,6 +1155,9 @@ void StepMovieFrame(MoviePlayer* self)
     UpdateMovieStream(s1);
 }
 
+// Ends a movie: stops and resets the stream and the MPEG decoder, waits for the decode thread
+// to go idle, resends the resident images and records the movie as seen (bit of its index,
+// below 16) in the save's movie bits.
 void FinishMovie(MoviePlayer* self)
 {
     s32 mask;
@@ -1133,6 +1181,9 @@ void FinishMovie(MoviePlayer* self)
     g_saveData->movieBits |= mask;
 }
 
+// Pumps the stream reader until data is there (returning 0 instead of waiting when wait is 0),
+// gives the decoder's demultiplexer the unused bytes and consumes what it took; gives back that
+// count.
 s32 FeedMovieDecoder(MoviePlayer* self, s32 wait)
 {
     while (ReaderEmpty::Of(self->reader)) {

@@ -15,6 +15,7 @@ void SetGameClockRunning(GameClock* clock, s32 running);
 s64 ReadCycleCounter(void);
 extern "C" f32 ConvertS64ToFloat(s64 x);
 
+// Sets the time scale and turns the game clock on when it is above 0, off otherwise.
 void SetGameClockScale(f32 x)
 {
     g_timeScale = x;
@@ -64,6 +65,8 @@ void AdvanceGameClock(GameClock* self)
     self->lastTick = now;
 }
 
+// Adds the cycle counter's ticks since the last call, converted to seconds, to the clock's elapsed
+// time; the scaled time is not touched.
 void AdvanceGameClockElapsed(GameClock* self)
 {
     s64 now = ReadCycleCounter();

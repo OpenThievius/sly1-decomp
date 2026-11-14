@@ -437,6 +437,8 @@ void InitPlayer(Player* self)
 
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
+// Loads the collider, resolves the player's links, builds its member group, resets two timestamps
+// to -1 and makes this the current player.
 void LoadPlayer(Player* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -817,6 +819,8 @@ divide:
 extern f32 D_002637C0[3];
 
 
+// In state 4 with flag 0x10, lowers the contact limit to the weight (mass times gravity), scaled by
+// the frame time with flag 1; in other states uses the collider's clamp.
 void ClampPlayerContactLimit(Player* self, s32 flags, ContactLimit03* out)
 {
     if (self->state == 4) {
@@ -839,6 +843,8 @@ void ClampPlayerContactLimit(Player* self, s32 flags, ContactLimit03* out)
 void SetPlayerState(Player* self, s32 state, s32 sub);
 void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2);
 
+// Carries out what was asked of the player since the last frame, by flags: 8 takes the jump kind, 1
+// sets the state and sub-state, 2 the aim mode, 0x10 runs the callback.
 void ApplyPendingPlayerStateRequest(Player* self)
 {
     s32 flags = self->pendingFlags;
@@ -895,6 +901,8 @@ void ReleasePlayerContacts(Player* self)
 extern f32 g_contactSideSigns[];
 
 
+// Outside state 0xD uses the collider's test. In state 0xD a contact counts as ground when its
+// normal points up enough (z 0.7 or more on the side) and its kind is 4 to 6 on side 0.
 s32 IsPlayerGroundContact(Player* self, Contact03* e, s32 idx)
 {
     if (self->state != 0xD) {
@@ -1249,6 +1257,8 @@ struct PoseTarget { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PoseHold
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Turns the player's heading toward the aim target (an object) or, failing that, the point on the
+// aim curve, using the direction from the player in the x/y plane. Gives 0 when it has neither.
 s32 AimPlayerAtTarget(Player* self)
 {
     Vec02 pos;
@@ -1613,6 +1623,9 @@ void UpdatePlayerState0(Player* self)
 }
 
 
+// Launches the player along a ballistic arc to target (starting 75 units below its position, at the
+// given angle), unless it is in state 4; then goes to state 2 and scales the jump speed, clearing
+// f2498 when scale is 0.
 void PlacePlayerOnGround(Player* self, void* target, f32 angle, f32 scale)
 {
     Vec02 tmp = self->v140;
@@ -1629,6 +1642,7 @@ void PlacePlayerOnGround(Player* self, void* target, f32 angle, f32 scale)
     }
 }
 
+// From state 3 or 7 (jump kind 1), or from state 6 with target mode 4 or 5, goes to state 2.
 void ReleasePlayerToState2(Player* self)
 {
     s32 st = self->state;
@@ -1761,6 +1775,8 @@ void BlendPlayerPose(Player* self, void* a, void* b)
 
 void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, PlacedObject* obj, f32 radius, FollowProbe* out); // the float where retail's caller passes it; the definition has it last
 
+// Recomputes the collider frame, then the two follow probes toward the linked parts (f610 and
+// f614), or marks them invalid when there are none or the player is in state 6 with target mode 7.
 void RecomputePlayerFrame(Player* self)
 {
     RecomputeTurningColliderFrame(self);
@@ -1955,6 +1971,7 @@ void PrunePlayerContacts(Player* self)
 }
 
 
+// Saves the collider's previous position and clears the bound point count.
 void SavePlayerPreviousPosition(Player* self)
 {
     SaveColliderPreviousPosition(self);
@@ -1983,6 +2000,8 @@ void SetPlayerBoundsPoints(Player* self)
 void UpdateColliderBounds(Collider* self);
 void ExpandColliderBoundsBySphere(void* self, void* p, f32 f);
 
+// Updates the collider's bounds, then grows them by a sphere around each of the player's extra
+// bound points.
 void UpdatePlayerBounds(Player* self)
 {
     s32 i = 0;
@@ -2090,6 +2109,7 @@ void CollidePlayerWithObject(Player* self, Collider* a1, s32 a2, void* a3, void*
     }
 }
 
+// 0 in state 3 or 0xD, 3 otherwise.
 s32 GetPlayerContactMode(Player* self)
 {
     if (self->state == 3 || self->state == 0xD) {
@@ -2401,6 +2421,8 @@ void FillPlayerPushRecord(Player* self, PushRecord* out)
 
 
 
+// Does the switched collider's activation and shows the mode label of the saved hint mode (or -1
+// when b is null).
 void SetPlayerTracked(Player* a, void* b)
 {
     HandleSwitchedColliderActivation(a, b);
@@ -4613,11 +4635,13 @@ void IgnorePlayerArgument(Player* self, s32 arg)
 
 void SetPlayerState(Player* self, s32 state, s32 sub);
 
+// Sets state 11 when flag is non-zero and state 0 otherwise.
 void SwitchPlayerState11(void* self, s32 flag)
 {
     SetPlayerState((Player*)self, flag ? 11 : 0, -1);
 }
 
+// Sets the flag that disables the probe contacts and clears f4B8.
 void SetPlayerProbeContactsDisabled(Player* self, s32 value)
 {
     self->probeContactsDisabled = value;
@@ -4659,6 +4683,7 @@ struct FloatKeyedItem {
     f32 key;                // 0x14
 };
 
+// Comparison for a sort into ascending key order: 1 when the first key is larger, else -1.
 s32 CompareKeysAscending(FloatKeyedItem* a, FloatKeyedItem* b)
 {
     s32 r = -1;
@@ -4808,6 +4833,8 @@ done:
 }
 
 
+// False in state 12 with sub-state 0x22; otherwise true when the player's camera controller is not
+// the top one.
 s32 IsPlayerCameraFree(Player* self)
 {
     if (self->state == 12 && self->subState == 0x22) return 0;
@@ -4816,6 +4843,8 @@ s32 IsPlayerCameraFree(Player* self)
 
 void SetPlayerState(Player* self, s32 state, s32 sub);
 
+// Starts the collider effect, and for effect modes 0 and 1 puts the player in state 9 with sub-
+// state 0x1C and 0x1D.
 void StartPlayerEffect(Player* self, s32 mode, PlacedObject* other)
 {
     StartSwitchedColliderEffect(self, mode, other);
@@ -4837,6 +4866,9 @@ struct InteractTarget {
 };
 extern s32 D_00275BC4;
 
+// Says what the player can do with an interact target, by state: out[0] (can start it) and out[1]
+// (can take it), mostly depending on the target's mode being 1. out[0] is cleared unless D_00275BC4
+// is 3.
 void GetPlayerInteractFlags(Player* self, InteractTarget* other, s32* out)
 {
     s32 v;
@@ -4885,6 +4917,8 @@ void GetPlayerInteractFlags(Player* self, InteractTarget* other, s32* out)
 extern u8 g_elementStack[];
 
 
+// For an interact target of mode 1 or 2 shows it in the typed-text caption box. Otherwise, unless
+// in state 0xC, requests state 0xC (sub-state 0x21) with the target as its caption.
 void ReceivePlayerNode(Player* self, InteractTarget* node)
 {
     if ((u32)(node->mode - 1) < 2) {
@@ -4902,6 +4936,7 @@ void ReceivePlayerNode(Player* self, InteractTarget* node)
 }
 
 
+// Moves the collider, clears the trail ring and f2768.
 void SetPlayerPosition(Player* self, Vec02* pos)
 {
     SetColliderPosition(self, pos);
@@ -4919,6 +4954,7 @@ s32 FindAnimRecord(s32 key);
 
 
 
+// Clears the trail ring and registers the switched collider.
 void RegisterPlayer(Player* self)
 {
     ResetTrailRing((TrailRing*)self->trail);
@@ -5012,6 +5048,8 @@ void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in
 struct WalkerKeys { s32 a, b; };
 
 
+// Remembers the object as the pending walker activation when the player is not in state 9 and the
+// object's state walker is at (or heading to) state 0x22E.
 void QueuePlayerWalkerActivation(Player* self, u8* other)
 {
     WalkerKeys r;
@@ -5053,6 +5091,7 @@ void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 
 
+// Remembers an interact target of mode 0 as the first pending activation (not in state 9).
 void QueuePlayerFirstActivation(Player* a0, InteractTarget* a1)
 {
     if (a0->state != 9 && a1->mode == 0) {
@@ -5060,6 +5099,7 @@ void QueuePlayerFirstActivation(Player* a0, InteractTarget* a1)
     }
 }
 
+// Remembers an interact target of mode 0 as the second pending activation (not in state 9).
 void QueuePlayerSecondActivation(Player* a0, InteractTarget* a1)
 {
     if (a0->state != 9 && a1->mode == 0) {

@@ -71,6 +71,9 @@ s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4,
     return result;
 }
 
+// Collects the spans along the segment a1 to a2 through the collider's own tree (up to a3 into
+// a4), or through its bounding shape when it has no tree and flag 0x8000<<25 is set; gives back
+// the count, 0 if neither.
 s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderSpan* a4)
 {
     if (self->tree.nodes != 0) {
@@ -82,6 +85,9 @@ s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderS
     return 0;
 }
 
+// Like CollectColliderSpans but for a given tree node a1 instead of the collider's own tree:
+// collects the spans the segment a2 to a3 covers into a5 (up to a4), or tests the bounding shape
+// when a1 is null; 0 if there is no shape either.
 s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, ColliderSpan* a5)
 {
     if (a1 != 0) {
@@ -93,6 +99,9 @@ s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32
     return 0;
 }
 
+// Tests the segment p1 to p2 (swept with radius x) against the collider's tree if it has one, or
+// else its bounding shape when flag 0x8000<<25 is set, and gives back how many hits it wrote to
+// p4 (up to p3); 0 when it has neither.
 s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, s32 p3, ColliderSpan* p4)
 {
     if (self->tree.nodes != 0) {
@@ -354,6 +363,8 @@ struct SpanEvent {
     Quad16 q20;
 };
 
+// Sort comparison for span events: orders by time, treating times within 0.0001 as equal, then by
+// the end flag.
 s32 CompareSpanEndpoints(SpanEvent* a, SpanEvent* b)
 {
     f32 d = a->time - b->time;

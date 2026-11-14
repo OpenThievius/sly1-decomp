@@ -48,6 +48,8 @@ s32 g_discSectorCheckState = 0;
 
 extern u8 g_flagTable[];
 
+// Initialises a masked collider: scale range 0.8 to 1.2, tint of 16 in each channel, a new
+// flag-table index and no receiver.
 void InitMaskedCollider(MaskedCollider* self)
 {
     MaskedCollider* o = self;
@@ -66,6 +68,8 @@ void InitMaskedCollider(MaskedCollider* self)
 }
 
 
+// Loads the collider; resolves its receiver from the receiver key (lookup mode 0x101) and
+// starts it, or builds the member group when the key is -1.
 void LoadMaskedCollider(MaskedCollider* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -82,6 +86,8 @@ void LoadMaskedCollider(MaskedCollider* self, BufferedStream* stream)
 
 void* CopyToFrontMemory(s32 size, void* owner);
 
+// Copies the collider but keeps its own flag-table index, and gives the copy its own 0x24-byte
+// copy of the sound parameters.
 void CopyMaskedCollider(MaskedCollider* self, MaskedCollider* other)
 {
     s32 saved = self->id688;
@@ -120,6 +126,7 @@ typedef void (*Hook_CE40)(void* self);
 void StartPlacedObject(PlacedObject* self);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
+// Starts the placed object and queues AttachMaskedColliderChildren for it.
 void StartMaskedCollider(MaskedCollider* self)
 {
     StartPlacedObject(self);
@@ -199,6 +206,8 @@ void AttachMaskedColliderChildren(MaskedCollider* self)
 }
 
 
+// Updates the collider; a busy collider is cleared and told through slot 0x48 of its class that
+// its contact ended.
 void UpdateMaskedCollider(MaskedCollider* self, f32 dt)
 {
     UpdateCollider(self, dt);
@@ -432,6 +441,7 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
 extern u8 g_flagTable[];
 
 
+// Sets the hold flag and mirrors it in the collider's flag-table bit.
 void SetObjectHold(MaskedCollider* self, s32 v)
 {
     self->hold = v;
@@ -442,6 +452,7 @@ void SetObjectHold(MaskedCollider* self, s32 v)
     }
 }
 
+// Appends a key of kind 0 to the collider's list of 16 key slots (ignored when full).
 void AddMaskedColliderKeyKind0(MaskedCollider* q, s32 value)
 {
     if ((u32)q->count550 < 16) {
@@ -451,6 +462,7 @@ void AddMaskedColliderKeyKind0(MaskedCollider* q, s32 value)
     }
 }
 
+// Appends a key of kind 1 to the collider's list of 16 key slots (ignored when full).
 void AddMaskedColliderKeyKind1(MaskedCollider* q, s32 value)
 {
     if ((u32)q->count550 < 16) {
@@ -462,6 +474,7 @@ void AddMaskedColliderKeyKind1(MaskedCollider* q, s32 value)
 
 
 
+// Appends a key of kind 2 to the collider's list of 16 key slots (ignored when full).
 void AddMaskedColliderKeyKind2(MaskedCollider* self, s32 value)
 {
     if ((u32)self->count550 < 16) {
@@ -471,6 +484,7 @@ void AddMaskedColliderKeyKind2(MaskedCollider* self, s32 value)
     }
 }
 
+// Appends a key of kind 3 to the collider's list of 16 key slots (ignored when full).
 void AddMaskedColliderKeyKind3(MaskedCollider* q, s32 value)
 {
     if ((u32)q->count550 < 16) {
@@ -480,6 +494,8 @@ void AddMaskedColliderKeyKind3(MaskedCollider* q, s32 value)
     }
 }
 
+// Turns the player bit (1) of the collider's accept mask on or off; the mask becomes 8 when
+// nothing else would be accepted.
 void SetAcceptsPlayer(MaskedCollider* self, s32 enabled)
 {
     if (enabled) {
@@ -494,6 +510,8 @@ void GetAcceptsPlayer(MaskedCollider* state, s32* result) {
 	*result = state->mask & 1;
 }
 
+// Turns the flagged-objects bit (4) of the collider's accept mask on or off; the mask becomes 8
+// when nothing else would be accepted.
 void SetAcceptsFlaggedObjects(MaskedCollider* self, s32 enabled)
 {
     if (enabled) {
@@ -508,8 +526,12 @@ void GetAcceptsFlaggedObjects(MaskedCollider* state, s32* result) {
 	*result = (state->mask >> 2) & 1;
 }
 
+// Adds an object id to the collider's list of 4 accepted ids and turns on the list bit (2) of
+// its mask.
 void AddAcceptedObjectId(MaskedCollider* obj, s32 value) { if ((u32)obj->count640 < 4) { obj->list644[obj->count640++] = value; obj->mask |= 2; } }
 
+// Adds a kind to the collider's list of 4 accepted kinds and turns on the list bit (2) of its
+// mask.
 void AddAcceptedKind(MaskedCollider* r, s32 value)
 {
     s32 n = r->count654;
@@ -520,8 +542,10 @@ void AddAcceptedKind(MaskedCollider* r, s32 value)
     }
 }
 
+// Adds an entry to the collider's list of 3 and turns on the list bit (2) of its mask.
 void AddMaskedColliderListEntry(MaskedCollider* obj, s32 value) { if ((u32)obj->count668 < 3) { obj->list66C[obj->count668++] = (void*)value; obj->mask |= 2; } }
 
+// The collider's sound parameters, created on first use.
 void* GetMaskedColliderSoundParams(MaskedCollider* self)
 {
     if (!self->soundParams) InitSoundParams((SoundRecord**)&self->soundParams);
@@ -568,6 +592,8 @@ s32 IsObjectAccepted(MaskedCollider* self, BaseObject* msg)
 
 extern f32 g_gameTime;
 
+// Updates the collider; state 1 moves to state 2 once the object has been tried twice or its
+// time limit has passed since the stamp.
 void UpdateTimedState(TimedStateObject* self, f32 dt)
 {
     s32 next;
@@ -586,6 +612,7 @@ void UpdateTimedState(TimedStateObject* self, f32 dt)
 
 void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
 
+// After the base handling, notification 0xF about this object starts the timed state 1.
 void HandleTimedStateNotification(TimedStateObject* self, s32 kind, ObjectMessage* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
@@ -597,6 +624,8 @@ void HandleTimedStateNotification(TimedStateObject* self, s32 kind, ObjectMessag
 }
 
 s32 IsObjectOfKind(BaseObject* list, s32 key);
+// Whether the contact counts: no for an object with flag bit 55, yes when it accepts all, and
+// otherwise no for an object of kind 0x27 unless its child allows it.
 s32 TestTimedStateContact(TimedStateObject* node, Collider* src)
 {
     s32 r;
@@ -613,6 +642,7 @@ s32 TestTimedStateContact(TimedStateObject* node, Collider* src)
 extern f32 g_gameTime;
 void FadeOutPlacedObject(Collider* self, f32 time);
 
+// Changes the timed state and stamps the time; entering state 2 fades the object out.
 void SetTimedState(TimedStateObject* self, s32 state)
 {
     if (state != self->state) {
@@ -626,6 +656,7 @@ void SetTimedState(TimedStateObject* self, s32 state)
 }
 
 
+// Initialises the masked collider to accept the player and flagged objects (mask 5).
 void InitPlayerFlaggedCollider(PlayerFlaggedCollider* self)
 {
     InitMaskedCollider(self);
@@ -633,6 +664,7 @@ void InitPlayerFlaggedCollider(PlayerFlaggedCollider* self)
     self->f698 = -1;
 }
 
+// Initialises the masked collider with mask 1, scale 1.0 and no anchor presets.
 void InitMassScalingCollider(MassScalingCollider* self)
 {
     InitMaskedCollider(self);
@@ -642,6 +674,9 @@ void InitMassScalingCollider(MassScalingCollider* self)
     self->sel6C8 = -1;
 }
 
+// When the collider is not held or busy, takes the other object of a contact pair (by index) if
+// accepted: applies its anchor presets, marks the collider busy, remembers the object and
+// scales the mass by the scale.
 void LatchContactObject(MassScalingCollider* self, u8* table, s32 index)
 {
     BaseObject* value;
@@ -661,6 +696,8 @@ void LatchContactObject(MassScalingCollider* self, u8* table, s32 index)
 
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
+// After LatchContactObject, remembers the other object of the contact pair as the collider's
+// switched collider when it is of kind 5 and accepted.
 void LatchAcceptedSwitchedCollider(LatchedSwitchCollider* self, u8* table, s32 index)
 {
     BaseObject* value;
@@ -677,6 +714,8 @@ void LatchAcceptedSwitchedCollider(LatchedSwitchCollider* self, u8* table, s32 i
 
 struct OwnerMessage;
 
+// Updates the masked collider and, if a switched collider was latched, sends it the owner
+// message when it is still the active one, then forgets it.
 void UpdateLatchedSwitchCollider(LatchedSwitchCollider* self, f32 dt)
 {
     s32 local[4];
@@ -929,6 +968,8 @@ void CloneTreeNodes(Mesh03* self, Tree03* src, Mesh03* base, Tree03* dst)
 }
 
 
+// Looks up each id of the pair's list under its owner and, for each object found, adds it to
+// the queued objects and starts it.
 void ResolveZoneObjects(void* self, Pair28* list, void* context)
 {
     s32 n = list->seen.count;
@@ -943,6 +984,7 @@ void ResolveZoneObjects(void* self, Pair28* list, void* context)
 }
 
 
+// Whether the object matches any id of the list.
 s32 IsObjectInIdList(Queue28* set, void* key)
 {
     s32 i = set->count - 1;
@@ -960,11 +1002,13 @@ s32 IsObjectInIdList(Queue28* set, void* key)
     return 0;
 }
 
+// Adds an object to the pair's list of queued objects; false once the list has 16.
 bool AppendToQueuedObjects(Pair28* pair, BaseObject* value) {
 	pair->queued.values[pair->queued.count++] = value;
 	return pair->queued.count < 16;
 }
 
+// Adds a value to a queue of at most 16; false once it is full.
 bool AppendToObjectQueue(Queue28* queue, s32 value) {
 	queue->values[queue->count++] = value;
 	return queue->count < 16;
@@ -972,6 +1016,7 @@ bool AppendToObjectQueue(Queue28* queue, s32 value) {
 
 extern u8 g_flagTable[];
 
+// Gives the zone record a flag-table index and no sequence.
 void InitZoneRecord(Zone28* s)
 {
     s->id120 = TakeFlagTableIndex((FlagTable*)g_flagTable);
@@ -1026,6 +1071,8 @@ extern u8 g_flagTable[];
 
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
+// Starts a zone record: mode -1, resolves the objects of both pairs, and, for a persistent
+// record whose flag-table bit is set, queues DeferZoneRecordActivation.
 void StartZoneRecord(Zone28* self)
 {
     s32 n;
@@ -1049,6 +1096,8 @@ void StartZoneRecord(Zone28* self)
 
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
+// Queued call: the first run (mode 0) queues itself once more with mode 0xC, and the run after
+// that activates the zone record, so the activation is deferred by a queue pass.
 void DeferZoneRecordActivation(void* selfp, s32 mode)
 {
     Zone28* self = (Zone28*)selfp;
@@ -1060,6 +1109,7 @@ void DeferZoneRecordActivation(void* selfp, s32 mode)
 }
 
 struct ZoneTargetEntry;
+// Sets a zone target entry (a flag, then id, key and state) in the zone's table of 8.
 void SetZoneEntry(Zone28* self, s32 a, s32 b, s32 c, s32 d)
 {
     UpsertKeyedEntry((ZoneTargetEntry*)self->table14C, 8, &self->count148, a, b, c, d);
@@ -1068,6 +1118,8 @@ void SetZoneEntry(Zone28* self, s32 a, s32 b, s32 c, s32 d)
 extern f32 g_gameTime;
 void ClearRootTries(PlacedObject* self);
 
+// Changes the zone record's mode and stamps the time; going from 0 to 1 activates the record,
+// going to 0 from any mode but -1 deactivates it.
 void SetZoneMode(Zone28* self, s32 b)
 {
     s32 old = self->mode;
@@ -1104,6 +1156,8 @@ struct ZoneTargetEntry {
     s32 offState;           // 0x0C: otherwise
 };
 
+// Sets the on-state (flag set) or off-state of the entry with id k1 and key k2 (or any key),
+// adding the entry if there is room (capacity cap); 0 when the table is full.
 s32 UpsertKeyedEntry(ZoneTargetEntry* tab, s32 cap, s32* count, s32 flag, s32 k1, s32 k2, s32 val)
 {
     for (s32 i = 0; i < *count; i++) {
@@ -1261,6 +1315,7 @@ void ActivateZoneRecord(Zone28* self, s32 p, s32 q)
 }
 
 
+// Triggers script event 3, runs the record's off entries and tells the owner (message 13).
 void DeactivateZoneRecord(Zone28* self, s32 p)
 {
     TriggerScriptEvent(self->owner, 3, 0, 0);
@@ -1270,6 +1325,7 @@ void DeactivateZoneRecord(Zone28* self, s32 p)
 }
 
 
+// Initialises the collider and its zone record.
 void InitTriggerZone(TriggerZone* self)
 {
     InitCollider(self);
@@ -1277,6 +1333,7 @@ void InitTriggerZone(TriggerZone* self)
 }
 
 
+// Loads the collider and collects the zone's children.
 void LoadTriggerZone(TriggerZone* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -1285,6 +1342,8 @@ void LoadTriggerZone(TriggerZone* self, BufferedStream* stream)
 
 void* MoveMemory(void* end, void* begin, s32 bytes);
 
+// Adds a quad to the trigger zone; an object matching id 0x200 puts its quad first (shifting
+// the others up), any other goes last.
 void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q)
 {
     s32 n = self->quadCount;
@@ -1310,6 +1369,8 @@ struct __attribute__((aligned(16))) Rotation30 { u8 b[0x30]; };
 // again apart from the destination's.
 static inline void MoveRotations(void* dst, void* src, s32 n) { MoveMemory(dst, src, n * 0x30); }
 
+// Adds a rotation entry to the trigger zone; an object matching id 0x200 puts its entry first
+// (shifting the others up), any other goes last.
 void AddTriggerZoneRotation(TriggerZone* self, BaseObject* a1, Mat02* e)
 {
     s32 n = self->count7E0;
@@ -1460,6 +1521,8 @@ void StartTriggerZone(TriggerZone* self)
 }
 
 
+// Copies the collider but keeps the zone's own flag-table index and points the zone's owner at
+// itself.
 void CopyTriggerZone(TriggerZone* self, TriggerZone* src)
 {
     s32 keep = self->zone.id120;
@@ -1532,6 +1595,9 @@ ASM_FUNC(func_0013F8A0);
 
 extern "C" f32 Arccosine(f32 x);
 
+// Gives the index of the zone's rotation entry closest to the zone's own rotation (the largest
+// rotation cosine of the product), and through out that angle with Arccosine; 0 when there are
+// none.
 s32 FindLargestEntryIndex(TriggerZone* s, f32* out)
 {
     Mat3U loc;
@@ -1748,6 +1814,8 @@ void UpdateTriggerZone(TriggerZone* self, f32 dt)
 }
 
 
+// After the base event handling, a handled event whose flags lack bit 4 sets mode 1 on a zone
+// that is in state 3 and in mode 0.
 s32 HandleTriggerZoneEvent(TriggerZone* a0, void* a1)
 {
     s32 r = HandleObjectEvent(a0, (ObjectEvent*)a1);
@@ -1758,6 +1826,7 @@ s32 HandleTriggerZoneEvent(TriggerZone* a0, void* a1)
 }
 
 
+// Initialises the collider and its zone record, sets flag bit 43 and sets both anchors to 3.
 void InitZoneCollider(ZoneCollider* self)
 {
     u64 m = 0x8000;
@@ -1769,6 +1838,8 @@ void InitZoneCollider(ZoneCollider* self)
 }
 
 
+// Loads the collider and collects its zone's children; a collider that reports what is inside
+// keeps its zone active.
 void LoadZoneCollider(ZoneCollider* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -1781,6 +1852,9 @@ void LoadZoneCollider(ZoneCollider* self, BufferedStream* stream)
 void StartPlacedObject(PlacedObject* self);
 
 
+// Starts the placed object and its zone record, sets mode 0, resolves each listed id to its
+// first object (mode 4 lookup) into the object list, and, when no ids were listed, makes it
+// test the active collider.
 void StartZoneCollider(ZoneCollider* self)
 {
     StartPlacedObject(self);
@@ -1801,6 +1875,8 @@ void StartZoneCollider(ZoneCollider* self)
 
 
 
+// Copies the collider but keeps the zone's own flag-table index and points the zone's owner at
+// itself.
 void CopyZoneCollider(ZoneCollider* self, ZoneCollider* src)
 {
     s32 saved = self->zone.id120;
@@ -1929,6 +2005,8 @@ struct ScriptListBuilder;
 
 s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
 
+// Appends each of the collider's listed inside entries to the script list; 0 as soon as one is
+// refused, else 1.
 s32 TestListedEntriesAccepted(ZoneCollider* self, void* arg)
 {
     for (s32 i = 0; i < self->countInside; i++) {
@@ -1977,11 +2055,13 @@ void AppendZoneColliderSecondQueue(ZoneCollider* self, s32 b)
     AppendZoneSecondQueue((u8*)self + 0x5C0, self, b);
 }
 
+// Adds an object id to the zone's list of ids that count.
 void AddIncludedId(TriggerZone* list, s32 value)
 {
     list->idsIn[list->countIdsIn++] = value;
 }
 
+// Adds an object id to the zone's list of ids that do not count.
 void AddExcludedId(TriggerZone* self, s32 value)
 {
     s32 n = self->countIdsOut;
@@ -1989,6 +2069,7 @@ void AddExcludedId(TriggerZone* self, s32 value)
     self->countIdsOut = n + 1;
 }
 
+// Adds a kind to the zone's list of kinds that count.
 void AddIncludedKind(TriggerZone* self, s32 value)
 {
     s32 n = self->countKindsIn;
@@ -1999,6 +2080,7 @@ void AddIncludedKind(TriggerZone* self, s32 value)
 struct Camera;
 extern void* g_camera;
 
+// Adds a kind to the zone's list of kinds that do not count.
 void AddExcludedKind(TriggerZone* self, s32 value)
 {
     s32 i = self->countKindsOut;
@@ -2006,6 +2088,7 @@ void AddExcludedKind(TriggerZone* self, s32 value)
     self->countKindsOut = i + 1;
 }
 
+// Adds an object id to the collider's list of ids to look for when it starts.
 void AddZoneColliderId(ZoneCollider* self, s32 value)
 {
     s32 i = *(s32*)((u8*)self + 0x550);

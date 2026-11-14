@@ -156,6 +156,7 @@ void InitActiveSetSolver(ActiveSetSolver* self, s32 count)
 	self->solution = (f32*)AllocateBackMemory(count << 3);
 }
 
+// Empties the solver's lists, clears every item and puts all items back in the pending list.
 void ResetActiveSetSolver(ActiveSetSolver* self)
 {
     s32 i;
@@ -172,6 +173,8 @@ void ResetActiveSetSolver(ActiveSetSolver* self)
     }
 }
 
+// Adds an item to the solver: fills its column in every existing item's row with the dot product of
+// their axes and puts it in the pending list.
 void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item)
 {
     for (s32 i = 0; i < self->count; i++) {

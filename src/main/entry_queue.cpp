@@ -61,6 +61,7 @@ f32 D_00263E44 = 0.5f;
 
 void* AllocateFrontMemory(int size);
 
+// Initialises the object, allocates the entry buffer (0xA00 bytes, 0x80 entries) and sets flag68.
 void InitEntryQueue(EntryQueue* self)
 {
     InitObject(self);
@@ -147,6 +148,8 @@ struct Aim_0017BB78 {
     Vec02 mark;             // 0x2530
 };
 
+// Ends any current aim at a node (the player keeps its heading as the mark) and, when target is
+// given, aims the player at the node's anchor, 125 units above it.
 void SetEntryQueueTargetNode(EntryQueue* self, BaseObject* target)
 {
     Aim_0017BB78* p = (Aim_0017BB78*)self->player;
@@ -167,6 +170,9 @@ void SetEntryQueueTargetNode(EntryQueue* self, BaseObject* target)
 
 
 
+// Releases the on/off object the queue was forcing (back to no forced state, restarting it if the
+// queue had set it up) and, if next is given, takes it over, forced to state 1 with the player as
+// its switched collider.
 void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next)
 {
     if (self->forcedOnOffObject != 0) {
@@ -486,6 +492,8 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
 }
 
 
+// Moves the queue on: starts the first entry when none has started, then keeps starting the next
+// entry while the current one is done, and drops the pending entry once it is done.
 void AdvanceEntryQueue(EntryQueue* self)
 {
     if (self->entryIndex < 0 && self->entryCount > 0)
@@ -660,6 +668,7 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
 }
 
 
+// Advances the queue and tells whether there are entries and not all have finished.
 s32 IsEntryQueueRunning(EntryQueue* self)
 {
     AdvanceEntryQueue(self);
@@ -670,6 +679,7 @@ s32 IsEntryQueueRunning(EntryQueue* self)
 }
 
 
+// Unbinds the queue if it is bound, empties it and sets the index to 0.
 void ResetEntryQueue(EntryQueue* self)
 {
     if (self->player != 0) {
@@ -683,6 +693,8 @@ void ResetEntryQueue(EntryQueue* self)
 
 
 
+// Connects the queue to the player: restarts it from the first entry, sends script event 0x17
+// and, if flag68 is set, takes a pad select flag.
 void BindEntryQueueToObject(EntryQueue* self, Player* player)
 {
     player->entryQueue = self;
@@ -697,6 +709,9 @@ void BindEntryQueueToObject(EntryQueue* self, Player* player)
 
 
 
+// Detaches the queue from its player: releases the forced on/off object and the aim node, stops
+// the animation player, restores the clock scale to 1, marks the queue as finished (script event
+// 25) and releases the pad select flags if it took them.
 void UnbindEntryQueue(EntryQueue* self)
 {
     if (self->player != 0) {
@@ -724,6 +739,8 @@ void UnbindEntryQueue(EntryQueue* self)
 static u8 g_queueOverflowEntry[0x14];
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// Adds an entry (0x14 bytes, cleared, with the three fields given) at the end of the queue's
+// buffer and gives it back; once the 0x80 entries are used it hands out a spare entry instead.
 void* AddQueueEntry(EntryQueue* pool, s32 a, s32 b, s32 c)
 {
     if (pool->entryCount >= 0x80) {
@@ -740,44 +757,53 @@ void* AddQueueEntry(EntryQueue* pool, s32 a, s32 b, s32 c)
     return e;
 }
 
+// Adds a kind 0 entry, which remembers the object b; gives the entry back.
 void* AddQueueEntryKind0(void* self, s32 b)
 {
     return AddQueueEntry((EntryQueue*)self, 0, b, 1);
 }
 
+// Adds a kind 1 entry, which puts the player at the arrival point or node b; gives the entry
+// back.
 void* AddQueueEntryKind1(void* self, s32 b)
 {
     return AddQueueEntry((EntryQueue*)self, 1, b, 1);
 }
 
+// Adds a kind 10 entry, which aims the player at the node b; gives the entry back.
 void* AddQueueEntryKind10(void* self, s32 b)
 {
     return AddQueueEntry((EntryQueue*)self, 10, b, 1);
 }
 
 
+// Adds a kind 2 entry, which sends script event 0x18 with the given value when it starts.
 void AddQueueEntryKind2(void* self, s32 value)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 2, -1, 1);
     o->value = value;
 }
 
+// Adds a kind 3 entry, which forces the on/off object given on or off; gives the entry back.
 void* AddQueueEntryKind3(void* self, s32 value)
 {
     return AddQueueEntry((EntryQueue*)self, 3, value, 1);
 }
 
+// Adds a kind 4 entry, a wait whose time is the given float.
 void AddQueueEntryKind4(void* self, s32 a, f32 value)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 4, a, 0);
     o->valueF = value;
 }
 
+// Adds a kind 9 entry, which plays the animation of the given object; gives the entry back.
 void* AddQueueEntryKind9(EntryQueue* self, s32 value, s32 c)
 {
     return AddQueueEntry(self, 9, value, c);
 }
 
+// Adds a kind 5 entry (a jump) with the two values c and d.
 void AddQueueEntryKind5(EntryQueue* self, s32 b, s32 c, s32 d, s32 e)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry(self, 5, b, e);
@@ -785,30 +811,37 @@ void AddQueueEntryKind5(EntryQueue* self, s32 b, s32 c, s32 d, s32 e)
     o->value10 = d;
 }
 
+// Adds a kind 6 entry (walk toward a node) with a float value.
 void AddQueueEntryKind6(EntryQueue* self, s32 a, s32 b, f32 value)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry(self, 6, a, b);
     o->valueF = value;
 }
 
+// Adds a kind 7 entry (walk along a path curve) with a float value.
 void AddQueueEntryKind7(EntryQueue* self, s32 b, s32 c, f32 value)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry(self, 7, b, c);
     o->valueF = value;
 }
 
+// Adds a kind 8 entry, an action on the player chosen by value c (2 aim mode 3, 4 state 2/7, 8
+// state 0xA/0x1F).
 void AddQueueEntryKind8(void* self, s32 b, s32 c, s32 d)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 8, b, d);
     o->value = c;
 }
 
+// Adds a kind 11 entry, which sets the game clock scale to the given float.
 void AddQueueEntryKind11(void* self, f32 value)
 {
     QueueEntry* o = (QueueEntry*)AddQueueEntry((EntryQueue*)self, 11, -1, 1);
     o->valueF = value;
 }
 
+// Adds a kind 12 entry, which waits for the player's jump sub state to end; gives the entry back
+// as a number.
 s32 AddQueueEntryKind12(void* self)
 {
     return (s32)AddQueueEntry((EntryQueue*)self, 0xC, -1, 0);

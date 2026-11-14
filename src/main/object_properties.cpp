@@ -220,6 +220,7 @@ void LoadScriptEntryTable(World* self, BufferedStream* arg) {
     DestroyScriptValue(&q0, 2);
 }
 
+// Gives the scope of script entry index in the world (null for -1), marking it as a root to keep.
 void* GetScriptEntryScope(s32 index, World* self)
 {
     if (index == -1) {
@@ -254,6 +255,7 @@ ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx)
     return self;
 }
 
+// Binary search of the property list of the object's class for key; null if absent.
 PropertyDescriptor* FindPropertyDescriptor(BaseObject* self, s32 key)
 {
     PropertyList* entry = &g_classPropertyLists[self->desc->id];
@@ -276,6 +278,8 @@ PropertyDescriptor* FindPropertyDescriptor(BaseObject* self, s32 key)
     return 0;
 }
 
+// Builds a script value holding a list that the callback fills (it gets the builder, with the given
+// type); an empty list becomes the tag value 0.
 ScriptValue* BuildScriptListFromCallback(ScriptValue* self, void* ctx, s32 v, PropertyGetter cb)
 {
     ScriptValue q;
@@ -449,6 +453,7 @@ ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor*
     return out;
 }
 
+// Converts value as a property of the builder's type and appends it, as a new node, to the list.
 s32 AppendPropertyToScriptList(ScriptListBuilder* self, sptr value)
 {
     PropertyDescriptor d;
@@ -587,6 +592,8 @@ ScriptValue* StoreScriptArguments(ScriptValue* out, s32 n, ScriptValue* args, co
     return out;
 }
 
+// Builds a script value holding a list from n pairs: each value is converted as a property of the
+// type given in keys[i] and appended. An empty list becomes the tag value 0.
 ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, sptr* vals)
 {
     ScriptValue q;
@@ -702,6 +709,8 @@ ScriptValue* WritePropertyValue(ScriptValue* out, void* base, PropertyDescriptor
     return out;
 }
 
+// Reads property n of the object into self: the descriptor's value for ids under 0x495, and for
+// higher ids the object's keyed (extra) list.
 ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n)
 {
     if (n < 0x495) {
@@ -717,6 +726,8 @@ ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n)
     return self;
 }
 
+// Writes property key of the object: through its descriptor for ids under 0x495, else into the
+// object's keyed list.
 ScriptValue* UpdateObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
     if (key < 0x495) {
@@ -728,6 +739,7 @@ ScriptValue* UpdateObjectProperty(ScriptValue* self, BaseObject* p, s32 key, Scr
     return self;
 }
 
+// Adds a keyed (extra) property to the object, creating the list first if needed.
 ScriptValue* AddObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
     EnsureKeyedList(p);
@@ -735,6 +747,7 @@ ScriptValue* AddObjectProperty(ScriptValue* self, BaseObject* p, s32 key, Script
     return self;
 }
 
+// Sets an extra (keyed) property of the object, adding it when the key is not there yet.
 ScriptValue* SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
     EnsureKeyedList(p);
@@ -743,6 +756,8 @@ ScriptValue* SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, S
     return self;
 }
 
+// Collects count variadic arguments (8 bytes each) from the register-saved list and stores them as
+// script arguments by kind.
 ScriptValue* StoreScriptArgumentsVa(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...)
 {
     void* arr[32];

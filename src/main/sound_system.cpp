@@ -285,6 +285,8 @@ s32 D_002748EC = 0;
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// Stops the staged bank's voice, unloads the bank, waits for the IOP commands to drain and
+// resets the staged state.
 void UnloadStagedBank(void)
 {
     if (g_stagedBankHandle != 0) {
@@ -358,11 +360,14 @@ s32 EnsureSoundBankLoaded(s32 n)
     return ((s32*)&g_soundBankHandles)[n];
 }
 
+// Loads the bank that sound entry idx belongs to (if needed).
 s32 EnsureSoundEntryBankLoaded(s32 idx)
 {
     return EnsureSoundBankLoaded(g_soundEntries[idx].bank);
 }
 
+// Allocates a sound record's parameter block (0x24 bytes) with the defaults: no sound, far range
+// 3000, near range 300, volume 1.
 void InitSoundParams(SoundRecord** self)
 {
     *self = (SoundRecord*)AllocateZeroedFrontMemory(0x24);
@@ -376,6 +381,7 @@ void InitSoundParams(SoundRecord** self)
     (*self)->startParam = 0;
 }
 
+// Whether the sound entry idx can be played, loading its bank first if it is not loaded.
 s32 IsSoundEntryAvailable(s32 idx)
 {
     const SoundEntry* p = g_soundEntries + idx;
@@ -386,6 +392,7 @@ s32 IsSoundEntryAvailable(s32 idx)
     return ((s32*)g_soundEntryAvailable)[idx];
 }
 
+// IOP reply callback: the stream voice's pending request is done.
 void ClearStreamVoicePending(s32 reply, s64 arg)
 {
     g_streamVoicePending = 0;
@@ -429,6 +436,7 @@ void StartLockedStreamVoice(KeyRecord* self)
     SetVolumeChannelFactor(8, 3, 0.5f);
 }
 
+// Unlocks the stream voice and stops it.
 void StopLockedStreamVoice(void)
 {
     g_streamVoiceLocked = 0;
@@ -469,6 +477,8 @@ void OpenKeyRecord(KeyRecord* self)
     RequestStreamCallback(h, ClearStreamVoicePending, (u32)h);
 }
 
+// Gives 1 while an unlocked stream voice has a pending request; otherwise queries the IOP about
+// the voice and gives 0.
 s32 CheckStreamVoicePending(void)
 {
     if (g_streamVoiceLocked != 0)
@@ -481,6 +491,8 @@ s32 CheckStreamVoicePending(void)
     return 0;
 }
 
+// Sends a sound record's volume (x 1024) and its pan, mapped by (pan + 2) * 179.5 (less 359 for a
+// positive pan), to its voice.
 void ApplySoundRecordVolumePan(PlayingSound* self)
 {
     s32 a1 = (s32)(self->volume * 1024.0f);
@@ -493,6 +505,8 @@ void ApplySoundRecordVolumePan(PlayingSound* self)
     SetVoiceVolumePan(self->voice, a1, a2);
 }
 
+// Plays sound -2 for an object with the given ranges and applies its volume and pan at once; the
+// handle is released again when the caller gave no slot for it.
 void PlaySoundAndApplyVolumePan(BaseObject* a0, PlayingSound** a1, f32 f12, f32 f13)
 {
     s32 flag = 0;
@@ -518,6 +532,8 @@ s32 HasStreamVoice(void)
 
 LINKER_REMNANT(func_001BE990);
 
+// Stops the stream voice (unless it is locked), busy-waits until the IOP reports it stopped and
+// forgets it.
 void StopStreamVoice(void)
 {
     s32 r;
@@ -533,6 +549,7 @@ void StopStreamVoice(void)
     g_streamVoicePending = 0;
 }
 
+// Pauses the stream voice, if there is one. ResumeStreamVoice undoes it.
 void PauseStreamVoice(void)
 {
     if (g_streamVoice != 0) {
@@ -547,6 +564,7 @@ void ResumeStreamVoice(void)
     }
 }
 
+// Stops the staged bank's voice (state 3) and goes back to state 2, loaded but not playing.
 void StopStagedBankVoice(void)
 {
     if (g_stagedBankState == 3) {
@@ -556,6 +574,8 @@ void StopStagedBankVoice(void)
     }
 }
 
+// Callback of the staged bank's load: keeps the bank handle and goes to state 2 (loaded), or
+// clears the record and the state when the load failed (handle 0).
 void StoreStagedBankHandle(s32 h, s64 arg)
 {
     g_stagedBankHandle = h;
@@ -616,6 +636,8 @@ void RequestStagedBank(KeyRecord* self)
     }
 }
 
+// Requests the staged sound bank of a key record, waits for it to finish loading (state 2) and
+// starts its voice (state 3).
 void PlayStagedBank(void* self)
 {
     RequestStagedBank((KeyRecord*)self);
@@ -631,6 +653,7 @@ void PlayStagedBank(void* self)
     }
 }
 
+// Sets row 2's factor of channel 1 to 0; RestoreVolumeChannel2 sets it back to 1.
 void SilenceVolumeChannel2(void)
 {
     SetVolumeChannelFactor(2, 1, 0.0f);
@@ -641,6 +664,7 @@ void RestoreVolumeChannel2(void)
     SetVolumeChannelFactor(2, 1, 1.0f);
 }
 
+// Pauses the staged bank's voice; ResumeStagedBankVoice resumes it.
 void PauseStagedBankVoice(void)
 {
     PauseIopVoice(g_stagedBankVoice);
@@ -651,6 +675,7 @@ void ResumeStagedBankVoice(void)
     ResumeIopVoice(g_stagedBankVoice);
 }
 
+// Takes a sound level entry (12 bytes) from the world's pool and links it into the level list.
 void* AllocateSoundLevelEntry(void)
 {
     void* p = PopFreeSlot(&g_currentWorld->pool1BB8);
@@ -667,6 +692,8 @@ void RemoveSoundLevelEntry(void* self)
     PushFreeSlot(&g_currentWorld->pool1BB8, self);
 }
 
+// Removes every sound level entry of the world, sends the IOP level 0x14 (the lowest) and resets
+// the current and previous levels.
 void ClearSoundLevels(void)
 {
     ListFrame it;
@@ -683,6 +710,8 @@ void ClearSoundLevels(void)
 
 }
 
+// Adds a sound level entry holding x (clamped to -20..0x6B); when it is higher than the current
+// level (or the list was empty) it becomes the current level and the old one the previous level.
 SoundLevelEntry* PushSoundLevel(s32 x)
 {
     s32 flag = IsListEmpty(&g_currentWorld->list1BC4);
@@ -703,6 +732,8 @@ SoundLevelEntry* PushSoundLevel(s32 x)
     return p;
 }
 
+// Sets g_currentSoundLevel to the highest level among the world's sound level entries, or to 0
+// when there are none (the floor for a non-empty list is -20).
 void RecomputeSoundLevel(SoundLevelEntry* entry)
 {
     ListFrame f;
@@ -735,6 +766,8 @@ void RecomputeSoundLevel(SoundLevelEntry* entry)
     g_activeListFrames = f.prev;
 }
 
+// Removes a sound level entry; if it was the current level, recomputes the level, sends the new
+// one to the IOP (plus 0x14) and restores channel 7's factor.
 void ReleaseSoundLevel(SoundLevelEntry* self)
 {
     if (self != 0) {
@@ -754,6 +787,7 @@ void ReleaseSoundLevel(SoundLevelEntry* self)
     }
 }
 
+// Removes a sound level entry and, when it was the current level, recomputes the level.
 void RemoveSoundLevelAndRecompute(SoundLevelEntry* self)
 {
     if (self == 0) {
@@ -767,6 +801,8 @@ void RemoveSoundLevelAndRecompute(SoundLevelEntry* self)
     }
 }
 
+// Brings the sound system up at start: clears the bank handles, starts the IOP command channels,
+// loads bank 0, resets the sound level and the volume factors and sends the IOP its channel set-up.
 void InitSoundSystem(void)
 {
     FillMemory(g_soundBankHandles, 0, 0x1C);
@@ -815,6 +851,9 @@ void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f3
     *pan = 0.0f;
 }
 
+// The distance from a to b as heard through the camera: the part along the camera's axis is
+// scaled down by 1 / ((1 - z) + z * 10), z being the camera controller's zoom fraction, so a
+// zoomed-in view hears things along the view axis as nearer.
 f32 MeasureCameraWeightedDistance(Vec02* a, Vec02* b)
 {
     Vec02 d;
@@ -832,6 +871,8 @@ f32 MeasureCameraWeightedDistance(Vec02* a, Vec02* b)
 
 ASM_FUNC(func_001BF398);
 
+// Where sounds are heard from: the active switched collider's position (+0x140) when it has
+// one, otherwise the camera's position.
 void* GetSoundListenerPosition(void)
 {
     SwitchedCollider* p = (SwitchedCollider*)GetActiveSwitchedCollider();
@@ -873,6 +914,8 @@ void ComputeSoundRecordDoppler(PlayingSound* self)
     }
 }
 
+// The distance function used for sounds: the camera-weighted one while the top camera controller
+// is one of the first two kinds, otherwise the plain distance.
 ListenerDistanceFn ChooseSoundListenerFunction(void)
 {
     s32 n;
@@ -883,12 +926,15 @@ ListenerDistanceFn ChooseSoundListenerFunction(void)
     return MeasureCameraWeightedDistance;
 }
 
+// The distance from the listener to position, by the function ChooseSoundListenerFunction picks.
 f32 ComputeSoundListenerFactor(void* position)
 {
     void* listener = GetSoundListenerPosition();
     return ChooseSoundListenerFunction()(listener, position);
 }
 
+// The volume and pan of a sound at a position for the listener of the moment: the base volume
+// and no pan when there is no position, otherwise ComputeSoundVolumeAndPan on the distance.
 void ComputeSoundAttenuation(void* self, f32* out, s32* flag, f32 a, f32 b, f32 c)
 {
     if (self != 0) {
@@ -900,6 +946,8 @@ void ComputeSoundAttenuation(void* self, f32* out, s32* flag, f32 a, f32 b, f32 
     }
 }
 
+// Takes a sound record (0x90 bytes) from the world's pool, clears it and links it into the
+// record list.
 void* AllocateSoundRecord(void)
 {
     void* s = PopFreeSlot(&g_currentWorld->pool1BA0);
@@ -910,6 +958,8 @@ void* AllocateSoundRecord(void)
     return s;
 }
 
+// Detaches a record from the caller's handle slot: the record's owner is cleared and the slot
+// set to null (the sound goes on playing).
 void ClearSoundRecordHandle(PlayingSound** slot)
 {
     PlayingSound* e = *slot;
@@ -917,6 +967,7 @@ void ClearSoundRecordHandle(PlayingSound** slot)
     *slot = 0;
 }
 
+// Clears the owner's handle, invalidates the record's serial and returns it to the pool.
 void FreeSoundRecord(PlayingSound* self)
 {
     if (self->owner != 0) {
@@ -927,6 +978,8 @@ void FreeSoundRecord(PlayingSound* self)
     PushFreeSlot(&g_currentWorld->pool1BA0, self);
 }
 
+// Stops a sound record's voice, at once for n = 0 or with a fade of n * 0.24 units, and frees
+// the record.
 void StopSoundRecord(PlayingSound* self, s32 n)
 {
     if (self != 0) {
@@ -967,6 +1020,8 @@ void SetSoundRecordPitch(PlayingSound* p, f32 a)
     SetVoicePitch(p->voice, p->Clamp(v, -0x8000, 0x7FFF));
 }
 
+// Changes a sound record's base volume to a, scaling its current volume by the same ratio, and
+// sends it.
 void SetSoundRecordVolume(PlayingSound* self, f32 a)
 {
     if (self != 0) {
@@ -1109,6 +1164,8 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
     }
 }
 
+// IOP reply callback: on success (reply 0) marks the record finished if its serial still equals
+// the one in the key's high word.
 void MarkSoundRecordIfIdMatches(s32 reply, s64 key)
 {
     if (reply == 0) {
@@ -1120,6 +1177,8 @@ void MarkSoundRecordIfIdMatches(s32 reply, s64 key)
     }
 }
 
+// Sets row 6 of the volume factors to x for channels 0, 2 and 3, and for channel 1 when flag is
+// set.
 void SetVolumeChannel6Factors(s32 flag, f32 x)
 {
     SetVolumeChannelFactor(6, 0, x);
@@ -1268,11 +1327,14 @@ void UpdateSoundEmitters(void)
     g_activeListFrames = f.prev;
 }
 
+// Sets IOP volume channel 8 to x (x 1024).
 void SetIopVolumeChannel8(f32 x)
 {
     SetIopVolumeChannel(8, (s32)(x * 1024.0f));
 }
 
+// Sets the IOP volume of channel column to the product of that column of every row of
+// g_volumeChannelFactors, clamped to 0..1 and scaled by 1024.
 void ApplyVolumeChannelFactors(s32 column)
 {
     f32* p = &g_volumeChannelFactors[0][column];
@@ -1296,12 +1358,16 @@ void ApplyVolumeChannelFactors(s32 column)
     SetIopVolumeChannel(column, (s32)(prod * 1024.0f));
 }
 
+// Sets one factor and re-applies the channel it belongs to.
 void SetVolumeChannelFactor(s32 row, s32 column, f32 value)
 {
     g_volumeChannelFactors[row][column] = value;
     ApplyVolumeChannelFactors(column);
 }
 
+// Restores the default volume channel factors and re-applies the four channels, then applies two
+// option flags (0x80 silences channel 3's factor, 0x40 goes to ApplySoundOptionFlag) from the
+// save data.
 void ResetVolumeChannelFactors(void)
 {
     CopyMemory(g_volumeChannelFactors, g_defaultVolumeChannelFactors, 0xB0);
@@ -1313,16 +1379,20 @@ void ResetVolumeChannelFactors(void)
     ApplySoundOptionFlag(g_saveData->optionFlags & 0x40);
 }
 
+// Channel 3's factor in row 3: 0 when flag is set, else 1.
 void SilenceVolumeChannel3(s32 flag)
 {
     SetVolumeChannelFactor(3, 1, flag ? 0.0f : 1.0f);
 }
 
+// Passes the sound option (a boolean) on to the IOP.
 void ApplySoundOptionFlag(s32 value)
 {
     SetIopSoundOptionFlag(value != 0);
 }
 
+// Stops every sound (IOP and world records), clears levels and cached parameters and waits
+// until the IOP has finished.
 void StopAllSoundsAndWait(void)
 {
     StopAllIopSounds();
@@ -1335,6 +1405,8 @@ void StopAllSoundsAndWait(void)
     SyncDiscRead(0);
 }
 
+// Stops every sound record of the current world (a fade of item frames when item is not 0) and
+// then polls the IOP commands.
 void StopWorldSoundRecords(s32 item)
 {
     if (g_currentWorld) {
@@ -1349,6 +1421,8 @@ void StopWorldSoundRecords(s32 item)
     PollIopCommands();
 }
 
+// Pushes a setting (a value index and a pair value) for IOP channel 2 onto the world's stack of
+// four and sends it; does nothing when the stack is full.
 void PushIopChannel2Setting(World* self, s32 a, s32 b)
 {
     if ((u32)self->channel2Count < 4) {
@@ -1360,6 +1434,8 @@ void PushIopChannel2Setting(World* self, s32 a, s32 b)
     }
 }
 
+// Drops the top setting of the world's IOP channel 2 stack and re-sends the one below it (the
+// last one is never dropped).
 void PopIopChannel2Setting(World* self)
 {
     s32 n = self->channel2Count;
@@ -1370,6 +1446,7 @@ void PopIopChannel2Setting(World* self)
     }
 }
 
+// Replaces the whole IOP channel 2 stack with a single setting and sends it.
 void SetIopChannel2Setting(World* self, s32 index, s32 value)
 {
     SetIopChannelValue(2, g_iopChannel2Values[index]);
@@ -1379,6 +1456,7 @@ void SetIopChannel2Setting(World* self, s32 index, s32 value)
     self->channel2Count = 1;
 }
 
+// Appends a sound entry (up to 16) with the default repeat and range to the world.
 void AddWorldSoundEntry(World* self, s32 key)
 {
     if (self->soundCount < 16) {
@@ -1390,6 +1468,8 @@ void AddWorldSoundEntry(World* self, s32 key)
     }
 }
 
+// Sets the ranges of the world's last sound entry from a 2D point: 8000 minus 50 times its y
+// and x.
 void SetLastWorldSoundEntryFromPoint(World* self, Point2* p)
 {
     s32 n = self->soundCount;
@@ -1400,6 +1480,7 @@ void SetLastWorldSoundEntryFromPoint(World* self, Point2* p)
     }
 }
 
+// Sets the repeat value of the world's last sound entry.
 void SetLastWorldSoundEntryValues(World* self, U64P* item)
 {
     if (!self->soundCount) return;
@@ -1408,6 +1489,8 @@ void SetLastWorldSoundEntryValues(World* self, U64P* item)
     e->repeat = *item;
 }
 
+// Starts the sound of each of the world's sound entries (the looping ambience placed in the
+// level), with the entry's own repeat and range values and the default 8000/3000 ranges.
 void StartWorldSoundEntries(World* self)
 {
     for (s32 i = 0; i < self->soundCount; i++) {
@@ -1416,6 +1499,8 @@ void StartWorldSoundEntries(World* self)
     }
 }
 
+// Sets voice parameter idx of the staged bank's voice, only when it differs from the cached
+// value.
 void SetCachedVoiceParam(s32 idx, s32 val)
 {
     if (val != g_cachedVoiceParams[idx]) {
@@ -1429,11 +1514,13 @@ s32 GetCachedVoiceParam(s32 index)
     return g_cachedVoiceParams[index];
 }
 
+// Reads parameter i back from the staged bank's voice into the cache.
 void RefreshCachedVoiceParam(s32 i, s32 unused1)
 {
     g_cachedVoiceParams[i] = GetVoiceParam(g_stagedBankVoice, i);
 }
 
+// Sets the eight cached voice parameters to 0 (sending those that differ).
 void ClearCachedVoiceParams(void)
 {
     for (s32 i = 0; i < 8; i++) {
@@ -1458,6 +1545,8 @@ s32 StepBiasedRandomWalk() {
     return g_randomWalkPosition;
 }
 
+// While D_002748EC is set, plays sound 0x77 at half volume with a pitch that wanders by a
+// biased random walk step in twelfths.
 void PlaySoundWithWanderingPitch(void)
 {
     if (D_002748EC != 0) {
@@ -1466,6 +1555,8 @@ void PlaySoundWithWanderingPitch(void)
     }
 }
 
+// Initialiser of class 0x66, an object linked to another by id: sets the placed-object defaults,
+// a grey colour (0x80808080), a few tuning floats and two vectors, and no link yet (id -1).
 void InitIdLinkedObject(IdLinkedObject* self)
 {
     InitPlacedObject(self);
@@ -1481,6 +1572,8 @@ void InitIdLinkedObject(IdLinkedObject* self)
     self->linkId = -1;
 }
 
+// Start of class 0x66: the placed object's start, then the link by id, then the descriptor's
+// slot 3 method.
 void StartIdLinkedObject(IdLinkedObject* self)
 {
     StartPlacedObject(self);
@@ -1488,6 +1581,8 @@ void StartIdLinkedObject(IdLinkedObject* self)
     self->desc->m03(self);
 }
 
+// Links the object to the object found by id v: drops the old link (a state walker), looks the
+// target up in the world and creates a new walker for it.
 void SetObjectLinkId(IdLinkedObject* self, s32 v)
 {
     if (self->link != 0) {
@@ -1502,24 +1597,29 @@ void SetObjectLinkId(IdLinkedObject* self, s32 v)
     self->linkId = v;
 }
 
+// Initialiser of class 0x81: the object's defaults, with a distance field set to the largest
+// float.
 void InitListedPointObject(ListedPointObject* self)
 {
     InitObject(self);
     self->f58 = 3.4028235e38f;
 }
 
+// Registers a class 0x81 object and also adds it to the world's list at 0x1C84.
 void RegisterListedPointObject(ListedPointObject* self)
 {
     RegisterObject(self);
     AppendToList(&self->world->list1C84, self);
 }
 
+// Undoes RegisterListedPointObject.
 void UnregisterListedPointObject(ListedPointObject* self)
 {
     UnregisterObject(self);
     RemoveFromList(&self->world->list1C84, self);
 }
 
+// Copy for class 0x81: copies the object's data but keeps the object's own list bits.
 void CopyListedPointObject(ListedPointObject* self, ListedPointObject* src)
 {
     KeptBits saved;

@@ -285,6 +285,8 @@ ThreadIds g_mainAndRenderThreads = { 0, 0 };
 u8 g_backgroundJobThread[4] = { 0 };
 s32 g_movieDecodeThread = 0;
 
+// Reads an optional minus sign and decimal digits from s into *out and gives how many characters
+// were read.
 s32 ParseSignedDecimal(s8* s, s32* out)
 {
     s8* p = s;
@@ -557,6 +559,8 @@ s32 ExtractIntegerSign(FormatSpec* self, void* dst)
     return ret;
 }
 
+// Gives the radix a format conversion letter stands for: 2 for b or B, 8 for o, 16 for x, and 10
+// for d, i, u and anything else.
 s32 GetConversionRadix(s8 c)
 {
     switch (c) {
@@ -575,6 +579,8 @@ s32 GetConversionRadix(s8 c)
     return 10;
 }
 
+// Writes value in the given radix into buf, most significant digit first, and gives the digit
+// count. The digits are produced from the end of the buffer backwards and then moved to the front.
 s32 WriteIntegerDigits(u8* buf, s32 len, u64 value, u32 radixArg)
 {
     u64 radix = radixArg;
@@ -703,6 +709,8 @@ void FormatIntegerArg(FormatSpec* self, OutputBuffer* sink, u64 value)
 }
 
 
+// Gives the decimal exponent of v, the floor of its base 10 logarithm; 0 for a value that is not
+// positive.
 s32 GetDecimalExponent(double v)
 {
     s32 i;
@@ -717,6 +725,9 @@ s32 GetDecimalExponent(double v)
     return i;
 }
 
+// Gives the character of the decimal digit of the value at position b (a is the value's decimal
+// exponent): '0' outside the 15 digits that follow the first, else the value scaled by 10^-b,
+// truncated, modulo 10.
 s8 GetDecimalDigit(RegDouble* self0, s32 a, s32 b)
 {
     RegDouble* self = self0;
@@ -993,6 +1004,7 @@ s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2)
     return ctx->count;
 }
 
+// Formats to the output buffer opened with -1 as its destination and gives the character count.
 s32 PrintFormattedVa(const char* fmt, void* ap)
 {
     OutputBufferStorage buf;
@@ -1002,12 +1014,15 @@ s32 PrintFormattedVa(const char* fmt, void* ap)
     return n;
 }
 
+// Prints with the arguments after fmt; rebuilds the register-saved argument list for
+// PrintFormattedVa.
 extern "C" s32 PrintFormatted(const char* fmt, ...)
 {
     void* ap = (char*)__builtin_next_arg(fmt) - 56;
     return PrintFormattedVa(fmt, ap);
 }
 
+// Formats into dst (unbounded), terminates it and gives the length.
 s32 FormatToStringVa(char* dst, const char* fmt, void* ap)
 {
     OutputBufferStorage buf;
@@ -1019,12 +1034,16 @@ s32 FormatToStringVa(char* dst, const char* fmt, void* ap)
     return n;
 }
 
+// Formats the arguments after fmt into dst; rebuilds the register-saved argument list for
+// FormatToStringVa.
 s32 FormatToString(char* dst, const char* fmt, ...)
 {
     void* ap = (char*)__builtin_next_arg(fmt) - 48;
     return FormatToStringVa(dst, fmt, ap);
 }
 
+// Formats into dst at most cap bytes long, always terminated. Gives the length, or -1 when the
+// output did not fit.
 s32 FormatToStringBoundedVa(char* dst, s32 cap, const char* a, void* b)
 {
     u8 buf[0x420];
@@ -1044,6 +1063,8 @@ s32 FormatToStringBoundedVa(char* dst, s32 cap, const char* a, void* b)
 
 LINKER_REMNANT(func_001E20B0);
 
+// Formats the arguments after fmt into dst, at most cap bytes; rebuilds the register-saved argument
+// list for FormatToStringBoundedVa.
 s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...)
 {
     void* ap = (char*)__builtin_next_arg(fmt) - 40;
@@ -1054,6 +1075,7 @@ LINKER_REMNANT(func_001E20F8);
 
 extern "C" s32 GetStringLength(const char* s) { s32 length = 0; while (*s) { s++; length++; } return length; }
 
+// Copies src, including its terminator, to dst and gives dst.
 void* CopyString(void* dst, const char* src)
 {
     s32 n = GetStringLength(src);
@@ -1061,6 +1083,7 @@ void* CopyString(void* dst, const char* src)
     return dst;
 }
 
+// Appends src to dst, including its terminator, and gives dst.
 void* AppendString(void* dst, const char* src)
 {
     s32 len = GetStringLength((const char*)dst);
@@ -1069,6 +1092,7 @@ void* AppendString(void* dst, const char* src)
     return dst;
 }
 
+// Gives the first place c occurs in s, or null.
 char* FindCharInString(char* s, s32 c)
 {
     while (*s != 0) {
@@ -1082,6 +1106,8 @@ char* FindCharInString(char* s, s32 c)
 
 LINKER_REMNANT(func_001E2210);
 
+// Turns lower-case letters (those with bit 2 in the character class table) into upper case, in
+// place.
 void UppercaseString(char* p)
 {
     while (*p != 0) {
@@ -1095,6 +1121,7 @@ void UppercaseString(char* p)
     }
 }
 
+// Creates a system semaphore with the given initial and maximum counts and gives its id.
 s32 CreateLockSemaphore(s32 initCount, s32 maxCount)
 {
     SemaphoreParams tmp;
@@ -1107,12 +1134,15 @@ s32 CreateLockSemaphore(s32 initCount, s32 maxCount)
 
 LINKER_REMNANT(func_001E22B8);
 
+// Sets up a lock with no holder and a binary semaphore.
 void InitRecursiveLock(RecursiveLock* self)
 {
     self->last = -1;
     self->sema = (void*)CreateLockSemaphore(1, 1);
 }
 
+// Takes the lock: a thread that already holds it just counts one more entry, any other waits on the
+// semaphore and becomes the holder.
 void EnterRecursiveLock(RecursiveLock* self)
 {
     s32 key = GetCurrentThreadId();
@@ -1125,6 +1155,7 @@ void EnterRecursiveLock(RecursiveLock* self)
     }
 }
 
+// Gives up one entry; the last one clears the holder and posts the semaphore.
 void LeaveRecursiveLock(RecursiveLock* self)
 {
     if (--self->count == 0) {
@@ -1135,6 +1166,8 @@ void LeaveRecursiveLock(RecursiveLock* self)
 
 LINKER_REMNANT(func_001E2390);
 
+// Raises the calling thread to priority 4, remembers it as the main thread, and creates (without
+// starting) the render thread: 0x20000 bytes of stack, priority 2.
 void CreateRenderThread(void)
 {
     ThreadParams l;

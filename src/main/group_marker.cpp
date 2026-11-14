@@ -82,6 +82,7 @@ void QueueDeferredRequest(DeferredRequest* src)
     }
 }
 
+// Sort comparison for pointers to deferred requests: larger f04 first, ties broken by address.
 int CompareEntriesByValueDescending(DeferredRequest** a, DeferredRequest** b)
 {
     DeferredRequest* left = *a;
@@ -206,6 +207,8 @@ void RunWorldFrameLists(World* self, void* arg)
     g_activeListFrames = f1.prev;
 }
 
+// Once per run of the flag, sends the projection constants (scale, offset, extra constants and a
+// world field) to the VU in one DMA packet; later calls do nothing.
 void UploadProjectionConstants(void)
 {
     if (*(s32*)g_projectionConstantsUploaded == 0) {
@@ -221,6 +224,8 @@ void UploadProjectionConstants(void)
     }
 }
 
+// Writes the camera matrices packet the first time it is called in a frame (the flag is cleared
+// elsewhere).
 void UploadCameraOncePerFrame(void)
 {
     if (!g_cameraUploadedThisFrame) {
@@ -229,6 +234,8 @@ void UploadCameraOncePerFrame(void)
     }
 }
 
+// Sends the 0x2C-word screen clear packet to the GIF the first time, and again (after a flush)
+// when the current flag was cleared since; otherwise does nothing.
 void UploadGroupConstants(void)
 {
     if (g_groupConstantsUploaded == 0) {
@@ -248,11 +255,15 @@ void UploadGroupConstants(void)
     }
 }
 
+// Adds the group microprogram to the packet chain, with nothing else uploaded.
 void PrepareBasicGroup(void)
 {
     AddDmaRefTagIfChanged(&g_vifPacketWriter, g_groupMicroprogram, g_groupMicroprogramEnd);
 }
 
+// Prepares a group that is drawn after a flush: uploads the projection constants and the camera,
+// adds the group microprogram, marks the frame as holding masked images and writes a flush
+// packet.
 void PrepareFlushedGroup(void)
 {
     UploadProjectionConstants();
@@ -266,6 +277,8 @@ void PrepareFlushedGroup(void)
     CloseDmaTag((PacketWriter*)self);
 }
 
+// Uploads the projection and group constants and adds the group microprogram, and clears the
+// camera-uploaded flag so the next group sends the camera again.
 void PrepareGroupWithoutCamera(void)
 {
     UploadProjectionConstants();
@@ -274,6 +287,8 @@ void PrepareGroupWithoutCamera(void)
     g_cameraUploadedThisFrame = 0;
 }
 
+// Uploads the projection constants, the camera (once per frame) and the group constants, then
+// adds the group microprogram.
 void PrepareStandardGroup(void)
 {
     UploadProjectionConstants();
@@ -282,6 +297,8 @@ void PrepareStandardGroup(void)
     AddDmaRefTagIfChanged(&g_vifPacketWriter, g_groupMicroprogram, g_groupMicroprogramEnd);
 }
 
+// The same preparation as PrepareStandardGroup but with the other microprogram block (D_00215C60
+// to D_00217348).
 void PrepareAlternateBlockGroup(void)
 {
     UploadProjectionConstants();

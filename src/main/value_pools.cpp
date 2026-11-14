@@ -22,6 +22,8 @@ void* AllocateZeroedFrontMemory(s32 size);
 
 void* AllocateFrontMemory(s32 bytes);
 
+// Allocates the pool's memory (size entries of count + 8 bytes, the 8 being each entry's header)
+// from front memory and chains all entries into the free list.
 void InitEntryPool(EntryPool* p, s32 count, s32 size)
 {
     p->stride = count + 8;
@@ -59,6 +61,8 @@ struct PoolEntryHeader {
 extern u8 g_markStacks[];
 struct MarkStacks;
 
+// Takes an entry from the free list (running the collector first if it is empty), puts it at the
+// head of the live list and gives back its payload; 0 if still none.
 void* PopPoolFreeEntry(EntryPool* self)
 {
     if (self->freeList == 0) {
@@ -84,16 +88,19 @@ void* TakePoolEntry(EntryPool* self)
 }
 
 
+// The address of entry number index in the pool's memory.
 void* GetPoolEntry(EntryPool* self, s32 index)
 {
     return self->mem + index * self->stride;
 }
 
+// Remembers the current head of the live list as the pool's mark; the sweep only looks past it.
 void MarkPoolLiveEnd(EntryPool* self)
 {
     self->liveMark = self->liveHead;
 }
 
+// Sets the state word of every live entry to 0 (unmarked), the start of a collection.
 void ClearPoolLiveStates(EntryPool* self)
 {
     PoolEntryHeader* node = (PoolEntryHeader*)self->liveHead;
@@ -106,6 +113,9 @@ void ClearPoolLiveStates(EntryPool* self)
 
 typedef void (*Cb_11C2E8)(void* p);
 
+// The sweep of the pool's collector: walks the live entries from the mark (MarkPoolLiveEnd) on
+// and moves each one still unmarked back to the free list, calling the pool's remove callback on
+// its payload first; the marked ones stay, and the mark moves to the new end.
 void ReleaseDeadPoolEntries(EntryPool* self)
 {
     PoolEntryHeader* prev = (PoolEntryHeader*)&self->liveHead;
@@ -148,11 +158,13 @@ PoolEntryHeader* GetPoolEntryHeader(u8* base)
     return (PoolEntryHeader*)(base - 8);
 }
 
+// Whether the collector has not marked this payload's entry as used.
 s32 IsPoolEntryUnmarked(void* payload)
 {
     return GetPoolEntryHeader((u8*)payload)->state == 0;
 }
 
+// Marks the payload's entry as used (state 1) so the sweep keeps it.
 void MarkPoolEntryUsed(void* payload)
 {
     GetPoolEntryHeader((u8*)payload)->state = 1;
@@ -164,6 +176,8 @@ extern s32 D_0025C2A8;
 extern s32 D_0025C2C8;
 extern s32 D_0025C2E8;
 
+// Copies a chain of keyed values: each node's key and value (the value cloned with c), making a
+// new node for each next link.
 void CopyKeyedValueChain(R11B008Key* a, R11B008Key* b, s32 c)
 {
     b->key = a->key;
@@ -177,6 +191,8 @@ void CopyKeyedValueChain(R11B008Key* a, R11B008Key* b, s32 c)
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// Takes a node from the keyed value pool, clears its 16 bytes and gives its value the tag -1
+// (empty).
 R11B008Key* NewKeyedValue(void)
 {
     R11B008Key* n = (R11B008Key*)TakePoolEntry(&g_keyedValuePool);
@@ -186,6 +202,7 @@ R11B008Key* NewKeyedValue(void)
     return n;
 }
 
+// Destroys the node's value (mode 2).
 void DestroyKeyedValue(R11B008Key* a)
 {
     DestroyScriptValue(&a->value, 2);
@@ -194,6 +211,8 @@ void DestroyKeyedValue(R11B008Key* a)
 extern s32 g_vectorAPayloadPool;
 struct Pool6C;
 
+// Takes a cleared slot from the vector A payload pool; if the pool is empty it runs the script
+// value collector and takes from what that frees.
 void* AcquireVectorAPayload(void)
 {
     void* p = PopFreeSlot((Pool6C*)&g_vectorAPayloadPool);
@@ -209,6 +228,7 @@ void* AcquireVectorAPayload(void)
 extern u8* g_vectorAPayloadBase;
 extern u8* g_payloadRefCounts[];
 
+// Adds one reference to a vector A payload (counted per 16-byte slot) and gives the new count.
 s32 AddRefVectorAPayload(void* payload)
 {
     u8* p = g_payloadRefCounts[0] + ((u32)((u8*)payload - g_vectorAPayloadBase) >> 4);
@@ -219,6 +239,7 @@ s32 AddRefVectorAPayload(void* payload)
 }
 
 
+// Drops one reference of a vector A payload (16-byte slots) and frees its slot when none is left.
 void ReleaseVectorAPayload(void* payload)
 {
     u8* pool = (u8*)&g_vectorAPayloadPool;
@@ -235,6 +256,7 @@ LINKER_REMNANT(func_0011C610);
 extern u8 g_matrixPayloadPool[];
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// The same as AcquireVectorAPayload, for the matrix payload pool.
 void* AcquireMatrixPayload(void)
 {
     void* s0 = PopFreeSlot((Pool6C*)g_matrixPayloadPool);
@@ -249,6 +271,7 @@ void* AcquireMatrixPayload(void)
 
 extern u8* g_matrixPayloadBase;
 
+// Adds one reference to a matrix payload (counted per 64-byte slot) and gives the new count.
 s32 AddRefMatrixPayload(void* payload)
 {
     u8* p = g_payloadRefCounts[1] + ((u32)((u8*)payload - g_matrixPayloadBase) >> 6);
@@ -258,6 +281,7 @@ s32 AddRefMatrixPayload(void* payload)
     return v;
 }
 
+// Drops one reference of a matrix payload (64-byte slots) and frees its slot when none is left.
 void ReleaseMatrixPayload(void* payload)
 {
     u8* base = g_matrixPayloadPool;
@@ -269,6 +293,7 @@ void ReleaseMatrixPayload(void* payload)
     }
 }
 
+// Returns a matrix payload slot to its pool without touching its reference count.
 void FreeMatrixPayload(void* item)
 {
     PushFreeSlot((Pool6C*)g_matrixPayloadPool, item);
@@ -276,6 +301,7 @@ void FreeMatrixPayload(void* item)
 
 extern u8 g_vectorBPayloadPool[];
 
+// The same as AcquireVectorAPayload, for the vector B payload pool.
 void* AcquireVectorBPayload(void)
 {
     void* s0 = PopFreeSlot((Pool6C*)g_vectorBPayloadPool);
@@ -290,6 +316,7 @@ void* AcquireVectorBPayload(void)
 
 extern u8* g_vectorBPayloadBase;
 
+// Adds one reference to a vector B payload (counted per 16-byte slot) and gives the new count.
 s32 AddRefVectorBPayload(void* payload)
 {
     u8* p = g_payloadRefCounts[2] + ((u32)((u8*)payload - g_vectorBPayloadBase) >> 4);
@@ -299,6 +326,7 @@ s32 AddRefVectorBPayload(void* payload)
     return v;
 }
 
+// Drops one reference of a vector B payload (16-byte slots) and frees its slot when none is left.
 void ReleaseVectorBPayload(void* payload)
 {
     u8* pool = g_vectorBPayloadPool;
@@ -314,6 +342,7 @@ LINKER_REMNANT(func_0011C850);
 
 extern u8 g_pairPayloadPool[];
 
+// The same as AcquireVectorAPayload, for the pair payload pool.
 void* AcquirePairPayload(void)
 {
     void* s0 = PopFreeSlot((Pool6C*)g_pairPayloadPool);
@@ -328,6 +357,7 @@ void* AcquirePairPayload(void)
 
 extern u8* g_pairPayloadBase;
 
+// Adds one reference to a pair payload (counted per 8-byte slot) and gives the new count.
 s32 AddRefPairPayload(void* payload)
 {
     u8* p = g_payloadRefCounts[3] + ((u32)((u8*)payload - g_pairPayloadBase) >> 3);
@@ -337,6 +367,7 @@ s32 AddRefPairPayload(void* payload)
     return v;
 }
 
+// Drops one reference of a pair payload (8-byte slots) and frees its slot when none is left.
 void ReleasePairPayload(void* payload)
 {
     u8* pool = g_pairPayloadPool;
@@ -354,6 +385,7 @@ extern s32 g_triplePayloadPool[];
 struct TriplePayloadSlot;
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// The same as AcquireVectorAPayload, for the triple payload pool (12-byte slots).
 TriplePayloadSlot* AcquireTriplePayload(void)
 {
     TriplePayloadSlot* p = (TriplePayloadSlot*)PopFreeSlot((Pool6C*)g_triplePayloadPool);
@@ -369,6 +401,7 @@ TriplePayloadSlot* AcquireTriplePayload(void)
 extern u8* g_triplePayloadBase;
 extern u8* g_triplePayloadRefCounts;
 
+// Adds one reference to a triple payload (counted per 12-byte slot) and gives the new count.
 s32 AddRefTriplePayload(void* payload)
 {
     u32 n = 12;
@@ -385,6 +418,8 @@ struct SlotPool {
 };
 
 
+// Drops one reference of a triple payload and, when none is left, gives its slot back to the
+// pool.
 void ReleaseTriplePayload(void* payload)
 {
     SlotPool* t = (SlotPool*)((u8*)&g_triplePayloadPool);

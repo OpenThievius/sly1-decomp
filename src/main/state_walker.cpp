@@ -264,6 +264,8 @@ u16 MapCharToCode(u8 ch)
     return code;
 }
 
+// Converts a string to 16-bit character codes (MapCharToCode) with the two bytes of each code
+// swapped, and a 0 at the end.
 void ConvertStringToCharCodes(u8* src, u16* dst)
 {
     s32 n = GetStringLength((const char*)src);
@@ -277,12 +279,15 @@ void ConvertStringToCharCodes(u8* src, u16* dst)
     dst[i] = 0;
 }
 
+// Starts the placed object and sets flag bit 40 while clearing bits 32 and 33.
 void StartCameraPositionedObject(CameraPositionedObject* self)
 {
     StartPlacedObject(self);
     self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
 }
 
+// Updates the object, then moves it to the camera's position, keeping its own height unless it
+// follows the camera's.
 void MoveObjectToCamera(CameraPositionedObject* self, f32 dt)
 {
     UpdatePlacedObject(self, dt);
@@ -294,6 +299,8 @@ void MoveObjectToCamera(CameraPositionedObject* self, f32 dt)
     self->desc02()->m1D(self, &q);
 }
 
+// Links count slots of v bytes from the pool's base into a singly linked free list (each slot's
+// first word points to the next, the last to 0).
 void BuildFreeList(Pool6C* s, s32 v, s32 n)
 {
     u32 cur = (u32)s->base;
@@ -308,6 +315,7 @@ void BuildFreeList(Pool6C* s, s32 v, s32 n)
     *(u32*)cur = 0;
 }
 
+// Allocates count slots of size rounded up to 8 and builds the free list.
 void InitSlotPool(Pool6C* s, s32 size, s32 count)
 {
     s32 stride = (size + 7) & ~7;
@@ -315,6 +323,8 @@ void InitSlotPool(Pool6C* s, s32 size, s32 count)
     BuildFreeList(s, stride, count);
 }
 
+// Allocates size*count bytes (plus 0x30) and builds a free list of count slots, with the first
+// slot aligned to 0x40.
 void InitAlignedSlotPool(Pool6C* s, s32 size, s32 count)
 {
     s32 addr = (s32)AllocateFrontMemory(size * count + 0x30);
@@ -324,6 +334,7 @@ void InitAlignedSlotPool(Pool6C* s, s32 size, s32 count)
 
 LINKER_REMNANT(func_001B5E98);
 
+// Takes the first slot off the pool's free list, or gives back 0 when it is empty.
 void* PopFreeSlot(Pool6C* pool)
 {
     FreeSlot* n = (FreeSlot*)pool->head;
@@ -338,6 +349,7 @@ void* TakePoolSlot(Pool6C* pool)
     return PopFreeSlot(pool);
 }
 
+// Takes a slot from the pool's free list, zeroed.
 void* PopZeroedFreeSlot(Pool6C* pool)
 {
     void* p = PopFreeSlot(pool);
@@ -345,6 +357,7 @@ void* PopZeroedFreeSlot(Pool6C* pool)
     return p;
 }
 
+// Puts a slot back at the head of the pool's free list (nothing for 0).
 void PushFreeSlot(Pool6C* list, void* item)
 {
     if (item) {
@@ -405,6 +418,7 @@ void LoadStateGraph(StateGraph* self, BufferedStream* s)
     }
 }
 
+// Starts the object and, if the graph is armed, queues SpawnInitialStateWalker for it.
 void StartStateGraph(StateGraph* self)
 {
     StartObject(self);
@@ -413,6 +427,8 @@ void StartStateGraph(StateGraph* self)
     }
 }
 
+// Finds the object of the first edge that has an animation (by that animation's id, lookup mode
+// 4) and creates the graph's first walker for it.
 void SpawnInitialStateWalker(StateGraph* self)
 {
     s32 i = 0;
@@ -462,6 +478,7 @@ StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3)
     return obj;
 }
 
+// The walker in the graph's list whose object is key, or 0.
 void* FindListNodeByKey(StateGraph* self, void* key)
 {
     ListFrame frame;
@@ -477,6 +494,7 @@ void* FindListNodeByKey(StateGraph* self, void* key)
     return 0;
 }
 
+// The index of the state with that key in the graph, or -1.
 s32 FindStateEntryIndex(StateGraph* self, s32 key)
 {
     s32 count = self->stateCount;
@@ -494,18 +512,23 @@ s32 FindStateEntryIndex(StateGraph* self, s32 key)
     return -1;
 }
 
+// FindStateEntryIndex, but 0 instead of -1 when the key is not there.
 s32 FindStateEntryIndexOrZero(void* self, s32 key)
 {
     s32 r = FindStateEntryIndex((StateGraph*)self, key);
     return r < 0 ? 0 : r;
 }
 
+// The key of state number n of the graph (states are 8 bytes each).
 u32 GetStateEntryKey(StateGraph* a0, s32 a1)
 {
     a1 = (a1 << 3) + (u32)a0->states;
     return *(u32*)a1;
 }
 
+// Tears a walker down: stops its animation player, releases its call records, takes it out of
+// the graph's and the world's lists, returns its slot to the pool and triggers script event
+// 0x12 on the graph.
 void DestroyStateWalker(StateWalker* self)
 {
     StateGraph* owner = self->owner;
@@ -521,6 +544,9 @@ void DestroyStateWalker(StateWalker* self)
     TriggerScriptEvent(owner, 0x12, 0, 0);
 }
 
+// Sets the state the walker is heading for (by key, -1 for none); when that is a change it
+// commits the current edge if it is flagged 2, stopping its player, and starts the next edge if
+// no player runs.
 void SetStateWalkerTarget(StateWalker* self, s32 key)
 {
     s32 v;
@@ -543,6 +569,7 @@ void SetStateWalkerTarget(StateWalker* self, s32 key)
     }
 }
 
+// Gives through *out the key of the state the walker is heading for, or -1.
 void GetStateWalkerTargetKey(StateWalker* a0, s32* out) {
     s32 idx = a0->index;
     s32 v;
@@ -554,6 +581,7 @@ void GetStateWalkerTargetKey(StateWalker* a0, s32* out) {
     *out = v;
 }
 
+// Gives through *out the key of the state the walker is in, or -1.
 void GetStateWalkerCurrentKey(StateWalker* a0, s32* out) {
     s32 idx = a0->currentEntry;
     s32 v;
@@ -565,6 +593,8 @@ void GetStateWalkerCurrentKey(StateWalker* a0, s32* out) {
     *out = v;
 }
 
+// Gives through *out the key of the state the walker is moving to along its current edge, or
+// -1.
 void GetStateWalkerNextKey(StateWalker* self, s32* out)
 {
     s32 value;
@@ -576,6 +606,7 @@ void GetStateWalkerNextKey(StateWalker* self, s32* out)
     *out = value;
 }
 
+// Sets the walker's speed and passes it on to its animation player if one is playing.
 void SetStateWalkerSpeed(StateWalker* self, f32 v)
 {
     self->speed = v;
@@ -584,6 +615,8 @@ void SetStateWalkerSpeed(StateWalker* self, f32 v)
     }
 }
 
+// Moves the walker at once to the state with that key (notifying the change), then starts its
+// next edge; nothing happens when it is already there.
 void TeleportStateWalker(StateWalker* self, s32 key)
 {
     s32 s1 = FindStateEntryIndexOrZero(self->owner, key);
@@ -800,6 +833,8 @@ done:
     CallStateWalkerListeners(self, 0x14, self);
 }
 
+// Notifies the change from the current to the next state and makes the next state the current
+// one.
 void CommitStateWalkerArrival(StateWalker* self)
 {
     NotifyStateWalkerChange(self, self->currentEntry, self->nextEntry);
@@ -808,6 +843,8 @@ void CommitStateWalkerArrival(StateWalker* self)
     self->currentEntry = v;
 }
 
+// When notification 5 comes from the walker's own player, commits its arrival and starts its
+// next edge.
 void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, s32 b)
 {
     if (a == 5 && b == (s32)self->player) {
@@ -816,6 +853,8 @@ void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, s32 b)
     }
 }
 
+// Moves the walker's animation forward by t seconds: finished edges are committed and the next
+// edge started, until the time is used up inside one edge.
 void AdvanceStateWalkerTime(StateWalker* self, f32 t)
 {
     f32 rem = t;
@@ -832,6 +871,7 @@ void AdvanceStateWalkerTime(StateWalker* self, f32 t)
     }
 }
 
+// Sends a message (a, b) to the walker's object and to each queued call on the walker's list.
 void CallStateWalkerListeners(StateWalker* self, s32 a, void* b)
 {
     BaseObject* o = (BaseObject*)self->object;
@@ -849,11 +889,14 @@ void CallStateWalkerListeners(StateWalker* self, s32 a, void* b)
     }
 }
 
+// Adds a listener for the walker's messages to its call list (AddCallbackNode on the world).
 void AddStateWalkerListener(StateWalker* self, PlacedObject** p)
 {
     AddCallbackNode(self->owner->world, (Callback01**)&self->calls, (void*)(*p)->link40.prev, p);
 }
 
+// Triggers script event 0xE on the graph with the walker and the keys of the two states (-1 for
+// none) it is moving between.
 void NotifyStateWalkerChange(StateWalker* self, s32 idx1, s32 idx2)
 {
     void* args[3];
@@ -875,6 +918,8 @@ void NotifyStateWalkerChange(StateWalker* self, s32 idx1, s32 idx2)
     TriggerScriptEvent(self->owner, 0xE, 3, args);
 }
 
+// Initialises the agent: close radius 2000, reach radius and heights 300, no close zone, no
+// companion, and its 17 look entries set to id -1.
 void InitCompanionAgent(CompanionAgent* self)
 {
     InitAgent(self);
@@ -941,12 +986,14 @@ void ResolveCompanionAgentObjects(CompanionAgent* self)
     }
 }
 
+// Sets the id of one of the agent's look entries.
 void SetCompanionAgentLookId(CompanionAgent* self, s32 index, s32 value)
 {
     (void)IsAgentSlotIndex(index);
     self->lookEntries[index].id = value;
 }
 
+// Adds an object id to the agent's list of excluded objects (at most 4).
 void AddCompanionAgentExcludedId(CompanionAgent* self, s32 value)
 {
     s32 n = self->excludedCount;
@@ -957,6 +1004,8 @@ void AddCompanionAgentExcludedId(CompanionAgent* self, s32 value)
     }
 }
 
+// Starts the agent, resolves its objects, its close zone (by id, lookup mode 4) and each of its
+// excluded objects (lookup mode 0x104).
 void StartCompanionAgent(CompanionAgent* self)
 {
     StartAgent(self);
@@ -975,6 +1024,9 @@ void StartCompanionAgent(CompanionAgent* self)
     }
 }
 
+// Whether the collider counts as something that blocks the companion agent: not one with flag
+// bit 43, not a root of kind 5 or 0x4C, and not a descendant of one of the agent's excluded
+// objects.
 s32 IsCompanionAgentBlocker(CompanionAgent* self, Collider* ent)
 {
     if (ent->flags538 & (1ULL << 43)) {
@@ -1095,6 +1147,7 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
 
 #undef F
 
+// Updates the agent, then aims its pose.
 void UpdateCompanionAgent(CompanionAgent* self, f32 dt)
 {
     UpdateAgent(self, dt);
@@ -1158,6 +1211,9 @@ void AimCompanionAgentPose(CompanionAgent *self) {
     ((ScalingVolume*)self->companion)->f2F0 = f;
 }
 
+// After the base state entry: state 6 resets the clip-end count, state 0xB tells the companion
+// and releases the sound level; the look target is then set from a table indexed by the new
+// state.
 void EnterCompanionAgentState(CompanionAgent* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
@@ -1178,6 +1234,7 @@ void EnterCompanionAgentState(CompanionAgent* self, s32 evt, Animation* arg)
     self->lookTarget = *(s32*)((u8*)self + (self->state << 3) + 0xC3C);
 }
 
+// Whether the target is in range by the base test and by the class's own method (slot 91).
 s32 IsCompanionAgentTargetInRange(CompanionAgent* self)
 {
     if (IsAgentTargetInRange(self) == 0) {
@@ -1186,6 +1243,8 @@ s32 IsCompanionAgentTargetInRange(CompanionAgent* self)
     return ((VFn_1B7818*)self->desc)[91](self);
 }
 
+// The agent's answer to a roster poll: 1 in state 11, 2 in state 6 once a clip has ended and
+// more than 5 s have passed in the state, 1 in state 6 sooner after a clip end, otherwise 0.
 s32 AnswerCompanionAgentRosterPoll(CompanionAgent* self)
 {
     s32 r;
@@ -1209,6 +1268,8 @@ ret0:
     return r;
 }
 
+// After the base handling, notification 7 from the agent's state player counts one more clip
+// end.
 void HandleCompanionAgentNotification(CompanionAgent* self, s32 code, void* req)
 {
     HandleAgentNotification(self, code, (AgentNotification*)req);
@@ -1219,6 +1280,7 @@ void HandleCompanionAgentNotification(CompanionAgent* self, s32 code, void* req)
     }
 }
 
+// Freezes or unfreezes the collider; freezing also releases the agent's sound level.
 void SetCompanionAgentFrozen(CompanionAgent* self, s32 p)
 {
     SetColliderFrozen(self, p);

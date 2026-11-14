@@ -77,12 +77,14 @@ void UpdateAgent(Agent* self, f32 dt);
 void LeaveAgentState(Agent* self, s32 mode);
 void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
 
+// Initialiser of the boss: an agent with its field at +0xE3C unset (-1).
 void InitWorld2Boss(World2Boss* self)
 {
 	InitAgent(self);
 	*(s32*)((char*)self + 0xE3C) = -1;
 }
 
+// Loads the boss as an agent and resolves its two links.
 void LoadWorld2Boss(World2Boss* self, void* reader)
 {
     LoadAgent(self, reader);
@@ -160,6 +162,8 @@ struct AgentDrawArgs {
 void DrawAgent(Agent* self, void* unused1, void* unused2);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// Draws the boss as an agent and, when it draws a ring, queues a deferred request (group 0xD,
+// sorted by its distance along the view weights) for the marker ring.
 void DrawWorld2Boss(World2Boss* self, AgentDrawArgs* args, void* arg2)
 {
     DrawAgent(self, args, arg2);
@@ -247,6 +251,8 @@ s32 IsWorld2BossBlocker(void* self, BlockerQuery* rec)
 typedef s32 (*Cb_18A910)(void* self, BlockerQuery* ctx);
 
 
+// Whether something that IsWorld2BossBlocker accepts lies between points a1 and a2: gathers the
+// colliders in the box and tests for a nearest hit along the line.
 s32 IsWorld2BossLineBlocked(World2Boss* self, void* a1, void* a2)
 {
     u8 buf[0x70];
@@ -320,6 +326,9 @@ second:
 
 typedef s32 (*VFnI_0018AAE0)(void* self);
 
+// Whether the boss can take part in something: not while the pad select flag is held, it is
+// flagged busy (fC10), in state 0xB or 0x10, or slot 0x66 of its descriptor says no, and only when
+// its state walker is on key 0x43A, 0x43C or 0x43E.
 s32 IsWorld2BossFree(World2Boss* self)
 {
     s32 out;
@@ -341,6 +350,8 @@ one:
     return 1;
 }
 
+// State change of the boss: state 0xB marks level 2 done and starts a memory card save; state
+// 0x10 re-enables contacts and counts one more hit left.
 void EnterWorld2BossState(World2Boss* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
@@ -357,6 +368,8 @@ void EnterWorld2BossState(World2Boss* self, s32 evt, Animation* arg)
     }
 }
 
+// Picks the boss's next state: 2 when it is in state 4 on walker key 0x438 and the roster state
+// is 0, otherwise the common choice.
 s32 ChooseWorld2BossState(World2Boss* self)
 {
     if (self->state == 4) {
@@ -370,6 +383,9 @@ s32 ChooseWorld2BossState(World2Boss* self)
     return ChooseAgentState(self);
 }
 
+// Moves the boss on to its next phase: one less on the gauge count, a change to the phase's
+// state with its clip, the walker token of that phase kept for later (applied when it leaves state
+// 16), and the phase counter incremented.
 void AdvanceWorld2BossPhase(World2Boss* self)
 {
     DecrementGaugeCount((T217D_2E0*)&g_gaugeBarElement);
@@ -385,6 +401,8 @@ void UpdateWorld2Boss(World2Boss* self, f32 dt)
     UpdateAgent(self, dt);
 }
 
+// Shows the shared gauge bar while the boss's state walker is on key 0x43A, 0x43C or 0x43E and
+// nothing else covers the screen; hides it otherwise.
 void ShowWorld2BossBar(World2Boss* self)
 {
     s32 kind;
@@ -408,6 +426,9 @@ void ShowWorld2BossBar(World2Boss* self)
 void SetAgentGoalPoint(Agent* self, Vec02* p);
 void UpdateAgentGoal(Agent* self, s32 flag);
 
+// Sets the boss's goal point each update. In state 4 it chases the object it holds (fE14) when it
+// has one, else the point its own state walker asks for: its own position in keys 0x438 and 0x439,
+// the player's otherwise. Other states use the common agent goal.
 void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
 {
     switch (self->state) {
@@ -539,6 +560,8 @@ void UpdateWorld2BossState(World2Boss* self)
     }
 }
 
+// When leaving state 16, hands the stored walker token (if any) to the state walker as its
+// target and clears it; the common leave runs first.
 void LeaveWorld2BossState(World2Boss* self, s32 mode)
 {
     LeaveAgentState(self, mode);
