@@ -5600,10 +5600,31 @@ T2195_7C0* FindPlayerAttachmentByOwner(AnimationPlayer* a0, s32 owner)
 
 LINKER_REMNANT(func_0012D5C8);
 
-// Runs one event of an animation player, switched on the event's kind: sound events pick a variant
-// from a SoundChoice, others open key records, stop the streamed voice or send script events. Kind
-// 42 holds the player in place (steps its counter back, sets *out = 1) while a streamed voice is
-// still pending.
+// Runs one event of an animation player (self) as its time passes the event, switched on the
+// event's kind. Objects named by an id are searched in the world under the player's object (or
+// the animation). `rev` is set when the player runs backwards over a timed event, which flips
+// the on/off sense of the paired kinds below. *out = 1 asks the caller to stop stepping.
+// 0 plays a sound chosen at random from a SoundChoice (never the same twice, skipped if still
+// playing in p50), at a target object or with default ranges; 1 stops that sound; 2 / 3 restore /
+// silence volume channel 2; 4 and 7 set the time and speed, then re-seek the event cursor and
+// settle the pose sources; 5 sets the speed; 6 chooses a step sequence's state; 8 stops the player
+// (*out = 1); 9 / 10 show / hide an object, with a fade if a time is given; 11 jumps to a time and
+// stops (speed 0); 12 / 13 push / remove an object's camera controller; 14 / 15 set the player's
+// pad select; 16 sets a collider's two anchor modes; 17 / 18 set an attachment to mode 5 or
+// restore its modes; 19 / 20 switch the player to / from state 11 (applying pose sources);
+// 21 to 24 set or clear one of the two driven attachments (f2C, f30); 25 / 26 start / save a
+// screen fade; 27 starts a level exit unless the player is already in one; 33 / 34 start / stop
+// the timer; 28 starts another animation on an object pair; 29 to 32 set a track's scale or morph
+// mode (2 on, -1 off) and notify the object when it changed; 35 / 36 evaluate a track's position
+// or rotation at a time and apply it; 37 starts a pad record pattern; 38 to 41 send callbacks
+// (0x12, 0x13, 0x15) or script event 0xA to an object or the player's listeners; 42 holds the
+// player while a streamed voice is pending (time = event time, counter f20 stepped back); 43 stops
+// the streamed voice; 44 opens a key record; 45 selects a value entry by key; 46 / 47 create /
+// destroy a state walker between two objects; 48 starts a request on an object (anchored to an
+// owner or a world position, with optional extra object and scale, method 0x1B); 49 / 50 show /
+// hide the counted screen element; 51 queues a movie; 52 to 54 resize, clear, or post to the
+// stacked caption group; 55 / 56 set the element stack state 0 / 1; 57 / 58 set the world's value
+// with / without its target; 59 binds an entry queue to the player.
 void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
 {
     EventScratch u;

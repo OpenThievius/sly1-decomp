@@ -576,9 +576,31 @@ s32 g_litStripStmasks[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
 s32 g_litStripUnpackAddresses[5] = { -1, 0, 4, 8, 12 };
 s32 D_00262474 = 0x28;
 
-// Reads a placed object's model data from the stream: the id and link tables, then the parts (their
-// meshes, strips, morph targets and attachment entries) and the object's animators, allocating each
-// in front memory.
+// Reads a placed object's model from the stream and builds its draw packets; everything is
+// allocated in front memory, the per-strip scratch in back memory (marked and popped per strip).
+//  1. Header: two bytes (the first becomes each new part's default f28, the second is passed to
+//     the lit strip builder), the id count, a link table (0x90 bytes per id) and the ids
+//     (s16 each), then the weight table (count byte, raw words, and a front-memory copy).
+//  2. Parts (a u16 count; 0x70-byte parts and 0x28-byte poses, in parallel). Each starts with a
+//     flag word: bit 0 copies another part and pose by index and reads a new matrix, otherwise the
+//     defaults are set (far 1e10, near 2000, f24 = float max); the optional fields follow in order,
+//     0x02 a word of the pose, 0x200 f50, 0x04 a scale (stored squared with its sign kept, float
+//     max kept as is), 0x08 f3C, 0x10 far, 0x20 near (float max means the default; near is then
+//     clamped to far), 0x40 an animator (counted in nanimators), 0x80 two vectors, 0x100 a
+//     link record (owner, id, bone and, when the bone is not -1, four floats and a matrix, three
+//     counts), pushed on the model's link list. Then the part's position, f10, an ignored s16,
+//     three bytes, and the camera's fog terms for the part.
+//  3. A copied part calls CopyAttachmentPart and is done. Otherwise it reads its strips: for each
+//     (0x50 bytes) the vectors, normals, tints, UVs and vertex refs, the mesh record (from
+//     g_animRecords), up to nkeys morph key weights and, when the model has weights, per-vertex
+//     weight indices; it then binds the part's animator, builds the strip's packets in three
+//     temporary buffers (BuildLitStripMeshPacket for mesh kind 0, BuildStripMeshPacket for the
+//     other kinds), detaches each into front memory and fixes every pointer into the moved
+//     packets (the mesh queue, the animator outputs and the strip's extra tables), and builds the
+//     VIF packets of the strip.
+//  4. Then the part's morph targets (32 bytes each): vectors, extra words, key weights and weight
+//     indices, built by BuildMorphTargetPacket the same way.
+//  5. At the end CollectNonNullRefs gathers the model's references.
 void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
 {
     s32 i;
@@ -2072,10 +2094,28 @@ static inline u64 Rgbaq_166690(u8 a, u8 r, u8 g, u8 b)
 {
     return (u64)r | ((u64)g << 8) | ((u64)b << 16) | ((u64)a << 24) | (1ULL << 32);
 }
-// Draw callback of one model part (queued by QueuePlacedObjectModelParts): collects the lights that
-// reach the part's sphere (or reuses the cached ones while the lighting has not changed), then
-// builds and sends the part's vertex batches, lit or unlit, skinned or not, with the fades and
-// colours of its request.
+// Draw callback of one model part (queued by QueuePlacedObjectModelParts): builds the DMA/VIF
+// packets that draw the part's meshes and strips. Parts, in order:
+//  1. Header batch: the part's matrix and its inverse, fog and the sphere centre.
+//  2. Lighting mode b.mode, from the part's flags and its light cache: -1 unlit; 4 the part has its
+//     own light, or is skinned (lights collected for the sphere); 2 no cache, collect fresh;
+//     0 cache still valid and no dynamic light reaches the part (reuse the cached count);
+//     1 cache valid plus dynamic lights; 3 cache stale, recollect and stamp it with the frame
+//     (2 when only dynamic lights were found). The collected lights are in lights[].
+//  3. Range records (collected when part->flags & 3 and the object has no per-mesh cache): the
+//     records in reach of the sphere are queued after each mesh that passes the sphere test.
+//  4. Fast path: with a cache holding a prebuilt call (cache->f18), unlit or cache-lit, an
+//     unskinned part sends only the header and calls the cached packet; it flips the packet buffer
+//     selector D_00262474 (0x28 or 0x214, i.e. 0x23C minus the other) back as needed. It is
+//     skipped when any mesh's cache was used this game tick (goes to the slow path).
+//  5. Meshes: each opens a packet with its bone matrices and skin words, then by kind (*e->kind)
+//     sends the mesh data and, for kind 0, the lights per mode (refs to each light's data and
+//     microprogram starts with the lit-batch programs); kinds 1, 6-10 send the data only; kinds 4
+//     and 5 are sent and then skip the range records.
+//  6. Strips (skipped when the skin hides the part or the alpha is <= 0): each opens a packet with
+//     its bones and skin, the colour (the skin's, or the default colour D_002623E0) scaled by the
+//     request's alpha, and refs the strip data.
+// Packet data is either called (shared in front memory when part->link) or sent by reference.
 void DrawModelPart(Frame_166690* self)
 {
     Batch_166690 b;
