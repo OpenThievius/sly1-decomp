@@ -464,12 +464,14 @@ void InitObjectPool(ObjectPool* self)
     AppendQueuedCall(self->world, (void*)SpawnObjectPoolCopies, self, 0, 0);
 }
 
+// Slot 7 of the object pool: unregisters the object and clears the chosen item.
 void UnregisterObjectPool(ObjectPool* self)
 {
     UnregisterObject(self);
     ClearObjectPoolChoice(self);
 }
 
+// The pool's shared record, allocated (0x20 bytes, pointing back at the pool) on first use.
 void* GetObjectPoolShare(ObjectPool* self)
 {
     if (self->sub == 0) {
@@ -480,6 +482,8 @@ void* GetObjectPoolShare(ObjectPool* self)
     return self->sub;
 }
 
+// Appends an entry (id, count and two flag bits) to the pool, allocating room for 4 entries on
+// first use.
 void AddObjectPoolEntry(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     if (self->items == 0) {
@@ -563,6 +567,8 @@ void SpawnObjectPoolCopies(ObjectPool* self)
     }
 }
 
+// Slot 9 of the object pool: copies the object data, then either shares the source's record
+// (marking it lent and linking itself in its list) or duplicates the source's entry array.
 void CopyObjectPool(ObjectPool* self, ObjectPool* other)
 {
     CopyObjectData(self, other);
@@ -630,6 +636,7 @@ void StartObjectPool(ObjectPool* self)
     }
 }
 
+// Slot 20 of the object pool: clears the chosen item when the flag is set.
 void ClearObjectPoolChoiceIfFlag(ObjectPool* self, s32 flag)
 {
     if (flag) {
@@ -637,6 +644,7 @@ void ClearObjectPoolChoiceIfFlag(ObjectPool* self, s32 flag)
     }
 }
 
+// The pool entry with the given id, or 0.
 ObjectPoolEntry* FindObjectPoolEntry(ObjectPool* self, s32 key)
 {
     s32 i;
@@ -647,6 +655,7 @@ ObjectPoolEntry* FindObjectPoolEntry(ObjectPool* self, s32 key)
     return 0;
 }
 
+// Sets the enabled bit (2) of the entry with the id.
 void EnableObjectPoolEntry(ObjectPool* table, s32 key)
 {
     ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
@@ -655,6 +664,7 @@ void EnableObjectPoolEntry(ObjectPool* table, s32 key)
     }
 }
 
+// Clears the enabled bit (2) of the entry with the id.
 void DisableObjectPoolEntry(ObjectPool* table, s32 key)
 {
     ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
@@ -663,6 +673,7 @@ void DisableObjectPoolEntry(ObjectPool* table, s32 key)
     }
 }
 
+// Sets the count of the entry with the id, limited to its total.
 void SetObjectPoolEntryCount(ObjectPool* table, s32 key, s32 value)
 {
     ObjectPoolEntry* e = FindObjectPoolEntry(table, key);
@@ -674,6 +685,8 @@ void SetObjectPoolEntryCount(ObjectPool* table, s32 key, s32 value)
     }
 }
 
+// True when query is one of the objects in the pool: finds the entry whose objects share query's id
+// and looks through its list.
 s32 IsObjectInPool(ObjectPool* list, BaseObject* query) { for(s32 i=0;i<list->count;i++){ ObjectPoolEntry* row=&list->items[i]; if(row->count<=0) continue; void** items=row->objects; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->count;j++) if(query==items[j]) return 1; } return 0; }
 
 // Tells whether an object can be released: not already chosen by another pool of the same sub
@@ -800,6 +813,7 @@ void ChooseObjectPoolItem(ObjectPool* self)
     }
 }
 
+// True when the pool has a chosen item, choosing one first when it has none.
 s32 HasObjectPoolChoice(ObjectPool* self)
 {
     if (self->chosenItem != 0) {
@@ -1057,8 +1071,10 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
     return 1;
 }
 
+// Clears the chosen item, and the lent record's copy of it.
 void ClearObjectPoolChoice(ObjectPool* p) { p->chosenItem = 0; if (p->sub != 0 && p->sub->lentOut != 0) p->sub->f10 = 0; }
 
+// Clears the placement record (0x80 bytes at +0x60) and sets its rotation to the identity.
 void ResetPlacementRecord(u8* self)
 {
     u8* p = self + 0x60;
@@ -1066,6 +1082,8 @@ void ResetPlacementRecord(u8* self)
     *(Mat02*)(p + 0x20) = g_identityMatrix;
 }
 
+// Clears the pool's release record (0x70 bytes) and sets its vector to (0, 1, 0) with a range of
+// 20000.0, as InitObjectPool does; a script host function calls it.
 void ResetObjectPoolReleaseRecord(ObjectPool* self)
 {
     FillMemory((u8*)self + 0xE0, 0, 0x70);
@@ -1077,6 +1095,8 @@ void ResetObjectPoolReleaseRecord(ObjectPool* self)
     self->f120 = 0;
 }
 
+// Clears the pool's 0x18-byte heading record, as InitObjectPool does; a script host function calls
+// it.
 void ClearObjectPoolHeadingRecord(u8* self)
 {
     FillMemory(self + 0x150, 0, 0x18);
@@ -1184,6 +1204,8 @@ void ComputeFrameFollowerPoint(FrameFollower* self, Vec02* target, Vec02* out, v
     }
 }
 
+// Writes the heading a placement record names: the angle of its object's rotation, or of its
+// collider's, seen from the frame x, else the angle stored in the record.
 void GetPlacementRecordAngle(u8* self, f32* out, void* x)
 {
     f32 v[12];
@@ -1199,6 +1221,8 @@ void GetPlacementRecordAngle(u8* self, f32* out, void* x)
     }
 }
 
+// Writes the pitch a placement record names: the elevation of its object's rotation seen from the
+// frame x, else the pitch stored in the record.
 void GetPlacementRecordPitch(u8* self, f32* out, void* x)
 {
     f32 v[12] __attribute__((aligned(16)));
@@ -1212,12 +1236,14 @@ void GetPlacementRecordPitch(u8* self, f32* out, void* x)
     }
 }
 
+// Slot 16 of the fourth boss: starts the agent and makes itself the world's active follower.
 void StartWorld4Boss(World4Boss* self)
 {
     StartAgent(self);
     SetWorldActiveFollower(self->world, self);
 }
 
+// Slot 0x16C of the fourth boss: 0 while the pad-select hold is set, else its free flag.
 s32 IsWorld4BossFree(World4Boss* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0)
@@ -1225,6 +1251,8 @@ s32 IsWorld4BossFree(World4Boss* self)
     return self->fC24;
 }
 
+// Slot 94 of the fourth boss: the agent's goal, and in state 0x10 the position of the object its
+// slot 102 returns.
 void UpdateWorld4BossGoal(World4Boss* self, s32 flag)
 {
     UpdateAgentGoal(self, flag);
@@ -1235,6 +1263,8 @@ void UpdateWorld4BossGoal(World4Boss* self, s32 flag)
     }
 }
 
+// Slot 90 of the fourth boss: the agent's state update, and in state 0x10 it turns toward the goal
+// point.
 void UpdateWorld4BossState(World4Boss* self)
 {
     UpdateAgentState(self);
@@ -1242,6 +1272,8 @@ void UpdateWorld4BossState(World4Boss* self)
         FaceAgentTowardGoalPoint(self);
 }
 
+// Slot 92 of the fourth boss: enters the agent state; on state 0xB it marks level part 4 done and
+// starts a memory card save.
 void EnterWorld4BossState(World4Boss* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
@@ -1251,6 +1283,8 @@ void EnterWorld4BossState(World4Boss* self, s32 evt, Animation* arg)
     }
 }
 
+// Slot 17 of the fourth boss: updates the agent, then stops and forgets the animation player at
+// +0xC20 once its rate has fallen to 0.
 void UpdateWorld4Boss(World4Boss* self, f32 dt)
 {
     u8* s = (u8*)self;
@@ -1264,6 +1298,8 @@ void UpdateWorld4Boss(World4Boss* self, f32 dt)
     }
 }
 
+// Slot 46 of the fourth boss: shows the gauge bar element while the menus and fade are clear,
+// otherwise hides it.
 void UpdateWorld4BossVisibility(void)
 {
     if (AreMenusAndFadeClear()) {
@@ -1316,6 +1352,7 @@ s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
     return HandleAgentObjectEvent(self, (AgentHit*)ev);
 }
 
+// Stores three animation values in the fourth boss (+0xC14, +0xC18, +0xC1C).
 void SetWorld4BossValues(World4Boss* self, Animation* a, Animation* b, Animation* c)
 {
     self->fC14 = a;
@@ -1371,6 +1408,7 @@ void InstallScreenElements()
     ResetScreenFade((ScreenFade*)g_screenFade);
 }
 
+// Initialises every screen element (slot 1, last to first).
 void InitScreenElements(void)
 {
     ScreenElement** base = (ScreenElement**)g_screenElements;
@@ -1383,6 +1421,8 @@ void InitScreenElements(void)
     } while (i >= 0);
 }
 
+// Updates every screen element (slot 2, last to first), then the screen fade with the live pad
+// record or a blank one depending on the pad routing bit.
 void UpdateScreenElements(void)
 {
     ScreenElement** slots = (ScreenElement**)g_screenElements;
@@ -1400,6 +1440,7 @@ void UpdateScreenElements(void)
     UpdateScreenFade((ScreenFade*)g, (PadRecord*)b);
 }
 
+// Hides every screen element (slot 16 with 0).
 void HideScreenElements(void)
 {
     ScreenElement** base = (ScreenElement**)g_screenElements;
@@ -1413,6 +1454,7 @@ void HideScreenElements(void)
     } while (i >= 0);
 }
 
+// Resets every screen element (slot 5).
 void ResetScreenElements(void)
 {
     ScreenElement** p = (ScreenElement**)g_screenElements;
@@ -1425,6 +1467,8 @@ void ResetScreenElements(void)
     } while (n >= 0);
 }
 
+// Lets each shown screen element that has a queueing slot (10) queue its draw;
+// QueueScreenElementDraws calls it.
 void QueueEachScreenElementDraw(void)
 {
     s32 n = 0x24;
@@ -1442,6 +1486,8 @@ void QueueEachScreenElementDraw(void)
     } while (n >= 0);
 }
 
+// Draws every screen element that is on (slot 9), then the screen fade and the cycling glyph
+// element.
 void DrawScreenElements(void)
 {
     s32 i;
@@ -1455,6 +1501,8 @@ void DrawScreenElements(void)
     DrawCyclingGlyphElement((T217D_600*)&g_cyclingGlyphElement);
 }
 
+// Sets up a screen element from its placement record number: slide times of 0.25, the default
+// clock, its size, and its position at the hidden spot.
 void InitScreenElement(ScreenElement* self, s32 index)
 {
     self->place = (T217D_Place*)((u8*)&g_elementPlaces + index * 20);

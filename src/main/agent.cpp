@@ -145,6 +145,8 @@ struct BufferedStream;
 struct Collider;
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
+// Slot 10 of the agent: loads the collider, resolves its links and then the state and secondary
+// clips.
 void LoadAgent(Agent* self, void* a1)
 {
     LoadCollider(self, (BufferedStream*)a1);
@@ -155,6 +157,8 @@ void LoadAgent(Agent* self, void* a1)
 
 void CopySwitchedCollider(Agent* self, void* src);
 
+// Slot 9 of the agent: copies as a switched collider but keeps its own keeper record and roster,
+// and remembers the object it was copied from.
 void CopyAgent(Agent* self, void* src)
 {
     s32 b = self->flagIndex;
@@ -167,6 +171,8 @@ void CopyAgent(Agent* self, void* src)
 
 void PostLoadPlacedObject(PlacedObject* self);
 
+// Slot 15 of the agent: after loading, looks up the path graph, the secondary target and the member
+// group by their ids (or builds the group when none is given).
 void PostLoadAgent(Agent* self)
 {
     s32 v;
@@ -187,6 +193,8 @@ void PostLoadAgent(Agent* self)
     }
 }
 
+// Takes the agent out of its parent's list (slot 3); StartAgent queues it for agents whose flag
+// table bit is set.
 void RemoveAgentFromParent(Agent* self)
 {
     self->desc->m03(self);
@@ -250,6 +258,8 @@ void StartAgent(Agent* self)
 }
 
 
+// Slot 56 of the agent: true when the base test says so, when obj is in the target set, or in state
+// 0xB when obj lacks flag bit 55.
 s32 TestAgentMayContact(Agent* self, Collider* obj)
 {
     if (TestCollidersMayContact(self, obj) != 0) {
@@ -269,6 +279,7 @@ s32 TestAgentMayContact(Agent* self, Collider* obj)
 }
 
 
+// Slot 6 of the agent: registers as a switched collider and joins the keeper's roster.
 void RegisterAgent(Agent* self)
 {
     RegisterSwitchedCollider(self);
@@ -280,6 +291,8 @@ void RegisterAgent(Agent* self)
 
 void StopAnimationPlayer(AnimationPlayer* self);
 
+// Slot 7 of the agent: ends its two animation players, leaves the keeper's roster and clears its
+// requests and deadlines (to the largest float).
 void UnregisterAgent(Agent* self)
 {
     UnregisterSwitchedCollider(self);
@@ -409,6 +422,8 @@ void StepAgent(Agent* self, f32 dt)
     }
 }
 
+// The angle in radians, wrapped, from the agent's facing to the direction of its target (0 without
+// one).
 f32 ComputeAgentTargetBearing(Agent* self)
 {
     PlacedObject* other = (PlacedObject*)self->desc08()->m62(self);
@@ -425,6 +440,8 @@ f32 ComputeAgentTargetBearing(Agent* self)
 // callers evaluate it before the matrix, as this order does.
 void BuildAxisAngleMatrix(const Vec02* v, f32 angle, Mat02* out);
 
+// Sets the agent's heading and pitch and rebuilds its heading matrix from them (yaw and pitch, or a
+// turn about the up axis when it has no pitch), unless facing is blocked.
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y)
 {
     if (IsAgentFacingBlocked(self) != 0) return;
@@ -439,6 +456,8 @@ void SetAgentFacingAngles(Agent* self, f32 x, f32 y)
 }
 
 
+// Changes state until the agent's choice (slot 93) equals the current state, unless the state is
+// locked or forced or the player is seeking.
 void SettleAgentState(Agent* self)
 {
     if (self->stateLocked != 0) return;
@@ -454,6 +473,9 @@ void SettleAgentState(Agent* self)
 extern f32 g_frameDt;
 void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2);
 
+// Turns the agent the way its animation moves it: takes the heading (and pitch) from the clip's
+// motion, and scales the clip's speed by the ratio of the agent's real speed to the clip's so the
+// two agree.
 void FaceAgentFromAnimationMotion(Agent* self)
 {
     f32 out[3];
@@ -820,6 +842,8 @@ done:
 }
 
 
+// Sets the point the agent heads for: snaps a copy to its path graph and takes it as the working
+// goal unless a valid path exists and the new point is still near the old one.
 void SetAgentGoalPoint(Agent* self, Vec02* p)
 {
     Vec02 t;
@@ -840,6 +864,8 @@ void SetAgentGoalPoint(Agent* self, Vec02* p)
     }
 }
 
+// True when the path is valid and the agent's path index has reached the number of points;
+// ChooseAgentState tests it before leaving states 4, 5 and 12.
 s32 HasAgentReachedPathEnd(Agent* self)
 {
     s32 result = 0;
@@ -852,6 +878,8 @@ s32 HasAgentReachedPathEnd(Agent* self)
 
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
+// Filter of the agent's path search: refuses an object with flag bit 43 (unless it can be pushed)
+// and one of kinds 5, 0x40 or 0x41, and accepts the rest.
 s32 IsAgentPathBlocker(void* unused, Collider* self)
 {
     if ((self->flags538 & (1ULL << 43)) != 0) {
@@ -1012,6 +1040,7 @@ void FaceAgentAlongPath(Agent* self)
 }
 
 
+// Turns the agent toward its goal point: heading and pitch from the direction to it.
 void FaceAgentTowardGoalPoint(Agent* self)
 {
     f32 x;
@@ -1066,12 +1095,15 @@ void UpdateAgentGoal(Agent* self, s32 flag)
     }
 }
 
+// Writes 1 to *out when the path is valid and the agent is within the last two points, else 0.
 void IsAgentNearPathEnd(Agent* self, s32* out) { if (self->pathValid && self->pathIndex >= self->pathCount - 2) { *out = 1; return; } *out = 0; }
 
 void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetBinding* pairs, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1);
 Attachment* FindPlayerAttachmentByOwner(AnimationPlayer* a0, s32 owner);
 
+// Creates the agent's main animation player from its state object's clip, binds it to the object
+// and puts the agent's own position and orientation attachments, when it has them, into mode 5.
 void CreateAgentAnimationPlayer(Agent* self)
 {
     StateResetObject* sub = ((StateResetObject*)self->stateObject);
@@ -1139,6 +1171,9 @@ void UpdateAgentState(Agent* self)
 struct StateChangeArgs { s32* oldSlot; s32* stateSlot; };
 extern f32 g_gameClock[];
 
+// Moves the agent to a new state: clears the change-request bit, calls the leave and enter slots
+// (0x5B, 0x5C) around storing the state and its game clock time, and raises script event 15 with
+// the old and new state.
 void ChangeAgentState(Agent* self, s32 state, void* context)
 {
     self->requestBits &= -2;
@@ -1155,6 +1190,8 @@ void ChangeAgentState(Agent* self, s32 state, void* context)
 }
 
 
+// Forces a state: mode -1 releases the forced flag, any other mode sets it and changes to that
+// state.
 void ForceAgentState(Agent* self, s32 mode, void* value)
 {
     if (mode == -1) {
@@ -1401,6 +1438,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
     }
 }
 
+// The state of the agent's keeper (3 when it has none).
 s32 GetAgentRosterState(Agent* self) { if (!self->roster) return 3; return *(s32*)((u32)self->roster + 0x50); }
 
 #include "object_message.h"
@@ -1484,6 +1522,9 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
+// Slot 76 of the agent: refuses (0) when slot 75 refuses the kind; otherwise builds a node query
+// from the request (its object, kind and the agent's position) and returns whether a node accepts
+// it.
 s32 AcceptAgentRequest(Agent* self, AgentRequest* req)
 {
     NodeQuery f;
@@ -1505,12 +1546,15 @@ s32 AcceptAgentRequest(Agent* self, AgentRequest* req)
     return FindNodeForQuery(&f, 0, 0) != 0;
 }
 
+// Slot 75 of the agent: true while the agent's requests are blocked.
 s32 IsAgentRequestBlocked(Agent* self, s32 unused1) { return self->requestsBlocked != 0; }
 
 
 
 void StopAnimationPlayer(AnimationPlayer* self);
 
+// Acts on the agent's request bits: bit 1 ends the state player (in state 0xB it parks it at its
+// end instead), bit 0 changes to the requested state.
 void ApplyPendingAgentChanges(Agent* self) {
     if (self->requestBits == 0) {
         return;
@@ -1577,6 +1621,8 @@ void SteerAgentAlongPath(Agent* self)
 f32 GetAnimationMarkerTime(Animation* self, s32 key);
 void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b);
 
+// Slot 96 of the agent: clears the loop-back arming, the path flag and arrival time, and seeks the
+// state player to the marker 0x1B1 of its clip.
 void RestartAgentClip(Agent* self)
 {
     self->loopBackArmed = 0;
@@ -1587,6 +1633,9 @@ void RestartAgentClip(Agent* self)
 }
 
 
+// True when a contact with other counts for the agent's target: only for the target itself, never
+// in states 10, 11 and 16, always in 12 to 14, else for objects under its own root or in the target
+// set.
 s32 TestAgentTargetContact(Agent* self, s32 key, Collider* other)
 {
     if (key != (s32)self->target)
@@ -1826,6 +1875,7 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
     }
 }
 
+// Slot 0x170 of the agent: always 2, the answer PollItemKeeperMembers takes as an immediate yes.
 s32 AnswerAgentRosterPoll(void)
 {
     return 2;
@@ -1880,6 +1930,7 @@ void DrawAgent(Agent* self, void* unused1, void* unused2)
     DrawTurningCollider(self, unused1, unused2);
 }
 
+// True for a valid clip slot index (0 to 16).
 s32 IsAgentSlotIndex(s32 index)
 {
     return (u32)index < 17;
@@ -1894,6 +1945,7 @@ void SetAgentStateClipId(u8* self, s32 index, s32 value)
 }
 
 
+// Stores a clip id for a state slot and resolves its animation object (none for -1).
 void SetAgentStateClip(Agent* self, s32 index, s32 value)
 {
     if (IsAgentSlotIndex(index)) {
@@ -1915,6 +1967,8 @@ s32 GetAgentStateClip(Agent* self, s32 index)
     return (s32)self->stateClips[index].obj;
 }
 
+// Adds an extra clip (a hit mask and a clip id) to the agent's list of at most 4; ResolveAgentClips
+// resolves the ids.
 void AddAgentExtraClip(Agent* self, s32 a1, s32 a2)
 {
     s32 n = self->extraClipCount;
@@ -1929,6 +1983,8 @@ void AddAgentExtraClip(Agent* self, s32 a1, s32 a2)
 
 void MoveObjectAnimationTrackToEnd(Animation* a0, BaseObject* owner);
 
+// Finds the animation object with the id in the world and prepares it for this agent (disabled,
+// tracks moved to the end, started); returns it or 0.
 void* ResolveAgentClip(Agent* self, s32 id)
 {
     Animation* item = (Animation*)FindFirstObjectById(self->world, 0x101, id, self->copySource);
@@ -1941,6 +1997,8 @@ void* ResolveAgentClip(Agent* self, s32 id)
 }
 
 
+// Looks up the animation objects of the 17 state clips and of the extra clip list by their ids and
+// marks each id used (-1).
 void ResolveAgentClips(Agent* self)
 {
     s32 i = 16;
@@ -1968,12 +2026,14 @@ void ResolveAgentClips(Agent* self)
     }
 }
 
+// Script built-in: stores the member group id; PostLoadAgent looks it up.
 void SetAgentMemberGroupId(Agent* self, s32 v)
 {
     self->memberGroupId = v;
     self->hasMemberGroupId = 1;
 }
 
+// Script built-in: stores the target set id that StartAgent looks up; targets must be in that set.
 void SetAgentTargetSetId(Agent* self, s32 v)
 {
     self->targetSetId = v;
@@ -1988,6 +2048,7 @@ void SetAgentSecondaryClipId(Agent* self, s32 index, s32 value)
 }
 
 
+// Looks up the objects of the 17 secondary clips by id and starts each one that is found.
 void ResolveAgentSecondaryClips(Agent* self)
 {
     for (s32 i = 16; i >= 0; i--) {
@@ -2000,6 +2061,8 @@ void ResolveAgentSecondaryClips(Agent* self)
     }
 }
 
+// Adds a mesh key object and a message kind to the agent's list of at most 4;
+// CollideAgentWithObject tests each entry.
 void AddAgentMeshKey(Agent* self, s32 a, s32 b)
 {
     u32 n = self->meshKeyCount;
@@ -2012,6 +2075,8 @@ void AddAgentMeshKey(Agent* self, s32 a, s32 b)
 }
 
 
+// Sets the path graph object by id (-1 for none); a different object invalidates the current path.
+// Does nothing when the id finds no object.
 void SetAgentPathObjectId(Agent* self, s32 index)
 {
     PointGraphObject* v;
@@ -2029,6 +2094,9 @@ void SetAgentPathObjectId(Agent* self, s32 index)
 }
 
 
+// Slot 98 of the agent: picks the target (the primary one, else the secondary, else the active
+// switched collider, dropped when the latter refuses it), tells the old target (slot 24) and the
+// new one (slot 23) when it changes and returns it.
 void* SelectAgentTarget(Agent* self)
 {
     void* s0;
@@ -2058,11 +2126,13 @@ void* SelectAgentTarget(Agent* self)
     return s0;
 }
 
+// Writes the agent's current target (slot 98) to *out.
 void StoreAgentTarget(Agent* self, s32* out)
 {
     *out = (s32)self->desc08()->m62(self);
 }
 
+// Sets the secondary target, which SelectAgentTarget uses when there is no primary one.
 void SetAgentSecondaryTarget(Agent* self, s32 value)
 {
     self->secondaryTarget = (void*)value;
@@ -2110,6 +2180,7 @@ void PickAgentSecondaryTarget(Agent* self)
     self->hasSecondaryTarget = 1;
 }
 
+// Sets the primary target, the first choice of SelectAgentTarget.
 void SetAgentPrimaryTarget(Agent* self, s32 value)
 {
     self->primaryTarget = (void*)value;
@@ -2117,6 +2188,8 @@ void SetAgentPrimaryTarget(Agent* self, s32 value)
 
 
 
+// Slot 0x100 of the agent: the friction and bounce of a contact: fixed constants while contacts are
+// disabled, else its contact value as friction when slot 86 accepts, else zeros.
 void ComputeAgentContactValue(Agent* self, Contact03* out)
 {
     if (self->contactsDisabled != 0) {
@@ -2137,10 +2210,13 @@ void ComputeAgentContactValue(Agent* self, Contact03* out)
 }
 
 
+// Slot 62 of the agent: the turning collider's limit, and with contacts disabled a contact flagged
+// 0x12 whose surface normal points up (z above 0.7) gets no limit.
 void ClampAgentContactLimit(Agent* self, s32 flags, ContactLimit03* out)
 { ClampTurningColliderContactLimit(self, flags, out);
     if (self->contactsDisabled != 0) { if ((flags & 0x12) == 0x12) { if (0.7f < out->contact->normal.z) { out->limit = 0; } } } }
 
+// Sets the target angle limit from degrees (stored in radians).
 void SetAgentAngleLimitDegrees(Agent* self, f32 value) { self->targetAngleLimit = value * 0.017453294f; }
 
 
@@ -2149,6 +2225,8 @@ void AddAgentStateTrigger(Agent* self, StateTrigger* value)
     AddItemKeeperStateTrigger((ItemKeeper*)self->roster, value);
 }
 
+// Adds a group of four clip ids (at most 8 groups); EnterAgentState looks for the old and new clip
+// in one group to carry a blend over.
 void AddAgentClipGroup(Agent* self, s32 a, s32 b, s32 c, s32 d) { if ((u32)self->clipGroupCount < 8) { Group08* e = &self->clipGroups[self->clipGroupCount]; self->clipGroupCount++; e->ids[0] = a; e->ids[1] = b; e->ids[2] = c; e->ids[3] = d; } }
 
 struct FaceRef;
@@ -2188,6 +2266,8 @@ void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 void SetPlayerState(Player* self, s32 state, s32 sub);
 
+// Gives the other object the agent's launch velocity (at +0xAB0) and, when it is the player, puts
+// the player into state 4 with 0x2B.
 void LaunchObjectWithAgentVelocity(u8* self, PlacedObject* other)
 {
     other->desc02()->m20(other, (Vec02*)(self + 0xAB0));
@@ -2310,6 +2390,8 @@ void StopAnimationPlayer(AnimationPlayer* self);
 void FindNearestAnimationPathTime(Animation* self, PlacedObject* owner, f32 start, Vec02* point, f32* outT, Vec02* outPos,
                    Vec02* outDir);
 
+// Replaces the agent's main clip: ends the running player, asks for a state change when the roster
+// state is 0, and seeks the new clip to the point nearest the agent.
 void SetAgentMainClip(Agent* self, void* value)
 {
     void* p;
@@ -2333,11 +2415,13 @@ void SetAgentMainClip(Agent* self, void* value)
     }
 }
 
+// Slot 71 of the agent: accepts a launch request (1) and does nothing with it.
 s32 RequestAgentLaunch(Agent* self, void* source, TrackedNodeOffer* offer)
 {
     return 1;
 }
 
+// Slot 0x16C of the agent: always 0 (subclasses override it).
 s32 IsAgentFree(void)
 {
     return 0;
@@ -2411,6 +2495,8 @@ s32 IsPlayerUntargetableByAgent(Agent* self)
 }
 
 
+// True when facing is locked, +0xB80 is set or the player is seeking; SetAgentFacingAngles tests
+// it.
 s32 IsAgentFacingBlocked(Agent* self)
 {
     s32 r = 0;
@@ -2434,6 +2520,8 @@ set:
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
+// Creates a keeper record (class 0x89) and queues GroupAnimationEventObjects on it; StartAgent
+// calls it.
 void* CreateItemKeeper(void* a0)
 {
     void* obj = CreateTypedRecord(0x89, a0, 0, 0x436, -1);
@@ -2442,6 +2530,7 @@ void* CreateItemKeeper(void* a0)
 }
 
 
+// Slot 0 of the keeper: base init and the selected id set to -1.
 void InitItemKeeper(ItemKeeper* self)
 {
     InitObject(self);
@@ -2449,6 +2538,8 @@ void InitItemKeeper(ItemKeeper* self)
 }
 
 
+// Adds an agent to the keeper's list of at most 16, setting the keeper to state 0 when the list was
+// empty.
 void AddItemKeeperMember(ItemKeeper* self, Agent* value)
 {
     u32 n;
@@ -2463,11 +2554,14 @@ void AddItemKeeperMember(ItemKeeper* self, Agent* value)
     }
 }
 
+// Adds a wanted id to the keeper's owned group while it has fewer than 16.
 void AddOwnedWantedId(ItemKeeper* self, s32 value) { u32 i = self->owned.wantedCount; if (i < 16) { self->owned.wanted[i] = value; self->owned.wantedCount = i + 1; } }
 
+// Adds a wanted id to the keeper's listed group while it has fewer than 16.
 void AddListedWantedId(ItemKeeper* self, s32 value) { u32 i = self->listed.wantedCount; if (i < 16) { self->listed.wanted[i] = value; self->listed.wantedCount = i + 1; } }
 
 
+// Removes an agent from the keeper's member list and sets the keeper to state 3 when none are left.
 void RemoveItemKeeperMember(ItemKeeper* self, Agent* value)
 {
     s32 i = 0;
@@ -2580,6 +2674,8 @@ void GroupAnimationEventObjects(ItemKeeper* self)
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 
+// Queues UpdateItemKeeper on the world once, unless the keeper is in state 3 or already queued;
+// UpdateAgent calls it.
 void QueueItemKeeperUpdate(ItemKeeper* a0)
 {
     ItemKeeper* self = a0;
@@ -2597,6 +2693,7 @@ void QueueItemKeeperUpdate(ItemKeeper* a0)
     }
 }
 
+// The target (slot 98) of the keeper's first member.
 void* GetItemKeeperTarget(ItemKeeper* self)
 {
     Agent* item = self->owned.found[0];
@@ -2605,6 +2702,8 @@ void* GetItemKeeperTarget(ItemKeeper* self)
 
 
 
+// The keeper's queued update: unless in state 3, records whether any member is free and changes
+// state until ChooseItemKeeperState keeps the current one.
 void UpdateItemKeeper(ItemKeeper* self)
 {
     s32 v;
@@ -2665,6 +2764,7 @@ s32 ChooseItemKeeperState(ItemKeeper* self)
     return state;
 }
 
+// True when some member answers that it is free; the keeper then also takes its target's position.
 s32 IsAnyItemKeeperMemberFree(ItemKeeper* self)
 {
     s32 i = 0;
@@ -2692,6 +2792,8 @@ s32 IsAnyItemKeeperMemberFree(ItemKeeper* self)
     return 1;
 }
 
+// Asks every member for its roster answer: any 2 gives 1 at once, any 0 makes the result 0,
+// otherwise 1.
 s32 PollItemKeeperMembers(ItemKeeper* a0)
 {
     s32 result = 1;
@@ -2707,10 +2809,13 @@ s32 PollItemKeeperMembers(ItemKeeper* a0)
     return result;
 }
 
+// Adds a trigger to the keeper's list of at most 4 unless it is already in it.
 void AddItemKeeperStateTrigger(ItemKeeper* self, StateTrigger* value) { for (s32 i = 0; i < self->triggerCount; i++) if (value == self->triggers[i]) return; s32 i = self->triggerCount; if ((u32)i < 4) { s32 next = i + 1; self->triggers[i] = value; self->triggerCount = next; } }
 
 void SetStateTriggerStateFromMessage(StateTrigger* object, s32 mode);
 
+// Passes a mode to each of the keeper's state triggers; SetItemKeeperState sends 1, 0 and 2 on
+// entering states 0, 2 and 3.
 void SetItemKeeperTriggerStates(ItemKeeper* self, s32 mode)
 {
     for (s32 i = 0; i < self->triggerCount; i++) {

@@ -65,6 +65,7 @@ u8 g_trailEdgeTexCoord[8] = { 0, 0, 0, 0, 0, 0, 0x80, 0x3F };
 u8 g_trailZeroTexCoord[16] = { 0 };
 
 
+// Empties the trail's ring buffer (both ends back to 0).
 void ResetTrailRing(TrailRing* o)
 {
     o->next = 0;
@@ -197,6 +198,8 @@ done:
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// Queues the ribbon draw (DrawTrailRibbon) as a deferred request sorted by the target's distance
+// along the camera's view; nothing when the ring holds fewer than 2 points.
 void QueueTrailRibbonDraw(TrailRing* self, u8* cam)
 {
     DeferredRequest req;

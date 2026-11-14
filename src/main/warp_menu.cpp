@@ -602,6 +602,8 @@ extern char D_00276660[16];
 extern char D_00276670[12];
 
 
+// Slot 0 of the first boss: runs InitConeAgent, sets the stage key to 0x2D8 and its leash and range
+// values, and a full turn (2 pi) as the near angle.
 void InitWorld1Boss(World1Boss* self)
 {
     InitConeAgent(self);
@@ -617,6 +619,8 @@ void InitWorld1Boss(World1Boss* self)
 // The file's first read-only data, for func_001E89F0.
 extern const f32 D_0024E600[4] = {3.40282347e+38f, 0.0f, 0.0f, 0.0f};
 
+// Slot 16 of the first boss: resolves its links, makes itself the world's active follower, creates
+// its state walker, sets 4 stages left with a flag table index each, and starts the cone agent.
 void StartWorld1Boss(World1Boss* self)
 {
     ResolveObjectLinks(self, 8, g_world1BossLinks);
@@ -738,6 +742,9 @@ void EnterWorld1BossState(World1Boss* self, s32 a, Animation* b)
     EnterAgentState(self, a, b);
 }
 
+// Slot 89 of the first boss: with no visits left it clears the clip-10 deadline to the largest
+// float; state 10 stays 10 while its state player exists (else 8), any other state is chosen by
+// ChooseAgentState.
 s32 ChooseWorld1BossState(World1Boss* self)
 {
     s32 a1;
@@ -753,12 +760,14 @@ s32 ChooseWorld1BossState(World1Boss* self)
     return a1;
 }
 
+// Slot 0x16C of the first boss: not free while disabled, otherwise free while visits are left.
 s32 IsWorld1BossFree(World1Boss* a0)
 {
     if (a0->disabled != 0) return 0;
     return a0->visitsLeft != 0;
 }
 
+// Slot 93 of the first boss: true only in mode 0x2DB while the visit count is neither 0 nor 5.
 s32 IsWorld1BossTargetInRange(World1Boss* a0)
 {
     if (a0->stageKey != 0x2DB) return 0;
@@ -769,6 +778,8 @@ s32 IsWorld1BossTargetInRange(World1Boss* a0)
     }
 }
 
+// Slot 97 of the first boss: outside mode 0x2DA it counts a visit down (not below 0), then steers
+// along the path as every agent does.
 void SteerWorld1BossAlongPath(World1Boss* a0)
 {
     if (a0->stageKey != 0x2DA) {
@@ -780,6 +791,9 @@ void SteerWorld1BossAlongPath(World1Boss* a0)
 }
 
 
+// Slot 96 of the first boss: in mode 0x2DA and state 12 while on the floor, when the nearest key
+// has changed it counts a visit down and points that key's state walker at 0x2E0; then restarts the
+// agent clip.
 void RestartWorld1BossClip(World1Boss* self)
 {
     if (self->stageKey == 0x2DA && self->state == 0xC && FindColliderFloorContact(self, 0, 0) != 0) {
@@ -798,6 +812,8 @@ void RestartWorld1BossClip(World1Boss* self)
     RestartAgentClip(self);
 }
 
+// Slot 94 of the first boss: in state 4 the goal is its own point or the object at +0xC60, in state
+// 8 the object its slot 98 returns, otherwise the agent's usual goal.
 void UpdateWorld1BossGoal(World1Boss* self, s32 flag)
 {
     Vec4U loc;
@@ -821,6 +837,8 @@ void UpdateWorld1BossGoal(World1Boss* self, s32 flag)
     }
 }
 
+// Slot 90 of the first boss: in state 8 it turns toward the goal point, otherwise the agent's usual
+// state update.
 void UpdateWorld1BossState(World1Boss* self)
 {
     if (self->state == 8) {
@@ -830,6 +848,8 @@ void UpdateWorld1BossState(World1Boss* self)
     }
 }
 
+// Shows the gauge bar element (slot 14) when the menus and fade are clear, otherwise hides it (slot
+// 15).
 void ShowElementWhenMenusClear(void)
 {
     if (AreMenusAndFadeClear()) {
@@ -839,6 +859,8 @@ void ShowElementWhenMenusClear(void)
     }
 }
 
+// Slot 60 of the first boss: 0 when the probe belongs to one of its six key objects, else the
+// agent's usual contact test.
 s32 TestAgentMayContactExceptKeys(World1Boss* self, Collider* probe)
 {
     PlacedObject* key = probe->root;
@@ -856,11 +878,14 @@ done:
     return result;
 }
 
+// Initialises the global element stack that the pause and map screens push to and pop from.
 void InitGlobalElementStack(void)
 {
     InitElementStack((ElementStack*)g_elementStack);
 }
 
+// Clears the saved and pending states to -1, enters state 3 and leaves the stack holding only its
+// empty base slot.
 void InitElementStack(ElementStack* self)
 {
     self->resumeState = -1;
@@ -870,6 +895,7 @@ void InitElementStack(ElementStack* self)
     self->count = 1;
 }
 
+// Enters state 3, which resumes the saved state when there is one.
 void ResumeElementStackState(void* self)
 {
     SetElementStackState((ElementStack*)self, 3);
@@ -990,6 +1016,9 @@ void UpdateElementStack(ElementStack* obj)
     UpdateScreenElements();
 }
 
+// Pushes a screen element onto the element stack: pauses the stream voice when a second element
+// goes on top of the first, tells the old top it is no longer on top (vt slot 3, 0), the new one
+// that it is (slot 3, 1), then calls its slot 6.
 void PushStackElement(ElementStack* self, ScreenElement* node)
 {
     if (IsStreamVoiceLocked() && self->count == 1) {
@@ -1012,6 +1041,9 @@ void PushStackElement(ElementStack* self, ScreenElement* node)
     }
 }
 
+// Pops the top screen element off the stack: tells it it is no longer on top (slot 3, 0), calls its
+// slot 7, tells the new top it is on top, and resumes the stream voice once only the base element
+// is left.
 void PopStackElement(ElementStack* g)
 {
     ScreenElement* item = g->items[--g->count];
@@ -1026,16 +1058,21 @@ void PopStackElement(ElementStack* g)
     }
 }
 
+// Draws the screen elements; the main loop calls it once a frame after the world draw.
 void DrawAllScreenElements(ElementStack* stack)
 {
     DrawScreenElements();
 }
 
+// Lets each shown screen element queue its draw (slot 10); the main loop calls it before the world
+// is drawn.
 void QueueScreenElementDraws(ElementStack* stack)
 {
     QueueEachScreenElementDraw();
 }
 
+// Pops every element above the base one, empties the saved state, sets the pad pattern player to
+// state 3 and resets the screen elements.
 void ResetElementStack(ElementStack* self)
 {
     while (self->count >= 2) {
@@ -1104,6 +1141,8 @@ void SetElementStackState(ElementStack* self, s32 state)
     }
 }
 
+// Scales the game clock by x and, while the game time is running, eases the volume of the two
+// channels toward 1.0 (factor 0.6) so sound follows the slow-down.
 void ApplyStackTimeScale(ElementStack* stack, f32 x)
 {
     if (0.0f < g_gameTime[0]) {
@@ -1114,6 +1153,8 @@ void ApplyStackTimeScale(ElementStack* stack, f32 x)
     SetGameClockScale(x);
 }
 
+// True when nothing is covering the game: no screen fade, no pad-select hold, the pause menu and
+// map list closed and the other screen mode not 1, 2 or 4.
 s32 AreMenusAndFadeClear(void)
 {
     if (g_screenFade.mode != 0) goto fail;
@@ -1130,6 +1171,7 @@ ok:
     return 1;
 }
 
+// True when no screen fade is on and neither the pause menu nor the map list is open or in a mode.
 s32 AreMenusClosed(void)
 {
     if (g_screenFade.mode != 0) goto fail;
@@ -1143,6 +1185,8 @@ ok:
     return 1;
 }
 
+// True when the arc may be drawn: no screen fade, pause menu and map list closed with no mode, and
+// the other screen mode neither 1 nor 4.
 s32 IsArcDrawAllowed(void)
 {
     s32 m;
@@ -1160,6 +1204,7 @@ ok:
     return 1;
 }
 
+// The same test as AreMenusClosed, a separate copy used beside the arc functions.
 s32 AreArcMenusClosed(void)
 {
     if (g_screenFade.mode != 0) goto fail;
@@ -1257,6 +1302,8 @@ void UpdateWorldDeltaLists(World* self, f32 dt)
     RunQueuedCalls(self);
 }
 
+// For every object of the world's list and every part in its list, calls the part's update (slot
+// 17) unless flag bit 53 is set, then clears that bit.
 void UpdateUnflaggedParts(World* self)
 {
     ListFrame frame;
@@ -1301,6 +1348,8 @@ void UpdateWorldStepLists(World* self, f32 dt)
     RunQueuedCalls(self);
 }
 
+// Eases the world's value toward its target over x, with one ramp profile when moving down and
+// another when moving up.
 void StepWorldValueTowardTarget(World* self, f32 x)
 {
     World* o = self;
@@ -1369,6 +1418,7 @@ void UpdateWorld(World* self, f32 unused1)
     StepWorldValueTowardTarget(self, g_gameClock.step);
 }
 
+// Brings an angle into -pi..pi (unchanged when already inside).
 f32 WrapAngle(f32 a)
 {
     f32 r = a;
@@ -1378,6 +1428,7 @@ f32 WrapAngle(f32 a)
     return r;
 }
 
+// Limits a to -b..b.
 f32 ClampToMagnitude(f32 a, f32 b)
 {
     f32 r = a;
@@ -1471,6 +1522,8 @@ f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* o
 
 LINKER_REMNANT(func_001EA720);
 
+// ApproachValueWithRamp for an angle: steps along the wrapped difference to the target and wraps
+// the result to -pi..pi.
 f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out)
 {
     f32 t = WrapAngle(b - a);
@@ -1478,6 +1531,8 @@ f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out)
     return WrapAngle(a + r);
 }
 
+// ApproachValueClampingVelocity for an angle: the step is taken along the wrapped difference to the
+// target and the result is wrapped to -pi..pi.
 f32 ApproachAngleClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self, f32* a1)
 {
     f32 t = WrapAngle(f14 - f12);
@@ -1543,6 +1598,7 @@ void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* 
     }
 }
 
+// A random integer from a to b inclusive (a when they are equal).
 s32 RandomIntInRange(s32 a, s32 b)
 {
     if (a == b) {
@@ -1555,6 +1611,7 @@ s32 RandomIntInRange(s32 a, s32 b)
     return a + r;
 }
 
+// A random float between a and b (a when they are equal).
 f32 RandomFloatInRange(f32 a, f32 b)
 {
     f32 r;
@@ -1593,6 +1650,7 @@ f32 RandomGaussian(f32 mean, f32 deviation, f32 limit)
     return v;
 }
 
+// True when |a - b| is below tolerance relative to the larger of 1 and |a|.
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance)
 {
     f32 scale = 1.0f;
@@ -1600,6 +1658,8 @@ s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance)
     return __builtin_fabsf(a - b) / scale < tolerance;
 }
 
+// Real roots of a x^2 + b x + c written to roots; returns 0 for a negative discriminant, 1 when it
+// is nearly zero (< 0.0001) and 2 otherwise.
 s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots)
 {
     f32 disc = b * b - a * (4.0f * c);
@@ -1618,6 +1678,8 @@ s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots)
     return 2;
 }
 
+// Rewrites quadratic coefficients (x, y, z) for the parameter change t -> s t + u, giving the
+// coefficients of the same curve in the new parameter.
 void RemapQuadraticParameter(Vec3* in, f32 s, f32 t, Vec3* out)
 {
     out->z = in->z * s * s;
@@ -1658,6 +1720,8 @@ void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle)
     *sinOut = s;
 }
 
+// The double version of TruncateFloat: rounds toward zero by clearing the fraction bits, adding 1.0
+// when they were all ones.
 double TruncateDouble(double x)
 {
     DoubleBits v;
@@ -1681,6 +1745,8 @@ double TruncateDouble(double x)
     return x;
 }
 
+// Rounds a float toward zero by clearing the fraction bits below the binary point (0 for |x| < 1);
+// when the discarded bits were all ones it adds 1.0 to the result, as the original's runtime did.
 f32 TruncateFloat(f32 x)
 {
     f32 buf[2];
@@ -1704,6 +1770,7 @@ f32 TruncateFloat(f32 x)
     return buf[0];
 }
 
+// x modulo y with the result always in 0..y (a negative remainder gets y added).
 f32 WrapModulo(f32 x, f32 y)
 {
     f32 r = FloatRemainder(x, y);
@@ -1713,6 +1780,8 @@ f32 WrapModulo(f32 x, f32 y)
     return r;
 }
 
+// Fits c0 + c1 t + c2 t^2 through the value x at t = 0, y at t = 1 and w at t = z and stores the
+// three coefficients.
 void FitQuadraticCurve(f32* a0, f32 x, f32 y, f32 z, f32 w)
 {
     f32 p = w - x;
@@ -1724,6 +1793,7 @@ void FitQuadraticCurve(f32* a0, f32 x, f32 y, f32 z, f32 w)
     a0[1] = q - r;
 }
 
+// True when x is strictly between the range's lo and hi.
 s32 IsInsideRange(ValueRange* span, f32 x)
 {
     s32 inside = 0;
@@ -1735,6 +1805,7 @@ s32 IsInsideRange(ValueRange* span, f32 x)
     return inside;
 }
 
+// True when x lies inside any of the count ranges in spans.
 s32 IsInsideAnyRange(s32 count, ValueRange* spans, f32 x)
 {
     for (s32 i = 0; i < count; i++) {
@@ -1745,6 +1816,7 @@ s32 IsInsideAnyRange(s32 count, ValueRange* spans, f32 x)
     return 0;
 }
 
+// x limited to the range's lo..hi.
 f32 ClampToRange(ValueRange* span, f32 x)
 {
     if (x < span->lo) {
@@ -1756,6 +1828,7 @@ f32 ClampToRange(ValueRange* span, f32 x)
     return x;
 }
 
+// qsort-style comparison of the floats two pointers refer to: 1, -1 or 0.
 s32 CompareFloats(f32* a, f32* b)
 {
     f32 x = *a;
@@ -1765,6 +1838,7 @@ s32 CompareFloats(f32* a, f32* b)
     return 0;
 }
 
+// Does nothing; its one caller passes it the address of a 16-byte local of its frame.
 void IgnoreStackLocal(Vec02* unused0)
 {
 }
@@ -1838,6 +1912,9 @@ void FindLocalMinimum(MinimumFn fn, void* ctx, f32 x, f32 step, f32 lo, f32 hi, 
 
 LINKER_REMNANT(func_001EB458);
 
+// Start-up of the beat-press collider: runs InitSwitchedCollider, then sets its timing window by
+// blending between two constants with a polynomial of the current entry's dt, clamped to the unit
+// range.
 void InitWorld3BeatPressCollider(World3BeatPressCollider* self)
 {
     InitSwitchedCollider(self);
@@ -1856,18 +1933,22 @@ void InitWorld3BeatPressCollider(World3BeatPressCollider* self)
     self->timingWindow = (1.0f - c) * D_00275C70[0] + c * D_00275C70[1];
 }
 
+// Slot 10 of the beat-press collider: loads the collider and resolves its link.
 void LoadWorld3BeatPressCollider(World3BeatPressCollider* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
     ResolveObjectLinks(self, 1, g_world3BeatPressLoadLinks);
 }
 
+// Copies the player's 0x580 block and the word at +0x604 into the beat-press collider.
 void CopyPlayerAttachBlock(World3BeatPressCollider* a0)
 {
     a0->blk580 = g_player->blk580;
     a0->f604 = g_player->f604;
 }
 
+// Slot 16 of the beat-press collider: starts the placed object, resolves its links, creates its
+// state walker at 0x4CA and queues CopyPlayerAttachBlock for itself.
 void StartWorld3BeatPressCollider(World3BeatPressCollider* self)
 {
     StartPlacedObject(self);
@@ -1876,6 +1957,9 @@ void StartWorld3BeatPressCollider(World3BeatPressCollider* self)
     AppendQueuedCall(self->world, (void*)CopyPlayerAttachBlock, self, 0, 0);
 }
 
+// Slot 72 of the beat-press collider: on activation sends its walker to 0x4CB and links it with the
+// tempo agent of the world; on deactivation back to 0x4CA and sets the player's pulse fade duration
+// to 2.0.
 void HandleWorld3BeatPressColliderActivation(World3BeatPressCollider* self, void* p)
 {
     HandleSwitchedColliderActivation(self, p);
@@ -1891,6 +1975,8 @@ void HandleWorld3BeatPressColliderActivation(World3BeatPressCollider* self, void
 }
 
 
+// Callback of a beat-press request: turns the player to face the collider (heading is the atan2 of
+// the direction to it plus pi) and sets the player to state 4 with 0x2B.
 void ContinueWorld3BeatPressColliderRequest(PlacedObject* from, Player* self)
 {
     Vec02 dir;
@@ -2017,6 +2103,8 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
     }
 }
 
+// Slot 75 of the beat-press collider: a request is blocked while a button code flag or the pad-
+// select hold is set, or after its run has ended.
 s32 IsWorld3BeatPressColliderRequestBlocked(World3BeatPressCollider* self)
 {
     if (g_buttonCodeFlags & 1) return 1;
@@ -2024,6 +2112,8 @@ s32 IsWorld3BeatPressColliderRequestBlocked(World3BeatPressCollider* self)
     return 1;
 }
 
+// Appends an eight-byte (time, direction) entry to the collider's list of beats that
+// JudgeWorld3BeatPressInput works through.
 void AppendWorld3BeatPressEntry(World3BeatPressCollider* list, const U64P* src)
 {
     s32 n = list->entryCount;
@@ -2032,6 +2122,7 @@ void AppendWorld3BeatPressEntry(World3BeatPressCollider* list, const U64P* src)
     *dst = *src;
 }
 
+// Slot 0x140 of the beat-press collider: takes no request (returns 0).
 s32 AcceptWorld3BeatPressColliderRequest(void)
 {
     return 0;
@@ -2049,6 +2140,9 @@ struct FramePoint_001EBD10 {
 
 void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 
+// Position and velocity of the collider at time t: the plain placed-object answer, or, when it is
+// anchored to a point on another object, that point's position and velocity in the other object's
+// frame at t.
 void GetWorld3BeatPressColliderPositionAt(World3BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
 {
     if (self->frameAnchor == 0) {
@@ -2082,6 +2176,8 @@ void GetWorld3BeatPressColliderRotationAt(World3BeatPressCollider* self, f32 t, 
     *spin = w;
 }
 
+// Slot 0 of the third boss: runs InitAgent, starts at 60 beats a minute with 8 beats per span,
+// allocates the 0x400-byte tempo entry array and stops the staged bank voice.
 void InitWorld3Boss(World3Boss* self)
 {
     InitAgent(self);
@@ -2101,6 +2197,8 @@ void InitWorld3Boss(World3Boss* self)
 
 s32 ResolveAgentClip(Agent* self, s32 id);
 void LoadAgent(Agent* self, void* reader);
+// Slot 10 of the third boss: loads the agent, then resolves its four clips from the table of clip
+// ids.
 void LoadWorld3Boss(World3Boss* self, void* reader)
 {
     LoadAgent(self, reader);
@@ -2145,6 +2243,8 @@ void RegisterWorld3Boss(World3Boss* self)
     RegisterSwitchedCollider(self);
 }
 
+// Slot 93 of the third boss: decided by the state its walker is in: the first group needs the
+// pending clip, the second group is true on phase 2 of the beat gate (phase 0 moves it to 1).
 s32 IsWorld3BossTargetInRange(World3Boss* self)
 {
     s32 r[4];
@@ -2175,6 +2275,7 @@ zero:
     return 0;
 }
 
+// Slot 0x16C of the third boss: always 1.
 s32 IsWorld3BossFree(void)
 {
     return 1;
@@ -2380,6 +2481,8 @@ char D_00276658[8] = "jojo";
 char D_00276660[16] = "08/24/02 22:06";
 char D_00276670[12] = "0824.2206";
 
+// Slot 0xA0 of the third boss: in state 16 it builds its own placed-object transform with +0x44
+// cleared and applies that, otherwise it applies the one given.
 void ApplyWorld3BossTransform(World3Boss* self, void* s, void* c)
 {
     u8 tmp[0x50];
@@ -2396,6 +2499,8 @@ void ApplyWorld3BossTransform(World3Boss* self, void* s, void* c)
 void DrawAgent(Agent* self, void* unused1, void* unused2);
 void DrawWorld3BossRing(DeferredRequest* self);
 
+// Slot 37 of the third boss: draws the agent, and in state 16 also queues a deferred request (group
+// 0xD, sorted by its distance along the camera's view) that draws the boss's ring.
 void DrawWorld3Boss(World3Boss* self, Camera* cam, void* arg2)
 {
     DrawAgent(self, cam, arg2);
@@ -2411,6 +2516,8 @@ void DrawWorld3Boss(World3Boss* self, Camera* cam, void* arg2)
     }
 }
 
+// Slot 91 of the third boss: runs LeaveAgentState; leaving state 14 or 16 clears the beat gate, and
+// leaving 16 also moves the walker from 0x4EE, 0x4F1 or 0x4F4 on to the next state.
 void LeaveWorld3BossState(World3Boss* self, s32 arg)
 {
     s32 out;
@@ -2440,6 +2547,8 @@ void LeaveWorld3BossState(World3Boss* self, s32 arg)
     }
 }
 
+// Called by a script built-in: lowers the gauge bar's count, sets the boss's hits left to 2 and
+// snaps the bar's fill to its target.
 void DecrementWorld3BossGauge(World3Boss* self)
 {
     T217D_2E0* g = &g_gaugeBarElement;
@@ -2647,6 +2756,8 @@ done:
     HandleAgentNotification(self, kind, (AgentNotification*)rec);
 }
 
+// Sets each tempo entry's animation speed so its animation reaches its next beat division exactly
+// at the next beat time (one more full length when that point has already passed).
 void SyncWorld3BossEntries(World3Boss* self)
 {
     f32 den = self->nextBeatTime - (*(f32*)&g_gameTime);
@@ -2720,6 +2831,8 @@ void UpdateWorld3Boss(World3Boss* self, f32 dt)
     AppendQueuedCall(self->world, (void*)(void (*)(World3Boss*))SyncWorld3BossEntries, self, 0, 0);
 }
 
+// Shows the gauge bar element while the boss's walker is in one of the gauge states (0x4EE, 0x4F1,
+// 0x4F4, 0x4F7) and the menus and fade are clear, else hides it.
 void ShowWorld3BossGauge(World3Boss* self)
 {
     s32 code;
@@ -2732,6 +2845,8 @@ void ShowWorld3BossGauge(World3Boss* self)
     else g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
+// Slot 94 of the third boss: in states 12 and 13 it heads for the object at +0xC48 (or stays on its
+// own position), otherwise the agent's usual goal.
 void UpdateWorld3BossGoal(World3Boss* self, s32 flag)
 {
     s32 loc[4];
@@ -2812,24 +2927,30 @@ void SetWorld3BossPendingTimeline(World3Boss* self, World3Timeline* value)
     self->pendingTimeline = value;
 }
 
+// Ends the timeline the boss holds and forgets it (a script built-in calls it).
 void EndHeldWorld3Timeline(World3Boss* self)
 {
     EndWorld3Timeline(self->heldTimeline);
     self->heldTimeline = 0;
 }
 
+// Sets the tempo in beats a minute and the beat length in seconds (60 / tempo); a script built-in
+// calls it.
 void SetWorld3BossTempo(World3Boss* self, s32 v)
 {
     self->tempo = v;
     self->newBeatLength = 60.0f / (f32)v;
 }
 
+// Sets the span in beats and, from the beat length, in seconds (a script built-in calls it).
 void SetWorld3BossSpanBeats(World3Boss* self, s32 v)
 {
     self->spanBeats = v;
     self->spanSeconds = self->beatLength * (f32)v;
 }
 
+// Appends a tempo entry (animation player, beats per cycle) to the boss's array and registers the
+// player's record callback; slot 92 and a script built-in call it.
 void AddWorld3BossEntry(World3Boss* self, AnimationPlayer* a, s32 b)
 {
     TempoPlayerEntry* e = &self->players[self->playerCount++];
@@ -2838,6 +2959,8 @@ void AddWorld3BossEntry(World3Boss* self, AnimationPlayer* a, s32 b)
     AddAnimationPlayerRecordCallback(a, (PlacedObject**)self);
 }
 
+// Removes the tempo entry whose animation player is key from the boss's array, shifting the rest
+// down.
 void RemoveWorld3BossEntry(World3Boss* self, AnimationPlayer* key)
 {
     s32 i = 0;
@@ -2857,18 +2980,23 @@ void RemoveWorld3BossEntry(World3Boss* self, AnimationPlayer* key)
     }
 }
 
+// Slot 4 of the timeline: base init, then allocates room for 0xC0 sixteen-byte entries.
 void InitWorld3Timeline(World3Timeline* self)
 {
     InitObject(self);
     self->buffer = AllocateFrontMemory(0xC00);
 }
 
+// Slot 20 of the timeline: starts the object and remembers the third boss of the world as its
+// target.
 void FindWorld3TimelineTarget(World3Timeline* self)
 {
     StartObject(self);
     self->found = FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
 }
 
+// Rewinds the timeline: entry index 0, time offset the target's current bar, and raises script
+// event 0x1A.
 void RestartWorld3Timeline(World3Timeline* self)
 {
     self->index = 0;
@@ -2876,6 +3004,8 @@ void RestartWorld3Timeline(World3Timeline* self)
     TriggerScriptEvent(self, 0x1A, 0, 0);
 }
 
+// Ends the timeline: raises script event 0x1C, runs its kind-5 entry and, when a beat-press
+// collider is linked, its kind-3 entry.
 void EndWorld3Timeline(World3Timeline* self)
 {
     s32 n;
@@ -2888,6 +3018,8 @@ void EndWorld3Timeline(World3Timeline* self)
     }
 }
 
+// Runs every timeline entry that is due, in order: one is due once the target's bar (and, on the
+// same bar, its position within it) has reached the entry's step plus the offset.
 void RunWorld3TimelineEntries(World3Timeline* self)
 {
     Entry90* e;
@@ -2937,6 +3069,8 @@ void RunWorld3TimelineEntry(World3Timeline* self, Entry90* msg)
     }
 }
 
+// Adds a 16-byte entry (kind, step, substep) to the timeline buffer and returns it; at the limit of
+// 0xC0 entries it returns a dummy entry.
 Entry90* AppendWorld3TimelineEntry(World3Timeline* self, s32 a, s32 b, f32 c)
 {
     if (self->entryCount >= 0xC0) return (Entry90*)D_00625760;
@@ -2949,31 +3083,38 @@ Entry90* AppendWorld3TimelineEntry(World3Timeline* self, s32 a, s32 b, f32 c)
     return e;
 }
 
+// Adds a kind-0 timeline entry at the given step and substep with a value (a script built-in calls
+// it).
 void AppendWorld3TimelineKind0Entry(World3Timeline* self, s32 p, f32 time, s32 val)
 {
     AppendWorld3TimelineEntry(self, 0, p, time)->value = val;
 }
 
+// Adds a kind-1 timeline entry at the given step and substep with a value.
 void AppendWorld3TimelineKind1Entry(World3Timeline* self, s32 p, f32 time, s32 val)
 {
     AppendWorld3TimelineEntry(self, 1, p, time)->value = val;
 }
 
+// Adds a kind-2 timeline entry at the given step and substep.
 void AppendWorld3TimelineKind2Entry(World3Timeline* self, s32 p, f32 time)
 {
     AppendWorld3TimelineEntry(self, 2, p, time);
 }
 
+// Adds a kind-3 timeline entry at the given step and substep.
 void AppendWorld3TimelineKind3Entry(World3Timeline* self, s32 p, f32 time)
 {
     AppendWorld3TimelineEntry(self, 3, p, time);
 }
 
+// Adds a kind-4 timeline entry at the given step and substep.
 void AppendWorld3TimelineKind4Entry(World3Timeline* self, s32 p, f32 time)
 {
     AppendWorld3TimelineEntry(self, 4, p, time);
 }
 
+// Adds a kind-5 timeline entry at the given step and substep.
 void AppendWorld3TimelineKind5Entry(World3Timeline* self, s32 p, f32 time)
 {
     AppendWorld3TimelineEntry(self, 5, p, time);
@@ -2981,6 +3122,7 @@ void AppendWorld3TimelineKind5Entry(World3Timeline* self, s32 p, f32 time)
 
 LINKER_REMNANT(func_001ED638);
 
+// Writes the vector (cos angle * scale, sin angle * scale, z).
 void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z)
 {
     SinCos p;
@@ -2990,6 +3132,7 @@ void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z)
     out->z = z;
 }
 
+// Writes the vector of length scale for a heading (first) and an elevation (second) angle.
 void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale)
 {
     f32 t[4];
@@ -3004,6 +3147,8 @@ ASM_FUNC(func_001ED738);
 
 ASM_FUNC(func_001ED780);
 
+// Writes a unit vector perpendicular to v: crosses v with a copy whose two smaller-magnitude
+// components are swapped (one negated), then normalises the result.
 void ComputeUnitPerpendicular(Vec02* v, Vec02* out)
 {
     Vec02 w;
@@ -3146,6 +3291,8 @@ void FindClosestPointsOnSegments(const Vec02* p0, const Vec02* p1, const Vec02* 
     Vu0::StoreX(*dist, Vu0::ToBits(len));
 }
 
+// The angle of a vector in the xy plane and its elevation, both wrapped, written to a1 and a2 (each
+// only when not null).
 void GetVectorAngles(Vec3* v, f32* a1, f32* a2)
 {
     if (a1)
@@ -3156,6 +3303,8 @@ void GetVectorAngles(Vec3* v, f32* a1, f32* a2)
     }
 }
 
+// Rotates vector b by the angles in in->y and in->z (sine/cosine of each) and writes the result to
+// out.
 void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out)
 {
     f32 t[4];
@@ -3278,6 +3427,7 @@ void ForwardBallisticLaunchVelocity(Vec02* from, Vec02* to, Vec02* out, u8* rec,
     ComputeBallisticLaunchVelocity(from, to, out, rec, angle);
 }
 
+// Writes v to out, scaled down to length max when it is longer.
 void ClampVectorLength(Vec02* v, Vec02* out, f32 max)
 {
     u128 q = Vu0::Q(*v);
@@ -3291,6 +3441,8 @@ void ClampVectorLength(Vec02* v, Vec02* out, f32 max)
     }
 }
 
+// Sets up a packet writer: base init, closing pad on, its vtable installed and the open tag and
+// register count cleared.
 PacketWriter* InitPacketWriter(PacketWriter* self)
 {
     (void)InitPacketBuffer(self);
@@ -3303,6 +3455,7 @@ PacketWriter* InitPacketWriter(PacketWriter* self)
 
 LINKER_REMNANT(func_001EE360);
 
+// Zero-fills words from the packet cursor until it sits at word target (0 to 3) of a quadword.
 void PadPacketToQuadSlot(PacketWriter* s, s32 target)
 {
     u32 raw = s->curU;
@@ -3318,6 +3471,7 @@ done:
     s->cur = (u8*)p;
 }
 
+// Appends the VIF BASE (0x03000000) and OFFSET (0x02000000) words with the given values.
 void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b)
 {
     u32* p = (u32*)s->cur;
@@ -3328,6 +3482,8 @@ void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b)
     *q = b | 0x2000000;
 }
 
+// Appends a VIF MSCAL code starting the microprogram at byte address n (stored in units of 8
+// bytes).
 void WriteVifMscal(PacketWriter* s, s32 n)
 {
     u32* p = (u32*)s->cur;
@@ -3335,6 +3491,7 @@ void WriteVifMscal(PacketWriter* s, s32 n)
     *p = (u32)((n / 8) | 0x14000000);
 }
 
+// Appends a VIF MSCALF code, as WriteVifMscal.
 void WriteVifMscalf(PacketWriter* s, s32 n)
 {
     u32* p = (u32*)s->cur;
@@ -3342,6 +3499,7 @@ void WriteVifMscalf(PacketWriter* s, s32 n)
     *p = (u32)((n / 8) | 0x15000000);
 }
 
+// Appends a VIF FLUSH code (0x11000000).
 void WriteVifFlush(PacketWriter* b)
 {
     u32* p = (u32*)b->cur;
@@ -3349,6 +3507,7 @@ void WriteVifFlush(PacketWriter* b)
     *p = 0x11000000;
 }
 
+// Appends a VIF FLUSHA code (0x13000000).
 void WriteVifFlushA(PacketWriter* b)
 {
     u32* p = (u32*)b->cur;
@@ -3356,6 +3515,7 @@ void WriteVifFlushA(PacketWriter* b)
     *p = 0x13000000;
 }
 
+// Appends a VIF FLUSHE code (0x10000000).
 void WriteVifFlushE(PacketWriter* b)
 {
     u32* p = (u32*)b->cur;
@@ -3363,6 +3523,7 @@ void WriteVifFlushE(PacketWriter* b)
     *p = 0x10000000;
 }
 
+// Appends a VIF STCYCL code with write cycle y and cycle length x.
 void WriteVifStcycl(PacketWriter* b, u32 x, u32 y)
 {
     u32* p = (u32*)b->cur;
@@ -3370,6 +3531,7 @@ void WriteVifStcycl(PacketWriter* b, u32 x, u32 y)
     *p = y | (x << 8) | 0x01000000;
 }
 
+// Appends a VIF STROW code (0x30000000) with the four words of src, the row register.
 void WriteVifStrow(PacketWriter* b, u32* src){
  u32 *p1,*p2,*p3,*p4,*p5;
  p1=(u32*)b->cur; b->cur = (u8*)(p1 + 1); *p1=0x30000000;
@@ -3379,6 +3541,8 @@ void WriteVifStrow(PacketWriter* b, u32* src){
  p5=(u32*)b->cur; b->cur = (u8*)(p5 + 1); *p5=src[3];
 }
 
+// Appends a VIF STMASK code (0x20000000) with the mask when it is nonzero, and remembers the mask
+// in the writer.
 void WriteVifStmask(PacketWriter* self, s32 value)
 {
     if (value != 0) {
@@ -3392,6 +3556,8 @@ void WriteVifStmask(PacketWriter* self, s32 value)
     self->mask = value;
 }
 
+// Appends a VIF UNPACK word for format a, count b at address c (the interrupt bit when the writer's
+// tag is open) and returns the data size in bytes (per-format size times count).
 s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c)
 {
     u32 lo = ((u32)b << 16) | 0x6000C000u;
@@ -3406,6 +3572,8 @@ s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c)
     return D_00275DD0[a] * b;
 }
 
+// Writes a VIF unpack header and reserves its data in the packet; gives back the start of the data
+// and its size (both 0 for an empty unpack).
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor)
 {
     if (size == 0) {
@@ -3419,6 +3587,8 @@ void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8*
     }
 }
 
+// Reserves a VIF unpack in the packet writer and copies size bytes of words from src into it, the
+// leftover words (count mod 4) first and then four at a time.
 void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4)
 {
     s32 outSize;
@@ -3458,6 +3628,9 @@ void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4)
     }
 }
 
+// Writes a VIF unpack header for b items, pads to quad slot 3, adds the data as a DMA reference tag
+// of its length in quadwords and optionally returns the offset of the header; nothing is written
+// for a count of zero.
 void WriteVifUnpack(PacketWriter* self, s32 a, s32 b, s32 c, s32 d, s32* out)
 {
     if (b != 0) {
@@ -3473,6 +3646,8 @@ void WriteVifUnpack(PacketWriter* self, s32 a, s32 b, s32 c, s32 d, s32* out)
     }
 }
 
+// Writes a VIF DIRECT code (0x50) for n quadwords, with the interrupt bit when flag is set, and
+// copies the n quadwords from buf behind it.
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag)
 {
     PadPacketToQuadSlot(self, 3);
@@ -3484,6 +3659,7 @@ void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag)
     AppendPacketQuadwords(self, n, buf);
 }
 
+// As WriteVifDirect, but the data is not copied: a DMA reference tag to it is added to the packet.
 void WriteVifDirectRef(PacketWriter* self, s32 a, s32 b, s32 c)
 {
     PadPacketToQuadSlot(self, 3);
@@ -3495,17 +3671,22 @@ void WriteVifDirectRef(PacketWriter* self, s32 a, s32 b, s32 c)
     AddDmaRefTag(self, a, b);
 }
 
+// Appends a DIRECT packet holding everything the second writer has written so far (its span in
+// quadwords).
 void WriteVifDirectFromWriter(PacketWriter* a0, PacketWriter* a1) {
     u32 span = a1->curU - (u32)a1->begin;
     WriteVifDirect(a0, span >> 4, (void*)a1->begin, 0);
 }
 
+// Slot 4 of the value-list object: base init and registers itself as the world's value list.
 void InitValueListObject(ValueListObject* self)
 {
     InitObject(self);
     self->world->valueListObject = self;
 }
 
+// Slot 10 of the value-list object: reads the tree of nodes, a 16-bit count and that many 32-bit
+// values, then the property records.
 void LoadValueList(ValueListObject* self, void* src)
 {
     s32 i;
@@ -3521,6 +3702,8 @@ void LoadValueList(ValueListObject* self, void* src)
     ReadPropertyRecords(self, src);
 }
 
+// Turns a leaf mask into the full mask: ANDs the table value of every set bit together and ORs the
+// result with the mask (0 for an empty mask).
 s32 ExpandMaskThroughTable(ValueListObject* self, s32 bits)
 {
     s32 acc;
@@ -3574,6 +3757,8 @@ s32 QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radi
     }
 }
 
+// Looks up the mask for a point and radius in the world's value tree into *out; 0x0FFFFFFF when
+// there is no list or tree.
 void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out)
 {
     if (self != 0 && self->data38 != 0) {
@@ -3587,6 +3772,8 @@ void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* ou
 
 ASM_FUNC(func_001EEBB0);
 
+// Slot 0 of the attached set: runs InitCollider, sets a flag bit, unit drag and push factors and
+// anchors 3, 0, 3, 0, and sets up the tracked nodes.
 void InitAttachedSet(AttachedSet* self)
 {
     u64 bits;
@@ -3606,6 +3793,8 @@ void InitAttachedSet(AttachedSet* self)
     self->trackedNodes.f04 = 3;
 }
 
+// Slot 16 of the attached set: starts the placed object, fills the tracked nodes, allocates the
+// 0x80-byte item block of its group and calls slot 50 when +0x278 is set.
 void StartAttachedSet(AttachedSet* self)
 {
     ChildWalkFrame fr((s32*)&self->children);
@@ -3791,6 +3980,8 @@ void UpdateAttachedSet(AttachedSet* self, f32 dt)
     }
 }
 
+// Slot 0xDC of the attached set: passes the step on to its link's target (that object's slot 46,
+// with this set).
 void ForwardAttachedSetLinkStep(AttachedSet* self, Attach03* link)
 {
     Collider* target = link->target;
@@ -3854,6 +4045,8 @@ void HandleAttachedSetNotification(AttachedSet* self, s32 kind, void* msg)
     HandlePlacedObjectNotification(self, kind, msg);
 }
 
+// On the root of an attached set, rebuilds the registered group of the object plus the target of
+// each attached link and registers it with the world.
 void RebuildAttachedSet(AttachedSet* self)
 {
     if (self->root == self) {
@@ -3944,6 +4137,8 @@ void UpdateAttachedSetBounds(AttachedSet* self)
     }
 }
 
+// Slot 71 of the attached set: passes the launch offer to its tracked nodes and accepts it (returns
+// 1).
 s32 RequestAttachedSetLaunch(AttachedSet* self, void* source, TrackedNodeOffer* offer)
 {
     OfferTrackedNodeLaunch(&self->trackedNodes, source, offer);
@@ -3960,6 +4155,7 @@ void ClearAttachedSetTrackedNodes(AttachedSet* o)
     o->trackedNodes.found = 0;
 }
 
+// Slot 0 of the state-reset object: base init and both its ids set to -1.
 void InitStateResetObject(StateResetObject* self)
 {
     InitPlacedObject(self);
@@ -3967,6 +4163,8 @@ void InitStateResetObject(StateResetObject* self)
     self->id2E0 = -1;
 }
 
+// Slot 16 of the state-reset object: starts the placed object, resolves its link, sets state 0 and
+// takes itself out of its parent's list.
 void StartStateResetObject(StateResetObject* self)
 {
     StartPlacedObject(self);
@@ -3975,13 +4173,18 @@ void StartStateResetObject(StateResetObject* self)
     self->desc->m03(self);
 }
 
+// Adds or updates a keyed entry in the object's table of 4 (a script built-in calls it).
 s32 AddStateResetEntry(StateResetObject* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     return UpsertKeyedEntry((ZoneTargetEntry*)self->f2E8, 4, &self->f2E4, a1, a2, a3, a4);
 }
 
+// Update slot of the state-reset object: does nothing.
 void UpdateStateResetObject(StateResetObject* self, f32 dt) {}
 
+// Sets the state of a state-reset object when it changes: entering or leaving state 2 turns its
+// walker targets on or off, and the change is stamped with the game time and sent to the object as
+// message 0x16 with the old and new state.
 void SetStateAndNotify(StateResetObject* self, s32 state)
 {
     if (self->id2D0 != state) {
@@ -4002,6 +4205,8 @@ void SetStateAndNotify(StateResetObject* self, s32 state)
     }
 }
 
+// Slot 13 of the state-reset object: base handling, and for notification kind 5 whose id matches
+// its own it resets the state to 0.
 void HandleStateResetNotification(StateResetObject* self, s32 kind, StateResetMsg* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
@@ -4012,6 +4217,7 @@ void HandleStateResetNotification(StateResetObject* self, s32 kind, StateResetMs
     }
 }
 
+// Allocates a zeroed 48-byte state-reset group and installs its method table.
 void* CreateRecord2505C0(void)
 {
     StateResetGroup* p = (StateResetGroup*)AllocateZeroedFrontMemory(48);
@@ -4019,8 +4225,11 @@ void* CreateRecord2505C0(void)
     return p;
 }
 
+// Appends a value to the group's list while it holds fewer than 8.
 void AppendToSmallList(StateResetGroup* self, StateResetObject* value) { u32 i = self->count; if (i < 8) { self->items[i] = value; self->count = i + 1; } }
 
+// Removes value from the list by moving the following items down one place and lowering the count;
+// does nothing when it is not in the list.
 void RemoveFromSmallList(StateResetGroup* self, StateResetObject* value)
 {
     s32 i;
@@ -4063,6 +4272,7 @@ void UpdateItemTimeouts(StateResetGroup* s)
     }
 }
 
+// Once per group, queues UpdateItemTimeouts on the current world.
 void ScheduleItemTimeouts(StateResetGroup* self)
 {
     if (self->scheduled == 0) {
@@ -4073,6 +4283,7 @@ void ScheduleItemTimeouts(StateResetGroup* self)
 
 LINKER_REMNANT(func_001EFCE0);
 
+// Puts the fade's mode to -1 and back to 0 so that it switches off.
 void ResetScreenFade(ScreenFade* o)
 {
     o->mode = -1;
@@ -4140,6 +4351,9 @@ void UpdateScreenFade(ScreenFade* self, PadRecord* a1)
     SetScreenFadeMode(self, s);
 }
 
+// Draws the screen fade when one is active: style 0 is a black full-screen sprite with alpha
+// opacity * 255, style 1 draws the coloured triangle set at that opacity (or the sprite when there
+// is none).
 void DrawScreenFade(ScreenFade* self)
 {
     if (g_currentWorld != 0 && g_screenFade.mode != 0) {
@@ -4191,6 +4405,7 @@ void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count)
 }
 
 
+// Stores a fade request and its style as the screen fade's queued one.
 void SaveFadeRequest(ScreenFade* dst, FadeRequestBlock* src, s32 last)
 {
     s32 mid = src->mid;
@@ -4337,6 +4552,7 @@ L0410:
     return;
 }
 
+// Starts the screen fade with a request of kind 1 for the given object and value (count passed on).
 void StartObjectFade(IdentityKey* obj, s32 value, s32 count)
 {
     FadeRequest m;
@@ -4347,6 +4563,8 @@ void StartObjectFade(IdentityKey* obj, s32 value, s32 count)
     StartScreenFade(&g_screenFade, &m, count);
 }
 
+// The warp entry the player is at: the saved location's entry, or 10 when the warp mode flag is 2;
+// the page compares its cursor with it before confirming.
 s32 GetCurrentWarpEntry(void)
 {
     if (D_00275BF0 != 2) {
@@ -4491,6 +4709,8 @@ void PostLoadWarpPage(WarpPage* self)
     g_activeListFrames = it.prev;
 }
 
+// Shows the caption text for entry value (the fourth entry for 10, none for 9 and up) and makes
+// value the selected entry.
 void SelectWarpPageEntry(WarpPage* self, s32 value)
 {
     if (value == 10) {
@@ -4504,6 +4724,8 @@ void SelectWarpPageEntry(WarpPage* self, s32 value)
     SetWarpPageSelectedEntry(self, value);
 }
 
+// Stores the warp entry and its at-end flag that the warp page's confirm step reads and clears; the
+// first argument is unused.
 void SetPendingWarpEntry(s32 unused, s32 a, s32 b)
 {
     g_pendingWarpEntry = a;
@@ -4644,6 +4866,8 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
     }
 }
 
+// Slot 0xA0 of the warp page: builds the page's transform with the camera zoom forced to 1.0 so the
+// page ignores the zoom, applies it, then restores the camera's zoom and zoom goal.
 void ApplyWarpPageTransform(WarpPage* obj, u8* s, void* c)
 {
     u8 tmp[0x50];
@@ -4867,6 +5091,8 @@ Lz:
     goto L154C;
 }
 
+// Moves the warp page's cursor: in modes 0 and 4 it stores the cursor and the open kind and enters
+// mode 1; in mode 2 it stores the cursor and enters mode 3 when the kind is 3.
 void SetWarpCursor(WarpPage* self, s32 a1, s32 a2)
 {
     s32 v = self->mode;
@@ -4889,6 +5115,7 @@ L_two:
     }
 }
 
+// Starts closing the warp page (mode 4) when it is in mode 1 or 2.
 void BeginWarpPageClose(WarpPage* self)
 {
     s32 v = self->mode;
@@ -4949,6 +5176,8 @@ void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
     }
 }
 
+// Makes idx the selected warp page entry: stores the entry's placement relative to the page (or the
+// identity) at +0x550, zeroes its float and sets the previous selection's float to 1.0.
 void SetWarpPageSelectedEntry(WarpPage* self, s32 idx) {
     u8* base = (u8*)self;
     if (*(s32*)(base + 0x534) == idx) {

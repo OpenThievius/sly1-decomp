@@ -122,6 +122,8 @@ void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64
 void CloseDmaTag(PacketWriter* f);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
+// Builds a small GIF packet that sets the GS TEST_1 register to 0x7180B and ALPHA_1 from the index,
+// and hands its buffer over through arg.
 void BuildAlphaStatePacket(s32 idx, void* arg)
 {
     PacketWriter f;
@@ -138,6 +140,7 @@ void BuildAlphaStatePacket(s32 idx, void* arg)
 
 
 
+// Startup entry: builds the two alpha state packets (indices 1 and 2).
 void InitAlphaStatePackets(void)
 {
     BuildAlphaStatePacket(1, &g_alphaStatePacket1);
@@ -147,6 +150,8 @@ void InitAlphaStatePackets(void)
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void AppendToList(List01* self, void* item);
 
+// Takes a cleared 0x10C0-byte record from the world's pool for the object (plus a 0x580-byte extra
+// record when its mode is 2) and links it into the object's member list; 0 when a pool is empty.
 OwnedRecord* AcquireOwnedRecord(WorldListedObject* o)
 {
     OwnedRecord* s = (OwnedRecord*)PopFreeSlot(&o->world->pool1B40);
@@ -176,12 +181,15 @@ OwnedRecord* AcquireOwnedRecord(WorldListedObject* o)
 void RemoveFromList(List01* list, void* item);
 void AppendToList(List01* self, void* item);
 
+// Takes a record out of its owner's member list and puts it on the deferred release list.
 void DetachOwnedRecord(OwnedRecord* o)
 {
     RemoveFromList((List01*)(&((WorldListedObject*)o->owner)->members), o);
     AppendToList(&g_deferredReleaseListB, o);
 }
 
+// Resets the world's first listed object: flag bits, source and particle count cleared, the far
+// fade distance set to 1e10, and calls its slot 2.
 WorldListedObject* ResetFirstListedObject(World* self)
 {
     WorldListedObject* s0 = (WorldListedObject*)self->list1CC0.head;
@@ -201,6 +209,8 @@ WorldListedObject* ResetFirstListedObject(World* self)
 void AppendToList(List01* self, void* item);
 void SetListLinkOffset(List01* self, s32 offset);
 
+// Slot 0 of the world-listed object: adds itself to the world's list, sets up its member list and
+// flags and a far fade distance of 1e10.
 void InitWorldListedObject(WorldListedObject* self)
 {
     AppendToList(&self->world->list1CC0, self);
@@ -218,6 +228,8 @@ void InitWorldListedObject(WorldListedObject* self)
 void RemoveFromList(List01* list, void* item);
 void AppendToList(List01* self, void* item);
 
+// Slot 6 of the world-listed object: moves itself from the world's list at +0x1CC0 to the one at
+// +0x1CB4 (the one ReleaseWorldListedObject takes it out of) and registers the placed object.
 void LeaveWorldLists(WorldListedObject* self)
 {
     RemoveFromList(&self->world->list1CC0, self);
@@ -228,6 +240,8 @@ void LeaveWorldLists(WorldListedObject* self)
 void RemoveFromList(List01* list, void* item);
 void AppendToList(List01* self, void* item);
 
+// Slot 7 of the world-listed object: detaches every record it owns, moves itself from the world's
+// active list to the deferred release list and unregisters it.
 void ReleaseWorldListedObject(WorldListedObject* self)
 {
     WorldListedObject* obj = self;
@@ -259,6 +273,8 @@ void ReleaseWorldListedObject(WorldListedObject* self)
 
 extern s32 g_animRecords;
 
+// Looks up the animation record x for the object (a default one when none is found), takes its four
+// colour bytes halved on the first call, and rebuilds its entries.
 void AssignAnimRecord(WorldListedObject* self, s32 x)
 {
     AnimRecord* r = FindAnimRecord(x);
@@ -420,6 +436,8 @@ void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src)
 }
 
 
+// Slot 17 of the world-listed object: base update, then calls its own slot 3 unless its record's
+// mask matches the camera's.
 void UpdateWorldListedObject(WorldListedObject* self, f32 dt)
 {
     UpdatePlacedObject(self, dt);
@@ -438,6 +456,8 @@ void UpdateWorldListedObject(WorldListedObject* self, f32 dt)
 
 s32 IsListEmpty(List01* p);
 
+// Slot 23 of the world-listed object: copies as a listener of src and, when src is an effect
+// spawner (kind 0x50), takes it as its source with its fade distance.
 void CopyWorldListedObject(WorldListedObject* self, BaseObject* src)
 {
     AddObjectListener(self, src);
@@ -700,6 +720,8 @@ struct Src_13AD08 { u8 pad[0x40]; f32 scale; };
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// Slot 37 of the world-listed object: queues a deferred draw request (the particle packet writer,
+// radius from the source or 1.0) for it.
 void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, Src_13AD08* src)
 {
     DeferredRadiusRequest blk;
@@ -891,6 +913,8 @@ void WriteListedObjectParticlePacket(void* self)
 
 
 
+// For a nonzero mask, rebuilds the animation record entries of every listed object whose record's
+// mask has bit 0x10000000 or contains all of the mask's bits.
 void UpdateMatchingListedObjects(s32 mask)
 {
     WorldListedObject* node;

@@ -466,6 +466,8 @@ s32 g_padPatternSetting = 0;
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
 extern const Vec02 g_unitZVector;
 
+// Slot 0 of the walker collider: switched-collider init, both states -1 and a speed scale of
+// 2000.0.
 void InitWalkerCollider(WalkerCollider* self)
 {
     WalkerCollider* o = self;
@@ -475,6 +477,7 @@ void InitWalkerCollider(WalkerCollider* self)
     o->subState = -1;
 }
 
+// Slot 10 of the walker collider: loads the collider and resolves its two object links.
 void LoadWalkerCollider(WalkerCollider* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -588,6 +591,8 @@ void UpdateWalkerCollider(WalkerCollider* self, f32 dt)
     ClearRootTries(self);
 }
 
+// Reads the pad record's two stick magnitudes into the collider; above 0.3 (first stick) or 0.8
+// (second) it also stores that stick's camera-relative heading.
 void ReadWalkerColliderInput(WalkerCollider* out, PadRecord* src)
 {
     if (0.3f < src->stickMagnitude) {
@@ -600,6 +605,8 @@ void ReadWalkerColliderInput(WalkerCollider* out, PadRecord* src)
     out->aimLength = src->secondStickMagnitude;
 }
 
+// Next state of the walker collider: 0 to 1 when the first stick is pushed, 1 back to 0 when
+// released, 2 to 1 when its state animation player is gone.
 s32 ChooseWalkerColliderState(WalkerCollider* self)
 {
     s32 r = self->state;
@@ -676,6 +683,8 @@ void SetWalkerColliderState(WalkerCollider* self, s32 n)
     }
 }
 
+// Next sub-state of the walker collider: 0 to 1 when the second stick reaches 0.8, back to 0 below
+// it.
 s32 ChooseWalkerColliderSubState(WalkerCollider* self)
 {
     s32 r = self->subState;
@@ -773,6 +782,8 @@ code5:
     }
 }
 
+// Slot 0x80 of the walker collider: steps the collider and turns it toward its heading with the
+// walker's turn ramp.
 void StepWalkerCollider(WalkerCollider* self, f32 dt)
 {
     f32 buf[12];
@@ -802,6 +813,8 @@ union Contact_001A4538 {
     };
 };
 
+// Slot 0x104 of the walker collider: unless its attachment is animation-driven, removes from the
+// contact point the part of its drive along the contact normal.
 void ResolveWalkerColliderContact(Walker_001A4538* self, Contact_001A4538* c, s32 i)
 {
     if (HasAnimationDrivenAttachment((SwitchedCollider*)self) == 0) {
@@ -814,6 +827,8 @@ void ResolveWalkerColliderContact(Walker_001A4538* self, Contact_001A4538* c, s3
     }
 }
 
+// Slot 0x100 of the walker collider: unless animation-driven, a contact whose normal points up (z
+// above 0.7) gets friction 20.
 void ComputeWalkerColliderContactValue(WalkerCollider* ctx, Contact03* obj)
 {
     if (HasAnimationDrivenAttachment(ctx) != 0) {
@@ -845,6 +860,7 @@ void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, s32 a2, 
     self->q450 = s1;
 }
 
+// Slot 0x138 of the walker collider: always 0.
 s32 IsWalkerColliderCameraFree(void)
 {
     return 0;
@@ -922,6 +938,7 @@ void SetPairControllerExtraId(PairController* obj, s32 value)
     obj->id2DC = value;
 }
 
+// Appends an id to the controller's list of ids.
 void AppendPairControllerId(PairController* list, s32 value)
 {
     s32 n = list->idCount;
@@ -929,6 +946,8 @@ void AppendPairControllerId(PairController* list, s32 value)
     list->idCount = n + 1;
 }
 
+// The variant of the current entry from its flags: 2 when bit 2 is set, else 1 when bit 1 is set,
+// else 0; the pair controller acts only when it equals its own.
 s32 GetCurrentEntryVariant(void)
 {
     s32 flags = g_currentEntry->flags;
@@ -1088,6 +1107,8 @@ void UpdatePairController(PairController* self, f32 dt)
     }
 }
 
+// Slot 0xC8 of the pair controller: shows its caption element (slot 14) in state 2 while the menus
+// and fade are clear, otherwise hides it (slot 15).
 void ShowPairControllerElement(PairController* self)
 {
     s32 p = 0;
@@ -1431,6 +1452,8 @@ void RemoveFinishedHitTarget(PairController* self, HitTarget* obj)
     self->count380 = self->count380 - 1;
 }
 
+// Moves the paired object's attachment back from the used list to the free list, sets its state to
+// 0 and clears the field.
 void ReleasePairedAttachment(u8* self, PairedObject* obj)
 {
     RemoveFromList((List01*)(self + 0x3AC), obj->attachment);
@@ -1439,6 +1462,8 @@ void ReleasePairedAttachment(u8* self, PairedObject* obj)
     obj->attachment = 0;
 }
 
+// Makes the paired object the parent of its partner, stops the partner's velocity and spin, fixes
+// its anchors and plays sound 0x151.
 void AttachPairedPartner(void* a0, void* a1)
 {
     PairedObject* s = (PairedObject*)a1;
@@ -1451,6 +1476,8 @@ void AttachPairedPartner(void* a0, void* a1)
     StartSoundEffect(0x151, (PlayingSound**)0, 0, (Vec02*)0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
+// Releases the partner from its parent, stops its velocity and spin and lets it move only along z
+// again.
 void DetachPairedPartner(PairController* unused, PairedObject* h)
 {
     Collider* o = (Collider*)h->partner;
@@ -1462,6 +1489,8 @@ void DetachPairedPartner(PairController* unused, PairedObject* h)
     SetColliderAnchors(o, 2, (Vec02*)&g_unitZVector, 3, 0);
 }
 
+// Sets the paired object's attachment to state 1; SetPairedState calls it on the transition from
+// state 5 to 6.
 void ActivatePairedAttachment(void* unused, PairedObject* obj)
 {
     SetSoundStateObjectState((SoundStateObject*)obj->attachment, 1);
@@ -1567,6 +1596,9 @@ s32 PairWithNearestFreeObject(void* self, void* child)
     return 1;
 }
 
+// Pairs obj with node (each becomes the other's partner), moving node from the controller's waiting
+// list to its paired list; whoever either had as a partner before is unpaired and looks for a new
+// one.
 void LinkPairedObjects(u8* self, PairedObject* obj, PairedObject* node)
 {
     PairedObject* cur = (PairedObject*)obj->partner;
@@ -1626,6 +1658,9 @@ s32 PairWithNearestWaitingObject(void* self, void* child)
     return 1;
 }
 
+// Takes the object of the controller's free list nearest (in x and y) to the paired object, moves
+// it to the used list and stores it as the paired object's attachment; 0 when the free list is
+// empty.
 s32 AssignNearestListedObjectToPair(PairController* self, PairedObject* obj)
 {
     ListFrame frame;
@@ -1648,6 +1683,8 @@ s32 AssignNearestListedObjectToPair(PairController* self, PairedObject* obj)
     return 1;
 }
 
+// Gives the paired object a random offset in the plane (random angle, radius up to the
+// controller's) and scales its +0x574 value by the controller's.
 void RandomizePairedObjectOffset(PairController* self, PairedObject* b)
 {
     f32 r0 = RandomFloatInRange(0.0f, 6.2831855f);
@@ -1656,12 +1693,15 @@ void RandomizePairedObjectOffset(PairController* self, PairedObject* b)
     b->f574 = b->f574 * self->tune34C;
 }
 
+// Address of the controller's current pose record (0xC0 bytes each, from +0x3E0).
 void* GetPairControllerPose(void* self)
 {
     PairController* obj = (PairController*)self;
     return (u8*)self + (obj->poseIndex * 0xC0 + 0x3E0);
 }
 
+// Slot 0 of the paired object: collider init, state -1, offset wait times of 1.0 and 2.5 and its
+// anchors.
 void InitPairedObject(PairedObject* self)
 {
     InitCollider(self);
@@ -1671,6 +1711,8 @@ void InitPairedObject(PairedObject* self)
     SetColliderAnchors(self, 1, (Vec02*)&g_unitZVector, 2, (Vec02*)&g_unitZVector);
 }
 
+// Slot 10 of the paired object: loads the collider, resolves its six object links and sets up its
+// notify group.
 void LoadPairedObject(PairedObject* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -1678,6 +1720,7 @@ void LoadPairedObject(PairedObject* self, BufferedStream* stream)
     FindOrBuildMemberGroup(&self->notifyRecord, self);
 }
 
+// Slot 9 of the paired object: copies as a collider but keeps its own 8-byte field at +0x5B0.
 void CopyPairedObject(PairedObject* self, PairedObject* src)
 {
     Bytes8 tmp = *(Bytes8*)&self->blob5B0;
@@ -1685,6 +1728,7 @@ void CopyPairedObject(PairedObject* self, PairedObject* src)
     *(Bytes8*)&self->blob5B0 = tmp;
 }
 
+// Slot 16 of the paired object: starts the placed object, sets state 0 and calls its slot 3.
 void StartPairedObject(PairedObject* self)
 {
     StartPlacedObject(self);
@@ -1994,6 +2038,8 @@ s32 HandlePairedHit(PairedObject* o, ObjectEvent* ev) {
     return ev->eventFlags != 0;
 }
 
+// Returns the first object among the collider's contacts, with data, that is a hit target (kind
+// 0x43); 0 if none.
 void* FindHitTargetChild(Collider* self)
 {
     ContactRow03* cur = self->contacts->head;
@@ -2005,6 +2051,8 @@ void* FindHitTargetChild(Collider* self)
     return 0;
 }
 
+// Slot 0 of the hit target: collider init, anchors, state -1, a hit limit of 8, recover delay 1.0
+// and hit interval 0.2, with its scale polynomial reset to 1.
 void InitHitTarget(HitTarget* self)
 {
     s32* z;
@@ -2021,6 +2069,8 @@ self->hitInterval = pt2;
 z[1]=0;z[2]=0;
 }
 
+// Slot 10 of the hit target: loads the collider, resolves its object link and sets up its notify
+// group.
 void LoadHitTarget(HitTarget* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -2028,6 +2078,7 @@ void LoadHitTarget(HitTarget* self, BufferedStream* stream)
     FindOrBuildMemberGroup(&self->notifyRecord, self);
 }
 
+// Slot 9 of the hit target: copies as a collider but keeps its own 8-byte field at +0x5A0.
 void CopyHitTarget(HitTarget* self, HitTarget* src)
 {
     Bytes8 tmp = *(Bytes8*)&self->blob5A0;
@@ -2035,6 +2086,8 @@ void CopyHitTarget(HitTarget* self, HitTarget* src)
     *(Bytes8*)&self->blob5A0 = tmp;
 }
 
+// Slot 16 of the hit target: starts the placed object, resolves its link, copies the pair of values
+// from its scaled object, creates its sound walker, sets state 0 and calls its slot 3.
 void StartHitTarget(HitTarget* self)
 {
     StartPlacedObject(self);
@@ -2088,6 +2141,8 @@ void UpdateHitTarget(HitTarget* self, f32 dt)
     }
 }
 
+// Slot 0x80 of the hit target: steps the collider and, without a parent, turns it toward its
+// upright rotation with the hit target's turn ramp.
 void StepHitTarget(HitTarget* self, f32 dt)
 {
     StepCollider(self, dt);
@@ -2098,6 +2153,7 @@ void StepHitTarget(HitTarget* self, f32 dt)
     }
 }
 
+// Slot 0x100 of the hit target: scales the contact's bounce by 0.6.
 void ComputeHitTargetContactValue(HitTarget* self, Contact03* obj)
 {
     obj->bounce = obj->bounce * 0.6f;
@@ -2146,6 +2202,8 @@ done:
     return ev->eventFlags != 0;
 }
 
+// Next state of a hit target: one lower once the recover delay has passed since the last change,
+// and 0 from state 9.
 s32 ChooseHitTargetState(HitTarget* self)
 {
     s32 v = self->state;
@@ -2169,6 +2227,9 @@ end:
     return v;
 }
 
+// Changes a hit target's state: stamps the clock, tells the controller when it leaves state 9 and
+// moves its sound walker to the sound of the new state (jumping straight there for the first
+// state).
 void SetHitTargetState(HitTarget* self, s32 value)
 {
     s32 old = self->state;
@@ -2191,18 +2252,21 @@ void SetHitTargetState(HitTarget* self, s32 value)
     }
 }
 
+// Slot 0 of the sound-state object: collider init and state -1.
 void InitSoundStateObject(SoundStateObject* self)
 {
     InitCollider(self);
     self->state = -1;
 }
 
+// Slot 10 of the sound-state object: loads the collider and resolves its object link.
 void LoadSoundStateObject(SoundStateObject* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
     ResolveObjectLinks(self, 1, g_soundStateObjectLinks);
 }
 
+// Slot 9 of the sound-state object: copies as a collider but keeps its own 8 bytes of kept data.
 void CopySoundStateObject(SoundStateObject* self, SoundStateObject* src)
 {
     PackedWord8 tmp;
@@ -2211,6 +2275,8 @@ void CopySoundStateObject(SoundStateObject* self, SoundStateObject* src)
     self->keptBytes = tmp;
 }
 
+// Slot 16 of the sound-state object: starts the placed object, creates its sound walker, finds its
+// first child of kind 0x7E and sets state 0.
 void StartSoundStateObject(SoundStateObject* self)
 {
     ListFrame frame;
@@ -2229,6 +2295,8 @@ void StartSoundStateObject(SoundStateObject* self)
     SetSoundStateObjectState(self, 0);
 }
 
+// Slot 17 of the sound-state object: updates the collider, then changes state until the chosen
+// state equals the current one.
 void UpdateSoundStateObject(SoundStateObject* self, f32 dt)
 {
     UpdateCollider(self, dt);
@@ -2240,6 +2308,8 @@ void UpdateSoundStateObject(SoundStateObject* self, f32 dt)
 
 s32 GetSoundStateObjectState(SoundStateObject* p) { return p->state; }
 
+// Changes a sound-state object's state, stamps the clock and moves its sound walker to the sound of
+// the new state (jumping straight there for the first state).
 void SetSoundStateObjectState(SoundStateObject* self, s32 idx)
 {
     s32 old = self->state;
@@ -2254,6 +2324,7 @@ void SetSoundStateObjectState(SoundStateObject* self, s32 idx)
     else SetStateWalkerTarget((StateWalker*)child, v);
 }
 
+// Slot 0 of the object creator: collider init, state -1 and its anchors.
 void InitObjectCreator(ObjectCreator* self)
 {
     InitCollider(self);
@@ -2261,6 +2332,8 @@ void InitObjectCreator(ObjectCreator* self)
     SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
+// Slot 10 of the object creator: loads the collider, resolves its object link and sets up its
+// notify group.
 void LoadObjectCreator(ObjectCreator* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -2268,6 +2341,8 @@ void LoadObjectCreator(ObjectCreator* self, BufferedStream* stream)
     FindOrBuildMemberGroup(&self->notifyRecord, self);
 }
 
+// Slot 16 of the object creator: starts the placed object, then either calls its slot 3 or, when it
+// creates an object, finds that object and sets state 0.
 void StartObjectCreator(ObjectCreator* self)
 {
     StartPlacedObject(self);
@@ -2358,6 +2433,8 @@ void SetObjectCreatorState(ObjectCreator* self, s32 idx)
     }
 }
 
+// Next state of the object creator: 1 becomes 2 when its handle's animation has ended; bit 1 of the
+// current entry's flags then gives 3 from states 1 and 2.
 s32 ChooseObjectCreatorState(ObjectCreator* self)
 {
     s32 mode = self->state;
@@ -2393,6 +2470,7 @@ out:
     return r;
 }
 
+// Selects the pad port and slot to play on; goes to state 1 when idle and to state 3 otherwise.
 void RequestPadPattern(PadPatternPlayer* self, s32 a1, s32 a2)
 {
     if (self->state == 0) {
@@ -2443,11 +2521,14 @@ void UpdatePadPattern(PadPatternPlayer* s)
     }
 }
 
+// Starts pad pattern number index of the global pattern table.
 void StartPadPatternFromTable(PadPatternPlayer* self, s32 index, f32 time)
 {
     StartPadPattern(self, &g_padPatterns[index], time);
 }
 
+// Starts a pad pattern when the player is not idle-off, the pattern has steps and pad patterns are
+// enabled: stores the pattern and its first delay and enters state 2.
 void StartPadPattern(PadPatternPlayer* self, PadPattern* p, f32 f)
 {
     if (self->state != 0 && p->count > 0) {
@@ -2463,6 +2544,8 @@ void StartPadPattern(PadPatternPlayer* self, PadPattern* p, f32 f)
     }
 }
 
+// State change of a pad pattern player: state 2 sends the first step's two bytes to the pad, states
+// 3 and 4 stop the pad output and set the step time to four frame steps; stores the state.
 void SetPadPatternState(PadPatternPlayer* self, s32 state)
 {
     u8 bytes[2];
@@ -2486,6 +2569,7 @@ void SetPadPatternState(PadPatternPlayer* self, s32 state)
     self->state = state;
 }
 
+// Sends zeros to the pad's actuators for the player's port and slot, stopping the output.
 void StopPadPatternOutput(PadPatternPlayer* self)
 {
     u8 bytes[2];
@@ -2494,6 +2578,7 @@ void StopPadPatternOutput(PadPatternPlayer* self)
     SetPadActuatorBytes(self->port, self->slot, bytes);
 }
 
+// Sets the pad pattern setting to 1 (follow the option flag) when it is still unset.
 void InitPadPatternSetting(void)
 {
     if (g_padPatternSetting == 0) {
@@ -2501,6 +2586,7 @@ void InitPadPatternSetting(void)
     }
 }
 
+// Writes the pad pattern setting into bit 5 of the option flags: 2 clears it, 3 sets it.
 void ApplyPadPatternSetting(GameProgress* ctx)
 {
     s32 v = g_padPatternSetting;
@@ -2521,6 +2607,8 @@ set:
     ctx->optionFlags |= 0x20;
 }
 
+// Whether pad patterns are on: setting 2 is always on, 0 and 3 off, 1 follows the inverse of bit 5
+// of the option flags.
 s32 IsPadPatternEnabled(GameProgress* ctx)
 {
     s32 v = g_padPatternSetting;
@@ -2548,6 +2636,8 @@ tail:
     return ((ctx->optionFlags >> 5) ^ 1) & 1;
 }
 
+// Applies the pad pattern setting to bit 5 of the option flags (1 toggles, 2 sets, 3 clears) and
+// then records which way the bit is now (3 set, 2 clear).
 void TogglePadPatternSetting(GameProgress* self)
 {
     s32 g = g_padPatternSetting;

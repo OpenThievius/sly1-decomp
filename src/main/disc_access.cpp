@@ -39,6 +39,7 @@ s32 RefreshDiscStatus(void);
 s32 TestDiscReadDone(s32 value);
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
 
+// Restarts the disc sector check from its first state (waiting for a disc change).
 void ResetDiscSectorCheck(void)
 {
     g_discSectorCheckState = 3;
@@ -133,6 +134,8 @@ again:
     return g_discStatus == 0x14;
 }
 
+// When the disc status is 0x14, sends the second disc client's command 0x22; LoadIopModules calls
+// it between its disc status waits.
 void SendDiscCommand22WhenReady(void)
 {
     if (g_discStatus == 0x14) {
@@ -140,6 +143,7 @@ void SendDiscCommand22WhenReady(void)
     }
 }
 
+// Does nothing.
 void InitDiscAccessModule(void) {}
 
 // A small state machine that checks the disc is still the right one: state 3 waits for a disc
@@ -199,6 +203,8 @@ extern const char g_discPathFormat[8] = "%s\\%s";
 extern const char g_discDevicePrefix[8] = "cdrom0:";
 extern const char g_emptyPathPrefix[4] = "";
 
+// Builds the full disc path of a file name into self: normalised, with backslash separators, behind
+// the "cdrom0:" device prefix when flag is set.
 void FormatDiscPath(void* self, const char* name, s32 flag)
 {
     char buf[256];
@@ -213,6 +219,8 @@ void FormatDiscPath(void* self, const char* name, s32 flag)
                   flag ? (void*)g_discDevicePrefix : (void*)g_emptyPathPrefix, buf);
 }
 
+// Starts a read of count sectors at a sector, retrying until the drive accepts it; after each
+// refusal it syncs and records the read error.
 void StartDiscReadUntilAccepted(s32 sector, s32 count, void* buffer)
 {
     s32 result;
@@ -223,6 +231,7 @@ void StartDiscReadUntilAccepted(s32 sector, s32 count, void* buffer)
     } while (result != 1);
 }
 
+// The same retry loop as StartDiscReadUntilAccepted, through the direct (non-IOP) read functions.
 void StartLowLevelDiscReadUntilAccepted(s32 sector, s32 count, void* buffer)
 {
     s32 result;
@@ -233,6 +242,8 @@ void StartLowLevelDiscReadUntilAccepted(s32 sector, s32 count, void* buffer)
     } while (result != 1);
 }
 
+// True when the disc read has finished; with 0 it waits for the read, with a positive value it only
+// polls.
 s32 TestDiscReadDone(s32 value) { s32 result = SyncDiscRead((u32)value < 1u); return result == 0; }
 
 LINKER_REMNANT(func_00140D88);
