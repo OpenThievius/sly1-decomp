@@ -3409,6 +3409,9 @@ static inline Vu0::Vec NormalizeInPlace_175170(Vec02& v, const Vec02& fallback)
     return len;
 }
 
+// A word of another object by its offset. Its uses below are left raw: the objects they reach
+// (f2490, f2494, boundObject, aimCurve, leapTarget, the tracks) are of classes the code does not
+// show, so no type has these fields.
 #define AT(T, p, o) (*(T*)((u8*)(p) + (o)))
 
 // Changes the player's state and sub-state (nothing happens if both are unchanged): runs the
