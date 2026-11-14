@@ -9,7 +9,7 @@ struct T217D_BF0Rates {
     Vec02 aim;                  // 0x580
 };
 
-void SetModeColliderMode(ModeCollider* self, s32 mode)
+void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
 {
     s32 old = self->f610;
     if (mode == old) return;

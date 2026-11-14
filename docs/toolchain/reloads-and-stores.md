@@ -89,7 +89,7 @@ Which GPR reloads a spilled pseudo is not decided at that insn alone
   a0 to vf1 and vf3 before each use). Copying the value through a Vu0::Vec
   local and normalizing the Vec values, `n.q = FromFloats(...); *(Vec*)&stick
   = n; *(Vec*)&stick = NormalizeOr(Vec::Of(stick), Vec::Of(g_unitXVector))`
-  (mode_collider.cpp's form), gives the pseudo equal costs (`TI_REGS` in the
+  (world5_boss.cpp's form), gives the pseudo equal costs (`TI_REGS` in the
   .lreg dump), global-alloc puts it in a0, and no reload needs a0. The .greg
   dump's `Spilling for insn N. / Spilling reg R.` lines list every insn's
   spill registers: one `Spilling reg 4` in a function shows where a0 came

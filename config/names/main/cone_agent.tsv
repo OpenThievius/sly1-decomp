@@ -2,4 +2,4 @@ symbol	name	evidence
 func_00167D68	InitConeAgent	slot 0x10 of class 0x0A: runs InitAgent and sets its two ranges (1000, 1500), two angles (pi/4, pi), the distances 2000 and 300, the angle pi/3 at +0x74C and the ids +0xC18 and +0xC30 to -1
 func_00167E08	StartConeAgent	slot 0x50 of class 0x0A: runs StartAgent, finds the objects of its ids +0xC18 and +0xC30 (FindFirstObjectByIdMode4) and gives each object its animation events gather a small list of its own
 func_00167EF0	DrawConeAgent	slot 0xA4 of class 0x0A: runs DrawAgent
-func_00167F10	IsConeAgentFree	slot 0x16C of class 0x0A, the slot IsGaugeAgentFree and IsContactAgentFree fill: tests func_001DDA80 for the world, the agent's state at +0x724 (0xB, 0x10) and its records at +0xC10..+0xC40
+func_00167F10	IsConeAgentFree	slot 0x16C of class 0x0A, the slot IsWorld2BossFree and IsContactAgentFree fill: tests func_001DDA80 for the world, the agent's state at +0x724 (0xB, 0x10) and its records at +0xC10..+0xC40

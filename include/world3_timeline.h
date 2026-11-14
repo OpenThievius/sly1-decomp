@@ -2,8 +2,8 @@
 // Class 0x90 (descriptor D_0021EF08, 0x48 bytes), a direct child of 0x01. Written for this
 // project from what retail's code does (config/us/classes.tsv). Fields follow the parent's
 // 0x34 bytes; pads keep each at its retail offset.
-#ifndef TIMELINE_H
-#define TIMELINE_H
+#ifndef WORLD3_TIMELINE_H
+#define WORLD3_TIMELINE_H
 
 #include "base_object.h"
 
@@ -17,7 +17,7 @@ struct Entry90 {
 
 // 0x90: func_001ED168 allocates its 0xC00-byte buffer, func_001ED198 looks something up in
 // the level (+0x14) and keeps the result.
-struct Timeline : BaseObject {
+struct World3Timeline : BaseObject {
     s32 f34;                // 0x34
     void* buffer;           // 0x38: f34 Entry90 records (0xC00 bytes, func_001ED168)
     s32 index;              // 0x3C: the entry func_001ED278 is at
@@ -27,9 +27,9 @@ struct Timeline : BaseObject {
     Entry90* Cur() { return &((Entry90*)buffer)[index]; }
 };
 
-typedef char check_Timeline[sizeof(Timeline) == 0x48 ? 1 : -1];
+typedef char check_World3Timeline[sizeof(World3Timeline) == 0x48 ? 1 : -1];
 
-void InitTimeline(Timeline* self);   // slot 0
-void FindTimelineTarget(Timeline* self);   // slot 16
+void InitWorld3Timeline(World3Timeline* self);   // slot 0
+void FindWorld3TimelineTarget(World3Timeline* self);   // slot 16
 
 #endif

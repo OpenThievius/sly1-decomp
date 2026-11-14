@@ -60,25 +60,25 @@ void SetTextLayoutColor(void* out, s32* value);
 void SetTextLayoutHorizontalAlign(void* out, s32 flag);
 void SetTextLayoutVerticalAlign(void* out, s32 flag);
 
-void StartAgent(GaugeBarAgent* self);
-void SetWorldActiveFollower(void* sub, GaugeBarAgent* self);
+void StartAgent(World4Boss* self);
+void SetWorldActiveFollower(void* sub, World4Boss* self);
 
 
 s32 IsPadSelectFlagHeld(void* sub);
 
 
 typedef void* (*VFn_1A9960)(void* self);
-void UpdateAgentGoal(GaugeBarAgent* self);
-void SetAgentGoalPoint(GaugeBarAgent* self, void* p);
+void UpdateAgentGoal(World4Boss* self);
+void SetAgentGoalPoint(World4Boss* self, void* p);
 
 
-void UpdateAgentState(GaugeBarAgent* self);
-void FaceAgentTowardGoalPoint(GaugeBarAgent* self);
+void UpdateAgentState(World4Boss* self);
+void FaceAgentTowardGoalPoint(World4Boss* self);
 
 
 extern u8 g_memoryCard[];
 
-void EnterAgentState(GaugeBarAgent* self);
+void EnterAgentState(World4Boss* self);
 void MarkLevelDone(s32 n);
 void StartMemoryCardSave(u8* p);
 
@@ -1287,20 +1287,20 @@ void GetPlacementRecordPitch(u8* self, f32* out, int x)
     }
 }
 
-void StartGaugeBarAgent(GaugeBarAgent* self)
+void StartWorld4Boss(World4Boss* self)
 {
     StartAgent(self);
     SetWorldActiveFollower(self->world, self);
 }
 
-s32 IsGaugeBarAgentFree(GaugeBarAgent* self)
+s32 IsWorld4BossFree(World4Boss* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0)
         return 0;
     return self->fC24;
 }
 
-void UpdateGaugeBarAgentGoal(GaugeBarAgent* self)
+void UpdateWorld4BossGoal(World4Boss* self)
 {
     UpdateAgentGoal(self);
     if (self->f724 == 0x10) {
@@ -1310,14 +1310,14 @@ void UpdateGaugeBarAgentGoal(GaugeBarAgent* self)
     }
 }
 
-void UpdateGaugeBarAgentState(GaugeBarAgent* self)
+void UpdateWorld4BossState(World4Boss* self)
 {
     UpdateAgentState(self);
     if (self->f724 == 0x10)
         FaceAgentTowardGoalPoint(self);
 }
 
-void EnterGaugeBarAgentState(GaugeBarAgent* self)
+void EnterWorld4BossState(World4Boss* self)
 {
     EnterAgentState(self);
     if (self->f724 == 0xB) {
@@ -1326,7 +1326,7 @@ void EnterGaugeBarAgentState(GaugeBarAgent* self)
     }
 }
 
-void UpdateGaugeBarAgent(GaugeBarAgent* self)
+void UpdateWorld4Boss(World4Boss* self)
 {
     u8* s = (u8*)self;
     UpdateAgent(self);
@@ -1339,7 +1339,7 @@ void UpdateGaugeBarAgent(GaugeBarAgent* self)
     }
 }
 
-void UpdateGaugeBarAgentVisibility(void)
+void UpdateWorld4BossVisibility(void)
 {
     if (AreMenusAndFadeClear()) {
         g_gaugeBarElement.vt->m14(&g_gaugeBarElement);
@@ -1354,11 +1354,11 @@ void UpdateGaugeBarAgentVisibility(void)
 typedef void (*VFn_1A9AE8)(void* self, SlotMessage* msg);
 void DecrementGaugeCount(void* element);
 void ReplaceAnimationPlayer(s32 a, void* b, s32 c, void* d, f32 e, f32 f);
-s32 HandleAgentObjectEvent(GaugeBarAgent* self, ObjectEvent* ev);
+s32 HandleAgentObjectEvent(World4Boss* self, ObjectEvent* ev);
 extern Player* g_player;
 extern const Vec02 g_unitXVector;
 
-s32 HandleGaugeBarAgentObjectEvent(GaugeBarAgent* self, ObjectEvent* ev)
+s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
 {
     if (self->fC14 != 0 && (ev->eventFlags & 0x20) != 0) {
         self->fC10 = self->fC10 + 1;
@@ -1388,7 +1388,7 @@ s32 HandleGaugeBarAgentObjectEvent(GaugeBarAgent* self, ObjectEvent* ev)
     return HandleAgentObjectEvent(self, ev);
 }
 
-void SetGaugeBarAgentValues(GaugeBarAgent* self, s32 a, s32 b, s32 c)
+void SetWorld4BossValues(World4Boss* self, s32 a, s32 b, s32 c)
 {
     self->fC14 = a;
     self->fC18 = b;

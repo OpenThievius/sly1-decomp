@@ -469,29 +469,29 @@ void GetPlayerInteractFlags();
 void ReceivePlayerNode();
 void SetPlayerPosition();
 void RegisterPlayer();
-void InitModeCollider();
-void StartModeCollider();
-void StepModeCollider();
-void MoveModeCollider();
-void UpdateModeCollider();
-void ControlModeCollider();
-void FinishModeCollider();
-void HandleModeColliderActivation();
-void ApplyModeColliderTint();
-s32 IsModeColliderRequestBlocked();
-s32 AcceptModeColliderRequest();
-void HandleModeColliderNotification();
-s32 HasModeColliderAcceptedRequest();
-void InitGaugeModeObject();
-void StartGaugeModeObject();
-void UpdateGaugeModeObject();
-void ShowGaugeModeObjectBar();
-s32 HandleGaugeModeObjectEvent();
-void InitCountdown();
-void StartCountdown();
-void UpdateCountdown();
-void UpdateCountdownVisibility();
-s32 HandleCountdownObjectEvent();
+void InitWorld5ModeCollider();
+void StartWorld5ModeCollider();
+void StepWorld5ModeCollider();
+void MoveWorld5ModeCollider();
+void UpdateWorld5ModeCollider();
+void ControlWorld5ModeCollider();
+void FinishWorld5ModeCollider();
+void HandleWorld5ModeColliderActivation();
+void ApplyWorld5ModeColliderTint();
+s32 IsWorld5ModeColliderRequestBlocked();
+s32 AcceptWorld5ModeColliderRequest();
+void HandleWorld5ModeColliderNotification();
+s32 HasWorld5ModeColliderAcceptedRequest();
+void InitWorld5Boss();
+void StartWorld5Boss();
+void UpdateWorld5Boss();
+void ShowWorld5BossBar();
+s32 HandleWorld5BossEvent();
+void InitWorld5Countdown();
+void StartWorld5Countdown();
+void UpdateWorld5Countdown();
+void UpdateWorld5CountdownVisibility();
+s32 HandleWorld5CountdownObjectEvent();
 void InitEntryQueue();
 void RegisterPointObject();
 void UnregisterPointObject();
@@ -547,20 +547,20 @@ void InitAim();
 void SwitchAimByTargetDistance();
 void GetAimRotation();
 void CollideColliderParts();
-void InitGaugeAgent();
-void LoadGaugeAgent();
-void StartGaugeAgent();
-void DrawGaugeAgent();
-s32 HasGaugeAgentClearLine();
-s32 IsGaugeAgentFree();
-void EnterGaugeAgentState();
-s32 ChooseGaugeAgentState();
-void UpdateGaugeAgent();
-void ShowGaugeAgentBar();
-void UpdateGaugeAgentGoal();
-void UpdateGaugeAgentState();
-void LeaveGaugeAgentState();
-void HandleGaugeAgentNotification();
+void InitWorld2Boss();
+void LoadWorld2Boss();
+void StartWorld2Boss();
+void DrawWorld2Boss();
+s32 HasWorld2BossClearLine();
+s32 IsWorld2BossFree();
+void EnterWorld2BossState();
+s32 ChooseWorld2BossState();
+void UpdateWorld2Boss();
+void ShowWorld2BossBar();
+void UpdateWorld2BossGoal();
+void UpdateWorld2BossState();
+void LeaveWorld2BossState();
+void HandleWorld2BossNotification();
 void InitContactListObject();
 void LoadContactListObject();
 void UnregisterContactListObject();
@@ -822,14 +822,14 @@ void UnregisterObjectPool();
 void CopyObjectPool();
 void StartObjectPool();
 void ClearObjectPoolChoiceIfFlag();
-void StartGaugeBarAgent();
-s32 IsGaugeBarAgentFree();
-void UpdateGaugeBarAgentGoal();
-void UpdateGaugeBarAgentState();
-void EnterGaugeBarAgentState();
-void UpdateGaugeBarAgent();
-void UpdateGaugeBarAgentVisibility();
-s32 HandleGaugeBarAgentObjectEvent();
+void StartWorld4Boss();
+s32 IsWorld4BossFree();
+void UpdateWorld4BossGoal();
+void UpdateWorld4BossState();
+void EnterWorld4BossState();
+void UpdateWorld4Boss();
+void UpdateWorld4BossVisibility();
+s32 HandleWorld4BossObjectEvent();
 void InitScreenElement();
 void SetupScreenElementText(ScreenElement* self);
 void UpdateScreenElementSlide(ScreenElement* self);
@@ -1156,46 +1156,46 @@ void SetArcMode();
 void UpdateArc();
 void QueueArcDraw();
 void ResetArc();
-void InitKeyedConeAgent();
-void StartKeyedConeAgent();
-void EnterKeyedConeAgentState();
-s32 ChooseKeyedConeAgentState();
-s32 IsKeyedConeAgentFree();
-s32 IsKeyedConeAgentTargetInRange();
-void SteerKeyedConeAgentAlongPath();
-void RestartKeyedConeAgentClip();
-void UpdateKeyedConeAgentGoal();
-void UpdateKeyedConeAgentState();
+void InitWorld1Boss();
+void StartWorld1Boss();
+void EnterWorld1BossState();
+s32 ChooseWorld1BossState();
+s32 IsWorld1BossFree();
+s32 IsWorld1BossTargetInRange();
+void SteerWorld1BossAlongPath();
+void RestartWorld1BossClip();
+void UpdateWorld1BossGoal();
+void UpdateWorld1BossState();
 void ShowElementWhenMenusClear();
 s32 TestAgentMayContactExceptKeys();
 void UpdateWorld();
-void InitBeatPressCollider();
-void LoadBeatPressCollider();
-void StartBeatPressCollider();
-void HandleBeatPressColliderActivation();
-void JudgeBeatPressInput();
-s32 IsBeatPressColliderRequestBlocked();
-s32 AcceptBeatPressColliderRequest();
-void GetBeatPressColliderPositionAt();
-void GetBeatPressColliderRotationAt();
-void InitTempoAgent();
-void LoadTempoAgent();
-void StartTempoAgent();
-void UnregisterTempoAgent();
-void RegisterTempoAgent();
-s32 IsTempoAgentTargetInRange();
-s32 IsTempoAgentFree();
-void ApplyTempoAgentTransform();
-void DrawTempoAgent();
-void LeaveTempoAgentState();
-void EnterTempoAgentState();
-void HandleTempoAgentNotification();
-void UpdateTempoAgent();
-void ShowTempoAgentGauge();
-void UpdateTempoAgentGoal();
-void UpdateTempoAgentState();
-void InitTimeline();
-void FindTimelineTarget();
+void InitWorld3BeatPressCollider();
+void LoadWorld3BeatPressCollider();
+void StartWorld3BeatPressCollider();
+void HandleWorld3BeatPressColliderActivation();
+void JudgeWorld3BeatPressInput();
+s32 IsWorld3BeatPressColliderRequestBlocked();
+s32 AcceptWorld3BeatPressColliderRequest();
+void GetWorld3BeatPressColliderPositionAt();
+void GetWorld3BeatPressColliderRotationAt();
+void InitWorld3Boss();
+void LoadWorld3Boss();
+void StartWorld3Boss();
+void UnregisterWorld3Boss();
+void RegisterWorld3Boss();
+s32 IsWorld3BossTargetInRange();
+s32 IsWorld3BossFree();
+void ApplyWorld3BossTransform();
+void DrawWorld3Boss();
+void LeaveWorld3BossState();
+void EnterWorld3BossState();
+void HandleWorld3BossNotification();
+void UpdateWorld3Boss();
+void ShowWorld3BossGauge();
+void UpdateWorld3BossGoal();
+void UpdateWorld3BossState();
+void InitWorld3Timeline();
+void FindWorld3TimelineTarget();
 void InitValueListObject();
 void LoadValueList();
 void InitAttachedSet();
@@ -3066,11 +3066,11 @@ extern const ClassDescriptor<48> D_0021E658 = { &D_00217498, 0x62, 0x1, 0x330, {
     (Fn_Table)UpdateLinkConstraint, (Fn_Table)TestOtherFlagged, 0, 0,
 } };
 extern const ClassDescriptor<100> D_0021E728 = { &D_0021BCF8, 0xB, 0xB, 0xCA0, {
-    (Fn_Table)InitKeyedConeAgent, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+    (Fn_Table)InitWorld1Boss, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterAgent, (Fn_Table)UnregisterAgent,
     (Fn_Table)ClonePlacedObject, (Fn_Table)CopyAgent, (Fn_Table)LoadAgent, 0,
     0, (Fn_Table)HandleAgentNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadAgent,
-    (Fn_Table)StartKeyedConeAgent, (Fn_Table)UpdateAgent, (Fn_Table)RecomputeTurningColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
+    (Fn_Table)StartWorld1Boss, (Fn_Table)UpdateAgent, (Fn_Table)RecomputeTurningColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
     (Fn_Table)SetColliderFrozen, (Fn_Table)ReparentCollider, (Fn_Table)ReframeColliderAnchors, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MoveCollider,
     (Fn_Table)StepAgent, (Fn_Table)SetColliderPosition, (Fn_Table)SetTurningColliderRotation, (Fn_Table)CopyPlacedObjectFrame,
@@ -3087,24 +3087,24 @@ extern const ClassDescriptor<100> D_0021E728 = { &D_0021BCF8, 0xB, 0xB, 0xCA0, {
     (Fn_Table)HandleSwitchedColliderActivation, 0, (Fn_Table)IsSwitchedColliderCameraFree, (Fn_Table)IsAgentRequestBlocked,
     (Fn_Table)AcceptAgentRequest, (Fn_Table)HasSwitchedColliderAcceptedRequest, (Fn_Table)StartSwitchedColliderEffect, (Fn_Table)SetSwitchedColliderMode,
     (Fn_Table)FinishSwitchedCollider, (Fn_Table)GetSwitchedColliderInteractFlags, (Fn_Table)ShowTypedTextCaptionBox, (Fn_Table)GetSwitchedColliderTarget,
-    (Fn_Table)BuildTurningColliderHeadingMatrix, (Fn_Table)GetTurningColliderContactMode, (Fn_Table)IsTurningColliderGroundContact, (Fn_Table)IsKeyedConeAgentFree,
-    (Fn_Table)AnswerAgentRosterPoll, (Fn_Table)ChooseKeyedConeAgentState, (Fn_Table)UpdateKeyedConeAgentState, (Fn_Table)LeaveAgentState,
-    (Fn_Table)EnterKeyedConeAgentState, (Fn_Table)IsKeyedConeAgentTargetInRange, (Fn_Table)UpdateKeyedConeAgentGoal, (Fn_Table)BuildAgentPath,
-    (Fn_Table)RestartKeyedConeAgentClip, (Fn_Table)SteerKeyedConeAgentAlongPath, (Fn_Table)SelectAgentTarget, 0,
+    (Fn_Table)BuildTurningColliderHeadingMatrix, (Fn_Table)GetTurningColliderContactMode, (Fn_Table)IsTurningColliderGroundContact, (Fn_Table)IsWorld1BossFree,
+    (Fn_Table)AnswerAgentRosterPoll, (Fn_Table)ChooseWorld1BossState, (Fn_Table)UpdateWorld1BossState, (Fn_Table)LeaveAgentState,
+    (Fn_Table)EnterWorld1BossState, (Fn_Table)IsWorld1BossTargetInRange, (Fn_Table)UpdateWorld1BossGoal, (Fn_Table)BuildAgentPath,
+    (Fn_Table)RestartWorld1BossClip, (Fn_Table)SteerWorld1BossAlongPath, (Fn_Table)SelectAgentTarget, 0,
 } };
 extern const ClassDescriptor<100> D_0021E8C8 = { &D_0021BB58, 0xC, 0xB, 0xE50, {
-    (Fn_Table)InitGaugeAgent, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+    (Fn_Table)InitWorld2Boss, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterAgent, (Fn_Table)UnregisterAgent,
-    (Fn_Table)ClonePlacedObject, (Fn_Table)CopyAgent, (Fn_Table)LoadGaugeAgent, 0,
-    0, (Fn_Table)HandleGaugeAgentNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadAgent,
-    (Fn_Table)StartGaugeAgent, (Fn_Table)UpdateGaugeAgent, (Fn_Table)RecomputeTurningColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
+    (Fn_Table)ClonePlacedObject, (Fn_Table)CopyAgent, (Fn_Table)LoadWorld2Boss, 0,
+    0, (Fn_Table)HandleWorld2BossNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadAgent,
+    (Fn_Table)StartWorld2Boss, (Fn_Table)UpdateWorld2Boss, (Fn_Table)RecomputeTurningColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
     (Fn_Table)SetColliderFrozen, (Fn_Table)ReparentCollider, (Fn_Table)ReframeColliderAnchors, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MoveCollider,
     (Fn_Table)StepAgent, (Fn_Table)SetColliderPosition, (Fn_Table)SetTurningColliderRotation, (Fn_Table)CopyPlacedObjectFrame,
     (Fn_Table)SetColliderVelocity, (Fn_Table)SetColliderSpin, (Fn_Table)GetPlacedObjectPositionAt, (Fn_Table)GetTurningColliderPose,
-    (Fn_Table)ApplyPlacedObjectTransform, (Fn_Table)DrawGaugeAgent, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
+    (Fn_Table)ApplyPlacedObjectTransform, (Fn_Table)DrawWorld2Boss, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
     0, (Fn_Table)ApplyObjectFrameOffsetToPose, (Fn_Table)RemoveObjectFrameOffsetFromPose, (Fn_Table)ChooseActiveAttachments,
-    (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleAgentObjectEvent, (Fn_Table)ShowGaugeAgentBar, (Fn_Table)ApplyColliderPendingMove,
+    (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleAgentObjectEvent, (Fn_Table)ShowWorld2BossBar, (Fn_Table)ApplyColliderPendingMove,
     (Fn_Table)ApplyColliderPendingImpulse, (Fn_Table)ApplyColliderPendingImpulseHalfStep, (Fn_Table)UpdateColliderBounds, (Fn_Table)IgnoreColliderAttachmentStep,
     (Fn_Table)CopyTurningColliderMeshesInFrame, (Fn_Table)NumberColliderParts, (Fn_Table)ComputeTurningColliderImpulseResponse, (Fn_Table)AddParentVelocityToChildRows,
     (Fn_Table)TestAgentMayContact, (Fn_Table)CollideColliderParts, (Fn_Table)CollideAgentWithObject, (Fn_Table)AddContactVertexBlendVelocity,
@@ -3114,9 +3114,9 @@ extern const ClassDescriptor<100> D_0021E8C8 = { &D_0021BB58, 0xC, 0xB, 0xE50, {
     (Fn_Table)HandleSwitchedColliderActivation, 0, (Fn_Table)IsSwitchedColliderCameraFree, (Fn_Table)IsAgentRequestBlocked,
     (Fn_Table)AcceptAgentRequest, (Fn_Table)HasSwitchedColliderAcceptedRequest, (Fn_Table)StartSwitchedColliderEffect, (Fn_Table)SetSwitchedColliderMode,
     (Fn_Table)FinishSwitchedCollider, (Fn_Table)GetSwitchedColliderInteractFlags, (Fn_Table)ShowTypedTextCaptionBox, (Fn_Table)GetSwitchedColliderTarget,
-    (Fn_Table)BuildTurningColliderHeadingMatrix, (Fn_Table)GetTurningColliderContactMode, (Fn_Table)IsTurningColliderGroundContact, (Fn_Table)IsGaugeAgentFree,
-    (Fn_Table)AnswerAgentRosterPoll, (Fn_Table)ChooseGaugeAgentState, (Fn_Table)UpdateGaugeAgentState, (Fn_Table)LeaveGaugeAgentState,
-    (Fn_Table)EnterGaugeAgentState, (Fn_Table)HasGaugeAgentClearLine, (Fn_Table)UpdateGaugeAgentGoal, (Fn_Table)BuildAgentPath,
+    (Fn_Table)BuildTurningColliderHeadingMatrix, (Fn_Table)GetTurningColliderContactMode, (Fn_Table)IsTurningColliderGroundContact, (Fn_Table)IsWorld2BossFree,
+    (Fn_Table)AnswerAgentRosterPoll, (Fn_Table)ChooseWorld2BossState, (Fn_Table)UpdateWorld2BossState, (Fn_Table)LeaveWorld2BossState,
+    (Fn_Table)EnterWorld2BossState, (Fn_Table)HasWorld2BossClearLine, (Fn_Table)UpdateWorld2BossGoal, (Fn_Table)BuildAgentPath,
     (Fn_Table)RestartAgentClip, (Fn_Table)SteerAgentAlongPath, (Fn_Table)SelectAgentTarget, 0,
 } };
 extern const ClassDescriptor<100> D_0021EA68 = { &D_0021BB58, 0xD, 0xB, 0xC30, {
@@ -3124,14 +3124,14 @@ extern const ClassDescriptor<100> D_0021EA68 = { &D_0021BB58, 0xD, 0xB, 0xC30, {
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterAgent, (Fn_Table)UnregisterAgent,
     (Fn_Table)ClonePlacedObject, (Fn_Table)CopyAgent, (Fn_Table)LoadAgent, 0,
     0, (Fn_Table)HandleAgentNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadAgent,
-    (Fn_Table)StartGaugeBarAgent, (Fn_Table)UpdateGaugeBarAgent, (Fn_Table)RecomputeTurningColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
+    (Fn_Table)StartWorld4Boss, (Fn_Table)UpdateWorld4Boss, (Fn_Table)RecomputeTurningColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
     (Fn_Table)SetColliderFrozen, (Fn_Table)ReparentCollider, (Fn_Table)ReframeColliderAnchors, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MoveCollider,
     (Fn_Table)StepAgent, (Fn_Table)SetColliderPosition, (Fn_Table)SetTurningColliderRotation, (Fn_Table)CopyPlacedObjectFrame,
     (Fn_Table)SetColliderVelocity, (Fn_Table)SetColliderSpin, (Fn_Table)GetPlacedObjectPositionAt, (Fn_Table)GetTurningColliderPose,
     (Fn_Table)ApplyPlacedObjectTransform, (Fn_Table)DrawAgent, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
     0, (Fn_Table)ApplyObjectFrameOffsetToPose, (Fn_Table)RemoveObjectFrameOffsetFromPose, (Fn_Table)ChooseActiveAttachments,
-    (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleGaugeBarAgentObjectEvent, (Fn_Table)UpdateGaugeBarAgentVisibility, (Fn_Table)ApplyColliderPendingMove,
+    (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleWorld4BossObjectEvent, (Fn_Table)UpdateWorld4BossVisibility, (Fn_Table)ApplyColliderPendingMove,
     (Fn_Table)ApplyColliderPendingImpulse, (Fn_Table)ApplyColliderPendingImpulseHalfStep, (Fn_Table)UpdateColliderBounds, (Fn_Table)IgnoreColliderAttachmentStep,
     (Fn_Table)CopyTurningColliderMeshesInFrame, (Fn_Table)NumberColliderParts, (Fn_Table)ComputeTurningColliderImpulseResponse, (Fn_Table)AddParentVelocityToChildRows,
     (Fn_Table)TestAgentMayContact, (Fn_Table)CollideColliderParts, (Fn_Table)CollideAgentWithObject, (Fn_Table)AddContactVertexBlendVelocity,
@@ -3141,21 +3141,21 @@ extern const ClassDescriptor<100> D_0021EA68 = { &D_0021BB58, 0xD, 0xB, 0xC30, {
     (Fn_Table)HandleSwitchedColliderActivation, 0, (Fn_Table)IsSwitchedColliderCameraFree, (Fn_Table)IsAgentRequestBlocked,
     (Fn_Table)AcceptAgentRequest, (Fn_Table)HasSwitchedColliderAcceptedRequest, (Fn_Table)StartSwitchedColliderEffect, (Fn_Table)SetSwitchedColliderMode,
     (Fn_Table)FinishSwitchedCollider, (Fn_Table)GetSwitchedColliderInteractFlags, (Fn_Table)ShowTypedTextCaptionBox, (Fn_Table)GetSwitchedColliderTarget,
-    (Fn_Table)BuildTurningColliderHeadingMatrix, (Fn_Table)GetTurningColliderContactMode, (Fn_Table)IsTurningColliderGroundContact, (Fn_Table)IsGaugeBarAgentFree,
-    (Fn_Table)AnswerAgentRosterPoll, (Fn_Table)ChooseAgentState, (Fn_Table)UpdateGaugeBarAgentState, (Fn_Table)LeaveAgentState,
-    (Fn_Table)EnterGaugeBarAgentState, (Fn_Table)IsAgentTargetInRange, (Fn_Table)UpdateGaugeBarAgentGoal, (Fn_Table)BuildAgentPath,
+    (Fn_Table)BuildTurningColliderHeadingMatrix, (Fn_Table)GetTurningColliderContactMode, (Fn_Table)IsTurningColliderGroundContact, (Fn_Table)IsWorld4BossFree,
+    (Fn_Table)AnswerAgentRosterPoll, (Fn_Table)ChooseAgentState, (Fn_Table)UpdateWorld4BossState, (Fn_Table)LeaveAgentState,
+    (Fn_Table)EnterWorld4BossState, (Fn_Table)IsAgentTargetInRange, (Fn_Table)UpdateWorld4BossGoal, (Fn_Table)BuildAgentPath,
     (Fn_Table)RestartAgentClip, (Fn_Table)SteerAgentAlongPath, (Fn_Table)SelectAgentTarget, 0,
 } };
 extern const ClassDescriptor<84> D_0021EC08 = { &D_00217C30, 0x1C, 0xB, 0x690, {
-    (Fn_Table)InitBeatPressCollider, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+    (Fn_Table)InitWorld3BeatPressCollider, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterSwitchedCollider, (Fn_Table)UnregisterSwitchedCollider,
-    (Fn_Table)ClonePlacedObject, (Fn_Table)CopySwitchedCollider, (Fn_Table)LoadBeatPressCollider, 0,
+    (Fn_Table)ClonePlacedObject, (Fn_Table)CopySwitchedCollider, (Fn_Table)LoadWorld3BeatPressCollider, 0,
     0, (Fn_Table)HandleSwitchedColliderNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadPlacedObject,
-    (Fn_Table)StartBeatPressCollider, (Fn_Table)UpdateSwitchedCollider, (Fn_Table)RecomputeColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
+    (Fn_Table)StartWorld3BeatPressCollider, (Fn_Table)UpdateSwitchedCollider, (Fn_Table)RecomputeColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
     (Fn_Table)SetColliderFrozen, (Fn_Table)ReparentCollider, (Fn_Table)ReframeColliderAnchors, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MoveCollider,
     (Fn_Table)StepCollider, (Fn_Table)SetColliderPosition, (Fn_Table)SetColliderRotation, (Fn_Table)CopyPlacedObjectFrame,
-    (Fn_Table)SetColliderVelocity, (Fn_Table)SetColliderSpin, (Fn_Table)GetBeatPressColliderPositionAt, (Fn_Table)GetBeatPressColliderRotationAt,
+    (Fn_Table)SetColliderVelocity, (Fn_Table)SetColliderSpin, (Fn_Table)GetWorld3BeatPressColliderPositionAt, (Fn_Table)GetWorld3BeatPressColliderRotationAt,
     (Fn_Table)ApplyPlacedObjectTransform, (Fn_Table)DrawCollider, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
     0, (Fn_Table)ApplyObjectFrameOffsetToPose, (Fn_Table)RemoveObjectFrameOffsetFromPose, (Fn_Table)ChooseActiveAttachments,
     (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleObjectEvent, 0, (Fn_Table)ApplyColliderPendingMove,
@@ -3165,23 +3165,23 @@ extern const ClassDescriptor<84> D_0021EC08 = { &D_00217C30, 0x1C, 0xB, 0x690, {
     0, 0, 0, 0,
     0, 0, 0, (Fn_Table)NotifyContactHandlers,
     (Fn_Table)SaveColliderPreviousPosition, (Fn_Table)CaptureSwitchedColliderPose, (Fn_Table)ApplyColliderAttachedSetContact, (Fn_Table)RequestColliderLaunch,
-    (Fn_Table)HandleBeatPressColliderActivation, (Fn_Table)JudgeBeatPressInput, (Fn_Table)IsSwitchedColliderCameraFree, (Fn_Table)IsBeatPressColliderRequestBlocked,
-    (Fn_Table)AcceptBeatPressColliderRequest, (Fn_Table)HasSwitchedColliderAcceptedRequest, (Fn_Table)StartSwitchedColliderEffect, (Fn_Table)SetSwitchedColliderMode,
+    (Fn_Table)HandleWorld3BeatPressColliderActivation, (Fn_Table)JudgeWorld3BeatPressInput, (Fn_Table)IsSwitchedColliderCameraFree, (Fn_Table)IsWorld3BeatPressColliderRequestBlocked,
+    (Fn_Table)AcceptWorld3BeatPressColliderRequest, (Fn_Table)HasSwitchedColliderAcceptedRequest, (Fn_Table)StartSwitchedColliderEffect, (Fn_Table)SetSwitchedColliderMode,
     (Fn_Table)FinishSwitchedCollider, (Fn_Table)GetSwitchedColliderInteractFlags, (Fn_Table)ShowTypedTextCaptionBox, (Fn_Table)GetSwitchedColliderTarget,
 } };
 extern const ClassDescriptor<100> D_0021ED68 = { &D_0021BB58, 0x13, 0xB, 0xCA0, {
-    (Fn_Table)InitTempoAgent, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
-    (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterTempoAgent, (Fn_Table)UnregisterTempoAgent,
-    (Fn_Table)ClonePlacedObject, (Fn_Table)CopyAgent, (Fn_Table)LoadTempoAgent, 0,
-    0, (Fn_Table)HandleTempoAgentNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadAgent,
-    (Fn_Table)StartTempoAgent, (Fn_Table)UpdateTempoAgent, (Fn_Table)RecomputeTurningColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
+    (Fn_Table)InitWorld3Boss, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+    (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterWorld3Boss, (Fn_Table)UnregisterWorld3Boss,
+    (Fn_Table)ClonePlacedObject, (Fn_Table)CopyAgent, (Fn_Table)LoadWorld3Boss, 0,
+    0, (Fn_Table)HandleWorld3BossNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadAgent,
+    (Fn_Table)StartWorld3Boss, (Fn_Table)UpdateWorld3Boss, (Fn_Table)RecomputeTurningColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
     (Fn_Table)SetColliderFrozen, (Fn_Table)ReparentCollider, (Fn_Table)ReframeColliderAnchors, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MoveCollider,
     (Fn_Table)StepAgent, (Fn_Table)SetColliderPosition, (Fn_Table)SetTurningColliderRotation, (Fn_Table)CopyPlacedObjectFrame,
     (Fn_Table)SetColliderVelocity, (Fn_Table)SetColliderSpin, (Fn_Table)GetPlacedObjectPositionAt, (Fn_Table)GetTurningColliderPose,
-    (Fn_Table)ApplyTempoAgentTransform, (Fn_Table)DrawTempoAgent, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
+    (Fn_Table)ApplyWorld3BossTransform, (Fn_Table)DrawWorld3Boss, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
     0, (Fn_Table)ApplyObjectFrameOffsetToPose, (Fn_Table)RemoveObjectFrameOffsetFromPose, (Fn_Table)ChooseActiveAttachments,
-    (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleAgentObjectEvent, (Fn_Table)ShowTempoAgentGauge, (Fn_Table)ApplyColliderPendingMove,
+    (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleAgentObjectEvent, (Fn_Table)ShowWorld3BossGauge, (Fn_Table)ApplyColliderPendingMove,
     (Fn_Table)ApplyColliderPendingImpulse, (Fn_Table)ApplyColliderPendingImpulseHalfStep, (Fn_Table)UpdateColliderBounds, (Fn_Table)IgnoreColliderAttachmentStep,
     (Fn_Table)CopyTurningColliderMeshesInFrame, (Fn_Table)NumberColliderParts, (Fn_Table)ComputeTurningColliderImpulseResponse, (Fn_Table)AddParentVelocityToChildRows,
     (Fn_Table)TestAgentMayContact, (Fn_Table)CollideColliderParts, (Fn_Table)CollideAgentWithObject, (Fn_Table)AddContactVertexBlendVelocity,
@@ -3191,17 +3191,17 @@ extern const ClassDescriptor<100> D_0021ED68 = { &D_0021BB58, 0x13, 0xB, 0xCA0, 
     (Fn_Table)HandleSwitchedColliderActivation, 0, (Fn_Table)IsSwitchedColliderCameraFree, (Fn_Table)IsAgentRequestBlocked,
     (Fn_Table)AcceptAgentRequest, (Fn_Table)HasSwitchedColliderAcceptedRequest, (Fn_Table)StartSwitchedColliderEffect, (Fn_Table)SetSwitchedColliderMode,
     (Fn_Table)FinishSwitchedCollider, (Fn_Table)GetSwitchedColliderInteractFlags, (Fn_Table)ShowTypedTextCaptionBox, (Fn_Table)GetSwitchedColliderTarget,
-    (Fn_Table)BuildTurningColliderHeadingMatrix, (Fn_Table)GetTurningColliderContactMode, (Fn_Table)IsTurningColliderGroundContact, (Fn_Table)IsTempoAgentFree,
-    (Fn_Table)AnswerAgentRosterPoll, (Fn_Table)ChooseAgentState, (Fn_Table)UpdateTempoAgentState, (Fn_Table)LeaveTempoAgentState,
-    (Fn_Table)EnterTempoAgentState, (Fn_Table)IsTempoAgentTargetInRange, (Fn_Table)UpdateTempoAgentGoal, (Fn_Table)BuildAgentPath,
+    (Fn_Table)BuildTurningColliderHeadingMatrix, (Fn_Table)GetTurningColliderContactMode, (Fn_Table)IsTurningColliderGroundContact, (Fn_Table)IsWorld3BossFree,
+    (Fn_Table)AnswerAgentRosterPoll, (Fn_Table)ChooseAgentState, (Fn_Table)UpdateWorld3BossState, (Fn_Table)LeaveWorld3BossState,
+    (Fn_Table)EnterWorld3BossState, (Fn_Table)IsWorld3BossTargetInRange, (Fn_Table)UpdateWorld3BossGoal, (Fn_Table)BuildAgentPath,
     (Fn_Table)RestartAgentClip, (Fn_Table)SteerAgentAlongPath, (Fn_Table)SelectAgentTarget, 0,
 } };
 extern const ClassDescriptor<28> D_0021EF08 = { &D_00217418, 0x90, 0x0, 0x48, {
-    (Fn_Table)InitTimeline, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+    (Fn_Table)InitWorld3Timeline, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachObject, (Fn_Table)DetachObject, (Fn_Table)RegisterObject, (Fn_Table)UnregisterObject,
     (Fn_Table)CloneObject, (Fn_Table)CopyObjectData, (Fn_Table)LoadObjectProperties, 0,
     0, 0, (Fn_Table)SendObjectNotification, 0,
-    (Fn_Table)FindTimelineTarget, 0, 0, 0,
+    (Fn_Table)FindWorld3TimelineTarget, 0, 0, 0,
     0, (Fn_Table)ReparentObject, 0, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, 0,
 } };
@@ -3578,16 +3578,16 @@ extern const ClassDescriptor<84> D_00220438 = { &D_00217C30, 0x19, 0xB, 0xBB0, {
     (Fn_Table)FinishSwitchedCollider, (Fn_Table)GetSwitchedColliderInteractFlags, (Fn_Table)ShowTypedTextCaptionBox, (Fn_Table)GetSwitchedColliderTarget,
 } };
 extern const ClassDescriptor<84> D_00220598 = { &D_00217C30, 0x1B, 0xB, 0x710, {
-    (Fn_Table)InitModeCollider, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+    (Fn_Table)InitWorld5ModeCollider, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterSwitchedCollider, (Fn_Table)UnregisterSwitchedCollider,
     (Fn_Table)ClonePlacedObject, (Fn_Table)CopySwitchedCollider, (Fn_Table)LoadCollider, 0,
-    0, (Fn_Table)HandleModeColliderNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadPlacedObject,
-    (Fn_Table)StartModeCollider, (Fn_Table)UpdateModeCollider, (Fn_Table)RecomputeColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
+    0, (Fn_Table)HandleWorld5ModeColliderNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadPlacedObject,
+    (Fn_Table)StartWorld5ModeCollider, (Fn_Table)UpdateWorld5ModeCollider, (Fn_Table)RecomputeColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
     (Fn_Table)SetColliderFrozen, (Fn_Table)ReparentCollider, (Fn_Table)ReframeColliderAnchors, (Fn_Table)AddObjectListener,
-    (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MoveModeCollider,
-    (Fn_Table)StepModeCollider, (Fn_Table)SetColliderPosition, (Fn_Table)SetColliderRotation, (Fn_Table)CopyPlacedObjectFrame,
+    (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MoveWorld5ModeCollider,
+    (Fn_Table)StepWorld5ModeCollider, (Fn_Table)SetColliderPosition, (Fn_Table)SetColliderRotation, (Fn_Table)CopyPlacedObjectFrame,
     (Fn_Table)SetColliderVelocity, (Fn_Table)SetColliderSpin, (Fn_Table)GetPlacedObjectPositionAt, (Fn_Table)GetPlacedObjectRotationAt,
-    (Fn_Table)ApplyModeColliderTint, (Fn_Table)DrawCollider, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
+    (Fn_Table)ApplyWorld5ModeColliderTint, (Fn_Table)DrawCollider, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
     0, (Fn_Table)ApplyObjectFrameOffsetToPose, (Fn_Table)RemoveObjectFrameOffsetFromPose, (Fn_Table)ChooseActiveAttachments,
     (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleObjectEvent, 0, (Fn_Table)ApplyColliderPendingMove,
     (Fn_Table)ApplyColliderPendingImpulse, (Fn_Table)ApplyColliderPendingImpulseHalfStep, (Fn_Table)UpdateColliderBounds, (Fn_Table)IgnoreColliderAttachmentStep,
@@ -3596,23 +3596,23 @@ extern const ClassDescriptor<84> D_00220598 = { &D_00217C30, 0x1B, 0xB, 0x710, {
     0, 0, 0, 0,
     0, 0, 0, (Fn_Table)NotifyContactHandlers,
     (Fn_Table)SaveColliderPreviousPosition, (Fn_Table)CaptureSwitchedColliderPose, (Fn_Table)ApplyColliderAttachedSetContact, (Fn_Table)RequestColliderLaunch,
-    (Fn_Table)HandleModeColliderActivation, (Fn_Table)ControlModeCollider, (Fn_Table)IsSwitchedColliderCameraFree, (Fn_Table)IsModeColliderRequestBlocked,
-    (Fn_Table)AcceptModeColliderRequest, (Fn_Table)HasModeColliderAcceptedRequest, (Fn_Table)StartSwitchedColliderEffect, (Fn_Table)SetSwitchedColliderMode,
-    (Fn_Table)FinishModeCollider, (Fn_Table)GetSwitchedColliderInteractFlags, (Fn_Table)ShowTypedTextCaptionBox, (Fn_Table)GetSwitchedColliderTarget,
+    (Fn_Table)HandleWorld5ModeColliderActivation, (Fn_Table)ControlWorld5ModeCollider, (Fn_Table)IsSwitchedColliderCameraFree, (Fn_Table)IsWorld5ModeColliderRequestBlocked,
+    (Fn_Table)AcceptWorld5ModeColliderRequest, (Fn_Table)HasWorld5ModeColliderAcceptedRequest, (Fn_Table)StartSwitchedColliderEffect, (Fn_Table)SetSwitchedColliderMode,
+    (Fn_Table)FinishWorld5ModeCollider, (Fn_Table)GetSwitchedColliderInteractFlags, (Fn_Table)ShowTypedTextCaptionBox, (Fn_Table)GetSwitchedColliderTarget,
 } };
 extern const ClassDescriptor<72> D_002206F8 = { &D_00217568, 0x4A, 0x3, 0x620, {
-    (Fn_Table)InitGaugeModeObject, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+    (Fn_Table)InitWorld5Boss, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterCollider, (Fn_Table)UnregisterCollider,
     (Fn_Table)ClonePlacedObject, (Fn_Table)CopyCollider, (Fn_Table)LoadCollider, 0,
     0, (Fn_Table)HandlePlacedObjectNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadPlacedObject,
-    (Fn_Table)StartGaugeModeObject, (Fn_Table)UpdateGaugeModeObject, (Fn_Table)RecomputeColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
+    (Fn_Table)StartWorld5Boss, (Fn_Table)UpdateWorld5Boss, (Fn_Table)RecomputeColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
     (Fn_Table)SetColliderFrozen, (Fn_Table)ReparentCollider, (Fn_Table)ReframeColliderAnchors, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MoveCollider,
     (Fn_Table)StepCollider, (Fn_Table)SetColliderPosition, (Fn_Table)SetColliderRotation, (Fn_Table)CopyPlacedObjectFrame,
     (Fn_Table)SetColliderVelocity, (Fn_Table)SetColliderSpin, (Fn_Table)GetPlacedObjectPositionAt, (Fn_Table)GetPlacedObjectRotationAt,
     (Fn_Table)ApplyPlacedObjectTransform, (Fn_Table)DrawCollider, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
     0, (Fn_Table)ApplyObjectFrameOffsetToPose, (Fn_Table)RemoveObjectFrameOffsetFromPose, (Fn_Table)ChooseActiveAttachments,
-    (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleGaugeModeObjectEvent, (Fn_Table)ShowGaugeModeObjectBar, (Fn_Table)ApplyColliderPendingMove,
+    (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleWorld5BossEvent, (Fn_Table)ShowWorld5BossBar, (Fn_Table)ApplyColliderPendingMove,
     (Fn_Table)ApplyColliderPendingImpulse, (Fn_Table)ApplyColliderPendingImpulseHalfStep, (Fn_Table)UpdateColliderBounds, (Fn_Table)IgnoreColliderAttachmentStep,
     (Fn_Table)CopyColliderMeshesInFrame, (Fn_Table)NumberColliderParts, (Fn_Table)ComputeColliderImpulseResponse, (Fn_Table)AddParentVelocityToChildRows,
     (Fn_Table)TestCollidersMayContact, (Fn_Table)CollideColliderParts, 0, (Fn_Table)AddContactVertexBlendVelocity,
@@ -3621,18 +3621,18 @@ extern const ClassDescriptor<72> D_002206F8 = { &D_00217568, 0x4A, 0x3, 0x620, {
     (Fn_Table)SaveColliderPreviousPosition, (Fn_Table)CaptureColliderPose, (Fn_Table)ApplyColliderAttachedSetContact, (Fn_Table)RequestColliderLaunch,
 } };
 extern const ClassDescriptor<72> g_countdownColliderClass = { &D_00217568, 0x4B, 0x3, 0x570, {
-    (Fn_Table)InitCountdown, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
+    (Fn_Table)InitWorld5Countdown, (Fn_Table)ApplyObjectClassDefaults, (Fn_Table)AddObjectToParentList, (Fn_Table)RemoveObjectFromParentList,
     (Fn_Table)AttachPlacedObject, (Fn_Table)DetachPlacedObject, (Fn_Table)RegisterCollider, (Fn_Table)UnregisterCollider,
     (Fn_Table)ClonePlacedObject, (Fn_Table)CopyCollider, (Fn_Table)LoadCollider, 0,
     0, (Fn_Table)HandlePlacedObjectNotification, (Fn_Table)SendColliderNotification, (Fn_Table)PostLoadPlacedObject,
-    (Fn_Table)StartCountdown, (Fn_Table)UpdateCountdown, (Fn_Table)RecomputeColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
+    (Fn_Table)StartWorld5Countdown, (Fn_Table)UpdateWorld5Countdown, (Fn_Table)RecomputeColliderFrame, (Fn_Table)ComputeColliderWorldFrame,
     (Fn_Table)SetColliderFrozen, (Fn_Table)ReparentCollider, (Fn_Table)ReframeColliderAnchors, (Fn_Table)AddObjectListener,
     (Fn_Table)RemoveObjectListener, (Fn_Table)AddObjectCallback, (Fn_Table)RemoveObjectCallback, (Fn_Table)MoveCollider,
     (Fn_Table)StepCollider, (Fn_Table)SetColliderPosition, (Fn_Table)SetColliderRotation, (Fn_Table)CopyPlacedObjectFrame,
     (Fn_Table)SetColliderVelocity, (Fn_Table)SetColliderSpin, (Fn_Table)GetPlacedObjectPositionAt, (Fn_Table)GetPlacedObjectRotationAt,
     (Fn_Table)ApplyPlacedObjectTransform, (Fn_Table)DrawCollider, (Fn_Table)QueuePlacedObjectModelParts, (Fn_Table)UpdateAttachmentFrames,
     0, (Fn_Table)ApplyObjectFrameOffsetToPose, (Fn_Table)RemoveObjectFrameOffsetFromPose, (Fn_Table)ChooseActiveAttachments,
-    (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleCountdownObjectEvent, (Fn_Table)UpdateCountdownVisibility, (Fn_Table)ApplyColliderPendingMove,
+    (Fn_Table)UpdateLinkConstraint, (Fn_Table)HandleWorld5CountdownObjectEvent, (Fn_Table)UpdateWorld5CountdownVisibility, (Fn_Table)ApplyColliderPendingMove,
     (Fn_Table)ApplyColliderPendingImpulse, (Fn_Table)ApplyColliderPendingImpulseHalfStep, (Fn_Table)UpdateColliderBounds, (Fn_Table)IgnoreColliderAttachmentStep,
     (Fn_Table)CopyColliderMeshesInFrame, (Fn_Table)NumberColliderParts, (Fn_Table)ComputeColliderImpulseResponse, (Fn_Table)AddParentVelocityToChildRows,
     (Fn_Table)TestCollidersMayContact, (Fn_Table)CollideColliderParts, 0, (Fn_Table)AddContactVertexBlendVelocity,

@@ -21,7 +21,7 @@
 #include "contact_tracker.h"
 #include "child_group_object.h"
 #include "target_follower.h"
-#include "gauge_mode_object.h"
+#include "world5_boss.h"
 #include "counted_collider.h"
 #include "lookup_object.h"
 #include "effect_spawner.h"
@@ -38,7 +38,7 @@
 #include "object_pool.h"
 #include "oscillator.h"
 #include "entry_queue.h"
-#include "timeline.h"
+#include "world3_timeline.h"
 
 // The kinds a property's arguments are read as (func_001C23B0's fourth argument): one word per
 // argument, copied from the file's .rodata into the frame as one block.
@@ -110,9 +110,9 @@ void SwitchPlayerState11(void*,s32);
 void QueuePlayerWalkerActivation(void* obj, s32 v);
 void QueuePlayerFirstActivation(void* obj, s32 v);
 void QueuePlayerSecondActivation(void*,s32);
-void PlaceModeColliderAtAnchor(void* x);
-void SetGaugeModeObjectTarget(void* self, s32 index);
-void PlayGaugeModeObjectTarget(void* x);
+void PlaceWorld5ModeColliderAtAnchor(void* x);
+void SetWorld5BossTarget(void* self, s32 index);
+void PlayWorld5BossTarget(void* x);
 void ResetEntryQueue(void*);
 void BindEntryQueueToObject(void* x, s32 v);
 void UnbindEntryQueue(void*);
@@ -141,7 +141,7 @@ void SetExtraObjectPropertyVectorB(void* a0, s32 a1, Quad16* a2);
 void SetExtraObjectPropertyPair(void* a0, s32 a1, Quad16* a2);
 void SetExtraObjectPropertyWord(BaseObject* x, s32 a, s32 b);
 void SetExtraObjectPropertyVectorA(void* a0, s32 a1, Quad16* a2);
-void AdvanceGaugeAgentPhase(GaugeAgent* st);
+void AdvanceWorld2BossPhase(World2Boss* st);
 void AddContactListId(void*,s32);
 void AddContactListKind(void*,s32);
 s32 AddSeekingAgentObject(void* x, s32 v);
@@ -160,7 +160,7 @@ s32 LaunchChosenPoolObject(void* obj, s32 v);
 void ResetPlacementRecord(void* x);
 void ResetObjectPoolReleaseRecord(void* x);
 void ClearObjectPoolHeadingRecord(void*);
-void SetGaugeBarAgentValues(GaugeBarAgent* self, s32 a, s32 b, s32 c);
+void SetWorld4BossValues(World4Boss* self, s32 a, s32 b, s32 c);
 void SetTimedGroupFadeOutTime(void* p, f32 x);
 void SetTimedGroupFadeInTime(void* p, f32 x);
 void* CreateStateWalker(StateGraph* a, s32 b, s32 c, s32 d);
@@ -216,17 +216,17 @@ s32 PushSoundLevelBuiltin(void*,s32);
 s32 RemoveSoundLevelBuiltin(void* unused, s32 p);
 void SetWorldFlagBit(void*,s32);
 void ClearWorldFlagBit(void*,s32);
-void DecrementTempoAgentGauge(void* x);
-void SetTempoAgentPendingTimeline(void* self, s32 value);
-void EndHeldTimeline(void* x);
-void AddTempoAgentEntry(TempoAgent* p, s32 a, s32 b);
-void RemoveTempoAgentEntry(void* self, s32 value);
-void AppendTimelineKind0Entry(Timeline* self, s32 p, f32 f, s32 q);
-void AppendTimelineKind1Entry(Timeline* self, s32 p, f32 f, s32 q);
-void AppendTimelineKind2Entry(Timeline* self, s32 p, f32 v);
-void AppendTimelineKind3Entry(Timeline* self, s32 p, f32 v);
-void AppendTimelineKind4Entry(Timeline* self, s32 p, f32 v);
-void AppendTimelineKind5Entry(Timeline* self, s32 p, f32 v);
+void DecrementWorld3BossGauge(void* x);
+void SetWorld3BossPendingTimeline(void* self, s32 value);
+void EndHeldWorld3Timeline(void* x);
+void AddWorld3BossEntry(World3Boss* p, s32 a, s32 b);
+void RemoveWorld3BossEntry(void* self, s32 value);
+void AppendWorld3TimelineKind0Entry(World3Timeline* self, s32 p, f32 f, s32 q);
+void AppendWorld3TimelineKind1Entry(World3Timeline* self, s32 p, f32 f, s32 q);
+void AppendWorld3TimelineKind2Entry(World3Timeline* self, s32 p, f32 v);
+void AppendWorld3TimelineKind3Entry(World3Timeline* self, s32 p, f32 v);
+void AppendWorld3TimelineKind4Entry(World3Timeline* self, s32 p, f32 v);
+void AppendWorld3TimelineKind5Entry(World3Timeline* self, s32 p, f32 v);
 void ClearAttachedSetTrackedNodes(void* o);
 s32 AddStateResetEntry(StateResetObject* self, s32 a1, s32 a2, s32 a3, s32 a4);
 void AddOscillatorXEntry(void*);
@@ -452,7 +452,7 @@ ScriptValue* AddScriptOscillatorXEntry(ScriptValue* ret, Oscillator* obj, s32 un
 ScriptValue* AddScriptOscillatorYZEntry(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptOscillatorEntryVectorA(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptOscillatorEntryVectorB(ScriptValue* ret, Oscillator* obj, s32 unused, ScriptValue* args);
-ScriptValue* AdvanceScriptGaugeAgentPhase(ScriptValue* ret, GaugeAgent* obj, s32 unused, ScriptValue* args);
+ScriptValue* AdvanceScriptWorld2BossPhase(ScriptValue* ret, World2Boss* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptEntryRecordKey(ScriptValue* ret, C17* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptPathFollowerEntry(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptPathFollowerActiveEntry(ScriptValue* ret, PathFollower* obj, s32 unused, ScriptValue* args);
@@ -478,21 +478,21 @@ ScriptValue* AddScriptQueueEntryKind9(ScriptValue* ret, EntryQueue* obj, s32 unu
 ScriptValue* AddScriptQueueEntryKind11(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptQueueEntryKind12(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
 ScriptValue* StartScriptColorFade(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* PlayScriptGaugeModeObjectTarget(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* SetScriptGaugeModeObjectTarget(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args);
-ScriptValue* PlaceScriptModeColliderAtAnchor(ScriptValue* ret, ModeCollider* obj, s32 unused, ScriptValue* args);
-ScriptValue* SetScriptTempoAgentPendingTimeline(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* EndScriptHeldTimeline(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* AddScriptC13Entry(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* RemoveScriptTempoAgentEntry(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* DecrementScriptTempoAgentGauge(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args);
-ScriptValue* AppendScriptTimelineKind0Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* AppendScriptTimelineKind1Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* AppendScriptTimelineKind2Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* AppendScriptTimelineKind3Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* AppendScriptTimelineKind4Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* AppendScriptTimelineKind5Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
-ScriptValue* SetScriptGaugeBarAgentValues(ScriptValue* ret, GaugeBarAgent* obj, s32 unused, ScriptValue* args);
+ScriptValue* PlayScriptWorld5BossTarget(ScriptValue* ret, World5Boss* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptWorld5BossTarget(ScriptValue* ret, World5Boss* obj, s32 unused, ScriptValue* args);
+ScriptValue* PlaceScriptWorld5ModeColliderAtAnchor(ScriptValue* ret, World5ModeCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptWorld3BossPendingTimeline(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args);
+ScriptValue* EndScriptHeldWorld3Timeline(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args);
+ScriptValue* AddScriptC13Entry(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args);
+ScriptValue* RemoveScriptWorld3BossEntry(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args);
+ScriptValue* DecrementScriptWorld3BossGauge(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptWorld3TimelineKind0Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptWorld3TimelineKind1Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptWorld3TimelineKind2Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptWorld3TimelineKind3Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptWorld3TimelineKind4Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* AppendScriptWorld3TimelineKind5Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* SetScriptWorld4BossValues(ScriptValue* ret, World4Boss* obj, s32 unused, ScriptValue* args);
 ScriptValue* SendScriptHitCountColliderRequest(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptHitCountColliderId(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args);
 ScriptValue* AddScriptHitCountColliderItem(ScriptValue* ret, HitCountCollider* obj, s32 unused, ScriptValue* args);
@@ -3273,7 +3273,7 @@ ScriptValue* AddScriptOscillatorEntryVectorB(ScriptValue* ret, Oscillator* obj, 
     return ret;
 }
 
-ScriptValue* AdvanceScriptGaugeAgentPhase(ScriptValue* ret, GaugeAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* AdvanceScriptWorld2BossPhase(ScriptValue* ret, World2Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3281,7 +3281,7 @@ ScriptValue* AdvanceScriptGaugeAgentPhase(ScriptValue* ret, GaugeAgent* obj, s32
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AdvanceGaugeAgentPhase(obj);
+    AdvanceWorld2BossPhase(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3735,7 +3735,7 @@ ScriptValue* StartScriptColorFade(ScriptValue* ret, BaseObject* obj, s32 unused,
     return ret;
 }
 
-ScriptValue* PlayScriptGaugeModeObjectTarget(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* PlayScriptWorld5BossTarget(ScriptValue* ret, World5Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3743,14 +3743,14 @@ ScriptValue* PlayScriptGaugeModeObjectTarget(ScriptValue* ret, GaugeModeObject* 
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    PlayGaugeModeObjectTarget(obj);
+    PlayWorld5BossTarget(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* SetScriptGaugeModeObjectTarget(ScriptValue* ret, GaugeModeObject* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptWorld5BossTarget(ScriptValue* ret, World5Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3761,14 +3761,14 @@ ScriptValue* SetScriptGaugeModeObjectTarget(ScriptValue* ret, GaugeModeObject* o
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)SetGaugeModeObjectTarget(obj, out);
+    (void)SetWorld5BossTarget(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* PlaceScriptModeColliderAtAnchor(ScriptValue* ret, ModeCollider* obj, s32 unused, ScriptValue* args)
+ScriptValue* PlaceScriptWorld5ModeColliderAtAnchor(ScriptValue* ret, World5ModeCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3776,14 +3776,14 @@ ScriptValue* PlaceScriptModeColliderAtAnchor(ScriptValue* ret, ModeCollider* obj
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    PlaceModeColliderAtAnchor(obj);
+    PlaceWorld5ModeColliderAtAnchor(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* SetScriptTempoAgentPendingTimeline(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptWorld3BossPendingTimeline(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3794,14 +3794,14 @@ ScriptValue* SetScriptTempoAgentPendingTimeline(ScriptValue* ret, TempoAgent* ob
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)SetTempoAgentPendingTimeline(obj, out);
+    (void)SetWorld3BossPendingTimeline(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* EndScriptHeldTimeline(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* EndScriptHeldWorld3Timeline(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3809,14 +3809,14 @@ ScriptValue* EndScriptHeldTimeline(ScriptValue* ret, TempoAgent* obj, s32 unused
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    EndHeldTimeline(obj);
+    EndHeldWorld3Timeline(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* AddScriptC13Entry(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptC13Entry(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3828,14 +3828,14 @@ ScriptValue* AddScriptC13Entry(ScriptValue* ret, TempoAgent* obj, s32 unused, Sc
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AddTempoAgentEntry(obj, o1, o2);
+    AddWorld3BossEntry(obj, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* RemoveScriptTempoAgentEntry(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* RemoveScriptWorld3BossEntry(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3846,14 +3846,14 @@ ScriptValue* RemoveScriptTempoAgentEntry(ScriptValue* ret, TempoAgent* obj, s32 
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)RemoveTempoAgentEntry(obj, out);
+    (void)RemoveWorld3BossEntry(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* DecrementScriptTempoAgentGauge(ScriptValue* ret, TempoAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* DecrementScriptWorld3BossGauge(ScriptValue* ret, World3Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     ScriptValue t;
@@ -3861,14 +3861,14 @@ ScriptValue* DecrementScriptTempoAgentGauge(ScriptValue* ret, TempoAgent* obj, s
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    DecrementTempoAgentGauge(obj);
+    DecrementWorld3BossGauge(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* AppendScriptTimelineKind0Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptWorld3TimelineKind0Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -3881,14 +3881,14 @@ ScriptValue* AppendScriptTimelineKind0Entry(ScriptValue* ret, Timeline* obj, s32
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AppendTimelineKind0Entry(obj, o0, o1, o2);
+    AppendWorld3TimelineKind0Entry(obj, o0, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* AppendScriptTimelineKind1Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptWorld3TimelineKind1Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -3901,14 +3901,14 @@ ScriptValue* AppendScriptTimelineKind1Entry(ScriptValue* ret, Timeline* obj, s32
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AppendTimelineKind1Entry(obj, o0, o1, o2);
+    AppendWorld3TimelineKind1Entry(obj, o0, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* AppendScriptTimelineKind2Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptWorld3TimelineKind2Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3920,14 +3920,14 @@ ScriptValue* AppendScriptTimelineKind2Entry(ScriptValue* ret, Timeline* obj, s32
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &n, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AppendTimelineKind2Entry(obj, n, out);
+    AppendWorld3TimelineKind2Entry(obj, n, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* AppendScriptTimelineKind3Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptWorld3TimelineKind3Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3939,14 +3939,14 @@ ScriptValue* AppendScriptTimelineKind3Entry(ScriptValue* ret, Timeline* obj, s32
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &n, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AppendTimelineKind3Entry(obj, n, out);
+    AppendWorld3TimelineKind3Entry(obj, n, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* AppendScriptTimelineKind4Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptWorld3TimelineKind4Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3958,14 +3958,14 @@ ScriptValue* AppendScriptTimelineKind4Entry(ScriptValue* ret, Timeline* obj, s32
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &n, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AppendTimelineKind4Entry(obj, n, out);
+    AppendWorld3TimelineKind4Entry(obj, n, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* AppendScriptTimelineKind5Entry(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
+ScriptValue* AppendScriptWorld3TimelineKind5Entry(ScriptValue* ret, World3Timeline* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3977,14 +3977,14 @@ ScriptValue* AppendScriptTimelineKind5Entry(ScriptValue* ret, Timeline* obj, s32
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &n, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    AppendTimelineKind5Entry(obj, n, out);
+    AppendWorld3TimelineKind5Entry(obj, n, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
 }
 
-ScriptValue* SetScriptGaugeBarAgentValues(ScriptValue* ret, GaugeBarAgent* obj, s32 unused, ScriptValue* args)
+ScriptValue* SetScriptWorld4BossValues(ScriptValue* ret, World4Boss* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds3 kinds;
@@ -3997,7 +3997,7 @@ ScriptValue* SetScriptGaugeBarAgentValues(ScriptValue* ret, GaugeBarAgent* obj, 
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetGaugeBarAgentValues(obj, o0, o1, o2);
+    SetWorld4BossValues(obj, o0, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -4093,7 +4093,7 @@ ScriptValue* TakeScriptCountedColliderTouch(ScriptValue* ret, CountedCollider* o
 // their files define them, after the types of theirs that this file does not use otherwise
 // (U128 is placed_object.cpp's 128-bit word).
 struct ConeVolume;
-struct CountdownCollider;
+struct World5Countdown;
 struct FlaggedObject;
 struct GaugeManager;
 struct IdFilterObject;
@@ -4191,7 +4191,7 @@ void SetClass75ObjectCount(PlacedObject* self, s32 value);
 void SetClass75ObjectScale(void* self, f32 value);
 void SetClass75ObjectField90(void* self, void* value);
 void SetObjectRecordValue(PlacedObject* state, u32 value);
-void SetObjectTreeRecordValue(ModeCollider* o, u32 value);
+void SetObjectTreeRecordValue(World5ModeCollider* o, u32 value);
 void GetColorPreset(PlacedObject* self, s32* out);
 void SetColorPreset(PlacedObject* self, s32 a1);
 void GetColorRecordFirstColor(PlacedObject* self, Quad16* out);
@@ -4413,7 +4413,7 @@ void* GetOscillatorEntryForPeriod(void* self, s32 mode);
 void GetOscillatorEntryPeriod(void* self, f32* out);
 void SetOscillatorEntryPeriod(void* self, f32 x);
 void* GetOscillatorEntryForVectors(void* self, s32 mode);
-void GetGaugeAgentLevelFactor(GaugeAgent* a0, f32* a1);
+void GetWorld2BossLevelFactor(World2Boss* a0, f32* a1);
 void SetTintBlendColliderState(void* self, s32 flag);
 void AddPlayerLinkedColliderId(PlayerLinkedCollider* self, void* value);
 void AppendGaugeSlot(GaugeManager* self, s32 value);
@@ -4425,11 +4425,11 @@ void SetSeekingAgentStateTarget(SeekingAgent* self, s32 value);
 void SetSeekingAgentTarget(SeekingAgent* self, s32 value);
 void PickRandomPointOnPointGraph(PointGraphObject* self, Vec02* out);
 void SetModeWalkerMode(ModeWalker* self, s32 n);
-void SetGaugeModeObjectMode(GaugeModeObject* self, s32 a1);
-s32 PlayGaugeModeObjectLoop(GaugeModeObject* self, s32 a1);
-void SetCountdownState(CountdownCollider* self, s32 state);
-void SetTempoAgentTempo(TempoAgent* self, s32 v);
-void SetTempoAgentSpanBeats(TempoAgent* self, s32 v);
+void SetWorld5BossMode(World5Boss* self, s32 a1);
+s32 PlayWorld5BossLoop(World5Boss* self, s32 a1);
+void SetWorld5CountdownState(World5Countdown* self, s32 state);
+void SetWorld3BossTempo(World3Boss* self, s32 v);
+void SetWorld3BossSpanBeats(World3Boss* self, s32 v);
 void SetHitCountColliderState(void* self, s32 flag);
 
 void FillObjectPropertyTable()
@@ -5462,8 +5462,8 @@ void FillObjectPropertyTable()
     p->type = 0; p->flags = 0x92; p->getter = 3088; p->putter = 3088; p->offset = 3088; p++;
     p->type = 8339; p->flags = 0x2; p->getter = 3600; p++;
     p->type = 8307; p->flags = 0x92; p->getter = 3604; p->putter = 3604; p->offset = 3604; p++;
-    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)AdvanceScriptGaugeAgentPhase; p->putter = 0; p++;
-    p->type = 1; p->flags = 0x4; p->getter = (s32)GetGaugeAgentLevelFactor; p++;
+    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)AdvanceScriptWorld2BossPhase; p->putter = 0; p++;
+    p->type = 1; p->flags = 0x4; p->getter = (s32)GetWorld2BossLevelFactor; p++;
     p->type = 4175; p->flags = 0x22; p->getter = 1824; p->putter = (s32)SetTintBlendColliderState; p++;
     p->type = 0; p->flags = 0x92; p->getter = 1852; p->putter = 1852; p->offset = 1852; p++;
     p->type = 1; p->flags = 0x92; p->getter = 88; p->putter = 88; p->offset = 88; p++;
@@ -5577,34 +5577,34 @@ void FillObjectPropertyTable()
     p->type = 1; p->flags = 0x92; p->getter = 76; p->putter = 76; p->offset = 76; p++;
     p->type = 4188; p->flags = 0x92; p->getter = 88; p->putter = 88; p->offset = 88; p++;
     p->type = 8195; p->flags = 0x12; p->getter = 1544; p->putter = 1544; p++;
-    p->type = 4190; p->flags = 0x22; p->getter = 1360; p->putter = (s32)SetGaugeModeObjectMode; p++;
-    p->type = 0; p->flags = 0x20; p->putter = (s32)PlayGaugeModeObjectLoop; p++;
-    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)PlayScriptGaugeModeObjectTarget; p->putter = 0; p++;
-    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)SetScriptGaugeModeObjectTarget; p->putter = 1; p++;
+    p->type = 4190; p->flags = 0x22; p->getter = 1360; p->putter = (s32)SetWorld5BossMode; p++;
+    p->type = 0; p->flags = 0x20; p->putter = (s32)PlayWorld5BossLoop; p++;
+    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)PlayScriptWorld5BossTarget; p->putter = 0; p++;
+    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)SetScriptWorld5BossTarget; p->putter = 1; p++;
     p->type = 1; p->flags = 0x92; p->getter = 1788; p->putter = 1788; p->offset = 1788; p++;
     p->type = 1; p->flags = 0x92; p->getter = 1792; p->putter = 1792; p->offset = 1792; p++;
-    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)PlaceScriptModeColliderAtAnchor; p->putter = 0; p++;
+    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)PlaceScriptWorld5ModeColliderAtAnchor; p->putter = 0; p++;
     p->type = 5; p->flags = 0x92; p->getter = 1368; p->putter = 1368; p->offset = 1368; p++;
-    p->type = 4191; p->flags = 0xA2; p->getter = 1360; p->putter = (s32)SetCountdownState; p->offset = 1360; p++;
-    p->type = 5; p->flags = 0x122; p->getter = 3164; p->putter = (s32)SetTempoAgentTempo; p->offset = (s32)SetTempoAgentTempo; p++;
-    p->type = 5; p->flags = 0x122; p->getter = 3168; p->putter = (s32)SetTempoAgentSpanBeats; p->offset = (s32)SetTempoAgentSpanBeats; p++;
-    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)SetScriptTempoAgentPendingTimeline; p->putter = 1; p++;
-    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)EndScriptHeldTimeline; p->putter = 0; p++;
+    p->type = 4191; p->flags = 0xA2; p->getter = 1360; p->putter = (s32)SetWorld5CountdownState; p->offset = 1360; p++;
+    p->type = 5; p->flags = 0x122; p->getter = 3164; p->putter = (s32)SetWorld3BossTempo; p->offset = (s32)SetWorld3BossTempo; p++;
+    p->type = 5; p->flags = 0x122; p->getter = 3168; p->putter = (s32)SetWorld3BossSpanBeats; p->offset = (s32)SetWorld3BossSpanBeats; p++;
+    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)SetScriptWorld3BossPendingTimeline; p->putter = 1; p++;
+    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)EndScriptHeldWorld3Timeline; p->putter = 0; p++;
     p->type = 8339; p->flags = 0x2; p->getter = 3156; p++;
     p->type = 8307; p->flags = 0x12; p->getter = 3144; p->putter = 3144; p++;
     p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)AddScriptC13Entry; p->putter = 2; p++;
-    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)RemoveScriptTempoAgentEntry; p->putter = 1; p++;
-    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)DecrementScriptTempoAgentGauge; p->putter = 0; p++;
+    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)RemoveScriptWorld3BossEntry; p->putter = 1; p++;
+    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)DecrementScriptWorld3BossGauge; p->putter = 0; p++;
     p->type = 8307; p->flags = 0x12; p->getter = 1660; p->putter = 1660; p++;
     p->type = 8335; p->flags = 0x12; p->getter = 1576; p->putter = 1576; p++;
-    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptTimelineKind0Entry; p->putter = 3; p++;
-    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptTimelineKind1Entry; p->putter = 3; p++;
-    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptTimelineKind2Entry; p->putter = 2; p++;
-    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptTimelineKind3Entry; p->putter = 2; p++;
-    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptTimelineKind4Entry; p->putter = 2; p++;
-    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptTimelineKind5Entry; p->putter = 2; p++;
+    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptWorld3TimelineKind0Entry; p->putter = 3; p++;
+    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptWorld3TimelineKind1Entry; p->putter = 3; p++;
+    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptWorld3TimelineKind2Entry; p->putter = 2; p++;
+    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptWorld3TimelineKind3Entry; p->putter = 2; p++;
+    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptWorld3TimelineKind4Entry; p->putter = 2; p++;
+    p->type = 18; p->flags = 0x401; p->getter = p->f10 = (s32)AppendScriptWorld3TimelineKind5Entry; p->putter = 2; p++;
     p->type = 5; p->flags = 0x12; p->getter = 3088; p->putter = 3088; p++;
-    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)SetScriptGaugeBarAgentValues; p->putter = 3; p++;
+    p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)SetScriptWorld4BossValues; p->putter = 3; p++;
     p->type = 0; p->flags = 0x12; p->getter = 3108; p->putter = 3108; p++;
     p->type = 4199; p->flags = 0x22; p->getter = 1552; p->putter = (s32)SetHitCountColliderState; p++;
     p->type = 18; p->flags = 0x1; p->getter = 0; p->f10 = (s32)SendScriptHitCountColliderRequest; p->putter = 1; p++;

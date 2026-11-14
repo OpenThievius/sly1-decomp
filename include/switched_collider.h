@@ -19,7 +19,7 @@ struct HitStamp {
 
 struct Player;
 struct ObjectMessage;    // object_message.h
-struct BeatPressCollider;
+struct World3BeatPressCollider;
 struct Agent;
 struct OnOffObject;     // an object of class 0x63 (c63.h)
 struct PathCurveObject;   // path_curve_object.h
@@ -27,7 +27,7 @@ struct StateTrigger;      // state_trigger.h
 struct StateWalker; // a handle func_001B6290 makes (s1b6290.h)
 struct AnimationPlayer;  // an animation's player (t2195.h)
 struct EntryQueue;       // class 0x8F (entry_queue.h)
-struct Timeline;         // class 0x90 (timeline.h)
+struct World3Timeline;         // class 0x90 (world3_timeline.h)
 struct PadRecord;        // pad_record.h
 
 // 0x80 bytes at 0x580 of class 0x05, which class 0x17's slot 72 copies as one block: the data
@@ -676,11 +676,11 @@ struct ConeAgent : Agent {
 
 // 0x0B, the keyed cone agent: a cone agent that counts down (+0xC5C) as it moves between its six
 // key objects (FindNearestAgentKey).
-struct KeyedConeAgent : ConeAgent {
+struct World1Boss : ConeAgent {
     void* fC50;             // 0xC50
     void* fC54;             // 0xC54
     s32 fC58;               // 0xC58: its mode, 0x2D8 to 0x2DB
-    s32 fC5C;               // 0xC5C: the count it lowers (ChooseKeyedConeAgentState stops at 0)
+    s32 fC5C;               // 0xC5C: the count it lowers (ChooseWorld1BossState stops at 0)
     void* fC60;             // 0xC60
     PlacedObject* fC64[6];  // 0xC64: the roots whose colliders slot 56 refuses (func_001E9038)
     s32 fC7C;               // 0xC7C
@@ -689,7 +689,7 @@ struct KeyedConeAgent : ConeAgent {
     u8 padC94[0xCA0 - 0xC94];
 };
 
-struct GaugeAgent : Agent {
+struct World2Boss : Agent {
     s32 fC10;               // 0xC10
     u8 padC14[0xE00 - 0xC14];
     s32 fE00;               // 0xE00
@@ -709,7 +709,7 @@ struct GaugeAgent : Agent {
     Vec02 vE40;             // 0xE40
 };
 
-struct GaugeBarAgent : Agent {
+struct World4Boss : Agent {
     s32 fC10;               // 0xC10
     s32 fC14;               // 0xC14
     s32 fC18;               // 0xC18
@@ -760,21 +760,21 @@ struct ContactAgent : WorldListedAgent {
 };
 
 // An entry of the tempo agent's table at 0xC6C (func_001ED090 adds one): an animation player
-// and the number of beats its animation spans, whose speed SyncTempoAgentEntries sets.
+// and the number of beats its animation spans, whose speed SyncWorld3BossEntries sets.
 struct TempoPlayerEntry {
     AnimationPlayer* player; // 0x00
     s32 beats;              // 0x04
 };
 
-// 0x13, the tempo agent: counts beats at a tempo (UpdateTempoAgent) for the class 0x1C
-// beat-press colliders to judge presses against (JudgeBeatPressInput).
-struct TempoAgent : Agent {
+// 0x13, the tempo agent: counts beats at a tempo (UpdateWorld3Boss) for the class 0x1C
+// beat-press colliders to judge presses against (JudgeWorld3BeatPressInput).
+struct World3Boss : Agent {
     s32 fC10[4];            // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
     s32 fC20;               // 0xC20
     void* fC24[4];          // 0xC24: the timelines of the links 0x4E7.. (func_001EC828 takes the one at fC40)
-    Timeline* fC34;         // 0xC34: the timeline to start when the beat clock restarts
-    Timeline* fC38;         // 0xC38: the timeline it runs (EndHeldTimeline)
-    BeatPressCollider* fC3C; // 0xC3C: the active beat-press collider (HandleBeatPressColliderActivation sets it)
+    World3Timeline* fC34;         // 0xC34: the timeline to start when the beat clock restarts
+    World3Timeline* fC38;         // 0xC38: the timeline it runs (EndHeldWorld3Timeline)
+    World3BeatPressCollider* fC3C; // 0xC3C: the active beat-press collider (HandleWorld3BeatPressColliderActivation sets it)
     s32 fC40;               // 0xC40: which of fC24 is in use
     f32 fC44;               // 0xC44
     void* fC48;             // 0xC48
@@ -782,8 +782,8 @@ struct TempoAgent : Agent {
     void* fC50;             // 0xC50
     void* fC54;             // 0xC54
     u8 padC58[0xC5C - 0xC58];
-    s32 fC5C;               // 0xC5C: the tempo in beats a minute (SetTempoAgentTempo)
-    s32 fC60;               // 0xC60: a span in beats (SetTempoAgentSpanBeats)
+    s32 fC5C;               // 0xC5C: the tempo in beats a minute (SetWorld3BossTempo)
+    s32 fC60;               // 0xC60: a span in beats (SetWorld3BossSpanBeats)
     f32 fC64;               // 0xC64: that span in seconds
     s32 fC68;               // 0xC68: the number of fC6C entries (func_001ED090)
     TempoPlayerEntry* fC6C; // 0xC6C: a 0x400-byte table (slot 0)
@@ -1061,8 +1061,8 @@ struct ModeWalker : PathFollower {
     u8 padC0C[0xC10 - 0xC0C];
 };
 
-struct ModeCollider : SwitchedCollider {
-    s32 f610;               // 0x610: the mode (SetModeColliderMode)
+struct World5ModeCollider : SwitchedCollider {
+    s32 f610;               // 0x610: the mode (SetWorld5ModeColliderMode)
     f32 f614;               // 0x614: the clock when the mode was set
     s32 f618;               // 0x618
     f32 f61C;               // 0x61C: the angle about z of the matrix at 0x620 outside modes 2 to 4 (func_00179A68)
@@ -1088,7 +1088,7 @@ struct ModeCollider : SwitchedCollider {
     u8 pad6AC[0x6B4 - 0x6AC];
     f32 f6B4;               // 0x6B4
     u8 pad6B8[0x6C0 - 0x6B8];
-    void* f6C0;             // 0x6C0: the animations of modes 2, 1, 3 and 4 (SetModeColliderMode)
+    void* f6C0;             // 0x6C0: the animations of modes 2, 1, 3 and 4 (SetWorld5ModeColliderMode)
     void* f6C4;             // 0x6C4
     void* f6C8;             // 0x6C8
     void* f6CC;             // 0x6CC
@@ -1110,7 +1110,7 @@ struct ModeCollider : SwitchedCollider {
     s32 f70C;               // 0x70C
 };
 
-struct BeatPressCollider : SwitchedCollider {
+struct World3BeatPressCollider : SwitchedCollider {
     void* f610;             // 0x610
     void* f614;             // 0x614
     void* f618[4];          // 0x618: the objects func_001EC828 places the tempo agent's timelines by
@@ -1171,15 +1171,15 @@ typedef char check_Player[sizeof(Player) == 0x2BF0 ? 1 : -1];
 typedef char check_Agent[sizeof(Agent) == 0xC10 ? 1 : -1];
 typedef char check_C09[sizeof(CompanionAgent) == 0xD00 ? 1 : -1];
 typedef char check_ConeAgent[sizeof(ConeAgent) == 0xC50 ? 1 : -1];
-typedef char check_KeyedConeAgent[sizeof(KeyedConeAgent) == 0xCA0 ? 1 : -1];
-typedef char check_GaugeAgent[sizeof(GaugeAgent) == 0xE50 ? 1 : -1];
-typedef char check_GaugeBarAgent[sizeof(GaugeBarAgent) == 0xC30 ? 1 : -1];
+typedef char check_World1Boss[sizeof(World1Boss) == 0xCA0 ? 1 : -1];
+typedef char check_World2Boss[sizeof(World2Boss) == 0xE50 ? 1 : -1];
+typedef char check_World4Boss[sizeof(World4Boss) == 0xC30 ? 1 : -1];
 typedef char check_SeekingAgent[sizeof(SeekingAgent) == 0xC50 ? 1 : -1];
 typedef char check_GaugeColliderAgent[sizeof(GaugeColliderAgent) == 0xC20 ? 1 : -1];
 typedef char check_WorldListedAgent[sizeof(WorldListedAgent) == 0xC20 ? 1 : -1];
 typedef char check_NumberedAgent[sizeof(NumberedAgent) == 0xC30 ? 1 : -1];
 typedef char check_ContactAgent[sizeof(ContactAgent) == 0xC30 ? 1 : -1];
-typedef char check_TempoAgent[sizeof(TempoAgent) == 0xCA0 ? 1 : -1];
+typedef char check_World3Boss[sizeof(World3Boss) == 0xCA0 ? 1 : -1];
 typedef char check_TintBlendCollider[sizeof(TintBlendCollider) == 0x760 ? 1 : -1];
 typedef char check_WalkerCollider[sizeof(WalkerCollider) == 0x690 ? 1 : -1];
 typedef char check_PlayerLinkedCollider[sizeof(PlayerLinkedCollider) == 0x660 ? 1 : -1];
@@ -1187,8 +1187,8 @@ typedef char check_C17[sizeof(C17) == 0x800 ? 1 : -1];
 typedef char check_GaugeCollider[sizeof(GaugeCollider) == 0x6C0 ? 1 : -1];
 typedef char check_PathFollower[sizeof(PathFollower) == 0xBB0 ? 1 : -1];
 typedef char check_ModeWalker[sizeof(ModeWalker) == 0xC10 ? 1 : -1];
-typedef char check_ModeCollider[sizeof(ModeCollider) == 0x710 ? 1 : -1];
-typedef char check_BeatPressCollider[sizeof(BeatPressCollider) == 0x690 ? 1 : -1];
+typedef char check_World5ModeCollider[sizeof(World5ModeCollider) == 0x710 ? 1 : -1];
+typedef char check_World3BeatPressCollider[sizeof(World3BeatPressCollider) == 0x690 ? 1 : -1];
 typedef char check_C1D[sizeof(HitCountCollider) == 0x760 ? 1 : -1];
 typedef char check_Desc05[sizeof(Desc05) == 0x160 ? 1 : -1];
 typedef char check_Desc06[sizeof(Desc06) == 0x170 ? 1 : -1];

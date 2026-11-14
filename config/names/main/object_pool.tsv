@@ -25,15 +25,15 @@ func_001A94C0	GetPlacementRecordTransform	gives the position and rotation a plac
 func_001A95D0	ComputeFrameFollowerPoint	a point in an object's frame (or the anchor's): mode 0 transforms it directly, modes 1 and 2 evaluate the object's frame at a time from a quadratic of the distance to the target clamped to a range and write the point in the destination frame
 func_001A97C8	GetPlacementRecordAngle	gives the heading a placement record names: the angle of its object's world rotation (+0x10) or its collider's (+0x14), else its own angle at +0x8
 func_001A9868	GetPlacementRecordPitch	the pitch of the record's object (+0x10) as atan2 of its rotation row's z over its length in x and y, else the stored pitch at +0x4; the counterpart of GetPlacementRecordAngle
-func_001A98F8	StartGaugeBarAgent	slot 16 of class 0x0D: runs StartAgent, then registers itself with its world through func_001DDC38
-func_001A9928	IsGaugeBarAgentFree	slot 0x16C of class 0x0D (as IsGaugeAgentFree): returns 0 when func_001DDA80 holds for its world, else its flag at +0xC24
-func_001A9960	UpdateGaugeBarAgentGoal	slot 94 of class 0x0D: runs UpdateAgentGoal and in state 0x10 heads for the position (+0x140) of the object its slot 102 returns
-func_001A99B8	UpdateGaugeBarAgentState	slot 90 of class 0x0D: runs UpdateAgentState, then func_001C8BC0 in state 0x10
-func_001A99F8	EnterGaugeBarAgentState	slot 92 of class 0x0D: runs EnterAgentState and on state 0xB marks level part 4 done (MarkLevelDone) and starts a memory card save
-func_001A9A40	UpdateGaugeBarAgent	slot 17 of class 0x0D: runs UpdateAgent, then stops and clears the animation player at 0xC20 once its value at +0x18 is 0
-func_001A9A98	UpdateGaugeBarAgentVisibility	slot 46 of class 0x0D: shows g_gaugeBarElement while AreMenusAndFadeClear, else hides it
-func_001A9AE8	HandleGaugeBarAgentObjectEvent	slot 0xC4 (object event) of class 0x0D: counts at 0xC10 and lowers the gauge (DecrementGaugeCount), sends its member group 0xB00 a message (slot 27) and plays a clip (ReplaceAnimationPlayer) on the events it handles, then runs HandleAgentObjectEvent
-func_001A9C58	SetGaugeBarAgentValues	stores its three arguments in the words 0xC14, 0xC18 and 0xC1C of a class 0x0D agent
+func_001A98F8	StartWorld4Boss	slot 16 of class 0x0D: runs StartAgent, then registers itself with its world through func_001DDC38
+func_001A9928	IsWorld4BossFree	slot 0x16C of class 0x0D (as IsWorld2BossFree): returns 0 when func_001DDA80 holds for its world, else its flag at +0xC24
+func_001A9960	UpdateWorld4BossGoal	slot 94 of class 0x0D: runs UpdateAgentGoal and in state 0x10 heads for the position (+0x140) of the object its slot 102 returns
+func_001A99B8	UpdateWorld4BossState	slot 90 of class 0x0D: runs UpdateAgentState, then func_001C8BC0 in state 0x10
+func_001A99F8	EnterWorld4BossState	slot 92 of class 0x0D: runs EnterAgentState and on state 0xB marks level part 4 done (MarkLevelDone) and starts a memory card save. Boss of world 4: one of the five calls of MarkLevelDone, with world 4, and the class's only object in retail's levels is in level 0x408, the last of world 4
+func_001A9A40	UpdateWorld4Boss	slot 17 of class 0x0D: runs UpdateAgent, then stops and clears the animation player at 0xC20 once its value at +0x18 is 0
+func_001A9A98	UpdateWorld4BossVisibility	slot 46 of class 0x0D: shows g_gaugeBarElement while AreMenusAndFadeClear, else hides it
+func_001A9AE8	HandleWorld4BossObjectEvent	slot 0xC4 (object event) of class 0x0D: counts at 0xC10 and lowers the gauge (DecrementGaugeCount), sends its member group 0xB00 a message (slot 27) and plays a clip (ReplaceAnimationPlayer) on the events it handles, then runs HandleAgentObjectEvent
+func_001A9C58	SetWorld4BossValues	stores its three arguments in the words 0xC14, 0xC18 and 0xC1C of a class 0x0D agent
 func_001A9C68	InstallScreenElements	stores each of the 37 element tables in its global element, calls slot 0 on every element of D_002486B0 and resets D_00275F80
 func_001A9F78	InitScreenElements	calls slot 1 on each of the 37 elements of D_002486B0 from the last to the first
 func_001A9FD0	UpdateScreenElements	calls slot 2 on each of the 37 elements from the last to the first, then advances the screen fade g_screenFade

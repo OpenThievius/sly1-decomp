@@ -1,6 +1,6 @@
 symbol	name	evidence
 func_0014B6A8	UpdateNumberedAgentGoal	slot 0x188 of class 0x11, the goal slot UpdateAgentGoal fills for class 0x08: steers the numbered agent's heading (WrapAngle, func_001C8418) from its position and its record at +0xC10, then runs UpdateAgentGoal
-func_0014BB08	IsNumberedAgentFree	slot 0x16C of class 0x11, the slot IsContactAgentFree and IsGaugeAgentFree fill: tests func_001DDA80 for the world and the agent's state at +0x724 (0xB, 0x10) and its record at +0xC20
+func_0014BB08	IsNumberedAgentFree	slot 0x16C of class 0x11, the slot IsContactAgentFree and IsWorld2BossFree fill: tests func_001DDA80 for the world and the agent's state at +0x724 (0xB, 0x10) and its record at +0xC20
 func_0014BCE8	HandleNumberedAgentObjectEvent	a method of class 0x11 (overriding HandleAgentObjectEvent): returns 1 in state 0x10 or 0xB, else runs the base HandleAgentObjectEvent and clears 0xC20 when it accepts
 func_0014BD38	EnterNumberedAgentState	a method of class 0x11 (overriding EnterAgentState): runs EnterAgentState, then on state 0xB adds to the gauge manager (AddToGaugeAmount) and on 0xB and 0xC clears the pending record at 0xC28
 func_0014BDC8	ChooseAgentStateByContact	a method of class 0x12 (overriding ChooseAgentState): runs ChooseAgentState, and when the controlled object touches it sends that object a message and returns state 0xB, and sends 0xB to each touching agent of kind 0x12 in the world list 0x1CCC

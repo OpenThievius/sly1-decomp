@@ -68,7 +68,7 @@ D_0021E418	g_triangleAnimatorMethods	method table func_001B4980 returns for curs
 D_0021E438	g_crossfadeAnimatorMethods	method table func_001B4980 returns for cursor animator type 5, the table of CrossfadeAnimator (include/cursor_animator.h)
 D_0021E458	g_scaledOffsetObjectClass	class descriptor of ScaledOffsetObject (include/scaled_offset_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
 D_0021EF88	g_entryTableObjectClass	class descriptor of EntryTableObject (include/entry_table_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
-D_00220828	g_countdownColliderClass	class descriptor of CountdownCollider (include/countdown_collider.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
+D_00220828	g_countdownColliderClass	class descriptor of World5Countdown (include/world5_countdown.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
 D_00220F50	g_idLinkedObjectClass	class descriptor of IdLinkedObject (include/id_linked_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
 D_00221140	g_partHolderObjectClass	class descriptor of PartHolderObject (include/part_holder_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
 D_00221210	g_currentPlacedObjectClass	class descriptor of CurrentPlacedObject (include/current_placed_object.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
@@ -232,11 +232,11 @@ D_00262D38	g_blankPadRecord	the second pad record, defined as zeros and never in
 D_00262DFC	g_buttonCodes	the head of the button-code list: AddButtonCode pushes onto it, AdvanceButtonCodes and RunCompletedButtonCode walk it
 D_00262E10	g_player	singleton LoadPlayerCharacter (class 0x07 slot 10) stores itself in; ShowModeLabel and others read it
 D_00262E40	g_playerCharacterLinks	0x97-entry link table LoadPlayerCharacter (class 0x07 slot 10) installs through func_00124DF8
-D_00263AC8	g_modeColliderLinks	26-entry link table StartModeCollider (class 0x1B) installs through func_00124DF8
+D_00263AC8	g_modeColliderLinks	26-entry link table StartWorld5ModeCollider (class 0x1B) installs through func_00124DF8
 D_00263D58	g_gaugeHolderLinks	13-entry link table StartGaugeHolder (class 0x4A) installs through func_00124DF8
-D_00263E04	g_timeoutLimit	the float 3.0 that UpdateCountdown compares the time elapsed since the object's start time against
-D_00263E08	g_countdownTable	the three-entry table StartCountdown hands to func_00124DF8
-D_00263E30	g_timeoutFired	defined in mode_collider.cpp only: InitCountdown clears it and UpdateCountdown sets it to 1 once, calling func_00160578(2), when the elapsed time passes the limit
+D_00263E04	g_timeoutLimit	the float 3.0 that UpdateWorld5Countdown compares the time elapsed since the object's start time against
+D_00263E08	g_countdownTable	the three-entry table StartWorld5Countdown hands to func_00124DF8
+D_00263E30	g_timeoutFired	defined in world5_boss.cpp only: InitWorld5Countdown clears it and UpdateWorld5Countdown sets it to 1 once, calling func_00160578(2), when the elapsed time passes the limit
 D_00264088	g_pointObjects	the list head RegisterPointObject and UnregisterPointObject append to and unlink from for the 0x80 class (ClearPointObjectList empties it)
 D_00264098	g_triangleGroupGrey	the colour (0xBF, 0xBF, 0xBF, 0x7F) DrawTriangleGroups gives the groups of kinds 3 and 4
 D_002640A0	g_triangleGroupBlue	the colour (0x00, 0x87, 0xFF, 0x7F) DrawTriangleGroups gives the other groups

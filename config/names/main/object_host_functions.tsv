@@ -155,7 +155,7 @@ func_00107040	AddScriptOscillatorXEntry	builtin: no arguments, calls AddOscillat
 func_001070E0	AddScriptOscillatorYZEntry	builtin: no arguments, calls AddOscillatorYZEntry on the object, empty result
 func_00107180	AddScriptOscillatorEntryVectorA	builtin: four arguments forwarded to AddOscillatorEntryVectorA, empty result
 func_00107268	AddScriptOscillatorEntryVectorB	builtin: four arguments forwarded to AddOscillatorEntryVectorB, empty result
-func_00107350	AdvanceScriptGaugeAgentPhase	builtin: no arguments, calls AdvanceGaugeAgentPhase on the object, empty result
+func_00107350	AdvanceScriptWorld2BossPhase	builtin: no arguments, calls AdvanceWorld2BossPhase on the object, empty result
 func_001073F0	AddScriptEntryRecordKey	builtin wrapper: two ints to func_0019AD30 (AddEntryRecordKey)
 func_001074C0	AddScriptPathFollowerEntry	builtin: one argument forwarded to AddPathFollowerEntry, empty result
 func_00107570	AddScriptPathFollowerActiveEntry	builtin: five arguments forwarded to AddPathFollowerActiveEntry, empty result
@@ -181,21 +181,21 @@ func_001083C8	AddScriptQueueEntryKind9	builtin: two arguments forwarded to AddQu
 func_00108498	AddScriptQueueEntryKind11	builtin: one argument forwarded to AddQueueEntryKind11, empty result
 func_00108548	AddScriptQueueEntryKind12	builtin: no arguments, calls AddQueueEntryKind12 on the object, empty result
 func_001085E8	StartScriptColorFade	builtin wrapper: no arguments, calls func_00159ED0 (StartColorFade)
-func_00108688	PlayScriptGaugeModeObjectTarget	builtin: no arguments, calls PlayGaugeModeObjectTarget on the object, empty result
-func_00108728	SetScriptGaugeModeObjectTarget	builtin: one argument forwarded to SetGaugeModeObjectTarget, empty result
-func_001087D8	PlaceScriptModeColliderAtAnchor	builtin wrapper: no arguments, calls func_0017AD50 (PlaceModeColliderAtAnchor)
-func_00108878	SetScriptTempoAgentPendingTimeline	host function: its argument to SetTempoAgentPendingTimeline on its object, returns the empty result
-func_00108928	EndScriptHeldTimeline	builtin: no arguments, calls EndHeldTimeline on the object, empty result
+func_00108688	PlayScriptWorld5BossTarget	builtin: no arguments, calls PlayWorld5BossTarget on the object, empty result
+func_00108728	SetScriptWorld5BossTarget	builtin: one argument forwarded to SetWorld5BossTarget, empty result
+func_001087D8	PlaceScriptWorld5ModeColliderAtAnchor	builtin wrapper: no arguments, calls func_0017AD50 (PlaceWorld5ModeColliderAtAnchor)
+func_00108878	SetScriptWorld3BossPendingTimeline	host function: its argument to SetWorld3BossPendingTimeline on its object, returns the empty result
+func_00108928	EndScriptHeldWorld3Timeline	builtin: no arguments, calls EndHeldWorld3Timeline on the object, empty result
 func_001089C8	AddScriptC13Entry	builtin: two arguments forwarded to AddC13Entry, empty result
-func_00108A98	RemoveScriptTempoAgentEntry	host function: its argument to RemoveTempoAgentEntry on its object, returns the empty result
-func_00108B48	DecrementScriptTempoAgentGauge	host function: calls DecrementTempoAgentGauge on its object, returns the empty result
-func_00108BE8	AppendScriptTimelineKind0Entry	builtin: three arguments forwarded to AppendTimelineKind0Entry, empty result
-func_00108CC8	AppendScriptTimelineKind1Entry	builtin: three arguments forwarded to AppendTimelineKind1Entry, empty result
-func_00108DA8	AppendScriptTimelineKind2Entry	builtin: two arguments forwarded to AppendTimelineKind2Entry, empty result
-func_00108E70	AppendScriptTimelineKind3Entry	builtin: two arguments forwarded to AppendTimelineKind3Entry, empty result
-func_00108F38	AppendScriptTimelineKind4Entry	builtin: two arguments forwarded to AppendTimelineKind4Entry, empty result
-func_00109000	AppendScriptTimelineKind5Entry	builtin: two arguments forwarded to AppendTimelineKind5Entry, empty result
-func_001090C8	SetScriptGaugeBarAgentValues	builtin: three arguments forwarded to func_001A9C58 (SetGaugeBarAgentValues), empty result
+func_00108A98	RemoveScriptWorld3BossEntry	host function: its argument to RemoveWorld3BossEntry on its object, returns the empty result
+func_00108B48	DecrementScriptWorld3BossGauge	host function: calls DecrementWorld3BossGauge on its object, returns the empty result
+func_00108BE8	AppendScriptWorld3TimelineKind0Entry	builtin: three arguments forwarded to AppendWorld3TimelineKind0Entry, empty result
+func_00108CC8	AppendScriptWorld3TimelineKind1Entry	builtin: three arguments forwarded to AppendWorld3TimelineKind1Entry, empty result
+func_00108DA8	AppendScriptWorld3TimelineKind2Entry	builtin: two arguments forwarded to AppendWorld3TimelineKind2Entry, empty result
+func_00108E70	AppendScriptWorld3TimelineKind3Entry	builtin: two arguments forwarded to AppendWorld3TimelineKind3Entry, empty result
+func_00108F38	AppendScriptWorld3TimelineKind4Entry	builtin: two arguments forwarded to AppendWorld3TimelineKind4Entry, empty result
+func_00109000	AppendScriptWorld3TimelineKind5Entry	builtin: two arguments forwarded to AppendWorld3TimelineKind5Entry, empty result
+func_001090C8	SetScriptWorld4BossValues	builtin: three arguments forwarded to func_001A9C58 (SetWorld4BossValues), empty result
 func_001091A8	SendScriptHitCountColliderRequest	builtin: one int argument forwarded to SendHitCountColliderRequest (func_001C3F68), empty result
 func_00109258	AddScriptHitCountColliderId	builtin: one argument forwarded to AddHitCountColliderId, empty result
 func_00109308	AddScriptHitCountColliderItem	builtin: one object argument forwarded to func_001C41A0, which places it at the nearest of the id positions at +0x69C, fades it in (FadeInPlacedObject) and appends it to the list at +0x720, empty result

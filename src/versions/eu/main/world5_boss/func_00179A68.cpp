@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the D_00270650 aim at 0x580 (US 0x270; PAL's ScreenElement is 0x310 bytes longer).
 
-void ControlModeCollider(ModeCollider* self, f32 dt, PadRecord* pad)
+void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
 {
     Mat02 mats[2];
     s32 i;
@@ -13,7 +13,7 @@ void ControlModeCollider(ModeCollider* self, f32 dt, PadRecord* pad)
     f32 loY;
 
     if (self->f610 == 3 && HasSpareCount() != 0) {
-        ModeColliderSource* src = (ModeColliderSource*)self->f618;
+        World5ModeColliderSource* src = (World5ModeColliderSource*)self->f618;
         if (src == 0 || src->f18 == 0.0f) {
             self->desc05()->m50(self);
         } else {
@@ -89,7 +89,7 @@ void ControlModeCollider(ModeCollider* self, f32 dt, PadRecord* pad)
             tx = loX + (pad->f40 + 1.0f) * ((hiX - loX) * 0.5f);
             ty = loY + (stickY + 1.0f) * ((hiY - loY) * 0.5f);
         } else {
-            f32 k = (g_gameTime - self->f614) / ((ModeColliderSource*)self->f618)->f08->length;
+            f32 k = (g_gameTime - self->f614) / ((World5ModeColliderSource*)self->f618)->f08->length;
             f32 s = D_00263CC0[0] + k * (D_00263CC0[1] + k * D_00263CC0[2]);
             tx = (loX + hiX) * 0.5f;
             ty = hiY;

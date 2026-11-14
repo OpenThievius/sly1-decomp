@@ -22,7 +22,7 @@
 #include "game_clock.h"
 #include "pad_record.h"
 #include "memory_card.h"
-#include "timeline.h"
+#include "world3_timeline.h"
 #include "value_list_object.h"
 #include "state_reset_object.h"
 #include "attached_set.h"
@@ -50,7 +50,7 @@ void StartPlacedObject(void* self);
 void ResolveObjectLinks(void* self, s32 a, void* p);
 void* CreateStateWalker(void* a, void* self, s32 b, s32 c);
 void AppendQueuedCall(void* a, void* cb, void* ctx, s32 b, s32 c); // stays void: retail returns a value, but declared so func_001EB598 differs in registers
-void CopyPlayerAttachBlock(BeatPressCollider* self);
+void CopyPlayerAttachBlock(World3BeatPressCollider* self);
 void HandleSwitchedColliderActivation(void* self);
 s32 FindFirstObjectByIdGathered(void* a, s32 b, s32 c, s32 d);
 void SetStateWalkerTarget(void* a, s32 b);
@@ -74,11 +74,11 @@ s32 FindNearestAgentKey(void* a, void* b);
 void* FindObjectHandle(s32 a, s32 b);
 void RestartAgentClip(void* a);
 typedef void* (*TargetObjectFn)(void* self);
-void SetAgentGoalPoint(KeyedConeAgent* self, void* p);
-void UpdateAgentGoal(KeyedConeAgent* self);
+void SetAgentGoalPoint(World1Boss* self, void* p);
+void UpdateAgentGoal(World1Boss* self);
 s32 GetObjectWorldPosition(void* self, void* arg);
-void FaceAgentTowardGoalPoint(KeyedConeAgent* self);
-void UpdateAgentState(KeyedConeAgent* self);
+void FaceAgentTowardGoalPoint(World1Boss* self);
+void UpdateAgentState(World1Boss* self);
 extern u8 g_flagTable[];
 void SetWorldActiveFollower(void* sub, void* self);
 void* TakeFlagTableIndex(void* p);
@@ -107,7 +107,7 @@ s32 FindFirstObjectById(void* a, s32 b, s32 c, void* self);
 // 0xC9C and fills each obj).
 struct TempoObjectRef { s32 id; f32 f04; s32 obj; };
 f32 ApproachValueWithRamp(void* p, void* out, f32 a, f32 b, f32 c);
-s32 ChooseAgentState(KeyedConeAgent* self);
+s32 ChooseAgentState(World1Boss* self);
 extern s32 g_previousSoundLevel;
 extern f32 g_elapsedTime[];
 void ApplyStackTimeScale(ElementStack* a, f32 f);
@@ -132,16 +132,16 @@ extern void ApplyStackTimeScale(ElementStack* o, f32 v);
 extern void SetElementStackState(ElementStack* o, s32 mode);
 extern void StepDiscSectorCheck(void);
 extern void UpdateScreenElements(void);
-typedef s32 (*BeatPressSlotFn)(BeatPressCollider* self, void* arg);
+typedef s32 (*World3BeatPressSlotFn)(World3BeatPressCollider* self, void* arg);
 typedef void (*PlayerSlotFn)(Player* g, void* arg);
 s32 GetObjectWorldPosition(void* a, Vec4U* out);
 s32 GetObjectWorldRotation(void* a, Mat3U* out);
 void StartSoundEffect(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 s32 HasSpareCount(void);
 void ActivateSwitchedCollider(Player* g);
-void InitOwnerMessage(OwnerMessage* out, s32 mode, BeatPressCollider* self);
-void ContinueBeatPressColliderRequest(PlacedObject* from, Player* self);
-void EndHeldTimeline(TempoAgent* o);
+void InitOwnerMessage(OwnerMessage* out, s32 mode, World3BeatPressCollider* self);
+void ContinueWorld3BeatPressColliderRequest(PlacedObject* from, Player* self);
+void EndHeldWorld3Timeline(World3Boss* o);
 void SetCachedVoiceParam(s32 a, s32 b);
 void BindEntryQueueToObject(void* a, Player* g);
 extern s32 D_00275C34;
@@ -153,7 +153,7 @@ extern u32 g_crc32Table[];
 struct Crc32 {
     static u32 Step(u32 h, u8 b) { return g_crc32Table[(h ^ b) & 0xFF] ^ (h >> 8); }
 };
-void InitSwitchedCollider(BeatPressCollider* self);
+void InitSwitchedCollider(World3BeatPressCollider* self);
 f32 RandomFloatInRange(f32 lo, f32 hi);
 f32 Logarithm(f32 x);
 s32 IsPadSelectFlagHeld(World* p);
@@ -262,14 +262,14 @@ void UpdateCamera(Camera* a, s32 b, f32 t);
 void StepWorldValueTowardTarget(World* self, f32 t);
 void StartObject(void);
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
-void RunTimelineEntry(Timeline* self, s32* p);
-Entry90* AppendTimelineEntry(void* self, s32 kind, s32 p);
+void RunWorld3TimelineEntry(World3Timeline* self, s32* p);
+Entry90* AppendWorld3TimelineEntry(void* self, s32 kind, s32 p);
 // What ComputeSinCos writes for func_001ED650.
 struct SinCos { f32 sine; f32 cosine; };
 void ComputeSinCos(f32* a, f32* b);
 void RegisterSwitchedCollider(void);
 void GetStateWalkerCurrentKey(void* sub, s32* out);
-void AddAnimationPlayerRecordCallback(void* a, TempoAgent* self);
+void AddAnimationPlayerRecordCallback(void* a, World3Boss* self);
 s32 ComputeBallisticLaunchVelocity(void* self);
 s32 WriteVifUnpackHeader(PacketWriter* s);
 void InitObject(BaseObject* self);
@@ -285,7 +285,7 @@ void SetStateAndNotify(void* self, s32 b);
 s32 UpsertKeyedEntry(void* a, s32 b, void* c, s32 d, s32 e, s32 f, s32 g, s32 h);
 void* AppendQueuedCall(s32 a, void* b, void* c, s32 d, s32 e);
 void UnregisterSwitchedCollider(void);
-void EndTimeline(void* p);
+void EndWorld3Timeline(void* p);
 void ComputeSinCos(f32 angle, f32* a, f32* b);
 typedef u64 Bits128 __attribute__((mode(TI)));
 s32 QueryValueTreeMask(ValueListObject* self, s32 node, Bits128 point, f32 radius, s32* out);
@@ -314,13 +314,13 @@ s32 RestoreFadeRequest(ScreenFade* self, s32 a1, s32 a2);
 void SetScreenFadeMode(ScreenFade* self, s32 state);
 void SetVolumeChannel6Factors(s32 flag, f32 x);
 typedef void (*TempoCallFn)(void);
-void UpdateAgent(TempoAgent* self);
-void RestartTimeline(Timeline* sub);
-void RunTimelineEntries(Timeline* sub);
+void UpdateAgent(World3Boss* self);
+void RestartWorld3Timeline(World3Timeline* sub);
+void RunWorld3TimelineEntries(World3Timeline* sub);
 void RefreshCachedVoiceParam(s32 a, void* b);
 s32 GetCachedVoiceParam(s32 a);
-void* AppendQueuedCall(World* world, TempoCallFn cb, TempoAgent* self, s32 a3, s32 a4);
-void SyncTempoAgentEntries(void);
+void* AppendQueuedCall(World* world, TempoCallFn cb, World3Boss* self, s32 a3, s32 a4);
+void SyncWorld3BossEntries(void);
 void LeaveAgentState(void* self, void* arg);
 void AppendPacketQuadwords(void* self, s32 index, s32 count);
 extern void* D_002505C0[6];
@@ -349,16 +349,16 @@ struct StateChangeMsg {
 };
 s32 SetGatheredWalkerTargets(World* mgr, s32 a, void* b, StateResetObject* self, s32 c);
 void GetStateWalkerCurrentKey(s32 sub, s32* out);
-void ScheduleTempoAgentBeatPress(TempoAgent* self, Entry90* e);
+void ScheduleWorld3BossBeatPress(World3Boss* self, Entry90* e);
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32* c);
 void ResetPadStepRepeat(void* p);
-void StartSoundEffect(s32 a0, Timeline* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void StartSoundEffect(s32 a0, World3Timeline* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 extern u8 D_00625760[];
 void* FillMemory(void* p, s32 value, s32 size);
 // The dead "li v0,2" after the func_001ED090 call is the compare constant of an
 // "if (n == 2)" whose two arms compile identically: jump2 cross-jumps the arms after
 // reload, deletes the branch and leaves the constant load.
-void EnterAgentState(TempoAgent* self, s32 a, s32 b);
+void EnterAgentState(World3Boss* self, s32 a, s32 b);
 void MarkLevelDone(s32 n);
 void StartMemoryCardSave(void* p);
 s32 TestFlagTableBit(void* table, s32 index);
@@ -367,7 +367,7 @@ void RaiseScatterLevelForObject(void* controller, void* node);
 extern u8 g_scatterController[];
 f32 ArctangentOfRatio(f32 a, f32 b);
 void CopyMemory(TempoPlayerEntry* dst, TempoPlayerEntry* src, s32 bytes);
-void RunTimelineEntry(Timeline* self, Entry90* e);
+void RunWorld3TimelineEntry(World3Timeline* self, Entry90* e);
 void* MoveMemory(void* dst, void* src, s32 size);
 // An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
 // Moves n bytes of the item list down over a removed item.
@@ -523,10 +523,10 @@ void PushStackElement(ElementStack* self, ScreenElement* node);
 void SetElementStackState(ElementStack* self, s32 state);
 void ApplyStackTimeScale(float x);
 f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
-void AddTempoAgentEntry(TempoAgent* self, AnimationPlayer* a, s32 b);
-void RestartTimeline(Timeline* self);
-void EndTimeline(Timeline* self);
-void RunTimelineEntries(Timeline* self);
+void AddWorld3BossEntry(World3Boss* self, AnimationPlayer* a, s32 b);
+void RestartWorld3Timeline(World3Timeline* self);
+void EndWorld3Timeline(World3Timeline* self);
+void RunWorld3TimelineEntries(World3Timeline* self);
 void SetStateAndNotify(StateResetObject* self, s32 state);
 s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, void* param2);
 void SetWarpPageMode(WarpPage* self, u32 next);
@@ -578,7 +578,7 @@ TempoObjectRef D_00275D48[9] = {
     { 0x60, 70.0f, 0 }, { 0x50, 220.0f, 0 }, { 0x52, 80.0f, 0 }, { 0x53, 80.0f, 0 },
     { 0x54, 80.0f, 0 }
 };
-// The data from D_00275DB8 on is defined after DrawTempoAgentRing (func_001EC190), whose static's
+// The data from D_00275DB8 on is defined after DrawWorld3BossRing (func_001EC190), whose static's
 // guard (D_00275DB4) retail's .data has before it: the compiler writes a guard out with its
 // function. Declared here for the functions above that.
 extern s32 D_00275DB8;
@@ -616,7 +616,7 @@ extern char D_00276660[16];
 extern char D_00276670[12];
 
 
-void InitKeyedConeAgent(KeyedConeAgent* self)
+void InitWorld1Boss(World1Boss* self)
 {
     InitConeAgent(self);
     self->fC58 = 0x2D8;
@@ -631,7 +631,7 @@ void InitKeyedConeAgent(KeyedConeAgent* self)
 // The file's first read-only data, for func_001E89F0.
 extern const f32 D_0024E600[4] = {3.40282347e+38f, 0.0f, 0.0f, 0.0f};
 
-void StartKeyedConeAgent(KeyedConeAgent* self)
+void StartWorld1Boss(World1Boss* self)
 {
     ResolveObjectLinks(self, 8, D_00275B60);
     SetWorldActiveFollower(self->world, self);
@@ -647,7 +647,7 @@ void StartKeyedConeAgent(KeyedConeAgent* self)
 
 ASM_FUNC(func_001E89F0);
 
-void EnterKeyedConeAgentState(KeyedConeAgent* self, s32 a, s32 b)
+void EnterWorld1BossState(World1Boss* self, s32 a, s32 b)
 {
     s32 key;
     s32 slot;
@@ -745,10 +745,10 @@ void EnterKeyedConeAgentState(KeyedConeAgent* self, s32 a, s32 b)
         self->fC5C = 0;
         break;
     }
-    EnterAgentState((TempoAgent*)self, a, b);
+    EnterAgentState((World3Boss*)self, a, b);
 }
 
-s32 ChooseKeyedConeAgentState(KeyedConeAgent* self)
+s32 ChooseWorld1BossState(World1Boss* self)
 {
     s32 a1;
     if (self->fC5C <= 0) {
@@ -763,13 +763,13 @@ s32 ChooseKeyedConeAgentState(KeyedConeAgent* self)
     return a1;
 }
 
-s32 IsKeyedConeAgentFree(KeyedConeAgent* a0)
+s32 IsWorld1BossFree(World1Boss* a0)
 {
     if (a0->fC40 != 0) return 0;
     return a0->fC5C != 0;
 }
 
-s32 IsKeyedConeAgentTargetInRange(KeyedConeAgent* a0)
+s32 IsWorld1BossTargetInRange(World1Boss* a0)
 {
     if (a0->fC58 != 0x2DB) return 0;
     {
@@ -779,7 +779,7 @@ s32 IsKeyedConeAgentTargetInRange(KeyedConeAgent* a0)
     }
 }
 
-void SteerKeyedConeAgentAlongPath(KeyedConeAgent* a0)
+void SteerWorld1BossAlongPath(World1Boss* a0)
 {
     if (a0->fC58 != 0x2DA) {
         s32 v = a0->fC5C - 1;
@@ -789,7 +789,7 @@ void SteerKeyedConeAgentAlongPath(KeyedConeAgent* a0)
     SteerAgentAlongPath();
 }
 
-void RestartKeyedConeAgentClip(KeyedConeAgent* self)
+void RestartWorld1BossClip(World1Boss* self)
 {
     if (self->fC58 == 0x2DA && self->f724 == 0xC && FindColliderFloorContact(self, 0, 0) != 0) {
         s32 s = FindNearestAgentKey(self, (u8*)self + 0x140);
@@ -807,7 +807,7 @@ void RestartKeyedConeAgentClip(KeyedConeAgent* self)
     RestartAgentClip(self);
 }
 
-void UpdateKeyedConeAgentGoal(KeyedConeAgent* self)
+void UpdateWorld1BossGoal(World1Boss* self)
 {
     Vec4U loc;
     switch (self->f724) {
@@ -830,7 +830,7 @@ void UpdateKeyedConeAgentGoal(KeyedConeAgent* self)
     }
 }
 
-void UpdateKeyedConeAgentState(KeyedConeAgent* self)
+void UpdateWorld1BossState(World1Boss* self)
 {
     if (self->f724 == 8) {
         FaceAgentTowardGoalPoint(self);
@@ -848,7 +848,7 @@ void ShowElementWhenMenusClear(void)
     }
 }
 
-s32 TestAgentMayContactExceptKeys(KeyedConeAgent* self, Collider* probe)
+s32 TestAgentMayContactExceptKeys(World1Boss* self, Collider* probe)
 {
     PlacedObject* key = probe->root;
     u32 i = 0;
@@ -1807,7 +1807,7 @@ void FindLocalMinimum(MinimumFn fn, void* ctx, f32 x, f32 step, f32 lo, f32 hi, 
 
 LINKER_REMNANT(func_001EB458);
 
-void InitBeatPressCollider(BeatPressCollider* self)
+void InitWorld3BeatPressCollider(World3BeatPressCollider* self)
 {
     InitSwitchedCollider(self);
     f32 t = g_currentEntry->dt;
@@ -1825,19 +1825,19 @@ void InitBeatPressCollider(BeatPressCollider* self)
     self->f684 = (1.0f - c) * D_00275C70[0] + c * D_00275C70[1];
 }
 
-void LoadBeatPressCollider(BeatPressCollider* self)
+void LoadWorld3BeatPressCollider(World3BeatPressCollider* self)
 {
     LoadCollider(self);
     ResolveObjectLinks(self, 1, D_00275C90);
 }
 
-void CopyPlayerAttachBlock(BeatPressCollider* a0)
+void CopyPlayerAttachBlock(World3BeatPressCollider* a0)
 {
     a0->blk580 = g_player->blk580;
     a0->f604 = g_player->f604;
 }
 
-void StartBeatPressCollider(BeatPressCollider* self)
+void StartWorld3BeatPressCollider(World3BeatPressCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 4, D_00275CA0);
@@ -1845,10 +1845,10 @@ void StartBeatPressCollider(BeatPressCollider* self)
     AppendQueuedCall(self->world, (void*)CopyPlayerAttachBlock, self, 0, 0);
 }
 
-void HandleBeatPressColliderActivation(BeatPressCollider* self, void* p)
+void HandleWorld3BeatPressColliderActivation(World3BeatPressCollider* self, void* p)
 {
     HandleSwitchedColliderActivation(self);
-    TempoAgent* r = (TempoAgent*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
+    World3Boss* r = (World3Boss*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
     if (p != 0) {
         SetStateWalkerTarget(self->f614, 0x4CB);
         r->fC3C = self;
@@ -1862,7 +1862,7 @@ void HandleBeatPressColliderActivation(BeatPressCollider* self, void* p)
 void TurnColliderTowardHeading(Player* self);
 void SetPlayerState(Player* self, s32 a, s32 b);
 
-void ContinueBeatPressColliderRequest(PlacedObject* from, Player* self)
+void ContinueWorld3BeatPressColliderRequest(PlacedObject* from, Player* self)
 {
     Vec02 dir;
     Vu0::Q(dir) = Vu0::MulXSum(Vu0::Q(from->m110.r[0]), Vu0::Scalar(-D_00275CD0), Vu0::Q(from->m110.r[2]), Vu0::ScalarAt(D_00275CD4));
@@ -1872,7 +1872,7 @@ void ContinueBeatPressColliderRequest(PlacedObject* from, Player* self)
     SetPlayerState(self, 4, 0x2B);
 }
 
-void JudgeBeatPressInput(BeatPressCollider* self, PadRecord* in)
+void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in)
 {
     if (self->f67C != 0 && g_player != 0) {
         Vec4U pos;
@@ -1881,8 +1881,8 @@ void JudgeBeatPressInput(BeatPressCollider* self, PadRecord* in)
         GetObjectWorldRotation(self->f67C, &mat);
         ((PlayerSlotFn*)g_player->desc)[0x84 / 4](g_player, &pos);
         ((PlayerSlotFn*)g_player->desc)[0x88 / 4](g_player, &mat);
-        ((BeatPressSlotFn*)self->desc)[0x84 / 4](self, &pos);
-        ((BeatPressSlotFn*)self->desc)[0x88 / 4](self, &mat);
+        ((World3BeatPressSlotFn*)self->desc)[0x84 / 4](self, &pos);
+        ((World3BeatPressSlotFn*)self->desc)[0x88 / 4](self, &mat);
     }
     if (self->f680 != 0) {
         u32 f = in->flags;
@@ -1903,7 +1903,7 @@ void JudgeBeatPressInput(BeatPressCollider* self, PadRecord* in)
             if (self->f62C < self->f630) {
                 Ent1C* e = &self->f634[self->f62C];
                 if (e->dir == dir) {
-                    TempoAgent* g = ((TempoAgent*)self->f68C);
+                    World3Boss* g = ((World3Boss*)self->f68C);
                     at = (f32)g->fC70 * 4.0f + g->fC7C;
                     if (__builtin_fabsf(e->t - at) < self->f684 * 0.5f) {
                         ok = 1;
@@ -1920,7 +1920,7 @@ void JudgeBeatPressInput(BeatPressCollider* self, PadRecord* in)
     }
     if (self->f62C < self->f630) {
         Ent1C* e = &self->f634[self->f62C];
-        TempoAgent* g = ((TempoAgent*)self->f68C);
+        World3Boss* g = ((World3Boss*)self->f68C);
         f32 at = (f32)g->fC70 * 4.0f + g->fC7C;
         f32 win = self->f684;
         if (self->f678 == e->dir && __builtin_fabsf(e->t - self->f674) < win * 0.5f) {
@@ -1931,29 +1931,29 @@ void JudgeBeatPressInput(BeatPressCollider* self, PadRecord* in)
                 return;
             }
             StartSoundEffect(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
-            if (HasSpareCount() == 0 && ((BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
+            if (HasSpareCount() == 0 && ((World3BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
                 OwnerMessage msg;
-                TempoAgent* o;
+                World3Boss* o;
                 ActivateSwitchedCollider(g_player);
                 InitOwnerMessage(&msg, 0, self);
-                msg.fn = (void (*)(void))ContinueBeatPressColliderRequest;
+                msg.fn = (void (*)(void))ContinueWorld3BeatPressColliderRequest;
                 ((s32 (*)(Player*, OwnerMessage*))((PlayerSlotFn*)g_player->desc)[0x140 / 4])(g_player, &msg);
-                o = (TempoAgent*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
-                EndHeldTimeline(o);
+                o = (World3Boss*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
+                EndHeldWorld3Timeline(o);
                 o->fBFC = g_gameTime[0];
                 SetCachedVoiceParam(2, 1);
                 goto next;
             }
-            if (((BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
-                Timeline* l;
-                ((void (*)(BeatPressCollider*))((BeatPressSlotFn*)self->desc)[0x150 / 4])(self);
+            if (((World3BeatPressSlotFn*)self->desc)[0x13C / 4](self, 0) == 0) {
+                World3Timeline* l;
+                ((void (*)(World3BeatPressCollider*))((World3BeatPressSlotFn*)self->desc)[0x150 / 4])(self);
                 Player* gl = g_player;
                 self->f688 = 1;
                 gl->f26C4 = 1;
                 f32 v = g_gameTime[0];
                 *(f32*)((u8*)gl + 0x26CC) = v;
                 gl->f26C8 = v;
-                l = ((TempoAgent*)self->f68C)->fC38;
+                l = ((World3Boss*)self->f68C)->fC38;
                 *(f32*)((u8*)gl + 0x26D0) = 2.0f;
                 if (l != 0) {
                     s32 j = l->index;
@@ -1964,7 +1964,7 @@ void JudgeBeatPressInput(BeatPressCollider* self, PadRecord* in)
                     }
                     if (j < l->f34) {
                         Entry90* it = &((Entry90*)l->buffer)[j];
-                        TempoAgent* gg = ((TempoAgent*)self->f68C);
+                        World3Boss* gg = ((World3Boss*)self->f68C);
                         *(f32*)((u8*)g_player + 0x26D0) = ((f32)it->f4 * 4.0f + it->f8 - ((f32)gg->fC70 * 4.0f + gg->fC7C)) * gg->fC88;
                     }
                 }
@@ -1984,14 +1984,14 @@ void JudgeBeatPressInput(BeatPressCollider* self, PadRecord* in)
     }
 }
 
-s32 IsBeatPressColliderRequestBlocked(BeatPressCollider* self)
+s32 IsWorld3BeatPressColliderRequestBlocked(World3BeatPressCollider* self)
 {
     if (g_buttonCodeFlags & 1) return 1;
     if (IsPadSelectFlagHeld(self->world) == 0) return self->f688 != 0;
     return 1;
 }
 
-void AppendBeatPressEntry(BeatPressCollider* list, const U64P* src)
+void AppendWorld3BeatPressEntry(World3BeatPressCollider* list, const U64P* src)
 {
     s32 n = list->f630;
     list->f630 = n + 1;
@@ -1999,12 +1999,12 @@ void AppendBeatPressEntry(BeatPressCollider* list, const U64P* src)
     *dst = *src;
 }
 
-s32 AcceptBeatPressColliderRequest(void)
+s32 AcceptWorld3BeatPressColliderRequest(void)
 {
     return 0;
 }
 
-// What GetBeatPressColliderPositionAt reads of its f67C: an object to place at a time (+0x18), a
+// What GetWorld3BeatPressColliderPositionAt reads of its f67C: an object to place at a time (+0x18), a
 // point in its frame (+0x40) and the rotation func_001EBDD0 turns the object's by (+0x50).
 struct FramePoint_001EBD10 {
     u8 pad0[0x18];
@@ -2017,7 +2017,7 @@ struct FramePoint_001EBD10 {
 void GetPlacedObjectPositionAt(void* self, f32 t, Vec02* pos, Vec02* vel);
 void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, Vec02* e, Vec02* f, f32 t);
 
-void GetBeatPressColliderPositionAt(BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
+void GetWorld3BeatPressColliderPositionAt(World3BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
 {
     if (self->f67C == 0) {
         GetPlacedObjectPositionAt(self, t, pos, vel);
@@ -2034,7 +2034,7 @@ void GetBeatPressColliderPositionAt(BeatPressCollider* self, f32 t, Vec02* pos, 
 
 void GetPlacedObjectRotationAt(void* self, f32 t, Mat02* rot, Vec02* spin);
 
-void GetBeatPressColliderRotationAt(BeatPressCollider* self, f32 t, Mat02* rot, Vec02* spin)
+void GetWorld3BeatPressColliderRotationAt(World3BeatPressCollider* self, f32 t, Mat02* rot, Vec02* spin)
 {
     if (self->f67C == 0) {
         GetPlacedObjectRotationAt(self, t, rot, spin);
@@ -2048,7 +2048,7 @@ void GetBeatPressColliderRotationAt(BeatPressCollider* self, f32 t, Mat02* rot, 
     *spin = w;
 }
 
-void InitTempoAgent(TempoAgent* self)
+void InitWorld3Boss(World3Boss* self)
 {
     InitAgent(self);
     *(s32*)((u8*)self + 0xC5C) = 0x3C;
@@ -2067,7 +2067,7 @@ void InitTempoAgent(TempoAgent* self)
 
 s32 ResolveAgentClip(void* self, s32 id);
 void LoadAgent(Agent* self, void* reader);
-void LoadTempoAgent(TempoAgent* self, void* reader)
+void LoadWorld3Boss(World3Boss* self, void* reader)
 {
     LoadAgent(self, reader);
     for (s32 i = 0; i < 4; i++) {
@@ -2075,7 +2075,7 @@ void LoadTempoAgent(TempoAgent* self, void* reader)
     }
 }
 
-void StartTempoAgent(TempoAgent* self)
+void StartWorld3Boss(World3Boss* self)
 {
     StartAgent(self);
     SetWorldActiveFollower(self->world, self);
@@ -2098,17 +2098,17 @@ void StartTempoAgent(TempoAgent* self)
 }
 
 
-void UnregisterTempoAgent(void)
+void UnregisterWorld3Boss(void)
 {
     UnregisterSwitchedCollider();
 }
 
-void RegisterTempoAgent(void)
+void RegisterWorld3Boss(void)
 {
     RegisterSwitchedCollider();
 }
 
-s32 IsTempoAgentTargetInRange(TempoAgent* self)
+s32 IsWorld3BossTargetInRange(World3Boss* self)
 {
     s32 r[4];
     GetStateWalkerCurrentKey(self->fC54, r);
@@ -2138,7 +2138,7 @@ zero:
     return 0;
 }
 
-s32 IsTempoAgentFree(void)
+s32 IsWorld3BossFree(void)
 {
     return 1;
 }
@@ -2164,11 +2164,11 @@ static inline void StoreScaledQuadword(void* dst, f32 k, void* p)
 
 // The tempo agent's ring: the block's defaults are built once, as a function-local static with
 // a brace initialiser (include/ring_params.h), and copied for each draw, where rows 1 and 2 are
-// scaled by the agent's level. DrawTempoAgent queues it as a deferred request's callback, the
+// scaled by the agent's level. DrawWorld3Boss queues it as a deferred request's callback, the
 // agent the request's argument.
-void DrawTempoAgentRing(DeferredRequest* request)
+void DrawWorld3BossRing(DeferredRequest* request)
 {
-    TempoAgent* agent = (TempoAgent*)request->arg;
+    World3Boss* agent = (World3Boss*)request->arg;
     static RingParams defaults = {
         1, 10.0f, 0.25f,
         {
@@ -2344,7 +2344,7 @@ char D_00276658[8] = "jojo";
 char D_00276660[16] = "08/24/02 22:06";
 char D_00276670[12] = "0824.2206";
 
-void ApplyTempoAgentTransform(TempoAgent* self, void* s, void* c)
+void ApplyWorld3BossTransform(World3Boss* self, void* s, void* c)
 {
     u8 tmp[0x50];
     void* out = c;
@@ -2357,11 +2357,11 @@ void ApplyTempoAgentTransform(TempoAgent* self, void* s, void* c)
 }
 
 #include "deferred_request.h"
-void DrawAgent(TempoAgent* self, Camera* cam);
+void DrawAgent(World3Boss* self, Camera* cam);
 void QueueDeferredRequest(DeferredRequest* r);
-void DrawTempoAgentRing(DeferredRequest* self);
+void DrawWorld3BossRing(DeferredRequest* self);
 
-void DrawTempoAgent(TempoAgent* self, Camera* cam)
+void DrawWorld3Boss(World3Boss* self, Camera* cam)
 {
     DrawAgent(self, cam);
     if (self->f724 == 16) {
@@ -2371,12 +2371,12 @@ void DrawTempoAgent(TempoAgent* self, Camera* cam)
         r.group = 0xD;
         r.f04 = d;
         r.arg = self;
-        r.callback = (void*)DrawTempoAgentRing;
+        r.callback = (void*)DrawWorld3BossRing;
         QueueDeferredRequest(&r);
     }
 }
 
-void LeaveTempoAgentState(TempoAgent* self, void* arg)
+void LeaveWorld3BossState(World3Boss* self, void* arg)
 {
     s32 out;
     s32 sel;
@@ -2405,7 +2405,7 @@ void LeaveTempoAgentState(TempoAgent* self, void* arg)
     }
 }
 
-void DecrementTempoAgentGauge(TempoAgent* self)
+void DecrementWorld3BossGauge(World3Boss* self)
 {
     T217D_2E0* g = &g_gaugeBarElement;
     DecrementGaugeCount((u8*)&g_gaugeBarElement);
@@ -2413,7 +2413,7 @@ void DecrementTempoAgentGauge(TempoAgent* self)
     g->fill = g->fillTarget;
 }
 
-void EnterTempoAgentState(TempoAgent* self, s32 a, s32 b)
+void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
 {
     s32 r[3];
     switch (self->f724) {
@@ -2467,7 +2467,7 @@ void EnterTempoAgentState(TempoAgent* self, s32 a, s32 b)
         if (r[2] < 0x4EF) {
             if (r[2] >= 0x4EC) n = 2;
         }
-        AddTempoAgentEntry(self, ((AnimationPlayer*)self->f7E0), n);
+        AddWorld3BossEntry(self, ((AnimationPlayer*)self->f7E0), n);
         if (n == 2) ((AnimationPlayer*)self->f7E0)->time = ((AnimationPlayer*)self->f7E0)->anim->length * (self->fC7C / (f32)n);
         else ((AnimationPlayer*)self->f7E0)->time = ((AnimationPlayer*)self->f7E0)->anim->length * (self->fC7C / (f32)n);
         break;
@@ -2486,7 +2486,7 @@ void EnterTempoAgentState(TempoAgent* self, s32 a, s32 b)
 // next statement sets again (the same choice, by index): flow deletes the two loads as dead,
 // but the branch keeps its two empty arms through reload and sched2, and jump2, which deletes
 // it, leaves the constant (docs/toolchain/alias-classes.md, "A merged arm keeps its place").
-void ScheduleTempoAgentBeatPress(TempoAgent* self, Entry90* e)
+void ScheduleWorld3BossBeatPress(World3Boss* self, Entry90* e)
 {
     s32 dir = e->fC;
     Ent1C entry;
@@ -2502,10 +2502,10 @@ void ScheduleTempoAgentBeatPress(TempoAgent* self, Entry90* e)
     self->fC44 = g_gameTime[0];
     entry.dir = dir;
     entry.t = (f32)e->f4 * 4.0f + e->f8 + (f32)self->fC60;
-    AppendBeatPressEntry(self->fC3C, (const U64P*)&entry);
+    AppendWorld3BeatPressEntry(self->fC3C, (const U64P*)&entry);
 }
 
-void RemoveTempoAgentEntry(TempoAgent* self, AnimationPlayer* key);
+void RemoveWorld3BossEntry(World3Boss* self, AnimationPlayer* key);
 
 struct TempoNoticeRec {
     void* object;           // 0x00
@@ -2530,11 +2530,11 @@ struct TempoLine {
 void ChooseObjectPoolItem(void* timeline);
 void GetPlacementRecordTransform(void* sub, Vec02* a, Mat02* b, s32 c);
 s32 LaunchChosenPoolObject(void* timeline, s32 a);
-void HandleAgentNotification(TempoAgent* self, s32 kind, void* rec);
+void HandleAgentNotification(World3Boss* self, s32 kind, void* rec);
 void SetCachedVoiceParam(s32 a, s32 b);
 s32 GetCachedVoiceParam(s32 a);
 
-void HandleTempoAgentNotification(TempoAgent* self, s32 kind, TempoNoticeRec* rec)
+void HandleWorld3BossNotification(World3Boss* self, s32 kind, TempoNoticeRec* rec)
 {
     Vec02 a;
     Mat02 b;
@@ -2552,7 +2552,7 @@ void HandleTempoAgentNotification(TempoAgent* self, s32 kind, TempoNoticeRec* re
             f32 half = self->fC88 * 0.5f;
             f32 t = self->fC64 + self->fC44 - g_gameTime[0] + ((f32*)self->fC3C)[0x684 / 4] * half;
             u8* r = line->rec;
-            FramePoint_001EBD10* fp = (FramePoint_001EBD10*)((BeatPressCollider*)self->fC3C)->f618[self->fC40];
+            FramePoint_001EBD10* fp = (FramePoint_001EBD10*)((World3BeatPressCollider*)self->fC3C)->f618[self->fC40];
             GetPlacementRecordTransform(sub, &a, &b, 0);
             ComputeObjectFrameAtTime(fp->object, 0, &p, &rot, 0, 0, t);
             Vu0::Q(line->vF0) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(fp->point)));
@@ -2572,7 +2572,7 @@ void HandleTempoAgentNotification(TempoAgent* self, s32 kind, TempoNoticeRec* re
             }
         }
         if (i < self->fC68) {
-            RemoveTempoAgentEntry(self, (AnimationPlayer*)rec);
+            RemoveWorld3BossEntry(self, (AnimationPlayer*)rec);
         }
         break;
     }
@@ -2606,7 +2606,7 @@ done:
     HandleAgentNotification(self, kind, rec);
 }
 
-void SyncTempoAgentEntries(TempoAgent* self)
+void SyncWorld3BossEntries(World3Boss* self)
 {
     f32 den = self->fC84 - (*(f32*)&g_gameTime);
     for (s32 k = 0; k < self->fC68; k++) {
@@ -2622,9 +2622,9 @@ void SyncTempoAgentEntries(TempoAgent* self)
 
 }
 
-void UpdateTempoAgent(TempoAgent* self)
+void UpdateWorld3Boss(World3Boss* self)
 {
-    Timeline* sub;
+    World3Timeline* sub;
     s32 code;
 
     UpdateAgent(self);
@@ -2642,7 +2642,7 @@ void UpdateTempoAgent(TempoAgent* self)
         if (sub != 0) {
             self->fC34 = 0;
             self->fC38 = sub;
-            RestartTimeline(sub);
+            RestartWorld3Timeline(sub);
         }
         D_00275DB8 = 0;
     }
@@ -2667,15 +2667,15 @@ void UpdateTempoAgent(TempoAgent* self)
         self->fC84 = self->fC84 + self->fC88;
     }
     self->fC7C = (f32)self->fC78 + (g_gameClock.time - self->fC80) / self->fC88;
-    if (self->fC38 != 0) RunTimelineEntries(self->fC38);
+    if (self->fC38 != 0) RunWorld3TimelineEntries(self->fC38);
     if (D_00275DB8 == 1) {
         RefreshCachedVoiceParam(1, 0);
         if (GetCachedVoiceParam(1) == D_00275DBC) D_00275DB8 = 2;
     }
-    AppendQueuedCall(self->world, SyncTempoAgentEntries, self, 0, 0);
+    AppendQueuedCall(self->world, SyncWorld3BossEntries, self, 0, 0);
 }
 
-void ShowTempoAgentGauge(TempoAgent* self)
+void ShowWorld3BossGauge(World3Boss* self)
 {
     s32 code;
     GetStateWalkerCurrentKey(self->fC54, &code);
@@ -2687,7 +2687,7 @@ void ShowTempoAgentGauge(TempoAgent* self)
     else g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
-void UpdateTempoAgentGoal(TempoAgent* self)
+void UpdateWorld3BossGoal(World3Boss* self)
 {
     s32 loc[4];
     s32 v = self->f724;
@@ -2707,10 +2707,10 @@ tail:
     UpdateAgentGoal(self);
 }
 
-void UpdateAgentState(TempoAgent* self);
-void SetAgentFacingAngles(TempoAgent* self, f32 angle, f32 zero);
+void UpdateAgentState(World3Boss* self);
+void SetAgentFacingAngles(World3Boss* self, f32 angle, f32 zero);
 
-void UpdateTempoAgentState(TempoAgent* self)
+void UpdateWorld3BossState(World3Boss* self)
 {
     Vec02 diff;
     Mat3U rot;
@@ -2758,30 +2758,30 @@ void UpdateTempoAgentState(TempoAgent* self)
     }
 }
 
-void SetTempoAgentPendingTimeline(TempoAgent* self, s32 value)
+void SetWorld3BossPendingTimeline(World3Boss* self, s32 value)
 {
-    self->fC34 = (Timeline*)value;
+    self->fC34 = (World3Timeline*)value;
 }
 
-void EndHeldTimeline(TempoAgent* self)
+void EndHeldWorld3Timeline(World3Boss* self)
 {
-    EndTimeline(self->fC38);
+    EndWorld3Timeline(self->fC38);
     self->fC38 = 0;
 }
 
-void SetTempoAgentTempo(TempoAgent* self, s32 v)
+void SetWorld3BossTempo(World3Boss* self, s32 v)
 {
     self->fC5C = v;
     self->fC8C = 60.0f / (f32)v;
 }
 
-void SetTempoAgentSpanBeats(TempoAgent* self, s32 v)
+void SetWorld3BossSpanBeats(World3Boss* self, s32 v)
 {
     self->fC60 = v;
     self->fC64 = self->fC88 * (f32)v;
 }
 
-void AddTempoAgentEntry(TempoAgent* self, AnimationPlayer* a, s32 b)
+void AddWorld3BossEntry(World3Boss* self, AnimationPlayer* a, s32 b)
 {
     TempoPlayerEntry* e = &self->fC6C[self->fC68++];
     e->beats = b;
@@ -2789,7 +2789,7 @@ void AddTempoAgentEntry(TempoAgent* self, AnimationPlayer* a, s32 b)
     AddAnimationPlayerRecordCallback(a, self);
 }
 
-void RemoveTempoAgentEntry(TempoAgent* self, AnimationPlayer* key)
+void RemoveWorld3BossEntry(World3Boss* self, AnimationPlayer* key)
 {
     s32 i = 0;
     if (self->fC68 > 0) {
@@ -2808,53 +2808,53 @@ void RemoveTempoAgentEntry(TempoAgent* self, AnimationPlayer* key)
     }
 }
 
-void InitTimeline(Timeline* self)
+void InitWorld3Timeline(World3Timeline* self)
 {
     InitObject(self);
     self->buffer = AllocateFrontMemory(0xC00);
 }
 
-void FindTimelineTarget(Timeline* self)
+void FindWorld3TimelineTarget(World3Timeline* self)
 {
     StartObject();
     self->found = FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
 }
 
-void RestartTimeline(Timeline* self)
+void RestartWorld3Timeline(World3Timeline* self)
 {
     self->index = 0;
-    self->f44 = ((TempoAgent*)self->found)->fC70;
+    self->f44 = ((World3Boss*)self->found)->fC70;
     TriggerScriptEvent(self, 0x1A, 0, 0);
 }
 
-void EndTimeline(Timeline* self)
+void EndWorld3Timeline(World3Timeline* self)
 {
     s32 n;
     TriggerScriptEvent(self, 0x1C, 0, 0);
     n = 5;
-    RunTimelineEntry(self, &n);
-    if (((TempoAgent*)self->found)->fC3C) {
+    RunWorld3TimelineEntry(self, &n);
+    if (((World3Boss*)self->found)->fC3C) {
         n = 3;
-        RunTimelineEntry(self, &n);
+        RunWorld3TimelineEntry(self, &n);
     }
 }
 
-void RunTimelineEntries(Timeline* self)
+void RunWorld3TimelineEntries(World3Timeline* self)
 {
     Entry90* e;
     s32 v;
-    while (self->index < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(((TempoAgent*)self->found)->fC70 < v))) {
-        if (v == ((TempoAgent*)self->found)->fC70 && ((TempoAgent*)self->found)->fC7C < e->f8) return;
-        RunTimelineEntry(self, e);
+    while (self->index < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(((World3Boss*)self->found)->fC70 < v))) {
+        if (v == ((World3Boss*)self->found)->fC70 && ((World3Boss*)self->found)->fC7C < e->f8) return;
+        RunWorld3TimelineEntry(self, e);
         self->index++;
     }
 }
 
-void RunTimelineEntry(Timeline* self, Entry90* msg)
+void RunWorld3TimelineEntry(World3Timeline* self, Entry90* msg)
 {
     switch (msg->f0) {
     case 0:
-        ScheduleTempoAgentBeatPress((TempoAgent*)self->found, msg);
+        ScheduleWorld3BossBeatPress((World3Boss*)self->found, msg);
         break;
     case 1: {
         s32* loc = &msg->fC;
@@ -2862,29 +2862,29 @@ void RunTimelineEntry(Timeline* self, Entry90* msg)
         break;
     }
     case 2:
-        ((TempoAgent*)self->found)->fC3C->f680 = 1;
+        ((World3Boss*)self->found)->fC3C->f680 = 1;
         D_00273C50.vt->m16(&D_00273C50, 2);
         ResetPadStepRepeat(&g_padRecord);
         StartSoundEffect(0, 0, 0, 0, 80000.0f, 70000.0f, 1.5f, 0.5f, 0.0f, 0, 0);
         break;
     case 3:
-        ((TempoAgent*)self->found)->fC3C->f680 = 0;
-        ((TempoAgent*)self->found)->fC3C->f688 = 0;
+        ((World3Boss*)self->found)->fC3C->f680 = 0;
+        ((World3Boss*)self->found)->fC3C->f688 = 0;
         D_00273C50.vt->m16(&D_00273C50, 0);
         break;
     case 4:
-        ((TempoAgent*)self->found)->fC4C = 1;
+        ((World3Boss*)self->found)->fC4C = 1;
         D_002739F0.vt->m16(&D_002739F0, 2);
         StartSoundEffect(0, 0, 0, 0, 80000.0f, 70000.0f, 1.5f, -0.25f, 0.0f, 0, 0);
         break;
     case 5:
-        ((TempoAgent*)self->found)->fC4C = 0;
+        ((World3Boss*)self->found)->fC4C = 0;
         D_002739F0.vt->m16(&D_002739F0, 0);
         break;
     }
 }
 
-void* AppendTimelineEntry(Timeline* self, s32 a, s32 b, f32 c)
+void* AppendWorld3TimelineEntry(World3Timeline* self, s32 a, s32 b, f32 c)
 {
     if (self->f34 >= 0xC0) return D_00625760;
     Entry90* e = (Entry90*)((u8*)self->buffer + self->f34 * 16);
@@ -2896,34 +2896,34 @@ void* AppendTimelineEntry(Timeline* self, s32 a, s32 b, f32 c)
     return e;
 }
 
-void AppendTimelineKind0Entry(void* self, s32 p, s32 val)
+void AppendWorld3TimelineKind0Entry(void* self, s32 p, s32 val)
 {
-    AppendTimelineEntry(self, 0, p)->fC = val;
+    AppendWorld3TimelineEntry(self, 0, p)->fC = val;
 }
 
-void AppendTimelineKind1Entry(void* self, s32 p, s32 val)
+void AppendWorld3TimelineKind1Entry(void* self, s32 p, s32 val)
 {
-    AppendTimelineEntry(self, 1, p)->fC = val;
+    AppendWorld3TimelineEntry(self, 1, p)->fC = val;
 }
 
-void AppendTimelineKind2Entry(void* self, s32 p)
+void AppendWorld3TimelineKind2Entry(void* self, s32 p)
 {
-    AppendTimelineEntry(self, 2, p);
+    AppendWorld3TimelineEntry(self, 2, p);
 }
 
-void AppendTimelineKind3Entry(void* self, s32 p)
+void AppendWorld3TimelineKind3Entry(void* self, s32 p)
 {
-    AppendTimelineEntry(self, 3, p);
+    AppendWorld3TimelineEntry(self, 3, p);
 }
 
-void AppendTimelineKind4Entry(void* self, s32 p)
+void AppendWorld3TimelineKind4Entry(void* self, s32 p)
 {
-    AppendTimelineEntry(self, 4, p);
+    AppendWorld3TimelineEntry(self, 4, p);
 }
 
-void AppendTimelineKind5Entry(void* self, s32 p)
+void AppendWorld3TimelineKind5Entry(void* self, s32 p)
 {
-    AppendTimelineEntry(self, 5, p);
+    AppendWorld3TimelineEntry(self, 5, p);
 }
 
 LINKER_REMNANT(func_001ED638);

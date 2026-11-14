@@ -229,7 +229,7 @@ Measured on this compiler; add to this list when you learn something.
   `config/us/files.tsv` gives the records' start. The parameter blocks of
   `DrawPlayerMarkerRing1` and its kin (func_001D5FA8, func_001D60B0, func_001D61C8, whose
   three guards end player_request.cpp's `.data`, and func_0018A510, whose guard sits before
-  gauge_agent.cpp's later globals, so those are defined after the function) are the known
+  world2_boss.cpp's later globals, so those are defined after the function) are the known
   cases: each is a brace initialiser that runs once (include/ring_params.h; a record cleared
   by the compiler's memset call and filled with constants in one block is that form,
   docs/toolchain/large-functions.md, "A brace initialiser's union member is a CLOBBER").

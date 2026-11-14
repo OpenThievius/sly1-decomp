@@ -11,7 +11,7 @@ shared helpers.
   fields, and ToFloatMoved, ToFloatY (prot3w), ToFloatZ (pextuw with $zero) for a vector's lanes
   in a GPR. No include/mmi.h: none of pmaxw, pminw, por, qfsrv, mfsa, plzcw or a multu read
   through hi is in game code's C. Matched with them: SetWorldGravityZ, BuildUniformScaleAboutPoint,
-  ResetFlagTable, HandleModeColliderActivation, ResetTintBlendColliderOrientation,
+  ResetFlagTable, HandleWorld5ModeColliderActivation, ResetTintBlendColliderOrientation,
   HandleModeWalkerActivation, func_00125BF0, SetRandomEffectSpin, InitIdLinkedObject,
   LaunchContactListObject, SetRangeRecordPosition and SetRangeRecordDirection, InitPlayer,
   MatrixToAxisAngle.

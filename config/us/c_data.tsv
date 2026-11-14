@@ -35,7 +35,7 @@ D_0024A7DC	0024A7DC	12	.rodata	src/main/link_constraint.cpp
 D_0024A7F0	0024A7F0	88	.rodata	src/main/target_follower.cpp
 D_0024A848	0024A848	24	.rodata	src/main/pad_input.cpp
 D_0024A860	0024A860	1936	.rodata	src/main/player.cpp
-D_0024AFF4	0024AFF4	4	.rodata	src/main/mode_collider.cpp
+D_0024AFF4	0024AFF4	4	.rodata	src/main/world5_boss.cpp
 D_0024B000	0024B000	84	.rodata	src/main/entry_queue.cpp
 D_0024B060	0024B060	260	.rodata	src/main/player_state2.cpp
 D_0024B164	0024B164	12	.rodata	src/main/mode_walker.cpp
@@ -43,7 +43,7 @@ D_0024B170	0024B170	120	.rodata	src/main/base_object.cpp
 D_0024B1E8	0024B1E8	109	.rodata	src/main/main_loop.cpp
 D_0024B258	0024B258	4	.rodata	src/main/collider_contact.cpp
 D_0024B260	0024B260	16	.rodata	src/main/matrix.cpp
-D_0024B270	0024B270	4	.rodata	src/main/gauge_agent.cpp
+D_0024B270	0024B270	4	.rodata	src/main/world2_boss.cpp
 D_0024B280	0024B280	436	.rodata	src/main/memory_card.cpp
 D_0024B438	0024B438	416	.rodata	src/main/movie_player.cpp
 D_0024B5E0	0024B5E0	116	.rodata	src/main/point_graph.cpp
@@ -165,7 +165,7 @@ D_00262718	00262718	684	.data	src/main/selection_menus.cpp
 D_002629C8	002629C8	104	.data	src/main/target_follower.cpp
 D_00262A30	00262A30	992	.data	src/main/pad_input.cpp
 D_00262E10	00262E10	3248	.data	src/main/player.cpp
-D_00263AC0	00263AC0	884	.data	src/main/mode_collider.cpp
+D_00263AC0	00263AC0	884	.data	src/main/world5_boss.cpp
 D_00263E34	00263E34	20	.data	src/main/entry_queue.cpp
 D_00263E50	00263E50	580	.data	src/main/player_state2.cpp
 D_00264098	00264098	16	.data	src/main/colored_triangle_set.cpp
@@ -173,7 +173,7 @@ D_002640B0	002640B0	384	.data	src/main/mode_walker.cpp
 D_00264230	00264230	48	.data	src/main/path_speed_collider.cpp
 D_00264260	00264260	1500	.data	src/main/main_loop.cpp
 D_00264840	00264840	208	.data	src/main/collider_contact.cpp
-D_00264910	00264910	300	.data	src/main/gauge_agent.cpp
+D_00264910	00264910	300	.data	src/main/world2_boss.cpp
 D_00264A40	00264A40	20324	.data	src/main/memory_card.cpp
 D_002699A4	002699A4	8	.data	src/main/heap.cpp
 D_002699B0	002699B0	416	.data	src/main/movie_player.cpp
@@ -252,7 +252,7 @@ D_0027C00C	0027C00C	4	.bss	src/main/gauge_manager.cpp
 D_0027C010	0027C010	272	.bss	src/main/effect_spawner.cpp
 D_002BE460	002BE460	24	.bss	src/main/display.cpp
 D_002BE478	002BE478	20	.bss	src/main/entry_queue.cpp
-D_002BE490	002BE490	128	.bss	src/main/gauge_agent.cpp
+D_002BE490	002BE490	128	.bss	src/main/world2_boss.cpp
 D_00604700	00604700	128	.bss	src/main/switched_collider.cpp
 D_00605550	00605550	384	.bss	src/main/player_request.cpp
 D_006256E0	006256E0	128	.bss	src/main/warp_menu.cpp

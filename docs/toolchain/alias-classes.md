@@ -438,7 +438,7 @@ A second function with func_001D87C8's blocker (2026-11-08, ApplyLinkConstraint,
 
 ### The Scalar slot against a method-table load (func_0017ABE8)
 
-SetModeColliderMode's mode 2 (`aim = FromFloats(0, 0, 2000); rates = D_00248D30;
+SetWorld5ModeColliderMode's mode 2 (`aim = FromFloats(0, 0, 2000); rates = D_00248D30;
 D_00270650.vt->m16(&D_00270650, 2)`) is the same wall, and all of its 20 differing words come
 from it (read from haifa-sched.c, alias.c, expr.c, stmt.c, integrate.c and cp/class.c with `-dS
 -fsched-verbose-6` dumps, 2026-11-09, still a near miss):
@@ -614,7 +614,7 @@ rows should be RotateMembers.
 
 ### A method read as a descriptor member passes the weight slots (func_001EB698)
 
-ContinueBeatPressColliderRequest (a MulXSum of two rows of the object's matrix, weights
+ContinueWorld3BeatPressColliderRequest (a MulXSum of two rows of the object's matrix, weights
 `-D_00275CD0` and `D_00275CD4`, then the player's slot 0x90 method with the sum) matched on
 2026-11-09 with the scalar slot and one more change (`-dS -dR -fsched-verbose-6` dumps):
 
@@ -1263,7 +1263,7 @@ maintainer's decision.
   whole body in both arms with or without the call (CSE folds `fC10[1]`). The one form with
   retail's B0 and no arm of its own is a third parameter compared with 1 (`if (mode == 1) dir =
   e->fC; else dir = e->fC;`: the surviving load is retail's `lw t0` and the `li` sits before it,
-  16 lines, the join scheduled differently), but RunTimelineEntry, the only caller, passes two
+  16 lines, the join scheduled differently), but RunWorld3TimelineEntry, the only caller, passes two
   arguments, so that is not the original either.
 - **Solved: two arms that flow empties (w44-fc, 2026-11-12).** Read from flow.c
   (tidy_fallthru_edge, make_edges) and the `-da` dumps of five probes. (1) One dead arm, `if
@@ -1563,7 +1563,7 @@ CollectMeshHits (2026-11-10):
 
 ### A parameter passed on fills sched1's second slot (func_0018AD88)
 
-- **What decided it.** UpdateGaugeAgentGoal opens with `switch (self->f724)` against 4. In its
+- **What decided it.** UpdateWorld2BossGoal opens with `switch (self->f724)` against 4. In its
   first block sched1 (issue rate 2, two ALU units) has three candidates at t=1: self's copy from
   $a0 (priority 4), the constant 4 (priority 2) and, at t=2, the load of f724 (it needs the
   copy). With only self as a parameter, the constant fills the second ALU slot of t=1 and comes
@@ -1573,7 +1573,7 @@ CollectMeshHits (2026-11-10):
   operands swapped) changes the block: they all expand to the same three insns.
 - **The fix was the signature.** The method's slot passes a second argument, and the base
   method it falls back on (UpdateAgentGoal, agent.cpp) reads it in $a1: the original was
-  `UpdateGaugeAgentGoal(GaugeAgent* self, s32 flag)` with `UpdateAgentGoal(self, flag)` in the
+  `UpdateWorld2BossGoal(World2Boss* self, s32 flag)` with `UpdateAgentGoal(self, flag)` in the
   default case. The flag's copy from $a1 is then one more candidate at t=1, with the constant's
   priority (2: it is live into the default block, so the jump depends on it) and the earlier
   insn of the two (expanded with the parameters), so it wins the tie and takes the second slot;
@@ -1622,7 +1622,7 @@ CollectMeshHits (2026-11-10):
 - **What global-alloc gives.** global-alloc has no widening: a pseudo born where $v0 dies does
   not conflict with $v0, and it takes the lowest free register in REG_ALLOC_ORDER (v0 first).
   A user variable assigned twice has two deaths, so it is global-alloc's even in one block.
-- **func_0018AE38.** UpdateGaugeAgentState's case 12 finds two entries (f610, f614) and reads
+- **func_0018AE38.** UpdateWorld2BossState's case 12 finds two entries (f610, f614) and reads
   each one's mover and the mover's sequence at 0x10 for FindCyclicRangeIndex. Retail keeps the
   mover in $v0 and the sequence in $a0 (`lw v0,4(v0); ... lw a0,16(v0); ... lw a1,8(a0); jal;
   lw a0,4(a0)`); per-call temporaries or locals, local-alloc's, took $v1 and $a3 (and pushed
@@ -1786,14 +1786,14 @@ TurnColliderTowardRotation (2026-11-09):
 
 ### A Load method's reader, passed on, ranks self below the counter (func_001EBF40)
 
-- LoadTempoAgent (slot 10 of class 0x13) calls LoadAgent and resolves four clip ids into
-  fC10 in a loop that loop.c reverses (`li s2,3` ... `bgez s2`). Written as `(TempoAgent*
+- LoadWorld3Boss (slot 10 of class 0x13) calls LoadAgent and resolves four clip ids into
+  fC10 in a loop that loop.c reverses (`li s2,3` ... `bgez s2`). Written as `(World3Boss*
   self)` it was retail's code with self and the counter in s2 and s3 swapped. global-alloc
   ranked 133 (the out pointer, 14/12), 135 (the id pointer, 14/18), self (5 refs: 2*5/15 =
   0.667) and the counter (7 refs; its `i = 3` carries a REG_EQUAL constant, so
   update_equiv_regs doubles its life 14 to 28: 2*7/28 = 0.5) in that order.
 - Load methods take a reader as their second parameter: LoadAgent passes its $a1 on to
-  LoadCollider untouched, and LoadCollider reads it. With `(TempoAgent* self, void* reader)`
+  LoadCollider untouched, and LoadCollider reads it. With `(World3Boss* self, void* reader)`
   passed on to `LoadAgent(self, reader)`, the copy of $a1 into its pseudo and back is one
   more candidate before the call: sched1 now issues the counter's `i = 3` after the call
   (its life 11, doubled 22, crossing one call instead of two) and self spans 16. The counter
@@ -2200,7 +2200,7 @@ variable set before the guards is needed. The notes below are kept as they were 
   ToFloatMoved of the u32 widens it to TImode first. Swept over the eleven near misses whose
   notes mention mtc1 or neg.s, it closed no other.
 
-- **A call's argument move against the last stores (func_001EC3D8).** DrawTempoAgent fills a
+- **A call's argument move against the last stores (func_001EC3D8).** DrawWorld3Boss fills a
   stack request (group, a float, the object, the callback) and passes `&r` (`move a0,sp`).
   With ToFloat, sched2 had the swc1 queued two cycles behind reload's mtc1, so the free alu
   slot took `move a0,sp` a cycle ahead of it, in every store order. With ToFloatMoved the
@@ -2648,7 +2648,7 @@ before the integer arguments, as calls.c's reversed evaluation does for a last p
 its three floats first (`(f32, f32, f32, RampProfile*, f32*)`, as the file's other callers
 declare it), which gives retail's argument order around its call. The ramp record is filled
 `y` before `x`, as the same file's other ramp fill does (func_001CFFD0's `i.y = ...; i.x = ...`),
-and the clamp of the dot is mode_collider.cpp's ClampBetween, which returns each outcome into one
+and the clamp of the dot is world5_boss.cpp's ClampBetween, which returns each outcome into one
 value (retail's merge in $f0).
 
 ### A call's result register ends a use's dependences in sched2 (func_00131198)
