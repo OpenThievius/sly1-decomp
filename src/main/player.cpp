@@ -5096,7 +5096,7 @@ void QueuePlayerSecondActivation(Player* a0, InteractTarget* a1)
     }
 }
 
-ASM_FUNC(func_001782A8);
+LINKER_REMNANT(func_001782A8);
 
 struct TargetArcSource {
     BaseObject* target;

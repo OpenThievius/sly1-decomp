@@ -597,7 +597,7 @@ void HandleStandInNotification(StandIn* self, s32 kind, ObjectMessage* ref)
 
 void InitOwnerMessage(OwnerMessage* self, s32 mode, s32 owner) { FillMemory(self, 0, 0x10); self->owner = owner; self->mode = mode; self->c = owner; }
 
-ASM_FUNC(func_001D70E8);
+LINKER_REMNANT(func_001D70E8);
 
 OutputBuffer* InitOutputBuffer(OutputBuffer* self, s32 handle)
 {

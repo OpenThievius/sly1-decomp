@@ -966,7 +966,7 @@ void ResetPathFollower(PathFollower* self)
     self->f85C = r;
 }
 
-ASM_FUNC(func_001DB448);
+LINKER_REMNANT(func_001DB448);
 
 ASM_FUNC(func_001DB460);
 

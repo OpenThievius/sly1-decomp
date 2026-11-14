@@ -1,0 +1,93 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Only in PAL: opens a file on the IOP. Claims a handle of the file table (ClaimFreeFileHandle),
+// sends the open request (the flags without their top bits, the mode, the name up to 0x400
+// bytes) and waits for the reply; the handle's id and flags are set under the table's lock
+// (D_002771C0, the one ClaimFreeFileHandle takes). Returns the handle's index, or a negative error.
+// The name is copied as chars and the copy's value tested, so the test sign-extends the stored
+// byte (retail's sll by 24). As CloseFile does with its reply, one variable holds the reply word
+// and then the index returned (retail's copy into s1 before the last lock).
+struct Open_1F9D40 {
+    s32 sema;
+    s32 result;
+    s32 result_size;
+    s32 flags;
+    s32 mode;
+    char name[0x400];
+    s32 index;
+};
+
+s32 IsFileServiceVersionUnknown(void);
+
+s32 OpenFile(const char* name, u32 flags, ...)
+{
+    Open_1F9D40* g = (Open_1F9D40*)D_00627880;
+    Handle_1F84D8* p;
+    s32 mode;
+    s32 h;
+    s32 i;
+    s32 result;
+    s32 index;
+    s32 out;
+    s32* reply;
+    SemaphoreParams ctor;
+
+    LockFileRequests(0);
+    if (g_fileClientOpen == 0) {
+        OpenFileClient();
+    }
+    if (IsFileServiceVersionUnknown() != 0) {
+        UnlockFileRequests();
+        return 0xFFFEFFFC;
+    }
+    p = ClaimFreeFileHandle();
+    if (p == 0) {
+        UnlockFileRequests();
+        return -0x13;
+    }
+    mode = *(s32*)((char*)__builtin_next_arg(flags) - 48);
+    for (i = 0; i < 0x400; i++) {
+        if ((g->name[i] = name[i]) == 0) {
+            break;
+        }
+    }
+    if (i == 0x400) {
+        g->name[0x3FF] = 0;
+    }
+    index = ((s32)p - (s32)D_00628940) >> 4;
+    g->flags = flags & 0x6FFFFFFF;
+    g->mode = mode;
+    g->index = index;
+    ctor.maxCount = 1;
+    ctor.initCount = 0;
+    ctor.option = 0;
+    h = NewSemaphore(&ctor);
+    g->result = (s32)&out;
+    g->sema = h;
+    g->result_size = 4;
+    if (CallRemoteService((RemoteCallClient*)g_fileClient, 0, 0, D_00627880, 0x418, D_006284C0, 4, 0, 0) < 0) {
+        FreeSemaphore(h);
+        UnlockFileRequests();
+        return -0xB;
+    }
+    reply = (s32*)((s32)D_006284C0 | 0x20000000);
+    result = *reply;
+    UnlockFileRequests();
+    if (result == 0) {
+        FreeSemaphore(h);
+        return -0xB;
+    }
+    AwaitSemaphore(h);
+    FreeSemaphore(h);
+    if (out < 0) {
+        AwaitSemaphore(D_002771C0);
+        p->used = 0;
+        PostSemaphore(D_002771C0);
+        return out;
+    }
+    result = index;
+    AwaitSemaphore(D_002771C0);
+    p->id = out;
+    p->used |= flags;
+    PostSemaphore(D_002771C0);
+    return result;
+}

@@ -1135,6 +1135,34 @@ class MapFixesTest(unittest.TestCase):
             inventory.apply_fixes(pairs, self.US, {"func_C": "func_B"})
 
 
+class MovedPairingTest(unittest.TestCase):
+    """inventory.moved and inventory.drop_implausible: what position gets wrong."""
+
+    def test_a_function_that_moved_is_paired_by_its_code(self):
+        us = [("func_A", 0x100, 40, "code", "a"), ("func_B", 0x128, 40, "code", "b")]
+        eu = [("func_X", 0x100, 44, "code", "x"), ("func_Y", 0x12C, 40, "code", "y")]
+        pairs = [(eu[0], us[0], "order"), (eu[1], us[1], "order")]
+        core_us = {"func_A": "1", "func_B": "2"}
+        core_eu = {"func_X": "2", "func_Y": "1"}
+        out = inventory.moved(pairs, us, core_us, core_eu)
+        self.assertEqual([(e[0], u[0], how) for e, u, how in out],
+                         [("func_X", "func_B", "moved"), ("func_Y", "func_A", "moved")])
+
+    def test_two_unpaired_functions_are_left_to_similar(self):
+        us = [("func_A", 0x100, 40, "code", "a")]
+        eu = [("func_X", 0x100, 40, "code", "x")]
+        out = inventory.moved([(eu[0], None, "none")], us, {"func_A": "1"}, {"func_X": "1"})
+        self.assertEqual([(e[0], u, how) for e, u, how in out], [("func_X", None, "none")])
+
+    def test_a_pair_by_position_of_very_different_sizes_is_dropped(self):
+        us = [("func_A", 0x100, 4, "code", "a"), ("func_B", 0x104, 100, "code", "b")]
+        eu = [("func_X", 0x100, 644, "code", "x"), ("func_Y", 0x384, 120, "code", "y")]
+        pairs = [(eu[0], us[0], "order-size"), (eu[1], us[1], "order-size")]
+        out = inventory.drop_implausible(pairs)
+        self.assertEqual([(e[0], u and u[0], how) for e, u, how in out],
+                         [("func_X", None, "none"), ("func_Y", "func_B", "order-size")])
+
+
 class SimilarPairingTest(unittest.TestCase):
     """inventory.similar: unpaired functions between paired neighbours, by shape and callees."""
 

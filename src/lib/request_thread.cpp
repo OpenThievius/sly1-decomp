@@ -59,7 +59,7 @@ extern u8 D_002832F0[];
 
 s32 NewSemaphore(Init_1F70F8* p);
 s32 MakeThread(Ctx_1F70F8* p);
-void FreeSemaphore(s32 h);
+s32 FreeSemaphore(s32 h);
 void RunThread(s32 h, Queue_1F7020* q);
 s32 GetCurrentThreadId(void);
 void SetThreadPriority(s32 h, s32 v);

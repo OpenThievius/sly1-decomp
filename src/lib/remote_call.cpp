@@ -106,7 +106,7 @@ s32 DisableInterrupts(void);
 s32 EnableInterrupts(void);
 void ShutDownCommandChannel(void);
 s32 NewSemaphore(SemaphoreParams* params);
-void FreeSemaphore(s32 sema);
+s32 FreeSemaphore(s32 sema);
 void PostSemaphoreFromInterrupt(s32 sema);
 s32 AwaitSemaphore(s32 sema);
 s32 SendCommand(u32 cmd, void* data, s32 size, s32 a3, s32 a4, s32 a5);

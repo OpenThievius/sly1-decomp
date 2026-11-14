@@ -727,7 +727,7 @@ void AddContactVertexBlendVelocity(Collider* self, Contact03* c, s32 which)
     Vu0::Q(end->v30) = Vu0::Add(Vec::Of(end->v30), Vec::Of(sum)).q;
 }
 
-ASM_FUNC(func_001B8FE0);
+LINKER_REMNANT(func_001B8FE0);
 
 ASM_FUNC(func_001B8FE8);
 

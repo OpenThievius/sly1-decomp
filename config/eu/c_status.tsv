@@ -4538,6 +4538,8 @@ func_eu_001E31E0	func_001E31E0	match	only in PAL
 func_eu_001E3210	func_001E3210	match	only in PAL
 func_eu_001E3248	func_001E3248	match	only in PAL
 func_eu_001F9538	func_001F9538	match	only in PAL
+func_eu_001F9C78	func_001F9C78	match	only in PAL
+func_eu_001F9D40	func_001F9D40	match	only in PAL
 func_eu_0020A730	func_0020A730	match	only in PAL
 func_eu_0020A7D0	func_0020A7D0	match	only in PAL
 func_eu_0020A810	func_0020A810	match	only in PAL

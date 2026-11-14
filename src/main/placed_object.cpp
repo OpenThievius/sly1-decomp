@@ -4487,7 +4487,7 @@ void SetFollowObjects(PlacedObject* self, void* a1, void* a2)
     }
 }
 
-ASM_FUNC(func_0012B6A0);
+LINKER_REMNANT(func_0012B6A0);
 
 void InitCodeChecksum(CodeChecksum* self)
 {

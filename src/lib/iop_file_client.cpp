@@ -77,7 +77,7 @@ static u8 D_00628B80[0x40] __attribute__((aligned(64)));
 static Callback_1F84D8 D_00628BC0 __attribute__((aligned(64)));
 
 s32 NewSemaphore(SemaphoreParams* params);
-void FreeSemaphore(s32 sema);
+s32 FreeSemaphore(s32 sema);
 s32 PostSemaphore(s32 sema);
 void PostSemaphoreFromInterrupt(s32 sema);
 s32 AwaitSemaphore(s32 sema);

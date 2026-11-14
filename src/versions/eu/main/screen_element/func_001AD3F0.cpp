@@ -33,10 +33,6 @@ extern f32 D_eu_0027939C;
 extern u8 D_eu_00263590[];
 void InitWideTextReader(void* buf, void* name, void* p, s32 zero);
 void DrawWrappedAlignedText(void* buf, Out_eu_1AE138* out, s32 zero, void* d);
-void func_eu_00161A20(void* ctx, s32 a, s32 b, u64 c);
-void func_eu_00161D68(void* ctx, s32 a, s64 b);
-void func_eu_00161AB8(void* ctx, s32 color);
-void func_eu_00161C50(void* ctx, s32 a, s32 b, s32 c, s32 d);
 
 void DrawMessageElement(Actor_eu_1AE138* self)
 {
@@ -75,7 +71,7 @@ void DrawMessageElement(Actor_eu_1AE138* self)
     L.FlagB(0);
     L.Fin(0);
     if (self->f974 == 0) {
-        u8* ctx = D_eu_00263590;
+        PacketWriter* ctx = (PacketWriter*)D_eu_00263590;
         f32 a = phase;
         if (D_eu_00274868.f56C != 0 && D_eu_00274868.f570 != 0 && D_eu_00274868.f570->f2D0 == 2) {
             a = 1.0f;
@@ -87,15 +83,15 @@ void DrawMessageElement(Actor_eu_1AE138* self)
         ((u8*)&slot)[2] = 0;
         ((u8*)&slot)[3] = (u8)(a * 64.0f);
         y = y - 54.305084f;
-        func_eu_00161A20(ctx, 0x46, 5, 0x441EE);
-        func_eu_00161D68(ctx, 0x47, 0x30000);
-        func_eu_00161D68(ctx, 0x42, 0x44);
-        func_eu_00161AB8(ctx, slot.v);
+        BeginGifTag(ctx, 0x46, 5, 0x441EE);
+        AddGifRegisterWrite(ctx, 0x47, 0x30000);
+        AddGifRegisterWrite(ctx, 0x42, 0x44);
+        AddGifRgbaEntry(ctx, slot.v);
         y *= 0.5462963f;
         y += 1920.0f;
         y *= 16.0f;
-        func_eu_00161C50(ctx, 0x6C00, (s32)y, 0xFFFFFF0, 0);
-        func_eu_00161C50(ctx, 0x9400, 0x8800, 0xFFFFFF0, 0);
+        AddGifXyzfEntry(ctx, 0x6C00, (s32)y, 0xFFFFFF0, 0);
+        AddGifXyzfEntry(ctx, 0x9400, 0x8800, 0xFFFFFF0, 0);
     }
     f12 = self->f51C;
     PushFontScale(self->p4, f12, f12);

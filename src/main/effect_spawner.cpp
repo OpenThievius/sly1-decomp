@@ -2884,7 +2884,7 @@ void DispatchDelayedMessages(World* self)
     g_activeListFrames = it.prev;
 }
 
-ASM_FUNC(func_00159668);
+LINKER_REMNANT(func_00159668);
 
 void LoadCrossfadeAnimator(CrossfadeAnimator* self, AnimatorParams* src)
 {
