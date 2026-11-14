@@ -121,6 +121,7 @@ s32 g_switchedColliderCount;
 void* g_switchedColliders[16];
 extern f32 g_gameClock[];
 
+// Initialises the collider, points f598 at itself, sets f580 to 1 and enables it.
 void InitSwitchedCollider(SwitchedCollider* self)
 {
     InitCollider(self);
@@ -129,6 +130,8 @@ void InitSwitchedCollider(SwitchedCollider* self)
     SetSwitchedColliderEnabled(self, 1);
 }
 
+// Copies the collider and, if the copy is not enabled, sets it enabled and then disabled again, so
+// that it ends up off the list.
 void CopySwitchedCollider(SwitchedCollider* self, SwitchedCollider* src)
 {
     CopyCollider(self, src);
@@ -139,6 +142,8 @@ void CopySwitchedCollider(SwitchedCollider* self, SwitchedCollider* src)
     SetSwitchedColliderEnabled(self, 0);
 }
 
+// After the placed object's handling: kind 0xB stops the collider's playing sound; kind 0x10
+// removes the message's object from the collider's effect list (its slot is cleared).
 void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
@@ -159,6 +164,8 @@ void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* 
     }
 }
 
+// With an activator, remembers the collider's position as the focus point and pushes a camera
+// controller for it; without one (deactivation), removes the camera controllers of kinds 1 to 6.
 void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator)
 {
     if (activator != 0) {
@@ -171,6 +178,9 @@ void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator)
     }
 }
 
+// Captures the collider's pose for the camera; unless it holds its focus, eases the focus point's z
+// toward the collider's z while the camera is not snapping, and stores the pose's focus back at
+// 0x560.
 void CaptureSwitchedColliderPose(SwitchedCollider* self, u8* out, f32 a)
 {
     CaptureColliderPose(self, (ColliderPose*)out);
@@ -185,32 +195,38 @@ void CaptureSwitchedColliderPose(SwitchedCollider* self, u8* out, f32 a)
     *(Quad16*)((u8*)self + 0x560) = *(Quad16*)(out + 0x10);
 }
 
+// Always 1: the base collider does not hold the camera.
 s32 IsSwitchedColliderCameraFree(void)
 {
     return 1;
 }
 
+// Makes the collider the active one unless it already is.
 void ActivateSwitchedColliderUnlessActive(void* self)
 {
     if (self != GetActiveSwitchedCollider()) ActivateSwitchedCollider(self);
 }
 
+// A request is blocked while button-code flag bit 1 is set or the pad-select flag is held.
 s32 IsSwitchedColliderRequestBlocked(SwitchedCollider* self)
 {
     if ((g_buttonCodeFlags & 1) || IsPadSelectFlagHeld(self->world)) return 1;
     return 0;
 }
 
+// Always refuses a request (0); the subclasses override it.
 s32 AcceptSwitchedColliderRequest(SwitchedCollider* self)
 {
     return 0;
 }
 
+// Always 0 in the base class.
 s32 HasSwitchedColliderAcceptedRequest(void)
 {
     return 0;
 }
 
+// Stores the result of the collider's method 0x4D (called with out) in *out.
 void StoreSwitchedColliderAccepted(SwitchedCollider* self, s32* out)
 {
     *out = ((s32 (*)(SwitchedCollider*, s32*))self->desc05()->m4D)(self, out);
@@ -250,6 +266,7 @@ void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject*
 
 ASM_FUNC(func_001925C0);
 
+// The active collider (the global active index into the list), or 0 when none is active.
 void* GetActiveSwitchedCollider()
 {
     s32 i = g_activeSwitchedCollider;
@@ -257,6 +274,8 @@ void* GetActiveSwitchedCollider()
     return g_switchedColliders[i];
 }
 
+// The active switched collider, else the player when it is enabled, else the first of the list,
+// else 0.
 void* GetCurrentSwitchedCollider(void)
 {
     void* r = GetActiveSwitchedCollider();
@@ -273,6 +292,7 @@ void* GetCurrentSwitchedCollider(void)
     return r;
 }
 
+// The index of obj in the global list of switched colliders, or -1.
 s32 FindSwitchedColliderIndex(void* obj)
 {
     s32 i;
@@ -284,6 +304,9 @@ s32 FindSwitchedColliderIndex(void* obj)
     return -1;
 }
 
+// Adds an enabled, parentless, attached collider to the global list of switched colliders (16 at
+// most) unless it is already there; when the list is full, the collider with id 5 takes slot 0
+// while there is no player.
 void AddToSwitchedColliderList(SwitchedCollider* self)
 {
     if (self->enabled == 0) return;
@@ -299,6 +322,8 @@ void AddToSwitchedColliderList(SwitchedCollider* self)
     }
 }
 
+// Removes the collider from the global list, deactivating it first if it is the active one, closing
+// the gap and keeping the active index pointing at the same entry.
 void RemoveFromSwitchedColliderList(SwitchedCollider* value)
 {
     s32 idx = FindSwitchedColliderIndex(value);
@@ -310,12 +335,14 @@ void RemoveFromSwitchedColliderList(SwitchedCollider* value)
     g_switchedColliderCount = g_switchedColliderCount - 1;
 }
 
+// Registers the collider as a collider and adds it to the switched list.
 void RegisterSwitchedCollider(SwitchedCollider* self)
 {
     RegisterCollider(self);
     AddToSwitchedColliderList(self);
 }
 
+// Unregisters the collider and removes it from the switched list.
 void UnregisterSwitchedCollider(SwitchedCollider* self)
 {
     UnregisterCollider(self);
@@ -352,6 +379,8 @@ void ActivateSwitchedColliderIndex(s32 index)
 
 LINKER_REMNANT(func_00192988);
 
+// Changes the enabled flag, adding the collider to the global list when it turns on and removing it
+// when it turns off.
 void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 value)
 {
     if (self->enabled == value) return;
@@ -360,11 +389,13 @@ void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 value)
     else RemoveFromSwitchedColliderList(self);
 }
 
+// Makes the collider the active one (by its index in the list; -1 if it is not in it).
 void ActivateSwitchedCollider(void* value)
 {
     ActivateSwitchedColliderIndex(FindSwitchedColliderIndex(value));
 }
 
+// The data block at 0x580 of the active collider, or a default block when none is active.
 void* GetActiveSwitchedColliderData()
 {
     void* r = GetActiveSwitchedCollider();
@@ -372,12 +403,14 @@ void* GetActiveSwitchedColliderData()
     return &g_defaultSwitchedColliderData;
 }
 
+// Gives back interact flags a and b both set to 1.
 void GetSwitchedColliderInteractFlags(s32, s32, InteractFlags* out)
 {
     out->b = 1;
     out->a = 1;
 }
 
+// Stores value in the typed-text caption box and pushes the box on the element stack.
 void ShowTypedTextCaptionBox(SwitchedCollider* self, u32 value)
 {
     T217D_440* block = &g_typedTextCaptionBox;
@@ -548,6 +581,7 @@ void EmitSwitchedColliderTrailPoints(SwitchedCollider* self)
     }
 }
 
+// The collider's own target is itself.
 void* GetSwitchedColliderTarget(SwitchedCollider* p)
 {
     return p;

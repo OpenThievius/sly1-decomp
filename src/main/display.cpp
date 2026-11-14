@@ -202,6 +202,8 @@ s32 HandleVblankStart(s32 cause)
     return 0;
 }
 
+// Sets the vertical-blank wait flag and sleeps on the vertical-blank semaphore until the interrupt
+// handler posts it.
 void SignalDisplaySync(void) {
     g_vblankWaiting = 1;
     AwaitSemaphore(g_vblankSemaphore);
@@ -243,6 +245,9 @@ void FlipDisplayFrame(void)
     WaitGsPaths(0, 0);
 }
 
+// Applies a display flip that the vertical-blank handler left pending: reads the GS field bit,
+// stores the draw-field parity, rebuilds the field draw-offset packet and sends the
+// draw-environment packet of the current frame buffer. Also moves display state 3 to 2.
 void ApplyPendingDisplayFlip(void)
 {
     if (D_002626CC == 3) {
@@ -315,6 +320,8 @@ s32 HandleGsFinish(s32 cause)
     return -1;
 }
 
+// Starts a DMA chain on the given channel and sleeps on the GS FINISH semaphore; HandleGsFinish
+// posts it once the GS reports FINISH (CSR bit 1).
 void SendGsPacketAndWait(s32 channel, void* b)
 {
     g_gsFinishWaiting = 1;
@@ -388,6 +395,8 @@ void InitDisplay(void)
     ResetDisplayBuffers();
 }
 
+// Sends the draw-environment packet and then the DMA chain once for each of the two frame buffers,
+// waiting on the GIF channel at the end.
 void SendPacketToBothBuffers(void* chain)
 {
     s32 i = 0;
@@ -406,6 +415,8 @@ void SendPacketToBothBuffers(void* chain)
     WaitDmaChannel((DmaChannel*)g_gifChannel, 0, 0);
 }
 
+// Builds a small packet of one 0x2C-quadword block (g_screenClearPacketC) and sends it to both
+// frame buffers.
 void SendDisplayResetPacket(void)
 {
     DmaChainBlock a;

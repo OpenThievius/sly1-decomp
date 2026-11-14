@@ -43,6 +43,9 @@ f32 g_rangeRecordClipMargin = 50.0f;
 
 ASM_FUNC(func_001B1AC8);
 
+// Prepares a range record for drawing: links it to record 0x2C if unlinked, gives it defaults of
+// 100 near and 400 far when it has no ranges, and unless its link's mask has bit 0x10000000
+// reserves a cleared 16-byte entry in the mesh queue (up to 0x4000).
 void PrepareRangeRecord(RangeRecord* self)
 {
     if (self->link == 0) {
@@ -63,6 +66,7 @@ void PrepareRangeRecord(RangeRecord* self)
     }
 }
 
+// Marks the record's drawing packet as not built, so QueueRangeRecordPacket builds it again.
 void InvalidateRangeRecordPacket(RangeRecord* self)
 {
     self->packetValid = 0;
@@ -104,6 +108,8 @@ void UpdateRangeRecordBounds(RangeRecord* self)
     Vu0::Q(self->v50) = Vu0::Add(Vu0::Q(self->v10), Vu0::Q(scaled));
 }
 
+// Links the record to the record found for key (0x2C when key is -1) and invalidates its packet if
+// it was found.
 void LinkRangeRecord(RangeRecord* self, s32 key)
 {
     AnimRecord* found = FindAnimRecord(key != -1 ? key : 0x2C);
@@ -112,6 +118,7 @@ void LinkRangeRecord(RangeRecord* self, s32 key)
         InvalidateRangeRecordPacket(self);
 }
 
+// True when both near and far ranges are set (not negative).
 s32 HasRangeRecordRanges(RangeRecord* p)
 {
     s32 r = 0;
@@ -120,6 +127,8 @@ s32 HasRangeRecordRanges(RangeRecord* p)
     return r;
 }
 
+// Stores the near range; the far range takes the same value while it is unset (negative).
+// Invalidates the packet.
 void StoreRangeRecordNear(RangeRecord* p, f32 v)
 {
     p->nearRange = v;
@@ -128,6 +137,8 @@ void StoreRangeRecordNear(RangeRecord* p, f32 v)
     InvalidateRangeRecordPacket(p);
 }
 
+// Stores the far range; the near range takes the same value while it is unset (negative).
+// Invalidates the packet.
 void StoreRangeRecordFar(RangeRecord* o, f32 v)
 {
     o->farRange = v;
@@ -179,6 +190,7 @@ void SetRangeRecordDirection(RangeRecord* self, Vec02* v)
     }
 }
 
+// Stores the inner distance, updates the record's bounds and invalidates the packet.
 void StoreRangeRecordInner(RangeRecord* o, f32 v)
 {
     o->innerDistance = v;
@@ -186,6 +198,7 @@ void StoreRangeRecordInner(RangeRecord* o, f32 v)
     InvalidateRangeRecordPacket(o);
 }
 
+// Stores the outer distance, updates the record's bounds and invalidates the packet.
 void StoreRangeRecordOuter(RangeRecord* o, f32 v)
 {
     o->outerDistance = v;
@@ -193,6 +206,8 @@ void StoreRangeRecordOuter(RangeRecord* o, f32 v)
     InvalidateRangeRecordPacket(o);
 }
 
+// Sets the near and far ranges to tan(s/2) times the inner and outer distances, where s is an angle
+// in degrees (s times pi/360 is the half angle in radians), and invalidates the packet.
 void ScaleRangeRecordByAngle(RangeRecord* o, f32 s) {
     f32 t = Tangent(s * 0.00872664712f);
     o->nearRange = t * o->innerDistance;
@@ -200,12 +215,15 @@ void ScaleRangeRecordByAngle(RangeRecord* o, f32 s) {
     InvalidateRangeRecordPacket(o);
 }
 
+// Stores a vector at 0x30 and invalidates the packet.
 void StoreRangeRecordVector(RangeRecord* self, Quad16* src)
 {
     *(Quad16*)((u8*)self + 0x30) = *src;
     InvalidateRangeRecordPacket(self);
 }
 
+// True when the record passes the camera's mask (as in QueueRangeRecordPacket) and its link's kind
+// is 2 for bit 1 of bits or 3 for bit 2.
 s32 RangeRecordMatchesKinds(RangeRecord* self, u32 bits)
 {
     s32 r = 0;
@@ -226,6 +244,7 @@ s32 RangeRecordMatchesKinds(RangeRecord* self, u32 bits)
     return r;
 }
 
+// Collider filter: accepts a collider without flag bit 43 that has face starts.
 s32 IsRangeRecordBodyCandidate(void* unused, Collider* o)
 {
     s32 r = 0;
@@ -397,6 +416,9 @@ void BuildRangeRecordPacket(RangeRecord* self)
     }
 }
 
+// Draws a range record if its link's mask passes the camera's (bit 0x10000000 or all of the
+// camera's bits): builds its packet when it has none and appends a reference to it to the VIF
+// packet.
 void QueueRangeRecordPacket(RangeRecord* o)
 {
     if (o->link != 0) {
@@ -433,6 +455,8 @@ done:
 
 ASM_FUNC(func_001B26F8);
 
+// Collects into out, up to max, the range records of the world's list 0x1C00 whose range reaches
+// the sphere (a1, radius f); *outCount gets how many.
 void CollectRangeRecordsInReach(World* self, void* a1, s32 max, s32* outCount, RangeRecord** out, f32 f)
 {
     ListFrame frame;
@@ -453,6 +477,8 @@ void CollectRangeRecordsInReach(World* self, void* a1, s32 max, s32* outCount, R
     *outCount = count;
 }
 
+// Loads a path-curve object: creates its curve from the stream's first byte, lets the curve read
+// its own data from the stream and then reads the property records.
 void LoadPathCurveObject(PathCurveObject* self, void* obj)
 {
     PathCurve* p = CreatePathCurve(ReadBufferedU8((BufferedStream*)obj));

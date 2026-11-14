@@ -877,6 +877,8 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
     CollectNonNullRefs((RefOwner*)self);
 }
 
+// Writes the VIF MSCAL that starts a strip-mesh microprogram for a drawn part: mode 0 starts one
+// program, mode 1 another; any other mode writes nothing.
 void WriteStripMeshMscal(s32 mode, void* obj)
 {
     switch (mode) {
@@ -889,6 +891,8 @@ void WriteStripMeshMscal(s32 mode, void* obj)
     }
 }
 
+// Writes the VIF MSCAL that starts a morph-target microprogram for a drawn part: mode 0 and mode 1
+// start different programs; any other mode writes nothing.
 void WriteMorphTargetMscal(s32 mode, void* obj)
 {
     switch (mode) {
@@ -1689,6 +1693,8 @@ void CopyAttachmentPart(AttachmentCopy* owner, void* partp, void* recp)
     }
 }
 
+// Per-frame update of an animator's steps: calls slot 2 of every element the step claims (with the
+// frame time f), then evaluates the oscillator of each entry of the owner's list at head4C.
 void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f)
 {
     AnimatorStep* e;
@@ -1708,6 +1714,8 @@ void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f)
     }
 }
 
+// The update method that applies the object's link constraint: when its link record has flag bit 4
+// (0x10) set and a linked object, ApplyLinkConstraint is run on that object.
 void UpdateLinkConstraint(PlacedObject* self)
 {
     u8* p=(u8*)self->linkRecord;
@@ -1859,6 +1867,8 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
     }
 }
 
+// Toggles the VIF double-buffer base between its two halves (0x23C minus the current offset) and
+// writes the new base offset into the VIF packet.
 void FlipVifBaseOffset(void)
 {
     s32 v = 0x23C - D_00262474;

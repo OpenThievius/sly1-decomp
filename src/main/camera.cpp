@@ -345,10 +345,13 @@ Vec02 g_cameraProbeBoxMin = { -250.0f, -250.0f, -250.0f, 0.0f };
 Vec02 g_cameraProbeBoxMax = { 250.0f, 250.0f, 250.0f, 0.0f };
 Camera* g_camera = 0;
 
+// Empty: the camera module needs no set-up of its own.
 void InitCameraModule(void)
 {
 }
 
+// Gives in a3 the offset that puts the camera behind the target: its distance away, opposite its
+// heading (heading plus pi).
 void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3)
 {
     ComputePolarOffset((Vec3*)a3, a2->heading + 3.1415927f, a2->distance, 0.0f);
@@ -434,6 +437,8 @@ struct Tracking_001433E0 {
     Quad16 v280;            // 0x280
 };
 
+// Starts the target camera over: the offset behind the target is recomputed and the three tracking
+// vectors at 0x260, 0x270 and 0x280 are zeroed.
 void ResetCameraTargetTracking(Tracking_001433E0* self, void* a1, Target_00143148* a2)
 {
     ComputeOffsetBehindTarget(self, a1, a2, &self->offset);
@@ -469,6 +474,9 @@ void GetCameraTargetPlacement(Camera* self, void* o, TargetRecord_00143418* out,
     }
 }
 
+// Computes the four fog terms into out for a fog strength factor p, fitting a reciprocal through
+// the near and far fog distances; the values are biased for the GS's float-to-integer trick
+// (8388608.0 and 36864.0).
 void ComputeCameraFogTerms(Camera* self, f32* out, f32 p)
 {
     f32 one = 1.0f;
@@ -551,41 +559,52 @@ void InitCamera(Camera* self)
     ResetCamera(self, 1);
 }
 
+// SnapCameraZoom on the current camera.
 void SnapCurrentCameraZoom(void* unused0, f32 zoom)
 {
     SnapCameraZoom(g_camera, zoom);
 }
 
+// SetCameraNearDistance on the current camera.
 void SetCurrentCameraNearDistance(void* unused0, f32 distance)
 {
     SetCameraNearDistance(g_camera, distance);
 }
 
+// SetCameraFarDistance on the current camera.
 void SetCurrentCameraFarDistance(void* unused0, f32 distance)
 {
     SetCameraFarDistance(g_camera, distance);
 }
 
+// SetCameraFogNear on the current camera.
 void SetCurrentCameraFogNear(void* unused0, f32 distance) { SetCameraFogNear(g_camera, distance); }
 
+// SetCameraFogFar on the current camera.
 void SetCurrentCameraFogFar(void* unused0, f32 distance) { SetCameraFogFar(g_camera, distance); }
 
+// SetCameraFogStrength on the current camera.
 void SetCurrentCameraFogStrength(void* unused0, f32 strength) { SetCameraFogStrength(g_camera, strength); }
 
+// SetCameraFogColor on the current camera.
 void SetCurrentCameraFogColor(void* unused0, void* color) { SetCameraFogColor(g_camera, color); }
 
+// SetCameraDistanceScale on the current camera.
 void SetCurrentCameraDistanceScale(void* unused0, f32 scale)
 {
     SetCameraDistanceScale(g_camera, scale);
 }
 
+// Sets only the camera's position (see SetCameraPlacement).
 void SetCameraPosition(void* self, void* value)
 {
     SetCameraPlacement((Camera*)self, (Quad16*)value, 0);
 }
 
+// Sets only the camera's orientation (see SetCameraPlacement).
 void SetCameraOrientation(void* arg, void* arg2) { SetCameraPlacement((Camera*)arg, 0, (Quad16*)arg2); }
 
+// Sets the zoom and its goal to x, so there is no easing, and updates the projection.
 void SnapCameraZoom(void* self, f32 x)
 {
     Camera* c = (Camera*)self;
@@ -595,6 +614,7 @@ void SnapCameraZoom(void* self, f32 x)
     UpdateCameraProjection((Camera*)self);
 }
 
+// Sets the near plane distance and updates the projection.
 void SetCameraNearDistance(void* self, f32 x)
 {
     Camera* c = (Camera*)self;
@@ -602,24 +622,28 @@ void SetCameraNearDistance(void* self, f32 x)
     UpdateCameraProjection((Camera*)self);
 }
 
+// Sets the far plane distance and updates the projection.
 void SetCameraFarDistance(Camera* self, f32 value)
 {
     self->farDistance = value;
     UpdateCameraProjection(self);
 }
 
+// Sets the distance where the fog starts and updates the projection.
 void SetCameraFogNear(Camera* self, f32 value)
 {
     self->fogNear = value;
     UpdateCameraProjection(self);
 }
 
+// Sets the distance where the fog is full and updates the projection.
 void SetCameraFogFar(Camera* self, f32 value)
 {
     self->fogFar = value;
     UpdateCameraProjection(self);
 }
 
+// Sets the fog's strength and updates the projection.
 void SetCameraFogStrength(void* ptr, f32 value)
 {
     Camera* self = (Camera*)ptr;
@@ -627,18 +651,23 @@ void SetCameraFogStrength(void* ptr, f32 value)
     UpdateCameraProjection(self);
 }
 
+// Sets the camera's fog colour and updates the projection.
 void SetCameraFogColor(void* self, void* value)
 {
     *(Value_00143A08*)((u8*)self + 0x204) = *(Value_00143A08*)value;
     UpdateCameraProjection((Camera*)self);
 }
 
+// Sets the distance scale and updates the projection of the current camera.
 void SetCameraDistanceScale(Camera* self, f32 value)
 {
     self->distanceScale = value;
     UpdateCameraProjection(g_camera);
 }
 
+// Resets the camera: with flag set, puts it at its reset position looking at the reset target;
+// empties the controller stack, pushes the base controller, requests a snap and restores the
+// default value mask (0x0FFFFFFF) and swing start time (-10).
 void ResetCamera(Camera* self, s32 flag)
 {
     if (flag != 0) {
@@ -652,11 +681,13 @@ void ResetCamera(Camera* self, s32 flag)
     self->swingStartTime = -10.0f;
 }
 
+// Empties the camera's object list.
 void ClearCameraObjectList(Camera* obj)
 {
     obj->objectCount = 0;
 }
 
+// Appends an object to the camera's list (8 at most).
 void AddCameraObject(Camera* list, void* item)
 {
     u32 n = list->objectCount;
@@ -666,6 +697,7 @@ void AddCameraObject(Camera* list, void* item)
     }
 }
 
+// Takes item out of the camera's object list (closing the gap) when it is there.
 void RemoveCameraObject(Camera* list, void* item)
 {
     for (s32 i = 0; i < list->objectCount; i++) {
@@ -677,6 +709,8 @@ void RemoveCameraObject(Camera* list, void* item)
     }
 }
 
+// Collider filter for the camera: a collider is an obstacle when its flag field matches 0x8000 at
+// bit 20 of the flags or it has node groups.
 s32 IsCameraObstacle(void* unused, Collider* e)
 {
     s64 field = 0xF000;
@@ -823,6 +857,7 @@ struct Frame_00144128 {
     f32 scaleZ;             // 0x1F4
 };
 
+// The inverse of ProjectPointToCamera: from a[0], a[1] and depth a[2] makes the world point.
 void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out)
 {
     Frame_00144128* self = (Frame_00144128*)camera;
@@ -839,6 +874,9 @@ void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out)
     Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(self->rot, Vu0::Q(v)), Vu0::Q(self->pos));
 }
 
+// Projects a world point into the camera's frame: out[2] is the depth along the camera's x axis,
+// out[0] and out[1] the sideways and up offsets scaled by the camera's y and z scale and, for a
+// point in front of the camera (depth above 1e-4), divided by the depth.
 void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out)
 {
     Frame_00144128* self = (Frame_00144128*)camera;
@@ -855,6 +893,8 @@ void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out)
     }
 }
 
+// Rebuilds the camera's ground frame and, when the world has a value tree, looks up the leaf at the
+// camera's position and keeps its value (when non-zero) in f21C.
 void UpdateCameraLocation(Camera* self)
 {
     Quad16 in;
@@ -986,6 +1026,8 @@ void UpdateCameraMatrices(Camera* self)
     }
 }
 
+// Writes a DMA packet that loads the camera's two matrices (at 0x100 and 0x140) into VU memory with
+// base offset 0.
 void WriteCameraMatricesPacket(Camera* self)
 {
     BeginDmaTag((PacketWriter*)g_vifPacketWriter);
@@ -995,6 +1037,8 @@ void WriteCameraMatricesPacket(Camera* self)
     CloseDmaTag((PacketWriter*)g_vifPacketWriter);
 }
 
+// Sets the camera's position and/or its three orientation vectors (either may be 0 to keep it),
+// updates its matrices and clears the look-frame offsets.
 void SetCameraPlacement(Camera* self, Quad16* a, Quad16* b)
 {
     if (a != 0) {
@@ -1014,6 +1058,7 @@ void SetCameraPlacement(Camera* self, Quad16* a, Quad16* b)
     self->f2B8 = zero;
 }
 
+// Places the camera at target looking at focus, through the orbit camera placement.
 void PlaceCameraLookingAt(Camera* self, const Vec02* target, const Vec02* focus)
 {
     UpdateOrbitCameraPlacement(self, 0, target, focus, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -1043,6 +1088,9 @@ void ComputeLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* in, f32* x, f32* 
     }
 }
 
+// Turns look-frame coordinates (x, y, z) into a point: the frame has its x axis from a to b and a
+// basis built from it; the point is (z, len*x, len*y) in that frame, with len the distance a to b,
+// rotated into world space into *out. The inverse of ComputeLookFrameCoordinates.
 void ApplyLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32 x, f32 y, f32 z)
 {
     Mat02 m;
@@ -1055,6 +1103,8 @@ void ApplyLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32 x, f32 y, 
     Vu0::Q(*out) = Vu0::RotateUntied(m, Vu0::Q(v));
 }
 
+// Moves the camera's look anchor to arg without moving the view: the look-frame coordinates
+// (f2B0-f2B8) are recomputed against the new anchor.
 void SetCameraLookAnchor(Camera* self, Quad16* arg)
 {
     Quad16 tmp;
@@ -1173,6 +1223,9 @@ void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, co
     *(Vec02*)self->f2D0 = *focus;
 }
 
+// Gives in *out the world heading the stick points to when the camera's view is taken into account:
+// the stick's angle (stick 0 or 1 by mode; 0 for other modes) plus the camera's own heading,
+// wrapped.
 void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out)
 {
     f32 t;
@@ -1298,6 +1351,8 @@ void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* 
 
 ASM_FUNC(func_001453B0);
 
+// Gives the offset a (minus b, when b is given) as an angle about the z axis (wrapped), the
+// horizontal distance and the height; any of the three outputs may be 0 to skip it.
 void ConvertOffsetToCylindrical(const Vec02* a, const Vec02* b, f32* angle, f32* dist, f32* height)
 {
     Vec02 d;
@@ -1340,6 +1395,8 @@ void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32*
     }
 }
 
+// Asks the camera to jump to its goal at the next update instead of easing; with src, also keeps
+// its value as the snap value.
 void RequestCameraSnap(Camera* self, f32* src)
 {
     self->snapping = 1;
@@ -1349,11 +1406,13 @@ void RequestCameraSnap(Camera* self, f32* src)
     }
 }
 
+// Sets the flag that queues a snap for later (snapQueued).
 void QueueCameraSnap(Camera* self)
 {
     self->snapQueued = 1;
 }
 
+// RequestCameraSnap without a value.
 void RequestPlainCameraSnap(void* p)
 {
     RequestCameraSnap((Camera*)p, 0);
@@ -1527,6 +1586,7 @@ void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWei
     Vu0::Q(*out) = Vu0::Add(Vu0::Q(*origin), Vu0::Q(sum));
 }
 
+// Collider filter: true when the collider has a second tree.
 s32 HasColliderSecondTree(void* unused, Collider* other)
 {
     return other->tree2.nodes != 0;
@@ -1541,6 +1601,9 @@ struct Heading_00145DE8 {
 
 extern f32 g_frameStep;
 
+// How far the camera's probe along direction h->dir is clear of a hit at v: the dot of v with the
+// direction minus the clearance, which follows a ramp toward the camera's probe distance less the
+// probe radius.
 f32 ComputeCameraHitClearance(Camera* self, void* unused, Quad16* v, Heading_00145DE8* h)
 {
     f32 out;
@@ -1569,27 +1632,35 @@ void PushCameraOutOfGeometry(Camera* self, Quad16* origin, Quad16* dest, Vec02* 
     PopBackMemoryMark();
 }
 
+// Pushes a value on the target controller's value stack.
 void PushCameraStackValue(Camera* self, s32 value)
 {
     PushStackValue(&self->ctl460, value);
 }
 
+// Pops the target controller's value stack.
 s32 PopCameraStackValue(Camera* self)
 {
     return PopStackValue(&self->ctl460);
 }
 
+// Reads the top of the target controller's value stack without popping.
 s32 PeekCameraStackValue(Camera* self)
 {
     return PeekStackValue(&self->ctl460);
 }
 
+// Sets the target controller's three settings: the value at 0x50, the one at 0x54 and the size
+// override.
 void SetCameraControllerSettings(Camera* obj, s32 value, f32 first, f32 second) { obj->ctl460.f50 = value; obj->ctl460.f54 = first; obj->ctl460.sizeOverride = second; }
 
+// Stores the current game time as the camera's swing start time.
 void RecordCameraTimestamp(Camera* obj) { obj->swingStartTime = g_gameTime; }
 
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
 
+// True when the sphere (centre p, given radius) is inside all of the camera's side planes and its
+// distance fade (ComputeCameraDistanceFade) is non-zero.
 s32 IsSphereInCameraView(Camera* self, Vec02* p, f32 radius, f32 x)
 {
     Vec02 r;
