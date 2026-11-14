@@ -113,6 +113,8 @@ extern "C" void PostSemaphore(s32 sema);
 extern "C" void InitRemoteCalls(s32 mode);
 extern "C" s32 PrintFormatted(const char* fmt, ...);
 
+// Binds the memory card client to the IOP's server and checks the server's version, printing its
+// messages (InitMemoryCardSystem calls it).
 s32 InitMemoryCardClient(void)
 {
     if (g_cardSemaphore < 0) {
@@ -161,6 +163,8 @@ extern const char g_cardNewCardFailureMessage[] = "sceMcUdCheckNewCard RPC faild
 
 LINKER_REMNANT(func_002095A8);
 
+// Sends the card server a request (operation 2) with a port, slot, path and flags and records it in
+// flight (OpenMemoryCardFile calls it).
 s32 OpenCardFile(s32 a0, s32 a1, const char* a2, s32 a3)
 {
     if (TrySemaphore(g_cardSemaphore) < 0) {
@@ -193,6 +197,7 @@ s32 OpenCardFile(s32 a0, s32 a1, const char* a2, s32 a3)
     return result;
 }
 
+// OpenCardFile with the directory flag (CreateMemoryCardDirectory calls it).
 s32 MakeCardDirectory(s32 a0, s32 a1, const char* a2)
 {
     s32 r = OpenCardFile(a0, a1, a2, 0x40);
@@ -202,6 +207,8 @@ s32 MakeCardDirectory(s32 a0, s32 a1, const char* a2)
     return r;
 }
 
+// Sends the card server the close request (operation 3) for a handle (CloseMemoryCardFile calls
+// it).
 s32 CloseCardFile(s32 value)
 {
     s32 r;
@@ -237,6 +244,8 @@ struct CardReplyCopy {
     u8 src1[0x40];
 };
 
+// The completion handler that copies the server's results out of uncached memory into the caller's
+// buffers.
 void CopyCardDirectoryReply(CardReplyCopy* p)
 {
     CardReplyCopy* q = (CardReplyCopy*)((u32)p | 0x20000000);
@@ -256,6 +265,8 @@ void CopyCardDirectoryReply(CardReplyCopy* p)
 
 extern "C" void WriteBackDataCacheRange(void* a, s32 b);
 
+// Sends the card server a read request (operation 5) of a size into a buffer for a handle
+// (ReadMemoryCardFile calls it).
 s32 ReadCardFile(s32 fd, void* buf, s32 size)
 {
     RemoteCallClient* ctl;
@@ -289,6 +300,8 @@ s32 ReadCardFile(s32 fd, void* buf, s32 size)
 
 extern "C" void SyncDataCache(s32 a);
 
+// Sends the card server a write request (operation 6) of data for a handle (WriteMemoryCardFile
+// calls it).
 s32 WriteCardFile(s32 self, const void* src, s32 n)
 {
     s32 r;
@@ -340,6 +353,7 @@ extern "C" s32 GetCurrentThreadId(void);
 extern "C" void ScheduleAlarm(s32 id, void (*cb)(s32 id, u16 time, s32 thread), s32 ctx);
 void SleepCurrentThread(void);
 
+// Arms an alarm of a number of ticks that wakes the current thread and sleeps until it does.
 void WaitCardTicks(u16 id)
 {
     ScheduleAlarm(id, WakeCardWaiter, GetCurrentThreadId());
@@ -374,6 +388,8 @@ s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2)
     return ok;
 }
 
+// The completion handler that copies the card information's words out of uncached memory to where
+// GetCardInfo was asked to put them.
 void CopyCardInfoReply(u32 base)
 {
     volatile u32* regs = (volatile u32*)(base | 0x20000000);
@@ -382,6 +398,8 @@ void CopyCardInfoReply(u32 base)
     if (g_cardInfoOutputC) *g_cardInfoOutputC = regs[0x24];
 }
 
+// Sends the card server the information request (operation 1) for a port and slot with three
+// pointers for its results (PollMemoryCard and GetMemoryCardFreeBytes call it).
 s32 GetCardInfo(s32 a0, s32 a1, s32* a2, s32* a3, s32* a4)
 {
     if (TrySemaphore(g_cardSemaphore) < 0) {
@@ -424,6 +442,8 @@ s32 GetCardInfo(s32 a0, s32 a1, s32* a2, s32* a3, s32* a4)
 
 LINKER_REMNANT(func_00209E40);
 
+// Sends the card server the directory request (operation 0xD) for a path into a table of entries
+// (ListMemoryCardDirectory and LoadMemoryCardSaveSlots call it).
 s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, void* a5)
 {
     s32 status = TrySemaphore(g_cardSemaphore);
@@ -461,6 +481,8 @@ s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, void* a5
 
 LINKER_REMNANT(func_00209FA0);
 
+// Sends the card server operation 0x10 with a port and slot after taking its request semaphore,
+// returning -200 when it is busy and -100 when unbound (FormatMemoryCard calls it).
 s32 RequestCardFormat(s32 a, s32 b)
 {
     s32 r = TrySemaphore(g_cardSemaphore);
@@ -485,6 +507,8 @@ s32 RequestCardFormat(s32 a, s32 b)
 
 LINKER_REMNANT(func_0020A070);
 
+// Sends the card server operation 0x12 with a port, slot and a path of up to 0x3FF characters,
+// returning -210 for an empty path (CreateMemoryCardSaveFiles calls it to learn the blocks needed).
 s32 RequestCardSpaceForPath(s32 a0, s32 a1, const char* a2)
 {
     RemoteCallClient* reg;

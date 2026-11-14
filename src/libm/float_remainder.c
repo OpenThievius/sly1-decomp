@@ -7,6 +7,9 @@
 
 f32 FloatRemainderKernel(f32 x, f32 y);
 
+/* Checked remainder of x / y with the sign of x (fmod): runs FloatRemainderKernel, and for y = 0
+ * reports a domain error "fmodf" through the error hook (result x in mode 0, else NaN) and sets
+ * the error number (0x21) unless the error mode is -1. */
 f32 FloatRemainder(f32 x, f32 y)
 {
     MathError e;

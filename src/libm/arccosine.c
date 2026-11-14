@@ -8,6 +8,9 @@
 f32 ArccosineKernel(f32 x);
 f32 AbsoluteValue(f32 x);
 
+/* Checked arccosine in radians: runs ArccosineKernel, and for |x| > 1 (not NaN) reports a domain
+ * error "acosf" through the error hook (HandleMathError) and sets the error number (0x21) unless
+ * the error mode is -1. */
 f32 Arccosine(f32 x)
 {
     MathError e;

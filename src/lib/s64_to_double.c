@@ -6,6 +6,8 @@
 
 typedef long long s64_t;
 
+/* A signed 64-bit integer as a double: the high word times 2^32 plus the unsigned low word, two
+ * roundings at most. */
 double ConvertS64ToDouble(s64_t x)
 {
     double d = (s32)(x >> 32);

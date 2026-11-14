@@ -7,6 +7,9 @@
 
 f32 ArctangentOfRatioKernel(f32 y, f32 x);
 
+/* Checked two-argument arctangent (atan2 of y, x): runs ArctangentOfRatioKernel, and for x = y =
+ * 0 reports a domain error "atan2f" through the error hook and sets the error number (0x21)
+ * unless the error mode is -1. */
 f32 ArctangentOfRatio(f32 y, f32 x)
 {
     MathError e;

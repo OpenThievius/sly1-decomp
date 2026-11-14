@@ -13,6 +13,7 @@
 #include "mpeg_bit_reader.h"
 
 
+// Sets the bit reader up over a ring buffer (DemultiplexPacks calls it).
 void InitBitReader(BitReader* self, u32 buf, u32 a, u32 b)
 {
     self->origin = buf;
@@ -26,6 +27,7 @@ void InitBitReader(BitReader* self, u32 buf, u32 a, u32 b)
     AdvanceBits(self, 0);
 }
 
+// Returns the next bits of the bit reader's window without consuming them.
 s32 PeekBits(BitReader* self, s32 n)
 {
     return self->window >> (64 - n);
@@ -53,6 +55,7 @@ u64 AdvanceBits(BitReader* self, s32 n)
     return self->consumed += n;
 }
 
+// Returns the next n bits and consumes them.
 u32 ReadBits(BitReader* self, s32 n)
 {
     u32 r = PeekBits(self, n);
@@ -60,6 +63,7 @@ u32 ReadBits(BitReader* self, s32 n)
     return r;
 }
 
+// Returns the next bit and consumes it.
 s32 ReadBit(BitReader* self)
 {
     s32 r = PeekBits(self, 1);
@@ -67,6 +71,7 @@ s32 ReadBit(BitReader* self)
     return r;
 }
 
+// Consumes a number of whole bytes.
 void SkipBytes(BitReader* self, s32 bytes)
 {
     self->window = 0;
@@ -79,6 +84,7 @@ void SkipBytes(BitReader* self, s32 bytes)
     AdvanceBits(self, 0);
 }
 
+// Returns the buffer position a number of bits ahead of the reader.
 u32 GetPositionAhead(BitReader* stream, s32 amount)
 {
     u32 position = stream->origin + (amount >> 3);

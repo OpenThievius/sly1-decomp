@@ -14,6 +14,10 @@ static const f32 g_piTail = 1.5099578832e-07f;
 f32 Arctangent(f32 x);
 f32 AbsoluteValue(f32 x);
 
+/* Unchecked two-argument arctangent of y / x in radians, -pi to pi, in the right quadrant:
+ * handles zero and infinite arguments by case, otherwise takes Arctangent of |y / x| (or a
+ * constant when the exponents differ by more than 60) and folds it into the quadrant from the two
+ * signs. */
 f32 ArctangentOfRatioKernel(f32 y, f32 x)
 {
     s32 xBits, yBits, xMag, yMag, quadrantCase, exponentGap, angleBits;

@@ -5,6 +5,7 @@
  * code. */
 #include "divide.h"
 
+/* Unsigned 64-bit division (the compiler's __udivdi3): the quotient from divide(). */
 u64 func_001FBE00(u64 num, u64 den)
 {
     return divide(num, den, 0);

@@ -115,6 +115,8 @@ s32 CountFrameDescriptions(FrameDesc* p);
 void CollectFrameDescriptions(FrameDesc* cur, FrameList* list, s32* lo, s32* hi);
 void SplitOutOfOrderFrames(KeyedArray* self, KeyedArray* out);
 
+/* Reads an unsigned number of 7-bit groups (the top bit marks a continuation) from the unwind
+ * tables and returns the position after it. */
 u8* ReadUnsignedLeb128(u8* input, u32* output)
 {
     u8 byte = *input;
@@ -135,6 +137,8 @@ u8* ReadUnsignedLeb128(u8* input, u32* output)
     return input;
 }
 
+/* Reads a signed number of 7-bit groups, extending the sign from bit 6 of the last byte, and
+ * returns the position after it. */
 u8* ReadSignedLeb128(u8* input, s32* output)
 {
     u32 shift = 0;
@@ -157,6 +161,8 @@ u8* ReadSignedLeb128(u8* input, s32* output)
     return input;
 }
 
+/* Merges the second sorted array of frame descriptions into the first, from the back, ordered by
+ * key. */
 void MergeFrameLists(KeyedArray* self, KeyedArray* other)
 {
     s32 j = other->count;
@@ -241,6 +247,7 @@ FrameDesc** FinishFrameTableSort(FrameList* list, s32 count)
     return list->items;
 }
 
+/* Counts the frame descriptions of a block that have a common record and a start address. */
 s32 CountFrameDescriptions(FrameDesc* p)
 {
     s32 n = 0;
@@ -260,6 +267,8 @@ s32 CountFrameDescriptions(FrameDesc* p)
     return n;
 }
 
+/* Appends a block's usable frame descriptions to a list and widens the lowest and highest code
+ * address it has seen. */
 void CollectFrameDescriptions(FrameDesc* cur, FrameList* list, s32* lo, s32* hi)
 {
     s32 mn = *lo;
@@ -285,6 +294,8 @@ void CollectFrameDescriptions(FrameDesc* cur, FrameList* list, s32* lo, s32* hi)
     *hi = mx;
 }
 
+/* Counts and collects a registered block's frame descriptions, sorts them and stores the sorted
+ * table with the code range it covers. */
 void BuildFrameTableIndex(FrameTable* self)
 {
     s32 count;
@@ -326,6 +337,8 @@ void BuildFrameTableIndex(FrameTable* self)
     self->end = acc.hi;
 }
 
+/* Finds the frame description holding a code address: picks the registered block covering it
+ * (building its index on first use), then binary-searches its sorted table. */
 FrameDesc* FindFrameDescription(void* pc)
 {
     FrameTable* t;
@@ -358,6 +371,9 @@ FrameDesc* FindFrameDescription(void* pc)
     return 0;
 }
 
+/* Reads a frame description's common record: its augmentation string, handler data, code and data
+ * alignment and return column, and returns where its instructions start; 0 for an unknown
+ * augmentation. */
 u8* ParseCommonFrameRecord(FrameDesc* f, CommonInfo* info)
 {
     CommonInfo* common = (CommonInfo*)((char*)&f->commonDelta - f->commonDelta);
@@ -387,6 +403,9 @@ u8* ParseCommonFrameRecord(FrameDesc* f, CommonInfo* info)
     return p;
 }
 
+/* Runs one unwind instruction (advance the location, record a register saved at an offset, set
+ * the frame address rule, push or pop the rule state) on an unwind state and returns the next
+ * instruction. */
 u8* RunUnwindInstruction(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
 {
     s32 offset;
@@ -489,6 +508,8 @@ u8* RunUnwindInstruction(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
     return p;
 }
 
+/* Adds an object's frame information to the runtime's list D_0062A7B8
+ * (RegisterProgramFrameInfo calls it at startup). */
 void RegisterFrameInfo(void* begin, FrameTable* ob)
 {
     ob->records = begin;
@@ -500,6 +521,8 @@ void RegisterFrameInfo(void* begin, FrameTable* ob)
 }
 
 
+/* Removes an object's frame information from the runtime's list D_0062A7B8, freeing its sorted
+ * table, and aborts when it is not there (ReleaseProgramFrameInfo calls it at exit). */
 FrameTable* DeregisterFrameInfo(void* value)
 {
     FrameTable** slot = &D_0062A7B8;
@@ -520,6 +543,8 @@ FrameTable* DeregisterFrameInfo(void* value)
     AbortProgram();
 }
 
+/* Finds the frame description of a code address and runs its unwind instructions into a state
+ * record (the throw and rethrow entries call it). */
 UnwindState* FindFrameUnwindState(void* target, UnwindState* out)
 {
     FrameDesc* f;
@@ -563,6 +588,8 @@ UnwindState* FindFrameUnwindState(void* target, UnwindState* out)
     return out;
 }
 
+/* Moves the frame descriptions that break the key order out of an array into a second one and
+ * closes the gaps. */
 void SplitOutOfOrderFrames(KeyedArray* self, KeyedArray* out)
 {
     u32 n = self->count;

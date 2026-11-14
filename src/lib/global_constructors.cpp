@@ -23,6 +23,8 @@ ASM_FUNC(func_001FAC00);
 
 extern "C" void func_001FAD68(void);
 
+// Runs the program's global constructors the first time it is called (the second entry of the
+// original assembly walks the list g_constructorList backwards); later calls do nothing.
 void RunConstructorsOnce(void)
 {
     if (g_constructorsRun == 0) {

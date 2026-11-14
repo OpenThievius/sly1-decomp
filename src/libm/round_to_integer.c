@@ -6,6 +6,9 @@
 #include "float_bits.h"
 static const double g_roundBias[] = { 4.50359962737049600000e+15, -4.50359962737049600000e+15 };
 
+/* The double rounded to the nearest integer, ties to even (rint), by adding and subtracting a
+ * bias of 2^52 with the sign of x, after clearing the bits below one half; keeps the sign of a
+ * zero result and returns infinities and NaNs unchanged. */
 double RoundToInteger(double x)
 {
     s32 high, low, exponent, sign;

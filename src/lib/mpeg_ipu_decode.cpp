@@ -1,15 +1,14 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-// The rest of the MPEG library's decoder, from 0x20DEE8 to 0x2115C0, built whole
-// (config/us/files.tsv): the IPU's control (func_0020DEE8), the slice and macroblock layer that
-// drives the IPU's decoding (func_0020DF10 to func_0020EF70), the IPU's commands and its bit
-// reading (func_0020F0C0 to func_0020F5B8), the picture header and its extensions, dispatched
-// through the table D_00250430 (func_0020F708 to func_00210090), the pictures' output and
-// their buffers (func_00210160 to func_00210A80), and the colour conversion by DMA and its
-// interrupt handlers (func_00210C38 to func_00211348). Its start is exact: the hand-written
-// prediction object ends at 0x20DEE8, and this file's .rodata starts at 0x250300 and its .data
-// at 0x27B040, after src/lib/mpeg_macroblock.cpp's. Its end is chosen: the bit reader of
-// src/lib/mpeg_bit_reader.cpp follows, which nothing here calls. Its .rodata is its messages and the
-// extension table, its .data the IPU commands' table D_0027B040 and the table D_0027B068 (which
+// SPDX-License-Identifier: AGPL-3.0-or-later The rest of the MPEG library's decoder, from 0x20DEE8
+// to 0x2115C0, built whole (config/us/files.tsv): the IPU's control (func_0020DEE8), the slice and
+// macroblock layer that drives the IPU's decoding (func_0020DF10 to func_0020EF70), the IPU's
+// commands and its bit reading (func_0020F0C0 to func_0020F5B8), the picture header and its
+// extensions, dispatched through the table D_00250430 (func_0020F708 to func_00210090), the
+// pictures' output and their buffers (func_00210160 to func_00210A80), and the colour conversion by
+// DMA and its interrupt handlers (func_00210C38 to func_00211348). Its start is exact: the
+// hand-written prediction object ends at 0x20DEE8, and this file's .rodata starts at 0x250300 and
+// its .data at 0x27B040, after src/lib/mpeg_macroblock.cpp's. Its end is chosen: the bit reader of
+// src/lib/mpeg_bit_reader.cpp follows, which nothing here calls. Its .rodata is its messages and
+// the extension table, its .data the IPU commands' table D_0027B040 and the table D_0027B068 (which
 // ends at 0x27B0A8, before the padding to the IPU library's .data), its .bss func_00210C38's
 // buffer. One file between those edges, with no evidence of a boundary inside it; it could be
 // several. Written for this project from retail's code.
@@ -18,6 +17,8 @@
 #include "mpeg_decoder.h"
 #include "system.h"
 
+// Sets or clears bit 23 of the IPU's control register 0x10002010, the MPEG-1 mode, as the sequence
+// header says.
 void SetIpuMpeg1Mode(u32 value)
 {
     u32* setting = (u32*)0x10002010;
@@ -30,6 +31,9 @@ void ReportMpegError(MpegDecoder* self, const char* value);
 extern "C" s32 DisableInterrupts(void);
 extern "C" s32 EnableInterrupts(void);
 
+// Waits for the IPU's block decode, running the decoder's callback of kind 1 while its input runs
+// dry, refreshes the bit window and reports "Error code detected(BDEC)" and resets the IPU on an
+// error.
 s32 WaitIpuDecodeDone(MpegDecoder* o)
 {
     MpegSignal m;
@@ -71,11 +75,15 @@ s32 WaitIpuDecodeDone(MpegDecoder* o)
 
 s16 DecodeIpuVariableLength(MpegDecoder* self, s32 mode);
 
+// Decodes one value with the IPU's variable-length table 3 (the motion vector's dmvector code,
+// which ReadMotionVector reads after each component).
 s32 DecodeIpuMotionCode(MpegDecoder* self)
 {
 	return DecodeIpuVariableLength(self, 3);
 }
 
+// For a frame picture (mode 3) or a field, turns a vector and a signed difference into two or four
+// derived vectors by half and three halves of the difference, rounded toward zero, plus the vector.
 void ComputeDualPrimeVectors(MpegDecoder* self, s32* out, s32* in, s32 x, s32 y)
 {
     if (self->pictureStructure == 3) {
@@ -111,6 +119,8 @@ s32 PeekIpuBits(MpegDecoder* obj, s32 a1);
 void SkipIpuBits(MpegDecoder* s0, u32 s1);
 void ReportMpegErrorFormat(MpegDecoder *self, const char *a1, s32 a2);
 
+// Reads the macroblock address increment with the IPU's variable-length table 0, adding 33 for
+// each escape code and skipping the stuffing code; reports an invalid code.
 s32 ReadMacroblockAddressIncrement(MpegDecoder *self) {
     s32 total = 0;
     s32 again;
@@ -151,6 +161,8 @@ s32 WaitIpuDecodeDone(MpegDecoder* o);
 void AddMacroblockResiduals(MpegDecoder* self, s32 next);
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Decodes every macroblock of a picture (half of them for a field) with DecodeSliceMacroblocks,
+// then adds the residuals, reporting "= Skip to the next picture =" on an error.
 s32 DecodeAllMacroblocks(MpegDecoder* c)
 {
     s32 r;
@@ -180,6 +192,8 @@ s32 ReadSliceQuantiser(MpegDecoder* self);
 s32 ReadMacroblockAddressIncrement(MpegDecoder *self);
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Finds the next start code, checks it is a slice code (0x101 to 0x1AF), reads the slice's
+// quantiser and address increment, and gives the index of the slice's first macroblock.
 s32 ReadSliceStart(MpegDecoder *self, s32 a1, s32 *outA, s32 *outB, MpegMotionVector *vectors) {
     u32 s2;
     s32 s3;
@@ -224,6 +238,8 @@ s32 HandleSkippedMacroblock(MpegDecoder *self, MpegMotionVector *vectors, s32 *m
 s32 PrepareMacroblockPrediction(MpegDecoder* d, s32 n, s32 mode, s32 flags, s32 code, MpegMotionVector* vec, s32* sel,
                                 s32* base);
 
+// Decodes macroblocks up to a count, reading each slice's start and each macroblock's address
+// increment, and returns 1 to 3 when it has to stop.
 s32 DecodeSliceMacroblocks(MpegDecoder* c, s32 n)
 {
     MpegMotionVector vectors[4];
@@ -280,6 +296,8 @@ s32 DecodeSliceMacroblocks(MpegDecoder* c, s32 n)
     }
 }
 
+// Sets up a skipped macroblock's motion fields by the picture structure and reports "skiped
+// macroblock in I picure is not allowed" for an intra picture.
 s32 HandleSkippedMacroblock(MpegDecoder *self, MpegMotionVector *vectors, s32 *motionType, s32 *select, s32 *type)
 {
     s32 ret = 1;
@@ -319,6 +337,8 @@ void StartIpuOutputDma(u32 a, s32 b);
 void ReadFieldMotionVector(MpegDecoder* c, MpegMotionVector* vectors, s32* a2, s32* out, s32 i, s32 mode, s32 a6, s32 a7, s32 s6, s32 s3, s32 fp);
 void ReadMotionVector(MpegDecoder* self, MpegMotionVector* n, s32* out, s32 p3, s32 p4, s32 want, s32 shift, s32 p7);
 
+// Reads a macroblock's type, motion type, quantiser and motion vectors by the picture's coding and
+// sends the IPU the command that decodes its blocks (DecodeSliceMacroblocks calls it).
 s32 DecodeMacroblock(MpegDecoder* self, s32* st, s32* mode, s32* o3, MpegMotionVector* b1, s32* o5, s32* b2)
 {
     s32 m3, m4, m7, mfp;
@@ -437,6 +457,8 @@ s32 DecodeMacroblock(MpegDecoder* self, s32* st, s32* mode, s32* o3, MpegMotionV
     return 1;
 }
 
+// Adds a decoded motion code and residual to a motion vector component, wrapping it into the range
+// of the vector size and halving it first and doubling it after for half-resolution.
 void ApplyMotionVectorDelta(s32* component, s32 rsize, s32 code, s32 residual, s32 half)
 {
     s32 f = 16 << rsize;
@@ -462,6 +484,8 @@ void ApplyMotionVectorDelta(s32* component, s32 rsize, s32 code, s32 residual, s
 u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 void ReadMotionVector(MpegDecoder* self, MpegMotionVector* n, s32* out, s32 p3, s32 p4, s32 want, s32 shift, s32 p7);
 
+// Reads a motion vector of a macroblock in the MPEG-2 layout: a field select bit before each of the
+// vector's two halves for field motion, copying the vector for the other half for frame motion.
 void ReadFieldMotionVector(MpegDecoder* c, MpegMotionVector* vectors, s32* a2, s32* out, s32 i, s32 mode, s32 a6, s32 a7, s32 s6, s32 s3, s32 fp)
 {
     s32 v;
@@ -492,6 +516,8 @@ void ReadFieldMotionVector(MpegDecoder* c, MpegMotionVector* vectors, s32* a2, s
 s16 DecodeIpuVariableLength(MpegDecoder* self, s32 mode);
 s32 DecodeIpuMotionCode(MpegDecoder* self);
 
+// Reads a motion vector's two components with the IPU's table 2 (with the residual bits when the
+// size is non-zero), applies each with ApplyMotionVectorDelta and optionally a dmvector code.
 void ReadMotionVector(MpegDecoder* self, MpegMotionVector* n, s32* out, s32 p3, s32 p4, s32 want, s32 shift, s32 p7)
 {
     s32 s0;
@@ -527,6 +553,8 @@ void ReadMotionVector(MpegDecoder* self, MpegMotionVector* n, s32* out, s32 p3, 
 
 u32 D_0027B040[10] = { 0x1, 0x1, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x1 };
 
+// Writes a command to the IPU's command register 0x10002000 and records what its kind leaves in the
+// bit window (D_0027B040).
 void SendIpuCommand(MpegDecoder* obj, u32 value)
 {
     u32 index = value >> 28;
@@ -536,6 +564,7 @@ void SendIpuCommand(MpegDecoder* obj, u32 value)
 }
 
 
+// Waits while the IPU is busy, running the stall callback every 5000 polls.
 void WaitIpuCommandDone(MpegDecoder* self)
 {
     s32 n = 0;
@@ -551,6 +580,8 @@ void WaitIpuCommandDone(MpegDecoder* self)
     }
 }
 
+// Waits while the IPU's command register (0x10002000) reads negative (busy) with no error set,
+// running the stall callback every 5001 polls, and returns the register.
 s64 WaitIpuCommandResult(MpegDecoder* p) {
     s32 i = 0;
     s64 v = *(volatile s64*)0x10002000;
@@ -571,6 +602,8 @@ s64 WaitIpuCommandResult(MpegDecoder* p) {
 extern u32 D_0027B040[];
 
 
+// Waits for the IPU, then sends it a variable-length decode command of a table and reads the
+// decoded value.
 s16 DecodeIpuVariableLength(MpegDecoder* self, s32 mode)
 {
     s32 m = 0;
@@ -617,6 +650,7 @@ s64 WaitIpuCommandResult(MpegDecoder* obj);
 
 extern u32 D_0027B040[];
 
+// Returns the next n bits of the IPU's bit stream without consuming them.
 s32 PeekIpuBits(MpegDecoder* obj, s32 a1)
 {
     if (obj->windowInvalid != 0 || obj->windowBits < a1) {
@@ -638,6 +672,7 @@ s32 PeekIpuBits(MpegDecoder* obj, s32 a1)
 extern u32 D_0027B040[];
 extern s64 WaitIpuCommandResult(MpegDecoder* c, u32* v);
 
+// Sends the IPU a command that consumes n bits and refreshes the bit window.
 void SkipIpuBits(MpegDecoder* s0, u32 s1)
 {
     s32 cnt = 0;
@@ -672,6 +707,7 @@ struct IpuCommand {
     }
 };
 
+// Returns the next n bits of the IPU's bit stream and consumes them.
 u32 ReadIpuBits(MpegDecoder* obj, s32 a1)
 {
     s32 cnt = 0;
@@ -694,6 +730,7 @@ u32 ReadIpuBits(MpegDecoder* obj, s32 a1)
 void WaitIpuCommandDone(MpegDecoder* self); // stays void: retail returns a value, but declared so func_0020DF10 and func_0020F708 differs in registers
 void SkipIpuBits(MpegDecoder* s0, u32 s1);
 s32 PeekIpuBits(MpegDecoder* obj, s32 a1);
+// Aligns the IPU's bit stream to a byte and skips to the next start code prefix 0x000001.
 void FindNextStartCode(MpegDecoder* self)
 {
     WaitIpuCommandDone(self);
@@ -712,6 +749,7 @@ u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 void SkipIpuBits(MpegDecoder* s0, u32 s1);
 void SkipExtraInformation(MpegDecoder* self);
 
+// Reads a slice's 5-bit quantiser scale and skips the extra slice information bytes.
 s32 ReadSliceQuantiser(MpegDecoder* self)
 {
     self->quantiserScale = ReadIpuBits(self, 5);
@@ -729,6 +767,8 @@ void ReadSequenceHeader(MpegDecoder* d);
 void ReadGroupOfPicturesHeader(MpegDecoder* self);
 void ReadPictureHeader(MpegDecoder* self);
 
+// Reads start codes and their headers: a sequence header (0x1B3), a group of pictures (0x1B8), a
+// picture (0x100), until the sequence's end (0x1B7).
 s32 ParseMpegHeaders(MpegDecoder* self)
 {
     u32 v;
@@ -769,6 +809,8 @@ void SkipExtraInformation(MpegDecoder* self);
 void ReadExtensionsAndUserData(MpegDecoder* self);
 s32 UpdatePictureOrder(MpegDecoder* self, s32 a1);
 
+// Reads a picture header: its temporal reference, coding type, delay and the forward and backward
+// codes of P and B pictures.
 void ReadPictureHeader(MpegDecoder* self)
 {
     s32 first = ReadIpuBits(self, 10);
@@ -825,6 +867,8 @@ void RejectSpatialScalableExtension(MpegDecoder* self);
 void RejectTemporalScalableExtension(MpegDecoder* self);
 extern const Fn_Table g_mpegExtensionHandlers[12] = { (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadSequenceExtension, (Fn_Table)ReadSequenceDisplayExtension, (Fn_Table)ReadQuantiserMatrixExtension, (Fn_Table)ReadCopyrightExtension, (Fn_Table)RejectSequenceScalableExtension, (Fn_Table)RejectUnknownExtension, (Fn_Table)ReadPictureDisplayExtension, (Fn_Table)ReadPictureCodingExtension, (Fn_Table)RejectSpatialScalableExtension, (Fn_Table)RejectTemporalScalableExtension, 0 };
 
+// Reads the extensions and user data after a header, dispatching each extension through the table
+// g_mpegExtensionHandlers.
 void ReadExtensionsAndUserData(MpegDecoder* self)
 {
     s32 kA = 0x1B2;
@@ -853,6 +897,8 @@ void ReadExtensionsAndUserData(MpegDecoder* self)
 
 u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 
+// Reads the picture coding extension's four 4-bit vector sizes, the intra DC precision, the picture
+// structure and the flags of the picture's coding, setting the IPU's control register bits.
 void ReadPictureCodingExtension(MpegDecoder* c)
 {
     c->fCode[0] = ReadIpuBits(c, 4);
@@ -883,6 +929,7 @@ void ReadPictureCodingExtension(MpegDecoder* c)
 u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 void SkipIpuBits(MpegDecoder* s0, u32 s1);
 
+// Skips bytes of extra information while the bit before each is set.
 void SkipExtraInformation(MpegDecoder* self)
 {
     while (ReadIpuBits(self, 1))
@@ -890,6 +937,8 @@ void SkipExtraInformation(MpegDecoder* self)
 }
 
 
+// Adds the picture header's temporal reference to the group of pictures' base to get the picture's
+// order number, raised to the highest seen.
 s32 UpdatePictureOrder(MpegDecoder* self, s32 a1)
 {
     s32 lim = 0;
@@ -917,6 +966,7 @@ s32 UpdatePictureOrder(MpegDecoder* self, s32 a1)
 u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 void ReadExtensionsAndUserData(MpegDecoder* self);
 
+// Reads a group of pictures header: its time code, closed and broken flags.
 void ReadGroupOfPicturesHeader(MpegDecoder* self)
 {
     self->fE8 = 0;
@@ -939,6 +989,8 @@ void WaitIpuCommandDone(MpegDecoder *self);
 void SendIpuCommand(MpegDecoder* obj, u32 value);
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Reads the quantiser matrix extension's four load flags, loading the intra and non-intra matrices
+// with the IPU's commands and reporting the chroma matrices as unsupported.
 void ReadQuantiserMatrixExtension(MpegDecoder *self)
 {
     s32 v;
@@ -970,6 +1022,8 @@ void ReadQuantiserMatrixExtension(MpegDecoder *self)
 
 u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 
+// Reads the picture display extension's offsets, one to three pairs of a 16-bit horizontal and
+// vertical offset by the picture structure and flags.
 void ReadPictureDisplayExtension(MpegDecoder* self)
 {
     s32 n;
@@ -992,6 +1046,8 @@ void ReadPictureDisplayExtension(MpegDecoder* self)
 
 u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 
+// Reads and discards the copyright extension: its flags, identifier and the three numbers of 20 and
+// 22 bits.
 void ReadCopyrightExtension(MpegDecoder* self)
 {
     ReadIpuBits(self, 1);
@@ -1010,6 +1066,8 @@ void ReadCopyrightExtension(MpegDecoder* self)
 void ReportMpegError(MpegDecoder* self, const char* value);
 s32 DecodeAllMacroblocks(MpegDecoder* c);
 
+// Picks the output picture by the picture structure (reporting "odd number of field pictures" or
+// "unknown picture sutructure") and decodes its macroblocks with DecodeAllMacroblocks.
 s32 DecodePictureData(MpegDecoder* self)
 {
     MpegPicture* s1;
@@ -1045,6 +1103,8 @@ s32 DecodePictureData(MpegDecoder* self)
 void OutputFramePicture(MpegDecoder* c, MpegPicture* s, s32 count);
 void OutputFieldPicturePair(MpegDecoder* c, MpegPicture* a, MpegPicture* b, s32 count);
 
+// When its flag is set, outputs the current picture by its structure with OutputFramePicture or
+// OutputFieldPicturePair, then moves a pending state of 1 on to 2.
 void OutputPictureIfDecoded(MpegDecoder* self, s32 count, s32 flag)
 {
     s32 n = count;
@@ -1078,6 +1138,8 @@ void OutputPictureIfDecoded(MpegDecoder* self, s32 count, s32 flag)
 
 
 
+// Chooses and rotates the picture buffers for the current picture, fills the chosen buffer's record
+// from the header's fields and returns whether the references it needs are decoded.
 s32 SelectPictureBuffer(MpegDecoder* p, s32 flag)
 {
     MpegPicture* o = 0;
@@ -1152,6 +1214,8 @@ s32 SelectPictureBuffer(MpegDecoder* p, s32 flag)
 s32 FormatToString(char* dst, const char* fmt, ...);
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Checks that the caller's output buffer is big enough for the picture, reporting "Too small
+// buffer size for %dx%d picture" when it is not.
 s32 CheckPictureBufferSize(MpegDecoder *self, MpegPicture *rec) {
     char buf[0x100];
     s32 flag;
@@ -1166,6 +1230,8 @@ s32 CheckPictureBufferSize(MpegDecoder *self, MpegPicture *rec) {
     return flag;
 }
 
+// Copies a picture to the output buffer row by row, each through DMA channel 8 into the scratchpad
+// and channel 9 back out, one or two passes by the picture's structure.
 void CopyPictureThroughScratchpad(MpegDecoder* c, MpegPicture* pic)
 {
     s32 passes;
@@ -1221,6 +1287,8 @@ void CopyPictureThroughScratchpad(MpegDecoder* c, MpegPicture* pic)
 }
 
 
+// Sets the state's mode word to 2, copies the current picture number to the output number and sets
+// the flag at +0x820 that ends the picture loop.
 s32 SignalPictureReady(MpegDecoder* obj)
 {
     s32 value;
@@ -1238,6 +1306,8 @@ done:
 
 extern "C" s64 MultiplySigned64(s64 u, s64 v);
 
+// Works out an output picture's timestamp and flags from its record and the decoder's running
+// timestamps.
 void FillPictureOutputInfo(MpegDecoder* self, MpegPicture* node, s64* out1, s64* out3, s64* out4)
 {
     s32 s0;
@@ -1294,6 +1364,8 @@ void ConvertPictureColours(MpegDecoder* self, MpegPicture* d);
 void CopyPictureThroughScratchpad(MpegDecoder* c, MpegPicture* pic);
 s32 SignalPictureReady(MpegDecoder* obj);
 
+// Outputs a frame picture: fills its timestamp and flags, checks the buffer size and, when the
+// picture is decoded, copies or converts it to the output and signals it.
 void OutputFramePicture(MpegDecoder* c, MpegPicture* s, s32 count)
 {
     FillPictureOutputInfo(c, s, &c->handle->info[0].pts, &c->handle->info[0].dts, &c->handle->info[0].flags);
@@ -1321,6 +1393,8 @@ void OutputFramePicture(MpegDecoder* c, MpegPicture* s, s32 count)
     }
 }
 
+// Outputs a pair of field pictures in the order the picture structure gives, fills the timestamps
+// and flags, and converts or copies the interleaved fields to the output.
 void OutputFieldPicturePair(MpegDecoder* c, MpegPicture* a, MpegPicture* b, s32 count)
 {
     MpegPicture* s3;
@@ -1419,6 +1493,8 @@ void StartBlockChainToScratchpad(MpegDecoder* decoder)
     EnableInterrupts();
 }
 
+// With interrupts disabled, starts the IPU's output DMA channel 3 towards an address for a number
+// of bytes.
 void StartIpuOutputDma(u32 a, s32 b)
 {
     DisableInterrupts();
@@ -1431,6 +1507,8 @@ void StartIpuOutputDma(u32 a, s32 b)
 
 void SendIpuCommand(MpegDecoder* obj, u32 value);
 
+// Converts a small picture's colours: starts the IPU's output DMA, sends the convert command and
+// runs the callback of kind 4, then waits for both to end.
 void ConvertSmallPictureColours(MpegDecoder* self, u32 a1, u32 a2)
 {
 
@@ -1499,6 +1577,9 @@ extern "C" s32 EnableInterrupts(void);
 s32 ContinueColourConversionOutput(s32 channel, void* arg);
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Converts a large picture's colours in chunks: installs ContinueColourConversionOutput on channel
+// 3, starts the first chunk, runs the callback of kind 4 and waits for the chunks, reporting "CSC
+// handler error" on failure.
 void ConvertLargePictureColours(MpegDecoder* self, s32 addr, s32 size)
 {
     s32 chunk = 0x3FF;
@@ -1539,6 +1620,8 @@ struct PendingInput { u32 size; u32 addr; };
 extern "C" s32 DisableInterrupts(void);
 extern "C" s32 EnableInterrupts(void);
 
+// The DMA handler of the colour conversion's input channel: starts the next chunk of up to 0xFFFF
+// quadwords to the IPU and ends with 1 when none is left.
 s32 ContinueColourConversionInput(s32 unused, PendingInput* p)
 {
     *(volatile u32*)0x1000E010 = 0x10;
@@ -1579,6 +1662,8 @@ void SendIpuCommand(MpegDecoder* obj, u32 value);
 void ConvertSmallPictureColours(MpegDecoder* self, u32 a1, u32 a2);
 void ConvertLargePictureColours(MpegDecoder* self, s32 addr, s32 size);
 
+// Converts a decoded picture's colours with the IPU by DMA, through interrupt handlers for large
+// pictures.
 void ConvertPictureColours(MpegDecoder* self, MpegPicture* d)
 {
     MpegSignal msg;

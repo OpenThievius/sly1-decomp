@@ -16,6 +16,7 @@
 struct StreamIdMask { u64 id; u64 mask; };
 extern StreamIdMask g_streamIds[10];
 
+// Turns a stream number into its id through the table g_streamIds (SetStreamCallback calls it).
 u64 GetStreamId(u32 idx, s32 key)
 {
     u64 r = 0;
@@ -73,6 +74,8 @@ struct DemuxRecord {
 s32 ParsePackHeader(BitReader* r, PackHeaderInfo* o);
 s32 ParsePacketHeader(MpegDecoder* decoder, BitReader* bs, PacketHeader* hdr);
 
+// Walks a buffer of packs and hands each packet to its stream's callback (DemultiplexBuffer calls
+// it).
 s32 DemultiplexPacks(MpegHandle* ctx, s32 a1, s32 count, s32 a3, s32 a4)
 {
     BitReader bits;
@@ -149,6 +152,7 @@ s32 DemultiplexPacks(MpegHandle* ctx, s32 a1, s32 count, s32 a3, s32 a4)
     return result;
 }
 
+// Runs DemultiplexPacks over a whole buffer (FeedMovieDecoder calls it).
 s32 DemultiplexBuffer(MpegHandle* ctx, s32 a, s32 b)
 {
     return DemultiplexPacks(ctx, a, b, 0, -1);
@@ -197,6 +201,7 @@ MpegStreamFn SetStreamCallback(MpegHandle* self, s32 idx, s32 key, MpegStreamFn 
 
 s32 ParseSystemHeader(BitReader* self, PackHeaderInfo* info);
 
+// Parses a pack header with the bit reader (DemultiplexPacks calls it).
 s32 ParsePackHeader(BitReader* r, PackHeaderInfo* o)
 {
     u32 i; u32 n; u32 a; u32 b; u32 c;
@@ -225,6 +230,7 @@ s32 ParsePackHeader(BitReader* r, PackHeaderInfo* o)
     return 1;
 }
 
+// Parses a system header with the bit reader (ParsePackHeader calls it).
 s32 ParseSystemHeader(BitReader* self, PackHeaderInfo* info)
 {
     ReadBits(self, 0x38);
@@ -246,6 +252,7 @@ extern const FieldLengths g_packetOptionalFieldLengths = { { 0x00, 0x10, 0x08, 0
 
 void ReportMpegError(MpegDecoder* self, const char* value);
 
+// Parses a packet header with its table of field lengths (DemultiplexPacks calls it).
 s32 ParsePacketHeader(MpegDecoder* decoder, BitReader* bs, PacketHeader* hdr)
 {
     FieldLengths tbl;

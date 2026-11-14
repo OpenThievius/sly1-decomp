@@ -77,6 +77,8 @@ void ClearImageEndRecordWord(void);
 extern "C" void WriteBackDataCacheRange(IopResetCommand* a0, s32 a1);
 void InstallThirdKernelPatch();
 
+// Sends the IOP the reset command 0x80000003 with its argument in a packet by DMA and waits for the
+// IOP to come back.
 s32 SendIopReset(char* text, void* q)
 {
     IopTransfer span;
@@ -114,6 +116,8 @@ s32 SendIopReset(char* text, void* q)
     return 0;
 }
 
+// Tells whether the IOP has come back from a reset, from a register shared with it (LoadIopModules
+// polls it).
 s32 IsIopResetDone(void)
 {
     if ((ReadIopRegister(4) & 0x40000) != 0) {
@@ -123,6 +127,8 @@ s32 IsIopResetDone(void)
     return 0;
 }
 
+// Resets the IOP with "rom0:UDNL " followed by an argument of up to 69 characters after shutting
+// the remote calls down (LoadIopModules resets it with the IOP image).
 s32 ResetIop(char* arg)
 {
     char buf[80];
@@ -162,6 +168,8 @@ ASM_FUNC(func_001F9D60);
 
 ASM_FUNC(func_001F9DA8);
 
+// Creates the two semaphores g_librarySemaphore0 and g_librarySemaphore1 (InitKernelLibrary calls
+// it first).
 void CreateLibrarySemaphores(void)
 {
     SemaphoreParamsPair f;
@@ -173,6 +181,7 @@ void CreateLibrarySemaphores(void)
     g_librarySemaphore1 = NewSemaphore(&f.second);
 }
 
+// Returns the address of the first word equal to a value from 0x80000000 on.
 s32* FindKernelWord(s32 value)
 {
     s32* p = (s32*)0x80000000;
@@ -183,6 +192,7 @@ s32* FindKernelWord(s32 value)
 
 ASM_FUNC(func_001F9E40);
 
+// Installs FindKernelWord as the system call g_kernelWordSearchCall names (0x83).
 s32 InstallKernelWordSearch(void)
 {
     SetSystemCallHandlerForWordSearch(g_kernelWordSearchCall.num, g_kernelWordSearchCall.handler);

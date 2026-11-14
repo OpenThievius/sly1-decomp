@@ -17,6 +17,8 @@ static const f32 g_tanCoefficients[] = {
 
 f32 AbsoluteValue(f32 x);
 
+/* Tangent of x + y for |x| up to about pi/4 (sign = 1), or minus the reciprocal for the odd
+ * quadrants (sign = -1), from a polynomial of degree 13 in x squared. */
 f32 TangentKernel(f32 x, f32 y, s32 sign)
 {
     s32 bits, magnitude, chopBits;

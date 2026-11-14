@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-// The kernel library's TLB set-up, its own object from 0x1FA9B0 to 0x1FAC00, built whole
-// (config/us/files.tsv): a file-local copy of the system call stub 0x56 (func_001FA9B0, which
-// only func_001FAA00 calls; the public one is func_001F6BD0), the entry func_001FA9C0, which
-// sets the TLB up through func_001FAA00 when func_001F6D20 reports 0x2000000 and calls
-// func_001F6D30 otherwise, and func_001FAA00 itself, which reports the entry counts and writes
-// the three tables of entries D_00277FE0 points to (C with a register variable and the TLB's
-// system sequence: docs/ASM_CLASSIFICATION.md, "Two kernel-library functions examined"). Its .rodata (the four messages) and .data (the three
-// tables and the record pointing to them) are this object's.
+// SPDX-License-Identifier: AGPL-3.0-or-later The kernel library's TLB set-up, its own object from
+// 0x1FA9B0 to 0x1FAC00, built whole (config/us/files.tsv): a file-local copy of the system call
+// stub 0x56 (func_001FA9B0, which only func_001FAA00 calls; the public one is func_001F6BD0), the
+// entry func_001FA9C0, which sets the TLB up through func_001FAA00 when func_001F6D20 reports
+// 0x2000000 and calls func_001F6D30 otherwise, and func_001FAA00 itself, which reports the entry
+// counts and writes the three tables of entries D_00277FE0 points to (C with a register variable
+// and the TLB's system sequence: docs/ASM_CLASSIFICATION.md, "Two kernel-library functions
+// examined"). Its .rodata (the four messages) and .data (the three tables and the record pointing
+// to them) are this object's.
 #include "common.h"
 #include "asm_func.h"
 #include "system.h"
@@ -17,6 +17,8 @@ s32 QueryMemorySize(void);
 s32 SetUpTlbSyscall(void);
 s32 SetUpTlbEntries(void);
 
+// Sets the TLB up through SetUpTlbEntries when QueryMemorySize reports 0x2000000, and calls the
+// system call stub SetUpTlbSyscall otherwise.
 s32 SetUpTlbForMemory(void)
 {
     if (QueryMemorySize() == 0x2000000) {

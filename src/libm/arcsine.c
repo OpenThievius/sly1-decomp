@@ -8,6 +8,9 @@
 f32 ArcsineKernel(f32 x);
 f32 AbsoluteValue(f32 x);
 
+/* Checked arcsine in radians: runs ArcsineKernel, and for |x| > 1 (not NaN) reports a domain
+ * error "asinf" through the error hook and sets the error number (0x21) unless the error mode is
+ * -1. */
 f32 Arcsine(f32 x)
 {
     MathError e;

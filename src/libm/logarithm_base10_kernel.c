@@ -12,6 +12,8 @@ static const f32 g_zero = 0.0f;
 
 f32 LogarithmKernel(f32 x);
 
+/* Unchecked base-10 logarithm: the exponent and the logarithm of the mantissa scaled by log10(2)
+ * and 1/ln(10) pieces; -infinity for 0 and NaN for a negative. */
 f32 LogarithmBase10Kernel(f32 x)
 {
     s32 bits, exponent, neg;

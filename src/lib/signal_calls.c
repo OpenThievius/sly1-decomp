@@ -14,6 +14,9 @@ extern s32 g_systemCallError;
 s32 SignalProcess(s32 mode, s32 status);
 s32 GetProcessId(void);
 
+/* Sends signal sig to process pid through SignalProcess (which ends the program with the signal
+ * as its status when pid is 1), clearing g_systemCallError first and copying it into state->error
+ * when the call returns -1 with an error set; returns the call's result. */
 s32 SendSignalFor(struct LibcState* state, s32 pid, s32 sig)
 {
     s32 ret;
@@ -25,6 +28,7 @@ s32 SendSignalFor(struct LibcState* state, s32 pid, s32 sig)
     return ret;
 }
 
+/* The current process's id (the kernel call GetProcessId); the state record is not used. */
 s32 GetProcessIdFor(struct LibcState* state)
 {
     return GetProcessId();

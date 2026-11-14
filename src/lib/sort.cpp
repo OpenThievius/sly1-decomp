@@ -54,6 +54,8 @@ struct SortHelpers {
 #define BLOCK_SWAP(x, y, count) \
     if ((count) > 0) SortHelpers::Exchange(x, y, count, kind)
 
+// Sorts n elements of a given size in place with a three-way-partition quicksort and the caller's
+// comparison; GatherAxisCurveTimes and MergeOverlappingSpans sort with it.
 void SortElements(void* base, u32 n, u32 size, CompareFn compare)
 {
     char *pa, *pb, *pc, *pd, *pl, *pm, *pn;

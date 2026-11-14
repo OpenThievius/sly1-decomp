@@ -11,6 +11,8 @@ s32 ReduceByHalfPi(f32 x, f32* parts);
 f32 CosineKernel(f32 x, f32 y);
 f32 SineKernel(s32 hasTail, f32 x, f32 y);
 
+/* Cosine of a float in radians: reduces by multiples of pi/2 (ReduceByHalfPi) and picks the
+ * cosine or sine kernel and the sign from the quadrant; returns NaN for infinities and NaNs. */
 f32 Cosine(f32 x)
 {
     f32 parts[2];

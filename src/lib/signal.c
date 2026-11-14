@@ -22,6 +22,8 @@ void* AllocateSignalTable(struct LibcState* state, s32 size);
 s32 SendSignalFor(struct LibcState* state, s32 pid, s32 sig);
 s32 GetProcessIdFor(struct LibcState* state);
 
+/* Allocates the state record's table of 32 signal handlers on first use and fills it with 0 (the
+ * default); returns 0, or -1 when the allocation fails. */
 s32 MakeSignalTable(struct LibcState* state)
 {
     s32 i;
@@ -38,6 +40,9 @@ s32 MakeSignalTable(struct LibcState* state)
 
 LINKER_REMNANT(func_00201570);
 
+/* Raises signal sig (0 to 31, else error 0x16 and -1) for a state record: the default handler (0)
+ * sends it to this process, 1 ignores it, -1 is an error (0x16, returns 1), anything else is a
+ * handler function, reset to the default before it is called with the signal number. */
 s32 RaiseSignalFor(struct LibcState* state, s32 sig)
 {
     s32 ret = 0;
@@ -69,6 +74,7 @@ s32 RaiseSignalFor(struct LibcState* state, s32 sig)
     return ret;
 }
 
+/* Raises a signal for the library's own state record (g_libraryState); abort calls it with 6. */
 s32 RaiseSignal(s32 sig)
 {
     return RaiseSignalFor(g_libraryState, sig);

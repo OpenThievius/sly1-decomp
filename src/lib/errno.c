@@ -7,6 +7,8 @@
 
 extern s32* g_libraryState;
 
+/* The address of the C library's error number: the first word of the state record that
+ * g_libraryState points to. The math library stores 0x21 (domain) or 0x22 (range) through it. */
 s32* GetErrorNumberAddress(void)
 {
     return g_libraryState;
