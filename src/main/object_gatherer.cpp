@@ -399,6 +399,9 @@ void LoadStateWalkerGroup(StateWalkerGroup* self, BufferedStream* stream)
     ResolveObjectLinks(self, 1, g_stateWalkerGroupLoadLinks);
 }
 
+// Starts the placed object, then gathers its walker objects (id 1 of kind 0x5C, and those named by
+// its ids, up to 8), and starts a state walker for each one and for itself, all moving to key 0x22F
+// if the level record has its flag mask set, 0x22E otherwise.
 void StartStateWalkerGroup(StateWalkerGroup* self)
 {
     StartPlacedObject(self);
@@ -479,6 +482,10 @@ void CopyNumberedItem(NumberedItem* obj, NumberedItem* src)
     obj->itemNumber = value;
 }
 
+// Starts the numbered item: the spin angle and speed (random sign), the animation half cycle
+// jittered and a random cycle time; if the entry's bit for this item number is already set, it is
+// turned off (method 3). When D_00275C34 is set, it removes the item at once with a chance of 20
+// percent, clearing its bit.
 void StartNumberedItem(NumberedItem* self)
 {
     s32 neg;
@@ -561,6 +568,9 @@ void UpdateNumberedItem(NumberedItem* self, f32 dt)
     }
 }
 
+// Sets this item's bit in the current entry's collected bits and counts it (once). Then, by the
+// save's first-time flags (1 and 4) and the count, starts a step sequence (0x348 or 0x34A) and sets
+// the flag; plays sound 0x6A when all items of the world are collected.
 void SetNumberedItemFlag(NumberedItem* self)
 {
     f32 zf;
@@ -603,6 +613,9 @@ L980:
     }
 }
 
+// Called when the item is collected: shows the collected-item caption and creates the pick-up
+// effect at the item's point (playing sound 0x21 when this is the last item of the world), or, with
+// no effect available, sets the flag at once; then collects the object set.
 void CollectNumberedItem(NumberedItem* self)
 {
     Quad16 loc;
@@ -630,6 +643,8 @@ void InvokeNumberedItemCollect(NumberedItem* p)
     ((SlotFn*)p->desc)[77](p);
 }
 
+// Turns the item off, sets its bit in the current entry's collected bits and counts it (once),
+// starts the animations of its found objects and triggers its script event 2.
 void FlagNumberedItem(NumberedItem* self)
 {
     self->desc->m03(self);
@@ -828,6 +843,10 @@ void StartC17Marker(C17Marker* self, s32 x)
     self->walker = CreateStateWalker((StateGraph*)self->object, (void*)self->owner, x, 0);
 }
 
+// Starts the collider: resolves links, starts its three markers, creates its state walker (key
+// 0x384) and, unless the entry has bit 4 (walker to 0x38F, stop), finds the objects of its six
+// sequence groups (random start in each) plus the extra and trigger objects, then works out which
+// level-completion bit it stands for (levelBit, levelBitIndex).
 void StartC17Collider(C17* o)
 {
     u32 i;
@@ -904,6 +923,10 @@ lookup:
         o->levelBitIndex = -1;
 }
 
+// Called when switched on (flag) or off. On: state walker to 0x385 (unless at 0x38F), resets pad
+// step repeat, queues the first-time object 0x39A or 0x39B (by the save's option bits) and the
+// extra object, copies the player's block. Off: walker to 0x384, clears the queue and, if mask bit
+// 4 is set, fades out and queues movie 4.
 void HandleC17ColliderActivation(C17* self, void* flag)
 {
     s32 r;
@@ -1105,6 +1128,10 @@ void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
     }
 }
 
+// Handles notifications after the base handler: message 12 from the trigger object either sends the
+// player to a state aimed at this collider (when f654 is set) or picks one of six sequence groups
+// from how much of the world is collected (under 0.5, 0.8, or more, all but one, all) and starts
+// that group's next step sequence in turn.
 void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
 {
     HandleSwitchedColliderNotification(self, msg, rec);
@@ -1157,6 +1184,10 @@ void AddEntryRecordKey(C17* list, u32 index, s32 key)
     }
 }
 
+// Records the completion: sets the state walker to 0x38E, releases the trigger object, and, if its
+// level bit is a valid one, counts it in the level record and the save (options bits 8 then 0x10),
+// sets flag 4 of the entry, applies the completion flags (where mask bit 4), starts the object
+// 0x37E or 0x37F (saving the memory card for the second), and queues the level bit's own object.
 void RecordC17ColliderCompletion(C17* self)
 {
     s32 sel;
@@ -1266,6 +1297,9 @@ void InitObjectGatherer(ObjectGatherer* self)
     self->f664 = -1;
 }
 
+// Loads the collider, joins its member group, resolves its links, and gathers the objects with ids
+// 0x269 to 0x287 that belong to it: those below 0x279 go to the low-detail list and the others to
+// the high-detail list.
 void LoadObjectGatherer(ObjectGatherer* self, BufferedStream* stream)
 {
     s32 k = 0x269;
@@ -1315,6 +1349,9 @@ void CopyObjectGatherer(ObjectGatherer* self, ObjectGatherer* src)
 }
 
 
+// Physics step of the gatherer: after the collider step it turns toward its wander point (state 1)
+// or its candidate's point (state 2) in the horizontal plane, and otherwise steers its rotation
+// toward zero.
 void StepObjectGatherer(ObjectGatherer* self, f32 dt)
 {
     Vec02 delta;
@@ -1524,6 +1561,10 @@ ASM_FUNC(func_0019BB10);
 ASM_FUNC(func_0019BB90);
 
 
+// Draws the gatherer with the object that matches its state: the base object in state 0, one of the
+// low-detail ring in state 1 and one of the high-detail ring in state 2 (the ring index advancing
+// each time it has moved farther than a threshold since the last change); nothing while suspended
+// (state 4) or when flag bit 32 is set.
 void ApplyObjectGathererLodObject(ObjectGatherer* self, void* a1, void* a2)
 {
     Vec02 tmp[4];
@@ -1627,6 +1668,10 @@ void ChooseObjectGathererCandidate(ObjectGatherer* self)
     g_activeListFrames = frame.prev;
 }
 
+// Suspends the gatherer (a1 non-zero: it leaves the world's list at +0x1C60 and its object is
+// turned off) or resumes it (it rejoins the list, its object is turned on and it is placed clear of
+// contacts at the candidate's point). Sets the listed state of its collider and all its parts to
+// match and zeroes its velocities.
 void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
         RemoveFromList(&self->world->list1C60, self);
@@ -1650,6 +1695,10 @@ void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
     self->desc02()->m21(self, (Vec02 *)&D_00248D30);
 }
 
+// Switches the gatherer to a new mode (nothing if unchanged): leaving 4 un-suspends it; mode 0 is
+// idle (a random time between idleTimeMin and idleTimeMax), 1 is wandering to a random point within
+// wanderRadius for 3 to 5 s, 2 goes to a chosen candidate for up to 10 s, 3 plays sound 0x3A and
+// scatters objects at its position, and 4 suspends it for 3 to 15 s.
 void SetObjectGathererState(ObjectGatherer* self, s32 mode)
 {
     Vec02 offset;
@@ -1715,6 +1764,10 @@ void InitAimBlendGrid(AimBlendGrid* obj)
     obj->first34 = -1;
 }
 
+// Loads an aim blend grid from the stream: 24 slot ids, the resolution, the mesh, the per-point
+// records (computing each one's 24 blend weights from its grid coordinates), the cells (16 bytes
+// each), and the plane tree of nodes and leaves with its child links (positive numbers a node,
+// negative a cell), then a float and the property records.
 void LoadAimBlendGrid(AimBlendGrid* o, LoadStream* in)
 {
     {
@@ -1779,6 +1832,10 @@ void LoadAimBlendGrid(AimBlendGrid* o, LoadStream* in)
     ReadPropertyRecords(o, in);
 }
 
+// Starts the grid: finds its root and sampled objects and the 24 slot objects, builds the combined
+// blend animation from them and samples it at the grid's blend point (and at a second point if
+// there is a second vector, otherwise both are the same), keeping the sample time and the two
+// resulting points.
 void StartAimBlendGrid(AimBlendGrid* self)
 {
     GridBlendSlot* s;
@@ -1864,6 +1921,9 @@ void BlendCellCornerRecords(AimBlendGrid* self, GridCell* cell, Quad16* point)
     SetBlendItemWeights(self->blendAnimation, 0x20, 0x18, self->slots);
 }
 
+// Computes the 24 blend weights for a grid coordinate (x in -1 to 1, y in 0 to 1, z in 0 to 3):
+// products of the weights along each axis (two on x on each side of zero, two on y, and linear
+// weights between the four z levels), written in the order of the slots.
 void ComputeGridBlendWeights(AimBlendGrid* self, f32* out, f32 x, f32 y, f32 z)
 {
     f32 xa, xb;
@@ -1989,6 +2049,9 @@ struct TreePlane {
     f32 dist;
 };
 
+// Walks the plane tree from node (the root if null) to the leaf cell that holds pt: it goes to the
+// child on the side of the node's plane that the point is on (distance within 0.0001 counts as on
+// the plane and tries the far child first, then the near one) and gives the cell found.
 u8* FindPlaneTreeLeafAtPoint(AimBlendGrid* self, AimPlaneNode* node, Vec02* pt)
 {
     if (node == 0) {
@@ -2098,6 +2161,9 @@ void TrackAimTargetObject(Player* self, AimBlendGrid* x, void* y)
     }
 }
 
+// Takes the player's position into the path curve object's frame, asks the curve (method 12) for
+// the point it follows from the time in k, converts that point into the player's frame, finds the
+// nearest accepted point on the grid's cells and blends the cell's corner records toward it.
 void TrackAimTargetPoint(Player* self, AimBlendGrid* dst, PathCurveObject* src, f32* k)
 {
     Quad16 q0;

@@ -351,6 +351,9 @@ void CopyTargetCurve(TargetCurve* self, TargetCurve* src)
 f32 WrapAngle(f32 a);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Gives the place on a target curve at length t where the player is held: the curve's point (in the
+// world) offset sideways, 20 units to one side for mode 0 and 70 for mode 1, and the heading angle
+// to face along the curve (turned half a turn for mode 1).
 void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t)
 {
     Vec02 pos;
@@ -386,6 +389,9 @@ void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t)
     }
 }
 
+// Finds the length along a target curve nearest the active switched collider (the player), kept 30
+// units from the ends of an open curve, and puts the place and angle at that length
+// (PlaceOnTargetCurve) in a2 and a3. The length is stored in *out.
 void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, void* a3)
 {
     CurveProbe f;
@@ -453,6 +459,9 @@ void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 f32 WrapAngle(f32 a);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Gives the place on a target point's ring at distance t along it (an angle of t over the ring's
+// radius): the point's position plus the offset at that angle, the radius grown by 20 for mode 0
+// and 70 for mode 1, and the angle to face (turned half a turn for mode 1).
 void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t)
 {
     Vec02 offset;
@@ -558,6 +567,10 @@ void StepListedCollisionPart(ListedCollisionPart* self, f32 t)
     SteerColliderTowardRotation(self, (Mat02*)&buf, (f32*)self->p214, (Vec02*)&D_00248D30, (f32*)self->p218, t);
 }
 
+// Changes the state of a pooled object that the player can pick up: leaving state 1 (held) lets go
+// of the player, clears the anchors and raises script event 3; entering state 1 takes the player as
+// its holder, zeroes its velocities, anchors it and stores the rotation of the player's upright
+// frame relative to its own, raising script event 2. The state time is stamped.
 void SetPooledObjectPlayerHold(PooledObject* self, s32 v)
 {
     HoldMatrices f;
@@ -603,6 +616,8 @@ s32 CountHeldPooledChildren(PlacedObject* self)
     return count;
 }
 
+// Finds the child of kind 0x46 in state 4 whose state time is the earliest (the one that has been
+// in that state longest); null when there is none.
 void* FindEarliestPooledChild(PlacedObject* self)
 {
     ChildListWalk w(&self->children);
@@ -625,6 +640,9 @@ void* FindEarliestPooledChild(PlacedObject* self)
 f32 WrapAngle(f32 a);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Gives the point on a ring around an object (the radius at +0x560 plus 70) in the direction of the
+// active switched collider, in the horizontal plane, and the heading angle of that direction turned
+// half a turn.
 void FindRingPointTowardCollider(PlacedObject* self, Vec02* out, f32* angleOut)
 {
     Vec02 d;

@@ -394,6 +394,10 @@ extern const Vec02 D_00248D30;
 void SpringCameraVector(Camera* self, Vec02* pos, Vec02* vel, Vec02* target, f32 k, f32 damp, f32 dt);
 void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3);
 
+// Moves the camera's tracking offset (v250, with velocity v260) and look offset (v270 and v280)
+// toward the offset behind the target by springs; for the player the springs depend on its camera
+// state (0 normal, 1 slower, 2 position only). Writes the tracked position, the record's base plus
+// the offset, into the record.
 void UpdateCameraTargetTracking(Spring_00143208* self, void* target, f32 dt, Record_00143208* rec)
 {
     Vec02 offset;
@@ -481,6 +485,10 @@ void ComputeCameraFogTerms(Camera* self, f32* out, f32 p)
 void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 extern "C" f32 Tangent(f32 x);
 
+// Recomputes the camera's projection from its zoom (the field of view): the tangent of half of it
+// and of its horizontal extent by the aspect, the distance scale (at least 1), the projection
+// matrix for the 640x224 screen with the near and far distances, and the fog terms, then the camera
+// matrices.
 void UpdateCameraProjection(Camera* self)
 {
     u8* s = (u8*)self;
@@ -499,6 +507,10 @@ void UpdateCameraProjection(Camera* self)
     UpdateCameraMatrices(self);
 }
 
+// Initialises the camera object: the scale and ramp defaults, the near-clip and fog defaults (a
+// field of view ratio of about 1.3, near 100, far 20000), the identity orientation, the projection,
+// and the five controllers it owns (the base one, the target, frame, value and on/off controllers)
+// with their method tables and owner; ends with ResetCamera.
 void InitCamera(Camera* self)
 {
     u8* s = (u8*)self;
@@ -695,6 +707,10 @@ struct PartFade {
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 
+// Marks the parts of colliders that lie between the camera and the camera's objects (those with
+// flag bit 37) as faded for the next 0.1 s: it gathers the colliders in the box of those points
+// that IsCameraObstacle accepts and, for each span a segment from the camera to an object crosses,
+// sets the fade-until time of the span's part group.
 void FadeCameraObstructingParts(Camera* self)
 {
     Vec02 lo;
@@ -738,6 +754,10 @@ void FadeCameraObstructingParts(Camera* self)
     PopBackMemoryMark();
 }
 
+// Per-frame camera update: turns a queued snap into the snapping state, runs the top controller of
+// the stack (updating its target tracking once per target and calling its method 4 with the target
+// record, the pad or a blank one, and dt; again if the top changes), then moves the zoom toward its
+// goal or snaps it. A set flag ends the snap.
 void UpdateCamera(Camera* self, s32 flag, f32 dt)
 {
     if (self->snapQueued != 0) {
@@ -852,6 +872,9 @@ void UpdateCameraLocation(Camera* self)
     }
 }
 
+// Builds the view matrix from the camera position b and the rows of its orientation a (as a matrix
+// whose columns are the negated second and third rows, and the first row), inverts it and
+// multiplies it with the projection matrix c, storing the four rows of the result in out.
 void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out)
 {
     Mat4 m;
@@ -895,6 +918,10 @@ static inline u128 Unit(u128 v)
     return Vu0::DivX(v, Vu0::Length(v));
 }
 
+// Builds the normals of the four side planes of a view frustum from the orientation matrix m (its
+// rows being the view axes) and the half-extents x and y (as tangents): two for the sides of the
+// horizontal range and two for the vertical one, each the cross product of a view axis with the
+// unit edge direction.
 void BuildFrustumSideNormals(Mat02* m, Vec02* out, f32 x, f32 y)
 {
     f32 nx = -x;
@@ -992,6 +1019,9 @@ void PlaceCameraLookingAt(Camera* self, const Vec02* target, const Vec02* focus)
     UpdateOrbitCameraPlacement(self, 0, target, focus, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
+// Gives the coordinates of the point in, in a frame that looks from a to b: z is the distance along
+// the look direction and x and y the sideways and up offsets divided by the look distance (at least
+// 100). All three are 0 when a and b are almost the same point.
 void ComputeLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* in, f32* x, f32* y, f32* z)
 {
     Mat02 m;
@@ -1037,6 +1067,10 @@ void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32*
 void VectorToAngles(Vec3* v, f32* a1, f32* a2);
 void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 
+// Places the camera on an orbit around focus, looking at target, from the spherical coordinates of
+// the offset plus yaw and pitch offsets scaled by the zoom. Unless snapping, the five current
+// values move toward their goals as damped springs (gain, damp, dt), going the short way round,
+// then the position, rotation rows and matrices are written and focus is kept.
 void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, const Vec02* focus, s32 e, f32 gain, f32 damp,
                    f32 unused, f32 yawOffset, f32 pitchOffset, f32 dt)
 {
@@ -1217,6 +1251,10 @@ void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* ta
     }
 }
 
+// Removes the entries of the camera's controller stack that match all of the selected fields (flags
+// 1 key, 2 controller, 4 target, 8 argument), calling each one's method 3 and keeping the others in
+// order. If the top entry was removed, it calls that controller's method 1 and, if any entry is
+// left, records the switch time and calls the new top's method 0.
 void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, void* k2, void* k3)
 {
     void* s5 = 0;
@@ -1280,6 +1318,8 @@ void ConvertOffsetToCylindrical(const Vec02* a, const Vec02* b, f32* angle, f32*
     }
 }
 
+// Turns the offset a - b (or a alone if b is null) into spherical coordinates: heading (the angle
+// in the xy plane), pitch (the elevation) and distance; each output may be null.
 void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist)
 {
     Vec02 d;
@@ -1360,6 +1400,10 @@ void AimCameraAtPointWithSpring(Camera* self, Vec02* a1, Vec02* a2, f32 turnYaw,
     BuildYawPitchMatrix(yaw, pitch, (Mat02*)self->rotation);
     UpdateCameraMatrices(self);
 }
+// Finds along the segment a2 to a3 the first stretch of at least thresh (as a fraction of the
+// segment) that no collider's tree crosses: the spans of all the colliders (at most 64) are merged
+// and the gaps between them, and from the start and to the end, are tested in order. Gives 1 and
+// the fractions lo and hi of that stretch, or 0.
 s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh, f32* lo, f32* hi)
 {
     ColliderSpan recs[64];
@@ -1389,6 +1433,10 @@ s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh
 }
 
 
+// Searches a sphere of radius r around origin for the nearest point the camera can take: samples
+// directions on nine latitude rings (counts in g_freePointRingSamples), tests the line from origin
+// to each with FindFirstFreeSpan and keeps the one with the smallest free fraction (plus a step);
+// origin if none.
 void FindNearestFreePointAround(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r)
 {
     Vec02 dir;
@@ -1431,6 +1479,10 @@ struct Mesh03;
 struct MeshHitEntry;
 void* AllocateBackMemory(s32 size);
 
+// Gives in out where origin must move to be clear of the meshes of the given colliders within r of
+// a4: up to 64 hit points are gathered, the weights that fn asks for are solved with the active-set
+// solver, and their weighted sum (limited to limit in length) is added to origin; origin itself if
+// nothing is hit.
 void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWeigh fn, f32 r, f32 limit, void* a4, Vec02* origin, Vec02* out)
 {
     MeshHit hits[64];

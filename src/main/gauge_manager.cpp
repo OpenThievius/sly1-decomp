@@ -192,6 +192,10 @@ ObjectLink g_gaugeManagerLinks[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, 
 extern s32 g_frameCount;
 typedef NumberedAgent* (*TargetOfFn)(NumberedAgent* self);
 
+// Chooses where an agent heads next. In states 12 and 13, every few frames (staggered by its
+// number), it tries 16 directions around the circle and scores each probe point (walls, its
+// target, the other agents' paths, the turn needed); the lowest score becomes the goal point. In
+// state 4 it stays put; other states use the default update.
 void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
 {
     typedef Vu0::Vec Vec;
@@ -311,6 +315,9 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
 
 extern const Vec02 g_unitXVector;
 
+// Tells whether an agent is free to take part: not while pad select is held or in states 4, 0xB
+// or 0x10, and only when its target is near (within the near radius and in front of the target's
+// velocity), with a hysteresis out to the far radius.
 s32 IsNumberedAgentFree(NumberedAgent* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0) {
@@ -376,6 +383,9 @@ void EnterNumberedAgentState(NumberedAgent* self, s32 evt, Animation* arg)
     }
 }
 
+// Chooses an agent's next state; when the agent is in contact with the active switched collider
+// it sends it a message and goes to state 0xB, and puts every other agent of kind 0x12 that
+// touches it into state 0xB too.
 s32 ChooseAgentStateByContact(ContactAgent* self)
 {
     s32 result = ChooseAgentState(self);
@@ -443,6 +453,9 @@ extern const GaugeParams g_defaultGaugeParams = {
     { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F59999A, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F4CCCCD, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000 }
 };
 
+// Sets the gauge manager's defaults: a maximum amount of 50, a 90 second timer, the default gauge
+// parameter set for both sets (the second with two ranges set to 12), and registers itself as the
+// one gauge manager.
 void InitGaugeManager(GaugeManager* self)
 {
     InitPlacedObject(self);
@@ -460,6 +473,9 @@ void InitGaugeManager(GaugeManager* self)
     g_gaugeManager = self;
 }
 
+// Start of the gauge manager: resolves its links, creates its state walker (at key 0x3FB), finds
+// the slots' objects, animations and anchors, and blends its two parameter sets (44 floats) by a
+// quadratic of the current entry's value, then computes the outputs.
 void BlendParamSets(GaugeManager* self)
 {
     s32 i = 0;
@@ -499,6 +515,10 @@ void BlendParamSets(GaugeManager* self)
     ComputeGaugeOutputs(self);
 }
 
+// Recomputes the gauge manager's outputs from its fill (amount over maxAmount): each output
+// (delay and wait ranges, two more values and the maximum number of slot agents) is a blend
+// between two values by a curve of the fill; also starts the contact timer once the fill passes
+// the trigger fraction.
 void ComputeGaugeOutputs(GaugeManager* o)
 {
     f32 t = GaugeCurve::Limit((f32)o->amount / (f32)o->maxAmount, 0.0f, 1.0f);
@@ -693,6 +713,9 @@ void RunGaugeTimedEvent(GaugeManager* self)
     } while (made < 2);
 }
 
+// Releases one pool object at a random free slot of the gauge manager (when fewer than the
+// maximum are out): places it at the slot's anchor with no motion, starts the slot's animation on
+// it, counts it and sets the time of the next one from a random delay.
 void ActivateRandomGaugeSlot(GaugeManager* self)
 {
     GaugeSlot* list[16];
@@ -738,6 +761,9 @@ void CountDownGaugeContacts(GaugeManager* self, ContactAgent* agent)
     self->contactAgents = self->contactAgents - 1;
 }
 
+// Adds an agent's value to the gauge's amount (kept between 0 and the maximum); at the maximum it
+// sends the state walker to key 0x3FE and puts every agent of kind 0x12 into state 0xB, and stops
+// the timer. Recomputes the outputs and gives back one slot.
 void AddToGaugeAmount(GaugeManager* self, NumberedAgent* arg)
 {
     s32 hi = self->maxAmount;
@@ -780,6 +806,9 @@ void AddToGaugeAmount(GaugeManager* self, NumberedAgent* arg)
     self->slotAgents = self->slotAgents - 1;
 }
 
+// Notification handler of the gauge manager: when a slot's animation ends (kind 6) it frees that
+// slot; when its state walker changes (kind 0x14) it starts the timer and the amount caption on
+// entering key 0x3FD, and stops them when leaving it.
 void HandleGaugeManagerNotification(GaugeManager* self, s32 kind, void* key)
 {
     HandlePlacedObjectNotification(self, kind, key);

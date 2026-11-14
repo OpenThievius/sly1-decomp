@@ -57,6 +57,9 @@ f32 g_aimTurnSearchOffset4[4] = { 125.0f, 0.0f, 0.0f, 0.0f };
 s32 D_00274C10 = 0;
 s32 D_00274C14 = 0;
 
+// Gives the owner's position (v190) plus the offsets of the pose sources attached to it (each
+// source's position minus the owner's) in *pos, and the sum of their second vectors in *vec, at
+// time t.
 void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec02* pos, Vec02* vec)
 {
     ListFrame frame;
@@ -104,6 +107,9 @@ static inline Mat02 RotateRowsBy(const Mat02& r, const Mat02& m) return out
     out.r[2] = t.r[2];
 }
 
+// Gives the owner's rotation combined with the rotations of the pose sources attached to it (each
+// applied in turn, relative to the owner's own) in *outRot, and the matching vector in *outVec,
+// at time t.
 void CombineChildPoseRotations(ChildPoseSource* self, Mat02* outRot, Vec02* outVec, f32 t)
 {
     ListFrame frame;
@@ -181,6 +187,10 @@ extern f32 g_aimDurationShort;
 extern s32 D_00274C10;
 extern s32 D_00274C14;
 
+// Changes the player's aim mode (-1 none, 0 to 11 the aiming variants): leaves the old mode (its
+// sound, the held slot object, the state walker), picks the animation, sound, delay and end time
+// of the new one (modes 4 to 7 blend toward the nearest class 75 object ahead; mode 3 chooses
+// among 4 to 7), continues the animation smoothly when the modes are chained, and starts it.
 void SetPlayerAimMode(Player* self, s32 state)
 {
     s32 old = self->aimMode;
@@ -431,6 +441,10 @@ void UpdatePlayerAimTarget(Player* s)
 }
 
 
+// The player's reaction to the aim button: in some states it forces the aim mode (state 3 returns
+// the player to state 2, state 0 moves modes 4 and 5 to 6 and 7), otherwise it records the press
+// time and enters aim mode 3 when the button was pressed less than 0.35 s ago and nothing else
+// forbids it.
 void HandlePlayerAimButton(Player* self, PadRecord* other)
 {
     s32 flag = 1;
@@ -491,6 +505,10 @@ tail:
     SetPlayerAimMode(self, st);
 }
 
+// Finds the class 75 object nearest the player's line of sight: for each object in the list
+// (whose mask matches mode) it measures the distance from the object's segment (its position to
+// its moved point) to the line ahead of the player, within 300 units and within b radians of the
+// heading, and gives the best object in *found and the vector to its hit point in dir.
 void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f32* dir, f32 a, f32 b)
 {
     ListFrame frame;
@@ -559,6 +577,9 @@ struct TwoBlendWeights { f32 a; u8 pad[0xC - 4]; f32 b; };
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Sets the weights of a two-entry aim blend from the nearest class 75 object ahead (the higher it
+// is relative to the eye, the more of the second entry; all of it when there is none); remembers
+// that object as the aim target and, in state 0, turns the player toward it.
 void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
 {
     NearestAhead fr;

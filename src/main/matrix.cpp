@@ -126,6 +126,8 @@ void AddMatrices(f32* a, f32* b, f32* out)
 
 LINKER_REMNANT(func_00188848);
 
+// Builds the rotation matrix about the unit axis v by angle radians (Rodrigues' formula) into the
+// 3x3 part of out.
 void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle)
 {
     const f32* axis = &v->x;
@@ -176,6 +178,9 @@ void BuildRotationFromVector(Vec02* v, Mat02* mat)
     }
 }
 
+// Builds the rotation matrix of three Euler angles in (radians, in[0] about x, in[1] about y and
+// in[2] about z; the first row comes out as cos(y) cos(z), cos(y) sin(z), -sin(y)) into the 3x3
+// part of out.
 void BuildEulerRotationMatrix(f32* in, f32* out)
 {
     f32 sc[6];
@@ -248,6 +253,10 @@ f32 GetMatrixRotationCosine(f32* p)
 
 extern "C" f32 Arccosine(f32 x);
 
+// Converts a rotation matrix to an angle in radians (*angle, 0 to pi) and a unit axis: the angle
+// from the trace, the axis components from the diagonal, signed by the off-diagonal differences.
+// The identity gives angle 0 about x, and a half turn (angle pi) takes its signs from the largest
+// component.
 void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis)
 {
     f32 (*e)[4] = (f32 (*)[4])m;
@@ -468,6 +477,9 @@ done:
     return ok;
 }
 
+// Inverts the 3x3 part of a matrix by Gauss-Jordan elimination with column pivoting, into out
+// (which starts as the identity). Gives 1, or 0 (with out half-worked) when a pivot column is all
+// zero, which means the matrix is singular.
 s32 InvertMatrix3x3(Matrix3x4* in, Matrix3x4* out)
 {
     Matrix3x4 m;
@@ -534,6 +546,9 @@ s32 InvertMatrix4x4(void* a0, void* a1)
 
 extern const Vec02 g_unitXVector;
 
+// Builds a rotation basis whose x row is the direction x (normalised) and whose z row is
+// perpendicular to both it and the hint, so that the y row lies as near the hint as the x row
+// allows. When the hint is parallel to x, an arbitrary perpendicular is used.
 void BuildBasisFromXAndYHint(Vec02* x, Vec02* hint, Mat02* out)
 {
     Vec02 c;
@@ -550,6 +565,9 @@ void BuildBasisFromXAndYHint(Vec02* x, Vec02* hint, Mat02* out)
     Vu0::Q(out->r[1]) = Vu0::Cross(Vu0::Q(out->r[2]), Vu0::Q(out->r[0]));
 }
 
+// Builds a rotation basis whose x row is the direction x (normalised) and whose y row is
+// perpendicular to both it and the hint, so that the z row lies as near the hint (the up direction)
+// as the x row allows. When the hint is parallel to x, an arbitrary perpendicular is used.
 void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out)
 {
     Vec02 c;

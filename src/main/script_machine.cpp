@@ -472,6 +472,10 @@ ScriptBuiltin g_scriptBuiltins[125] = {
 };
 MarkStacks g_markStacks;
 
+// The script's + built-in: the first argument plus every further argument (the rest list in
+// args[1]). Numbers add as floats and the result stays an int only if every operand was one; a
+// vector (tag 0x16) adds component by component on the VU0 and a matrix (tag 0x17) element by
+// element. Any other first operand gives an empty result.
 ScriptValue* AddScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
@@ -550,6 +554,8 @@ ScriptValue* AddScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, Scr
     DestroyScriptValue(&t, 2);
     return ret;
 }
+// The script's - built-in, AddScriptValues with subtraction: the first argument minus each further
+// argument in turn, for numbers (int result only if all are ints), vectors and matrices.
 ScriptValue* SubtractScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
@@ -666,6 +672,10 @@ void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
 ScriptMatrixPayload MultiplyMatrices(const ScriptMatrixPayload* a, const void* b);
 void FreeMatrixPayload(void* p);
 
+// The script's * built-in: multiplies the first argument by each further one. Number times number
+// is a number (an int only if all are ints); a scalar scales a vector (0x16 or 0x18), a matrix or a
+// float pair (0x19), in either order; a matrix times a vector transforms it (w = 1), and a matrix
+// times a matrix multiplies them.
 ScriptValue* MultiplyScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
@@ -864,6 +874,9 @@ ScriptValue* MultiplyScriptValues(ScriptValue* ret, s32 count, ScriptValue* args
     return ret;
 }
 
+// The script's / built-in: divides the first argument by each further number in turn. A number is
+// divided as a float (int result only if all are ints); a vector (0x16 or 0x18), matrix or float
+// pair is scaled by the reciprocal, so the divisor must be a number.
 ScriptValue* DivideScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
@@ -1051,6 +1064,9 @@ ScriptValue* TestScriptWordsEqual(ScriptValue* ret, s32 count, ScriptValue* args
     return ret;
 }
 
+// The shared body of the four ordering built-ins: converts the first two arguments to floats (an
+// int is converted) and gives back the boolean of mode 0 (<), 1 (<=), 2 (>) or 3 (>=). The
+// arguments are read from args[0] and args[1] in that order.
 ScriptValue* CompareScriptNumbers(ScriptValue* ret, ScriptValue* e, s32 mode)
 {
     f32 xy[2];
@@ -1136,6 +1152,10 @@ ScriptValue* TestScriptValuesIdentical(ScriptValue* ret, s32 count, ScriptValue*
     return ret;
 }
 
+// Structural equality of two script values, the body of the = built-in: values of different tags
+// are never equal; ints, pointers and refs compare by their word; lists (tag 0x1E) and function
+// records (0x1F) compare element by element, recursively; a host function (0x21) by its object and
+// function pointers. The result is a bool value in *ret.
 ScriptValue* CompareScriptValues(ScriptValue* ret, ScriptValue* a, ScriptValue* b)
 {
     ScriptValue R;
@@ -1560,6 +1580,9 @@ ScriptValue* GetScriptListItem(ScriptValue* ret, s32 count, ScriptValue* args, S
     return ret;
 }
 
+// The script's list-membership built-in: gives true if the list in args[1] has an element equal
+// (TestScriptEqual, so the structural comparison) to args[0], false otherwise or when args[1] is
+// not a list.
 ScriptValue* TestScriptListContains(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue A;
@@ -1626,6 +1649,9 @@ struct RetValue : ScriptValue {
     ~RetValue() { DestroyScriptValue(this, 2); }
 };
 
+// The script's append built-in: concatenates the lists in the rest argument into one list. Every
+// list but the last is copied, the last is shared, not copied. Non-list arguments are skipped, and
+// no list at all gives the empty list.
 RetValue AppendScriptLists(s32 count, ScriptValue* args, ScriptScope* scope)
 {
     RetValue q;
@@ -1665,6 +1691,10 @@ RetValue AppendScriptLists(s32 count, ScriptValue* args, ScriptScope* scope)
     return q;
 }
 
+// The script's map built-in: calls the function args[0] on each element of the list args[1] and
+// gives back the list of the results. It builds a small call expression (the function applied to
+// one argument slot) and evaluates it with EvalScriptExpression once per element; an empty list
+// comes back empty.
 ScriptValue* MapScriptList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
@@ -1725,6 +1755,9 @@ ScriptValue* MapScriptList(ScriptValue* ret, s32 count, ScriptValue* args, Scrip
     return ret;
 }
 
+// The script's filter built-in: calls the function args[0] on each element of the list args[1] and
+// keeps the elements for which it gave true (a bool value that is non-zero). The result is the new
+// list, or the empty list when none passed.
 ScriptValue* FilterScriptList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
@@ -1795,6 +1828,9 @@ ScriptValue* FilterScriptList(ScriptValue* ret, s32 count, ScriptValue* args, Sc
     return ret;
 }
 
+// The script's for-each built-in: calls the function args[0] on each element of the list args[1]
+// for its side effects, then gives back the empty result (tag 0x22). Like MapScriptList it
+// evaluates a small call expression once per element.
 ScriptValue* ForEachScriptListItem(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
@@ -1887,6 +1923,9 @@ struct __attribute__((aligned(16))) Row_115510 {
     f32 f[4];               // 0x00
 };
 
+// The script's matrix constructor: with 3 or 4 arguments they are row vectors copied in (the rest
+// is the identity); with 9 or 16 numbers they fill a 3x3 or 4x4 block row by row, a 3x3 over the
+// identity. The result is a new tag 0x17 value.
 ScriptValue* MakeScriptMatrix(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t, u;
@@ -1982,6 +2021,8 @@ ScriptValue* MakeScriptFloatPair(ScriptValue* ret, s32 count, ScriptValue* args,
     return ret;
 }
 
+// The script's constructor for a value of three floats (tag 0x1A): converts the three arguments to
+// floats and stores them in a new pooled payload.
 ScriptValue* MakeScriptFloatTriple(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
@@ -2006,6 +2047,9 @@ ScriptValue* MakeScriptFloatTriple(ScriptValue* ret, s32 count, ScriptValue* arg
     return ret;
 }
 
+// The script's element accessor: takes a component of a vector, a four-float vector, a float pair
+// or a float triple by index, or, for a matrix, gives the row as a vector (two arguments) or one
+// element of the row (three arguments).
 ScriptValue* GetScriptVectorElement(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
@@ -2210,6 +2254,9 @@ ScriptValue* GetScriptVectorLength(ScriptValue* ret, s32 count, ScriptValue* arg
     return ret;
 }
 
+// The script's distance built-in: the length of args[0] minus the optional second vector in
+// args[1], which defaults to the zero vector (D_00248D30), so with one argument it is the vector's
+// distance from the origin.
 ScriptValue* GetScriptDistance(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue obj;
@@ -2224,6 +2271,9 @@ ScriptValue* GetScriptDistance(ScriptValue* ret, s32 count, ScriptValue* args, S
     return ret;
 }
 
+// Like GetScriptDistance but gives the squared distance (a dot product of the difference with
+// itself), which avoids the square root; the second vector is optional and defaults to the zero
+// vector.
 ScriptValue* GetScriptDistanceSquared(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue obj;
@@ -2240,6 +2290,9 @@ ScriptValue* GetScriptDistanceSquared(ScriptValue* ret, s32 count, ScriptValue* 
     return ret;
 }
 
+// The script's normalise built-in: args[0] divided by its length. When the length is under 0.0001
+// it gives back the fallback instead: the optional second argument, or the zero vector (D_00248D30)
+// when there is none.
 ScriptValue* NormalizeScriptVector(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue obj;
@@ -2298,6 +2351,10 @@ ScriptValue* RemoveScriptVectorComponent(ScriptValue* ret, s32 count, ScriptValu
     return ret;
 }
 
+// The script's launch-velocity built-in: gives the velocity vector that carries a projectile from
+// the point args[0] to the point args[1] at the launch angle args[2], through
+// ComputeBallisticLaunchVelocity. The optional fourth argument is a pointer passed through as that
+// function's object (null when absent).
 ScriptValue* GetScriptBallisticVelocity(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
@@ -2382,6 +2439,9 @@ void ResetMatrixHomogeneous(HomogeneousMatrix* self);
 void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
+// The script's rotation-blend built-in: takes the rotation between the matrices args[0] and args[1]
+// as an axis and an angle, scales the angle by the weight args[2] and applies that partial rotation
+// to args[0]'s three rows. The result is a matrix with the translation cleared.
 ScriptValue* InterpolateScriptRotation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue obj;
@@ -2520,6 +2580,8 @@ ScriptValue* EvalScriptQuadratic(ScriptValue* ret, s32 count, ScriptValue* args,
     return ret;
 }
 
+// The script's clamped polynomial built-in: evaluates c0 + x*(c1 + x*c2) for the coefficient triple
+// args[0] at x = args[2], then clamps the value into the float pair args[1] (low, high).
 ScriptValue* EvalScriptClampedQuadratic(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue t;
@@ -2544,6 +2606,10 @@ ScriptValue* EvalScriptClampedQuadratic(ScriptValue* ret, s32 count, ScriptValue
     return ret;
 }
 
+// The script's built-in that fits a quadratic through three points of a curve: the four numbers are
+// the values at t = 0 and t = 1, the t of the third point, and the value there; the three
+// coefficients come back as a four-float vector (FitQuadraticCurve), the fourth float is not
+// written here.
 ScriptValue* MakeScriptVector4FromFour(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q0;
@@ -2664,6 +2730,9 @@ ScriptValue* GetScriptAbsolute(ScriptValue* ret, s32 count, ScriptValue* args, S
     return ret;
 }
 
+// The script's max built-in: the largest of args[0] and every element of the rest list in args[1].
+// Ints and floats compare across types, and the winning value is kept as it was (an int stays an
+// int).
 ScriptValue* GetScriptMaximum(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
@@ -2707,6 +2776,8 @@ ScriptValue* GetScriptMaximum(ScriptValue* ret, s32 count, ScriptValue* args, Sc
     return ret;
 }
 
+// The script's min built-in, GetScriptMaximum with the comparison reversed: the smallest of args[0]
+// and every element of the rest list, keeping the winner's own type.
 ScriptValue* GetScriptMinimum(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
@@ -2771,6 +2842,10 @@ ScriptValue* GetScriptClock(ScriptValue* ret, s32 count, ScriptValue* args, Scri
     return ret;
 }
 
+// The script's delayed-call built-in: makes an entry from the delay in args[0], the function in
+// args[1] and the remaining arguments (each as a quoted constant) and pushes it on the list the
+// current world keeps in its script scope under scopeVariableId (world.cpp reads that list back).
+// Gives back the empty value.
 ScriptValue* ScheduleScriptCall(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
@@ -2843,6 +2918,10 @@ ScriptValue* SetScriptObjectEventTimer(ScriptValue* ret, s32 count, ScriptValue*
     return ret;
 }
 
+// The shared body of the four object-property built-ins: reads the object (args[0]) and the
+// property key (args[1]) and calls AddObjectProperty (kind 0x63), SetExtraObjectProperty (0x64),
+// UpdateObjectProperty (0x65) or GetObjectProperty (0x66), with args[2] as the value for the first
+// three. The call's result is the built-in's result.
 ScriptValue* DispatchScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope, s32 kind)
 {
     ScriptValue q1;
@@ -2902,6 +2981,9 @@ ScriptValue* GetScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* a
     return ret;
 }
 
+// Turns count object pointers into a script list of tag 0x20 reference values, in order; a count of
+// 0 gives the empty list. The built-ins that search for objects use it to hand their results to the
+// script.
 ScriptValue* MakeScriptRefList(ScriptValue* ret, s32 count, void** values)
 {
     ScriptValue q;
@@ -3080,6 +3162,10 @@ ScriptValue* FindScriptObjectsInSphere(ScriptValue* ret, s32 count, ScriptValue*
     return ret;
 }
 
+// The shared search of the two ray-test built-ins: for each object in the list args[0], looks for
+// the nearest span hit of the segment from args[1] to args[2] (FindNearestSpanObject). With id 0x71
+// every hit is collected as a list of (object, vector, vector); with any other id it stops at the
+// first hit and gives (object, vector). No hit gives the empty list.
 RetValue SearchScriptObjectHits(s32 id, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     RetValue l0;
@@ -3293,6 +3379,10 @@ struct __attribute__((aligned(16))) ScriptSampleRotation {
 void* AllocateBackMemory(s32 size);
 void *CopyRotationMatrix(Quad16* destination, const Quad16* source);
 
+// The script's animation-sampling built-in: samples the animation args[0] (two float arguments,
+// then the objects args[3] and args[4], through SampleAnimationFrameChain) for n entries and gives
+// back a list with one list of n values per bit set in the mask args[6]: 1 positions, 2 rotation
+// matrices, 4 and 8 two more vectors. The buffers come from back memory, released on return.
 ScriptValue* SampleScriptAnimation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
@@ -3470,6 +3560,8 @@ ScriptValue* EvalScriptDefine(ScriptValue* ret, R11B008Node* expr, ScriptScope* 
 extern const char g_assertFailedMessage[];
 INCLUDE_RODATA(D_00249200);
 
+// The script's assert form: evaluates its condition and, when the value is zero, prints the failure
+// message (PrintFormatted). Either way it gives back the empty result (tag 0x22).
 ScriptValue* EvalScriptAssert(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q;
@@ -3494,6 +3586,9 @@ ScriptValue* EvalScriptAssert(ScriptValue* ret, R11B008Node* expr, ScriptScope* 
     return ret;
 }
 
+// The script's if form: evaluates the condition; if it is true (a bool value of 1) it evaluates and
+// gives back the then-branch, otherwise the else-branch, or the empty result (tag 0x22) when there
+// is no else.
 ScriptValue* EvalScriptIf(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q;
@@ -3524,6 +3619,8 @@ ScriptValue* EvalScriptIf(ScriptValue* ret, R11B008Node* expr, ScriptScope* scop
     return ret;
 }
 
+// The script's or form: evaluates the operands in order and gives back the first one that is not
+// boolean false, without evaluating the rest; false when none is.
 ScriptValue* EvalScriptOr(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue L;
@@ -3552,6 +3649,8 @@ done:
     return ret;
 }
 
+// The script's and form: starts from true and evaluates the operands in order, stopping at the
+// first boolean false (which it gives back); otherwise it gives back the last operand's value.
 RetValue EvalScriptAnd(R11B008Node* expr, ScriptScope* scope)
 {
     RetValue L;
@@ -3567,6 +3666,10 @@ RetValue EvalScriptAnd(R11B008Node* expr, ScriptScope* scope)
     return L;
 }
 
+// The script's cond form: each clause is a test followed by a body. It runs the body of the first
+// clause whose test is not boolean false (a clause headed by the else marker, node tag 10, always
+// matches) and gives back the body's last value, or the test's own value when the body is empty; no
+// clause gives the empty result.
 ScriptValue* EvalScriptCond(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q, r, t;
@@ -3608,6 +3711,10 @@ ScriptValue* EvalScriptCond(ScriptValue* ret, R11B008Node* expr, ScriptScope* sc
     return ret;
 }
 
+// The script's case form: evaluates the key, then walks the clauses, each a list of constants and a
+// body. The first clause that has a constant identical to the key (TestScriptValuesIdentical), or
+// the else clause (node tag 10), has its body evaluated and the last value is the result; no match
+// gives the empty result.
 ScriptValue* EvalScriptCase(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue a;
@@ -3678,6 +3785,10 @@ ScriptValue* EvalScriptCase(ScriptValue* ret, R11B008Node* expr, ScriptScope* sc
     return ret;
 }
 
+// The script's let form: when the first operand is a list of (name value) bindings, evaluates each
+// value in the outer scope and defines it in a new scope whose parent is the current one; otherwise
+// the body runs in the current scope. The remaining operands are evaluated in order and the last
+// value is the result.
 ScriptValue* EvalScriptLet(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q, r, u, t;
@@ -3721,6 +3832,8 @@ ScriptValue* EvalScriptLet(ScriptValue* ret, R11B008Node* expr, ScriptScope* sco
     return ret;
 }
 
+// The script's while form: evaluates the test and, for as long as it is not boolean false,
+// evaluates the body; gives back the empty result (tag 0x22).
 ScriptValue* EvalScriptWhile(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q, t;
@@ -3750,6 +3863,9 @@ ScriptValue* EvalScriptWhile(ScriptValue* ret, R11B008Node* expr, ScriptScope* s
     return ret;
 }
 
+// The script's lambda form: makes a function record (tag 0x1F) holding the defining scope, the
+// parameter list, the body and the parameter count; a parameter marker of node tag 0x13 ends the
+// fixed parameters and says the function takes the rest of the arguments as a list.
 ScriptValue* EvalScriptLambda(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue q;
@@ -3816,6 +3932,10 @@ ScriptValue* EvalScriptSequence(ScriptValue* ret, R11B008Node* expr, ScriptScope
     return ret;
 }
 
+// Evaluates a call: the operator is a built-in (tag 0x1D, an index into g_scriptBuiltins), a host
+// function (0x21) or a script function (0x1F). The fixed arguments are evaluated into an array and
+// extras are collected into a rest list. A built-in or host function is called directly; a script
+// function's body runs in a new scope under its defining scope.
 ScriptValue* EvalScriptCall(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     R11B008Node* node;
@@ -3937,6 +4057,9 @@ ScriptValue* EvalScriptCall(ScriptValue* ret, R11B008Node* expr, ScriptScope* sc
     return ret;
 }
 
+// The script's import form: takes the entry number written after the operator, finds that script
+// entry's scope in the current world (evaluating the entry first if it has not run yet) and adds it
+// as another parent of the current scope. Gives back the empty result.
 ScriptValue* EvalScriptImportScope(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue a;
@@ -3960,6 +4083,10 @@ ScriptValue* EvalScriptImportScope(ScriptValue* ret, R11B008Node* expr, ScriptSc
     return ret;
 }
 
+// The script evaluator: a constant (int, float, vector, bool, pointer, function, empty) evaluates
+// to itself, a variable node is looked up in the scope, and a list is dispatched on its head's node
+// tag to the form handlers (assign, define, assert, if, or, and, cond, case, let, while, sequence,
+// lambda, import; tag 17 quotes its operand). Any other list is a call.
 ScriptValue* EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope)
 {
     ScriptValue t;
@@ -4197,6 +4324,9 @@ void MarkPoolLiveEnds(MarkStacks* stacks)
     MarkPoolLiveEnd(&g_propertyRefPool);
 }
 
+// The mark phase of the script pool collector: pops entries off the object, record and chain mark
+// stacks until all are empty and marks (MarkPoolEntryUsed) everything they reach, pushing each
+// newly marked scope, value chain or function record on the matching stack so it is walked in turn.
 void DrainMarkStacks(MarkStacks* self)
 {
     MarkEntry* obj;
@@ -4300,6 +4430,10 @@ void DrainMarkStacks(MarkStacks* self)
     }
 }
 
+// The garbage collector of the script machine's pools: clears the live marks of the five pools,
+// marks and walks everything reachable from the registered roots, the root lists, and the queued
+// script event handlers of the current world (DrainMarkStacks), then releases every pool entry left
+// unmarked.
 void CollectScriptPools(MarkStacks* w) {
     ClearPoolLiveStates(&g_valueNodePool);
     ClearPoolLiveStates(&g_scopePool);

@@ -95,6 +95,10 @@ struct PlayerBlendItem {
 struct PlayerBlendCurve { u8 pad00[0x10]; void* f10; };
 
 
+// Builds the combined animation blend of the six items (a 3 by 2 grid, see
+// FillOuterProductTable): for each item it reads the animation's motion over its duration (a
+// velocity vector) and the midpoint of two key positions, builds the blend, clears the curve
+// fields of its entries and sets the item weights. Gives the blend in *out.
 void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAnimationView** out)
 {
     Vec02 a0;
@@ -178,6 +182,8 @@ void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out)
 ASM_FUNC(func_001D3A38);
 s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 
+// Casts the segment from one point to another against the colliders in its bounding box; gives 1
+// and the fraction of the way to the nearest hit in *ratio (1.0 when it hits nothing).
 s32 FindObjectAlongSegment(PlacedObject* self, Vec02* from, Vec02* to, f32* ratio)
 {
     Vec02 a;
@@ -197,6 +203,9 @@ s32 FindObjectAlongSegment(PlacedObject* self, Vec02* from, Vec02* to, f32* rati
 
 extern "C" f32 ConvertDoubleToFloat(u64 bits);
 
+// Fills a table of n by m floats, spaced by stride bytes, with the products of two sets of
+// weights (rows[i] * cols[j]) given as doubles, where the first of each set is one minus the sum
+// of the others. Gives 1 when any entry changed.
 s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     f32 rows[16];
     f32 cols[16];
@@ -243,6 +252,10 @@ struct BlendSpans { u8 pad0[8]; BlendSpan* a; u8 padC[8]; BlendSpan* b; };
 
 void InterpolateBlendEntryPosition(void* p, void* e, f32 a, f32 b, s32 i, s32 j, void* out);
 
+// Per-frame weights for the six-entry blend: works out two blend factors from where the player
+// stands against the entries' positions and whether the segments between them hit a collider
+// (FindObjectAlongSegment), turns them into the weights of a 3 by 2 grid (FillOuterProductTable)
+// and, when any weight changed, sets them and the player's heading velocity.
 void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView* g, void* a3)
 {
     f32 t;
@@ -353,6 +366,9 @@ void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecor
     SumBlendEntryVectors(6, (WeightedRow*)a1, (f32*)a2->pC0->p8, (Vec02*)&a0->f640);
 }
 
+// Builds the combined animation blend of the eight entries: for each it works out the entry's
+// velocity vector (from the animation's motion over its duration or from the key object) and then
+// sets the weights, with slot 6 starting at 1.0. Gives the blend in *gr.
 void CreateEightEntryBlend(TurningCollider* self, BlendSlot* slots, BlendAnimationView** gr)
 {
     Vec02 here;
@@ -429,6 +445,10 @@ static inline void SetSlotWeights(Player* self, BlendSlot* slots, s32 o, f32 sca
     }
 }
 
+// Sets the weights of the eight-entry blend (animations of the eight directions of the player's
+// heading velocity): picks the half (forward or back) from the sign of the velocity against the
+// first slot's direction, sets the weights for it, and sets the heading velocity to the blend of
+// the slots' vectors scaled by the animation's rate.
 void UpdateEightEntryBlendWeights(Player* self, BlendSlot* slots, BlendAnimationView* gr)
 {
     Vec02 acc;
@@ -521,6 +541,9 @@ void ResolvePlayerTableObjects(Player* self)
 
 void AddColliderForce(Collider* self, Vec02* force);
 
+// Per-frame forces of the request sub states: in 0x25, 0x26, 0x29 and 0x30 it cancels gravity and
+// steers the position toward rest (holding the height in 0x29 and 0x30 from the heading
+// velocity); always turns toward the heading matrix.
 void StepPlayerRequestState(Player* self)
 {
     Vec02 force;
@@ -566,6 +589,10 @@ struct Chooser;
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
+// Per-frame update of the request sub states: in 0x2B it turns the player away from its velocity
+// and calls the callback after 0.25 s on the ground; in 0x2C it waits for the animation's end and
+// then calls the callback or, if it touches a target of the right kinds, picks a target by cost
+// and moves to its state; otherwise it recomputes the arc to the target.
 void UpdatePlayerRequestSubState(Player* self) {
     switch (self->subState) {
     case 0x2B: {
@@ -638,6 +665,10 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 extern u32 g_buttonCodeFlags;
 extern f32 g_gameTime[];
 
+// The player's answer to an object's request (a message of kind 0 to 6): refuses when its own
+// check (slot 75) says no, or drops what it carries (state 6 mode 2); otherwise remembers the
+// message and by its kind enters sub state 0x25 to 0x31 of state 4 with a callback to continue.
+// Gives back whether it accepted (f2730) and sends event 0x17 when it did.
 s32 AcceptPlayerRequest(Player* self, Ev07* msg)
 {
     if (self->desc05()->m4B(self, msg->kind) != 0) {
@@ -767,6 +798,10 @@ s32 HasSpareCount(void);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
+// The callback after a kind 0 request has run: when the player touched a target of one of six
+// kinds in state 0x2C, it finishes the switched collider and goes to the state for the chosen
+// target; otherwise to state 0x24 (finishing the request) or 0x2D when no spare count is left;
+// plays a sound whose volume follows the vertical velocity.
 void ContinuePlayerRequestKind0(Player* self)
 {
     if (self->subState == 0x2C && self->touchedObject != 0 &&
@@ -837,6 +872,9 @@ void ContinuePlayerRequestKind1Or2(Player* self)
 struct PlayerWorld;
 extern u32 g_buttonCodeFlags;
 
+// Tells whether the player cannot take a request of kind n now: for kinds 3 and 5 by its state
+// and sub state (carrying or busy states block), for the others when it is in state 4 or 11,
+// pulsing, has the button flag or the pad select is held.
 s32 IsPlayerRequestBlocked(Player* self, s32 n)
 {
     s32 v;
@@ -1142,6 +1180,9 @@ void DrawPlayerMarkerRing1(DeferredRequest* request)
     DrawAngleSortedRing(&player->v140, 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
 }
 
+// Deferred draw callback of the second marker ring: draws the ring of seven points around the
+// player from the player's ring anchors with a fixed parameter set and the texture of animation
+// record 0x15D.
 void DrawPlayerMarkerRing2(DeferredRequest* request)
 {
     Player* player = (Player*)request->arg;
@@ -1159,6 +1200,8 @@ void DrawPlayerMarkerRing2(DeferredRequest* request)
     DrawAngleSortedRing(&player->v140, 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
 }
 
+// Deferred draw callback of the third marker ring: draws a ring of 17 points around the player
+// with the texture of animation record 0x15C, scaled to 60.
 void DrawPlayerMarkerRing3(DeferredRequest* request)
 {
     Player* player = (Player*)request->arg;

@@ -159,6 +159,10 @@ struct BlendAnimationView;
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode);
 s32 FindAnimRecord(s32 key);
 
+// Starts the world 5 mode collider: resolves its links, makes its follow objects and state
+// walker, builds the five-weight blend animation (rest, minus and plus x and y) with the rest
+// weight at 1, enters mode 2 and gives the spinning sprite element its icon (animation record
+// 0x36A).
 void StartWorld5ModeCollider(World5ModeCollider* self)
 {
     StartPlacedObject(self);
@@ -185,6 +189,9 @@ extern f32 D_00263C40[];
 
 void ComputeWorld5ModeColliderAnchors(World5ModeCollider* self, Vec02* a, Vec02* b);
 
+// Per-frame forces of the world 5 mode collider: in modes 0 and 1 the ordinary collider step; in
+// modes 2 and 3 it steers toward the anchor point (taken to the frame of its parent object), in
+// mode 4 toward its own current position, and always turns toward its target rotation.
 void StepWorld5ModeCollider(World5ModeCollider* self, f32 f)
 {
     Vec02 a;
@@ -239,6 +246,10 @@ static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
     return v;
 }
 
+// Per-frame update of the world 5 mode collider: when a release is pending it hands control back
+// to the player; fades out the pulse after 2 s; shows or hides the spinning sprite by whether
+// this is the active collider; and turns its motion relative to the parent into the weights of
+// its five-way blend animation.
 void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
 {
     Vec02 a;
@@ -528,6 +539,9 @@ extern Rgba4 D_002623E0;
 
 extern "C" f32 Cosine(f32 x);
 
+// Draw-time tint of the world 5 mode collider: sets its object-tree colour to the base colour
+// mixed toward a fixed colour by a pulse (a cosine of the time since the pulse started, faded by
+// a curve), then applies the placed object's transform.
 void ApplyWorld5ModeColliderTint(World5ModeCollider* self, void* s, void* out)
 {
     Rgba4 res;
@@ -608,6 +622,9 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode);
 
 extern f32 g_gameTime;
 
+// The collider's answer to a request message: refuses when its own check (slot 75) says no;
+// otherwise starts the pulse when a spare count is left, moves toward the anchor, enters mode 3
+// (with a spare count) or 4 (without), and sends event 0x17. Gives 1 when accepted.
 s32 AcceptWorld5ModeColliderRequest(World5ModeCollider* self, s32* arg)
 {
     u8 bufA[16];
@@ -666,6 +683,9 @@ s32 HasWorld5ModeColliderAcceptedRequest(World5ModeCollider* self)
 }
 
 
+// Changes the collider's mode (1 to 4) and starts the animation of the new mode (mode 2 the five-
+// way blend); mode 2 resets and shows the spinning sprite, modes 3 and 4 hold the pulse, and mode
+// 4 also sets its follow objects.
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
 {
     s32 old = self->mode;
@@ -725,6 +745,8 @@ void InitWorld5Boss(World5Boss* self)
 void SetWorld5BossMode(World5Boss* self, s32 a1);
 s32 PlayWorld5BossLoop(World5Boss* self, s32 a1);
 
+// Starts the world 5 boss: resolves its links, builds its three combined blend animations (mode
+// 0, mode 1 and a loop) each at weight 1, enters mode 0 and starts the loop animation.
 void StartWorld5Boss(World5Boss* self)
 {
     StartPlacedObject(self);
@@ -860,6 +882,9 @@ s32 HandleWorld5BossEvent(World5Boss* self, ObjectEvent* msg)
 extern f32 g_gameTime;
 
 
+// Changes the boss's mode (0 to 3) and starts the animation of the mode: modes 0 and 1 reset and
+// show the gauge bar and make the boss the world's active follower, modes 2 and 3 hide the gauge
+// and release the follower.
 void SetWorld5BossMode(World5Boss* self, s32 mode)
 {
     void* x;
@@ -982,6 +1007,10 @@ void UpdateWorld5CountdownVisibility(World5Countdown* self)
 extern s32 g_world5CountdownRequest;
 
 
+// Object event handler of the world 5 countdown object: on an event with flag 0x20 it decrements
+// the countdown and the gauge, sets the world's request to 2 when it reaches 0, otherwise picks
+// one of three animations by the event's extra flags and the player's aim mode, plays it and
+// sends script event 2; then handles the event as an object.
 s32 HandleWorld5CountdownObjectEvent(World5Countdown* self, ObjectEvent* msg)
 {
     void* p;

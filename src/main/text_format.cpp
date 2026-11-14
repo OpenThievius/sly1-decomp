@@ -313,6 +313,10 @@ s32 ParseSignedDecimal(s8* s, s32* out)
     return count;
 }
 
+// Parses the format conversion starting at the '%' into spec and returns how many characters it
+// used. A small state machine reads the flags (- + space # 0), width and precision (a number or *
+// from the arguments), the length modifier (including vector and matrix counts) and the conversion
+// letter, whose upper case sets the upper flag.
 s32 ParseFormatSpec(s8* at, FormatSpec* spec, s32** va)
 {
     s32 state = 0;
@@ -479,6 +483,8 @@ s32 ParseFormatSpec(s8* at, FormatSpec* spec, s32** va)
 }
 
 
+// Writes a %s argument: "(null)" for a null pointer, truncated to the precision, padded to the
+// width on the left (zeros if the zero flag is set) or on the right.
 void FormatStringArg(FormatSpec* self, PaddedOutput* ctx, const char* str) {
     s32 n;
     s32 right;
@@ -511,6 +517,9 @@ void FormatStringArg(FormatSpec* self, PaddedOutput* ctx, const char* str) {
 }
 
 
+// Prepares an integer argument for printing as an unsigned number: for the short length it
+// zero-extends the low 16 bits, and for d and i of the three lengths (16, 32, 64 bits) it negates a
+// negative value in place. Gives 1 if it was negative.
 s32 ExtractIntegerSign(FormatSpec* self, void* dst)
 {
     s32 ret = 0;
@@ -586,6 +595,9 @@ s32 WriteIntegerDigits(u8* buf, s32 len, u64 value, u32 radixArg)
 }
 
 
+// Writes one integer conversion into the sink, honouring the spec: sign (d, i), the alternate
+// prefix (0b, 0, 0x), precision as minimum digits, width with left, zero or space padding, upper
+// case, and the case of a zero value with an explicit precision of zero printing nothing.
 void FormatIntegerArg(FormatSpec* self, OutputBuffer* sink, u64 value)
 {
     char buf[0x50];
@@ -723,6 +735,10 @@ s8 GetDecimalDigit(RegDouble* self0, s32 a, s32 b)
 }
 
 
+// Writes the digits of a float conversion (e, f or g, per spec) into buf, rounding by adding half a
+// unit of the last digit, and returns the length. Gives "(nan)" or "(inf)" for those values. For g
+// it picks exponent form when the exponent is below -4 or at least the precision and strips
+// trailing zeros.
 s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
 {
     DoubleBits bits;
@@ -791,6 +807,9 @@ s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
 }
 
 
+// Writes one floating-point conversion into the sink: default precision 6 (1 for g without one),
+// the sign (- + or space), the digits from FormatFloatDigits, then padding to the width with spaces
+// or zeros, or to the right when left-aligned.
 void FormatFloatArg(FormatSpec* spec, OutputBuffer* ctx, double value)
 {
     char buf[0x1C0];
@@ -850,6 +869,10 @@ void FormatFloatArg(FormatSpec* spec, OutputBuffer* ctx, double value)
 }
 
 
+// Writes one parsed conversion of a printf-style format: %% and %c directly, %s via
+// FormatStringArg, %p as hex with precision 8, b d i o u x via FormatIntegerArg, e f g via
+// FormatFloatArg (vectors and matrices as braces, one row per line, where vectorCount is set), %n
+// stores the count, an unknown conversion is copied as text. Arguments are 8-byte slots.
 void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len) {
     u64 v;
     switch (sp->conv) {
@@ -936,6 +959,9 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
 }
 
 
+// The core of the formatted output: copies the plain text between conversions to the sink and
+// handles each '%' conversion with ParseFormatSpec and FormatConversionArg, stopping if the sink
+// fills; then flushes the sink and gives back the character count.
 s32 FormatToOutputBuffer(OutputBuffer* ctx, const char* fmt, void* a2)
 {
     FormatFrame loc;

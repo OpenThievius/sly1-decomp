@@ -91,6 +91,10 @@ int CompareEntriesByValueDescending(DeferredRequest** a, DeferredRequest** b)
     return ((s32)left - (s32)right) >> 7;
 }
 
+// Sorts the frame's deferred draw requests by their group (0 to 17) into out: each non-empty
+// group begins with that group's marker (when it has a handler) followed by its requests in
+// order, and groups 4, 8, 13 and 1 are then heap sorted by value, descending. Gives the total
+// count.
 s32 BucketDeferredRequests(s32 n, DeferredRequest* items, void** out)
 {
     s32 start[18];
@@ -139,6 +143,8 @@ s32 BucketDeferredRequests(s32 n, DeferredRequest* items, void** out)
     return cnt[17];
 }
 
+// Per-frame walk of the world's three lists: calls the draw hook of each object in the first two
+// (resetting the deferred request cursor first) and updates each colour fade of the third.
 void RunWorldFrameLists(World* self, void* arg)
 {
     ListFrame f1;
@@ -284,6 +290,9 @@ void PrepareAlternateBlockGroup(void)
     AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00215C60, D_00217348);
 }
 
+// Prepares the last draw group: sends the group's microprogram and projection constants, the mask
+// image upload when there is one, and the camera matrices with the zoom temporarily set to 1.0
+// (restored afterwards).
 void PrepareUnzoomedGroup(void)
 {
     PacketWriter* self = &g_vifPacketWriter;
@@ -337,6 +346,8 @@ void SubmitDeferredRequests(World* world, void* camera)
     *(DeferredRequest**)g_nextDeferredRequest = 0;
 }
 
+// Writes a flat-coloured rectangle sprite from (x0, y0) to (x1, y1) in screen coordinates and an
+// RGBA colour to the GS packet, alpha-blended unless the alpha is 255.
 void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p)
 {
     u32 col;
@@ -349,6 +360,9 @@ void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 
     AddGifXyzfEntry(p, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
 }
 
+// Sets up the draw groups: reserves a packet for the projection constants, gives each of the 18
+// group markers the function that prepares that group (basic, flushed, without camera, standard,
+// alternate block or unzoomed), and clears their words to -1.
 void InitGroupMarkers(void)
 {
     PacketWriter buf;

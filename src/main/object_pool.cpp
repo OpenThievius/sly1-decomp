@@ -433,6 +433,9 @@ void SpawnObjectPoolCopies(ObjectPool* self);
 
 
 
+// Sets an object pool's defaults: the four ids to -1, its records cleared (the placement and the
+// release record, with identity rotation), a 20000 range and 5.0 in field D8, and queues
+// SpawnObjectPoolCopies.
 void InitObjectPool(ObjectPool* self)
 {
     InitObject(self);
@@ -488,6 +491,9 @@ void AddObjectPoolEntry(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4)
     e->flags = ((((e->flags & -2) | (a3 & 1)) & -3) | ((a4 & 1) << 1));
 }
 
+// Set-up of the pool's objects, queued by InitObjectPool: for each entry finds the original
+// object by id and creates copies of it up to the entry's count (fewer when a lent-out sub pool
+// already holds some), starting each one and recording them in the entry's list.
 void SpawnObjectPoolCopies(ObjectPool* self)
 {
     s32 i;
@@ -578,6 +584,8 @@ void CopyObjectPool(ObjectPool* self, ObjectPool* other)
     }
 }
 
+// Starts a pool and, the first time, finds the objects its four ids name and files each by its
+// kind (0x7E, 0x73, 2 or 0x75) in the matching field.
 void StartObjectPool(ObjectPool* self)
 {
     StartObject(self);
@@ -668,6 +676,8 @@ void SetObjectPoolEntryCount(ObjectPool* table, s32 key, s32 value)
 
 s32 IsObjectInPool(ObjectPool* list, BaseObject* query) { for(s32 i=0;i<list->count;i++){ ObjectPoolEntry* row=&list->items[i]; if(row->count<=0) continue; void** items=row->objects; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->count;j++) if(query==items[j]) return 1; } return 0; }
 
+// Tells whether an object can be released: not already chosen by another pool of the same sub
+// pool, not attached anywhere, and, for kinds 0x3B and 0x20, in their right state.
 s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key)
 {
     Sub8C* group = self->sub;
@@ -715,6 +725,8 @@ s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key)
     return 1;
 }
 
+// Moves lastItemIndex to the next entry (cyclically) that is enabled (flag 2) and has a free
+// object; leaves it unchanged when there is none.
 void AdvanceObjectPoolEntry(ObjectPool* self)
 {
     s32 i;
@@ -747,6 +759,9 @@ found:
     }
 }
 
+// Picks the next item to release: moves on to the next entry that has a free object when needed
+// (AdvanceObjectPoolEntry), and takes the first free object of the entry, removing it from the
+// entry's list unless the entry's flag 1 keeps it; the choice is stored in chosenItem.
 void ChooseObjectPoolItem(ObjectPool* self)
 {
     s32 s5 = 0;
@@ -892,6 +907,10 @@ static inline u128 NormalizeVectorOr(Vec02& v, const Vec02& fallback)
     return len;
 }
 
+// Releases the pool's chosen object (choosing one first if none is): places it at the release
+// point and gives it a velocity and spin, either a mover's or aimed at the release target (a
+// heading, a ballistic arc or a set speed). Also sets its lifetime, aims agents, and sends script
+// event 0xD. Gives 1, or 0 when there is nothing to release.
 s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
 {
     PoolView_1A8C90* self = (PoolView_1A8C90*)pool;
@@ -1063,6 +1082,9 @@ void ClearObjectPoolHeadingRecord(u8* self)
     FillMemory(self + 0x150, 0, 0x18);
 }
 
+// Gives the release point of a placement record in a1 (position) and a2 (rotation): from its
+// position object, its frame object, its placed object, or its own position and rotation;
+// converted into the frame a3 when given.
 void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* a3)
 {
     if (self->positionObject != 0) {
@@ -1113,6 +1135,9 @@ struct FrameFollower {
 // Left in this order: retail's call here evaluates the time before the pointers.
 void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 
+// Gives in *out the point a frame follower aims at, in the frame `to` (or the world): the point's
+// local position in its frame object (or its anchor's), in mode 0 as it is now, in modes 1 and 2
+// as the frame will be a time ahead (a clamped quadratic of the distance to the target).
 void ComputeFrameFollowerPoint(FrameFollower* self, Vec02* target, Vec02* out, void* to)
 {
     Vec02 here;
@@ -1258,6 +1283,9 @@ extern Player* g_player;
 extern const Vec02 g_unitXVector;
 
 
+// Object event handler of the world 4 boss: on an event with flag 0x20 it counts the hit, lowers
+// the gauge, sends a message to its attached object and starts one of three animations (chosen by
+// the event's extra flags and the player's aim mode); then handles the event as an agent.
 s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
 {
     if (self->fC14 != 0 && (ev->eventFlags & 0x20) != 0) {
@@ -1295,6 +1323,9 @@ void SetWorld4BossValues(World4Boss* self, Animation* a, Animation* b, Animation
     self->fC1C = c;
 }
 
+// Sets the method table of each screen element global (captions, gauges, timer, prompts, menus,
+// letterbox, glyph elements), calls slot 0 of each of the 0x25 elements with its index and resets
+// the screen fade.
 void InstallScreenElements()
 {
     g_reserveCountCaption.vt = (const T217D_Vt*)D_00217E30;

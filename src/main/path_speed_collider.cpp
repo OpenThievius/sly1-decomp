@@ -89,6 +89,10 @@ void StartC24Object(C24* self)
 }
 
 
+// Per-frame update of the path-speed object: advances its level by levelRate (kept between 0 and
+// levelLimit), and when it reaches the limit (or the player is near the end, in state key 0x36F)
+// sends the player a message, notifies its member, calls slot 3 on itself and sends script event
+// 2; near the end it moves its state walker to key 0x36F.
 void UpdateC24Object(C24* self, f32 dt)
 {
     SwitchedCollider* target;
@@ -157,6 +161,9 @@ struct ScopedListFrame {
     ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
+// Moves the path-speed object to the point and velocity its curve table gives for the current
+// level, turns it toward the velocity (with the acceleration relative to gravity as its up hint)
+// through a rotation ramp, steps its children, and calls slot 18 unless a1 is set.
 void MoveC24Object(C24* self, s32 a1, f32 dt)
 {
     if (self->curveTable != 0) {
@@ -218,6 +225,10 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 bytes);
 
+// Builds the speed table for travelling a path curve in a set time: at each curve node the speed
+// is limited by the curve's sharpness (from points half a unit either side) and by a ramp toward
+// the end; the times to each node are accumulated and the table is rescaled so the whole path
+// takes the level range 0 to the given speed (levelLimit). Restarts the level at 0.
 void BuildPathSpeedProfile(C24* self, PathCurveObject* path, f32 speed)
 {
     Vec02 p0;

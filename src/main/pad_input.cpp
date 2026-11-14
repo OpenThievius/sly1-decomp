@@ -152,6 +152,10 @@ extern "C" s32 GetPadRequestMode(s32 port, s32 slot);
 s32 PollPadInput(PadRecord* self);
 void SetPadConnectionState(PadRecord* self, s32 mode, s32 n);
 
+// Runs the pad's connection state machine each frame (mode and step; nothing in mode 0). Modes 1
+// and 2 negotiate the controller (reply list, request the full mode, send the six-byte request and
+// the full mask); mode 3 is connected and polls the input (and the vibration pattern from step 3).
+// It falls back to mode 1 when the slot stops answering or a step takes two seconds.
 void UpdatePadConnection(PadRecord* self)
 {
     u8 buf[16];
@@ -301,6 +305,9 @@ void UpdatePadConnection(PadRecord* self)
 }
 
 
+// Moves the pad's connection to mode and step n and stamps the time; does nothing if neither
+// changed. Step 0 forces mode 1 and clears the device type; reaching step 3 asks for the vibration
+// pattern; mode 3 resets the stick state and the stick ranges to -0.75..0.75.
 void SetPadConnectionState(PadRecord* self, s32 mode, s32 n)
 {
     s32 next = mode;
@@ -404,6 +411,10 @@ extern "C" s32 ReadPadFrame(s32 port, s32 slot, u8* data);
 void CopyMemory(void* dst, void* src, u32 size);
 void AdvanceButtonCodes(PadRecord* p, s32 old);
 
+// Reads one frame of the pad into the record: buttons (inverted, with newly pressed and released
+// sets), device type (0 returned if it changed), pressure bytes at step 4 and both sticks (from
+// step 2). Unless the camera uses its own controller, a held d-pad overrides the left stick
+// (diagonals 0.8). Updates button codes and times. Gives 0 when no read worked for 2 s.
 s32 PollPadInput(PadRecord* self)
 {
     u8 buf[0x40];
@@ -486,6 +497,10 @@ void ResetPadStepRepeat(PadRecord* p) { p->stepX = 0; p->stepY = 0; }
 
 extern f32 g_elapsedTime[];
 
+// Gives -1, 0 or 1: a left or right step from the d-pad or the stick, with auto-repeat. The first
+// press steps at once; while it is held the next step comes after a delay that starts at 1/3 s and
+// shrinks by a third each repeat down to 0.1 s. The stick must be at full range (0.8) to start and
+// 0.25 to repeat, and mostly horizontal.
 s32 GetPadHorizontalStep(PadRecord* self)
 {
     f32 c;
@@ -566,6 +581,8 @@ done:
 
 void ClearPadPressedBits(PadRecord* self, u32 mask);
 
+// Gives -1, 0 or 1: an up or down step from the d-pad or the stick, with the same auto-repeat as
+// GetPadHorizontalStep (1/3 s first, shrinking to 0.1 s). Up is -1.
 s32 GetPadVerticalStep(PadRecord* self)
 {
     f32 c;
@@ -729,6 +746,9 @@ struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
+// Once the button-code timer has expired, drops the codes marked for removal and, among the codes
+// that have been completely entered, takes the longest one, plays sound 0x79 and calls its
+// function; then it resets all the codes and the timer.
 void RunCompletedButtonCode(void)
 {
     if (g_buttonCodeTimer.time == 0.0f) {
@@ -790,6 +810,9 @@ LINKER_REMNANT(func_0016F470);
 extern const char g_scrambledPassword[24];
 
 
+// If the save is at level 4, entry 0 with the completion mask having bits 1 and 2, pickupCount 99
+// and reserveCount 0, decodes a short scrambled string (xor 0x23 per byte), formats it into the
+// message and shows it on the button hint element for 10 seconds.
 void ShowPasswordMessage(void)
 {
     char text[0x40];

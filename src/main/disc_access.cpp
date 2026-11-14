@@ -50,6 +50,10 @@ s32 GetKeyIdSecond(KeyId* key)
     return key->second;
 }
 
+// Rewrites a disc path in place into the 8.3 form the disc's file system wants: upper case, ";1"
+// appended unless it ends in a separator, components cut to 8 characters and extensions to 3,
+// characters outside A-Z and 0-9 replaced by '_' and the separators replaced by zeros. Gives the
+// number of components.
 s32 NormalizeDiscPath(s8* path)
 {
     UppercaseString((char*)path);
@@ -138,6 +142,10 @@ void SendDiscCommand22WhenReady(void)
 
 void InitDiscAccessModule(void) {}
 
+// A small state machine that checks the disc is still the right one: state 3 waits for a disc
+// change and then pauses the game on a message page, state 1 waits for the drive to be ready and
+// starts reading a fixed sector, and state 2 compares the CRC-32 of that sector with the expected
+// value (a mismatch goes back to state 1, a match clears the message and returns to state 3).
 void StepDiscSectorCheck(void)
 {
     s32 tmp[1];

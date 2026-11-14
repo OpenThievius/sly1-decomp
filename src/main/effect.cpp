@@ -580,6 +580,9 @@ void ReleaseEffectOwner(EffectOwner* self)
     UnregisterCollider(self);
 }
 
+// Moves every effect of the owner that has started (method 3 with the frame time) and rebuilds the
+// owner's bounds: the box of every effect's current and previous point, grown by boundsMargin, with
+// the radius taken from the box's centre to its far corner.
 void MoveEffectsAndBounds(EffectOwner* self, f32 dt)
 {
     ListWalk walk(&self->list558);
@@ -613,6 +616,9 @@ void MoveEffectsAndBounds(EffectOwner* self, f32 dt)
 
 void KeepEffectOwnerBounds(void) {}
 
+// The effect owner's per-frame update: runs method 4 on each effect that has started (holding it so
+// it may end itself), then collides the effects, or calls the owner's own method 3 instead when it
+// is flagged or has no effects left.
 void UpdateEffectOwner(EffectOwner* self, f32 t)
 {
     ListFrame it;
@@ -637,6 +643,10 @@ void UpdateEffectOwner(EffectOwner* self, f32 t)
     g_activeListFrames = it.prev;
 }
 
+// Tests the owner's effects against the colliders it is in contact with: for each part of a
+// contacted object (not the ones flagged to be skipped) it sweeps every started effect from its
+// previous point to its current one through the part's tree, and gives each hit (up to four) to the
+// effect's contact method until one accepts. Only for an owner with exclusive set to 1.
 void CollideEffects(EffectOwner* self)
 {
     if (self->exclusive != 1) return;
@@ -718,6 +728,8 @@ void DrawEffects(EffectOwner* self, void* arg, void* arg2)
     g_activeListFrames = fr.prev;
 }
 
+// Gives the table of methods of an effect kind: kinds 0 and 2 to 27 (there is no kind 1) map to the
+// tables of g_*EffectMethods in the class descriptors; any other number gives null.
 const Vt219C* GetEffectKindTable(u32 n)
 {
     switch (n) {
@@ -998,6 +1010,10 @@ struct EffectDraw {
     f32 scale;              // 0x44: 1.0
 };
 
+// Draws an effect as its object (p20) at pos with the rotation rot: the scale and the alpha are two
+// quadratics of the fraction of life gone, it is culled against the camera planes and its distance
+// fade, and the object is drawn with that transform (and a second time at the xy scale when it has
+// one). Gives 0 when the effect is over or out of range, else 1.
 s32 DrawEffectAt(Effect* self, Camera* cam, Vec02* pos, f32 (*rot)[4])
 {
     PlacedObject* o = (PlacedObject*)self->p20;
@@ -1119,6 +1135,9 @@ void InitRisingEffect(Effect* self, void* pos, f32 scale, s32 flags)
 // evaluates its float arguments there, and only their place in the list decides that.
 void ComputeSinCos(f32 angle, f32* sinOut, f32* cosOut);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
+// The move of a drifting effect: the plain effect move, then, in 3 of 10 frames when it has a
+// velocity, a sideways push in a random direction across that velocity, at a random speed of 100 to
+// 400 units/s scaled down by the roll.
 void MoveDriftingEffect(Effect* self, f32 dt)
 {
     MoveEffect(self, dt);
@@ -1209,6 +1228,8 @@ void UpdateDroppingEffect(Effect* self, f32 dt)
 }
 
 
+// Draws a dropping effect, and a beam from its previous point to its current one when it has moved
+// more than 10 units since the last frame, with the width taken from its alpha curve.
 void DrawDroppingEffect(Effect* self, void* a1)
 {
     DrawEffect(self, a1);
@@ -1238,6 +1259,9 @@ void InitStreakEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->f120 = 0.05f;
 }
 
+// Draws a streak: a beam from the point a short way back along the velocity (the age or f120,
+// whichever is smaller) to the current point, its width and alpha two quadratics of the fraction of
+// life gone. The effect is removed when either reaches zero.
 void DrawStreakEffect(Effect* self, void* a1)
 {
     Vec02 pos;
@@ -1298,6 +1322,10 @@ void DetachTrailSegment(Effect* self)
 }
 
 
+// Sets what the far end of a trail segment follows: kind 0 a fixed point (its previous point), 1
+// another effect, 2 a placed object, 3 a following segment. It releases the old anchor's end
+// callback, copies the new anchor's position and velocity and has the new anchor call
+// OnTrailAnchorEnded when it ends.
 void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
 {
     Effect* self = (Effect*)selfv;
@@ -1352,6 +1380,10 @@ void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
     }
 }
 
+// Called when a trail segment's anchor ends: makes a new trail segment (kind 10) at its position
+// that takes over the old anchor and the segment's width, scaled to the anchor's width curve now,
+// and anchors this segment to the new one (kind 3). When no effect can be made it fixes its end at
+// its last point instead.
 void SplitTrailSegment(Effect* self)
 {
     Effect* d = CreateEffect(10, 0);
@@ -1425,6 +1457,10 @@ void MoveTrailSegment(Effect* self, f32 dt)
 
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
 
+// Draws a trail segment as a beam from its point to its anchor's point (another effect, an object's
+// position or its fixed point), with width 100 times the first quadratic of the fraction of life
+// gone and the second as alpha, after the camera culling and distance fade. It is removed when
+// either value has faded, or when it has no object.
 void DrawTrailSegment(Effect* self, Camera* cam)
 {
     Vec02 r;
@@ -1673,6 +1709,10 @@ void MoveEmitterEffect(Effect* self, f32 dt)
 }
 
 
+// The update of an emitter effect: turns its orientation about the vertical at its turn rate and,
+// when its first axis crosses the camera's view direction (and it is over half a second old), makes
+// a camera-space flash effect (kind 0x10, 0.25 s) at its turned position and counts down, removing
+// itself when the count is 0.
 void UpdateEmitterEffect(Effect* self, f32 dt)
 {
     Mat02 axisRot;
@@ -1738,6 +1778,9 @@ void KeepPhasedEffectStill(Effect* self)
 {
 }
 
+// Advances the effect's cycling phase (f124, wrapping at 1) at a rate taken from the speed curve of
+// its phase (0 fading in, 1 steady, 2 fading out), and moves to the next phase (SetEffectPhase)
+// when its life fraction passes 1; the end of phase 2 removes the effect.
 void AdvanceEffectPhases(Effect* c, f32 dt)
 {
     f32 t = (g_gameTime - c->start) / c->life;
@@ -1915,6 +1958,9 @@ void DrawPhasedEffect(Effect* self, Camera* cam)
     }
 }
 
+// Switches the effect to phase 0 (fade in, 0.25 s), 1 (steady, no end) or 2 (fade out, 0.5 s) with
+// its alpha curve, and moves its start time back so that a fade picks up where the other one
+// stopped (a fade in or out right after another continues from the same alpha).
 void SetEffectPhase(Effect* self, s32 mode)
 {
     f32 t;
@@ -2004,6 +2050,9 @@ s32 ComputeHullSeenFromCamera(Vec02* pos, s32 n, HullPoint* pts)
 
 void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
 
+// Gives the convex hull of n points projected by the matrix m (perspective divide by z): finds the
+// lowest point of the projection and puts it first, sorts the others by the angle around it and
+// keeps the left turns (a Graham scan), in the same array. Gives the number of points on the hull.
 s32 ComputeProjectedHull(void* m, s32 n, HullPoint* pts)
 {
     HullPoint tmp;
@@ -2073,6 +2122,10 @@ void DrawProjectileEffect(Effect* self, void* a1)
 }
 
 
+// Makes a hit-mark effect (kind 0x14) of a random size at a point on another object where the
+// effect hit, turned to lie on the surface normal with a random roll, and tied to that object.
+// Gives it through *out (null if target is 0 or no effect could be made). On steep surfaces it also
+// gets a small downward drift.
 void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Vec02* normal, Effect** out)
 {
     Effect* e = 0;
@@ -2299,6 +2352,10 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 extern const Vec02 g_unitZVector;
 
+// Aims an effect along its direction: works out how far it can travel from the peak of the
+// source's curve and sweeps that segment against the candidate colliders; if something is hit the
+// speed is cut to the distance of the hit. The speed times the curve becomes the effect's scale
+// (q30), its orientation is built from the direction and the direction is cleared.
 void AimEffectAtNearestObject(Effect* self, Rec50* src)
 {
     f32* poly = (f32*)((u8*)src + 0x1C0);
@@ -2371,6 +2428,10 @@ void DrawStreakedEffect(Effect* self, void* a1)
 
 s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
+// The contact method of a streaked effect: when it checks (i124) it first runs a node query of kind
+// 0x10 and removes itself if a node takes it. If it bounces (i120) it moves to the hit point and
+// reflects its velocity (the part along the hit direction scaled by -0.85 to -0.95, the others
+// given up to 400 of random spread); otherwise it is removed. Always gives 1.
 s32 HandleStreakedEffectImpact(Effect* self, void* hold, Vec02* where, Vec02* dir)
 {
     if (self->i124 != 0) {
@@ -2402,6 +2463,9 @@ remove:
     return 1;
 }
 
+// Sets up an effect's spin: scales its life by a random factor, copies three floats of the source
+// record (+0x1F0) and gives it a random spin on each axis of up to 10 times the spin-speed curve of
+// its velocity's length.
 void RandomizeEffectSpin(Effect* self, Rec50* src)
 {
     self->life *= RandomFloatInRange(g_spinLifeScaleRange[0], g_spinLifeScaleRange[1]);

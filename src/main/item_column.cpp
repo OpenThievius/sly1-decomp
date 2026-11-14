@@ -123,6 +123,10 @@ void ClearItemColumn(T217D_720* self)
     self->vt->m16(self, 0);
 }
 
+// Sets the text of item index in a column of screen items (underscores become spaces), resizes the
+// column to the widest item and a line's height times the number of items and, with a hold time,
+// shows the item for that time less its own slide-in and slide-out time (at least one frame, 1/60
+// s).
 void PostItemColumnEntry(T217D_720* self, s32 index, char* text, f32 hold)
 {
     T217D_330* item = &self->items[index];

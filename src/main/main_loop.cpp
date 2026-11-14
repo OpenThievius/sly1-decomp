@@ -466,6 +466,10 @@ void GetAimRotation(T2195_790* self, f32 dt, Mat02* rot, Vec02* vec)
     BuildYawPitchMatrix(angles[0], angles[1], rot);
 }
 
+// The game's top-level loop; never returns. After the constructors and startup initialisers, each
+// frame it plays queued movies, runs a pending world load, updates pad, memory card and element
+// stack and, while a world exists, advances the clock, updates the camera, runs the world's frame
+// lists and deferred requests, draws the screen elements and submits the frame.
 void RunMainLoop(s32 a, s32 b)
 {
     RunConstructorsOnce();
@@ -506,6 +510,10 @@ void RunMainLoop(s32 a, s32 b)
     }
 }
 
+// Boot-time IOP setup: builds the path of the IOP image ("ioprp243.img"), initialises the remote
+// calls and the disc library (hanging forever if the disc is not ready), resets the IOP with that
+// image and waits for it, initialises them again, then loads the six IOP modules named in
+// g_iopModuleNames, retrying each until it loads.
 void LoadIopModules()
 {
     u8 buf[0x100];
@@ -561,6 +569,9 @@ void SendVif1StartupPacket()
     (*(DmaChannelFlags**)g_vif1Channel)->flags &= ~0x40;
 }
 
+// Runs the table of 0x1D startup initialisers in order behind a load-progress display (colours set
+// in its frame): from the fourth one on, the progress bar is updated before each call with a count
+// that falls from 0x1A, then it is set to 0 and ended. Holds screen owner 1 while it runs.
 void RunStartupInitializers(void)
 {
     ProgressFrame fr;

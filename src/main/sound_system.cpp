@@ -300,6 +300,10 @@ void UnloadStagedBank(void)
     g_stagedBankVoice = 0;
 }
 
+// Makes sound bank n the loaded one and gives its handle: bank 0 stays loaded; for another bank the
+// staged bank and the previous one are unloaded first, then the bank is read from its disc location
+// (named by its key record), and the first time that works the availability of every sound entry of
+// the bank is recorded.
 s32 EnsureSoundBankLoaded(s32 n)
 {
     KeyId l;
@@ -389,6 +393,9 @@ void ClearStreamVoicePending(s32 reply, s64 arg)
 
 s32 IsStreamVoiceLocked(void) { return g_streamVoiceLocked; }
 
+// Starts the streamed voice of a key record and locks it: stops any current stream voice, starts
+// the stream, remembers it as g_streamVoice with its lock set and lowers channel 8's volume factors
+// to one half. Does nothing when the voice is already locked or the key is empty.
 void StartLockedStreamVoice(KeyRecord* self)
 {
     if (g_streamVoiceLocked != 0) {
@@ -428,6 +435,9 @@ void StopLockedStreamVoice(void)
     StopStreamVoice();
 }
 
+// Opens the streamed voice of a key record: unless one is locked, stops the current stream voice
+// and starts the record's stream, marking it pending until the stream reports its start
+// (ClearStreamVoicePending). Does nothing for an empty key.
 void OpenKeyRecord(KeyRecord* self)
 {
     if (g_streamVoiceLocked != 0) {
@@ -558,6 +568,10 @@ void StoreStagedBankHandle(s32 h, s64 arg)
     }
 }
 
+// Asks for the staged sound bank of a key record to be loaded in the background (nothing when it is
+// already staged): waits for pending IOP commands, unloads the old staged bank and starts the load
+// of the new one, with StoreStagedBankHandle taking the handle. A null record stops the staged
+// bank's voice.
 void RequestStagedBank(KeyRecord* self)
 {
     KeyId local;
@@ -773,6 +787,9 @@ LINKER_REMNANT(func_001BF1E8);
 
 s32 IsSoundEmitterUpdateDisabled(void) { return g_soundEmitterUpdateDisabled; }
 
+// The volume and pan of a positional sound at distance r: full base volume a up to the near range
+// c, fading linearly to 0 at the far range b with the pan following the direction to the camera's
+// side (0.7 at most), and 0 beyond b. Without a position it is the base volume with no pan.
 void ComputeSoundVolumeAndPan(f32 r, void* pos, f32* volume, f32* pan, f32 a, f32 b, f32 c)
 {
     if (pos != 0) {
@@ -828,6 +845,9 @@ void* GetSoundListenerPosition(void)
 }
 
 
+// Sets the pitch offset of a playing sound for the Doppler shift: from the speed of the source
+// relative to the listener (the active switched collider) along the line between them, scaled by
+// the sound's Doppler scale; 0 without a source object or listener, or with a scale near 0.
 void ComputeSoundRecordDoppler(PlayingSound* self)
 {
     PlacedObject* source = (PlacedObject*)self->object;
@@ -921,6 +941,9 @@ void StopSoundRecord(PlayingSound* self, s32 n)
     }
 }
 
+// Sets the pitch of a sound record's voice: the sound's own base pitch plus the pitch (1524 units
+// per octave step) and the Doppler offset, clamped to the 16-bit range. It does nothing when the
+// pitch is unchanged and no Doppler effect applies.
 void SetSoundRecordPitch(PlayingSound* p, f32 a)
 {
     if (p == 0) {
@@ -955,6 +978,10 @@ void SetSoundRecordVolume(PlayingSound* self, f32 a)
     }
 }
 
+// Fills a playing-sound record (the link kept): its owner slot, the object it follows or position,
+// far and near range, base volume, pitch and Doppler scale, a serial number, a random poll tick,
+// the optional repeat interval and range (-1 when none), and whether it is positional; then its
+// first volume, pan and Doppler offset.
 void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, BaseObject* object, Quad16* position, f32 farRange, f32 nearRange, f32 baseVolume, f32 pitch, f32 f16, U64P* interval, U64P* p80)
 {
     U64P keep = self->link;
@@ -985,6 +1012,9 @@ void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, 
     ComputeSoundRecordDoppler(self);
 }
 
+// Starts the voice of a playing-sound record for sound entry idx (-2 being the stream voice): loads
+// the entry's bank and starts its voice when the record is audible and not a repeating one, with
+// its Doppler, pitch and volume set; otherwise the record starts silent.
 void StartSoundRecordVoice(PlayingSound* self, s32 idx)
 {
     s32 link;
@@ -1015,6 +1045,9 @@ void StartSoundRecordVoice(PlayingSound* self, s32 idx)
     }
 }
 
+// Sets when a repeating sound plays next (a random time in its interval from now) and, for one
+// without an object, picks a random place around the listener at a random distance within its
+// range, on the ground plane.
 void ScheduleAmbientSoundRecord(PlayingSound* self)
 {
     self->nextTime = g_gameTime[0] + RandomFloatInRange(self->interval.value, (&self->interval.value)[1]);
@@ -1027,6 +1060,10 @@ void ScheduleAmbientSoundRecord(PlayingSound* self)
     }
 }
 
+// Plays sound entry id (-1 none, -2 the stream voice). With an object, a position or an out slot
+// it makes a playing-sound record (far range fa, near range fb, base volume fc, pitch fd, Doppler
+// scale fe, a repeat interval p4 and range p5 for an ambient sound), with *out set to it;
+// otherwise it is a one-shot voice at volume fc and pitch fd.
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5) {
     PlayingSound* s1;
@@ -1093,6 +1130,10 @@ void SetVolumeChannel6Factors(s32 flag, f32 x)
     }
 }
 
+// The sound system's per-frame update: lets go of a finished stream voice, steps the IOP sound
+// level one notch toward the wanted level, and walks the world's playing sounds: stops those whose
+// object is gone, schedules repeating ones, silences or stops those past their far range, and
+// updates volume, pan and Doppler pitch for the rest.
 void UpdateSoundEmitters(void)
 {
     PlayingSoundFrame f;
@@ -1403,6 +1444,12 @@ void ClearCachedVoiceParams(void)
 extern const RandomWalkSteps g_randomWalkSteps = { { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, 1, -5, -5, -5, -5, 1, 1, -5, -5, -5, 1, 1, 1, -5, -5, 1, 1, 1, 1, -5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
 extern const RandomWalkRows g_randomWalkRows = { { 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0 } };
 
+// One step of a random walk with a bias: from the current position (-12 to 12) it adds one of six
+// steps chosen at random from the row of that position (seven rows of six steps), and gives the new
+// position. A sound's wandering pitch follows it.
+// One step of a biased random walk: from the current position (-12 to 12) it adds one of six steps
+// chosen at random from the row of that position (seven rows of six), and gives the new position.
+// PlaySoundWithWanderingPitch uses it as the pitch of a sound.
 s32 StepBiasedRandomWalk() {
     RandomWalkSteps a = g_randomWalkSteps;
     RandomWalkRows b = g_randomWalkRows;

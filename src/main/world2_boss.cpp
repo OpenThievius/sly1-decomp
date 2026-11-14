@@ -89,6 +89,9 @@ void LoadWorld2Boss(World2Boss* self, void* reader)
     ResolveObjectLinks(self, 2, g_world2BossLoadLinks);
 }
 
+// Starts the boss agent: becomes the world's active follower, resolves its links, creates the
+// six-entry blend and the state walker (starting at 0x438), looks up its three phase clips, and
+// copies the table of six keyed objects, finding each by its id in the world.
 void StartWorld2Boss(World2Boss* self)
 {
     s32 n;
@@ -174,6 +177,9 @@ void DrawWorld2Boss(World2Boss* self, AgentDrawArgs* args, void* arg2)
 // A 0x70-byte hit func_00141D00 gives (collider_contact.cpp's MeshHit): its score at 0x40.
 struct __attribute__((aligned(16))) HitCandidate { u8 pad0[0x40]; f32 score; u8 pad1[0x70 - 0x44]; };
 
+// Tests the segment a1..a2 against each of the a3 colliders in the table a4 and gives back the one
+// hit with the lowest score (0 if none), copying that hit's record to a5 if given. When bit 0 of a0
+// is set, a first hit with a zero score is skipped in favour of the second.
 s32 FindNearestHitObject(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f)
 {
     HitCandidate buf[2];
@@ -209,6 +215,9 @@ typedef s32 (*VFn_18A830)(BaseObject* self, void* arg);
 // What func_001DC238 hands its filter (IsWorld2BossBlocker): the object hit at 0x50.
 struct BlockerQuery { u8 pad[0x50]; BaseObject* sub; };
 
+// True when the object in the query would block the boss's line: it is not one of the five excluded
+// kinds in a table, not of class id 3, not a kind-0x34 object that its own method says to ignore
+// for the boss, and does not have object id 0x449 or 0x44A.
 s32 IsWorld2BossBlocker(void* self, BlockerQuery* rec)
 {
     s32* e = g_world2BossBlockerKinds;
@@ -259,6 +268,10 @@ struct LineCheckFrame {
     s32 code;
 };
 
+// True when the boss may attack its target: not before the time stored at +0x748, and only if it
+// has a target that is not marked in a way that excludes it. In the attack states 0x43A and 0x43C
+// it needs a line to the target to be unblocked, now or to where the target will be a short time
+// ahead; state 0x43E needs no check. Any other state gives 0.
 s32 HasWorld2BossClearLine(World2Boss* self)
 {
     u8* obj = (u8*)self;
@@ -447,6 +460,10 @@ s32 IsAgentFacingBlocked(Agent* self);
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 typedef Agent* (*GaugeTargetFn)(World2Boss* self);
 
+// Per-frame state update of the second world's boss after the generic agent update. In state 12
+// (the paired attack animation) it sets the player blend weights from the target distance and the
+// turn since the heading, and plays sound 0x1CC (with a camera timestamp) each time one of its two
+// blended clips leaves its cyclic range. In state 14 it aims at where the target will be.
 void UpdateWorld2BossState(World2Boss* self)
 {
     typedef Vu0::Vec Vec;
@@ -533,6 +550,10 @@ void LeaveWorld2BossState(World2Boss* self, s32 mode)
     }
 }
 
+// Handles the boss's notifications. From its state player it reacts to code 0x442 or 0x443 by
+// placing the matching pool object at the launch point (raised or lowered by a constant, by the
+// current attack state) and launching it, and to 0x444 and 0x445 by switching the ring draw flag on
+// and off. Everything else goes to the generic agent handler.
 void HandleWorld2BossNotification(World2Boss* self, s32 a1, MessageBody* key)
 {
     if (a1 == 0x13 && key->sourceId == (s32)self->statePlayer) {

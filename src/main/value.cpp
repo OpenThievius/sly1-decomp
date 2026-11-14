@@ -141,6 +141,9 @@ ScriptValue* AssignScriptValue(ScriptValue* self, const ScriptValue* src)
     return self;
 }
 
+// Whether two script values are equal as plain data (not recursively): values of different tags are
+// different; floats, vectors, matrices, pairs and triples by their numbers, bools by being zero or
+// not, and ints, pointers, lists, functions and the like by their word.
 s32 AreScriptValuesEqual(const ScriptValue* a, const ScriptValue* b)
 {
     if (a->tag != b->tag)
@@ -194,6 +197,9 @@ s32 AreScriptValuesEqual(const ScriptValue* a, const ScriptValue* b)
     return 1;
 }
 
+// Copies the value src into dst: a list or a function record is copied recursively into new nodes,
+// a vector, matrix, pair or triple gets a new pooled payload with the same floats, and any other
+// value is copied as it is.
 void CloneScriptValue(const ScriptValue* src, ScriptValue* dst, s32 first)
 {
     dst->tag = src->tag;
@@ -413,6 +419,10 @@ ScriptValue* ConvertScriptValueToFloat(ScriptValue* out, const ScriptValue* in)
     return out;
 }
 
+// Reads a chain of script values (a program or data list) from a stream: each node is a tag byte
+// (0xFF ends, bit 0x80 means a following node) and a payload by the tag (an int, float, bool,
+// pointer, vector, matrix, four-float vector, pair, triple, or a nested chain for tag 30). Gives
+// the first node, or null for 0xFF.
 R11B008Node* ReadScriptValueChain(BufferedStream* rd)
 {
     s32 tag = ReadBufferedU8(rd);

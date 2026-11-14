@@ -242,6 +242,8 @@ struct OrbitPoly {
     void Clear() { FillMemory(this, 0, (s32)sizeof(*this)); }
 };
 
+// Gives the point the camera looks at: the eye's point blended between two (by t) and, when an
+// on/off object is given, moved by an orbit-style offset from it.
 void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object)
 {
     Block63* b = (Block63*)block;
@@ -263,6 +265,8 @@ void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffO
     }
 }
 
+// Sets an on/off object's defaults: copies the default parameter block, 2.0 second ramp times,
+// speeds 1.0, forced state -1 and flags.
 void InitOnOffObject(OnOffObject* self)
 {
     InitPlacedObject(self);
@@ -288,6 +292,9 @@ void UnregisterOnOffObject(OnOffObject* self)
     RemoveQueuedCalls(self->world, 2, 0, self, -1, 0);
 }
 
+// Reads an on/off object: rotation, position, its mesh tables, then either a rail curve (created
+// from an index, with the last value of its data kept) or an own frame (rotation and position),
+// and its property records.
 void LoadOnOffObject(OnOffObject* self, void* a1)
 {
     ReadBufferedRotation3((BufferedStream*)a1, &self->rot);
@@ -403,6 +410,8 @@ void SetOnOffObjectBlockValue(OnOffObject* self, f32 value) { self->block2F0.f74
 
 typedef void (*OnOffShapeFn)(f32 angle, Arr63* obj, Vec02* out, Vec02* dir);
 
+// Gives the eye point in the rail's local frame at the object's current rail angle (for a curve,
+// a circle, or the object's own frame), and the rail's tangent direction in *dir.
 void PlaceOnOffCameraFrame(OnOffObject* self, Vec02* eye, Vec02* out, Vec02* dir)
 {
     Vec02 a;
@@ -432,6 +441,10 @@ void PlaceOnOffCameraFrame(OnOffObject* self, Vec02* eye, Vec02* out, Vec02* dir
 
 extern "C" f32 FloatRemainder(f32 x, f32 y);
 
+// Gives in *out the camera point on an on/off object's rail: three coordinates from quadratic
+// polynomials of x clamped to ranges, positioned on the rail (a curve, a circle of orbitRadius,
+// or the object's own frame) at the angle plus or minus offset (mode 1 or 2 is the side), in the
+// object's world frame.
 void PlaceOnOffCameraOrbit(f32 angle, f32 offset, OnOffObject* self, f32* x, f32* poly, f32* range, s32 mode, Vec02* out)
 {
     Vec02 v;
@@ -545,6 +558,10 @@ struct Camera;
 
 extern f32 g_gameClock[];
 
+// Starts the controller on an object: reads the target's placement, computes the blended point
+// and, for a curved or circular rail, its angle, then stores the camera's angle, distance and
+// height relative to it, snaps the camera when the object asks and applies the object's zoom
+// override.
 void ActivateOnOffCameraController(OnOffCameraController* self, OnOffObject* object)
 {
     OnOffCameraView* view = (OnOffCameraView*)self;
@@ -620,6 +637,9 @@ void NoteOnOffCameraControllerRemoved(OnOffCameraController* self, s32 arg) {}
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Updates the object's rail angle for the eye point: for a curve it asks the curve (probably for
+// the nearest parameter to the point), for a circle it takes the angle of the point around the
+// centre scaled by the radius.
 void ComputeOnOffCameraHeading(OnOffCameraController* self, CameraPlacement* eye)
 {
     Vec02 blended;
@@ -668,6 +688,10 @@ struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
+// Per-frame update of the camera controller of an on/off object (looks like a camera rail, a
+// curve or circle whose angle the camera follows): blends the eye point, lets the stick turn the
+// camera (a button snaps it to the goal angle), otherwise drifts the angle toward what the rail
+// wants and places the camera. Modes 1 and 2 are the rail's two sides, 4 is free turning.
 void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* eye, PadRecord* pad, f32 dt)
 {
     OnOffCameraView* view = (OnOffCameraView*)self;
@@ -1074,6 +1098,9 @@ extern f32 g_gameTime;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+// Checks whether the camera can see five probe points around the target; when it cannot for
+// longer than a delay it queues a camera snap. Skipped while the pad select flag is held, a flag
+// is set or the last move is recent.
 void FindFreeOnOffCameraScreenSpan(CameraController* self, Vec02* center)
 {
     Vec02 lo;
@@ -1136,6 +1163,10 @@ f32 GetSpanCandidateValue(void* a0, void* a1, void* a2, SpanCandidate* a3)
 struct MeshHit;
 typedef f32 (*MeshHitWeigh)(void* ctx, void* a, void* b, MeshHit* hit);
 void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWeigh fn, f32 r, f32 limit, void* a4, Vec02* origin, Vec02* out);
+// Looks for a camera position that sees the target through free space: from the point p and the
+// wanted position q it finds the first free span among the colliders in the box, and when q is
+// blocked tries angles around the target (alternating sides, up to half a turn) to pick the one
+// with the best score; the position is then pushed out of the geometry into *out.
 void FindFreeOnOffCameraAngle(CameraController* self, Vec02* p, Vec02* q, Vec02* out)
 {
     Vec02 lo;
@@ -1225,6 +1256,9 @@ static inline void SetLink(MeshLink* link, s32 which, MeshLink* links, s32 k)
     }
 }
 
+// Reads from a stream a table of n points (a float and a vector each) and a table of m links
+// between them (a point and two link ids), allocated from front memory; gives the counts and
+// tables through the four out pointers.
 void ReadMeshTables(void* stream, void* nOut, void* pointsOut, void* mOut, void* linksOut)
 {
     BufferedStream* s = (BufferedStream*)stream;
@@ -1271,6 +1305,10 @@ void QueueWorldLoad(WorldLoadRequest* self, WorldKeyBlock* key, s32 a2, s32 a3, 
     }
 }
 
+// Loads the world that was asked for (a key block), if any: opens its sector stream, resets and
+// rebuilds the world from the stream (showing a load progress), saves to the memory card when the
+// entry changed and the option is set, then resets the camera, sound and contacts for the new
+// world and places the player. Always clears the request state at the end.
 void RunPendingWorldLoad(WorldLoadRequest* self)
 {
     KeyId key;

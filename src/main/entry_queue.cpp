@@ -70,6 +70,9 @@ void InitEntryQueue(EntryQueue* self)
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Gives the world position and heading of a node object of a queue entry: for kinds 0x7E, 0x73,
+// 0x6E (a point on a path curve nearest the player) and 2 from the object, otherwise (or with no
+// object) the player's own position 75 units down and its heading. Either output may be 0.
 void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* outf)
 {
     Vec02 v;
@@ -206,6 +209,10 @@ struct QueueTargetHolder {
 struct Chooser_1CDFB8;
 extern f32 g_gameTime;
 
+// Moves an entry queue (a scripted sequence that drives the player) to its next entry and starts
+// it by kind: 0 remembers the object, 1 puts the player at an arrival point or node, 4 waits, 5
+// starts a jump, 6 and 7 walk toward a node or along a path curve. Most set pendingEntry for
+// DrivePlayerFromEntryQueue and CheckQueueEntryDone to carry on.
 void StartNextQueueEntry(EntryQueue* self)
 {
     s32 n = self->entryIndex + 1;
@@ -406,6 +413,10 @@ done:
 
 extern f32 g_gameTime;
 
+// Tells whether the running entry has finished: kind 4 when its time has passed, 5 when the
+// player left state 2, 6 when the player is near the node, 7 when its path position is near the
+// target, 8 by the player's aim mode or state, 9 when the entry's animation has ended, 12 when
+// the jump sub state ended. Other kinds are done at once.
 s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
 {
     s32 done;
@@ -506,6 +517,10 @@ struct TrackShapeDesc_17C718 {
 struct TrackShape_17C718 { TrackShapeDesc_17C718* desc; u8 pad04[4]; s32 looped; };
 struct TrackRecord_17C718 { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; TrackShape_17C718* shape; };
 
+// Per-frame, fakes the pad input the player reads while an entry runs: sets the stick heading
+// toward the node (or along the path curve in the direction of the target position) and its level
+// from the entry's value, presses the button bit 0x20 where the state asks for it, and for kind 5
+// triggers a target jump once the player has been in its sub state long enough.
 void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
 {
     Vec02 a;

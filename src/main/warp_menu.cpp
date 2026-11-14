@@ -633,6 +633,10 @@ void StartWorld1Boss(World1Boss* self)
 
 ASM_FUNC(func_001E89F0);
 
+// Called when the first world's boss enters a state: leaving state 1 sends its state walker to the
+// stage key and gives each of its six key roots 0x2DE or 0x2DF by the stage (the nearest to the
+// target gets 0x2DE) and sets the visits left (8 within 300 of its home, else 5); leaving 16 steps
+// the stage key along 0x2D8 to 0x2DD with its slot.
 void EnterWorld1BossState(World1Boss* self, s32 a, Animation* b)
 {
     PlacedObject* key;
@@ -871,6 +875,10 @@ void ResumeElementStackState(void* self)
     SetElementStackState((ElementStack*)self, 3);
 }
 
+// Per-frame input update of the screen element stack (pad by the routing flags), reacting by state:
+// 0 finishes an object sub-group when the memory card dialogue shows; 1 takes 0x800 (restore the
+// saved card or reset progress and resume) and 0x100 (pause page 0x17); 3 takes 0x800 (pause page
+// 0) and 0x100 (push the map screen list).
 void UpdateElementStack(ElementStack* obj)
 {
     f32 d = g_gameClock.elapsed - obj->stateTime;
@@ -1042,6 +1050,10 @@ void ResetElementStack(ElementStack* self)
     ResetScreenElements();
 }
 
+// Switches the stack's state (a requested 3 becomes the resume state if set): leaving 1 hides the
+// title and prompt and releases the pad select flag; the new state sets the time scale (0 for 5 and
+// 7, else 1) and, for 0 the memory card display and fade, for 1 the title, prompt and select flag,
+// for 3 the sound level, for 8 hides the counter captions.
 void SetElementStackState(ElementStack* self, s32 state)
 {
     if (state == 3) {
@@ -1161,6 +1173,10 @@ ok:
     return 1;
 }
 
+// Runs a little of a background CRC-32 check of the code in main memory each frame: it takes 32
+// words at a time from the cursor (restarting from address 0x100004 when a pass is finished, unless
+// the check has already failed), and when a pass ends with a non-zero result it sets D_00275C34 to
+// 1.
 void StepMemoryChecksum(void) {
     if (D_00275C34 == 0) {
         if (g_memoryChecksumRemaining == 0) {
@@ -1192,6 +1208,10 @@ void StepMemoryChecksum(void) {
     }
 }
 
+// Updates the world's lists that run on the frame delta: the memory checksum step, the active
+// collider's control method (method 0x49, with the pad if the routing flags allow it), the world's
+// object lists, the object trees, animation players and level ramps, then the delayed messages, the
+// sound emitters and the queued calls.
 void UpdateWorldDeltaLists(World* self, f32 dt)
 {
     StepMemoryChecksum();
@@ -1259,6 +1279,9 @@ void UpdateUnflaggedParts(World* self)
     }
 }
 
+// Updates the world's lists that run on the step clock (it does nothing when dt is 0): the object
+// trees, the animation players and the level ramps of their lists, then the first list's objects'
+// update method (with dt), and then the queued calls.
 void UpdateWorldStepLists(World* self, f32 dt)
 {
     if (dt == 0.0f) return;
@@ -1290,6 +1313,10 @@ void StepWorldValueTowardTarget(World* self, f32 x)
     }
 }
 
+// Per-frame update of the world: step-clock lists first, then, if dt is not 0, the delta lists,
+// parts, contacts, collider groups, each actor's update, the second contact pass, at-rest counting,
+// each actor's post method, delayed script calls, queued calls and animators. Always: notifies the
+// active follower, updates the camera and moves the world value.
 void UpdateWorld(World* self, f32 unused1)
 {
     ListFrame it;
@@ -1365,6 +1392,9 @@ f32 ClampToMagnitude(f32 a, f32 b)
     return r;
 }
 
+// Moves a value x toward the target y for z seconds under a ramp profile: it runs at maxSpeed and
+// slows to endSpeed over rampTime near the target. Gives the new value, and the speed it ends with
+// (signed toward the target) in out if given.
 f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z)
 {
     f32 roots[4];
@@ -1414,6 +1444,10 @@ tail:
     return res;
 }
 
+// The same as ApproachValueWithRamp but with the rate of change of the velocity also limited by the
+// profile's maxAccel (when positive): if the new velocity would differ from the old velocity b by
+// more than maxAccel times d, it is clamped and the value is moved with the constant acceleration
+// instead. The new velocity goes to out.
 f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* out)
 {
     RampProfile* o = (RampProfile*)self;
@@ -1481,6 +1515,10 @@ u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec
 }
 
 
+// Turns the rotation from toward to under a ramp profile for limit seconds: the remaining rotation
+// is taken as an axis and angle, ApproachValueWithRamp gives how far it turns this step, and the
+// new rotation (or the target itself when it arrives) goes to outRot and the angular velocity along
+// the axis to outSpin; either may be null.
 void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit)
 {
     Mat02 rel;
@@ -1529,6 +1567,9 @@ f32 RandomFloatInRange(f32 a, f32 b)
     return r;
 }
 
+// A random number with a normal distribution around mean with the given deviation (the polar method
+// of Box and Muller: a random point in the unit circle turned into a Gaussian), clamped to mean
+// plus or minus limit when limit is not 0.
 f32 RandomGaussian(f32 mean, f32 deviation, f32 limit)
 {
     f32 x;
@@ -1584,6 +1625,9 @@ void RemapQuadraticParameter(Vec3* in, f32 s, f32 t, Vec3* out)
     out->x = (in->z * t * t + in->y * t) + in->x;
 }
 
+// Computes sine and cosine of an angle in radians: the angle is reduced to a half turn around zero
+// (flipping its sign for odd half turns), the sine comes from a degree-9 polynomial and the cosine
+// from the square root of 1 - sine squared, with the sign of the half turn.
 void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle)
 {
     f32 t = (angle + 1.5707964f) * 0.31830987f;
@@ -1733,6 +1777,9 @@ struct MinimumSample {
 
 typedef f32 (*MinimumFn)(void* ctx, f32 x);
 
+// Finds a local minimum of fn(ctx, x) near x (outputs the position and the value in outX and outY):
+// it brackets a minimum between lo and hi starting with step by shifting five samples toward the
+// lower side, then narrows the bracket by ten bisection steps.
 void FindLocalMinimum(MinimumFn fn, void* ctx, f32 x, f32 step, f32 lo, f32 hi, f32* outX, f32* outY)
 {
     // The bracket's low end, the midpoint below the middle, the middle, the midpoint above it
@@ -1854,6 +1901,10 @@ void ContinueWorld3BeatPressColliderRequest(PlacedObject* from, Player* self)
     SetPlayerState(self, 4, 0x2B);
 }
 
+// Judges the pad against the beat-press timeline each frame. While judging, a face or d-pad press
+// (flags 0xF0, direction 0 to 3) is a hit when the next entry has that direction and its beat is
+// within half the timing window of the boss's bar position (4 beats a bar), else sound 0x7B plays.
+// Also places player and collider at the frame anchor and handles missed entries.
 void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32 dt)
 {
     if (self->frameAnchor != 0 && g_player != 0) {
@@ -2014,6 +2065,9 @@ void GetWorld3BeatPressColliderPositionAt(World3BeatPressCollider* self, f32 t, 
 }
 
 
+// Gives the press collider's rotation and spin at t seconds from now: those of a placed object when
+// it has no frame anchor, otherwise the anchor object's frame at that time composed with the
+// anchor's own rotation, and the object's spin.
 void GetWorld3BeatPressColliderRotationAt(World3BeatPressCollider* self, f32 t, Mat02* rot, Vec02* spin)
 {
     if (self->frameAnchor == 0) {
@@ -2055,6 +2109,9 @@ void LoadWorld3Boss(World3Boss* self, void* reader)
     }
 }
 
+// Starts the third world's boss agent: becomes the world's active follower, resolves its links,
+// creates its state walker (with itself as listener) and copies the table of nine keyed object
+// references, finding each object by its id in the world.
 void StartWorld3Boss(World3Boss* self)
 {
     StartAgent(self);
@@ -2391,6 +2448,10 @@ void DecrementWorld3BossGauge(World3Boss* self)
     g->fill = g->fillTarget;
 }
 
+// Called when the third world's boss enters a state: on leaving state 0xE it hands the pending clip
+// on for some walker keys, on leaving 0x10 or 0xB it decrements the gauge count (0xB also marks
+// level 3 done and saves the memory card); then the base agent state is entered and, for state 14
+// and states 2 and 13, the state player's start time and speed are set from the walker key.
 void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
 {
     s32 r[3];
@@ -2510,6 +2571,10 @@ struct AgentNotification;
 struct Agent;
 void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg);
 
+// Handles the third world's boss notifications: 0x13 with id 0x1A5 from its state player launches
+// the next note of the current direction's line from the frame point toward the player's press
+// collider, with a speed that arrives on the beat; 6 removes a finished player's entry; 0x14 from
+// its walker maps its key (0x4EC to 0x4F8) to a voice number for the cached voice parameter.
 void HandleWorld3BossNotification(World3Boss* self, s32 kind, TempoNoticeRec* rec)
 {
     Vec02 a;
@@ -2598,6 +2663,10 @@ void SyncWorld3BossEntries(World3Boss* self)
 
 }
 
+// Per-frame tempo of the third world's boss after the agent update: keeps the beat clock (beats,
+// bars of four, new beat length at the bar end, held in some states), restarts the pending timeline
+// once the voice parameter is taken (flag 2), runs the held timeline's entries, follows the cached
+// voice parameter, and queues SyncWorld3BossEntries.
 void UpdateWorld3Boss(World3Boss* self, f32 dt)
 {
     World3Timeline* sub;
@@ -2686,6 +2755,10 @@ tail:
 void UpdateAgentState(Agent* self);
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 
+// Per-frame facing of the third world's boss by its walker key: for 0x4ED, 0x4F0, 0x4F3 and 0x4F6
+// it faces the active collider; for 0x4EC, 0x4EF, 0x4F2 and 0x4F5 (states 13 and 14) the way a face
+// object points; for 0x4EE, 0x4F1, 0x4F4 and 0x4F7 (states 13 and 14) away from the collider.
+// Otherwise it runs the generic agent state update.
 void UpdateWorld3BossState(World3Boss* self)
 {
     Vec02 diff;
@@ -2826,6 +2899,10 @@ void RunWorld3TimelineEntries(World3Timeline* self)
     }
 }
 
+// Runs one entry of a third-world boss timeline by its kind: 0 schedules a beat press, 1 triggers
+// script event 0x1B with the entry's value, 2 and 3 start and end the judging of the press collider
+// (with its caption and a sound for 2), 4 and 5 turn the boss's flag on and off (with a caption and
+// a lower-pitched sound for 4).
 void RunWorld3TimelineEntry(World3Timeline* self, Entry90* msg)
 {
     switch (msg->kind) {
@@ -2964,6 +3041,9 @@ LINKER_REMNANT(func_001ED900);
 void ComputeUnitPerpendicular(Vec02* v, Vec02* out);
 extern "C" f32 Arccosine(f32 x);
 
+// Gives the angle between a and b in radians (0 and the x axis in axis if either is almost zero),
+// and the unit axis of the turn from a to b in axis (a perpendicular if they are parallel); axis
+// may be null.
 f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis)
 {
     u128 va = Vu0::Length(Vu0::Q(*a));
@@ -2987,6 +3067,10 @@ f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis)
     return Arccosine(Vu0::ToFloat(Vu0::Dot(Vu0::Q(*a), Vu0::Q(*b))) / (la * lb));
 }
 
+// Finds the closest approach of the two lines a to b and c to d: writes to out2 the parameters of
+// the closest point on each line (both 0 where they are almost parallel), to dist the signed
+// distance between the lines along their common normal, and to normal that unit normal (the z axis
+// if it has no length), oriented to point from the first line toward the second.
 void FindSegmentClosestParams(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out2, f32* dist, Vec02* normal)
 {
     u128 v = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
@@ -3539,6 +3623,10 @@ void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02
 void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB);
 
+// Gives the position (outA) and velocity (outB) that a point in (given in world space) of the
+// attached set has, by taking it into the set's frame and moving it with the set's state up the
+// frames to the ancestor (and, if the set has an oscillator, adding the oscillator's displacement
+// at the point).
 void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16* outB)
 {
     Vec02 a;
@@ -3562,6 +3650,10 @@ void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16
     }
 }
 
+// After the attach records of an owner have been rebuilt, compares each one's two marker bits in
+// its target's flags (59 for the old records, 60 for the new) to remove or add the attachment on
+// the target, drops the records without bit 60 from the list (freeing them in a chain) and clears
+// both bits.
 void ReconcileColliderAttachments(void* owner, Attach03** head)
 {
     Attach03** link = head;
@@ -3598,6 +3690,10 @@ f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02*
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
+// Per-frame update of an attached set (a collider others ride on): after the base update it clears
+// the old attach records and takes a new one for each collider in contact with its root that pushes
+// and sinks into it (MeasureAttachedSetContactDepth not 0). When the set tells landings and the
+// collider fell faster than 100, it checks by a segment test where it landed and notifies it.
 void UpdateAttachedSet(AttachedSet* self, f32 dt)
 {
     s32 changed = 0;
@@ -3701,6 +3797,10 @@ void ForwardAttachedSetLinkStep(AttachedSet* self, Attach03* link)
     ((AttachNotifyFn)target->desc03()->m46)(target, self);
 }
 
+// Handles the destruction message (kind 2) of an attached set: when it is the set itself, it
+// detaches all its attached colliders and frees the records; when it is a collider it was carrying,
+// that attach record is removed and the collider is told (message 11). Rebuilds the set afterwards
+// if anything changed.
 void HandleAttachedSetNotification(AttachedSet* self, s32 kind, void* msg)
 {
     s32 flag = 0;
@@ -3773,6 +3873,10 @@ void RebuildAttachedSet(AttachedSet* self)
 }
 
 
+// Measures how far collider o sinks into the set: a segment from below the collider (the player's
+// feet 75 below, else its lower bound) to its upper bound is tested against the set's tree
+// (displaced by its oscillator). Gives the first span's length as a fraction of the segment (0 for
+// none); nOut gets its normal, hitOut the surface normal or the z axis.
 f32 MeasureAttachedSetContactDepth(AttachedSet* self, TurningCollider* o, Vec02* nOut, Vec02* hitOut)
 {
     Vec02 from;
@@ -3929,6 +4033,9 @@ void RemoveFromSmallList(StateResetGroup* self, StateResetObject* value)
     }
 }
 
+// Checks a state reset group's items: when its owner has a selected id equal to the first item's
+// and all items are in state 1 it moves every item to state 2 and clears the selection; otherwise
+// each item in state 2 with no hold whose time has run longer than its limit is reset to state 0.
 void UpdateItemTimeouts(StateResetGroup* s)
 {
     s->scheduled = 0;
@@ -3972,6 +4079,10 @@ void ResetScreenFade(ScreenFade* o)
     SetScreenFadeMode(o, 0);
 }
 
+// Per-frame update of the screen fade by its mode: 0 checks for a restore request, 1 fades out (0.5
+// s, or 1.5 s for style 1) raising the opacity and lowering the volume on channel 6 and then goes
+// to mode 2, 2 waits for the world load to finish and goes to 3, 3 fades back in (0.25 s, or 1 s
+// for style 1) and ends at mode 0.
 void UpdateScreenFade(ScreenFade* self, PadRecord* a1)
 {
     s32 s = self->mode;
@@ -4049,6 +4160,10 @@ void DrawScreenFade(ScreenFade* self)
     }
 }
 
+// Starts a screen fade to the request args (a world to load) with the style count, only if no fade
+// is running: pops an active step sequence element unless it is in its state 2, flags whether the
+// request's key is the fixed one, and begins mode 1 (fade out) when a world exists, or mode 2
+// straight away.
 void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count)
 {
     IdentityKey* p;
@@ -4087,6 +4202,9 @@ void SaveFadeRequest(ScreenFade* dst, FadeRequestBlock* src, s32 last)
     dst->queued.flags = mid;
 }
 
+// When the pad select flag is held, a fade request is queued and button 0x800 is pressed, copies
+// the queued request into the active one (flagging whether its key is the fixed one), switches the
+// fade to mode and gives 1; otherwise gives 0.
 s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, s32 mode)
 {
     if (IsPadSelectFlagHeld(g_currentWorld) != 0 && self->queued.kind != 0 && (o->flags & 0x800) != 0) {
@@ -4108,6 +4226,10 @@ s32 RestoreFadeRequest(ScreenFade* self, PadRecord* o, s32 mode)
 
 LINKER_REMNANT(func_001F0218);
 
+// Switches the screen fade to a mode (nothing if unchanged): leaving 2 closes the warp page, mode 0
+// clears the opacity, mode 1 sets up the fade out (for style 2 the warp cursor of the destination
+// entry), mode 2 starts the queued world load (and sets the opacity to 1), mode 3 starts fading
+// back in.
 void SetScreenFadeMode(ScreenFade* self, s32 mode)
 {
     if (self->mode == mode) goto L0410;
@@ -4233,6 +4355,10 @@ s32 GetCurrentWarpEntry(void)
     return 10;
 }
 
+// True when warp entry kind (0 to 8 are the page's entries, 9 and 10 special ones) is available on
+// this page: the save's entry flag (bit 0) for the page's slot and entry, with kind 9 using the
+// slot's mask in D_00275FC8 and kind 10 always counting. Slot 5 excludes kinds 1 and 7. The slot
+// and entry index it looked at go to outA and outB when given.
 s32 IsWarpEntryAvailable(WarpPage* self, s32 kind, s32* outA, s32* outB)
 {
     s32 flag = 0;
@@ -4278,6 +4404,9 @@ s32 IsWarpEntryAvailable(WarpPage* self, s32 kind, s32* outA, s32* outB)
     return flag;
 }
 
+// True when the entry can be reached by the cursor on this page: never for kind 9; the entry's own
+// availability, or, for entries from 2 up, the availability of entry 1 (below a limit that depends
+// on the slot) or of the special entry 9 (above it).
 s32 IsWarpEntryReachable(void* self, s32 code)
 {
     s32 r;
@@ -4312,6 +4441,9 @@ s32 IsWarpEntryReachable(void* self, s32 code)
     return r;
 }
 
+// Starts the warp page object: sets its flag bits, links itself into the map screen list, and picks
+// its slot from its id (0x1C7 to 1, 0x1C8 to 2, 0x1C9 to 3, 0x1C6 to 4, 0x1CA to 5, else the
+// current level index), registering itself there.
 void StartWarpPage(WarpPage* o) {
     StartPlacedObject(o);
     o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
@@ -4330,6 +4462,9 @@ void StartWarpPage(WarpPage* o) {
     g_mapScreenList.nodes[o->slot] = o;
 }
 
+// After loading a warp page: resolves its links, starts its child objects, gives each of its 11
+// entries a random phase (0 to 2 pi) and speed (0.5 to 0.7) for its idle motion and clears its dim
+// values, and sets selected to -1.
 void PostLoadWarpPage(WarpPage* self)
 {
     ListFrame it;
@@ -4375,6 +4510,9 @@ void SetPendingWarpEntry(s32 unused, s32 a, s32 b)
     g_pendingWarpEntryAtEnd = b;
 }
 
+// If a warp entry is pending, shows the letterbox and the entry's caption text, starts the entry's
+// animation (at its start or its end) on the page, wakes the objects its close animation starts,
+// and clears the pending entry.
 void AnnouncePendingWarpEntry(WarpPage* self)
 {
     if (g_pendingWarpEntry == -1) return;
@@ -4520,6 +4658,10 @@ void ApplyWarpPageTransform(WarpPage* obj, u8* s, void* c)
     g_camera->zoomGoal = keep2;
 }
 
+// Handles notifications after the base handler: for message 5 (an animation finished) it moves on
+// by the page's mode: from 1 to the mode it was opened with, from 3 to screen fade mode 2, and from
+// 4, when the close player is the one that finished, ends the fade (if it was in mode 3) and sets
+// the page to mode 0.
 void HandleWarpPageNotification(WarpPage* self, s32 kind, void* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
@@ -4547,6 +4689,10 @@ L_four:
     SetWarpPageMode(self, 0);
 }
 
+// Switches the warp page's mode (nothing if unchanged): leaving 1 or 4 stops its sound, leaving 2
+// hides the caption and clears dim targets, leaving 0 turns the page on and sets each entry's
+// available and cursor levels (and ramp nodes) for the reachable entries and the one under the
+// cursor. Then it sets up the new mode.
 void SetWarpPageMode(WarpPage* self, u32 next)
 {
     s32 i;
@@ -4753,6 +4899,9 @@ void BeginWarpPageClose(WarpPage* self)
     }
 }
 
+// Moves the warp page's cursor in direction idx (an index of the page's neighbour table) to the
+// next reachable entry (skipping the unreachable ones) and plays the move sound, or the refuse
+// sound if there is none or no table.
 void MoveWarpCursor(WarpPage* self, s32 idx)
 {
     s32 (*table)[4] = g_warpCursorTables[self->slot];
@@ -4774,6 +4923,9 @@ void MoveWarpCursor(WarpPage* self, s32 idx)
 
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
+// Gives in out the screen position (in 640x492.8 pixel units) of one of an entry's two anchor
+// objects (picked by flag): its point is taken into the camera's view and projected; the screen
+// centre if the entry has no such object.
 void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
 {
     Vec02 v;

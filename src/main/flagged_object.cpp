@@ -188,6 +188,9 @@ struct ScopedListFrame {
 };
 
 
+// Loads the flagged object (as a collider), resolves its links, and sorts its children into two
+// lists: those of kind 0x7B into the B list and those of kind 0x83 into the A list, each resolved
+// and started.
 void CollectChildLists(FlaggedObject* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -221,6 +224,8 @@ skip:
 }
 
 
+// After loading, appends to the A list and the B list the objects found by the ids stored for
+// each (those that exist).
 void ResolveListIds(FlaggedObject* self)
 {
     PostLoadPlacedObject(self);
@@ -267,6 +272,9 @@ struct ListWalkBegin {
 
 struct StateGraph;
 
+// Starts the flagged object: starts the objects of both lists, finds its child (by id, or the
+// first child of kind 0x74 when it has none yet), and, when it has a state graph, creates its
+// state walker, sending it to key 0x547 when its flag is already set in the flag table.
 void StartFlaggedObject(FlaggedObject* self)
 {
     StartPlacedObject(self);
@@ -317,6 +325,9 @@ void CopyFlaggedObject(FlaggedObject* self, FlaggedObject* src)
 extern s32 D_0026EC58;
 PlacedObject* GetActiveSwitchedCollider();
 
+// Per-frame update: when the active player enters the shape of one of the B objects and the
+// object's flag is not yet set (or was set far away), it saves that object's position in the flag
+// table and raises the flag.
 void UpdateFlaggedObject(FlaggedObject* self, f32 dt)
 {
     UpdateCollider(self, dt);
@@ -371,6 +382,9 @@ extern u8 g_scatterController[];
 struct ScatterController;
 struct FlaggedObject;
 
+// Sets the object's bit in the flag table: notes it to the scatter controller, saves a snapshot
+// of the flag table with the child's id and the alias id of its tree, starts the animations of
+// the A list and moves its state walker to key 0x548 or 0x549.
 void RaiseObjectFlag(FlaggedObject* self)
 {
     RaiseScatterLevelForObject((ScatterController*)g_scatterController, self);
